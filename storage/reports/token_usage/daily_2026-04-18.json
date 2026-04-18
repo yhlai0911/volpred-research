@@ -4,278 +4,412 @@
   "date": "2026-04-18",
   "week_range": "2026-04-17 → 2026-04-24",
   "totals": {
-    "input_tokens": 36228,
-    "output_tokens": 1050932,
-    "cache_read_tokens": 298610998,
-    "cache_create_tokens": 5317026,
-    "billable_total": 6404186,
-    "assistant_messages": 1389,
-    "unique_sessions": 26,
-    "estimated_cost_usd": 569.1094
+    "input_tokens": 50697,
+    "output_tokens": 3919282,
+    "cache_read_tokens": 986458500,
+    "cache_create_tokens": 18139170,
+    "billable_total": 22109149,
+    "assistant_messages": 4619,
+    "unique_sessions": 95,
+    "estimated_cost_usd": 2030.6948
   },
   "by_model": {
     "claude-opus-4-7": {
-      "input_tokens": 13033,
-      "output_tokens": 1003625,
-      "cache_read_tokens": 279774713,
-      "cache_create_tokens": 3771732,
-      "messages": 981,
-      "estimated_cost_usd": 565.8494
+      "input_tokens": 26808,
+      "output_tokens": 3851384,
+      "cache_read_tokens": 959535678,
+      "cache_create_tokens": 15862067,
+      "messages": 4035,
+      "estimated_cost_usd": 2025.9732
     },
     "claude-haiku-4-5-20251001": {
-      "input_tokens": 23195,
-      "output_tokens": 47307,
-      "cache_read_tokens": 18836285,
-      "cache_create_tokens": 1545294,
-      "messages": 408,
-      "estimated_cost_usd": 3.26
+      "input_tokens": 23889,
+      "output_tokens": 67898,
+      "cache_read_tokens": 26922822,
+      "cache_create_tokens": 2277103,
+      "messages": 584,
+      "estimated_cost_usd": 4.7216
     }
   },
   "by_category": {
     "text_only": {
-      "input_tokens": 6023,
-      "output_tokens": 457289,
-      "cache_read_tokens": 135468605,
-      "cache_create_tokens": 1420829,
-      "messages": 346,
-      "billable_total": 1884141,
-      "estimated_cost_usd": 264.2305,
+      "input_tokens": 10529,
+      "output_tokens": 1770837,
+      "cache_read_tokens": 511627967,
+      "cache_create_tokens": 4926019,
+      "messages": 1423,
+      "billable_total": 6707385,
+      "estimated_cost_usd": 992.7755,
       "emoji": "💬",
       "description": "純文字回覆（無工具）"
     },
-    "investigation": {
-      "input_tokens": 8784,
-      "output_tokens": 117423,
-      "cache_read_tokens": 40674972,
-      "cache_create_tokens": 1691132,
-      "messages": 424,
-      "billable_total": 1817339,
-      "estimated_cost_usd": 101.6597,
-      "emoji": "🔍",
-      "description": "閱讀 / 搜尋檔案"
-    },
     "bash_other": {
-      "input_tokens": 717,
-      "output_tokens": 77377,
-      "cache_read_tokens": 36685864,
-      "cache_create_tokens": 777827,
-      "messages": 179,
-      "billable_total": 855921,
-      "estimated_cost_usd": 75.4271,
+      "input_tokens": 3952,
+      "output_tokens": 574795,
+      "cache_read_tokens": 144007845,
+      "cache_create_tokens": 3431974,
+      "messages": 885,
+      "billable_total": 4010721,
+      "estimated_cost_usd": 323.5302,
       "emoji": "💭",
       "description": "其他 Bash 操作"
     },
-    "file_edit": {
-      "input_tokens": 5971,
-      "output_tokens": 140360,
-      "cache_read_tokens": 18275762,
-      "cache_create_tokens": 142911,
-      "messages": 65,
-      "billable_total": 289242,
-      "estimated_cost_usd": 40.7098,
-      "emoji": "📄",
-      "description": "其他檔案編輯"
+    "investigation": {
+      "input_tokens": 11828,
+      "output_tokens": 324513,
+      "cache_read_tokens": 96101694,
+      "cache_create_tokens": 4442901,
+      "messages": 958,
+      "billable_total": 4779242,
+      "estimated_cost_usd": 251.9728,
+      "emoji": "🔍",
+      "description": "閱讀 / 搜尋檔案"
     },
     "agent_delegation": {
-      "input_tokens": 6900,
-      "output_tokens": 49736,
-      "cache_read_tokens": 11044723,
-      "cache_create_tokens": 887298,
-      "messages": 196,
-      "billable_total": 943934,
-      "estimated_cost_usd": 37.0376,
+      "input_tokens": 9722,
+      "output_tokens": 143558,
+      "cache_read_tokens": 48003104,
+      "cache_create_tokens": 2996623,
+      "messages": 671,
+      "billable_total": 3149903,
+      "estimated_cost_usd": 139.104,
       "emoji": "🤖",
       "description": "Agent 派送（非實驗）"
     },
+    "file_edit": {
+      "input_tokens": 6064,
+      "output_tokens": 338773,
+      "cache_read_tokens": 36324643,
+      "cache_create_tokens": 278755,
+      "messages": 128,
+      "billable_total": 623592,
+      "estimated_cost_usd": 85.2126,
+      "emoji": "📄",
+      "description": "其他檔案編輯"
+    },
     "task_management": {
-      "input_tokens": 115,
-      "output_tokens": 62091,
-      "cache_read_tokens": 20494047,
-      "cache_create_tokens": 78730,
-      "messages": 50,
-      "billable_total": 140936,
-      "estimated_cost_usd": 36.8758,
+      "input_tokens": 140,
+      "output_tokens": 99025,
+      "cache_read_tokens": 25458555,
+      "cache_create_tokens": 117615,
+      "messages": 75,
+      "billable_total": 216780,
+      "estimated_cost_usd": 47.8221,
       "emoji": "📌",
       "description": "任務管理（TaskCreate/Update）"
     },
+    "git_sync": {
+      "input_tokens": 53,
+      "output_tokens": 29598,
+      "cache_read_tokens": 26269612,
+      "cache_create_tokens": 51190,
+      "messages": 48,
+      "billable_total": 80841,
+      "estimated_cost_usd": 42.5849,
+      "emoji": "🔄",
+      "description": "Git commit / pull / push"
+    },
     "experiment": {
-      "input_tokens": 41,
-      "output_tokens": 85233,
-      "cache_read_tokens": 6837352,
-      "cache_create_tokens": 53162,
-      "messages": 36,
-      "billable_total": 138436,
-      "estimated_cost_usd": 17.6459,
+      "input_tokens": 122,
+      "output_tokens": 240494,
+      "cache_read_tokens": 14748681,
+      "cache_create_tokens": 101437,
+      "messages": 67,
+      "billable_total": 342053,
+      "estimated_cost_usd": 42.0638,
       "emoji": "🔬",
       "description": "研究實驗（Agent 派送 K\\d+ / experiments/ 編輯）"
     },
     "script_dev": {
-      "input_tokens": 27,
-      "output_tokens": 29320,
-      "cache_read_tokens": 9236444,
-      "cache_create_tokens": 36549,
-      "messages": 22,
-      "billable_total": 65896,
-      "estimated_cost_usd": 16.7394,
+      "input_tokens": 68,
+      "output_tokens": 78625,
+      "cache_read_tokens": 19117226,
+      "cache_create_tokens": 112954,
+      "messages": 58,
+      "billable_total": 191647,
+      "estimated_cost_usd": 36.6916,
       "emoji": "💻",
       "description": "腳本開發（scripts/ *.py）"
     },
-    "worktree_merge": {
-      "input_tokens": 32,
-      "output_tokens": 2932,
-      "cache_read_tokens": 8037102,
-      "cache_create_tokens": 16104,
-      "messages": 13,
-      "billable_total": 19068,
-      "estimated_cost_usd": 12.578,
-      "emoji": "🔀",
-      "description": "Worktree 合併與分支管理"
-    },
-    "git_sync": {
-      "input_tokens": 12,
-      "output_tokens": 4661,
-      "cache_read_tokens": 3160368,
-      "cache_create_tokens": 12169,
-      "messages": 12,
-      "billable_total": 16842,
-      "estimated_cost_usd": 5.3185,
-      "emoji": "🔄",
-      "description": "Git commit / pull / push"
-    },
-    "knowledge_recording": {
-      "input_tokens": 12,
-      "output_tokens": 7663,
-      "cache_read_tokens": 1310127,
-      "cache_create_tokens": 15895,
-      "messages": 7,
-      "billable_total": 23570,
-      "estimated_cost_usd": 2.8381,
-      "emoji": "📚",
-      "description": "知識記錄（knowledge.json / thinking_journal）"
-    },
-    "tool_setup": {
-      "input_tokens": 11,
-      "output_tokens": 3935,
-      "cache_read_tokens": 470020,
-      "cache_create_tokens": 87686,
-      "messages": 6,
-      "billable_total": 91632,
-      "estimated_cost_usd": 2.6444,
-      "emoji": "🛠️",
-      "description": "ToolSearch 載入工具"
-    },
-    "article_writing": {
-      "input_tokens": 5,
-      "output_tokens": 2045,
-      "cache_read_tokens": 1205655,
-      "cache_create_tokens": 14912,
-      "messages": 5,
-      "billable_total": 16962,
-      "estimated_cost_usd": 2.2415,
-      "emoji": "✍️",
-      "description": "文章撰寫/發佈（publish-milestone / mile_*）"
-    },
-    "knowledge_index": {
-      "input_tokens": 4,
-      "output_tokens": 1895,
-      "cache_read_tokens": 1140454,
-      "cache_create_tokens": 6408,
-      "messages": 4,
-      "billable_total": 8307,
-      "estimated_cost_usd": 1.973,
-      "emoji": "📇",
-      "description": "知識索引更新"
-    },
-    "web_research": {
-      "input_tokens": 7545,
-      "output_tokens": 576,
-      "cache_read_tokens": 362650,
-      "cache_create_tokens": 62121,
-      "messages": 11,
-      "billable_total": 70242,
-      "estimated_cost_usd": 1.8651,
-      "emoji": "🌐",
-      "description": "WebSearch / WebFetch"
+    "research_planning": {
+      "input_tokens": 77,
+      "output_tokens": 69895,
+      "cache_read_tokens": 13469579,
+      "cache_create_tokens": 74368,
+      "messages": 27,
+      "billable_total": 144340,
+      "estimated_cost_usd": 26.842,
+      "emoji": "📋",
+      "description": "研究計劃（research_program.md / CLAUDE.md）"
     },
     "scheduling": {
-      "input_tokens": 7,
-      "output_tokens": 6822,
-      "cache_read_tokens": 594927,
-      "cache_create_tokens": 8407,
-      "messages": 7,
-      "billable_total": 15236,
-      "estimated_cost_usd": 1.5618,
+      "input_tokens": 128,
+      "output_tokens": 65318,
+      "cache_read_tokens": 7309647,
+      "cache_create_tokens": 552703,
+      "messages": 38,
+      "billable_total": 618149,
+      "estimated_cost_usd": 26.2284,
       "emoji": "⏰",
       "description": "Cron / Monitor 排程"
     },
-    "member_qa": {
-      "input_tokens": 5,
-      "output_tokens": 126,
-      "cache_read_tokens": 882076,
-      "cache_create_tokens": 1583,
-      "messages": 1,
-      "billable_total": 1714,
-      "estimated_cost_usd": 1.3623,
-      "emoji": "❓",
-      "description": "會員問答研究"
+    "worktree_merge": {
+      "input_tokens": 53,
+      "output_tokens": 26066,
+      "cache_read_tokens": 13060322,
+      "cache_create_tokens": 44164,
+      "messages": 27,
+      "billable_total": 70283,
+      "estimated_cost_usd": 22.3743,
+      "emoji": "🔀",
+      "description": "Worktree 合併與分支管理"
     },
-    "token_report": {
-      "input_tokens": 6,
-      "output_tokens": 194,
-      "cache_read_tokens": 884821,
-      "cache_create_tokens": 112,
-      "messages": 1,
-      "billable_total": 312,
-      "estimated_cost_usd": 1.344,
-      "emoji": "📈",
-      "description": "Token 用量報告"
+    "article_writing": {
+      "input_tokens": 40,
+      "output_tokens": 37613,
+      "cache_read_tokens": 4380618,
+      "cache_create_tokens": 64473,
+      "messages": 30,
+      "billable_total": 102126,
+      "estimated_cost_usd": 10.6014,
+      "emoji": "✍️",
+      "description": "文章撰寫/發佈（publish-milestone / mile_*）"
+    },
+    "web_research": {
+      "input_tokens": 7647,
+      "output_tokens": 3959,
+      "cache_read_tokens": 1210357,
+      "cache_create_tokens": 399556,
+      "messages": 36,
+      "billable_total": 411162,
+      "estimated_cost_usd": 9.7188,
+      "emoji": "🌐",
+      "description": "WebSearch / WebFetch"
+    },
+    "platform_ops": {
+      "input_tokens": 39,
+      "output_tokens": 26584,
+      "cache_read_tokens": 4143706,
+      "cache_create_tokens": 30346,
+      "messages": 17,
+      "billable_total": 56969,
+      "estimated_cost_usd": 8.7789,
+      "emoji": "🛡️",
+      "description": "平台運維（Supabase sync / daily_update）"
+    },
+    "knowledge_index": {
+      "input_tokens": 49,
+      "output_tokens": 8079,
+      "cache_read_tokens": 4365052,
+      "cache_create_tokens": 84119,
+      "messages": 29,
+      "billable_total": 92247,
+      "estimated_cost_usd": 8.7315,
+      "emoji": "📇",
+      "description": "知識索引更新"
     },
     "skill_invoke": {
-      "input_tokens": 6,
-      "output_tokens": 167,
-      "cache_read_tokens": 882048,
-      "cache_create_tokens": 28,
-      "messages": 1,
-      "billable_total": 201,
-      "estimated_cost_usd": 1.3362,
+      "input_tokens": 45,
+      "output_tokens": 26510,
+      "cache_read_tokens": 2277344,
+      "cache_create_tokens": 161268,
+      "messages": 30,
+      "billable_total": 187823,
+      "estimated_cost_usd": 8.4287,
       "emoji": "⚡",
       "description": "Skill 呼叫"
     },
-    "skill_edit": {
-      "input_tokens": 1,
-      "output_tokens": 726,
-      "cache_read_tokens": 804894,
-      "cache_create_tokens": 327,
-      "messages": 1,
-      "billable_total": 1054,
-      "estimated_cost_usd": 1.2679,
-      "emoji": "🔧",
-      "description": "Skill 編輯"
+    "tool_setup": {
+      "input_tokens": 38,
+      "output_tokens": 11905,
+      "cache_read_tokens": 2157411,
+      "cache_create_tokens": 129583,
+      "messages": 18,
+      "billable_total": 141526,
+      "estimated_cost_usd": 6.5592,
+      "emoji": "🛠️",
+      "description": "ToolSearch 載入工具"
+    },
+    "token_report": {
+      "input_tokens": 27,
+      "output_tokens": 3520,
+      "cache_read_tokens": 3741963,
+      "cache_create_tokens": 4332,
+      "messages": 7,
+      "billable_total": 7879,
+      "estimated_cost_usd": 5.9586,
+      "emoji": "📈",
+      "description": "Token 用量報告"
     },
     "chart_generation": {
-      "input_tokens": 1,
-      "output_tokens": 261,
-      "cache_read_tokens": 101697,
-      "cache_create_tokens": 1509,
-      "messages": 1,
-      "billable_total": 1771,
-      "estimated_cost_usd": 0.2004,
+      "input_tokens": 25,
+      "output_tokens": 18831,
+      "cache_read_tokens": 1835187,
+      "cache_create_tokens": 42388,
+      "messages": 25,
+      "billable_total": 61244,
+      "estimated_cost_usd": 4.9603,
       "emoji": "📊",
       "description": "圖表生成（matplotlib / upload_chart）"
     },
-    "platform_ops": {
-      "input_tokens": 3,
-      "output_tokens": 100,
-      "cache_read_tokens": 56390,
-      "cache_create_tokens": 1327,
-      "messages": 1,
-      "billable_total": 1430,
-      "estimated_cost_usd": 0.117,
-      "emoji": "🛡️",
-      "description": "平台運維（Supabase sync / daily_update）"
+    "knowledge_recording": {
+      "input_tokens": 25,
+      "output_tokens": 13667,
+      "cache_read_tokens": 2084508,
+      "cache_create_tokens": 29992,
+      "messages": 10,
+      "billable_total": 43684,
+      "estimated_cost_usd": 4.7145,
+      "emoji": "📚",
+      "description": "知識記錄（knowledge.json / thinking_journal）"
+    },
+    "skill_edit": {
+      "input_tokens": 5,
+      "output_tokens": 5483,
+      "cache_read_tokens": 2611186,
+      "cache_create_tokens": 6639,
+      "messages": 5,
+      "billable_total": 12127,
+      "estimated_cost_usd": 4.4526,
+      "emoji": "🔧",
+      "description": "Skill 編輯"
+    },
+    "member_qa": {
+      "input_tokens": 17,
+      "output_tokens": 459,
+      "cache_read_tokens": 1954373,
+      "cache_create_tokens": 1627,
+      "messages": 3,
+      "billable_total": 2103,
+      "estimated_cost_usd": 2.9967,
+      "emoji": "❓",
+      "description": "會員問答研究"
+    },
+    "paper_work": {
+      "input_tokens": 4,
+      "output_tokens": 1175,
+      "cache_read_tokens": 197920,
+      "cache_create_tokens": 54144,
+      "messages": 4,
+      "billable_total": 55323,
+      "estimated_cost_usd": 1.4003,
+      "emoji": "📝",
+      "description": "論文撰寫/審查（paper/ *.tex 編輯）"
     }
   },
   "git_commits_context": [
+    {
+      "sha": "474b4e54",
+      "message": "feed-publisher SKILL: align to Contentlayer pattern"
+    },
+    {
+      "sha": "6d30d594",
+      "message": "4-hour sync: settings + session_state"
+    },
+    {
+      "sha": "a86ecc8d",
+      "message": "Phase 3 cleanup: archive 3 legacy mile_*.json that slipped past the initial 1010"
+    },
+    {
+      "sha": "1009918e",
+      "message": "commit previously-untracked supervisor observability modules"
+    },
+    {
+      "sha": "58b2273c",
+      "message": "Paper 9: self-contain K998 (script + results + index)"
+    },
+    {
+      "sha": "36ff6757",
+      "message": "K998: persist diagnostics (autocorr lag1 etc.) to results JSON"
+    },
+    {
+      "sha": "3b787038",
+      "message": "Merge branch 'main' of https://github.com/yhlai0911/volpred-research"
+    },
+    {
+      "sha": "4c2b32b1",
+      "message": "Phase 5: document Contentlayer pattern in canonical + render docs"
+    },
+    {
+      "sha": "e74ab077",
+      "message": "Phase 4: declarative articles RLS + daily_update dead-code cleanup"
+    },
+    {
+      "sha": "3eeeecce",
+      "message": "Phase 3: retire mile_*.json singles — Contentlayer cutover"
+    },
+    {
+      "sha": "8450e5f6",
+      "message": "Rename cron「繼續研究」→「繼續任務」across all canonical + render docs"
+    },
+    {
+      "sha": "f497a873",
+      "message": "Phase 1-2: Contentlayer pattern — feed.json → Supabase one-way sync"
+    },
+    {
+      "sha": "f00fb286",
+      "message": "BUG-001 FIX: cleanup-post FK cascade (article_impressions pre-delete)"
+    },
+    {
+      "sha": "588cf019",
+      "message": "2 articles published: mile_2c711833 (VIX 恐慌 Markov, general, released) + mile_da"
+    },
+    {
+      "sha": "eed79108",
+      "message": "CLAUDE.md 瘦身：10 類任務表搬 agent-delegation.md + 自動化段壓縮"
+    },
+    {
+      "sha": "9ae0b807",
+      "message": "Paper9 bib fix done + CLAUDE.md Compact Instructions + bug_backlog 建立"
+    },
+    {
+      "sha": "d2ac7c86",
+      "message": "docs: cleanup-post FK bug 記錄 + 清 2 個 Supabase 殘留（mile_b8ab23a3, mile_71826160）"
+    },
+    {
+      "sha": "d483faae",
+      "message": "CLAUDE.md: 補 AI 完全運營宣告 + 明確邊界"
+    },
+    {
+      "sha": "144237fc",
+      "message": "CLAUDE.md: 加「系統任務類型 × Skill 對應（10 類）」+ 主 agent 決策邏輯 research_program.md: 行為準則 9 "
+    },
+    {
+      "sha": "e64a1907",
+      "message": "架構簡化：移除 agent-specs canonical render + 3-terminal Codex worker"
+    },
+    {
+      "sha": "016f3be1",
+      "message": "Merge origin/main: complete conflict resolution"
+    },
+    {
+      "sha": "c2aaaa49",
+      "message": "4-hour sync: resolve merge state + incremental session progress"
+    },
+    {
+      "sha": "327038dd",
+      "message": "Merge agent worktree agent-afab0431 (1 commits)"
+    },
+    {
+      "sha": "f3ef80dd",
+      "message": "Auto-commit: save agent work before worktree merge"
+    },
+    {
+      "sha": "83e70af7",
+      "message": "Merge agent worktree agent-a7aac49d (1 commits)"
+    },
+    {
+      "sha": "461d23ae",
+      "message": "Copy experiments from worktree agent-a7aac49d (fallback)"
+    },
+    {
+      "sha": "b35c8828",
+      "message": "Auto-commit: save agent work before worktree merge"
+    },
+    {
+      "sha": "19ac8e49",
+      "message": "4-hour sync: canonical guide/skills/config state + auto-generated headers"
+    },
     {
       "sha": "2d8411c3",
       "message": "知識索引更新: K1250 K1251 補 knowledge + LanceDB rebuild (5220 entries)"

@@ -1,0 +1,50 @@
+{
+  "_schema_version": "2.0",
+  "_note": "Audit trail for Paper 4 (vix-sufficiency) main_v2.tex Table 2 calendar anomaly row (K736). paper_value = as printed in main_v2.tex; canonical_rerun = fresh re-estimation 2026-04-18. Codex note: K736 paper row is composite/non-canonical — may combine multiple sub-experiments. Canonical single-spec rerun cannot fully reproduce composite row. Supervisor must inspect K736 sub-components before errata decision.",
+  "canonical_spec": {
+    "seed": 42,
+    "lag": "signal.shift(1)",
+    "target": "22d forward RV",
+    "regression": "rolling 252 OLS",
+    "dm_hac_bandwidth": 22
+  },
+  "fields": {
+    "partial_r": {
+      "paper_value": -0.007,
+      "canonical_rerun_2026_04_18": -0.003741,
+      "abs_pct_diff": 46.556,
+      "status": "divergent"
+    },
+    "is_t_stat": {
+      "paper_value": -2.39,
+      "canonical_rerun_2026_04_18": -0.266224,
+      "abs_pct_diff": 88.861,
+      "status": "divergent_major"
+    },
+    "r2_oos_ct": {
+      "paper_value": 0.348,
+      "canonical_rerun_2026_04_18": 0.357047,
+      "abs_pct_diff": 2.6,
+      "status": "match"
+    },
+    "dm_abs_t": {
+      "paper_value": 0.15,
+      "canonical_rerun_2026_04_18": 0.211909,
+      "abs_pct_diff": 41.272,
+      "status": "divergent"
+    },
+    "raw_p": {
+      "paper_value": 0.881,
+      "canonical_rerun_2026_04_18": 0.832178,
+      "abs_pct_diff": 5.542,
+      "status": "divergent"
+    }
+  },
+  "provenance": {
+    "task_id": "task_a683510edfc3",
+    "agent": "codex-worker",
+    "generated_at": "2026-04-18T14:02:44+00:00",
+    "source_experiments": ["paper/vix-sufficiency/experiments/k736_calendar_anomaly_vt_results.json"],
+    "supervisor_action_required": "Paper 4 Table 2 calendar row composite nature: identify sub-components (multiple calendar effects combined?), decide whether to (a) report composite in paper with explicit sub-component JSONs, (b) split row into single-spec rows matching rerun, (c) drop row. 4/5 fields divergent + is_t_stat 88% divergence makes current row audit-fragile."
+  }
+}

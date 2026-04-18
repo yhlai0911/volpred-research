@@ -9,7 +9,7 @@
   "fallback_allowed": false,
   "approval_mode": "auto",
   "risk_level": "safe",
-  "status": "queued",
+  "status": "succeeded",
   "payload": {},
   "parent_task_id": "task_a2ad5cff36e9",
   "created_by": "claude-supervisor",
@@ -49,23 +49,99 @@
     "rollback_point_id": "codex-worker_session_20260418T062302Z_46965",
     "why_this_agent": "程式與實作任務優先交給 codex。"
   },
-  "claimed_by": null,
-  "claimed_by_session_key": null,
-  "claimed_by_role": null,
+  "claimed_by": "codex",
+  "claimed_by_session_key": "codex-worker",
+  "claimed_by_role": "worker",
   "claimed_at": null,
   "started_at": null,
-  "finished_at": null,
+  "finished_at": "2026-04-18T14:02:44.245559+00:00",
   "approved_by": null,
   "approved_at": null,
   "rejected_by": null,
   "rejected_at": null,
-  "result_summary": null,
-  "signal_payload": null,
+  "result_summary": "Added K732/K736 Table 2 expose JSONs; fresh canonical rerun flags K732 divergences and K736 composite-row inconsistencies.",
+  "signal_payload": {
+    "k732": [
+      {
+        "field": "partial_r",
+        "paper_value": 0.091,
+        "new_value": 0.086164,
+        "abs_pct_diff": 5.315,
+        "status": "divergent"
+      },
+      {
+        "field": "is_t_stat",
+        "paper_value": 1.64,
+        "new_value": 5.292581,
+        "abs_pct_diff": 222.718,
+        "status": "divergent"
+      },
+      {
+        "field": "r2_oos_ct",
+        "paper_value": 0.365,
+        "new_value": 0.296575,
+        "abs_pct_diff": 18.747,
+        "status": "divergent"
+      },
+      {
+        "field": "dm_abs_t",
+        "paper_value": 0.52,
+        "new_value": 0.671645,
+        "abs_pct_diff": 29.162,
+        "status": "divergent"
+      },
+      {
+        "field": "raw_p",
+        "paper_value": 0.603,
+        "new_value": 0.50181,
+        "abs_pct_diff": 16.781,
+        "status": "divergent"
+      }
+    ],
+    "k736": [
+      {
+        "field": "partial_r",
+        "paper_value": -0.007,
+        "new_value": -0.003741,
+        "abs_pct_diff": 46.556,
+        "status": "divergent"
+      },
+      {
+        "field": "is_t_stat",
+        "paper_value": -2.39,
+        "new_value": -0.266224,
+        "abs_pct_diff": 88.861,
+        "status": "divergent"
+      },
+      {
+        "field": "r2_oos_ct",
+        "paper_value": 0.348,
+        "new_value": 0.357047,
+        "abs_pct_diff": 2.6,
+        "status": "match"
+      },
+      {
+        "field": "dm_abs_t",
+        "paper_value": 0.15,
+        "new_value": 0.211909,
+        "abs_pct_diff": 41.272,
+        "status": "divergent"
+      },
+      {
+        "field": "raw_p",
+        "paper_value": 0.881,
+        "new_value": 0.832178,
+        "abs_pct_diff": 5.542,
+        "status": "divergent"
+      }
+    ],
+    "note": "Expose JSONs mirror current Table 2 rows. Fresh canonical re-estimation uses lagged signals, 22d forward RV, rolling 252 OLS, DM HAC bandwidth=22; K736 paper row is composite/non-canonical."
+  },
   "curated_by": null,
   "curated_at": null,
   "curated_promoted": [],
   "curated_notes": null,
   "last_error": "reclaimed_from_stale_codex-worker_at_2026-04-18T06:29:45.575967+00:00",
   "created_at": "2026-04-18T06:08:25.841958+00:00",
-  "updated_at": "2026-04-18T06:29:45.575967+00:00"
+  "updated_at": "2026-04-18T14:02:44.245559+00:00"
 }

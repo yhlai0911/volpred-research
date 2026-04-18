@@ -1,0 +1,88 @@
+{
+  "timestamp": "2026-04-18T22:29:20+08:00",
+  "paper_version": "main.tex@9ae0b807ae81 (README status: submitted under review)",
+  "total_checks": 7,
+  "total_match": 0,
+  "match_rate": 0.0,
+  "divergences": [
+    {
+      "code": "reproduce_py_missing",
+      "severity": "red",
+      "reason": "paper/garch-x-vix/reproduce.py is missing in a submitted paper",
+      "evidence": "ls paper/garch-x-vix/reproduce.py -> No such file or directory",
+      "workflow_requirement": ".claude/rules/paper-workflow.md requires paper/<name>/reproduce.py or scripts/reproduce_all.sh plus reproduce_report.json for reproduce checks"
+    },
+    {
+      "code": "no_reproduce_entrypoint",
+      "severity": "red",
+      "reason": "No reproduce.py or scripts/reproduce_all.sh exists, so one-command replication cannot be executed from paper/garch-x-vix/",
+      "evidence": "find paper/garch-x-vix -name 'reproduce_all.sh' -o -name 'reproduce*.py' -o -name 'reproduce*.sh' -> no files",
+      "exit_code": null,
+      "traceback_head": []
+    },
+    {
+      "code": "core_claims_unverifiable_from_reproduce_output",
+      "severity": "red",
+      "reason": "Required reproduce output does not exist, so A4f DM, cross-asset claims, and VRP rho cannot be matched within 5% tolerance from a fresh one-click run"
+    },
+    {
+      "code": "main_tex_cross_asset_scope_mismatch",
+      "severity": "yellow",
+      "reason": "main.tex does not claim USO+OVX > 3.0 or 0050.TW+VIXTWN > 3.0; instead it reports 0050.TW with VIX t=1.44 (not significant) and contains no USO/OVX or VIXTWN table row",
+      "evidence": "main.tex Table 6 and local fear table list SPY/QQQ/GLD/STOXX50E/FEZ/EEM/0050.TW only"
+    },
+    {
+      "code": "drift_since_latest_audit",
+      "severity": "red",
+      "reason": "Latest reproducibility audit dated 2026-04-17 already rated the paper NEEDS-FIX, but it did not escalate the missing root reproduce entrypoint; current audit raises this as a submission-package blocker"
+    }
+  ],
+  "core_claims_status": {
+    "A4f_dm_t": {
+      "paper": 4.03,
+      "reproduced": null,
+      "status": "missing_reproduce_output",
+      "paper_source": "main.tex abstract/table 3/table 4",
+      "canonical_reference": 4.030378564428692,
+      "canonical_source": "paper/garch-x-vix/mcs_dm_results.json"
+    },
+    "cross_asset_4markets": [
+      {
+        "market": "SPY",
+        "paper": 4.03,
+        "reproduced": null,
+        "status": "missing_reproduce_output",
+        "paper_source": "main.tex table 6"
+      },
+      {
+        "market": "GLD+GVZ",
+        "paper": 3.17,
+        "reproduced": null,
+        "status": "missing_reproduce_output",
+        "paper_source": "main.tex table 6"
+      },
+      {
+        "market": "USO+OVX",
+        "paper": null,
+        "reproduced": null,
+        "status": "claim_absent_in_main_tex",
+        "note": "README and experiments mention K1088, but main.tex does not state a USO+OVX > 3.0 core claim"
+      },
+      {
+        "market": "0050.TW+VIXTWN",
+        "paper": null,
+        "reproduced": null,
+        "status": "claim_absent_in_main_tex",
+        "note": "main.tex reports 0050.TW with VIX t=1.44 (not significant), not 0050.TW+VIXTWN > 3.0"
+      }
+    ],
+    "vrp_spearman": {
+      "paper": 0.8,
+      "reproduced": null,
+      "status": "missing_reproduce_output",
+      "paper_source": "main.tex abstract/section 4.2/table 10",
+      "canonical_reference": 0.8008446882164573,
+      "canonical_source": "paper/garch-x-vix/reproducibility_audit/script_output.json -> K988b A2n_vrp_spearman"
+    }
+  }
+}

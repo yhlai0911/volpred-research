@@ -1,0 +1,50 @@
+{
+  "_schema_version": "2.0",
+  "_note": "Audit trail for Paper 4 (vix-sufficiency) main_v2.tex Table 2 behavioral sentiment row (K732). paper_value = as printed in main_v2.tex; canonical_rerun = fresh re-estimation 2026-04-18 under canonical spec (seed=42, signal.shift(1), 22d forward RV, rolling 252 OLS, DM HAC bandwidth=22). Values DIVERGENT — paper may require errata per .claude/rules/paper-workflow.md 數字必須三方一致.",
+  "canonical_spec": {
+    "seed": 42,
+    "lag": "signal.shift(1)",
+    "target": "22d forward RV",
+    "regression": "rolling 252 OLS",
+    "dm_hac_bandwidth": 22
+  },
+  "fields": {
+    "partial_r": {
+      "paper_value": 0.091,
+      "canonical_rerun_2026_04_18": 0.086164,
+      "abs_pct_diff": 5.315,
+      "status": "divergent"
+    },
+    "is_t_stat": {
+      "paper_value": 1.64,
+      "canonical_rerun_2026_04_18": 5.292581,
+      "abs_pct_diff": 222.718,
+      "status": "divergent_major"
+    },
+    "r2_oos_ct": {
+      "paper_value": 0.365,
+      "canonical_rerun_2026_04_18": 0.296575,
+      "abs_pct_diff": 18.747,
+      "status": "divergent"
+    },
+    "dm_abs_t": {
+      "paper_value": 0.52,
+      "canonical_rerun_2026_04_18": 0.671645,
+      "abs_pct_diff": 29.162,
+      "status": "divergent"
+    },
+    "raw_p": {
+      "paper_value": 0.603,
+      "canonical_rerun_2026_04_18": 0.50181,
+      "abs_pct_diff": 16.781,
+      "status": "divergent"
+    }
+  },
+  "provenance": {
+    "task_id": "task_a683510edfc3",
+    "agent": "codex-worker",
+    "generated_at": "2026-04-18T14:02:44+00:00",
+    "source_experiments": ["paper/vix-sufficiency/experiments/k732_pcr_behavioral_sentiment_results.json"],
+    "supervisor_action_required": "Paper 4 narrative decision: (a) fix rerun spec to match paper, (b) update paper values to canonical rerun, (c) errata note. is_t_stat 222% divergence is the blocker."
+  }
+}

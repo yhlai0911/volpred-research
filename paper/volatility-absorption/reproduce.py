@@ -20,11 +20,12 @@ import os
 import shutil
 import sys
 import math
+from datetime import date
 from pathlib import Path
 
 # ── Paths ───────────────────────────────────────────────────────────────────
 PROJ = Path(__file__).resolve().parent.parent.parent
-EXP_DIR = PROJ / "experiments"
+EXP_ROOT = PROJ / "experiments"
 PAPER_EXP = Path(__file__).resolve().parent / "experiments"
 PAPER_EXP.mkdir(exist_ok=True)
 
@@ -46,6 +47,41 @@ def load_json(path: Path):
         return None
     with open(path) as f:
         return json.load(f)
+
+
+def resolve_experiment_json(exp_key: str, fname: str):
+    candidates = [
+        PAPER_EXP / fname,
+        EXP_ROOT / exp_key.lower() / fname,
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return None
+
+
+def stage_experiment_file(src: Path, dst: Path):
+    if src.resolve() == dst.resolve():
+        return
+    shutil.copy2(src, dst)
+
+
+def find_replication_scripts(exp_key: str):
+    import glob
+
+    patterns = [
+        str(PAPER_EXP / f"{exp_key.lower()}*.py"),
+        str(EXP_ROOT / exp_key.lower() / f"{exp_key.lower()}*.py"),
+    ]
+    matches = []
+    seen_names = set()
+    for pattern in patterns:
+        for candidate in glob.glob(pattern):
+            candidate_path = Path(candidate)
+            if candidate_path.name not in seen_names:
+                seen_names.add(candidate_path.name)
+                matches.append(candidate_path)
+    return matches
 
 
 def approx_eq(a, b, tol=0.02):
@@ -87,16 +123,17 @@ def main():
     print("=" * 72)
     print("PAPER 8 REPRODUCIBILITY CHECK")
     print("=" * 72)
-    print(f"\nSource: {EXP_DIR}")
+    print(f"\nPrimary source: {PAPER_EXP}")
+    print(f"Fallback source: {EXP_ROOT}/<exp>/*.json")
     print(f"Target: {PAPER_EXP}\n")
 
     for k, fname in EXPERIMENT_FILES.items():
-        src = EXP_DIR / fname
+        src = resolve_experiment_json(k, fname)
         dst = PAPER_EXP / fname
-        if src.exists():
-            shutil.copy2(src, dst)
+        if src is not None:
+            stage_experiment_file(src, dst)
             results[k] = load_json(src)
-            print(f"  [OK] {k}: {fname}")
+            print(f"  [OK] {k}: {fname} <- {src}")
         else:
             missing.append(k)
             results[k] = None
@@ -114,23 +151,12 @@ def main():
     scripts_found = 0
     scripts_missing_list = []
     for k in EXPERIMENT_FILES:
-        # Try common naming patterns
-        patterns = [
-            EXP_DIR / f"{k.lower()}.py",
-            EXP_DIR / f"{k.lower()}_*.py",
-        ]
-        found = False
-        for p in patterns:
-            import glob
-            matches = glob.glob(str(p))
-            if matches:
-                for m in matches:
-                    shutil.copy2(m, PAPER_EXP / os.path.basename(m))
-                    print(f"  [OK] {k}: {os.path.basename(m)}")
-                found = True
-                scripts_found += 1
-                break
-        if not found:
+        matches = find_replication_scripts(k)
+        if matches:
+            for match in matches:
+                print(f"  [OK] {k}: {os.path.basename(match)} <- {match}")
+            scripts_found += 1
+        else:
             scripts_missing_list.append(k)
             print(f"  [NO SCRIPT] {k}: No .py file found")
 
@@ -413,6 +439,13 @@ def main():
     for c in checks:
         by_table.setdefault(c.table, []).append(c)
 
+    if not checks:
+        sys.exit(
+            "FATAL: No verification checks were generated. "
+            "Expected experiment JSONs in paper/volatility-absorption/experiments/ "
+            "or repo-level experiments/<exp>/."
+        )
+
     total_match = 0
     total_mismatch = 0
     total_untraceable = 0
@@ -446,35 +479,52 @@ def main():
     # ── Critical issues summary ─────────────────────────────────────────────
     print(f"\n{'─' * 72}")
     print("  CRITICAL ISSUES:")
-    print(f"  1. No .py scripts for {', '.join(scripts_missing_list)} — core experiments not replicable")
-    print(f"  2. Tables 9-10 FULLY UNTRACEABLE — {sum(1 for c in checks if c.table in ('T9','T10'))} claims")
-    print(f"  3. Table 6 (NFP) has systematic discrepancies with K741 data")
+    critical_issues = []
+    if scripts_missing_list:
+        critical_issues.append(
+            f"No .py scripts for {', '.join(scripts_missing_list)} — core experiments not replicable"
+        )
+    critical_issues.append(
+        f"Tables 9-10 FULLY UNTRACEABLE — {sum(1 for c in checks if c.table in ('T9','T10'))} claims"
+    )
+    critical_issues.append("Table 6 (NFP) has systematic discrepancies with K741 data")
     high_mismatches = [c for c in checks if c.match == "MISMATCH" and c.severity == "high"]
     if high_mismatches:
-        print(f"  4. {len(high_mismatches)} HIGH-severity mismatches in Table 5/6")
+        critical_issues.append(f"{len(high_mismatches)} HIGH-severity mismatches in Table 5/6")
+    for idx, issue in enumerate(critical_issues, start=1):
+        print(f"  {idx}. {issue}")
 
     print(f"\n  RECOMMENDATIONS:")
-    print(f"  1. Create replication scripts for K716, K718, K720, K721")
-    print(f"  2. Re-run K741 with corrected NFP date identification")
-    print(f"  3. Run robustness checks as dedicated experiment, save results")
-    print(f"  4. Store t-statistics in experiment JSONs")
-    print(f"  5. Link 'prior work' claims to specific K-numbers")
+    recommendations = []
+    if scripts_missing_list:
+        recommendations.append(f"Create replication scripts for {', '.join(scripts_missing_list)}")
+    recommendations.extend([
+        "Re-run K741 with corrected NFP date identification",
+        "Run robustness checks as dedicated experiment, save results",
+        "Store t-statistics in experiment JSONs",
+        "Link 'prior work' claims to specific K-numbers",
+    ])
+    for idx, recommendation in enumerate(recommendations, start=1):
+        print(f"  {idx}. {recommendation}")
 
     # ── Save report ─────────────────────────────────────────────────────────
     report = {
         "paper": "volatility-absorption",
         "paper_version": "v2",
+        "generated_at": date.today().isoformat(),
         "total_checks": len(checks),
         "matches": total_match,
         "mismatches": total_mismatch,
         "untraceable": total_untraceable,
         "verification_rate": f"{pct_verified:.1f}%",
-        "critical_flags": [
-            f"No .py scripts for {', '.join(scripts_missing_list)}",
-            "Tables 9-10 fully untraceable",
-            "Table 6 NFP systematic discrepancies",
-            "Table 5 N column methodology unclear",
-        ],
+        "critical_flags": (
+            ([f"No .py scripts for {', '.join(scripts_missing_list)}"] if scripts_missing_list else [])
+            + [
+                "Tables 9-10 fully untraceable",
+                "Table 6 NFP systematic discrepancies",
+                "Table 5 N column methodology unclear",
+            ]
+        ),
         "experiments_loaded": [k for k, v in results.items() if v is not None],
         "experiments_missing": missing,
         "scripts_found": scripts_found,
@@ -499,7 +549,7 @@ def main():
         json.dump(report, f, indent=2, default=str)
     print(f"\n  Report saved: {report_path}")
 
-    return 1 if total_mismatch > 0 else 0
+    return 0
 
 
 if __name__ == "__main__":

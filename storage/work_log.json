@@ -85,5 +85,34 @@
     "derived_tasks": [
       "BUG-001_test_verification"
     ]
+  },
+  {
+    "entry_id": "a1b2c3d4",
+    "timestamp": "2026-04-18T13:48:52+00:00",
+    "task_type": "governance",
+    "task_id": null,
+    "agent": "main",
+    "skill_used": null,
+    "outcome": "done",
+    "summary": "啟動完整排程：6 system crontab + 6 session crons (CronCreate durable) + 2 remote triggers re-enabled (platform-ops-patrol / token-usage-daily-report 從 04-13 起 disabled 恢復) + Monitor scheduler_state poll 每 60s",
+    "duration_min": 10,
+    "derived_tasks": []
+  },
+  {
+    "entry_id": "b2c3d4e5",
+    "timestamp": "2026-04-18T13:48:52+00:00",
+    "task_type": "governance",
+    "task_id": null,
+    "agent": "main",
+    "skill_used": null,
+    "outcome": "done",
+    "summary": "並行 4 agent team: (1) codex-rescue task_a683510edfc3 K732/K736 Table2 expose running (2) draft pool audit → FOMC 預告 + 除權息 2 cand (3) paper audit → vt-trend-following priority 1 (4) experiment discovery → K1125 首選. Assign 4 tasks 入 queue (FOMC/除權息/vt-tf-package/K1125)",
+    "duration_min": 15,
+    "derived_tasks": [
+      "task_FOMC_preview",
+      "task_dividend_season",
+      "task_vt_tf_package",
+      "K1125"
+    ]
   }
 ]

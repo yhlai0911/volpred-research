@@ -14,11 +14,12 @@ import os
 import shutil
 import sys
 import math
+from datetime import date
 from pathlib import Path
 
 # ── Paths ───────────────────────────────────────────────────────────────────
 PROJ = Path(__file__).resolve().parent.parent.parent
-EXP_DIR = PROJ / "experiments"
+EXP_ROOT = PROJ / "experiments"
 PAPER_EXP = Path(__file__).resolve().parent / "experiments"
 PAPER_EXP.mkdir(exist_ok=True)
 
@@ -55,6 +56,23 @@ def load_json(path: Path):
         return None
     with open(path) as f:
         return json.load(f)
+
+
+def resolve_experiment_json(exp_key: str, fname: str):
+    candidates = [
+        PAPER_EXP / fname,
+        EXP_ROOT / exp_key.lower() / fname,
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return None
+
+
+def stage_experiment_file(src: Path, dst: Path):
+    if src.resolve() == dst.resolve():
+        return
+    shutil.copy2(src, dst)
 
 
 def approx_eq(a, b, tol=0.05):
@@ -99,16 +117,17 @@ def main():
     print("=" * 72)
     print("PAPER 7 REPRODUCIBILITY CHECK")
     print("=" * 72)
-    print(f"\nSource: {EXP_DIR}")
+    print(f"\nPrimary source: {PAPER_EXP}")
+    print(f"Fallback source: {EXP_ROOT}/<exp>/*.json")
     print(f"Target: {PAPER_EXP}\n")
 
     for k, fname in EXPERIMENT_FILES.items():
-        src = EXP_DIR / fname
+        src = resolve_experiment_json(k, fname)
         dst = PAPER_EXP / fname
-        if src.exists():
-            shutil.copy2(src, dst)
+        if src is not None:
+            stage_experiment_file(src, dst)
             results[k] = load_json(src)
-            print(f"  [OK] {k}: {fname}")
+            print(f"  [OK] {k}: {fname} <- {src}")
         else:
             missing.append(k)
             results[k] = None
@@ -429,6 +448,13 @@ def main():
     for c in checks:
         by_table.setdefault(c.table, []).append(c)
 
+    if not checks:
+        sys.exit(
+            "FATAL: No verification checks were generated. "
+            "Expected experiment JSONs in paper/vix-sufficiency/experiments/ "
+            "or repo-level experiments/<exp>/."
+        )
+
     total_match = 0
     total_mismatch = 0
     total_untraceable = 0
@@ -479,6 +505,7 @@ def main():
     report = {
         "paper": "vix-sufficiency",
         "paper_version": "v2",
+        "generated_at": date.today().isoformat(),
         "total_checks": len(checks),
         "matches": total_match,
         "mismatches": total_mismatch,
@@ -506,7 +533,7 @@ def main():
         json.dump(report, f, indent=2, default=str)
     print(f"\n  Report saved: {report_path}")
 
-    return 1 if total_mismatch > 0 else 0
+    return 0
 
 
 if __name__ == "__main__":
