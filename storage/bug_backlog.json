@@ -1,8 +1,19 @@
 {
   "schema_version": "1.0",
   "description": "Bug + 優化任務 backlog。定期從此處 promote 到 storage/next_tasks.json 成為 active 任務。不搶研究 slot。",
-  "categories": ["bug", "optimization", "tech_debt", "refactor", "documentation"],
-  "severities": ["critical", "high", "medium", "low"],
+  "categories": [
+    "bug",
+    "optimization",
+    "tech_debt",
+    "refactor",
+    "documentation"
+  ],
+  "severities": [
+    "critical",
+    "high",
+    "medium",
+    "low"
+  ],
   "entries": [
     {
       "id": "BUG-001",
@@ -14,8 +25,13 @@
       "detail": "scripts/supabase_sync.py / cleanup-post 遇 article_impressions / article_reactions FK 引用時 DELETE 回 409，cleanup 吞掉 error 照樣宣稱 supabase_deleted=true。Admin 畫面仍看到 ghost drafts。",
       "reproduction": "任何有 impression 記錄的 article 跑 cleanup-post --hard-delete",
       "fix_proposal": "delete_article 改 cascade：先 DELETE article_impressions / article_reactions / question_article_links，再 DELETE articles。409 時 abort 不 silent。",
-      "related": ["docs/error_log.md 2026-04-18 cleanup-post FK entry"],
-      "promoted_to_next_tasks": false
+      "related": [
+        "docs/error_log.md 2026-04-18 cleanup-post FK entry"
+      ],
+      "promoted_to_next_tasks": false,
+      "resolved_at": "2026-04-18",
+      "resolved_commit": "pending_git_commit",
+      "resolution": "scripts/supabase_sync.py delete_article 改為 cascade：先 DELETE article_impressions (唯一非 CASCADE FK) 再 DELETE articles；articles DELETE 失敗時 print warning 不再 silent success。_get_article_id helper 新增供 UUID 解析。"
     },
     {
       "id": "OPT-001",

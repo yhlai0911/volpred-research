@@ -345,3 +345,16 @@ K693 修改了 paper_trading.json 中 9,935 筆歷史 portfolio_return（same-da
 - 過程：通知收到 → bash scripts/merge_worktree.sh agent-a96a6532 → ls experiments/k1114/ 報 No such file → git reflog --all 找回 commit 5c6a5c8c → git checkout worktree-agent-a96a6532 -- experiments/k1114/ → git add + commit recover
 - 解決：當下用 reflog 救回；長期需修 merge_worktree.sh 改用 git rev-list --count main..<branch> 確切數新 commits（K1143 任務）
 - 經驗：E067（infrastructure 類）；worktree-merge-verification skill 必加「merge 後立即 ls experiments/<latest> 驗證」
+
+
+## [FIXED 2026-04-18] BUG-001 cleanup-post FK cascade
+
+`scripts/supabase_sync.py` `delete_article` 改為 cascade：
+- 先 `_get_article_id(slug)` 拿 UUID
+- 再 `_delete_where("article_impressions", {"article_id": uuid})`（唯一非 CASCADE FK，per migrations/001 line 85-252）
+- 最後 `_delete_where("articles", {"slug": slug})`
+- articles DELETE 失敗時 print `[BUG-001 guard]` 警告，不再 silent success
+
+驗證：`article_reactions`、`question_articles`、`article_tags`、`comments` 都是 ON DELETE CASCADE，不需 manual cascade。
+
+**測試 TODO**（未執行）：下次 cleanup-post 用有 impression 的 draft 驗證 Supabase row 真刪。

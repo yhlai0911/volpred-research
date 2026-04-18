@@ -59,5 +59,31 @@
     "summary": "K530 HAR vs GJR research article (proxy-choice angle) published as draft; differentiated from recent VIX-Markov and HAR+VIX articles",
     "duration_min": 25,
     "derived_tasks": []
+  },
+  {
+    "entry_id": "78fd904c",
+    "timestamp": "2026-04-18T18:28:39.555526+08:00",
+    "task_type": "event_article",
+    "task_id": "FOMC_0428_preview_abort",
+    "agent": "main",
+    "skill_used": "feed-publisher",
+    "outcome": "aborted_duplicate",
+    "summary": "任務要求寫 FOMC 04/28-29 預告（event_preview, general）。查重發現 2026-04-17 04:03 UTC 已 published 同主題文章 mile_78d649c4「FOMC 4/29 會議前 11 天：94.8% 不降息，為什麼市場還在盯 Powell 的嘴？」，內容完整覆蓋 CME FedWatch 機率、Powell 記者會、VIX 反應、普通投資人建議。依任務 abort 規則直接放棄，不重複發文。next_tasks.json 內查無 FOMC_0428 條目（可能已由 04-17 發文同時 clear）。",
+    "duration_min": 2,
+    "derived_tasks": []
+  },
+  {
+    "entry_id": "21e027f4",
+    "timestamp": "2026-04-18T18:33:26.347143+08:00",
+    "task_type": "governance",
+    "task_id": "BUG-001_cleanup_post_FK_cascade",
+    "agent": "main (investigation by a5d68ac8)",
+    "skill_used": null,
+    "outcome": "done",
+    "summary": "cleanup-post FK 半刪 bug 修完：supabase_sync.py delete_article cascade + loud fail。需下次 cleanup-post 對有 impression 的 article 驗證。",
+    "duration_min": 5,
+    "derived_tasks": [
+      "BUG-001_test_verification"
+    ]
   }
 ]
