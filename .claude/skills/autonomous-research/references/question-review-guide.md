@@ -1,3 +1,5 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 # Open Questions 重評指南
 
 ## 觸發時機

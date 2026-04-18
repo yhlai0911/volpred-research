@@ -1,26 +1,104 @@
-# Session 啟動必建集（cron + Monitor 操作細節）
+# Session 啟動必建集（VS Code supervisor / worker terminals）
 
 SessionStart hook 會提醒讀這份。這裡只放**每次新 session 要執行的具體指令**——不是原則、不是教訓（那些留在 CLAUDE.md）。
 
-## 1. Session Cron 標準啟動集（台灣時間，直接複製執行）
+校正後的標準 user story 是：
+
+1. VS Code 開 3 個終端機
+2. 終端機 A：Claude Code supervisor
+3. 終端機 B：Claude Code worker
+4. 終端機 C：Codex worker
+
+這 3 個終端機都應該是**已完成 OAuth / 人工認證**的互動 session。
+
+## 0. 三終端機最小啟動方式
+
+### A. Claude supervisor terminal
+
+不需要 headless `claude -p`。
+這個終端機負責：
+
+- `uv run volpred ops tasks`
+- `uv run volpred ops task-show <task_id>`
+- `uv run volpred ops brief-show <task_id>`
+- `uv run volpred ops brief-set <task_id> --brief-json ... --actor claude-supervisor`
+- `uv run volpred ops control-plane-summary`
+- `uv run volpred ops health`
+
+### B. Claude worker terminal
+
+```bash
+export VOLPRED_ACTOR=claude
+uv run volpred ops session-bootstrap --agent claude --session-id claude:worker
+```
+
+工作循環：
+
+```bash
+uv run volpred ops next-task --agent claude --emit-brief
+# 在同一個已登入的 Claude Code terminal 內完成任務
+uv run volpred ops finish-task <task_id> --agent claude --summary "..."
+```
+
+### C. Codex worker terminal
+
+```bash
+export VOLPRED_ACTOR=codex
+uv run volpred ops session-bootstrap --agent codex --session-id codex:worker
+```
+
+工作循環：
+
+```bash
+uv run volpred ops next-task --agent codex --emit-brief
+# 在同一個已登入的 Codex terminal 內完成任務
+uv run volpred ops finish-task <task_id> --agent codex --summary "..."
+```
+
+worker session 結束後：
+
+```bash
+uv run volpred ops session-shutdown --agent claude
+uv run volpred ops session-shutdown --agent codex
+```
+
+## 1. 補充：shared scheduler 與 session cron
+
+repo 內仍保留：
+
+```bash
+scripts/install_scheduler_cron.sh
+```
+
+但這條路徑目前應視為過渡期 / 輔助自動化機制，不是校正後的正式 worker runtime。
+
+下面的 session cron 僅保留為 session-local 提醒 / monitor。
+
+**Canonical source**：`config/runtime_schedules.json`
+若本檔和其他文件不一致，以該檔為準；本檔只是方便複製執行的操作手冊。
+
+## 2. Session Cron 標準啟動集（台灣時間，直接複製執行）
 
 ```python
-CronCreate(cron="3 9 * * *", prompt="每日任務審視與執行計劃：(1) 盤點草稿池數量、今日已發佈文章（一般4/研究2/每日1）、**草稿 buffer 目標 ≥12（含研究 ≥4、一般 ≥8）** (2) 讀 research_program.md 事件日曆，WebSearch 確認今日是否有 CPI/NFP/FOMC/TSMC 等重要事件 (3) 有事件→立即寫事件文章（--status published）(4) 檢查 research_program.md 行數(<700)、知識索引是否過期(>24h)、next_tasks 是否為空 (5) 根據缺口用 TaskCreate 列出今日必做清單 (6) 文章撰寫前必做 LanceDB 語義查重 + grep (7) 輸出今日計劃告訴用戶")
-
-CronCreate(cron="*/5 * * * *", prompt="繼續研究：(1) 讀 storage/next_tasks.json 取最高優先任務 (2) 分配編號前先 ls experiments/ 確認該編號目錄不存在，已存在則跳到下一個可用編號。**同時檢查 .claude/worktrees/ 確認沒有 agent 在用該編號** (3) 啟動 agent 執行 (4) 完成後從 research_program.md 補充 next_tasks (5) next_tasks 空了才讀 research_program.md 全文。絕對不可只 check status。**注意：cron 每 5 分鐘觸發（剛好貼齊 cache TTL 省 20% 觸發，若前任務在跑直接跳過）**")
-
-CronCreate(cron="53 */6 * * *", prompt="會員問題研究")
-
-CronCreate(cron="47 */4 * * *", prompt="每4小時 git commit + sync remote：(1) git add 有意義的變更 (2) git commit (3) git pull --no-rebase origin main (4) git push origin main。必須 push，防止本地與雲端巡檢分叉。用 merge 不用 rebase，避免多 session 並行時 rebase 衝突")
-
-CronCreate(cron="33 */3 * * *", prompt="知識索引更新")
-
-CronCreate(cron="23 0,6,12,18 * * *", prompt="Token 用量日報：(1) python scripts/token_usage_report.py --detailed (2) 將結果存檔到 storage/token_reports/ (3) 週五額外 --weekly (4) >40% 標記高消耗警告 (5) 摘要告訴用戶")
+CronCreate(cron="3 9 * * *", prompt="每日任務審視與執行計劃：(1) 盤點 user queue / scheduled queue / approval backlog (2) 盤點草稿池與今日已發佈文章缺口 (3) 讀 research_program.md 事件日曆，確認今日是否有 CPI/NFP/FOMC/TSMC 等重要事件 (4) 有事件→立即建立或執行事件任務（必要時 status=published）(5) 檢查 research_program.md 行數(<700)、知識索引是否過期(>24h) (6) 用 uv run volpred ops assign 建立今日正式任務")
+CronCreate(cron="17 */6 * * *", prompt="會員問題研究")
+CronCreate(cron="37 */6 * * *", prompt="平台巡檢：先跑 health + platform-cycle-summary；只有異常或 release_due 才真正執行寫入")
+CronCreate(cron="7 */6 * * *", prompt="知識索引檢查：先判斷是否真的需要更新")
+CronCreate(cron="23 22 * * *", prompt="Token 用量日報：每日一次 detailed；週五再補 weekly")
 
 CronCreate(cron="0 10 28 * *", prompt="更新 NDC 景氣指標：用 Chrome DevTools MCP 導航 NDC 網站提取最新領先指標和景氣對策信號，更新 storage/macro/tw_dgbas_bci_m.csv，git commit")
 ```
 
-## 2. Monitor 啟動（persistent，每 30 分鐘檢查，只異常通知）
+**不再建立 `*/4 * * * *` 的「繼續研究」heartbeat cron。** 研究續跑改為 **slot-aware**（2026-04-17 放寬，M1 Max 10 核硬體）：
+1. 每次觸發先 count 當前 running agents（`.claude/worktrees/` + 背景 task id 數）
+2. 若 running >= **3**（建議上限）→ 直接跳過本次，避免資源競爭與編號衝突
+3. 有 slot 就挑新任務，優先序：(1) user-assigned pending (2) scheduled (3) discovery
+4. **不必等 user queue 清空才 discovery** — slot 有空就可**並行**跑 discovery agent
+5. discovery pass 整體節奏最多每 30 分鐘一次（對整個系統的限速，不是每個 slot）
+6. 同一個 K 編號 / task id 不得同時被兩個 agent 執行（啟動前 `ls experiments/<k>` + `ls .claude/worktrees/` 檢查）
+7. user-assigned pending 永遠優先於 discovery — 下次 slot 空出必須先挑 user
+
+## 3. Monitor 啟動（persistent，每 30 分鐘檢查，只異常通知）
 
 ```python
 Monitor(
@@ -66,7 +144,7 @@ done"""
 )
 ```
 
-## 3. 參考資料（不是啟動指令，僅供查閱）
+## 4. 參考資料（不是啟動指令，僅供查閱）
 
 ### 永久任務（系統 crontab，不需重啟）
 ```
@@ -84,6 +162,13 @@ done"""
 |---------|-----------|---------|------|
 | `platform-ops-patrol` | `0 */6 * * *` | 每 6 小時 | 平台巡檢 `trig_01HzWX2ZUmsGHnzwciGpHeNz` |
 | `token-usage-daily-report` | `43 14 * * *` | 22:43 | Token 日報 `trig_015iaE6yv3V9V1opjUAA5R2V` |
+
+### 本機控制面入口
+- `uv run volpred ops assign ...`：建立正式 task
+- `uv run volpred ops claim-next --agent claude|codex`：agent claim 任務
+- `uv run volpred ops heartbeat --agent claude|codex`：更新 session 心跳
+- `uv run volpred ops control-plane-summary`：檢查 queue / agent 狀態
+- `uv run volpred ops rollback create`：建立回滾點
 
 ### Monitor 使用規則
 - **stdout 要精簡**：必須 `grep --line-buffered` 過濾，不可 pipe raw log

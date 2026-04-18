@@ -1,76 +1,74 @@
 """
-K1100g_d7 — Cross-market replication: SPY + N225 overnight gap^2 → intraday r^2
-==============================================================================
+K1100g_d7 — Cross-market replication of gap² session asymmetry
+==============================================================
 
 Parent chain:
-  - K1100g       : TAIFEX overnight/day vol ratio 1.586 (anchor)
-  - K1100g_d1-d5 : Single-market analyses all landed borderline
-                   (DM t 1.3-2.0, below Harvey 2016 threshold 3.0)
+  K1100g    : TAIFEX overnight/intraday vol ratio 1.586 (vs SPY 1.001)
+              Paper 3 reframe anchor candidate
+  K1100g_d1 : TAIFEX ratio decomposed: 13:45→15:00 + 05:00→08:45 gap
+  K1100g_d3 : Student-t night r² exog → DM t=1.92 borderline
+  K1100g_d5 : TAIFEX pure gap² exog → DM t=+1.49 (M2_gap_total) vs
+              REF_night_r² DM t=+2.01 — same signal class, neither past Harvey
+  K1100g_d6 : extending TAIFEX OOS to 2022-2025 (concurrent)
 
-Question this experiment addresses:
-  Is the TAIFEX "overnight info predicts day session variance" signal
-  a **universal structural property** or a **Taiwan-specific artifact**
-  of the emerging-market / narrow-breadth index?
+K1100g_d7 hypothesis:
+  If overnight gap² predictive power is UNIVERSAL (not TAIFEX-specific
+  microstructure), we should see same-direction gap² loading in
+  SPY (US equity, 17.5h close-to-open gap 16:00 ET → 09:30 ET next day)
+  and N225 (Japan equity, 18h close-to-open gap 15:00 JST → 09:00 JST next day).
 
-Hypotheses:
-  H1 universal       : Both SPY and N225 OOS DM t > 3 → TAIFEX borrowed N,
-                       structural claim passes cross-market robustness
-  H2 market-specific : Both SPY and N225 NS (|t| < 2) → effect is Taiwan-only
-  H3 partial         : Exactly one market passes Harvey → regional variation
+  Universal gap effect → Paper 3 reframe anchor strengthened (structural claim)
+  TAIFEX-only → Paper 3 narrative should be scoped to Taiwan microstructure
 
-Design (cross-market common framework):
-  Daily OHLC from yfinance 2005-01-01 ~ 2024-12-31:
-    SPY  (S&P 500 ETF, US market)        N ~ 5030
-    ^N225 (Nikkei 225 index, Japan)      N ~ 4900
+Models (per market, using daily OHLC only):
+  M_base = Student-t GJR-like PRG (no exog)
+    σ²_t = τ_t × g_t
+    τ_t  = θ0 + θ1·r²_{t-1} + Σ d_k·DOW_k(t)
+    g_t  = (1 - α - γ/2 - β) + α·u²_{t-1} + γ·u²_{t-1}·I(r_{t-1}<0) + β·g_{t-1}
+  M_gap  = M_base + ξ · gap²_t
+    gap²_t = (log Open_t − log Close_{t-1})²   realized before intraday return begins
+    exog_contemp=True (known at open_t, forecasting intraday r_t=log Close_t − log Open_t)
 
-  Decomposition (daily OHLC only — no intraday session split):
-    r_intraday[t] = log(Close[t] / Open[t])      ← day session return
-    r_gap[t]      = log(Open[t] / Close[t-1])    ← overnight gap
-    r_cc[t]       = log(Close[t] / Close[t-1]) = r_intraday[t] + r_gap[t]
+Target return:
+  r_intraday_t = log Close_t − log Open_t   (replicates TAIFEX day session)
 
-  Information set (analogous to TAIFEX overnight→day):
-    r_gap[t]   is realized BEFORE the day session opens   → exog for r_intraday[t]
-    r_gap[t-1] is yesterday's gap, trivially legal        → alternative lag
-    r_intraday[t-1], r_gap[t-1] are both legal
+Data:
+  yfinance daily OHLC
+    SPY : 2010-01-01 .. 2026-03-31  (≥ 4000 trading days)
+    ^N225 : 2010-01-01 .. 2026-03-31
 
-Models (all Student-t innovation, per K1100g_d3 lesson E074 fat-tail QML):
-  M1 baseline : GJR-GARCH(1,1)-t on r_intraday[t]
-                h_t = omega + alpha*r²[t-1] + gamma*r²[t-1]*I(r<0) + beta*h[t-1]
-                omega re-parameterized so unconditional var = sample var
-  M2_gap      : M1 + xi * r_gap[t]²  (overnight gap² as exog, legal contemp)
-  M2_gap_lag  : M1 + xi * r_gap[t-1]² (lagged gap²; sanity check)
-  M4_night    : M1 + xi * r_intraday[t-1]² (control: yesterday intraday)
-
-  Note: For TAIFEX we had an explicit "night session" 5-min RV; here we
-  don't have free intraday data, so we use gap² as the closest proxy for
-  "overnight information aggregated into the open price."
+Train/OOS split:
+  Train: 2010-2019 (~2500 obs)   Test: 2020-01-01 .. 2025-12-31 (≥ 504 obs)
+  Expanding-window refit every 5 days (matches K1100g_d5 cadence)
 
 Evaluation:
-  IS  : Full-sample LRT (df=1) for each exog model vs M1 baseline
-  OOS : Expanding-window refit every 20 days, train first 60%, test last 40%
-        (longer window than K1100g_d3 REFIT_EVERY=5 for computational tractability)
-  DM  : HLN-corrected DM t-stat (Harvey 2016 threshold |t| > 3)
-        QLIKE loss on r_intraday[t]² (Patton 2011 proxy-robust)
+  IS  : LRT M_gap vs M_base (dof=1)
+  OOS : QLIKE, Student-t log-lik, DM-HLN (positive t = M_gap better than M_base)
+  Harvey (2016) |t|>3 threshold
+
+Cross-market verdict logic:
+  PASS_UNIVERSAL : all 3 markets (TAIFEX + SPY + N225) same positive direction
+                    AND ≥2 past Harvey 3.0
+  PASS_SOME      : all same direction, ≥1 past Harvey
+  TAIFEX_ONLY    : SPY/N225 DM t < 1 or reverse direction
+  MIXED          : direction inconsistent across markets
 
 Lookahead discipline:
-  - r_gap[t] uses Open[t] and Close[t-1] — both realized BEFORE intraday starts
-  - Student-t innovation (K1100g_d3 lesson E074)
-  - seed=42; L-BFGS-B deterministic
-  - OOS h[t] = f(r[t-1], h[t-1], gap_exog[t]) — no future info
+  - gap²_t uses Open_t and Close_{t-1} — both realized BEFORE
+    intraday r_t = log(Close_t/Open_t) begins. LEGAL contemp exog.
+  - seed=42, deterministic L-BFGS-B
+  - TAIFEX source: K1100g_d5 result JSON (read-only, not re-running)
 
-Author: Claude (worktree agent-a7aac49d)
-Date: 2026-04-13
+Author: Claude (worktree agent-a6989c35)
+Date: 2026-04-17
 Seed: 42
-
-References (cross-market replication context):
-  - Andersen, Bollerslev, Huang (2011) JoE 160(1) — overnight jump
-  - French & Roll (1986) JFE 17(1) — non-trading-hours info
-  - Bollerslev (1987) REStat 69(3) — Student-t GARCH
-  - Glosten, Jagannathan, Runkle (1993) JoF 48(5) — GJR asymmetry
-  - Harvey, Leybourne, Newbold (1997) IJF 13(2) — HLN DM correction
+References:
+  - Bollerslev (1987) RESTAT — Student-t GARCH
+  - Engle & Rangel (2008) RFS — τ×g multiplicative PRG
+  - French & Roll (1986) JFE — non-trading-hour information
+  - Harvey, Leybourne & Newbold (1997) IJF — HLN DM correction
   - Harvey (2016) JF — t>3 threshold
-  - Patton (2011) JoE 160(1) — QLIKE proxy-robust
-  - Engle & Ng (1993) JoF — news impact curve (asymmetry)
+  - Ito & Lin (1994) JFQA — intraday vol structure in Japan
 """
 from __future__ import annotations
 
@@ -78,17 +76,16 @@ import json
 import time
 import warnings
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple, Optional
 
 import numpy as np
 import pandas as pd
-import yfinance as yf
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from scipy import optimize
 from scipy.special import gammaln
-from scipy.stats import norm, chi2, skew as skew_fn, kurtosis as kurt_fn
+from scipy.stats import norm, chi2, spearmanr, kurtosis as kurt_fn, skew as skew_fn
 
 warnings.filterwarnings("ignore")
 np.random.seed(42)
@@ -96,132 +93,149 @@ RNG = np.random.default_rng(42)
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 DATA_DIR = SCRIPT_DIR / "data"
-DATA_DIR.mkdir(exist_ok=True)
+DATA_DIR.mkdir(exist_ok=True, parents=True)
 RESULTS_PATH = SCRIPT_DIR / "k1100g_d7_results.json"
 
-START_DATE = "2005-01-01"
-END_DATE = "2024-12-31"
-REFIT_EVERY = 20      # OOS expanding-window refit cadence (days)
-TRAIN_FRAC = 0.60     # first 60% is in-sample
-HARVEY_T = 3.0        # Harvey (2016) threshold
-CHI2_1_1pct = 6.635   # chi²(1) critical value at 1%
+# Cross-market spec
+MARKETS = [
+    # (label, yfinance ticker, cache filename)
+    ("SPY", "SPY", "spy_daily_2010-2026.parquet"),
+    ("N225", "^N225", "n225_daily_2010-2026.parquet"),
+]
+START_DATE = "2010-01-01"
+END_DATE = "2026-04-01"
+
+TRAIN_START = pd.Timestamp("2010-01-01")
+TRAIN_END = pd.Timestamp("2019-12-31")
+TEST_START = pd.Timestamp("2020-01-01")
+TEST_END = pd.Timestamp("2025-12-31")
+REFIT_EVERY = 5
+
+# K1100g_d5 TAIFEX anchor (for cross-market comparison; read-only)
+TAIFEX_D5_RESULTS = (Path(__file__).resolve().parent.parent
+                     / "k1100g_d5" / "k1100g_d5_results.json")
 
 
-# ======================================================================
-# 1. Data loading (yfinance daily OHLC with cache)
-# ======================================================================
-def load_market(ticker: str, cache_name: str) -> pd.DataFrame:
-    cache_path = DATA_DIR / f"_cache_{cache_name}_{START_DATE}_{END_DATE}.parquet"
+# ----------------------------------------------------------------------
+# 1. Data fetch + gap² construction
+# ----------------------------------------------------------------------
+def fetch_daily(ticker: str, cache_file: str) -> pd.DataFrame:
+    cache_path = DATA_DIR / cache_file
     if cache_path.exists():
         df = pd.read_parquet(cache_path)
-        print(f"  loaded {ticker} from cache: {df.shape}")
+        print(f"  [cache] {ticker} -> {cache_path.name} n={len(df)}")
         return df
-    print(f"  fetching {ticker} from yfinance...")
+    print(f"  [fetch] {ticker} {START_DATE}..{END_DATE}")
+    import yfinance as yf
     raw = yf.download(ticker, start=START_DATE, end=END_DATE,
-                      auto_adjust=False, progress=False)
-    # yfinance 1.2 returns MultiIndex columns; flatten
+                      progress=False, auto_adjust=False)
+    # Flatten any MultiIndex columns (single-ticker download)
     if isinstance(raw.columns, pd.MultiIndex):
         raw.columns = [c[0] for c in raw.columns]
-    raw = raw[["Open", "High", "Low", "Close", "Volume"]].copy()
-    raw.index = pd.to_datetime(raw.index)
-    raw = raw.dropna()
-    raw.to_parquet(cache_path)
-    print(f"  cached to {cache_path}: {raw.shape}")
-    return raw
+    df = raw[["Open", "High", "Low", "Close", "Volume"]].copy()
+    df.index.name = "date"
+    df = df.reset_index()
+    df["date"] = pd.to_datetime(df["date"])
+    df = df.sort_values("date").dropna(
+        subset=["Open", "High", "Low", "Close"]).reset_index(drop=True)
+    df.to_parquet(cache_path, index=False)
+    print(f"  [OK] {ticker} cached n={len(df)}")
+    return df
 
 
-def build_features(df: pd.DataFrame) -> pd.DataFrame:
-    out = pd.DataFrame(index=df.index)
-    open_p = df["Open"].astype(float).values
-    close_p = df["Close"].astype(float).values
-
-    # intraday return (Close/Open) — day session
-    r_intra = np.log(close_p / open_p)
-    # overnight gap (Open_t / Close_{t-1}) — NaN for t=0
-    r_gap = np.concatenate([[np.nan], np.log(open_p[1:] / close_p[:-1])])
-    # close-to-close
-    r_cc = np.concatenate([[np.nan], np.log(close_p[1:] / close_p[:-1])])
-
-    out["r_intraday"] = r_intra
-    out["r_gap"] = r_gap
-    out["r_cc"] = r_cc
-    out = out.dropna().copy()
-
-    # demean (so GJR-GARCH operates on approximate zero-mean residuals)
-    out["r_intraday"] = out["r_intraday"] - out["r_intraday"].mean()
-    out["r_gap"] = out["r_gap"] - out["r_gap"].mean()
-
-    # squared terms and lags used as exog
-    out["r_intraday2"] = out["r_intraday"] ** 2
-    out["r_gap2"] = out["r_gap"] ** 2
-    out["r_gap2_lag1"] = out["r_gap2"].shift(1)   # r_gap[t-1]²
-    out["r_intra2_lag1"] = out["r_intraday2"].shift(1)
-
-    out = out.dropna().copy()
-    return out
-
-
-# ======================================================================
-# 2. GJR-GARCH(1,1) Student-t kernel
-# ======================================================================
-def _gjr_recursion(params: np.ndarray, r: np.ndarray,
-                   exog: Optional[np.ndarray] = None,
-                   exog_contemp: bool = True) -> Optional[np.ndarray]:
+def build_market_series(df: pd.DataFrame) -> Dict[str, np.ndarray]:
+    """Construct:
+      r_intraday[t]  = log(Close_t / Open_t)   target
+      r_overnight[t] = log(Open_t / Close_{t-1})  gap
+      r_full[t]      = log(Close_t / Close_{t-1})  full-day (for descriptives)
     """
-    Return conditional variance h[t] under GJR-GARCH(1,1) with optional
-    ONE-dimensional exog term.
+    close = df["Close"].values.astype(float)
+    openp = df["Open"].values.astype(float)
+    prev_close = np.r_[np.nan, close[:-1]]
+    r_intraday = np.log(close / openp)
+    r_overnight = np.log(openp / prev_close)
+    r_full = np.log(close / prev_close)
+    dow = df["date"].dt.dayofweek.values.astype(int)
+    return {
+        "date": df["date"].values,
+        "r_intraday": r_intraday,
+        "r_overnight": r_overnight,
+        "r_full": r_full,
+        "gap2": r_overnight ** 2,
+        "dow": dow,
+    }
 
-    params: [theta0, alpha, gamma, beta] (+ [xi] if exog)
-      h[t] = theta0 + alpha*r²[t-1] + gamma*r²[t-1]*I(r[t-1]<0) + beta*h[t-1]
-             [+ xi * exog[t]        if exog_contemp=True]
-             [+ xi * exog[t-1]      otherwise]
-    """
-    theta0 = params[0]
-    alpha = params[1]
-    gamma = params[2]
-    beta = params[3]
-    xi = params[4] if len(params) >= 5 else 0.0
 
-    if (theta0 <= 0 or alpha < 0 or gamma < -alpha or beta < 0
+def make_dow_dummies(dow: np.ndarray) -> np.ndarray:
+    """Use weekdays 1..4 (Tue..Fri) vs Mon=0 base."""
+    N = len(dow)
+    X = np.zeros((N, 4), dtype=float)
+    for k, d in enumerate((1, 2, 3, 4)):
+        X[:, k] = (dow == d).astype(float)
+    return X
+
+
+# ----------------------------------------------------------------------
+# 2. Student-t PRG (identical kernel to K1100g_d5)
+# ----------------------------------------------------------------------
+def _prg_variance_recursion(params: np.ndarray, r: np.ndarray,
+                             dow_dum: np.ndarray,
+                             exog: Optional[np.ndarray] = None,
+                             exog_contemp: bool = False,
+                             ) -> Optional[np.ndarray]:
+    theta0, theta1, d1, d2, d3, d4, alpha, gamma, beta = params[:9]
+    xn = params[9] if len(params) >= 10 else 0.0
+    if (theta0 <= 0 or theta1 < 0 or alpha < 0 or gamma < 0 or beta < 0
             or alpha + 0.5 * gamma + beta >= 0.999):
         return None
-
+    omega = 1.0 - alpha - 0.5 * gamma - beta
+    if omega <= 0:
+        return None
     N = len(r)
-    h = np.zeros(N)
-    # init at unconditional var proxy
+    tau = np.zeros(N); g = np.zeros(N); h = np.zeros(N)
     uncond = float(np.mean(r * r))
-    h[0] = max(uncond, 1e-10)
-
+    tau[0] = max(uncond, 1e-10); g[0] = 1.0; h[0] = tau[0] * g[0]
     for t in range(1, N):
         x2_lag = r[t - 1] * r[t - 1]
-        neg_ind = 1.0 if r[t - 1] < 0 else 0.0
-        h_t = theta0 + alpha * x2_lag + gamma * x2_lag * neg_ind + beta * h[t - 1]
+        dow_term = (d1 * dow_dum[t, 0] + d2 * dow_dum[t, 1]
+                    + d3 * dow_dum[t, 2] + d4 * dow_dum[t, 3])
         if exog is not None:
-            ex = exog[t] if exog_contemp else exog[t - 1]
-            if np.isfinite(ex):
-                h_t += xi * ex
-        if h_t <= 1e-12:
+            exog_val = exog[t] if exog_contemp else exog[t - 1]
+            exog_term = xn * exog_val
+        else:
+            exog_term = 0.0
+        tau_t = theta0 + theta1 * x2_lag + dow_term + exog_term
+        if tau_t <= 1e-10:
             return None
-        h[t] = h_t
+        tau[t] = tau_t
+        u_lag = r[t - 1] / np.sqrt(max(tau[t - 1], 1e-10))
+        u2_lag = u_lag * u_lag
+        neg_ind = 1.0 if r[t - 1] < 0 else 0.0
+        g_t = omega + alpha * u2_lag + gamma * u2_lag * neg_ind + beta * g[t - 1]
+        if g_t <= 1e-10:
+            return None
+        g[t] = g_t
+        h[t] = tau[t] * g[t]
+        if h[t] <= 1e-10:
+            return None
     return h
 
 
-def gjr_nll_student(params: np.ndarray, r: np.ndarray,
+def prg_nll_student(params: np.ndarray, r: np.ndarray, dow_dum: np.ndarray,
                     exog: Optional[np.ndarray] = None,
-                    exog_contemp: bool = True) -> float:
+                    exog_contemp: bool = False) -> float:
     df = params[-1]
     prg_params = params[:-1]
-    h = _gjr_recursion(prg_params, r, exog, exog_contemp)
+    h = _prg_variance_recursion(prg_params, r, dow_dum, exog, exog_contemp)
     if h is None:
         return 1e10
     if df <= 2.01:
         return 1e10
-
     N = len(r)
-    valid = slice(1, N)
-    h_v = h[valid]
-    r_v = r[valid]
-
+    h_v = h[1:N]; r_v = r[1:N]
+    scale2 = h_v * (df - 2.0) / df
+    if np.any(scale2 <= 0):
+        return 1e10
     log_const = (gammaln((df + 1.0) / 2.0) - gammaln(df / 2.0)
                  - 0.5 * np.log(np.pi * (df - 2.0)))
     log_pdf = (log_const - 0.5 * np.log(h_v)
@@ -232,54 +246,57 @@ def gjr_nll_student(params: np.ndarray, r: np.ndarray,
     return nll
 
 
-def fit_gjr_student(r: np.ndarray,
+def fit_prg_student(r: np.ndarray, dow_dum: np.ndarray,
                     exog: Optional[np.ndarray] = None,
-                    exog_contemp: bool = True,
+                    exog_contemp: bool = False,
                     n_restarts: int = 8,
                     x0_warm: Optional[np.ndarray] = None) -> Dict:
     r = np.asarray(r, dtype=float)
     use_exog = exog is not None
     local_rng = np.random.default_rng(42)
     best = {"nll": np.inf, "params": None, "success": False}
-
-    base_dim = 5 if use_exog else 4   # [theta0, alpha, gamma, beta, (xi)]
-    dim = base_dim + 1  # + df
-
-    uncond = float(np.var(r, ddof=1))
+    prg_base_dim = 10 if use_exog else 9
+    dim = prg_base_dim + 1
 
     for trial in range(n_restarts):
+        uncond = float(np.var(r, ddof=1))
         if trial == 0 and x0_warm is not None and len(x0_warm) == dim:
             x0 = np.array(x0_warm, dtype=float).copy()
         elif trial == 0:
-            x0 = np.array([uncond * 0.05, 0.05, 0.05, 0.85])
+            x0 = np.array([uncond * 0.5, 0.05, 0.0, 0.0, 0.0, 0.0,
+                           0.05, 0.05, 0.80])
             if use_exog:
                 x0 = np.concatenate([x0, [0.0]])
             x0 = np.concatenate([x0, [8.0]])
         else:
             x0 = np.array([
-                uncond * (0.02 + 0.08 * local_rng.random()),
+                uncond * (0.3 + 0.4 * local_rng.random()),
                 0.02 + 0.06 * local_rng.random(),
+                uncond * 0.01 * (local_rng.random() - 0.5),
+                uncond * 0.01 * (local_rng.random() - 0.5),
+                uncond * 0.01 * (local_rng.random() - 0.5),
+                uncond * 0.01 * (local_rng.random() - 0.5),
                 0.02 + 0.08 * local_rng.random(),
-                0.75 + 0.15 * local_rng.random(),
+                0.02 + 0.08 * local_rng.random(),
+                0.70 + 0.20 * local_rng.random(),
             ])
             if use_exog:
-                x0 = np.concatenate([x0, [0.5 * (local_rng.random() - 0.5)]])
+                x0 = np.concatenate([x0, [0.3 * (local_rng.random() - 0.5)]])
             df0 = 4.0 + 8.0 * local_rng.random()
             x0 = np.concatenate([x0, [df0]])
 
         bounds = [
-            (1e-10, None),   # theta0
-            (0.0, 0.4),      # alpha
-            (-0.4, 0.6),     # gamma
-            (0.0, 0.9999),   # beta
+            (1e-8, None), (0.0, 1.0),
+            (None, None), (None, None), (None, None), (None, None),
+            (0.0, 0.4), (0.0, 0.4), (0.0, 0.9999),
         ]
         if use_exog:
-            bounds.append((None, None))  # xi
-        bounds.append((2.05, 200.0))  # df
+            bounds.append((None, None))
+        bounds.append((2.05, 200.0))
 
         try:
             res = optimize.minimize(
-                gjr_nll_student, x0, args=(r, exog, exog_contemp),
+                prg_nll_student, x0, args=(r, dow_dum, exog, exog_contemp),
                 method="L-BFGS-B", bounds=bounds,
                 options={"maxiter": 500, "ftol": 1e-8},
             )
@@ -290,33 +307,45 @@ def fit_gjr_student(r: np.ndarray,
                         "trial": trial}
         except Exception:
             continue
-
     return best
 
 
-def gjr_variance_path_student(params: np.ndarray, r: np.ndarray,
+def prg_variance_path_student(params: np.ndarray, r: np.ndarray,
+                              dow_dum: np.ndarray,
                               exog: Optional[np.ndarray] = None,
-                              exog_contemp: bool = True) -> np.ndarray:
+                              exog_contemp: bool = False) -> np.ndarray:
     if params is None:
         return np.full(len(r), float(np.var(r, ddof=1)))
-    prg_params = params[:-1]  # drop df
-    h = _gjr_recursion(prg_params, r, exog, exog_contemp)
+    prg_params = params[:-1]
+    h = _prg_variance_recursion(prg_params, r, dow_dum, exog, exog_contemp)
     if h is None:
         return np.full(len(r), float(np.var(r, ddof=1)))
     return h
 
 
-# ======================================================================
+# ----------------------------------------------------------------------
 # 3. Eval utilities
-# ======================================================================
+# ----------------------------------------------------------------------
 def qlike_loss(h_hat: np.ndarray, r2: np.ndarray) -> np.ndarray:
-    eps = 1e-12
+    eps = 1e-10
     ratio = r2 / np.maximum(h_hat, eps)
     return ratio - np.log(np.maximum(ratio, eps)) - 1.0
 
 
+def student_loglik_per_obs(h_hat: np.ndarray, r: np.ndarray,
+                           df: float) -> np.ndarray:
+    eps = 1e-12
+    h = np.maximum(h_hat, eps)
+    if df <= 2.0:
+        return np.full_like(h, -np.inf)
+    log_const = (gammaln((df + 1.0) / 2.0) - gammaln(df / 2.0)
+                 - 0.5 * np.log(np.pi * (df - 2.0)))
+    return (log_const - 0.5 * np.log(h)
+            - (df + 1.0) / 2.0 * np.log1p(r ** 2 / (h * (df - 2.0))))
+
+
 def dm_test_hln(loss1: np.ndarray, loss2: np.ndarray) -> Tuple[float, float]:
-    """HLN-corrected DM. Positive t = loss1 > loss2 (i.e. model 2 better)."""
+    """HLN-corrected DM test. Positive t = loss1 > loss2 (model 2 better)."""
     d = loss1 - loss2
     d = d[np.isfinite(d)]
     if len(d) < 20:
@@ -344,370 +373,672 @@ def dm_test_hln(loss1: np.ndarray, loss2: np.ndarray) -> Tuple[float, float]:
     return float(t_hln), float(p)
 
 
-# ======================================================================
-# 4. Experiment runner per market
-# ======================================================================
-def run_market(ticker: str, label: str, cache_name: str) -> Dict:
-    t0 = time.time()
-    print(f"\n=== {label} ({ticker}) ===")
+def lrt_chi2_test(ll_restricted: float, ll_full: float,
+                  dof: int = 1) -> Tuple[float, float]:
+    if ll_restricted is None or ll_full is None:
+        return np.nan, np.nan
+    lr = 2.0 * (ll_full - ll_restricted)
+    if lr < 0:
+        lr = 0.0
+    p = 1.0 - chi2.cdf(lr, df=dof)
+    return float(lr), float(p)
 
-    raw = load_market(ticker, cache_name)
-    feat = build_features(raw)
 
-    r_intra = feat["r_intraday"].values
-    r_gap2 = feat["r_gap2"].values
-    r_gap2_lag = feat["r_gap2_lag1"].values
-    r_intra2_lag = feat["r_intra2_lag1"].values
-    dates = feat.index
+# ----------------------------------------------------------------------
+# 4. OOS expanding-window
+# ----------------------------------------------------------------------
+def expanding_oos_student(r_target: np.ndarray, dow_dum: np.ndarray,
+                          exog: Optional[np.ndarray],
+                          exog_contemp: bool,
+                          test_start_idx: int,
+                          label: str = "",
+                          refit_every: int = REFIT_EVERY) -> Dict:
+    N = len(r_target)
+    h_oos = np.full(N, np.nan)
+    df_log = np.full(N, np.nan)
+    params_log: List[Tuple[int, List[float]]] = []
+    current_params: Optional[np.ndarray] = None
 
-    N = len(feat)
-    # Descriptive stats
-    desc = {
-        "N": int(N),
-        "date_range": [str(dates[0].date()), str(dates[-1].date())],
-        "r_intraday_stats": {
-            "mean": float(np.mean(r_intra)),
-            "std": float(np.std(r_intra, ddof=1)),
-            "skew": float(skew_fn(r_intra)),
-            "excess_kurt": float(kurt_fn(r_intra)),
-        },
-        "r_gap_stats": {
-            "mean": float(np.mean(feat["r_gap"].values)),
-            "std": float(np.std(feat["r_gap"].values, ddof=1)),
-            "skew": float(skew_fn(feat["r_gap"].values)),
-            "excess_kurt": float(kurt_fn(feat["r_gap"].values)),
-        },
-        "var_ratio_gap_over_intra": float(
-            np.var(feat["r_gap"].values, ddof=1) / np.var(r_intra, ddof=1)
-        ),
-    }
-    print(f"  N={N}, period={desc['date_range']}")
-    print(f"  r_intraday: std={desc['r_intraday_stats']['std']:.4e} "
-          f"skew={desc['r_intraday_stats']['skew']:.2f} "
-          f"kurt={desc['r_intraday_stats']['excess_kurt']:.2f}")
-    print(f"  r_gap:      std={desc['r_gap_stats']['std']:.4e} "
-          f"skew={desc['r_gap_stats']['skew']:.2f} "
-          f"kurt={desc['r_gap_stats']['excess_kurt']:.2f}")
-
-    # ------------------------------------------------------------------
-    # IS full-sample fit: M1 baseline, M2_gap, M2_gap_lag, M4_night
-    # ------------------------------------------------------------------
-    print("\n  IS full-sample fits (Student-t GJR-GARCH)...")
-    is_fits = {}
-
-    # Baseline
-    fit_m1 = fit_gjr_student(r_intra, exog=None, n_restarts=8)
-    ll_m1 = -fit_m1["nll"]
-    is_fits["M1"] = {
-        "log_lik": ll_m1,
-        "params": fit_m1["params"].tolist() if fit_m1["params"] is not None else None,
-        "success": fit_m1["success"],
-    }
-    print(f"    M1 baseline       : LL={ll_m1:.3f}  df={fit_m1['params'][-1]:.2f}")
-
-    # M2_gap: r_gap²[t] contemp
-    fit_m2 = fit_gjr_student(r_intra, exog=r_gap2, exog_contemp=True, n_restarts=8)
-    ll_m2 = -fit_m2["nll"]
-    lrt_m2 = 2 * (ll_m2 - ll_m1)
-    is_fits["M2_gap"] = {
-        "log_lik": ll_m2,
-        "LRT_vs_M1": float(lrt_m2),
-        "p_value": float(1 - chi2.cdf(lrt_m2, df=1)) if lrt_m2 > 0 else 1.0,
-        "xi_coef": float(fit_m2["params"][4]) if fit_m2["params"] is not None else None,
-        "params": fit_m2["params"].tolist() if fit_m2["params"] is not None else None,
-        "success": fit_m2["success"],
-    }
-    print(f"    M2_gap (contemp)  : LL={ll_m2:.3f}  LRT={lrt_m2:.2f} "
-          f"p={is_fits['M2_gap']['p_value']:.4e}  xi={is_fits['M2_gap']['xi_coef']:.4e}")
-
-    # M2_gap_lag: r_gap²[t-1]
-    fit_m2lag = fit_gjr_student(r_intra, exog=r_gap2_lag, exog_contemp=True, n_restarts=8)
-    ll_m2lag = -fit_m2lag["nll"]
-    lrt_m2lag = 2 * (ll_m2lag - ll_m1)
-    is_fits["M2_gap_lag"] = {
-        "log_lik": ll_m2lag,
-        "LRT_vs_M1": float(lrt_m2lag),
-        "p_value": float(1 - chi2.cdf(lrt_m2lag, df=1)) if lrt_m2lag > 0 else 1.0,
-        "xi_coef": float(fit_m2lag["params"][4]) if fit_m2lag["params"] is not None else None,
-        "params": fit_m2lag["params"].tolist() if fit_m2lag["params"] is not None else None,
-        "success": fit_m2lag["success"],
-    }
-    print(f"    M2_gap_lag        : LL={ll_m2lag:.3f}  LRT={lrt_m2lag:.2f} "
-          f"p={is_fits['M2_gap_lag']['p_value']:.4e}  xi={is_fits['M2_gap_lag']['xi_coef']:.4e}")
-
-    # M4_night: r_intraday²[t-1] (yesterday's intraday) — pure control
-    fit_m4 = fit_gjr_student(r_intra, exog=r_intra2_lag, exog_contemp=True, n_restarts=8)
-    ll_m4 = -fit_m4["nll"]
-    lrt_m4 = 2 * (ll_m4 - ll_m1)
-    is_fits["M4_intra_lag"] = {
-        "log_lik": ll_m4,
-        "LRT_vs_M1": float(lrt_m4),
-        "p_value": float(1 - chi2.cdf(lrt_m4, df=1)) if lrt_m4 > 0 else 1.0,
-        "xi_coef": float(fit_m4["params"][4]) if fit_m4["params"] is not None else None,
-        "params": fit_m4["params"].tolist() if fit_m4["params"] is not None else None,
-        "success": fit_m4["success"],
-    }
-    print(f"    M4_intra_lag      : LL={ll_m4:.3f}  LRT={lrt_m4:.2f} "
-          f"p={is_fits['M4_intra_lag']['p_value']:.4e}")
-
-    # ------------------------------------------------------------------
-    # OOS expanding-window forecasts
-    # ------------------------------------------------------------------
-    n_train_init = int(N * TRAIN_FRAC)
-    print(f"\n  OOS expanding-window (refit every {REFIT_EVERY}, "
-          f"init train={n_train_init}, test={N - n_train_init})...")
-
-    def run_oos(exog_name: str, exog_arr: Optional[np.ndarray]) -> Dict:
-        h_forecast = np.full(N, np.nan)
-        warm = None
-        last_fit_end = n_train_init
-        # one-step-ahead forecasts for t in [n_train_init, N-1]
-        # at each time t, use data r[0..t-1] (and exog[0..t] if contemp, bc exog[t] is known by design)
-        for t in range(n_train_init, N):
-            if (t - n_train_init) % REFIT_EVERY == 0 or warm is None:
-                r_tr = r_intra[:t]
-                ex_tr = exog_arr[:t] if exog_arr is not None else None
-                fit = fit_gjr_student(r_tr, exog=ex_tr, n_restarts=3, x0_warm=warm)
-                if fit["success"]:
-                    warm = fit["params"].copy()
-                else:
-                    # keep previous warm if fit fails
-                    pass
-            # one-step-ahead h[t]: run recursion over r[0..t-1] and set h[t] using
-            # last r[t-1], h[t-1], and exog[t] (if contemp) known at time t's open
-            if warm is None:
-                h_forecast[t] = float(np.var(r_intra[:t], ddof=1))
-                continue
-            prg_params = warm[:-1]  # drop df
-            # build recursion through t
-            r_slice = r_intra[:t + 1].copy()
-            ex_slice = exog_arr[:t + 1] if exog_arr is not None else None
-            h_path = _gjr_recursion(prg_params, r_slice, ex_slice, exog_contemp=True)
-            if h_path is None:
-                h_forecast[t] = float(np.var(r_intra[:t], ddof=1))
+    for t in range(test_start_idx, N):
+        steps = t - test_start_idx
+        need_refit = (steps % refit_every == 0)
+        if need_refit:
+            r_train = r_target[:t]
+            dow_train = dow_dum[:t]
+            if exog is not None:
+                exog_train = exog[:t]
+                fit = fit_prg_student(r_train, dow_train,
+                                      exog=exog_train,
+                                      exog_contemp=exog_contemp,
+                                      n_restarts=4, x0_warm=current_params)
             else:
-                h_forecast[t] = h_path[t]
-        return {"h_forecast": h_forecast, "last_params": warm}
-
-    # OOS runs
-    oos_m1 = run_oos("M1", None)
-    oos_m2 = run_oos("M2_gap", r_gap2)
-    oos_m2lag = run_oos("M2_gap_lag", r_gap2_lag)
-    oos_m4 = run_oos("M4_intra_lag", r_intra2_lag)
-
-    test_slice = slice(n_train_init, N)
-    r2_target = (r_intra[test_slice]) ** 2
-    h_m1_oos = oos_m1["h_forecast"][test_slice]
-    h_m2_oos = oos_m2["h_forecast"][test_slice]
-    h_m2lag_oos = oos_m2lag["h_forecast"][test_slice]
-    h_m4_oos = oos_m4["h_forecast"][test_slice]
-
-    loss_m1 = qlike_loss(h_m1_oos, r2_target)
-    loss_m2 = qlike_loss(h_m2_oos, r2_target)
-    loss_m2lag = qlike_loss(h_m2lag_oos, r2_target)
-    loss_m4 = qlike_loss(h_m4_oos, r2_target)
-
-    # DM tests: each vs M1 baseline (positive t = model better than M1)
-    dm_m2_t, dm_m2_p = dm_test_hln(loss_m1, loss_m2)
-    dm_m2lag_t, dm_m2lag_p = dm_test_hln(loss_m1, loss_m2lag)
-    dm_m4_t, dm_m4_p = dm_test_hln(loss_m1, loss_m4)
-
-    # QLIKE improvement %
-    def qlike_improve(loss_base, loss_alt):
-        return float((np.mean(loss_base) - np.mean(loss_alt)) / np.mean(loss_base) * 100)
-
-    oos_res = {
-        "n_train_init": int(n_train_init),
-        "n_test": int(N - n_train_init),
-        "test_date_range": [str(dates[n_train_init].date()),
-                             str(dates[-1].date())],
-        "QLIKE_M1": float(np.mean(loss_m1)),
-        "QLIKE_M2_gap": float(np.mean(loss_m2)),
-        "QLIKE_M2_gap_lag": float(np.mean(loss_m2lag)),
-        "QLIKE_M4_intra_lag": float(np.mean(loss_m4)),
-        "DM_M2_gap": {"t_HLN": dm_m2_t, "p": dm_m2_p,
-                       "QLIKE_improv_pct": qlike_improve(loss_m1, loss_m2),
-                       "harvey_pass": bool(abs(dm_m2_t) > HARVEY_T)
-                           if np.isfinite(dm_m2_t) else False},
-        "DM_M2_gap_lag": {"t_HLN": dm_m2lag_t, "p": dm_m2lag_p,
-                          "QLIKE_improv_pct": qlike_improve(loss_m1, loss_m2lag),
-                          "harvey_pass": bool(abs(dm_m2lag_t) > HARVEY_T)
-                              if np.isfinite(dm_m2lag_t) else False},
-        "DM_M4_intra_lag": {"t_HLN": dm_m4_t, "p": dm_m4_p,
-                            "QLIKE_improv_pct": qlike_improve(loss_m1, loss_m4),
-                            "harvey_pass": bool(abs(dm_m4_t) > HARVEY_T)
-                                if np.isfinite(dm_m4_t) else False},
-    }
-    print(f"    OOS QLIKE      M1={oos_res['QLIKE_M1']:.4f}  "
-          f"M2_gap={oos_res['QLIKE_M2_gap']:.4f} "
-          f"M2_lag={oos_res['QLIKE_M2_gap_lag']:.4f} "
-          f"M4_lag={oos_res['QLIKE_M4_intra_lag']:.4f}")
-    print(f"    DM M2_gap     : t={dm_m2_t:.2f}  p={dm_m2_p:.4f}  "
-          f"QLIKE improv={oos_res['DM_M2_gap']['QLIKE_improv_pct']:.2f}%  "
-          f"Harvey={oos_res['DM_M2_gap']['harvey_pass']}")
-    print(f"    DM M2_gap_lag : t={dm_m2lag_t:.2f}  p={dm_m2lag_p:.4f}  "
-          f"QLIKE improv={oos_res['DM_M2_gap_lag']['QLIKE_improv_pct']:.2f}%")
-    print(f"    DM M4_intra_l : t={dm_m4_t:.2f}  p={dm_m4_p:.4f}  "
-          f"QLIKE improv={oos_res['DM_M4_intra_lag']['QLIKE_improv_pct']:.2f}%")
-
-    elapsed = time.time() - t0
-    print(f"  elapsed: {elapsed:.1f}s")
+                fit = fit_prg_student(r_train, dow_train,
+                                      exog=None, exog_contemp=False,
+                                      n_restarts=4, x0_warm=current_params)
+            if fit["success"]:
+                current_params = fit["params"]
+                params_log.append((int(t), current_params.tolist()))
+            else:
+                if exog is not None:
+                    fit = fit_prg_student(r_train, dow_train,
+                                          exog=exog[:t],
+                                          exog_contemp=exog_contemp,
+                                          n_restarts=6, x0_warm=None)
+                else:
+                    fit = fit_prg_student(r_train, dow_train,
+                                          exog=None, exog_contemp=False,
+                                          n_restarts=6, x0_warm=None)
+                if fit["success"]:
+                    current_params = fit["params"]
+                    params_log.append((int(t), current_params.tolist()))
+                else:
+                    print(f"  [warn {label}] refit failed at t={t}")
+        if current_params is None:
+            continue
+        df_t = float(current_params[-1])
+        df_log[t] = df_t
+        r_slice = r_target[:t + 1]
+        dow_slice = dow_dum[:t + 1]
+        if exog is not None:
+            exog_slice = exog[:t + 1]
+            h_path = prg_variance_path_student(current_params, r_slice,
+                                               dow_slice, exog=exog_slice,
+                                               exog_contemp=exog_contemp)
+        else:
+            h_path = prg_variance_path_student(current_params, r_slice,
+                                               dow_slice, exog=None,
+                                               exog_contemp=False)
+        h_oos[t] = h_path[t]
 
     return {
-        "ticker": ticker,
-        "label": label,
-        "desc": desc,
-        "IS": is_fits,
-        "OOS": oos_res,
-        "elapsed_sec": float(elapsed),
+        "h_oos": h_oos,
+        "df_log": df_log,
+        "params_log": params_log,
+        "n_refits": len(params_log),
     }
 
 
-# ======================================================================
-# 5. Verdict logic + plots
-# ======================================================================
-def make_verdict(results: Dict) -> Dict:
-    """Decide H1/H2/H3 based on SPY and N225 DM t-stats for M2_gap."""
-    markers = []
-    for m in ["SPY", "N225"]:
-        dm_t = results[m]["OOS"]["DM_M2_gap"]["t_HLN"]
-        pass_harvey = abs(dm_t) > HARVEY_T if np.isfinite(dm_t) else False
-        markers.append({"market": m, "dm_t": dm_t, "harvey_pass": pass_harvey})
-    pass_count = sum(1 for m in markers if m["harvey_pass"])
+def clean_for_json(obj):
+    if isinstance(obj, dict):
+        return {k: clean_for_json(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [clean_for_json(v) for v in obj]
+    if isinstance(obj, float):
+        if np.isnan(obj) or np.isinf(obj):
+            return None
+        return obj
+    if isinstance(obj, (np.floating,)):
+        f = float(obj)
+        if np.isnan(f) or np.isinf(f):
+            return None
+        return f
+    if isinstance(obj, (np.integer,)):
+        return int(obj)
+    if isinstance(obj, (np.bool_,)):
+        return bool(obj)
+    if isinstance(obj, np.ndarray):
+        return clean_for_json(obj.tolist())
+    return obj
 
-    if pass_count == 2:
-        verdict = "H1_UNIVERSAL"
-        narrative = ("Both SPY and N225 pass Harvey threshold. "
-                     "Overnight→day predictability is a universal property, "
-                     "not TAIFEX-specific. Paper 3 reframe anchor ESTABLISHED.")
-    elif pass_count == 0:
-        verdict = "H2_TAIFEX_SPECIFIC"
-        narrative = ("Neither SPY nor N225 passes Harvey threshold. "
-                     "TAIFEX night→day signal is likely a market-specific "
-                     "property of the Taiwan emerging-market / narrow-index "
-                     "structure. Paper 3 reframe anchor FAILS cross-market.")
+
+# ----------------------------------------------------------------------
+# 5. Per-market pipeline
+# ----------------------------------------------------------------------
+def run_market(label: str, ticker: str, cache_file: str) -> Dict:
+    print(f"\n=== [{label}] ({ticker}) ===")
+    df_raw = fetch_daily(ticker, cache_file)
+    s = build_market_series(df_raw)
+
+    # Filter: drop first row (overnight undefined) and require finite
+    valid = (np.isfinite(s["r_intraday"]) & np.isfinite(s["gap2"]))
+    # Additional: drop zero-variance rows (holidays with Open=Close=prev)
+    valid &= (s["gap2"] > 0) | (s["r_intraday"] != 0)
+    dates = pd.DatetimeIndex(pd.to_datetime(s["date"][valid]))
+    r_intra = s["r_intraday"][valid].astype(float)
+    r_ovn = s["r_overnight"][valid].astype(float)
+    gap2 = s["gap2"][valid].astype(float)
+    dow = s["dow"][valid].astype(int)
+    N = len(r_intra)
+    print(f"  Aligned rows (finite overnight): {N}")
+    print(f"  Date range: {dates.min().date()} .. {dates.max().date()}")
+
+    # Descriptives
+    desc = {
+        "n": int(N),
+        "date_min": str(pd.Timestamp(dates.min()).date()),
+        "date_max": str(pd.Timestamp(dates.max()).date()),
+        "r_intraday": {
+            "mean": float(np.mean(r_intra)),
+            "sd": float(np.std(r_intra)),
+            "skew": float(skew_fn(r_intra)),
+            "excess_kurt": float(kurt_fn(r_intra, fisher=True)),
+        },
+        "r_overnight": {
+            "mean": float(np.mean(r_ovn)),
+            "sd": float(np.std(r_ovn)),
+            "skew": float(skew_fn(r_ovn)),
+            "excess_kurt": float(kurt_fn(r_ovn, fisher=True)),
+        },
+        "gap2": {
+            "mean": float(np.mean(gap2)),
+            "sd": float(np.std(gap2)),
+        },
+        "overnight_over_intraday_var_ratio": float(
+            np.var(r_ovn) / np.var(r_intra)) if np.var(r_intra) > 0 else None,
+    }
+    print(f"  r_intraday sd={desc['r_intraday']['sd']:.4e}  "
+          f"r_overnight sd={desc['r_overnight']['sd']:.4e}  "
+          f"ratio(ovn/day var)={desc['overnight_over_intraday_var_ratio']:.3f}")
+
+    dow_dum = make_dow_dummies(dow)
+
+    # Train/Test split
+    train_mask = (dates >= TRAIN_START) & (dates <= TRAIN_END)
+    test_mask = (dates >= TEST_START) & (dates <= TEST_END)
+    train_mask_arr = np.asarray(train_mask)
+    test_mask_arr = np.asarray(test_mask)
+    train_idx = np.where(train_mask_arr)[0]
+    test_idx = np.where(test_mask_arr)[0]
+    if len(test_idx) == 0:
+        raise RuntimeError(f"{label}: no test obs in range")
+    test_start_idx = int(test_idx[0])
+    test_end_idx = int(test_idx[-1])
+    print(f"  Train n={len(train_idx)}  Test n={len(test_idx)}")
+
+    # IS fits on FULL aligned sample (matching K1100g_d5 pattern)
+    print(f"  [{time.strftime('%H:%M:%S')}] IS fits ...")
+    fit_base = fit_prg_student(r_intra, dow_dum,
+                               exog=None, exog_contemp=False, n_restarts=8)
+    fit_gap = fit_prg_student(r_intra, dow_dum,
+                              exog=gap2, exog_contemp=True, n_restarts=8)
+    ll_base = -fit_base["nll"] if np.isfinite(fit_base["nll"]) else None
+    ll_gap = -fit_gap["nll"] if np.isfinite(fit_gap["nll"]) else None
+    xn_gap = (float(fit_gap["params"][9])
+              if fit_gap["params"] is not None else None)
+    df_base = (float(fit_base["params"][-1])
+               if fit_base["params"] is not None else None)
+    df_gap = (float(fit_gap["params"][-1])
+              if fit_gap["params"] is not None else None)
+    is_lrt_chi2, is_lrt_p = lrt_chi2_test(ll_base, ll_gap, dof=1)
+    print(f"    M_base  ll={ll_base:.3f} df={df_base:.2f} success={fit_base['success']}")
+    print(f"    M_gap   ll={ll_gap:.3f} df={df_gap:.2f} xn={xn_gap:+.4f} "
+          f"LRT={is_lrt_chi2:.3f} (p={is_lrt_p:.4g})")
+
+    is_result = {
+        "M_base": {
+            "success": bool(fit_base["success"]),
+            "log_lik": ll_base,
+            "df": df_base,
+            "params": (fit_base["params"].tolist()
+                       if fit_base["params"] is not None else None),
+        },
+        "M_gap": {
+            "success": bool(fit_gap["success"]),
+            "log_lik": ll_gap,
+            "df": df_gap,
+            "xn_coef": xn_gap,
+            "params": (fit_gap["params"].tolist()
+                       if fit_gap["params"] is not None else None),
+        },
+        "lrt_chi2": float(is_lrt_chi2) if np.isfinite(is_lrt_chi2) else None,
+        "lrt_p": float(is_lrt_p) if np.isfinite(is_lrt_p) else None,
+    }
+
+    # OOS expanding-window
+    print(f"  [{time.strftime('%H:%M:%S')}] OOS M_base ...")
+    t_oos = time.time()
+    oos_base = expanding_oos_student(r_intra, dow_dum, None, False,
+                                     test_start_idx, label=f"{label}_base",
+                                     refit_every=REFIT_EVERY)
+    print(f"    refits={oos_base['n_refits']} elapsed={time.time() - t_oos:.1f}s")
+    print(f"  [{time.strftime('%H:%M:%S')}] OOS M_gap ...")
+    t_oos = time.time()
+    oos_gap = expanding_oos_student(r_intra, dow_dum, gap2, True,
+                                    test_start_idx, label=f"{label}_gap",
+                                    refit_every=REFIT_EVERY)
+    print(f"    refits={oos_gap['n_refits']} elapsed={time.time() - t_oos:.1f}s")
+
+    # OOS metrics
+    test_slice = slice(test_start_idx, test_end_idx + 1)
+    r_test = r_intra[test_slice]
+    r2_test = r_test ** 2
+    d_test = pd.DatetimeIndex(np.asarray(dates)[test_slice])
+
+    h_base = oos_base["h_oos"][test_slice]
+    h_gap = oos_gap["h_oos"][test_slice]
+    df_base_arr = oos_base["df_log"][test_slice]
+    df_gap_arr = oos_gap["df_log"][test_slice]
+    valid = (np.isfinite(h_base) & np.isfinite(h_gap)
+             & np.isfinite(df_base_arr) & np.isfinite(df_gap_arr))
+    n_valid = int(valid.sum())
+    print(f"  [OOS] n_valid={n_valid}")
+
+    r_v = r_test[valid]; r2_v = r2_test[valid]
+    hb = h_base[valid]; hg = h_gap[valid]
+    dfb = df_base_arr[valid]; dfg = df_gap_arr[valid]
+    d_v = d_test[valid]
+
+    q_base = qlike_loss(hb, r2_v)
+    q_gap = qlike_loss(hg, r2_v)
+    ll_base_obs = np.array([
+        float(student_loglik_per_obs(np.array([hb[i]]),
+                                     np.array([r_v[i]]), dfb[i])[0])
+        for i in range(n_valid)])
+    ll_gap_obs = np.array([
+        float(student_loglik_per_obs(np.array([hg[i]]),
+                                     np.array([r_v[i]]), dfg[i])[0])
+        for i in range(n_valid)])
+
+    ll_base_sum = float(np.sum(ll_base_obs))
+    ll_gap_sum = float(np.sum(ll_gap_obs))
+    oos_lrt_chi2, oos_lrt_p = lrt_chi2_test(ll_base_sum, ll_gap_sum, dof=1)
+    dm_q_t, dm_q_p = dm_test_hln(q_base, q_gap)
+    dm_ll_t, dm_ll_p = dm_test_hln(-ll_base_obs, -ll_gap_obs)
+
+    qb_mean = float(np.mean(q_base)); qg_mean = float(np.mean(q_gap))
+    imp_pct = ((qb_mean - qg_mean) / abs(qb_mean) * 100
+               if qb_mean != 0 else np.nan)
+    harvey_pass = (np.isfinite(dm_q_t) and abs(dm_q_t) > 3.0)
+
+    print(f"  [OOS] LRT={oos_lrt_chi2:.3f}  DM-QLIKE t={dm_q_t:+.3f}  "
+          f"QLIKE improv={imp_pct:+.2f}%  Harvey_pass={harvey_pass}")
+
+    # Sub-period breakdown (annual)
+    annual = {}
+    for yr in range(TEST_START.year, TEST_END.year + 1):
+        mask = (d_v >= pd.Timestamp(yr, 1, 1)) & (d_v <= pd.Timestamp(yr, 12, 31))
+        if mask.sum() < 30:
+            continue
+        qb_y = q_base[mask]; qg_y = q_gap[mask]
+        dm_y, _ = dm_test_hln(qb_y, qg_y)
+        qbm_y = float(np.mean(qb_y))
+        imp_y = ((qbm_y - float(np.mean(qg_y))) / abs(qbm_y) * 100
+                 if qbm_y != 0 else np.nan)
+        annual[str(yr)] = {
+            "n": int(mask.sum()),
+            "dm_qlike_t_hln": float(dm_y) if np.isfinite(dm_y) else None,
+            "qlike_improv_pct": float(imp_y) if np.isfinite(imp_y) else None,
+        }
+
+    oos_result = {
+        "n_valid": n_valid,
+        "test_start": str(TEST_START.date()),
+        "test_end": str(TEST_END.date()),
+        "lrt_chi2": float(oos_lrt_chi2) if np.isfinite(oos_lrt_chi2) else None,
+        "lrt_p": float(oos_lrt_p) if np.isfinite(oos_lrt_p) else None,
+        "dm_qlike_t_hln": float(dm_q_t) if np.isfinite(dm_q_t) else None,
+        "dm_qlike_p": float(dm_q_p) if np.isfinite(dm_q_p) else None,
+        "dm_loglik_t_hln": float(dm_ll_t) if np.isfinite(dm_ll_t) else None,
+        "dm_loglik_p": float(dm_ll_p) if np.isfinite(dm_ll_p) else None,
+        "qlike_base_mean": qb_mean,
+        "qlike_gap_mean": qg_mean,
+        "qlike_improv_pct": float(imp_pct) if np.isfinite(imp_pct) else None,
+        "ll_base_sum": ll_base_sum,
+        "ll_gap_sum": ll_gap_sum,
+        "harvey_pass": bool(harvey_pass),
+        "annual": annual,
+    }
+
+    return {
+        "label": label,
+        "ticker": ticker,
+        "descriptives": desc,
+        "is": is_result,
+        "oos": oos_result,
+        "_internals": {
+            "dates_test": d_v,
+            "r_test": r_v,
+            "h_base": hb,
+            "h_gap": hg,
+            "q_base": q_base,
+            "q_gap": q_gap,
+            "n_train": int(len(train_idx)),
+            "n_test": int(len(test_idx)),
+        },
+    }
+
+
+# ----------------------------------------------------------------------
+# 6. Load K1100g_d5 TAIFEX anchor (read-only)
+# ----------------------------------------------------------------------
+def load_taifex_anchor() -> Dict:
+    if not TAIFEX_D5_RESULTS.exists():
+        print(f"  [warn] TAIFEX d5 results not found at {TAIFEX_D5_RESULTS}")
+        return {}
+    with open(TAIFEX_D5_RESULTS) as f:
+        d5 = json.load(f)
+    # Prefer M2_gap_total as pure-gap² anchor for cross-market comparison
+    m = d5.get("oos_metrics", {}).get("M2_gap_total", {})
+    is_lrt = d5.get("is_lrt_vs_M1", {}).get("M2_gap_total", {})
+    return {
+        "label": "TAIFEX",
+        "ticker": "TX (TAIFEX)",
+        "source": "K1100g_d5",
+        "oos": {
+            "n_valid": m.get("n_valid"),
+            "test_start": "2020-01-01",
+            "test_end": "2021-12-31",
+            "dm_qlike_t_hln": m.get("dm_qlike_t_hln"),
+            "dm_qlike_p": m.get("dm_qlike_p"),
+            "qlike_improv_pct": m.get("qlike_improv_pct"),
+            "lrt_chi2": m.get("lrt_chi2"),
+            "lrt_p": m.get("lrt_p"),
+            "harvey_pass": (abs(m.get("dm_qlike_t_hln") or 0.0) > 3.0),
+        },
+        "is": {
+            "lrt_chi2": is_lrt.get("chi2"),
+            "lrt_p": is_lrt.get("p_value"),
+        },
+    }
+
+
+# ----------------------------------------------------------------------
+# 7. Cross-market verdict
+# ----------------------------------------------------------------------
+def classify_verdict(markets_out: Dict[str, Dict], taifex: Dict) -> Dict:
+    """Build cross-market verdict."""
+    # Collect DM t-stat signs
+    entries = []
+    if taifex and taifex.get("oos", {}).get("dm_qlike_t_hln") is not None:
+        entries.append(("TAIFEX", taifex["oos"]["dm_qlike_t_hln"],
+                        taifex["oos"].get("qlike_improv_pct")))
+    for k, v in markets_out.items():
+        t = v.get("oos", {}).get("dm_qlike_t_hln")
+        imp = v.get("oos", {}).get("qlike_improv_pct")
+        if t is not None:
+            entries.append((k, t, imp))
+
+    if not entries:
+        return {"verdict": "NO_DATA", "explanation": "No DM statistics available",
+                "entries": entries}
+
+    signs = [np.sign(e[1]) for e in entries]
+    directions_consistent = len(set(signs)) == 1 and signs[0] != 0
+
+    # Harvey passes (|t|>3)
+    harvey_count = sum(1 for _, t, _ in entries if abs(t) > 3.0)
+    positive_count = sum(1 for s in signs if s > 0)
+    n = len(entries)
+
+    # Spearman correlation rank of (DM t) across markets — at n=3, just report
+    if n >= 2:
+        try:
+            ts = np.array([e[1] for e in entries])
+            imps = np.array([e[2] if e[2] is not None else 0.0
+                             for e in entries])
+            rho_t_imp, _ = spearmanr(ts, imps)
+        except Exception:
+            rho_t_imp = None
     else:
-        which = [m["market"] for m in markers if m["harvey_pass"]]
-        verdict = "H3_PARTIAL"
-        narrative = (f"Only {which[0]} passes Harvey threshold. "
-                     "Effect shows regional variation; Paper 3 reframe needs "
-                     "caveats about market-structure heterogeneity.")
+        rho_t_imp = None
+
+    if directions_consistent and positive_count == n and harvey_count >= 2:
+        verdict = "PASS_UNIVERSAL"
+        explanation = (
+            f"All {n} markets (TAIFEX/SPY/N225) gap² loading positive and "
+            f"{harvey_count}/{n} past Harvey threshold |t|>3. Overnight gap² "
+            "predictive effect is structural, not TAIFEX-specific — Paper 3 "
+            "reframe anchor established."
+        )
+    elif directions_consistent and positive_count == n and harvey_count >= 1:
+        verdict = "PASS_SOME"
+        explanation = (
+            f"All {n} markets positive, but only {harvey_count}/{n} past "
+            "Harvey threshold. Direction universal, strength borderline — "
+            "Paper 3 reframe supported as direction-consistent weak effect."
+        )
+    elif directions_consistent and positive_count == n:
+        verdict = "DIRECTION_CONSISTENT_ALL_BORDERLINE"
+        explanation = (
+            f"All {n} markets positive direction but none past Harvey t>3. "
+            "Consistent direction suggests real but weak structural effect; "
+            "Paper 3 should frame as direction-consistent borderline signal."
+        )
+    elif (not directions_consistent) and any(
+            lbl == "TAIFEX" and t > 0 for lbl, t, _ in entries):
+        # TAIFEX positive but SPY/N225 flip
+        verdict = "TAIFEX_ONLY"
+        explanation = (
+            f"TAIFEX positive (t={entries[0][1]:+.2f}) but cross-markets "
+            "disagree: " + ", ".join(f"{l} t={t:+.2f}"
+                                      for l, t, _ in entries[1:]) +
+            ". Gap² effect is Taiwan-specific microstructural — Paper 3 "
+            "narrative must be scoped to TAIFEX/PRG, not universal claim."
+        )
+    else:
+        verdict = "MIXED"
+        explanation = (
+            "Mixed cross-market signs: " + ", ".join(
+                f"{l} t={t:+.2f}" for l, t, _ in entries) +
+            ". Neither universal nor cleanly TAIFEX-only — further markets "
+            "needed before Paper 3 can anchor the claim."
+        )
+
     return {
         "verdict": verdict,
-        "narrative": narrative,
-        "pass_count": pass_count,
-        "per_market": markers,
+        "explanation": explanation,
+        "n_markets_evaluated": n,
+        "directions_consistent": bool(directions_consistent),
+        "positive_count": int(positive_count),
+        "harvey_count": int(harvey_count),
+        "spearman_t_vs_qlike_imp": (float(rho_t_imp)
+                                      if rho_t_imp is not None
+                                      and np.isfinite(rho_t_imp) else None),
+        "entries": [{"market": l, "dm_qlike_t_hln": float(t),
+                     "qlike_improv_pct": (float(imp) if imp is not None
+                                          else None)}
+                    for l, t, imp in entries],
     }
 
 
-def make_plots(results: Dict, out_dir: Path):
-    # Plot 1: DM t-stat bar chart (TAIFEX from K1100g_d5, SPY, N225)
-    fig, ax = plt.subplots(figsize=(8, 5))
-    markets = ["TAIFEX\n(K1100g_d5 REF\nnight_r2)", "SPY\n(M2_gap)", "N225\n(M2_gap)"]
-    dm_ts = [
-        2.01,  # TAIFEX REF_night_r2 DM from K1100g_d5 (night_r2 as exog)
-        results["SPY"]["OOS"]["DM_M2_gap"]["t_HLN"],
-        results["N225"]["OOS"]["DM_M2_gap"]["t_HLN"],
-    ]
-    colors = ["#888888",
-              "#2ca02c" if abs(dm_ts[1]) > HARVEY_T else
-              "#ff9800" if abs(dm_ts[1]) > 2.0 else "#d62728",
-              "#2ca02c" if abs(dm_ts[2]) > HARVEY_T else
-              "#ff9800" if abs(dm_ts[2]) > 2.0 else "#d62728"]
-    bars = ax.bar(markets, dm_ts, color=colors, edgecolor="black")
-    ax.axhline(HARVEY_T, color="red", linestyle="--", label=f"Harvey |t|={HARVEY_T}")
-    ax.axhline(-HARVEY_T, color="red", linestyle="--")
-    ax.axhline(2.0, color="orange", linestyle=":", label="|t|=2 (conventional)")
-    ax.axhline(-2.0, color="orange", linestyle=":")
-    ax.axhline(0, color="black", linewidth=0.5)
-    ax.set_ylabel("DM-HLN t-statistic (vs baseline)")
-    ax.set_title("Cross-market overnight→day: DM t-stat comparison\n"
-                  f"Verdict: {results['VERDICT']['verdict']}")
-    for bar, v in zip(bars, dm_ts):
-        ax.text(bar.get_x() + bar.get_width() / 2,
-                 v + 0.08 * np.sign(v if v != 0 else 1),
-                 f"{v:.2f}", ha="center",
-                 va="bottom" if v >= 0 else "top", fontsize=10)
-    ax.legend(loc="upper left", fontsize=9)
-    ax.grid(axis="y", alpha=0.3)
-    fig.tight_layout()
-    fig.savefig(out_dir / "k1100g_d7_cross_market_dm.png", dpi=120)
-    plt.close(fig)
+# ----------------------------------------------------------------------
+# 8. Plots
+# ----------------------------------------------------------------------
+def plot_cross_market(markets_out: Dict[str, Dict], taifex: Dict,
+                      verdict: Dict):
+    # Plot 1: Per-market DM + LRT bar
+    labels = []
+    dm_vals = []
+    lrt_vals = []
+    imp_vals = []
+    if taifex:
+        labels.append("TAIFEX\n(d5 M2_gap_total)")
+        dm_vals.append(taifex["oos"].get("dm_qlike_t_hln") or 0.0)
+        lrt_vals.append(taifex["oos"].get("lrt_chi2") or 0.0)
+        imp_vals.append(taifex["oos"].get("qlike_improv_pct") or 0.0)
+    for k, v in markets_out.items():
+        labels.append(k)
+        dm_vals.append(v["oos"].get("dm_qlike_t_hln") or 0.0)
+        lrt_vals.append(v["oos"].get("lrt_chi2") or 0.0)
+        imp_vals.append(v["oos"].get("qlike_improv_pct") or 0.0)
 
-    # Plot 2: QLIKE improvement % comparison
-    fig, ax = plt.subplots(figsize=(8, 5))
-    markets = ["SPY", "N225"]
-    improv_gap = [results[m]["OOS"]["DM_M2_gap"]["QLIKE_improv_pct"] for m in markets]
-    improv_lag = [results[m]["OOS"]["DM_M2_gap_lag"]["QLIKE_improv_pct"] for m in markets]
-    improv_intra = [results[m]["OOS"]["DM_M4_intra_lag"]["QLIKE_improv_pct"]
-                     for m in markets]
-    x = np.arange(len(markets))
-    w = 0.25
-    ax.bar(x - w, improv_gap, w, label="M2_gap (contemp gap²)",
-            color="#1f77b4", edgecolor="black")
-    ax.bar(x, improv_lag, w, label="M2_gap_lag (gap²[t-1])",
-            color="#ff7f0e", edgecolor="black")
-    ax.bar(x + w, improv_intra, w, label="M4_intra_lag (r²_intraday[t-1])",
-            color="#2ca02c", edgecolor="black")
-    ax.axhline(0, color="black", linewidth=0.5)
-    ax.set_xticks(x)
-    ax.set_xticklabels(markets)
-    ax.set_ylabel("OOS QLIKE improvement vs M1 baseline (%)")
-    ax.set_title("Cross-market: OOS QLIKE improvement by exog specification")
-    ax.legend(fontsize=9)
-    ax.grid(axis="y", alpha=0.3)
-    fig.tight_layout()
-    fig.savefig(out_dir / "k1100g_d7_qlike_improvement.png", dpi=120)
-    plt.close(fig)
+    fig, axes = plt.subplots(3, 1, figsize=(10, 9), sharex=True)
+    ax0, ax1, ax2 = axes
+    colors = ["#d62728", "#1f77b4", "#2ca02c"][:len(labels)]
+
+    # DM bar
+    bars = ax0.bar(range(len(labels)), dm_vals, color=colors, alpha=0.85)
+    ax0.axhline(3.0, ls="--", color="#444", alpha=0.7, label="Harvey |t|=3")
+    ax0.axhline(-3.0, ls="--", color="#444", alpha=0.7)
+    ax0.axhline(1.96, ls=":", color="#666", alpha=0.5, label="|t|=1.96")
+    ax0.axhline(-1.96, ls=":", color="#666", alpha=0.5)
+    ax0.axhline(0, color="black", lw=0.8)
+    ax0.set_ylabel("OOS DM-HLN t-stat\n(M_gap vs M_base)")
+    ax0.set_title("K1100g_d7 Cross-market gap² predictive power "
+                  f"— verdict: {verdict['verdict']}")
+    for b, v in zip(bars, dm_vals):
+        ax0.text(b.get_x() + b.get_width() / 2,
+                 v + 0.08 * (1 if v >= 0 else -1),
+                 f"{v:+.2f}", ha="center", fontsize=9)
+    ax0.legend(loc="upper right", fontsize=8)
+    ax0.grid(alpha=0.3, axis="y")
+
+    # LRT bar
+    bars1 = ax1.bar(range(len(labels)), lrt_vals, color=colors, alpha=0.85)
+    ax1.axhline(3.84, ls="--", color="#444", alpha=0.6, label="chi²(1,0.05)=3.84")
+    ax1.axhline(7.88, ls=":", color="#666", alpha=0.6, label="chi²(1,0.005)=7.88")
+    ax1.set_ylabel("OOS LRT chi²")
+    for b, v in zip(bars1, lrt_vals):
+        ax1.text(b.get_x() + b.get_width() / 2,
+                 v + max(lrt_vals + [1]) * 0.02,
+                 f"{v:.2f}", ha="center", fontsize=9)
+    ax1.legend(loc="upper right", fontsize=8)
+    ax1.grid(alpha=0.3, axis="y")
+
+    # QLIKE improv bar
+    bars2 = ax2.bar(range(len(labels)), imp_vals, color=colors, alpha=0.85)
+    ax2.axhline(0, color="black", lw=0.8)
+    ax2.set_ylabel("OOS QLIKE improv (%)")
+    ax2.set_xticks(range(len(labels)))
+    ax2.set_xticklabels(labels, fontsize=9)
+    for b, v in zip(bars2, imp_vals):
+        ax2.text(b.get_x() + b.get_width() / 2,
+                 v + 0.1 * (1 if v >= 0 else -1),
+                 f"{v:+.2f}%", ha="center", fontsize=9)
+    ax2.grid(alpha=0.3, axis="y")
+
+    plt.tight_layout()
+    out = SCRIPT_DIR / "k1100g_d7_cross_market_bars.png"
+    plt.savefig(out, dpi=120)
+    plt.close()
+    print(f"  [plot] {out.name}")
+
+    # Plot 2: Gap² contribution ranking (QLIKE improvement across markets)
+    fig, ax = plt.subplots(figsize=(9, 4.5))
+    order = np.argsort(imp_vals)[::-1]
+    ordered_labels = [labels[i] for i in order]
+    ordered_imps = [imp_vals[i] for i in order]
+    ordered_colors = [colors[i] for i in order]
+    bars = ax.barh(range(len(ordered_labels)), ordered_imps,
+                   color=ordered_colors, alpha=0.85)
+    ax.axvline(0, color="black", lw=0.8)
+    ax.set_yticks(range(len(ordered_labels)))
+    ax.set_yticklabels(ordered_labels, fontsize=10)
+    ax.set_xlabel("Gap² contribution to QLIKE improvement (%)")
+    ax.set_title("K1100g_d7 Cross-market ranking — gap² contribution strength")
+    for b, v in zip(bars, ordered_imps):
+        ax.text(v + 0.1 * (1 if v >= 0 else -1),
+                b.get_y() + b.get_height() / 2,
+                f"{v:+.2f}%", va="center", fontsize=9)
+    ax.grid(alpha=0.3, axis="x")
+    plt.tight_layout()
+    out2 = SCRIPT_DIR / "k1100g_d7_gap2_contribution_ranking.png"
+    plt.savefig(out2, dpi=120)
+    plt.close()
+    print(f"  [plot] {out2.name}")
 
 
-# ======================================================================
-# 6. Main
-# ======================================================================
-def main():
-    t_start = time.time()
-    results = {
-        "experiment_id": "k1100g_d7",
-        "title": "Cross-market replication: SPY + N225 overnight gap²→intraday r²",
+# ----------------------------------------------------------------------
+# 9. Main
+# ----------------------------------------------------------------------
+def run():
+    t_total = time.time()
+    print(f"[{time.strftime('%H:%M:%S')}] K1100g_d7 cross-market gap² start")
+
+    # 1. Run each market
+    markets_out: Dict[str, Dict] = {}
+    for label, ticker, cache_file in MARKETS:
+        try:
+            res = run_market(label, ticker, cache_file)
+            markets_out[label] = res
+        except Exception as exc:
+            import traceback
+            traceback.print_exc()
+            markets_out[label] = {"error": str(exc)}
+
+    # 2. TAIFEX anchor (from d5)
+    print(f"\n[{time.strftime('%H:%M:%S')}] Loading TAIFEX d5 anchor ...")
+    taifex = load_taifex_anchor()
+    if taifex:
+        print(f"  TAIFEX d5: DM t={taifex['oos']['dm_qlike_t_hln']:+.3f}  "
+              f"LRT={taifex['oos']['lrt_chi2']:.3f}  "
+              f"QLIKE improv={taifex['oos']['qlike_improv_pct']:+.2f}%")
+
+    # 3. Cross-market verdict
+    verdict = classify_verdict(markets_out, taifex)
+    print(f"\n[{time.strftime('%H:%M:%S')}] === Verdict: {verdict['verdict']} ===")
+    print(f"  {verdict['explanation']}")
+
+    # 4. Compile result (strip _internals)
+    clean_markets = {}
+    for k, v in markets_out.items():
+        if "error" in v:
+            clean_markets[k] = v
+            continue
+        cv = {kk: vv for kk, vv in v.items() if kk != "_internals"}
+        clean_markets[k] = cv
+
+    result = {
+        "experiment_id": "K1100g_d7",
+        "title": ("Cross-market replication of overnight gap² session "
+                  "asymmetry — SPY + N225 vs TAIFEX (K1100g_d5 anchor)"),
+        "run_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "seed": 42,
-        "config": {
-            "start_date": START_DATE,
-            "end_date": END_DATE,
+        "parent_chain": [
+            "K1100g", "K1100g_d1", "K1100g_d3", "K1100g_d5", "K1100g_d6",
+        ],
+        "references": [
+            "Bollerslev (1987) REStat — Student-t GARCH",
+            "Engle & Rangel (2008) RFS — tau*g PRG",
+            "French & Roll (1986) JFE — non-trading-hour information",
+            "Harvey et al. (1997) IJF — HLN DM correction",
+            "Harvey (2016) JF — t>3 threshold",
+            "Ito & Lin (1994) JFQA — Japan intraday vol structure",
+        ],
+        "design": {
+            "markets": [{"label": l, "ticker": t, "cache": c}
+                         for l, t, c in MARKETS],
+            "target_return": "r_intraday[t] = log(Close_t / Open_t)",
+            "exog": "gap²[t] = (log Open_t - log Close_{t-1})²",
+            "innovation": "student",
+            "prg_kernel": "tau*g multiplicative, Student-t (Var(r)=h)",
+            "train_start": str(TRAIN_START.date()),
+            "train_end": str(TRAIN_END.date()),
+            "test_start": str(TEST_START.date()),
+            "test_end": str(TEST_END.date()),
             "refit_every": REFIT_EVERY,
-            "train_frac": TRAIN_FRAC,
-            "harvey_threshold": HARVEY_T,
+            "note_data_granularity": (
+                "Daily OHLC only. 5-min intraday not sufficient on yfinance "
+                "for SPY/N225 at 2010-2025 span (only last ~60 days available); "
+                "using daily close-to-open gap² as second-best consistent "
+                "with K1100g_d5 TAIFEX gap² definition."),
         },
+        "markets": clean_markets,
+        "taifex_d5_anchor": taifex,
+        "cross_market_verdict": verdict,
+        "limitations": [
+            "Daily OHLC only — 5-min intraday RV not used (yfinance 5-min "
+            "limited to ~60 days). K1100g_d5 TAIFEX result also based on "
+            "daily close-to-open gap², so comparison is apples-to-apples.",
+            "SPY/N225 DOW structure differs from TAIFEX "
+            "(no Saturday half-day, no lunch break on daily OHLC)",
+            "TAIFEX anchor is d5 Student-t gap_total DM t=+1.49 "
+            "(BORDERLINE not Harvey-passing); d7 tests whether other "
+            "markets behave similarly or whether TAIFEX is idiosyncratic.",
+            "N225 trading hours partially overlap US close → overnight gap "
+            "may be dampened by Asia daylight trading in other venues "
+            "(unlike TAIFEX night session which is structurally separated).",
+            "No winsorization — COVID Mar 2020 extreme gaps may dominate "
+            "gap² mass in SPY/N225 (similar issue to TAIFEX_d5 limitation).",
+        ],
     }
 
-    # Run each market
-    results["SPY"] = run_market("SPY", "SPY (S&P 500 ETF)", "spy")
-    results["N225"] = run_market("^N225", "Nikkei 225 Index", "n225")
-
-    # Verdict
-    results["VERDICT"] = make_verdict(results)
-    print(f"\n\n*** VERDICT: {results['VERDICT']['verdict']} ***")
-    print(results["VERDICT"]["narrative"])
-
-    # Cross-market summary
-    print("\n=== Cross-market summary ===")
-    print(f"  TAIFEX (K1100g_d5 REF_night_r2):  DM t = +2.01 (HARVEY FAIL)")
-    for m in ["SPY", "N225"]:
-        dm = results[m]["OOS"]["DM_M2_gap"]
-        passed = "HARVEY PASS" if dm["harvey_pass"] else "HARVEY FAIL"
-        print(f"  {m}: DM t = {dm['t_HLN']:+.2f}  QLIKE improv = "
-               f"{dm['QLIKE_improv_pct']:+.2f}%  [{passed}]")
-
-    # Plots
-    print("\nGenerating plots...")
-    make_plots(results, SCRIPT_DIR)
-
-    # Save
-    results["total_elapsed_sec"] = float(time.time() - t_start)
+    result = clean_for_json(result)
     with open(RESULTS_PATH, "w") as f:
-        json.dump(results, f, indent=2, default=str)
-    print(f"\nResults saved to {RESULTS_PATH}")
-    print(f"Total elapsed: {results['total_elapsed_sec']:.1f}s")
+        json.dump(result, f, indent=2, allow_nan=False)
+    print(f"\n[OK] results -> {RESULTS_PATH.name}")
+
+    # 5. Plots
+    try:
+        plot_cross_market(markets_out, taifex, verdict)
+    except Exception as exc:
+        import traceback
+        traceback.print_exc()
+        print(f"  [warn] plotting failed: {exc}")
+
+    print(f"\n[DONE] total elapsed: {time.time() - t_total:.1f}s")
+    return result
 
 
 if __name__ == "__main__":
-    main()
+    run()

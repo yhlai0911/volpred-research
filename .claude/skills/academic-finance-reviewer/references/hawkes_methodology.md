@@ -1,3 +1,5 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 # Hawkes Process Methodology for Financial Applications
 
 Comprehensive guide to Hawkes self-exciting point processes in financial econometrics, with emphasis on proper citations, identification strategies, and common pitfalls.

@@ -1,3 +1,5 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 #!/usr/bin/env python3
 """
 verify_moment_conditions.py

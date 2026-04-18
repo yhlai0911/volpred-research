@@ -2,16 +2,24 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 import uuid
 from datetime import datetime
 from pathlib import Path
 
+from volpred.config.runtime import get_default_mirror_url
 from volpred.core.types import ExperimentResult
 from volpred.memory.schemas import ExperimentRecord, KnowledgeItem, ResearchLogEntry
 
 
 class MemorySystem:
-    MIRROR_URL = os.environ.get("VOLPRED_MIRROR_URL", "https://mirror-api.zeabur.app")
+    SUPPORTED_MIRROR_FILES = {
+        "thinking_journal.json",
+        "knowledge.json",
+        "experiments.json",
+        "research_log.json",
+    }
+    MIRROR_URL = os.environ.get("VOLPRED_MIRROR_URL", get_default_mirror_url())
     MIRROR_TOKEN = os.environ.get("RESEARCH_MIRROR_TOKEN", "")
 
     def __init__(self, storage_dir: str = "storage"):
@@ -21,13 +29,25 @@ class MemorySystem:
         for d in [self.memory_dir, self.results_dir]:
             d.mkdir(parents=True, exist_ok=True)
 
-    def _sync_to_remote(self, filename: str, new_entries: list[dict] | None = None) -> None:
+    def _sync_to_remote(
+        self,
+        filename: str,
+        new_entries: list[dict] | None = None,
+        *,
+        raise_on_error: bool = False,
+    ) -> bool:
         """Sync memory to Mirror API. Append new entries if given, else full push."""
+        if filename not in self.SUPPORTED_MIRROR_FILES:
+            return False
         if not self.MIRROR_URL or not self.MIRROR_TOKEN:
-            return
+            if raise_on_error:
+                raise RuntimeError("Mirror URL/token not configured")
+            return False
         filepath = self.memory_dir / filename
         if not filepath.exists():
-            return
+            if raise_on_error:
+                raise FileNotFoundError(filepath)
+            return False
         try:
             import urllib.request
             auth_headers = {
@@ -53,16 +73,24 @@ class MemorySystem:
                     method="PUT",
                 )
             urllib.request.urlopen(req, timeout=30)
-        except Exception:
-            pass  # Don't fail research for sync issues
+            return True
+        except Exception as exc:
+            print(f"Warning: Mirror sync failed for {filename}: {exc}", file=sys.stderr)
+            if raise_on_error:
+                raise
+            return False
 
     def reconcile_remote(self) -> dict[str, str]:
         """Full sync all memory files to remote (for initial population or recovery)."""
         results = {}
         for filename in ["thinking_journal.json", "knowledge.json", "experiments.json", "research_log.json"]:
             try:
-                self._sync_to_remote(filename, new_entries=None)  # full push
-                results[filename] = "ok"
+                synced = self._sync_to_remote(
+                    filename,
+                    new_entries=None,
+                    raise_on_error=True,
+                )
+                results[filename] = "ok" if synced else "skipped"
             except Exception as e:
                 results[filename] = str(e)
         return results
@@ -239,13 +267,42 @@ class MemorySystem:
 
     # --- Internal helpers ---
     def _append_to_index(self, filename: str, record: dict) -> None:
+        # Lock: serialize concurrent writers (Claude Code, Codex, cron workers)
+        # against the same memory file. Lock scope is per-file to maximize
+        # parallelism across different memory indexes.
+        from volpred.ops.shared_lock import shared_state_lock
+        from volpred.ops.writer_log import append_writer_log
+
         filepath = self.memory_dir / filename
-        data = self._load_index(filename)
-        data.append(record)
-        with open(filepath, "w") as f:
-            json.dump(data, f, indent=2, default=str)
-        # Incremental sync: only send the new entry
-        self._sync_to_remote(filename, new_entries=[record])
+        # Derive a friendly subsystem key without the .json suffix
+        lock_key = f"memory_{Path(filename).stem}"
+        record_id = record.get("experiment_id") or record.get("item_id") or record.get("id")
+
+        result_label = "ok"
+        try:
+            with shared_state_lock(lock_key, storage_dir=str(self.storage_dir)):
+                data = self._load_index(filename)
+                data.append(record)
+                tmp_path = filepath.with_name(f".{filepath.name}.tmp")
+                with open(tmp_path, "w") as f:
+                    json.dump(data, f, indent=2, default=str)
+                # Post-write sanity: reject write if result is not parseable (2026-04-17 guard)
+                with open(tmp_path) as f:
+                    json.load(f)
+                tmp_path.replace(filepath)
+                # Incremental sync: only send the new entry
+                self._sync_to_remote(filename, new_entries=[record])
+        except Exception as exc:
+            result_label = f"error: {type(exc).__name__}: {exc}"[:200]
+            raise
+        finally:
+            append_writer_log(
+                subsystem="memory",
+                target=f"memory/{filename}",
+                record_id=str(record_id) if record_id is not None else None,
+                result=result_label,
+                storage_dir=str(self.storage_dir),
+            )
 
     def _load_index(self, filename: str) -> list[dict]:
         filepath = self.memory_dir / filename

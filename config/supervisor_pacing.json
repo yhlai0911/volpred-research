@@ -1,0 +1,45 @@
+{
+  "description": "Supervisor pacing config — 控制 T1 派工節奏。2026-04-18 放寬：獨立任務可持續分派，不要節流浪費 worker slot。",
+  "policy_summary": [
+    "獨立任務可持續分派：任務間無因果關係、無高耦合（不共用同一 K 編號、不改同一論文 body、不搶同一數據源），supervisor 應主動派工填滿 slot。Worker idle 等於浪費。",
+    "Curate gate 保留：派新 task 前，該 worker 最近 succeeded task 必須有 curated_at（signal_payload 已 promote 到 canonical 活文件）。未 curate 的先 curate 完才能派。研究誠實要求不可跳過。",
+    "Cooldown 降為防爆衝：同一 worker 連續派工仍須滿足 cooldown_per_family，但已放寬為獨立研究可平行（research cooldown 從 30 降到 15 min）。Cooldown 的目的是避免同 family 連續高 token 爆衝，不是整體節流。",
+    "Urgent override：user-assigned / scheduler-expanded / approval-required / 獨立性高且 worker idle 的任務可 bypass cooldown，立即派。",
+    "Coupled-task serial：同一 K 編號、同一 paper body、同一 experiments/kXXX/ 目錄的任務必須序貫（一次只派一個），避免 worktree 撞車。"
+  ],
+  "cooldown_minutes_per_family": {
+    "research": 15,
+    "code": 10,
+    "review": 5,
+    "ops": 3,
+    "content": 20,
+    "member": 60,
+    "strategy": 30
+  },
+  "min_cooldown_between_dispatches_to_same_worker_min": 5,
+  "urgent_override_sources": ["user", "scheduler", "approval"],
+  "urgent_override_families": ["ops", "review"],
+  "max_pending_per_worker": 3,
+  "coupling_rules": {
+    "description": "判斷兩個 task 是否高耦合、必須序貫的規則。高耦合 → queue 只能有 1 個 pending。",
+    "high_coupling_signals": [
+      "同一 K 編號（task title / brief 引用同一 kXXX）",
+      "同一 paper body.tex（同一 paper/<name>/main*.tex 修訂）",
+      "同一 experiments/kXXX/ 目錄產出",
+      "同一 strategy_id 的回測與 recalc",
+      "同一 Supabase schema migration"
+    ],
+    "independent_examples": [
+      "K1200 實驗 vs K1210 實驗（不同 K）",
+      "Paper 3 reframe draft vs Paper 7 body revision（不同 paper）",
+      "Research article on SPY vs reader article on TSMC（不同主題）",
+      "Member question 回答 vs ops daily_update（不同 family）"
+    ]
+  },
+  "max_pending_per_worker_notes": [
+    "max_pending_per_worker=3（2026-04-18 從 1 放寬）：worker 可堆疊 3 個 pending；解鎖後可連續 claim，減少 supervisor tick 依賴。",
+    "獨立任務可以同時多個 pending 給同 worker；高耦合任務必須序貫（由 coupling_rules 判斷）。",
+    "Cooldown 算的是「上次 claim 給該 worker 同 family task 的 claimed_at」，確保長任務完成後也要等冷卻。",
+    "Task family 輪派：每輪 supervisor 應覆蓋多個 family（research / content / member / ops / review / code / strategy），不要連續三輪都 review。"
+  ]
+}

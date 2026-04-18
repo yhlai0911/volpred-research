@@ -1,0 +1,1255 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-04-17",
+  "week_range": "2026-04-17 → 2026-04-24",
+  "totals": {
+    "input_tokens": 215495,
+    "output_tokens": 7808097,
+    "cache_read_tokens": 2497667564,
+    "cache_create_tokens": 61418735,
+    "billable_total": 69442327,
+    "assistant_messages": 15308,
+    "unique_sessions": 161,
+    "estimated_cost_usd": 4742.4272
+  },
+  "by_model": {
+    "claude-opus-4-7": {
+      "input_tokens": 106892,
+      "output_tokens": 5938064,
+      "cache_read_tokens": 2183038917,
+      "cache_create_tokens": 45096234,
+      "messages": 10795,
+      "estimated_cost_usd": 4567.0709
+    },
+    "<synthetic>": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 0,
+      "messages": 50,
+      "estimated_cost_usd": 0.0
+    },
+    "claude-sonnet-4-6": {
+      "input_tokens": 94675,
+      "output_tokens": 1807542,
+      "cache_read_tokens": 295008423,
+      "cache_create_tokens": 15019395,
+      "messages": 4042,
+      "estimated_cost_usd": 172.2224
+    },
+    "claude-haiku-4-5-20251001": {
+      "input_tokens": 13928,
+      "output_tokens": 62491,
+      "cache_read_tokens": 19620224,
+      "cache_create_tokens": 1303106,
+      "messages": 421,
+      "estimated_cost_usd": 3.1338
+    }
+  },
+  "by_category": {
+    "bash_other": {
+      "input_tokens": 41585,
+      "output_tokens": 1797974,
+      "cache_read_tokens": 1026616978,
+      "cache_create_tokens": 12026525,
+      "messages": 6157,
+      "billable_total": 13866084,
+      "estimated_cost_usd": 1900.8946,
+      "emoji": "💭",
+      "description": "其他 Bash 操作"
+    },
+    "text_only": {
+      "input_tokens": 3993,
+      "output_tokens": 1195823,
+      "cache_read_tokens": 480558056,
+      "cache_create_tokens": 7893327,
+      "messages": 1461,
+      "billable_total": 9093143,
+      "estimated_cost_usd": 958.5836,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "investigation": {
+      "input_tokens": 74688,
+      "output_tokens": 588492,
+      "cache_read_tokens": 258348885,
+      "cache_create_tokens": 18171789,
+      "messages": 3026,
+      "billable_total": 18834969,
+      "estimated_cost_usd": 773.5016,
+      "emoji": "🔍",
+      "description": "閱讀 / 搜尋檔案"
+    },
+    "agent_delegation": {
+      "input_tokens": 69567,
+      "output_tokens": 178005,
+      "cache_read_tokens": 219058913,
+      "cache_create_tokens": 14738465,
+      "messages": 2552,
+      "billable_total": 14986037,
+      "estimated_cost_usd": 619.3285,
+      "emoji": "🤖",
+      "description": "Agent 派送（非實驗）"
+    },
+    "experiment": {
+      "input_tokens": 695,
+      "output_tokens": 2873276,
+      "cache_read_tokens": 109593410,
+      "cache_create_tokens": 1536416,
+      "messages": 681,
+      "billable_total": 4410387,
+      "estimated_cost_usd": 408.704,
+      "emoji": "🔬",
+      "description": "研究實驗（Agent 派送 K\\d+ / experiments/ 編輯）"
+    },
+    "worktree_merge": {
+      "input_tokens": 1009,
+      "output_tokens": 113702,
+      "cache_read_tokens": 99754861,
+      "cache_create_tokens": 4270475,
+      "messages": 275,
+      "billable_total": 4385186,
+      "estimated_cost_usd": 238.2465,
+      "emoji": "🔀",
+      "description": "Worktree 合併與分支管理"
+    },
+    "task_management": {
+      "input_tokens": 295,
+      "output_tokens": 231524,
+      "cache_read_tokens": 84997428,
+      "cache_create_tokens": 460446,
+      "messages": 215,
+      "billable_total": 692265,
+      "estimated_cost_usd": 153.4982,
+      "emoji": "📌",
+      "description": "任務管理（TaskCreate/Update）"
+    },
+    "git_sync": {
+      "input_tokens": 357,
+      "output_tokens": 203912,
+      "cache_read_tokens": 85717869,
+      "cache_create_tokens": 400862,
+      "messages": 346,
+      "billable_total": 605131,
+      "estimated_cost_usd": 151.3917,
+      "emoji": "🔄",
+      "description": "Git commit / pull / push"
+    },
+    "file_edit": {
+      "input_tokens": 250,
+      "output_tokens": 406282,
+      "cache_read_tokens": 40040537,
+      "cache_create_tokens": 340895,
+      "messages": 195,
+      "billable_total": 747427,
+      "estimated_cost_usd": 96.9275,
+      "emoji": "📄",
+      "description": "其他檔案編輯"
+    },
+    "paper_work": {
+      "input_tokens": 55,
+      "output_tokens": 40986,
+      "cache_read_tokens": 31420300,
+      "cache_create_tokens": 62435,
+      "messages": 55,
+      "billable_total": 103476,
+      "estimated_cost_usd": 51.3759,
+      "emoji": "📝",
+      "description": "論文撰寫/審查（paper/ *.tex 編輯）"
+    },
+    "web_research": {
+      "input_tokens": 19338,
+      "output_tokens": 19707,
+      "cache_read_tokens": 10674494,
+      "cache_create_tokens": 480991,
+      "messages": 105,
+      "billable_total": 520036,
+      "estimated_cost_usd": 26.7984,
+      "emoji": "🌐",
+      "description": "WebSearch / WebFetch"
+    },
+    "platform_ops": {
+      "input_tokens": 167,
+      "output_tokens": 27751,
+      "cache_read_tokens": 12143368,
+      "cache_create_tokens": 60728,
+      "messages": 62,
+      "billable_total": 88646,
+      "estimated_cost_usd": 21.4375,
+      "emoji": "🛡️",
+      "description": "平台運維（Supabase sync / daily_update）"
+    },
+    "knowledge_index": {
+      "input_tokens": 1703,
+      "output_tokens": 11337,
+      "cache_read_tokens": 9197172,
+      "cache_create_tokens": 18417,
+      "messages": 21,
+      "billable_total": 31457,
+      "estimated_cost_usd": 15.0169,
+      "emoji": "📇",
+      "description": "知識索引更新"
+    },
+    "knowledge_recording": {
+      "input_tokens": 24,
+      "output_tokens": 25412,
+      "cache_read_tokens": 6979378,
+      "cache_create_tokens": 26428,
+      "messages": 19,
+      "billable_total": 51864,
+      "estimated_cost_usd": 12.8709,
+      "emoji": "📚",
+      "description": "知識記錄（knowledge.json / thinking_journal）"
+    },
+    "script_dev": {
+      "input_tokens": 35,
+      "output_tokens": 40132,
+      "cache_read_tokens": 6022529,
+      "cache_create_tokens": 41182,
+      "messages": 35,
+      "billable_total": 81349,
+      "estimated_cost_usd": 12.8164,
+      "emoji": "💻",
+      "description": "腳本開發（scripts/ *.py）"
+    },
+    "tool_setup": {
+      "input_tokens": 50,
+      "output_tokens": 7137,
+      "cache_read_tokens": 4274539,
+      "cache_create_tokens": 268043,
+      "messages": 35,
+      "billable_total": 275230,
+      "estimated_cost_usd": 11.9736,
+      "emoji": "🛠️",
+      "description": "ToolSearch 載入工具"
+    },
+    "scheduling": {
+      "input_tokens": 23,
+      "output_tokens": 10299,
+      "cache_read_tokens": 1949773,
+      "cache_create_tokens": 398523,
+      "messages": 8,
+      "billable_total": 408845,
+      "estimated_cost_usd": 11.1697,
+      "emoji": "⏰",
+      "description": "Cron / Monitor 排程"
+    },
+    "chart_generation": {
+      "input_tokens": 1580,
+      "output_tokens": 16215,
+      "cache_read_tokens": 1457748,
+      "cache_create_tokens": 141157,
+      "messages": 22,
+      "billable_total": 158952,
+      "estimated_cost_usd": 6.0731,
+      "emoji": "📊",
+      "description": "圖表生成（matplotlib / upload_chart）"
+    },
+    "token_report": {
+      "input_tokens": 21,
+      "output_tokens": 2815,
+      "cache_read_tokens": 3026190,
+      "cache_create_tokens": 21622,
+      "messages": 11,
+      "billable_total": 24458,
+      "estimated_cost_usd": 5.1561,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    },
+    "article_writing": {
+      "input_tokens": 23,
+      "output_tokens": 7009,
+      "cache_read_tokens": 1913939,
+      "cache_create_tokens": 32282,
+      "messages": 13,
+      "billable_total": 39314,
+      "estimated_cost_usd": 4.0022,
+      "emoji": "✍️",
+      "description": "文章撰寫/發佈（publish-milestone / mile_*）"
+    },
+    "member_qa": {
+      "input_tokens": 22,
+      "output_tokens": 1402,
+      "cache_read_tokens": 1755594,
+      "cache_create_tokens": 4454,
+      "messages": 4,
+      "billable_total": 5878,
+      "estimated_cost_usd": 2.8224,
+      "emoji": "❓",
+      "description": "會員問答研究"
+    },
+    "skill_invoke": {
+      "input_tokens": 10,
+      "output_tokens": 2977,
+      "cache_read_tokens": 1159276,
+      "cache_create_tokens": 12443,
+      "messages": 5,
+      "billable_total": 15430,
+      "estimated_cost_usd": 2.1956,
+      "emoji": "⚡",
+      "description": "Skill 呼叫"
+    },
+    "research_planning": {
+      "input_tokens": 5,
+      "output_tokens": 5928,
+      "cache_read_tokens": 1006327,
+      "cache_create_tokens": 10830,
+      "messages": 5,
+      "billable_total": 16763,
+      "estimated_cost_usd": 2.1572,
+      "emoji": "📋",
+      "description": "研究計劃（research_program.md / CLAUDE.md）"
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "d1240e89",
+      "message": "K1108c complete: capex-guidance magnitude is also NULL for foundry θ_EAV"
+    },
+    {
+      "sha": "ff43a492",
+      "message": "Merge commit '9e8a1061'"
+    },
+    {
+      "sha": "9e8a1061",
+      "message": "K1108c: continuous guide_delta_pct is also NULL for foundry theta_EAV"
+    },
+    {
+      "sha": "124d2bd5",
+      "message": "K1133 complete: BTC GAS-t reversal is regime-concentrated, not universal"
+    },
+    {
+      "sha": "a5d0e94f",
+      "message": "Merge commit 'b05e4745'"
+    },
+    {
+      "sha": "b05e4745",
+      "message": "K1133: Regime-switching GAS-t on BTC — K1129 reversal is regime-concentrated"
+    },
+    {
+      "sha": "0a442356",
+      "message": "Paper 1 errata batch (v3): Kupiec p 2-decimal + GLD γ forensic + γ_HM disambigua"
+    },
+    {
+      "sha": "2997023f",
+      "message": "Papers 2/3/4 compile + paper-update to v3"
+    },
+    {
+      "sha": "db6bfc7d",
+      "message": "Merge agent worktree agent-ae4e1d3e (2 commits)"
+    },
+    {
+      "sha": "e4967de3",
+      "message": "Auto-commit: save agent work before worktree merge"
+    },
+    {
+      "sha": "7d35418b",
+      "message": "Paper 6 K880 lookahead errata: option (b) defensible two-phase forecast timing"
+    },
+    {
+      "sha": "95f614e9",
+      "message": "K1156: Paper 2 cover figure — six-market overnight-channel validation"
+    },
+    {
+      "sha": "6e04cd43",
+      "message": "Paper 4 main_v3: Abstract/intro/conclusion 41.8% direction errata + CV 0.33->0.3"
+    },
+    {
+      "sha": "a29e8ae2",
+      "message": "Paper 3 body_v3: TSMOM direction reversal + 1.4% + rho=0.830 errata"
+    },
+    {
+      "sha": "5c0ef08e",
+      "message": "Paper 2 body_v3: Table 3 errata to K1175 canonical (2010-2026)"
+    },
+    {
+      "sha": "6013753b",
+      "message": "K1100e 善後: Paper 3 pivot CONFIRMED — Spearman p=0.001 asset-class threshold"
+    },
+    {
+      "sha": "5d3338bf",
+      "message": "Merge K1100e Paper 3 pivot confirmed (orphan)"
+    },
+    {
+      "sha": "348b827f",
+      "message": "K1100e: N=13 pairs cross-asset λ_L threshold (Spearman ρ=-0.791, p=0.001)"
+    },
+    {
+      "sha": "02058297",
+      "message": "4-hour sync: auto-gen headers + storage state"
+    },
+    {
+      "sha": "26924986",
+      "message": "K1198 善後: Paper 1 pre-K era Tables 10/11/12/C3 — 3/6 MATCHED (Spearman ρ=1.000 E"
+    },
+    {
+      "sha": "c49e8633",
+      "message": "Merge K1198 (orphan)"
+    },
+    {
+      "sha": "9080fbb3",
+      "message": "K1198: Paper 1 Tables 10/11/12/C3 KB-only rebuild (match: 3/6)"
+    },
+    {
+      "sha": "8dcd35a9",
+      "message": "K1195 善後: Paper 1 JBF robustness suite 5/6 MATCHED (R11 confirmed)"
+    },
+    {
+      "sha": "9f9cafc5",
+      "message": "Merge K1195 Paper 1 JBF robustness (orphan)"
+    },
+    {
+      "sha": "f4e394a0",
+      "message": "K1195: Paper 1 JBF robustness suite activation (match: 5/6)"
+    },
+    {
+      "sha": "9ee9585a",
+      "message": "K1197 善後: Paper 1 GJR vs EWMA crisis partial match (MDD dir confirmed, Sharpe di"
+    },
+    {
+      "sha": "86b38b35",
+      "message": "Merge K1197 (orphan)"
+    },
+    {
+      "sha": "9c1d5aca",
+      "message": "K1197: Paper 1 GJR vs EWMA crisis (match: b)"
+    },
+    {
+      "sha": "bb8e90e3",
+      "message": "K1196 善後: Paper 1 structural leverage panel 3/4 MATCHED"
+    },
+    {
+      "sha": "9210a235",
+      "message": "Merge K1196 Paper 1 structural panel (orphan)"
+    },
+    {
+      "sha": "0956dbcf",
+      "message": "K1196: Paper 1 structural leverage panel (match: PARTIAL-b)"
+    },
+    {
+      "sha": "98725bac",
+      "message": "K1183 + K1184 善後: Paper 2 TSMC + skew-t 全 MATCHED"
+    },
+    {
+      "sha": "7f971756",
+      "message": "Merge K1184 (orphan)"
+    },
+    {
+      "sha": "eede50fa",
+      "message": "Merge K1183 (orphan)"
+    },
+    {
+      "sha": "a2df89da",
+      "message": "K1184: Paper 2 skew-t params (match: η=4.97 vs 5.2, λ=-0.059 vs -0.05)"
+    },
+    {
+      "sha": "c0e45ba4",
+      "message": "K1183: Paper 2 TSMC decomposition (match: PARTIAL_b)"
+    },
+    {
+      "sha": "16022f46",
+      "message": "K1193 善後: Paper 3 split-sample STRENGTHENING (not attenuation) — good-news errat"
+    },
+    {
+      "sha": "81aad672",
+      "message": "Merge K1193 Paper 3 split-sample (orphan)"
+    },
+    {
+      "sha": "fc0b3a02",
+      "message": "K1193: Paper 3 split-sample (match: DIVERGED)"
+    },
+    {
+      "sha": "642dcf93",
+      "message": "K1181 善後: Paper 2 VIXTWN 2/4 MATCHED (VXEEM delisted blocks 2/4)"
+    },
+    {
+      "sha": "de3c1041",
+      "message": "Merge K1181 Paper 2 VIXTWN (orphan)"
+    },
+    {
+      "sha": "bd5f87d4",
+      "message": "K1181: Paper 2 VIXTWN stats + Steiger Z (match: 2/4)"
+    },
+    {
+      "sha": "31505d80",
+      "message": "K1182 + K1187 + K1190 善後: Granger MATCHED, Table 7 6/20, sector γ range MATCHED"
+    },
+    {
+      "sha": "31baa2ac",
+      "message": "Merge K1182 Paper 2 Granger (orphan)"
+    },
+    {
+      "sha": "5efb638e",
+      "message": "K1187: Paper 1 Table 7 5-asset canonical (match: 6/20)"
+    },
+    {
+      "sha": "2ad0ef7a",
+      "message": "K1182: Paper 2 Granger F=58.8 (match: STRONG_MATCH F=58.90)"
+    },
+    {
+      "sha": "a73d97d5",
+      "message": "K1190 善後: Paper 3 sector γ range MATCHED (r magnitude diverges)"
+    },
+    {
+      "sha": "ef689b37",
+      "message": "Merge K1190 Paper 3 sector (orphan)"
+    },
+    {
+      "sha": "72187f6d",
+      "message": "K1190: Paper 3 sector 11 SPDR (match: (c) gamma_range_match_r_diverges)"
+    },
+    {
+      "sha": "4f810afc",
+      "message": "Token reports + skill compliance audit (daily/weekly/audit)"
+    },
+    {
+      "sha": "a22a8ca3",
+      "message": "Rate limit hit 8pm Asia/Taipei: 4 agents rate-limited, worktrees cleaned"
+    },
+    {
+      "sha": "84e8f08d",
+      "message": "K1188 + K1191 + K1186 善後: Paper 1 Table 8 PERFECT (15/15), Table 6 2/5, COVID di"
+    },
+    {
+      "sha": "67aed23b",
+      "message": "Merge K1191 Paper 3 COVID (ort fallback)"
+    },
+    {
+      "sha": "ad050a38",
+      "message": "Merge K1188 Paper 1 Table 8 (ort fallback)"
+    },
+    {
+      "sha": "94f4d883",
+      "message": "K1186: Paper 1 Table 6 pass-rate canonical (match: 2/5)"
+    },
+    {
+      "sha": "3b016cc9",
+      "message": "K1191: Paper 3 COVID sub-period Sharpe 1.295 vs 1.254 replication (match: QUALIT"
+    },
+    {
+      "sha": "e0212023",
+      "message": "K1188: Paper 1 Table 8 window robustness (match: 15/15)"
+    },
+    {
+      "sha": "baba06c9",
+      "message": "Non-K sweep + K1179 善後: 2 hidden sources, Paper 2 G12 direction confirmed"
+    },
+    {
+      "sha": "53c86a67",
+      "message": "Merge K1179 Paper 2 Section 6.1 (orphan after cd race)"
+    },
+    {
+      "sha": "ef94120f",
+      "message": "K1179: Paper 2 Section 6.1 import growth formal experiment (match: 0/3, errata p"
+    },
+    {
+      "sha": "952c3b51",
+      "message": "Merge Non-K forensic sweep (orphan after cd race)"
+    },
+    {
+      "sha": "ad6cb402",
+      "message": "Non-K forensic sweep: 47 non-K folders inspected, 2 NONK_UNDOCUMENTED matches fo"
+    },
+    {
+      "sha": "95d4e0d7",
+      "message": "K1194 善後: Paper 3 TSMOM direction reversal RE-CONFIRMED (4-way, errata req)"
+    },
+    {
+      "sha": "528bfb35",
+      "message": "Merge K1194 Paper 3 TSMOM forensic (orphan after cd race)"
+    },
+    {
+      "sha": "163542b0",
+      "message": "K1194: Paper 3 TSMOM hedge 5-implementation forensic (canonical match: NONE — sy"
+    },
+    {
+      "sha": "60cdb183",
+      "message": "K1185 善後: Paper 1 Table 4 3/4 MATCHED, KB validated (lesson applied)"
+    },
+    {
+      "sha": "147c4632",
+      "message": "Merge K1185 Paper 1 Table 4 VaR (orphan after cd race)"
+    },
+    {
+      "sha": "6f9b1764",
+      "message": "WALKBACK: Paper 3 TSMOM systematic direction claim premature — knowledge missed"
+    },
+    {
+      "sha": "818fff7c",
+      "message": "K1185: Paper 1 Table 4 VaR config canonical replication (match: 3/4)"
+    },
+    {
+      "sha": "5e427156",
+      "message": "K1192 善後: Paper 3 Table 6 BLOCKER confirmed, TSMOM systematic direction reversed"
+    },
+    {
+      "sha": "eb63916d",
+      "message": "Merge K1192 Paper 3 Table 6 Bootstrap (orphan after cd race)"
+    },
+    {
+      "sha": "d4dfd7bd",
+      "message": "K1192: Paper 3 Table 6 Bootstrap MDD CI (match: DIVERGE ALL 4 DEFS, definition: "
+    },
+    {
+      "sha": "b13e862f",
+      "message": "K1180 善後: Paper 2 G20 partial resolved (3/5 MATCH, T4 IS Sharpe 44% gap)"
+    },
+    {
+      "sha": "a1d9a74e",
+      "message": "Merge K1180 Paper 2 Section 6.2/6.3 (orphan after cd race)"
+    },
+    {
+      "sha": "18084478",
+      "message": "K1180: Paper 2 Section 6.2/6.3 BCI Leading formal experiment (match: 3/5 PARTIAL"
+    },
+    {
+      "sha": "85121d33",
+      "message": "K716-K722 file placement fix + non-K experiments forensic task"
+    },
+    {
+      "sha": "f21ad0da",
+      "message": "Paper 3 no-source rescan: 2 undocumented + 5 still-no-source, Table 6 BLOCKER"
+    },
+    {
+      "sha": "584a6450",
+      "message": "Merge Paper 3 no-source rescan (orphan after cd race)"
+    },
+    {
+      "sha": "f0cd9229",
+      "message": "Paper 3 no-source rescan: 2 undocumented K, 5 still no-source"
+    },
+    {
+      "sha": "7914426e",
+      "message": "Paper 6 rescan: K880 lookahead CONFIRMED at code level (critical finding)"
+    },
+    {
+      "sha": "5b4fd26e",
+      "message": "Merge agent worktree agent-aa007cf9 (1 commits)"
+    },
+    {
+      "sha": "c190fefd",
+      "message": "Paper 6 no-source rescan: 2 undocumented, 3 still, 0 KB-only, K880 lookahead not"
+    },
+    {
+      "sha": "e2e248df",
+      "message": "K1178 善後: Paper 3 Table 5 core claim CONFIRMED, ρ=0.830 unreproducible"
+    },
+    {
+      "sha": "06de573c",
+      "message": "Merge K1178 Paper 3 Table 5 13-market (orphan after cd race)"
+    },
+    {
+      "sha": "ca5ec507",
+      "message": "K1178: Paper 3 Table 5 13-market international replication (match: PARTIAL)"
+    },
+    {
+      "sha": "99ece002",
+      "message": "Paper 1 no-source rescan: K1045 pattern doesn't apply (0 undocumented)"
+    },
+    {
+      "sha": "f96e5502",
+      "message": "Merge Paper 1 no-source rescan (orphan after worktree cd race)"
+    },
+    {
+      "sha": "dcb84f0c",
+      "message": "Paper 1 no-source rescan: 0 undocumented K, 15 still no-source, 6 KB-only pre-K"
+    },
+    {
+      "sha": "93fed0c3",
+      "message": "Paper 2 no-source rescan: 62% docs-gap resolvable, 38% needs new experiments"
+    },
+    {
+      "sha": "5fbbd447",
+      "message": "Merge agent worktree agent-a92656cd (1 commits)"
+    },
+    {
+      "sha": "dc1ba4fe",
+      "message": "K1177 善後: Paper 3 TSMOM hedge direction REVERSED (research integrity)"
+    },
+    {
+      "sha": "fc7c9a7c",
+      "message": "Paper 2 no-source rescan: 15 undocumented K, 16 still-no-source"
+    },
+    {
+      "sha": "4616054c",
+      "message": "Merge K1177 Paper 3 TSMOM hedge (orphaned after worktree cd race)"
+    },
+    {
+      "sha": "25af9f1e",
+      "message": "K1177: Paper 3 Table 3 TSMOM hedge canonical replication (match: (b) paper errat"
+    },
+    {
+      "sha": "3f891977",
+      "message": "K1027 7-window sub-period 善後: 7/7 A4f wins CONFIRMED (paper stronger)"
+    },
+    {
+      "sha": "8e34265d",
+      "message": "Merge K1027 7-window sub-period (orphaned after worktree cd race)"
+    },
+    {
+      "sha": "fdd06cff",
+      "message": "K1027 7-window sub-period: 3/4 matched vs Paper 9 Section 4.3 (N148 exact, N150 "
+    },
+    {
+      "sha": "0e52df2d",
+      "message": "Paper 8 audit: 97.5% matched (NEW BEST), SUBMISSION-READY, seed deterministic"
+    },
+    {
+      "sha": "65142608",
+      "message": "Merge agent worktree agent-a7dacfdf (2 commits)"
+    },
+    {
+      "sha": "3f856786",
+      "message": "Auto-commit: save agent work before worktree merge"
+    },
+    {
+      "sha": "986e7b60",
+      "message": "K988_sens 善後: Paper 9 D4 Harvey-consistent, 3 cells minor divergence"
+    },
+    {
+      "sha": "1bd06dfe",
+      "message": "Paper 8 reproducibility audit: 97.5% matched, 4 divergent, ABM seed-deterministi"
+    },
+    {
+      "sha": "1c1a6825",
+      "message": "Merge agent worktree agent-a232706a (2 commits)"
+    },
+    {
+      "sha": "a18af45d",
+      "message": "Auto-commit: save agent work before worktree merge"
+    },
+    {
+      "sha": "7f85d06b",
+      "message": "K988_sens: Paper 9 Table 12 sensitivity replication (match: 8M/5A/3D)"
+    },
+    {
+      "sha": "23fee5b2",
+      "message": "4-hour sync: notifications + feed/mile + session state snapshots"
+    },
+    {
+      "sha": "d2bff3fd",
+      "message": "Paper 7 audit: 96% matched, READY FOR SUBMISSION (best score)"
+    },
+    {
+      "sha": "9894a17d",
+      "message": "Merge agent worktree agent-a1343ea9 (2 commits)"
+    },
+    {
+      "sha": "c4b5792f",
+      "message": "Auto-commit: save agent work before worktree merge"
+    },
+    {
+      "sha": "f96888d1",
+      "message": "Paper 9 experiments.md: register K1045/K1003/K1001/K1023 (audit quick-win)"
+    },
+    {
+      "sha": "cb1dd9b4",
+      "message": "Paper 7 reproducibility audit: 96% matched, 2 divergent, no direction issues"
+    },
+    {
+      "sha": "edca3544",
+      "message": "Paper 6 (prg-periodic-garch) audit: 90% coverage but BLOCKER lookahead debate"
+    },
+    {
+      "sha": "dee7336d",
+      "message": "Merge agent worktree agent-ad1a8110 (2 commits)"
+    },
+    {
+      "sha": "dfe5b1f0",
+      "message": "Auto-commit: save agent work before worktree merge"
+    },
+    {
+      "sha": "453f921f",
+      "message": "Paper 6 reproducibility audit: 90% matched, 10 divergent, readiness: NEEDS-FIX"
+    },
+    {
+      "sha": "a1677a26",
+      "message": "Paper 9 no-source rescan: 19 undocumented K found, 7 still-no-source"
+    },
+    {
+      "sha": "aea86bad",
+      "message": "Merge agent worktree agent-ae925c35 (1 commits)"
+    },
+    {
+      "sha": "bdbe7ecb",
+      "message": "Auto-commit: save agent work before worktree merge"
+    },
+    {
+      "sha": "26c7a6ed",
+      "message": "Paper 9 no-source rescan: 19 undocumented K found, 7 still missing, 0 ambiguous"
+    },
+    {
+      "sha": "24297576",
+      "message": "Paper 4 (vix-sufficiency) reproducibility audit: 77% matched, CRITICAL findings"
+    },
+    {
+      "sha": "00d72821",
+      "message": "Merge agent worktree agent-a0605254 (2 commits)"
+    },
+    {
+      "sha": "d6417ca3",
+      "message": "Auto-commit: save agent work before worktree merge"
+    },
+    {
+      "sha": "a772592a",
+      "message": "Paper 4 reproducibility audit: 77% matched, 8 divergent, body stale: YES"
+    },
+    {
+      "sha": "3cd0b38a",
+      "message": "K1176 善後: Paper 2 TZ momentum 方向 confirmed, magnitude documentation issue"
+    },
+    {
+      "sha": "f39fb6a7",
+      "message": "Merge agent worktree agent-a9210ffd (2 commits)"
+    },
+    {
+      "sha": "5e00b213",
+      "message": "Auto-commit: save agent work before worktree merge"
+    },
+    {
+      "sha": "c9937d49",
+      "message": "K1176: Paper 2 Table 4 TZ Momentum 6-market replication (match: PARTIAL_MATCH)"
+    },
+    {
+      "sha": "c6ca7e5a",
+      "message": "K1144 善後: Paper 9 FEZ/STOXX50E Harvey significance PRESERVED"
+    },
+    {
+      "sha": "e1a3c0bb",
+      "message": "Merge agent worktree agent-ae8a1d78 (1 commits)"
+    },
+    {
+      "sha": "df512d46",
+      "message": "Auto-commit: save agent work before worktree merge"
+    },
+    {
+      "sha": "1e3ecff8",
+      "message": "K1144: Paper 9 FEZ/STOXX50E A4f 2019-2026 canonical replication (match: NOT_MATC"
+    },
+    {
+      "sha": "88887aa6",
+      "message": "K995b 善後: Paper 9 D3 resolved — K1045 existing script, audit missed it"
+    },
+    {
+      "sha": "667a5d2d",
+      "message": "Merge agent worktree agent-aa539c1b (2 commits)"
+    },
+    {
+      "sha": "542b976d",
+      "message": "Auto-commit: save agent work before worktree merge"
+    },
+    {
+      "sha": "2b9beac0",
+      "message": "K995b: Paper 9 Table 11 residual diagnostics source recovery (match: A4f-t MATCH"
+    },
+    {
+      "sha": "49d27e8c",
+      "message": "K903 善後: Paper 1 internal inconsistency + GLD gamma sign flip"
+    },
+    {
+      "sha": "88150f37",
+      "message": "Merge agent worktree agent-a3ad0b51 (2 commits)"
+    },
+    {
+      "sha": "c847e3db",
+      "message": "Auto-commit: save agent work before worktree merge"
+    },
+    {
+      "sha": "efaa93c0",
+      "message": "K903: Paper 1 Tables 2/3 canonical 2010-start replication (K902 extension)"
+    },
+    {
+      "sha": "d58eea4b",
+      "message": "K1175 善後: Paper 2 Table 3 DIVERGENT + 紙面算術錯誤發現 (research integrity)"
+    },
+    {
+      "sha": "7b8a0f73",
+      "message": "Merge K1175 Paper 2 Table 3 canonical replication (orphaned after worktree race)"
+    },
+    {
+      "sha": "4549bc00",
+      "message": "K1175: Paper 2 Table 3 VT 2010-2026 canonical replication (match: DIVERGENT — pa"
+    },
+    {
+      "sha": "752bd544",
+      "message": "Paper 3 (vt-trend-following) reproducibility audit: 77% matched, 3 BLOCKERS"
+    },
+    {
+      "sha": "1625f033",
+      "message": "Merge agent worktree agent-af2babb1 (2 commits)"
+    },
+    {
+      "sha": "c8060a2e",
+      "message": "Auto-commit: save agent work before worktree merge"
+    },
+    {
+      "sha": "0fa27397",
+      "message": "Paper 3 reproducibility audit: 77% matched, 14 divergent, 5H status: 3 BLOCKER+2"
+    },
+    {
+      "sha": "46a44043",
+      "message": "Paper 2 (taiwan-vt) reproducibility audit: NEEDS-FIX, 2 BLOCKERS"
+    },
+    {
+      "sha": "21af3b47",
+      "message": "Merge agent worktree agent-a6be0705 (2 commits)"
+    },
+    {
+      "sha": "38863467",
+      "message": "Auto-commit: save agent work before worktree merge"
+    },
+    {
+      "sha": "8b43604a",
+      "message": "Paper 2 reproducibility audit: 17% matched, 18 divergent, NEEDS-FIX"
+    },
+    {
+      "sha": "7b3464e6",
+      "message": "Paper 9 (submitted) reproducibility audit: NEEDS-FIX, 4 blockers"
+    },
+    {
+      "sha": "c912da89",
+      "message": "Merge agent worktree agent-adb9418c (2 commits)"
+    },
+    {
+      "sha": "888d0b9c",
+      "message": "Auto-commit: save agent work before worktree merge"
+    },
+    {
+      "sha": "4e84d37f",
+      "message": "Paper 9 reproducibility audit: 85% matched, 7 divergent, NEEDS-FIX"
+    },
+    {
+      "sha": "86bd0980",
+      "message": "Paper 1 reproducibility audit 善後: 3 follow-up tasks + pilot pattern"
+    },
+    {
+      "sha": "2e1c0cd2",
+      "message": "Merge agent worktree agent-af5db316 (2 commits)"
+    },
+    {
+      "sha": "4b293eec",
+      "message": "Auto-commit: save agent work before worktree merge"
+    },
+    {
+      "sha": "77b93f27",
+      "message": "K71X 善後 + VolAbsorption_errata_decision P4 task"
+    },
+    {
+      "sha": "a9f25e9f",
+      "message": "Paper 1 reproducibility audit (pilot): 48% matched, 6 divergent"
+    },
+    {
+      "sha": "6a6d597a",
+      "message": "Merge agent worktree agent-a4d7577c (2 commits)"
+    },
+    {
+      "sha": "d3e7cdf6",
+      "message": "Auto-commit: save agent work before worktree merge"
+    },
+    {
+      "sha": "86d10c7b",
+      "message": "K716-K722 script reconstruction from main_v2.tex methodology (replication-packag"
+    },
+    {
+      "sha": "e8e73250",
+      "message": "K1141 善後: Paper 4 §4 3x4 table + heatmap prepared"
+    },
+    {
+      "sha": "d2d7b55e",
+      "message": "Merge agent worktree agent-a30373aa (2 commits)"
+    },
+    {
+      "sha": "9b7f91c4",
+      "message": "Auto-commit: save agent work before worktree merge"
+    },
+    {
+      "sha": "23e00eff",
+      "message": "K1141: Paper 4 §4 channel-specific 3x4 table + cover figure (from experiment JSO"
+    },
+    {
+      "sha": "f3995ffe",
+      "message": "K1138b 善後: HAR structure drives all (Scenario A)"
+    },
+    {
+      "sha": "a4e0f9b2",
+      "message": "Merge agent worktree agent-ad8aacfc (2 commits)"
+    },
+    {
+      "sha": "aaeb3ab4",
+      "message": "Auto-commit: save agent work before worktree merge"
+    },
+    {
+      "sha": "eaf414cd",
+      "message": "K1138b: Pure HAR vs GJR — VIX X incremental contribution diagnosis — Scenario A"
+    },
+    {
+      "sha": "11b27017",
+      "message": "K1100c 善後: asymmetric copula MIXED -> Paper 3 narrative state machine triggered"
+    },
+    {
+      "sha": "8cb53172",
+      "message": "Merge agent worktree agent-ab76e332 (2 commits)"
+    },
+    {
+      "sha": "7bd3c216",
+      "message": "Auto-commit: save agent work before worktree merge"
+    },
+    {
+      "sha": "445ed344",
+      "message": "K1100c: Skew-t/Vine copula on equity pairs — Scenario C"
+    },
+    {
+      "sha": "d2de0e23",
+      "message": "K1100d 善後: regime-switching copula NULL + Paper 3 narrative update"
+    },
+    {
+      "sha": "e755ae4c",
+      "message": "Merge agent worktree agent-a705fa94 (2 commits)"
+    },
+    {
+      "sha": "0b0e3360",
+      "message": "Auto-commit: save agent work before worktree merge"
+    },
+    {
+      "sha": "4392012f",
+      "message": "K1100d: VIX regime-switching copula — Scenario B"
+    },
+    {
+      "sha": "daec88f8",
+      "message": "paper-workflow: add script/data/paper-numbers three-way consistency rule"
+    },
+    {
+      "sha": "1c27f572",
+      "message": "Paper folders backfill round-2 complete; flag K716-K722 script-loss issue"
+    },
+    {
+      "sha": "ffdfc230",
+      "message": "Merge agent worktree agent-a9408cba (1 commits)"
+    },
+    {
+      "sha": "616b5efc",
+      "message": "Auto-commit: save agent work before worktree merge"
+    },
+    {
+      "sha": "65bdf9ef",
+      "message": "paper-folder backfill: prg-periodic-garch + volatility-absorption + vt-crowding-"
+    },
+    {
+      "sha": "14615292",
+      "message": "K1132 善後: block-bootstrap validates K1128 — Scenario A ROBUST"
+    },
+    {
+      "sha": "a578d1e2",
+      "message": "paper-workflow: emphasize replication package is submission hard requirement"
+    },
+    {
+      "sha": "202a7dcc",
+      "message": "next_tasks: mark paper-folder backfill partially_completed"
+    },
+    {
+      "sha": "3ba96c4b",
+      "message": "Merge agent worktree agent-a56fe73a (1 commits)"
+    },
+    {
+      "sha": "ab179dab",
+      "message": "Auto-commit: save agent work before worktree merge"
+    },
+    {
+      "sha": "5b785551",
+      "message": "paper-folder backfill: garch-x-vix + vix-sufficiency self-contained indexes"
+    },
+    {
+      "sha": "ed573aa0",
+      "message": "Idle policy: raise cap 3->4, add proactive next_tasks refill rule"
+    },
+    {
+      "sha": "5e011a9a",
+      "message": "paper-workflow: require each paper folder to be self-contained"
+    },
+    {
+      "sha": "0e4dd5d5",
+      "message": "feat(control-plane): Phase B/C/D — dual-agent concurrency, admin UI closure, gov"
+    },
+    {
+      "sha": "c1165d6f",
+      "message": "Paper numbering fix: Crypto Fear Channel = Paper 10 (not Paper 6)"
+    },
+    {
+      "sha": "eaf8bbe7",
+      "message": "next_tasks reality: Paper 4 = vix-sufficiency integrate (not kickoff); Paper 2 E"
+    },
+    {
+      "sha": "cc3fb741",
+      "message": "K1135 善後 + Paper 4 Channel 3 narrative complete"
+    },
+    {
+      "sha": "100881ac",
+      "message": "K1135: Skew-t GAS on negatively skewed commodities (K1129 extension, Paper 4 Cha"
+    },
+    {
+      "sha": "d7d03315",
+      "message": "chore(storage): snapshot runtime state (notifications, reports, sync/session sta"
+    },
+    {
+      "sha": "537c36f1",
+      "message": "chore(ops+docs): ops control-plane modules, tests, scripts, docs + Phase A.1 pru"
+    },
+    {
+      "sha": "37841357",
+      "message": "chore(agent-specs): establish canonical agent-specs/ and refresh render outputs"
+    },
+    {
+      "sha": "76aa426d",
+      "message": "chore(experiments+archive): migrate legacy experiment artifacts to canonical lay"
+    },
+    {
+      "sha": "8d3d40a3",
+      "message": "prune_rollback_points: accept --preserve flag for snapshot ID whitelist (linter "
+    },
+    {
+      "sha": "6211faf4",
+      "message": "Fix sync health check: paper_trading.json nested structure + per-table column sp"
+    },
+    {
+      "sha": "075d0cba",
+      "message": "project_improvement_status: flag historical cron examples as stale + confirm mig"
+    },
+    {
+      "sha": "9fbae2ef",
+      "message": "General article mile_8a82b298 factor control lay version"
+    },
+    {
+      "sha": "5585bfc5",
+      "message": "Paper 6 kick-off outline + cross-market research article (pool refill)"
+    },
+    {
+      "sha": "60947c8c",
+      "message": "K1137 善後: HAR regime-invariant (Scenario C) + Paper 4 Channel 1 strengthened"
+    },
+    {
+      "sha": "7a830c8f",
+      "message": "K1137: Regime-conditional robust vol models (K1136/K1138 extension, rolling quan"
+    },
+    {
+      "sha": "0263b63a",
+      "message": "Add scripts/prune_rollback_points.py (retention tool for storage/ops/rollback_po"
+    },
+    {
+      "sha": "570cf738",
+      "message": "General article mile_72fb5130 GAS-t harm lay version — pool refill"
+    },
+    {
+      "sha": "8a17bd5c",
+      "message": "Paper 9 bib fix done + Paper 2/4 reality check (new paper kick-off tasks, not bo"
+    },
+    {
+      "sha": "2bf5f2f6",
+      "message": "Paper 9 bib fix: 1 MAJOR + 5 MED + 2 MINOR DOI per citation_check v1"
+    },
+    {
+      "sha": "13b453b7",
+      "message": "4 防止規則 + K1143 mechanism diagnostic + canonical guide restored"
+    },
+    {
+      "sha": "7443e065",
+      "message": "K1143: GAS-t equity harm mechanism diagnostic (Paper 4 channel-specific rational"
+    },
+    {
+      "sha": "72c1c7bc",
+      "message": "Critical bug fix + K1127 merged + general article + batch 善後"
+    },
+    {
+      "sha": "a9f3dad9",
+      "message": "Merge agent worktree agent-k1127 (1 commits)"
+    },
+    {
+      "sha": "6ac6613d",
+      "message": "K1127: Cross-asset OFI lead-lag TX vs ES overnight channel (K1100g_d1 extension)"
+    },
+    {
+      "sha": "eb9bd6f9",
+      "message": "Paper 4 channel-specific research article draft (mile_363a296e) + --tags fix ver"
+    },
+    {
+      "sha": "377f5881",
+      "message": "Level 2 fixes: publish-milestone --tags JSON array parser + ops scaffold dirs"
+    },
+    {
+      "sha": "6af9df49",
+      "message": "K1161: IV crush as continuous EAV regressor (Paper 2 market-implied magnitude te"
+    },
+    {
+      "sha": "05ed44fb",
+      "message": "K1123 FAIL + K1149 A+D + K1139 B_AGGREGATOR + Paper 2 trilogy article draft"
+    },
+    {
+      "sha": "4e186ef8",
+      "message": "K1123: Cross-asset alt-data allocation (SPY+GLD+TLT portfolio extension of K1121"
+    },
+    {
+      "sha": "8b36a0d2",
+      "message": "K1149: Pooled EAV vs PCA factor competition (Paper 2 absorption test)"
+    },
+    {
+      "sha": "8206ff0c",
+      "message": "K1139: Equity HAR-RV-X VIX component decomposition (Paper 4 mechanism diagnostic"
+    },
+    {
+      "sha": "937cdca7",
+      "message": "Q1-Q5 batch: Paper decisions + skills drift gitignore + cron stub + narrative st"
+    },
+    {
+      "sha": "b1ba36e6",
+      "message": "docs + token reports 2026-04-17 (project analysis + UX flow audit + daily/weekly"
+    },
+    {
+      "sha": "2922e1ff",
+      "message": "Batch 善後 K1117/K1130/K1138 + Paper 4 narrative pivot escalation + error_log fix "
+    },
+    {
+      "sha": "55dd6065",
+      "message": "K1138: Equity compendium (SPY/QQQ/IWM) robust models — Paper 4 universal-null as"
+    },
+    {
+      "sha": "04fe1db9",
+      "message": "K1130: Extended IS 2012-2019 OFI-regime retest (error_log fix #1 validation)"
+    },
+    {
+      "sha": "bd50ac5e",
+      "message": "K1117: Matched-pair alt-data forecast on VIX jump days (K1116 derivative, last a"
+    },
+    {
+      "sha": "a16e2d0f",
+      "message": "K1131 善後：knowledge + next_tasks + error_log fix #3 降級"
+    },
+    {
+      "sha": "8135a777",
+      "message": "K1131: Continuous VIX-dependent beta via natural cubic spline (fix K1128 regime "
+    },
+    {
+      "sha": "30142d85",
+      "message": "K1148_d2: US EAV binary-vs-continuous OOS panel DM (cross-market validation)"
+    },
+    {
+      "sha": "cef890f3",
+      "message": "K1148_d3: TW OOS PASS stock characteristics (9 vs 20 feature comparison)"
+    },
+    {
+      "sha": "aa9d8c98",
+      "message": "Relax idle-driven policy to slot-aware concurrent execution (M1 Max 10-core) + K"
+    },
+    {
+      "sha": "8dd6fa37",
+      "message": "K1148_d1: K1145 binary EAV OOS panel DM retest (Scenario B: Marginal FAIL)"
+    },
+    {
+      "sha": "a5d152ff",
+      "message": "K1148: EAV continuous surprise refinement (experiments-only)"
+    },
+    {
+      "sha": "f5edd6d2",
+      "message": "Fix knowledge.json stray `]}` corruption + post-write sanity guard + TSMC mile_f"
+    }
+  ]
+}

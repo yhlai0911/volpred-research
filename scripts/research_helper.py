@@ -17,6 +17,7 @@ import shutil
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+from volpred.config.runtime import get_local_data_sync_dirs
 from volpred.memory.system import MemorySystem
 from volpred.publisher.publisher import Publisher
 
@@ -54,7 +55,13 @@ def record_finding(
         phase=phase,
     )
 
-    # 4. Frontend local JSON sync — REMOVED 2026-04-18
-    # frontend-v2-fix 走 Supabase API；publish_milestone 已自動 sync 到 articles 表。
+    # 4. Sync to configured local data mirrors
+    feed_path = Path("storage/reports/feed.json")
+    for data_dir in get_local_data_sync_dirs(active_only=True):
+        data_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(feed_path, data_dir / "feed.json")
+        report_dir = data_dir / "reports"
+        report_dir.mkdir(exist_ok=True)
+        shutil.copy2(feed_path, report_dir / "feed.json")
 
     print(f"📢 {title}")

@@ -1,3 +1,5 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 # Trading Strategies Guide
 
 ## Strategy Types

@@ -1,3 +1,5 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 # Publishing Guide
 
 ## ⚠️ 標準流程 vs Legacy（必讀）

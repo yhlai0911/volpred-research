@@ -356,7 +356,7 @@ K598 實驗嘗試了 5 種「消除假訊號」的改良版本（延遲確認 3 
 *數據來源：yfinance（SPY、GLD、^VIX），期間：2005–2026，共 5,342 個交易日*
 
 實驗腳本：`experiments/k597_stress_test.py`、`experiments/k598_adaptive_debounce.py`
-結果數據：`experiments/k597_stress_test_results.json`、`experiments/k598_adaptive_debounce_results.json`
+結果數據：`experiments/k597/k597_stress_test_results.json`、`experiments/k598_adaptive_debounce_results.json`
 """
 
     return content

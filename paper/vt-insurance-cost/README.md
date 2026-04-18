@@ -23,3 +23,22 @@ uv run python paper/vt-insurance-cost/reproduce.py
 ## Number Traceability
 See `reviews/audit_step1_2.md` for complete traceability table.
 All numbers verified — 0 mismatches.
+
+## Self-Contained Index (2026-04-17)
+
+| File | Status |
+|------|--------|
+| `data_sources.md` | ✅ All 4 data files documented; pre-downloaded CSVs in data/ |
+| `scripts/README.md` | ✅ Reproduction guide for all experiments |
+| `results/README.md` | ✅ Table → JSON source mapping |
+| `figures/` | ✅ Directory created (no figures in current draft) |
+| `experiments.md` | ✅ Full K-number index (K811–K860) |
+
+## Supporting Experiments (K Index)
+
+| K | Title | Key Result |
+|---|-------|-----------|
+| K811 | Insurance Premium VoV (original) | Pilot; superseded by K811v2 |
+| K811v2 | Insurance Premium VoV (fixed) | Main Table 2; 0-mismatch verified |
+| K846 | Rebalancing Premium | Isolated rebalancing cost component |
+| K860 | Prospect Theory VT | Supplementary behavioral analysis |

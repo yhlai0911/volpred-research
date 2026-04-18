@@ -3,13 +3,17 @@
 每日由 daily_update.py 呼叫，或獨立執行：
   uv run python scripts/recalc_metrics.py
 
-輸出：storage/strategy_metrics.json + frontend-v2/data/strategy_metrics.json
+輸出：storage/strategy_metrics.json + active frontend data/strategy_metrics.json
 """
 import json
 import math
+import sys
 from pathlib import Path
 
 PROJECT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT / "src"))
+
+from volpred.config.runtime import get_strategy_metrics_sync_paths
 
 # All strategies use the same start date for fair comparison.
 # Latest common start: 2023-01-04 (US strategies).
@@ -137,12 +141,18 @@ def recalc_all():
     out_path = PROJECT / "storage" / "strategy_metrics.json"
     out_path.write_text(json.dumps(metrics, indent=2, ensure_ascii=False))
 
-    # Frontend local JSON copy — REMOVED 2026-04-18
-    # frontend-v2-fix 走 Supabase REST API 讀 strategy_metrics_cache 表；
-    # 下面的 Supabase sync 區段會把 metrics 推到該表。
-    # storage/strategy_metrics.json 仍是 source of truth，保留上面寫入。
+    synced_targets = []
+    metrics_json = json.dumps(metrics, indent=2, ensure_ascii=False)
+    for target_path in get_strategy_metrics_sync_paths(active_only=True):
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        target_path.write_text(metrics_json)
+        synced_targets.append(str(target_path.relative_to(PROJECT)))
 
     print(f"\n✓ {len(metrics)} strategies updated → {out_path.name}")
+    if synced_targets:
+        print(f"  → frontend metrics synced: {', '.join(synced_targets)}")
+    else:
+        print("  → frontend metrics sync skipped: no configured targets")
 
     # Sync metrics to Supabase strategy_metrics_cache (so frontend shows correct numbers)
     try:

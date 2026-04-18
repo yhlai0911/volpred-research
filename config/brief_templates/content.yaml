@@ -1,0 +1,18 @@
+task_summary: "{{title}}"
+goal: "完成內容任務：{{description}}"
+success_criteria:
+  - "內容必須對應真實研究或正式資料來源"
+  - "不可用 thinking 直接冒充 published content"
+repo_root: "/Users/yhlai0911/Desktop/volpred-research"
+required_files:
+  - "research_program.md"
+  - "docs/error_log.md"
+  - "docs/architecture.md"
+recommended_files:
+  - "docs/project_improvement_status.md"
+forbidden_large_files:
+  - "storage/reports/feed.json"
+  - "storage/memory/knowledge.json"
+relevant_commands:
+  - "uv run volpred ops health"
+why_this_agent: "內容與發佈前判斷任務優先交給 {{preferred_agent}}。"

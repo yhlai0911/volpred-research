@@ -10,6 +10,8 @@ from email.utils import formataddr
 from html import escape
 from pathlib import Path
 from typing import Any
+
+from volpred.config.runtime import get_default_remote_url
 from zoneinfo import ZoneInfo
 
 
@@ -214,7 +216,10 @@ class EmailNotifier:
             _parse_csv_env("ADMIN_NOTIFICATION_EMAILS")
             or _parse_csv_env("OPS_ADMIN_EMAILS")
         )
-        self.site_url = os.environ.get("NEXT_PUBLIC_SITE_URL", os.environ.get("VOLPRED_REMOTE_URL", "https://volpred.zeabur.app")).strip()
+        self.site_url = os.environ.get(
+            "NEXT_PUBLIC_SITE_URL",
+            os.environ.get("VOLPRED_REMOTE_URL", get_default_remote_url()),
+        ).strip()
 
     def is_configured(self) -> bool:
         return bool(self.smtp_host and self.from_email and self.admin_emails)

@@ -13,6 +13,10 @@ uv run python scripts/recalc_metrics.py              # 手動重算績效指標
 uv run python scripts/supabase_sync.py full          # 手動 incremental sync
 uv run python scripts/supabase_sync.py force-full    # 強制全量同步（慎用，IO 大）
 uv run volpred ops health                            # 本地營運健康檢查
+uv run volpred ops scheduler-preview                 # 預覽 shared scheduler 下一輪會做什麼
+uv run volpred ops scheduler-tick                    # 手動跑一輪 shared scheduler
+uv run volpred ops scheduler-smoke --cleanup         # 隔離 mock smoke，不碰真實 Claude/Codex CLI
+uv run volpred ops scheduler-live-smoke --cleanup    # 隔離 live smoke，真打本機 Claude/Codex CLI
 uv run volpred ops article-backups --repair          # 確保每篇已發布文章都有本地單篇 JSON，可用於 DB 災難復原
 uv run volpred ops sync-all                          # 統一入口：手動 Supabase sync
 uv run volpred ops daily-update                      # 統一入口：每日更新
@@ -35,6 +39,12 @@ uv run volpred ops jobs --status queued              # 查看待處理任務
 uv run volpred ops job-show <job_id>                 # 查看任務詳情及日誌
 uv run volpred ops enqueue --action daily_update     # 手動入隊任務
 uv run volpred ops worker --poll-interval 10         # 啟動本地 worker
+
+# experiments/ 結構整理（新規先行 + touched-file migration）
+uv run volpred ops experiments report                # 查看 experiments/ 根層散檔與遷移候選
+uv run volpred ops experiments scaffold --experiment-id k1121 --title "..."   # 建立 experiments/k1121/ 標準骨架
+uv run volpred ops experiments migrate --experiment-id k1121                  # 只看遷移計畫（dry-run）
+uv run volpred ops experiments migrate --experiment-id k1121 --apply          # 實際搬移該實驗的根層散檔
 
 # Zeabur CLI（部署 + 域名管理）
 # Project ID: 69b5b264800a475a1f82b073

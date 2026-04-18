@@ -12,7 +12,7 @@
 - **第九篇**：`paper/garch-x-vix/main.tex`（31 頁，Multiplicative GARCH-X with VIX，目標 J. Empirical Finance 或 J. Forecasting）
 - 編譯：`cd paper/<name> && /Library/TeX/texbin/xelatex -interaction=nonstopmode main.tex`（跑兩次解引用）
 - 作者：Yi-Hao Lai (Da-Yeh University) + VolPred Research System
-- 論文頁 `/paper` 讀 Supabase `papers` table（metadata）；**PDF 放前端 `frontend-v2-fix/public/paper/`**（由 Zeabur CDN serve，不走 Supabase Storage）
+- 論文頁 `/paper` 讀 Supabase `papers` table（metadata）；**前端靜態 PDF 目錄由 `config/project_targets.json` 的 `paper_public_dir` 決定**（目前是 `frontend-v2-fix/public/paper/`，由 Zeabur CDN serve）
 
 ## 版本命名規則
 - `main.tex` / `body.tex` = 原版（不動）
@@ -43,8 +43,8 @@
 
 ## 論文更新後同步網頁
 
-每次論文 PDF 更新後必須同步前端：
+每次論文 PDF 更新後必須同步平台：
 1. 編譯 PDF: `cd paper/<name> && /Library/TeX/texbin/xelatex -interaction=nonstopmode main.tex`
-2. 複製到前端: `cp paper/<name>/main.pdf frontend-v2-fix/public/paper/<slug>.pdf`（slug 見上方對照表）
-3. 更新頁數: Supabase `papers` table 中的 metadata
-4. Deploy: `bash scripts/deploy_zeabur.sh`
+2. 標準流程：`uv run volpred ops paper-update --paper-id <paper_id>`
+3. `paper-update` 會自動更新 metadata、上傳 PDF，並同步到 active frontend 的 configured `paper_public_dir`
+4. 只有在前端程式碼或部署環境有變動時才 redeploy；單純 PDF / metadata 更新通常不需 redeploy

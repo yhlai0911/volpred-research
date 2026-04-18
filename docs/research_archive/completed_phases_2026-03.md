@@ -630,7 +630,7 @@
 ## 面向 I: 期貨避險完成實驗（archived 2026-03-30）
 
 **已完成實驗（按正確順序排列）：**
-- [x] I0: ★★★ Data Diagnostics (15 pairs) — A=9, B=3, C=3。USO-CL/UNG-NG 不適合 GARCH。Bond corr 不穩定。experiments/i0_futures_data_diagnostics.py
+- [x] I0: ★★★ Data Diagnostics (15 pairs) — A=9, B=3, C=3。USO-CL/UNG-NG 不適合 GARCH。Bond corr 不穩定。experiments/i0/i0_futures_data_diagnostics.py
 
 **已有基礎：**
 - [x] K341: ★★ Futures Hedging Framework — VIX>25 tail hedge 效率 7.71 MDD/cost, 12/VIX VT 勝固定避險
@@ -638,17 +638,17 @@
 - [x] K340: ES Futures Basis — null（VIX 吸收）
 
 **研究方向完成項目：**
-- [x] I1: ★ GARCH-based OHR — GARCH 不勝 EWMA（DM 全 NS）。Correlation 決定複雜度：SPY-ES corr>0.95→h=1 足夠，TLT-ZN corr<0.90→dynamic 必要（Harvey t=3.88）。EWMA(0.94) 是最佳實務。experiments/I1_garch_ohr.py
-- [x] I1b: ★★ Commodity Futures Dynamic Hedging — Static OHR wins 5/6 pairs！GLD DM t=-3.8★（dynamic HURTS）。USO-CL catastrophic（corr 0.510）。Static 對所有資產類別都夠用。experiments/i1b_commodity_futures_hedge.py
+- [x] I1: ★ GARCH-based OHR — GARCH 不勝 EWMA（DM 全 NS）。Correlation 決定複雜度：SPY-ES corr>0.95→h=1 足夠，TLT-ZN corr<0.90→dynamic 必要（Harvey t=3.88）。EWMA(0.94) 是最佳實務。experiments/I1/I1_garch_ohr.py
+- [x] I1b: ★★ Commodity Futures Dynamic Hedging — Static OHR wins 5/6 pairs！GLD DM t=-3.8★（dynamic HURTS）。USO-CL catastrophic（corr 0.510）。Static 對所有資產類別都夠用。experiments/i1b/i1b_commodity_futures_hedge.py
 - [x] I2: ★★ 台指期避險 — GARCH OHR~0.74（非 1.0），50/50 0050+GLD 仍是 Sharpe 冠軍（0.940）。GARCH hedge only MDD -14.0%（equity-only 最佳）。Futures on top of VT: 統計顯著但經濟邊際。SPY NOT viable cross-hedge（corr=0.15）。experiments/i2_taiwan_futures_hedge.py
-- [x] I3 Fixed: Multi-futures HE 評估 — ES only HE=94.3% ≈ ES+GC+ZN 94.2%（DM 全 NS）。多期貨對 SPY 零增量。experiments/i3_fixed_hedging_metrics.py
-- [x] I5: Regime-Switching Hedge Ratio — NULL。OHR 跨 VIX regime 穩定。experiments/i5_regime_hedge_ratio.py
-- [x] I12: ★★ Window Sensitivity — 最佳窗口取決於 corr + structural stability。High corr→Naive 最好。Medium corr→長窗口(500d+)。Low corr + shift→短窗口(60-120d)。experiments/i12_window_sensitivity_hedge.py
+- [x] I3 Fixed: Multi-futures HE 評估 — ES only HE=94.3% ≈ ES+GC+ZN 94.2%（DM 全 NS）。多期貨對 SPY 零增量。experiments/i3/i3_fixed_hedging_metrics.py
+- [x] I5: Regime-Switching Hedge Ratio — NULL。OHR 跨 VIX regime 穩定。experiments/i5/i5_regime_hedge_ratio.py
+- [x] I12: ★★ Window Sensitivity — 最佳窗口取決於 corr + structural stability。High corr→Naive 最好。Medium corr→長窗口(500d+)。Low corr + shift→短窗口(60-120d)。experiments/i12/i12_window_sensitivity_hedge.py
 - [x] K417: ★★★ Naive Hedge Superiority (Cao & Conlon 2025 JFM) — PARTIALLY REJECTED。Complex beats Naive 10/15 pairs (67%)。Correlation r=-0.899 是決定性 moderator。Equity: Naive 3/3。Commodity: Complex 4/4。Bond: Complex 3/4。FX: marginal 3/4
-- [x] I11: ★★★ Full Panel 15 Pairs — Naive wins 8/15, Complex wins 7/15。Correlation threshold refined: >0.96→Naive, 0.89-0.96→mixed, <0.89→Complex。USO-CL disaster (HE=-817%)。Bond pairs 全需 dynamic (TLT-ZN t=9.2★★★)。experiments/i11_full_panel_daily_garch_hedge.py
+- [x] I11: ★★★ Full Panel 15 Pairs — Naive wins 8/15, Complex wins 7/15。Correlation threshold refined: >0.96→Naive, 0.89-0.96→mixed, <0.89→Complex。USO-CL disaster (HE=-817%)。Bond pairs 全需 dynamic (TLT-ZN t=9.2★★★)。experiments/i11/i11_full_panel_daily_garch_hedge.py
 - [x] I10: ★ VOV State-Dependent Hedging (Li & Chen 2025 JFM) — 方向確認但幅度微小（HE 差 1.9pp）。Partial r(VVIX,HE|VIX)=0.003 FAIL。SPY-ES corr>0.96 壓縮了所有差異。VIX sufficient for hedging decisions
-- [x] I9: ★★★ Proper Hedging Effectiveness (Academic Standard) — Ederington HE + VaR/ES + Utility。SPY-ES corr>0.95: h=1 足夠（HE 94%）。TLT-ZN corr=0.81: EWMA t=6.91★（HE 45%→68%）。GLD-GC: OLS→85% 略勝 Naive。避險價值取決於 corr + h 偏離度 + unhedged 風險。experiments/i9_proper_hedging_effectiveness.py
-- [x] I6 Fixed: 避險 vs 投資組合（分開評估）— Section A 避險: Static OHR HE=94.5%, TX 0.12%/yr。Section B 投資組合: 50/50 Sharpe 1.155, 50/50+VT MDD -14.3%。兩個框架不混用。experiments/i6_fixed_hedging_metrics.py
+- [x] I9: ★★★ Proper Hedging Effectiveness (Academic Standard) — Ederington HE + VaR/ES + Utility。SPY-ES corr>0.95: h=1 足夠（HE 94%）。TLT-ZN corr=0.81: EWMA t=6.91★（HE 45%→68%）。GLD-GC: OLS→85% 略勝 Naive。避險價值取決於 corr + h 偏離度 + unhedged 風險。experiments/i9/i9_proper_hedging_effectiveness.py
+- [x] I6 Fixed: 避險 vs 投資組合（分開評估）— Section A 避險: Static OHR HE=94.5%, TX 0.12%/yr。Section B 投資組合: 50/50 Sharpe 1.155, 50/50+VT MDD -14.3%。兩個框架不混用。experiments/i6/i6_fixed_hedging_metrics.py
 - [x] I8: 期貨基差波動率預測 — NULL（confirms K340）。SPY-ES r=-0.045 FAIL, GLD-GC null, TLT-ZN IS t=5.11★ BUT OOS collapses (ΔR²=-0.074)。Sixth Law confirmed。VIX sufficient re-confirmed
 - [x] I5: Regime-Switching Hedge Ratio — NULL。OHR 跨 regime 穩定。文獻預測 regime-switching 有效但我們實證否定
 - [x] I1b: Static OHR 跨 6 資產類別勝出。文獻推薦 DCC/copula 的增量價值可疑

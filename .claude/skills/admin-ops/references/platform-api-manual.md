@@ -1,3 +1,5 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 # Platform API Manual
 
 這份文件給本地 `Claude Code` 使用，目的不是介紹產品，而是讓 agent 能可靠地：
@@ -410,4 +412,4 @@ uv run python -m volpred.cli ops recalc-metrics
 - 不要把 `research_program.md` / `CLAUDE.md` 當一般後台欄位直接改
 - 不要直接 patch DB 當常規營運手段
 - 不要在沒有必要時破壞既有 API contract
-- 不要假設目前已經有完整自動排程引擎；目前仍以 Claude + session cron 為主
+- 不要假設所有自動化都已完全收斂；v11 正式治理是 Claude coordinator + shared scheduler，若本機仍有 session cron，只視為過渡期 convenience

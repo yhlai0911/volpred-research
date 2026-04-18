@@ -1,3 +1,5 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 # 數據時間與跨市場對齊
 
 ## yfinance 時間語義

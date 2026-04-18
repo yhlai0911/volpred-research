@@ -21,6 +21,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+from volpred.config.runtime import get_default_remote_url, get_local_data_sync_dirs
 from volpred.memory.system import MemorySystem
 from volpred.publisher.publisher import Publisher
 
@@ -69,6 +70,7 @@ def record_and_publish(
     # Ensure content and tags fields are set
     import json
     feed_path = Path("storage/reports/feed.json")
+    report_id = ""
     if feed_path.exists():
         feed = json.loads(feed_path.read_text())
         if feed and feed[0].get("title") == title:
@@ -89,16 +91,36 @@ def record_and_publish(
                 report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False, default=str))
     print(f"✓ feed published (via Publisher — correct format)")
 
-    # 4. Frontend local JSON sync — REMOVED 2026-04-18
-    # 前端 (frontend-v2-fix) 現在走 Supabase REST API，不讀本地 JSON。
-    # Publisher.publish_milestone 已觸發 _sync_to_remote（supabase_sync.sync_article），
-    # 所以上面 publish_milestone(...) 那步就已同步到 Supabase articles 表。
+    # 4. Sync to configured local data mirrors
     storage = Path("storage")
     feed_path = storage / "reports" / "feed.json"
+    data_sync_dirs = get_local_data_sync_dirs(active_only=True)
+    synced_local_dirs = 0
+    for data_dir in data_sync_dirs:
+        data_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(feed_path, data_dir / "feed.json")
+        report_dir = data_dir / "reports"
+        report_dir.mkdir(exist_ok=True)
+        shutil.copy2(feed_path, report_dir / "feed.json")
+        synced_local_dirs += 1
+
+    # Sync individual report file to all locations
+    if report_id:
+        src_report = Path(f"storage/reports/{report_id}.json")
+        if src_report.exists():
+            for data_dir in data_sync_dirs:
+                report_dir = data_dir / "reports"
+                report_dir.mkdir(exist_ok=True)
+                shutil.copy2(src_report, report_dir / f"{report_id}.json")
+
+    if synced_local_dirs:
+        print(f"✓ local data mirrors synced ({synced_local_dirs})")
+    else:
+        print("✓ local data mirrors skipped (no configured targets)")
 
     # 5. Sync to Zeabur via API (no redeploy needed)
     import json as json_mod
-    zeabur_url = os.environ.get("VOLPRED_REMOTE_URL", "https://volpred.zeabur.app")
+    zeabur_url = os.environ.get("VOLPRED_REMOTE_URL", get_default_remote_url())
     try:
         import urllib.request
         feed_data = json_mod.loads(feed_path.read_text())

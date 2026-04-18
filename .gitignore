@@ -17,6 +17,7 @@ venv/
 .vscode/
 *.swp
 *.swo
+.pytest_cache/
 
 # Data cache
 data/cache/*.db
@@ -36,11 +37,7 @@ node_modules/
 out/
 
 # Frontend repos (separate git repos)
-frontend-v2/
 frontend-v2-fix/
-
-# Legacy frontend
-frontend/
 
 # Env / Secrets — NEVER commit
 .env
@@ -51,13 +48,42 @@ frontend-v2/.env.local
 
 # Claude worktrees (temporary)
 .claude/worktrees/
+
+# Agent skills rendered output (canonical source is agent-specs/skills/)
+# Tracking both .agents/skills/ and .claude/skills/ creates 3-way drift.
+# Canonical: agent-specs/ → rendered to .claude/skills/ (actively read by Claude Code).
+# .agents/skills/ is a legacy third copy — gitignore from 2026-04-17 to simplify canonical governance.
+.agents/skills/
 .claude/scheduled_tasks.lock
+
+# Local control-plane runtime state
+storage/ops/tasks/
+storage/ops/agents/
+storage/ops/executions/
+storage/ops/approvals/
+storage/ops/rollback_points/
+storage/ops/*.lock
+storage/ops/locks/
+storage/ops/writer_log.jsonl
 
 # Supabase local
 supabase/.temp/
 
 # Backups (large, not needed in repo)
 backups/
+.codex-backups/
+舊前端/
+.worktree_tmp_*
+texput.log
+
+# Archive: keep tracked root-clutter records, ignore local archived payloads
+archive/*
+!archive/root-clutter/
+archive/root-clutter/*
+!archive/root-clutter/README.md
+!archive/root-clutter/tracked/
+!archive/root-clutter/tracked/**
+archive/root-clutter/local/
 
 # User-organized archive (moved clutter, 500MB+)
 archive/
@@ -78,6 +104,8 @@ data/intraday/*.csv
 # Temp files
 /tmp/
 *.tmp
+*.bak
+*.orig
 
 # Keep data/vixtwn (small) but ignore large 5-min CSVs
 !data/

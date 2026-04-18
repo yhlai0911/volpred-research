@@ -74,10 +74,13 @@ You are not a script runner. You are a thinking researcher with these abilities:
 
 ### Step -1: 確認實驗編號不衝突（多 session 安全）
 
-分配新 K 編號前，必須檢查以下三處確認該編號未被佔用：
-1. `ls experiments/ | sort` — 已完成/進行中的實驗目錄
-2. `cat storage/next_tasks.json` — 已排定但未開始的任務
-3. `ls .claude/worktrees/ 2>/dev/null` — 其他 session 正在跑的 worktree agent
+分配新 K 編號前，**用一條 bash 同時檢查三個來源**（避免 312 次/天的重複 `ls` 浪費 context；2026-04-17 教訓：a10f7b0f session 312 次重複 `ls .claude/worktrees/`）：
+
+```bash
+{ ls experiments/ 2>/dev/null | grep -oE 'k[0-9]+$' | sort -u;
+  jq -r '.[].id // empty' storage/next_tasks.json 2>/dev/null;
+  ls .claude/worktrees/ 2>/dev/null; } | sort -u | tail -20
+```
 
 從最大現有編號 +1 開始，跳過所有已佔用的。（2026-04-08 教訓：K988 被另一個 session 佔用）
 
@@ -215,21 +218,25 @@ uv run python scripts/build_knowledge_index.py build
 系統 crontab 已設定永久任務（5-min 數據收集 + daily update）。
 但以下 session-only cron 需要每次新 session 重新建立：
 
+**Canonical source**：`config/runtime_schedules.json`
+若本段與其他文件不一致，以該檔為準。
+
 #### 最小啟動集（保守模式）
 ```
-CronCreate(cron="13 */6 * * *", prompt="會員問題研究")               # :13 每6小時
-CronCreate(cron="37 */6 * * *", prompt="平台巡檢")                   # :37 每6小時
-CronCreate(cron="47 */2 * * *", prompt="每2小時 git commit")        # :47
-CronCreate(cron="7 * * * *", prompt="知識索引更新")                 # :07
+CronCreate(cron="17 */6 * * *", prompt="會員問題研究摘要：先跑 question-ranking-workflow；只有 pending_questions > 0 才建立/執行後續任務")
+CronCreate(cron="37 */6 * * *", prompt="平台巡檢摘要：先跑 ops health + platform-cycle-summary；只有異常或 release_due 才建立/執行後續任務")
+CronCreate(cron="3 9 * * *", prompt="每日任務審視與執行計劃：(1) 盤點 user queue / scheduled queue / approval backlog (2) 盤點草稿池與今日已發佈文章缺口 (3) 讀 research_program.md 事件日曆，確認今日是否有 CPI/NFP/FOMC/TSMC 等重要事件 (4) 有事件→立即建立或執行事件任務（必要時 status=published）(5) 檢查 research_program.md 行數(<700)、知識索引是否過期(>24h) (6) 用 uv run volpred ops assign 建立今日正式任務")
+CronCreate(cron="7 */6 * * *", prompt="知識索引檢查：先判斷是否真的需要更新")
+CronCreate(cron="23 22 * * *", prompt="Token 用量日報：每日一次 detailed；週五再補 weekly")
 ```
 
-#### 全速模式（確認穩定後加入）
-```
-CronCreate(cron="*/4 * * * *", prompt="繼續研究")                   # 每 4 分鐘 heartbeat（在 5 分鐘 cache TTL 內維持 warm）
-CronCreate(cron="37 */2 * * *", prompt="網站健康檢查（含自動修復）")   # :37 每2小時
-```
-
-**為什麼 4 分鐘**：5 分鐘 cache TTL 內維持 warm 又不過度 heartbeat。原 15 分鐘是早期保守設定；3 分鐘曾測過但比 4 分鐘額外消耗 25% heartbeat 成本而效益相同。
+#### Idle-driven continuation（取代高頻 heartbeat）
+- 不再建立 `*/4 * * * *` 的「繼續研究」cron
+- agent 完成主任務後，先檢查 `user queue`
+- `user queue` 為空，再檢查 `scheduled queue`
+- queue 皆空，才允許做一輪 discovery / research continuation
+- discovery pass 最多每 30 分鐘一次
+- 只要 queue 裡存在 `user-assigned` 任務，discovery 直接停用
 
 也可以安排**單次性提醒**避免忘記（範例格式，日期需依實際事件更新）：
 ```
@@ -399,9 +406,9 @@ All publications in **繁體中文**. Details in `references/publishing-guide.md
 
 **論文更新後必須同步網頁：**
 1. 編譯 PDF: `cd paper/leverage-direction && xelatex main.tex`
-2. 複製到前端: `cp paper/leverage-direction/main.pdf frontend/public/paper/leverage-direction-matters.pdf`
-3. 更新頁數: `frontend/src/app/paper/page.tsx` 中的 "Download PDF (XX pages)"
-4. Push 到 Zeabur
+2. 標準流程：`uv run volpred ops paper-update --paper-id leverage-direction`
+3. `paper-update` 會同步 metadata + PDF 到 active frontend configured `paper_public_dir`（見 `config/project_targets.json`）
+4. 只有前端程式碼或部署環境改動時才需要 deploy
 
 ## Reference Files
 
@@ -422,6 +429,43 @@ All publications in **繁體中文**. Details in `references/publishing-guide.md
 - `references/ai-collaboration.md` — AI 協作模式（Codex/Gemini 使用指引）
 - `references/question-review-guide.md` — 會員問題審查標準
 - `research_program.md` — **Core research direction, progress, and findings** (highest priority)
+
+## Token Thrift（2026-04-17 加入；防止單日 $1000+ 浪費）
+
+主 session 是 token 大戶，每條訊息都帶完整 cache。下列規則保持 cache 命中率與訊息精簡：
+
+### Agent prompt 精簡（最高 ROI）
+
+派 Agent 時 prompt 不要超過 **800 字**。違反此上限的常見浪費（13f14b3a session 統計）：
+
+- ❌ 重複「專案路徑 / Python CLI / 部署目標」boilerplate — agent 已從 system prompt + CLAUDE.md 知道
+- ❌ 整段抄 `CLAUDE.md` / `error_log.md` / `research_program.md` — 引用路徑與行號即可
+- ❌ 把 `references/experiment-preamble.md` 內容複製進 prompt — 寫「**讀** `.claude/skills/autonomous-research/references/experiment-preamble.md`」就好
+- ❌ 重述「研究誠實 13 條」 — 寫「遵守 CLAUDE.md §研究誠實原則」即可
+
+✅ Prompt 必備（≤ 800 字）：任務 ID + 一句話目標 + 必讀檔路徑 + 成功標準 + 輸出位置。背景由 agent 自己讀。
+
+### Tool call 合併
+
+- ❌ 不要分次 `ls experiments/` → `ls .claude/worktrees/` → `git worktree list` → `cat storage/next_tasks.json`。**一條 bash 用 `{ ... ; ... ; }` 包起來**（見 Step -1）
+- ❌ 不要每完成 1 個 K 實驗就 `git add storage/memory/knowledge.json && git commit && git push`。**批次每 5-10 個實驗 commit 一次**，或交給每 4h cron 處理（13f14b3a 教訓：1 天 46 次 add knowledge.json）
+- ❌ 不要 `git status` + `git status --short` + `git diff --stat` 連續呼叫。挑一個
+
+### Subagent_type 選擇
+
+- 純探索 / 找檔 / 列實驗結果 → `Explore`（輕量，無 write 權限）
+- 寫實驗 / 寫文章 / 修論文 / 修 bug → `general-purpose`（必要，無法替代）
+- **不要為了「保險」一律選 general-purpose** — Explore 載入的 context 約小 60%
+
+### Session 衛生
+
+- 單一 session 累積成本超過 **$200** 或跨日超過 **24h**，主動建議使用者 `/clear`
+- 排程 cron tick 用 stub 回覆（≤15 字）省 token — 已在 CLAUDE.md「Cron skip 用 stub」段
+- `next_tasks.json` 只放 next-action 任務；completed/cancelled/superseded/resolved_* 一律移到 `storage/next_tasks_archive.jsonl`（2026-04-17 教訓：曾累積到 128KB / 205 條，每次 Edit 都重寫整檔）
+- 但在 v11 之後，`next_tasks.json` 只算 **legacy planning / working list**：
+  - scheduler / control plane 的正式 task source of truth 是 `storage/ops/`
+  - `next_tasks.json` 只能當補充線索，不可當成 canonical queue
+  - 若是正式排程、approval、rollback、event 任務，一律以 control plane / `event_jobs` 為準
 
 ## Related Skills
 

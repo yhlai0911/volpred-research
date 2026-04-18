@@ -1,3 +1,5 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 # Experiment Agent Preamble（實驗 Agent 必讀）
 
 **此文件必須附加在每個實驗 agent prompt 的開頭。不可省略。**

@@ -1,0 +1,18 @@
+task_summary: "{{title}}"
+goal: "完成程式或實作任務：{{description}}"
+success_criteria:
+  - "改動應最小且通過對應測試"
+  - "不要回退或覆寫使用者未要求的變更"
+repo_root: "/Users/yhlai0911/Desktop/volpred-research"
+required_files:
+  - "AGENTS.md"
+  - "docs/error_log.md"
+  - "docs/project_improvement_status.md"
+recommended_files:
+  - "docs/architecture.md"
+forbidden_large_files:
+  - "storage/reports/feed.json"
+  - "storage/memory/knowledge.json"
+relevant_commands:
+  - "uv run pytest"
+why_this_agent: "程式與實作任務優先交給 {{preferred_agent}}。"

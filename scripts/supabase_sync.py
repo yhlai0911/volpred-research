@@ -63,13 +63,32 @@ CONFLICT_KEYS = {
     "feature_flags": "feature",
     "strategy_signals": "strategy_name",
     "paper_trades": "strategy,trade_date",  # requires migration 018
+    "market_daily": "trade_date",  # one row per trade_date (fixes 2026-04-17 bug: silent 400)
 
+}
+
+# Whitelist of columns allowed in market_daily table (migration 019).
+# Any other keys (e.g. overnight_gap, gap_alert_level) must be stripped
+# before POST or PostgREST returns 400 "column X does not exist".
+# Root cause of 2026-04-12..17 silent sync failure.
+_MARKET_DAILY_COLUMNS = {
+    "trade_date",
+    "spy_close", "spy_open",
+    "gld_close", "gld_open",
+    "tw50_close", "tw50_open",
+    "nk225_close", "nk225_open",
+    "vix_level",
+    "sigma_spy_ann", "sigma_gld_ann",
 }
 
 
 def _post(table: str, data: list | dict) -> bool:
     """POST (upsert) to Supabase table. Returns success.
-    Falls back to PATCH on 409 conflict."""
+    Falls back to PATCH on 409 conflict.
+
+    Note: schema-level column filtering is handled by the table-specific
+    helpers (e.g. `sync_market_daily`) — `_post` stays generic.
+    """
     if not SUPABASE_KEY:
         return False
     conflict = CONFLICT_KEYS.get(table)
@@ -532,6 +551,44 @@ def sync_paper_trade(strategy: str, entry: dict, trade_date: str) -> bool:
         "trade_date": trade_date,
     }
     return _post("paper_trades", row)
+
+
+def sync_market_daily(trade_date: str, market: dict) -> bool:
+    """Upsert a single market_daily row. Strips unknown columns so we don't
+    get silent PostgREST 400 when daily_update adds new keys (overnight_gap,
+    gap_alert_level etc.).
+
+    Root cause fix for 2026-04-12..17 outage: daily_update.py only sync'd
+    `today` and included unknown keys; every request 400'd → market_daily
+    table stuck at 2026-04-11 → frontend /portfolio trade log prices blank
+    for all 10 active strategies.
+    """
+    if not SUPABASE_KEY or not trade_date or not isinstance(market, dict):
+        return False
+    row = {k: v for k, v in market.items() if k in _MARKET_DAILY_COLUMNS}
+    row["trade_date"] = trade_date
+    return _post("market_daily", row)
+
+
+def sync_market_daily_backfill(market_daily: dict, since: str | None = None) -> tuple[int, int]:
+    """Backfill market_daily from a local {trade_date: {...}} mapping.
+
+    Returns (ok_count, fail_count). Iterating in date order lets the server
+    idempotently upsert each row; any previous skipped day (e.g. due to the
+    400 bug) is reconciled automatically on the next daily_update run.
+    """
+    if not SUPABASE_KEY or not market_daily:
+        return (0, 0)
+    ok = 0
+    fail = 0
+    for d in sorted(market_daily.keys()):
+        if since and d < since:
+            continue
+        if sync_market_daily(d, market_daily[d]):
+            ok += 1
+        else:
+            fail += 1
+    return (ok, fail)
 
 
 def sync_memory_entry(entry_id: str, entry_type: str, content: dict) -> bool:

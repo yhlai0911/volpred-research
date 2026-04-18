@@ -1,3 +1,5 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 # Journal Standards for Top Finance Journals
 
 This document outlines specific requirements and standards for top-tier finance journals commonly targeted by financial econometrics research.

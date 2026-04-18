@@ -1,0 +1,17 @@
+task_summary: "{{title}}"
+goal: "完成會員相關任務：{{description}}"
+success_criteria:
+  - "回答或內容必須基於真實研究與平台規範"
+  - "不能過度宣稱或掩蓋不確定性"
+repo_root: "/Users/yhlai0911/Desktop/volpred-research"
+required_files:
+  - "research_program.md"
+  - "docs/error_log.md"
+recommended_files:
+  - "docs/architecture.md"
+forbidden_large_files:
+  - "storage/reports/feed.json"
+  - "storage/memory/knowledge.json"
+relevant_commands:
+  - "uv run volpred ops health"
+why_this_agent: "會員與高判斷問答任務優先交給 {{preferred_agent}}。"

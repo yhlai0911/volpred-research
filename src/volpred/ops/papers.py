@@ -15,6 +15,11 @@ from scripts.supabase_sync import (
     _select_rows,
 )
 
+from ..config.runtime import (
+    get_active_frontend_paper_dir,
+    get_frontend_path,
+    iter_frontend_paper_public_dirs,
+)
 from .common import project_path
 
 PAPER_SELECT = (
@@ -227,8 +232,8 @@ def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
 
     metrics: dict[str, int | None] = {}
 
-    # Find the best tex file (v2 preferred over v1)
-    for name in ["main_v2.tex", "main.tex"]:
+    # Find the best tex file (v3 > v2 > v1)
+    for name in ["main_v3.tex", "main_v2.tex", "main.tex"]:
         tex = paper_dir / name
         if tex.exists():
             break
@@ -240,7 +245,7 @@ def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
     # Count \bibitem entries (citations)
     citations = len(re.findall(r"\\bibitem", content))
     # Also check body files
-    for body_name in ["body_v2.tex", "body.tex"]:
+    for body_name in ["body_v3.tex", "body_v2.tex", "body.tex"]:
         body = paper_dir / body_name
         if body.exists():
             body_content = body.read_text(errors="ignore")
@@ -291,9 +296,9 @@ def update_paper_full(
     # 1. Auto-detect metrics
     metrics = _count_tex_metrics(paper_dir)
 
-    # 2. Find best PDF (v2 preferred)
+    # 2. Find best PDF (v3 > v2 > v1)
     pdf_path = None
-    for name in ["main_v2.pdf", "main.pdf"]:
+    for name in ["main_v3.pdf", "main_v2.pdf", "main.pdf"]:
         candidate = paper_dir / name
         if candidate.exists():
             pdf_path = candidate
@@ -325,10 +330,12 @@ def update_paper_full(
     }
     frontend_name = slug_map.get(paper_id)
     if frontend_name:
-        frontend_dst = PROJECT / "frontend-v2-fix" / "public" / "paper" / frontend_name
-        if frontend_dst.parent.exists():
+        frontend_dir = get_frontend_path()
+        frontend_paper_dir = get_active_frontend_paper_dir()
+        if frontend_paper_dir is not None and frontend_dir.exists():
+            frontend_paper_dir.mkdir(parents=True, exist_ok=True)
             import shutil
-            shutil.copy2(pdf_path, frontend_dst)
+            shutil.copy2(pdf_path, frontend_paper_dir / frontend_name)
 
     return paper
 
@@ -337,12 +344,8 @@ def _resolve_static_pdf_path(pdf_url: str | None) -> Path | None:
     if not isinstance(pdf_url, str) or not pdf_url.startswith("/paper/"):
         return None
     relative = pdf_url.lstrip("/")
-    candidates = [
-        project_path("frontend-v2-fix", "public", relative),
-        project_path("frontend-v2", "public", relative),
-        project_path("frontend", "public", relative),
-    ]
-    for candidate in candidates:
+    for paper_dir in iter_frontend_paper_public_dirs(active_first=True):
+        candidate = paper_dir.parent / relative
         if candidate.exists():
             return candidate
     return None

@@ -1,3 +1,5 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 # 新增交易策略完整流程
 
 ## 架構
@@ -64,7 +66,7 @@ Agent(isolation="worktree", prompt="""
 回測完後：
 1. 合併到 `storage/paper_trading.json`
 2. 跑 `uv run python scripts/recalc_metrics.py` 更新績效指標
-3. 複製 `strategy_metrics.json` 到 `frontend-v2/data/`
+3. `recalc_metrics.py` 會自動同步到 active frontend 的 configured metrics target（由 `config/project_targets.json` 控制；目前是 `frontend-v2-fix/data/strategy_metrics.json`）
 
 ### Step 3: 寫入 DB（不需改前端代碼）
 ```bash
@@ -118,7 +120,7 @@ pt = json.loads(open('storage/paper_trading.json').read())
 _post('paper_trades', {'strategy': 'strategy_id', 'entry': pt['strategy_id'], 'trade_date': '2026-03-17'})
 ```
 
-`strategy_metrics.json` 複製到 `frontend-v2/data/` 並同步。
+`strategy_metrics.json` 會自動同步到 active frontend configured target；不要手動複製到 `frontend-v2/data/`。
 
 ### Step 6: 驗證（不需部署）
 刷新網站即可看到新策略：

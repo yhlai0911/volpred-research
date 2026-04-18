@@ -4,6 +4,8 @@ import os
 from datetime import date, datetime, timezone
 from pathlib import Path
 
+from volpred.config.runtime import get_default_remote_url
+
 class Publisher:
     """Publishes research results to storage/reports/ for Web platform consumption.
 
@@ -11,7 +13,7 @@ class Publisher:
     """
 
     # Set this to Zeabur URL to enable dual publishing
-    REMOTE_URL = os.environ.get("VOLPRED_REMOTE_URL", "https://volpred.zeabur.app")
+    REMOTE_URL = os.environ.get("VOLPRED_REMOTE_URL", get_default_remote_url())
 
     def __init__(self, storage_dir: str = 'storage'):
         self.reports_dir = Path(storage_dir) / 'reports'
@@ -471,16 +473,41 @@ class Publisher:
         # Ensure content is not empty (use description as fallback)
         if not item.get('content') and item.get('description'):
             item['content'] = item['description']
-        feed = self._load_feed()
-        feed.append(item)
-        # Sort newest first — use published_at (consistent with frontend display)
-        feed.sort(key=lambda x: x.get('published_at') or x.get('created_at') or '', reverse=True)
-        with open(self._feed_file, 'w') as f:
-            json.dump(feed, f, indent=2, default=str, ensure_ascii=False)
-        self._sync_feed_to_remote()
-        # Also sync the individual report JSON
-        if item.get('id'):
-            self._sync_report_to_remote(item['id'], item)
+        # Serialize concurrent writers (Claude Code, Codex, cron workers)
+        # against feed.json. Lock name follows docs/agent-collab-invariants.md.
+        from volpred.ops.shared_lock import shared_state_lock
+        from volpred.ops.writer_log import append_writer_log
+
+        storage_dir = str(self.reports_dir.parent)
+        result_label = "ok"
+        try:
+            with shared_state_lock("publisher_feed", storage_dir=storage_dir):
+                feed = self._load_feed()
+                feed.append(item)
+                # Sort newest first — use published_at (consistent with frontend display)
+                feed.sort(key=lambda x: x.get('published_at') or x.get('created_at') or '', reverse=True)
+                tmp_file = self._feed_file.with_name(f".{self._feed_file.name}.tmp")
+                with open(tmp_file, 'w') as f:
+                    json.dump(feed, f, indent=2, default=str, ensure_ascii=False)
+                # Post-write sanity: reject if result is not parseable
+                with open(tmp_file) as f:
+                    json.load(f)
+                tmp_file.replace(self._feed_file)
+                self._sync_feed_to_remote()
+                # Also sync the individual report JSON
+                if item.get('id'):
+                    self._sync_report_to_remote(item['id'], item)
+        except Exception as exc:
+            result_label = f"error: {type(exc).__name__}: {exc}"[:200]
+            raise
+        finally:
+            append_writer_log(
+                subsystem="publisher",
+                target="reports/feed.json",
+                record_id=item.get('id'),
+                result=result_label,
+                storage_dir=storage_dir,
+            )
 
     def get_report(self, pub_id: str) -> dict | None:
         report_file = self.reports_dir / f"{pub_id}.json"

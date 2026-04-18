@@ -1,12 +1,15 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 # 網站架構（v4 Supabase + Admin CMS + Mirror API）
 
 完整細節見 `docs/architecture.md`
 
+- **前端 target 設定**：`config/project_targets.json`（唯一來源；目前 `active_frontend=frontend-v2-fix`、`active_service=volpred-v3`）
 - **前端（線上版）**：`frontend-v2-fix/`（Next.js 15 + React 19 + Supabase，部署於 volpred-v3 服務）
 - **Mirror API**：`mirror-api.zeabur.app`（研究記憶檔案鏡像，減少 Supabase egress）
 - **資料庫**：Supabase（PostgreSQL + Auth + REST API + RPC）
 - **線上網址**：https://volpred.zeabur.app
-- **Zeabur Dashboard**：https://zeabur.com/projects/69b5b264800a475a1f82b073
+- **Zeabur Project / Service IDs**：見 `config/project_targets.json`
 
 ## 前端頁面列表
 | 路徑 | 說明 |
@@ -31,13 +34,15 @@
   - **Paper trades 同步**：自動剝離市場數據，只存策略 weights + returns
   - **Draft 同步**：用 `published_at OR created_at` 過濾
 - `scripts/daily_update.py` → 每日 00:03 UTC（台灣 08:03）美股收盤後計算策略權重 + 同步 Supabase + 重算績效指標。每日只產出一篇「每日策略建議」（含市場快照+持倉表+VIX分析），不再分兩篇
+- `config/project_targets.json` + `src/volpred/config/runtime.py` → 控制 active frontend、deploy service、paper public dir、metrics sync target、預設 remote/mirror URL
 - **Paper Trading 資料結構**：
   - `paper_trading.json` 是唯一源頭，不可手動修改歷史數據
   - `daily_update.py` 正確使用 next-day return（K692 驗證），forward tracking 自動修正
-  - `recalc_metrics.py` 每次執行自動 sync 到 Supabase `strategy_metrics_cache`
+  - `recalc_metrics.py` 每次執行自動 sync 到 Supabase `strategy_metrics_cache`，並同步到 active frontend configured target（目前 `frontend-v2-fix/data/strategy_metrics.json`）
   - 市場數據統一存在 `_market_daily`（key=日期），不在每個 entry 重複
 - **新策略評估**：必須用 `scripts/evaluate_new_strategy.py` 在 COMMON_START（2023-01-04）~ 今天同期間比較
-- **Mirror 資料流**：`MemorySystem._sync_to_remote()` → PUT 到 Mirror API（`/api/mirror/memory/{filename}`）
+- **Mirror 資料流**：`MemorySystem._sync_to_remote()` 直接呼叫 Mirror API（預設 URL 由 `config/project_targets.json` 提供，可被 env 覆蓋）
+- **本地 frontend data mirror**：預設不啟用；只有 `project_targets.json` 明確配置 `local_data_sync_dirs` 才會寫入
 
 ## Supabase 資料庫表
 | 表名 | 用途 |
@@ -67,6 +72,8 @@
 
 ## 程式碼架構
 - **Python CLI (volpred)**：研究引擎（實驗、評估、記憶、發佈）
+- **config/project_targets.json**：前端 / deploy / mirror target 的版本控制設定
+- **src/volpred/config/runtime.py**：runtime target helper
 - **storage/**：唯一資料源頭（JSON），跨 session 保存
 - **frontend-v2-fix/**：Next.js 15 前端（線上版，volpred-v3 服務）
 - **scripts/supabase_sync.py**：資料同步到 Supabase

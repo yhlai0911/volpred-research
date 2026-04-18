@@ -1,0 +1,20 @@
+task_summary: "{{title}}"
+goal: "完成平台或控制面相關任務：{{description}}"
+success_criteria:
+  - "結果與現有 canonical config / ops 流程一致"
+  - "不要直接修改歷史資料掩蓋流程問題"
+repo_root: "/Users/yhlai0911/Desktop/volpred-research"
+required_files:
+  - "docs/architecture.md"
+  - "docs/error_log.md"
+  - "docs/project_improvement_status.md"
+  - "config/project_targets.json"
+  - "config/runtime_schedules.json"
+recommended_files:
+  - "AGENTS.md"
+forbidden_large_files:
+  - "storage/reports/feed.json"
+  - "storage/memory/knowledge.json"
+relevant_commands:
+  - "uv run volpred ops health"
+why_this_agent: "這是 {{task_family}} 任務，優先交給 {{preferred_agent}}。"

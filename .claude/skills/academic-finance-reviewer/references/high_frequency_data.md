@@ -1,3 +1,5 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 # High-Frequency Data Methodology for Financial Econometrics
 
 Comprehensive guide to handling intraday/high-frequency financial data, with emphasis on microstructure noise, jump detection, and estimation challenges.

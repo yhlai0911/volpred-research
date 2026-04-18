@@ -17,6 +17,7 @@ from arch import arch_model
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
+from volpred.config.runtime import get_default_mirror_url, get_local_data_sync_dirs
 from volpred.data.manager import DataManager
 from volpred.publisher.publisher import Publisher
 
@@ -92,8 +93,8 @@ def generate_daily_article(pub, strat_list, vix_level, sigma_gjr_ann, spy_close,
     """Generate a rich 每日建議 article with chart, VIX interpretation, and advice.
 
     This runs as part of daily_update.py (system crontab) and requires zero
-    Claude session dependency.  It creates a draft article that the hourly
-    release-pool cron will publish.
+    Claude session dependency. Because daily recommendations are time-sensitive,
+    they should be published immediately instead of waiting in the content pool.
 
     Returns the pub_id of the created article, or None if skipped.
     """
@@ -242,14 +243,14 @@ def generate_daily_article(pub, strat_list, vix_level, sigma_gjr_ann, spy_close,
 *免責聲明：本文僅供研究參考，不構成投資建議。*
 """
 
-    # --- Publish as draft (hourly cron will release) ---
+    # --- Publish immediately (daily recommendation is time-sensitive) ---
     title = f"每日策略建議：VIX {vix_display}（{regime_name}）— {today}"
     pub_id = pub.publish_milestone(
         title=title,
         tags=["每日建議", "VIX", "策略配置"],
         description=content,
         phase="daily_recommendation",
-        status="draft",
+        status="published",
         audience="daily",
         category="general",
         details={
@@ -269,7 +270,7 @@ def generate_daily_article(pub, strat_list, vix_level, sigma_gjr_ann, spy_close,
         },
     )
 
-    print(f"  Daily recommendation article created: {pub_id} (status=draft)")
+    print(f"  Daily recommendation article created: {pub_id} (status=published)")
     return pub_id
 
 
@@ -883,16 +884,39 @@ def main():
         except Exception as e:
             print(f"  Daily recommendation article failed: {e}")
 
-    # --- Static data sync (REMOVED 2026-04-18) ---
-    # 舊版把 storage/ 複製到 frontend/public/data/ 供本地 JSON 讀取。
-    # 現在前端 (frontend-v2-fix) 完全走 Supabase REST API：
-    #   storage/ → supabase_sync.py → Supabase tables → /api/... routes
-    # 若需要重新啟用本地 JSON，請改寫 frontend-v2-fix/public/data/（不是 legacy frontend/）。
+    # --- Sync static data ---
+    storage = Path("storage")
+    feed_source = storage / "reports" / "feed.json"
+    feed = json.loads(feed_source.read_text()) if feed_source.exists() else []
+    feed.sort(key=lambda x: x.get("published_at") or "", reverse=True)
+    sorted_feed = json.dumps(feed, indent=2, ensure_ascii=False, default=str)
 
-    print(f"  Published + synced locally. Feed: {len(feed)} items")
+    data_sync_dirs = get_local_data_sync_dirs(active_only=True)
+    if data_sync_dirs:
+        for data_dir in data_sync_dirs:
+            data_dir.mkdir(parents=True, exist_ok=True)
+            for src, dst in [
+                ("memory/research_log.json", "research_log.json"),
+                ("memory/knowledge.json", "knowledge.json"),
+                ("memory/experiments.json", "experiments.json"),
+                ("memory/thinking_journal.json", "thinking_journal.json"),
+                ("memory/open_questions.json", "open_questions.json"),
+            ]:
+                source_path = storage / src
+                if source_path.exists():
+                    shutil.copy2(source_path, data_dir / dst)
+            if feed_source.exists():
+                (data_dir / "feed.json").write_text(sorted_feed)
+            report_dir = data_dir / "reports"
+            report_dir.mkdir(exist_ok=True)
+            for report_file in (storage / "reports").glob("*.json"):
+                shutil.copy2(report_file, report_dir / report_file.name)
+        print(f"  Published + synced locally to {len(data_sync_dirs)} configured data mirror(s). Feed: {len(feed)} items")
+    else:
+        print(f"  Published locally. Feed: {len(feed)} items (no configured local data mirrors)")
 
     # --- Sync to Mirror API ---
-    mirror_url = os.environ.get("VOLPRED_MIRROR_URL", "https://mirror-api.zeabur.app")
+    mirror_url = os.environ.get("VOLPRED_MIRROR_URL", get_default_mirror_url())
     mirror_token = os.environ.get("RESEARCH_MIRROR_TOKEN", "")
     if mirror_url and mirror_token:
         import urllib.request
@@ -1001,12 +1025,21 @@ def main():
                         sync_paper_trade(strat_id, enriched, trade_date)
                         pt_synced += 1
         print(f"  Supabase: {pt_synced} paper trades synced (last 30d × {len(strat_list)} strategies)")
-        # Sync today's market_daily row to Supabase
-        today_market = pt.get("_market_daily", {}).get(today)
-        if today_market:
-            from supabase_sync import _post
-            _post("market_daily", {"trade_date": today, **today_market})
-            print(f"  Supabase: market_daily synced for {today}")
+        # Sync market_daily to Supabase — last 30 days (backfills any prior failures)
+        # 2026-04-17 fix: previously only synced today, and silently failed with
+        # HTTP 400 because `overnight_gap`/`gap_alert_level` keys aren't in
+        # market_daily schema. Now sync_market_daily() strips unknown columns,
+        # and CONFLICT_KEYS["market_daily"]="trade_date" makes it idempotent.
+        from supabase_sync import sync_market_daily_backfill
+        local_md = pt.get("_market_daily", {})
+        # Only last 30 dates — full backfill on demand via force-full
+        recent_dates = sorted(local_md.keys())[-30:]
+        recent_md = {d: local_md[d] for d in recent_dates}
+        md_synced, md_failed = sync_market_daily_backfill(recent_md)
+        if md_failed:
+            print(f"  ⚠️ Supabase: market_daily synced {md_synced}/{len(recent_md)} (FAILED {md_failed})")
+        else:
+            print(f"  Supabase: market_daily synced {md_synced}/{len(recent_md)} dates")
     except Exception as e:
         print(f"  Supabase sync skipped: {e}")
 
@@ -1035,7 +1068,77 @@ def main():
     except Exception as e:
         print(f"  Market status update failed: {e}")
 
+    # --- End-of-run sync health check (2026-04-17: catches silent 400/409 drift) ---
+    _run_sync_health_check()
+
     print(f"\n✓ Done!")
+
+
+def _run_sync_health_check() -> None:
+    """Query Supabase max(trade_date) on critical tables vs local. Prints drift alerts."""
+    import json
+    import sys as _sys
+    from urllib.request import Request, urlopen
+    _sys.path.insert(0, str(Path(__file__).parent))
+    try:
+        from supabase_sync import SUPABASE_URL, HEADERS
+    except Exception as e:
+        print(f"\n[health] skipped: {e}")
+        return
+    print("\n--- Sync health check ---")
+    try:
+        pt = json.loads(Path("storage/paper_trading.json").read_text())
+        local_dates: set[str] = set()
+
+        def collect(obj):
+            if isinstance(obj, dict):
+                if "trade_date" in obj and isinstance(obj.get("trade_date"), str):
+                    local_dates.add(obj["trade_date"])
+                else:
+                    for v in obj.values():
+                        collect(v)
+            elif isinstance(obj, list):
+                for item in obj:
+                    collect(item)
+
+        collect(pt)
+        local_max = max(local_dates) if local_dates else None
+    except Exception as e:
+        print(f"  [health] cannot read local paper_trading: {e}")
+        return
+
+    if not local_max:
+        print("  [health] no local trade_date — skipping")
+        return
+
+    alerts = []
+    # Each table's freshness column differs:
+    # paper_trades + market_daily have trade_date (date-indexed rows)
+    # strategy_signals is upsert-keyed by strategy, so compare updated_at date
+    table_specs = [
+        ("paper_trades", "trade_date", "date"),
+        ("market_daily", "trade_date", "date"),
+        ("strategy_signals", "updated_at", "timestamp"),
+    ]
+    for table, col, kind in table_specs:
+        try:
+            url = f"{SUPABASE_URL}/rest/v1/{table}?select={col}&order={col}.desc&limit=1"
+            req = Request(url, headers=HEADERS, method="GET")
+            with urlopen(req, timeout=15) as resp:
+                rows = json.loads(resp.read().decode())
+            raw = rows[0].get(col) if rows else None
+            remote_date = raw[:10] if isinstance(raw, str) else None
+            if remote_date == local_max:
+                print(f"  {table}: OK ({col}={raw})")
+            else:
+                alerts.append(f"{table}: remote {col}={raw} local trade_date={local_max}")
+                print(f"  ⚠️  {table}: remote {col}={raw} local trade_date={local_max}")
+        except Exception as e:
+            alerts.append(f"{table}: query failed {e}")
+            print(f"  ⚠️  {table}: query failed — {e}")
+
+    if alerts:
+        print(f"\n⚠️  Sync health: {len(alerts)} table(s) drifted — investigate supabase_sync.py")
 
 
 if __name__ == "__main__":

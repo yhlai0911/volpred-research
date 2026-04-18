@@ -117,6 +117,10 @@ After 主線程完成 v<n+1> 修正 → 新一輪 → 寫入 review_history/v<n+
 → `volpred ops paper-upsert --paper-id <id> --stage <stage>` (若 CLI 支援)
 → `next_tasks.json` 對應任務 description 同步更新
 
+補充：
+- 這裡更新 `next_tasks.json`，只是在維持 legacy paper working list / human-readable follow-up。
+- v11 之後，正式 orchestration 狀態仍以 `storage/ops/` control plane 與 `config/runtime_schedules.json` / `event_jobs` 為準；`next_tasks.json` 不是 canonical scheduler queue。
+
 ## Review Report Archive 規則（MUST）
 
 ```

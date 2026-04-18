@@ -1,73 +1,10 @@
 [
   {
-    "id": "K1068",
-    "title": "K1068: Traditional CAR/CASV Event Study",
-    "priority": 1,
-    "status": "completed",
-    "description": "★ 用戶 methodology correction. CAR NULL, CASV t=4.35 (p<0.0001, 2x K1060's t=2.07). Taiwan earnings = pure vol event. Paper 2 应用 CASV."
-  },
-  {
-    "id": "K1070",
-    "title": "K1070: 0050.TW ETF-Level CAR/CASV Event Study",
-    "priority": 1,
-    "status": "completed",
-    "description": "Pre-event window is the real signal. Aggregation effect quantified. Committed + in knowledge.json."
-  },
-  {
-    "id": "K1071",
-    "title": "K1071: Right-tail CASV decomposition",
-    "priority": 1,
-    "status": "completed",
-    "description": "VIX regime captures all earnings vol. K1071 is right-tail decomposition (NOT EPS surprise — that was placeholder)."
-  },
-  {
-    "id": "K1100",
-    "title": "K1100: Student-t/Clayton Copula-GARCH vs DCC-A4f-ASYM",
-    "priority": 1,
-    "status": "completed",
-    "description": "NULL: Copula 無法打敗 DCC-A4f-ASYM（SPY-GLD tail-independent λ<0.04）。用戶 PRS copula 適用 tail-dependent pair，非 SPY-GLD。"
-  },
-  {
-    "id": "K1100b",
-    "title": "K1100b: Copula-GARCH on 5 pairs",
-    "priority": 2,
-    "status": "completed",
-    "description": "NULL 全部 5 pairs (含 SPY-QQQ λ_L=0.589 high tail-dep)。SPY-TLT 負相關 copula 結構性 FAIL (DCC Harvey -4.29***)。Paper 3 不擴充，深挖 spot-futures periodic 結構。"
-  },
-  {
-    "id": "K1100f",
-    "title": "K1100f: Copula + PRG on SPY-ES spot-futures",
-    "priority": 2,
-    "description": "全 4 假設 NULL on both pairs。機制：高 ρ portfolio 退化為 single-asset，tail dependence 對 portfolio risk 數學上不重要。Paper 3 須 reframe 為 Taiwan-specific study。",
-    "status": "completed"
-  },
-  {
     "id": "Paper3_reframe",
     "title": "Paper 3 完整重構為 Taiwan microstructural study (PRIORITY 1)",
     "priority": 4,
     "description": "[priority 4 — wait for new evidence per user 2026-04-13] K1100/K1100b/K1100f 連 5 null 證明 Lai 2024 不可推廣為通用方法。改寫 Paper 3 outline 為 TAIFEX 微結構 empirical study，或完全 pivot 到不同 paper。Main thread 主導。",
     "status": "pending"
-  },
-  {
-    "id": "K1100g",
-    "title": "K1100g: TAIFEX vs SPY microstructure",
-    "priority": 2,
-    "description": "4 H 嚴格 FAIL 但 Dim2 overnight ratio TAIFEX 1.586 vs SPY 1.001 提供 single-mechanism reframe anchor。意外發現 SPY OPEX 3.12× pinning。Worktree-only 規則本次正確遵守。",
-    "status": "completed"
-  },
-  {
-    "id": "K1100g_d1",
-    "title": "K1100g_d1: TAIFEX day vs night PRG decomposition",
-    "priority": 2,
-    "description": "H1/H2/H3 PASS (night→day LRT χ²=12.5 p=0.0004, asymmetric)。H4 FAIL 推翻 K1100g 1.586 narrative (gap effect ≠ session asymmetry)。Codex 抓 4 bugs。Paper 3 anchor 改 asymmetric cross-prediction。",
-    "status": "completed"
-  },
-  {
-    "id": "K1100g_d2",
-    "title": "K1100g_d2: OOS 驗證",
-    "priority": 2,
-    "description": "全 4 假設 FAIL: LRT 12.48→0.00, DM 反向, QLIKE 惡化。**K1100g_d1 是 in-sample data mining**。Paper 3 reframe anchor REJECTED。E059 教訓：LRT+DM divergence。",
-    "status": "completed"
   },
   {
     "id": "Paper3_decision",
@@ -77,196 +14,11 @@
     "status": "pending"
   },
   {
-    "id": "K1100g_d5",
-    "title": "K1100g_d5: Overnight gap² 替代 night session r² 再 OOS",
-    "priority": 3,
-    "description": "K1100g_d2 衍生：K1100g_d2 用 night session r² FAIL，改用 overnight gap²（13:45→15:00 + 05:00→08:45 純 gap）作 exog 重做 OOS。也許 gap 才是真正載 info 的對象。",
-    "status": "completed",
-    "completed_at": "2026-04-14T13:45:00+08:00"
-  },
-  {
-    "id": "K1100g_d3",
-    "title": "K1100g_d3: Student-t PRG innovation 厚尾檢驗",
-    "priority": 3,
-    "description": "K1100g_d1 衍生：Student-t innovation 重估 M1-M5，檢查厚尾是否改變 H1/H3。",
-    "status": "completed",
-    "completed_at": "2026-04-14T12:00:00+08:00"
-  },
-  {
-    "id": "K1100g_d4",
-    "title": "K1100g_d4: Night→day 效應年度穩定性",
-    "priority": 3,
-    "description": "K1100g_d1 衍生：逐年 (2017-2021) 擬合 M4，判斷是結構性或 COVID 驅動。",
-    "status": "completed",
-    "completed_at": "2026-04-14T12:45:00+08:00"
-  },
-  {
     "id": "K1100h",
     "title": "K1100h: Tick-level PRG on TAIFEX TX (Dropbox 2017-2021)",
-    "priority": 4,
-    "description": "[HALF DONE 2026-04-18] agent-a7aac49d worktree 中斷產出 experiments/k1100h/ 但無 results。需重跑或補完。K1100f agent 衍生：only tick-level reveals true periodic structure。Daily DOW dummies 太粗。",
+    "priority": 3,
+    "description": "K1100f agent 衍生：only tick-level reveals true periodic structure。Daily DOW dummies 太粗。",
     "status": "pending"
-  },
-  {
-    "id": "TSMC_0416_post",
-    "title": "TSMC 法說 04/16 事後解讀文章",
-    "priority": 1,
-    "description": "法說會 04/16 14:00 結束後，04/17 前完成解讀文章。已發佈 draft mile_39b36b79（research audience，OOS 價量解讀）。",
-    "status": "done",
-    "claimed_by": "agent-tsmc-0416-20260418",
-    "completed_pub_id": "mile_f52fb13b",
-    "completed_at": "2026-04-18",
-    "note": "[2026-04-18] 已被 mile_f52fb13b 覆蓋；agent 誤派又發一篇 mile_39b36b79（已 cleanup）"
-  },
-  {
-    "id": "K1067b",
-    "title": "K1067b: UMC (2303.TW) A4f-EAV — MIXED result",
-    "priority": 2,
-    "description": "MIXED: H2/H3/H4 PASS, H1 marginal. EAV 在 event window 有真預測價值但 event days 只 1.6%。Paper 2 建議移除主 regressor，保留為 descriptive analysis。",
-    "status": "completed"
-  },
-  {
-    "id": "K1067c",
-    "title": "K1067c: MediaTek (2454.TW) 第三重驗證",
-    "priority": 2,
-    "description": "MONOTONICITY FAIL: MediaTek event DM +1.59 (預期 -0.90)，方向翻轉非單調。T+1 作為 firm-selection criterion 不可行。UMC +39% 可能是 firm-specific artefact。",
-    "status": "completed"
-  },
-  {
-    "id": "K1101",
-    "title": "K1101: Panel GARCH-MIDAS across N≥15 Taiwan stocks",
-    "priority": 2,
-    "description": "K1067c 衍生：foundry/fabless 分組、analyst dispersion、float size 為 covariates。橫截面統計檢驗取代 N=3 類比。",
-    "status": "superseded",
-    "superseded_by": "K1109+K1113 Paper 2 firm-selection exhaustion (E054)",
-    "completed_at": "2026-04-13T12:10:00+08:00"
-  },
-  {
-    "id": "K1102",
-    "title": "K1102: Options-implied pre-event signal",
-    "priority": 2,
-    "description": "K1067c 衍生：改用 options-implied 30-day IV 於公告前 T-1 的 upward shift 作為 ex-ante EAV（forward-looking），取代 backward-looking announcement flag。",
-    "status": "superseded",
-    "superseded_by": "K1140 dual-NULL Paper 2 verdict (cross+temporal exhaustion)",
-    "completed_at": "2026-04-13T21:10:00+08:00"
-  },
-  {
-    "id": "K1103",
-    "title": "K1103: u_prev τ-lag bug-fix replication",
-    "priority": 1,
-    "description": "SCENARIO STABLE: UMC event DM -2.20→-2.40 (更強), K1067b/c findings HOLD. Paper 2 KEEP EAV 含 monotonicity nuance。Back-annotated K1067/b/c in knowledge.",
-    "status": "completed"
-  },
-  {
-    "id": "K1104",
-    "title": "K1104: Multi-covariate firm-level θ₂ regression",
-    "priority": 2,
-    "description": "完成：fabless coef p=0.039 * 統計顯著（4 檔 fabless 一致 θ₂<0）。foundry/size 方向對但 N 小。ASE out-of-sample 方向對。Paper 2 有 3 條 firm-selection rules。",
-    "status": "completed"
-  },
-  {
-    "id": "K1106b",
-    "title": "K1106b: Sector-diversified firm θ₂ heterogeneity",
-    "priority": 2,
-    "description": "完成 N=14 / 7 sectors：ANOVA F=6.87 p=0.026 nominally sig 但 underpowered (dof=5)。fabless β=-2.29e-3 p=0.004 重現 K1104 但 cherry-pick bias warning。E052 記錄教訓。",
-    "status": "completed"
-  },
-  {
-    "id": "K1109",
-    "title": "K1109: Pre-registered random N=31 sector confirmatory",
-    "priority": 1,
-    "description": "完成：ANOVA FAIL (p=0.297), fabless BH-adj p=0.278 FAIL。K1106b cherry-pick 量化確認——|β| 衰減 46%, p 放大 11x。Paper 2 sector-based rules 廢止，改 firm-level θ₂ tiering + log_mktcap + beta。",
-    "status": "completed"
-  },
-  {
-    "id": "K1112",
-    "title": "K1112: N≥50 真 confirmatory sector test",
-    "priority": 2,
-    "description": "K1109 D1：納入中型股、退市股、跨市場擴大樣本，power > 0.8。檢驗 sector effect 是否在更大樣本下浮現。",
-    "status": "superseded",
-    "superseded_by": "K1109+K1113 Paper 2 firm-selection exhaustion (E054)",
-    "completed_at": "2026-04-13T12:10:00+08:00"
-  },
-  {
-    "id": "K1113",
-    "title": "K1113: Firm-level covariate rule",
-    "priority": 1,
-    "description": "STRONG NULL: 全 5 假設 FAIL, CV R²=-0.661, Tier A=0。Codex 抓 2 HIGH bugs 修正後更 null。Paper 2 firm-selection 路線耗盡 — 不用 Tier 規則，pooled A4f-EAV + cluster SE 當 default。",
-    "status": "completed"
-  },
-  {
-    "id": "K1114",
-    "title": "K1114: Rolling θ₂ heterogeneity (time-varying)",
-    "priority": 2,
-    "description": "K1109/K1113 後：jump 到不同 dimension (時間) 而非繼續 cross-sectional。可能找到結構 vs 循環 heterogeneity。",
-    "status": "completed",
-    "completed_at": "2026-04-13T20:50:00+08:00"
-  },
-  {
-    "id": "K1110",
-    "title": "K1110: Panel regression with time-varying θ₂",
-    "priority": 2,
-    "description": "K1106b D2 衍生：rolling 63-day refits，測 sector heterogeneity 是結構性還是循環性。",
-    "status": "superseded",
-    "superseded_by": "K1140 dual-NULL Paper 2 verdict (cross+temporal exhaustion)",
-    "completed_at": "2026-04-13T21:10:00+08:00"
-  },
-  {
-    "id": "K1111",
-    "title": "K1111: Fundamental covariates replace sector dummies",
-    "priority": 2,
-    "description": "K1106b D3 衍生：EPS-guidance-spread、earnings-day volume spike、analyst coverage 替代 sector dummies。測 sector effect 是否可 decompose 為 firm characteristics。",
-    "status": "superseded",
-    "superseded_by": "K1140 dual-NULL Paper 2 verdict (cross+temporal exhaustion)",
-    "completed_at": "2026-04-13T21:10:00+08:00"
-  },
-  {
-    "id": "K1107",
-    "title": "K1107: Panel θ₂ with time fixed effects",
-    "priority": 3,
-    "description": "K1104 衍生：rolling-window 63-day refits，加時間固定效應檢驗 firm vs time effect。",
-    "status": "completed",
-    "completed_at": "2026-04-14T14:45:00+08:00"
-  },
-  {
-    "id": "K1108",
-    "title": "K1108: Foundry economic rationale — capex guidance",
-    "priority": 3,
-    "description": "K1104 衍生：foundry θ₂>0 是否因 capex guidance 才 reveal capacity info？比對 capex 公告日 τ-jumps。",
-    "status": "completed",
-    "completed_at": "2026-04-14T13:30:00+08:00"
-  },
-  {
-    "id": "K1105",
-    "title": "K1105: ASE + mid-cap chip validation",
-    "priority": 2,
-    "description": "K1103 衍生：UMC signal 穩固後延伸測試 ASE (T+1=1.85)、Nanya (2408)、WPG (3702)、Realtek (2379)。建立 firm-list selection criterion。",
-    "status": "superseded",
-    "superseded_by": "K1140 dual-NULL Paper 2 verdict (cross+temporal exhaustion)",
-    "completed_at": "2026-04-13T21:10:00+08:00"
-  },
-  {
-    "id": "K1067d",
-    "title": "K1067d: Earnings surprise magnitude as continuous EAV",
-    "priority": 2,
-    "description": "K1067b 衍生：取代 binary indicator，用 EPS surprise magnitude 作連續 EAV，提升 non-event days 的 signal density。",
-    "status": "superseded",
-    "superseded_by": "K1151 (same continuous-surprise EAV concept, post K1147 derivative)"
-  },
-  {
-    "id": "K1067e",
-    "title": "K1067e: GARCH-X + EAV only (exclude VIX)",
-    "priority": 3,
-    "description": "K1067b 衍生：確認是 EAV 本身無力還是 VIX 占位效應。",
-    "status": "completed",
-    "completed_at": "2026-04-14T05:00:00+08:00"
-  },
-  {
-    "id": "K1061",
-    "title": "K1061: Full TWSE 50 Constituents EAV",
-    "priority": 2,
-    "description": "[K1145+K1147+K1150 3-market complete] N=50 sample expansion 邊際價值低，3 markets × N=30 已達 universality 證據。除非 reviewer 要求 N≥50，否則不做。",
-    "status": "deprioritized"
   },
   {
     "id": "Paper9_dual_target_integration",
@@ -276,191 +28,33 @@
     "status": "pending"
   },
   {
-    "id": "Paper9_citation_verify",
-    "title": "Paper 9 citation-verifier",
+    "id": "Paper10_start",
+    "title": "Paper 10 Crypto Fear Channel 論文",
     "priority": 2,
-    "description": "Paper 9 v5 + K1054-K1068 additions. Main thread skill invocation.",
-    "status": "completed",
-    "completed_at": "2026-04-14T04:10:00+08:00",
-    "result": "needs revision: 1 MAJOR (conrad2015 wrong journal metadata) + 5 MED + 4 MINOR"
-  },
-  {
-    "id": "Paper6_start",
-    "title": "Paper 6 Crypto Fear Channel 論文",
-    "priority": 2,
-    "description": "K639/K746b/K1025 素材齊備。主線程撰寫",
-    "status": "pending"
-  },
-  {
-    "id": "FOMC_0428",
-    "title": "FOMC 04/28-29 預告文章",
-    "priority": 2,
-    "description": "04/26 前完成預告文",
-    "status": "pending"
-  },
-  {
-    "id": "K1115",
-    "title": "K1115: SPY VaR breach clustering",
-    "priority": 1,
-    "description": "REJECTED: GARCH-t 已吸收 SPY breach clustering (Christoffersen p=0.620)，conditional models 加東西反而 overfit。E055 條件 (c) FAIL → 三條件全 REJECTED。Paper 3 完整死局，需 strategic decision (A reframe / B microstructure / C abandon)。",
-    "status": "completed"
+    "description": "[Renumbered 2026-04-17 from Paper6_start → Paper10_start. Paper 6 slot belongs to paper/prg-periodic-garch/ (Periodic Realized GARCH). Crypto Fear Channel becomes Paper 10 = the 10th paper in the project.] K639/K746b/K1025 素材齊備。主線程撰寫 [STARTED 2026-04-17: paper/crypto-fear-channel/outline.md created. Next main-thread session: draft Abstract + Introduction.]",
+    "status": "in_progress",
+    "started_at": "2026-04-17T17:50:00+08:00"
   },
   {
     "id": "Paper3_strategic_decision",
     "title": "Paper 3 Strategic Decision (PRIORITY 1) — A/B/C 三選一",
     "priority": 4,
-    "description": "[priority 4 — wait for new evidence] K1100/K1100b/K1100f/K1100g/K1100g_d1/K1100g_d2/K1115 共 7 實驗證明 E055 三條件全 REJECTED。Lai 2024 PRS edge = TAIFEX market microstructure 特有，非通用方法論。需 user 決策：(A) 寫 negative result paper (B) Pivot to TAIFEX microstructure (C) Abandon Paper 3 資源轉其他 papers。",
-    "status": "blocked_user_decision"
-  },
-  {
-    "id": "K1116",
-    "title": "K1116: FRED Alt-Data (EPU+NFCI+STLFSI) for SPY vol",
-    "priority": 1,
-    "description": "Agent pivot 自 Google Trends（與 K473/750/789 80% overlap）。NULL with strong negative evidence: M3 EPU OOS DM t=-2.55, M4 NFCI t=-3.00 VIX wins。VIX sufficiency #37+ (5 alt-data sources)。",
-    "status": "completed"
-  },
-  {
-    "id": "Paper4_VIX_sufficiency_compendium",
-    "title": "Paper4 = vix-sufficiency expansion (subsumed)",
-    "priority": 3,
-    "description": "原 Paper 4 與 vix-sufficiency 是同 paper。改由 vix_sufficiency_expansion 統一。",
-    "status": "cancelled"
-  },
-  {
-    "id": "K1117",
-    "title": "K1117: Daily-freq alt-data conditional on VIX jumps",
-    "priority": 3,
-    "description": "K1116 衍生：唯一還沒測的 angle。matched-pair design around |ΔVIX|>2σ days。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
-  },
-  {
-    "id": "K1118",
-    "title": "K1118: Universal IV sufficiency confirmed (GLD/TLT/BTC)",
-    "priority": 3,
-    "description": "3/3 NULL: GLD GVZ sufficient, TLT split (5% threshold fail), BTC EPU harmful。Paper 4 compendium 9 實驗 × 5 asset class universal claim。",
-    "status": "completed"
-  },
-  {
-    "id": "K1119",
-    "title": "K1119: BTC real Deribit DVOL/BVOL test",
-    "priority": 3,
-    "description": "K1118 衍生：BTC RV30 proxy bug 修正，從 Deribit API 取真 IV。",
-    "status": "completed",
-    "completed_at": "2026-04-14T05:30:00+08:00"
-  },
-  {
-    "id": "K1120",
-    "title": "K1120: TLT FinStress regime-dependent tracking",
-    "priority": 3,
-    "description": "K1118 衍生：52-week rolling DM 驗證 M4 是否只在 rate-hike regime (2023-24) 有 signal。",
-    "status": "completed",
-    "completed_at": "2026-04-14T09:00:00+08:00"
-  },
-  {
-    "id": "K1121",
-    "title": "K1121: Alt-data for portfolio allocation",
-    "priority": 2,
-    "description": "全 4 alt-data 策略 NULL vs 50/50 (bootstrap p>0.16)。S5 NFCI lowest MDD/highest Calmar but Sharpe tied → drawdown insurance at zero alpha。Codex 抓 HIGH FRED publication delay bug (E062)。Paper 4 compendium 領土擴張到 allocation。",
-    "status": "completed"
-  },
-  {
-    "id": "K1116b_recheck",
-    "title": "K1116b: FRED publication delay recheck (verified)",
-    "priority": 2,
-    "description": "H2 concerning verdict: 3 cells flip threshold, 最重要 TLT M4 NFCI t=+3.74 → +1.96 (47% bug artifact)。Paper 4 narrative 反而 STRENGTHENED (universal null across 4 classes)。SPY M4 從 -3.00→-3.61 active harm pattern 確認。",
-    "status": "completed"
-  },
-  {
-    "id": "K1122",
-    "title": "K1122: Continuous-weight alt-data (sigmoid loading)",
-    "priority": 3,
-    "description": "K1121 衍生：替代 70-th percentile step 為 sigmoid on EPU/NFCI z-score。測 soft loading 是否避免 null。",
-    "status": "completed",
-    "completed_at": "2026-04-14T10:45:00+08:00"
-  },
-  {
-    "id": "K1123",
-    "title": "K1123: Cross-asset alt-data allocation (SPY+GLD+TLT)",
-    "priority": 3,
-    "description": "K1121 衍生：3-asset allocation 用 alt-data signal。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
-  },
-  {
-    "id": "K1116c",
-    "title": "K1116c: ALFRED vintage-based intraday release-time alignment",
-    "priority": 3,
-    "description": "K1116b 衍生：ultimate publication-delay fix using vintage data。",
-    "status": "completed",
-    "completed_at": "2026-04-14T08:30:00+08:00"
-  },
-  {
-    "id": "K1117b",
-    "title": "K1117b: Monthly-frequency alt-data re-test",
-    "priority": 3,
-    "description": "K1116b 衍生：publication delay <<25% of period，monthly 是 cleanest null test。",
-    "status": "completed",
-    "completed_at": "2026-04-14T14:30:00+08:00"
-  },
-  {
-    "id": "K1118b",
-    "title": "K1118b: Currency cross-asset extension (DXY/EUR/JPY)",
-    "priority": 3,
-    "description": "K1116b 衍生：擴大 universal-sufficiency 到 currency markets。",
-    "status": "completed",
-    "completed_at": "2026-04-14T07:00:00+08:00"
-  },
-  {
-    "id": "K1124",
-    "title": "K1124: TAIFEX OFI vol prediction (NULL but stylized fact)",
-    "priority": 1,
-    "description": "Triple-threshold FAIL but Taiwan stylized fact: |OFI| 高 → 下一 5-min RV 低 (反 US 直覺)。Codex 攔 2 HIGH bugs (bar overflow, contract selection lookahead)。",
-    "status": "completed"
-  },
-  {
-    "id": "TSMC_0414_pre2",
-    "title": "TSMC_0414_pre2 [SKIPPED — quota exhausted]",
-    "priority": 1,
-    "description": "查 feed 已有 5+ 篇 TSMC 04/16 預告文章 (含 法說會前瞻/三件反直覺/三個關鍵數字 等)。CLAUDE.md 新規則 quota 為 2 預告/事件，已嚴重 over。不再寫額外預告，避免重複污染 feed。教訓：今後事件預告必須在 T-7 + T-2 兩個時點寫，不可隨便看到實驗就發 TSMC 文。",
-    "status": "cancelled"
+    "description": "[priority 4 — wait for new evidence] K1100/K1100b/K1100f/K1100g/K1100g_d1/K1100g_d2/K1115 共 7 實驗證明 E055 三條件全 REJECTED。Lai 2024 PRS edge = TAIFEX market microstructure 特有，非通用方法論。需 user 決策：(A) 寫 negative result paper (B) Pivot to TAIFEX microstructure (C) Abandon Paper 3 資源轉其他 papers。 | 2026-04-17 narrative state machine 觸發: K1100b NULL + K1100d NULL + K1100c MIXED (2/5 PASS flight-to-safety). 3/3 互補實驗完成. **新 Paper 3 可發表主張浮現**: asset-class-specific copula advantage — Joe upper-tail significantly beats DCC on equity-bond & equity-gold (λ_L<0.05), NULL on equity-equity (λ_L>0.4, mixing-averaging 主導). 用戶選項: (A) Paper 3 reframe 為 asset-class-specific copula (需 K1172 衍生 N=10-15 pairs 擴驗 λ_L threshold) (B) 保留原 periodic/spot-futures 方向（PRS 延伸） (C) 結合 A+B 雙 subsection. 等用戶 confirm 再進 body rewrite.",
+    "status": "decision_ready_user_input_needed"
   },
   {
     "id": "TSMC_0417_optional",
     "title": "TSMC 法說 04/17 深度追蹤（optional）",
     "priority": 3,
     "description": "只有真新發現才寫。否則跳過避免重複。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
+    "status": "pending"
   },
   {
     "id": "K1125",
     "title": "K1125: OFI × Lee-Mykland jump detection",
     "priority": 2,
     "description": "Agent a9109d114c8b9e792 in worktree agent-k1125。K1124 衍生：直接續測 |OFI| → JUMP 預測（不是 diffusive vol）。reuse K1124 cache。Lee-Mykland test + logistic regression 4 spec。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: stale in_progress (4/14 agent), check experiments/k1125/ for actual state"
-  },
-  {
-    "id": "K1126",
-    "title": "K1126: OFI 不對稱 regime — VIX 高/低時 buy vs sell asymmetry",
-    "priority": 3,
-    "description": "K1124 衍生：條件式 regime 拆 buy/sell side。",
-    "status": "completed",
-    "completed_at": "2026-04-14T07:30:00+08:00"
-  },
-  {
-    "id": "K1127",
-    "title": "K1127: Cross-asset OFI lead-lag (TX vs ES via overnight)",
-    "priority": 3,
-    "description": "K1124 衍生：延伸 K1100g night→day channel，跨市場 OFI lead-lag。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
+    "status": "in_progress"
   },
   {
     "id": "leverage_direction_review_v2",
@@ -474,170 +68,30 @@
     "title": "Paper vix-sufficiency 擴充：integrate K1116/K1118/K1116b/K1121 + K504/K1098",
     "priority": 1,
     "description": "Agent a90f872c29a03c25d 產出 integration_plan_v2.md。今日 6+ 實驗直接擴大 paper evidence base，從 SPY-only 升級為 cross-asset universal compendium。最佳 paper 排名第 1 (貢獻度 × 完成度)。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: stale in_progress (4/14 agent), paper still exists in paper/vix-sufficiency/"
-  },
-  {
-    "id": "K1128",
-    "title": "K1128: VIX tertile for OFI-jump (COVID out-of-range + high-VIX DM+3.59)",
-    "priority": 3,
-    "status": "completed",
-    "description": "IS-based tertile degenerate (COVID); OOS-internal high-VIX DM+3.59 強 signal 但 N=6 jumps。U-shape not monotonic。E064 教訓: IS cutoff 遇 unprecedented 會 degenerate。"
-  },
-  {
-    "id": "K1129",
-    "title": "K1129: GAS-t on commodities (USO/GLD/UNG/BTC) — claim from Creal-Koopman-Lucas",
-    "priority": 2,
-    "description": "4/4 commodity NULL triple-gate (USO +2.65% NS, BTC DM -4.58 Harvey 反向)。GAS compendium 8+ assets all null。可加 Paper 4 作 alt-method NULL。",
-    "status": "completed"
-  },
-  {
-    "id": "K1130",
-    "title": "K1130: Expanding-window IS with prior crises (OFI regime test v2)",
-    "priority": 3,
-    "description": "K1128 衍生 (was agent K1129，avoid conflict with GAS K1129): IS 擴含 2008 GFC / 2011 debt / 2015 China deval → 修正 VIX tertile degeneracy 問題。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
-  },
-  {
-    "id": "K1131",
-    "title": "K1131: Continuous VIX-dependent β via spline (OFI-jump)",
-    "priority": 3,
-    "description": "K1128 衍生: β_2(VIX)·|OFI|_t spline basis 取代 tertile dummy。繞過離散 cutoff 問題。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
-  },
-  {
-    "id": "K1132",
-    "title": "K1132: Block-bootstrap CI on high-tertile DM (robustness)",
-    "priority": 3,
-    "description": "K1128 衍生: High-VIX DM +3.59 只 N=6 jumps，block-bootstrap 驗 CI 是否不跨越 0。",
-    "status": "done",
-    "claimed_by": "agent-afab0431",
-    "claimed_at": "2026-04-18T08:10",
-    "auto_closed_at": "2026-04-18",
-    "completed_pub_id": null,
-    "result_summary": "robust (DM t=-3.94, 95% CI [-7.98, -2.43] not cross 0, B=5000 Politis-Romano). Codex review pending main thread follow-up."
+    "status": "in_progress"
   },
   {
     "id": "K1133",
     "title": "K1133: Regime-switching GAS-t (Markov or 2021-23 vs 2024-26 split)",
     "priority": 3,
     "description": "K1129 衍生: BTC DM t=-4.58 反向可能 regime-dependent。Catania 2018 Markov-switching GAS 或 sub-period split 測。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
-  },
-  {
-    "id": "K1134",
-    "title": "K1134: Range-proxy + GAS commodity (hidden damage revealed)",
-    "priority": 3,
-    "description": "0/4 triple-gate under Parkinson/GK/RS. GLD r² NS → range t=-4.0 Harvey sig (proxy-robustness Patton 2011). GAS compendium final: 8 assets × 4 proxies = 32 DM 0 PASS.",
-    "status": "completed"
-  },
-  {
-    "id": "K1135",
-    "title": "K1135: Skew-t GAS (Gonzalez-Rivera 2014) on negatively skewed commodities",
-    "priority": 3,
-    "description": "K1129 衍生: USO skew=-0.58 明顯，對稱 t 不捕捉，skew-t 可能改善 VaR/ES。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
-  },
-  {
-    "id": "K1135",
-    "title": "K1135: Hansen-Lunde 5-min RV as 5th proxy (where intraday exists)",
-    "priority": 3,
-    "description": "K1134 衍生: SPY/GLD/BTC close proxy-robustness audit。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
-  },
-  {
-    "id": "K1136",
-    "title": "K1136: Non-score-driven robust vol models (GARCH-MIDAS, HAR-RV-X)",
-    "priority": 3,
-    "description": "K1134 衍生: 區分「score-driven downweight fails」vs「all robust extensions fail」。",
     "status": "completed",
-    "completed_at": "2026-04-13T12:00:00+08:00"
-  },
-  {
-    "id": "K1137",
-    "title": "K1137: Regime-conditional robust models",
-    "priority": 3,
-    "description": "K1136 延伸：VIX tertile regime 切分，檢驗 GARCH-MIDAS/HAR-RV-X 在高 VIX regime 是否有條件優勢。控 K1128 IS-regime degeneracy 教訓：regime cutoff 用 rolling ex-ante percentile。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
-  },
-  {
-    "id": "K1138",
-    "title": "K1138: Equity compendium (SPY/QQQ/IWM) robust models",
-    "priority": 3,
-    "description": "K1136 擴充：將 MIDAS-X + HAR-RV-X + GAS-t 3 家族套用到 equity，與 commodity 對稱。若 equity 也 NULL → Paper 4 'universal-null' 可含 5 asset classes 全包。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
+    "completed_at": "2026-04-17T23:41:20.635360",
+    "outcome": "K1129 BTC reversal regime-concentrated (P1 t=-4.67, P2/P3 NS, MS-GAS in-sample LRT significant, OOS pending K1133b)"
   },
   {
     "id": "K1139",
     "title": "K1139: Intraday 5-min RV as target",
     "priority": 4,
     "description": "Hansen-Lunde 高頻標準。K1136 改用 5-min 彙總 RV 當 target，檢驗 daily proxy 是否仍為 NULL。資料需 yfinance/polygon 5-min 回抓。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
-  },
-  {
-    "id": "K1140",
-    "title": "K1140: HAC Newey-West rolling θ_EAV trend re-test (K1114 follow-up)",
-    "priority": 2,
-    "description": "K1114 3/9 BH-PASS 用 OLS SE 評估 overlapping rolling t-stat, 偏高估。改用 Newey-West HAC SE (lag=63 ≈ 3 month overlap) 重檢 UMC trend t=3.06 / MediaTek t=4.67 / TSMC regime。HAC 過才能 Paper 2 narrative pivot。",
-    "status": "completed",
-    "completed_at": "2026-04-13T21:05:00+08:00"
-  },
-  {
-    "id": "K1141",
-    "title": "K1141: Block bootstrap θ_EAV temporal heterogeneity (independence-free)",
-    "priority": 3,
-    "description": "K1114 caveat 替代方案：moving block bootstrap (block=63) 重抽 θ_EAV 序列，建構非 overlap-dependent 的 trend slope CI。與 K1140 HAC 互補。",
-    "status": "superseded",
-    "superseded_by": "K1140 included block-bootstrap"
-  },
-  {
-    "id": "K1142",
-    "title": "K1142: Extend rolling θ_EAV to N=10 Taiwan large caps",
-    "priority": 3,
-    "description": "[K1140 後] N=10 擴展已無必要——dual NULL 已確認。除非 reviewer 要求，否則不做。",
-    "status": "deprioritized"
-  },
-  {
-    "id": "K1143",
-    "title": "K1143: Fix merge_worktree.sh K1032/K1114 detection bug",
-    "priority": 2,
-    "description": "Recurrent bug：script 用 rev-parse 比較 detect 新 commit 偶爾失敗。改用 git rev-list --count main..<branch> 確切數，並加 ls experiments/ 驗證。E067 教訓。",
-    "status": "completed",
-    "completed_at": "2026-04-13T20:55:00+08:00"
+    "status": "pending"
   },
   {
     "id": "K1144",
     "title": "K1144: Paper 2 narrative pivot to dual-NULL (after K1140 confirmation)",
     "priority": 2,
     "description": "K1140 確認 cross + temporal θ_EAV heterogeneity dual NULL。Paper 2 contribution 從「找 firm-attribute predictor」改為「rigorous null verification: after N=31 sector ANOVA + 5 covariates + rolling HAC + block-boot, no systematic source of θ heterogeneity survives MTCorrection」。需主線程更新 paper/2/body.tex (5-stage classifier 判 stage)。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
-  },
-  {
-    "id": "K1145",
-    "title": "K1145: A4f-EAV pooled panel estimation (Paper 2 side-finding candidate)",
-    "priority": 3,
-    "description": "K1140 derivative：在 N=31 stocks pooled panel 上估 single θ_EAV，若顯著 → 'EAV effect 是 universal magnitude not stock-specific'，當 Paper 2 small contribution。若 NS → 純 NULL paper。",
-    "status": "completed",
-    "completed_at": "2026-04-13T22:00:00+08:00"
+    "status": "pending"
   },
   {
     "id": "K1146",
@@ -647,137 +101,20 @@
     "status": "pending"
   },
   {
-    "id": "K1147",
-    "title": "K1147: Cross-market validation of universal-magnitude (US S&P 500 pooled)",
-    "priority": 2,
-    "description": "K1145 在 TW 找到 universal-magnitude，跨市場驗證 (US large-caps N=30 from S&P 500) 是否同 pattern 存在。若 PASS → 'EAV universal effect is global volatility regularity'，contribution 加大；若 NS → TW 特殊性 caveat。",
-    "status": "completed",
-    "completed_at": "2026-04-13T22:30:00+08:00"
-  },
-  {
-    "id": "K1148",
-    "title": "K1148: EAV refinement — earnings surprise (continuous) vs binary indicator",
-    "priority": 3,
-    "description": "K1145 用 binary EAV 已 PASS。改用 actual surprise magnitude (consensus vs actual EPS deviation) 作 continuous covariate，是否 θ_continuous 訊號更強？",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
-  },
-  {
-    "id": "K1149",
-    "title": "K1149: Pooled spec + PCA factor — θ_EAV vs systematic factor competition",
-    "priority": 3,
-    "description": "K1145 pooled θ_EAV 是否被市場 factor (TWII / VIX) 主導？加 factor PC1/PC2 為 covariate，看 θ_EAV 是否 absorb。若 absorb → 解釋為 factor effect 不純為 EAV; 若 incremental → 真 firm-event effect。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
-  },
-  {
-    "id": "K1150",
-    "title": "K1150: TOPIX N=30 Japan pooled θ_EAV — third market validation",
-    "priority": 2,
-    "description": "K1145 TW + K1147 US 都 PASS。第三市場 (Japan TOPIX top-30) 若也 PASS → 三大區域 universal，extreme-strong contribution。EAV 用 Japan earnings (yfinance 或 EDINET API)。",
-    "status": "completed",
-    "completed_at": "2026-04-13T23:30:00+08:00"
-  },
-  {
-    "id": "K1151",
-    "title": "K1151: Continuous earnings surprise vs binary EAV indicator",
-    "priority": 3,
-    "description": "K1145+K1147 binary EAV 已 PASS。改用 actual surprise (consensus EPS deviation) 作 continuous covariate，看 θ_continuous 是否更強且更精確 (smaller SE)。",
-    "status": "completed",
-    "completed_at": "2026-04-13T23:50:00+08:00"
-  },
-  {
-    "id": "K1152",
-    "title": "K1152: Relative-magnitude analysis (θ_EAV / avg_σ²) cross-market",
-    "priority": 3,
-    "description": "K1147 absolute US/TW=3.0 但相對 σ² baseline 後是否一致？θ_relative_TW vs θ_relative_US 比較 — 真 universal vs scale artifact 區辨。",
-    "status": "completed",
-    "completed_at": "2026-04-14T00:10:00+08:00"
-  },
-  {
-    "id": "K1153",
-    "title": "K1153: EU index pooled (DAX+CAC+FTSE composite) — fourth market",
-    "priority": 4,
-    "description": "歐洲市場 large-cap pooled，第四市場驗證。Top 10 from each + composite N=30。EU earnings 通常季報但時點分散。",
-    "status": "completed",
-    "completed_at": "2026-04-14T00:30:00+08:00"
-  },
-  {
     "id": "K1156",
     "title": "K1156: 5-market validation visualization for Paper 2 cover figure",
     "priority": 3,
     "description": "Three-market table 已成核心 finding；若 K1153 EU 也 PASS → 4-market。視覺化 fig 為 Paper 2 cover：x=market, y=θ_EAV with 95% CI bars + placebo z annotation。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
-  },
-  {
-    "id": "K1157",
-    "title": "K1157: JP TOPIX continuous EAV — verify binary-sufficient universality",
-    "priority": 3,
-    "description": "K1151 (US) 顯示 binary > continuous。檢驗 K1150 JP TOPIX 是否同 pattern。若 universal binary-sufficient → mechanism 進一步穩固。",
-    "status": "completed",
-    "completed_at": "2026-04-14T00:20:00+08:00"
-  },
-  {
-    "id": "K1161",
-    "title": "K1161: Options-implied IV crush as continuous EAV regressor",
-    "priority": 3,
-    "description": "K1151 yfinance Surprise(%) noisy。改用 30-day IV at T-1 minus T+1 (IV crush) 作為市場彙總 continuous expected impact。OptionMetrics 或 polygon API 需要付費；先試 yfinance options chain 拼湊。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
-  },
-  {
-    "id": "K1162",
-    "title": "K1162: Analyst-coverage-high sub-sample — continuous EAV mechanism test",
-    "priority": 3,
-    "description": "K1151+K1157 兩市場 continuous NS 是 surprise noise 太大？在高 analyst coverage 子集（I/B/E/S covered, ≥5 analysts）檢驗 continuous θ_SURP 是否 PASS — 若 PASS → 'noise masks true effect in low coverage'; 若 NS → 機制確為非 shock-scale。",
-    "status": "completed",
-    "completed_at": "2026-04-14T01:00:00+08:00"
+    "status": "pending"
   },
   {
     "id": "K1163",
     "title": "K1163: EU earnings via BaFin/AMF/FCA local filings (K1153 follow-up)",
     "priority": 3,
     "description": "K1153 EU yfinance earnings 資料稀疏 (12/30 skip)，N=18 DAX-biased。改用 BaFin (DE)/AMF (FR)/FCA (UK) 本地 filing API 取完整 CAC+FTSE earnings，N=30 重測是否改變 θ_rel=0.137 cluster 歸屬。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
-  },
-  {
-    "id": "K1164",
-    "title": "K1164: Analyst-coverage density + media-concentration mechanism test",
-    "priority": 2,
-    "description": "K1153 推翻 quarterly-density hypothesis。新假說測試: 用 I/B/E/S analyst coverage count per stock × earnings-season media article volume 作為 cross-market predictor of θ_rel。若 correlation 顯著 → mechanism 確認。",
     "status": "completed",
-    "completed_at": "2026-04-14T01:30:00+08:00"
-  },
-  {
-    "id": "K1165",
-    "title": "K1165: Expand to N≥8 markets to confirm K1167 two-level mechanism (preliminary N=4)",
-    "priority": 1,
-    "description": "K1164 N=4 markets 無 Spearman power (ρ=+0.40 p=0.60)。擴展至 8+ markets (+AU ASX, KR KOSPI, CA TSX, HK HSI 各 30 large-caps) pooled panel θ_EAV，再做 cross-market mechanism regression。",
-    "status": "completed",
-    "completed_at": "2026-04-14T03:00:00+08:00"
-  },
-  {
-    "id": "K1166",
-    "title": "K1166: per-stock θ_EAV refit to remove σ² tautology",
-    "priority": 3,
-    "description": "K1164 panel coef 受 θ_rel = θ_EAV/σ² 機械 rank-inversion 污染。改 per-stock fit 取 θ_EAV_i (allow heterogeneity)，再用真正 cross-stock θ_EAV_i variation 跟 analyst/media correlate。",
-    "status": "completed",
-    "completed_at": "2026-04-14T02:00:00+08:00"
-  },
-  {
-    "id": "K1167",
-    "title": "K1167: retail-vs-institutional ownership proxy mechanism test",
-    "priority": 2,
-    "description": "[K1166 within-market analyst CONFIRMED 後] retail-vs-institutional ownership 解 cross-market 4-market EU>JP rank inversion (EU LOW vs JP HIGH cluster). Proxy: US 13F, JP MOF, EU ECB SHS-S, TW FISC.",
-    "status": "completed",
-    "completed_at": "2026-04-14T02:30:00+08:00"
+    "completed_at": "2026-04-18T01:29:22.302596",
+    "outcome": "ROBUST: 30/30 coverage. θ_rel 0.137→0.194 still low-cluster. Bootstrap t +4.19→+4.81; placebo z +14.77σ→+22.27σ. Paper 2 §5 two-cluster taxonomy robust."
   },
   {
     "id": "K1169",
@@ -787,72 +124,38 @@
     "status": "pending"
   },
   {
-    "id": "K1170",
-    "title": "K1170: press-release concentration mechanism — solve EU-JP residual gap",
-    "priority": 3,
-    "description": "K1167 institutions_pct EU(0.416)≈JP(0.425) 但 θ_rel EU 0.14 << JP 0.39。新假說: 財報日 media coverage 集中度 (US Bloomberg/CNBC + JP 日經 single-source vs EU 多語言分散)。Proxy: GDELT or Bloomberg news count per earnings event per stock per market。",
-    "status": "completed",
-    "completed_at": "2026-04-14T04:00:00+08:00"
-  },
-  {
-    "id": "K1168",
-    "title": "K1168: N≥10 markets +BR/CH/IN for CONFIRMED-level mechanism evidence",
-    "priority": 2,
-    "description": "K1165 N=7 ρ=+0.750 p=0.052 緊貼門檻 (STRENGTHENED but not CONFIRMED)。+BR (Bovespa), CH (SSE), IN (Nifty) 至 N≥10 跨美洲+新興+亞洲, 預期 ρ p < 0.01 確定。",
-    "status": "completed",
-    "completed_at": "2026-04-14T03:30:00+08:00"
-  },
-  {
     "id": "K1171",
     "title": "K1171: ASX earnings via Alpha Vantage (yfinance failed K1165)",
     "priority": 3,
     "description": "K1165 AU 0/10 stocks earnings via yfinance 不足。改 Alpha Vantage EARNINGS endpoint 或 ASX official disclosures 取得 ASX top-10 earnings dates, 加入 K1168 N≥10 panel。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
+    "status": "completed",
+    "completed_at": "2026-04-18T01:56:27.370249",
+    "outcome": "DATA_LIMITED: AU 10/10 HAND_CODED, θ_rel=0.150 below-ladder mirror of BR/IN/MX above-ladder. N=13 ρ=+0.385 p=0.194 (K1172 N=12 +0.441). Panel Harvey t 3.81 strengthens monotonically. Sector composition orthogonal to inst ownership implied."
   },
   {
     "id": "K1172",
     "title": "K1172: Extend to N≥13 markets +LatAm/ZA/ID for true CONFIRMED",
     "priority": 3,
     "description": "K1168 N=10 ρ=+0.612 p=0.060 卡在門檻外。+MX (Bovespa-like Bolsa Mexicana), ZA (JSE Top 40), ID (IDX Composite) 至 N≥13 增 power。yfinance earnings 可能稀疏，預期 N=11-13 final。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
+    "status": "completed",
+    "completed_at": "2026-04-18T01:06:17.178865",
+    "outcome": "PARTIAL: rho=+0.441 p=0.152 N=12 (ZA dropped UNDERPOWERED). Decay K1165 0.75→K1168 0.61→K1172 0.44. Panel Harvey t=+3.79 STRENGTHENED. Paper 2 §5 keeps STRENGTHENED language + EM scale residual caveat."
   },
   {
     "id": "K1173",
     "title": "K1173: Refine institutional-share proxy for emerging markets",
     "priority": 3,
     "description": "K1168 BR/CH/IN θ_rel residuals 主因 yfinance institutional% 對新興市場不準: CH state-owned undercounted, IN promoter+FII inflated, BR control-shareholder ambiguous. 用 BCBS/CSRC/SEBI/CVM 官方數據 separate state-owned vs private institutions, 重做 N=10 cross-market regression。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
-  },
-  {
-    "id": "K1174",
-    "title": "K1174: GDELT BigQuery export for true per-stock PCR (replaces K1170 hardcoded)",
-    "priority": 3,
-    "description": "K1170 GDELT DOC API 429 → hardcoded PCR (circularity risk)。改用 GDELT BigQuery export (公開 GCP, 不限速) 取每檔股票 ±2 天 article volume 算 true per-stock PCR variance, rerun within-market panel 看 PCR 是否真有 per-stock signal。",
     "status": "completed",
-    "completed_at": "2026-04-14T04:30:00+08:00"
+    "completed_at": "2026-04-18T01:24:11.388618",
+    "outcome": "NULL: refined rho=+0.385 p=0.217 (vs yfinance +0.441). EM off-ladder is STRUCTURAL cost-of-capital scale factor, not proxy artefact. Paper 2 §5 sharpens EM caveat."
   },
   {
     "id": "K1175",
     "title": "K1175: Full 96-files-per-day GDELT scan OR GCP-authed BigQuery rerun",
     "priority": 2,
     "description": "K1174 only 1/96 slice coverage (1.04%) + 131/413 events. Need full-day (96 files) scan or GCP BigQuery (if user can provide auth) for N≥10 per market decisive PCR test. Current K1170 press concentration claim hangs on this.",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
-  },
-  {
-    "id": "K1067f",
-    "title": "K1067f: VIX-only ablation (reverse sanity check of K1067e)",
-    "priority": 3,
-    "description": "K1067e 確認移除 VIX 後 θ_EAV 仍穩定 (H3 borderline H1)。反向: 保留 VIX 但移除 EAV: τ=exp(m+θ_VIX×VIX²)。看 loglik 變化 + 每檔 stock θ_VIX 穩定性, 完整的 robustness sanity check 雙邊。",
-    "status": "completed",
-    "completed_at": "2026-04-14T06:30:00+08:00"
+    "status": "pending"
   },
   {
     "id": "K1116d",
@@ -866,67 +169,1049 @@
     "title": "K1116f: PIT alignment 套用 GLD/TLT/BTC cross-asset Paper 4 cells",
     "priority": 3,
     "description": "K1116c SPY 已 ROBUST NULL。擴展 PIT 套用到 K1118 cross-asset (GLD/TLT/BTC), 確認 alt-data NULL universality 跨資產 (K1118 原用 shift(1))。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
-  },
-  {
-    "id": "K1120b",
-    "title": "K1120b: Residualized NFCI (control VIX+MOVE) TLT regime retest",
-    "priority": 3,
-    "description": "K1120 post-2022 M4 t=+5.68 但 NFCI 可能共享 Fed shock with VIX/MOVE。residualize NFCI on VIX+MOVE 取殘差再測 DM，排除 common shock confound。",
     "status": "completed",
-    "completed_at": "2026-04-14T10:00:00+08:00"
-  },
-  {
-    "id": "K1108b",
-    "title": "K1108b: Multi-foundry pool for capex guidance mechanism power",
-    "priority": 3,
-    "description": "K1108 N=25/23 TSMC power constraint. +UMC 2303.TW + TSM ADR + GFS + SMIC 600029.SS/0981.HK pool 250+ capex events 測 Harvey threshold 是否 pass。",
-    "status": "completed",
-    "completed_at": "2026-04-14T16:00:00+08:00"
+    "completed_at": "2026-04-18T00:01:53.945552",
+    "outcome": "Cross-asset NULL universality CONFIRMED (GLD+BTC); TLT finstress +3.74 single-cell triple-gate FAIL (QLIKE +0.50%, subperiod 2/3 NS, all-aug overfit t=-5.67). Paper 4 universal native-IV claim STRENGTHENED."
   },
   {
     "id": "K1108c",
     "title": "K1108c: Continuous guide_delta_pct as capex covariate (replace binary)",
     "priority": 3,
     "description": "K1108 binary flag direction-only. 改用 continuous guide_delta_pct (-32.5% to +60.6% range) 作 θ_EAV covariate, 看 signed magnitude 是否 PASS。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
+    "status": "completed",
+    "completed_at": "2026-04-17T23:51:54.221344",
+    "outcome": "DECISIVE NULL: continuous guide_delta_pct β1=-1.29e-05 HAC t=-1.34 p=0.18, bootstrap p=0.728. 3-layer null (K1108→K1108b→K1108c) confirms capex guidance NOT foundry θ₂>0 mechanism."
   },
   {
     "id": "K1100g_d6",
     "title": "K1100g_d6: Extend 2022-2025 N double for Harvey threshold",
     "priority": 3,
     "description": "K1100g_d3/d4/d5 在 2017-2021 n=1071 下 DM t=1.5-2.0 borderline。擴 2022-2025 至 n~1800+ 測是否跨 Harvey 3.0。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
+    "status": "completed",
+    "completed_at": "2026-04-18T01:24:11.388624",
+    "outcome": "FAIL: max |DM_t|=1.99 < Harvey and weak |t|>2. sqrt(N) scaling only 54-57% (not i.i.d.). COVID 2020-21 drives all; 2022-25 near-zero. Paper 3 TAIFEX anchor NOT established."
   },
   {
     "id": "K1100g_d7",
     "title": "K1100g_d7: Cross-market replicate (SPY overnight, N225 morning→afternoon)",
     "priority": 3,
     "description": "K1100g_d5 確認信號方向穩但 borderline。跨市場複製: SPY overnight gap→intraday, N225 morning session→afternoon session asymmetry。若 universal 則 Paper 3 reframe 真 anchor。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
-  },
-  {
-    "id": "Paper9_bib_fix",
-    "title": "Paper 9 bib fix: conrad2015 MAJOR + 5 MED + 4 MINOR fixes (main thread)",
-    "priority": 1,
-    "description": "修 paper/garch-x-vix/main.tex 的 bibentry conrad2015 (JApplEconometrics 30(7):1090-1114), 補 5 MED DOI (bollerslev1986 engle1982 glosten1993 han2014 francq2019), 4 MINOR 格式統一。詳見 review_history/v1/citation_check_report.md。主線程修完 commit v2 (禁 agent 寫論文)。",
-    "status": "pending"
+    "status": "completed",
+    "completed_at": "2026-04-18T02:07:02.413821",
+    "outcome": "DIRECTION_CONSISTENT_ALL_BORDERLINE: TAIFEX +1.49 / SPY +0.66 / N225 +2.32. 3/3 positive direction consistent but 0/3 Harvey pass. Paper 3 narrative candidate: \"weak-but-universal overnight gap² info carrier\"."
   },
   {
     "id": "K1108d",
     "title": "K1108d: Non-capex foundry signal — utilisation rate + wafer ASP",
     "priority": 3,
     "description": "K1108b 否證 capex 為 foundry mechanism。嘗試 utilisation rate (TSMC 75-80%/UMC 60-70% quarterly disclosures) + wafer ASP (industry report) 作為 alternative foundry-specific signals 預測 θ_EAV。",
-    "status": "done",
-    "auto_closed_at": "2026-04-18",
-    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
+    "status": "pending"
+  },
+  {
+    "id": "Paper2_section5_decision",
+    "title": "Paper 2 section 5 narrative decision (main thread + 用戶決策)",
+    "priority": 1,
+    "status": "decision_made_awaiting_body_rewrite",
+    "description": "**DECISION (2026-04-17): Option 4 CONFIRMED by user**. Execute Paper 2 §5 rewrite: (a) keep universal-magnitude claim as IS-identified panel regularity across TW+US; (b) US cross-market OOS validation as main confirmatory evidence (K1148_d2 t=-5.58 p<0.0001, 19/30 stock PASS); (c) TW OOS heterogeneity as subsection (K1148_d1 t=-1.46, 9/29 stock PASS, framed as market-microstructure anomaly); (d) firm-level attribution REJECTED (K1148_d3 no robust differentiator under BH correction, report as exploratory footnote). 主線程執行 body_v2.tex rewrite，須 read 現有 paper/<paper2-dir>/body.tex 和 §5 相關 data tables。 | K1149 (2026-04-17) MAJOR UPGRADE: PCA factor absorption test both markets PASS Harvey joint (US OOS DM t=-3.31, TW t=-2.48). TW OOS heterogeneity reframe: K1148_d1 FAIL was baseline choice artifact. New Opt 4+: claim universal-magnitude is TRUE firm-event effect orthogonal to market factor, surviving both IS and OOS in US+TW. Optional interaction subsection with US-vs-TW sign opposition caveat. | 2026-04-17 REALITY CHECK: 目前 paper/ 沒有 Paper 2 目錄 (EAV universal-magnitude) - 這其實是「start a new paper」不是「rewrite section 5」. 主線程需要先建立 paper/eav-universal-magnitude/ + outline + literature review 才有 body 可寫. Decision 已 confirmed Opt4, 但 paper kick-off is separate P1."
+  },
+  {
+    "id": "K1133_expanding_window",
+    "title": "K1133: Expanding-window adaptive VIX quantile for K1128 OFI-jump",
+    "priority": 3,
+    "status": "completed",
+    "description": "K1131 NULL. Try error_log fix #2: expanding-window rolling quantile so VIX tertile cutoffs update each OOS period with latest info. Bypasses both discrete-cutoff degeneracy and IS-extrapolation explosion. Test if regime-switching beta can be identified under adaptive quantile.",
+    "completed_at": "2026-04-18T00:54:17.549836",
+    "outcome": "NULL: AUC 0.548, DM t=+1.14. Structural failure — IS 2017-19 VIX 9-37 disjoint from COVID OOS 12-83. K1128 regime story 4-branch pivot gate satisfied (K1128/K1131/K1142/K1199)."
+  },
+  {
+    "id": "K1142_vol_normalized_ofi",
+    "title": "K1142: Volatility-normalized OFI (alternative specification, no VIX-regime)",
+    "priority": 3,
+    "status": "completed",
+    "description": "K1131 agent suggested alt-direction: instead of VIX-conditional beta, normalize OFI by rolling realized vol. |OFI|/sigma_t_hat provides regime-free standardization. Test if this 繞過 regime-switching 本身. If PASS → K1128 story changes from \"regime-dependent\" to \"vol-normalized signal\". [Renumbered from K1134_vol_normalized_ofi: collision with existing experiments/k1134]",
+    "completed_at": "2026-04-18T00:34:41.286222",
+    "outcome": "PARTIAL_OOS_ONLY: DM t=+2.255 OOS (Harvey fail), AUC +0.040. Realvol-tertile equivalent. Lag-12 breaks. 33 jumps underpowered. Narrative pivot viable but needs more power."
+  },
+  {
+    "id": "Paper4_channel_specific_pivot",
+    "title": "Paper 4 narrative pivot: universal null -> channel-specific claims (主線程 + 用戶決策)",
+    "priority": 1,
+    "status": "decision_made_awaiting_body_rewrite",
+    "description": "**DECISION (2026-04-17): Channel-specific reframe CONFIRMED by user**. Original \"universal robust null\" claim refuted by K1138 MIXED. New narrative: 3 channels each with distinct universal behavior: (1) HAR+VIX regressor = asset-class HETEROGENEOUS (equity PASS SPY/QQQ t=+4.22, commodity NULL K1136); (2) MIDAS long-run driver = universal NULL (7 assets); (3) GAS-t score-driven = universally unhelpful (equity actively harmful t=-3.27). Supporting evidence: K1117 event-conditional null, K1130 regime fix invalidated. 主線程執行 Paper 4 body rewrite 等 K1139 (VIX component diagnostic) + K1141 write-up prep 完成後再動手。 | K1139 (2026-04-17) 補充: HAR+VIX equity channel 的 mechanism = VIX 是 forward-looking IV components (VRP + TermPrem + SKEW + VVIX) 的 efficient aggregator, 不是 realized-vol proxy. M7 encompass approx M1 表示 decomposition 沒超越 composite VIX. Paper 4 section 5 equity channel 段可加 mechanism subsection but 不可 overclaim \"we found better signal than VIX\". | K1143 (2026-04-17) mechanism diagnostic: GAS-t architectural incompatibility on equity with 3 evidence-backed rationale (score skew / near-Gaussian innovations / long-memory). Paper 4 Channel 3 narrative upgraded from \"unhelpful\" to \"mechanistically incompatible\" with concrete diagnostic numbers. | 2026-04-17 REALITY CHECK: 目前 paper/ 沒有 Paper 4 目錄 (robust null compendium) - 這也是 start-from-scratch. 素材 K1117/K1123/K1130/K1131/K1136/K1138/K1139/K1143/K1137 (running) 齊全. 主線程需建立 paper/robust-null-compendium/ + outline. | K1137 (2026-04-17) regime-conditional PASS 17/54: HAR-RV-X 15/18 cells PASS regime-invariantly (QQQ 3/3, IWM 3/3). Rolling ex-ante 252d quantile fixes K1128 degeneracy. NEW direction: TLT/GLD/USO HAR-structure effect 30-52% might warrant independent subsection. | K1135 (2026-04-17) commodity skew-t diagnostic: QLIKE 0/4 but ES 4/4 PASS. Channel 3 narrative complete: \"asset-class-specific usage pattern — equity harmful, commodity skew-t is concrete tail-risk tool not vol forecasting tool\"."
+  },
+  {
+    "id": "K1161b_paid_options_data",
+    "title": "K1161b: IV crush retry with paid options data (ThetaData / OptionMetrics)",
+    "priority": 4,
+    "status": "blocked_on_user",
+    "description": "K1161 DATA_INFEASIBLE due to yfinance free options chain history limit (~90d per contract). Requires paid data source: ThetaData Standard (~$50/mo), OptionMetrics IvyDB (academic), HistoricalOptionData.com, or Bloomberg OVDV. 需用戶決定是否訂閱，否則此路線 blocked."
+  },
+  {
+    "id": "Paper2_kickoff",
+    "title": "Paper 2 kick-off: EAV Universal-Magnitude paper (main thread, new paper/)",
+    "priority": 2,
+    "status": "pending",
+    "description": "Paper 2 K1145 universal-magnitude EAV line is a NEW paper (NOT taiwan-vt — that is different, about VT strategies in Taiwan). Verified 2026-04-17: paper/taiwan-vt/main_v2.tex is VT/GJR focused, has no EAV content. So K1145/K1148 line needs a fresh paper dir, tentative name: paper/eav-universal-magnitude/. Decision already confirmed Option 4+ (K1149 strengthened): universal-magnitude is true firm-event effect orthogonal to factor, US+TW IS+OOS both PASS under PCA absorption test. Scaffolding: outline, abstract (150 words), lit review collection, methodology reuse K1148/K1149 panel DM + stock-bootstrap spec. N=29 TW + N=30 US panel. Execution needs main thread (禁止 agent 寫論文 per CLAUDE.md)."
+  },
+  {
+    "id": "Paper4_v3_integrate_today",
+    "title": "Paper 4 v3: integrate K1117/K1123/K1130/K1131/K1135/K1137/K1138/K1139/K1143 into existing main_v2.tex",
+    "priority": 2,
+    "status": "pending",
+    "description": "Paper 4 = paper/vix-sufficiency/main_v2.tex (953 LoC, 39 pages, 40 citations). Already wrote \"universal null across 11 signal families\". Integration plan v2 (2026-04-13) planned 6 integrations (K1116/K1116b/K1118/K1121/K504/K1098). Today added 9 more experiments forming complete channel-specific narrative: Channel 1 HAR+VIX regime-invariant (K1137 17/54 PASS) + mechanism (K1139 VIX is IV aggregator); Channel 2 MIDAS universal null (K1136+K1137+K1138 confirmed); Channel 3 GAS-t asset-class-specific (K1143 equity architectural, K1135 commodity ES-only). Supporting nulls: K1117 matched-pair alt-data, K1123 portfolio allocation, K1130/K1131 regime-fix invalidated. Main thread executes v3 rewrite — likely +10-15 pages, new §11 \"channel-specific universal claims\" section."
+  },
+  {
+    "id": "Paper_folders_backfill_selfcontained",
+    "title": "論文資料夾 self-contained 補齊：data/scripts/results/experiments.md",
+    "status": "partially_completed",
+    "priority": 3,
+    "created_at": "2026-04-17T15:33:04+08:00",
+    "description": "Audit 2026-04-17: 10 個 paper/ 有 6 個缺項（參考 agent-specs/claude_rules/paper-workflow.md 新增規範）。缺口清單：(1) crypto-fear-channel (Paper 10, kick-off) — 缺 data/script/results（kickoff 階段，可暫緩）;(2) garch-x-vix (Paper 9, submitted) — 缺 results/figures 與 expref;(3) vix-sufficiency (Paper 4, 39 pages) — 缺 results/figures 與 experiments 索引;(4) volatility-absorption — 缺 results;(5) vt-crowding-abm — 缺 results + expref;(6) vt-insurance-cost — 缺 results。處理策略：主線程分批補 experiments.md + figures soft-link（從對應 experiments/kXXX/）+ scripts/README.md 指向實驗入口檔。不需搬移原始資料（仍在 experiments/kXXX/），只需建立引用。參考樣板：paper/leverage-direction/、paper/taiwan-vt/、paper/vt-trend-following/。注意：Kickoff 階段（outline-only）可暫緩，body drafting 開始時必須補齊；第一次投稿前再做完整性檢查。 | 2026-04-17 done (commit 5b785551 + merge 3ba96c4b): Paper 9 (garch-x-vix) + Paper 4 (vix-sufficiency) 完成 self-contained 索引 — experiments.md, data_sources.md, scripts/README.md, results/README.md, figures/ soft-links. .tex 未動。剩 Paper 6 (prg-periodic-garch 缺 expref) / volatility-absorption / vt-crowding-abm / vt-insurance-cost 缺 results. 孤兒 figure: K1118/K1116b/K504/K1134/K889 (在 experiments.md 標 TODO).",
+    "tags": [
+      "paper",
+      "infrastructure",
+      "compliance"
+    ],
+    "completed_at": "2026-04-17T15:47:34+08:00"
+  },
+  {
+    "id": "VolAbsorption_missing_scripts_recovery",
+    "title": "volatility-absorption 缺 K716-K722 原始 .py 腳本 — 投稿前必須重建",
+    "status": "partially_completed",
+    "priority": 4,
+    "created_at": "2026-04-17T15:59:00+08:00",
+    "description": "Paper folder audit (commit 65bdf9ef, 2026-04-17) 發現 paper/volatility-absorption/ 對應 K716/K717/K718/K719/K720/K721/K722 的 .py 原始腳本不在 repo（只有 results JSON）。**投稿 hard requirement**: 審稿人需要完整 replication package，缺腳本會 desk-reject。處理方案：(1) 從 git log 查這些 K 編號是否曾存在於 experiments/ 然後被刪（git log -- experiments/k71X/）; (2) 若曾存在，從 git blob 恢復到 paper/volatility-absorption/scripts/legacy_k71X/; (3) 若 never existed 於 tracked experiments，從 results JSON + main_v2.tex method 描述重建; (4) 更新 paper/volatility-absorption/scripts/README.md 標明恢復狀態. **必做 before Paper 5 投稿**. | 2026-04-17 深查: `git log --all -- experiments/k71[6-9]*.py k72[0-2]*.py` 空 → 腳本 **從未被 commit**. 所有 K716-K722 README 是 2026-04-16 migration 的 stub（\"待補充\"），僅 results JSON 有效. K716 JSON 結構示例: VIX tertile buckets (calm/normal/elevated/high/crisis) × (shock_days, shock_abs_r, normal_abs_r, ratio) + regression_raw_slope/normalized_slope/conclusion. **重建路徑必走**: (a) 從 main_v2.tex methodology 段 + results JSON 結構反推 → 寫 reconstruct_k71X.py 能重產相同 JSON; (b) validate 重建腳本 output 與舊 JSON 一致 (allclose); (c) 若輸出不同，論文需更正或明註 \"original script lost, reconstruction approximate\"；不可偽造一致性. [DONE commit 86d10c7b: 7 scripts 重建. K716 (SAR core) MATCHED 全 5 SAR values 1% 內, NSI slope -0.00027 vs -0.00028 rounding; K717-K722 APPROXIMATE — 所有 **qualitative findings 全確認**（endogenous absorption / paralysis flags / VRP positive / 0050.TW NO）. 但**數值 divergence** 3 處（K716 t-stat sample filter 差異, K718 0050.TW slope magnitude 差, K721 rate-shock 0.060 vs 0.066 9%, K722 corr 0.57 vs 0.68 17%）. 投稿前決策: 見 VolAbsorption_errata_decision (P4).]",
+    "tags": [
+      "paper",
+      "submission-critical",
+      "volatility-absorption"
+    ],
+    "completed_at": "2026-04-17T16:18:08+08:00"
+  },
+  {
+    "id": "All_papers_reproducibility_audit",
+    "title": "所有論文 reproducibility audit：腳本 output 必須與論文 body 數字一致",
+    "status": "pending",
+    "priority": 4,
+    "created_at": "2026-04-17T16:04:03+08:00",
+    "description": "用戶 2026-04-17 強化規則：『所有論文中的腳本和資料 都要能直接跑出最新的論文內結果』。需對所有 10 個 paper/ 做 reproducibility audit：(1) 對每個 paper 跑其 scripts/ 或 experiments/kXXX 取得最新 output; (2) 對比 main.tex / main_v2.tex body 內寫的數字（Table, Figure, inline 結果）; (3) 列 diff report：per-paper (matched / approx / divergent) 數字清單; (4) divergent cases 走三選一：修腳本 / 修論文 / 明記 errata. 特別注意：- Paper 4 (vix-sufficiency v2): 剛整合 9 個新實驗，需確認 main_v2.tex 的數字對得上 K1135/K1137/K1138/K1139/K1143 JSON; - Paper 5 (volatility-absorption): 承 VolAbsorption_missing_scripts_recovery 結果; - Paper 9 (garch-x-vix, submitted): 確認投稿版的數字當前腳本能重現; - Paper 2/3/6 等其他 paper 依序. **Blocker if any paper's script cannot reproduce its own paper numbers**. | 2026-04-17 progress: Paper 1 (commit a9f25e9f, 48% match, 3 follow-ups), Paper 9 (commit 4e84d37f, 55.5% match NEEDS-FIX submitted-paper 4 blockers). Paper 2/3 audit 跑中. | Paper 2 done commit 8b43604a: 17% matched NEEDS-FIX 2 BLOCKERS (Table 3 VT 2010-2026 無實驗, Table 4 TZ momentum 全無 JSON 這是第三貢獻核心). | Paper 3 done commit 0fa27397: 77% matched (best), 3 BLOCKERS (TSMOM hedge Table 3, Table 5 13-market 缺, 1.4% 數字不明). 覆蓋率 4/10 papers. | Paper 4 done commit a772592a: 77% matched 5 MAJOR/MEDIUM divergent + body stale YES. DIV-1 CRITICAL: 41.8% QLIKE 方向反了 (research integrity). 覆蓋率 5/10 papers. | Paper 6 done commit 453f921f: 90% coverage (best), 1 BLOCKER K880 vs K880v2 lookahead methodology 爭議 (SPY 主結果 DM=6.00 可能錯或是 K880v2 過修正). 覆蓋率 6/10 papers. | Paper 7 done commit cb1dd9b4: 96% matched (BEST score), READY FOR SUBMISSION, only 2 minor errata. 覆蓋率 7/10 papers. | Paper 8 done commit 1bd06dfe: 97.5% matched (NEW BEST), SUBMISSION-READY, seed deterministic CONFIRMED. 覆蓋率 8/10 papers (Paper 5 done via K71X, Paper 10 kickoff skip).",
+    "tags": [
+      "paper",
+      "reproducibility",
+      "submission-critical",
+      "multi-paper"
+    ]
+  },
+  {
+    "id": "K1100e_cross_asset_threshold_test",
+    "title": "K1100e: 10-15 pairs cross-asset λ_L threshold test (K1100c follow-up)",
+    "status": "completed",
+    "priority": 3,
+    "created_at": "2026-04-17T16:09:43+08:00",
+    "description": "K1100c (2026-04-17, Scenario C MIXED) 發現 copula advantage 在 λ_L<0.05 的 flight-to-safety pairs (TLT/GLD) 顯著. N=5 下 Spearman(λ_L, DM)=-0.600 p=0.285 underpowered. K1100e 擴展到 N=10-15 pairs 跨 asset-class: equity-equity x 3 (K1100b baseline), equity-bond x 3 (SPY-TLT/IEF/TIP), equity-commodity x 3 (SPY-GLD/SLV/USO), equity-FX x 2 (SPY-UUP/FXE), equity-credit x 2 (SPY-LQD/HYG). 檢驗 H1: Spearman(λ_L, DM_copula-vs-DCC) < 0, Harvey significant. 若 confirm → Paper 3 最有力主張 + 可發表到 J. Financial Econometrics. Joe copula 主力（K1100c 證實上尾為 driver）. 重用 k1100c 腳本延伸. [DONE commit 348b827f: H1 CONFIRMED Spearman=-0.791 p=0.001. 9/13 Harvey sig. Paper 3 pivot 可發表.]",
+    "tags": [
+      "paper-3",
+      "copula",
+      "threshold-test",
+      "follow-up-K1100c"
+    ],
+    "completed_at": "2026-04-17T21:27:55+08:00"
+  },
+  {
+    "id": "VolAbsorption_errata_decision",
+    "title": "Paper 5 (volatility-absorption) 數值 divergence 三選一決策（投稿前必做）",
+    "status": "pending_main_thread",
+    "priority": 4,
+    "created_at": "2026-04-17T16:18:08+08:00",
+    "description": "K716-K722 reconstruction (commit 86d10c7b) 發現 4 處數值 divergence，皆因 paper 未完整 spec exact formula 或 data vintage 差異：(A) K716 NSI t-stat: -1.77 reconstructed vs paper -3.42. 原因：N=767 (reconstruction) vs paper N=893，likely sample filter 差. (B) K718 0050.TW slope: +0.00008 vs paper +0.00019. 符號一致 (non-absorption 結論不變) 但 magnitude 差異 60%. (C) K721 rate-shock NSI high_vix_norm: 0.060 vs 0.066 (9% diff). rate-shock absorption coefficient +0.019 需 recheck. (D) K722 corr_raw: 0.5671 vs 0.6803 (17% diff). 'not improved' 結論一致 — 此項 low risk. Qualitative findings 全部一致（endogenous absorption, paralysis flags, VRP positive, 0050.TW NO paralysis）. **三選一決策** (用戶或主線程決定): (a) 修 reconstruction scripts — 需定位 paper 原始 data vintage (yfinance snapshot 2025-XX) + sample filter 精確規則; (b) 修 paper main_v2.tex 到 reconstruction 數字為準 — 誠實 research 路徑，主線程 body rewrite + errata; (c) 明記 errata pending — scripts/README.md 標註 'reconstruction approximate, qualitative conclusions unaffected, submitting with current paper numbers, errata may follow if reviewer asks'. **Blocker if undecided before Paper 5 submission**. 建議 (c) 為最低成本路徑（qualitative 都 match，reviewer 若不抓 exact numbers 無風險）.",
+    "tags": [
+      "paper-5",
+      "submission-critical",
+      "reproducibility",
+      "main-thread-decision"
+    ]
+  },
+  {
+    "id": "Paper1_D4_gamma_HM_clarification",
+    "title": "Paper 1 CRITICAL: Sec 4.7 vs 5.4 γ_HM 值衝突 — 需主線程 clarification",
+    "status": "pending_main_thread",
+    "priority": 4,
+    "created_at": "2026-04-17T16:19:18+08:00",
+    "description": "Paper 1 audit (a9f25e9f) 發現: body.tex Sec 4.7 report γ_HM=-0.035 t=-0.39 p=0.70 (不顯著), Sec 5.4 report γ_HM=-0.043 t=-4.06 p<0.001 (高度顯著). 同標記但不同值 — 兩節 likely 不同 setup (SPY-only short-window vs Hybrid VT full-period) 但 paper 未明說. **投稿 JBF 前必做**: 主線程 body rewrite 在兩節加入 explicit clarification 說明 γ_HM_section_4 vs γ_HM_section_5 是哪種 strategy × period. 主線程 .tex 修改 + commit (禁用 agent). 可能需升級為 γ_HM_A vs γ_HM_B 避免混淆.",
+    "tags": [
+      "paper-1",
+      "leverage-direction",
+      "submission-blocker",
+      "main-thread-only"
+    ]
+  },
+  {
+    "id": "Paper1_D3_kupiec_rounding_precision",
+    "title": "Paper 1 MEDIUM: Kupiec p 1-decimal rounding — 建議 paper 改 2-decimal",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T16:19:18+08:00",
+    "description": "Paper 1 audit 發現: GJR+Student-t Kupiec p paper 0.60 actual 0.6698; GJR+HistSim paper 0.60 vs 0.6353. 1-decimal rounding 讓 Student-t 與 HistSim 看起來一樣 (都 0.60) 但實際 0.67 vs 0.64 明顯差. Basel zone 結論不變 (都 Yellow). **建議 (b) 修 paper 到 0.67 與 0.64** — 主線程 body rewrite 順便修, 誠實 research.",
+    "tags": [
+      "paper-1",
+      "precision-fix",
+      "main-thread-only"
+    ]
+  },
+  {
+    "id": "Paper9_D5_0050TW_t144_source",
+    "title": "Paper 9: 0050.TW DM t=1.44 setting 不明",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T16:24:26+08:00",
+    "description": "Paper 9 audit: tex t=1.44 但 K997 t=1.677, K1098 t=2.68. 找不到生成 1.44 的設定. **動作**: 主線程檢查 paper 草稿期 notebook 或 deprecated 腳本找出 1.44 來源; 若找不到 → 更新 tex 用 K997 (1.677) 或 K1098 (2.68) 的 canonical 結果. 影響：t=1.44 NS 與 t=1.677 NS 結論相同, t=2.68 Harvey 不顯著但超過 2.0.",
+    "tags": [
+      "paper-9",
+      "data-forensics"
+    ]
+  },
+  {
+    "id": "Paper2_D3D4D5_gamma_VaR_days",
+    "title": "Paper 2 MAJOR: 0050.TW gamma + VaR 分布標籤 + sample days 3 處小 errata",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T16:29:10+08:00",
+    "description": "Paper 2 audit 3 MAJOR: (D3) 0050.TW gamma paper 0.087 vs K892 全樣本 0.097 或 2000-day rolling 0.136; (D4) VaR '0.5% GJR+Student-t' 應為 '0.5% CF' (K896 Student-t 1.03%, CF 0.51%); (D5) 4532 trading days 應為 4217 (差 315 天). 全部主線程 body edit 即可修. 誠實 research errata path.",
+    "tags": [
+      "paper-2",
+      "taiwan-vt",
+      "errata",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper3_H4_TSMOM_1.4pct_origin",
+    "title": "Paper 3 BLOCKER: '1.4% TSMOM Sharpe contribution' 數字來源不明 (K898 back-calc 5.3%)",
+    "status": "pending_main_thread",
+    "priority": 4,
+    "created_at": "2026-04-17T16:30:37+08:00",
+    "description": "Paper 3 audit: paper 寫 '1.4% TSMOM Sharpe contribution' 但 K898 back-calc = 5.3% (0.043/0.805), K898 paper_comparison 硬寫 93% 而非 1.4%. **數字可能錯誤**. 主線程決: (a) 找原始 derivation notebook (likely 草稿期 ad-hoc 計算), (b) 更新 tex 到 5.3% (K898 back-calc canonical), (c) errata pending. 不可靜默保留.",
+    "tags": [
+      "paper-3",
+      "vt-trend-following",
+      "blocker",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper2_errata_Table3_full_rewrite",
+    "title": "Paper 2 ERRATA: Table 3 全面重寫 (K1175 canonical) + Data section + abstract",
+    "status": "pending_main_thread",
+    "priority": 4,
+    "created_at": "2026-04-17T16:42:10+08:00",
+    "description": "K1175 audit 發現 Paper 2 Table 3 紙面 Sharpe 0.729 與 Return/Vol (10.2/20.8=0.490) 算術矛盾 — **research integrity 問題**。Paper 2 投稿 PBFJ 前必做 errata： (1) main.tex Table 3 全 cells 改為 K1175 canonical (B&H Sharpe=0.799, MDD=-33.83%, Return=14.48%, Vol=18.13%; EWMA/GARCH/GJR VT 也改 K1175); (2) Data section 明載 '0050.TW data from 2009-01 (yfinance earliest)，缺 2008 crisis'; (3) Methodology section 明載 daily rebalancing (不 monthly); (4) Abstract 更新敘述; (5) Section 4 'Sharpe 從 0.729 到 0.796' 改為 K1175 數字. 主線程 body edit only (禁用 agent 改 .tex).",
+    "tags": [
+      "paper-2",
+      "taiwan-vt",
+      "errata",
+      "research-integrity",
+      "main-thread-only"
+    ]
+  },
+  {
+    "id": "Paper1_Table3_vs_Table8_inconsistency",
+    "title": "Paper 1 CRITICAL: Table 3 vs Table 8 同設定 GJR QLIKE 值不同 (-9.034 vs -8.671)",
+    "status": "pending_main_thread",
+    "priority": 4,
+    "created_at": "2026-04-17T16:48:14+08:00",
+    "description": "K903 (efaa93c0) 發現 Paper 1 Table 3 GJR QLIKE=-9.034 vs Table 8 (同 SPY 2023-24 w=504)=-8.671，差 0.363 (4.1%). K903 重現 -8.674 (match Table 8 0.003 內). Paper 1 內部不一致類似 Paper 2 算術錯誤. **主線程 decision**: (a) Table 3 用了 daily refit 而非 63d - 需確認 paper 是否有未明說; (b) errata 修 Table 3 到 K903 canonical (= Table 8); (c) errata pending. **research integrity**: 同 paper 兩 table 同設定不同值必須解釋.",
+    "tags": [
+      "paper-1",
+      "leverage-direction",
+      "research-integrity",
+      "internal-inconsistency",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper1_GLD_gamma_negative_0.067_forensic",
+    "title": "Paper 1: GLD mean γ=-0.067 反推不出，需查原始 K799 spec",
+    "status": "pending_main_thread",
+    "priority": 4,
+    "created_at": "2026-04-17T16:48:14+08:00",
+    "description": "K903 試 data_start=2010 + step=63 + HAC lags=8，GLD mean γ=+0.002 (67% negative) 無法重現 paper -0.067 (93% negative) **符號翻轉**. date_start alone insufficient. **主線程 forensic**: 查 K799 (paper GLD 段原始實驗) 腳本實際 settings — sample filter, weighting, 是否 truncated early data, HAC lags. 若找到 → K903 update 試 match; 若找不到 → paper errata -0.067 → K903 +0.002 (GLD 反而 positive gamma, 結論可能要重寫). 影響: 若 +0.002 canonical，則 'GLD leverage negative' claim 可能錯誤.",
+    "tags": [
+      "paper-1",
+      "leverage-direction",
+      "forensic",
+      "main-thread",
+      "possible-major-errata"
+    ]
+  },
+  {
+    "id": "Paper9_experiments_md_add_K1045",
+    "title": "Paper 9: paper/garch-x-vix/experiments.md 加 K1045 為 Table 11 source (main-thread quick)",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T16:52:19+08:00",
+    "description": "K995b 確認 Paper 9 Table 11 (GJR-t / A4f-t kurtosis/skewness/JB) source 是 K1045. 主線程 edit paper/garch-x-vix/experiments.md 加一行: 'K1045: Table 11 residual diagnostics - joint MLE Student-t, Fisher excess kurt'. 5 min main-thread edit.",
+    "tags": [
+      "paper-9",
+      "experiments-md",
+      "quick-fix",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper9_STOXX50E_ticker_forensic",
+    "title": "Paper 9: STOXX50E ticker 查 (^STOXX50E vs ^ESTX50, K1144 30% QLIKE 差)",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T16:58:13+08:00",
+    "description": "K1144 (1e3ecff8) 發現 STOXX50E QLIKE 1.09 vs paper 1.565 (30% 差). 疑 ^STOXX50E yfinance ticker 有 FX 因子或收市時差. 嘗試 ^ESTX50 或其他 source 看能否收斂. 若可收斂 → K1144 update 對齊 paper; 若仍差 → (b) paper errata STOXX50E 到 K1144 canonical 3.03 (Harvey 仍顯著). **Harvey significance 不受影響**, 此為 magnitude cosmetic fix. 主線程 forensic.",
+    "tags": [
+      "paper-9",
+      "ticker-forensic",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper2_Table4_documentation_errata",
+    "title": "Paper 2: Table 4 / Methodology / Data section 補說明 (K1176 發現)",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T17:05:46+08:00",
+    "description": "K1176 (c9937d49) 確認 Paper 2 TZ momentum 方向結論成立，需補 documentation: (1) Table 4 備注: o2o 精確公式 (open→close 日內段 or open_t/open_{t-1}?); (2) 0050.TW 2014-01-02 4:1 split 處理方式腳注 (重要: yfinance auto_adjust 仍保留虛假 -75%); (3) Section 5 methodology: 資料來源 TEJ/Bloomberg/yfinance 明載 + 若差異顯著需討論; (4) experiments.md 加 K1176 為 Table 4 source; (5) 若 paper 最終採 K1176 magnitude → 更新 Sharpe 1.473 → 1.915 (+30%), 組合 Sharpe 1.810 → 2.192. 方向結論不變. 主線程 body edit. 配合 Paper2_errata_Table3_full_rewrite 一併做.",
+    "tags": [
+      "paper-2",
+      "taiwan-vt",
+      "documentation-errata",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper4_DIV1_41pct_direction_CRITICAL",
+    "title": "Paper 4 CRITICAL: '41.8% QLIKE improvement' Abstract 方向錯 (research integrity)",
+    "status": "pending_main_thread",
+    "priority": 4,
+    "created_at": "2026-04-17T17:09:27+08:00",
+    "description": "Paper 4 audit (a772592a) 發現 Abstract L98 + §8.2 L703 '5-min HAR-RV 比 daily 改善 41.8% QLIKE' **方向完全反了**. K745 improvement_pct=-41.8 實際 daily HAR-ABS (QLIKE=0.077) 比 5-min HAR-RV (QLIKE=0.109) 好 41.8%. K745 N=37 PRELIMINARY; K1139 未執行. **主線程決策**: (a) 跑 K1139 完整 5-min RV target 實驗對比, 看是否能改變方向; (b) **立即 errata** — 修 abstract + §8.2 將 direction 反轉，承認 5-min 不優於 daily 或至少 preliminary N=37; (c) 保留 pending 待 K1139. **research integrity — 必須在下次 submission commit 前解**.",
+    "tags": [
+      "paper-4",
+      "vix-sufficiency",
+      "research-integrity",
+      "critical",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper4_DIV3_Table3_Sharpe_ranking",
+    "title": "Paper 4: Table 3 BH 50/50 Sharpe 0.947 vs K731 0.827 — 可能 ranking 翻轉",
+    "status": "pending_main_thread",
+    "priority": 4,
+    "created_at": "2026-04-17T17:09:27+08:00",
+    "description": "Paper 4 audit: Table 3 BH 50/50 Sharpe paper 0.947 vs K731 (2008-2026 canonical) 0.827. 12/VIX Sharpe 0.870 一致. 若 K731 canonical → 12/VIX (0.870) > BH (0.827) 為 ranking 翻轉, **影響 Paper 4 核心敘事 'BH 打不贏' 可能變成 'BH 打 平但 12/VIX 更好'**. 主線程 forensic: (a) K731 的 2008-2026 是否為 paper 設定 (可能 paper 用不同 window); (b) 確認 Table 3 來源 K, 若非 K731 → 找正確 K; (c) 若 K731 canonical → errata Table 3 + 重寫相關 narrative.",
+    "tags": [
+      "paper-4",
+      "vix-sufficiency",
+      "ranking-flip-risk",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper4_DIV4_Table6_era_Harvey_passes",
+    "title": "Paper 4 MAJOR: Table 6 era-specific Harvey pass 隱藏 + incr R² 低估 10-186×",
+    "status": "pending_main_thread",
+    "priority": 4,
+    "created_at": "2026-04-17T17:09:27+08:00",
+    "description": "Paper 4 audit: Table 6 era 數字與 K752 不符. K752 Era3 GFC 3 訊號過 Harvey (t=-3.15, -6.51, +7.6), Era5 COVID 1 過 (t=+9.3). Paper Table 6 顯示 0/5 Harvey pass, 數字小 10-186×. **Paper '全 null' universal claim 實際 era-specific 有顯著**. 影響核心 contribution. 主線程 decision: (a) 修腳本重建 Table 6 (K752 是 canonical?); (b) paper errata 承認 era-specific Harvey passes, 弱化 universal claim; (c) errata pending.",
+    "tags": [
+      "paper-4",
+      "vix-sufficiency",
+      "era-specific",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper4_DIV2_CV_0.33_to_0.37",
+    "title": "Paper 4 MEDIUM: CV=0.33 應為 0.37 (全 paper 6 處 rounding/typo)",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T17:09:27+08:00",
+    "description": "K752 mean=0.446 std=0.165 CV=0.370, paper abstract+Table 5+§8+conclusion 共 6 處寫 0.33. 可能 typo 或 rounding 錯誤. 主線程 body edit 全改 0.33 → 0.37.",
+    "tags": [
+      "paper-4",
+      "vix-sufficiency",
+      "typo-fix",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper4_body_integration_9_new_experiments",
+    "title": "Paper 4 body stale: 9 新實驗未整合 main_v2.tex (integration_plan_v2 未套用)",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T17:09:27+08:00",
+    "description": "Paper 4 audit 確認 K1116/K1117/K1118/K1116b/K1121/K1098/K1129/K1136/K1138 皆未整合到 main_v2.tex. K1135/K1137/K1139/K1141/K1143/K1123 agent 找不到 (但實驗 dir 存在, 可能 path issue). integration_plan_v2.md 存在但完全未套用. 主線程 body rewrite 任務: 先完成 critical errata (DIV-1/3/4), 再整合 9 個新實驗 + K1141 table/heatmap 到 §4. narrative state 已設 decision_made_awaiting_body_rewrite.",
+    "tags": [
+      "paper-4",
+      "vix-sufficiency",
+      "body-rewrite",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "K998_add_vrp_autocorr_to_json",
+    "title": "K998: 小 fix — vrp_autocorr_lag1 寫入 JSON (解 Paper 9 1 個 no-source)",
+    "status": "pending_main_thread",
+    "priority": 2,
+    "created_at": "2026-04-17T17:12:12+08:00",
+    "description": "K998.py 第 129 行 compute autocorr 但只 print, 未寫入 JSON. 主線程一行 fix: results['vrp_autocorr_lag1'] = float(np.corrcoef(oos_vrp[1:], oos_vrp[:-1])[0,1]). 然後重跑 K998 產 JSON. 解 Paper 9 autocorr=0.20 no-source.",
+    "tags": [
+      "paper-9",
+      "k998",
+      "small-fix",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Data_summary_script_SPY_VIX",
+    "title": "建 data summary script 輸出 SPY std + VIX means (解 Paper 9 3 個 no-source)",
+    "status": "pending",
+    "priority": 2,
+    "created_at": "2026-04-17T17:12:12+08:00",
+    "description": "Paper 9 Table 1 summary stats 3 values 無 script source: SPY ann.std 0.188, OOS VIX mean 22.14, full VIX mean 18.97. 建小腳本導出 descriptive stats JSON.",
+    "tags": [
+      "paper-9",
+      "data-summary",
+      "quick-build"
+    ]
+  },
+  {
+    "id": "Other_papers_nosource_rescan_extension",
+    "title": "其他 paper 做同樣 no-source rescan (K1045 pattern generalization)",
+    "status": "pending",
+    "priority": 3,
+    "created_at": "2026-04-17T17:12:12+08:00",
+    "description": "Paper 9 rescan 發現 34.8% no-source 大半是 documentation gap (19 UNDOCUMENTED / 26 可 source). Paper 1 (24% no-source), Paper 2 (51%), Paper 3 (18%), Paper 4 (3%) 可能也有同樣 pattern. **動作**: 對每個已 audit 的 paper 啟 rescan agent 找未登錄 K. 可大幅降低每 paper 的 apparent no-source count.",
+    "tags": [
+      "audit-extension",
+      "pattern-generalization"
+    ]
+  },
+  {
+    "id": "Paper6_DIV2_0050TW_OOS_date_errata",
+    "title": "Paper 6: 0050.TW OOS 起始 2019/12 vs K886 2021-01-08 (差 13 月)",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T17:13:53+08:00",
+    "description": "Paper 6 audit: Paper Table 1 0050.TW OOS starts 2019/12, K886 JSON 2021-01-08. n_oos=1266 一致但 Spearman n=1251 與 n_oos 不一致. 主線程 verify K886 70/30 split cutoff, update Table 1.",
+    "tags": [
+      "paper-6",
+      "date-errata",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper6_DIV3_SPY_VaR_violation_rate",
+    "title": "Paper 6: SPY VaR VR=0.93%, Kupiec p=0.77 無對應 source",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T17:13:53+08:00",
+    "description": "Paper 6 audit: Paper SPY VR=0.93% Kupiec p=0.77 vs K880v2 VR=1.59% p=0.0196. 兩版都不吻合. 若 DIV-1 確認 K880 為正確 source, 需從 K880 重取 VaR 數字重核 Table 4.",
+    "tags": [
+      "paper-6",
+      "var-errata",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper7_minor_errata_97_80bps",
+    "title": "Paper 7 MINOR errata: '97%' → 98.0%, '80 bps' → 81 bps (main-thread 2 處)",
+    "status": "pending_main_thread",
+    "priority": 2,
+    "created_at": "2026-04-17T17:16:50+08:00",
+    "description": "Paper 7 audit (cb1dd9b4, 96% matched best score) 發現 2 minor: (1) Sec 2.3 '1 bps opp share 97%' → 98.0% (K811v2 4.195/4.281); (2) Sec 3.3 '54-80 bps' upper → 81 bps (K846 theoretical 81.46). 2 unverifiable footnote (2012-2024 sub-period ρ=0.04, 48 bps rebalancing) — 需補 sub-period 分析或刪腳註. Main-thread 5-min edit. Paper 7 基本 ready for submission, 此為最後清理.",
+    "tags": [
+      "paper-7",
+      "minor-errata",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper9_Table12_footnote_errata",
+    "title": "Paper 9 Table 12 加 footnote (K988_sens 驗證 + 5-day vintage 差異)",
+    "status": "pending_main_thread",
+    "priority": 2,
+    "created_at": "2026-04-17T17:19:17+08:00",
+    "description": "K988_sens (7f85d06b) + K1003 (experiments.md 已登錄) 都能 replicate Table 12. 主線程 edit paper/garch-x-vix/main.tex Table 12 加 footnote: 'Results replicated in K988_sens (2026-04-17); DM t values differ ≤ 0.82 due to 5-day data vintage; Harvey significance count unchanged at 13/16.' 5 min body edit.",
+    "tags": [
+      "paper-9",
+      "footnote-errata",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper8_K827v3_code_cutoff_fix",
+    "title": "Paper 8: K827v3 code cutoff 30% → 50% (threshold_region label consistency)",
+    "status": "pending",
+    "priority": 2,
+    "created_at": "2026-04-17T17:20:14+08:00",
+    "description": "Paper 8 audit (1bd06dfe) 發現 K827v3 analyze_results 用 30% cutoff, 但 paper footnote [c] 用 50%. Paper table 正確, 僅 code metadata mislabeled. 小 fix: 改 K827v3.py 的 30→50%. agent-launchable.",
+    "tags": [
+      "paper-8",
+      "k827v3",
+      "code-label-fix"
+    ]
+  },
+  {
+    "id": "Paper8_K827v2_audit_design_validation",
+    "title": "Paper 8: K827v2 design-validation (Sharpe 0.43/0.18) 單獨 audit",
+    "status": "pending",
+    "priority": 2,
+    "created_at": "2026-04-17T17:20:14+08:00",
+    "description": "Paper 8 Section 4.6 的 K827v2 design-validation (30% 下 Sharpe 0.43, 50% 下 0.18) 未正式 audit. 建議單獨 audit 補 verification.",
+    "tags": [
+      "paper-8",
+      "k827v2",
+      "audit-followup"
+    ]
+  },
+  {
+    "id": "Paper9_subperiod_numbers_update_from_K1027",
+    "title": "Paper 9 update subperiod numbers from K1027 (pooled t 6.535 → 6.977, range更新)",
+    "status": "pending_main_thread",
+    "priority": 2,
+    "created_at": "2026-04-17T17:25:19+08:00",
+    "description": "K1027 (fdd06cff) 執行完, 7/7 A4f wins exact match paper, 但 N149/150/154 有 minor 修正: paper range 4.81-8.09% → 4.80-7.00% (K1027 canonical), mean 6.52% → 6.42%, pooled t 6.535 → 6.977. K1027 結果 STRONGER 而非弱, 有利 paper. 主線程 body edit: Section 4.3 + 任何引用這些數字的段落更新. 同時 experiments.md 加 K1027 為 Section 4.3 source. 5 min.",
+    "tags": [
+      "paper-9",
+      "subperiod-update",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper3_D1_errata_TSMOM_direction_research_integrity",
+    "title": "Paper 3 ERRATA: Table 3 narrative 'TSMOM hedge 93% retention' → '100%+ enhances MDD'",
+    "status": "pending_main_thread",
+    "priority": 4,
+    "created_at": "2026-04-17T17:29:23+08:00",
+    "description": "K1177 (25af9f1e) + K898 雙 independent implementation 都顯示 TSMOM hedging retention >100% (107-141%), **paper 聲稱 93% (protection 降低) 方向反了**. 類似 Paper 4 DIV-1 41.8% 方向錯 pattern. **Research integrity issue**. 主線程 body edit: (1) Table 3 narrative 'TSMOM hedging only retains 93% of VT protection' → 'TSMOM hedging retains 100%+ of VT protection and further enhances MDD reduction'; (2) Section 4.7 γ_HM 解釋需改 (hedge coefficient 方向); (3) Abstract/Conclusion 重新措辭; (4) 同時修 text/code inconsistency (paper 寫 monthly 但 -24.7% 是 daily) — 選 K1177 monthly canonical 或 paper 原 daily, 在 methodology section 明載選擇. 投稿 JPM/FAJ 前必做.",
+    "tags": [
+      "paper-3",
+      "vt-trend-following",
+      "research-integrity",
+      "errata",
+      "main-thread",
+      "direction-reversal"
+    ]
+  },
+  {
+    "id": "Paper2_experiments_md_add_K515_K516_K512",
+    "title": "Paper 2 QUICK WIN: experiments.md 加 K515/K516/K512 (解 15 UNDOCUMENTED)",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T17:30:16+08:00",
+    "description": "Paper 2 rescan (fc7c9a7c) 發現 15 UNDOCUMENTED_K 可由 3 個 K 涵蓋: K515 (overnight gap 87%, t=6.845), K516 (futures Sharpe=0.93), K512 (fill rate 79/90%). Ready-to-apply block 在 paper/taiwan-vt/reproducibility_audit/undocumented_k_additions_for_experiments_md.md. 5 min main-thread edit. 解 Paper 2 audit 15 no-source.",
+    "tags": [
+      "paper-2",
+      "quick-win",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper2_G12_G20_Section6_formal_experiments",
+    "title": "Paper 2 CRITICAL: G12/G20 Section 6 數字 8 個 knowledge 有但無 formal experiment",
+    "status": "partially_resolved_K1180_done_awaiting_K1179",
+    "priority": 4,
+    "created_at": "2026-04-17T17:30:16+08:00",
+    "description": "Paper 2 rescan G12/G20: Section 6 共 8 數字在 knowledge.json 有 match 但 experiments/ 無 formal .py + results.json. **不符 research 誠實原則 reproducibility standard**. G12 (Section 6.1 import growth): r=0.214, OOS +5.6%, DM p=0.043 (3 數字). G20 (Section 6.2/6.3 BCI leading): BCI t=-0.53, Leading t=3.74, R²=7.1%, Sharpe 0.732 (5 數字). **動作**: 建 K1179 (Section 6.1 import growth) + K1180 (Section 6.2/6.3 BCI leading) formal experiments, 產生 _results.json 可 replicate knowledge 數字. Agent-launchable. | K1180 (18084478) PARTIAL: 3/5 MATCH (T1 BCI null, T5 OOS Sharpe exact). 2/5 DIVERGENT (T4 IS Sharpe 44% gap — 主要問題, T3 R² 期間敏感). 方向確認 valid. K1179 Section 6.1 仍在跑.]",
+    "tags": [
+      "paper-2",
+      "section-6",
+      "blocker",
+      "new-experiment-required"
+    ]
+  },
+  {
+    "id": "Paper1_new_experiments_Tables_4_6_7_8",
+    "title": "Paper 1 BLOCKER: 4 new K experiments 補 Tables 4/6/7/8 的 15 no-source",
+    "status": "pending",
+    "priority": 4,
+    "created_at": "2026-04-17T17:36:43+08:00",
+    "description": "Paper 1 rescan (dcb84f0c): 0 UNDOCUMENTED_K, 15 STILL_NO_SOURCE — 需建 4 new K experiments. Table 4 (VaR config): K1185 VaR backtest with specific config matching paper 2020-2025 n=1508. Table 6 (pass-rate rows): K1186 Kupiec/Christoffersen pass rate aggregation. Table 7 (5 asset rows): K1187 cross-asset GARCH comparison (SPY/GLD/TLT/BTC/EEM). Table 8 (window robustness): K1188 rolling window sensitivity (w=250/500/1000). Agent-launchable, ~2-3h each = 8-12h total. | K1185 (Table 4) DONE commit 818fff7c: 3/4 MATCHED (StudentT/Adaptive/Jump exact), Normal Δ=-3 data vintage. Knowledge base 驗證一致. 建議 (b1) Table 4 腳注 data-revision disclaimer. Paper 1 base = GARCH(1,1) 非 GJR (methodology clarification). 剩 K1186 (Table 6 pass-rate) + K1187 (Table 7 5-asset) + K1188 (Table 8 window) 3 個 new experiments. | K1188 (Table 8) DONE commit e0212023: **(a) PAPER REPRODUCED 15/15 MATCH** 全 cells ±0.10. Scale quasi-LL confirmed. RANK 3/3. BLOCKER resolved. 剩 K1186 Table 6 + K1187 Table 7 跑中. | K1186 (Table 6) DONE commit 94f4d883: **2/5 matched** (Normal 57.1 exact + FHS 76.2 exact). 3/5 divergent upward (StudentT5/SkewedT/CFVaR +19/+14/+10pp) 根因 data vintage. (a) Normal/FHS confirmed (b) SkewedT/CFVaR paper footnote (c) StudentT5 errata. Paper 1 Tables batch progress: T4 3/4, T6 2/5, T7 跑中, T8 15/15 PERFECT. | K1187 (Table 7) DONE commit 5efb638e: **6/20 MATCHED** (SPY/TLT/EEM core). GLD BH=1.56 vs 0.83 (paper internal inconsistency — period 無法驗證), BTC 0.43 vs 0.92. (b) caption 加 per-asset period. Paper 1 Tables batch COMPLETE: T4 3/4 + T6 2/5 + T7 6/20 + T8 15/15. Paper 1 Tables 4+7 有 GJR vs GARCH base + period 不一致 research integrity issues.",
+    "tags": [
+      "paper-1",
+      "leverage-direction",
+      "new-experiments-batch",
+      "blocker"
+    ]
+  },
+  {
+    "id": "Paper1_KB_only_tables_10_11_12_C3_footnote",
+    "title": "Paper 1: Tables 10/11/12/C3 6 KB-only 數字加 'pre-K era, KB source' footnote",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T17:36:43+08:00",
+    "description": "Paper 1 rescan 發現 Tables 10/11/12/C3 共 6 數字只在 knowledge.json, experiments/ 無 (pre-K numbering era). avg stock γ, t-stat, ES/kurtosis block, β_trend/Spearman, gold regime t-test. 建議 main-thread footnote: 'Source: internal research memo <knowledge_id>; experiment pre-dates current K numbering system'. 或選 build 補遺 experiments (K1189+) 但 KB footnote 較經濟.",
+    "tags": [
+      "paper-1",
+      "leverage-direction",
+      "kb-footnote",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper3_D2_errata_Table5_and_remove_rho_0.830",
+    "title": "Paper 3 ERRATA: Table 5 update K1178 canonical + REMOVE ρ=0.830 unreproducible claim",
+    "status": "pending_main_thread",
+    "priority": 4,
+    "created_at": "2026-04-17T17:39:42+08:00",
+    "description": "K1178 (ca5ec507) 確認 Paper 3 Table 5: core claim (13/13 改善, r=-0.806) robust; 但 avg ΔMDD 24.9 vs 28.7 + t 10.25 vs 15.70 需更新; **ρ=0.830 GJR γ vs ΔSharpe 完全 NOT REPRODUCIBLE (K1178 +0.187 NS)** — 可能 fabricated 或 pre-K 原 source 丟失. **主線程 body edit**: (1) Table 5 數字全更新為 K1178 canonical (24.9pp, t=10.25, r=-0.806, ρ_spearman=-0.835); (2) **刪除** 'ρ=0.830 GJR γ vs ΔSharpe' 相關段落 (無法 replicate); (3) Section methodology 補 K1178 提到的 auto_adjust + 13 market list; (4) experiments.md 加 K1178 為 Table 5 source.",
+    "tags": [
+      "paper-3",
+      "vt-trend-following",
+      "errata",
+      "research-integrity",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper6_experiments_md_add_K874c_K874e",
+    "title": "Paper 6 QUICK WIN: experiments.md 加 K874c (Table 2 PRG vs Separate) + K874e (MCS)",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T17:43:58+08:00",
+    "description": "Paper 6 rescan (c190fefd) 發現 2 UNDOCUMENTED_K: K874c exact match Table 2 DM=-4.07, K874e MCS result. Ready-to-apply block 在 paper/prg-periodic-garch/reproducibility_audit/undocumented_k_additions_for_experiments_md.md. 5 min main-thread edit.",
+    "tags": [
+      "paper-6",
+      "quick-win",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper6_major_errata_K880v2_canonical",
+    "title": "Paper 6 MAJOR ERRATA: SPY 主結果改為 K880v2 canonical (DM 6.00 → -0.57)",
+    "status": "pending_main_thread",
+    "priority": 4,
+    "created_at": "2026-04-17T17:43:58+08:00",
+    "description": "Paper 6 rescan 程式碼層級確認 K880 line 512 r2_overnight[t] 是 lookahead. K880v2 才是 canonical. **Paper 6 SPY 核心 claim 'PRG beats GJR on SPY, DM=6.00' 是 artifact**. K880v2 canonical: DM=-0.57 NS, 'PRG no significant advantage on SPY'. **主線程 major decision**: (1) 全面 rewrite SPY 欄位到 K880v2 canonical — paper 主 contribution 弱化為 'TAIFEX only, SPY null' (2) 若保留 K880 敘事 — 需明確 'forecast at open using realized overnight return' methodology Eq 3-4 defensible claim (非 traditional volatility forecast convention); (3) 撤稿或大幅 restructure. **FRL 投稿前不可避免 — 現 paper 數字無法 reviewer replication**.",
+    "tags": [
+      "paper-6",
+      "prg-periodic-garch",
+      "major-errata",
+      "research-integrity",
+      "main-thread",
+      "critical"
+    ]
+  },
+  {
+    "id": "Paper3_experiments_md_add_K697_paper3_fixes",
+    "title": "Paper 3 QUICK WIN: experiments.md 加 K697 (VIX predictive) + paper3_fixes.json (VIX threshold)",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T17:48:11+08:00",
+    "description": "Paper 3 rescan (f0cd9229) 發現 2 UNDOCUMENTED: K697 (VIX predictive r=0.570 magnitude, r=0.042 direction) + paper3_fixes.json (VIX threshold t-stats 7.98-10.91). 建議主線程: (1) experiments.md 加 K697; (2) body main.tex §methodology cite K697 核心發現; (3) paper3_fixes.json 正式化成 K 編號 + experiments.md 登錄. 5-10 min.",
+    "tags": [
+      "paper-3",
+      "quick-win",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper2_G20_T4_IS_Sharpe_errata",
+    "title": "Paper 2 G20 T4: IS Sharpe 0.732 vs K1180 0.413 (44% gap) — main-thread errata",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T17:54:37+08:00",
+    "description": "K1180 (18084478) 確認 Paper 2 Section 6.2/6.3 T4 IS Sharpe=0.732 無法 reproduce (K1180 全期 0.413). 主線程 decision: (a) body.tex 補腳注說明 IS 計算精確期間 + 策略規則 (可能 paper 用 sub-period), (b) errata 改為 K1180 canonical 0.413, (c) pending. Paper 2 G20 partial resolve — T1 BCI null + T5 OOS Sharpe 已 formal verify.",
+    "tags": [
+      "paper-2",
+      "g20-section6",
+      "main-thread",
+      "errata"
+    ]
+  },
+  {
+    "id": "Paper1_Table4_footnote_and_methodology_clarify",
+    "title": "Paper 1: Table 4 footnote (data vintage ±3) + base model clarify (GARCH not GJR)",
+    "status": "pending_main_thread",
+    "priority": 2,
+    "created_at": "2026-04-17T18:01:06+08:00",
+    "description": "K1185 (818fff7c) 發現: Paper 1 Table 4 base model 是 GARCH(1,1) 非 GJR (若 GJR Normal=34 不匹配 33). Adaptive = 20-day rolling max sigma. Student-t scale correction sqrt((df-2)/df). 主線程: (1) Table 4 footnote 加 'Violation counts computed 2025-Q4; minor yfinance data revisions may produce ±3 count differences upon replication.'; (2) Methodology section 明載 Table 4 base = GARCH(1,1), Adaptive = 20-day rolling max sigma, Student-t scale correction; (3) experiments.md 加 K1185 為 Table 4 source.",
+    "tags": [
+      "paper-1",
+      "footnote",
+      "methodology-clarify",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper4_experiments_md_add_vix_term_structure",
+    "title": "Paper 4 QUICK WIN: experiments.md 加 vix_term_structure_vol_pred(_v2)",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T18:15:35+08:00",
+    "description": "Non-K sweep (ad6cb402) 發現 experiments/vix_term_structure_vol_pred + _v2 是真實 experiment 支持 Paper 4 VIX sufficiency 主論述 (DM t=-2.21 p=0.027, term structure 無增量). 未登錄 paper/vix-sufficiency/experiments.md. 主線程 5 min edit 加入, 解 Paper 4 audit partial no-source.",
+    "tags": [
+      "paper-4",
+      "quick-win",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper9_experiments_md_add_garch_midas_test",
+    "title": "Paper 9 QUICK WIN: experiments.md 加 garch_midas_test",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T18:15:35+08:00",
+    "description": "Non-K sweep 發現 experiments/garch_midas_test 是真實 experiment 支持 Paper 9 A4f vs GARCH-MIDAS 比較 (GJR 1.672 vs MIDAS 1.682, A4f 1.408 遠優). 未登錄 paper/garch-x-vix/experiments.md. 主線程 5 min edit.",
+    "tags": [
+      "paper-9",
+      "quick-win",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper1_stubs_activate_GJR_EWMA_JBF_Leverage",
+    "title": "Paper 1: 3 個 planning stubs 需協調執行 (gjr_vs_ewma_crisis / jbf_robustness_suite / structural_leverage_panel)",
+    "status": "pending",
+    "priority": 3,
+    "created_at": "2026-04-17T18:15:35+08:00",
+    "description": "Non-K sweep 發現 Paper 1 的 3 個 non-K folders 是 planning stubs (metrics={}) 設計為填 Tables 3/7/12 缺口但從未執行. 主線程協調: 當 K1185/K1186/K1187 跑完, 看 Paper 1 各 Table 剩餘 no-source 缺口, 若尚有 stubs 覆蓋的 numbers → agent execute 這些 stubs 而非建新 K. 或最終併成 K1196+ 統一 new experiment. 決策待 K1185-K1188 完成.",
+    "tags": [
+      "paper-1",
+      "stubs-activation",
+      "coordination"
+    ]
+  },
+  {
+    "id": "Paper1_experiments_md_add_K1188_Table8",
+    "title": "Paper 1 QUICK WIN: experiments.md 加 K1188 為 Table 8 source (15/15 MATCH)",
+    "status": "pending_main_thread",
+    "priority": 2,
+    "created_at": "2026-04-17T18:24:15+08:00",
+    "description": "K1188 (e0212023) 完美 reproduce Paper 1 Table 8 — 15/15 cells ±0.10 absolute tolerance. QLIKE scale quasi-LL confirmed. Window rank per period 全 match. 主線程 5 min edit: paper/leverage-direction/experiments.md 加 K1188 為 Table 8 source.",
+    "tags": [
+      "paper-1",
+      "quick-win",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper3_split_sample_K1193_STRENGTHENING_update",
+    "title": "Paper 3 GOOD NEWS: K1193 finds r=0.793 (STRENGTHENING) vs paper 0.487 — update Panel B narrative",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T20:28:48+08:00",
+    "description": "K1193 (fc0b3a02) 發現 Paper 3 Panel B split-sample 結果 **比原 paper narrative 更強**: r=0.793 vs paper 0.487, CI [0.589, 0.919] vs [0.114, 0.737]. 方向反轉: paper 'attenuation' → K1193 'STRENGTHENING'. Regime shift 2017-2026 消除 suppressive variance. 主線程 body edit: (1) Panel B 數字更新 r=0.793 (Pearson) / 0.749 (Spearman), CI [0.589, 0.919]; (2) Section 4 narrative 'attenuation' → 'strengthening' (實際對 paper 更有利); (3) 機制討論: second half 國際 ETFs + safe havens TSMOM loadings 翻正; (4) experiments.md 加 K1193 為 Panel B source. 此為 paper-friendly errata (結果變強).",
+    "tags": [
+      "paper-3",
+      "good-news-errata",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "K1133b",
+    "title": "K1133b: MS-GAS OOS forecasting + GAS-Normal/GAS-t innovation decomposition",
+    "priority": 3,
+    "description": "K1133 finding: BTC reversal concentrated in P1 2017-2020 (n=1441 t=-4.67). GJR-t also reversal (t=-3.36) suggests Student-t innovation not GAS dynamics. (a) Implement MS-GAS OOS forecast with Gray 1996/Klaassen 2002 state-probability tracking. (b) Add GAS-Normal as baseline to isolate innovation-distribution vs score-driven contribution. agent-launchable 3-4h.",
+    "status": "completed",
+    "created_at": "2026-04-17T23:41:20.635375",
+    "tags": [
+      "K1133-followup",
+      "BTC",
+      "GAS",
+      "regime-switching"
+    ],
+    "completed_at": "2026-04-18T01:08:17.057754",
+    "outcome": "~75% P1 reversal from Student-t innovation, ~25% GAS dynamics NS. M4 GAS-Normal DM=-1.90 NS. MS-GAS-t rescues single-state (+5.97) but no edge vs GJR-N. Catania 2018 does not generalize BTC. Paper pivot: negative-result methodology paper feasible."
+  },
+  {
+    "id": "K1108d_D2_noncapex",
+    "title": "K1108d: Non-capex guidance (utilisation/wafer-price/R&D) as foundry mechanism",
+    "priority": 3,
+    "description": "K1108/b/c 三層 capex NULL. 測 D2 candidate: non-capex guidance — capacity utilisation rate, wafer ASP/pricing guidance, R&D spend guidance. Reuse K1108c continuous regression framework. Need scrape legal-disclosure 重大訊息 + earnings call transcripts for non-capex guidance tokens. Agent-launchable 4-6h.",
+    "status": "completed",
+    "created_at": "2026-04-17T23:51:54.221353",
+    "tags": [
+      "K1108-followup",
+      "foundry",
+      "Paper2",
+      "D2"
+    ],
+    "completed_at": "2026-04-18T00:53:30.983837",
+    "outcome": "D2 PRELIMINARY NULL (partial-F p=0.791 at 8.9% coverage). 6-layer NULL stack. Paper 2 narrative = PROVISIONAL_INDUSTRY_FE_FRAMING. Pre-submission need MOPS/10-Q scrape to >=60% coverage."
+  },
+  {
+    "id": "K1108e_D3_opleverage",
+    "title": "K1108e: Operating leverage (fixed-cost:sales ratio) as foundry mechanism",
+    "priority": 3,
+    "description": "K1108c capex NULL. D3 candidate: Foundry high fixed-cost structure (fab depreciation) → operating leverage amplifies vol on earnings surprise. Test θ_EAV ~ β * op_leverage (debt/equity + PP&E/sales) on same 5-foundry pool. Firm-FE + year-FE. Agent-launchable 3-4h.",
+    "status": "completed",
+    "created_at": "2026-04-17T23:51:54.221355",
+    "tags": [
+      "K1108-followup",
+      "foundry",
+      "Paper2",
+      "D3"
+    ],
+    "completed_at": "2026-04-18T00:40:22.229686",
+    "outcome": "D3 NULL: max HAC |t|=1.58, partial-F p=0.102. Firm-FE absorbs SMIC level confound. Balance-sheet is NOT foundry mechanism."
+  },
+  {
+    "id": "K1108f_D4_regime",
+    "title": "K1108f: Regime-aware spec (up-cycle vs down-cycle) for foundry θ₂",
+    "priority": 3,
+    "description": "K1108c pooled NULL 可能 regime-contaminated. D4: split 5-foundry pool by semi cycle (up 2020-2021 2024-26 vs down 2022-2023) and re-estimate. Cross-reference TSMC revenue YoY as regime indicator. Agent-launchable 2-3h.",
+    "status": "completed",
+    "created_at": "2026-04-17T23:51:54.221356",
+    "tags": [
+      "K1108-followup",
+      "foundry",
+      "Paper2",
+      "D4",
+      "regime"
+    ],
+    "completed_at": "2026-04-18T00:40:22.229696",
+    "outcome": "D4 NULL: Wald(β_up=β_down) p=0.849. Same-sign same-magnitude across regimes confirms K1108c pooled NULL is genuine not masking."
+  },
+  {
+    "id": "K1108d_transcript_scrape",
+    "title": "K1108d_transcript_scrape: 補 MOPS/10-Q transcript coverage to >=60% before Paper 2 final submission",
+    "priority": 3,
+    "description": "K1108d coverage 8.9% below 60% gate. Scrape TSMC/UMC MOPS 重大訊息 + TSM/GFS/SMIC 10-Q earnings calls for utilisation/ASP/R&D tokens pre-2024. Rerun K1108d spec with ≥60% coverage; finalize industry-FE commitment only after this.",
+    "status": "completed",
+    "created_at": "2026-04-18T00:53:30.983850",
+    "tags": [
+      "K1108d-followup",
+      "Paper2",
+      "coverage",
+      "submission-gate"
+    ],
+    "completed_at": "2026-04-18T01:41:26.568249",
+    "outcome": "FINAL_NULL with UNCERTAIN_SCRAPE: coverage 8.9%→96.3% via LLM extraction (79.3% LLM share). Partial-F p=0.320. Paper 2 narrative upgraded to INDUSTRY_FIXED_EFFECT_NO_ATTRIBUTABLE_CHANNEL_FINAL. Submission caveat: reviewer may challenge LLM provenance."
+  },
+  {
+    "id": "Paper3_K1128_pivot_decision",
+    "title": "Paper 3 K1128 narrative pivot decision: abandon VIX-regime → adopt pooled microstructure signal (K1142 anchor)",
+    "priority": 4,
+    "description": "4 complementary K1128 NULL/PARTIAL experiments done (K1128/K1131/K1142/K1199) satisfying >=3 gate. Main thread decide: (a) Full reframe to K1142 vol-norm pooled signal anchor; (b) Hybrid K1128 null + K1142 positive subframe; (c) Abandon Paper 3 leverage-only direction entirely. | K1205 synthesis completed (commit e7088770): integrity 7/7 PASS, recommends path (b) hybrid null+positive negative-result methodology paper. Figures ready at experiments/k1205/.",
+    "status": "pending",
+    "created_at": "2026-04-18T00:54:17.549854",
+    "tags": [
+      "Paper3",
+      "narrative-pivot",
+      "decision-required",
+      "K1128"
+    ],
+    "synthesis_ready": true
+  },
+  {
+    "id": "BTC_GAS_negative_paper",
+    "title": "Negative-result methodology paper: \"Why GAS-t fails on BTC — Student-t innovation is the culprit, MS cannot rescue it\"",
+    "priority": 4,
+    "description": "K1129 full-sample reversal + K1133 sub-period concentration (P1 t=-4.67) + K1133b decomposition (75% Student-t innovation, 25% GAS dynamics NS) + MS-GAS rescue analysis. Materials: k1129 + k1133 + k1133b. Feasible as JBF-style methodology paper. Main thread decides framing after K1133b synthesis.",
+    "status": "pending",
+    "created_at": "2026-04-18T01:08:17.057769",
+    "tags": [
+      "Paper-new",
+      "BTC",
+      "GAS",
+      "negative-result",
+      "methodology"
+    ]
+  },
+  {
+    "id": "K1203_EEM_PIT",
+    "title": "K1203: EEM PIT alt-data test — complete Paper 4 7/7 panorama",
+    "priority": 3,
+    "description": "K1201 completed QQQ+USO PIT NULL; Paper 4 panorama now 6/7 (SPY/GLD/TLT/BTC/QQQ/USO). EEM remaining. Test weekly AR(1)+IV vs +alt-data (epu/finstress/all) with K1116f PIT lags for ^EEM (or VXEEM proxy if available). agent-launchable 2h.",
+    "status": "completed",
+    "created_at": "2026-04-18T01:34:47.609307",
+    "tags": [
+      "K1116-followup",
+      "Paper4",
+      "EEM",
+      "PIT"
+    ],
+    "completed_at": "2026-04-18T01:46:41.583067",
+    "outcome": "UNIVERSAL_NULL_7_OF_7: EEM DM max |t|=3.54 (epu), zero Harvey pass. Paper 4 body gate UNLOCKED."
+  },
+  {
+    "id": "K1202b_primary_source_verify",
+    "title": "K1202b: Primary-source hand-verify K1202 LLM-extracted D2 data (reviewer credibility)",
+    "priority": 3,
+    "description": "K1202 80%+ LLM_EXTRACTED_FROM_PUBLIC triggers UNCERTAIN_SCRAPE. For Paper 2 submission credibility, hand-verify >=1 firm × >=5 quarters via primary sources (TSMC/UMC MOPS 法說會 raw PDF + TSM 10-Q MD&A direct). Cross-check LLM values against primary. If >10% divergence → rerun D2 with hand-verified subset; if <5% → LLM provenance defensible as appendix note.",
+    "status": "pending",
+    "created_at": "2026-04-18T01:41:26.568266",
+    "tags": [
+      "K1202-followup",
+      "Paper2",
+      "submission-gate",
+      "reviewer-defense"
+    ]
+  },
+  {
+    "id": "Paper4_body_rewrite",
+    "title": "Paper 4 body_v4.tex rewrite: incorporate K1203 + UNIVERSAL_NULL_7_OF_7 FINAL claim",
+    "priority": 4,
+    "description": "Paper 4 body.tex rewrite gate UNLOCKED via K1116c+K1116f+K1201+K1203 4-experiment quorum. Main thread: body_v4.tex new section on 7-asset panorama + ^VXEEM delisting caveat + TLT finstress regime-artefact footnote. FINAL native-IV sufficiency claim.",
+    "status": "pending",
+    "created_at": "2026-04-18T01:46:41.583082",
+    "tags": [
+      "Paper4",
+      "body-rewrite",
+      "narrative-final"
+    ]
+  },
+  {
+    "id": "Paper2_section5_rewrite",
+    "title": "Paper 2 §5 cross-market rewrite: apply K1204 synthesis (STRENGTHENED + 3 caveats) + Figures A-E",
+    "priority": 4,
+    "description": "K1204 synthesis materials ready (commit cf5188eb). Main thread body_v4.tex §5 rewrite: adopt STRENGTHENED with 3-caveat narrative (EM cost-of-capital, AU sector, EU ROBUST), insert Figures A-E, reference K1165/K1166/K1168/K1172/K1171/K1173/K1163 iterations.",
+    "status": "pending",
+    "created_at": "2026-04-18T02:06:04.706687",
+    "tags": [
+      "Paper2",
+      "section5",
+      "rewrite",
+      "narrative-final"
+    ]
+  },
+  {
+    "id": "Paper1_Table6_errata",
+    "title": "Paper 1 Table 6 errata: update StudentT5 57.1→76.2, Skewed-t 76.2→90.5, CF-VaR 66.7→76.2",
+    "priority": 4,
+    "description": "K1206 forensic confirms 3/5 divergent methods NOT reconstructible (hypothesis b bisection falsified; a vintage + c spec insufficient). Paper 1 body_v4.tex Table 6 errata: 3 cell updates + footnote citing K1186/K1206 replication package. Main thread task.",
+    "status": "pending",
+    "created_at": "2026-04-18T02:10:32.319584",
+    "tags": [
+      "Paper1",
+      "errata-batch-2",
+      "Table6",
+      "K1186-K1206-followup"
+    ]
+  },
+  {
+    "id": "K1213_AU_multistart",
+    "title": "K1213: AU pooled multi-start refit to escape secondary local minimum (K1210 NUMERICAL_FRAGILITY follow-up)",
+    "priority": 3,
+    "description": "K1210 diagnosed AU pooled theta_EAV 3.2e-5 stuck in secondary local minimum (per-stock mean 1.8e-4, 6x divergence; jitter bimodal 2/10 explode; drop-BHP LOO 0.150->1.37 amplification). Run multi-start pooled MLE on K1171 AU 10-stock pool with 50-100 random initializations, keep best by LL. Compare basin-A (current 0.150) vs basin-B (likely closer to per-stock mean). If basin-B is global → AU below-ladder CONFIRMED or OVERTURNED depending on new rho direction.",
+    "status": "completed",
+    "created_at": "2026-04-18T02:35:58.757216",
+    "tags": [
+      "K1210-followup",
+      "Paper2",
+      "AU",
+      "numerical-fragility",
+      "pooled-MLE"
+    ],
+    "completed_at": "2026-04-18T02:50:33.770850",
+    "outcome": "ABOVE_LADDER_OVERTURNED: basin-B θ_rel=1.476 LR vs K1171 >>χ²(1). K1171 stuck in neither local max — it was artifact. AU sits ABOVE US in ladder. K1211 draft §5.5 revision required."
+  },
+  {
+    "id": "K1211_revise_AU",
+    "title": "K1211 Paper 2 §5 draft: revise §5.5 AU from below-ladder to above-ladder (K1213 result)",
+    "priority": 3,
+    "description": "K1213 overturns K1171 below-ladder framing. K1211 §5.5 must be revised: AU θ_rel ∈ [1.07, 1.48] ABOVE ladder. K1210 H2 ±1-day precision partially superseded by numerical entrapment. Primary Spearman unchanged (ρ=+0.418). Update trajectory table + narrative commitment.",
+    "status": "pending",
+    "created_at": "2026-04-18T02:50:33.770865",
+    "tags": [
+      "K1211-revision",
+      "Paper2",
+      "AU-overturned"
+    ]
+  },
+  {
+    "id": "K1216b_CH_ID_multistart",
+    "title": "K1216b: CH/ID multistart completion (EM widespread fragility verification)",
+    "priority": 4,
+    "description": "Complete EM fragility audit: K1216 covered BR/IN/MX. CH (K1168) + ID (K1172) remaining. Same 100-start L-BFGS-B+NM+DE pattern. If also fragile → Paper 2 §5 certain 6-market-EM revision.",
+    "status": "completed",
+    "created_at": "2026-04-18T03:13:18.883452",
+    "tags": [
+      "K1216-followup",
+      "Paper2",
+      "numerical-fragility"
+    ],
+    "completed_at": "2026-04-18T03:23:32.609931",
+    "outcome": "ALL_5_EM_FRAGILE: CH LR=598, ID LR=365. Primary ρ N=13 collapses to -0.071 p=0.817 (from K1172 +0.441). Paper 2 §5 cross-market ordering VANISHES at global optimum."
+  },
+  {
+    "id": "K1216c_developed_multistart",
+    "title": "K1216c: Developed markets (US/EU/JP/TW) multistart sanity check",
+    "priority": 4,
+    "description": "If K1216 WIDESPREAD_FRAGILITY extends to DEV markets → Paper 2 §5 methodology root-cause (MLE design) not EM-specific. Apply 100-start to US/EU/JP/TW pools for full paper revision scope.",
+    "status": "pending",
+    "created_at": "2026-04-18T03:13:18.883460",
+    "tags": [
+      "K1216-followup",
+      "Paper2",
+      "numerical-fragility"
+    ]
+  },
+  {
+    "id": "Paper2_section5_major_revision",
+    "title": "Paper 2 §5 MAJOR trajectory revision (K1215 supersede): integrate K1216 WIDESPREAD_FRAGILITY",
+    "priority": 4,
+    "description": "K1215 K1213 AU-only revision SUPERSEDED by K1216 EM widespread fragility. Whole trajectory K1165-K1172 needs rebuild. Main-thread task, blocked until K1216b+c complete for scope.",
+    "status": "pending",
+    "created_at": "2026-04-18T03:13:18.883461",
+    "tags": [
+      "K1216-followup",
+      "Paper2",
+      "numerical-fragility"
+    ]
+  },
+  {
+    "id": "K1100g_d9_cadence_verify",
+    "title": "K1100g_d9: rerun K1100g_d8 with d7 cadence (refit_every=5 n_restarts=10) to disambiguate sign flip",
+    "priority": 3,
+    "description": "K1100g_d8 N225 DM +2.32 → -1.33 sign flip likely refit-cadence artifact (d7 used refit_every=5, d8 used 25). Rerun skewed-t on N225+SPY with d7 cadence. If sign holds under d7 cadence → signal real. If flips back positive → cadence artifact confirmed, Path (b) still candidate.",
+    "status": "pending",
+    "created_at": "2026-04-18T03:28:41.635550",
+    "tags": [
+      "K1100g-followup",
+      "Paper3",
+      "cadence-verify"
+    ]
+  },
+  {
+    "id": "K1222b_revise_post_K1216c",
+    "title": "K1222b: Revise K1222 Paper 2 §5 guide to integrate K1216c (ρ rebounds to +0.379 not collapse to -0.071)",
+    "priority": 3,
+    "description": "K1222 wrote narrative around K1216b -0.071 COLLAPSE headline. K1216c revealed asymmetric-refinement artifact; 9-market consistent refined ρ=+0.379 p=0.20 (statistically indistinguishable from canonical +0.441). K1222b supersede K1222: (1) ρ REBOUNDS not collapses; (2) Paper 2 §5 shifts from \"RETRACTED cross-market ladder\" to \"multistart methodology contribution + cross-market ladder modestly weaker but surviving\"; (3) three-version Spearman table.",
+    "status": "pending",
+    "created_at": "2026-04-18T06:17:42.553113",
+    "tags": [
+      "K1222-supersede",
+      "Paper2",
+      "K1216c-integration"
+    ]
+  },
+  {
+    "id": "K1235b_A4f_spec_replication",
+    "title": "K1235b: A4f spec replication on FEZ + STOXX50E to vindicate paper Table 6 claimed t=3.45/3.64",
+    "priority": 3,
+    "description": "K1235 with K949 log-exp spec gave FEZ t=4.03 / STOXX50E t=5.01 (MISMATCH paper 3.45/3.64). Paper 9 Table 6 uses A4f spec (VIX², free ω, OOS 2019-2026, refit=63). K1235b replicates A4f spec on same 2 tickers. If A4f matches 3.45/3.64 → paper claim vindicated (path a), no errata needed. If also MISMATCH → path (a) full Table 6 replacement required.",
+    "status": "completed",
+    "created_at": "2026-04-18T07:10:12.244743",
+    "tags": [
+      "K1235-followup",
+      "Paper9",
+      "A4f-spec"
+    ],
+    "completed_at": "2026-04-18T07:19:44.086980",
+    "outcome": "BORDERLINE: FEZ 3.11 + STOXX50E 3.92 both within Harvey ±0.5 of paper claims (3.45/3.64) + clear |t|>3. R2 path (b) footnote, errata NOT required. K1232 fully resolved."
+  },
+  {
+    "id": "K716_upgrade_to_errata",
+    "title": "K716 upgrade from option (a) to (c) errata disclosure per K1249 finding",
+    "priority": 3,
+    "description": "K1249 confirmed K716 (a) rebuild BLOCKED by yfinance data-vintage drift (N=767 vs paper 893 unreproducible; slope 3.57% drift; t-stat 48% divergence). SAR Table 3 preserves ≤0.82%. Recommended: option (c) errata disclosure in paper/volatility-absorption/README.md + docs/error_log.md. Qualitative paralysis claim + SAR Table 3 remain valid.",
+    "status": "pending",
+    "created_at": "2026-04-18T08:19:19.745834",
+    "tags": [
+      "K1249-followup",
+      "Paper8",
+      "errata",
+      "K716"
+    ]
   }
 ]

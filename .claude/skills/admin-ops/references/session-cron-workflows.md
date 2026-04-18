@@ -1,12 +1,16 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 # Session Cron Workflows
 
-這份文件給本地 `Claude Code + session cron` 使用。目的不是定義研究內容，而是把**平台層工作**包成穩定、可重複採用的節奏。
+這份文件給本地 **Claude Code / Codex + local control plane** 使用。目的不是定義研究內容，而是把**平台層工作**包成穩定、可重複採用的節奏。
 
 ## 原則
 
 - 先讀摘要，再決定是否執行寫入
 - 沒有需要就不要每天重做整站操作
 - ranking / release 都要保留可觀測結果
+- user-assigned 任務永遠高於 scheduled / agent-discovered
+- 先寫正式 queue task，再執行；不要只靠聊天上下文記住待辦
 - 若治理文件需要被刪除或改寫，先停下來取得使用者同意
 
 ## 1. 6 小時會員問題重排
@@ -189,19 +193,21 @@ uv run python -m volpred.cli ops paper-upload-pdf --paper-id <id> --file paper/<
 
 ## 6. 推薦的最小採用方式
 
-經 2026-03-21 全面測試驗證，建議的最小啟動集：
+v2 建議的最小啟動集：
 
 ```
 CronCreate(cron="13 */6 * * *", prompt="會員問題研究")     # 6 小時重排
 CronCreate(cron="37 */6 * * *", prompt="平台巡檢")         # 6 小時巡檢（health + cycle summary）
-CronCreate(cron="47 */2 * * *", prompt="每2小時 git commit") # 自動存檔
-CronCreate(cron="7 * * * *", prompt="知識索引更新")         # 每小時
+CronCreate(cron="3 9 * * *", prompt="每日任務審視與執行計劃") # 每日計劃與 queue 補單
+CronCreate(cron="7 */6 * * *", prompt="知識索引檢查")         # 6 小時檢查
+CronCreate(cron="23 22 * * *", prompt="Token 用量日報")      # 每日一次
 ```
 
-先讓 Claude 養成：
+先讓本機 agent 養成：
 
 - 先讀摘要（`platform-cycle-summary` / `question-ranking-workflow`）
 - 再決定是否寫入
-- 寫入後留可觀測結果（snapshot 存 `storage/ops/`）
+- 寫入前先建立正式 queue task（`uv run python -m volpred.cli ops assign ...`）
+- 寫入後留可觀測結果（snapshot / execution receipt 存 `storage/ops/`）
 
-等穩定後再加入「繼續研究」高頻 cron 進入全速模式。
+**不再建議加入高頻「繼續研究」cron。** 研究續跑改由 queue 清空後的 idle-driven continuation 處理。
