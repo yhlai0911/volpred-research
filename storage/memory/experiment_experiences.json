@@ -1057,5 +1057,32 @@
       "K1107",
       "K1108"
     ]
+  },
+  {
+    "id": "E076",
+    "title": "Audit 時先信 stored experiment JSON 為 canonical, 不要憑手算 recompute 推翻 paper 數字",
+    "category": "methodology",
+    "lesson": "Reproducibility audit 應以 `experiments/kXXX/*_results.json` / `paper/<name>/experiments/*.json` 的 stored output 為 canonical; 手算時易踩 sample-vs-population CV、raw-score-vs-total-score 之類細節差, 會把實際 reproducible 的數字誤判為 divergent. 正確順序: (1) 先 grep paper 數字, (2) 在 stored JSON 找 exact 對應 key, (3) 只有 stored JSON 也沒有時才 recompute, 且 recompute 誤差也要記錄與 paper 對照.",
+    "examples": [
+      "Paper 4 K752 CV=0.3309 被舊 audit 旗為 divergent — 實為 synthesis.r2_cv = 0.3309 stored 可直接對齊.",
+      "Paper 4 K780 total_score=1.9407 / 1.6257 被舊 audit 旗為 divergent — 實為 part_d_economic_ranking.{amem,gjr}.total_score 可直接對齊.",
+      "若以手算 (e.g. N-1 vs N, 用小樣本 sample std) 推翻 stored JSON, 會產生 false positive divergence 汙染後續修 tex 判斷."
+    ],
+    "recommendation": "每次 audit / reproducibility check: 明寫 `rule: stored JSON is canonical over manual recompute`. 若 stored JSON 缺 key 就先開 code task expose 它, 不要跳過 stored JSON 直接手算.",
+    "source_task_id": "task_a2ad5cff36e9",
+    "created_at": "2026-04-18T06:08:02.931407+00:00"
+  },
+  {
+    "id": "E077",
+    "title": "Paper table 若混 sample 窗 / 混實驗 id, 即便 cell 數字可追溯, ranking claim 仍不合 Patton 2011 公平比較",
+    "category": "methodology",
+    "lesson": "即使每個 cell 都能對上 stored JSON, 只要 rows 來自不同 sample window / 不同 K 實驗, ranking / dominance claim 就不成立. Paper 4 Table 3: 50/50 SPY/GLD Sharpe 0.947 來自 K507 (2005-2026, n=5339); 12/VIX Sharpe 0.870 來自 K731 不同期間. L493 的 ranking 解讀屬 methodologically unfair, 需先選 canonical source 重跑同窗比較, 或明確標示 sample-window caveat. 這類問題屬 audit divergent (b): 不是數字錯, 是方法論錯.",
+    "examples": [
+      "Paper 4 L493 '12/VIX 不如 50/50 BH' — K507 vs K731 sample 窗不同, 不是 fair Patton 2011 comparison.",
+      "Paper 4 Table 10 標籤 SPY/GLD 但數據來自 K738 cross_asset_summary, 混 SPY+GLD+其他 asset 平均 → 標籤誤導."
+    ],
+    "recommendation": "撰 paper table 時: (1) 表頭註明 sample window + 來源 K; (2) Ranking / dominance claim 必用同一 K 或強制跨 K pooled OOS window; (3) 若 fair 比較不可得, 明寫 'not directly comparable' 而非 rank.",
+    "source_task_id": "task_a2ad5cff36e9",
+    "created_at": "2026-04-18T06:08:02.931591+00:00"
   }
 ]

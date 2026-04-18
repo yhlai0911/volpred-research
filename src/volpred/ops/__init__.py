@@ -86,11 +86,16 @@ from .questions import (
 )
 from .strategies import activate_strategy, deactivate_strategy, upsert_strategy_metadata
 from .sync import run_daily_update, run_recalc_metrics, sync_all
+from .supervisor import build_supervisor_snapshot, load_supervisor_rules
+from .autotune import autotune_supervisor_rules
 
 __all__ = [
     "activate_strategy",
     "admin_override_claim",
     "adopt_experiment_files",
+    "autotune_supervisor_rules",
+    "build_supervisor_snapshot",
+    "load_supervisor_rules",
     "answer_internal_question",
     "build_question_rerank_workflow",
     "claim_question_for_research",

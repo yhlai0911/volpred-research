@@ -32,8 +32,9 @@
     "title": "Paper 10 Crypto Fear Channel 論文",
     "priority": 2,
     "description": "[Renumbered 2026-04-17 from Paper6_start → Paper10_start. Paper 6 slot belongs to paper/prg-periodic-garch/ (Periodic Realized GARCH). Crypto Fear Channel becomes Paper 10 = the 10th paper in the project.] K639/K746b/K1025 素材齊備。主線程撰寫 [STARTED 2026-04-17: paper/crypto-fear-channel/outline.md created. Next main-thread session: draft Abstract + Introduction.]",
-    "status": "in_progress",
-    "started_at": "2026-04-17T17:50:00+08:00"
+    "status": "pending",
+    "started_at": "2026-04-17T17:50:00+08:00",
+    "last_note": "[session-restart-2026-04-18] cleared stale in_progress: no agent claim"
   },
   {
     "id": "Paper3_strategic_decision",
@@ -54,7 +55,8 @@
     "title": "K1125: OFI × Lee-Mykland jump detection",
     "priority": 2,
     "description": "Agent a9109d114c8b9e792 in worktree agent-k1125。K1124 衍生：直接續測 |OFI| → JUMP 預測（不是 diffusive vol）。reuse K1124 cache。Lee-Mykland test + logistic regression 4 spec。",
-    "status": "in_progress"
+    "status": "pending",
+    "last_note": "[session-restart-2026-04-18] cleared stale in_progress: no agent claim"
   },
   {
     "id": "leverage_direction_review_v2",
@@ -68,7 +70,8 @@
     "title": "Paper vix-sufficiency 擴充：integrate K1116/K1118/K1116b/K1121 + K504/K1098",
     "priority": 1,
     "description": "Agent a90f872c29a03c25d 產出 integration_plan_v2.md。今日 6+ 實驗直接擴大 paper evidence base，從 SPY-only 升級為 cross-asset universal compendium。最佳 paper 排名第 1 (貢獻度 × 完成度)。",
-    "status": "in_progress"
+    "status": "pending",
+    "last_note": "[session-restart-2026-04-18] cleared stale in_progress: no agent claim"
   },
   {
     "id": "K1133",
@@ -558,7 +561,7 @@
   {
     "id": "K998_add_vrp_autocorr_to_json",
     "title": "K998: 小 fix — vrp_autocorr_lag1 寫入 JSON (解 Paper 9 1 個 no-source)",
-    "status": "pending_main_thread",
+    "status": "done",
     "priority": 2,
     "created_at": "2026-04-17T17:12:12+08:00",
     "description": "K998.py 第 129 行 compute autocorr 但只 print, 未寫入 JSON. 主線程一行 fix: results['vrp_autocorr_lag1'] = float(np.corrcoef(oos_vrp[1:], oos_vrp[:-1])[0,1]). 然後重跑 K998 產 JSON. 解 Paper 9 autocorr=0.20 no-source.",
@@ -567,7 +570,9 @@
       "k998",
       "small-fix",
       "main-thread"
-    ]
+    ],
+    "completed_at": "2026-04-18T20:44:39.840185",
+    "last_note": "Done 2026-04-18 cron 21:11: added results[\"diagnostics\"] with oos_vrp_autocorr_lag1=0.2034 (matches Paper 9 claim 0.20) + skew/kurt/mean/std"
   },
   {
     "id": "Data_summary_script_SPY_VIX",

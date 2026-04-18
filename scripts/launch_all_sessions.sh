@@ -41,24 +41,29 @@ _open_window() {
   local cli_cmd="$2"
   local title="$3"
   local session_key="$4"
-  local auto_loop_prefix="$5"  # e.g. "/loop 15m " for Claude Code sessions; "" for codex
+  local sleep_seconds="$5"  # shell-wrapper loop interval (seconds) between CLI exec calls
 
-  # 組合要在 Terminal.app 裡跑的指令：
-  #   cd → source bootstrap（設 VOLPRED_SESSION_KEY + session-bootstrap）
-  #      → 啟動 CLI 並把 prompt 當 positional 參數送進互動 session
-  #      → 若是 Claude Code session，prompt 前綴加 "/loop <interval> " 讓 session 啟動即自動循環
+  # 組合要在 Terminal.app 裡跑的指令：shell-level while-loop，每次 CLI 非互動執行
+  # 一次 prompt（single-shot），跑完退出→ sleep → 下一輪 re-exec。這比 /loop skill
+  # 可靠（/loop skill 不支援 CLI positional arg 觸發）。
+  # 使用 -p 讓 Claude 跑 non-interactive mode；Codex 原生 single-shot。
+  local exec_cmd
+  if [[ "${cli_cmd}" == claude* ]]; then
+    exec_cmd="${cli_cmd} -p \"\$(cat scripts/agent_prompts/${session_key}.txt)\""
+  else
+    exec_cmd="${cli_cmd} \"\$(cat scripts/agent_prompts/${session_key}.txt)\""
+  fi
+
   local inner_cmd
   inner_cmd="cd '${PROJECT_DIR}' && "
   inner_cmd+="source scripts/bootstrap_agent_session.sh ${role} && "
-  if [[ -n "${auto_loop_prefix}" ]]; then
-    # Claude Code: 把 "/loop Nm <prompt>" 作為首發 user message，session 啟動就進自動循環
-    inner_cmd+="${cli_cmd} \"${auto_loop_prefix}\$(cat scripts/agent_prompts/${session_key}.txt)\""
-  else
-    # Codex: 沒有 /loop skill，用 shell wrapper 包 while loop 週期 re-exec
-    #   codex 跑完 prompt 退出 → sleep → 下一輪 re-exec
-    #   task queue 空時 codex 自己 null-poll 結束，shell wrapper 接力
-    inner_cmd+="while true; do ${cli_cmd} \"\$(cat scripts/agent_prompts/${session_key}.txt)\"; echo '[auto-loop] codex session ended, sleep 300s then restart'; sleep 300; done"
-  fi
+  inner_cmd+="echo '[auto-loop] ${session_key} starting shell-wrapper loop (sleep ${sleep_seconds}s between rounds)' && "
+  inner_cmd+="while true; do "
+  inner_cmd+="echo '[auto-loop] === $(date +%H:%M:%S) round start ==='; "
+  inner_cmd+="${exec_cmd}; "
+  inner_cmd+="echo '[auto-loop] === round done, sleep ${sleep_seconds}s ==='; "
+  inner_cmd+="sleep ${sleep_seconds}; "
+  inner_cmd+="done"
 
   # 轉義 double-quote 以便塞進 AppleScript
   local escaped_cmd="${inner_cmd//\\/\\\\}"
@@ -84,22 +89,24 @@ if [[ -f "${AUTO_LOOP_FLAG}" ]]; then
 fi
 echo
 
-# T1 supervisor: /loop 15m — 每 15 分鐘跑一次啟動檢查 + 派工判斷
-_open_window supervisor    "claude --dangerously-skip-permissions"              "T1 supervisor (claude-supervisor)" "claude-supervisor" "/loop 15m "
+# 全部用 shell-wrapper while-sleep-re-exec 模式，interval 從 config/supervisor_rules.json 讀
+# 預設：supervisor 900s (15 min)、worker 600s (10 min)、codex 300s (5 min)
+# 不再用 /loop skill — Claude Code CLI positional arg 不觸發 slash command，/loop 路線走不通
+_open_window supervisor    "claude --dangerously-skip-permissions"              "T1 supervisor (claude-supervisor)" "claude-supervisor" 900
 sleep 1
-# T2 claude-worker: /loop 10m — 每 10 分鐘 poll next-task；有 task 則執行，無則結束本輪
-_open_window worker-claude "claude --dangerously-skip-permissions"              "T2 claude-worker"                   "claude-worker"     "/loop 10m "
+_open_window worker-claude "claude --dangerously-skip-permissions"              "T2 claude-worker"                   "claude-worker"     600
 sleep 1
-# T3 codex-worker: 沒有 /loop skill，shell wrapper 包 while-sleep-restart
-_open_window worker-codex  "codex --dangerously-bypass-approvals-and-sandbox"   "T3 codex-worker"                    "codex-worker"      ""
+_open_window worker-codex  "codex --dangerously-bypass-approvals-and-sandbox"   "T3 codex-worker"                    "codex-worker"      300
 
 cat <<EOF
 
-✅ 三個 Terminal.app 視窗已開啟，**全自動循環模式**：
-   T1 supervisor：/loop 15m — 每 15 分鐘跑啟動檢查 + 派工判斷
-   T2 claude-worker：/loop 10m — 每 10 分鐘 poll next-task + 執行
-   T3 codex-worker：shell wrapper 包 while-sleep 300s — codex 跑完自動 re-exec
+✅ 三個 Terminal.app 視窗已開啟，**shell-wrapper 自動循環模式**：
+   T1 supervisor：每 900s (15 min) claude -p 跑一次首發 prompt
+   T2 claude-worker：每 600s (10 min) claude -p 跑一次
+   T3 codex-worker：每 300s (5 min) codex 跑一次
 
-三個 session 啟動即自動運作，**用戶不需輸入任何指令**。
-停止方式：bash scripts/shutdown_all_sessions.sh --kill（或在各 terminal Ctrl+C）
+每輪 CLI 都是 non-interactive single-shot 執行（-p 模式），讀 CLAUDE.md 規則 + prompt →
+執行工作循環 → 退出 → sleep → 下一輪。用戶不需輸入任何指令。
+
+停止方式：bash scripts/shutdown_all_sessions.sh --kill（或在各 terminal Ctrl+C 再關 tab）
 EOF

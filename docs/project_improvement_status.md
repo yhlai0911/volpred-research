@@ -662,3 +662,45 @@ Last updated: 2026-04-18
   https://code.claude.com/docs/en/sub-agents  
   https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan/  
   https://github.com/openai/codex
+
+
+---
+
+## 2026-04-18 Supervisor TODO — Paper 4 (vix-sufficiency) main_v2.tex patches
+
+**Source**: Paper 4 reproducibility audit (task_a2ad5cff36e9, codex-worker) → `paper/vix-sufficiency/reproduce_report_2026-04-18.md`. Audit confidence: strong + codex_reviewed.
+
+**規則**: 論文 .tex 寫作只能 supervisor 親自做 (CLAUDE.md §論文 .tex 寫作). 以下三條屬 supervisor 不可派工 backlog, 必須等 supervisor 有 narrative patch window 時執行 (非自動 tick 派工). 相關 knowledge: `PAPER4_AUDIT` item_id=2baed83f. Relevant experiences: E076, E077.
+
+### TODO-P4-PATCH-1: K745 `41.8% QLIKE improvement` 方向反轉 (推薦 (a) 直接改 tex)
+- **Location**: `paper/vix-sufficiency/main_v2.tex:98, 703, 813`
+- **事實**: K745 `key_comparison.improvement_pct = -41.8` 意味 **daily HAR-ABS 勝 5-min HAR-RV 41.8%**, 不是反過來.
+- **修法**: 改三處敘述為 "5-min HAR-RV underperforms best daily model by 41.8%" 或等義表達; 確保 L98 claim、L703、L813 一致.
+- **相關檔**: `paper/vix-sufficiency/experiments/k745_pilot_har_rv_results.json` (n_oos=37)
+
+### TODO-P4-PATCH-2: Table 6 era-cells 數量級錯誤 + "Harvey Pass? 0/5" 錯判 (推薦 (a))
+- **Location**: `paper/vix-sufficiency/main_v2.tex:583-590`
+- **Canonical source**: `paper/vix-sufficiency/experiments/k752_vix_sufficiency_eras_results.json -> part_d_competing_signals_by_era`
+- **Divergent cells**: Overnight VIX Era3 (0.0004→0.0039), Era5 (0.0003→0.0032); VRP proxy Era3 (0.0008→0.0160); Vol mom 20/60 Era3 (0.0006→0.0216), Era5 (0.0002→0.0372).
+- **Harvey Pass 正解**: **4 pass** (Era3: Overnight VIX t=-3.15, VRP t=-6.51, Vol mom t=+7.60; Era5: Vol mom t=+9.30), 不是 0/5.
+- **修法**: 重寫 Table 6 + header claim + narrative 討論 era 5 VRP failure mechanism (現有文字仍保留但把 "0/5" 改 "4/10 pass Harvey t>3.0 threshold").
+
+### TODO-P4-PATCH-3: Table 3 mixed-sample-window Sharpe ranking 方法論不公 (推薦 (b) 重寫)
+- **Location**: `paper/vix-sufficiency/main_v2.tex:470-471, 493`
+- **問題**: BH 50/50 Sharpe 0.947 來自 K507 (2005-01-03 – 2026-03-26, n=5339); 12/VIX Sharpe 0.870 來自 K731 不同 sample 窗. L493 ranking claim 混期間.
+- **修法**: 選 canonical — 要嘛把 BH 50/50 改用 K731 同窗, 要嘛在 K507 同窗加跑 12/VIX (需新 code task), 要嘛 Table 3 加註 sample-window caveat 並撤回 ranking claim. 決策前不要改 tex.
+- **實驗側配合**: 若走 K507 窗統一跑, 可能需派 code task 在 K731 script 加 K507 matching period.
+
+### TODO-P4-PATCH-4: Table 10 SPY/GLD label 與 K738 cross-asset 輸出不符 (推薦 (c) 產 canonical 或 relabel)
+- **Location**: `paper/vix-sufficiency/main_v2.tex:772-775`
+- **問題**: Table 10 row label 寫 "SPY/GLD", 但 `3.49%/yr` / `2.12%/yr` 取自 K738 `cross_asset_summary.avg_return_drag_{12vix,ewma}` (跨所有 asset 平均); 而 K738 per-asset output 的 mdd_reduction_pp SPY=20.28, GLD=9.42 不是 paper 寫的 -8.2pp.
+- **修法選項**: (i) 在 experiments/k738/ 開 subtask 算 SPY/GLD two-asset 專屬 insurance cost output + 存 JSON, 然後 supervisor 改 tex 用該 output; 或 (ii) supervisor 直接 relabel Table 10 為 "Cross-asset summary (6-asset)" 去掉 SPY/GLD 特稱.
+- **建議先等 supervisor 決定走 (i) 或 (ii) 再派 code task**.
+
+### 不派 worker 的理由
+- P4-PATCH-1/2: 純論文文字修訂 → supervisor 專屬.
+- P4-PATCH-3: 需 narrative 決策 (選哪個 canonical window) → supervisor 判斷.
+- P4-PATCH-4: 需先走 narrative 決策 (relabel vs rerun) → supervisor 判斷後才能 spawn code task.
+- **已派 worker 的部分**: `task_a683510edfc3` (codex-worker, code) — expose Table 2 behavioral sentiment (K732) + calendar anomaly OOS (K736) intermediate outputs, 讓 Table 2 也能 reproduce.
+
+_Created 2026-04-18 06:09 UTC by claude-supervisor from audit task_a2ad5cff36e9._

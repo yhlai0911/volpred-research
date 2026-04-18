@@ -313,6 +313,18 @@ results['contemporaneous'] = {
     'spearman_p': float(spear_g_vrp.pvalue),
 }
 
+# Diagnostics — persisted so Paper 9 Table 1 has a citable source
+# (previously only printed at line 129; Paper 9 autocorr=0.20 no-source task)
+results['diagnostics'] = {
+    'oos_vrp_autocorr_lag1': float(np.corrcoef(oos_vrp[1:], oos_vrp[:-1])[0, 1]),
+    'oos_vrp_mean_bps_ann': float(np.mean(oos_vrp) * 252 * 1e4),
+    'oos_vrp_std_bps_ann': float(np.std(oos_vrp) * 252 * 1e4),
+    'oos_vrp_skewness': float(stats.skew(oos_vrp)),
+    'oos_vrp_kurtosis': float(stats.kurtosis(oos_vrp)),
+    'oos_ret_mean_ann': float(np.mean(oos_ret) * 252),
+    'oos_ret_std_ann': float(np.std(oos_ret) * np.sqrt(252)),
+}
+
 # Use valid series
 g_v = g_series[valid]
 vrp_v = vrp_oos[valid]
