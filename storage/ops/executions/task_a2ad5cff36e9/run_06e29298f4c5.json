@@ -1,0 +1,68 @@
+{
+  "task_id": "task_a2ad5cff36e9",
+  "run_id": "run_06e29298f4c5",
+  "agent_name": "codex",
+  "result_status": "succeeded",
+  "summary": "Paper 4 audit done: report created at paper/vix-sufficiency/reproduce_report_2026-04-18.md; main issues are K745 sign reversal, Table 6 era mismatches, mixed-period Table 3 benchmarking, and unmapped Table 2/Table 10 outputs.",
+  "commands_run": [],
+  "files_touched": [],
+  "subagent_count": 0,
+  "session_id": "codex-worker:84101",
+  "rollback_point_id": "codex-worker_session_20260418T044812Z_84101",
+  "session_key": "codex-worker",
+  "role": "worker",
+  "signal_payload": {
+    "summary_text": "Paper 4 main_v2 reproducibility audit completed: structured corpus 69 matched / 0 approx / 9 divergent / 1 missing, with extra unmapped Table 2 fields and a Table 10 source-label gap noted in the report.",
+    "null_result": false,
+    "knowledge_candidates": [
+      {
+        "topic": "paper4_main_v2_reproducibility_audit_2026_04_18",
+        "one_line_finding": "Paper 4 main_v2.tex is mostly reproducible against stored JSON outputs, but K745's 41.8% claim is sign-reversed, Table 6 understates era exceptions, Table 3 mixes sample periods, and Table 2/Table 10 still have unmapped canonical outputs.",
+        "evidence_paths": [
+          "paper/vix-sufficiency/reproduce_report_2026-04-18.md",
+          "paper/vix-sufficiency/experiments/k745_pilot_har_rv_results.json",
+          "paper/vix-sufficiency/experiments/k752_vix_sufficiency_eras_results.json",
+          "experiments/k507/k507_dynamic_allocation_results.json"
+        ],
+        "confidence": "strong",
+        "codex_reviewed": true
+      }
+    ],
+    "experience_candidates": [
+      {
+        "lesson": "Reproducibility audit should treat stored experiment JSON outputs as canonical before manually recomputing derived statistics; otherwise sample-vs-population CV and raw-score-vs-total-score confusion creates false positives.",
+        "context": "Paper 4 main_v2 audit: K752 CV=0.3309 and K780 total_score=1.9407/1.6257 matched the paper even though an older manual audit flagged them."
+      },
+      {
+        "lesson": "A numerically traceable table can still be methodologically invalid if rows mix different experiments or sample windows.",
+        "context": "Paper 4 Table 3 uses K507 for BH 50/50 (2005-2026) and K731 for 12/VIX, so the ranking claim is not a fair same-window comparison."
+      }
+    ],
+    "followup_task_candidates": [
+      {
+        "title": "Supervisor patch Paper 4 main_v2.tex using reproduce_report_2026-04-18.md",
+        "priority": "P3",
+        "preferred_family": "review"
+      },
+      {
+        "title": "Expose canonical Table 2 intermediate outputs in K732 and K736 result JSONs so paper rows are directly reproducible",
+        "priority": "P3",
+        "preferred_family": "code"
+      },
+      {
+        "title": "Create a canonical SPY/GLD insurance output or relabel Table 10 as cross-asset summary before submission",
+        "priority": "P3",
+        "preferred_family": "review"
+      }
+    ],
+    "doc_update_needed": [
+      "paper/vix-sufficiency/main_v2.tex"
+    ],
+    "frontend_impact": {
+      "pipeline": "none",
+      "requires_sync": false
+    }
+  },
+  "timestamp": "2026-04-18T04:58:27.179466+00:00",
+  "error": null
+}

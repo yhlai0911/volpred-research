@@ -40,19 +40,26 @@ Do **not** use this skill for：
 
 ### Step 1: 並行啟動兩個 review agents
 
-```bash
-# Agent 1 (citation-verifier)
-prompt: "Run citation-verifier on paper/<id>/main_v<n>.tex.
-        Output to paper/<id>/review_history/v<n>/citation_check_report.md
-        Format: Markdown."
+**⚠️ 關鍵：審查 agent 通常派 Codex-based subagent（`codex:review` / `codex:codex-rescue`）。Codex 讀不到 `.claude/skills/`，prompt 必須引用 `.agents/skills/<name>/SKILL.md` 路徑（skill 同源 canonical 在 `agent-specs/skills/`）。** 忘了指 path → agent 瞎做不符合規範 → 主線程要重派燒 token。
 
-# Agent 2 (latex-academic-reviewer)  
-prompt: "Run latex-academic-reviewer on paper/<id>/main_v<n>.tex + body_v<n>.tex.
-        Output to paper/<id>/review_history/v<n>/academic_review_report.md
-        Format: Markdown."
+```bash
+# Agent 1 (citation-verifier, Codex-based)
+prompt: "先讀 .agents/skills/citation-verifier/SKILL.md 掌握規範。
+        接著對 paper/<id>/main_v<n>.tex 跑完整 citation verification：
+        APA format / DOI / author / quoted-content accuracy / cited-fact verification via web search。
+        輸出報告到 paper/<id>/review_history/v<n>/citation_check_report.md
+        Format: Markdown，含 severity (MAJOR/MED/MINOR) + suggested fix。"
+
+# Agent 2 (latex-academic-reviewer, Codex-based)
+prompt: "先讀 .agents/skills/latex-academic-reviewer/SKILL.md 和
+        .agents/skills/latex-academic-reviewer/references/review-criteria.md。
+        對 paper/<id>/main_v<n>.tex + body_v<n>.tex 做完整學術審查：
+        logic / argument / model / equation / symbol / citation / 結構。
+        輸出報告到 paper/<id>/review_history/v<n>/academic_review_report.md
+        Format: Markdown，含 severity + suggested fix + academic-score 1-5★。"
 ```
 
-**並行**（非串行）以省時間。兩 agent 互不依賴。
+**並行**（非串行）以省時間。兩 agent 互不依賴。兩個報告都要**存進 paper 資料夾的 `review_history/v<n>/`**（不是放 `/tmp` 或散在 project root），這樣整包 paper 資料夾 self-contained，投稿時附上 replication package 可帶審查紀錄。
 
 ### Step 2: 等兩 agents 回報
 

@@ -175,6 +175,15 @@ Load these references only when relevant:
 - `references/architecture.md`
   - use when you need current platform topology, source-of-truth ownership, or deploy surface boundaries
 
+- `references/data-flow.md`
+  - use when the task touches `storage/` source-of-truth, `supabase_sync.py`, `daily_update.py`, `paper_trading.json` structure, or Mirror 雙寫
+
+- `references/strategy-lifecycle.md`
+  - use when adding / deactivating / recalculating a strategy; includes STRATEGY_REGISTRY 3-step SOP and upsert/activation CLI
+
+- `references/monitor-usage.md`
+  - use when deciding between Monitor / Bash(run_in_background) / CronCreate, or setting up session-level persistent monitors
+
 **⚠️ 系統出錯時第一步：查 `docs/error_log.md`。** 不只研究錯誤，所有平台/sync/deploy/merge 錯誤都記錄在此。先查再修，避免重蹈覆轍。
 
 Do not paste or re-explain all references by default. Load the minimal needed section and move.

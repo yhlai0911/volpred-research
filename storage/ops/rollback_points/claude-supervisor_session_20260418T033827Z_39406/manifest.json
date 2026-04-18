@@ -1,0 +1,19 @@
+{
+  "point_id": "claude-supervisor_session_20260418T033827Z_39406",
+  "created_at": "2026-04-18T03:38:35.126117+00:00",
+  "branch": "main",
+  "head_sha": "e250c74a62d418f5c800750f432cb60833c001f3",
+  "tracked_patch_path": "tracked.patch",
+  "tracked_files_path": "tracked_files.txt",
+  "git_status_path": "git_status.txt",
+  "untracked_list_path": "untracked.txt",
+  "storage_archive_path": "storage.tar.gz",
+  "config_archive_path": "config.tar.gz",
+  "untracked_archive_path": "untracked.tar.gz",
+  "restore_steps": [
+    "git restore --source <head_sha> --worktree --staged .",
+    "git apply tracked.patch",
+    "extract storage/config archives over repo root",
+    "restore baseline untracked archive and remove post-baseline untracked files"
+  ]
+}

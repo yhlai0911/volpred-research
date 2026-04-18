@@ -521,8 +521,36 @@ def sync_article_status(slug: str, status: str) -> bool:
 
 
 def delete_article(slug: str) -> bool:
-    """Hard-delete an article row by slug. Cascades where DB constraints allow."""
-    return _delete_where("articles", {"slug": slug})
+    """Hard-delete an article row by slug. Manual cascade: article_impressions
+    has NO ON DELETE CASCADE (per migrations/001), so we must pre-delete it.
+
+    Returns True iff articles row is actually gone; False on any HTTP error.
+    """
+    # Resolve UUID first (article_impressions uses article_id uuid FK)
+    article_id = _get_article_id(slug)
+    if article_id:
+        # Pre-delete the only non-CASCADE FK reference (BUG-001 fix 2026-04-18)
+        _delete_where("article_impressions", {"article_id": article_id})
+        # article_reactions / question_articles / article_tags / comments are
+        # ON DELETE CASCADE (schema 001), so the final articles DELETE handles them.
+    ok = _delete_where("articles", {"slug": slug})
+    if not ok:
+        # 409 / other error — don't silently succeed. Caller (cleanup_test_post)
+        # must surface this to user.
+        print(f"  [BUG-001 guard] articles DELETE for slug={slug} FAILED; row may still exist with FK blocker.")
+    return ok
+
+
+def _get_article_id(slug: str) -> str | None:
+    """Fetch article UUID by slug (for FK cascade pre-delete)."""
+    url = f"{SUPABASE_URL}/rest/v1/articles?select=id&slug=eq.{slug}"
+    req = Request(url, headers=HEADERS, method="GET")
+    try:
+        with urlopen(req, timeout=15) as resp:
+            data = json.loads(resp.read().decode())
+            return data[0]["id"] if data else None
+    except Exception:
+        return None
 
 
 def sync_paper_trade(strategy: str, entry: dict, trade_date: str) -> bool:

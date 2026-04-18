@@ -1213,5 +1213,19 @@
       "errata",
       "K716"
     ]
+  },
+  {
+    "id": "Paper9_bib_fix",
+    "title": "Paper 9 bibliography fix per citation_check_report v1 (1 MAJOR + 5 MED + 4 MINOR)",
+    "priority": 2,
+    "status": "done",
+    "created_at": "2026-04-18T10:08:44.461415+00:00",
+    "auto_closed_at": "2026-04-18T10:08:44.461415+00:00",
+    "description": "Fix conrad2015 wrong-journal MAJOR (JAE 30(7):1090-1114 + DOI 10.1002/jae.2404); add DOIs to bollerslev1986/engle1982/glosten1993/han2014/francq2019 (MED); standardize JBES ampersand + acerbi2014 URL + conrad2020/kupiec1995 DOIs (MINOR). Verified via xelatex 2 passes, no undefined refs, 39-page main.pdf regenerated.",
+    "tags": [
+      "paper-9",
+      "citation-verifier",
+      "main-thread"
+    ]
   }
 ]

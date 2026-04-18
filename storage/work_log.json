@@ -1,0 +1,89 @@
+[
+  {
+    "entry_id": "init0001",
+    "timestamp": "2026-04-18T09:12:00+08:00",
+    "task_type": "governance",
+    "task_id": "session_20260418_work_log_init",
+    "agent": "main",
+    "skill_used": null,
+    "outcome": "done",
+    "summary": "work_log.json 初始化。跨類型工作日誌（task_type ∈ 10 類，見 CLAUDE.md「系統任務類型 × Skill 對應」段）。每完成一個任務 append 一筆。主 agent 每輪 cron 讀最近 5 筆做多樣化決策。",
+    "duration_min": null,
+    "derived_tasks": []
+  },
+  {
+    "entry_id": "00b08314",
+    "timestamp": "2026-04-18T17:53:57.650314+08:00",
+    "task_type": "governance",
+    "task_id": "session_20260418_ai_operated_declaration",
+    "agent": "main",
+    "skill_used": null,
+    "outcome": "done",
+    "summary": "CLAUDE.md 加 AI 完全運營宣告 + 明確允許問用戶的邊界（破壞性/policy/模糊）；移除過時的 canonical render 引述。接下來不再事事請示。",
+    "duration_min": 3,
+    "derived_tasks": []
+  },
+  {
+    "entry_id": "7990081c",
+    "timestamp": "2026-04-18T09:59:39.686024+00:00",
+    "task_type": "daily_article",
+    "task_id": null,
+    "agent": "agent-article-writer",
+    "skill_used": "feed-publisher",
+    "outcome": "done",
+    "summary": "Published general article mile_2c711833 (K673 VIX Markov recovery) as draft to refill empty pool",
+    "duration_min": 20,
+    "derived_tasks": [],
+    "completed_pub_id": "mile_2c711833"
+  },
+  {
+    "entry_id": "f1c025b5",
+    "timestamp": "2026-04-18T10:08:44.461415+00:00",
+    "task_type": "paper_review",
+    "task_id": "Paper9_bib_fix",
+    "agent": "agent-paper9-bib-20260418",
+    "skill_used": "citation-verifier",
+    "outcome": "done",
+    "summary": "Paper 9 bib fix: conrad2015 MAJOR + 5 MED DOIs (bollerslev1986/engle1982/glosten1993/han2014/francq2019) already applied in prior commit 2bf5f2f6; this session added 4 MINOR (conrad2020+kupiec1995 DOIs already in; acerbi2014 URL + 3x JBES ampersand standardization). xelatex 2 passes EXIT 0, 39 pages, no undefined refs.",
+    "duration_min": 10,
+    "derived_tasks": []
+  },
+  {
+    "entry_id": "55219334",
+    "timestamp": "2026-04-18T10:18:03.091621+00:00",
+    "task_type": "daily_article",
+    "task_id": "mile_daf56741",
+    "agent": "main",
+    "skill_used": "feed-publisher",
+    "outcome": "done",
+    "summary": "K530 HAR vs GJR research article (proxy-choice angle) published as draft; differentiated from recent VIX-Markov and HAR+VIX articles",
+    "duration_min": 25,
+    "derived_tasks": []
+  },
+  {
+    "entry_id": "78fd904c",
+    "timestamp": "2026-04-18T18:28:39.555526+08:00",
+    "task_type": "event_article",
+    "task_id": "FOMC_0428_preview_abort",
+    "agent": "main",
+    "skill_used": "feed-publisher",
+    "outcome": "aborted_duplicate",
+    "summary": "任務要求寫 FOMC 04/28-29 預告（event_preview, general）。查重發現 2026-04-17 04:03 UTC 已 published 同主題文章 mile_78d649c4「FOMC 4/29 會議前 11 天：94.8% 不降息，為什麼市場還在盯 Powell 的嘴？」，內容完整覆蓋 CME FedWatch 機率、Powell 記者會、VIX 反應、普通投資人建議。依任務 abort 規則直接放棄，不重複發文。next_tasks.json 內查無 FOMC_0428 條目（可能已由 04-17 發文同時 clear）。",
+    "duration_min": 2,
+    "derived_tasks": []
+  },
+  {
+    "entry_id": "21e027f4",
+    "timestamp": "2026-04-18T18:33:26.347143+08:00",
+    "task_type": "governance",
+    "task_id": "BUG-001_cleanup_post_FK_cascade",
+    "agent": "main (investigation by a5d68ac8)",
+    "skill_used": null,
+    "outcome": "done",
+    "summary": "cleanup-post FK 半刪 bug 修完：supabase_sync.py delete_article cascade + loud fail。需下次 cleanup-post 對有 impression 的 article 驗證。",
+    "duration_min": 5,
+    "derived_tasks": [
+      "BUG-001_test_verification"
+    ]
+  }
+]

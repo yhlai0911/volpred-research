@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0",
+  "description": "Bug + 優化任務 backlog。定期從此處 promote 到 storage/next_tasks.json 成為 active 任務。不搶研究 slot。",
+  "categories": [
+    "bug",
+    "optimization",
+    "tech_debt",
+    "refactor",
+    "documentation"
+  ],
+  "severities": [
+    "critical",
+    "high",
+    "medium",
+    "low"
+  ],
+  "entries": [
+    {
+      "id": "BUG-001",
+      "title": "cleanup-post 遇 FK constraint 半刪 + 靜默宣稱成功",
+      "category": "bug",
+      "severity": "high",
+      "discovered_at": "2026-04-18",
+      "discovered_in": "session_20260418",
+      "detail": "scripts/supabase_sync.py / cleanup-post 遇 article_impressions / article_reactions FK 引用時 DELETE 回 409，cleanup 吞掉 error 照樣宣稱 supabase_deleted=true。Admin 畫面仍看到 ghost drafts。",
+      "reproduction": "任何有 impression 記錄的 article 跑 cleanup-post --hard-delete",
+      "fix_proposal": "delete_article 改 cascade：先 DELETE article_impressions / article_reactions / question_article_links，再 DELETE articles。409 時 abort 不 silent。",
+      "related": [
+        "docs/error_log.md 2026-04-18 cleanup-post FK entry"
+      ],
+      "promoted_to_next_tasks": false,
+      "resolved_at": "2026-04-18",
+      "resolved_commit": "pending_git_commit",
+      "resolution": "scripts/supabase_sync.py delete_article 改為 cascade：先 DELETE article_impressions (唯一非 CASCADE FK) 再 DELETE articles；articles DELETE 失敗時 print warning 不再 silent success。_get_article_id helper 新增供 UUID 解析。"
+    },
+    {
+      "id": "OPT-001",
+      "title": "feed.json 5.4MB append-rewrite 效能瓶頸",
+      "category": "optimization",
+      "severity": "medium",
+      "discovered_at": "2026-04-18",
+      "detail": "每次 publish 都 append 新 item 後整份 feed.json 重寫 5.4MB。Claude 整讀 = 135 萬 token。",
+      "fix_proposal": "改由 Supabase view 即時產出 feed 或用 SQLite FTS cache；本地只存 individual mile_*.json 個別檔",
+      "promoted_to_next_tasks": false
+    },
+    {
+      "id": "OPT-002",
+      "title": "Next.js ISR cache 導致 stale content（/reports/<slug>）",
+      "category": "optimization",
+      "severity": "low",
+      "discovered_at": "2026-04-18",
+      "detail": "Supabase DELETE article 後線上 URL 仍 HTTP 200 直到 ISR revalidate",
+      "fix_proposal": "admin cleanup 動作後呼叫 Next.js on-demand revalidation API",
+      "promoted_to_next_tasks": false
+    },
+    {
+      "id": "REFACTOR-001",
+      "title": "research_program.md Paper 2 narrative 14 段 → 1 段 pending final",
+      "category": "refactor",
+      "severity": "low",
+      "discovered_at": "2026-04-18",
+      "detail": "canonical render 版已壓縮部分，session 早段完整壓縮被 merge 覆蓋後未重做完",
+      "fix_proposal": "session 閒時重做 14→1 段 summary",
+      "promoted_to_next_tasks": false
+    },
+    {
+      "id": "DOC-001",
+      "title": "docs/ 歷史 audit 檔仍引用已刪 agent-specs/",
+      "category": "documentation",
+      "severity": "low",
+      "discovered_at": "2026-04-18",
+      "detail": "docs/audits/skill_compliance_2026-04-17.md、docs/ux_flow_audit_2026-04-17.md、docs/project_analysis_2026-04-17.md 提到 agent-specs（已刪）",
+      "fix_proposal": "屬歷史快照，加 stale marker 或不動（歷史記錄價值）",
+      "promoted_to_next_tasks": false
+    }
+  ],
+  "promotion_policy": {
+    "frequency": "cron 每日審視時掃描；或 ≥ 3 個 high 同時存在時強制 promote 至少 1 個",
+    "promotion_action": "複製 entry 到 next_tasks.json (status=pending, priority 依 severity)，本處 entry 的 promoted_to_next_tasks=true + 記 promoted_at",
+    "completion_sync": "next_tasks.json 該 id 標 done 時，backlog 對應 entry 也標 completed_at（不刪，留歷史）"
+  }
+}

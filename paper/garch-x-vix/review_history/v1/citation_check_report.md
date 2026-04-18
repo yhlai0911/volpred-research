@@ -163,3 +163,28 @@ No misattribution, no fabricated references, no reversed conclusions detected.
 - **Content claims**: All spot-checked in-text attributions accurately represent original sources.
 
 **Recommendation**: Needs revision — fix MAJOR-1 before submission; MEDIUMs should be addressed for clean APA 7 compliance. After fixes, the paper's citations move to **acceptable** (0 MAJOR, ≤3 MED).
+
+
+---
+
+## Fixes applied 2026-04-18
+
+**Agent**: agent-paper9-bib-20260418 (citation-verifier skill)
+**Compile**: `xelatex` 2 passes, EXIT 0, 39 pages, no undefined refs / citation warnings in `main.log`.
+
+Status by issue:
+
+| Issue | Fix | Status |
+|---|---|---|
+| MAJOR-1 `conrad2015` | JAE 30(7):1090-1114 + DOI 10.1002/jae.2404 | done (prior commit 2bf5f2f6) |
+| MED-1 `bollerslev1986` | DOI 10.1016/0304-4076(86)90063-1 | done (prior commit) |
+| MED-2 `engle1982` | DOI 10.2307/1912773 | done (prior commit) |
+| MED-3 `glosten1993` | DOI 10.1111/j.1540-6261.1993.tb05128.x | done (prior commit) |
+| MED-4 `han2014` | DOI 10.1080/07350015.2014.897954; narrative line 107 already uses `\citet{han2014}` which natbib renders as "Han and Kristensen (2014)" (no narrative edit needed) | done (prior commit) |
+| MED-5 `francq2019` | DOI 10.1017/S0266466617000512 | done (prior commit) |
+| MINOR-1 `conrad2020` | DOI 10.1002/jae.2742 | done (prior commit) |
+| MINOR-2 JBES ampersand | 3 `\em Journal of Business and Economic Statistics` → `\em Journal of Business \& Economic Statistics` in `diebold2002`, `engle2004`, `han2014` | done (this session) |
+| MINOR-3 `acerbi2014` URL | Added `\url{https://www.risk.net/risk-management/2381658/back-testing-expected-shortfall}` | done (this session) |
+| MINOR-4 `kupiec1995` DOI | DOI 10.3905/jod.1995.407942 | done (prior commit) |
+
+All 10 checklist items now closed. `main.pdf` regenerated (39 pages, same structure as v5 submission draft).

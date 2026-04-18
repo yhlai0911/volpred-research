@@ -1,0 +1,131 @@
+{
+  "id": "task_4f9eb51458cf",
+  "title": "K1100h scoping: TAIFEX TX tick-level data readiness + PRG experimental design (no estimation yet)",
+  "description": "K1100g_d6-d8 都卡在 daily/weekly 尺度, DM |t| borderline 皆小於 Harvey 3.0. K1100h agent 衍生假設: only tick-level 才能揭示真正 periodic structure. 本任務是 K1100h 的 Phase 0 scoping — 不跑 estimation, 只做 data readiness + experiment design. Scope: (1) 用 skill external-data-sources 查 TAIFEX TX tick data path (用戶 Dropbox 2017-2021); (2) 讀 3 個樣本檔 (任 3 個 trading days) 驗證 schema: 欄位名、格式、時區、tick 頻率、連續合約/主力月合約轉倉規則 (參考 CLAUDE.md: 不可直接把 TX1 當永久連續合約); (3) 比對 K1100g daily 用的 TAIFEX daily data 能 re-aggregate 對上; (4) 寫 experiments/k1100h/README.md (K1100h Phase 0 Scoping), 含 7 節: Problem (為何要 tick-level), Motivation (K1100g_d6-d8 failure 摘要), Data (path/schema/coverage/quality issues), Method (PRG estimation plan on tick grid: 小時內 intraday pattern, periodic dummies, aggregation to 5-min / 15-min), Expected Output (sample estimate / DM test design / Harvey threshold), Risks (tick data noise, rollover bias, dayboundary handling, seed-fix for bootstrap), References (K1100f/g knowledge refs). Hard rules: 不動 knowledge.json/research_program.md (supervisor 專屬); 不跑 estimation; 不 commit; 不用 dangerous git. 成功標準: README.md 存在且含上述 7 節, 對每個 Risk 給具體 mitigation. 完成後 ops finish-task 回報, signal_payload 列 data path confirmed + any schema surprises + proposed next task (K1100h Phase 1 implementation).",
+  "source": "agent",
+  "task_family": "research",
+  "priority": 70,
+  "preferred_agent": "claude",
+  "fallback_allowed": false,
+  "approval_mode": "auto",
+  "risk_level": "safe",
+  "status": "succeeded",
+  "payload": {},
+  "parent_task_id": null,
+  "created_by": "claude-supervisor",
+  "session_id": "claude-worker:46630",
+  "rollback_point_id": "claude-worker_session_20260418T062301Z_46630",
+  "public_effect": "none",
+  "brief_status": "ready",
+  "brief_payload": {
+    "generated_at": "2026-04-18T06:23:20.298889+00:00",
+    "source_type": "template",
+    "template_id": "research.yaml",
+    "template_hash": "ed6ba5b03cb65775376c547197e8b738b73e12c7417401cebed90eff485031cc",
+    "coordinator_run_id": null,
+    "task_summary": "K1100h scoping: TAIFEX TX tick-level data readiness + PRG experimental design (no estimation yet)",
+    "goal": "完成研究任務：K1100g_d6-d8 都卡在 daily/weekly 尺度, DM |t| borderline 皆小於 Harvey 3.0. K1100h agent 衍生假設: only tick-level 才能揭示真正 periodic structure. 本任務是 K1100h 的 Phase 0 scoping — 不跑 estimation, 只做 data readiness + experiment design. Scope: (1) 用 skill external-data-sources 查 TAIFEX TX tick data path (用戶 Dropbox 2017-2021); (2) 讀 3 個樣本檔 (任 3 個 trading days) 驗證 schema: 欄位名、格式、時區、tick 頻率、連續合約/主力月合約轉倉規則 (參考 CLAUDE.md: 不可直接把 TX1 當永久連續合約); (3) 比對 K1100g daily 用的 TAIFEX daily data 能 re-aggregate 對上; (4) 寫 experiments/k1100h/README.md (K1100h Phase 0 Scoping), 含 7 節: Problem (為何要 tick-level), Motivation (K1100g_d6-d8 failure 摘要), Data (path/schema/coverage/quality issues), Method (PRG estimation plan on tick grid: 小時內 intraday pattern, periodic dummies, aggregation to 5-min / 15-min), Expected Output (sample estimate / DM test design / Harvey threshold), Risks (tick data noise, rollover bias, dayboundary handling, seed-fix for bootstrap), References (K1100f/g knowledge refs). Hard rules: 不動 knowledge.json/research_program.md (supervisor 專屬); 不跑 estimation; 不 commit; 不用 dangerous git. 成功標準: README.md 存在且含上述 7 節, 對每個 Risk 給具體 mitigation. 完成後 ops finish-task 回報, signal_payload 列 data path confirmed + any schema surprises + proposed next task (K1100h Phase 1 implementation).",
+    "success_criteria": [
+      "遵守 research honesty 與 lookahead 防錯",
+      "先讀 error log、再看必要研究背景"
+    ],
+    "repo_root": "/Users/yhlai0911/Desktop/volpred-research",
+    "required_files": [
+      "research_program.md",
+      "docs/error_log.md",
+      "docs/project_improvement_status.md"
+    ],
+    "recommended_files": [
+      "docs/architecture.md",
+      "AGENTS.md"
+    ],
+    "forbidden_large_files": [
+      "storage/reports/feed.json",
+      "storage/memory/knowledge.json"
+    ],
+    "relevant_commands": [
+      "uv run volpred ops health"
+    ],
+    "prior_findings": [],
+    "rollback_point_id": "claude-worker_session_20260418T062301Z_46630",
+    "why_this_agent": "研究與高判斷任務預設由 claude 處理。"
+  },
+  "claimed_by": "claude",
+  "claimed_by_session_key": "claude-worker",
+  "claimed_by_role": "worker",
+  "claimed_at": "2026-04-18T06:23:20.297156+00:00",
+  "started_at": null,
+  "finished_at": "2026-04-18T06:29:29.160921+00:00",
+  "approved_by": null,
+  "approved_at": null,
+  "rejected_by": null,
+  "rejected_at": null,
+  "result_summary": "K1100h Phase 0 scoping 完成：TAIFEX tick schema 驗證（3 樣本，2017-05-16 起 10 欄穩定，big5 encoding），tick→day OHLC 對 K1100g 2020-06-15 完全吻合；寫完 experiments/k1100h/README.md 7 節 + Phase 1 task proposal；發現 2 個 legacy trap (is_settlement flag 2018 bug、TX1 settle day 仍為 expiring 合約)",
+  "signal_payload": {
+    "summary_text": "K1100h Phase 0 scoping 完成：TAIFEX tick 檔 (~/Dropbox/TAIFEXDATA/TAIFEXDATA/python/, 10,467 檔) 3 樣本驗證 schema 穩定；tick→day OHLC 對 K1100g daily 2020-06-15 完全吻合；提案 Phase 1 做 15-min/5-min grid PRG 打 Harvey |t|>3",
+    "null_result": false,
+    "knowledge_candidates": [
+      {
+        "topic": "TAIFEX tick data readiness for intraday PRG",
+        "one_line_finding": "TAIFEX TX tick 資料路徑 + 2017-05-16 起 10 欄 schema 穩定；tick→day-session OHLC re-aggregation 與 K1100g daily cache 2020-06-15 完全吻合 (11356/11446/11216/11229)；可直接進 Phase 1 intraday PRG 建構",
+        "evidence_paths": [
+          "experiments/k1100h/README.md"
+        ],
+        "confidence": "strong"
+      },
+      {
+        "topic": "K1100g is_settlement flag off-by-year bug",
+        "one_line_finding": "K1100g cache 的 is_settlement flag 對 2018-03-21 (第三週三) 為 False、2021-11-17 (亦第三週三) 為 True；K1100h Phase 1 要自己重算 settlement (weekday==2 and 15<=day<=21)，不要 reuse",
+        "evidence_paths": [
+          "experiments/k1100h/README.md"
+        ],
+        "confidence": "medium"
+      },
+      {
+        "topic": "TX1 settlement-day expiring contract trap",
+        "one_line_finding": "TX1 檔在 settle day (第三週三) 仍是 expiring 合約 (2018-03-21 TX1 到期月份=201803)，intraday pricing 受結算干擾；K1100h Phase 1 改用 TX (全合約) + daily volume-based active contract picker (K849 rule)",
+        "evidence_paths": [
+          "experiments/k1100h/README.md"
+        ],
+        "confidence": "strong"
+      },
+      {
+        "topic": "K1100h Phase 0 narrative implication",
+        "one_line_finding": "K1100g_d5-d8 daily-scale borderline (+1.49 / +2.32 未過 Harvey) 的瓶頸在 daily aggregation 把 intraday periodic structure 平均化；tick→15-min/5-min grid 是 Paper 3 narrative 是否能升級到 intraday-periodic anchor 的下一步 lever",
+        "evidence_paths": [
+          "experiments/k1100h/README.md",
+          "experiments/k1100g_d8/README.md"
+        ],
+        "confidence": "medium"
+      }
+    ],
+    "experience_candidates": [
+      {
+        "lesson": "Scoping 任務必須做小樣本 re-aggregation sanity check (3 random days) 對齊既有 daily cache，發現 (a) schema 斷點 (b) legacy flag bug (c) contract-month settle day 陷阱，才能讓 Phase 1 不踩坑",
+        "context": "K1100h Phase 0: 3 樣本 tick 檔驗證發現 K1100g is_settlement flag off-by-year、TX1 settle day = expiring contract 兩個 legacy trap，若 Phase 1 直接 reuse 會重製 K1100g_d6 d8 的 daily borderline 結果"
+      }
+    ],
+    "followup_task_candidates": [
+      {
+        "title": "K1100h Phase 1 — TAIFEX tick PRG at 15-min / 5-min grid with periodic dummies (M1 to M4 exog ladder, Harvey |t|>3 DM test)",
+        "priority": "P3",
+        "preferred_family": "research"
+      }
+    ],
+    "skill_candidates": [],
+    "doc_update_needed": [
+      "research_program.md"
+    ],
+    "frontend_impact": {
+      "pipeline": "none",
+      "requires_sync": false
+    }
+  },
+  "curated_by": null,
+  "curated_at": null,
+  "curated_promoted": [],
+  "curated_notes": null,
+  "last_error": null,
+  "created_at": "2026-04-18T06:11:36.267698+00:00",
+  "updated_at": "2026-04-18T06:29:29.160921+00:00"
+}

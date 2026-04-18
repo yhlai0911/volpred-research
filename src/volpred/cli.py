@@ -458,9 +458,26 @@ def summary() -> None:
 @click.option("--experiment-id", required=True, help="Experiment ID to publish")
 @click.option("--title", default=None, help="Publication title (auto-generated if not provided)")
 def publish(experiment_id: str, title: str | None) -> None:
-    """Publish experiment results to the feed."""
+    """[DEPRECATED] Publish experiment results to the feed.
+
+    ⚠️ This is a legacy path. It hard-codes status='published' and lacks
+    --status / --audience / --tags options. For the standard flow use:
+      uv run volpred ops publish-milestone --status draft \\
+          --audience research --title '...' --description '...' --phase '...'
+    Or the one-stop: scripts/record_and_publish.py
+    """
+    import sys
+
     from volpred.memory.system import MemorySystem
     from volpred.publisher.publisher import Publisher
+
+    console.print(
+        "[yellow]⚠️  'volpred publish' is legacy — status is hard-coded to 'published'.\n"
+        "   For drafts, tags, or audience control, use:\n"
+        "     volpred ops publish-milestone --status draft --audience research ...\n"
+        "   Or the one-stop: scripts/record_and_publish.py[/yellow]",
+        file=sys.stderr,
+    )
 
     memory = MemorySystem()
     exp = memory.load_experiment(experiment_id)
