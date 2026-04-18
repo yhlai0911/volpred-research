@@ -23,6 +23,7 @@ Use this skill as the research orchestrator for：
 - 實驗設計與執行
 - knowledge / experience 記錄
 - 研究多元化與下一步方向生成
+- **milestone article 排程**（2026-04-18 新增防漏）：每完成 4 個 decisive K experiments（Harvey-significant / PASS confirmed / artifact discovered / narrative pivot gate met），強制啟 1 個 `feed-publisher` agent 把最新 decisive finding 寫成 reader 文章。違反：如 2026-04-17 session 做 ~80 K experiments 整天沒發任何 milestone（K1216c ROOT_CAUSE / K1203 UNIVERSAL_NULL / K1133b decomposition / K1235b defensibility 全漏發）。
 
 Do **not** use this skill as the primary owner for：
 

@@ -69,6 +69,19 @@ with open(f'experiments/K{ID}/k{id}_results.json') as f:
 - 撰寫文章
 - 更新 research_program.md
 
+### 6. Publishable-finding gate（2026-04-18 新增，防 session 整天不發 milestone）
+每次 agent 回報 **必做** 這個判定：
+
+- ✅ Confidence ≥ 0.85（knowledge.json 標 confidence）
+- ✅ Harvey-significant 或 decisive verdict（PASS / NULL confirmed / artifact discovered / narrative pivot gate met）
+- ✅ 結果對讀者/實務有 takeaway（非純 internal audit）
+
+**三項全中**：立即 `TaskCreate` 一個 `publish_milestone_article` P3 task，指向該 K experiment；不 queue 到下 session 才處理。
+
+**排除**：純 markdown draft / edit guide / session consolidation / reproduction-package audit — 這些是 internal artifacts，不面向外部讀者。
+
+2026-04-17 教訓：~80 K experiments 含 K1216c ROOT_CAUSE / K1203 UNIVERSAL_NULL / K1133b BTC decomposition / K1235b Paper 9 defensibility 等 decisive findings 全沒發 milestone 文章，根因就是 agent-result-verification skill 沒這個 publish gate。
+
 ## 歷史事件
 
 | 日期 | 實驗 | 問題 | 影響 |

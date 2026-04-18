@@ -47,6 +47,7 @@
 8. **區分實證、理論、模擬**：不可混用口徑。
 9. **Null result 如實報告**：失敗也是結果。
 10. **承認局限，不可過度宣稱**：結論強度不能超過證據。
+11. **Decisive findings 必有 reader 層 output**（2026-04-18 新增）：每個 Harvey-significant / PASS / decisive NULL / narrative pivot gate met 的 experiment，agent 返回後必 queue `publish_milestone_article` P3 task；不可只 knowledge.json 記錄後就繼續下一個實驗。每 4 個 decisive K 完成，強制觸發 `feed-publisher`。違反：2026-04-17 ~80 experiments 整天零 milestone 文章（K1216c / K1203 / K1133b / K1235b 漏發）。
 11. **Lookahead bias 是最高風險**：
    - `signal from t-1, return at t`
    - 禁止 same-day 訊號乘 same-day 報酬
