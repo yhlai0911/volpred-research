@@ -1,0 +1,163 @@
+{
+  "experiment_id": "k1248",
+  "title": "Final 1-page execution playbook",
+  "date": "2026-04-17",
+  "seed": 42,
+  "type": "distillation",
+  "session_state": {
+    "k_experiments": 80,
+    "drafts": 30,
+    "estimated_spend_usd": 4000
+  },
+  "sources": [
+    "experiments/k1236/k1236_final_briefing.md",
+    "experiments/k1226/k1226_master_index.md",
+    "experiments/k1219/k1219_dashboard.md",
+    "K1223","K1224","K1225","K1228","K1231","K1232","K1233","K1234",
+    "K1243","K1244","K1245","K1246","K1247"
+  ],
+  "buckets": {
+    "immediate": {
+      "total_hours": 3.0,
+      "user_decision_required": false,
+      "items": [
+        {
+          "slot": "00:00-00:30",
+          "duration_min": 30,
+          "paper": "Paper 1",
+          "source_k": "K1224",
+          "items_count": 7,
+          "action": "body_v4.tex cherry-pick -> xelatex -> paper-update",
+          "blocked_by": null
+        },
+        {
+          "slot": "00:30-01:45",
+          "duration_min": 75,
+          "paper": "Paper 6",
+          "source_k": "K1223",
+          "items_count": 6,
+          "action": "body_v2 + K1218 Appendix A + 3 warnings -> xelatex -> paper-update",
+          "blocked_by": null
+        },
+        {
+          "slot": "01:45-02:00",
+          "duration_min": 15,
+          "paper": "Paper 5",
+          "source_k": "K1233 P5-1",
+          "items_count": 1,
+          "action": "1 script edit -> commit",
+          "blocked_by": null
+        },
+        {
+          "slot": "02:00-02:30",
+          "duration_min": 30,
+          "paper": "Paper 7",
+          "source_k": "K1233 P7-1/2/3/4",
+          "items_count": 4,
+          "action": "3 fixes + decision -> xelatex -> paper-update",
+          "blocked_by": null
+        },
+        {
+          "slot": "02:30-03:00",
+          "duration_min": 30,
+          "paper": "Paper 9 R2 footnote",
+          "source_k": "K1245",
+          "items_count": 1,
+          "action": "tablenotes \\item insert -> xelatex -> paper-update",
+          "blocked_by": "K1235b vindicate (done)"
+        }
+      ]
+    },
+    "quick_decisions": {
+      "user_decision_minutes": 10,
+      "items": [
+        {
+          "paper": "Paper 4",
+          "decision": "A/B pick",
+          "source_k": "K1247",
+          "default": "B",
+          "followup_k": "K1225 Version B",
+          "execute_hours": 2.5
+        },
+        {
+          "paper": "Paper 2 §5",
+          "decision": "review K1222b",
+          "source_k": "K1222b",
+          "review_minutes": 15,
+          "followup": "body_v4 §5 rewrite",
+          "execute_hours": 2.5
+        }
+      ]
+    },
+    "deep_decisions": {
+      "user_decision_minutes": 30,
+      "execute_hours_total": 12,
+      "items": [
+        {
+          "paper": "Paper 3",
+          "decision": "pivot a/b/c",
+          "recommendation": "b",
+          "source_k": ["K1205","K1217"],
+          "if_chosen_b": "initialize paper/prg-hybrid-null/ (~2 wk review cycle)"
+        },
+        {
+          "paper": "BTC GAS negative",
+          "decision": "go/no-go",
+          "source_k": ["K1214","K1228"],
+          "if_go": "initialize paper/btc-gas-negative/ (~2 hr init + 1-2 wk review)"
+        },
+        {
+          "paper": "Paper 8",
+          "decision": "a/b/c per-K",
+          "source_k": "K1231",
+          "experiments": 7,
+          "breakdown": "4 rebuild + 1 revise + 2 errata",
+          "execute_hours": 12
+        }
+      ]
+    },
+    "pending_autonomous": {
+      "user_decision_required": false,
+      "items": [
+        {
+          "paper": "Paper 10",
+          "source_k": ["K1234","K1237","K1238","K1239","K1240","K1241","K1242","K1243","K1244","K1245","K1246","K1247"],
+          "action": "body_v1 awaits user execute command",
+          "execute_hours": 4.5
+        },
+        {
+          "task": "K1100g_d9 cadence verification",
+          "priority": "P3"
+        },
+        {
+          "task": "K1202b primary-source hand-verify",
+          "priority": "P3"
+        }
+      ]
+    }
+  },
+  "dependency_graph": {
+    "independent": ["Paper 1 (K1224)","Paper 6 (K1223)","Paper 5/7 (K1233)","Paper 9 (K1245)"],
+    "blocked_short_review": ["Paper 2 (K1222b)","Paper 4 (K1225)"],
+    "blocked_deep_decision": ["Paper 3 (K1217/K1227)","BTC GAS (K1214/K1228)","Paper 8 (K1231)"],
+    "blocked_execute_command": ["Paper 10 (K1243/K1246)"]
+  },
+  "single_shot_blueprint_hours": 5.5,
+  "single_shot_blueprint": [
+    {"step": 1, "action": "Review K1247 Paper 4 cheatsheet, pick B", "minutes": 1},
+    {"step": 2, "action": "Execute IMMEDIATE items Paper 1/5/6/7/9", "minutes": 180},
+    {"step": 3, "action": "Review K1222b Paper 2 §5, execute body_v4", "minutes": 135},
+    {"step": 4, "action": "Execute Paper 4 Version B", "minutes": 120},
+    {"step": 5, "action": "Push to remote (4h sync) + session close commit", "minutes": 10}
+  ],
+  "recommended_next_user_action": "Start IMMEDIATE pipeline Paper 1 -> 6 -> 5 -> 7 -> 9 (3 hr block); then K1247 cheatsheet (2 min) -> Paper 4 B; then REVIEW K1222b (15 min) -> Paper 2 §5; then DEFER Paper 3/8/BTC-GAS to dedicated decision session.",
+  "rules_observed": {
+    "no_tex_output": true,
+    "word_count_main_playbook_approx": 500,
+    "hour_granularity_clear": true,
+    "dependency_graph_ascii": true,
+    "seed_fixed": 42,
+    "worktree_only": "experiments/k1248/",
+    "no_shared_state_mutation": true
+  }
+}
