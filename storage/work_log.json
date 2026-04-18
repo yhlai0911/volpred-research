@@ -10,5 +10,17 @@
     "summary": "work_log.json 初始化。跨類型工作日誌（task_type ∈ 10 類，見 CLAUDE.md「系統任務類型 × Skill 對應」段）。每完成一個任務 append 一筆。主 agent 每輪 cron 讀最近 5 筆做多樣化決策。",
     "duration_min": null,
     "derived_tasks": []
+  },
+  {
+    "entry_id": "00b08314",
+    "timestamp": "2026-04-18T17:53:57.650314+08:00",
+    "task_type": "governance",
+    "task_id": "session_20260418_ai_operated_declaration",
+    "agent": "main",
+    "skill_used": null,
+    "outcome": "done",
+    "summary": "CLAUDE.md 加 AI 完全運營宣告 + 明確允許問用戶的邊界（破壞性/policy/模糊）；移除過時的 canonical render 引述。接下來不再事事請示。",
+    "duration_min": 3,
+    "derived_tasks": []
   }
 ]
