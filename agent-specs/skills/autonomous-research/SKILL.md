@@ -221,22 +221,23 @@ uv run python scripts/build_knowledge_index.py build
 **Canonical source**：`config/runtime_schedules.json`
 若本段與其他文件不一致，以該檔為準。
 
-#### 最小啟動集（保守模式）
+#### 標準啟動集（7 條，2026-04-18 回復 4/11 版本 — supervisor 3-terminal workflow 已廢棄）
 ```
+CronCreate(cron="3 9 * * *", prompt="每日任務審視與執行計劃：(1) 盤點 user queue / scheduled queue / approval backlog (2) 盤點草稿池與今日已發佈文章缺口 (3) 讀 research_program.md 事件日曆，確認今日是否有 CPI/NFP/FOMC/TSMC 等重要事件 (4) 有事件→立即建立或執行事件任務（必要時 status=published）(5) 檢查 research_program.md 行數(<700)、知識索引是否過期(>24h) (6) 用 uv run volpred ops assign 建立今日正式任務")
+CronCreate(cron="11 */2 * * *", prompt="繼續研究：(1) slot check — `ls .claude/worktrees/ 2>/dev/null | grep -c agent-` + 背景 task；>= 3 slot 滿則回「跳過：slot N/3」≤15字 (2) 讀 storage/next_tasks.json 取最高優先任務（P1>P2>P3>P4）(3) 分配新 K 編號前必 ls experiments/ + .claude/worktrees/ 確認不衝突 (4) 啟動 agent 執行 (5) 完成後從 research_program.md 補充 next_tasks (6) next_tasks pending 空才讀 research_program.md 全文。反空轉：cron 觸發必有新 agent / git diff / 新 knowledge / research_program.md 更新，至少一項。")
 CronCreate(cron="17 */6 * * *", prompt="會員問題研究摘要：先跑 question-ranking-workflow；只有 pending_questions > 0 才建立/執行後續任務")
 CronCreate(cron="37 */6 * * *", prompt="平台巡檢摘要：先跑 ops health + platform-cycle-summary；只有異常或 release_due 才建立/執行後續任務")
-CronCreate(cron="3 9 * * *", prompt="每日任務審視與執行計劃：(1) 盤點 user queue / scheduled queue / approval backlog (2) 盤點草稿池與今日已發佈文章缺口 (3) 讀 research_program.md 事件日曆，確認今日是否有 CPI/NFP/FOMC/TSMC 等重要事件 (4) 有事件→立即建立或執行事件任務（必要時 status=published）(5) 檢查 research_program.md 行數(<700)、知識索引是否過期(>24h) (6) 用 uv run volpred ops assign 建立今日正式任務")
-CronCreate(cron="7 */6 * * *", prompt="知識索引檢查：先判斷是否真的需要更新")
-CronCreate(cron="23 22 * * *", prompt="Token 用量日報：每日一次 detailed；週五再補 weekly")
+CronCreate(cron="47 */4 * * *", prompt="每 4 小時 git commit + sync remote：(1) git status (2) git add 指定檔（不用 -A）(3) git commit (4) git pull --no-rebase origin main（merge 不 rebase）(5) git push origin main。必須 push，防本地與雲端分叉。")
+CronCreate(cron="7 */3 * * *", prompt="知識索引更新：先判斷是否真需更新（knowledge.json mtime 比 lancedb 新才做）；用 `uv run python scripts/build_knowledge_index.py update` 增量，不要 `build` 全量（炸 Gemini 額度）")
+CronCreate(cron="23 0,6,12,18 * * *", prompt="Token 用量日報：每 6 小時一次 --detailed；週五再補 --weekly；>40% 標記高消耗警告")
 ```
 
-#### Idle-driven continuation（取代高頻 heartbeat）
-- 不再建立 `*/4 * * * *` 的「繼續研究」cron
-- agent 完成主任務後，先檢查 `user queue`
-- `user queue` 為空，再檢查 `scheduled queue`
-- queue 皆空，才允許做一輪 discovery / research continuation
-- discovery pass 最多每 30 分鐘一次
-- 只要 queue 裡存在 `user-assigned` 任務，discovery 直接停用
+#### Heartbeat 與 slot-aware 規則
+- `11 */2 * * *` 繼續研究 cron 是低頻 heartbeat（每 2h），配合 slot-aware check 不會爆資源
+- **禁止**建立 `*/4 * * * *` 或更密的高頻 heartbeat — 會造成資源競爭與 token 浪費
+- agent 完成主任務後：先檢查 user queue → scheduled queue → discovery
+- discovery pass 最多每 30 分鐘一次；user-assigned 永遠優先於 discovery
+- 反空轉原則：每次 cron 觸發必須真的產出（新 agent / git diff / 新 knowledge / research_program.md 更新）
 
 也可以安排**單次性提醒**避免忘記（範例格式，日期需依實際事件更新）：
 ```

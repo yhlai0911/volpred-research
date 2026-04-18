@@ -1461,6 +1461,85 @@ def ops_control_plane_summary(storage_dir: str) -> None:
     _print_json(summary)
 
 
+@ops.command("supervisor-report")
+@click.option("--days", default=7, show_default=True, type=int, help="Rolling window in days")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+@click.option("--rules-path", default="config/supervisor_rules.json", show_default=True, help="Supervisor rules config")
+@click.option("--format", "output_format", default="both", type=click.Choice(["table", "json", "both"]), show_default=True)
+def ops_supervisor_report(days: int, storage_dir: str, rules_path: str, output_format: str) -> None:
+    """Aggregated historical view for T1 supervisor — task activity, curation,
+    followup backlog, feed cadence, token usage, family coverage deficit.
+    Reads config/supervisor_rules.json at runtime (no restart needed)."""
+    from volpred.ops import build_supervisor_snapshot
+
+    snapshot = build_supervisor_snapshot(days=days, storage_dir=storage_dir, rules_path=rules_path)
+
+    if output_format in ("table", "both"):
+        activity = snapshot["task_activity"]
+        table = Table(title=f"Supervisor Report (window={days}d)")
+        table.add_column("Section", style="cyan")
+        table.add_column("Value", style="green")
+        table.add_row("Total tasks in window", str(activity["total_tasks_in_window"]))
+        table.add_row("By family", json.dumps(activity["by_family"], ensure_ascii=False))
+        table.add_row("By source", json.dumps(activity["by_source"], ensure_ascii=False))
+        table.add_row("By status", json.dumps(activity["by_status"], ensure_ascii=False))
+        table.add_row("Avg cycle (hours)", str(activity["avg_cycle_hours"]))
+        table.add_row("Pending curations", str(snapshot["curation"]["pending_curations_count"]))
+        table.add_row("Curated in window", str(snapshot["curation"]["recently_curated_in_window"]))
+        table.add_row("Followup backlog", str(snapshot["followup_backlog"]["unmaterialized_count"]))
+        if snapshot["feed_rhythm"].get("available"):
+            fr = snapshot["feed_rhythm"]
+            table.add_row("Feed published (window)", str(fr["published_in_window"]))
+            table.add_row("Feed drafts pending", str(fr["draft_count"]))
+            table.add_row("Days since last publish", str(fr["days_since_last_publish"]))
+        if snapshot["token_usage"].get("available"):
+            tu = snapshot["token_usage"]
+            table.add_row(f"Token cost (last {tu['window_days']}d, USD)", str(tu["total_cost_usd"]))
+        deficit_rows = snapshot["family_coverage_deficit"]["families_below_floor"]
+        if deficit_rows:
+            table.add_row("Families below floor", json.dumps(deficit_rows, ensure_ascii=False))
+        next_prio = snapshot["supervisor_next_actions"]["prioritize_families"]
+        if next_prio:
+            table.add_row("Next-tick prioritize", ", ".join(next_prio))
+        console.print(table)
+
+    if output_format in ("json", "both"):
+        _print_json(snapshot)
+
+
+@ops.command("pacing-autotune")
+@click.option("--days", default=7, show_default=True, type=int)
+@click.option("--storage-dir", default="storage", show_default=True)
+@click.option("--rules-path", default="config/supervisor_rules.json", show_default=True)
+@click.option("--dry-run", is_flag=True, help="Show what would change without writing")
+@click.option("--aggressiveness", default=0.3, show_default=True, type=float, help="Change rate 0-1")
+def ops_pacing_autotune(
+    days: int,
+    storage_dir: str,
+    rules_path: str,
+    dry_run: bool,
+    aggressiveness: float,
+) -> None:
+    """Let supervisor adjust family floors/caps in supervisor_rules.json based on
+    actual throughput from the last N days. Self-improvement loop — changes
+    apply on next supervisor tick without session restart."""
+    from volpred.ops import autotune_supervisor_rules
+
+    result = autotune_supervisor_rules(
+        days=days,
+        storage_dir=storage_dir,
+        rules_path=rules_path,
+        dry_run=dry_run,
+        aggressiveness=aggressiveness,
+    )
+    if result.get("ok"):
+        tag = "[yellow]DRY RUN[/yellow]" if dry_run else "[green]applied[/green]"
+        console.print(f"Pacing autotune {tag}")
+    else:
+        console.print(f"[red]Autotune failed[/red]: {result.get('error')}")
+    _print_json(result)
+
+
 @ops.command("health")
 @click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
 def ops_health(storage_dir: str) -> None:
@@ -1596,6 +1675,29 @@ def ops_sync_all(storage_dir: str) -> None:
     for key, value in result.items():
         console.print(f"  {key}: {value}")
     _print_json({"action": "sync_all", "counts": result})
+
+
+@ops.command("feed-sync")
+@click.option("--storage-dir", default="storage", show_default=True)
+@click.option("--dry-run/--apply", default=True, show_default=True,
+              help="Dry-run shows diff only; --apply writes to Supabase")
+@click.option("--allow-delete/--no-delete", default=False, show_default=True,
+              help="Allow DELETE of Supabase rows missing from feed.json")
+def ops_feed_sync(storage_dir: str, dry_run: bool, allow_delete: bool) -> None:
+    """One-way reconcile feed.json (canonical) -> Supabase articles projection.
+
+    Contentlayer pattern: feed.json is the single source of truth; this
+    command pushes diffs to the DB projection. Never reads from DB as truth.
+    """
+    from volpred.ops.feed_sync import sync_feed_to_supabase
+
+    result = sync_feed_to_supabase(
+        storage_dir=storage_dir,
+        dry_run=dry_run,
+        allow_delete=allow_delete,
+        verbose=True,
+    )
+    _print_json({"action": "feed_sync", "result": result})
 
 
 @ops.command("daily-update")
