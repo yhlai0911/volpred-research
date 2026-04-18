@@ -7,6 +7,7 @@ from pathlib import Path
 
 from volpred.ops.local_control_plane import (
     AGENT_STALE_SECONDS,
+    AUTO_PREFERRED_SESSION_KEY,
     admin_override_claim,
     claim_next_task,
     create_task,
@@ -19,7 +20,8 @@ from volpred.ops.local_control_plane import (
 
 def _set_heartbeat(storage_dir: Path, agent_name: str, seconds_ago: int) -> None:
     """Rewrite an agent session with a heartbeat_at N seconds in the past."""
-    path = _agent_path(agent_name, storage_dir=str(storage_dir))
+    session_key = AUTO_PREFERRED_SESSION_KEY.get(agent_name, agent_name)
+    path = _agent_path(session_key, storage_dir=str(storage_dir))
     session = json.loads(path.read_text())
     ts = (datetime.now(timezone.utc) - timedelta(seconds=seconds_ago)).isoformat()
     session["heartbeat_at"] = ts

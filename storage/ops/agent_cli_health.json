@@ -1,0 +1,54 @@
+{
+  "generated_at": "2026-04-18T01:25:40.247754+00:00",
+  "overall_status": "blocked",
+  "requested_paths": [
+    "coordinator",
+    "claude_executor",
+    "codex_executor"
+  ],
+  "paths": {
+    "coordinator": {
+      "path": "coordinator",
+      "agent": "claude",
+      "role": "coordinator",
+      "task_id": "task_7c9eef0a07ef",
+      "scheduler_result": "blocked",
+      "task_status": "blocked",
+      "brief_status": "needs_manual_review",
+      "readiness": "blocked",
+      "reason_code": "free_text_response",
+      "message": "Brief 已產出（read-only、不改共享狀態）。"
+    },
+    "claude_executor": {
+      "path": "claude_executor",
+      "agent": "claude",
+      "role": "executor",
+      "task_id": "task_338daf7bdbe9",
+      "scheduler_result": "failed",
+      "task_status": "failed",
+      "brief_status": "ready",
+      "readiness": "blocked",
+      "reason_code": "free_text_response",
+      "message": "empty coordinator output"
+    },
+    "codex_executor": {
+      "path": "codex_executor",
+      "agent": "codex",
+      "role": "executor",
+      "task_id": "task_622ca77d5efd",
+      "scheduler_result": "failed",
+      "task_status": "failed",
+      "brief_status": "ready",
+      "readiness": "blocked",
+      "reason_code": "timeout",
+      "message": "codex_executor_timeout_after_60s"
+    }
+  },
+  "cli_paths": {
+    "claude": "/Users/yhlai0911/.local/bin/claude",
+    "codex": "/Users/yhlai0911/.nvm/versions/node/v22.20.0/bin/codex"
+  },
+  "suggestions": [
+    "Claude live path 目前能執行，但 structured output contract 尚未穩定；需要優先處理 coordinator / executor 的 JSON 輸出相容性。"
+  ]
+}

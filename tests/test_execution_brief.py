@@ -6,10 +6,15 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from volpred.ops.execution_brief import (
+    BriefContent,
+    ExecutorResult,
+    _codex_output_schema,
     build_execution_brief,
+    preview_execution_brief,
     preflight_executor_task,
     run_coordinator_brief,
     run_executor_task,
+    set_execution_brief,
     task_brief_is_ready,
     task_brief_is_stale,
     task_unmet_preconditions,
@@ -336,6 +341,46 @@ why_this_agent: "ops template"
     assert task_state["last_error"] == "preconditions_not_met: storage/macro/cpi.json"
 
 
+def test_supervisor_can_preview_and_set_manual_brief(tmp_path: Path, monkeypatch):
+    templates_root = tmp_path / "brief_templates"
+    templates_root.mkdir(parents=True, exist_ok=True)
+    monkeypatch.setattr("volpred.ops.execution_brief.BRIEF_TEMPLATES_ROOT", templates_root)
+
+    storage_dir = tmp_path / "storage"
+    task = create_task(
+        title="Manual brief task",
+        description="needs supervisor-authored brief",
+        task_family="research",
+        preferred_agent="auto",
+        payload={"brief_template": "missing.yaml"},
+        storage_dir=str(storage_dir),
+    )
+
+    preview = preview_execution_brief(task["id"], storage_dir=str(storage_dir))
+    assert preview["requires_supervisor"] is True
+    assert preview["brief"] is None
+    assert preview["suggested_brief"]["task_summary"] == "Manual brief task"
+
+    stored = set_execution_brief(
+        task["id"],
+        actor="claude-supervisor",
+        brief_payload={
+            **preview["suggested_brief"],
+            "success_criteria": ["task completed in VS Code worker terminal"],
+            "required_files": ["docs/project_improvement_status.md"],
+            "why_this_agent": "supervisor assigned this to a worker terminal",
+        },
+        storage_dir=str(storage_dir),
+    )
+    assert stored["brief_status"] == "ready"
+    assert stored["brief_payload"]["source_type"] == "supervisor"
+
+    task_state = get_task(task["id"], storage_dir=str(storage_dir))
+    assert task_state is not None
+    assert task_state["brief_status"] == "ready"
+    assert task_state["brief_payload"]["source_type"] == "supervisor"
+
+
 def test_run_coordinator_brief_timeout_blocks_task(tmp_path: Path, monkeypatch):
     storage_dir = tmp_path / "storage"
     task = create_task(
@@ -410,3 +455,126 @@ why_this_agent: "ops template"
         assert str(exc) == "claude_executor_timeout_after_180s"
     else:  # pragma: no cover
         raise AssertionError("executor timeout should fail")
+
+
+def test_pydantic_schemas_forbid_additional_properties():
+    brief_schema = BriefContent.model_json_schema()
+    executor_schema = ExecutorResult.model_json_schema()
+    codex_schema = _codex_output_schema()
+
+    assert brief_schema["additionalProperties"] is False
+    assert executor_schema["additionalProperties"] is False
+    assert codex_schema["additionalProperties"] is False
+    assert codex_schema["required"] == ["summary", "commands_run", "files_touched"]
+
+
+def test_run_coordinator_brief_unwraps_claude_json_envelope(tmp_path: Path, monkeypatch):
+    storage_dir = tmp_path / "storage"
+    task = create_task(
+        title="Coordinator envelope task",
+        description="should unwrap Claude result envelope",
+        task_family="research",
+        preferred_agent="auto",
+        payload={"brief_template": "missing.yaml"},
+        storage_dir=str(storage_dir),
+    )
+
+    payload = {
+        "type": "result",
+        "subtype": "success",
+        "is_error": False,
+        "result": json.dumps(
+            {
+                "task_summary": "Envelope brief",
+                "goal": "Confirm envelope parsing works",
+                "success_criteria": ["return valid JSON"],
+                "repo_root": "/Users/yhlai0911/Desktop/volpred-research",
+                "required_files": ["docs/project_improvement_status.md"],
+                "recommended_files": [],
+                "forbidden_large_files": [],
+                "relevant_commands": [],
+                "prior_findings": [],
+                "rollback_point_id": None,
+                "why_this_agent": "Claude coordinator",
+            },
+            ensure_ascii=False,
+        ),
+    }
+
+    monkeypatch.setattr(
+        "volpred.ops.execution_brief.subprocess.run",
+        lambda *args, **kwargs: subprocess.CompletedProcess(
+            args=args[0],
+            returncode=0,
+            stdout=json.dumps(payload, ensure_ascii=False),
+            stderr="",
+        ),
+    )
+
+    brief = run_coordinator_brief(task["id"], storage_dir=str(storage_dir))
+    assert brief["task_summary"] == "Envelope brief"
+
+
+def test_run_coordinator_brief_surfaces_claude_json_envelope_errors(tmp_path: Path, monkeypatch):
+    storage_dir = tmp_path / "storage"
+    task = create_task(
+        title="Coordinator envelope error task",
+        description="should surface Claude auth error",
+        task_family="research",
+        preferred_agent="auto",
+        payload={"brief_template": "missing.yaml"},
+        storage_dir=str(storage_dir),
+    )
+
+    payload = {
+        "type": "result",
+        "subtype": "success",
+        "is_error": True,
+        "result": "Not logged in · Please run /login",
+    }
+
+    monkeypatch.setattr(
+        "volpred.ops.execution_brief.subprocess.run",
+        lambda *args, **kwargs: subprocess.CompletedProcess(
+            args=args[0],
+            returncode=0,
+            stdout=json.dumps(payload, ensure_ascii=False),
+            stderr="",
+        ),
+    )
+
+    try:
+        run_coordinator_brief(task["id"], storage_dir=str(storage_dir))
+    except RuntimeError as exc:
+        assert str(exc) == "Not logged in · Please run /login"
+    else:  # pragma: no cover
+        raise AssertionError("coordinator envelope error should fail")
+
+
+def test_run_coordinator_brief_surfaces_plain_text_errors(tmp_path: Path, monkeypatch):
+    storage_dir = tmp_path / "storage"
+    task = create_task(
+        title="Coordinator plain text error task",
+        description="should surface plain text cli errors",
+        task_family="research",
+        preferred_agent="auto",
+        payload={"brief_template": "missing.yaml"},
+        storage_dir=str(storage_dir),
+    )
+
+    monkeypatch.setattr(
+        "volpred.ops.execution_brief.subprocess.run",
+        lambda *args, **kwargs: subprocess.CompletedProcess(
+            args=args[0],
+            returncode=0,
+            stdout="Not logged in · Please run /login",
+            stderr="",
+        ),
+    )
+
+    try:
+        run_coordinator_brief(task["id"], storage_dir=str(storage_dir))
+    except RuntimeError as exc:
+        assert str(exc) == "Not logged in · Please run /login"
+    else:  # pragma: no cover
+        raise AssertionError("plain text coordinator errors should fail")

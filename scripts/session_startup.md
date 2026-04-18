@@ -1,19 +1,83 @@
-# Session 啟動必建集（shared scheduler + session-only monitor 操作細節）
+# Session 啟動必建集（VS Code supervisor / worker terminals）
 
 SessionStart hook 會提醒讀這份。這裡只放**每次新 session 要執行的具體指令**——不是原則、不是教訓（那些留在 CLAUDE.md）。
 
-正式時鐘現在是：
+校正後的標準 user story 是：
+
+1. VS Code 開 3 個終端機
+2. 終端機 A：Claude Code supervisor
+3. 終端機 B：Claude Code worker
+4. 終端機 C：Codex worker
+
+這 3 個終端機都應該是**已完成 OAuth / 人工認證**的互動 session。
+
+## 0. 三終端機最小啟動方式
+
+### A. Claude supervisor terminal
+
+不需要 headless `claude -p`。
+這個終端機負責：
+
+- `uv run volpred ops tasks`
+- `uv run volpred ops task-show <task_id>`
+- `uv run volpred ops brief-show <task_id>`
+- `uv run volpred ops brief-set <task_id> --brief-json ... --actor claude-supervisor`
+- `uv run volpred ops control-plane-summary`
+- `uv run volpred ops health`
+
+### B. Claude worker terminal
+
+```bash
+export VOLPRED_ACTOR=claude
+uv run volpred ops session-bootstrap --agent claude --session-id claude:worker
+```
+
+工作循環：
+
+```bash
+uv run volpred ops next-task --agent claude --emit-brief
+# 在同一個已登入的 Claude Code terminal 內完成任務
+uv run volpred ops finish-task <task_id> --agent claude --summary "..."
+```
+
+### C. Codex worker terminal
+
+```bash
+export VOLPRED_ACTOR=codex
+uv run volpred ops session-bootstrap --agent codex --session-id codex:worker
+```
+
+工作循環：
+
+```bash
+uv run volpred ops next-task --agent codex --emit-brief
+# 在同一個已登入的 Codex terminal 內完成任務
+uv run volpred ops finish-task <task_id> --agent codex --summary "..."
+```
+
+worker session 結束後：
+
+```bash
+uv run volpred ops session-shutdown --agent claude
+uv run volpred ops session-shutdown --agent codex
+```
+
+## 1. 補充：shared scheduler 與 session cron
+
+repo 內仍保留：
 
 ```bash
 scripts/install_scheduler_cron.sh
 ```
 
-下面的 session cron 僅保留為 session-local 提醒 / monitor，**不是正式派工來源**。
+但這條路徑目前應視為過渡期 / 輔助自動化機制，不是校正後的正式 worker runtime。
+
+下面的 session cron 僅保留為 session-local 提醒 / monitor。
 
 **Canonical source**：`config/runtime_schedules.json`
 若本檔和其他文件不一致，以該檔為準；本檔只是方便複製執行的操作手冊。
 
-## 1. Session Cron 標準啟動集（台灣時間，直接複製執行）
+## 2. Session Cron 標準啟動集（台灣時間，直接複製執行）
 
 ```python
 CronCreate(cron="3 9 * * *", prompt="每日任務審視與執行計劃：(1) 盤點 user queue / scheduled queue / approval backlog (2) 盤點草稿池與今日已發佈文章缺口 (3) 讀 research_program.md 事件日曆，確認今日是否有 CPI/NFP/FOMC/TSMC 等重要事件 (4) 有事件→立即建立或執行事件任務（必要時 status=published）(5) 檢查 research_program.md 行數(<700)、知識索引是否過期(>24h) (6) 用 uv run volpred ops assign 建立今日正式任務")
@@ -34,7 +98,7 @@ CronCreate(cron="0 10 28 * *", prompt="更新 NDC 景氣指標：用 Chrome DevT
 6. 同一個 K 編號 / task id 不得同時被兩個 agent 執行（啟動前 `ls experiments/<k>` + `ls .claude/worktrees/` 檢查）
 7. user-assigned pending 永遠優先於 discovery — 下次 slot 空出必須先挑 user
 
-## 2. Monitor 啟動（persistent，每 30 分鐘檢查，只異常通知）
+## 3. Monitor 啟動（persistent，每 30 分鐘檢查，只異常通知）
 
 ```python
 Monitor(
@@ -80,7 +144,7 @@ done"""
 )
 ```
 
-## 3. 參考資料（不是啟動指令，僅供查閱）
+## 4. 參考資料（不是啟動指令，僅供查閱）
 
 ### 永久任務（系統 crontab，不需重啟）
 ```

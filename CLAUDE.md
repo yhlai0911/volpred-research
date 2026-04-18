@@ -2,6 +2,7 @@
 
 # 自主波動率預測研究系統
 原則上使用繁體中文互動
+完成任務後，使用bash say "主人 {任務簡短名稱} 任務已完成"
 
 ## Bootstrap 原則
 
@@ -28,6 +29,21 @@
 - `agent-specs/codex/config.toml`：Codex config canonical
 
 **不要直接手改 render 產物。** `CLAUDE.md`、`.claude/skills/` 與 provider-native rules / subagents / config 都應由 `agent-specs/` render。
+
+## 多 Agent 自動偵測（3-terminal workflow）
+
+啟動時**第一件事**：檢查 `VOLPRED_SESSION_KEY` 環境變數（用 `echo $VOLPRED_SESSION_KEY`）決定是否進入多 agent 協同模式。
+
+**若 `VOLPRED_SESSION_KEY` 有值**（`claude-supervisor` / `claude-worker` / `codex-worker` 其中之一）：
+1. 你正處於 3-terminal 協同模式中的一個 agent session（詳見 `docs/multi-agent-terminal-workflow.md`）
+2. **立即讀 `scripts/agent_prompts/${VOLPRED_SESSION_KEY}.txt`** 載入你的角色工作流，完全按該檔指示執行（別的職責本輪不管）
+3. 節奏控制遵守 `config/supervisor_pacing.json`（curate-gate、cooldown、max_pending_per_worker）
+4. Session 狀態寫在 `storage/ops/agents/${VOLPRED_SESSION_KEY}.json`；work queue 是 `storage/ops/tasks/`
+5. 需要額外資訊：`echo $VOLPRED_ROLE`、`echo $VOLPRED_TERMINAL_LABEL`、`uv run volpred ops agents`
+
+**若 `VOLPRED_SESSION_KEY` 未設**：標準互動模式，等用戶 prompt，不要主動進入 worker loop。
+
+**重要：** 多 agent 模式下禁止跨角色行動。supervisor 不 claim worker task、worker 不寫 canonical 活文件。寫入權限矩陣見 `docs/multi-agent-terminal-workflow.md` §1.6。
 
 ## 研究誠實原則（最高優先，不可違反）
 

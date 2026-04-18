@@ -1,5 +1,7 @@
 # 系統架構
 
+補充總覽文件：`docs/system_handbook.md`。若你要一次看完整系統架構、功能、資料流、排程、control plane、前後台與維運邏輯，先讀這份再回來查本檔細節。`2026-04-18` 後的校正 user story 以「VS Code supervisor + worker terminals」為準；repo 內仍保留部分 shared scheduler / headless path 作為過渡期能力。
+
 ## 網站架構（v4 Supabase + Admin CMS + Mirror API）
 - **前端 target 設定**：`config/project_targets.json`（唯一來源；目前 `active_frontend=frontend-v2-fix`、`active_service=volpred-v3`）
 - **排程 target 設定**：`config/runtime_schedules.json`（唯一來源；shared scheduler / `event_jobs` / system crontab spec。若本機仍保留 session cron，只視為過渡期 monitor / reminder）
@@ -84,6 +86,8 @@
 
 ### Agent-first Ops Layer
 - **本地唯一核心 orchestrator**：`Claude Code + shared scheduler`
+- 校正後的正式操作故事是：1 個 Claude supervisor + 1 個 Claude worker + 1 個 Codex worker，在已登入 OAuth 的 VS Code 終端機中協作
+- `shared_scheduler_tick` / cron 路徑目前仍存在，但應視為過渡期與輔助自動化，不是校正後的最終 worker runtime
 - 若本機仍保留 session cron，僅視為過渡期 monitor / reminder，不再作為正式執行時鐘
 - 後台最終形態是 **agent-first control plane**，不是只有真人點擊的 CMS
 - **核心原則**：同一套操作能力，同時暴露給本機 agent（CLI / job）與真人 UI

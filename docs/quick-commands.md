@@ -13,6 +13,10 @@ uv run python scripts/recalc_metrics.py              # 手動重算績效指標
 uv run python scripts/supabase_sync.py full          # 手動 incremental sync
 uv run python scripts/supabase_sync.py force-full    # 強制全量同步（慎用，IO 大）
 uv run volpred ops health                            # 本地營運健康檢查
+uv run volpred ops scheduler-preview                 # 預覽 shared scheduler 下一輪會做什麼
+uv run volpred ops scheduler-tick                    # 手動跑一輪 shared scheduler
+uv run volpred ops scheduler-smoke --cleanup         # 隔離 mock smoke，不碰真實 Claude/Codex CLI
+uv run volpred ops scheduler-live-smoke --cleanup    # 隔離 live smoke，真打本機 Claude/Codex CLI
 uv run volpred ops article-backups --repair          # 確保每篇已發布文章都有本地單篇 JSON，可用於 DB 災難復原
 uv run volpred ops sync-all                          # 統一入口：手動 Supabase sync
 uv run volpred ops daily-update                      # 統一入口：每日更新

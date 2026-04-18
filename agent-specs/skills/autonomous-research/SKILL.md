@@ -23,7 +23,6 @@ Use this skill as the research orchestrator for：
 - 實驗設計與執行
 - knowledge / experience 記錄
 - 研究多元化與下一步方向生成
-- **milestone article 排程**（2026-04-18 新增防漏）：每完成 4 個 decisive K experiments（Harvey-significant / PASS confirmed / artifact discovered / narrative pivot gate met），強制啟 1 個 `feed-publisher` agent 把最新 decisive finding 寫成 reader 文章。違反：如 2026-04-17 session 做 ~80 K experiments 整天沒發任何 milestone（K1216c ROOT_CAUSE / K1203 UNIVERSAL_NULL / K1133b decomposition / K1235b defensibility 全漏發）。
 
 Do **not** use this skill as the primary owner for：
 
@@ -75,7 +74,7 @@ You are not a script runner. You are a thinking researcher with these abilities:
 
 ### Step -1: 確認實驗編號不衝突（多 session 安全）
 
-分配新 K 編號前，**用一條 bash 同時檢查三個來源**（避免 312 次/天的重複 `ls` 浪費 context；2026-04-17 教訓：a10f7b0f session 312 次重複 `ls .claude/worktrees/`）：
+分配新 K 編號前，**用一條 bash 同時檢查三個來源**（避免 312 次/天的重複 `ls` 浪費 context；2026-04-17 教訓：a10f7b0f session 312 次重複 `ls {{PROVIDER_DIR}}/worktrees/`）：
 
 ```bash
 { ls experiments/ 2>/dev/null | grep -oE 'k[0-9]+$' | sort -u;
@@ -437,16 +436,16 @@ All publications in **繁體中文**. Details in `references/publishing-guide.md
 
 派 Agent 時 prompt 不要超過 **800 字**。違反此上限的常見浪費（13f14b3a session 統計）：
 
-- ❌ 重複「專案路徑 / Python CLI / 部署目標」boilerplate — agent 已從 system prompt + CLAUDE.md 知道
-- ❌ 整段抄 `CLAUDE.md` / `error_log.md` / `research_program.md` — 引用路徑與行號即可
+- ❌ 重複「專案路徑 / Python CLI / 部署目標」boilerplate — agent 已從 system prompt + {{GUIDE_FILE}} 知道
+- ❌ 整段抄 `{{GUIDE_FILE}}` / `error_log.md` / `research_program.md` — 引用路徑與行號即可
 - ❌ 把 `references/experiment-preamble.md` 內容複製進 prompt — 寫「**讀** `{{SKILL_ROOT}}/autonomous-research/references/experiment-preamble.md`」就好
-- ❌ 重述「研究誠實 13 條」 — 寫「遵守 CLAUDE.md §研究誠實原則」即可
+- ❌ 重述「研究誠實 13 條」 — 寫「遵守 {{GUIDE_FILE}} §研究誠實原則」即可
 
 ✅ Prompt 必備（≤ 800 字）：任務 ID + 一句話目標 + 必讀檔路徑 + 成功標準 + 輸出位置。背景由 agent 自己讀。
 
 ### Tool call 合併
 
-- ❌ 不要分次 `ls experiments/` → `ls .claude/worktrees/` → `git worktree list` → `cat storage/next_tasks.json`。**一條 bash 用 `{ ... ; ... ; }` 包起來**（見 Step -1）
+- ❌ 不要分次 `ls experiments/` → `ls {{PROVIDER_DIR}}/worktrees/` → `git worktree list` → `cat storage/next_tasks.json`。**一條 bash 用 `{ ... ; ... ; }` 包起來**（見 Step -1）
 - ❌ 不要每完成 1 個 K 實驗就 `git add storage/memory/knowledge.json && git commit && git push`。**批次每 5-10 個實驗 commit 一次**，或交給每 4h cron 處理（13f14b3a 教訓：1 天 46 次 add knowledge.json）
 - ❌ 不要 `git status` + `git status --short` + `git diff --stat` 連續呼叫。挑一個
 
@@ -459,7 +458,7 @@ All publications in **繁體中文**. Details in `references/publishing-guide.md
 ### Session 衛生
 
 - 單一 session 累積成本超過 **$200** 或跨日超過 **24h**，主動建議使用者 `/clear`
-- 排程 cron tick 用 stub 回覆（≤15 字）省 token — 已在 CLAUDE.md「Cron skip 用 stub」段
+- 排程 cron tick 用 stub 回覆（≤15 字）省 token — 已在 {{GUIDE_FILE}}「Cron skip 用 stub」段
 - `next_tasks.json` 只放 next-action 任務；completed/cancelled/superseded/resolved_* 一律移到 `storage/next_tasks_archive.jsonl`（2026-04-17 教訓：曾累積到 128KB / 205 條，每次 Edit 都重寫整檔）
 - 但在 v11 之後，`next_tasks.json` 只算 **legacy planning / working list**：
   - scheduler / control plane 的正式 task source of truth 是 `storage/ops/`

@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from .agent_spec import check_agent_specs
 from .common import project_path
@@ -33,9 +33,13 @@ DEFAULT_FORBIDDEN_LARGE_FILES = [
 ]
 COORDINATOR_TIMEOUT_SECONDS = 90
 EXECUTOR_TIMEOUT_SECONDS = 180
+CLAUDE_PRINT_EXTRA_ARGS: tuple[str, ...] = ()
+CODEX_EXEC_EXTRA_ARGS: tuple[str, ...] = ("--full-auto",)
 
 
 class BriefContent(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     task_summary: str
     goal: str
     success_criteria: list[str] = Field(default_factory=list)
@@ -50,6 +54,8 @@ class BriefContent(BaseModel):
 
 
 class ExecutorResult(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     summary: str
     commands_run: list[str] = Field(default_factory=list)
     files_touched: list[str] = Field(default_factory=list)
@@ -214,6 +220,24 @@ def _render_template_brief(task: dict[str, Any], template_name: str, template_pa
         "template_hash": _template_hash(template_payload),
         "coordinator_run_id": None,
         **validated.model_dump(),
+    }
+
+
+def _supervisor_brief_skeleton(task: dict[str, Any], *, storage_dir: str = "storage") -> dict[str, Any]:
+    return {
+        "task_summary": str(task.get("title") or ""),
+        "goal": str(task.get("description") or ""),
+        "success_criteria": [],
+        "repo_root": str(project_path()),
+        "required_files": [],
+        "recommended_files": [],
+        "forbidden_large_files": list(DEFAULT_FORBIDDEN_LARGE_FILES),
+        "relevant_commands": [],
+        "prior_findings": _prior_findings(str(task.get("id") or ""), storage_dir=storage_dir),
+        "rollback_point_id": task.get("rollback_point_id"),
+        "why_this_agent": (
+            "Prepared by a supervisor Claude session for a VS Code worker terminal."
+        ),
     }
 
 
@@ -392,10 +416,26 @@ def _extract_json_object(raw: str) -> dict[str, Any]:
     text = raw.strip()
     if not text:
         raise RuntimeError("empty coordinator output")
+
+    def _unwrap_candidate(candidate: Any) -> dict[str, Any]:
+        if isinstance(candidate, dict):
+            # `claude -p --output-format json` returns a result envelope. Pull the
+            # actual model text out before validating against our schema.
+            if "result" in candidate and any(
+                key in candidate for key in ("type", "subtype", "is_error", "session_id", "duration_ms")
+            ):
+                if bool(candidate.get("is_error")):
+                    detail = str(candidate.get("result") or candidate.get("error") or "claude_cli_error").strip()
+                    raise RuntimeError(detail or "claude_cli_error")
+                return _extract_json_object(str(candidate.get("result") or ""))
+            return candidate
+        if isinstance(candidate, str):
+            return _extract_json_object(candidate)
+        raise RuntimeError("unable to extract JSON object from coordinator output")
+
     try:
         payload = json.loads(text)
-        if isinstance(payload, dict):
-            return payload
+        return _unwrap_candidate(payload)
     except json.JSONDecodeError:
         pass
     start = text.find("{")
@@ -403,9 +443,8 @@ def _extract_json_object(raw: str) -> dict[str, Any]:
     if start >= 0 and end > start:
         snippet = text[start : end + 1]
         payload = json.loads(snippet)
-        if isinstance(payload, dict):
-            return payload
-    raise RuntimeError("unable to extract JSON object from coordinator output")
+        return _unwrap_candidate(payload)
+    raise RuntimeError(text if len(text) <= 500 else f"{text[:500]}...")
 
 
 def _load_prompt(name: str) -> str:
@@ -434,6 +473,15 @@ def _coordinator_schema() -> dict[str, Any]:
     return BriefContent.model_json_schema()
 
 
+def _codex_output_schema() -> dict[str, Any]:
+    schema = ExecutorResult.model_json_schema()
+    properties = schema.get("properties")
+    if isinstance(properties, dict):
+        schema["required"] = list(properties.keys())
+        schema["additionalProperties"] = False
+    return schema
+
+
 def run_coordinator_brief(task_id: str, *, storage_dir: str = "storage") -> dict[str, Any]:
     task = _load_task(task_id, storage_dir=storage_dir)
     if task is None:
@@ -444,7 +492,7 @@ def run_coordinator_brief(task_id: str, *, storage_dir: str = "storage") -> dict
     for _ in range(3):
         try:
             result = subprocess.run(
-                ["claude", "-p", "--output-format", "json", "--json-schema", schema, prompt],
+                ["claude", "-p", *CLAUDE_PRINT_EXTRA_ARGS, "--output-format", "json", "--json-schema", schema, prompt],
                 cwd=project_path(),
                 capture_output=True,
                 text=True,
@@ -509,6 +557,60 @@ def build_execution_brief(task_id: str, *, storage_dir: str = "storage", allow_c
     return ensure_execution_brief(task_id, storage_dir=storage_dir, allow_coordinator=allow_coordinator)
 
 
+def preview_execution_brief(task_id: str, *, storage_dir: str = "storage") -> dict[str, Any]:
+    task = _load_task(task_id, storage_dir=storage_dir)
+    if task is None:
+        raise RuntimeError(f"Unknown task: {task_id}")
+    brief = build_execution_brief(task_id, storage_dir=storage_dir, allow_coordinator=False)
+    task = _load_task(task_id, storage_dir=storage_dir)
+    if task is None:
+        raise RuntimeError(f"Unknown task: {task_id}")
+    requires_supervisor = brief is None and task_requires_coordinator(task)
+    return {
+        "task_id": task_id,
+        "task_status": task.get("status"),
+        "brief_status": task.get("brief_status"),
+        "requires_supervisor": requires_supervisor,
+        "brief": brief,
+        "suggested_brief": None if brief is not None else _supervisor_brief_skeleton(task, storage_dir=storage_dir),
+    }
+
+
+def set_execution_brief(
+    task_id: str,
+    *,
+    brief_payload: dict[str, Any],
+    actor: str,
+    storage_dir: str = "storage",
+) -> dict[str, Any]:
+    task = _load_task(task_id, storage_dir=storage_dir)
+    if task is None:
+        raise RuntimeError(f"Unknown task: {task_id}")
+    validated = BriefContent.model_validate(brief_payload)
+    coordinator_run_id = None
+    if isinstance(brief_payload, dict):
+        raw_run_id = str(brief_payload.get("coordinator_run_id") or "").strip()
+        coordinator_run_id = raw_run_id or None
+    payload = {
+        "generated_at": (
+            str(brief_payload.get("generated_at") or "").strip()
+            if isinstance(brief_payload, dict)
+            else ""
+        )
+        or _utc_now(),
+        "source_type": "supervisor",
+        "template_id": None,
+        "template_hash": None,
+        "coordinator_run_id": coordinator_run_id or f"supervisor_{actor}_{uuid.uuid4().hex[:8]}",
+        **validated.model_dump(),
+    }
+    _set_task_brief(task_id, brief_status="ready", brief_payload=payload, storage_dir=storage_dir)
+    refreshed = _load_task(task_id, storage_dir=storage_dir)
+    if refreshed is None:
+        raise RuntimeError(f"Unknown task: {task_id}")
+    return refreshed
+
+
 def preflight_executor_task(task_id: str, *, agent_name: str, storage_dir: str = "storage") -> dict[str, Any]:
     task = _load_task(task_id, storage_dir=storage_dir)
     if task is None:
@@ -568,7 +670,7 @@ def run_executor_task(task_id: str, *, agent_name: str, storage_dir: str = "stor
         schema = json.dumps(ExecutorResult.model_json_schema(), ensure_ascii=False)
         try:
             result = subprocess.run(
-                ["claude", "-p", "--output-format", "json", "--json-schema", schema, prompt],
+                ["claude", "-p", *CLAUDE_PRINT_EXTRA_ARGS, "--output-format", "json", "--json-schema", schema, prompt],
                 cwd=project_path(),
                 capture_output=True,
                 text=True,
@@ -583,7 +685,7 @@ def run_executor_task(task_id: str, *, agent_name: str, storage_dir: str = "stor
         payload = _extract_json_object(result.stdout)
     else:
         with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as schema_file:
-            json.dump(ExecutorResult.model_json_schema(), schema_file, ensure_ascii=False)
+            json.dump(_codex_output_schema(), schema_file, ensure_ascii=False)
             schema_path = schema_file.name
         with tempfile.NamedTemporaryFile("w+", suffix=".json", delete=False) as output_file:
             output_path = output_file.name
@@ -595,7 +697,7 @@ def run_executor_task(task_id: str, *, agent_name: str, storage_dir: str = "stor
                         "exec",
                         "--cd",
                         str(project_path()),
-                        "--full-auto",
+                        *CODEX_EXEC_EXTRA_ARGS,
                         "--output-schema",
                         schema_path,
                         "--output-last-message",

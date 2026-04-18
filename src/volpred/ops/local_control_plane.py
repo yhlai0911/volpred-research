@@ -35,6 +35,13 @@ TERMINAL_TASK_STATUSES = {"succeeded", "failed", "cancelled"}
 ACTIVE_EXPERIMENT_STATUSES = {"claimed", "running", "awaiting_approval", "blocked"}
 AGENT_STATUSES = {"online", "idle", "busy", "offline"}
 AGENT_NAMES = {"claude", "codex"}
+AGENT_ROLES = {"supervisor", "worker"}
+SESSION_KEYS = {"claude-supervisor", "claude-worker", "codex-worker"}
+SESSION_KEY_SPEC: dict[str, tuple[str, str]] = {
+    "claude-supervisor": ("claude", "supervisor"),
+    "claude-worker": ("claude", "worker"),
+    "codex-worker": ("codex", "worker"),
+}
 APPROVAL_DECISIONS = {"approved", "rejected"}
 AGENT_STALE_SECONDS = 300
 
@@ -47,6 +54,55 @@ AUTO_PREFERRED_AGENT = {
     "ops": "codex",
     "strategy": "codex",
 }
+
+AUTO_PREFERRED_SESSION_KEY = {
+    "claude": "claude-worker",
+    "codex": "codex-worker",
+}
+
+
+def resolve_session_key(
+    *,
+    session_key: str | None = None,
+    agent_name: str | None = None,
+    role: str | None = None,
+) -> tuple[str, str, str]:
+    """Resolve (session_key, agent_name, role) from any combination of inputs.
+
+    Accepts the canonical session_key (e.g. "claude-supervisor") as the
+    highest-priority input, falling back to agent_name+role, and finally to
+    the worker default for the given agent_name. Raises ValueError if the
+    combination is inconsistent or incomplete.
+    """
+    if session_key is not None:
+        if session_key not in SESSION_KEY_SPEC:
+            allowed = ", ".join(sorted(SESSION_KEY_SPEC))
+            raise ValueError(f"session_key must be one of: {allowed}")
+        spec_agent, spec_role = SESSION_KEY_SPEC[session_key]
+        if agent_name is not None and agent_name != spec_agent:
+            raise ValueError(
+                f"agent_name={agent_name!r} conflicts with session_key={session_key!r} (expects {spec_agent!r})"
+            )
+        if role is not None and role != spec_role:
+            raise ValueError(
+                f"role={role!r} conflicts with session_key={session_key!r} (expects {spec_role!r})"
+            )
+        return session_key, spec_agent, spec_role
+    if agent_name is None:
+        raise ValueError("either session_key or agent_name must be provided")
+    if agent_name not in AGENT_NAMES:
+        allowed = ", ".join(sorted(AGENT_NAMES))
+        raise ValueError(f"agent_name must be one of: {allowed}")
+    resolved_role = role if role is not None else "worker"
+    if resolved_role not in AGENT_ROLES:
+        allowed = ", ".join(sorted(AGENT_ROLES))
+        raise ValueError(f"role must be one of: {allowed}")
+    candidate_key = f"{agent_name}-{resolved_role}"
+    if candidate_key not in SESSION_KEY_SPEC:
+        raise ValueError(
+            f"agent_name={agent_name!r} + role={resolved_role!r} is not a supported session"
+        )
+    return candidate_key, agent_name, resolved_role
 
 SCHEDULE_GOVERNANCE_AREA = "schedule"
 
@@ -122,7 +178,12 @@ def _task_path(task_id: str, storage_dir: str = "storage") -> Path:
     return _control_plane_paths(storage_dir)["tasks"] / f"{task_id}.json"
 
 
-def _agent_path(agent_name: str, storage_dir: str = "storage") -> Path:
+def _agent_path(session_key: str, storage_dir: str = "storage") -> Path:
+    return _control_plane_paths(storage_dir)["agents"] / f"{session_key}.json"
+
+
+def _legacy_agent_path(agent_name: str, storage_dir: str = "storage") -> Path:
+    """Legacy filename keyed on agent_name (pre session-key schema)."""
     return _control_plane_paths(storage_dir)["agents"] / f"{agent_name}.json"
 
 
@@ -182,6 +243,8 @@ class TaskRecord:
     brief_status: str | None = None
     brief_payload: dict[str, Any] | None = None
     claimed_by: str | None = None
+    claimed_by_session_key: str | None = None
+    claimed_by_role: str | None = None
     claimed_at: str | None = None
     started_at: str | None = None
     finished_at: str | None = None
@@ -190,6 +253,11 @@ class TaskRecord:
     rejected_by: str | None = None
     rejected_at: str | None = None
     result_summary: str | None = None
+    signal_payload: dict[str, Any] | None = None
+    curated_by: str | None = None
+    curated_at: str | None = None
+    curated_promoted: list[str] = field(default_factory=list)
+    curated_notes: str | None = None
     last_error: str | None = None
     created_at: str = field(default_factory=_utc_now)
     updated_at: str = field(default_factory=_utc_now)
@@ -198,6 +266,8 @@ class TaskRecord:
         payload = asdict(self)
         payload["payload"] = _json_safe(self.payload)
         payload["brief_payload"] = _json_safe(self.brief_payload)
+        payload["signal_payload"] = _json_safe(self.signal_payload)
+        payload["curated_promoted"] = _normalize_list(self.curated_promoted)
         return payload
 
 
@@ -213,6 +283,9 @@ class AgentSession:
     session_id: str | None = None
     session_rollback_point_id: str | None = None
     subagent_budget: int = 0
+    role: str = "worker"
+    session_key: str | None = None
+    terminal_label: str | None = None
     updated_at: str = field(default_factory=_utc_now)
 
     def to_dict(self) -> dict[str, Any]:
@@ -245,6 +318,9 @@ class ExecutionReceipt:
     subagent_count: int
     session_id: str | None = None
     rollback_point_id: str | None = None
+    session_key: str | None = None
+    role: str | None = None
+    signal_payload: dict[str, Any] | None = None
     timestamp: str = field(default_factory=_utc_now)
     error: str | None = None
 
@@ -260,6 +336,9 @@ class ExecutionReceipt:
             "subagent_count": self.subagent_count,
             "session_id": self.session_id,
             "rollback_point_id": self.rollback_point_id,
+            "session_key": self.session_key,
+            "role": self.role,
+            "signal_payload": _json_safe(self.signal_payload),
             "timestamp": self.timestamp,
             "error": self.error,
         }
@@ -339,8 +418,45 @@ def _load_task(task_id: str, storage_dir: str = "storage") -> dict[str, Any] | N
     return _load_json(_task_path(task_id, storage_dir=storage_dir))
 
 
-def _load_agent(agent_name: str, storage_dir: str = "storage") -> dict[str, Any] | None:
-    return _load_json(_agent_path(agent_name, storage_dir=storage_dir))
+def _load_agent(session_key: str, storage_dir: str = "storage") -> dict[str, Any] | None:
+    """Load an agent session by session_key, with fallbacks.
+
+    Historically, agents were stored at `storage/ops/agents/{agent_name}.json`
+    (claude.json / codex.json). After the session-identity refactor, canonical
+    filenames are `storage/ops/agents/{session_key}.json` (e.g.
+    claude-worker.json). This function accepts either form:
+
+    1. Canonical session_key ("claude-worker") → direct lookup.
+    2. Plain agent_name ("claude") → try default worker session_key
+       ("claude-worker"), then legacy filename ("claude.json").
+    """
+    payload = _load_json(_agent_path(session_key, storage_dir=storage_dir))
+    if payload is not None:
+        return payload
+    if session_key in AGENT_NAMES:
+        default_key = AUTO_PREFERRED_SESSION_KEY.get(session_key)
+        if default_key:
+            via_default = _load_json(_agent_path(default_key, storage_dir=storage_dir))
+            if via_default is not None:
+                return via_default
+        legacy = _load_json(_legacy_agent_path(session_key, storage_dir=storage_dir))
+        return legacy
+    return None
+
+
+def _load_agent_for_agent_name(agent_name: str, storage_dir: str = "storage") -> dict[str, Any] | None:
+    """Find the worker session for a given agent_name.
+
+    Used by scheduler/fallback logic that operates at the agent_name level
+    (does not care about supervisor vs worker roles).
+    """
+    default_key = AUTO_PREFERRED_SESSION_KEY.get(agent_name)
+    if default_key:
+        payload = _load_json(_agent_path(default_key, storage_dir=storage_dir))
+        if payload is not None:
+            return payload
+    # Legacy fallback.
+    return _load_json(_legacy_agent_path(agent_name, storage_dir=storage_dir))
 
 
 def _build_agent_session(
@@ -355,10 +471,22 @@ def _build_agent_session(
     session_id: str | None = None,
     session_rollback_point_id: str | None = None,
     subagent_budget: int | None = None,
+    role: str | None = None,
+    session_key: str | None = None,
+    terminal_label: str | None = None,
 ) -> AgentSession:
     defaults = DEFAULT_AGENT_PROFILES[agent_name]
     now = _utc_now()
     current = current or {}
+    resolved_role = role if role is not None else str(current.get("role") or "worker")
+    resolved_session_key = (
+        session_key
+        if session_key is not None
+        else str(current.get("session_key") or f"{agent_name}-{resolved_role}")
+    )
+    resolved_terminal = (
+        terminal_label if terminal_label is not None else current.get("terminal_label")
+    )
     return AgentSession(
         agent_name=agent_name,
         provider=provider or str(current.get("provider") or defaults["provider"]),
@@ -367,7 +495,7 @@ def _build_agent_session(
         capabilities=_normalize_list(capabilities or current.get("capabilities") or defaults["capabilities"]),
         heartbeat_at=now,
         claimed_task_id=claimed_task_id if claimed_task_id is not None else current.get("claimed_task_id"),
-        session_id=session_id or str(current.get("session_id") or f"{agent_name}:{os.getpid()}"),
+        session_id=session_id or str(current.get("session_id") or f"{resolved_session_key}:{os.getpid()}"),
         session_rollback_point_id=(
             session_rollback_point_id
             if session_rollback_point_id is not None
@@ -379,6 +507,9 @@ def _build_agent_session(
             else current.get("subagent_budget")
             or defaults["subagent_budget"]
         ),
+        role=resolved_role,
+        session_key=resolved_session_key,
+        terminal_label=resolved_terminal,
         updated_at=now,
     )
 
@@ -420,11 +551,34 @@ def get_task(task_id: str, storage_dir: str = "storage") -> dict[str, Any] | Non
 
 
 def list_agent_sessions(storage_dir: str = "storage") -> list[dict[str, Any]]:
-    return _list_json_payloads(ensure_control_plane_dirs(storage_dir)["agents"])
+    sessions = _list_json_payloads(ensure_control_plane_dirs(storage_dir)["agents"])
+    # Ensure each session advertises a session_key / role for downstream
+    # consumers (CLI display, scheduler). Legacy files (pre-refactor) may lack
+    # these fields.
+    for session in sessions:
+        if not session.get("session_key"):
+            agent_name = str(session.get("agent_name") or "")
+            inferred_role = str(session.get("role") or "worker")
+            if agent_name in AGENT_NAMES:
+                session["session_key"] = f"{agent_name}-{inferred_role}"
+            else:
+                session["session_key"] = agent_name
+        if not session.get("role"):
+            session["role"] = "worker"
+    return sessions
 
 
-def get_agent_session(agent_name: str, storage_dir: str = "storage") -> dict[str, Any] | None:
-    return _load_agent(agent_name, storage_dir=storage_dir)
+def get_agent_session(
+    identifier: str, storage_dir: str = "storage"
+) -> dict[str, Any] | None:
+    """Fetch an agent session by session_key or (legacy) agent_name."""
+    return _load_agent(identifier, storage_dir=storage_dir)
+
+
+def get_agent_session_by_session_key(
+    session_key: str, storage_dir: str = "storage"
+) -> dict[str, Any] | None:
+    return _load_json(_agent_path(session_key, storage_dir=storage_dir))
 
 
 def create_task(
@@ -498,7 +652,10 @@ def create_task(
 
 def heartbeat_agent(
     *,
-    agent_name: str,
+    agent_name: str | None = None,
+    session_key: str | None = None,
+    role: str | None = None,
+    terminal_label: str | None = None,
     status: str = "idle",
     provider: str | None = None,
     claimed_task_id: str | None = None,
@@ -509,13 +666,20 @@ def heartbeat_agent(
     subagent_budget: int | None = None,
     storage_dir: str = "storage",
 ) -> dict[str, Any]:
-    _validate_choice(agent_name, choices=AGENT_NAMES, field_name="agent_name")
+    resolved_key, resolved_agent, resolved_role = resolve_session_key(
+        session_key=session_key, agent_name=agent_name, role=role
+    )
     _validate_choice(status, choices=AGENT_STATUSES, field_name="status")
 
     with _plane_lock(storage_dir):
-        current = _load_agent(agent_name, storage_dir=storage_dir) or {}
+        current = _load_json(_agent_path(resolved_key, storage_dir=storage_dir))
+        if current is None and resolved_key in (f"{resolved_agent}-worker",):
+            # Adopt legacy record if present so heartbeats don't lose history.
+            legacy = _load_json(_legacy_agent_path(resolved_agent, storage_dir=storage_dir))
+            if legacy is not None:
+                current = legacy
         session = _build_agent_session(
-            agent_name=agent_name,
+            agent_name=resolved_agent,
             current=current,
             status=status,
             provider=provider,
@@ -525,8 +689,11 @@ def heartbeat_agent(
             session_id=session_id,
             session_rollback_point_id=session_rollback_point_id,
             subagent_budget=subagent_budget,
+            role=resolved_role,
+            session_key=resolved_key,
+            terminal_label=terminal_label,
         )
-        _atomic_write_json(_agent_path(agent_name, storage_dir=storage_dir), session.to_dict())
+        _atomic_write_json(_agent_path(resolved_key, storage_dir=storage_dir), session.to_dict())
     return session.to_dict()
 
 
@@ -604,43 +771,68 @@ def _reclaim_stale_tasks(storage_dir: str) -> list[str]:
             claimed_by = task.get("claimed_by")
             if not claimed_by:
                 continue
-            session = _load_agent(str(claimed_by), storage_dir=storage_dir)
+            claimed_by_session_key = str(
+                task.get("claimed_by_session_key") or ""
+            ) or None
+            session_identifier = claimed_by_session_key or str(claimed_by)
+            session = _load_agent(session_identifier, storage_dir=storage_dir)
             if not _agent_is_stale(session):
                 continue
             now = _utc_now()
             prior_status = task.get("status")
             task["status"] = "queued"
             task["claimed_by"] = None
+            task["claimed_by_session_key"] = None
+            task["claimed_by_role"] = None
             task["claimed_at"] = None
             task["updated_at"] = now
-            task["last_error"] = f"reclaimed_from_stale_{claimed_by}_at_{now}"
+            task["last_error"] = f"reclaimed_from_stale_{session_identifier}_at_{now}"
             _atomic_write_json(_task_path(str(task["id"]), storage_dir=storage_dir), task)
             # Also reset agent's claimed_task_id so the stale session doesn't still "own" it
             if session is not None:
                 session["claimed_task_id"] = None
                 session["updated_at"] = now
-                _atomic_write_json(_agent_path(str(claimed_by), storage_dir=storage_dir), session)
+                reset_key = session.get("session_key") or session_identifier
+                _atomic_write_json(
+                    _agent_path(str(reset_key), storage_dir=storage_dir), session
+                )
             reclaimed.append(str(task["id"]))
             append_writer_log(
                 subsystem="control_plane",
                 target=f"ops/tasks/{task['id']}",
                 record_id=str(task["id"]),
-                result=f"reclaimed_from_{prior_status}_{claimed_by}",
+                result=f"reclaimed_from_{prior_status}_{session_identifier}",
                 actor="system",
                 storage_dir=storage_dir,
             )
     return reclaimed
 
 
-def claim_next_task(agent_name: str, storage_dir: str = "storage") -> dict[str, Any] | None:
-    _validate_choice(agent_name, choices=AGENT_NAMES, field_name="agent_name")
+def claim_next_task(
+    agent_name: str | None = None,
+    storage_dir: str = "storage",
+    skip_task_ids: set[str] | None = None,
+    *,
+    session_key: str | None = None,
+    role: str | None = None,
+) -> dict[str, Any] | None:
+    resolved_key, resolved_agent, resolved_role = resolve_session_key(
+        session_key=session_key, agent_name=agent_name, role=role
+    )
+    skipped = {str(task_id) for task_id in (skip_task_ids or set())}
     with _plane_lock(storage_dir):
         # Reclaim any tasks held by stale agents before matching; this also
         # prevents the current agent being blocked by its own stale previous
         # claim if its session clock expired.
         _reclaim_stale_tasks(storage_dir)
 
-        current_session = _load_agent(agent_name, storage_dir=storage_dir)
+        current_session = _load_json(_agent_path(resolved_key, storage_dir=storage_dir))
+        if current_session is None:
+            # Legacy fallback so agents that haven't re-bootstrapped yet still
+            # look up their own prior heartbeat.
+            current_session = _load_json(
+                _legacy_agent_path(resolved_agent, storage_dir=storage_dir)
+            )
         if current_session:
             active_task_id = current_session.get("claimed_task_id")
             if active_task_id:
@@ -648,12 +840,29 @@ def claim_next_task(agent_name: str, storage_dir: str = "storage") -> dict[str, 
                 if active_task and str(active_task.get("status")) not in TERMINAL_TASK_STATUSES:
                     return None
 
-        sessions = {session["agent_name"]: session for session in list_agent_sessions(storage_dir)}
+        # Build agent→session map, preferring worker sessions so fallback logic
+        # doesn't get confused by an idle supervisor while the worker is busy.
+        sessions: dict[str, dict[str, Any]] = {}
+        for session in list_agent_sessions(storage_dir):
+            name = str(session.get("agent_name") or "")
+            if not name:
+                continue
+            existing = sessions.get(name)
+            if existing is None:
+                sessions[name] = session
+                continue
+            if (
+                str(session.get("role") or "worker") == "worker"
+                and str(existing.get("role") or "worker") != "worker"
+            ):
+                sessions[name] = session
         tasks = list_tasks(status="queued", storage_dir=storage_dir)
         for task in tasks:
+            if str(task.get("id") or "") in skipped:
+                continue
             if not _agent_matches_task(
                 task,
-                agent_name=agent_name,
+                agent_name=resolved_agent,
                 sessions=sessions,
                 storage_dir=storage_dir,
             ):
@@ -662,7 +871,9 @@ def claim_next_task(agent_name: str, storage_dir: str = "storage") -> dict[str, 
                 continue
             now = _utc_now()
             task["status"] = "claimed"
-            task["claimed_by"] = agent_name
+            task["claimed_by"] = resolved_agent
+            task["claimed_by_session_key"] = resolved_key
+            task["claimed_by_role"] = resolved_role
             task["claimed_at"] = now
             if current_session and current_session.get("session_id"):
                 task["session_id"] = current_session.get("session_id")
@@ -671,17 +882,29 @@ def claim_next_task(agent_name: str, storage_dir: str = "storage") -> dict[str, 
             task["updated_at"] = now
             _atomic_write_json(_task_path(str(task["id"]), storage_dir=storage_dir), task)
             session = _build_agent_session(
-                agent_name=agent_name,
+                agent_name=resolved_agent,
                 current=current_session,
                 status="busy",
                 claimed_task_id=str(task["id"]),
+                role=resolved_role,
+                session_key=resolved_key,
             )
-            _atomic_write_json(_agent_path(agent_name, storage_dir=storage_dir), session.to_dict())
+            _atomic_write_json(
+                _agent_path(resolved_key, storage_dir=storage_dir), session.to_dict()
+            )
             return task
     return None
 
 
-def admin_override_claim(task_id: str, *, agent_name: str, actor: str, storage_dir: str = "storage") -> dict[str, Any]:
+def admin_override_claim(
+    task_id: str,
+    *,
+    agent_name: str | None = None,
+    session_key: str | None = None,
+    role: str | None = None,
+    actor: str,
+    storage_dir: str = "storage",
+) -> dict[str, Any]:
     """Admin-side override: forcibly assign a specific queued task to an agent.
 
     Normal claim flow is agent-pull (claim_next_task). This is for the Ops
@@ -690,7 +913,9 @@ def admin_override_claim(task_id: str, *, agent_name: str, actor: str, storage_d
     """
     from .writer_log import append_writer_log
 
-    _validate_choice(agent_name, choices=AGENT_NAMES, field_name="agent_name")
+    resolved_key, resolved_agent, resolved_role = resolve_session_key(
+        session_key=session_key, agent_name=agent_name, role=role
+    )
     with _plane_lock(storage_dir):
         task = _load_task(task_id, storage_dir=storage_dir)
         if task is None:
@@ -700,23 +925,29 @@ def admin_override_claim(task_id: str, *, agent_name: str, actor: str, storage_d
             raise ValueError(f"Cannot claim a {current_status} task")
         now = _utc_now()
         task["status"] = "claimed"
-        task["claimed_by"] = agent_name
+        task["claimed_by"] = resolved_agent
+        task["claimed_by_session_key"] = resolved_key
+        task["claimed_by_role"] = resolved_role
         task["claimed_at"] = now
         task["updated_at"] = now
         _atomic_write_json(_task_path(task_id, storage_dir=storage_dir), task)
-        current_session = _load_agent(agent_name, storage_dir=storage_dir)
+        current_session = _load_json(_agent_path(resolved_key, storage_dir=storage_dir))
         session = _build_agent_session(
-            agent_name=agent_name,
+            agent_name=resolved_agent,
             current=current_session,
             status="busy",
             claimed_task_id=task_id,
+            role=resolved_role,
+            session_key=resolved_key,
         )
-        _atomic_write_json(_agent_path(agent_name, storage_dir=storage_dir), session.to_dict())
+        _atomic_write_json(
+            _agent_path(resolved_key, storage_dir=storage_dir), session.to_dict()
+        )
         append_writer_log(
             subsystem="control_plane",
             target=f"ops/tasks/{task_id}",
             record_id=task_id,
-            result=f"admin_override_claim_by_{agent_name}",
+            result=f"admin_override_claim_by_{resolved_key}",
             actor=actor,
             storage_dir=storage_dir,
         )
@@ -767,15 +998,40 @@ def _write_execution(task_id: str, receipt: ExecutionReceipt, storage_dir: str =
     _atomic_write_json(_execution_path(task_id, receipt.run_id, storage_dir=storage_dir), receipt.to_dict())
 
 
-def _close_agent_claim(agent_name: str, storage_dir: str = "storage") -> None:
-    session = _load_agent(agent_name, storage_dir=storage_dir)
+def _close_agent_claim(
+    identifier: str | None = None,
+    *,
+    session_key: str | None = None,
+    storage_dir: str = "storage",
+) -> None:
+    """Close an active claim for the given agent or session.
+
+    Accepts either a canonical ``session_key`` (preferred) or a legacy
+    ``identifier`` that may be an agent_name ("claude"/"codex") or a
+    session_key. Agents names resolve to the default worker session_key.
+    """
+    key = session_key if session_key is not None else identifier
+    if not key:
+        return
+    key = str(key)
+    target_session_key = key
+    if key in AGENT_NAMES:
+        target_session_key = AUTO_PREFERRED_SESSION_KEY.get(key, key)
+    session = _load_json(_agent_path(target_session_key, storage_dir=storage_dir))
+    target_path = _agent_path(target_session_key, storage_dir=storage_dir)
+    if session is None and key in AGENT_NAMES:
+        legacy_path = _legacy_agent_path(key, storage_dir=storage_dir)
+        session = _load_json(legacy_path)
+        if session is None:
+            return
+        target_path = legacy_path
     if session is None:
         return
     session["status"] = "idle"
     session["claimed_task_id"] = None
     session["heartbeat_at"] = _utc_now()
     session["updated_at"] = _utc_now()
-    _atomic_write_json(_agent_path(agent_name, storage_dir=storage_dir), session)
+    _atomic_write_json(target_path, session)
 
 
 def requeue_task(task_id: str, *, actor: str, reason: str, storage_dir: str = "storage") -> dict[str, Any]:
@@ -811,14 +1067,19 @@ def requeue_task(task_id: str, *, actor: str, reason: str, storage_dir: str = "s
 def complete_task(
     task_id: str,
     *,
-    agent_name: str,
+    agent_name: str | None = None,
+    session_key: str | None = None,
+    role: str | None = None,
     summary: str | None = None,
+    signal_payload: dict[str, Any] | None = None,
     commands_run: list[str] | None = None,
     files_touched: list[str] | None = None,
     subagent_count: int = 0,
     storage_dir: str = "storage",
 ) -> dict[str, Any]:
-    _validate_choice(agent_name, choices=AGENT_NAMES, field_name="agent_name")
+    resolved_key, resolved_agent, resolved_role = resolve_session_key(
+        session_key=session_key, agent_name=agent_name, role=role
+    )
     with _plane_lock(storage_dir):
         task = _load_task(task_id, storage_dir=storage_dir)
         if task is None:
@@ -827,14 +1088,18 @@ def complete_task(
         task["status"] = "succeeded"
         task["finished_at"] = now
         task["updated_at"] = now
-        task["claimed_by"] = agent_name
+        task["claimed_by"] = resolved_agent
+        task["claimed_by_session_key"] = resolved_key
+        task["claimed_by_role"] = resolved_role
         task["result_summary"] = summary
+        if signal_payload is not None:
+            task["signal_payload"] = _json_safe(signal_payload)
         _atomic_write_json(_task_path(task_id, storage_dir=storage_dir), task)
 
         receipt = ExecutionReceipt(
             task_id=task_id,
             run_id=f"run_{uuid.uuid4().hex[:12]}",
-            agent_name=agent_name,
+            agent_name=resolved_agent,
             result_status="succeeded",
             summary=summary,
             commands_run=_normalize_list(commands_run),
@@ -842,25 +1107,33 @@ def complete_task(
             subagent_count=subagent_count,
             session_id=task.get("session_id"),
             rollback_point_id=task.get("rollback_point_id"),
+            session_key=resolved_key,
+            role=resolved_role,
+            signal_payload=signal_payload,
             timestamp=now,
         )
         _write_execution(task_id, receipt, storage_dir=storage_dir)
-        _close_agent_claim(agent_name, storage_dir=storage_dir)
+        _close_agent_claim(session_key=resolved_key, storage_dir=storage_dir)
     return {"task": task, "receipt": receipt.to_dict()}
 
 
 def fail_task(
     task_id: str,
     *,
-    agent_name: str,
+    agent_name: str | None = None,
+    session_key: str | None = None,
+    role: str | None = None,
     error: str,
     summary: str | None = None,
+    signal_payload: dict[str, Any] | None = None,
     commands_run: list[str] | None = None,
     files_touched: list[str] | None = None,
     subagent_count: int = 0,
     storage_dir: str = "storage",
 ) -> dict[str, Any]:
-    _validate_choice(agent_name, choices=AGENT_NAMES, field_name="agent_name")
+    resolved_key, resolved_agent, resolved_role = resolve_session_key(
+        session_key=session_key, agent_name=agent_name, role=role
+    )
     with _plane_lock(storage_dir):
         task = _load_task(task_id, storage_dir=storage_dir)
         if task is None:
@@ -869,15 +1142,19 @@ def fail_task(
         task["status"] = "failed"
         task["finished_at"] = now
         task["updated_at"] = now
-        task["claimed_by"] = agent_name
+        task["claimed_by"] = resolved_agent
+        task["claimed_by_session_key"] = resolved_key
+        task["claimed_by_role"] = resolved_role
         task["result_summary"] = summary
         task["last_error"] = error
+        if signal_payload is not None:
+            task["signal_payload"] = _json_safe(signal_payload)
         _atomic_write_json(_task_path(task_id, storage_dir=storage_dir), task)
 
         receipt = ExecutionReceipt(
             task_id=task_id,
             run_id=f"run_{uuid.uuid4().hex[:12]}",
-            agent_name=agent_name,
+            agent_name=resolved_agent,
             result_status="failed",
             summary=summary,
             commands_run=_normalize_list(commands_run),
@@ -885,12 +1162,70 @@ def fail_task(
             subagent_count=subagent_count,
             session_id=task.get("session_id"),
             rollback_point_id=task.get("rollback_point_id"),
+            session_key=resolved_key,
+            role=resolved_role,
+            signal_payload=signal_payload,
             timestamp=now,
             error=error,
         )
         _write_execution(task_id, receipt, storage_dir=storage_dir)
-        _close_agent_claim(agent_name, storage_dir=storage_dir)
+        _close_agent_claim(session_key=resolved_key, storage_dir=storage_dir)
     return {"task": task, "receipt": receipt.to_dict()}
+
+
+def list_pending_curations(
+    *, limit: int | None = None, storage_dir: str = "storage"
+) -> list[dict[str, Any]]:
+    """List succeeded tasks that haven't been curated yet (Phase B)."""
+    tasks = list_tasks(status="succeeded", storage_dir=storage_dir)
+    pending = [task for task in tasks if not task.get("curated_at")]
+    pending.sort(key=lambda task: str(task.get("finished_at") or task.get("updated_at") or ""))
+    if limit is not None:
+        return pending[: max(limit, 0)]
+    return pending
+
+
+def curate_task(
+    task_id: str,
+    *,
+    actor: str,
+    promoted: list[str] | None = None,
+    notes: str | None = None,
+    storage_dir: str = "storage",
+) -> dict[str, Any]:
+    """Mark a succeeded task as curated by the supervisor.
+
+    `promoted` enumerates canonical destinations where signal payloads were
+    promoted (e.g. ["knowledge.json", "research_program.md"]). `notes` is free
+    text for the supervisor's judgement trail.
+    """
+    from .writer_log import append_writer_log
+
+    with _plane_lock(storage_dir):
+        task = _load_task(task_id, storage_dir=storage_dir)
+        if task is None:
+            raise ValueError(f"Unknown task: {task_id}")
+        status = str(task.get("status"))
+        if status != "succeeded":
+            raise ValueError(
+                f"Only succeeded tasks can be curated (current status: {status})"
+            )
+        now = _utc_now()
+        task["curated_by"] = actor
+        task["curated_at"] = now
+        task["curated_promoted"] = _normalize_list(promoted)
+        task["curated_notes"] = notes
+        task["updated_at"] = now
+        _atomic_write_json(_task_path(task_id, storage_dir=storage_dir), task)
+        append_writer_log(
+            subsystem="control_plane",
+            target=f"ops/tasks/{task_id}",
+            record_id=task_id,
+            result=f"curated_by_{actor}",
+            actor=actor,
+            storage_dir=storage_dir,
+        )
+    return task
 
 
 def build_control_plane_snapshot(storage_dir: str = "storage") -> dict[str, Any]:

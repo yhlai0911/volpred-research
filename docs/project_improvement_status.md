@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: 2026-04-17
+Last updated: 2026-04-18
 
 ## VolPred 雙 Agent 最終優化方案 v11
 
@@ -8,9 +8,11 @@ Last updated: 2026-04-17
 
 - 本方案只在**目前 `volpred-research` 專案基礎上增量調整**，不重做網站、不替換 `storage/` / `ops` / `frontend-v2-fix/` / Supabase / Mirror / Admin 主架構。
 - 優先序正式鎖定為：**正確性 > 穩定性 > token 效率 > 吞吐量**。
-- 運作模式鎖定為：**Claude Code = 協調者 / 規則主導者 / brief builder；Claude 與 Codex = 執行者；shared scheduler = 唯一時鐘；control plane = 唯一狀態來源。**
-- shared scheduler 跑在 **macOS `crontab`**；Claude 既有 session cron **退役為非執行時鐘**，只保留提醒與 monitor。
+- 運作模式鎖定為：**Claude Code = 協調者 / 規則主導者 / brief builder；Claude 與 Codex = 執行者；control plane = 唯一狀態來源。** repo 目前仍保留 `shared scheduler` 這條 `cron-driven` 過渡路徑，但校正後的目標 runtime 是 VS Code supervisor / worker sessions。
+- `2026-04-18` 依 user story 校正後，**正式操作故事應是 VS Code 三終端機模式**：1 個 Claude supervisor 管理排程 / brief / 狀態，1 個 Claude worker + 1 個 Codex worker 在已登入 OAuth 的互動 session 內認領並完成任務。
+- shared scheduler 跑在 **macOS `crontab`**；Claude 既有 session cron **退役為非執行時鐘**，只保留提醒與 monitor；`idle_policy` 僅作為 slot-aware continuation / selection policy，不是另一個主時鐘。
 - shared scheduler 對 live manual agent session 採保守策略：若偵測到非 scheduler 擁有的 Claude/Codex session 仍在線，則不會搶同一個 agent。
+- 目前 repo 仍殘留 `scheduler -> subprocess.run(["claude", "-p", ...]) / subprocess.run(["codex", "exec", ...])` 的 headless 路徑；這是**偏離 user story 的過渡期實作**，不應視為最終 runtime contract。
 - Claude 與 Codex **都可以提出 cron / schedule 需求**，但只有 **Claude coordinator** 可以把需求落成正式 canonical schedule、調整排程策略、安裝或移除 cron。
 - 每輪任務都必須符合 **codebase grounding contract**：在 repo root 啟動、先讀必要背景、用結構化 brief 控制上下文；拿不到足夠背景就 fail closed。
 - 一次性任務與事件前後任務正式納入 canonical schedule，新增 `event_jobs`；不再只靠 prompt 或自由文字文件記憶。
@@ -42,11 +44,16 @@ Last updated: 2026-04-17
   - `uv run volpred ops propose-schedule ...` 已提供正式 CLI 提案入口，Claude/Codex 都可用同一個 contract 建立 schedule proposal task
   - `/admin/ops` 建立本機 task 表單已補齊 `member` / `strategy` family、`public_effect` 欄位與「Schedule Proposal 範本」快捷按鈕
   - `storage/next_tasks.json` 的定位已正式收斂為 **legacy planning / working list**；canonical orchestration 仍以 `storage/ops/` control plane、`config/runtime_schedules.json`、`event_jobs` / `event_ledger` 為準
+  - session worker flow 已補強：`next-task --emit-brief` 現在只會返回可執行 task，會跳過尚未被 supervisor brief 化或 preconditions 未滿足的 queued task
+  - supervisor 已可用 `uv run volpred ops brief-show` / `brief-set` 正式查看與寫入 manual brief，不必手改 `storage/ops/tasks/*.json`
   - canonical `system_crontab` spec 已補上 `shared_scheduler_tick`，並把既有 `market_calendar sync` 納回 canonical，避免 install script、live crontab 與 `/admin/schedules` 的 source of truth 分裂
   - shared scheduler 已實際安裝進本機 `crontab`，目前 canonical system tasks 與 live crontab 對齊（`schedule-report` = `6/6` matched）
   - `/admin/schedules` 的心智模型已更新：shared scheduler / system crontab 為正式時鐘，session cron 僅保留為 legacy session convenience
   - coordinator / executor subprocess 已補 timeout fail-closed 護欄，避免 `claude -p` / `codex exec` 卡住時長時間占住 scheduler self-lock
   - 已新增 `uv run volpred ops scheduler-smoke` 隔離 smoke helper：自備最小 prompt / brief template，mock 掉真實 `claude -p` / `codex exec`，可在不碰 live queue 的前提下驗證 coordinator 與 executor 鏈路
+  - 已新增 `uv run volpred ops scheduler-live-smoke`：用隔離 storage 真正呼叫本機 Claude/Codex CLI 做最終 smoke；Claude 走 no-persistence + no-tools，Codex 走 read-only sandbox + ephemeral，避免碰 live queue 與 repo 內容
+  - 已補 execution brief CLI 相容性修正：Claude `-p --output-format json` result envelope / 純文字錯誤可正確解包；Codex output schema 已符合新版 `additionalProperties=false` 與 full required set 規則
+  - 已新增 agent CLI readiness snapshot：`scheduler-live-smoke` 會把 Claude/Codex live path 分類成 `ready / auth_required / free_text_response / schema_mismatch / timeout` 等狀態，寫入 `storage/ops/agent_cli_health.json`，`ops health` / `/admin/health` 可直接觀察
 - 已驗證：
   - `uv run pytest tests/test_shared_lock.py tests/test_execution_brief.py tests/test_scheduler.py tests/test_agent_spec.py tests/test_local_control_plane.py tests/test_stale_reclaim.py tests/test_session_ops.py tests/test_event_jobs.py tests/test_runtime_schedules.py`
   - `uv run python -m volpred.cli ops scheduler-preview`
@@ -63,13 +70,17 @@ Last updated: 2026-04-17
   - `uv run python -m volpred.cli ops propose-schedule --title ... --description ... --proposal-json ... --storage-dir /tmp/...`
   - `uv run python -m volpred.cli ops task-show <task_id> --storage-dir /tmp/...`
   - `uv run python -m volpred.cli ops scheduler-smoke --mode both --cleanup`
+  - `uv run python -m volpred.cli ops scheduler-live-smoke --mode all --cleanup`
+  - `2026-04-18` live smoke 實測：Codex executor path 已通過（read-only sandbox、`files_touched=[]`）；Claude coordinator / executor 目前仍會輸出自由文字而非 schema-valid JSON，因此 helper 已能穩定暴露這個剩餘 gap
   - `cd frontend-v2-fix && npm run typecheck`
 - 尚未執行：
-  - Claude/Codex live executor smoke run
+  - 將正式執行路徑從 headless scheduler subprocess 收斂回 VS Code supervisor / worker session 模式，並退役或降級 `claude -p` / `codex exec` 直跑 task 的舊路徑
+  - Claude live structured-output compatibility remediation（`scheduler-live-smoke` 已確認 gap，可作為後續修正入口）
   - 最終 commit / deploy
 
 ### User Stories
 
+- 作為專案 owner，我希望打開 VS Code 後能建立 3 個終端機：1 個 Claude supervisor、1 個 Claude worker、1 個 Codex worker；全部都用 OAuth 訂閱登入的互動 session，而不是背景另外開 headless process。
 - 作為專案 owner，我希望平台能在**不犧牲正確性與穩定性**的前提下持續推進任務，而不是為了並行而增加錯誤與重工。
 - 作為專案 owner，我希望 **Claude 負責協調與規則判斷**，而 Claude 或 Codex 都可以根據任務類型成為執行者。
 - 作為專案 owner，我希望每輪任務都能讀到**剛好夠用的 codebase 背景**，而不是每次都重掃整個 repo 浪費 token。
@@ -79,6 +90,7 @@ Last updated: 2026-04-17
 - 作為專案 owner，我希望導入新 orchestration 後，網站上的文章、策略績效、會員問答、工具頁仍照常運作。
 - 作為專案 owner，我希望從 `/admin/ops`、`/admin/health`、CLI 看到 scheduler、event materialization、agent session、approval、rollback、brief 狀態的實際情況。
 - 作為 Claude 協調者，我希望能用最少 token 先把任務變成低歧義、可執行、可驗證的 brief，再決定交給 Claude 或 Codex。
+- 作為 Claude supervisor，我希望能在互動 session 中查看 task、補 manual brief、調整 queue，然後由 worker terminals 去 claim 與完成任務。
 - 作為 Codex 執行者，我希望接到的是已經定義好目標、必讀檔案、成功標準、禁止整檔讀取清單的任務，而不是模糊探索題。
 - 作為平台維運者，我希望 scheduler 空轉時幾乎不耗 token，只有真的有可做任務時才喚起 LLM。
 - 作為事件任務管理者，我希望 CPI / NFP / FOMC / TSMC 財報前後任務能被正式展開、去重、觀測，而不是靠記憶與臨場判斷。
@@ -188,11 +200,14 @@ Last updated: 2026-04-17
 - `uv run volpred ops next-task --agent claude|codex [--emit-brief]`
 - `uv run volpred ops finish-task --agent claude|codex --task-id ...`
 - `uv run volpred ops session-shutdown --agent claude|codex`
+- `uv run volpred ops brief-show <task_id>`
+- `uv run volpred ops brief-set <task_id> --brief-json ... --actor ...`
 - `uv run volpred ops requeue-task --task-id ... --actor ... --reason ...`
 - `uv run volpred ops agent-spec sync --from claude|codex`
 - `uv run volpred ops scheduler-tick`
 - `uv run volpred ops scheduler-preview`
 - `uv run volpred ops scheduler-smoke [--mode coordinator|executor|both] [--cleanup]`
+- `uv run volpred ops scheduler-live-smoke [--mode coordinator|claude-executor|codex-executor|all] [--cleanup]`
 - `uv run volpred ops event-preview`
 
 #### New Scripts
@@ -545,6 +560,7 @@ Last updated: 2026-04-17
   - `set -a; source .env.local 2>/dev/null || true; set +a`
   - `export PATH="$HOME/.local/bin:/opt/homebrew/bin:$PATH"`
   - `exec uv run volpred ops scheduler-tick`
+- 正式派工由 `crontab -> shared scheduler tick` 驅動；`idle_policy` 只決定 slot 空出時如何挑 user / scheduled / discovery 任務，不是獨立自動觸發器
 - 建議 cron line：
   - `*/10 * * * * /Users/yhlai0911/Desktop/volpred-research/scripts/run_scheduler_tick.sh # volpred-scheduler-tick`
 - scheduler 先做便宜檢查與 event 展開
@@ -628,6 +644,7 @@ Last updated: 2026-04-17
 - 優先目標是**正確、穩定、token 效率**，不是最大吞吐量
 - v1 架構採 **Claude 協調、Claude/Codex 執行**，不採雙主並行自治
 - shared scheduler 層固定選 **macOS `crontab`**
+- 目前系統是 **`cron-driven shared scheduler + slot-aware idle policy`**，不是純 idle-driven runtime
 - Claude session cron 正式退役為非執行時鐘
 - Brief 生成策略固定為 **模板優先，Claude 協調輪只處理例外**
 - brief 模板固定放在 **`config/brief_templates/*.yaml`**

@@ -3,7 +3,7 @@
     "canonical_path": "config/runtime_schedules.json",
     "timezone": "Asia/Taipei",
     "updated_at": "2026-04-17",
-    "policy_summary": "Queue-first local control plane. Session-only work should be recreated from this spec; high-frequency continue-research heartbeat cron is deprecated in favor of idle-driven continuation."
+    "policy_summary": "Queue-first local control plane. Session-only work should be recreated from this spec; high-frequency continue-research heartbeat cron is deprecated. The formal clock is the cron-driven shared scheduler, while idle_policy only governs slot-aware continuation/selection."
   },
   "system_crontab": {
     "source_label": "Canonical system crontab spec",
@@ -152,7 +152,7 @@
   },
   "idle_policy": {
     "source_label": "Slot-aware idle continuation policy (updated 2026-04-17 for M1 Max 10-core, cap raised 3->4)",
-    "note": "Use after a top-level agent completes its main task instead of a high-frequency heartbeat cron. Priority ordering decides WHICH task to pick; it does NOT mandate sequential execution.",
+    "note": "Use after a top-level agent completes its main task instead of a high-frequency heartbeat cron. This is a continuation/selection policy, not a standalone scheduler clock. Priority ordering decides WHICH task to pick; it does NOT mandate sequential execution.",
     "max_concurrent_agents": 4,
     "rules": [
       "硬體容量：M1 Max 10 核，同時最多 4 個 agent（每個約 1-2 核 + 1-2GB RAM + 1 個 worktree），保留 ≥1 核給主線程 buffer。",
