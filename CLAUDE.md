@@ -201,56 +201,24 @@
 
 ## 自動化與控制面
 
-- 任務優先順序：`user-assigned > scheduled > agent-discovered`（只決定「誰先被挑」，不要求序貫執行）
-- 研究續跑採 `slot-aware idle-driven continuation`（2026-04-17 放寬；M1 Max 10 核建議 4 並行 agent，保留 1 核給主線程）
-- **不必等 queue 清空才 discovery**；slot 有空（running < 4）就允許挑新任務；優先序仍為 user > scheduled > discovery
-- 同一 K 編號 / task id 不得同時被兩個 agent 執行（啟動前 `ls experiments/` + `ls .claude/worktrees/` 檢查）
-- 每次 idle / discovery pass 必須真的產生可驗證輸出，不可空轉
-- **Cron skip 用 stub** — slot 滿或 agent 仍在跑時，回覆 ≤15 字省 token（例：`跳過：slot 4/4`）
-- **next_tasks 主動補滿**（2026-04-17）：每次 cron tick check，若 P4 pending < 2 **或** P3 pending < 5，主動從 `research_program.md` / knowledge.json / 最近實驗 NULL 衍生新任務補齊；不必等 queue 清空才 refill。
-  - 這裡的「補滿」指的是 discovery / planning view 的補充；正式可執行任務仍要 materialize 進 `storage/ops/` control plane。若同步 `storage/next_tasks.json`，也只屬 legacy working list，不是 canonical queue。
-- **論文 narrative state machine**（防 Paper 2/4 單一實驗觸發反覆 pivot）：
-  - 單一實驗不可直接改 paper body.tex — 只能更新 `research_program.md` + knowledge.json
-  - 必須 ≥ 3 個互補實驗（OOS-verified + Codex/Gemini reviewed）都完成才進 narrative decision
-  - 決策 user confirm 後設 `status='decision_made_awaiting_body_rewrite'`，body rewrite 才開始
-- Admin 目前是 observer，不是 canonical control plane；control plane 真正 source of truth 在本機檔案與 ops layer
+**核心 dispatch 規則（inline 保留）**：
+- 任務優先序：`user-assigned > scheduled > agent-discovered`；slot running < 4 可繼續 discovery（不必等 queue 清空）
+- 同一 K 編號禁止雙 agent — 派前 `ls experiments/` + `ls .claude/worktrees/` 檢查
+- **Cron skip 用 stub**（slot 滿 / agent 仍跑 → 回覆 ≤15 字）
+- 每次 idle / discovery pass 必須產生可驗證輸出，不可空轉
 
-排程與控制面細節：
+**論文 narrative state machine（防 paper drift）**：
+- 單一實驗不直接改 `paper/*/body.tex`，只更新 `research_program.md` + `knowledge.json`
+- ≥3 互補實驗（OOS-verified + Codex reviewed）完成才進 narrative decision
+- 用戶 confirm 後設 `status='decision_made_awaiting_body_rewrite'`，body rewrite 才開始
 
-- `config/runtime_schedules.json`
-- `scripts/session_startup.md`
-- `docs/architecture.md`
-- `docs/project_improvement_status.md`
+細節（排程 / next_tasks refill / control plane source of truth / Admin observer 角色）見：`config/runtime_schedules.json`、`scripts/session_startup.md`、`.claude/skills/admin-ops/references/scheduling.md`、`docs/architecture.md`。
 
-## 系統任務類型 × Skill 對應（10 類）
+## 系統任務類型與派工
 
-主 agent 派工前先識別任務類型，再選對應 skill。每類任務的 brief 格式差異見對應 skill 的 `references/`。
+10 類任務（experiment / paper_decision / paper_body / paper_review / event_article / daily_article / member_qa / strategy_lifecycle / platform_ops / governance）× 對應 skill 映射 + 主 agent 依 `storage/work_log.json` 做多樣化決策的完整表格、schema、decision tree，全在 `.claude/rules/agent-delegation.md`（Claude 碰 `.claude/skills/**` 或 `scripts/agent_prompts/**` 時自動載入）。
 
-| # | 任務類型 | 範例 | 對應 skill |
-|---|---|---|---|
-| 1 | 研究實驗 | K1132 bootstrap、K1100h tick-level、新 K 編號 | `autonomous-research` + `agent-result-verification` |
-| 2 | 論文方向決策 | Paper3_reframe、Paper3_strategic_decision（blocked_user） | `paper-stage-classifier` + 主線程 |
-| 3 | 論文修稿（body） | K1146 pivot、K1169 rewrite、Paper6_start | `paper-update` + `finance-paper-quality` |
-| 4 | 論文審查 + citation | 每輪 review round、Paper9_bib_fix | `paper-review-cycle` + `citation-verifier` + `latex-academic-reviewer` |
-| 5 | 事件驅動文章 | TSMC_0416_post、FOMC_0428 | `feed-publisher` + `publication-candidates` |
-| 6 | 日常文章補草稿池 | general/research/daily 每日目標 | `feed-publisher` + `publication-candidates` |
-| 7 | 會員問題研究 | 6h cron 觸發 | `member-questions` |
-| 8 | 策略生命週期 | STRATEGY_REGISTRY 新增/下架 | `admin-ops` + `admin-ops/references/strategy-lifecycle.md` |
-| 9 | 平台 ops / 巡檢 | release-pool、cleanup、health、article-backups | `admin-ops` |
-| 10 | 系統 governance / 修復 | script bug fix、legacy cleanup、rules 重構、歸檔 | 無 skill（主線程做，參考 `.claude/rules/`）|
-
-### 主 agent 依「工作成果日誌」做多樣化決策
-
-`storage/work_log.json` 是跨類型工作日誌（非研究專屬；`storage/memory/research_log.json` 只記 research 事件）。每完成一個 task（任何類型）都要 append 一筆。
-
-每輪 cron 觸發時主 agent：
-1. 讀 `work_log.json` 最近 5 筆 → 看 task_type 分布
-2. 讀 `next_tasks.json` priority 1-3 pending
-3. **多樣化規則**：最近 5 筆中 ≥3 筆同 type → 下一輪換 type
-4. 結合 Monitor alert（草稿池低 → 偏 type 5/6；knowledge.json 膨脹 → 偏 type 10）
-5. 依選定 task type 查上表 → 派對應 skill 的 agent
-
-完整 schema + decision tree 見 `.claude/rules/agent-delegation.md`。
+派工前先識別 task_type → 查 skill 表 → 依 work_log 最近 5 筆做多樣化（≥3 筆同 type 則換）→ 派。
 
 ## Subagent / Skill 使用準則
 
