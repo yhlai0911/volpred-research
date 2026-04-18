@@ -1,0 +1,181 @@
+{
+  "experiment_id": "k1246",
+  "paper": "crypto-fear-channel",
+  "paper_number": 10,
+  "status": "done",
+  "produced_by": "Claude (worktree agent-a3b10f9b)",
+  "produced_at": "2026-04-17",
+  "purpose": "Paper 10 pre-flight reproduction package Markdown drafts (3 of 5 items) for main-thread drop-in adoption",
+  "seed": 42,
+  "paper_guide_five_item_compliance": {
+    "item_1_data_sources": {
+      "required_by": "docs/paper-guide.md \u00a7\"Self-contained paper folder\" item 1",
+      "draft_artifact": "experiments/k1246/data_sources.md",
+      "target_path": "paper/crypto-fear-channel/data_sources.md",
+      "status": "drafted",
+      "covers": [
+        "Yahoo Finance via yfinance retrieval",
+        "BTC-USD, ^VIX, SPY tickers",
+        "2015-02-02 to 2026-04-14 coverage",
+        "License terms (MIT wrapper + Yahoo ToS)",
+        "Preprocessing (returns, RV, asymmetric decomposition)",
+        "Lookahead guards",
+        "Random seed"
+      ]
+    },
+    "item_2_scripts": {
+      "required_by": "docs/paper-guide.md \u00a7\"Self-contained paper folder\" item 2",
+      "draft_artifact": "experiments/k1246/scripts_README.md",
+      "target_path": "paper/crypto-fear-channel/scripts/README.md",
+      "status": "drafted",
+      "covers": [
+        "Canonical entry points per Paper 10 section",
+        "Single-section reproduction commands",
+        "Planned reproduce.py coordinator specification",
+        "Rationale for not creating per-analysis wrappers"
+      ],
+      "out_of_scope_for_k1246": [
+        "paper/crypto-fear-channel/reproduce.py (executable, main-thread)",
+        "paper/crypto-fear-channel/scripts/reproduce_report.json (generated artifact)"
+      ]
+    },
+    "item_3_results": {
+      "required_by": "docs/paper-guide.md \u00a7\"Self-contained paper folder\" item 3",
+      "draft_artifact": null,
+      "target_path": "paper/crypto-fear-channel/results/ and figures/",
+      "status": "deferred_to_body_drafting",
+      "note": "Generated once \u00a75 main results body drafting begins; soft-linked or regenerated from K1025 .png files"
+    },
+    "item_4_experiments_index": {
+      "required_by": "docs/paper-guide.md \u00a7\"Self-contained paper folder\" item 4",
+      "draft_artifact": "experiments/k1246/experiments.md",
+      "target_path": "paper/crypto-fear-channel/experiments.md",
+      "status": "drafted",
+      "covers": [
+        "K1025 primary framework",
+        "K639 bilateral baseline",
+        "K746b asymmetric confirmation",
+        "K1241 pooled GARCH-X NULL",
+        "K1133, K1133b regime context",
+        "K1214 companion paper cross-reference",
+        "K1234, K1238 writing-only experiments",
+        "Minimum reproduction bundle declaration"
+      ]
+    },
+    "item_5_paper_readme": {
+      "required_by": "docs/paper-guide.md \u00a7\"Self-contained paper folder\" item 5",
+      "draft_artifact": null,
+      "target_path": "paper/crypto-fear-channel/README.md",
+      "status": "deferred_to_main_thread",
+      "reason": "Paper-level README encodes editorial metadata (title, target journal, status tracker) best authored in main-thread commit history, not in a worktree draft. Template fields listed in k1246_README.md adoption procedure."
+    }
+  },
+  "supporting_k_experiments": [
+    {
+      "k_id": "k1025",
+      "path": "experiments/k1025/",
+      "entry_point": "k1025.py",
+      "results_json": "experiments/k1025/k1025_results.json",
+      "role": "primary framework (\u00a75.1-\u00a75.3, \u00a76.1-\u00a76.2, \u00a77.1)",
+      "exists_on_main": true
+    },
+    {
+      "k_id": "k639",
+      "path": "experiments/k639/",
+      "entry_point": "k639_crypto_equity_vol.py",
+      "results_json": "experiments/k639/k639_results.json",
+      "role": "BTC\u2192SPY Granger baseline (\u00a75.1)",
+      "exists_on_main": true
+    },
+    {
+      "k_id": "k746b",
+      "path": "experiments/k746b/",
+      "entry_point": "k746b_bitcoin_vix_fixed.py",
+      "results_json": "experiments/k746b/k746b_bitcoin_vix_fixed_results.json",
+      "role": "asymmetric BTC\u2192VIX Granger confirmation (\u00a75.1)",
+      "exists_on_main": true
+    },
+    {
+      "k_id": "k1241",
+      "path": "experiments/k1241/",
+      "entry_point": "k1241.py",
+      "results_json": "experiments/k1241/k1241_results.json",
+      "role": "pooled GARCH-X(VIX\u00b2) conditional-variance NULL (\u00a76.5 Table 3)",
+      "exists_on_main": true,
+      "exists_in_worktree": false,
+      "note": "Created on main by separate worktree after this worktree branched; path reference is forward-valid post-merge"
+    },
+    {
+      "k_id": "k1133",
+      "path": "experiments/k1133/",
+      "role": "sub-period regime partition convention (\u00a76.2 context)",
+      "exists_on_main": true
+    },
+    {
+      "k_id": "k1133b",
+      "path": "experiments/k1133b/",
+      "role": "Student-t vs GAS-dynamics attribution + MS-GAS-t OOS (\u00a78 discussion)",
+      "exists_on_main": true
+    },
+    {
+      "k_id": "k1214",
+      "path": "experiments/k1214/",
+      "role": "BTC GAS-t negative-result companion paper (\u00a72.4 + \u00a78 cross-reference)",
+      "exists_on_main": true
+    },
+    {
+      "k_id": "k1234",
+      "path": "experiments/k1234/",
+      "role": "Paper 10 \u00a72-\u00a79 kickoff writing guide (no numerical claims)",
+      "exists_on_main": true
+    },
+    {
+      "k_id": "k1238",
+      "path": "experiments/k1238/",
+      "role": "Paper 10 \u00a73 Data and Preliminaries first-pass Markdown draft",
+      "exists_on_main": true
+    }
+  ],
+  "data_sources": {
+    "provider": "Yahoo Finance via yfinance",
+    "tickers": ["BTC-USD", "^VIX", "SPY"],
+    "retrieval_call": "yf.download(['BTC-USD','^VIX','SPY'], start='2015-01-01', end='2026-04-15', auto_adjust=False)",
+    "license": "yfinance MIT wrapper; Yahoo ToS for underlying data; academic non-commercial use standard",
+    "primary_sample_period": "2015-02-02 to 2026-04-08",
+    "primary_sample_n": 2812,
+    "extended_sample_period_for_section_6_5": "2015-01-03 to 2026-04-14",
+    "extended_sample_n": 4120,
+    "extended_sample_forward_fill": "VIX forward-filled onto BTC-only weekend dates"
+  },
+  "artifacts_produced_by_k1246": [
+    "experiments/k1246/k1246_README.md",
+    "experiments/k1246/data_sources.md",
+    "experiments/k1246/experiments.md",
+    "experiments/k1246/scripts_README.md",
+    "experiments/k1246/k1246_package_manifest.json"
+  ],
+  "main_thread_adoption_procedure": [
+    "cp experiments/k1246/data_sources.md paper/crypto-fear-channel/data_sources.md",
+    "cp experiments/k1246/experiments.md paper/crypto-fear-channel/experiments.md",
+    "mkdir -p paper/crypto-fear-channel/scripts",
+    "cp experiments/k1246/scripts_README.md paper/crypto-fear-channel/scripts/README.md",
+    "main-thread authors paper/crypto-fear-channel/README.md (item 5, editorial metadata)",
+    "main-thread builds paper/crypto-fear-channel/reproduce.py once first body draft lands (item 2 executable + item 3 generated)"
+  ],
+  "strict_rules_compliance": {
+    "real_data_sources_only": true,
+    "real_k_experiment_paths_only": true,
+    "no_fabricated_script_names": true,
+    "fixed_seed_42": true,
+    "worktree_only_writes_to_experiments_k1246": true
+  },
+  "successor_experiments": [],
+  "references": [
+    "docs/paper-guide.md",
+    "experiments/k1234/k1234_kickoff_guide.md",
+    "experiments/k1238/k1238_data_draft.md",
+    "experiments/k1241/README.md",
+    "paper/crypto-fear-channel/outline.md",
+    "paper/crypto-fear-channel/body_v0_intro.tex"
+  ]
+}
