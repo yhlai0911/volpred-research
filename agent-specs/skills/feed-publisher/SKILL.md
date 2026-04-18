@@ -501,8 +501,8 @@ Agent 在 worktree 中寫文章時：
 ## 資料同步
 
 發佈後必須同步：
-1. `storage/reports/feed.json` + `reports/{id}.json`（**唯一源頭**，不是 `storage/feed.json`）
-2. 執行 `uv run python scripts/supabase_sync.py full`（將 draft 同步到 Supabase）
+1. **`storage/reports/feed.json` 是唯一 canonical 源**（Contentlayer 模式，2026-04-18 起）。個別 `reports/mile_*.json` 單檔已廢除（archived），不再作為 source 或 backup
+2. 執行 `uv run python scripts/supabase_sync.py full`（或 `uv run volpred ops feed-sync --apply`）（將 draft 同步到 Supabase）
 3. System crontab 每小時 `:03` 自動從 Supabase 釋出 draft → published
 3. `frontend-v2-fix` 與後台工作台讀取最新資料
 4. 依部署流程同步到線上站

@@ -27,8 +27,14 @@
 
 ## 資料流核心規則
 - `storage/` → 本地唯一源頭（JSON）
+- **文章採 Contentlayer 模式（2026-04-18 起）**：
+  - `storage/reports/feed.json` 是**唯一 canonical 文章源**；Supabase `articles` 表是**唯讀 projection**
+  - 寫入只走 `publisher.publish_milestone` / `ops release-pool` / `ops feed-sync` 三條 path
+  - RLS（migration 022）物理阻擋前端/admin CMS/anon 反向寫；寫入只給 `service_role`
+  - 歷史的 `storage/reports/mile_*.json` 個別檔案已廢除 → `storage/reports/_archive_mile_files/`
+  - 漂移偵測：`uv run volpred ops feed-sync --dry-run` 或 session Monitor 每小時檢查
 - `scripts/supabase_sync.py` → Supabase 同步（由 daily_update.py 呼叫）
-  - **文章同步**：只讀取 `storage/reports/feed.json`（唯一源頭，`storage/feed.json` 已廢除）
+  - **文章同步**：只讀取 `storage/reports/feed.json`（唯一源頭，`storage/feed.json` + `mile_*.json` 全部已廢除）
   - **Paper trades 同步**：自動剝離市場數據，只存策略 weights + returns
   - **Draft 同步**：用 `published_at OR created_at` 過濾
 - `scripts/daily_update.py` → 每日 00:03 UTC（台灣 08:03）美股收盤後計算策略權重 + 同步 Supabase + 重算績效指標。每日只產出一篇「每日策略建議」（含市場快照+持倉表+VIX分析），不再分兩篇

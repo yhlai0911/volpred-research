@@ -28,8 +28,15 @@
 
 ### 資料流
 - `storage/` → 本地唯一源頭（JSON）
+- **文章採 Contentlayer 模式（2026-04-18 起）**：
+  - `storage/reports/feed.json` 是**唯一 canonical 文章源**，git-tracked，保留完整 audit trail
+  - Supabase `articles` 表是**唯讀 projection**，寫入只允許 `service_role`（migration 022 RLS 物理阻擋前端/admin CMS 反向寫）
+  - **寫入只走三條 path**：`publisher.publish_milestone` / `ops release-pool` / `ops feed-sync`
+  - 三者內部都先改 feed.json，再呼叫 `sync_article(...)` / `_delete_where(...)` 把變動推 Supabase
+  - 歷史的 `storage/reports/mile_*.json` 個別檔案已廢除，全部移到 `storage/reports/_archive_mile_files/`，不再被任何 code 讀寫
+  - 漂移偵測：`uv run volpred ops feed-sync --dry-run` 或 session Monitor 每小時檢查 `feed.json ↔ Supabase`
 - `scripts/supabase_sync.py` → Supabase 同步工具（由 daily_update.py 呼叫，不需獨立 cron）
-  - **文章同步**：只讀取 `storage/reports/feed.json`（唯一源頭，`storage/feed.json` 已廢除）
+  - **文章同步**：只讀取 `storage/reports/feed.json`（唯一源頭，`storage/feed.json` + `mile_*.json` 全部已廢除）
   - **Paper trades 同步**：自動剝離市場數據（spy_close/gld_close 等），只存策略 weights + returns
   - **Draft 同步**：用 `published_at OR created_at` 過濾（支持 draft sync）
 - `scripts/daily_update.py` → 每日 08:03 台灣時間（crontab `3 8 * * 2-6`，美股收盤後）計算策略權重 + 同步 Supabase + 重算績效指標 + Supabase heartbeat

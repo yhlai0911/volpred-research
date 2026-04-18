@@ -33,7 +33,7 @@ Last updated: 2026-04-18
 
 - 正確性優先於吞吐量
 - 永遠修流程，不修資料
-- `storage/` 是本地唯一源頭
+- `storage/` 是本地唯一源頭（文章採 Contentlayer 模式：feed.json 唯一 canonical；Supabase 是 read-only projection；mile_*.json 單檔已廢除）
 - 正式 user story 是 VS Code `supervisor + worker terminals`
 - control plane 是任務狀態唯一來源
 - Claude 是排程治理 owner

@@ -340,6 +340,42 @@ K693 修改了 paper_trading.json 中 9,935 筆歷史 portfolio_return（same-da
 - **前端改 `frontend-v2-fix/`**，不是 `frontend/`（舊版）。部署用 `frontend-v2-fix/scripts/deploy-zeabur-safe.sh`
 - **遇到 error 第一步查 error_log**——這次的 article_tags 殘留問題跟 2026-04-09 同根源
 
+## 2026-04-18: 文章 3-source divergence → Contentlayer 模式（P1/P2/P3/P4）
+
+### 問題
+`storage/reports/feed.json`、`storage/reports/mile_*.json`（1010 個單檔）、Supabase `articles` 三個地方同時存在文章資料，無事務保證：
+- feed.json 925 筆 / mile_*.json 含 42 個 draft (status != feed 的 status) / Supabase 965 筆
+- 25 筆 feed=published 但單檔 status=draft（release_pool 同步缺口）
+- 16 筆單檔 orphan（不在 feed.json）
+- 40 筆 Supabase 有但 feed 沒（admin/手動 PATCH 繞過 publisher）
+- Monitor 抓 `feed.json.status=='draft'` 永遠 0（target 12 → 錯報 "pool 緊急"）
+
+### 根因（反模式）
+1. **Publisher 同時寫 3 處**（feed + 單檔 + Supabase），無原子性；任一步失敗不 rollback
+2. **admin CMS / 手動 PATCH** 可反向寫 Supabase，不回流 feed
+3. **Supabase `article_impressions.article_id` FK 原為 NO ACTION**（migration 001 疏漏），`DELETE FROM articles` 直接 409，導致同步工具失敗
+4. **feed.json 5.4MB**（170 萬 token），Claude session 誤讀即燒滿 context
+
+### 解決（Contentlayer 模式，4 phase）
+**Phase 1**：新 `src/volpred/ops/feed_sync.py` + `ops feed-sync` CLI，單向 feed → Supabase reconcile（timestamp-normalized 比對避免 Postgres trim 微秒尾零 false-positive）；套用 reconcile 歷史 drift（1 insert / 78 update / 40 delete）。
+**Phase 1b**：migration 021 將 `article_impressions.article_id` FK 改為 ON DELETE CASCADE（從 Python 補丁升級成 schema 底層修）。BUG-001 正式 resolved。
+**Phase 2**：Monitor 改查 real feed↔Supabase drift，不再抓 `feed.json.status=='draft'` count。Session cron `11 */2` 重命名為「繼續任務」涵蓋非研究類。
+**Phase 3**：publisher.py / content.py / supabase_sync.py 移除所有單檔讀寫；1010 個 `mile_*.json` 移到 `storage/reports/_archive_mile_files/`（git rename 保留歷史）；`article_backups.py` 整檔成 deprecation stub。
+**Phase 4**：migration 022 declarative 記錄 articles RLS（service_role-only write；anon/auth read-only）。daily_update.py 清 dead code（不再 read archived singles）。
+
+### 教訓
+- **保留 feed.json 的 Contentlayer 模式最佳**：canonical + git audit + DB 是唯讀 projection，一次性砍單檔+封 RLS，永久無 divergence 風險
+- **Supabase FK 必須 ON DELETE CASCADE 或顯式 pre-delete**：Python 補丁易被 canonical re-render 蓋掉（f00fb286 → 19ac8e49 覆蓋），修 schema 才穩固
+- **timestamp 比對用 datetime parse，不用字串相等**：Postgres 返回 `.862770` → `.86277`（微秒尾零被 trim）
+- **廢棄 code 先做 deprecation stub，不要立刻刪除函式**：保護既有 caller 不 break（article_backups）
+- **3-source 模式天生反架構**。商業標準：單一 DB SoT（Headless CMS）或單一 Git SoT + read-only projection（Contentlayer / Astro）。混合多源沒事務 = 必定漂移
+
+### 驗證
+- `uv run volpred ops feed-sync` → feed=925 / db=925 / drift=0
+- `Publisher.get_report(mile_xxx)` → 從 feed 讀 5314 字 content
+- Monitor 每小時查 drift，0 alert = 健康
+- Commits: f497a873 (Phase 1-2), 8450e5f6 (cron rename), 3eeeecce (Phase 3), e74ab077 (Phase 4)
+
 ## 2026-04-13: merge_worktree.sh K1032 bug 再現 (K1114)
 - 現象：agent commit 5c6a5c8c (K1114 完整實驗檔) 真實存在於 worktree branch，但 merge_worktree.sh 在 detect-new-commits 階段判「沒有新的 commits 可安全移除」，執行 worktree force-delete + branch delete，主分支 experiments/k1114/ 不存在
 - 過程：通知收到 → bash scripts/merge_worktree.sh agent-a96a6532 → ls experiments/k1114/ 報 No such file → git reflog --all 找回 commit 5c6a5c8c → git checkout worktree-agent-a96a6532 -- experiments/k1114/ → git add + commit recover
