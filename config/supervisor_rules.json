@@ -1,0 +1,244 @@
+{
+  "_description": "Supervisor 決策規則 — runtime 讀，改這個檔下一輪 tick 立即生效，不需重啟 session。與 supervisor_pacing.json 併用：pacing 管派工節流（cooldown/curate-gate/coupling），rules 管決策內容（family 最低量、skill 對照、seed 優先序、rotation）。",
+  "_last_updated": "2026-04-18",
+  "_autotune": {
+    "enabled": true,
+    "last_run_at": "2026-04-18T06:24:23.821356+00:00",
+    "last_run_notes": "days=7, floor_changes=1, cap_changes=0",
+    "history": [
+      {
+        "timestamp": "2026-04-18T06:10:01.311667+00:00",
+        "days_window": 7,
+        "floor_changes": [
+          {
+            "family": "research",
+            "old_floor": 3,
+            "new_floor": 2,
+            "actual": 0,
+            "rationale": "actual(0) < 50% of floor(3); lowered by 1"
+          },
+          {
+            "family": "content",
+            "old_floor": 2,
+            "new_floor": 1,
+            "actual": 0,
+            "rationale": "actual(0) < 50% of floor(2); lowered by 1"
+          },
+          {
+            "family": "ops",
+            "old_floor": 3,
+            "new_floor": 2,
+            "actual": 1,
+            "rationale": "actual(1) < 50% of floor(3); lowered by 1"
+          },
+          {
+            "family": "member",
+            "old_floor": 1,
+            "new_floor": 0,
+            "actual": 0,
+            "rationale": "actual(0) < 50% of floor(1); lowered by 1"
+          },
+          {
+            "family": "paper",
+            "old_floor": 1,
+            "new_floor": 0,
+            "actual": 0,
+            "rationale": "actual(0) < 50% of floor(1); lowered by 1"
+          }
+        ],
+        "cap_changes": []
+      },
+      {
+        "timestamp": "2026-04-18T06:24:23.821359+00:00",
+        "days_window": 7,
+        "floor_changes": [
+          {
+            "family": "content",
+            "old_floor": 1,
+            "new_floor": 0,
+            "actual": 0,
+            "rationale": "actual(0) < 50% of floor(1); lowered by 1"
+          }
+        ],
+        "cap_changes": []
+      }
+    ]
+  },
+  "loop_intervals_minutes": {
+    "_note": "Session 啟動時讀這個決定 /loop 間隔；未來 self-tune 可動態調整。",
+    "claude-supervisor": 15,
+    "claude-worker": 10,
+    "codex-worker-sleep-between-exec": 5
+  },
+  "family_minimums": {
+    "_description": "7 天滾動窗口內，每個 family 應達到的最低完成數。supervisor 每輪檢查 family_coverage_deficit 若有 family 低於 floor 則優先派該 family 任務。Autotune 可根據實際吞吐回寫 floors。",
+    "window_days": 7,
+    "floors": {
+      "research": 2,
+      "content": 0,
+      "review": 2,
+      "ops": 2,
+      "member": 0,
+      "code": 1,
+      "strategy": 0,
+      "paper": 0
+    },
+    "weekly_caps": {
+      "_note": "防爆衝 — 單週上限。strategy 0 表示不限。",
+      "research": 25,
+      "content": 14,
+      "review": 20,
+      "ops": 30,
+      "member": 7,
+      "code": 15,
+      "strategy": 0,
+      "paper": 10
+    }
+  },
+  "seed_sources_priority": {
+    "_description": "Supervisor 每輪 seed 任務掃描的優先序。worker pending=0 或 queue 整體 pending<5 時觸發。越上面越優先。",
+    "order": [
+      {
+        "id": "user_assigned",
+        "label": "User-assigned task (urgent override)",
+        "source_field": "source=user",
+        "bypass_cooldown": true
+      },
+      {
+        "id": "next_tasks_legacy",
+        "label": "storage/next_tasks.json legacy working list",
+        "filter": "status in [pending, pending_main_thread, in_progress] AND priority != P4_wait_for_user",
+        "priority_order": [
+          "P1",
+          "P2",
+          "P3",
+          "P4"
+        ]
+      },
+      {
+        "id": "family_coverage_deficit",
+        "label": "補 7 天內 family 低於 floor 的項目",
+        "source": "supervisor-report --days 7 的 family_coverage_deficit"
+      },
+      {
+        "id": "pending_followups",
+        "label": "未 materialize 的 followup_task_candidates",
+        "source": "supervisor-report --days 7 的 followup_backlog.sample"
+      },
+      {
+        "id": "research_program_threads",
+        "label": "research_program.md 的 7 條研究主軸 open thread",
+        "source": "research_program.md"
+      },
+      {
+        "id": "knowledge_null_results",
+        "label": "knowledge.json 的 NULL results 或待驗證 K",
+        "source": "storage/memory/knowledge.json"
+      },
+      {
+        "id": "paper_backlog",
+        "label": "論文修訂 backlog (Paper 1/2/3 R1 revision, Paper 6 errata)",
+        "source": "paper/*/review_history/"
+      },
+      {
+        "id": "member_qa_ranking",
+        "label": "會員問答排行榜最高分",
+        "skill": "member-questions"
+      },
+      {
+        "id": "publication_candidates",
+        "label": "讀者文章候選",
+        "skill": "publication-candidates"
+      },
+      {
+        "id": "ops_maintenance",
+        "label": "ops / maintenance (daily_update, supabase_sync, memory-health, recalc)",
+        "source": "runtime_schedules.json"
+      }
+    ]
+  },
+  "family_to_worker_routing": {
+    "_description": "task_family 到 preferred_agent 路由，覆寫預設可派的 worker。",
+    "research": "claude-worker",
+    "content": "claude-worker",
+    "member": "claude-worker",
+    "paper": "claude-worker",
+    "code": "codex-worker",
+    "review": "codex-worker",
+    "ops": "codex-worker",
+    "strategy": "codex-worker"
+  },
+  "skill_dispatch_table": {
+    "_description": "按 task_family / 情境告訴 worker 該載哪個 .claude/skills/<name>/。brief_payload 產出時，supervisor 可從這裡取要求 worker 載入哪些 skill。",
+    "by_task_family": {
+      "research": [
+        "autonomous-research"
+      ],
+      "content": [
+        "feed-publisher",
+        "publication-candidates"
+      ],
+      "member": [
+        "member-questions"
+      ],
+      "paper": [
+        "paper-update",
+        "finance-paper-quality"
+      ],
+      "review": [
+        "paper-review-cycle",
+        "latex-academic-reviewer",
+        "citation-verifier",
+        "agent-result-verification"
+      ],
+      "code": [
+        "agent-result-verification"
+      ],
+      "ops": [
+        "memory-health",
+        "admin-ops"
+      ],
+      "strategy": []
+    },
+    "by_context": {
+      "external_data_fetch": [
+        "external-data-sources"
+      ],
+      "taiwan_macro": [
+        "taiwan-macro-data"
+      ],
+      "experiment_numbers_produced": [
+        "agent-result-verification"
+      ],
+      "worktree_merge": [
+        "worktree-merge-verification"
+      ],
+      "paper_stage_decision": [
+        "paper-stage-classifier"
+      ],
+      "methodology_peer_review": [
+        "academic-finance-reviewer"
+      ]
+    }
+  },
+  "rotation_policy": {
+    "_description": "防止連續多輪派同一 family。supervisor 每輪派完後檢查最近 3 次 dispatch 的 family，若都相同則下一輪強制換 family。",
+    "min_distinct_families_in_last_n_dispatches": 2,
+    "lookback_dispatches": 3
+  },
+  "curation_policy": {
+    "_description": "Curate-gate 嚴格度與 promote 規則。",
+    "gate_blocks_new_dispatch": true,
+    "max_pending_curations_before_stop": 5,
+    "promote_targets": {
+      "knowledge_candidates": "storage/memory/knowledge.json",
+      "experience_candidates": "storage/memory/experiment_experiences.json",
+      "followup_task_candidates": "storage/ops/tasks (via ops assign)",
+      "skill_candidates": "agent-specs/skills/",
+      "doc_update_needed": [
+        "research_program.md",
+        "docs/error_log.md"
+      ]
+    }
+  }
+}
