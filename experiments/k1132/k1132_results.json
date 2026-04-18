@@ -1,0 +1,193 @@
+{
+  "experiment_id": "K1132",
+  "title": "Block-Bootstrap CI for K1131 OOS DM-HLN t-stat",
+  "timestamp": "2026-04-18T16:26:12.073820",
+  "seed": 42,
+  "runtime_sec": 19.298942,
+  "data_source": "TAIFEX TX 5-min bars 2017-2021 (K1124 cache, same as K1131)",
+  "upstream": {
+    "K1131_DM_reported_t_hln": -3.936694237337927,
+    "K1131_DM_reported_mean_d": -0.0007578513340819119
+  },
+  "point_estimate": {
+    "t_hln": -3.936694237337927,
+    "t_plain": -3.9367883569567788,
+    "mean_d": -0.0007578513340819119,
+    "se_hac": 0.00019250497242065284,
+    "n": 20914,
+    "matches_K1131_within_0p02": true
+  },
+  "OOS_mean_log_loss": {
+    "base": 0.011707634471523584,
+    "tertile": 0.011720834011924587,
+    "spline": 0.012478685346006501
+  },
+  "ljung_box_on_d": {
+    "1": {
+      "Q": 21.88108276563369,
+      "p": 2.900795018190294e-06,
+      "n": 20914
+    },
+    "5": {
+      "Q": 797.074995859257,
+      "p": 0.0,
+      "n": 20914
+    },
+    "10": {
+      "Q": 808.4979311527333,
+      "p": 0.0,
+      "n": 20914
+    },
+    "20": {
+      "Q": 919.6279660853547,
+      "p": 0.0,
+      "n": 20914
+    },
+    "60": {
+      "Q": 1076.2249837169352,
+      "p": 0.0,
+      "n": 20914
+    },
+    "120": {
+      "Q": 1190.4089751250237,
+      "p": 0.0,
+      "n": 20914
+    }
+  },
+  "bootstrap": {
+    "method": "circular block bootstrap (Politis & Romano 1994, Annals of Statistics 22, 2031-2050)",
+    "B": 5000,
+    "block_sizes_tested": [
+      20,
+      40,
+      60,
+      100
+    ],
+    "rng": "np.random.default_rng(seed=42)",
+    "per_block": {
+      "20": {
+        "t_draws_mean": -4.830200311027553,
+        "t_draws_std": 1.577601281752343,
+        "t_draws_median": -4.507352346798088,
+        "ci": {
+          "95": [
+            -8.957617708216377,
+            -2.5534592797613276
+          ],
+          "90": [
+            -8.167233161357377,
+            -2.8329458575701327
+          ],
+          "99": [
+            -10.166725871751405,
+            -1.8897556224199068
+          ]
+        },
+        "frac_t_ge_0": 0.0002,
+        "frac_t_ge_m1p96": 0.0056,
+        "B": 5000
+      },
+      "40": {
+        "t_draws_mean": -4.557455438484901,
+        "t_draws_std": 1.4076056379459687,
+        "t_draws_median": -4.30517800764887,
+        "ci": {
+          "95": [
+            -8.20924025316368,
+            -2.4051663324360035
+          ],
+          "90": [
+            -7.508576035877629,
+            -2.7438983532665926
+          ],
+          "99": [
+            -9.364232861302206,
+            -1.726621056090778
+          ]
+        },
+        "frac_t_ge_0": 0.0,
+        "frac_t_ge_m1p96": 0.0088,
+        "B": 5000
+      },
+      "60": {
+        "t_draws_mean": -4.513182160861173,
+        "t_draws_std": 1.378796399722771,
+        "t_draws_median": -4.236320969716578,
+        "ci": {
+          "95": [
+            -7.979044941732135,
+            -2.4260147385641075
+          ],
+          "90": [
+            -7.426194632381648,
+            -2.732795784693713
+          ],
+          "99": [
+            -8.96705709228726,
+            -1.7466969557455594
+          ]
+        },
+        "frac_t_ge_0": 0.0,
+        "frac_t_ge_m1p96": 0.0088,
+        "B": 5000
+      },
+      "100": {
+        "t_draws_mean": -4.461015446711419,
+        "t_draws_std": 1.307370110198693,
+        "t_draws_median": -4.245096495215368,
+        "ci": {
+          "95": [
+            -7.798974574453201,
+            -2.418439832673784
+          ],
+          "90": [
+            -7.163147183564876,
+            -2.724971300727912
+          ],
+          "99": [
+            -8.736950350450854,
+            -1.8981403623217439
+          ]
+        },
+        "frac_t_ge_0": 0.0,
+        "frac_t_ge_m1p96": 0.0062,
+        "B": 5000
+      }
+    }
+  },
+  "headline": {
+    "block_size": 60,
+    "point_estimate_t": -3.936694237337927,
+    "ci_95": [
+      -7.979044941732135,
+      -2.4260147385641075
+    ],
+    "ci_90": [
+      -7.426194632381648,
+      -2.732795784693713
+    ],
+    "ci_99": [
+      -8.96705709228726,
+      -1.7466969557455594
+    ],
+    "bootstrap_mean_t": -4.513182160861173,
+    "bootstrap_std_t": 1.378796399722771,
+    "frac_t_ge_0": 0.0,
+    "frac_t_ge_minus_1p96": 0.0088,
+    "B": 5000,
+    "seed": 42
+  },
+  "verdict": "robust",
+  "verdict_rule": {
+    "robust": "95% CI upper bound < -1.96 at all block sizes",
+    "inconclusive": "95% CI upper bound >= -1.96 at any block size OR CI spans 0",
+    "not-robust": "95% CI includes 0 at any block size (sign could flip)"
+  },
+  "references": [
+    "Politis, D.N., Romano, J.P. (1994). 'The Stationary Bootstrap.' J. Amer. Statist. Assoc. 89, 1303-1313.",
+    "Politis, D.N., Romano, J.P. (1994). 'Large sample confidence regions based on subsamples under minimal assumptions.' Ann. Statist. 22, 2031-2050.",
+    "Politis, D.N., White, H. (2004). 'Automatic block-length selection for the dependent bootstrap.' Econometric Reviews 23, 53-70.",
+    "Harvey, D., Leybourne, S., Newbold, P. (1997). 'Testing the Equality of Prediction Mean Squared Errors.' Int. J. Forecasting 13, 281-291.",
+    "Diebold, F.X., Mariano, R.S. (1995). 'Comparing Predictive Accuracy.' J. Business Econ. Statist. 13, 253-263."
+  ]
+}

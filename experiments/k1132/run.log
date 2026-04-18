@@ -1,0 +1,44 @@
+Using CPython 3.12.10
+Creating virtual environment at: .venv
+   Building volpred @ file:///Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-afab0431
+      Built volpred @ file:///Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-afab0431
+Installed 109 packages in 993ms
+======================================================================
+K1132 — Block-Bootstrap CI for K1131 OOS DM-HLN t
+======================================================================
+[1] Loading cache: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-afab0431/experiments/k1124/_cache_bars_2017-01-01_2021-12-31.parquet
+    73,203 bars, 1223 days
+[2] Lee-Mykland jump detection
+[3] VIX T-1 merge
+[4] IS N=31,498  OOS N=20,914  IS jumps=81  OOS jumps=33
+[5] Knots (IS q20/40/60/80) = [11.04800014 12.5        14.25       17.29999924]
+    Tertile cutoffs (IS q33/q67) = 12.070 / 14.990
+    VIX center = 13.110
+[6] Fitting M_base / M_tertile / M_spline on IS ...
+    nll_is: base=557.056  tertile=554.861  spline=553.032
+    success: base=True  tertile=True  spline=True
+[7] OOS mean log-loss: base=0.011708  tertile=0.011721  spline=0.012479
+[8] Point DM-HLN (spline vs tertile): t_hln=-3.937  t_plain=-3.937  mean_d=-7.579e-04
+[9] Ljung-Box on loss differentials:
+    Q(1): Q=21.88  p=0.0000
+    Q(5): Q=797.07  p=0.0000
+    Q(10): Q=808.50  p=0.0000
+    Q(20): Q=919.63  p=0.0000
+    Q(60): Q=1076.22  p=0.0000
+    Q(120): Q=1190.41  p=0.0000
+[10] Block bootstrap (B=5000, circular Politis-Romano 1994)
+    b=20 ... mean_t=-4.830  95% CI=[-8.958, -2.553]  P(t>=0)=0.0002
+    b=40 ... mean_t=-4.557  95% CI=[-8.209, -2.405]  P(t>=0)=0.0000
+    b=60 ... mean_t=-4.513  95% CI=[-7.979, -2.426]  P(t>=0)=0.0000
+    b=100 ... mean_t=-4.461  95% CI=[-7.799, -2.418]  P(t>=0)=0.0000
+
+[11] Verdict (pre-registered): robust
+    95% CI upper bounds across b: ['-2.553', '-2.405', '-2.426', '-2.418']
+    95% CI lower bounds across b: ['-8.958', '-8.209', '-7.979', '-7.799']
+
+[12] Saved /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-afab0431/experiments/k1132/k1132_results.json
+[13] Plotting bootstrap_distribution.png
+    Saved /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-afab0431/experiments/k1132/bootstrap_distribution.png
+
+K1132 complete. Runtime=19.3s  Verdict=robust
+Headline (b=60): point t=-3.937, 95% CI=[-7.979, -2.426], 90% CI=[-7.426, -2.733]
