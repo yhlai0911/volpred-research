@@ -83,7 +83,7 @@ scripts/install_scheduler_cron.sh
 
 ```python
 CronCreate(cron="3 9 * * *", prompt="每日任務審視與執行計劃：(1) 盤點 user queue / scheduled queue / approval backlog (2) 盤點草稿池與今日已發佈文章缺口 (3) 讀 research_program.md 事件日曆，確認今日是否有 CPI/NFP/FOMC/TSMC 等重要事件 (4) 有事件→立即建立或執行事件任務（必要時 status=published）(5) 檢查 research_program.md 行數(<700)、知識索引是否過期(>24h) (6) 用 uv run volpred ops assign 建立今日正式任務")
-CronCreate(cron="11 */2 * * *", prompt="繼續研究：(1) slot check — `ls .claude/worktrees/ 2>/dev/null | grep -c agent-` + 背景 task；>= 3 slot 滿則回「跳過：slot N/3」≤15字 (2) 讀 storage/next_tasks.json 取最高優先任務（P1>P2>P3>P4）(3) 分配新 K 編號前必 ls experiments/ + .claude/worktrees/ 確認不衝突 (4) 啟動 agent 執行 (5) 完成後從 research_program.md 補充 next_tasks (6) next_tasks pending 空才讀 research_program.md 全文。反空轉：cron 觸發必有新 agent / git diff / 新 knowledge / research_program.md 更新，至少一項。")
+CronCreate(cron="11 */2 * * *", prompt="繼續任務（每 2 小時，slot-aware）：任務類型不限於研究，涵蓋研究/發文/論文修訂/平台 ops/bug fix/會員問題/文件更新/重構。(1) slot check — `ls .claude/worktrees/ 2>/dev/null | grep -c agent-` + 背景 task；>= 3 slot 滿回「跳過：slot N/3」≤15字 (2) 讀 storage/next_tasks.json 取最高優先任務（P1>P2>P3>P4），不分類型 (3) 若是實驗類任務，分配新 K 編號前必 ls experiments/ + .claude/worktrees/ 確認不衝突 (4) 啟動 agent 或主線程執行（文件/ops 任務主線程做，實驗類派 agent）(5) 完成後從 research_program.md / bug_backlog / next_tasks 補充 (6) queue 空才做 discovery。反空轉：cron 觸發必有新 agent / git diff / 新 knowledge / research_program.md 更新，至少一項。")
 CronCreate(cron="17 */6 * * *", prompt="會員問題研究")
 CronCreate(cron="37 */6 * * *", prompt="平台巡檢：先跑 health + platform-cycle-summary；只有異常或 release_due 才真正執行寫入")
 CronCreate(cron="47 */4 * * *", prompt="每 4 小時 git commit + sync remote：(1) git status 看有意義變更 (2) git add 指定檔（不用 -A）(3) git commit (4) git pull --no-rebase origin main（merge 不 rebase，避免多 session 並行衝突）(5) git push origin main。必須 push，防本地與雲端巡檢分叉。遇 conflict 先 resolve 不可強推。")
@@ -93,7 +93,7 @@ CronCreate(cron="23 0,6,12,18 * * *", prompt="Token 用量日報：每 6 小時�
 CronCreate(cron="0 10 28 * *", prompt="更新 NDC 景氣指標：用 Chrome DevTools MCP 導航 NDC 網站提取最新領先指標和景氣對策信號，更新 storage/macro/tw_dgbas_bci_m.csv，git commit")
 ```
 
-**繼續研究 cron 規則（`11 */2 * * *` 低頻 heartbeat + slot-aware）**：
+**繼續任務 cron 規則（`11 */2 * * *` 低頻 heartbeat + slot-aware，任務類型不限於研究）**：
 1. 每次觸發先 count 當前 running agents（`.claude/worktrees/` + 背景 task id 數）
 2. 若 running >= **3**（建議上限）→ 直接跳過本次，回「跳過：slot N/3」≤15 字
 3. 有 slot 就挑新任務，優先序：(1) user-assigned pending (2) scheduled (3) discovery

@@ -208,4 +208,4 @@ CronCreate(cron="23 22 * * *", prompt="Token 用量日報")      # 每日一次
 - 寫入前先建立正式 queue task（`uv run python -m volpred.cli ops assign ...`）
 - 寫入後留可觀測結果（snapshot / execution receipt 存 `storage/ops/`）
 
-**不再建議加入高頻「繼續研究」cron。** 研究續跑改由 queue 清空後的 idle-driven continuation 處理。
+**標準「繼續任務」cron 為 `11 */2 * * *`（每 2 小時 slot-aware heartbeat）**。任務類型不限於研究（涵蓋發文/論文/ops/bug fix/會員問題/文件/重構）。禁止高於 `*/20` 的密度，避免資源爆衝。

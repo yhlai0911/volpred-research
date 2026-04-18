@@ -33,7 +33,7 @@ CronCreate(cron="0 10 28 * *", prompt="更新 NDC 景氣指標：用 Chrome DevT
 ```
 
 ## Idle-driven continuation（取代高頻 heartbeat）
-- 不再建立 `*/4 * * * *` 的「繼續研究」cron
+- 不再建立 `*/4 * * * *` 或更密的「繼續任務」heartbeat cron（標準是 `11 */2` 每 2 小時 slot-aware）
 - agent 完成主任務後，先檢查 `user queue`
 - `user queue` 為空，再檢查 `scheduled queue`
 - queue 都空了，才允許做一輪 discovery / research continuation
