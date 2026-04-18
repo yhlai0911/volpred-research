@@ -96,8 +96,8 @@ B_BOOTSTRAP = 5000
 BLOCK_SIZES = [20, 40, 60, 100]  # bars; K1124 is 5-min bars, ~60/day
 CI_LEVELS = {"95": 0.95, "90": 0.90, "99": 0.99}
 
-np.random.seed(SEED)
-RNG_BOOT = np.random.default_rng(SEED)
+# Bootstrap 用顯式 Generator（見 block_bootstrap_dm 簽名），
+# 不依賴全域 state，避免其他 import 污染。
 
 
 # ============================================================
@@ -476,8 +476,8 @@ def main():
         delta = abs(k1131_t - dm_point["t_hln"])
         print(f"    K1131 reported t={k1131_t:+.3f}, our t={dm_point['t_hln']:+.3f}, "
               f"|delta|={delta:.3f}")
-        if delta > 0.02:
-            print("    WARNING: point DM t differs from K1131 by >0.02 -> "
+        if delta > 1e-6:
+            print(f"    WARNING: point DM t differs from K1131 by {delta:.2e} (>1e-6) -> "
                   "reconstruction diverged, aborting")
             sys.exit(1)
 
@@ -533,8 +533,10 @@ def main():
     print(f"    95% CI upper bounds across b: {[f'{x:+.3f}' for x in ci95_ub_list]}")
     print(f"    95% CI lower bounds across b: {[f'{x:+.3f}' for x in ci95_lb_list]}")
 
-    # Pick representative b for headline numbers = 60 (1 trading day), as per
-    # Politis-White (2004) rule-of-thumb and 5-min bars=60/day convention.
+    # Headline b=60 是 heuristic（1 trading day, 5-min bars × 60/day），
+    # NOT data-driven Politis-White (2004) 自動選擇。選這個是因為 Ljung-Box 在 m=60
+    # 顯著表示相依延伸至此 lag。敏感性 BLOCK_SIZES=[20,40,60,100] 已驗證 CI 穩定。
+    # TODO: 若要 data-driven，接 `arch.bootstrap.optimal_block_length()` 取代。
     headline_b = 60
     headline = bs_results[headline_b]
 

@@ -35,20 +35,6 @@
     "description": "NULL 全部 5 pairs (含 SPY-QQQ λ_L=0.589 high tail-dep)。SPY-TLT 負相關 copula 結構性 FAIL (DCC Harvey -4.29***)。Paper 3 不擴充，深挖 spot-futures periodic 結構。"
   },
   {
-    "id": "K1100c",
-    "title": "K1100c: Vine / skew-t copula for asymmetric tail",
-    "priority": 3,
-    "description": "K1100b 衍生：單 Student-t 抓非對稱尾部不夠，用 pair-copula construction (PCC) 或 skew-t。",
-    "status": "pending"
-  },
-  {
-    "id": "K1100d",
-    "title": "K1100d: VIX regime-switching copula",
-    "priority": 3,
-    "description": "K1100b 衍生：低 VIX → Gaussian copula；高 VIX → Student-t。Regime-switching 可能超越 uniform DCC。",
-    "status": "pending"
-  },
-  {
     "id": "K1100f",
     "title": "K1100f: Copula + PRG on SPY-ES spot-futures",
     "priority": 2,
@@ -117,16 +103,20 @@
   {
     "id": "K1100h",
     "title": "K1100h: Tick-level PRG on TAIFEX TX (Dropbox 2017-2021)",
-    "priority": 3,
-    "description": "K1100f agent 衍生：only tick-level reveals true periodic structure。Daily DOW dummies 太粗。",
+    "priority": 4,
+    "description": "[HALF DONE 2026-04-18] agent-a7aac49d worktree 中斷產出 experiments/k1100h/ 但無 results。需重跑或補完。K1100f agent 衍生：only tick-level reveals true periodic structure。Daily DOW dummies 太粗。",
     "status": "pending"
   },
   {
     "id": "TSMC_0416_post",
     "title": "TSMC 法說 04/16 事後解讀文章",
     "priority": 1,
-    "description": "法說會 04/16 14:00 結束後，04/17 前完成解讀文章",
-    "status": "pending"
+    "description": "法說會 04/16 14:00 結束後，04/17 前完成解讀文章。已發佈 draft mile_39b36b79（research audience，OOS 價量解讀）。",
+    "status": "done",
+    "claimed_by": "agent-tsmc-0416-20260418",
+    "completed_pub_id": "mile_f52fb13b",
+    "completed_at": "2026-04-18",
+    "note": "[2026-04-18] 已被 mile_f52fb13b 覆蓋；agent 誤派又發一篇 mile_39b36b79（已 cleanup）"
   },
   {
     "id": "K1067b",
@@ -341,7 +331,9 @@
     "title": "K1117: Daily-freq alt-data conditional on VIX jumps",
     "priority": 3,
     "description": "K1116 衍生：唯一還沒測的 angle。matched-pair design around |ΔVIX|>2σ days。",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   },
   {
     "id": "K1118",
@@ -393,7 +385,9 @@
     "title": "K1123: Cross-asset alt-data allocation (SPY+GLD+TLT)",
     "priority": 3,
     "description": "K1121 衍生：3-asset allocation 用 alt-data signal。",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   },
   {
     "id": "K1116c",
@@ -434,25 +428,22 @@
     "status": "cancelled"
   },
   {
-    "id": "TSMC_0416_immediate",
-    "title": "TSMC 法說 04/16 14:00 後立即解讀（T+0 published）",
-    "priority": 1,
-    "description": "04/16 14:00 結束後立即發 --status published（不等次日）。Hot-take 3 重點 + 對台股影響。",
-    "status": "pending"
-  },
-  {
     "id": "TSMC_0417_optional",
     "title": "TSMC 法說 04/17 深度追蹤（optional）",
     "priority": 3,
     "description": "只有真新發現才寫。否則跳過避免重複。",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   },
   {
     "id": "K1125",
     "title": "K1125: OFI × Lee-Mykland jump detection",
     "priority": 2,
     "description": "Agent a9109d114c8b9e792 in worktree agent-k1125。K1124 衍生：直接續測 |OFI| → JUMP 預測（不是 diffusive vol）。reuse K1124 cache。Lee-Mykland test + logistic regression 4 spec。",
-    "status": "in_progress"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: stale in_progress (4/14 agent), check experiments/k1125/ for actual state"
   },
   {
     "id": "K1126",
@@ -467,7 +458,9 @@
     "title": "K1127: Cross-asset OFI lead-lag (TX vs ES via overnight)",
     "priority": 3,
     "description": "K1124 衍生：延伸 K1100g night→day channel，跨市場 OFI lead-lag。",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   },
   {
     "id": "leverage_direction_review_v2",
@@ -481,7 +474,9 @@
     "title": "Paper vix-sufficiency 擴充：integrate K1116/K1118/K1116b/K1121 + K504/K1098",
     "priority": 1,
     "description": "Agent a90f872c29a03c25d 產出 integration_plan_v2.md。今日 6+ 實驗直接擴大 paper evidence base，從 SPY-only 升級為 cross-asset universal compendium。最佳 paper 排名第 1 (貢獻度 × 完成度)。",
-    "status": "in_progress"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: stale in_progress (4/14 agent), paper still exists in paper/vix-sufficiency/"
   },
   {
     "id": "K1128",
@@ -502,28 +497,39 @@
     "title": "K1130: Expanding-window IS with prior crises (OFI regime test v2)",
     "priority": 3,
     "description": "K1128 衍生 (was agent K1129，avoid conflict with GAS K1129): IS 擴含 2008 GFC / 2011 debt / 2015 China deval → 修正 VIX tertile degeneracy 問題。",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   },
   {
     "id": "K1131",
     "title": "K1131: Continuous VIX-dependent β via spline (OFI-jump)",
     "priority": 3,
     "description": "K1128 衍生: β_2(VIX)·|OFI|_t spline basis 取代 tertile dummy。繞過離散 cutoff 問題。",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   },
   {
     "id": "K1132",
     "title": "K1132: Block-bootstrap CI on high-tertile DM (robustness)",
     "priority": 3,
     "description": "K1128 衍生: High-VIX DM +3.59 只 N=6 jumps，block-bootstrap 驗 CI 是否不跨越 0。",
-    "status": "pending"
+    "status": "done",
+    "claimed_by": "agent-afab0431",
+    "claimed_at": "2026-04-18T08:10",
+    "auto_closed_at": "2026-04-18",
+    "completed_pub_id": null,
+    "result_summary": "robust (DM t=-3.94, 95% CI [-7.98, -2.43] not cross 0, B=5000 Politis-Romano). Codex review pending main thread follow-up."
   },
   {
     "id": "K1133",
     "title": "K1133: Regime-switching GAS-t (Markov or 2021-23 vs 2024-26 split)",
     "priority": 3,
     "description": "K1129 衍生: BTC DM t=-4.58 反向可能 regime-dependent。Catania 2018 Markov-switching GAS 或 sub-period split 測。",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   },
   {
     "id": "K1134",
@@ -537,14 +543,18 @@
     "title": "K1135: Skew-t GAS (Gonzalez-Rivera 2014) on negatively skewed commodities",
     "priority": 3,
     "description": "K1129 衍生: USO skew=-0.58 明顯，對稱 t 不捕捉，skew-t 可能改善 VaR/ES。",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   },
   {
     "id": "K1135",
     "title": "K1135: Hansen-Lunde 5-min RV as 5th proxy (where intraday exists)",
     "priority": 3,
     "description": "K1134 衍生: SPY/GLD/BTC close proxy-robustness audit。",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   },
   {
     "id": "K1136",
@@ -559,21 +569,27 @@
     "title": "K1137: Regime-conditional robust models",
     "priority": 3,
     "description": "K1136 延伸：VIX tertile regime 切分，檢驗 GARCH-MIDAS/HAR-RV-X 在高 VIX regime 是否有條件優勢。控 K1128 IS-regime degeneracy 教訓：regime cutoff 用 rolling ex-ante percentile。",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   },
   {
     "id": "K1138",
     "title": "K1138: Equity compendium (SPY/QQQ/IWM) robust models",
     "priority": 3,
     "description": "K1136 擴充：將 MIDAS-X + HAR-RV-X + GAS-t 3 家族套用到 equity，與 commodity 對稱。若 equity 也 NULL → Paper 4 'universal-null' 可含 5 asset classes 全包。",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   },
   {
     "id": "K1139",
     "title": "K1139: Intraday 5-min RV as target",
     "priority": 4,
     "description": "Hansen-Lunde 高頻標準。K1136 改用 5-min 彙總 RV 當 target，檢驗 daily proxy 是否仍為 NULL。資料需 yfinance/polygon 5-min 回抓。",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   },
   {
     "id": "K1140",
@@ -611,7 +627,9 @@
     "title": "K1144: Paper 2 narrative pivot to dual-NULL (after K1140 confirmation)",
     "priority": 2,
     "description": "K1140 確認 cross + temporal θ_EAV heterogeneity dual NULL。Paper 2 contribution 從「找 firm-attribute predictor」改為「rigorous null verification: after N=31 sector ANOVA + 5 covariates + rolling HAC + block-boot, no systematic source of θ heterogeneity survives MTCorrection」。需主線程更新 paper/2/body.tex (5-stage classifier 判 stage)。",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   },
   {
     "id": "K1145",
@@ -641,14 +659,18 @@
     "title": "K1148: EAV refinement — earnings surprise (continuous) vs binary indicator",
     "priority": 3,
     "description": "K1145 用 binary EAV 已 PASS。改用 actual surprise magnitude (consensus vs actual EPS deviation) 作 continuous covariate，是否 θ_continuous 訊號更強？",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   },
   {
     "id": "K1149",
     "title": "K1149: Pooled spec + PCA factor — θ_EAV vs systematic factor competition",
     "priority": 3,
     "description": "K1145 pooled θ_EAV 是否被市場 factor (TWII / VIX) 主導？加 factor PC1/PC2 為 covariate，看 θ_EAV 是否 absorb。若 absorb → 解釋為 factor effect 不純為 EAV; 若 incremental → 真 firm-event effect。",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   },
   {
     "id": "K1150",
@@ -687,7 +709,9 @@
     "title": "K1156: 5-market validation visualization for Paper 2 cover figure",
     "priority": 3,
     "description": "Three-market table 已成核心 finding；若 K1153 EU 也 PASS → 4-market。視覺化 fig 為 Paper 2 cover：x=market, y=θ_EAV with 95% CI bars + placebo z annotation。",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   },
   {
     "id": "K1157",
@@ -702,7 +726,9 @@
     "title": "K1161: Options-implied IV crush as continuous EAV regressor",
     "priority": 3,
     "description": "K1151 yfinance Surprise(%) noisy。改用 30-day IV at T-1 minus T+1 (IV crush) 作為市場彙總 continuous expected impact。OptionMetrics 或 polygon API 需要付費；先試 yfinance options chain 拼湊。",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   },
   {
     "id": "K1162",
@@ -717,7 +743,9 @@
     "title": "K1163: EU earnings via BaFin/AMF/FCA local filings (K1153 follow-up)",
     "priority": 3,
     "description": "K1153 EU yfinance earnings 資料稀疏 (12/30 skip)，N=18 DAX-biased。改用 BaFin (DE)/AMF (FR)/FCA (UK) 本地 filing API 取完整 CAC+FTSE earnings，N=30 重測是否改變 θ_rel=0.137 cluster 歸屬。",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   },
   {
     "id": "K1164",
@@ -779,21 +807,27 @@
     "title": "K1171: ASX earnings via Alpha Vantage (yfinance failed K1165)",
     "priority": 3,
     "description": "K1165 AU 0/10 stocks earnings via yfinance 不足。改 Alpha Vantage EARNINGS endpoint 或 ASX official disclosures 取得 ASX top-10 earnings dates, 加入 K1168 N≥10 panel。",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   },
   {
     "id": "K1172",
     "title": "K1172: Extend to N≥13 markets +LatAm/ZA/ID for true CONFIRMED",
     "priority": 3,
     "description": "K1168 N=10 ρ=+0.612 p=0.060 卡在門檻外。+MX (Bovespa-like Bolsa Mexicana), ZA (JSE Top 40), ID (IDX Composite) 至 N≥13 增 power。yfinance earnings 可能稀疏，預期 N=11-13 final。",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   },
   {
     "id": "K1173",
     "title": "K1173: Refine institutional-share proxy for emerging markets",
     "priority": 3,
     "description": "K1168 BR/CH/IN θ_rel residuals 主因 yfinance institutional% 對新興市場不準: CH state-owned undercounted, IN promoter+FII inflated, BR control-shareholder ambiguous. 用 BCBS/CSRC/SEBI/CVM 官方數據 separate state-owned vs private institutions, 重做 N=10 cross-market regression。",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   },
   {
     "id": "K1174",
@@ -808,7 +842,9 @@
     "title": "K1175: Full 96-files-per-day GDELT scan OR GCP-authed BigQuery rerun",
     "priority": 2,
     "description": "K1174 only 1/96 slice coverage (1.04%) + 131/413 events. Need full-day (96 files) scan or GCP BigQuery (if user can provide auth) for N≥10 per market decisive PCR test. Current K1170 press concentration claim hangs on this.",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   },
   {
     "id": "K1067f",
@@ -830,7 +866,9 @@
     "title": "K1116f: PIT alignment 套用 GLD/TLT/BTC cross-asset Paper 4 cells",
     "priority": 3,
     "description": "K1116c SPY 已 ROBUST NULL。擴展 PIT 套用到 K1118 cross-asset (GLD/TLT/BTC), 確認 alt-data NULL universality 跨資產 (K1118 原用 shift(1))。",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   },
   {
     "id": "K1120b",
@@ -853,21 +891,27 @@
     "title": "K1108c: Continuous guide_delta_pct as capex covariate (replace binary)",
     "priority": 3,
     "description": "K1108 binary flag direction-only. 改用 continuous guide_delta_pct (-32.5% to +60.6% range) 作 θ_EAV covariate, 看 signed magnitude 是否 PASS。",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   },
   {
     "id": "K1100g_d6",
     "title": "K1100g_d6: Extend 2022-2025 N double for Harvey threshold",
     "priority": 3,
     "description": "K1100g_d3/d4/d5 在 2017-2021 n=1071 下 DM t=1.5-2.0 borderline。擴 2022-2025 至 n~1800+ 測是否跨 Harvey 3.0。",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   },
   {
     "id": "K1100g_d7",
     "title": "K1100g_d7: Cross-market replicate (SPY overnight, N225 morning→afternoon)",
     "priority": 3,
     "description": "K1100g_d5 確認信號方向穩但 borderline。跨市場複製: SPY overnight gap→intraday, N225 morning session→afternoon session asymmetry。若 universal 則 Paper 3 reframe 真 anchor。",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   },
   {
     "id": "Paper9_bib_fix",
@@ -881,6 +925,8 @@
     "title": "K1108d: Non-capex foundry signal — utilisation rate + wafer ASP",
     "priority": 3,
     "description": "K1108b 否證 capex 為 foundry mechanism。嘗試 utilisation rate (TSMC 75-80%/UMC 60-70% quarterly disclosures) + wafer ASP (industry report) 作為 alternative foundry-specific signals 預測 θ_EAV。",
-    "status": "pending"
+    "status": "done",
+    "auto_closed_at": "2026-04-18",
+    "auto_closed_reason": "post-restore audit: experiments/ + results JSON 存在"
   }
 ]

@@ -1,5 +1,18 @@
 # Publishing Guide
 
+## ⚠️ 標準流程 vs Legacy（必讀）
+
+**✅ 標準發文路徑（實驗完成後發草稿/文章）**
+- **One-stop（推薦）**：`uv run python scripts/record_and_publish.py` — 同時寫 `thinking_journal` + `knowledge` + `feed`（格式保證正確）
+- **CLI**：`uv run volpred ops publish-milestone --status draft --audience research --title '…' --description '…' --phase '…' --tags '…'`
+- **Python**：`Publisher().publish_milestone(title, description, phase, details={}, status='draft')`
+
+**❌ 不要用（legacy，已加 deprecation warning）**
+- `uv run volpred publish --experiment-id KXXX` — 此命令 **狀態硬寫 `published`**，無 `--status` / `--audience` / `--tags` 選項。歷史 demo 用途，不是發文標準流程。
+- `Publisher().publish_experiment(...)` — 同上，內部硬 coded `status='published'`（`publisher.py:161`），無 status 參數。若要用 experiment 專屬的 pub_id 格式，自行在 milestone 的 `details` 補 `experiment_id`。
+
+**為何要區分**：2026-04-18 smoke test 發現 `volpred publish` 發出後會直接 published + auto-sync Supabase，污染線上 feed；且無法發草稿。`publish-milestone` 才是統一入口。
+
 ## Language
 All publications: **繁體中文**. Technical terms in English.
 
@@ -9,13 +22,15 @@ All publications: **繁體中文**. Technical terms in English.
 - Weight: `round(x, 2)` → 0.77
 - Return: `.2f`% → +1.23%
 
-## Publishing Methods
+## Publishing Methods（參考）
 
-### Python Publisher (main)
+### Python Publisher
 ```python
 from volpred.publisher.publisher import Publisher
 pub = Publisher()
-pub.publish_milestone(title, description, phase, details={})
+# ✅ 標準：含 status / details 完整控制
+pub.publish_milestone(title, description, phase, details={}, status='draft')
+# ⚠️ legacy：status 硬 coded 'published'，需求複雜時改走 publish_milestone
 pub.publish_experiment(experiment_id, title, summary, metrics, tags)
 pub.publish_comparison(experiment_ids, title, ranking, analysis, tags)
 ```

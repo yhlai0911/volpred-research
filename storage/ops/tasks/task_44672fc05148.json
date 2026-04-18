@@ -1,0 +1,84 @@
+{
+  "id": "task_44672fc05148",
+  "title": "Autonomous loop smoke test: 驗證 3-terminal auto-loop 實際運作",
+  "description": "簡單查詢測試，驗證 CLAUDE.md auto-load + /loop auto-cycle + worker pickup 全流程。在 bash 中跑以下 3 項並回報 signal_payload：(a) date +%Y-%m-%dT%H:%M:%S (b) grep -n 'Lookahead' CLAUDE.md 的結果 (c) wc -l storage/memory/knowledge.json 的結果。完成後用 uv run volpred ops complete <task_id> --session-key codex-worker --summary '<三項答案>' --signals-json '<json>' 回報。任務非常小，應在 2 分鐘內完成。",
+  "source": "user",
+  "task_family": "ops",
+  "priority": 30,
+  "preferred_agent": "codex",
+  "fallback_allowed": false,
+  "approval_mode": "auto",
+  "risk_level": "safe",
+  "status": "succeeded",
+  "payload": {},
+  "parent_task_id": null,
+  "created_by": "user-smoke-test",
+  "session_id": "codex-worker:28576",
+  "rollback_point_id": "codex-worker_session_20260418T060539Z_32469",
+  "public_effect": "none",
+  "brief_status": "ready",
+  "brief_payload": {
+    "generated_at": "2026-04-18T06:06:06.293360+00:00",
+    "source_type": "template",
+    "template_id": "ops.yaml",
+    "template_hash": "d86b984f49d78a3fbc82c14c939da58ddc8cae5121ec0aabe46c7ef637be7d64",
+    "coordinator_run_id": null,
+    "task_summary": "Autonomous loop smoke test: 驗證 3-terminal auto-loop 實際運作",
+    "goal": "完成平台或控制面相關任務：簡單查詢測試，驗證 CLAUDE.md auto-load + /loop auto-cycle + worker pickup 全流程。在 bash 中跑以下 3 項並回報 signal_payload：(a) date +%Y-%m-%dT%H:%M:%S (b) grep -n 'Lookahead' CLAUDE.md 的結果 (c) wc -l storage/memory/knowledge.json 的結果。完成後用 uv run volpred ops complete <task_id> --session-key codex-worker --summary '<三項答案>' --signals-json '<json>' 回報。任務非常小，應在 2 分鐘內完成。",
+    "success_criteria": [
+      "結果與現有 canonical config / ops 流程一致",
+      "不要直接修改歷史資料掩蓋流程問題"
+    ],
+    "repo_root": "/Users/yhlai0911/Desktop/volpred-research",
+    "required_files": [
+      "docs/architecture.md",
+      "docs/error_log.md",
+      "docs/project_improvement_status.md",
+      "config/project_targets.json",
+      "config/runtime_schedules.json"
+    ],
+    "recommended_files": [
+      "AGENTS.md"
+    ],
+    "forbidden_large_files": [
+      "storage/reports/feed.json",
+      "storage/memory/knowledge.json"
+    ],
+    "relevant_commands": [
+      "uv run volpred ops health"
+    ],
+    "prior_findings": [],
+    "rollback_point_id": "codex-worker_session_20260418T060539Z_32469",
+    "why_this_agent": "這是 ops 任務，優先交給 codex。"
+  },
+  "claimed_by": "codex",
+  "claimed_by_session_key": "codex-worker",
+  "claimed_by_role": "worker",
+  "claimed_at": "2026-04-18T06:06:06.291151+00:00",
+  "started_at": null,
+  "finished_at": "2026-04-18T06:06:58.271108+00:00",
+  "approved_by": null,
+  "approved_at": null,
+  "rejected_by": null,
+  "rejected_at": null,
+  "result_summary": "Smoke test passed: date=2026-04-18T14:06:33; CLAUDE.md Lookahead=45:12. **Lookahead Bias 檢查（最常見錯誤）**：所有策略回測必須確認信號 lag：; knowledge.json lines=27855.",
+  "signal_payload": {
+    "summary_text": "Smoke test passed: date=2026-04-18T14:06:33; CLAUDE.md Lookahead line=45; knowledge.json lines=27855.",
+    "null_result": false,
+    "knowledge_candidates": [],
+    "experience_candidates": [],
+    "followup_task_candidates": [],
+    "doc_update_needed": [],
+    "frontend_impact": {
+      "pipeline": "none",
+      "requires_sync": false
+    }
+  },
+  "curated_by": "claude-supervisor",
+  "curated_at": "2026-04-18T06:24:11.746834+00:00",
+  "curated_promoted": [],
+  "curated_notes": "Smoke test validated 3-terminal auto-loop flow; test-only payload, no knowledge/experience/followup promotion needed.",
+  "last_error": null,
+  "created_at": "2026-04-18T05:53:54.528091+00:00",
+  "updated_at": "2026-04-18T06:24:11.746834+00:00"
+}

@@ -1,0 +1,19 @@
+{
+  "point_id": "k189_k190_k191_k193_k194_safe_migration_20260416T091126Z",
+  "created_at": "2026-04-16T09:11:40.438803+00:00",
+  "branch": "main",
+  "head_sha": "28fc37725952b4421984a54c87a94a4b68e6cb54",
+  "tracked_patch_path": "tracked.patch",
+  "tracked_files_path": "tracked_files.txt",
+  "git_status_path": "git_status.txt",
+  "untracked_list_path": "untracked.txt",
+  "storage_archive_path": "storage.tar.gz",
+  "config_archive_path": "config.tar.gz",
+  "untracked_archive_path": "untracked.tar.gz",
+  "restore_steps": [
+    "git restore --source <head_sha> --worktree --staged .",
+    "git apply tracked.patch",
+    "extract storage/config archives over repo root",
+    "restore baseline untracked archive and remove post-baseline untracked files"
+  ]
+}

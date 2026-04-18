@@ -137,10 +137,10 @@ def recalc_all():
     out_path = PROJECT / "storage" / "strategy_metrics.json"
     out_path.write_text(json.dumps(metrics, indent=2, ensure_ascii=False))
 
-    # Also copy to frontend
-    fe_path = PROJECT / "frontend-v2" / "data" / "strategy_metrics.json"
-    fe_path.parent.mkdir(parents=True, exist_ok=True)
-    fe_path.write_text(json.dumps(metrics, indent=2, ensure_ascii=False))
+    # Frontend local JSON copy — REMOVED 2026-04-18
+    # frontend-v2-fix 走 Supabase REST API 讀 strategy_metrics_cache 表；
+    # 下面的 Supabase sync 區段會把 metrics 推到該表。
+    # storage/strategy_metrics.json 仍是 source of truth，保留上面寫入。
 
     print(f"\n✓ {len(metrics)} strategies updated → {out_path.name}")
 

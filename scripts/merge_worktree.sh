@@ -176,10 +176,19 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>") || {
         done
 
         if $shared_json_modified; then
-            echo "  [⚠️ WARNING] Agent 修改了共享 JSON（違反 worktree 規則）:"
+            echo "  [🛑 ABORT] Agent 修改了共享 JSON（違反 worktree 規則）:"
             echo "     $shared_files"
-            echo "  [⚠️ WARNING] 這些檔案的 agent 變更將被 main 覆蓋（-X ours）"
-            echo "  [⚠️ WARNING] 請在合併後手動從 experiments/ README 恢復知識記錄"
+            echo "  [🛑 ABORT] -X ours 會靜默覆蓋 agent 變更；改 abort 讓你手動處理"
+            echo "  [HINT] 手動路徑："
+            echo "         1. 檢視 git diff $main_branch..$branch -- $shared_files"
+            echo "         2. 決定把 agent 的有價值變更手動 apply 到 main（或直接 drop）"
+            echo "         3. 再跑 bash scripts/merge_worktree.sh $wt_name 續做合併"
+            # 還原 stash 才退出（避免 silent stash）
+            if $main_dirty; then
+                echo "  [RESTORE] 還原剛才的 stash..."
+                git stash pop 2>&1 | head -5 || echo "  [⚠️] stash pop 失敗，手動 git stash list + git stash apply stash@{0}"
+            fi
+            return 1
         fi
 
         # 用 -X ours 自動解決衝突：新檔案照常加入，衝突部分保留 main 版本
@@ -196,33 +205,56 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>" 2>&1; then
             echo "  [ERROR] 合併失敗（即使 -X ours 也無法解決）"
             git merge --abort 2>/dev/null || true
 
-            # 最後手段：直接複製 experiments/ 新檔案
-            echo "  [FALLBACK] 直接複製 experiments/ 檔案..."
+            # 最後手段：只複製 agent **新增**（--diff-filter=A）的 experiments/ 檔案
+            # 不用 diff --name-only（會列所有差異，包含 agent 從未動過但 main 領先的檔，
+            # 會導致 worktree 舊版覆蓋 main 新版 — 2026-04-18 agent-a7aac49d 教訓）
+            echo "  [FALLBACK] 只複製 agent 新增的 experiments/ 檔案..."
             local exp_files
-            exp_files=$(cd "$wt_path" && git diff --name-only "$main_branch" -- experiments/ 2>/dev/null || true)
+            exp_files=$(cd "$wt_path" && git log --diff-filter=A --name-only --pretty=format: "$main_branch..$branch" -- experiments/ 2>/dev/null | grep -v '^$' | sort -u || true)
             if [[ -n "$exp_files" ]]; then
+                local copy_count=0
                 echo "$exp_files" | while IFS= read -r f; do
-                    if [[ -f "$wt_path/$f" ]]; then
+                    if [[ -f "$wt_path/$f" ]] && [[ ! -f "$MAIN_DIR/$f" ]]; then
                         mkdir -p "$MAIN_DIR/$(dirname "$f")"
                         cp "$wt_path/$f" "$MAIN_DIR/$f"
-                        echo "      Copied: $f"
+                        echo "      Copied NEW: $f"
+                        copy_count=$((copy_count + 1))
+                    elif [[ -f "$wt_path/$f" ]] && [[ -f "$MAIN_DIR/$f" ]]; then
+                        echo "      SKIP (main 已有同名檔，不覆蓋): $f"
                     fi
                 done
-                git add experiments/ 2>/dev/null || true
-                git commit -m "Copy experiments from worktree $wt_name (fallback)
+                # 只 add 新複製的檔，不是整個 experiments/（避免把主目錄 untracked 也一併 commit）
+                if [[ -n "$exp_files" ]]; then
+                    echo "$exp_files" | xargs -I{} git add "{}" 2>/dev/null || true
+                fi
+                git commit -m "Copy new experiments from worktree $wt_name (fallback, new files only)
 
-Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>" 2>/dev/null || true
-                merge_ok=true
-                echo "  [OK] fallback 複製成功"
+Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>" 2>/dev/null && merge_ok=true
+                if $merge_ok; then
+                    echo "  [OK] fallback 複製成功（只複製新增檔案）"
+                else
+                    echo "  [WARN] fallback commit 失敗（可能沒有新檔要 commit）"
+                fi
+            else
+                echo "  [INFO] agent 沒有新增檔案，nothing to fallback"
             fi
         fi
 
         # 還原 main 的 stash
         if $main_dirty; then
             echo "  [PREP] 還原 main 的 stash..."
-            git stash pop 2>/dev/null || {
-                echo "  [WARN] stash pop 衝突，保留在 stash 中（git stash list 查看）"
-            }
+            if ! git stash pop 2>&1 | tee /tmp/merge_worktree_stash_pop.log; then
+                echo ""
+                echo "  🚨 ============================================="
+                echo "  🚨 STASH POP 衝突！你的主線程修改還在 stash@{0}"
+                echo "  🚨 不要關掉這個 session 以免遺忘。"
+                echo "  🚨 救回方法："
+                echo "  🚨   git stash show stash@{0} --name-only   # 看有哪些檔"
+                echo "  🚨   git checkout stash@{0} -- <path>       # 救特定檔"
+                echo "  🚨   git stash apply stash@{0}              # 全部 apply"
+                echo "  🚨 ============================================="
+                echo ""
+            fi
         fi
 
         # 合併後驗證：確認 agent 的 experiments/ 檔案全部到位
@@ -253,9 +285,31 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>" 2>/dev/nul
             exp_dirs_on_main=$(ls -d experiments/K*/ 2>/dev/null | wc -l | tr -d ' ')
             echo "  [VERIFY] main 上 experiments/ 目錄數: $exp_dirs_on_main"
 
-            git worktree remove "$wt_path" 2>/dev/null || git worktree remove --force "$wt_path" 2>/dev/null
-            git branch -D "$branch" 2>/dev/null || true
-            echo "  [DONE] 已移除 worktree 和 branch"
+            # loud remove — 不吞錯誤，remove 失敗必須讓使用者知道
+            local remove_ok=false
+            if git worktree remove "$wt_path" 2>&1; then
+                remove_ok=true
+            else
+                echo "  [WARN] worktree remove 拒絕（可能仍有 untracked 檔）；嘗試 --force..."
+                if git worktree remove --force "$wt_path" 2>&1; then
+                    remove_ok=true
+                else
+                    echo "  [WARN] --force 也失敗（常見是 claude agent lock）；嘗試 unlock + -f -f..."
+                    git worktree unlock "$wt_path" 2>&1 || true
+                    if git worktree remove -f -f "$wt_path" 2>&1; then
+                        remove_ok=true
+                    else
+                        echo "  🚨 [ERROR] unlock + -f -f 也失敗。手動處理："
+                        echo "  🚨   ls $wt_path                              # 看殘留"
+                        echo "  🚨   rm -rf $wt_path && git worktree prune   # 強制清"
+                        echo "  🚨   git branch -D $branch                   # 再刪 branch"
+                    fi
+                fi
+            fi
+            if $remove_ok; then
+                git branch -D "$branch" 2>&1 || echo "  [WARN] branch $branch 刪除失敗（可能已被 remove 連帶處理）"
+                echo "  [DONE] 已移除 worktree 和 branch"
+            fi
         else
             echo "  [SKIP] 合併失敗，保留 worktree 待手動處理: $wt_path"
             echo "  [HINT] 手動修復: git cherry-pick <commit-hash>"

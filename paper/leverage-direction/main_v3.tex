@@ -1,0 +1,230 @@
+\documentclass[12pt,a4paper]{article}
+
+% ─── Packages ────────────────────────────────────────────────
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{natbib}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{fontspec}           % XeLaTeX for Unicode/CJK support
+\usepackage{xeCJK}              % 繁體中文支援
+\setCJKmainfont{PingFang TC}    % macOS 內建繁體中文字型
+
+\usepackage{pifont}% for \ding check/cross marks
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+\doublespacing
+
+% ─── Title ───────────────────────────────────────────────────
+\title{Leverage Direction Matters: Cross-Asset Evidence on GARCH Model Selection and Volatility Targeting\thanks{I thank seminar participants for helpful comments. All errors remain my own. Data and replication code available upon request.}}
+
+\author{Yi-Hao Lai\thanks{Department of Finance, Da-Yeh University. Corresponding author. Email: yhlai@mail.dyu.edu.tw}}
+
+\date{April 2026 (v3 errata)}
+
+\begin{document}
+
+\maketitle
+
+% ─── Abstract ────────────────────────────────────────────────
+\begin{abstract}
+\noindent
+% v2: Abstract revised for H1 (two contributions, TZ removed), H7 (twelve->nine), H3 (OOS caveat)
+The direction of the asymmetric volatility response---measured by the GJR-GARCH $\gamma$ parameter---varies systematically across asset classes in ways that have direct implications for model selection, risk management, and portfolio construction. Using daily data for seven primary assets (equities, gold, bonds, emerging markets, cryptocurrency) over 2017--2025, extended to 26 assets in validation analyses, we make two contributions. First, we propose a leverage direction taxonomy: equities exhibit standard leverage ($\gamma > 0$), gold displays regime-dependent leverage (inverted during fear-driven rallies, standard during liquidation-driven declines), and bonds show near-zero asymmetry. This taxonomy determines optimal GARCH specification: GJR-GARCH significantly outperforms symmetric GARCH only when $|\gamma| > 0.10$, correctly classifying all nine Diebold-Mariano comparisons in the primary sample, with 6/6 correct out-of-sample predictions. Second, we link leverage direction to the economic channel of volatility targeting (VT) alpha: $\gamma$ predicts whether VT acts as trend-following or contrarian within homogeneous equity markets (Spearman $\rho = 0.886$, $p = 0.019$ for six equity-type assets), but this relationship does not extend to diverse asset classes ($\rho = -0.448$, $p = 0.14$ for twelve assets). Meanwhile, VT's primary benefit---maximum drawdown reduction---is universal across all tested assets and driven by base volatility level ($\rho = 0.944$ for primary assets, $\rho = 0.83$ for the extended $N = 14$ sample), independent of $\gamma$. These findings delineate a complexity ceiling: increasing model sophistication (DCC-GARCH, copula, GARCH-MIDAS, Markov-switching) improves statistical measurement but not investable allocation decisions.
+
+\medskip
+\noindent
+\textbf{Keywords:} GARCH, leverage effect, gold, asymmetric volatility, Value-at-Risk, Basel III, volatility targeting, cross-asset, regime-dependent
+
+\medskip
+\noindent
+\textbf{JEL Classification:} C22, C53, G01, G11, G17
+\end{abstract}
+
+\newpage
+
+% ─── Body (auto-converted from paper_complete.md) ────────────
+\input{body_v3}
+
+% Tables are embedded in body.tex at the appropriate locations
+% Additional formal tables:
+\input{tables}
+
+% Null results comprehensive table
+\input{table_nulls}
+
+% ─── References ──────────────────────────────────────────────
+\bibliographystyle{apalike}
+\begin{thebibliography}{99}
+
+\bibitem[Araya et al.(2024)]{araya2024}
+Araya, H.~T., Aduda, J., \& Berhane, T. (2024). A hybrid GARCH and deep learning method for volatility prediction. \textit{Journal of Applied Mathematics}, 2024, 6305525. https://doi.org/10.1155/2024/6305525
+
+\bibitem[Baur and Lucey(2010)]{baur2010hedge}
+Baur, D.~G., \& Lucey, B.~M. (2010). Is gold a hedge or a safe haven? An analysis of stocks, bonds and gold. \textit{Financial Review}, 45(2), 217--229. https://doi.org/10.1111/j.1540-6288.2010.00244.x
+
+\bibitem[Baur and McDermott(2010)]{baur2010safe}
+Baur, D.~G., \& McDermott, T.~K. (2010). Is gold a safe haven? International evidence. \textit{Journal of Banking \& Finance}, 34(8), 1886--1898. https://doi.org/10.1016/j.jbankfin.2009.12.008
+
+\bibitem[Bali et al.(2016)]{bali2016}
+Bali, T.~G., Engle, R.~F., \& Murray, S. (2016). \textit{Empirical Asset Pricing: The Cross Section of Stock Returns}. John Wiley \& Sons. https://doi.org/10.1002/9781118709207
+
+\bibitem[Batten et al.(2010)]{batten2010}
+Batten, J.~A., Ciner, C., \& Lucey, B.~M. (2010). The macroeconomic determinants of volatility in precious metals markets. \textit{Resources Policy}, 35(2), 65--71. https://doi.org/10.1016/j.resourpol.2009.12.002
+
+\bibitem[BCBS(2006)]{bcbs2006}
+Basel Committee on Banking Supervision. (2006). \textit{International Convergence of Capital Measurement and Capital Standards: A Revised Framework}. Bank for International Settlements.
+
+\bibitem[BCBS(2019)]{bcbs2019}
+Basel Committee on Banking Supervision. (2019). \textit{Minimum Capital Requirements for Market Risk}. Bank for International Settlements.
+
+\bibitem[Black(1976)]{black1976}
+Black, F. (1976). Studies of stock price volatility changes. \textit{Proceedings of the Business and Economics Statistics Section, ASA}, 177--181.
+
+\bibitem[Bollerslev(1986)]{bollerslev1986}
+Bollerslev, T. (1986). Generalized autoregressive conditional heteroskedasticity. \textit{Journal of Econometrics}, 31(3), 307--327. https://doi.org/10.1016/0304-4076(86)90063-1
+
+\bibitem[Bollerslev(1987)]{bollerslev1987}
+Bollerslev, T. (1987). A conditionally heteroskedastic time series model for speculative prices and rates of return. \textit{Review of Economics and Statistics}, 69(3), 542--547. https://doi.org/10.2307/1925546
+
+\bibitem[Bollerslev et al.(1994)]{bollerslev1994}
+Bollerslev, T., Engle, R.~F., \& Nelson, D.~B. (1994). ARCH models. In R.~F. Engle \& D.~L. McFadden (Eds.), \textit{Handbook of Econometrics} (Vol.~4, pp. 2959--3038). Elsevier.
+
+\bibitem[Bozovic(2024)]{bozovic2024}
+Bozovic, M. (2024). VIX-managed portfolios. \textit{International Review of Financial Analysis}, 95, 103353. https://doi.org/10.1016/j.irfa.2024.103353
+
+\bibitem[Bucci(2020)]{bucci2020}
+Bucci, A. (2020). Realized volatility forecasting with neural networks. \textit{Journal of Financial Econometrics}, 18(3), 502--531. https://doi.org/10.1093/jjfinec/nbaa008
+
+\bibitem[Cederburg et al.(2020)]{cederburg2020}
+Cederburg, S., O'Doherty, M.~S., Wang, F., \& Yan, X.~S. (2020). On the performance of volatility-managed portfolios. \textit{Journal of Financial Economics}, 138(1), 95--117. https://doi.org/10.1016/j.jfineco.2020.04.015
+
+\bibitem[Corsi(2009)]{corsi2009}
+Corsi, F. (2009). A simple approximate long-memory model of realized volatility. \textit{Journal of Financial Econometrics}, 7(2), 174--196. https://doi.org/10.1093/jjfinec/nbp001
+
+\bibitem[Chang et al.(2021)]{chang2021}
+Chang, M.-S., Kung, C.-C., Chen, M.-W., \& Tian, Y. (2021). Volatility regime, inverted asymmetry, contagion, and flights in the gold market. \textit{Pacific-Basin Finance Journal}, 67, 101522. https://doi.org/10.1016/j.pacfin.2021.101522
+
+\bibitem[Chevallier and Ielpo(2017)]{chevallier2017}
+Chevallier, J., \& Ielpo, F. (2017). Investigating the leverage effect in commodity markets with a recursive estimation approach. \textit{Research in International Business and Finance}, 39, 763--778. https://doi.org/10.1016/j.ribaf.2014.09.010
+
+\bibitem[Engle(2002)]{engle2002}
+Engle, R.~F. (2002). Dynamic conditional correlation: A simple class of multivariate generalized autoregressive conditional heteroskedasticity models. \textit{Journal of Business \& Economic Statistics}, 20(3), 339--350. https://doi.org/10.1198/073500102288618487
+
+\bibitem[Engle and Gallo(2006)]{engle2006}
+Engle, R.~F., \& Gallo, G.~M. (2006). A multiple indicators model for volatility using intra-daily data. \textit{Journal of Econometrics}, 131(1--2), 3--27. https://doi.org/10.1016/j.jeconom.2005.01.018
+
+\bibitem[Christoffersen(1998)]{christoffersen1998}
+Christoffersen, P.~F. (1998). Evaluating interval forecasts. \textit{International Economic Review}, 39(4), 841--862. https://doi.org/10.2307/2527341
+
+\bibitem[Christie(1982)]{christie1982}
+Christie, A.~A. (1982). The stochastic behavior of common stock variances: Value, leverage and interest rate effects. \textit{Journal of Financial Economics}, 10(4), 407--432. https://doi.org/10.1016/0304-405X(82)90018-6
+
+\bibitem[Diebold and Mariano(1995)]{diebold1995}
+Diebold, F.~X., \& Mariano, R.~S. (1995). Comparing predictive accuracy. \textit{Journal of Business \& Economic Statistics}, 13(3), 253--263. https://doi.org/10.1080/07350015.1995.10524599
+
+\bibitem[DeMiguel et al.(2024)]{demiguel2024}
+DeMiguel, V., Martin-Utrera, A., \& Uppal, R. (2024). A multifactor perspective on volatility-managed portfolios. \textit{Journal of Finance}, 79(6), 3859--3891. https://doi.org/10.1111/jofi.13395
+
+\bibitem[Engle and Siriwardane(2018)]{engle2018}
+Engle, R.~F., \& Siriwardane, E.~N. (2018). Structural GARCH: The volatility-leverage connection. \textit{Review of Financial Studies}, 31(2), 449--492. https://doi.org/10.1093/rfs/hhx099
+
+\bibitem[Engle(2004)]{engle2004}
+Engle, R.~F. (2004). Risk and volatility: Econometric models and financial practice. \textit{American Economic Review}, 94(3), 405--420. https://doi.org/10.1257/0002828041464597
+
+\bibitem[Fleming et al.(2001)]{fleming2001}
+Fleming, J., Kirby, C., \& Ostdiek, B. (2001). The economic value of volatility timing. \textit{Journal of Finance}, 56(1), 329--352. https://doi.org/10.1111/0022-1082.00327
+
+\bibitem[Fleming et al.(2003)]{fleming2003}
+Fleming, J., Kirby, C., \& Ostdiek, B. (2003). The economic value of volatility timing using realized volatility. \textit{Journal of Financial Economics}, 67(3), 473--509. https://doi.org/10.1016/S0304-405X(02)00259-3
+
+\bibitem[Francq and Zako\"{\i}an(2004)]{francq2004}
+Francq, C., \& Zako\"{\i}an, J.-M. (2004). Maximum likelihood estimation of pure GARCH and ARMA-GARCH processes. \textit{Bernoulli}, 10(4), 605--637. https://doi.org/10.3150/bj/1093265632
+
+\bibitem[Glosten et al.(1993)]{glosten1993}
+Glosten, L.~R., Jagannathan, R., \& Runkle, D.~E. (1993). On the relation between the expected value and the volatility of the nominal excess return on stocks. \textit{Journal of Finance}, 48(5), 1779--1801. https://doi.org/10.1111/j.1540-6261.1993.tb05128.x
+
+\bibitem[Hansen(1994)]{hansen1994}
+Hansen, B.~E. (1994). Autoregressive conditional density estimation. \textit{International Economic Review}, 35(3), 705--730. https://doi.org/10.2307/2527081
+
+\bibitem[Hansen and Lunde(2005)]{hansen2005}
+Hansen, P.~R., \& Lunde, A. (2005). A forecast comparison of volatility models: Does anything beat a GARCH(1,1)? \textit{Journal of Applied Econometrics}, 20(7), 873--889. https://doi.org/10.1002/jae.800
+
+\bibitem[Hansen et al.(2012)]{hansen2012}
+Hansen, P.~R., Huang, Z., \& Shek, H.~H. (2012). Realized GARCH: A joint model for returns and realized measures of volatility. \textit{Journal of Applied Econometrics}, 27(6), 877--906. https://doi.org/10.1002/jae.1234
+
+\bibitem[Harri and Brorsen(2009)]{harri2009}
+Harri, A., \& Brorsen, B.~W. (2009). The overlapping data problem. \textit{Quantitative and Qualitative Analysis in Social Sciences}, 3(3), 78--115.
+
+\bibitem[Harvey et al.(2016)]{harvey2016}
+Harvey, C.~R., Liu, Y., \& Zhu, H. (2016). \ldots and the cross-section of expected returns. \textit{Review of Financial Studies}, 29(1), 5--68. https://doi.org/10.1093/rfs/hhv059
+
+\bibitem[Harvey et al.(2018)]{harvey2018}
+Harvey, C.~R., Hoyle, E., Korgaonkar, R., Rattray, S., Sargaison, M., \& Van Hemert, O. (2018). The impact of volatility targeting. \textit{Journal of Portfolio Management}, 45(1), 14--33. https://doi.org/10.3905/jpm.2018.45.1.014
+
+\bibitem[Hood and Raughtigan(2025)]{hood2025}
+Hood, B., \& Raughtigan, C. (2025). Volatility targeting is trendy. \textit{Journal of Portfolio Management}, early access. https://doi.org/10.3905/jpm.2025.1.764
+
+\bibitem[Henriksson and Merton(1981)]{henriksson1981}
+Henriksson, R.~D., \& Merton, R.~C. (1981). On market timing and investment performance. II. Statistical procedures for evaluating forecasting skills. \textit{Journal of Business}, 54(4), 513--533. https://doi.org/10.1086/296144
+
+\bibitem[Hou et al.(2020)]{hou2020}
+Hou, K., Xue, C., \& Zhang, L. (2020). Replicating anomalies. \textit{Review of Financial Studies}, 33(5), 2019--2133. https://doi.org/10.1093/rfs/hhy131
+
+\bibitem[Hwang and Valls Pereira(2006)]{hwang2006}
+Hwang, S., \& Valls Pereira, P.~L. (2006). Small sample properties of GARCH estimates and persistence. \textit{European Journal of Finance}, 12(6--7), 473--494. https://doi.org/10.1080/13518470500039436
+
+\bibitem[Kim and Kim(2019)]{kim2019}
+Kim, T., \& Kim, H.~Y. (2019). Forecasting stock prices with a feature fusion LSTM-CNN model using different representations of the same data. \textit{PLoS ONE}, 14(2), e0212320. https://doi.org/10.1371/journal.pone.0212320
+
+\bibitem[Kuester et al.(2006)]{kuester2006}
+Kuester, K., Mittnik, S., \& Paolella, M.~S. (2006). Value-at-risk prediction: A comparison of alternative strategies. \textit{Journal of Financial Econometrics}, 4(1), 53--89. https://doi.org/10.1093/jjfinec/nbj002
+
+\bibitem[Kupiec(1995)]{kupiec1995}
+Kupiec, P.~H. (1995). Techniques for verifying the accuracy of risk measurement models. \textit{Journal of Derivatives}, 3(2), 73--84. https://doi.org/10.3905/jod.1995.407942
+
+\bibitem[Longin and Solnik(2001)]{longin2001}
+Longin, F., \& Solnik, B. (2001). Extreme correlation of international equity markets. \textit{Journal of Finance}, 56(2), 649--676. https://doi.org/10.1111/0022-1082.00340
+
+\bibitem[McNeil et al.(2015)]{mcneil2015}
+McNeil, A.~J., Frey, R., \& Embrechts, P. (2015). \textit{Quantitative Risk Management}. Princeton University Press.
+
+\bibitem[Moreira and Muir(2017)]{moreira2017}
+Moreira, A., \& Muir, T. (2017). Volatility-managed portfolios. \textit{Journal of Finance}, 72(4), 1611--1644. https://doi.org/10.1111/jofi.12513
+
+\bibitem[Nelson(1991)]{nelson1991}
+Nelson, D.~B. (1991). Conditional heteroskedasticity in asset returns: A new approach. \textit{Econometrica}, 59(2), 347--370. https://doi.org/10.2307/2938260
+
+\bibitem[Newey and West(1987)]{newey1987}
+Newey, W.~K., \& West, K.~D. (1987). A simple, positive semi-definite, heteroskedasticity and autocorrelation consistent covariance matrix. \textit{Econometrica}, 55(3), 703--708. https://doi.org/10.2307/1913610
+
+\bibitem[Nelson(2025)]{nelson2025}
+Nelson, R. (2025). Portfolio construction under correlation breakdowns and tail risk. SSRN Working Paper No.~5931154. https://doi.org/10.2139/ssrn.5931154
+
+\bibitem[Parkinson(1980)]{parkinson1980}
+Parkinson, M. (1980). The extreme value method for estimating the variance of the rate of return. \textit{Journal of Business}, 53(1), 61--65. https://doi.org/10.1086/296071
+
+\bibitem[Patton(2011)]{patton2011}
+Patton, A.~J. (2011). Volatility forecast comparison using imperfect volatility proxies. \textit{Journal of Econometrics}, 160(1), 246--256. https://doi.org/10.1016/j.jeconom.2010.03.034
+
+\bibitem[Sheppard(2023)]{sheppard2023}
+Sheppard, K. (2023). \textit{arch: ARCH and other financial models in Python} (Version 6.2) [Computer software]. https://github.com/bashtage/arch
+
+\bibitem[Treynor and Mazuy(1966)]{treynor1966}
+Treynor, J.~L., \& Mazuy, K.~K. (1966). Can mutual funds outguess the market? \textit{Harvard Business Review}, 44(4), 131--136.
+
+\bibitem[Xu(2024)]{xu2024}
+Xu, Y. (2024). Improving volatility-managed portfolios in real time. \textit{Critical Finance Review}, forthcoming.
+
+\bibitem[Campbell et~al., 2017]{campbell2017}
+Campbell, J.Y., Sunderam, A., and Viceira, L.M. (2017). Inflation bets or deflation hedges? The changing risks of nominal bonds. \textit{Critical Finance Review}, 6(2), 263--301.
+
+\end{thebibliography}
+
+\end{document}

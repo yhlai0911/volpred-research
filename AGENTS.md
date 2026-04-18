@@ -34,7 +34,7 @@
    - **結果異常時**：HE < 0、相關係數不穩定、parameter 在邊界上 → 必須啟動覆查，不能直接報告
    - **期貨避險特別注意**：spot-futures 相關性穩定性（rolling correlation）、共整合檢定、ETF 結構問題（如 USO contango roll）
 6. **方法論嚴謹**：每個結論必須經過正規統計檢定（DM test、t-test、bootstrap），不可僅憑觀察就下結論。遵守 Harvey (2016) t>3.0 門檻
-6b. **模型比較必須公平（Patton 2011 標準）**：不同類型的波動率模型必須在公平框架下比較，不可只用單一 target，不可只報告對自己有利的結果。VaR/ES 評估必須做正確的分配轉換，不可直接把預測值當 VaR。**技術細節（評估層次、VaR 轉換公式、backtesting 規格）見 `research_program.md` 的「模型比較公平性標準」和「經濟顯著性評估」段。**
+6b. **模型比較必須公平（Patton 2011 標準）**：不同類型的波動率模型必須在公平框架下比較，不可只用單一 target，不可只報告對自己有利的結果。VaR/ES 評估必須做正確的分配轉換，不可直接把預測值當 VaR。**技術細節（評估層次、VaR 轉換公式、backtesting 規格）見 `.claude/skills/autonomous-research/references/methodology.md` §2（模型比較公平性）與 §3（經濟顯著性 VaR/ES）。**
 7. **區分實證與理論**：明確標示每項分析屬於「實證分析（真實數據）」、「理論推導」或「模擬實驗」。不可混淆
 8. **Null result 如實報告**：負面結果同樣重要，必須完整記錄。不可只報告成功、隱藏失敗
 9. **發佈內容真實不虛**：Feed 文章、研究摘要、知識記錄的每一項數據和結論都必須可追溯到具體實驗腳本和數據
@@ -142,7 +142,7 @@ Codex 驅動的自主研究系統，用於尋找給定資產的最佳波動率�
 - **VT = drawdown insurance，不是 alpha generator**（K687/K697）。50/50 SPY/GLD 不可動搖（K846 三重護城河）
 - **Smooth-weight 策略（12/VIX, Risk Parity）幾乎不受 lag 影響——最可靠的設計原則**
 - **模型評估 target 必須匹配**：GARCH 用 r²、HAR-RV 用 5-min RV。跨模型用 Patton (2011) QLIKE
-- **⚠️ 風險管理評估必須同時做 VaR + ES（不可只做 VaR）**。詳見 `research_program.md` 評估指標段
+- **⚠️ 風險管理評估必須同時做 VaR + ES（不可只做 VaR）**。詳見 `.claude/skills/autonomous-research/references/methodology.md` §3（VaR/ES 轉換）與 §7（評估指標）
 
 ### Token 節約規則（必須遵守）
 - **⚠️ 禁止整檔讀取 `feed.json`（5.4MB = 135 萬 tokens）**。任何情況都不可 `Read("storage/reports/feed.json")`：
@@ -422,7 +422,7 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 **2026-03-29 教訓**：93 個實驗中 8 個被推翻（10%），全部因為跳過「Codex 先審代碼」這一步。如果每個實驗都先審再跑，推翻率應該趨近 0%。
 
 ### 研究多元化（必須遵守）
-**不要停留在模型舒適區。** 每個 session 至少 1 個完全不同方向。連續 3 個 null result → 必須換方向。**具體跳躍方向和判斷清單見 `research_program.md`「研究多元化原則」。**
+**不要停留在模型舒適區。** 每個 session 至少 1 個完全不同方向。連續 3 個 null result → 必須換方向。**具體跳躍方向和判斷清單見 `.claude/skills/autonomous-research/references/methodology.md` §8（研究多元化原則）。**
 
 ## 活文件原則
 以下文件會隨研究推展持續演化，應主動修改以反映最新狀態：
@@ -478,7 +478,7 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 記得開啟 `--full-auto` 模式讓 Codex 自主修復。
 
 ### 研究主題來源（必須多元）
-研究主題不可只靠 Claude 自選。必須來自：用戶指定（最高優先）、Codex/Gemini 建議、會員問題、文獻搜索、跨 AI 交叉驗證。**完整流程和頻率表見 `research_program.md`「研究主題來源」段。**
+研究主題不可只靠 Claude 自選。必須來自：用戶指定（最高優先）、Codex/Gemini 建議、會員問題、文獻搜索、跨 AI 交叉驗證。**完整流程和頻率表見 `.claude/skills/autonomous-research/references/methodology.md` §9（研究主題來源）。**
 
 ## 硬體資源與 Agent Team
 → 完整 Agent 設定對照表見 `docs/hardware.md`
@@ -588,7 +588,7 @@ CronCreate(cron="23 0,6,12,18 * * *", prompt="Token 用量日報：(1) python sc
 **所有模型清單、策略績效數字、參數估計結果、評估指標定義 → 見 `research_program.md`**
 
 AGENTS.md 不放具體的 Sharpe/MDD 數字或模型參數值——這些會隨數據更新而過時。
-研究約束（統計門檻、OOS 規範、Harvey threshold）見 `research_program.md` 約束區。
+研究約束（統計門檻、OOS 規範、Harvey threshold、評估指標定義、資料期間 COMMON_START）見 `.claude/skills/autonomous-research/references/methodology.md`（9 節技術細節）。
 
 ## 研究成果
 **所有研究發現、實驗結果、Phase 進度、AI 協作建議 → 見 `research_program.md`（北極星文件）。**

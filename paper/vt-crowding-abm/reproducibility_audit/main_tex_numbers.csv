@@ -1,0 +1,192 @@
+section,location,claim_type,paper_value,source_k,computed_value,match,notes
+abstract,abstract,sharpe,0.47,K827v3-10%,0.4675,YES,rounded to 2 decimal
+abstract,abstract,sharpe,0.34,K827v3-50%,0.3357,YES,rounded to 2 decimal
+abstract,abstract,sharpe_decline_pct,28,K827v3-50%,28.2,YES,rounded to 0 decimal
+abstract,abstract,sharpe,0.08,K827v3-70%,0.0844,YES,rounded to 2 decimal
+abstract,abstract,sharpe_decline_pct,82,K827v3-70%,82.0,YES,exact
+abstract,abstract,sharpe,-0.27,K827v3-100%,-0.2670,YES,rounded to 2 decimal
+abstract,abstract,kurtosis,61,K827v3-100%,61.35,YES,rounded to integer
+abstract,abstract,n_agents,1000,K827v3-config,1000,YES,config match
+abstract,abstract,n_noise,200,K827v3-config,200,YES,config match
+abstract,abstract,n_MC_sims,500,K827v3-config,500,YES,config match
+abstract,abstract,n_days,2520,K827v3-config,2520,YES,config match
+abstract,abstract,n_OAT,9,K827v3-derived,9,YES,3 params x 3 values
+abstract,abstract,n_MC_sens,200,K827v3-config,200,YES,config match
+model_section,sec:model,N_agents,1000,K827v3-config,1000,YES
+model_section,sec:model,T_days,2520,K827v3-config,2520,YES
+model_section,sec:model,VT_cap,1.5,K827v3-config,1.5,YES
+model_section,sec:model,BH_weight,1.0,K827v3-code,1.0,YES
+model_section,sec:model,noise_std,0.02,K827v3-config,0.02,YES
+model_section,sec:model,noise_clip_lo,0,K827v3-code,0.0,YES
+model_section,sec:model,noise_clip_hi,1.5,K827v3-code,1.5,YES
+model_section,eq:price,mu,0.08/252,K827v3-config,0.08/252,YES
+model_section,eq:price,lambda,0.005,K827v3-config,0.005,YES
+model_section,eq:price,sigma_f,0.16/sqrt252,K827v3-config,0.16/sqrt(252),YES
+model_section,eq:vix,kappa,0.03,K827v3-config,0.03,YES
+model_section,eq:vix,V_bar,18,K827v3-config,18.0,YES
+model_section,eq:vix,gamma,200,K827v3-config,200.0,YES
+model_section,eq:vix,eta_std,0.3,K827v3-config,0.3,YES
+model_section,eq:vix,baseline_annvol,0.16,K827v3-code,0.16,YES
+model_section,eq:vix,vix_lo,9,K827v3-code,9.0,YES
+model_section,eq:vix,vix_hi,80,K827v3-code,80.0,YES
+model_section,sec:model,n_noise_fixed,200,K827v3-config,200,YES
+model_section,sec:design,n_bootstrap,2000,K827v3-config,2000,YES
+results_table1,tab:main,sharpe_10pct,0.47,K827v3-10%,0.4675,YES,rounded 2dp
+results_table1,tab:main,ci_lo_10pct,0.44,K827v3-10%,0.4397,YES,rounded 2dp
+results_table1,tab:main,ci_hi_10pct,0.50,K827v3-10%,0.4958,YES,rounded 2dp
+results_table1,tab:main,sharpe_20pct,0.50,K827v3-20%,0.4956,YES,rounded 2dp
+results_table1,tab:main,ci_lo_20pct,0.47,K827v3-20%,0.4705,YES,rounded 2dp
+results_table1,tab:main,ci_hi_20pct,0.52,K827v3-20%,0.5216,YES,rounded 2dp
+results_table1,tab:main,sharpe_30pct,0.47,K827v3-30%,0.4664,YES,rounded 2dp
+results_table1,tab:main,ci_lo_30pct,0.44,K827v3-30%,0.4391,YES,rounded 2dp
+results_table1,tab:main,ci_hi_30pct,0.50,K827v3-30%,0.4950,YES,rounded 2dp
+results_table1,tab:main,sharpe_50pct,0.34,K827v3-50%,0.3357,YES,rounded 2dp
+results_table1,tab:main,ci_lo_50pct,0.31,K827v3-50%,0.3128,YES,rounded 2dp
+results_table1,tab:main,ci_hi_50pct,0.36,K827v3-50%,0.3583,YES,rounded 2dp
+results_table1,tab:main,sharpe_70pct,0.08,K827v3-70%,0.0844,YES,rounded 2dp
+results_table1,tab:main,ci_lo_70pct,0.07,K827v3-70%,0.0664,YES,rounded 2dp
+results_table1,tab:main,ci_hi_70pct,0.10,K827v3-70%,0.1022,YES,rounded 2dp
+results_table1,tab:main,sharpe_100pct,-0.27,K827v3-100%,-0.2670,YES,rounded 2dp
+results_table1,tab:main,ci_lo_100pct,-0.28,K827v3-100%,-0.2783,YES,rounded 2dp
+results_table1,tab:main,ci_hi_100pct,-0.26,K827v3-100%,-0.2557,YES,rounded 2dp
+results_table1,tab:main,delta_sharpe_20pct,+6%,K827v3-derived,+6.0%,YES,exact
+results_table1,tab:main,delta_sharpe_30pct,-0%,K827v3-derived,-0.2%,YES,rounds to -0%
+results_table1,tab:main,delta_sharpe_50pct,-28%,K827v3-derived,-28.2%,YES,rounded
+results_table1,tab:main,delta_sharpe_70pct,-82%,K827v3-derived,-82.0%,YES,exact
+results_table1,tab:main,delta_sharpe_100pct,-157%,K827v3-derived,-157.1%,YES,rounded
+results_table1,tab:main,ret_10pct,4.69,K827v3-10%,4.6886,YES,rounded 2dp
+results_table1,tab:main,ret_20pct,4.98,K827v3-20%,4.9809,YES,rounded 2dp
+results_table1,tab:main,ret_30pct,4.74,K827v3-30%,4.7358,YES,rounded 2dp
+results_table1,tab:main,ret_50pct,3.46,K827v3-50%,3.4566,YES,rounded 2dp
+results_table1,tab:main,ret_70pct,0.90,K827v3-70%,0.8952,YES,rounded 2dp
+results_table1,tab:main,ret_100pct,-3.82,K827v3-100%,-3.8159,YES,rounded 2dp
+results_table1,tab:main,delta_vol_0pct,baseline,K827v3-0%,baseline,YES
+results_table1,tab:main,delta_vol_10pct,-0.1,K827v3-derived,-0.1%,YES,exact
+results_table1,tab:main,delta_vol_20pct,+0.8,K827v3-derived,+0.8%,YES,exact
+results_table1,tab:main,delta_vol_30pct,+3.8,K827v3-derived,+3.8%,YES,exact
+results_table1,tab:main,delta_vol_50pct,+18.8,K827v3-derived,+18.8%,YES,exact
+results_table1,tab:main,delta_vol_70pct,+42.7,K827v3-derived,+42.7%,YES,exact
+results_table1,tab:main,delta_vol_100pct,+119.1,K827v3-derived,+119.0%,DIVERGE,paper=119.1% computed=119.0%; +0.1% rounding
+results_table1,tab:main,kurt_0pct,-0.00,K827v3-0%,-0.00268,YES,rounds to -0.00
+results_table1,tab:main,kurt_ci_0pct_lo,-0.01,K827v3-0%,-0.01153,YES,rounded 2dp
+results_table1,tab:main,kurt_ci_0pct_hi,0.01,K827v3-0%,0.00583,YES,rounded 2dp
+results_table1,tab:main,kurt_10pct,-0.01,K827v3-10%,-0.01279,YES,rounded 2dp
+results_table1,tab:main,kurt_ci_10pct_lo,-0.02,K827v3-10%,-0.02169,YES,rounded 2dp
+results_table1,tab:main,kurt_ci_10pct_hi,-0.00,K827v3-10%,-0.00452,YES,rounded 2dp
+results_table1,tab:main,kurt_20pct,0.00,K827v3-20%,0.00283,YES,rounded 2dp
+results_table1,tab:main,kurt_ci_20pct_lo,-0.01,K827v3-20%,-0.00566,YES,rounded 2dp
+results_table1,tab:main,kurt_ci_20pct_hi,0.01,K827v3-20%,0.01135,YES,rounded 2dp
+results_table1,tab:main,kurt_30pct,-0.00,K827v3-30%,-0.00367,YES,rounded 2dp
+results_table1,tab:main,kurt_ci_30pct_lo,-0.01,K827v3-30%,-0.01123,YES,rounded 2dp
+results_table1,tab:main,kurt_ci_30pct_hi,0.00,K827v3-30%,0.00447,YES,rounded 2dp
+results_table1,tab:main,kurt_50pct,0.06,K827v3-50%,0.05633,YES,rounded 2dp
+results_table1,tab:main,kurt_ci_50pct_lo,0.05,K827v3-50%,0.04553,YES,rounded 2dp
+results_table1,tab:main,kurt_ci_50pct_hi,0.07,K827v3-50%,0.06658,YES,rounded 2dp
+results_table1,tab:main,kurt_70pct,1.41,K827v3-70%,1.41209,YES,rounded 2dp
+results_table1,tab:main,kurt_ci_70pct_lo,1.28,K827v3-70%,1.27704,YES,rounded 2dp
+results_table1,tab:main,kurt_ci_70pct_hi,1.55,K827v3-70%,1.55299,YES,rounded 2dp
+results_table1,tab:main,kurt_100pct,61.4,K827v3-100%,61.35,YES,rounded 1dp
+results_table1,tab:main,kurt_ci_100pct_lo,59.2,K827v3-100%,59.20,YES,rounded 1dp
+results_table1,tab:main,kurt_ci_100pct_hi,63.4,K827v3-100%,63.42,YES,rounded 1dp
+results_table1,tab:main,flash_0pct,0.32,K827v3-0%,0.3229,YES,rounded 2dp
+results_table1,tab:main,flash_10pct,0.30,K827v3-10%,0.2967,YES,rounded 2dp
+results_table1,tab:main,flash_20pct,0.31,K827v3-20%,0.3101,YES,rounded 2dp
+results_table1,tab:main,flash_30pct,0.31,K827v3-30%,0.3061,YES,rounded 2dp
+results_table1,tab:main,flash_50pct,0.40,K827v3-50%,0.4030,YES,rounded 2dp
+results_table1,tab:main,flash_70pct,1.09,K827v3-70%,1.0868,YES,rounded 2dp
+results_table1,tab:main,flash_100pct,1.20,K827v3-100%,1.1991,YES,rounded 2dp
+results_table2,tab:market,vol_0pct,16.0%,K827v3-0%,16.01%,YES,rounded 1dp
+results_table2,tab:market,vol_10pct,16.0%,K827v3-10%,16.01%,YES,rounded 1dp
+results_table2,tab:market,vol_20pct,16.1%,K827v3-20%,16.14%,YES,rounded 1dp
+results_table2,tab:market,vol_30pct,16.6%,K827v3-30%,16.61%,YES,rounded 1dp
+results_table2,tab:market,vol_50pct,19.0%,K827v3-50%,19.02%,YES,rounded 1dp
+results_table2,tab:market,vol_70pct,22.8%,K827v3-70%,22.85%,YES,rounded 1dp
+results_table2,tab:market,vol_100pct,35.1%,K827v3-100%,35.08%,YES,rounded 1dp
+results_table2,tab:market,vix_mean_0pct,19.4,K827v3-0%,19.41,YES,rounded 1dp
+results_table2,tab:market,vix_mean_10pct,19.4,K827v3-10%,19.40,YES,rounded 1dp
+results_table2,tab:market,vix_mean_20pct,19.5,K827v3-20%,19.53,YES,rounded 1dp
+results_table2,tab:market,vix_mean_30pct,20.0,K827v3-30%,19.96,YES,rounded 1dp
+results_table2,tab:market,vix_mean_50pct,22.8,K827v3-50%,22.82,YES,rounded 1dp
+results_table2,tab:market,vix_mean_70pct,27.4,K827v3-70%,27.37,YES,rounded 1dp
+results_table2,tab:market,vix_mean_100pct,35.0,K827v3-100%,34.96,YES,rounded 1dp
+results_table2,tab:market,vix_std_0pct,1.76,K827v3-0%,1.760,YES,rounded 2dp
+results_table2,tab:market,vix_std_10pct,1.76,K827v3-10%,1.761,YES,rounded 2dp
+results_table2,tab:market,vix_std_20pct,1.77,K827v3-20%,1.774,YES,rounded 2dp
+results_table2,tab:market,vix_std_30pct,1.89,K827v3-30%,1.888,YES,rounded 2dp
+results_table2,tab:market,vix_std_50pct,2.33,K827v3-50%,2.331,YES,rounded 2dp
+results_table2,tab:market,vix_std_70pct,3.39,K827v3-70%,3.390,YES,rounded 2dp
+results_table2,tab:market,vix_std_100pct,6.45,K827v3-100%,6.452,YES,rounded 2dp
+results_table2,tab:market,skew_0pct,-0.005,K827v3-0%,-0.00516,YES,rounded 3dp
+results_table2,tab:market,skew_10pct,0.001,K827v3-10%,0.000486,YES,rounded 3dp
+results_table2,tab:market,skew_20pct,-0.002,K827v3-20%,-0.00224,YES,rounded 3dp
+results_table2,tab:market,skew_30pct,0.002,K827v3-30%,0.00161,YES,rounded 3dp
+results_table2,tab:market,skew_50pct,-0.024,K827v3-50%,-0.02374,YES,rounded 3dp
+results_table2,tab:market,skew_70pct,-0.321,K827v3-70%,-0.32061,YES,rounded 3dp
+results_table2,tab:market,skew_100pct,-4.73,K827v3-100%,-4.73436,YES,rounded 2dp
+results_table2,tab:market,mdd_0pct,-33.4%,K827v3-0%,-33.40%,YES,exact
+results_table2,tab:market,mdd_10pct,-34.2%,K827v3-10%,-34.17%,YES,rounded 1dp
+results_table2,tab:market,mdd_20pct,-33.2%,K827v3-20%,-33.20%,YES,exact
+results_table2,tab:market,mdd_30pct,-34.9%,K827v3-30%,-34.88%,YES,rounded 1dp
+results_table2,tab:market,mdd_50pct,-40.2%,K827v3-50%,-40.25%,YES,rounded 1dp
+results_table2,tab:market,mdd_70pct,-60.1%,K827v3-70%,-60.09%,YES,rounded 1dp
+results_table2,tab:market,mdd_100pct,-91.3%,K827v3-100%,-91.31%,YES,rounded 1dp
+results_table2,tab:market,vix_spike_0pct,0.0,K827v3-0%,0.0%,YES
+results_table2,tab:market,vix_spike_10pct,0.0,K827v3-10%,0.0%,YES
+results_table2,tab:market,vix_spike_20pct,0.0,K827v3-20%,0.0%,YES
+results_table2,tab:market,vix_spike_30pct,0.0,K827v3-30%,0.0%,YES
+results_table2,tab:market,vix_spike_50pct,0.3,K827v3-50%,0.3%,YES
+results_table2,tab:market,vix_spike_70pct,16.2,K827v3-70%,16.2%,YES,exact
+results_table2,tab:market,vix_spike_100pct,90.0,K827v3-100%,90.0%,YES,exact
+results_text,sec:results,t_stat_30v10,0.05,K827v3-sig,0.0505,YES,rounded 2dp
+results_text,sec:results,p_30v10,0.96,K827v3-sig,0.9597,YES,rounded 2dp
+results_text,sec:results,t_stat_50v10,7.12,K827v3-sig,7.1250,YES,rounded 2dp
+results_text,sec:results,p_50v10,<0.001,K827v3-sig,<0.001,YES
+results_text,sec:results,kurt_70pct_inline,1.4,K827v3-70%,1.412,YES,rounded 1dp
+results_text,sec:results,kurt_100pct_inline,61,K827v3-100%,61.35,YES,rounded integer
+sensitivity_table3,tab:sensitivity,lambda_lo_s10,0.52,K827v3-sens,0.5172,YES,rounded 2dp
+sensitivity_table3,tab:sensitivity,lambda_lo_s30,0.49,K827v3-sens,0.4879,YES,rounded 2dp
+sensitivity_table3,tab:sensitivity,lambda_lo_s50,0.43,K827v3-sens,0.4334,YES,rounded 2dp
+sensitivity_table3,tab:sensitivity,lambda_baseline_s10,0.49,K827v3-sens,0.4874,YES,rounded 2dp
+sensitivity_table3,tab:sensitivity,lambda_baseline_s30,0.45,K827v3-sens,0.4541,YES,rounded 2dp
+sensitivity_table3,tab:sensitivity,lambda_baseline_s50,0.35,K827v3-sens,0.3486,YES,rounded 2dp
+sensitivity_table3,tab:sensitivity,lambda_hi_s10,0.52,K827v3-sens,0.5152,YES,rounded 2dp
+sensitivity_table3,tab:sensitivity,lambda_hi_s30,0.40,K827v3-sens,0.4015,YES,rounded 2dp
+sensitivity_table3,tab:sensitivity,lambda_hi_s50,0.23,K827v3-sens,0.2269,YES,rounded 2dp
+sensitivity_table3,tab:sensitivity,gamma_lo_s10,0.47,K827v3-sens,0.4713,YES,rounded 2dp
+sensitivity_table3,tab:sensitivity,gamma_lo_s30,0.51,K827v3-sens,0.5105,YES,rounded 2dp
+sensitivity_table3,tab:sensitivity,gamma_lo_s50,0.36,K827v3-sens,0.3605,YES,rounded 2dp
+sensitivity_table3,tab:sensitivity,gamma_baseline_s10,0.52,K827v3-sens,0.5156,YES,rounded 2dp
+sensitivity_table3,tab:sensitivity,gamma_baseline_s30,0.47,K827v3-sens,0.4656,YES,rounded 2dp
+sensitivity_table3,tab:sensitivity,gamma_baseline_s50,0.32,K827v3-sens,0.3208,YES,rounded 2dp
+sensitivity_table3,tab:sensitivity,gamma_hi_s10,0.48,K827v3-sens,0.4813,YES,rounded 2dp
+sensitivity_table3,tab:sensitivity,gamma_hi_s30,0.41,K827v3-sens,0.4096,YES,rounded 2dp
+sensitivity_table3,tab:sensitivity,gamma_hi_s50,0.31,K827v3-sens,0.3134,YES,rounded 2dp
+sensitivity_table3,tab:sensitivity,kappa_lo_s10,0.45,K827v3-sens,0.4517,YES,rounded 2dp
+sensitivity_table3,tab:sensitivity,kappa_lo_s30,0.48,K827v3-sens,0.4807,YES,rounded 2dp
+sensitivity_table3,tab:sensitivity,kappa_lo_s50,0.32,K827v3-sens,0.3195,YES,rounded 2dp
+sensitivity_table3,tab:sensitivity,kappa_baseline_s10,0.49,K827v3-sens,0.4879,YES,rounded 2dp
+sensitivity_table3,tab:sensitivity,kappa_baseline_s30,0.47,K827v3-sens,0.4658,YES,rounded 2dp
+sensitivity_table3,tab:sensitivity,kappa_baseline_s50,0.34,K827v3-sens,0.3364,YES,rounded 2dp
+sensitivity_table3,tab:sensitivity,kappa_hi_s10,0.51,K827v3-sens,0.5098,YES,rounded 2dp
+sensitivity_table3,tab:sensitivity,kappa_hi_s30,0.44,K827v3-sens,0.4415,YES,rounded 2dp
+sensitivity_table3,tab:sensitivity,kappa_hi_s50,0.32,K827v3-sens,0.3184,YES,rounded 2dp
+sensitivity_text,sec:sensitivity,lambda_sharpe_range_50pct,0.21,K827v3-derived,0.2065,YES,computed=0.4334-0.2269=0.2065
+sensitivity_text,sec:sensitivity,gamma_sharpe_range_50pct,0.05,K827v3-derived,0.0471,YES,computed=0.3605-0.3134=0.0471
+sensitivity_text,sec:sensitivity,kappa_sharpe_range_50pct,0.02,K827v3-derived,0.0169,YES,computed=0.3364-0.3184=0.0169
+threshold_region,tab:sensitivity,lambda_lo_threshold,>50%,K827v3-ts,>50%,YES
+threshold_region,tab:sensitivity,lambda_baseline_threshold,>50%,K827v3-ts,>50%,YES
+threshold_region,tab:sensitivity,lambda_hi_threshold,30-50%,K827v3-ts,30-50%,YES
+threshold_region,tab:sensitivity,gamma_lo_threshold,>50%,K827v3-ts,>50%,YES
+threshold_region,tab:sensitivity,gamma_baseline_threshold,>50%,K827v3-ts,30-50%,DIVERGE,paper claims >50% but computed shows 30-50% (deg@50%=37.8%>30%)
+threshold_region,tab:sensitivity,gamma_hi_threshold,>50%,K827v3-ts,30-50%,DIVERGE,paper claims >50% but computed shows 30-50% (deg@50%=34.9%>30%)
+threshold_region,tab:sensitivity,kappa_lo_threshold,>50%,K827v3-ts,>50%,YES
+threshold_region,tab:sensitivity,kappa_baseline_threshold,>50%,K827v3-ts,30-50%,DIVERGE,paper claims >50% but computed shows 30-50% (deg@50%=31.0%>30%)
+threshold_region,tab:sensitivity,kappa_hi_threshold,>50%,K827v3-ts,30-50%,DIVERGE,paper claims >50% but computed shows 30-50% (deg@50%=37.5%>30%)
+summary_text,sec:sensitivity,n_above50_threshold,8 of 9,K827v3-derived,4 of 9,DIVERGE,paper=8/9 above 50%; computed=only 4/9 are truly >50% (5 are 30-50%)
+design_validation,sec:validation,scaled_threshold,30-50%,K827v3-design,design description only,NO_SOURCE,mentioned in text; not computed from K827v3 (K827v2 design comparison)
+design_validation,sec:validation,fixed_sharpe_30pct,0.47,K827v3-30%,0.4664,YES,consistent
+design_validation,sec:validation,fixed_sharpe_50pct,0.34,K827v3-50%,0.3357,YES,consistent
+design_validation,sec:validation,scaled_sharpe_30pct,0.43,K827v2,NOT_CHECKED,NO_SOURCE,K827v2 results not audited
+design_validation,sec:validation,scaled_sharpe_50pct,0.18,K827v2,NOT_CHECKED,NO_SOURCE,K827v2 results not audited
+seed_scheme,simulation,seed_formula,vt_frac*100000+sim_idx+42,K827v3-code,int(vt_frac*100000)+sim_idx+42,YES,fixed seed per simulation
+seed_scheme,bootstrap,bootstrap_seed,12345,K827v3-code,12345,YES,fixed global bootstrap seed

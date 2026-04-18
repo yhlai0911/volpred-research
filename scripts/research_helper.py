@@ -54,11 +54,7 @@ def record_finding(
         phase=phase,
     )
 
-    # 4. Sync to frontend
-    feed_path = Path("storage/reports/feed.json")
-    for dst in ["frontend/public/data/feed.json", "frontend/public/data/reports/feed.json"]:
-        p = Path(dst)
-        p.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(feed_path, p)
+    # 4. Frontend local JSON sync — REMOVED 2026-04-18
+    # frontend-v2-fix 走 Supabase API；publish_milestone 已自動 sync 到 articles 表。
 
     print(f"📢 {title}")

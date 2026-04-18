@@ -89,30 +89,12 @@ def record_and_publish(
                 report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False, default=str))
     print(f"✓ feed published (via Publisher — correct format)")
 
-    # 4. Sync to ALL frontend data locations
+    # 4. Frontend local JSON sync — REMOVED 2026-04-18
+    # 前端 (frontend-v2-fix) 現在走 Supabase REST API，不讀本地 JSON。
+    # Publisher.publish_milestone 已觸發 _sync_to_remote（supabase_sync.sync_article），
+    # 所以上面 publish_milestone(...) 那步就已同步到 Supabase articles 表。
     storage = Path("storage")
     feed_path = storage / "reports" / "feed.json"
-
-    # Sync feed.json to all 3 frontend locations
-    for dst in [
-        "frontend/data/feed.json",
-        "frontend/public/data/feed.json",
-        "frontend/public/data/reports/feed.json",
-    ]:
-        dst_path = Path(dst)
-        if dst_path.parent.exists():
-            shutil.copy2(feed_path, dst_path)
-
-    # Sync individual report file to all locations
-    if report_id:
-        src_report = Path(f"storage/reports/{report_id}.json")
-        if src_report.exists():
-            for dst_dir in ["frontend/data/reports", "frontend/public/data/reports"]:
-                dst_path = Path(dst_dir)
-                if dst_path.exists():
-                    shutil.copy2(src_report, dst_path / f"{report_id}.json")
-
-    print(f"✓ frontend synced (data/ + public/data/)")
 
     # 5. Sync to Zeabur via API (no redeploy needed)
     import json as json_mod

@@ -1,0 +1,240 @@
+location,context,number,unit,likely_source_K
+abstract,Spearman rho equity-type gamma vs trend_beta,0.886,correlation,K799/K902
+abstract,p-value equity-type rho,0.019,p-value,K799/K902
+abstract,OOS rho gamma 2010-2017 predicting 2018-2026,0.821,correlation,unknown
+abstract,diverse-asset rho (12 assets),−0.448,correlation,unknown
+abstract,diverse-asset p-value,0.14,p-value,unknown
+abstract,MDD-base_vol Spearman rho,0.944,correlation,unknown
+abstract,c2c Sharpe global portfolio,1.61,Sharpe ratio,unknown
+abstract,c2c t-stat global portfolio,4.31,t-statistic,unknown
+abstract,global portfolio MDD,−8.4,percent,unknown
+abstract,c2c alpha capturable (78% NOT capturable),78,percent,unknown
+intro/contrib1,HAC t-stat gold inverted leverage,−5.79,t-statistic,K799/K902
+intro/contrib1,p-value gold inverted leverage,0.001,p-value,K799/K902
+intro/contrib1,pct quarterly windows gold negative gamma,93,percent,K799/K902
+intro/contrib1,regime diff t-stat gold,−4.71,t-statistic,unknown
+intro/contrib1,p-value regime diff gold,0.0001,p-value,unknown
+intro/contrib1,DM comparisons correctly classified,12,count,K799/K802/K902
+intro/contrib2,equity-type Spearman rho (6 assets),0.886,correlation,K799/K902
+intro/contrib2,equity-type rho p-value,0.019,p-value,K799/K902
+intro/contrib2,OOS rho 2010-2017 to 2018-2026,0.821,correlation,unknown
+intro/contrib2,diverse-asset Spearman rho (12 assets),−0.448,correlation,unknown
+intro/contrib2,diverse-asset p-value,0.14,p-value,unknown
+intro/contrib2,MDD-base_vol rho,0.944,correlation,unknown
+intro/contrib3,Hong Kong c2c t-stat,4.12,t-statistic,unknown
+intro/contrib3,Australia c2c t-stat,4.04,t-statistic,unknown
+intro/contrib3,Singapore c2c t-stat,4.03,t-statistic,unknown
+intro/contrib3,Korea c2c t-stat,3.83,t-statistic,unknown
+intro/contrib3,Taiwan c2c t-stat,3.75,t-statistic,unknown
+intro/contrib3,Japan c2c t-stat,3.69,t-statistic,unknown
+intro/contrib3,global portfolio c2c Sharpe,1.61,Sharpe ratio,unknown
+intro/contrib3,global portfolio c2c t-stat,4.31,t-statistic,unknown
+intro/contrib3,global portfolio MDD,−8.4,percent,unknown
+intro/contrib3,pct c2c alpha not capturable (o2o),78,percent,unknown
+Table1/SPY,mean return,0.063,percent,K902
+Table1/SPY,std dev,1.16,percent,K902
+Table1/SPY,skewness,−0.32,dimensionless,K902
+Table1/SPY,excess kurtosis,14.6,dimensionless,K902
+Table1/SPY,minimum return,−10.9,percent,K902
+Table1/SPY,maximum return,10.5,percent,K902
+Table1/SPY,N,2260,count,K902
+Table1/QQQ,mean return,0.086,percent,K902
+Table1/QQQ,std dev,1.45,percent,K902
+Table1/QQQ,skewness,−0.19,dimensionless,K902
+Table1/QQQ,excess kurtosis,7.6,dimensionless,K902
+Table1/QQQ,minimum,−12.0,percent,K902
+Table1/QQQ,maximum,12.0,percent,K902
+Table1/QQQ,N,2260,count,K902
+Table1/EEM,mean,0.036,percent,K902
+Table1/EEM,std,1.27,percent,K902
+Table1/EEM,skewness,−0.57,dimensionless,K902
+Table1/EEM,kurtosis,9.9,dimensionless,K902
+Table1/EEM,min,−12.5,percent,K902
+Table1/EEM,max,8.1,percent,K902
+Table1/EEM,N,2260,count,K902
+Table1/GLD,mean,0.061,percent,K902
+Table1/GLD,std,0.92,percent,K902
+Table1/GLD,skewness,−0.30,dimensionless,K902
+Table1/GLD,kurtosis,3.5,dimensionless,K902
+Table1/GLD,min,−6.4,percent,K902
+Table1/GLD,max,4.9,percent,K902
+Table1/GLD,N,2260,count,K902
+Table1/TLT,mean,0.002,percent,K902
+Table1/TLT,std,0.96,percent,K902
+Table1/TLT,skewness,0.15,dimensionless,K902
+Table1/TLT,kurtosis,5.1,dimensionless,K902
+Table1/TLT,min,−6.7,percent,K902
+Table1/TLT,max,7.5,percent,K902
+Table1/TLT,N,2260,count,K902
+Table1/BTC,mean,0.202,percent,K902
+Table1/BTC,std,3.61,percent,K902
+Table1/BTC,skewness,−0.03,dimensionless,K902
+Table1/BTC,kurtosis,7.7,dimensionless,K902
+Table1/BTC,min,−37.2,percent,K902
+Table1/BTC,max,25.2,percent,K902
+Table1/BTC,N,3285,count,K902
+Table1/SLV,mean,0.082,percent,unknown
+Table1/SLV,std,1.76,percent,unknown
+Table1/SLV,skewness,−0.13,dimensionless,unknown
+Table1/SLV,kurtosis,5.8,dimensionless,unknown
+Table1/SLV,min,−13.6,percent,unknown
+Table1/SLV,max,9.1,percent,unknown
+Table1/SLV,N,2260,count,unknown
+Table2/SPY,mean gamma,+0.211,dimensionless,K799/K902
+Table2/SPY,std gamma,0.044,dimensionless,K799/K902
+Table2/SPY,pct negative,0,percent,K799/K902
+Table2/SPY,HAC t-stat,+8.30,t-statistic,K799/K902
+Table2/QQQ,mean gamma,+0.110,dimensionless,K902
+Table2/QQQ,std gamma,0.072,dimensionless,K902
+Table2/QQQ,pct negative,12,percent,K902
+Table2/QQQ,HAC t-stat,+3.21,t-statistic,K902
+Table2/EEM,mean gamma,+0.180,dimensionless,K902
+Table2/EEM,std gamma,0.095,dimensionless,K902
+Table2/EEM,pct negative,8,percent,K902
+Table2/EEM,HAC t-stat,+4.12,t-statistic,K902
+Table2/GLD,mean gamma,−0.067,dimensionless,K799/K902
+Table2/GLD,std gamma,0.044,dimensionless,K799/K902
+Table2/GLD,pct negative,93,percent,K799/K902
+Table2/GLD,HAC t-stat,−5.79,t-statistic,K799
+Table2/TLT,mean gamma,−0.008,dimensionless,K902
+Table2/TLT,std gamma,0.048,dimensionless,K902
+Table2/TLT,pct negative,52,percent,K902
+Table2/TLT,HAC t-stat,−0.34,t-statistic,K902
+Table2/BTC,mean gamma,+0.117,dimensionless,K902
+Table2/BTC,std gamma,0.136,dimensionless,K902
+Table2/BTC,pct negative,28,percent,K902
+Table2/BTC,HAC t-stat,+1.83,t-statistic,K902
+Table2/SLV,mean gamma,−0.041,dimensionless,unknown
+Table2/SLV,std gamma,0.058,dimensionless,unknown
+Table2/SLV,pct negative,72,percent,unknown
+Table2/SLV,HAC t-stat,−2.91,t-statistic,unknown
+Table3/SPY_2023-24,GARCH QLIKE,−8.985,quasi-LL,K799/K902
+Table3/SPY_2023-24,GJR QLIKE,−9.034,quasi-LL,K799/K902
+Table3/SPY_2023-24,delta pct,−0.54,percent,K799/K902
+Table3/SPY_2023-24,DM p-value,0.001,p-value,K802
+Table3/SPY_2025,GARCH QLIKE,−8.719,quasi-LL,K902
+Table3/SPY_2025,GJR QLIKE,−8.818,quasi-LL,K902
+Table3/SPY_2025,delta pct,−1.13,percent,K902
+Table3/SPY_2025,DM p-value,0.029,p-value,K902
+Table3/QQQ_2023-24,GARCH QLIKE,−8.554,quasi-LL,K902
+Table3/QQQ_2023-24,GJR QLIKE,−8.475,quasi-LL,K902
+Table3/QQQ_2023-24,delta pct,+0.92,percent,K902
+Table3/QQQ_2023-24,DM p-value,0.067,p-value,K902
+Table3/QQQ_2025,GARCH QLIKE,−8.367,quasi-LL,K902
+Table3/QQQ_2025,GJR QLIKE,−8.454,quasi-LL,K902
+Table3/QQQ_2025,delta pct,−1.04,percent,K902
+Table3/QQQ_2025,DM p-value,0.023,p-value,K902
+Table3/GLD_2023-24,GARCH QLIKE,−9.058,quasi-LL,K902
+Table3/GLD_2023-24,GJR QLIKE,−9.065,quasi-LL,K902
+Table3/GLD_2023-24,delta pct,−0.07,percent,K902
+Table3/GLD_2023-24,DM p-value,0.871,p-value,K902
+Table3/GLD_2025,GARCH QLIKE,−8.637,quasi-LL,K902
+Table3/GLD_2025,GJR QLIKE,−8.633,quasi-LL,K902
+Table3/GLD_2025,delta pct,+0.05,percent,K902
+Table3/GLD_2025,DM p-value,0.350,p-value,K902
+Table3/TLT_2023-24,GARCH QLIKE,−9.169,quasi-LL,K902
+Table3/TLT_2023-24,GJR QLIKE,−9.170,quasi-LL,K902
+Table3/TLT_2023-24,delta pct,−0.01,percent,K902
+Table3/TLT_2023-24,DM p-value,0.104,p-value,K902
+Table3/EEM_2023-24,GARCH QLIKE,−8.867,quasi-LL,K902
+Table3/EEM_2023-24,GJR QLIKE,−8.889,quasi-LL,K902
+Table3/EEM_2023-24,delta pct,−0.25,percent,K902
+Table3/EEM_2023-24,DM p-value,0.156,p-value,K902
+Table3/BTC_2023-24,GARCH QLIKE,−6.871,quasi-LL,K902
+Table3/BTC_2023-24,GJR QLIKE,−6.881,quasi-LL,K902
+Table3/BTC_2023-24,delta pct,−0.14,percent,K902
+Table3/BTC_2023-24,DM p-value,0.293,p-value,K902
+Table4/VaR_attr,Normal violations,33,count,unknown (KB only)
+Table4/VaR_attr,Normal rate,2.2,percent,unknown (KB only)
+Table4/VaR_attr,Student-t(5) violations,18,count,unknown (KB only)
+Table4/VaR_attr,Student-t(5) rate,1.2,percent,unknown (KB only)
+Table4/VaR_attr,Student-t improvement,-45.5,percent,unknown (KB only)
+Table4/VaR_attr,Adaptive violations,14,count,unknown (KB only)
+Table4/VaR_attr,Adaptive rate,0.9,percent,unknown (KB only)
+Table4/VaR_attr,Jump violations,14,count,unknown (KB only)
+Table5/VaR_ortho/GARCH_Normal,violations,7,count,K799
+Table5/VaR_ortho/GARCH_Normal,violation rate,1.39,percent,K799
+Table5/VaR_ortho/GARCH_Normal,Kupiec p,0.40,p-value,K799
+Table5/VaR_ortho/GJR_Normal,violations,10,count,K799
+Table5/VaR_ortho/GJR_Normal,violation rate,1.99,percent,K799
+Table5/VaR_ortho/GJR_Normal,Kupiec p,0.049,p-value,K799
+Table5/VaR_ortho/GJR_StudentT,violations,6,count,K802
+Table5/VaR_ortho/GJR_StudentT,violation rate,1.20,percent,K802
+Table5/VaR_ortho/GJR_StudentT,Kupiec p,0.60,p-value,K802
+Table6/VaR_panel,Skewed-t pass rate,76.2% (16/21),percent,unknown
+Table6/VaR_panel,FHS pass rate,76.2% (16/21),percent,unknown
+Table6/VaR_panel,CF-VaR pass rate,66.7% (14/21),percent,unknown
+Table6/VaR_panel,Student-t(5) pass rate,57.1% (12/21),percent,unknown
+Table6/VaR_panel,Normal pass rate,57.1% (12/21),percent,unknown
+Table7/VT_cross_asset/SPY,BH Sharpe,0.82,Sharpe ratio,K799
+Table7/VT_cross_asset/SPY,VT Sharpe,0.85,Sharpe ratio,K799
+Table7/VT_cross_asset/SPY,BH MaxDD,−33.7,percent,K799
+Table7/VT_cross_asset/SPY,VT MaxDD,−14.8,percent,K799
+Table7/VT_cross_asset/GLD,BH Sharpe,1.56,Sharpe ratio,unknown
+Table7/VT_cross_asset/GLD,VT Sharpe,1.71,Sharpe ratio,unknown
+Table7/VT_cross_asset/GLD,BH MaxDD,−25.1,percent,unknown
+Table7/VT_cross_asset/GLD,VT MaxDD,−13.4,percent,unknown
+Table7/VT_cross_asset/TLT,BH Sharpe,0.02,Sharpe ratio,unknown
+Table7/VT_cross_asset/TLT,VT Sharpe,0.33,Sharpe ratio,unknown
+Table7/VT_cross_asset/TLT,BH MaxDD,−43.8,percent,unknown
+Table7/VT_cross_asset/TLT,VT MaxDD,−30.7,percent,unknown
+Table7/VT_cross_asset/EEM,BH Sharpe,0.42,Sharpe ratio,unknown
+Table7/VT_cross_asset/EEM,VT Sharpe,0.45,Sharpe ratio,unknown
+Table7/VT_cross_asset/EEM,BH MaxDD,−38.2,percent,unknown
+Table7/VT_cross_asset/EEM,VT MaxDD,−21.5,percent,unknown
+Table7/VT_cross_asset/BTC,BH Sharpe,0.43,Sharpe ratio,unknown
+Table7/VT_cross_asset/BTC,VT Sharpe,0.60,Sharpe ratio,unknown
+Table7/VT_cross_asset/BTC,BH MaxDD,−76.6,percent,unknown
+Table7/VT_cross_asset/BTC,VT MaxDD,−21.3,percent,unknown
+Table8/window_robustness/SPY_2020-21,w=504 QLIKE,−8.051,quasi-LL,unknown
+Table8/window_robustness/SPY_2023-24,w=5000 QLIKE (best),−8.682,quasi-LL,unknown
+Table8/window_robustness/SPY_2025-26,w=5000 QLIKE (best),−8.457,quasi-LL,unknown
+Table9/hybrid_VT,Hybrid VT Sharpe,0.99,Sharpe ratio,KB (Kill Test #3)
+Table9/hybrid_VT,Hybrid VT MaxDD,−11.4,percent,KB (Kill Test #3)
+Table9/hybrid_VT,RV20 VT Sharpe,0.83,Sharpe ratio,KB (Kill Test #3)
+Table9/hybrid_VT,GARCH VT Sharpe,0.82,Sharpe ratio,KB (Kill Test #3)
+Table9/hybrid_VT,EWMA VT Sharpe,0.79,Sharpe ratio,KB (Kill Test #3)
+Table9/hybrid_VT,BH Sharpe,0.75,Sharpe ratio,KB (Kill Test #3)
+Table10/amplify,SPY ETF gamma,0.211,dimensionless,K799/K824v2/K902
+Table10/amplify,SPY avg stock gamma,0.076,dimensionless,KB
+Table10/amplify,SPY ratio,2.8x,dimensionless,K799/KB
+Table10/amplify,SPY t-stat,−16.92,t-statistic,KB
+Table11/tail_risk/SPY,ES 1pct,−4.68,percent,unknown
+Table11/tail_risk/SPY,ES 5pct,−2.69,percent,unknown
+Table11/tail_risk/SPY,worst single day,−11.59,percent,unknown
+Table11/tail_risk/SPY,worst 5-day,−19.81,percent,unknown
+Table11/tail_risk/SPY,excess kurtosis BH,14.71,dimensionless,unknown
+Table11/tail_risk/SPY,skewness BH,−0.583,dimensionless,unknown
+Table12/gamma_mechanism/SPY,gamma,+0.211,dimensionless,K799/K902
+Table12/gamma_mechanism/SPY,beta_trend,+0.109,dimensionless,unknown
+Table12/gamma_mechanism/SPY,t-stat,18.0,t-statistic,unknown
+Table12/gamma_mechanism/GLD,gamma,−0.088,dimensionless,K799/K902
+Table12/gamma_mechanism/GLD,beta_trend,−0.055,dimensionless,unknown
+Table12/gamma_mechanism/GLD,t-stat,−11.8,t-statistic,unknown
+Table12/gamma_mechanism,Spearman rho,1.000,correlation,KB
+Table12/gamma_mechanism,Pearson r,0.993,correlation,KB
+Sec4.7/HM_test,gamma_HM,−0.035,regression coeff,body.tex Sec4.7
+Sec4.7/HM_test,t-stat,−0.39,t-statistic,body.tex Sec4.7
+Sec4.7/HM_test,p-value,0.70,p-value,body.tex Sec4.7
+Sec4.7/TM_test,gamma_TM,0.094,regression coeff,body.tex Sec4.7
+Sec4.7/TM_test,t-stat,0.19,t-statistic,body.tex Sec4.7
+Sec4.7/TM_test,p-value,0.85,p-value,body.tex Sec4.7
+Sec5.4/HM_test,alpha annualized,5.77,percent,body.tex Sec5.4
+Sec5.4/HM_test,alpha t-stat,3.99,t-statistic,body.tex Sec5.4
+Sec5.4/HM_test,gamma_HM,−0.043,regression coeff,body.tex Sec5.4
+Sec5.4/HM_test,gamma_HM t-stat,−4.06,t-statistic,body.tex Sec5.4
+Sec5.4/VT_perf,MaxDD BH,−33.7,percent,K799/KB
+Sec5.4/VT_perf,MaxDD VT,−11.4,percent,K799/KB
+AppxB/TZ_momentum/Taiwan,c2c Sharpe,1.62,Sharpe ratio,unknown
+AppxB/TZ_momentum/Taiwan,o2o Sharpe,0.87,Sharpe ratio,unknown
+AppxB/TZ_momentum/Taiwan,c2c t-stat,3.75,t-statistic,unknown
+AppxB/TZ_momentum/Taiwan,MDD,−9.5,percent,unknown
+AppxB/TZ_momentum/Japan,c2c Sharpe,1.23,Sharpe ratio,unknown
+AppxB/TZ_momentum/Japan,o2o Sharpe,0.78,Sharpe ratio,unknown
+AppxB/TZ_momentum/Japan,c2c t-stat,3.69,t-statistic,unknown
+AppxB/TZ_momentum/HK,c2c Sharpe,1.53,Sharpe ratio,unknown
+AppxB/TZ_momentum/HK,c2c t-stat,4.12,t-statistic,unknown
+AppxB/TZ_momentum/HK,MDD,−14.2,percent,unknown
+AppxB/global_portfolio,c2c Sharpe,1.61,Sharpe ratio,unknown
+AppxB/global_portfolio,c2c t-stat,4.31,t-statistic,unknown
+AppxB/global_portfolio,MDD,−8.4,percent,unknown

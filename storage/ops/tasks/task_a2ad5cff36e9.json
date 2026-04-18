@@ -1,0 +1,140 @@
+{
+  "id": "task_a2ad5cff36e9",
+  "title": "Paper 4 (vix-sufficiency) reproducibility audit: scripts/JSON 與 main_v2.tex body 數字比對",
+  "description": "用戶 2026-04-17 強化規則：『所有論文中的腳本和資料都要能直接跑出最新的論文內結果』。Paper 4 (paper/vix-sufficiency/) 剛整合 9 個新實驗 (K1135/K1137/K1138/K1139/K1143 等)，需先對此 paper 做 audit。\n\nScope（只做 Paper 4，不展開到其他 10 papers）：\n(1) 列 paper/vix-sufficiency/main_v2.tex 所有 Table/Figure/inline 結果的具體數字\n(2) 找出對應的 experiments/kXXX/ JSON 或 paper/vix-sufficiency/scripts/ output\n(3) 輸出 diff report（markdown 檔：paper/vix-sufficiency/reproduce_report_2026-04-18.md），分類成：\n    - matched（數字一致）\n    - approx（誤差 <0.5%，記誤差值）\n    - divergent（不一致，標註原因與幅度）\n(4) 對 divergent case：不要自己改 .tex（論文寫作只能 supervisor 做）。只標 (a)/(b)/(c) 三選一建議。\n\n硬規則：\n- 不改 paper/vix-sufficiency/main_v2.tex（supervisor 專屬）\n- 不 commit，只產 reproduce_report_2026-04-18.md\n- 不要跑新 experiment（純數字對照）\n- 遇資料缺失標 MISSING，不要偽造\n\n完成後用 ops finish-task 回報，signal_payload 列 matched/approx/divergent count。",
+  "source": "user",
+  "task_family": "review",
+  "priority": 50,
+  "preferred_agent": "codex",
+  "fallback_allowed": false,
+  "approval_mode": "auto",
+  "risk_level": "safe",
+  "status": "succeeded",
+  "payload": {},
+  "parent_task_id": null,
+  "created_by": "claude-supervisor",
+  "session_id": "codex-worker:84101",
+  "rollback_point_id": "codex-worker_session_20260418T044812Z_84101",
+  "public_effect": "none",
+  "brief_status": "ready",
+  "brief_payload": {
+    "generated_at": "2026-04-18T04:49:27.329930+00:00",
+    "source_type": "supervisor",
+    "template_id": null,
+    "template_hash": null,
+    "coordinator_run_id": "supervisor_claude-supervisor_a6da8c59",
+    "task_summary": "Paper 4 (vix-sufficiency) reproducibility audit — diff between main_v2.tex body numbers and scripts/experiments JSON outputs.",
+    "goal": "產出 paper/vix-sufficiency/reproduce_report_2026-04-18.md：列出 main_v2.tex 所有 Table/Figure/inline 數字、對應 experiments/kXXX/ 或 paper/vix-sufficiency/scripts/ 輸出、分類 matched/approx/divergent，對 divergent case 提出 (a) 修腳本 / (b) 修論文 / (c) 標 errata 三選一建議。",
+    "success_criteria": [
+      "新增檔案 paper/vix-sufficiency/reproduce_report_2026-04-18.md 存在，containing sections: Summary, Matched, Approx (<0.5%), Divergent, Suggested Actions",
+      "Summary 含 matched/approx/divergent count 與總數（signal_payload 回報同組數字）",
+      "每個 divergent case 標註 (a)/(b)/(c) 建議，不自行改 .tex",
+      "不 commit、不改 main_v2.tex、不跑新 experiment"
+    ],
+    "repo_root": "/Users/yhlai0911/Desktop/volpred-research",
+    "required_files": [
+      "paper/vix-sufficiency/main_v2.tex",
+      "paper/vix-sufficiency/reproduce.py",
+      "paper/vix-sufficiency/reproduce_report.json",
+      "paper/vix-sufficiency/experiments.md",
+      "paper/vix-sufficiency/scripts"
+    ],
+    "recommended_files": [
+      "paper/vix-sufficiency/README.md",
+      "paper/vix-sufficiency/data_sources.md",
+      "paper/vix-sufficiency/results",
+      "paper/vix-sufficiency/figures"
+    ],
+    "forbidden_large_files": [
+      "storage/reports/feed.json",
+      "storage/memory/knowledge.json"
+    ],
+    "relevant_commands": [
+      "cd paper/vix-sufficiency && python reproduce.py (只有當需要重跑數字時才跑；不改 seed)",
+      "uv run volpred ops finish-task <task_id> --session-key codex-worker --actor codex-worker --signal-json <path>"
+    ],
+    "prior_findings": [
+      "用戶 2026-04-17 硬規則：所有論文中的腳本和資料要能直接跑出論文內結果，divergent 必須走 (a)/(b)/(c) 三選一決策，禁止靜默保留不一致。",
+      "Paper 4 近期整合 K1135/K1137/K1138/K1139/K1143 等 9 個新實驗，main_v2.tex 為當前主 body。",
+      "supervisor 專屬：論文 .tex 寫作只能 supervisor 做；worker 只出 diff report，不改 tex。",
+      "CLAUDE.md 明文：reconstruction 未能 allclose 還原舊 JSON → 必須走 (a)(b)(c) 其一決策，不可靜默 commit divergent 狀態。"
+    ],
+    "rollback_point_id": null,
+    "why_this_agent": "codex-worker 擅長 code/numeric diff 與 script audit；review 家族且無破壞性，auto approval 可直接跑。Claude-worker 同時段可優先做 research/content 任務。"
+  },
+  "claimed_by": "codex",
+  "claimed_by_session_key": "codex-worker",
+  "claimed_by_role": "worker",
+  "claimed_at": "2026-04-18T04:48:40.115531+00:00",
+  "started_at": null,
+  "finished_at": "2026-04-18T04:58:27.179466+00:00",
+  "approved_by": null,
+  "approved_at": null,
+  "rejected_by": null,
+  "rejected_at": null,
+  "result_summary": "Paper 4 audit done: report created at paper/vix-sufficiency/reproduce_report_2026-04-18.md; main issues are K745 sign reversal, Table 6 era mismatches, mixed-period Table 3 benchmarking, and unmapped Table 2/Table 10 outputs.",
+  "signal_payload": {
+    "summary_text": "Paper 4 main_v2 reproducibility audit completed: structured corpus 69 matched / 0 approx / 9 divergent / 1 missing, with extra unmapped Table 2 fields and a Table 10 source-label gap noted in the report.",
+    "null_result": false,
+    "knowledge_candidates": [
+      {
+        "topic": "paper4_main_v2_reproducibility_audit_2026_04_18",
+        "one_line_finding": "Paper 4 main_v2.tex is mostly reproducible against stored JSON outputs, but K745's 41.8% claim is sign-reversed, Table 6 understates era exceptions, Table 3 mixes sample periods, and Table 2/Table 10 still have unmapped canonical outputs.",
+        "evidence_paths": [
+          "paper/vix-sufficiency/reproduce_report_2026-04-18.md",
+          "paper/vix-sufficiency/experiments/k745_pilot_har_rv_results.json",
+          "paper/vix-sufficiency/experiments/k752_vix_sufficiency_eras_results.json",
+          "experiments/k507/k507_dynamic_allocation_results.json"
+        ],
+        "confidence": "strong",
+        "codex_reviewed": true
+      }
+    ],
+    "experience_candidates": [
+      {
+        "lesson": "Reproducibility audit should treat stored experiment JSON outputs as canonical before manually recomputing derived statistics; otherwise sample-vs-population CV and raw-score-vs-total-score confusion creates false positives.",
+        "context": "Paper 4 main_v2 audit: K752 CV=0.3309 and K780 total_score=1.9407/1.6257 matched the paper even though an older manual audit flagged them."
+      },
+      {
+        "lesson": "A numerically traceable table can still be methodologically invalid if rows mix different experiments or sample windows.",
+        "context": "Paper 4 Table 3 uses K507 for BH 50/50 (2005-2026) and K731 for 12/VIX, so the ranking claim is not a fair same-window comparison."
+      }
+    ],
+    "followup_task_candidates": [
+      {
+        "title": "Supervisor patch Paper 4 main_v2.tex using reproduce_report_2026-04-18.md",
+        "priority": "P3",
+        "preferred_family": "review"
+      },
+      {
+        "title": "Expose canonical Table 2 intermediate outputs in K732 and K736 result JSONs so paper rows are directly reproducible",
+        "priority": "P3",
+        "preferred_family": "code"
+      },
+      {
+        "title": "Create a canonical SPY/GLD insurance output or relabel Table 10 as cross-asset summary before submission",
+        "priority": "P3",
+        "preferred_family": "review"
+      }
+    ],
+    "doc_update_needed": [
+      "paper/vix-sufficiency/main_v2.tex"
+    ],
+    "frontend_impact": {
+      "pipeline": "none",
+      "requires_sync": false
+    }
+  },
+  "curated_by": "claude-supervisor",
+  "curated_at": "2026-04-18T06:09:28.274824+00:00",
+  "curated_promoted": [
+    "knowledge.json",
+    "experiment_experiences.json",
+    "storage/ops/tasks/task_a683510edfc3",
+    "docs/project_improvement_status.md"
+  ],
+  "curated_notes": "Paper 4 audit curate 2026-04-18: knowledge PAPER4_AUDIT item_id=2baed83f, experience E076/E077, materialized code followup task_a683510edfc3. Supervisor-only patches (K745 sign, Table 6 era cells, Table 3 mixed-window, Table 10 label) 落到 docs/project_improvement_status.md 待 supervisor narrative patch window.",
+  "last_error": null,
+  "created_at": "2026-04-18T04:45:03.481746+00:00",
+  "updated_at": "2026-04-18T06:09:28.274824+00:00"
+}

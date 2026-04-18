@@ -883,29 +883,11 @@ def main():
         except Exception as e:
             print(f"  Daily recommendation article failed: {e}")
 
-    # --- Sync static data ---
-    storage = Path("storage")
-    pub_data = Path("frontend/public/data")
-    pub_data.mkdir(parents=True, exist_ok=True)
-    for src, dst in [
-        ("memory/research_log.json", "research_log.json"),
-        ("memory/knowledge.json", "knowledge.json"),
-        ("memory/experiments.json", "experiments.json"),
-        ("memory/thinking_journal.json", "thinking_journal.json"),
-        ("memory/open_questions.json", "open_questions.json"),
-        ("reports/feed.json", "feed.json"),
-    ]:
-        s = storage / src
-        if s.exists():
-            shutil.copy2(s, pub_data / dst)
-    (pub_data / "reports").mkdir(exist_ok=True)
-    for f in (storage / "reports").glob("*.json"):
-        shutil.copy2(f, pub_data / "reports" / f.name)
-    # Sort feed
-    fp = pub_data / "feed.json"
-    feed = json.loads(fp.read_text())
-    feed.sort(key=lambda x: x.get("published_at") or "", reverse=True)
-    fp.write_text(json.dumps(feed, indent=2, ensure_ascii=False, default=str))
+    # --- Static data sync (REMOVED 2026-04-18) ---
+    # 舊版把 storage/ 複製到 frontend/public/data/ 供本地 JSON 讀取。
+    # 現在前端 (frontend-v2-fix) 完全走 Supabase REST API：
+    #   storage/ → supabase_sync.py → Supabase tables → /api/... routes
+    # 若需要重新啟用本地 JSON，請改寫 frontend-v2-fix/public/data/（不是 legacy frontend/）。
 
     print(f"  Published + synced locally. Feed: {len(feed)} items")
 

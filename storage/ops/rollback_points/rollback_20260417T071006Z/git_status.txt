@@ -1,0 +1,2270 @@
+ M .claude/settings.local.json
+ M .claude/skills/academic-finance-reviewer/assets/jbf_author_guidelines.md
+ M .claude/skills/academic-finance-reviewer/assets/review_rubric_template.md
+ M .claude/skills/academic-finance-reviewer/assets/revision_response_template.md
+ M .claude/skills/academic-finance-reviewer/references/common_rejections.md
+ M .claude/skills/academic-finance-reviewer/references/gmm_best_practices.md
+ M .claude/skills/academic-finance-reviewer/references/hawkes_methodology.md
+ M .claude/skills/academic-finance-reviewer/references/high_frequency_data.md
+ M .claude/skills/academic-finance-reviewer/references/journal_standards.md
+ M .claude/skills/academic-finance-reviewer/references/writing_style_guide.md
+ M .claude/skills/academic-finance-reviewer/scripts/assess_sample_split.py
+ M .claude/skills/academic-finance-reviewer/scripts/check_identification.py
+ M .claude/skills/academic-finance-reviewer/scripts/validate_citation_format.py
+ M .claude/skills/academic-finance-reviewer/scripts/verify_moment_conditions.py
+ M .claude/skills/admin-ops/SKILL.md
+ M .claude/skills/admin-ops/references/architecture.md
+ M .claude/skills/admin-ops/references/deploy-and-runtime.md
+ M .claude/skills/admin-ops/references/governance.md
+ M .claude/skills/admin-ops/references/platform-api-manual.md
+ M .claude/skills/admin-ops/references/scheduling.md
+ M .claude/skills/admin-ops/references/session-cron-workflows.md
+ M .claude/skills/admin-ops/references/surfaces.md
+ M .claude/skills/agent-result-verification/SKILL.md
+ M .claude/skills/autonomous-research/SKILL.md
+ M .claude/skills/autonomous-research/references/add-strategy-guide.md
+ M .claude/skills/autonomous-research/references/agent-brief-template.md
+ M .claude/skills/autonomous-research/references/agent-orchestration.md
+ M .claude/skills/autonomous-research/references/agent-result-template.md
+ M .claude/skills/autonomous-research/references/ai-collaboration.md
+ M .claude/skills/autonomous-research/references/data-timing.md
+ M .claude/skills/autonomous-research/references/experiment-preamble.md
+ M .claude/skills/autonomous-research/references/models.md
+ M .claude/skills/autonomous-research/references/paper-writing-process.md
+ M .claude/skills/autonomous-research/references/publishing-guide.md
+ M .claude/skills/autonomous-research/references/question-review-guide.md
+ M .claude/skills/autonomous-research/references/strategies.md
+ M .claude/skills/autonomous-research/references/strategy-launch-gate.md
+ M .claude/skills/autonomous-research/references/transaction-costs.md
+ M .claude/skills/citation-verifier/SKILL.md
+ M .claude/skills/external-data-sources/SKILL.md
+ M .claude/skills/feed-publisher/SKILL.md
+ M .claude/skills/finance-paper-quality/SKILL.md
+ M .claude/skills/latex-academic-reviewer/SKILL.md
+ M .claude/skills/latex-academic-reviewer/references/review-criteria.md
+ M .claude/skills/member-questions/references/evaluation-guide.md
+ M .claude/skills/member-questions/skill.md
+ M .claude/skills/memory-health/SKILL.md
+ M .claude/skills/paper-review-cycle/SKILL.md
+ M .claude/skills/paper-stage-classifier/SKILL.md
+ M .claude/skills/paper-update/SKILL.md
+ M .claude/skills/publication-candidates/SKILL.md
+ M .claude/skills/taiwan-macro-data/skill.md
+ M .claude/skills/worktree-merge-verification/SKILL.md
+ D .codex-backups/frontend-v2-fix-git-recovery-20260322/gitfile.broken
+ D .codex-backups/pre-egress-20260322/ROLLBACK.md
+ D .codex-backups/pre-egress-20260322/scripts/supabase_sync.py
+ D .codex-backups/pre-egress-batch2-20260322/ROLLBACK.md
+ D .codex-backups/pre-egress-batch3-20260322/ROLLBACK.md
+ D .worktree_tmp_k797.py
+ M .zeaburignore
+ M Dockerfile.frontend
+ M data/vixtwn/vixtwn_daily.csv
+ M docs/architecture.md
+ M docs/error_log.md
+ M docs/paper-guide.md
+ M docs/quick-commands.md
+ M docs/research_archive/completed_phases_2026-03.md
+ D experiments/I1_garch_ohr.py
+ D experiments/I1_garch_ohr_supplemental.py
+ D experiments/K158_wavelet_garch_modwt.py
+ D experiments/K158_wavelet_garch_modwt_results.json
+ D experiments/behavioral_vt_barriers.py
+ D experiments/btc_derivatives_vol.py
+ D experiments/btc_liquidation_abm.py
+ D experiments/btc_var_methods.py
+ D experiments/caviar_results.json
+ D experiments/caviar_test.py
+ D experiments/climate_event_vol.py
+ D experiments/climate_event_vol_results.json
+ D experiments/cross_asset_info_topology.py
+ D experiments/dca_optimal_frequency.py
+ D experiments/decision_model_router.py
+ D experiments/drawdown_duration_analysis.py
+ D experiments/drawdown_duration_results.json
+ D experiments/dynamic_leadlag_network.py
+ D experiments/dynamic_leadlag_network_robustness.py
+ D experiments/economic_sufficiency_frontier.py
+ D experiments/emd_garch_vol.py
+ D experiments/emd_garch_vol_results.json
+ D experiments/entropy_vol_regime.py
+ D experiments/es_backtest_acerbi_szekely.py
+ D experiments/es_backtest_results.json
+ D experiments/garch_midas_results.json
+ D experiments/garch_midas_test.py
+ D experiments/gjr_vs_ewma_crisis.py
+ D experiments/gld_inventory_vol.py
+ D experiments/hawkes_vol_jump.py
+ D experiments/hurst_fingerprint.py
+ D experiments/i0_diagnostics_results.json
+ D experiments/i0_futures_data_diagnostics.py
+ D experiments/i10_vov_hedging_results.json
+ D experiments/i10_vov_state_dependent_hedging.py
+ D experiments/i11_full_panel_daily_garch_hedge.py
+ D experiments/i11_full_panel_results.json
+ D experiments/i12_window_sensitivity_hedge.py
+ D experiments/i12_window_sensitivity_results.json
+ D experiments/i1b_commodity_futures_hedge.py
+ D experiments/i1b_commodity_futures_results.json
+ D experiments/i2_taiwan_futures_hedge.py
+ D experiments/i3_cross_asset_futures_portfolio.py
+ D experiments/i3_cross_asset_futures_results.json
+ D experiments/i3_fixed_hedging_metrics.py
+ D experiments/i3_fixed_results.json
+ D experiments/i5_regime_hedge_ratio.py
+ D experiments/i5_regime_hedge_ratio_results.json
+ D experiments/i6_fixed_hedging_metrics.py
+ D experiments/i6_fixed_results.json
+ D experiments/i6_futures_vs_vt_cost.py
+ D experiments/i6_futures_vs_vt_cost_results.json
+ D experiments/i8_futures_basis_results.json
+ D experiments/i8_futures_basis_vol_predictor.py
+ D experiments/i9_proper_hedging_effectiveness.py
+ D experiments/i9_proper_hedging_results.json
+ D experiments/i9b_proper_rolling_oos_hedge.py
+ D experiments/i9b_proper_rolling_results.json
+ D experiments/jbf_robustness_suite.py
+ D experiments/k142_foundation_ml_vol.py
+ D experiments/k142_foundation_ml_vol_results.json
+ D experiments/k144_mf2_cross_bond.py
+ D experiments/k145_r2_peak_mechanism.py
+ D experiments/k145_r2_peak_mechanism_results.json
+ D experiments/k147_execution_alpha_almgren_chriss.py
+ D experiments/k147_execution_alpha_results.json
+ D experiments/k148_climate_vol.py
+ D experiments/k148_climate_vol_results.json
+ D experiments/k149_regime_icl.py
+ D experiments/k149_regime_icl_results.json
+ D experiments/k150_amihud_fragility.py
+ D experiments/k151_sectoral_vol_dispersion.py
+ D experiments/k151_sectoral_vol_dispersion_results.json
+ D experiments/k152_liquidity_ms_garch.py
+ D experiments/k152_liquidity_ms_garch_results.json
+ D experiments/k153_vix_move_vecm.py
+ D experiments/k154_order_flow_imbalance.py
+ D experiments/k155_entropy_vol.py
+ D experiments/k156_rv_decomposition_pilot.py
+ D experiments/k157_correlation_forecasting.py
+ D experiments/k157_correlation_forecasting_results.json
+ D experiments/k158_overnight_gap.py
+ D experiments/k159_evt_var.py
+ D experiments/k159_evt_var_results.json
+ D experiments/k160_copula_tail_dependence.py
+ D experiments/k180_directional_change.py
+ D experiments/k180_directional_change_results.json
+ D experiments/k181_skew_predictor.py
+ D experiments/k181_skew_predictor_results.json
+ D experiments/k182_fomc_vol_effect.py
+ D experiments/k182_fomc_vol_effect_results.json
+ D experiments/k186_volume_displacement.py
+ D experiments/k186_volume_displacement_results.json
+ D experiments/k187_overnight_gap_structure.py
+ D experiments/k188_har_ceiling.py
+ D experiments/k188_har_ceiling_results.json
+ D experiments/k189_attention_vol.py
+ D experiments/k189_attention_vol_results.json
+ D experiments/k190_realized_semivariance.py
+ D experiments/k190_realized_semivariance_results.json
+ D experiments/k191_put_call_ratio.py
+ D experiments/k191_put_call_ratio_results.json
+ D experiments/k192_google_trends_vol.py
+ D experiments/k193_copula_tail_dep.py
+ D experiments/k193_copula_tail_dep_results.json
+ D experiments/k194_fractional_diff.py
+ D experiments/k194_fractional_diff_results.json
+ D experiments/k195_tda_deep_dive.py
+ D experiments/k195_tda_deep_dive_results.json
+ D experiments/k196_5min_rv_pilot.py
+ D experiments/k197_persistence_break.py
+ D experiments/k197_persistence_break_results.json
+ D experiments/k198_realized_garch.py
+ D experiments/k199_vix_futures_basis.py
+ D experiments/k199_vix_futures_basis_results.json
+ D experiments/k200_meta_analysis.py
+ D experiments/k200_meta_analysis_results.json
+ D experiments/k201_tda_vt_strategy.py
+ D experiments/k202_btc_features.py
+ D experiments/k202_btc_features_results.json
+ D experiments/k203_momentum_crash_vol.py
+ D experiments/k203_momentum_crash_vol_results.json
+ D experiments/k204_gld_momentum_vt.py
+ D experiments/k204_gld_momentum_vt_results.json
+ D experiments/k205_btc_micro_vt.py
+ D experiments/k205_btc_micro_vt_results.json
+ D experiments/k206_asset_specific_vt.py
+ D experiments/k206_asset_specific_vt_results.json
+ D experiments/k207_vix_boundary_panel.py
+ D experiments/k207_vix_boundary_panel_results.json
+ D experiments/k208_implied_realized_gap.py
+ D experiments/k208_implied_realized_gap_results.json
+ D experiments/k209_two_tier_vt.py
+ D experiments/k210_vix_skew_ratio.py
+ D experiments/k211_mean_reversion_speed.py
+ D experiments/k212_conditional_vix.py
+ D experiments/k213_signature_vol.py
+ D experiments/k214_wasserstein_regime.py
+ D experiments/k215_seasonality.py
+ D experiments/k216_ensemble_forecast.py
+ D experiments/k217_nonequity_optimal_vt.py
+ D experiments/k218_contagion_timing.py
+ D experiments/k219_risk_parity_vs_equal.py
+ D experiments/k220_rebalance_frequency.py
+ D experiments/k221_drawdown_anatomy.py
+ D experiments/k222_retirement_swr.py
+ D experiments/k223_inflation_regime.py
+ D experiments/k224_dollar_strength.py
+ D experiments/k225_maximum_loss.py
+ D experiments/k226_factor_exposure.py
+ D experiments/k228_leverage_dynamics.py
+ D experiments/k229_vt_insurance.py
+ D experiments/k230_optimal_vt_param.py
+ D experiments/k231_vt_vs_puts.py
+ D experiments/k232_gld_role.py
+ D experiments/k233_three_asset.py
+ D experiments/k234_vt_behavioral.py
+ D experiments/k235_tax_efficiency.py
+ D experiments/k236_starting_capital.py
+ D experiments/k237_international_vt.py
+ D experiments/k237_international_vt_results.json
+ D experiments/k238_tz_arbitrage_deep.py
+ D experiments/k239_vix_mean_reversion.py
+ D experiments/k240_tsmom_cross_asset.py
+ D experiments/k241_tsmom_no_btc.py
+ D experiments/k242_vrp_harvesting.py
+ D experiments/k243_sector_rotation.py
+ D experiments/k244_combined_strategy.py
+ D experiments/k245_gld_momentum_breakout.py
+ D experiments/k246_pairs_trading.py
+ D experiments/k247_dual_momentum.py
+ D experiments/k248_carry_trade.py
+ D experiments/k249_risk_on_off.py
+ D experiments/k250_tsmom_vt_hybrid.py
+ D experiments/k251_gld_tlt_rotation.py
+ D experiments/k252_adaptive_vt.py
+ D experiments/k253_value_timing.py
+ D experiments/k254_vol_dispersion_trade.py
+ D experiments/k255_tsmom_final_validation.py
+ D experiments/k256_fed_communication.py
+ D experiments/k257_5min_status.py
+ D experiments/k258_skew_dynamics.py
+ D experiments/k259_macro_surprise.py
+ D experiments/k260_vol_clustering.py
+ D experiments/k261_vol_contest.py
+ D experiments/k262_tail_risk_cost.py
+ D experiments/k263_complete_guide.py
+ D experiments/k263_complete_guide_results.json
+ D experiments/k264_geopolitical_proxy.py
+ D experiments/k265_liquidity_proxy.py
+ D experiments/k266_amihud_validation.py
+ D experiments/k267_session_summary.py
+ D experiments/k267_session_summary_results.json
+ D experiments/k268_overnight_intraday.py
+ D experiments/k269_corr_regime.py
+ D experiments/k270_rate_hike_detector.py
+ D experiments/k271_gld_self_healing.py
+ D experiments/k272_vt_insurance_formal.py
+ D experiments/k273_crash_taxonomy.py
+ D experiments/k274_paper_mapping.py
+ D experiments/k274_paper_mapping_results.json
+ D experiments/k275_complete_proof.py
+ D experiments/k275_complete_proof_results.json
+ D experiments/k276_jbf_updates.py
+ D experiments/k277_btc_deep_structure.py
+ D experiments/k277_btc_deep_structure_results.json
+ D experiments/k278_vix_transition.py
+ D experiments/k279_weekly_vt.py
+ D experiments/k280_portfolio_guide.py
+ D experiments/k280_portfolio_guide_results.json
+ D experiments/k281_vix_trigger.py
+ D experiments/k282_alert_system.py
+ D experiments/k283_rebalance_day.py
+ D experiments/k284_current_assessment.py
+ D experiments/k285_publication_audit.json
+ D experiments/k285_publication_audit.py
+ D experiments/k286_session_final.py
+ D experiments/k286_session_final_results.json
+ D experiments/k288_cross_period_stability.py
+ D experiments/k288_cross_period_stability_results.json
+ D experiments/k289_stress_test.py
+ D experiments/k291_behavior_simulation.py
+ D experiments/k292_dca_analysis.py
+ D experiments/k293_lifecycle.py
+ D experiments/k294_sequence_risk.py
+ D experiments/k295_taiwan_guide.py
+ D experiments/k296_paper4_outline.json
+ D experiments/k296_paper4_outline.py
+ D experiments/k297_intraday_pattern.py
+ D experiments/k298_knowledge_graph.py
+ D experiments/k299_gap_pilots.py
+ D experiments/k300_vix_speed_validation.py
+ D experiments/k301_robustness_table.py
+ D experiments/k301_robustness_table_results.json
+ D experiments/k302_open_questions.py
+ D experiments/k302_open_questions_results.json
+ D experiments/k304_causal_inference.py
+ D experiments/k305_overnight_forecast.py
+ D experiments/k306_vix_speed_trigger.py
+ D experiments/k307_emh_test.py
+ D experiments/k319_decade_results.json
+ D experiments/k319_decade_table.py
+ D experiments/k320_content_audit.py
+ D experiments/k320_content_audit_results.json
+ D experiments/k322_cleanup_actions.json
+ D experiments/k322_empty_cleanup.py
+ D experiments/k334_defi_vol.py
+ D experiments/k335_esg_vol.py
+ D experiments/k336_carbon_vol.py
+ D experiments/k337_commodity_cycle.py
+ D experiments/k338_em_contagion.py
+ D experiments/k339_esg_validation.py
+ D experiments/k340_futures_basis.py
+ D experiments/k341_futures_hedging.py
+ D experiments/k342_oil_vol.py
+ D experiments/k343_natgas_vol.py
+ D experiments/k344_cross_commodity.py
+ D experiments/k345_fx_vol.py
+ D experiments/k346_vvix.py
+ D experiments/k347_multi_hedge.py
+ D experiments/k348_credit_spread.py
+ D experiments/k349_reit_vol.py
+ D experiments/k350_heston_vs_garch.py
+ D experiments/k351_conformal_prediction.py
+ D experiments/k352_bayesian_garch.py
+ D experiments/k353_market_breadth.py
+ D experiments/k354_yield_curve.py
+ D experiments/k355_transfer_learning.py
+ D experiments/k356_causal_dag.py
+ D experiments/k357_global_spillover.py
+ D experiments/k358_cppi.py
+ D experiments/k359_quantile_reg.py
+ D experiments/k360_multi_freq_vol.py
+ D experiments/k364_monday_effect.py
+ D experiments/k365_vol_term_structure.py
+ D experiments/k366_cross_asset_term.py
+ D experiments/k367_short_interest.py
+ D experiments/k368_predictor_ranking.py
+ D experiments/k369_vix_pricing.py
+ D experiments/k370_vix_ts_validation.py
+ D experiments/k372_info_theory.py
+ D experiments/k374_parkinson_garch.py
+ D experiments/k375_economic_value.py
+ D experiments/k376_smoothness_theorem.py
+ D experiments/k377_decision_framework.py
+ D experiments/k378_cash_frontier.py
+ D experiments/k380_agriculture_vol.py
+ D experiments/k381_defi_tokens.py
+ D experiments/k382_regret_theory.py
+ D experiments/k385_survival.py
+ D experiments/k386_stylized_facts.py
+ D experiments/k388_minimax.py
+ D experiments/k390_move_index.py
+ D experiments/k391_market_cycles.py
+ D experiments/k392_retail_revolution.py
+ D experiments/k394_black_swan.py
+ D experiments/k396_higher_moments.py
+ D experiments/k397_india_vol.py
+ D experiments/k398_total_crypto.py
+ D experiments/k399_markov_regime.py
+ D experiments/k401_stablecoin.py
+ D experiments/k402_covid_structural.py
+ D experiments/k403_corr_threat.py
+ D experiments/k404_cross_section.py
+ D experiments/k405_vol_rotation.py
+ D experiments/k406_dispersion_alert.py
+ D experiments/k408_nonequity_vt.py
+ D experiments/k409_options_mispricing.py
+ D experiments/k410_algo_impact.py
+ D experiments/k411_sector_momentum.py
+ D experiments/k412_earnings_vol.py
+ D experiments/k413_etf_flows.py
+ D experiments/k414_fed_rate_causal.py
+ D experiments/k414_fed_rate_causal_results.json
+ D experiments/k416_fx_carry_vol_results.json
+ D experiments/k416_fx_carry_vol_structure.py
+ D experiments/k418_institutional_sentiment_results.json
+ D experiments/k418_institutional_sentiment_taiwan.py
+ D experiments/k420_prs_jump_results.json
+ D experiments/k420_prs_jump_taiwan_vol.py
+ D experiments/k420b_prs_taiwan_clean.py
+ D experiments/k420b_prs_taiwan_clean_results.json
+ D experiments/k421_vix_etp_market_impact.py
+ D experiments/k421_vix_etp_results.json
+ D experiments/k422_commodity_spillover_results.json
+ D experiments/k422_commodity_vol_spillover.py
+ D experiments/k423_monday_effect_results.json
+ D experiments/k423_monday_effect_vol.py
+ D experiments/k424_eld_hedge_ratio.py
+ D experiments/k424_eld_hedge_results.json
+ D experiments/k425_bond_equity_decorrelation.py
+ D experiments/k425_decorrelation_results.json
+ D experiments/k426_efficient_ginn.py
+ D experiments/k426_efficient_ginn_results.json
+ D experiments/k429_vix_term_structure.py
+ D experiments/k429_vix_term_structure_results.json
+ D experiments/k430_vrp_predictability.py
+ D experiments/k430_vrp_predictability_results.json
+ D experiments/k431_stgarch.py
+ D experiments/k431_stgarch_results.json
+ D experiments/k432_bayesian_garch.py
+ D experiments/k432_bayesian_garch_results.json
+ D experiments/k433_ssvs_garch.py
+ D experiments/k433_ssvs_garch_results.json
+ D experiments/k434_bma_garch.py
+ D experiments/k434_bma_garch_results.json
+ D experiments/k435_structural_break_garch.py
+ D experiments/k435_structural_break_garch_results.json
+ D experiments/k436_vrp_robustness.py
+ D experiments/k436_vrp_robustness_results.json
+ D experiments/k437_gas_model.py
+ D experiments/k437_gas_model_results.json
+ D experiments/k438_garchx_vrp.py
+ D experiments/k438_garchx_vrp_results.json
+ D experiments/k439_cross_asset_vrp.py
+ D experiments/k439_cross_asset_vrp_results.json
+ D experiments/k440_vrp_strategy.py
+ D experiments/k440_vrp_strategy_results.json
+ D experiments/k441_range_vol.py
+ D experiments/k441_range_vol_results.json
+ D experiments/k442_figarch.py
+ D experiments/k442_figarch_results.json
+ D experiments/k443_copula_dependence.py
+ D experiments/k443_copula_dependence_results.json
+ D experiments/k444_dcc_garch.py
+ D experiments/k444_dcc_garch_results.json
+ D experiments/k445_btc_leverage.py
+ D experiments/k445_btc_leverage_results.json
+ D experiments/k446_gpr_vol.py
+ D experiments/k446_gpr_vol_results.json
+ D experiments/k447_skew_index.py
+ D experiments/k447_skew_index_results.json
+ D experiments/k450_vrp_semivar_combined.py
+ D experiments/k450_vrp_semivar_combined_results.json
+ D experiments/k451_overnight_vol.py
+ D experiments/k451_overnight_vol_results.json
+ D experiments/k453_semivar_cross_asset.py
+ D experiments/k453_semivar_cross_asset_results.json
+ D experiments/k455_vol_spillover_network.py
+ D experiments/k455_vol_spillover_results.json
+ D experiments/k456_taiwan_semivar_var.py
+ D experiments/k456_taiwan_semivar_var_results.json
+ D experiments/k457_weekly_vol.py
+ D experiments/k457_weekly_vol_results.json
+ D experiments/k458_meta_analysis.py
+ D experiments/k458_meta_analysis_results.json
+ D experiments/k459_weekly_vrp_cross_oos.py
+ D experiments/k459_weekly_vrp_cross_oos_results.json
+ D experiments/k460_semivar_cross_oos.py
+ D experiments/k460_semivar_cross_oos_results.json
+ D experiments/k461_ssvs_taiwan.py
+ D experiments/k461_ssvs_taiwan_results.json
+ D experiments/k462_taiwan_methods.py
+ D experiments/k462_taiwan_methods_results.json
+ D experiments/k463_tvp_garchx_taiwan.py
+ D experiments/k463_tvp_garchx_taiwan_results.json
+ D experiments/k464_threshold_sv.py
+ D experiments/k464_threshold_sv_results.json
+ D experiments/k465_har_range_cross_oos.py
+ D experiments/k465_har_range_cross_oos_results.json
+ D experiments/k467_har_range_var.py
+ D experiments/k467_har_range_var_results.json
+ D experiments/k468_yang_zhang.py
+ D experiments/k468_yang_zhang_results.json
+ D experiments/k469_har_r2_proxy.py
+ D experiments/k469_har_r2_proxy_results.json
+ D experiments/k470_har_vt_strategy.py
+ D experiments/k470_har_vt_strategy_results.json
+ D experiments/k471_higher_moments.py
+ D experiments/k471_higher_moments_results.json
+ D experiments/k472_taiwan_comprehensive.py
+ D experiments/k472_taiwan_comprehensive_results.json
+ D experiments/k473_attention_vol.py
+ D experiments/k473_attention_vol_results.json
+ D experiments/k474_weekly_rv_vs_vix.py
+ D experiments/k474_weekly_rv_vs_vix_results.json
+ D experiments/k475_validated_ensemble.py
+ D experiments/k475_validated_ensemble_results.json
+ D experiments/k476_ensemble_var_cross_oos.py
+ D experiments/k476_ensemble_var_cross_oos_results.json
+ D experiments/k478_entropy_vol.py
+ D experiments/k478_entropy_vol_results.json
+ D experiments/k479_wavelet_vol.py
+ D experiments/k479_wavelet_vol_results.json
+ D experiments/k480_regime_tool_selection.py
+ D experiments/k480_regime_tool_selection_results.json
+ D experiments/k481_model_confidence_set.py
+ D experiments/k481_model_confidence_set_results.json
+ D experiments/k482_mcs_weighted_ensemble.py
+ D experiments/k482_mcs_weighted_ensemble_results.json
+ D experiments/k483_commodity_vol.py
+ D experiments/k483_commodity_vol_results.json
+ D experiments/k484_ssvs_variance_eq.py
+ D experiments/k484_ssvs_variance_eq_results.json
+ D experiments/k485_ssvs_vareq_cross_oos.py
+ D experiments/k485_ssvs_vareq_cross_oos_results.json
+ D experiments/k486_gjr_vix_final.py
+ D experiments/k486_gjr_vix_final_results.json
+ D experiments/k487_gjr_vix_cross_asset.py
+ D experiments/k487_gjr_vix_cross_asset_results.json
+ D experiments/k488_gjrx_vt_strategy.py
+ D experiments/k488_gjrx_vt_strategy_results.json
+ D experiments/k489_vix_term_structure.py
+ D experiments/k489_vix_term_structure_results.json
+ D experiments/k490_gjrx_vix9d.py
+ D experiments/k490_gjrx_vix9d_results.json
+ D experiments/k491_persistence_law.py
+ D experiments/k491_persistence_law_results.json
+ D experiments/k492_research_efficiency.py
+ D experiments/k492_research_efficiency_results.json
+ D experiments/k493_signal_comparison.py
+ D experiments/k493_signal_comparison_results.json
+ D experiments/k494_forex_vol.py
+ D experiments/k494_forex_vol_results.json
+ D experiments/k495_unified_guide.py
+ D experiments/k495_unified_guide_results.json
+ D experiments/k497_loss_sensitivity.py
+ D experiments/k497_loss_sensitivity_results.json
+ D experiments/k498_earnings_vol.py
+ D experiments/k498_earnings_vol_results.json
+ D experiments/k499_rebalancing_frequency.py
+ D experiments/k499_rebalancing_frequency_results.json
+ D experiments/k501_return_prediction.py
+ D experiments/k501_return_prediction_results.json
+ D experiments/k502_tw_leadlag_strategy.py
+ D experiments/k502_tw_leadlag_strategy_results.json
+ D experiments/k503_vix_meanrevert_strategy.py
+ D experiments/k503_vix_meanrevert_strategy_results.json
+ D experiments/k504_stlfsi_strategy.py
+ D experiments/k504_stlfsi_strategy_results.json
+ D experiments/k506_ewt_volspread_cross_oos.py
+ D experiments/k506_ewt_volspread_cross_oos_results.json
+ D experiments/k507_dynamic_allocation.py
+ D experiments/k507_dynamic_allocation_results.json
+ D experiments/k508_tw_price_limit.py
+ D experiments/k508_tw_price_limit_results.json
+ D experiments/k510_volume_garch.py
+ D experiments/k510_volume_garch_results.json
+ D experiments/k511_pairs_trading.py
+ D experiments/k511_pairs_trading_results.json
+ D experiments/k512_tw_exdividend.py
+ D experiments/k512_tw_exdividend_results.json
+ D experiments/k513_macro_event_vol.py
+ D experiments/k513_macro_event_vol_results.json
+ D experiments/k514_fomc_surprise.py
+ D experiments/k514_fomc_surprise_results.json
+ D experiments/k515_overnight_gap.py
+ D experiments/k515_overnight_gap_results.json
+ D experiments/k516_overnight_futures.py
+ D experiments/k516_overnight_futures_results.json
+ D experiments/k517_monthly_overnight.py
+ D experiments/k517_monthly_overnight_results.json
+ D experiments/k518_trend_following.py
+ D experiments/k518_trend_following_results.json
+ D experiments/k519_premium_futures.py
+ D experiments/k519_premium_futures_results.json
+ D experiments/k520_k519_sensitivity.py
+ D experiments/k520_k519_sensitivity_results.json
+ D experiments/k521_2day_momentum_check.py
+ D experiments/k521_2day_momentum_check_results.json
+ D experiments/k521_verify_sharpe.py
+ D experiments/k522_har_rv_pilot.py
+ D experiments/k522_har_rv_pilot_results.json
+ D experiments/k523_putcall_ratio.py
+ D experiments/k523_putcall_ratio_results.json
+ D experiments/k524_policy_learning.py
+ D experiments/k524_policy_learning_results.json
+ D experiments/k525_har_rv_formal.py
+ D experiments/k526_garch_midas.py
+ D experiments/k526_garch_midas_results.json
+ D experiments/k527_volume_garch.py
+ D experiments/k527_volume_garch_results.json
+ D experiments/k528_nfp_event_study.py
+ D experiments/k528_nfp_event_study_results.json
+ D experiments/k529_rough_volatility.py
+ D experiments/k529_rough_volatility_results.json
+ D experiments/k530_har_multiscale.py
+ D experiments/k530_har_multiscale_results.json
+ D experiments/k531_sentiment_nlp_pilot.py
+ D experiments/k531_sentiment_nlp_pilot_results.json
+ D experiments/k532_har_cross_asset.py
+ D experiments/k532_har_cross_asset_results.json
+ D experiments/k533_har_vt_strategy.py
+ D experiments/k533_har_vt_strategy_results.json
+ D experiments/k534_copula_dcc.py
+ D experiments/k534_copula_dcc_results.json
+ D experiments/k535_skew_predictor.py
+ D experiments/k535_skew_predictor_results.json
+ D experiments/k536_evt_var.py
+ D experiments/k536_evt_var_results.json
+ D experiments/k537_cross_asset_vol_momentum.py
+ D experiments/k537_cross_asset_vol_momentum_results.json
+ D experiments/k538_meta_labeling.py
+ D experiments/k538_meta_labeling_results.json
+ D experiments/k539_vrp_carry.py
+ D experiments/k539_vrp_carry_results.json
+ D experiments/k540_har_ensemble_vt.py
+ D experiments/k540_har_ensemble_vt_results.json
+ D experiments/k541_weekly_meta_label.py
+ D experiments/k541_weekly_meta_label_results.json
+ D experiments/k542_vix_term_structure.py
+ D experiments/k542_vix_term_structure_results.json
+ D experiments/k543_drawdown_conditional_vt.py
+ D experiments/k543_drawdown_conditional_vt_results.json
+ D experiments/k544_tail_hedge.py
+ D experiments/k544_tail_hedge_results.json
+ D experiments/k545_intraday_seasonality.py
+ D experiments/k545_intraday_seasonality_results.json
+ D experiments/k546_gld_timing.py
+ D experiments/k546_gld_timing_results.json
+ D experiments/k547_monthly_tom_vt.py
+ D experiments/k547_monthly_tom_vt_results.json
+ D experiments/k548_leveraged_risk_parity.py
+ D experiments/k548_leveraged_risk_parity_results.json
+ D experiments/k549_multi_asset_expansion.py
+ D experiments/k549_multi_asset_expansion_results.json
+ D experiments/k550_adaptive_vix_threshold.py
+ D experiments/k550_adaptive_vix_threshold_results.json
+ D experiments/k551_k548_validation.py
+ D experiments/k551_k548_validation_results.json
+ D experiments/k552_dca_vix_timing.py
+ D experiments/k552_dca_vix_timing_results.json
+ D experiments/k553_leveraged_vt_taiwan.py
+ D experiments/k553_leveraged_vt_taiwan_results.json
+ D experiments/k554_hmm_regime.py
+ D experiments/k554_hmm_regime_results.json
+ D experiments/k556_momentum_crash_filter.py
+ D experiments/k556_momentum_crash_filter_results.json
+ D experiments/k557_gold_regime.py
+ D experiments/k557_gold_regime_results.json
+ D experiments/k558_k553_taiwan_validation.py
+ D experiments/k558_k553_taiwan_validation_results.json
+ D experiments/k559_conditional_dispersion.py
+ D experiments/k559_conditional_dispersion_results.json
+ D experiments/k560_sector_rotation_vt.py
+ D experiments/k560_sector_rotation_vt_results.json
+ D experiments/k561_bond_equity_switch.py
+ D experiments/k561_bond_equity_switch_results.json
+ D experiments/k562_k560_sector_validation.py
+ D experiments/k562_k560_sector_validation_results.json
+ D experiments/k563_weekly_sector_momentum.py
+ D experiments/k563_weekly_sector_momentum_results.json
+ D experiments/k564_vix_futures_carry.py
+ D experiments/k564_vix_futures_carry_results.json
+ D experiments/k565_btc_allocation.py
+ D experiments/k565_btc_allocation_results.json
+ D experiments/k566_factor_timing_vt.py
+ D experiments/k566_factor_timing_vt_results.json
+ D experiments/k567_international_vt_leverage.py
+ D experiments/k567_international_vt_leverage_results.json
+ D experiments/k568_optimal_weight_function.py
+ D experiments/k568_optimal_weight_function_results.json
+ D experiments/k569_piecewise_vt_validation.py
+ D experiments/k569_piecewise_vt_validation_results.json
+ D experiments/k570_earnings_season.py
+ D experiments/k570_earnings_season_results.json
+ D experiments/k571_vix_mean_reversion_speed.py
+ D experiments/k571_vix_mean_reversion_speed_results.json
+ D experiments/k572_vix_regime_map.py
+ D experiments/k572_vix_regime_map_results.json
+ D experiments/k573_insurance_pricing.py
+ D experiments/k573_insurance_pricing_results.json
+ D experiments/k574_complete_strategy_backtest.py
+ D experiments/k574_complete_strategy_backtest_results.json
+ D experiments/k575_life_stage_vt.py
+ D experiments/k575_life_stage_vt_results.json
+ D experiments/k576_vol_clustering_vt.py
+ D experiments/k576_vol_clustering_vt_results.json
+ D experiments/k577_rebalancing_frequency.py
+ D experiments/k577_rebalancing_frequency_results.json
+ D experiments/k583_iv_surface.py
+ D experiments/k583_iv_surface_results.json
+ D experiments/k585.py
+ D experiments/k585_paper_contribution_analysis.json
+ D experiments/k588_backfill_audit.json
+ D experiments/k591_window_size_sweep.py
+ D experiments/k591_window_size_sweep_results.json
+ D experiments/k592_mf2_garch.py
+ D experiments/k592_mf2_garch_results.json
+ D experiments/k593_window_cross_oos.py
+ D experiments/k593_window_cross_oos_results.json
+ D experiments/k594_adaptive_window_vt.py
+ D experiments/k594_adaptive_window_vt_results.json
+ D experiments/k595_hybrid_multi_strategy.py
+ D experiments/k595_hybrid_multi_strategy_results.json
+ D experiments/k597_stress_test.py
+ D experiments/k597_stress_test_results.json
+ D experiments/k598_adaptive_debounce.py
+ D experiments/k598_adaptive_debounce_results.json
+ D experiments/k600_session_meta_analysis.json
+ D experiments/k603_dynamic_target_vol.py
+ D experiments/k603_dynamic_target_vol_results.json
+ D experiments/k604_implementation_costs.py
+ D experiments/k604_implementation_costs_results.json
+ D experiments/k608_seo_audit.json
+ D experiments/k610_howto_audit.json
+ D experiments/k617_tsmc_event_study.py
+ D experiments/k617_tsmc_event_study_results.json
+ D experiments/k618_kan_volatility.py
+ D experiments/k618_kan_volatility_results.json
+ D experiments/k619_kan_corrected.py
+ D experiments/k619_kan_corrected_results.json
+ D experiments/k620_post_event_vol_crush.py
+ D experiments/k620_post_event_vol_crush_results.json
+ D experiments/k621_mf2_garch.py
+ D experiments/k621_results.json
+ D experiments/k621_submission_checklist.json
+ D experiments/k622_persistence_vs_window.png
+ D experiments/k622_results.json
+ D experiments/k622_window_sensitivity.py
+ D experiments/k622_window_sweep.png
+ D experiments/k623_mf2_garch_corrected.py
+ D experiments/k623_results.json
+ D experiments/k624_har_pd_daily.py
+ D experiments/k624_results.json
+ D experiments/k625_hurst_evolution.png
+ D experiments/k625_hurst_oos_comparison.png
+ D experiments/k625_hurst_volatility.py
+ D experiments/k625_hurst_volatility_results.json
+ D experiments/k625_tx_cost_correction.py
+ D experiments/k625_tx_cost_correction_results.json
+ D experiments/k626_results.json
+ D experiments/k626_vix_direction.py
+ D experiments/k627_momentum_vt_hybrid.py
+ D experiments/k627_results.json
+ D experiments/k628_trim_plan.json
+ D experiments/k628b_results.json
+ D experiments/k628b_spillover_network.png
+ D experiments/k628b_spillover_timeseries.png
+ D experiments/k628b_vol_spillover.py
+ D experiments/k629_disposition_vol.py
+ D experiments/k629_results.json
+ D experiments/k630_overnight_intraday.py
+ D experiments/k630_results.json
+ D experiments/k631_calendar_vol.py
+ D experiments/k631_results.json
+ D experiments/k632_fear_dca_optimization.py
+ D experiments/k632_results.json
+ D experiments/k633_results.json
+ D experiments/k633_taiwan_0050_optimization.py
+ D experiments/k634_cross_asset_cv.png
+ D experiments/k634_garch_param_stability.py
+ D experiments/k634_param_evolution.png
+ D experiments/k634_results.json
+ D experiments/k635_fixed_vs_rolling_vt.png
+ D experiments/k635_fixed_vs_rolling_vt.py
+ D experiments/k635_results.json
+ D experiments/k636_plots.png
+ D experiments/k636_results.json
+ D experiments/k636_taiwan_amplification.py
+ D experiments/k637_results.json
+ D experiments/k637_vol_regime_clustering.py
+ D experiments/k638_results.json
+ D experiments/k638_vix_term_structure.py
+ D experiments/k639_crypto_equity_vol.py
+ D experiments/k639_results.json
+ D experiments/k640_live_performance_audit.py
+ D experiments/k640_results.json
+ D experiments/k641_results.json
+ D experiments/k641_vt_regime_decomposition.py
+ D experiments/k642_rebalance_frequency.png
+ D experiments/k642_rebalance_frequency.py
+ D experiments/k642_results.json
+ D experiments/k643_multi_strategy_portfolio.py
+ D experiments/k643_results.json
+ D experiments/k644_results.json
+ D experiments/k644_session_meta_analysis.py
+ D experiments/k645_gld_role_analysis.py
+ D experiments/k645_results.json
+ D experiments/k646_8020_vs_5050_cross_oos.py
+ D experiments/k646_results.json
+ D experiments/k647_results.json
+ D experiments/k647_strategy_matcher.py
+ D experiments/k648_drawdown_recovery.py
+ D experiments/k648_results.json
+ D experiments/k649_results.json
+ D experiments/k649_vol_of_vol.py
+ D experiments/k650_knowledge_milestone.py
+ D experiments/k650_results.json
+ D experiments/k651_fred_macro_vol.py
+ D experiments/k651_results.json
+ D experiments/k652_results.json
+ D experiments/k652_vix_action_thresholds.py
+ D experiments/k653_behavior_simulation.py
+ D experiments/k653_results.json
+ D experiments/k654_piecewise_decomposition.py
+ D experiments/k654_results.json
+ D experiments/k655_horizon_analysis.py
+ D experiments/k655_results.json
+ D experiments/k656_results.json
+ D experiments/k656_vt_value_reconciliation.py
+ D experiments/k657_results.json
+ D experiments/k657_synthetic_tail_hedge.py
+ D experiments/k658_results.json
+ D experiments/k658_vix_mean_reversion.py
+ D experiments/k659_results.json
+ D experiments/k659_vol_clustering_duration.py
+ D experiments/k660_complete_investor_guide.py
+ D experiments/k660_results.json
+ D experiments/k661_nfp_vol_analysis.py
+ D experiments/k661_results.json
+ D experiments/k662_commodity_vt.py
+ D experiments/k662_results.json
+ D experiments/k663_rate_environment_vt.py
+ D experiments/k663_results.json
+ D experiments/k664_mdd_probability.py
+ D experiments/k664_results.json
+ D experiments/k665_lookup_table_strategy.py
+ D experiments/k665_results.json
+ D experiments/k666_results.json
+ D experiments/k666_vix_seasonality.py
+ D experiments/k667_insurance_cost.py
+ D experiments/k667_results.json
+ D experiments/k668_results.json
+ D experiments/k668_retirement_vt.py
+ D experiments/k669_global_vt.py
+ D experiments/k669_results.json
+ D experiments/k670_results.json
+ D experiments/k670_vt_dca_ultimate.py
+ D experiments/k671_results.json
+ D experiments/k671_vix_roll_yield.py
+ D experiments/k672_definitive_conclusions.py
+ D experiments/k672_results.json
+ D experiments/k673_results.json
+ D experiments/k673_vix_markov_chain.py
+ D experiments/k674_crisis_scenarios.py
+ D experiments/k674_results.json
+ D experiments/k675_results.json
+ D experiments/k675_wealth_inequality.py
+ D experiments/k676_results.json
+ D experiments/k676_tax_optimization.py
+ D experiments/k677_results.json
+ D experiments/k677_vix_economic_indicator.py
+ D experiments/k678_results.json
+ D experiments/k678_strategy_correlation.py
+ D experiments/k679_results.json
+ D experiments/k679_vix_percentile_strategy.py
+ D experiments/k680_percentile_cross_oos.py
+ D experiments/k680_results.json
+ D experiments/k681_percentile_global.py
+ D experiments/k681_results.json
+ D experiments/k682_percentile_lookup.py
+ D experiments/k682_results.json
+ D experiments/k683_percentile_vs_piecewise.py
+ D experiments/k683_results.json
+ D experiments/k684_percentile_implementation.py
+ D experiments/k684_results.json
+ D experiments/k685_percentile_live_sim.py
+ D experiments/k685_results.json
+ D experiments/k686_percentile_corrected.py
+ D experiments/k686_results.json
+ D experiments/k687_definitive_ranking.py
+ D experiments/k687_results.json
+ D experiments/k688_crra_lagged.py
+ D experiments/k688_results.json
+ D experiments/k689_live_backtest_discrepancy.py
+ D experiments/k689_results.json
+ D experiments/k690_results.json
+ D experiments/k690_weight_smoothness.py
+ D experiments/k691_results.json
+ D experiments/k691_session_synthesis.py
+ D experiments/k692_results.json
+ D experiments/k692_verify_paper_trading.py
+ D experiments/k693_fix_historical_returns.py
+ D experiments/k693_results.json
+ D experiments/k694_corrected_live_audit.py
+ D experiments/k694_results.json
+ D experiments/k695_ewma_lambda.py
+ D experiments/k695_results.json
+ D experiments/k696_minimum_exposure.py
+ D experiments/k696_results.json
+ D experiments/k697_alpha_upper_bound.py
+ D experiments/k697_results.json
+ D experiments/k698_contrarian_vt.py
+ D experiments/k698_results.json
+ D experiments/k699_contrarian_cross_oos.py
+ D experiments/k699_results.json
+ D experiments/k700_final_truth.py
+ D experiments/k700_results.json
+ D experiments/k701_results.json
+ D experiments/k701_weekly_monthly_alpha.py
+ D experiments/k702_optimal_static.py
+ D experiments/k702_results.json
+ D experiments/k703_results.json
+ D experiments/k703_ten_numbers.py
+ D experiments/k704_results.json
+ D experiments/k704_risk_parity_deep.py
+ D experiments/k705_messaging_audit.py
+ D experiments/k705_results.json
+ D experiments/k706_correlation_stability.py
+ D experiments/k706_results.json
+ D experiments/k707_investor_faq.py
+ D experiments/k707_results.json
+ D experiments/k708_next_roadmap.py
+ D experiments/k708_results.json
+ D experiments/k709_results.json
+ D experiments/k710_results.json
+ D experiments/k711_results.json
+ D experiments/k712_results.json
+ D experiments/k713_results.json
+ D experiments/k716_results.json
+ D experiments/k717_results.json
+ D experiments/k718_results.json
+ D experiments/k719_results.json
+ D experiments/k720_results.json
+ D experiments/k721_results.json
+ D experiments/k722_results.json
+ D experiments/k724_results.json
+ D experiments/k725_results.json
+ D experiments/k726_results.json
+ D experiments/k727_results.json
+ D experiments/k730_cross_asset_vol_momentum.py
+ D experiments/k730_cross_asset_vol_momentum_results.json
+ D experiments/k731_vix_term_structure.py
+ D experiments/k731_vix_term_structure_results.json
+ D experiments/k732_pcr_behavioral_sentiment.py
+ D experiments/k732_pcr_behavioral_sentiment_results.json
+ D experiments/k733_regime_rebalancing.py
+ D experiments/k733_regime_rebalancing_results.json
+ D experiments/k734_vrp_trading.py
+ D experiments/k734_vrp_trading_results.json
+ D experiments/k735_drawdown_recovery.py
+ D experiments/k735_drawdown_recovery_results.json
+ D experiments/k736_calendar_anomaly_vt.py
+ D experiments/k736_calendar_anomaly_vt_results.json
+ D experiments/k737_max_diversification.py
+ D experiments/k737_max_diversification_results.json
+ D experiments/k738_vt_insurance_cost_benefit.py
+ D experiments/k738_vt_insurance_cost_benefit_results.json
+ D experiments/k738v2_vt_insurance_clean_tw50.py
+ D experiments/k738v2_vt_insurance_clean_tw50_results.json
+ D experiments/k739_taiwan_vt_crossval.py
+ D experiments/k739_taiwan_vt_crossval_results.json
+ D experiments/k739b_taiwan_vt_fixed.py
+ D experiments/k739b_taiwan_vt_fixed_results.json
+ D experiments/k739bv2_taiwan_vt_clean.py
+ D experiments/k739bv2_taiwan_vt_clean_results.json
+ D experiments/k740_strategy_meta_analysis.py
+ D experiments/k740_strategy_meta_analysis_results.json
+ D experiments/k741_nfp_event_study.py
+ D experiments/k741_nfp_event_study_results.json
+ D experiments/k742_crowding_simulation.py
+ D experiments/k742_crowding_simulation_results.json
+ D experiments/k743_investor_behavior.py
+ D experiments/k743_investor_behavior_results.json
+ D experiments/k744_rv_5min_validation.py
+ D experiments/k744_rv_5min_validation_results.json
+ D experiments/k745_forecasts.json
+ D experiments/k745_pilot_har_rv.py
+ D experiments/k745_pilot_har_rv_results.json
+ D experiments/k746_bitcoin_vix.py
+ D experiments/k746_bitcoin_vix_results.json
+ D experiments/k746b_bitcoin_vix_fixed.py
+ D experiments/k746b_bitcoin_vix_fixed_results.json
+ D experiments/k747_equal_risk_contribution.py
+ D experiments/k747_equal_risk_contribution_results.json
+ D experiments/k748_simplicity_premium.py
+ D experiments/k748_simplicity_premium_results.json
+ D experiments/k749_yield_curve_vol.py
+ D experiments/k749_yield_curve_vol_results.json
+ D experiments/k750_google_trends_fear.py
+ D experiments/k750_google_trends_fear_results.json
+ D experiments/k751_overnight_vix_news.py
+ D experiments/k751_overnight_vix_news_results.json
+ D experiments/k752_vix_sufficiency_eras.py
+ D experiments/k752_vix_sufficiency_eras_results.json
+ D experiments/k753_liquidity_vol.py
+ D experiments/k753_liquidity_vol_results.json
+ D experiments/k754_volume_exhaustion.py
+ D experiments/k754_volume_exhaustion_results.json
+ D experiments/k755_fomo_cooling.py
+ D experiments/k755_fomo_cooling_results.json
+ D experiments/k756_international_vix.py
+ D experiments/k756_international_vix_results.json
+ D experiments/k757_taiwan_covar.py
+ D experiments/k757_taiwan_covar_results.json
+ D experiments/k757b_taiwan_covar_fixed.py
+ D experiments/k757b_taiwan_covar_fixed_results.json
+ D experiments/k757bv2_taiwan_covar_clean.py
+ D experiments/k757bv2_taiwan_covar_clean_results.json
+ D experiments/k758_tw_cross_border_hedge.py
+ D experiments/k758_tw_cross_border_hedge_results.json
+ D experiments/k758v2_tw_cross_border_hedge.py
+ D experiments/k758v2_tw_cross_border_hedge_results.json
+ D experiments/k759_financial_early_warning.py
+ D experiments/k759_financial_early_warning_results.json
+ D experiments/k760_alt_risk_premia.py
+ D experiments/k760_alt_risk_premia_results.json
+ D experiments/k761_taiwan_yield_curve.py
+ D experiments/k761_taiwan_yield_curve_results.json
+ D experiments/k761v2_taiwan_yield_curve.py
+ D experiments/k761v2_taiwan_yield_curve_results.json
+ D experiments/k762_meta_model.py
+ D experiments/k762_meta_model_results.json
+ D experiments/k763_regime_carry_filter.py
+ D experiments/k763_regime_carry_filter_results.json
+ D experiments/k764_rough_vol_multivariate.py
+ D experiments/k764_rough_vol_multivariate_results.json
+ D experiments/k764v2_rough_vol_multivariate.py
+ D experiments/k764v2_rough_vol_multivariate_results.json
+ D experiments/k765_xai_volatility.py
+ D experiments/k765_xai_volatility_results.json
+ D experiments/k766_bond_stress_signal.py
+ D experiments/k766_bond_stress_signal_results.json
+ D experiments/k767_har_5day_rv.py
+ D experiments/k767_har_5day_rv_results.json
+ D experiments/k768_conformal_var.py
+ D experiments/k768_conformal_var_results.json
+ D experiments/k769_transfer_entropy_vt.py
+ D experiments/k769_transfer_entropy_vt_results.json
+ D experiments/k770_mem_model.py
+ D experiments/k770_mem_model_results.json
+ D experiments/k770b_mem_unified_target.py
+ D experiments/k770b_mem_unified_target_results.json
+ D experiments/k771_dispersion_timing.py
+ D experiments/k771_dispersion_timing_results.json
+ D experiments/k772_overnight_vol.py
+ D experiments/k772_overnight_vol_results.json
+ D experiments/k773_event_risk_budgeter.py
+ D experiments/k773_event_risk_budgeter_results.json
+ D experiments/k774_all_weather_vt.py
+ D experiments/k774_all_weather_vt_results.json
+ D experiments/k775_har_pd.py
+ D experiments/k775_har_pd_results.json
+ D experiments/k776_dmem.py
+ D experiments/k776_dmem_results.json
+ D experiments/k777_multi_target_fair.py
+ D experiments/k777_multi_target_fair_results.json
+ D experiments/k778_mem_r2_native.py
+ D experiments/k778_mem_r2_native_results.json
+ D experiments/k780_tail_first_es.py
+ D experiments/k780_tail_first_es_results.json
+ D experiments/k781_mvf.py
+ D experiments/k781_mvf_results.json
+ D experiments/k782_har_5d_rv.py
+ D experiments/k782_har_5d_rv_results.json
+ D experiments/k782v2_har_5d_rv.py
+ D experiments/k782v2_har_5d_rv_results.json
+ D experiments/k783_window_sensitivity.py
+ D experiments/k783_window_sensitivity_results.json
+ D experiments/k783b_cross_asset_window.py
+ D experiments/k783b_cross_asset_window_results.json
+ D experiments/k783c_cross_period_window.py
+ D experiments/k783c_cross_period_window_results.json
+ D experiments/k784_garch_gru.py
+ D experiments/k784_garch_gru_results.json
+ D experiments/k785_mf2_garch.py
+ D experiments/k785_mf2_garch_results.json
+ D experiments/k786_vt_insurance_premium.py
+ D experiments/k786_vt_insurance_premium_results.json
+ D experiments/k787_har_directional.py
+ D experiments/k787_har_directional_results.json
+ D experiments/k788_vt_crowding_abm.py
+ D experiments/k788_vt_crowding_abm_results.json
+ D experiments/k789_google_trends.py
+ D experiments/k789_google_trends_results.json
+ D experiments/k790_taiwan_price_limit_results.json
+ D experiments/k790v2_taiwan_price_limit.py
+ D experiments/k790v2_taiwan_price_limit_results.json
+ D experiments/k791_overnight_intraday.py
+ D experiments/k791_overnight_intraday_results.json
+ D experiments/k792_ewt_vol_spread.py
+ D experiments/k792_ewt_vol_spread_results.json
+ D experiments/k793_strategy_evaluation.py
+ D experiments/k793_strategy_evaluation_results.json
+ D experiments/k794_multivariate_fbm.py
+ D experiments/k794_multivariate_fbm_results.json
+ D experiments/k795_stlfsi4_regime.py
+ D experiments/k795_stlfsi4_regime_results.json
+ D experiments/k796v2_vix_spike_taiwan.py
+ D experiments/k796v2_vix_spike_taiwan_results.json
+ D experiments/k797_kan_garch.py
+ D experiments/k797_kan_garch_results.json
+ D experiments/k797v2_kan_garch.py
+ D experiments/k797v2_kan_garch_results.json
+ D experiments/k798_decision_focused.py
+ D experiments/k798_decision_focused_results.json
+ D experiments/k799_grand_evaluation.py
+ D experiments/k799_grand_evaluation_results.json
+ D experiments/k800_conformal_var.py
+ D experiments/k800_conformal_var_results.json
+ D experiments/k800v2_conformal_var.py
+ D experiments/k800v2_conformal_var_results.json
+ D experiments/k801_event_surprise.py
+ D experiments/k801_event_surprise_results.json
+ D experiments/k802_gjr_skewt.py
+ D experiments/k802_gjr_skewt_results.json
+ D experiments/k803_vix_term_structure.py
+ D experiments/k803_vix_term_structure_results.json
+ D experiments/k804_cross_asset_skewt.py
+ D experiments/k804_cross_asset_skewt_results.json
+ D experiments/k805_mem_model.py
+ D experiments/k805_mem_model_results.json
+ D experiments/k806_multivariate_fbm.py
+ D experiments/k806_multivariate_fbm_results.json
+ D experiments/k807_bond_stress_signal.py
+ D experiments/k807_bond_stress_signal_results.json
+ D experiments/k808_allweather_vt.py
+ D experiments/k808_allweather_vt_results.json
+ D experiments/k809_dispersion_timing.py
+ D experiments/k809_dispersion_timing_results.json
+ D experiments/k810_vix_mean_reversion.py
+ D experiments/k810_vix_mean_reversion_results.json
+ D experiments/k811_insurance_premium_vov.py
+ D experiments/k811_insurance_premium_vov_results.json
+ D experiments/k811v2_insurance_premium_vov_fixed.py
+ D experiments/k811v2_insurance_premium_vov_fixed_results.json
+ D experiments/k811v2_sensitivity_results.json
+ D experiments/k811v2_sensitivity_sweep.json
+ D experiments/k812_us_taiwan_leadlag.py
+ D experiments/k812_us_taiwan_leadlag_results.json
+ D experiments/k812v2_us_taiwan_leadlag_otc.py
+ D experiments/k812v2_us_taiwan_leadlag_otc_results.json
+ D experiments/k813_smooth_transition_garch.py
+ D experiments/k813_smooth_transition_garch_results.json
+ D experiments/k814_bayesian_mcmc_garch.py
+ D experiments/k814_bayesian_mcmc_garch_results.json
+ D experiments/k814v2_bayesian_mcmc_fixed.py
+ D experiments/k814v2_bayesian_mcmc_fixed_results.json
+ D experiments/k815_agent_based_vt.py
+ D experiments/k815_agent_based_vt_results.json
+ D experiments/k816_ginn_garch_nn.py
+ D experiments/k816_ginn_garch_nn_results.json
+ D experiments/k816v2_ginn_fixed.py
+ D experiments/k816v2_ginn_fixed_results.json
+ D experiments/k817_vix_taiwan_spillover.py
+ D experiments/k817_vix_taiwan_spillover_results.json
+ D experiments/k818_ssvs_return_prediction.py
+ D experiments/k818_ssvs_return_prediction_results.json
+ D experiments/k819_tail_first_es.py
+ D experiments/k819_tail_first_es_results.json
+ D experiments/k820_event_risk_budgeter.py
+ D experiments/k820_event_risk_budgeter_results.json
+ D experiments/k821_ssvs_variance_equation.py
+ D experiments/k821_ssvs_variance_equation_results.json
+ D experiments/k822_vix_product_trading.py
+ D experiments/k822_vix_product_trading_results.json
+ D experiments/k823_congressional_trading.py
+ D experiments/k823_congressional_trading_results.json
+ D experiments/k823v2_congressional_real.py
+ D experiments/k823v2_congressional_real_results.json
+ D experiments/k824_quantile_forecasting.py
+ D experiments/k824_quantile_forecasting_results.json
+ D experiments/k824v2_quantile_fixed.py
+ D experiments/k824v2_quantile_fixed_results.json
+ D experiments/k825_conformal_var_proxy.py
+ D experiments/k825_conformal_var_proxy_results.json
+ D experiments/k826_kan_garch_midas.py
+ D experiments/k826_kan_garch_midas_results.json
+ D experiments/k827_abm_vt_crowding.py
+ D experiments/k827_abm_vt_crowding_results.json
+ D experiments/k827v2_abm_sensitivity.py
+ D experiments/k827v2_abm_sensitivity_results.json
+ D experiments/k827v3_abm_fixed_liquidity.py
+ D experiments/k827v3_abm_fixed_liquidity_results.json
+ D experiments/k828_vix_only_insurance.py
+ D experiments/k828_vix_only_insurance_results.json
+ D experiments/k829_crossasset_var.py
+ D experiments/k829_crossasset_var_results.json
+ D experiments/k830_btc_skewed_var.py
+ D experiments/k830_btc_skewed_var_results.json
+ D experiments/k833_iv_straddle.py
+ D experiments/k833_iv_straddle_results.json
+ D experiments/k834_iv_connectedness.py
+ D experiments/k834_iv_connectedness_results.json
+ D experiments/k835_taiwan_vix_blend.py
+ D experiments/k835_taiwan_vix_blend_results.json
+ D experiments/k836_tw_evt_var.py
+ D experiments/k836_tw_evt_var_results.json
+ D experiments/k837_btc_regime_var.py
+ D experiments/k837_btc_regime_var_results.json
+ D experiments/k838_taifex_night_momentum.py
+ D experiments/k838_taifex_night_momentum_results.json
+ D experiments/k839_hierarchical_bayesian.py
+ D experiments/k839_hierarchical_bayesian_results.json
+ D experiments/k840_return_prediction_pipeline.py
+ D experiments/k840_return_prediction_pipeline_results.json
+ D experiments/k841_futures_realtime_vt.py
+ D experiments/k841_futures_realtime_vt_results.json
+ D experiments/k842_futures_profit_trading.py
+ D experiments/k842_futures_profit_trading_results.json
+ D experiments/k843_intraday_futures.py
+ D experiments/k843_intraday_futures_results.json
+ D experiments/k844_futures_vs_stock_vt.py
+ D experiments/k844_futures_vs_stock_vt_results.json
+ D experiments/k845_tx_vt_listing_eval.py
+ D experiments/k845_tx_vt_listing_eval_results.json
+ D experiments/k846_rebalancing_premium.py
+ D experiments/k846_rebalancing_premium_results.json
+ D experiments/k847_overnight_gap_decomposition.py
+ D experiments/k847_overnight_gap_decomposition_results.json
+ D experiments/k848_taifex_5min_rv.py
+ D experiments/k848_taifex_5min_rv_results.json
+ D experiments/k849_har_rv_taifex.py
+ D experiments/k849_har_rv_taifex_results.json
+ D experiments/k850_har_rv_var_taiwan.py
+ D experiments/k850_har_rv_var_taiwan_results.json
+ D experiments/k851_jump_dynamics.py
+ D experiments/k851_jump_dynamics_results.json
+ D experiments/k851_results.json
+ D experiments/k852_realized_garch.py
+ D experiments/k852_realized_garch_results.json
+ D experiments/k852b_regime_har.py
+ D experiments/k852b_results.json
+ D experiments/k853_proxy_ablation.py
+ D experiments/k853_proxy_ablation_results.json
+ D experiments/k854_common_sample_var.py
+ D experiments/k854_common_sample_var_results.json
+ D experiments/k855_crypto_fear_channel.py
+ D experiments/k855_results.json
+ D experiments/k856_fed_causal.py
+ D experiments/k856_results.json
+ D experiments/k857_results.json
+ D experiments/k857_tsmc_earnings_vol.py
+ D experiments/k858_congressional_trades.py
+ D experiments/k858_results.json
+ D experiments/k859_results.json
+ D experiments/k859_robust_vt.py
+ D experiments/k860_prospect_theory_vt.py
+ D experiments/k860_results.json
+ D experiments/k861_climate_vol.py
+ D experiments/k861_results.json
+ D experiments/k862_bidask_spread_vol.py
+ D experiments/k862_results.json
+ D experiments/k863_phase_transition.py
+ D experiments/k863_results.json
+ D experiments/k864_heterogeneous_abm.py
+ D experiments/k864_results.json
+ D experiments/k865_results.json
+ D experiments/k865_vol_spillover_network.py
+ D experiments/k866_results.json
+ D experiments/k866_vix_term_structure.py
+ D experiments/k867_results.json
+ D experiments/k867_tail_dependence.py
+ D experiments/k868_har_day_night.py
+ D experiments/k868_results.json
+ D experiments/k869_results.json
+ D experiments/k869_sector_rotation.py
+ D experiments/k870_drawdown_recovery.py
+ D experiments/k870_results.json
+ D experiments/k871_results.json
+ D experiments/k871_yield_curve_vol.py
+ D experiments/k872_credit_spread_vol.py
+ D experiments/k872_results.json
+ D experiments/k873_results.json
+ D experiments/k873_weekend_vol.py
+ D experiments/k874_joint_har_overnight.py
+ D experiments/k874_results.json
+ D experiments/k874b_logspace_cross_har.py
+ D experiments/k874b_results.json
+ D experiments/k874c_periodic_realized_garch.py
+ D experiments/k874c_results.json
+ D experiments/k874d_fair_comparison.py
+ D experiments/k874d_results.json
+ D experiments/k874e_full_comparison.py
+ D experiments/k874e_results.json
+ D experiments/k875_earnings_season_vol.py
+ D experiments/k875_results.json
+ D experiments/k876_momentum_crash.py
+ D experiments/k876_results.json
+ D experiments/k877_gold_silver_ratio.py
+ D experiments/k877_results.json
+ D experiments/k878_dollar_index_vol.py
+ D experiments/k878_results.json
+ D experiments/k879_results.json
+ D experiments/k879_vix_reversion_speed.py
+ D experiments/k880_prg_spy_validation.py
+ D experiments/k880_results.json
+ D experiments/k880b_es_supplement.py
+ D experiments/k880b_results.json
+ D experiments/k880v2_prg_fixed.py
+ D experiments/k880v2_results.json
+ D experiments/k881_prg_multi_asset.py
+ D experiments/k881_results.json
+ D experiments/k881b_multi_asset_es.py
+ D experiments/k881b_results.json
+ D experiments/k882_dca_day_study.py
+ D experiments/k882_results.json
+ D experiments/k883_results.json
+ D experiments/k883_taifex_tick_prg.py
+ D experiments/k884_har_day_night.py
+ D experiments/k884_har_day_night_results.json
+ D experiments/k885_evt_var.py
+ D experiments/k885_evt_var_results.json
+ D experiments/k886_prg_0050tw.py
+ D experiments/k886_prg_0050tw_results.json
+ D experiments/k887_financial_early_warning.py
+ D experiments/k887_financial_early_warning_results.json
+ D experiments/k888_congressional_contrarian.py
+ D experiments/k888_congressional_contrarian_results.json
+ D experiments/k889_multiplicative_vol_factor.py
+ D experiments/k889_multiplicative_vol_factor_results.json
+ D experiments/k889b_mf_gjr_cross_oos.py
+ D experiments/k889b_mf_gjr_cross_oos_results.json
+ D experiments/k889v2_mfgjr_fixed.py
+ D experiments/k889v2_mfgjr_fixed_results.json
+ D experiments/k890_path_signatures_vol.py
+ D experiments/k890_path_signatures_vol_results.json
+ D experiments/k891_dcc_portfolio_var.py
+ D experiments/k891_dcc_portfolio_var_results.json
+ D experiments/k892_verify_tw_gamma.py
+ D experiments/k892_verify_tw_gamma_results.json
+ D experiments/k893_regime_conformal_var.py
+ D experiments/k893_regime_conformal_var_results.json
+ D experiments/k894_gjrx_vs_mfgjr.py
+ D experiments/k894_gjrx_vs_mfgjr_results.json
+ D experiments/k895_ssvs_arx_garch.py
+ D experiments/k895_ssvs_arx_garch_results.json
+ D experiments/k896_taiwan_es_supplement.py
+ D experiments/k896_taiwan_es_supplement_results.json
+ D experiments/k897_sar_null_simulation.py
+ D experiments/k897_sar_null_simulation_results.json
+ D experiments/k898_paper3_table3_supplement.py
+ D experiments/k898_paper3_table3_supplement_results.json
+ D experiments/k899_unified_var_paper1.py
+ D experiments/k899_unified_var_paper1_results.json
+ D experiments/k900_taiwan_vt_performance.py
+ D experiments/k900_taiwan_vt_performance_results.json
+ D experiments/k901_international_vt_13markets.py
+ D experiments/k901_international_vt_13markets_results.json
+ D experiments/k901b_split_sample_note.json
+ D experiments/k902_paper1_tables_supplement.py
+ D experiments/k902_paper1_tables_supplement_results.json
+ D experiments/k903_paper8_robustness.py
+ D experiments/k904_paper8_shock_nfp_fix.py
+ D experiments/k905_quantile_vol_forecast.py
+ D experiments/k905_quantile_vol_forecast_results.json
+ D experiments/k908_mfgjr_student_t_var_es.py
+ D experiments/k908_mfgjr_student_t_var_es_results.json
+ D experiments/momentum_overlay_cross_asset_results.json
+ D experiments/multi_asset_hybrid_vt.py
+ D experiments/multi_asset_hybrid_vt_results.json
+ D experiments/multi_asset_hybrid_vt_v2.py
+ D experiments/multi_asset_hybrid_vt_v2_results.json
+ D experiments/order_flow_vol.py
+ D experiments/pairs_trading_garch.py
+ D experiments/pairs_trading_garch_results.json
+ D experiments/predictive_model_selection.py
+ D experiments/qlike_error_decomposition.py
+ D experiments/rate_hike_vt_experiment.py
+ D experiments/realized_garch_pilot.py
+ D experiments/rebalance_freq_hybrid_vt.py
+ D experiments/rebalance_freq_results.json
+ D experiments/regime_survival_analysis.py
+ D experiments/results_k131_tda_topology.json
+ D experiments/retail_implementation_guide.py
+ D experiments/retail_implementation_results.json
+ D experiments/rough_vol_pilot_results.json
+ D experiments/structural_leverage_index.py
+ D experiments/structural_leverage_panel.py
+ D experiments/tail_risk_parity.py
+ D experiments/tail_risk_parity_results.json
+ D experiments/taiwan_paper_fixes.py
+ D experiments/tda_vol_topology.py
+ D experiments/transaction_cost_analysis.py
+ D experiments/transaction_cost_results.json
+ D experiments/transfer_entropy_vix.py
+ D experiments/var_position_sizing.py
+ D experiments/var_position_sizing_results.json
+ D experiments/vix_death_zone_enhanced.py
+ D experiments/vix_death_zone_results.json
+ D experiments/vix_sufficiency_boundary.py
+ D experiments/vix_term_structure_results.json
+ D experiments/vix_term_structure_results_v2.json
+ D experiments/vix_term_structure_trading.py
+ D experiments/vix_term_structure_vol_pred.py
+ D experiments/vix_term_structure_vol_pred_v2.py
+ D experiments/vix_zone_cross_period_results.json
+ D experiments/vix_zone_cross_period_validation.py
+ D experiments/vol_cartography.py
+ D experiments/vrp_regime_decomposition.py
+ D experiments/vt_crowding_simulation.py
+ D experiments/vt_insurance_pricing.py
+ D experiments/vt_tsmom_cross_asset.py
+ D experiments/vt_vs_tsmom_frequency.py
+ D experiments/wavelet_vol_decomposition.py
+ M paper/vt-insurance-cost/reviews/audit_step1_2.md
+ M pyproject.toml
+ M scripts/deploy_zeabur.sh
+ M scripts/recalc_metrics.py
+ M scripts/record_and_publish.py
+ M scripts/research_helper.py
+ M scripts/setup_session_crons.sh
+ M scripts/supabase_sync.py
+ M scripts/write_k604_k597_k598_articles.py
+ M server.py
+ M src/volpred/memory/system.py
+ M src/volpred/ops/__init__.py
+ M src/volpred/ops/papers.py
+ M src/volpred/publisher/email_notifier.py
+ M src/volpred/publisher/publisher.py
+ M storage/.knowledge_index_state.json
+ M storage/.release_settings.json
+ M storage/.supabase_sync_state.json
+ M storage/market_status.json
+ M storage/notifications/notification_log.json
+ M storage/paper_trading.json
+ M storage/reports/mile_03173c26.json
+ M storage/reports/mile_043a8a2c.json
+ M storage/reports/mile_1ea1005b.json
+ M storage/reports/mile_20f2be2e.json
+ M storage/reports/mile_45060685.json
+ M storage/reports/mile_54a80b14.json
+ M storage/reports/mile_62a2b03d.json
+ M storage/reports/mile_69c4f0de.json
+ M storage/reports/mile_87c2efe0.json
+ M storage/reports/mile_b8a4dc23.json
+ M storage/reports/mile_caccf211.json
+ M storage/reports/mile_d862ad6c.json
+ M storage/reports/mile_e2cbf790.json
+ M storage/reports/mile_ea176c2f.json
+ M storage/reports/mile_eb8a1e7c.json
+ M storage/reports/mile_f068a2eb.json
+ M storage/reports/mile_f7d35a20.json
+ M storage/reports/mile_fcf218fa.json
+ M storage/risk_forecast.json
+ M storage/session_state.json
+ M storage/strategy_metrics.json
+ D texput.log
+ M uv.lock
+?? .claude/agents/
+?? .claude/rules/
+?? .codex/
+?? agent-specs/claude_agents/
+?? agent-specs/claude_rules/
+?? agent-specs/codex/
+?? agent-specs/references/
+?? agent-specs/skills/academic-finance-reviewer/
+?? agent-specs/skills/admin-ops/SKILL.md
+?? agent-specs/skills/admin-ops/references/architecture.md
+?? agent-specs/skills/admin-ops/references/deploy-and-runtime.md
+?? agent-specs/skills/admin-ops/references/governance.md
+?? agent-specs/skills/admin-ops/references/platform-api-manual.md
+?? agent-specs/skills/admin-ops/references/scheduling.md
+?? agent-specs/skills/admin-ops/references/session-cron-workflows.md
+?? agent-specs/skills/admin-ops/references/surfaces.md
+?? agent-specs/skills/agent-result-verification/
+?? agent-specs/skills/autonomous-research/
+?? agent-specs/skills/citation-verifier/
+?? agent-specs/skills/external-data-sources/
+?? agent-specs/skills/feed-publisher/
+?? agent-specs/skills/finance-paper-quality/
+?? agent-specs/skills/latex-academic-reviewer/
+?? agent-specs/skills/member-questions/
+?? agent-specs/skills/memory-health/
+?? agent-specs/skills/paper-review-cycle/
+?? agent-specs/skills/paper-stage-classifier/
+?? agent-specs/skills/paper-update/
+?? agent-specs/skills/publication-candidates/
+?? agent-specs/skills/taiwan-macro-data/
+?? agent-specs/skills/worktree-merge-verification/
+?? archive/
+?? config/project_targets.json
+?? experiments/I1/
+?? experiments/K158/
+?? experiments/behavioral_vt_barriers/
+?? experiments/btc_derivatives_vol/
+?? experiments/btc_liquidation_abm/
+?? experiments/btc_var_methods/
+?? experiments/caviar_test/
+?? experiments/climate_event_vol/
+?? experiments/cross_asset_info_topology/
+?? experiments/dca_optimal_frequency/
+?? experiments/decision_model_router/
+?? experiments/drawdown_duration_analysis/
+?? experiments/dynamic_leadlag_network/
+?? experiments/dynamic_leadlag_network_robustness/
+?? experiments/economic_sufficiency_frontier/
+?? experiments/emd_garch_vol/
+?? experiments/entropy_vol_regime/
+?? experiments/es_backtest_acerbi_szekely/
+?? experiments/garch_midas_test/
+?? experiments/gjr_vs_ewma_crisis/
+?? experiments/gld_inventory_vol/
+?? experiments/hawkes_vol_jump/
+?? experiments/hurst_fingerprint/
+?? experiments/i0/
+?? experiments/i10/
+?? experiments/i11/
+?? experiments/i12/
+?? experiments/i1b/
+?? experiments/i2/
+?? experiments/i3/
+?? experiments/i5/
+?? experiments/i6/
+?? experiments/i8/
+?? experiments/i9/
+?? experiments/i9b/
+?? experiments/jbf_robustness_suite/
+?? experiments/k1074/data/
+?? experiments/k1074/references/
+?? experiments/k1121/references/
+?? experiments/k1135/
+?? experiments/k142/
+?? experiments/k144/
+?? experiments/k145/
+?? experiments/k147/
+?? experiments/k148/
+?? experiments/k149/
+?? experiments/k150/
+?? experiments/k151/
+?? experiments/k152/
+?? experiments/k153/
+?? experiments/k154/
+?? experiments/k155/
+?? experiments/k156/
+?? experiments/k157/
+?? experiments/k159/
+?? experiments/k160/
+?? experiments/k180/
+?? experiments/k181/
+?? experiments/k182/
+?? experiments/k186/
+?? experiments/k187/
+?? experiments/k188/
+?? experiments/k189/
+?? experiments/k190/
+?? experiments/k191/
+?? experiments/k192/
+?? experiments/k193/
+?? experiments/k194/
+?? experiments/k195/
+?? experiments/k196/
+?? experiments/k197/
+?? experiments/k198/
+?? experiments/k199/
+?? experiments/k200/
+?? experiments/k201/
+?? experiments/k202/
+?? experiments/k203/
+?? experiments/k204/
+?? experiments/k205/
+?? experiments/k206/
+?? experiments/k207/
+?? experiments/k208/
+?? experiments/k209/
+?? experiments/k210/
+?? experiments/k211/
+?? experiments/k212/
+?? experiments/k213/
+?? experiments/k214/
+?? experiments/k215/
+?? experiments/k216/
+?? experiments/k217/
+?? experiments/k218/
+?? experiments/k219/
+?? experiments/k220/
+?? experiments/k221/
+?? experiments/k222/
+?? experiments/k223/
+?? experiments/k224/
+?? experiments/k225/
+?? experiments/k226/
+?? experiments/k228/
+?? experiments/k229/
+?? experiments/k230/
+?? experiments/k231/
+?? experiments/k232/
+?? experiments/k233/
+?? experiments/k234/
+?? experiments/k235/
+?? experiments/k236/
+?? experiments/k237/
+?? experiments/k238/
+?? experiments/k239/
+?? experiments/k240/
+?? experiments/k241/
+?? experiments/k242/
+?? experiments/k243/
+?? experiments/k244/
+?? experiments/k245/
+?? experiments/k246/
+?? experiments/k247/
+?? experiments/k248/
+?? experiments/k249/
+?? experiments/k250/
+?? experiments/k251/
+?? experiments/k252/
+?? experiments/k253/
+?? experiments/k254/
+?? experiments/k255/
+?? experiments/k256/
+?? experiments/k257/
+?? experiments/k258/
+?? experiments/k259/
+?? experiments/k260/
+?? experiments/k261/
+?? experiments/k262/
+?? experiments/k263/
+?? experiments/k264/
+?? experiments/k265/
+?? experiments/k266/
+?? experiments/k267/
+?? experiments/k268/
+?? experiments/k269/
+?? experiments/k270/
+?? experiments/k271/
+?? experiments/k272/
+?? experiments/k273/
+?? experiments/k274/
+?? experiments/k275/
+?? experiments/k276/
+?? experiments/k277/
+?? experiments/k278/
+?? experiments/k279/
+?? experiments/k280/
+?? experiments/k281/
+?? experiments/k282/
+?? experiments/k283/
+?? experiments/k284/
+?? experiments/k285/
+?? experiments/k286/
+?? experiments/k288/
+?? experiments/k289/
+?? experiments/k291/
+?? experiments/k292/
+?? experiments/k293/
+?? experiments/k294/
+?? experiments/k295/
+?? experiments/k296/
+?? experiments/k297/
+?? experiments/k298/
+?? experiments/k299/
+?? experiments/k300/
+?? experiments/k301/
+?? experiments/k302/
+?? experiments/k304/
+?? experiments/k305/
+?? experiments/k306/
+?? experiments/k307/
+?? experiments/k319/
+?? experiments/k320/
+?? experiments/k322/
+?? experiments/k334/
+?? experiments/k335/
+?? experiments/k336/
+?? experiments/k337/
+?? experiments/k338/
+?? experiments/k339/
+?? experiments/k340/
+?? experiments/k341/
+?? experiments/k342/
+?? experiments/k343/
+?? experiments/k344/
+?? experiments/k345/
+?? experiments/k346/
+?? experiments/k347/
+?? experiments/k348/
+?? experiments/k349/
+?? experiments/k350/
+?? experiments/k351/
+?? experiments/k352/
+?? experiments/k353/
+?? experiments/k354/
+?? experiments/k355/
+?? experiments/k356/
+?? experiments/k357/
+?? experiments/k358/
+?? experiments/k359/
+?? experiments/k360/
+?? experiments/k364/
+?? experiments/k365/
+?? experiments/k366/
+?? experiments/k367/
+?? experiments/k368/
+?? experiments/k369/
+?? experiments/k370/
+?? experiments/k372/
+?? experiments/k374/
+?? experiments/k375/
+?? experiments/k376/
+?? experiments/k377/
+?? experiments/k378/
+?? experiments/k380/
+?? experiments/k381/
+?? experiments/k382/
+?? experiments/k385/
+?? experiments/k386/
+?? experiments/k388/
+?? experiments/k390/
+?? experiments/k391/
+?? experiments/k392/
+?? experiments/k394/
+?? experiments/k396/
+?? experiments/k397/
+?? experiments/k398/
+?? experiments/k399/
+?? experiments/k401/
+?? experiments/k402/
+?? experiments/k403/
+?? experiments/k404/
+?? experiments/k405/
+?? experiments/k406/
+?? experiments/k408/
+?? experiments/k409/
+?? experiments/k410/
+?? experiments/k411/
+?? experiments/k412/
+?? experiments/k413/
+?? experiments/k414/
+?? experiments/k416/
+?? experiments/k418/
+?? experiments/k420/
+?? experiments/k420b/
+?? experiments/k421/
+?? experiments/k422/
+?? experiments/k423/
+?? experiments/k424/
+?? experiments/k425/
+?? experiments/k426/
+?? experiments/k429/
+?? experiments/k430/
+?? experiments/k431/
+?? experiments/k432/
+?? experiments/k433/
+?? experiments/k434/
+?? experiments/k435/
+?? experiments/k436/
+?? experiments/k437/
+?? experiments/k438/
+?? experiments/k439/
+?? experiments/k440/
+?? experiments/k441/
+?? experiments/k442/
+?? experiments/k443/
+?? experiments/k444/
+?? experiments/k445/
+?? experiments/k446/
+?? experiments/k447/
+?? experiments/k450/
+?? experiments/k451/
+?? experiments/k453/
+?? experiments/k455/
+?? experiments/k456/
+?? experiments/k457/
+?? experiments/k458/
+?? experiments/k459/
+?? experiments/k460/
+?? experiments/k461/
+?? experiments/k462/
+?? experiments/k463/
+?? experiments/k464/
+?? experiments/k465/
+?? experiments/k467/
+?? experiments/k468/
+?? experiments/k469/
+?? experiments/k470/
+?? experiments/k471/
+?? experiments/k472/
+?? experiments/k473/
+?? experiments/k474/
+?? experiments/k475/
+?? experiments/k476/
+?? experiments/k478/
+?? experiments/k479/
+?? experiments/k480/
+?? experiments/k481/
+?? experiments/k482/
+?? experiments/k483/
+?? experiments/k484/
+?? experiments/k485/
+?? experiments/k486/
+?? experiments/k487/
+?? experiments/k488/
+?? experiments/k489/
+?? experiments/k490/
+?? experiments/k491/
+?? experiments/k492/
+?? experiments/k493/
+?? experiments/k494/
+?? experiments/k495/
+?? experiments/k497/
+?? experiments/k498/
+?? experiments/k499/
+?? experiments/k501/
+?? experiments/k502/
+?? experiments/k503/
+?? experiments/k504/
+?? experiments/k506/
+?? experiments/k507/
+?? experiments/k508/
+?? experiments/k510/
+?? experiments/k511/
+?? experiments/k512/
+?? experiments/k513/
+?? experiments/k514/
+?? experiments/k515/
+?? experiments/k516/
+?? experiments/k517/
+?? experiments/k518/
+?? experiments/k519/
+?? experiments/k520/
+?? experiments/k521/
+?? experiments/k522/
+?? experiments/k523/
+?? experiments/k524/
+?? experiments/k525/
+?? experiments/k526/
+?? experiments/k527/
+?? experiments/k528/
+?? experiments/k529/
+?? experiments/k530/
+?? experiments/k531/
+?? experiments/k532/
+?? experiments/k533/
+?? experiments/k534/
+?? experiments/k535/
+?? experiments/k536/
+?? experiments/k537/
+?? experiments/k538/
+?? experiments/k539/
+?? experiments/k540/
+?? experiments/k541/
+?? experiments/k542/
+?? experiments/k543/
+?? experiments/k544/
+?? experiments/k545/
+?? experiments/k546/
+?? experiments/k547/
+?? experiments/k548/
+?? experiments/k549/
+?? experiments/k550/
+?? experiments/k551/
+?? experiments/k552/
+?? experiments/k553/
+?? experiments/k554/
+?? experiments/k556/
+?? experiments/k557/
+?? experiments/k558/
+?? experiments/k559/
+?? experiments/k560/
+?? experiments/k561/
+?? experiments/k562/
+?? experiments/k563/
+?? experiments/k564/
+?? experiments/k565/
+?? experiments/k566/
+?? experiments/k567/
+?? experiments/k568/
+?? experiments/k569/
+?? experiments/k570/
+?? experiments/k571/
+?? experiments/k572/
+?? experiments/k573/
+?? experiments/k574/
+?? experiments/k575/
+?? experiments/k576/
+?? experiments/k577/
+?? experiments/k583/
+?? experiments/k585/
+?? experiments/k588/
+?? experiments/k591/
+?? experiments/k592/
+?? experiments/k593/
+?? experiments/k594/
+?? experiments/k595/
+?? experiments/k597/
+?? experiments/k598/
+?? experiments/k600/
+?? experiments/k603/
+?? experiments/k604/
+?? experiments/k608/
+?? experiments/k610/
+?? experiments/k617/
+?? experiments/k618/
+?? experiments/k619/
+?? experiments/k620/
+?? experiments/k621/
+?? experiments/k622/
+?? experiments/k623/
+?? experiments/k624/
+?? experiments/k625/
+?? experiments/k626/
+?? experiments/k627/
+?? experiments/k628/
+?? experiments/k628b/
+?? experiments/k629/
+?? experiments/k630/
+?? experiments/k631/
+?? experiments/k632/
+?? experiments/k633/
+?? experiments/k634/
+?? experiments/k635/
+?? experiments/k636/
+?? experiments/k637/
+?? experiments/k638/
+?? experiments/k639/
+?? experiments/k640/
+?? experiments/k641/
+?? experiments/k642/
+?? experiments/k643/
+?? experiments/k644/
+?? experiments/k645/
+?? experiments/k646/
+?? experiments/k647/
+?? experiments/k648/
+?? experiments/k649/
+?? experiments/k650/
+?? experiments/k651/
+?? experiments/k652/
+?? experiments/k653/
+?? experiments/k654/
+?? experiments/k655/
+?? experiments/k656/
+?? experiments/k657/
+?? experiments/k658/
+?? experiments/k659/
+?? experiments/k660/
+?? experiments/k661/
+?? experiments/k662/
+?? experiments/k663/
+?? experiments/k664/
+?? experiments/k665/
+?? experiments/k666/
+?? experiments/k667/
+?? experiments/k668/
+?? experiments/k669/
+?? experiments/k670/
+?? experiments/k671/
+?? experiments/k672/
+?? experiments/k673/
+?? experiments/k674/
+?? experiments/k675/
+?? experiments/k676/
+?? experiments/k677/
+?? experiments/k678/
+?? experiments/k679/
+?? experiments/k680/
+?? experiments/k681/
+?? experiments/k682/
+?? experiments/k683/
+?? experiments/k684/
+?? experiments/k685/
+?? experiments/k686/
+?? experiments/k687/
+?? experiments/k688/
+?? experiments/k689/
+?? experiments/k690/
+?? experiments/k691/
+?? experiments/k692/
+?? experiments/k693/
+?? experiments/k694/
+?? experiments/k695/
+?? experiments/k696/
+?? experiments/k697/
+?? experiments/k698/
+?? experiments/k699/
+?? experiments/k700/
+?? experiments/k701/
+?? experiments/k702/
+?? experiments/k703/
+?? experiments/k704/
+?? experiments/k705/
+?? experiments/k706/
+?? experiments/k707/
+?? experiments/k708/
+?? experiments/k709/
+?? experiments/k710/
+?? experiments/k711/
+?? experiments/k712/
+?? experiments/k713/
+?? experiments/k716/
+?? experiments/k717/
+?? experiments/k718/
+?? experiments/k719/
+?? experiments/k720/
+?? experiments/k721/
+?? experiments/k722/
+?? experiments/k724/
+?? experiments/k725/
+?? experiments/k726/
+?? experiments/k727/
+?? experiments/k730/
+?? experiments/k731/
+?? experiments/k732/
+?? experiments/k733/
+?? experiments/k734/
+?? experiments/k735/
+?? experiments/k736/
+?? experiments/k737/
+?? experiments/k738/
+?? experiments/k738v2/
+?? experiments/k739/
+?? experiments/k739b/
+?? experiments/k739bv2/
+?? experiments/k740/
+?? experiments/k741/
+?? experiments/k742/
+?? experiments/k743/
+?? experiments/k744/
+?? experiments/k745/
+?? experiments/k746/
+?? experiments/k746b/
+?? experiments/k747/
+?? experiments/k748/
+?? experiments/k749/
+?? experiments/k750/
+?? experiments/k751/
+?? experiments/k752/
+?? experiments/k753/
+?? experiments/k754/
+?? experiments/k755/
+?? experiments/k756/
+?? experiments/k757/
+?? experiments/k757b/
+?? experiments/k757bv2/
+?? experiments/k758/
+?? experiments/k758v2/
+?? experiments/k759/
+?? experiments/k760/
+?? experiments/k761/
+?? experiments/k761v2/
+?? experiments/k762/
+?? experiments/k763/
+?? experiments/k764/
+?? experiments/k764v2/
+?? experiments/k765/
+?? experiments/k766/
+?? experiments/k767/
+?? experiments/k768/
+?? experiments/k769/
+?? experiments/k770/
+?? experiments/k770b/
+?? experiments/k771/
+?? experiments/k772/
+?? experiments/k773/
+?? experiments/k774/
+?? experiments/k775/
+?? experiments/k776/
+?? experiments/k777/
+?? experiments/k778/
+?? experiments/k780/
+?? experiments/k781/
+?? experiments/k782/
+?? experiments/k782v2/
+?? experiments/k783/
+?? experiments/k783b/
+?? experiments/k783c/
+?? experiments/k784/
+?? experiments/k785/
+?? experiments/k786/
+?? experiments/k787/
+?? experiments/k788/
+?? experiments/k789/
+?? experiments/k790/
+?? experiments/k790v2/
+?? experiments/k791/
+?? experiments/k792/
+?? experiments/k793/
+?? experiments/k794/
+?? experiments/k795/
+?? experiments/k796v2/
+?? experiments/k797/
+?? experiments/k797v2/
+?? experiments/k798/
+?? experiments/k799/
+?? experiments/k800/
+?? experiments/k800v2/
+?? experiments/k801/
+?? experiments/k802/
+?? experiments/k803/
+?? experiments/k804/
+?? experiments/k805/
+?? experiments/k806/
+?? experiments/k807/
+?? experiments/k808/
+?? experiments/k809/
+?? experiments/k810/
+?? experiments/k811/
+?? experiments/k811v2/
+?? experiments/k812/
+?? experiments/k812v2/
+?? experiments/k813/
+?? experiments/k814/
+?? experiments/k814v2/
+?? experiments/k815/
+?? experiments/k816/
+?? experiments/k816v2/
+?? experiments/k817/
+?? experiments/k818/
+?? experiments/k819/
+?? experiments/k820/
+?? experiments/k821/
+?? experiments/k822/
+?? experiments/k823/
+?? experiments/k823v2/
+?? experiments/k824/
+?? experiments/k824v2/
+?? experiments/k825/
+?? experiments/k826/
+?? experiments/k827/
+?? experiments/k827v2/
+?? experiments/k827v3/
+?? experiments/k828/
+?? experiments/k829/
+?? experiments/k830/
+?? experiments/k833/
+?? experiments/k834/
+?? experiments/k835/
+?? experiments/k836/
+?? experiments/k837/
+?? experiments/k838/
+?? experiments/k839/
+?? experiments/k840/
+?? experiments/k841/
+?? experiments/k842/
+?? experiments/k843/
+?? experiments/k844/
+?? experiments/k845/
+?? experiments/k846/
+?? experiments/k847/
+?? experiments/k848/
+?? experiments/k849/
+?? experiments/k850/
+?? experiments/k851/
+?? experiments/k852/
+?? experiments/k852b/
+?? experiments/k853/
+?? experiments/k854/
+?? experiments/k855/
+?? experiments/k856/
+?? experiments/k857/
+?? experiments/k858/
+?? experiments/k859/
+?? experiments/k860/
+?? experiments/k861/
+?? experiments/k862/
+?? experiments/k863/
+?? experiments/k864/
+?? experiments/k865/
+?? experiments/k866/
+?? experiments/k867/
+?? experiments/k868/
+?? experiments/k869/
+?? experiments/k870/
+?? experiments/k871/
+?? experiments/k872/
+?? experiments/k873/
+?? experiments/k874/
+?? experiments/k874b/
+?? experiments/k874c/
+?? experiments/k874d/
+?? experiments/k874e/
+?? experiments/k875/
+?? experiments/k876/
+?? experiments/k877/
+?? experiments/k878/
+?? experiments/k879/
+?? experiments/k880/
+?? experiments/k880b/
+?? experiments/k880v2/
+?? experiments/k881/
+?? experiments/k881b/
+?? experiments/k882/
+?? experiments/k883/
+?? experiments/k884/
+?? experiments/k885/
+?? experiments/k886/
+?? experiments/k887/
+?? experiments/k888/
+?? experiments/k889/
+?? experiments/k889b/
+?? experiments/k889v2/
+?? experiments/k890/
+?? experiments/k891/
+?? experiments/k892/
+?? experiments/k893/
+?? experiments/k894/
+?? experiments/k895/
+?? experiments/k896/
+?? experiments/k897/
+?? experiments/k898/
+?? experiments/k899/
+?? experiments/k900/
+?? experiments/k901/
+?? experiments/k901b/
+?? experiments/k902/
+?? experiments/k903/
+?? experiments/k904/
+?? experiments/k905/
+?? experiments/k908/data/
+?? experiments/k908/references/
+?? experiments/momentum_overlay_cross_asset_validation/
+?? experiments/multi_asset_hybrid_vt/
+?? experiments/multi_asset_hybrid_vt_v2/
+?? experiments/order_flow_vol/
+?? experiments/pairs_trading_garch/
+?? experiments/predictive_model_selection/
+?? experiments/qlike_error_decomposition/
+?? experiments/rate_hike_vt_experiment/
+?? experiments/realized_garch_pilot/
+?? experiments/rebalance_freq_hybrid_vt/
+?? experiments/regime_survival_analysis/
+?? experiments/retail_implementation_guide/
+?? experiments/rough_vol_pilot/
+?? experiments/structural_leverage_index/
+?? experiments/structural_leverage_panel/
+?? experiments/tail_risk_parity/
+?? experiments/taiwan_paper_fixes/
+?? experiments/tda_vol_topology/
+?? experiments/transaction_cost_analysis/
+?? experiments/transfer_entropy_vix/
+?? experiments/var_position_sizing/
+?? experiments/vix_death_zone_enhanced/
+?? experiments/vix_sufficiency_boundary/
+?? experiments/vix_term_structure_trading/
+?? experiments/vix_term_structure_vol_pred/
+?? experiments/vix_term_structure_vol_pred_v2/
+?? experiments/vix_zone_cross_period_validation/
+?? experiments/vol_cartography/
+?? experiments/vrp_regime_decomposition/
+?? experiments/vt_crowding_simulation/
+?? experiments/vt_insurance_pricing/
+?? experiments/vt_tsmom_cross_asset/
+?? experiments/vt_vs_tsmom_frequency/
+?? experiments/wavelet_vol_decomposition/
+?? paper/crypto-fear-channel/body_v0_intro.tex
+?? src/volpred/config/
+?? src/volpred/ops/agent_spec.py
+?? src/volpred/ops/experiments.py
+?? src/volpred/ops/hygiene.py
+?? src/volpred/ops/local_control_plane.py
+?? src/volpred/ops/rollback.py
+?? src/volpred/ops/schedules.py
+?? storage/memory/knowledge.json.bak_2026-04-17_corrupted
+?? storage/notifications/0472fa57.json
+?? storage/notifications/1fe40e59.json
+?? storage/notifications/25fec1b7.json
+?? storage/notifications/27cfd088.json
+?? storage/notifications/2e4ce8a3.json
+?? storage/notifications/33b3ae4c.json
+?? storage/notifications/37e04f17.json
+?? storage/notifications/424a3e35.json
+?? storage/notifications/42b077d5.json
+?? storage/notifications/504a0a22.json
+?? storage/notifications/5102f2f4.json
+?? storage/notifications/7cfa47d4.json
+?? storage/notifications/8561c525.json
+?? storage/notifications/8ae8dd3d.json
+?? storage/notifications/91b5b0ce.json
+?? storage/notifications/9f8103ba.json
+?? storage/notifications/aa0fbab0.json
+?? storage/notifications/b6db5e2e.json
+?? storage/notifications/bd383405.json
+?? storage/notifications/cd985e32.json
+?? storage/notifications/e9847d3b.json
+?? storage/notifications/f6b4b327.json
+?? storage/reports/mile_0c481a74.json
+?? storage/reports/mile_5aef5e64.json
+?? storage/reports/mile_78d649c4.json
+?? storage/reports/mile_7e295058.json
+?? storage/reports/mile_d08970f1.json
+?? storage/reports/mile_d14e7f5b.json
+?? storage/reports/mile_ee729e84.json
+?? storage/reports/mile_f52fb13b.json
+?? tests/conftest.py
+?? tests/test_agent_spec.py
+?? tests/test_experiments_ops.py
+?? tests/test_local_control_plane.py
+?? tests/test_memory_system.py
+?? tests/test_rollback.py
+?? tests/test_runtime_schedules.py
+?? tests/test_schedule_report.py

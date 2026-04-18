@@ -6,20 +6,13 @@
 3. 持續找出利用研究成果獲利的模式
 4. 持續找出並優化本網站的風格、經營模式、發展方向，持續修正朝之前進
 
-## 行為準則（統一區）
+## 行為準則（已搬到 `.claude/skills/autonomous-research/references/methodology.md`）
 
-### 統計有效性（最重要，違反即無效）
-| 項目 | 最低要求 | 建議 | 依據 |
-|------|---------|------|------|
-| GARCH 估計 window | ≥500 | ≥2000 | Hwang & Valls Pereira (2006): w<500 persistence bias >5% |
-| OOS 評估期間 | ≥252 天 | ≥504 天 | 至少 1 年才能涵蓋不同 regime |
-| DM test 樣本 | ≥200 | ≥500 | t-test 漸近分配需要足夠樣本 |
-| Cross-sectional 測試 | ≥7 資產 | ≥15 | N<7 的 Spearman 很不穩定 |
-| Bootstrap | ≥1000 reps | ≥5000 | <1000 CI 不精確 |
-| Harvey (2016) threshold | t>3.0 | — | 多重檢定下 t>1.96 不夠 |
-| Sharpe CI | SE ≈ 1/√N_years | — | 19 年 SE=0.23，差異<0.1 不顯著 |
+**2026-04-18 搬移**：原 9 段技術細節（統計有效性、模型比較公平性、VaR/ES 轉換、多頻率、跨資產假日、資料期間、評估指標、研究多元化、研究主題來源）移至 `.claude/skills/autonomous-research/references/methodology.md`（同步於 `.agents/skills/autonomous-research/references/methodology.md` 供 Codex 讀）。
 
-**違反這些約束的結果應標記為 preliminary / unreliable，不可作為結論。**
+此處保留為 stub，避免舊引用 404。若要查技術細節，直接打開對應 skill reference（9 節、對應原編號）。
+
+`research_program.md` 回歸**方向／方法／標的／軌跡**文件（短期 active 詳細、中期概念、長期索引）。
 
 ### 模型比較公平性標準（2026-03-31 建立，K777/K778 教訓）
 
@@ -602,6 +595,15 @@ K2/K16/K19/K24/K54/K63/K64/K89 共 **8 次獨立驗證**（見 line 191）+ K534
 - **Paper Taiwan microstructure** candidate（US vs Taiwan 對比、sell-side asymmetry）
 - Triple-gate 擋住 K1124/K1125/K1128 各自 null，但 meta-finding (decomposition + regime) 可寫
 
+### 10b. Regime-switching rescue NULL（2026-04-17/18 K1130+K1131+K1132）
+**K1128 high-VIX tertile DM+3.59 無法透過 regime-switching 救出——此路徑關閉**
+- K1130：extended IS 2012-2019（含 GFC / 2011 / 2015 China deval）→ DM 仍惡化，NULL
+- K1131：continuous VIX-dependent β via natural cubic spline → DM t=-3.94 spline 輸 tertile，NULL
+- K1132：block-bootstrap B=5000 (Politis-Romano circular, b=60) 驗 K1131，95% CI=[-7.98, -2.43] **不跨 0 → NULL robust**（bootstrap mean t≈-4.5 比 point 更負，顯示 HAC SE 可能輕微高估）
+- 合：regime-based rescue paradigm 結構性耗盡。Paper 3 若走 TAIFEX microstructure 方向，K1128/K1131/K1132 可作「discovery + null rescue」敘事素材
+- **教訓**：IS 規範 cutoff 遇 OOS unprecedented regime（COVID VIX 82）時結構性 degenerate；spline、extended IS、bootstrap CI 三條獨立證據一致 → 不是 sample artifact 可補救
+- **下一步選項**（非此處決策）：放棄 regime paradigm / 改 non-OFI vol-scaling (K1134) / 接受 NULL 作為 paper negative result
+
 ### 11. GAS compendium: 8+ assets 全 null（2026-04-13 K437/K1038/K1129）
 **Generalized Autoregressive Score (Creal-Koopman-Lucas 2008) 不是通用替代品**
 - K437/K1038：equity 4 assets NS
@@ -611,171 +613,37 @@ K2/K16/K19/K24/K54/K63/K64/K89 共 **8 次獨立驗證**（見 line 191）+ K534
 - 通則：score-driven downweight 大 shock 在含極端 events 的期間反向傷害（K1038 equity + K1129 BTC 共同 pattern）
 - H4 VaR violation rate 低是「分配假設好」不是「vol predict 好」——兩個不同 task
 
-### 26. K1174 WEAKENS K1170 press-concentration claim：3.28σ → 0.03σ in empirical partial replication（2026-04-14 K1174）
-**真實 GDELT 數據未支持 K1170 hardcoded PCR**
-- K1174 GCP BigQuery 無 auth → fallback GKG raw CSV 每日 12:00 UTC 1/96 slice (1.04%)，131/413 events 覆蓋
-- Real Cross-market Spearman ρ(hardcoded, real) = -0.257 (N=6, p=0.62) — 完全不對齊甚至微負相關
-- **EU-JP pair test**: hardcoded +0.45 (3.28σ) → empirical +0.005 (0.03σ, Welch t=+0.03 p=0.98) — **崩潰**
-- US 最大落差 (hardcoded 0.85 vs real 0.24) 推測因 AMC 盤後財報新聞在 T+1 UTC, 12:00 UTC slice under-sample
-- **Verdict: INSUFFICIENT_COVERAGE with direction-of-evidence WEAKENING K1170**
-- Sample 太小 (EU n=3, JP n=2) 無法決定性 overturn，但 direction 明確不 support K1170 claim
-- **K1170 PARTIAL_CONFIRMED 應降級為 OPEN question**，3-level mechanism 第三層 (press) 從 claim 降為 hypothesis
-- 前兩層仍穩固：institutional ownership (between-market) + analyst coverage (within-market)
-- **既有 press article mile_45060685 已加 caveat**
-- 衍生 K1175 (full 96-files-per-day scan 或 GCP-authed BigQuery decisive)
+### 13. Paper 2 universal-magnitude EAV + two-level mechanism（2026-04-13/14，K1145-K1175 合併）
+**Paper 2 narrative 主軸：Earnings Announcement Volatility (EAV) universal 跨市場 + between/within two-level mechanism。**
+（原 14 段 narrative 日誌 #14-20、#22-26 於 2026-04-18 壓縮至此；per-experiment 數字見 `knowledge.json` / `experiments/kXXX/README.md`）
 
-### 25. Paper 2 三層 mechanism 浮現：press concentration 解 EU-JP residual（2026-04-14 K1170）→ K1174 WEAKENS
-**EU-JP pair gap (institutions_pct 幾乎相同但 θ_rel 半數差距) 由媒體集中度解釋**
-- K1170 GDELT API 429 → fallback hardcoded PCR (Reuters Institute 2024 + Pew + K1153 prior)
-- Per-market PCR: EU 0.317 / TW 0.65 / JP 0.767 / US 0.85 / BR 0.567 / CH 0.567 / CA 0.65 / HK 0.667 / KR 0.65 / IN 0.517
-- **EU-JP pair**: ΔPCR=+0.45 (3.28σ) 跟 Δθ_rel=+0.25 sign consistent — **first regressor to discriminate EU from JP**
-- Joint between-market R²: inst_pct 0.196 → +PCR 0.239 (incremental +0.04)
-- Cross-market N=10 Spearman ρ(PCR, θ_rel)=+0.062 NS — 新興市場 break ladder
-- Developed N=6 ρ=+0.899 p=0.015 (drop CA outlier)
-- **Verdict PARTIAL_CONFIRMED**: pair gap supported, universal driver rejected
-- **3-level mechanism revised**:
-  1. Between-market institutional ownership (developed ladder, K1167/K1168)
-  2. Within-market analyst coverage (per-stock, K1166/K1168 t=+3.63)
-  3. Press concentration (EU-JP residual, K1170)
-- E072: GDELT rate-limit fallback + hardcoded prior circularity risk
-- 衍生 K1174 (GDELT BigQuery export 取真實 PCR)
+**Finding**
+- 方向 universal：TW K1145 + US K1147 + JP K1150 + EU K1153 四市場 pooled A4f-EAV 均 PASS（bootstrap t ≈ 4-12、5 層 robustness、placebo p=0/60），sign 一致、量級 market-specific（US/TW 約 3×）
+- Binary sufficient：continuous surprise magnitude 在 US/JP 全 NS（K1151/K1157），機制非 surprise-size driven，比較接近 attention / IV crush / announcement-day information friction
+- θ_rel cluster：US/JP 0.39-0.59 vs TW/EU 0.14-0.17（K1152）；quarterly-cadence hypothesis REJECTED（EU 純季報但 θ_rel 落 TW cluster，K1153）
 
-### 24. Paper 2 two-level mechanism STRENGTHENED：N=7 markets 確認 between/within R² super-clean 切換（2026-04-14 K1165）
-**N=4 → N=7 把 Spearman p 從 0.20 推進到 0.052 緊貼門檻**
-- K1165 +AU/KR/CA/HK 擴展，AU 因 yfinance earnings 0/10 droppped → N=7 final
-- Spearman ρ(institutions_pct, θ_rel)=+0.750 p=0.052 (Drop-EU LOO ρ=+0.943 p=0.005)
-- Per-market table: TW 6.36e-5 / HK 5.21e-5 / KR 1.27e-4 / EU 4.07e-5 / JP 1.41e-4 / CA 3.13e-4 / US 1.91e-4
-- Per-stock panel (N=133, +24 new) log_analyst β=+1.07e-3 t=+3.24 PASS Harvey (replicates K1166 t=+3.56)
-- **Two-level R² 分解 super-clean**:
-  - Between-market: institutions_pct 63.1% vs log_analyst 15.8% (institutions 強 4×)
-  - Within-market: log_analyst 7.2% vs institutions_pct 0.4% (analyst 強 20×)
-  - 兩個 channel 在 between/within 邊界乾淨切換 — 強 evidence for K1167 hypothesis
-- **Verdict**: STRENGTHENED (CONFIRMED 留 N≥10 K1168)
-- Paper 2 §5 narrative **READY commit**
-- 衍生 K1168 (+BR/CH/IN N≥10), K1171 (AU via Alpha Vantage)
+**Mechanism（two-level，K1166+K1167+K1165+K1168）**
+- **Between-market**：institutional ownership（K1167/K1168 ranking 完全匹配 cluster split，per 市場以 US 13F / JP MOF / EU SHS-S / TW FISC 驗證）
+- **Within-market**：analyst coverage per-stock（K1166 per-stock refit + Engle-Ghysels-Sohn 2013 E[g]=1 normalization 移除 σ² tautology，US ρ 顯著 PASS Harvey）
+- K1165 N=7 markets 把 between/within R² 分解切成 super-clean ladder（institutions 主導 between、analyst 主導 within）
 
-### 23. Paper 2 two-level mechanism 浮現：between-market 用 institutional + within-market 用 analyst（2026-04-14 K1167）
-**K1166 within-market analyst 確認後，K1167 用 institutional ownership 解 cross-market puzzle**
-- 4-market institutions_pct ranking: TW 0.247 < EU 0.416 < JP 0.425 < US 0.750 **完全匹配** 2-cluster split
-- Spearman ρ(institutions_pct, θ_rel)=+0.80 p=0.20 (N=4 限制 power) — 優於 analyst ρ=+0.40
-- Per-stock joint panel: log_analyst β=+1.14e-3 t=+2.71 (PASS); institutions_pct β=-2.73e-3 t=-0.93 (NS)
-- **Two-level mechanism**:
-  - **Between-market** retail-vs-institutional → cluster split
-  - **Within-market** analyst coverage → per-stock θ_EAV_i
-  - Institutions_pct **不 subsume** analyst — 兩通道互補
-- EU-vs-JP gap (0.14 vs 0.39) institutions_pct 也未完全解釋 (EU 0.416 ≈ JP 0.425) — 殘差留 K1170 press-concentration
-- N=4 preliminary, K1165 升 P1 補 N≥8 markets
-- **E071**: yfinance major_holders 0.2+ 結構踩坑教訓
+**Residual gap + WEAKENED hypothesis**
+- EU-JP pair institutions 幾乎相同但 θ_rel 半差 → K1170 提出 press-concentration hypothesis（GDELT hardcoded PCR）
+- K1174 用真實 GDELT 1/96 partial replication：EU-JP ΔPCR 從 hardcoded 3.28σ 塌到 empirical 0.03σ → **WEAKENED**
+- Press concentration 從 claim 降為 open question，需 K1175（GDELT full-day 或 GCP BigQuery 授權）decisive
 
-### 22. Paper 2 mechanism 翻轉再翻轉：per-stock refit CONFIRMED within-market（2026-04-14 K1166）
-**K1164 REJECTED 純粹是 σ² tautology artifact，移除後 analyst hypothesis 在 within-market 層級成立**
-- K1166: 110 stocks per-stock θ_EAV_i refit (no shared pooling) + Engle-Ghysels-Sohn (2013) E[g]=1 normalization
-- Pooled Spearman ρ(log_analyst, θ_EAV_i) = +0.241, p=0.012 (vs K1164 ρ=+0.40 p=0.60)
-- US 獨市場 ρ=+0.575 p=0.001 PASS Harvey
-- Panel OLS coef log_analyst β=+9.68e-4 t=+3.56 p=0.0006 **PASS Harvey 3.0**
-- 全 4 markets ρ>0 無反向；JP 100% |t|>2 80% Harvey
-- Per-stock vs pooled-shared θ_EAV ratio 6-16x（EGS normalization 差異），ordering 保留
-- **Mechanism verdict**:
-  - K1153 within-market analyst hypothesis **CONFIRMED**
-  - cross-market 4-market rank inversion (EU 21 analysts > JP 14.5 但 EU LOW JP HIGH cluster) **仍 open puzzle**
-- **E070 教訓**: shared-coef pooled spec 評估個股 mechanism 必踩 σ² tautology；per-stock refit + EGS E[g]=1 才是 ground truth
-- K1167 升級 P2 (retail-vs-institutional 解 cross-market puzzle)
-- K1169 NEW P1：Paper 2 §5 主線程改寫（K1164 降為 tautology demonstration, K1166 升為 main mechanism test）
+**有參考價值的錯誤**
+- E068：HAC 對高 overlap rolling 不夠，必配 block-bootstrap 第二道閘
+- E069：pooled panel 揭露 firm-level idiosyncratic SE 掩蓋的 universal signal — 判「dual NULL」前必先跑 pooled spec
+- E070：shared-coef pooled spec 評估個股 mechanism 必踩 σ² tautology；per-stock refit + EGS normalization 才是 ground truth
+- E071：yfinance major_holders 0.2+ 結構踩坑
+- E072：GDELT rate-limit fallback + hardcoded prior 會製造 circularity risk
 
-### 21. Paper 2 mechanism 仍 OPEN：analyst hypothesis 也被推翻（2026-04-14 K1164）→ 已被 K1166 翻轉
-**K1153 後第二次推翻——cluster mechanism 尚未找到**
-- K1164 檢驗 analyst coverage × media density 假說 (K1153 §5.4 提出)
-- 4-market analyst median: TW 7.5 / EU 21.0 / JP 14.5 / US 32.5
-- 假設預測順序 TW<EU<JP<US，但實際 EU(21) > JP(14.5) 且 cluster 反轉 (EU LOW vs JP HIGH) — **rank-ordering inversion**
-- Cross-market Spearman ρ=+0.40 p=0.60 無 power
-- Panel coef β=-0.149 但是 σ² tautology artifact (θ_rel=θ_EAV/σ² 機械 rank-inverse)，**不可採信**
-- **Mechanism question remains OPEN**：K1153 §5.4 必須改寫為「analyst hypothesis tested in K1164 also rejected」
-- 衍生 K1165 (N≥8 markets), K1166 (per-stock θ_EAV refit 移除 tautology), K1167 (retail-vs-institutional ownership proxy via 13F/MOF/ECB/FISC)
+**歷史起點（已被 pivot）**：Paper 2 曾以「dual-NULL contribution」定位（K1114→K1140 cross+temporal θ_EAV heterogeneity 全 NULL），K1145 pooled MLE 推翻此定位，narrative pivot 至 universal-magnitude。
 
-### 20. Paper 2 四市場 + 雙 cluster taxonomy（2026-04-14 K1153 EU）
-**EU 加入四市場全 PASS，但 K1152 quarterly hypothesis 被推翻**
-- EU (DAX+CAC+FTSE, N=18 due yfinance earnings 稀疏) pooled θ_EAV = +4.07e-5, bootstrap t=+4.19 PASS
-- Placebo +14.77σ p=0/60；3 EAV-def monotonic, drop-5×5 stable
-- **Four-market direction universal confirmed** (TW+US+JP+EU all PASS + placebo p=0)
-- **θ_rel cluster**: TW 0.167 / EU 0.137 / JP 0.388 / US 0.586
-- EU 是純季報但 θ_rel 落 TW cluster → **K1152 quarterly-cadence hypothesis REJECTED**
-- 新假說：media concentration × analyst coverage 密度（US 季報媒體報導 + I/B/E/S coverage 最密）
-- Paper 2 narrative: "four independent markets + refined two-cluster θ_rel taxonomy; quarterly cadence 不是 cluster 主因"
-- 衍生 K1163 (EU local filings 改 N=30), K1164 (analyst coverage + media mechanism test)
+**方向**：Paper 2 narrative 軸 = universal + two-level；K1146/K1169 是主線程 body 改寫任務；press concentration 留為 open question 等 K1175 結果。
 
-### 18. Paper 2 relative-magnitude verdict: 方向 universal + 量級 market-specific（2026-04-13 K1152）
-**Scale-adjusted θ_rel 仍顯著差異：quarterly vs mixed reporting cluster**
-- K1145/K1147/K1150 三市場 absolute θ_EAV 差 3× — 只是 scale artifact 還是真 magnitude 差異？
-- θ_rel = θ_EAV / avg_σ²: TW 0.1673 [0.109, 0.247] / US 0.5862 [0.395, 0.859] / JP 0.3875 [0.354, 0.482]
-- avg_σ² 三市場近乎相同 (3.26e-4 ~ 3.80e-4) — scaling 沒校正差異
-- Wald H0 (equal θ_rel): χ²(2)=29.19, p≈4.6e-7 bootstrap p=0.000 — 決定性 reject
-- CI overlap: TW∩US=F, TW∩JP=F, US∩JP=T → quarterly cluster (US+JP) vs mixed (TW)
-- **Paper 2 narrative 雙層修正**: "方向 universal（三市場均顯著正向）+ 量級 market-specific（quarterly reporting institutional density 主導）"
-- 衍生 K1153 EU 4th market, K1156 TW 季報 sub-sample converge test
-
-### 19. Paper 2 binary-sufficient universality 跨市場確認（2026-04-13 K1157）
-**JP 完美複製 US K1151 — 三市場 binary EAV 全 PASS，US+JP continuous 全 NS**
-- JP TOPIX N=30 同 panel 同 design：binary θ=+1.25e-4 boot t=+13.03 PASS vs continuous θ=+4.76e-6 boot t=+1.32 NS, ΔAIC=-2551 strongly favors binary
-- Placebo z=+1.53 p=0.067 跟 US K1151 (+1.60) 量級一致
-- Drop-5 sign-flip when removing SoftBank (outlier-driven main-spec signal)
-- **Universality verdict**: 三市場 binary PASS + 兩市場 continuous NS replication
-- Paper 2 narrative 升級：「Announcement-day long-run variance channel reflects information-processing friction (attention/IV crush/scheduled hedging), not scaling with market-aggregated EPS surprise magnitude — universal across US and JP」
-- 衍生 K1162 (analyst-coverage-high sub-sample mechanism test)
-
-### 17. Paper 2 mechanism narrowing: binary sufficient, surprise size 無關（2026-04-13 K1151）
-**Continuous EAV surprise spec 全面失效 — 機制非 surprise-size driven**
-- US S&P 500 N=30 (K1147 cache) 同 panel: continuous |Surprise%| z-score winsor p99 取代 binary EAV
-- Binary θ=+1.72e-4 boot t=+4.49 p=0.000 (K1147 confirmed) vs Continuous θ=+5.26e-6 boot t=+1.11 p=0.413
-- Placebo continuous z=+1.60 p=0.10 (跟 null 無法區別)
-- **ΔAIC binary - continuous = -5479** (binary 嚴格更佳)
-- **Mechanism evidence**: announcement-day vol clustering 跟 surprise size 無關 → 解釋為 attention-based vol spike 或 IV crush 一致性 resolve，非 information-shock-magnitude 驅動
-- Paper 2 narrative 微調：「effect characterised by announcement-day information-processing friction rather than surprise-magnitude-scaled information shock」
-- 衍生 K1157 (JP universality verification), K1161 (options IV crush as alt continuous regressor)
-
-### 16. Paper 2 三市場全 PASS：true global volatility regularity（2026-04-13 K1150）
-**TW + US + JP 三市場全 universal-magnitude PASS — 真 cross-market regularity 確認**
-- JP TOPIX top-30 pooled θ_EAV = +1.413e-4，bootstrap (n=150) t=+11.99，95% CI [+1.29e-4, +1.76e-4]
-- Placebo 60 reps: 觀測值 = +38.6σ from null mean，p=0/60 decisive
-- 3 EAV-def monotonic shrinkage 同 K1145 TW pattern
-- Drop-5 × 5 seeds θ ∈ [+1.34e-4, +1.47e-4]，全部 t > 18
-- **Three-market table**: TW (+6.36e-5, t=+5.24, +13.6σ) / US (+1.91e-4, t=+4.50, +70.7σ) / JP (+1.41e-4, t=+11.99, +38.6σ)
-- Magnitude ratio US/TW=3.0, JP/TW=2.2, JP/US=0.74 — 同 1e-4 量級
-- JP 高 t (+11.99) 觸發 Rule #5 self-challenge: TOPIX top-30 同質性 > S&P 500 (NVDA/TSLA outlier 不存在)，所有 150 bootstrap draws 嚴格 >0，三層一致可接受
-- **Paper 2 final narrative**: "Three independent equity markets, 5 robustness layers each, magnitudes differ ~3× but direction uniformly positive — global volatility regularity where GARCH-MIDAS τ component absorbs market-wide announcement-day variance premium invisible at firm level but robust at panel level"
-- K1146 主線程改稿升 P1; 衍生 K1153 EU + K1156 cover-fig
-
-### 15. Paper 2 cross-market 升級：global volatility regularity（2026-04-13 K1147）
-**TW K1145 + US K1147 雙市場全 PASS — universal regularity 確認**
-- US S&P 500 top-30 pooled θ_EAV = +1.91e-4，bootstrap t=+4.50，95% CI [+1.29e-4, +2.80e-4]
-- Placebo 60 reps: 觀測值 = +70.7σ from null mean，p=0/60 (比 K1145 +13.6σ 強 5×)
-- 3 EAV-def: 1d 峰 +1.91e-4 / 3d +7.7e-5 / 5d +8.3e-5 — US conference call 同日集中釋出
-- TW (+6.36e-5) vs US (+1.91e-4) 方向 match，量級比 3.0 (US 大型股 σ² 規模較大 + 季報密度)
-- **Paper 2 升級 narrative**: "Two independent equity markets (TW N=31 + US N=30), 5 robustness layers each, consistent with global volatility regularity where GARCH-MIDAS τ component absorbs market-wide announcement-day variance premium invisible at firm level but robust at panel level"
-- 衍生 K1150 (TOPIX 第三市場), K1151 (continuous surprise), K1152 (relative-magnitude), K1153 (EU)
-
-### 14. Paper 2 SAVED：universal-magnitude pooled effect（2026-04-13 K1145）
-**Pooled MLE 揭露 firm-level idiosyncratic SE 掩蓋的 universal signal**
-- N=31 K1109 pre-reg stocks pooled A4f-EAV，shared θ_EAV，stock-FE on (m_i, GJR_i)
-- **Pooled θ_EAV = +6.36e-5**
-- Cluster bootstrap (n=150) **t=+5.24** primary inference (Hessian Wald t=14.14 may inflate)
-- Bootstrap 95% CI [+4.13e-5, +9.38e-5] excludes 0
-- Placebo permutation 60 reps mean=+1.36e-6 ≈0; observed = +13.6σ from null mean; one-sided p=0/60
-- 三 EAV-def (1d/3d/5d) θ 線性遞減 +6.4e-5 / +3.8e-5 / +1.7e-5 符合 smear-over-days 物理直覺
-- Drop-5 stocks × 5 seeds θ ∈ [+6.21e-5, +7.96e-5], t ∈ [+12.17, +14.12]
-- vs single-stock K1109: mean θ=+4.64e-5 SE=1.15e-4 (t=0.40 NS); pooled SE=1.21e-5 (9.5x reduction)
-- Codex review passed
-- **Paper 2 narrative pivot**: 從 dual-NULL 改為 "EAV is universal-magnitude population-level constant, invisible at firm level due to large idiosyncratic SE"
-- **E069**: pooled panel reveals signal hidden by firm-level noise floor — 對 dual-NULL 假設前必跑 pooled spec
-- 衍生 K1146 (paper rewrite, main thread), K1147 (US S&P validation), K1148 (continuous surprise EAV), K1149 (PCA factor competition)
-
-### 13. Paper 2 dual-NULL 確認（2026-04-13 K1114→K1140）→ 被 K1145 推翻
-**Cross-sectional + temporal θ_EAV heterogeneity 雙 NULL**（已過時 — 見 §14 K1145）
-- K1114 rolling 2-yr A4f-EAV on TSMC/UMC/MediaTek 報 3/9 BH-PASS (UMC trend t=3.06, MediaTek t=4.51, TSMC regime KS p=0.009)
-- K1140 三層 robustness 重檢：(1) Newey-West HAC L=5/24/48; (2) Spearman block-permutation; (3) Block-bootstrap block=24 gold standard
-- 結果：HAC L=24 後 1/9 倖存 (MediaTek t=4.33)，block-boot 後 0/9 PASS — K1114 全為 96% overlap artifact
-- K1067 三檔 mean pattern 真實但 within-sample artifact，無 systematic 來源
-- Paper 2 contribution 定位轉為 rigorous null：「after N=31 sector ANOVA + 5 covariates + rolling HAC + block-boot, no systematic θ_EAV heterogeneity survives MTCorrection」
-- **E068**：HAC alone 對 high-overlap rolling 不夠，必加 block-bootstrap 第二門
+**支持實驗索引**：K1114, K1140, K1145-K1153, K1156-K1157, K1161-K1168, K1170, K1171-K1175（細節見 `knowledge.json`）
 
 ### 12. Universal robust-method NULL：非 score-driven 也失敗（2026-04-13 K1136）
 **「alt-model NULL」擴張到 score-driven + non-score-driven 兩家族**

@@ -417,6 +417,8 @@ All publications in **繁體中文**. Details in `references/publishing-guide.md
 - `references/strategy-launch-gate.md` — 新策略是否可上架的 5 項 gate
 - `references/add-strategy-guide.md` — 新策略上線完整步驟
 - `references/data-timing.md` — 數據時間對齊規則
+- `references/methodology.md` — **研究方法論 9 節技術細節**（統計有效性、模型比較公平性 Patton 2011、VaR/ES 轉換、多頻率約束、跨資產假日、資料期間 COMMON_START、評估指標、研究多元化、主題來源）。原位於 `research_program.md`，2026-04-18 搬到此處。
+- `references/folder_layout.md` — experiments/ 與 paper/ 資料夾結構規範
 - `references/ai-collaboration.md` — AI 協作模式（Codex/Gemini 使用指引）
 - `references/question-review-guide.md` — 會員問題審查標準
 - `research_program.md` — **Core research direction, progress, and findings** (highest priority)

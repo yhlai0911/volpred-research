@@ -1,0 +1,259 @@
+{
+  "audit_date": "2026-04-17",
+  "paper": "vix-sufficiency (Paper 4)",
+  "main_tex": "paper/vix-sufficiency/main_v2.tex",
+  "auditor": "agent-a0605254",
+
+  "experiment_mapping": {
+    "K730": {
+      "path": "experiments/k730_cross_asset_vol_momentum_results.json",
+      "status": "EXISTS",
+      "paper_tables": ["Table2_Family1"],
+      "key_stats": {"partial_r": 0.087, "IS_t": -1.45, "DM_t": 1.45}
+    },
+    "K731": {
+      "path": "experiments/k731_vix_term_structure_results.json",
+      "status": "EXISTS",
+      "paper_tables": ["Table2_Family2", "Table3_strategies"],
+      "key_stats": {
+        "BH_5050_sharpe": 0.827,
+        "vix12_sharpe": 0.870,
+        "contango_sharpe": 0.880,
+        "IS_t_term_struct": 17.6,
+        "note": "Paper Table 3 uses k507 for BH Sharpe=0.947 but k731 shows 0.827"
+      }
+    },
+    "K732": {
+      "path": "experiments/k732_pcr_behavioral_sentiment_results.json",
+      "status": "EXISTS",
+      "paper_tables": ["Table2_Family3", "Table3_BSI"],
+      "key_stats": {"BSI_fear_hedge_sharpe": 0.900}
+    },
+    "K734": {
+      "path": "experiments/k734_vrp_trading_results.json",
+      "status": "EXISTS",
+      "paper_tables": ["Table2_Family4"],
+      "key_stats": {"VRP_IS_t": 3.51}
+    },
+    "K736": {
+      "path": "experiments/k736_calendar_anomaly_vt_results.json",
+      "status": "EXISTS",
+      "paper_tables": ["Table2_Family11"]
+    },
+    "K738": {
+      "path": "experiments/k738_vt_insurance_cost_benefit_results.json",
+      "status": "EXISTS",
+      "paper_tables": ["Table10_insurance", "Abstract_drag"],
+      "key_stats": {
+        "avg_return_drag_12vix": 3.486,
+        "avg_return_drag_ewma": 2.121,
+        "gamma_star_12vix": 4.5,
+        "gamma_star_ewma": 4.4,
+        "note": "Cross-asset avg; SPY-specific drag=3.75%, not 3.49%"
+      }
+    },
+    "K747": {
+      "path": "experiments/k747_equal_risk_contribution_results.json",
+      "status": "EXISTS",
+      "paper_tables": ["Table4_multiasset"],
+      "key_stats": {"static_5050_sharpe": 1.849, "inverse_vol_2asset": 1.795, "erc_2asset": 1.795}
+    },
+    "K748": {
+      "path": "experiments/k748_simplicity_premium_results.json",
+      "status": "EXISTS",
+      "paper_tables": ["§8.5_simplicity"],
+      "key_stats": {"spearman_rho": 0.077, "p_value": 0.794}
+    },
+    "K749": {
+      "path": "experiments/k749_yield_curve_vol_results.json",
+      "status": "EXISTS",
+      "paper_tables": ["Table2_Family8"]
+    },
+    "K750": {
+      "path": "experiments/k750_google_trends_fear_results.json",
+      "status": "EXISTS",
+      "paper_tables": ["Table2_Family9"],
+      "key_stats": {"IS_t": 7.92, "IS_delta_R2": 0.038, "partial_r": 0.271, "DM_t": 0.67}
+    },
+    "K751": {
+      "path": "experiments/k751_overnight_vix_news_results.json",
+      "status": "EXISTS",
+      "paper_tables": ["Table2_Family10"],
+      "key_stats": {"IS_t": 5.07}
+    },
+    "K752": {
+      "path": "experiments/k752_vix_sufficiency_eras_results.json",
+      "status": "EXISTS",
+      "paper_tables": ["Table5_era_stability", "Table6_competing_eras", "Table7_12vix_eras"],
+      "key_stats": {
+        "n_full": 8325,
+        "full_R2": 0.5137,
+        "era_r2": [0.5248, 0.6446, 0.508, 0.2439, 0.3094],
+        "cv_correct": 0.370,
+        "cv_paper": 0.33,
+        "era3_GFC_harvey_passes": 3,
+        "era5_COVID_harvey_passes": 1,
+        "note": "Table 6 incr_R2 values are 10-186x understated in paper; era exceptions omitted"
+      }
+    },
+    "K778": {
+      "path": "experiments/k778_mem_r2_native_results.json",
+      "status": "EXISTS",
+      "paper_tables": ["Table8_criterion_dependent"],
+      "key_stats": {
+        "qlike_GJR": 1.5268, "qlike_AMEM": 1.5586, "qlike_MEM": 1.5762,
+        "qlike_GARCH": 1.5764, "qlike_HAR": 1.6491, "qlike_EWMA": 1.6240,
+        "dm_GJR_vs_AMEM": 3.778, "dm_GJR_vs_GARCH": 4.757, "dm_AMEM_vs_GARCH": 2.853
+      }
+    },
+    "K780": {
+      "path": "experiments/k780_tail_first_es_results.json",
+      "status": "EXISTS",
+      "paper_tables": ["Table9_VaR_backtest"],
+      "key_stats": {
+        "amem_viol_1pct": 0.0109, "amem_kupiec_p": 0.549, "amem_raw_score": 24,
+        "gjr_viol_1pct": 0.0135, "gjr_kupiec_p": 0.023, "gjr_raw_score": 20,
+        "ewma_viol_1pct": 0.0233, "ewma_raw_score": 13,
+        "har_viol_1pct": 0.0251, "har_raw_score": 12,
+        "hist_viol_1pct": 0.0159, "hist_raw_score": 16,
+        "note": "Paper scores 1.94/1.63 don't linearly scale from raw scores 24/20; normalization unclear"
+      }
+    },
+    "K745": {
+      "path": "experiments/k745_pilot_har_rv_results.json",
+      "status": "EXISTS",
+      "paper_ref": "§8.2 and §8.1 '41.8% QLIKE improvement'",
+      "key_stats": {
+        "n_oos": 37,
+        "best_5min_QLIKE": 0.109341,
+        "best_daily_QLIKE": 0.077108,
+        "improvement_pct": -41.8,
+        "note": "CRITICAL: improvement_pct=-41.8 means 5-min is WORSE, not better; paper reverses direction; N=37 PRELIMINARY"
+      }
+    },
+
+    "K1116": {
+      "path": "experiments/k1116/k1116_results.json",
+      "status": "EXISTS_NOT_IN_PAPER",
+      "integration_status": "MISSING from main_v2.tex",
+      "key_stats": {
+        "dm_M4_FinStress_t": -3.001,
+        "dm_M3_EPU_t": -2.554,
+        "verdict": "NULL (active harm)",
+        "note": "Family 13 FinStress DM t=-3.00 (active harm signal)"
+      }
+    },
+    "K1116b": {
+      "path": "experiments/k1116b/k1116b_results.json",
+      "status": "EXISTS_NOT_IN_PAPER",
+      "integration_status": "MISSING from main_v2.tex",
+      "key_stats": {
+        "TLT_M4_original_t": 3.743,
+        "TLT_M4_corrected_t": 1.963,
+        "SPY_M4_corrected_t": -3.608,
+        "note": "Publication-delay correction: TLT M4 collapses below Harvey threshold"
+      }
+    },
+    "K1117": {
+      "path": "experiments/k1117/k1117_results.json",
+      "status": "EXISTS_NOT_IN_PAPER",
+      "integration_status": "MISSING from main_v2.tex",
+      "key_stats": {"verdict": "FULL_NULL"}
+    },
+    "K1118": {
+      "path": "experiments/k1118/k1118_results.json",
+      "status": "EXISTS_NOT_IN_PAPER",
+      "integration_status": "MISSING from main_v2.tex",
+      "key_stats": {
+        "GLD_verdict": "NULL",
+        "TLT_verdict": "NULL",
+        "BTC_verdict": "NULL",
+        "TLT_M4_t_original": 3.743,
+        "BTC_M1_t": -5.494,
+        "note": "Triple NULL; GLD M5 improvement=-0.02%; TLT M4 t=3.74 collapses in K1116b"
+      }
+    },
+    "K1121": {
+      "path": "experiments/k1121/k1121_results.json",
+      "status": "EXISTS_NOT_IN_PAPER",
+      "integration_status": "MISSING from main_v2.tex",
+      "key_stats": {
+        "S5_NFCI_sharpe": 1.312,
+        "S1_5050_sharpe": 1.309,
+        "S5_vs_S1_p_value": 0.966,
+        "note": "All 5 alt-data strategies p>0.26 vs 50/50"
+      }
+    },
+    "K1098": {
+      "path": "experiments/k1098/k1098_results.json",
+      "status": "EXISTS_NOT_IN_PAPER",
+      "integration_status": "MISSING from main_v2.tex",
+      "key_stats": {
+        "H1_a4f_vixtwn_harvey_pass": "FAIL",
+        "vixtwn_kupiec_p": 0.063,
+        "note": "VIXTWN t=+1.86 fails Harvey; all hypotheses FAIL"
+      }
+    },
+    "K1129": {
+      "path": "experiments/k1129/k1129_results.json",
+      "status": "EXISTS_NOT_IN_PAPER",
+      "integration_status": "Commodity GAS-t; NULL results",
+      "key_stats": {"USO_GAS_DM_t": 1.033, "verdict": "NULL for all assets"}
+    },
+    "K1130": {
+      "path": "experiments/k1130/k1130_results.json",
+      "status": "EXISTS",
+      "integration_status": "OFI-jump regime extension; NOT directly relevant to Paper 4 main claims"
+    },
+    "K1131": {
+      "path": "experiments/k1131/k1131_results.json",
+      "status": "EXISTS",
+      "integration_status": "VIX-dep spline fix; NOT directly relevant to Paper 4 main claims"
+    },
+    "K1136": {
+      "path": "experiments/k1136/k1136_results.json",
+      "status": "EXISTS_NOT_IN_PAPER",
+      "integration_status": "Commodity compendium (USO/GLD/UNG/BTC); FAIL under fair tests",
+      "key_stats": {
+        "fair_test_1_pass_count": 0,
+        "fair_test_2_pass_count": 0,
+        "verdict": "FAIL"
+      }
+    },
+    "K1138": {
+      "path": "experiments/k1138/k1138_results.json",
+      "status": "EXISTS_NOT_IN_PAPER",
+      "integration_status": "Equity compendium (SPY/QQQ/IWM); MIXED",
+      "key_stats": {
+        "SPY_HAR_RV_X_DM_t": 4.185,
+        "QQQ_HAR_RV_X_DM_t": 4.219,
+        "IWM_HAR_RV_X_DM_t": 2.064,
+        "pass_count": "2/9",
+        "verdict": "MIXED - HAR-RV-X on Parkinson passes for SPY/QQQ but not fair test under r² target",
+        "note": "Summary says MIXED but paper4 implication requires explicit reporting of passing combos"
+      }
+    },
+
+    "K1135": {"status": "NOT_FOUND", "note": "Experiment directory not present"},
+    "K1137": {"status": "NOT_FOUND", "note": "Experiment directory not present"},
+    "K1139": {"status": "NOT_FOUND", "note": "Experiment directory not present"},
+    "K1141": {"status": "NOT_FOUND", "note": "Experiment directory not present"},
+    "K1143": {"status": "NOT_FOUND", "note": "Experiment directory not present"},
+    "K1123": {"status": "NOT_FOUND", "note": "Experiment directory not present"},
+
+    "K504": {
+      "path": "experiments/k504_stlfsi_strategy_results.json",
+      "status": "EXISTS_FLAT_DIR",
+      "integration_status": "STLFSI strategy null; light integration planned as footnote"
+    }
+  },
+
+  "nine_new_experiments_integration_status": {
+    "summary": "0 of 9 listed new experiments integrated into main_v2.tex",
+    "experiments_present_not_integrated": ["K1116", "K1117", "K1118", "K1116b", "K1121", "K1098", "K1129", "K1136", "K1138"],
+    "experiments_not_found": ["K1135", "K1137", "K1139", "K1141", "K1143", "K1123"],
+    "body_stale": true,
+    "integration_plan_exists": true,
+    "integration_plan_path": "paper/vix-sufficiency/integration_plan_v2.md"
+  }
+}

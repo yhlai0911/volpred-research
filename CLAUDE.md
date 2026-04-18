@@ -8,7 +8,7 @@
 1. **不可造假、不可虛構**：所有數據、統計量、圖表必須來自實際計算，不可編造數字或偽造結果
 2. **數據來源透明**：每個實驗必須標明數據來源（yfinance、FRED、CBOE 等）、資料期間、樣本數量。不可用模擬數據冒充實證數據
 3. **實驗必須有對應檔案 + 知識庫記錄 + 經驗記錄**：每個實驗完成後，**必須同時產出三項**：
-   - **檔案**：每個實驗必須有專屬資料夾 `experiments/<experiment_id>/`，所有相關檔案放在裡面：
+   - **檔案**：每個實驗必須有專屬資料夾 `experiments/<experiment_id>/`，所有相關檔案放在裡面（完整命名 convention 與七種類型見 `.claude/skills/autonomous-research/references/folder_layout.md` §1）：
      - `experiments/<experiment_id>/README.md`（**必備：計劃、問題描述、動機、方法、預期、結論**）
      - `experiments/<experiment_id>/<experiment_id>.py`（腳本）
      - `experiments/<experiment_id>/<experiment_id>_results.json`（結果）
@@ -34,7 +34,7 @@
    - **結果異常時**：HE < 0、相關係數不穩定、parameter 在邊界上 → 必須啟動覆查，不能直接報告
    - **期貨避險特別注意**：spot-futures 相關性穩定性（rolling correlation）、共整合檢定、ETF 結構問題（如 USO contango roll）
 6. **方法論嚴謹**：每個結論必須經過正規統計檢定（DM test、t-test、bootstrap），不可僅憑觀察就下結論。遵守 Harvey (2016) t>3.0 門檻
-6b. **模型比較必須公平（Patton 2011 標準）**：不同類型的波動率模型必須在公平框架下比較，不可只用單一 target，不可只報告對自己有利的結果。VaR/ES 評估必須做正確的分配轉換，不可直接把預測值當 VaR。**技術細節（評估層次、VaR 轉換公式、backtesting 規格）見 `research_program.md` 的「模型比較公平性標準」和「經濟顯著性評估」段。**
+6b. **模型比較必須公平（Patton 2011 標準）**：不同類型的波動率模型必須在公平框架下比較，不可只用單一 target，不可只報告對自己有利的結果。VaR/ES 評估必須做正確的分配轉換，不可直接把預測值當 VaR。**技術細節（評估層次、VaR 轉換公式、backtesting 規格）見 `.claude/skills/autonomous-research/references/methodology.md` §2（模型比較公平性）與 §3（經濟顯著性 VaR/ES）。**
 7. **區分實證與理論**：明確標示每項分析屬於「實證分析（真實數據）」、「理論推導」或「模擬實驗」。不可混淆
 8. **Null result 如實報告**：負面結果同樣重要，必須完整記錄。不可只報告成功、隱藏失敗
 9. **發佈內容真實不虛**：Feed 文章、研究摘要、知識記錄的每一項數據和結論都必須可追溯到具體實驗腳本和數據
@@ -85,6 +85,36 @@ CLAUDE.md 只保留高層 source-of-truth：
 - **論文系列 workflow**：`.claude/skills/paper-stage-classifier/SKILL.md`、`.claude/skills/paper-review-cycle/SKILL.md`、`.claude/skills/paper-update/SKILL.md`
 - **support gates**：`agent-result-verification` / `worktree-merge-verification` / `memory-health`
 
+### 系統任務類型 × Skill 對應（10 類）
+
+主 agent 派工前先識別任務類型，再選對應 skill。每類任務的 brief 格式差異見對應 skill 的 `references/`。
+
+| # | 任務類型 | 範例 | 對應 skill |
+|---|---|---|---|
+| 1 | 研究實驗 | K1132 bootstrap、K1100h tick-level、新 K 編號 | `autonomous-research` + `agent-result-verification` |
+| 2 | 論文方向決策 | Paper3_reframe、Paper3_strategic_decision（blocked_user） | `paper-stage-classifier` + 主線程 |
+| 3 | 論文修稿（body） | K1146 pivot、K1169 rewrite、Paper6_start | `paper-update` + `finance-paper-quality` |
+| 4 | 論文審查 + citation | 每輪 review round、Paper9_bib_fix | `paper-review-cycle` + `citation-verifier` + `latex-academic-reviewer` |
+| 5 | 事件驅動文章 | TSMC_0416_post、FOMC_0428 | `feed-publisher` + `publication-candidates` |
+| 6 | 日常文章補草稿池 | general/research/daily 每日目標 | `feed-publisher` + `publication-candidates` |
+| 7 | 會員問題研究 | 6h cron 觸發 | `member-questions` |
+| 8 | 策略生命週期 | STRATEGY_REGISTRY 新增/下架 | `admin-ops` + `admin-ops/references/strategy-lifecycle.md` |
+| 9 | 平台 ops / 巡檢 | release-pool、cleanup、health、article-backups | `admin-ops` |
+| 10 | 系統 governance / 修復 | script bug fix、legacy cleanup、rules 重構、歸檔 | 無 skill（主線程做，參考 `.claude/rules/`）|
+
+### 主 agent 依「工作成果日誌」做多樣化決策
+
+**`storage/work_log.json`** 是跨類型工作日誌（非研究專屬；`research_log.json` 只記 research 事件）。每完成一個 task（任何類型）都要 append 一筆。
+
+每輪 cron 觸發時主 agent：
+1. 讀 `work_log.json` 最近 5 筆 → 看 task_type 分布
+2. 讀 `next_tasks.json` priority 1-3 pending
+3. **多樣化規則**：最近 5 筆中 ≥3 筆同 type → 下一輪換 type
+4. 結合 Monitor alert（草稿池低 → 偏 type 5/6；knowledge.json 膨脹 → 偏 type 10）
+5. 依選定 task type 查上表 → 派對應 skill 的 agent
+
+完整 schema + decision tree 見 `.claude/rules/agent-delegation.md`。
+
 ### 研究結論（非此處）
 → 所有研究結論、設計原則、K 編號詳情見 `research_program.md`「重大研究結論」段（5 條核心結論：VT 本質、50/50 SPY/GLD、Smooth-weight、Proxy-robust、VaR+ES）。CLAUDE.md 只放跨研究通用的操作規則（如 Token 節約、部署、排程），不放會隨實驗更新的研究結論。
 
@@ -123,6 +153,7 @@ CLAUDE.md 只保留高層 source-of-truth：
 
 ## 論文
 - 論文列表、版本命名、PDF slug → `docs/paper-guide.md`
+- 資料夾 self-contained 架構、投稿前必備五項、10 篇自足度快照 → `.claude/skills/autonomous-research/references/folder_layout.md` §2
 - paper workflow 現在拆成 4 個 skill：
   - stage 判定 → `.claude/skills/paper-stage-classifier/SKILL.md`
   - review orchestration → `.claude/skills/paper-review-cycle/SKILL.md`
@@ -251,6 +282,8 @@ session 自動化與平台 cycle 的 runtime 母本是 `.claude/skills/admin-ops
 完整硬體資訊與 agent 容量見 `docs/hardware.md`。
 實務上預設同時跑 `3-4` 個獨立 worktree agent；具體派工與模型選擇仍以 `.claude/skills/autonomous-research/references/agent-orchestration.md` 為準。
 
+**主 agent token 節約規則**：主線程 context 貴、agent context 用完即丟。會燒 3000+ tokens 的任務（多步流程、WebSearch、寫實驗、寫文章、批次改檔）優先派 agent；主線程保留 context 給 synthesis、驗證、決策、記錄。Agent brief 必須 self-contained（6 要素 + 指向相關 README），不可假設 agent 知道上下文。完整 delegation threshold 與 anti-patterns 見 `.claude/rules/agent-delegation.md`。
+
 ### 模型選擇原則（必須遵守）
 模型選擇與 agent 派工的 runtime 規則改由 `.claude/skills/autonomous-research/references/agent-orchestration.md` 承接。
 高層原則只保留兩條：
@@ -279,7 +312,7 @@ session 自動化與平台 cycle 的 runtime 母本是 `.claude/skills/admin-ops
 **所有模型清單、策略績效數字、參數估計結果、評估指標定義 → 見 `research_program.md`**
 
 CLAUDE.md 不放具體的 Sharpe/MDD 數字或模型參數值——這些會隨數據更新而過時。
-研究約束（統計門檻、OOS 規範、Harvey threshold）見 `research_program.md` 約束區。
+研究約束（統計門檻、OOS 規範、Harvey threshold、評估指標定義、資料期間 COMMON_START）見 `.claude/skills/autonomous-research/references/methodology.md`（9 節技術細節）。
 
 ## 研究成果
 **所有研究發現、實驗結果、Phase 進度、AI 協作建議 → 見 `research_program.md`（北極星文件）。**

@@ -1,0 +1,80 @@
+section,location,description,paper_value,source_exp,source_value,status,notes
+abstract,L48,"R2 range low (Low-Vol QE)",0.24,K752,0.2439,MATCH,era4
+abstract,L48,"R2 range high (Post-Dot-Com)",0.64,K752,0.6446,MATCH,era2
+abstract,L48,"CV of R2 across 5 eras",0.33,K752,0.370,MISMATCH,"computed from k752: mean=0.446 std=0.165 cv=0.370; paper rounds aggressively"
+abstract,L48,"Return drag 12/VIX",3.49%/yr,K738,3.486,MATCH,cross-asset avg
+abstract,L48,"Break-even CRRA gamma",4.5,K738,4.5,MATCH,from k738 conclusions
+abstract,L98,"41.8% QLIKE improvement intraday",41.8%,K745,-41.8%,MISMATCH_DIRECTION,"K745 shows 5-min WORSE than daily: HAR-RV QLIKE=0.109 > HAR-ABS QLIKE=0.077; daily beats 5-min by 41.8% NOT the other way; also N=37 (PRELIMINARY)"
+abstract,L88,"Max incremental R2=0.038",0.038,K750,0.038,MATCH,Google Trends family 9 IS delta R2
+abstract,L89,"Max Sharpe improvement=+0.010",0.010,K731,0.010,MATCH,TS contango boost
+Table1,T1-Row1,"Family 1 sample N",4053,K730,4053,MATCH,
+Table1,T1-Row2,"Family 2 sample N",4566,K731,4566,MATCH,
+Table2,T2-Row1,"Family 1 partial r|VIX",0.087,K730,0.087,MATCH,
+Table2,T2-Row2,"Family 2 partial r|VIX",0.181,K731,0.181,MATCH,
+Table2,T2-Row2,"Family 2 IS t-stat (VIX term struct)",17.6,K731,17.6,MATCH,
+Table2,T2-Row4,"Family 4 VRP IS t-stat",3.51,K734,3.51,MATCH,
+Table2,T2-Row9,"Family 9 Google Trends IS t",7.92,K750,7.92,MATCH,
+Table2,T2-Row9,"Family 9 Google Trends OOS DM |t|",0.67,K750,0.67,MATCH,
+Table2,T2-Row9,"Family 9 IS partial r",0.271,K750,0.271,MATCH,
+Table2,T2-Row10,"Family 10 Overnight VIX IS t",5.07,K751,5.07,MATCH,
+Table2,T2-Row8,"Family 8 yield curve yield OOS DM |t|",0.84,K749,0.84,MATCH,
+Table2,untraceable,"Family 7 Bitcoin partial r",0.178,K746b,?,UNTRACED,"K746b not verified"
+Table2,untraceable,"Family 11 Calendar IS t","-2.39*",K736,?,UNTRACED,
+Table3,T3-row-BH,"BH 50/50 Sharpe",0.947,K507,0.947,MISMATCH_PERIOD,"k731 (registered source) shows BH=0.827; paper uses k507 value which has different period/assets; 12/VIX=0.870 matches k731"
+Table3,T3-row-VT,"12/VIX Sharpe",0.870,K731,0.870,MATCH,
+Table3,T3-row-VT,"12/VIX Delta Sharpe","-0.077",K731,"-0.077",MATCH,
+Table3,T3-row-TS,"VIX Term Structure Sharpe",0.880,K731,0.880,MATCH,
+Table3,T3-row-BSI,"Behavioral Sentiment Sharpe",0.900,K732,0.900,MATCH,
+Table4,T4-row1,"50/50 SPY/GLD Sharpe (short period)",1.849,K747,1.849,MATCH,common period 2023-2026
+Table4,T4-row7,"Inverse Vol 2-asset Sharpe",1.795,K747,1.795,MATCH,
+Table4,T4-row8,"ERC 2-asset Sharpe",1.795,K747,1.795,MATCH,
+Table5,T5-Era1,"Era 1 N",1811,K752,1811,MATCH,
+Table5,T5-Era1,"Era 1 R2",0.525,K752,0.5248,MATCH,
+Table5,T5-Era1,"Era 1 beta",0.810,K752,0.8097,MATCH,
+Table5,T5-Era1,"Era 1 t-stat",44.7,K752,44.7,MATCH,
+Table5,T5-Era2,"Era 2 R2",0.645,K752,0.6446,MATCH,
+Table5,T5-Era3,"Era 3 R2",0.508,K752,0.508,MATCH,
+Table5,T5-Era4,"Era 4 R2 (QE low)",0.244,K752,0.2439,MATCH,
+Table5,T5-Era5,"Era 5 R2 (COVID)",0.309,K752,0.3094,MATCH,
+Table5,T5-Full,"Full sample R2",0.514,K752,0.5137,MATCH,
+Table5,T5-Full,"Full sample N",8325,K752,8325,MATCH,
+Table5,T5-Full,"Full sample t-stat",93.8,K752,93.77,MATCH,
+Table5,T5-CV,"Cross-era CV",0.33,K752,0.370,MISMATCH,"Same CV error as in abstract; mean=0.446 std=0.165 cv=0.370 NOT 0.33"
+Table6,T6-Era3,"Overnight VIX GFC incr R2",0.0004,K752,0.0039,MISMATCH,"10x understatement; k752 shows 0.0039 with harvey_pass=True"
+Table6,T6-Era5,"Overnight VIX COVID incr R2",0.0003,K752,0.0032,MISMATCH,"10x understatement"
+Table6,T6-Era3,"VRP GFC incr R2",0.0008,K752,0.016,MISMATCH,"20x understatement; k752 shows 0.016 with harvey_pass=True"
+Table6,T6-Era3,"Vol Momentum GFC incr R2",0.0006,K752,0.0216,MISMATCH,"36x understatement; k752 shows harvey_pass=True"
+Table6,T6-Era5,"Vol Momentum COVID incr R2",0.0002,K752,0.0372,MISMATCH,"186x understatement; k752 shows harvey_pass=True (t=9.3)"
+Table6,T6-Harvey,"Header 0/5 Harvey pass",0/5,K752,0/5,MISMATCH_CLAIM,"K752 shows 4 era-signal combinations pass Harvey threshold including Era3 GFC (3 signals) and Era5 COVID (1 signal); paper omits this finding entirely"
+Table7,T7-Era1,"Era 1 VT Sharpe",1.236,K752,1.2358,MATCH,
+Table7,T7-Era1,"Era 1 BH Sharpe",1.261,K752,1.2614,MATCH,
+Table7,T7-Era2,"Era 2 VT Sharpe",0.128,K752,0.1278,MATCH,
+Table7,T7-Era3,"Era 3 VT Sharpe",0.537,K752,0.537,MATCH,
+Table7,T7-Era4,"Era 4 VT Sharpe (12/VIX wins)",1.116,K752,1.116,MATCH,
+Table7,T7-Era5,"Era 5 VT Sharpe",0.963,K752,0.9632,MATCH,
+Table8_QLIKE,T8-GJR,"GJR QLIKE",1.527,K778,1.5268,MATCH,
+Table8_QLIKE,T8-AMEM,"AMEM QLIKE",1.559,K778,1.5586,MATCH,
+Table8_QLIKE,T8-MEM,"MEM QLIKE",1.576,K778,1.5762,MATCH,
+Table8_QLIKE,T8-GARCH,"GARCH QLIKE",1.576,K778,1.5764,MATCH,
+Table8_QLIKE,T8-HAR,"HAR QLIKE",1.649,K778,1.6491,MATCH,
+Table8_QLIKE,T8-EWMA,"EWMA QLIKE",1.624,K778,1.6240,MATCH,
+Table8_DM,T8-DM1,"GJR vs AMEM DM",3.78,K778,3.778,MATCH,
+Table8_DM,T8-DM2,"GJR vs GARCH DM",4.76,K778,4.757,MATCH,
+Table8_DM,T8-DM3,"AMEM vs GARCH DM",2.85,K778,2.853,MATCH,
+Table9_VaR,T9-AMEM1,"AMEM VaR 1% violation",1.09%,K780,1.09%,MATCH,
+Table9_VaR,T9-AMEM-Kupiec,"AMEM Kupiec p",0.549,K780,0.549,MATCH,
+Table9_VaR,T9-GJR1,"GJR VaR 1% violation",1.35%,K780,1.35%,MATCH,
+Table9_VaR,T9-GJR-Kupiec,"GJR Kupiec p",0.023,K780,0.023,MATCH,
+Table9_VaR,T9-EWMA1,"EWMA VaR 1% violation",2.33%,K780,2.33%,MATCH,
+Table9_VaR,T9-HAR1,"HAR-ABS VaR 1% violation",2.51%,K780,2.51%,MATCH,
+Table9_VaR,T9-HistSim1,"HistSim VaR 1% violation",1.59%,K780,1.59%,MATCH,
+Table9_Score,T9-AMEM-Score,"AMEM composite risk score",1.94,K780,2.00,MISMATCH_FORMULA,"k780 raw scores: amem=24/24 max=2.0 after normalization but paper shows 1.94; normalization inconsistent; rank order correct"
+Table9_Score,T9-GJR-Score,"GJR composite risk score",1.63,K780,1.67,APPROX,"small discrepancy from normalization formula"
+Table10_Insur,T10-Drag12,"12/VIX return drag",3.49%/yr,K738,3.486,MATCH,cross-asset average
+Table10_Insur,T10-DragEWMA,"EWMA return drag",2.12%/yr,K738,2.121,MATCH,cross-asset average
+Table10_Insur,T10-MDD12,"12/VIX MDD reduction",-8.2pp,K738,varies,UNTRACED,"k738 cross-asset avg gives ~12.3pp; EEM-specific gives 8.2pp; table says SPY/GLD specific"
+Table10_Insur,T10-Gamma,"12/VIX break-even gamma",4.5,K738,4.5,MATCH,
+Table10_Simpl,simplicity,"Spearman rho complexity-Sharpe",0.077,K748,0.077,MATCH,
+Table10_Simpl,simplicity,"Spearman p-value",0.794,K748,0.794,MATCH,
+Inline_§8.1,L703,"41.8% QLIKE improvement (5-min HAR-RV)",41.8%,K745,-41.8%,MISMATCH_DIRECTION,"SAME ERROR AS ABSTRACT: K745 improvement_pct=-41.8 means daily beats 5-min; paper claims 5-min beats daily; N=37 preliminary sample only"
+Inline_§8.2,L703,"CRRA gamma* threshold",4.5,K738,4.5,MATCH,

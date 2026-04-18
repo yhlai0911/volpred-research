@@ -1,0 +1,109 @@
+section,location,metric,value_in_paper,source_k,value_in_json,rtol_001,rtol_0001,status,notes
+Abstract,abstract,TAIFEX DM vs GJR,5.10,K883 or K874d,K883=4.000 K874d=5.1,,,DIVERGENT,"Paper 5.10; K874d DM PRG_Extended vs GJR_GARCH = 5.0996 (Table: 5.10 rounded); K883 ext vs gjr = 4.000"
+Abstract,abstract,SPY DM vs GJR,6.00,K880,6.003887940674553,YES,YES,MATCH_K880_NOT_K880v2,"Paper uses K880 (with lookahead), not K880v2 (fixed). K880v2 gives -0.57"
+Abstract,abstract,QQQ DM vs GJR,4.26,K881,4.257153099532295,YES,YES,MATCH
+Abstract,abstract,GLD DM vs GJR,6.12,K881,6.117543150726165,YES,YES,MATCH
+Abstract,abstract,EEM DM vs GJR,6.63,K881,6.628948718417019,YES,YES,MATCH
+Abstract,abstract,Harvey threshold,3.0,standard,,,,STANDARD_REF
+Table1,tab:data,TAIFEX OOS obs,843,K874d/K883,843,,YES,YES,MATCH
+Table1,tab:data,TAIFEX OOS period,2022/07--2025/12,K874d,"2022-07-14 to 2025-12-31",YES,YES,MATCH
+Table1,tab:data,SPY OOS obs,1823,K880/K880v2,1823,,YES,YES,MATCH
+Table1,tab:data,SPY OOS period,2019/01--2026/04,K880v2,"2019-01-02 to 2026-04-02",YES,YES,MATCH
+Table1,tab:data,QQQ OOS obs,1981,K881,"1981",YES,YES,MATCH
+Table1,tab:data,QQQ OOS period,2018/05--2026/04,K881,"2018-05-16 to 2026-04-02",YES,YES,MATCH
+Table1,tab:data,GLD OOS obs,1613,K881,"1613",YES,YES,MATCH
+Table1,tab:data,GLD OOS period,2019/10--2026/04,K881,"2019-10-31 to 2026-04-02",YES,YES,MATCH
+Table1,tab:data,EEM OOS obs,1734,K881,"1734",YES,YES,MATCH
+Table1,tab:data,EEM OOS period,2019/05--2026/04,K881,"2019-05-10 to 2026-04-02",YES,YES,MATCH
+Table1,tab:data,0050.TW OOS obs,1266,K886,"1266",YES,YES,MATCH
+Table1,tab:data,0050.TW OOS period,2019/12--2026/04,K886,"2021-01-08 to 2026-04-02",NO,NO,DIVERGENT,"Paper: 2019/12; K886 oos_period=2021-01-08. OOS date mismatch. n_oos=1266 with Spearman n=1251 also inconsistent"
+Table1,tab:data,SPY ON var share,34.5,K880v2,34.47,YES,YES,MATCH
+Table1,tab:data,QQQ ON var share,27.9,K881,27.86,YES,YES,MATCH
+Table1,tab:data,GLD ON var share,53.1,K881,53.1,YES,YES,MATCH
+Table1,tab:data,EEM ON var share,52.6,K881,52.6,YES,YES,MATCH
+Table1,tab:data,0050.TW ON var share,46.1,K886,46.15,YES,YES,MATCH
+Table2,tab:main_results,TAIFEX best QLIKE,0.198,K883/K874d,K883=0.121 K874d=0.198,,,DIVERGENT,"Paper 0.198 matches K874d PRG_Extended. K883 (true tick-level) gets 0.121. Different data/methodology."
+Table2,tab:main_results,SPY best QLIKE,0.748,K880,0.7478,YES,YES,MATCH_K880_NOT_K880v2,"K880v2 gives 0.8636 -- paper uses K880 (lookahead version)"
+Table2,tab:main_results,QQQ best QLIKE,0.765,K881,0.7652,YES,YES,MATCH
+Table2,tab:main_results,GLD best QLIKE,0.811,K881,0.8204,NO,NO,DIVERGENT,"Paper: 0.811; K881 GLD PRG_Ext QLIKE=0.8204. Diff ~1.1%. Note: paper says PRG Basic for GLD; K881 GLD PRG_Basic QLIKE needs check"
+Table2,tab:main_results,EEM best QLIKE,0.664,K881,0.6641,YES,YES,MATCH
+Table2,tab:main_results,0050.TW best QLIKE,0.784,K886,0.7838,YES,YES,MATCH
+Table2,tab:main_results,TAIFEX DM PRG vs GJR,5.10,K874d,5.0996,YES,YES,MATCH
+Table2,tab:main_results,TAIFEX DM PRG vs Sep,-4.07,K883/K874d,K874d not available,,,?,TAIFEX Sep DM not found in K874d. K883 PRG_Ext vs Sep = -3.303
+Table2,tab:main_results,TAIFEX DM PRG vs HAR,2.63,K874d/K884,K884 PRG_Ext vs HAR_Std=2.305,NO,NO,DIVERGENT,"Paper 2.63; K884 = 2.30. Different experiment context (K874d TAIFEX HAR vs PRG)"
+Table2,tab:main_results,TAIFEX Spearman rho,0.726,K883/K874d,K874d=0.650 K883=spearman_fullday,,,DIVERGENT,"Paper 0.726; K874d HAR(RV_total)=0.650; need K883 PRG_Ext spearman check"
+Table2,tab:main_results,TAIFEX MCS,PRG only,K883,K883 MCS not reported,,,?,"K874d has no MCS. K883 winner_qlike=PRG_Extended but no MCS table"
+Table2,tab:main_results,SPY DM PRG vs GJR,6.00,K880,6.003887940674553,YES,YES,MATCH_K880,"Matches K880 (with lookahead bug). K880v2 gives -0.57"
+Table2,tab:main_results,SPY DM PRG vs Sep,-6.69,K880,-6.689785527256411,YES,YES,MATCH_K880
+Table2,tab:main_results,SPY DM PRG vs HAR,7.31,K880,7.310421987026993,YES,YES,MATCH_K880
+Table2,tab:main_results,SPY Spearman rho,0.568,K880,0.5677794555906424,YES,YES,MATCH_K880
+Table2,tab:main_results,SPY MCS,All,K880,All survive,YES,,MATCH_K880
+Table2,tab:main_results,QQQ DM PRG vs GJR,4.26,K881,4.257153099532295,YES,YES,MATCH
+Table2,tab:main_results,QQQ DM PRG vs Sep,-5.47,K881,-5.4682936164892615,YES,YES,MATCH
+Table2,tab:main_results,QQQ DM PRG vs HAR,8.84,K881,8.840448980589832,YES,YES,MATCH
+Table2,tab:main_results,QQQ Spearman rho,0.502,K881,0.5017,YES,YES,MATCH
+Table2,tab:main_results,GLD DM PRG vs GJR,6.12,K881,6.117543150726165,YES,YES,MATCH
+Table2,tab:main_results,GLD DM PRG vs Sep,-5.16,K881,-5.164383143560252,YES,YES,MATCH
+Table2,tab:main_results,GLD DM PRG vs HAR,6.87,K881,6.873419010747847,YES,YES,MATCH
+Table2,tab:main_results,GLD Spearman rho,0.352,K881,0.3523,YES,YES,MATCH
+Table2,tab:main_results,EEM DM PRG vs GJR,6.63,K881,6.628948718417019,YES,YES,MATCH
+Table2,tab:main_results,EEM DM PRG vs Sep,-6.34,K881,-6.335808468388594,YES,YES,MATCH
+Table2,tab:main_results,EEM DM PRG vs HAR,6.30,K881,6.303986129293879,YES,YES,MATCH
+Table2,tab:main_results,EEM Spearman rho,0.469,K881,0.4694,YES,YES,MATCH
+Table2,tab:main_results,0050.TW DM PRG vs GJR,5.27,K886,5.267,YES,YES,MATCH
+Table2,tab:main_results,0050.TW DM PRG vs Sep,-4.51,K886,-4.513,YES,YES,MATCH
+Table2,tab:main_results,0050.TW DM PRG vs HAR,4.51,K886,4.513,YES,YES,MATCH
+Table2,tab:main_results,0050.TW Spearman rho,0.440,K886,0.4398,YES,YES,MATCH
+Table2,tab:main_results,GJR HAR DM TAIFEX,0.57,K874d,0.5669,YES,YES,MATCH
+Table3,tab:ablation,PRG Extended QLIKE,0.748,K880,0.7478,YES,YES,MATCH_K880
+Table3,tab:ablation,PRG Extended DM vs GJR,6.00,K880,6.003887940674553,YES,YES,MATCH_K880
+Table3,tab:ablation,PRG Extended Spearman,0.568,K880,0.5677,YES,YES,MATCH_K880
+Table3,tab:ablation,PRG Extended MZ_R2,0.464,K880,0.4635,YES,YES,MATCH_K880
+Table3,tab:ablation,PRG Ablated QLIKE,0.864,K880v2,"K880v2 PRG_Ext=0.8636",YES,YES,MATCH_K880v2_AS_ABLATION,"CRITICAL: Paper uses K880v2 (bug-fixed=lookahead removed) as the 'Ablated' baseline"
+Table3,tab:ablation,PRG Ablated DM vs GJR,-0.57,K880v2,-0.5687,YES,YES,MATCH_K880v2_AS_ABLATION
+Table3,tab:ablation,PRG Ablated Spearman,0.474,K880v2,0.4742,YES,YES,MATCH_K880v2_AS_ABLATION
+Table3,tab:ablation,PRG Ablated MZ_R2,0.264,K880v2,0.2640,YES,YES,MATCH_K880v2_AS_ABLATION
+Table3,tab:ablation,Delta t 6.57 sigma,6.57,computed,6.57 (=6.003+0.569),YES,YES,MATCH
+Table4,tab:var_es,SPY PRG Ext VaR VR,0.93%,K880,1.59%,NO,NO,DIVERGENT,"Paper 0.93%; K880 PRG_Ext VaR_1pct vr=1.5908% (29 violations/1823). K880b notes n_oos=1824 vs 1823 discrepancy"
+Table4,tab:var_es,SPY GJR VaR VR,1.92%,K880,2.08%,NO,NO,DIVERGENT,"Paper 1.92%; K880v2 GJR vr=2.0845% (38 violations/1823)"
+Table4,tab:var_es,SPY GJR Kupiec p,<0.001,K880v2,4.86e-5,YES,,MATCH
+Table4,tab:var_es,SPY PRG Ext Kupiec p,0.77,K880,0.0196,NO,NO,DIVERGENT,"Paper 0.77; K880v2 PRG_Ext kupiec_p=0.0196. Neither K880 nor K880v2 gives 0.77"
+Table4,tab:var_es,TAIFEX PRG Ext VaR VR,0.24%,K874d,0.2372%,YES,YES,MATCH
+Table4,tab:var_es,TAIFEX GJR VaR VR,2.49%,K874d,2.49%,YES,YES,MATCH
+Table4,tab:var_es,TAIFEX PRG Ext Kupiec p,<0.01,K874d,0.0075,YES,,MATCH
+Table4,tab:var_es,SPY FZ DM t,3.75,K880b,3.750174644637396,YES,YES,MATCH
+Table4,tab:var_es,QQQ PRG Ext VaR VR,1.26%,K881,not extracted,,,,?,Not extracted from K881 VaR
+Table4,tab:var_es,GLD PRG Ext VaR VR,1.12%,K881,not extracted,,,,?,Not extracted from K881 VaR
+Table4,tab:var_es,EEM PRG Ext VaR VR,0.40%,K881,not extracted,,,,?,Not extracted from K881 VaR
+Table5,tab:economic,Buy-Hold Sharpe,1.01,K874e,1.0104,YES,YES,MATCH
+Table5,tab:economic,Buy-Hold CAGR,23.6%,K874e,23.6%,YES,YES,MATCH
+Table5,tab:economic,Buy-Hold MDD,-31.7%,K874e,-31.71%,YES,YES,MATCH
+Table5,tab:economic,Buy-Hold Sortino,0.91,K874e,0.9125,YES,YES,MATCH
+Table5,tab:economic,GJR Sharpe,1.11,K874e,1.1124,YES,YES,MATCH
+Table5,tab:economic,GJR CAGR,19.7%,K874e,19.66%,YES,YES,MATCH
+Table5,tab:economic,GJR MDD,-23.3%,K874e,-23.30%,YES,YES,MATCH
+Table5,tab:economic,GJR Sortino,1.04,K874e,1.0372,YES,YES,MATCH
+Table5,tab:economic,HAR Sharpe,1.07,K874e,1.0702,YES,YES,MATCH
+Table5,tab:economic,HAR CAGR,17.2%,K874e,17.19%,YES,YES,MATCH
+Table5,tab:economic,HAR MDD,-23.7%,K874e,-23.74%,YES,YES,MATCH
+Table5,tab:economic,HAR Sortino,0.96,K874e,0.9625,YES,YES,MATCH
+Table5,tab:economic,PRG Basic Sharpe,1.39,K874e,1.3875,YES,YES,MATCH
+Table5,tab:economic,PRG Basic CAGR,19.8%,K874e,19.76%,YES,YES,MATCH
+Table5,tab:economic,PRG Basic MDD,-13.9%,K874e,-13.85%,YES,YES,MATCH
+Table5,tab:economic,PRG Basic Sortino,1.33,K874e,1.3257,YES,YES,MATCH
+Table5,tab:economic,PRG Extended Sharpe,1.66,K874e,1.6622,YES,YES,MATCH
+Table5,tab:economic,PRG Extended CAGR,23.6%,K874e,23.59%,YES,YES,MATCH
+Table5,tab:economic,PRG Extended MDD,-11.5%,K874e,-11.46%,YES,YES,MATCH
+Table5,tab:economic,PRG Extended Sortino,1.65,K874e,1.6475,YES,YES,MATCH
+Inline,sec4.1,GJR HAR DM TAIFEX,0.57,K874d,0.5669,YES,YES,MATCH
+Inline,sec4.2,ablation QLIKE gap,-0.116,computed,0.864-0.748=0.116,YES,YES,MATCH
+Inline,sec4.2,ablation DM swing 6.57sigma,6.57,computed,6.57,YES,YES,MATCH
+Inline,sec4.2,MZ_R2 full,0.464,K880,0.4635,YES,YES,MATCH_K880
+Inline,sec4.2,MZ_R2 ablated,0.264,K880v2,0.2640,YES,YES,MATCH
+Inline,sec4.3,SPY FZ DM 3.75,3.75,K880b,3.750174644637396,YES,YES,MATCH
+Inline,sec4.4,TAIFEX OOS days,843,K874e,843,YES,YES,MATCH
+Inline,sec4.4,PRG Ext Sharpe improvement,64%,computed,1.66/1.01=1.64,approx,,APPROX
+Inline,sec5,EEM overnight share,52.6%,K881,52.6%,YES,YES,MATCH
+Inline,sec5,EEM DM 6.63,6.63,K881,6.629,YES,YES,MATCH
+Inline,sec5,QQQ overnight share,27.9%,K881,27.86%,YES,YES,MATCH
+Inline,sec5,QQQ DM 4.26,4.26,K881,4.257,YES,YES,MATCH

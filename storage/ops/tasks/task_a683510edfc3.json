@@ -1,0 +1,71 @@
+{
+  "id": "task_a683510edfc3",
+  "title": "Expose canonical Table 2 intermediate outputs in K732 (behavioral sentiment) and K736 (calendar anomaly) result JSONs",
+  "description": "Paper 4 audit (task_a2ad5cff36e9) 發現 main_v2.tex Table 2 行 '\\text{partial r}=0.091, IS t-stat=1.64, R^2_{OOS,CT}=0.365, DM |t|=0.52, Raw p=0.603' (behavioral sentiment, K732) 與 calendar anomaly 行 ('partial r=-0.007, IS ΔR²=0.012, R²_{OOS,CT}=0.348, DM |t|=0.15, Raw p=0.881', K736) 在現有 stored JSON 中**無對應 key**, 無法一鍵 reproduce. 現有 K732 只有 delta_r2=0.0043, bsi_t_stat=5.58, dm_stat_oos=1.64, dm_pval_oos=0.1016, dm_bsi_vs_bh.dm_stat=-1.18; K736 只有 part_a.t_stat=-2.39. Scope: (1) 讀 paper/vix-sufficiency/experiments/k732_pcr_behavioral_sentiment_results.json 與 k736_calendar_anomaly_vt_results.json; (2) 讀 paper/vix-sufficiency/main_v2.tex Table 2 L420 (behavioral) + L428 (calendar) 所需 field; (3) 在 experiments/k732/ 或 experiments/k736/ 目錄下開 rerun 或 extend script 計算並 dump 所需欄位 (partial r, IS t-stat with correct spec, R²_OOS_CT, DM |t|, Raw p), 結果寫入同資料夾 *_table2_expose_results.json; (4) 不改 main_v2.tex (supervisor 專屬). 硬規則: (a) 固定 seed, (b) 不要為了 match paper 數字而偽造輸出, 若新算出數字與 paper 不一致, 回報 signal_payload divergent 並建議 (a)/(b)/(c). 成功標準: 兩個 experiment 資料夾各有 *_table2_expose_results.json 且 JSON key 名稱能直接對應 paper Table 2 列名. 不 commit. 完成後 ops finish-task 回報.",
+  "source": "agent",
+  "task_family": "code",
+  "priority": 60,
+  "preferred_agent": "codex",
+  "fallback_allowed": false,
+  "approval_mode": "auto",
+  "risk_level": "safe",
+  "status": "queued",
+  "payload": {},
+  "parent_task_id": "task_a2ad5cff36e9",
+  "created_by": "claude-supervisor",
+  "session_id": "codex-worker:46965",
+  "rollback_point_id": "codex-worker_session_20260418T062302Z_46965",
+  "public_effect": "none",
+  "brief_status": "ready",
+  "brief_payload": {
+    "generated_at": "2026-04-18T06:23:35.551347+00:00",
+    "source_type": "template",
+    "template_id": "code.yaml",
+    "template_hash": "a9088e0c5a198b77b110ddb048070bc09c20affcd2e1628f2137f29cfe781bfe",
+    "coordinator_run_id": null,
+    "task_summary": "Expose canonical Table 2 intermediate outputs in K732 (behavioral sentiment) and K736 (calendar anomaly) result JSONs",
+    "goal": "完成程式或實作任務：Paper 4 audit (task_a2ad5cff36e9) 發現 main_v2.tex Table 2 行 '\\text{partial r}=0.091, IS t-stat=1.64, R^2_{OOS,CT}=0.365, DM |t|=0.52, Raw p=0.603' (behavioral sentiment, K732) 與 calendar anomaly 行 ('partial r=-0.007, IS ΔR²=0.012, R²_{OOS,CT}=0.348, DM |t|=0.15, Raw p=0.881', K736) 在現有 stored JSON 中**無對應 key**, 無法一鍵 reproduce. 現有 K732 只有 delta_r2=0.0043, bsi_t_stat=5.58, dm_stat_oos=1.64, dm_pval_oos=0.1016, dm_bsi_vs_bh.dm_stat=-1.18; K736 只有 part_a.t_stat=-2.39. Scope: (1) 讀 paper/vix-sufficiency/experiments/k732_pcr_behavioral_sentiment_results.json 與 k736_calendar_anomaly_vt_results.json; (2) 讀 paper/vix-sufficiency/main_v2.tex Table 2 L420 (behavioral) + L428 (calendar) 所需 field; (3) 在 experiments/k732/ 或 experiments/k736/ 目錄下開 rerun 或 extend script 計算並 dump 所需欄位 (partial r, IS t-stat with correct spec, R²_OOS_CT, DM |t|, Raw p), 結果寫入同資料夾 *_table2_expose_results.json; (4) 不改 main_v2.tex (supervisor 專屬). 硬規則: (a) 固定 seed, (b) 不要為了 match paper 數字而偽造輸出, 若新算出數字與 paper 不一致, 回報 signal_payload divergent 並建議 (a)/(b)/(c). 成功標準: 兩個 experiment 資料夾各有 *_table2_expose_results.json 且 JSON key 名稱能直接對應 paper Table 2 列名. 不 commit. 完成後 ops finish-task 回報.",
+    "success_criteria": [
+      "改動應最小且通過對應測試",
+      "不要回退或覆寫使用者未要求的變更"
+    ],
+    "repo_root": "/Users/yhlai0911/Desktop/volpred-research",
+    "required_files": [
+      "AGENTS.md",
+      "docs/error_log.md",
+      "docs/project_improvement_status.md"
+    ],
+    "recommended_files": [
+      "docs/architecture.md"
+    ],
+    "forbidden_large_files": [
+      "storage/reports/feed.json",
+      "storage/memory/knowledge.json"
+    ],
+    "relevant_commands": [
+      "uv run pytest"
+    ],
+    "prior_findings": [],
+    "rollback_point_id": "codex-worker_session_20260418T062302Z_46965",
+    "why_this_agent": "程式與實作任務優先交給 codex。"
+  },
+  "claimed_by": null,
+  "claimed_by_session_key": null,
+  "claimed_by_role": null,
+  "claimed_at": null,
+  "started_at": null,
+  "finished_at": null,
+  "approved_by": null,
+  "approved_at": null,
+  "rejected_by": null,
+  "rejected_at": null,
+  "result_summary": null,
+  "signal_payload": null,
+  "curated_by": null,
+  "curated_at": null,
+  "curated_promoted": [],
+  "curated_notes": null,
+  "last_error": "reclaimed_from_stale_codex-worker_at_2026-04-18T06:29:45.575967+00:00",
+  "created_at": "2026-04-18T06:08:25.841958+00:00",
+  "updated_at": "2026-04-18T06:29:45.575967+00:00"
+}

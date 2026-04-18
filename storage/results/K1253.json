@@ -1,0 +1,21 @@
+{
+  "experiment_id": "K1253",
+  "asset": "SPY",
+  "model_name": "garch_arch",
+  "config": {
+    "p": 1,
+    "q": 1,
+    "vol": "GARCH",
+    "rescale": false,
+    "seed": 42
+  },
+  "metrics": {
+    "qlike": 0.8814523473245361,
+    "qlike_std": 2.4041216732615402,
+    "qlike_median": 0.3034087691319205,
+    "n_forecasts": 323
+  },
+  "n_forecasts": 323,
+  "notes": "K1253 environment smoke test after 2026-04-18 restore. SPY logret pct x 100, GARCH(1,1) rolling 1-step OOS from 2025-01-01. Lookahead-safe (returns[:t] predicts t). Not a research finding.",
+  "timestamp": "2026-04-18T07:15:52.174476Z"
+}

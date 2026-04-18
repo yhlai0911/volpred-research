@@ -1,0 +1,374 @@
+ M .agents/skills/academic-finance-reviewer/assets/jbf_author_guidelines.md
+ M .agents/skills/academic-finance-reviewer/assets/review_rubric_template.md
+ M .agents/skills/academic-finance-reviewer/assets/revision_response_template.md
+ M .agents/skills/academic-finance-reviewer/references/common_rejections.md
+ M .agents/skills/academic-finance-reviewer/references/gmm_best_practices.md
+ M .agents/skills/academic-finance-reviewer/references/hawkes_methodology.md
+ M .agents/skills/academic-finance-reviewer/references/high_frequency_data.md
+ M .agents/skills/academic-finance-reviewer/references/journal_standards.md
+ M .agents/skills/academic-finance-reviewer/references/writing_style_guide.md
+ M .agents/skills/academic-finance-reviewer/scripts/assess_sample_split.py
+ M .agents/skills/academic-finance-reviewer/scripts/check_identification.py
+ M .agents/skills/academic-finance-reviewer/scripts/validate_citation_format.py
+ M .agents/skills/academic-finance-reviewer/scripts/verify_moment_conditions.py
+ M .agents/skills/admin-ops/SKILL.md
+ M .agents/skills/admin-ops/references/architecture.md
+ M .agents/skills/admin-ops/references/deploy-and-runtime.md
+ M .agents/skills/admin-ops/references/governance.md
+ M .agents/skills/admin-ops/references/platform-api-manual.md
+ M .agents/skills/admin-ops/references/scheduling.md
+ M .agents/skills/admin-ops/references/session-cron-workflows.md
+ M .agents/skills/admin-ops/references/surfaces.md
+ M .agents/skills/agent-result-verification/SKILL.md
+ M .agents/skills/autonomous-research/SKILL.md
+ M .agents/skills/autonomous-research/references/add-strategy-guide.md
+ M .agents/skills/autonomous-research/references/agent-brief-template.md
+ M .agents/skills/autonomous-research/references/agent-orchestration.md
+ M .agents/skills/autonomous-research/references/agent-result-template.md
+ M .agents/skills/autonomous-research/references/ai-collaboration.md
+ M .agents/skills/autonomous-research/references/data-timing.md
+ M .agents/skills/autonomous-research/references/experiment-preamble.md
+ M .agents/skills/autonomous-research/references/models.md
+ M .agents/skills/autonomous-research/references/paper-writing-process.md
+ M .agents/skills/autonomous-research/references/publishing-guide.md
+ M .agents/skills/autonomous-research/references/question-review-guide.md
+ M .agents/skills/autonomous-research/references/strategies.md
+ M .agents/skills/autonomous-research/references/strategy-launch-gate.md
+ M .agents/skills/autonomous-research/references/transaction-costs.md
+ M .agents/skills/citation-verifier/SKILL.md
+ M .agents/skills/external-data-sources/SKILL.md
+ M .agents/skills/feed-publisher/SKILL.md
+ M .agents/skills/finance-paper-quality/SKILL.md
+ M .agents/skills/latex-academic-reviewer/SKILL.md
+ M .agents/skills/latex-academic-reviewer/references/review-criteria.md
+ M .agents/skills/member-questions/references/evaluation-guide.md
+ M .agents/skills/member-questions/skill.md
+ M .agents/skills/memory-health/SKILL.md
+ M .agents/skills/paper-review-cycle/SKILL.md
+ M .agents/skills/paper-stage-classifier/SKILL.md
+ M .agents/skills/paper-update/SKILL.md
+ M .agents/skills/taiwan-macro-data/skill.md
+ M .agents/skills/worktree-merge-verification/SKILL.md
+ M .claude/skills/academic-finance-reviewer/assets/jbf_author_guidelines.md
+ M .claude/skills/academic-finance-reviewer/assets/review_rubric_template.md
+ M .claude/skills/academic-finance-reviewer/assets/revision_response_template.md
+ M .claude/skills/academic-finance-reviewer/references/common_rejections.md
+ M .claude/skills/academic-finance-reviewer/references/gmm_best_practices.md
+ M .claude/skills/academic-finance-reviewer/references/hawkes_methodology.md
+ M .claude/skills/academic-finance-reviewer/references/high_frequency_data.md
+ M .claude/skills/academic-finance-reviewer/references/journal_standards.md
+ M .claude/skills/academic-finance-reviewer/references/writing_style_guide.md
+ M .claude/skills/academic-finance-reviewer/scripts/assess_sample_split.py
+ M .claude/skills/academic-finance-reviewer/scripts/check_identification.py
+ M .claude/skills/academic-finance-reviewer/scripts/validate_citation_format.py
+ M .claude/skills/academic-finance-reviewer/scripts/verify_moment_conditions.py
+ M .claude/skills/admin-ops/SKILL.md
+ M .claude/skills/admin-ops/references/architecture.md
+ M .claude/skills/admin-ops/references/deploy-and-runtime.md
+ M .claude/skills/admin-ops/references/governance.md
+ M .claude/skills/admin-ops/references/platform-api-manual.md
+ M .claude/skills/admin-ops/references/scheduling.md
+ M .claude/skills/admin-ops/references/session-cron-workflows.md
+ M .claude/skills/admin-ops/references/surfaces.md
+ M .claude/skills/agent-result-verification/SKILL.md
+ M .claude/skills/autonomous-research/SKILL.md
+ M .claude/skills/autonomous-research/references/add-strategy-guide.md
+ M .claude/skills/autonomous-research/references/agent-brief-template.md
+ M .claude/skills/autonomous-research/references/agent-orchestration.md
+ M .claude/skills/autonomous-research/references/agent-result-template.md
+ M .claude/skills/autonomous-research/references/ai-collaboration.md
+ M .claude/skills/autonomous-research/references/data-timing.md
+ M .claude/skills/autonomous-research/references/experiment-preamble.md
+ M .claude/skills/autonomous-research/references/models.md
+ M .claude/skills/autonomous-research/references/paper-writing-process.md
+ M .claude/skills/autonomous-research/references/publishing-guide.md
+ M .claude/skills/autonomous-research/references/question-review-guide.md
+ M .claude/skills/autonomous-research/references/strategies.md
+ M .claude/skills/autonomous-research/references/strategy-launch-gate.md
+ M .claude/skills/autonomous-research/references/transaction-costs.md
+ M .claude/skills/citation-verifier/SKILL.md
+ M .claude/skills/external-data-sources/SKILL.md
+ M .claude/skills/feed-publisher/SKILL.md
+ M .claude/skills/finance-paper-quality/SKILL.md
+ M .claude/skills/latex-academic-reviewer/SKILL.md
+ M .claude/skills/latex-academic-reviewer/references/review-criteria.md
+ M .claude/skills/member-questions/references/evaluation-guide.md
+ M .claude/skills/member-questions/skill.md
+ M .claude/skills/memory-health/SKILL.md
+ M .claude/skills/paper-review-cycle/SKILL.md
+ M .claude/skills/paper-stage-classifier/SKILL.md
+ M .claude/skills/paper-update/SKILL.md
+ M .claude/skills/publication-candidates/SKILL.md
+ M .claude/skills/taiwan-macro-data/skill.md
+ M .claude/skills/worktree-merge-verification/SKILL.md
+ D .codex-backups/frontend-v2-fix-git-recovery-20260322/gitfile.broken
+ D .codex-backups/pre-egress-20260322/ROLLBACK.md
+ D .codex-backups/pre-egress-20260322/scripts/supabase_sync.py
+ D .codex-backups/pre-egress-batch2-20260322/ROLLBACK.md
+ D .codex-backups/pre-egress-batch3-20260322/ROLLBACK.md
+ M .gitignore
+ D .worktree_tmp_k797.py
+ M .zeaburignore
+ M AGENTS.md
+ M CLAUDE.md
+ M Dockerfile.frontend
+ M data/vixtwn/vixtwn_daily.csv
+ M docs/architecture.md
+ M docs/error_log.md
+ M docs/paper-guide.md
+ M docs/quick-commands.md
+ M docs/research_archive/completed_phases_2026-03.md
+ D experiments/I1_garch_ohr.py
+ D experiments/I1_garch_ohr_supplemental.py
+ D experiments/K158_wavelet_garch_modwt.py
+ D experiments/K158_wavelet_garch_modwt_results.json
+ D experiments/i0_diagnostics_results.json
+ D experiments/i0_futures_data_diagnostics.py
+ D experiments/i10_vov_hedging_results.json
+ D experiments/i10_vov_state_dependent_hedging.py
+ D experiments/i11_full_panel_daily_garch_hedge.py
+ D experiments/i11_full_panel_results.json
+ D experiments/i12_window_sensitivity_hedge.py
+ D experiments/i12_window_sensitivity_results.json
+ D experiments/i1b_commodity_futures_hedge.py
+ D experiments/i1b_commodity_futures_results.json
+ D experiments/i3_cross_asset_futures_portfolio.py
+ D experiments/i3_cross_asset_futures_results.json
+ D experiments/i3_fixed_hedging_metrics.py
+ D experiments/i3_fixed_results.json
+ D experiments/i5_regime_hedge_ratio.py
+ D experiments/i5_regime_hedge_ratio_results.json
+ D experiments/i6_fixed_hedging_metrics.py
+ D experiments/i6_fixed_results.json
+ D experiments/i6_futures_vs_vt_cost.py
+ D experiments/i6_futures_vs_vt_cost_results.json
+ D experiments/i8_futures_basis_results.json
+ D experiments/i8_futures_basis_vol_predictor.py
+ D experiments/i9_proper_hedging_effectiveness.py
+ D experiments/i9_proper_hedging_results.json
+ D experiments/i9b_proper_rolling_oos_hedge.py
+ D experiments/i9b_proper_rolling_results.json
+ D experiments/k142_foundation_ml_vol.py
+ D experiments/k142_foundation_ml_vol_results.json
+ D experiments/k145_r2_peak_mechanism.py
+ D experiments/k145_r2_peak_mechanism_results.json
+ D experiments/k147_execution_alpha_almgren_chriss.py
+ D experiments/k147_execution_alpha_results.json
+ D experiments/k148_climate_vol.py
+ D experiments/k148_climate_vol_results.json
+ D experiments/k149_regime_icl.py
+ D experiments/k149_regime_icl_results.json
+ D experiments/k151_sectoral_vol_dispersion.py
+ D experiments/k151_sectoral_vol_dispersion_results.json
+ D experiments/k152_liquidity_ms_garch.py
+ D experiments/k152_liquidity_ms_garch_results.json
+ D experiments/k157_correlation_forecasting.py
+ D experiments/k157_correlation_forecasting_results.json
+ D experiments/k158_overnight_gap.py
+ D experiments/k159_evt_var.py
+ D experiments/k159_evt_var_results.json
+ D experiments/k180_directional_change.py
+ D experiments/k180_directional_change_results.json
+ D experiments/k181_skew_predictor.py
+ D experiments/k181_skew_predictor_results.json
+ D experiments/k182_fomc_vol_effect.py
+ D experiments/k182_fomc_vol_effect_results.json
+ D experiments/k186_volume_displacement.py
+ D experiments/k186_volume_displacement_results.json
+ D experiments/k188_har_ceiling.py
+ D experiments/k188_har_ceiling_results.json
+ D experiments/k189_attention_vol.py
+ D experiments/k189_attention_vol_results.json
+ D experiments/k190_realized_semivariance.py
+ D experiments/k190_realized_semivariance_results.json
+ D experiments/k191_put_call_ratio.py
+ D experiments/k191_put_call_ratio_results.json
+ D experiments/k193_copula_tail_dep.py
+ D experiments/k193_copula_tail_dep_results.json
+ D experiments/k194_fractional_diff.py
+ D experiments/k194_fractional_diff_results.json
+ D experiments/k195_tda_deep_dive.py
+ D experiments/k195_tda_deep_dive_results.json
+ D experiments/k197_persistence_break.py
+ D experiments/k197_persistence_break_results.json
+ D experiments/k199_vix_futures_basis.py
+ D experiments/k199_vix_futures_basis_results.json
+ D experiments/k200_meta_analysis.py
+ D experiments/k200_meta_analysis_results.json
+ D experiments/k202_btc_features.py
+ D experiments/k202_btc_features_results.json
+ D experiments/k521_2day_momentum_check.py
+ D experiments/k521_2day_momentum_check_results.json
+ D experiments/k521_verify_sharpe.py
+ D experiments/k621_mf2_garch.py
+ D experiments/k621_results.json
+ D experiments/k621_submission_checklist.json
+ D experiments/k622_persistence_vs_window.png
+ D experiments/k622_results.json
+ D experiments/k622_window_sensitivity.py
+ D experiments/k622_window_sweep.png
+ D experiments/k625_hurst_evolution.png
+ D experiments/k625_hurst_oos_comparison.png
+ D experiments/k625_hurst_volatility.py
+ D experiments/k625_hurst_volatility_results.json
+ D experiments/k625_tx_cost_correction.py
+ D experiments/k625_tx_cost_correction_results.json
+ D experiments/k628b_results.json
+ D experiments/k628b_spillover_network.png
+ D experiments/k628b_spillover_timeseries.png
+ D experiments/k628b_vol_spillover.py
+ D experiments/k634_cross_asset_cv.png
+ D experiments/k634_garch_param_stability.py
+ D experiments/k634_param_evolution.png
+ D experiments/k634_results.json
+ D experiments/k635_fixed_vs_rolling_vt.png
+ D experiments/k635_fixed_vs_rolling_vt.py
+ D experiments/k635_results.json
+ D experiments/k636_plots.png
+ D experiments/k636_results.json
+ D experiments/k636_taiwan_amplification.py
+ D experiments/k642_rebalance_frequency.png
+ D experiments/k642_rebalance_frequency.py
+ D experiments/k642_results.json
+ D experiments/k745_forecasts.json
+ D experiments/k745_pilot_har_rv.py
+ D experiments/k745_pilot_har_rv_results.json
+ D experiments/k811v2_insurance_premium_vov_fixed.py
+ D experiments/k811v2_insurance_premium_vov_fixed_results.json
+ D experiments/k811v2_sensitivity_results.json
+ D experiments/k811v2_sensitivity_sweep.json
+ D experiments/k851_jump_dynamics.py
+ D experiments/k851_jump_dynamics_results.json
+ D experiments/k851_results.json
+ M paper/vt-insurance-cost/reviews/audit_step1_2.md
+ M pyproject.toml
+ M scripts/daily_update.py
+ M scripts/deploy_zeabur.sh
+ M scripts/recalc_metrics.py
+ M scripts/record_and_publish.py
+ M scripts/research_helper.py
+ M scripts/session_startup.md
+ M scripts/setup_session_crons.sh
+ M server.py
+ M src/volpred/cli.py
+ M src/volpred/memory/system.py
+ M src/volpred/ops/__init__.py
+ M src/volpred/ops/papers.py
+ M src/volpred/publisher/email_notifier.py
+ M src/volpred/publisher/publisher.py
+ M storage/.release_settings.json
+ M storage/market_status.json
+ M storage/memory/knowledge.json
+ M storage/notifications/notification_log.json
+ M storage/paper_trading.json
+ M storage/reports/feed.json
+ M storage/reports/mile_043a8a2c.json
+ M storage/reports/mile_1ea1005b.json
+ M storage/reports/mile_20f2be2e.json
+ M storage/reports/mile_45060685.json
+ M storage/reports/mile_54a80b14.json
+ M storage/reports/mile_62a2b03d.json
+ M storage/reports/mile_69c4f0de.json
+ M storage/reports/mile_b8a4dc23.json
+ M storage/reports/mile_caccf211.json
+ M storage/reports/mile_d862ad6c.json
+ M storage/reports/mile_e2cbf790.json
+ M storage/reports/mile_ea176c2f.json
+ M storage/reports/mile_eb8a1e7c.json
+ M storage/reports/mile_f068a2eb.json
+ M storage/reports/mile_f7d35a20.json
+ M storage/reports/mile_fcf218fa.json
+ M storage/risk_forecast.json
+ M storage/session_state.json
+ M storage/strategy_metrics.json
+ D texput.log
+ M uv.lock
+?? .agents/skills/publication-candidates/
+?? agent-specs/
+?? archive/
+?? config/
+?? docs/project_improvement_status.md
+?? experiments/I1/
+?? experiments/K158/
+?? experiments/i0/
+?? experiments/i10/
+?? experiments/i11/
+?? experiments/i12/
+?? experiments/i1b/
+?? experiments/i3/
+?? experiments/i5/
+?? experiments/i6/
+?? experiments/i8/
+?? experiments/i9/
+?? experiments/i9b/
+?? experiments/k1074/data/
+?? experiments/k1074/references/
+?? experiments/k1121/references/
+?? experiments/k142/
+?? experiments/k145/
+?? experiments/k147/
+?? experiments/k148/
+?? experiments/k149/
+?? experiments/k151/
+?? experiments/k152/
+?? experiments/k157/
+?? experiments/k159/
+?? experiments/k180/
+?? experiments/k181/
+?? experiments/k182/
+?? experiments/k186/
+?? experiments/k188/
+?? experiments/k189/
+?? experiments/k190/
+?? experiments/k191/
+?? experiments/k193/
+?? experiments/k194/
+?? experiments/k195/
+?? experiments/k197/
+?? experiments/k199/
+?? experiments/k200/
+?? experiments/k202/
+?? experiments/k521/
+?? experiments/k621/
+?? experiments/k622/
+?? experiments/k625/
+?? experiments/k628b/
+?? experiments/k634/
+?? experiments/k635/
+?? experiments/k636/
+?? experiments/k642/
+?? experiments/k745/
+?? experiments/k811v2/
+?? experiments/k851/
+?? src/volpred/config/
+?? src/volpred/ops/agent_spec.py
+?? src/volpred/ops/experiments.py
+?? src/volpred/ops/hygiene.py
+?? src/volpred/ops/local_control_plane.py
+?? src/volpred/ops/rollback.py
+?? storage/notifications/0472fa57.json
+?? storage/notifications/27cfd088.json
+?? storage/notifications/2e4ce8a3.json
+?? storage/notifications/33b3ae4c.json
+?? storage/notifications/37e04f17.json
+?? storage/notifications/424a3e35.json
+?? storage/notifications/42b077d5.json
+?? storage/notifications/504a0a22.json
+?? storage/notifications/5102f2f4.json
+?? storage/notifications/8561c525.json
+?? storage/notifications/8ae8dd3d.json
+?? storage/notifications/91b5b0ce.json
+?? storage/notifications/9f8103ba.json
+?? storage/notifications/aa0fbab0.json
+?? storage/notifications/b6db5e2e.json
+?? storage/notifications/cd985e32.json
+?? storage/notifications/e9847d3b.json
+?? storage/reports/mile_0c481a74.json
+?? storage/reports/mile_5aef5e64.json
+?? storage/reports/mile_7e295058.json
+?? storage/reports/mile_d14e7f5b.json
+?? tests/conftest.py
+?? tests/test_agent_spec.py
+?? tests/test_experiments_ops.py
+?? tests/test_local_control_plane.py
+?? tests/test_rollback.py

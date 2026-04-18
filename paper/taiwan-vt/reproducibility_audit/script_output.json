@@ -1,0 +1,179 @@
+{
+  "audit_date": "2026-04-17",
+  "paper": "Paper 2 — Taiwan VT (taiwan-vt/main.tex + body.tex)",
+  "source_experiments": {
+    "K461": {
+      "file": "paper/taiwan-vt/experiments/k461_ssvs_taiwan_results.json",
+      "description": "Bayesian SSVS for 0050.TW ARX-GARCH",
+      "data_period": "2009-01-13 to 2026-03-26",
+      "key_results": {
+        "SPY_ret_L1_PIP": 1.0,
+        "AR1_PIP": 0.9994,
+        "AR2_PIP": 0.97872,
+        "lagged_own_return_PIP_note": "Paper says 0.312; K461 AR(1) PIP=0.9994 — misidentified variable"
+      }
+    },
+    "K553": {
+      "file": "paper/taiwan-vt/experiments/k553_leveraged_vt_taiwan_results.json",
+      "description": "VIX-Conditional Leverage for Taiwan",
+      "data_period": "2010-01-11 to 2026-03-26",
+      "key_results": {
+        "best_variant": "E: Hybrid RV+Pctile lev=1.5",
+        "best_sharpe_diff": 0.248
+      }
+    },
+    "K558": {
+      "file": "paper/taiwan-vt/experiments/k558_k553_taiwan_validation_results.json",
+      "description": "Deep validation of Taiwan Hybrid Leverage",
+      "data_period": "2010-01-11 to 2026-03-26",
+      "n_days": 3961,
+      "key_results": {
+        "full_sample_base_sharpe": 0.472,
+        "full_sample_base_mdd": -48.38,
+        "full_sample_strategy_sharpe": 0.634,
+        "full_sample_strategy_mdd": -48.38,
+        "sharpe_diff": 0.162,
+        "harvey_t_stat": 4.7929,
+        "harvey_p_value": "2e-06",
+        "cross_oos_5_split_a_wins": "5/5",
+        "note_paper_claim": "Paper says 18/18 OOS periods positive; K558 has 5-split and 13-split cross-OOS sections"
+      }
+    },
+    "K844": {
+      "file": "paper/taiwan-vt/experiments/k844_futures_vs_stock_vt_results.json",
+      "description": "TX Futures vs 0050.TW VT comparison",
+      "key_results": {
+        "tx_vt_sharpe": 1.465,
+        "stock_vt_sharpe": 1.370,
+        "dm_harvey_pass": false,
+        "dm_t_stat": 0.216
+      }
+    },
+    "K847": {
+      "file": "paper/taiwan-vt/experiments/k847_overnight_gap_decomposition_results.json",
+      "description": "0050.TW overnight gap decomposition using TAIFEX TX tick",
+      "data_period": "2017-05-16 to 2026-04-02",
+      "n_merged_days": 2151,
+      "key_results": {
+        "stock_gap_SPY_pearson_r": 0.3988,
+        "stock_gap_mean_bps": 6.88,
+        "slot_c_SPY_pearson_r": 0.6415,
+        "variance_decomposition_slot_c_pct": 39.8,
+        "variance_decomposition_gap_e_pct": 23.6,
+        "tradable_BCD_sharpe": 1.008,
+        "non_tradable_AE_sharpe": 0.204,
+        "note_paper_claims": {
+          "r_0.376": "K847 stock_gap SPY pearson=0.3988 — off by 0.023",
+          "gap_87_pct": "K847 variance decomp shows 39.8+5.1=44.9% from slot_c+gap_a; 87% not directly computed in JSON",
+          "conditional_means_10.73_bps": "Not directly extracted in K847 JSON"
+        }
+      }
+    },
+    "K848": {
+      "file": "paper/taiwan-vt/experiments/k848_taifex_5min_rv_results.json",
+      "description": "TAIFEX 5-min RV calculation",
+      "data_period": "2017-05-16 to 2026-04-02"
+    },
+    "K849": {
+      "file": "paper/taiwan-vt/experiments/k849_har_rv_taifex_results.json",
+      "description": "HAR-RV vs GJR-GARCH for 0050.TW with 5-min RV target",
+      "key_results": {
+        "best_QLIKE": "HAR-RV-J (0.180)"
+      }
+    },
+    "K886": {
+      "file": "paper/taiwan-vt/experiments/k886_prg_0050tw_results.json",
+      "description": "PRG model on 0050.TW",
+      "data_period": "2009-01-05 to 2026-04-02",
+      "n_total": 4217,
+      "key_results": {
+        "overnight_var_share_pct": 46.14,
+        "intraday_var_share_pct": 53.85
+      }
+    },
+    "K892": {
+      "file": "paper/taiwan-vt/experiments/k892_verify_tw_gamma_results.json",
+      "description": "Verify 0050.TW GJR-GARCH gamma",
+      "key_results": {
+        "0050.TW_full_sample_gamma": 0.09704,
+        "0050.TW_full_sample_t": 3.5965,
+        "0050.TW_full_sample_n": 4219,
+        "0050.TW_rolling_last_gamma": 0.13599,
+        "0050.TW_rolling_last_t": 2.1856,
+        "paper_claimed_gamma": 0.087,
+        "paper_claimed_t": 2.20,
+        "TWII_full_sample_gamma": 0.10899,
+        "TWII_rolling_last_gamma": 0.26145,
+        "TWII_rolling_last_t": 3.3245,
+        "SPY_rolling_mean_gamma": 0.21400,
+        "SPY_rolling_mean_t": 5.310,
+        "TSMC_full_sample_gamma": 0.05250,
+        "TSMC_rolling_last_t": 1.343
+      }
+    },
+    "K896": {
+      "file": "paper/taiwan-vt/experiments/k896_taiwan_es_supplement_results.json",
+      "description": "ES analysis for Taiwan VT Paper",
+      "oos_period": "2019-01-01 to 2026-04-02",
+      "n_oos": 1756,
+      "key_results": {
+        "GJR_Normal_violations_1pct": 30,
+        "GJR_Normal_violation_rate": 0.017084,
+        "GJR_StudentT_violations_1pct": 18,
+        "GJR_StudentT_violation_rate": 0.010251,
+        "GJR_StudentT_Kupiec_p": 0.9163,
+        "GJR_CF_violations_1pct": 9,
+        "GJR_CF_violation_rate": 0.005125,
+        "VIX863_violations_1pct": 26,
+        "VIX863_violation_rate": 0.017287
+      }
+    },
+    "K900": {
+      "file": "paper/taiwan-vt/experiments/k900_taiwan_vt_performance_results.json",
+      "description": "Taiwan VT Performance Tables (S5 Resolution)",
+      "data_period": "2009-01-02 to 2026-03-30",
+      "oos_period": "2019-01-01 to 2026-03-31",
+      "key_results": {
+        "BuyHold_sharpe": 1.2469,
+        "BuyHold_mdd": -33.83,
+        "BuyHold_ann_return": 25.97,
+        "BuyHold_ann_vol": 20.83,
+        "EWMA_VT_sharpe": 1.2076,
+        "EWMA_VT_mdd": -21.17,
+        "EWMA_VT_ann_return": 12.87,
+        "EWMA_VT_ann_vol": 10.66,
+        "GJR_VT_sharpe": 1.2915,
+        "GJR_VT_mdd": -22.21,
+        "VIX863_sharpe": 1.2592,
+        "VIX863_mdd": -13.71,
+        "VIX863_ann_return": 12.15,
+        "VIX863_ann_vol": 9.65,
+        "descriptive_stats_tw50_mean": 0.0724,
+        "descriptive_stats_tw50_std": 1.3442,
+        "descriptive_stats_tw50_skew": 0.473,
+        "descriptive_stats_tw50_kurt": 19.054,
+        "descriptive_stats_twii_mean": 0.0376,
+        "descriptive_stats_twii_std": 1.18,
+        "descriptive_stats_twii_skew": -0.395,
+        "descriptive_stats_twii_kurt": 5.935,
+        "n_tw_trading_days": 4217
+      }
+    }
+  },
+  "missing_experiment_sources": [
+    "Time-zone momentum strategy results (Table 4: Taiwan c2c=1.473, o2o=0.87) — no experiment JSON found",
+    "Multi-market TZ (HK, Australia, Singapore, Korea, Japan t-stats) — no experiment JSON",
+    "DM test GJR vs GARCH QLIKE (t=-0.17, p=0.86) — no experiment JSON",
+    "SPY->0050 c2c correlation t=24.8 — no experiment JSON",
+    "VIX Granger F=58.8 — no experiment JSON",
+    "Macro indicators sweep (import growth, BCI) — no experiment JSON",
+    "TSMC concentration decomposition (K900 excerpt only) — no dedicated experiment JSON",
+    "Ex-dividend volatility spike (+32%, +69%) — no experiment JSON",
+    "Currency drag -18% — no experiment JSON",
+    "TSMC VT Sharpe (1.121) and ex-TSMC Sharpe range — no experiment JSON",
+    "Skewed-t parameters (eta=5.2, lambda=-0.05) — not in K896",
+    "Bootstrap CI for TZ strategy [0.65, 2.24] — no experiment JSON",
+    "VIX+Leading indicator DM p=0.0005 — no experiment JSON",
+    "Sharpe reconciliation sub-period 8.63/VIX (0.334 in 2018-2024) — no experiment JSON"
+  ]
+}
