@@ -1,28 +1,25 @@
+"""Deprecated as of 2026-04-18 (Contentlayer pattern rollout).
+
+Legacy module that backed up each feed item as an individual
+`storage/reports/mile_*.json` file, or audited for missing singles.
+
+Under the new Contentlayer pattern, `storage/reports/feed.json` is the
+single canonical source of truth for all articles; individual mile_*.json
+singles are archived under `storage/reports/_archive_mile_files/` and are
+no longer written or read as a live source.
+
+Both public functions are now safe no-op stubs that return the same
+shape they used to, so existing callers (`supabase_sync.py`,
+`src/volpred/ops/content.py::ensure_article_local_backups`) keep
+working without behavior change.
+
+Remove this file once no caller imports it.
+"""
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 ARTICLE_BODY_FIELDS = ("content", "description", "summary", "analysis")
-
-
-def _load_feed(feed_path: Path) -> list[dict]:
-    if not feed_path.exists():
-        return []
-    raw = json.loads(feed_path.read_text())
-    if isinstance(raw, list):
-        return [item for item in raw if isinstance(item, dict)]
-    if isinstance(raw, dict) and isinstance(raw.get("items"), list):
-        return [item for item in raw["items"] if isinstance(item, dict)]
-    return []
-
-
-def _extract_article_body(item: dict) -> str:
-    for field in ARTICLE_BODY_FIELDS:
-        value = item.get(field)
-        if isinstance(value, str) and value.strip():
-            return value
-    return ""
 
 
 def audit_local_article_backups(
@@ -30,68 +27,29 @@ def audit_local_article_backups(
     *,
     include_non_published: bool = False,
 ) -> dict:
-    storage = Path(storage_dir)
-    reports_dir = storage / "reports"
-    feed = _load_feed(reports_dir / "feed.json")
-    report_files = sorted(
-        path.stem
-        for path in reports_dir.glob("*.json")
-        if path.name != "feed.json"
-    )
+    """No-op stub (Contentlayer cutover). Returns a deprecation marker.
 
-    tracked_items: list[dict] = []
-    missing_report_ids: list[str] = []
-    bodyless_ids: list[str] = []
-    feed_only_ids: list[str] = []
-    skipped_without_id = 0
-
-    for item in feed:
-        status = str(item.get("status") or "published")
-        if not include_non_published and status != "published":
-            continue
-        pub_id = str(item.get("id") or item.get("pub_id") or "").strip()
-        if not pub_id:
-            skipped_without_id += 1
-            continue
-
-        tracked_items.append(item)
-        report_path = reports_dir / f"{pub_id}.json"
-        feed_body = _extract_article_body(item)
-        report_body = ""
-
-        if report_path.exists():
-            report = json.loads(report_path.read_text())
-            if isinstance(report, dict):
-                report_body = _extract_article_body(report)
-        else:
-            missing_report_ids.append(pub_id)
-            if feed_body:
-                feed_only_ids.append(pub_id)
-
-        if not feed_body and not report_body:
-            bodyless_ids.append(pub_id)
-
-    tracked_ids = {
-        str(item.get("id") or item.get("pub_id") or "").strip()
-        for item in tracked_items
-        if str(item.get("id") or item.get("pub_id") or "").strip()
-    }
-
+    Previously audited `storage/reports/mile_*.json` presence. Under
+    Contentlayer these singles are archived and irrelevant.
+    """
     return {
-        "storage_dir": str(storage),
-        "total_feed_items": len(feed),
-        "published_items": sum(
-            1 for item in feed if str(item.get("status") or "published") == "published"
+        "deprecated": True,
+        "message": (
+            "article_backups is deprecated after 2026-04-18 Contentlayer "
+            "cutover; feed.json is the only canonical source."
         ),
-        "tracked_items": len(tracked_items),
-        "report_file_count": len(report_files),
-        "missing_report_ids": sorted(missing_report_ids),
-        "feed_only_ids": sorted(feed_only_ids),
-        "bodyless_ids": sorted(bodyless_ids),
-        "extra_report_ids": sorted(set(report_files) - tracked_ids),
-        "skipped_without_id": skipped_without_id,
-        "recoverable": not bodyless_ids,
-        "fully_materialized": not missing_report_ids,
+        "storage_dir": str(Path(storage_dir)),
+        "total_feed_items": 0,
+        "published_items": 0,
+        "tracked_items": 0,
+        "report_file_count": 0,
+        "missing_report_ids": [],
+        "feed_only_ids": [],
+        "bodyless_ids": [],
+        "extra_report_ids": [],
+        "skipped_without_id": 0,
+        "recoverable": True,
+        "fully_materialized": True,
     }
 
 
@@ -101,43 +59,16 @@ def ensure_local_article_backups(
     repair: bool = False,
     include_non_published: bool = False,
 ) -> dict:
+    """No-op stub (Contentlayer cutover). Never writes new singles.
+
+    Under the Contentlayer pattern feed.json is canonical; individual
+    mile_*.json singles have been archived. Attempting to "repair" them
+    would reintroduce the very divergence problem this cutover fixed.
+    """
     audit = audit_local_article_backups(
         storage_dir,
         include_non_published=include_non_published,
     )
     audit["repaired_ids"] = []
-
-    if not repair or not audit["missing_report_ids"]:
-        return audit
-
-    storage = Path(storage_dir)
-    reports_dir = storage / "reports"
-    feed = _load_feed(reports_dir / "feed.json")
-    feed_map = {
-        str(item.get("id") or item.get("pub_id") or "").strip(): item
-        for item in feed
-        if isinstance(item, dict) and str(item.get("id") or item.get("pub_id") or "").strip()
-    }
-
-    repaired_ids: list[str] = []
-    for pub_id in audit["missing_report_ids"]:
-        item = feed_map.get(pub_id)
-        if not item:
-            continue
-        if not _extract_article_body(item):
-            continue
-        payload = dict(item)
-        payload.setdefault("id", pub_id)
-        report_path = reports_dir / f"{pub_id}.json"
-        report_path.write_text(
-            json.dumps(payload, indent=2, ensure_ascii=False, default=str)
-        )
-        repaired_ids.append(pub_id)
-
-    repaired_audit = audit_local_article_backups(
-        storage_dir,
-        include_non_published=include_non_published,
-    )
-    repaired_audit["repaired_ids"] = repaired_ids
-    repaired_audit["created_count"] = len(repaired_ids)
-    return repaired_audit
+    audit["created_count"] = 0
+    return audit

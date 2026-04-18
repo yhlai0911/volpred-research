@@ -25,10 +25,6 @@ def _feed_path(storage_dir: str = "storage") -> Path:
     return project_path(storage_dir, "reports", "feed.json")
 
 
-def _report_path(pub_id: str, storage_dir: str = "storage") -> Path:
-    return project_path(storage_dir, "reports", f"{pub_id}.json")
-
-
 def load_feed(storage_dir: str = "storage") -> list[dict]:
     return load_json(_feed_path(storage_dir), [])
 
@@ -201,16 +197,9 @@ def release_pool_articles(
             continue
         item["status"] = "published"
         item["published_at"] = released_at
-        report_path = _report_path(str(item["id"]), storage_dir)
-        if report_path.exists():
-            report = load_json(report_path, {})
-            report["status"] = "published"
-            report["published_at"] = released_at
-            dump_json(report_path, report)
-            # CRITICAL: update in-place so feed list reflects report content
-            # Previously `item = report` only reassigned the local variable,
-            # leaving the feed list entry unchanged (missing content/audience)
-            item.update(report)
+        # Contentlayer pattern (2026-04-18): feed.json is canonical; no
+        # mile_*.json singles to read back / rewrite. feed entry already
+        # holds the full content since reconcile_content_from_singles().
         article_slug = str(item.get("id", ""))
         released.append({
             "id": article_slug,
@@ -218,7 +207,6 @@ def release_pool_articles(
             "status": item.get("status"),
             "published_at": item.get("published_at"),
         })
-        publisher._sync_report_to_remote(article_slug, item)
         sync_article(item, storage_dir=publisher.reports_dir.parent)
         # Auto-mark linked questions as answered now that article is published
         _mark_questions_answered_on_publish(article_slug)
@@ -521,13 +509,14 @@ def unpublish_article(pub_id: str, storage_dir: str = "storage") -> dict:
 
 
 def cleanup_test_post(pub_id: str, *, hard_delete: bool = False, storage_dir: str = "storage") -> dict:
+    # Contentlayer pattern (2026-04-18): feed.json is the only canonical
+    # source; mile_*.json singles are archived. We no longer check or
+    # delete single files here.
     publisher = Publisher(storage_dir=storage_dir)
     feed = load_feed(storage_dir)
     had_feed_item = any(item.get("id") == pub_id for item in feed)
-    report_path = _report_path(pub_id, storage_dir)
-    had_report = report_path.exists()
 
-    if not had_feed_item and not had_report:
+    if not had_feed_item:
         return {"id": pub_id, "found": False, "hard_delete": hard_delete}
 
     result = {
@@ -536,7 +525,6 @@ def cleanup_test_post(pub_id: str, *, hard_delete: bool = False, storage_dir: st
         "hard_delete": hard_delete,
         "unpublished": publisher.unpublish(pub_id),
         "local_feed_removed": False,
-        "local_report_deleted": False,
         "supabase_deleted": False,
         "question_article_links_removed": 0,
     }
@@ -552,10 +540,6 @@ def cleanup_test_post(pub_id: str, *, hard_delete: bool = False, storage_dir: st
         dump_json(_feed_path(storage_dir), trimmed_feed)
         result["local_feed_removed"] = True
         publisher._sync_feed_to_remote()  # internal use: keep remote feed in sync
-
-    if report_path.exists():
-        report_path.unlink()
-        result["local_report_deleted"] = True
 
     result["supabase_deleted"] = delete_article(pub_id)
     return result

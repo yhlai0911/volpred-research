@@ -204,6 +204,73 @@ def apply_diff(
     }
 
 
+def reconcile_content_from_singles(
+    *,
+    storage_dir: str | Path = "storage",
+    dry_run: bool = True,
+    min_gain: int = 100,
+) -> dict:
+    """Pre-Phase-3 one-shot: merge longer content from mile_*.json singles
+    back into feed.json before the single files are archived.
+
+    Singles have historically been written as a second source (Phase 0 bug).
+    For 25+ items the single has more complete content than the feed entry.
+    Once feed.json holds the complete content, singles can be safely archived.
+
+    Only updates feed entries where the single's content is at least
+    `min_gain` chars longer than the feed's current content (safe default,
+    avoids noisy small-diff updates).
+
+    Returns counters; writes feed.json only when dry_run=False.
+    """
+    from urllib.parse import quote as _q  # noqa: F401 (future use)
+
+    feed_path = _feed_path(storage_dir)
+    feed = _load_feed(storage_dir)
+    feed_by_id: dict[str, dict] = {
+        a["id"]: a for a in feed if isinstance(a, dict) and a.get("id")
+    }
+
+    singles_dir = Path(storage_dir) / "reports"
+    updated: list[dict] = []
+    for single_path in singles_dir.glob("mile_*.json"):
+        try:
+            single = json.loads(single_path.read_text())
+        except Exception:
+            continue
+        sid = single.get("id")
+        if not sid or sid not in feed_by_id:
+            continue
+        fc = feed_by_id[sid].get("content") or ""
+        sc = single.get("content") or ""
+        if len(sc) >= len(fc) + min_gain:
+            updated.append({
+                "id": sid,
+                "feed_len": len(fc),
+                "single_len": len(sc),
+                "gain": len(sc) - len(fc),
+            })
+            if not dry_run:
+                feed_by_id[sid]["content"] = sc
+                # also hydrate description if it's much shorter
+                fd = feed_by_id[sid].get("description") or ""
+                sd = single.get("description") or ""
+                if len(sd) > len(fd):
+                    feed_by_id[sid]["description"] = sd
+
+    if not dry_run and updated:
+        # Preserve original feed order (feed list carries same dict refs,
+        # so mutations are already in place).
+        feed_path.write_text(json.dumps(feed, ensure_ascii=False, indent=2))
+
+    return {
+        "checked_singles": len(list(singles_dir.glob("mile_*.json"))),
+        "updated": len(updated),
+        "examples": updated[:5],
+        "mode": "dry_run" if dry_run else "apply",
+    }
+
+
 def sync_feed_to_supabase(
     *,
     storage_dir: str | Path = "storage",

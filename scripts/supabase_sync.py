@@ -356,19 +356,12 @@ def extract_proposer(item: dict) -> str | None:
 
 def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
     """Sync a single article (feed item) to Supabase.
-    Tries individual report file for full content first."""
-    content = item.get("content") or ""
-    # Try individual report file for richer content
-    slug = item.get("id", "")
-    if slug and (not content or len(content) < 200):
-        report_path = Path(storage_dir) / "reports" / f"{slug}.json"
-        if report_path.exists():
-            import json as _json
-            report = _json.loads(report_path.read_text())
-            if report.get("content") and len(report["content"]) > len(content):
-                content = report["content"]
-    if not content:
-        content = item.get("description") or ""
+
+    Contentlayer pattern (2026-04-18): feed.json is canonical and now
+    holds the complete content directly (post reconcile_content_from_singles).
+    We no longer read mile_*.json singles as a content fallback.
+    """
+    content = item.get("content") or item.get("description") or ""
     row = {
         "slug": item.get("id", ""),
         "title": item.get("title", ""),

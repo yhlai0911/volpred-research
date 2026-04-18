@@ -163,12 +163,9 @@ class Publisher:
             'status': 'published',
         }
 
-        # Save individual report
-        report_file = self.reports_dir / f"{item['id']}.json"
-        with open(report_file, 'w') as f:
-            json.dump(item, f, indent=2, default=str)
-
-        # Append to feed
+        # Contentlayer pattern (2026-04-18): feed.json is canonical.
+        # Individual mile_*.json snapshots are archived to
+        # storage/reports/_archive_mile_files/ and no longer written.
         self._append_to_feed(item)
         try:
             from volpred.publisher.email_notifier import EmailNotifier
@@ -200,10 +197,7 @@ class Publisher:
             'status': 'published',
         }
 
-        report_file = self.reports_dir / f"{pub_id}.json"
-        with open(report_file, 'w') as f:
-            json.dump(item, f, indent=2, default=str)
-
+        # Contentlayer pattern: feed.json is canonical; no per-item mile_*.json.
         self._append_to_feed(item)
         self._sync_to_remote(title, analysis, 'comparison')
         try:
@@ -354,13 +348,9 @@ class Publisher:
         if proposer:
             item['proposer'] = proposer
 
-        report_file = self.reports_dir / f"{pub_id}.json"
-        with open(report_file, 'w') as f:
-            json.dump(item, f, indent=2, default=str)
-
+        # Contentlayer pattern: feed.json is canonical; no per-item mile_*.json.
         self._append_to_feed(item)
         self._sync_to_remote(title, description, phase, details)
-        self._sync_report_to_remote(pub_id, item)
 
         # Sync to Supabase DB (so website shows article immediately)
         try:
@@ -413,15 +403,8 @@ class Publisher:
             return False
         with open(self._feed_file, 'w') as f:
             json.dump(feed, f, indent=2, default=str, ensure_ascii=False)
-        report_file = self.reports_dir / f"{pub_id}.json"
-        if report_file.exists():
-            report = json.loads(report_file.read_text())
-            report['status'] = 'unpublished'
-            report_file.write_text(json.dumps(report, indent=2, default=str, ensure_ascii=False))
-            target_item = report
+        # Contentlayer pattern: no per-item mile_*.json to sync.
         self._sync_feed_to_remote()
-        if target_item:
-            self._sync_report_to_remote(pub_id, target_item)
         try:
             import sys
             sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent / "scripts"))
@@ -494,9 +477,6 @@ class Publisher:
                     json.load(f)
                 tmp_file.replace(self._feed_file)
                 self._sync_feed_to_remote()
-                # Also sync the individual report JSON
-                if item.get('id'):
-                    self._sync_report_to_remote(item['id'], item)
         except Exception as exc:
             result_label = f"error: {type(exc).__name__}: {exc}"[:200]
             raise
@@ -510,12 +490,9 @@ class Publisher:
             )
 
     def get_report(self, pub_id: str) -> dict | None:
-        report_file = self.reports_dir / f"{pub_id}.json"
-        if report_file.exists():
-            try:
-                return json.loads(report_file.read_text())
-            except Exception:
-                return None
+        # Contentlayer pattern: feed.json is canonical. Read from it only.
+        # (Legacy mile_*.json singles are archived; the archive is not a
+        # live source and must not be read back from.)
         for item in self._load_feed():
             if item.get("id") == pub_id:
                 return item
@@ -563,21 +540,14 @@ class Publisher:
         return result
 
     def _sync_report_to_remote(self, pub_id: str, item: dict):
-        """PUT individual report JSON to remote."""
-        if not self.REMOTE_URL:
-            return
-        try:
-            import urllib.request
-            data = json.dumps(item, indent=2, default=str).encode('utf-8')
-            req = urllib.request.Request(
-                f"{self.REMOTE_URL}/api/sync/reports/{pub_id}.json",
-                data=data,
-                headers={"Content-Type": "application/json"},
-                method="PUT",
-            )
-            urllib.request.urlopen(req, timeout=5)
-        except Exception:
-            pass
+        """Deprecated (2026-04-18 Contentlayer cutover): no-op.
+
+        Individual mile_*.json files are no longer canonical. feed.json
+        alone is PUT to the remote mirror via _sync_feed_to_remote().
+        Kept as a stub so existing callers (content.py release_pool) don't
+        break during transition — safe to delete once callers are updated.
+        """
+        return
 
     def _sync_feed_to_remote(self):
         """PUT full feed.json to remote for consistency."""
