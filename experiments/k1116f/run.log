@@ -1,0 +1,84 @@
+Using CPython 3.12.10
+Creating virtual environment at: .venv
+   Building volpred @ file:///Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a458447b
+      Built volpred @ file:///Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a458447b
+Installed 109 packages in 724ms
+[15:58:10] Loading alt-data PIT + weekly-mean views from K1116c cache...
+[15:58:10]   weekly_mean panel: (2885, 5), PIT panel: (2885, 5)
+[15:58:13] Fetching GLD + IV=^GVZ (iv_type=close)...
+[15:58:14]   GLD: 431 weeks, 2018-01-12 to 2026-04-10
+[15:58:39]   [GLD/k1118_shift1] best_alt=all qlike_imp%=-0.02 DM finstress t=-3.34 n_oos=170
+[15:58:39]   [GLD/pit_shift0] best_alt=all qlike_imp%=-0.63 DM finstress t=-3.34 n_oos=170
+[15:58:39]   [GLD/pit_shift1] best_alt=all qlike_imp%=-0.09 DM finstress t=-3.03 n_oos=170
+[15:58:39] Fetching TLT + IV=^MOVE (iv_type=close)...
+[15:58:40]   TLT: 431 weeks, 2018-01-12 to 2026-04-10
+[15:58:40]   [TLT/k1118_shift1] best_alt=finstress qlike_imp%=+0.50 DM finstress t=+3.74 n_oos=170
+[15:58:40]   [TLT/pit_shift0] best_alt=finstress qlike_imp%=+0.50 DM finstress t=+3.74 n_oos=170
+[15:58:40]   [TLT/pit_shift1] best_alt=finstress qlike_imp%=+0.18 DM finstress t=+2.00 n_oos=170
+[15:58:40] Fetching BTC-USD + IV=None (iv_type=rv30)...
+[15:58:40]   BTC-USD: 428 weeks, 2018-02-02 to 2026-04-10
+[15:58:40]   [BTC-USD/k1118_shift1] best_alt=finstress qlike_imp%=+0.23 DM finstress t=+1.37 n_oos=170
+[15:58:40]   [BTC-USD/pit_shift0] best_alt=finstress qlike_imp%=+0.23 DM finstress t=+1.37 n_oos=170
+[15:58:40]   [BTC-USD/pit_shift1] best_alt=finstress qlike_imp%=+0.13 DM finstress t=+1.03 n_oos=170
+[15:58:40] Saved /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a458447b/experiments/k1116f/k1116f_results.json
+[15:58:43]   saved k1116f_dm_heatmap.png
+[15:58:43]   saved k1116f_qlike_ratio.png
+
+==========================================================================================
+K1116f SUMMARY — Cross-asset PIT alignment vs K1118 shift(1)
+==========================================================================================
+Verdict: ASSET_SPECIFIC — Only ['TLT'] show alt-data DM>3 under PIT; other assets remain NULL. Paper 4 narrative needs per-asset treatment.
+
+[GLD]
+  k1118_shift1    n_oos=170  best_alt=all         qlike_imp%=-0.02
+    iv_vs_base            t=-2.103  p=0.0369  [B<-2]
+    iv_vs_epu             t=-1.773  p=0.0780  [ns]
+    iv_vs_finstress       t=-3.341  p=0.0010  [B<-3]
+    iv_vs_all             t=-0.129  p=0.8978  [ns]
+  pit_shift0      n_oos=170  best_alt=all         qlike_imp%=-0.63
+    iv_vs_base            t=-2.103  p=0.0369  [B<-2]
+    iv_vs_epu             t=-2.069  p=0.0400  [B<-2]
+    iv_vs_finstress       t=-3.341  p=0.0010  [B<-3]
+    iv_vs_all             t=-2.246  p=0.0260  [B<-2]
+  pit_shift1      n_oos=170  best_alt=all         qlike_imp%=-0.09
+    iv_vs_base            t=-2.103  p=0.0369  [B<-2]
+    iv_vs_epu             t=-2.942  p=0.0037  [B<-2]
+    iv_vs_finstress       t=-3.029  p=0.0028  [B<-3]
+    iv_vs_all             t=-0.613  p=0.5410  [ns]
+[TLT]
+  k1118_shift1    n_oos=170  best_alt=finstress   qlike_imp%=+0.50
+    iv_vs_base            t=+1.433  p=0.1537  [ns]
+    iv_vs_epu             t=-0.831  p=0.4071  [ns]
+    iv_vs_finstress       t=+3.743  p=0.0002  [CH>3]
+    iv_vs_all             t=-5.179  p=0.0000  [B<-3]
+  pit_shift0      n_oos=170  best_alt=finstress   qlike_imp%=+0.50
+    iv_vs_base            t=+1.433  p=0.1537  [ns]
+    iv_vs_epu             t=-2.477  p=0.0142  [B<-2]
+    iv_vs_finstress       t=+3.743  p=0.0002  [CH>3]
+    iv_vs_all             t=-5.666  p=0.0000  [B<-3]
+  pit_shift1      n_oos=170  best_alt=finstress   qlike_imp%=+0.18
+    iv_vs_base            t=+1.433  p=0.1537  [ns]
+    iv_vs_epu             t=-1.385  p=0.1678  [ns]
+    iv_vs_finstress       t=+2.000  p=0.0471  [ns]
+    iv_vs_all             t=-5.600  p=0.0000  [B<-3]
+[BTC-USD]
+  k1118_shift1    n_oos=170  best_alt=finstress   qlike_imp%=+0.23
+    iv_vs_base            t=-5.494  p=0.0000  [B<-3]
+    iv_vs_epu             t=-5.039  p=0.0000  [B<-3]
+    iv_vs_finstress       t=+1.370  p=0.1725  [ns]
+    iv_vs_all             t=-1.282  p=0.2015  [ns]
+  pit_shift0      n_oos=170  best_alt=finstress   qlike_imp%=+0.23
+    iv_vs_base            t=-5.494  p=0.0000  [B<-3]
+    iv_vs_epu             t=-3.550  p=0.0005  [B<-3]
+    iv_vs_finstress       t=+1.370  p=0.1725  [ns]
+    iv_vs_all             t=+0.203  p=0.8391  [ns]
+  pit_shift1      n_oos=170  best_alt=finstress   qlike_imp%=+0.13
+    iv_vs_base            t=-5.494  p=0.0000  [B<-3]
+    iv_vs_epu             t=-3.387  p=0.0009  [B<-3]
+    iv_vs_finstress       t=+1.035  p=0.3023  [ns]
+    iv_vs_all             t=+0.142  p=0.8869  [ns]
+
+Cross-asset synthesis:
+  k1118_shift1: harvey>3 pass = ['TLT'], |t|>2 pass = ['TLT'], baseline>3 wins total = 4
+  pit_shift0: harvey>3 pass = ['TLT'], |t|>2 pass = ['TLT'], baseline>3 wins total = 4
+  pit_shift1: harvey>3 pass = [], |t|>2 pass = [], baseline>3 wins total = 4

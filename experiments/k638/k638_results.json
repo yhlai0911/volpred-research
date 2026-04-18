@@ -1,0 +1,363 @@
+{
+  "experiment_id": "K638",
+  "title": "VIX Term Structure Slope as Vol Forecasting Signal",
+  "timestamp": "2026-03-29T03:27:43.606092",
+  "data_source": "yfinance (SPY, ^VIX, ^VIX3M)",
+  "data_period": "2008-04-08 to 2026-02-25",
+  "total_observations": 4500,
+  "term_structure_source": "^VIX3M",
+  "oos_period": "2023-01-01 to 2024-12-31",
+  "rolling_window": 2000,
+  "refit_frequency": 63,
+  "descriptive_statistics": {
+    "slope": {
+      "mean": 0.11618457302120055,
+      "std": 0.09301998830885182,
+      "min": -0.3011499917034067,
+      "q25": 0.05888937207978723,
+      "median": 0.1234025461143935,
+      "q75": 0.17997556489372285,
+      "max": 0.40774018405848067,
+      "skewness": -0.5706603672074433,
+      "kurtosis": 1.0268179618092503
+    },
+    "abs_slope": {
+      "mean": 0.1284080829134865,
+      "std": 0.07524807593674664,
+      "min": 0.0,
+      "q25": 0.06684454138246715,
+      "median": 0.12678371162585123,
+      "q75": 0.1818565263613618,
+      "max": 0.40774018405848067,
+      "skewness": 0.28214993496489144,
+      "kurtosis": -0.5916184841360033
+    },
+    "vix": {
+      "mean": 19.830600003136528,
+      "std": 8.946094785538568,
+      "min": 9.140000343322754,
+      "q25": 14.050000190734863,
+      "median": 17.335000038146973,
+      "q75": 22.510000228881836,
+      "max": 82.69000244140625,
+      "skewness": 2.5142031499464514,
+      "kurtosis": 9.080435355470657
+    },
+    "vix3m": {
+      "mean": 21.558653336630925,
+      "std": 7.746899622293905,
+      "min": 11.850000381469727,
+      "q25": 16.1200008392334,
+      "median": 19.675000190734863,
+      "q75": 24.549999237060547,
+      "max": 72.9800033569336,
+      "skewness": 2.042406298183668,
+      "kurtosis": 6.029010891482374
+    },
+    "rv_22d": {
+      "mean": 0.16282368027153232,
+      "std": 0.11636123592832966,
+      "min": 0.03396581972599023,
+      "q25": 0.096599428370515,
+      "median": 0.1318114446665855,
+      "q75": 0.1895838288273646,
+      "max": 0.9367122641370871,
+      "skewness": 3.265308618079162,
+      "kurtosis": 14.478169390483828
+    }
+  },
+  "adf_test_slope": {
+    "adf_stat": -8.949177806949365,
+    "p_value": 8.818692659367988e-15,
+    "stationary": "True"
+  },
+  "correlations": {
+    "slope_vs_fwd_rv22": {
+      "pearson_r": -0.5813389093078533,
+      "pearson_p": 0.0,
+      "spearman_r": -0.5145059038360482,
+      "spearman_p": 1.0492320576776973e-302,
+      "n": 4500
+    },
+    "slope_vs_fwd_rv5": {
+      "pearson_r": -0.6222487168082067,
+      "pearson_p": 0.0,
+      "spearman_r": -0.5759362936056394,
+      "spearman_p": 0.0,
+      "n": 4500
+    },
+    "abs_slope_vs_fwd_rv22": {
+      "pearson_r": -0.2656778930933544,
+      "pearson_p": 1.4243730464284815e-73,
+      "spearman_r": -0.4376909083264131,
+      "spearman_p": 5.219312062840728e-210,
+      "n": 4500
+    },
+    "slope_x_vix_vs_fwd_rv22": {
+      "pearson_r": -0.6155555700882003,
+      "pearson_p": 0.0,
+      "spearman_r": -0.3280537410805604,
+      "spearman_p": 2.2184093102474606e-113,
+      "n": 4500
+    },
+    "vix_vs_fwd_rv22": {
+      "pearson_r": 0.6960602736107973,
+      "pearson_p": 0.0,
+      "spearman_r": 0.6650080799006997,
+      "spearman_p": 0.0,
+      "n": 4500
+    },
+    "partial_slope_vix_fwd_rv22": {
+      "partial_r": -0.19199336823211727,
+      "partial_p": 1.275455044791698e-38,
+      "n": 4500,
+      "controlling_for": "VIX level"
+    }
+  },
+  "granger_causality": {
+    "lag_1": {
+      "F_stat": 22.388033744769704,
+      "p_value": 2.29592354969273e-06
+    },
+    "lag_5": {
+      "F_stat": 13.563587913078662,
+      "p_value": 3.6749666571674055e-13
+    },
+    "lag_10": {
+      "F_stat": 7.463718516591206,
+      "p_value": 7.161420250114292e-12
+    },
+    "lag_22": {
+      "F_stat": 3.9392567946317305,
+      "p_value": 1.6145597033871325e-09
+    }
+  },
+  "regime_analysis": {
+    "<15": {
+      "count": 1441,
+      "pct_of_total": 32.022222222222226,
+      "slope_mean": 0.17995223454814105,
+      "slope_std": 0.06079432110696221,
+      "slope_median": 0.17660910835342358,
+      "backwardation_pct": 0.0,
+      "fwd_rv22_mean": 0.10741098433515717,
+      "spy_return_mean_ann": 42.893226316145906
+    },
+    "15-20": {
+      "count": 1473,
+      "pct_of_total": 32.733333333333334,
+      "slope_mean": 0.1276147829408918,
+      "slope_std": 0.06959314252687111,
+      "slope_median": 0.12830959959662103,
+      "backwardation_pct": 2.4439918533604885,
+      "fwd_rv22_mean": 0.13712080012571284,
+      "spy_return_mean_ann": 27.225631632181713
+    },
+    "20-25": {
+      "count": 790,
+      "pct_of_total": 17.555555555555554,
+      "slope_mean": 0.0871615001624888,
+      "slope_std": 0.07194299214083397,
+      "slope_median": 0.08955166537887893,
+      "backwardation_pct": 11.89873417721519,
+      "fwd_rv22_mean": 0.1760596617615024,
+      "spy_return_mean_ann": -10.729102908053937
+    },
+    "25-30": {
+      "count": 355,
+      "pct_of_total": 7.888888888888888,
+      "slope_mean": 0.056685176374894876,
+      "slope_std": 0.07224521445497305,
+      "slope_median": 0.06247553440019726,
+      "backwardation_pct": 16.901408450704224,
+      "fwd_rv22_mean": 0.2140331149487545,
+      "spy_return_mean_ann": -13.793169042375483
+    },
+    ">30": {
+      "count": 441,
+      "pct_of_total": 9.8,
+      "slope_mean": -0.03047163129672631,
+      "slope_std": 0.08375547098791646,
+      "slope_median": -0.009293657013796253,
+      "backwardation_pct": 55.32879818594104,
+      "fwd_rv22_mean": 0.36093135625443973,
+      "spy_return_mean_ann": -89.30718691458395
+    }
+  },
+  "contango_vs_backwardation": {
+    "contango": {
+      "count": 4066,
+      "pct": 90.35555555555555,
+      "spy_return_ann": 29.90879547684625,
+      "fwd_rv22_mean": 0.14358091207085225
+    },
+    "backwardation": {
+      "count": 434,
+      "pct": 9.644444444444444,
+      "spy_return_ann": -166.9440175802405,
+      "fwd_rv22_mean": 0.339165426817175
+    },
+    "return_diff_ttest": {
+      "t_stat": 12.576415354657174,
+      "p_value": 1.1268442938808355e-35
+    }
+  },
+  "model_evaluation": {
+    "gjr_baseline": {
+      "qlike": 0.41570647386310583,
+      "mse": 0.0021187741461079867,
+      "mae": 0.033885354889782456,
+      "corr": -0.05207139554707334,
+      "corr_p": 0.2441971697876196,
+      "n_valid": 502,
+      "mean_forecast": 0.12647301749363524,
+      "mean_actual": 0.1243600346794525
+    },
+    "garchx_slope": {
+      "qlike": 0.41570647386310583,
+      "mse": 0.0021187741461079867,
+      "mae": 0.033885354889782456,
+      "corr": -0.05207139554707334,
+      "corr_p": 0.2441971697876196,
+      "n_valid": 502,
+      "mean_forecast": 0.12647301749363524,
+      "mean_actual": 0.1243600346794525
+    },
+    "har_slope": {
+      "qlike": 0.5728538831494677,
+      "mse": 0.0025418479511722936,
+      "mae": 0.03939988767162198,
+      "corr": 0.25682128108427266,
+      "corr_p": 5.282183412603429e-09,
+      "n_valid": 502,
+      "mean_forecast": 0.12234768542882592,
+      "mean_actual": 0.1243600346794525
+    }
+  },
+  "dm_tests": {
+    "garchx_slope": {
+      "dm_stat": 0.0,
+      "p_value": 1.0,
+      "loss_diff_mean": 0.0,
+      "n": 502,
+      "significant_at_5pct": "False",
+      "model_better": "False"
+    },
+    "har_slope": {
+      "dm_stat": -2.106903961589154,
+      "p_value": 0.03512590515890035,
+      "loss_diff_mean": -0.0004230738050643067,
+      "n": 502,
+      "significant_at_5pct": "True",
+      "model_better": "False"
+    }
+  },
+  "strategy_backtest": {
+    "12/VIX Standard": {
+      "name": "12/VIX Standard",
+      "ann_return": 8.666912757851627,
+      "ann_vol": 9.37942129857681,
+      "sharpe": 0.9240349145172425,
+      "max_drawdown": -15.244544568020812,
+      "calmar": 0.5685255285377702,
+      "n_days": 3269
+    },
+    "Slope-Adjusted": {
+      "name": "Slope-Adjusted",
+      "ann_return": 9.635025455050155,
+      "ann_vol": 10.257887960876003,
+      "sharpe": 0.9392796540378028,
+      "max_drawdown": -17.354914476844574,
+      "calmar": 0.555175622899524,
+      "n_days": 3269
+    },
+    "Conservative Backwardation": {
+      "name": "Conservative Backwardation",
+      "ann_return": 8.670228765453574,
+      "ann_vol": 9.376659707133955,
+      "sharpe": 0.924660703945253,
+      "max_drawdown": -15.244544568020846,
+      "calmar": 0.5687430494736783,
+      "n_days": 3269
+    },
+    "Buy & Hold SPY": {
+      "name": "Buy & Hold SPY",
+      "ann_return": 13.805212138674234,
+      "ann_vol": 16.971777929265645,
+      "sharpe": 0.8134216813471806,
+      "max_drawdown": -35.74587365713864,
+      "calmar": 0.38620435665075037,
+      "n_days": 3270
+    }
+  },
+  "strategy_sharpe_bootstrap": {
+    "sharpe_diff_mean": 0.01461747152607864,
+    "sharpe_diff_se": 0.025947572429368057,
+    "sharpe_diff_pval": 0.5844,
+    "n_bootstrap": 5000
+  },
+  "slope_quintile_analysis": {
+    "Q1(most_backw)": {
+      "count": 900,
+      "slope_range": "[-0.3011, 0.0426]",
+      "fwd_rv22_mean": 0.26922598794886743,
+      "spy_return_ann": -104.66739610439913,
+      "vix_mean": 30.29724444071452
+    },
+    "Q2": {
+      "count": 900,
+      "slope_range": "[0.0426, 0.0994]",
+      "fwd_rv22_mean": 0.17216525676164787,
+      "spy_return_ann": 14.44554954213971,
+      "vix_mean": 20.836844461229113
+    },
+    "Q3": {
+      "count": 900,
+      "slope_range": "[0.0994, 0.1448]",
+      "fwd_rv22_mean": 0.13703892750023633,
+      "spy_return_ann": 42.17391056496925,
+      "vix_mean": 17.709688890245225
+    },
+    "Q4": {
+      "count": 900,
+      "slope_range": "[0.1449, 0.1927]",
+      "fwd_rv22_mean": 0.1256416686597378,
+      "spy_return_ann": 44.11589556485046,
+      "vix_mean": 16.134011108610366
+    },
+    "Q5(most_contango)": {
+      "count": 900,
+      "slope_range": "[0.1927, 0.4077]",
+      "fwd_rv22_mean": 0.10814791881699846,
+      "spy_return_ann": 58.54921685358691,
+      "vix_mean": 14.175211114883423
+    }
+  },
+  "monotonicity_test": {
+    "spearman_r": -0.5010923104974891,
+    "p_value": 9.180550068004632e-285
+  },
+  "conclusions": {
+    "slope_adds_vol_forecast": false,
+    "slope_adds_strategy": false,
+    "partial_r_controlling_vix": -0.19199336823211727,
+    "partial_r_p_value": 1.275455044791698e-38,
+    "key_finding": "Slope captures term structure shape but most information is already in VIX level. Backwardation is strongly associated with high future vol but this is largely simultaneous with VIX spikes, not incremental."
+  },
+  "limitations": [
+    "VIX3M availability may be limited (check ts_source)",
+    "OOS period (2023-2024) is relatively calm \u2014 slope signal may differ in crisis",
+    "1-step GARCH vs 22-day horizon mismatch",
+    "HAR model uses realized vol proxies, not high-frequency RV",
+    "No transaction costs in strategy backtest"
+  ],
+  "references": [
+    "Lu & Zhu (2010) JFE \u2014 volatility components and term structure",
+    "Johnson (2017) JFQA \u2014 VIX term structure predictive power",
+    "Mixon (2007) J Empirical Finance \u2014 IV term structure dynamics",
+    "Nossman & Wilhelmsson (2009) \u2014 VIX term structure for allocation",
+    "VolPred K502: VIX/VIX3M ratio GARCH-X no improvement",
+    "VolPred P35: backwardation predicts regime change (lift=3.39x)",
+    "VolPred P41: backwardation-enhanced VT Sharpe +0.219 (t=4.49)"
+  ]
+}

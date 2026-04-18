@@ -1,0 +1,457 @@
+{
+  "experiment_id": "K585",
+  "title": "Session Meta-Analysis: Quantifying K526-K583 Contributions to Three Papers",
+  "date": "2026-03-27",
+  "methodology": "READ-ONLY synthesis — cross-referencing 50 knowledge entries (K526-K583) against current paper content in leverage-direction/body.tex, taiwan-vt/body.tex, and vt-trend-following/main.tex",
+  "session_stats": {
+    "total_experiments_in_range": 58,
+    "knowledge_entries_found": 50,
+    "missing_from_knowledge_base": ["K531", "K546", "K555", "K559", "K578", "K579", "K580", "K581", "K582"],
+    "star_rated_findings": 20,
+    "null_results": 25,
+    "harvey_passes": 8
+  },
+
+  "paper_1_leverage_direction": {
+    "paper_file": "paper/leverage-direction/body.tex",
+    "current_status": "62 pages, targeting JBF",
+    "current_sections": [
+      "Introduction", "Literature Review", "Data and Methodology", "Empirical Results",
+      "Discussion (Economics of Inverted Leverage, Diversification Amplification, Conditional Leverage, Risk Management, Proposition 1, VT as Insurance, Cross-Asset VT, IVT, Complexity Ceiling)",
+      "Conclusion", "Appendix A (Commodity Extension)", "Appendix B (TZ Transmission)"
+    ],
+
+    "findings_that_STRENGTHEN_existing_claims": [
+      {
+        "finding_id": "K530",
+        "title": "HAR Multi-Scale — 4 HAR variants overwhelmingly beat GJR-GARCH (DM=-15.45)",
+        "paper_section": "Section 5.7 (Complexity Ceiling)",
+        "strength": "★★★★",
+        "how_strengthens": "Paper claims GARCH defines a daily-frequency floor. K530 shows HAR with |r| proxy SHATTERS this floor (DM=-15.45). This CONTRADICTS the complexity ceiling claim for volatility forecasting but STRENGTHENS it for VT strategy (K533 shows HAR is worse for VT). Needs nuanced treatment.",
+        "recommended_action": "UPDATE Complexity Ceiling table to add row: 'GJR → HAR-ABS: QLIKE improves massively (DM=-15.45) but VT strategy WORSENS.' This actually strengthens the ceiling's main point that better prediction ≠ better investment decisions."
+      },
+      {
+        "finding_id": "K532",
+        "title": "HAR Cross-Asset — 7/7 assets all beat GJR-GARCH, HAR advantage is UNIVERSAL",
+        "paper_section": "Section 5.7 (Complexity Ceiling) + Section 3 (Methodology)",
+        "strength": "★★★★★",
+        "how_strengthens": "Validates that HAR universally dominates GARCH for pure forecasting across ALL 7 assets tested. Strengthens the paper's nuance: the complexity ceiling is about INVESTMENT DECISIONS, not STATISTICAL MEASUREMENT. Currently the paper only mentions HAR indirectly.",
+        "recommended_action": "ADD 1-2 paragraphs in Complexity Ceiling section acknowledging HAR as the true QLIKE champion while reinforcing that this forecasting superiority does not translate to VT improvement (K533)."
+      },
+      {
+        "finding_id": "K533",
+        "title": "Prediction ≠ Application #5 — HAR best predictor but worst VT strategy",
+        "paper_section": "Section 5.7 (Complexity Ceiling) + Section 5.5 (IVT)",
+        "strength": "★★★",
+        "how_strengthens": "CRITICAL supporting evidence for the paper's central thesis that better statistical measurement doesn't improve investment decisions. HAR-ABS has the best QLIKE (DM=-15.45 vs GJR) but the WORST VT Sharpe (1.123 vs 12/VIX's 1.748). 12/VIX remains irreplaceable.",
+        "recommended_action": "ADD as a key example in the Complexity Ceiling discussion. This is perhaps the single strongest piece of evidence for the ceiling proposition."
+      },
+      {
+        "finding_id": "K536",
+        "title": "HAR-EVT is the only model passing complete Trinity Test for VaR",
+        "paper_section": "Section 4.4 (VaR) + Section 5.7 (Complexity Ceiling)",
+        "strength": "★★★★",
+        "how_strengthens": "Refines the VaR narrative: while Student-t improves VaR broadly, HAR-EVT is the ONLY specification passing both 1% and 2.5% VaR. Strengthens the three-domain framework: (i) GARCH eq for QLIKE, (ii) distributional assumption for VaR, (iii) VIX for strategy. HAR-EVT belongs to domain (ii).",
+        "recommended_action": "UPDATE VaR section or Complexity Ceiling to note HAR-EVT as the domain (ii) optimal solution. Adds nuance without contradicting the ceiling."
+      },
+      {
+        "finding_id": "K534",
+        "title": "SPY-GLD correlation is VIX-regime dependent — theoretical basis for 50/50",
+        "paper_section": "Section 5.6 (Cross-Asset VT)",
+        "strength": "★★★",
+        "how_strengthens": "Paper mentions SPY-GLD allocation is robust but doesn't deeply explain WHY. K534 shows the correlation structure is VIX-regime dependent but UNSTABLE across decades, which paradoxically supports static 50/50 (dynamic optimization can't track shifting correlation).",
+        "recommended_action": "ADD footnote or brief paragraph in Cross-Asset VT section explaining the VIX-regime dependence of SPY-GLD correlation as theoretical support for static allocation."
+      },
+      {
+        "finding_id": "K550",
+        "title": "Adaptive VIX Threshold — 12 has no structural significance, any [10,16] works",
+        "paper_section": "Section 5.5 (IVT) + Section 5.7 (Complexity Ceiling)",
+        "strength": "★★",
+        "how_strengthens": "Confirms that the 12 in 12/VIX is NOT a magic number — it's robust across [10,16]. Strengthens the parsimony argument. Adaptive thresholds are WORSE due to crisis lag.",
+        "recommended_action": "Already implicitly covered; could add a sentence in IVT section for emphasis."
+      }
+    ],
+
+    "findings_that_ADD_new_sections": [
+      {
+        "finding_id": "K573",
+        "title": "Insurance Pricing — Breakeven VIX=26.6, Leverage 5.7x more efficient",
+        "paper_section": "NEW subsection in Section 5.6 or expand Section 5.8 (VT as Insurance)",
+        "strength": "★★★★",
+        "new_content": "Precise decomposition of VT insurance cost: equity reduction -4.50%/yr (92% of cost), cash +0.40%, TX -0.40%, net -4.27%/yr for 19.8pp MDD improvement. Breakeven VIX=26.6. Regime breakdown: Low VIX costs -3.47%/yr, Medium -8.94%, High VIX EARNS +8.17%. Efficiency ratios: VCL 26.2pp per unit cost (most efficient), 12/VIX 4.6pp, Piecewise 1.4pp.",
+        "recommended_action": "ADD detailed insurance cost decomposition to Section 5.8 (VT as Insurance). Currently the paper states '~4%/yr insurance premium' without the precise breakdown. K573 provides the breakeven VIX, regime costs, and efficiency comparison that strengthens this section significantly.",
+        "tables_to_add": "Table: VT Insurance Cost Decomposition by Regime (Low/Medium/High/Crisis VIX)"
+      },
+      {
+        "finding_id": "K574",
+        "title": "Complete 3-Tier Backtest — VCL $1M→$36.9M, PW worst year +0.2%",
+        "paper_section": "NEW Table or expand existing Table in Section 5.5/5.8",
+        "strength": "★★★★★",
+        "new_content": "5-strategy 21-year comparison: VIX-Conditional Leverage (VCL): CAGR 19.0%, Sharpe 1.553, MDD -12.3%. Piecewise: Sharpe 1.875 (highest!), MDD -4.9%, worst year +0.2%. 12/VIX: CAGR 13.1%, Sharpe 1.414, MDD -9.6%. All VT strategies dominate B&H on BOTH return AND risk.",
+        "recommended_action": "ADD comprehensive strategy comparison table. Currently the paper presents VT results piecemeal; K574 provides the definitive head-to-head that should be a centerpiece table.",
+        "tables_to_add": "Table: Complete 3-Tier VT Strategy Comparison (21 years, 5 strategies)"
+      },
+      {
+        "finding_id": ["K548", "K551"],
+        "title": "VIX-Conditional Leverage — Harvey t=7.90, 11/11 OOS, 100% bootstrap",
+        "paper_section": "NEW subsection: 'VIX-Conditional Leverage as an Alpha Extension'",
+        "strength": "★★★★★",
+        "new_content": "When VIX<15, lever to 1.5x; when VIX>25, 1.0x. Sharpe +0.112, CAGR +5.4%. Harvey DM t=7.90, JKM z=6.05. 11/11 cross-OOS wins. 100% bootstrap win rate. 25/25 sensitivity configs safe. Borrowing breakeven 9.7%. Survives 8% interest rate.",
+        "recommended_action": "ADD new subsection in Discussion. This is the session's most validated finding and represents a genuine alpha source BEYOND the standard 12/VIX framework. Must be presented as an EXTENSION (not replacement) of the base VT framework.",
+        "caveats": "K567 shows this does NOT generalize internationally — 0/6 non-US markets pass Harvey. Must include this boundary condition."
+      },
+      {
+        "finding_id": "K568",
+        "title": "Optimal Weight Function — 12/VIX is return-optimal, nonlinear only improves risk",
+        "paper_section": "Section 5.5 (IVT) — expand",
+        "strength": "★★★★",
+        "new_content": "Systematic comparison of 7 function families, 427 configurations. 12/VIX produces the HIGHEST return (12.5%/yr). Piecewise achieves highest Sharpe (1.803) but at 9.4% return — it trades return for lower vol. Linear c=10-14 produces a Sharpe flat curve. Nonlinear forms are preference choices, not dominance improvements.",
+        "recommended_action": "EXPAND IVT subsection to include this systematic function comparison. Currently the paper treats 12/VIX as simply 'parsimonious' — K568 shows it is actually RETURN-OPTIMAL, a much stronger claim."
+      },
+      {
+        "finding_id": "K575",
+        "title": "Life Stage Strategy Guide — VCL 30yr $23.7M, Retiree ruin 0% vs B&H 5.2%",
+        "paper_section": "Section 5.8 (VT as Insurance) — expand",
+        "strength": "★★★★",
+        "new_content": "1000 bootstrap paths, 4 investor profiles. Young+VCL: $23.7M (4.94x vs conservative). Retiree+Piecewise: 0% ruin probability vs B&H 5.2%. Strategy-to-profile matching is more important than return maximization for shorter horizons.",
+        "recommended_action": "ADD investor-profile analysis to VT as Insurance section. The ruin probability result (0% vs 5.2%) is powerful evidence for the insurance interpretation."
+      },
+      {
+        "finding_id": "K569",
+        "title": "Piecewise VT — 6/8 PASS, Harvey z=2.84, GFC MDD -0.56%",
+        "paper_section": "NEW subsection or extend K574 table",
+        "strength": "★★★",
+        "new_content": "Piecewise function (w=1 if VIX<12, ramp to 0 at VIX=20, w=0 if VIX>20): Sharpe 1.327, MDD -5.4%, GFC MDD -0.56% (94.5% reduction). Just misses Harvey (z=2.84). Represents the conservative extreme of VT.",
+        "recommended_action": "Include in K574's comprehensive strategy table as the conservative tier."
+      },
+      {
+        "finding_id": "K577",
+        "title": "Monthly Hybrid Leverage PASS — t=5.16, 5/5 OOS, deployable for retail",
+        "paper_section": "Section 5.9 (Practical Implementation)",
+        "strength": "★★★★",
+        "new_content": "VIX-Conditional Leverage works with monthly rebalancing IF combined with daily VIX check (30 seconds/day). Hybrid approach: monthly rebal + daily VIX check. Sharpe 0.947 vs base 0.776, Harvey t=5.16 PASS, 5/5 OOS. Retains 64% of daily benefit.",
+        "recommended_action": "ADD to practical implementation section. Bridges the gap between daily trading (impractical for retail) and monthly rebalancing (misses VIX spikes)."
+      }
+    ],
+
+    "findings_that_CONTRADICT_or_require_caveats": [
+      {
+        "finding_id": "K567",
+        "title": "International VT Leverage — VIX-Conditional Leverage has LIMITED generalizability",
+        "paper_section": "Section 5.6 (Cross-Asset VT) + K548/K551 leverage section",
+        "impact": "IMPORTANT CAVEAT",
+        "contradiction": "K548/K551 show VIX-Conditional Leverage is stellar for US (t=7.90). But K567 shows 0/6 international markets pass Harvey, 0/6 OOS majority wins. Only 3/6 markets have tiny improvements. This LIMITS the generalizability claim of conditional leverage.",
+        "recommended_action": "Any new section on VIX-Conditional Leverage MUST include K567 as a boundary condition. The strategy is US-specific (and Taiwan-specific via K553/K558's hybrid variant), not universal."
+      },
+      {
+        "finding_id": ["K530", "K532"],
+        "title": "HAR universally dominates GJR-GARCH for QLIKE",
+        "paper_section": "Section 5.7 (Complexity Ceiling)",
+        "impact": "REQUIRES NUANCE",
+        "contradiction": "The paper's Complexity Ceiling table shows 'GJR → MIDAS/MS/CARR: Nothing (OOS)'. But HAR is NOT in this table despite being the most dramatic QLIKE improvement (DM=-15.45). This omission could be seen as cherry-picking. However, K533 shows HAR's prediction superiority doesn't help VT, which actually STRENGTHENS the ceiling thesis.",
+        "recommended_action": "ADD HAR to the Complexity Ceiling table. The fact that the biggest statistical improvement produces the worst strategy is the strongest evidence FOR the ceiling."
+      },
+      {
+        "finding_id": "K529",
+        "title": "Rough Volatility H=0.1 — HAR-Rough significantly beats GJR-GARCH",
+        "paper_section": "Section 2 (Literature Review)",
+        "impact": "MINOR — literature completeness",
+        "contradiction": "Paper mentions deep learning but not rough volatility (Gatheral et al. 2018). K529 confirms SPY has H=0.1 (rough) and HAR-Rough beats GJR (DM=-7.04). Should be mentioned in lit review for completeness.",
+        "recommended_action": "ADD brief mention of rough volatility literature in Section 2 (Literature Review), connecting to the HAR results."
+      },
+      {
+        "finding_id": ["K560", "K562", "K563"],
+        "title": "Sector Momentum with VT — daily-only artifact",
+        "paper_section": "Section 3.4 (Boundary: gamma within equity sectors)",
+        "impact": "MINOR CAVEAT",
+        "contradiction": "Paper states 'sector rotation investors can apply uniform VT overlay.' K560 shows sector MOMENTUM with VT produces Sharpe 2.157 (Harvey t=10.87 daily). But K562/K563 reveal this is a microstructure artifact — monthly rebalancing fails, weekly fails Harvey. Not a genuine strategy.",
+        "recommended_action": "The current paper statement is actually CORRECT — the sector momentum alpha is a microstructure artifact, confirming uniform VT overlay is appropriate. Could add a footnote noting the artifact for transparency."
+      }
+    ],
+
+    "null_results_that_CONFIRM_existing_claims": [
+      {
+        "ids": ["K535", "K537", "K539", "K542", "K554", "K564", "K576", "K583"],
+        "count": 8,
+        "paper_claim_confirmed": "VIX Sufficiency (#34-#37+): VIX is a sufficient statistic. K535 (SKEW), K537 (cross-asset vol), K539 (VRP carry), K542 (term structure), K554 (HMM regime), K564 (slope derivative), K576 (vol clustering), K583 (IV surface) — all null after controlling for VIX.",
+        "recommended_action": "The paper already mentions '10+ alternative indicators' absorbed by VIX. Update the count to 37+ and add VIX Sufficiency evidence count as supporting the sufficient statistic hypothesis."
+      },
+      {
+        "ids": ["K538", "K540", "K541"],
+        "count": 3,
+        "paper_claim_confirmed": "12/VIX is irreducible. K538 (meta-labeling ML), K540 (HAR-VIX ensemble), K541 (weekly meta-labeling) — no ML or ensemble method beats 12/VIX.",
+        "recommended_action": "Strengthens the 'irreducible' claim. Could note that machine learning approaches also fail."
+      },
+      {
+        "ids": ["K547", "K570"],
+        "count": 2,
+        "paper_claim_confirmed": "Calendar effects don't improve VT. K547 (turn-of-month), K570 (earnings season) — both null.",
+        "recommended_action": "Minor support for VIX sufficiency; no paper change needed."
+      },
+      {
+        "ids": ["K543", "K544", "K545", "K556", "K571"],
+        "count": 5,
+        "paper_claim_confirmed": "VT overlay modifications are futile. K543 (drawdown-conditional), K544 (tail hedge), K545 (intraday seasonality), K556 (momentum crash), K571 (VIX mean-reversion speed) — all fail to improve 12/VIX.",
+        "recommended_action": "Collective evidence for the '12/VIX kernel' irreducibility. The paper could cite the total count of failed modifications (9+ overlay attempts, all null)."
+      }
+    ]
+  },
+
+  "paper_2_taiwan_vt": {
+    "paper_file": "paper/taiwan-vt/body.tex",
+    "current_status": "34 pages, targeting PBFJ",
+    "current_sections": [
+      "Introduction", "Data and Methodology", "Leverage Effect (Index, Diversification Amplification, Spillover, SSVS)",
+      "VT Strategies (EWMA, GJR vs GARCH, VIX-Proxy)", "Time-Zone Information Transmission",
+      "Macroeconomic Indicators", "VaR", "Discussion", "Conclusion"
+    ],
+
+    "findings_that_STRENGTHEN_existing_claims": [
+      {
+        "finding_id": "K530",
+        "title": "HAR Multi-Scale dominates GJR-GARCH for 0050.TW too",
+        "paper_section": "Section 4.2 (GJR vs GARCH)",
+        "strength": "★★★★",
+        "how_strengthens": "K530 confirms HAR dominance on 0050.TW as well (not just SPY). Strengthens the 'GARCH ceiling' narrative — even HAR can't improve VT for Taiwan.",
+        "recommended_action": "ADD mention that HAR also dominates GARCH for 0050.TW QLIKE but does not improve VT, consistent with Paper 1's complexity ceiling."
+      },
+      {
+        "finding_id": "K534",
+        "title": "SPY-GLD correlation VIX-regime dependent",
+        "paper_section": "Section 7 (Discussion)",
+        "strength": "★★★",
+        "how_strengthens": "Taiwan VT uses 50% GLD. K534's regime analysis supports this allocation choice for the Taiwan paper too.",
+        "recommended_action": "Brief mention in Discussion that SPY-GLD regime analysis confirms the hedge allocation."
+      }
+    ],
+
+    "findings_that_ADD_new_sections": [
+      {
+        "finding_id": "K553",
+        "title": "Taiwan VIX-Conditional Leverage — Hybrid Harvey t=6.30, 9/9 OOS",
+        "paper_section": "NEW Section: 'Enhanced VT: VIX-Conditional Leverage for Taiwan'",
+        "strength": "★★★★★",
+        "new_content": "5 variants tested. US-style VIX thresholds FAIL (t=2.07). Taiwan-specific: RV22 PASS (t=4.61, 6/9 OOS), VIX percentile PASS (t=6.11, 9/9 OOS, 100% bootstrap), Hybrid RV+Percentile BEST (t=6.30, 9/9 OOS, 100% bootstrap). Sharpe +0.248. Uses rolling percentile for adaptive thresholds.",
+        "recommended_action": "ADD new subsection after Section 4 (VT Strategies). This is a major new contribution showing that conditional leverage WORKS for Taiwan but requires different calibration than US (percentile-based, not absolute VIX thresholds).",
+        "key_insight": "US absolute VIX thresholds don't work for Taiwan because VIX levels don't map directly to Taiwan vol regimes. Rolling percentile is the solution — a methodological contribution applicable to all emerging markets."
+      },
+      {
+        "finding_id": "K558",
+        "title": "Taiwan Hybrid Leverage FULLY VALIDATED — t=4.79, 18/18 OOS, 0056 confirmed",
+        "paper_section": "Same new section as K553",
+        "strength": "★★★★★",
+        "new_content": "8-check 11-item deep validation: Harvey t=4.79. Cross-OOS 18/18 (5/5 + 6/6 + 7/7). Sensitivity 100/100 positive, 96% safe zone. TX breakeven 24bp (Taiwan ETF ~5-10bp OK). MDD -48.4% identical to base (zero MDD penalty). 0056.TW robustness t=5.67, 5/5 OOS. Sharpe +0.162, CAGR 6.66%→9.64%. Leverage active only 34.8% of days.",
+        "recommended_action": "ADD full validation results to the new leverage section. The 0056.TW confirmation is especially important for the Taiwan paper — shows the method works for the high-dividend ETF popular with Taiwan retail investors.",
+        "tables_to_add": "Table: Taiwan VIX-Conditional Leverage Validation Results (8 checks)"
+      }
+    ],
+
+    "findings_that_CONTRADICT_or_require_caveats": [
+      {
+        "finding_id": "K567",
+        "title": "International VT Leverage has LIMITED generalizability",
+        "paper_section": "New leverage section + Discussion",
+        "impact": "IMPORTANT CAVEAT",
+        "contradiction": "K567 shows leverage overlay fails for most international markets (0/6 Harvey pass). Taiwan's success (K553/K558) is the EXCEPTION, not the rule. Must frame Taiwan's result as leveraging its unique characteristics (VIX-proxy calibration, TSMC dominance, retail structure) rather than claiming universal applicability.",
+        "recommended_action": "ADD caveat paragraph in new leverage section: 'While VIX-conditional leverage succeeds for Taiwan using adaptive percentile thresholds, international evidence (K567) suggests this is market-specific rather than universal, consistent with Taiwan's exceptional US-linkage documented in Section 3.'"
+      },
+      {
+        "finding_id": "K532",
+        "title": "HAR Cross-Asset — 0050.TW included, HAR universally better QLIKE",
+        "paper_section": "Section 4.2 (GJR vs GARCH)",
+        "impact": "REQUIRES MENTION",
+        "contradiction": "Paper currently says 'simpler GARCH is sufficient' for Taiwan forecasting. K532 shows HAR dominates 0050.TW too (DM t=-12.78). This should be acknowledged even though HAR doesn't help VT.",
+        "recommended_action": "ADD acknowledgment that HAR outperforms for pure forecasting, maintaining the paper's existing nuance that tail-specific accuracy (not average QLIKE) drives VT."
+      }
+    ],
+
+    "null_results_that_CONFIRM_existing_claims": [
+      {
+        "ids": ["K526"],
+        "paper_claim_confirmed": "GARCH-MIDAS doesn't beat GJR-GARCH OOS (though it has regime-transition advantages)",
+        "recommended_action": "Already consistent with the paper's GARCH ceiling finding for Taiwan."
+      },
+      {
+        "ids": ["K527"],
+        "paper_claim_confirmed": "Volume-GARCH fails OOS despite IS persistence drop. SPY and 0050.TW both fail.",
+        "recommended_action": "Supports the complexity ceiling for Taiwan. No paper change needed."
+      }
+    ]
+  },
+
+  "paper_3_vt_trend_following": {
+    "paper_file": "paper/vt-trend-following/main.tex",
+    "current_status": "24 pages, target journal TBD",
+    "current_sections": [
+      "Introduction", "Data and Methodology (VT construction, TSMOM, alpha decomposition, pure VT, cross-sectional)",
+      "Empirical Results (TSMOM exposure, leverage effect drives TSMOM, dual mechanism Sharpe vs MDD, FF5 controls, boundary condition, international evidence, sub-period stability)",
+      "Discussion (VT contains but ≠ trend, VIX level insurance, insurance pricing, limitations)",
+      "Conclusion"
+    ],
+
+    "findings_that_STRENGTHEN_existing_claims": [
+      {
+        "finding_id": "K533",
+        "title": "Prediction ≠ Application #5 — HAR best predictor but worst VT strategy",
+        "paper_section": "Section 4.1 (VT Contains but ≠ Trend Following)",
+        "strength": "★★★",
+        "how_strengthens": "Provides another dimension to the 'VT ≠ trend following' argument. Not only is VT mechanically different from TSMOM, but the best STATISTICAL predictor (HAR) makes the WORST VT strategy. This means VT's value is NOT about prediction quality — it's about VIX-level-based position sizing, which HAR cannot replicate.",
+        "recommended_action": "ADD as supporting evidence in the discussion of why VT ≠ trend following. 'A parallel test confirms this separation: the statistically best volatility forecaster (HAR-ABS, DM=-15.45 vs GJR) produces the worst VT strategy (Sharpe 1.123 vs 12/VIX's 1.748), because prediction accuracy and position-sizing effectiveness operate through different channels.'"
+      },
+      {
+        "finding_id": "K573",
+        "title": "Insurance Pricing — Breakeven VIX=26.6",
+        "paper_section": "Section 4.3 (Insurance Pricing Interpretation)",
+        "strength": "★★★★",
+        "how_strengthens": "Paper currently states '~4%/year Sharpe drag' as insurance premium. K573 provides the PRECISE decomposition: equity reduction -4.50%/yr, cash +0.40%, TX -0.40%, net -4.27%/yr. Also provides breakeven VIX=26.6 — below this, VT costs money; above this, VT earns money. This makes the insurance analogy QUANTITATIVELY precise.",
+        "recommended_action": "EXPAND Section 4.3 with the precise cost decomposition and breakeven VIX. The breakeven at VIX=26.6 is a publishable finding that strengthens the insurance framing."
+      },
+      {
+        "finding_id": "K572",
+        "title": "VIX Regime Map — Crisis 252d +28% (91% positive)",
+        "paper_section": "Section 4.2 (Why VIX Level Provides Insurance Beyond Trend)",
+        "strength": "★★★",
+        "how_strengthens": "K572 maps 5 VIX regimes with transition probabilities and forward returns. Crisis regime: 252d forward return +28% (91% positive, t=19.7). This supports the paper's argument that VIX-level deleveraging works because elevated VIX signals high expected forward returns — VT reduces exposure during high-VIX periods but these periods are followed by strong recoveries, explaining the '~4% insurance cost.'",
+        "recommended_action": "ADD brief mention of VIX regime forward returns in Section 4.2 to explain WHY the insurance premium is paid (and why it's a fair price)."
+      },
+      {
+        "finding_id": "K534",
+        "title": "SPY-GLD correlation VIX-regime dependent but unstable across decades",
+        "paper_section": "Section 4.3 (50/50 allocation irreducible)",
+        "strength": "★★★",
+        "how_strengthens": "Paper claims 50/50 SPY/GLD resists optimization. K534 shows correlation structure is VIX-regime dependent AND decade-unstable — which explains WHY dynamic allocation fails. The instability makes it impossible to reliably time the allocation.",
+        "recommended_action": "ADD explanation for WHY dynamic allocation fails: 'The underlying VIX-correlation relationship reversed sign between 2005-2014 (negative) and 2015-2026 (positive), rendering dynamic allocation schemes structurally unstable.'"
+      },
+      {
+        "finding_id": "K544",
+        "title": "Tail Hedge Efficiency — 12/VIX VT is itself a tail hedge",
+        "paper_section": "Section 4.1-4.2 (VT mechanism)",
+        "strength": "★★",
+        "how_strengthens": "K544 shows that adding tail hedges (put protection) to VT is redundant because VT IS already a tail hedge. This strengthens the paper's insurance interpretation.",
+        "recommended_action": "Brief mention as supporting evidence that VT provides tail insurance without needing additional hedges."
+      },
+      {
+        "finding_id": "K543",
+        "title": "Drawdown-Conditional VT — MDD dramatically better but Sharpe null",
+        "paper_section": "Section 3.3 (Dual Mechanism)",
+        "strength": "★★",
+        "how_strengthens": "K543's drawdown-conditional approach cuts MDD from -28.6% to -15.4% but Sharpe is null — because VIX already contains 77% of drawdown information. Confirms the MDD channel operates through VIX level, not drawdown depth.",
+        "recommended_action": "Could mention as additional evidence that VIX-level captures drawdown risk."
+      }
+    ],
+
+    "findings_that_ADD_new_sections": [
+      {
+        "finding_id": "K568",
+        "title": "Optimal Weight Function — 12/VIX is return-optimal, nonlinear only improves risk",
+        "paper_section": "NEW subsection in Section 4: 'The Optimality of 12/VIX'",
+        "strength": "★★★★",
+        "new_content": "7 function families, 427 configurations. 12/VIX produces the HIGHEST annual return (12.5%). Piecewise achieves highest Sharpe (1.803) but lower return (9.4%) — it trades return for vol reduction. The 12/VIX formula is not just parsimonious — it is return-optimal. Nonlinear alternatives represent investor preference (risk vs return tradeoff), not dominance.",
+        "recommended_action": "ADD new insight to the discussion. Currently the paper says 12/VIX 'resists optimization.' K568 provides the deeper explanation: 12/VIX is RETURN-optimal. This transforms the claim from 'can't improve' to 'already optimal in the return dimension.'"
+      },
+      {
+        "finding_id": "K574",
+        "title": "Complete 3-Tier Backtest — comprehensive strategy comparison",
+        "paper_section": "Could ADD as online appendix table",
+        "strength": "★★★★★",
+        "new_content": "5-strategy comparison over 21 years with comprehensive metrics (CAGR, Sharpe, MDD, worst year, Calmar, terminal wealth). All VT strategies dominate B&H on BOTH dimensions.",
+        "recommended_action": "ADD as supplementary table. Relevant because it shows that different VT implementations (standard, piecewise, conditional leverage) all preserve the MDD channel — consistent with the paper's central finding."
+      },
+      {
+        "finding_id": "K565",
+        "title": "BTC 5% — Harvey pass but post-ETF correlation shift neutralizes benefit",
+        "paper_section": "Section 4.4 (Limitations) or online appendix",
+        "strength": "★★★",
+        "new_content": "5% BTC allocation passes Harvey (t=3.07) historically, but post-ETF (2024+) SPY-BTC correlation rose from 0.008 to 0.310, neutralizing the diversification benefit. Illustrates time-varying asset characteristics relevant to VT.",
+        "recommended_action": "MENTION in limitations as an example of how asset correlations evolve, relevant to the VT-TSMOM relationship stability."
+      }
+    ],
+
+    "findings_that_CONTRADICT_or_require_caveats": [
+      {
+        "finding_id": "K567",
+        "title": "International leverage overlay has limited generalizability",
+        "paper_section": "Section 3.5 (International Evidence)",
+        "impact": "MINOR — complements existing analysis",
+        "contradiction": "Paper's international section focuses on MDD (which is universal). K567 tests LEVERAGE overlay internationally and finds it fails (0/6 Harvey pass). This doesn't contradict the paper's MDD finding — it adds a boundary: while MDD protection is universal, LEVERAGE enhancement is market-specific.",
+        "recommended_action": "ADD footnote or brief sentence: 'While the 12/VIX MDD channel is universal (13/13 markets), leverage extensions of VT are market-specific (Section 3.5), consistent with the distinct mechanisms documented in this paper.'"
+      }
+    ],
+
+    "null_results_that_CONFIRM_existing_claims": [
+      {
+        "ids": ["K538", "K540", "K541"],
+        "count": 3,
+        "paper_claim_confirmed": "12/VIX is irreducible — ML methods, HAR-VIX ensembles, weekly meta-labeling all fail to beat it. Supports the paper's conclusion that VT's value is in its parsimonious mechanism.",
+        "recommended_action": "Could cite the count of failed optimization attempts in the conclusion for emphasis."
+      },
+      {
+        "ids": ["K550"],
+        "count": 1,
+        "paper_claim_confirmed": "The threshold 12 in 12/VIX is not special — any value in [10,16] works. Adaptive thresholds are worse. Supports parsimony.",
+        "recommended_action": "Already consistent with the paper. K550 explicitly confirms the robustness claim."
+      },
+      {
+        "ids": ["K557", "K561"],
+        "count": 2,
+        "paper_claim_confirmed": "50/50 SPY/GLD allocation is immovable (#11). Gold regime allocation (K557) and bond-equity switch (K561) both fail. Static GLD wins, TLT significantly worse.",
+        "recommended_action": "Supports the paper's 50/50 irreducibility claim. K561 is particularly relevant: TLT is significantly WORSE than GLD (t=-4.60)."
+      }
+    ]
+  },
+
+  "cross_paper_themes": {
+    "theme_1_complexity_ceiling": {
+      "description": "K530/K532/K533 collectively provide the strongest evidence for the complexity ceiling. HAR dominates GARCH for prediction (DM=-15.45) but produces the WORST VT strategy. This theme touches all 3 papers.",
+      "papers_affected": ["leverage-direction (main)", "taiwan-vt (supporting)", "vt-trend (supporting)"],
+      "action": "Add HAR results to Paper 1's Complexity Ceiling table. Mention in Paper 3 as evidence VT ≠ prediction."
+    },
+    "theme_2_conditional_leverage": {
+      "description": "K548/K551 (US) + K553/K558 (Taiwan) establish VIX-conditional leverage as a validated alpha extension. K567 provides the critical boundary: US and Taiwan only, not universal.",
+      "papers_affected": ["leverage-direction (new section)", "taiwan-vt (new section)"],
+      "action": "Both papers need new sections. Paper 1 for US results + international caveat. Paper 2 for Taiwan-specific results + 0056 confirmation."
+    },
+    "theme_3_insurance_pricing": {
+      "description": "K573 provides precise insurance cost decomposition. K574 provides the comprehensive strategy table. K575 provides life-stage analysis. Together they transform the 'insurance pricing' narrative from qualitative to quantitative.",
+      "papers_affected": ["leverage-direction (expand)", "vt-trend (expand)"],
+      "action": "Both papers should incorporate the precise breakeven VIX=26.6 and regime-by-regime cost analysis."
+    },
+    "theme_4_vix_sufficiency": {
+      "description": "8 additional null results (K535/K537/K539/K542/K554/K564/K576/K583) raise the VIX sufficiency count from ~29 to ~37. Every alternative signal tested fails after controlling for VIX.",
+      "papers_affected": ["leverage-direction (update count)"],
+      "action": "Update the VIX sufficiency count in Paper 1's Section 5.7."
+    }
+  },
+
+  "priority_ranking": {
+    "highest_priority_additions": [
+      "Paper 1: Add K530/K532/K533 to Complexity Ceiling (strengthens core thesis)",
+      "Paper 1: Add K548/K551 VIX-Conditional Leverage section with K567 caveat",
+      "Paper 2: Add K553/K558 Taiwan Hybrid Leverage section",
+      "Paper 1: Add K573/K574 insurance pricing decomposition and strategy table"
+    ],
+    "medium_priority_additions": [
+      "Paper 3: Add K568 optimal weight function analysis",
+      "Paper 3: Expand K573 insurance pricing with precise numbers",
+      "Paper 1: Add K575 life-stage analysis to VT insurance section",
+      "Paper 1: Add K577 monthly hybrid leverage for practical implementation"
+    ],
+    "low_priority_additions": [
+      "Paper 1: Add K529 rough volatility mention in lit review",
+      "Paper 3: Add K565 BTC correlation shift in limitations",
+      "Paper 2: Add K534 correlation regime analysis to discussion",
+      "All papers: Update VIX sufficiency count"
+    ]
+  },
+
+  "summary": {
+    "total_findings_relevant_to_papers": 35,
+    "findings_strengthening_existing": 15,
+    "findings_adding_new_content": 12,
+    "findings_requiring_caveats": 5,
+    "null_results_confirming_claims": 18,
+    "most_impactful_for_paper_1": "K530/K532/K533 (HAR complexity ceiling evidence) + K548/K551 (conditional leverage) + K573/K574 (insurance pricing)",
+    "most_impactful_for_paper_2": "K553/K558 (Taiwan hybrid leverage — potential 4th contribution)",
+    "most_impactful_for_paper_3": "K533 (prediction ≠ application) + K568 (12/VIX is return-optimal) + K573 (precise insurance pricing)"
+  }
+}

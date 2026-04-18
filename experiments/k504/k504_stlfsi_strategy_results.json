@@ -1,0 +1,275 @@
+{
+  "experiment_id": "K504",
+  "title": "FRED STLFSI4 Macro Stress Regime Strategy",
+  "timestamp": "2026-03-26T23:10:10.248913",
+  "author": "[\u63d0\u51fa: Gemini, \u57f7\u884c: Claude]",
+  "data_source": "yfinance (SPY, GLD, ^VIX) + FRED (STLFSI4)",
+  "data_period": "1999-01-05 to 2025-12-31",
+  "eval_period": "2005-01-01 to 2025-12-31",
+  "sample_size": 6790,
+  "tx_cost": "0.05% round-trip (monthly rebalancing)",
+  "rf_rate": "4% annual",
+  "stlfsi4_stats": {
+    "mean": 0.0321,
+    "std": 1.0838,
+    "min": -1.1336,
+    "max": 9.6461,
+    "pct_normal": 60.0,
+    "pct_mild": 31.0,
+    "pct_severe": 9.0,
+    "corr_with_vix": 0.8101
+  },
+  "strategy_design": {
+    "base": "weight = target_vol / VIX (monthly rebalancing, cap 1.5)",
+    "stlfsi_step": "STLFSI4 < 0 \u2192 target=12, 0-1 \u2192 target=10, >1 \u2192 target=8",
+    "stlfsi_cont": "target = 12 - 2*clip(STLFSI4, 0, 2)",
+    "stlfsi_aggr": "target = 12 - 4*clip(STLFSI4, 0, 1)",
+    "5050": "50% SPY (VT-managed) + 50% GLD (fixed) + cash"
+  },
+  "full_sample_metrics": {
+    "BH_SPY": {
+      "name": "BH_SPY",
+      "ann_ret": 0.082531,
+      "ann_vol": 0.191079,
+      "sharpe": 0.4319,
+      "mdd": -0.6073,
+      "calmar": 0.1359,
+      "sortino": 0.5157,
+      "cagr": 0.066316,
+      "total_ret": 2.8425,
+      "n_days": 5283
+    },
+    "12/VIX_SPY": {
+      "name": "12/VIX_SPY",
+      "ann_ret": 0.069861,
+      "ann_vol": 0.1047,
+      "sharpe": 0.6673,
+      "mdd": -0.2571,
+      "calmar": 0.2717,
+      "sortino": 0.8515,
+      "cagr": 0.066478,
+      "total_ret": 2.8547,
+      "n_days": 5283,
+      "harvey_t": -0.5554
+    },
+    "STLFSI_Step_SPY": {
+      "name": "STLFSI_Step_SPY",
+      "ann_ret": 0.068505,
+      "ann_vol": 0.097769,
+      "sharpe": 0.7007,
+      "mdd": -0.1847,
+      "calmar": 0.3709,
+      "sortino": 0.8869,
+      "cagr": 0.065782,
+      "total_ret": 2.8023,
+      "n_days": 5283,
+      "harvey_t": -0.5518
+    },
+    "STLFSI_Cont_SPY": {
+      "name": "STLFSI_Cont_SPY",
+      "ann_ret": 0.070437,
+      "ann_vol": 0.099993,
+      "sharpe": 0.7044,
+      "mdd": -0.1896,
+      "calmar": 0.3715,
+      "sortino": 0.897,
+      "cagr": 0.067606,
+      "total_ret": 2.9411,
+      "n_days": 5283,
+      "harvey_t": -0.4866
+    },
+    "STLFSI_Aggr_SPY": {
+      "name": "STLFSI_Aggr_SPY",
+      "ann_ret": 0.070111,
+      "ann_vol": 0.098268,
+      "sharpe": 0.7135,
+      "mdd": -0.1734,
+      "calmar": 0.4043,
+      "sortino": 0.9066,
+      "cagr": 0.067442,
+      "total_ret": 2.9284,
+      "n_days": 5283,
+      "harvey_t": -0.4885
+    },
+    "50/50_12VIX": {
+      "name": "50/50_12VIX",
+      "ann_ret": 0.087462,
+      "ann_vol": 0.104645,
+      "sharpe": 0.8358,
+      "mdd": -0.2225,
+      "calmar": 0.3931,
+      "sortino": 1.1035,
+      "cagr": 0.085417,
+      "total_ret": 4.5752,
+      "n_days": 5283,
+      "harvey_t": 0.1366
+    },
+    "50/50_STLFSI_Step": {
+      "name": "50/50_STLFSI_Step",
+      "ann_ret": 0.086784,
+      "ann_vol": 0.102944,
+      "sharpe": 0.843,
+      "mdd": -0.2036,
+      "calmar": 0.4262,
+      "sortino": 1.1159,
+      "cagr": 0.084874,
+      "total_ret": 4.517,
+      "n_days": 5283,
+      "harvey_t": 0.1144
+    },
+    "50/50_STLFSI_Cont": {
+      "name": "50/50_STLFSI_Cont",
+      "ann_ret": 0.08775,
+      "ann_vol": 0.103545,
+      "sharpe": 0.8475,
+      "mdd": -0.2045,
+      "calmar": 0.4292,
+      "sortino": 1.1222,
+      "cagr": 0.085854,
+      "total_ret": 4.6224,
+      "n_days": 5283,
+      "harvey_t": 0.1413
+    }
+  },
+  "cross_oos": {
+    "n_periods": 10,
+    "stlfsi_wins": 4,
+    "stlfsi_win_rate": 0.4,
+    "periods": [
+      {
+        "period": "2006-2007",
+        "bh_sharpe": 0.6061,
+        "vix12_sharpe": 0.7886,
+        "stlfsi_step_sharpe": 0.8158,
+        "stlfsi_cont_sharpe": 0.8216,
+        "vix12_mdd": -0.0686,
+        "stlfsi_step_mdd": -0.0686,
+        "stlfsi_cont_mdd": -0.0686,
+        "winner": "STLFSI"
+      },
+      {
+        "period": "2008-2009",
+        "bh_sharpe": -0.3904,
+        "vix12_sharpe": -0.2553,
+        "stlfsi_step_sharpe": -0.115,
+        "stlfsi_cont_sharpe": -0.1226,
+        "vix12_mdd": -0.2269,
+        "stlfsi_step_mdd": -0.1551,
+        "stlfsi_cont_mdd": -0.1598,
+        "winner": "STLFSI"
+      },
+      {
+        "period": "2010-2011",
+        "bh_sharpe": 0.2874,
+        "vix12_sharpe": 0.4196,
+        "stlfsi_step_sharpe": 0.3767,
+        "stlfsi_cont_sharpe": 0.4209,
+        "vix12_mdd": -0.1036,
+        "stlfsi_step_mdd": -0.1036,
+        "stlfsi_cont_mdd": -0.1036,
+        "winner": "12/VIX"
+      },
+      {
+        "period": "2012-2013",
+        "bh_sharpe": 1.6185,
+        "vix12_sharpe": 1.6524,
+        "stlfsi_step_sharpe": 1.5959,
+        "stlfsi_cont_sharpe": 1.6313,
+        "vix12_mdd": -0.0643,
+        "stlfsi_step_mdd": -0.0603,
+        "stlfsi_cont_mdd": -0.0634,
+        "winner": "12/VIX"
+      },
+      {
+        "period": "2014-2015",
+        "bh_sharpe": 0.363,
+        "vix12_sharpe": 0.215,
+        "stlfsi_step_sharpe": 0.1886,
+        "stlfsi_cont_sharpe": 0.2098,
+        "vix12_mdd": -0.1207,
+        "stlfsi_step_mdd": -0.1207,
+        "stlfsi_cont_mdd": -0.1207,
+        "winner": "12/VIX"
+      },
+      {
+        "period": "2016-2017",
+        "bh_sharpe": 1.2897,
+        "vix12_sharpe": 1.5905,
+        "stlfsi_step_sharpe": 1.6768,
+        "stlfsi_cont_sharpe": 1.6111,
+        "vix12_mdd": -0.0547,
+        "stlfsi_step_mdd": -0.0515,
+        "stlfsi_cont_mdd": -0.0515,
+        "winner": "STLFSI"
+      },
+      {
+        "period": "2018-2019",
+        "bh_sharpe": 0.6232,
+        "vix12_sharpe": 0.6873,
+        "stlfsi_step_sharpe": 0.6606,
+        "stlfsi_cont_sharpe": 0.6708,
+        "vix12_mdd": -0.173,
+        "stlfsi_step_mdd": -0.173,
+        "stlfsi_cont_mdd": -0.173,
+        "winner": "12/VIX"
+      },
+      {
+        "period": "2020-2021",
+        "bh_sharpe": 0.7582,
+        "vix12_sharpe": 0.8457,
+        "stlfsi_step_sharpe": 0.8699,
+        "stlfsi_cont_sharpe": 0.8519,
+        "vix12_mdd": -0.176,
+        "stlfsi_step_mdd": -0.1608,
+        "stlfsi_cont_mdd": -0.166,
+        "winner": "STLFSI"
+      },
+      {
+        "period": "2022-2023",
+        "bh_sharpe": 0.0019,
+        "vix12_sharpe": 0.0984,
+        "stlfsi_step_sharpe": 0.0816,
+        "stlfsi_cont_sharpe": 0.0782,
+        "vix12_mdd": -0.1529,
+        "stlfsi_step_mdd": -0.1515,
+        "stlfsi_cont_mdd": -0.1542,
+        "winner": "12/VIX"
+      },
+      {
+        "period": "2024-2025",
+        "bh_sharpe": 1.1128,
+        "vix12_sharpe": 1.3124,
+        "stlfsi_step_sharpe": 1.3124,
+        "stlfsi_cont_sharpe": 1.3124,
+        "vix12_mdd": -0.1125,
+        "stlfsi_step_mdd": -0.1125,
+        "stlfsi_cont_mdd": -0.1125,
+        "winner": "12/VIX"
+      }
+    ]
+  },
+  "statistical_tests": {
+    "paired_t_step": -0.4271,
+    "paired_t_cont": 0.2279,
+    "harvey_threshold": 3.0,
+    "step_significant": false,
+    "cont_significant": false
+  },
+  "mdd_comparison": {
+    "vix12_mdd": -0.2571,
+    "stlfsi_step_mdd": -0.1847,
+    "stlfsi_cont_mdd": -0.1896,
+    "step_mdd_diff": 0.0724,
+    "cont_mdd_diff": 0.0675
+  },
+  "verdict": "NULL RESULT \u2014 no meaningful difference",
+  "conclusion": "STLFSI4 macro stress adjustment does NOT meaningfully improve 12/VIX strategy. Sharpe difference (Step): +0.0334, t-stat: -0.4271. Cross-OOS: STLFSI wins 4/10 periods. MDD diff: +0.0724. 12/VIX remains the irreducible kernel \u2014 macro regime overlay adds complexity without benefit.",
+  "references": [
+    "Kliesen, Owyang, Vermann (2012) 'Disentangling Diverse Measures' Fed StL Review",
+    "Moreira & Muir (2017) 'Volatility-Managed Portfolios' JF",
+    "Harvey, Liu, Zhu (2016) '...and the Cross-Section of Expected Returns' RFS",
+    "Bozovic (2024) 'VIX-managed portfolios' IRFA"
+  ],
+  "related_knowledge": "N79 (12/VIX), N80 (19yr backtest), N105 (Harvey test), K503 (VIX mean revert)",
+  "elapsed_seconds": 1.7
+}

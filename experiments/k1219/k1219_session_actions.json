@@ -1,0 +1,248 @@
+{
+  "experiment_id": "K1219",
+  "title": "Unified main-thread cherry-pick action dashboard consolidating 6 paper-related markdown drafts",
+  "date": "2026-04-17",
+  "worktree": "agent-a53cb331",
+  "task_type": "pure_consolidation",
+  "seed": 42,
+  "seed_notes": "N/A for synthesis task; declared for repo-rule compliance",
+  "total_drafts": 6,
+  "total_words": 20057,
+  "papers_ready_immediate": 3,
+  "papers_with_decision_blocker": 2,
+  "new_paper_candidates": 1,
+  "drafts": [
+    {
+      "k_id": "K1208",
+      "commit_hash": "af7b196a",
+      "paper_target": "paper/vix-sufficiency/",
+      "target_section": "§5 Cross-Asset Universality of VIX Sufficiency",
+      "target_file": "body_v4.tex",
+      "status": "READY_WITH_BLOCKER",
+      "decision_blocker": "CONFLICT-A4: channel-specific (user decision 7ecab636) vs UNIVERSAL_NULL_7_OF_7 (K1203 session gate)",
+      "draft_framing": "UNIVERSAL_NULL",
+      "draft_word_count": 1762,
+      "source_draft": "experiments/k1208/k1208_draft.md",
+      "source_metadata": "experiments/k1208/k1208_panorama_table.csv + k1208_results.json",
+      "supporting_experiments": ["K1116c", "K1116f", "K1201", "K1203"],
+      "supporting_commits": ["64a9d569", "885d7b0b", "87059567", "477c504a"],
+      "narrative_state": "UNLOCKED (4 OOS-verified complementary experiments, 7/7 panorama)",
+      "figure_to_attach": "experiments/k1203/k1203_dm_heatmap_7asset.png",
+      "subsections": ["5.1 panorama overview", "5.2 results by asset class", "5.3 TLT outlier", "5.4 ^VXEEM data gap", "5.5 final narrative commitment", "5.6 limitations"],
+      "action_items": [
+        "Resolve CONFLICT-A4 framing (user clarification)",
+        "Create body_v4.tex or new §5 block in main_v4.tex",
+        "Renumber current v3 §5 'Volatility-Timing Strategy Design' to §6",
+        "Map Markdown → LaTeX (subsection, subsubsection)",
+        "Convert Tables 5.1/5.2 to tabular",
+        "Attach Figure 5.1 (k1203_dm_heatmap_7asset.png)",
+        "Run paper-review-cycle v4 round",
+        "xelatex main_v4.tex × 2",
+        "uv run volpred ops paper-update --paper-id vix-sufficiency",
+        "Update research_program.md + knowledge.json narrative-state transition"
+      ]
+    },
+    {
+      "k_id": "K1209",
+      "commit_hash": "2ca9f2f8",
+      "predecessor_commit": "0a442356",
+      "predecessor_scope": ["Kupiec p 2-decimal (Sec 4.5 + 4.8)", "GLD gamma rolling-window forensic footnote", "gamma_HM Sec 5.4 three-value disambiguation"],
+      "paper_target": "paper/leverage-direction/",
+      "target_section": "Batch 2 errata (8 items)",
+      "target_file": "body_v4.tex + tables.tex + new experiments.md",
+      "status": "READY",
+      "decision_blocker": null,
+      "draft_word_count": 3574,
+      "source_draft": "experiments/k1209/k1209_batch2_draft.md",
+      "source_metadata": "experiments/k1209/k1209_batch2_items.json",
+      "items_summary": {
+        "total": 8,
+        "pending_rewrite": 6,
+        "pending_add": 1,
+        "dropped": 1
+      },
+      "items": [
+        {"id": 1, "title": "Table 3 vs Table 8 SPY 2023-24 GJR QLIKE inconsistency", "action": "add_footnote", "v3_line": 219, "source_k": ["K903", "K1188"]},
+        {"id": 2, "title": "Table 6 VaR panel errata (3 cell updates)", "action": "rewrite_table_rows_plus_sentence_plus_footnote", "v3_line": 249, "also_edits": "tables.tex tab:var_panel", "source_k": ["K1186", "K1206"], "cell_updates": {"StudentT5": "57.1→76.2", "SkewedT": "76.2→90.5", "CFVaR": "66.7→76.2"}},
+        {"id": 3, "title": "Table 4 base = GARCH(1,1) not GJR methodology footnote", "action": "add_footnote", "v3_line": 247, "source_k": ["K1185"]},
+        {"id": 4, "title": "Table 7 per-asset evaluation period disclosure", "action": "amend_caption_plus_footnote", "v3_line": 279, "also_edits": "tables.tex tab:vt caption", "source_k": ["K1187"]},
+        {"id": 5, "title": "Table 7 GLD 1.56 Sharpe forensic footnote", "action": "add_footnote", "v3_line": 294, "source_k": ["K1187"]},
+        {"id": 6, "title": "Create paper/leverage-direction/experiments.md", "action": "add_new_file", "v3_line": null, "source_k": ["K903", "K1185", "K1186", "K1187", "K1188", "K1198", "K1206"]},
+        {"id": 7, "title": "Tables 10/11/12 + §4.2.3 pre-K unified rebuild footnote", "action": "add_unified_footnote", "v3_line": null, "notes": "First Table 10/11/12 or §4.2.3 value in reading order", "source_k": ["K1198"]},
+        {"id": 8, "title": "gamma_HM Sec 4.7 second disambiguation", "action": "DROPPED", "v3_line": null, "notes": "Batch 1 Sec 5.4 footnote covers all three values"}
+      ],
+      "post_adoption_commit_template": "Paper 1 errata batch 2 (v4): Table 6 errata + Table 3/4/7 footnotes + experiments.md"
+    },
+    {
+      "k_id": "K1214",
+      "commit_hash": "91e5ab1d",
+      "paper_target": "paper/btc-gas-negative/ (NEW)",
+      "target_section": "Full new paper (Abstract + 6 sections + refs + appendix)",
+      "target_file": "main.tex (to be created)",
+      "status": "READY",
+      "decision_blocker": "User go/no-go on new paper initiative",
+      "draft_word_count": 4829,
+      "source_draft": "experiments/k1214/k1214_paper_draft.md",
+      "source_metadata": "experiments/k1214/k1214_paper_outline.json",
+      "paper_title": "Why GAS-t Fails on Bitcoin: Student-t Innovation Is the Culprit, Regime-Switching Cannot Rescue",
+      "core_claim": "BTC GAS-t underperformance (DM t = -4.58) is (i) concentrated 2015-2020, (ii) ~75% Student-t / 25% GAS dynamics, (iii) MS-GAS-t cannot rescue; falsifies Catania (2018) for BTC",
+      "supporting_experiments": ["K1129", "K1133", "K1133b"],
+      "target_journals": ["Journal of Empirical Finance (primary)", "Journal of Financial Econometrics (home of Catania 2018)", "Journal of Risk", "Quantitative Finance", "International Journal of Forecasting"],
+      "section_word_budget": {
+        "abstract": {"target": 200, "actual": 280},
+        "introduction": {"target": 800, "actual": 820},
+        "methodology": {"target": 500, "actual": 650},
+        "data": {"target": 300, "actual": 320},
+        "results": {"target": 1200, "actual": 1200},
+        "discussion": {"target": 600, "actual": 700},
+        "conclusion": {"target": 300, "actual": 230},
+        "references": {"target": 20, "actual": 16},
+        "appendix_a": {"actual": 250}
+      },
+      "initialization_steps": [
+        "mkdir -p paper/btc-gas-negative/{figures,tables,scripts,data_docs,review_history}",
+        "Seed main.tex: cherry-pick k1214_paper_draft.md sections, convert math to amsmath, tables to booktabs",
+        "Write README.md (title, journal, status=draft, K-list K1129/K1133/K1133b, data source summary)",
+        "Write experiments.md (K1129 full-sample, K1133 sub-period, K1133b decomposition + MS-GAS-t OOS)",
+        "Write data_sources.md (yfinance BTC-USD 2015-01-02 to 2026-04-14, n=4121, pct_change*100, seed 42)",
+        "Write scripts/README.md (Table 1 ← K1129/k1129.py; Tables 2-3 + App A.1 ← k1133b.py; App A.3 ← k1133.py)",
+        "figures/ soft-link 7 PNGs (k1129 qlike_comparison, k1129 dm_heatmap, k1133 qlike_by_period, k1133 dm_heatmap, k1133b qlike_5model, k1133b ms_state_prob, k1133b dm_heatmap)",
+        "Run pre-submission checklist per CLAUDE.md paper-workflow",
+        "Write reproduce.py + reproduce_report.json diff"
+      ]
+    },
+    {
+      "k_id": "K1215",
+      "commit_hash": "45f621ee",
+      "predecessor_k": "K1211",
+      "predecessor_commit": "9efffe4b",
+      "paper_target": "paper/taiwan-vt/",
+      "target_section": "§5 (full revision with §5.5 rewrite)",
+      "target_file": "body_v4.tex",
+      "status": "READY",
+      "decision_blocker": null,
+      "draft_word_count": 3971,
+      "source_draft": "experiments/k1215/k1215_revised_draft.md",
+      "source_metadata": "experiments/k1215/k1215_revision_stats.json",
+      "trigger": "K1213 ABOVE_LADDER_OVERTURNED verdict (commit c34d0546) after K1211 draft",
+      "subsection_changes": {
+        "5.1": {"action": "light_edit", "delta_words": 89, "notes": "Harvey t invariance + Spearman ρ N=13 update +0.385→+0.418"},
+        "5.2-5.4": {"action": "verbatim"},
+        "5.5": {"action": "full_rewrite", "old_words": 451, "new_words": 1228, "notes": "Integrates K1213 multi-start resolution; AU reclassified above-ladder EM-scale residual"},
+        "5.6": {"action": "light_edit", "delta_words": 92, "notes": "K1213 caveat on basin-A input"},
+        "5.7_FINAL": {"action": "full_replacement", "delta_words": 108, "notes": "0 open residuals; only magnitude heterogeneity"}
+      },
+      "table_changes": {
+        "Table_5": "Iter 5 (K1171) marked *retracted*; NEW row Iter 5' (K1213) — AU θ_rel=1.476, ρ=+0.418, p=0.156, Panel Harvey t=3.808"
+      },
+      "figure_additions": {
+        "Figure_5G": "NEW slot: K1213 basin bimodality PNGs (k1213_theta_eav_hist.png + k1213_ll_vs_theta_scatter.png)"
+      },
+      "new_bibliography": [
+        "McCullough, B.D., Vinod, H.D. (2003). AER 93(3), 873-892",
+        "Hansen, L.P. (1982). Econometrica 50(4), 1029-1054"
+      ],
+      "supporting_experiments": ["K1165", "K1166", "K1168", "K1171", "K1172", "K1173", "K1163", "K1204", "K1207", "K1210", "K1213"],
+      "action_items": [
+        "Read k1215_revised_draft.md end-to-end",
+        "Create body_v4.tex (do not modify v3)",
+        "Supersede K1211 §5.5 language with K1215 §5.5",
+        "Apply light §5.1/§5.6 edits",
+        "Replace §5.7 FINAL fully",
+        "Update Table 5: mark Iter 5 retracted + add Iter 5'",
+        "Add Figure 5G slot with K1213 PNGs",
+        "Add McCullough-Vinod + Hansen bibliography entries",
+        "xelatex main_v4.tex + paper-update CLI",
+        "Re-run K1204 32/32 integrity under K1213 canonical"
+      ]
+    },
+    {
+      "k_id": "K1217",
+      "commit_hash": "4b100d3b",
+      "paper_target": "paper/prg-hybrid-null/ (NEW, if path b)",
+      "target_section": "Full new paper (CONDITIONAL)",
+      "target_file": "main.tex (to be created if path b)",
+      "status": "CONDITIONAL",
+      "decision_blocker": "User Paper 3 K1128 pivot decision (a/b/c)",
+      "k1205_recommendation": "(b) Hybrid null+positive",
+      "draft_word_count": 4991,
+      "source_draft": "experiments/k1217/k1217_paper_draft.md",
+      "source_metadata": "experiments/k1217/k1217_paper_outline.json",
+      "pivot_options": {
+        "a": "Full K1142 vol-norm anchor — high reviewer risk, single positive cell",
+        "b": "Hybrid null + positive — 4-branch honest null + K1142 partial (K1205 RECOMMENDED)",
+        "c": "Abandon leverage-direction — K1142 kept for separate submission"
+      },
+      "supporting_experiments": ["K1128", "K1131", "K1142", "K1199", "K1100g_d7", "K1205"],
+      "target_journals": ["Journal of Empirical Finance", "International Review of Financial Analysis", "Pacific-Basin Finance Journal"],
+      "action_items_if_path_b": [
+        "User confirms path (b)",
+        "Create paper/prg-hybrid-null/ with standard subdirs",
+        "Copy k1217_paper_draft.md §1-§6 to main.tex body",
+        "Add LaTeX preamble + bibliography (24 refs)",
+        "Link K1205 figures (panorama / regime coverage / AUC ranking PDFs)",
+        "Run paper-review-cycle round 1",
+        "Iterate via paper-update CLI"
+      ]
+    },
+    {
+      "k_id": "K1218",
+      "commit_hash": "581be90f",
+      "paper_target": "paper/prg-periodic-garch/",
+      "target_section": "Appendix A (A.1-A.5)",
+      "target_file": "main.tex \\appendix OR new appendix.tex",
+      "status": "READY",
+      "decision_blocker": null,
+      "draft_word_count": 930,
+      "source_draft": "experiments/k1218/k1218_appendix_draft.md",
+      "source_metadata": "experiments/k1218/k1218_appendix_meta.json",
+      "evidence": "K1200 clean-slate replication (commit 287de785), verdict MINOR_DIVERGENT (clean-slate performs better)",
+      "canonical_table": {
+        "GJR_QLIKE": {"k880": 0.8542, "k1200": 0.8544, "delta": 0.0002},
+        "PRG_Extended_QLIKE": {"k880": 0.7478, "k1200": 0.7355, "delta": -0.0124},
+        "DM_t_PRG_vs_GJR": {"k880": 6.004, "k1200": 6.128, "delta": 0.124},
+        "Spearman_rho_PRG_Extended": {"k880": 0.5678, "k1200": 0.5761, "delta": 0.0084},
+        "OOS_obs": {"k880": 1823, "k1200": 1823, "delta": 0}
+      },
+      "action_items": [
+        "Cherry-pick into \\appendix \\section{Independent Replication of the Two-Phase Forecast Timing}",
+        "Add Section 4 cross-reference: 'Appendix A.3 documents an independent clean-slate replication...'",
+        "xelatex main.tex × 2",
+        "uv run volpred ops paper-update --paper-id prg-periodic-garch"
+      ]
+    }
+  ],
+  "execution_order": {
+    "tier_1_immediate_no_gate": ["K1209", "K1215", "K1218"],
+    "tier_1_papers": ["Paper 1 leverage-direction", "Paper 2 taiwan-vt", "Paper 6 prg-periodic-garch"],
+    "tier_1_estimated_main_thread_time_min_per_paper": [15, 30],
+    "tier_2_user_quick_decisions": [
+      {"item": "Paper 4 CONFLICT-A4 framing", "decision_type": "clarification", "estimated_time_min": [5, 10]},
+      {"item": "BTC paper (K1214) go/no-go", "decision_type": "approval", "estimated_time_min": [5, 10]}
+    ],
+    "tier_3_user_deep_decision": [
+      {"item": "Paper 3 K1128 pivot a/b/c", "decision_type": "narrative_choice", "estimated_time_min": 30, "k1205_recommendation": "b"}
+    ]
+  },
+  "session_stats": {
+    "k_experiments_completed_this_session": 30,
+    "knowledge_entries_added": 88,
+    "markdown_drafts_for_adoption": 6,
+    "papers_ready_immediate": 3,
+    "papers_with_decision_blocker": 2,
+    "new_paper_candidates": 1,
+    "session_consolidating_commit": "1a23e22c",
+    "session_consolidating_k": "K1212"
+  },
+  "compliance": {
+    "no_tex_output": true,
+    "worktree_scope_only": "experiments/k1219/",
+    "no_shared_state_mutation": true,
+    "word_counts_from_wc_w": true,
+    "commit_hashes_from_git_log": true,
+    "no_new_numerical_claims": true,
+    "seed_declared": 42,
+    "rng_used": false
+  },
+  "decision": "dashboard_ready"
+}

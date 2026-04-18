@@ -1,0 +1,400 @@
+{
+  "experiment_id": "K763",
+  "title": "Regime-Switched Carry Filter \u2014 When to Sell Vol Premium",
+  "proposer": "Codex (7th suggestion)",
+  "executor": "Claude",
+  "date": "2026-03-31",
+  "data_source": "yfinance SPY/GLD/^VIX/^VIX3M",
+  "data_period": "2006-07-17 to 2026-03-27",
+  "sample_size": 4956,
+  "methodology": {
+    "concept": "Binary admission filter for vol risk premium harvesting",
+    "filters": {
+      "term_structure": "VIX/VIX3M < 0.95 (contango)",
+      "momentum": "VIX 5d change < 0 (declining)",
+      "level": "VIX < 30 (no extreme fear)"
+    },
+    "allocations": {
+      "risk_on": "80% SPY + 20% GLD (all filters pass)",
+      "defensive": "30% SPY + 70% GLD (any filter fails)"
+    },
+    "lag": "signal.shift(1) \u2014 no lookahead",
+    "tx_cost": "5bps per leg on weight changes"
+  },
+  "descriptive_stats": {
+    "vrp_mean_pct": 3.5756422681216864,
+    "vrp_positive_pct": 84.54361054766734,
+    "contango_pct": 73.93509127789046,
+    "vix_declining_pct": 53.34685598377283,
+    "vix_under30_pct": 90.91277890466532,
+    "all_pass_pct": 43.85395537525355,
+    "vrp_when_pass": 2.869287195600384,
+    "vrp_when_fail": 4.127354575488398,
+    "spy_ann_ret_when_pass": 0.08697808284880931,
+    "spy_ann_ret_when_fail": 0.14355742030115967,
+    "return_diff_tstat": -0.6355931296713337,
+    "return_diff_pvalue": 0.5250711674295305
+  },
+  "full_sample_metrics": {
+    "Carry Filter": {
+      "name": "Carry Filter",
+      "ann_return": 0.09195097600635677,
+      "ann_vol": 0.13638673611729643,
+      "sharpe": 0.6741929503120915,
+      "mdd": -0.3627929078935376,
+      "calmar": 0.2534530692461607,
+      "sortino": 0.8710954695797961,
+      "n_days": 4588
+    },
+    "12/VIX": {
+      "name": "12/VIX",
+      "ann_return": 0.10719969642198456,
+      "ann_vol": 0.12956357013106967,
+      "sharpe": 0.8273907265255096,
+      "mdd": -0.3233472551549609,
+      "calmar": 0.33153117805379295,
+      "sortino": 1.0644599094632112,
+      "n_days": 4588
+    },
+    "50/50": {
+      "name": "50/50",
+      "ann_return": 0.11193016131029238,
+      "ann_vol": 0.13692666642040482,
+      "sharpe": 0.8174460405443167,
+      "mdd": -0.32489858624845414,
+      "calmar": 0.34450799741153054,
+      "sortino": 1.0380437030559417,
+      "n_days": 4588
+    },
+    "BH SPY": {
+      "name": "BH SPY",
+      "ann_return": 0.11886880911960244,
+      "ann_vol": 0.19879624262693582,
+      "sharpe": 0.5979429366915829,
+      "mdd": -0.5187374814573893,
+      "calmar": 0.22915022216177894,
+      "sortino": 0.7298073254939855,
+      "n_days": 4588
+    }
+  },
+  "cross_oos": {
+    "periods": [
+      {
+        "period": "2008-01-01 to 2009-12-31",
+        "metrics": {
+          "Carry Filter": {
+            "sharpe": 0.18333161549951188,
+            "mdd": -0.3627929078935376,
+            "ann_ret": 0.04011132849679642,
+            "n": 505
+          },
+          "12/VIX": {
+            "sharpe": 0.2661716781077304,
+            "mdd": -0.3233472551549609,
+            "ann_ret": 0.05494037763395092,
+            "n": 505
+          },
+          "50/50": {
+            "sharpe": 0.2623745385714121,
+            "mdd": -0.32489858624845414,
+            "ann_ret": 0.058397353435552225,
+            "n": 505
+          },
+          "BH SPY": {
+            "sharpe": -0.14961544879680708,
+            "mdd": -0.5187374814573893,
+            "ann_ret": -0.05204213186095227,
+            "n": 505
+          }
+        }
+      },
+      {
+        "period": "2012-01-01 to 2013-12-31",
+        "metrics": {
+          "Carry Filter": {
+            "sharpe": 0.36996384045102376,
+            "mdd": -0.1233320925220952,
+            "ann_ret": 0.0428419810819861,
+            "n": 502
+          },
+          "12/VIX": {
+            "sharpe": 1.4285832208911888,
+            "mdd": -0.07323774352000223,
+            "ann_ret": 0.14861485140302666,
+            "n": 502
+          },
+          "50/50": {
+            "sharpe": 0.4354248358312068,
+            "mdd": -0.13119939320242535,
+            "ann_ret": 0.052310582049166214,
+            "n": 502
+          },
+          "BH SPY": {
+            "sharpe": 1.8630478797712162,
+            "mdd": -0.09687003035501318,
+            "ann_ret": 0.2221897843783502,
+            "n": 502
+          }
+        }
+      },
+      {
+        "period": "2016-01-01 to 2017-12-31",
+        "metrics": {
+          "Carry Filter": {
+            "sharpe": 1.3133605035712619,
+            "mdd": -0.07206510039168723,
+            "ann_ret": 0.10069624691212432,
+            "n": 503
+          },
+          "12/VIX": {
+            "sharpe": 2.1518893900405978,
+            "mdd": -0.04151316706184649,
+            "ann_ret": 0.16144032180425935,
+            "n": 503
+          },
+          "50/50": {
+            "sharpe": 1.9142409166773553,
+            "mdd": -0.06844442888565128,
+            "ann_ret": 0.13434231661413532,
+            "n": 503
+          },
+          "BH SPY": {
+            "sharpe": 1.5455653557084494,
+            "mdd": -0.09187528061842865,
+            "ann_ret": 0.16062575231761578,
+            "n": 503
+          }
+        }
+      },
+      {
+        "period": "2020-01-01 to 2021-12-31",
+        "metrics": {
+          "Carry Filter": {
+            "sharpe": 1.0429080907737471,
+            "mdd": -0.1597017423616257,
+            "ann_ret": 0.1491128721911864,
+            "n": 505
+          },
+          "12/VIX": {
+            "sharpe": 1.0269428986811335,
+            "mdd": -0.19976272550648178,
+            "ann_ret": 0.14511296592214853,
+            "n": 505
+          },
+          "50/50": {
+            "sharpe": 1.0634402809905437,
+            "mdd": -0.20315126164601238,
+            "ann_ret": 0.17304297634866828,
+            "n": 505
+          },
+          "BH SPY": {
+            "sharpe": 0.9568715549753449,
+            "mdd": -0.33717259886422934,
+            "ann_ret": 0.24240141534570434,
+            "n": 505
+          }
+        }
+      },
+      {
+        "period": "2022-01-01 to 2023-12-31",
+        "metrics": {
+          "Carry Filter": {
+            "sharpe": 0.1646204707806405,
+            "mdd": -0.19469550782731349,
+            "ann_ret": 0.022723207236877666,
+            "n": 501
+          },
+          "12/VIX": {
+            "sharpe": 0.30717264889516976,
+            "mdd": -0.19691817320538318,
+            "ann_ret": 0.03959033690682777,
+            "n": 501
+          },
+          "50/50": {
+            "sharpe": 0.39520315461854794,
+            "mdd": -0.1803148094490583,
+            "ann_ret": 0.05077371811530348,
+            "n": 501
+          },
+          "BH SPY": {
+            "sharpe": 0.17970838897381175,
+            "mdd": -0.24496392800105882,
+            "ann_ret": 0.035064583520226074,
+            "n": 501
+          }
+        }
+      }
+    ],
+    "carry_vs_5050_wins": "0/5",
+    "carry_vs_12vix_wins": "1/5"
+  },
+  "sensitivity": {
+    "Base": {
+      "name": "Base",
+      "ann_return": 0.09195097600635677,
+      "ann_vol": 0.13638673611729643,
+      "sharpe": 0.6741929503120915,
+      "mdd": -0.3627929078935376,
+      "calmar": 0.2534530692461607,
+      "sortino": 0.8710954695797961,
+      "n_days": 4588
+    },
+    "TS loose (1.00)": {
+      "name": "TS loose (1.00)",
+      "ann_return": 0.09362952898866463,
+      "ann_vol": 0.1374155450948198,
+      "sharpe": 0.6813605325660802,
+      "mdd": -0.3476634487342094,
+      "calmar": 0.2693108215130343,
+      "sortino": 0.8817313474288287,
+      "n_days": 4588
+    },
+    "TS tight (0.90)": {
+      "name": "TS tight (0.90)",
+      "ann_return": 0.10922281696422072,
+      "ann_vol": 0.13547071600222851,
+      "sharpe": 0.8062466943957393,
+      "mdd": -0.31792829495748864,
+      "calmar": 0.3435454430969263,
+      "sortino": 1.04844397760304,
+      "n_days": 4588
+    },
+    "VIX max 25": {
+      "name": "VIX max 25",
+      "ann_return": 0.08992960905971198,
+      "ann_vol": 0.13522836664774193,
+      "sharpe": 0.6650203007625667,
+      "mdd": -0.3627929078935376,
+      "calmar": 0.2478813866066589,
+      "sortino": 0.8592264352162896,
+      "n_days": 4588
+    },
+    "VIX max 35": {
+      "name": "VIX max 35",
+      "ann_return": 0.09058116290369743,
+      "ann_vol": 0.13705236243441143,
+      "sharpe": 0.6609237615079161,
+      "mdd": -0.3627929078935376,
+      "calmar": 0.24967732536347895,
+      "sortino": 0.8529884036572984,
+      "n_days": 4588
+    },
+    "Aggressive (90/10)": {
+      "name": "Aggressive (90/10)",
+      "ann_return": 0.07885328117450582,
+      "ann_vol": 0.15255491002372185,
+      "sharpe": 0.516884583801625,
+      "mdd": -0.4033362911386288,
+      "calmar": 0.19550256921315207,
+      "sortino": 0.6764300825934079,
+      "n_days": 4588
+    },
+    "Conservative (70/30 vs 40/60)": {
+      "name": "Conservative (70/30 vs 40/60)",
+      "ann_return": 0.10022019604030344,
+      "ann_vol": 0.13354000765026383,
+      "sharpe": 0.7504881705771375,
+      "mdd": -0.3497674450767977,
+      "calmar": 0.2865338025335614,
+      "sortino": 0.9627156358825503,
+      "n_days": 4588
+    }
+  },
+  "ablation": {
+    "All 3 filters": {
+      "name": "All 3 filters",
+      "ann_return": 0.09195097600635677,
+      "ann_vol": 0.13638673611729643,
+      "sharpe": 0.6741929503120915,
+      "mdd": -0.3627929078935376,
+      "calmar": 0.2534530692461607,
+      "sortino": 0.8710954695797961,
+      "n_days": 4588,
+      "pct_risk_on": 44.703574542284215
+    },
+    "No term structure": {
+      "name": "No term structure",
+      "ann_return": 0.09441506421118057,
+      "ann_vol": 0.13810320174747778,
+      "sharpe": 0.6836558676157187,
+      "mdd": -0.35201264345465766,
+      "calmar": 0.2682149802478389,
+      "sortino": 0.8862250554051501,
+      "n_days": 4588,
+      "pct_risk_on": 49.5640802092415
+    },
+    "No momentum": {
+      "name": "No momentum",
+      "ann_return": 0.11214364050891437,
+      "ann_vol": 0.13539382501583566,
+      "sharpe": 0.8282773641692895,
+      "mdd": -0.35393381790743084,
+      "calmar": 0.3168491814993639,
+      "sortino": 1.0711358458595182,
+      "n_days": 4588,
+      "pct_risk_on": 74.54228421970357
+    },
+    "No level": {
+      "name": "No level",
+      "ann_return": 0.0899750810161086,
+      "ann_vol": 0.13719659233914874,
+      "sharpe": 0.6558113396409366,
+      "mdd": -0.3627929078935376,
+      "calmar": 0.24800672521005288,
+      "sortino": 0.846478927309226,
+      "n_days": 4588,
+      "pct_risk_on": 45.31386224934612
+    },
+    "Only term structure": {
+      "name": "Only term structure",
+      "ann_return": 0.10953747474726723,
+      "ann_vol": 0.13694288151063813,
+      "sharpe": 0.7998770986775098,
+      "mdd": -0.35393381790743084,
+      "calmar": 0.3094857546952918,
+      "sortino": 1.0293156337599518,
+      "n_days": 4588,
+      "pct_risk_on": 75.65387968613774
+    },
+    "Only momentum": {
+      "name": "Only momentum",
+      "ann_return": 0.08831835770538302,
+      "ann_vol": 0.14469870334601873,
+      "sharpe": 0.610360394828051,
+      "mdd": -0.3945886148121206,
+      "calmar": 0.2238238874363745,
+      "sortino": 0.7840158127281877,
+      "n_days": 4588,
+      "pct_risk_on": 53.5745422842197
+    },
+    "Only level": {
+      "name": "Only level",
+      "ann_return": 0.10417673415546533,
+      "ann_vol": 0.14086247710481056,
+      "sharpe": 0.7395634117519548,
+      "mdd": -0.2989254904813138,
+      "calmar": 0.34850401679604354,
+      "sortino": 0.9450353106758328,
+      "n_days": 4588,
+      "pct_risk_on": 90.32258064516128
+    }
+  },
+  "simple_vix_threshold_comparison": {
+    "simple_vix_lt20_sharpe": 0.793170291069455,
+    "carry_filter_sharpe": 0.6741929503120915,
+    "twelve_vix_sharpe": 0.8273907265255096
+  },
+  "conclusions": [
+    "Carry Filter (Sharpe 0.674) UNDERPERFORMS 12/VIX (0.827)",
+    "Cross-OOS: fails vs 50/50 (0/5)",
+    "Cross-OOS: fails vs 12/VIX (1/5)",
+    "Best single filter: Only term structure (Sharpe 0.800) \u2014 combining filters does not help",
+    "Binary switch (80/30) vs continuous 12/VIX: discrete regime change underperforms smooth weighting"
+  ],
+  "references": [
+    "Carr & Wu (2009) Variance Risk Premiums, RFS",
+    "Todorov (2010) Variance Risk Premium and Forward Premium Puzzle",
+    "Mixon (2009) Option Markets and Implied Volatility, JBF",
+    "Related: K242 (VRP harvest MDD -90%), K430 (VRP OOS null), K440 (VRP VT), K161 (TS absorbed by VIX), K760 (alt risk premia dilution)"
+  ]
+}

@@ -1,0 +1,266 @@
+{
+  "experiment_id": "K1205",
+  "title": "Paper 3 K1128 OFI-jump regime synthesis (4-branch null panorama)",
+  "task_type": "pure_synthesis_no_new_estimation",
+  "seed": 42,
+  "timestamp": "2026-04-17",
+  "data_source": "TAIFEX TX 5-min bars 2017-2021 (K1124 cache)",
+  "n_bars_total": 73203,
+  "n_valid_prediction_superset": 52412,
+  "jump_detection_canonical": {
+    "method": "Lee-Mykland K=16 strictly-past BV",
+    "alpha": 0.01,
+    "gumbel_threshold": 5.125598054567598,
+    "n_jumps": 115,
+    "jump_rate_pct": 0.2144
+  },
+  "is_period": "2017-2019",
+  "oos_period": "2020-2021",
+  "oos_vix_range": {
+    "min": 12.319999694824219,
+    "max": 82.69000244140625,
+    "mean": 24.43031987211861
+  },
+  "is_vix_range": {
+    "min": 9.140000343322754,
+    "max": 37.31999969482422,
+    "mean": 14.344739332586041
+  },
+  "branches": [
+    {
+      "experiment": "K1128",
+      "branch": "VIX tertile (IS-fixed)",
+      "focal_model": "M3_tertile_high",
+      "n_oos": 20060,
+      "n_oos_jumps": 32,
+      "auc_oos": 0.5926468569003396,
+      "ll_oos": 0.011963303138594384,
+      "ll_oos_unit_note": "sign-flipped from K1128 raw ll_oos (-log_loss) to positive log_loss per-bar for cross-experiment comparability",
+      "brier_oos": 0.0015920904956065853,
+      "dm_t_vs_baseline": 1.3061066504589265,
+      "dm_baseline": "M1 (jump_curr only)",
+      "verdict": "NULL (partial only; OOS coverage 0/854/20060 degenerate)",
+      "regime_coverage_oos": {
+        "low": {
+          "status": "ok",
+          "n": 7074,
+          "jumps": 16,
+          "base_rate": 0.0022618037885213456,
+          "auc_M1": 0.5301873760272031,
+          "auc_M3": 0.5621457920090678,
+          "brier_M1": 0.0022516618718675346,
+          "brier_M3": 0.0022499941051202896,
+          "dm_M3_vs_M1": {
+            "t": 0.5285818937546207,
+            "t_plain": 0.5286192586077233,
+            "mean_d": 5.715274439073751e-05,
+            "se": 0.00010811703028237438,
+            "n": 7074
+          },
+          "vix_min": 12.319999694824219,
+          "vix_max": 18.84000015258789,
+          "vix_mean": 16.592281588127562
+        },
+        "mid": {
+          "status": "ok",
+          "n": 6894,
+          "jumps": 11,
+          "base_rate": 0.0015955903684363214,
+          "auc_M1": 0.4992009298271103,
+          "auc_M3": 0.4957008703921387,
+          "brier_M1": 0.0015948743842604477,
+          "brier_M3": 0.00159326958615915,
+          "dm_M3_vs_M1": {
+            "t": 1.8463859694267521,
+            "t_plain": 1.846519896527311,
+            "mean_d": 0.0002511545447116768,
+            "se": 0.00013601507635201487,
+            "n": 6894
+          },
+          "vix_min": 18.860000610351562,
+          "vix_max": 25.34000015258789,
+          "vix_mean": 22.08591092742973
+        },
+        "high": {
+          "status": "ok",
+          "n": 6946,
+          "jumps": 6,
+          "base_rate": 0.0008638065073423554,
+          "auc_M1": 0.4994956772334294,
+          "auc_M3": 0.6260566762728146,
+          "brier_M1": 0.0008663433468307319,
+          "brier_M3": 0.0008653853911187705,
+          "dm_M3_vs_M1": {
+            "t": 3.592277436840362,
+            "t_plain": 3.592536050816928,
+            "mean_d": 0.00020651510381348206,
+            "se": 5.7484490313332105e-05,
+            "n": 6946
+          },
+          "vix_min": 25.350000381469727,
+          "vix_max": 82.69000244140625,
+          "vix_mean": 34.73965446550154
+        }
+      }
+    },
+    {
+      "experiment": "K1131",
+      "branch": "Natural cubic spline (continuous beta)",
+      "focal_model": "M_spline",
+      "n_oos": 20914,
+      "n_oos_jumps": 33,
+      "auc_oos": 0.49645248036129697,
+      "ll_oos": 0.012478685346006501,
+      "brier_oos": null,
+      "dm_t_vs_baseline": -3.934465769448788,
+      "dm_baseline": "M_base (jump_curr + |OFI| + OFI)",
+      "verdict": "NULL",
+      "LRT_chi2_p_vs_base": {
+        "chi2": 8.047111231029476,
+        "p": 0.23467210172997477
+      }
+    },
+    {
+      "experiment": "K1142",
+      "branch": "Vol-normalized OFI (sigma_60, strictly past)",
+      "focal_model": "M_volnorm",
+      "n_oos": 20914,
+      "n_oos_jumps": 33,
+      "auc_oos": 0.594028499157564,
+      "ll_oos": 0.011649952199682428,
+      "brier_oos": 0.001573503713389211,
+      "dm_t_vs_baseline": 2.2548702921694104,
+      "dm_baseline": "M_base (raw OFI features)",
+      "verdict": "PARTIAL_OOS_ONLY",
+      "spearman_rho_oos": 0.012928425726834813,
+      "realvol_tertile_aux": {
+        "auc_oos": 0.6663161958166988,
+        "dm_t_vs_base": 1.9822438339828246
+      }
+    },
+    {
+      "experiment": "K1199",
+      "branch": "Expanding-window adaptive VIX quantile",
+      "focal_model": "M_expanding",
+      "n_oos": 20914,
+      "n_oos_jumps": 33,
+      "auc_oos": 0.5483526418826452,
+      "ll_oos": 0.011645884931261515,
+      "brier_oos": 0.0015735522017606871,
+      "dm_t_vs_baseline": 1.1433015421188153,
+      "dm_baseline": "M_base (raw OFI features, K1128 replication)",
+      "verdict": "NULL",
+      "oos_regime_coverage": {
+        "low": 0,
+        "mid": 6816,
+        "high": 14098
+      },
+      "n_refits": 82
+    }
+  ],
+  "integrity_checks": [
+    {
+      "check": "Total Lee-Mykland jumps (K=16, alpha=0.01)",
+      "values": {
+        "K1128": 115,
+        "K1131": 115,
+        "K1142": 115,
+        "K1199": 115
+      },
+      "pass": true,
+      "note": "K1128 denominator is n_valid_prediction=52412 (post jump/OFI valid mask); K1131/K1142/K1199 inherit same cache."
+    },
+    {
+      "check": "Gumbel threshold alpha=0.01",
+      "values": {
+        "K1128": 5.125598054567598,
+        "K1131": 5.125598054567598,
+        "K1142": 5.125598054567598,
+        "K1199": 5.125598054567598
+      },
+      "pass": true
+    },
+    {
+      "check": "IS VIX tertile cutoff_33",
+      "values": {
+        "K1128": 12.069999694824219,
+        "K1131": 12.069999694824219,
+        "K1199": 12.069999694824219
+      },
+      "pass": true
+    },
+    {
+      "check": "IS VIX tertile cutoff_67",
+      "values": {
+        "K1128": 14.989999771118164,
+        "K1131": 14.989999771118164,
+        "K1199": 14.989999771118164
+      },
+      "pass": true
+    },
+    {
+      "check": "M_base beta identical across K1131 & K1199",
+      "values": {
+        "K1131": [
+          -6.261803083749046,
+          2.276980104523164,
+          1.529129428130548,
+          -0.8859756470268693
+        ],
+        "K1199": [
+          -6.261803083749046,
+          2.276980104523164,
+          1.529129428130548,
+          -0.8859756470268693
+        ]
+      },
+      "pass": true,
+      "note": "K1142 M_base nll differs (556.9451 vs 557.0556) by 43-bar sample exclusion from sigma_60 strict-past NaN (52369 vs 52412 valid rows)."
+    },
+    {
+      "check": "K1128 OOS coverage gap vs full OOS",
+      "values": {
+        "K1128_high_tertile_only": 20060,
+        "K1131_full_oos": 20914,
+        "K1199_full_oos": 20914,
+        "K1142_full_oos": 20914
+      },
+      "pass": true,
+      "note": "Full OOS - K1128 high = 854 bars, matches K1128 mid-tertile n_oos=854."
+    },
+    {
+      "check": "K1142 vs K1199 volnorm AUC implementation note",
+      "values": {
+        "K1142_volnorm_auc_oos_canonical": 0.594028499157564,
+        "K1199_M_volnorm_auc_oos_bench": 0.6712162572035184,
+        "K1142_n_valid": 52369,
+        "K1199_n_bars_valid": 52412
+      },
+      "pass": true,
+      "note": "DOCUMENTED IMPLEMENTATION DIFFERENCE (not bug): K1199 uses sigma fallback (rolling-60 -> LM BV sigma) for 43 bars; K1142 drops those rows. Both are valid operationalizations but produce different AUC. K1142 is the paper-quotable canonical for the vol-norm hypothesis (explicit volnorm-only experiment)."
+    }
+  ],
+  "integrity_all_pass": true,
+  "narrative_verdict": {
+    "k1128_4branch_gate": "ALL NULL (K1128 degenerate, K1131 null, K1199 null) with ONE PARTIAL CELL (K1142 volnorm AUC 0.5940 DM t=+2.25 at |t|>2 but <|3|)",
+    "implication_for_paper3_leverage_direction": "Regime-switching OFI->jump narrative is not supported. K1142 vol-norm is a standalone partial positive that may anchor a restricted-scope revision but does not rescue K1128's leverage-regime story."
+  },
+  "decision_matrix": {
+    "path_a_full_K1142_volnorm_anchor": {
+      "evidence_strength": "PARTIAL (one cell; AUC 0.5940, DM t=+2.25, n_oos_jumps=33)",
+      "feasibility": "HIGH",
+      "reviewer_risk": "HIGH (single positive cell; |t|=2.25 below Harvey 2016 threshold |t|>3; power limited)"
+    },
+    "path_b_hybrid_null_plus_positive": {
+      "evidence_strength": "COMPLETE (4-branch panorama; honest null with one partial)",
+      "feasibility": "MEDIUM (complex framing; explain why leverage-direction fails AND why vol-norm partially works)",
+      "reviewer_risk": "MEDIUM (honest null is publishable; fits JoE/IJF 'what does not work' niche)"
+    },
+    "path_c_abandon_leverage_direction": {
+      "evidence_strength": "N/A (preserves prior positive K1142 for a separate vol-norm paper)",
+      "feasibility": "HIGH (but sunk cost: ~1 year's work on K1128 story discarded)",
+      "reviewer_risk": "N/A (non-submission)"
+    }
+  },
+  "recommendation": "Path (b) Hybrid null+positive: honest 4-branch null with K1142 vol-norm partial is publishable as a clean negative-result methodological paper."
+}

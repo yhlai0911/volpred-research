@@ -1,0 +1,913 @@
+{
+  "experiment_id": "K540",
+  "title": "HAR-VIX Ensemble VT Strategy",
+  "timestamp": "2026-03-27T13:57:54.165773+00:00",
+  "runtime_seconds": 11.1,
+  "data_source": "yfinance (SPY, GLD, ^VIX)",
+  "data_period": "2005-01-03 to 2026-03-27",
+  "n_observations": 5342,
+  "methodology": {
+    "har_window": 500,
+    "target_vol": 0.12,
+    "tx_cost": 0.001,
+    "oos_periods": {
+      "OOS1_2015_2016": [
+        "2015-01-01",
+        "2016-12-31"
+      ],
+      "OOS2_2017_2018": [
+        "2017-01-01",
+        "2018-12-31"
+      ],
+      "OOS3_2019_2020": [
+        "2019-01-01",
+        "2020-12-31"
+      ],
+      "OOS4_2021_2022": [
+        "2021-01-01",
+        "2022-12-31"
+      ],
+      "OOS5_2023_2024": [
+        "2023-01-01",
+        "2024-12-31"
+      ]
+    },
+    "strategies": {
+      "12/VIX": "Benchmark",
+      "DisagreeFilter": "Disagree\u2192conservative",
+      "HARReality": "HAR checks VIX complacency",
+      "RegimeCond": "VIX regime blend",
+      "DynBlend": "Dynamic \u03b1 blend",
+      "DisagreeMom": "Disagreement momentum"
+    }
+  },
+  "cross_oos_results": {
+    "OOS1_2015_2016": {
+      "B&H 50/50": {
+        "name": "B&H 50/50",
+        "sharpe": 0.2403,
+        "net_sharpe": 0.2303,
+        "cagr": 0.0183,
+        "ann_vol": 0.0936,
+        "mdd": -0.1253,
+        "calmar": 0.1459,
+        "sortino": 0.3481,
+        "turnover": 0.0,
+        "avg_weight": 1.0,
+        "n_obs": 504
+      },
+      "12/VIX": {
+        "name": "12/VIX",
+        "sharpe": 0.4169,
+        "net_sharpe": 0.2518,
+        "cagr": 0.0268,
+        "ann_vol": 0.0691,
+        "mdd": -0.06,
+        "calmar": 0.446,
+        "sortino": 0.6394,
+        "turnover": 0.042887,
+        "avg_weight": 0.7764,
+        "n_obs": 504
+      },
+      "DisagreeFilter": {
+        "name": "DisagreeFilter",
+        "sharpe": 0.333,
+        "net_sharpe": 0.1633,
+        "cagr": 0.0206,
+        "ann_vol": 0.0684,
+        "mdd": -0.0647,
+        "calmar": 0.3191,
+        "sortino": 0.5054,
+        "turnover": 0.04362,
+        "avg_weight": 0.7743,
+        "n_obs": 504
+      },
+      "HARReality": {
+        "name": "HARReality",
+        "sharpe": 0.4087,
+        "net_sharpe": 0.2434,
+        "cagr": 0.0262,
+        "ann_vol": 0.0691,
+        "mdd": -0.06,
+        "calmar": 0.4359,
+        "sortino": 0.6261,
+        "turnover": 0.042887,
+        "avg_weight": 0.7761,
+        "n_obs": 504
+      },
+      "RegimeCond": {
+        "name": "RegimeCond",
+        "sharpe": 0.3557,
+        "net_sharpe": 0.187,
+        "cagr": 0.0226,
+        "ann_vol": 0.0696,
+        "mdd": -0.071,
+        "calmar": 0.3184,
+        "sortino": 0.5422,
+        "turnover": 0.044186,
+        "avg_weight": 0.7805,
+        "n_obs": 504
+      },
+      "DynBlend": {
+        "name": "DynBlend",
+        "sharpe": 0.3017,
+        "net_sharpe": 0.1591,
+        "cagr": 0.0191,
+        "ann_vol": 0.071,
+        "mdd": -0.0753,
+        "calmar": 0.2531,
+        "sortino": 0.4587,
+        "turnover": 0.037418,
+        "avg_weight": 0.8012,
+        "n_obs": 504
+      },
+      "DisagreeMom": {
+        "name": "DisagreeMom",
+        "sharpe": 0.3282,
+        "net_sharpe": 0.1619,
+        "cagr": 0.0183,
+        "ann_vol": 0.0609,
+        "mdd": -0.0577,
+        "calmar": 0.317,
+        "sortino": 0.4876,
+        "turnover": 0.038081,
+        "avg_weight": 0.6868,
+        "n_obs": 504
+      },
+      "dm_tests": {
+        "DisagreeFilter_vs_VIX": {
+          "t_stat": -1.6152,
+          "p_value": 0.1069,
+          "significant_at_5pct": false
+        },
+        "HARReality_vs_VIX": {
+          "t_stat": -1.0383,
+          "p_value": 0.2996,
+          "significant_at_5pct": false
+        },
+        "RegimeCond_vs_VIX": {
+          "t_stat": -1.2231,
+          "p_value": 0.2219,
+          "significant_at_5pct": false
+        },
+        "DynBlend_vs_VIX": {
+          "t_stat": -1.9787,
+          "p_value": 0.0484,
+          "significant_at_5pct": true
+        },
+        "DisagreeMom_vs_VIX": {
+          "t_stat": -1.2932,
+          "p_value": 0.1965,
+          "significant_at_5pct": false
+        }
+      }
+    },
+    "OOS2_2017_2018": {
+      "B&H 50/50": {
+        "name": "B&H 50/50",
+        "sharpe": 0.8054,
+        "net_sharpe": 0.7583,
+        "cagr": 0.0617,
+        "ann_vol": 0.0781,
+        "mdd": -0.12,
+        "calmar": 0.5138,
+        "sortino": 1.0868,
+        "turnover": 0.0,
+        "avg_weight": 1.0,
+        "n_obs": 502
+      },
+      "12/VIX": {
+        "name": "12/VIX",
+        "sharpe": 1.6158,
+        "net_sharpe": 1.4384,
+        "cagr": 0.0977,
+        "ann_vol": 0.0588,
+        "mdd": -0.0396,
+        "calmar": 2.4692,
+        "sortino": 2.6553,
+        "turnover": 0.027797,
+        "avg_weight": 0.8759,
+        "n_obs": 502
+      },
+      "DisagreeFilter": {
+        "name": "DisagreeFilter",
+        "sharpe": 1.5861,
+        "net_sharpe": 1.4054,
+        "cagr": 0.0954,
+        "ann_vol": 0.0586,
+        "mdd": -0.0435,
+        "calmar": 2.1947,
+        "sortino": 2.5975,
+        "turnover": 0.028354,
+        "avg_weight": 0.8751,
+        "n_obs": 502
+      },
+      "HARReality": {
+        "name": "HARReality",
+        "sharpe": 1.6149,
+        "net_sharpe": 1.4375,
+        "cagr": 0.0976,
+        "ann_vol": 0.0588,
+        "mdd": -0.0397,
+        "calmar": 2.4604,
+        "sortino": 2.6536,
+        "turnover": 0.027797,
+        "avg_weight": 0.8759,
+        "n_obs": 502
+      },
+      "RegimeCond": {
+        "name": "RegimeCond",
+        "sharpe": 1.5718,
+        "net_sharpe": 1.3904,
+        "cagr": 0.095,
+        "ann_vol": 0.0589,
+        "mdd": -0.0422,
+        "calmar": 2.2501,
+        "sortino": 2.5684,
+        "turnover": 0.028716,
+        "avg_weight": 0.8772,
+        "n_obs": 502
+      },
+      "DynBlend": {
+        "name": "DynBlend",
+        "sharpe": 1.493,
+        "net_sharpe": 1.3201,
+        "cagr": 0.0908,
+        "ann_vol": 0.0594,
+        "mdd": -0.0496,
+        "calmar": 1.8305,
+        "sortino": 2.4184,
+        "turnover": 0.026764,
+        "avg_weight": 0.886,
+        "n_obs": 502
+      },
+      "DisagreeMom": {
+        "name": "DisagreeMom",
+        "sharpe": 1.6613,
+        "net_sharpe": 1.4813,
+        "cagr": 0.095,
+        "ann_vol": 0.0556,
+        "mdd": -0.0401,
+        "calmar": 2.3671,
+        "sortino": 2.7487,
+        "turnover": 0.026176,
+        "avg_weight": 0.8389,
+        "n_obs": 502
+      },
+      "dm_tests": {
+        "DisagreeFilter_vs_VIX": {
+          "t_stat": -1.4224,
+          "p_value": 0.1555,
+          "significant_at_5pct": false
+        },
+        "HARReality_vs_VIX": {
+          "t_stat": -1.0071,
+          "p_value": 0.3144,
+          "significant_at_5pct": false
+        },
+        "RegimeCond_vs_VIX": {
+          "t_stat": -1.5746,
+          "p_value": 0.116,
+          "significant_at_5pct": false
+        },
+        "DynBlend_vs_VIX": {
+          "t_stat": -3.1158,
+          "p_value": 0.0019,
+          "significant_at_5pct": true
+        },
+        "DisagreeMom_vs_VIX": {
+          "t_stat": -0.8234,
+          "p_value": 0.4107,
+          "significant_at_5pct": false
+        }
+      }
+    },
+    "OOS3_2019_2020": {
+      "B&H 50/50": {
+        "name": "B&H 50/50",
+        "sharpe": 1.3254,
+        "net_sharpe": 1.324,
+        "cagr": 0.2139,
+        "ann_vol": 0.1555,
+        "mdd": -0.2166,
+        "calmar": 0.9878,
+        "sortino": 1.3934,
+        "turnover": 0.0,
+        "avg_weight": 1.0,
+        "n_obs": 505
+      },
+      "12/VIX": {
+        "name": "12/VIX",
+        "sharpe": 2.7956,
+        "net_sharpe": 2.6501,
+        "cagr": 0.1821,
+        "ann_vol": 0.0605,
+        "mdd": -0.0468,
+        "calmar": 3.8945,
+        "sortino": 4.14,
+        "turnover": 0.0339,
+        "avg_weight": 0.6367,
+        "n_obs": 505
+      },
+      "DisagreeFilter": {
+        "name": "DisagreeFilter",
+        "sharpe": 2.7814,
+        "net_sharpe": 2.6343,
+        "cagr": 0.1808,
+        "ann_vol": 0.0604,
+        "mdd": -0.0468,
+        "calmar": 3.8662,
+        "sortino": 4.1124,
+        "turnover": 0.034264,
+        "avg_weight": 0.6363,
+        "n_obs": 505
+      },
+      "HARReality": {
+        "name": "HARReality",
+        "sharpe": 2.8229,
+        "net_sharpe": 2.676,
+        "cagr": 0.1818,
+        "ann_vol": 0.0598,
+        "mdd": -0.0455,
+        "calmar": 3.9965,
+        "sortino": 4.2144,
+        "turnover": 0.033847,
+        "avg_weight": 0.636,
+        "n_obs": 505
+      },
+      "RegimeCond": {
+        "name": "RegimeCond",
+        "sharpe": 2.6967,
+        "net_sharpe": 2.5199,
+        "cagr": 0.177,
+        "ann_vol": 0.0611,
+        "mdd": -0.0465,
+        "calmar": 3.8034,
+        "sortino": 3.9726,
+        "turnover": 0.041269,
+        "avg_weight": 0.6568,
+        "n_obs": 505
+      },
+      "DynBlend": {
+        "name": "DynBlend",
+        "sharpe": 2.67,
+        "net_sharpe": 2.5141,
+        "cagr": 0.1811,
+        "ann_vol": 0.0631,
+        "mdd": -0.0465,
+        "calmar": 3.8912,
+        "sortino": 3.8654,
+        "turnover": 0.037233,
+        "avg_weight": 0.6753,
+        "n_obs": 505
+      },
+      "DisagreeMom": {
+        "name": "DisagreeMom",
+        "sharpe": 2.7755,
+        "net_sharpe": 2.625,
+        "cagr": 0.1567,
+        "ann_vol": 0.053,
+        "mdd": -0.0431,
+        "calmar": 3.6364,
+        "sortino": 4.162,
+        "turnover": 0.03076,
+        "avg_weight": 0.5639,
+        "n_obs": 505
+      },
+      "dm_tests": {
+        "DisagreeFilter_vs_VIX": {
+          "t_stat": -1.0033,
+          "p_value": 0.3162,
+          "significant_at_5pct": false
+        },
+        "HARReality_vs_VIX": {
+          "t_stat": -0.3249,
+          "p_value": 0.7454,
+          "significant_at_5pct": false
+        },
+        "RegimeCond_vs_VIX": {
+          "t_stat": -0.9406,
+          "p_value": 0.3474,
+          "significant_at_5pct": false
+        },
+        "DynBlend_vs_VIX": {
+          "t_stat": -0.1403,
+          "p_value": 0.8885,
+          "significant_at_5pct": false
+        },
+        "DisagreeMom_vs_VIX": {
+          "t_stat": -3.2523,
+          "p_value": 0.0012,
+          "significant_at_5pct": true
+        }
+      }
+    },
+    "OOS4_2021_2022": {
+      "B&H 50/50": {
+        "name": "B&H 50/50",
+        "sharpe": 0.0035,
+        "net_sharpe": -0.0124,
+        "cagr": -0.0081,
+        "ann_vol": 0.1313,
+        "mdd": -0.1899,
+        "calmar": -0.0428,
+        "sortino": 0.0051,
+        "turnover": 0.0,
+        "avg_weight": 1.0,
+        "n_obs": 503
+      },
+      "12/VIX": {
+        "name": "12/VIX",
+        "sharpe": 0.7103,
+        "net_sharpe": 0.579,
+        "cagr": 0.0461,
+        "ann_vol": 0.0665,
+        "mdd": -0.0669,
+        "calmar": 0.689,
+        "sortino": 1.1705,
+        "turnover": 0.031103,
+        "avg_weight": 0.5548,
+        "n_obs": 503
+      },
+      "DisagreeFilter": {
+        "name": "DisagreeFilter",
+        "sharpe": 0.686,
+        "net_sharpe": 0.5524,
+        "cagr": 0.0443,
+        "ann_vol": 0.0664,
+        "mdd": -0.0669,
+        "calmar": 0.6625,
+        "sortino": 1.1282,
+        "turnover": 0.031656,
+        "avg_weight": 0.5541,
+        "n_obs": 503
+      },
+      "HARReality": {
+        "name": "HARReality",
+        "sharpe": 0.7103,
+        "net_sharpe": 0.579,
+        "cagr": 0.0461,
+        "ann_vol": 0.0665,
+        "mdd": -0.0669,
+        "calmar": 0.689,
+        "sortino": 1.1705,
+        "turnover": 0.031103,
+        "avg_weight": 0.5548,
+        "n_obs": 503
+      },
+      "RegimeCond": {
+        "name": "RegimeCond",
+        "sharpe": 0.4369,
+        "net_sharpe": 0.3029,
+        "cagr": 0.0283,
+        "ann_vol": 0.0695,
+        "mdd": -0.0846,
+        "calmar": 0.3347,
+        "sortino": 0.6904,
+        "turnover": 0.031461,
+        "avg_weight": 0.5697,
+        "n_obs": 503
+      },
+      "DynBlend": {
+        "name": "DynBlend",
+        "sharpe": 0.4011,
+        "net_sharpe": 0.2805,
+        "cagr": 0.0265,
+        "ann_vol": 0.0716,
+        "mdd": -0.0833,
+        "calmar": 0.3179,
+        "sortino": 0.6342,
+        "turnover": 0.028665,
+        "avg_weight": 0.5951,
+        "n_obs": 503
+      },
+      "DisagreeMom": {
+        "name": "DisagreeMom",
+        "sharpe": 0.7261,
+        "net_sharpe": 0.5995,
+        "cagr": 0.0411,
+        "ann_vol": 0.0577,
+        "mdd": -0.0646,
+        "calmar": 0.6357,
+        "sortino": 1.1906,
+        "turnover": 0.026579,
+        "avg_weight": 0.4665,
+        "n_obs": 503
+      },
+      "dm_tests": {
+        "DisagreeFilter_vs_VIX": {
+          "t_stat": -1.4105,
+          "p_value": 0.159,
+          "significant_at_5pct": false
+        },
+        "HARReality_vs_VIX": {
+          "t_stat": 0.0,
+          "p_value": 1.0,
+          "significant_at_5pct": false
+        },
+        "RegimeCond_vs_VIX": {
+          "t_stat": -3.5614,
+          "p_value": 0.0004,
+          "significant_at_5pct": true
+        },
+        "DynBlend_vs_VIX": {
+          "t_stat": -3.5056,
+          "p_value": 0.0005,
+          "significant_at_5pct": true
+        },
+        "DisagreeMom_vs_VIX": {
+          "t_stat": -0.6392,
+          "p_value": 0.523,
+          "significant_at_5pct": false
+        }
+      }
+    },
+    "OOS5_2023_2024": {
+      "B&H 50/50": {
+        "name": "B&H 50/50",
+        "sharpe": 1.9938,
+        "net_sharpe": 1.9858,
+        "cagr": 0.2192,
+        "ann_vol": 0.102,
+        "mdd": -0.0755,
+        "calmar": 2.9014,
+        "sortino": 2.8476,
+        "turnover": 0.0,
+        "avg_weight": 1.0,
+        "n_obs": 502
+      },
+      "12/VIX": {
+        "name": "12/VIX",
+        "sharpe": 2.4263,
+        "net_sharpe": 2.3069,
+        "cagr": 0.1999,
+        "ann_vol": 0.0763,
+        "mdd": -0.0509,
+        "calmar": 3.9257,
+        "sortino": 3.7337,
+        "turnover": 0.034034,
+        "avg_weight": 0.7661,
+        "n_obs": 502
+      },
+      "DisagreeFilter": {
+        "name": "DisagreeFilter",
+        "sharpe": 2.3831,
+        "net_sharpe": 2.2542,
+        "cagr": 0.1951,
+        "ann_vol": 0.076,
+        "mdd": -0.0514,
+        "calmar": 3.7946,
+        "sortino": 3.6499,
+        "turnover": 0.036784,
+        "avg_weight": 0.762,
+        "n_obs": 502
+      },
+      "HARReality": {
+        "name": "HARReality",
+        "sharpe": 2.4263,
+        "net_sharpe": 2.3069,
+        "cagr": 0.1999,
+        "ann_vol": 0.0763,
+        "mdd": -0.0509,
+        "calmar": 3.9257,
+        "sortino": 3.7337,
+        "turnover": 0.034034,
+        "avg_weight": 0.7661,
+        "n_obs": 502
+      },
+      "RegimeCond": {
+        "name": "RegimeCond",
+        "sharpe": 2.3331,
+        "net_sharpe": 2.2193,
+        "cagr": 0.194,
+        "ann_vol": 0.0773,
+        "mdd": -0.0509,
+        "calmar": 3.811,
+        "sortino": 3.4765,
+        "turnover": 0.033065,
+        "avg_weight": 0.7679,
+        "n_obs": 502
+      },
+      "DynBlend": {
+        "name": "DynBlend",
+        "sharpe": 2.2424,
+        "net_sharpe": 2.1498,
+        "cagr": 0.1911,
+        "ann_vol": 0.0794,
+        "mdd": -0.0549,
+        "calmar": 3.482,
+        "sortino": 3.3226,
+        "turnover": 0.027377,
+        "avg_weight": 0.788,
+        "n_obs": 502
+      },
+      "DisagreeMom": {
+        "name": "DisagreeMom",
+        "sharpe": 2.3675,
+        "net_sharpe": 2.2429,
+        "cagr": 0.175,
+        "ann_vol": 0.0692,
+        "mdd": -0.0492,
+        "calmar": 3.556,
+        "sortino": 3.5804,
+        "turnover": 0.031906,
+        "avg_weight": 0.6874,
+        "n_obs": 502
+      },
+      "dm_tests": {
+        "DisagreeFilter_vs_VIX": {
+          "t_stat": -1.5313,
+          "p_value": 0.1263,
+          "significant_at_5pct": false
+        },
+        "HARReality_vs_VIX": {
+          "t_stat": 0.0,
+          "p_value": 1.0,
+          "significant_at_5pct": false
+        },
+        "RegimeCond_vs_VIX": {
+          "t_stat": -1.156,
+          "p_value": 0.2482,
+          "significant_at_5pct": false
+        },
+        "DynBlend_vs_VIX": {
+          "t_stat": -1.5088,
+          "p_value": 0.132,
+          "significant_at_5pct": false
+        },
+        "DisagreeMom_vs_VIX": {
+          "t_stat": -3.2274,
+          "p_value": 0.0013,
+          "significant_at_5pct": true
+        }
+      }
+    }
+  },
+  "cross_oos_summary": {
+    "12/VIX": {
+      "mean_sharpe": 1.593,
+      "std_sharpe": 0.9277,
+      "mean_net_sharpe": 1.4452,
+      "mean_mdd": -0.0528,
+      "per_period_sharpe": [
+        0.4169,
+        1.6158,
+        2.7956,
+        0.7103,
+        2.4263
+      ]
+    },
+    "DisagreeFilter": {
+      "mean_sharpe": 1.5539,
+      "std_sharpe": 0.9423,
+      "mean_net_sharpe": 1.4019,
+      "mean_mdd": -0.0547,
+      "per_period_sharpe": [
+        0.333,
+        1.5861,
+        2.7814,
+        0.686,
+        2.3831
+      ]
+    },
+    "HARReality": {
+      "mean_sharpe": 1.5966,
+      "std_sharpe": 0.9369,
+      "mean_net_sharpe": 1.4486,
+      "mean_mdd": -0.0526,
+      "per_period_sharpe": [
+        0.4087,
+        1.6149,
+        2.8229,
+        0.7103,
+        2.4263
+      ]
+    },
+    "RegimeCond": {
+      "mean_sharpe": 1.4788,
+      "std_sharpe": 0.9559,
+      "mean_net_sharpe": 1.3239,
+      "mean_mdd": -0.059,
+      "per_period_sharpe": [
+        0.3557,
+        1.5718,
+        2.6967,
+        0.4369,
+        2.3331
+      ]
+    },
+    "DynBlend": {
+      "mean_sharpe": 1.4216,
+      "std_sharpe": 0.9521,
+      "mean_net_sharpe": 1.2847,
+      "mean_mdd": -0.0619,
+      "per_period_sharpe": [
+        0.3017,
+        1.493,
+        2.67,
+        0.4011,
+        2.2424
+      ]
+    },
+    "DisagreeMom": {
+      "mean_sharpe": 1.5717,
+      "std_sharpe": 0.9329,
+      "mean_net_sharpe": 1.4221,
+      "mean_mdd": -0.0509,
+      "per_period_sharpe": [
+        0.3282,
+        1.6613,
+        2.7755,
+        0.7261,
+        2.3675
+      ]
+    }
+  },
+  "sensitivity_analysis": {
+    "disagreement_threshold": {
+      "0.05": 1.535,
+      "0.1": 1.5331,
+      "0.15": 1.5539,
+      "0.2": 1.5766,
+      "0.25": 1.585,
+      "0.3": 1.589
+    },
+    "reality_check_ratio": {
+      "1.0": 1.5291,
+      "1.2": 1.5804,
+      "1.5": 1.5966,
+      "1.8": 1.5952,
+      "2.0": 1.5934,
+      "2.5": 1.5924
+    },
+    "dynamic_blend_alpha_high": {
+      "0.3": 1.3766,
+      "0.4": 1.3991,
+      "0.5": 1.4216,
+      "0.6": 1.444,
+      "0.7": 1.4661,
+      "0.8": 1.4881,
+      "0.9": 1.5099,
+      "1.0": 1.5315
+    }
+  },
+  "bootstrap_ci": {
+    "DisagreeFilter": {
+      "mean_diff": -0.0379,
+      "ci_lo": -0.0588,
+      "ci_hi": -0.0195,
+      "p_positive": 0.0
+    },
+    "HARReality": {
+      "mean_diff": 0.0005,
+      "ci_lo": -0.0139,
+      "ci_hi": 0.0173,
+      "p_positive": 0.5002
+    },
+    "RegimeCond": {
+      "mean_diff": -0.1205,
+      "ci_lo": -0.1745,
+      "ci_hi": -0.0698,
+      "p_positive": 0.0
+    },
+    "DynBlend": {
+      "mean_diff": -0.1764,
+      "ci_lo": -0.2298,
+      "ci_hi": -0.1244,
+      "p_positive": 0.0
+    },
+    "DisagreeMom": {
+      "mean_diff": -0.0164,
+      "ci_lo": -0.0855,
+      "ci_hi": 0.0523,
+      "p_positive": 0.3211
+    }
+  },
+  "regime_analysis": {
+    "Low VIX (<15)": {
+      "12/VIX": {
+        "sharpe": 2.9096,
+        "mdd": -0.055,
+        "avg_weight": 0.9247
+      },
+      "DisagreeFilter": {
+        "sharpe": 2.8841,
+        "mdd": -0.055,
+        "avg_weight": 0.9225
+      },
+      "HARReality": {
+        "sharpe": 2.9096,
+        "mdd": -0.055,
+        "avg_weight": 0.9247
+      },
+      "RegimeCond": {
+        "sharpe": 2.9096,
+        "mdd": -0.055,
+        "avg_weight": 0.9247
+      },
+      "DynBlend": {
+        "sharpe": 2.888,
+        "mdd": -0.0557,
+        "avg_weight": 0.93
+      },
+      "DisagreeMom": {
+        "sharpe": 2.8496,
+        "mdd": -0.0518,
+        "avg_weight": 0.8731
+      }
+    },
+    "Mid VIX (15-25)": {
+      "12/VIX": {
+        "sharpe": 1.4774,
+        "mdd": -0.0787,
+        "avg_weight": 0.6438
+      },
+      "DisagreeFilter": {
+        "sharpe": 1.4259,
+        "mdd": -0.0787,
+        "avg_weight": 0.6423
+      },
+      "HARReality": {
+        "sharpe": 1.4736,
+        "mdd": -0.0787,
+        "avg_weight": 0.6436
+      },
+      "RegimeCond": {
+        "sharpe": 1.4774,
+        "mdd": -0.0787,
+        "avg_weight": 0.6438
+      },
+      "DynBlend": {
+        "sharpe": 1.3592,
+        "mdd": -0.0861,
+        "avg_weight": 0.6799
+      },
+      "DisagreeMom": {
+        "sharpe": 1.395,
+        "mdd": -0.0744,
+        "avg_weight": 0.5428
+      }
+    },
+    "High VIX (>25)": {
+      "12/VIX": {
+        "sharpe": -1.8632,
+        "mdd": -0.1673,
+        "avg_weight": 0.3979
+      },
+      "DisagreeFilter": {
+        "sharpe": -1.886,
+        "mdd": -0.1673,
+        "avg_weight": 0.3975
+      },
+      "HARReality": {
+        "sharpe": -1.8946,
+        "mdd": -0.1673,
+        "avg_weight": 0.397
+      },
+      "RegimeCond": {
+        "sharpe": -2.3218,
+        "mdd": -0.2134,
+        "avg_weight": 0.4581
+      },
+      "DynBlend": {
+        "sharpe": -2.3218,
+        "mdd": -0.2134,
+        "avg_weight": 0.4581
+      },
+      "DisagreeMom": {
+        "sharpe": -1.7054,
+        "mdd": -0.1427,
+        "avg_weight": 0.3527
+      }
+    }
+  },
+  "weight_analysis": {
+    "weight_correlation_vix_har": 0.8064,
+    "disagreement_stats": {
+      "mean_abs_diff": 0.1489,
+      "median_abs_diff": 0.1248,
+      "pct_diff_gt_015": 43.1
+    },
+    "har_vix_vol_ratio": {
+      "mean": 0.7769,
+      "median": 0.7592,
+      "pct_gt_1.5": 0.7
+    }
+  },
+  "conclusion": {
+    "best_ensemble": "HARReality",
+    "best_mean_sharpe": 1.5966,
+    "vix_mean_sharpe": 1.593,
+    "delta": 0.0036,
+    "harvey_t": 0.5956,
+    "harvey_significant": "False",
+    "verdict": "MARGINAL: ensemble improves but not significantly"
+  },
+  "references": [
+    "Corsi (2009, JFE): HAR-RV model",
+    "Moreira & Muir (2017, JoF): Volatility-managed portfolios",
+    "K530: HAR-ABS DM=-15.45 vs GJR-GARCH",
+    "K533: prediction \u2260 application (HAR best predictor, worst VT)",
+    "K440/K470/K488/K503/K504/K524: 12/VIX irreducible kernel"
+  ]
+}

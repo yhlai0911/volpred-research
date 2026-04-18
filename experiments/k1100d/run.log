@@ -1,0 +1,219 @@
+[    0.0s] ========================================================================
+[    0.0s] K1100d: VIX Regime-Switching Copula
+[    0.0s]   5 pairs × 6 models; OOS from 2013-06-01; window=1250; refit=63d
+[    0.0s]   Regime R1: VIX(t-1)>=25; R2: rolling-252d-75pct
+[    0.0s] ========================================================================
+[    0.2s] Downloading: ['SPY', 'QQQ', 'IWM', 'XLF', 'TLT', 'GLD'] + ^VIX + ^GVZ ...
+[    3.5s] Data: 2005-01-04 to 2026-04-09 (5349 days)
+[    3.5s] 
+>>> [3s] Starting pair SPY-QQQ ...
+[    3.5s] 
+========================================================================
+[    3.5s] PAIR: SPY-QQQ
+[    3.5s] ========================================================================
+[    3.5s]   Pair sample: 5349 days
+[    3.5s]   Full-sample log-return corr: 0.9204
+[    3.5s]   [SPY-QQQ] OOS day 0/3233 (3s)
+[   11.0s]   [SPY-QQQ] OOS day 500/3233 (11s)
+[   18.1s]   [SPY-QQQ] OOS day 1000/3233 (18s)
+[   25.7s]   [SPY-QQQ] OOS day 1500/3233 (26s)
+[   32.2s]   [SPY-QQQ] OOS day 2000/3233 (32s)
+[   39.2s]   [SPY-QQQ] OOS day 2500/3233 (39s)
+[   46.2s]   [SPY-QQQ] OOS day 3000/3233 (46s)
+[   50.3s]   OOS: 3233 days; fit time 47s
+[   50.3s]   Regime R1 high-VIX: 393/3233 (12.2%)
+[   50.3s]   Regime R2 high-VIX: 797/3233 (24.7%)
+[  113.8s] 
+  --- SPY-QQQ DM Summary (QLIKE, full OOS) ---
+[  113.8s]   Model                                     DM t-stat  Harvey
+[  113.8s]   Copula-t-A4f-ASYM                            +0.676   [RS_better]
+[  113.8s]   RS-Copula-Gaussian-t-R1                      +0.374   [RS_better]
+[  113.8s]   RS-Copula-Gaussian-Clayton-R1                +0.423   [RS_better]
+[  113.8s]   RS-Copula-Gaussian-t-R2                      +1.652   [RS_better]
+[  113.8s]   RS-Copula-Gaussian-Clayton-R2                -0.275   [DCC_better]
+[  113.8s] 
+  --- SPY-QQQ DM by Regime (R1 VIX>=25) ---
+[  113.8s]   Model                                    High-VIX t   Low-VIX t
+[  113.8s]   RS-Copula-Gaussian-t-R1                      -0.390      +0.534
+[  113.8s]   RS-Copula-Gaussian-Clayton-R1                -0.214      +0.534
+[  113.8s] 
+  --- SPY-QQQ DM by Regime (R2 rolling-75pct) ---
+[  113.8s]   Model                                    High-VIX t   Low-VIX t
+[  113.8s]   RS-Copula-Gaussian-t-R2                      +1.907      +0.712
+[  113.8s]   RS-Copula-Gaussian-Clayton-R2                -1.756      +0.712
+[  113.8s]   Checkpoint saved (1/5 pairs)
+[  113.8s] 
+>>> [114s] Starting pair SPY-XLF ...
+[  113.8s] 
+========================================================================
+[  113.8s] PAIR: SPY-XLF
+[  113.8s] ========================================================================
+[  113.8s]   Pair sample: 5349 days
+[  113.8s]   Full-sample log-return corr: 0.8422
+[  113.9s]   [SPY-XLF] OOS day 0/3233 (114s)
+[  120.9s]   [SPY-XLF] OOS day 500/3233 (121s)
+[  127.8s]   [SPY-XLF] OOS day 1000/3233 (128s)
+[  135.0s]   [SPY-XLF] OOS day 1500/3233 (135s)
+[  141.5s]   [SPY-XLF] OOS day 2000/3233 (141s)
+[  148.7s]   [SPY-XLF] OOS day 2500/3233 (149s)
+[  155.7s]   [SPY-XLF] OOS day 3000/3233 (156s)
+[  159.1s]   OOS: 3233 days; fit time 45s
+[  159.1s]   Regime R1 high-VIX: 393/3233 (12.2%)
+[  159.1s]   Regime R2 high-VIX: 797/3233 (24.7%)
+[  221.9s] 
+  --- SPY-XLF DM Summary (QLIKE, full OOS) ---
+[  221.9s]   Model                                     DM t-stat  Harvey
+[  221.9s]   Copula-t-A4f-ASYM                            +1.769   [RS_better]
+[  221.9s]   RS-Copula-Gaussian-t-R1                      +2.256  * [RS_better]
+[  221.9s]   RS-Copula-Gaussian-Clayton-R1                +2.288  * [RS_better]
+[  221.9s]   RS-Copula-Gaussian-t-R2                      +2.369  * [RS_better]
+[  221.9s]   RS-Copula-Gaussian-Clayton-R2                +2.224  * [RS_better]
+[  221.9s] 
+  --- SPY-XLF DM by Regime (R1 VIX>=25) ---
+[  221.9s]   Model                                    High-VIX t   Low-VIX t
+[  221.9s]   RS-Copula-Gaussian-t-R1                      -0.788      +2.496
+[  221.9s]   RS-Copula-Gaussian-Clayton-R1                -0.826      +2.496
+[  221.9s] 
+  --- SPY-XLF DM by Regime (R2 rolling-75pct) ---
+[  221.9s]   Model                                    High-VIX t   Low-VIX t
+[  221.9s]   RS-Copula-Gaussian-t-R2                      +1.093      +2.154
+[  221.9s]   RS-Copula-Gaussian-Clayton-R2                +0.761      +2.154
+[  221.9s]   Checkpoint saved (2/5 pairs)
+[  221.9s] 
+>>> [222s] Starting pair SPY-IWM ...
+[  221.9s] 
+========================================================================
+[  221.9s] PAIR: SPY-IWM
+[  221.9s] ========================================================================
+[  221.9s]   Pair sample: 5349 days
+[  221.9s]   Full-sample log-return corr: 0.8951
+[  221.9s]   [SPY-IWM] OOS day 0/3233 (222s)
+[  229.2s]   [SPY-IWM] OOS day 500/3233 (229s)
+[  236.4s]   [SPY-IWM] OOS day 1000/3233 (236s)
+[  244.6s]   [SPY-IWM] OOS day 1500/3233 (245s)
+[  251.6s]   [SPY-IWM] OOS day 2000/3233 (252s)
+[  258.7s]   [SPY-IWM] OOS day 2500/3233 (259s)
+[  266.2s]   [SPY-IWM] OOS day 3000/3233 (266s)
+[  270.1s]   OOS: 3233 days; fit time 48s
+[  270.1s]   Regime R1 high-VIX: 393/3233 (12.2%)
+[  270.1s]   Regime R2 high-VIX: 797/3233 (24.7%)
+[  330.9s] 
+  --- SPY-IWM DM Summary (QLIKE, full OOS) ---
+[  330.9s]   Model                                     DM t-stat  Harvey
+[  330.9s]   Copula-t-A4f-ASYM                            +2.114  * [RS_better]
+[  330.9s]   RS-Copula-Gaussian-t-R1                      +2.288  * [RS_better]
+[  330.9s]   RS-Copula-Gaussian-Clayton-R1                +2.109  * [RS_better]
+[  330.9s]   RS-Copula-Gaussian-t-R2                      +2.586  * [RS_better]
+[  330.9s]   RS-Copula-Gaussian-Clayton-R2                +2.080  * [RS_better]
+[  330.9s] 
+  --- SPY-IWM DM by Regime (R1 VIX>=25) ---
+[  330.9s]   Model                                    High-VIX t   Low-VIX t
+[  330.9s]   RS-Copula-Gaussian-t-R1                      -0.535      +2.374
+[  330.9s]   RS-Copula-Gaussian-Clayton-R1                -1.236      +2.374
+[  330.9s] 
+  --- SPY-IWM DM by Regime (R2 rolling-75pct) ---
+[  330.9s]   Model                                    High-VIX t   Low-VIX t
+[  330.9s]   RS-Copula-Gaussian-t-R2                      +1.858      +1.957
+[  330.9s]   RS-Copula-Gaussian-Clayton-R2                +0.653      +1.957
+[  330.9s]   Checkpoint saved (3/5 pairs)
+[  330.9s] 
+>>> [331s] Starting pair SPY-TLT ...
+[  330.9s] 
+========================================================================
+[  330.9s] PAIR: SPY-TLT
+[  330.9s] ========================================================================
+[  330.9s]   Pair sample: 5349 days
+[  330.9s]   Full-sample log-return corr: -0.3032
+[  330.9s]   [SPY-TLT] OOS day 0/3233 (331s)
+[  337.7s]   [SPY-TLT] OOS day 500/3233 (338s)
+[  343.8s]   [SPY-TLT] OOS day 1000/3233 (344s)
+[  351.2s]   [SPY-TLT] OOS day 1500/3233 (351s)
+[  358.1s]   [SPY-TLT] OOS day 2000/3233 (358s)
+[  364.8s]   [SPY-TLT] OOS day 2500/3233 (365s)
+[  371.4s]   [SPY-TLT] OOS day 3000/3233 (371s)
+[  375.0s]   OOS: 3233 days; fit time 44s
+[  375.0s]   Regime R1 high-VIX: 393/3233 (12.2%)
+[  375.0s]   Regime R2 high-VIX: 797/3233 (24.7%)
+[  435.6s] 
+  --- SPY-TLT DM Summary (QLIKE, full OOS) ---
+[  435.6s]   Model                                     DM t-stat  Harvey
+[  435.6s]   Copula-t-A4f-ASYM                            -3.995  *** [DCC_better]
+[  435.6s]   RS-Copula-Gaussian-t-R1                      -3.682  *** [DCC_better]
+[  435.6s]   RS-Copula-Gaussian-Clayton-R1                -4.192  *** [DCC_better]
+[  435.6s]   RS-Copula-Gaussian-t-R2                      -3.599  *** [DCC_better]
+[  435.6s]   RS-Copula-Gaussian-Clayton-R2                -4.645  *** [DCC_better]
+[  435.6s] 
+  --- SPY-TLT DM by Regime (R1 VIX>=25) ---
+[  435.6s]   Model                                    High-VIX t   Low-VIX t
+[  435.6s]   RS-Copula-Gaussian-t-R1                      -0.862      -3.779
+[  435.6s]   RS-Copula-Gaussian-Clayton-R1                -2.102      -3.779
+[  435.6s] 
+  --- SPY-TLT DM by Regime (R2 rolling-75pct) ---
+[  435.6s]   Model                                    High-VIX t   Low-VIX t
+[  435.6s]   RS-Copula-Gaussian-t-R2                      -1.878      -3.667
+[  435.6s]   RS-Copula-Gaussian-Clayton-R2                -2.912      -3.667
+[  435.6s]   Checkpoint saved (4/5 pairs)
+[  435.6s] 
+>>> [436s] Starting pair SPY-GLD ...
+[  435.6s] 
+========================================================================
+[  435.6s] PAIR: SPY-GLD
+[  435.6s] ========================================================================
+[  435.6s]   Pair sample: 5349 days
+[  435.6s]   Full-sample log-return corr: 0.0590
+[  435.6s]   [SPY-GLD] OOS day 0/3233 (436s)
+[  442.4s]   [SPY-GLD] OOS day 500/3233 (442s)
+[  448.6s]   [SPY-GLD] OOS day 1000/3233 (449s)
+[  457.0s]   [SPY-GLD] OOS day 1500/3233 (457s)
+[  464.8s]   [SPY-GLD] OOS day 2000/3233 (465s)
+[  473.6s]   [SPY-GLD] OOS day 2500/3233 (474s)
+[  480.9s]   [SPY-GLD] OOS day 3000/3233 (481s)
+[  484.1s]   OOS: 3233 days; fit time 49s
+[  484.1s]   Regime R1 high-VIX: 393/3233 (12.2%)
+[  484.1s]   Regime R2 high-VIX: 797/3233 (24.7%)
+[  549.3s] 
+  --- SPY-GLD DM Summary (QLIKE, full OOS) ---
+[  549.3s]   Model                                     DM t-stat  Harvey
+[  549.3s]   Copula-t-A4f-ASYM                            -1.454   [DCC_better]
+[  549.3s]   RS-Copula-Gaussian-t-R1                      -2.155  * [DCC_better]
+[  549.3s]   RS-Copula-Gaussian-Clayton-R1                -1.741   [DCC_better]
+[  549.3s]   RS-Copula-Gaussian-t-R2                      -1.331   [DCC_better]
+[  549.3s]   RS-Copula-Gaussian-Clayton-R2                -1.089   [DCC_better]
+[  549.3s] 
+  --- SPY-GLD DM by Regime (R1 VIX>=25) ---
+[  549.3s]   Model                                    High-VIX t   Low-VIX t
+[  549.3s]   RS-Copula-Gaussian-t-R1                      -0.563      -2.182
+[  549.3s]   RS-Copula-Gaussian-Clayton-R1                +0.269      -2.182
+[  549.3s] 
+  --- SPY-GLD DM by Regime (R2 rolling-75pct) ---
+[  549.3s]   Model                                    High-VIX t   Low-VIX t
+[  549.3s]   RS-Copula-Gaussian-t-R2                      -0.034      -1.647
+[  549.3s]   RS-Copula-Gaussian-Clayton-R2                +0.837      -1.647
+[  549.3s]   Checkpoint saved (5/5 pairs)
+[  549.3s] 
+========================================================================
+[  549.3s] SCENARIO DETERMINATION: B
+[  549.3s]   B (NULL): All RS models 5/5 NULL → mixing-averaging is fundamental, not regime-specific
+[  549.3s] ========================================================================
+[  549.3s]   SPY-QQQ: RS-full-Harvey=False, RS-highVIX-pass=False
+[  549.3s]   SPY-XLF: RS-full-Harvey=False, RS-highVIX-pass=False
+[  549.3s]   SPY-IWM: RS-full-Harvey=False, RS-highVIX-pass=False
+[  549.3s]   SPY-TLT: RS-full-Harvey=False, RS-highVIX-pass=False
+[  549.3s]   SPY-GLD: RS-full-Harvey=False, RS-highVIX-pass=False
+[  549.3s] 
+Pair            Full DM     HighR1     LowR1     HighR2     LowR2  Model
+[  549.3s] --------------------------------------------------------------------------------
+[  549.3s]   SPY-QQQ         +0.374    -0.390   +0.534    +1.907   +0.712  RS-Gauss-t
+[  549.3s]   SPY-XLF         +2.256    -0.788   +2.496    +1.093   +2.154  RS-Gauss-t
+[  549.3s]   SPY-IWM         +2.288    -0.535   +2.374    +1.858   +1.957  RS-Gauss-t
+[  549.3s]   SPY-TLT         -3.682    -0.862   -3.779    -1.878   -3.667  RS-Gauss-t
+[  549.3s]   SPY-GLD         -2.155    -0.563   -2.182    -0.034   -1.647  RS-Gauss-t
+[  549.3s] 
+Final results saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a705fa94/experiments/k1100d/k1100d_results.json
+[  549.3s] 
+--- Generating Plots ---
+[  549.7s]   Saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a705fa94/experiments/k1100d/k1100d_dm_by_regime.png
+[  550.1s]   Saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a705fa94/experiments/k1100d/k1100d_fz_regime_comparison.png
+[  550.1s] 
+Total runtime: 550.1s
+[  550.1s] FINAL SCENARIO: B — B (NULL): All RS models 5/5 NULL → mixing-averaging is fundamental, not regime-specific

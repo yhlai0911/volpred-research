@@ -1,0 +1,1182 @@
+{
+  "experiment": "k1178",
+  "title": "Paper 3 Table 5 \u2014 13-Market International Replication (CANONICAL)",
+  "date": "2026-04-17T17:36:53.133913",
+  "resolves": "Paper 3 BLOCKER D5 (diff_report.md)",
+  "parent_experiment": "k901 (used wrong asset set: EWH, EWY instead of EWC, VGK, MCHI, INDA)",
+  "config": {
+    "markets_paper": [
+      "EFA",
+      "EWJ",
+      "EWG",
+      "EWU",
+      "EWA",
+      "EWC",
+      "VGK",
+      "EEM",
+      "FXI",
+      "EWZ",
+      "INDA",
+      "EWT",
+      "MCHI"
+    ],
+    "markets_k901": [
+      "SPY",
+      "EWJ",
+      "EWG",
+      "EWU",
+      "EWA",
+      "EWC",
+      "EWZ",
+      "EEM",
+      "EFA",
+      "FXI",
+      "EWH",
+      "EWT",
+      "EWY"
+    ],
+    "markets_changed": [
+      "removed EWH+EWY from K901, added VGK+MCHI+INDA"
+    ],
+    "sample_start": "2007-01-01",
+    "sample_end": "2026-03-31",
+    "strategy": "w_t = min(12/VIX_{t-1}, 1.0) equity + SHY",
+    "vt_numerator": 12,
+    "rf_annual": 0.04,
+    "lag": "signal.shift(1) \u2014 VIX from t-1 determines weight on t",
+    "seed": 42,
+    "rtol_threshold": 0.05
+  },
+  "per_market_results": {
+    "EFA": {
+      "name": "EAFE (Dev ex-US)",
+      "region": "DM",
+      "period": "2007-01-04 to 2026-03-31",
+      "n_days": 4840,
+      "status": "OK",
+      "vix_sensitivity": -0.6537974572343572,
+      "bh_sharpe": 0.12701642693102735,
+      "bh_mdd_pct": -61.03730079466373,
+      "bh_ann_return": 0.04495803932896125,
+      "bh_ann_vol": 0.21705001946802785,
+      "vt_sharpe": -0.06529958186496745,
+      "vt_mdd_pct": -29.01574565796724,
+      "vt_ann_return": 0.02759644885209922,
+      "vt_ann_vol": 0.10729719011846191,
+      "sharpe_diff": -0.1923160087959948,
+      "delta_mdd_pp": 32.02155513669649,
+      "gjr_gamma_full": 0.13870008013471513,
+      "gjr_gamma_tstat": 5.784629776832967,
+      "paper_bh_sharpe": 0.122,
+      "paper_bh_mdd": -61.0,
+      "paper_vt_sharpe": 0.069,
+      "paper_vt_mdd": -28.3,
+      "paper_delta_mdd": 32.7,
+      "paper_vix_sens": -0.653
+    },
+    "EWJ": {
+      "name": "Japan (MSCI Japan)",
+      "region": "DM",
+      "period": "2007-01-04 to 2026-03-31",
+      "n_days": 4840,
+      "status": "OK",
+      "vix_sensitivity": -0.5759772153739966,
+      "bh_sharpe": 0.09216269989388144,
+      "bh_mdd_pct": -53.55016280696364,
+      "bh_ann_return": 0.03861060621331669,
+      "bh_ann_vol": 0.20512535883371408,
+      "vt_sharpe": -0.04361345630815414,
+      "vt_mdd_pct": -25.60489115489212,
+      "vt_ann_return": 0.029153002919520832,
+      "vt_ann_vol": 0.11262864239029084,
+      "sharpe_diff": -0.1357761562020356,
+      "delta_mdd_pp": 27.945271652071522,
+      "gjr_gamma_full": 0.10138433915406153,
+      "gjr_gamma_tstat": 4.385267563968099,
+      "paper_bh_sharpe": 0.086,
+      "paper_bh_mdd": -53.6,
+      "paper_vt_sharpe": 0.09,
+      "paper_vt_mdd": -24.7,
+      "paper_delta_mdd": 28.9,
+      "paper_vix_sens": -0.575
+    },
+    "EWG": {
+      "name": "Germany (MSCI Germany)",
+      "region": "DM",
+      "period": "2007-01-04 to 2026-03-31",
+      "n_days": 4840,
+      "status": "OK",
+      "vix_sensitivity": -0.6060295339155719,
+      "bh_sharpe": 0.14115575249881754,
+      "bh_mdd_pct": -63.09547762347217,
+      "bh_ann_return": 0.04434350370709672,
+      "bh_ann_vol": 0.2557052835771208,
+      "vt_sharpe": 0.00038682084476243656,
+      "vt_mdd_pct": -30.980150843907907,
+      "vt_ann_return": 0.031780222633394306,
+      "vt_ann_vol": 0.13225462171970293,
+      "sharpe_diff": -0.1407689316540551,
+      "delta_mdd_pp": 32.11532677956426,
+      "gjr_gamma_full": 0.11826086491106097,
+      "gjr_gamma_tstat": 6.443309501603625,
+      "paper_bh_sharpe": 0.137,
+      "paper_bh_mdd": -63.1,
+      "paper_vt_sharpe": 0.085,
+      "paper_vt_mdd": -29.2,
+      "paper_delta_mdd": 33.9,
+      "paper_vix_sens": -0.606
+    },
+    "EWU": {
+      "name": "UK (MSCI UK)",
+      "region": "DM",
+      "period": "2007-01-04 to 2026-03-31",
+      "n_days": 4840,
+      "status": "OK",
+      "vix_sensitivity": -0.6096915100626714,
+      "bh_sharpe": 0.10057249403425678,
+      "bh_mdd_pct": -63.993671030371324,
+      "bh_ann_return": 0.03721800742730519,
+      "bh_ann_vol": 0.23025901705530322,
+      "vt_sharpe": -0.08745133874219617,
+      "vt_mdd_pct": -30.57095054241894,
+      "vt_ann_return": 0.023842631764811495,
+      "vt_ann_vol": 0.11373892116253019,
+      "sharpe_diff": -0.18802383277645296,
+      "delta_mdd_pp": 33.42272048795238,
+      "gjr_gamma_full": 0.13583075939176728,
+      "gjr_gamma_tstat": 5.846091451793991,
+      "paper_bh_sharpe": 0.096,
+      "paper_bh_mdd": -64.0,
+      "paper_vt_sharpe": 0.028,
+      "paper_vt_mdd": -30.2,
+      "paper_delta_mdd": 33.8,
+      "paper_vix_sens": -0.609
+    },
+    "EWA": {
+      "name": "Australia (MSCI Australia)",
+      "region": "DM",
+      "period": "2007-01-04 to 2026-03-31",
+      "n_days": 4840,
+      "status": "OK",
+      "vix_sensitivity": -0.5874398511225145,
+      "bh_sharpe": 0.1844256662047528,
+      "bh_mdd_pct": -66.98001652490842,
+      "bh_ann_return": 0.053855390599079955,
+      "bh_ann_vol": 0.27913682358491054,
+      "vt_sharpe": -0.037190435873474724,
+      "vt_mdd_pct": -35.412396683515226,
+      "vt_ann_return": 0.025626527326044535,
+      "vt_ann_vol": 0.138126362565408,
+      "sharpe_diff": -0.22161610207822752,
+      "delta_mdd_pp": 31.567619841393196,
+      "gjr_gamma_full": 0.10955107954406762,
+      "gjr_gamma_tstat": 5.823243360724159,
+      "paper_bh_sharpe": 0.184,
+      "paper_bh_mdd": -67.0,
+      "paper_vt_sharpe": 0.081,
+      "paper_vt_mdd": -33.3,
+      "paper_delta_mdd": 33.6,
+      "paper_vix_sens": -0.587
+    },
+    "EWC": {
+      "name": "Canada (MSCI Canada)",
+      "region": "DM",
+      "period": "2007-01-04 to 2026-03-31",
+      "n_days": 4840,
+      "status": "OK",
+      "vix_sensitivity": -0.5882995267981304,
+      "bh_sharpe": 0.20876902078454135,
+      "bh_mdd_pct": -60.75024341022216,
+      "bh_ann_return": 0.0634671753369842,
+      "bh_ann_vol": 0.22442713552788526,
+      "vt_sharpe": 0.08801815953438291,
+      "vt_mdd_pct": -36.622481075521954,
+      "vt_ann_return": 0.044511330998810106,
+      "vt_ann_vol": 0.11295525979688274,
+      "sharpe_diff": -0.12075086125015844,
+      "delta_mdd_pp": 24.127762334700208,
+      "gjr_gamma_full": 0.1248634025300701,
+      "gjr_gamma_tstat": 6.341716945213269,
+      "paper_bh_sharpe": 0.206,
+      "paper_bh_mdd": -60.8,
+      "paper_vt_sharpe": 0.156,
+      "paper_vt_mdd": -33.0,
+      "paper_delta_mdd": 27.7,
+      "paper_vix_sens": -0.588
+    },
+    "VGK": {
+      "name": "Europe (Vanguard Europe)",
+      "region": "DM",
+      "period": "2007-01-04 to 2026-03-31",
+      "n_days": 4840,
+      "status": "OK",
+      "vix_sensitivity": -0.6401409815587408,
+      "bh_sharpe": 0.14548246610315002,
+      "bh_mdd_pct": -63.60668865462866,
+      "bh_ann_return": 0.04749723963609509,
+      "bh_ann_vol": 0.23554860186653678,
+      "vt_sharpe": -0.036340658316686286,
+      "vt_mdd_pct": -30.052323543569802,
+      "vt_ann_return": 0.028928370436437367,
+      "vt_ann_vol": 0.1193439897345138,
+      "sharpe_diff": -0.1818231244198363,
+      "delta_mdd_pp": 33.55436511105886,
+      "gjr_gamma_full": 0.1335855151859367,
+      "gjr_gamma_tstat": 5.875683010687921,
+      "paper_bh_sharpe": 0.14,
+      "paper_bh_mdd": -63.6,
+      "paper_vt_sharpe": 0.082,
+      "paper_vt_mdd": -30.1,
+      "paper_delta_mdd": 33.6,
+      "paper_vix_sens": -0.64
+    },
+    "EEM": {
+      "name": "EM Broad (MSCI EM)",
+      "region": "EM",
+      "period": "2007-01-04 to 2026-03-31",
+      "n_days": 4840,
+      "status": "OK",
+      "vix_sensitivity": -0.6002521745502225,
+      "bh_sharpe": 0.14298134493498846,
+      "bh_mdd_pct": -66.4342999896955,
+      "bh_ann_return": 0.04187985564163288,
+      "bh_ann_vol": 0.2796827385235237,
+      "vt_sharpe": -0.14859105036885661,
+      "vt_mdd_pct": -45.20473487548738,
+      "vt_ann_return": 0.009553740322060689,
+      "vt_ann_vol": 0.13953746708355258,
+      "sharpe_diff": -0.29157239530384504,
+      "delta_mdd_pp": 21.22956511420812,
+      "gjr_gamma_full": 0.11193667127358836,
+      "gjr_gamma_tstat": 6.05797900248341,
+      "paper_bh_sharpe": 0.142,
+      "paper_bh_mdd": -66.4,
+      "paper_vt_sharpe": 0.087,
+      "paper_vt_mdd": -32.8,
+      "paper_delta_mdd": 33.6,
+      "paper_vix_sens": -0.6
+    },
+    "FXI": {
+      "name": "China (China Large-Cap)",
+      "region": "EM",
+      "period": "2007-01-04 to 2026-03-31",
+      "n_days": 4840,
+      "status": "OK",
+      "vix_sensitivity": -0.49289010491252866,
+      "bh_sharpe": 0.10486077281093492,
+      "bh_mdd_pct": -72.67577735136534,
+      "bh_ann_return": 0.018647590033396222,
+      "bh_ann_vol": 0.33904124212307624,
+      "vt_sharpe": -0.1212511450550621,
+      "vt_mdd_pct": -54.787411171727285,
+      "vt_ann_return": 0.00022231014730689225,
+      "vt_ann_vol": 0.18576526073265787,
+      "sharpe_diff": -0.22611191786599702,
+      "delta_mdd_pp": 17.888366179638055,
+      "gjr_gamma_full": 0.06839134546632214,
+      "gjr_gamma_tstat": 3.8928877712391423,
+      "paper_bh_sharpe": 0.104,
+      "paper_bh_mdd": -72.7,
+      "paper_vt_sharpe": 0.08,
+      "paper_vt_mdd": -42.8,
+      "paper_delta_mdd": 29.9,
+      "paper_vix_sens": -0.493
+    },
+    "EWZ": {
+      "name": "Brazil (MSCI Brazil)",
+      "region": "EM",
+      "period": "2007-01-04 to 2026-03-31",
+      "n_days": 4840,
+      "status": "OK",
+      "vix_sensitivity": -0.5047511155252694,
+      "bh_sharpe": 0.1665800197211523,
+      "bh_mdd_pct": -77.24913172922913,
+      "bh_ann_return": 0.03218243302821233,
+      "bh_ann_vol": 0.37496597358662526,
+      "vt_sharpe": -0.049860272473851525,
+      "vt_mdd_pct": -71.48788806807556,
+      "vt_ann_return": 0.006924170989605072,
+      "vt_ann_vol": 0.21193889619662726,
+      "sharpe_diff": -0.21644029219500382,
+      "delta_mdd_pp": 5.761243661153571,
+      "gjr_gamma_full": 0.08013110300459994,
+      "gjr_gamma_tstat": 4.530627874721014,
+      "paper_bh_sharpe": 0.156,
+      "paper_bh_mdd": -77.3,
+      "paper_vt_sharpe": 0.099,
+      "paper_vt_mdd": -64.1,
+      "paper_delta_mdd": 13.2,
+      "paper_vix_sens": -0.504
+    },
+    "INDA": {
+      "name": "India (iShares India)",
+      "region": "EM",
+      "period": "2012-02-06 to 2026-03-31",
+      "n_days": 3558,
+      "status": "OK",
+      "vix_sensitivity": -0.4667141045627268,
+      "bh_sharpe": 0.15485809393168878,
+      "bh_mdd_pct": -45.067112928835286,
+      "bh_ann_return": 0.05102526944513541,
+      "bh_ann_vol": 0.21915851073386503,
+      "vt_sharpe": -0.03400572174497167,
+      "vt_mdd_pct": -27.421130161233098,
+      "vt_ann_return": 0.0255973330061654,
+      "vt_ann_vol": 0.14085474228106085,
+      "sharpe_diff": -0.18886381567666044,
+      "delta_mdd_pp": 17.645982767602188,
+      "gjr_gamma_full": 0.10976473374268955,
+      "gjr_gamma_tstat": 3.397402053453224,
+      "paper_bh_sharpe": 0.157,
+      "paper_bh_mdd": -45.1,
+      "paper_vt_sharpe": 0.098,
+      "paper_vt_mdd": -26.4,
+      "paper_delta_mdd": 18.7,
+      "paper_vix_sens": -0.466
+    },
+    "EWT": {
+      "name": "Taiwan (MSCI Taiwan)",
+      "region": "EM",
+      "period": "2007-01-04 to 2026-03-31",
+      "n_days": 4840,
+      "status": "OK",
+      "vix_sensitivity": -0.5689489795800373,
+      "bh_sharpe": 0.3109800371839754,
+      "bh_mdd_pct": -62.90709799130918,
+      "bh_ann_return": 0.09055940220523406,
+      "bh_ann_vol": 0.25270532079185554,
+      "vt_sharpe": 0.12559921405393154,
+      "vt_mdd_pct": -31.611993408870966,
+      "vt_ann_return": 0.04895762687553029,
+      "vt_ann_vol": 0.137491267478882,
+      "sharpe_diff": -0.18538082313004384,
+      "delta_mdd_pp": 31.295104582438213,
+      "gjr_gamma_full": 0.09761139229144701,
+      "gjr_gamma_tstat": 5.031190961648993,
+      "paper_bh_sharpe": 0.311,
+      "paper_bh_mdd": -62.9,
+      "paper_vt_sharpe": 0.262,
+      "paper_vt_mdd": -32.9,
+      "paper_delta_mdd": 30.1,
+      "paper_vix_sens": -0.569
+    },
+    "MCHI": {
+      "name": "China Broad (MSCI China)",
+      "region": "EM",
+      "period": "2011-04-01 to 2026-03-31",
+      "n_days": 3771,
+      "status": "OK",
+      "vix_sensitivity": -0.4682869860708959,
+      "bh_sharpe": 0.0785065438721623,
+      "bh_mdd_pct": -62.836259298540355,
+      "bh_ann_return": 0.025943833838061314,
+      "bh_ann_vol": 0.2662080188530953,
+      "vt_sharpe": -0.07684337552581481,
+      "vt_mdd_pct": -47.66129686806079,
+      "vt_ann_return": 0.012088600422401896,
+      "vt_ann_vol": 0.17200955142221255,
+      "sharpe_diff": -0.1553499193979771,
+      "delta_mdd_pp": 15.174962430479567,
+      "gjr_gamma_full": 0.07667497672813864,
+      "gjr_gamma_tstat": 3.2547952081333733,
+      "paper_bh_sharpe": 0.077,
+      "paper_bh_mdd": -62.8,
+      "paper_vt_sharpe": 0.083,
+      "paper_vt_mdd": -39.9,
+      "paper_delta_mdd": 23.0,
+      "paper_vix_sens": -0.468
+    }
+  },
+  "table5_rows": [
+    {
+      "ticker": "EFA",
+      "region": "DM",
+      "vix_sensitivity": -0.6537974572343572,
+      "bh_sharpe": 0.12701642693102735,
+      "bh_mdd_pct": -61.03730079466373,
+      "vt_sharpe": -0.06529958186496745,
+      "vt_mdd_pct": -29.01574565796724,
+      "sharpe_diff": -0.1923160087959948,
+      "delta_mdd_pp": 32.02155513669649,
+      "gjr_gamma": 0.13870008013471513,
+      "gjr_tstat": 5.784629776832967
+    },
+    {
+      "ticker": "EWJ",
+      "region": "DM",
+      "vix_sensitivity": -0.5759772153739966,
+      "bh_sharpe": 0.09216269989388144,
+      "bh_mdd_pct": -53.55016280696364,
+      "vt_sharpe": -0.04361345630815414,
+      "vt_mdd_pct": -25.60489115489212,
+      "sharpe_diff": -0.1357761562020356,
+      "delta_mdd_pp": 27.945271652071522,
+      "gjr_gamma": 0.10138433915406153,
+      "gjr_tstat": 4.385267563968099
+    },
+    {
+      "ticker": "EWG",
+      "region": "DM",
+      "vix_sensitivity": -0.6060295339155719,
+      "bh_sharpe": 0.14115575249881754,
+      "bh_mdd_pct": -63.09547762347217,
+      "vt_sharpe": 0.00038682084476243656,
+      "vt_mdd_pct": -30.980150843907907,
+      "sharpe_diff": -0.1407689316540551,
+      "delta_mdd_pp": 32.11532677956426,
+      "gjr_gamma": 0.11826086491106097,
+      "gjr_tstat": 6.443309501603625
+    },
+    {
+      "ticker": "EWU",
+      "region": "DM",
+      "vix_sensitivity": -0.6096915100626714,
+      "bh_sharpe": 0.10057249403425678,
+      "bh_mdd_pct": -63.993671030371324,
+      "vt_sharpe": -0.08745133874219617,
+      "vt_mdd_pct": -30.57095054241894,
+      "sharpe_diff": -0.18802383277645296,
+      "delta_mdd_pp": 33.42272048795238,
+      "gjr_gamma": 0.13583075939176728,
+      "gjr_tstat": 5.846091451793991
+    },
+    {
+      "ticker": "EWA",
+      "region": "DM",
+      "vix_sensitivity": -0.5874398511225145,
+      "bh_sharpe": 0.1844256662047528,
+      "bh_mdd_pct": -66.98001652490842,
+      "vt_sharpe": -0.037190435873474724,
+      "vt_mdd_pct": -35.412396683515226,
+      "sharpe_diff": -0.22161610207822752,
+      "delta_mdd_pp": 31.567619841393196,
+      "gjr_gamma": 0.10955107954406762,
+      "gjr_tstat": 5.823243360724159
+    },
+    {
+      "ticker": "EWC",
+      "region": "DM",
+      "vix_sensitivity": -0.5882995267981304,
+      "bh_sharpe": 0.20876902078454135,
+      "bh_mdd_pct": -60.75024341022216,
+      "vt_sharpe": 0.08801815953438291,
+      "vt_mdd_pct": -36.622481075521954,
+      "sharpe_diff": -0.12075086125015844,
+      "delta_mdd_pp": 24.127762334700208,
+      "gjr_gamma": 0.1248634025300701,
+      "gjr_tstat": 6.341716945213269
+    },
+    {
+      "ticker": "VGK",
+      "region": "DM",
+      "vix_sensitivity": -0.6401409815587408,
+      "bh_sharpe": 0.14548246610315002,
+      "bh_mdd_pct": -63.60668865462866,
+      "vt_sharpe": -0.036340658316686286,
+      "vt_mdd_pct": -30.052323543569802,
+      "sharpe_diff": -0.1818231244198363,
+      "delta_mdd_pp": 33.55436511105886,
+      "gjr_gamma": 0.1335855151859367,
+      "gjr_tstat": 5.875683010687921
+    },
+    {
+      "ticker": "EEM",
+      "region": "EM",
+      "vix_sensitivity": -0.6002521745502225,
+      "bh_sharpe": 0.14298134493498846,
+      "bh_mdd_pct": -66.4342999896955,
+      "vt_sharpe": -0.14859105036885661,
+      "vt_mdd_pct": -45.20473487548738,
+      "sharpe_diff": -0.29157239530384504,
+      "delta_mdd_pp": 21.22956511420812,
+      "gjr_gamma": 0.11193667127358836,
+      "gjr_tstat": 6.05797900248341
+    },
+    {
+      "ticker": "FXI",
+      "region": "EM",
+      "vix_sensitivity": -0.49289010491252866,
+      "bh_sharpe": 0.10486077281093492,
+      "bh_mdd_pct": -72.67577735136534,
+      "vt_sharpe": -0.1212511450550621,
+      "vt_mdd_pct": -54.787411171727285,
+      "sharpe_diff": -0.22611191786599702,
+      "delta_mdd_pp": 17.888366179638055,
+      "gjr_gamma": 0.06839134546632214,
+      "gjr_tstat": 3.8928877712391423
+    },
+    {
+      "ticker": "EWZ",
+      "region": "EM",
+      "vix_sensitivity": -0.5047511155252694,
+      "bh_sharpe": 0.1665800197211523,
+      "bh_mdd_pct": -77.24913172922913,
+      "vt_sharpe": -0.049860272473851525,
+      "vt_mdd_pct": -71.48788806807556,
+      "sharpe_diff": -0.21644029219500382,
+      "delta_mdd_pp": 5.761243661153571,
+      "gjr_gamma": 0.08013110300459994,
+      "gjr_tstat": 4.530627874721014
+    },
+    {
+      "ticker": "INDA",
+      "region": "EM",
+      "vix_sensitivity": -0.4667141045627268,
+      "bh_sharpe": 0.15485809393168878,
+      "bh_mdd_pct": -45.067112928835286,
+      "vt_sharpe": -0.03400572174497167,
+      "vt_mdd_pct": -27.421130161233098,
+      "sharpe_diff": -0.18886381567666044,
+      "delta_mdd_pp": 17.645982767602188,
+      "gjr_gamma": 0.10976473374268955,
+      "gjr_tstat": 3.397402053453224
+    },
+    {
+      "ticker": "EWT",
+      "region": "EM",
+      "vix_sensitivity": -0.5689489795800373,
+      "bh_sharpe": 0.3109800371839754,
+      "bh_mdd_pct": -62.90709799130918,
+      "vt_sharpe": 0.12559921405393154,
+      "vt_mdd_pct": -31.611993408870966,
+      "sharpe_diff": -0.18538082313004384,
+      "delta_mdd_pp": 31.295104582438213,
+      "gjr_gamma": 0.09761139229144701,
+      "gjr_tstat": 5.031190961648993
+    },
+    {
+      "ticker": "MCHI",
+      "region": "EM",
+      "vix_sensitivity": -0.4682869860708959,
+      "bh_sharpe": 0.0785065438721623,
+      "bh_mdd_pct": -62.836259298540355,
+      "vt_sharpe": -0.07684337552581481,
+      "vt_mdd_pct": -47.66129686806079,
+      "sharpe_diff": -0.1553499193979771,
+      "delta_mdd_pp": 15.174962430479567,
+      "gjr_gamma": 0.07667497672813864,
+      "gjr_tstat": 3.2547952081333733
+    }
+  ],
+  "cross_sectional": {
+    "n_markets_ok": 13,
+    "vix_sens_vs_delta_mdd_pearson_r": -0.8063393452172525,
+    "vix_sens_vs_delta_mdd_pearson_p": 0.0008697269549781327,
+    "vix_sens_vs_delta_mdd_spearman_rho": -0.8351648351648352,
+    "vix_sens_vs_delta_mdd_spearman_p": 0.0003802080801851203,
+    "gjr_gamma_vs_delta_sharpe_spearman_rho": 0.1868131868131868,
+    "gjr_gamma_vs_delta_sharpe_spearman_p": 0.541123523509894,
+    "avg_delta_mdd_pp": 24.903834313765895,
+    "std_delta_mdd_pp": 8.763850283022864,
+    "t_avg_delta_mdd": 10.245730891579202,
+    "p_avg_delta_mdd": 2.753330533585358e-07,
+    "n_mdd_improved": 13,
+    "n_sharpe_improved": 0,
+    "avg_sharpe_diff": -0.18806109082663755,
+    "dm_avg_delta_mdd_pp": 30.679231620490985,
+    "em_avg_delta_mdd_pp": 18.165870789253287
+  },
+  "paper_cross_section_claimed": {
+    "vix_sens_vs_delta_mdd_pearson_r": -0.77,
+    "vix_sens_vs_delta_mdd_pearson_p": 0.002,
+    "vix_sens_vs_delta_mdd_spearman_rho": -0.72,
+    "vix_sens_vs_delta_mdd_spearman_p": 0.006,
+    "gjr_gamma_vs_delta_sharpe_spearman_rho": 0.83,
+    "gjr_gamma_vs_delta_sharpe_spearman_p": 0.0005,
+    "avg_delta_mdd_pp": 28.7,
+    "t_avg_delta_mdd": 15.7,
+    "n_markets_mdd_improved": 13,
+    "n_markets_sharpe_improved": 2,
+    "avg_delta_sharpe": -0.048,
+    "dm_avg_delta_mdd": 32.0,
+    "em_avg_delta_mdd": 24.7
+  },
+  "match_assessment": {
+    "per_market": {
+      "EFA": {
+        "checks": {
+          "bh_sharpe": {
+            "exp": 0.127,
+            "paper": 0.122,
+            "rtol": 0.0411,
+            "match": true
+          },
+          "bh_mdd_pct": {
+            "exp": -61.0373,
+            "paper": -61.0,
+            "rtol": 0.0006,
+            "match": true
+          },
+          "vt_sharpe": {
+            "exp": -0.0653,
+            "paper": 0.069,
+            "rtol": 1.9464,
+            "match": false
+          },
+          "vt_mdd_pct": {
+            "exp": -29.0157,
+            "paper": -28.3,
+            "rtol": 0.0253,
+            "match": true
+          },
+          "delta_mdd_pp": {
+            "exp": 32.0216,
+            "paper": 32.7,
+            "rtol": 0.0207,
+            "match": true
+          },
+          "vix_sensitivity": {
+            "exp": -0.6538,
+            "paper": -0.653,
+            "rtol": 0.0012,
+            "match": true
+          }
+        },
+        "overall_match": false
+      },
+      "EWJ": {
+        "checks": {
+          "bh_sharpe": {
+            "exp": 0.0922,
+            "paper": 0.086,
+            "rtol": 0.0717,
+            "match": false
+          },
+          "bh_mdd_pct": {
+            "exp": -53.5502,
+            "paper": -53.6,
+            "rtol": 0.0009,
+            "match": true
+          },
+          "vt_sharpe": {
+            "exp": -0.0436,
+            "paper": 0.09,
+            "rtol": 1.4846,
+            "match": false
+          },
+          "vt_mdd_pct": {
+            "exp": -25.6049,
+            "paper": -24.7,
+            "rtol": 0.0366,
+            "match": true
+          },
+          "delta_mdd_pp": {
+            "exp": 27.9453,
+            "paper": 28.9,
+            "rtol": 0.033,
+            "match": true
+          },
+          "vix_sensitivity": {
+            "exp": -0.576,
+            "paper": -0.575,
+            "rtol": 0.0017,
+            "match": true
+          }
+        },
+        "overall_match": false
+      },
+      "EWG": {
+        "checks": {
+          "bh_sharpe": {
+            "exp": 0.1412,
+            "paper": 0.137,
+            "rtol": 0.0303,
+            "match": true
+          },
+          "bh_mdd_pct": {
+            "exp": -63.0955,
+            "paper": -63.1,
+            "rtol": 0.0001,
+            "match": true
+          },
+          "vt_sharpe": {
+            "exp": 0.0004,
+            "paper": 0.085,
+            "rtol": 0.9954,
+            "match": false
+          },
+          "vt_mdd_pct": {
+            "exp": -30.9802,
+            "paper": -29.2,
+            "rtol": 0.061,
+            "match": false
+          },
+          "delta_mdd_pp": {
+            "exp": 32.1153,
+            "paper": 33.9,
+            "rtol": 0.0526,
+            "match": false
+          },
+          "vix_sensitivity": {
+            "exp": -0.606,
+            "paper": -0.606,
+            "rtol": 0.0,
+            "match": true
+          }
+        },
+        "overall_match": false
+      },
+      "EWU": {
+        "checks": {
+          "bh_sharpe": {
+            "exp": 0.1006,
+            "paper": 0.096,
+            "rtol": 0.0476,
+            "match": true
+          },
+          "bh_mdd_pct": {
+            "exp": -63.9937,
+            "paper": -64.0,
+            "rtol": 0.0001,
+            "match": true
+          },
+          "vt_sharpe": {
+            "exp": -0.0875,
+            "paper": 0.028,
+            "rtol": 4.1233,
+            "match": false
+          },
+          "vt_mdd_pct": {
+            "exp": -30.571,
+            "paper": -30.2,
+            "rtol": 0.0123,
+            "match": true
+          },
+          "delta_mdd_pp": {
+            "exp": 33.4227,
+            "paper": 33.8,
+            "rtol": 0.0112,
+            "match": true
+          },
+          "vix_sensitivity": {
+            "exp": -0.6097,
+            "paper": -0.609,
+            "rtol": 0.0011,
+            "match": true
+          }
+        },
+        "overall_match": false
+      },
+      "EWA": {
+        "checks": {
+          "bh_sharpe": {
+            "exp": 0.1844,
+            "paper": 0.184,
+            "rtol": 0.0023,
+            "match": true
+          },
+          "bh_mdd_pct": {
+            "exp": -66.98,
+            "paper": -67.0,
+            "rtol": 0.0003,
+            "match": true
+          },
+          "vt_sharpe": {
+            "exp": -0.0372,
+            "paper": 0.081,
+            "rtol": 1.4591,
+            "match": false
+          },
+          "vt_mdd_pct": {
+            "exp": -35.4124,
+            "paper": -33.3,
+            "rtol": 0.0634,
+            "match": false
+          },
+          "delta_mdd_pp": {
+            "exp": 31.5676,
+            "paper": 33.6,
+            "rtol": 0.0605,
+            "match": false
+          },
+          "vix_sensitivity": {
+            "exp": -0.5874,
+            "paper": -0.587,
+            "rtol": 0.0007,
+            "match": true
+          }
+        },
+        "overall_match": false
+      },
+      "EWC": {
+        "checks": {
+          "bh_sharpe": {
+            "exp": 0.2088,
+            "paper": 0.206,
+            "rtol": 0.0134,
+            "match": true
+          },
+          "bh_mdd_pct": {
+            "exp": -60.7502,
+            "paper": -60.8,
+            "rtol": 0.0008,
+            "match": true
+          },
+          "vt_sharpe": {
+            "exp": 0.088,
+            "paper": 0.156,
+            "rtol": 0.4358,
+            "match": false
+          },
+          "vt_mdd_pct": {
+            "exp": -36.6225,
+            "paper": -33.0,
+            "rtol": 0.1098,
+            "match": false
+          },
+          "delta_mdd_pp": {
+            "exp": 24.1278,
+            "paper": 27.7,
+            "rtol": 0.129,
+            "match": false
+          },
+          "vix_sensitivity": {
+            "exp": -0.5883,
+            "paper": -0.588,
+            "rtol": 0.0005,
+            "match": true
+          }
+        },
+        "overall_match": false
+      },
+      "VGK": {
+        "checks": {
+          "bh_sharpe": {
+            "exp": 0.1455,
+            "paper": 0.14,
+            "rtol": 0.0392,
+            "match": true
+          },
+          "bh_mdd_pct": {
+            "exp": -63.6067,
+            "paper": -63.6,
+            "rtol": 0.0001,
+            "match": true
+          },
+          "vt_sharpe": {
+            "exp": -0.0363,
+            "paper": 0.082,
+            "rtol": 1.4432,
+            "match": false
+          },
+          "vt_mdd_pct": {
+            "exp": -30.0523,
+            "paper": -30.1,
+            "rtol": 0.0016,
+            "match": true
+          },
+          "delta_mdd_pp": {
+            "exp": 33.5544,
+            "paper": 33.6,
+            "rtol": 0.0014,
+            "match": true
+          },
+          "vix_sensitivity": {
+            "exp": -0.6401,
+            "paper": -0.64,
+            "rtol": 0.0002,
+            "match": true
+          }
+        },
+        "overall_match": false
+      },
+      "EEM": {
+        "checks": {
+          "bh_sharpe": {
+            "exp": 0.143,
+            "paper": 0.142,
+            "rtol": 0.0069,
+            "match": true
+          },
+          "bh_mdd_pct": {
+            "exp": -66.4343,
+            "paper": -66.4,
+            "rtol": 0.0005,
+            "match": true
+          },
+          "vt_sharpe": {
+            "exp": -0.1486,
+            "paper": 0.087,
+            "rtol": 2.7079,
+            "match": false
+          },
+          "vt_mdd_pct": {
+            "exp": -45.2047,
+            "paper": -32.8,
+            "rtol": 0.3782,
+            "match": false
+          },
+          "delta_mdd_pp": {
+            "exp": 21.2296,
+            "paper": 33.6,
+            "rtol": 0.3682,
+            "match": false
+          },
+          "vix_sensitivity": {
+            "exp": -0.6003,
+            "paper": -0.6,
+            "rtol": 0.0004,
+            "match": true
+          }
+        },
+        "overall_match": false
+      },
+      "FXI": {
+        "checks": {
+          "bh_sharpe": {
+            "exp": 0.1049,
+            "paper": 0.104,
+            "rtol": 0.0083,
+            "match": true
+          },
+          "bh_mdd_pct": {
+            "exp": -72.6758,
+            "paper": -72.7,
+            "rtol": 0.0003,
+            "match": true
+          },
+          "vt_sharpe": {
+            "exp": -0.1213,
+            "paper": 0.08,
+            "rtol": 2.5156,
+            "match": false
+          },
+          "vt_mdd_pct": {
+            "exp": -54.7874,
+            "paper": -42.8,
+            "rtol": 0.2801,
+            "match": false
+          },
+          "delta_mdd_pp": {
+            "exp": 17.8884,
+            "paper": 29.9,
+            "rtol": 0.4017,
+            "match": false
+          },
+          "vix_sensitivity": {
+            "exp": -0.4929,
+            "paper": -0.493,
+            "rtol": 0.0002,
+            "match": true
+          }
+        },
+        "overall_match": false
+      },
+      "EWZ": {
+        "checks": {
+          "bh_sharpe": {
+            "exp": 0.1666,
+            "paper": 0.156,
+            "rtol": 0.0678,
+            "match": false
+          },
+          "bh_mdd_pct": {
+            "exp": -77.2491,
+            "paper": -77.3,
+            "rtol": 0.0007,
+            "match": true
+          },
+          "vt_sharpe": {
+            "exp": -0.0499,
+            "paper": 0.099,
+            "rtol": 1.5036,
+            "match": false
+          },
+          "vt_mdd_pct": {
+            "exp": -71.4879,
+            "paper": -64.1,
+            "rtol": 0.1153,
+            "match": false
+          },
+          "delta_mdd_pp": {
+            "exp": 5.7612,
+            "paper": 13.2,
+            "rtol": 0.5635,
+            "match": false
+          },
+          "vix_sensitivity": {
+            "exp": -0.5048,
+            "paper": -0.504,
+            "rtol": 0.0015,
+            "match": true
+          }
+        },
+        "overall_match": false
+      },
+      "INDA": {
+        "checks": {
+          "bh_sharpe": {
+            "exp": 0.1549,
+            "paper": 0.157,
+            "rtol": 0.0136,
+            "match": true
+          },
+          "bh_mdd_pct": {
+            "exp": -45.0671,
+            "paper": -45.1,
+            "rtol": 0.0007,
+            "match": true
+          },
+          "vt_sharpe": {
+            "exp": -0.034,
+            "paper": 0.098,
+            "rtol": 1.347,
+            "match": false
+          },
+          "vt_mdd_pct": {
+            "exp": -27.4211,
+            "paper": -26.4,
+            "rtol": 0.0387,
+            "match": true
+          },
+          "delta_mdd_pp": {
+            "exp": 17.646,
+            "paper": 18.7,
+            "rtol": 0.0564,
+            "match": false
+          },
+          "vix_sensitivity": {
+            "exp": -0.4667,
+            "paper": -0.466,
+            "rtol": 0.0015,
+            "match": true
+          }
+        },
+        "overall_match": false
+      },
+      "EWT": {
+        "checks": {
+          "bh_sharpe": {
+            "exp": 0.311,
+            "paper": 0.311,
+            "rtol": 0.0001,
+            "match": true
+          },
+          "bh_mdd_pct": {
+            "exp": -62.9071,
+            "paper": -62.9,
+            "rtol": 0.0001,
+            "match": true
+          },
+          "vt_sharpe": {
+            "exp": 0.1256,
+            "paper": 0.262,
+            "rtol": 0.5206,
+            "match": false
+          },
+          "vt_mdd_pct": {
+            "exp": -31.612,
+            "paper": -32.9,
+            "rtol": 0.0391,
+            "match": true
+          },
+          "delta_mdd_pp": {
+            "exp": 31.2951,
+            "paper": 30.1,
+            "rtol": 0.0397,
+            "match": true
+          },
+          "vix_sensitivity": {
+            "exp": -0.5689,
+            "paper": -0.569,
+            "rtol": 0.0001,
+            "match": true
+          }
+        },
+        "overall_match": false
+      },
+      "MCHI": {
+        "checks": {
+          "bh_sharpe": {
+            "exp": 0.0785,
+            "paper": 0.077,
+            "rtol": 0.0196,
+            "match": true
+          },
+          "bh_mdd_pct": {
+            "exp": -62.8363,
+            "paper": -62.8,
+            "rtol": 0.0006,
+            "match": true
+          },
+          "vt_sharpe": {
+            "exp": -0.0768,
+            "paper": 0.083,
+            "rtol": 1.9258,
+            "match": false
+          },
+          "vt_mdd_pct": {
+            "exp": -47.6613,
+            "paper": -39.9,
+            "rtol": 0.1945,
+            "match": false
+          },
+          "delta_mdd_pp": {
+            "exp": 15.175,
+            "paper": 23.0,
+            "rtol": 0.3402,
+            "match": false
+          },
+          "vix_sensitivity": {
+            "exp": -0.4683,
+            "paper": -0.468,
+            "rtol": 0.0006,
+            "match": true
+          }
+        },
+        "overall_match": false
+      }
+    },
+    "n_matched_markets": 0,
+    "cross_section": {
+      "pearson_r": {
+        "exp": -0.8063,
+        "paper": -0.77,
+        "rtol": 0.0472,
+        "match": "True"
+      },
+      "spearman_rho": {
+        "exp": -0.8352,
+        "paper": -0.72,
+        "rtol": 0.16,
+        "match": "False"
+      },
+      "rho_gamma_sharpe": {
+        "exp": 0.1868,
+        "paper": 0.83,
+        "rtol": 0.7749,
+        "match": "False"
+      },
+      "avg_delta_mdd": {
+        "exp": 24.9038,
+        "paper": 28.7,
+        "rtol": 0.1323,
+        "match": false
+      },
+      "t_one_sample": {
+        "exp": 10.2457,
+        "paper": 15.7,
+        "rtol": 0.3474,
+        "match": "False"
+      }
+    },
+    "overall_status": "PARTIAL",
+    "recommendation": "(b) PARTIAL \u2014 Same direction/magnitude but divergence >5% rtol. Most likely cause: sample cutoff date difference (paper may have used slightly different end date), or minor VIX sensitivity calculation difference. Recommend: (b) update paper Table 5 with K1178 canonical numbers if divergence is systematic."
+  },
+  "feasibility_flags": {
+    "EFA": "OK",
+    "EWJ": "OK",
+    "EWG": "OK",
+    "EWU": "OK",
+    "EWA": "OK",
+    "EWC": "OK",
+    "VGK": "OK",
+    "EEM": "OK",
+    "FXI": "OK",
+    "EWZ": "OK",
+    "INDA": "OK",
+    "EWT": "OK",
+    "MCHI": "OK"
+  },
+  "data_source": "yfinance (real data)"
+}

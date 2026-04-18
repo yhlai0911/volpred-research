@@ -1,0 +1,605 @@
+{
+  "experiment_id": "K1139",
+  "title": "Equity HAR-RV-X VIX component decomposition (Paper 4 mechanism diagnostic)",
+  "description": "Decompose K1138 VIX predictive power into realized-vol component (\u03c3_21d), VRP (VIX\u00b2-\u03c3\u00b2_21d), term premium (VIX3M-VIX), SKEW, VVIX. Test each individually (M1..M6) and jointly (M7 encompassing) vs HAR-RV baseline (M0) on Parkinson RV target for SPY/QQQ/IWM. Diagnose whether VIX is realized-vol proxy (Scenario A) vs genuine IV signal (Scenario B/C/D).",
+  "design": {
+    "assets": [
+      "SPY",
+      "QQQ",
+      "IWM"
+    ],
+    "target": "Parkinson range-based variance (pct\u00b2)",
+    "oos_period": "2021-01-01 to 2026-04-11",
+    "window": 1500,
+    "refit_every": 63,
+    "specs": {
+      "M0_HAR": [],
+      "M1_HAR_VIX": [
+        "log_vix2"
+      ],
+      "M2_HAR_SIGMA21": [
+        "log_sigma21"
+      ],
+      "M3_HAR_VRP": [
+        "vrp"
+      ],
+      "M4_HAR_TERM": [
+        "term_prem"
+      ],
+      "M5_HAR_SKEW": [
+        "log_skew"
+      ],
+      "M6_HAR_VVIX": [
+        "log_vvix"
+      ],
+      "M7_HAR_ENCOMPASS": [
+        "log_sigma21",
+        "vrp",
+        "term_prem",
+        "log_skew",
+        "log_vvix"
+      ]
+    },
+    "baseline": "M0_HAR (plain Corsi 2009)",
+    "seed": 42,
+    "lag_safeguards": [
+      "All HAR regressors .shift(1) explicit",
+      "\u03c3_21d = rolling(21).std()**2 .shift(1) -- strictly past 21 days",
+      "VIX/VIX3M/VVIX/SKEW levels at t-1 used to forecast day t",
+      "BH FDR across 7 specs per asset"
+    ]
+  },
+  "per_asset_results": {
+    "SPY": {
+      "n_oos": 1323,
+      "oos_start": "2021-01-04",
+      "oos_end": "2026-04-10",
+      "model_metrics": {
+        "M0_HAR": {
+          "QLIKE": 0.38988193717900216
+        },
+        "M1_HAR_VIX": {
+          "QLIKE": 0.34728306523467145
+        },
+        "M2_HAR_SIGMA21": {
+          "QLIKE": 0.39236253799064874
+        },
+        "M3_HAR_VRP": {
+          "QLIKE": 0.3857282051807278
+        },
+        "M4_HAR_TERM": {
+          "QLIKE": 0.36013272052009404
+        },
+        "M5_HAR_SKEW": {
+          "QLIKE": 0.3898041506040814
+        },
+        "M6_HAR_VVIX": {
+          "QLIKE": 0.38368789318045365
+        },
+        "M7_HAR_ENCOMPASS": {
+          "QLIKE": 0.3492679971810467
+        }
+      },
+      "dm_tests": {
+        "M1_HAR_VIX_vs_M0": {
+          "DM_HLN_t": 4.184825696254099,
+          "DM_HLN_p": 3.0422942994157154e-05,
+          "n_used": 1323,
+          "QLIKE_rel_improvement_pct": 10.926095282216872,
+          "DM_HLN_p_BH": 0.00021296060095910008,
+          "PASS": true,
+          "PASS_Harvey": true
+        },
+        "M2_HAR_SIGMA21_vs_M0": {
+          "DM_HLN_t": -0.9552551801352408,
+          "DM_HLN_p": 0.3396233068626744,
+          "n_used": 1323,
+          "QLIKE_rel_improvement_pct": -0.6362440972759638,
+          "DM_HLN_p_BH": 0.3962271913397868,
+          "PASS": false,
+          "PASS_Harvey": false
+        },
+        "M3_HAR_VRP_vs_M0": {
+          "DM_HLN_t": 2.104775180087608,
+          "DM_HLN_p": 0.03549921644417986,
+          "n_used": 1323,
+          "QLIKE_rel_improvement_pct": 1.0653820046983322,
+          "DM_HLN_p_BH": 0.062123628777314754,
+          "PASS": false,
+          "PASS_Harvey": false
+        },
+        "M4_HAR_TERM_vs_M0": {
+          "DM_HLN_t": 2.9972898246452058,
+          "DM_HLN_p": 0.002774733383493544,
+          "n_used": 1323,
+          "QLIKE_rel_improvement_pct": 7.630314159757981,
+          "DM_HLN_p_BH": 0.006474377894818269,
+          "PASS": true,
+          "PASS_Harvey": false
+        },
+        "M5_HAR_SKEW_vs_M0": {
+          "DM_HLN_t": 0.02797533438885919,
+          "DM_HLN_p": 0.9776860460858472,
+          "n_used": 1323,
+          "QLIKE_rel_improvement_pct": 0.019951315386286535,
+          "DM_HLN_p_BH": 0.9776860460858472,
+          "PASS": false,
+          "PASS_Harvey": false
+        },
+        "M6_HAR_VVIX_vs_M0": {
+          "DM_HLN_t": 1.086477040570627,
+          "DM_HLN_p": 0.2774660538608633,
+          "n_used": 1323,
+          "QLIKE_rel_improvement_pct": 1.5886973485782958,
+          "DM_HLN_p_BH": 0.38845247540520866,
+          "PASS": false,
+          "PASS_Harvey": false
+        },
+        "M7_HAR_ENCOMPASS_vs_M0": {
+          "DM_HLN_t": 3.375960303555356,
+          "DM_HLN_p": 0.000756932387527387,
+          "n_used": 1323,
+          "QLIKE_rel_improvement_pct": 10.416984252160637,
+          "DM_HLN_p_BH": 0.0026492633563458545,
+          "PASS": true,
+          "PASS_Harvey": true
+        },
+        "M7_ENCOMPASS_vs_M1_VIX": {
+          "DM_HLN_t": -0.24439352557611696,
+          "DM_HLN_p": 0.806963980137668,
+          "n_used": 1323,
+          "description": "positive t => decomposed components carry info beyond composite VIX"
+        }
+      },
+      "m7_last_refit_coefs": {
+        "const": 6.22751030794748,
+        "daily": 0.1661515814198713,
+        "weekly": 0.09344072919777147,
+        "monthly": 0.04151792325186017,
+        "log_sigma21": 0.09447818950953206,
+        "vrp": 0.02966311640381798,
+        "term_prem": -2.2090451872753625,
+        "log_skew": -2.408326225889282,
+        "log_vvix": 1.1956036778017303
+      },
+      "joint_regression_IS": {
+        "const": {
+          "beta": -0.6464345967265194,
+          "se": 0.7549457663816924,
+          "t_stat": -0.8562662717147936,
+          "p_value": 0.39190129609162483
+        },
+        "daily": {
+          "beta": 0.14225994723571506,
+          "se": 0.018717964292308292,
+          "t_stat": 7.600182638139418,
+          "p_value": 3.6637359812630166e-14
+        },
+        "weekly": {
+          "beta": 0.15712854014357325,
+          "se": 0.031760448921176854,
+          "t_stat": 4.947302241650777,
+          "p_value": 7.831187047724342e-07
+        },
+        "monthly": {
+          "beta": 0.3473721562032665,
+          "se": 0.047843946713449645,
+          "t_stat": 7.260524686305091,
+          "p_value": 4.602984660095899e-13
+        },
+        "log_sigma21": {
+          "beta": -0.048268194353062205,
+          "se": 0.03999790926449539,
+          "t_stat": -1.2067679346407245,
+          "p_value": 0.2275921832690082
+        },
+        "vrp": {
+          "beta": 0.04987299294030444,
+          "se": 0.008875535813816905,
+          "t_stat": 5.619152914989667,
+          "p_value": 2.048280789423984e-08
+        },
+        "term_prem": {
+          "beta": -1.8813598029666538,
+          "se": 0.11602456251859938,
+          "t_stat": -16.215185492856836,
+          "p_value": 0.0
+        },
+        "log_skew": {
+          "beta": -0.9655396877682529,
+          "se": 0.17438157444749597,
+          "t_stat": -5.536936404132333,
+          "p_value": 3.2736544142153434e-08
+        },
+        "log_vvix": {
+          "beta": 1.1722352708788113,
+          "se": 0.10805694077491254,
+          "t_stat": 10.848310737582604,
+          "p_value": 0.0
+        }
+      }
+    },
+    "QQQ": {
+      "n_oos": 1323,
+      "oos_start": "2021-01-04",
+      "oos_end": "2026-04-10",
+      "model_metrics": {
+        "M0_HAR": {
+          "QLIKE": 0.3410692198734258
+        },
+        "M1_HAR_VIX": {
+          "QLIKE": 0.3135104135819195
+        },
+        "M2_HAR_SIGMA21": {
+          "QLIKE": 0.34202402671660526
+        },
+        "M3_HAR_VRP": {
+          "QLIKE": 0.3344098938393768
+        },
+        "M4_HAR_TERM": {
+          "QLIKE": 0.3253917453968818
+        },
+        "M5_HAR_SKEW": {
+          "QLIKE": 0.3404395028579488
+        },
+        "M6_HAR_VVIX": {
+          "QLIKE": 0.335732670527352
+        },
+        "M7_HAR_ENCOMPASS": {
+          "QLIKE": 0.3130200365526892
+        }
+      },
+      "dm_tests": {
+        "M1_HAR_VIX_vs_M0": {
+          "DM_HLN_t": 4.2188141628458125,
+          "DM_HLN_p": 2.623283419533884e-05,
+          "n_used": 1323,
+          "QLIKE_rel_improvement_pct": 8.08012118529302,
+          "DM_HLN_p_BH": 0.00018362983936737187,
+          "PASS": true,
+          "PASS_Harvey": true
+        },
+        "M2_HAR_SIGMA21_vs_M0": {
+          "DM_HLN_t": -1.0962038579869935,
+          "DM_HLN_p": 0.27318922036220794,
+          "n_used": 1323,
+          "QLIKE_rel_improvement_pct": -0.2799451804926237,
+          "DM_HLN_p_BH": 0.3187207570892426,
+          "PASS": false,
+          "PASS_Harvey": false
+        },
+        "M3_HAR_VRP_vs_M0": {
+          "DM_HLN_t": 2.1630549362551657,
+          "DM_HLN_p": 0.030715722694918846,
+          "n_used": 1323,
+          "QLIKE_rel_improvement_pct": 1.9524851983184963,
+          "DM_HLN_p_BH": 0.06251855968506342,
+          "PASS": false,
+          "PASS_Harvey": false
+        },
+        "M4_HAR_TERM_vs_M0": {
+          "DM_HLN_t": 2.1021956136310154,
+          "DM_HLN_p": 0.03572489124860767,
+          "n_used": 1323,
+          "QLIKE_rel_improvement_pct": 4.596566785581549,
+          "DM_HLN_p_BH": 0.06251855968506342,
+          "PASS": false,
+          "PASS_Harvey": false
+        },
+        "M5_HAR_SKEW_vs_M0": {
+          "DM_HLN_t": 0.6116594594676147,
+          "DM_HLN_p": 0.5408682586094775,
+          "n_used": 1323,
+          "QLIKE_rel_improvement_pct": 0.1846302682226008,
+          "DM_HLN_p_BH": 0.5408682586094775,
+          "PASS": false,
+          "PASS_Harvey": false
+        },
+        "M6_HAR_VVIX_vs_M0": {
+          "DM_HLN_t": 1.2632032437125489,
+          "DM_HLN_p": 0.2067388820597984,
+          "n_used": 1323,
+          "QLIKE_rel_improvement_pct": 1.5646528725325175,
+          "DM_HLN_p_BH": 0.2894344348837178,
+          "PASS": false,
+          "PASS_Harvey": false
+        },
+        "M7_HAR_ENCOMPASS_vs_M0": {
+          "DM_HLN_t": 2.96280973397063,
+          "DM_HLN_p": 0.0031029569198461893,
+          "n_used": 1323,
+          "QLIKE_rel_improvement_pct": 8.223897580422522,
+          "DM_HLN_p_BH": 0.010860349219461662,
+          "PASS": true,
+          "PASS_Harvey": false
+        },
+        "M7_ENCOMPASS_vs_M1_VIX": {
+          "DM_HLN_t": 0.08459003093798657,
+          "DM_HLN_p": 0.9326001324629902,
+          "n_used": 1323,
+          "description": "positive t => decomposed components carry info beyond composite VIX"
+        }
+      },
+      "m7_last_refit_coefs": {
+        "const": 3.5650881999963007,
+        "daily": 0.09667628859460901,
+        "weekly": 0.2586190070714707,
+        "monthly": 0.11675535108182807,
+        "log_sigma21": 0.14873298855602254,
+        "vrp": 0.05121062760762902,
+        "term_prem": -1.2569390768576436,
+        "log_skew": -1.4802028119660136,
+        "log_vvix": 0.8303984137345347
+      },
+      "joint_regression_IS": {
+        "const": {
+          "beta": -2.5865074795783487,
+          "se": 0.7244852618260335,
+          "t_stat": -3.5701312585147273,
+          "p_value": 0.0003609544308238455
+        },
+        "daily": {
+          "beta": 0.11619540246954105,
+          "se": 0.018811339189918203,
+          "t_stat": 6.176880938482844,
+          "p_value": 7.183620365225352e-10
+        },
+        "weekly": {
+          "beta": 0.25115517368781637,
+          "se": 0.033029907499569966,
+          "t_stat": 7.603871542512987,
+          "p_value": 3.552713678800501e-14
+        },
+        "monthly": {
+          "beta": 0.366761333399417,
+          "se": 0.04922615751095671,
+          "t_stat": 7.450537517940206,
+          "p_value": 1.1302070390684094e-13
+        },
+        "log_sigma21": {
+          "beta": -0.027653276160681462,
+          "se": 0.04052829188254183,
+          "t_stat": -0.6823202971599581,
+          "p_value": 0.49507555930927816
+        },
+        "vrp": {
+          "beta": 0.04872870248835886,
+          "se": 0.008840409609208427,
+          "t_stat": 5.512041256278627,
+          "p_value": 3.768305223417201e-08
+        },
+        "term_prem": {
+          "beta": -1.3833337999721909,
+          "se": 0.10637675925180491,
+          "t_stat": -13.0040979787483,
+          "p_value": 0.0
+        },
+        "log_skew": {
+          "beta": -0.2674695505866857,
+          "se": 0.16127716524999328,
+          "t_stat": -1.658446502157235,
+          "p_value": 0.09730500590857716
+        },
+        "log_vvix": {
+          "beta": 0.8887633439267806,
+          "se": 0.10375312423783632,
+          "t_stat": 8.566135723194632,
+          "p_value": 0.0
+        }
+      }
+    },
+    "IWM": {
+      "n_oos": 1323,
+      "oos_start": "2021-01-04",
+      "oos_end": "2026-04-10",
+      "model_metrics": {
+        "M0_HAR": {
+          "QLIKE": 0.2895437888986135
+        },
+        "M1_HAR_VIX": {
+          "QLIKE": 0.27624450446743276
+        },
+        "M2_HAR_SIGMA21": {
+          "QLIKE": 0.2896533047452145
+        },
+        "M3_HAR_VRP": {
+          "QLIKE": 0.28732409652183594
+        },
+        "M4_HAR_TERM": {
+          "QLIKE": 0.28328950118297297
+        },
+        "M5_HAR_SKEW": {
+          "QLIKE": 0.2896192934870219
+        },
+        "M6_HAR_VVIX": {
+          "QLIKE": 0.28433035556580116
+        },
+        "M7_HAR_ENCOMPASS": {
+          "QLIKE": 0.27529213226261245
+        }
+      },
+      "dm_tests": {
+        "M1_HAR_VIX_vs_M0": {
+          "DM_HLN_t": 2.0636146169098875,
+          "DM_HLN_p": 0.039249087071323796,
+          "n_used": 1323,
+          "QLIKE_rel_improvement_pct": 4.593185881061188,
+          "DM_HLN_p_BH": 0.1373718047496333,
+          "PASS": false,
+          "PASS_Harvey": false
+        },
+        "M2_HAR_SIGMA21_vs_M0": {
+          "DM_HLN_t": -0.10092613115742219,
+          "DM_HLN_p": 0.9196244031906007,
+          "n_used": 1323,
+          "QLIKE_rel_improvement_pct": -0.0378235868977193,
+          "DM_HLN_p_BH": 0.9196244031906007,
+          "PASS": false,
+          "PASS_Harvey": false
+        },
+        "M3_HAR_VRP_vs_M0": {
+          "DM_HLN_t": 1.5355609429029673,
+          "DM_HLN_p": 0.12488538098294244,
+          "n_used": 1323,
+          "QLIKE_rel_improvement_pct": 0.7666171618534685,
+          "DM_HLN_p_BH": 0.21819314206979595,
+          "PASS": false,
+          "PASS_Harvey": false
+        },
+        "M4_HAR_TERM_vs_M0": {
+          "DM_HLN_t": 1.419969799751809,
+          "DM_HLN_p": 0.15585224433556855,
+          "n_used": 1323,
+          "QLIKE_rel_improvement_pct": 2.1600489996456163,
+          "DM_HLN_p_BH": 0.21819314206979595,
+          "PASS": false,
+          "PASS_Harvey": false
+        },
+        "M5_HAR_SKEW_vs_M0": {
+          "DM_HLN_t": -0.15470005750624272,
+          "DM_HLN_p": 0.8770813987707284,
+          "n_used": 1323,
+          "QLIKE_rel_improvement_pct": -0.026077087923607904,
+          "DM_HLN_p_BH": 0.9196244031906007,
+          "PASS": false,
+          "PASS_Harvey": false
+        },
+        "M6_HAR_VVIX_vs_M0": {
+          "DM_HLN_t": 1.7429054549320133,
+          "DM_HLN_p": 0.08158263506502328,
+          "n_used": 1323,
+          "QLIKE_rel_improvement_pct": 1.8005681809454583,
+          "DM_HLN_p_BH": 0.19035948181838766,
+          "PASS": false,
+          "PASS_Harvey": false
+        },
+        "M7_HAR_ENCOMPASS_vs_M0": {
+          "DM_HLN_t": 2.3076704924665217,
+          "DM_HLN_p": 0.021171288931550736,
+          "n_used": 1323,
+          "QLIKE_rel_improvement_pct": 4.922107529991391,
+          "DM_HLN_p_BH": 0.1373718047496333,
+          "PASS": false,
+          "PASS_Harvey": false
+        },
+        "M7_ENCOMPASS_vs_M1_VIX": {
+          "DM_HLN_t": 0.22890241333005115,
+          "DM_HLN_p": 0.8189801692518224,
+          "n_used": 1323,
+          "description": "positive t => decomposed components carry info beyond composite VIX"
+        }
+      },
+      "m7_last_refit_coefs": {
+        "const": 0.9527477537694569,
+        "daily": 0.15836331350678934,
+        "weekly": 0.24239004324341337,
+        "monthly": -0.0720077850042095,
+        "log_sigma21": 0.14471198048077138,
+        "vrp": 0.013931338961429366,
+        "term_prem": -0.8700590610503864,
+        "log_skew": -1.1957693097128923,
+        "log_vvix": 1.1000694060594283
+      },
+      "joint_regression_IS": {
+        "const": {
+          "beta": -2.344053423100639,
+          "se": 0.6760031021694723,
+          "t_stat": -3.4675187370856038,
+          "p_value": 0.0005307669048975061
+        },
+        "daily": {
+          "beta": 0.13545562653467733,
+          "se": 0.018748088928276743,
+          "t_stat": 7.225036485205531,
+          "p_value": 5.95967719618784e-13
+        },
+        "weekly": {
+          "beta": 0.28521329573737686,
+          "se": 0.033853510319635065,
+          "t_stat": 8.424925304480254,
+          "p_value": 0.0
+        },
+        "monthly": {
+          "beta": 0.2829720466282613,
+          "se": 0.05124279780849393,
+          "t_stat": 5.522181823205529,
+          "p_value": 3.558636318956587e-08
+        },
+        "log_sigma21": {
+          "beta": 0.05683414913139939,
+          "se": 0.04032463831270535,
+          "t_stat": 1.4094149757939003,
+          "p_value": 0.15878946722867093
+        },
+        "vrp": {
+          "beta": 0.033408714729605056,
+          "se": 0.007147826049423432,
+          "t_stat": 4.673968630266249,
+          "p_value": 3.050650506430941e-06
+        },
+        "term_prem": {
+          "beta": -0.8698497583105581,
+          "se": 0.0937000208776931,
+          "t_stat": -9.28334647273959,
+          "p_value": 0.0
+        },
+        "log_skew": {
+          "beta": -0.11446343198156275,
+          "se": 0.14890409583436912,
+          "t_stat": -0.7687057319691472,
+          "p_value": 0.4421129546439264
+        },
+        "log_vvix": {
+          "beta": 0.6617793161460364,
+          "se": 0.09578498930463845,
+          "t_stat": 6.909008613461204,
+          "p_value": 5.646150214033696e-12
+        }
+      }
+    }
+  },
+  "pass_count_primary_assets": {
+    "M1_HAR_VIX": 2,
+    "M2_HAR_SIGMA21": 0,
+    "M3_HAR_VRP": 0,
+    "M4_HAR_TERM": 1,
+    "M5_HAR_SKEW": 0,
+    "M6_HAR_VVIX": 0,
+    "M7_HAR_ENCOMPASS": 2
+  },
+  "scenario": "B_AGGREGATOR",
+  "paper4_narrative": "\u03c3_21d FAILS decisively (mean t=-1.03) while forward-looking components collectively stronger (mean t VRP/Term/VVIX = +1.95). No single forward component PASSES at Harvey joint threshold but VIX as composite PASSES. VIX is an EFFICIENT AGGREGATOR of weak-but-coherent forward-looking signals. Paper 4 narrative MID-STRONG: VIX genuinely adds IV info beyond RV memory; no single component replaces it but the composite is not a realized-vol proxy.",
+  "components_available": {
+    "VIX": {
+      "n": 4092,
+      "start": "2010-01-04",
+      "end": "2026-04-10"
+    },
+    "VIX3M": {
+      "n": 4092,
+      "start": "2010-01-04",
+      "end": "2026-04-10"
+    },
+    "VVIX": {
+      "n": 4083,
+      "start": "2010-01-04",
+      "end": "2026-04-10"
+    },
+    "SKEW": {
+      "n": 4030,
+      "start": "2010-01-04",
+      "end": "2026-04-10"
+    }
+  },
+  "data_source": "yfinance (SPY/QQQ/IWM OHLC + ^VIX + ^VIX3M + ^VVIX + ^SKEW)",
+  "timestamp": "2026-04-17T05:37:43.333680+00:00",
+  "references": [
+    "Corsi (2009) J Financial Econometrics 7(2):174-196.",
+    "Patton (2011) J Econometrics 160:246-256.",
+    "Harvey, Leybourne, Newbold (1997) IJF 13:281-291.",
+    "Harvey (2016) RFS 29:5-68 (|t|>3 threshold).",
+    "Benjamini, Hochberg (1995) JRSS-B 57:289-300.",
+    "Bollerslev, Tauchen, Zhou (2009) RFS 22:4463-4492 (VRP).",
+    "Bekaert, Hoerova (2014) JoE 183:181-192 (VIX conditional vol vs VRP)."
+  ]
+}

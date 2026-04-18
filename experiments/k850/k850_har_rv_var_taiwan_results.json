@@ -1,0 +1,275 @@
+{
+  "experiment_id": "K850",
+  "title": "K850: HAR-RV based VaR for Taiwan — HAR σ vs GJR σ for 0050.TW VaR",
+  "method": "HAR-RV (TAIFEX 5-min RV) + Cornish-Fisher/Normal/HistSim vs GJR-GARCH",
+  "asset": "0050.TW",
+  "rv_source": "TAIFEX TX1 tick data (5-min RV)",
+  "oos_period": "2023-01-01 to 2024-12-31",
+  "refit_every": 63,
+  "alpha_levels": [
+    0.01,
+    0.05
+  ],
+  "data_source": "TAIFEX TX tick data (5-min RV) + yfinance (0050.TW returns)",
+  "error_log_rules": [
+    "0050.TW: clean_tw50_data applied",
+    "HAR: RV_{t-1}, RV_{t-1:5}, RV_{t-1:22} (no lookahead)",
+    "GJR: recursive h[t]=f(h[t-1], r²[t-1])",
+    "Date alignment: inner join (TX RV ∩ 0050.TW returns)"
+  ],
+  "references": [
+    "Corsi (2009) - HAR-RV model, J Financial Econometrics",
+    "Hansen & Lunde (2005) - 5-min RV gold standard",
+    "Cornish & Fisher (1938) - CF expansion",
+    "McNeil & Frey (2000) - EVT-POT for VaR, J Empirical Finance",
+    "Patton (2011) - QLIKE proxy-robust, J Econometrics",
+    "K836: GJR+CF Trinity PASS (3/481 at 1%)",
+    "K849: HAR-RV QLIKE=0.109 vs GJR=0.202 (Track B)"
+  ],
+  "timestamp": "2026-04-04T06:49:14.370960+00:00",
+  "elapsed_sec": 54.6,
+  "n_oos": 481,
+  "n_common_dates": 2185,
+  "n_gjr_refits": 8,
+  "oos_stats": {
+    "mean": 0.0014134646846276498,
+    "std": 0.012862868744383773,
+    "skewness": -0.6812450191238493,
+    "kurtosis": 7.668146333269837,
+    "min": -0.09129929932826675,
+    "max": 0.05511806086874138,
+    "n_oos": 481
+  },
+  "var_results": {
+    "1%": {
+      "GJR+Normal": {
+        "violation_rate": 0.018711,
+        "expected_rate": 0.01,
+        "n_violations": 9,
+        "n_total": 481,
+        "kupiec": {
+          "stat": 2.9345,
+          "p_value": 0.0867,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 2.0593,
+          "p_value": 0.1513,
+          "pass": true
+        },
+        "basel_traffic_light": "yellow",
+        "basel_violations_in_window": 7,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      },
+      "GJR+CF": {
+        "violation_rate": 0.004158,
+        "expected_rate": 0.01,
+        "n_violations": 2,
+        "n_total": 481,
+        "kupiec": {
+          "stat": 2.1263,
+          "p_value": 0.1448,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 2,
+        "basel_window_size": 250,
+        "trinity_pass": true
+      },
+      "HAR+Normal": {
+        "violation_rate": 0.033333,
+        "expected_rate": 0.01,
+        "n_violations": 15,
+        "n_total": 450,
+        "kupiec": {
+          "stat": 15.3686,
+          "p_value": 0.0001,
+          "pass": false
+        },
+        "christoffersen": {
+          "stat": 0.4194,
+          "p_value": 0.5172,
+          "pass": true
+        },
+        "basel_traffic_light": "red",
+        "basel_violations_in_window": 12,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      },
+      "HAR+CF": {
+        "violation_rate": 0.037778,
+        "expected_rate": 0.01,
+        "n_violations": 17,
+        "n_total": 450,
+        "kupiec": {
+          "stat": 20.5447,
+          "p_value": 0.0,
+          "pass": false
+        },
+        "christoffersen": {
+          "stat": 0.1844,
+          "p_value": 0.6676,
+          "pass": true
+        },
+        "basel_traffic_light": "red",
+        "basel_violations_in_window": 10,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      },
+      "HAR+HistSim": {
+        "violation_rate": 0.02,
+        "expected_rate": 0.01,
+        "n_violations": 9,
+        "n_total": 450,
+        "kupiec": {
+          "stat": 3.5223,
+          "p_value": 0.0605,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 1.9448,
+          "p_value": 0.1631,
+          "pass": true
+        },
+        "basel_traffic_light": "yellow",
+        "basel_violations_in_window": 8,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      }
+    },
+    "5%": {
+      "GJR+Normal": {
+        "violation_rate": 0.045738,
+        "expected_rate": 0.05,
+        "n_violations": 22,
+        "n_total": 481,
+        "kupiec": {
+          "stat": 0.1891,
+          "p_value": 0.6637,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0001,
+          "p_value": 0.9931,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 14,
+        "basel_window_size": 250,
+        "trinity_pass": true
+      },
+      "GJR+CF": {
+        "violation_rate": 0.045738,
+        "expected_rate": 0.05,
+        "n_violations": 22,
+        "n_total": 481,
+        "kupiec": {
+          "stat": 0.1891,
+          "p_value": 0.6637,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0001,
+          "p_value": 0.9931,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 14,
+        "basel_window_size": 250,
+        "trinity_pass": true
+      },
+      "HAR+Normal": {
+        "violation_rate": 0.066667,
+        "expected_rate": 0.05,
+        "n_violations": 30,
+        "n_total": 450,
+        "kupiec": {
+          "stat": 2.3933,
+          "p_value": 0.1219,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 1.838,
+          "p_value": 0.1752,
+          "pass": true
+        },
+        "basel_traffic_light": "yellow",
+        "basel_violations_in_window": 21,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      },
+      "HAR+CF": {
+        "violation_rate": 0.102222,
+        "expected_rate": 0.05,
+        "n_violations": 46,
+        "n_total": 450,
+        "kupiec": {
+          "stat": 20.1078,
+          "p_value": 0.0,
+          "pass": false
+        },
+        "christoffersen": {
+          "stat": 0.4091,
+          "p_value": 0.5224,
+          "pass": true
+        },
+        "basel_traffic_light": "yellow",
+        "basel_violations_in_window": 27,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      },
+      "HAR+HistSim": {
+        "violation_rate": 0.057778,
+        "expected_rate": 0.05,
+        "n_violations": 26,
+        "n_total": 450,
+        "kupiec": {
+          "stat": 0.547,
+          "p_value": 0.4596,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 1.3396,
+          "p_value": 0.2471,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 18,
+        "basel_window_size": 250,
+        "trinity_pass": true
+      }
+    }
+  },
+  "qlike_results": {
+    "HAR-RV": 0.10097537335164511,
+    "GJR-GARCH": 0.22024510127753055
+  },
+  "dm_test": {
+    "HAR-RV_vs_GJR": {
+      "t_stat": -5.6037,
+      "p_value": 0.0,
+      "n_obs": 481,
+      "significant": true,
+      "interpretation": "HAR better"
+    }
+  },
+  "avg_var_1pct": {
+    "GJR+Normal": -0.02658116559680121,
+    "GJR+CF": -0.03827094919637306,
+    "HAR+Normal": -0.0209085269237424,
+    "HAR+CF": -0.021379388884162305,
+    "HAR+HistSim": -0.02518840009691039
+  },
+  "best_method_1pct": "GJR+CF",
+  "conclusions": [
+    "GJR+CF remains champion — HAR-RV methods fail Trinity at 1%",
+    "HAR-RV QLIKE=0.1010 vs GJR=0.2202 (+54.2% improvement)",
+    "Best 1% VaR method: GJR+CF (2 violations)"
+  ]
+}

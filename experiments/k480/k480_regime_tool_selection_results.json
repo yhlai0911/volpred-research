@@ -1,0 +1,1446 @@
+{
+  "experiment_id": "K480",
+  "title": "Regime-Switching Tool Selection (Adaptive Model Selection)",
+  "date": "2026-03-26T07:27:18.775016+00:00",
+  "background": "K467: HAR best forecasting but VaR 0/6 (misses jumps/overnight gaps). K476: Ensemble VaR 0/5 at 1% \u2014 HAR pollutes ensemble. K475: GJR+HAR ensemble forecasting 5/5 top. Core tradeoff: HAR=best forecasting, GJR=best VaR. Can regime-switching get both?",
+  "hypothesis": "Instead of fixed ensemble, select model based on VIX regime: calm (VIX<20) \u2192 HAR (better forecasting, jumps rare), crisis (VIX\u226520) \u2192 GJR (better tail coverage). This should preserve GJR's VaR while gaining HAR's QLIKE advantage in calm periods.",
+  "references": [
+    "Hamilton (1989) 'A New Approach to the Economic Analysis of Nonstationary Time Series'",
+    "Ang & Bekaert (2002) 'Regime Switches in Interest Rates' J Business & Econ Stats",
+    "Timmermann (2006) 'Forecast Combinations' Handbook of Economic Forecasting",
+    "K467 \u2014 HAR VaR 0/6 failure",
+    "K475 \u2014 Ensemble forecasting 5/5 top (QLIKE avg 0.694)",
+    "K476 \u2014 Ensemble VaR 0/5 at 1%, GJR 3/5 (7/10 total)"
+  ],
+  "method": {
+    "models": {
+      "GJR": "GJR-GARCH(1,1) Student-t, always",
+      "HAR": "HAR log-range (1d+5d+21d), always",
+      "Ens_50_50": "\u03c3\u00b2 = 0.5*\u03c3\u00b2_GJR + 0.5*\u03c3\u00b2_HAR, always",
+      "RS_Binary": "VIX<20 \u2192 HAR, VIX\u226520 \u2192 GJR",
+      "RS_Ternary": "VIX<15 \u2192 HAR, VIX 15-25 \u2192 Ensemble, VIX\u226525 \u2192 GJR",
+      "Adaptive_63d": "Past 63-day QLIKE selects best model (GJR or HAR)"
+    },
+    "is_window": 2000,
+    "var_levels": [
+      0.01,
+      0.05
+    ],
+    "var_formula": "VaR_\u03b1 = \u03bc + z_\u03b1 \u00d7 \u03c3 (Normal, left tail)",
+    "var_tests": [
+      "Kupiec unconditional coverage",
+      "Christoffersen conditional coverage"
+    ],
+    "forecasting_metric": "QLIKE with r\u00b2 proxy (lower is better)",
+    "har_scaling": "Parkinson \u2192 r\u00b2 level using IS scale ratio"
+  },
+  "asset": "SPY",
+  "data_source": "yfinance (SPY OHLC + ^VIX close)",
+  "diagnostics": {
+    "n_obs": 5319,
+    "date_range": "2005-02-02 to 2026-03-25",
+    "return_mean_pct": 0.03947840052488426,
+    "return_std_pct": 1.1989783963424028,
+    "return_skew": -0.3041491310630244,
+    "return_kurt": 14.698827746898772,
+    "log_range_mean": 0.012354426508104503,
+    "r2_proxy_mean": 0.00014391077390038033,
+    "vix_mean": 19.1756044396065,
+    "vix_median": 16.799999237060547,
+    "vix_min": 9.140000343322754,
+    "vix_max": 82.69000244140625,
+    "pct_vix_below_20": 66.91107351005829,
+    "pct_vix_20_25": 16.600864824215076,
+    "pct_vix_above_25": 16.48806166572664,
+    "adf_stat": -16.365516409845988,
+    "adf_p": 2.843279827386556e-29,
+    "is_stationary": true,
+    "arch_lm_stat": 1456.7121463131175,
+    "arch_lm_p": 5.630262549663975e-307,
+    "has_arch_effects": true
+  },
+  "cross_oos_results": [
+    {
+      "period": "2015-2016",
+      "oos_start": "2015-01-02",
+      "oos_end": "2016-12-30",
+      "n_oos": 504,
+      "vix_stats": {
+        "mean": 16.25,
+        "median": 14.89,
+        "min": 11.27,
+        "max": 40.74,
+        "pct_below_20": 83.3,
+        "pct_above_25": 5.2
+      },
+      "regime_choices": {
+        "RS_Binary": {
+          "HAR": 420,
+          "GJR": 84
+        },
+        "Adaptive": {
+          "GJR": 304,
+          "HAR": 137,
+          "Ens": 63
+        }
+      },
+      "qlike_r2": {
+        "GJR": 0.588471,
+        "HAR": 0.637193,
+        "Ens_50_50": 0.576537,
+        "RS_Binary": 0.604804,
+        "RS_Ternary": 0.557184,
+        "Adaptive_63d": 0.620512
+      },
+      "qlike_ranking": [
+        "RS_Ternary",
+        "Ens_50_50",
+        "GJR",
+        "RS_Binary",
+        "Adaptive_63d",
+        "HAR"
+      ],
+      "var_results": {
+        "1%": {
+          "GJR": {
+            "n_obs": 504,
+            "n_violations": 6,
+            "violation_rate": 0.0119,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 0.1741,
+              "p_value": 0.6765,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 3.7264,
+              "p_value": 0.0536,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "HAR": {
+            "n_obs": 504,
+            "n_violations": 15,
+            "violation_rate": 0.0298,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 12.9995,
+              "p_value": 0.0003,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 3.2341,
+              "p_value": 0.0721,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "Ens_50_50": {
+            "n_obs": 504,
+            "n_violations": 7,
+            "violation_rate": 0.0139,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 0.6868,
+              "p_value": 0.4073,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 9.4511,
+              "p_value": 0.0021,
+              "pass": false
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "RS_Binary": {
+            "n_obs": 504,
+            "n_violations": 12,
+            "violation_rate": 0.0238,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 6.9976,
+              "p_value": 0.0082,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 1.164,
+              "p_value": 0.2806,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "RS_Ternary": {
+            "n_obs": 504,
+            "n_violations": 8,
+            "violation_rate": 0.0159,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 1.4902,
+              "p_value": 0.2222,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 2.5806,
+              "p_value": 0.1082,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "Adaptive_63d": {
+            "n_obs": 504,
+            "n_violations": 8,
+            "violation_rate": 0.0159,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 1.4902,
+              "p_value": 0.2222,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 2.5806,
+              "p_value": 0.1082,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          }
+        },
+        "5%": {
+          "GJR": {
+            "n_obs": 504,
+            "n_violations": 26,
+            "violation_rate": 0.0516,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.0265,
+              "p_value": 0.8708,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.3143,
+              "p_value": 0.575,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "HAR": {
+            "n_obs": 504,
+            "n_violations": 34,
+            "violation_rate": 0.0675,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 2.9299,
+              "p_value": 0.087,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 2.8605,
+              "p_value": 0.0908,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "Ens_50_50": {
+            "n_obs": 504,
+            "n_violations": 27,
+            "violation_rate": 0.0536,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.1324,
+              "p_value": 0.716,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 1.4614,
+              "p_value": 0.2267,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "RS_Binary": {
+            "n_obs": 504,
+            "n_violations": 30,
+            "violation_rate": 0.0595,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.9095,
+              "p_value": 0.3403,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.7882,
+              "p_value": 0.3746,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "RS_Ternary": {
+            "n_obs": 504,
+            "n_violations": 28,
+            "violation_rate": 0.0556,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.3166,
+              "p_value": 0.5737,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 1.2109,
+              "p_value": 0.2712,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "Adaptive_63d": {
+            "n_obs": 504,
+            "n_violations": 28,
+            "violation_rate": 0.0556,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.3166,
+              "p_value": 0.5737,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 1.2109,
+              "p_value": 0.2712,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          }
+        }
+      },
+      "elapsed_s": 9.2
+    },
+    {
+      "period": "2017-2018 (Volmageddon)",
+      "oos_start": "2017-01-03",
+      "oos_end": "2018-12-31",
+      "n_oos": 502,
+      "vix_stats": {
+        "mean": 13.87,
+        "median": 12.17,
+        "min": 9.14,
+        "max": 37.32,
+        "pct_below_20": 88.2,
+        "pct_above_25": 3.2
+      },
+      "regime_choices": {
+        "RS_Binary": {
+          "HAR": 443,
+          "GJR": 59
+        },
+        "Adaptive": {
+          "GJR": 202,
+          "HAR": 237,
+          "Ens": 63
+        }
+      },
+      "qlike_r2": {
+        "GJR": 0.104382,
+        "HAR": 0.118297,
+        "Ens_50_50": 0.078969,
+        "RS_Binary": 0.079173,
+        "RS_Ternary": 0.037947,
+        "Adaptive_63d": 0.104408
+      },
+      "qlike_ranking": [
+        "RS_Ternary",
+        "Ens_50_50",
+        "RS_Binary",
+        "GJR",
+        "Adaptive_63d",
+        "HAR"
+      ],
+      "var_results": {
+        "1%": {
+          "GJR": {
+            "n_obs": 502,
+            "n_violations": 9,
+            "violation_rate": 0.0179,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 2.5803,
+              "p_value": 0.1082,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 2.1335,
+              "p_value": 0.1441,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "HAR": {
+            "n_obs": 502,
+            "n_violations": 12,
+            "violation_rate": 0.0239,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 7.0539,
+              "p_value": 0.0079,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 1.1581,
+              "p_value": 0.2819,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "Ens_50_50": {
+            "n_obs": 502,
+            "n_violations": 11,
+            "violation_rate": 0.0219,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 5.3705,
+              "p_value": 0.0205,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 1.4355,
+              "p_value": 0.2309,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "RS_Binary": {
+            "n_obs": 502,
+            "n_violations": 11,
+            "violation_rate": 0.0219,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 5.3705,
+              "p_value": 0.0205,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 1.4355,
+              "p_value": 0.2309,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "RS_Ternary": {
+            "n_obs": 502,
+            "n_violations": 11,
+            "violation_rate": 0.0219,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 5.3705,
+              "p_value": 0.0205,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 1.4355,
+              "p_value": 0.2309,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "Adaptive_63d": {
+            "n_obs": 502,
+            "n_violations": 11,
+            "violation_rate": 0.0219,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 5.3705,
+              "p_value": 0.0205,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 1.4355,
+              "p_value": 0.2309,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          }
+        },
+        "5%": {
+          "GJR": {
+            "n_obs": 502,
+            "n_violations": 18,
+            "violation_rate": 0.0359,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 2.3353,
+              "p_value": 0.1265,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 2.0302,
+              "p_value": 0.1542,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "HAR": {
+            "n_obs": 502,
+            "n_violations": 28,
+            "violation_rate": 0.0558,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.3405,
+              "p_value": 0.5595,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 1.198,
+              "p_value": 0.2737,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "Ens_50_50": {
+            "n_obs": 502,
+            "n_violations": 19,
+            "violation_rate": 0.0378,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 1.6974,
+              "p_value": 0.1926,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.1054,
+              "p_value": 0.7454,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "RS_Binary": {
+            "n_obs": 502,
+            "n_violations": 24,
+            "violation_rate": 0.0478,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.0515,
+              "p_value": 0.8205,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0225,
+              "p_value": 0.8808,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "RS_Ternary": {
+            "n_obs": 502,
+            "n_violations": 23,
+            "violation_rate": 0.0458,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.19,
+              "p_value": 0.6629,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0034,
+              "p_value": 0.9535,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "Adaptive_63d": {
+            "n_obs": 502,
+            "n_violations": 23,
+            "violation_rate": 0.0458,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.19,
+              "p_value": 0.6629,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 2.7406,
+              "p_value": 0.0978,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          }
+        }
+      },
+      "elapsed_s": 8.1
+    },
+    {
+      "period": "2019-2020 (COVID)",
+      "oos_start": "2019-01-02",
+      "oos_end": "2020-12-31",
+      "n_oos": 505,
+      "vix_stats": {
+        "mean": 22.33,
+        "median": 18.84,
+        "min": 11.54,
+        "max": 82.69,
+        "pct_below_20": 53.9,
+        "pct_above_25": 30.9
+      },
+      "regime_choices": {
+        "RS_Binary": {
+          "HAR": 272,
+          "GJR": 233
+        },
+        "Adaptive": {
+          "GJR": 208,
+          "HAR": 234,
+          "Ens": 63
+        }
+      },
+      "qlike_r2": {
+        "GJR": 1.132929,
+        "HAR": 1.057874,
+        "Ens_50_50": 1.006965,
+        "RS_Binary": 1.09976,
+        "RS_Ternary": 1.079613,
+        "Adaptive_63d": 1.079467
+      },
+      "qlike_ranking": [
+        "Ens_50_50",
+        "HAR",
+        "Adaptive_63d",
+        "RS_Ternary",
+        "RS_Binary",
+        "GJR"
+      ],
+      "var_results": {
+        "1%": {
+          "GJR": {
+            "n_obs": 505,
+            "n_violations": 12,
+            "violation_rate": 0.0238,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 6.9695,
+              "p_value": 0.0083,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "HAR": {
+            "n_obs": 505,
+            "n_violations": 15,
+            "violation_rate": 0.0297,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 12.9592,
+              "p_value": 0.0003,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "Ens_50_50": {
+            "n_obs": 505,
+            "n_violations": 13,
+            "violation_rate": 0.0257,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 8.8117,
+              "p_value": 0.003,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "RS_Binary": {
+            "n_obs": 505,
+            "n_violations": 12,
+            "violation_rate": 0.0238,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 6.9695,
+              "p_value": 0.0083,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "RS_Ternary": {
+            "n_obs": 505,
+            "n_violations": 13,
+            "violation_rate": 0.0257,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 8.8117,
+              "p_value": 0.003,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "Adaptive_63d": {
+            "n_obs": 505,
+            "n_violations": 13,
+            "violation_rate": 0.0257,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 8.8117,
+              "p_value": 0.003,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          }
+        },
+        "5%": {
+          "GJR": {
+            "n_obs": 505,
+            "n_violations": 38,
+            "violation_rate": 0.0752,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 5.9077,
+              "p_value": 0.0151,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0075,
+              "p_value": 0.931,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "HAR": {
+            "n_obs": 505,
+            "n_violations": 39,
+            "violation_rate": 0.0772,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 6.8073,
+              "p_value": 0.0091,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.3462,
+              "p_value": 0.5563,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "Ens_50_50": {
+            "n_obs": 505,
+            "n_violations": 38,
+            "violation_rate": 0.0752,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 5.9077,
+              "p_value": 0.0151,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0075,
+              "p_value": 0.931,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "RS_Binary": {
+            "n_obs": 505,
+            "n_violations": 38,
+            "violation_rate": 0.0752,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 5.9077,
+              "p_value": 0.0151,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.3365,
+              "p_value": 0.5618,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "RS_Ternary": {
+            "n_obs": 505,
+            "n_violations": 36,
+            "violation_rate": 0.0713,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 4.2806,
+              "p_value": 0.0386,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.1579,
+              "p_value": 0.6911,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "Adaptive_63d": {
+            "n_obs": 505,
+            "n_violations": 38,
+            "violation_rate": 0.0752,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 5.9077,
+              "p_value": 0.0151,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0075,
+              "p_value": 0.931,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          }
+        }
+      },
+      "elapsed_s": 8.6
+    },
+    {
+      "period": "2021-2022 (rate hikes)",
+      "oos_start": "2021-01-04",
+      "oos_end": "2022-12-30",
+      "n_oos": 503,
+      "vix_stats": {
+        "mean": 22.63,
+        "median": 21.89,
+        "min": 15.01,
+        "max": 37.21,
+        "pct_below_20": 36.4,
+        "pct_above_25": 30.2
+      },
+      "regime_choices": {
+        "RS_Binary": {
+          "HAR": 183,
+          "GJR": 320
+        },
+        "Adaptive": {
+          "GJR": 163,
+          "HAR": 277,
+          "Ens": 63
+        }
+      },
+      "qlike_r2": {
+        "GJR": 1.233792,
+        "HAR": 1.198968,
+        "Ens_50_50": 1.173864,
+        "RS_Binary": 1.216231,
+        "RS_Ternary": 1.212396,
+        "Adaptive_63d": 1.223209
+      },
+      "qlike_ranking": [
+        "Ens_50_50",
+        "HAR",
+        "RS_Ternary",
+        "RS_Binary",
+        "Adaptive_63d",
+        "GJR"
+      ],
+      "var_results": {
+        "1%": {
+          "GJR": {
+            "n_obs": 503,
+            "n_violations": 13,
+            "violation_rate": 0.0258,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 8.876,
+              "p_value": 0.0029,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "HAR": {
+            "n_obs": 503,
+            "n_violations": 13,
+            "violation_rate": 0.0258,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 8.876,
+              "p_value": 0.0029,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "Ens_50_50": {
+            "n_obs": 503,
+            "n_violations": 11,
+            "violation_rate": 0.0219,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 5.3463,
+              "p_value": 0.0208,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "RS_Binary": {
+            "n_obs": 503,
+            "n_violations": 13,
+            "violation_rate": 0.0258,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 8.876,
+              "p_value": 0.0029,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "RS_Ternary": {
+            "n_obs": 503,
+            "n_violations": 10,
+            "violation_rate": 0.0199,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 3.8531,
+              "p_value": 0.0497,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "Adaptive_63d": {
+            "n_obs": 503,
+            "n_violations": 15,
+            "violation_rate": 0.0298,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 13.0399,
+              "p_value": 0.0003,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          }
+        },
+        "5%": {
+          "GJR": {
+            "n_obs": 503,
+            "n_violations": 34,
+            "violation_rate": 0.0676,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 2.9671,
+              "p_value": 0.085,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.9616,
+              "p_value": 0.3268,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "HAR": {
+            "n_obs": 503,
+            "n_violations": 40,
+            "violation_rate": 0.0795,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 7.8881,
+              "p_value": 0.005,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.2809,
+              "p_value": 0.5961,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "Ens_50_50": {
+            "n_obs": 503,
+            "n_violations": 37,
+            "violation_rate": 0.0736,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 5.1648,
+              "p_value": 0.023,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.051,
+              "p_value": 0.8214,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "RS_Binary": {
+            "n_obs": 503,
+            "n_violations": 31,
+            "violation_rate": 0.0616,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 1.3379,
+              "p_value": 0.2474,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.524,
+              "p_value": 0.4691,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "RS_Ternary": {
+            "n_obs": 503,
+            "n_violations": 33,
+            "violation_rate": 0.0656,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 2.3585,
+              "p_value": 0.1246,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.802,
+              "p_value": 0.3705,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "Adaptive_63d": {
+            "n_obs": 503,
+            "n_violations": 39,
+            "violation_rate": 0.0775,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 6.9243,
+              "p_value": 0.0085,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.3995,
+              "p_value": 0.5274,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          }
+        }
+      },
+      "elapsed_s": 8.4
+    },
+    {
+      "period": "2023-2024",
+      "oos_start": "2023-01-03",
+      "oos_end": "2024-12-31",
+      "n_oos": 502,
+      "vix_stats": {
+        "mean": 16.24,
+        "median": 15.4,
+        "min": 11.86,
+        "max": 38.57,
+        "pct_below_20": 86.7,
+        "pct_above_25": 1.4
+      },
+      "regime_choices": {
+        "RS_Binary": {
+          "HAR": 435,
+          "GJR": 67
+        },
+        "Adaptive": {
+          "GJR": 203,
+          "HAR": 236,
+          "Ens": 63
+        }
+      },
+      "qlike_r2": {
+        "GJR": 0.555633,
+        "HAR": 0.603738,
+        "Ens_50_50": 0.556801,
+        "RS_Binary": 0.561077,
+        "RS_Ternary": 0.539218,
+        "Adaptive_63d": 0.601962
+      },
+      "qlike_ranking": [
+        "RS_Ternary",
+        "GJR",
+        "Ens_50_50",
+        "RS_Binary",
+        "Adaptive_63d",
+        "HAR"
+      ],
+      "var_results": {
+        "1%": {
+          "GJR": {
+            "n_obs": 502,
+            "n_violations": 9,
+            "violation_rate": 0.0179,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 2.5803,
+              "p_value": 0.1082,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "HAR": {
+            "n_obs": 502,
+            "n_violations": 13,
+            "violation_rate": 0.0259,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 8.9083,
+              "p_value": 0.0028,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "Ens_50_50": {
+            "n_obs": 502,
+            "n_violations": 11,
+            "violation_rate": 0.0219,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 5.3705,
+              "p_value": 0.0205,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "RS_Binary": {
+            "n_obs": 502,
+            "n_violations": 11,
+            "violation_rate": 0.0219,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 5.3705,
+              "p_value": 0.0205,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "RS_Ternary": {
+            "n_obs": 502,
+            "n_violations": 11,
+            "violation_rate": 0.0219,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 5.3705,
+              "p_value": 0.0205,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "Adaptive_63d": {
+            "n_obs": 502,
+            "n_violations": 10,
+            "violation_rate": 0.0199,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 3.8732,
+              "p_value": 0.0491,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          }
+        },
+        "5%": {
+          "GJR": {
+            "n_obs": 502,
+            "n_violations": 31,
+            "violation_rate": 0.0618,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 1.3627,
+              "p_value": 0.2431,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "HAR": {
+            "n_obs": 502,
+            "n_violations": 31,
+            "violation_rate": 0.0618,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 1.3627,
+              "p_value": 0.2431,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "Ens_50_50": {
+            "n_obs": 502,
+            "n_violations": 32,
+            "violation_rate": 0.0637,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 1.8439,
+              "p_value": 0.1745,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "RS_Binary": {
+            "n_obs": 502,
+            "n_violations": 30,
+            "violation_rate": 0.0598,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.9503,
+              "p_value": 0.3296,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "RS_Ternary": {
+            "n_obs": 502,
+            "n_violations": 32,
+            "violation_rate": 0.0637,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 1.8439,
+              "p_value": 0.1745,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "Adaptive_63d": {
+            "n_obs": 502,
+            "n_violations": 30,
+            "violation_rate": 0.0598,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.9503,
+              "p_value": 0.3296,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          }
+        }
+      },
+      "elapsed_s": 8.3
+    }
+  ],
+  "combined_summary": {
+    "GJR": {
+      "avg_qlike": 0.723041,
+      "avg_rank": 4.2,
+      "var_pass": 7,
+      "var_total": 10,
+      "var_pass_rate": 0.7
+    },
+    "HAR": {
+      "avg_qlike": 0.723214,
+      "avg_rank": 4.4,
+      "var_pass": 3,
+      "var_total": 10,
+      "var_pass_rate": 0.3
+    },
+    "Ens_50_50": {
+      "avg_qlike": 0.678627,
+      "avg_rank": 1.8,
+      "var_pass": 3,
+      "var_total": 10,
+      "var_pass_rate": 0.3
+    },
+    "RS_Binary": {
+      "avg_qlike": 0.712209,
+      "avg_rank": 4.0,
+      "var_pass": 4,
+      "var_total": 10,
+      "var_pass_rate": 0.4
+    },
+    "RS_Ternary": {
+      "avg_qlike": 0.685272,
+      "avg_rank": 2.0,
+      "var_pass": 5,
+      "var_total": 10,
+      "var_pass_rate": 0.5
+    },
+    "Adaptive_63d": {
+      "avg_qlike": 0.725912,
+      "avg_rank": 4.6,
+      "var_pass": 4,
+      "var_total": 10,
+      "var_pass_rate": 0.4
+    }
+  },
+  "conclusion": "NEGATIVE: No regime-switching model matches GJR's VaR performance (best: RS_Ternary 0.500 vs GJR 0.700). HAR contamination persists even with regime selection. For risk management, GJR remains the only reliable tool.",
+  "key_findings": [
+    "GJR: QLIKE rank 4.2, VaR 7/10 (0.700)",
+    "HAR: QLIKE rank 4.4, VaR 3/10 (0.300)",
+    "Ens 50/50: QLIKE rank 1.8, VaR 3/10 (0.300)",
+    "RS Binary: QLIKE rank 4.0, VaR 4/10 (0.400)",
+    "RS Ternary: QLIKE rank 2.0, VaR 5/10 (0.500)",
+    "Adaptive: QLIKE rank 4.6, VaR 4/10 (0.400)"
+  ],
+  "limitations": [
+    "VIX thresholds (15, 20, 25) are ad-hoc \u2014 could be optimized but risks overfitting",
+    "Adaptive lookback (63d) not optimized \u2014 could try 21d or 126d",
+    "Uses same-day VIX \u2014 in practice need previous-day VIX for true out-of-sample",
+    "Scale ratio computed from IS data \u2014 could drift in OOS",
+    "Only SPY \u2014 regime definitions may differ for other assets",
+    "Normal VaR assumption \u2014 could test Student-t overlay"
+  ],
+  "runtime_seconds": 42.5
+}

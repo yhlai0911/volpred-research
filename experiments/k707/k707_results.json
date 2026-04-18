@@ -1,0 +1,483 @@
+{
+  "experiment_id": "K707",
+  "title": "Complete Investor FAQ — 20 Questions Answered by 86 Experiments",
+  "date": "2026-03-29 09:26 UTC",
+  "type": "knowledge_synthesis",
+  "data_source": "yfinance (SPY, GLD, ^VIX, 0050.TW, BTC-USD, TLT, EFA)",
+  "data_period": "2006-2026 (varies by experiment)",
+  "n_experiments_cited": 25,
+  "unique_experiments_cited": [
+    "K604",
+    "K619",
+    "K623",
+    "K626",
+    "K632",
+    "K633",
+    "K639",
+    "K642",
+    "K645",
+    "K654",
+    "K658",
+    "K661",
+    "K664",
+    "K668",
+    "K670",
+    "K673",
+    "K679",
+    "K686",
+    "K687",
+    "K688",
+    "K690",
+    "K697",
+    "K700",
+    "K702",
+    "K704"
+  ],
+  "n_questions": 20,
+  "faq": [
+    {
+      "id": 1,
+      "question": "VIX 能預測明天漲跌嗎？",
+      "short_answer": "不能。",
+      "detailed_answer": "VIX 能預測波動率大小（相關係數 0.570），但完全無法預測方向（相關係數僅 0.042）。即使用完美事後資訊（oracle）基於 VIX 調整持倉，Sharpe 也只從 0.86 升到 1.14——而且這需要極高換手率（73.7 次/年），扣掉交易成本後優勢消失。VIX 告訴你「明天會震多大」，不告訴你「往哪個方向震」。",
+      "evidence": {
+        "vix_direction_corr": 0.042,
+        "vix_magnitude_corr": 0.57,
+        "oracle_vix_sharpe": 1.143,
+        "bh_5050_sharpe": 0.86,
+        "oracle_turnover_per_year": 73.7
+      },
+      "experiments": [
+        "K697",
+        "K626"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": 2,
+      "question": "什麼配置最好？",
+      "short_answer": "50/50 SPY/GLD，每年再平衡一次。",
+      "detailed_answer": "在 21 種配置的網格搜尋中，50% SPY + 50% GLD 的 Sharpe 最高（0.548），打敗 60/40 SPY/GLD（0.536）、60/40 SPY/TLT（0.420）、Markowitz 最優（0.405）、風險平價（0.369）、甚至 100% SPY（0.395）。Cross-OOS 5 期驗證中，50/50 在 2 期排第一。DM 統計檢定顯示沒有任何配置在統計上顯著優於 50/50。關鍵原因：SPY 和 GLD 波動率幾乎相同（19.3% vs 18.3%），相關性極低（0.058），所以 50/50 本身就是最優的風險平價配置。",
+      "evidence": {
+        "best_allocation": "50/50 SPY/GLD",
+        "sharpe": 0.548,
+        "cagr_pct": 10.94,
+        "mdd_pct": -32.63,
+        "spy_only_sharpe": 0.395,
+        "markowitz_sharpe": 0.405,
+        "spy_gld_corr": 0.058
+      },
+      "experiments": [
+        "K702",
+        "K704",
+        "K645"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": 3,
+      "question": "VT（波動率目標）策略能賺更多嗎？",
+      "short_answer": "Sharpe 不行，但 MDD 大幅降低。",
+      "detailed_answer": "修正所有 lookahead bias 後（K686/K687），沒有任何 VT 策略在 Sharpe 上打敗 BH 50/50（Sharpe 0.545）。最接近的 EWMA VT 只有 0.525。但 VT 的真正價值在風險控制：EWMA VT 的 MDD 只有 -17.0%（vs BH 的 -32.5%），12/VIX 的 MDD 更低至 -12.2%。對於風險厭惡程度 gamma >= 5 的投資人，EWMA VT 在 CRRA 效用框架下勝出。VT 是 drawdown insurance，不是 alpha generator。",
+      "evidence": {
+        "bh_5050_sharpe": 0.545,
+        "ewma_vt_sharpe": 0.525,
+        "vix12_sharpe": 0.438,
+        "bh_5050_mdd": -32.49,
+        "ewma_vt_mdd": -17.03,
+        "vix12_mdd": -12.21,
+        "crra_crossover_gamma_ewma": 5,
+        "crra_crossover_gamma_12vix": 10
+      },
+      "experiments": [
+        "K687",
+        "K688",
+        "K690"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": 4,
+      "question": "多久 rebalance 一次？",
+      "short_answer": "美股每日最佳，台股月頻即可。",
+      "detailed_answer": "美股交易成本低（2bp），每日 rebalance 的 Net Sharpe 最高（1.42），遠勝月頻（0.82）和年頻（0.76）。但台股交易成本高（18.5bp），每日 rebalance 的交易成本拖累達 127bp/年，月頻只有 20bp/年。台股最佳是用 25% 閾值觸發 rebalance（Net Sharpe 0.23，每年僅 0.3 次交易）。簡單規則：美股可以每天調，台股一個月看一次就好。",
+      "evidence": {
+        "us_daily_net_sharpe": 1.4229,
+        "us_monthly_net_sharpe": 0.8233,
+        "us_tx_cost_bp": 2,
+        "us_daily_tx_drag_bp_ann": 17.17,
+        "tw_daily_net_sharpe": 0.1914,
+        "tw_monthly_net_sharpe": 0.1674,
+        "tw_tx_cost_bp": 18.5,
+        "tw_daily_tx_drag_bp_ann": 126.77
+      },
+      "experiments": [
+        "K642"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": 5,
+      "question": "需要多少錢開始？",
+      "short_answer": "美股 US$5,000，台股 15 萬台幣。",
+      "detailed_answer": "美股零股交易已普及，理論上 $100 就能開始。但要有效分散到 SPY + GLD，建議至少 $5,000。台股 0050 目前一張約 75,000 元（減資後），零股交易手續費較高（最低 1 元，但比例偏高），建議至少 15 萬以上才能有效配置 0050 + GLD ETF（如 00635U）。定期定額每月 $1,000 美元 / 10,000 台幣也是可行的起步方案。",
+      "evidence": {
+        "us_minimum_suggested_usd": 5000,
+        "tw_minimum_suggested_twd": 150000,
+        "tw_0050_per_lot_twd": 75000,
+        "dca_monthly_usd": 1000
+      },
+      "experiments": [
+        "K633",
+        "K632"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": 6,
+      "question": "0050 一張多少錢？",
+      "short_answer": "約 75,000 元台幣（減資後）。",
+      "detailed_answer": "0050（元大台灣50）在 2023 年減資後，一張約 75,000 元台幣（視市場價格波動）。零股交易可降低門檻，每股約 75 元。台股 VT 策略使用 8.63/VIX 公式（= 12/VIX × 1/1.39，考慮台股波動率放大效應），台股用前一天的 VIX 值。",
+      "evidence": {
+        "tw_0050_approx_price_per_share_twd": 75,
+        "tw_0050_per_lot_twd": 75000,
+        "tw_vix_formula": "8.63/VIX",
+        "tw_amplification_factor": 1.39
+      },
+      "experiments": [
+        "K633"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": 7,
+      "question": "恐慌時要賣嗎？",
+      "short_answer": "不要！等 VIX 回到 Normal（31 天平均回歸）。",
+      "detailed_answer": "VIX spike 後的平均回歸半衰期是 10.2 天（K658）。VIX 從 >25 回到 <20 的中位數時間是 15 天，回到 <15 的中位數是 95 天。在 VIX 回歸期間，SPY 的年化報酬率高達 33.7%（Sharpe 1.34）！馬可夫鏈分析（K673）確認：Crisis 狀態 45% 機率在 1 個月內回到 Normal。恐慌時賣出 = 賣在最低點 + 錯過回彈。正確做法：什麼都不做，等待回歸。",
+      "evidence": {
+        "vix_halflife_days": 10.2,
+        "vix_25_to_20_median_days": 15,
+        "vix_25_to_15_median_days": 95,
+        "spy_reversion_ann_return": 0.337,
+        "spy_reversion_sharpe": 1.34,
+        "crisis_to_normal_1month_prob": 0.45
+      },
+      "experiments": [
+        "K658",
+        "K673"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": 8,
+      "question": "VIX 多少算高？",
+      "short_answer": "用百分位數，不是絕對值。但加 lag 後沒有 alpha。",
+      "detailed_answer": "VIX 均值 19.5，中位數 17.1。>25 算「高」（佔 17.2% 交易日），>30 算「恐慌」（佔 8.8%）。K679 曾發現百分位策略 Sharpe 1.68，但 Codex 審查（K686）發現這是 100% lookahead artifact——修正 lag 後 Sharpe 只有 0.355，反而比 12/VIX（0.438）更差。教訓：任何「太好的結果」都要檢查是否有 same-day lookahead。",
+      "evidence": {
+        "vix_mean": 19.47,
+        "vix_median": 17.12,
+        "k679_buggy_sharpe": 1.68,
+        "k686_corrected_sharpe": 0.355,
+        "lookahead_inflation": "1.325 Sharpe points (100% artifact)"
+      },
+      "experiments": [
+        "K679",
+        "K686",
+        "K697"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": 9,
+      "question": "ETF 交易成本多少？",
+      "short_answer": "美股約 2bp，台股 ETF 約 18.5bp。",
+      "detailed_answer": "美股 ETF（SPY/GLD）：bid-ask spread ~1bp + 近零手續費 = ~2bp 單邊。台股 ETF（0050）：手續費 0.1425%（折讓後 ~0.0427%）+ 證交稅 0.1% = 約 18.5bp 來回。台股成本是美股的 9.25 倍。這個差異導致台股每日 rebalance 的年度交易成本拖累達 127bp，而美股只有 17bp。台股策略必須降低換手頻率才能存活。",
+      "evidence": {
+        "us_etf_roundtrip_bp": 2,
+        "tw_etf_roundtrip_bp": 18.5,
+        "tw_vs_us_cost_ratio": 9.25,
+        "us_daily_rebal_annual_drag_bp": 17.17,
+        "tw_daily_rebal_annual_drag_bp": 126.77
+      },
+      "experiments": [
+        "K642",
+        "K604"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": 10,
+      "question": "BTC 能分散風險嗎？",
+      "short_answer": "不能。危機時正相關，且波動率太高。",
+      "detailed_answer": "BTC 在 2020 年前與 SPY 幾乎不相關（0.029），但 2020 年後相關性飆升至 0.396（Fisher z-test p < 0.001）。更致命的是尾部相依性：在最極端的 5% 交易日，BTC-SPY 聯合極端事件的發生率是無條件的 4.25 倍。也就是說，你最需要分散風險的時候（危機），BTC 反而一起跌。BTC 年化波動率 61.1%，是 SPY 的 3.4 倍，作為避險工具完全不合格。",
+      "evidence": {
+        "btc_spy_corr_pre2020": 0.029,
+        "btc_spy_corr_post2020": 0.396,
+        "tail_dep_5pct_exceedance_corr": 0.339,
+        "unconditional_corr": 0.25,
+        "tail_dep_ratio": "4.25x (exceedance vs unconditional)",
+        "btc_annual_vol": 0.611,
+        "spy_annual_vol": 0.177,
+        "btc_spy_vol_ratio": 3.44
+      },
+      "experiments": [
+        "K639"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": 11,
+      "question": "黃金為什麼有效？",
+      "short_answer": "報酬相近、相關性極低、危機時有正向 alpha。",
+      "detailed_answer": "GLD 有效的三個原因：(1) 報酬與 SPY 相當（CAGR 10.5% vs 10.4%），不是「死錢」避險；(2) 與 SPY 相關性接近零（0.058），50/50 配置讓組合波動率從加權平均 18.8% 降至 13.5%（降 27%）；(3) 危機時（VIX>30）GLD 年化報酬 +12.2%，提供正向 alpha。黃金不是因為「危機時飆漲」而有效，而是因為「一直有報酬 + 一直不相關」。這就是 return parity 的威力。",
+      "evidence": {
+        "gld_cagr_pct": 10.53,
+        "spy_cagr_pct": 10.42,
+        "spy_gld_correlation": 0.058,
+        "portfolio_vol_reduction_pct": 27.2,
+        "gld_crisis_ann_return_pct": 12.24,
+        "gld_return_contribution_pct": 49.8
+      },
+      "experiments": [
+        "K645",
+        "K702"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": 12,
+      "question": "退休金該用 VT 嗎？",
+      "short_answer": "如果你怕虧損，是的——VT 降低 sequence risk。",
+      "detailed_answer": "K668 模擬退休金 10 年提領情境：BH SPY 和 VT 都有 100% 存活率，但 VT（80/20 SPY/GLD + 12/VIX）的最差情境終端財富為 $736,851，BH SPY 只有 $420,663。VT 保護了 downside floor。K688 的 CRRA 效用分析確認：gamma >= 5 的投資人用 EWMA VT 比 BH 好。gamma=5 大約對應「非常不喜歡虧損，但不是極端保守」的退休族。結論：退休金適合用 EWMA VT，因為 sequence of returns risk 在退休初期最致命。",
+      "evidence": {
+        "bh_survival_rate": 1.0,
+        "vt_survival_rate": 1.0,
+        "vt_worst_case_terminal": 736851,
+        "bh_worst_case_terminal": 420663,
+        "crra_crossover_gamma": 5
+      },
+      "experiments": [
+        "K668",
+        "K688"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": 13,
+      "question": "每月定投怎麼做？",
+      "short_answer": "Fear DCA：VIX > 25 時加碼 4%，階梯函數最佳。",
+      "detailed_answer": "K632 測試多種恐慌加碼定期定額策略。最佳的是 Step（階梯）函數：VIX >= 25 時額外投入 4% 的累積資本。每投入 1 元的終端財富為 3.43，比普通定投多 13.14%。K670 的實務建議：VIX < 15 全額投入，VIX 15-25 投一半存一半，VIX > 25 只投 20% 存 80%（等之後加碼用）。定投最大的好處是紀律——不需要判斷市場方向，只需要跟著 VIX 表格操作。",
+      "evidence": {
+        "best_dca_strategy": "Step function",
+        "wealth_per_dollar": 3.4276,
+        "delta_vs_plain_dca_pct": 13.14,
+        "vix_threshold": 25,
+        "extra_invest_pct": 4
+      },
+      "experiments": [
+        "K632",
+        "K670"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": 14,
+      "question": "最大可能虧多少？",
+      "short_answer": "50/50 + VT：任何 1 年期間 MDD > 20% 的機率為 0%。",
+      "detailed_answer": "K664 的滾動窗口 drawdown 分析（4,837 個窗口）：50/50 SPY/GLD + 12/VIX：P(MDD > 20%) = 0%。Piecewise Conservative：P(MDD > 20%) = 0%。但 BH SPY：P(MDD > 10%) = 57%，P(MDD > 20%) 也非常高。Piecewise 將 P(MDD > 10%) 降至 5.3%（相對 SPY 降 91%）。如果你完全無法承受超過 10% 的虧損，Piecewise Conservative 是唯一選擇。",
+      "evidence": {
+        "vt_5050_prob_mdd_gt20_pct": 0,
+        "piecewise_prob_mdd_gt10_pct": 5.3,
+        "piecewise_prob_mdd_gt10_ci": "2.7%-8.3%",
+        "bh_spy_prob_mdd_gt10_pct": 57.0,
+        "bh_spy_prob_mdd_gt10_ci": "50.8%-63.2%",
+        "piecewise_reduction_vs_spy": "91%"
+      },
+      "experiments": [
+        "K664"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": 15,
+      "question": "Non-farm payrolls（非農就業）重要嗎？",
+      "short_answer": "看 VIX regime——VIX > 25 時 NFP 效果消失。",
+      "detailed_answer": "K661 分析 194 次 NFP 發布日。在 VIX < 20 時，NFP 日的絕對報酬比非 NFP 日高 24-30%（t=1.85-2.69）。但 VIX >= 25 時，NFP 日的波動率效果完全消失（t=1.10, p=0.28），因為整體波動率已經很高，NFP 的增量影響被淹沒。實務上：低波動環境下 NFP 前可以降低持倉，高波動時不用特別調整。",
+      "evidence": {
+        "n_nfp_dates": 194,
+        "low_vix_nfp_ratio": 1.24,
+        "low_vix_t_stat": 1.85,
+        "medium_vix_nfp_ratio": 1.3,
+        "medium_vix_t_stat": 2.69,
+        "high_vix_nfp_ratio": 1.18,
+        "high_vix_t_stat": 1.1,
+        "high_vix_p_value": 0.279
+      },
+      "experiments": [
+        "K661"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": 16,
+      "question": "什麼時候該加碼？",
+      "short_answer": "VIX 從高位跌回 30 以下時。",
+      "detailed_answer": "K658 分析 52 次 VIX spike 事件。VIX 跌破 30 後 60 天的平均累積報酬為 +7.21%（中位數 +7.83%），這是最可靠的加碼信號。VIX 回歸期間 SPY 年化報酬率 33.7%，Sharpe 1.34——這是因為恐慌情緒消散、被壓低的股價回歸合理水位。但注意：不要在 VIX 還在上升時抄底，等到確認回歸趨勢再行動。",
+      "evidence": {
+        "n_spike_events": 52,
+        "vix_below30_mean_60d_return": 0.0721,
+        "vix_below30_median_60d_return": 0.0783,
+        "reversion_ann_return": 0.337,
+        "reversion_sharpe": 1.34
+      },
+      "experiments": [
+        "K658"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": 17,
+      "question": "複雜策略比簡單的好嗎？",
+      "short_answer": "不會。50/50 打敗 Markowitz、風險平價、等權重。",
+      "detailed_answer": "K702 的 8 策略比較：50/50 SPY/GLD（Sharpe 0.548）打敗Markowitz 最優化（0.405）、風險平價（0.369）、等權重四資產（0.400）。K704 進一步解釋：因為 SPY 和 GLD 波動率幾乎一樣（19.3% vs 18.3%），50/50 本身就是最優的風險平價配置，而「正式」風險平價多了估計誤差反而更差。這驗證了 DeMiguel et al. (2009) 的 1/N 結論：估計誤差 > 最優化收益。",
+      "evidence": {
+        "bh_5050_sharpe": 0.548,
+        "markowitz_sharpe": 0.405,
+        "risk_parity_sharpe": 0.369,
+        "equal_weight_4asset_sharpe": 0.4,
+        "spy_vol_pct": 19.32,
+        "gld_vol_pct": 18.31
+      },
+      "experiments": [
+        "K702",
+        "K704"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": 18,
+      "question": "保守型策略的代價是什麼？",
+      "short_answer": "CAGR 只有 3.1% vs 買持 11.4%——放棄 73% 的報酬。",
+      "detailed_answer": "K654 分析 Piecewise Conservative：CAGR 3.13% vs BH 50/50 的 11.38%，Sharpe 0.61 vs 0.856。原因是 VIX >= 20 時強制降倉，但 VIX 20-25 區間的預期報酬其實是正的。Piecewise 的 avoidance ratio 高達 84.9%——也就是說 85% 的「避開損失」其實是避開了正報酬。如果你的風險承受度高，保守策略讓你付出太大的機會成本。如果你的風險承受度低（gamma >= 10），它的 CRRA 效用仍然有價值。",
+      "evidence": {
+        "piecewise_cagr_pct": 3.13,
+        "benchmark_cagr_pct": 11.38,
+        "piecewise_sharpe": 0.61,
+        "benchmark_sharpe": 0.856,
+        "avoidance_ratio": 0.849,
+        "opportunity_cost_pct": 72.5
+      },
+      "experiments": [
+        "K654"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": 19,
+      "question": "Codex/AI 審查重要嗎？",
+      "short_answer": "非常重要。4 次審查抓到 3 次 false positive，防止了 37.5% 的錯誤。",
+      "detailed_answer": "K700 統計：80 個實驗中有 4 次 Codex 審查，每次都抓到關鍵 bug。K618 KAN 模型實作錯誤、K621 MF2-GARCH 估計 bug、K679 VIX percentile lookahead（Sharpe 從 1.68 修正到 0.35）。如果沒有 Codex 審查，我們會發佈 3 個錯誤的「突破性發現」。教訓：任何 Sharpe > 1.0 的策略結果，在發佈前必須經過獨立審查。我們 8 個被推翻的結論中，有 3 個是 Codex 直接抓到的。",
+      "evidence": {
+        "total_codex_reviews": 4,
+        "critical_bugs_caught": 4,
+        "false_positives_prevented": 3,
+        "overturned_conclusions_total": 8,
+        "k679_buggy_sharpe": 1.68,
+        "k686_corrected_sharpe": 0.355,
+        "avg_sharpe_inflation_from_lookahead": 0.619
+      },
+      "experiments": [
+        "K700",
+        "K686",
+        "K619",
+        "K623"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": 20,
+      "question": "一句話總結？",
+      "short_answer": "「50/50 SPY/GLD，不要動，如果怕虧就用 EWMA VT。」",
+      "detailed_answer": "86 個實驗、5,088 個交易日、20 年數據的結論可以歸結為三個確定性：(1) VIX 預測波動率大小（r=0.57）但不預測方向（r=0.04）；(2) BH 50/50 SPY/GLD 在所有正確 lag 的策略中 Sharpe 最高（0.545）；(3) VT 是 drawdown insurance，gamma >= 5 投資人用 EWMA VT 效用更高。最大的教訓：簡單打敗複雜，審查打敗直覺，紀律打敗預測。",
+      "evidence": {
+        "total_experiments": 86,
+        "total_trading_days": 5088,
+        "data_years": 20,
+        "certainty_1": "VIX predicts magnitude (r=0.57), not direction (r=0.04)",
+        "certainty_2": "BH 50/50 SPY/GLD highest Sharpe (0.545) after lag correction",
+        "certainty_3": "VT is drawdown insurance for gamma >= 5 investors"
+      },
+      "experiments": [
+        "K687",
+        "K688",
+        "K697",
+        "K700",
+        "K702"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "category_breakdown": {
+    "market_prediction": [
+      1,
+      8,
+      15
+    ],
+    "asset_allocation": [
+      2,
+      5,
+      6,
+      10,
+      11
+    ],
+    "vt_strategy": [
+      3,
+      4,
+      12,
+      18
+    ],
+    "trading_execution": [
+      7,
+      9,
+      13,
+      16
+    ],
+    "drawdown_risk": [
+      14
+    ],
+    "methodology": [
+      17,
+      19
+    ],
+    "summary": [
+      20
+    ]
+  },
+  "confidence_distribution": {
+    "high": 14,
+    "medium": 6,
+    "low": 0
+  },
+  "references": [
+    "DeMiguel, Garlappi & Uppal (2009) RFS — Optimal vs Naive Diversification",
+    "Moreira & Muir (2017) JF — Volatility Managed Portfolios",
+    "Harvey et al. (2016) JFE — ...and the Cross-Section of Expected Returns",
+    "Copeland & Copeland (1999) JPC — Market Timing with VIX",
+    "RiskMetrics (1996) — Technical Document (EWMA lambda=0.94)",
+    "Arrow (1965) — Aspects of the Theory of Risk-Bearing",
+    "Pratt (1964) — Risk Aversion in the Small and in the Large",
+    "Maillard, Roncalli & Teiletche (2010) JPM — Risk Parity",
+    "Markowitz (1952) JoF — Portfolio Selection",
+    "Diebold & Mariano (1995) — Comparing Predictive Accuracy"
+  ],
+  "limitations": [
+    "All results from US/TW markets only — may not generalize globally",
+    "Data period includes specific regimes (GFC, COVID) that may not repeat",
+    "Transaction costs are estimates — actual costs depend on broker/platform",
+    "Tax implications not modeled (vary by jurisdiction)",
+    "No inflation adjustment in most experiments",
+    "0050 price is approximate and fluctuates with market",
+    "VIX is a proxy for implied volatility, not realized volatility",
+    "BTC correlation regime shift (2020) may continue to evolve"
+  ]
+}

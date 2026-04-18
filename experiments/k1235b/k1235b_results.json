@@ -1,0 +1,163 @@
+{
+  "experiment_id": "K1235b",
+  "title": "Paper 9 Table 6 A4f spec decisive replication on FEZ + STOXX50E",
+  "timestamp": "2026-04-18T07:17:47.233831",
+  "data_source": "yfinance (daily Close, auto_adjust=True)",
+  "tickers": [
+    "FEZ",
+    "^STOXX50E"
+  ],
+  "ticker_labels": {
+    "FEZ": "FEZ",
+    "^STOXX50E": "STOXX50E"
+  },
+  "spec": "A4f (Paper 9 main.tex Table 6): tau=max(theta0+theta1*VIX_{t-1}^2, 1e-16), free omega, contemporaneous u_{t-1}=r_{t-1}/sqrt(tau_t), GJR(1,1,1) short-run, joint MLE with L-BFGS-B",
+  "data_start": "2005-01-01",
+  "data_end": "2026-04-15",
+  "oos_start": "2019-01-01",
+  "window": 2000,
+  "refit_every": 63,
+  "seed": 42,
+  "paper_claims": {
+    "FEZ": 3.45,
+    "^STOXX50E": 3.64
+  },
+  "tolerance_match_lt": 0.2,
+  "tolerance_borderline_lt": 0.5,
+  "evaluation": "QLIKE on r^2 (Patton 2011), DM test with Newey-West HAC + Harvey (1997) small-sample correction; DM t positive = A4f better",
+  "results": {
+    "FEZ": {
+      "ticker": "FEZ",
+      "label": "FEZ",
+      "n_oos": 1878,
+      "oos_period": "2019-01-02 to 2026-04-14",
+      "GJR": {
+        "QLIKE": -7.910262356311021,
+        "Spearman_rho": 0.2837590343707836
+      },
+      "A4f": {
+        "QLIKE": -7.949104626076385,
+        "Spearman_rho": 0.3182239299233603
+      },
+      "QLIKE_improvement_pct": 0.49103642857527013,
+      "DM_A4f_vs_GJR": {
+        "t_stat": 3.1113969817393,
+        "t_harvey": 3.1105689321971766,
+        "p_value_raw": 0.0018620443124881536,
+        "p_value_harvey": 0.0018672730737734344,
+        "significant_harvey3": true,
+        "mean_loss_diff": 0.03884226976536414,
+        "hac_lag": 12,
+        "n_effective": 1878
+      },
+      "paper_comparison": {
+        "paper_claimed_t": 3.45,
+        "k1235b_t_harvey": 3.1105689321971766,
+        "diff": -0.3394310678028236,
+        "abs_diff": 0.3394310678028236,
+        "pct_diff": -9.838581675444162,
+        "verdict": "BORDERLINE",
+        "tolerance_match_lt": 0.2,
+        "tolerance_borderline_lt": 0.5,
+        "note": "A4f spec: tau=VIX^2 + free omega + OOS 2019-2026 + refit=63. Verdict reflects reproducibility under paper-declared spec."
+      },
+      "a4f_params": {
+        "theta0": 4.599539597672555e-06,
+        "theta1": 2.001164296394712e-07,
+        "omega_g": 0.09997487259592895,
+        "alpha": 0.029985744735665034,
+        "gamma": 0.07996190650112965,
+        "beta": 0.8798188294171743
+      }
+    },
+    "^STOXX50E": {
+      "ticker": "^STOXX50E",
+      "label": "STOXX50E",
+      "n_oos": 1878,
+      "oos_period": "2019-01-02 to 2026-04-14",
+      "GJR": {
+        "QLIKE": -8.152771854621369,
+        "Spearman_rho": 0.30275464688798054
+      },
+      "A4f": {
+        "QLIKE": -8.208559059771087,
+        "Spearman_rho": 0.3366003294879367
+      },
+      "QLIKE_improvement_pct": 0.6842728601327824,
+      "DM_A4f_vs_GJR": {
+        "t_stat": 3.9240490534162458,
+        "t_harvey": 3.923004729261848,
+        "p_value_raw": 8.707299377452848e-05,
+        "p_value_harvey": 8.745143400923361e-05,
+        "significant_harvey3": true,
+        "mean_loss_diff": 0.05578720514972108,
+        "hac_lag": 12,
+        "n_effective": 1878
+      },
+      "paper_comparison": {
+        "paper_claimed_t": 3.64,
+        "k1235b_t_harvey": 3.923004729261848,
+        "diff": 0.28300472926184783,
+        "abs_diff": 0.28300472926184783,
+        "pct_diff": 7.774855199501314,
+        "verdict": "BORDERLINE",
+        "tolerance_match_lt": 0.2,
+        "tolerance_borderline_lt": 0.5,
+        "note": "A4f spec: tau=VIX^2 + free omega + OOS 2019-2026 + refit=63. Verdict reflects reproducibility under paper-declared spec."
+      },
+      "a4f_params": {
+        "theta0": -0.005821107600881691,
+        "theta1": 0.0009301128044034251,
+        "omega_g": 3.633783857087922e-05,
+        "alpha": 0.0001,
+        "gamma": 0.14920252619359028,
+        "beta": 0.8163905511972358
+      }
+    }
+  },
+  "summary_table": [
+    {
+      "Ticker": "FEZ",
+      "Label": "FEZ",
+      "N_OOS": 1878,
+      "QLIKE_GJR": -7.910262356311021,
+      "QLIKE_A4f": -7.949104626076385,
+      "Improve_pct": 0.49103642857527013,
+      "DM_t_raw": 3.1113969817393,
+      "DM_t_harvey": 3.1105689321971766,
+      "p_harvey": 0.0018672730737734344,
+      "paper_claim": 3.45,
+      "diff": -0.3394310678028236,
+      "verdict": "BORDERLINE"
+    },
+    {
+      "Ticker": "^STOXX50E",
+      "Label": "STOXX50E",
+      "N_OOS": 1878,
+      "QLIKE_GJR": -8.152771854621369,
+      "QLIKE_A4f": -8.208559059771087,
+      "Improve_pct": 0.6842728601327824,
+      "DM_t_raw": 3.9240490534162458,
+      "DM_t_harvey": 3.923004729261848,
+      "p_harvey": 8.745143400923361e-05,
+      "paper_claim": 3.64,
+      "diff": 0.28300472926184783,
+      "verdict": "BORDERLINE"
+    }
+  ],
+  "paper9_r2_recommendation": {
+    "path": "b",
+    "code": "spec_clarification_footnote_with_borderline_note",
+    "message": "All tickers MATCH or BORDERLINE under A4f spec. Path (b): spec-clarification footnote with note on borderline divergence (|diff| < 0.5 Harvey). Errata not required."
+  },
+  "context": {
+    "prior_experiment": "K1235 (log-exp K949 spec, OOS 2016-2025, refit 21) MISMATCH: FEZ t=4.03 vs 3.45; STOXX50E t=5.01 vs 3.64",
+    "k1235b_goal": "Decisive test under paper-declared A4f spec. MATCH \u2192 path b; MISMATCH \u2192 path a errata."
+  },
+  "reproducibility": {
+    "numpy_seed": 42,
+    "mle_starts_per_fit": 3,
+    "optimizer": "scipy L-BFGS-B, maxiter=500",
+    "yfinance_mode": "auto_adjust=True"
+  }
+}

@@ -1,0 +1,1339 @@
+{
+  "experiment_id": "K641",
+  "title": "VT Strategy Performance by VIX Regime \u2014 Regime Decomposition",
+  "timestamp": "2026-03-28T19:50:28.328150+00:00",
+  "data_source": "paper_trading.json + yfinance (^VIX, SPY)",
+  "data_period": "2023-01-04 to 2026-03-27",
+  "methodology": {
+    "regime_definition": {
+      "Calm": [
+        0,
+        15
+      ],
+      "Normal": [
+        15,
+        20
+      ],
+      "Elevated": [
+        20,
+        30
+      ],
+      "Crisis": [
+        30,
+        200
+      ]
+    },
+    "rebound_window_days": 20,
+    "strategies_analyzed": [
+      "GARCH VT (SPY)",
+      "12/VIX (SPY)",
+      "Piecewise Conservative",
+      "50/50 SPY/GLD",
+      "Risk Parity (SPY+GLD)",
+      "VIX Cond Leverage",
+      "Fear DCA",
+      "Adaptive Tier"
+    ],
+    "architecture_types": {
+      "continuous": "simple_12vix",
+      "piecewise": "adaptive_tier",
+      "multi_asset": "risk_parity",
+      "conditional": "vix_cond_leverage",
+      "always_invested": "fear_dca"
+    }
+  },
+  "vix_statistics": {
+    "mean": 17.48,
+    "median": 16.64,
+    "min": 11.86,
+    "max": 52.33,
+    "regime_distribution": {
+      "Calm": 261,
+      "Normal": 394,
+      "Elevated": 163,
+      "Crisis": 14
+    }
+  },
+  "regime_performance": {
+    "slow_vt": {
+      "Calm": {
+        "n_days": 261,
+        "mean_daily_return": 0.001787,
+        "annualized_return": 0.4504,
+        "annualized_vol": 0.0861,
+        "sharpe": 5.23,
+        "avg_total_weight": 0.9191,
+        "avg_spy_weight": 0.9191,
+        "avg_gld_weight": 0.0
+      },
+      "Normal": {
+        "n_days": 392,
+        "mean_daily_return": 0.000666,
+        "annualized_return": 0.1679,
+        "annualized_vol": 0.0874,
+        "sharpe": 1.92,
+        "avg_total_weight": 0.7193,
+        "avg_spy_weight": 0.7193,
+        "avg_gld_weight": 0.0
+      },
+      "Elevated": {
+        "n_days": 143,
+        "mean_daily_return": -0.002202,
+        "annualized_return": -0.5549,
+        "annualized_vol": 0.1067,
+        "sharpe": -5.201,
+        "avg_total_weight": 0.5665,
+        "avg_spy_weight": 0.5665,
+        "avg_gld_weight": 0.0
+      },
+      "Crisis": {
+        "n_days": 14,
+        "mean_daily_return": -0.003831,
+        "annualized_return": -0.9655,
+        "annualized_vol": 0.1872,
+        "sharpe": -5.157,
+        "avg_total_weight": 0.2722,
+        "avg_spy_weight": 0.2722,
+        "avg_gld_weight": 0.0
+      }
+    },
+    "simple_12vix": {
+      "Calm": {
+        "n_days": 261,
+        "mean_daily_return": 0.001718,
+        "annualized_return": 0.4328,
+        "annualized_vol": 0.0802,
+        "sharpe": 5.399,
+        "avg_total_weight": 0.8786,
+        "avg_spy_weight": 0.8786,
+        "avg_gld_weight": 0.0
+      },
+      "Normal": {
+        "n_days": 392,
+        "mean_daily_return": 0.000636,
+        "annualized_return": 0.1602,
+        "annualized_vol": 0.0843,
+        "sharpe": 1.899,
+        "avg_total_weight": 0.6989,
+        "avg_spy_weight": 0.6989,
+        "avg_gld_weight": 0.0
+      },
+      "Elevated": {
+        "n_days": 143,
+        "mean_daily_return": -0.002026,
+        "annualized_return": -0.5104,
+        "annualized_vol": 0.1017,
+        "sharpe": -5.021,
+        "avg_total_weight": 0.5488,
+        "avg_spy_weight": 0.5488,
+        "avg_gld_weight": 0.0
+      },
+      "Crisis": {
+        "n_days": 14,
+        "mean_daily_return": -0.004561,
+        "annualized_return": -1.1494,
+        "annualized_vol": 0.2144,
+        "sharpe": -5.361,
+        "avg_total_weight": 0.3663,
+        "avg_spy_weight": 0.3663,
+        "avg_gld_weight": 0.0
+      }
+    },
+    "piecewise_conservative": {
+      "Calm": {
+        "n_days": 261,
+        "mean_daily_return": 0.001277,
+        "annualized_return": 0.3217,
+        "annualized_vol": 0.0761,
+        "sharpe": 4.23,
+        "avg_total_weight": 0.7983,
+        "avg_spy_weight": 0.3992,
+        "avg_gld_weight": 0.3992
+      },
+      "Normal": {
+        "n_days": 392,
+        "mean_daily_return": 0.00052,
+        "annualized_return": 0.131,
+        "annualized_vol": 0.0428,
+        "sharpe": 3.061,
+        "avg_total_weight": 0.3482,
+        "avg_spy_weight": 0.1741,
+        "avg_gld_weight": 0.1741
+      },
+      "Elevated": {
+        "n_days": 143,
+        "mean_daily_return": 0.0,
+        "annualized_return": 0.0,
+        "annualized_vol": 0.0,
+        "sharpe": 0.0,
+        "avg_total_weight": 0.0,
+        "avg_spy_weight": 0.0,
+        "avg_gld_weight": 0.0
+      },
+      "Crisis": {
+        "n_days": 14,
+        "mean_daily_return": 0.0,
+        "annualized_return": 0.0,
+        "annualized_vol": 0.0,
+        "sharpe": 0.0,
+        "avg_total_weight": 0.0,
+        "avg_spy_weight": 0.0,
+        "avg_gld_weight": 0.0
+      }
+    },
+    "recommended_5050": {
+      "Calm": {
+        "n_days": 261,
+        "mean_daily_return": 0.001271,
+        "annualized_return": 0.3204,
+        "annualized_vol": 0.0844,
+        "sharpe": 3.798,
+        "avg_total_weight": 0.8786,
+        "avg_spy_weight": 0.4393,
+        "avg_gld_weight": 0.4393
+      },
+      "Normal": {
+        "n_days": 392,
+        "mean_daily_return": 0.000756,
+        "annualized_return": 0.1905,
+        "annualized_vol": 0.0822,
+        "sharpe": 2.319,
+        "avg_total_weight": 0.6989,
+        "avg_spy_weight": 0.3495,
+        "avg_gld_weight": 0.3495
+      },
+      "Elevated": {
+        "n_days": 143,
+        "mean_daily_return": -0.000676,
+        "annualized_return": -0.1704,
+        "annualized_vol": 0.0849,
+        "sharpe": -2.007,
+        "avg_total_weight": 0.5489,
+        "avg_spy_weight": 0.2745,
+        "avg_gld_weight": 0.2745
+      },
+      "Crisis": {
+        "n_days": 14,
+        "mean_daily_return": -0.001568,
+        "annualized_return": -0.3952,
+        "annualized_vol": 0.1333,
+        "sharpe": -2.965,
+        "avg_total_weight": 0.367,
+        "avg_spy_weight": 0.1835,
+        "avg_gld_weight": 0.1835
+      }
+    },
+    "risk_parity": {
+      "Calm": {
+        "n_days": 261,
+        "mean_daily_return": 0.002146,
+        "annualized_return": 0.5408,
+        "annualized_vol": 0.1273,
+        "sharpe": 4.247,
+        "avg_total_weight": 1.4115,
+        "avg_spy_weight": 0.7821,
+        "avg_gld_weight": 0.6294
+      },
+      "Normal": {
+        "n_days": 392,
+        "mean_daily_return": 0.001305,
+        "annualized_return": 0.329,
+        "annualized_vol": 0.1246,
+        "sharpe": 2.639,
+        "avg_total_weight": 1.212,
+        "avg_spy_weight": 0.649,
+        "avg_gld_weight": 0.5629
+      },
+      "Elevated": {
+        "n_days": 143,
+        "mean_daily_return": -0.001252,
+        "annualized_return": -0.3155,
+        "annualized_vol": 0.139,
+        "sharpe": -2.27,
+        "avg_total_weight": 0.9961,
+        "avg_spy_weight": 0.5158,
+        "avg_gld_weight": 0.4803
+      },
+      "Crisis": {
+        "n_days": 14,
+        "mean_daily_return": -0.001447,
+        "annualized_return": -0.3647,
+        "annualized_vol": 0.2749,
+        "sharpe": -1.327,
+        "avg_total_weight": 0.6744,
+        "avg_spy_weight": 0.215,
+        "avg_gld_weight": 0.4594
+      }
+    },
+    "vix_cond_leverage": {
+      "Calm": {
+        "n_days": 261,
+        "mean_daily_return": 0.002087,
+        "annualized_return": 0.5259,
+        "annualized_vol": 0.1258,
+        "sharpe": 4.18,
+        "avg_total_weight": 1.3265,
+        "avg_spy_weight": 0.6633,
+        "avg_gld_weight": 0.6633
+      },
+      "Normal": {
+        "n_days": 392,
+        "mean_daily_return": 0.000913,
+        "annualized_return": 0.23,
+        "annualized_vol": 0.082,
+        "sharpe": 2.807,
+        "avg_total_weight": 0.7016,
+        "avg_spy_weight": 0.3508,
+        "avg_gld_weight": 0.3508
+      },
+      "Elevated": {
+        "n_days": 143,
+        "mean_daily_return": -0.000418,
+        "annualized_return": -0.1054,
+        "annualized_vol": 0.0783,
+        "sharpe": -1.347,
+        "avg_total_weight": 0.534,
+        "avg_spy_weight": 0.267,
+        "avg_gld_weight": 0.267
+      },
+      "Crisis": {
+        "n_days": 14,
+        "mean_daily_return": 0.000197,
+        "annualized_return": 0.0496,
+        "annualized_vol": 0.1391,
+        "sharpe": 0.356,
+        "avg_total_weight": 0.3371,
+        "avg_spy_weight": 0.1686,
+        "avg_gld_weight": 0.1686
+      }
+    },
+    "fear_dca": {
+      "Calm": {
+        "n_days": 261,
+        "mean_daily_return": 0.002149,
+        "annualized_return": 0.5416,
+        "annualized_vol": 0.0914,
+        "sharpe": 5.926,
+        "avg_total_weight": 0.5,
+        "avg_spy_weight": 0.5,
+        "avg_gld_weight": 0.0
+      },
+      "Normal": {
+        "n_days": 392,
+        "mean_daily_return": 0.001291,
+        "annualized_return": 0.3252,
+        "annualized_vol": 0.1231,
+        "sharpe": 2.642,
+        "avg_total_weight": 1.0,
+        "avg_spy_weight": 1.0,
+        "avg_gld_weight": 0.0
+      },
+      "Elevated": {
+        "n_days": 143,
+        "mean_daily_return": -0.002602,
+        "annualized_return": -0.6557,
+        "annualized_vol": 0.176,
+        "sharpe": -3.726,
+        "avg_total_weight": 1.0839,
+        "avg_spy_weight": 1.0839,
+        "avg_gld_weight": 0.0
+      },
+      "Crisis": {
+        "n_days": 14,
+        "mean_daily_return": -0.007537,
+        "annualized_return": -1.8993,
+        "annualized_vol": 0.6464,
+        "sharpe": -2.938,
+        "avg_total_weight": 1.5,
+        "avg_spy_weight": 1.5,
+        "avg_gld_weight": 0.0
+      }
+    },
+    "adaptive_tier": {
+      "Calm": {
+        "n_days": 261,
+        "mean_daily_return": 0.002087,
+        "annualized_return": 0.5259,
+        "annualized_vol": 0.1258,
+        "sharpe": 4.18,
+        "avg_total_weight": 1.3265,
+        "avg_spy_weight": 0.6633,
+        "avg_gld_weight": 0.6633
+      },
+      "Normal": {
+        "n_days": 392,
+        "mean_daily_return": 0.000913,
+        "annualized_return": 0.23,
+        "annualized_vol": 0.082,
+        "sharpe": 2.807,
+        "avg_total_weight": 0.7016,
+        "avg_spy_weight": 0.3508,
+        "avg_gld_weight": 0.3508
+      },
+      "Elevated": {
+        "n_days": 143,
+        "mean_daily_return": -5.2e-05,
+        "annualized_return": -0.013,
+        "annualized_vol": 0.0098,
+        "sharpe": -1.327,
+        "avg_total_weight": 0.0042,
+        "avg_spy_weight": 0.0021,
+        "avg_gld_weight": 0.0021
+      },
+      "Crisis": {
+        "n_days": 14,
+        "mean_daily_return": 0.0,
+        "annualized_return": 0.0,
+        "annualized_vol": 0.0,
+        "sharpe": 0.0,
+        "avg_total_weight": 0.0,
+        "avg_spy_weight": 0.0,
+        "avg_gld_weight": 0.0
+      }
+    }
+  },
+  "rebound_analysis": {
+    "ep1_2024-08-05": {
+      "crisis_start": "2024-08-05",
+      "crisis_end": "2024-08-05",
+      "peak_vix": 38.6,
+      "crisis_days": 1,
+      "rebound_days": 20,
+      "spy_bh_rebound": 0.0671,
+      "strategies": {
+        "slow_vt": {
+          "crisis_return": -0.0149,
+          "crisis_avg_weight": 0.513,
+          "rebound_return": 0.0254,
+          "rebound_avg_weight": 0.6383
+        },
+        "simple_12vix": {
+          "crisis_return": -0.0149,
+          "crisis_avg_weight": 0.513,
+          "rebound_return": 0.0348,
+          "rebound_avg_weight": 0.6696
+        },
+        "piecewise_conservative": {
+          "crisis_return": 0.0,
+          "crisis_avg_weight": 0.0,
+          "rebound_return": 0.0224,
+          "rebound_avg_weight": 0.35
+        },
+        "recommended_5050": {
+          "crisis_return": -0.0107,
+          "crisis_avg_weight": 0.513,
+          "rebound_return": 0.0287,
+          "rebound_avg_weight": 0.6696
+        },
+        "risk_parity": {
+          "crisis_return": -0.0212,
+          "crisis_avg_weight": 1.0221,
+          "rebound_return": 0.0393,
+          "rebound_avg_weight": 1.046
+        },
+        "vix_cond_leverage": {
+          "crisis_return": -0.0067,
+          "crisis_avg_weight": 0.32,
+          "rebound_return": 0.0433,
+          "rebound_avg_weight": 0.723
+        },
+        "fear_dca": {
+          "crisis_return": -0.0291,
+          "crisis_avg_weight": 1.5,
+          "rebound_return": 0.0671,
+          "rebound_avg_weight": 1.0
+        },
+        "adaptive_tier": {
+          "crisis_return": 0.0,
+          "crisis_avg_weight": 0.0,
+          "rebound_return": 0.0348,
+          "rebound_avg_weight": 0.567
+        }
+      },
+      "spy_bh_crisis": -0.0291
+    },
+    "ep2_2025-04-03": {
+      "crisis_start": "2025-04-03",
+      "crisis_end": "2025-04-22",
+      "peak_vix": 52.3,
+      "crisis_days": 13,
+      "rebound_days": 20,
+      "spy_bh_rebound": 0.1244,
+      "strategies": {
+        "slow_vt": {
+          "crisis_return": -0.0386,
+          "crisis_avg_weight": 0.2387,
+          "rebound_return": 0.0499,
+          "rebound_avg_weight": 0.4583
+        },
+        "simple_12vix": {
+          "crisis_return": -0.0484,
+          "crisis_avg_weight": 0.3532,
+          "rebound_return": 0.0606,
+          "rebound_avg_weight": 0.5398
+        },
+        "piecewise_conservative": {
+          "crisis_return": 0.0,
+          "crisis_avg_weight": 0.0,
+          "rebound_return": 0.0053,
+          "rebound_avg_weight": 0.085
+        },
+        "recommended_5050": {
+          "crisis_return": -0.0121,
+          "crisis_avg_weight": 0.3532,
+          "rebound_return": 0.0271,
+          "rebound_avg_weight": 0.5398
+        },
+        "risk_parity": {
+          "crisis_return": -0.0022,
+          "crisis_avg_weight": 0.6417,
+          "rebound_return": 0.0293,
+          "rebound_avg_weight": 0.6832
+        },
+        "vix_cond_leverage": {
+          "crisis_return": 0.0084,
+          "crisis_avg_weight": 0.34,
+          "rebound_return": 0.0275,
+          "rebound_avg_weight": 0.552
+        },
+        "fear_dca": {
+          "crisis_return": -0.066,
+          "crisis_avg_weight": 1.5,
+          "rebound_return": 0.1244,
+          "rebound_avg_weight": 1.075
+        },
+        "adaptive_tier": {
+          "crisis_return": 0.0,
+          "crisis_avg_weight": 0.0,
+          "rebound_return": 0.0136,
+          "rebound_avg_weight": 0.233
+        }
+      },
+      "spy_bh_crisis": -0.066
+    }
+  },
+  "transition_analysis": {
+    "Calm\u2192Normal": {
+      "count": 30,
+      "strategies": {
+        "slow_vt": {
+          "mean_return": -0.005707,
+          "n_obs": 30,
+          "avg_weight": 0.8422
+        },
+        "simple_12vix": {
+          "mean_return": -0.005564,
+          "n_obs": 30,
+          "avg_weight": 0.8239
+        },
+        "piecewise_conservative": {
+          "mean_return": -0.001804,
+          "n_obs": 30,
+          "avg_weight": 0.5247
+        },
+        "recommended_5050": {
+          "mean_return": -0.003453,
+          "n_obs": 30,
+          "avg_weight": 0.8239
+        },
+        "risk_parity": {
+          "mean_return": -0.00565,
+          "n_obs": 30,
+          "avg_weight": 1.3536
+        },
+        "vix_cond_leverage": {
+          "mean_return": -0.003052,
+          "n_obs": 30,
+          "avg_weight": 0.762
+        },
+        "fear_dca": {
+          "mean_return": -0.006749,
+          "n_obs": 30,
+          "avg_weight": 1.0
+        },
+        "adaptive_tier": {
+          "mean_return": -0.003052,
+          "n_obs": 30,
+          "avg_weight": 0.762
+        }
+      }
+    },
+    "Crisis\u2192Elevated": {
+      "count": 3,
+      "strategies": {
+        "slow_vt": {
+          "mean_return": 0.002414,
+          "n_obs": 3,
+          "avg_weight": 0.2568
+        },
+        "simple_12vix": {
+          "mean_return": 0.003159,
+          "n_obs": 3,
+          "avg_weight": 0.3571
+        },
+        "piecewise_conservative": {
+          "mean_return": 0.0,
+          "n_obs": 3,
+          "avg_weight": 0.0
+        },
+        "recommended_5050": {
+          "mean_return": -0.000673,
+          "n_obs": 3,
+          "avg_weight": 0.3571
+        },
+        "risk_parity": {
+          "mean_return": -0.001902,
+          "n_obs": 3,
+          "avg_weight": 0.674
+        },
+        "vix_cond_leverage": {
+          "mean_return": -0.000702,
+          "n_obs": 3,
+          "avg_weight": 0.42
+        },
+        "fear_dca": {
+          "mean_return": 0.008714,
+          "n_obs": 3,
+          "avg_weight": 1.5
+        },
+        "adaptive_tier": {
+          "mean_return": 0.0,
+          "n_obs": 3,
+          "avg_weight": 0.0
+        }
+      }
+    },
+    "Elevated\u2192Crisis": {
+      "count": 4,
+      "strategies": {
+        "slow_vt": {
+          "mean_return": -0.011409,
+          "n_obs": 4,
+          "avg_weight": 0.4067
+        },
+        "simple_12vix": {
+          "mean_return": -0.013017,
+          "n_obs": 4,
+          "avg_weight": 0.4664
+        },
+        "piecewise_conservative": {
+          "mean_return": 0.0,
+          "n_obs": 4,
+          "avg_weight": 0.0
+        },
+        "recommended_5050": {
+          "mean_return": -0.006179,
+          "n_obs": 4,
+          "avg_weight": 0.4689
+        },
+        "risk_parity": {
+          "mean_return": -0.008957,
+          "n_obs": 4,
+          "avg_weight": 0.7738
+        },
+        "vix_cond_leverage": {
+          "mean_return": -0.004118,
+          "n_obs": 4,
+          "avg_weight": 0.365
+        },
+        "fear_dca": {
+          "mean_return": -0.029815,
+          "n_obs": 4,
+          "avg_weight": 1.5
+        },
+        "adaptive_tier": {
+          "mean_return": 0.0,
+          "n_obs": 4,
+          "avg_weight": 0.0
+        }
+      }
+    },
+    "Elevated\u2192Normal": {
+      "count": 34,
+      "strategies": {
+        "slow_vt": {
+          "mean_return": 0.006084,
+          "n_obs": 34,
+          "avg_weight": 0.6032
+        },
+        "simple_12vix": {
+          "mean_return": 0.005773,
+          "n_obs": 34,
+          "avg_weight": 0.5758
+        },
+        "piecewise_conservative": {
+          "mean_return": 0.000912,
+          "n_obs": 34,
+          "avg_weight": 0.1318
+        },
+        "recommended_5050": {
+          "mean_return": 0.003192,
+          "n_obs": 34,
+          "avg_weight": 0.5758
+        },
+        "risk_parity": {
+          "mean_return": 0.00562,
+          "n_obs": 34,
+          "avg_weight": 1.0781
+        },
+        "vix_cond_leverage": {
+          "mean_return": 0.003634,
+          "n_obs": 34,
+          "avg_weight": 0.6359
+        },
+        "fear_dca": {
+          "mean_return": 0.010194,
+          "n_obs": 34,
+          "avg_weight": 1.0
+        },
+        "adaptive_tier": {
+          "mean_return": 0.003634,
+          "n_obs": 34,
+          "avg_weight": 0.6359
+        }
+      }
+    },
+    "Normal\u2192Calm": {
+      "count": 30,
+      "strategies": {
+        "slow_vt": {
+          "mean_return": 0.005754,
+          "n_obs": 30,
+          "avg_weight": 0.8276
+        },
+        "simple_12vix": {
+          "mean_return": 0.005294,
+          "n_obs": 30,
+          "avg_weight": 0.7722
+        },
+        "piecewise_conservative": {
+          "mean_return": 0.002318,
+          "n_obs": 30,
+          "avg_weight": 0.6647
+        },
+        "recommended_5050": {
+          "mean_return": 0.002579,
+          "n_obs": 30,
+          "avg_weight": 0.7722
+        },
+        "risk_parity": {
+          "mean_return": 0.004648,
+          "n_obs": 30,
+          "avg_weight": 1.3069
+        },
+        "vix_cond_leverage": {
+          "mean_return": 0.00424,
+          "n_obs": 30,
+          "avg_weight": 1.2273
+        },
+        "fear_dca": {
+          "mean_return": 0.007013,
+          "n_obs": 30,
+          "avg_weight": 0.5
+        },
+        "adaptive_tier": {
+          "mean_return": 0.00424,
+          "n_obs": 30,
+          "avg_weight": 1.2273
+        }
+      }
+    },
+    "Normal\u2192Elevated": {
+      "count": 35,
+      "strategies": {
+        "slow_vt": {
+          "mean_return": -0.008851,
+          "n_obs": 34,
+          "avg_weight": 0.6845
+        },
+        "simple_12vix": {
+          "mean_return": -0.008323,
+          "n_obs": 34,
+          "avg_weight": 0.6509
+        },
+        "piecewise_conservative": {
+          "mean_return": 0.0,
+          "n_obs": 34,
+          "avg_weight": 0.0
+        },
+        "recommended_5050": {
+          "mean_return": -0.003649,
+          "n_obs": 34,
+          "avg_weight": 0.651
+        },
+        "risk_parity": {
+          "mean_return": -0.007254,
+          "n_obs": 34,
+          "avg_weight": 1.1643
+        },
+        "vix_cond_leverage": {
+          "mean_return": -0.002997,
+          "n_obs": 34,
+          "avg_weight": 0.5682
+        },
+        "fear_dca": {
+          "mean_return": -0.01245,
+          "n_obs": 34,
+          "avg_weight": 1.0147
+        },
+        "adaptive_tier": {
+          "mean_return": -0.000218,
+          "n_obs": 34,
+          "avg_weight": 0.0176
+        }
+      }
+    }
+  },
+  "net_regime_value": {
+    "slow_vt": {
+      "protection_during_crisis": 0.0568,
+      "spy_crisis_return": -0.11,
+      "strategy_crisis_return": -0.0532,
+      "opportunity_cost_calm": 0.1561,
+      "spy_calm_return": 0.7438,
+      "strategy_calm_return": 0.5877,
+      "rebound_missed": 0.1162,
+      "net_regime_value": -0.2155
+    },
+    "simple_12vix": {
+      "protection_during_crisis": 0.0468,
+      "spy_crisis_return": -0.11,
+      "strategy_crisis_return": -0.0631,
+      "opportunity_cost_calm": 0.1839,
+      "spy_calm_return": 0.7438,
+      "strategy_calm_return": 0.5599,
+      "rebound_missed": 0.0961,
+      "net_regime_value": -0.2332
+    },
+    "piecewise_conservative": {
+      "protection_during_crisis": 0.11,
+      "spy_crisis_return": -0.11,
+      "strategy_crisis_return": 0.0,
+      "opportunity_cost_calm": 0.3527,
+      "spy_calm_return": 0.7438,
+      "strategy_calm_return": 0.391,
+      "rebound_missed": 0.1638,
+      "net_regime_value": -0.4066
+    },
+    "recommended_5050": {
+      "protection_during_crisis": 0.0878,
+      "spy_crisis_return": -0.11,
+      "strategy_crisis_return": -0.0222,
+      "opportunity_cost_calm": 0.3557,
+      "spy_calm_return": 0.7438,
+      "strategy_calm_return": 0.3881,
+      "rebound_missed": 0.1357,
+      "net_regime_value": -0.4036
+    },
+    "risk_parity": {
+      "protection_during_crisis": 0.088,
+      "spy_crisis_return": -0.11,
+      "strategy_crisis_return": -0.022,
+      "opportunity_cost_calm": 0.0084,
+      "spy_calm_return": 0.7438,
+      "strategy_calm_return": 0.7353,
+      "rebound_missed": 0.1229,
+      "net_regime_value": -0.0434
+    },
+    "vix_cond_leverage": {
+      "protection_during_crisis": 0.1122,
+      "spy_crisis_return": -0.11,
+      "strategy_crisis_return": 0.0023,
+      "opportunity_cost_calm": 0.0347,
+      "spy_calm_return": 0.7438,
+      "strategy_calm_return": 0.7091,
+      "rebound_missed": 0.1207,
+      "net_regime_value": -0.0432
+    },
+    "fear_dca": {
+      "protection_during_crisis": -0.0,
+      "spy_crisis_return": -0.11,
+      "strategy_crisis_return": -0.11,
+      "opportunity_cost_calm": 0.0,
+      "spy_calm_return": 0.7438,
+      "strategy_calm_return": 0.7438,
+      "rebound_missed": 0.0,
+      "net_regime_value": -0.0
+    },
+    "adaptive_tier": {
+      "protection_during_crisis": 0.11,
+      "spy_crisis_return": -0.11,
+      "strategy_crisis_return": 0.0,
+      "opportunity_cost_calm": 0.0347,
+      "spy_calm_return": 0.7438,
+      "strategy_calm_return": 0.7091,
+      "rebound_missed": 0.1431,
+      "net_regime_value": -0.0678
+    }
+  },
+  "architecture_comparison": {
+    "continuous": {
+      "strategies": [
+        "GARCH VT (SPY)",
+        "12/VIX (SPY)"
+      ],
+      "regimes": {
+        "Calm": {
+          "avg_ann_return": 0.4416,
+          "avg_weight": 0.8989,
+          "avg_sharpe": 5.315
+        },
+        "Normal": {
+          "avg_ann_return": 0.1641,
+          "avg_weight": 0.7091,
+          "avg_sharpe": 1.909
+        },
+        "Elevated": {
+          "avg_ann_return": -0.5326,
+          "avg_weight": 0.5576,
+          "avg_sharpe": -5.111
+        },
+        "Crisis": {
+          "avg_ann_return": -1.0575,
+          "avg_weight": 0.3193,
+          "avg_sharpe": -5.259
+        }
+      },
+      "avg_net_regime_value": -0.2243
+    },
+    "piecewise": {
+      "strategies": [
+        "Piecewise Conservative",
+        "Adaptive Tier"
+      ],
+      "regimes": {
+        "Calm": {
+          "avg_ann_return": 0.4238,
+          "avg_weight": 1.0624,
+          "avg_sharpe": 4.205
+        },
+        "Normal": {
+          "avg_ann_return": 0.1805,
+          "avg_weight": 0.5249,
+          "avg_sharpe": 2.934
+        },
+        "Elevated": {
+          "avg_ann_return": -0.0065,
+          "avg_weight": 0.0021,
+          "avg_sharpe": -0.663
+        },
+        "Crisis": {
+          "avg_ann_return": 0.0,
+          "avg_weight": 0.0,
+          "avg_sharpe": 0.0
+        }
+      },
+      "avg_net_regime_value": -0.2372
+    },
+    "multi_asset": {
+      "strategies": [
+        "50/50 SPY/GLD",
+        "Risk Parity (SPY+GLD)"
+      ],
+      "regimes": {
+        "Calm": {
+          "avg_ann_return": 0.4306,
+          "avg_weight": 1.145,
+          "avg_sharpe": 4.022
+        },
+        "Normal": {
+          "avg_ann_return": 0.2598,
+          "avg_weight": 0.9554,
+          "avg_sharpe": 2.479
+        },
+        "Elevated": {
+          "avg_ann_return": -0.2429,
+          "avg_weight": 0.7725,
+          "avg_sharpe": -2.139
+        },
+        "Crisis": {
+          "avg_ann_return": -0.38,
+          "avg_weight": 0.5207,
+          "avg_sharpe": -2.146
+        }
+      },
+      "avg_net_regime_value": -0.2235
+    },
+    "conditional": {
+      "strategies": [
+        "VIX Cond Leverage"
+      ],
+      "regimes": {
+        "Calm": {
+          "avg_ann_return": 0.5259,
+          "avg_weight": 1.3265,
+          "avg_sharpe": 4.18
+        },
+        "Normal": {
+          "avg_ann_return": 0.23,
+          "avg_weight": 0.7016,
+          "avg_sharpe": 2.807
+        },
+        "Elevated": {
+          "avg_ann_return": -0.1054,
+          "avg_weight": 0.534,
+          "avg_sharpe": -1.347
+        },
+        "Crisis": {
+          "avg_ann_return": 0.0496,
+          "avg_weight": 0.3371,
+          "avg_sharpe": 0.356
+        }
+      },
+      "avg_net_regime_value": -0.0432
+    },
+    "always_invested": {
+      "strategies": [
+        "Fear DCA"
+      ],
+      "regimes": {
+        "Calm": {
+          "avg_ann_return": 0.5416,
+          "avg_weight": 0.5,
+          "avg_sharpe": 5.926
+        },
+        "Normal": {
+          "avg_ann_return": 0.3252,
+          "avg_weight": 1.0,
+          "avg_sharpe": 2.642
+        },
+        "Elevated": {
+          "avg_ann_return": -0.6557,
+          "avg_weight": 1.0839,
+          "avg_sharpe": -3.726
+        },
+        "Crisis": {
+          "avg_ann_return": -1.8993,
+          "avg_weight": 1.5,
+          "avg_sharpe": -2.938
+        }
+      },
+      "avg_net_regime_value": 0.0
+    }
+  },
+  "weight_dynamics": {
+    "Crisis\u2192Elevated": {
+      "slow_vt": {
+        "avg_weight_before": 0.3329,
+        "avg_weight_after": 0.3219,
+        "weight_change": -0.011
+      },
+      "simple_12vix": {
+        "avg_weight_before": 0.4643,
+        "avg_weight_after": 0.4426,
+        "weight_change": -0.0217
+      },
+      "piecewise_conservative": {
+        "avg_weight_before": 0.0613,
+        "avg_weight_after": 0.0133,
+        "weight_change": -0.048
+      },
+      "recommended_5050": {
+        "avg_weight_before": 0.4643,
+        "avg_weight_after": 0.4426,
+        "weight_change": -0.0217
+      },
+      "risk_parity": {
+        "avg_weight_before": 0.6821,
+        "avg_weight_after": 0.657,
+        "weight_change": -0.0251
+      },
+      "vix_cond_leverage": {
+        "avg_weight_before": 0.4387,
+        "avg_weight_after": 0.4744,
+        "weight_change": 0.0358
+      },
+      "fear_dca": {
+        "avg_weight_before": 1.3667,
+        "avg_weight_after": 1.2778,
+        "weight_change": -0.0889
+      },
+      "adaptive_tier": {
+        "avg_weight_before": 0.1373,
+        "avg_weight_after": 0.0367,
+        "weight_change": -0.1007
+      }
+    },
+    "Elevated\u2192Crisis": {
+      "slow_vt": {
+        "avg_weight_before": 0.4578,
+        "avg_weight_after": 0.3374,
+        "weight_change": -0.1205
+      },
+      "simple_12vix": {
+        "avg_weight_before": 0.5246,
+        "avg_weight_after": 0.404,
+        "weight_change": -0.1206
+      },
+      "piecewise_conservative": {
+        "avg_weight_before": 0.075,
+        "avg_weight_after": 0.0,
+        "weight_change": -0.075
+      },
+      "recommended_5050": {
+        "avg_weight_before": 0.5251,
+        "avg_weight_after": 0.4065,
+        "weight_change": -0.1186
+      },
+      "risk_parity": {
+        "avg_weight_before": 0.8079,
+        "avg_weight_after": 0.7017,
+        "weight_change": -0.1062
+      },
+      "vix_cond_leverage": {
+        "avg_weight_before": 0.514,
+        "avg_weight_after": 0.3975,
+        "weight_change": -0.1165
+      },
+      "fear_dca": {
+        "avg_weight_before": 1.25,
+        "avg_weight_after": 1.4167,
+        "weight_change": 0.1667
+      },
+      "adaptive_tier": {
+        "avg_weight_before": 0.171,
+        "avg_weight_after": 0.0,
+        "weight_change": -0.171
+      }
+    },
+    "Normal\u2192Elevated": {
+      "slow_vt": {
+        "avg_weight_before": 0.6932,
+        "avg_weight_after": 0.6211,
+        "weight_change": -0.0721
+      },
+      "simple_12vix": {
+        "avg_weight_before": 0.671,
+        "avg_weight_after": 0.5959,
+        "weight_change": -0.075
+      },
+      "piecewise_conservative": {
+        "avg_weight_before": 0.2404,
+        "avg_weight_after": 0.0884,
+        "weight_change": -0.1519
+      },
+      "recommended_5050": {
+        "avg_weight_before": 0.671,
+        "avg_weight_after": 0.596,
+        "weight_change": -0.075
+      },
+      "risk_parity": {
+        "avg_weight_before": 1.1787,
+        "avg_weight_after": 1.0834,
+        "weight_change": -0.0953
+      },
+      "vix_cond_leverage": {
+        "avg_weight_before": 0.6782,
+        "avg_weight_after": 0.5933,
+        "weight_change": -0.0849
+      },
+      "fear_dca": {
+        "avg_weight_before": 0.9853,
+        "avg_weight_after": 1.0319,
+        "weight_change": 0.0466
+      },
+      "adaptive_tier": {
+        "avg_weight_before": 0.5832,
+        "avg_weight_after": 0.2609,
+        "weight_change": -0.3223
+      }
+    },
+    "Elevated\u2192Normal": {
+      "slow_vt": {
+        "avg_weight_before": 0.6572,
+        "avg_weight_after": 0.6392,
+        "weight_change": -0.018
+      },
+      "simple_12vix": {
+        "avg_weight_before": 0.6249,
+        "avg_weight_after": 0.6345,
+        "weight_change": 0.0096
+      },
+      "piecewise_conservative": {
+        "avg_weight_before": 0.1229,
+        "avg_weight_after": 0.2067,
+        "weight_change": 0.0837
+      },
+      "recommended_5050": {
+        "avg_weight_before": 0.6249,
+        "avg_weight_after": 0.6345,
+        "weight_change": 0.0096
+      },
+      "risk_parity": {
+        "avg_weight_before": 1.1267,
+        "avg_weight_after": 1.065,
+        "weight_change": -0.0617
+      },
+      "vix_cond_leverage": {
+        "avg_weight_before": 0.6167,
+        "avg_weight_after": 0.6702,
+        "weight_change": 0.0535
+      },
+      "fear_dca": {
+        "avg_weight_before": 1.0088,
+        "avg_weight_after": 0.9779,
+        "weight_change": -0.0309
+      },
+      "adaptive_tier": {
+        "avg_weight_before": 0.2879,
+        "avg_weight_after": 0.5454,
+        "weight_change": 0.2575
+      }
+    }
+  },
+  "tariff_shock_2025": {
+    "slow_vt": {
+      "pre_shock_return": -0.046,
+      "shock_return": -0.0396,
+      "recovery_return": 0.0435,
+      "total_return": -0.0439,
+      "shock_avg_weight": 0.4096,
+      "recovery_avg_weight": 0.5599
+    },
+    "simple_12vix": {
+      "pre_shock_return": -0.0399,
+      "shock_return": -0.0433,
+      "recovery_return": 0.047,
+      "total_return": -0.0383,
+      "shock_avg_weight": 0.4729,
+      "recovery_avg_weight": 0.5934
+    },
+    "piecewise_conservative": {
+      "pre_shock_return": 0.0183,
+      "shock_return": 0.0026,
+      "recovery_return": 0.0082,
+      "total_return": 0.0293,
+      "shock_avg_weight": 0.0341,
+      "recovery_avg_weight": 0.1313
+    },
+    "recommended_5050": {
+      "pre_shock_return": -0.0006,
+      "shock_return": 0.0061,
+      "recovery_return": 0.0292,
+      "total_return": 0.0348,
+      "shock_avg_weight": 0.4729,
+      "recovery_avg_weight": 0.5934
+    },
+    "risk_parity": {
+      "pre_shock_return": 0.0031,
+      "shock_return": 0.0355,
+      "recovery_return": 0.038,
+      "total_return": 0.0783,
+      "shock_avg_weight": 0.8247,
+      "recovery_avg_weight": 0.816
+    },
+    "vix_cond_leverage": {
+      "pre_shock_return": 0.0048,
+      "shock_return": 0.0324,
+      "recovery_return": 0.0294,
+      "total_return": 0.0679,
+      "shock_avg_weight": 0.4724,
+      "recovery_avg_weight": 0.6
+    },
+    "fear_dca": {
+      "pre_shock_return": -0.0555,
+      "shock_return": -0.041,
+      "recovery_return": 0.0891,
+      "total_return": -0.0136,
+      "shock_avg_weight": 1.25,
+      "recovery_avg_weight": 1.0167
+    },
+    "adaptive_tier": {
+      "pre_shock_return": 0.0161,
+      "shock_return": 0.007,
+      "recovery_return": 0.0223,
+      "total_return": 0.0461,
+      "shock_avg_weight": 0.1324,
+      "recovery_avg_weight": 0.3753
+    }
+  },
+  "overall_performance": {
+    "slow_vt": {
+      "total_return": 0.411,
+      "annualized_return": 0.1131,
+      "annualized_vol": 0.0958,
+      "sharpe": 1.18,
+      "max_drawdown": -0.1072,
+      "n_days": 810,
+      "avg_weight": 0.749,
+      "architecture": "continuous"
+    },
+    "simple_12vix": {
+      "total_return": 0.3911,
+      "annualized_return": 0.1082,
+      "annualized_vol": 0.0926,
+      "sharpe": 1.168,
+      "max_drawdown": -0.1099,
+      "n_days": 810,
+      "avg_weight": 0.7246,
+      "architecture": "continuous"
+    },
+    "piecewise_conservative": {
+      "total_return": 0.7028,
+      "annualized_return": 0.1801,
+      "annualized_vol": 0.0529,
+      "sharpe": 3.405,
+      "max_drawdown": -0.0248,
+      "n_days": 810,
+      "avg_weight": 0.4258,
+      "architecture": "piecewise"
+    },
+    "recommended_5050": {
+      "total_return": 0.645,
+      "annualized_return": 0.1675,
+      "annualized_vol": 0.085,
+      "sharpe": 1.969,
+      "max_drawdown": -0.0767,
+      "n_days": 810,
+      "avg_weight": 0.7246,
+      "architecture": "multi_asset"
+    },
+    "risk_parity": {
+      "total_return": 1.3249,
+      "annualized_return": 0.3002,
+      "annualized_vol": 0.133,
+      "sharpe": 2.256,
+      "max_drawdown": -0.1148,
+      "n_days": 810,
+      "avg_weight": 1.2289,
+      "architecture": "multi_asset"
+    },
+    "vix_cond_leverage": {
+      "total_return": 1.2913,
+      "annualized_return": 0.2943,
+      "annualized_vol": 0.0995,
+      "sharpe": 2.956,
+      "max_drawdown": -0.0641,
+      "n_days": 810,
+      "avg_weight": 0.8671,
+      "architecture": "conditional"
+    },
+    "fear_dca": {
+      "total_return": 0.7369,
+      "annualized_return": 0.1874,
+      "annualized_vol": 0.1522,
+      "sharpe": 1.232,
+      "max_drawdown": -0.1876,
+      "n_days": 810,
+      "avg_weight": 0.8623,
+      "architecture": "always_invested"
+    },
+    "adaptive_tier": {
+      "total_return": 1.4133,
+      "annualized_return": 0.3153,
+      "annualized_vol": 0.0922,
+      "sharpe": 3.42,
+      "max_drawdown": -0.0506,
+      "n_days": 810,
+      "avg_weight": 0.7677,
+      "architecture": "piecewise"
+    }
+  },
+  "spy_benchmark": {
+    "total_return": 0.7369,
+    "annualized_return": 0.1874,
+    "annualized_vol": 0.1522,
+    "sharpe": 1.232,
+    "max_drawdown": -0.1876
+  }
+}

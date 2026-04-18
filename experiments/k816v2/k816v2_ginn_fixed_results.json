@@ -1,0 +1,263 @@
+{
+  "experiment_id": "K816v2",
+  "title": "GINN with FIXED GJR State Propagation (Bug Fix of K816)",
+  "date": "2026-04-01T07:36:08.701172+00:00",
+  "proposer": "User",
+  "executor": "Claude",
+  "asset": "SPY",
+  "data_source": "yfinance (SPY + ^VIX)",
+  "data_period": "2005-01-04 to 2025-12-30",
+  "total_observations": 5281,
+  "oos_period": "2023-01-03 to 2024-12-31",
+  "oos_observations": 502,
+  "refit_every": 63,
+  "n_refits": 8,
+  "min_train_window": 2000,
+  "literature": [
+    "Bali, Karabulut & Zhao (2024) GINN, arXiv:2410.00288",
+    "Patton (2011) J. Econometrics 160(1), 246-256 -- QLIKE proxy-robust",
+    "Hansen & Lunde (2005) JFE 72(2), 401-438 -- r2 proxy",
+    "Harvey et al. (2016) -- multiple testing t>3.0",
+    "K816: original GINN with GJR state propagation bug (Codex confirmed)",
+    "K797v2: QLIKE training loss bug fix (must use +log_s2)"
+  ],
+  "bug_fix": {
+    "description": "K816 GJR conditional variance was misindexed after first OOS day in each refit block. Code read from conditional_volatility array which only covers training period, causing days 2-63 to use stale h from end of training. K816v2 maintains a running h_prev variable updated day-by-day via GJR recursion.",
+    "affected_components": [
+      "GJR baseline forecast (h_t was stale for days 2-63 of each 63-day block)",
+      "GINN/GINN-VIX input feature (sigma2_{GJR,t-1} was stale)"
+    ],
+    "fix_method": "Day-by-day recursion: h_t = omega + (alpha + gamma*I) * r2_{t-1} + beta * h_{t-1}. h_running initialized from last training day on refit, then propagated."
+  },
+  "k816_comparison": {
+    "k816_gjr_qlike": 1.6023383244252047,
+    "k816v2_gjr_qlike": 1.4651735265904942,
+    "gjr_change_pct": -8.560289406041306,
+    "gjr_bug_impact": "GJR IMPROVED (stale h was hurting baseline)",
+    "k816_ginn_vix_qlike": 1.4543894016068308,
+    "k816v2_ginn_vix_qlike": 1.4503663756965055,
+    "ginn_vix_change_pct": -0.27661270811521527,
+    "k816_dm_gjr_vs_ginn_vix": 2.959873891181993,
+    "k816v2_dm_gjr_vs_ginn_vix": 0.6429431567409013,
+    "dm_artifact_confirmed": true
+  },
+  "hypothesis": "Structure + flexibility > pure GARCH or pure ML. GINN uses GJR fitted sigma2 as physics-informed prior in NN architecture. K816v2 tests whether K816's findings hold with correct GJR propagation.",
+  "architecture": {
+    "GJR-GARCH": "GJR-GARCH(1,1) baseline, arch package, FIXED day-by-day propagation",
+    "Pure_MLP": {
+      "inputs": [
+        "r2_{t-1}",
+        "|r_{t-1}|",
+        "VIX_{t-1}"
+      ],
+      "hidden": "2x32 neurons, ReLU, LayerNorm",
+      "output": "log(sigma2) + learnable bias -> exp -> sigma2",
+      "loss": "QLIKE (r2/sigma2 + log(sigma2))",
+      "optimizer": "Adam lr=0.001, weight_decay=1e-5",
+      "scheduler": "CosineAnnealing",
+      "early_stopping": "patience=20 on validation QLIKE (20% holdout)",
+      "epochs": "200 max"
+    },
+    "GINN": {
+      "inputs": [
+        "r2_{t-1}",
+        "sigma2_{GJR,t-1} (FIXED)",
+        "|r_{t-1}|"
+      ],
+      "note": "sigma2_{GJR,t-1} from day-by-day propagated GJR state (not stale array)",
+      "hidden": "2x32 neurons, ReLU, LayerNorm",
+      "output": "log(sigma2) + learnable bias -> exp -> sigma2",
+      "loss": "QLIKE"
+    },
+    "GINN-VIX": {
+      "inputs": [
+        "r2_{t-1}",
+        "sigma2_{GJR,t-1} (FIXED)",
+        "VIX_{t-1}",
+        "|r_{t-1}|"
+      ],
+      "note": "Full physics-informed model with FIXED GJR state + market-implied vol",
+      "hidden": "2x32 neurons, ReLU, LayerNorm",
+      "output": "log(sigma2) + learnable bias -> exp -> sigma2",
+      "loss": "QLIKE"
+    }
+  },
+  "diagnostics": {
+    "ADF": {
+      "stat": -18.18043165860716,
+      "p": 2.433815364611572e-30,
+      "stationary": true
+    },
+    "ARCH_LM": {
+      "stat": 1342.3026908809536,
+      "p": 2.8335897954078435e-282,
+      "arch_effects": true
+    },
+    "Ljung_Box_r2": {
+      "stat": 4069.9943143783776,
+      "p": 0.0,
+      "autocorrelated": true
+    }
+  },
+  "garch_params": {
+    "omega": 0.02838857659238283,
+    "alpha": 0.006118833399882404,
+    "gamma": 0.21157809092736296,
+    "beta": 0.8606841636504474,
+    "persistence": 0.9725920425140113,
+    "convergence": 0,
+    "std_resid_sq_LB10_p": 0.42647132614368227
+  },
+  "models": {
+    "GJR-GARCH": {
+      "QLIKE": 1.4651735265904942,
+      "MSE": 1.0912686377089182e-08,
+      "MAE": 6.730894848568397e-05,
+      "Spearman_rho": 0.21872311233631206,
+      "Spearman_p": 7.48287619562194e-07,
+      "Pearson_r": 0.23066045050218814,
+      "pred_min": 2.3597409366377342e-05,
+      "pred_max": 0.0003534245587333639,
+      "pred_mean": 6.814054029890335e-05,
+      "n_valid": 502
+    },
+    "Pure_MLP": {
+      "QLIKE": 1.462615368961925,
+      "MSE": 1.0769173994976844e-08,
+      "MAE": 6.505928526515114e-05,
+      "Spearman_rho": 0.22122564372810777,
+      "Spearman_p": 5.544412488574006e-07,
+      "Pearson_r": 0.24721849489537714,
+      "pred_min": 2.0927180230501108e-05,
+      "pred_max": 0.00035844583180733025,
+      "pred_mean": 6.361555898615643e-05,
+      "n_valid": 502
+    },
+    "GINN": {
+      "QLIKE": 1.4845198515395377,
+      "MSE": 1.1154555945437096e-08,
+      "MAE": 6.949607841490958e-05,
+      "Spearman_rho": 0.17856052842474698,
+      "Spearman_p": 5.743322514250175e-05,
+      "Pearson_r": 0.21930483475248852,
+      "pred_min": 2.8308964829193428e-05,
+      "pred_max": 0.000329210190102458,
+      "pred_mean": 7.289709668679917e-05,
+      "n_valid": 502
+    },
+    "GINN-VIX": {
+      "QLIKE": 1.4503663756965055,
+      "MSE": 1.0671576151004109e-08,
+      "MAE": 6.427320588557954e-05,
+      "Spearman_rho": 0.24727219382846463,
+      "Spearman_p": 1.9790836667475196e-08,
+      "Pearson_r": 0.25947865401859843,
+      "pred_min": 1.867412902356591e-05,
+      "pred_max": 0.0003298978554084897,
+      "pred_mean": 6.367612055342703e-05,
+      "n_valid": 502
+    }
+  },
+  "dm_tests": {
+    "GJR vs Pure_MLP": {
+      "DM_stat": 0.0967071254455068,
+      "p_value": 0.9229976536755626,
+      "better_model": "Pure_MLP",
+      "significant_Harvey": false
+    },
+    "GJR vs GINN": {
+      "DM_stat": -1.9962511152271316,
+      "p_value": 0.04644733731918427,
+      "better_model": "GJR",
+      "significant_Harvey": false
+    },
+    "GJR vs GINN-VIX": {
+      "DM_stat": 0.6429431567409013,
+      "p_value": 0.5205551248586036,
+      "better_model": "GINN-VIX",
+      "significant_Harvey": false
+    },
+    "Pure_MLP vs GINN": {
+      "DM_stat": -0.7176346543488316,
+      "p_value": 0.4733170564130269,
+      "better_model": "Pure_MLP",
+      "significant_Harvey": false
+    },
+    "Pure_MLP vs GINN-VIX": {
+      "DM_stat": 1.0219398144439662,
+      "p_value": 0.30730258936798327,
+      "better_model": "GINN-VIX",
+      "significant_Harvey": false
+    },
+    "GINN vs GINN-VIX": {
+      "DM_stat": 1.359911801875358,
+      "p_value": 0.17446947968815207,
+      "better_model": "GINN-VIX",
+      "significant_Harvey": false
+    }
+  },
+  "ablation": {
+    "Pure_MLP": {
+      "QLIKE": 1.462615368961925,
+      "pct_vs_GJR": -0.1745975873944475,
+      "direction": "BETTER"
+    },
+    "GINN": {
+      "QLIKE": 1.4845198515395377,
+      "pct_vs_GJR": 1.3204118555201483,
+      "direction": "WORSE"
+    },
+    "GINN-VIX": {
+      "QLIKE": 1.4503663756965055,
+      "pct_vs_GJR": -1.0106073188781515,
+      "direction": "BETTER"
+    }
+  },
+  "gjr_input_effect": {
+    "GINN_minus_PureMLP_QLIKE": 0.021904482577612683,
+    "GINN-VIX_minus_PureMLP_QLIKE": -0.012248993265419506,
+    "gjr_input_helps": false,
+    "insight": "GJR input HURTS/NEUTRAL: GINN >= Pure MLP (physics-informed prior adds no value even with correct h)"
+  },
+  "ranking": [
+    {
+      "rank": 1,
+      "model": "GINN-VIX",
+      "QLIKE": 1.4503663756965055
+    },
+    {
+      "rank": 2,
+      "model": "Pure_MLP",
+      "QLIKE": 1.462615368961925
+    },
+    {
+      "rank": 3,
+      "model": "GJR-GARCH",
+      "QLIKE": 1.4651735265904942
+    },
+    {
+      "rank": 4,
+      "model": "GINN",
+      "QLIKE": 1.4845198515395377
+    }
+  ],
+  "verdict": "MARGINAL: GINN-VIX has lowest QLIKE but difference not significant (Harvey t>3.0)",
+  "ginn_insight": "GJR input HURTS/NEUTRAL: GINN >= Pure MLP (physics-informed prior adds no value even with correct h)",
+  "any_nn_beats_gjr_harvey": false,
+  "ginn_beats_pure_mlp_harvey": false,
+  "total_runtime_s": 50.9,
+  "lookahead_check": {
+    "all_features_lagged": true,
+    "lag_mechanism": "Features at t-1 -> target r2_t. GJR sigma2_{t-1} from model fitted on data up to t-1, propagated day-by-day using GJR recursion. No contemporaneous data. h_running updated AFTER prediction.",
+    "shift_equivalent": "Explicit index-based lag + day-by-day h propagation"
+  },
+  "limitations": [
+    "r2 proxy for sigma2 is noisy (no intraday data) -- Hansen & Lunde (2005)",
+    "Single asset (SPY) -- cross-asset validation needed",
+    "OOS 2023-2024 (~500 days) -- limited OOS sample",
+    "Hidden dim=32 -- larger architectures not tested",
+    "No attention/transformer -- only feedforward MLP",
+    "VIX is closing value -- intraday VIX spikes not captured",
+    "NN training has randomness -- single run, no ensemble averaging"
+  ]
+}

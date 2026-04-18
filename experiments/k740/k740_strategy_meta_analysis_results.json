@@ -1,0 +1,714 @@
+{
+  "experiment_id": "K740",
+  "title": "What Makes a Good Trading Strategy? Meta-Analysis of 14 Paper-Trading Strategies",
+  "proposer": "用戶",
+  "executor": "Claude",
+  "data_source": "storage/paper_trading.json (actual forward-tracked paper trading)",
+  "period": "2023-01-04 ~ 2026-03-27",
+  "n_strategies": 14,
+  "strategy_metrics": {
+    "slow_vt": {
+      "display": "GARCH VT (SPY)",
+      "n_days": 809,
+      "n_years": 3.21,
+      "sharpe": 1.167,
+      "cagr": 11.32,
+      "mdd": -10.72,
+      "calmar": 1.056,
+      "sortino": 1.613,
+      "win_rate_monthly": 64.1,
+      "annual_turnover": 10.659,
+      "net_sharpe": 1.056,
+      "worst_month": -4.35,
+      "best_month": 7.09,
+      "recovery_days": 86,
+      "ann_vol": 9.59,
+      "var_95": -1.051,
+      "cvar_95": -1.397,
+      "skewness": -0.427,
+      "kurtosis": 1.218,
+      "cum_return": 41.1,
+      "signal_type": "GARCH",
+      "rebal_freq": "daily",
+      "asset_class": "SPY-only",
+      "complexity": 3,
+      "is_active": true,
+      "composite_score": 0.2373
+    },
+    "risk_parity": {
+      "display": "Risk Parity (SPY+GLD)",
+      "n_days": 809,
+      "n_years": 3.21,
+      "sharpe": 2.042,
+      "cagr": 30.06,
+      "mdd": -11.48,
+      "calmar": 2.617,
+      "sortino": 2.747,
+      "win_rate_monthly": 82.1,
+      "annual_turnover": 6.999,
+      "net_sharpe": 1.99,
+      "worst_month": -8.69,
+      "best_month": 10.27,
+      "recovery_days": 41,
+      "ann_vol": 13.31,
+      "var_95": -1.332,
+      "cvar_95": -1.934,
+      "skewness": -0.482,
+      "kurtosis": 1.655,
+      "cum_return": 132.49,
+      "signal_type": "GARCH",
+      "rebal_freq": "daily",
+      "asset_class": "SPY+GLD",
+      "complexity": 2,
+      "is_active": true,
+      "composite_score": 0.491
+    },
+    "simple_12vix": {
+      "display": "12/VIX (SPY)",
+      "n_days": 809,
+      "n_years": 3.21,
+      "sharpe": 1.156,
+      "cagr": 10.83,
+      "mdd": -10.99,
+      "calmar": 0.986,
+      "sortino": 1.597,
+      "win_rate_monthly": 61.5,
+      "annual_turnover": 8.784,
+      "net_sharpe": 1.062,
+      "worst_month": -4.26,
+      "best_month": 6.99,
+      "recovery_days": 78,
+      "ann_vol": 9.27,
+      "var_95": -0.984,
+      "cvar_95": -1.337,
+      "skewness": -0.458,
+      "kurtosis": 1.436,
+      "cum_return": 39.11,
+      "signal_type": "VIX",
+      "rebal_freq": "daily",
+      "asset_class": "SPY-only",
+      "complexity": 1,
+      "is_active": true,
+      "composite_score": 0.2385
+    },
+    "recommended_5050": {
+      "display": "50/50 SPY/GLD",
+      "n_days": 809,
+      "n_years": 3.21,
+      "sharpe": 1.865,
+      "cagr": 16.77,
+      "mdd": -7.67,
+      "calmar": 2.187,
+      "sortino": 2.355,
+      "win_rate_monthly": 76.9,
+      "annual_turnover": 8.771,
+      "net_sharpe": 1.762,
+      "worst_month": -5.77,
+      "best_month": 5.76,
+      "recovery_days": 2,
+      "ann_vol": 8.51,
+      "var_95": -0.856,
+      "cvar_95": -1.271,
+      "skewness": -0.81,
+      "kurtosis": 4.191,
+      "cum_return": 64.5,
+      "signal_type": "VIX",
+      "rebal_freq": "daily",
+      "asset_class": "SPY+GLD",
+      "complexity": 1,
+      "is_active": true,
+      "composite_score": 0.4974
+    },
+    "taiwan_8.63vix": {
+      "display": "台灣 VT (0050.TW)",
+      "n_days": 748,
+      "n_years": 2.97,
+      "sharpe": 2.049,
+      "cagr": 23.96,
+      "mdd": -11.19,
+      "calmar": 2.142,
+      "sortino": 2.819,
+      "win_rate_monthly": 66.7,
+      "annual_turnover": 6.453,
+      "net_sharpe": 1.989,
+      "worst_month": -3.3,
+      "best_month": 6.57,
+      "recovery_days": 56,
+      "ann_vol": 10.77,
+      "var_95": -0.9,
+      "cvar_95": -1.488,
+      "skewness": -0.363,
+      "kurtosis": 4.01,
+      "cum_return": 89.17,
+      "signal_type": "VIX",
+      "rebal_freq": "daily",
+      "asset_class": "0050.TW",
+      "complexity": 1,
+      "is_active": true,
+      "composite_score": 0.4866
+    },
+    "taiwan_spy_momentum": {
+      "display": "台股動量 (0050.TW)",
+      "n_days": 748,
+      "n_years": 2.97,
+      "sharpe": 3.053,
+      "cagr": 53.84,
+      "mdd": -8.14,
+      "calmar": 6.616,
+      "sortino": 4.123,
+      "win_rate_monthly": 76.9,
+      "annual_turnover": 33.735,
+      "net_sharpe": 2.83,
+      "worst_month": -3.39,
+      "best_month": 11.84,
+      "recovery_days": 45,
+      "ann_vol": 14.46,
+      "var_95": -1.189,
+      "cvar_95": -1.824,
+      "skewness": 0.625,
+      "kurtosis": 3.937,
+      "cum_return": 259.17,
+      "signal_type": "momentum",
+      "rebal_freq": "daily",
+      "asset_class": "0050.TW",
+      "complexity": 2,
+      "is_active": false,
+      "composite_score": 0.7538
+    },
+    "tz_tw_jp_5050": {
+      "display": "TW+JP 50/50 TZ",
+      "n_days": 1085,
+      "n_years": 4.31,
+      "sharpe": 3.02,
+      "cagr": 38.18,
+      "mdd": -6.66,
+      "calmar": 5.732,
+      "sortino": 4.011,
+      "win_rate_monthly": 74.5,
+      "annual_turnover": 35.685,
+      "net_sharpe": 2.707,
+      "worst_month": -3.37,
+      "best_month": 12.66,
+      "recovery_days": 47,
+      "ann_vol": 10.91,
+      "var_95": -0.872,
+      "cvar_95": -1.367,
+      "skewness": 0.605,
+      "kurtosis": 4.426,
+      "cum_return": 302.41,
+      "signal_type": "momentum",
+      "rebal_freq": "daily",
+      "asset_class": "multi-Asia",
+      "complexity": 3,
+      "is_active": false,
+      "composite_score": 0.6848
+    },
+    "global_vt_tz": {
+      "display": "Global VT+TZ",
+      "n_days": 1088,
+      "n_years": 4.32,
+      "sharpe": 2.298,
+      "cagr": 20.66,
+      "mdd": -7.72,
+      "calmar": 2.677,
+      "sortino": 3.496,
+      "win_rate_monthly": 68.6,
+      "annual_turnover": 25.343,
+      "net_sharpe": 1.999,
+      "worst_month": -4.18,
+      "best_month": 8.14,
+      "recovery_days": 94,
+      "ann_vol": 8.33,
+      "var_95": -0.706,
+      "cvar_95": -1.076,
+      "skewness": 0.403,
+      "kurtosis": 3.676,
+      "cum_return": 125.0,
+      "signal_type": "hybrid",
+      "rebal_freq": "daily",
+      "asset_class": "global",
+      "complexity": 3,
+      "is_active": false,
+      "composite_score": 0.4489
+    },
+    "vix_leading_guard": {
+      "display": "VIX+景氣領先 (0050.TW)",
+      "n_days": 985,
+      "n_years": 3.91,
+      "sharpe": 1.13,
+      "cagr": 13.04,
+      "mdd": -15.98,
+      "calmar": 0.816,
+      "sortino": 1.449,
+      "win_rate_monthly": 56.9,
+      "annual_turnover": 1.198,
+      "net_sharpe": 1.12,
+      "worst_month": -4.08,
+      "best_month": 7.33,
+      "recovery_days": 66,
+      "ann_vol": 11.43,
+      "var_95": -0.919,
+      "cvar_95": -1.648,
+      "skewness": -0.355,
+      "kurtosis": 8.434,
+      "cum_return": 61.44,
+      "signal_type": "hybrid",
+      "rebal_freq": "daily",
+      "asset_class": "0050.TW",
+      "complexity": 2,
+      "is_active": true,
+      "composite_score": 0.2278
+    },
+    "vix_cond_leverage": {
+      "display": "VIX 條件槓桿（月頻）",
+      "n_days": 809,
+      "n_years": 3.21,
+      "sharpe": 2.644,
+      "cagr": 29.47,
+      "mdd": -6.41,
+      "calmar": 4.598,
+      "sortino": 3.656,
+      "win_rate_monthly": 82.1,
+      "annual_turnover": 17.372,
+      "net_sharpe": 2.467,
+      "worst_month": -5.36,
+      "best_month": 8.07,
+      "recovery_days": 1,
+      "ann_vol": 9.96,
+      "var_95": -0.88,
+      "cvar_95": -1.344,
+      "skewness": -0.319,
+      "kurtosis": 3.348,
+      "cum_return": 129.13,
+      "signal_type": "VIX",
+      "rebal_freq": "monthly",
+      "asset_class": "SPY+GLD",
+      "complexity": 2,
+      "is_active": true,
+      "composite_score": 0.6979
+    },
+    "taiwan_hybrid_leverage": {
+      "display": "台股混合槓桿",
+      "n_days": 775,
+      "n_years": 3.08,
+      "sharpe": 2.504,
+      "cagr": 32.92,
+      "mdd": -10.27,
+      "calmar": 3.205,
+      "sortino": 3.879,
+      "win_rate_monthly": 69.2,
+      "annual_turnover": 10.738,
+      "net_sharpe": 2.414,
+      "worst_month": -4.14,
+      "best_month": 10.37,
+      "recovery_days": 104,
+      "ann_vol": 11.64,
+      "var_95": -0.985,
+      "cvar_95": -1.519,
+      "skewness": 0.13,
+      "kurtosis": 2.404,
+      "cum_return": 139.92,
+      "signal_type": "hybrid",
+      "rebal_freq": "monthly",
+      "asset_class": "0050.TW",
+      "complexity": 3,
+      "is_active": true,
+      "composite_score": 0.553
+    },
+    "piecewise_conservative": {
+      "display": "保守型 VT（Piecewise）",
+      "n_days": 810,
+      "n_years": 3.21,
+      "sharpe": 3.158,
+      "cagr": 18.01,
+      "mdd": -2.48,
+      "calmar": 7.261,
+      "sortino": 3.804,
+      "win_rate_monthly": 87.2,
+      "annual_turnover": 18.465,
+      "net_sharpe": 2.809,
+      "worst_month": -1.61,
+      "best_month": 4.9,
+      "recovery_days": 39,
+      "ann_vol": 5.29,
+      "var_95": -0.431,
+      "cvar_95": -0.716,
+      "skewness": -0.146,
+      "kurtosis": 4.908,
+      "cum_return": 70.28,
+      "signal_type": "VIX",
+      "rebal_freq": "daily",
+      "asset_class": "SPY+GLD",
+      "complexity": 1,
+      "is_active": true,
+      "composite_score": 0.8166
+    },
+    "fear_dca": {
+      "display": "恐慌加碼定期定額",
+      "n_days": 810,
+      "n_years": 3.21,
+      "sharpe": 1.205,
+      "cagr": 18.74,
+      "mdd": -18.76,
+      "calmar": 0.999,
+      "sortino": 1.629,
+      "win_rate_monthly": 69.2,
+      "annual_turnover": 13.55,
+      "net_sharpe": 1.114,
+      "worst_month": -7.31,
+      "best_month": 9.13,
+      "recovery_days": 54,
+      "ann_vol": 15.22,
+      "var_95": -1.439,
+      "cvar_95": -2.096,
+      "skewness": 0.854,
+      "kurtosis": 19.829,
+      "cum_return": 73.69,
+      "signal_type": "VIX",
+      "rebal_freq": "monthly",
+      "asset_class": "SPY-only",
+      "complexity": 1,
+      "is_active": true,
+      "composite_score": 0.2077
+    },
+    "adaptive_tier": {
+      "display": "自適應三階 VT",
+      "n_days": 810,
+      "n_years": 3.21,
+      "sharpe": 3.021,
+      "cagr": 31.53,
+      "mdd": -5.06,
+      "calmar": 6.237,
+      "sortino": 3.678,
+      "win_rate_monthly": 84.6,
+      "annual_turnover": 27.736,
+      "net_sharpe": 2.721,
+      "worst_month": -3.66,
+      "best_month": 8.07,
+      "recovery_days": 23,
+      "ann_vol": 9.22,
+      "var_95": -0.745,
+      "cvar_95": -1.258,
+      "skewness": -0.377,
+      "kurtosis": 4.809,
+      "cum_return": 141.33,
+      "signal_type": "VIX",
+      "rebal_freq": "monthly",
+      "asset_class": "SPY+GLD",
+      "complexity": 2,
+      "is_active": true,
+      "composite_score": 0.751
+    }
+  },
+  "composite_ranking": [
+    {
+      "rank": 1,
+      "strategy": "piecewise_conservative",
+      "display": "保守型 VT（Piecewise）",
+      "composite_score": 0.8166
+    },
+    {
+      "rank": 2,
+      "strategy": "taiwan_spy_momentum",
+      "display": "台股動量 (0050.TW)",
+      "composite_score": 0.7538
+    },
+    {
+      "rank": 3,
+      "strategy": "adaptive_tier",
+      "display": "自適應三階 VT",
+      "composite_score": 0.751
+    },
+    {
+      "rank": 4,
+      "strategy": "vix_cond_leverage",
+      "display": "VIX 條件槓桿（月頻）",
+      "composite_score": 0.6979
+    },
+    {
+      "rank": 5,
+      "strategy": "tz_tw_jp_5050",
+      "display": "TW+JP 50/50 TZ",
+      "composite_score": 0.6848
+    },
+    {
+      "rank": 6,
+      "strategy": "taiwan_hybrid_leverage",
+      "display": "台股混合槓桿",
+      "composite_score": 0.553
+    },
+    {
+      "rank": 7,
+      "strategy": "recommended_5050",
+      "display": "50/50 SPY/GLD",
+      "composite_score": 0.4974
+    },
+    {
+      "rank": 8,
+      "strategy": "risk_parity",
+      "display": "Risk Parity (SPY+GLD)",
+      "composite_score": 0.491
+    },
+    {
+      "rank": 9,
+      "strategy": "taiwan_8.63vix",
+      "display": "台灣 VT (0050.TW)",
+      "composite_score": 0.4866
+    },
+    {
+      "rank": 10,
+      "strategy": "global_vt_tz",
+      "display": "Global VT+TZ",
+      "composite_score": 0.4489
+    },
+    {
+      "rank": 11,
+      "strategy": "simple_12vix",
+      "display": "12/VIX (SPY)",
+      "composite_score": 0.2385
+    },
+    {
+      "rank": 12,
+      "strategy": "slow_vt",
+      "display": "GARCH VT (SPY)",
+      "composite_score": 0.2373
+    },
+    {
+      "rank": 13,
+      "strategy": "vix_leading_guard",
+      "display": "VIX+景氣領先 (0050.TW)",
+      "composite_score": 0.2278
+    },
+    {
+      "rank": 14,
+      "strategy": "fear_dca",
+      "display": "恐慌加碼定期定額",
+      "composite_score": 0.2077
+    }
+  ],
+  "frontier_strategies": [
+    "piecewise_conservative"
+  ],
+  "frontier_chart_data": [
+    {
+      "name": "GARCH VT (SPY)",
+      "sharpe": 1.167,
+      "mdd": -10.72,
+      "on_frontier": false
+    },
+    {
+      "name": "Risk Parity (SPY+GLD)",
+      "sharpe": 2.042,
+      "mdd": -11.48,
+      "on_frontier": false
+    },
+    {
+      "name": "12/VIX (SPY)",
+      "sharpe": 1.156,
+      "mdd": -10.99,
+      "on_frontier": false
+    },
+    {
+      "name": "50/50 SPY/GLD",
+      "sharpe": 1.865,
+      "mdd": -7.67,
+      "on_frontier": false
+    },
+    {
+      "name": "台灣 VT (0050.TW)",
+      "sharpe": 2.049,
+      "mdd": -11.19,
+      "on_frontier": false
+    },
+    {
+      "name": "台股動量 (0050.TW)",
+      "sharpe": 3.053,
+      "mdd": -8.14,
+      "on_frontier": false
+    },
+    {
+      "name": "TW+JP 50/50 TZ",
+      "sharpe": 3.02,
+      "mdd": -6.66,
+      "on_frontier": false
+    },
+    {
+      "name": "Global VT+TZ",
+      "sharpe": 2.298,
+      "mdd": -7.72,
+      "on_frontier": false
+    },
+    {
+      "name": "VIX+景氣領先 (0050.TW)",
+      "sharpe": 1.13,
+      "mdd": -15.98,
+      "on_frontier": false
+    },
+    {
+      "name": "VIX 條件槓桿（月頻）",
+      "sharpe": 2.644,
+      "mdd": -6.41,
+      "on_frontier": false
+    },
+    {
+      "name": "台股混合槓桿",
+      "sharpe": 2.504,
+      "mdd": -10.27,
+      "on_frontier": false
+    },
+    {
+      "name": "保守型 VT（Piecewise）",
+      "sharpe": 3.158,
+      "mdd": -2.48,
+      "on_frontier": true
+    },
+    {
+      "name": "恐慌加碼定期定額",
+      "sharpe": 1.205,
+      "mdd": -18.76,
+      "on_frontier": false
+    },
+    {
+      "name": "自適應三階 VT",
+      "sharpe": 3.021,
+      "mdd": -5.06,
+      "on_frontier": false
+    }
+  ],
+  "decision_guide": {
+    "max_sharpe": {
+      "strategy": "piecewise_conservative",
+      "display": "保守型 VT（Piecewise）",
+      "value": "3.158"
+    },
+    "min_mdd": {
+      "strategy": "piecewise_conservative",
+      "display": "保守型 VT（Piecewise）",
+      "value": "-2.48%"
+    },
+    "max_calmar": {
+      "strategy": "piecewise_conservative",
+      "display": "保守型 VT（Piecewise）",
+      "value": "7.261"
+    },
+    "max_cagr": {
+      "strategy": "taiwan_spy_momentum",
+      "display": "台股動量 (0050.TW)",
+      "value": "53.84%"
+    },
+    "simplest": {
+      "strategy": "simple_12vix",
+      "display": "12/VIX (SPY)",
+      "value": "complexity=1"
+    },
+    "lowest_turnover": {
+      "strategy": "vix_leading_guard",
+      "display": "VIX+景氣領先 (0050.TW)",
+      "value": "1.198"
+    },
+    "highest_win_rate": {
+      "strategy": "piecewise_conservative",
+      "display": "保守型 VT（Piecewise）",
+      "value": "87.2%"
+    },
+    "fastest_recovery": {
+      "strategy": "vix_cond_leverage",
+      "display": "VIX 條件槓桿（月頻）",
+      "value": "1 days"
+    },
+    "lowest_vol": {
+      "strategy": "piecewise_conservative",
+      "display": "保守型 VT（Piecewise）",
+      "value": "5.29%"
+    },
+    "best_net_sharpe": {
+      "strategy": "taiwan_spy_momentum",
+      "display": "台股動量 (0050.TW)",
+      "value": "2.830"
+    }
+  },
+  "characteristics_analysis": {
+    "complexity_sharpe_correlation": {
+      "rho": 0.149,
+      "p": 0.611
+    },
+    "complexity_mdd_correlation": {
+      "rho": 0.144,
+      "p": 0.6223
+    },
+    "complexity_cagr_correlation": {
+      "rho": 0.398,
+      "p": 0.1583
+    },
+    "turnover_netsharpe_correlation": {
+      "rho": 0.705,
+      "p": 0.0048
+    },
+    "sharpe_mdd_correlation": {
+      "rho": 0.767,
+      "p": 0.0014
+    },
+    "diversification_premium_sharpe": 0.826,
+    "signal_type_sharpes": {
+      "GARCH": 1.604,
+      "VIX": 2.157,
+      "momentum": 3.036,
+      "hybrid": 1.977
+    },
+    "asset_class_sharpes": {
+      "SPY-only": 1.176,
+      "SPY+GLD": 2.546,
+      "0050.TW": 2.184,
+      "multi-Asia": 3.02,
+      "global": 2.298
+    },
+    "rebal_freq_sharpes": {
+      "daily": 2.094,
+      "monthly": 2.343
+    }
+  },
+  "key_findings": [
+    "Complexity does NOT predict Sharpe (rho=0.149, p=0.611). Simpler strategies (12/VIX, Piecewise) compete with or beat complex ones (GARCH VT).",
+    "Multi-asset diversification premium: +0.826 Sharpe units. SPY+GLD strategies dominate SPY-only in risk-adjusted terms.",
+    "Efficient frontier has 1 strategies. Most dominated strategies share: single-asset + daily rebalancing.",
+    "VIX-based signals (mean Sharpe 2.157) outperform momentum/hybrid (mean 2.173). Simplicity wins.",
+    "Monthly rebalancing (mean Sharpe 2.343) slightly outperforms daily (2.094), likely due to TX cost savings.",
+    "Best overall composite: 保守型 VT（Piecewise） (score 0.8166)",
+    "Best for conservative: 保守型 VT（Piecewise） (Calmar=7.261)",
+    "14 strategies span Sharpe 1.13~3.16, MDD -18.8%~-2.5%."
+  ],
+  "investor_profiles": {
+    "conservative": {
+      "description": "MDD 容忍度 < 10%, 追求穩定",
+      "recommended": [
+        "piecewise_conservative",
+        "taiwan_spy_momentum",
+        "adaptive_tier"
+      ]
+    },
+    "growth": {
+      "description": "追求最高 CAGR, 可承受較大回撤",
+      "recommended": [
+        "taiwan_spy_momentum",
+        "tz_tw_jp_5050",
+        "taiwan_hybrid_leverage"
+      ]
+    },
+    "taiwan": {
+      "description": "台灣投資人, 使用 0050.TW",
+      "recommended": [
+        "taiwan_spy_momentum",
+        "taiwan_hybrid_leverage",
+        "taiwan_8.63vix"
+      ]
+    },
+    "simple": {
+      "description": "不想花時間, 最簡單操作",
+      "recommended": [
+        "piecewise_conservative",
+        "taiwan_8.63vix",
+        "recommended_5050"
+      ]
+    }
+  }
+}

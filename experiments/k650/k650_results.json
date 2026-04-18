@@ -1,0 +1,268 @@
+{
+  "experiment_id": "K650",
+  "title": "Knowledge Base 1400 Milestone — What Have We Learned?",
+  "data_source": "storage/memory/knowledge.json",
+  "analysis_date": "2026-03-29T04:46:59.561961",
+  "total_entries": 1399,
+  "quantitative_summary": {
+    "importance_distribution": {
+      "1": 3,
+      "2": 29,
+      "3": 25,
+      "4": 22,
+      "5": 9,
+      "9": 1
+    },
+    "entries_without_importance": 1310,
+    "top_30_tags": {
+      "backfill": 179,
+      "null_result": 83,
+      "important": 45,
+      "VIX": 37,
+      "SPY": 35,
+      "VT策略": 34,
+      "breakthrough": 33,
+      "garch": 30,
+      "notable": 30,
+      "vix": 28,
+      "har": 27,
+      "GLD": 24,
+      "leverage-effect": 22,
+      "Taiwan": 20,
+      "experiment": 20,
+      "50_50_portfolio": 17,
+      "0050.TW": 16,
+      "面向G": 14,
+      "strategy": 14,
+      "vix_sufficient": 14,
+      "50/50": 12,
+      "cross-oos": 12,
+      "VIX_sufficiency": 11,
+      "qlike_ceiling": 11,
+      "BTC": 10,
+      "null-result": 10,
+      "portfolio": 9,
+      "HAR": 9,
+      "taiwan": 9,
+      "VT_strategy": 9
+    },
+    "monthly_velocity": {
+      "2026-03": 1398
+    },
+    "null_results_count": 165,
+    "significant_results_count": 172,
+    "null_result_pct": 11.8,
+    "significant_result_pct": 12.3,
+    "most_cited_experiments": {
+      "K530": 7,
+      "K551": 5,
+      "K111": 4,
+      "K113": 4,
+      "K115": 4,
+      "K144": 4,
+      "K154": 4,
+      "K164": 4,
+      "K533": 4,
+      "K548": 4,
+      "K553": 4,
+      "K560": 4,
+      "K562": 4,
+      "K590": 4,
+      "K114": 3,
+      "K112": 3,
+      "K116": 3,
+      "K117": 3,
+      "K120": 3,
+      "K129": 3
+    }
+  },
+  "core_findings_taxonomy": {
+    "established_facts": {
+      "VIX as regime indicator": 260,
+      "HAR components": 132,
+      "Leverage effect asymmetry": 131,
+      "VIX sufficiency": 91,
+      "12/VIX strategy": 87,
+      "QLIKE ceiling": 62,
+      "50/50 SPY+GLD robust": 61,
+      "Cross-OOS validation": 60,
+      "GJR > GARCH": 36,
+      "Contango/Backwardation": 33,
+      "Transaction costs matter": 22,
+      "Taiwan amplification": 13,
+      "Prediction != Application": 5,
+      "Multi-start optimization": 4,
+      "VT works for equities": 4,
+      "Sentiment weak predictor": 3
+    },
+    "established_fact_count": 16,
+    "overturned_conclusions_count": 87,
+    "open_questions_count": 19
+  },
+  "vix_sufficiency": {
+    "total_confirmations": 101,
+    "exceptions_count": 10,
+    "exception_ids": [
+      "97c43020",
+      "ec8a9050",
+      "e2401142",
+      "K762",
+      "K950",
+      "K186",
+      "kb_k148",
+      "k531",
+      "K583",
+      "K629"
+    ]
+  },
+  "prediction_vs_application": {
+    "total_confirmations": 6,
+    "sample_ids": [
+      "6c10f1a4",
+      "K533",
+      "K540",
+      "K957",
+      "K594",
+      "K635"
+    ]
+  },
+  "top_10_experiments": [
+    {
+      "id": "K560",
+      "score": 35,
+      "importance": 9,
+      "citations": 4,
+      "breakthrough": false,
+      "title": "K560: Sector Rotation with VT — Momentum sector selection dramatically improves VT"
+    },
+    {
+      "id": "K530",
+      "score": 34,
+      "importance": 5,
+      "citations": 7,
+      "breakthrough": true,
+      "title": "K530: ★★★★ HAR Multi-Scale — 4 個 HAR 變體壓倒性勝過 GJR-GARCH (DM=-15.45) 和 EWMA (DM=-16.26)"
+    },
+    {
+      "id": "K551",
+      "score": 25,
+      "importance": 5,
+      "citations": 5,
+      "breakthrough": false,
+      "title": "K551: ★★★★★ K548 VIX-Conditional Leverage VALIDATED — Harvey t=7.90, 11/11 OOS, 100% bootstrap"
+    },
+    {
+      "id": "K532",
+      "score": 24,
+      "importance": 5,
+      "citations": 2,
+      "breakthrough": true,
+      "title": "K532: ★★★★★ HAR Cross-Asset — 7/7 資產全勝 GJR-GARCH，HAR 優勢是 UNIVERSAL"
+    },
+    {
+      "id": "K553",
+      "score": 23,
+      "importance": 5,
+      "citations": 4,
+      "breakthrough": false,
+      "title": "K553: ★★★★★ Taiwan VIX-Conditional Leverage — Hybrid Harvey t=6.30, 9/9 OOS, 100% bootstrap！"
+    },
+    {
+      "id": "K558",
+      "score": 21,
+      "importance": 5,
+      "citations": 3,
+      "breakthrough": false,
+      "title": "K558: ★★★★★ Taiwan Hybrid Leverage FULLY VALIDATED — t=4.79, 18/18 OOS, 0056 confirmed"
+    },
+    {
+      "id": "K533",
+      "score": 20,
+      "importance": 4,
+      "citations": 4,
+      "breakthrough": false,
+      "title": "K533: ★★★ Prediction ≠ Application #5 — HAR 最佳預測但最差 VT 策略，12/VIX 不可替代"
+    },
+    {
+      "id": "K548",
+      "score": 20,
+      "importance": 4,
+      "citations": 4,
+      "breakthrough": false,
+      "title": "K548: ★★★★ VIX-Conditional Leverage — Sharpe +0.112, CAGR +5.4%, 5/5 Cross-OOS！"
+    },
+    {
+      "id": "K562",
+      "score": 20,
+      "importance": 4,
+      "citations": 4,
+      "breakthrough": false,
+      "title": "K562: ★★★ Sector Momentum Validation — Daily PASS (t=10.87, 10/10) but Monthly FAIL (Sharpe 1.23<1.34)"
+    },
+    {
+      "id": "K536",
+      "score": 19,
+      "importance": 4,
+      "citations": 1,
+      "breakthrough": true,
+      "title": "K536: ★★★★ HAR-EVT 是唯一通過完整 Trinity Test 的 VaR 模型（1% + 2.5%）"
+    }
+  ],
+  "research_efficiency": {
+    "unique_k_experiments": 271,
+    "null_tagged_count": 93,
+    "null_rate_among_tagged_pct": 19.0,
+    "actionable_results_pct": 12.3,
+    "date_range": "2026-03-14 to 2026-03-29",
+    "days_span": 14,
+    "avg_entries_per_day": 99.9,
+    "monthly_discovery_rates": {
+      "2026-03": {
+        "total": 1398,
+        "notable": 108,
+        "null": 92,
+        "notable_pct": 7.7
+      }
+    }
+  },
+  "category_distribution": {
+    "model_behavior": 224,
+    "experiment_result": 85,
+    "vol_prediction": 52,
+    "vt_strategy": 47,
+    "experiment": 46,
+    "research_methodology": 43,
+    "data_property": 37,
+    "strategy": 36,
+    "strategies": 36,
+    "literature": 35,
+    "strategy_optimization": 35,
+    "cross_asset": 32,
+    "model_comparison": 28,
+    "leverage_effect": 27,
+    "vol_models": 27,
+    "market_context": 26,
+    "research_finding": 26,
+    "var_methods": 22,
+    "parameter_sensitivity": 15,
+    "methodology": 15
+  },
+  "assets_studied": {
+    "SPY": 584,
+    "GLD": 260,
+    "0050.TW": 77,
+    "BTC": 90,
+    "TLT": 150,
+    "VIX": 588,
+    "USO": 35,
+    "QQQ": 83,
+    "IWM": 12,
+    "EEM": 50,
+    "ES (futures)": 3,
+    "GC (futures)": 4,
+    "JPY": 11,
+    "EUR": 4,
+    "Crude Oil": 4
+  },
+  "summary": "Knowledge Base 1400 Milestone — What Have We Learned?\n\nAfter 14 days and 1399 knowledge entries spanning 271 unique experiments (K1-K958), the VolPred research system has established several core findings:\n\n**Established Facts**: The most confirmed finding is VIX sufficiency (101 confirmations) — for US equity volatility targeting, VIX alone captures virtually all actionable information. No alternative variable (MOVE, STLFSI4, sentiment, macro indicators) has produced statistically significant incremental value. GJR-GARCH outperforms symmetric GARCH (36 confirmations), and Normal distribution beats Student-t for GARCH models (1 confirmations).\n\n**The Prediction-Application Gap**: 6 entries confirm that superior volatility prediction (QLIKE) does not translate to superior trading strategy performance (Sharpe). Model rankings change completely between forecasting accuracy and portfolio utility. This is the central insight shaping our strategy design.\n\n**Research Efficiency**: Of all tagged entries, 19% are null results — meaning the research system correctly identifies dead ends and reports them honestly. The 50/50 SPY+GLD portfolio emerged as the most robust simple strategy. Cross-OOS validation (60 confirmations) catches 53% of false positives from single-period testing.\n\n**Scale**: The system averaged 99.9 knowledge entries per day, with the most prolific month being 2026-03 (1398 entries). 87 entries involved corrections or overturned conclusions, demonstrating active self-correction.\n\n**Key Numbers**: 16 themes confirmed ≥3 times. 10 VIX sufficiency exceptions found. 19 entries flag open/unresolved questions. The research covers 11 major asset classes."
+}

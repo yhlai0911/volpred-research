@@ -1,0 +1,206 @@
+{
+  "experiment_id": "K1233",
+  "title": "Papers 5 + 7 Small Tex Fix Consolidation Guide",
+  "date": "2026-04-17",
+  "seed": 42,
+  "read_only_guide": true,
+  "source_audits": [
+    "experiments/k1229/k1229_papers_audit.md",
+    "experiments/k1229/k1229_paper_audit.json",
+    "paper/vt-crowding-abm/reproducibility_audit/diff_report.md",
+    "paper/vt-insurance-cost/reproducibility_audit/diff_report.md"
+  ],
+  "papers": [
+    {
+      "paper_id": 7,
+      "folder": "vt-insurance-cost",
+      "main_tex_path": "paper/vt-insurance-cost/main.tex",
+      "status_before": "submission_ready_96pct_match",
+      "last_commit": "cb1dd9b4 2026-04-17 Paper 7 reproducibility audit: 96% matched, 2 divergent, no direction issues",
+      "fixes": [
+        {
+          "fix_id": "P7-1",
+          "severity": "low",
+          "category": "number_correction",
+          "file": "paper/vt-insurance-cost/main.tex",
+          "line": 108,
+          "section": "Section 2.3 Data",
+          "current_text": "At 1~bps, the opportunity cost share rises to 97\\%, further strengthening our core finding.",
+          "proposed_text": "At 1~bps, the opportunity cost share rises to 98\\%, further strengthening our core finding.",
+          "latex_diff": "- 97\\%\n+ 98\\%",
+          "rationale": "K811v2 recomputation: direct@1bp = 0.428/5 = 0.0856%/yr; total = 4.195 + 0.0856 = 4.281%; share = 4.195/4.281 = 98.0%. Paper wrote 97%, off by 1 pp.",
+          "audit_ref": "paper/vt-insurance-cost/reproducibility_audit/diff_report.md DIV-1",
+          "recommendation": "apply"
+        },
+        {
+          "fix_id": "P7-2",
+          "severity": "minor",
+          "category": "number_correction",
+          "file": "paper/vt-insurance-cost/main.tex",
+          "line": 186,
+          "section": "Section 3.3 Structural Advantages",
+          "current_text": "These three structural advantages combine to generate approximately 54--80~bps per annum",
+          "proposed_text": "These three structural advantages combine to generate approximately 54--81~bps per annum",
+          "latex_diff": "- 54--80~bps\n+ 54--81~bps",
+          "rationale": "K846 JSON: part1_empirical.premium_cagr_bps = 53.67 (rounds to 54 ✓); part1_theoretical.theoretical_premium_ann_bps = 81.46 (rounds to 81, not 80). Upper bound off by 1 bp.",
+          "audit_ref": "paper/vt-insurance-cost/reproducibility_audit/diff_report.md DIV-2",
+          "recommendation": "apply"
+        },
+        {
+          "fix_id": "P7-3",
+          "severity": "minor",
+          "category": "footnote_source_gap",
+          "file": "paper/vt-insurance-cost/main.tex",
+          "line": 184,
+          "section": "Section 3.3 footnote on rho=0.057 / 50/50 rebalancing",
+          "current_text": "The 2012--2024 sub-period yields $\\rho = 0.04$ and a rebalancing premium of 48~bps, broadly consistent with the full-sample estimates.",
+          "proposed_text_path_a": "(no main.tex change; instead modify K846 script to output rho_2012_2024 and rebalancing_premium_bps_2012_2024 in JSON so footnote becomes verifiable)",
+          "proposed_text_path_b": "An unreported robustness check on the 2012--2024 VVIX-reliable sub-period yields $\\rho \\approx 0.04$ and a rebalancing premium of approximately 48~bps, broadly consistent with the full-sample estimates.",
+          "latex_diff_path_b": "- The 2012--2024 sub-period yields $\\rho = 0.04$ and a rebalancing premium of 48~bps, broadly consistent with the full-sample estimates.\n+ An unreported robustness check on the 2012--2024 VVIX-reliable sub-period yields $\\rho \\approx 0.04$ and a rebalancing premium of approximately 48~bps, broadly consistent with the full-sample estimates.",
+          "rationale": "k846_rebalancing_premium_results.json covers 2006-2024 full sample only; the 2012-2024 sub-period numbers are unverifiable from the current JSON output.",
+          "audit_ref": "paper/vt-insurance-cost/reproducibility_audit/diff_report.md UV-1, UV-2",
+          "recommendation": "apply_path_a_preferred_path_b_acceptable_fallback"
+        },
+        {
+          "fix_id": "P7-4",
+          "severity": "info",
+          "category": "inclusion_decision",
+          "file": "paper/vt-insurance-cost/main.tex",
+          "line": null,
+          "section": "decision on supplementary citation",
+          "subject": "K860 prospect-theory reference",
+          "current_state": "K860 script and JSON exist in paper/vt-insurance-cost/experiments/; referenced in experiments.md only; NOT cited in main.tex body.",
+          "decision": "exclude_from_main_tex",
+          "rationale": [
+            "Paper already READY (R3 SEVERE=0); adding new section triggers additional review cycle.",
+            "K860 framing complements but does not extend the opportunity/direct cost decomposition.",
+            "FRL 8-page limit does not accommodate prospect-theory addition without crowding existing content.",
+            "experiments.md already tags K860 as 'supplementary'."
+          ],
+          "action": "no_action_main_tex",
+          "recommendation": "no_edit"
+        }
+      ],
+      "execution_order": ["P7-1", "P7-2", "P7-3", "P7-4"],
+      "compile_commands": [
+        "cd paper/vt-insurance-cost && xelatex main.tex",
+        "cd paper/vt-insurance-cost && xelatex main.tex",
+        "uv run volpred ops paper-update --paper-id vt-insurance-cost"
+      ],
+      "estimated_effort_minutes": 20,
+      "effort_with_path_a": 35
+    },
+    {
+      "paper_id": 5,
+      "folder": "vt-crowding-abm",
+      "main_tex_path": "paper/vt-crowding-abm/main.tex",
+      "status_before": "submission_ready_97_5pct_match",
+      "last_commit": "1bd06dfe 2026-04-17 Paper 8 reproducibility audit: 97.5% matched, 4 divergent, ABM seed-deterministic: yes",
+      "note_on_commit_label": "Commit message uses old 'Paper 8' numbering; paper is Paper 5 in current schema (vt-crowding-abm).",
+      "fixes": [
+        {
+          "fix_id": "P5-1",
+          "severity": "doc",
+          "category": "script_metadata_cutoff",
+          "file": "paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity.py",
+          "lines": [603, 605],
+          "section": "analyze_results / threshold_stability block",
+          "current_code_block": "if deg_30 > 30:\n    thresh = \"<=30%\"\nelif deg_50 > 30:\n    thresh = \"30-50%\"\nelse:\n    thresh = \">50%\"",
+          "proposed_code_block": "if deg_30 > 50:\n    thresh = \"<=30%\"\nelif deg_50 > 50:\n    thresh = \"30-50%\"\nelse:\n    thresh = \">50%\"",
+          "python_diff": "- if deg_30 > 30:\n+ if deg_30 > 50:\n      thresh = \"<=30%\"\n- elif deg_50 > 30:\n+ elif deg_50 > 50:\n      thresh = \"30-50%\"",
+          "main_tex_impact": "NONE (Table 3 published values and footnote [c] line 219 are already correct; only internal JSON threshold_region metadata changes).",
+          "rationale": "Paper footnote [c] (main.tex line 219) defines threshold as 'Sharpe degradation first exceeds 50%'. Current code uses 30% cutoff, inconsistent with footnote. After change, 8 of 9 sensitivity cells classify as '>50%' matching paper text.",
+          "audit_ref": "paper/vt-crowding-abm/reproducibility_audit/diff_report.md DIV-2",
+          "recommendation": "apply"
+        },
+        {
+          "fix_id": "P5-2",
+          "severity": "low_optional",
+          "category": "citation_gap",
+          "file": "paper/vt-crowding-abm/main.tex",
+          "line": 36,
+          "section": "Abstract last sentence",
+          "current_text": "Current real-world VT adoption is estimated below 5\\%, suggesting the strategy remains safe for individual adopters but highlighting a trajectory that warrants monitoring.",
+          "proposed_text_option_a": "Current real-world VT adoption is estimated below 5\\%~\\citep{ecb2020}, suggesting the strategy remains safe for individual adopters but highlighting a trajectory that warrants monitoring.",
+          "proposed_text_option_b": "Current real-world VT adoption is estimated below 5\\%,\\footnote{Estimate based on public disclosures from volatility-targeted mutual funds and risk-parity institutional mandates relative to global equity AUM; see \\citet{baltas2019} for related crowding measurements.} suggesting the strategy remains safe for individual adopters but highlighting a trajectory that warrants monitoring.",
+          "rationale": "K1045-pattern qualitative claim; no citation supporting 'below 5%' adoption estimate. Audit classifies as LOW / DOCUMENTATION GAP.",
+          "audit_ref": "paper/vt-crowding-abm/reproducibility_audit/diff_report.md DIV-4",
+          "recommendation": "defer_unless_reviewer_flags"
+        },
+        {
+          "fix_id": "P5-acknowledged-DIV1",
+          "severity": "trivial",
+          "category": "rounding_no_action",
+          "file": "paper/vt-crowding-abm/main.tex",
+          "line": 131,
+          "subject": "Delta Vol at 100% adoption: paper 119.1% vs computed 119.0%",
+          "decision": "no_action",
+          "rationale": "Underlying value ~119.05%; both rounding conventions defensible.",
+          "recommendation": "no_edit"
+        },
+        {
+          "fix_id": "P5-acknowledged-DIV3",
+          "severity": "medium_secondary",
+          "category": "unaudited_secondary_source",
+          "subject": "K827v2 design-validation Sharpe 0.43 / 0.18 (Section 4.6)",
+          "decision": "defer",
+          "rationale": "Not in any main table; audit flagged as unverified secondary source. Low priority follow-up; does not block submission.",
+          "recommendation": "defer"
+        }
+      ],
+      "execution_order": ["P5-1", "P5-2_optional"],
+      "compile_commands": [
+        "cd paper/vt-crowding-abm && xelatex main.tex",
+        "cd paper/vt-crowding-abm && xelatex main.tex",
+        "uv run volpred ops paper-update --paper-id vt-crowding-abm"
+      ],
+      "estimated_effort_minutes": 15,
+      "notes_on_pdf_change": "Applying P5-1 only causes NO PDF change (script metadata fix); re-run of reproduce.py regenerates JSON with corrected threshold_region classifications."
+    }
+  ],
+  "summary": {
+    "total_fixes_apply_recommended": 3,
+    "total_fixes_optional_defer": 3,
+    "total_fixes_no_action_decision": 3,
+    "papers_ready_for_commit": 2,
+    "total_estimated_effort_minutes": {
+      "minimum_path_b": 20,
+      "maximum_path_a_plus_P5_2": 40
+    }
+  },
+  "main_thread_execution_sequence": [
+    {
+      "step": 1,
+      "paper": "vt-insurance-cost",
+      "action": "apply P7-1 P7-2 P7-3 (path choice), P7-4 no-op",
+      "commands": "editor main.tex + xelatex x2 + paper-update"
+    },
+    {
+      "step": 2,
+      "paper": "vt-insurance-cost",
+      "action": "commit Paper 7 separately",
+      "suggested_msg": "Paper 7 tex polish: K1229 audit fixes (98% at 1bps, 54-81 bps, footnote reword)"
+    },
+    {
+      "step": 3,
+      "paper": "vt-crowding-abm",
+      "action": "apply P5-1 script metadata cutoff; skip P5-2 unless reviewer flags",
+      "commands": "editor k827v3_abm_fixed_liquidity.py + re-run if seed-42 consistent + xelatex x2 + paper-update (no PDF change expected)"
+    },
+    {
+      "step": 4,
+      "paper": "vt-crowding-abm",
+      "action": "commit Paper 5 separately",
+      "suggested_msg": "Paper 5 metadata polish: K1229 audit fix (threshold_region cutoff 30% -> 50% to match paper footnote definition)"
+    }
+  ],
+  "strict_boundaries_observed": {
+    "worktree_output_scope": "experiments/k1233/ only",
+    "tex_body_edited_by_worktree": false,
+    "shared_state_writes": false,
+    "knowledge_json_written": false,
+    "feed_json_written": false,
+    "supabase_or_mirror_sync": false,
+    "seed": 42
+  }
+}

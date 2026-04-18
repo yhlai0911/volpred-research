@@ -1,0 +1,431 @@
+{
+  "experiment_id": "K1251",
+  "decision_source": "K1231 option (a) for K719",
+  "paper": "volatility-absorption",
+  "table": "Table 8 \u2014 Hedging Cost-Benefit Ratio by VIX Regime",
+  "canonical_paper_values": {
+    "Calm": {
+      "shock_loss_pct": 1.18,
+      "hedge_cost_pct": 0.086,
+      "cb_ratio": 13.7
+    },
+    "Elevated": {
+      "shock_loss_pct": 1.56,
+      "hedge_cost_pct": 0.196,
+      "cb_ratio": 8.0
+    },
+    "High": {
+      "shock_loss_pct": 2.61,
+      "hedge_cost_pct": 0.725,
+      "cb_ratio": 3.6
+    }
+  },
+  "formula": {
+    "shock": "|Delta VIX| > 2",
+    "regimes": {
+      "Calm": "V<15",
+      "Elevated": "15<=V<25",
+      "High": "V>=25"
+    },
+    "shock_loss": "mean(|SPY log return * 100|) on shock days in regime",
+    "hedge_cost": "mean(VRP) in regime, where VRP_t = VIX_t^2/252 - RV_t/252",
+    "cb_ratio": "shock_loss / hedge_cost"
+  },
+  "seed": 42,
+  "sample": {
+    "start": "2006-01-04",
+    "end": "2026-03-30",
+    "n_days": 5090
+  },
+  "rv_22": {
+    "rv_window": 22,
+    "regime_table": {
+      "Calm": {
+        "total_days": 1735,
+        "shock_days": 33,
+        "avg_shock_loss_pct": 1.2138234713265976,
+        "daily_hedge_cost_pct_raw": 0.6207871247181559,
+        "daily_hedge_cost_pct_clipped": 0.6207871247181559,
+        "cb_ratio_raw": 1.955297432880372,
+        "cb_ratio_clipped": 1.955297432880372
+      },
+      "Elevated": {
+        "total_days": 2454,
+        "shock_days": 357,
+        "avg_shock_loss_pct": 1.5496704352747208,
+        "daily_hedge_cost_pct_raw": 1.3876026351593023,
+        "daily_hedge_cost_pct_clipped": 1.3876026351593023,
+        "cb_ratio_raw": 1.1167969820818426,
+        "cb_ratio_clipped": 1.1167969820818426
+      },
+      "High": {
+        "total_days": 880,
+        "shock_days": 376,
+        "avg_shock_loss_pct": 2.6275853366092057,
+        "daily_hedge_cost_pct_raw": 4.585850913655167,
+        "daily_hedge_cost_pct_clipped": 4.585850913655167,
+        "cb_ratio_raw": 0.5729766156996325,
+        "cb_ratio_clipped": 0.5729766156996325
+      }
+    },
+    "comparison_raw_vrp": {
+      "Calm": {
+        "shock_loss": {
+          "reconstructed": 1.2138,
+          "paper": 1.18,
+          "abs_diff": 0.0338,
+          "rel_diff_pct": 2.87,
+          "within_5pct": true,
+          "verdict": "YES"
+        },
+        "hedge_cost": {
+          "reconstructed": 0.6208,
+          "paper": 0.086,
+          "abs_diff": 0.5348,
+          "rel_diff_pct": 621.85,
+          "within_5pct": false,
+          "verdict": "NO"
+        },
+        "cb_ratio": {
+          "reconstructed": 1.9553,
+          "paper": 13.7,
+          "abs_diff": -11.7447,
+          "rel_diff_pct": 85.73,
+          "within_5pct": false,
+          "verdict": "NO"
+        }
+      },
+      "Elevated": {
+        "shock_loss": {
+          "reconstructed": 1.5497,
+          "paper": 1.56,
+          "abs_diff": -0.0103,
+          "rel_diff_pct": 0.66,
+          "within_5pct": true,
+          "verdict": "YES"
+        },
+        "hedge_cost": {
+          "reconstructed": 1.3876,
+          "paper": 0.196,
+          "abs_diff": 1.1916,
+          "rel_diff_pct": 607.96,
+          "within_5pct": false,
+          "verdict": "NO"
+        },
+        "cb_ratio": {
+          "reconstructed": 1.1168,
+          "paper": 8.0,
+          "abs_diff": -6.8832,
+          "rel_diff_pct": 86.04,
+          "within_5pct": false,
+          "verdict": "NO"
+        }
+      },
+      "High": {
+        "shock_loss": {
+          "reconstructed": 2.6276,
+          "paper": 2.61,
+          "abs_diff": 0.0176,
+          "rel_diff_pct": 0.67,
+          "within_5pct": true,
+          "verdict": "YES"
+        },
+        "hedge_cost": {
+          "reconstructed": 4.5859,
+          "paper": 0.725,
+          "abs_diff": 3.8609,
+          "rel_diff_pct": 532.53,
+          "within_5pct": false,
+          "verdict": "NO"
+        },
+        "cb_ratio": {
+          "reconstructed": 0.573,
+          "paper": 3.6,
+          "abs_diff": -3.027,
+          "rel_diff_pct": 84.08,
+          "within_5pct": false,
+          "verdict": "NO"
+        }
+      }
+    },
+    "comparison_clipped_vrp": {
+      "Calm": {
+        "shock_loss": {
+          "reconstructed": 1.2138,
+          "paper": 1.18,
+          "abs_diff": 0.0338,
+          "rel_diff_pct": 2.87,
+          "within_5pct": true,
+          "verdict": "YES"
+        },
+        "hedge_cost": {
+          "reconstructed": 0.6208,
+          "paper": 0.086,
+          "abs_diff": 0.5348,
+          "rel_diff_pct": 621.85,
+          "within_5pct": false,
+          "verdict": "NO"
+        },
+        "cb_ratio": {
+          "reconstructed": 1.9553,
+          "paper": 13.7,
+          "abs_diff": -11.7447,
+          "rel_diff_pct": 85.73,
+          "within_5pct": false,
+          "verdict": "NO"
+        }
+      },
+      "Elevated": {
+        "shock_loss": {
+          "reconstructed": 1.5497,
+          "paper": 1.56,
+          "abs_diff": -0.0103,
+          "rel_diff_pct": 0.66,
+          "within_5pct": true,
+          "verdict": "YES"
+        },
+        "hedge_cost": {
+          "reconstructed": 1.3876,
+          "paper": 0.196,
+          "abs_diff": 1.1916,
+          "rel_diff_pct": 607.96,
+          "within_5pct": false,
+          "verdict": "NO"
+        },
+        "cb_ratio": {
+          "reconstructed": 1.1168,
+          "paper": 8.0,
+          "abs_diff": -6.8832,
+          "rel_diff_pct": 86.04,
+          "within_5pct": false,
+          "verdict": "NO"
+        }
+      },
+      "High": {
+        "shock_loss": {
+          "reconstructed": 2.6276,
+          "paper": 2.61,
+          "abs_diff": 0.0176,
+          "rel_diff_pct": 0.67,
+          "within_5pct": true,
+          "verdict": "YES"
+        },
+        "hedge_cost": {
+          "reconstructed": 4.5859,
+          "paper": 0.725,
+          "abs_diff": 3.8609,
+          "rel_diff_pct": 532.53,
+          "within_5pct": false,
+          "verdict": "NO"
+        },
+        "cb_ratio": {
+          "reconstructed": 0.573,
+          "paper": 3.6,
+          "abs_diff": -3.027,
+          "rel_diff_pct": 84.08,
+          "within_5pct": false,
+          "verdict": "NO"
+        }
+      }
+    }
+  },
+  "rv_20": {
+    "rv_window": 20,
+    "regime_table": {
+      "Calm": {
+        "total_days": 1737,
+        "shock_days": 33,
+        "avg_shock_loss_pct": 1.2138234713265976,
+        "daily_hedge_cost_pct_raw": 0.6245040759193412,
+        "daily_hedge_cost_pct_clipped": 0.6245040759193412,
+        "cb_ratio_raw": 1.9436598064467572,
+        "cb_ratio_clipped": 1.9436598064467572
+      },
+      "Elevated": {
+        "total_days": 2454,
+        "shock_days": 357,
+        "avg_shock_loss_pct": 1.5496704352747208,
+        "daily_hedge_cost_pct_raw": 1.3959950051938685,
+        "daily_hedge_cost_pct_clipped": 1.3959950051938685,
+        "cb_ratio_raw": 1.1100830801751405,
+        "cb_ratio_clipped": 1.1100830801751405
+      },
+      "High": {
+        "total_days": 880,
+        "shock_days": 376,
+        "avg_shock_loss_pct": 2.6275853366092057,
+        "daily_hedge_cost_pct_raw": 4.623107189475084,
+        "daily_hedge_cost_pct_clipped": 4.623107189475084,
+        "cb_ratio_raw": 0.5683591638522114,
+        "cb_ratio_clipped": 0.5683591638522114
+      }
+    },
+    "comparison_raw_vrp": {
+      "Calm": {
+        "shock_loss": {
+          "reconstructed": 1.2138,
+          "paper": 1.18,
+          "abs_diff": 0.0338,
+          "rel_diff_pct": 2.87,
+          "within_5pct": true,
+          "verdict": "YES"
+        },
+        "hedge_cost": {
+          "reconstructed": 0.6245,
+          "paper": 0.086,
+          "abs_diff": 0.5385,
+          "rel_diff_pct": 626.17,
+          "within_5pct": false,
+          "verdict": "NO"
+        },
+        "cb_ratio": {
+          "reconstructed": 1.9437,
+          "paper": 13.7,
+          "abs_diff": -11.7563,
+          "rel_diff_pct": 85.81,
+          "within_5pct": false,
+          "verdict": "NO"
+        }
+      },
+      "Elevated": {
+        "shock_loss": {
+          "reconstructed": 1.5497,
+          "paper": 1.56,
+          "abs_diff": -0.0103,
+          "rel_diff_pct": 0.66,
+          "within_5pct": true,
+          "verdict": "YES"
+        },
+        "hedge_cost": {
+          "reconstructed": 1.396,
+          "paper": 0.196,
+          "abs_diff": 1.2,
+          "rel_diff_pct": 612.24,
+          "within_5pct": false,
+          "verdict": "NO"
+        },
+        "cb_ratio": {
+          "reconstructed": 1.1101,
+          "paper": 8.0,
+          "abs_diff": -6.8899,
+          "rel_diff_pct": 86.12,
+          "within_5pct": false,
+          "verdict": "NO"
+        }
+      },
+      "High": {
+        "shock_loss": {
+          "reconstructed": 2.6276,
+          "paper": 2.61,
+          "abs_diff": 0.0176,
+          "rel_diff_pct": 0.67,
+          "within_5pct": true,
+          "verdict": "YES"
+        },
+        "hedge_cost": {
+          "reconstructed": 4.6231,
+          "paper": 0.725,
+          "abs_diff": 3.8981,
+          "rel_diff_pct": 537.67,
+          "within_5pct": false,
+          "verdict": "NO"
+        },
+        "cb_ratio": {
+          "reconstructed": 0.5684,
+          "paper": 3.6,
+          "abs_diff": -3.0316,
+          "rel_diff_pct": 84.21,
+          "within_5pct": false,
+          "verdict": "NO"
+        }
+      }
+    },
+    "comparison_clipped_vrp": {
+      "Calm": {
+        "shock_loss": {
+          "reconstructed": 1.2138,
+          "paper": 1.18,
+          "abs_diff": 0.0338,
+          "rel_diff_pct": 2.87,
+          "within_5pct": true,
+          "verdict": "YES"
+        },
+        "hedge_cost": {
+          "reconstructed": 0.6245,
+          "paper": 0.086,
+          "abs_diff": 0.5385,
+          "rel_diff_pct": 626.17,
+          "within_5pct": false,
+          "verdict": "NO"
+        },
+        "cb_ratio": {
+          "reconstructed": 1.9437,
+          "paper": 13.7,
+          "abs_diff": -11.7563,
+          "rel_diff_pct": 85.81,
+          "within_5pct": false,
+          "verdict": "NO"
+        }
+      },
+      "Elevated": {
+        "shock_loss": {
+          "reconstructed": 1.5497,
+          "paper": 1.56,
+          "abs_diff": -0.0103,
+          "rel_diff_pct": 0.66,
+          "within_5pct": true,
+          "verdict": "YES"
+        },
+        "hedge_cost": {
+          "reconstructed": 1.396,
+          "paper": 0.196,
+          "abs_diff": 1.2,
+          "rel_diff_pct": 612.24,
+          "within_5pct": false,
+          "verdict": "NO"
+        },
+        "cb_ratio": {
+          "reconstructed": 1.1101,
+          "paper": 8.0,
+          "abs_diff": -6.8899,
+          "rel_diff_pct": 86.12,
+          "within_5pct": false,
+          "verdict": "NO"
+        }
+      },
+      "High": {
+        "shock_loss": {
+          "reconstructed": 2.6276,
+          "paper": 2.61,
+          "abs_diff": 0.0176,
+          "rel_diff_pct": 0.67,
+          "within_5pct": true,
+          "verdict": "YES"
+        },
+        "hedge_cost": {
+          "reconstructed": 4.6231,
+          "paper": 0.725,
+          "abs_diff": 3.8981,
+          "rel_diff_pct": 537.67,
+          "within_5pct": false,
+          "verdict": "NO"
+        },
+        "cb_ratio": {
+          "reconstructed": 0.5684,
+          "paper": 3.6,
+          "abs_diff": -3.0316,
+          "rel_diff_pct": 84.21,
+          "within_5pct": false,
+          "verdict": "NO"
+        }
+      }
+    }
+  },
+  "summary": {
+    "rv_22_raw_pass": "3/9",
+    "rv_20_raw_pass": "3/9",
+    "rv_22_clipped_pass": "3/9",
+    "primary_rv_window": 22,
+    "primary_cb_pass_rate_pct": 33.33
+  }
+}

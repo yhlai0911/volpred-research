@@ -1,0 +1,59 @@
+{
+  "experiment_id": "K790v2",
+  "title": "Taiwan Price Limit Latent Volatility (GJR-GARCH-X)",
+  "asset": "0050.TW",
+  "data_source": "yfinance",
+  "start_date": "2009-01-05",
+  "end_date": "2026-03-30",
+  "oos_start": "2015-01-01",
+  "total_obs": 4216,
+  "oos_obs": 2731,
+  "diagnostics": {
+    "limit_days_5pct": 39,
+    "limit_days_3pct": 122,
+    "limit_freq_5pct": 0.009250474383301708,
+    "limit_freq_3pct": 0.028937381404174574,
+    "oos_limit_days_5pct": 12,
+    "oos_limit_days_3pct": 66,
+    "total_refits": 44,
+    "convergence_rate_base": 1.0,
+    "convergence_rate_x5": 1.0,
+    "convergence_rate_x3": 1.0
+  },
+  "qlike": {
+    "base": -8.044779569586932,
+    "x5": -8.043322856275422,
+    "x3": -8.048794173863559
+  },
+  "mse_r2": {
+    "base": 1.8074277915405042e-07,
+    "x5": 1.8100126807289143e-07,
+    "x3": 1.7891846078135644e-07
+  },
+  "dm_test": {
+    "base_vs_x5_stat": -0.22331117542247003,
+    "base_vs_x5_pval": 0.8232933301368104,
+    "base_vs_x3_stat": 1.069910464014502,
+    "base_vs_x3_pval": 0.28465961256862293,
+    "x5_vs_x3_stat": 0.9498630049488352,
+    "x5_vs_x3_pval": 0.3421818668135077,
+    "x5_significant_harvey3": false,
+    "x3_significant_harvey3": false
+  },
+  "conclusion": "NULL RESULT: Price limit dummy does NOT significantly improve GJR-GARCH forecasts. QLIKE: Base=-8.0448, X5=-8.0433, X3=-8.0488. DM(Base vs X5) t=-0.22 p=0.8233, DM(Base vs X3) t=1.07 p=0.2847. Limit events (39 days @ >5%) are too infrequent or their vol impact is already captured by GARCH asymmetry terms.",
+  "methodology": {
+    "model": "GJR-GARCH(1,1)-X",
+    "exog_x5": "I(|r_{t-1}|>5%) — hard limit proxy",
+    "exog_x3": "I(|r_{t-1}|>3%) — soft limit proxy",
+    "window": "expanding",
+    "refit_every": 63,
+    "min_train": 500,
+    "evaluation": "QLIKE on r² (Patton 2011), DM test (Harvey et al. 1997)",
+    "lag": "signal.shift(1) via exog index: exog[t-1] is used in variance at t"
+  },
+  "references": [
+    "Patton A.J. (2011). Volatility forecast comparison using imperfect volatility proxies. JoE.",
+    "Harvey, Leybourne & Newbold (1997). Testing equality of prediction MSEs. IJoF.",
+    "Huang & Liu (2014). Price limits and stock market volatility in Taiwan. JFEC."
+  ]
+}

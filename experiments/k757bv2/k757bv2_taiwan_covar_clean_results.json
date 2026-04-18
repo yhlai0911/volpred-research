@@ -1,0 +1,405 @@
+{
+  "experiment_id": "K757bv2",
+  "title": "Taiwan CoVaR Contagion Structure — CLEAN 0050.TW Data",
+  "data_source": "yfinance + clean_tw50_data (volpred.utils)",
+  "data_fix": "Pre-2014 0050.TW prices divided by 4 (split ratio); other TW tickers unaffected",
+  "original_experiment": "K757b",
+  "tickers": {
+    "0050": "0050.TW",
+    "TSMC": "2330.TW",
+    "Fubon": "2881.TW",
+    "Cathay": "2882.TW",
+    "VIX": "^VIX"
+  },
+  "period": "2010-01-04 to 2026-03-30",
+  "n_obs_prices": 3967,
+  "n_obs_returns": 3966,
+  "n_vix_ffilled": 130,
+  "proposer": "User (split artifact fix)",
+  "executor": "Claude",
+  "part_a": {
+    "full_sample_corr": {
+      "0050": {
+        "0050": 1.0,
+        "TSMC": 0.8376030268431887,
+        "Fubon": 0.6111734280606672,
+        "Cathay": 0.6080827619158458
+      },
+      "TSMC": {
+        "0050": 0.8376030268431887,
+        "TSMC": 1.0,
+        "Fubon": 0.45905618732361775,
+        "Cathay": 0.45428022792986855
+      },
+      "Fubon": {
+        "0050": 0.6111734280606672,
+        "TSMC": 0.45905618732361775,
+        "Fubon": 1.0,
+        "Cathay": 0.7725252762346312
+      },
+      "Cathay": {
+        "0050": 0.6080827619158458,
+        "TSMC": 0.45428022792986855,
+        "Fubon": 0.7725252762346312,
+        "Cathay": 1.0
+      }
+    },
+    "rolling_60d_corr": {
+      "0050-TSMC": {
+        "mean": 0.8207109662180063,
+        "std": 0.11533725269599314,
+        "min": 0.3968197009234638,
+        "max": 0.9829442673530691
+      },
+      "0050-Fubon": {
+        "mean": 0.5912413036928758,
+        "std": 0.14242162977887934,
+        "min": 0.1687968978858884,
+        "max": 0.9516197986402264
+      },
+      "0050-Cathay": {
+        "mean": 0.5952011314725131,
+        "std": 0.1526383834750451,
+        "min": 0.02863414111369215,
+        "max": 0.901197219918899
+      },
+      "TSMC-Fubon": {
+        "mean": 0.4391371901508852,
+        "std": 0.15968817836464236,
+        "min": -0.09300038929325455,
+        "max": 0.8732321841547916
+      },
+      "TSMC-Cathay": {
+        "mean": 0.4443956601381355,
+        "std": 0.1512684029493512,
+        "min": -0.10880210373738504,
+        "max": 0.8295537864206056
+      },
+      "Fubon-Cathay": {
+        "mean": 0.7719572673882,
+        "std": 0.08595926950657483,
+        "min": 0.5074729625111499,
+        "max": 0.955015326121616
+      }
+    },
+    "crisis_corr": {
+      "0050-TSMC": 0.9116698250460514,
+      "0050-Fubon": 0.8105576372788442,
+      "0050-Cathay": 0.7842108613264108,
+      "TSMC-Fubon": 0.6784719683988891,
+      "TSMC-Cathay": 0.6816563662897448,
+      "Fubon-Cathay": 0.8006731924401472
+    },
+    "calm_corr": {
+      "0050-TSMC": 0.8092392445928981,
+      "0050-Fubon": 0.5041747028154216,
+      "0050-Cathay": 0.5052338133504115,
+      "TSMC-Fubon": 0.34593496496589116,
+      "TSMC-Cathay": 0.36099607670705763,
+      "Fubon-Cathay": 0.746612670427595
+    },
+    "n_crisis_days": 250,
+    "n_calm_days": 2802
+  },
+  "part_b": {
+    "adf_results": {
+      "0050": {
+        "stat": -9.021660234778615,
+        "p_value": 5.753425885117949e-15
+      },
+      "TSMC": {
+        "stat": -8.945502647286002,
+        "p_value": 9.011787897087888e-15
+      },
+      "Fubon": {
+        "stat": -8.563440057682607,
+        "p_value": 8.57193105766516e-14
+      },
+      "Cathay": {
+        "stat": -8.712788858649832,
+        "p_value": 3.553774512134338e-14
+      }
+    },
+    "used_differenced_rv": false,
+    "lag_selection_method": "AIC via statsmodels VAR.select_order()",
+    "granger_causality": {
+      "0050->TSMC": {
+        "aic_lag": 8,
+        "f_stat": 3.2834840927363693,
+        "p_value": 0.000970521361983106,
+        "significant": "True"
+      },
+      "TSMC->0050": {
+        "aic_lag": 8,
+        "f_stat": 0.7454698797191912,
+        "p_value": 0.6512885202919524,
+        "significant": "False"
+      },
+      "0050->Fubon": {
+        "aic_lag": 6,
+        "f_stat": 2.7455456898296995,
+        "p_value": 0.011544710739532336,
+        "significant": "True"
+      },
+      "Fubon->0050": {
+        "aic_lag": 6,
+        "f_stat": 1.9258439508812726,
+        "p_value": 0.07295053608437731,
+        "significant": "False"
+      },
+      "0050->Cathay": {
+        "aic_lag": 10,
+        "f_stat": 3.3944720988189445,
+        "p_value": 0.00019712525612725608,
+        "significant": "True"
+      },
+      "Cathay->0050": {
+        "aic_lag": 10,
+        "f_stat": 1.4836654165984458,
+        "p_value": 0.13862146930814878,
+        "significant": "False"
+      },
+      "TSMC->Fubon": {
+        "aic_lag": 7,
+        "f_stat": 1.3057273122432913,
+        "p_value": 0.24308904313356977,
+        "significant": "False"
+      },
+      "Fubon->TSMC": {
+        "aic_lag": 7,
+        "f_stat": 5.599678701649563,
+        "p_value": 1.930468830094199e-06,
+        "significant": "True"
+      },
+      "TSMC->Cathay": {
+        "aic_lag": 10,
+        "f_stat": 1.1188629172065268,
+        "p_value": 0.34335736404371975,
+        "significant": "False"
+      },
+      "Cathay->TSMC": {
+        "aic_lag": 10,
+        "f_stat": 3.004371021185153,
+        "p_value": 0.0008697752085305306,
+        "significant": "True"
+      },
+      "Fubon->Cathay": {
+        "aic_lag": 10,
+        "f_stat": 2.383213413490228,
+        "p_value": 0.008194377662386926,
+        "significant": "True"
+      },
+      "Cathay->Fubon": {
+        "aic_lag": 10,
+        "f_stat": 1.718295261659364,
+        "p_value": 0.07083695274784746,
+        "significant": "False"
+      }
+    }
+  },
+  "part_c": {
+    "covar_analysis": {
+      "TSMC -> 0050": {
+        "covar_distress_mean": -0.018444237820136905,
+        "covar_median_mean": 0.00043541734597600805,
+        "delta_covar_mean": -0.018879655166112914,
+        "delta_covar_std": 0.004877283646938036,
+        "unconditional_var": -0.01709011939198274,
+        "var_x_tau_mean": -0.023109092265048297,
+        "var_x_med_mean": 0.0006577733449830952,
+        "beta_x_tau": 0.09695228447140902,
+        "beta_x_tau_pval": 0.0009885187492134505,
+        "n_obs": 3946
+      },
+      "Fubon -> 0050": {
+        "covar_distress_mean": -0.01737087628956449,
+        "covar_median_mean": 0.00039202054848461095,
+        "delta_covar_mean": -0.0177628968380491,
+        "delta_covar_std": 0.004720484864907272,
+        "unconditional_var": -0.01709011939198274,
+        "var_x_tau_mean": -0.021035393128662216,
+        "var_x_med_mean": 0.000303224559190559,
+        "beta_x_tau": 0.05165176093606405,
+        "beta_x_tau_pval": 0.06872902213590848,
+        "n_obs": 3946
+      },
+      "Cathay -> 0050": {
+        "covar_distress_mean": -0.017207367718855685,
+        "covar_median_mean": 0.00038457510335846275,
+        "delta_covar_mean": -0.017591942822214147,
+        "delta_covar_std": 0.004721910334392621,
+        "unconditional_var": -0.01709011939198274,
+        "var_x_tau_mean": -0.02101183784290388,
+        "var_x_med_mean": 0.00010773802662523665,
+        "beta_x_tau": 0.05592644905553712,
+        "beta_x_tau_pval": 0.05323137487792625,
+        "n_obs": 3946
+      },
+      "Fubon -> TSMC": {
+        "covar_distress_mean": -0.02223381857128726,
+        "covar_median_mean": 0.0005726732531460828,
+        "delta_covar_mean": -0.022806491824433343,
+        "delta_covar_std": 0.0033233756520090803,
+        "unconditional_var": -0.0234703572785549,
+        "var_x_tau_mean": -0.021035393128662216,
+        "var_x_med_mean": 0.000303224559190559,
+        "beta_x_tau": -0.03609645400732564,
+        "beta_x_tau_pval": 0.32942850191530293,
+        "n_obs": 3946
+      }
+    },
+    "tsmc_covar_periods": {
+      "2011-2014": {
+        "mean_delta_covar": -0.019068821048333347,
+        "std_delta_covar": 0.004725486316608773,
+        "n_obs": 739
+      },
+      "2014-2017": {
+        "mean_delta_covar": -0.016765980873433794,
+        "std_delta_covar": 0.0027422565586627933,
+        "n_obs": 738
+      },
+      "2017-2020": {
+        "mean_delta_covar": -0.015816492039656876,
+        "std_delta_covar": 0.003030254314450541,
+        "n_obs": 729
+      },
+      "2020-2023": {
+        "mean_delta_covar": -0.02329385480585836,
+        "std_delta_covar": 0.00598477113052414,
+        "n_obs": 734
+      },
+      "2023-2026": {
+        "mean_delta_covar": -0.018461416091001596,
+        "std_delta_covar": 0.0034339405787641845,
+        "n_obs": 723
+      }
+    },
+    "tsmc_covar_trend": {
+      "slope": -3.2642902581990857e-07,
+      "r_squared": 0.005813858695984937,
+      "p_value": 1.625196426424001e-06
+    }
+  },
+  "part_d": {
+    "oos_prediction": {
+      "VIX_only": {
+        "r2_oos": 0.10143317798335794,
+        "qlike": -3.889448044486965,
+        "spearman_rho": 0.2470117836572249,
+        "spearman_p": 3.009937349745073e-49,
+        "n": 3459
+      },
+      "VIX+TSMC": {
+        "r2_oos": 0.1012293423917684,
+        "qlike": -3.8887944761085023,
+        "spearman_rho": 0.24070748503395675,
+        "spearman_p": 8.7856689731198e-47,
+        "n": 3459
+      },
+      "VIX+TSMC+Fin": {
+        "r2_oos": 0.09426298545541922,
+        "qlike": -3.8870400538329752,
+        "spearman_rho": 0.23607068496844927,
+        "spearman_p": 5.1485533299803696e-45,
+        "n": 3459
+      },
+      "TSMC_only": {
+        "r2_oos": 0.03380261333679835,
+        "qlike": -3.8633622846302114,
+        "spearman_rho": 0.1330699057682015,
+        "spearman_p": 3.890169917253589e-15,
+        "n": 3459
+      }
+    },
+    "partial_corr_tsmc_0050_given_vix": {
+      "spearman_rho": 0.5211755296147537,
+      "p_value": 9.722167511615668e-275
+    }
+  },
+  "part_e": {
+    "comparison_with_k757b": {
+      "sample_size_diff": 1,
+      "corr_changes": {
+        "0050-TSMC": {
+          "old": 0.5866163749925943,
+          "new": 0.8376030268431887
+        },
+        "0050-Fubon": {
+          "old": 0.4238865192531311,
+          "new": 0.6111734280606672
+        },
+        "0050-Cathay": {
+          "old": 0.4073465384358566,
+          "new": 0.6080827619158458
+        }
+      },
+      "granger_significance_changes": [
+        "0050->TSMC: sig→insig",
+        "TSMC->0050: sig→insig",
+        "0050->Fubon: sig→insig",
+        "Fubon->0050: sig→insig",
+        "0050->Cathay: sig→insig",
+        "Cathay->0050: sig→insig",
+        "TSMC->Fubon: sig→insig",
+        "Fubon->TSMC: sig→insig",
+        "TSMC->Cathay: sig→insig",
+        "Cathay->TSMC: sig→insig",
+        "Fubon->Cathay: sig→insig",
+        "Cathay->Fubon: sig→insig"
+      ],
+      "covar_changes": {
+        "TSMC -> 0050": {
+          "delta_covar_old": -0.018882331527497024,
+          "delta_covar_new": -0.018879655166112914,
+          "significant_old": true,
+          "significant_new": true,
+          "significance_changed": false
+        },
+        "Fubon -> 0050": {
+          "delta_covar_old": -0.017839839990897777,
+          "delta_covar_new": -0.0177628968380491,
+          "significant_old": false,
+          "significant_new": false,
+          "significance_changed": false
+        },
+        "Cathay -> 0050": {
+          "delta_covar_old": -0.017761989130614164,
+          "delta_covar_new": -0.017591942822214147,
+          "significant_old": true,
+          "significant_new": false,
+          "significance_changed": true
+        },
+        "Fubon -> TSMC": {
+          "delta_covar_old": -0.022872195604733945,
+          "delta_covar_new": -0.022806491824433343,
+          "significant_old": false,
+          "significant_new": false,
+          "significance_changed": false
+        }
+      },
+      "loaded_original": true
+    }
+  },
+  "summary": {
+    "findings": [
+      "A: 0050-TSMC corr = 0.838, 0050-Fin avg = 0.610",
+      "B: Significant Granger causality: 6/12 pairs",
+      "   0050->TSMC: F=3.28, p=0.000971",
+      "   0050->Fubon: F=2.75, p=0.011545",
+      "   0050->Cathay: F=3.39, p=0.000197",
+      "   Fubon->TSMC: F=5.60, p=0.000002",
+      "   Cathay->TSMC: F=3.00, p=0.000870",
+      "   Fubon->Cathay: F=2.38, p=0.008194",
+      "C: TSMC DeltaCoVaR→0050 = -0.018880, beta=0.0970, p=0.0010",
+      "D: VIX-only OOS R²=0.1014, VIX+TSMC=0.1012, gain=-0.0002",
+      "D: Partial corr TSMC_RV→0050_RV|VIX = 0.5212 (p=9.72e-275)"
+    ]
+  },
+  "references": [
+    "K757b: Taiwan CoVaR contagion (raw 0050.TW, fixed A&B2016)",
+    "Adrian & Brunnermeier (2016) CoVaR, American Economic Review",
+    "K738: VT insurance cost-benefit"
+  ],
+  "timestamp": "2026-03-31T20:14:47.197474"
+}

@@ -1,0 +1,391 @@
+{
+  "experiment_id": "K1194",
+  "title": "Paper 3 TSMOM Hedge 5-Implementation Forensic",
+  "description": "Systematic test of 5+1 TSMOM hedge implementations to find which (if any) reproduces paper Table 3 retention=93% and Table 6 CI=[86,97].",
+  "data_source": "yfinance (SPY, SHY, GLD, VIX)",
+  "period": "2005-01-03 to 2026-03-31",
+  "methodology": {
+    "vt_rule_monthly": "w = min(12/VIX_month_end_t, 1), lag 1 month, monthly rebalancing",
+    "vt_rule_daily": "w = min(12/VIX_{t-1}, 1), daily signal (K898 style)",
+    "tx_cost_monthly": "10 bps per round trip on monthly weight changes",
+    "tsmom_lookback": 252,
+    "bootstrap": "10000 reps, block=252 days, seed=42",
+    "mdd_retention_formula": "(MDD_BH - MDD_Hedged) / (MDD_BH - MDD_VT) * 100"
+  },
+  "paper_targets": {
+    "table3": {
+      "bh_sharpe": 0.611,
+      "vt_sharpe": 0.797,
+      "hedged_sharpe": 0.737,
+      "bh_mdd": -55.2,
+      "vt_mdd": -24.7,
+      "hedged_mdd": -26.9,
+      "mdd_retention": 93
+    },
+    "table6_spy_ci_90pct": [
+      86,
+      97
+    ]
+  },
+  "prior_experiments": {
+    "K898": {
+      "method": "daily VIX, raw TSMOM, beta clipped [0,0.5]",
+      "SPY_retention": 107.0,
+      "verdict": "direction_reversal"
+    },
+    "K1177": {
+      "method": "monthly VIX, orth TSMOM, no beta constraint",
+      "SPY_retention": 132.0,
+      "verdict": "direction_reversal"
+    },
+    "K1192": {
+      "method": "monthly VIX, raw TSMOM, beta clipped [0,0.5]",
+      "SPY_retention": 103.7,
+      "verdict": "partial/direction_reversal",
+      "note": "CI=[93,182], far from paper [86,97]"
+    }
+  },
+  "implementations": {
+    "Impl1_Raw_TSMOM_Monthly": {
+      "implementation": "Impl1_Raw_TSMOM_Monthly",
+      "constrain_beta": false,
+      "vt_type": "monthly",
+      "metrics": {
+        "bh_sharpe": 0.61,
+        "vt_sharpe": 0.675,
+        "hedged_sharpe": 0.625,
+        "bh_mdd_pct": -55.19,
+        "vt_mdd_pct": -26.41,
+        "hedged_mdd_pct": -17.1
+      },
+      "mdd_retention_point_pct": 132.4,
+      "bootstrap_ci": {
+        "point_estimate_pct": 132.4,
+        "median_bootstrap_pct": 142.4,
+        "mean_bootstrap_pct": 149.9,
+        "ci_lower_5_pct": 105.5,
+        "ci_upper_95_pct": 195.1,
+        "n_valid": 10000
+      },
+      "paper_comparison": {
+        "paper_retention": 93,
+        "paper_ci_lower": 86,
+        "paper_ci_upper": 97,
+        "diff_retention": 39.4,
+        "diff_ci_lower": 19.5,
+        "diff_ci_upper": 98.1
+      },
+      "verdict": "DIRECTION_REVERSAL",
+      "n_obs": 5344
+    },
+    "Impl2_Orth_TSMOM_Monthly": {
+      "implementation": "Impl2_Orth_TSMOM_Monthly",
+      "constrain_beta": false,
+      "vt_type": "monthly",
+      "metrics": {
+        "bh_sharpe": 0.61,
+        "vt_sharpe": 0.675,
+        "hedged_sharpe": 0.632,
+        "bh_mdd_pct": -55.19,
+        "vt_mdd_pct": -26.41,
+        "hedged_mdd_pct": -17.19
+      },
+      "mdd_retention_point_pct": 132.0,
+      "bootstrap_ci": {
+        "point_estimate_pct": 132.0,
+        "median_bootstrap_pct": 142.7,
+        "mean_bootstrap_pct": 149.5,
+        "ci_lower_5_pct": 104.3,
+        "ci_upper_95_pct": 194.7,
+        "n_valid": 10000
+      },
+      "paper_comparison": {
+        "paper_retention": 93,
+        "paper_ci_lower": 86,
+        "paper_ci_upper": 97,
+        "diff_retention": 39.0,
+        "diff_ci_lower": 18.3,
+        "diff_ci_upper": 97.7
+      },
+      "verdict": "DIRECTION_REVERSAL",
+      "n_obs": 5344
+    },
+    "Impl3_Orth_BH_Monthly": {
+      "implementation": "Impl3_Orth_BH_Monthly",
+      "constrain_beta": false,
+      "vt_type": "monthly",
+      "metrics": {
+        "bh_sharpe": 0.61,
+        "vt_sharpe": 0.675,
+        "hedged_sharpe": -0.239,
+        "bh_mdd_pct": -55.19,
+        "vt_mdd_pct": -26.41,
+        "hedged_mdd_pct": -8070327022685883.0
+      },
+      "mdd_retention_point_pct": -2.803927775678401e+16,
+      "bootstrap_ci": {
+        "point_estimate_pct": -2.803927775678402e+16,
+        "median_bootstrap_pct": -8459930374104427.0,
+        "mean_bootstrap_pct": -1.7838320129544268e+16,
+        "ci_lower_5_pct": -6.4647327254024136e+16,
+        "ci_upper_95_pct": -750.2,
+        "n_valid": 10000
+      },
+      "paper_comparison": {
+        "paper_retention": 93,
+        "paper_ci_lower": 86,
+        "paper_ci_upper": 97,
+        "diff_retention": -2.80392777567841e+16,
+        "diff_ci_lower": -6.464732725402422e+16,
+        "diff_ci_upper": -847.2
+      },
+      "verdict": "NO_MATCH",
+      "n_obs": 5344
+    },
+    "Impl4_Orth_DeltaVIX_Monthly": {
+      "implementation": "Impl4_Orth_DeltaVIX_Monthly",
+      "constrain_beta": false,
+      "vt_type": "monthly",
+      "metrics": {
+        "bh_sharpe": 0.61,
+        "vt_sharpe": 0.675,
+        "hedged_sharpe": 0.577,
+        "bh_mdd_pct": -55.19,
+        "vt_mdd_pct": -26.41,
+        "hedged_mdd_pct": -19.13
+      },
+      "mdd_retention_point_pct": 125.3,
+      "bootstrap_ci": {
+        "point_estimate_pct": 125.3,
+        "median_bootstrap_pct": 136.4,
+        "mean_bootstrap_pct": 137.2,
+        "ci_lower_5_pct": 68.9,
+        "ci_upper_95_pct": 191.1,
+        "n_valid": 10000
+      },
+      "paper_comparison": {
+        "paper_retention": 93,
+        "paper_ci_lower": 86,
+        "paper_ci_upper": 97,
+        "diff_retention": 32.3,
+        "diff_ci_lower": -17.1,
+        "diff_ci_upper": 94.1
+      },
+      "verdict": "DIRECTION_REVERSAL",
+      "n_obs": 5344
+    },
+    "Impl5_Normalized_TSMOM_Monthly": {
+      "implementation": "Impl5_Normalized_TSMOM_Monthly",
+      "constrain_beta": false,
+      "vt_type": "monthly",
+      "metrics": {
+        "bh_sharpe": 0.614,
+        "vt_sharpe": 0.681,
+        "hedged_sharpe": 0.599,
+        "bh_mdd_pct": -55.19,
+        "vt_mdd_pct": -26.41,
+        "hedged_mdd_pct": -20.07
+      },
+      "mdd_retention_point_pct": 122.0,
+      "bootstrap_ci": {
+        "point_estimate_pct": 122.0,
+        "median_bootstrap_pct": 133.1,
+        "mean_bootstrap_pct": 145.2,
+        "ci_lower_5_pct": 100.9,
+        "ci_upper_95_pct": 196.4,
+        "n_valid": 10000
+      },
+      "paper_comparison": {
+        "paper_retention": 93,
+        "paper_ci_lower": 86,
+        "paper_ci_upper": 97,
+        "diff_retention": 29.0,
+        "diff_ci_lower": 14.9,
+        "diff_ci_upper": 99.4
+      },
+      "verdict": "DIRECTION_REVERSAL",
+      "n_obs": 5113
+    },
+    "Impl6_Raw_Daily_K898style": {
+      "implementation": "Impl6_Raw_Daily_K898style",
+      "constrain_beta": true,
+      "vt_type": "daily",
+      "metrics": {
+        "bh_sharpe": 0.61,
+        "vt_sharpe": 0.783,
+        "hedged_sharpe": 0.791,
+        "bh_mdd_pct": -55.19,
+        "vt_mdd_pct": -24.66,
+        "hedged_mdd_pct": -22.47
+      },
+      "mdd_retention_point_pct": 107.2,
+      "bootstrap_ci": {
+        "point_estimate_pct": 107.2,
+        "median_bootstrap_pct": 111.9,
+        "mean_bootstrap_pct": 120.1,
+        "ci_lower_5_pct": 95.7,
+        "ci_upper_95_pct": 175.5,
+        "n_valid": 10000
+      },
+      "paper_comparison": {
+        "paper_retention": 93,
+        "paper_ci_lower": 86,
+        "paper_ci_upper": 97,
+        "diff_retention": 14.2,
+        "diff_ci_lower": 9.7,
+        "diff_ci_upper": 78.5
+      },
+      "verdict": "DIRECTION_REVERSAL",
+      "n_obs": 5344
+    },
+    "ADD_Raw_Daily_clip05": {
+      "implementation": "ADD_Raw_Daily_clip05",
+      "sign_note": "ADD (inverted hedge sign)",
+      "constrain_beta": true,
+      "vt_type": "daily",
+      "metrics": {
+        "hedged_sharpe": 0.615,
+        "hedged_mdd_pct": -28.84,
+        "vt_mdd_pct": -24.66,
+        "bh_mdd_pct": -55.19
+      },
+      "mdd_retention_point_pct": 86.3,
+      "bootstrap_ci": {
+        "point_estimate_pct": 86.3,
+        "median_bootstrap_pct": 46.6,
+        "mean_bootstrap_pct": 32.5,
+        "ci_lower_5_pct": -70.2,
+        "ci_upper_95_pct": 88.1,
+        "n_valid": 10000
+      },
+      "paper_comparison": {
+        "paper_retention": 93,
+        "paper_ci_lower": 86,
+        "paper_ci_upper": 97,
+        "diff_retention": -6.7,
+        "diff_ci_lower": -156.2,
+        "diff_ci_upper": -8.9
+      },
+      "verdict": "PARTIAL",
+      "n_obs": 5344
+    },
+    "ADD_Raw_Daily_noclip": {
+      "implementation": "ADD_Raw_Daily_noclip",
+      "sign_note": "ADD (inverted hedge sign)",
+      "constrain_beta": false,
+      "vt_type": "daily",
+      "metrics": {
+        "hedged_sharpe": 0.574,
+        "hedged_mdd_pct": -38.45,
+        "vt_mdd_pct": -24.66,
+        "bh_mdd_pct": -55.19
+      },
+      "mdd_retention_point_pct": 54.8,
+      "bootstrap_ci": {
+        "point_estimate_pct": 54.8,
+        "median_bootstrap_pct": 26.4,
+        "mean_bootstrap_pct": 8.1,
+        "ci_lower_5_pct": -109.5,
+        "ci_upper_95_pct": 66.4,
+        "n_valid": 10000
+      },
+      "paper_comparison": {
+        "paper_retention": 93,
+        "paper_ci_lower": 86,
+        "paper_ci_upper": 97,
+        "diff_retention": -38.2,
+        "diff_ci_lower": -195.5,
+        "diff_ci_upper": -30.6
+      },
+      "verdict": "NO_MATCH",
+      "n_obs": 5344
+    },
+    "ADD_Raw_Monthly_clip05": {
+      "implementation": "ADD_Raw_Monthly_clip05",
+      "sign_note": "ADD (inverted hedge sign)",
+      "constrain_beta": true,
+      "vt_type": "monthly",
+      "metrics": {
+        "hedged_sharpe": 0.577,
+        "hedged_mdd_pct": -33.95,
+        "vt_mdd_pct": -26.41,
+        "bh_mdd_pct": -55.19
+      },
+      "mdd_retention_point_pct": 73.8,
+      "bootstrap_ci": {
+        "point_estimate_pct": 73.8,
+        "median_bootstrap_pct": 41.1,
+        "mean_bootstrap_pct": 19.2,
+        "ci_lower_5_pct": -92.7,
+        "ci_upper_95_pct": 89.4,
+        "n_valid": 10000
+      },
+      "paper_comparison": {
+        "paper_retention": 93,
+        "paper_ci_lower": 86,
+        "paper_ci_upper": 97,
+        "diff_retention": -19.2,
+        "diff_ci_lower": -178.7,
+        "diff_ci_upper": -7.6
+      },
+      "verdict": "NO_MATCH",
+      "n_obs": 5344
+    },
+    "ADD_Orth_Daily_clip05": {
+      "implementation": "ADD_Orth_Daily_clip05",
+      "sign_note": "ADD (inverted hedge sign)",
+      "constrain_beta": true,
+      "vt_type": "daily",
+      "metrics": {
+        "hedged_sharpe": 0.612,
+        "hedged_mdd_pct": -28.72,
+        "vt_mdd_pct": -24.66,
+        "bh_mdd_pct": -55.19
+      },
+      "mdd_retention_point_pct": 86.7,
+      "bootstrap_ci": {
+        "point_estimate_pct": 86.7,
+        "median_bootstrap_pct": 47.2,
+        "mean_bootstrap_pct": 33.3,
+        "ci_lower_5_pct": -68.2,
+        "ci_upper_95_pct": 88.5,
+        "n_valid": 10000
+      },
+      "paper_comparison": {
+        "paper_retention": 93,
+        "paper_ci_lower": 86,
+        "paper_ci_upper": 97,
+        "diff_retention": -6.3,
+        "diff_ci_lower": -154.2,
+        "diff_ci_upper": -8.5
+      },
+      "verdict": "PARTIAL",
+      "n_obs": 5344
+    }
+  },
+  "summary": {
+    "matched_implementations": [],
+    "direction_reversal_implementations": [
+      "Impl1_Raw_TSMOM_Monthly",
+      "Impl2_Orth_TSMOM_Monthly",
+      "Impl4_Orth_DeltaVIX_Monthly",
+      "Impl5_Normalized_TSMOM_Monthly",
+      "Impl6_Raw_Daily_K898style"
+    ],
+    "all_implementations_tested": [
+      "Impl1_Raw_TSMOM_Monthly",
+      "Impl2_Orth_TSMOM_Monthly",
+      "Impl3_Orth_BH_Monthly",
+      "Impl4_Orth_DeltaVIX_Monthly",
+      "Impl5_Normalized_TSMOM_Monthly",
+      "Impl6_Raw_Daily_K898style",
+      "ADD_Raw_Daily_clip05",
+      "ADD_Raw_Daily_noclip",
+      "ADD_Raw_Monthly_clip05",
+      "ADD_Orth_Daily_clip05"
+    ],
+    "overall_verdict": "SYSTEMATIC_DIRECTION_REVERSAL",
+    "recommendation": "ALL implementations yield retention > 105%. Paper claims 93% (hedged VT slightly worse than VT). Empirical result: hedged VT is BETTER than VT in MDD. This means TSMOM hedge ADDS drawdown protection rather than removing it. Paper Table 3 row 'TSMOM-Hedged VT MDD=-26.9%' cannot be reproduced; actual hedged MDD appears to be better than VT's -24.7%. Errata required in paper Table 3 and Table 6."
+  },
+  "timestamp": "2026-04-17T10:10:05.351389Z"
+}

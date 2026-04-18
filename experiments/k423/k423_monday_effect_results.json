@@ -1,0 +1,131 @@
+{
+  "experiment": "K423",
+  "title": "Day-of-Week Volatility Effect",
+  "timestamp": "2026-03-25T17:10:33.436477+00:00",
+  "data": {
+    "source": "yfinance",
+    "n_assets": 10
+  },
+  "results": {
+    "SPY": {
+      "vol_by_day": {
+        "Mon": 11.2,
+        "Tue": 11.1,
+        "Wed": 11.3,
+        "Thu": 11.8,
+        "Fri": 11.6
+      },
+      "monday_ratio": 0.984,
+      "monday_t": -0.43,
+      "anova_p": 0.7742
+    },
+    "QQQ": {
+      "vol_by_day": {
+        "Mon": 14.3,
+        "Tue": 13.6,
+        "Wed": 14.2,
+        "Thu": 14.8,
+        "Fri": 14.5
+      },
+      "monday_ratio": 0.998,
+      "monday_t": -0.05,
+      "anova_p": 0.5706
+    },
+    "GLD": {
+      "vol_by_day": {
+        "Mon": 11.7,
+        "Tue": 11.6,
+        "Wed": 11.0,
+        "Thu": 12.0,
+        "Fri": 12.0
+      },
+      "monday_ratio": 1.004,
+      "monday_t": 0.12,
+      "anova_p": 0.3709
+    },
+    "TLT": {
+      "vol_by_day": {
+        "Mon": 10.4,
+        "Tue": 11.5,
+        "Wed": 11.7,
+        "Thu": 11.2,
+        "Fri": 11.8
+      },
+      "monday_ratio": 0.921,
+      "monday_t": -2.82,
+      "anova_p": 0.0447
+    },
+    "BTC": {
+      "vol_by_day": {
+        "Mon": 41.8,
+        "Tue": 38.5,
+        "Wed": 41.0,
+        "Thu": 41.6,
+        "Fri": 37.4
+      },
+      "monday_ratio": 1.044,
+      "monday_t": 1.08,
+      "anova_p": 0.3094
+    },
+    "EEM": {
+      "vol_by_day": {
+        "Mon": 15.7,
+        "Tue": 15.4,
+        "Wed": 15.3,
+        "Thu": 15.5,
+        "Fri": 15.1
+      },
+      "monday_ratio": 1.019,
+      "monday_t": 0.62,
+      "anova_p": 0.9422
+    },
+    "ES": {
+      "vol_by_day": {
+        "Mon": 12.0,
+        "Tue": 10.9,
+        "Wed": 11.4,
+        "Thu": 11.8,
+        "Fri": 11.3
+      },
+      "monday_ratio": 1.043,
+      "monday_t": 1.17,
+      "anova_p": 0.5554
+    },
+    "GC": {
+      "vol_by_day": {
+        "Mon": 11.6,
+        "Tue": 11.6,
+        "Wed": 10.5,
+        "Thu": 13.0,
+        "Fri": 12.3
+      },
+      "monday_ratio": 0.985,
+      "monday_t": -0.43,
+      "anova_p": 0.001
+    },
+    "ZN": {
+      "vol_by_day": {
+        "Mon": 3.7,
+        "Tue": 4.0,
+        "Wed": 4.1,
+        "Thu": 4.3,
+        "Fri": 4.3
+      },
+      "monday_ratio": 0.913,
+      "monday_t": -3.06,
+      "anova_p": 0.0122
+    },
+    "FXY": {
+      "vol_by_day": {
+        "Mon": 6.2,
+        "Tue": 6.5,
+        "Wed": 6.7,
+        "Thu": 7.2,
+        "Fri": 7.1
+      },
+      "monday_ratio": 0.916,
+      "monday_t": -2.65,
+      "anova_p": 0.0061
+    }
+  }
+}

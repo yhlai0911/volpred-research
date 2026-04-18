@@ -1,0 +1,367 @@
+{
+  "experiment_id": "K507",
+  "title": "Dynamic SPY/GLD Allocation Strategy",
+  "date": "2026-03-26",
+  "description": "Test whether dynamic SPY/GLD allocation (VIX-based, momentum, risk parity, combined) can beat static 50/50 + 12/VIX",
+  "data": {
+    "assets": [
+      "SPY",
+      "GLD"
+    ],
+    "source": "yfinance",
+    "period": "2005-01-03 to 2026-03-26",
+    "n_days": 5341,
+    "vt_method": "12/VIX",
+    "tx_cost": "0.05% per monthly rebalance"
+  },
+  "diagnostics": {
+    "spy_ann_return": 0.1162,
+    "spy_ann_vol": 0.19,
+    "spy_skew": 0.0,
+    "spy_excess_kurt": 15.397,
+    "gld_ann_return": 0.1226,
+    "gld_ann_vol": 0.1808,
+    "gld_skew": -0.315,
+    "gld_excess_kurt": 6.79,
+    "spy_gld_corr": 0.057,
+    "rolling_corr_mean": 0.054,
+    "rolling_corr_std": 0.174,
+    "vix_regime_pct": {
+      "low_lt15": 0.373,
+      "mid_15_25": 0.463,
+      "high_gt25": 0.164
+    }
+  },
+  "full_sample_results": {
+    "static_5050": {
+      "ann_return": 0.0745,
+      "ann_vol": 0.0786,
+      "sharpe": 0.947,
+      "net_sharpe": 0.871,
+      "max_dd": -0.128,
+      "calmar": 0.582,
+      "sortino": 1.262,
+      "n_days": 5339,
+      "cum_return": 3.5391,
+      "annual_tx": 0.0,
+      "avg_spy_weight": 0.5,
+      "std_spy_weight": 0.0,
+      "min_spy_weight": 0.5,
+      "max_spy_weight": 0.5
+    },
+    "vix_dynamic": {
+      "ann_return": 0.0723,
+      "ann_vol": 0.0742,
+      "sharpe": 0.975,
+      "net_sharpe": 0.894,
+      "max_dd": -0.1119,
+      "calmar": 0.647,
+      "sortino": 1.302,
+      "n_days": 5339,
+      "cum_return": 3.3657,
+      "annual_tx": 0.000849,
+      "avg_spy_weight": 0.542,
+      "std_spy_weight": 0.14,
+      "min_spy_weight": 0.3,
+      "max_spy_weight": 0.7
+    },
+    "momentum": {
+      "ann_return": 0.0739,
+      "ann_vol": 0.0824,
+      "sharpe": 0.897,
+      "net_sharpe": 0.824,
+      "max_dd": -0.1899,
+      "calmar": 0.389,
+      "sortino": 1.18,
+      "n_days": 5339,
+      "cum_return": 3.4509,
+      "annual_tx": 0.001236,
+      "avg_spy_weight": 0.512,
+      "std_spy_weight": 0.183,
+      "min_spy_weight": 0.3,
+      "max_spy_weight": 0.7
+    },
+    "inv_vol": {
+      "ann_return": 0.0733,
+      "ann_vol": 0.074,
+      "sharpe": 0.991,
+      "net_sharpe": 0.91,
+      "max_dd": -0.1327,
+      "calmar": 0.553,
+      "sortino": 1.34,
+      "n_days": 5277,
+      "cum_return": 3.3841,
+      "annual_tx": 0.000458,
+      "avg_spy_weight": 0.521,
+      "std_spy_weight": 0.098,
+      "min_spy_weight": 0.254,
+      "max_spy_weight": 0.778
+    },
+    "combined": {
+      "ann_return": 0.0731,
+      "ann_vol": 0.0769,
+      "sharpe": 0.95,
+      "net_sharpe": 0.872,
+      "max_dd": -0.1497,
+      "calmar": 0.488,
+      "sortino": 1.264,
+      "n_days": 5339,
+      "cum_return": 3.4189,
+      "annual_tx": 0.000949,
+      "avg_spy_weight": 0.527,
+      "std_spy_weight": 0.13,
+      "min_spy_weight": 0.3,
+      "max_spy_weight": 0.7
+    }
+  },
+  "cross_oos": {
+    "static_5050": {
+      "sharpes": [
+        0.895,
+        0.641,
+        0.685,
+        1.173,
+        1.4
+      ],
+      "mean_sharpe": 0.959,
+      "wins_vs_benchmark": "N/A"
+    },
+    "vix_dynamic": {
+      "sharpes": [
+        0.661,
+        0.819,
+        0.79,
+        1.351,
+        1.366
+      ],
+      "mean_sharpe": 0.997,
+      "wins_vs_benchmark": 3
+    },
+    "momentum": {
+      "sharpes": [
+        0.906,
+        0.931,
+        0.326,
+        1.284,
+        1.096
+      ],
+      "mean_sharpe": 0.909,
+      "wins_vs_benchmark": 3
+    },
+    "inv_vol": {
+      "sharpes": [
+        0.87,
+        0.764,
+        0.738,
+        1.184,
+        1.446
+      ],
+      "mean_sharpe": 1.0,
+      "wins_vs_benchmark": 4
+    },
+    "combined": {
+      "sharpes": [
+        0.815,
+        0.884,
+        0.56,
+        1.341,
+        1.236
+      ],
+      "mean_sharpe": 0.967,
+      "wins_vs_benchmark": 2
+    }
+  },
+  "dm_tests": {
+    "vix_dynamic": {
+      "dm_stat": -0.455,
+      "dm_p": 0.6493
+    },
+    "momentum": {
+      "dm_stat": -0.105,
+      "dm_p": 0.9166
+    },
+    "inv_vol": {
+      "dm_stat": -0.552,
+      "dm_p": 0.581
+    },
+    "combined": {
+      "dm_stat": -0.328,
+      "dm_p": 0.743
+    }
+  },
+  "crisis_analysis": {
+    "GFC_2008": {
+      "static_5050": {
+        "return": -0.0577,
+        "max_dd": -0.0769,
+        "avg_spy_weight": 0.5,
+        "n_days": 146
+      },
+      "vix_dynamic": {
+        "return": -0.019,
+        "max_dd": -0.0615,
+        "avg_spy_weight": 0.311,
+        "n_days": 146
+      },
+      "momentum": {
+        "return": -0.0683,
+        "max_dd": -0.0869,
+        "avg_spy_weight": 0.344,
+        "n_days": 146
+      },
+      "inv_vol": {
+        "return": -0.0533,
+        "max_dd": -0.0766,
+        "avg_spy_weight": 0.439,
+        "n_days": 146
+      },
+      "combined": {
+        "return": -0.0439,
+        "max_dd": -0.0678,
+        "avg_spy_weight": 0.327,
+        "n_days": 146
+      }
+    },
+    "Euro_Crisis_2011": {
+      "static_5050": {
+        "return": 0.0205,
+        "max_dd": -0.0369,
+        "avg_spy_weight": 0.5,
+        "n_days": 85
+      },
+      "vix_dynamic": {
+        "return": 0.0249,
+        "max_dd": -0.0358,
+        "avg_spy_weight": 0.356,
+        "n_days": 85
+      },
+      "momentum": {
+        "return": 0.0493,
+        "max_dd": -0.0358,
+        "avg_spy_weight": 0.3,
+        "n_days": 85
+      },
+      "inv_vol": {
+        "return": 0.026,
+        "max_dd": -0.0325,
+        "avg_spy_weight": 0.45,
+        "n_days": 85
+      },
+      "combined": {
+        "return": 0.037,
+        "max_dd": -0.0358,
+        "avg_spy_weight": 0.328,
+        "n_days": 85
+      }
+    },
+    "COVID_2020": {
+      "static_5050": {
+        "return": -0.0185,
+        "max_dd": -0.0656,
+        "avg_spy_weight": 0.5,
+        "n_days": 41
+      },
+      "vix_dynamic": {
+        "return": -0.009,
+        "max_dd": -0.0504,
+        "avg_spy_weight": 0.339,
+        "n_days": 41
+      },
+      "momentum": {
+        "return": 0.0012,
+        "max_dd": -0.0447,
+        "avg_spy_weight": 0.32,
+        "n_days": 41
+      },
+      "inv_vol": {
+        "return": -0.0086,
+        "max_dd": -0.0556,
+        "avg_spy_weight": 0.351,
+        "n_days": 41
+      },
+      "combined": {
+        "return": -0.0039,
+        "max_dd": -0.0476,
+        "avg_spy_weight": 0.329,
+        "n_days": 41
+      }
+    },
+    "Rate_Hike_2022": {
+      "static_5050": {
+        "return": -0.058,
+        "max_dd": -0.0927,
+        "avg_spy_weight": 0.5,
+        "n_days": 251
+      },
+      "vix_dynamic": {
+        "return": -0.0643,
+        "max_dd": -0.0953,
+        "avg_spy_weight": 0.396,
+        "n_days": 251
+      },
+      "momentum": {
+        "return": -0.0799,
+        "max_dd": -0.1118,
+        "avg_spy_weight": 0.439,
+        "n_days": 251
+      },
+      "inv_vol": {
+        "return": -0.0478,
+        "max_dd": -0.0908,
+        "avg_spy_weight": 0.387,
+        "n_days": 251
+      },
+      "combined": {
+        "return": -0.0721,
+        "max_dd": -0.1034,
+        "avg_spy_weight": 0.418,
+        "n_days": 251
+      }
+    },
+    "Iran_Crisis_2026": {
+      "static_5050": {
+        "return": -0.0054,
+        "max_dd": -0.0255,
+        "avg_spy_weight": 0.5,
+        "n_days": 19
+      },
+      "vix_dynamic": {
+        "return": -0.0057,
+        "max_dd": -0.0258,
+        "avg_spy_weight": 0.468,
+        "n_days": 19
+      },
+      "momentum": {
+        "return": -0.0013,
+        "max_dd": -0.0282,
+        "avg_spy_weight": 0.3,
+        "n_days": 19
+      },
+      "inv_vol": {
+        "return": -0.0111,
+        "max_dd": -0.0219,
+        "avg_spy_weight": 0.766,
+        "n_days": 19
+      },
+      "combined": {
+        "return": -0.0035,
+        "max_dd": -0.027,
+        "avg_spy_weight": 0.384,
+        "n_days": 19
+      }
+    }
+  },
+  "year_by_year_win_rates": {
+    "vix_dynamic": "13/22",
+    "momentum": "7/22",
+    "inv_vol": "15/22",
+    "combined": "9/22"
+  },
+  "conclusion": "No dynamic allocation strategy passes all criteria (Sharpe improvement + 4/5 cross-OOS + Harvey t>3.0). Best candidate: inv_vol (Sharpe 0.991 vs benchmark 0.947). Static 50/50 + 12/VIX remains the optimal retail strategy. The lack of improvement is consistent with DCC-GARCH finding that 2-asset RP weights are independent of correlation \u2014 the diversification benefit from 50/50 is already near-optimal analytically.",
+  "references": [
+    "Asness, Moskowitz, Pedersen (2013) \"Value and Momentum Everywhere\", JF",
+    "Qian (2005) \"Risk Parity Portfolios\", PanAgora",
+    "K458 meta-analysis, N79 12/VIX, Q21 optimal retail portfolio",
+    "DCC-GARCH SPY-GLD (knowledge): 2-asset RP weights independent of rho"
+  ]
+}

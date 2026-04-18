@@ -1,0 +1,440 @@
+{
+  "experiment_id": "K830",
+  "title": "K830: BTC Skewed-t VaR \u2014 Fixing the K829 Positive-Skew Paradox",
+  "method": "GJR-GARCH(1,1) expanding window + 5 VaR methods (Normal/Student-t/HistSim/Skewed-t/Asym-HistSim)",
+  "asset": "BTC-USD",
+  "oos_period": "2023-01-01 to 2024-12-31",
+  "refit_every": 63,
+  "alpha_levels": [
+    0.01,
+    0.05
+  ],
+  "data_source": "yfinance",
+  "hypothesis": "Skewed-t (xi>1 for BTC positive skew) should fix Student-t over-conservatism at 1% VaR",
+  "error_log_rules": [
+    "Student-t: scale=sqrt((df-2)/df) per-refit (K824v2 fix)",
+    "GARCH OOS: recursive h[t]=f(h[t-1], r^2[t-1])",
+    "Skewed-t: Fernandez-Steel (1998) with per-refit df and xi",
+    "Per-refit parameters updated every 63 trading days (K825 lesson)"
+  ],
+  "references": [
+    "K829: BTC Normal PASS (3/731), Student-t/HistSim FAIL (1/731, over-conservative)",
+    "K802: GJR+Skewed-t for SPY, Fernandez-Steel (1998)",
+    "K824v2: Student-t scale=sqrt((df-2)/df) fix",
+    "Hansen (1994) Int. Econ. Rev. \u2014 skewed-t distribution",
+    "Fernandez & Steel (1998) JASA 93 \u2014 skewed distributions",
+    "Kupiec (1995), Christoffersen (1998), Basel Committee (1996, 2019)"
+  ],
+  "timestamp": "2026-04-03T09:57:17.128714+00:00",
+  "elapsed_total_sec": 3.2,
+  "oos_stats": {
+    "mean": 0.0026937683140765617,
+    "std": 0.025565949688907137,
+    "skewness": 0.6193436512135061,
+    "kurtosis": 2.538033116411513,
+    "min": -0.08343356981432348,
+    "max": 0.12144256099404904
+  },
+  "full_sample_stats": {
+    "mean": 0.002027340327909545,
+    "std": 0.03521383637226404,
+    "skewness": -0.12007808884416901,
+    "kurtosis": 7.969813879050923
+  },
+  "n_oos": 731,
+  "n_refits": 12,
+  "refit_params_log": [
+    {
+      "refit_num": 1,
+      "day_idx": "0",
+      "date": "2023-01-01",
+      "n_train": 2921,
+      "gjr_persistence": 0.97,
+      "student_df": 3.12,
+      "skewt_df": 8.84,
+      "skewt_xi": 1.0326,
+      "residual_skewness": -0.1632,
+      "residual_kurtosis": 7.72
+    },
+    {
+      "refit_num": 2,
+      "day_idx": "63",
+      "date": "2023-03-05",
+      "n_train": 2984,
+      "gjr_persistence": 0.9624,
+      "student_df": 3.17,
+      "skewt_df": 8.62,
+      "skewt_xi": 1.0333,
+      "residual_skewness": -0.2699,
+      "residual_kurtosis": 8.14
+    },
+    {
+      "refit_num": 3,
+      "day_idx": "126",
+      "date": "2023-05-07",
+      "n_train": 3047,
+      "gjr_persistence": 0.9618,
+      "student_df": 3.18,
+      "skewt_df": 8.67,
+      "skewt_xi": 1.0344,
+      "residual_skewness": -0.2567,
+      "residual_kurtosis": 8.03
+    },
+    {
+      "refit_num": 4,
+      "day_idx": "189",
+      "date": "2023-07-09",
+      "n_train": 3110,
+      "gjr_persistence": 0.9614,
+      "student_df": 3.17,
+      "skewt_df": 8.72,
+      "skewt_xi": 1.0351,
+      "residual_skewness": -0.2034,
+      "residual_kurtosis": 7.81
+    },
+    {
+      "refit_num": 5,
+      "day_idx": "252",
+      "date": "2023-09-10",
+      "n_train": 3173,
+      "gjr_persistence": 0.97,
+      "student_df": 3.11,
+      "skewt_df": 8.78,
+      "skewt_xi": 1.0349,
+      "residual_skewness": -0.1265,
+      "residual_kurtosis": 7.69
+    },
+    {
+      "refit_num": 6,
+      "day_idx": "315",
+      "date": "2023-11-12",
+      "n_train": 3236,
+      "gjr_persistence": 0.9649,
+      "student_df": 3.12,
+      "skewt_df": 8.59,
+      "skewt_xi": 1.0366,
+      "residual_skewness": -0.1751,
+      "residual_kurtosis": 8.01
+    },
+    {
+      "refit_num": 7,
+      "day_idx": "378",
+      "date": "2024-01-14",
+      "n_train": 3299,
+      "gjr_persistence": 0.9658,
+      "student_df": 3.14,
+      "skewt_df": 8.59,
+      "skewt_xi": 1.0364,
+      "residual_skewness": -0.226,
+      "residual_kurtosis": 8.21
+    },
+    {
+      "refit_num": 8,
+      "day_idx": "441",
+      "date": "2024-03-17",
+      "n_train": 3362,
+      "gjr_persistence": 0.9651,
+      "student_df": 3.14,
+      "skewt_df": 8.64,
+      "skewt_xi": 1.0389,
+      "residual_skewness": -0.2221,
+      "residual_kurtosis": 8.15
+    },
+    {
+      "refit_num": 9,
+      "day_idx": "504",
+      "date": "2024-05-19",
+      "n_train": 3425,
+      "gjr_persistence": 0.97,
+      "student_df": 3.12,
+      "skewt_df": 8.94,
+      "skewt_xi": 1.0395,
+      "residual_skewness": -0.0907,
+      "residual_kurtosis": 7.47
+    },
+    {
+      "refit_num": 10,
+      "day_idx": "567",
+      "date": "2024-07-21",
+      "n_train": 3488,
+      "gjr_persistence": 0.9646,
+      "student_df": 3.18,
+      "skewt_df": 8.73,
+      "skewt_xi": 1.0377,
+      "residual_skewness": -0.2064,
+      "residual_kurtosis": 8.0
+    },
+    {
+      "refit_num": 11,
+      "day_idx": "630",
+      "date": "2024-09-22",
+      "n_train": 3551,
+      "gjr_persistence": 0.9638,
+      "student_df": 3.19,
+      "skewt_df": 8.78,
+      "skewt_xi": 1.0371,
+      "residual_skewness": -0.189,
+      "residual_kurtosis": 7.85
+    },
+    {
+      "refit_num": 12,
+      "day_idx": "693",
+      "date": "2024-11-24",
+      "n_train": 3614,
+      "gjr_persistence": 0.9636,
+      "student_df": 3.2,
+      "skewt_df": 8.8,
+      "skewt_xi": 1.0396,
+      "residual_skewness": -0.1729,
+      "residual_kurtosis": 7.79
+    }
+  ],
+  "var_results": {
+    "1%": {
+      "Normal": {
+        "violation_rate": 0.004104,
+        "expected_rate": 0.01,
+        "n_violations": 3,
+        "n_total": 731,
+        "kupiec": {
+          "stat": 3.3018,
+          "p_value": 0.0692,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 1,
+        "basel_window_size": 250,
+        "pinball_loss": 0.00074454,
+        "trinity_pass": true
+      },
+      "Student-t": {
+        "violation_rate": 0.001368,
+        "expected_rate": 0.01,
+        "n_violations": 1,
+        "n_total": 731,
+        "kupiec": {
+          "stat": 8.6964,
+          "p_value": 0.0032,
+          "pass": false
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 0,
+        "basel_window_size": 250,
+        "pinball_loss": 0.0008172,
+        "trinity_pass": false
+      },
+      "HistSim": {
+        "violation_rate": 0.001368,
+        "expected_rate": 0.01,
+        "n_violations": 1,
+        "n_total": 731,
+        "kupiec": {
+          "stat": 8.6964,
+          "p_value": 0.0032,
+          "pass": false
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 0,
+        "basel_window_size": 250,
+        "pinball_loss": 0.00086216,
+        "trinity_pass": false
+      },
+      "Skewed-t": {
+        "violation_rate": 0.001368,
+        "expected_rate": 0.01,
+        "n_violations": 1,
+        "n_total": 731,
+        "kupiec": {
+          "stat": 8.6964,
+          "p_value": 0.0032,
+          "pass": false
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 0,
+        "basel_window_size": 250,
+        "pinball_loss": 0.00083744,
+        "trinity_pass": false
+      },
+      "Asym-HistSim": {
+        "violation_rate": 0.001368,
+        "expected_rate": 0.01,
+        "n_violations": 1,
+        "n_total": 731,
+        "kupiec": {
+          "stat": 8.6964,
+          "p_value": 0.0032,
+          "pass": false
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 0,
+        "basel_window_size": 250,
+        "pinball_loss": 0.00086221,
+        "trinity_pass": false
+      }
+    },
+    "5%": {
+      "Normal": {
+        "violation_rate": 0.030096,
+        "expected_rate": 0.05,
+        "n_violations": 22,
+        "n_total": 731,
+        "kupiec": {
+          "stat": 7.0666,
+          "p_value": 0.0079,
+          "pass": false
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 8,
+        "basel_window_size": 250,
+        "pinball_loss": 0.00286627,
+        "trinity_pass": false
+      },
+      "Student-t": {
+        "violation_rate": 0.045144,
+        "expected_rate": 0.05,
+        "n_violations": 33,
+        "n_total": 731,
+        "kupiec": {
+          "stat": 0.3747,
+          "p_value": 0.5405,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.1993,
+          "p_value": 0.6553,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 12,
+        "basel_window_size": 250,
+        "pinball_loss": 0.00275055,
+        "trinity_pass": true
+      },
+      "HistSim": {
+        "violation_rate": 0.038304,
+        "expected_rate": 0.05,
+        "n_violations": 28,
+        "n_total": 731,
+        "kupiec": {
+          "stat": 2.2821,
+          "p_value": 0.1309,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0056,
+          "p_value": 0.9402,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 10,
+        "basel_window_size": 250,
+        "pinball_loss": 0.00277247,
+        "trinity_pass": true
+      },
+      "Skewed-t": {
+        "violation_rate": 0.024624,
+        "expected_rate": 0.05,
+        "n_violations": 18,
+        "n_total": 731,
+        "kupiec": {
+          "stat": 12.092,
+          "p_value": 0.0005,
+          "pass": false
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 7,
+        "basel_window_size": 250,
+        "pinball_loss": 0.00294008,
+        "trinity_pass": false
+      },
+      "Asym-HistSim": {
+        "violation_rate": 0.038304,
+        "expected_rate": 0.05,
+        "n_violations": 28,
+        "n_total": 731,
+        "kupiec": {
+          "stat": 2.2821,
+          "p_value": 0.1309,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0056,
+          "p_value": 0.9402,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 10,
+        "basel_window_size": 250,
+        "pinball_loss": 0.00277262,
+        "trinity_pass": true
+      }
+    }
+  },
+  "analysis": {
+    "avg_skewt_xi": 1.0363,
+    "avg_student_df": 3.15,
+    "avg_skewt_df": 8.72,
+    "avg_residual_skewness": -0.1918,
+    "quantile_comparison_1pct": {
+      "normal": -2.3263,
+      "student_t": -2.6421,
+      "skewed_t": -2.7186
+    }
+  },
+  "conclusion": {
+    "hypothesis_rejected": true,
+    "summary": "Skewed-t does NOT fix the BTC 1% VaR over-conservatism paradox. All heavy-tail methods (Student-t, HistSim, Skewed-t, Asym-HistSim) produce only 1/731 violations at 1% — all fail Kupiec (p=0.003). Only Normal passes (3/731). At 5%, Student-t, HistSim, and Asym-HistSim all PASS while Normal and Skewed-t FAIL.",
+    "root_cause": "The positive skewness exists in raw BTC returns (skew=0.619) but NOT in GJR-GARCH standardized residuals (skew=-0.19). GJR's asymmetric leverage term already absorbs the directional asymmetry. Residual xi=1.036 is essentially 1.0 (symmetric). The real issue is that BTC's df~3.2 creates extremely heavy tails in all directions, making any parametric/nonparametric heavy-tail method too conservative at 1%.",
+    "key_findings": [
+      "1. Raw BTC returns skew=+0.619 but residual skew=-0.19 after GJR filtering",
+      "2. Skewed-t xi=1.036 is essentially symmetric — no meaningful asymmetry left to model",
+      "3. Skewed-t df=8.7 vs Student-t df=3.2: Skewed-t uses HIGHER df because xi absorbs some tail behavior, but the 1% quantile is still more conservative (-2.72 vs -2.64)",
+      "4. The real issue is GARCH variance over-prediction during the 2023-2024 bull run (mean=0.27%/day), not distributional misspecification",
+      "5. For BTC 1% VaR: Normal is the best method (pinball=0.000745, Trinity PASS). Heavy-tail corrections are counterproductive",
+      "6. For BTC 5% VaR: Student-t (33/731, pinball=0.00275) and HistSim are optimal. Normal under-covers (22/731)",
+      "7. Asym-HistSim produces identical results to HistSim — the negative residual distribution contains the same quantile information",
+      "8. This is a REGIME-SPECIFIC finding: 2023-2024 was a strong BTC bull market with low realized downside"
+    ],
+    "practical_implication": "For BTC VaR: use Normal at 1% (thin-tail asset in bull regimes), Student-t or HistSim at 5%. The 'right' distribution depends on VaR level. No single method passes Trinity at both 1% and 5%.",
+    "limitations": [
+      "OOS 2023-2024 is a bull market period; bear market results may differ dramatically",
+      "BTC trades 24/7 but yfinance daily data misses intraday dynamics",
+      "Only tested GJR-GARCH variance model; EGARCH or HAR-RV may behave differently"
+    ]
+  }
+}

@@ -1,0 +1,630 @@
+{
+  "experiment_id": "K892",
+  "title": "Verify 0050.TW GJR-GARCH Gamma \u2014 Resolve Paper 2 Conflict",
+  "date": "2026-04-05T12:26:17.647247+00:00",
+  "data_source": "yfinance (0050.TW, ^TWII, 2330.TW, SPY)",
+  "method": "GJR-GARCH(1,1) MLE via arch package, Normal innovations",
+  "purpose": "Resolve conflict: N120 gamma=0.147 vs Paper gamma=0.087 vs K636 gamma=0.411",
+  "references": [
+    "Glosten, Jagannathan, Runkle (1993) - GJR-GARCH",
+    "N120 knowledge entry: 0050.TW gamma=0.147 (t=2.20)",
+    "Paper body_v2.tex Table 2: 0050.TW gamma=0.087 (t=2.20)",
+    "K636: OLS Engle-Ng gamma=0.411 (DIFFERENT METHOD - not MLE)"
+  ],
+  "assets": {
+    "0050.TW": {
+      "full_sample": {
+        "omega": 0.03777638766252461,
+        "alpha": 0.0315107925957667,
+        "gamma": 0.09704207469890694,
+        "beta": 0.8931784395669295,
+        "omega_se": 0.011062958435405239,
+        "alpha_se": 0.00881106406143121,
+        "gamma_se": 0.026982247918621017,
+        "beta_se": 0.018764352016921535,
+        "omega_t": 3.414673198231252,
+        "alpha_t": 3.5762755072567596,
+        "gamma_t": 3.5965155679981784,
+        "beta_t": 47.59974864900577,
+        "persistence": 0.9732102695121497,
+        "n_obs": 4219,
+        "convergence": 0,
+        "log_likelihood": -6319.356023579579,
+        "aic": 12648.712047159159,
+        "bic": 12680.44881421978,
+        "dist": "normal",
+        "note": "Parameters estimated on returns*100 (percentage). omega is in pct^2 units."
+      },
+      "rolling_w2000": {
+        "last_window": {
+          "omega": 0.12560657597788233,
+          "alpha": 0.04439651621676308,
+          "gamma": 0.1359908673428232,
+          "beta": 0.8095415345995045,
+          "omega_se": 0.06556604655146864,
+          "alpha_se": 0.019494504753364908,
+          "gamma_se": 0.062222255107380615,
+          "beta_se": 0.06458110715497867,
+          "omega_t": 1.9157259371934607,
+          "alpha_t": 2.277386205930668,
+          "gamma_t": 2.1855663557699048,
+          "beta_t": 12.535268753705402,
+          "persistence": 0.9219334844876792,
+          "n_obs": 2000,
+          "convergence": 0,
+          "log_likelihood": -3156.729638168238,
+          "aic": 6323.459276336476,
+          "bic": 6351.463788634187,
+          "dist": "normal",
+          "note": "Parameters estimated on returns*100 (percentage). omega is in pct^2 units."
+        },
+        "rolling_stats": {
+          "n_windows": 9,
+          "gamma_mean": 0.10644762994172795,
+          "gamma_median": 0.10341938303550441,
+          "gamma_std": 0.014892843710395653,
+          "gamma_min": 0.08881317013223015,
+          "gamma_max": 0.12973636652318832,
+          "gamma_positive_pct": 100.0,
+          "gamma_significant_pct": 100.0,
+          "gamma_t_mean": 2.7756879597567883,
+          "gamma_t_median": 2.8581971309987613
+        }
+      },
+      "expanding": [
+        {
+          "period": "2009-2013",
+          "n_obs": 1237,
+          "gamma": 0.07321207188579192,
+          "gamma_t": 3.7878905085612833,
+          "alpha": 0.0,
+          "beta": 0.9451819144941551,
+          "persistence": 0.981787950437051
+        },
+        {
+          "period": "2009-2017",
+          "n_obs": 2218,
+          "gamma": 0.08926407435660398,
+          "gamma_t": 4.2220363580536375,
+          "alpha": 1.7569343045272048e-09,
+          "beta": 0.9404224340821459,
+          "persistence": 0.9850544730173821
+        },
+        {
+          "period": "2009-2019",
+          "n_obs": 2704,
+          "gamma": 0.09457696969631392,
+          "gamma_t": 3.0985937208118943,
+          "alpha": 0.0,
+          "beta": 0.9329782800049634,
+          "persistence": 0.9802667648531204
+        },
+        {
+          "period": "2009-2021",
+          "n_obs": 3192,
+          "gamma": 0.09408352520378266,
+          "gamma_t": 2.724801692898267,
+          "alpha": 0.017291148902818666,
+          "beta": 0.9068331905325447,
+          "persistence": 0.9711661020372547
+        },
+        {
+          "period": "2009-2023",
+          "n_obs": 3677,
+          "gamma": 0.08259379574203275,
+          "gamma_t": 3.2365182715533742,
+          "alpha": 0.015008113471663333,
+          "beta": 0.9196989227115858,
+          "persistence": 0.9760039340542656
+        },
+        {
+          "period": "2009-2025",
+          "n_obs": 4162,
+          "gamma": 0.09968179514927504,
+          "gamma_t": 3.6378540291704096,
+          "alpha": 0.026859466891540954,
+          "beta": 0.8948729501100174,
+          "persistence": 0.9715733145761959
+        }
+      ]
+    },
+    "^TWII": {
+      "full_sample": {
+        "omega": 0.027047835987572988,
+        "alpha": 0.03884110321652359,
+        "gamma": 0.10899461698945981,
+        "beta": 0.8921353897648019,
+        "omega_se": 0.006992044722172263,
+        "alpha_se": 0.007187211103129184,
+        "gamma_se": 0.019405355390912385,
+        "beta_se": 0.014719362551565855,
+        "omega_t": 3.8683728526224104,
+        "alpha_t": 5.404196796113706,
+        "gamma_t": 5.616728722242442,
+        "beta_t": 60.60964845722181,
+        "persistence": 0.9854738014760553,
+        "n_obs": 7044,
+        "convergence": 0,
+        "log_likelihood": -11020.38543238047,
+        "aic": 22050.77086476094,
+        "bic": 22085.07052210902,
+        "dist": "normal",
+        "note": "Parameters estimated on returns*100 (percentage). omega is in pct^2 units."
+      },
+      "rolling_w2000": {
+        "last_window": {
+          "omega": 0.15176648579990806,
+          "alpha": 0.01722013300593498,
+          "gamma": 0.26144621389432127,
+          "beta": 0.730500905925642,
+          "omega_se": 0.05521136505163854,
+          "alpha_se": 0.019955154649275216,
+          "gamma_se": 0.07864127932593382,
+          "beta_se": 0.06695653824365122,
+          "omega_t": 2.748826906524819,
+          "alpha_t": 0.8629415962236316,
+          "gamma_t": 3.324541718233508,
+          "beta_t": 10.910075775832208,
+          "persistence": 0.8784441458787375,
+          "n_obs": 2000,
+          "convergence": 0,
+          "log_likelihood": -2913.4228808140674,
+          "aic": 5836.845761628135,
+          "bic": 5864.850273925846,
+          "dist": "normal",
+          "note": "Parameters estimated on returns*100 (percentage). omega is in pct^2 units."
+        },
+        "rolling_stats": {
+          "n_windows": 21,
+          "gamma_mean": 0.11410036203367369,
+          "gamma_median": 0.09638410159197101,
+          "gamma_std": 0.044746782211116165,
+          "gamma_min": 0.06051312477922784,
+          "gamma_max": 0.2359990271344274,
+          "gamma_positive_pct": 100.0,
+          "gamma_significant_pct": 90.47619047619048,
+          "gamma_t_mean": 2.7620825297889056,
+          "gamma_t_median": 2.805787340261239
+        }
+      },
+      "period_2008_2026": {
+        "omega": 0.03222232829936143,
+        "alpha": 0.027925933530421533,
+        "gamma": 0.12850783384876452,
+        "beta": 0.881259766313909,
+        "omega_se": 0.009127210553550763,
+        "alpha_se": 0.008143715144765992,
+        "gamma_se": 0.02778417391191009,
+        "beta_se": 0.018985032499566033,
+        "omega_t": 3.5303588221514146,
+        "alpha_t": 3.429139285203225,
+        "gamma_t": 4.625217012253072,
+        "beta_t": 46.41865987503857,
+        "persistence": 0.9734396167687128,
+        "n_obs": 4461,
+        "convergence": 0,
+        "log_likelihood": -6388.776425570788,
+        "aic": 12787.552851141576,
+        "bic": 12819.568492317218,
+        "dist": "normal",
+        "note": "Parameters estimated on returns*100 (percentage). omega is in pct^2 units."
+      }
+    },
+    "2330.TW": {
+      "full_sample": {
+        "omega": 0.04707181627328265,
+        "alpha": 0.03217925073266886,
+        "gamma": 0.052496163571335644,
+        "beta": 0.930405941129591,
+        "omega_se": 0.015277803348185917,
+        "alpha_se": 0.009241048786585741,
+        "gamma_se": 0.01318986912119039,
+        "beta_se": 0.013341240354100453,
+        "omega_t": 3.0810591811205597,
+        "alpha_t": 3.4822076450218615,
+        "gamma_t": 3.980036730387045,
+        "beta_t": 69.73908845316838,
+        "persistence": 0.9888332736479276,
+        "n_obs": 6525,
+        "convergence": 0,
+        "log_likelihood": -13048.48391584351,
+        "aic": 26106.96783168702,
+        "bic": 26140.884812847973,
+        "dist": "normal",
+        "note": "Parameters estimated on returns*100 (percentage). omega is in pct^2 units."
+      },
+      "rolling_w2000": {
+        "last_window": {
+          "omega": 0.24200764311330225,
+          "alpha": 0.06667080746774254,
+          "gamma": 0.04784651069312103,
+          "beta": 0.8362193701984375,
+          "omega_se": 0.1265977514668433,
+          "alpha_se": 0.028461263298268893,
+          "gamma_se": 0.03563299406864766,
+          "beta_se": 0.05903551327587554,
+          "omega_t": 1.9116267098684252,
+          "alpha_t": 2.3425104771016145,
+          "gamma_t": 1.342758641076969,
+          "beta_t": 14.16468365898248,
+          "persistence": 0.9268134330127406,
+          "n_obs": 2000,
+          "convergence": 0,
+          "log_likelihood": -3931.8518829834634,
+          "aic": 7873.703765966927,
+          "bic": 7901.708278264638,
+          "dist": "normal",
+          "note": "Parameters estimated on returns*100 (percentage). omega is in pct^2 units."
+        },
+        "rolling_stats": {
+          "n_windows": 19,
+          "gamma_mean": 0.06577956813228451,
+          "gamma_median": 0.0663571656328498,
+          "gamma_std": 0.02028626290019401,
+          "gamma_min": 0.021975770939000647,
+          "gamma_max": 0.10259521556252506,
+          "gamma_positive_pct": 100.0,
+          "gamma_significant_pct": 63.1578947368421,
+          "gamma_t_mean": 2.33074018826326,
+          "gamma_t_median": 2.424325359475476
+        }
+      },
+      "period_2008_2026": {
+        "omega": 0.06851435993776658,
+        "alpha": 0.04147118625365835,
+        "gamma": 0.046627548469439624,
+        "beta": 0.9130625608811119,
+        "omega_se": 0.02704635081764615,
+        "alpha_se": 0.013661278072206216,
+        "gamma_se": 0.01807962527039264,
+        "beta_se": 0.02163523600938621,
+        "omega_t": 2.5332201153386285,
+        "alpha_t": 3.035673970946483,
+        "gamma_t": 2.5790107799301194,
+        "beta_t": 42.20256994122873,
+        "persistence": 0.97784752136949,
+        "n_obs": 4470,
+        "convergence": 0,
+        "log_likelihood": -8501.305710703367,
+        "aic": 17012.611421406735,
+        "bic": 17044.637139844774,
+        "dist": "normal",
+        "note": "Parameters estimated on returns*100 (percentage). omega is in pct^2 units."
+      }
+    },
+    "SPY": {
+      "full_sample": {
+        "omega": 0.023807806503001197,
+        "alpha": 2.7817733906793495e-13,
+        "gamma": 0.18920654513794563,
+        "beta": 0.8833124271972361,
+        "omega_se": 0.005472344105691913,
+        "alpha_se": 0.011909727529765437,
+        "gamma_se": 0.027490667649303593,
+        "beta_se": 0.019708596508405576,
+        "omega_t": 4.350568247021992,
+        "alpha_t": 2.33571539208348e-11,
+        "gamma_t": 6.882573662874961,
+        "beta_t": 44.81863672131649,
+        "persistence": 0.9779156997664871,
+        "n_obs": 6601,
+        "convergence": 0,
+        "log_likelihood": -8929.35334445172,
+        "aic": 17868.70668890344,
+        "bic": 17902.681571061883,
+        "dist": "normal",
+        "note": "Parameters estimated on returns*100 (percentage). omega is in pct^2 units."
+      },
+      "rolling_w2000": {
+        "last_window": {
+          "omega": 0.04086791468409915,
+          "alpha": 0.0273307779158341,
+          "gamma": 0.2076645108561932,
+          "beta": 0.8345118599556145,
+          "omega_se": 0.012671965614492828,
+          "alpha_se": 0.03271636312375669,
+          "gamma_se": 0.049776686550029,
+          "beta_se": 0.036409492863865495,
+          "omega_t": 3.2250651499053022,
+          "alpha_t": 0.8353855779277649,
+          "gamma_t": 4.171923148148402,
+          "beta_t": 22.920172579053514,
+          "persistence": 0.9656748932995451,
+          "n_obs": 2000,
+          "convergence": 0,
+          "log_likelihood": -2710.863590464788,
+          "aic": 5431.727180929576,
+          "bic": 5459.731693227287,
+          "dist": "normal",
+          "note": "Parameters estimated on returns*100 (percentage). omega is in pct^2 units."
+        },
+        "rolling_stats": {
+          "n_windows": 19,
+          "gamma_mean": 0.21399696278993255,
+          "gamma_median": 0.20928047127812344,
+          "gamma_std": 0.0642334420831074,
+          "gamma_min": 0.1229549378754591,
+          "gamma_max": 0.31730166954692746,
+          "gamma_positive_pct": 100.0,
+          "gamma_significant_pct": 100.0,
+          "gamma_t_mean": 5.310126516169797,
+          "gamma_t_median": 5.673432124404444
+        }
+      },
+      "expanding": [
+        {
+          "period": "2000-2009",
+          "n_obs": 2514,
+          "gamma": 0.13451568125742966,
+          "gamma_t": 6.686622442178064,
+          "alpha": 0.0,
+          "beta": 0.9232633001212901,
+          "persistence": 0.990521140750005
+        },
+        {
+          "period": "2000-2013",
+          "n_obs": 3520,
+          "gamma": 0.1587894152227318,
+          "gamma_t": 7.525296303684284,
+          "alpha": 2.3464077915800653e-14,
+          "beta": 0.9058664989627292,
+          "persistence": 0.9852612065741185
+        },
+        {
+          "period": "2000-2017",
+          "n_obs": 4527,
+          "gamma": 0.1770574833508499,
+          "gamma_t": 7.976486514748839,
+          "alpha": 0.0,
+          "beta": 0.8942998046946993,
+          "persistence": 0.9828285463701242
+        },
+        {
+          "period": "2000-2019",
+          "n_obs": 5030,
+          "gamma": 0.2041419144069547,
+          "gamma_t": 8.921691289925576,
+          "alpha": 0.0,
+          "beta": 0.8770748203093849,
+          "persistence": 0.9791457775128622
+        },
+        {
+          "period": "2000-2021",
+          "n_obs": 5535,
+          "gamma": 0.1941411894248973,
+          "gamma_t": 6.604677731612528,
+          "alpha": 0.00758850609711076,
+          "beta": 0.8731764695639781,
+          "persistence": 0.9778355703735375
+        },
+        {
+          "period": "2000-2023",
+          "n_obs": 6036,
+          "gamma": 0.18281788648615893,
+          "gamma_t": 6.105540744435206,
+          "alpha": 0.00419401264581603,
+          "beta": 0.8844513868781194,
+          "persistence": 0.980054342767015
+        },
+        {
+          "period": "2000-2025",
+          "n_obs": 6538,
+          "gamma": 0.190489002926019,
+          "gamma_t": 6.882099981957462,
+          "alpha": 0.0,
+          "beta": 0.8826793870764071,
+          "persistence": 0.9779238885394166
+        }
+      ]
+    }
+  },
+  "conflict_resolution": {
+    "all_tw50_gammas": {
+      "full_sample_all": {
+        "gamma": 0.09704207469890694,
+        "t": 3.5965155679981784,
+        "n": 4219
+      },
+      "2008_2026_full": {
+        "gamma": 0.09704207469890694,
+        "t": 3.5965155679981784,
+        "n": 4219
+      },
+      "2018_2026": {
+        "gamma": 0.13558996643656213,
+        "t": 2.192272245863443,
+        "n": 2001
+      },
+      "last_2000_of_2008": {
+        "gamma": 0.1359908673428232,
+        "t": 2.1855663557699048,
+        "n": 2000
+      },
+      "rolling_w2000_last": {
+        "gamma": 0.1359908673428232,
+        "t": 2.1855663557699048,
+        "n": 2000
+      }
+    },
+    "paper_value": {
+      "gamma": 0.087,
+      "t": 2.2
+    },
+    "n120_value": {
+      "gamma": 0.147,
+      "t": 2.2
+    },
+    "k636_value": {
+      "gamma": 0.411,
+      "t": 14.85,
+      "note": "OLS Engle-Ng, not MLE"
+    },
+    "closest_to_paper": {
+      "config": "full_sample_all",
+      "gamma": 0.09704207469890694,
+      "t": 3.5965155679981784,
+      "n": 4219
+    },
+    "closest_to_n120": {
+      "config": "last_2000_of_2008",
+      "gamma": 0.1359908673428232,
+      "t": 2.1855663557699048,
+      "n": 2000
+    },
+    "t_stat_matches": {
+      "2018_2026": {
+        "gamma": 0.13558996643656213,
+        "t": 2.192272245863443,
+        "n": 2001
+      },
+      "last_2000_of_2008": {
+        "gamma": 0.1359908673428232,
+        "t": 2.1855663557699048,
+        "n": 2000
+      },
+      "rolling_w2000_last": {
+        "gamma": 0.1359908673428232,
+        "t": 2.1855663557699048,
+        "n": 2000
+      }
+    }
+  },
+  "paper_specific": {
+    "tw50_2008_2026_full": {
+      "omega": 0.03777638766252461,
+      "alpha": 0.0315107925957667,
+      "gamma": 0.09704207469890694,
+      "beta": 0.8931784395669295,
+      "omega_se": 0.011062958435405239,
+      "alpha_se": 0.00881106406143121,
+      "gamma_se": 0.026982247918621017,
+      "beta_se": 0.018764352016921535,
+      "omega_t": 3.414673198231252,
+      "alpha_t": 3.5762755072567596,
+      "gamma_t": 3.5965155679981784,
+      "beta_t": 47.59974864900577,
+      "persistence": 0.9732102695121497,
+      "n_obs": 4219,
+      "convergence": 0,
+      "log_likelihood": -6319.356023579579,
+      "aic": 12648.712047159159,
+      "bic": 12680.44881421978,
+      "dist": "normal",
+      "note": "Parameters estimated on returns*100 (percentage). omega is in pct^2 units."
+    },
+    "tw50_2008_2026_t": {
+      "omega": 0.02811054855876441,
+      "alpha": 0.02256093962287173,
+      "gamma": 0.0800619676862728,
+      "beta": 0.917278811402706,
+      "omega_se": 0.010015586339785335,
+      "alpha_se": 0.006541699873055179,
+      "gamma_se": 0.02300767062854137,
+      "beta_se": 0.01789637333727553,
+      "omega_t": 2.8066802686428547,
+      "alpha_t": 3.448788550480391,
+      "gamma_t": 3.479794585852368,
+      "beta_t": 51.255010951975855,
+      "persistence": 0.9798707348687141,
+      "n_obs": 4219,
+      "convergence": 0,
+      "log_likelihood": -6148.968738049015,
+      "aic": 12309.93747609803,
+      "bic": 12348.021596570776,
+      "dist": "t",
+      "note": "Parameters estimated on returns*100 (percentage). omega is in pct^2 units."
+    },
+    "tw50_last2000_of_2008": {
+      "omega": 0.12560657597788233,
+      "alpha": 0.04439651621676308,
+      "gamma": 0.1359908673428232,
+      "beta": 0.8095415345995045,
+      "omega_se": 0.06556604655146864,
+      "alpha_se": 0.019494504753364908,
+      "gamma_se": 0.062222255107380615,
+      "beta_se": 0.06458110715497867,
+      "omega_t": 1.9157259371934607,
+      "alpha_t": 2.277386205930668,
+      "gamma_t": 2.1855663557699048,
+      "beta_t": 12.535268753705402,
+      "persistence": 0.9219334844876792,
+      "n_obs": 2000,
+      "convergence": 0,
+      "log_likelihood": -3156.729638168238,
+      "aic": 6323.459276336476,
+      "bic": 6351.463788634187,
+      "dist": "normal",
+      "note": "Parameters estimated on returns*100 (percentage). omega is in pct^2 units."
+    }
+  },
+  "n120_check": {
+    "tw50_2018_2026": {
+      "omega": 0.1246522838406221,
+      "alpha": 0.04446840423685444,
+      "gamma": 0.13558996643656213,
+      "beta": 0.8102547135979673,
+      "omega_se": 0.06471239070445935,
+      "alpha_se": 0.01946659909597069,
+      "gamma_se": 0.06184905487555402,
+      "beta_se": 0.06390617853915766,
+      "omega_t": 1.926250637376503,
+      "alpha_t": 2.2843437632646766,
+      "gamma_t": 2.192272245863443,
+      "beta_t": 12.678816541995147,
+      "persistence": 0.9225181010531028,
+      "n_obs": 2001,
+      "convergence": 0,
+      "log_likelihood": -3157.5649511064994,
+      "aic": 6325.129902212999,
+      "bic": 6353.136913885917,
+      "dist": "normal",
+      "note": "Parameters estimated on returns*100 (percentage). omega is in pct^2 units."
+    },
+    "tw50_first2000_from_2008": {
+      "omega": 0.01825182627327897,
+      "alpha": 1.2701351026338377e-10,
+      "gamma": 0.08881317013223015,
+      "beta": 0.9379692474846425,
+      "omega_se": 0.006709805998579711,
+      "alpha_se": 0.011899126776730393,
+      "gamma_se": 0.023288227812413912,
+      "beta_se": 0.02152237691558527,
+      "omega_t": 2.7201719807014393,
+      "alpha_t": 1.0674187496831106e-08,
+      "gamma_t": 3.813650864617866,
+      "beta_t": 43.58111797611996,
+      "persistence": 0.9823758326777711,
+      "n_obs": 2000,
+      "convergence": 0,
+      "log_likelihood": -2915.276506224114,
+      "aic": 5840.553012448228,
+      "bic": 5868.557524745939,
+      "dist": "normal",
+      "note": "Parameters estimated on returns*100 (percentage). omega is in pct^2 units."
+    }
+  },
+  "spy_control": {
+    "spy_2008_2026": {
+      "omega": 0.030038951712486318,
+      "alpha": 0.013224289245791545,
+      "gamma": 0.2196935927397569,
+      "beta": 0.8516710955250858,
+      "omega_se": 0.005518006404782033,
+      "alpha_se": 0.018384035144358542,
+      "gamma_se": 0.03167494591754476,
+      "beta_se": 0.018265523304661007,
+      "omega_t": 5.44380515514695,
+      "alpha_t": 0.719335507245788,
+      "gamma_t": 6.9358790165469095,
+      "beta_t": 46.62724857752944,
+      "persistence": 0.9747421811407557,
+      "n_obs": 4592,
+      "convergence": 0,
+      "log_likelihood": -6147.994789555355,
+      "aic": 12305.98957911071,
+      "bic": 12338.149933800707,
+      "dist": "normal",
+      "note": "Parameters estimated on returns*100 (percentage). omega is in pct^2 units."
+    }
+  }
+}

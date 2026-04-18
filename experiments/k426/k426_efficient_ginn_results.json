@@ -1,0 +1,203 @@
+{
+  "experiment_id": "K426",
+  "title": "Efficient GARCH-Informed Neural Network (GINN) for Volatility Forecasting",
+  "date": "2026-03-25T17:45:49.717972+00:00",
+  "asset": "SPY",
+  "data_source": "yfinance",
+  "data_period": "2005-01-04 to 2026-03-24",
+  "total_observations": 5338,
+  "oos_period": "2023-01-01 to 2024-12-31",
+  "oos_observations": 502,
+  "train_window": 2000,
+  "refit_every": 21,
+  "n_refits": 24,
+  "feature_engineering": {
+    "total_features": 28,
+    "feature_list": [
+      "ret_lag1",
+      "ret_lag2",
+      "ret_lag3",
+      "ret_lag5",
+      "rv_lag1",
+      "rv_lag2",
+      "rv_lag3",
+      "abs_ret_lag1",
+      "abs_ret_lag2",
+      "rstd_5d_lag1",
+      "rstd_10d_lag1",
+      "rstd_21d_lag1",
+      "rstd_63d_lag1",
+      "rmean_abs_5d_lag1",
+      "rmean_abs_21d_lag1",
+      "neg_ret_lag1",
+      "neg_ret_lag2",
+      "leverage_5d_lag1",
+      "leverage_21d_lag1",
+      "vol_of_vol_21d_lag1",
+      "ret_5d_lag1",
+      "ret_21d_lag1",
+      "parkinson_lag1",
+      "volume_change_lag1",
+      "volume_21d_ratio_lag1",
+      "garch_h_lag1",
+      "log_garch_h_lag1",
+      "rv_garch_ratio_lag1"
+    ],
+    "all_lagged": true,
+    "min_lag": 1,
+    "leakage_check": "Max |feature-target corr| = 0.569",
+    "note": "ALL features strictly lagged by >= 1 day. No contemporaneous ret_sq/abs_ret/garch_ratio."
+  },
+  "diagnostics": {
+    "ADF": {
+      "stat": -18.2537,
+      "p": 0.0,
+      "stationary": true
+    },
+    "ARCH_LM": {
+      "stat": 1357.0457,
+      "p": 0.0,
+      "arch_effects": true
+    },
+    "Ljung_Box_r2": {
+      "stat": 4116.4853,
+      "p": 0.0,
+      "autocorrelated": true
+    },
+    "GARCH_std_resid_sq_LB10_p": 0.5144
+  },
+  "garch_params": {
+    "omega": 0.023005,
+    "alpha": 0.035184,
+    "gamma": 0.297877,
+    "beta": 0.811926,
+    "persistence": 0.996047,
+    "convergence": 0
+  },
+  "models": {
+    "GJR-GARCH": {
+      "QLIKE": 0.5686,
+      "MSE": 1.1493,
+      "MAE": 0.6913
+    },
+    "GINN-MLP": {
+      "architecture": "(64, 32) relu, adam, early_stopping",
+      "QLIKE": 7.5653,
+      "MSE": 1.3293,
+      "MAE": 0.7389,
+      "QLIKE_pct_change": 1230.4325,
+      "MSE_pct_change": 15.6669,
+      "MAE_pct_change": 6.8821,
+      "training_time_s": 0.07,
+      "n_iterations": 25,
+      "DM_test_QLIKE": {
+        "DM_stat": -1.3868,
+        "p_value": 0.1661,
+        "significant": false
+      },
+      "DM_test_MSE": {
+        "DM_stat": -3.4107,
+        "p_value": 0.0007,
+        "significant": true
+      }
+    },
+    "GINN-Ridge": {
+      "architecture": "Ridge(alpha=1.0)",
+      "QLIKE": 103.9089,
+      "MSE": 1.4092,
+      "MAE": 0.7402,
+      "QLIKE_pct_change": 18173.3692,
+      "MSE_pct_change": 22.6175,
+      "MAE_pct_change": 7.0818,
+      "training_time_s": 0.0006,
+      "DM_test_QLIKE": {
+        "DM_stat": -4.8845,
+        "p_value": 0.0,
+        "significant": true
+      },
+      "DM_test_MSE": {
+        "DM_stat": -2.8249,
+        "p_value": 0.0049,
+        "significant": true
+      }
+    }
+  },
+  "top_features_mlp": [
+    {
+      "rank": 1,
+      "feature": "rstd_5d_lag1",
+      "importance": 0.0146
+    },
+    {
+      "rank": 2,
+      "feature": "rv_lag2",
+      "importance": 0.0106
+    },
+    {
+      "rank": 3,
+      "feature": "rmean_abs_5d_lag1",
+      "importance": 0.0026
+    },
+    {
+      "rank": 4,
+      "feature": "rmean_abs_21d_lag1",
+      "importance": 0.0026
+    },
+    {
+      "rank": 5,
+      "feature": "ret_lag5",
+      "importance": -0.0001
+    },
+    {
+      "rank": 6,
+      "feature": "vol_of_vol_21d_lag1",
+      "importance": -0.0045
+    },
+    {
+      "rank": 7,
+      "feature": "rv_lag3",
+      "importance": -0.0067
+    },
+    {
+      "rank": 8,
+      "feature": "rv_lag1",
+      "importance": -0.0074
+    },
+    {
+      "rank": 9,
+      "feature": "rstd_63d_lag1",
+      "importance": -0.0075
+    },
+    {
+      "rank": 10,
+      "feature": "rstd_21d_lag1",
+      "importance": -0.0109
+    }
+  ],
+  "prediction_correlations": {
+    "GJR-GARCH": {
+      "pearson_r": 0.2189,
+      "spearman_rho": 0.2101
+    },
+    "GINN-MLP": {
+      "pearson_r": 0.1783,
+      "spearman_rho": 0.1673
+    },
+    "GINN-Ridge": {
+      "pearson_r": 0.1803,
+      "spearman_rho": 0.1971
+    }
+  },
+  "conclusion": "ML WORSE: GINN-MLP QLIKE +1230.4% worse than GJR-GARCH (DM p=0.1661)",
+  "verdict": "QLIKE ceiling confirmed (14th time) \u2014 ML overfits or adds noise",
+  "total_runtime_s": 1.5,
+  "k419_comparison": "K419 failed (exit 144 timeout) due to inefficient per-day GARCH refit + LSTM training. K426 completed in 1.5s with: (1) refit every 21 days (24 refits vs ~504), (2) MLP instead of LSTM, (3) vectorized feature engineering, (4) strictly lagged features (no leakage).",
+  "limitations": [
+    "RV proxy = return^2 (noisy, no intraday data)",
+    "MLP may not capture temporal dependencies (but daily vol has weak temporal structure beyond GARCH)",
+    "Refit every 21 days means params may be stale during fast regime changes",
+    "Single asset (SPY) \u2014 results may differ for other assets",
+    "OOS period 2023-2024 is relatively calm \u2014 extreme events may show different results",
+    "Only tested MLP and Ridge \u2014 deeper architectures (CNN, Transformer) not tested"
+  ]
+}

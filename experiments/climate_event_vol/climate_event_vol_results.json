@@ -1,0 +1,391 @@
+{
+  "experiment": "K117",
+  "title": "Climate/Weather Event Impact on Volatility",
+  "data_range": "2010-01-05 to 2024-12-30",
+  "n_observations": 3772,
+  "events": {
+    "Insurance Disaster": {
+      "count": 93,
+      "frequency_per_year": 6.2065137949936044
+    },
+    "Energy Weather": {
+      "count": 192,
+      "frequency_per_year": 12.813447834825507
+    },
+    "Agriculture Shock": {
+      "count": 105,
+      "frequency_per_year": 7.007354284670199
+    },
+    "Combined Crisis": {
+      "count": 27,
+      "frequency_per_year": 1.801891101772337
+    }
+  },
+  "significant_findings": [
+    {
+      "event": "Insurance Disaster",
+      "asset": "SPY",
+      "horizon": 5,
+      "vol_ratio": 1.258,
+      "t_stat": 2.707,
+      "p_value": 0.008036,
+      "cohens_d": 0.305
+    },
+    {
+      "event": "Insurance Disaster",
+      "asset": "SPY",
+      "horizon": 22,
+      "vol_ratio": 1.216,
+      "t_stat": 2.765,
+      "p_value": 0.00685,
+      "cohens_d": 0.317
+    },
+    {
+      "event": "Insurance Disaster",
+      "asset": "KIE",
+      "horizon": 5,
+      "vol_ratio": 1.48,
+      "t_stat": 4.538,
+      "p_value": 1.7e-05,
+      "cohens_d": 0.529
+    },
+    {
+      "event": "Insurance Disaster",
+      "asset": "KIE",
+      "horizon": 22,
+      "vol_ratio": 1.38,
+      "t_stat": 4.411,
+      "p_value": 2.7e-05,
+      "cohens_d": 0.518
+    },
+    {
+      "event": "Insurance Disaster",
+      "asset": "XLE",
+      "horizon": 5,
+      "vol_ratio": 1.413,
+      "t_stat": 3.99,
+      "p_value": 0.00013,
+      "cohens_d": 0.48
+    },
+    {
+      "event": "Insurance Disaster",
+      "asset": "XLE",
+      "horizon": 22,
+      "vol_ratio": 1.379,
+      "t_stat": 4.567,
+      "p_value": 1.5e-05,
+      "cohens_d": 0.549
+    },
+    {
+      "event": "Insurance Disaster",
+      "asset": "DBA",
+      "horizon": 5,
+      "vol_ratio": 1.121,
+      "t_stat": 2.103,
+      "p_value": 0.03809,
+      "cohens_d": 0.23
+    },
+    {
+      "event": "Insurance Disaster",
+      "asset": "DBA",
+      "horizon": 22,
+      "vol_ratio": 1.115,
+      "t_stat": 2.595,
+      "p_value": 0.010981,
+      "cohens_d": 0.298
+    },
+    {
+      "event": "Energy Weather",
+      "asset": "SPY",
+      "horizon": 5,
+      "vol_ratio": 1.551,
+      "t_stat": 6.458,
+      "p_value": 0.0,
+      "cohens_d": 0.559
+    },
+    {
+      "event": "Energy Weather",
+      "asset": "SPY",
+      "horizon": 22,
+      "vol_ratio": 1.348,
+      "t_stat": 6.11,
+      "p_value": 0.0,
+      "cohens_d": 0.5
+    },
+    {
+      "event": "Energy Weather",
+      "asset": "KIE",
+      "horizon": 5,
+      "vol_ratio": 1.527,
+      "t_stat": 6.361,
+      "p_value": 0.0,
+      "cohens_d": 0.542
+    },
+    {
+      "event": "Energy Weather",
+      "asset": "KIE",
+      "horizon": 22,
+      "vol_ratio": 1.378,
+      "t_stat": 6.149,
+      "p_value": 0.0,
+      "cohens_d": 0.511
+    },
+    {
+      "event": "Energy Weather",
+      "asset": "XLE",
+      "horizon": 5,
+      "vol_ratio": 1.684,
+      "t_stat": 8.563,
+      "p_value": 0.0,
+      "cohens_d": 0.746
+    },
+    {
+      "event": "Energy Weather",
+      "asset": "XLE",
+      "horizon": 22,
+      "vol_ratio": 1.539,
+      "t_stat": 9.577,
+      "p_value": 0.0,
+      "cohens_d": 0.8
+    },
+    {
+      "event": "Energy Weather",
+      "asset": "DBA",
+      "horizon": 5,
+      "vol_ratio": 1.148,
+      "t_stat": 3.836,
+      "p_value": 0.000166,
+      "cohens_d": 0.289
+    },
+    {
+      "event": "Energy Weather",
+      "asset": "DBA",
+      "horizon": 22,
+      "vol_ratio": 1.098,
+      "t_stat": 3.628,
+      "p_value": 0.00036,
+      "cohens_d": 0.276
+    },
+    {
+      "event": "Agriculture Shock",
+      "asset": "SPY",
+      "horizon": 5,
+      "vol_ratio": 2.128,
+      "t_stat": 5.908,
+      "p_value": 0.0,
+      "cohens_d": 0.77
+    },
+    {
+      "event": "Agriculture Shock",
+      "asset": "SPY",
+      "horizon": 22,
+      "vol_ratio": 1.794,
+      "t_stat": 6.264,
+      "p_value": 0.0,
+      "cohens_d": 0.797
+    },
+    {
+      "event": "Agriculture Shock",
+      "asset": "KIE",
+      "horizon": 5,
+      "vol_ratio": 2.006,
+      "t_stat": 5.101,
+      "p_value": 2e-06,
+      "cohens_d": 0.666
+    },
+    {
+      "event": "Agriculture Shock",
+      "asset": "KIE",
+      "horizon": 22,
+      "vol_ratio": 1.74,
+      "t_stat": 5.382,
+      "p_value": 0.0,
+      "cohens_d": 0.69
+    },
+    {
+      "event": "Agriculture Shock",
+      "asset": "XLE",
+      "horizon": 5,
+      "vol_ratio": 1.848,
+      "t_stat": 5.214,
+      "p_value": 1e-06,
+      "cohens_d": 0.672
+    },
+    {
+      "event": "Agriculture Shock",
+      "asset": "XLE",
+      "horizon": 22,
+      "vol_ratio": 1.649,
+      "t_stat": 5.435,
+      "p_value": 0.0,
+      "cohens_d": 0.691
+    },
+    {
+      "event": "Agriculture Shock",
+      "asset": "DBA",
+      "horizon": 5,
+      "vol_ratio": 1.302,
+      "t_stat": 4.633,
+      "p_value": 1e-05,
+      "cohens_d": 0.517
+    },
+    {
+      "event": "Agriculture Shock",
+      "asset": "DBA",
+      "horizon": 22,
+      "vol_ratio": 1.246,
+      "t_stat": 5.674,
+      "p_value": 0.0,
+      "cohens_d": 0.627
+    },
+    {
+      "event": "Combined Crisis",
+      "asset": "SPY",
+      "horizon": 5,
+      "vol_ratio": 2.968,
+      "t_stat": 4.337,
+      "p_value": 0.000193,
+      "cohens_d": 1.126
+    },
+    {
+      "event": "Combined Crisis",
+      "asset": "SPY",
+      "horizon": 22,
+      "vol_ratio": 2.26,
+      "t_stat": 3.83,
+      "p_value": 0.000725,
+      "cohens_d": 0.985
+    },
+    {
+      "event": "Combined Crisis",
+      "asset": "KIE",
+      "horizon": 5,
+      "vol_ratio": 2.85,
+      "t_stat": 3.814,
+      "p_value": 0.000757,
+      "cohens_d": 0.994
+    },
+    {
+      "event": "Combined Crisis",
+      "asset": "KIE",
+      "horizon": 22,
+      "vol_ratio": 2.284,
+      "t_stat": 3.644,
+      "p_value": 0.001172,
+      "cohens_d": 0.94
+    },
+    {
+      "event": "Combined Crisis",
+      "asset": "XLE",
+      "horizon": 5,
+      "vol_ratio": 2.339,
+      "t_stat": 3.718,
+      "p_value": 0.000968,
+      "cohens_d": 0.95
+    },
+    {
+      "event": "Combined Crisis",
+      "asset": "XLE",
+      "horizon": 22,
+      "vol_ratio": 2.105,
+      "t_stat": 3.58,
+      "p_value": 0.001381,
+      "cohens_d": 0.92
+    }
+  ],
+  "trend_data": {
+    "Insurance Disaster": [
+      {
+        "period": "2010-2014",
+        "count": 10,
+        "freq": 2.0047732696897373,
+        "avg_excess": 0.01832434771210808,
+        "post_vol": 0.15600503620945808
+      },
+      {
+        "period": "2015-2019",
+        "count": 10,
+        "freq": 2.0031796502384736,
+        "avg_excess": 0.01896681573486747,
+        "post_vol": 0.13549417828735766
+      },
+      {
+        "period": "2020-2024",
+        "count": 73,
+        "freq": 14.634844868735083,
+        "avg_excess": 0.020794951015098213,
+        "post_vol": 0.17853496733462473
+      }
+    ],
+    "Energy Weather": [
+      {
+        "period": "2010-2014",
+        "count": 5,
+        "freq": 1.0023866348448687,
+        "avg_excess": 0.03615457038269006,
+        "post_vol": 0.15902138351042241
+      },
+      {
+        "period": "2015-2019",
+        "count": 22,
+        "freq": 4.406995230524642,
+        "avg_excess": 0.030015844457587027,
+        "post_vol": 0.14561684979762307
+      },
+      {
+        "period": "2020-2024",
+        "count": 165,
+        "freq": 33.078758949880665,
+        "avg_excess": 0.03529488324416911,
+        "post_vol": 0.21661654158838806
+      }
+    ],
+    "Agriculture Shock": [
+      {
+        "period": "2010-2014",
+        "count": 28,
+        "freq": 5.613365155131265,
+        "avg_excess": 0.028998076417263235,
+        "post_vol": 0.24795699504576943
+      },
+      {
+        "period": "2015-2019",
+        "count": 23,
+        "freq": 4.60731319554849,
+        "avg_excess": 0.028790983073411637,
+        "post_vol": 0.20946654850983118
+      },
+      {
+        "period": "2020-2024",
+        "count": 54,
+        "freq": 10.825775656324582,
+        "avg_excess": 0.03356646428994389,
+        "post_vol": 0.3337274238557045
+      }
+    ],
+    "Combined Crisis": [
+      {
+        "period": "2010-2014",
+        "count": 9,
+        "freq": 1.8042959427207637,
+        "avg_excess": 0.01708607643850457,
+        "post_vol": 0.3343576060209746
+      },
+      {
+        "period": "2015-2019",
+        "count": 9,
+        "freq": 1.8028616852146264,
+        "avg_excess": 0.013777643525520097,
+        "post_vol": 0.2731122017826164
+      },
+      {
+        "period": "2020-2024",
+        "count": 9,
+        "freq": 1.8042959427207637,
+        "avg_excess": 0.030776118293130886,
+        "post_vol": 0.5972930041008986
+      }
+    ]
+  },
+  "conclusion": "POSITIVE: 30 findings survive BH correction. Climate-proxy events have measurable vol impact."
+}

@@ -1,0 +1,643 @@
+{
+  "experiment_id": "K435",
+  "title": "Structural Break Detection + Adaptive GARCH",
+  "asset": "SPY",
+  "data_source": "yfinance",
+  "data_period": "2005-01-04 to 2026-03-25",
+  "n_obs": 5339,
+  "oos_period": "2023-01-03 to 2024-12-31",
+  "oos_n": 502,
+  "timestamp": "2026-03-25T18:15:11.706350+00:00",
+  "diagnostics": {
+    "descriptive": {
+      "mean": 0.03914618183922372,
+      "std": 1.1974907592832167,
+      "skewness": -0.3037632671538715,
+      "kurtosis": 14.727177740156229,
+      "min": -11.588656767207608,
+      "max": 13.55773976878894,
+      "n": 5339
+    },
+    "adf_stat": -16.40044107964378,
+    "adf_pval": 2.6413705998091e-29,
+    "arch_lm_stat": 1462.6818264249032,
+    "arch_lm_pval": 2.8928360204279785e-308,
+    "ljungbox_stat": 94.88705897743155,
+    "ljungbox_pval": 5.720170080584833e-16,
+    "ljungbox_sq_stat": 4574.123900548431,
+    "ljungbox_sq_pval": 0.0,
+    "jarque_bera_stat": 48331.04226911415,
+    "jarque_bera_pval": 0.0
+  },
+  "structural_breaks": {
+    "method": "ICSS (Inclán & Tiao 1994)",
+    "significance_level": 0.05,
+    "critical_value": 1.358,
+    "min_segment": 126,
+    "n_breaks": 20,
+    "breaks": [
+      {
+        "index": 640,
+        "date": "2007-07-23",
+        "test_statistic": 6.633690530187267,
+        "critical_value": 1.358,
+        "vol_before_ann": 10.107893844713661,
+        "vol_after_ann": 19.98408648369697,
+        "vol_ratio": 1.9770772023044612
+      },
+      {
+        "index": 922,
+        "date": "2008-09-03",
+        "test_statistic": 9.739117395563506,
+        "critical_value": 1.358,
+        "vol_before_ann": 19.68120227234906,
+        "vol_after_ann": 45.32578905945013,
+        "vol_ratio": 2.302998995296655
+      },
+      {
+        "index": 1080,
+        "date": "2009-04-21",
+        "test_statistic": 9.081481357407094,
+        "critical_value": 1.358,
+        "vol_before_ann": 44.76400673892422,
+        "vol_after_ann": 17.24201874525662,
+        "vol_ratio": 0.3851759482974062
+      },
+      {
+        "index": 1428,
+        "date": "2010-09-07",
+        "test_statistic": 2.935290070363179,
+        "critical_value": 1.358,
+        "vol_before_ann": 18.812428066787735,
+        "vol_after_ann": 18.482262841980354,
+        "vol_ratio": 0.9824496219395374
+      },
+      {
+        "index": 1626,
+        "date": "2011-06-20",
+        "test_statistic": 4.067975728076256,
+        "critical_value": 1.358,
+        "vol_before_ann": 14.324637713000028,
+        "vol_after_ann": 23.075783898100575,
+        "vol_ratio": 1.6109157076383598
+      },
+      {
+        "index": 1754,
+        "date": "2011-12-20",
+        "test_statistic": 8.072875574833827,
+        "critical_value": 1.358,
+        "vol_before_ann": 22.768270332216566,
+        "vol_after_ann": 12.95034331063933,
+        "vol_ratio": 0.5687890701260209
+      },
+      {
+        "index": 2133,
+        "date": "2013-06-26",
+        "test_statistic": 1.5949845894346748,
+        "critical_value": 1.358,
+        "vol_before_ann": 12.424946060605013,
+        "vol_after_ann": 10.1740640445752,
+        "vol_ratio": 0.8188417072355315
+      },
+      {
+        "index": 2446,
+        "date": "2014-09-23",
+        "test_statistic": 1.88197517011584,
+        "critical_value": 1.358,
+        "vol_before_ann": 10.023512104876389,
+        "vol_after_ann": 15.075916653778972,
+        "vol_ratio": 1.504055314747873
+      },
+      {
+        "index": 2674,
+        "date": "2015-08-19",
+        "test_statistic": 3.7856820969067426,
+        "critical_value": 1.358,
+        "vol_before_ann": 12.02712383968166,
+        "vol_after_ann": 16.91997513057058,
+        "vol_ratio": 1.406818068568123
+      },
+      {
+        "index": 2897,
+        "date": "2016-07-08",
+        "test_statistic": 4.209557274438311,
+        "critical_value": 1.358,
+        "vol_before_ann": 17.090528739024993,
+        "vol_after_ann": 8.175843049665191,
+        "vol_ratio": 0.4783844417286074
+      },
+      {
+        "index": 3023,
+        "date": "2017-01-06",
+        "test_statistic": 1.6994277503819042,
+        "critical_value": 1.358,
+        "vol_before_ann": 12.933586420232755,
+        "vol_after_ann": 6.74806133026775,
+        "vol_ratio": 0.5217471095033137
+      },
+      {
+        "index": 3292,
+        "date": "2018-02-01",
+        "test_statistic": 2.8789814934004525,
+        "critical_value": 1.358,
+        "vol_before_ann": 6.9581836492694755,
+        "vol_after_ann": 17.639462162331995,
+        "vol_ratio": 2.535067059373163
+      },
+      {
+        "index": 3524,
+        "date": "2019-01-04",
+        "test_statistic": 3.1978964908172256,
+        "critical_value": 1.358,
+        "vol_before_ann": 17.16451929592557,
+        "vol_after_ann": 12.304045315743675,
+        "vol_ratio": 0.7168301717988893
+      },
+      {
+        "index": 3808,
+        "date": "2020-02-21",
+        "test_statistic": 9.822488159173448,
+        "critical_value": 1.358,
+        "vol_before_ann": 11.90560682716986,
+        "vol_after_ann": 33.788020170159704,
+        "vol_ratio": 2.8379922720992137
+      },
+      {
+        "index": 3948,
+        "date": "2020-09-10",
+        "test_statistic": 8.385199315669574,
+        "critical_value": 1.358,
+        "vol_before_ann": 32.69896082203171,
+        "vol_after_ann": 13.874815632337087,
+        "vol_ratio": 0.42431977296931706
+      },
+      {
+        "index": 4074,
+        "date": "2021-03-12",
+        "test_statistic": 1.8609439658386293,
+        "critical_value": 1.358,
+        "vol_before_ann": 30.72830970655602,
+        "vol_after_ann": 14.35468065551552,
+        "vol_ratio": 0.46714839809274916
+      },
+      {
+        "index": 4296,
+        "date": "2022-01-27",
+        "test_statistic": 4.595450586655037,
+        "critical_value": 1.358,
+        "vol_before_ann": 13.140216707697492,
+        "vol_after_ann": 24.203609992013426,
+        "vol_ratio": 1.8419490736279134
+      },
+      {
+        "index": 4533,
+        "date": "2023-01-06",
+        "test_statistic": 3.1075685017297188,
+        "critical_value": 1.358,
+        "vol_before_ann": 24.194575391000956,
+        "vol_after_ann": 13.022718074411756,
+        "vol_ratio": 0.5382494986564421
+      },
+      {
+        "index": 5068,
+        "date": "2025-02-26",
+        "test_statistic": 3.7428890958511007,
+        "critical_value": 1.358,
+        "vol_before_ann": 12.609202388623299,
+        "vol_after_ann": 19.166090073328828,
+        "vol_ratio": 1.520008124433113
+      },
+      {
+        "index": 5194,
+        "date": "2025-08-27",
+        "test_statistic": 3.7568007334026,
+        "critical_value": 1.358,
+        "vol_before_ann": 19.50828599320253,
+        "vol_after_ann": 11.773978728072636,
+        "vol_ratio": 0.6035373242003507
+      }
+    ],
+    "cusum_sq_max_deviation": 0.15624757879734708,
+    "cusum_sq_critical_value": 0.018612681593181444,
+    "cusum_sq_reject_stability": true
+  },
+  "garch_parameters": {
+    "full_sample": {
+      "omega": 0.028952287928524632,
+      "alpha": 0.005625193573895478,
+      "gamma": 0.20426563741478831,
+      "beta": 0.8626202481910632,
+      "persistence": 0.9703782604723529,
+      "converged": true,
+      "loglik": -6971.285712621875,
+      "n_obs": 5339,
+      "unconditional_vol_ann": 15.963268640636922,
+      "resid_arch_lm_pval": 0.3172588366944534,
+      "resid_arch_remaining": false
+    },
+    "per_regime": {
+      "Regime 1: 2005-01-04 to 2007-07-20": {
+        "omega": 0.04750288651646898,
+        "alpha": 2.5541320958087213e-09,
+        "gamma": 0.14742069675860214,
+        "beta": 0.8147741466351079,
+        "persistence": 0.8884844975685411,
+        "converged": true,
+        "loglik": -624.5095732208438,
+        "n_obs": 640,
+        "unconditional_vol_ann": 10.359802650756526,
+        "resid_arch_lm_pval": 0.8256963447946891,
+        "resid_arch_remaining": false
+      },
+      "Regime 2: 2007-07-23 to 2008-09-02": {
+        "omega": 0.0802179630820757,
+        "alpha": 9.921717351080475e-12,
+        "gamma": 0.08856507848691479,
+        "beta": 0.904833336979053,
+        "persistence": 0.9491158762324321,
+        "converged": true,
+        "loglik": -462.35937551146355,
+        "n_obs": 282,
+        "unconditional_vol_ann": 19.905837968924896,
+        "resid_arch_lm_pval": 0.6646252663495285,
+        "resid_arch_remaining": false
+      },
+      "Regime 3: 2008-09-03 to 2009-04-20": {
+        "skipped": true,
+        "n_obs": 158,
+        "reason": "too few observations"
+      },
+      "Regime 4: 2009-04-21 to 2010-09-03": {
+        "omega": 0.04350931099725948,
+        "alpha": 0.016667405477019157,
+        "gamma": 0.12177855334334917,
+        "beta": 0.8897665812695474,
+        "persistence": 0.9673232634182412,
+        "converged": true,
+        "loglik": -546.9596675897762,
+        "n_obs": 348,
+        "unconditional_vol_ann": 18.92678190010053,
+        "resid_arch_lm_pval": 0.14346827810032053,
+        "resid_arch_remaining": false
+      },
+      "Regime 5: 2010-09-07 to 2011-06-17": {
+        "skipped": true,
+        "n_obs": 198,
+        "reason": "too few observations"
+      },
+      "Regime 6: 2011-06-20 to 2011-12-19": {
+        "skipped": true,
+        "n_obs": 128,
+        "reason": "too few observations"
+      },
+      "Regime 7: 2011-12-20 to 2013-06-25": {
+        "omega": 0.053986863923009706,
+        "alpha": 1.1009511923290802e-10,
+        "gamma": 0.2524376557813314,
+        "beta": 0.8002277877890115,
+        "persistence": 0.9264466157897724,
+        "converged": true,
+        "loglik": -439.5808327936792,
+        "n_obs": 379,
+        "unconditional_vol_ann": 12.534129430290225,
+        "resid_arch_lm_pval": 0.3028977562431544,
+        "resid_arch_remaining": false
+      },
+      "Regime 8: 2013-06-26 to 2014-09-22": {
+        "omega": 0.05796983205352575,
+        "alpha": 0.0,
+        "gamma": 0.24027687853738194,
+        "beta": 0.7288878157936571,
+        "persistence": 0.8490262550623481,
+        "converged": true,
+        "loglik": -283.4828309641732,
+        "n_obs": 313,
+        "unconditional_vol_ann": 9.726846697208513,
+        "resid_arch_lm_pval": 0.3115955526443639,
+        "resid_arch_remaining": false
+      },
+      "Regime 9: 2014-09-23 to 2015-08-18": {
+        "skipped": true,
+        "n_obs": 228,
+        "reason": "too few observations"
+      },
+      "Regime 10: 2015-08-19 to 2016-07-07": {
+        "skipped": true,
+        "n_obs": 223,
+        "reason": "too few observations"
+      },
+      "Regime 11: 2016-07-08 to 2017-01-05": {
+        "skipped": true,
+        "n_obs": 126,
+        "reason": "too few observations"
+      },
+      "Regime 12: 2017-01-06 to 2018-01-31": {
+        "omega": 0.04987822909558313,
+        "alpha": 0.002829860068724772,
+        "gamma": 0.04981771248018174,
+        "beta": 0.7120830621797848,
+        "persistence": 0.7398217784886004,
+        "converged": true,
+        "loglik": -157.47178717695414,
+        "n_obs": 269,
+        "unconditional_vol_ann": 6.92105680096341,
+        "resid_arch_lm_pval": 0.7192430071211855,
+        "resid_arch_remaining": false
+      },
+      "Regime 13: 2018-02-01 to 2019-01-03": {
+        "skipped": true,
+        "n_obs": 232,
+        "reason": "too few observations"
+      },
+      "Regime 14: 2019-01-04 to 2020-02-20": {
+        "omega": 0.049581655834571275,
+        "alpha": 0.03341352699820992,
+        "gamma": 0.43317028483591935,
+        "beta": 0.6841684953823103,
+        "persistence": 0.9341671647984799,
+        "converged": true,
+        "loglik": -294.7706644424411,
+        "n_obs": 284,
+        "unconditional_vol_ann": 11.714079476544278,
+        "resid_arch_lm_pval": 0.6666579506841168,
+        "resid_arch_remaining": false
+      },
+      "Regime 15: 2020-02-21 to 2020-09-09": {
+        "skipped": true,
+        "n_obs": 140,
+        "reason": "too few observations"
+      },
+      "Regime 16: 2020-09-10 to 2021-03-11": {
+        "skipped": true,
+        "n_obs": 126,
+        "reason": "too few observations"
+      },
+      "Regime 17: 2021-03-12 to 2022-01-26": {
+        "skipped": true,
+        "n_obs": 222,
+        "reason": "too few observations"
+      },
+      "Regime 18: 2022-01-27 to 2023-01-05": {
+        "skipped": true,
+        "n_obs": 237,
+        "reason": "too few observations"
+      },
+      "Regime 19: 2023-01-06 to 2025-02-25": {
+        "omega": 0.04655880911700201,
+        "alpha": 3.4936531411188676e-11,
+        "gamma": 0.12675418020058482,
+        "beta": 0.8610727263843071,
+        "persistence": 0.9244498165195361,
+        "converged": true,
+        "loglik": -626.8626701831558,
+        "n_obs": 535,
+        "unconditional_vol_ann": 12.544253498701822,
+        "resid_arch_lm_pval": 0.4684365904397233,
+        "resid_arch_remaining": false
+      },
+      "Regime 20: 2025-02-26 to 2025-08-26": {
+        "skipped": true,
+        "n_obs": 126,
+        "reason": "too few observations"
+      },
+      "Regime 21: 2025-08-27 to 2026-03-25": {
+        "skipped": true,
+        "n_obs": 145,
+        "reason": "too few observations"
+      }
+    },
+    "hillebrand_effect": {
+      "full_sample_persistence": 0.9703782604723529,
+      "avg_regime_persistence": 0.8973544084847439,
+      "persistence_difference": 0.07302385198760897,
+      "hillebrand_effect_confirmed": true
+    }
+  },
+  "oos_forecasting": {
+    "strategies": {
+      "Standard (w=2000)": {
+        "QLIKE": 1.4937806932542144,
+        "MSE": 1.1720377025185436,
+        "MAE": 0.7101041946173445
+      },
+      "Post-break": {
+        "QLIKE": 1.4937806932542144,
+        "MSE": 1.1720377025185436,
+        "MAE": 0.7101041946173445
+      },
+      "Adaptive": {
+        "QLIKE": 1.489379318116519,
+        "MSE": 1.175644051547291,
+        "MAE": 0.708589850275853
+      }
+    },
+    "best_strategy": "Adaptive",
+    "dm_tests": {
+      "adaptive_vs_standard": {
+        "t_stat": -1.9796342125303388,
+        "p_value": 0.04829260259890722
+      },
+      "postbreak_vs_standard": {
+        "t_stat": 0.0,
+        "p_value": 1.0
+      },
+      "adaptive_vs_postbreak": {
+        "t_stat": -1.9796342125303388,
+        "p_value": 0.04829260259890722
+      }
+    },
+    "harvey_threshold_passed": false,
+    "qlike_improvement_pct": 0.29464667454678484,
+    "subperiod_qlike": {
+      "2023": {
+        "Standard (w=2000)": 1.3712596154619408,
+        "Post-break": 1.3712596154619408,
+        "Adaptive": 1.370206375544689
+      },
+      "2024": {
+        "Standard (w=2000)": 1.614843186787056,
+        "Post-break": 1.614843186787056,
+        "Adaptive": 1.6071335351815412
+      }
+    }
+  },
+  "rolling_persistence": {
+    "window": 504,
+    "step": 63,
+    "n_estimates": 77,
+    "mean": 0.9552263499475715,
+    "std": 0.035529215729845465,
+    "min": 0.8691216880515272,
+    "max": 1.0,
+    "series": [
+      {
+        "date": "2006-01-04",
+        "persistence": 0.9340977756677571,
+        "alpha": 7.198494463822986e-10,
+        "gamma": 0.1622140058621644,
+        "beta": 0.8529907720168255
+      },
+      {
+        "date": "2006-04-05",
+        "persistence": 0.8998553468470406,
+        "alpha": 0.0,
+        "gamma": 0.134683079155423,
+        "beta": 0.8325138072693291
+      },
+      {
+        "date": "2006-07-06",
+        "persistence": 0.8876345034608294,
+        "alpha": 0.0,
+        "gamma": 0.15368204782188363,
+        "beta": 0.8107934795498876
+      },
+      {
+        "date": "2006-10-04",
+        "persistence": 0.9300917852618774,
+        "alpha": 0.0,
+        "gamma": 0.16350250686079598,
+        "beta": 0.8483405318314794
+      },
+      {
+        "date": "2007-01-05",
+        "persistence": 0.9606508313656464,
+        "alpha": 1.218468335157213e-10,
+        "gamma": 0.1389596082518728,
+        "beta": 0.8911710271178632
+      },
+      {
+        "date": "2007-04-09",
+        "persistence": 0.9689398135043251,
+        "alpha": 2.723290702723603e-10,
+        "gamma": 0.16602643106285822,
+        "beta": 0.8859265977005669
+      },
+      {
+        "date": "2007-07-09",
+        "persistence": 0.9807656380510563,
+        "alpha": 3.612867587994186e-14,
+        "gamma": 0.11671293134060216,
+        "beta": 0.9224091723807191
+      },
+      {
+        "date": "2007-10-05",
+        "persistence": 0.9882890454123536,
+        "alpha": 5.165124279823378e-11,
+        "gamma": 0.12395549851465587,
+        "beta": 0.9263112961033745
+      },
+      {
+        "date": "2008-01-07",
+        "persistence": 0.9722736534645389,
+        "alpha": 1.0449157905530795e-11,
+        "gamma": 0.19522649137445633,
+        "beta": 0.8746604077668615
+      },
+      {
+        "date": "2008-04-08",
+        "persistence": 0.9923899148472597,
+        "alpha": 4.595879369041016e-12,
+        "gamma": 0.16474940777249503,
+        "beta": 0.9100152109564162
+      },
+      "... truncated ...",
+      {
+        "date": "2022-10-11",
+        "persistence": 0.9918042287172076,
+        "alpha": 0.0,
+        "gamma": 0.10027306154931613,
+        "beta": 0.9416676979425496
+      },
+      {
+        "date": "2023-01-11",
+        "persistence": 0.9942635786128745,
+        "alpha": 1.9875390944541677e-10,
+        "gamma": 0.07159755997656651,
+        "beta": 0.9584647984258373
+      },
+      {
+        "date": "2023-04-13",
+        "persistence": 0.9896517163704767,
+        "alpha": 1.4505721069515472e-10,
+        "gamma": 0.055631745881236226,
+        "beta": 0.9618358432848013
+      },
+      {
+        "date": "2023-07-14",
+        "persistence": 0.9921588349184781,
+        "alpha": 5.783718636138105e-12,
+        "gamma": 0.06653804541636335,
+        "beta": 0.9588898122045127
+      },
+      {
+        "date": "2023-10-12",
+        "persistence": 0.9690969586056611,
+        "alpha": 1.2103372903610925e-13,
+        "gamma": 0.13458851087566373,
+        "beta": 0.9018027031677083
+      },
+      {
+        "date": "2024-01-12",
+        "persistence": 0.9227520256533548,
+        "alpha": 0.0,
+        "gamma": 0.13703317675298754,
+        "beta": 0.854235437276861
+      },
+      {
+        "date": "2024-04-15",
+        "persistence": 0.9511930680203886,
+        "alpha": 0.0,
+        "gamma": 0.20956135993452032,
+        "beta": 0.8464123880531285
+      },
+      {
+        "date": "2024-07-16",
+        "persistence": 0.9469011425209151,
+        "alpha": 2.927551830176994e-10,
+        "gamma": 0.19252698576539795,
+        "beta": 0.8506376493454609
+      },
+      {
+        "date": "2024-10-14",
+        "persistence": 0.9407705183367465,
+        "alpha": 6.72612939143796e-10,
+        "gamma": 0.21540620651854953,
+        "beta": 0.8330674144048588
+      },
+      {
+        "date": "2025-01-15",
+        "persistence": 0.9384934033450616,
+        "alpha": 6.303791668324502e-11,
+        "gamma": 0.20958464809969754,
+        "beta": 0.833701079232175
+      }
+    ]
+  },
+  "parameter_stability_test": {
+    "restricted_ll": -6971.285712621875,
+    "unrestricted_ll": -3435.997401882487,
+    "lr_statistic": 7070.576621478776,
+    "degrees_of_freedom": 35,
+    "p_value": 0.0,
+    "reject_stability": true
+  },
+  "references": [
+    "Hasanov (2024) \"Structural breaks and GARCH models of exchange rate volatility\" JAE. DOI: 10.1002/jae.3091",
+    "Hillebrand (2005) \"Neglecting parameter changes in GARCH models\" J. Econometrics",
+    "Inclán & Tiao (1994) \"Use of cumulative sums of squares for retrospective detection of changes of variance\" JASA"
+  ],
+  "prior_knowledge": [
+    "K427: SPY-TLT correlation structural break in 2020 (Chow F=74.4)",
+    "SPY persistence typically 0.94-0.98 (std 0.007-0.012)",
+    "TLT persistence dropped 0.96→0.67 in 2023 (Fed policy structural break)"
+  ],
+  "conclusion": "ICSS detected 20 structural break(s) in SPY volatility at: 2007-07-23, 2008-09-03, 2009-04-21, 2010-09-07, 2011-06-20, 2011-12-20, 2013-06-26, 2014-09-23, 2015-08-19, 2016-07-08, 2017-01-06, 2018-02-01, 2019-01-04, 2020-02-21, 2020-09-10, 2021-03-12, 2022-01-27, 2023-01-06, 2025-02-26, 2025-08-27. Hillebrand effect: full-sample persistence (0.9704) vs avg regime persistence (0.8974), difference = 0.0730 (confirms spurious IGARCH). OOS forecasting: best = Adaptive (QLIKE=1.489379), QLIKE improvement = 0.29%. DM test adaptive vs standard: t=-1.9796, p=0.0483. Harvey (2016) threshold: FAILS.",
+  "limitations": [
+    "Squared returns as RV proxy (noisy)",
+    "Single asset (SPY only)",
+    "ICSS assumes IID within segments (violated by ARCH effects)",
+    "Adaptive ICSS check frequency (quarterly) is ad hoc",
+    "Post-break minimum window (504) is ad hoc",
+    "No bootstrap confidence intervals for QLIKE differences"
+  ]
+}

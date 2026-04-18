@@ -1,0 +1,261 @@
+{
+  "experiment": "K506",
+  "title": "EWT-0050 Vol Spread Strategy \u2014 Cross-OOS Validation",
+  "date": "2026-03-26T15:25:44.854014+00:00",
+  "data_source": "yfinance (EWT, 0050.TW, ^VIX)",
+  "data_range": "2010-02-02 to 2021-12-30",
+  "n_total_days": 2923,
+  "strategy": {
+    "base": "weight = min(8.63/VIX, 1.0)",
+    "vol_spread_adjustment": {
+      "vol_window": 21,
+      "ratio_high_threshold": 1.2,
+      "ratio_low_threshold": 0.8,
+      "adjust_down_multiplier": 0.5,
+      "adjust_up_multiplier": 1.2
+    },
+    "rebalancing": "monthly (1st trading day)",
+    "tx_cost_roundtrip": 0.00585,
+    "cash_rate_annual": 0.015
+  },
+  "oos_periods": {
+    "2012-2013": {
+      "period": "2012-2013",
+      "n_days": 492,
+      "vix_mean": 16.0,
+      "vol_ratio_mean": 1.273,
+      "vol_ratio_std": 0.186,
+      "pct_high_ratio": 62.8,
+      "pct_low_ratio": 0.0,
+      "buy_hold": {
+        "sharpe": 0.6217,
+        "ann_ret_pct": 8.78,
+        "mdd_pct": -14.86
+      },
+      "vt_only": {
+        "sharpe": 0.5751,
+        "ann_ret_pct": 4.24,
+        "ann_vol_pct": 7.38,
+        "mdd_pct": -7.1,
+        "calmar": 0.597,
+        "n_rebalances": 24,
+        "tx_total_pct": 1.193
+      },
+      "vt_volspread": {
+        "sharpe": 0.682,
+        "ann_ret_pct": 3.71,
+        "ann_vol_pct": 5.44,
+        "mdd_pct": -5.48,
+        "calmar": 0.677,
+        "n_rebalances": 24,
+        "tx_total_pct": 1.82
+      },
+      "dm_test_vs_minus_vt": {
+        "t_stat": -0.3064,
+        "p_value": 0.7594,
+        "significant_5pct": false,
+        "direction": "VT better"
+      },
+      "sharpe_diff": 0.1069,
+      "winner": "VT+VS"
+    },
+    "2014-2015": {
+      "period": "2014-2015",
+      "n_days": 494,
+      "vix_mean": 15.4,
+      "vol_ratio_mean": 1.212,
+      "vol_ratio_std": 0.329,
+      "pct_high_ratio": 56.5,
+      "pct_low_ratio": 5.5,
+      "buy_hold": {
+        "sharpe": -0.896,
+        "ann_ret_pct": -49.83,
+        "mdd_pct": -20.96
+      },
+      "vt_only": {
+        "sharpe": -0.7927,
+        "ann_ret_pct": -26.81,
+        "ann_vol_pct": 33.83,
+        "mdd_pct": -13.93,
+        "calmar": -1.925,
+        "n_rebalances": 24,
+        "tx_total_pct": 2.069
+      },
+      "vt_volspread": {
+        "sharpe": -0.819,
+        "ann_ret_pct": -32.58,
+        "ann_vol_pct": 39.78,
+        "mdd_pct": -7.99,
+        "calmar": -4.079,
+        "n_rebalances": 24,
+        "tx_total_pct": 2.885
+      },
+      "dm_test_vs_minus_vt": {
+        "t_stat": -0.6755,
+        "p_value": 0.4996,
+        "significant_5pct": false,
+        "direction": "VT better"
+      },
+      "sharpe_diff": -0.0263,
+      "winner": "VT"
+    },
+    "2016-2017": {
+      "period": "2016-2017",
+      "n_days": 487,
+      "vix_mean": 13.3,
+      "vol_ratio_mean": 1.372,
+      "vol_ratio_std": 0.274,
+      "pct_high_ratio": 71.3,
+      "pct_low_ratio": 0.0,
+      "buy_hold": {
+        "sharpe": 1.3147,
+        "ann_ret_pct": 16.9,
+        "mdd_pct": -8.58
+      },
+      "vt_only": {
+        "sharpe": 1.3633,
+        "ann_ret_pct": 11.17,
+        "ann_vol_pct": 8.19,
+        "mdd_pct": -5.39,
+        "calmar": 2.073,
+        "n_rebalances": 24,
+        "tx_total_pct": 1.233
+      },
+      "vt_volspread": {
+        "sharpe": 1.1511,
+        "ann_ret_pct": 6.59,
+        "ann_vol_pct": 5.73,
+        "mdd_pct": -3.07,
+        "calmar": 2.15,
+        "n_rebalances": 24,
+        "tx_total_pct": 2.733
+      },
+      "dm_test_vs_minus_vt": {
+        "t_stat": -1.7775,
+        "p_value": 0.0761,
+        "significant_5pct": false,
+        "direction": "VT better"
+      },
+      "sharpe_diff": -0.2122,
+      "winner": "VT"
+    },
+    "2018-2019": {
+      "period": "2018-2019",
+      "n_days": 486,
+      "vix_mean": 16.0,
+      "vol_ratio_mean": 1.234,
+      "vol_ratio_std": 0.302,
+      "pct_high_ratio": 47.9,
+      "pct_low_ratio": 0.6,
+      "buy_hold": {
+        "sharpe": 0.5972,
+        "ann_ret_pct": 8.97,
+        "mdd_pct": -18.23
+      },
+      "vt_only": {
+        "sharpe": 0.5032,
+        "ann_ret_pct": 4.51,
+        "ann_vol_pct": 8.96,
+        "mdd_pct": -12.11,
+        "calmar": 0.372,
+        "n_rebalances": 24,
+        "tx_total_pct": 2.094
+      },
+      "vt_volspread": {
+        "sharpe": 0.1997,
+        "ann_ret_pct": 1.52,
+        "ann_vol_pct": 7.62,
+        "mdd_pct": -11.57,
+        "calmar": 0.132,
+        "n_rebalances": 24,
+        "tx_total_pct": 2.802
+      },
+      "dm_test_vs_minus_vt": {
+        "t_stat": -1.5349,
+        "p_value": 0.1255,
+        "significant_5pct": false,
+        "direction": "VT better"
+      },
+      "sharpe_diff": -0.3035,
+      "winner": "VT"
+    },
+    "2020-2021": {
+      "period": "2020-2021",
+      "n_days": 488,
+      "vix_mean": 24.4,
+      "vol_ratio_mean": 1.178,
+      "vol_ratio_std": 0.302,
+      "pct_high_ratio": 38.1,
+      "pct_low_ratio": 5.1,
+      "buy_hold": {
+        "sharpe": 1.1127,
+        "ann_ret_pct": 23.32,
+        "mdd_pct": -30.48
+      },
+      "vt_only": {
+        "sharpe": 0.6414,
+        "ann_ret_pct": 4.98,
+        "ann_vol_pct": 7.76,
+        "mdd_pct": -12.75,
+        "calmar": 0.39,
+        "n_rebalances": 24,
+        "tx_total_pct": 1.7
+      },
+      "vt_volspread": {
+        "sharpe": 0.6789,
+        "ann_ret_pct": 4.28,
+        "ann_vol_pct": 6.3,
+        "mdd_pct": -9.57,
+        "calmar": 0.447,
+        "n_rebalances": 24,
+        "tx_total_pct": 2.229
+      },
+      "dm_test_vs_minus_vt": {
+        "t_stat": -0.3919,
+        "p_value": 0.6953,
+        "significant_5pct": false,
+        "direction": "VT better"
+      },
+      "sharpe_diff": 0.0375,
+      "winner": "VT+VS"
+    }
+  },
+  "pooled_analysis": {
+    "n_total_days": 2447,
+    "n_years": 9.71,
+    "vt_only_pooled_sharpe": 0.0248,
+    "vt_volspread_pooled_sharpe": -0.1098,
+    "harvey_t_vt": 0.077,
+    "harvey_t_vs": -0.342,
+    "harvey_threshold": 3.0,
+    "pooled_dm_test": {
+      "t_stat": -1.8113,
+      "p_value": 0.0702,
+      "significant_5pct": false
+    }
+  },
+  "cross_oos_score": {
+    "vs_wins": 2,
+    "vt_wins": 3,
+    "total_periods": 5,
+    "pass_threshold": ">=4/5",
+    "verdict": "FAIL \u2014 VT+VolSpread does NOT consistently outperform. Do NOT deploy."
+  },
+  "vol_ratio_diagnostics": {
+    "full_sample_mean": 1.267,
+    "full_sample_std": 0.28,
+    "full_sample_min": 0.031,
+    "full_sample_max": 2.563,
+    "pct_above_1.2": 58.0,
+    "pct_below_0.8": 1.9
+  },
+  "runtime_seconds": 1.09,
+  "references": [
+    "Moreira & Muir (2017) 'Volatility-Managed Portfolios' JF",
+    "Harvey, Liu, Zhu (2016) '...and the Cross-Section of Expected Returns' RFS",
+    "Bozovic (2024) 'VIX-managed portfolios' IRFA",
+    "K499: Monthly rebalancing optimal for Taiwan TX cost",
+    "K505: VT+VolSpread initial results (Sharpe=0.698, MDD=-25%)",
+    "Q1: 8.63/VIX for Taiwan = 12/(VIX*1.39)"
+  ]
+}

@@ -1,0 +1,1596 @@
+{
+  "experiment_id": "K737",
+  "title": "Maximum Diversification Portfolio vs 50/50 SPY/GLD",
+  "date": "2026-03-30",
+  "data_source": "yfinance",
+  "assets": [
+    "SPY",
+    "GLD",
+    "TLT",
+    "IEF",
+    "EFA",
+    "EEM",
+    "VNQ",
+    "DBC",
+    "TIP"
+  ],
+  "methods": [
+    "equal_weight",
+    "minimum_variance",
+    "max_diversification",
+    "risk_parity",
+    "static_50_50"
+  ],
+  "params": {
+    "lookback": 252,
+    "rebal_days": 21,
+    "tx_cost_bps": 5,
+    "common_start": "2023-01-04"
+  },
+  "diagnostics": {
+    "full_sample_stats": {
+      "SPY": {
+        "ann_ret": 11.75,
+        "ann_vol": 19.36,
+        "sharpe": 0.607,
+        "skew": -0.0,
+        "kurt": 14.98
+      },
+      "GLD": {
+        "ann_ret": 11.58,
+        "ann_vol": 18.32,
+        "sharpe": 0.632,
+        "skew": -0.321,
+        "kurt": 6.764
+      },
+      "TLT": {
+        "ann_ret": 3.97,
+        "ann_vol": 14.88,
+        "sharpe": 0.267,
+        "skew": 0.082,
+        "kurt": 3.386
+      },
+      "IEF": {
+        "ann_ret": 3.49,
+        "ann_vol": 6.86,
+        "sharpe": 0.509,
+        "skew": 0.144,
+        "kurt": 2.734
+      },
+      "EFA": {
+        "ann_ret": 7.27,
+        "ann_vol": 21.43,
+        "sharpe": 0.339,
+        "skew": -0.046,
+        "kurt": 13.964
+      },
+      "EEM": {
+        "ann_ret": 8.48,
+        "ann_vol": 27.93,
+        "sharpe": 0.304,
+        "skew": 0.538,
+        "kurt": 18.269
+      },
+      "VNQ": {
+        "ann_ret": 9.99,
+        "ann_vol": 29.19,
+        "sharpe": 0.342,
+        "skew": 0.014,
+        "kurt": 16.993
+      },
+      "DBC": {
+        "ann_ret": 3.93,
+        "ann_vol": 19.26,
+        "sharpe": 0.204,
+        "skew": -0.397,
+        "kurt": 3.071
+      },
+      "TIP": {
+        "ann_ret": 3.47,
+        "ann_vol": 6.24,
+        "sharpe": 0.556,
+        "skew": 0.215,
+        "kurt": 10.126
+      }
+    },
+    "correlation_matrix": {
+      "SPY": {
+        "SPY": 1.0,
+        "GLD": 0.0567,
+        "TLT": -0.3088,
+        "IEF": -0.2969,
+        "EFA": 0.8848,
+        "EEM": 0.8213,
+        "VNQ": 0.749,
+        "DBC": 0.3979,
+        "TIP": -0.103
+      },
+      "GLD": {
+        "SPY": 0.0567,
+        "GLD": 1.0,
+        "TLT": 0.1587,
+        "IEF": 0.2084,
+        "EFA": 0.1633,
+        "EEM": 0.1827,
+        "VNQ": 0.0564,
+        "DBC": 0.3774,
+        "TIP": 0.2672
+      },
+      "TLT": {
+        "SPY": -0.3088,
+        "GLD": 0.1587,
+        "TLT": 1.0,
+        "IEF": 0.9113,
+        "EFA": -0.2873,
+        "EEM": -0.2682,
+        "VNQ": -0.1574,
+        "DBC": -0.2243,
+        "TIP": 0.7026
+      },
+      "IEF": {
+        "SPY": -0.2969,
+        "GLD": 0.2084,
+        "TLT": 0.9113,
+        "IEF": 1.0,
+        "EFA": -0.2627,
+        "EEM": -0.2672,
+        "VNQ": -0.1504,
+        "DBC": -0.1931,
+        "TIP": 0.7627
+      },
+      "EFA": {
+        "SPY": 0.8848,
+        "GLD": 0.1633,
+        "TLT": -0.2873,
+        "IEF": -0.2627,
+        "EFA": 1.0,
+        "EEM": 0.8746,
+        "VNQ": 0.6884,
+        "DBC": 0.4462,
+        "TIP": -0.0635
+      },
+      "EEM": {
+        "SPY": 0.8213,
+        "GLD": 0.1827,
+        "TLT": -0.2682,
+        "IEF": -0.2672,
+        "EFA": 0.8746,
+        "EEM": 1.0,
+        "VNQ": 0.6574,
+        "DBC": 0.4418,
+        "TIP": -0.0899
+      },
+      "VNQ": {
+        "SPY": 0.749,
+        "GLD": 0.0564,
+        "TLT": -0.1574,
+        "IEF": -0.1504,
+        "EFA": 0.6884,
+        "EEM": 0.6574,
+        "VNQ": 1.0,
+        "DBC": 0.2684,
+        "TIP": -0.0466
+      },
+      "DBC": {
+        "SPY": 0.3979,
+        "GLD": 0.3774,
+        "TLT": -0.2243,
+        "IEF": -0.1931,
+        "EFA": 0.4462,
+        "EEM": 0.4418,
+        "VNQ": 0.2684,
+        "DBC": 1.0,
+        "TIP": 0.0605
+      },
+      "TIP": {
+        "SPY": -0.103,
+        "GLD": 0.2672,
+        "TLT": 0.7026,
+        "IEF": 0.7627,
+        "EFA": -0.0635,
+        "EEM": -0.0899,
+        "VNQ": -0.0466,
+        "DBC": 0.0605,
+        "TIP": 1.0
+      }
+    }
+  },
+  "common_period_results": {
+    "BH_SPY": {
+      "label": "BH_SPY",
+      "sharpe": 1.205,
+      "cagr": 18.46,
+      "ann_vol": 15.22,
+      "mdd": -18.76,
+      "calmar": 0.984,
+      "sortino": 1.629,
+      "win_rate": 69.2,
+      "n_days": 810
+    },
+    "Static_50_50_SPY_GLD": {
+      "label": "Static_50_50_SPY_GLD",
+      "sharpe": 1.862,
+      "cagr": 25.6,
+      "ann_vol": 12.83,
+      "mdd": -12.89,
+      "calmar": 1.986,
+      "sortino": 2.348,
+      "win_rate": 71.8,
+      "n_days": 810
+    },
+    "equal_weight_2_asset_spy_gld": {
+      "label": "equal_weight_2_asset_spy_gld",
+      "sharpe": 1.862,
+      "cagr": 25.6,
+      "ann_vol": 12.83,
+      "mdd": -12.89,
+      "calmar": 1.986,
+      "sortino": 2.348,
+      "win_rate": 71.8,
+      "n_days": 810
+    },
+    "minimum_variance_2_asset_spy_gld": {
+      "label": "minimum_variance_2_asset_spy_gld",
+      "sharpe": 1.716,
+      "cagr": 23.58,
+      "ann_vol": 13.0,
+      "mdd": -11.54,
+      "calmar": 2.043,
+      "sortino": 2.212,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    "max_diversification_2_asset_spy_gld": {
+      "label": "max_diversification_2_asset_spy_gld",
+      "sharpe": 1.818,
+      "cagr": 24.83,
+      "ann_vol": 12.81,
+      "mdd": -12.21,
+      "calmar": 2.033,
+      "sortino": 2.314,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    "risk_parity_2_asset_spy_gld": {
+      "label": "risk_parity_2_asset_spy_gld",
+      "sharpe": 1.818,
+      "cagr": 24.83,
+      "ann_vol": 12.81,
+      "mdd": -12.21,
+      "calmar": 2.033,
+      "sortino": 2.314,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    "equal_weight_3_asset_no_tlt": {
+      "label": "equal_weight_3_asset_no_tlt",
+      "sharpe": 1.691,
+      "cagr": 21.91,
+      "ann_vol": 12.36,
+      "mdd": -11.07,
+      "calmar": 1.98,
+      "sortino": 2.228,
+      "win_rate": 69.2,
+      "n_days": 810
+    },
+    "minimum_variance_3_asset_no_tlt": {
+      "label": "minimum_variance_3_asset_no_tlt",
+      "sharpe": 1.713,
+      "cagr": 23.11,
+      "ann_vol": 12.78,
+      "mdd": -11.02,
+      "calmar": 2.096,
+      "sortino": 2.219,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    "max_diversification_3_asset_no_tlt": {
+      "label": "max_diversification_3_asset_no_tlt",
+      "sharpe": 1.795,
+      "cagr": 24.38,
+      "ann_vol": 12.76,
+      "mdd": -12.21,
+      "calmar": 1.997,
+      "sortino": 2.28,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    "risk_parity_3_asset_no_tlt": {
+      "label": "risk_parity_3_asset_no_tlt",
+      "sharpe": 1.665,
+      "cagr": 21.33,
+      "ann_vol": 12.26,
+      "mdd": -10.49,
+      "calmar": 2.034,
+      "sortino": 2.204,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    "equal_weight_3_asset_with_tlt": {
+      "label": "equal_weight_3_asset_with_tlt",
+      "sharpe": 1.486,
+      "cagr": 16.11,
+      "ann_vol": 10.65,
+      "mdd": -10.57,
+      "calmar": 1.524,
+      "sortino": 2.127,
+      "win_rate": 61.5,
+      "n_days": 810
+    },
+    "minimum_variance_3_asset_with_tlt": {
+      "label": "minimum_variance_3_asset_with_tlt",
+      "sharpe": 1.492,
+      "cagr": 15.49,
+      "ann_vol": 10.22,
+      "mdd": -9.62,
+      "calmar": 1.61,
+      "sortino": 2.215,
+      "win_rate": 69.2,
+      "n_days": 810
+    },
+    "max_diversification_3_asset_with_tlt": {
+      "label": "max_diversification_3_asset_with_tlt",
+      "sharpe": 1.51,
+      "cagr": 15.9,
+      "ann_vol": 10.34,
+      "mdd": -10.48,
+      "calmar": 1.518,
+      "sortino": 2.195,
+      "win_rate": 61.5,
+      "n_days": 810
+    },
+    "risk_parity_3_asset_with_tlt": {
+      "label": "risk_parity_3_asset_with_tlt",
+      "sharpe": 1.504,
+      "cagr": 15.76,
+      "ann_vol": 10.3,
+      "mdd": -10.31,
+      "calmar": 1.53,
+      "sortino": 2.235,
+      "win_rate": 61.5,
+      "n_days": 810
+    },
+    "equal_weight_4_asset_diversified": {
+      "label": "equal_weight_4_asset_diversified",
+      "sharpe": 1.627,
+      "cagr": 19.43,
+      "ann_vol": 11.37,
+      "mdd": -10.24,
+      "calmar": 1.898,
+      "sortino": 2.179,
+      "win_rate": 71.8,
+      "n_days": 810
+    },
+    "minimum_variance_4_asset_diversified": {
+      "label": "minimum_variance_4_asset_diversified",
+      "sharpe": 1.794,
+      "cagr": 21.92,
+      "ann_vol": 11.57,
+      "mdd": -12.32,
+      "calmar": 1.78,
+      "sortino": 2.402,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    "max_diversification_4_asset_diversified": {
+      "label": "max_diversification_4_asset_diversified",
+      "sharpe": 1.598,
+      "cagr": 19.78,
+      "ann_vol": 11.78,
+      "mdd": -11.54,
+      "calmar": 1.714,
+      "sortino": 2.075,
+      "win_rate": 69.2,
+      "n_days": 810
+    },
+    "risk_parity_4_asset_diversified": {
+      "label": "risk_parity_4_asset_diversified",
+      "sharpe": 1.656,
+      "cagr": 19.53,
+      "ann_vol": 11.25,
+      "mdd": -10.61,
+      "calmar": 1.841,
+      "sortino": 2.217,
+      "win_rate": 64.1,
+      "n_days": 810
+    },
+    "equal_weight_5_asset": {
+      "label": "equal_weight_5_asset",
+      "sharpe": 1.444,
+      "cagr": 16.58,
+      "ann_vol": 11.21,
+      "mdd": -10.76,
+      "calmar": 1.542,
+      "sortino": 1.962,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    "minimum_variance_5_asset": {
+      "label": "minimum_variance_5_asset",
+      "sharpe": 1.563,
+      "cagr": 18.19,
+      "ann_vol": 11.27,
+      "mdd": -12.9,
+      "calmar": 1.41,
+      "sortino": 2.1,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    "max_diversification_5_asset": {
+      "label": "max_diversification_5_asset",
+      "sharpe": 1.315,
+      "cagr": 15.28,
+      "ann_vol": 11.41,
+      "mdd": -12.22,
+      "calmar": 1.251,
+      "sortino": 1.728,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    "risk_parity_5_asset": {
+      "label": "risk_parity_5_asset",
+      "sharpe": 1.485,
+      "cagr": 16.77,
+      "ann_vol": 11.01,
+      "mdd": -11.02,
+      "calmar": 1.522,
+      "sortino": 2.006,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    "equal_weight_6_asset": {
+      "label": "equal_weight_6_asset",
+      "sharpe": 1.321,
+      "cagr": 13.51,
+      "ann_vol": 10.18,
+      "mdd": -9.09,
+      "calmar": 1.486,
+      "sortino": 1.826,
+      "win_rate": 64.1,
+      "n_days": 810
+    },
+    "minimum_variance_6_asset": {
+      "label": "minimum_variance_6_asset",
+      "sharpe": 1.289,
+      "cagr": 12.06,
+      "ann_vol": 9.37,
+      "mdd": -9.76,
+      "calmar": 1.235,
+      "sortino": 1.845,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    "max_diversification_6_asset": {
+      "label": "max_diversification_6_asset",
+      "sharpe": 1.082,
+      "cagr": 10.34,
+      "ann_vol": 9.63,
+      "mdd": -9.1,
+      "calmar": 1.136,
+      "sortino": 1.543,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    "risk_parity_6_asset": {
+      "label": "risk_parity_6_asset",
+      "sharpe": 1.35,
+      "cagr": 13.46,
+      "ann_vol": 9.92,
+      "mdd": -9.11,
+      "calmar": 1.477,
+      "sortino": 1.867,
+      "win_rate": 64.1,
+      "n_days": 810
+    },
+    "equal_weight_all_9_asset": {
+      "label": "equal_weight_all_9_asset",
+      "sharpe": 1.285,
+      "cagr": 11.29,
+      "ann_vol": 8.87,
+      "mdd": -8.33,
+      "calmar": 1.355,
+      "sortino": 1.786,
+      "win_rate": 61.5,
+      "n_days": 810
+    },
+    "minimum_variance_all_9_asset": {
+      "label": "minimum_variance_all_9_asset",
+      "sharpe": 1.007,
+      "cagr": 5.07,
+      "ann_vol": 5.22,
+      "mdd": -5.72,
+      "calmar": 0.887,
+      "sortino": 1.539,
+      "win_rate": 64.1,
+      "n_days": 810
+    },
+    "max_diversification_all_9_asset": {
+      "label": "max_diversification_all_9_asset",
+      "sharpe": 0.872,
+      "cagr": 7.16,
+      "ann_vol": 8.61,
+      "mdd": -10.15,
+      "calmar": 0.706,
+      "sortino": 1.221,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    "risk_parity_all_9_asset": {
+      "label": "risk_parity_all_9_asset",
+      "sharpe": 1.255,
+      "cagr": 9.12,
+      "ann_vol": 7.39,
+      "mdd": -7.58,
+      "calmar": 1.204,
+      "sortino": 1.791,
+      "win_rate": 66.7,
+      "n_days": 810
+    }
+  },
+  "subset_results": {
+    "2_asset_spy_gld": {
+      "equal_weight": {
+        "label": "equal_weight_2_asset_spy_gld",
+        "sharpe": 1.862,
+        "cagr": 25.6,
+        "ann_vol": 12.83,
+        "mdd": -12.89,
+        "calmar": 1.986,
+        "sortino": 2.348,
+        "win_rate": 71.8,
+        "n_days": 810
+      },
+      "minimum_variance": {
+        "label": "minimum_variance_2_asset_spy_gld",
+        "sharpe": 1.716,
+        "cagr": 23.58,
+        "ann_vol": 13.0,
+        "mdd": -11.54,
+        "calmar": 2.043,
+        "sortino": 2.212,
+        "win_rate": 66.7,
+        "n_days": 810
+      },
+      "max_diversification": {
+        "label": "max_diversification_2_asset_spy_gld",
+        "sharpe": 1.818,
+        "cagr": 24.83,
+        "ann_vol": 12.81,
+        "mdd": -12.21,
+        "calmar": 2.033,
+        "sortino": 2.314,
+        "win_rate": 66.7,
+        "n_days": 810
+      },
+      "risk_parity": {
+        "label": "risk_parity_2_asset_spy_gld",
+        "sharpe": 1.818,
+        "cagr": 24.83,
+        "ann_vol": 12.81,
+        "mdd": -12.21,
+        "calmar": 2.033,
+        "sortino": 2.314,
+        "win_rate": 66.7,
+        "n_days": 810
+      }
+    },
+    "3_asset_no_tlt": {
+      "equal_weight": {
+        "label": "equal_weight_3_asset_no_tlt",
+        "sharpe": 1.691,
+        "cagr": 21.91,
+        "ann_vol": 12.36,
+        "mdd": -11.07,
+        "calmar": 1.98,
+        "sortino": 2.228,
+        "win_rate": 69.2,
+        "n_days": 810
+      },
+      "minimum_variance": {
+        "label": "minimum_variance_3_asset_no_tlt",
+        "sharpe": 1.713,
+        "cagr": 23.11,
+        "ann_vol": 12.78,
+        "mdd": -11.02,
+        "calmar": 2.096,
+        "sortino": 2.219,
+        "win_rate": 66.7,
+        "n_days": 810
+      },
+      "max_diversification": {
+        "label": "max_diversification_3_asset_no_tlt",
+        "sharpe": 1.795,
+        "cagr": 24.38,
+        "ann_vol": 12.76,
+        "mdd": -12.21,
+        "calmar": 1.997,
+        "sortino": 2.28,
+        "win_rate": 66.7,
+        "n_days": 810
+      },
+      "risk_parity": {
+        "label": "risk_parity_3_asset_no_tlt",
+        "sharpe": 1.665,
+        "cagr": 21.33,
+        "ann_vol": 12.26,
+        "mdd": -10.49,
+        "calmar": 2.034,
+        "sortino": 2.204,
+        "win_rate": 66.7,
+        "n_days": 810
+      }
+    },
+    "3_asset_with_tlt": {
+      "equal_weight": {
+        "label": "equal_weight_3_asset_with_tlt",
+        "sharpe": 1.486,
+        "cagr": 16.11,
+        "ann_vol": 10.65,
+        "mdd": -10.57,
+        "calmar": 1.524,
+        "sortino": 2.127,
+        "win_rate": 61.5,
+        "n_days": 810
+      },
+      "minimum_variance": {
+        "label": "minimum_variance_3_asset_with_tlt",
+        "sharpe": 1.492,
+        "cagr": 15.49,
+        "ann_vol": 10.22,
+        "mdd": -9.62,
+        "calmar": 1.61,
+        "sortino": 2.215,
+        "win_rate": 69.2,
+        "n_days": 810
+      },
+      "max_diversification": {
+        "label": "max_diversification_3_asset_with_tlt",
+        "sharpe": 1.51,
+        "cagr": 15.9,
+        "ann_vol": 10.34,
+        "mdd": -10.48,
+        "calmar": 1.518,
+        "sortino": 2.195,
+        "win_rate": 61.5,
+        "n_days": 810
+      },
+      "risk_parity": {
+        "label": "risk_parity_3_asset_with_tlt",
+        "sharpe": 1.504,
+        "cagr": 15.76,
+        "ann_vol": 10.3,
+        "mdd": -10.31,
+        "calmar": 1.53,
+        "sortino": 2.235,
+        "win_rate": 61.5,
+        "n_days": 810
+      }
+    },
+    "4_asset_diversified": {
+      "equal_weight": {
+        "label": "equal_weight_4_asset_diversified",
+        "sharpe": 1.627,
+        "cagr": 19.43,
+        "ann_vol": 11.37,
+        "mdd": -10.24,
+        "calmar": 1.898,
+        "sortino": 2.179,
+        "win_rate": 71.8,
+        "n_days": 810
+      },
+      "minimum_variance": {
+        "label": "minimum_variance_4_asset_diversified",
+        "sharpe": 1.794,
+        "cagr": 21.92,
+        "ann_vol": 11.57,
+        "mdd": -12.32,
+        "calmar": 1.78,
+        "sortino": 2.402,
+        "win_rate": 66.7,
+        "n_days": 810
+      },
+      "max_diversification": {
+        "label": "max_diversification_4_asset_diversified",
+        "sharpe": 1.598,
+        "cagr": 19.78,
+        "ann_vol": 11.78,
+        "mdd": -11.54,
+        "calmar": 1.714,
+        "sortino": 2.075,
+        "win_rate": 69.2,
+        "n_days": 810
+      },
+      "risk_parity": {
+        "label": "risk_parity_4_asset_diversified",
+        "sharpe": 1.656,
+        "cagr": 19.53,
+        "ann_vol": 11.25,
+        "mdd": -10.61,
+        "calmar": 1.841,
+        "sortino": 2.217,
+        "win_rate": 64.1,
+        "n_days": 810
+      }
+    },
+    "5_asset": {
+      "equal_weight": {
+        "label": "equal_weight_5_asset",
+        "sharpe": 1.444,
+        "cagr": 16.58,
+        "ann_vol": 11.21,
+        "mdd": -10.76,
+        "calmar": 1.542,
+        "sortino": 1.962,
+        "win_rate": 66.7,
+        "n_days": 810
+      },
+      "minimum_variance": {
+        "label": "minimum_variance_5_asset",
+        "sharpe": 1.563,
+        "cagr": 18.19,
+        "ann_vol": 11.27,
+        "mdd": -12.9,
+        "calmar": 1.41,
+        "sortino": 2.1,
+        "win_rate": 66.7,
+        "n_days": 810
+      },
+      "max_diversification": {
+        "label": "max_diversification_5_asset",
+        "sharpe": 1.315,
+        "cagr": 15.28,
+        "ann_vol": 11.41,
+        "mdd": -12.22,
+        "calmar": 1.251,
+        "sortino": 1.728,
+        "win_rate": 66.7,
+        "n_days": 810
+      },
+      "risk_parity": {
+        "label": "risk_parity_5_asset",
+        "sharpe": 1.485,
+        "cagr": 16.77,
+        "ann_vol": 11.01,
+        "mdd": -11.02,
+        "calmar": 1.522,
+        "sortino": 2.006,
+        "win_rate": 66.7,
+        "n_days": 810
+      }
+    },
+    "6_asset": {
+      "equal_weight": {
+        "label": "equal_weight_6_asset",
+        "sharpe": 1.321,
+        "cagr": 13.51,
+        "ann_vol": 10.18,
+        "mdd": -9.09,
+        "calmar": 1.486,
+        "sortino": 1.826,
+        "win_rate": 64.1,
+        "n_days": 810
+      },
+      "minimum_variance": {
+        "label": "minimum_variance_6_asset",
+        "sharpe": 1.289,
+        "cagr": 12.06,
+        "ann_vol": 9.37,
+        "mdd": -9.76,
+        "calmar": 1.235,
+        "sortino": 1.845,
+        "win_rate": 66.7,
+        "n_days": 810
+      },
+      "max_diversification": {
+        "label": "max_diversification_6_asset",
+        "sharpe": 1.082,
+        "cagr": 10.34,
+        "ann_vol": 9.63,
+        "mdd": -9.1,
+        "calmar": 1.136,
+        "sortino": 1.543,
+        "win_rate": 66.7,
+        "n_days": 810
+      },
+      "risk_parity": {
+        "label": "risk_parity_6_asset",
+        "sharpe": 1.35,
+        "cagr": 13.46,
+        "ann_vol": 9.92,
+        "mdd": -9.11,
+        "calmar": 1.477,
+        "sortino": 1.867,
+        "win_rate": 64.1,
+        "n_days": 810
+      }
+    },
+    "all_9_asset": {
+      "equal_weight": {
+        "label": "equal_weight_all_9_asset",
+        "sharpe": 1.285,
+        "cagr": 11.29,
+        "ann_vol": 8.87,
+        "mdd": -8.33,
+        "calmar": 1.355,
+        "sortino": 1.786,
+        "win_rate": 61.5,
+        "n_days": 810
+      },
+      "minimum_variance": {
+        "label": "minimum_variance_all_9_asset",
+        "sharpe": 1.007,
+        "cagr": 5.07,
+        "ann_vol": 5.22,
+        "mdd": -5.72,
+        "calmar": 0.887,
+        "sortino": 1.539,
+        "win_rate": 64.1,
+        "n_days": 810
+      },
+      "max_diversification": {
+        "label": "max_diversification_all_9_asset",
+        "sharpe": 0.872,
+        "cagr": 7.16,
+        "ann_vol": 8.61,
+        "mdd": -10.15,
+        "calmar": 0.706,
+        "sortino": 1.221,
+        "win_rate": 66.7,
+        "n_days": 810
+      },
+      "risk_parity": {
+        "label": "risk_parity_all_9_asset",
+        "sharpe": 1.255,
+        "cagr": 9.12,
+        "ann_vol": 7.39,
+        "mdd": -7.58,
+        "calmar": 1.204,
+        "sortino": 1.791,
+        "win_rate": 66.7,
+        "n_days": 810
+      }
+    }
+  },
+  "ranking": [
+    {
+      "rank": 1,
+      "strategy": "Static_50_50_SPY_GLD",
+      "label": "Static_50_50_SPY_GLD",
+      "sharpe": 1.862,
+      "cagr": 25.6,
+      "ann_vol": 12.83,
+      "mdd": -12.89,
+      "calmar": 1.986,
+      "sortino": 2.348,
+      "win_rate": 71.8,
+      "n_days": 810
+    },
+    {
+      "rank": 2,
+      "strategy": "equal_weight_2_asset_spy_gld",
+      "label": "equal_weight_2_asset_spy_gld",
+      "sharpe": 1.862,
+      "cagr": 25.6,
+      "ann_vol": 12.83,
+      "mdd": -12.89,
+      "calmar": 1.986,
+      "sortino": 2.348,
+      "win_rate": 71.8,
+      "n_days": 810
+    },
+    {
+      "rank": 3,
+      "strategy": "max_diversification_2_asset_spy_gld",
+      "label": "max_diversification_2_asset_spy_gld",
+      "sharpe": 1.818,
+      "cagr": 24.83,
+      "ann_vol": 12.81,
+      "mdd": -12.21,
+      "calmar": 2.033,
+      "sortino": 2.314,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    {
+      "rank": 4,
+      "strategy": "risk_parity_2_asset_spy_gld",
+      "label": "risk_parity_2_asset_spy_gld",
+      "sharpe": 1.818,
+      "cagr": 24.83,
+      "ann_vol": 12.81,
+      "mdd": -12.21,
+      "calmar": 2.033,
+      "sortino": 2.314,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    {
+      "rank": 5,
+      "strategy": "max_diversification_3_asset_no_tlt",
+      "label": "max_diversification_3_asset_no_tlt",
+      "sharpe": 1.795,
+      "cagr": 24.38,
+      "ann_vol": 12.76,
+      "mdd": -12.21,
+      "calmar": 1.997,
+      "sortino": 2.28,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    {
+      "rank": 6,
+      "strategy": "minimum_variance_4_asset_diversified",
+      "label": "minimum_variance_4_asset_diversified",
+      "sharpe": 1.794,
+      "cagr": 21.92,
+      "ann_vol": 11.57,
+      "mdd": -12.32,
+      "calmar": 1.78,
+      "sortino": 2.402,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    {
+      "rank": 7,
+      "strategy": "minimum_variance_2_asset_spy_gld",
+      "label": "minimum_variance_2_asset_spy_gld",
+      "sharpe": 1.716,
+      "cagr": 23.58,
+      "ann_vol": 13.0,
+      "mdd": -11.54,
+      "calmar": 2.043,
+      "sortino": 2.212,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    {
+      "rank": 8,
+      "strategy": "minimum_variance_3_asset_no_tlt",
+      "label": "minimum_variance_3_asset_no_tlt",
+      "sharpe": 1.713,
+      "cagr": 23.11,
+      "ann_vol": 12.78,
+      "mdd": -11.02,
+      "calmar": 2.096,
+      "sortino": 2.219,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    {
+      "rank": 9,
+      "strategy": "equal_weight_3_asset_no_tlt",
+      "label": "equal_weight_3_asset_no_tlt",
+      "sharpe": 1.691,
+      "cagr": 21.91,
+      "ann_vol": 12.36,
+      "mdd": -11.07,
+      "calmar": 1.98,
+      "sortino": 2.228,
+      "win_rate": 69.2,
+      "n_days": 810
+    },
+    {
+      "rank": 10,
+      "strategy": "risk_parity_3_asset_no_tlt",
+      "label": "risk_parity_3_asset_no_tlt",
+      "sharpe": 1.665,
+      "cagr": 21.33,
+      "ann_vol": 12.26,
+      "mdd": -10.49,
+      "calmar": 2.034,
+      "sortino": 2.204,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    {
+      "rank": 11,
+      "strategy": "risk_parity_4_asset_diversified",
+      "label": "risk_parity_4_asset_diversified",
+      "sharpe": 1.656,
+      "cagr": 19.53,
+      "ann_vol": 11.25,
+      "mdd": -10.61,
+      "calmar": 1.841,
+      "sortino": 2.217,
+      "win_rate": 64.1,
+      "n_days": 810
+    },
+    {
+      "rank": 12,
+      "strategy": "equal_weight_4_asset_diversified",
+      "label": "equal_weight_4_asset_diversified",
+      "sharpe": 1.627,
+      "cagr": 19.43,
+      "ann_vol": 11.37,
+      "mdd": -10.24,
+      "calmar": 1.898,
+      "sortino": 2.179,
+      "win_rate": 71.8,
+      "n_days": 810
+    },
+    {
+      "rank": 13,
+      "strategy": "max_diversification_4_asset_diversified",
+      "label": "max_diversification_4_asset_diversified",
+      "sharpe": 1.598,
+      "cagr": 19.78,
+      "ann_vol": 11.78,
+      "mdd": -11.54,
+      "calmar": 1.714,
+      "sortino": 2.075,
+      "win_rate": 69.2,
+      "n_days": 810
+    },
+    {
+      "rank": 14,
+      "strategy": "minimum_variance_5_asset",
+      "label": "minimum_variance_5_asset",
+      "sharpe": 1.563,
+      "cagr": 18.19,
+      "ann_vol": 11.27,
+      "mdd": -12.9,
+      "calmar": 1.41,
+      "sortino": 2.1,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    {
+      "rank": 15,
+      "strategy": "max_diversification_3_asset_with_tlt",
+      "label": "max_diversification_3_asset_with_tlt",
+      "sharpe": 1.51,
+      "cagr": 15.9,
+      "ann_vol": 10.34,
+      "mdd": -10.48,
+      "calmar": 1.518,
+      "sortino": 2.195,
+      "win_rate": 61.5,
+      "n_days": 810
+    },
+    {
+      "rank": 16,
+      "strategy": "risk_parity_3_asset_with_tlt",
+      "label": "risk_parity_3_asset_with_tlt",
+      "sharpe": 1.504,
+      "cagr": 15.76,
+      "ann_vol": 10.3,
+      "mdd": -10.31,
+      "calmar": 1.53,
+      "sortino": 2.235,
+      "win_rate": 61.5,
+      "n_days": 810
+    },
+    {
+      "rank": 17,
+      "strategy": "minimum_variance_3_asset_with_tlt",
+      "label": "minimum_variance_3_asset_with_tlt",
+      "sharpe": 1.492,
+      "cagr": 15.49,
+      "ann_vol": 10.22,
+      "mdd": -9.62,
+      "calmar": 1.61,
+      "sortino": 2.215,
+      "win_rate": 69.2,
+      "n_days": 810
+    },
+    {
+      "rank": 18,
+      "strategy": "equal_weight_3_asset_with_tlt",
+      "label": "equal_weight_3_asset_with_tlt",
+      "sharpe": 1.486,
+      "cagr": 16.11,
+      "ann_vol": 10.65,
+      "mdd": -10.57,
+      "calmar": 1.524,
+      "sortino": 2.127,
+      "win_rate": 61.5,
+      "n_days": 810
+    },
+    {
+      "rank": 19,
+      "strategy": "risk_parity_5_asset",
+      "label": "risk_parity_5_asset",
+      "sharpe": 1.485,
+      "cagr": 16.77,
+      "ann_vol": 11.01,
+      "mdd": -11.02,
+      "calmar": 1.522,
+      "sortino": 2.006,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    {
+      "rank": 20,
+      "strategy": "equal_weight_5_asset",
+      "label": "equal_weight_5_asset",
+      "sharpe": 1.444,
+      "cagr": 16.58,
+      "ann_vol": 11.21,
+      "mdd": -10.76,
+      "calmar": 1.542,
+      "sortino": 1.962,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    {
+      "rank": 21,
+      "strategy": "risk_parity_6_asset",
+      "label": "risk_parity_6_asset",
+      "sharpe": 1.35,
+      "cagr": 13.46,
+      "ann_vol": 9.92,
+      "mdd": -9.11,
+      "calmar": 1.477,
+      "sortino": 1.867,
+      "win_rate": 64.1,
+      "n_days": 810
+    },
+    {
+      "rank": 22,
+      "strategy": "equal_weight_6_asset",
+      "label": "equal_weight_6_asset",
+      "sharpe": 1.321,
+      "cagr": 13.51,
+      "ann_vol": 10.18,
+      "mdd": -9.09,
+      "calmar": 1.486,
+      "sortino": 1.826,
+      "win_rate": 64.1,
+      "n_days": 810
+    },
+    {
+      "rank": 23,
+      "strategy": "max_diversification_5_asset",
+      "label": "max_diversification_5_asset",
+      "sharpe": 1.315,
+      "cagr": 15.28,
+      "ann_vol": 11.41,
+      "mdd": -12.22,
+      "calmar": 1.251,
+      "sortino": 1.728,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    {
+      "rank": 24,
+      "strategy": "minimum_variance_6_asset",
+      "label": "minimum_variance_6_asset",
+      "sharpe": 1.289,
+      "cagr": 12.06,
+      "ann_vol": 9.37,
+      "mdd": -9.76,
+      "calmar": 1.235,
+      "sortino": 1.845,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    {
+      "rank": 25,
+      "strategy": "equal_weight_all_9_asset",
+      "label": "equal_weight_all_9_asset",
+      "sharpe": 1.285,
+      "cagr": 11.29,
+      "ann_vol": 8.87,
+      "mdd": -8.33,
+      "calmar": 1.355,
+      "sortino": 1.786,
+      "win_rate": 61.5,
+      "n_days": 810
+    },
+    {
+      "rank": 26,
+      "strategy": "risk_parity_all_9_asset",
+      "label": "risk_parity_all_9_asset",
+      "sharpe": 1.255,
+      "cagr": 9.12,
+      "ann_vol": 7.39,
+      "mdd": -7.58,
+      "calmar": 1.204,
+      "sortino": 1.791,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    {
+      "rank": 27,
+      "strategy": "BH_SPY",
+      "label": "BH_SPY",
+      "sharpe": 1.205,
+      "cagr": 18.46,
+      "ann_vol": 15.22,
+      "mdd": -18.76,
+      "calmar": 0.984,
+      "sortino": 1.629,
+      "win_rate": 69.2,
+      "n_days": 810
+    },
+    {
+      "rank": 28,
+      "strategy": "max_diversification_6_asset",
+      "label": "max_diversification_6_asset",
+      "sharpe": 1.082,
+      "cagr": 10.34,
+      "ann_vol": 9.63,
+      "mdd": -9.1,
+      "calmar": 1.136,
+      "sortino": 1.543,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    {
+      "rank": 29,
+      "strategy": "minimum_variance_all_9_asset",
+      "label": "minimum_variance_all_9_asset",
+      "sharpe": 1.007,
+      "cagr": 5.07,
+      "ann_vol": 5.22,
+      "mdd": -5.72,
+      "calmar": 0.887,
+      "sortino": 1.539,
+      "win_rate": 64.1,
+      "n_days": 810
+    },
+    {
+      "rank": 30,
+      "strategy": "max_diversification_all_9_asset",
+      "label": "max_diversification_all_9_asset",
+      "sharpe": 0.872,
+      "cagr": 7.16,
+      "ann_vol": 8.61,
+      "mdd": -10.15,
+      "calmar": 0.706,
+      "sortino": 1.221,
+      "win_rate": 66.7,
+      "n_days": 810
+    }
+  ],
+  "best_per_subset": {
+    "2_asset_spy_gld": {
+      "method": "equal_weight",
+      "label": "equal_weight_2_asset_spy_gld",
+      "sharpe": 1.862,
+      "cagr": 25.6,
+      "ann_vol": 12.83,
+      "mdd": -12.89,
+      "calmar": 1.986,
+      "sortino": 2.348,
+      "win_rate": 71.8,
+      "n_days": 810
+    },
+    "3_asset_no_tlt": {
+      "method": "max_diversification",
+      "label": "max_diversification_3_asset_no_tlt",
+      "sharpe": 1.795,
+      "cagr": 24.38,
+      "ann_vol": 12.76,
+      "mdd": -12.21,
+      "calmar": 1.997,
+      "sortino": 2.28,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    "3_asset_with_tlt": {
+      "method": "max_diversification",
+      "label": "max_diversification_3_asset_with_tlt",
+      "sharpe": 1.51,
+      "cagr": 15.9,
+      "ann_vol": 10.34,
+      "mdd": -10.48,
+      "calmar": 1.518,
+      "sortino": 2.195,
+      "win_rate": 61.5,
+      "n_days": 810
+    },
+    "4_asset_diversified": {
+      "method": "minimum_variance",
+      "label": "minimum_variance_4_asset_diversified",
+      "sharpe": 1.794,
+      "cagr": 21.92,
+      "ann_vol": 11.57,
+      "mdd": -12.32,
+      "calmar": 1.78,
+      "sortino": 2.402,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    "5_asset": {
+      "method": "minimum_variance",
+      "label": "minimum_variance_5_asset",
+      "sharpe": 1.563,
+      "cagr": 18.19,
+      "ann_vol": 11.27,
+      "mdd": -12.9,
+      "calmar": 1.41,
+      "sortino": 2.1,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    "6_asset": {
+      "method": "risk_parity",
+      "label": "risk_parity_6_asset",
+      "sharpe": 1.35,
+      "cagr": 13.46,
+      "ann_vol": 9.92,
+      "mdd": -9.11,
+      "calmar": 1.477,
+      "sortino": 1.867,
+      "win_rate": 64.1,
+      "n_days": 810
+    },
+    "all_9_asset": {
+      "method": "equal_weight",
+      "label": "equal_weight_all_9_asset",
+      "sharpe": 1.285,
+      "cagr": 11.29,
+      "ann_vol": 8.87,
+      "mdd": -8.33,
+      "calmar": 1.355,
+      "sortino": 1.786,
+      "win_rate": 61.5,
+      "n_days": 810
+    }
+  },
+  "cross_oos": {
+    "max_diversification_all_9_asset": {
+      "wins": 3,
+      "periods": [
+        {
+          "period": "2006-06-01 to 2008-05-31",
+          "method_sharpe": 1.817,
+          "baseline_sharpe": 0.902,
+          "win": "True"
+        },
+        {
+          "period": "2008-06-01 to 2010-05-31",
+          "method_sharpe": 0.306,
+          "baseline_sharpe": 0.329,
+          "win": "False"
+        },
+        {
+          "period": "2012-01-01 to 2013-12-31",
+          "method_sharpe": 0.888,
+          "baseline_sharpe": 0.435,
+          "win": "True"
+        },
+        {
+          "period": "2016-01-01 to 2017-12-31",
+          "method_sharpe": 1.779,
+          "baseline_sharpe": 1.914,
+          "win": "False"
+        },
+        {
+          "period": "2020-01-01 to 2021-12-31",
+          "method_sharpe": 1.171,
+          "baseline_sharpe": 1.063,
+          "win": "True"
+        }
+      ]
+    },
+    "risk_parity_all_9_asset": {
+      "wins": 2,
+      "periods": [
+        {
+          "period": "2006-06-01 to 2008-05-31",
+          "method_sharpe": 1.868,
+          "baseline_sharpe": 0.902,
+          "win": "True"
+        },
+        {
+          "period": "2008-06-01 to 2010-05-31",
+          "method_sharpe": 0.138,
+          "baseline_sharpe": 0.329,
+          "win": "False"
+        },
+        {
+          "period": "2012-01-01 to 2013-12-31",
+          "method_sharpe": 0.476,
+          "baseline_sharpe": 0.435,
+          "win": "True"
+        },
+        {
+          "period": "2016-01-01 to 2017-12-31",
+          "method_sharpe": 1.588,
+          "baseline_sharpe": 1.914,
+          "win": "False"
+        },
+        {
+          "period": "2020-01-01 to 2021-12-31",
+          "method_sharpe": 0.988,
+          "baseline_sharpe": 1.063,
+          "win": "False"
+        }
+      ]
+    },
+    "minimum_variance_all_9_asset": {
+      "wins": 2,
+      "periods": [
+        {
+          "period": "2006-06-01 to 2008-05-31",
+          "method_sharpe": 2.064,
+          "baseline_sharpe": 0.902,
+          "win": "True"
+        },
+        {
+          "period": "2008-06-01 to 2010-05-31",
+          "method_sharpe": 0.172,
+          "baseline_sharpe": 0.329,
+          "win": "False"
+        },
+        {
+          "period": "2012-01-01 to 2013-12-31",
+          "method_sharpe": 0.734,
+          "baseline_sharpe": 0.435,
+          "win": "True"
+        },
+        {
+          "period": "2016-01-01 to 2017-12-31",
+          "method_sharpe": 1.548,
+          "baseline_sharpe": 1.914,
+          "win": "False"
+        },
+        {
+          "period": "2020-01-01 to 2021-12-31",
+          "method_sharpe": 0.645,
+          "baseline_sharpe": 1.063,
+          "win": "False"
+        }
+      ]
+    },
+    "equal_weight_all_9_asset": {
+      "wins": 2,
+      "periods": [
+        {
+          "period": "2006-06-01 to 2008-05-31",
+          "method_sharpe": 1.218,
+          "baseline_sharpe": 0.902,
+          "win": "True"
+        },
+        {
+          "period": "2008-06-01 to 2010-05-31",
+          "method_sharpe": 0.085,
+          "baseline_sharpe": 0.329,
+          "win": "False"
+        },
+        {
+          "period": "2012-01-01 to 2013-12-31",
+          "method_sharpe": 0.567,
+          "baseline_sharpe": 0.435,
+          "win": "True"
+        },
+        {
+          "period": "2016-01-01 to 2017-12-31",
+          "method_sharpe": 1.581,
+          "baseline_sharpe": 1.914,
+          "win": "False"
+        },
+        {
+          "period": "2020-01-01 to 2021-12-31",
+          "method_sharpe": 0.977,
+          "baseline_sharpe": 1.063,
+          "win": "False"
+        }
+      ]
+    }
+  },
+  "diversification_ratios": {
+    "equal_weight": {
+      "weights": {
+        "SPY": 0.1111,
+        "GLD": 0.1111,
+        "TLT": 0.1111,
+        "IEF": 0.1111,
+        "EFA": 0.1111,
+        "EEM": 0.1111,
+        "VNQ": 0.1111,
+        "DBC": 0.1111,
+        "TIP": 0.1111
+      },
+      "diversification_ratio": 1.5687
+    },
+    "minimum_variance": {
+      "weights": {
+        "SPY": 0.0199,
+        "GLD": 0.0,
+        "TLT": 0.0,
+        "IEF": 0.4358,
+        "EFA": 0.0,
+        "EEM": 0.0,
+        "VNQ": 0.0,
+        "DBC": 0.0845,
+        "TIP": 0.4599
+      },
+      "diversification_ratio": 1.4732
+    },
+    "max_diversification": {
+      "weights": {
+        "SPY": 0.1143,
+        "GLD": 0.0321,
+        "TLT": 0.0,
+        "IEF": 0.6839,
+        "EFA": 0.0,
+        "EEM": 0.0107,
+        "VNQ": 0.0,
+        "DBC": 0.1589,
+        "TIP": 0.0
+      },
+      "diversification_ratio": 1.8535
+    },
+    "risk_parity": {
+      "weights": {
+        "SPY": 0.064,
+        "GLD": 0.0439,
+        "TLT": 0.1059,
+        "IEF": 0.2259,
+        "EFA": 0.0695,
+        "EEM": 0.0607,
+        "VNQ": 0.0742,
+        "DBC": 0.0647,
+        "TIP": 0.2913
+      },
+      "diversification_ratio": 1.6174
+    },
+    "static_50_50": {
+      "weights": {
+        "SPY": 0.5,
+        "GLD": 0.5
+      },
+      "diversification_ratio": 1.3505
+    }
+  },
+  "sensitivity_lookback": {
+    "lookback_126": {
+      "label": "maxdiv_lb126",
+      "sharpe": 0.869,
+      "cagr": 6.91,
+      "ann_vol": 8.25,
+      "mdd": -8.87,
+      "calmar": 0.779,
+      "sortino": 1.254,
+      "win_rate": 64.1,
+      "n_days": 810
+    },
+    "lookback_252": {
+      "label": "maxdiv_lb252",
+      "sharpe": 0.872,
+      "cagr": 7.16,
+      "ann_vol": 8.61,
+      "mdd": -10.15,
+      "calmar": 0.706,
+      "sortino": 1.221,
+      "win_rate": 66.7,
+      "n_days": 810
+    },
+    "lookback_504": {
+      "label": "maxdiv_lb504",
+      "sharpe": 1.369,
+      "cagr": 11.18,
+      "ann_vol": 7.92,
+      "mdd": -7.3,
+      "calmar": 1.532,
+      "sortino": 1.775,
+      "win_rate": 70.4,
+      "n_days": 558
+    }
+  },
+  "conclusions": [
+    "NO multi-asset strategy beats 50/50 SPY/GLD on Sharpe",
+    "\n  26 strategies have lower MDD than 50/50:",
+    "  - minimum_variance_all_9_asset: MDD=-5.72% (vs -12.89%)",
+    "  - risk_parity_all_9_asset: MDD=-7.58% (vs -12.89%)",
+    "  - equal_weight_all_9_asset: MDD=-8.33% (vs -12.89%)",
+    "  - equal_weight_6_asset: MDD=-9.09% (vs -12.89%)",
+    "  - max_diversification_6_asset: MDD=-9.10% (vs -12.89%)",
+    "\n  Cross-OOS winners (\u22653/5): ['max_diversification_all_9_asset']",
+    "\n  DeMiguel check: Best 1/N=1.862 (equal_weight_2_asset_spy_gld) vs Best optimized=1.818 (max_diversification_2_asset_spy_gld)",
+    "  \u2192 1/N WINS over optimization (confirms DeMiguel et al 2009)"
+  ],
+  "verdict": {
+    "baseline_sharpe": 1.862,
+    "baseline_mdd": -12.89,
+    "best_strategy": "Static_50_50_SPY_GLD",
+    "best_sharpe": 1.862,
+    "best_mdd": -12.89,
+    "multi_asset_beats_50_50": false,
+    "n_winners": 0,
+    "cross_oos_pass": true
+  }
+}

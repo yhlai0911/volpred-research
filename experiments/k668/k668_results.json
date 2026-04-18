@@ -1,0 +1,982 @@
+{
+  "experiment_id": "K668",
+  "title": "VT Strategies for Retirement Portfolios: Sequence of Returns Risk",
+  "type": "empirical_analysis",
+  "data_source": "yfinance",
+  "data_period": "2006-01-04 to 2026-03-26",
+  "n_trading_days": 5088,
+  "methodology": {
+    "initial_portfolio": 1000000,
+    "annual_withdrawal_4pct": 40000,
+    "inflation_rate": 0.025,
+    "retirement_horizons": [
+      10,
+      15,
+      20
+    ],
+    "rolling_step": "~monthly (21 trading days)",
+    "strategy_signal": "Previous day VIX (no lookahead)",
+    "withdrawal_timing": "Monthly (every 21 trading days), inflation-adjusted annually"
+  },
+  "descriptive_stats": {
+    "SPY_ann_return_pct": 11.78,
+    "SPY_ann_vol_pct": 19.32,
+    "GLD_ann_return_pct": 11.69,
+    "GLD_ann_vol_pct": 18.31,
+    "VIX_mean": 19.47,
+    "VIX_median": 17.12
+  },
+  "strategy_annualized": {
+    "BH 60/40 SPY/GLD": {
+      "ann_return_pct": 11.74,
+      "ann_vol_pct": 14.07,
+      "sharpe": 0.835
+    },
+    "50/50 SPY/GLD (12/VIX)": {
+      "ann_return_pct": 7.06,
+      "ann_vol_pct": 7.87,
+      "sharpe": 0.897
+    },
+    "Piecewise Conservative": {
+      "ann_return_pct": 3.24,
+      "ann_vol_pct": 5.29,
+      "sharpe": 0.614
+    },
+    "BH SPY": {
+      "ann_return_pct": 11.78,
+      "ann_vol_pct": 19.32,
+      "sharpe": 0.61
+    },
+    "80/20 SPY/GLD (12/VIX)": {
+      "ann_return_pct": 6.9,
+      "ann_vol_pct": 8.08,
+      "sharpe": 0.854
+    }
+  },
+  "rolling_simulations": {
+    "10yr": {
+      "BH 60/40 SPY/GLD": {
+        "n_simulations": 123,
+        "survival_rate": 1.0,
+        "ruin_probability": 0.0,
+        "n_survived": "123",
+        "n_ruined": "0",
+        "median_terminal_wealth": 1749123.77,
+        "mean_terminal_wealth": 1827812.92,
+        "worst_terminal_wealth": 1323334.69,
+        "best_terminal_wealth": 3357424.41,
+        "p10_terminal_wealth": 1438380.71,
+        "p25_terminal_wealth": 1527359.17,
+        "p75_terminal_wealth": 1958211.97,
+        "worst_min_portfolio": 638689.76,
+        "median_min_portfolio": 915314.37,
+        "sustainable_withdrawal_rate": 0.1213,
+        "sustainable_annual_dollar": 121300.0,
+        "avg_ruin_day": null,
+        "avg_ruin_year": null
+      },
+      "50/50 SPY/GLD (12/VIX)": {
+        "n_simulations": 123,
+        "survival_rate": 1.0,
+        "ruin_probability": 0.0,
+        "n_survived": "123",
+        "n_ruined": "0",
+        "median_terminal_wealth": 979835.5,
+        "mean_terminal_wealth": 1040191.95,
+        "worst_terminal_wealth": 811032.53,
+        "best_terminal_wealth": 1831731.28,
+        "p10_terminal_wealth": 870368.73,
+        "p25_terminal_wealth": 908284.6,
+        "p75_terminal_wealth": 1058376.63,
+        "worst_min_portfolio": 776213.86,
+        "median_min_portfolio": 861502.87,
+        "sustainable_withdrawal_rate": 0.1015,
+        "sustainable_annual_dollar": 101500.0,
+        "avg_ruin_day": null,
+        "avg_ruin_year": null
+      },
+      "Piecewise Conservative": {
+        "n_simulations": 123,
+        "survival_rate": 1.0,
+        "ruin_probability": 0.0,
+        "n_survived": "123",
+        "n_ruined": "0",
+        "median_terminal_wealth": 589438.74,
+        "mean_terminal_wealth": 632389.54,
+        "worst_terminal_wealth": 487498.68,
+        "best_terminal_wealth": 1037017.23,
+        "p10_terminal_wealth": 531328.35,
+        "p25_terminal_wealth": 552373.3,
+        "p75_terminal_wealth": 677172.71,
+        "worst_min_portfolio": 477244.99,
+        "median_min_portfolio": 582813.43,
+        "sustainable_withdrawal_rate": 0.0861,
+        "sustainable_annual_dollar": 86100.0,
+        "avg_ruin_day": null,
+        "avg_ruin_year": null
+      },
+      "BH SPY": {
+        "n_simulations": 123,
+        "survival_rate": 1.0,
+        "ruin_probability": 0.0,
+        "n_survived": "123",
+        "n_ruined": "0",
+        "median_terminal_wealth": 2498604.04,
+        "mean_terminal_wealth": 2352857.45,
+        "worst_terminal_wealth": 1121119.12,
+        "best_terminal_wealth": 4129440.3,
+        "p10_terminal_wealth": 1191422.12,
+        "p25_terminal_wealth": 1825884.19,
+        "p75_terminal_wealth": 2794665.02,
+        "worst_min_portfolio": 420663.2,
+        "median_min_portfolio": 893161.07,
+        "sustainable_withdrawal_rate": 0.0982,
+        "sustainable_annual_dollar": 98200.0,
+        "avg_ruin_day": null,
+        "avg_ruin_year": null
+      },
+      "80/20 SPY/GLD (12/VIX)": {
+        "n_simulations": 123,
+        "survival_rate": 1.0,
+        "ruin_probability": 0.0,
+        "n_survived": "123",
+        "n_ruined": "0",
+        "median_terminal_wealth": 1288736.11,
+        "mean_terminal_wealth": 1255767.08,
+        "worst_terminal_wealth": 841569.76,
+        "best_terminal_wealth": 1885378.57,
+        "p10_terminal_wealth": 922778.03,
+        "p25_terminal_wealth": 1113430.16,
+        "p75_terminal_wealth": 1364543.13,
+        "worst_min_portfolio": 736850.63,
+        "median_min_portfolio": 931279.72,
+        "sustainable_withdrawal_rate": 0.1009,
+        "sustainable_annual_dollar": 100900.0,
+        "avg_ruin_day": null,
+        "avg_ruin_year": null
+      }
+    },
+    "15yr": {
+      "BH 60/40 SPY/GLD": {
+        "n_simulations": 63,
+        "survival_rate": 1.0,
+        "ruin_probability": 0.0,
+        "n_survived": "63",
+        "n_ruined": "0",
+        "median_terminal_wealth": 2599410.2,
+        "mean_terminal_wealth": 2813890.27,
+        "worst_terminal_wealth": 1741516.12,
+        "best_terminal_wealth": 4341310.8,
+        "p10_terminal_wealth": 1989352.79,
+        "p25_terminal_wealth": 2300370.36,
+        "p75_terminal_wealth": 3436409.84,
+        "worst_min_portfolio": 638689.76,
+        "median_min_portfolio": 788095.23,
+        "sustainable_withdrawal_rate": 0.0933,
+        "sustainable_annual_dollar": 93300.0,
+        "avg_ruin_day": null,
+        "avg_ruin_year": null
+      },
+      "50/50 SPY/GLD (12/VIX)": {
+        "n_simulations": 63,
+        "survival_rate": 1.0,
+        "ruin_probability": 0.0,
+        "n_survived": "63",
+        "n_ruined": "0",
+        "median_terminal_wealth": 1104802.46,
+        "mean_terminal_wealth": 1067784.02,
+        "worst_terminal_wealth": 775342.05,
+        "best_terminal_wealth": 1304770.28,
+        "p10_terminal_wealth": 824300.0,
+        "p25_terminal_wealth": 911672.75,
+        "p75_terminal_wealth": 1216463.01,
+        "worst_min_portfolio": 762246.06,
+        "median_min_portfolio": 865145.91,
+        "sustainable_withdrawal_rate": 0.0721,
+        "sustainable_annual_dollar": 72100.0,
+        "avg_ruin_day": null,
+        "avg_ruin_year": null
+      },
+      "Piecewise Conservative": {
+        "n_simulations": 63,
+        "survival_rate": 1.0,
+        "ruin_probability": 0.0,
+        "n_survived": "63",
+        "n_ruined": "0",
+        "median_terminal_wealth": 383295.84,
+        "mean_terminal_wealth": 382579.75,
+        "worst_terminal_wealth": 297903.32,
+        "best_terminal_wealth": 612454.14,
+        "p10_terminal_wealth": 313534.18,
+        "p25_terminal_wealth": 319832.46,
+        "p75_terminal_wealth": 414088.66,
+        "worst_min_portfolio": 297903.32,
+        "median_min_portfolio": 358153.0,
+        "sustainable_withdrawal_rate": 0.0561,
+        "sustainable_annual_dollar": 56100.0,
+        "avg_ruin_day": null,
+        "avg_ruin_year": null
+      },
+      "BH SPY": {
+        "n_simulations": 63,
+        "survival_rate": 1.0,
+        "ruin_probability": 0.0,
+        "n_survived": "63",
+        "n_ruined": "0",
+        "median_terminal_wealth": 2863773.2,
+        "mean_terminal_wealth": 3601927.61,
+        "worst_terminal_wealth": 1501319.27,
+        "best_terminal_wealth": 7889639.95,
+        "p10_terminal_wealth": 1870664.07,
+        "p25_terminal_wealth": 2191296.05,
+        "p75_terminal_wealth": 5140960.89,
+        "worst_min_portfolio": 420663.2,
+        "median_min_portfolio": 533228.7,
+        "sustainable_withdrawal_rate": 0.0767,
+        "sustainable_annual_dollar": 76700.0,
+        "avg_ruin_day": null,
+        "avg_ruin_year": null
+      },
+      "80/20 SPY/GLD (12/VIX)": {
+        "n_simulations": 63,
+        "survival_rate": 1.0,
+        "ruin_probability": 0.0,
+        "n_survived": "63",
+        "n_ruined": "0",
+        "median_terminal_wealth": 1242585.55,
+        "mean_terminal_wealth": 1359415.79,
+        "worst_terminal_wealth": 878806.41,
+        "best_terminal_wealth": 1860562.21,
+        "p10_terminal_wealth": 970891.56,
+        "p25_terminal_wealth": 1067559.55,
+        "p75_terminal_wealth": 1686743.22,
+        "worst_min_portfolio": 736850.63,
+        "median_min_portfolio": 859216.47,
+        "sustainable_withdrawal_rate": 0.0725,
+        "sustainable_annual_dollar": 72500.0,
+        "avg_ruin_day": null,
+        "avg_ruin_year": null
+      }
+    },
+    "20yr": {
+      "BH 60/40 SPY/GLD": {
+        "n_simulations": 3,
+        "survival_rate": 1.0,
+        "ruin_probability": 0.0,
+        "n_survived": "3",
+        "n_ruined": "0",
+        "median_terminal_wealth": 5062057.13,
+        "mean_terminal_wealth": 5104040.01,
+        "worst_terminal_wealth": 5040900.97,
+        "best_terminal_wealth": 5209161.94,
+        "p10_terminal_wealth": 5045132.2,
+        "p25_terminal_wealth": 5051479.05,
+        "p75_terminal_wealth": 5135609.53,
+        "worst_min_portfolio": 788095.23,
+        "median_min_portfolio": 796351.57,
+        "sustainable_withdrawal_rate": 0.0891,
+        "sustainable_annual_dollar": 89100.0,
+        "avg_ruin_day": null,
+        "avg_ruin_year": null
+      },
+      "50/50 SPY/GLD (12/VIX)": {
+        "n_simulations": 3,
+        "survival_rate": 1.0,
+        "ruin_probability": 0.0,
+        "n_survived": "3",
+        "n_ruined": "0",
+        "median_terminal_wealth": 1653308.01,
+        "mean_terminal_wealth": 1660243.92,
+        "worst_terminal_wealth": 1616049.65,
+        "best_terminal_wealth": 1711374.11,
+        "p10_terminal_wealth": 1623501.32,
+        "p25_terminal_wealth": 1634678.83,
+        "p75_terminal_wealth": 1682341.06,
+        "worst_min_portfolio": 971820.54,
+        "median_min_portfolio": 988627.64,
+        "sustainable_withdrawal_rate": 0.068,
+        "sustainable_annual_dollar": 68000.0,
+        "avg_ruin_day": null,
+        "avg_ruin_year": null
+      },
+      "Piecewise Conservative": {
+        "n_simulations": 3,
+        "survival_rate": 1.0,
+        "ruin_probability": 0.0,
+        "n_survived": "3",
+        "n_ruined": "0",
+        "median_terminal_wealth": 401594.23,
+        "mean_terminal_wealth": 405842.06,
+        "worst_terminal_wealth": 381083.94,
+        "best_terminal_wealth": 434848.02,
+        "p10_terminal_wealth": 385185.99,
+        "p25_terminal_wealth": 391339.08,
+        "p75_terminal_wealth": 418221.12,
+        "worst_min_portfolio": 379158.24,
+        "median_min_portfolio": 401594.23,
+        "sustainable_withdrawal_rate": 0.0507,
+        "sustainable_annual_dollar": 50700.0,
+        "avg_ruin_day": null,
+        "avg_ruin_year": null
+      },
+      "BH SPY": {
+        "n_simulations": 3,
+        "survival_rate": 1.0,
+        "ruin_probability": 0.0,
+        "n_survived": "3",
+        "n_ruined": "0",
+        "median_terminal_wealth": 3657445.08,
+        "mean_terminal_wealth": 3614664.72,
+        "worst_terminal_wealth": 3495621.77,
+        "best_terminal_wealth": 3690927.3,
+        "p10_terminal_wealth": 3527986.44,
+        "p25_terminal_wealth": 3576533.43,
+        "p75_terminal_wealth": 3674186.19,
+        "worst_min_portfolio": 496077.97,
+        "median_min_portfolio": 498513.87,
+        "sustainable_withdrawal_rate": 0.075,
+        "sustainable_annual_dollar": 75000.0,
+        "avg_ruin_day": null,
+        "avg_ruin_year": null
+      },
+      "80/20 SPY/GLD (12/VIX)": {
+        "n_simulations": 3,
+        "survival_rate": 1.0,
+        "ruin_probability": 0.0,
+        "n_survived": "3",
+        "n_ruined": "0",
+        "median_terminal_wealth": 1514424.69,
+        "mean_terminal_wealth": 1524188.4,
+        "worst_terminal_wealth": 1500182.76,
+        "best_terminal_wealth": 1557957.76,
+        "p10_terminal_wealth": 1503031.14,
+        "p25_terminal_wealth": 1507303.72,
+        "p75_terminal_wealth": 1536191.23,
+        "worst_min_portfolio": 852468.46,
+        "median_min_portfolio": 854617.71,
+        "sustainable_withdrawal_rate": 0.0661,
+        "sustainable_annual_dollar": 66100.0,
+        "avg_ruin_day": null,
+        "avg_ruin_year": null
+      }
+    }
+  },
+  "stress_tests": {
+    "GFC_2007": {
+      "label": "Pre-GFC (2007-01)",
+      "start_date": "2007-01-03",
+      "available_years": 19.2,
+      "strategies": {
+        "BH 60/40 SPY/GLD": {
+          "survived_to_end": "True",
+          "terminal_wealth": 4053861.94,
+          "min_portfolio": 716920.89,
+          "min_portfolio_pct_of_initial": 71.7,
+          "years_simulated": 19.2,
+          "ruin_year": null,
+          "months_elapsed": 230,
+          "first_3yr_min_portfolio": 716920.89,
+          "first_3yr_max_drawdown_pct": -28.3,
+          "portfolio_after_3yr": 1031808.46
+        },
+        "50/50 SPY/GLD (12/VIX)": {
+          "survived_to_end": "True",
+          "terminal_wealth": 1191329.49,
+          "min_portfolio": 841067.38,
+          "min_portfolio_pct_of_initial": 84.1,
+          "years_simulated": 19.2,
+          "ruin_year": null,
+          "months_elapsed": 230,
+          "first_3yr_min_portfolio": 899445.41,
+          "first_3yr_max_drawdown_pct": -10.1,
+          "portfolio_after_3yr": 983868.37
+        },
+        "Piecewise Conservative": {
+          "survived_to_end": "True",
+          "terminal_wealth": 158578.38,
+          "min_portfolio": 158578.38,
+          "min_portfolio_pct_of_initial": 15.9,
+          "years_simulated": 19.2,
+          "ruin_year": null,
+          "months_elapsed": 230,
+          "first_3yr_min_portfolio": 915055.22,
+          "first_3yr_max_drawdown_pct": -8.5,
+          "portfolio_after_3yr": 915055.22
+        },
+        "BH SPY": {
+          "survived_to_end": "True",
+          "terminal_wealth": 2910836.25,
+          "min_portfolio": 452255.08,
+          "min_portfolio_pct_of_initial": 45.2,
+          "years_simulated": 19.2,
+          "ruin_year": null,
+          "months_elapsed": 230,
+          "first_3yr_min_portfolio": 452255.08,
+          "first_3yr_max_drawdown_pct": -54.8,
+          "portfolio_after_3yr": 716874.98
+        },
+        "80/20 SPY/GLD (12/VIX)": {
+          "survived_to_end": "True",
+          "terminal_wealth": 1189080.38,
+          "min_portfolio": 771967.17,
+          "min_portfolio_pct_of_initial": 77.2,
+          "years_simulated": 19.2,
+          "ruin_year": null,
+          "months_elapsed": 230,
+          "first_3yr_min_portfolio": 771967.17,
+          "first_3yr_max_drawdown_pct": -22.8,
+          "portfolio_after_3yr": 866544.91
+        }
+      }
+    },
+    "GFC_2008_Sep": {
+      "label": "GFC Peak (2008-09)",
+      "start_date": "2008-09-02",
+      "available_years": 17.5,
+      "strategies": {
+        "BH 60/40 SPY/GLD": {
+          "survived_to_end": "True",
+          "terminal_wealth": 4079874.19,
+          "min_portfolio": 707276.41,
+          "min_portfolio_pct_of_initial": 70.7,
+          "years_simulated": 17.5,
+          "ruin_year": null,
+          "months_elapsed": 210,
+          "first_3yr_min_portfolio": 707276.41,
+          "first_3yr_max_drawdown_pct": -29.3,
+          "portfolio_after_3yr": 1279766.29
+        },
+        "50/50 SPY/GLD (12/VIX)": {
+          "survived_to_end": "True",
+          "terminal_wealth": 1272984.98,
+          "min_portfolio": 857445.99,
+          "min_portfolio_pct_of_initial": 85.7,
+          "years_simulated": 17.5,
+          "ruin_year": null,
+          "months_elapsed": 210,
+          "first_3yr_min_portfolio": 902510.66,
+          "first_3yr_max_drawdown_pct": -9.7,
+          "portfolio_after_3yr": 1093943.9
+        },
+        "Piecewise Conservative": {
+          "survived_to_end": "True",
+          "terminal_wealth": 251775.71,
+          "min_portfolio": 251775.71,
+          "min_portfolio_pct_of_initial": 25.2,
+          "years_simulated": 17.5,
+          "ruin_year": null,
+          "months_elapsed": 210,
+          "first_3yr_min_portfolio": 899164.84,
+          "first_3yr_max_drawdown_pct": -10.1,
+          "portfolio_after_3yr": 903015.61
+        },
+        "BH SPY": {
+          "survived_to_end": "True",
+          "terminal_wealth": 3917675.98,
+          "min_portfolio": 520718.7,
+          "min_portfolio_pct_of_initial": 52.1,
+          "years_simulated": 17.5,
+          "ruin_year": null,
+          "months_elapsed": 210,
+          "first_3yr_min_portfolio": 520718.7,
+          "first_3yr_max_drawdown_pct": -47.9,
+          "portfolio_after_3yr": 864789.17
+        },
+        "80/20 SPY/GLD (12/VIX)": {
+          "survived_to_end": "True",
+          "terminal_wealth": 1526037.97,
+          "min_portfolio": 840500.08,
+          "min_portfolio_pct_of_initial": 84.1,
+          "years_simulated": 17.5,
+          "ruin_year": null,
+          "months_elapsed": 210,
+          "first_3yr_min_portfolio": 840500.08,
+          "first_3yr_max_drawdown_pct": -15.9,
+          "portfolio_after_3yr": 971164.61
+        }
+      }
+    },
+    "COVID_2020_Feb": {
+      "label": "Pre-COVID Crash (2020-02)",
+      "start_date": "2020-02-03",
+      "available_years": 6.1,
+      "strategies": {
+        "BH 60/40 SPY/GLD": {
+          "survived_to_end": "True",
+          "terminal_wealth": 2045033.95,
+          "min_portfolio": 800844.24,
+          "min_portfolio_pct_of_initial": 80.1,
+          "years_simulated": 6.1,
+          "ruin_year": null,
+          "months_elapsed": 73,
+          "first_3yr_min_portfolio": 800844.24,
+          "first_3yr_max_drawdown_pct": -19.9,
+          "portfolio_after_3yr": 1188574.77
+        },
+        "50/50 SPY/GLD (12/VIX)": {
+          "survived_to_end": "True",
+          "terminal_wealth": 1430984.47,
+          "min_portfolio": 944619.51,
+          "min_portfolio_pct_of_initial": 94.5,
+          "years_simulated": 6.1,
+          "ruin_year": null,
+          "months_elapsed": 73,
+          "first_3yr_min_portfolio": 944619.51,
+          "first_3yr_max_drawdown_pct": -5.5,
+          "portfolio_after_3yr": 1004977.57
+        },
+        "Piecewise Conservative": {
+          "survived_to_end": "True",
+          "terminal_wealth": 1030419.82,
+          "min_portfolio": 846690.37,
+          "min_portfolio_pct_of_initial": 84.7,
+          "years_simulated": 6.1,
+          "ruin_year": null,
+          "months_elapsed": 73,
+          "first_3yr_min_portfolio": 897923.49,
+          "first_3yr_max_drawdown_pct": -10.2,
+          "portfolio_after_3yr": 897923.49
+        },
+        "BH SPY": {
+          "survived_to_end": "True",
+          "terminal_wealth": 1801149.94,
+          "min_portfolio": 694557.56,
+          "min_portfolio_pct_of_initial": 69.5,
+          "years_simulated": 6.1,
+          "ruin_year": null,
+          "months_elapsed": 73,
+          "first_3yr_min_portfolio": 694557.56,
+          "first_3yr_max_drawdown_pct": -30.5,
+          "portfolio_after_3yr": 1203080.55
+        },
+        "80/20 SPY/GLD (12/VIX)": {
+          "survived_to_end": "True",
+          "terminal_wealth": 1317056.1,
+          "min_portfolio": 922498.18,
+          "min_portfolio_pct_of_initial": 92.2,
+          "years_simulated": 6.1,
+          "ruin_year": null,
+          "months_elapsed": 73,
+          "first_3yr_min_portfolio": 922498.18,
+          "first_3yr_max_drawdown_pct": -7.8,
+          "portfolio_after_3yr": 1006379.66
+        }
+      }
+    },
+    "COVID_2020_Mar": {
+      "label": "COVID Bottom (2020-03)",
+      "start_date": "2020-03-02",
+      "available_years": 6.1,
+      "strategies": {
+        "BH 60/40 SPY/GLD": {
+          "survived_to_end": "True",
+          "terminal_wealth": 2185976.36,
+          "min_portfolio": 845758.69,
+          "min_portfolio_pct_of_initial": 84.6,
+          "years_simulated": 6.1,
+          "ruin_year": null,
+          "months_elapsed": 72,
+          "first_3yr_min_portfolio": 845758.69,
+          "first_3yr_max_drawdown_pct": -15.4,
+          "portfolio_after_3yr": 1199971.83
+        },
+        "50/50 SPY/GLD (12/VIX)": {
+          "survived_to_end": "True",
+          "terminal_wealth": 1451126.05,
+          "min_portfolio": 956159.35,
+          "min_portfolio_pct_of_initial": 95.6,
+          "years_simulated": 6.1,
+          "ruin_year": null,
+          "months_elapsed": 72,
+          "first_3yr_min_portfolio": 956159.35,
+          "first_3yr_max_drawdown_pct": -4.4,
+          "portfolio_after_3yr": 981908.76
+        },
+        "Piecewise Conservative": {
+          "survived_to_end": "True",
+          "terminal_wealth": 1011806.28,
+          "min_portfolio": 832886.35,
+          "min_portfolio_pct_of_initial": 83.3,
+          "years_simulated": 6.1,
+          "ruin_year": null,
+          "months_elapsed": 72,
+          "first_3yr_min_portfolio": 874203.28,
+          "first_3yr_max_drawdown_pct": -12.6,
+          "portfolio_after_3yr": 874203.28
+        },
+        "BH SPY": {
+          "survived_to_end": "True",
+          "terminal_wealth": 1999418.0,
+          "min_portfolio": 756973.53,
+          "min_portfolio_pct_of_initial": 75.7,
+          "years_simulated": 6.1,
+          "ruin_year": null,
+          "months_elapsed": 72,
+          "first_3yr_min_portfolio": 756973.53,
+          "first_3yr_max_drawdown_pct": -24.3,
+          "portfolio_after_3yr": 1268461.78
+        },
+        "80/20 SPY/GLD (12/VIX)": {
+          "survived_to_end": "True",
+          "terminal_wealth": 1364996.08,
+          "min_portfolio": 948666.04,
+          "min_portfolio_pct_of_initial": 94.9,
+          "years_simulated": 6.1,
+          "ruin_year": null,
+          "months_elapsed": 72,
+          "first_3yr_min_portfolio": 948666.04,
+          "first_3yr_max_drawdown_pct": -5.1,
+          "portfolio_after_3yr": 1007043.63
+        }
+      }
+    }
+  },
+  "withdrawal_rate_sensitivity_10yr": {
+    "BH 60/40 SPY/GLD": {
+      "3.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 30000.0,
+        "n_sims": 123
+      },
+      "3.5%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 35000.0,
+        "n_sims": 123
+      },
+      "4.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 40000.0,
+        "n_sims": 123
+      },
+      "4.5%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 45000.0,
+        "n_sims": 123
+      },
+      "5.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 50000.0,
+        "n_sims": 123
+      },
+      "5.5%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 55000.0,
+        "n_sims": 123
+      },
+      "6.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 60000.0,
+        "n_sims": 123
+      },
+      "7.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 70000.0,
+        "n_sims": 123
+      },
+      "8.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 80000.0,
+        "n_sims": 123
+      },
+      "10.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 100000.0,
+        "n_sims": 123
+      }
+    },
+    "50/50 SPY/GLD (12/VIX)": {
+      "3.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 30000.0,
+        "n_sims": 123
+      },
+      "3.5%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 35000.0,
+        "n_sims": 123
+      },
+      "4.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 40000.0,
+        "n_sims": 123
+      },
+      "4.5%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 45000.0,
+        "n_sims": 123
+      },
+      "5.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 50000.0,
+        "n_sims": 123
+      },
+      "5.5%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 55000.0,
+        "n_sims": 123
+      },
+      "6.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 60000.0,
+        "n_sims": 123
+      },
+      "7.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 70000.0,
+        "n_sims": 123
+      },
+      "8.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 80000.0,
+        "n_sims": 123
+      },
+      "10.0%": {
+        "survival_rate_pct": 99.2,
+        "annual_withdrawal": 100000.0,
+        "n_sims": 123
+      }
+    },
+    "Piecewise Conservative": {
+      "3.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 30000.0,
+        "n_sims": 123
+      },
+      "3.5%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 35000.0,
+        "n_sims": 123
+      },
+      "4.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 40000.0,
+        "n_sims": 123
+      },
+      "4.5%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 45000.0,
+        "n_sims": 123
+      },
+      "5.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 50000.0,
+        "n_sims": 123
+      },
+      "5.5%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 55000.0,
+        "n_sims": 123
+      },
+      "6.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 60000.0,
+        "n_sims": 123
+      },
+      "7.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 70000.0,
+        "n_sims": 123
+      },
+      "8.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 80000.0,
+        "n_sims": 123
+      },
+      "10.0%": {
+        "survival_rate_pct": 11.4,
+        "annual_withdrawal": 100000.0,
+        "n_sims": 123
+      }
+    },
+    "BH SPY": {
+      "3.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 30000.0,
+        "n_sims": 123
+      },
+      "3.5%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 35000.0,
+        "n_sims": 123
+      },
+      "4.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 40000.0,
+        "n_sims": 123
+      },
+      "4.5%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 45000.0,
+        "n_sims": 123
+      },
+      "5.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 50000.0,
+        "n_sims": 123
+      },
+      "5.5%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 55000.0,
+        "n_sims": 123
+      },
+      "6.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 60000.0,
+        "n_sims": 123
+      },
+      "7.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 70000.0,
+        "n_sims": 123
+      },
+      "8.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 80000.0,
+        "n_sims": 123
+      },
+      "10.0%": {
+        "survival_rate_pct": 91.9,
+        "annual_withdrawal": 100000.0,
+        "n_sims": 123
+      }
+    },
+    "80/20 SPY/GLD (12/VIX)": {
+      "3.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 30000.0,
+        "n_sims": 123
+      },
+      "3.5%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 35000.0,
+        "n_sims": 123
+      },
+      "4.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 40000.0,
+        "n_sims": 123
+      },
+      "4.5%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 45000.0,
+        "n_sims": 123
+      },
+      "5.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 50000.0,
+        "n_sims": 123
+      },
+      "5.5%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 55000.0,
+        "n_sims": 123
+      },
+      "6.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 60000.0,
+        "n_sims": 123
+      },
+      "7.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 70000.0,
+        "n_sims": 123
+      },
+      "8.0%": {
+        "survival_rate_pct": 100.0,
+        "annual_withdrawal": 80000.0,
+        "n_sims": 123
+      },
+      "10.0%": {
+        "survival_rate_pct": 95.1,
+        "annual_withdrawal": 100000.0,
+        "n_sims": 123
+      }
+    }
+  },
+  "sequence_of_returns_decomposition_10yr": {
+    "BH 60/40 SPY/GLD": {
+      "n_windows": 123,
+      "median_first_3yr_return": 23.5,
+      "good_start_median_terminal": 1957330.0,
+      "bad_start_median_terminal": 1574689.0,
+      "worst_quartile_median_terminal": 1516627.0,
+      "good_start_survival_pct": 100.0,
+      "bad_start_survival_pct": 100.0,
+      "worst_quartile_survival_pct": 100.0,
+      "correlation_3yr_ret_vs_terminal": 0.422
+    },
+    "50/50 SPY/GLD (12/VIX)": {
+      "n_windows": 123,
+      "median_first_3yr_return": 12.2,
+      "good_start_median_terminal": 1003576.0,
+      "bad_start_median_terminal": 946727.0,
+      "worst_quartile_median_terminal": 938890.0,
+      "good_start_survival_pct": 100.0,
+      "bad_start_survival_pct": 100.0,
+      "worst_quartile_survival_pct": 100.0,
+      "correlation_3yr_ret_vs_terminal": 0.307
+    },
+    "Piecewise Conservative": {
+      "n_windows": 123,
+      "median_first_3yr_return": 0.6,
+      "good_start_median_terminal": 557818.0,
+      "bad_start_median_terminal": 590610.0,
+      "worst_quartile_median_terminal": 596635.0,
+      "good_start_survival_pct": 100.0,
+      "bad_start_survival_pct": 100.0,
+      "worst_quartile_survival_pct": 100.0,
+      "correlation_3yr_ret_vs_terminal": 0.354
+    },
+    "BH SPY": {
+      "n_windows": 123,
+      "median_first_3yr_return": 38.6,
+      "good_start_median_terminal": 2792692.0,
+      "bad_start_median_terminal": 1825884.0,
+      "worst_quartile_median_terminal": 1229709.0,
+      "good_start_survival_pct": 100.0,
+      "bad_start_survival_pct": 100.0,
+      "worst_quartile_survival_pct": 100.0,
+      "correlation_3yr_ret_vs_terminal": 0.961
+    },
+    "80/20 SPY/GLD (12/VIX)": {
+      "n_windows": 123,
+      "median_first_3yr_return": 17.4,
+      "good_start_median_terminal": 1363824.0,
+      "bad_start_median_terminal": 1113430.0,
+      "worst_quartile_median_terminal": 944318.0,
+      "good_start_survival_pct": 100.0,
+      "bad_start_survival_pct": 100.0,
+      "worst_quartile_survival_pct": 100.0,
+      "correlation_3yr_ret_vs_terminal": 0.899
+    }
+  },
+  "key_findings": [
+    "10-year horizon: best strategy is BH SPY with 100.0% survival, $2,498,604 median terminal wealth, SWR 9.82%.",
+    "VT and BH have equal survival rates (100.0%). VT worst-case floor: $736,851 vs BH: $420,663.",
+    "Worst-case minimum portfolio (downside floor): VT (80/20 SPY/GLD (12/VIX)) $736,851 vs BH (BH SPY) $420,663. VT protects better.",
+    "Sequence of returns for BH SPY: bad-start median terminal $1,825,884, good-start $2,792,692 (corr=0.961).",
+    "Sequence of returns for 50/50 SPY/GLD (12/VIX): bad-start median terminal $946,727, good-start $1,003,576 (corr=0.307).",
+    "Sustainable withdrawal rate (10yr, 95% survival): 8.61% (Piecewise Conservative) to 12.13% (BH 60/40 SPY/GLD).",
+    "GFC stress test (Sep 2008 start): best downside protection = 50/50 SPY/GLD (12/VIX) (min portfolio 85.7% of initial), worst = Piecewise Conservative (25.2% of initial)."
+  ],
+  "limitations": [
+    "Data covers 2006-2026 only (~20 years); limited number of 20-year windows",
+    "10-year and 15-year horizons provide more rolling windows for robust analysis",
+    "Daily rebalanced returns (approximation; real portfolios rebalance less frequently)",
+    "Inflation assumed constant 2.5%/yr (real inflation varies significantly)",
+    "No transaction costs modeled",
+    "Cash portion earns 0% (real SHY/T-bills would earn some yield)",
+    "Withdrawals are rigid (real retirees often adjust spending in down markets)",
+    "VIX signal uses previous-day close",
+    "Survivorship bias in SPY (failed companies dropped from S&P 500)",
+    "This period (2006-2026) includes strong bull market recovery after GFC \u2014 results may be optimistic"
+  ],
+  "references": [
+    "Bengen (1994) 'Determining Withdrawal Rates Using Historical Data'",
+    "Pfau (2012) 'Capital Market Expectations, Sequence of Returns Risk'",
+    "Kitces (2008) 'Resolving the Paradox \u2014 The 4% Rule'",
+    "Estrada (2018) 'Sequence Risk: Is It Really a Big Deal?'",
+    "Blanchett et al. (2012) 'Low Bond Yields and Safe Portfolio Withdrawal Rates'"
+  ],
+  "timestamp": "2026-03-29T08:41:54.703411"
+}

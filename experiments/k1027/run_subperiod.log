@@ -1,0 +1,86 @@
+Using CPython 3.12.10
+Creating virtual environment at: .venv
+   Building volpred @ file:///Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ac4496a9
+      Built volpred @ file:///Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ac4496a9
+Installed 109 packages in 728ms
+======================================================================
+K1027: A4f Sub-Period Robustness Analysis
+  7 non-overlapping 2-year sub-periods, Paper 9 robustness test
+======================================================================
+
+[1] Loading data...
+  SPY: 2005-01-04 to 2026-04-09, n=5349
+
+[2] Overall diagnostics...
+  Mean daily return: 0.1000
+  Annualized std: 0.1902
+  Skewness: -0.301
+  Kurtosis: 14.673
+  VIX range: [9.1, 82.7]
+  VIX mean: 19.2
+
+[3] Model implementations (Student-t df=8)...
+
+[4] Running full OOS forecasting from 2013-01-01 to end...
+  OOS observations: 3337 (from 2013-01-01)
+  OOS dates: 2013-01-02 to 2026-04-09
+  Refit every 63 days
+  OOS step 0/3337 (3s elapsed)
+  OOS step 500/3337 (38s elapsed)
+  OOS step 1000/3337 (70s elapsed)
+  OOS step 1500/3337 (104s elapsed)
+  OOS step 2000/3337 (137s elapsed)
+  OOS step 2500/3337 (175s elapsed)
+  OOS step 3000/3337 (207s elapsed)
+
+  OOS forecasting completed in 230s, 53 refits
+
+[5] Sub-period analysis...
+
+  Full OOS (2013-01-01 to end):
+    GJR QLIKE: 1.545366
+    A4f QLIKE: 1.446465
+    Improvement: 6.40%
+    DM t-stat: -6.9766 (negative = A4f better)
+
+  Sub-period results:
+  Period Dates                        N  VIX_avg  GJR_QLIKE  A4f_QLIKE  Improv%     DM_t   Winner
+  ----------------------------------------------------------------------------------------------------
+  P1     2013-01~2014-12    504     14.2   1.467635   1.374323   +6.36%   -4.375      A4f
+  P2     2015-01~2016-12    504     16.2   1.606615   1.495719   +6.90%   -3.488      A4f
+  P3     2017-01~2018-12    502     13.9   1.737849   1.629680   +6.22%   -2.124      A4f
+  P4     2019-01~2020-12    505     22.3   1.496284   1.391507   +7.00%   -1.858      A4f
+  P5     2021-01~2022-12    503     22.6   1.394606   1.299390   +6.83%   -2.822      A4f
+  P6     2023-01~2024-12    502     16.2   1.507558   1.435221   +4.80%   -2.687      A4f
+  P7     2025-01~2026-12    317     19.3   1.644722   1.532154   +6.84%   -3.295      A4f
+
+  A4f wins: 7/7
+
+  Conclusion: A4f robustly outperforms GJR across ALL regimes — advantage not driven by any single period
+
+  Spearman(avg_VIX, QLIKE_improvement): rho=0.643, p=0.1194
+
+[6] Generating charts...
+  Saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ac4496a9/experiments/k1027/k1027_dm_by_period.png
+  Saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ac4496a9/experiments/k1027/k1027_vix_vs_improvement.png
+  Saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ac4496a9/experiments/k1027/k1027_qlike_comparison.png
+
+  Results saved to: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ac4496a9/experiments/k1027/k1027_results.json
+
+======================================================================
+K1027: FINAL SUMMARY
+======================================================================
+  Models: A4f-VIX²-t(df=8) vs GJR-t(df=8)
+  Window: 2000, Refit: every 63 days
+  Full OOS QLIKE improvement: +6.40%
+  Full OOS DM t-stat: -6.977
+
+  Sub-period results (7 periods):
+    A4f win rate: 7/7 (100%)
+    Mean QLIKE improvement: +6.42%
+    Improvement range: [+4.80%, +7.00%]
+    VIX-Improvement correlation: rho=0.643
+
+  Conclusion: A4f robustly outperforms GJR across ALL regimes — advantage not driven by any single period
+  Runtime: 234s
+======================================================================

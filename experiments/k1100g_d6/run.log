@@ -1,0 +1,78 @@
+[00:48:01] === K1100g_d6 extended sample ===
+  Sample: 2017-01-01 .. 2025-12-31
+  Train : 2017-01-01 .. 2019-12-31
+  Test  : 2020-01-01 .. 2025-12-31
+[Sessions] Loading cache: _cache_taifex_sessions_2017-2025.parquet
+  Aligned rows: 1992  (K1100g_d5 baseline was 1071)
+  --- Gap series descriptives (2017-2025) ---
+    gap_night_t: mean=+8.18e-04  sd=1.2535e-02  kurt=11.58  skew=-1.489
+    gap_day_lag: mean=-5.38e-04  sd=1.1650e-02  kurt=11.94  skew=1.113
+
+[00:48:01] === IS fits (Student-t) ===
+  [00:48:01] fitting M1_baseline ...
+    ll=7111.770 df=5.12  success=True
+  [00:48:07] fitting M2_gap_night ...
+    ll=7125.614 df=8.43 xn=+0.0404  success=True
+  [00:48:12] fitting M2_gap_day_lag ...
+    ll=7117.926 df=8.43 xn=+0.0404  success=True
+  [00:48:16] fitting M2_gap_total ...
+    ll=7127.696 df=8.43 xn=+0.0404  success=True
+  [00:48:20] fitting M2_signed_gn ...
+    ll=7120.437 df=8.00 xn=-0.0005  success=True
+  [00:48:21] fitting REF_night_r2 ...
+    ll=7125.894 df=6.61 xn=+0.1403  success=True
+
+[00:48:26] === IS LRT (vs M1_baseline) ===
+  M2_gap_night vs M1: chi2=27.689  p=1.425e-07
+  M2_gap_day_lag vs M1: chi2=12.313  p=0.0004499
+  M2_gap_total vs M1: chi2=31.852  p=1.664e-08
+  M2_signed_gn vs M1: chi2=17.334  p=3.136e-05
+  REF_night_r2 vs M1: chi2=28.248  p=1.067e-07
+
+[00:48:26] === OOS expanding-window ===
+  Train: n=607  Test(combined): n=1385
+[00:48:26] OOS M1_baseline ...
+  refits=277  elapsed=452.7s
+[00:55:58] OOS M2_gap_night ...
+  refits=277  elapsed=319.9s
+[01:01:18] OOS M2_gap_day_lag ...
+  refits=277  elapsed=344.5s
+[01:07:03] OOS M2_gap_total ...
+  refits=277  elapsed=269.2s
+[01:11:32] OOS M2_signed_gn ...
+  refits=277  elapsed=81.3s
+[01:12:53] OOS REF_night_r2 ...
+  refits=277  elapsed=444.1s
+[OOS] Cached to: _oos_runs_cache.npz
+
+[01:20:17] === Segmented OOS summary ===
+  model              period           n     DM_t   QLIKE%
+  M2_gap_night       A              464   +1.292    +4.75%
+  M2_gap_night       B              921   +0.735    +1.22%
+  M2_gap_night       C             1385   +1.467    +2.53%
+  M2_gap_day_lag     A              464   +0.139    +0.42%
+  M2_gap_day_lag     B              921   +0.395    +0.75%
+  M2_gap_day_lag     C             1385   +0.380    +0.63%
+  M2_gap_total       A              464   +1.490    +6.62%
+  M2_gap_total       B              921   +0.482    +1.18%
+  M2_gap_total       C             1385   +1.398    +3.18%
+  M2_signed_gn       A              464   -0.267    -1.02%
+  M2_signed_gn       B              921   +0.866    +0.62%
+  M2_signed_gn       C             1385   +0.010    +0.02%
+  REF_night_r2       A              464   +2.010    +3.80%
+  REF_night_r2       B              921   +0.922    +1.28%
+  REF_night_r2       C             1385   +1.988    +2.21%
+
+[01:20:17] === Cross-model DM (combined period) ===
+  M2_gap_night vs REF_night_r2: DM_qlike t=-0.192 p=0.848 DM_ll t=+0.407
+  M2_gap_total vs REF_night_r2: DM_qlike t=-0.550 p=0.582 DM_ll t=+0.410
+  M2_gap_night vs M2_gap_total: DM_qlike t=+0.495 p=0.62 DM_ll t=-0.100
+  M2_gap_total: t_old=+1.49(N=464) → t_new=+1.40(N=1385), expected √N=+2.57, Δ=-1.18
+  REF_night_r2: t_old=+2.01(N=464) → t_new=+1.99(N=1385), expected √N=+3.47, Δ=-1.48
+[OK] results -> k1100g_d6_results.json
+[OK] 2 charts saved
+
+[01:20:18] === Verdict: FAIL ===
+  DM t weakens or stays weak at extended N: |M2_gap_total|=1.40, |REF_night_r2|=1.99. Signal did NOT scale with N as expected — TAIFEX overnight→day predictability likely spurious/period-specific. Paper 3 reframe NOT anchored by this analysis.
+
+[DONE] Total: 1936.4s

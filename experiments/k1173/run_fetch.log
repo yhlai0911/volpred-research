@@ -1,0 +1,60 @@
+Using CPython 3.12.10
+Creating virtual environment at: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a38fdfbe/.venv
+   Building volpred @ file:///Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a38fdfbe
+      Built volpred @ file:///Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a38fdfbe
+Installed 109 packages in 715ms
+[csv] 40 rows, {'IN': 10, 'BR': 10, 'MX': 10, 'CH': 10}
+
+yfinance vs refined diff summary per market:
+  BR: n=10, mean_diff=-0.117, median_diff=-0.120, min=-0.290, max=+0.153
+  CH: n=10, mean_diff=+0.126, median_diff=+0.092, min=-0.004, max=+0.399
+  IN: n=10, mean_diff=+0.186, median_diff=+0.160, min=+0.062, max=+0.348
+  MX: n=10, mean_diff=+0.045, median_diff=-0.003, min=-0.167, max=+0.321
+
+Per-stock refined vs yfinance (sorted by |diff| desc):
+  601398.SS            (CH): yf=0.075 refined=0.474 diff=+0.399
+  ITC.NS               (IN): yf=0.502 refined=0.850 diff=+0.348
+  ICICIBANK.NS         (IN): yf=0.559 refined=0.906 diff=+0.348
+  CEMEXCPO.MX          (MX): yf=0.244 refined=0.565 diff=+0.321
+  ITUB4.SA             (BR): yf=0.600 refined=0.310 diff=-0.290
+  HDFCBANK.NS          (IN): yf=0.556 refined=0.842 diff=+0.286
+  PETR4.SA             (BR): yf=0.610 refined=0.365 diff=-0.245
+  TLEVISACPO.MX        (MX): yf=0.122 refined=0.360 diff=+0.238
+  INFY.NS              (IN): yf=0.491 refined=0.716 diff=+0.226
+  601318.SS            (CH): yf=0.207 refined=0.431 diff=+0.225
+  RENT3.SA             (BR): yf=0.792 refined=0.583 diff=-0.209
+  B3SA3.SA             (BR): yf=0.829 refined=0.641 diff=-0.188
+  KOFUBL.MX            (MX): yf=0.311 refined=0.144 diff=-0.167
+  BHARTIARTL.NS        (IN): yf=0.318 refined=0.483 diff=+0.165
+  KOTAKBANK.NS         (IN): yf=0.471 refined=0.626 diff=+0.155
+  ABEV3.SA             (BR): yf=0.100 refined=0.253 diff=+0.153
+  600585.SS            (CH): yf=0.128 refined=0.274 diff=+0.146
+  ITSA4.SA             (BR): yf=0.378 refined=0.244 diff=-0.134
+  FEMSAUBD.MX          (MX): yf=0.210 refined=0.082 diff=-0.128
+  RELIANCE.NS          (IN): yf=0.279 refined=0.394 diff=+0.115
+  600276.SS            (CH): yf=0.196 refined=0.307 diff=+0.111
+  600519.SS            (CH): yf=0.093 refined=0.201 diff=+0.108
+  MGLU3.SA             (BR): yf=0.292 refined=0.185 diff=-0.107
+  BBAS3.SA             (BR): yf=0.285 refined=0.180 diff=-0.105
+  AMXB.MX              (MX): yf=0.070 refined=0.160 diff=+0.090
+  GMEXICOB.MX          (MX): yf=0.185 refined=0.270 diff=+0.085
+  SBIN.NS              (IN): yf=0.289 refined=0.374 diff=+0.085
+  601166.SS            (CH): yf=0.242 refined=0.319 diff=+0.077
+  600028.SS            (CH): yf=0.046 refined=0.118 diff=+0.072
+  HINDUNILVR.NS        (IN): yf=0.195 refined=0.264 diff=+0.069
+  600036.SS            (CH): yf=0.185 refined=0.253 diff=+0.068
+  TCS.NS               (IN): yf=0.170 refined=0.232 diff=+0.062
+  600030.SS            (CH): yf=0.145 refined=0.205 diff=+0.060
+  BBDC4.SA             (BR): yf=0.399 refined=0.371 diff=-0.028
+  GFNORTEO.MX          (MX): yf=0.426 refined=0.402 diff=-0.024
+  VALE3.SA             (BR): yf=0.571 refined=0.551 diff=-0.020
+  BIMBOA.MX            (MX): yf=0.060 refined=0.056 diff=-0.005
+  600887.SS            (CH): yf=0.254 refined=0.250 diff=-0.004
+  WALMEX.MX            (MX): yf=0.132 refined=0.129 diff=-0.003
+  GRUMAB.MX            (MX): yf=  N/A refined=0.194 diff=+nan
+
+Market-level mean refined vs yfinance:
+  BR: yf_mean=0.486, refined_mean=0.368, diff=-0.117
+  CH: yf_mean=0.157, refined_mean=0.283, diff=+0.126
+  IN: yf_mean=0.383, refined_mean=0.569, diff=+0.186
+  MX: yf_mean=0.195, refined_mean=0.236, diff=+0.045

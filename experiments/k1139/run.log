@@ -1,0 +1,89 @@
+========================================================================
+K1139: Equity HAR-RV-X VIX component decomposition
+Paper 4 mechanism diagnostic (which VIX channel drives K1138 PASS?)
+========================================================================
+
+[0] Downloading VIX components...
+  VIX:    n=4092, 2010-01-04 ~ 2026-04-10, mean=18.45
+  VIX3M:  n=4092, 2010-01-04 ~ 2026-04-10, mean=20.36
+  VVIX:   n=4083, 2010-01-04 ~ 2026-04-10, mean=95.87
+  SKEW:   n=4030, 2010-01-04 ~ 2026-04-10, mean=131.15
+
+[1] Downloading SPY...
+  SPY: n=4091, 2010-01-05 ~ 2026-04-10
+  Mean r=0.0497%, Std=1.0851%, Mean Park=0.7121 pct²
+
+[1] Downloading QQQ...
+  QQQ: n=4091, 2010-01-05 ~ 2026-04-10
+  Mean r=0.0715%, Std=1.2989%, Mean Park=1.0574 pct²
+
+[1] Downloading IWM...
+  IWM: n=4091, 2010-01-05 ~ 2026-04-10
+  Mean r=0.0443%, Std=1.4050%, Mean Park=1.3092 pct²
+
+============================================================
+  Running OOS for SPY
+============================================================
+  First fully-aligned date: 2010-02-03
+  OOS: 2021-01-04 ~ 2026-04-10 (1323 obs)
+  [SPY] 0% (0/1323) 0.0s
+  [SPY] 19% (252/1323) 1.1s
+  [SPY] 38% (504/1323) 2.1s
+  [SPY] 57% (756/1323) 3.2s
+  [SPY] 76% (1008/1323) 4.3s
+  [SPY] 95% (1260/1323) 5.4s
+  [SPY] done in 5.7s
+  Valid OOS: 1323
+
+============================================================
+  Running OOS for QQQ
+============================================================
+  First fully-aligned date: 2010-02-03
+  OOS: 2021-01-04 ~ 2026-04-10 (1323 obs)
+  [QQQ] 0% (0/1323) 0.0s
+  [QQQ] 19% (252/1323) 1.1s
+  [QQQ] 38% (504/1323) 2.1s
+  [QQQ] 57% (756/1323) 3.2s
+  [QQQ] 76% (1008/1323) 4.3s
+  [QQQ] 95% (1260/1323) 5.5s
+  [QQQ] done in 5.8s
+  Valid OOS: 1323
+
+============================================================
+  Running OOS for IWM
+============================================================
+  First fully-aligned date: 2010-02-03
+  OOS: 2021-01-04 ~ 2026-04-10 (1323 obs)
+  [IWM] 0% (0/1323) 0.0s
+  [IWM] 19% (252/1323) 1.1s
+  [IWM] 38% (504/1323) 2.2s
+  [IWM] 57% (756/1323) 3.3s
+  [IWM] 76% (1008/1323) 4.4s
+  [IWM] 95% (1260/1323) 5.5s
+  [IWM] done in 5.8s
+  Valid OOS: 1323
+
+========================================================================
+SCENARIO DIAGNOSIS
+========================================================================
+
+PASS count across primary assets (SPY+QQQ, out of 2):
+  M1_HAR_VIX: 2/2
+  M2_HAR_SIGMA21: 0/2
+  M3_HAR_VRP: 0/2
+  M4_HAR_TERM: 1/2
+  M5_HAR_SKEW: 0/2
+  M6_HAR_VVIX: 0/2
+  M7_HAR_ENCOMPASS: 2/2
+
+>>> Scenario: B_AGGREGATOR
+>>> Narrative: σ_21d FAILS decisively (mean t=-1.03) while forward-looking components collectively stronger (mean t VRP/Term/VVIX = +1.95). No single forward component PASSES at Harvey joint threshold but VIX as composite PASSES. VIX is an EFFICIENT AGGREGATOR of weak-but-coherent forward-looking signals. Paper 4 narrative MID-STRONG: VIX genuinely adds IV info beyond RV memory; no single component replaces it but the composite is not a realized-vol proxy.
+
+Results saved: /Users/yhlai0911/Desktop/volpred-research/experiments/k1139/k1139_results.json
+Chart 1 saved: /Users/yhlai0911/Desktop/volpred-research/experiments/k1139/vix_component_contribution.png
+
+VRP diagnostic (daily pct² units): mean=0.343, std=1.611, frac>0=85.36%
+  (Typical VRP is POSITIVE because IV includes risk premium over RV; expect ~80%+ positive)
+Chart 2 saved: /Users/yhlai0911/Desktop/volpred-research/experiments/k1139/component_correlation_matrix.png
+
+*** K1139 COMPLETE. Scenario: B_AGGREGATOR ***

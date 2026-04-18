@@ -1,0 +1,323 @@
+{
+  "experiment_id": "K433",
+  "title": "Bayesian SSVS for ARX-GARCH Variable Selection",
+  "method": "Stochastic Search Variable Selection (So, Chen, Liu 2006 JRSS-C)",
+  "asset": "SPY",
+  "data_source": "yfinance (empirical)",
+  "data_period": "~11.8 years, T=2986 trading days",
+  "sample_split": {
+    "train": 2388,
+    "test": 598
+  },
+  "model_spec": {
+    "AR_lags": 3,
+    "exogenous_vars": 8,
+    "lags_per_var": 2,
+    "total_candidates": 19,
+    "possible_subsets": 524288,
+    "GARCH": "(1,1)"
+  },
+  "mcmc_settings": {
+    "total_iterations": 20000,
+    "burn_in": 5000,
+    "effective_samples": 15000,
+    "c_value": 10.0,
+    "prior_inclusion_prob": 0.5,
+    "tau_calibration": "OLS standard errors"
+  },
+  "mcmc_diagnostics": {
+    "final_phi_acceptance_rate": 0.3515710691012323,
+    "final_alpha_acceptance_rate": 0.2517581779469643,
+    "computation_time_seconds": 462.27937269210815
+  },
+  "posterior_inclusion_probabilities": {
+    "AR(1)": {
+      "PIP": 0.24326666666666666,
+      "phi_mean": -0.060413331089651856,
+      "phi_std": 0.03750203250053916,
+      "phi_95CI": [
+        -0.13978614060974415,
+        0.008720522657737352
+      ]
+    },
+    "AR(2)": {
+      "PIP": 0.1594,
+      "phi_mean": -0.03246509605331023,
+      "phi_std": 0.033438126346045635,
+      "phi_95CI": [
+        -0.1021221270442726,
+        0.03037341041213965
+      ]
+    },
+    "AR(3)": {
+      "PIP": 0.1242,
+      "phi_mean": -0.001773311353214478,
+      "phi_std": 0.01875067496602576,
+      "phi_95CI": [
+        -0.039528724571334856,
+        0.03454140197452875
+      ]
+    },
+    "VIX_level(L1)": {
+      "PIP": 0.08893333333333334,
+      "phi_mean": -0.15425356129655832,
+      "phi_std": 0.06762147722767692,
+      "phi_95CI": [
+        -0.22986993394051816,
+        -0.027080059013179194
+      ]
+    },
+    "VIX_level(L2)": {
+      "PIP": 0.08866666666666667,
+      "phi_mean": 0.10758245544937435,
+      "phi_std": 0.06782210248373653,
+      "phi_95CI": [
+        -0.05239042700352006,
+        0.1942186157802445
+      ]
+    },
+    "VIX_chg(L1)": {
+      "PIP": 0.09126666666666666,
+      "phi_mean": 0.012464535211479152,
+      "phi_std": 0.05161798548634407,
+      "phi_95CI": [
+        -0.09067253410903843,
+        0.1420729932170177
+      ]
+    },
+    "VIX_chg(L2)": {
+      "PIP": 0.24206666666666668,
+      "phi_mean": -0.041029625280699714,
+      "phi_std": 0.028803614965688125,
+      "phi_95CI": [
+        -0.10428035706036522,
+        0.00992255197831142
+      ]
+    },
+    "Vol_surprise(L1)": {
+      "PIP": 0.13093333333333335,
+      "phi_mean": 0.01554645692718128,
+      "phi_std": 0.015953668926631658,
+      "phi_95CI": [
+        -0.015474572437592727,
+        0.04741998398616922
+      ]
+    },
+    "Vol_surprise(L2)": {
+      "PIP": 0.17933333333333334,
+      "phi_mean": -0.025209546874522273,
+      "phi_std": 0.016605190502318182,
+      "phi_95CI": [
+        -0.059388071566977806,
+        0.005533945920565865
+      ]
+    },
+    "Mom5d(L1)": {
+      "PIP": 0.1306,
+      "phi_mean": -0.023732929470618898,
+      "phi_std": 0.03266906244852617,
+      "phi_95CI": [
+        -0.08920031654040453,
+        0.039397134127754925
+      ]
+    },
+    "Mom5d(L2)": {
+      "PIP": 0.12633333333333333,
+      "phi_mean": -0.018512221337255035,
+      "phi_std": 0.02783022142057069,
+      "phi_95CI": [
+        -0.0719397048071145,
+        0.03793886614212274
+      ]
+    },
+    "TLT_ret(L1)": {
+      "PIP": 0.17266666666666666,
+      "phi_mean": 0.01965623708756593,
+      "phi_std": 0.014481474373911476,
+      "phi_95CI": [
+        -0.00823855083819608,
+        0.0494272406147123
+      ]
+    },
+    "TLT_ret(L2)": {
+      "PIP": 0.11933333333333333,
+      "phi_mean": -0.008948128193217917,
+      "phi_std": 0.013921153489582202,
+      "phi_95CI": [
+        -0.03671690669607895,
+        0.01793969825136814
+      ]
+    },
+    "GLD_ret(L1)": {
+      "PIP": 0.1556,
+      "phi_mean": 0.015604050394336337,
+      "phi_std": 0.013409563094199776,
+      "phi_95CI": [
+        -0.009399904889770211,
+        0.04238297045509021
+      ]
+    },
+    "GLD_ret(L2)": {
+      "PIP": 0.12613333333333332,
+      "phi_mean": -0.0104169070594767,
+      "phi_std": 0.012528543612243299,
+      "phi_95CI": [
+        -0.03560078746573428,
+        0.014038941741851932
+      ]
+    },
+    "HYG_ret(L1)": {
+      "PIP": 0.1424,
+      "phi_mean": 0.0194272183028193,
+      "phi_std": 0.02374709401309572,
+      "phi_95CI": [
+        -0.02641482460547598,
+        0.06789111712672391
+      ]
+    },
+    "HYG_ret(L2)": {
+      "PIP": 0.21066666666666667,
+      "phi_mean": 0.033935141266787844,
+      "phi_std": 0.025490212757144623,
+      "phi_95CI": [
+        -0.01306559365414493,
+        0.0891307866459784
+      ]
+    },
+    "VIX_slope(L1)": {
+      "PIP": 0.11373333333333334,
+      "phi_mean": 0.02945491279247519,
+      "phi_std": 0.06936471716306307,
+      "phi_95CI": [
+        -0.10084155431061007,
+        0.17655816936610153
+      ]
+    },
+    "VIX_slope(L2)": {
+      "PIP": 0.1234,
+      "phi_mean": -0.04536035594995304,
+      "phi_std": 0.06824796808629877,
+      "phi_95CI": [
+        -0.1900901244187937,
+        0.08000087544016035
+      ]
+    }
+  },
+  "top_models": [
+    {
+      "rank": 1,
+      "posterior_probability": 0.0492,
+      "n_variables": 0,
+      "variables": []
+    },
+    {
+      "rank": 2,
+      "posterior_probability": 0.0164,
+      "n_variables": 1,
+      "variables": [
+        "AR(1)"
+      ]
+    },
+    {
+      "rank": 3,
+      "posterior_probability": 0.0156,
+      "n_variables": 1,
+      "variables": [
+        "VIX_chg(L2)"
+      ]
+    },
+    {
+      "rank": 4,
+      "posterior_probability": 0.011066666666666667,
+      "n_variables": 1,
+      "variables": [
+        "HYG_ret(L2)"
+      ]
+    },
+    {
+      "rank": 5,
+      "posterior_probability": 0.010266666666666667,
+      "n_variables": 1,
+      "variables": [
+        "TLT_ret(L1)"
+      ]
+    }
+  ],
+  "garch_posterior": {
+    "omega": {
+      "mean": 0.03849832929518793,
+      "std": 0.005786237326029343
+    },
+    "alpha": {
+      "mean": 0.17608190234843724,
+      "std": 0.01718655166187546
+    },
+    "beta": {
+      "mean": 0.7915235997319604,
+      "std": 0.017809588909765948
+    },
+    "persistence": 0.9676055020803976
+  },
+  "oos_evaluation": {
+    "Baseline GARCH(1,1)": {
+      "QLIKE": 1.6427231365870307,
+      "MSE": 20.460942141653685,
+      "relative_QLIKE_vs_baseline": 0.0
+    },
+    "SSVS Median Model": {
+      "QLIKE": 1.6427231365870307,
+      "MSE": 20.460942141653685,
+      "relative_QLIKE_vs_baseline": 0.0
+    },
+    "SSVS Top Model": {
+      "QLIKE": 1.6427231365870307,
+      "MSE": 20.460942141653685,
+      "relative_QLIKE_vs_baseline": 0.0
+    },
+    "Kitchen Sink": {
+      "QLIKE": 1.6408203305825002,
+      "MSE": 20.142466584230824,
+      "relative_QLIKE_vs_baseline": -0.1158324225276286
+    }
+  },
+  "dm_tests": {
+    "SSVS Median Model": {
+      "dm_stat": NaN,
+      "p_value": NaN,
+      "interpretation": "baseline better"
+    },
+    "SSVS Top Model": {
+      "dm_stat": NaN,
+      "p_value": NaN,
+      "interpretation": "baseline better"
+    },
+    "Kitchen Sink": {
+      "dm_stat": 0.25836666952598103,
+      "p_value": 0.7962129835436547,
+      "interpretation": "model better"
+    }
+  },
+  "bic_comparison": {
+    "Baseline_GARCH": 6106.6102334729085,
+    "SSVS_Median": 6106.6102334729085,
+    "Kitchen_Sink": 6320.994944275667
+  },
+  "conclusion": {
+    "any_variable_selected": false,
+    "strong_pip_vars": [],
+    "moderate_pip_vars": [],
+    "best_oos_model": "Kitchen Sink",
+    "best_oos_qlike": 1.6408203305825002,
+    "baseline_qlike": 1.6427231365870307,
+    "ssvs_confirms_null": true,
+    "interpretation": "SSVS with 2^19 subset space confirms that no exogenous variable combination improves SPY daily vol forecasting beyond GARCH(1,1). This is the STRONGEST null result yet — not just one-at-a-time testing (K113) but simultaneous Bayesian model selection over 524,288 possible subsets. VIX sufficient statistic hypothesis reinforced."
+  },
+  "references": [
+    "So, Chen, Liu (2006) Best Subset Selection of ARX-GARCH, JRSS-C 55(2):201-224",
+    "Chen, Liu, Gerlach (2011) Bayesian Subset Selection for TARMA",
+    "Chen, Liu, So (2013) Threshold Variable Selection for Asymmetric SV",
+    "K113: Order flow microstructure 0/12 null",
+    "Previous GARCH-X null results: VIX, VIX slope, Volume, Panel GARCH-X"
+  ],
+  "total_time_seconds": 477.2207908630371
+}

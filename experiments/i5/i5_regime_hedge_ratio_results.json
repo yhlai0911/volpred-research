@@ -1,0 +1,69 @@
+{
+  "experiment": "I5",
+  "title": "Regime-Switching Hedge Ratio",
+  "timestamp": "2026-03-25T15:50:23.898900+00:00",
+  "data": {
+    "source": "yfinance",
+    "tickers": [
+      "SPY",
+      "ES=F",
+      "^VIX"
+    ],
+    "period": "2005-01-04 to 2026-03-25",
+    "n_obs": 5337
+  },
+  "regime_ohr": {
+    "Low (VIX<15)": {
+      "n": 1987,
+      "ohr": 0.9592,
+      "var_reduction": 0.9361,
+      "hedged_vol_ann": 2.1
+    },
+    "Normal (15-20)": {
+      "n": 1590,
+      "ohr": 0.9521,
+      "var_reduction": 0.9536,
+      "hedged_vol_ann": 2.8
+    },
+    "Elevated (20-30)": {
+      "n": 1313,
+      "ohr": 0.9735,
+      "var_reduction": 0.9693,
+      "hedged_vol_ann": 3.5
+    },
+    "Crisis (VIX>30)": {
+      "n": 447,
+      "ohr": 0.968,
+      "var_reduction": 0.9542,
+      "hedged_vol_ann": 10.0
+    }
+  },
+  "anova": {
+    "f_stat": 54.36,
+    "p_value": 5.667064262810676e-45
+  },
+  "spearman_vix_ohr": {
+    "rho": -0.035,
+    "p": 0.011818
+  },
+  "static_ohr": 0.9668258264637465,
+  "method_comparison": {
+    "static": {
+      "sharpe": 0.533,
+      "mdd": -0.0691,
+      "var_reduction": 0.9575,
+      "ann_vol": 3.9
+    },
+    "regime_aware": {
+      "sharpe": 0.593,
+      "mdd": -0.0691,
+      "var_reduction": 0.9575,
+      "ann_vol": 3.9
+    }
+  },
+  "dm_test": {
+    "t": 0.62,
+    "significant": false
+  },
+  "conclusion": "NULL. OHR stable across regimes (0.952-0.973). Dynamic hedging adds zero value for equity index futures."
+}

@@ -1,0 +1,331 @@
+{
+  "experiment_id": "K776",
+  "title": "DMEM (Doubly Multiplicative Error Model) \u2014 Long/Short Components",
+  "proposer": "\u7528\u6236 + \u6587\u737b\u641c\u5c0b",
+  "executor": "Claude",
+  "timestamp": "2026-03-31T12:27:55.775031+00:00",
+  "data_source": "yfinance",
+  "asset": "SPY",
+  "data_period": "2007-01-04 to 2026-03-30",
+  "n_total": 4839,
+  "n_oos": 4326,
+  "min_window": 500,
+  "refit_freq": 63,
+  "target": "E[|r_{t+1}|] (Approach A: unified absolute return target)",
+  "models_compared": [
+    "DMEM",
+    "AMEM",
+    "MEM",
+    "HAR-ABS",
+    "GJR-GARCH"
+  ],
+  "dmem_specification": {
+    "long_run": "\u03c4_t = exp(\u03c9_\u03c4 + \u03b1_\u03c4 \u00d7 log(RV_22d_t))",
+    "short_run": "g_t = \u03c9_g + \u03b1_g \u00d7 (x_{t-1}/\u03c4_{t-1}) + \u03b2_g \u00d7 g_{t-1} + \u03b3_g \u00d7 I(r<0) \u00d7 (x_{t-1}/\u03c4_{t-1})",
+    "full_model": "x_t = \u03c4_t \u00d7 g_t \u00d7 \u03b5_t, \u03b5_t ~ Gamma(k, 1/k)",
+    "n_params": 7
+  },
+  "full_sample_dmem": {
+    "params": {
+      "omega_tau": -0.5101813511643426,
+      "alpha_tau": 0.8772210365078436,
+      "omega_g": 0.1716071734631945,
+      "alpha_g": 0.0,
+      "beta_g": 0.7268365312776721,
+      "gamma_g": 0.18942338023200497,
+      "k": 1.2449579965476667,
+      "short_persistence": 0.8215482213936746
+    },
+    "converged": true,
+    "nll": -19342.092873360205
+  },
+  "oos_metrics": {
+    "dmem": {
+      "qlike": 0.4826322361727008,
+      "mse": 5.165285026198107e-05,
+      "mae": 0.004906489206539034,
+      "mean_forecast": 0.00757935466743612,
+      "std_forecast": 0.004906653232584164,
+      "corr_with_actual": 0.5246971530034834
+    },
+    "amem": {
+      "qlike": 0.4728461221773024,
+      "mse": 5.049282337331558e-05,
+      "mae": 0.004862735286160391,
+      "mean_forecast": 0.007653344333472748,
+      "std_forecast": 0.004483002162752899,
+      "corr_with_actual": 0.537198480381038
+    },
+    "mem": {
+      "qlike": 0.4979159565585762,
+      "mse": 5.457325744339481e-05,
+      "mae": 0.005100642391843891,
+      "mean_forecast": 0.0077381122420542205,
+      "std_forecast": 0.004006504125340387,
+      "corr_with_actual": 0.4811859609696702
+    },
+    "har_abs": {
+      "qlike": 0.5016088884838859,
+      "mse": 5.512477562048882e-05,
+      "mae": 0.0051214279091123,
+      "mean_forecast": 0.007725773870046591,
+      "std_forecast": 0.004318281595561928,
+      "corr_with_actual": 0.47446424020998695
+    },
+    "gjr": {
+      "qlike": 0.4865865120977624,
+      "mse": 5.220433116764255e-05,
+      "mae": 0.005031581755454604,
+      "mean_forecast": 0.007913892739288435,
+      "std_forecast": 0.004051419927084137,
+      "corr_with_actual": 0.5175556709190832
+    }
+  },
+  "dm_tests": {
+    "dmem_vs_amem": {
+      "dm_stat": 4.346118695269874,
+      "p_value": 1.3856760567421134e-05,
+      "harvey_pass": true,
+      "better": "amem"
+    },
+    "dmem_vs_mem": {
+      "dm_stat": -5.17209937706952,
+      "p_value": 2.3147841132775682e-07,
+      "harvey_pass": true,
+      "better": "dmem"
+    },
+    "dmem_vs_har_abs": {
+      "dm_stat": -5.4982095376534295,
+      "p_value": 3.836668693857348e-08,
+      "harvey_pass": true,
+      "better": "dmem"
+    },
+    "dmem_vs_gjr": {
+      "dm_stat": -1.3258431590283026,
+      "p_value": 0.1848916538901939,
+      "harvey_pass": false,
+      "better": "dmem"
+    },
+    "amem_vs_mem": {
+      "dm_stat": -7.788296936696743,
+      "p_value": 6.8833827526759706e-15,
+      "harvey_pass": true,
+      "better": "amem"
+    },
+    "amem_vs_har_abs": {
+      "dm_stat": -7.463409860197799,
+      "p_value": 8.43769498715119e-14,
+      "harvey_pass": true,
+      "better": "amem"
+    },
+    "amem_vs_gjr": {
+      "dm_stat": -5.547462131597195,
+      "p_value": 2.8984590949576727e-08,
+      "harvey_pass": true,
+      "better": "amem"
+    },
+    "mem_vs_har_abs": {
+      "dm_stat": -1.8924876373598716,
+      "p_value": 0.05842603927343504,
+      "harvey_pass": false,
+      "better": "mem"
+    },
+    "mem_vs_gjr": {
+      "dm_stat": 5.283107234989445,
+      "p_value": 1.2701099461054355e-07,
+      "harvey_pass": true,
+      "better": "gjr"
+    },
+    "har_abs_vs_gjr": {
+      "dm_stat": 4.773274081808969,
+      "p_value": 1.812548518609347e-06,
+      "harvey_pass": true,
+      "better": "gjr"
+    }
+  },
+  "qlike_ranking": [
+    "amem",
+    "dmem",
+    "gjr",
+    "mem",
+    "har_abs"
+  ],
+  "subsample_robustness": [
+    {
+      "period": "split_1",
+      "n_obs": 1442,
+      "metrics": {
+        "dmem": {
+          "qlike": 0.49333142010306946,
+          "mae": 0.005286539087724464
+        },
+        "amem": {
+          "qlike": 0.48220914168886964,
+          "mae": 0.005280053184083722
+        },
+        "mem": {
+          "qlike": 0.5044288344002966,
+          "mae": 0.005490733984431174
+        },
+        "har_abs": {
+          "qlike": 0.5038731545299875,
+          "mae": 0.005486858822671002
+        },
+        "gjr": {
+          "qlike": 0.49444908699886336,
+          "mae": 0.005425159696425382
+        }
+      },
+      "ranking": [
+        "amem",
+        "dmem",
+        "gjr",
+        "har_abs",
+        "mem"
+      ]
+    },
+    {
+      "period": "split_2",
+      "n_obs": 1442,
+      "metrics": {
+        "dmem": {
+          "qlike": 0.5039657978468143,
+          "mae": 0.004545252665117265
+        },
+        "amem": {
+          "qlike": 0.4936695230883875,
+          "mae": 0.004531660979557892
+        },
+        "mem": {
+          "qlike": 0.5261947447357754,
+          "mae": 0.004800836249697876
+        },
+        "har_abs": {
+          "qlike": 0.5355817271932556,
+          "mae": 0.004833107847363718
+        },
+        "gjr": {
+          "qlike": 0.518338019762793,
+          "mae": 0.004763297936814105
+        }
+      },
+      "ranking": [
+        "amem",
+        "dmem",
+        "gjr",
+        "mem",
+        "har_abs"
+      ]
+    },
+    {
+      "period": "split_3",
+      "n_obs": 1442,
+      "metrics": {
+        "dmem": {
+          "qlike": 0.4505994905682188,
+          "mae": 0.004887675866775374
+        },
+        "amem": {
+          "qlike": 0.4426597017546499,
+          "mae": 0.00477649169483956
+        },
+        "mem": {
+          "qlike": 0.4631242905396566,
+          "mae": 0.005010356941402623
+        },
+        "har_abs": {
+          "qlike": 0.4653717837284148,
+          "mae": 0.005044317057302179
+        },
+        "gjr": {
+          "qlike": 0.44697242953163074,
+          "mae": 0.0049062876331243226
+        }
+      },
+      "ranking": [
+        "amem",
+        "gjr",
+        "dmem",
+        "mem",
+        "har_abs"
+      ]
+    }
+  ],
+  "regime_analysis": {
+    "calm": {
+      "n_obs": 1082,
+      "threshold": 0.002076951519227932,
+      "metrics": {
+        "dmem": {
+          "qlike": 1.1798346193158957,
+          "mae": 0.005018989430015424
+        },
+        "amem": {
+          "qlike": 1.2183010354884596,
+          "mae": 0.005183282532001288
+        },
+        "mem": {
+          "qlike": 1.2842608244656517,
+          "mae": 0.005603106724599055
+        },
+        "har_abs": {
+          "qlike": 1.2564745477006891,
+          "mae": 0.005440322786614769
+        },
+        "gjr": {
+          "qlike": 1.3031536044302685,
+          "mae": 0.0057060042958516155
+        }
+      },
+      "ranking": [
+        "dmem",
+        "amem",
+        "har_abs",
+        "mem",
+        "gjr"
+      ]
+    },
+    "crisis": {
+      "n_obs": 1082,
+      "threshold": 0.010154544102528695,
+      "metrics": {
+        "dmem": {
+          "qlike": 0.4155675737769045,
+          "mae": 0.008549311193377953
+        },
+        "amem": {
+          "qlike": 0.3736809146600501,
+          "mae": 0.008457247985177638
+        },
+        "mem": {
+          "qlike": 0.4045237527780053,
+          "mae": 0.008837618267582675
+        },
+        "har_abs": {
+          "qlike": 0.4307097237392819,
+          "mae": 0.00888312425785076
+        },
+        "gjr": {
+          "qlike": 0.35003854097882403,
+          "mae": 0.008505323597692809
+        }
+      },
+      "ranking": [
+        "gjr",
+        "amem",
+        "mem",
+        "dmem",
+        "har_abs"
+      ]
+    }
+  },
+  "conclusion": "DMEM ranks #2 overall but AMEM (#1) significantly beats it (DM=+4.35, Harvey PASS). QLIKE ranking: AMEM > DMEM > GJR > MEM > HAR-ABS. Despite +122 NLL improvement in-sample (7 vs 5 params), DMEM loses OOS to simpler AMEM. Key finding: DMEM wins in calm regime (QLIKE 1.18 vs 1.22) but loses badly in crisis (0.41 vs 0.37) — the extra τ_t estimation noise hurts when volatility spikes. AMEM's high β=0.88 implicitly captures long-memory without explicit decomposition. The α_g=0 in DMEM (short-run ARCH collapsed to zero) suggests the model struggles to separate components cleanly.",
+  "references": [
+    "Cipollini, Engle & Gallo (2013) J.Applied Econometrics 28, 1067-1088",
+    "Engle & Gallo (2006) J.Econometrics 131, 3-27",
+    "Brownlees, Cipollini & Gallo (2012) Handbook of Volatility Models",
+    "Engle, Ghysels & Sohn (2013) GARCH-MIDAS long/short decomposition",
+    "Corsi (2009) J.Financial Econometrics (HAR baseline)",
+    "Patton (2011) J.Econometrics 160, 246-256 (QLIKE robustness)"
+  ]
+}

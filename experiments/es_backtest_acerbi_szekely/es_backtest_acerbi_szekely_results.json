@@ -1,0 +1,59 @@
+{
+  "test": "Acerbi-Szekely (2014) ES Backtest",
+  "asset": "SPY",
+  "window": 2000,
+  "alpha": 0.01,
+  "oos_period": "2020-01-02 to 2026-03-15",
+  "n_bootstrap": 5000,
+  "generated_at": "2026-03-16T21:37:16.917810",
+  "results": {
+    "normal": {
+      "T": 1557,
+      "n_violations": 32,
+      "violation_rate_pct": 2.06,
+      "Z1": -0.277491,
+      "Z2": -1.625543,
+      "p_value_Z1": 0.4848,
+      "p_value_Z2": 0.4812,
+      "pass_Z1": "PASS",
+      "pass_Z2": "PASS",
+      "mean_ES_pct": 2.8512,
+      "median_ES_pct": 2.3275,
+      "max_ES_pct": 23.5742,
+      "mean_VaR_pct": 2.4887,
+      "ES_VaR_ratio": 1.1457
+    },
+    "studentt": {
+      "T": 1557,
+      "n_violations": 23,
+      "violation_rate_pct": 1.48,
+      "Z1": -0.119362,
+      "Z2": -0.653522,
+      "p_value_Z1": 0.4826,
+      "p_value_Z2": 0.4888,
+      "pass_Z1": "PASS",
+      "pass_Z2": "PASS",
+      "mean_ES_pct": 3.7442,
+      "median_ES_pct": 3.0198,
+      "max_ES_pct": 32.2817,
+      "mean_VaR_pct": 2.8297,
+      "ES_VaR_ratio": 1.3232
+    },
+    "skewt": {
+      "T": 1557,
+      "n_violations": 18,
+      "violation_rate_pct": 1.16,
+      "Z1": -0.114664,
+      "Z2": -0.288628,
+      "p_value_Z1": 0.451,
+      "p_value_Z2": 0.5048,
+      "pass_Z1": "PASS",
+      "pass_Z2": "PASS",
+      "mean_ES_pct": 4.0234,
+      "median_ES_pct": 3.2411,
+      "max_ES_pct": 34.1688,
+      "mean_VaR_pct": 3.1152,
+      "ES_VaR_ratio": 1.2915
+    }
+  }
+}

@@ -1,0 +1,200 @@
+{
+  "experiment_id": "K1215",
+  "title": "K1211 Paper 2 §5 markdown draft revision integrating K1213 AU above-ladder resolution",
+  "proposer": "Main thread narrative state-machine: K1213 lands after K1211, triggers §5.5 rewrite",
+  "executor": "Claude (worktree agent-a875c734)",
+  "timestamp_utc": "2026-04-18T00:00:00+00:00",
+  "random_seed": 42,
+  "task_type": "pure_writing_canonical_number_lookup",
+  "no_new_estimation": true,
+  "output_format": ["markdown", "json"],
+  "predecessor_draft": {
+    "experiment_id": "K1211",
+    "commit": "9efffe4b",
+    "source_file": "experiments/k1211/k1211_draft.md"
+  },
+  "trigger_experiment": {
+    "experiment_id": "K1213",
+    "commit": "c34d0546",
+    "verdict": "ABOVE_LADDER_OVERTURNED",
+    "key_finding": "K1171 pooled AU θ_rel=0.150 is a basin-A trap; 100-start multi-start finds basin-B best at θ_rel=1.476 (L-BFGS-B) / 1.070 (NM-refined), LR=198.9 >> χ²(1)=3.84"
+  },
+  "paper_target": "Paper 2 §5 body_v4.tex (main-thread cherry-pick; paper folder to be identified by main thread — cross-market institutional ladder paper)",
+  "paper_workflow_compliance": {
+    "no_tex_writes_from_agent": true,
+    "body_rewrite_reserved_to_main_thread": true,
+    "narrative_state_machine_status": "decision_candidate (11 complementary experiments satisfied; K1211's 9 + K1210 forensic + K1213 resolution)"
+  },
+  "source_experiments": [
+    {"id": "K1165", "results_json": "experiments/k1165/k1165_results.json", "role": "N=7 base confirmation", "in_k1211": true, "in_k1215": true},
+    {"id": "K1166", "results_json": "experiments/k1166/k1166_results.json", "role": "per-stock theta_EAV refit tautology-removed", "in_k1211": true, "in_k1215": true},
+    {"id": "K1168", "results_json": "experiments/k1168/k1168_results.json", "role": "N=10 extension", "in_k1211": true, "in_k1215": true},
+    {"id": "K1172", "results_json": "experiments/k1172/k1172_results.json", "role": "N=12 extension", "in_k1211": true, "in_k1215": true},
+    {"id": "K1171", "results_json": "experiments/k1171/k1171_results.json", "role": "N=13 extension +AU (pooled AU θ_rel=0.150 now retracted post-K1213)", "in_k1211": true, "in_k1215": true},
+    {"id": "K1173", "results_json": "experiments/k1173/k1173_results.json", "role": "EM refined proxy falsification NULL", "in_k1211": true, "in_k1215": true},
+    {"id": "K1163", "results_json": "experiments/k1163/k1163_results.json", "role": "EU full-coverage refit ROBUST", "in_k1211": true, "in_k1215": true},
+    {"id": "K1204", "results_json": "experiments/k1204/k1204_results.json", "role": "synthesis + 32/32 integrity PASS + Figures A-E", "in_k1211": true, "in_k1215": true},
+    {"id": "K1207", "results_json": "experiments/k1207/k1207_results.json", "role": "GICS sector-FE orthogonality verification", "in_k1211": true, "in_k1215": true},
+    {"id": "K1210", "results_json": "experiments/k1210/k1210_results.json", "role": "AU forensic NUMERICAL_FRAGILITY diagnosis (H1 rejected, H2 supported, STOCK_DRIVEN)", "in_k1211": false, "in_k1215": true, "commit": "03a94d23"},
+    {"id": "K1213", "results_json": "experiments/k1213/k1213_results.json", "role": "AU 100-start multi-start ABOVE_LADDER_OVERTURNED resolution", "in_k1211": false, "in_k1215": true, "commit": "c34d0546"}
+  ],
+  "section_change_summary": {
+    "§5.1": {
+      "change_type": "light_edit",
+      "changes": [
+        "one new paragraph: Panel Harvey t invariance under K1213 revision noted explicitly",
+        "AU entry in N=13 Spearman update: ρ=+0.385 (K1171 retracted) → ρ=+0.418 (K1213 canonical)",
+        "K1171 '+AU below-ladder' phrasing retained with context 'originally-reported θ_rel=0.150'; ρ_N=13 now canonical to K1213 basin-B",
+        "closing sentence reframed: Spearman retains N=12/N=13 gap at 5% significance but Δρ is only −0.024 (not −0.056) under K1213 basin-B input"
+      ],
+      "word_count_k1211": 421,
+      "word_count_k1215": 510,
+      "numerical_changes": {
+        "au_theta_rel_input_to_spearman": "0.150 → 1.476",
+        "primary_rho_N13": "+0.385 → +0.418",
+        "primary_p_N13": "0.194 → 0.156",
+        "delta_rho_vs_k1172": "−0.056 → −0.024"
+      }
+    },
+    "§5.2": {
+      "change_type": "verbatim",
+      "changes": ["unchanged from K1211 — between/within R² decomposition is invariant under K1213 AU revision"],
+      "word_count_k1211": 196,
+      "word_count_k1215": 196
+    },
+    "§5.3": {
+      "change_type": "verbatim",
+      "changes": ["unchanged from K1211 — EM scale-factor narrative / K1173 NULL falsification unaffected by K1213"],
+      "word_count_k1211": 371,
+      "word_count_k1215": 371
+    },
+    "§5.4": {
+      "change_type": "verbatim",
+      "changes": ["unchanged from K1211 — EU K1163 robustness unaffected by K1213"],
+      "word_count_k1211": 293,
+      "word_count_k1215": 293
+    },
+    "§5.5": {
+      "change_type": "full_rewrite",
+      "old_title": "Australia below-ladder residual (K1171 / K1207 / K1210 forensic)",
+      "new_title": "AU Residual Resolution: From Below-Ladder Artifact to Above-Ladder Confirmation (K1171→K1210→K1213)",
+      "changes": [
+        "full rewrite into 5 subsections: 5.5.1 K1210 forensic; 5.5.2 K1213 multi-start resolution; 5.5.3 implications for K1207 sector amplification; 5.5.4 procedural correction for future pooled MLE; 5.5.5 Paper 2 §5 AU commitment (K1215 final language)",
+        "retract K1171 below-ladder framing",
+        "introduce K1213 canonical AU θ_rel ∈ [1.07, 1.48] (basin-B best + NM refined)",
+        "cite LR test statistic 198.9 >> χ²(1)=3.84; ΔLL=+99.47 (primary) and +255.97 (NM refined)",
+        "add K1207 re-interpretation under K1213 basin-B canonical",
+        "add procedural norm for small-S multi-start pooled MLE (K1213 §4.3)"
+      ],
+      "word_count_k1211": 451,
+      "word_count_k1215": 1228
+    },
+    "§5.6": {
+      "change_type": "light_edit",
+      "changes": [
+        "AU paragraph rewritten: K1207 +31% amplification now noted as basin-A-input-sensitive, not a standalone AU-specific finding",
+        "closing bullet 'Paper 2 §5 gains one concrete bullet' extended to flag K1213 basin-sensitivity for AU sector decomposition",
+        "pool-level orthogonality conclusion (F=689.5, p=7.9e-14) unchanged — pool statistics invariant"
+      ],
+      "word_count_k1211": 420,
+      "word_count_k1215": 512
+    },
+    "§5.7": {
+      "change_type": "substantial_rewrite",
+      "changes": [
+        "caveat (ii) reworded: AU now classified as above-ladder EM-scale residual (joining BR/IN/MX + CA) after K1213 multi-start",
+        "caveat (ii) adds procedural note for ≥50 multi-starts on small-S pooled MLE",
+        "closing sentence: 'no remaining open residual' after K1213 (K1211 had 'AU pending K1210' as the only remaining open residual)",
+        "caveat (i) and caveat (iii) unchanged"
+      ],
+      "word_count_k1211": 402,
+      "word_count_k1215": 510
+    },
+    "Table 5": {
+      "change_type": "row_addition",
+      "changes": [
+        "new column: AU θ_rel per iter (N/A for K1165/K1166/K1168/K1172; K1171 basin-A marked retracted; K1213 row 5′ added)",
+        "Iter 5 (K1171) retained with *retracted* annotation for traceability",
+        "Iter 5′ (K1213) added: AU θ_rel=1.476, primary ρ=+0.418, p=0.156, Panel Harvey t=3.808 (unchanged)",
+        "Panel Harvey t invariance note added to legend",
+        "Figure mapping extended with Figure 5G for K1213 basin bimodality PNGs"
+      ],
+      "rows_k1211": 5,
+      "rows_k1215": 6,
+      "new_figure_slot": "Figure 5G → experiments/k1213/k1213_theta_eav_hist.png + k1213_ll_vs_theta_scatter.png"
+    }
+  },
+  "numerical_diff_au_centric": {
+    "k1211_k1171_values": {
+      "theta_eav": 3.163797681847504e-05,
+      "theta_rel": 0.14981716921228005,
+      "loglik": 89047.22333560206,
+      "primary_rho_N13": 0.38461538461538464,
+      "primary_p_N13": 0.19441291997748628
+    },
+    "k1215_k1213_values": {
+      "theta_eav_lbfgsb_best": 0.0003116320599684957,
+      "theta_rel_lbfgsb_best": 1.4756895906506924,
+      "theta_eav_nm_refined": 0.0002259081066151598,
+      "theta_rel_nm_refined": 1.070,
+      "loglik_lbfgsb_best": 89146.6926548808,
+      "loglik_nm_refined": 89303.19245801578,
+      "delta_ll_vs_k1171_lbfgsb": 99.4693192787,
+      "delta_ll_vs_k1171_nm": 255.9691224137,
+      "lr_statistic_lbfgsb": 198.9386385574,
+      "lr_statistic_nm": 511.9382448275,
+      "chi2_crit_df1_p05": 3.84,
+      "rejection": "decisive",
+      "primary_rho_N13": 0.4175824175824176,
+      "primary_p_N13": 0.1556747536334745,
+      "delta_rho_vs_k1172_n12_baseline": -0.023417582417582405,
+      "au_inst_pct_mean": 0.367725499,
+      "au_rank_of_13": "mid-rank (8-9 of 13)"
+    },
+    "invariant_under_revision": {
+      "panel_harvey_t_N13": 3.807645658649989,
+      "between_r2_inst_pct_N13": 0.4194408675389064,
+      "within_r2_log_analyst_N13": 0.05335826723618908,
+      "r2_ratio_between_over_within_N13": 7.8608,
+      "k1207_sector_fe_incremental_adj_r2": 0.148,
+      "k1207_inst_fe_incremental_adj_r2": 0.0046,
+      "k1207_sector_joint_F": 689.5,
+      "k1207_sector_joint_p": 7.9e-14,
+      "k1207_cross_sector_spearman": -0.006,
+      "k1207_cross_sector_spearman_p": 0.987,
+      "k1207_cross_sector_n": 10
+    }
+  },
+  "narrative_commitment_delta": {
+    "k1211_final": "Paper 2 §5 headline: STRENGTHENED across five N-extension iterations with three residual caveats: (i) EM cost-of-capital scale factor — STRUCTURAL, not yfinance proxy artefact (K1173 NULL); (ii) AU below-ladder sector-independent residual (K1207 sector amplifies 31%, K1210 forensic pending); (iii) EU full-coverage low-cluster robust.",
+    "k1215_final": "Paper 2 §5 headline: STRENGTHENED across five N-extension iterations with three residual caveats: (i) EM cost-of-capital scale factor — STRUCTURAL, not yfinance proxy artefact (K1173 NULL); (ii) EM above-ladder residuals — BR/IN/MX originally + AU added post-K1213 multi-start resolution (all above-ladder, differing magnitudes), with procedural note that future small-S pooled MLE requires ≥50 multi-starts; (iii) EU full-coverage low-cluster robust. No remaining open residual; only magnitude heterogeneity across AU/BR/CA/IN/MX above-ladder cluster remains for future work."
+  },
+  "cherry_pick_summary": [
+    "Replace K1211 §5.5 entirely with K1215 §5.5 (5 subsections, 1228 words)",
+    "Apply light edits to K1211 §5.1 (~90 word delta), §5.6 (~90 word delta), §5.7 (~110 word delta) per K1215 draft",
+    "Add Iter 5′ (K1213) row to Table 5; mark Iter 5 (K1171) retracted for traceability",
+    "Add Figure 5G slot for K1213 basin bimodality PNGs",
+    "Extend bibliography: McCullough & Vinod (2003), Hansen (1982)",
+    "Main-thread errata: K1171 AU θ_rel entry should carry a 'superseded by K1213' note; paper-update workflow can cherry-pick K1215 §5.5 into body_v4.tex and rerun xelatex"
+  ],
+  "word_counts": {
+    "k1211_total": 2554,
+    "k1215_total": 3620,
+    "delta": 1066,
+    "delta_pct": 41.7
+  },
+  "compliance": {
+    "claude_md_no_tex_writes_from_agent": "PASS — only .md / .json outputs",
+    "numbers_verbatim_from_source_jsons": "PASS — K1211 trajectory + K1213 multi-start + K1210 forensic all canonical",
+    "seed_declared": 42,
+    "worktree_scope": "experiments/k1215/ only; no shared-state writes",
+    "shared_state_untouched": ["storage/reports/feed.json", "storage/memory/knowledge.json", "storage/memory/thinking_journal.json", "storage/memory/experiment_experiences.json"],
+    "paper_body_untouched": true,
+    "cross_experiment_divergence_check": "PASS — K1213 supersedes K1171 AU row; all other K1211 numbers unchanged; no trajectory-table cell inconsistency"
+  },
+  "output_deliverables": [
+    "experiments/k1215/k1215_revised_draft.md (~3,620 words, 7 subsections + Table 5 + Figure 5A–5G mapping; §5.5 rewritten as 5 subsections, §5.5.5 contains K1215 final AU commitment language)",
+    "experiments/k1215/k1215_revision_stats.json (this file)",
+    "experiments/k1215/README.md"
+  ]
+}

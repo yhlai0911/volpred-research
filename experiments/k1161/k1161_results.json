@@ -1,0 +1,120 @@
+{
+  "experiment_id": "K1161",
+  "title": "Options-implied IV crush as continuous EAV regressor (Paper 2 market-implied magnitude test)",
+  "proposer": "Claude (承接 K1151 next_tasks K1161)",
+  "executor": "Claude",
+  "timestamp_utc": "2026-04-17T06:02:48.058142+00:00",
+  "random_seed": 42,
+  "tickers": [
+    "AAPL",
+    "MSFT",
+    "NVDA",
+    "GOOGL",
+    "AMZN",
+    "META",
+    "TSLA",
+    "BRK-B",
+    "UNH",
+    "V",
+    "JPM",
+    "WMT",
+    "MA",
+    "JNJ",
+    "XOM",
+    "PG",
+    "HD",
+    "CVX",
+    "ABBV",
+    "AVGO",
+    "COST",
+    "PEP",
+    "KO",
+    "MRK",
+    "ADBE",
+    "CSCO",
+    "TMO",
+    "CRM",
+    "MCD",
+    "ABT"
+  ],
+  "data_source_probed": "yfinance.Ticker.option_chain (current) and yfinance.Ticker(contract_symbol).history (historical per-contract)",
+  "earnings_cache_source": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1148_d2/data/earnings_dates_surprise_us.json",
+  "coverage_terminate_threshold_frac": 0.1,
+  "feasibility_study": {
+    "api_sanity_current_chain": {
+      "ok": true,
+      "n_expirations": 23,
+      "first_exp": "2026-04-17",
+      "last_exp": "2028-12-15",
+      "calls_rows": 69,
+      "iv_column_present": true,
+      "iv_rows_gt_zero": 69
+    },
+    "total_earnings_events": 1439,
+    "events_last_6m": 26,
+    "events_last_1y": 87,
+    "events_last_2y": 207,
+    "events_last_90d": 0,
+    "expired_contract_probes": {
+      "AAPL240315C00180000": {
+        "ok": false,
+        "n_rows": 0,
+        "reason": "delisted/no-data"
+      },
+      "AAPL230721C00190000": {
+        "ok": false,
+        "n_rows": 0,
+        "reason": "delisted/no-data"
+      },
+      "MSFT240119C00330000": {
+        "ok": false,
+        "n_rows": 0,
+        "reason": "delisted/no-data"
+      },
+      "NVDA230915C00420000": {
+        "ok": false,
+        "n_rows": 0,
+        "reason": "delisted/no-data"
+      },
+      "AMZN231117C00140000": {
+        "ok": false,
+        "n_rows": 0,
+        "reason": "delisted/no-data"
+      }
+    },
+    "expired_accessibility_rate": 0.0,
+    "reachback_probe": {
+      "contract": "AAPL281215C00210000",
+      "exp": "2028-12-15",
+      "hist": {
+        "ok": true,
+        "n_rows": 52,
+        "date_range_days": 93,
+        "first_date": "2026-01-12",
+        "last_date": "2026-04-16",
+        "has_price": true,
+        "has_iv": false
+      }
+    },
+    "coverage_upper_bound_frac": 0.0,
+    "coverage_terminate_threshold": 0.1,
+    "feasible": false
+  },
+  "verdict": "DATA_INFEASIBLE",
+  "rationale": "yfinance option-chain history does not support historical IV reconstruction for earnings events prior to the last ~90 days. Coverage ceiling = 0.00% of 1439 events, below the 10% threshold. Expired contracts return no OHLC data (tested 5/5 fail). Currently-listed contracts only retain ~90 days of Yahoo history (reachback probe). Therefore IV_pre / IV_post cannot be systematically built for the K1148_d2 panel.",
+  "paper2_implication": "No IV-crush upgrade candidate for Paper 2 §5. K1148_d2 binary EAV claim (US cross-market OOS PASS, panel DM t=-5.58) retained as the main spec. K1151 continuous Surprise(%) result (NS) also retained. Any market-implied magnitude test would require a paid data source (OptionMetrics IvyDB, CBOE DataShop, Bloomberg OVDV, polygon.io paid tier with historical options, or ORATS) — flagged as future work.",
+  "scenario_flag": "DATA_INFEASIBLE",
+  "oos_panel_dm_table": null,
+  "best_iv_regressor": null,
+  "gemini_review_summary": "see README.md §Gemini review",
+  "model_specs_run": [],
+  "model_specs_planned": [
+    "M1_binary",
+    "M2_surprise",
+    "M3_iv_crush",
+    "M4_iv_pre",
+    "M5_joint"
+  ],
+  "note": "Experiment terminated at Step 1 (data feasibility) per pre-registered prompt rule: \"若覆蓋率 < 10% → 立即終止\".",
+  "elapsed_seconds": 7.313626050949097
+}

@@ -1,0 +1,91 @@
+% K1141: Channel × Asset-Class 3×4 Results Table
+% Paper 4 §4 — channel-specific universal claims
+% Generated from experiments/k1141/figures/paper4_cover_fig.py
+% All DM t-statistics read from experiment JSONs; no hardcoded values.
+%
+% Usage in main.tex:
+%   \input{../experiments/k1141/tables/channel_x_asset_3x4}
+%   (or copy to paper/vix-sufficiency/tables/ and adjust path)
+%
+% Symbols:
+%   PASS   = DM t > +2, BH-adjusted p < 0.05 (Harvey-Leybourne-Newbold 1997)
+%   NULL   = |DM t| <= 2 or BH p >= 0.05; no significant difference from GJR baseline
+%   HARM   = DM t < -2, BH-adjusted p < 0.05; model significantly worse than GJR
+%   PASS*  = HAR structure beats GJR (PASS); VIX marginal value NULL (K1136 Fair Test 2)
+%   PASS†  = Tail-only PASS: VaR/ES passes but QLIKE NULL (K1135 skew-t commodity)
+%   ---    = No experiment conducted
+%
+% Note on Channel 1 Commodity: K1137 shows HAR-RV-X (with VIX) beats GJR-GARCH
+%   on Parkinson (DM t > +5). However, K1136 Fair Test 2 (HAR+VIX vs HAR-no-VIX)
+%   is NULL, indicating the VIX regressor adds nothing to the HAR structure on
+%   commodity. PASS* reflects the HAR architecture advantage, not VIX sufficiency.
+
+\begin{table}[H]
+\centering
+\small
+\begin{threeparttable}
+\caption{Channel-Specific Model Evaluation: 3 Channels $\times$ 4 Asset Classes}
+\label{tab:channel_x_asset}
+\begin{tabular}{@{}p{3.2cm}p{3.5cm}p{3.5cm}p{2.8cm}p{1.8cm}@{}}
+\toprule
+\textbf{Channel} &
+\textbf{Equity} &
+\textbf{Commodity} &
+\textbf{Bond} &
+\textbf{FX} \\
+& (SPY / QQQ / IWM) & (USO / GLD / UNG) & (TLT) & \\
+\midrule
+\textbf{Ch.\ 1:} HAR+VIX &
+\textbf{PASS} &
+\textbf{PASS*} &
+\textbf{PASS} &
+--- \\
+\small HAR-RV-X vs GJR &
+\small $\bar{t}=+3.49$\tnote{a} (K1138, K1137) &
+\small $\bar{t}=+8.13$\tnote{b} (K1137) &
+\small $t_{\max}=+11.01$ (K1137) &
+\small \textit{no expt.} \\
+\midrule
+\textbf{Ch.\ 2:} MIDAS &
+\textbf{NULL} &
+\textbf{NULL} &
+\textbf{NULL} &
+--- \\
+\small MIDAS-X vs GJR &
+\small $t_{\max}=+1.36$ (K1138, K1137) &
+\small $t_{\max}=+1.23$ (K1136, K1137) &
+\small $t_{\max}=+0.51$ (K1137) &
+\small \textit{no expt.} \\
+\midrule
+\textbf{Ch.\ 3:} GAS-$t$ &
+\textbf{HARM} &
+\textbf{NULL/PASS}\tnote{†} &
+\textbf{PASS} &
+--- \\
+\small GAS-$t$ vs GJR &
+\small $t_{\min}=-3.27$ (K1138, K1143) &
+\small $t_{\max}=+1.03$; skew-$t$ tail\tnote{†} (K1129, K1135) &
+\small $t_{\max}=+3.18$ low/high VIX (K1137) &
+\small \textit{no expt.} \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\footnotesize
+\item \textit{Notes}: DM $t$-statistics are Harvey-Leybourne-Newbold (1997) corrected; all pooled results use
+  Benjamini-Hochberg FDR correction across assets. PASS: $t > +2$, BH $p < 0.05$.
+  NULL: $|t| \leq 2$ or BH $p \geq 0.05$. HARM: $t < -2$, BH $p < 0.05$.
+  Out-of-sample period: 2021--2026 (Ch.\ 1--2 from K1137/K1138) or 2020--2026 (Ch.\ 3 from K1129/K1135).
+  Numbers read directly from experiment JSON files; see
+  \texttt{experiments/k1141/tables/table\_source\_data.json} for per-cell traceback.
+\item[\tnote{a}] Mean of SPY ($t = +4.18$), QQQ ($t = +4.22$), IWM ($t = +2.06$) from K1138 nine-cell analysis.
+  IWM BH-adjusted $p = 0.071$ pooled (borderline); all three assets regime-invariant in K1137 ($3/3$ regimes PASS for QQQ/IWM; $2/3$ for SPY).
+\item[\tnote{b}] HAR structure beats GJR-GARCH on Parkinson (PASS). However, VIX marginal value is NULL
+  in K1136 Fair Test 2 (HAR+VIX vs HAR-only on Parkinson): the HAR architecture, not the VIX regressor,
+  drives commodity gains. See K1136 \texttt{summary.warning} and K1137 Note 4.
+\item[\tnote{†}] Symmetric GAS-$t$ is NULL on commodity (USO/GLD/UNG $|t| < 1.1$, K1129).
+  Hansen (1994) skew-$t$ GAS (K1135) achieves VaR/ES PASS (Acerbi-Sz\'{e}kely $Z_1$ and $Z_2$ pass at
+  1\% and 5\% for all four commodities) but QLIKE remains NULL (K1135 Verdict B).
+  Channel 3 commodity claim is limited to tail-risk management, not point-forecast improvement.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

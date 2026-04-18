@@ -1,0 +1,572 @@
+{
+  "experiment_id": "K515",
+  "title": "Taiwan Overnight Gap Trading Strategy",
+  "timestamp": "2026-03-26T23:25:00.383054+00:00",
+  "attribution": "[提出: 用戶, 執行: Claude]",
+  "data_source": "yfinance: 0050.TW, SPY, ^VIX",
+  "data_period": "2010-01-05 to 2025-12-31",
+  "n_trading_days": 3911,
+  "references": [
+    "K502: Alpha concentration in overnight gap (77-93%)",
+    "K451: Overnight vol decomposition (36-44% of total)",
+    "T5d/T5e: SPY overnight momentum for Taiwan (Sharpe 1.82 but TX kills)",
+    "Lou, Polk, Skouras (2019): A Tug of War: Overnight Versus Intraday Expected Returns, JFE"
+  ],
+  "tx_assumptions": {
+    "stock_round_trip_pct": 0.585,
+    "etf_round_trip_pct": 0.385,
+    "note": "Stock: 0.1425%*2 commission + 0.3% tax; ETF: 0.1425%*2 + 0.1% tax"
+  },
+  "gap_return_diagnostics": {
+    "mean_bps_per_day": 4.97,
+    "median_bps_per_day": 0.0,
+    "std_bps_per_day": 81.18,
+    "skew": 0.21,
+    "kurtosis": 23.572,
+    "pct_positive": 55.0,
+    "annualized_return_pct": 12.53,
+    "annualized_vol_pct": 12.89,
+    "sharpe_no_tx": 0.972,
+    "t_stat": 3.831,
+    "p_val": 0.0001,
+    "gap_share_of_total_return_pct": 86.5,
+    "gap_share_of_total_vol_pct": 51.5
+  },
+  "strategies": {
+    "always_overnight": {
+      "name": "Always Overnight",
+      "n_days": 3911,
+      "n_trades": 3911,
+      "exposure_pct": 100.0,
+      "avg_gap_signal_bps": 4.97,
+      "avg_gap_nosignal_bps": 0,
+      "win_rate_gross_pct": 55.0,
+      "win_rate_net_pct": 16.1,
+      "ann_return_gross_pct": 12.53,
+      "ann_vol_gross_pct": 12.89,
+      "sharpe_gross": 0.972,
+      "total_return_gross_pct": 514.51,
+      "mdd_gross_pct": -22.03,
+      "t_stat_gross": 3.831,
+      "p_val_gross": 0.0001,
+      "ann_return_net_stock_pct": -134.89,
+      "sharpe_net_stock": -10.467,
+      "total_return_net_stock_pct": -100.0,
+      "mdd_net_stock_pct": -100.0,
+      "t_stat_net_stock": -41.234,
+      "ann_return_net_etf_pct": -84.49,
+      "sharpe_net_etf": -6.556,
+      "total_return_net_etf_pct": -100.0,
+      "mdd_net_etf_pct": -100.0,
+      "tx_cost_drag_stock_pct": 147.42,
+      "tx_cost_drag_etf_pct": 97.02
+    },
+    "spy_conditioned": {
+      "name": "SPY-Conditioned",
+      "n_days": 3911,
+      "n_trades": 2187,
+      "exposure_pct": 55.9,
+      "avg_gap_signal_bps": 9.65,
+      "avg_gap_nosignal_bps": -0.95,
+      "win_rate_gross_pct": 57.6,
+      "win_rate_net_pct": 17.3,
+      "ann_return_gross_pct": 13.59,
+      "ann_vol_gross_pct": 9.34,
+      "sharpe_gross": 1.455,
+      "total_return_gross_pct": 670.29,
+      "mdd_gross_pct": -13.91,
+      "t_stat_gross": 5.749,
+      "p_val_gross": 0.0,
+      "ann_return_net_stock_pct": -68.84,
+      "sharpe_net_stock": -6.832,
+      "total_return_net_stock_pct": -100.0,
+      "mdd_net_stock_pct": -100.0,
+      "t_stat_net_stock": -29.122,
+      "ann_return_net_etf_pct": -40.66,
+      "sharpe_net_etf": -4.242,
+      "total_return_net_etf_pct": -99.83,
+      "mdd_net_etf_pct": -99.84,
+      "tx_cost_drag_stock_pct": 82.44,
+      "tx_cost_drag_etf_pct": 54.25
+    },
+    "vix_conditioned": {
+      "name": "VIX<20 Conditioned",
+      "n_days": 3911,
+      "n_trades": 2771,
+      "exposure_pct": 70.9,
+      "avg_gap_signal_bps": 8.18,
+      "avg_gap_nosignal_bps": -2.83,
+      "win_rate_gross_pct": 56.1,
+      "win_rate_net_pct": 13.6,
+      "ann_return_gross_pct": 14.61,
+      "ann_vol_gross_pct": 8.46,
+      "sharpe_gross": 1.728,
+      "total_return_gross_pct": 813.45,
+      "mdd_gross_pct": -9.15,
+      "t_stat_gross": 6.822,
+      "p_val_gross": 0.0,
+      "ann_return_net_stock_pct": -89.84,
+      "sharpe_net_stock": -9.78,
+      "total_return_net_stock_pct": -100.0,
+      "mdd_net_stock_pct": -100.0,
+      "t_stat_net_stock": -41.943,
+      "ann_return_net_etf_pct": -54.13,
+      "sharpe_net_etf": -6.21,
+      "total_return_net_etf_pct": -99.98,
+      "mdd_net_etf_pct": -99.98,
+      "tx_cost_drag_stock_pct": 104.45,
+      "tx_cost_drag_etf_pct": 68.74
+    },
+    "spy_vix_combined": {
+      "name": "SPY+VIX Combined",
+      "n_days": 3911,
+      "n_trades": 1954,
+      "exposure_pct": 50.0,
+      "avg_gap_signal_bps": 10.73,
+      "avg_gap_nosignal_bps": -0.77,
+      "win_rate_gross_pct": 57.9,
+      "win_rate_net_pct": 15.9,
+      "ann_return_gross_pct": 13.51,
+      "ann_vol_gross_pct": 7.82,
+      "sharpe_gross": 1.727,
+      "total_return_gross_pct": 675.71,
+      "mdd_gross_pct": -7.99,
+      "t_stat_gross": 6.845,
+      "p_val_gross": 0.0,
+      "ann_return_net_stock_pct": -60.15,
+      "sharpe_net_stock": -6.955,
+      "total_return_net_stock_pct": -99.99,
+      "mdd_net_stock_pct": -99.99,
+      "t_stat_net_stock": -30.484,
+      "ann_return_net_etf_pct": -34.97,
+      "sharpe_net_etf": -4.328,
+      "total_return_net_etf_pct": -99.58,
+      "mdd_net_etf_pct": -99.6,
+      "tx_cost_drag_stock_pct": 73.65,
+      "tx_cost_drag_etf_pct": 48.47
+    },
+    "strong_spy_up": {
+      "name": "Strong SPY Up Only",
+      "n_days": 3911,
+      "n_trades": 1118,
+      "exposure_pct": 28.6,
+      "avg_gap_signal_bps": 9.06,
+      "avg_gap_nosignal_bps": 3.34,
+      "win_rate_gross_pct": 55.8,
+      "win_rate_net_pct": 19.3,
+      "ann_return_gross_pct": 6.52,
+      "ann_vol_gross_pct": 7.83,
+      "sharpe_gross": 0.833,
+      "total_return_gross_pct": 162.5,
+      "mdd_gross_pct": -11.45,
+      "t_stat_gross": 3.292,
+      "p_val_gross": 0.001,
+      "ann_return_net_stock_pct": -35.62,
+      "sharpe_net_stock": -4.155,
+      "total_return_net_stock_pct": -99.63,
+      "mdd_net_stock_pct": -99.63,
+      "t_stat_net_stock": -17.974,
+      "ann_return_net_etf_pct": -21.21,
+      "sharpe_net_etf": -2.624,
+      "total_return_net_etf_pct": -96.47,
+      "mdd_net_etf_pct": -96.57,
+      "tx_cost_drag_stock_pct": 42.14,
+      "tx_cost_drag_etf_pct": 27.73
+    },
+    "top_quartile_spy": {
+      "name": "Top Quartile SPY Up",
+      "n_days": 3911,
+      "n_trades": 978,
+      "exposure_pct": 25.0,
+      "avg_gap_signal_bps": 10.51,
+      "avg_gap_nosignal_bps": 3.12,
+      "win_rate_gross_pct": 57.2,
+      "win_rate_net_pct": 20.1,
+      "ann_return_gross_pct": 6.63,
+      "ann_vol_gross_pct": 7.65,
+      "sharpe_gross": 0.866,
+      "total_return_gross_pct": 167.3,
+      "mdd_gross_pct": -11.55,
+      "t_stat_gross": 3.425,
+      "p_val_gross": 0.0006,
+      "ann_return_net_stock_pct": -30.24,
+      "sharpe_net_stock": -3.642,
+      "total_return_net_stock_pct": -99.13,
+      "mdd_net_stock_pct": -99.15,
+      "t_stat_net_stock": -15.628,
+      "ann_return_net_etf_pct": -17.64,
+      "sharpe_net_etf": -2.244,
+      "total_return_net_etf_pct": -93.83,
+      "mdd_net_etf_pct": -94.03,
+      "tx_cost_drag_stock_pct": 36.86,
+      "tx_cost_drag_etf_pct": 24.26
+    },
+    "2day_spy_momentum": {
+      "name": "2-Day SPY Momentum",
+      "n_days": 3911,
+      "n_trades": 1236,
+      "exposure_pct": 31.6,
+      "avg_gap_signal_bps": 36.36,
+      "avg_gap_nosignal_bps": -9.53,
+      "win_rate_gross_pct": 75.5,
+      "win_rate_net_pct": 26.6,
+      "ann_return_gross_pct": 28.96,
+      "ann_vol_gross_pct": 6.64,
+      "sharpe_gross": 4.362,
+      "total_return_gross_pct": 8530.76,
+      "mdd_gross_pct": -2.97,
+      "t_stat_gross": 18.784,
+      "p_val_gross": 0.0,
+      "ann_return_net_stock_pct": -17.63,
+      "sharpe_net_stock": -2.804,
+      "total_return_net_stock_pct": -93.72,
+      "mdd_net_stock_pct": -93.99,
+      "t_stat_net_stock": -11.438,
+      "ann_return_net_etf_pct": -1.7,
+      "sharpe_net_etf": -0.281,
+      "total_return_net_etf_pct": -25.38,
+      "mdd_net_etf_pct": -60.37,
+      "tx_cost_drag_stock_pct": 46.59,
+      "tx_cost_drag_etf_pct": 30.66
+    }
+  },
+  "cross_oos": {
+    "P1: 2013-01-01 to 2015-12-31": {
+      "always_overnight": {
+        "sharpe_gross": 1.319,
+        "sharpe_net_etf": -9.182,
+        "sharpe_net_stock": -14.637,
+        "ann_return_gross_pct": 12.19
+      },
+      "spy_conditioned": {
+        "sharpe_gross": 1.672,
+        "sharpe_net_etf": -5.548,
+        "sharpe_net_stock": -8.549,
+        "ann_return_gross_pct": 12.09
+      },
+      "vix_conditioned": {
+        "sharpe_gross": 1.815,
+        "sharpe_net_etf": -8.606,
+        "sharpe_net_stock": -13.743,
+        "ann_return_gross_pct": 15.49
+      },
+      "spy_vix_combined": {
+        "sharpe_gross": 1.699,
+        "sharpe_net_etf": -5.526,
+        "sharpe_net_stock": -8.51,
+        "ann_return_gross_pct": 12.08
+      }
+    },
+    "P2: 2016-01-01 to 2018-12-31": {
+      "always_overnight": {
+        "sharpe_gross": 0.298,
+        "sharpe_net_etf": -10.763,
+        "sharpe_net_stock": -16.509,
+        "ann_return_gross_pct": 2.61
+      },
+      "spy_conditioned": {
+        "sharpe_gross": 0.973,
+        "sharpe_net_etf": -7.076,
+        "sharpe_net_stock": -10.065,
+        "ann_return_gross_pct": 6.03
+      },
+      "vix_conditioned": {
+        "sharpe_gross": 1.54,
+        "sharpe_net_etf": -11.047,
+        "sharpe_net_stock": -16.692,
+        "ann_return_gross_pct": 10.06
+      },
+      "spy_vix_combined": {
+        "sharpe_gross": 1.335,
+        "sharpe_net_etf": -7.401,
+        "sharpe_net_stock": -10.464,
+        "ann_return_gross_pct": 7.41
+      }
+    },
+    "P3: 2019-01-01 to 2020-12-31": {
+      "always_overnight": {
+        "sharpe_gross": 2.07,
+        "sharpe_net_etf": -4.589,
+        "sharpe_net_stock": -8.048,
+        "ann_return_gross_pct": 30.16
+      },
+      "spy_conditioned": {
+        "sharpe_gross": 1.559,
+        "sharpe_net_etf": -3.046,
+        "sharpe_net_stock": -5.288,
+        "ann_return_gross_pct": 19.41
+      },
+      "vix_conditioned": {
+        "sharpe_gross": 1.569,
+        "sharpe_net_etf": -4.113,
+        "sharpe_net_stock": -6.665,
+        "ann_return_gross_pct": 13.84
+      },
+      "spy_vix_combined": {
+        "sharpe_gross": 1.953,
+        "sharpe_net_etf": -2.634,
+        "sharpe_net_stock": -4.783,
+        "ann_return_gross_pct": 17.59
+      }
+    },
+    "P4: 2021-01-01 to 2023-06-30": {
+      "always_overnight": {
+        "sharpe_gross": 0.996,
+        "sharpe_net_etf": -6.106,
+        "sharpe_net_stock": -9.796,
+        "ann_return_gross_pct": 13.61
+      },
+      "spy_conditioned": {
+        "sharpe_gross": 1.862,
+        "sharpe_net_etf": -3.539,
+        "sharpe_net_stock": -6.035,
+        "ann_return_gross_pct": 17.31
+      },
+      "vix_conditioned": {
+        "sharpe_gross": 2.648,
+        "sharpe_net_etf": -3.747,
+        "sharpe_net_stock": -6.475,
+        "ann_return_gross_pct": 17.29
+      },
+      "spy_vix_combined": {
+        "sharpe_gross": 2.022,
+        "sharpe_net_etf": -3.328,
+        "sharpe_net_stock": -5.706,
+        "ann_return_gross_pct": 15.53
+      }
+    },
+    "P5: 2023-07-01 to 2025-12-31": {
+      "always_overnight": {
+        "sharpe_gross": 1.317,
+        "sharpe_net_etf": -3.972,
+        "sharpe_net_stock": -6.72,
+        "ann_return_gross_pct": 24.16
+      },
+      "spy_conditioned": {
+        "sharpe_gross": 2.443,
+        "sharpe_net_etf": -2.351,
+        "sharpe_net_stock": -4.725,
+        "ann_return_gross_pct": 28.98
+      },
+      "vix_conditioned": {
+        "sharpe_gross": 2.338,
+        "sharpe_net_etf": -4.198,
+        "sharpe_net_stock": -7.487,
+        "ann_return_gross_pct": 29.52
+      },
+      "spy_vix_combined": {
+        "sharpe_gross": 2.321,
+        "sharpe_net_etf": -2.696,
+        "sharpe_net_stock": -5.14,
+        "ann_return_gross_pct": 25.52
+      }
+    }
+  },
+  "yearly_stats": [
+    {
+      "year": 2010,
+      "n_days": 248,
+      "mean_gap_bps": -1.16,
+      "ann_return_pct": -2.92,
+      "ann_vol_pct": 10.21,
+      "sharpe": -0.286,
+      "mdd_pct": -11.52,
+      "pct_positive": 53.6
+    },
+    {
+      "year": 2011,
+      "n_days": 247,
+      "mean_gap_bps": 0.2,
+      "ann_return_pct": 0.51,
+      "ann_vol_pct": 14.74,
+      "sharpe": 0.035,
+      "mdd_pct": -13.1,
+      "pct_positive": 50.2
+    },
+    {
+      "year": 2012,
+      "n_days": 248,
+      "mean_gap_bps": 1.77,
+      "ann_return_pct": 4.45,
+      "ann_vol_pct": 10.86,
+      "sharpe": 0.41,
+      "mdd_pct": -10.12,
+      "pct_positive": 52.4
+    },
+    {
+      "year": 2013,
+      "n_days": 244,
+      "mean_gap_bps": 5.78,
+      "ann_return_pct": 14.57,
+      "ann_vol_pct": 6.81,
+      "sharpe": 2.139,
+      "mdd_pct": -3.46,
+      "pct_positive": 52.5
+    },
+    {
+      "year": 2014,
+      "n_days": 247,
+      "mean_gap_bps": 4.98,
+      "ann_return_pct": 12.54,
+      "ann_vol_pct": 11.4,
+      "sharpe": 1.1,
+      "mdd_pct": -7.05,
+      "pct_positive": 52.6
+    },
+    {
+      "year": 2015,
+      "n_days": 246,
+      "mean_gap_bps": 3.76,
+      "ann_return_pct": 9.47,
+      "ann_vol_pct": 8.93,
+      "sharpe": 1.06,
+      "mdd_pct": -6.47,
+      "pct_positive": 51.2
+    },
+    {
+      "year": 2016,
+      "n_days": 244,
+      "mean_gap_bps": 1.81,
+      "ann_return_pct": 4.56,
+      "ann_vol_pct": 8.58,
+      "sharpe": 0.531,
+      "mdd_pct": -4.16,
+      "pct_positive": 47.5
+    },
+    {
+      "year": 2017,
+      "n_days": 243,
+      "mean_gap_bps": 4.86,
+      "ann_return_pct": 12.25,
+      "ann_vol_pct": 5.37,
+      "sharpe": 2.282,
+      "mdd_pct": -2.66,
+      "pct_positive": 57.2
+    },
+    {
+      "year": 2018,
+      "n_days": 245,
+      "mean_gap_bps": -3.53,
+      "ann_return_pct": -8.89,
+      "ann_vol_pct": 11.3,
+      "sharpe": -0.787,
+      "mdd_pct": -12.64,
+      "pct_positive": 52.2
+    },
+    {
+      "year": 2019,
+      "n_days": 241,
+      "mean_gap_bps": 8.06,
+      "ann_return_pct": 20.32,
+      "ann_vol_pct": 8.08,
+      "sharpe": 2.514,
+      "mdd_pct": -5.7,
+      "pct_positive": 61.0
+    },
+    {
+      "year": 2020,
+      "n_days": 245,
+      "mean_gap_bps": 15.81,
+      "ann_return_pct": 39.84,
+      "ann_vol_pct": 18.89,
+      "sharpe": 2.108,
+      "mdd_pct": -19.59,
+      "pct_positive": 61.6
+    },
+    {
+      "year": 2021,
+      "n_days": 243,
+      "mean_gap_bps": 7.55,
+      "ann_return_pct": 19.03,
+      "ann_vol_pct": 11.41,
+      "sharpe": 1.667,
+      "mdd_pct": -6.64,
+      "pct_positive": 61.7
+    },
+    {
+      "year": 2022,
+      "n_days": 246,
+      "mean_gap_bps": -0.6,
+      "ann_return_pct": -1.52,
+      "ann_vol_pct": 16.33,
+      "sharpe": -0.093,
+      "mdd_pct": -11.86,
+      "pct_positive": 52.8
+    },
+    {
+      "year": 2023,
+      "n_days": 239,
+      "mean_gap_bps": 9.64,
+      "ann_return_pct": 24.3,
+      "ann_vol_pct": 10.19,
+      "sharpe": 2.385,
+      "mdd_pct": -5.43,
+      "pct_positive": 55.2
+    },
+    {
+      "year": 2024,
+      "n_days": 242,
+      "mean_gap_bps": 8.46,
+      "ann_return_pct": 21.32,
+      "ann_vol_pct": 18.82,
+      "sharpe": 1.133,
+      "mdd_pct": -14.17,
+      "pct_positive": 55.0
+    },
+    {
+      "year": 2025,
+      "n_days": 243,
+      "mean_gap_bps": 12.64,
+      "ann_return_pct": 31.85,
+      "ann_vol_pct": 21.31,
+      "sharpe": 1.494,
+      "mdd_pct": -22.03,
+      "pct_positive": 63.0
+    }
+  ],
+  "statistical_tests": {
+    "spy_conditioning": {
+      "gap_spy_up_bps": 9.65,
+      "gap_spy_dn_bps": -0.95,
+      "t_stat": 4.062,
+      "p_val": 0.0
+    },
+    "vix_conditioning": {
+      "gap_vix_low_bps": 8.18,
+      "gap_vix_high_bps": -2.83,
+      "t_stat": 3.864,
+      "p_val": 0.0001
+    },
+    "spy_gap_correlation": 0.0496,
+    "spy_gap_regression": {
+      "intercept_bps": 4.73,
+      "slope": 0.0374,
+      "t_slope": 3.108,
+      "r_squared": 0.0025
+    }
+  },
+  "benchmark_buy_hold": {
+    "ann_return_pct": 14.49,
+    "ann_vol_pct": 17.96,
+    "sharpe": 0.807,
+    "mdd_pct": -33.83
+  },
+  "conclusion": "INFEASIBLE — TX costs destroy all gap returns",
+  "key_findings": [
+    "Gap return mean = 4.97 bps/day, ETF TX = 38 bps/day",
+    "Always overnight gross Sharpe = 0.972, but TX destroys it",
+    "SPY-conditioned gap (SPY>0) = 9.65 bps vs SPY≤0 = -0.95 bps (t=4.062)",
+    "SPY→TW gap correlation = 0.0496, R²=0.0025",
+    "Daily overnight trading requires ~2-4 bps avg gap to cover ETF TX of 38.5 bps → impossible",
+    "Even with SPY/VIX conditioning, gap returns cannot cover daily round-trip TX costs",
+    "Validates T5e finding: alpha exists in theory but TX costs are prohibitive for daily frequency"
+  ],
+  "limitations": [
+    "yfinance open/close prices may not reflect actual executable prices",
+    "0050.TW has smaller tick size issues for large positions",
+    "No slippage modeled (market-on-close/open orders have variable fill quality)",
+    "Futures (TX) would have lower TX but different mechanics",
+    "Period includes multiple structural regime changes (2010-2025)"
+  ],
+  "elapsed_seconds": 1.4
+}

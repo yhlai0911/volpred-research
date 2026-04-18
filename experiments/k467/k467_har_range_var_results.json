@@ -1,0 +1,927 @@
+{
+  "experiment_id": "K467",
+  "title": "HAR Log-Range Based VaR Estimation",
+  "background": "K465: HAR log-range 10/10 cross-OOS (publication ready) \u2014 best vol forecaster. K454: Semivariance (RS\u207b) VaR passes Trinity 3/3 at 1% (beats GARCH Skewed-t 1/3). Question: If HAR log-range is a better \u03c3 forecaster, does it produce better VaR?",
+  "references": [
+    "Corsi (2009) J Financial Econometrics \u2014 HAR-RV model",
+    "Alizadeh, Brandt & Diebold (2002) JFE \u2014 Range-based vol estimation",
+    "Kupiec (1995) \u2014 Unconditional coverage test",
+    "Christoffersen (1998) \u2014 Independence test",
+    "Engle & Manganelli (2004) \u2014 Dynamic Quantile test",
+    "Patton & Sheppard (2015) \u2014 Semivariance decomposition",
+    "K465 \u2014 HAR log-range cross-OOS validation (10/10)",
+    "K454 \u2014 Semivariance VaR Trinity test (RS\u207b 3/3 wins)"
+  ],
+  "method": "Rolling window VaR backtest with Trinity test (Kupiec + Christoffersen + DQ)",
+  "assets": [
+    "SPY",
+    "QQQ",
+    "EEM"
+  ],
+  "oos_period": "2023-01-01 to 2024-12-31",
+  "rolling_window": 504,
+  "var_methods": [
+    "GJR-Normal",
+    "GJR-SkewT",
+    "RS_neg-Normal",
+    "HAR-Range-Normal",
+    "HAR+Semi-Combined",
+    "Hybrid-GARCH+HAR"
+  ],
+  "var_levels": [
+    0.01,
+    0.05
+  ],
+  "data_source": "yfinance (OHLC for range-based, Close for returns)",
+  "results": {
+    "SPY": {
+      "diagnostics": {
+        "n_obs": 5319,
+        "date_range": "2005-02-02 to 2026-03-25",
+        "return_mean": 0.0394784023079594,
+        "return_std": 1.1989791140785926,
+        "return_skew": -0.30415078973355164,
+        "return_kurt": 14.698790163149454,
+        "log_range_mean": 0.012354426508104503,
+        "log_range_std": 0.010275809892812803,
+        "adf_stat": -16.365525321254115,
+        "adf_p": 2.843226022034502e-29,
+        "is_stationary": true,
+        "arch_lm_stat": 1456.7156077449254,
+        "arch_lm_p": 5.620579940750801e-307,
+        "has_arch_effects": true,
+        "ljung_box_sq_p10": 0.0
+      },
+      "n_oos": 502,
+      "oos_range": "2023-01-03 to 2024-12-31",
+      "methods": {
+        "GJR-Normal": {
+          "1%": {
+            "n_obs": 502,
+            "n_violations": 9,
+            "violation_rate": 0.0179,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 2.5803,
+              "p_value": 0.1082
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0
+            },
+            "dq": {
+              "stat": 0.0694,
+              "p_value": 1.0
+            },
+            "trinity_pass": true,
+            "tests_passed": 3
+          },
+          "5%": {
+            "n_obs": 502,
+            "n_violations": 26,
+            "violation_rate": 0.0518,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.0336,
+              "p_value": 0.8546
+            },
+            "christoffersen": {
+              "stat": 0.3086,
+              "p_value": 0.5786
+            },
+            "dq": {
+              "stat": 0.3737,
+              "p_value": 0.9991
+            },
+            "trinity_pass": true,
+            "tests_passed": 3
+          }
+        },
+        "GJR-SkewT": {
+          "1%": {
+            "n_obs": 502,
+            "n_violations": 8,
+            "violation_rate": 0.0159,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 1.5141,
+              "p_value": 0.2185
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0
+            },
+            "dq": {
+              "stat": 0.0707,
+              "p_value": 1.0
+            },
+            "trinity_pass": true,
+            "tests_passed": 3
+          },
+          "5%": {
+            "n_obs": 502,
+            "n_violations": 24,
+            "violation_rate": 0.0478,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.0515,
+              "p_value": 0.8205
+            },
+            "christoffersen": {
+              "stat": 0.5798,
+              "p_value": 0.4464
+            },
+            "dq": {
+              "stat": 0.3407,
+              "p_value": 0.9993
+            },
+            "trinity_pass": true,
+            "tests_passed": 3
+          }
+        },
+        "RS_neg-Normal": {
+          "1%": {
+            "n_obs": 502,
+            "n_violations": 12,
+            "violation_rate": 0.0239,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 7.0539,
+              "p_value": 0.0079
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0
+            },
+            "dq": {
+              "stat": 0.2711,
+              "p_value": 0.9996
+            },
+            "trinity_pass": false,
+            "tests_passed": 2
+          },
+          "5%": {
+            "n_obs": 502,
+            "n_violations": 29,
+            "violation_rate": 0.0578,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.6088,
+              "p_value": 0.4352
+            },
+            "christoffersen": {
+              "stat": 0.3559,
+              "p_value": 0.5508
+            },
+            "dq": {
+              "stat": 0.3605,
+              "p_value": 0.9991
+            },
+            "trinity_pass": true,
+            "tests_passed": 3
+          }
+        },
+        "HAR-Range-Normal": {
+          "1%": {
+            "n_obs": 502,
+            "n_violations": 21,
+            "violation_rate": 0.0418,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 28.6653,
+              "p_value": 0.0
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0
+            },
+            "dq": {
+              "stat": 0.2447,
+              "p_value": 0.9997
+            },
+            "trinity_pass": false,
+            "tests_passed": 2
+          },
+          "5%": {
+            "n_obs": 502,
+            "n_violations": 43,
+            "violation_rate": 0.0857,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 11.177,
+              "p_value": 0.0008
+            },
+            "christoffersen": {
+              "stat": 0.0305,
+              "p_value": 0.8613
+            },
+            "dq": {
+              "stat": 0.0902,
+              "p_value": 1.0
+            },
+            "trinity_pass": false,
+            "tests_passed": 2
+          }
+        },
+        "HAR+Semi-Combined": {
+          "1%": {
+            "n_obs": 502,
+            "n_violations": 16,
+            "violation_rate": 0.0319,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 15.3775,
+              "p_value": 0.0001
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0
+            },
+            "dq": {
+              "stat": 0.2137,
+              "p_value": 0.9998
+            },
+            "trinity_pass": false,
+            "tests_passed": 2
+          },
+          "5%": {
+            "n_obs": 502,
+            "n_violations": 40,
+            "violation_rate": 0.0797,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 7.9514,
+              "p_value": 0.0048
+            },
+            "christoffersen": {
+              "stat": 0.0143,
+              "p_value": 0.9049
+            },
+            "dq": {
+              "stat": 0.0796,
+              "p_value": 1.0
+            },
+            "trinity_pass": false,
+            "tests_passed": 2
+          }
+        },
+        "Hybrid-GARCH+HAR": {
+          "1%": {
+            "n_obs": 502,
+            "n_violations": 15,
+            "violation_rate": 0.0299,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 13.0804,
+              "p_value": 0.0003
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0
+            },
+            "dq": {
+              "stat": 0.1509,
+              "p_value": 0.9999
+            },
+            "trinity_pass": false,
+            "tests_passed": 2
+          },
+          "5%": {
+            "n_obs": 502,
+            "n_violations": 35,
+            "violation_rate": 0.0697,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 3.6806,
+              "p_value": 0.0551
+            },
+            "christoffersen": {
+              "stat": 0.1372,
+              "p_value": 0.711
+            },
+            "dq": {
+              "stat": 0.0702,
+              "p_value": 1.0
+            },
+            "trinity_pass": true,
+            "tests_passed": 3
+          }
+        }
+      }
+    },
+    "QQQ": {
+      "diagnostics": {
+        "n_obs": 5319,
+        "date_range": "2005-02-02 to 2026-03-25",
+        "return_mean": 0.054718685866058034,
+        "return_std": 1.3617454449788358,
+        "return_skew": -0.2517597935638568,
+        "return_kurt": 7.670639450969823,
+        "log_range_mean": 0.015150763440444364,
+        "log_range_std": 0.010563253724827953,
+        "adf_stat": -18.30538813005117,
+        "adf_p": 2.281968675659017e-30,
+        "is_stationary": true,
+        "arch_lm_stat": 1051.5716119255246,
+        "arch_lm_p": 1.4469723674898043e-219,
+        "has_arch_effects": true,
+        "ljung_box_sq_p10": 0.0
+      },
+      "n_oos": 502,
+      "oos_range": "2023-01-03 to 2024-12-31",
+      "methods": {
+        "GJR-Normal": {
+          "1%": {
+            "n_obs": 502,
+            "n_violations": 9,
+            "violation_rate": 0.0179,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 2.5803,
+              "p_value": 0.1082
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0
+            },
+            "dq": {
+              "stat": 0.1668,
+              "p_value": 0.9999
+            },
+            "trinity_pass": true,
+            "tests_passed": 3
+          },
+          "5%": {
+            "n_obs": 502,
+            "n_violations": 30,
+            "violation_rate": 0.0598,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.9503,
+              "p_value": 0.3296
+            },
+            "christoffersen": {
+              "stat": 0.7774,
+              "p_value": 0.3779
+            },
+            "dq": {
+              "stat": 0.2649,
+              "p_value": 0.9996
+            },
+            "trinity_pass": true,
+            "tests_passed": 3
+          }
+        },
+        "GJR-SkewT": {
+          "1%": {
+            "n_obs": 502,
+            "n_violations": 7,
+            "violation_rate": 0.0139,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 0.7026,
+              "p_value": 0.4019
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0
+            },
+            "dq": {
+              "stat": 0.2093,
+              "p_value": 0.9998
+            },
+            "trinity_pass": true,
+            "tests_passed": 3
+          },
+          "5%": {
+            "n_obs": 502,
+            "n_violations": 30,
+            "violation_rate": 0.0598,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.9503,
+              "p_value": 0.3296
+            },
+            "christoffersen": {
+              "stat": 0.7774,
+              "p_value": 0.3779
+            },
+            "dq": {
+              "stat": 0.3024,
+              "p_value": 0.9995
+            },
+            "trinity_pass": true,
+            "tests_passed": 3
+          }
+        },
+        "RS_neg-Normal": {
+          "1%": {
+            "n_obs": 502,
+            "n_violations": 14,
+            "violation_rate": 0.0279,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 10.9208,
+              "p_value": 0.001
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0
+            },
+            "dq": {
+              "stat": 0.3823,
+              "p_value": 0.999
+            },
+            "trinity_pass": false,
+            "tests_passed": 2
+          },
+          "5%": {
+            "n_obs": 502,
+            "n_violations": 33,
+            "violation_rate": 0.0657,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 2.3918,
+              "p_value": 0.122
+            },
+            "christoffersen": {
+              "stat": 0.886,
+              "p_value": 0.3466
+            },
+            "dq": {
+              "stat": 0.6512,
+              "p_value": 0.9955
+            },
+            "trinity_pass": true,
+            "tests_passed": 3
+          }
+        },
+        "HAR-Range-Normal": {
+          "1%": {
+            "n_obs": 502,
+            "n_violations": 22,
+            "violation_rate": 0.0438,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 31.6418,
+              "p_value": 0.0
+            },
+            "christoffersen": {
+              "stat": 0.9486,
+              "p_value": 0.3301
+            },
+            "dq": {
+              "stat": 0.1487,
+              "p_value": 0.9999
+            },
+            "trinity_pass": false,
+            "tests_passed": 2
+          },
+          "5%": {
+            "n_obs": 502,
+            "n_violations": 43,
+            "violation_rate": 0.0857,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 11.177,
+              "p_value": 0.0008
+            },
+            "christoffersen": {
+              "stat": 1.5025,
+              "p_value": 0.2203
+            },
+            "dq": {
+              "stat": 0.4848,
+              "p_value": 0.998
+            },
+            "trinity_pass": false,
+            "tests_passed": 2
+          }
+        },
+        "HAR+Semi-Combined": {
+          "1%": {
+            "n_obs": 502,
+            "n_violations": 15,
+            "violation_rate": 0.0299,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 13.0804,
+              "p_value": 0.0003
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0
+            },
+            "dq": {
+              "stat": 0.3501,
+              "p_value": 0.9992
+            },
+            "trinity_pass": false,
+            "tests_passed": 2
+          },
+          "5%": {
+            "n_obs": 502,
+            "n_violations": 37,
+            "violation_rate": 0.0737,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 5.2151,
+              "p_value": 0.0224
+            },
+            "christoffersen": {
+              "stat": 0.0299,
+              "p_value": 0.8628
+            },
+            "dq": {
+              "stat": 0.2294,
+              "p_value": 0.9998
+            },
+            "trinity_pass": false,
+            "tests_passed": 2
+          }
+        },
+        "Hybrid-GARCH+HAR": {
+          "1%": {
+            "n_obs": 502,
+            "n_violations": 12,
+            "violation_rate": 0.0239,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 7.0539,
+              "p_value": 0.0079
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0
+            },
+            "dq": {
+              "stat": 0.2437,
+              "p_value": 0.9997
+            },
+            "trinity_pass": false,
+            "tests_passed": 2
+          },
+          "5%": {
+            "n_obs": 502,
+            "n_violations": 35,
+            "violation_rate": 0.0697,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 3.6806,
+              "p_value": 0.0551
+            },
+            "christoffersen": {
+              "stat": 0.1372,
+              "p_value": 0.711
+            },
+            "dq": {
+              "stat": 0.2537,
+              "p_value": 0.9997
+            },
+            "trinity_pass": true,
+            "tests_passed": 3
+          }
+        }
+      }
+    },
+    "EEM": {
+      "diagnostics": {
+        "n_obs": 5319,
+        "date_range": "2005-02-02 to 2026-03-25",
+        "return_mean": 0.02553595624775764,
+        "return_std": 1.7353147177841999,
+        "return_skew": 0.034923278750975326,
+        "return_kurt": 15.939126742449371,
+        "log_range_mean": 0.01408883417781278,
+        "log_range_std": 0.012039506647881547,
+        "adf_stat": -16.041172479543704,
+        "adf_p": 5.91172796474575e-29,
+        "is_stationary": true,
+        "arch_lm_stat": 2165.7891620449523,
+        "arch_lm_p": 0.0,
+        "has_arch_effects": true,
+        "ljung_box_sq_p10": 0.0
+      },
+      "n_oos": 502,
+      "oos_range": "2023-01-03 to 2024-12-31",
+      "methods": {
+        "GJR-Normal": {
+          "1%": {
+            "n_obs": 502,
+            "n_violations": 6,
+            "violation_rate": 0.012,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 0.1819,
+              "p_value": 0.6698
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0
+            },
+            "dq": {
+              "stat": 0.0147,
+              "p_value": 1.0
+            },
+            "trinity_pass": true,
+            "tests_passed": 3
+          },
+          "5%": {
+            "n_obs": 502,
+            "n_violations": 28,
+            "violation_rate": 0.0558,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.3405,
+              "p_value": 0.5595
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0
+            },
+            "dq": {
+              "stat": 0.4805,
+              "p_value": 0.9981
+            },
+            "trinity_pass": true,
+            "tests_passed": 3
+          }
+        },
+        "GJR-SkewT": {
+          "1%": {
+            "n_obs": 502,
+            "n_violations": 6,
+            "violation_rate": 0.012,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 0.1819,
+              "p_value": 0.6698
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0
+            },
+            "dq": {
+              "stat": 0.0185,
+              "p_value": 1.0
+            },
+            "trinity_pass": true,
+            "tests_passed": 3
+          },
+          "5%": {
+            "n_obs": 502,
+            "n_violations": 28,
+            "violation_rate": 0.0558,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.3405,
+              "p_value": 0.5595
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0
+            },
+            "dq": {
+              "stat": 0.5018,
+              "p_value": 0.9978
+            },
+            "trinity_pass": true,
+            "tests_passed": 3
+          }
+        },
+        "RS_neg-Normal": {
+          "1%": {
+            "n_obs": 502,
+            "n_violations": 14,
+            "violation_rate": 0.0279,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 10.9208,
+              "p_value": 0.001
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0
+            },
+            "dq": {
+              "stat": 0.343,
+              "p_value": 0.9993
+            },
+            "trinity_pass": false,
+            "tests_passed": 2
+          },
+          "5%": {
+            "n_obs": 502,
+            "n_violations": 35,
+            "violation_rate": 0.0697,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 3.6806,
+              "p_value": 0.0551
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0
+            },
+            "dq": {
+              "stat": 0.8855,
+              "p_value": 0.9896
+            },
+            "trinity_pass": true,
+            "tests_passed": 3
+          }
+        },
+        "HAR-Range-Normal": {
+          "1%": {
+            "n_obs": 502,
+            "n_violations": 50,
+            "violation_rate": 0.0996,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 144.099,
+              "p_value": 0.0
+            },
+            "christoffersen": {
+              "stat": 0.2567,
+              "p_value": 0.6124
+            },
+            "dq": {
+              "stat": 0.5812,
+              "p_value": 0.9967
+            },
+            "trinity_pass": false,
+            "tests_passed": 2
+          },
+          "5%": {
+            "n_obs": 502,
+            "n_violations": 80,
+            "violation_rate": 0.1594,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 82.2429,
+              "p_value": 0.0
+            },
+            "christoffersen": {
+              "stat": 0.8998,
+              "p_value": 0.3428
+            },
+            "dq": {
+              "stat": 1.0542,
+              "p_value": 0.9835
+            },
+            "trinity_pass": false,
+            "tests_passed": 2
+          }
+        },
+        "HAR+Semi-Combined": {
+          "1%": {
+            "n_obs": 502,
+            "n_violations": 25,
+            "violation_rate": 0.0498,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 41.1265,
+              "p_value": 0.0
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0
+            },
+            "dq": {
+              "stat": 0.6591,
+              "p_value": 0.9953
+            },
+            "trinity_pass": false,
+            "tests_passed": 2
+          },
+          "5%": {
+            "n_obs": 502,
+            "n_violations": 54,
+            "violation_rate": 0.1076,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 26.7284,
+              "p_value": 0.0
+            },
+            "christoffersen": {
+              "stat": 0.7846,
+              "p_value": 0.3757
+            },
+            "dq": {
+              "stat": 0.715,
+              "p_value": 0.9942
+            },
+            "trinity_pass": false,
+            "tests_passed": 2
+          }
+        },
+        "Hybrid-GARCH+HAR": {
+          "1%": {
+            "n_obs": 502,
+            "n_violations": 23,
+            "violation_rate": 0.0458,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 34.7134,
+              "p_value": 0.0
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0
+            },
+            "dq": {
+              "stat": 0.2107,
+              "p_value": 0.9998
+            },
+            "trinity_pass": false,
+            "tests_passed": 2
+          },
+          "5%": {
+            "n_obs": 502,
+            "n_violations": 46,
+            "violation_rate": 0.0916,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 14.8608,
+              "p_value": 0.0001
+            },
+            "christoffersen": {
+              "stat": 0.4695,
+              "p_value": 0.4932
+            },
+            "dq": {
+              "stat": 0.7511,
+              "p_value": 0.9933
+            },
+            "trinity_pass": false,
+            "tests_passed": 2
+          }
+        }
+      }
+    }
+  },
+  "summary": {
+    "trinity_pass_counts": {
+      "GJR-Normal": {
+        "pass_1pct": 3,
+        "pass_5pct": 3,
+        "total_pass": 6,
+        "total_possible": 6
+      },
+      "GJR-SkewT": {
+        "pass_1pct": 3,
+        "pass_5pct": 3,
+        "total_pass": 6,
+        "total_possible": 6
+      },
+      "RS_neg-Normal": {
+        "pass_1pct": 0,
+        "pass_5pct": 3,
+        "total_pass": 3,
+        "total_possible": 6
+      },
+      "HAR-Range-Normal": {
+        "pass_1pct": 0,
+        "pass_5pct": 0,
+        "total_pass": 0,
+        "total_possible": 6
+      },
+      "HAR+Semi-Combined": {
+        "pass_1pct": 0,
+        "pass_5pct": 0,
+        "total_pass": 0,
+        "total_possible": 6
+      },
+      "Hybrid-GARCH+HAR": {
+        "pass_1pct": 0,
+        "pass_5pct": 2,
+        "total_pass": 2,
+        "total_possible": 6
+      }
+    },
+    "best_method": [
+      "GJR-Normal",
+      "GJR-SkewT"
+    ],
+    "best_score": "6/6"
+  },
+  "comparisons": {
+    "har_vs_rs_neg": "RS\u207b WINS \u2014 semivariance still superior for tail risk",
+    "har_vs_gjr_normal": "HAR 0/6 vs GJR-Normal 6/6",
+    "har_vs_gjr_skewt": "HAR 0/6 vs GJR-SkewT 6/6",
+    "combined_models": "HAR+Semi 0/6, GARCH+HAR 2/6",
+    "k454_comparison": "DOES NOT IMPROVE on K454: Semivariance VaR still better for tail risk"
+  },
+  "judgment": "HAR-Range VaR FAILS \u2014 does not pass Trinity test",
+  "key_insight": "IMPORTANT: Best vol forecaster (HAR, K465) does NOT automatically produce best VaR. Semivariance captures downside risk directly, while HAR measures total range. For tail risk, downside-specific information matters more than overall forecast accuracy.",
+  "limitations": [
+    "OOS limited to 2023-2024 (2 years, ~502 days) \u2014 single regime",
+    "HAR log-range uses Parkinson estimator which assumes no jumps",
+    "RS\u207b scaling factor (\u00d72) assumes approximate symmetry baseline",
+    "EWMA lambda=0.94 (RiskMetrics standard) not optimized per asset",
+    "Normal VaR assumption for HAR \u2014 could test Student-t or EVT overlay",
+    "Only 3 assets (SPY, QQQ, EEM) \u2014 limited cross-asset validation"
+  ],
+  "runtime_seconds": 49.1,
+  "timestamp": "2026-03-26T04:11:37.166202+00:00"
+}

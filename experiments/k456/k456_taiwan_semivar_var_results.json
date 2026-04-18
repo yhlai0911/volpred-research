@@ -1,0 +1,321 @@
+{
+  "experiment_id": "K456",
+  "title": "Taiwan 0050.TW Semivariance VaR Application",
+  "timestamp": "2026-03-26T01:13:32.044978+00:00",
+  "data_source": "yfinance (Close, auto-adjusted in yfinance v2)",
+  "price_column": "Close (yfinance v2 auto-adjusted)",
+  "asset": "0050.TW",
+  "data_range": "2009-01-02 to 2026-03-24",
+  "total_trading_days": 4212,
+  "oos_period": "2023-01-01 to 2024-12-31",
+  "oos_days": 481,
+  "rolling_window": 504,
+  "data_cleaning": {
+    "original_count": 4212,
+    "extreme_returns_clipped": 2,
+    "winsorization_threshold": 15.0,
+    "dates_affected": [
+      "2009-02-19",
+      "2014-01-02"
+    ]
+  },
+  "diagnostics": {
+    "descriptive_stats": {
+      "mean": 0.05997963467435717,
+      "std": 1.360239339111213,
+      "skewness": -0.2746339736623559,
+      "kurtosis": 20.268534405081176,
+      "min": -15.0,
+      "max": 15.0,
+      "count": 4212
+    },
+    "adf_test": {
+      "statistic": -15.8384,
+      "p_value": 0.0,
+      "stationary": true
+    },
+    "arch_lm_test": {
+      "statistic": 878.7589,
+      "p_value": 0.0,
+      "arch_effects": true
+    },
+    "ljung_box_squared_returns": {
+      "lag_10_Q": 2688.28,
+      "lag_10_p": 0.0,
+      "lag_20_Q": 4197.09,
+      "lag_20_p": 0.0
+    },
+    "gjr_garch_full_sample": {
+      "omega": 0.085194,
+      "alpha": 0.024236,
+      "gamma": 0.087801,
+      "beta": 0.870316,
+      "persistence": 0.9385,
+      "convergence": true,
+      "residual_arch_lm_pval": 0.999989
+    }
+  },
+  "var_methods": [
+    "GJR-Normal",
+    "GJR-SkewT",
+    "RS_neg-Normal",
+    "Hybrid",
+    "HistSim-250"
+  ],
+  "var_levels": [
+    0.01,
+    0.05
+  ],
+  "trinity_test_results": {
+    "GJR-Normal": {
+      "1%": {
+        "n_obs": 481,
+        "n_violations": 10,
+        "violation_rate": 0.0208,
+        "expected_rate": 0.01,
+        "basel_zone": "Yellow",
+        "kupiec": {
+          "stat": 4.3145,
+          "p_value": 0.0378
+        },
+        "christoffersen": {
+          "stat": 1.6869,
+          "p_value": 0.194
+        },
+        "dq": {
+          "stat": 0.163,
+          "p_value": 0.9999
+        },
+        "trinity_pass": false
+      },
+      "5%": {
+        "n_obs": 481,
+        "n_violations": 22,
+        "violation_rate": 0.0457,
+        "expected_rate": 0.05,
+        "basel_zone": "Green",
+        "kupiec": {
+          "stat": 0.1891,
+          "p_value": 0.6637
+        },
+        "christoffersen": {
+          "stat": 0.8536,
+          "p_value": 0.3555
+        },
+        "dq": {
+          "stat": 0.1548,
+          "p_value": 0.9999
+        },
+        "trinity_pass": true
+      }
+    },
+    "GJR-SkewT": {
+      "1%": {
+        "n_obs": 481,
+        "n_violations": 6,
+        "violation_rate": 0.0125,
+        "expected_rate": 0.01,
+        "basel_zone": "Green",
+        "kupiec": {
+          "stat": 0.2757,
+          "p_value": 0.5995
+        },
+        "christoffersen": {
+          "stat": 3.6375,
+          "p_value": 0.0565
+        },
+        "dq": {
+          "stat": 0.3437,
+          "p_value": 0.9993
+        },
+        "trinity_pass": true
+      },
+      "5%": {
+        "n_obs": 481,
+        "n_violations": 24,
+        "violation_rate": 0.0499,
+        "expected_rate": 0.05,
+        "basel_zone": "Green",
+        "kupiec": {
+          "stat": 0.0001,
+          "p_value": 0.9917
+        },
+        "christoffersen": {
+          "stat": 2.1973,
+          "p_value": 0.1383
+        },
+        "dq": {
+          "stat": 0.1844,
+          "p_value": 0.9999
+        },
+        "trinity_pass": true
+      }
+    },
+    "RS_neg-Normal": {
+      "1%": {
+        "n_obs": 481,
+        "n_violations": 13,
+        "violation_rate": 0.027,
+        "expected_rate": 0.01,
+        "basel_zone": "Red",
+        "kupiec": {
+          "stat": 9.6122,
+          "p_value": 0.0019
+        },
+        "christoffersen": {
+          "stat": 4.1077,
+          "p_value": 0.0427
+        },
+        "dq": {
+          "stat": 0.3391,
+          "p_value": 0.9993
+        },
+        "trinity_pass": false
+      },
+      "5%": {
+        "n_obs": 481,
+        "n_violations": 29,
+        "violation_rate": 0.0603,
+        "expected_rate": 0.05,
+        "basel_zone": "Green",
+        "kupiec": {
+          "stat": 1.0091,
+          "p_value": 0.3151
+        },
+        "christoffersen": {
+          "stat": 0.0383,
+          "p_value": 0.8448
+        },
+        "dq": {
+          "stat": 0.0856,
+          "p_value": 1.0
+        },
+        "trinity_pass": true
+      }
+    },
+    "Hybrid": {
+      "1%": {
+        "n_obs": 481,
+        "n_violations": 9,
+        "violation_rate": 0.0187,
+        "expected_rate": 0.01,
+        "basel_zone": "Yellow",
+        "kupiec": {
+          "stat": 2.9345,
+          "p_value": 0.0867
+        },
+        "christoffersen": {
+          "stat": 2.0593,
+          "p_value": 0.1513
+        },
+        "dq": {
+          "stat": 0.1867,
+          "p_value": 0.9999
+        },
+        "trinity_pass": true
+      },
+      "5%": {
+        "n_obs": 481,
+        "n_violations": 24,
+        "violation_rate": 0.0499,
+        "expected_rate": 0.05,
+        "basel_zone": "Green",
+        "kupiec": {
+          "stat": 0.0001,
+          "p_value": 0.9917
+        },
+        "christoffersen": {
+          "stat": 0.5017,
+          "p_value": 0.4788
+        },
+        "dq": {
+          "stat": 0.0334,
+          "p_value": 1.0
+        },
+        "trinity_pass": true
+      }
+    },
+    "HistSim-250": {
+      "1%": {
+        "n_obs": 481,
+        "n_violations": 9,
+        "violation_rate": 0.0187,
+        "expected_rate": 0.01,
+        "basel_zone": "Yellow",
+        "kupiec": {
+          "stat": 2.9345,
+          "p_value": 0.0867
+        },
+        "christoffersen": {
+          "stat": 2.0593,
+          "p_value": 0.1513
+        },
+        "dq": {
+          "stat": 0.2172,
+          "p_value": 0.9998
+        },
+        "trinity_pass": true
+      },
+      "5%": {
+        "n_obs": 481,
+        "n_violations": 28,
+        "violation_rate": 0.0582,
+        "expected_rate": 0.05,
+        "basel_zone": "Green",
+        "kupiec": {
+          "stat": 0.6501,
+          "p_value": 0.4201
+        },
+        "christoffersen": {
+          "stat": 5.3804,
+          "p_value": 0.0204
+        },
+        "dq": {
+          "stat": 1.8481,
+          "p_value": 0.9331
+        },
+        "trinity_pass": false
+      }
+    }
+  },
+  "summary": {
+    "method_scores": {
+      "GJR-Normal": "1/2",
+      "GJR-SkewT": "2/2",
+      "RS_neg-Normal": "1/2",
+      "Hybrid": "2/2",
+      "HistSim-250": "1/2"
+    },
+    "best_method": [
+      "GJR-SkewT",
+      "Hybrid"
+    ],
+    "best_score": "2/2"
+  },
+  "comparison_with_k454": {
+    "k454_rs_neg_result": "3/3 markets Trinity pass",
+    "k454_gjr_skewt_result": "1/3 markets Trinity pass",
+    "k456_rs_neg_result": "1/2 levels pass",
+    "k456_gjr_skewt_result": "2/2 levels pass",
+    "comparison": "DIFFERS: GJR-SkewT > RS- in Taiwan (opposite to K454)",
+    "consistent": false
+  },
+  "key_findings": [
+    "Best VaR method for 0050.TW: GJR-SkewT, Hybrid (2/2 Trinity pass)",
+    "GJR-Normal: 1%=0.021(Yellow), 5%=0.046(Green)",
+    "GJR-SkewT: 1%=0.013(Green), 5%=0.050(Green)",
+    "RS_neg-Normal: 1%=0.027(Red), 5%=0.060(Green)",
+    "Hybrid: 1%=0.019(Yellow), 5%=0.050(Green)",
+    "HistSim-250: 1%=0.019(Yellow), 5%=0.058(Green)",
+    "GJR gamma (full sample) = 0.0878, persistence = 0.9385",
+    "DIFFERS: GJR-SkewT > RS- in Taiwan (opposite to K454)"
+  ],
+  "limitations": [
+    "Single asset (0050.TW only) \u2014 cross-market Taiwan confirmation needed",
+    "OOS limited to 2023-2024 (2 years)",
+    "EWMA lambda=0.94 not optimized for Taiwan market",
+    "yfinance v2 auto-adjusts Close but historical artifacts remain (Winsorized)",
+    "Semivariance scaling factor (x2) assumes approximate symmetry baseline",
+    "2 extreme returns Winsorized at \u00b115.0% \u2014 may affect tail coverage"
+  ]
+}

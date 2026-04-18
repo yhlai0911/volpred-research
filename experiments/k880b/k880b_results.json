@@ -1,0 +1,901 @@
+{
+  "experiment_id": "K880b",
+  "title": "ES (Expected Shortfall) Supplement for K880 SPY PRG Validation",
+  "type": "empirical",
+  "data_source": "yfinance (SPY)",
+  "period": "2000-01-04 to 2026-04-02",
+  "is_period": "2000-01-04 to 2018-12-31",
+  "oos_period": "2018-12-31 to 2026-04-02",
+  "n_is": 4777,
+  "n_oos": 1824,
+  "es_parametric_normal": {
+    "GJR": {
+      "1pct": {
+        "es_mean": -0.0280524256783644,
+        "es_std": 0.01740359539352813
+      },
+      "5pct": {
+        "es_mean": -0.021710861846183847,
+        "es_std": 0.013469318466359494
+      }
+    },
+    "HAR": {
+      "1pct": {
+        "es_mean": -0.01846930677841285,
+        "es_std": 0.00905591162595355
+      },
+      "5pct": {
+        "es_mean": -0.014294113901535795,
+        "es_std": 0.007008721757490138
+      }
+    },
+    "PRG_Basic": {
+      "1pct": {
+        "es_mean": -0.02838372357290814,
+        "es_std": 0.016959847248076292
+      },
+      "5pct": {
+        "es_mean": -0.021967266155060353,
+        "es_std": 0.013125884540507025
+      }
+    },
+    "PRG_Extended": {
+      "1pct": {
+        "es_mean": -0.029399607887589524,
+        "es_std": 0.021741660142501062
+      },
+      "5pct": {
+        "es_mean": -0.022753498485220784,
+        "es_std": 0.01682671527491394
+      }
+    },
+    "Separate": {
+      "1pct": {
+        "es_mean": -0.029260159812243267,
+        "es_std": 0.01682569828029668
+      },
+      "5pct": {
+        "es_mean": -0.022645574203261316,
+        "es_std": 0.013022061443721582
+      }
+    }
+  },
+  "es_historical_sim": {
+    "GJR": {
+      "1pct": {
+        "z_es_factor": -4.042567290846748,
+        "z_var_quantile": -2.8555508715074502,
+        "es_mean": -0.04270685287133953,
+        "es_std": 0.026307287731669092
+      },
+      "5pct": {
+        "z_es_factor": -2.45365297180844,
+        "z_var_quantile": -1.6341507004151496,
+        "es_mean": -0.025818666463398147,
+        "es_std": 0.015928669892353996
+      }
+    },
+    "HAR": {
+      "1pct": {
+        "z_es_factor": -4.834172286235751,
+        "z_var_quantile": -3.590572569642258,
+        "es_mean": -0.0318131905044535,
+        "es_std": 0.015290435061243734
+      },
+      "5pct": {
+        "z_es_factor": -2.8936588897641955,
+        "z_var_quantile": -1.874293998945107,
+        "es_mean": -0.01878386453646681,
+        "es_std": 0.008974746353890584
+      }
+    },
+    "PRG_Basic": {
+      "1pct": {
+        "z_es_factor": -3.8153572732630185,
+        "z_var_quantile": -2.7018676435570894,
+        "es_mean": -0.04153636615320983,
+        "es_std": 0.024965395096941196
+      },
+      "5pct": {
+        "z_es_factor": -2.357896212767302,
+        "z_var_quantile": -1.619251986373764,
+        "es_mean": -0.02541845177599557,
+        "es_std": 0.015231028316717224
+      }
+    },
+    "PRG_Extended": {
+      "1pct": {
+        "z_es_factor": -3.7828233679413517,
+        "z_var_quantile": -2.660657058255183,
+        "es_mean": -0.04282897573907668,
+        "es_std": 0.03201983444989251
+      },
+      "5pct": {
+        "z_es_factor": -2.321742506262446,
+        "z_var_quantile": -1.5843497051259385,
+        "es_mean": -0.026113264208972305,
+        "es_std": 0.0194598940072106
+      }
+    },
+    "Separate": {
+      "1pct": {
+        "z_es_factor": -3.930589665468301,
+        "z_var_quantile": -2.766996500085614,
+        "es_mean": -0.04369374762527246,
+        "es_std": 0.02518037942553927
+      },
+      "5pct": {
+        "z_es_factor": -2.4066320460069517,
+        "z_var_quantile": -1.6112894598241942,
+        "es_mean": -0.02661387101909961,
+        "es_std": 0.015305594159143692
+      }
+    }
+  },
+  "acerbi_szekely_tests": {
+    "GJR": {
+      "1pct": {
+        "parametric": {
+          "Z2": 3.6331015987062565,
+          "p_value": 1.0,
+          "n": 1824,
+          "n_violations": 39,
+          "violation_rate": 0.02138157894736842,
+          "reject_H0_at_5pct": false,
+          "interpretation": "ES not rejected"
+        },
+        "historical_sim": {
+          "Z2": 2.731706576940034,
+          "p_value": 1.0,
+          "n": 1824,
+          "n_violations": 39,
+          "violation_rate": 0.02138157894736842,
+          "reject_H0_at_5pct": false,
+          "interpretation": "ES not rejected"
+        }
+      },
+      "5pct": {
+        "parametric": {
+          "Z2": 2.3401178801639073,
+          "p_value": 1.0,
+          "n": 1824,
+          "n_violations": 104,
+          "violation_rate": 0.05701754385964912,
+          "reject_H0_at_5pct": false,
+          "interpretation": "ES not rejected"
+        },
+        "historical_sim": {
+          "Z2": 2.127450544815675,
+          "p_value": 1.0,
+          "n": 1824,
+          "n_violations": 104,
+          "violation_rate": 0.05701754385964912,
+          "reject_H0_at_5pct": false,
+          "interpretation": "ES not rejected"
+        }
+      }
+    },
+    "HAR": {
+      "1pct": {
+        "parametric": {
+          "Z2": 9.030138931792216,
+          "p_value": 1.0,
+          "n": 1824,
+          "n_violations": 110,
+          "violation_rate": 0.06030701754385965,
+          "reject_H0_at_5pct": false,
+          "interpretation": "ES not rejected"
+        },
+        "historical_sim": {
+          "Z2": 5.713332838577852,
+          "p_value": 1.0,
+          "n": 1824,
+          "n_violations": 110,
+          "violation_rate": 0.06030701754385965,
+          "reject_H0_at_5pct": false,
+          "interpretation": "ES not rejected"
+        }
+      },
+      "5pct": {
+        "parametric": {
+          "Z2": 4.06687311642844,
+          "p_value": 1.0,
+          "n": 1824,
+          "n_violations": 204,
+          "violation_rate": 0.1118421052631579,
+          "reject_H0_at_5pct": false,
+          "interpretation": "ES not rejected"
+        },
+        "historical_sim": {
+          "Z2": 3.3439748433329672,
+          "p_value": 1.0,
+          "n": 1824,
+          "n_violations": 204,
+          "violation_rate": 0.1118421052631579,
+          "reject_H0_at_5pct": false,
+          "interpretation": "ES not rejected"
+        }
+      }
+    },
+    "PRG_Basic": {
+      "1pct": {
+        "parametric": {
+          "Z2": 2.4930499956722585,
+          "p_value": 0.9999999999999979,
+          "n": 1824,
+          "n_violations": 24,
+          "violation_rate": 0.013157894736842105,
+          "reject_H0_at_5pct": false,
+          "interpretation": "ES not rejected"
+        },
+        "historical_sim": {
+          "Z2": 2.023899604538764,
+          "p_value": 1.0,
+          "n": 1824,
+          "n_violations": 24,
+          "violation_rate": 0.013157894736842105,
+          "reject_H0_at_5pct": false,
+          "interpretation": "ES not rejected"
+        }
+      },
+      "5pct": {
+        "parametric": {
+          "Z2": 2.0425427682076576,
+          "p_value": 1.0,
+          "n": 1824,
+          "n_violations": 90,
+          "violation_rate": 0.049342105263157895,
+          "reject_H0_at_5pct": false,
+          "interpretation": "ES not rejected"
+        },
+        "historical_sim": {
+          "Z2": 1.901558083092132,
+          "p_value": 1.0,
+          "n": 1824,
+          "n_violations": 90,
+          "violation_rate": 0.049342105263157895,
+          "reject_H0_at_5pct": false,
+          "interpretation": "ES not rejected"
+        }
+      }
+    },
+    "PRG_Extended": {
+      "1pct": {
+        "parametric": {
+          "Z2": 2.1168794992505964,
+          "p_value": 0.9999999999999947,
+          "n": 1824,
+          "n_violations": 18,
+          "violation_rate": 0.009868421052631578,
+          "reject_H0_at_5pct": false,
+          "interpretation": "ES not rejected"
+        },
+        "historical_sim": {
+          "Z2": 1.768977744561413,
+          "p_value": 1.0,
+          "n": 1824,
+          "n_violations": 18,
+          "violation_rate": 0.009868421052631578,
+          "reject_H0_at_5pct": false,
+          "interpretation": "ES not rejected"
+        }
+      },
+      "5pct": {
+        "parametric": {
+          "Z2": 1.7699396782513612,
+          "p_value": 1.0,
+          "n": 1824,
+          "n_violations": 66,
+          "violation_rate": 0.03618421052631579,
+          "reject_H0_at_5pct": false,
+          "interpretation": "ES not rejected"
+        },
+        "historical_sim": {
+          "Z2": 1.6715370459283805,
+          "p_value": 1.0,
+          "n": 1824,
+          "n_violations": 66,
+          "violation_rate": 0.03618421052631579,
+          "reject_H0_at_5pct": false,
+          "interpretation": "ES not rejected"
+        }
+      }
+    },
+    "Separate": {
+      "1pct": {
+        "parametric": {
+          "Z2": 3.176082399160461,
+          "p_value": 0.9999999999999999,
+          "n": 1824,
+          "n_violations": 34,
+          "violation_rate": 0.01864035087719298,
+          "reject_H0_at_5pct": false,
+          "interpretation": "ES not rejected"
+        },
+        "historical_sim": {
+          "Z2": 2.4582651055233287,
+          "p_value": 1.0,
+          "n": 1824,
+          "n_violations": 34,
+          "violation_rate": 0.01864035087719298,
+          "reject_H0_at_5pct": false,
+          "interpretation": "ES not rejected"
+        }
+      },
+      "5pct": {
+        "parametric": {
+          "Z2": 2.1132247930456187,
+          "p_value": 1.0,
+          "n": 1824,
+          "n_violations": 88,
+          "violation_rate": 0.04824561403508772,
+          "reject_H0_at_5pct": false,
+          "interpretation": "ES not rejected"
+        },
+        "historical_sim": {
+          "Z2": 1.9483637875008428,
+          "p_value": 1.0,
+          "n": 1824,
+          "n_violations": 88,
+          "violation_rate": 0.04824561403508772,
+          "reject_H0_at_5pct": false,
+          "interpretation": "ES not rejected"
+        }
+      }
+    }
+  },
+  "fissler_ziegel_scores": {
+    "GJR": {
+      "1pct": {
+        "parametric": {
+          "FZ_score": -3.0416626828028543,
+          "n": 1824
+        },
+        "historical_sim": {
+          "FZ_score": -3.182716162557231,
+          "n": 1824
+        }
+      },
+      "5pct": {
+        "parametric": {
+          "FZ_score": -3.7093799761186,
+          "n": 1824
+        },
+        "historical_sim": {
+          "FZ_score": -3.7310145862670394,
+          "n": 1824
+        }
+      }
+    },
+    "HAR": {
+      "1pct": {
+        "parametric": {
+          "FZ_score": -1.4428203524002745,
+          "n": 1824
+        },
+        "historical_sim": {
+          "FZ_score": -2.3955064148544105,
+          "n": 1824
+        }
+      },
+      "5pct": {
+        "parametric": {
+          "FZ_score": -3.2575567784371766,
+          "n": 1824
+        },
+        "historical_sim": {
+          "FZ_score": -3.4718666476296995,
+          "n": 1824
+        }
+      }
+    },
+    "PRG_Basic": {
+      "1pct": {
+        "parametric": {
+          "FZ_score": -3.447639920091337,
+          "n": 1824
+        },
+        "historical_sim": {
+          "FZ_score": -3.451456605413374,
+          "n": 1824
+        }
+      },
+      "5pct": {
+        "parametric": {
+          "FZ_score": -3.868278474612198,
+          "n": 1824
+        },
+        "historical_sim": {
+          "FZ_score": -3.8650652706151236,
+          "n": 1824
+        }
+      }
+    },
+    "PRG_Extended": {
+      "1pct": {
+        "parametric": {
+          "FZ_score": -3.52735386934064,
+          "n": 1824
+        },
+        "historical_sim": {
+          "FZ_score": -3.504158407570641,
+          "n": 1824
+        }
+      },
+      "5pct": {
+        "parametric": {
+          "FZ_score": -3.921700629197306,
+          "n": 1824
+        },
+        "historical_sim": {
+          "FZ_score": -3.911146442444323,
+          "n": 1824
+        }
+      }
+    },
+    "Separate": {
+      "1pct": {
+        "parametric": {
+          "FZ_score": -3.207380060523953,
+          "n": 1824
+        },
+        "historical_sim": {
+          "FZ_score": -3.2756726306881085,
+          "n": 1824
+        }
+      },
+      "5pct": {
+        "parametric": {
+          "FZ_score": -3.7443422561259156,
+          "n": 1824
+        },
+        "historical_sim": {
+          "FZ_score": -3.7527757189967046,
+          "n": 1824
+        }
+      }
+    }
+  },
+  "es_violation_rates": {
+    "GJR": {
+      "1pct": {
+        "parametric": {
+          "es_violation_rate": 0.013157894736842105,
+          "n_below_es": 24,
+          "n": 1824
+        },
+        "historical_sim": {
+          "es_violation_rate": 0.003837719298245614,
+          "n_below_es": 7,
+          "n": 1824
+        }
+      },
+      "5pct": {
+        "parametric": {
+          "es_violation_rate": 0.03070175438596491,
+          "n_below_es": 56,
+          "n": 1824
+        },
+        "historical_sim": {
+          "es_violation_rate": 0.017543859649122806,
+          "n_below_es": 32,
+          "n": 1824
+        }
+      }
+    },
+    "HAR": {
+      "1pct": {
+        "parametric": {
+          "es_violation_rate": 0.04057017543859649,
+          "n_below_es": 74,
+          "n": 1824
+        },
+        "historical_sim": {
+          "es_violation_rate": 0.011513157894736841,
+          "n_below_es": 21,
+          "n": 1824
+        }
+      },
+      "5pct": {
+        "parametric": {
+          "es_violation_rate": 0.07894736842105263,
+          "n_below_es": 144,
+          "n": 1824
+        },
+        "historical_sim": {
+          "es_violation_rate": 0.039473684210526314,
+          "n_below_es": 72,
+          "n": 1824
+        }
+      }
+    },
+    "PRG_Basic": {
+      "1pct": {
+        "parametric": {
+          "es_violation_rate": 0.00712719298245614,
+          "n_below_es": 13,
+          "n": 1824
+        },
+        "historical_sim": {
+          "es_violation_rate": 0.0027412280701754384,
+          "n_below_es": 5,
+          "n": 1824
+        }
+      },
+      "5pct": {
+        "parametric": {
+          "es_violation_rate": 0.018092105263157895,
+          "n_below_es": 33,
+          "n": 1824
+        },
+        "historical_sim": {
+          "es_violation_rate": 0.01206140350877193,
+          "n_below_es": 22,
+          "n": 1824
+        }
+      }
+    },
+    "PRG_Extended": {
+      "1pct": {
+        "parametric": {
+          "es_violation_rate": 0.004934210526315789,
+          "n_below_es": 9,
+          "n": 1824
+        },
+        "historical_sim": {
+          "es_violation_rate": 0.001644736842105263,
+          "n_below_es": 3,
+          "n": 1824
+        }
+      },
+      "5pct": {
+        "parametric": {
+          "es_violation_rate": 0.015899122807017545,
+          "n_below_es": 29,
+          "n": 1824
+        },
+        "historical_sim": {
+          "es_violation_rate": 0.00932017543859649,
+          "n_below_es": 17,
+          "n": 1824
+        }
+      }
+    },
+    "Separate": {
+      "1pct": {
+        "parametric": {
+          "es_violation_rate": 0.00932017543859649,
+          "n_below_es": 17,
+          "n": 1824
+        },
+        "historical_sim": {
+          "es_violation_rate": 0.003289473684210526,
+          "n_below_es": 6,
+          "n": 1824
+        }
+      },
+      "5pct": {
+        "parametric": {
+          "es_violation_rate": 0.02631578947368421,
+          "n_below_es": 48,
+          "n": 1824
+        },
+        "historical_sim": {
+          "es_violation_rate": 0.013706140350877192,
+          "n_below_es": 25,
+          "n": 1824
+        }
+      }
+    }
+  },
+  "fz_dm_tests": {
+    "1pct": {
+      "parametric": {
+        "GJR_vs_HAR": {
+          "t_stat": -4.844433106081402,
+          "p_value": 1.3771174904864125e-06,
+          "n": 1824,
+          "winner": "GJR",
+          "harvey_pass": true
+        },
+        "GJR_vs_PRG_Basic": {
+          "t_stat": 3.6344611994930602,
+          "p_value": 0.00028628297232202726,
+          "n": 1824,
+          "winner": "PRG_Basic",
+          "harvey_pass": true
+        },
+        "GJR_vs_PRG_Extended": {
+          "t_stat": 3.750174644637396,
+          "p_value": 0.0001822283039301098,
+          "n": 1824,
+          "winner": "PRG_Extended",
+          "harvey_pass": true
+        },
+        "GJR_vs_Separate": {
+          "t_stat": 2.4614113786409946,
+          "p_value": 0.013931187412762114,
+          "n": 1824,
+          "winner": "Separate",
+          "harvey_pass": false
+        },
+        "HAR_vs_PRG_Basic": {
+          "t_stat": 5.077983908418053,
+          "p_value": 4.2042256209740003e-07,
+          "n": 1824,
+          "winner": "PRG_Basic",
+          "harvey_pass": true
+        },
+        "HAR_vs_PRG_Extended": {
+          "t_stat": 5.1621533213386455,
+          "p_value": 2.707713906424658e-07,
+          "n": 1824,
+          "winner": "PRG_Extended",
+          "harvey_pass": true
+        },
+        "HAR_vs_Separate": {
+          "t_stat": 5.115393288765047,
+          "p_value": 3.4602711407316633e-07,
+          "n": 1824,
+          "winner": "Separate",
+          "harvey_pass": true
+        },
+        "PRG_Basic_vs_PRG_Extended": {
+          "t_stat": 1.5816258553235893,
+          "p_value": 0.11390847570555751,
+          "n": 1824,
+          "winner": "PRG_Extended",
+          "harvey_pass": false
+        },
+        "PRG_Basic_vs_Separate": {
+          "t_stat": -2.963455839247726,
+          "p_value": 0.0030814831788088526,
+          "n": 1824,
+          "winner": "PRG_Basic",
+          "harvey_pass": false
+        },
+        "PRG_Extended_vs_Separate": {
+          "t_stat": -3.064010310904893,
+          "p_value": 0.0022159057683064365,
+          "n": 1824,
+          "winner": "PRG_Extended",
+          "harvey_pass": true
+        }
+      },
+      "historical_sim": {
+        "GJR_vs_HAR": {
+          "t_stat": -3.9774534614948616,
+          "p_value": 7.238086180727521e-05,
+          "n": 1824,
+          "winner": "GJR",
+          "harvey_pass": true
+        },
+        "GJR_vs_PRG_Basic": {
+          "t_stat": 3.705804796250159,
+          "p_value": 0.0002170079991417051,
+          "n": 1824,
+          "winner": "PRG_Basic",
+          "harvey_pass": true
+        },
+        "GJR_vs_PRG_Extended": {
+          "t_stat": 3.827426786276567,
+          "p_value": 0.00013385937252796687,
+          "n": 1824,
+          "winner": "PRG_Extended",
+          "harvey_pass": true
+        },
+        "GJR_vs_Separate": {
+          "t_stat": 2.1145779990276927,
+          "p_value": 0.03460133839479029,
+          "n": 1824,
+          "winner": "Separate",
+          "harvey_pass": false
+        },
+        "HAR_vs_PRG_Basic": {
+          "t_stat": 4.428587219153547,
+          "p_value": 1.0047902297305455e-05,
+          "n": 1824,
+          "winner": "PRG_Basic",
+          "harvey_pass": true
+        },
+        "HAR_vs_PRG_Extended": {
+          "t_stat": 4.569378244665119,
+          "p_value": 5.21987271695501e-06,
+          "n": 1824,
+          "winner": "PRG_Extended",
+          "harvey_pass": true
+        },
+        "HAR_vs_Separate": {
+          "t_stat": 4.273486902502814,
+          "p_value": 2.023719200772156e-05,
+          "n": 1824,
+          "winner": "Separate",
+          "harvey_pass": true
+        },
+        "PRG_Basic_vs_PRG_Extended": {
+          "t_stat": 1.541252959347213,
+          "p_value": 0.12342878650689304,
+          "n": 1824,
+          "winner": "PRG_Extended",
+          "harvey_pass": false
+        },
+        "PRG_Basic_vs_Separate": {
+          "t_stat": -3.266483680662969,
+          "p_value": 0.0011091355664016866,
+          "n": 1824,
+          "winner": "PRG_Basic",
+          "harvey_pass": true
+        },
+        "PRG_Extended_vs_Separate": {
+          "t_stat": -3.311450466050503,
+          "p_value": 0.0009462671058375616,
+          "n": 1824,
+          "winner": "PRG_Extended",
+          "harvey_pass": true
+        }
+      }
+    },
+    "5pct": {
+      "parametric": {
+        "GJR_vs_HAR": {
+          "t_stat": -4.591002931190615,
+          "p_value": 4.7126768356609006e-06,
+          "n": 1824,
+          "winner": "GJR",
+          "harvey_pass": true
+        },
+        "GJR_vs_PRG_Basic": {
+          "t_stat": 4.930535794925241,
+          "p_value": 8.944517415621078e-07,
+          "n": 1824,
+          "winner": "PRG_Basic",
+          "harvey_pass": true
+        },
+        "GJR_vs_PRG_Extended": {
+          "t_stat": 4.940813803008116,
+          "p_value": 8.491531953147557e-07,
+          "n": 1824,
+          "winner": "PRG_Extended",
+          "harvey_pass": true
+        },
+        "GJR_vs_Separate": {
+          "t_stat": 1.844610508916402,
+          "p_value": 0.06525635415202014,
+          "n": 1824,
+          "winner": "Separate",
+          "harvey_pass": false
+        },
+        "HAR_vs_PRG_Basic": {
+          "t_stat": 5.172489215055339,
+          "p_value": 2.5641394030273545e-07,
+          "n": 1824,
+          "winner": "PRG_Basic",
+          "harvey_pass": true
+        },
+        "HAR_vs_PRG_Extended": {
+          "t_stat": 5.219042428982492,
+          "p_value": 2.0037281145413033e-07,
+          "n": 1824,
+          "winner": "PRG_Extended",
+          "harvey_pass": true
+        },
+        "HAR_vs_Separate": {
+          "t_stat": 4.779990686394297,
+          "p_value": 1.893587279200304e-06,
+          "n": 1824,
+          "winner": "Separate",
+          "harvey_pass": true
+        },
+        "PRG_Basic_vs_PRG_Extended": {
+          "t_stat": 2.625334038457407,
+          "p_value": 0.008728775533439093,
+          "n": 1824,
+          "winner": "PRG_Extended",
+          "harvey_pass": false
+        },
+        "PRG_Basic_vs_Separate": {
+          "t_stat": -5.0398573216667195,
+          "p_value": 5.120403532288265e-07,
+          "n": 1824,
+          "winner": "PRG_Basic",
+          "harvey_pass": true
+        },
+        "PRG_Extended_vs_Separate": {
+          "t_stat": -4.676129124919995,
+          "p_value": 3.138234897281933e-06,
+          "n": 1824,
+          "winner": "PRG_Extended",
+          "harvey_pass": true
+        }
+      },
+      "historical_sim": {
+        "GJR_vs_HAR": {
+          "t_stat": -3.4212768927076254,
+          "p_value": 0.0006370339642169931,
+          "n": 1824,
+          "winner": "GJR",
+          "harvey_pass": true
+        },
+        "GJR_vs_PRG_Basic": {
+          "t_stat": 5.0068112779259115,
+          "p_value": 6.067925506503258e-07,
+          "n": 1824,
+          "winner": "PRG_Basic",
+          "harvey_pass": true
+        },
+        "GJR_vs_PRG_Extended": {
+          "t_stat": 5.046178804534709,
+          "p_value": 4.956201129502347e-07,
+          "n": 1824,
+          "winner": "PRG_Extended",
+          "harvey_pass": true
+        },
+        "GJR_vs_Separate": {
+          "t_stat": 1.3618181316011957,
+          "p_value": 0.1734235476072059,
+          "n": 1824,
+          "winner": "Separate",
+          "harvey_pass": false
+        },
+        "HAR_vs_PRG_Basic": {
+          "t_stat": 4.286036576731915,
+          "p_value": 1.913846072376657e-05,
+          "n": 1824,
+          "winner": "PRG_Basic",
+          "harvey_pass": true
+        },
+        "HAR_vs_PRG_Extended": {
+          "t_stat": 4.441802451662283,
+          "p_value": 9.456244554950644e-06,
+          "n": 1824,
+          "winner": "PRG_Extended",
+          "harvey_pass": true
+        },
+        "HAR_vs_Separate": {
+          "t_stat": 3.5885708908733123,
+          "p_value": 0.0003412786420102787,
+          "n": 1824,
+          "winner": "Separate",
+          "harvey_pass": true
+        },
+        "PRG_Basic_vs_PRG_Extended": {
+          "t_stat": 2.640669036385682,
+          "p_value": 0.008344887746236651,
+          "n": 1824,
+          "winner": "PRG_Extended",
+          "harvey_pass": false
+        },
+        "PRG_Basic_vs_Separate": {
+          "t_stat": -5.411270931219185,
+          "p_value": 7.085462927491903e-08,
+          "n": 1824,
+          "winner": "PRG_Basic",
+          "harvey_pass": true
+        },
+        "PRG_Extended_vs_Separate": {
+          "t_stat": -4.968505392502595,
+          "p_value": 7.378409292435606e-07,
+          "n": 1824,
+          "winner": "PRG_Extended",
+          "harvey_pass": true
+        }
+      }
+    }
+  },
+  "key_findings": [
+    "Best FZ score at 1% (param): PRG_Extended (-3.5274)",
+    "Best FZ score at 5% (param): PRG_Extended (-3.9217)",
+    "A-S rejected at 1pct \u2014 Param: 0/5, HS: 0/5",
+    "A-S rejected at 5pct \u2014 Param: 0/5, HS: 0/5",
+    "FZ DM 1% PRG_Ext vs GJR: t=3.75, Harvey PASS, winner=PRG_Extended"
+  ],
+  "runtime_seconds": 12.397102,
+  "references": [
+    "Acerbi & Szekely (2014): Backtesting Expected Shortfall. Risk.",
+    "Fissler & Ziegel (2016): Higher order elicitability. Ann. Stat.",
+    "McNeil & Frey (2000): Estimation of tail-related risk measures. J. Empirical Finance.",
+    "Patton, Ziegel & Chen (2019): Dynamic semiparametric models for ES. J. Econometrics.",
+    "Basel Committee (2019): MAR 99. Minimum capital requirements for market risk.",
+    "K880: PRG Cross-Market Validation on SPY"
+  ]
+}

@@ -1,0 +1,554 @@
+{
+  "experiment_id": "K1100g_d8",
+  "title": "Hansen (1994) skewed-t innovation on N225 (+SPY) gap\u00b2 PRG \u2014 push K1100g_d7 N225 DM t=+2.32 borderline past Harvey |t|>3",
+  "run_at": "2026-04-18T03:24:20",
+  "seed": 42,
+  "parent_chain": [
+    "K1100g",
+    "K1100g_d1",
+    "K1100g_d3",
+    "K1100g_d5",
+    "K1100g_d6",
+    "K1100g_d7"
+  ],
+  "references": [
+    "Hansen (1994) IER 35(3) \u2014 Autoregressive conditional density estimation",
+    "Jondeau & Rockinger (2003) JEDC 27(10) \u2014 Conditional volatility/skewness/kurtosis",
+    "Bollerslev (1987) REStat 69(3) \u2014 Student-t GARCH",
+    "Engle & Rangel (2008) RFS 21(3) \u2014 tau*g multiplicative PRG",
+    "Harvey et al. (1997) IJF 13(2) \u2014 HLN DM correction",
+    "Harvey (2016) JF \u2014 t>3 threshold"
+  ],
+  "design": {
+    "markets": [
+      {
+        "label": "N225",
+        "ticker": "^N225",
+        "cache": "n225_daily_2010-2026.parquet"
+      },
+      {
+        "label": "SPY",
+        "ticker": "SPY",
+        "cache": "spy_daily_2010-2026.parquet"
+      }
+    ],
+    "target_return": "r_intraday[t] = log(Close_t / Open_t)",
+    "exog": "gap\u00b2[t] = (log Open_t - log Close_{t-1})\u00b2",
+    "innovations_compared": [
+      "student",
+      "skewt"
+    ],
+    "skewt_spec": "Hansen (1994) eq. 9-10 closed form, E[z]=0, Var[z]=1, \u03b7\u2208(2.05, 200), \u03bb\u2208(-0.98, 0.98)",
+    "train_start": "2010-01-01",
+    "train_end": "2019-12-31",
+    "test_start": "2020-01-01",
+    "test_end": "2025-12-31",
+    "refit_every": 25,
+    "n_restarts_is": 10,
+    "n_restarts_oos": 5
+  },
+  "markets": {
+    "N225": {
+      "label": "N225",
+      "ticker": "^N225",
+      "descriptives": {
+        "n": 3970,
+        "date_min": "2010-01-05",
+        "date_max": "2026-03-31",
+        "r_intraday": {
+          "mean": -8.465698733033783e-05,
+          "sd": 0.00946663023566593,
+          "skew": -0.9771160869478072,
+          "excess_kurt": 15.67572875940759
+        },
+        "r_overnight": {
+          "mean": 0.00047938360702270093,
+          "sd": 0.007900847537974584,
+          "skew": -0.18123572400599772,
+          "excess_kurt": -0.05173898002741417
+        },
+        "gap2": {
+          "mean": 6.265320046100115e-05,
+          "sd": 8.647388215448935e-05
+        }
+      },
+      "is": {
+        "M_base_st": {
+          "success": true,
+          "log_lik": 13582.961412234405,
+          "params": [
+            5.6356916514725266e-05,
+            0.06996068756294374,
+            9.07237664468511e-06,
+            2.7681683250670255e-06,
+            8.24225176115891e-06,
+            6.994330670428857e-06,
+            0.05099836858067414,
+            0.0430663198134033,
+            0.8364991509318571,
+            5.11801986927514
+          ],
+          "df": 5.11801986927514
+        },
+        "M_gap_st": {
+          "success": true,
+          "log_lik": 13614.147655741888,
+          "params": [
+            4.221418207230679e-05,
+            0.07358725510061388,
+            1.0740145470325768e-05,
+            5.403137554037042e-06,
+            1.0034315041057878e-05,
+            9.634662386821602e-06,
+            0.032343190815068076,
+            0.07464392885523596,
+            0.8489524475745205,
+            0.14025292574983816,
+            6.606602864838559
+          ],
+          "df": 6.606602864838559,
+          "xn_coef": 0.14025292574983816
+        },
+        "M_base_sk": {
+          "success": true,
+          "log_lik": 13576.722840304214,
+          "params": [
+            5.488613742312587e-05,
+            0.046332688063033985,
+            7.964915256456657e-06,
+            2.776525651428408e-06,
+            6.96216965952669e-06,
+            6.478886391744474e-06,
+            0.08089121095080859,
+            0.08288517110312309,
+            0.7256227590715172,
+            7.603087502352917,
+            -0.07752118025261358
+          ],
+          "eta": 7.603087502352917,
+          "lam": -0.07752118025261358,
+          "lambda_at_boundary": false
+        },
+        "M_gap_sk": {
+          "success": true,
+          "log_lik": 13607.645780792853,
+          "params": [
+            5.4203552853693444e-05,
+            0.04854228848187367,
+            1.3100437521343025e-05,
+            7.384757521880803e-06,
+            1.1592640864828878e-05,
+            1.088213422306324e-05,
+            0.07602110800325534,
+            0.0449892907201344,
+            0.8664518980863882,
+            0.0914293449056635,
+            7.099827031468682,
+            -0.12700310299256434
+          ],
+          "eta": 7.099827031468682,
+          "lam": -0.12700310299256434,
+          "lambda_at_boundary": false,
+          "xn_coef": 0.0914293449056635
+        },
+        "lrt_gap_within_student": {
+          "chi2": 62.37248701496719,
+          "p": 2.886579864025407e-15
+        },
+        "lrt_gap_within_skewt": {
+          "chi2": 61.845880977278284,
+          "p": 3.6637359812630166e-15
+        },
+        "lrt_innovation_base": {
+          "chi2": 0.0,
+          "p": 1.0,
+          "note": "SkewT base vs Student-t base, restricting lambda=0"
+        },
+        "lrt_innovation_gap": {
+          "chi2": 0.0,
+          "p": 1.0,
+          "note": "SkewT gap vs Student-t gap, restricting lambda=0"
+        }
+      },
+      "oos": {
+        "n_valid": 1465,
+        "test_start": "2020-01-01",
+        "test_end": "2025-12-31",
+        "dm_gap_within_student": {
+          "t_hln": -1.9190324007546329,
+          "p": 0.0549802334713112,
+          "qlike_improv_pct": -0.3765816472931603,
+          "lrt_chi2": 0.0,
+          "lrt_p": 1.0,
+          "dm_loglik_t_hln": -1.5620636377693642
+        },
+        "dm_gap_within_skewt": {
+          "t_hln": -1.3326567546444958,
+          "p": 0.182644471010184,
+          "qlike_improv_pct": -0.6908024289582976,
+          "lrt_chi2": 0.0,
+          "lrt_p": 1.0,
+          "dm_loglik_t_hln": -1.5024625525826638,
+          "harvey_pass": false
+        },
+        "dm_innov_base": {
+          "t_hln": -2.226363325007123,
+          "p": 0.02598985497256412,
+          "qlike_improv_pct": -0.06336669452641747
+        },
+        "dm_innov_gap": {
+          "t_hln": -0.8206510021449713,
+          "p": 0.411845087674245,
+          "qlike_improv_pct": -0.3766069820795575,
+          "dm_loglik_t_hln": -0.5276772798721617
+        },
+        "dm_cross_best": {
+          "t_hln": -1.434441724944604,
+          "p": 0.1514462478050551,
+          "note": "DM(M_base_student vs M_gap_skewt) \u2014 overall best OOS improvement"
+        },
+        "qlike_means": {
+          "base_st": 1.5151587386382936,
+          "gap_st": 1.520864548375364,
+          "base_sk": 1.516118844647797,
+          "gap_sk": 1.5265922304525184
+        },
+        "ll_sums": {
+          "base_st": 4963.074359153445,
+          "gap_st": 4960.68493161239,
+          "base_sk": 4962.723991245748,
+          "gap_sk": 4958.866375229529
+        },
+        "skewt_param_oos_summary": {
+          "base_sk": {
+            "eta_mean": 7.603087486344661,
+            "eta_sd": 9.119466543959111e-09,
+            "lam_mean": -0.077521243742555,
+            "lam_sd": 3.4257945159114465e-08,
+            "lambda_boundary_hits": 0
+          },
+          "gap_sk": {
+            "eta_mean": 7.999999984983921,
+            "eta_sd": 7.632966825983912e-09,
+            "lam_mean": -0.0999999051986497,
+            "lam_sd": 5.090803201442086e-08,
+            "lambda_boundary_hits": 0
+          }
+        },
+        "annual": {
+          "2020": {
+            "n": 242,
+            "dm_gap_st_t": -0.8879560001573997,
+            "dm_gap_sk_t": -1.4116838845552093,
+            "qlike_imp_gap_sk_pct": -1.5239754033874238
+          },
+          "2021": {
+            "n": 245,
+            "dm_gap_st_t": -0.5074044869244245,
+            "dm_gap_sk_t": -0.4054027713634372,
+            "qlike_imp_gap_sk_pct": -0.2230880716681108
+          },
+          "2022": {
+            "n": 244,
+            "dm_gap_st_t": -0.5376235798225241,
+            "dm_gap_sk_t": 1.106348677870439,
+            "qlike_imp_gap_sk_pct": 0.4884021232556834
+          },
+          "2023": {
+            "n": 246,
+            "dm_gap_st_t": -1.6465487898892712,
+            "dm_gap_sk_t": 0.6965597192670087,
+            "qlike_imp_gap_sk_pct": 0.2105240803625516
+          },
+          "2024": {
+            "n": 245,
+            "dm_gap_st_t": -0.7076935861397202,
+            "dm_gap_sk_t": -0.53081803630939,
+            "qlike_imp_gap_sk_pct": -1.071413689483384
+          },
+          "2025": {
+            "n": 243,
+            "dm_gap_st_t": -2.131561882961461,
+            "dm_gap_sk_t": -1.1021205957401747,
+            "qlike_imp_gap_sk_pct": -1.8125099371772917
+          }
+        }
+      }
+    },
+    "SPY": {
+      "label": "SPY",
+      "ticker": "SPY",
+      "descriptives": {
+        "n": 4084,
+        "date_min": "2010-01-05",
+        "date_max": "2026-03-31",
+        "r_intraday": {
+          "mean": 0.00018175947973584754,
+          "sd": 0.008165758962943368,
+          "skew": 0.11535775503910824,
+          "excess_kurt": 10.826198100586682
+        },
+        "r_overnight": {
+          "mean": 0.00024605428408602353,
+          "sd": 0.006940451734198825,
+          "skew": -1.8478191324064916,
+          "excess_kurt": 30.290913486407305
+        },
+        "gap2": {
+          "mean": 4.823041298546056e-05,
+          "sd": 0.00027263424828709336
+        }
+      },
+      "is": {
+        "M_base_st": {
+          "success": true,
+          "log_lik": 14612.379808911828,
+          "params": [
+            3.042910811642106e-05,
+            0.07560588732773946,
+            3.877346433696573e-06,
+            1.0812737750814843e-05,
+            1.0672161626260334e-05,
+            5.0733699283894824e-06,
+            0.0643668475506429,
+            0.025105438388397294,
+            0.8655262755672528,
+            9.05331519266517
+          ],
+          "df": 9.05331519266517
+        },
+        "M_gap_st": {
+          "success": true,
+          "log_lik": 14669.22264773364,
+          "params": [
+            3.676371237161112e-05,
+            0.0481733321138002,
+            5.257404535158628e-06,
+            1.444043949776093e-05,
+            1.3917240619680785e-05,
+            8.221207330547068e-06,
+            0.07358514361559636,
+            0.054972196340798744,
+            0.8665356717062873,
+            0.06007954729673714,
+            6.498933130812091
+          ],
+          "df": 6.498933130812091,
+          "xn_coef": 0.06007954729673714
+        },
+        "M_base_sk": {
+          "success": true,
+          "log_lik": 14684.451813983458,
+          "params": [
+            3.7271145100662005e-05,
+            0.048173334984790886,
+            4.197806568727594e-06,
+            1.2092633641494702e-05,
+            1.1943808414931826e-05,
+            5.553661752055829e-06,
+            0.07358513834579841,
+            0.05497218644792588,
+            0.8665356584404739,
+            9.602120815572308,
+            -0.11258003842424195
+          ],
+          "eta": 9.602120815572308,
+          "lam": -0.11258003842424195,
+          "lambda_at_boundary": false
+        },
+        "M_gap_sk": {
+          "success": true,
+          "log_lik": 14719.73869465745,
+          "params": [
+            3.0543685473094114e-05,
+            0.025258990192431243,
+            4.2404588572717185e-06,
+            1.1750869317701282e-05,
+            1.1023056463091546e-05,
+            6.730103492396389e-06,
+            0.04126963508730872,
+            0.09753414000314035,
+            0.8557502125592672,
+            0.06506706368103088,
+            7.594892016982001,
+            -0.13665507566175122
+          ],
+          "eta": 7.594892016982001,
+          "lam": -0.13665507566175122,
+          "lambda_at_boundary": false,
+          "xn_coef": 0.06506706368103088
+        },
+        "lrt_gap_within_student": {
+          "chi2": 113.68567764362524,
+          "p": 0.0
+        },
+        "lrt_gap_within_skewt": {
+          "chi2": 70.57376134798324,
+          "p": 0.0
+        },
+        "lrt_innovation_base": {
+          "chi2": 144.14401014325995,
+          "p": 0.0,
+          "note": "SkewT base vs Student-t base, restricting lambda=0"
+        },
+        "lrt_innovation_gap": {
+          "chi2": 101.03209384761794,
+          "p": 0.0,
+          "note": "SkewT gap vs Student-t gap, restricting lambda=0"
+        }
+      },
+      "oos": {
+        "n_valid": 1508,
+        "test_start": "2020-01-01",
+        "test_end": "2025-12-31",
+        "dm_gap_within_student": {
+          "t_hln": -2.0983399223185133,
+          "p": 0.03587512827285111,
+          "qlike_improv_pct": -19.727186336843143,
+          "lrt_chi2": 0.0,
+          "lrt_p": 1.0,
+          "dm_loglik_t_hln": -3.8055155123598348
+        },
+        "dm_gap_within_skewt": {
+          "t_hln": -1.7423633845821638,
+          "p": 0.08144487869805284,
+          "qlike_improv_pct": -1.3086058507809548,
+          "lrt_chi2": 0.0,
+          "lrt_p": 1.0,
+          "dm_loglik_t_hln": -1.765027517328944,
+          "harvey_pass": false
+        },
+        "dm_innov_base": {
+          "t_hln": -0.47211576418914314,
+          "p": 0.6368441609208215,
+          "qlike_improv_pct": -0.49172490725692436
+        },
+        "dm_innov_gap": {
+          "t_hln": 1.8834928845904064,
+          "p": 0.059633603218053555,
+          "qlike_improv_pct": 14.967712335176273,
+          "dm_loglik_t_hln": 4.072274643321943
+        },
+        "dm_cross_best": {
+          "t_hln": -2.112856439633641,
+          "p": 0.034613057211462905,
+          "note": "DM(M_base_student vs M_gap_skewt) \u2014 overall best OOS improvement"
+        },
+        "qlike_means": {
+          "base_st": 1.6217618267351555,
+          "gap_st": 1.9416898042349908,
+          "base_sk": 1.629736433573597,
+          "gap_sk": 1.65106325989565
+        },
+        "ll_sums": {
+          "base_st": 5130.387248238319,
+          "gap_st": 5009.758925333172,
+          "base_sk": 5145.8771496054505,
+          "gap_sk": 5137.1076034190755
+        },
+        "skewt_param_oos_summary": {
+          "base_sk": {
+            "eta_mean": 7.60294141828756,
+            "eta_sd": 0.00013150081617138622,
+            "lam_mean": -0.09201148837573708,
+            "lam_sd": 0.013043764259389232,
+            "lambda_boundary_hits": 0
+          },
+          "gap_sk": {
+            "eta_mean": 7.999944364236587,
+            "eta_sd": 5.7204632941108145e-05,
+            "lam_mean": -0.10379095061266419,
+            "lam_sd": 0.0038978969032812494,
+            "lambda_boundary_hits": 0
+          }
+        },
+        "annual": {
+          "2020": {
+            "n": 253,
+            "dm_gap_st_t": -1.3415035113289437,
+            "dm_gap_sk_t": -0.3152933806502146,
+            "qlike_imp_gap_sk_pct": -0.3050994610768335
+          },
+          "2021": {
+            "n": 252,
+            "dm_gap_st_t": -2.8442477331363927,
+            "dm_gap_sk_t": -1.9378039039302846,
+            "qlike_imp_gap_sk_pct": -1.0633971204195403
+          },
+          "2022": {
+            "n": 251,
+            "dm_gap_st_t": -1.4025373102715937,
+            "dm_gap_sk_t": -2.0446525503180744,
+            "qlike_imp_gap_sk_pct": -8.118174164498084
+          },
+          "2023": {
+            "n": 250,
+            "dm_gap_st_t": -1.1283061089999984,
+            "dm_gap_sk_t": -0.011414613991035435,
+            "qlike_imp_gap_sk_pct": -0.009714495560384196
+          },
+          "2024": {
+            "n": 252,
+            "dm_gap_st_t": -1.3804872167488438,
+            "dm_gap_sk_t": 2.3913064897995464,
+            "qlike_imp_gap_sk_pct": 1.0877862757083154
+          },
+          "2025": {
+            "n": 250,
+            "dm_gap_st_t": -1.1360195446918948,
+            "dm_gap_sk_t": -0.025312066357261954,
+            "qlike_imp_gap_sk_pct": -0.02134880267315883
+          }
+        }
+      }
+    }
+  },
+  "d7_anchor": {
+    "SPY": {
+      "dm_qlike_t_hln": 0.6603955857641025,
+      "qlike_improv_pct": 1.375587834111437,
+      "lrt_chi2": 22.294914328169398,
+      "n_valid": 1508
+    },
+    "N225": {
+      "dm_qlike_t_hln": 2.3146126850632074,
+      "qlike_improv_pct": 2.3332572310414563,
+      "lrt_chi2": 36.725695854984224,
+      "n_valid": 1465
+    },
+    "verdict_d7": "DIRECTION_CONSISTENT_ALL_BORDERLINE"
+  },
+  "verdict": {
+    "verdict": "STILL_BORDERLINE",
+    "preliminary": true,
+    "reason": "N225 gap\u00b2 DM-HLN t=-1.33 under skewed-t; weak but not a regression. [PRELIMINARY] OOS SkewT parameters fixed at warm-start values across refits (N225: eta=8.00+-0.00, lam=-0.100+-0.000); either (a) likelihood surface flat in PRG-integrated framework (supported by IS LRT=0 for N225 lambda=0 restriction) or (b) warm-start artifact with n_restarts=2. See README Sec 5.2. Also flag: d7 used refit_every=5 while d8 uses refit_every=25; Student-t DM sign flip between d7 (+2.32/+0.66) and d8 (-1.92/-2.10) is refit-cadence artifact not skewed-t regression. Proper re-test deferred to K1100g_d9.",
+    "evidence": {
+      "N225_dm_student": -1.9190324007546329,
+      "N225_dm_skewt": -1.3326567546444958,
+      "SPY_dm_student": -2.0983399223185133,
+      "SPY_dm_skewt": -1.7423633845821638
+    },
+    "d7_anchor": {
+      "SPY": {
+        "dm_qlike_t_hln": 0.6603955857641025,
+        "qlike_improv_pct": 1.375587834111437,
+        "lrt_chi2": 22.294914328169398,
+        "n_valid": 1508
+      },
+      "N225": {
+        "dm_qlike_t_hln": 2.3146126850632074,
+        "qlike_improv_pct": 2.3332572310414563,
+        "lrt_chi2": 36.725695854984224,
+        "n_valid": 1465
+      },
+      "verdict_d7": "DIRECTION_CONSISTENT_ALL_BORDERLINE"
+    }
+  },
+  "limitations": [
+    "Hansen skewed-t \u03bb at \u00b10.98 boundary flagged as PRELIMINARY (MLE identification concern); non-boundary fits preferred.",
+    "TAIFEX not rerun under skewed-t in d8 (d5 Student-t anchor only) because d7 already showed TAIFEX borderline at smaller n; skewed-t at n=464 would add little power. A future K1100g_d9 could refit TAIFEX d6 extended OOS under skewed-t to close the loop.",
+    "OOS test window 2020-2025 spans COVID-Mar2020 extreme gap \u2014 winsorised gap\u00b2 robustness (K1100g_d9 proposed in d7) still open.",
+    "yfinance daily OHLC only; 5-min intraday not available at 15-year span.",
+    "DM-HLN uses 1/3 power bandwidth; alternative kernels may shift t by ~0.1-0.2 \u2014 not expected to cross Harvey by kernel choice alone."
+  ]
+}

@@ -1,0 +1,374 @@
+{
+  "experiment_id": "k571",
+  "title": "VIX Mean-Reversion Speed as Portfolio Signal",
+  "timestamp": "2026-03-27T23:24:05.744647+00:00",
+  "data_source": "yfinance (SPY, ^VIX)",
+  "data_period": "2004-01-05 to 2026-03-26",
+  "observations": 5592,
+  "references": [
+    "K503: 12/VIX IS the mean-reversion trade",
+    "K211: Mean Reversion Speed (QQQ/GLD pass Harvey, SPY fails)",
+    "K524: Decision-focused policy, 0/384 survive BH correction",
+    "Whaley (2009) Understanding the VIX, JPortMgmt"
+  ],
+  "methodology": {
+    "spike_threshold": 25,
+    "half_life_target": 20,
+    "full_norm_target": 15,
+    "n_spike_events": 101,
+    "n_valid_events": 97
+  },
+  "reversion_statistics": {
+    "half_life_mean": 33.3,
+    "half_life_median": 20.0,
+    "half_life_std": 49.0,
+    "half_life_min": 2,
+    "half_life_max": 273,
+    "peak_vix_mean": 33.0,
+    "peak_vix_median": 30.7
+  },
+  "regression": {
+    "R2": 0.8352,
+    "R2_adj": 0.8299,
+    "coefficients": {
+      "Intercept": -102.1172,
+      "peak_vix": 4.0235,
+      "velocity": -9.2517,
+      "spy_drawdown_pct": -1.5484
+    },
+    "p_values": {
+      "Intercept": 0.0,
+      "peak_vix": 0.0,
+      "velocity": 0.0,
+      "spy_drawdown_pct": 0.032
+    }
+  },
+  "strategy_results": {
+    "baseline_12vix": {
+      "ann_ret": 6.7,
+      "ann_vol": 9.45,
+      "sharpe": 0.2858,
+      "sortino": 0.0015,
+      "max_dd": -28.6,
+      "calmar": 0.2343,
+      "avg_weight": 0.7051
+    },
+    "fast_reentry_14vix": {
+      "ann_ret": 6.93,
+      "ann_vol": 9.71,
+      "sharpe": 0.3021,
+      "sortino": 0.0016,
+      "max_dd": -29.32,
+      "calmar": 0.2365,
+      "avg_weight": 0.7202
+    },
+    "slow_reentry_10vix": {
+      "ann_ret": 6.2,
+      "ann_vol": 8.85,
+      "sharpe": 0.2483,
+      "sortino": 0.0013,
+      "max_dd": -26.73,
+      "calmar": 0.2319,
+      "avg_weight": 0.6777
+    },
+    "adaptive_peak": {
+      "ann_ret": 6.98,
+      "ann_vol": 9.63,
+      "sharpe": 0.3098,
+      "sortino": 0.0016,
+      "max_dd": -28.13,
+      "calmar": 0.2482,
+      "avg_weight": 0.7171
+    },
+    "regression_adaptive": {
+      "ann_ret": 6.88,
+      "ann_vol": 9.63,
+      "sharpe": 0.2989,
+      "sortino": 0.0016,
+      "max_dd": -28.22,
+      "calmar": 0.2438,
+      "avg_weight": 0.7182
+    }
+  },
+  "dm_tests": {
+    "fast_reentry_14vix": {
+      "dm_stat": 1.896,
+      "dm_pval": 0.058,
+      "mean_diff_bps": 0.09,
+      "significant": false,
+      "harvey_significant": false
+    },
+    "slow_reentry_10vix": {
+      "dm_stat": -2.5441,
+      "dm_pval": 0.011,
+      "mean_diff_bps": -0.2,
+      "significant": true,
+      "harvey_significant": false
+    },
+    "adaptive_peak": {
+      "dm_stat": 2.0099,
+      "dm_pval": 0.0444,
+      "mean_diff_bps": 0.11,
+      "significant": true,
+      "harvey_significant": false
+    },
+    "regression_adaptive": {
+      "dm_stat": 1.3668,
+      "dm_pval": 0.1717,
+      "mean_diff_bps": 0.07,
+      "significant": false,
+      "harvey_significant": false
+    }
+  },
+  "cross_oos": [
+    {
+      "period": "2005-01-01..2011-12-31 \u2192 2012-01-01..2015-12-31",
+      "oos_obs": 1006,
+      "results": {
+        "baseline_12vix": {
+          "sharpe": 0.5215,
+          "max_dd": -9.19,
+          "ann_ret": 8.74
+        },
+        "fast_reentry_14vix": {
+          "sharpe": 0.5495,
+          "max_dd": -9.69,
+          "ann_ret": 9.06
+        },
+        "slow_reentry_10vix": {
+          "sharpe": 0.4636,
+          "max_dd": -8.75,
+          "ann_ret": 8.13
+        },
+        "adaptive_peak": {
+          "sharpe": 0.5784,
+          "max_dd": -8.8,
+          "ann_ret": 9.3
+        },
+        "regression_adaptive": {
+          "sharpe": 0.551,
+          "max_dd": -9.58,
+          "ann_ret": 9.08
+        }
+      },
+      "dm_vs_baseline": {
+        "fast_reentry_14vix": 1.3541,
+        "slow_reentry_10vix": -2.2279,
+        "adaptive_peak": 2.43,
+        "regression_adaptive": 1.4761
+      }
+    },
+    {
+      "period": "2010-01-01..2017-12-31 \u2192 2018-01-01..2021-12-31",
+      "oos_obs": 1008,
+      "results": {
+        "baseline_12vix": {
+          "sharpe": 0.5822,
+          "max_dd": -13.08,
+          "ann_ret": 9.51
+        },
+        "fast_reentry_14vix": {
+          "sharpe": 0.625,
+          "max_dd": -13.08,
+          "ann_ret": 10.08
+        },
+        "slow_reentry_10vix": {
+          "sharpe": 0.5089,
+          "max_dd": -12.07,
+          "ann_ret": 8.47
+        },
+        "adaptive_peak": {
+          "sharpe": 0.6084,
+          "max_dd": -12.97,
+          "ann_ret": 9.85
+        },
+        "regression_adaptive": {
+          "sharpe": 0.5968,
+          "max_dd": -12.97,
+          "ann_ret": 9.74
+        }
+      },
+      "dm_vs_baseline": {
+        "fast_reentry_14vix": 1.8208,
+        "slow_reentry_10vix": -2.095,
+        "adaptive_peak": 0.9505,
+        "regression_adaptive": 0.6828
+      }
+    },
+    {
+      "period": "2015-01-01..2022-12-31 \u2192 2023-01-01..2026-03-27",
+      "oos_obs": 810,
+      "results": {
+        "baseline_12vix": {
+          "sharpe": 0.8607,
+          "max_dd": -10.67,
+          "ann_ret": 11.93
+        },
+        "fast_reentry_14vix": {
+          "sharpe": 0.8902,
+          "max_dd": -10.77,
+          "ann_ret": 12.38
+        },
+        "slow_reentry_10vix": {
+          "sharpe": 0.8305,
+          "max_dd": -10.2,
+          "ann_ret": 11.31
+        },
+        "adaptive_peak": {
+          "sharpe": 0.8544,
+          "max_dd": -10.38,
+          "ann_ret": 11.98
+        },
+        "regression_adaptive": {
+          "sharpe": 0.8936,
+          "max_dd": -10.61,
+          "ann_ret": 12.41
+        }
+      },
+      "dm_vs_baseline": {
+        "fast_reentry_14vix": 1.3158,
+        "slow_reentry_10vix": -1.3096,
+        "adaptive_peak": 0.1456,
+        "regression_adaptive": 1.3807
+      }
+    }
+  ],
+  "cross_oos_wins": {
+    "fast_reentry_14vix": 3,
+    "slow_reentry_10vix": 0,
+    "adaptive_peak": 2,
+    "regression_adaptive": 3
+  },
+  "harvey_pass": [],
+  "verdict": "MARGINAL: Some OOS improvement but no Harvey significance",
+  "events": [
+    {
+      "start_date": "2007-08-03",
+      "peak_date": "2007-08-16",
+      "peak_vix": 30.8,
+      "velocity": 0.48,
+      "spy_drawdown_pct": -8.4,
+      "days_to_20": 25,
+      "days_to_15": null,
+      "spy_ret_reversion_pct": 7.5,
+      "spy_ret_22d_pct": 7.3,
+      "vix_initial_decay_pct": 26.6
+    },
+    {
+      "start_date": "2007-08-09",
+      "peak_date": "2007-08-16",
+      "peak_vix": 30.8,
+      "velocity": 0.96,
+      "spy_drawdown_pct": -8.4,
+      "days_to_20": 25,
+      "days_to_15": null,
+      "spy_ret_reversion_pct": 7.5,
+      "spy_ret_22d_pct": 7.3,
+      "vix_initial_decay_pct": 26.6
+    },
+    {
+      "start_date": "2007-08-28",
+      "peak_date": "2007-09-10",
+      "peak_vix": 27.4,
+      "velocity": 0.16,
+      "spy_drawdown_pct": -2.2,
+      "days_to_20": 9,
+      "days_to_15": null,
+      "spy_ret_reversion_pct": 4.7,
+      "spy_ret_22d_pct": 7.7,
+      "vix_initial_decay_pct": 3.3
+    },
+    {
+      "start_date": "2007-08-30",
+      "peak_date": "2007-09-10",
+      "peak_vix": 27.4,
+      "velocity": 0.43,
+      "spy_drawdown_pct": -2.2,
+      "days_to_20": 9,
+      "days_to_15": null,
+      "spy_ret_reversion_pct": 4.7,
+      "spy_ret_22d_pct": 7.7,
+      "vix_initial_decay_pct": 3.3
+    },
+    {
+      "start_date": "2007-09-07",
+      "peak_date": "2007-09-10",
+      "peak_vix": 27.4,
+      "velocity": 0.39,
+      "spy_drawdown_pct": -2.2,
+      "days_to_20": 9,
+      "days_to_15": null,
+      "spy_ret_reversion_pct": 4.7,
+      "spy_ret_22d_pct": 7.7,
+      "vix_initial_decay_pct": 3.3
+    },
+    {
+      "start_date": "2007-09-17",
+      "peak_date": "2007-09-17",
+      "peak_vix": 26.5,
+      "velocity": -0.18,
+      "spy_drawdown_pct": -0.7,
+      "days_to_20": 4,
+      "days_to_15": null,
+      "spy_ret_reversion_pct": 3.1,
+      "spy_ret_22d_pct": 4.6,
+      "vix_initial_decay_pct": 26.9
+    },
+    {
+      "start_date": "2007-11-07",
+      "peak_date": "2007-11-12",
+      "peak_vix": 31.1,
+      "velocity": 1.57,
+      "spy_drawdown_pct": -7.3,
+      "days_to_20": 28,
+      "days_to_15": null,
+      "spy_ret_reversion_pct": 3.6,
+      "spy_ret_22d_pct": 3.7,
+      "vix_initial_decay_pct": 16.3
+    },
+    {
+      "start_date": "2007-11-14",
+      "peak_date": "2007-11-26",
+      "peak_vix": 28.9,
+      "velocity": 0.2,
+      "spy_drawdown_pct": -8.9,
+      "days_to_20": 19,
+      "days_to_15": null,
+      "spy_ret_reversion_pct": 5.7,
+      "spy_ret_22d_pct": 5.3,
+      "vix_initial_decay_pct": 18.3
+    },
+    {
+      "start_date": "2007-11-21",
+      "peak_date": "2007-11-26",
+      "peak_vix": 28.9,
+      "velocity": 0.42,
+      "spy_drawdown_pct": -8.9,
+      "days_to_20": 19,
+      "days_to_15": null,
+      "spy_ret_reversion_pct": 5.7,
+      "spy_ret_22d_pct": 5.3,
+      "vix_initial_decay_pct": 18.3
+    },
+    {
+      "start_date": "2008-01-08",
+      "peak_date": "2008-03-17",
+      "peak_vix": 32.2,
+      "velocity": 0.19,
+      "spy_drawdown_pct": -7.3,
+      "days_to_20": 28,
+      "days_to_15": null,
+      "spy_ret_reversion_pct": 9.3,
+      "spy_ret_22d_pct": 7.3,
+      "vix_initial_decay_pct": 20.2
+    }
+  ],
+  "event_categories": {
+    "fast_events": 49,
+    "slow_events": 48,
+    "fast_mean_spy_ret": 4.5,
+    "slow_mean_spy_ret": 14.3,
+    "fast_annualized_spy_ret": 129.6,
+    "slow_annualized_spy_ret": 61.7
+  }
+}

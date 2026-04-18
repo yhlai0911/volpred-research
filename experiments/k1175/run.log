@@ -1,0 +1,114 @@
+======================================================================
+K1175: Paper 2 Table 3 VT 2010-2026 Canonical Replication
+======================================================================
+
+[1] Downloading data...
+  0050.TW (CLEAN): 4217 days (2009-01-02 to 2026-03-30)
+  ^VIX: 4589 days
+
+[2] Building lagged VIX for Taiwan...
+  VIX-for-Taiwan: 4217 days
+
+[3] Building strategies...
+  8.63/VIX weights: 4203 days, first=2009-02-02
+
+  Fitting GARCH(1,1) OOS (this may take several minutes)...
+  GARCH forecasts: 1512 days (2020-01-02 to 2026-03-30)
+  GARCH weights: 1511 days
+
+  Fitting GJR-GARCH OOS (this may take several minutes)...
+  GJR-GARCH forecasts: 1512 days (2020-01-02 to 2026-03-30)
+  GJR weights: 1511 days
+  EWMA weights: 4215 days, first=2009-01-06
+
+[4] Evaluating strategies per paper's stated periods...
+  Buy & Hold:  Sharpe=0.7989, MDD=-33.83%, Return=14.48%, Vol=18.13%, TO=0.0
+    Period: 2010-01-04 to 2026-03-30, N=3968
+  EWMA VT:     Sharpe=0.7012, MDD=-21.17%, Return=7.42%, Vol=10.58%, TO=479.9
+    Period: 2010-01-04 to 2026-03-30, N=3968
+  GARCH VT:    Sharpe=0.9497, MDD=-22.18%, Return=10.50%, Vol=11.06%, TO=677.8
+    Period: 2020-01-03 to 2026-03-30, N=1511
+  GJR VT:      Sharpe=1.0742, MDD=-22.25%, Return=12.19%, Vol=11.35%, TO=694.3
+    Period: 2020-01-03 to 2026-03-30, N=1511
+  8.63/VIX:    Sharpe=1.1369, MDD=-13.71%, Return=10.72%, Vol=9.43%, TO=102.1
+    Period: 2016-01-04 to 2026-03-30, N=2485
+
+[5] Computing diff vs Paper 2 Table 3...
+
+  [BUY_HOLD]
+    sharpe              : paper=   0.729  k1175=   0.799  diff=+0.0699 (9.6%)  [~OK]
+    mdd_pct             : paper= -41.300  k1175= -33.830  diff=+7.4700 (18.1%)  [!!!DIVERGENT!!!]
+    ann_return_pct      : paper=  10.200  k1175=  14.480  diff=+4.2800 (42.0%)  [!!!DIVERGENT!!!]
+    ann_vol_pct         : paper=  20.800  k1175=  18.130  diff=-2.6700 (12.8%)  [!!!DIVERGENT!!!]
+    ann_turnover_pct    : paper=   0.000  k1175=   0.000  diff=+0.0000 (inf%)  [!!!DIVERGENT!!!]
+
+  [EWMA_VT]
+    sharpe              : paper=   0.796  k1175=   0.701  diff=-0.0948 (11.9%)  [!!!DIVERGENT!!!]
+    mdd_pct             : paper= -18.400  k1175= -21.170  diff=-2.7700 (15.1%)  [!!!DIVERGENT!!!]
+    ann_return_pct      : paper=   7.800  k1175=   7.420  diff=-0.3800 (4.9%)  [OK]
+    ann_vol_pct         : paper=  10.200  k1175=  10.580  diff=+0.3800 (3.7%)  [OK]
+    ann_turnover_pct    : paper= 116.000  k1175= 479.900  diff=+363.9000 (313.7%)  [!!!DIVERGENT!!!]
+
+  [GARCH_VT]
+    sharpe              : paper=   0.994  k1175=   0.950  diff=-0.0443 (4.5%)  [OK]
+    mdd_pct             : paper= -16.800  k1175= -22.180  diff=-5.3800 (32.0%)  [!!!DIVERGENT!!!]
+    ann_return_pct      : paper=   8.100  k1175=  10.500  diff=+2.4000 (29.6%)  [!!!DIVERGENT!!!]
+    ann_vol_pct         : paper=  10.500  k1175=  11.060  diff=+0.5600 (5.3%)  [~OK]
+    ann_turnover_pct    : paper=  98.000  k1175= 677.800  diff=+579.8000 (591.6%)  [!!!DIVERGENT!!!]
+
+  [GJR_VT]
+    sharpe              : paper=   1.108  k1175=   1.074  diff=-0.0338 (3.1%)  [OK]
+    mdd_pct             : paper= -15.100  k1175= -22.250  diff=-7.1500 (47.4%)  [!!!DIVERGENT!!!]
+    ann_return_pct      : paper=   8.400  k1175=  12.190  diff=+3.7900 (45.1%)  [!!!DIVERGENT!!!]
+    ann_vol_pct         : paper=  10.300  k1175=  11.350  diff=+1.0500 (10.2%)  [!!!DIVERGENT!!!]
+    ann_turnover_pct    : paper= 102.000  k1175= 694.300  diff=+592.3000 (580.7%)  [!!!DIVERGENT!!!]
+
+  [VIX_863]
+    sharpe              : paper=   0.690  k1175=   1.137  diff=+0.4469 (64.8%)  [!!!DIVERGENT!!!]
+    mdd_pct             : paper= -15.300  k1175= -13.710  diff=+1.5900 (10.4%)  [!!!DIVERGENT!!!]
+    ann_return_pct      : paper=   7.200  k1175=  10.720  diff=+3.5200 (48.9%)  [!!!DIVERGENT!!!]
+    ann_vol_pct         : paper=  12.100  k1175=   9.430  diff=-2.6700 (22.1%)  [!!!DIVERGENT!!!]
+    ann_turnover_pct    : paper=  24.000  k1175= 102.100  diff=+78.1000 (325.4%)  [!!!DIVERGENT!!!]
+
+[6] Saving results...
+
+Results saved to /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a65a26a5/experiments/k1175/k1175_results.json
+
+====================================================================================================
+K1175 vs PAPER TABLE 3 SUMMARY
+====================================================================================================
+Strategy             Metric                     Paper     K1175   Diff%  Status
+----------------------------------------------------------------------------------------------------
+  buy_hold           sharpe                     0.729     0.799    9.6%  APPROX
+  buy_hold           mdd_pct                  -41.300   -33.830   18.1%  DIVERGENT
+  buy_hold           ann_return_pct            10.200    14.480   42.0%  DIVERGENT
+  buy_hold           ann_vol_pct               20.800    18.130   12.8%  DIVERGENT
+  buy_hold           ann_turnover_pct           0.000     0.000    inf%  DIVERGENT
+
+  ewma_vt            sharpe                     0.796     0.701   11.9%  DIVERGENT
+  ewma_vt            mdd_pct                  -18.400   -21.170   15.1%  DIVERGENT
+  ewma_vt            ann_return_pct             7.800     7.420    4.9%  MATCHED
+  ewma_vt            ann_vol_pct               10.200    10.580    3.7%  MATCHED
+  ewma_vt            ann_turnover_pct         116.000   479.900  313.7%  DIVERGENT
+
+  garch_vt           sharpe                     0.994     0.950    4.5%  MATCHED
+  garch_vt           mdd_pct                  -16.800   -22.180   32.0%  DIVERGENT
+  garch_vt           ann_return_pct             8.100    10.500   29.6%  DIVERGENT
+  garch_vt           ann_vol_pct               10.500    11.060    5.3%  APPROX
+  garch_vt           ann_turnover_pct          98.000   677.800  591.6%  DIVERGENT
+
+  gjr_vt             sharpe                     1.108     1.074    3.1%  MATCHED
+  gjr_vt             mdd_pct                  -15.100   -22.250   47.4%  DIVERGENT
+  gjr_vt             ann_return_pct             8.400    12.190   45.1%  DIVERGENT
+  gjr_vt             ann_vol_pct               10.300    11.350   10.2%  DIVERGENT
+  gjr_vt             ann_turnover_pct         102.000   694.300  580.7%  DIVERGENT
+
+  vix_863            sharpe                     0.690     1.137   64.8%  DIVERGENT
+  vix_863            mdd_pct                  -15.300   -13.710   10.4%  DIVERGENT
+  vix_863            ann_return_pct             7.200    10.720   48.9%  DIVERGENT
+  vix_863            ann_vol_pct               12.100     9.430   22.1%  DIVERGENT
+  vix_863            ann_turnover_pct          24.000   102.100  325.4%  DIVERGENT
+
+======================================================================
+K1175 COMPLETE — Paper 2 Table 3 VT 2010-2026 Canonical Replication
+======================================================================

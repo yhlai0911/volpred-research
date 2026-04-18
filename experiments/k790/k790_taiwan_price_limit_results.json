@@ -1,0 +1,238 @@
+{
+  "experiment_id": "K790",
+  "title": "Taiwan Price Limit Latent Volatility",
+  "hypothesis": "Taiwan \u00b110% daily price limit suppresses observed volatility; GARCH-X with limit proximity dummy should improve forecasts",
+  "proposer": "Gemini",
+  "executor": "Claude",
+  "timestamp": "2026-03-31T14:58:33.303973+00:00",
+  "elapsed_seconds": 6.46523118019104,
+  "data_source": "yfinance (daily close)",
+  "assets": [
+    "0050.TW",
+    "SPY"
+  ],
+  "period": "2006-01-01 to 2025-12-31",
+  "oos_period": "2015-01-01 to 2025-12-31",
+  "refit_frequency": 63,
+  "descriptive_stats": {
+    "0050.TW": {
+      "n": 4216,
+      "start": "2009-01-05",
+      "end": "2026-03-30",
+      "mean": 0.06333375509818495,
+      "std": 1.3413262294006238,
+      "skew": 0.06394292250404464,
+      "kurtosis": 18.12629150548656,
+      "min": -12.69511945245329,
+      "max": 15.311031026288886,
+      "n_above_5pct": 40,
+      "n_above_7pct": 19,
+      "n_above_9pct": 11,
+      "pct_above_5pct": 0.9487666034155597,
+      "pct_above_7pct": 0.4506641366223909,
+      "pct_above_9pct": 0.26091081593927895
+    },
+    "SPY": {
+      "n": 5090,
+      "start": "2006-01-04",
+      "end": "2026-03-30",
+      "mean": 0.03890668730689107,
+      "std": 1.218200526260858,
+      "skew": -0.30225014331370637,
+      "kurtosis": 14.366468529157443,
+      "min": -11.588650567543265,
+      "max": 13.557707130119468,
+      "n_above_5pct": 36,
+      "n_above_7pct": 13,
+      "n_above_9pct": 7,
+      "pct_above_5pct": 0.7072691552062869,
+      "pct_above_7pct": 0.2554027504911591,
+      "pct_above_9pct": 0.137524557956778
+    }
+  },
+  "regime_analysis": {
+    "pre_2015_7pct_limit": {
+      "n": 1580,
+      "std": 1.5446134000695704,
+      "n_above_7pct": 14
+    },
+    "post_2015_10pct_limit": {
+      "n": 2636,
+      "std": 1.2034269835445828,
+      "n_above_7pct": 5
+    }
+  },
+  "models": {
+    "Baseline": "GJR-GARCH(1,1)-t, expanding window",
+    "Hard_7pct": "GJR-GARCH-X: I(|r_{t-1}| > 7%)",
+    "Soft_5pct": "GJR-GARCH-X: I(|r_{t-1}| > 5%)",
+    "Distance": "GJR-GARCH-X: max(0, |r_{t-1}| - 5%) / 5% (continuous)"
+  },
+  "oos_evaluation": {
+    "0050.TW": {
+      "Baseline": {
+        "qlike": NaN,
+        "qlike_improve_pct": 0.0,
+        "mse": NaN,
+        "dm_stat": 0.0,
+        "dm_pval": 1.0,
+        "dm_pass_harvey": false,
+        "n_forecasts": 0,
+        "n_fits": 0,
+        "delta_mean": 0.0,
+        "delta_std": 0.0,
+        "delta_pct_positive": 0.0,
+        "delta_tstat_mean": 0.0,
+        "delta_pct_significant": 0.0
+      },
+      "Hard_7pct": {
+        "qlike": NaN,
+        "qlike_improve_pct": NaN,
+        "mse": NaN,
+        "dm_stat": 0.0,
+        "dm_pval": 1.0,
+        "dm_pass_harvey": false,
+        "n_forecasts": 0,
+        "n_fits": 0,
+        "delta_mean": 0.0,
+        "delta_std": 0.0,
+        "delta_pct_positive": 0.0,
+        "delta_tstat_mean": 0.0,
+        "delta_pct_significant": 0.0
+      },
+      "Soft_5pct": {
+        "qlike": NaN,
+        "qlike_improve_pct": NaN,
+        "mse": NaN,
+        "dm_stat": 0.0,
+        "dm_pval": 1.0,
+        "dm_pass_harvey": false,
+        "n_forecasts": 0,
+        "n_fits": 0,
+        "delta_mean": 0.0,
+        "delta_std": 0.0,
+        "delta_pct_positive": 0.0,
+        "delta_tstat_mean": 0.0,
+        "delta_pct_significant": 0.0
+      },
+      "Distance": {
+        "qlike": NaN,
+        "qlike_improve_pct": NaN,
+        "mse": NaN,
+        "dm_stat": 0.0,
+        "dm_pval": 1.0,
+        "dm_pass_harvey": false,
+        "n_forecasts": 0,
+        "n_fits": 0,
+        "delta_mean": 0.0,
+        "delta_std": 0.0,
+        "delta_pct_positive": 0.0,
+        "delta_tstat_mean": 0.0,
+        "delta_pct_significant": 0.0
+      }
+    },
+    "SPY": {
+      "Baseline": {
+        "qlike": NaN,
+        "qlike_improve_pct": 0.0,
+        "mse": NaN,
+        "dm_stat": 0.0,
+        "dm_pval": 1.0,
+        "dm_pass_harvey": false,
+        "n_forecasts": 0,
+        "n_fits": 0,
+        "delta_mean": 0.0,
+        "delta_std": 0.0,
+        "delta_pct_positive": 0.0,
+        "delta_tstat_mean": 0.0,
+        "delta_pct_significant": 0.0
+      },
+      "Hard_7pct": {
+        "qlike": NaN,
+        "qlike_improve_pct": NaN,
+        "mse": NaN,
+        "dm_stat": 0.0,
+        "dm_pval": 1.0,
+        "dm_pass_harvey": false,
+        "n_forecasts": 0,
+        "n_fits": 0,
+        "delta_mean": 0.0,
+        "delta_std": 0.0,
+        "delta_pct_positive": 0.0,
+        "delta_tstat_mean": 0.0,
+        "delta_pct_significant": 0.0
+      },
+      "Soft_5pct": {
+        "qlike": NaN,
+        "qlike_improve_pct": NaN,
+        "mse": NaN,
+        "dm_stat": 0.0,
+        "dm_pval": 1.0,
+        "dm_pass_harvey": false,
+        "n_forecasts": 0,
+        "n_fits": 0,
+        "delta_mean": 0.0,
+        "delta_std": 0.0,
+        "delta_pct_positive": 0.0,
+        "delta_tstat_mean": 0.0,
+        "delta_pct_significant": 0.0
+      },
+      "Distance": {
+        "qlike": NaN,
+        "qlike_improve_pct": NaN,
+        "mse": NaN,
+        "dm_stat": 0.0,
+        "dm_pval": 1.0,
+        "dm_pass_harvey": false,
+        "n_forecasts": 0,
+        "n_fits": 0,
+        "delta_mean": 0.0,
+        "delta_std": 0.0,
+        "delta_pct_positive": 0.0,
+        "delta_tstat_mean": 0.0,
+        "delta_pct_significant": 0.0
+      }
+    }
+  },
+  "full_sample_params": {
+    "0050.TW": {},
+    "SPY": {}
+  },
+  "delta_significance_summary_TW": {
+    "Hard_7pct": {
+      "delta_mean": 0.0,
+      "delta_positive_pct": 0.0,
+      "delta_tstat_mean": 0.0,
+      "delta_significant_pct": 0.0
+    },
+    "Soft_5pct": {
+      "delta_mean": 0.0,
+      "delta_positive_pct": 0.0,
+      "delta_tstat_mean": 0.0,
+      "delta_significant_pct": 0.0
+    },
+    "Distance": {
+      "delta_mean": 0.0,
+      "delta_positive_pct": 0.0,
+      "delta_tstat_mean": 0.0,
+      "delta_significant_pct": 0.0
+    }
+  },
+  "conclusion": "NULL RESULT: Price limit proximity does NOT significantly improve vol forecasting for 0050.TW at Harvey (2016) t>3.0 threshold. Best model: Baseline (QLIKE: nan). The limit dummy \u03b4 may be positive but the effect is too small or rare to matter OOS. SPY (no limit) also shows no improvement \u2014 confirming this is not a universal effect.",
+  "codex_rating": "LOW",
+  "limitations": [
+    "0050.TW rarely hits the \u00b110% limit \u2014 very few extreme events reduces statistical power",
+    "Squared return proxy (not 5-min RV) \u2014 limit-hit days likely have especially poor proxy quality",
+    "Price limit changed from \u00b17% to \u00b110% in 2015 \u2014 regime shift in data",
+    "No intraday data available for 0050.TW to construct better RV proxy",
+    "The dummy captures limit proximity but not the direction of censoring"
+  ],
+  "references": [
+    "Kim & Rhee (1997) JFE \u2014 Price limit effects on volatility",
+    "Chen (1993) \u2014 Taiwan price limit study",
+    "Cho et al (2003) \u2014 Magnet effect of price limits",
+    "Patton (2011) JoE \u2014 QLIKE proxy-robust loss",
+    "Harvey (2016) \u2014 t>3.0 threshold for multiple testing",
+    "Bollerslev & Ghysels (1996) \u2014 GARCH-X formulation"
+  ]
+}

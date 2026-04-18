@@ -1,0 +1,109 @@
+/Users/yhlai0911/opt/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/masked.py:61: UserWarning: Pandas requires version '1.3.6' or newer of 'bottleneck' (version '1.3.4' currently installed).
+  from pandas.core import (
+HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: AAPL240315C00180000"}}}
+$AAPL240315C00180000: possibly delisted; no price data found  (period=2y) (Yahoo error = "No data found, symbol may be delisted")
+HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: AAPL230721C00190000"}}}
+$AAPL230721C00190000: possibly delisted; no price data found  (period=2y) (Yahoo error = "No data found, symbol may be delisted")
+$MSFT240119C00330000: possibly delisted; no price data found  (period=2y) (Yahoo error = "No data found, symbol may be delisted")
+$NVDA230915C00420000: possibly delisted; no price data found  (period=2y) (Yahoo error = "No data found, symbol may be delisted")
+$AMZN231117C00140000: possibly delisted; no price data found  (period=2y) (Yahoo error = "No data found, symbol may be delisted")
+
+========================================================================
+K1161: IV-crush data feasibility probe
+========================================================================
+
+[1/4] yfinance option-chain API sanity check (AAPL current)
+  AAPL current chain: {'ok': True, 'n_expirations': 23, 'first_exp': '2026-04-17', 'last_exp': '2028-12-15', 'calls_rows': 69, 'iv_column_present': True, 'iv_rows_gt_zero': 69}
+
+[2/4] Earnings events in K1148_d2 panel: 1439
+  Last 6 months:  26 (1.8%)
+  Last 1 year:    87 (6.0%)
+  Last 2 years:   207 (14.4%)
+
+[3/4] Probe: can yfinance return OHLC on expired option contracts?
+  AAPL240315C00180000: FAIL — {'ok': False, 'n_rows': 0, 'reason': 'delisted/no-data'}
+  AAPL230721C00190000: FAIL — {'ok': False, 'n_rows': 0, 'reason': 'delisted/no-data'}
+  MSFT240119C00330000: FAIL — {'ok': False, 'n_rows': 0, 'reason': 'delisted/no-data'}
+  NVDA230915C00420000: FAIL — {'ok': False, 'n_rows': 0, 'reason': 'delisted/no-data'}
+  AMZN231117C00140000: FAIL — {'ok': False, 'n_rows': 0, 'reason': 'delisted/no-data'}
+
+[4/4] Probe: longest-dated AAPL option contract history span
+  longest-dated exp = 2028-12-15, ATM-ish contract = AAPL281215C00210000
+  history span: {'ok': True, 'n_rows': 52, 'date_range_days': 93, 'first_date': '2026-01-12', 'last_date': '2026-04-16', 'has_price': True, 'has_iv': False}
+
+  Expired-contract retrieval rate: 0/5
+  Realistic coverage upper bound (90-day history × currently listed): 0/1439 = 0.00%
+
+
+========================================================================
+ FEASIBILITY VERDICT
+========================================================================
+  Verdict: DATA_INFEASIBLE
+  Rationale: yfinance option-chain history does not support historical IV reconstruction for earnings events prior to the last ~90 days. Coverage ceiling = 0.00% of 1439 events, below the 10% threshold. Expired contracts return no OHLC data (tested 5/5 fail). Currently-listed contracts only retain ~90 days of Yahoo history (reachback probe). Therefore IV_pre / IV_post cannot be systematically built for the K1148_d2 panel.
+  Paper 2 implication: No IV-crush upgrade candidate for Paper 2 §5. K1148_d2 binary EAV claim (US cross-market OOS PASS, panel DM t=-5.58) retained as the main spec. K1151 continuous Surprise(%) result (NS) also retained. Any market-implied magnitude test would require a paid data source (OptionMetrics IvyDB, CBOE DataShop, Bloomberg OVDV, polygon.io paid tier with historical options, or ORATS) — flagged as future work.
+
+[plot] coverage funnel + placeholder
+  → /Users/yhlai0911/Desktop/volpred-research/experiments/k1161/iv_crush_vs_surprise.png
+  → /Users/yhlai0911/Desktop/volpred-research/experiments/k1161/theta_comparison.png
+
+  Results → /Users/yhlai0911/Desktop/volpred-research/experiments/k1161/k1161_results.json
+  Elapsed: 7.3s
+
+
+================================================================================
+GEMINI REVIEW (gemini-cli 0.33.1, 2026-04-17)
+================================================================================
+
+(a) Is the expired-contract probe sound?
+Verdict: YES.
+- Logic: Sampling 5 contracts across multiple tickers (AAPL, MSFT, NVDA, AMZN)
+  and diverse expiration dates (2023-2024) is a statistically sufficient
+  "canary" test.
+- Technical Reality: yfinance relies on Yahoo Finance's public API, which
+  typically purges data for expired options contracts once they are no longer
+  listed. Unlike equities, option tickers are transient. If
+  Ticker(symbol).history() returns empty data for these specific, valid
+  historical symbols, the retrieval logic is fundamentally broken for
+  retrospective studies.
+
+(b) Is 90-day reachback a fair upper bound for yfinance?
+Verdict: YES (and likely optimistic).
+- Reality: Yahoo Finance usually stores OHLC data for *active* options only
+  for the duration of their current listing, and often only provides granular
+  history for the last few months.
+- The LEAPS Test: Your observation that a 2028 LEAPS contract only has ~90
+  days of history (starting Jan 2026) confirms that history is truncated to
+  the "start of tracking" on Yahoo's servers, not the contract's actual
+  inception. This makes reconstructing 2014-2025 earnings moves impossible.
+
+(c) Any legal/free alternatives for pre-2026 individual IV?
+Verdict: NO (for high-fidelity research).
+- The "Data Wall": Individual equity IV history (especially pre/post
+  earnings) is high-value proprietary data.
+- Free Limitations:
+  * AlphaVantage/Polygon: Free tiers usually exclude options or limit
+    history to very recent windows.
+  * CBOE DataShop: Requires payment for historical "Time and Sales" or
+    "End of Day" summaries.
+  * ThetaData: Excellent, but historical API (even "free" tiers) often has
+    restrictive rate limits or requires a subscription for 10+ years of
+    backfill.
+- Conclusion: There is no reliable, free API that provides a 10-year
+  longitudinal database of individual stock IV at the resolution required
+  for an earnings-impact study.
+
+(d) Is DATA_INFEASIBLE verdict defensible?
+Verdict: DEFENSIBLE.
+- Requirement vs. Reality: Your research goal requires 2014-2025 coverage.
+  With a 0% coverage ceiling using the proposed stack, the experiment cannot
+  proceed.
+- Integrity: Terminating at the data step prevents "model hallucination" or
+  the use of proxies (like VIX) that don't capture the idiosyncratic "IV
+  crush" of individual earnings.
+- Recommendation: Record the verdict. To unblock, the project would require
+  a budget for ThetaData (Standard) or HistoricalOptionData.com CSVs.
+  Without funding, the scope must be pivoted to "Live Forward-Testing" only.
+
+================================================================================
+END GEMINI REVIEW
+================================================================================

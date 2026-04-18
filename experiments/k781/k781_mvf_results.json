@@ -1,0 +1,252 @@
+{
+  "experiment_id": "K781",
+  "title": "K781 MVF: Multiplicative Volatility Factor Model",
+  "proposer": "\u6587\u737b\u641c\u5c0b J.Econometrics 2025",
+  "executor": "Claude",
+  "timestamp": "2026-03-31T13:43:41.815302+00:00",
+  "data_source": "yfinance",
+  "asset": "SPY",
+  "data_period": "2007-01-04 to 2026-03-31",
+  "n_total": 4840,
+  "oos_period": "2009-12-24 to 2026-03-31",
+  "n_oos": 4090,
+  "n_refits": 65,
+  "min_window": 750,
+  "refit_freq": 63,
+  "evaluation_target": "r\u00b2 (squared returns, Patton 2011 proxy-robust)",
+  "models": {
+    "MVF": "5 params (\u03c1, \u03c9_g, \u03b1_g, \u03b2_g, \u03b3_g): \u03c3\u00b2=exp(f_t)\u00d7g_t, f=EWA of log-RV66, g=GJR on detrended r\u00b2",
+    "GJR-GARCH": "4 params (\u03c9, \u03b1, \u03b2, \u03b3): standard GJR-GARCH(1,1)",
+    "AMEM-r2": "5 params (\u03c9, \u03b1, \u03b2, \u03b3, k): Asymmetric MEM on r\u00b2, Gamma innovations",
+    "GARCH": "3 params (\u03c9, \u03b1, \u03b2): standard GARCH(1,1)",
+    "HAR-r2": "4 params (\u03b2\u2080, \u03b2\u2081, \u03b2\u2082, \u03b2\u2083): HAR on squared returns"
+  },
+  "full_sample_params": {
+    "MVF": {
+      "rho": 0.9,
+      "omega_g": 0.10789948734653695,
+      "alpha_g": 0.0,
+      "beta_g": 0.7616071334040289,
+      "gamma_g": 0.32032013476507987,
+      "persistence_short": 0.9217672007865688
+    },
+    "GJR-GARCH": {
+      "omega": 3.3072630292351238e-06,
+      "alpha": 0.008380459952519164,
+      "beta": 0.8553950240373148,
+      "gamma": 0.2291788498762464,
+      "persistence": 0.9783649089279571
+    },
+    "AMEM-r2": {
+      "omega": 2.605095766682029e-06,
+      "alpha": 0.07944843152045127,
+      "beta": 0.8850382099759125,
+      "gamma": 0.009994680943796866,
+      "k": 0.412562798426621,
+      "persistence": 0.9694839819682622
+    },
+    "GARCH": {
+      "omega": 3.1232902874949305e-06,
+      "alpha": 0.1369881220737286,
+      "beta": 0.8396353630205595,
+      "persistence": 0.9766234850942881
+    }
+  },
+  "qlike_ranking": [
+    {
+      "rank": 1,
+      "model": "GJR-GARCH",
+      "QLIKE": 1.536481
+    },
+    {
+      "rank": 2,
+      "model": "MVF",
+      "QLIKE": 1.549047
+    },
+    {
+      "rank": 3,
+      "model": "AMEM-r2",
+      "QLIKE": 1.571453
+    },
+    {
+      "rank": 4,
+      "model": "GARCH",
+      "QLIKE": 1.581942
+    },
+    {
+      "rank": 5,
+      "model": "HAR-r2",
+      "QLIKE": 1.658306
+    }
+  ],
+  "metrics": {
+    "MVF": {
+      "QLIKE": 1.549047,
+      "Spearman_rho": 0.3812,
+      "Spearman_p": 0.0
+    },
+    "GJR-GARCH": {
+      "QLIKE": 1.536481,
+      "Spearman_rho": 0.3874,
+      "Spearman_p": 0.0
+    },
+    "AMEM-r2": {
+      "QLIKE": 1.571453,
+      "Spearman_rho": 0.3445,
+      "Spearman_p": 0.0
+    },
+    "GARCH": {
+      "QLIKE": 1.581942,
+      "Spearman_rho": 0.3369,
+      "Spearman_p": 0.0
+    },
+    "HAR-r2": {
+      "QLIKE": 1.658306,
+      "Spearman_rho": 0.3211,
+      "Spearman_p": 0.0
+    }
+  },
+  "dm_tests_vs_best": {
+    "MVF vs GJR-GARCH": {
+      "DM_stat": 0.6942,
+      "p_value": 0.487576,
+      "Harvey_t": 0.6941,
+      "Harvey_pass": "FAIL"
+    },
+    "AMEM-r2 vs GJR-GARCH": {
+      "DM_stat": 2.7761,
+      "p_value": 0.005502,
+      "Harvey_t": 2.7758,
+      "Harvey_pass": "FAIL"
+    },
+    "GARCH vs GJR-GARCH": {
+      "DM_stat": 3.6767,
+      "p_value": 0.000236,
+      "Harvey_t": 3.6763,
+      "Harvey_pass": "PASS"
+    },
+    "HAR-r2 vs GJR-GARCH": {
+      "DM_stat": 5.1628,
+      "p_value": 0.0,
+      "Harvey_t": 5.1621,
+      "Harvey_pass": "PASS"
+    }
+  },
+  "dm_tests_mvf_vs_each": {
+    "MVF vs GJR-GARCH": {
+      "DM_stat": 0.6942,
+      "p_value": 0.487576,
+      "Harvey_t": 0.6941,
+      "Harvey_pass": "FAIL"
+    },
+    "MVF vs AMEM-r2": {
+      "DM_stat": -1.4685,
+      "p_value": 0.141973,
+      "Harvey_t": -1.4683,
+      "Harvey_pass": "FAIL"
+    },
+    "MVF vs GARCH": {
+      "DM_stat": -2.2197,
+      "p_value": 0.026439,
+      "Harvey_t": -2.2194,
+      "Harvey_pass": "FAIL"
+    },
+    "MVF vs HAR-r2": {
+      "DM_stat": -4.5595,
+      "p_value": 5e-06,
+      "Harvey_t": -4.5589,
+      "Harvey_pass": "PASS"
+    }
+  },
+  "mcs": {
+    "alpha": 0.1,
+    "n_boot": 5000,
+    "surviving_models": [
+      "MVF",
+      "GJR-GARCH"
+    ],
+    "p_values": {
+      "HAR-r2": 0.0,
+      "GARCH": 0.0016,
+      "AMEM-r2": 0.0222,
+      "MVF": 0.4984,
+      "GJR-GARCH": 0.4984
+    },
+    "elimination_order": [
+      [
+        "HAR-r2",
+        0.0
+      ],
+      [
+        "GARCH",
+        0.0016
+      ],
+      [
+        "AMEM-r2",
+        0.0222
+      ]
+    ]
+  },
+  "regime_analysis": {
+    "MVF": {
+      "QLIKE_all": 1.549047,
+      "QLIKE_high_vol": 1.552796,
+      "QLIKE_low_vol": 1.545294
+    },
+    "GJR-GARCH": {
+      "QLIKE_all": 1.536481,
+      "QLIKE_high_vol": 1.539393,
+      "QLIKE_low_vol": 1.533567
+    },
+    "AMEM-r2": {
+      "QLIKE_all": 1.571453,
+      "QLIKE_high_vol": 1.573183,
+      "QLIKE_low_vol": 1.569722
+    },
+    "GARCH": {
+      "QLIKE_all": 1.581942,
+      "QLIKE_high_vol": 1.585209,
+      "QLIKE_low_vol": 1.578671
+    },
+    "HAR-r2": {
+      "QLIKE_all": 1.658306,
+      "QLIKE_high_vol": 1.621725,
+      "QLIKE_low_vol": 1.694924
+    }
+  },
+  "subsample_stability": {
+    "period_1_2009-2015": {
+      "GJR-GARCH": 1.509247,
+      "MVF": 1.510555,
+      "AMEM-r2": 1.56174,
+      "GARCH": 1.577264,
+      "HAR-r2": 1.634339
+    },
+    "period_2_2015-2020": {
+      "AMEM-r2": 1.663485,
+      "GJR-GARCH": 1.664034,
+      "GARCH": 1.673139,
+      "MVF": 1.67461,
+      "HAR-r2": 1.846457
+    },
+    "period_3_2020-2026": {
+      "GJR-GARCH": 1.436344,
+      "MVF": 1.46211,
+      "AMEM-r2": 1.489302,
+      "HAR-r2": 1.494449,
+      "GARCH": 1.495606
+    }
+  },
+  "references": [
+    "J. Econometrics 2025: Multiplicative Volatility Factor model",
+    "Conrad (2025) MF2-GARCH, J. Applied Econometrics",
+    "Engle, Ghysels & Sohn (2013) GARCH-MIDAS",
+    "Patton (2011) J.Econometrics 160, QLIKE proxy-robust loss",
+    "Hansen, Lunde & Nason (2011) Econometrica 79, MCS",
+    "Glosten, Jagannathan, Runkle (1993) JoF 48, GJR-GARCH",
+    "Engle & Gallo (2006) J.Econometrics 131, MEM/AMEM",
+    "Corsi (2009) J.Financial Econometrics 7, HAR"
+  ],
+  "conclusion": "MVF QLIKE=1.549047 (rank #2/5). Best: GJR-GARCH (1.536481). MVF IN MCS (p=0.4984). MVF vs GJR: NS (Harvey t=0.69, FAIL). Multiplicative decomposition (slow exp(f) \u00d7 fast GARCH) does not improve over standard GJR.",
+  "runtime_seconds": 40.4
+}

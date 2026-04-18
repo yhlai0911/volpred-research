@@ -1,0 +1,338 @@
+{
+  "data_source": "VIX-proxy for Google Trends (pytrends rate-limited/failed)",
+  "part_a": {
+    "N_total": 873,
+    "period": "2009-07-17 to 2026-04-03",
+    "descriptive_stats": {
+      "fear_index": {
+        "mean": -0.07016739313236929,
+        "std": 1.0134672922252674,
+        "skew": 1.8069221518430487,
+        "kurt": 5.101819128428854
+      },
+      "net_fear": {
+        "mean": -0.15681319931839527,
+        "std": 2.0656495327934206,
+        "skew": 1.6981537202004668,
+        "kurt": 4.588614466629761
+      },
+      "spy_weekly_ret": {
+        "mean": 0.0028603510790894864,
+        "std": 0.02249559767888834,
+        "skew": -0.4733965124158802,
+        "kurt": 5.022996279577679
+      },
+      "vix_level": {
+        "mean": 18.426025228948255,
+        "std": 6.762098224271717,
+        "skew": 2.0266935760806692,
+        "kurt": 7.559724760740018
+      }
+    },
+    "correlations": {
+      "contemporaneous_fear_ret": {
+        "r": -0.3033084581316885,
+        "p": 4.9244632857150236e-20
+      },
+      "contemporaneous_fear_vix": {
+        "r": 0.6284634422306832,
+        "p": 3.960671115421947e-97
+      },
+      "contemporaneous_netfear_ret": {
+        "r": -0.3652409543280521,
+        "p": 6.10775862731312e-29
+      },
+      "lagged_fear_ret": {
+        "r": 0.04752788955785193,
+        "p": 0.16083730705006263
+      },
+      "lagged_netfear_ret": {
+        "r": 0.04848392073389614,
+        "p": 0.15257337945975305
+      }
+    },
+    "data_type": "VIX-proxy"
+  },
+  "part_b_return_prediction": {
+    "oos_period": "2023-01-01 to 2024-12-31",
+    "n_oos": 104,
+    "target_positive_rate": 0.625,
+    "fear_only": {
+      "accuracy": 0.625,
+      "precision": 0.625,
+      "recall": 1.0,
+      "f1": 0.7692307692307693,
+      "auc": 0.5467455621301774
+    },
+    "fear_plus_vix": {
+      "accuracy": 0.625,
+      "precision": 0.625,
+      "recall": 1.0,
+      "f1": 0.7692307692307693,
+      "auc": 0.49151873767258375
+    },
+    "vix_only": {
+      "accuracy": 0.625,
+      "precision": 0.625,
+      "recall": 1.0,
+      "f1": 0.7692307692307693,
+      "auc": 0.4623274161735701
+    },
+    "naive_always_up": {
+      "accuracy": 0.625,
+      "precision": 0.625,
+      "recall": 1.0,
+      "f1": 0.7692307692307693,
+      "auc": NaN
+    },
+    "binomial_test_fear_vs_50pct": 0.006918097533373939,
+    "mcnemar_fear_vs_vix": {
+      "stat": 0.0,
+      "p": 1.0,
+      "b": 0,
+      "c": 0
+    },
+    "fear_model_coefficients": {
+      "intercept": 0.3441982195561913,
+      "fear_coef": 0.0029014206150913165,
+      "net_fear_coef": 0.0022401983642159726
+    }
+  },
+  "part_c_tail_prediction": {
+    "oos_period": "2023-01-01 to 2024-12-31",
+    "n_tail_events_oos": 1,
+    "n_oos": 104,
+    "threshold_2sigma": -0.04213084427868719,
+    "conditional_tail_rates": {
+      "low_fear": 0.0045871559633027525,
+      "overall": 0.028669724770642203,
+      "high_fear_Q4": 0.06880733944954129,
+      "extreme_fear_P90": 0.07954545454545454,
+      "high_vix_Q4": 0.07339449541284404,
+      "low_vix_Q1_3": 0.013761467889908258
+    },
+    "fisher_exact": {
+      "OR": 4.758620689655173,
+      "p": 0.00017074709900572458
+    },
+    "oos_fear_model": {
+      "accuracy": 0.7596153846153846,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "auc": 0.5242718446601942
+    },
+    "oos_vix_model": {
+      "accuracy": 0.9038461538461539,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "auc": 0.7864077669902912
+    },
+    "oos_fear_vix_model": {
+      "accuracy": 0.8269230769230769,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "auc": 0.6213592233009708
+    }
+  },
+  "part_d_garch_x": {
+    "error": "Item wrong length 4201 instead of 812."
+  },
+  "part_e_strategy_oos": {
+    "fear_percentile_contra": {
+      "sharpe": 1.7622120159088006,
+      "ann_ret": 0.19136962282379122,
+      "ann_vol": 0.10859625351328618,
+      "max_dd": -0.053018235078640896,
+      "sortino": 3.299195348633579,
+      "n_weeks": 104,
+      "avg_tx_cost_bps": 0.44341715976331364
+    },
+    "fear_binary_contra": {
+      "sharpe": 1.8296272077501103,
+      "ann_ret": 0.20408148208933077,
+      "ann_vol": 0.11154265810262487,
+      "max_dd": -0.049217931777092896,
+      "sortino": 3.931629570230686,
+      "n_weeks": 104,
+      "avg_tx_cost_bps": 0.4038461538461538
+    },
+    "12_vix": {
+      "sharpe": 2.147411656426979,
+      "ann_ret": 0.2243207206536152,
+      "ann_vol": 0.10446097746663835,
+      "max_dd": -0.06845069288062265,
+      "sortino": 3.579291811823038,
+      "n_weeks": 104,
+      "avg_tx_cost_bps": 0.33741219235477493
+    },
+    "bh_5050": {
+      "sharpe": 2.102459083910547,
+      "ann_ret": 0.21497944775332037,
+      "ann_vol": 0.10225142995575512,
+      "max_dd": -0.06140937465821745,
+      "sortino": 3.9498131758401622,
+      "n_weeks": 104,
+      "avg_tx_cost_bps": 0.0
+    }
+  },
+  "part_e_strategy": {
+    "full_period": "2010-01-15 to 2026-04-03",
+    "n_weeks": 847,
+    "strategies": {
+      "fear_percentile_contra": {
+        "sharpe": 0.9098418422016507,
+        "ann_ret": 0.12587229871641956,
+        "ann_vol": 0.13834525175477932,
+        "max_dd": -0.2712309624573992,
+        "sortino": 1.2110791663377558,
+        "n_weeks": 847,
+        "avg_tx_cost_bps": 0.511418755229301
+      },
+      "fear_binary_defensive": {
+        "sharpe": 0.8438839402698928,
+        "ann_ret": 0.10334658751482241,
+        "ann_vol": 0.12246540381106184,
+        "max_dd": -0.20750431189833107,
+        "sortino": 1.1453616376945446,
+        "n_weeks": 847,
+        "avg_tx_cost_bps": 0.3046044864226682
+      },
+      "fear_binary_contra": {
+        "sharpe": 0.9379044859141507,
+        "ann_ret": 0.1223388365296964,
+        "ann_vol": 0.13043848106820385,
+        "max_dd": -0.24906064132613817,
+        "sortino": 1.255388957602955,
+        "n_weeks": 847,
+        "avg_tx_cost_bps": 0.3046044864226682
+      },
+      "12_vix": {
+        "sharpe": 0.942637280652539,
+        "ann_ret": 0.11240270387150884,
+        "ann_vol": 0.1192427948464952,
+        "max_dd": -0.19130379926818097,
+        "sortino": 1.2172829739214552,
+        "n_weeks": 847,
+        "avg_tx_cost_bps": 0.3483647813246533
+      },
+      "bh_5050": {
+        "sharpe": 0.9585705191011307,
+        "ann_ret": 0.11442665535165729,
+        "ann_vol": 0.1193721829239619,
+        "max_dd": -0.2067114459552627,
+        "sortino": 1.301988194257914,
+        "n_weeks": 847,
+        "avg_tx_cost_bps": 0.0
+      }
+    },
+    "dm_test_fear_vs_bh": {
+      "t": -1.1300314484847294,
+      "p": 0.2587832535593637,
+      "harvey_pass": false
+    }
+  },
+  "part_f_cross_oos": {
+    "windows": [
+      {
+        "period": "2011-01-01 to 2012-12-31",
+        "n": 104,
+        "sharpe_fear": 0.6751272976788695,
+        "sharpe_bh": 0.6599811513622709,
+        "win": true
+      },
+      {
+        "period": "2013-01-01 to 2014-12-31",
+        "n": 104,
+        "sharpe_fear": 1.0226967939978213,
+        "sharpe_bh": 0.38226302510378257,
+        "win": true
+      },
+      {
+        "period": "2015-01-01 to 2016-12-31",
+        "n": 105,
+        "sharpe_fear": 0.5192456055864909,
+        "sharpe_bh": 0.2975305245643113,
+        "win": true
+      },
+      {
+        "period": "2017-01-01 to 2018-12-31",
+        "n": 104,
+        "sharpe_fear": 0.7062471675263055,
+        "sharpe_bh": 0.8292825246644354,
+        "win": false
+      },
+      {
+        "period": "2019-01-01 to 2020-12-31",
+        "n": 104,
+        "sharpe_fear": 1.0664359801743746,
+        "sharpe_bh": 1.3348716246371461,
+        "win": false
+      }
+    ],
+    "wins_vs_bh": 3,
+    "total_windows": 5,
+    "listing_threshold_pass": true
+  },
+  "part_g_incremental": {
+    "r_squared_vix_only": 0.00947972775006345,
+    "r_squared_fear_only": 0.002365005335294268,
+    "r_squared_vix_plus_fear": 0.009742674904629323,
+    "delta_r_squared": 0.0002629471545658735,
+    "partial_corr_fear_given_vix": {
+      "r": -0.016293056127094696,
+      "p": 0.6310897672839622
+    },
+    "f_test_incremental_fear": {
+      "F": 0.23048365750917352,
+      "p": 0.6312863925110511
+    },
+    "fear_coefficient": {
+      "coef": -0.0004600646780321669,
+      "t": -0.4800871353299152,
+      "p": 0.6312863925109691
+    },
+    "vix_coefficient": {
+      "coef": 0.00036585940867975904,
+      "t": 2.542994558391598,
+      "p": 0.01116325129421964
+    },
+    "n_obs": 871
+  },
+  "summary": {
+    "verdict": "NULL (VIX-PROXY): Using VIX as attention proxy = circular reasoning. All 'fear' signals reduce to VIX transformations. Lagged fear\u2192return r=0.048 (p=0.16, NS). Classifier trivial (always predicts up). Fear adds \u0394R\u00b2=0.00026 beyond VIX (p=0.63, NS). No strategy beats BH 50/50 (DM t=-1.13, Harvey FAIL). CONSISTENT with K750: Google Trends/attention does not predict returns or vol beyond VIX.",
+    "classifier_trivial_always_up": true,
+    "return_prediction_works": false,
+    "tail_risk_prediction_works": false,
+    "incremental_r2_beyond_vix": 0.0002629471545658735,
+    "incremental_significant": false,
+    "strategy_beats_bh": false,
+    "cross_oos_pass": true,
+    "data_type": "VIX-proxy (simulated \u2014 circular reasoning caveat)",
+    "key_difference_from_K750": "K750 tested vol prediction (QLIKE). K789 tests RETURN + TAIL RISK prediction.",
+    "honest_assessment": "Using VIX-proxy means fear index = VIX transformation. All results are essentially testing whether VIX predicts returns (already known: weakly). Classifier predicts \"always up\" = trivial. Tail risk Fisher test is circular (fear ~ VIX by construction). Definitive test: \u0394R\u00b2=0.00026, p=0.63 \u2014 fear adds NOTHING beyond VIX for return prediction. Need real pytrends data for genuine test. K750 had real data and found NULL for vol. Even with real data, K750 showed fear LAGS VIX (contemporaneous, not leading).",
+    "limitations": [
+      "VIX-proxy instead of real Google Trends (pytrends urllib3 incompatibility)",
+      "VIX-proxy creates circular reasoning for all fear-based analyses",
+      "Only 1 tail event in OOS period (2023-2024) \u2014 insufficient for tail risk evaluation",
+      "Weekly frequency limits return prediction granularity",
+      "No NLP/sentiment analysis \u2014 pure search volume only"
+    ],
+    "references": [
+      "Da, Engelberg & Gao (2011) \"In Search of Attention\" JoF",
+      "Preis, Moat & Stanley (2013) \"Quantifying Trading Behavior\" Sci. Rep.",
+      "Vlastakis & Markellos (2012) \"Information demand and stock market volatility\" JBFA",
+      "Andrei & Hasler (2015) \"Investor Attention and Stock Market Volatility\" RFS"
+    ],
+    "prior_experiments": {
+      "K192": "Google Trends for vol = textbook overfitting",
+      "K473": "Attention proxies dont beat VIX for vol",
+      "K750": "Real Google Trends NULL for vol (VIX sufficiency #36). Fear LAGS VIX."
+    }
+  },
+  "experiment_id": "K789",
+  "title": "Google Trends Search Volume as Return/Tail-Risk Predictor",
+  "timestamp": "2026-03-31T14:49:54.378344+00:00"
+}

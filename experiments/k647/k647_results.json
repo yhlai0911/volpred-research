@@ -1,0 +1,1120 @@
+{
+  "experiment_id": "K647",
+  "title": "Investor Profile Strategy Matching Algorithm",
+  "timestamp": "2026-03-28T20:26:46.284185+00:00",
+  "data_source": "K640 live audit (paper_trading.json) + strategy_metrics.json",
+  "data_period": "2025-01-02 to 2026-03-27 (live), 2022-01 to 2026-03 (backtest)",
+  "methodology": "Multi-criteria scoring with min-max normalization. Score = w1*norm(Sharpe) + w2*norm(-MDD) + w3*norm(-Complexity) + w4*capital_eligible. Hard filters remove strategies by market access and minimum capital. Soft penalties for MDD excess, complexity excess, daily rebalancing preference, and negative net Sharpe.",
+  "references": [
+    "Markowitz (1952) Portfolio Selection, Journal of Finance",
+    "DeMiguel, Garlappi & Uppal (2009) Optimal vs Naive Diversification, RFS",
+    "Brinson, Hood & Beebower (1986) Determinants of Portfolio Performance, FAJ"
+  ],
+  "strategy_database": {
+    "slow_vt": {
+      "display_name": "GARCH VT (SPY)",
+      "live_sharpe": 0.255,
+      "backtest_sharpe": 1.17,
+      "net_sharpe": -0.187,
+      "mdd_pct": -10.69,
+      "complexity": 3,
+      "min_capital_usd": 5000,
+      "rebalance_freq": "daily",
+      "assets": [
+        "SPY"
+      ],
+      "tx_cost_annual_pct": 4.075,
+      "market": "US",
+      "is_active": true
+    },
+    "risk_parity": {
+      "display_name": "Risk Parity (SPY+GLD)",
+      "live_sharpe": 2.448,
+      "backtest_sharpe": 2.04,
+      "net_sharpe": 2.324,
+      "mdd_pct": -11.12,
+      "complexity": 3,
+      "min_capital_usd": 10000,
+      "rebalance_freq": "daily",
+      "assets": [
+        "SPY",
+        "GLD"
+      ],
+      "tx_cost_annual_pct": 1.669,
+      "market": "US",
+      "is_active": true
+    },
+    "simple_12vix": {
+      "display_name": "12/VIX (SPY)",
+      "live_sharpe": 0.232,
+      "backtest_sharpe": 1.16,
+      "net_sharpe": -0.417,
+      "mdd_pct": -10.75,
+      "complexity": 1,
+      "min_capital_usd": 5000,
+      "rebalance_freq": "daily",
+      "assets": [
+        "SPY"
+      ],
+      "tx_cost_annual_pct": 5.989,
+      "market": "US",
+      "is_active": true
+    },
+    "recommended_5050": {
+      "display_name": "50/50 SPY/GLD",
+      "live_sharpe": 1.995,
+      "backtest_sharpe": 1.87,
+      "net_sharpe": 1.372,
+      "mdd_pct": -7.67,
+      "complexity": 2,
+      "min_capital_usd": 10000,
+      "rebalance_freq": "daily",
+      "assets": [
+        "SPY",
+        "GLD"
+      ],
+      "tx_cost_annual_pct": 5.94,
+      "market": "US",
+      "is_active": true
+    },
+    "taiwan_8.63vix": {
+      "display_name": "Taiwan VT (0050.TW)",
+      "live_sharpe": 2.484,
+      "backtest_sharpe": 2.05,
+      "net_sharpe": 1.968,
+      "mdd_pct": -11.19,
+      "complexity": 2,
+      "min_capital_usd": 3000,
+      "rebalance_freq": "daily",
+      "assets": [
+        "0050.TW"
+      ],
+      "tx_cost_annual_pct": 5.498,
+      "market": "TW",
+      "is_active": true
+    },
+    "vix_leading_guard": {
+      "display_name": "VIX+Leading Guard (0050.TW)",
+      "live_sharpe": 1.825,
+      "backtest_sharpe": 1.52,
+      "net_sharpe": 1.782,
+      "mdd_pct": -15.29,
+      "complexity": 4,
+      "min_capital_usd": 5000,
+      "rebalance_freq": "monthly",
+      "assets": [
+        "0050.TW"
+      ],
+      "tx_cost_annual_pct": 0.557,
+      "market": "TW",
+      "is_active": true
+    },
+    "vix_cond_leverage": {
+      "display_name": "VIX Conditional Leverage",
+      "live_sharpe": 2.827,
+      "backtest_sharpe": 2.64,
+      "net_sharpe": 2.211,
+      "mdd_pct": -6.41,
+      "complexity": 4,
+      "min_capital_usd": 20000,
+      "rebalance_freq": "monthly",
+      "assets": [
+        "SPY",
+        "GLD"
+      ],
+      "tx_cost_annual_pct": 6.185,
+      "market": "US",
+      "is_active": true
+    },
+    "taiwan_hybrid_leverage": {
+      "display_name": "Taiwan Hybrid Leverage",
+      "live_sharpe": 3.762,
+      "backtest_sharpe": 2.5,
+      "net_sharpe": 3.174,
+      "mdd_pct": -8.5,
+      "complexity": 5,
+      "min_capital_usd": 15000,
+      "rebalance_freq": "daily",
+      "assets": [
+        "0050.TW"
+      ],
+      "tx_cost_annual_pct": 6.458,
+      "market": "TW",
+      "is_active": true
+    },
+    "piecewise_conservative": {
+      "display_name": "Piecewise Conservative VT",
+      "live_sharpe": 3.975,
+      "backtest_sharpe": 3.16,
+      "net_sharpe": 2.806,
+      "mdd_pct": -2.48,
+      "complexity": 3,
+      "min_capital_usd": 5000,
+      "rebalance_freq": "daily",
+      "assets": [
+        "SPY",
+        "GLD"
+      ],
+      "tx_cost_annual_pct": 5.236,
+      "market": "US",
+      "is_active": true
+    },
+    "fear_dca": {
+      "display_name": "Fear DCA",
+      "live_sharpe": 0.427,
+      "backtest_sharpe": 1.2,
+      "net_sharpe": 0.378,
+      "mdd_pct": -18.76,
+      "complexity": 1,
+      "min_capital_usd": 1000,
+      "rebalance_freq": "monthly",
+      "assets": [
+        "SPY"
+      ],
+      "tx_cost_annual_pct": 0.905,
+      "market": "US",
+      "is_active": true
+    },
+    "adaptive_tier": {
+      "display_name": "Adaptive Tier VT",
+      "live_sharpe": 3.735,
+      "backtest_sharpe": 3.02,
+      "net_sharpe": 3.19,
+      "mdd_pct": -4.85,
+      "complexity": 5,
+      "min_capital_usd": 20000,
+      "rebalance_freq": "daily",
+      "assets": [
+        "SPY",
+        "GLD"
+      ],
+      "tx_cost_annual_pct": 4.649,
+      "market": "US",
+      "is_active": true
+    }
+  },
+  "investor_profiles": {
+    "conservative_retiree": {
+      "label": "Conservative Retiree",
+      "description": "Risk-averse, capital preservation priority, prefers simplicity, has $50K. Cannot tolerate large drawdowns.",
+      "weights": {
+        "sharpe": 0.2,
+        "mdd_safety": 0.5,
+        "simplicity": 0.2,
+        "capital_eligible": 0.1
+      },
+      "constraints": {
+        "max_mdd_tolerance_pct": -5.0,
+        "available_capital_usd": 50000,
+        "market_access": [
+          "US"
+        ],
+        "max_complexity": 3,
+        "prefers_low_rebalance": true
+      }
+    },
+    "young_professional": {
+      "label": "Young Professional",
+      "description": "Moderate risk tolerance, wants growth, has $10K. Willing to accept some drawdown for higher returns.",
+      "weights": {
+        "sharpe": 0.4,
+        "mdd_safety": 0.2,
+        "simplicity": 0.3,
+        "capital_eligible": 0.1
+      },
+      "constraints": {
+        "max_mdd_tolerance_pct": -15.0,
+        "available_capital_usd": 10000,
+        "market_access": [
+          "US"
+        ],
+        "max_complexity": 4,
+        "prefers_low_rebalance": false
+      }
+    },
+    "sophisticated_investor": {
+      "label": "Sophisticated Investor",
+      "description": "High risk tolerance, seeks max risk-adjusted returns, has $100K+. Comfortable with complex strategies and multiple markets.",
+      "weights": {
+        "sharpe": 0.5,
+        "mdd_safety": 0.2,
+        "simplicity": 0.1,
+        "capital_eligible": 0.2
+      },
+      "constraints": {
+        "max_mdd_tolerance_pct": -20.0,
+        "available_capital_usd": 100000,
+        "market_access": [
+          "US",
+          "TW"
+        ],
+        "max_complexity": 5,
+        "prefers_low_rebalance": false
+      }
+    }
+  },
+  "recommendations": {
+    "conservative_retiree": {
+      "profile_label": "Conservative Retiree",
+      "top3": [
+        {
+          "rank": 1,
+          "strategy_key": "piecewise_conservative",
+          "display_name": "Piecewise Conservative VT",
+          "score": 0.85,
+          "live_sharpe": 3.975,
+          "mdd_pct": -2.48,
+          "net_sharpe": 2.806,
+          "why": "Recommended for excellent drawdown protection. Live Sharpe 3.98, MDD -2.5%, strong net Sharpe 2.81 after TX costs"
+        },
+        {
+          "rank": 2,
+          "strategy_key": "recommended_5050",
+          "display_name": "50/50 SPY/GLD",
+          "score": 0.5948,
+          "live_sharpe": 1.995,
+          "mdd_pct": -7.67,
+          "net_sharpe": 1.372,
+          "why": "Recommended for excellent drawdown protection. Live Sharpe 2.00, MDD -7.7%, positive net Sharpe 1.37"
+        },
+        {
+          "rank": 3,
+          "strategy_key": "vix_cond_leverage",
+          "display_name": "VIX Conditional Leverage",
+          "score": 0.5468,
+          "live_sharpe": 2.827,
+          "mdd_pct": -6.41,
+          "net_sharpe": 2.211,
+          "why": "Recommended for excellent drawdown protection. Live Sharpe 2.83, MDD -6.4%, strong net Sharpe 2.21 after TX costs, low-maintenance monthly rebalancing"
+        }
+      ],
+      "total_eligible": 8,
+      "filtered_out": {
+        "taiwan_8.63vix": "No TW market access",
+        "vix_leading_guard": "No TW market access",
+        "taiwan_hybrid_leverage": "No TW market access"
+      },
+      "full_rankings": [
+        {
+          "rank": 1,
+          "strategy_key": "piecewise_conservative",
+          "display_name": "Piecewise Conservative VT",
+          "score": 0.85,
+          "base_score": 0.9,
+          "penalty": 0.05,
+          "penalty_reasons": [
+            "Daily rebalancing (prefers less frequent)"
+          ],
+          "components": {
+            "sharpe_score": 0.2,
+            "mdd_safety_score": 0.5,
+            "simplicity_score": 0.1,
+            "capital_score": 0.1
+          },
+          "metrics": {
+            "live_sharpe": 3.975,
+            "net_sharpe": 2.806,
+            "mdd_pct": -2.48,
+            "complexity": 3,
+            "rebalance_freq": "daily",
+            "tx_cost_annual_pct": 5.236,
+            "market": "US"
+          }
+        },
+        {
+          "rank": 2,
+          "strategy_key": "recommended_5050",
+          "display_name": "50/50 SPY/GLD",
+          "score": 0.5948,
+          "base_score": 0.6848,
+          "penalty": 0.0901,
+          "penalty_reasons": [
+            "MDD -7.7% exceeds tolerance -5.0%",
+            "Daily rebalancing (prefers less frequent)"
+          ],
+          "components": {
+            "sharpe_score": 0.0942,
+            "mdd_safety_score": 0.3406,
+            "simplicity_score": 0.15,
+            "capital_score": 0.1
+          },
+          "metrics": {
+            "live_sharpe": 1.995,
+            "net_sharpe": 1.372,
+            "mdd_pct": -7.67,
+            "complexity": 2,
+            "rebalance_freq": "daily",
+            "tx_cost_annual_pct": 5.94,
+            "market": "US"
+          }
+        },
+        {
+          "rank": 3,
+          "strategy_key": "vix_cond_leverage",
+          "display_name": "VIX Conditional Leverage",
+          "score": 0.5468,
+          "base_score": 0.668,
+          "penalty": 0.1212,
+          "penalty_reasons": [
+            "MDD -6.4% exceeds tolerance -5.0%",
+            "Complexity 4 > preference 3"
+          ],
+          "components": {
+            "sharpe_score": 0.1387,
+            "mdd_safety_score": 0.3793,
+            "simplicity_score": 0.05,
+            "capital_score": 0.1
+          },
+          "metrics": {
+            "live_sharpe": 2.827,
+            "net_sharpe": 2.211,
+            "mdd_pct": -6.41,
+            "complexity": 4,
+            "rebalance_freq": "monthly",
+            "tx_cost_annual_pct": 6.185,
+            "market": "US"
+          }
+        },
+        {
+          "rank": 4,
+          "strategy_key": "adaptive_tier",
+          "display_name": "Adaptive Tier VT",
+          "score": 0.4644,
+          "base_score": 0.7144,
+          "penalty": 0.25,
+          "penalty_reasons": [
+            "Complexity 5 > preference 3",
+            "Daily rebalancing (prefers less frequent)"
+          ],
+          "components": {
+            "sharpe_score": 0.1872,
+            "mdd_safety_score": 0.4272,
+            "simplicity_score": 0.0,
+            "capital_score": 0.1
+          },
+          "metrics": {
+            "live_sharpe": 3.735,
+            "net_sharpe": 3.19,
+            "mdd_pct": -4.85,
+            "complexity": 5,
+            "rebalance_freq": "daily",
+            "tx_cost_annual_pct": 4.649,
+            "market": "US"
+          }
+        },
+        {
+          "rank": 5,
+          "strategy_key": "risk_parity",
+          "display_name": "Risk Parity (SPY+GLD)",
+          "score": 0.4113,
+          "base_score": 0.5531,
+          "penalty": 0.1418,
+          "penalty_reasons": [
+            "MDD -11.1% exceeds tolerance -5.0%",
+            "Daily rebalancing (prefers less frequent)"
+          ],
+          "components": {
+            "sharpe_score": 0.1184,
+            "mdd_safety_score": 0.2346,
+            "simplicity_score": 0.1,
+            "capital_score": 0.1
+          },
+          "metrics": {
+            "live_sharpe": 2.448,
+            "net_sharpe": 2.324,
+            "mdd_pct": -11.12,
+            "complexity": 3,
+            "rebalance_freq": "daily",
+            "tx_cost_annual_pct": 1.669,
+            "market": "US"
+          }
+        },
+        {
+          "rank": 6,
+          "strategy_key": "simple_12vix",
+          "display_name": "12/VIX (SPY)",
+          "score": 0.2098,
+          "base_score": 0.546,
+          "penalty": 0.3362,
+          "penalty_reasons": [
+            "MDD -10.8% exceeds tolerance -5.0%",
+            "Daily rebalancing (prefers less frequent)",
+            "Net Sharpe negative (-0.417)"
+          ],
+          "components": {
+            "sharpe_score": 0.0,
+            "mdd_safety_score": 0.246,
+            "simplicity_score": 0.2,
+            "capital_score": 0.1
+          },
+          "metrics": {
+            "live_sharpe": 0.232,
+            "net_sharpe": -0.417,
+            "mdd_pct": -10.75,
+            "complexity": 1,
+            "rebalance_freq": "daily",
+            "tx_cost_annual_pct": 5.989,
+            "market": "US"
+          }
+        },
+        {
+          "rank": 7,
+          "strategy_key": "slow_vt",
+          "display_name": "GARCH VT (SPY)",
+          "score": 0.1137,
+          "base_score": 0.4491,
+          "penalty": 0.3354,
+          "penalty_reasons": [
+            "MDD -10.7% exceeds tolerance -5.0%",
+            "Daily rebalancing (prefers less frequent)",
+            "Net Sharpe negative (-0.187)"
+          ],
+          "components": {
+            "sharpe_score": 0.0012,
+            "mdd_safety_score": 0.2479,
+            "simplicity_score": 0.1,
+            "capital_score": 0.1
+          },
+          "metrics": {
+            "live_sharpe": 0.255,
+            "net_sharpe": -0.187,
+            "mdd_pct": -10.69,
+            "complexity": 3,
+            "rebalance_freq": "daily",
+            "tx_cost_annual_pct": 4.075,
+            "market": "US"
+          }
+        },
+        {
+          "rank": 8,
+          "strategy_key": "fear_dca",
+          "display_name": "Fear DCA",
+          "score": 0.104,
+          "base_score": 0.3104,
+          "penalty": 0.2064,
+          "penalty_reasons": [
+            "MDD -18.8% exceeds tolerance -5.0%"
+          ],
+          "components": {
+            "sharpe_score": 0.0104,
+            "mdd_safety_score": 0.0,
+            "simplicity_score": 0.2,
+            "capital_score": 0.1
+          },
+          "metrics": {
+            "live_sharpe": 0.427,
+            "net_sharpe": 0.378,
+            "mdd_pct": -18.76,
+            "complexity": 1,
+            "rebalance_freq": "monthly",
+            "tx_cost_annual_pct": 0.905,
+            "market": "US"
+          }
+        }
+      ]
+    },
+    "young_professional": {
+      "profile_label": "Young Professional",
+      "top3": [
+        {
+          "rank": 1,
+          "strategy_key": "piecewise_conservative",
+          "display_name": "Piecewise Conservative VT",
+          "score": 0.7,
+          "live_sharpe": 3.975,
+          "mdd_pct": -2.48,
+          "net_sharpe": 2.806,
+          "why": "Recommended for strong risk-adjusted returns. Live Sharpe 3.98, MDD -2.5%, strong net Sharpe 2.81 after TX costs"
+        },
+        {
+          "rank": 2,
+          "strategy_key": "recommended_5050",
+          "display_name": "50/50 SPY/GLD",
+          "score": 0.5446,
+          "live_sharpe": 1.995,
+          "mdd_pct": -7.67,
+          "net_sharpe": 1.372,
+          "why": "Recommended for strong risk-adjusted returns. Live Sharpe 2.00, MDD -7.7%, positive net Sharpe 1.37"
+        },
+        {
+          "rank": 3,
+          "strategy_key": "risk_parity",
+          "display_name": "Risk Parity (SPY+GLD)",
+          "score": 0.4007,
+          "live_sharpe": 2.448,
+          "mdd_pct": -11.12,
+          "net_sharpe": 2.324,
+          "why": "Recommended for strong risk-adjusted returns. Live Sharpe 2.45, MDD -11.1%, strong net Sharpe 2.32 after TX costs"
+        }
+      ],
+      "total_eligible": 6,
+      "filtered_out": {
+        "taiwan_8.63vix": "No TW market access",
+        "vix_leading_guard": "No TW market access",
+        "vix_cond_leverage": "Requires $20,000 (has $10,000)",
+        "taiwan_hybrid_leverage": "No TW market access",
+        "adaptive_tier": "Requires $20,000 (has $10,000)"
+      },
+      "full_rankings": [
+        {
+          "rank": 1,
+          "strategy_key": "piecewise_conservative",
+          "display_name": "Piecewise Conservative VT",
+          "score": 0.7,
+          "base_score": 0.7,
+          "penalty": 0.0,
+          "penalty_reasons": [],
+          "components": {
+            "sharpe_score": 0.4,
+            "mdd_safety_score": 0.2,
+            "simplicity_score": 0.0,
+            "capital_score": 0.1
+          },
+          "metrics": {
+            "live_sharpe": 3.975,
+            "net_sharpe": 2.806,
+            "mdd_pct": -2.48,
+            "complexity": 3,
+            "rebalance_freq": "daily",
+            "tx_cost_annual_pct": 5.236,
+            "market": "US"
+          }
+        },
+        {
+          "rank": 2,
+          "strategy_key": "recommended_5050",
+          "display_name": "50/50 SPY/GLD",
+          "score": 0.5446,
+          "base_score": 0.5446,
+          "penalty": 0.0,
+          "penalty_reasons": [],
+          "components": {
+            "sharpe_score": 0.1884,
+            "mdd_safety_score": 0.1362,
+            "simplicity_score": 0.15,
+            "capital_score": 0.07
+          },
+          "metrics": {
+            "live_sharpe": 1.995,
+            "net_sharpe": 1.372,
+            "mdd_pct": -7.67,
+            "complexity": 2,
+            "rebalance_freq": "daily",
+            "tx_cost_annual_pct": 5.94,
+            "market": "US"
+          }
+        },
+        {
+          "rank": 3,
+          "strategy_key": "risk_parity",
+          "display_name": "Risk Parity (SPY+GLD)",
+          "score": 0.4007,
+          "base_score": 0.4007,
+          "penalty": 0.0,
+          "penalty_reasons": [],
+          "components": {
+            "sharpe_score": 0.2368,
+            "mdd_safety_score": 0.0939,
+            "simplicity_score": 0.0,
+            "capital_score": 0.07
+          },
+          "metrics": {
+            "live_sharpe": 2.448,
+            "net_sharpe": 2.324,
+            "mdd_pct": -11.12,
+            "complexity": 3,
+            "rebalance_freq": "daily",
+            "tx_cost_annual_pct": 1.669,
+            "market": "US"
+          }
+        },
+        {
+          "rank": 4,
+          "strategy_key": "fear_dca",
+          "display_name": "Fear DCA",
+          "score": 0.3644,
+          "base_score": 0.4208,
+          "penalty": 0.0564,
+          "penalty_reasons": [
+            "MDD -18.8% exceeds tolerance -15.0%"
+          ],
+          "components": {
+            "sharpe_score": 0.0208,
+            "mdd_safety_score": 0.0,
+            "simplicity_score": 0.3,
+            "capital_score": 0.1
+          },
+          "metrics": {
+            "live_sharpe": 0.427,
+            "net_sharpe": 0.378,
+            "mdd_pct": -18.76,
+            "complexity": 1,
+            "rebalance_freq": "monthly",
+            "tx_cost_annual_pct": 0.905,
+            "market": "US"
+          }
+        },
+        {
+          "rank": 5,
+          "strategy_key": "simple_12vix",
+          "display_name": "12/VIX (SPY)",
+          "score": 0.2984,
+          "base_score": 0.4984,
+          "penalty": 0.2,
+          "penalty_reasons": [
+            "Net Sharpe negative (-0.417)"
+          ],
+          "components": {
+            "sharpe_score": 0.0,
+            "mdd_safety_score": 0.0984,
+            "simplicity_score": 0.3,
+            "capital_score": 0.1
+          },
+          "metrics": {
+            "live_sharpe": 0.232,
+            "net_sharpe": -0.417,
+            "mdd_pct": -10.75,
+            "complexity": 1,
+            "rebalance_freq": "daily",
+            "tx_cost_annual_pct": 5.989,
+            "market": "US"
+          }
+        },
+        {
+          "rank": 6,
+          "strategy_key": "slow_vt",
+          "display_name": "GARCH VT (SPY)",
+          "score": 0.0016,
+          "base_score": 0.2016,
+          "penalty": 0.2,
+          "penalty_reasons": [
+            "Net Sharpe negative (-0.187)"
+          ],
+          "components": {
+            "sharpe_score": 0.0025,
+            "mdd_safety_score": 0.0991,
+            "simplicity_score": 0.0,
+            "capital_score": 0.1
+          },
+          "metrics": {
+            "live_sharpe": 0.255,
+            "net_sharpe": -0.187,
+            "mdd_pct": -10.69,
+            "complexity": 3,
+            "rebalance_freq": "daily",
+            "tx_cost_annual_pct": 4.075,
+            "market": "US"
+          }
+        }
+      ]
+    },
+    "sophisticated_investor": {
+      "profile_label": "Sophisticated Investor",
+      "top3": [
+        {
+          "rank": 1,
+          "strategy_key": "piecewise_conservative",
+          "display_name": "Piecewise Conservative VT",
+          "score": 0.95,
+          "live_sharpe": 3.975,
+          "mdd_pct": -2.48,
+          "net_sharpe": 2.806,
+          "why": "Recommended for strong risk-adjusted returns. Live Sharpe 3.98, MDD -2.5%, strong net Sharpe 2.81 after TX costs"
+        },
+        {
+          "rank": 2,
+          "strategy_key": "adaptive_tier",
+          "display_name": "Adaptive Tier VT",
+          "score": 0.8388,
+          "live_sharpe": 3.735,
+          "mdd_pct": -4.85,
+          "net_sharpe": 3.19,
+          "why": "Recommended for strong risk-adjusted returns. Live Sharpe 3.73, MDD -4.8%, strong net Sharpe 3.19 after TX costs"
+        },
+        {
+          "rank": 3,
+          "strategy_key": "taiwan_hybrid_leverage",
+          "display_name": "Taiwan Hybrid Leverage",
+          "score": 0.7976,
+          "live_sharpe": 3.762,
+          "mdd_pct": -8.5,
+          "net_sharpe": 3.174,
+          "why": "Recommended for strong risk-adjusted returns. Live Sharpe 3.76, MDD -8.5%, strong net Sharpe 3.17 after TX costs"
+        }
+      ],
+      "total_eligible": 11,
+      "filtered_out": {},
+      "full_rankings": [
+        {
+          "rank": 1,
+          "strategy_key": "piecewise_conservative",
+          "display_name": "Piecewise Conservative VT",
+          "score": 0.95,
+          "base_score": 0.95,
+          "penalty": 0.0,
+          "penalty_reasons": [],
+          "components": {
+            "sharpe_score": 0.5,
+            "mdd_safety_score": 0.2,
+            "simplicity_score": 0.05,
+            "capital_score": 0.2
+          },
+          "metrics": {
+            "live_sharpe": 3.975,
+            "net_sharpe": 2.806,
+            "mdd_pct": -2.48,
+            "complexity": 3,
+            "rebalance_freq": "daily",
+            "tx_cost_annual_pct": 5.236,
+            "market": "US"
+          }
+        },
+        {
+          "rank": 2,
+          "strategy_key": "adaptive_tier",
+          "display_name": "Adaptive Tier VT",
+          "score": 0.8388,
+          "base_score": 0.8388,
+          "penalty": 0.0,
+          "penalty_reasons": [],
+          "components": {
+            "sharpe_score": 0.4679,
+            "mdd_safety_score": 0.1709,
+            "simplicity_score": 0.0,
+            "capital_score": 0.2
+          },
+          "metrics": {
+            "live_sharpe": 3.735,
+            "net_sharpe": 3.19,
+            "mdd_pct": -4.85,
+            "complexity": 5,
+            "rebalance_freq": "daily",
+            "tx_cost_annual_pct": 4.649,
+            "market": "US"
+          }
+        },
+        {
+          "rank": 3,
+          "strategy_key": "taiwan_hybrid_leverage",
+          "display_name": "Taiwan Hybrid Leverage",
+          "score": 0.7976,
+          "base_score": 0.7976,
+          "penalty": 0.0,
+          "penalty_reasons": [],
+          "components": {
+            "sharpe_score": 0.4715,
+            "mdd_safety_score": 0.126,
+            "simplicity_score": 0.0,
+            "capital_score": 0.2
+          },
+          "metrics": {
+            "live_sharpe": 3.762,
+            "net_sharpe": 3.174,
+            "mdd_pct": -8.5,
+            "complexity": 5,
+            "rebalance_freq": "daily",
+            "tx_cost_annual_pct": 6.458,
+            "market": "TW"
+          }
+        },
+        {
+          "rank": 4,
+          "strategy_key": "vix_cond_leverage",
+          "display_name": "VIX Conditional Leverage",
+          "score": 0.7234,
+          "base_score": 0.7234,
+          "penalty": 0.0,
+          "penalty_reasons": [],
+          "components": {
+            "sharpe_score": 0.3466,
+            "mdd_safety_score": 0.1517,
+            "simplicity_score": 0.025,
+            "capital_score": 0.2
+          },
+          "metrics": {
+            "live_sharpe": 2.827,
+            "net_sharpe": 2.211,
+            "mdd_pct": -6.41,
+            "complexity": 4,
+            "rebalance_freq": "monthly",
+            "tx_cost_annual_pct": 6.185,
+            "market": "US"
+          }
+        },
+        {
+          "rank": 5,
+          "strategy_key": "taiwan_8.63vix",
+          "display_name": "Taiwan VT (0050.TW)",
+          "score": 0.6688,
+          "base_score": 0.6688,
+          "penalty": 0.0,
+          "penalty_reasons": [],
+          "components": {
+            "sharpe_score": 0.3008,
+            "mdd_safety_score": 0.093,
+            "simplicity_score": 0.075,
+            "capital_score": 0.2
+          },
+          "metrics": {
+            "live_sharpe": 2.484,
+            "net_sharpe": 1.968,
+            "mdd_pct": -11.19,
+            "complexity": 2,
+            "rebalance_freq": "daily",
+            "tx_cost_annual_pct": 5.498,
+            "market": "TW"
+          }
+        },
+        {
+          "rank": 6,
+          "strategy_key": "recommended_5050",
+          "display_name": "50/50 SPY/GLD",
+          "score": 0.6467,
+          "base_score": 0.6467,
+          "penalty": 0.0,
+          "penalty_reasons": [],
+          "components": {
+            "sharpe_score": 0.2355,
+            "mdd_safety_score": 0.1362,
+            "simplicity_score": 0.075,
+            "capital_score": 0.2
+          },
+          "metrics": {
+            "live_sharpe": 1.995,
+            "net_sharpe": 1.372,
+            "mdd_pct": -7.67,
+            "complexity": 2,
+            "rebalance_freq": "daily",
+            "tx_cost_annual_pct": 5.94,
+            "market": "US"
+          }
+        },
+        {
+          "rank": 7,
+          "strategy_key": "risk_parity",
+          "display_name": "Risk Parity (SPY+GLD)",
+          "score": 0.6399,
+          "base_score": 0.6399,
+          "penalty": 0.0,
+          "penalty_reasons": [],
+          "components": {
+            "sharpe_score": 0.296,
+            "mdd_safety_score": 0.0939,
+            "simplicity_score": 0.05,
+            "capital_score": 0.2
+          },
+          "metrics": {
+            "live_sharpe": 2.448,
+            "net_sharpe": 2.324,
+            "mdd_pct": -11.12,
+            "complexity": 3,
+            "rebalance_freq": "daily",
+            "tx_cost_annual_pct": 1.669,
+            "market": "US"
+          }
+        },
+        {
+          "rank": 8,
+          "strategy_key": "vix_leading_guard",
+          "display_name": "VIX+Leading Guard (0050.TW)",
+          "score": 0.4804,
+          "base_score": 0.4804,
+          "penalty": 0.0,
+          "penalty_reasons": [],
+          "components": {
+            "sharpe_score": 0.2128,
+            "mdd_safety_score": 0.0426,
+            "simplicity_score": 0.025,
+            "capital_score": 0.2
+          },
+          "metrics": {
+            "live_sharpe": 1.825,
+            "net_sharpe": 1.782,
+            "mdd_pct": -15.29,
+            "complexity": 4,
+            "rebalance_freq": "monthly",
+            "tx_cost_annual_pct": 0.557,
+            "market": "TW"
+          }
+        },
+        {
+          "rank": 9,
+          "strategy_key": "fear_dca",
+          "display_name": "Fear DCA",
+          "score": 0.326,
+          "base_score": 0.326,
+          "penalty": 0.0,
+          "penalty_reasons": [],
+          "components": {
+            "sharpe_score": 0.026,
+            "mdd_safety_score": 0.0,
+            "simplicity_score": 0.1,
+            "capital_score": 0.2
+          },
+          "metrics": {
+            "live_sharpe": 0.427,
+            "net_sharpe": 0.378,
+            "mdd_pct": -18.76,
+            "complexity": 1,
+            "rebalance_freq": "monthly",
+            "tx_cost_annual_pct": 0.905,
+            "market": "US"
+          }
+        },
+        {
+          "rank": 10,
+          "strategy_key": "simple_12vix",
+          "display_name": "12/VIX (SPY)",
+          "score": 0.1984,
+          "base_score": 0.3984,
+          "penalty": 0.2,
+          "penalty_reasons": [
+            "Net Sharpe negative (-0.417)"
+          ],
+          "components": {
+            "sharpe_score": 0.0,
+            "mdd_safety_score": 0.0984,
+            "simplicity_score": 0.1,
+            "capital_score": 0.2
+          },
+          "metrics": {
+            "live_sharpe": 0.232,
+            "net_sharpe": -0.417,
+            "mdd_pct": -10.75,
+            "complexity": 1,
+            "rebalance_freq": "daily",
+            "tx_cost_annual_pct": 5.989,
+            "market": "US"
+          }
+        },
+        {
+          "rank": 11,
+          "strategy_key": "slow_vt",
+          "display_name": "GARCH VT (SPY)",
+          "score": 0.1522,
+          "base_score": 0.3522,
+          "penalty": 0.2,
+          "penalty_reasons": [
+            "Net Sharpe negative (-0.187)"
+          ],
+          "components": {
+            "sharpe_score": 0.0031,
+            "mdd_safety_score": 0.0991,
+            "simplicity_score": 0.05,
+            "capital_score": 0.2
+          },
+          "metrics": {
+            "live_sharpe": 0.255,
+            "net_sharpe": -0.187,
+            "mdd_pct": -10.69,
+            "complexity": 3,
+            "rebalance_freq": "daily",
+            "tx_cost_annual_pct": 4.075,
+            "market": "US"
+          }
+        }
+      ]
+    }
+  },
+  "validation": {
+    "tests": [
+      {
+        "profile": "Conservative Retiree",
+        "expected": "piecewise_conservative in top 3 (lowest MDD at -2.48%)",
+        "actual_top3": [
+          "Piecewise Conservative VT",
+          "50/50 SPY/GLD",
+          "VIX Conditional Leverage"
+        ],
+        "pass": true,
+        "reasoning": "Piecewise has MDD of only -2.48% — perfect for capital preservation."
+      },
+      {
+        "profile": "Young Professional",
+        "expected": "No negative net Sharpe in top 3",
+        "actual_top3": [
+          "Piecewise Conservative VT",
+          "50/50 SPY/GLD",
+          "Risk Parity (SPY+GLD)"
+        ],
+        "pass": true,
+        "reasoning": "All top 3 have positive net Sharpe — TX costs don't destroy returns."
+      },
+      {
+        "profile": "Sophisticated Investor",
+        "expected": "Top recommendation has live Sharpe >= 2.5",
+        "actual_top3": [
+          "Piecewise Conservative VT",
+          "Adaptive Tier VT",
+          "Taiwan Hybrid Leverage"
+        ],
+        "top1_live_sharpe": 3.975,
+        "pass": true,
+        "reasoning": "Top pick has Sharpe 3.975 — appropriate for sophisticated investor."
+      },
+      {
+        "profile": "Cross-profile differentiation",
+        "expected": "Top 3 picks differ between profiles (at least 1 unique per pair)",
+        "conservative_top3": [
+          "vix_cond_leverage",
+          "recommended_5050",
+          "piecewise_conservative"
+        ],
+        "young_top3": [
+          "risk_parity",
+          "recommended_5050",
+          "piecewise_conservative"
+        ],
+        "sophisticated_top3": [
+          "adaptive_tier",
+          "taiwan_hybrid_leverage",
+          "piecewise_conservative"
+        ],
+        "pass": true,
+        "reasoning": "Profiles correctly produce differentiated recommendations."
+      },
+      {
+        "profile": "Sophisticated investor access breadth",
+        "expected": "Sophisticated investor has more eligible strategies than conservative",
+        "sophisticated_eligible": 11,
+        "conservative_eligible": 8,
+        "pass": true,
+        "reasoning": "Sophisticated: 11 eligible vs Conservative: 8 — broader access."
+      }
+    ],
+    "all_pass": true
+  },
+  "algorithm_specification": {
+    "normalization": "min-max to [0,1]",
+    "score_formula": "Score = w_sharpe * norm(live_sharpe) + w_mdd * norm(-|MDD|) + w_simplicity * norm(-complexity) + w_capital * capital_eligible",
+    "hard_filters": [
+      "market_access: strategy market must be in investor's accessible markets",
+      "min_capital: investor's capital must meet strategy minimum"
+    ],
+    "soft_penalties": [
+      "MDD excess: 0.15 * (excess_pct / 10) per 10% beyond tolerance",
+      "Complexity excess: 0.10 per level beyond preference",
+      "Daily rebalancing: 0.05 if investor prefers low frequency",
+      "Negative net Sharpe: 0.20 flat penalty"
+    ],
+    "capital_eligible_bonus": "1.0 if capital >= 2x minimum, else 0.7"
+  },
+  "key_findings": [
+    "Algorithm correctly matches conservative investors to Piecewise Conservative (MDD -2.48%)",
+    "Piecewise Conservative dominates all profiles — live Sharpe 3.975 AND lowest MDD (-2.48%) make it a 'Pareto dominant' strategy in the current 15-month live sample",
+    "Young professionals are steered toward balanced strategies with positive net Sharpe",
+    "Sophisticated investors get access to Taiwan market + leverage strategies (Adaptive Tier, Taiwan Hybrid) that US-only investors cannot reach",
+    "Negative net Sharpe penalty effectively deprioritizes slow_vt (-0.187) and simple_12vix (-0.417) — TX cost drag is the main differentiator",
+    "Hard market filter prevents US-only investors from seeing Taiwan strategies — this is a real constraint for retail investors",
+    "Capital constraint filters out leverage strategies (VIX Cond Leverage, Adaptive Tier) for young professionals with $10K — appropriate since leverage needs margin",
+    "Algorithm produces differentiated recommendations across profiles despite Piecewise dominance"
+  ],
+  "limitations": [
+    "Live performance period is only 15 months — may not represent full cycle",
+    "Complexity scores are subjective (1-5 scale assigned by researcher)",
+    "TX cost estimates assume current market conditions and 10bps round-trip",
+    "Algorithm uses only live Sharpe; a blend of live+backtest might be more robust",
+    "No risk factor analysis (beta, sector exposure) in matching",
+    "Only 3 archetypes; real investors have more nuanced profiles"
+  ]
+}

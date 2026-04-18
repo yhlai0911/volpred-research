@@ -1,0 +1,765 @@
+{
+  "experiment": "K190",
+  "title": "Realized Semivariance Decomposition for Volatility Prediction",
+  "attribution": "[\u63d0\u51fa: \u7528\u6236, \u57f7\u884c: Claude]",
+  "timestamp": "2026-03-24T13:41:19.520457",
+  "methodology": {
+    "data_source": "yfinance daily",
+    "assets": [
+      "SPY",
+      "QQQ",
+      "GLD",
+      "TLT",
+      "BTC-USD"
+    ],
+    "sample": "2010-01-01 to 2024-12-31",
+    "oos": "2023-01-01 to 2024-12-31",
+    "models": [
+      "GJR-GARCH(1,1) baseline",
+      "EWMA(lam=0.94) on total r^2",
+      "EWMA asymmetric (lam+=0.96 lam-=0.92) on RS+/RS-",
+      "Semivariance HAR (daily+weekly RS+/RS-)",
+      "GARCH-X with SJV exogenous"
+    ],
+    "semivariance": {
+      "RS_plus": "r^2 * I(r>0)",
+      "RS_minus": "r^2 * I(r<0)",
+      "SJV": "RS+ - RS- (signed jump variation)"
+    },
+    "evaluation": "QLIKE (primary), DM test, SJV regime, partial r|VIX",
+    "reference": "Barndorff-Nielsen, Kinnebrock & Shephard (2010, JFE)",
+    "causal": "All forecasts use only t-1 information"
+  },
+  "cross_asset_summary": {
+    "n_assets": 5,
+    "assets": [
+      "SPY",
+      "QQQ",
+      "GLD",
+      "TLT",
+      "BTC-USD"
+    ],
+    "best_models": {
+      "SPY": "GJR_GARCH",
+      "QQQ": "EWMA_semivar",
+      "GLD": "GJR_GARCH",
+      "TLT": "GJR_GARCH",
+      "BTC-USD": "GJR_GARCH"
+    },
+    "model_wins": {
+      "GJR_GARCH": 4,
+      "EWMA_semivar": 1
+    },
+    "significant_dm_over_gjr": {},
+    "rs_neg_more_persistent": "3/5",
+    "sjv_predicts_higher_vol": "2/5",
+    "sjv_partial_corr_sig_given_vix": "0/5"
+  },
+  "per_asset": {
+    "SPY": {
+      "summary": {
+        "n_total": 3772,
+        "n_oos": 501,
+        "oos_range": "2023-01-03 to 2024-12-30",
+        "annualized_vol_oos_pct": 12.89,
+        "rs_neg_share": 0.4474,
+        "sjv_mean": 6.9419e-06
+      },
+      "qlike": {
+        "GJR_GARCH": -8.671921,
+        "EWMA_total": -8.619993,
+        "EWMA_semivar": -8.643232,
+        "SemiVar_HAR": -8.628986,
+        "GARCH_X_SJV": -8.626668
+      },
+      "best_model": "GJR_GARCH",
+      "dm_tests": {
+        "EWMA_total_vs_GJR": {
+          "t_stat": 2.2697,
+          "p_value": 0.0236,
+          "n": 501
+        },
+        "EWMA_semivar_vs_GJR": {
+          "t_stat": 1.454,
+          "p_value": 0.1466,
+          "n": 501
+        },
+        "SemiVar_HAR_vs_GJR": {
+          "t_stat": 1.8625,
+          "p_value": 0.0631,
+          "n": 501
+        },
+        "GARCH_X_SJV_vs_GJR": {
+          "t_stat": 2.9588,
+          "p_value": 0.0032,
+          "n": 501
+        },
+        "SemiVar_HAR_vs_EWMA_total": {
+          "t_stat": -0.3105,
+          "p_value": 0.7563,
+          "n": 501
+        },
+        "EWMA_semivar_vs_EWMA_total": {
+          "t_stat": -4.4244,
+          "p_value": 0.0,
+          "n": 501
+        }
+      },
+      "sjv_regime": {
+        "n_down": 211,
+        "n_up": 289,
+        "mean_rv_after_down": 8.282e-05,
+        "mean_rv_after_up": 5.38e-05,
+        "ratio": 1.5393,
+        "t_stat": 2.8369,
+        "p_value": 0.0048
+      },
+      "partial_corr_sjv_vix": {
+        "partial_r": -0.0094,
+        "partial_p": 0.8345,
+        "raw_r": -0.0772,
+        "raw_p": 0.0845,
+        "n": 500
+      },
+      "asymmetry": {
+        "rs_pos": {
+          "lag_1": {
+            "r": -0.0151,
+            "p": 0.7366
+          },
+          "lag_5": {
+            "r": -0.0181,
+            "p": 0.6871
+          },
+          "lag_22": {
+            "r": -0.0524,
+            "p": 0.2521
+          }
+        },
+        "rs_neg": {
+          "lag_1": {
+            "r": 0.0786,
+            "p": 0.079
+          },
+          "lag_5": {
+            "r": -0.0043,
+            "p": 0.9248
+          },
+          "lag_22": {
+            "r": 0.0201,
+            "p": 0.661
+          }
+        },
+        "rv": {
+          "lag_1": {
+            "r": 0.0208,
+            "p": 0.643
+          },
+          "lag_5": {
+            "r": 0.0595,
+            "p": 0.1861
+          },
+          "lag_22": {
+            "r": -0.0254,
+            "p": 0.5786
+          }
+        },
+        "asymmetry_test": {
+          "rs_neg_acf1": 0.0786,
+          "rs_pos_acf1": -0.0151,
+          "z_stat": 1.4798,
+          "p_one_sided": 0.0695,
+          "rs_neg_more_persistent": true
+        }
+      },
+      "har_coefficients": {
+        "intercept": {
+          "beta": 4.097e-05,
+          "t": 6.467
+        },
+        "rs_pos_lag1": {
+          "beta": 0.20716247,
+          "t": 7.031
+        },
+        "rs_neg_lag1": {
+          "beta": 0.045681,
+          "t": 2.081
+        },
+        "rs_pos_5d": {
+          "beta": 0.19969877,
+          "t": 3.267
+        },
+        "rs_neg_5d": {
+          "beta": 0.82245517,
+          "t": 20.031
+        },
+        "R_squared": 0.2962,
+        "n_obs": 3766
+      }
+    },
+    "QQQ": {
+      "summary": {
+        "n_total": 3772,
+        "n_oos": 501,
+        "oos_range": "2023-01-03 to 2024-12-30",
+        "annualized_vol_oos_pct": 18.04,
+        "rs_neg_share": 0.4365,
+        "sjv_mean": 1.63985e-05
+      },
+      "qlike": {
+        "GJR_GARCH": -7.957425,
+        "EWMA_total": -7.953675,
+        "EWMA_semivar": -7.96815,
+        "SemiVar_HAR": -7.943149,
+        "GARCH_X_SJV": -7.956642
+      },
+      "best_model": "EWMA_semivar",
+      "dm_tests": {
+        "EWMA_total_vs_GJR": {
+          "t_stat": 0.1429,
+          "p_value": 0.8864,
+          "n": 501
+        },
+        "EWMA_semivar_vs_GJR": {
+          "t_stat": -0.4611,
+          "p_value": 0.6449,
+          "n": 501
+        },
+        "SemiVar_HAR_vs_GJR": {
+          "t_stat": 0.5594,
+          "p_value": 0.5762,
+          "n": 501
+        },
+        "GARCH_X_SJV_vs_GJR": {
+          "t_stat": 0.0335,
+          "p_value": 0.9733,
+          "n": 501
+        },
+        "SemiVar_HAR_vs_EWMA_total": {
+          "t_stat": 0.4953,
+          "p_value": 0.6206,
+          "n": 501
+        },
+        "EWMA_semivar_vs_EWMA_total": {
+          "t_stat": -3.0225,
+          "p_value": 0.0026,
+          "n": 501
+        }
+      },
+      "sjv_regime": {
+        "n_down": 210,
+        "n_up": 290,
+        "mean_rv_after_down": 0.00015061,
+        "mean_rv_after_up": 0.00011387,
+        "ratio": 1.3226,
+        "t_stat": 1.989,
+        "p_value": 0.0474
+      },
+      "partial_corr_sjv_vix": {
+        "partial_r": 0.032,
+        "partial_p": 0.4754,
+        "raw_r": -0.0027,
+        "raw_p": 0.9524,
+        "n": 500
+      },
+      "asymmetry": {
+        "rs_pos": {
+          "lag_1": {
+            "r": 0.0228,
+            "p": 0.6113
+          },
+          "lag_5": {
+            "r": 0.0186,
+            "p": 0.68
+          },
+          "lag_22": {
+            "r": -0.0403,
+            "p": 0.3787
+          }
+        },
+        "rs_neg": {
+          "lag_1": {
+            "r": 0.038,
+            "p": 0.3968
+          },
+          "lag_5": {
+            "r": 0.0525,
+            "p": 0.2435
+          },
+          "lag_22": {
+            "r": 0.0599,
+            "p": 0.1905
+          }
+        },
+        "rv": {
+          "lag_1": {
+            "r": 0.0192,
+            "p": 0.6684
+          },
+          "lag_5": {
+            "r": 0.1481,
+            "p": 0.0009
+          },
+          "lag_22": {
+            "r": -0.0045,
+            "p": 0.9214
+          }
+        },
+        "asymmetry_test": {
+          "rs_neg_acf1": 0.038,
+          "rs_pos_acf1": 0.0228,
+          "z_stat": 0.2397,
+          "p_one_sided": 0.4053,
+          "rs_neg_more_persistent": true
+        }
+      },
+      "har_coefficients": {
+        "intercept": {
+          "beta": 6.396e-05,
+          "t": 8.015
+        },
+        "rs_pos_lag1": {
+          "beta": 0.20623991,
+          "t": 7.138
+        },
+        "rs_neg_lag1": {
+          "beta": 0.13977648,
+          "t": 6.367
+        },
+        "rs_pos_5d": {
+          "beta": 0.26403809,
+          "t": 4.205
+        },
+        "rs_neg_5d": {
+          "beta": 0.61741487,
+          "t": 13.988
+        },
+        "R_squared": 0.2248,
+        "n_obs": 3766
+      }
+    },
+    "GLD": {
+      "summary": {
+        "n_total": 3772,
+        "n_oos": 501,
+        "oos_range": "2023-01-03 to 2024-12-30",
+        "annualized_vol_oos_pct": 14.26,
+        "rs_neg_share": 0.4595,
+        "sjv_mean": 6.534e-06
+      },
+      "qlike": {
+        "GJR_GARCH": -8.450807,
+        "EWMA_total": -8.4309,
+        "EWMA_semivar": -8.423938,
+        "SemiVar_HAR": -8.439109,
+        "GARCH_X_SJV": -8.439135
+      },
+      "best_model": "GJR_GARCH",
+      "dm_tests": {
+        "EWMA_total_vs_GJR": {
+          "t_stat": 1.1478,
+          "p_value": 0.2516,
+          "n": 501
+        },
+        "EWMA_semivar_vs_GJR": {
+          "t_stat": 1.4638,
+          "p_value": 0.1439,
+          "n": 501
+        },
+        "SemiVar_HAR_vs_GJR": {
+          "t_stat": 0.628,
+          "p_value": 0.5303,
+          "n": 501
+        },
+        "GARCH_X_SJV_vs_GJR": {
+          "t_stat": 1.0977,
+          "p_value": 0.2729,
+          "n": 501
+        },
+        "SemiVar_HAR_vs_EWMA_total": {
+          "t_stat": -0.2404,
+          "p_value": 0.8101,
+          "n": 501
+        },
+        "EWMA_semivar_vs_EWMA_total": {
+          "t_stat": 1.0522,
+          "p_value": 0.2932,
+          "n": 501
+        }
+      },
+      "sjv_regime": {
+        "n_down": 230,
+        "n_up": 270,
+        "mean_rv_after_down": 7.584e-05,
+        "mean_rv_after_up": 8.488e-05,
+        "ratio": 0.8935,
+        "t_stat": -0.7256,
+        "p_value": 0.4684
+      },
+      "partial_corr_sjv_vix": {
+        "partial_r": -0.0045,
+        "partial_p": 0.9202,
+        "raw_r": -0.0019,
+        "raw_p": 0.9665,
+        "n": 500
+      },
+      "asymmetry": {
+        "rs_pos": {
+          "lag_1": {
+            "r": 0.0025,
+            "p": 0.9559
+          },
+          "lag_5": {
+            "r": 0.0517,
+            "p": 0.2506
+          },
+          "lag_22": {
+            "r": 0.0033,
+            "p": 0.9428
+          }
+        },
+        "rs_neg": {
+          "lag_1": {
+            "r": 0.0037,
+            "p": 0.9347
+          },
+          "lag_5": {
+            "r": -0.0221,
+            "p": 0.6231
+          },
+          "lag_22": {
+            "r": 0.0402,
+            "p": 0.3797
+          }
+        },
+        "rv": {
+          "lag_1": {
+            "r": 0.0278,
+            "p": 0.5347
+          },
+          "lag_5": {
+            "r": 0.0484,
+            "p": 0.2823
+          },
+          "lag_22": {
+            "r": 0.0411,
+            "p": 0.3696
+          }
+        },
+        "asymmetry_test": {
+          "rs_neg_acf1": 0.0037,
+          "rs_pos_acf1": 0.0025,
+          "z_stat": 0.0188,
+          "p_one_sided": 0.4925,
+          "rs_neg_more_persistent": true
+        }
+      },
+      "har_coefficients": {
+        "intercept": {
+          "beta": 6.484e-05,
+          "t": 12.578
+        },
+        "rs_pos_lag1": {
+          "beta": -0.03693546,
+          "t": -1.082
+        },
+        "rs_neg_lag1": {
+          "beta": 0.10789636,
+          "t": 5.168
+        },
+        "rs_pos_5d": {
+          "beta": 0.40814783,
+          "t": 5.849
+        },
+        "rs_neg_5d": {
+          "beta": 0.1683194,
+          "t": 4.069
+        },
+        "R_squared": 0.0324,
+        "n_obs": 3766
+      }
+    },
+    "TLT": {
+      "summary": {
+        "n_total": 3772,
+        "n_oos": 501,
+        "oos_range": "2023-01-03 to 2024-12-30",
+        "annualized_vol_oos_pct": 16.42,
+        "rs_neg_share": 0.5098,
+        "sjv_mean": -2.0977e-06
+      },
+      "qlike": {
+        "GJR_GARCH": -8.151469,
+        "EWMA_total": -8.149333,
+        "EWMA_semivar": -8.149311,
+        "SemiVar_HAR": -8.064034,
+        "GARCH_X_SJV": -8.150532
+      },
+      "best_model": "GJR_GARCH",
+      "dm_tests": {
+        "EWMA_total_vs_GJR": {
+          "t_stat": 0.3697,
+          "p_value": 0.7118,
+          "n": 501
+        },
+        "EWMA_semivar_vs_GJR": {
+          "t_stat": 0.2454,
+          "p_value": 0.8063,
+          "n": 501
+        },
+        "SemiVar_HAR_vs_GJR": {
+          "t_stat": 2.9126,
+          "p_value": 0.0037,
+          "n": 501
+        },
+        "GARCH_X_SJV_vs_GJR": {
+          "t_stat": 0.2134,
+          "p_value": 0.8311,
+          "n": 501
+        },
+        "SemiVar_HAR_vs_EWMA_total": {
+          "t_stat": 2.6911,
+          "p_value": 0.0074,
+          "n": 501
+        },
+        "EWMA_semivar_vs_EWMA_total": {
+          "t_stat": 0.0045,
+          "p_value": 0.9964,
+          "n": 501
+        }
+      },
+      "sjv_regime": {
+        "n_down": 247,
+        "n_up": 253,
+        "mean_rv_after_down": 8.977e-05,
+        "mean_rv_after_up": 0.00012288,
+        "ratio": 0.7305,
+        "t_stat": -2.4111,
+        "p_value": 0.0163
+      },
+      "partial_corr_sjv_vix": {
+        "partial_r": -0.0019,
+        "partial_p": 0.966,
+        "raw_r": -0.0005,
+        "raw_p": 0.9916,
+        "n": 500
+      },
+      "asymmetry": {
+        "rs_pos": {
+          "lag_1": {
+            "r": 0.026,
+            "p": 0.5615
+          },
+          "lag_5": {
+            "r": 0.11,
+            "p": 0.0142
+          },
+          "lag_22": {
+            "r": 0.0127,
+            "p": 0.7811
+          }
+        },
+        "rs_neg": {
+          "lag_1": {
+            "r": -0.0498,
+            "p": 0.2667
+          },
+          "lag_5": {
+            "r": 0.038,
+            "p": 0.3985
+          },
+          "lag_22": {
+            "r": 0.0056,
+            "p": 0.9022
+          }
+        },
+        "rv": {
+          "lag_1": {
+            "r": 0.0956,
+            "p": 0.0326
+          },
+          "lag_5": {
+            "r": 0.1225,
+            "p": 0.0063
+          },
+          "lag_22": {
+            "r": 0.0263,
+            "p": 0.5657
+          }
+        },
+        "asymmetry_test": {
+          "rs_neg_acf1": -0.0498,
+          "rs_pos_acf1": 0.026,
+          "z_stat": -1.1956,
+          "p_one_sided": 0.8841,
+          "rs_neg_more_persistent": false
+        }
+      },
+      "har_coefficients": {
+        "intercept": {
+          "beta": 2.983e-05,
+          "t": 8.272
+        },
+        "rs_pos_lag1": {
+          "beta": 0.22625037,
+          "t": 9.4
+        },
+        "rs_neg_lag1": {
+          "beta": 0.07239442,
+          "t": 3.009
+        },
+        "rs_pos_5d": {
+          "beta": 0.2910214,
+          "t": 6.286
+        },
+        "rs_neg_5d": {
+          "beta": 0.76524526,
+          "t": 15.47
+        },
+        "R_squared": 0.2443,
+        "n_obs": 3766
+      }
+    },
+    "BTC-USD": {
+      "summary": {
+        "n_total": 3757,
+        "n_oos": 730,
+        "oos_range": "2023-01-01 to 2024-12-30",
+        "annualized_vol_oos_pct": 40.42,
+        "rs_neg_share": 0.3807,
+        "sjv_mean": 0.0001546637
+      },
+      "qlike": {
+        "GJR_GARCH": -6.334559,
+        "EWMA_total": -6.298241,
+        "EWMA_semivar": -6.301676,
+        "SemiVar_HAR": -6.198434,
+        "GARCH_X_SJV": -6.239152
+      },
+      "best_model": "GJR_GARCH",
+      "dm_tests": {
+        "EWMA_total_vs_GJR": {
+          "t_stat": 0.6526,
+          "p_value": 0.5142,
+          "n": 730
+        },
+        "EWMA_semivar_vs_GJR": {
+          "t_stat": 0.6133,
+          "p_value": 0.5399,
+          "n": 730
+        },
+        "SemiVar_HAR_vs_GJR": {
+          "t_stat": 5.3772,
+          "p_value": 0.0,
+          "n": 730
+        },
+        "GARCH_X_SJV_vs_GJR": {
+          "t_stat": 4.7194,
+          "p_value": 0.0,
+          "n": 730
+        },
+        "SemiVar_HAR_vs_EWMA_total": {
+          "t_stat": 1.3273,
+          "p_value": 0.1848,
+          "n": 730
+        },
+        "EWMA_semivar_vs_EWMA_total": {
+          "t_stat": -0.2342,
+          "p_value": 0.8149,
+          "n": 730
+        }
+      },
+      "sjv_regime": {
+        "n_down": 357,
+        "n_up": 372,
+        "mean_rv_after_down": 0.0006121,
+        "mean_rv_after_up": 0.00068454,
+        "ratio": 0.8942,
+        "t_stat": -0.7178,
+        "p_value": 0.4731
+      },
+      "partial_corr_sjv_vix": {
+        "partial_r": -0.0349,
+        "partial_p": 0.4358,
+        "raw_r": -0.0356,
+        "raw_p": 0.4271,
+        "n": 500
+      },
+      "asymmetry": {
+        "rs_pos": {
+          "lag_1": {
+            "r": 0.0457,
+            "p": 0.2174
+          },
+          "lag_5": {
+            "r": 0.1281,
+            "p": 0.0005
+          },
+          "lag_22": {
+            "r": -0.0303,
+            "p": 0.4205
+          }
+        },
+        "rs_neg": {
+          "lag_1": {
+            "r": 0.02,
+            "p": 0.5899
+          },
+          "lag_5": {
+            "r": -0.0119,
+            "p": 0.75
+          },
+          "lag_22": {
+            "r": 0.0181,
+            "p": 0.6298
+          }
+        },
+        "rv": {
+          "lag_1": {
+            "r": 0.1097,
+            "p": 0.003
+          },
+          "lag_5": {
+            "r": 0.0878,
+            "p": 0.0181
+          },
+          "lag_22": {
+            "r": 0.0006,
+            "p": 0.9867
+          }
+        },
+        "asymmetry_test": {
+          "rs_neg_acf1": 0.02,
+          "rs_pos_acf1": 0.0457,
+          "z_stat": -0.4911,
+          "p_one_sided": 0.6883,
+          "rs_neg_more_persistent": false
+        }
+      },
+      "har_coefficients": {
+        "intercept": {
+          "beta": 0.00098046,
+          "t": 10.668
+        },
+        "rs_pos_lag1": {
+          "beta": 0.05063944,
+          "t": 1.317
+        },
+        "rs_neg_lag1": {
+          "beta": 0.09448903,
+          "t": 4.591
+        },
+        "rs_pos_5d": {
+          "beta": 0.2131058,
+          "t": 2.752
+        },
+        "rs_neg_5d": {
+          "beta": 0.16460169,
+          "t": 3.746
+        },
+        "R_squared": 0.0233,
+        "n_obs": 3751
+      }
+    }
+  }
+}

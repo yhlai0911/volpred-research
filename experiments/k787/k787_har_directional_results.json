@@ -1,0 +1,274 @@
+{
+  "experiment_id": "K787",
+  "title": "HAR Directional Volatility Prediction",
+  "description": "Can we predict whether vol goes UP or DOWN using HAR features + VIX?",
+  "timestamp": "2026-03-31 22:39:50",
+  "data_source": "yfinance (SPY + ^VIX)",
+  "data_period": "2005-02-04 to 2024-12-31",
+  "oos_period": "2023-01-03 to 2024-12-31",
+  "oos_n": 502,
+  "train_n_initial": 4508,
+  "target": "Direction of 5-day RV change (binary: UP/DOWN)",
+  "target_balance_oos": {
+    "UP": 0.5139442231075697,
+    "DOWN": 0.4860557768924303
+  },
+  "features": [
+    "log_RV_1d_lag1",
+    "log_RV_5d_lag1",
+    "log_RV_22d_lag1",
+    "VIX_scaled_lag1"
+  ],
+  "lag": "All features shifted by 1 day (signal.shift(1))",
+  "retrain_interval": 63,
+  "models": {
+    "HAR_Logistic": {
+      "accuracy": 0.6792828685258964,
+      "f1_score": 0.6956521739130435,
+      "auc_roc": 0.7612625492438684,
+      "precision_up": 0.6789667896678967,
+      "recall_up": 0.7131782945736435,
+      "confusion_matrix": [
+        [
+          157,
+          87
+        ],
+        [
+          74,
+          184
+        ]
+      ],
+      "n_predict_up": 271,
+      "n_predict_down": 231,
+      "rolling_63d_accuracy": {
+        "min": 0.5714285714285714,
+        "max": 0.7619047619047619,
+        "std": 0.06025093086433752,
+        "values": [
+          0.6984126984126984,
+          0.5714285714285714,
+          0.6349206349206349,
+          0.6666666666666666,
+          0.746031746031746,
+          0.6825396825396826,
+          0.7619047619047619
+        ]
+      },
+      "significance": {
+        "z_stat": 8.03379316819413,
+        "p_value": 8.881784197001252e-16,
+        "significant_05": true
+      },
+      "mcnemar_vs_naive": {
+        "b": 184,
+        "c": 87,
+        "chi2_stat": 34.00738007380074,
+        "p_value": 5.490343069070036e-09
+      },
+      "coefficients": {
+        "log_RV_1d_lag1": 0.15501183392645132,
+        "log_RV_5d_lag1": 1.5105104351659224,
+        "log_RV_22d_lag1": -1.6565827460024796,
+        "VIX_scaled_lag1": 0.3428803664253466
+      },
+      "intercept": -0.05798969302898498
+    },
+    "VIX_Direction": {
+      "accuracy": 0.4960159362549801,
+      "f1_score": 0.4340044742729307,
+      "auc_roc": 0.4994599059600966,
+      "precision_up": 0.5132275132275133,
+      "recall_up": 0.375968992248062,
+      "confusion_matrix": [
+        [
+          152,
+          92
+        ],
+        [
+          161,
+          97
+        ]
+      ],
+      "n_predict_up": 189,
+      "n_predict_down": 313,
+      "rolling_63d_accuracy": {
+        "min": 0.4603174603174603,
+        "max": 0.5396825396825397,
+        "std": 0.024632155308844023,
+        "values": [
+          0.47619047619047616,
+          0.49206349206349204,
+          0.5079365079365079,
+          0.47619047619047616,
+          0.47619047619047616,
+          0.5396825396825397,
+          0.4603174603174603
+        ]
+      },
+      "significance": {
+        "z_stat": -0.17852873707098055,
+        "p_value": 0.8583077547763822,
+        "significant_05": false
+      },
+      "mcnemar_vs_naive": {
+        "b": 97,
+        "c": 92,
+        "chi2_stat": 0.08465608465608465,
+        "p_value": 0.7710840634043519
+      }
+    },
+    "Momentum": {
+      "accuracy": 0.7808764940239044,
+      "f1_score": 0.7868217054263565,
+      "auc_roc": 0.7807059346803915,
+      "precision_up": 0.7868217054263565,
+      "recall_up": 0.7868217054263565,
+      "confusion_matrix": [
+        [
+          189,
+          55
+        ],
+        [
+          55,
+          203
+        ]
+      ],
+      "n_predict_up": 258,
+      "n_predict_down": 244,
+      "significance": {
+        "z_stat": 12.58627596350414,
+        "p_value": 0.0,
+        "significant_05": true
+      }
+    },
+    "Random_Forest": {
+      "accuracy": 0.6394422310756972,
+      "f1_score": 0.6372745490981963,
+      "auc_roc": 0.7254416063032152,
+      "precision_up": 0.6597510373443983,
+      "recall_up": 0.6162790697674418,
+      "confusion_matrix": [
+        [
+          162,
+          82
+        ],
+        [
+          99,
+          159
+        ]
+      ],
+      "n_predict_up": 241,
+      "n_predict_down": 261,
+      "rolling_63d_accuracy": {
+        "min": 0.5714285714285714,
+        "max": 0.7301587301587301,
+        "std": 0.052888452560955104,
+        "values": [
+          0.7301587301587301,
+          0.5714285714285714,
+          0.6825396825396826,
+          0.6031746031746031,
+          0.6507936507936508,
+          0.5873015873015873,
+          0.6666666666666666
+        ]
+      },
+      "significance": {
+        "z_stat": 6.2485057974843246,
+        "p_value": 4.143978493686973e-10,
+        "significant_05": true
+      },
+      "mcnemar_vs_naive": {
+        "b": 159,
+        "c": 82,
+        "chi2_stat": 23.966804979253112,
+        "p_value": 9.801104241535796e-07
+      },
+      "feature_importance": {
+        "log_RV_1d_lag1": 0.18397573195198008,
+        "log_RV_5d_lag1": 0.39229954137151535,
+        "log_RV_22d_lag1": 0.3496042423185853,
+        "VIX_scaled_lag1": 0.07412048435791926
+      }
+    },
+    "Naive": {
+      "accuracy": 0.4860557768924303,
+      "f1_score": 0.0,
+      "auc_roc": 0.5,
+      "precision_up": 0.0,
+      "recall_up": 0.0,
+      "confusion_matrix": [
+        [
+          244,
+          0
+        ],
+        [
+          258,
+          0
+        ]
+      ],
+      "n_predict_up": 0,
+      "n_predict_down": 502
+    }
+  },
+  "economic_value": {
+    "HAR_Logistic": {
+      "cumulative_return": 0.3269143904513503,
+      "annualized_sharpe": 1.7503564489750771,
+      "max_drawdown": -0.04744573805235264,
+      "days_invested": 231,
+      "days_cash": 271
+    },
+    "Random_Forest": {
+      "cumulative_return": 0.2811335584221937,
+      "annualized_sharpe": 1.4463760248476834,
+      "max_drawdown": -0.04844953690653686,
+      "days_invested": 261,
+      "days_cash": 241
+    },
+    "VIX_Direction": {
+      "cumulative_return": 0.18903884445877406,
+      "annualized_sharpe": 1.0221662654129735,
+      "max_drawdown": -0.09674927309374803,
+      "days_invested": 313,
+      "days_cash": 189
+    },
+    "Momentum": {
+      "cumulative_return": 0.38359738552974076,
+      "annualized_sharpe": 1.8667118485088365,
+      "max_drawdown": -0.06387421097509072,
+      "days_invested": 244,
+      "days_cash": 258
+    },
+    "Naive": {
+      "cumulative_return": 0.5757646386624891,
+      "annualized_sharpe": 1.8484848167714942,
+      "max_drawdown": -0.0997432473274118,
+      "days_invested": 502,
+      "days_cash": 0
+    },
+    "Buy_Hold": {
+      "cumulative_return": 0.5757646386624891
+    }
+  },
+  "critical_warning": "Momentum 78.1% accuracy is ARTIFACT of overlapping rolling windows (4/5 days shared between signal and target). NOT genuine prediction. HAR Logistic 67.9% is the best GENUINE directional predictor.",
+  "key_findings": [
+    "HAR Logistic achieves 67.9% directional accuracy (OOS 2023-2024, z=8.03, p<0.0001) — significantly above random",
+    "Random Forest: 63.9% accuracy (z=6.25, p<0.0001) — also significantly above random",
+    "Momentum 78.1% is ARTIFACT: RV_5d(t-1) vs RV_5d(t-6) shares 4/5 days with target RV_5d(t) vs RV_5d(t-5) — overlapping window, not real prediction",
+    "VIX-only direction: 49.6% — pure random. VIX level does NOT predict vol direction (confirms K697)",
+    "HAR Logistic and RF significantly beat naive (McNemar p<0.0001)",
+    "HOWEVER: direction-timing strategies ALL underperform Buy & Hold (HAR 32.7% vs BH 57.6%)",
+    "Key coefficient: log_RV_5d positive (+1.51), log_RV_22d negative (-1.66) — weekly vol above monthly average predicts further increase",
+    "Direction prediction is statistically accurate but economically useless for simple timing",
+    "Best accuracy in extreme quintiles: Q1(big drop) 71.3%, Q5(big rise) 85.1% — easier at extremes",
+    "VIX sufficiency test #26: VIX alone is INSUFFICIENT for direction prediction (49.6% = random)"
+  ],
+  "references": [
+    "Corsi (2009): A Simple Approximate Long-Memory Model of Realized Volatility, Journal of Financial Econometrics",
+    "Applied Economics Letters 2024: HAR for directional RV prediction",
+    "Patton & Sheppard (2015): Good Volatility, Bad Volatility, JFE",
+    "K697: VIX predicts vol magnitude (corr 0.57) but NOT direction (corr 0.04)",
+    "K782: GJR beats HAR on r\u00b2 magnitude forecasting"
+  ]
+}

@@ -1,0 +1,1001 @@
+{
+  "experiment_id": "K1138",
+  "title": "Equity compendium (SPY/QQQ/IWM) robust models \u2014 Paper 4 asset-class extension",
+  "description": "Extend K1136 commodity compendium to equity ETFs (SPY/QQQ/IWM) with 3 robust volatility models (HAR-RV-X, GARCH-MIDAS-X, GAS-t) to test whether Paper 4 universal-null claim is asset-class invariant.",
+  "methodology": {
+    "assets": [
+      "SPY",
+      "QQQ",
+      "IWM"
+    ],
+    "baseline": "M1 GJR-GARCH Normal",
+    "robust_models": {
+      "M3_GARCH_MIDAS_X": "\u03c4_t = exp(m + \u03b8 \u00d7 VIX\u00b2_monthly_lag1); g_t GJR. r\u00b2-native.",
+      "M4_HAR_RV_X": "Corsi 2009 HAR on log-Parkinson + log(VIX\u00b2_{t-1}). Parkinson-native.",
+      "M5_HAR_RV": "Control: plain Corsi HAR-RV (no VIX). Parkinson-native.",
+      "M6_GAS_t": "Creal-Koopman-Lucas 2013 GAS-t with Fisher-scaled score. r\u00b2-native."
+    },
+    "targets": [
+      "parkinson",
+      "r2_close"
+    ],
+    "window": 1500,
+    "refit_every": 63,
+    "oos_period": "2021-01-01 to 2026-04-10",
+    "seed": 42,
+    "rv_proxy_note": "5-min RV not available for SPY/QQQ/IWM in local cache. Using Parkinson range-based variance (same as K1136) as RV proxy. This is consistent with K1136 cross-asset comparison.",
+    "fair_tests_9_cell": {
+      "HAR-RV-X": "M4 vs M5 on Parkinson (within-family VIX marginal)",
+      "GARCH-MIDAS-X": "M3 vs M1 on r\u00b2 (close\u00b2-native)",
+      "GAS-t": "M6 vs M1 on r\u00b2 (close\u00b2-native)"
+    },
+    "bh_correction": "Benjamini-Hochberg FDR across 9 cells"
+  },
+  "hypotheses": {
+    "H1_primary": "\u22651 robust model beats M1 on \u22652/3 equity assets via fair test",
+    "H2_universal_null": "All 9 cells NULL \u2192 Paper 4 universal-null spans equity+commodity",
+    "H3_equity_heterogeneity": "\u22654/9 PASS \u2192 asset-class heterogeneity subsection"
+  },
+  "per_asset_results": {
+    "SPY": {
+      "n_oos": 1323,
+      "oos_start": "2021-01-04",
+      "oos_end": "2026-04-10",
+      "kurtosis_excess": 12.066285824133503,
+      "skewness": 0.03644175771836424,
+      "std_pct": 1.2174572406600037,
+      "per_target": {
+        "parkinson": {
+          "model_metrics": {
+            "M1_GJR_N": {
+              "QLIKE": 0.48835901808973425,
+              "Spearman_rho": 0.6141757054908352,
+              "Spearman_p": 5.1807513438254283e-138,
+              "n_finite": 1323
+            },
+            "M3_GARCH_MIDAS_X": {
+              "QLIKE": 0.4734622825604847,
+              "Spearman_rho": 0.6134152752928531,
+              "Spearman_p": 1.3949815532454628e-137,
+              "n_finite": 1323
+            },
+            "M4_HAR_RV_X": {
+              "QLIKE": 0.3472830652346713,
+              "Spearman_rho": 0.6725458575792586,
+              "Spearman_p": 6.477050806542791e-175,
+              "n_finite": 1323
+            },
+            "M5_HAR_RV": {
+              "QLIKE": 0.3898819371790021,
+              "Spearman_rho": 0.6406822657487838,
+              "Spearman_p": 8.945715679187678e-154,
+              "n_finite": 1323
+            },
+            "M6_GAS_t": {
+              "QLIKE": 0.5425754490929152,
+              "Spearman_rho": 0.540416629498382,
+              "Spearman_p": 3.4240466532598604e-101,
+              "n_finite": 1323
+            }
+          },
+          "dm_tests": {
+            "M3_GARCH_MIDAS_X_vs_M1": {
+              "DM_HLN_t": 3.941733414534205,
+              "DM_HLN_p": 8.512887870959496e-05,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": 3.0503656075646184,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": true,
+              "better": "M3_GARCH_MIDAS_X",
+              "gate_subperiod_stable": true,
+              "sub_early_beats": true,
+              "sub_late_beats": true,
+              "triple_gate_PASS": false
+            },
+            "M4_HAR_RV_X_vs_M1": {
+              "DM_HLN_t": 8.087662531116548,
+              "DM_HLN_p": 1.3322676295501878e-15,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": 28.887754219609956,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": true,
+              "significant_Harvey": true,
+              "better": "M4_HAR_RV_X",
+              "gate_subperiod_stable": true,
+              "sub_early_beats": true,
+              "sub_late_beats": true,
+              "triple_gate_PASS": true
+            },
+            "M5_HAR_RV_vs_M1": {
+              "DM_HLN_t": 4.49171007674237,
+              "DM_HLN_p": 7.681720991081775e-06,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": 20.164894526968137,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": true,
+              "significant_Harvey": true,
+              "better": "M5_HAR_RV",
+              "gate_subperiod_stable": true,
+              "sub_early_beats": true,
+              "sub_late_beats": true,
+              "triple_gate_PASS": true
+            },
+            "M6_GAS_t_vs_M1": {
+              "DM_HLN_t": -5.242572567858386,
+              "DM_HLN_p": 1.841723678008833e-07,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": -11.101756903200851,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": true,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M4_HAR_RV_X_vs_M5_HAR_RV": {
+              "DM_HLN_t": 4.184825696254127,
+              "DM_HLN_p": 3.0422942994157154e-05,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": 10.926095282216904,
+              "gate_DM": true,
+              "significant_Harvey": true,
+              "better": "M4_HAR_RV_X",
+              "description": "VIX marginal value within HAR-RV family"
+            }
+          },
+          "sub_period_qlike": {
+            "M1_GJR_N": {
+              "early": 0.45573085357808135,
+              "late": 0.5314625406814443,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M3_GARCH_MIDAS_X": {
+              "early": 0.43808167635826795,
+              "late": 0.5202019254907817,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M4_HAR_RV_X": {
+              "early": 0.3292048954761302,
+              "late": 0.37116527896832285,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M5_HAR_RV": {
+              "early": 0.3649269355179921,
+              "late": 0.4228488077943363,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M6_GAS_t": {
+              "early": 0.5202149055405229,
+              "late": 0.5721149039963385,
+              "n_early": 753,
+              "n_late": 570
+            }
+          }
+        },
+        "r2_close": {
+          "model_metrics": {
+            "M1_GJR_N": {
+              "QLIKE": 1.4736631829675846,
+              "Spearman_rho": 0.33236453318904724,
+              "Spearman_p": 1.9505489970881036e-35,
+              "n_finite": 1321
+            },
+            "M3_GARCH_MIDAS_X": {
+              "QLIKE": 1.466111347887761,
+              "Spearman_rho": 0.33176264818988377,
+              "Spearman_p": 2.6279156759587573e-35,
+              "n_finite": 1321
+            },
+            "M4_HAR_RV_X": {
+              "QLIKE": 1.5323091607153592,
+              "Spearman_rho": 0.38665622383196396,
+              "Spearman_p": 2.3536952132479217e-48,
+              "n_finite": 1321
+            },
+            "M5_HAR_RV": {
+              "QLIKE": 1.5528314404961987,
+              "Spearman_rho": 0.3715060690842917,
+              "Spearman_p": 1.7029933324810186e-44,
+              "n_finite": 1321
+            },
+            "M6_GAS_t": {
+              "QLIKE": 1.5272348107296345,
+              "Spearman_rho": 0.27674697456770125,
+              "Spearman_p": 1.1853353528038837e-24,
+              "n_finite": 1321
+            }
+          },
+          "dm_tests": {
+            "M3_GARCH_MIDAS_X_vs_M1": {
+              "DM_HLN_t": 1.3557376580521607,
+              "DM_HLN_p": 0.17541454884922714,
+              "n_used": 1321,
+              "QLIKE_rel_improvement_pct": 0.5124532638873501,
+              "gate_DM": false,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": false,
+              "better": "M3_GARCH_MIDAS_X",
+              "gate_subperiod_stable": true,
+              "sub_early_beats": true,
+              "sub_late_beats": true,
+              "triple_gate_PASS": false
+            },
+            "M4_HAR_RV_X_vs_M1": {
+              "DM_HLN_t": -1.7298583411349087,
+              "DM_HLN_p": 0.0838893408565109,
+              "n_used": 1321,
+              "QLIKE_rel_improvement_pct": -3.9796052738235903,
+              "gate_DM": false,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": false,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M5_HAR_RV_vs_M1": {
+              "DM_HLN_t": -1.9623093425227633,
+              "DM_HLN_p": 0.04993629779882869,
+              "n_used": 1321,
+              "QLIKE_rel_improvement_pct": -5.372208415303508,
+              "gate_DM": false,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": false,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M6_GAS_t_vs_M1": {
+              "DM_HLN_t": -3.2673620841816824,
+              "DM_HLN_p": 0.0011134644533752347,
+              "n_used": 1321,
+              "QLIKE_rel_improvement_pct": -3.6352694687106344,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": true,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M4_HAR_RV_X_vs_M5_HAR_RV": {
+              "DM_HLN_t": 0.9606555142216112,
+              "DM_HLN_p": 0.33690133790776255,
+              "n_used": 1321,
+              "QLIKE_rel_improvement_pct": 1.321603829342981,
+              "gate_DM": false,
+              "significant_Harvey": false,
+              "better": "M4_HAR_RV_X",
+              "description": "VIX marginal value within HAR-RV family"
+            }
+          },
+          "sub_period_qlike": {
+            "M1_GJR_N": {
+              "early": 1.3814800095559503,
+              "late": 1.5951185570590531,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M3_GARCH_MIDAS_X": {
+              "early": 1.3777299130393839,
+              "late": 1.5825577646792197,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M4_HAR_RV_X": {
+              "early": 1.4142294658522636,
+              "late": 1.6878843376314727,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M5_HAR_RV": {
+              "early": 1.4268288547355643,
+              "late": 1.718845373665034,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M6_GAS_t": {
+              "early": 1.4077821475584853,
+              "late": 1.6846189336095174,
+              "n_early": 753,
+              "n_late": 570
+            }
+          }
+        }
+      }
+    },
+    "QQQ": {
+      "n_oos": 1323,
+      "oos_start": "2021-01-04",
+      "oos_end": "2026-04-10",
+      "kurtosis_excess": 7.425781906479486,
+      "skewness": 0.212375796177936,
+      "std_pct": 1.6724164971055437,
+      "per_target": {
+        "parkinson": {
+          "model_metrics": {
+            "M1_GJR_N": {
+              "QLIKE": 0.43133740099390955,
+              "Spearman_rho": 0.600204120083496,
+              "Spearman_p": 2.7200338029931156e-130,
+              "n_finite": 1323
+            },
+            "M3_GARCH_MIDAS_X": {
+              "QLIKE": 0.4224766588347477,
+              "Spearman_rho": 0.6039177823137335,
+              "Spearman_p": 2.6294061608453657e-132,
+              "n_finite": 1323
+            },
+            "M4_HAR_RV_X": {
+              "QLIKE": 0.3135104135819195,
+              "Spearman_rho": 0.6414051260529013,
+              "Spearman_p": 3.161002283795263e-154,
+              "n_finite": 1323
+            },
+            "M5_HAR_RV": {
+              "QLIKE": 0.3410692198734258,
+              "Spearman_rho": 0.6194831137111343,
+              "Spearman_p": 4.77488724763383e-141,
+              "n_finite": 1323
+            },
+            "M6_GAS_t": {
+              "QLIKE": 0.48149058709411796,
+              "Spearman_rho": 0.5501212491889177,
+              "Spearman_p": 1.6079945869044394e-105,
+              "n_finite": 1323
+            }
+          },
+          "dm_tests": {
+            "M3_GARCH_MIDAS_X_vs_M1": {
+              "DM_HLN_t": 3.697695852087688,
+              "DM_HLN_p": 0.00022647585901514056,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": 2.054248516067574,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": true,
+              "better": "M3_GARCH_MIDAS_X",
+              "gate_subperiod_stable": true,
+              "sub_early_beats": true,
+              "sub_late_beats": true,
+              "triple_gate_PASS": false
+            },
+            "M4_HAR_RV_X_vs_M1": {
+              "DM_HLN_t": 7.728480085656598,
+              "DM_HLN_p": 2.1538326677728037e-14,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": 27.316663739450163,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": true,
+              "significant_Harvey": true,
+              "better": "M4_HAR_RV_X",
+              "gate_subperiod_stable": true,
+              "sub_early_beats": true,
+              "sub_late_beats": true,
+              "triple_gate_PASS": true
+            },
+            "M5_HAR_RV_vs_M1": {
+              "DM_HLN_t": 5.275866178603031,
+              "DM_HLN_p": 1.5424659305374178e-07,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": 20.927510786795487,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": true,
+              "significant_Harvey": true,
+              "better": "M5_HAR_RV",
+              "gate_subperiod_stable": true,
+              "sub_early_beats": true,
+              "sub_late_beats": true,
+              "triple_gate_PASS": true
+            },
+            "M6_GAS_t_vs_M1": {
+              "DM_HLN_t": -5.353956343467021,
+              "DM_HLN_p": 1.0136216954670374e-07,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": -11.62736780641857,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": true,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M4_HAR_RV_X_vs_M5_HAR_RV": {
+              "DM_HLN_t": 4.21881416284582,
+              "DM_HLN_p": 2.623283419533884e-05,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": 8.08012118529302,
+              "gate_DM": true,
+              "significant_Harvey": true,
+              "better": "M4_HAR_RV_X",
+              "description": "VIX marginal value within HAR-RV family"
+            }
+          },
+          "sub_period_qlike": {
+            "M1_GJR_N": {
+              "early": 0.37108581953287456,
+              "late": 0.5109329112398032,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M3_GARCH_MIDAS_X": {
+              "early": 0.3599802968469771,
+              "late": 0.5050376423028026,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M4_HAR_RV_X": {
+              "early": 0.2832864783801919,
+              "late": 0.3534378227168333,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M5_HAR_RV": {
+              "early": 0.3103182763213156,
+              "late": 0.38169283477647664,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M6_GAS_t": {
+              "early": 0.44469079040952125,
+              "late": 0.5301050553458746,
+              "n_early": 753,
+              "n_late": 570
+            }
+          }
+        },
+        "r2_close": {
+          "model_metrics": {
+            "M1_GJR_N": {
+              "QLIKE": 1.455917489767199,
+              "Spearman_rho": 0.30072529320369773,
+              "Spearman_p": 4.9000980849925647e-29,
+              "n_finite": 1322
+            },
+            "M3_GARCH_MIDAS_X": {
+              "QLIKE": 1.4565381252764653,
+              "Spearman_rho": 0.3019114324872074,
+              "Spearman_p": 2.905179798456949e-29,
+              "n_finite": 1322
+            },
+            "M4_HAR_RV_X": {
+              "QLIKE": 1.5538924629811668,
+              "Spearman_rho": 0.35324628896621096,
+              "Spearman_p": 3.8692763069301595e-40,
+              "n_finite": 1322
+            },
+            "M5_HAR_RV": {
+              "QLIKE": 1.5484550024856991,
+              "Spearman_rho": 0.3404494263177302,
+              "Spearman_p": 3.133870395232051e-37,
+              "n_finite": 1322
+            },
+            "M6_GAS_t": {
+              "QLIKE": 1.4942670419315511,
+              "Spearman_rho": 0.255575048751623,
+              "Spearman_p": 3.6935736036051185e-21,
+              "n_finite": 1322
+            }
+          },
+          "dm_tests": {
+            "M3_GARCH_MIDAS_X_vs_M1": {
+              "DM_HLN_t": -0.19687745851298177,
+              "DM_HLN_p": 0.8439537190818414,
+              "n_used": 1322,
+              "QLIKE_rel_improvement_pct": -0.042628480915194375,
+              "gate_DM": false,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": false,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": true,
+              "triple_gate_PASS": false
+            },
+            "M4_HAR_RV_X_vs_M1": {
+              "DM_HLN_t": -3.3712111871058146,
+              "DM_HLN_p": 0.0007700051975467748,
+              "n_used": 1322,
+              "QLIKE_rel_improvement_pct": -6.7294317090478835,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": true,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M5_HAR_RV_vs_M1": {
+              "DM_HLN_t": -3.1187563549008335,
+              "DM_HLN_p": 0.0018554176094682795,
+              "n_used": 1322,
+              "QLIKE_rel_improvement_pct": -6.355958587549967,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": true,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M6_GAS_t_vs_M1": {
+              "DM_HLN_t": -2.8056537388936666,
+              "DM_HLN_p": 0.005095120342693438,
+              "n_used": 1322,
+              "QLIKE_rel_improvement_pct": -2.6340470826052305,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": false,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M4_HAR_RV_X_vs_M5_HAR_RV": {
+              "DM_HLN_t": -0.40550629231508384,
+              "DM_HLN_p": 0.685171059528332,
+              "n_used": 1322,
+              "QLIKE_rel_improvement_pct": -0.35115392353920794,
+              "gate_DM": false,
+              "significant_Harvey": false,
+              "better": "M5_HAR_RV",
+              "description": "VIX marginal value within HAR-RV family"
+            }
+          },
+          "sub_period_qlike": {
+            "M1_GJR_N": {
+              "early": 1.3627990531453906,
+              "late": 1.5787684798366723,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M3_GARCH_MIDAS_X": {
+              "early": 1.3680173672938687,
+              "late": 1.5733234059833296,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M4_HAR_RV_X": {
+              "early": 1.4358573180619711,
+              "late": 1.7096160225938608,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M5_HAR_RV": {
+              "early": 1.4225987524958426,
+              "late": 1.7144969322968784,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M6_GAS_t": {
+              "early": 1.389588704617832,
+              "late": 1.6323689887033352,
+              "n_early": 753,
+              "n_late": 570
+            }
+          }
+        }
+      }
+    },
+    "IWM": {
+      "n_oos": 1323,
+      "oos_start": "2021-01-04",
+      "oos_end": "2026-04-10",
+      "kurtosis_excess": 5.5736200150447415,
+      "skewness": -0.2796640757850545,
+      "std_pct": 1.5014326237198719,
+      "per_target": {
+        "parkinson": {
+          "model_metrics": {
+            "M1_GJR_N": {
+              "QLIKE": 0.36224163914397517,
+              "Spearman_rho": 0.39497633620074013,
+              "Spearman_p": 1.2306086005350598e-50,
+              "n_finite": 1323
+            },
+            "M3_GARCH_MIDAS_X": {
+              "QLIKE": 0.35813215334093246,
+              "Spearman_rho": 0.3951301240269772,
+              "Spearman_p": 1.118540848010521e-50,
+              "n_finite": 1323
+            },
+            "M4_HAR_RV_X": {
+              "QLIKE": 0.27624450446743265,
+              "Spearman_rho": 0.5207619939346956,
+              "Spearman_p": 7.57613298615612e-93,
+              "n_finite": 1323
+            },
+            "M5_HAR_RV": {
+              "QLIKE": 0.2895437888986135,
+              "Spearman_rho": 0.489649380235112,
+              "Spearman_p": 1.0465243392282109e-80,
+              "n_finite": 1323
+            },
+            "M6_GAS_t": {
+              "QLIKE": 0.4005604498966458,
+              "Spearman_rho": 0.34310172856646104,
+              "Spearman_p": 7.533529965871303e-38,
+              "n_finite": 1323
+            }
+          },
+          "dm_tests": {
+            "M3_GARCH_MIDAS_X_vs_M1": {
+              "DM_HLN_t": 3.330555412397973,
+              "DM_HLN_p": 0.0008906369883059373,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": 1.1344598077553893,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": true,
+              "better": "M3_GARCH_MIDAS_X",
+              "gate_subperiod_stable": true,
+              "sub_early_beats": true,
+              "sub_late_beats": true,
+              "triple_gate_PASS": false
+            },
+            "M4_HAR_RV_X_vs_M1": {
+              "DM_HLN_t": 5.7966332593790195,
+              "DM_HLN_p": 8.450751431965386e-09,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": 23.740267651108553,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": true,
+              "significant_Harvey": true,
+              "better": "M4_HAR_RV_X",
+              "gate_subperiod_stable": true,
+              "sub_early_beats": true,
+              "sub_late_beats": true,
+              "triple_gate_PASS": true
+            },
+            "M5_HAR_RV_vs_M1": {
+              "DM_HLN_t": 5.119539024516624,
+              "DM_HLN_p": 3.515659210417965e-07,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": 20.068882864255006,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": true,
+              "significant_Harvey": true,
+              "better": "M5_HAR_RV",
+              "gate_subperiod_stable": true,
+              "sub_early_beats": true,
+              "sub_late_beats": true,
+              "triple_gate_PASS": true
+            },
+            "M6_GAS_t_vs_M1": {
+              "DM_HLN_t": -4.801489635877391,
+              "DM_HLN_p": 1.754267694442646e-06,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": -10.57824573763056,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": true,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M4_HAR_RV_X_vs_M5_HAR_RV": {
+              "DM_HLN_t": 2.0636146169099185,
+              "DM_HLN_p": 0.03924908707132091,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": 4.593185881061226,
+              "gate_DM": true,
+              "significant_Harvey": false,
+              "better": "M4_HAR_RV_X",
+              "description": "VIX marginal value within HAR-RV family"
+            }
+          },
+          "sub_period_qlike": {
+            "M1_GJR_N": {
+              "early": 0.3104761993070466,
+              "late": 0.4306265096653912,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M3_GARCH_MIDAS_X": {
+              "early": 0.3056479484224737,
+              "late": 0.4274665503647912,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M4_HAR_RV_X": {
+              "early": 0.24667392340177097,
+              "late": 0.31530879840154363,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M5_HAR_RV": {
+              "early": 0.25551764654513615,
+              "late": 0.33449411379715466,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M6_GAS_t": {
+              "early": 0.35112457704947386,
+              "late": 0.46586783981580443,
+              "n_early": 753,
+              "n_late": 570
+            }
+          }
+        },
+        "r2_close": {
+          "model_metrics": {
+            "M1_GJR_N": {
+              "QLIKE": 1.3339537077431771,
+              "Spearman_rho": 0.168546228863087,
+              "Spearman_p": 6.875305301291337e-10,
+              "n_finite": 1323
+            },
+            "M3_GARCH_MIDAS_X": {
+              "QLIKE": 1.332448244720748,
+              "Spearman_rho": 0.16998587092159756,
+              "Spearman_p": 4.896062157026879e-10,
+              "n_finite": 1323
+            },
+            "M4_HAR_RV_X": {
+              "QLIKE": 1.3856487243492661,
+              "Spearman_rho": 0.2631674160798171,
+              "Spearman_p": 2.132606903226369e-22,
+              "n_finite": 1323
+            },
+            "M5_HAR_RV": {
+              "QLIKE": 1.3436949605817297,
+              "Spearman_rho": 0.26917610653001955,
+              "Spearman_p": 2.1467651787153378e-23,
+              "n_finite": 1323
+            },
+            "M6_GAS_t": {
+              "QLIKE": 1.3393157263792466,
+              "Spearman_rho": 0.1491819334391861,
+              "Spearman_p": 4.9916295412405036e-08,
+              "n_finite": 1323
+            }
+          },
+          "dm_tests": {
+            "M3_GARCH_MIDAS_X_vs_M1": {
+              "DM_HLN_t": 1.0096757500538187,
+              "DM_HLN_p": 0.3128354253111316,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": 0.11285721638542778,
+              "gate_DM": false,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": false,
+              "better": "M3_GARCH_MIDAS_X",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": true,
+              "triple_gate_PASS": false
+            },
+            "M4_HAR_RV_X_vs_M1": {
+              "DM_HLN_t": -1.6557676667391306,
+              "DM_HLN_p": 0.09800620672556137,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": -3.8753231319809576,
+              "gate_DM": false,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": false,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M5_HAR_RV_vs_M1": {
+              "DM_HLN_t": -0.4455930968688282,
+              "DM_HLN_p": 0.6559641572208506,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": -0.7302541896324936,
+              "gate_DM": false,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": false,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": true,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M6_GAS_t_vs_M1": {
+              "DM_HLN_t": -0.48775571206419094,
+              "DM_HLN_p": 0.6258037622065826,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": -0.4019643713979451,
+              "gate_DM": false,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": false,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": true,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M4_HAR_RV_X_vs_M5_HAR_RV": {
+              "DM_HLN_t": -2.139413707278583,
+              "DM_HLN_p": 0.032584874309740774,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": -3.122268446208453,
+              "gate_DM": true,
+              "significant_Harvey": false,
+              "better": "M5_HAR_RV",
+              "description": "VIX marginal value within HAR-RV family"
+            }
+          },
+          "sub_period_qlike": {
+            "M1_GJR_N": {
+              "early": 1.2683152338990233,
+              "late": 1.420665586347823,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M3_GARCH_MIDAS_X": {
+              "early": 1.268841675437804,
+              "late": 1.4164758704576896,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M4_HAR_RV_X": {
+              "early": 1.3154477023635862,
+              "late": 1.4783879691829802,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M5_HAR_RV": {
+              "early": 1.2674609460475974,
+              "late": 1.4444041060978725,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M6_GAS_t": {
+              "early": 1.2675477976422607,
+              "late": 1.434124937500212,
+              "n_early": 753,
+              "n_late": 570
+            }
+          }
+        }
+      }
+    }
+  },
+  "nine_cell_analysis": {
+    "cell_results": {
+      "SPY_HAR-RV-X": {
+        "DM_HLN_t": 4.184825696254127,
+        "DM_HLN_p": 3.0422942994157154e-05,
+        "rel_pct": 10.926095282216904,
+        "target": "parkinson",
+        "DM_HLN_p_BH": 0.0001369032434737072
+      },
+      "SPY_GARCH-MIDAS-X": {
+        "DM_HLN_t": 1.3557376580521607,
+        "DM_HLN_p": 0.17541454884922714,
+        "rel_pct": 0.5124532638873501,
+        "target": "r2_close",
+        "DM_HLN_p_BH": 0.2631218232738407
+      },
+      "SPY_GAS-t": {
+        "DM_HLN_t": -3.2673620841816824,
+        "DM_HLN_p": 0.0011134644533752347,
+        "rel_pct": -3.6352694687106344,
+        "target": "r2_close",
+        "DM_HLN_p_BH": 0.003340393360125704
+      },
+      "QQQ_HAR-RV-X": {
+        "DM_HLN_t": 4.21881416284582,
+        "DM_HLN_p": 2.623283419533884e-05,
+        "rel_pct": 8.08012118529302,
+        "target": "parkinson",
+        "DM_HLN_p_BH": 0.0001369032434737072
+      },
+      "QQQ_GARCH-MIDAS-X": {
+        "DM_HLN_t": -0.19687745851298177,
+        "DM_HLN_p": 0.8439537190818414,
+        "rel_pct": -0.042628480915194375,
+        "target": "r2_close",
+        "DM_HLN_p_BH": 0.8439537190818414
+      },
+      "QQQ_GAS-t": {
+        "DM_HLN_t": -2.8056537388936666,
+        "DM_HLN_p": 0.005095120342693438,
+        "rel_pct": -2.6340470826052305,
+        "target": "r2_close",
+        "DM_HLN_p_BH": 0.011464020771060235
+      },
+      "IWM_HAR-RV-X": {
+        "DM_HLN_t": 2.0636146169099185,
+        "DM_HLN_p": 0.03924908707132091,
+        "rel_pct": 4.593185881061226,
+        "target": "parkinson",
+        "DM_HLN_p_BH": 0.07064835672837763
+      },
+      "IWM_GARCH-MIDAS-X": {
+        "DM_HLN_t": 1.0096757500538187,
+        "DM_HLN_p": 0.3128354253111316,
+        "rel_pct": 0.11285721638542778,
+        "target": "r2_close",
+        "DM_HLN_p_BH": 0.4022169754000264
+      },
+      "IWM_GAS-t": {
+        "DM_HLN_t": -0.48775571206419094,
+        "DM_HLN_p": 0.6258037622065826,
+        "rel_pct": -0.4019643713979451,
+        "target": "r2_close",
+        "DM_HLN_p_BH": 0.7040292324824055
+      }
+    },
+    "pass_count_out_of_9": 2,
+    "harvey_joint_threshold_cells": 2,
+    "asset_null_map": {
+      "SPY": "PASS",
+      "QQQ": "PASS",
+      "IWM": "PASS"
+    },
+    "model_null_map": {
+      "HAR-RV-X": "PASS",
+      "GARCH-MIDAS-X": "NULL",
+      "GAS-t": "NULL"
+    },
+    "verdict": "MIXED"
+  },
+  "k1136_comparison": {
+    "USO": {
+      "MIDAS_r2": 1.2335462805635145,
+      "HAR_VIX_park": 1.6532709000838663,
+      "max": 1.6532709000838663
+    },
+    "GLD": {
+      "MIDAS_r2": 0.9443057015316108,
+      "HAR_VIX_park": -0.8783027234232191,
+      "max": 0.9443057015316108
+    },
+    "UNG": {
+      "MIDAS_r2": 0.6204420963866583,
+      "HAR_VIX_park": 0.7396436962410733,
+      "max": 0.7396436962410733
+    },
+    "BTC-USD": {
+      "MIDAS_r2": -0.31629703942366516,
+      "HAR_VIX_park": 0.51556215170147,
+      "max": 0.51556215170147
+    }
+  },
+  "summary": {
+    "verdict": "MIXED",
+    "paper4_implication": "Mixed results: some (asset, model) combos PASS, others NULL. Paper 4 should report the specific passing combos explicitly rather than claiming universal null.",
+    "max_dm_t_equity": {
+      "SPY": 4.184825696254127,
+      "QQQ": 4.21881416284582,
+      "IWM": 2.0636146169099185
+    },
+    "best_equity_model_combo": [
+      "QQQ",
+      "HAR-RV-X"
+    ]
+  },
+  "data_source": "yfinance (SPY/QQQ/IWM OHLC + ^VIX)",
+  "timestamp": "2026-04-17T05:18:16.434159+00:00",
+  "references": [
+    "Engle, Ghysels, Sohn (2013) Review of Economics and Statistics 95(3):776-797.",
+    "Corsi (2009) J Financial Econometrics 7(2):174-196.",
+    "Creal, Koopman, Lucas (2013) J Applied Econometrics 28(5):777-795.",
+    "Patton (2011) J Econometrics 160:246-256.",
+    "Harvey, Leybourne, Newbold (1997) Int J Forecasting 13:281-291.",
+    "Harvey (2016) Review of Financial Studies 29:5-68 (|t|>3 threshold).",
+    "Benjamini, Hochberg (1995) J Royal Statistical Society B 57(1):289-300."
+  ]
+}

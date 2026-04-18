@@ -1,0 +1,334 @@
+{
+  "experiment_id": "K552",
+  "title": "DCA + VIX Timing: Can VIX Improve Dollar-Cost Averaging?",
+  "date": "2026-03-27T14:58:03.323189+00:00",
+  "data_source": "yfinance (SPY, ^VIX)",
+  "period": "2005-01 to 2026-03",
+  "n_months": 255,
+  "total_budget": 255000.0,
+  "base_monthly": 1000.0,
+  "vix_stats": {
+    "mean": 19.27,
+    "std": 8.06,
+    "min": 9.51,
+    "max": 59.89,
+    "pct_below_15": 33.7,
+    "pct_15_25": 48.2,
+    "pct_above_25": 18.0
+  },
+  "spy_monthly_return_stats": {
+    "mean_pct": 0.915,
+    "std_pct": 4.28,
+    "skew": -0.595,
+    "kurtosis": 1.224
+  },
+  "full_sample_results": {
+    "Plain DCA": {
+      "terminal_wealth": 1095200.27,
+      "total_invested": 255000.0,
+      "profit": 840200.27,
+      "profit_pct": 329.49,
+      "annual_irr": 12.14,
+      "max_dd_pct": -31.29,
+      "max_underwater_months": 18,
+      "sharpe": 0.7413,
+      "avg_cost": 149.03
+    },
+    "Fear DCA": {
+      "terminal_wealth": 1127277.14,
+      "total_invested": 255000.0,
+      "profit": 872277.14,
+      "profit_pct": 342.07,
+      "annual_irr": 12.54,
+      "max_dd_pct": -22.37,
+      "max_underwater_months": 18,
+      "sharpe": 0.7475,
+      "avg_cost": 144.79
+    },
+    "Proportional VIX": {
+      "terminal_wealth": 1154250.89,
+      "total_invested": 255000.0,
+      "profit": 899250.89,
+      "profit_pct": 352.65,
+      "annual_irr": 12.55,
+      "max_dd_pct": -22.44,
+      "max_underwater_months": 18,
+      "sharpe": 0.7478,
+      "avg_cost": 141.41
+    },
+    "Percentile VIX": {
+      "terminal_wealth": 1114165.78,
+      "total_invested": 255000.0,
+      "profit": 859165.78,
+      "profit_pct": 336.93,
+      "annual_irr": 12.09,
+      "max_dd_pct": -27.48,
+      "max_underwater_months": 18,
+      "sharpe": 0.7463,
+      "avg_cost": 146.5
+    },
+    "Binary VIX>20": {
+      "terminal_wealth": 1294246.47,
+      "total_invested": 255000.0,
+      "profit": 1039246.47,
+      "profit_pct": 407.55,
+      "annual_irr": 13.13,
+      "max_dd_pct": -21.03,
+      "max_underwater_months": 17,
+      "sharpe": 0.7313,
+      "avg_cost": 126.11
+    },
+    "Lump Sum": {
+      "terminal_wealth": 2041919.99,
+      "total_invested": 255000.0,
+      "profit": 1786919.99,
+      "profit_pct": 700.75,
+      "annual_irr": 10.29,
+      "max_dd_pct": -50.78,
+      "max_underwater_months": 52,
+      "sharpe": 0.7418,
+      "avg_cost": 79.94
+    }
+  },
+  "cross_oos_results": {
+    "OOS1: 2005-2011 (GFC)": {
+      "Plain DCA": {
+        "terminal_wealth": 92735.85,
+        "total_invested": 83000.0,
+        "profit_pct": 11.73,
+        "annual_irr": 3.16,
+        "max_dd_pct": -31.29,
+        "max_underwater_months": 13,
+        "sharpe": 0.2468,
+        "avg_cost": 86.59
+      },
+      "Fear DCA": {
+        "terminal_wealth": 95171.38,
+        "total_invested": 83000.0,
+        "profit_pct": 14.66,
+        "annual_irr": 4.58,
+        "max_dd_pct": -19.05,
+        "max_underwater_months": 7,
+        "sharpe": 0.2587,
+        "avg_cost": 84.37
+      },
+      "Proportional VIX": {
+        "terminal_wealth": 96285.51,
+        "total_invested": 83000.0,
+        "profit_pct": 16.01,
+        "annual_irr": 4.88,
+        "max_dd_pct": -14.19,
+        "max_underwater_months": 7,
+        "sharpe": 0.2584,
+        "avg_cost": 83.39
+      },
+      "Percentile VIX": {
+        "terminal_wealth": 92765.76,
+        "total_invested": 83000.0,
+        "profit_pct": 11.77,
+        "annual_irr": 3.16,
+        "max_dd_pct": -27.48,
+        "max_underwater_months": 13,
+        "sharpe": 0.2576,
+        "avg_cost": 86.56
+      },
+      "Binary VIX>20": {
+        "terminal_wealth": 98356.34,
+        "total_invested": 83000.0,
+        "profit_pct": 18.5,
+        "annual_irr": 7.17,
+        "max_dd_pct": -10.24,
+        "max_underwater_months": 5,
+        "sharpe": 0.0588,
+        "avg_cost": 81.64
+      },
+      "Lump Sum": {
+        "terminal_wealth": 100451.75,
+        "total_invested": 83000.0,
+        "profit_pct": 21.03,
+        "annual_irr": 2.8,
+        "max_dd_pct": -50.78,
+        "max_underwater_months": 49,
+        "sharpe": 0.2541,
+        "avg_cost": 79.94
+      }
+    },
+    "OOS2: 2012-2018 (Bull)": {
+      "Plain DCA": {
+        "terminal_wealth": 126478.17,
+        "total_invested": 83000.0,
+        "profit_pct": 52.38,
+        "annual_irr": 11.97,
+        "max_dd_pct": -6.15,
+        "max_underwater_months": 4,
+        "sharpe": 1.3365,
+        "avg_cost": 161.3
+      },
+      "Fear DCA": {
+        "terminal_wealth": 130589.08,
+        "total_invested": 83000.0,
+        "profit_pct": 57.34,
+        "annual_irr": 12.26,
+        "max_dd_pct": -5.93,
+        "max_underwater_months": 3,
+        "sharpe": 1.3448,
+        "avg_cost": 156.22
+      },
+      "Proportional VIX": {
+        "terminal_wealth": 129106.84,
+        "total_invested": 83000.0,
+        "profit_pct": 55.55,
+        "annual_irr": 12.15,
+        "max_dd_pct": -5.87,
+        "max_underwater_months": 3,
+        "sharpe": 1.3503,
+        "avg_cost": 158.01
+      },
+      "Percentile VIX": {
+        "terminal_wealth": 123243.73,
+        "total_invested": 83000.0,
+        "profit_pct": 48.49,
+        "annual_irr": 11.83,
+        "max_dd_pct": -5.47,
+        "max_underwater_months": 3,
+        "sharpe": 1.3538,
+        "avg_cost": 165.53
+      },
+      "Binary VIX>20": {
+        "terminal_wealth": 129408.19,
+        "total_invested": 83000.0,
+        "profit_pct": 55.91,
+        "annual_irr": 13.6,
+        "max_dd_pct": -6.28,
+        "max_underwater_months": 5,
+        "sharpe": 1.5285,
+        "avg_cost": 157.65
+      },
+      "Lump Sum": {
+        "terminal_wealth": 199443.74,
+        "total_invested": 83000.0,
+        "profit_pct": 140.29,
+        "annual_irr": 13.51,
+        "max_dd_pct": -8.49,
+        "max_underwater_months": 9,
+        "sharpe": 1.3491,
+        "avg_cost": 102.29
+      }
+    },
+    "OOS3: 2019-2025 (COVID+)": {
+      "Plain DCA": {
+        "terminal_wealth": 147608.54,
+        "total_invested": 83000.0,
+        "profit_pct": 77.84,
+        "annual_irr": 16.36,
+        "max_dd_pct": -10.74,
+        "max_underwater_months": 7,
+        "sharpe": 0.996,
+        "avg_cost": 382.09
+      },
+      "Fear DCA": {
+        "terminal_wealth": 150075.02,
+        "total_invested": 83000.0,
+        "profit_pct": 80.81,
+        "annual_irr": 16.45,
+        "max_dd_pct": -8.56,
+        "max_underwater_months": 3,
+        "sharpe": 1.0153,
+        "avg_cost": 375.81
+      },
+      "Proportional VIX": {
+        "terminal_wealth": 151952.08,
+        "total_invested": 83000.0,
+        "profit_pct": 83.07,
+        "annual_irr": 16.55,
+        "max_dd_pct": -8.95,
+        "max_underwater_months": 3,
+        "sharpe": 1.0164,
+        "avg_cost": 371.17
+      },
+      "Percentile VIX": {
+        "terminal_wealth": 148266.84,
+        "total_invested": 83000.0,
+        "profit_pct": 78.63,
+        "annual_irr": 16.61,
+        "max_dd_pct": -7.99,
+        "max_underwater_months": 3,
+        "sharpe": 1.0171,
+        "avg_cost": 380.4
+      },
+      "Binary VIX>20": {
+        "terminal_wealth": 158896.31,
+        "total_invested": 83000.0,
+        "profit_pct": 91.44,
+        "annual_irr": 16.89,
+        "max_dd_pct": -8.33,
+        "max_underwater_months": 3,
+        "sharpe": 1.106,
+        "avg_cost": 354.95
+      },
+      "Lump Sum": {
+        "terminal_wealth": 232966.44,
+        "total_invested": 83000.0,
+        "profit_pct": 180.68,
+        "annual_irr": 16.09,
+        "max_dd_pct": -23.93,
+        "max_underwater_months": 23,
+        "sharpe": 1.0051,
+        "avg_cost": 242.1
+      }
+    }
+  },
+  "bootstrap_tests": {
+    "Fear DCA": {
+      "mean_diff": 16181.14,
+      "ci_95_lo": -52474.06,
+      "ci_95_hi": 118492.83,
+      "p_value_one_sided": 0.3189,
+      "pct_a_wins": 68.1
+    },
+    "Proportional VIX": {
+      "mean_diff": 24876.96,
+      "ci_95_lo": -47588.52,
+      "ci_95_hi": 152454.86,
+      "p_value_one_sided": 0.2713,
+      "pct_a_wins": 72.9
+    },
+    "Percentile VIX": {
+      "mean_diff": 6228.52,
+      "ci_95_lo": -37632.35,
+      "ci_95_hi": 66832.85,
+      "p_value_one_sided": 0.3945,
+      "pct_a_wins": 60.6
+    },
+    "Binary VIX>20": {
+      "mean_diff": 83724.61,
+      "ci_95_lo": -153382.64,
+      "ci_95_hi": 486891.54,
+      "p_value_one_sided": 0.2564,
+      "pct_a_wins": 74.4
+    }
+  },
+  "vix_return_relationship": {
+    "vix_spy_correlation": -0.4554,
+    "mean_return_vix_above_25_pct": -1.976,
+    "mean_return_vix_below_25_pct": 1.554,
+    "n_high_vix_months": 46,
+    "n_low_vix_months": 208
+  },
+  "conclusion": "Full sample (2005-2026): Best VIX-DCA = Binary VIX>20 ($1,294,246 vs Plain $1,095,200, +18.2%). No VIX-DCA variant achieved statistical significance (p<0.05) over Plain DCA. Cross-OOS: Fear DCA most consistent (3/3 periods beat Plain DCA). OOS wins: {'Fear DCA': 3, 'Proportional VIX': 3, 'Percentile VIX': 2, 'Binary VIX>20': 3}. Average cost advantage: Binary VIX>20 avg cost $126.11 vs Plain $149.03 (+15.4%). Lump Sum (invest all day 1) terminal: $2,041,920 (+86.4% vs Plain DCA). Key finding: VIX-timed DCA mechanically buys more shares when prices are lower (VIX-price negative correlation), achieving a lower average cost per share. The improvement is modest but systematic.",
+  "limitations": [
+    "Budget neutralization is ex-post (requires knowing total period); in practice, use running budget tracker",
+    "Monthly frequency only \u2014 intra-month VIX spikes are missed",
+    "No transaction costs (but DCA has no rebalancing cost, only purchase spread)",
+    "SPY only \u2014 not tested on international markets",
+    "VIX percentile lookback (12 months) is arbitrary",
+    "Survivorship bias: SPY has been a strong performer; may not hold for other assets"
+  ],
+  "references": [
+    "K31: DCA+VT interaction (MDD improvement)",
+    "K59: DCA optimal VT threshold 24/VIX",
+    "K65: DCA 50/50 SPY/GLD + VT layers",
+    "Constantinides (1979): Suboptimality of DCA",
+    "Brennan (2005): Optimal securities in portfolio"
+  ]
+}

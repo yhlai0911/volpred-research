@@ -1,0 +1,223 @@
+========================================================================
+K1137: Regime-conditional robust vol models (rolling ex-ante VIX tertile)
+6 assets × 3 robust models × 3 regimes = 54 cells
+========================================================================
+
+[0] Downloading VIX...
+  VIX: 1999-01-04 ~ 2026-04-10, n=6859
+
+[0] Downloading SPY...
+  Obs: 6606 [2000-01-04 ~ 2026-04-10], Mean VIX: 19.85
+
+[0] Downloading QQQ...
+  Obs: 6606 [2000-01-04 ~ 2026-04-10], Mean VIX: 19.85
+
+[0] Downloading IWM...
+  Obs: 6354 [2001-01-03 ~ 2026-04-10], Mean VIX: 19.71
+
+[0] Downloading USO...
+  Obs: 4847 [2007-01-04 ~ 2026-04-10], Mean VIX: 19.83
+
+[0] Downloading GLD...
+  Obs: 5350 [2005-01-04 ~ 2026-04-10], Mean VIX: 19.17
+
+[0] Downloading TLT...
+  Obs: 5854 [2003-01-03 ~ 2026-04-10], Mean VIX: 19.13
+
+============================================================
+  Processing: SPY
+============================================================
+  OOS: 2021-01-04 ~ 2026-04-10 (1323 obs)
+  [SPY] 0% (0/1323) 1.6s
+  [SPY] 19% (252/1323) 8.9s
+  [SPY] 38% (504/1323) 16.0s
+  [SPY] 57% (756/1323) 23.9s
+  [SPY] 76% (1008/1323) 30.3s
+  [SPY] 95% (1260/1323) 38.0s
+  [SPY] fitting done in 38.0s
+  Valid OOS w/ regime: 1323
+  Regime coverage OOS: low=45.6% mid=22.9% high=31.5%
+    low  GARCH-MIDAS-X : n= 601 t= +1.99 p=0.047 rel=+0.74%
+    low  HAR-RV-X      : n= 603 t= +7.99 p=0.000 rel=+33.98%
+    low  GAS-t         : n= 601 t= -4.44 p=0.000 rel=-4.52%
+    mid  GARCH-MIDAS-X : n= 303 t= +0.51 p=0.608 rel=+0.66%
+    mid  HAR-RV-X      : n= 303 t= +4.71 p=0.000 rel=+28.78%
+    mid  GAS-t         : n= 303 t= -0.75 p=0.454 rel=-1.72%
+    high GARCH-MIDAS-X : n= 417 t= -0.11 p=0.913 rel=-0.07%
+    high HAR-RV-X      : n= 417 t= +2.14 p=0.033 rel=+19.34%
+    high GAS-t         : n= 417 t= -1.45 p=0.148 rel=-3.84%
+
+============================================================
+  Processing: QQQ
+============================================================
+  OOS: 2021-01-04 ~ 2026-04-10 (1323 obs)
+  [QQQ] 0% (0/1323) 2.5s
+  [QQQ] 19% (252/1323) 11.9s
+  [QQQ] 38% (504/1323) 20.5s
+  [QQQ] 57% (756/1323) 31.0s
+  [QQQ] 76% (1008/1323) 38.6s
+  [QQQ] 95% (1260/1323) 46.7s
+  [QQQ] fitting done in 46.7s
+  Valid OOS w/ regime: 1323
+  Regime coverage OOS: low=45.6% mid=22.9% high=31.5%
+    low  GARCH-MIDAS-X : n= 602 t= +1.55 p=0.122 rel=+0.45%
+    low  HAR-RV-X      : n= 603 t= +6.79 p=0.000 rel=+30.22%
+    low  GAS-t         : n= 602 t= -3.71 p=0.000 rel=-3.63%
+    mid  GARCH-MIDAS-X : n= 303 t= +0.08 p=0.937 rel=+0.05%
+    mid  HAR-RV-X      : n= 303 t= +5.13 p=0.000 rel=+27.55%
+    mid  GAS-t         : n= 303 t= -1.16 p=0.247 rel=-2.20%
+    high GARCH-MIDAS-X : n= 417 t= -2.42 p=0.016 rel=-0.76%
+    high HAR-RV-X      : n= 417 t= +2.97 p=0.003 rel=+22.62%
+    high GAS-t         : n= 417 t= -0.72 p=0.472 rel=-1.52%
+
+============================================================
+  Processing: IWM
+============================================================
+  OOS: 2021-01-04 ~ 2026-04-10 (1323 obs)
+  [IWM] 0% (0/1323) 2.2s
+  [IWM] 19% (252/1323) 11.7s
+  [IWM] 38% (504/1323) 24.1s
+  [IWM] 57% (756/1323) 34.9s
+  [IWM] 76% (1008/1323) 42.0s
+  [IWM] 95% (1260/1323) 49.3s
+  [IWM] fitting done in 49.3s
+  Valid OOS w/ regime: 1323
+  Regime coverage OOS: low=45.6% mid=22.9% high=31.5%
+    low  GARCH-MIDAS-X : n= 603 t= +0.01 p=0.995 rel=+0.00%
+    low  HAR-RV-X      : n= 603 t= +4.23 p=0.000 rel=+24.98%
+    low  GAS-t         : n= 603 t= -0.35 p=0.728 rel=-0.47%
+    mid  GARCH-MIDAS-X : n= 303 t= -0.08 p=0.939 rel=-0.03%
+    mid  HAR-RV-X      : n= 303 t= +3.65 p=0.000 rel=+25.50%
+    mid  GAS-t         : n= 303 t= +0.35 p=0.725 rel=+0.65%
+    high GARCH-MIDAS-X : n= 417 t= +1.52 p=0.130 rel=+0.26%
+    high HAR-RV-X      : n= 417 t= +2.66 p=0.008 rel=+20.30%
+    high GAS-t         : n= 417 t= -0.86 p=0.389 rel=-0.99%
+
+============================================================
+  Processing: USO
+============================================================
+  OOS: 2021-01-04 ~ 2026-04-10 (1323 obs)
+  [USO] 0% (0/1323) 2.3s
+  [USO] 19% (252/1323) 10.9s
+  [USO] 38% (504/1323) 19.5s
+  [USO] 57% (756/1323) 28.1s
+  [USO] 76% (1008/1323) 36.4s
+  [USO] 95% (1260/1323) 44.9s
+  [USO] fitting done in 45.0s
+  Valid OOS w/ regime: 1323
+  Regime coverage OOS: low=45.6% mid=22.9% high=31.5%
+    low  GARCH-MIDAS-X : n= 600 t= +1.31 p=0.189 rel=+0.26%
+    low  HAR-RV-X      : n= 603 t=+10.61 p=0.000 rel=+47.38%
+    low  GAS-t         : n= 600 t= -1.94 p=0.053 rel=-1.86%
+    mid  GARCH-MIDAS-X : n= 302 t= +0.94 p=0.350 rel=+0.49%
+    mid  HAR-RV-X      : n= 303 t= +6.78 p=0.000 rel=+45.91%
+    mid  GAS-t         : n= 302 t= +0.89 p=0.376 rel=+1.16%
+    high GARCH-MIDAS-X : n= 417 t= +0.82 p=0.412 rel=+0.93%
+    high HAR-RV-X      : n= 417 t= +1.92 p=0.056 rel=+26.83%
+    high GAS-t         : n= 417 t= +1.31 p=0.191 rel=+8.82%
+
+============================================================
+  Processing: GLD
+============================================================
+  OOS: 2021-01-04 ~ 2026-04-10 (1323 obs)
+  [GLD] 0% (0/1323) 2.4s
+  [GLD] 19% (252/1323) 13.0s
+  [GLD] 38% (504/1323) 24.3s
+  [GLD] 57% (756/1323) 36.0s
+  [GLD] 76% (1008/1323) 47.6s
+  [GLD] 95% (1260/1323) 56.7s
+  [GLD] fitting done in 56.7s
+  Valid OOS w/ regime: 1323
+  Regime coverage OOS: low=45.6% mid=22.9% high=31.5%
+    low  GARCH-MIDAS-X : n= 602 t= +1.46 p=0.145 rel=+0.72%
+    low  HAR-RV-X      : n= 603 t= +5.65 p=0.000 rel=+41.22%
+    low  GAS-t         : n= 602 t= -0.97 p=0.333 rel=-0.67%
+    mid  GARCH-MIDAS-X : n= 303 t= +0.96 p=0.336 rel=+1.64%
+    mid  HAR-RV-X      : n= 303 t= +2.15 p=0.032 rel=+28.31%
+    mid  GAS-t         : n= 303 t= -0.99 p=0.324 rel=-1.47%
+    high GARCH-MIDAS-X : n= 417 t= -0.48 p=0.632 rel=-0.55%
+    high HAR-RV-X      : n= 417 t= +4.74 p=0.000 rel=+36.58%
+    high GAS-t         : n= 417 t= +0.86 p=0.388 rel=+0.64%
+
+============================================================
+  Processing: TLT
+============================================================
+  OOS: 2021-01-04 ~ 2026-04-10 (1323 obs)
+  [TLT] 0% (0/1323) 2.3s
+  [TLT] 19% (252/1323) 13.1s
+  [TLT] 38% (504/1323) 22.1s
+  [TLT] 57% (756/1323) 33.8s
+  [TLT] 76% (1008/1323) 41.5s
+  [TLT] 95% (1260/1323) 48.1s
+  [TLT] fitting done in 48.1s
+  Valid OOS w/ regime: 1323
+  Regime coverage OOS: low=45.6% mid=22.9% high=31.5%
+    low  GARCH-MIDAS-X : n= 602 t= +0.51 p=0.608 rel=+0.29%
+    low  HAR-RV-X      : n= 603 t=+11.01 p=0.000 rel=+52.19%
+    low  GAS-t         : n= 602 t= +2.53 p=0.012 rel=+1.07%
+    mid  GARCH-MIDAS-X : n= 301 t= -0.22 p=0.824 rel=-0.40%
+    mid  HAR-RV-X      : n= 303 t= +8.62 p=0.000 rel=+51.87%
+    mid  GAS-t         : n= 301 t= +2.22 p=0.027 rel=+1.23%
+    high GARCH-MIDAS-X : n= 416 t= -1.49 p=0.137 rel=-1.30%
+    high HAR-RV-X      : n= 417 t= +7.34 p=0.000 rel=+45.23%
+    high GAS-t         : n= 416 t= +3.18 p=0.002 rel=+1.52%
+
+========================================================================
+BH-FDR correction across 54 regime-conditional cells
+========================================================================
+
+Total PASS cells (DM t>2 AND BH p<0.05): 17 / 54
+  TLT   HAR-RV-X       low  t=+11.01 p_BH=0.000 rel=+52.19% n=603 tgt=parkinson
+  USO   HAR-RV-X       low  t=+10.61 p_BH=0.000 rel=+47.38% n=603 tgt=parkinson
+  TLT   HAR-RV-X       mid  t= +8.62 p_BH=0.000 rel=+51.87% n=303 tgt=parkinson
+  SPY   HAR-RV-X       low  t= +7.99 p_BH=0.000 rel=+33.98% n=603 tgt=parkinson
+  TLT   HAR-RV-X       high t= +7.34 p_BH=0.000 rel=+45.23% n=417 tgt=parkinson
+  QQQ   HAR-RV-X       low  t= +6.79 p_BH=0.000 rel=+30.22% n=603 tgt=parkinson
+  USO   HAR-RV-X       mid  t= +6.78 p_BH=0.000 rel=+45.91% n=303 tgt=parkinson
+  GLD   HAR-RV-X       low  t= +5.65 p_BH=0.000 rel=+41.22% n=603 tgt=parkinson
+  QQQ   HAR-RV-X       mid  t= +5.13 p_BH=0.000 rel=+27.55% n=303 tgt=parkinson
+  GLD   HAR-RV-X       high t= +4.74 p_BH=0.000 rel=+36.58% n=417 tgt=parkinson
+
+Harvey-threshold PASS cells (DM t>3 AND BH p<0.05): 14 / 54
+
+========================================================================
+Paper 4 Channel 1 check: HAR+VIX consistency across regimes (equity)
+========================================================================
+  SPY: low t=+7.99 mid t=+4.71 high t=+2.14 → 2/3 PASS
+  QQQ: low t=+6.79 mid t=+5.13 high t=+2.97 → 3/3 PASS
+  IWM: low t=+4.23 mid t=+3.65 high t=+2.66 → 3/3 PASS
+
+========================================================================
+Paper 4 Channel 3 check: GAS-t regime rescue
+========================================================================
+  GAS-t rescued on some regime: 1/6 assets
+    SPY: max DM t=-0.75 (best: mid, rescued: False)
+    QQQ: max DM t=-0.72 (best: high, rescued: False)
+    IWM: max DM t=+0.35 (best: mid, rescued: False)
+    USO: max DM t=+1.31 (best: high, rescued: False)
+    GLD: max DM t=+0.86 (best: high, rescued: False)
+    TLT: max DM t=+3.18 (best: high, rescued: True)
+
+========================================================================
+Paper 4 Channel 2 check: MIDAS conditional PASS
+========================================================================
+  MIDAS conditional PASS (≥1 regime BH-pass): 0/6
+    SPY: max DM t=+1.99 (best: low, cond pass: False)
+    QQQ: max DM t=+1.55 (best: low, cond pass: False)
+    IWM: max DM t=+1.52 (best: high, cond pass: False)
+    USO: max DM t=+1.31 (best: low, cond pass: False)
+    GLD: max DM t=+1.46 (best: low, cond pass: False)
+    TLT: max DM t=+0.51 (best: low, cond pass: False)
+
+========================================================================
+K1137 VERDICT: C_HAR_REGIME_INVARIANT
+HAR+VIX PASSES across all 3 regimes for ≥2 equity assets AND ≥8 total PASS cells. Paper 4 Channel 1 can claim regime-invariant robustness for HAR+VIX on equity.
+Total PASS / 54: 17
+Harvey-threshold PASS / 54: 14
+========================================================================
+
+Charts saved: /Users/yhlai0911/Desktop/volpred-research/experiments/k1137/regime_conditional_heatmap.png, /Users/yhlai0911/Desktop/volpred-research/experiments/k1137/dm_by_regime.png
+
+Results saved: /Users/yhlai0911/Desktop/volpred-research/experiments/k1137/k1137_results.json
+
+K1137 complete. Verdict: C_HAR_REGIME_INVARIANT

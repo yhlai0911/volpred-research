@@ -1,0 +1,3575 @@
+{
+  "experiment_id": "K1100d",
+  "scenario": "B",
+  "scenario_description": "B (NULL): All RS models 5/5 NULL \u2192 mixing-averaging is fundamental, not regime-specific",
+  "pair_verdicts": {
+    "SPY-QQQ": {
+      "rs_full_harvey": false,
+      "rs_highvix_pass": false,
+      "is_tail_dep": true
+    },
+    "SPY-XLF": {
+      "rs_full_harvey": false,
+      "rs_highvix_pass": false,
+      "is_tail_dep": true
+    },
+    "SPY-IWM": {
+      "rs_full_harvey": false,
+      "rs_highvix_pass": false,
+      "is_tail_dep": true
+    },
+    "SPY-TLT": {
+      "rs_full_harvey": false,
+      "rs_highvix_pass": false,
+      "is_tail_dep": false
+    },
+    "SPY-GLD": {
+      "rs_full_harvey": false,
+      "rs_highvix_pass": false,
+      "is_tail_dep": false
+    }
+  },
+  "pair_results": {
+    "SPY-QQQ": {
+      "pair_name": "SPY-QQQ",
+      "asset1": "SPY",
+      "asset2": "QQQ",
+      "n_oos": 3233,
+      "full_sample_corr": 0.9203555983464703,
+      "regime_stats": {
+        "R1_high_n": 393,
+        "R1_high_frac": 0.12155892360037117,
+        "R2_high_n": 797,
+        "R2_high_frac": 0.24652025982060005
+      },
+      "models": {
+        "DCC-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 0.28752552575375034,
+                "p_value": 0.5918106125209573,
+                "violations": 70,
+                "rate": 0.023482053002348204,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.9511742924099771,
+                "p_value": 0.3294205713186791,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 6.363636363636363,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.04142366658542729,
+                "p_value": 0.966958145780358,
+                "pass": true,
+                "n_violations": 70
+              },
+              "trinity_pass": true,
+              "n_oos": 2981,
+              "violation_rate": 0.023482053002348204
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.5690815889377632,
+                "p_value": 0.450624099417234,
+                "violations": 34,
+                "rate": 0.011405568601140557,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.6923113141356954,
+                "p_value": 0.4053793280169803,
+                "clusters": 1,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 3.090909090909091,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.17261993128408126,
+                "p_value": 0.8629501841843681,
+                "pass": true,
+                "n_violations": 34
+              },
+              "trinity_pass": true,
+              "n_oos": 2981,
+              "violation_rate": 0.011405568601140557
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.153141568939104,
+              "n": 2981
+            },
+            "alpha_0.010": {
+              "mean": -5.076787188561969,
+              "n": 2981
+            }
+          }
+        },
+        "Copula-t-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 13.866481962102,
+                "p_value": 0.000196267766560565,
+                "violations": 116,
+                "rate": 0.035879987627590475,
+                "expected_rate": 0.025,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 0.3850332525257514,
+                "p_value": 0.5349217582062579,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 9.666666666666666,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.4245314198636976,
+                "p_value": 0.6711782960430079,
+                "pass": true,
+                "n_violations": 116
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.035879987627590475
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 16.662331620216776,
+                "p_value": 4.465903368944257e-05,
+                "violations": 58,
+                "rate": 0.017939993813795237,
+                "expected_rate": 0.01,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 2.5707566028378537,
+                "p_value": 0.1088556569143605,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Yellow",
+                "violations_per_block": 4.833333333333333,
+                "n_blocks": 12,
+                "pass": false
+              },
+              "es_test": {
+                "z_stat": 0.8195893906121321,
+                "p_value": 0.4124502237856914,
+                "pass": true,
+                "n_violations": 58
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.017939993813795237
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.164772741638666,
+              "n": 3233
+            },
+            "alpha_0.010": {
+              "mean": -5.005453997336018,
+              "n": 3233
+            }
+          }
+        },
+        "RS-Copula-Gaussian-t-R1": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 11.030952811115071,
+                "p_value": 0.0008960308158443286,
+                "violations": 112,
+                "rate": 0.03464274667491494,
+                "expected_rate": 0.025,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 0.23178469201790008,
+                "p_value": 0.6302036523089933,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 9.333333333333334,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.41581959246255384,
+                "p_value": 0.6775420209884402,
+                "pass": true,
+                "n_violations": 112
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.03464274667491494
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 19.10177772585169,
+                "p_value": 1.2392939752636778e-05,
+                "violations": 60,
+                "rate": 0.018558614290133002,
+                "expected_rate": 0.01,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 2.295680942470554,
+                "p_value": 0.12973430326876145,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Yellow",
+                "violations_per_block": 5.0,
+                "n_blocks": 12,
+                "pass": false
+              },
+              "es_test": {
+                "z_stat": 0.8698429800684908,
+                "p_value": 0.3843862197120619,
+                "pass": true,
+                "n_violations": 60
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.018558614290133002
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.1675516538482515,
+              "n": 3233
+            },
+            "alpha_0.010": {
+              "mean": -5.008224907828829,
+              "n": 3233
+            }
+          }
+        },
+        "RS-Copula-Gaussian-Clayton-R1": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 13.130397203248009,
+                "p_value": 0.00029054317037935373,
+                "violations": 115,
+                "rate": 0.03557067738942159,
+                "expected_rate": 0.025,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 0.3432397308312076,
+                "p_value": 0.5579651306539977,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 9.583333333333334,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.49925397029088225,
+                "p_value": 0.6176004777748455,
+                "pass": true,
+                "n_violations": 115
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.03557067738942159
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 24.38400606441091,
+                "p_value": 7.892120312824602e-07,
+                "violations": 64,
+                "rate": 0.019795855242808538,
+                "expected_rate": 0.01,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 1.802441594292528,
+                "p_value": 0.17941759808851587,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Yellow",
+                "violations_per_block": 5.333333333333333,
+                "n_blocks": 12,
+                "pass": false
+              },
+              "es_test": {
+                "z_stat": 1.0522643544546004,
+                "p_value": 0.29267828096971693,
+                "pass": true,
+                "n_violations": 64
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.019795855242808538
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.201515934479987,
+              "n": 3233
+            },
+            "alpha_0.010": {
+              "mean": -5.041545184629061,
+              "n": 3233
+            }
+          }
+        },
+        "RS-Copula-Gaussian-t-R2": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 10.367924900544352,
+                "p_value": 0.001282235900379014,
+                "violations": 111,
+                "rate": 0.03433343643674606,
+                "expected_rate": 0.025,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 0.19932731711286067,
+                "p_value": 0.6552643649766711,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 9.25,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.40377880988669435,
+                "p_value": 0.6863753801132303,
+                "pass": true,
+                "n_violations": 111
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.03433343643674606
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 19.10177772585169,
+                "p_value": 1.2392939752636778e-05,
+                "violations": 60,
+                "rate": 0.018558614290133002,
+                "expected_rate": 0.01,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 2.295680942470554,
+                "p_value": 0.12973430326876145,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Yellow",
+                "violations_per_block": 5.0,
+                "n_blocks": 12,
+                "pass": false
+              },
+              "es_test": {
+                "z_stat": 0.8795332319320788,
+                "p_value": 0.3791122227890589,
+                "pass": true,
+                "n_violations": 60
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.018558614290133002
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.170139532255086,
+              "n": 3233
+            },
+            "alpha_0.010": {
+              "mean": -5.0041331995490035,
+              "n": 3233
+            }
+          }
+        },
+        "RS-Copula-Gaussian-Clayton-R2": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 10.367924900544352,
+                "p_value": 0.001282235900379014,
+                "violations": 111,
+                "rate": 0.03433343643674606,
+                "expected_rate": 0.025,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 0.19932731711286067,
+                "p_value": 0.6552643649766711,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 9.25,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.4770841963839969,
+                "p_value": 0.6333021677318554,
+                "pass": true,
+                "n_violations": 111
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.03433343643674606
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 28.682314244657334,
+                "p_value": 8.527900663413135e-08,
+                "violations": 67,
+                "rate": 0.020723785957315187,
+                "expected_rate": 0.01,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 1.478960134642989,
+                "p_value": 0.22393728977502758,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Yellow",
+                "violations_per_block": 5.583333333333333,
+                "n_blocks": 12,
+                "pass": false
+              },
+              "es_test": {
+                "z_stat": 1.1947621297038529,
+                "p_value": 0.23217998031171994,
+                "pass": true,
+                "n_violations": 67
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.020723785957315187
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.224507425164572,
+              "n": 3233
+            },
+            "alpha_0.010": {
+              "mean": -5.052252972277913,
+              "n": 3233
+            }
+          }
+        }
+      },
+      "dm_full": {
+        "DCC_vs_Copula-t-A4f-ASYM": {
+          "t_stat": 0.6762468190331785,
+          "p_value": 0.49888395140751207,
+          "mean_loss_diff": 0.00043622780536636786,
+          "n": 3233,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R1": {
+          "t_stat": 0.37448526630324475,
+          "p_value": 0.7080433162805088,
+          "mean_loss_diff": 0.0002378941258187907,
+          "n": 3233,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R1": {
+          "t_stat": 0.4227371270403177,
+          "p_value": 0.6724870644039986,
+          "mean_loss_diff": 0.0002715422265216259,
+          "n": 3233,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R2": {
+          "t_stat": 1.651646267819111,
+          "p_value": 0.09860668220759682,
+          "mean_loss_diff": 0.0011847018724378004,
+          "n": 3233,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R2": {
+          "t_stat": -0.2747676390243555,
+          "p_value": 0.7834947617955902,
+          "mean_loss_diff": -0.00018885096529501288,
+          "n": 3233,
+          "significant_harvey": false
+        }
+      },
+      "dm_high_R1": {
+        "DCC_vs_Copula-t-A4f-ASYM": {
+          "t_stat": 0.036698707395748605,
+          "p_value": 0.9707252392991228,
+          "mean_loss_diff": 5.599544888251324e-05,
+          "n": 393,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R1": {
+          "t_stat": -0.39019111259668265,
+          "p_value": 0.6963952329597504,
+          "mean_loss_diff": -0.0006991160133411307,
+          "n": 393,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R1": {
+          "t_stat": -0.213930012493736,
+          "p_value": 0.83060163539886,
+          "mean_loss_diff": -0.0004223111543786216,
+          "n": 393,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R2": {
+          "t_stat": -0.5595931698710152,
+          "p_value": 0.5757569647073326,
+          "mean_loss_diff": -0.001112481708166018,
+          "n": 393,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R2": {
+          "t_stat": -0.10795189892733986,
+          "p_value": 0.9140338482373765,
+          "mean_loss_diff": -0.00024630792862139877,
+          "n": 393,
+          "significant_harvey": false
+        }
+      },
+      "dm_low_R1": {
+        "DCC_vs_Copula-t-A4f-ASYM": {
+          "t_stat": 0.6828706461658014,
+          "p_value": 0.4946885838774241,
+          "mean_loss_diff": 0.0004888444659643097,
+          "n": 2840,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R1": {
+          "t_stat": 0.5338268055443124,
+          "p_value": 0.5934613662016521,
+          "mean_loss_diff": 0.0003675578528222587,
+          "n": 2840,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R1": {
+          "t_stat": 0.5338268055443124,
+          "p_value": 0.5934613662016521,
+          "mean_loss_diff": 0.0003675578528222587,
+          "n": 2840,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R2": {
+          "t_stat": 1.9149963418120803,
+          "p_value": 0.05549297014085978,
+          "mean_loss_diff": 0.0015025867834157231,
+          "n": 2840,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R2": {
+          "t_stat": -0.24851180948416915,
+          "p_value": 0.8037384339737135,
+          "mean_loss_diff": -0.0001809000545248475,
+          "n": 2840,
+          "significant_harvey": false
+        }
+      },
+      "dm_high_R2": {
+        "DCC_vs_Copula-t-A4f-ASYM": {
+          "t_stat": 0.31818949782598027,
+          "p_value": 0.7503411986411863,
+          "mean_loss_diff": 0.0002569664005347748,
+          "n": 797,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R1": {
+          "t_stat": -0.8703405600845764,
+          "p_value": 0.38411431948664265,
+          "mean_loss_diff": -0.0008228754864472188,
+          "n": 797,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R1": {
+          "t_stat": -0.5023388152205095,
+          "p_value": 0.6154292099957372,
+          "mean_loss_diff": -0.0005343895928765258,
+          "n": 797,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R2": {
+          "t_stat": 1.9066562827123947,
+          "p_value": 0.05656511162561079,
+          "mean_loss_diff": 0.00307537957167746,
+          "n": 797,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R2": {
+          "t_stat": -1.7563597430695927,
+          "p_value": 0.07902700211228487,
+          "mean_loss_diff": -0.0024963849507694475,
+          "n": 797,
+          "significant_harvey": false
+        }
+      },
+      "dm_low_R2": {
+        "DCC_vs_Copula-t-A4f-ASYM": {
+          "t_stat": 0.5865499571772675,
+          "p_value": 0.5575060003801824,
+          "mean_loss_diff": 0.000494877780592468,
+          "n": 2436,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R1": {
+          "t_stat": 0.7107391451874602,
+          "p_value": 0.4772458973377942,
+          "mean_loss_diff": 0.0005849521639862824,
+          "n": 2436,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R1": {
+          "t_stat": 0.665495853079235,
+          "p_value": 0.5057333950633363,
+          "mean_loss_diff": 0.0005352235319651098,
+          "n": 2436,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R2": {
+          "t_stat": 0.7124783910473442,
+          "p_value": 0.4761685879003821,
+          "mean_loss_diff": 0.0005661180767506047,
+          "n": 2436,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R2": {
+          "t_stat": 0.7124783910473442,
+          "p_value": 0.4761685879003821,
+          "mean_loss_diff": 0.0005661180767506047,
+          "n": 2436,
+          "significant_harvey": false
+        }
+      },
+      "mean_qlike": {
+        "DCC-A4f-ASYM": -8.374388304059563,
+        "Copula-t-A4f-ASYM": -8.37482453186493,
+        "RS-Copula-Gaussian-t-R1": -8.37462619818538,
+        "RS-Copula-Gaussian-Clayton-R1": -8.374659846286084,
+        "RS-Copula-Gaussian-t-R2": -8.375573005932,
+        "RS-Copula-Gaussian-Clayton-R2": -8.374199453094269
+      },
+      "fz_high_R1": {
+        "DCC-A4f-ASYM": -4.4531870287737325,
+        "Copula-t-A4f-ASYM": -4.389033002424811,
+        "RS-Copula-Gaussian-t-R1": -4.3809289045448825,
+        "RS-Copula-Gaussian-Clayton-R1": -4.655036932267902,
+        "RS-Copula-Gaussian-t-R2": -4.347826174423548,
+        "RS-Copula-Gaussian-Clayton-R2": -4.579325208352915
+      },
+      "fz_low_R1": {
+        "DCC-A4f-ASYM": -5.1714838125174465,
+        "Copula-t-A4f-ASYM": -5.090754508251547,
+        "RS-Copula-Gaussian-t-R1": -5.095030305466362,
+        "RS-Copula-Gaussian-Clayton-R1": -5.095030305466362,
+        "RS-Copula-Gaussian-t-R2": -5.094953150561083,
+        "RS-Copula-Gaussian-Clayton-R2": -5.117696849468943
+      },
+      "fz_high_R2": {
+        "DCC-A4f-ASYM": -4.695774092772281,
+        "Copula-t-A4f-ASYM": -4.641268420107739,
+        "RS-Copula-Gaussian-t-R1": -4.654645165954684,
+        "RS-Copula-Gaussian-Clayton-R1": -4.77779100846256,
+        "RS-Copula-Gaussian-t-R2": -4.654463788861026,
+        "RS-Copula-Gaussian-Clayton-R2": -4.849659805463992
+      },
+      "fz_low_R2": {
+        "DCC-A4f-ASYM": -5.205329964709947,
+        "Copula-t-A4f-ASYM": -5.124606667718176,
+        "RS-Copula-Gaussian-t-R1": -5.123907606627554,
+        "RS-Copula-Gaussian-Clayton-R1": -5.127839141281237,
+        "RS-Copula-Gaussian-t-R2": -5.11853653301301,
+        "RS-Copula-Gaussian-Clayton-R2": -5.11853653301301
+      },
+      "oos_dates_first": "2013-06-03",
+      "oos_dates_last": "2026-04-09"
+    },
+    "SPY-XLF": {
+      "pair_name": "SPY-XLF",
+      "asset1": "SPY",
+      "asset2": "XLF",
+      "n_oos": 3233,
+      "full_sample_corr": 0.8422325998085942,
+      "regime_stats": {
+        "R1_high_n": 393,
+        "R1_high_frac": 0.12155892360037117,
+        "R2_high_n": 797,
+        "R2_high_frac": 0.24652025982060005
+      },
+      "models": {
+        "DCC-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 3.568310781255647,
+                "p_value": 0.05889219113735311,
+                "violations": 59,
+                "rate": 0.019792016101979202,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 4.468206877398359,
+                "p_value": 0.03453121231000378,
+                "clusters": 4,
+                "pass": false
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 5.363636363636363,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.22771096252861367,
+                "p_value": 0.8198709494524009,
+                "pass": true,
+                "n_violations": 59
+              },
+              "trinity_pass": false,
+              "n_oos": 2981,
+              "violation_rate": 0.019792016101979202
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.8294311866156292,
+                "p_value": 0.3624370588941218,
+                "violations": 25,
+                "rate": 0.008386447500838645,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 1.5944587794099414,
+                "p_value": 0.20669025358552473,
+                "clusters": 1,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 2.272727272727273,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.13991275198547537,
+                "p_value": 0.8887289257691567,
+                "pass": true,
+                "n_violations": 25
+              },
+              "trinity_pass": true,
+              "n_oos": 2981,
+              "violation_rate": 0.008386447500838645
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.169069162951696,
+              "n": 2981
+            },
+            "alpha_0.010": {
+              "mean": -5.067980906320543,
+              "n": 2981
+            }
+          }
+        },
+        "Copula-t-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 0.33298786704753525,
+                "p_value": 0.5639049978204806,
+                "violations": 86,
+                "rate": 0.02660068048252397,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 1.1158155010740778,
+                "p_value": 0.29082127227749,
+                "clusters": 4,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 7.166666666666667,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.1053456845766314,
+                "p_value": 0.9161015135723253,
+                "pass": true,
+                "n_violations": 86
+              },
+              "trinity_pass": true,
+              "n_oos": 3233,
+              "violation_rate": 0.02660068048252397
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 2.164777545840181,
+                "p_value": 0.1412050560150674,
+                "violations": 41,
+                "rate": 0.012681719764924219,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 5.866370905899171,
+                "p_value": 0.015432834981665144,
+                "clusters": 3,
+                "pass": false
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 3.4166666666666665,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.3815324288343105,
+                "p_value": 0.7028082129250524,
+                "pass": true,
+                "n_violations": 41
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.012681719764924219
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.252702951808587,
+              "n": 3233
+            },
+            "alpha_0.010": {
+              "mean": -5.053808658419663,
+              "n": 3233
+            }
+          }
+        },
+        "RS-Copula-Gaussian-t-R1": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 0.2175707459635703,
+                "p_value": 0.640897154660504,
+                "violations": 85,
+                "rate": 0.02629137024435509,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 1.2024985442506129,
+                "p_value": 0.2728228710949461,
+                "clusters": 4,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 7.083333333333333,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.10523491046739086,
+                "p_value": 0.9161894099592416,
+                "pass": true,
+                "n_violations": 85
+              },
+              "trinity_pass": true,
+              "n_oos": 3233,
+              "violation_rate": 0.02629137024435509
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 2.164777545840181,
+                "p_value": 0.1412050560150674,
+                "violations": 41,
+                "rate": 0.012681719764924219,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 5.866370905899171,
+                "p_value": 0.015432834981665144,
+                "clusters": 3,
+                "pass": false
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 3.4166666666666665,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.3833124201978939,
+                "p_value": 0.701488131273881,
+                "pass": true,
+                "n_violations": 41
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.012681719764924219
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.267185980728901,
+              "n": 3233
+            },
+            "alpha_0.010": {
+              "mean": -5.069850518268013,
+              "n": 3233
+            }
+          }
+        },
+        "RS-Copula-Gaussian-Clayton-R1": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 0.2175707459635703,
+                "p_value": 0.640897154660504,
+                "violations": 85,
+                "rate": 0.02629137024435509,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 1.2024985442506129,
+                "p_value": 0.2728228710949461,
+                "clusters": 4,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 7.083333333333333,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.14356061900044192,
+                "p_value": 0.8858474399303875,
+                "pass": true,
+                "n_violations": 85
+              },
+              "trinity_pass": true,
+              "n_oos": 3233,
+              "violation_rate": 0.02629137024435509
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 3.223198986630649,
+                "p_value": 0.07260161790485564,
+                "violations": 43,
+                "rate": 0.013300340241261985,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 5.371795164237877,
+                "p_value": 0.02046490509746035,
+                "clusters": 3,
+                "pass": false
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 3.5833333333333335,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.48349986998853,
+                "p_value": 0.628740852059581,
+                "pass": true,
+                "n_violations": 43
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.013300340241261985
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.2795518436255655,
+              "n": 3233
+            },
+            "alpha_0.010": {
+              "mean": -5.079876155006479,
+              "n": 3233
+            }
+          }
+        },
+        "RS-Copula-Gaussian-t-R2": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 0.017437524712249797,
+                "p_value": 0.8949437787048674,
+                "violations": 82,
+                "rate": 0.025363439529848437,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 1.484746524723576,
+                "p_value": 0.22303335860138573,
+                "clusters": 4,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 6.833333333333333,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0683913450399043,
+                "p_value": 0.9454741113575426,
+                "pass": true,
+                "n_violations": 82
+              },
+              "trinity_pass": true,
+              "n_oos": 3233,
+              "violation_rate": 0.025363439529848437
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 2.164777545840181,
+                "p_value": 0.1412050560150674,
+                "violations": 41,
+                "rate": 0.012681719764924219,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 5.866370905899171,
+                "p_value": 0.015432834981665144,
+                "clusters": 3,
+                "pass": false
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 3.4166666666666665,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.381517812261825,
+                "p_value": 0.7028190566213555,
+                "pass": true,
+                "n_violations": 41
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.012681719764924219
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.270244196663718,
+              "n": 3233
+            },
+            "alpha_0.010": {
+              "mean": -5.069904594650967,
+              "n": 3233
+            }
+          }
+        },
+        "RS-Copula-Gaussian-Clayton-R2": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 0.05951226950045907,
+                "p_value": 0.8072684855191873,
+                "violations": 83,
+                "rate": 0.02567274976801732,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 1.3869072197259698,
+                "p_value": 0.2389280912701316,
+                "clusters": 4,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 6.916666666666667,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.09758288236262058,
+                "p_value": 0.9222635175209805,
+                "pass": true,
+                "n_violations": 83
+              },
+              "trinity_pass": true,
+              "n_oos": 3233,
+              "violation_rate": 0.02567274976801732
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 2.66986311094864,
+                "p_value": 0.10226481906380447,
+                "violations": 42,
+                "rate": 0.012991030003093103,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 5.614776431665945,
+                "p_value": 0.01780965303188531,
+                "clusters": 3,
+                "pass": false
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 3.5,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.45520385443970435,
+                "p_value": 0.6489625877834109,
+                "pass": true,
+                "n_violations": 42
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.012991030003093103
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.294047931977856,
+              "n": 3233
+            },
+            "alpha_0.010": {
+              "mean": -5.097757079258645,
+              "n": 3233
+            }
+          }
+        }
+      },
+      "dm_full": {
+        "DCC_vs_Copula-t-A4f-ASYM": {
+          "t_stat": 1.7686506341145285,
+          "p_value": 0.07695219527564161,
+          "mean_loss_diff": 0.004517781801363109,
+          "n": 3233,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R1": {
+          "t_stat": 2.25647650700042,
+          "p_value": 0.024040804980536658,
+          "mean_loss_diff": 0.00545192952914254,
+          "n": 3233,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R1": {
+          "t_stat": 2.287563723211841,
+          "p_value": 0.022162940518325867,
+          "mean_loss_diff": 0.005513618142362943,
+          "n": 3233,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R2": {
+          "t_stat": 2.3690175334705676,
+          "p_value": 0.017835407918828327,
+          "mean_loss_diff": 0.006378988367295755,
+          "n": 3233,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R2": {
+          "t_stat": 2.2239403043567445,
+          "p_value": 0.026152460884981833,
+          "mean_loss_diff": 0.005569934278488489,
+          "n": 3233,
+          "significant_harvey": false
+        }
+      },
+      "dm_high_R1": {
+        "DCC_vs_Copula-t-A4f-ASYM": {
+          "t_stat": -1.9028865047772736,
+          "p_value": 0.05705535627350204,
+          "mean_loss_diff": -0.006295799968772115,
+          "n": 393,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R1": {
+          "t_stat": -0.7878712221425509,
+          "p_value": 0.43077203571864997,
+          "mean_loss_diff": -0.003313149059821569,
+          "n": 393,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R1": {
+          "t_stat": -0.8261937687191004,
+          "p_value": 0.408694182462062,
+          "mean_loss_diff": -0.0028056699592069042,
+          "n": 393,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R2": {
+          "t_stat": -1.3631134093134363,
+          "p_value": 0.17284677133148096,
+          "mean_loss_diff": -0.006108648047383925,
+          "n": 393,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R2": {
+          "t_stat": -1.5524430129413187,
+          "p_value": 0.12055625829153702,
+          "mean_loss_diff": -0.0070908392403877885,
+          "n": 393,
+          "significant_harvey": false
+        }
+      },
+      "dm_low_R1": {
+        "DCC_vs_Copula-t-A4f-ASYM": {
+          "t_stat": 2.1211365146344185,
+          "p_value": 0.03391031589265958,
+          "mean_loss_diff": 0.006014168292793791,
+          "n": 2840,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R1": {
+          "t_stat": 2.49592236809163,
+          "p_value": 0.01256300926054804,
+          "mean_loss_diff": 0.006664843573319616,
+          "n": 2840,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R1": {
+          "t_stat": 2.49592236809163,
+          "p_value": 0.01256300926054804,
+          "mean_loss_diff": 0.006664843573319616,
+          "n": 2840,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R2": {
+          "t_stat": 2.6906284945833776,
+          "p_value": 0.007131756454446695,
+          "mean_loss_diff": 0.008107031012003189,
+          "n": 2840,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R2": {
+          "t_stat": 2.658086154718683,
+          "p_value": 0.007858580063019477,
+          "mean_loss_diff": 0.0073219356844456615,
+          "n": 2840,
+          "significant_harvey": false
+        }
+      },
+      "dm_high_R2": {
+        "DCC_vs_Copula-t-A4f-ASYM": {
+          "t_stat": 0.8564948694804363,
+          "p_value": 0.39172410948346625,
+          "mean_loss_diff": 0.004970590480058464,
+          "n": 797,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R1": {
+          "t_stat": 0.9508969945854489,
+          "p_value": 0.34165666762177005,
+          "mean_loss_diff": 0.0051669266567511835,
+          "n": 797,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R1": {
+          "t_stat": 0.9635734355228999,
+          "p_value": 0.335259830395075,
+          "mean_loss_diff": 0.005338104131028255,
+          "n": 797,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R2": {
+          "t_stat": 1.0932503501301722,
+          "p_value": 0.2742838956905037,
+          "mean_loss_diff": 0.008100231525498037,
+          "n": 797,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R2": {
+          "t_stat": 0.7608764448529168,
+          "p_value": 0.44673086902124526,
+          "mean_loss_diff": 0.004818334575543342,
+          "n": 797,
+          "significant_harvey": false
+        }
+      },
+      "dm_low_R2": {
+        "DCC_vs_Copula-t-A4f-ASYM": {
+          "t_stat": 1.497124761195054,
+          "p_value": 0.13436079793618216,
+          "mean_loss_diff": 0.004369633805911467,
+          "n": 2436,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R1": {
+          "t_stat": 1.983488395154256,
+          "p_value": 0.04731290206307088,
+          "mean_loss_diff": 0.005545175542810812,
+          "n": 2436,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R1": {
+          "t_stat": 2.0218905665694242,
+          "p_value": 0.043187658540469964,
+          "mean_loss_diff": 0.005571042061506517,
+          "n": 2436,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R2": {
+          "t_stat": 2.1538273279313818,
+          "p_value": 0.03125371574418394,
+          "mean_loss_diff": 0.005815839435814958,
+          "n": 2436,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R2": {
+          "t_stat": 2.1538273279313818,
+          "p_value": 0.03125371574418394,
+          "mean_loss_diff": 0.005815839435814958,
+          "n": 2436,
+          "significant_harvey": false
+        }
+      },
+      "mean_qlike": {
+        "DCC-A4f-ASYM": -8.460600938069911,
+        "Copula-t-A4f-ASYM": -8.465118719871272,
+        "RS-Copula-Gaussian-t-R1": -8.466052867599053,
+        "RS-Copula-Gaussian-Clayton-R1": -8.466114556212274,
+        "RS-Copula-Gaussian-t-R2": -8.466979926437205,
+        "RS-Copula-Gaussian-Clayton-R2": -8.466170872348398
+      },
+      "fz_high_R1": {
+        "DCC-A4f-ASYM": -4.416280522031696,
+        "Copula-t-A4f-ASYM": -4.386962810995085,
+        "RS-Copula-Gaussian-t-R1": -4.381907087665858,
+        "RS-Copula-Gaussian-Clayton-R1": -4.464382618392215,
+        "RS-Copula-Gaussian-t-R2": -4.373475283909749,
+        "RS-Copula-Gaussian-Clayton-R2": -4.444211563967429
+      },
+      "fz_low_R1": {
+        "DCC-A4f-ASYM": -5.166944681832722,
+        "Copula-t-A4f-ASYM": -5.146086974630177,
+        "RS-Copula-Gaussian-t-R1": -5.165048323981622,
+        "RS-Copula-Gaussian-Clayton-R1": -5.165048323981622,
+        "RS-Copula-Gaussian-t-R2": -5.166276678848607,
+        "RS-Copula-Gaussian-Clayton-R2": -5.188194891761972
+      },
+      "fz_high_R2": {
+        "DCC-A4f-ASYM": -4.68171398892668,
+        "Copula-t-A4f-ASYM": -4.606885280048293,
+        "RS-Copula-Gaussian-t-R1": -4.618118289213495,
+        "RS-Copula-Gaussian-Clayton-R1": -4.648325436455949,
+        "RS-Copula-Gaussian-t-R2": -4.624989386849428,
+        "RS-Copula-Gaussian-Clayton-R2": -4.737971924787478
+      },
+      "fz_low_R2": {
+        "DCC-A4f-ASYM": -5.198296169613583,
+        "Copula-t-A4f-ASYM": -5.200031126630657,
+        "RS-Copula-Gaussian-t-R1": -5.217646325557198,
+        "RS-Copula-Gaussian-Clayton-R1": -5.2210690625125435,
+        "RS-Copula-Gaussian-t-R2": -5.2154700382543435,
+        "RS-Copula-Gaussian-Clayton-R2": -5.2154700382543435
+      },
+      "oos_dates_first": "2013-06-03",
+      "oos_dates_last": "2026-04-09"
+    },
+    "SPY-IWM": {
+      "pair_name": "SPY-IWM",
+      "asset1": "SPY",
+      "asset2": "IWM",
+      "n_oos": 3233,
+      "full_sample_corr": 0.8951457890078475,
+      "regime_stats": {
+        "R1_high_n": 393,
+        "R1_high_frac": 0.12155892360037117,
+        "R2_high_n": 797,
+        "R2_high_frac": 0.24652025982060005
+      },
+      "models": {
+        "DCC-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 2.681025282627459,
+                "p_value": 0.10155032814919074,
+                "violations": 61,
+                "rate": 0.020462931902046292,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 1.8613302773002047,
+                "p_value": 0.17247134568181766,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 5.545454545454546,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.18980903356421686,
+                "p_value": 0.8494587768240084,
+                "pass": true,
+                "n_violations": 61
+              },
+              "trinity_pass": true,
+              "n_oos": 2981,
+              "violation_rate": 0.020462931902046292
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.022433789959109163,
+                "p_value": 0.8809388697143518,
+                "violations": 29,
+                "rate": 0.009728279100972828,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 2.6363636363636362,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.0068406884341756236,
+                "p_value": 0.9945419628812995,
+                "pass": true,
+                "n_violations": 29
+              },
+              "trinity_pass": true,
+              "n_oos": 2981,
+              "violation_rate": 0.009728279100972828
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.150674601374931,
+              "n": 2981
+            },
+            "alpha_0.010": {
+              "mean": -4.997974780679343,
+              "n": 2981
+            }
+          }
+        },
+        "Copula-t-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 2.4160471692329395,
+                "p_value": 0.12009763643079086,
+                "violations": 95,
+                "rate": 0.029384472626043923,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.016016537497598904,
+                "p_value": 0.8992914598642691,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 7.916666666666667,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.20381757554497404,
+                "p_value": 0.8384960578307052,
+                "pass": true,
+                "n_violations": 95
+              },
+              "trinity_pass": true,
+              "n_oos": 3233,
+              "violation_rate": 0.029384472626043923
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 2.164777545840181,
+                "p_value": 0.1412050560150674,
+                "violations": 41,
+                "rate": 0.012681719764924219,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 2.5379042866516457,
+                "p_value": 0.11114221723060236,
+                "clusters": 2,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 3.4166666666666665,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.3532162162312189,
+                "p_value": 0.7239263516344652,
+                "pass": true,
+                "n_violations": 41
+              },
+              "trinity_pass": true,
+              "n_oos": 3233,
+              "violation_rate": 0.012681719764924219
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.234122074626753,
+              "n": 3233
+            },
+            "alpha_0.010": {
+              "mean": -5.065803778863457,
+              "n": 3233
+            }
+          }
+        },
+        "RS-Copula-Gaussian-t-R1": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 2.4160471692329395,
+                "p_value": 0.12009763643079086,
+                "violations": 95,
+                "rate": 0.029384472626043923,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.016016537497598904,
+                "p_value": 0.8992914598642691,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 7.916666666666667,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.2055765506535039,
+                "p_value": 0.8371216961449985,
+                "pass": true,
+                "n_violations": 95
+              },
+              "trinity_pass": true,
+              "n_oos": 3233,
+              "violation_rate": 0.029384472626043923
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 2.66986311094864,
+                "p_value": 0.10226481906380447,
+                "violations": 42,
+                "rate": 0.012991030003093103,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 2.3901543935336704,
+                "p_value": 0.1221015690339573,
+                "clusters": 2,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 3.5,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.37569078588989724,
+                "p_value": 0.707146788727192,
+                "pass": true,
+                "n_violations": 42
+              },
+              "trinity_pass": true,
+              "n_oos": 3233,
+              "violation_rate": 0.012991030003093103
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.2425624410739795,
+              "n": 3233
+            },
+            "alpha_0.010": {
+              "mean": -5.0743061689757,
+              "n": 3233
+            }
+          }
+        },
+        "RS-Copula-Gaussian-Clayton-R1": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 2.4160471692329395,
+                "p_value": 0.12009763643079086,
+                "violations": 95,
+                "rate": 0.029384472626043923,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.016016537497598904,
+                "p_value": 0.8992914598642691,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 7.916666666666667,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.21981101840354533,
+                "p_value": 0.8260183380503371,
+                "pass": true,
+                "n_violations": 95
+              },
+              "trinity_pass": true,
+              "n_oos": 3233,
+              "violation_rate": 0.029384472626043923
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 3.223198986630649,
+                "p_value": 0.07260161790485564,
+                "violations": 43,
+                "rate": 0.013300340241261985,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 2.248453588294593,
+                "p_value": 0.1337480021519758,
+                "clusters": 2,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 3.5833333333333335,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.4328237565935995,
+                "p_value": 0.6651428131052229,
+                "pass": true,
+                "n_violations": 43
+              },
+              "trinity_pass": true,
+              "n_oos": 3233,
+              "violation_rate": 0.013300340241261985
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.2533337882814815,
+              "n": 3233
+            },
+            "alpha_0.010": {
+              "mean": -5.090910072143861,
+              "n": 3233
+            }
+          }
+        },
+        "RS-Copula-Gaussian-t-R2": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 2.094734046687222,
+                "p_value": 0.14780742997471885,
+                "violations": 94,
+                "rate": 0.02907516238787504,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.026672975406420107,
+                "p_value": 0.8702675650077645,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 7.833333333333333,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.1952786059274425,
+                "p_value": 0.8451748446476722,
+                "pass": true,
+                "n_violations": 94
+              },
+              "trinity_pass": true,
+              "n_oos": 3233,
+              "violation_rate": 0.02907516238787504
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 3.223198986630649,
+                "p_value": 0.07260161790485564,
+                "violations": 43,
+                "rate": 0.013300340241261985,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 2.248453588294593,
+                "p_value": 0.1337480021519758,
+                "clusters": 2,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 3.5833333333333335,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.4105398978878181,
+                "p_value": 0.6814099421053338,
+                "pass": true,
+                "n_violations": 43
+              },
+              "trinity_pass": true,
+              "n_oos": 3233,
+              "violation_rate": 0.013300340241261985
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.241844725724342,
+              "n": 3233
+            },
+            "alpha_0.010": {
+              "mean": -5.070155834054388,
+              "n": 3233
+            }
+          }
+        },
+        "RS-Copula-Gaussian-Clayton-R2": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 2.094734046687222,
+                "p_value": 0.14780742997471885,
+                "violations": 94,
+                "rate": 0.02907516238787504,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.026672975406420107,
+                "p_value": 0.8702675650077645,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 7.833333333333333,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.20525066775102307,
+                "p_value": 0.8373762848673767,
+                "pass": true,
+                "n_violations": 94
+              },
+              "trinity_pass": true,
+              "n_oos": 3233,
+              "violation_rate": 0.02907516238787504
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 4.470241914365374,
+                "p_value": 0.03449010807486519,
+                "violations": 45,
+                "rate": 0.013918960717599753,
+                "expected_rate": 0.01,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 1.982322346726784,
+                "p_value": 0.15914596602421216,
+                "clusters": 2,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 3.75,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.48783580668861726,
+                "p_value": 0.6256661466665552,
+                "pass": true,
+                "n_violations": 45
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.013918960717599753
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.2591207841513326,
+              "n": 3233
+            },
+            "alpha_0.010": {
+              "mean": -5.098707424491703,
+              "n": 3233
+            }
+          }
+        }
+      },
+      "dm_full": {
+        "DCC_vs_Copula-t-A4f-ASYM": {
+          "t_stat": 2.114125570906348,
+          "p_value": 0.034504543702315794,
+          "mean_loss_diff": 0.0048809179544411704,
+          "n": 3233,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R1": {
+          "t_stat": 2.2878482753182365,
+          "p_value": 0.022146358387162064,
+          "mean_loss_diff": 0.004949864701092664,
+          "n": 3233,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R1": {
+          "t_stat": 2.1086501697897364,
+          "p_value": 0.03497478897374773,
+          "mean_loss_diff": 0.004608399043330005,
+          "n": 3233,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R2": {
+          "t_stat": 2.5858644469287104,
+          "p_value": 0.009713512286013566,
+          "mean_loss_diff": 0.005901554311527737,
+          "n": 3233,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R2": {
+          "t_stat": 2.0801991197005156,
+          "p_value": 0.037507272964055594,
+          "mean_loss_diff": 0.004560165791958381,
+          "n": 3233,
+          "significant_harvey": false
+        }
+      },
+      "dm_high_R1": {
+        "DCC_vs_Copula-t-A4f-ASYM": {
+          "t_stat": -1.3856773702768683,
+          "p_value": 0.16584544121988865,
+          "mean_loss_diff": -0.004014855480424351,
+          "n": 393,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R1": {
+          "t_stat": -0.5353325239930576,
+          "p_value": 0.592419940095487,
+          "mean_loss_diff": -0.0011656888722877824,
+          "n": 393,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R1": {
+          "t_stat": -1.2357123503497238,
+          "p_value": 0.21656550513406414,
+          "mean_loss_diff": -0.0039747435072666,
+          "n": 393,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R2": {
+          "t_stat": -0.937578840523918,
+          "p_value": 0.3484608895760648,
+          "mean_loss_diff": -0.003488482749199961,
+          "n": 393,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R2": {
+          "t_stat": -1.2671378379189935,
+          "p_value": 0.20510600806784185,
+          "mean_loss_diff": -0.00522162654353459,
+          "n": 393,
+          "significant_harvey": false
+        }
+      },
+      "dm_low_R1": {
+        "DCC_vs_Copula-t-A4f-ASYM": {
+          "t_stat": 2.34799893258296,
+          "p_value": 0.018874575395239217,
+          "mean_loss_diff": 0.006111917588209535,
+          "n": 2840,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R1": {
+          "t_stat": 2.374431121630231,
+          "p_value": 0.017576015109799004,
+          "mean_loss_diff": 0.005796136727268198,
+          "n": 2840,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R1": {
+          "t_stat": 2.374431121630231,
+          "p_value": 0.017576015109799004,
+          "mean_loss_diff": 0.005796136727268198,
+          "n": 2840,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R2": {
+          "t_stat": 2.7893268500329214,
+          "p_value": 0.005281773076713375,
+          "mean_loss_diff": 0.007200950285072097,
+          "n": 2840,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R2": {
+          "t_stat": 2.4247846385488825,
+          "p_value": 0.015317470395363795,
+          "mean_loss_diff": 0.00591377297077836,
+          "n": 2840,
+          "significant_harvey": false
+        }
+      },
+      "dm_high_R2": {
+        "DCC_vs_Copula-t-A4f-ASYM": {
+          "t_stat": 1.3737469708021692,
+          "p_value": 0.16952024923268372,
+          "mean_loss_diff": 0.0043565749923675815,
+          "n": 797,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R1": {
+          "t_stat": 1.4451350770170963,
+          "p_value": 0.14841994800093664,
+          "mean_loss_diff": 0.004311881662207728,
+          "n": 797,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R1": {
+          "t_stat": 1.0989281124645756,
+          "p_value": 0.2717994233074317,
+          "mean_loss_diff": 0.0035685899614708244,
+          "n": 797,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R2": {
+          "t_stat": 1.8577707514136121,
+          "p_value": 0.06320157632741595,
+          "mean_loss_diff": 0.0075112528476504814,
+          "n": 797,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R2": {
+          "t_stat": 0.6525660557535137,
+          "p_value": 0.5140360748240805,
+          "mean_loss_diff": 0.002069961650953215,
+          "n": 797,
+          "significant_harvey": false
+        }
+      },
+      "dm_low_R2": {
+        "DCC_vs_Copula-t-A4f-ASYM": {
+          "t_stat": 1.7288560615623183,
+          "p_value": 0.08383485959692862,
+          "mean_loss_diff": 0.005052470228978385,
+          "n": 2436,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R1": {
+          "t_stat": 1.8880636614006094,
+          "p_value": 0.059017404519054205,
+          "mean_loss_diff": 0.005158597247066102,
+          "n": 2436,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R1": {
+          "t_stat": 1.8118408783712452,
+          "p_value": 0.0700107867454828,
+          "mean_loss_diff": 0.004948599305334016,
+          "n": 2436,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R2": {
+          "t_stat": 1.9573741848756714,
+          "p_value": 0.05030349130177265,
+          "mean_loss_diff": 0.00537490006961894,
+          "n": 2436,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R2": {
+          "t_stat": 1.9573741848756714,
+          "p_value": 0.05030349130177265,
+          "mean_loss_diff": 0.00537490006961894,
+          "n": 2436,
+          "significant_harvey": false
+        }
+      },
+      "mean_qlike": {
+        "DCC-A4f-ASYM": -8.310018029769523,
+        "Copula-t-A4f-ASYM": -8.314898947723965,
+        "RS-Copula-Gaussian-t-R1": -8.314967894470616,
+        "RS-Copula-Gaussian-Clayton-R1": -8.314626428812852,
+        "RS-Copula-Gaussian-t-R2": -8.315919584081051,
+        "RS-Copula-Gaussian-Clayton-R2": -8.31457819556148
+      },
+      "fz_high_R1": {
+        "DCC-A4f-ASYM": -4.407107661702346,
+        "Copula-t-A4f-ASYM": -4.4485166520262664,
+        "RS-Copula-Gaussian-t-R1": -4.447288270856743,
+        "RS-Copula-Gaussian-Clayton-R1": -4.583879667657408,
+        "RS-Copula-Gaussian-t-R2": -4.429675775348542,
+        "RS-Copula-Gaussian-Clayton-R2": -4.5050284141768815
+      },
+      "fz_low_R1": {
+        "DCC-A4f-ASYM": -5.087700738081955,
+        "Copula-t-A4f-ASYM": -5.151224145358885,
+        "RS-Copula-Gaussian-t-R1": -5.1610730823421616,
+        "RS-Copula-Gaussian-Clayton-R1": -5.1610730823421616,
+        "RS-Copula-Gaussian-t-R2": -5.15878564499502,
+        "RS-Copula-Gaussian-Clayton-R2": -5.180860893172594
+      },
+      "fz_high_R2": {
+        "DCC-A4f-ASYM": -4.714519487594331,
+        "Copula-t-A4f-ASYM": -4.707395942641553,
+        "RS-Copula-Gaussian-t-R1": -4.72312431058568,
+        "RS-Copula-Gaussian-Clayton-R1": -4.765824897254018,
+        "RS-Copula-Gaussian-t-R2": -4.701589517862069,
+        "RS-Copula-Gaussian-Clayton-R2": -4.8174079518443085
+      },
+      "fz_low_R2": {
+        "DCC-A4f-ASYM": -5.093604381576575,
+        "Copula-t-A4f-ASYM": -5.183066112799771,
+        "RS-Copula-Gaussian-t-R1": -5.1892043385721065,
+        "RS-Copula-Gaussian-Clayton-R1": -5.197270041104124,
+        "RS-Copula-Gaussian-t-R2": -5.190741775764271,
+        "RS-Copula-Gaussian-Clayton-R2": -5.190741775764271
+      },
+      "oos_dates_first": "2013-06-03",
+      "oos_dates_last": "2026-04-09"
+    },
+    "SPY-TLT": {
+      "pair_name": "SPY-TLT",
+      "asset1": "SPY",
+      "asset2": "TLT",
+      "n_oos": 3233,
+      "full_sample_corr": -0.30315632877788895,
+      "regime_stats": {
+        "R1_high_n": 393,
+        "R1_high_frac": 0.12155892360037117,
+        "R2_high_n": 797,
+        "R2_high_frac": 0.24652025982060005
+      },
+      "models": {
+        "DCC-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 0.16372958047688257,
+                "p_value": 0.6857457391355826,
+                "violations": 78,
+                "rate": 0.02616571620261657,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 5.555856663420279,
+                "p_value": 0.01841895693535711,
+                "clusters": 6,
+                "pass": false
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 7.090909090909091,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.05560719714903173,
+                "p_value": 0.9556547308827674,
+                "pass": true,
+                "n_violations": 78
+              },
+              "trinity_pass": false,
+              "n_oos": 2981,
+              "violation_rate": 0.02616571620261657
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.0012206709468003396,
+                "p_value": 0.9721290984261967,
+                "violations": 30,
+                "rate": 0.010063737001006373,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 2.727272727272727,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.005391617015472638,
+                "p_value": 0.9956981328678146,
+                "pass": true,
+                "n_violations": 30
+              },
+              "trinity_pass": true,
+              "n_oos": 2981,
+              "violation_rate": 0.010063737001006373
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.773967763860382,
+              "n": 2981
+            },
+            "alpha_0.010": {
+              "mean": -5.579121272628887,
+              "n": 2981
+            }
+          }
+        },
+        "Copula-t-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 21.278840118291384,
+                "p_value": 3.9709067816140475e-06,
+                "violations": 125,
+                "rate": 0.03866377977111042,
+                "expected_rate": 0.025,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 10.545635797395263,
+                "p_value": 0.0011646275297642061,
+                "clusters": 13,
+                "pass": false
+              },
+              "basel": {
+                "color": "Yellow",
+                "violations_per_block": 10.416666666666666,
+                "n_blocks": 12,
+                "pass": false
+              },
+              "es_test": {
+                "z_stat": 0.5941382656448662,
+                "p_value": 0.552419639080366,
+                "pass": true,
+                "n_violations": 125
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.03866377977111042
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 20.372730997715692,
+                "p_value": 6.373151198890703e-06,
+                "violations": 61,
+                "rate": 0.018867924528301886,
+                "expected_rate": 0.01,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 0.5360390371463843,
+                "p_value": 0.4640789296293807,
+                "clusters": 2,
+                "pass": true
+              },
+              "basel": {
+                "color": "Yellow",
+                "violations_per_block": 5.083333333333333,
+                "n_blocks": 12,
+                "pass": false
+              },
+              "es_test": {
+                "z_stat": 0.9196794384451721,
+                "p_value": 0.35774030061599815,
+                "pass": true,
+                "n_violations": 61
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.018867924528301886
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.7278899240440815,
+              "n": 3233
+            },
+            "alpha_0.010": {
+              "mean": -5.575470778491304,
+              "n": 3233
+            }
+          }
+        },
+        "RS-Copula-Gaussian-t-R1": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 23.112520769204536,
+                "p_value": 1.5279250238364739e-06,
+                "violations": 127,
+                "rate": 0.03928240024744819,
+                "expected_rate": 0.025,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 12.255723020937928,
+                "p_value": 0.00046383339797628764,
+                "clusters": 14,
+                "pass": false
+              },
+              "basel": {
+                "color": "Yellow",
+                "violations_per_block": 10.583333333333334,
+                "n_blocks": 12,
+                "pass": false
+              },
+              "es_test": {
+                "z_stat": 0.6937298374020966,
+                "p_value": 0.4878516505290367,
+                "pass": true,
+                "n_violations": 127
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.03928240024744819
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 30.17665825883512,
+                "p_value": 3.9442807686640435e-08,
+                "violations": 68,
+                "rate": 0.02103309619548407,
+                "expected_rate": 0.01,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 1.3794790240076615,
+                "p_value": 0.2401899084187593,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Yellow",
+                "violations_per_block": 5.666666666666667,
+                "n_blocks": 12,
+                "pass": false
+              },
+              "es_test": {
+                "z_stat": 1.254555341814664,
+                "p_value": 0.2096402237732109,
+                "pass": true,
+                "n_violations": 68
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.02103309619548407
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.773540390227418,
+              "n": 3233
+            },
+            "alpha_0.010": {
+              "mean": -5.574405772667246,
+              "n": 3233
+            }
+          }
+        },
+        "RS-Copula-Gaussian-Clayton-R1": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 14.6204499564422,
+                "p_value": 0.00013148002551055527,
+                "violations": 117,
+                "rate": 0.036189297865759355,
+                "expected_rate": 0.025,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 8.31134911811963,
+                "p_value": 0.003939811589901976,
+                "clusters": 11,
+                "pass": false
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 9.75,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.5769136899255265,
+                "p_value": 0.5639977621268202,
+                "pass": true,
+                "n_violations": 117
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.036189297865759355
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 23.014365462590334,
+                "p_value": 1.6079538319724307e-06,
+                "violations": 63,
+                "rate": 0.019486545004639654,
+                "expected_rate": 0.01,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 0.4265682536206441,
+                "p_value": 0.5136776762942625,
+                "clusters": 2,
+                "pass": true
+              },
+              "basel": {
+                "color": "Yellow",
+                "violations_per_block": 5.25,
+                "n_blocks": 12,
+                "pass": false
+              },
+              "es_test": {
+                "z_stat": 1.0928478145943359,
+                "p_value": 0.2744606240534605,
+                "pass": true,
+                "n_violations": 63
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.019486545004639654
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.781816164251025,
+              "n": 3233
+            },
+            "alpha_0.010": {
+              "mean": -5.591401708906774,
+              "n": 3233
+            }
+          }
+        },
+        "RS-Copula-Gaussian-t-R2": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 22.18742199860813,
+                "p_value": 2.47288543209212e-06,
+                "violations": 126,
+                "rate": 0.03897309000927931,
+                "expected_rate": 0.025,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 12.577288046856715,
+                "p_value": 0.0003904629153982375,
+                "clusters": 14,
+                "pass": false
+              },
+              "basel": {
+                "color": "Yellow",
+                "violations_per_block": 10.5,
+                "n_blocks": 12,
+                "pass": false
+              },
+              "es_test": {
+                "z_stat": 0.6747817141488701,
+                "p_value": 0.49981445966362936,
+                "pass": true,
+                "n_violations": 126
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.03897309000927931
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 33.255054393377236,
+                "p_value": 8.08293898479917e-09,
+                "violations": 70,
+                "rate": 0.021651716671821836,
+                "expected_rate": 0.01,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 1.1925356514408385,
+                "p_value": 0.2748186814278334,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Yellow",
+                "violations_per_block": 5.833333333333333,
+                "n_blocks": 12,
+                "pass": false
+              },
+              "es_test": {
+                "z_stat": 1.2991038144024767,
+                "p_value": 0.19390830425248062,
+                "pass": true,
+                "n_violations": 70
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.021651716671821836
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.760815734954713,
+              "n": 3233
+            },
+            "alpha_0.010": {
+              "mean": -5.56704376459646,
+              "n": 3233
+            }
+          }
+        },
+        "RS-Copula-Gaussian-Clayton-R2": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 7.335986126350633,
+                "p_value": 0.006758759036607276,
+                "violations": 106,
+                "rate": 0.03278688524590164,
+                "expected_rate": 0.025,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 6.690856598485283,
+                "p_value": 0.009690863010782702,
+                "clusters": 9,
+                "pass": false
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 8.833333333333334,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.43263064361434966,
+                "p_value": 0.6652831235785147,
+                "pass": true,
+                "n_violations": 106
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.03278688524590164
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 20.372730997715692,
+                "p_value": 6.373151198890703e-06,
+                "violations": 61,
+                "rate": 0.018867924528301886,
+                "expected_rate": 0.01,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 0.5360390371463843,
+                "p_value": 0.4640789296293807,
+                "clusters": 2,
+                "pass": true
+              },
+              "basel": {
+                "color": "Yellow",
+                "violations_per_block": 5.083333333333333,
+                "n_blocks": 12,
+                "pass": false
+              },
+              "es_test": {
+                "z_stat": 0.9953146631874157,
+                "p_value": 0.31958324836332286,
+                "pass": true,
+                "n_violations": 61
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.018867924528301886
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.790403896618339,
+              "n": 3233
+            },
+            "alpha_0.010": {
+              "mean": -5.6122484421691565,
+              "n": 3233
+            }
+          }
+        }
+      },
+      "dm_full": {
+        "DCC_vs_Copula-t-A4f-ASYM": {
+          "t_stat": -3.9951873250080725,
+          "p_value": 6.464312034766797e-05,
+          "mean_loss_diff": -0.031291960862050654,
+          "n": 3233,
+          "significant_harvey": true
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R1": {
+          "t_stat": -3.6817954352594944,
+          "p_value": 0.00023159720933209983,
+          "mean_loss_diff": -0.029499507395544567,
+          "n": 3233,
+          "significant_harvey": true
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R1": {
+          "t_stat": -4.192352455018971,
+          "p_value": 2.7607663406892167e-05,
+          "mean_loss_diff": -0.03245601458864443,
+          "n": 3233,
+          "significant_harvey": true
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R2": {
+          "t_stat": -3.5990442093711805,
+          "p_value": 0.0003193888950871015,
+          "mean_loss_diff": -0.03493216818186255,
+          "n": 3233,
+          "significant_harvey": true
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R2": {
+          "t_stat": -4.644912439628656,
+          "p_value": 3.4022072017294203e-06,
+          "mean_loss_diff": -0.036546208056234084,
+          "n": 3233,
+          "significant_harvey": true
+        }
+      },
+      "dm_high_R1": {
+        "DCC_vs_Copula-t-A4f-ASYM": {
+          "t_stat": -0.5853730239751084,
+          "p_value": 0.5582969233092876,
+          "mean_loss_diff": -0.009737676091596622,
+          "n": 393,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R1": {
+          "t_stat": -0.8623579063179078,
+          "p_value": 0.38849059663363605,
+          "mean_loss_diff": -0.032548795957997124,
+          "n": 393,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R1": {
+          "t_stat": -2.1023836502029525,
+          "p_value": 0.03551968223542446,
+          "mean_loss_diff": -0.056870393299706695,
+          "n": 393,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R2": {
+          "t_stat": -0.8498174671952663,
+          "p_value": 0.395426576839775,
+          "mean_loss_diff": -0.019117794697955104,
+          "n": 393,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R2": {
+          "t_stat": -2.029491764253436,
+          "p_value": 0.04240822698915473,
+          "mean_loss_diff": -0.049425259562756216,
+          "n": 393,
+          "significant_harvey": false
+        }
+      },
+      "dm_low_R1": {
+        "DCC_vs_Copula-t-A4f-ASYM": {
+          "t_stat": -3.985317170679937,
+          "p_value": 6.739004914137785e-05,
+          "mean_loss_diff": -0.03427464886021559,
+          "n": 2840,
+          "significant_harvey": true
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R1": {
+          "t_stat": -3.77855417257485,
+          "p_value": 0.0001577415401110431,
+          "mean_loss_diff": -0.029077545985317855,
+          "n": 2840,
+          "significant_harvey": true
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R1": {
+          "t_stat": -3.77855417257485,
+          "p_value": 0.0001577415401110431,
+          "mean_loss_diff": -0.029077545985317855,
+          "n": 2840,
+          "significant_harvey": true
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R2": {
+          "t_stat": -3.478646368879135,
+          "p_value": 0.000503953138709732,
+          "mean_loss_diff": -0.03712056563931877,
+          "n": 2840,
+          "significant_harvey": true
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R2": {
+          "t_stat": -4.454325735484602,
+          "p_value": 8.415725076342612e-06,
+          "mean_loss_diff": -0.03476400128085971,
+          "n": 2840,
+          "significant_harvey": true
+        }
+      },
+      "dm_high_R2": {
+        "DCC_vs_Copula-t-A4f-ASYM": {
+          "t_stat": -0.9932037414044114,
+          "p_value": 0.3206106754270157,
+          "mean_loss_diff": -0.013781371243216132,
+          "n": 797,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R1": {
+          "t_stat": -1.1680190013986658,
+          "p_value": 0.24279910039850516,
+          "mean_loss_diff": -0.019770163938950702,
+          "n": 797,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R1": {
+          "t_stat": -2.0760077292296892,
+          "p_value": 0.037893236140676925,
+          "mean_loss_diff": -0.03431318321680303,
+          "n": 797,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R2": {
+          "t_stat": -1.8777513586299057,
+          "p_value": 0.060415187234155,
+          "mean_loss_diff": -0.0569434947742229,
+          "n": 797,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R2": {
+          "t_stat": -2.912235949233078,
+          "p_value": 0.003588514562368615,
+          "mean_loss_diff": -0.0634907857577149,
+          "n": 797,
+          "significant_harvey": false
+        }
+      },
+      "dm_low_R2": {
+        "DCC_vs_Copula-t-A4f-ASYM": {
+          "t_stat": -3.886662369380176,
+          "p_value": 0.00010163195562854235,
+          "mean_loss_diff": -0.03702100024062665,
+          "n": 2436,
+          "significant_harvey": true
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R1": {
+          "t_stat": -3.5615269621604955,
+          "p_value": 0.00036870423655655524,
+          "mean_loss_diff": -0.032682712130727376,
+          "n": 2436,
+          "significant_harvey": true
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R1": {
+          "t_stat": -3.587148000039976,
+          "p_value": 0.0003343145890218,
+          "mean_loss_diff": -0.031848394146673,
+          "n": 2436,
+          "significant_harvey": true
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R2": {
+          "t_stat": -3.6670079205503563,
+          "p_value": 0.00024540519647596,
+          "mean_loss_diff": -0.02773059704306486,
+          "n": 2436,
+          "significant_harvey": true
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R2": {
+          "t_stat": -3.6670079205503563,
+          "p_value": 0.00024540519647596,
+          "mean_loss_diff": -0.02773059704306486,
+          "n": 2436,
+          "significant_harvey": true
+        }
+      },
+      "mean_qlike": {
+        "DCC-A4f-ASYM": -9.428440171541418,
+        "Copula-t-A4f-ASYM": -9.397148210679367,
+        "RS-Copula-Gaussian-t-R1": -9.398940664145874,
+        "RS-Copula-Gaussian-Clayton-R1": -9.395984156952773,
+        "RS-Copula-Gaussian-t-R2": -9.393508003359555,
+        "RS-Copula-Gaussian-Clayton-R2": -9.391893963485185
+      },
+      "fz_high_R1": {
+        "DCC-A4f-ASYM": -5.1100871137012405,
+        "Copula-t-A4f-ASYM": -5.089743618620622,
+        "RS-Copula-Gaussian-t-R1": -4.946859870767321,
+        "RS-Copula-Gaussian-Clayton-R1": -5.086676313165266,
+        "RS-Copula-Gaussian-t-R2": -5.048721289378187,
+        "RS-Copula-Gaussian-Clayton-R2": -5.087407479652053
+      },
+      "fz_low_R1": {
+        "DCC-A4f-ASYM": -5.650346320719523,
+        "Copula-t-A4f-ASYM": -5.642685839698761,
+        "RS-Copula-Gaussian-t-R1": -5.6612457513456516,
+        "RS-Copula-Gaussian-Clayton-R1": -5.6612457513456516,
+        "RS-Copula-Gaussian-t-R2": -5.638769374723496,
+        "RS-Copula-Gaussian-Clayton-R2": -5.684876082404799
+      },
+      "fz_high_R2": {
+        "DCC-A4f-ASYM": -5.335233768204971,
+        "Copula-t-A4f-ASYM": -5.313688525300128,
+        "RS-Copula-Gaussian-t-R1": -5.296092650884222,
+        "RS-Copula-Gaussian-Clayton-R1": -5.329348327820792,
+        "RS-Copula-Gaussian-t-R2": -5.186590187981298,
+        "RS-Copula-Gaussian-Clayton-R2": -5.369961232639428
+      },
+      "fz_low_R2": {
+        "DCC-A4f-ASYM": -5.6614018483699295,
+        "Copula-t-A4f-ASYM": -5.661119569867891,
+        "RS-Copula-Gaussian-t-R1": -5.665463062511692,
+        "RS-Copula-Gaussian-Clayton-R1": -5.677139206741554,
+        "RS-Copula-Gaussian-t-R2": -5.691518929030895,
+        "RS-Copula-Gaussian-Clayton-R2": -5.691518929030895
+      },
+      "oos_dates_first": "2013-06-03",
+      "oos_dates_last": "2026-04-09"
+    },
+    "SPY-GLD": {
+      "pair_name": "SPY-GLD",
+      "asset1": "SPY",
+      "asset2": "GLD",
+      "n_oos": 3233,
+      "full_sample_corr": 0.059021596905203096,
+      "regime_stats": {
+        "R1_high_n": 393,
+        "R1_high_frac": 0.12155892360037117,
+        "R2_high_n": 797,
+        "R2_high_frac": 0.24652025982060005
+      },
+      "models": {
+        "DCC-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 0.003098728454290267,
+                "p_value": 0.955607707392927,
+                "violations": 75,
+                "rate": 0.025159342502515933,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.5895167007148245,
+                "p_value": 0.44260606842277384,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 6.818181818181818,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.01830900558890214,
+                "p_value": 0.9853923432505381,
+                "pass": true,
+                "n_violations": 75
+              },
+              "trinity_pass": true,
+              "n_oos": 2981,
+              "violation_rate": 0.025159342502515933
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.5690815889377632,
+                "p_value": 0.450624099417234,
+                "violations": 34,
+                "rate": 0.011405568601140557,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 3.494318244514254,
+                "p_value": 0.06157975834640028,
+                "clusters": 2,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 3.090909090909091,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.11097038701258932,
+                "p_value": 0.9116398294055569,
+                "pass": true,
+                "n_violations": 34
+              },
+              "trinity_pass": true,
+              "n_oos": 2981,
+              "violation_rate": 0.011405568601140557
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.605643093429531,
+              "n": 2981
+            },
+            "alpha_0.010": {
+              "mean": -5.5291830740737,
+              "n": 2981
+            }
+          }
+        },
+        "Copula-t-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 6.258554950004282,
+                "p_value": 0.012359497712871925,
+                "violations": 104,
+                "rate": 0.03216826476956387,
+                "expected_rate": 0.025,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 1.8425526818138138,
+                "p_value": 0.17465205181868637,
+                "clusters": 6,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 8.666666666666666,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.2938317478279031,
+                "p_value": 0.7688864741110816,
+                "pass": true,
+                "n_violations": 104
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.03216826476956387
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 5.897630604287485,
+                "p_value": 0.015161267113522281,
+                "violations": 47,
+                "rate": 0.01453758119393752,
+                "expected_rate": 0.01,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 1.73790342537845,
+                "p_value": 0.18740469600018717,
+                "clusters": 2,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 3.9166666666666665,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.4289262907975664,
+                "p_value": 0.6679768666504197,
+                "pass": true,
+                "n_violations": 47
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.01453758119393752
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.568080411755281,
+              "n": 3233
+            },
+            "alpha_0.010": {
+              "mean": -5.433649407031211,
+              "n": 3233
+            }
+          }
+        },
+        "RS-Copula-Gaussian-t-R1": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 7.335986126350633,
+                "p_value": 0.006758759036607276,
+                "violations": 106,
+                "rate": 0.03278688524590164,
+                "expected_rate": 0.025,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 1.6291879660094324,
+                "p_value": 0.20181540105239681,
+                "clusters": 6,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 8.833333333333334,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.35715006242269376,
+                "p_value": 0.7209794681244723,
+                "pass": true,
+                "n_violations": 106
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.03278688524590164
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 8.36047249016677,
+                "p_value": 0.0038347084519356756,
+                "violations": 50,
+                "rate": 0.01546551190844417,
+                "expected_rate": 0.01,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 1.4089702771998596,
+                "p_value": 0.23522740829816358,
+                "clusters": 2,
+                "pass": true
+              },
+              "basel": {
+                "color": "Yellow",
+                "violations_per_block": 4.166666666666667,
+                "n_blocks": 12,
+                "pass": false
+              },
+              "es_test": {
+                "z_stat": 0.5689373697210209,
+                "p_value": 0.5693986438001857,
+                "pass": true,
+                "n_violations": 50
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.01546551190844417
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.595101172903935,
+              "n": 3233
+            },
+            "alpha_0.010": {
+              "mean": -5.4503195118531576,
+              "n": 3233
+            }
+          }
+        },
+        "RS-Copula-Gaussian-Clayton-R1": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 6.787426891575791,
+                "p_value": 0.00918021366603039,
+                "violations": 105,
+                "rate": 0.032477575007732754,
+                "expected_rate": 0.025,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 1.7340344537765873,
+                "p_value": 0.18789647953042943,
+                "clusters": 6,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 8.75,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.3394283192191523,
+                "p_value": 0.73428708786481,
+                "pass": true,
+                "n_violations": 105
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.032477575007732754
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 5.161881641571497,
+                "p_value": 0.023087870923079512,
+                "violations": 46,
+                "rate": 0.014228270955768636,
+                "expected_rate": 0.01,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 1.857490784611496,
+                "p_value": 0.17291467923059078,
+                "clusters": 2,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 3.8333333333333335,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.450736518393529,
+                "p_value": 0.6521794591427366,
+                "pass": true,
+                "n_violations": 46
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.014228270955768636
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.603517120869936,
+              "n": 3233
+            },
+            "alpha_0.010": {
+              "mean": -5.4641143484410275,
+              "n": 3233
+            }
+          }
+        },
+        "RS-Copula-Gaussian-t-R2": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 9.098009311418991,
+                "p_value": 0.002558878457765923,
+                "violations": 109,
+                "rate": 0.03371481596040829,
+                "expected_rate": 0.025,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 2.5848005722380663,
+                "p_value": 0.10789399677783318,
+                "clusters": 7,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 9.083333333333334,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.37035829463993797,
+                "p_value": 0.7111155439675416,
+                "pass": true,
+                "n_violations": 109
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.03371481596040829
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 10.20693731061084,
+                "p_value": 0.0013991333588387889,
+                "violations": 52,
+                "rate": 0.016084132384781936,
+                "expected_rate": 0.01,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 1.2130759782403295,
+                "p_value": 0.27072378679208053,
+                "clusters": 2,
+                "pass": true
+              },
+              "basel": {
+                "color": "Yellow",
+                "violations_per_block": 4.333333333333333,
+                "n_blocks": 12,
+                "pass": false
+              },
+              "es_test": {
+                "z_stat": 0.595506238354383,
+                "p_value": 0.5515051303722704,
+                "pass": true,
+                "n_violations": 52
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.016084132384781936
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.591860035136867,
+              "n": 3233
+            },
+            "alpha_0.010": {
+              "mean": -5.449242898370485,
+              "n": 3233
+            }
+          }
+        },
+        "RS-Copula-Gaussian-Clayton-R2": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 5.260608320159349,
+                "p_value": 0.021813393152411376,
+                "violations": 102,
+                "rate": 0.031549644293226105,
+                "expected_rate": 0.025,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 0.9072593137674261,
+                "p_value": 0.34084265068542186,
+                "clusters": 5,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 8.5,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.2983408061210513,
+                "p_value": 0.7654430627308398,
+                "pass": true,
+                "n_violations": 102
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.031549644293226105
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 8.36047249016677,
+                "p_value": 0.0038347084519356756,
+                "violations": 50,
+                "rate": 0.01546551190844417,
+                "expected_rate": 0.01,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 1.4089702771998596,
+                "p_value": 0.23522740829816358,
+                "clusters": 2,
+                "pass": true
+              },
+              "basel": {
+                "color": "Yellow",
+                "violations_per_block": 4.166666666666667,
+                "n_blocks": 12,
+                "pass": false
+              },
+              "es_test": {
+                "z_stat": 0.5344119766402904,
+                "p_value": 0.5930565346124824,
+                "pass": true,
+                "n_violations": 50
+              },
+              "trinity_pass": false,
+              "n_oos": 3233,
+              "violation_rate": 0.01546551190844417
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.611479297796859,
+              "n": 3233
+            },
+            "alpha_0.010": {
+              "mean": -5.474266728830521,
+              "n": 3233
+            }
+          }
+        }
+      },
+      "dm_full": {
+        "DCC_vs_Copula-t-A4f-ASYM": {
+          "t_stat": -1.4544970288399786,
+          "p_value": 0.1458085566216687,
+          "mean_loss_diff": -0.005902854515559282,
+          "n": 3233,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R1": {
+          "t_stat": -2.15461136111601,
+          "p_value": 0.031192259244936363,
+          "mean_loss_diff": -0.009229093192603142,
+          "n": 3233,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R1": {
+          "t_stat": -1.741028554000776,
+          "p_value": 0.08167857350751881,
+          "mean_loss_diff": -0.007377383097461792,
+          "n": 3233,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R2": {
+          "t_stat": -1.330841021911689,
+          "p_value": 0.18324132683077032,
+          "mean_loss_diff": -0.006354290406439914,
+          "n": 3233,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R2": {
+          "t_stat": -1.0887934992255015,
+          "p_value": 0.2762449589907604,
+          "mean_loss_diff": -0.004743933653100818,
+          "n": 3233,
+          "significant_harvey": false
+        }
+      },
+      "dm_high_R1": {
+        "DCC_vs_Copula-t-A4f-ASYM": {
+          "t_stat": 0.3943064047195655,
+          "p_value": 0.693354835265573,
+          "mean_loss_diff": 0.006528765106524945,
+          "n": 393,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R1": {
+          "t_stat": -0.5625463279858198,
+          "p_value": 0.5737438484225392,
+          "mean_loss_diff": -0.010384199793064153,
+          "n": 393,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R1": {
+          "t_stat": 0.26858421683960115,
+          "p_value": 0.7882496592822492,
+          "mean_loss_diff": 0.00484882498452361,
+          "n": 393,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R2": {
+          "t_stat": 0.46292738865745087,
+          "p_value": 0.6434164148814557,
+          "mean_loss_diff": 0.007103144291510569,
+          "n": 393,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R2": {
+          "t_stat": 0.29661060841031706,
+          "p_value": 0.7667638108342875,
+          "mean_loss_diff": 0.0048166864050016205,
+          "n": 393,
+          "significant_harvey": false
+        }
+      },
+      "dm_low_R1": {
+        "DCC_vs_Copula-t-A4f-ASYM": {
+          "t_stat": -1.8664705920233604,
+          "p_value": 0.06197555475193172,
+          "mean_loss_diff": -0.007623145540727978,
+          "n": 2840,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R1": {
+          "t_stat": -2.181571379480717,
+          "p_value": 0.029141181085870715,
+          "mean_loss_diff": -0.009069249215849208,
+          "n": 2840,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R1": {
+          "t_stat": -2.181571379480717,
+          "p_value": 0.029141181085870715,
+          "mean_loss_diff": -0.009069249215849208,
+          "n": 2840,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R2": {
+          "t_stat": -1.5794099931977137,
+          "p_value": 0.11424204668819629,
+          "mean_loss_diff": -0.008216534010768977,
+          "n": 2840,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R2": {
+          "t_stat": -1.3697082302605528,
+          "p_value": 0.1707779985124691,
+          "mean_loss_diff": -0.006066934949873444,
+          "n": 2840,
+          "significant_harvey": false
+        }
+      },
+      "dm_high_R2": {
+        "DCC_vs_Copula-t-A4f-ASYM": {
+          "t_stat": -0.5298476546857414,
+          "p_value": 0.5962175614596568,
+          "mean_loss_diff": -0.003768579805720742,
+          "n": 797,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R1": {
+          "t_stat": -1.5579266925650554,
+          "p_value": 0.11925062683109074,
+          "mean_loss_diff": -0.012388708785427515,
+          "n": 797,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R1": {
+          "t_stat": -0.7414991297851785,
+          "p_value": 0.4583908592171415,
+          "mean_loss_diff": -0.005684690965901432,
+          "n": 797,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R2": {
+          "t_stat": -0.03392529098486868,
+          "p_value": 0.972936725503507,
+          "mean_loss_diff": -0.00038229720637459447,
+          "n": 797,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R2": {
+          "t_stat": 0.8367004121773333,
+          "p_value": 0.40276098740854605,
+          "mean_loss_diff": 0.006150053337596917,
+          "n": 797,
+          "significant_harvey": false
+        }
+      },
+      "dm_low_R2": {
+        "DCC_vs_Copula-t-A4f-ASYM": {
+          "t_stat": -1.352964627253422,
+          "p_value": 0.17606693113639638,
+          "mean_loss_diff": -0.006601137333187079,
+          "n": 2436,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R1": {
+          "t_stat": -1.6252207173244693,
+          "p_value": 0.1041155375807878,
+          "mean_loss_diff": -0.00819534375603458,
+          "n": 2436,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R1": {
+          "t_stat": -1.556563401119113,
+          "p_value": 0.11957417885778106,
+          "mean_loss_diff": -0.007931190826876242,
+          "n": 2436,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-t-R2": {
+          "t_stat": -1.6465385154736285,
+          "p_value": 0.09965293719713232,
+          "mean_loss_diff": -0.008308181449318428,
+          "n": 2436,
+          "significant_harvey": false
+        },
+        "DCC_vs_RS-Copula-Gaussian-Clayton-R2": {
+          "t_stat": -1.6465385154736285,
+          "p_value": 0.09965293719713232,
+          "mean_loss_diff": -0.008308181449318428,
+          "n": 2436,
+          "significant_harvey": false
+        }
+      },
+      "mean_qlike": {
+        "DCC-A4f-ASYM": -9.116441728639424,
+        "Copula-t-A4f-ASYM": -9.110538874123865,
+        "RS-Copula-Gaussian-t-R1": -9.10721263544682,
+        "RS-Copula-Gaussian-Clayton-R1": -9.109064345541963,
+        "RS-Copula-Gaussian-t-R2": -9.110087438232982,
+        "RS-Copula-Gaussian-Clayton-R2": -9.111697794986322
+      },
+      "fz_high_R1": {
+        "DCC-A4f-ASYM": -4.829805257596433,
+        "Copula-t-A4f-ASYM": -4.849156350756396,
+        "RS-Copula-Gaussian-t-R1": -4.788779863871819,
+        "RS-Copula-Gaussian-Clayton-R1": -4.902262578092128,
+        "RS-Copula-Gaussian-t-R2": -4.8352828740464595,
+        "RS-Copula-Gaussian-Clayton-R2": -4.890843647844375
+      },
+      "fz_low_R1": {
+        "DCC-A4f-ASYM": -5.635386892418199,
+        "Copula-t-A4f-ASYM": -5.514531720804452,
+        "RS-Copula-Gaussian-t-R1": -5.5418635546900115,
+        "RS-Copula-Gaussian-Clayton-R1": -5.5418635546900115,
+        "RS-Copula-Gaussian-t-R2": -5.534202859482928,
+        "RS-Copula-Gaussian-Clayton-R2": -5.555000979121914
+      },
+      "fz_high_R2": {
+        "DCC-A4f-ASYM": -5.190791857172576,
+        "Copula-t-A4f-ASYM": -5.113617210095868,
+        "RS-Copula-Gaussian-t-R1": -5.135524479908657,
+        "RS-Copula-Gaussian-Clayton-R1": -5.181383155521743,
+        "RS-Copula-Gaussian-t-R2": -5.106064687330678,
+        "RS-Copula-Gaussian-Clayton-R2": -5.207572897967191
+      },
+      "fz_low_R2": {
+        "DCC-A4f-ASYM": -5.643346463535183,
+        "Copula-t-A4f-ASYM": -5.5383561644029164,
+        "RS-Copula-Gaussian-t-R1": -5.553312796114146,
+        "RS-Copula-Gaussian-Clayton-R1": -5.556617123792697,
+        "RS-Copula-Gaussian-t-R2": -5.561522469059616,
+        "RS-Copula-Gaussian-Clayton-R2": -5.561522469059616
+      },
+      "oos_dates_first": "2013-06-03",
+      "oos_dates_last": "2026-04-09"
+    }
+  },
+  "config": {
+    "oos_start": "2013-06-01",
+    "window": 1250,
+    "refit_every": 63,
+    "alpha_levels": [
+      0.025,
+      0.01
+    ],
+    "weights": [
+      0.5,
+      0.5
+    ],
+    "mc_paths": 5000,
+    "seed": 42,
+    "vix_crisis_threshold": 25.0,
+    "vix_rolling_window": 252,
+    "vix_rolling_pct": 75.0
+  },
+  "metadata": {
+    "experiment_id": "K1100d",
+    "parent_experiments": [
+      "K1100b",
+      "K1092",
+      "K1041"
+    ],
+    "data_source": "yfinance (SPY, QQQ, IWM, XLF, TLT, GLD, ^VIX, ^GVZ)",
+    "data_period": "2005-01-01 to 2026-04-10",
+    "oos_start": "2013-06-01",
+    "pairs": [
+      "SPY-QQQ",
+      "SPY-XLF",
+      "SPY-IWM",
+      "SPY-TLT",
+      "SPY-GLD"
+    ],
+    "models": [
+      "DCC-A4f-ASYM",
+      "Copula-t-A4f-ASYM",
+      "RS-Copula-Gaussian-t-R1",
+      "RS-Copula-Gaussian-Clayton-R1",
+      "RS-Copula-Gaussian-t-R2",
+      "RS-Copula-Gaussian-Clayton-R2"
+    ],
+    "regime_definitions": {
+      "R1": "VIX(t-1) >= 25.0 (classical crisis)",
+      "R2": "VIX(t-1) >= rolling-252d-75.0pct (adaptive)"
+    },
+    "lookahead_prevention": "regime(t) = VIX(t-1) >= threshold; 1-day lag enforced",
+    "runtime_seconds": 549.2901191711426,
+    "timestamp": "2026-04-17T08:03:37.587801+00:00"
+  }
+}

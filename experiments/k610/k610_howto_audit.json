@@ -1,0 +1,465 @@
+{
+  "experiment_id": "k610",
+  "title": "Strategy Howto Quality Audit",
+  "audit_date": "2026-03-27",
+  "data_source": "Supabase strategy_signals table",
+  "methodology": "5-criteria rubric: (1) 交易標的+查詢工具 (2) 操作步驟+具體金額 (3) VIX閾值明確 (4) description具體 (5) 無未解釋英文術語",
+  "summary": {
+    "total_strategies": 14,
+    "grade_A": 5,
+    "grade_B": 1,
+    "grade_C": 1,
+    "grade_D": 5,
+    "grade_F": 2,
+    "stubs_count": 5,
+    "taiwan_avg_score": 2.25,
+    "us_avg_score": 4.0
+  },
+  "strategies": {
+    "adaptive_tier": {
+      "strategy_key": "adaptive_tier",
+      "category": "us",
+      "grade": "B",
+      "quality_score": "4/5",
+      "howto_length_chars": 746,
+      "is_stub": false,
+      "checks_passed": {
+        "check1": 1,
+        "check2": 1,
+        "check3": 1,
+        "check4": 1,
+        "check5": 0
+      },
+      "issues": [
+        {
+          "check": "check5_jargon",
+          "severity": "LOW",
+          "detail": "英文術語問題：\"margin account\"（建議替換為「融資帳戶」）"
+        }
+      ],
+      "warnings": [],
+      "taiwan_vs_us_quality_gap": null
+    },
+    "fear_dca": {
+      "strategy_key": "fear_dca",
+      "category": "us",
+      "grade": "A",
+      "quality_score": "5/5",
+      "howto_length_chars": 482,
+      "is_stub": false,
+      "checks_passed": {
+        "check1": 1,
+        "check2": 1,
+        "check3": 1,
+        "check4": 1,
+        "check5": 1
+      },
+      "issues": [],
+      "warnings": [],
+      "taiwan_vs_us_quality_gap": null
+    },
+    "global_vt_tz": {
+      "strategy_key": "global_vt_tz",
+      "category": "combined",
+      "grade": "D",
+      "quality_score": "2/5",
+      "howto_length_chars": 39,
+      "is_stub": true,
+      "checks_passed": {
+        "check1": 0,
+        "check2": 0,
+        "check3": 1,
+        "check4": 1,
+        "check5": 0
+      },
+      "issues": [
+        {
+          "check": "check1_trading_target",
+          "severity": "HIGH",
+          "detail": "缺少「交易標的：」開頭（讀者不知道買什麼）"
+        },
+        {
+          "check": "check1_query_tool",
+          "severity": "HIGH",
+          "detail": "缺少「查詢工具：」說明（讀者不知道去哪裡查資料）"
+        },
+        {
+          "check": "check2_operation",
+          "severity": "CRITICAL",
+          "detail": "howto 過短（少於 150 字），不足以指導操作"
+        },
+        {
+          "check": "check5_jargon",
+          "severity": "LOW",
+          "detail": "英文術語問題：description 中 \"corr=\"（建議改為「相關係數」）"
+        }
+      ],
+      "warnings": [
+        "description 中 \"MDD\" 未解釋（可寫「最大跌幅」）",
+        "description 中 \"Sharpe\" 未加中文說明（可接受，常見金融詞彙）"
+      ],
+      "taiwan_vs_us_quality_gap": null
+    },
+    "piecewise_conservative": {
+      "strategy_key": "piecewise_conservative",
+      "category": "us",
+      "grade": "A",
+      "quality_score": "5/5",
+      "howto_length_chars": 468,
+      "is_stub": false,
+      "checks_passed": {
+        "check1": 1,
+        "check2": 1,
+        "check3": 1,
+        "check4": 1,
+        "check5": 1
+      },
+      "issues": [],
+      "warnings": [],
+      "taiwan_vs_us_quality_gap": null
+    },
+    "recommended_5050": {
+      "strategy_key": "recommended_5050",
+      "category": "us",
+      "grade": "A",
+      "quality_score": "5/5",
+      "howto_length_chars": 403,
+      "is_stub": false,
+      "checks_passed": {
+        "check1": 1,
+        "check2": 1,
+        "check3": 1,
+        "check4": 1,
+        "check5": 1
+      },
+      "issues": [],
+      "warnings": [],
+      "taiwan_vs_us_quality_gap": null
+    },
+    "risk_parity": {
+      "strategy_key": "risk_parity",
+      "category": "us",
+      "grade": "D",
+      "quality_score": "2/5",
+      "howto_length_chars": 76,
+      "is_stub": true,
+      "checks_passed": {
+        "check1": 0,
+        "check2": 0,
+        "check3": 0,
+        "check4": 1,
+        "check5": 1
+      },
+      "issues": [
+        {
+          "check": "check1_trading_target",
+          "severity": "HIGH",
+          "detail": "缺少「交易標的：」開頭（讀者不知道買什麼）"
+        },
+        {
+          "check": "check1_query_tool",
+          "severity": "HIGH",
+          "detail": "缺少「查詢工具：」說明（讀者不知道去哪裡查資料）"
+        },
+        {
+          "check": "check2_operation",
+          "severity": "CRITICAL",
+          "detail": "howto 過短（少於 150 字），不足以指導操作"
+        },
+        {
+          "check": "check3_vix",
+          "severity": "HIGH",
+          "detail": "缺少明確 VIX 數字閾值（例：VIX < 20）——只用文字描述或沒有明確門檻"
+        }
+      ],
+      "warnings": [],
+      "taiwan_vs_us_quality_gap": null
+    },
+    "simple_12vix": {
+      "strategy_key": "simple_12vix",
+      "category": "us",
+      "grade": "A",
+      "quality_score": "5/5",
+      "howto_length_chars": 368,
+      "is_stub": false,
+      "checks_passed": {
+        "check1": 1,
+        "check2": 1,
+        "check3": 1,
+        "check4": 1,
+        "check5": 1
+      },
+      "issues": [],
+      "warnings": [],
+      "taiwan_vs_us_quality_gap": null
+    },
+    "slow_vt": {
+      "strategy_key": "slow_vt",
+      "category": "us",
+      "grade": "F",
+      "quality_score": "1/5",
+      "howto_length_chars": 101,
+      "is_stub": false,
+      "checks_passed": {
+        "check1": 0,
+        "check2": 0,
+        "check3": 0,
+        "check4": 0,
+        "check5": 1
+      },
+      "issues": [
+        {
+          "check": "check1_trading_target",
+          "severity": "HIGH",
+          "detail": "缺少「交易標的：」開頭（讀者不知道買什麼）"
+        },
+        {
+          "check": "check1_query_tool",
+          "severity": "HIGH",
+          "detail": "缺少「查詢工具：」說明（讀者不知道去哪裡查資料）"
+        },
+        {
+          "check": "check2_operation",
+          "severity": "CRITICAL",
+          "detail": "howto 過短（少於 150 字），不足以指導操作"
+        },
+        {
+          "check": "check2_amounts",
+          "severity": "MEDIUM",
+          "detail": "缺少具體金額示範（如「帳戶 100 萬」範例）"
+        },
+        {
+          "check": "check3_vix",
+          "severity": "HIGH",
+          "detail": "缺少明確 VIX 數字閾值（例：VIX < 20）——只用文字描述或沒有明確門檻"
+        },
+        {
+          "check": "check4_description",
+          "severity": "MEDIUM",
+          "detail": "description 缺乏具體數字，太模糊"
+        }
+      ],
+      "warnings": [],
+      "taiwan_vs_us_quality_gap": null
+    },
+    "taiwan_8.63vix": {
+      "strategy_key": "taiwan_8.63vix",
+      "category": "taiwan",
+      "grade": "D",
+      "quality_score": "2/5",
+      "howto_length_chars": 328,
+      "is_stub": false,
+      "checks_passed": {
+        "check1": 0,
+        "check2": 0,
+        "check3": 1,
+        "check4": 1,
+        "check5": 0
+      },
+      "issues": [
+        {
+          "check": "check1_trading_target",
+          "severity": "HIGH",
+          "detail": "缺少「交易標的：」開頭（讀者不知道買什麼）"
+        },
+        {
+          "check": "check1_query_tool",
+          "severity": "HIGH",
+          "detail": "缺少「查詢工具：」說明（讀者不知道去哪裡查資料）"
+        },
+        {
+          "check": "check2_operation",
+          "severity": "MEDIUM",
+          "detail": "步驟中缺少明確的「操作：」格式標記"
+        },
+        {
+          "check": "check5_jargon",
+          "severity": "LOW",
+          "detail": "英文術語問題：description 中 \"lagged\"（建議改為「滯後一天」）"
+        }
+      ],
+      "warnings": [],
+      "taiwan_vs_us_quality_gap": "台股策略缺少交易標的說明，與美股策略相比質量較低"
+    },
+    "taiwan_hybrid_leverage": {
+      "strategy_key": "taiwan_hybrid_leverage",
+      "category": "taiwan",
+      "grade": "C",
+      "quality_score": "3/5",
+      "howto_length_chars": 825,
+      "is_stub": false,
+      "checks_passed": {
+        "check1": 0,
+        "check2": 0,
+        "check3": 1,
+        "check4": 1,
+        "check5": 1
+      },
+      "issues": [
+        {
+          "check": "check1_trading_target",
+          "severity": "HIGH",
+          "detail": "缺少「交易標的：」開頭（讀者不知道買什麼）"
+        },
+        {
+          "check": "check1_query_tool",
+          "severity": "HIGH",
+          "detail": "缺少「查詢工具：」說明（讀者不知道去哪裡查資料）"
+        },
+        {
+          "check": "check2_operation",
+          "severity": "MEDIUM",
+          "detail": "步驟中缺少明確的「操作：」格式標記"
+        }
+      ],
+      "warnings": [],
+      "taiwan_vs_us_quality_gap": "台股策略缺少交易標的說明，與美股策略相比質量較低"
+    },
+    "taiwan_spy_momentum": {
+      "strategy_key": "taiwan_spy_momentum",
+      "category": "taiwan",
+      "grade": "D",
+      "quality_score": "2/5",
+      "howto_length_chars": 26,
+      "is_stub": true,
+      "checks_passed": {
+        "check1": 0,
+        "check2": 0,
+        "check3": 0,
+        "check4": 1,
+        "check5": 1
+      },
+      "issues": [
+        {
+          "check": "check1_trading_target",
+          "severity": "HIGH",
+          "detail": "缺少「交易標的：」開頭（讀者不知道買什麼）"
+        },
+        {
+          "check": "check1_query_tool",
+          "severity": "HIGH",
+          "detail": "缺少「查詢工具：」說明（讀者不知道去哪裡查資料）"
+        },
+        {
+          "check": "check2_operation",
+          "severity": "CRITICAL",
+          "detail": "howto 過短（少於 150 字），不足以指導操作"
+        },
+        {
+          "check": "check3_vix",
+          "severity": "HIGH",
+          "detail": "缺少明確 VIX 數字閾值（例：VIX < 20）——只用文字描述或沒有明確門檻"
+        }
+      ],
+      "warnings": [],
+      "taiwan_vs_us_quality_gap": "台股策略 howto 過短，缺乏操作指引，明顯低於美股策略水準"
+    },
+    "tz_tw_jp_5050": {
+      "strategy_key": "tz_tw_jp_5050",
+      "category": "combined",
+      "grade": "F",
+      "quality_score": "1/5",
+      "howto_length_chars": 32,
+      "is_stub": true,
+      "checks_passed": {
+        "check1": 0,
+        "check2": 0,
+        "check3": 0,
+        "check4": 1,
+        "check5": 0
+      },
+      "issues": [
+        {
+          "check": "check1_trading_target",
+          "severity": "HIGH",
+          "detail": "缺少「交易標的：」開頭（讀者不知道買什麼）"
+        },
+        {
+          "check": "check1_query_tool",
+          "severity": "HIGH",
+          "detail": "缺少「查詢工具：」說明（讀者不知道去哪裡查資料）"
+        },
+        {
+          "check": "check2_operation",
+          "severity": "CRITICAL",
+          "detail": "howto 過短（少於 150 字），不足以指導操作"
+        },
+        {
+          "check": "check3_vix",
+          "severity": "HIGH",
+          "detail": "缺少明確 VIX 數字閾值（例：VIX < 20）——只用文字描述或沒有明確門檻"
+        },
+        {
+          "check": "check5_jargon",
+          "severity": "LOW",
+          "detail": "英文術語問題：description 中 \"corr=\"（建議改為「相關係數」）"
+        }
+      ],
+      "warnings": [
+        "description 中 \"MDD\" 未解釋（可寫「最大跌幅」）",
+        "description 中 \"Sharpe\" 未加中文說明（可接受，常見金融詞彙）"
+      ],
+      "taiwan_vs_us_quality_gap": null
+    },
+    "vix_cond_leverage": {
+      "strategy_key": "vix_cond_leverage",
+      "category": "us",
+      "grade": "A",
+      "quality_score": "5/5",
+      "howto_length_chars": 539,
+      "is_stub": false,
+      "checks_passed": {
+        "check1": 1,
+        "check2": 1,
+        "check3": 1,
+        "check4": 1,
+        "check5": 1
+      },
+      "issues": [],
+      "warnings": [],
+      "taiwan_vs_us_quality_gap": null
+    },
+    "vix_leading_guard": {
+      "strategy_key": "vix_leading_guard",
+      "category": "taiwan",
+      "grade": "D",
+      "quality_score": "2/5",
+      "howto_length_chars": 35,
+      "is_stub": true,
+      "checks_passed": {
+        "check1": 0,
+        "check2": 0,
+        "check3": 0,
+        "check4": 1,
+        "check5": 1
+      },
+      "issues": [
+        {
+          "check": "check1_trading_target",
+          "severity": "HIGH",
+          "detail": "缺少「交易標的：」開頭（讀者不知道買什麼）"
+        },
+        {
+          "check": "check1_query_tool",
+          "severity": "HIGH",
+          "detail": "缺少「查詢工具：」說明（讀者不知道去哪裡查資料）"
+        },
+        {
+          "check": "check2_operation",
+          "severity": "CRITICAL",
+          "detail": "howto 過短（少於 150 字），不足以指導操作"
+        },
+        {
+          "check": "check3_vix",
+          "severity": "HIGH",
+          "detail": "缺少明確 VIX 數字閾值（例：VIX < 20）——只用文字描述或沒有明確門檻"
+        }
+      ],
+      "warnings": [
+        "description 中 \"MDD\" 未解釋（可寫「最大跌幅」）",
+        "description 中 \"Sharpe\" 未加中文說明（可接受，常見金融詞彙）"
+      ],
+      "taiwan_vs_us_quality_gap": "台股策略 howto 過短，缺乏操作指引，明顯低於美股策略水準"
+    }
+  }
+}

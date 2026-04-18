@@ -1,0 +1,340 @@
+================================================================================
+K1178: Paper 3 Table 5 — 13-Market International Replication (CANONICAL)
+================================================================================
+Date: 2026-04-17 17:36
+Markets (exact paper list): EFA, EWJ, EWG, EWU, EWA, EWC, VGK, EEM, FXI, EWZ, INDA, EWT, MCHI
+Sample: 2007-01-01 to 2026-03-31
+Strategy: w_t = min(12/VIX_{t-1}, 1.0) equity + SHY
+Lag: signal.shift(1) enforced (no lookahead)
+Match threshold: rtol=0.05
+
+[1/7] Downloading market data from yfinance...
+  EFA (adj): 5607 rows, 2004-01-02 to 2026-04-16
+  EWJ (adj): 5607 rows, 2004-01-02 to 2026-04-16
+  EWG (adj): 5607 rows, 2004-01-02 to 2026-04-16
+  EWU (adj): 5607 rows, 2004-01-02 to 2026-04-16
+  EWA (adj): 5607 rows, 2004-01-02 to 2026-04-16
+  EWC (adj): 5607 rows, 2004-01-02 to 2026-04-16
+  VGK (adj): 5309 rows, 2005-03-10 to 2026-04-16
+  EEM (adj): 5607 rows, 2004-01-02 to 2026-04-16
+  FXI (adj): 5414 rows, 2004-10-08 to 2026-04-16
+  EWZ (adj): 5607 rows, 2004-01-02 to 2026-04-16
+  INDA (adj): 3570 rows, 2012-02-03 to 2026-04-16
+  EWT (adj): 5607 rows, 2004-01-02 to 2026-04-16
+  MCHI (adj): 3783 rows, 2011-03-31 to 2026-04-16
+  ^VIX (raw): 5608 rows, 2004-01-02 to 2026-04-17
+  SHY (adj): 5607 rows, 2004-01-02 to 2026-04-16
+
+Feasibility: {'EFA': 'OK', 'EWJ': 'OK', 'EWG': 'OK', 'EWU': 'OK', 'EWA': 'OK', 'EWC': 'OK', 'VGK': 'OK', 'EEM': 'OK', 'FXI': 'OK', 'EWZ': 'OK', 'INDA': 'OK', 'EWT': 'OK', 'MCHI': 'OK'}
+
+[2/7] Running per-market analysis (paper sample: 2007-01-01 to 2026-03-31)...
+
+--- EFA: EAFE (Dev ex-US) ---
+  Period: 2007-01-04 to 2026-03-31 (4840 days)
+  VIX sensitivity: -0.6538
+  B&H: Sharpe=0.1270, MDD=-61.0%
+  VT:  Sharpe=-0.0653, MDD=-29.0%
+  Delta MDD: +32.0pp, Delta Sharpe: -0.1923
+  GJR gamma (full): 0.1387 (t=5.78)
+  Paper match (5% rtol): MATCHED
+    BH Sharpe rtol: 0.041, BH MDD rtol: 0.001
+    ΔMDD rtol: 0.021, VIX sens rtol: 0.001
+
+--- EWJ: Japan (MSCI Japan) ---
+  Period: 2007-01-04 to 2026-03-31 (4840 days)
+  VIX sensitivity: -0.5760
+  B&H: Sharpe=0.0922, MDD=-53.6%
+  VT:  Sharpe=-0.0436, MDD=-25.6%
+  Delta MDD: +27.9pp, Delta Sharpe: -0.1358
+  GJR gamma (full): 0.1014 (t=4.39)
+  Paper match (5% rtol): DIVERGED
+    BH Sharpe rtol: 0.072, BH MDD rtol: 0.001
+    ΔMDD rtol: 0.033, VIX sens rtol: 0.002
+
+--- EWG: Germany (MSCI Germany) ---
+  Period: 2007-01-04 to 2026-03-31 (4840 days)
+  VIX sensitivity: -0.6060
+  B&H: Sharpe=0.1412, MDD=-63.1%
+  VT:  Sharpe=0.0004, MDD=-31.0%
+  Delta MDD: +32.1pp, Delta Sharpe: -0.1408
+  GJR gamma (full): 0.1183 (t=6.44)
+  Paper match (5% rtol): DIVERGED
+    BH Sharpe rtol: 0.030, BH MDD rtol: 0.000
+    ΔMDD rtol: 0.053, VIX sens rtol: 0.000
+
+--- EWU: UK (MSCI UK) ---
+  Period: 2007-01-04 to 2026-03-31 (4840 days)
+  VIX sensitivity: -0.6097
+  B&H: Sharpe=0.1006, MDD=-64.0%
+  VT:  Sharpe=-0.0875, MDD=-30.6%
+  Delta MDD: +33.4pp, Delta Sharpe: -0.1880
+  GJR gamma (full): 0.1358 (t=5.85)
+  Paper match (5% rtol): MATCHED
+    BH Sharpe rtol: 0.048, BH MDD rtol: 0.000
+    ΔMDD rtol: 0.011, VIX sens rtol: 0.001
+
+--- EWA: Australia (MSCI Australia) ---
+  Period: 2007-01-04 to 2026-03-31 (4840 days)
+  VIX sensitivity: -0.5874
+  B&H: Sharpe=0.1844, MDD=-67.0%
+  VT:  Sharpe=-0.0372, MDD=-35.4%
+  Delta MDD: +31.6pp, Delta Sharpe: -0.2216
+  GJR gamma (full): 0.1096 (t=5.82)
+  Paper match (5% rtol): DIVERGED
+    BH Sharpe rtol: 0.002, BH MDD rtol: 0.000
+    ΔMDD rtol: 0.060, VIX sens rtol: 0.001
+
+--- EWC: Canada (MSCI Canada) ---
+  Period: 2007-01-04 to 2026-03-31 (4840 days)
+  VIX sensitivity: -0.5883
+  B&H: Sharpe=0.2088, MDD=-60.8%
+  VT:  Sharpe=0.0880, MDD=-36.6%
+  Delta MDD: +24.1pp, Delta Sharpe: -0.1208
+  GJR gamma (full): 0.1249 (t=6.34)
+  Paper match (5% rtol): DIVERGED
+    BH Sharpe rtol: 0.013, BH MDD rtol: 0.001
+    ΔMDD rtol: 0.129, VIX sens rtol: 0.001
+
+--- VGK: Europe (Vanguard Europe) ---
+  Period: 2007-01-04 to 2026-03-31 (4840 days)
+  VIX sensitivity: -0.6401
+  B&H: Sharpe=0.1455, MDD=-63.6%
+  VT:  Sharpe=-0.0363, MDD=-30.1%
+  Delta MDD: +33.6pp, Delta Sharpe: -0.1818
+  GJR gamma (full): 0.1336 (t=5.88)
+  Paper match (5% rtol): MATCHED
+    BH Sharpe rtol: 0.039, BH MDD rtol: 0.000
+    ΔMDD rtol: 0.001, VIX sens rtol: 0.000
+
+--- EEM: EM Broad (MSCI EM) ---
+  Period: 2007-01-04 to 2026-03-31 (4840 days)
+  VIX sensitivity: -0.6003
+  B&H: Sharpe=0.1430, MDD=-66.4%
+  VT:  Sharpe=-0.1486, MDD=-45.2%
+  Delta MDD: +21.2pp, Delta Sharpe: -0.2916
+  GJR gamma (full): 0.1119 (t=6.06)
+  Paper match (5% rtol): DIVERGED
+    BH Sharpe rtol: 0.007, BH MDD rtol: 0.001
+    ΔMDD rtol: 0.368, VIX sens rtol: 0.000
+
+--- FXI: China (China Large-Cap) ---
+  Period: 2007-01-04 to 2026-03-31 (4840 days)
+  VIX sensitivity: -0.4929
+  B&H: Sharpe=0.1049, MDD=-72.7%
+  VT:  Sharpe=-0.1213, MDD=-54.8%
+  Delta MDD: +17.9pp, Delta Sharpe: -0.2261
+  GJR gamma (full): 0.0684 (t=3.89)
+  Paper match (5% rtol): DIVERGED
+    BH Sharpe rtol: 0.008, BH MDD rtol: 0.000
+    ΔMDD rtol: 0.402, VIX sens rtol: 0.000
+
+--- EWZ: Brazil (MSCI Brazil) ---
+  Period: 2007-01-04 to 2026-03-31 (4840 days)
+  VIX sensitivity: -0.5048
+  B&H: Sharpe=0.1666, MDD=-77.2%
+  VT:  Sharpe=-0.0499, MDD=-71.5%
+  Delta MDD: +5.8pp, Delta Sharpe: -0.2164
+  GJR gamma (full): 0.0801 (t=4.53)
+  Paper match (5% rtol): DIVERGED
+    BH Sharpe rtol: 0.068, BH MDD rtol: 0.001
+    ΔMDD rtol: 0.564, VIX sens rtol: 0.001
+
+--- INDA: India (iShares India) ---
+  Period: 2012-02-06 to 2026-03-31 (3558 days)
+  VIX sensitivity: -0.4667
+  B&H: Sharpe=0.1549, MDD=-45.1%
+  VT:  Sharpe=-0.0340, MDD=-27.4%
+  Delta MDD: +17.6pp, Delta Sharpe: -0.1889
+  GJR gamma (full): 0.1098 (t=3.40)
+  Paper match (5% rtol): DIVERGED
+    BH Sharpe rtol: 0.014, BH MDD rtol: 0.001
+    ΔMDD rtol: 0.056, VIX sens rtol: 0.002
+
+--- EWT: Taiwan (MSCI Taiwan) ---
+  Period: 2007-01-04 to 2026-03-31 (4840 days)
+  VIX sensitivity: -0.5689
+  B&H: Sharpe=0.3110, MDD=-62.9%
+  VT:  Sharpe=0.1256, MDD=-31.6%
+  Delta MDD: +31.3pp, Delta Sharpe: -0.1854
+  GJR gamma (full): 0.0976 (t=5.03)
+  Paper match (5% rtol): MATCHED
+    BH Sharpe rtol: 0.000, BH MDD rtol: 0.000
+    ΔMDD rtol: 0.040, VIX sens rtol: 0.000
+
+--- MCHI: China Broad (MSCI China) ---
+  Period: 2011-04-01 to 2026-03-31 (3771 days)
+  VIX sensitivity: -0.4683
+  B&H: Sharpe=0.0785, MDD=-62.8%
+  VT:  Sharpe=-0.0768, MDD=-47.7%
+  Delta MDD: +15.2pp, Delta Sharpe: -0.1553
+  GJR gamma (full): 0.0767 (t=3.25)
+  Paper match (5% rtol): DIVERGED
+    BH Sharpe rtol: 0.020, BH MDD rtol: 0.001
+    ΔMDD rtol: 0.340, VIX sens rtol: 0.001
+
+================================================================================
+[3/7] CROSS-SECTIONAL ANALYSIS
+================================================================================
+
+OK markets: 13 / 13
+
+--- VIX Sensitivity vs Delta MDD ---
+  Pearson r  = -0.8063 (p=0.0009) — paper: r=-0.770 (p=0.002)
+  Spearman ρ = -0.8352 (p=0.0004) — paper: ρ=-0.720 (p=0.006)
+
+--- GJR Gamma vs Delta Sharpe ---
+  Spearman ρ = 0.1868 (p=0.5411) — paper: ρ=0.830 (p=0.0005)
+
+--- MDD Improvement Summary ---
+  MDD improved: 13/13 markets
+  Average ΔMDD: 24.90pp — paper: 28.7pp
+  Std ΔMDD:     8.76pp
+  t(avg vs 0):  10.25 (p=0.0000) — paper: t=15.70
+
+--- Sharpe Summary ---
+  Sharpe improved: 0/13 markets — paper: 2/13
+  Average ΔSharpe: -0.1881 — paper: -0.048
+
+--- DM/EM Subgroup ---
+  DM avg ΔMDD: 30.7pp — paper: 32.0pp
+  EM avg ΔMDD: 18.2pp — paper: 24.7pp
+
+================================================================================
+[4/7] TABLE 5 FORMAT
+================================================================================
+Market Rgn   VIX_s   BH_S  BH_MDD   VT_S  VT_MDD      ΔS    ΔMDD       γ     γt
+-------------------------------------------------------------------------------
+EFA    DM   -0.654  0.127   -61.0% -0.065   -29.0%  -0.192   +32.0  0.1387   5.78
+EWJ    DM   -0.576  0.092   -53.6% -0.044   -25.6%  -0.136   +27.9  0.1014   4.39
+EWG    DM   -0.606  0.141   -63.1%  0.000   -31.0%  -0.141   +32.1  0.1183   6.44
+EWU    DM   -0.610  0.101   -64.0% -0.087   -30.6%  -0.188   +33.4  0.1358   5.85
+EWA    DM   -0.587  0.184   -67.0% -0.037   -35.4%  -0.222   +31.6  0.1096   5.82
+EWC    DM   -0.588  0.209   -60.8%  0.088   -36.6%  -0.121   +24.1  0.1249   6.34
+VGK    DM   -0.640  0.145   -63.6% -0.036   -30.1%  -0.182   +33.6  0.1336   5.88
+EEM    EM   -0.600  0.143   -66.4% -0.149   -45.2%  -0.292   +21.2  0.1119   6.06
+FXI    EM   -0.493  0.105   -72.7% -0.121   -54.8%  -0.226   +17.9  0.0684   3.89
+EWZ    EM   -0.505  0.167   -77.2% -0.050   -71.5%  -0.216    +5.8  0.0801   4.53
+INDA   EM   -0.467  0.155   -45.1% -0.034   -27.4%  -0.189   +17.6  0.1098   3.40
+EWT    EM   -0.569  0.311   -62.9%  0.126   -31.6%  -0.185   +31.3  0.0976   5.03
+MCHI   EM   -0.468  0.079   -62.8% -0.077   -47.7%  -0.155   +15.2  0.0767   3.25
+
+================================================================================
+[5/7] MATCH ASSESSMENT vs PAPER TABLE 5
+================================================================================
+  EFA: DIVERGED
+    [ok] bh_sharpe: exp=0.1270, paper=0.1220, rtol=0.041
+    [ok] bh_mdd_pct: exp=-61.0373, paper=-61.0000, rtol=0.001
+    [XX] vt_sharpe: exp=-0.0653, paper=0.0690, rtol=1.946
+    [ok] vt_mdd_pct: exp=-29.0157, paper=-28.3000, rtol=0.025
+    [ok] delta_mdd_pp: exp=32.0216, paper=32.7000, rtol=0.021
+    [ok] vix_sensitivity: exp=-0.6538, paper=-0.6530, rtol=0.001
+  EWJ: DIVERGED
+    [XX] bh_sharpe: exp=0.0922, paper=0.0860, rtol=0.072
+    [ok] bh_mdd_pct: exp=-53.5502, paper=-53.6000, rtol=0.001
+    [XX] vt_sharpe: exp=-0.0436, paper=0.0900, rtol=1.485
+    [ok] vt_mdd_pct: exp=-25.6049, paper=-24.7000, rtol=0.037
+    [ok] delta_mdd_pp: exp=27.9453, paper=28.9000, rtol=0.033
+    [ok] vix_sensitivity: exp=-0.5760, paper=-0.5750, rtol=0.002
+  EWG: DIVERGED
+    [ok] bh_sharpe: exp=0.1412, paper=0.1370, rtol=0.030
+    [ok] bh_mdd_pct: exp=-63.0955, paper=-63.1000, rtol=0.000
+    [XX] vt_sharpe: exp=0.0004, paper=0.0850, rtol=0.995
+    [XX] vt_mdd_pct: exp=-30.9802, paper=-29.2000, rtol=0.061
+    [XX] delta_mdd_pp: exp=32.1153, paper=33.9000, rtol=0.053
+    [ok] vix_sensitivity: exp=-0.6060, paper=-0.6060, rtol=0.000
+  EWU: DIVERGED
+    [ok] bh_sharpe: exp=0.1006, paper=0.0960, rtol=0.048
+    [ok] bh_mdd_pct: exp=-63.9937, paper=-64.0000, rtol=0.000
+    [XX] vt_sharpe: exp=-0.0875, paper=0.0280, rtol=4.123
+    [ok] vt_mdd_pct: exp=-30.5710, paper=-30.2000, rtol=0.012
+    [ok] delta_mdd_pp: exp=33.4227, paper=33.8000, rtol=0.011
+    [ok] vix_sensitivity: exp=-0.6097, paper=-0.6090, rtol=0.001
+  EWA: DIVERGED
+    [ok] bh_sharpe: exp=0.1844, paper=0.1840, rtol=0.002
+    [ok] bh_mdd_pct: exp=-66.9800, paper=-67.0000, rtol=0.000
+    [XX] vt_sharpe: exp=-0.0372, paper=0.0810, rtol=1.459
+    [XX] vt_mdd_pct: exp=-35.4124, paper=-33.3000, rtol=0.063
+    [XX] delta_mdd_pp: exp=31.5676, paper=33.6000, rtol=0.060
+    [ok] vix_sensitivity: exp=-0.5874, paper=-0.5870, rtol=0.001
+  EWC: DIVERGED
+    [ok] bh_sharpe: exp=0.2088, paper=0.2060, rtol=0.013
+    [ok] bh_mdd_pct: exp=-60.7502, paper=-60.8000, rtol=0.001
+    [XX] vt_sharpe: exp=0.0880, paper=0.1560, rtol=0.436
+    [XX] vt_mdd_pct: exp=-36.6225, paper=-33.0000, rtol=0.110
+    [XX] delta_mdd_pp: exp=24.1278, paper=27.7000, rtol=0.129
+    [ok] vix_sensitivity: exp=-0.5883, paper=-0.5880, rtol=0.001
+  VGK: DIVERGED
+    [ok] bh_sharpe: exp=0.1455, paper=0.1400, rtol=0.039
+    [ok] bh_mdd_pct: exp=-63.6067, paper=-63.6000, rtol=0.000
+    [XX] vt_sharpe: exp=-0.0363, paper=0.0820, rtol=1.443
+    [ok] vt_mdd_pct: exp=-30.0523, paper=-30.1000, rtol=0.002
+    [ok] delta_mdd_pp: exp=33.5544, paper=33.6000, rtol=0.001
+    [ok] vix_sensitivity: exp=-0.6401, paper=-0.6400, rtol=0.000
+  EEM: DIVERGED
+    [ok] bh_sharpe: exp=0.1430, paper=0.1420, rtol=0.007
+    [ok] bh_mdd_pct: exp=-66.4343, paper=-66.4000, rtol=0.001
+    [XX] vt_sharpe: exp=-0.1486, paper=0.0870, rtol=2.708
+    [XX] vt_mdd_pct: exp=-45.2047, paper=-32.8000, rtol=0.378
+    [XX] delta_mdd_pp: exp=21.2296, paper=33.6000, rtol=0.368
+    [ok] vix_sensitivity: exp=-0.6003, paper=-0.6000, rtol=0.000
+  FXI: DIVERGED
+    [ok] bh_sharpe: exp=0.1049, paper=0.1040, rtol=0.008
+    [ok] bh_mdd_pct: exp=-72.6758, paper=-72.7000, rtol=0.000
+    [XX] vt_sharpe: exp=-0.1213, paper=0.0800, rtol=2.516
+    [XX] vt_mdd_pct: exp=-54.7874, paper=-42.8000, rtol=0.280
+    [XX] delta_mdd_pp: exp=17.8884, paper=29.9000, rtol=0.402
+    [ok] vix_sensitivity: exp=-0.4929, paper=-0.4930, rtol=0.000
+  EWZ: DIVERGED
+    [XX] bh_sharpe: exp=0.1666, paper=0.1560, rtol=0.068
+    [ok] bh_mdd_pct: exp=-77.2491, paper=-77.3000, rtol=0.001
+    [XX] vt_sharpe: exp=-0.0499, paper=0.0990, rtol=1.504
+    [XX] vt_mdd_pct: exp=-71.4879, paper=-64.1000, rtol=0.115
+    [XX] delta_mdd_pp: exp=5.7612, paper=13.2000, rtol=0.564
+    [ok] vix_sensitivity: exp=-0.5048, paper=-0.5040, rtol=0.002
+  INDA: DIVERGED
+    [ok] bh_sharpe: exp=0.1549, paper=0.1570, rtol=0.014
+    [ok] bh_mdd_pct: exp=-45.0671, paper=-45.1000, rtol=0.001
+    [XX] vt_sharpe: exp=-0.0340, paper=0.0980, rtol=1.347
+    [ok] vt_mdd_pct: exp=-27.4211, paper=-26.4000, rtol=0.039
+    [XX] delta_mdd_pp: exp=17.6460, paper=18.7000, rtol=0.056
+    [ok] vix_sensitivity: exp=-0.4667, paper=-0.4660, rtol=0.002
+  EWT: DIVERGED
+    [ok] bh_sharpe: exp=0.3110, paper=0.3110, rtol=0.000
+    [ok] bh_mdd_pct: exp=-62.9071, paper=-62.9000, rtol=0.000
+    [XX] vt_sharpe: exp=0.1256, paper=0.2620, rtol=0.521
+    [ok] vt_mdd_pct: exp=-31.6120, paper=-32.9000, rtol=0.039
+    [ok] delta_mdd_pp: exp=31.2951, paper=30.1000, rtol=0.040
+    [ok] vix_sensitivity: exp=-0.5689, paper=-0.5690, rtol=0.000
+  MCHI: DIVERGED
+    [ok] bh_sharpe: exp=0.0785, paper=0.0770, rtol=0.020
+    [ok] bh_mdd_pct: exp=-62.8363, paper=-62.8000, rtol=0.001
+    [XX] vt_sharpe: exp=-0.0768, paper=0.0830, rtol=1.926
+    [XX] vt_mdd_pct: exp=-47.6613, paper=-39.9000, rtol=0.195
+    [XX] delta_mdd_pp: exp=15.1750, paper=23.0000, rtol=0.340
+    [ok] vix_sensitivity: exp=-0.4683, paper=-0.4680, rtol=0.001
+
+Overall: 0/13 markets fully matched (rtol<0.05)
+
+--- Cross-Section Match ---
+  [ok] VIX sens vs ΔMDD Pearson r: exp=-0.8063, paper=-0.7700, rtol=0.047
+  [XX] VIX sens vs ΔMDD Spearman ρ: exp=-0.8352, paper=-0.7200, rtol=0.160
+  [XX] GJR γ vs ΔSharpe Spearman ρ: exp=0.1868, paper=0.8300, rtol=0.775
+  [XX] avg ΔMDD pp: exp=24.9038, paper=28.7000, rtol=0.132
+  [XX] t(avg ΔMDD vs 0): exp=10.2457, paper=15.7000, rtol=0.347
+
+================================================================================
+[6/7] RECOMMENDATION
+================================================================================
+
+  (b) PARTIAL — Same direction/magnitude but divergence >5% rtol. Most likely cause: sample cutoff date difference (paper may have used slightly different end date), or minor VIX sensitivity calculation difference. Recommend: (b) update paper Table 5 with K1178 canonical numbers if divergence is systematic.
+
+  D5 status: PARTIAL
+
+================================================================================
+[7/7] Saving results...
+
+Results saved to: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a39889f8/experiments/k1178/k1178_results.json
+
+K1178 COMPLETE
+D5 status: PARTIAL
+Key numbers: avg ΔMDD=24.90pp, t=10.25, r=-0.806, ρ=-0.835

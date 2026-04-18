@@ -1,0 +1,480 @@
+{
+  "experiment_id": "K441",
+  "title": "Range-Based Volatility Estimators as GARCH Proxy",
+  "proposer": "User",
+  "executor": "Claude",
+  "literature": [
+    "Parkinson (1980) J. Business",
+    "Garman & Klass (1980) J. Business",
+    "Rogers & Satchell (1991)",
+    "Yang & Zhang (2000)",
+    "Alizadeh, Brandt & Diebold (2002) JoF",
+    "Chou (2005) JME"
+  ],
+  "asset": "SPY",
+  "data_source": "yfinance",
+  "oos_period": "2023-2024",
+  "descriptive_stats": {
+    "CC (r\u00b2)": {
+      "mean": 0.00014441683948635814,
+      "std": 0.000588768207900547,
+      "skewness": 15.442741229408648,
+      "kurtosis": 334.1566513775405,
+      "annualized_vol_pct": 19.076960856111818,
+      "pct_negative": 0.0
+    },
+    "Parkinson": {
+      "mean": 9.336002325377087e-05,
+      "std": 0.0002653199090765589,
+      "skewness": 9.995495328118967,
+      "kurtosis": 132.97881608661888,
+      "annualized_vol_pct": 15.338424254124106,
+      "pct_negative": 0.0
+    },
+    "Garman-Klass": {
+      "mean": 9.594643770516487e-05,
+      "std": 0.00028779048658034173,
+      "skewness": 10.91575705542556,
+      "kurtosis": 159.99522450063614,
+      "annualized_vol_pct": 15.549438028977622,
+      "pct_negative": 0.0
+    },
+    "Rogers-Satchell": {
+      "mean": 9.938202807345245e-05,
+      "std": 0.00032630265211912546,
+      "skewness": 11.599578274601877,
+      "kurtosis": 178.1534256272354,
+      "annualized_vol_pct": 15.825381851478346,
+      "pct_negative": 0.0
+    },
+    "Yang-Zhang": {
+      "mean": 0.00014972626143919352,
+      "std": 0.0005027349076879238,
+      "skewness": 14.070328606806727,
+      "kurtosis": 296.873077760398,
+      "annualized_vol_pct": 19.424473707845152,
+      "pct_negative": 0.0
+    }
+  },
+  "log_range_stats": {
+    "mean": 0.012356821601376732,
+    "std": 0.010303295952907411,
+    "skewness": 3.7409186512154537,
+    "kurtosis": 22.346176408427766,
+    "r2_skewness": 15.442741229408648,
+    "r2_kurtosis": 334.1566513775405
+  },
+  "cross_correlations": {
+    "estimators": [
+      "CC (r\u00b2)",
+      "Parkinson",
+      "Garman-Klass",
+      "Rogers-Satchell",
+      "Yang-Zhang"
+    ],
+    "matrix": [
+      [
+        1.0,
+        0.7110719569743327,
+        0.5968790396559738,
+        0.5357858964038139,
+        0.711509374674147
+      ],
+      [
+        0.7110719569743327,
+        1.0,
+        0.9526503044377479,
+        0.8892843329180106,
+        0.8142171576990728
+      ],
+      [
+        0.5968790396559737,
+        0.9526503044377478,
+        1.0,
+        0.9797287914426558,
+        0.8593791930280953
+      ],
+      [
+        0.5357858964038139,
+        0.8892843329180106,
+        0.9797287914426558,
+        1.0,
+        0.8676689547058488
+      ],
+      [
+        0.7115093746741469,
+        0.8142171576990728,
+        0.8593791930280954,
+        0.8676689547058488,
+        1.0
+      ]
+    ]
+  },
+  "oos_evaluation": {
+    "GARCH(1,1)": {
+      "CC (r\u00b2)": {
+        "qlike": 1.321610693303287,
+        "mse": 0.008333998091713967
+      },
+      "Parkinson": {
+        "qlike": 0.43101652501899573,
+        "mse": 0.002733708947841247
+      },
+      "Garman-Klass": {
+        "qlike": 0.4083195113961187,
+        "mse": 0.002654879480131569
+      },
+      "Rogers-Satchell": {
+        "qlike": 0.4692056127562122,
+        "mse": 0.003012127144364066
+      },
+      "Yang-Zhang": {
+        "qlike": 0.30779742479941385,
+        "mse": 0.00887194125118615
+      }
+    },
+    "GJR-GARCH(1,1)": {
+      "CC (r\u00b2)": {
+        "qlike": 1.3178875634912026,
+        "mse": 0.008330344011781498
+      },
+      "Parkinson": {
+        "qlike": 0.38201038585989877,
+        "mse": 0.0025525571133434726
+      },
+      "Garman-Klass": {
+        "qlike": 0.3590658363783801,
+        "mse": 0.0024937784409164616
+      },
+      "Rogers-Satchell": {
+        "qlike": 0.41936291891328903,
+        "mse": 0.0028495370162224492
+      },
+      "Yang-Zhang": {
+        "qlike": 0.2828416170575485,
+        "mse": 0.008104302581156261
+      }
+    },
+    "EGARCH(1,1)": {
+      "CC (r\u00b2)": {
+        "qlike": 1.3450271562888114,
+        "mse": 0.00876836751127434
+      },
+      "Parkinson": {
+        "qlike": 0.4035422444478971,
+        "mse": 0.0028764931969610685
+      },
+      "Garman-Klass": {
+        "qlike": 0.37849312037044885,
+        "mse": 0.002776335566186967
+      },
+      "Rogers-Satchell": {
+        "qlike": 0.43760914263318246,
+        "mse": 0.003125802760685333
+      },
+      "Yang-Zhang": {
+        "qlike": 0.2898725464331606,
+        "mse": 0.008276241908696436
+      }
+    }
+  },
+  "cross_proxy_consistency": {
+    "CC (r\u00b2)": {
+      "rankings": {
+        "GARCH(1,1)": 2,
+        "GJR-GARCH(1,1)": 1,
+        "EGARCH(1,1)": 3
+      },
+      "best_model": "GJR-GARCH(1,1)",
+      "qlikes": {
+        "GARCH(1,1)": 1.321610693303287,
+        "GJR-GARCH(1,1)": 1.3178875634912026,
+        "EGARCH(1,1)": 1.3450271562888114
+      }
+    },
+    "Parkinson": {
+      "rankings": {
+        "GARCH(1,1)": 3,
+        "GJR-GARCH(1,1)": 1,
+        "EGARCH(1,1)": 2
+      },
+      "best_model": "GJR-GARCH(1,1)",
+      "qlikes": {
+        "GARCH(1,1)": 0.43101652501899573,
+        "GJR-GARCH(1,1)": 0.38201038585989877,
+        "EGARCH(1,1)": 0.4035422444478971
+      }
+    },
+    "Garman-Klass": {
+      "rankings": {
+        "GARCH(1,1)": 3,
+        "GJR-GARCH(1,1)": 1,
+        "EGARCH(1,1)": 2
+      },
+      "best_model": "GJR-GARCH(1,1)",
+      "qlikes": {
+        "GARCH(1,1)": 0.4083195113961187,
+        "GJR-GARCH(1,1)": 0.3590658363783801,
+        "EGARCH(1,1)": 0.37849312037044885
+      }
+    },
+    "Rogers-Satchell": {
+      "rankings": {
+        "GARCH(1,1)": 3,
+        "GJR-GARCH(1,1)": 1,
+        "EGARCH(1,1)": 2
+      },
+      "best_model": "GJR-GARCH(1,1)",
+      "qlikes": {
+        "GARCH(1,1)": 0.4692056127562122,
+        "GJR-GARCH(1,1)": 0.41936291891328903,
+        "EGARCH(1,1)": 0.43760914263318246
+      }
+    },
+    "Yang-Zhang": {
+      "rankings": {
+        "GARCH(1,1)": 3,
+        "GJR-GARCH(1,1)": 1,
+        "EGARCH(1,1)": 2
+      },
+      "best_model": "GJR-GARCH(1,1)",
+      "qlikes": {
+        "GARCH(1,1)": 0.30779742479941385,
+        "GJR-GARCH(1,1)": 0.2828416170575485,
+        "EGARCH(1,1)": 0.2898725464331606
+      }
+    }
+  },
+  "ranking_consistent": true,
+  "dm_tests": {
+    "CC (r\u00b2)": {
+      "GARCH_vs_GJR-GARCH(1,1)": {
+        "dm_stat": 0.26815795748134436,
+        "p_value": 0.7885777352213805,
+        "direction": "GJR-GARCH(1,1) better"
+      },
+      "GARCH_vs_EGARCH(1,1)": {
+        "dm_stat": -1.4513245674545598,
+        "p_value": 0.14668950342979126,
+        "direction": "GARCH better"
+      }
+    },
+    "Parkinson": {
+      "GARCH_vs_GJR-GARCH(1,1)": {
+        "dm_stat": 6.014555525623886,
+        "p_value": 1.8038093241301567e-09,
+        "direction": "GJR-GARCH(1,1) better"
+      },
+      "GARCH_vs_EGARCH(1,1)": {
+        "dm_stat": 2.830956679645775,
+        "p_value": 0.004640900624109046,
+        "direction": "EGARCH(1,1) better"
+      }
+    },
+    "Garman-Klass": {
+      "GARCH_vs_GJR-GARCH(1,1)": {
+        "dm_stat": 6.232260279337547,
+        "p_value": 4.597526803706842e-10,
+        "direction": "GJR-GARCH(1,1) better"
+      },
+      "GARCH_vs_EGARCH(1,1)": {
+        "dm_stat": 3.1598379236871184,
+        "p_value": 0.0015785692489067582,
+        "direction": "EGARCH(1,1) better"
+      }
+    },
+    "Rogers-Satchell": {
+      "GARCH_vs_GJR-GARCH(1,1)": {
+        "dm_stat": 6.16427794051542,
+        "p_value": 7.080547259619152e-10,
+        "direction": "GJR-GARCH(1,1) better"
+      },
+      "GARCH_vs_EGARCH(1,1)": {
+        "dm_stat": 3.2422399739302197,
+        "p_value": 0.0011859411557870736,
+        "direction": "EGARCH(1,1) better"
+      }
+    },
+    "Yang-Zhang": {
+      "GARCH_vs_GJR-GARCH(1,1)": {
+        "dm_stat": 2.7170431416691305,
+        "p_value": 0.006586802129279867,
+        "direction": "GJR-GARCH(1,1) better"
+      },
+      "GARCH_vs_EGARCH(1,1)": {
+        "dm_stat": 1.659869012154236,
+        "p_value": 0.0969408065819033,
+        "direction": "EGARCH(1,1) better"
+      }
+    }
+  },
+  "carr_model": {
+    "CARR_Exp": {
+      "omega": 0.05013396930883381,
+      "alpha": 0.2932569351385131,
+      "beta": 0.6654348648184547,
+      "persistence": 0.9586917999569677,
+      "converged": true,
+      "loglik": -5264.294429421109
+    },
+    "CARR_Weibull": {
+      "omega": 0.07862145339674674,
+      "alpha": 0.3414186703498979,
+      "beta": 0.6363325628968721,
+      "kappa": 2.171227335962217,
+      "persistence": 0.97775123324677,
+      "converged": true,
+      "loglik": -3355.916239734246
+    }
+  },
+  "carr_evaluation": {
+    "CC (r\u00b2)": {
+      "CARR_Exp_QLIKE": 1.7930620272001119,
+      "CARR_Weibull_QLIKE": 1.6189929144191217
+    },
+    "Parkinson": {
+      "CARR_Exp_QLIKE": 0.3978240160862402,
+      "CARR_Weibull_QLIKE": 0.37882716630664587
+    },
+    "Garman-Klass": {
+      "CARR_Exp_QLIKE": 0.32416327082190255,
+      "CARR_Weibull_QLIKE": 0.3166548956133588
+    },
+    "Rogers-Satchell": {
+      "CARR_Exp_QLIKE": 0.36450647870672903,
+      "CARR_Weibull_QLIKE": 0.36039049204676804
+    },
+    "Yang-Zhang": {
+      "CARR_Exp_QLIKE": 0.5667058458976345,
+      "CARR_Weibull_QLIKE": 0.4214621188381898
+    }
+  },
+  "comprehensive_comparison": {
+    "qlike_table": {
+      "GARCH(1,1)": {
+        "CC (r\u00b2)": 1.321610693303287,
+        "Parkinson": 0.43101652501899573,
+        "Garman-Klass": 0.4083195113961187,
+        "Rogers-Satchell": 0.4692056127562122,
+        "Yang-Zhang": 0.30779742479941385
+      },
+      "GJR-GARCH(1,1)": {
+        "CC (r\u00b2)": 1.3178875634912026,
+        "Parkinson": 0.38201038585989877,
+        "Garman-Klass": 0.3590658363783801,
+        "Rogers-Satchell": 0.41936291891328903,
+        "Yang-Zhang": 0.2828416170575485
+      },
+      "EGARCH(1,1)": {
+        "CC (r\u00b2)": 1.3450271562888114,
+        "Parkinson": 0.4035422444478971,
+        "Garman-Klass": 0.37849312037044885,
+        "Rogers-Satchell": 0.43760914263318246,
+        "Yang-Zhang": 0.2898725464331606
+      },
+      "CARR-Exp": {
+        "CC (r\u00b2)": 1.7930620272001119,
+        "Parkinson": 0.3978240160862402,
+        "Garman-Klass": 0.32416327082190255,
+        "Rogers-Satchell": 0.36450647870672903,
+        "Yang-Zhang": 0.5667058458976345
+      },
+      "CARR-Weibull": {
+        "CC (r\u00b2)": 1.6189929144191217,
+        "Parkinson": 0.37882716630664587,
+        "Garman-Klass": 0.3166548956133588,
+        "Rogers-Satchell": 0.36039049204676804,
+        "Yang-Zhang": 0.4214621188381898
+      }
+    },
+    "average_ranks": {
+      "GARCH(1,1)": 4.0,
+      "GJR-GARCH(1,1)": 2.0,
+      "EGARCH(1,1)": 3.4,
+      "CARR-Exp": 3.4,
+      "CARR-Weibull": 2.2
+    }
+  },
+  "dm_carr_vs_gjr": {
+    "CC (r\u00b2)": {
+      "dm_stat": -2.975836640722691,
+      "p_value": 0.0029219046157058504,
+      "direction": "GJR better"
+    },
+    "Parkinson": {
+      "dm_stat": -0.23062002192373057,
+      "p_value": 0.817610011616456,
+      "direction": "GJR better"
+    },
+    "Garman-Klass": {
+      "dm_stat": 0.858675016239832,
+      "p_value": 0.39051983797936307,
+      "direction": "CARR better"
+    },
+    "Rogers-Satchell": {
+      "dm_stat": 1.7781906282750208,
+      "p_value": 0.07537255161983047,
+      "direction": "CARR better"
+    },
+    "Yang-Zhang": {
+      "dm_stat": -4.663298060589955,
+      "p_value": 3.111815347622837e-06,
+      "direction": "GJR better"
+    }
+  },
+  "efficiency": {
+    "CC (r\u00b2)": {
+      "variance": 2.4487190635851133e-07,
+      "relative_to_cc": 1.0,
+      "efficiency_multiple": 1.0
+    },
+    "Parkinson": {
+      "variance": 3.595962097160517e-08,
+      "relative_to_cc": 0.1468507412971969,
+      "efficiency_multiple": 6.809635356053105
+    },
+    "Garman-Klass": {
+      "variance": 4.433313135989346e-08,
+      "relative_to_cc": 0.18104621317802927,
+      "efficiency_multiple": 5.523451622910577
+    },
+    "Rogers-Satchell": {
+      "variance": 6.225180901656474e-08,
+      "relative_to_cc": 0.2542219315490741,
+      "efficiency_multiple": 3.9335709311411775
+    },
+    "Yang-Zhang": {
+      "variance": 1.4789736143715013e-07,
+      "relative_to_cc": 0.603978478529983,
+      "efficiency_multiple": 1.6556881338452485
+    }
+  },
+  "diagnostics": {
+    "jarque_bera": {
+      "stat": 1809.1064626601371,
+      "p_value": 0.0
+    },
+    "ljung_box_sq_resid": {
+      "lag_10": {
+        "Q": 9.265506968332966,
+        "p": 0.5071051224987421
+      },
+      "lag_20": {
+        "Q": 12.536573621433382,
+        "p": 0.8963712861139068
+      }
+    }
+  },
+  "rv5min_comparison": "no_5min_data_available",
+  "summary": {
+    "best_model_overall": "GJR-GARCH(1,1)",
+    "best_model_avg_rank": 2.0,
+    "best_proxy_for_gjr": "Yang-Zhang",
+    "worst_proxy_for_gjr": "CC (r\u00b2)",
+    "qlike_reduction_pct": 78.53825888543362,
+    "ranking_consistent": true,
+    "log_range_more_gaussian": true,
+    "elapsed_seconds": 4.5482261180877686
+  },
+  "elapsed_seconds": 4.5482261180877686
+}

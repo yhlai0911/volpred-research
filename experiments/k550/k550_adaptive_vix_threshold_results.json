@@ -1,0 +1,437 @@
+{
+  "experiment_id": "K550",
+  "title": "Adaptive VIX Threshold \u2014 Should 12/VIX Be Dynamic?",
+  "date": "2026-03-27",
+  "data_source": "yfinance (SPY, ^VIX, 0050.TW)",
+  "data_period": "2005-01-03 to 2026-03-27",
+  "n_days_spy": 5217,
+  "hypothesis": "Using rolling VIX median instead of fixed 12 could adapt to regime changes",
+  "conclusion": "NUANCED \u2014 Adaptive thresholds do NOT improve over fixed 12/VIX for the core question; Percentile-based and Z-score show higher Sharpe but via extreme risk reduction, not alpha",
+  "key_findings": [
+    "VIX equilibrium shifts: median VIX ranges from 13.3 (Low Vol) to 24.4 (GFC) across periods",
+    "Adaptive 1yr median/VIX UNDERPERFORMS fixed 12/VIX (Sharpe 1.35 vs 1.70, MDD -27.6% vs -13.9%)",
+    "Adaptive 5yr median/VIX also underperforms (Sharpe 1.40, similar to fixed 14/VIX)",
+    "All fixed thresholds 10-16 produce very similar Sharpe (1.47-1.74) \u2014 confirms N81",
+    "Percentile-based has highest Sharpe (3.07) but via extreme conservatism (mean weight 0.53)",
+    "Z-score has Sharpe 2.19 but also very conservative (mean weight 0.84)",
+    "CAVEAT: Sharpe-optimal threshold is always lowest (mechanical vol reduction, not alpha)",
+    "Cross-OOS: all strategies consistent across 5 periods, no structural breaks",
+    "Taiwan: adaptive 1yr (Sharpe 0.577) \u2248 fixed 8.63/VIX (0.593) \u2014 no improvement",
+    "Key insight: Adaptive median tracks VIX with a lag \u2192 during crisis it stays high too long \u2192 slow to de-risk",
+    "Occam Razor: fixed 12/VIX is optimal for simplicity; the exact number barely matters in [10-16]"
+  ],
+  "literature": [
+    "Moreira & Muir (2017): Volatility-Managed Portfolios, JF",
+    "Fleming, Kirby & Ostdiek (2001): Economic Value of Volatility Timing, JFE",
+    "Harvey, Liu & Zhu (2016): ...and the Cross-Section of Expected Returns, RFS"
+  ],
+  "prior_knowledge": [
+    "N79: 12/VIX Sharpe 0.737, MDD -16.5%",
+    "N81: Target/VIX (6-18) all give Sharpe 0.59-0.62",
+    "N83: 12/VIX+SHY daily Sharpe 0.682, MDD -27.3%",
+    "Adaptive Hybrid VT threshold: NULL \u2014 fixed beat adaptive for VRP ratio"
+  ],
+  "full_sample_results": {
+    "Buy & Hold": {
+      "n_days": 5217,
+      "ann_return": 0.118,
+      "ann_vol": 0.1915,
+      "sharpe": 0.6161,
+      "mdd": -0.5519,
+      "cagr": 0.1046,
+      "calmar": 0.1895,
+      "sortino": 0.7516
+    },
+    "Fixed 10/VIX": {
+      "n_days": 5217,
+      "ann_return": 0.1333,
+      "ann_vol": 0.0767,
+      "sharpe": 1.7381,
+      "mdd": -0.1166,
+      "cagr": 0.1391,
+      "calmar": 1.1935,
+      "sortino": 2.7558
+    },
+    "Fixed 12/VIX": {
+      "n_days": 5217,
+      "ann_return": 0.1556,
+      "ann_vol": 0.0916,
+      "sharpe": 1.6976,
+      "mdd": -0.1393,
+      "cagr": 0.1632,
+      "calmar": 1.1712,
+      "sortino": 2.6781
+    },
+    "Fixed 14/VIX": {
+      "n_days": 5217,
+      "ann_return": 0.1678,
+      "ann_vol": 0.1053,
+      "sharpe": 1.5938,
+      "mdd": -0.1621,
+      "cagr": 0.1759,
+      "calmar": 1.0852,
+      "sortino": 2.4782
+    },
+    "Fixed 16/VIX": {
+      "n_days": 5217,
+      "ann_return": 0.1716,
+      "ann_vol": 0.1171,
+      "sharpe": 1.466,
+      "mdd": -0.1846,
+      "cagr": 0.1789,
+      "calmar": 0.9688,
+      "sortino": 2.2309
+    },
+    "Adaptive 1yr Median": {
+      "n_days": 5217,
+      "ann_return": 0.1808,
+      "ann_vol": 0.1337,
+      "sharpe": 1.352,
+      "mdd": -0.2757,
+      "cagr": 0.1873,
+      "calmar": 0.6793,
+      "sortino": 1.9846
+    },
+    "Adaptive 5yr Median": {
+      "n_days": 4839,
+      "ann_return": 0.1705,
+      "ann_vol": 0.1218,
+      "sharpe": 1.4002,
+      "mdd": -0.1601,
+      "cagr": 0.1772,
+      "calmar": 1.1069,
+      "sortino": 2.1062
+    },
+    "Percentile-based": {
+      "n_days": 5217,
+      "ann_return": 0.2139,
+      "ann_vol": 0.0696,
+      "sharpe": 3.0726,
+      "mdd": -0.0562,
+      "cagr": 0.2353,
+      "calmar": 4.1861,
+      "sortino": 4.8201
+    },
+    "Z-score": {
+      "n_days": 5217,
+      "ann_return": 0.2579,
+      "ann_vol": 0.1179,
+      "sharpe": 2.1876,
+      "mdd": -0.1701,
+      "cagr": 0.285,
+      "calmar": 1.6752,
+      "sortino": 3.179
+    }
+  },
+  "sub_period_sharpes": {
+    "Buy & Hold": {
+      "GFC": 0.105,
+      "Recovery": 0.9801,
+      "Low Vol": 0.8837,
+      "COVID+": 0.7497
+    },
+    "Fixed 10/VIX": {
+      "GFC": 1.0925,
+      "Recovery": 1.9703,
+      "Low Vol": 2.021,
+      "COVID+": 1.8593
+    },
+    "Fixed 12/VIX": {
+      "GFC": 1.0359,
+      "Recovery": 1.9593,
+      "Low Vol": 1.9251,
+      "COVID+": 1.8591
+    },
+    "Fixed 14/VIX": {
+      "GFC": 0.9317,
+      "Recovery": 1.8743,
+      "Low Vol": 1.7285,
+      "COVID+": 1.8038
+    },
+    "Fixed 16/VIX": {
+      "GFC": 0.8391,
+      "Recovery": 1.7382,
+      "Low Vol": 1.5254,
+      "COVID+": 1.7119
+    },
+    "Adaptive 1yr Median": {
+      "GFC": 0.795,
+      "Recovery": 1.5241,
+      "Low Vol": 1.735,
+      "COVID+": 1.5054
+    },
+    "Percentile-based": {
+      "GFC": 2.2732,
+      "Recovery": 3.3036,
+      "Low Vol": 3.9693,
+      "COVID+": 3.0938
+    },
+    "Z-score": {
+      "GFC": 1.6578,
+      "Recovery": 2.2648,
+      "Low Vol": 2.6689,
+      "COVID+": 2.3088
+    }
+  },
+  "cross_oos_sharpes": {
+    "Buy & Hold": [
+      0.105,
+      0.958,
+      0.9922,
+      0.8809,
+      0.563
+    ],
+    "Fixed 10/VIX": [
+      1.0925,
+      1.9556,
+      1.9779,
+      2.2644,
+      1.5372
+    ],
+    "Fixed 12/VIX": [
+      1.0359,
+      1.9546,
+      1.8692,
+      2.238,
+      1.537
+    ],
+    "Fixed 14/VIX": [
+      0.9317,
+      1.9009,
+      1.6717,
+      2.1259,
+      1.4793
+    ],
+    "Fixed 16/VIX": [
+      0.8391,
+      1.7896,
+      1.4736,
+      1.9985,
+      1.3589
+    ],
+    "Adaptive 1yr Median": [
+      0.795,
+      1.4896,
+      1.6453,
+      2.1009,
+      1.1595
+    ],
+    "Percentile-based": [
+      2.2732,
+      3.2153,
+      3.7801,
+      4.2395,
+      2.7418
+    ],
+    "Z-score": [
+      1.6578,
+      2.1138,
+      2.5638,
+      3.0303,
+      2.0154
+    ]
+  },
+  "statistical_tests_vs_12VIX": {
+    "Fixed 10/VIX": {
+      "sharpe_diff": 0.0405,
+      "t_stat": -6.7151,
+      "p_val": 0.0,
+      "harvey_pass": "YES",
+      "n": 5217
+    },
+    "Fixed 14/VIX": {
+      "sharpe_diff": -0.1038,
+      "t_stat": 3.9021,
+      "p_val": 0.0001,
+      "harvey_pass": "YES",
+      "n": 5217
+    },
+    "Fixed 16/VIX": {
+      "sharpe_diff": -0.2316,
+      "t_stat": 2.7138,
+      "p_val": 0.0067,
+      "harvey_pass": "no",
+      "n": 5217
+    },
+    "Adaptive 1yr Median": {
+      "sharpe_diff": -0.3456,
+      "t_stat": 2.2321,
+      "p_val": 0.0257,
+      "harvey_pass": "no",
+      "n": 5217
+    },
+    "Percentile-based": {
+      "sharpe_diff": 1.375,
+      "t_stat": 4.8238,
+      "p_val": 0.0,
+      "harvey_pass": "YES",
+      "n": 5217
+    },
+    "Z-score": {
+      "sharpe_diff": 0.49,
+      "t_stat": 7.7684,
+      "p_val": 0.0,
+      "harvey_pass": "YES",
+      "n": 5217
+    }
+  },
+  "optimal_threshold_by_period": {
+    "GFC": {
+      "sharpe_optimal_threshold": 8,
+      "cagr_optimal_threshold": 15,
+      "calmar_optimal_threshold": 10,
+      "vix_median": 21.2,
+      "fixed_12_sharpe": 1.0359
+    },
+    "Recovery": {
+      "sharpe_optimal_threshold": 8,
+      "cagr_optimal_threshold": 16,
+      "calmar_optimal_threshold": 12,
+      "vix_median": 16.9,
+      "fixed_12_sharpe": 1.9593
+    },
+    "Low Vol": {
+      "sharpe_optimal_threshold": 8,
+      "cagr_optimal_threshold": 13,
+      "calmar_optimal_threshold": 9,
+      "vix_median": 14.0,
+      "fixed_12_sharpe": 1.9251
+    },
+    "COVID+": {
+      "sharpe_optimal_threshold": 8,
+      "cagr_optimal_threshold": 18,
+      "calmar_optimal_threshold": 12,
+      "vix_median": 19.6,
+      "fixed_12_sharpe": 1.8591
+    }
+  },
+  "taiwan_results": {
+    "Buy & Hold": {
+      "n_days": 3952,
+      "ann_return": 0.0968,
+      "ann_vol": 0.263,
+      "sharpe": 0.3679,
+      "mdd": -0.7816,
+      "cagr": 0.0404,
+      "calmar": 0.0516,
+      "sortino": 0.3128
+    },
+    "Fixed 8.63/VIX": {
+      "n_days": 3952,
+      "ann_return": 0.0835,
+      "ann_vol": 0.1409,
+      "sharpe": 0.5925,
+      "mdd": -0.468,
+      "cagr": 0.0731,
+      "calmar": 0.1561,
+      "sortino": 0.4702
+    },
+    "Fixed 12/VIX": {
+      "n_days": 3952,
+      "ann_return": 0.113,
+      "ann_vol": 0.1955,
+      "sharpe": 0.5779,
+      "mdd": -0.6449,
+      "cagr": 0.0867,
+      "calmar": 0.1344,
+      "sortino": 0.4578
+    },
+    "Adaptive 1yr Median": {
+      "n_days": 3952,
+      "ann_return": 0.137,
+      "ann_vol": 0.2377,
+      "sharpe": 0.5765,
+      "mdd": -0.7413,
+      "cagr": 0.0932,
+      "calmar": 0.1258,
+      "sortino": 0.4754
+    }
+  },
+  "vix_regime_analysis": {
+    "2006": {
+      "rolling_median": 12.3,
+      "actual_mean": 12.8
+    },
+    "2007": {
+      "rolling_median": 12.8,
+      "actual_mean": 17.5
+    },
+    "2008": {
+      "rolling_median": 22.1,
+      "actual_mean": 32.7
+    },
+    "2009": {
+      "rolling_median": 35.1,
+      "actual_mean": 31.5
+    },
+    "2010": {
+      "rolling_median": 23.8,
+      "actual_mean": 22.5
+    },
+    "2011": {
+      "rolling_median": 19.9,
+      "actual_mean": 24.2
+    },
+    "2012": {
+      "rolling_median": 20.3,
+      "actual_mean": 17.8
+    },
+    "2013": {
+      "rolling_median": 15.3,
+      "actual_mean": 14.2
+    },
+    "2014": {
+      "rolling_median": 13.7,
+      "actual_mean": 14.2
+    },
+    "2015": {
+      "rolling_median": 14.3,
+      "actual_mean": 16.7
+    },
+    "2016": {
+      "rolling_median": 15.7,
+      "actual_mean": 15.8
+    },
+    "2017": {
+      "rolling_median": 12.4,
+      "actual_mean": 11.1
+    },
+    "2018": {
+      "rolling_median": 12.0,
+      "actual_mean": 16.6
+    },
+    "2019": {
+      "rolling_median": 15.6,
+      "actual_mean": 15.4
+    },
+    "2020": {
+      "rolling_median": 19.4,
+      "actual_mean": 29.3
+    },
+    "2021": {
+      "rolling_median": 22.9,
+      "actual_mean": 19.7
+    },
+    "2022": {
+      "rolling_median": 21.6,
+      "actual_mean": 25.6
+    },
+    "2023": {
+      "rolling_median": 21.3,
+      "actual_mean": 16.9
+    },
+    "2024": {
+      "rolling_median": 14.5,
+      "actual_mean": 15.6
+    },
+    "2025": {
+      "rolling_median": 16.8,
+      "actual_mean": 19.0
+    },
+    "2026": {
+      "rolling_median": 17.2,
+      "actual_mean": 20.2
+    }
+  },
+  "elapsed_seconds": 1.5
+}

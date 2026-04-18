@@ -1,0 +1,10 @@
+Channel,Description,Equity (SPY/QQQ/IWM),Commodity (USO/GLD/UNG),Bond (TLT),FX
+Channel 1,HAR+VIX regime-invariant (HAR-RV-X vs GJR),PASS (mean DM t=+3.49),PASS* (mean DM t=+8.13),PASS (max DM t=+11.01),—
+Channel 1 Key Experiments,,,K1138+K1137,K1137 (VIX marginal NULL in K1136),K1137,
+Channel 1 Note,"SPY t=+4.18, QQQ t=+4.22, IWM t=+2.06 (BH borderline pooled; regime-invariant in K1137)","USO t=+10.61, GLD t=+5.65 (HAR beats GJR; VIX marginal=NULL in K1136 Fair Test 2)","TLT low/mid/high all PASS (t=11.01/8.62/7.34)",No experiment
+Channel 2,MIDAS universal null (GARCH-MIDAS-X vs GJR),NULL (max DM t=+1.36),NULL (max DM t=+1.23),NULL (max DM t=+0.51),—
+Channel 2 Key Experiments,,,K1138+K1137,K1136+K1137,K1137,
+Channel 2 Note,"SPY t=+1.36, QQQ t=-0.20, IWM t=+1.01","USO t=+1.23, GLD t=+0.94, UNG t=+0.62","TLT max t=+0.51 across all regimes",No experiment
+Channel 3,GAS-t asset-class-specific,HARM (DM t=-3.27),NULL/PASS† (DM t=+1.03),PASS (max DM t=+3.18),—
+Channel 3 Key Experiments,,,K1138+K1143,K1129+K1135,K1137,
+Channel 3 Note,"SPY t=-3.27, QQQ t=-2.81; K1143 confirms all skew-t variants still HARM","USO/GLD/UNG symmetric GAS-t NULL; K1135 skew-t: VaR/ES PASS but QLIKE NULL","TLT rescued in low (t=+2.53) and high (t=+3.18) VIX regimes; modest +1.1-1.5% QLIKE",No experiment

@@ -1,0 +1,658 @@
+{
+  "experiment_id": "K1207",
+  "seed": 42,
+  "panel_N": 182,
+  "n_markets": 12,
+  "n_gics_sectors": 10,
+  "coverage_by_market": {
+    "AU": "10/10 (100%)",
+    "BR": "10/10 (100%)",
+    "CA": "10/10 (100%)",
+    "EU": "18/18 (100%)",
+    "HK": "5/5 (100%)",
+    "ID": "10/10 (100%)",
+    "IN": "10/10 (100%)",
+    "JP": "30/30 (100%)",
+    "KR": "10/10 (100%)",
+    "MX": "9/9 (100%)",
+    "TW": "30/30 (100%)",
+    "US": "30/30 (100%)"
+  },
+  "sectors_present": {
+    "Financials": 45,
+    "Information Technology": 29,
+    "Industrials": 19,
+    "Consumer Staples": 19,
+    "Communication Services": 17,
+    "Consumer Discretionary": 15,
+    "Health Care": 14,
+    "Materials": 13,
+    "Energy": 10,
+    "Real Estate": 1
+  },
+  "analysis1_sector_only": {
+    "S1_sector_only": {
+      "n": 182,
+      "r2": 0.1791975913761762,
+      "adj_r2": 0.13624862813423189,
+      "sector_fe_f": 380.38950956518624,
+      "sector_fe_p": 2.047298781845301e-12,
+      "sector_fe_df": 9
+    },
+    "S2_sector_plus_mcap": {
+      "n": 182,
+      "r2": 0.1836930346304535,
+      "adj_r2": 0.13595578519363782
+    }
+  },
+  "analysis2_4model": {
+    "M1": {
+      "n": 182,
+      "r2": 0.15470262052147488,
+      "adj_r2": 0.09468150481885773,
+      "f_stat": 0.07463350431247671,
+      "f_pvalue": 0.7897671717289332,
+      "aic": -1833.5481659913492,
+      "bic": -1791.8960790593508,
+      "log_mcap_beta": -2.0743771445237932e-05,
+      "log_mcap_se": 0.00027007921364741064,
+      "log_mcap_t": -0.07680624941510308,
+      "log_mcap_p": 0.9387776791130032
+    },
+    "M2": {
+      "n": 182,
+      "r2": 0.1640055614842878,
+      "adj_r2": 0.09931551564676244,
+      "f_stat": 1.9276273804092692,
+      "f_pvalue": 0.19156633721184166,
+      "aic": -1833.5622750432956,
+      "bic": -1788.7061814242204,
+      "log_mcap_beta": -4.142446171244348e-06,
+      "log_mcap_se": 0.0002698159970196949,
+      "log_mcap_t": -0.015352856083407,
+      "log_mcap_p": 0.9877506743838561,
+      "institutions_pct_beta": -0.001274309446296991,
+      "institutions_pct_se": 0.0014570843631114474,
+      "institutions_pct_t": -0.8745611980735556,
+      "institutions_pct_p": 0.38181270805348166
+    },
+    "M3": {
+      "n": 182,
+      "r2": 0.3305370164256861,
+      "adj_r2": 0.24266999983155735,
+      "f_stat": 870.2295917877289,
+      "f_pvalue": 2.1932180952888895e-14,
+      "aic": -1857.9928628088992,
+      "bic": -1787.5047156932096,
+      "log_mcap_beta": -8.475270097219755e-05,
+      "log_mcap_se": 0.00023725757504268924,
+      "log_mcap_t": -0.3572181033922655,
+      "log_mcap_p": 0.7209285342389151,
+      "sector_fe_f": 689.5201482099515,
+      "sector_fe_p": 7.865192356265678e-14,
+      "sector_fe_df": 9
+    },
+    "M4": {
+      "n": 182,
+      "r2": 0.33762967860523996,
+      "adj_r2": 0.24598095489024174,
+      "f_stat": 652.802179669064,
+      "f_pvalue": 9.010959028298714e-14,
+      "aic": -1857.9313587383767,
+      "bic": -1784.2392049356104,
+      "log_mcap_beta": -8.336330109081799e-05,
+      "log_mcap_se": 0.00022799137684088806,
+      "log_mcap_t": -0.36564234246892613,
+      "log_mcap_p": 0.7146319750200236,
+      "institutions_pct_beta": -0.0012187311451080714,
+      "institutions_pct_se": 0.0015230450096940162,
+      "institutions_pct_t": -0.800193781110197,
+      "institutions_pct_p": 0.423598532368222,
+      "sector_fe_f": 154.39359918089633,
+      "sector_fe_p": 2.8041176441698043e-10,
+      "sector_fe_df": 9
+    }
+  },
+  "analysis2b_4model_theta_rel_stock": {
+    "M1_rel": {
+      "n": 182,
+      "r2": 0.17259949777823225,
+      "adj_r2": 0.1138491662595269,
+      "f_stat": 0.0035335455494467953,
+      "f_pvalue": 0.9536649513078234,
+      "aic": 924.0008358983532,
+      "bic": 965.6529228303516,
+      "log_mcap_beta": 0.03299220245654724,
+      "log_mcap_se": 0.3192416875954098,
+      "log_mcap_t": 0.10334553330127685,
+      "log_mcap_p": 0.9176887387094144
+    },
+    "M2_rel": {
+      "n": 182,
+      "r2": 0.17308963646448128,
+      "adj_r2": 0.10910252500042328,
+      "f_stat": 0.0960018028859024,
+      "f_pvalue": 0.9092151018832203,
+      "aic": 925.892990093367,
+      "bic": 970.7490837124421,
+      "log_mcap_beta": 0.025480873579789218,
+      "log_mcap_se": 0.32782349573098574,
+      "log_mcap_t": 0.0777274170753734,
+      "log_mcap_p": 0.9380448844050232,
+      "institutions_pct_beta": 0.5765658574791432,
+      "institutions_pct_se": 1.364580266427475,
+      "institutions_pct_t": 0.4225224940329933,
+      "institutions_pct_p": 0.6726436856264293
+    },
+    "M3_rel": {
+      "n": 182,
+      "r2": 0.3030890321259694,
+      "adj_r2": 0.21161946759250283,
+      "f_stat": 177.93750071972897,
+      "f_pvalue": 1.2960001146623222e-10,
+      "aic": 910.7639584801251,
+      "bic": 981.2521055958146,
+      "log_mcap_beta": -0.1304117807247569,
+      "log_mcap_se": 0.24585406520987016,
+      "log_mcap_t": -0.5304438656055273,
+      "log_mcap_p": 0.5958042192395636,
+      "sector_fe_f": 688.2830938539212,
+      "sector_fe_p": 7.943042513358365e-14,
+      "sector_fe_df": 9
+    },
+    "M4_rel": {
+      "n": 182,
+      "r2": 0.3033977463262504,
+      "adj_r2": 0.20701252883680077,
+      "f_stat": 1283.4900021207682,
+      "f_pvalue": 2.203441877500717e-15,
+      "aic": 912.6833191514105,
+      "bic": 986.3754729541768,
+      "log_mcap_beta": -0.13098316144639827,
+      "log_mcap_se": 0.2513919362879682,
+      "log_mcap_t": -0.5210316742075518,
+      "log_mcap_p": 0.6023447065907395,
+      "institutions_pct_beta": 0.5011944296988882,
+      "institutions_pct_se": 2.1620457244528923,
+      "institutions_pct_t": 0.23181490753425943,
+      "institutions_pct_p": 0.816681777882625,
+      "sector_fe_f": 372.8727033218954,
+      "sector_fe_p": 2.283587701650545e-12,
+      "sector_fe_df": 9
+    }
+  },
+  "analysis3a_sector_adjusted_residuals": [
+    {
+      "market": "AU",
+      "theta_raw_mean": 0.0002948998261423175,
+      "theta_sec_adj_mean": -0.0003867622774462653,
+      "theta_raw_median": 0.0001163354992908,
+      "theta_sec_adj_median": -0.0003452708979592173,
+      "n": 10,
+      "abs_reduction_pct": -31.150391814614153
+    },
+    {
+      "market": "BR",
+      "theta_raw_mean": 0.0016804489075650784,
+      "theta_sec_adj_mean": 0.001031712133732902,
+      "theta_raw_median": 0.000791201754709,
+      "theta_sec_adj_median": 0.000401425231933618,
+      "n": 10,
+      "abs_reduction_pct": 38.604968643300026
+    },
+    {
+      "market": "CA",
+      "theta_raw_mean": 0.0003597470451425943,
+      "theta_sec_adj_mean": -0.00026496995036509304,
+      "theta_raw_median": 0.00010533979246322743,
+      "theta_sec_adj_median": -0.000337500470864051,
+      "n": 10,
+      "abs_reduction_pct": 26.345482487544576
+    },
+    {
+      "market": "EU",
+      "theta_raw_mean": 0.0006486991753613768,
+      "theta_sec_adj_mean": -0.00033688438796144007,
+      "theta_raw_median": 0.00022696295000165,
+      "theta_sec_adj_median": -0.00025123393052512534,
+      "n": 18,
+      "abs_reduction_pct": 48.06770214039985
+    },
+    {
+      "market": "HK",
+      "theta_raw_mean": 0.00024681131571978305,
+      "theta_sec_adj_mean": -0.00034364784035662054,
+      "theta_raw_median": 0.0001252705316154,
+      "theta_sec_adj_median": -0.00032770292126297034,
+      "n": 5,
+      "abs_reduction_pct": -39.23504250784868
+    },
+    {
+      "market": "ID",
+      "theta_raw_mean": 0.00042838767728211306,
+      "theta_sec_adj_mean": -7.050742077652458e-05,
+      "theta_raw_median": 0.00036393874662595,
+      "theta_sec_adj_median": -0.00011148389935528588,
+      "n": 10,
+      "abs_reduction_pct": 83.54121173049236
+    },
+    {
+      "market": "IN",
+      "theta_raw_mean": 0.00069771487801248,
+      "theta_sec_adj_mean": -3.2280802341751336e-05,
+      "theta_raw_median": 0.0006092735731805499,
+      "theta_sec_adj_median": -0.00010208632978318149,
+      "n": 10,
+      "abs_reduction_pct": 95.37335330533486
+    },
+    {
+      "market": "JP",
+      "theta_raw_mean": 0.00101882726602056,
+      "theta_sec_adj_mean": -3.7358957686730765e-06,
+      "theta_raw_median": 0.0007619218243662,
+      "theta_sec_adj_median": 2.9014558194597292e-05,
+      "n": 30,
+      "abs_reduction_pct": 99.63331411582013
+    },
+    {
+      "market": "KR",
+      "theta_raw_mean": 7.676518734639533e-05,
+      "theta_sec_adj_mean": -0.0009594751538193816,
+      "theta_raw_median": 8.11820123774254e-05,
+      "theta_sec_adj_median": -0.0008140240901445613,
+      "n": 10,
+      "abs_reduction_pct": -1149.883165776493
+    },
+    {
+      "market": "MX",
+      "theta_raw_mean": 0.0006894528138741157,
+      "theta_sec_adj_mean": 0.0001501431511996015,
+      "theta_raw_median": 0.000207575110247,
+      "theta_sec_adj_median": -4.816363644463971e-05,
+      "n": 9,
+      "abs_reduction_pct": 78.22285322821013
+    },
+    {
+      "market": "TW",
+      "theta_raw_mean": 0.00039505948606864287,
+      "theta_sec_adj_mean": -0.0005513880307270596,
+      "theta_raw_median": 9.247306847930208e-05,
+      "theta_sec_adj_median": -0.00037740850385675805,
+      "n": 30,
+      "abs_reduction_pct": -39.57088746661663
+    },
+    {
+      "market": "US",
+      "theta_raw_mean": 0.002019001389399096,
+      "theta_sec_adj_mean": 0.0009969140776441908,
+      "theta_raw_median": 0.00023194728782460002,
+      "theta_sec_adj_median": -0.00011424554944221548,
+      "n": 30,
+      "abs_reduction_pct": 50.62340804327546
+    }
+  ],
+  "analysis3b_residual_markets": {
+    "AU": {
+      "n": 10,
+      "theta_eav_median": 0.0001163354992908,
+      "inst_pct_mean": 0.37470199800000004,
+      "sector_mix_pct": {
+        "Financials": 50.0,
+        "Materials": 20.0,
+        "Health Care": 10.0,
+        "Consumer Discretionary": 10.0,
+        "Communication Services": 10.0
+      },
+      "top_sector_pct": 50.0,
+      "top_sector": "Financials"
+    },
+    "BR": {
+      "n": 10,
+      "theta_eav_median": 0.000791201754709,
+      "inst_pct_mean": 0.4856220004,
+      "sector_mix_pct": {
+        "Financials": 40.0,
+        "Industrials": 20.0,
+        "Materials": 10.0,
+        "Energy": 10.0,
+        "Consumer Staples": 10.0,
+        "Consumer Discretionary": 10.0
+      },
+      "top_sector_pct": 40.0,
+      "top_sector": "Financials"
+    },
+    "IN": {
+      "n": 10,
+      "theta_eav_median": 0.0006092735731805499,
+      "inst_pct_mean": 0.382842999,
+      "sector_mix_pct": {
+        "Financials": 40.0,
+        "Information Technology": 20.0,
+        "Consumer Staples": 20.0,
+        "Energy": 10.0,
+        "Communication Services": 10.0
+      },
+      "top_sector_pct": 40.0,
+      "top_sector": "Financials"
+    },
+    "MX": {
+      "n": 9,
+      "theta_eav_median": 0.000207575110247,
+      "inst_pct_mean": 0.19547777733333332,
+      "sector_mix_pct": {
+        "Consumer Staples": 44.4,
+        "Communication Services": 22.2,
+        "Materials": 22.2,
+        "Financials": 11.1
+      },
+      "top_sector_pct": 44.4,
+      "top_sector": "Consumer Staples"
+    },
+    "EU": {
+      "n": 18,
+      "theta_eav_median": 0.00022696295000165,
+      "inst_pct_mean": 0.4130050033333334,
+      "sector_mix_pct": {
+        "Consumer Discretionary": 22.2,
+        "Financials": 16.7,
+        "Health Care": 16.7,
+        "Energy": 16.7,
+        "Industrials": 11.1,
+        "Information Technology": 5.6,
+        "Materials": 5.6,
+        "Communication Services": 5.6
+      },
+      "top_sector_pct": 22.2,
+      "top_sector": "Consumer Discretionary"
+    },
+    "US": {
+      "n": 30,
+      "theta_eav_median": 0.00023194728782460002,
+      "inst_pct_mean": 0.7496643360000002,
+      "sector_mix_pct": {
+        "Information Technology": 23.3,
+        "Health Care": 20.0,
+        "Consumer Staples": 16.7,
+        "Consumer Discretionary": 13.3,
+        "Financials": 13.3,
+        "Communication Services": 6.7,
+        "Energy": 6.7
+      },
+      "top_sector_pct": 23.3,
+      "top_sector": "Information Technology"
+    },
+    "CA": {
+      "n": 10,
+      "theta_eav_median": 0.00010533979246322743,
+      "inst_pct_mean": 0.551501006,
+      "sector_mix_pct": {
+        "Financials": 50.0,
+        "Energy": 20.0,
+        "Communication Services": 10.0,
+        "Industrials": 10.0,
+        "Information Technology": 10.0
+      },
+      "top_sector_pct": 50.0,
+      "top_sector": "Financials"
+    },
+    "JP": {
+      "n": 30,
+      "theta_eav_median": 0.0007619218243662,
+      "inst_pct_mean": 0.42508333099999995,
+      "sector_mix_pct": {
+        "Industrials": 26.7,
+        "Information Technology": 16.7,
+        "Communication Services": 16.7,
+        "Financials": 13.3,
+        "Consumer Discretionary": 10.0,
+        "Health Care": 10.0,
+        "Materials": 3.3,
+        "Real Estate": 3.3
+      },
+      "top_sector_pct": 26.7,
+      "top_sector": "Industrials"
+    }
+  },
+  "analysis4_orthogonality": {
+    "rho": -0.006060606060606061,
+    "p": 0.9867429111949892,
+    "n_sectors": 10
+  },
+  "sector_median_table": [
+    {
+      "gics_sector": "Communication Services",
+      "theta_eav_median": 0.0003348118969009,
+      "theta_eav_mean": 0.0011727674479553364,
+      "inst_pct_median": 0.31827,
+      "log_analyst_median": 2.9444389791664403,
+      "n": 17
+    },
+    {
+      "gics_sector": "Consumer Discretionary",
+      "theta_eav_median": 0.0003523011038893,
+      "theta_eav_mean": 0.0024738177755729254,
+      "inst_pct_median": 0.3415,
+      "log_analyst_median": 3.1780538303479458,
+      "n": 15
+    },
+    {
+      "gics_sector": "Consumer Staples",
+      "theta_eav_median": 0.0001835252692777,
+      "theta_eav_mean": 0.0003879731229175014,
+      "inst_pct_median": 0.19452,
+      "log_analyst_median": 2.9444389791664403,
+      "n": 19
+    },
+    {
+      "gics_sector": "Energy",
+      "theta_eav_median": 0.00017193310209485,
+      "theta_eav_mean": 0.0002689798225690296,
+      "inst_pct_median": 0.55207502,
+      "log_analyst_median": 3.0433873634561532,
+      "n": 10
+    },
+    {
+      "gics_sector": "Financials",
+      "theta_eav_median": 0.0001221541844955,
+      "theta_eav_mean": 0.0004448820831066704,
+      "inst_pct_median": 0.40655,
+      "log_analyst_median": 2.70805020110221,
+      "n": 45
+    },
+    {
+      "gics_sector": "Health Care",
+      "theta_eav_median": 0.00019504499530820002,
+      "theta_eav_mean": 0.0004341479034409351,
+      "inst_pct_median": 0.5750850000000001,
+      "log_analyst_median": 3.198464827608073,
+      "n": 14
+    },
+    {
+      "gics_sector": "Industrials",
+      "theta_eav_median": 0.0005662874107136,
+      "theta_eav_mean": 0.0006606649690719937,
+      "inst_pct_median": 0.37798,
+      "log_analyst_median": 2.70805020110221,
+      "n": 19
+    },
+    {
+      "gics_sector": "Information Technology",
+      "theta_eav_median": 0.0013684129895576,
+      "theta_eav_mean": 0.0016513674773781315,
+      "inst_pct_median": 0.46422002,
+      "log_analyst_median": 3.1354942159291497,
+      "n": 29
+    },
+    {
+      "gics_sector": "Materials",
+      "theta_eav_median": 0.000207575110247,
+      "theta_eav_mean": 0.0002557387466916397,
+      "inst_pct_median": 0.24355,
+      "log_analyst_median": 2.5649493574615367,
+      "n": 13
+    },
+    {
+      "gics_sector": "Real Estate",
+      "theta_eav_median": 0.0005117363582738,
+      "theta_eav_mean": 0.0005117363582738,
+      "inst_pct_median": 0.4743,
+      "log_analyst_median": 2.4849066497880004,
+      "n": 1
+    }
+  ],
+  "per_market_sector_mix_pct": {
+    "Communication Services": {
+      "AU": 10.0,
+      "BR": 0.0,
+      "CA": 10.0,
+      "EU": 5.6,
+      "HK": 20.0,
+      "ID": 10.0,
+      "IN": 10.0,
+      "JP": 16.7,
+      "KR": 20.0,
+      "MX": 22.2,
+      "TW": 0.0,
+      "US": 6.7
+    },
+    "Consumer Discretionary": {
+      "AU": 10.0,
+      "BR": 10.0,
+      "CA": 0.0,
+      "EU": 22.2,
+      "HK": 0.0,
+      "ID": 0.0,
+      "IN": 0.0,
+      "JP": 10.0,
+      "KR": 10.0,
+      "MX": 0.0,
+      "TW": 3.3,
+      "US": 13.3
+    },
+    "Consumer Staples": {
+      "AU": 0.0,
+      "BR": 10.0,
+      "CA": 0.0,
+      "EU": 0.0,
+      "HK": 0.0,
+      "ID": 40.0,
+      "IN": 20.0,
+      "JP": 0.0,
+      "KR": 0.0,
+      "MX": 44.4,
+      "TW": 10.0,
+      "US": 16.7
+    },
+    "Energy": {
+      "AU": 0.0,
+      "BR": 10.0,
+      "CA": 20.0,
+      "EU": 16.7,
+      "HK": 0.0,
+      "ID": 10.0,
+      "IN": 10.0,
+      "JP": 0.0,
+      "KR": 0.0,
+      "MX": 0.0,
+      "TW": 0.0,
+      "US": 6.7
+    },
+    "Financials": {
+      "AU": 50.0,
+      "BR": 40.0,
+      "CA": 50.0,
+      "EU": 16.7,
+      "HK": 80.0,
+      "ID": 30.0,
+      "IN": 40.0,
+      "JP": 13.3,
+      "KR": 20.0,
+      "MX": 11.1,
+      "TW": 20.0,
+      "US": 13.3
+    },
+    "Health Care": {
+      "AU": 10.0,
+      "BR": 0.0,
+      "CA": 0.0,
+      "EU": 16.7,
+      "HK": 0.0,
+      "ID": 0.0,
+      "IN": 0.0,
+      "JP": 10.0,
+      "KR": 10.0,
+      "MX": 0.0,
+      "TW": 0.0,
+      "US": 20.0
+    },
+    "Industrials": {
+      "AU": 0.0,
+      "BR": 20.0,
+      "CA": 10.0,
+      "EU": 11.1,
+      "HK": 0.0,
+      "ID": 10.0,
+      "IN": 0.0,
+      "JP": 26.7,
+      "KR": 10.0,
+      "MX": 0.0,
+      "TW": 13.3,
+      "US": 0.0
+    },
+    "Information Technology": {
+      "AU": 0.0,
+      "BR": 0.0,
+      "CA": 10.0,
+      "EU": 5.6,
+      "HK": 0.0,
+      "ID": 0.0,
+      "IN": 20.0,
+      "JP": 16.7,
+      "KR": 20.0,
+      "MX": 0.0,
+      "TW": 36.7,
+      "US": 23.3
+    },
+    "Materials": {
+      "AU": 20.0,
+      "BR": 10.0,
+      "CA": 0.0,
+      "EU": 5.6,
+      "HK": 0.0,
+      "ID": 0.0,
+      "IN": 0.0,
+      "JP": 3.3,
+      "KR": 10.0,
+      "MX": 22.2,
+      "TW": 16.7,
+      "US": 0.0
+    },
+    "Real Estate": {
+      "AU": 0.0,
+      "BR": 0.0,
+      "CA": 0.0,
+      "EU": 0.0,
+      "HK": 0.0,
+      "ID": 0.0,
+      "IN": 0.0,
+      "JP": 3.3,
+      "KR": 0.0,
+      "MX": 0.0,
+      "TW": 0.0,
+      "US": 0.0
+    }
+  },
+  "verdict": {
+    "verdict": "SECTOR_ORTHOGONAL_CONFIRMED",
+    "inc_R2_inst_M2_minus_M1": 0.004634010827904711,
+    "inc_R2_sector_M3_minus_M1": 0.14798849501269962,
+    "inc_R2_joint_M4_minus_M1": 0.151299450071384,
+    "inst_beta_M2": -0.001274309446296991,
+    "inst_beta_M4": -0.0012187311451080714,
+    "inst_t_M2": -0.8745611980735556,
+    "inst_t_M4": -0.800193781110197,
+    "inst_beta_relative_change_M2_to_M4": 0.04361444651487465,
+    "sector_fe_joint_F_M3": 689.5201482099515,
+    "sector_fe_joint_p_M3": 7.865192356265678e-14
+  }
+}

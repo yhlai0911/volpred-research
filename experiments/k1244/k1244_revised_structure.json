@@ -1,0 +1,161 @@
+{
+  "experiment_id": "K1244",
+  "title": "Paper 10 Section 6 Revised Structure (post-K1241 NULL reframing)",
+  "paper": "crypto-fear-channel (Paper 10)",
+  "created_at": "2026-04-17",
+  "supersedes": "K1240 §6 (K1241 NULL forced pivot of Main vs Robustness)",
+  "source_experiments": {
+    "K1240": "original §6 skeleton (superseded)",
+    "K1241": "pooled GARCH-X(VIX²) NULL (now §6.5 Robustness, demoted)",
+    "K1025": "QR + asymmetric Granger + DY spillover + regime Granger (promoted to Main)",
+    "K746b": "asymmetric VIX↔BTC Granger (supports §6.2)",
+    "K639": "BTC→SPY RV Granger (supports §6.2)",
+    "K1133": "sub-period convention P1/P2/P3 (supports §6.4 framing)"
+  },
+  "seed": 42,
+  "subsections": [
+    {
+      "id": "§6.1",
+      "title": "Quantile Regression Fear-Channel Identification",
+      "role": "MAIN (promoted)",
+      "source": "K1025 quantile_regression",
+      "primary_phi_redefinition": "β_{τ=0.95} = 22.308 replaces K1241 pooled φ_M2 as Paper 10 canonical fear-channel coefficient",
+      "canonical_numbers": {
+        "beta_0.05": -2.863,
+        "t_0.05": -10.93,
+        "p_0.05": 2.93e-27,
+        "beta_0.25": -2.343,
+        "t_0.25": -6.54,
+        "p_0.25": 7.45e-11,
+        "beta_0.50": 2.613,
+        "t_0.50": 5.44,
+        "p_0.50": 5.71e-08,
+        "beta_0.75": 8.759,
+        "t_0.75": 11.17,
+        "p_0.75": 2.32e-28,
+        "beta_0.95": 22.308,
+        "t_0.95": 8.88,
+        "p_0.95": 1.16e-18,
+        "tail_amplification_ratio": 8.54,
+        "harvey_t_gt_3_pass": "5/5 quantiles"
+      },
+      "word_count_target": 380
+    },
+    {
+      "id": "§6.2",
+      "title": "Asymmetric Granger Causality",
+      "role": "MAIN (promoted from K1240 §6.4 sketch)",
+      "source": "K1025 asymmetric_granger, K746b part_b_granger_fixed, K639 granger_causality",
+      "canonical_numbers": {
+        "btc_neg_to_vix_lag1_F": 18.96,
+        "btc_neg_to_vix_lag1_p": 1.38e-05,
+        "btc_neg_to_vix_lag5_F": 6.64,
+        "btc_neg_to_vix_lag5_p": 3.69e-06,
+        "btc_pos_to_vix_lag1_F": 2.00,
+        "btc_pos_to_vix_lag1_p": 0.157,
+        "btc_pos_to_vix_lag5_F": 0.28,
+        "btc_pos_to_vix_lag5_p": 0.927,
+        "k746b_VIX_to_BTC_absret_lag4_F": 3.41,
+        "k746b_VIX_to_BTC_absret_lag4_p": 0.0087,
+        "k746b_BTC_absret_to_dVIX_lag1_F": 14.82,
+        "k746b_BTC_absret_to_dVIX_lag1_p": 1.21e-04
+      },
+      "interpretation": "Sign-conditional flight-to-quality / forced-liquidation narrative: downside BTC moves transmit into cross-margining cascades; upside BTC moves are idiosyncratic",
+      "word_count_target": 260
+    },
+    {
+      "id": "§6.3",
+      "title": "Diebold-Yilmaz Spillover Characterisation",
+      "role": "MAIN (promoted from K1240 §7.3 sketch)",
+      "source": "K1025 spillover_index (252-day rolling, 10-day GFEVD)",
+      "canonical_numbers": {
+        "mean_total_spillover_pct": 90.11,
+        "std_total_spillover_pct": 0.21,
+        "max_total_spillover_pct": 90.81,
+        "min_total_spillover_pct": 89.79,
+        "mean_from_btc_pct": 21.47,
+        "mean_net_btc_pct": -76.89,
+        "n_rolling_windows": 512
+      },
+      "narrative": "BTC is a NET RECEIVER — rehabilitates 'crypto as fear amplifier, not fear originator'",
+      "word_count_target": 240
+    },
+    {
+      "id": "§6.4",
+      "title": "Regime-Dependent Fear Channel",
+      "role": "MAIN (promoted from K1240 §6.3 sketch)",
+      "source": "K1025 subperiod_granger (five-regime decomposition)",
+      "canonical_numbers": {
+        "2015-2017_Pre-mania": {"n": 735, "lag": 1, "F": 0.59, "p": 0.443, "significant": false},
+        "2018-2019_Crypto-winter": {"n": 503, "lag": 1, "F": 0.23, "p": 0.630, "significant": false},
+        "2020_COVID": {"n": 253, "lag": 3, "F": 11.05, "p": 7.94e-07, "significant": true},
+        "2021-2022_Bull-Bear": {"n": 503, "lag": 1, "F": 1.95, "p": 0.163, "significant": false},
+        "2023-2026_Recovery-ETF": {"n": 818, "lag": 3, "F": 0.46, "p": 0.709, "significant": false}
+      },
+      "key_finding": "Full-sample BTC→VIX Granger concentrates ENTIRELY in 2020 COVID sub-panel; 4/5 other regimes insignificant — channel is crisis-time phenomenon, not uniform linear driver",
+      "word_count_target": 280
+    },
+    {
+      "id": "§6.5",
+      "title": "Robustness: Pooled-Variance Naive Specification (NULL)",
+      "role": "ROBUSTNESS (demoted from K1240 §6.1 Main)",
+      "source": "K1241 (pooled GJR-GARCH-X(VIX²) Student-t QMLE + BW SE)",
+      "canonical_numbers": {
+        "M2_phi": -9.67e-06,
+        "M2_SE_BW": 7.78e-05,
+        "M2_t_BW": -0.12,
+        "M2_p_BW": 0.901,
+        "M2_LRT_p": 0.946,
+        "M3_phi": -9.67e-06,
+        "M3_t_BW": -0.06,
+        "M3_p_BW": 0.951,
+        "OOS_QLIKE_M1": 2.0131,
+        "OOS_QLIKE_M2": 2.0129,
+        "OOS_DM_HLN_M2_vs_M1_t": 0.75,
+        "OOS_DM_HLN_M2_vs_M1_p": 0.452,
+        "subperiod_P1_2015-2020_phi": -7.83e-05,
+        "subperiod_P1_t_BW": -0.60,
+        "subperiod_P2_2021-2023_phi": 4.14e-05,
+        "subperiod_P2_t_BW": 0.61,
+        "subperiod_P3_2024-2026_phi": -1.36e-04,
+        "subperiod_P3_t_BW": -0.31,
+        "subperiod_same_sign_t2": "0/3",
+        "harvey_verdict": "NULL (FAIL on all 4 gates)"
+      },
+      "interpretation": "NULL not a rejection of fear-channel hypothesis — evidence that channel is tail-concentrated (§6.1), sign-asymmetric (§6.2), and regime-conditional (§6.4). Pooled linear exog-var term averages heterogeneities to ~0.",
+      "side_observation": "γ = 0 (no BTC leverage effect) consistent with Baur & Dimpfl (2018); motivates QR / asymmetric Granger over symmetric GJR news-impact curve",
+      "word_count_target": 370
+    }
+  ],
+  "summary_promotions": {
+    "promoted_from_k1240_or_k1242_robustness_to_main": [
+      "QR tail coefficient (was K1240 §6.2)",
+      "Asymmetric Granger (was K1240 §6.4)",
+      "DY spillover (was K1242 §7.3)",
+      "Regime Granger (was K1240 §6.3)"
+    ],
+    "demoted_from_k1240_main_to_robustness": [
+      "Pooled GJR-GARCH-X(VIX²) Table 3 (now §6.5, reframed as honest NULL)"
+    ]
+  },
+  "k1242_s7_coordination": {
+    "action_required": "main-thread consolidation",
+    "§7.2_sub-sample_granger": "CONSOLIDATE with §6.4 (redundant)",
+    "§7.5_endogeneity_IV": "NARROW to IV-orthogonalised VIX innovation only (§6.2 covers symmetric bivariate Granger)",
+    "§7.1_alternative_fear_proxies": "RETAIN",
+    "§7.3_ETH_SOL": "RETAIN (pending scope decision)",
+    "§7.4_EGARCH_APARCH": "RETAIN"
+  },
+  "narrative_alignment": {
+    "§1_introduction": "existing framing (asymmetric / tail / regime) consistent — amplify in preview paragraph",
+    "§2_literature": "Hatemi-J 2012, Koenker-Bassett 1978, Diebold-Yilmaz 2012 already cited; Bekaert et al. 2014, Geanakoplos 2010 for mechanism",
+    "§8_discussion": "K1242 §8.1-§8.4 valid; §8.2 K1214 positioning unchanged",
+    "§9_conclusion": "K1242 §9 placeholder 'headline φ' REWRITE to three-pillar tail/asymmetric/regime framing + honest pooled NULL as methodological contribution"
+  },
+  "research_honesty": {
+    "principle_1_no_fabrication": "all numbers verbatim from k1025_results.json and k1241_results.json",
+    "principle_9_null_reported": "K1241 NULL reported in §6.5 without softening",
+    "principle_11_lookahead": "K1025 Δ VIX_{t-1}, K746b VIX_{t-1}, K1241 VIX²_{t-1} (signal.shift(1) in code) — all lag-1, consistent",
+    "seed": 42
+  }
+}

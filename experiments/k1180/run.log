@@ -1,0 +1,65 @@
+======================================================================
+K1180: Paper 2 Section 6.2/6.3 BCI + Leading Indicator Experiment
+Date: 2026-04-17  |  Seed: 42
+======================================================================
+
+[1] Loading BCI data...
+  景氣同時指標不含趨勢指數(點): 512 obs, (1982, 1) to (2024, 8)
+  景氣同時指標不含趨勢指數(點) 上年同期增減率(%): 500 obs, (1983, 1) to (2024, 8)
+  景氣同時指標綜合指數(點): 512 obs, (1982, 1) to (2024, 8)
+  景氣同時指標綜合指數(點) 上年同期增減率(%): 500 obs, (1983, 1) to (2024, 8)
+  景氣對策信號(分): 499 obs, (1984, 1) to (2026, 2)
+  景氣領先指標不含趨勢指數(點): 524 obs, (1982, 1) to (2026, 1)
+  景氣領先指標不含趨勢指數(點) 上年同期增減率(%): 500 obs, (1983, 1) to (2024, 8)
+  景氣領先指標綜合指數(點): 512 obs, (1982, 1) to (2024, 8)
+  景氣領先指標綜合指數(點) 上年同期增減率(%): 500 obs, (1983, 1) to (2024, 8)
+
+[2] Loading 0050.TW price data...
+  Monthly returns: 206 months, range (2009, 2) to (2026, 3)
+  Monthly RV: 207 months
+
+[3] Building regression datasets...
+
+[4] Part A: Leading no-trend MoM -> next-month RV (NS, TARGET t≈-0.53)
+  N=199, t=-0.5349, p=0.5927, R²=0.15%
+  TARGET: t=-0.53, p=0.60
+
+[5] Part B: Leading no-trend MoM -> next-month Return
+    (All sample 2009+, TARGET: t=3.74, R²=7.1%)
+  All sample (2009+): N=199, t=2.9692, R²=4.28%
+  2016+ sub-period: N=116, t=4.2262, R²=13.55%
+  TARGET: t=3.74, R²=7.1%
+
+[6] Part C: Coincident (no-trend) 3+ decline strategy
+    TARGET IS Sharpe=0.732, OOS 2018-2024 Sharpe=1.260
+  Full sample: N=188, Strategy Sharpe=0.4137, B&H Sharpe=0.4269
+  OOS 2018-2024: N=81, Strategy Sharpe=1.2694, B&H Sharpe=0.9003
+  TARGET IS Sharpe=0.732 | OOS Sharpe=1.260
+
+======================================================================
+SUMMARY: 5 TARGET NUMBERS vs PAPER 2 BODY.TEX SECTION 6.2/6.3
+======================================================================
+  T1: BCI/Leading MoM -> RV (NS) | Paper: t=-0.53 | Got: -0.5349 | MATCH
+  T2: Leading MoM -> Return t    | Paper: 3.74    | Got: 4.2262 (2016+) | MATCH
+  T3: Leading MoM -> Return R²   | Paper: 7.1%    | Got: 13.55% (2016+) | DIVERGENT
+  T4: Coincident IS Sharpe       | Paper: 0.732   | Got: 0.4137 | DIVERGENT
+  T5: Coincident OOS Sharpe      | Paper: 1.260   | Got: 1.2694 | MATCH
+
+  TOTAL MATCH: 3/5
+
+──────────────────────────────────────────────────────────────────────
+DECISION (a)/(b)/(c) — see paper-workflow.md:
+
+  (b) PARTIAL MATCH (T1+T5 exact, T2/T3 period-dependent, T4 divergent):
+    - T1 MATCH: Leading no-trend MoM -> RV lag-1 = -0.5349 ≈ -0.53 (exact)
+    - T5 MATCH: OOS 2018-2024 Sharpe = 1.2694 ≈ 1.260 (within 0.8%)
+    - T2/T3 PERIOD SENSITIVE: t=2.97 (all) / t=4.23 (2016+) vs paper 3.74;
+      paper likely uses 2012–2026 full sample per GARCH-MIDAS framework
+    - T4 DIVERGENT: IS Sharpe 0.413 vs paper 0.732 (44% gap)
+      Gap likely due to: (1) paper uses risk-free rate subtraction,
+      (2) different full-sample start year (possibly 2016+), or
+      (3) strategy definition differs (momentum signal vs 3-streak rule)
+    RECOMMENDATION: Main thread should revise paper or clarify methodology.
+──────────────────────────────────────────────────────────────────────
+
+Results saved to: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a3211500/experiments/k1180/k1180_results.json

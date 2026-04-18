@@ -1,0 +1,651 @@
+{
+  "experiment": "k237_international_vt",
+  "date": "2026-03-24T17:08:27.632247",
+  "question": "Does 50/50+VT work outside the US?",
+  "attribution": "[\u63d0\u51fa: \u7528\u6236, \u57f7\u884c: Claude]",
+  "config": {
+    "strategy": "50/50 [Market ETF]/GLD + 12/VIX monthly",
+    "vt_numerator": 12,
+    "max_weight": 1.5,
+    "tx_cost_bps": 10,
+    "rf_annual": 0.04,
+    "markets": {
+      "SPY": {
+        "name": "US (S&P 500)",
+        "data_start": "2004-01-01"
+      },
+      "EWJ": {
+        "name": "Japan (MSCI Japan)",
+        "data_start": "2004-01-01"
+      },
+      "VGK": {
+        "name": "Europe (FTSE Europe)",
+        "data_start": "2005-06-01"
+      },
+      "EEM": {
+        "name": "Emerging Markets",
+        "data_start": "2004-01-01"
+      },
+      "0050.TW": {
+        "name": "Taiwan (\u53f0\u706350)",
+        "data_start": "2004-01-01"
+      }
+    },
+    "oos_periods": [
+      [
+        "2007-01-01",
+        "2009-12-31"
+      ],
+      [
+        "2010-01-01",
+        "2013-12-31"
+      ],
+      [
+        "2014-01-01",
+        "2017-12-31"
+      ],
+      [
+        "2018-01-01",
+        "2021-12-31"
+      ],
+      [
+        "2022-01-01",
+        "2026-03-31"
+      ]
+    ]
+  },
+  "full_period_results": {
+    "SPY": {
+      "name": "US (S&P 500)",
+      "period": "2004-11-19 to 2026-03-23",
+      "n_days": 5367,
+      "vt": {
+        "name": "50/50 SPY/GLD + VT",
+        "ann_return": 0.0812,
+        "ann_vol": 0.1062,
+        "sharpe": 0.3583,
+        "max_dd": -0.2247,
+        "calmar": 0.3613,
+        "sortino": 0.5041,
+        "total_growth": 5.2698,
+        "years": 21.2976,
+        "win_rate": 0.5914,
+        "n_days": 5367,
+        "n_trades": 254,
+        "trades_per_year": 11.9262
+      },
+      "bh_5050": {
+        "name": "50/50 SPY/GLD B&H",
+        "ann_return": 0.0963,
+        "ann_vol": 0.1348,
+        "sharpe": 0.3855,
+        "max_dd": -0.3505,
+        "calmar": 0.2748,
+        "sortino": 0.5253,
+        "total_growth": 7.0887,
+        "years": 21.2976,
+        "win_rate": 0.6148,
+        "n_days": 5367
+      },
+      "mkt_bh": {
+        "name": "SPY B&H",
+        "ann_return": 0.0835,
+        "ann_vol": 0.1901,
+        "sharpe": 0.2115,
+        "max_dd": -0.5647,
+        "calmar": 0.1479,
+        "sortino": 0.2734,
+        "total_growth": 5.5195,
+        "years": 21.2976,
+        "win_rate": 0.6381,
+        "n_days": 5367
+      },
+      "vix_mkt_corr": -0.8187,
+      "avg_vt_weight": 0.7165
+    },
+    "EWJ": {
+      "name": "Japan (MSCI Japan)",
+      "period": "2004-11-19 to 2026-03-23",
+      "n_days": 5367,
+      "vt": {
+        "name": "50/50 EWJ/GLD + VT",
+        "ann_return": 0.068,
+        "ann_vol": 0.1162,
+        "sharpe": 0.2222,
+        "max_dd": -0.2259,
+        "calmar": 0.3011,
+        "sortino": 0.3345,
+        "total_growth": 4.0627,
+        "years": 21.2976,
+        "win_rate": 0.5486,
+        "n_days": 5367,
+        "n_trades": 254,
+        "trades_per_year": 11.9262
+      },
+      "bh_5050": {
+        "name": "50/50 EWJ/GLD B&H",
+        "ann_return": 0.0706,
+        "ann_vol": 0.1445,
+        "sharpe": 0.195,
+        "max_dd": -0.3222,
+        "calmar": 0.219,
+        "sortino": 0.2857,
+        "total_growth": 4.272,
+        "years": 21.2976,
+        "win_rate": 0.5564,
+        "n_days": 5367
+      },
+      "mkt_bh": {
+        "name": "EWJ B&H",
+        "ann_return": 0.0332,
+        "ann_vol": 0.2036,
+        "sharpe": -0.0361,
+        "max_dd": -0.5582,
+        "calmar": 0.0595,
+        "sortino": -0.0443,
+        "total_growth": 2.0046,
+        "years": 21.2976,
+        "win_rate": 0.5642,
+        "n_days": 5367
+      },
+      "vix_mkt_corr": -0.6397,
+      "avg_vt_weight": 0.7165
+    },
+    "VGK": {
+      "name": "Europe (FTSE Europe)",
+      "period": "2005-06-02 to 2026-03-23",
+      "n_days": 5234,
+      "vt": {
+        "name": "50/50 VGK/GLD + VT",
+        "ann_return": 0.0649,
+        "ann_vol": 0.1203,
+        "sharpe": 0.1902,
+        "max_dd": -0.2846,
+        "calmar": 0.2281,
+        "sortino": 0.2793,
+        "total_growth": 3.6914,
+        "years": 20.7698,
+        "win_rate": 0.588,
+        "n_days": 5234,
+        "n_trades": 247,
+        "trades_per_year": 11.8922
+      },
+      "bh_5050": {
+        "name": "50/50 VGK/GLD B&H",
+        "ann_return": 0.0694,
+        "ann_vol": 0.1589,
+        "sharpe": 0.1707,
+        "max_dd": -0.4013,
+        "calmar": 0.173,
+        "sortino": 0.2393,
+        "total_growth": 4.0319,
+        "years": 20.7698,
+        "win_rate": 0.588,
+        "n_days": 5234
+      },
+      "mkt_bh": {
+        "name": "VGK B&H",
+        "ann_return": 0.025,
+        "ann_vol": 0.2323,
+        "sharpe": -0.0658,
+        "max_dd": -0.6733,
+        "calmar": 0.0372,
+        "sortino": -0.0779,
+        "total_growth": 1.6709,
+        "years": 20.7698,
+        "win_rate": 0.576,
+        "n_days": 5234
+      },
+      "vix_mkt_corr": -0.7182,
+      "avg_vt_weight": 0.7114
+    },
+    "EEM": {
+      "name": "Emerging Markets",
+      "period": "2004-11-19 to 2026-03-23",
+      "n_days": 5367,
+      "vt": {
+        "name": "50/50 EEM/GLD + VT",
+        "ann_return": 0.0697,
+        "ann_vol": 0.1313,
+        "sharpe": 0.2085,
+        "max_dd": -0.3774,
+        "calmar": 0.1847,
+        "sortino": 0.3048,
+        "total_growth": 4.2002,
+        "years": 21.2976,
+        "win_rate": 0.5798,
+        "n_days": 5367,
+        "n_trades": 254,
+        "trades_per_year": 11.9262
+      },
+      "bh_5050": {
+        "name": "50/50 EEM/GLD B&H",
+        "ann_return": 0.0779,
+        "ann_vol": 0.1779,
+        "sharpe": 0.1968,
+        "max_dd": -0.4631,
+        "calmar": 0.1682,
+        "sortino": 0.2778,
+        "total_growth": 4.9409,
+        "years": 21.2976,
+        "win_rate": 0.572,
+        "n_days": 5367
+      },
+      "mkt_bh": {
+        "name": "EEM B&H",
+        "ann_return": 0.0474,
+        "ann_vol": 0.2749,
+        "sharpe": 0.023,
+        "max_dd": -0.6723,
+        "calmar": 0.0705,
+        "sortino": 0.0344,
+        "total_growth": 2.6815,
+        "years": 21.2976,
+        "win_rate": 0.5486,
+        "n_days": 5367
+      },
+      "vix_mkt_corr": -0.6925,
+      "avg_vt_weight": 0.7165
+    },
+    "0050.TW": {
+      "name": "Taiwan (\u53f0\u706350)",
+      "period": "2009-01-05 to 2026-03-23",
+      "n_days": 4073,
+      "vt": {
+        "name": "50/50 0050.TW/GLD + VT",
+        "ann_return": 0.0515,
+        "ann_vol": 0.1869,
+        "sharpe": 0.0549,
+        "max_dd": -0.5891,
+        "calmar": 0.0875,
+        "sortino": 0.0498,
+        "total_growth": 2.2533,
+        "years": 16.1627,
+        "win_rate": 0.5797,
+        "n_days": 4073,
+        "n_trades": 204,
+        "trades_per_year": 12.6217
+      },
+      "bh_5050": {
+        "name": "50/50 0050.TW/GLD B&H",
+        "ann_return": 0.0757,
+        "ann_vol": 0.2207,
+        "sharpe": 0.1494,
+        "max_dd": -0.6199,
+        "calmar": 0.1222,
+        "sortino": 0.133,
+        "total_growth": 3.2534,
+        "years": 16.1627,
+        "win_rate": 0.5894,
+        "n_days": 4073
+      },
+      "mkt_bh": {
+        "name": "0050.TW B&H",
+        "ann_return": 0.0517,
+        "ann_vol": 0.4068,
+        "sharpe": 0.0256,
+        "max_dd": -0.7786,
+        "calmar": 0.0664,
+        "sortino": 0.0217,
+        "total_growth": 2.2589,
+        "years": 16.1627,
+        "win_rate": 0.599,
+        "n_days": 4073
+      },
+      "vix_mkt_corr": -0.0788,
+      "avg_vt_weight": 0.7028
+    }
+  },
+  "cross_oos_results": {
+    "SPY": {
+      "periods": [
+        {
+          "period": "2007-2009",
+          "vt_sharpe": 0.2221342235337236,
+          "bh_sharpe": 0.041684975655111534,
+          "vt_mdd": -0.22466948107101958,
+          "bh_mdd": -0.3505310583761514,
+          "vt_calmar": 0.32638132716607204,
+          "bh_calmar": 0.1410721560671579,
+          "n_days": "756"
+        },
+        {
+          "period": "2010-2013",
+          "vt_sharpe": 0.04844290228743097,
+          "bh_sharpe": 0.25026796626575226,
+          "vt_mdd": -0.15116761117675892,
+          "bh_mdd": -0.1420136139333701,
+          "vt_calmar": 0.3069744687278215,
+          "bh_calmar": 0.534451831302547,
+          "n_days": "1006"
+        },
+        {
+          "period": "2014-2017",
+          "vt_sharpe": 0.02230886438964826,
+          "bh_sharpe": 0.1669315296074822,
+          "vt_mdd": -0.13583666688623086,
+          "bh_mdd": -0.12973844040167815,
+          "vt_calmar": 0.3136980239645353,
+          "bh_calmar": 0.42695742710960355,
+          "n_days": "1007"
+        },
+        {
+          "period": "2018-2021",
+          "vt_sharpe": 0.37507925993332314,
+          "bh_sharpe": 0.5537060085055414,
+          "vt_mdd": -0.11842090622323254,
+          "bh_mdd": -0.21171634007697127,
+          "vt_calmar": 0.6469506184059464,
+          "bh_calmar": 0.5627319853293521,
+          "n_days": "1008"
+        },
+        {
+          "period": "2022-2026",
+          "vt_sharpe": 0.7692742313098067,
+          "bh_sharpe": 0.7479225248109292,
+          "vt_mdd": -0.149138050376865,
+          "bh_mdd": -0.18729095328688128,
+          "vt_calmar": 0.9030808583743153,
+          "bh_calmar": 0.8071206912165717,
+          "n_days": "1058"
+        }
+      ],
+      "vt_wins_sharpe": 2,
+      "vt_wins_mdd": 3,
+      "n_valid": 5
+    },
+    "EWJ": {
+      "periods": [
+        {
+          "period": "2007-2009",
+          "vt_sharpe": 0.12759488278716655,
+          "bh_sharpe": -0.0707734121058941,
+          "vt_mdd": -0.22140760161083617,
+          "bh_mdd": -0.32215739496097484,
+          "vt_calmar": 0.2709419325528506,
+          "bh_calmar": 0.07940463785927238,
+          "n_days": "756"
+        },
+        {
+          "period": "2010-2013",
+          "vt_sharpe": -0.09160927931279372,
+          "bh_sharpe": -0.01761611446851941,
+          "vt_mdd": -0.16331820823711496,
+          "bh_mdd": -0.14480229149760626,
+          "vt_calmar": 0.18073482085231538,
+          "bh_calmar": 0.26367737787036366,
+          "n_days": "1006"
+        },
+        {
+          "period": "2014-2017",
+          "vt_sharpe": -0.10152347863031135,
+          "bh_sharpe": -0.059981166770770124,
+          "vt_mdd": -0.14937350650646886,
+          "bh_mdd": -0.14659725479592067,
+          "vt_calmar": 0.21150865312706785,
+          "bh_calmar": 0.23722080428451525,
+          "n_days": "1007"
+        },
+        {
+          "period": "2018-2021",
+          "vt_sharpe": -0.05272559830129059,
+          "bh_sharpe": 0.12012831359332576,
+          "vt_mdd": -0.1389335029069544,
+          "bh_mdd": -0.16837007263677484,
+          "vt_calmar": 0.2584956188146553,
+          "bh_calmar": 0.331806825276562,
+          "n_days": "1008"
+        },
+        {
+          "period": "2022-2026",
+          "vt_sharpe": 0.6444725457378041,
+          "bh_sharpe": 0.6049475221571098,
+          "vt_mdd": -0.1573618273086238,
+          "bh_mdd": -0.20503769465155397,
+          "vt_calmar": 0.8074739525503538,
+          "bh_calmar": 0.6703751787771166,
+          "n_days": "1058"
+        }
+      ],
+      "vt_wins_sharpe": 2,
+      "vt_wins_mdd": 3,
+      "n_valid": 5
+    },
+    "VGK": {
+      "periods": [
+        {
+          "period": "2007-2009",
+          "vt_sharpe": 0.17408698390780336,
+          "bh_sharpe": -0.03682748088509375,
+          "vt_mdd": -0.25626330518226237,
+          "bh_mdd": -0.4012820641582495,
+          "vt_calmar": 0.26940998644291403,
+          "bh_calmar": 0.07955612246926429,
+          "n_days": "756"
+        },
+        {
+          "period": "2010-2013",
+          "vt_sharpe": -0.16451336847083817,
+          "bh_sharpe": -0.033885925506631935,
+          "vt_mdd": -0.1914577801040782,
+          "bh_mdd": -0.19057733603035476,
+          "vt_calmar": 0.09642375844712277,
+          "bh_calmar": 0.1817669248125819,
+          "n_days": "1006"
+        },
+        {
+          "period": "2014-2017",
+          "vt_sharpe": -0.4019986944724259,
+          "bh_sharpe": -0.3084674514936107,
+          "vt_mdd": -0.2247985727470202,
+          "bh_mdd": -0.22733696300511907,
+          "vt_calmar": 0.014257203668007841,
+          "bh_calmar": 0.03801124512390887,
+          "n_days": "1007"
+        },
+        {
+          "period": "2018-2021",
+          "vt_sharpe": -0.03856298778133834,
+          "bh_sharpe": 0.1351159368538268,
+          "vt_mdd": -0.15028140169132154,
+          "bh_mdd": -0.2370778917583065,
+          "vt_calmar": 0.24635236006520073,
+          "bh_calmar": 0.25351601177179695,
+          "n_days": "1008"
+        },
+        {
+          "period": "2022-2026",
+          "vt_sharpe": 0.6075217594599244,
+          "bh_sharpe": 0.5690220050656009,
+          "vt_mdd": -0.16584237272023772,
+          "bh_mdd": -0.23483282605839706,
+          "vt_calmar": 0.7194638719332067,
+          "bh_calmar": 0.5568850708027301,
+          "n_days": "1058"
+        }
+      ],
+      "vt_wins_sharpe": 2,
+      "vt_wins_mdd": 4,
+      "n_valid": 5
+    },
+    "EEM": {
+      "periods": [
+        {
+          "period": "2007-2009",
+          "vt_sharpe": 0.3133449038150885,
+          "bh_sharpe": 0.21141376603053982,
+          "vt_mdd": -0.2829402604144069,
+          "bh_mdd": -0.4630773670851026,
+          "vt_calmar": 0.35318898551400413,
+          "bh_calmar": 0.2334364910948654,
+          "n_days": "756"
+        },
+        {
+          "period": "2010-2013",
+          "vt_sharpe": -0.321101228676989,
+          "bh_sharpe": -0.17099930658788035,
+          "vt_mdd": -0.24009185672058952,
+          "bh_mdd": -0.24306129969993817,
+          "vt_calmar": -0.009620788245658006,
+          "bh_calmar": 0.044609798220189054,
+          "n_days": "1006"
+        },
+        {
+          "period": "2014-2017",
+          "vt_sharpe": -0.21170426460420738,
+          "bh_sharpe": -0.1504695332256168,
+          "vt_mdd": -0.25963308127978635,
+          "bh_mdd": -0.2767295438654259,
+          "vt_calmar": 0.07184957464384836,
+          "bh_calmar": 0.08352839616976415,
+          "n_days": "1007"
+        },
+        {
+          "period": "2018-2021",
+          "vt_sharpe": -0.1482016679164871,
+          "bh_sharpe": 0.03422449112761849,
+          "vt_mdd": -0.17410961955296222,
+          "bh_mdd": -0.20367066717716187,
+          "vt_calmar": 0.14371452234209378,
+          "bh_calmar": 0.22601180603035573,
+          "n_days": "1008"
+        },
+        {
+          "period": "2022-2026",
+          "vt_sharpe": 0.6455475123863408,
+          "bh_sharpe": 0.5396818606133831,
+          "vt_mdd": -0.16069146435352566,
+          "bh_mdd": -0.2283454374529481,
+          "vt_calmar": 0.801737454458822,
+          "bh_calmar": 0.5655218544209384,
+          "n_days": "1058"
+        }
+      ],
+      "vt_wins_sharpe": 2,
+      "vt_wins_mdd": 5,
+      "n_valid": 5
+    },
+    "0050.TW": {
+      "periods": [
+        {
+          "period": "2007-2009",
+          "vt_sharpe": 0.80720706502166,
+          "bh_sharpe": 1.380778820810912,
+          "vt_mdd": -0.10723768984648208,
+          "bh_mdd": -0.10723768984648208,
+          "vt_calmar": 1.8950863652638137,
+          "bh_calmar": 4.568742115093461,
+          "n_days": "240"
+        },
+        {
+          "period": "2010-2013",
+          "vt_sharpe": -0.2725103985806954,
+          "bh_sharpe": -0.18420041177281465,
+          "vt_mdd": -0.2060031060097276,
+          "bh_mdd": -0.21035205726078654,
+          "vt_calmar": 0.04590694718876172,
+          "bh_calmar": 0.07458275781137139,
+          "n_days": "955"
+        },
+        {
+          "period": "2014-2017",
+          "vt_sharpe": -0.4917379034282434,
+          "bh_sharpe": -0.46676867027740243,
+          "vt_mdd": -0.18430826299608216,
+          "bh_mdd": -0.18507483665500002,
+          "vt_calmar": -0.7036000237874992,
+          "bh_calmar": -0.661900096542552,
+          "n_days": "952"
+        },
+        {
+          "period": "2018-2021",
+          "vt_sharpe": 0.37300306499794694,
+          "bh_sharpe": 0.650882589855121,
+          "vt_mdd": -0.11717264917047443,
+          "bh_mdd": -0.18837974926250478,
+          "vt_calmar": 0.6644786626408132,
+          "bh_calmar": 0.6686230605837542,
+          "n_days": "944"
+        },
+        {
+          "period": "2022-2026",
+          "vt_sharpe": 1.1487932644135739,
+          "bh_sharpe": 1.0401431336686597,
+          "vt_mdd": -0.17005422136846216,
+          "bh_mdd": -0.2374882416445493,
+          "vt_calmar": 1.222974803390142,
+          "bh_calmar": 0.9466202495829638,
+          "n_days": "982"
+        }
+      ],
+      "vt_wins_sharpe": 1,
+      "vt_wins_mdd": 4,
+      "n_valid": 5
+    }
+  },
+  "statistical_tests": {
+    "SPY": {
+      "sharpe_vt": 0.3583,
+      "sharpe_bh": 0.3855,
+      "sharpe_diff_t": -1.23,
+      "sharpe_diff_p": 0.2186,
+      "mdd_bootstrap_p": 0.0554,
+      "vix_vol_r2": 0.3228,
+      "vix_vol_t": 50.57,
+      "vix_vol_p": 0.0,
+      "harvey_pass": "True"
+    },
+    "EWJ": {
+      "sharpe_vt": 0.2222,
+      "sharpe_bh": 0.195,
+      "sharpe_diff_t": -0.216,
+      "sharpe_diff_p": 0.8286,
+      "mdd_bootstrap_p": 0.024,
+      "vix_vol_r2": 0.17,
+      "vix_vol_t": 33.14,
+      "vix_vol_p": 0.0,
+      "harvey_pass": "True"
+    },
+    "VGK": {
+      "sharpe_vt": 0.1902,
+      "sharpe_bh": 0.1707,
+      "sharpe_diff_t": -0.311,
+      "sharpe_diff_p": 0.7558,
+      "mdd_bootstrap_p": 0.0128,
+      "vix_vol_r2": 0.265,
+      "vix_vol_t": 43.43,
+      "vix_vol_p": 0.0,
+      "harvey_pass": "True"
+    },
+    "EEM": {
+      "sharpe_vt": 0.2085,
+      "sharpe_bh": 0.1968,
+      "sharpe_diff_t": -0.478,
+      "sharpe_diff_p": 0.6325,
+      "mdd_bootstrap_p": 0.016,
+      "vix_vol_r2": 0.2378,
+      "vix_vol_t": 40.91,
+      "vix_vol_p": 0.0,
+      "harvey_pass": "True"
+    },
+    "0050.TW": {
+      "sharpe_vt": 0.0549,
+      "sharpe_bh": 0.1494,
+      "sharpe_diff_t": -1.664,
+      "sharpe_diff_p": 0.0962,
+      "mdd_bootstrap_p": 0.0728,
+      "vix_vol_r2": 0.0247,
+      "vix_vol_t": 10.15,
+      "vix_vol_p": 0.0,
+      "harvey_pass": "True"
+    }
+  },
+  "summary": {
+    "vt_better_sharpe": "3/5",
+    "vt_better_mdd": "5/5",
+    "harvey_pass_count": "5/5",
+    "avg_oos_win_rate": 0.36,
+    "best_market": "Japan (MSCI Japan)",
+    "worst_market": "Taiwan (\u53f0\u706350)"
+  }
+}

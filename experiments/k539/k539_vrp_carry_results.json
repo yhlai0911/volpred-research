@@ -1,0 +1,494 @@
+{
+  "experiment_id": "K539",
+  "title": "Variance Risk Premium (VRP) as Strategy Signal",
+  "subtitle": "Can we time the vol carry trade?",
+  "timestamp": "2026-03-27T13:42:45.362860+00:00",
+  "data_source": "yfinance (SPY, ^VIX)",
+  "data_period": "2005-02-03 to 2026-03-26",
+  "n_observations": 5319,
+  "references": [
+    "Bollerslev, Tauchen & Zhou (2009) 'Expected Stock Returns and Variance Risk Premia' RFS",
+    "Carr & Wu (2009) 'Variance Risk Premiums' RFS",
+    "Past: K430 (VRP predictability IS t=4.38, OOS fail), K440 (no Sharpe improvement), K459 (cross-OOS sparse)"
+  ],
+  "vrp_descriptive": {
+    "mean": 0.00797,
+    "median": 0.009909,
+    "std": 0.044267,
+    "skew": -7.322,
+    "kurtosis": 76.49,
+    "min": -0.602757,
+    "max": 0.223291,
+    "pct_negative": 14.1
+  },
+  "in_sample_results": {
+    "B&H": {
+      "sharpe": 0.518,
+      "net_sharpe": 0.518,
+      "ann_return": 0.0986,
+      "ann_vol": 0.1904,
+      "mdd": -0.5958,
+      "ann_turnover": 0.0,
+      "n_days": 5318
+    },
+    "Pure VT (12/VIX)": {
+      "sharpe": 0.6421,
+      "net_sharpe": 0.5491,
+      "ann_return": 0.0614,
+      "ann_vol": 0.0956,
+      "mdd": -0.2988,
+      "ann_turnover": 8.8957,
+      "n_days": 5318
+    },
+    "VRP Timing": {
+      "sharpe": 0.4039,
+      "net_sharpe": 0.3082,
+      "ann_return": 0.0578,
+      "ann_vol": 0.1431,
+      "mdd": -0.4868,
+      "ann_turnover": 13.6582,
+      "n_days": 5318
+    },
+    "VRP Percentile": {
+      "sharpe": 0.4021,
+      "net_sharpe": 0.3211,
+      "ann_return": 0.0586,
+      "ann_vol": 0.1456,
+      "mdd": -0.4912,
+      "ann_turnover": 11.7822,
+      "n_days": 5067
+    },
+    "VRP+VIX Combined": {
+      "sharpe": 0.6286,
+      "net_sharpe": 0.5274,
+      "ann_return": 0.0704,
+      "ann_vol": 0.112,
+      "mdd": -0.3675,
+      "ann_turnover": 11.3206,
+      "n_days": 5318
+    },
+    "VRP Crash Filter": {
+      "sharpe": 0.6355,
+      "net_sharpe": 0.4993,
+      "ann_return": 0.0572,
+      "ann_vol": 0.09,
+      "mdd": -0.2857,
+      "ann_turnover": 12.2613,
+      "n_days": 5318
+    }
+  },
+  "cross_oos_results": {
+    "VRP Timing": {
+      "periods": [
+        {
+          "oos_start": "2016-01-01",
+          "oos_end": "2017-12-31",
+          "sharpe": 1.664976022997725,
+          "net_sharpe": 1.5694709289481132,
+          "sharpe_diff": -0.07603313354277574,
+          "dm_tstat": 0.4457811174393515,
+          "dm_pval": 0.6559479388585521,
+          "mdd": -0.07676098689192332,
+          "n_days": 502,
+          "benchmark_sharpe": 1.7410091565405008
+        },
+        {
+          "oos_start": "2018-01-01",
+          "oos_end": "2019-12-31",
+          "sharpe": 0.8246731729924297,
+          "net_sharpe": 0.7211869140275209,
+          "sharpe_diff": 0.0393208727840626,
+          "dm_tstat": 0.9422355554455412,
+          "dm_pval": 0.3465261699734139,
+          "mdd": -0.1466235933302857,
+          "n_days": 502,
+          "benchmark_sharpe": 0.7853523002083671
+        },
+        {
+          "oos_start": "2020-01-01",
+          "oos_end": "2021-12-31",
+          "sharpe": 0.384739526523732,
+          "net_sharpe": 0.2960149967756039,
+          "sharpe_diff": -0.669513406531684,
+          "dm_tstat": -0.30857806028631807,
+          "dm_pval": 0.7577702694519246,
+          "mdd": -0.3335796797924308,
+          "n_days": 504,
+          "benchmark_sharpe": 1.054252933055416
+        },
+        {
+          "oos_start": "2022-01-01",
+          "oos_end": "2023-12-31",
+          "sharpe": 0.15391568864201147,
+          "net_sharpe": 0.043571326183334966,
+          "sharpe_diff": 0.04939377760447197,
+          "dm_tstat": 0.2712437349081515,
+          "dm_pval": 0.7863157484234127,
+          "mdd": -0.20340763359161695,
+          "n_days": 500,
+          "benchmark_sharpe": 0.1045219110375395
+        },
+        {
+          "oos_start": "2024-01-01",
+          "oos_end": "2025-12-31",
+          "sharpe": 1.206014944302262,
+          "net_sharpe": 1.0926581274740539,
+          "sharpe_diff": -0.05594780760183915,
+          "dm_tstat": 0.865029328401965,
+          "dm_pval": 0.3874375215127188,
+          "mdd": -0.1720750739666252,
+          "n_days": 501,
+          "benchmark_sharpe": 1.2619627519041012
+        }
+      ],
+      "wins": 2,
+      "total": 5,
+      "verdict": {
+        "wins": 2,
+        "total": 5,
+        "win_rate": 0.4,
+        "mean_sharpe_diff": -0.14255593945755288,
+        "mean_dm_tstat": 0.4431423351817383,
+        "median_dm_tstat": 0.4457811174393515,
+        "stouffer_z": 0.9908963851743634,
+        "stouffer_p": 0.32173617765369644,
+        "passes_harvey": "False",
+        "verdict": "WEAK"
+      }
+    },
+    "VRP Percentile": {
+      "periods": [
+        {
+          "oos_start": "2016-01-01",
+          "oos_end": "2017-12-31",
+          "sharpe": 1.6242209710143725,
+          "net_sharpe": 1.5423556656599249,
+          "sharpe_diff": -0.11678818552612835,
+          "dm_tstat": 0.4180836682938011,
+          "dm_pval": 0.6760650824458394,
+          "mdd": -0.08130323702032935,
+          "n_days": 502,
+          "benchmark_sharpe": 1.7410091565405008
+        },
+        {
+          "oos_start": "2018-01-01",
+          "oos_end": "2019-12-31",
+          "sharpe": 0.7900029945394833,
+          "net_sharpe": 0.7060218338385681,
+          "sharpe_diff": 0.004650694331116201,
+          "dm_tstat": 0.8682479779180036,
+          "dm_pval": 0.3856743012582644,
+          "mdd": -0.1563899157386716,
+          "n_days": 502,
+          "benchmark_sharpe": 0.7853523002083671
+        },
+        {
+          "oos_start": "2020-01-01",
+          "oos_end": "2021-12-31",
+          "sharpe": 0.4830361828219124,
+          "net_sharpe": 0.39883307922595546,
+          "sharpe_diff": -0.5712167502335036,
+          "dm_tstat": -0.09819032621209962,
+          "dm_pval": 0.9218202790952543,
+          "mdd": -0.3331337008240637,
+          "n_days": 504,
+          "benchmark_sharpe": 1.054252933055416
+        },
+        {
+          "oos_start": "2022-01-01",
+          "oos_end": "2023-12-31",
+          "sharpe": -0.01287162005405831,
+          "net_sharpe": -0.0989255291512963,
+          "sharpe_diff": -0.11739353109159781,
+          "dm_tstat": -0.3185555678704305,
+          "dm_pval": 0.7501968377076451,
+          "mdd": -0.2205495747906371,
+          "n_days": 500,
+          "benchmark_sharpe": 0.1045219110375395
+        },
+        {
+          "oos_start": "2024-01-01",
+          "oos_end": "2025-12-31",
+          "sharpe": 1.2137468367847275,
+          "net_sharpe": 1.1242242683255508,
+          "sharpe_diff": -0.04821591511937373,
+          "dm_tstat": 0.9973683544149009,
+          "dm_pval": 0.3190681712486516,
+          "mdd": -0.16489078444958558,
+          "n_days": 501,
+          "benchmark_sharpe": 1.2619627519041012
+        }
+      ],
+      "wins": 1,
+      "total": 5,
+      "verdict": {
+        "wins": 1,
+        "total": 5,
+        "win_rate": 0.2,
+        "mean_sharpe_diff": -0.16979273752789745,
+        "mean_dm_tstat": 0.3733908213088351,
+        "median_dm_tstat": 0.4180836682938011,
+        "stouffer_z": 0.8349272586210322,
+        "stouffer_p": 0.4037586659629455,
+        "passes_harvey": "False",
+        "verdict": "FAIL"
+      }
+    },
+    "VRP+VIX Combined": {
+      "periods": [
+        {
+          "oos_start": "2016-01-01",
+          "oos_end": "2017-12-31",
+          "sharpe": 1.6975121963476056,
+          "net_sharpe": 1.5974621027695208,
+          "sharpe_diff": -0.04349696019289517,
+          "dm_tstat": -0.1810296252565503,
+          "dm_pval": 0.8564175323217618,
+          "mdd": -0.05597265763298154,
+          "n_days": 502,
+          "benchmark_sharpe": 1.7410091565405008
+        },
+        {
+          "oos_start": "2018-01-01",
+          "oos_end": "2019-12-31",
+          "sharpe": 0.7329211817659457,
+          "net_sharpe": 0.5909371096296892,
+          "sharpe_diff": -0.05243111844242143,
+          "dm_tstat": -0.20890206156845204,
+          "dm_pval": 0.8346096025306826,
+          "mdd": -0.1340930320164003,
+          "n_days": 502,
+          "benchmark_sharpe": 0.7853523002083671
+        },
+        {
+          "oos_start": "2020-01-01",
+          "oos_end": "2021-12-31",
+          "sharpe": 0.8437847350669441,
+          "net_sharpe": 0.7531965400587676,
+          "sharpe_diff": -0.21046819798847194,
+          "dm_tstat": 0.2997566108603136,
+          "dm_pval": 0.764486642517924,
+          "mdd": -0.2207842276193069,
+          "n_days": 504,
+          "benchmark_sharpe": 1.054252933055416
+        },
+        {
+          "oos_start": "2022-01-01",
+          "oos_end": "2023-12-31",
+          "sharpe": 0.16576821066388325,
+          "net_sharpe": 0.08690106104327969,
+          "sharpe_diff": 0.06124629962634376,
+          "dm_tstat": 0.6365791509686358,
+          "dm_pval": 0.52469090686727,
+          "mdd": -0.16241516698524952,
+          "n_days": 500,
+          "benchmark_sharpe": 0.1045219110375395
+        },
+        {
+          "oos_start": "2024-01-01",
+          "oos_end": "2025-12-31",
+          "sharpe": 1.261703009085319,
+          "net_sharpe": 1.123693003466841,
+          "sharpe_diff": -0.00025974281878227146,
+          "dm_tstat": 1.1423289495498168,
+          "dm_pval": 0.25386403267524305,
+          "mdd": -0.12179810845293447,
+          "n_days": 501,
+          "benchmark_sharpe": 1.2619627519041012
+        }
+      ],
+      "wins": 1,
+      "total": 5,
+      "verdict": {
+        "wins": 1,
+        "total": 5,
+        "win_rate": 0.2,
+        "mean_sharpe_diff": -0.04908194396324541,
+        "mean_dm_tstat": 0.3377466049107528,
+        "median_dm_tstat": 0.2997566108603136,
+        "stouffer_z": 0.7552243677502075,
+        "stouffer_p": 0.45011437004179955,
+        "passes_harvey": "False",
+        "verdict": "FAIL"
+      }
+    },
+    "VRP Crash Filter": {
+      "periods": [
+        {
+          "oos_start": "2016-01-01",
+          "oos_end": "2017-12-31",
+          "sharpe": 1.8644008604215567,
+          "net_sharpe": 1.6664543611309426,
+          "sharpe_diff": 0.12339170388105591,
+          "dm_tstat": 0.16553833351066785,
+          "dm_pval": 0.8685870562486129,
+          "mdd": -0.044230533172761835,
+          "n_days": 502,
+          "benchmark_sharpe": 1.7410091565405008
+        },
+        {
+          "oos_start": "2018-01-01",
+          "oos_end": "2019-12-31",
+          "sharpe": 0.7884213082733251,
+          "net_sharpe": 0.6091607368175429,
+          "sharpe_diff": 0.003069008064958023,
+          "dm_tstat": -0.37325068186334587,
+          "dm_pval": 0.7091197536016467,
+          "mdd": -0.09775445662504223,
+          "n_days": 502,
+          "benchmark_sharpe": 0.7853523002083671
+        },
+        {
+          "oos_start": "2020-01-01",
+          "oos_end": "2021-12-31",
+          "sharpe": 1.0547014781903294,
+          "net_sharpe": 0.9539880628234341,
+          "sharpe_diff": 0.00044854513491343617,
+          "dm_tstat": -0.32753386704928106,
+          "dm_pval": 0.7434004058429475,
+          "mdd": -0.12930154314976053,
+          "n_days": 504,
+          "benchmark_sharpe": 1.054252933055416
+        },
+        {
+          "oos_start": "2022-01-01",
+          "oos_end": "2023-12-31",
+          "sharpe": 0.17255425150246093,
+          "net_sharpe": 0.07441342991538734,
+          "sharpe_diff": 0.06803234046492143,
+          "dm_tstat": 0.2682543446369944,
+          "dm_pval": 0.7886144035376499,
+          "mdd": -0.12088562223679776,
+          "n_days": 500,
+          "benchmark_sharpe": 0.1045219110375395
+        },
+        {
+          "oos_start": "2024-01-01",
+          "oos_end": "2025-12-31",
+          "sharpe": 1.1076629564233147,
+          "net_sharpe": 0.9696329582241304,
+          "sharpe_diff": -0.15429979548078654,
+          "dm_tstat": -1.2841619470259102,
+          "dm_pval": 0.19968000248790196,
+          "mdd": -0.10947143285067593,
+          "n_days": 501,
+          "benchmark_sharpe": 1.2619627519041012
+        }
+      ],
+      "wins": 4,
+      "total": 5,
+      "verdict": {
+        "wins": 4,
+        "total": 5,
+        "win_rate": 0.8,
+        "mean_sharpe_diff": 0.008128360413012454,
+        "mean_dm_tstat": -0.31023076355817497,
+        "median_dm_tstat": -0.32753386704928106,
+        "stouffer_z": -0.6936970760277437,
+        "stouffer_p": 0.48787220009207943,
+        "passes_harvey": "False",
+        "verdict": "PROMISING"
+      }
+    }
+  },
+  "crash_filter_analysis": {
+    "vrp_negative_days": 750,
+    "vrp_negative_pct": 14.1,
+    "next_day_return_vrp_neg_ann": 0.9923,
+    "next_day_vol_vrp_neg_ann": 0.2905,
+    "next_day_return_vrp_pos_ann": -0.048,
+    "next_day_vol_vrp_pos_ann": 0.1667,
+    "ttest_t": 8.7917,
+    "ttest_p": 0.0,
+    "events": {
+      "2008 GFC": {
+        "vrp_neg_days": 74,
+        "total_days": 146,
+        "pct": 51.0
+      },
+      "2011 Euro Crisis": {
+        "vrp_neg_days": 24,
+        "total_days": 85,
+        "pct": 28.0
+      },
+      "2015 China Fear": {
+        "vrp_neg_days": 31,
+        "total_days": 64,
+        "pct": 48.0
+      },
+      "2018 Volmageddon": {
+        "vrp_neg_days": 37,
+        "total_days": 65,
+        "pct": 57.0
+      },
+      "2020 COVID": {
+        "vrp_neg_days": 34,
+        "total_days": 52,
+        "pct": 65.0
+      },
+      "2022 Rate Hikes": {
+        "vrp_neg_days": 56,
+        "total_days": 209,
+        "pct": 27.0
+      }
+    }
+  },
+  "bootstrap": {
+    "n_reps": 10000,
+    "mean_sharpe_diff": -0.1943,
+    "ci_95_low": -0.6261,
+    "ci_95_high": 0.2264,
+    "zero_in_ci": true
+  },
+  "final_verdicts": {
+    "VRP Timing": {
+      "wins": 2,
+      "total": 5,
+      "win_rate": 0.4,
+      "mean_sharpe_diff": -0.14255593945755288,
+      "mean_dm_tstat": 0.4431423351817383,
+      "median_dm_tstat": 0.4457811174393515,
+      "stouffer_z": 0.9908963851743634,
+      "stouffer_p": 0.32173617765369644,
+      "passes_harvey": "False",
+      "verdict": "WEAK"
+    },
+    "VRP Percentile": {
+      "wins": 1,
+      "total": 5,
+      "win_rate": 0.2,
+      "mean_sharpe_diff": -0.16979273752789745,
+      "mean_dm_tstat": 0.3733908213088351,
+      "median_dm_tstat": 0.4180836682938011,
+      "stouffer_z": 0.8349272586210322,
+      "stouffer_p": 0.4037586659629455,
+      "passes_harvey": "False",
+      "verdict": "FAIL"
+    },
+    "VRP+VIX Combined": {
+      "wins": 1,
+      "total": 5,
+      "win_rate": 0.2,
+      "mean_sharpe_diff": -0.04908194396324541,
+      "mean_dm_tstat": 0.3377466049107528,
+      "median_dm_tstat": 0.2997566108603136,
+      "stouffer_z": 0.7552243677502075,
+      "stouffer_p": 0.45011437004179955,
+      "passes_harvey": "False",
+      "verdict": "FAIL"
+    },
+    "VRP Crash Filter": {
+      "wins": 4,
+      "total": 5,
+      "win_rate": 0.8,
+      "mean_sharpe_diff": 0.008128360413012454,
+      "mean_dm_tstat": -0.31023076355817497,
+      "median_dm_tstat": -0.32753386704928106,
+      "stouffer_z": -0.6936970760277437,
+      "stouffer_p": 0.48787220009207943,
+      "passes_harvey": "False",
+      "verdict": "PROMISING"
+    }
+  },
+  "overall_conclusion": "No VRP strategy passes Harvey |t|>3.0 threshold in cross-OOS. VRP Crash Filter shows PROMISING results \u2014 defensive use of VRP signal has merit. VRP is negative 14% of days, concentrated in crisis periods. Bootstrap 95% CI for Crash Filter Sharpe diff: [-0.6261, 0.2264] \u2014 NOT significant. K459 comparison: methodology differences (expanding medians, crash filter) do not overcome the fundamental result \u2014 VRP timing adds no reliable alpha over pure VT."
+}

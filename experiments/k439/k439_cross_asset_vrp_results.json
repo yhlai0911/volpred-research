@@ -1,0 +1,610 @@
+{
+  "experiment_id": "k439",
+  "title": "Cross-Asset VRP Predictability Test",
+  "timestamp": "2026-03-25T19:11:37.342631+00:00",
+  "data_source": "yfinance (SPY, QQQ, EEM, GLD, TLT, ^VIX)",
+  "oos_start": "2023-01-01",
+  "n_bootstrap": 10000,
+  "block_size": 21,
+  "literature": [
+    "Bollerslev, Tauchen, Zhou (2009) RFS \u2014 VRP predicts equity returns",
+    "Bekaert & Hoerova (2014) JoE \u2014 VRP decomposition",
+    "K436: VRP confirmed for SPY (daily DM p=0.018, bootstrap p=0.000)"
+  ],
+  "design_note": "All assets use VIX (SPY implied vol) as proxy. For non-SPY assets, VRP = VIX - asset_RV21 is a cross-asset fear premium measure, not a true asset-specific VRP.",
+  "assets": {
+    "SPY": {
+      "n_is": 4509,
+      "n_oos": 807,
+      "data_period": "2005-02-03 to 2026-03-23",
+      "descriptive_statistics": {
+        "vix": {
+          "mean": 19.174398046225154,
+          "std": 8.622998102067914,
+          "skew": 2.54431931971126,
+          "kurtosis": 9.675163394019567,
+          "N": 5316
+        },
+        "rv_21": {
+          "mean": 15.65974427242471,
+          "std": 11.045988467848707,
+          "skew": 3.4558788203768853,
+          "kurtosis": 16.798804412072474,
+          "N": 5316
+        },
+        "vrp": {
+          "mean": 3.5146537738004406,
+          "std": 5.501481183808748,
+          "skew": -2.5860254927332336,
+          "kurtosis": 16.485091245347054,
+          "N": 5316
+        },
+        "abs_ret_next": {
+          "mean": 0.7677091347811634,
+          "std": 0.9215276091437058,
+          "skew": 4.087858943089898,
+          "kurtosis": 31.32066008636648,
+          "N": 5316
+        }
+      },
+      "adf_test_vrp": {
+        "statistic": -10.01535236139992,
+        "p_value": 1.734741634349283e-17,
+        "stationary": true
+      },
+      "arch_lm_test": {
+        "lm_stat": 1350.9279140924475,
+        "lm_p_value": 3.894967525503871e-284,
+        "arch_present": true
+      },
+      "corr_vix_rv21": 0.8719394680570987,
+      "spearman_vix_rv21": 0.8031938904036524,
+      "is_regression_baseline": {
+        "r_squared": 0.25642645495564464,
+        "adj_r_squared": 0.25626147302863234,
+        "n_obs": 4509,
+        "rv21_coef": 0.04175827971549392,
+        "rv21_t_stat": 15.387434078713428,
+        "rv21_p_value": 1.9875919780608962e-53
+      },
+      "is_regression_vrp_augmented": {
+        "r_squared": 0.3190036407419733,
+        "adj_r_squared": 0.3187013787094576,
+        "n_obs": 4509,
+        "rv21_coef": 0.05865825121781974,
+        "rv21_t_stat": 17.178036943620853,
+        "rv21_p_value": 3.87814097366188e-66,
+        "vrp_coef": 0.056252188317201926,
+        "vrp_t_stat": 10.332731721168956,
+        "vrp_p_value": 5.011274855662783e-25
+      },
+      "oos_performance": {
+        "mse_baseline": 0.48392602067297547,
+        "mse_vrp_augmented": 0.41138674121236457,
+        "mse_improvement_pct": 14.98974561436758,
+        "corr_baseline": 0.21931888186819282,
+        "corr_vrp_augmented": 0.39355795940391775
+      },
+      "dm_test_hac": {
+        "stat": 1.9377943286293837,
+        "p_value": 0.05264831997484709,
+        "mean_loss_diff": 0.07253927946061091,
+        "hac_lag": 9
+      },
+      "block_bootstrap": {
+        "obs_stat": 0.07253927946061091,
+        "bootstrap_p_value": 0.0813,
+        "ci_95_lower": 0.009900687230155567,
+        "ci_95_upper": 0.17972249244568936,
+        "n_boot": 10000,
+        "block_size": 21
+      },
+      "encompassing_test": {
+        "lambda_vrp": 1.1788047147854703,
+        "t_stat": 5.418760851347887,
+        "p_value": 6.001352953464862e-08,
+        "significant_5pct": true
+      },
+      "verdict": "SIGNIFICANT (>=2/3 tests pass)",
+      "sig_dm_10pct": true,
+      "sig_bootstrap_10pct": true,
+      "sig_encompassing_10pct": true
+    },
+    "QQQ": {
+      "n_is": 4509,
+      "n_oos": 807,
+      "data_period": "2005-02-03 to 2026-03-23",
+      "descriptive_statistics": {
+        "vix": {
+          "mean": 19.174398046225154,
+          "std": 8.622998102067914,
+          "skew": 2.54431931971126,
+          "kurtosis": 9.675163394019567,
+          "N": 5316
+        },
+        "rv_21": {
+          "mean": 18.960428726051173,
+          "std": 10.630339925171082,
+          "skew": 2.670341123262845,
+          "kurtosis": 11.049124623981713,
+          "N": 5316
+        },
+        "vrp": {
+          "mean": 0.21396932017397807,
+          "std": 6.091997375762534,
+          "skew": -1.3582441339254376,
+          "kurtosis": 6.335442411109279,
+          "N": 5316
+        },
+        "abs_ret_next": {
+          "mean": 0.9357150142230802,
+          "std": 0.9907103322002474,
+          "skew": 3.0267383088924107,
+          "kurtosis": 17.98716221108005,
+          "N": 5316
+        }
+      },
+      "adf_test_vrp": {
+        "statistic": -9.103386737641701,
+        "p_value": 3.5556597209711895e-15,
+        "stationary": true
+      },
+      "arch_lm_test": {
+        "lm_stat": 988.6333285203816,
+        "lm_p_value": 5.252082807417608e-206,
+        "arch_present": true
+      },
+      "corr_vix_rv21": 0.819544722049228,
+      "spearman_vix_rv21": 0.7262067082776782,
+      "is_regression_baseline": {
+        "r_squared": 0.18891223560926584,
+        "adj_r_squared": 0.18873227382439983,
+        "n_obs": 4509,
+        "rv21_coef": 0.0397044312329565,
+        "rv21_t_stat": 15.298191735095342,
+        "rv21_p_value": 7.861053248545638e-53
+      },
+      "is_regression_vrp_augmented": {
+        "r_squared": 0.23674896164888004,
+        "adj_r_squared": 0.2364101906598205,
+        "n_obs": 4509,
+        "rv21_coef": 0.053298097055612476,
+        "rv21_t_stat": 15.928474140972403,
+        "rv21_p_value": 4.020487146365776e-57,
+        "vrp_coef": 0.04431517640966259,
+        "vrp_t_stat": 9.322456681631275,
+        "vrp_p_value": 1.1367715157614934e-20
+      },
+      "oos_performance": {
+        "mse_baseline": 0.7534331262110419,
+        "mse_vrp_augmented": 0.6877543373294855,
+        "mse_improvement_pct": 8.717268540056098,
+        "corr_baseline": 0.1929512871712274,
+        "corr_vrp_augmented": 0.3202023396205208
+      },
+      "dm_test_hac": {
+        "stat": 1.9406243344131662,
+        "p_value": 0.05230386024566247,
+        "mean_loss_diff": 0.06567878888155637,
+        "hac_lag": 9
+      },
+      "block_bootstrap": {
+        "obs_stat": 0.06567878888155637,
+        "bootstrap_p_value": 0.086,
+        "ci_95_lower": 0.006657957885803201,
+        "ci_95_upper": 0.16147680218589486,
+        "n_boot": 10000,
+        "block_size": 21
+      },
+      "encompassing_test": {
+        "lambda_vrp": 1.3704004898543019,
+        "t_stat": 4.936450624880864,
+        "p_value": 7.95571669477549e-07,
+        "significant_5pct": true
+      },
+      "verdict": "SIGNIFICANT (>=2/3 tests pass)",
+      "sig_dm_10pct": true,
+      "sig_bootstrap_10pct": true,
+      "sig_encompassing_10pct": true
+    },
+    "EEM": {
+      "n_is": 4509,
+      "n_oos": 808,
+      "data_period": "2005-02-03 to 2026-03-24",
+      "descriptive_statistics": {
+        "vix": {
+          "mean": 19.17586045034716,
+          "std": 8.62284640447656,
+          "skew": 2.543603787498556,
+          "kurtosis": 9.672065791009658,
+          "N": 5317
+        },
+        "rv_21": {
+          "mean": 22.915807310276964,
+          "std": 15.79452733722354,
+          "skew": 4.434420023054527,
+          "kurtosis": 27.856517451740892,
+          "N": 5317
+        },
+        "vrp": {
+          "mean": -3.7399468599298054,
+          "std": 10.559044333640069,
+          "skew": -3.710145356538981,
+          "kurtosis": 24.730572689287204,
+          "N": 5317
+        },
+        "abs_ret_next": {
+          "mean": 1.144744648318108,
+          "std": 1.3104358393565636,
+          "skew": 4.6090591508846375,
+          "kurtosis": 41.84351588169901,
+          "N": 5317
+        }
+      },
+      "adf_test_vrp": {
+        "statistic": -6.486202849993509,
+        "p_value": 1.2591061179715974e-08,
+        "stationary": true
+      },
+      "arch_lm_test": {
+        "lm_stat": 1888.9735349192204,
+        "lm_p_value": 0.0,
+        "arch_present": true
+      },
+      "corr_vix_rv21": 0.7795038495850038,
+      "spearman_vix_rv21": 0.5878328343523116,
+      "is_regression_baseline": {
+        "r_squared": 0.26073746489556193,
+        "adj_r_squared": 0.2605734394828474,
+        "n_obs": 4509,
+        "rv21_coef": 0.04218313252513516,
+        "rv21_t_stat": 12.56965419903962,
+        "rv21_p_value": 3.1007717469723924e-36
+      },
+      "is_regression_vrp_augmented": {
+        "r_squared": 0.278479044798393,
+        "adj_r_squared": 0.27815879581694536,
+        "n_obs": 4509,
+        "rv21_coef": 0.06069537324062623,
+        "rv21_t_stat": 12.81497129956592,
+        "rv21_p_value": 1.3518838021078996e-37,
+        "vrp_coef": 0.03250113915053247,
+        "vrp_t_stat": 5.75627799008793,
+        "vrp_p_value": 8.598874049743955e-09
+      },
+      "oos_performance": {
+        "mse_baseline": 0.539949036008258,
+        "mse_vrp_augmented": 0.5322721228533087,
+        "mse_improvement_pct": 1.421784769115122,
+        "corr_baseline": 0.12788984983006418,
+        "corr_vrp_augmented": 0.2003803490939646
+      },
+      "dm_test_hac": {
+        "stat": 0.5790830733330835,
+        "p_value": 0.562533120725305,
+        "mean_loss_diff": 0.007676913154949297,
+        "hac_lag": 9
+      },
+      "block_bootstrap": {
+        "obs_stat": 0.007676913154949297,
+        "bootstrap_p_value": 0.5148,
+        "ci_95_lower": -0.011565204515145634,
+        "ci_95_upper": 0.0339818457398937,
+        "n_boot": 10000,
+        "block_size": 21
+      },
+      "encompassing_test": {
+        "lambda_vrp": 1.1396505208090082,
+        "t_stat": 2.5662026640493716,
+        "p_value": 0.010281873446107197,
+        "significant_5pct": true
+      },
+      "verdict": "BORDERLINE (1/3 tests pass)",
+      "sig_dm_10pct": false,
+      "sig_bootstrap_10pct": false,
+      "sig_encompassing_10pct": true
+    },
+    "GLD": {
+      "n_is": 4509,
+      "n_oos": 808,
+      "data_period": "2005-02-03 to 2026-03-24",
+      "descriptive_statistics": {
+        "vix": {
+          "mean": 19.17586045034716,
+          "std": 8.62284640447656,
+          "skew": 2.543603787498556,
+          "kurtosis": 9.672065791009658,
+          "N": 5317
+        },
+        "rv_21": {
+          "mean": 16.410481265010326,
+          "std": 7.592734928957158,
+          "skew": 2.0446755968276418,
+          "kurtosis": 6.204369356186556,
+          "N": 5317
+        },
+        "vrp": {
+          "mean": 2.765379185336836,
+          "std": 8.102936125050856,
+          "skew": -0.2656825829125833,
+          "kurtosis": 3.265552635553752,
+          "N": 5317
+        },
+        "abs_ret_next": {
+          "mean": 0.8025313412244652,
+          "std": 0.8107871696992421,
+          "skew": 2.8459574714923295,
+          "kurtosis": 16.98641656432745,
+          "N": 5317
+        }
+      },
+      "adf_test_vrp": {
+        "statistic": -7.0161220506148085,
+        "p_value": 6.725870266501651e-10,
+        "stationary": true
+      },
+      "arch_lm_test": {
+        "lm_stat": 371.99992367017296,
+        "lm_p_value": 8.481502906286757e-74,
+        "arch_present": true
+      },
+      "corr_vix_rv21": 0.5066788582746203,
+      "spearman_vix_rv21": 0.36629517388575805,
+      "is_regression_baseline": {
+        "r_squared": 0.11216465627621375,
+        "adj_r_squared": 0.11196766596254082,
+        "n_obs": 4509,
+        "rv21_coef": 0.036216028455114804,
+        "rv21_t_stat": 14.739172984252429,
+        "rv21_p_value": 3.6118061563761206e-49
+      },
+      "is_regression_vrp_augmented": {
+        "r_squared": 0.11901325184725153,
+        "adj_r_squared": 0.11862222355246566,
+        "n_obs": 4509,
+        "rv21_coef": 0.03898190096566011,
+        "rv21_t_stat": 14.356984171459851,
+        "rv21_p_value": 9.632860775408675e-47,
+        "vrp_coef": 0.008687267585322818,
+        "vrp_t_stat": 4.188065148913031,
+        "vrp_p_value": 2.813427621700389e-05
+      },
+      "oos_performance": {
+        "mse_baseline": 0.6695781857830494,
+        "mse_vrp_augmented": 0.6660252539561948,
+        "mse_improvement_pct": 0.5306223981445171,
+        "corr_baseline": 0.32526012341798066,
+        "corr_vrp_augmented": 0.33530171663456354
+      },
+      "dm_test_hac": {
+        "stat": 0.5069342052368343,
+        "p_value": 0.612200984453904,
+        "mean_loss_diff": 0.003552931826854576,
+        "hac_lag": 9
+      },
+      "block_bootstrap": {
+        "obs_stat": 0.003552931826854576,
+        "bootstrap_p_value": 0.619,
+        "ci_95_lower": -0.012206051506475617,
+        "ci_95_upper": 0.017202019521823275,
+        "n_boot": 10000,
+        "block_size": 21
+      },
+      "encompassing_test": {
+        "lambda_vrp": 1.4519656086576769,
+        "t_stat": 1.7723296722954685,
+        "p_value": 0.07633984847296411,
+        "significant_5pct": false
+      },
+      "verdict": "BORDERLINE (1/3 tests pass)",
+      "sig_dm_10pct": false,
+      "sig_bootstrap_10pct": false,
+      "sig_encompassing_10pct": true
+    },
+    "TLT": {
+      "n_is": 4509,
+      "n_oos": 808,
+      "data_period": "2005-02-03 to 2026-03-24",
+      "descriptive_statistics": {
+        "vix": {
+          "mean": 19.17586045034716,
+          "std": 8.62284640447656,
+          "skew": 2.543603787498556,
+          "kurtosis": 9.672065791009658,
+          "N": 5317
+        },
+        "rv_21": {
+          "mean": 13.581611339704603,
+          "std": 5.627956021161019,
+          "skew": 2.5477415134206756,
+          "kurtosis": 14.587254994081766,
+          "N": 5317
+        },
+        "vrp": {
+          "mean": 5.594249110642557,
+          "std": 6.748519573724274,
+          "skew": 1.9361000393144705,
+          "kurtosis": 8.692521201224524,
+          "N": 5317
+        },
+        "abs_ret_next": {
+          "mean": 0.6916295620826831,
+          "std": 0.6118576132329164,
+          "skew": 2.2617911786482425,
+          "kurtosis": 11.076638788047196,
+          "N": 5317
+        }
+      },
+      "adf_test_vrp": {
+        "statistic": -6.486506246594372,
+        "p_value": 1.2570356796533939e-08,
+        "stationary": true
+      },
+      "arch_lm_test": {
+        "lm_stat": 1171.63191002641,
+        "lm_p_value": 1.893072833282043e-245,
+        "arch_present": true
+      },
+      "corr_vix_rv21": 0.6231825529950482,
+      "spearman_vix_rv21": 0.5272385318372296,
+      "is_regression_baseline": {
+        "r_squared": 0.11738920634412964,
+        "adj_r_squared": 0.11719337523837059,
+        "n_obs": 4509,
+        "rv21_coef": 0.036279858119387505,
+        "rv21_t_stat": 11.609221221677231,
+        "rv21_p_value": 3.6996978247294333e-31
+      },
+      "is_regression_vrp_augmented": {
+        "r_squared": 0.1390954052487482,
+        "adj_r_squared": 0.13871329047078496,
+        "n_obs": 4509,
+        "rv21_coef": 0.03561464478486442,
+        "rv21_t_stat": 12.236429460762814,
+        "rv21_p_value": 1.9857777189731385e-34,
+        "vrp_coef": 0.013410013522337455,
+        "vrp_t_stat": 6.38331305739902,
+        "vrp_p_value": 1.7329711933380443e-10
+      },
+      "oos_performance": {
+        "mse_baseline": 0.3107211990486156,
+        "mse_vrp_augmented": 0.3147040596406114,
+        "mse_improvement_pct": -1.2818116704591507,
+        "corr_baseline": 0.2448718997174369,
+        "corr_vrp_augmented": 0.24027138598275258
+      },
+      "dm_test_hac": {
+        "stat": -0.8065331095941558,
+        "p_value": 0.4199355250326886,
+        "mean_loss_diff": -0.003982860591995724,
+        "hac_lag": 9
+      },
+      "block_bootstrap": {
+        "obs_stat": -0.003982860591995724,
+        "bootstrap_p_value": 0.4552,
+        "ci_95_lower": -0.0141114799174781,
+        "ci_95_upper": 0.0067565472857205435,
+        "n_boot": 10000,
+        "block_size": 21
+      },
+      "encompassing_test": {
+        "lambda_vrp": 0.40333172039043075,
+        "t_stat": 1.3323436728625446,
+        "p_value": 0.18274728224974524,
+        "significant_5pct": false
+      },
+      "verdict": "NOT SIGNIFICANT (0/3 tests pass)",
+      "sig_dm_10pct": false,
+      "sig_bootstrap_10pct": false,
+      "sig_encompassing_10pct": false
+    }
+  },
+  "cross_asset_summary": {
+    "n_significant": 2,
+    "n_total": 5,
+    "n_equity_significant": 2,
+    "n_equity_total": 3,
+    "overall_conclusion": "EQUITY-SPECIFIC: VRP predicts equity vol but not commodity/bond",
+    "asset_table": [
+      {
+        "asset": "SPY",
+        "corr_vix_rv": 0.8719394680570987,
+        "is_vrp_t": 10.332731721168956,
+        "oos_mse_impr": 14.98974561436758,
+        "dm_p": 0.05264831997484709,
+        "boot_p": 0.0813,
+        "enc_p": 6.001352953464862e-08,
+        "verdict": "SIGNIFICANT (>=2/3 tests pass)"
+      },
+      {
+        "asset": "QQQ",
+        "corr_vix_rv": 0.819544722049228,
+        "is_vrp_t": 9.322456681631275,
+        "oos_mse_impr": 8.717268540056098,
+        "dm_p": 0.05230386024566247,
+        "boot_p": 0.086,
+        "enc_p": 7.95571669477549e-07,
+        "verdict": "SIGNIFICANT (>=2/3 tests pass)"
+      },
+      {
+        "asset": "EEM",
+        "corr_vix_rv": 0.7795038495850038,
+        "is_vrp_t": 5.75627799008793,
+        "oos_mse_impr": 1.421784769115122,
+        "dm_p": 0.562533120725305,
+        "boot_p": 0.5148,
+        "enc_p": 0.010281873446107197,
+        "verdict": "BORDERLINE (1/3 tests pass)"
+      },
+      {
+        "asset": "GLD",
+        "corr_vix_rv": 0.5066788582746203,
+        "is_vrp_t": 4.188065148913031,
+        "oos_mse_impr": 0.5306223981445171,
+        "dm_p": 0.612200984453904,
+        "boot_p": 0.619,
+        "enc_p": 0.07633984847296411,
+        "verdict": "BORDERLINE (1/3 tests pass)"
+      },
+      {
+        "asset": "TLT",
+        "corr_vix_rv": 0.6231825529950482,
+        "is_vrp_t": 6.38331305739902,
+        "oos_mse_impr": -1.2818116704591507,
+        "dm_p": 0.4199355250326886,
+        "boot_p": 0.4552,
+        "enc_p": 0.18274728224974524,
+        "verdict": "NOT SIGNIFICANT (0/3 tests pass)"
+      }
+    ],
+    "harvey_threshold_check": {
+      "SPY": {
+        "is_vrp_t": 10.332731721168956,
+        "passes_t3": true
+      },
+      "QQQ": {
+        "is_vrp_t": 9.322456681631275,
+        "passes_t3": true
+      },
+      "EEM": {
+        "is_vrp_t": 5.75627799008793,
+        "passes_t3": true
+      },
+      "GLD": {
+        "is_vrp_t": 4.188065148913031,
+        "passes_t3": true
+      },
+      "TLT": {
+        "is_vrp_t": 6.38331305739902,
+        "passes_t3": true
+      }
+    }
+  },
+  "conclusions": [
+    "Cross-asset VRP test: 2/5 assets show significant VRP predictability",
+    "Equity assets: 2/3 significant",
+    "EQUITY-SPECIFIC: VRP predicts equity vol but not commodity/bond",
+    "  SPY: DM p=0.0526, Bootstrap p=0.0813, MSE improvement +15.0%, Corr(VIX,RV)=0.872",
+    "  QQQ: DM p=0.0523, Bootstrap p=0.0860, MSE improvement +8.7%, Corr(VIX,RV)=0.820",
+    "  EEM: DM p=0.5625, Bootstrap p=0.5148, MSE improvement +1.4%, Corr(VIX,RV)=0.780",
+    "  GLD: DM p=0.6122, Bootstrap p=0.6190, MSE improvement +0.5%, Corr(VIX,RV)=0.507",
+    "  TLT: DM p=0.4199, Bootstrap p=0.4552, MSE improvement -1.3%, Corr(VIX,RV)=0.623",
+    "\nKey insight: VIX is SPY-specific implied vol. For non-SPY assets, VRP = VIX - asset_RV21 measures CROSS-ASSET fear premium, not asset-specific VRP.",
+    "High Corr(VIX,RV) indicates the asset moves with SPY \u2192 VRP proxy is more valid.",
+    "Low Corr(VIX,RV) indicates the asset has its own dynamics \u2192 VIX-based VRP is a poor proxy."
+  ],
+  "limitations": [
+    "All assets use VIX (SPY implied vol) as proxy \u2014 not true asset-specific VRP",
+    "Ideal: use GVZ for GLD, MOVE for TLT, but not freely available via yfinance",
+    "OOS period (2023-2025) is relatively calm, limiting crisis-period inference",
+    "Daily |return| is noisy \u2014 VRP is a slow-moving predictor, better at monthly/quarterly horizon",
+    "Ridge regularization (alpha=0.01) \u2014 negligible impact but noted for reproducibility",
+    "VRP for non-equity assets is really a 'cross-asset fear spillover' measure, not VRP per se"
+  ],
+  "prior_knowledge": [
+    "K436: VRP confirmed for SPY (daily DM p=0.018, bootstrap p=0.000)",
+    "K430: VRP IS t=4.38 passes Harvey threshold",
+    "VRP = VIX - RV21 is positive ~86% of the time (mean +3.5%)",
+    "VRP is NOT a directional return predictor, but IS a vol predictor"
+  ]
+}

@@ -1,0 +1,870 @@
+{
+  "experiment_id": "K453",
+  "title": "Daily Semivariance Cross-Asset Validation",
+  "timestamp": "2026-03-26T00:40:56.454831+00:00",
+  "methodology": {
+    "target": "next-day |return|",
+    "models": {
+      "M1": "OLS: lagged RV_21 \u2192 |r_t+1|",
+      "M2": "OLS: lagged RS\u207b_21 \u2192 |r_t+1|",
+      "M3": "OLS: RS\u207b_5 + RS\u207b_21 + RS\u207a_5 + RS\u207a_21 \u2192 |r_t+1| (HAR-semi)"
+    },
+    "OOS_period": "2023-01-01 to 2025-12-31",
+    "evaluation": "DM test (MSE), block bootstrap (10000 reps, block=10)",
+    "harvey_threshold": 3.0
+  },
+  "data_source": "yfinance",
+  "assets": {
+    "SPY": {
+      "name": "US Large Cap",
+      "start": "2005-01-01"
+    },
+    "QQQ": {
+      "name": "US Tech",
+      "start": "2005-01-01"
+    },
+    "EEM": {
+      "name": "Emerging Markets",
+      "start": "2005-01-01"
+    },
+    "TLT": {
+      "name": "Long-Term Bonds",
+      "start": "2005-01-01"
+    },
+    "IWM": {
+      "name": "US Small Cap",
+      "start": "2005-01-01"
+    },
+    "XLE": {
+      "name": "Energy Sector",
+      "start": "2005-01-01"
+    },
+    "BTC-USD": {
+      "name": "Crypto (Bitcoin)",
+      "start": "2015-01-01"
+    },
+    "0050.TW": {
+      "name": "Taiwan (0050)",
+      "start": "2005-01-01"
+    }
+  },
+  "diagnostics": {
+    "SPY": {
+      "n_obs": 5339,
+      "ann_mean_pct": 11.66,
+      "ann_std_pct": 19.0,
+      "skewness": -0.0,
+      "kurtosis": 15.4123,
+      "adf_stat": -17.7341,
+      "adf_p": 0.0,
+      "arch_lm_p": 0.0,
+      "neg_return_frac": 0.4463
+    },
+    "QQQ": {
+      "n_obs": 5339,
+      "ann_mean_pct": 15.83,
+      "ann_std_pct": 21.59,
+      "skewness": -0.0532,
+      "kurtosis": 7.8171,
+      "adf_stat": -18.0032,
+      "adf_p": 0.0,
+      "arch_lm_p": 0.0,
+      "neg_return_frac": 0.4417
+    },
+    "EEM": {
+      "n_obs": 5339,
+      "ann_mean_pct": 10.27,
+      "ann_std_pct": 27.58,
+      "skewness": 0.5194,
+      "kurtosis": 18.2578,
+      "adf_stat": -15.8717,
+      "adf_p": 0.0,
+      "arch_lm_p": 0.0,
+      "neg_return_frac": 0.4669
+    },
+    "TLT": {
+      "n_obs": 5339,
+      "ann_mean_pct": 4.2,
+      "ann_std_pct": 14.64,
+      "skewness": 0.0782,
+      "kurtosis": 3.4865,
+      "adf_stat": -13.7469,
+      "adf_p": 0.0,
+      "arch_lm_p": 0.0,
+      "neg_return_frac": 0.4774
+    },
+    "IWM": {
+      "n_obs": 5339,
+      "ann_mean_pct": 10.72,
+      "ann_std_pct": 24.11,
+      "skewness": -0.3195,
+      "kurtosis": 6.2693,
+      "adf_stat": -16.0528,
+      "adf_p": 0.0,
+      "arch_lm_p": 0.0,
+      "neg_return_frac": 0.4647
+    },
+    "XLE": {
+      "n_obs": 5339,
+      "ann_mean_pct": 13.15,
+      "ann_std_pct": 29.83,
+      "skewness": -0.3148,
+      "kurtosis": 11.6851,
+      "adf_stat": -52.6592,
+      "adf_p": 0.0,
+      "arch_lm_p": 0.0,
+      "neg_return_frac": 0.4696
+    },
+    "BTC-USD": {
+      "n_obs": 4101,
+      "ann_mean_pct": 49.05,
+      "ann_std_pct": 55.8,
+      "skewness": -0.119,
+      "kurtosis": 7.9583,
+      "adf_stat": -65.8044,
+      "adf_p": 0.0,
+      "arch_lm_p": 0.0,
+      "neg_return_frac": 0.4738
+    },
+    "0050.TW": {
+      "n_obs": 4213,
+      "ann_mean_pct": 13.95,
+      "ann_std_pct": 28.16,
+      "skewness": -17.8104,
+      "kurtosis": 768.5968,
+      "adf_stat": -67.312,
+      "adf_p": 0.0,
+      "arch_lm_p": 0.999912,
+      "neg_return_frac": 0.4462
+    }
+  },
+  "gjr_gammas": {
+    "SPY": {
+      "alpha": 0.0,
+      "gamma": 0.240774,
+      "beta": 0.861292,
+      "persistence": 0.981679,
+      "converged": true,
+      "gamma_pval": 0.0,
+      "gamma_tstat": 8.9562
+    },
+    "QQQ": {
+      "alpha": 0.0,
+      "gamma": 0.204898,
+      "beta": 0.875027,
+      "persistence": 0.977476,
+      "converged": true,
+      "gamma_pval": 0.0,
+      "gamma_tstat": 8.5814
+    },
+    "EEM": {
+      "alpha": 0.027254,
+      "gamma": 0.120918,
+      "beta": 0.892365,
+      "persistence": 0.980078,
+      "converged": true,
+      "gamma_pval": 0.0,
+      "gamma_tstat": 6.9097
+    },
+    "TLT": {
+      "alpha": 0.059354,
+      "gamma": -0.014041,
+      "beta": 0.942303,
+      "persistence": 0.994636,
+      "converged": true,
+      "gamma_pval": 0.105338,
+      "gamma_tstat": -1.6195
+    },
+    "IWM": {
+      "alpha": 0.014894,
+      "gamma": 0.138408,
+      "beta": 0.899607,
+      "persistence": 0.983705,
+      "converged": true,
+      "gamma_pval": 0.0,
+      "gamma_tstat": 7.2771
+    },
+    "XLE": {
+      "alpha": 0.033631,
+      "gamma": 0.071867,
+      "beta": 0.921344,
+      "persistence": 0.990909,
+      "converged": true,
+      "gamma_pval": 0.0,
+      "gamma_tstat": 5.8083
+    },
+    "BTC-USD": {
+      "alpha": 0.101628,
+      "gamma": -0.011883,
+      "beta": 0.904313,
+      "persistence": 1.0,
+      "converged": true,
+      "gamma_pval": 0.503187,
+      "gamma_tstat": -0.6695
+    },
+    "0050.TW": {
+      "alpha": 0.041945,
+      "gamma": 0.146007,
+      "beta": 0.822102,
+      "persistence": 0.937051,
+      "converged": true,
+      "gamma_pval": 0.000114,
+      "gamma_tstat": 3.8593
+    }
+  },
+  "per_asset_results": {
+    "SPY": {
+      "name": "US Large Cap",
+      "n_is": 4509,
+      "n_oos": 752,
+      "models": {
+        "M1_RV21": {
+          "R2_oos": 0.026865,
+          "RMSE": 0.00700196,
+          "MAE": 0.00469178
+        },
+        "M2_RS_neg21": {
+          "R2_oos": 0.083202,
+          "RMSE": 0.00679626,
+          "MAE": 0.00455403
+        },
+        "M3_HAR_semi": {
+          "R2_oos": 0.153488,
+          "RMSE": 0.00653055,
+          "MAE": 0.0044719,
+          "IS_coefs": {
+            "rs_neg_5": 10.927512,
+            "rs_neg_21": 18.181179,
+            "rs_pos_5": -4.136328,
+            "rs_pos_21": 1.626295
+          },
+          "IS_tvals": {
+            "rs_neg_5": 14.3539,
+            "rs_neg_21": 10.9692,
+            "rs_pos_5": -5.2954,
+            "rs_pos_21": 1.0443
+          }
+        }
+      },
+      "dm_tests": {
+        "M2_vs_M1": {
+          "DM_stat": 2.6952,
+          "DM_pval": 0.007192,
+          "boot_pval": 0.0,
+          "RS_neg_better": true,
+          "significant_5pct": true,
+          "passes_harvey": false
+        },
+        "M3_vs_M1": {
+          "DM_stat": 1.8033,
+          "DM_pval": 0.071734,
+          "boot_pval": 0.0,
+          "HAR_semi_better": true,
+          "significant_5pct": false,
+          "passes_harvey": false
+        },
+        "M3_vs_M2": {
+          "DM_stat": 1.3759,
+          "DM_pval": 0.169251
+        }
+      },
+      "gjr_gamma": {
+        "alpha": 0.0,
+        "gamma": 0.240774,
+        "beta": 0.861292,
+        "persistence": 0.981679,
+        "converged": true,
+        "gamma_pval": 0.0,
+        "gamma_tstat": 8.9562
+      }
+    },
+    "QQQ": {
+      "name": "US Tech",
+      "n_is": 4509,
+      "n_oos": 752,
+      "models": {
+        "M1_RV21": {
+          "R2_oos": 0.013022,
+          "RMSE": 0.00883715,
+          "MAE": 0.00617892
+        },
+        "M2_RS_neg21": {
+          "R2_oos": 0.07054,
+          "RMSE": 0.00857578,
+          "MAE": 0.00602012
+        },
+        "M3_HAR_semi": {
+          "R2_oos": 0.117033,
+          "RMSE": 0.00835854,
+          "MAE": 0.00595527,
+          "IS_coefs": {
+            "rs_neg_5": 8.654518,
+            "rs_neg_21": 20.116472,
+            "rs_pos_5": -3.905045,
+            "rs_pos_21": 1.243299
+          },
+          "IS_tvals": {
+            "rs_neg_5": 10.078,
+            "rs_neg_21": 10.8858,
+            "rs_pos_5": -4.1374,
+            "rs_pos_21": 0.6979
+          }
+        }
+      },
+      "dm_tests": {
+        "M2_vs_M1": {
+          "DM_stat": 2.8859,
+          "DM_pval": 0.004015,
+          "boot_pval": 0.0054,
+          "RS_neg_better": true,
+          "significant_5pct": true,
+          "passes_harvey": false
+        },
+        "M3_vs_M1": {
+          "DM_stat": 1.9774,
+          "DM_pval": 0.048365,
+          "boot_pval": 0.0024,
+          "HAR_semi_better": true,
+          "significant_5pct": true,
+          "passes_harvey": false
+        },
+        "M3_vs_M2": {
+          "DM_stat": 1.3369,
+          "DM_pval": 0.181675
+        }
+      },
+      "gjr_gamma": {
+        "alpha": 0.0,
+        "gamma": 0.204898,
+        "beta": 0.875027,
+        "persistence": 0.977476,
+        "converged": true,
+        "gamma_pval": 0.0,
+        "gamma_tstat": 8.5814
+      }
+    },
+    "EEM": {
+      "name": "Emerging Markets",
+      "n_is": 4509,
+      "n_oos": 752,
+      "models": {
+        "M1_RV21": {
+          "R2_oos": -0.139937,
+          "RMSE": 0.00736891,
+          "MAE": 0.00592918
+        },
+        "M2_RS_neg21": {
+          "R2_oos": -0.09489,
+          "RMSE": 0.00722184,
+          "MAE": 0.00576605
+        },
+        "M3_HAR_semi": {
+          "R2_oos": -0.05835,
+          "RMSE": 0.00710031,
+          "MAE": 0.00570748,
+          "IS_coefs": {
+            "rs_neg_5": 5.850207,
+            "rs_neg_21": 14.162933,
+            "rs_pos_5": -1.163562,
+            "rs_pos_21": 0.27509
+          },
+          "IS_tvals": {
+            "rs_neg_5": 8.9661,
+            "rs_neg_21": 10.4392,
+            "rs_pos_5": -2.6305,
+            "rs_pos_21": 0.2854
+          }
+        }
+      },
+      "dm_tests": {
+        "M2_vs_M1": {
+          "DM_stat": 5.1442,
+          "DM_pval": 0.0,
+          "boot_pval": 0.0,
+          "RS_neg_better": true,
+          "significant_5pct": true,
+          "passes_harvey": true
+        },
+        "M3_vs_M1": {
+          "DM_stat": 3.5335,
+          "DM_pval": 0.000435,
+          "boot_pval": 0.0,
+          "HAR_semi_better": true,
+          "significant_5pct": true,
+          "passes_harvey": true
+        },
+        "M3_vs_M2": {
+          "DM_stat": 2.3819,
+          "DM_pval": 0.01747
+        }
+      },
+      "gjr_gamma": {
+        "alpha": 0.027254,
+        "gamma": 0.120918,
+        "beta": 0.892365,
+        "persistence": 0.980078,
+        "converged": true,
+        "gamma_pval": 0.0,
+        "gamma_tstat": 6.9097
+      }
+    },
+    "TLT": {
+      "name": "Long-Term Bonds",
+      "n_is": 4509,
+      "n_oos": 752,
+      "models": {
+        "M1_RV21": {
+          "R2_oos": 0.041794,
+          "RMSE": 0.00572192,
+          "MAE": 0.00431331
+        },
+        "M2_RS_neg21": {
+          "R2_oos": 0.045821,
+          "RMSE": 0.00570988,
+          "MAE": 0.00432993
+        },
+        "M3_HAR_semi": {
+          "R2_oos": 0.045369,
+          "RMSE": 0.00571123,
+          "MAE": 0.0043185,
+          "IS_coefs": {
+            "rs_neg_5": 15.95418,
+            "rs_neg_21": 5.959744,
+            "rs_pos_5": 7.619113,
+            "rs_pos_21": 9.231225
+          },
+          "IS_tvals": {
+            "rs_neg_5": 10.5766,
+            "rs_neg_21": 1.8943,
+            "rs_pos_5": 5.6105,
+            "rs_pos_21": 3.7367
+          }
+        }
+      },
+      "dm_tests": {
+        "M2_vs_M1": {
+          "DM_stat": 0.4282,
+          "DM_pval": 0.66861,
+          "boot_pval": 0.7958,
+          "RS_neg_better": true,
+          "significant_5pct": false,
+          "passes_harvey": false
+        },
+        "M3_vs_M1": {
+          "DM_stat": 0.3492,
+          "DM_pval": 0.727004,
+          "boot_pval": 0.7332,
+          "HAR_semi_better": true,
+          "significant_5pct": false,
+          "passes_harvey": false
+        },
+        "M3_vs_M2": {
+          "DM_stat": -0.0407,
+          "DM_pval": 0.967523
+        }
+      },
+      "gjr_gamma": {
+        "alpha": 0.059354,
+        "gamma": -0.014041,
+        "beta": 0.942303,
+        "persistence": 0.994636,
+        "converged": true,
+        "gamma_pval": 0.105338,
+        "gamma_tstat": -1.6195
+      }
+    },
+    "IWM": {
+      "name": "US Small Cap",
+      "n_is": 4509,
+      "n_oos": 752,
+      "models": {
+        "M1_RV21": {
+          "R2_oos": -0.0006,
+          "RMSE": 0.00875471,
+          "MAE": 0.00628328
+        },
+        "M2_RS_neg21": {
+          "R2_oos": 0.01833,
+          "RMSE": 0.0086715,
+          "MAE": 0.00620822
+        },
+        "M3_HAR_semi": {
+          "R2_oos": 0.040412,
+          "RMSE": 0.00857342,
+          "MAE": 0.00621503,
+          "IS_coefs": {
+            "rs_neg_5": 8.759905,
+            "rs_neg_21": 8.772659,
+            "rs_pos_5": -3.507311,
+            "rs_pos_21": 11.792254
+          },
+          "IS_tvals": {
+            "rs_neg_5": 14.5007,
+            "rs_neg_21": 7.164,
+            "rs_pos_5": -3.5742,
+            "rs_pos_21": 7.841
+          }
+        }
+      },
+      "dm_tests": {
+        "M2_vs_M1": {
+          "DM_stat": 1.9951,
+          "DM_pval": 0.046393,
+          "boot_pval": 0.071,
+          "RS_neg_better": true,
+          "significant_5pct": true,
+          "passes_harvey": false
+        },
+        "M3_vs_M1": {
+          "DM_stat": 1.5771,
+          "DM_pval": 0.11519,
+          "boot_pval": 0.163,
+          "HAR_semi_better": true,
+          "significant_5pct": false,
+          "passes_harvey": false
+        },
+        "M3_vs_M2": {
+          "DM_stat": 1.0675,
+          "DM_pval": 0.286098
+        }
+      },
+      "gjr_gamma": {
+        "alpha": 0.014894,
+        "gamma": 0.138408,
+        "beta": 0.899607,
+        "persistence": 0.983705,
+        "converged": true,
+        "gamma_pval": 0.0,
+        "gamma_tstat": 7.2771
+      }
+    },
+    "XLE": {
+      "name": "Energy Sector",
+      "n_is": 4509,
+      "n_oos": 752,
+      "models": {
+        "M1_RV21": {
+          "R2_oos": -0.0056,
+          "RMSE": 0.00936257,
+          "MAE": 0.00682412
+        },
+        "M2_RS_neg21": {
+          "R2_oos": -0.015942,
+          "RMSE": 0.00941059,
+          "MAE": 0.00693006
+        },
+        "M3_HAR_semi": {
+          "R2_oos": 0.054149,
+          "RMSE": 0.00908017,
+          "MAE": 0.00674555,
+          "IS_coefs": {
+            "rs_neg_5": 6.735929,
+            "rs_neg_21": 4.560161,
+            "rs_pos_5": -1.817246,
+            "rs_pos_21": 8.254376
+          },
+          "IS_tvals": {
+            "rs_neg_5": 15.1654,
+            "rs_neg_21": 5.5203,
+            "rs_pos_5": -2.8845,
+            "rs_pos_21": 8.8576
+          }
+        }
+      },
+      "dm_tests": {
+        "M2_vs_M1": {
+          "DM_stat": -1.0303,
+          "DM_pval": 0.30322,
+          "boot_pval": 0.391,
+          "RS_neg_better": false,
+          "significant_5pct": false,
+          "passes_harvey": false
+        },
+        "M3_vs_M1": {
+          "DM_stat": 1.5669,
+          "DM_pval": 0.117567,
+          "boot_pval": 0.0412,
+          "HAR_semi_better": true,
+          "significant_5pct": false,
+          "passes_harvey": false
+        },
+        "M3_vs_M2": {
+          "DM_stat": 2.2314,
+          "DM_pval": 0.025948
+        }
+      },
+      "gjr_gamma": {
+        "alpha": 0.033631,
+        "gamma": 0.071867,
+        "beta": 0.921344,
+        "persistence": 0.990909,
+        "converged": true,
+        "gamma_pval": 0.0,
+        "gamma_tstat": 5.8083
+      }
+    },
+    "BTC-USD": {
+      "name": "Crypto (Bitcoin)",
+      "n_is": 2900,
+      "n_oos": 1096,
+      "models": {
+        "M1_RV21": {
+          "R2_oos": -0.017103,
+          "RMSE": 0.01766906,
+          "MAE": 0.01386079
+        },
+        "M2_RS_neg21": {
+          "R2_oos": -0.064355,
+          "RMSE": 0.01807483,
+          "MAE": 0.01454546
+        },
+        "M3_HAR_semi": {
+          "R2_oos": -0.011195,
+          "RMSE": 0.01761767,
+          "MAE": 0.01380337,
+          "IS_coefs": {
+            "rs_neg_5": 2.124275,
+            "rs_neg_21": 2.414658,
+            "rs_pos_5": 0.524925,
+            "rs_pos_21": 5.698361
+          },
+          "IS_tvals": {
+            "rs_neg_5": 5.7098,
+            "rs_neg_21": 3.4717,
+            "rs_pos_5": 1.2363,
+            "rs_pos_21": 7.6557
+          }
+        }
+      },
+      "dm_tests": {
+        "M2_vs_M1": {
+          "DM_stat": -6.3774,
+          "DM_pval": 0.0,
+          "boot_pval": 0.0,
+          "RS_neg_better": false,
+          "significant_5pct": true,
+          "passes_harvey": true
+        },
+        "M3_vs_M1": {
+          "DM_stat": 2.0699,
+          "DM_pval": 0.038696,
+          "boot_pval": 0.0578,
+          "HAR_semi_better": true,
+          "significant_5pct": true,
+          "passes_harvey": false
+        },
+        "M3_vs_M2": {
+          "DM_stat": 6.276,
+          "DM_pval": 0.0
+        }
+      },
+      "gjr_gamma": {
+        "alpha": 0.101628,
+        "gamma": -0.011883,
+        "beta": 0.904313,
+        "persistence": 1.0,
+        "converged": true,
+        "gamma_pval": 0.503187,
+        "gamma_tstat": -0.6695
+      }
+    },
+    "0050.TW": {
+      "name": "Taiwan (0050)",
+      "n_is": 3417,
+      "n_oos": 724,
+      "models": {
+        "M1_RV21": {
+          "R2_oos": -0.009166,
+          "RMSE": 0.01039542,
+          "MAE": 0.00652238
+        },
+        "M2_RS_neg21": {
+          "R2_oos": -0.010377,
+          "RMSE": 0.01040165,
+          "MAE": 0.00653144
+        },
+        "M3_HAR_semi": {
+          "R2_oos": -0.00066,
+          "RMSE": 0.01035151,
+          "MAE": 0.00653028,
+          "IS_coefs": {
+            "rs_neg_5": -0.005881,
+            "rs_neg_21": -0.019988,
+            "rs_pos_5": 2.991992,
+            "rs_pos_21": 9.023553
+          },
+          "IS_tvals": {
+            "rs_neg_5": -0.0847,
+            "rs_neg_21": -0.1401,
+            "rs_pos_5": 2.2969,
+            "rs_pos_21": 5.8482
+          }
+        }
+      },
+      "dm_tests": {
+        "M2_vs_M1": {
+          "DM_stat": -2.7034,
+          "DM_pval": 0.007024,
+          "boot_pval": 0.0392,
+          "RS_neg_better": false,
+          "significant_5pct": true,
+          "passes_harvey": false
+        },
+        "M3_vs_M1": {
+          "DM_stat": 0.9895,
+          "DM_pval": 0.32274,
+          "boot_pval": 0.3574,
+          "HAR_semi_better": true,
+          "significant_5pct": false,
+          "passes_harvey": false
+        },
+        "M3_vs_M2": {
+          "DM_stat": 1.0955,
+          "DM_pval": 0.273681
+        }
+      },
+      "gjr_gamma": {
+        "alpha": 0.041945,
+        "gamma": 0.146007,
+        "beta": 0.822102,
+        "persistence": 0.937051,
+        "converged": true,
+        "gamma_pval": 0.000114,
+        "gamma_tstat": 3.8593
+      }
+    }
+  },
+  "cross_sectional_analysis": {
+    "n_assets": 8,
+    "pearson": {
+      "gamma_vs_r2_gain_M2": {
+        "r": 0.8116,
+        "p": 0.0144
+      },
+      "gamma_vs_rmse_gain_M2": {
+        "r": 0.826,
+        "p": 0.0115
+      },
+      "skew_vs_r2_gain_M2": {
+        "r": 0.2003,
+        "p": 0.6343
+      }
+    },
+    "spearman": {
+      "gamma_vs_r2_gain_M2": {
+        "rho": 0.6905,
+        "p": 0.058
+      },
+      "gamma_vs_rmse_gain_M2": {
+        "rho": 0.6905,
+        "p": 0.058
+      },
+      "skew_vs_r2_gain_M2": {
+        "rho": 0.4524,
+        "p": 0.2604
+      }
+    },
+    "per_asset": [
+      {
+        "ticker": "SPY",
+        "gamma": 0.240774,
+        "r2_gain_m2": 0.056337,
+        "r2_gain_m3": 0.126623,
+        "rmse_gain_m2": 0.029377488588909338,
+        "rmse_gain_m3": 0.0673254345925997,
+        "skewness": -0.0
+      },
+      {
+        "ticker": "QQQ",
+        "gamma": 0.204898,
+        "r2_gain_m2": 0.05751800000000001,
+        "r2_gain_m3": 0.10401099999999999,
+        "rmse_gain_m2": 0.029576277419756408,
+        "rmse_gain_m3": 0.054158863434478406,
+        "skewness": -0.0532
+      },
+      {
+        "ticker": "EEM",
+        "gamma": 0.120918,
+        "r2_gain_m2": 0.045047000000000004,
+        "r2_gain_m3": 0.081587,
+        "rmse_gain_m2": 0.01995817563248839,
+        "rmse_gain_m3": 0.036450438395909286,
+        "skewness": 0.5194
+      },
+      {
+        "ticker": "TLT",
+        "gamma": -0.014041,
+        "r2_gain_m2": 0.004027000000000003,
+        "r2_gain_m3": 0.003575000000000002,
+        "rmse_gain_m2": 0.0021041888037582643,
+        "rmse_gain_m3": 0.0018682540126390846,
+        "skewness": 0.0782
+      },
+      {
+        "ticker": "IWM",
+        "gamma": 0.138408,
+        "r2_gain_m2": 0.01893,
+        "r2_gain_m3": 0.041012,
+        "rmse_gain_m2": 0.009504598096339025,
+        "rmse_gain_m3": 0.020707710478131268,
+        "skewness": -0.3195
+      },
+      {
+        "ticker": "XLE",
+        "gamma": 0.071867,
+        "r2_gain_m2": -0.010342,
+        "r2_gain_m3": 0.059749000000000003,
+        "rmse_gain_m2": -0.00512893361544953,
+        "rmse_gain_m3": 0.030162658329924406,
+        "skewness": -0.3148
+      },
+      {
+        "ticker": "BTC-USD",
+        "gamma": -0.011883,
+        "r2_gain_m2": -0.047251999999999995,
+        "r2_gain_m3": 0.005908,
+        "rmse_gain_m2": -0.022965002099715533,
+        "rmse_gain_m3": 0.002908473908629087,
+        "skewness": -0.119
+      },
+      {
+        "ticker": "0050.TW",
+        "gamma": 0.146007,
+        "r2_gain_m2": -0.0012110000000000003,
+        "r2_gain_m3": 0.008506,
+        "rmse_gain_m2": -0.0005993023850887631,
+        "rmse_gain_m3": 0.004223975558467206,
+        "skewness": -17.8104
+      }
+    ]
+  },
+  "summary": {
+    "n_assets": 8,
+    "n_m2_significant_5pct": 4,
+    "n_m3_significant_5pct": 3,
+    "n_m2_passes_harvey": 1,
+    "n_m3_passes_harvey": 1,
+    "n_equity_m2_sig": 4,
+    "n_equity_total": 5,
+    "n_non_equity_m2_sig": 0,
+    "n_non_equity_total": 3,
+    "verdict": "EQUITY_SPECIFIC",
+    "verdict_description": "RS\u207b semivariance is EQUITY-SPECIFIC (4/5 equity sig, 0/3 non-equity sig)"
+  },
+  "references": [
+    "Patton & Sheppard (2015) JFQA",
+    "K449: SPY RS\u207b DM p=0.007, QQQ p=0.003, GLD FAIL",
+    "K450: VRP + Semi combined \u2014 no synergy",
+    "Black (1976) leverage effect",
+    "Engle & Ng (1993) news impact curve"
+  ],
+  "limitations": [
+    "Daily close-to-close data only (no intraday semivariance)",
+    "Linear OLS models (nonlinear relationships not captured)",
+    "Single OOS window (2023-2025) \u2014 could differ in other periods",
+    "Small cross-section (N=8) limits statistical power for gamma correlation",
+    "BTC and 0050.TW have shorter IS period",
+    "yfinance data may have survivorship/adjustment issues"
+  ]
+}

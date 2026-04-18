@@ -1,0 +1,600 @@
+{
+  "experiment_id": "K851",
+  "title": "Jump Dynamics — Lagged Jump Features for Next-Day Volatility Prediction (TAIFEX)",
+  "date": "2026-04-04",
+  "data_source": "TAIFEX TX1 tick data (day session, 5-min bars)",
+  "data_period": "2012-01 to 2025-12",
+  "oos_period": "2020-01-01 to 2025-12",
+  "n_total_days": 3424,
+  "methodology": {
+    "models": [
+      "HAR-RV",
+      "HAR-RV-J",
+      "HAR-RV-JFreq",
+      "HAR-RV-JSize",
+      "HAR-RV-SignedJ",
+      "HAR-RV-Full"
+    ],
+    "model_features": {
+      "HAR-RV": [
+        "rv_lag1",
+        "rv_5d",
+        "rv_22d"
+      ],
+      "HAR-RV-J": [
+        "rv_lag1",
+        "rv_5d",
+        "rv_22d",
+        "jump_lag1"
+      ],
+      "HAR-RV-JFreq": [
+        "rv_lag1",
+        "rv_5d",
+        "rv_22d",
+        "jump_freq_22d"
+      ],
+      "HAR-RV-JSize": [
+        "rv_lag1",
+        "rv_5d",
+        "rv_22d",
+        "jump_size_5d"
+      ],
+      "HAR-RV-SignedJ": [
+        "rv_lag1",
+        "rv_5d",
+        "rv_22d",
+        "pos_jump_lag1",
+        "neg_jump_lag1"
+      ],
+      "HAR-RV-Full": [
+        "rv_lag1",
+        "rv_5d",
+        "rv_22d",
+        "jump_lag1",
+        "jump_freq_22d",
+        "jump_size_5d"
+      ]
+    },
+    "target": "5-min RV (day session)",
+    "oos_method": "Rolling with refit every 63 days, min_train=250",
+    "metrics": "QLIKE (Patton 2011), MSE, MAE, Spearman",
+    "dm_test": "Newey-West HAC, Harvey threshold |t|>3.0"
+  },
+  "references": [
+    "Andersen, Bollerslev, Diebold (2007): Roughing it up — HAR-RV-J, RES",
+    "Corsi (2009): HAR-RV model, J. Financial Econometrics",
+    "Barndorff-Nielsen & Shephard (2004): Bipower variation, J. Financial Econometrics",
+    "Patton (2011): QLIKE proxy-robust, J. Econometrics",
+    "Tauchen & Zhou (2011): Realized jumps on international stock markets, JFE",
+    "Busch, Christensen, Nielsen (2011): Role of implied volatility in forecasting RV"
+  ],
+  "jump_descriptive_stats": {
+    "jump_summary": {
+      "total_days": 3424,
+      "jump_days": 2382,
+      "jump_freq_pct": 69.6,
+      "mean_jump_all": 4.656375289762222e-06,
+      "mean_jump_when_positive": 6.693295126845444e-06,
+      "std_jump_when_positive": 1.1077239706295323e-05,
+      "jump_as_pct_of_rv": 9.8
+    },
+    "signed_jump": {
+      "pos_jump_mean": 2.3084900705663772e-06,
+      "neg_jump_mean": 2.3478852191958445e-06,
+      "pos_jump_days": 1258,
+      "neg_jump_days": 1124,
+      "pos_neg_ratio": 0.983
+    },
+    "jump_freq_22d_stats": {
+      "mean": 0.6952,
+      "std": 0.1302,
+      "min": 0.2727,
+      "max": 1.0,
+      "median": 0.7273
+    },
+    "correlation_with_future_rv": {
+      "jump_lag1": {
+        "spearman_rho": 0.126,
+        "p_value": 1.3607745663113663e-13,
+        "significant_5pct": "True"
+      },
+      "jump_freq_22d": {
+        "spearman_rho": -0.0793,
+        "p_value": 3.5761802389105437e-06,
+        "significant_5pct": "True"
+      },
+      "jump_size_5d": {
+        "spearman_rho": 0.417,
+        "p_value": 4.557811733194464e-144,
+        "significant_5pct": "True"
+      },
+      "pos_jump_lag1": {
+        "spearman_rho": -0.055,
+        "p_value": 0.0012869020574379569,
+        "significant_5pct": "True"
+      },
+      "neg_jump_lag1": {
+        "spearman_rho": 0.0992,
+        "p_value": 6.106772889059324e-09,
+        "significant_5pct": "True"
+      }
+    }
+  },
+  "is_diagnostics": {
+    "HAR-RV": {
+      "model": "HAR-RV",
+      "n": 1952,
+      "R2": 0.174282,
+      "coefficients": {
+        "const": {
+          "estimate": 9.03e-06,
+          "se": 1.98e-06,
+          "t_stat": 4.5644
+        },
+        "rv_lag1": {
+          "estimate": 0.17297584,
+          "se": 0.02629702,
+          "t_stat": 6.5778
+        },
+        "rv_5d": {
+          "estimate": 0.22435359,
+          "se": 0.05129417,
+          "t_stat": 4.3739
+        },
+        "rv_22d": {
+          "estimate": 0.35564346,
+          "se": 0.06015115,
+          "t_stat": 5.9125
+        }
+      }
+    },
+    "HAR-RV-J": {
+      "model": "HAR-RV-J",
+      "n": 1952,
+      "R2": 0.176649,
+      "coefficients": {
+        "const": {
+          "estimate": 9.44e-06,
+          "se": 1.98e-06,
+          "t_stat": 4.7596
+        },
+        "rv_lag1": {
+          "estimate": 0.1847246,
+          "se": 0.02673132,
+          "t_stat": 6.9104
+        },
+        "rv_5d": {
+          "estimate": 0.23842069,
+          "se": 0.05157758,
+          "t_stat": 4.6226
+        },
+        "rv_22d": {
+          "estimate": 0.36622689,
+          "se": 0.06024659,
+          "t_stat": 6.0788
+        },
+        "jump_lag1": {
+          "estimate": -0.36378866,
+          "se": 0.15375913,
+          "t_stat": -2.366
+        }
+      }
+    },
+    "HAR-RV-JFreq": {
+      "model": "HAR-RV-JFreq",
+      "n": 1952,
+      "R2": 0.174471,
+      "coefficients": {
+        "const": {
+          "estimate": 3.6e-06,
+          "se": 8.38e-06,
+          "t_stat": 0.4296
+        },
+        "rv_lag1": {
+          "estimate": 0.17290975,
+          "se": 0.02630095,
+          "t_stat": 6.5743
+        },
+        "rv_5d": {
+          "estimate": 0.22415241,
+          "se": 0.05130237,
+          "t_stat": 4.3692
+        },
+        "rv_22d": {
+          "estimate": 0.35436068,
+          "se": 0.06019044,
+          "t_stat": 5.8873
+        },
+        "jump_freq_22d": {
+          "estimate": 7.36e-06,
+          "se": 1.104e-05,
+          "t_stat": 0.6671
+        }
+      }
+    },
+    "HAR-RV-JSize": {
+      "model": "HAR-RV-JSize",
+      "n": 1952,
+      "R2": 0.176155,
+      "coefficients": {
+        "const": {
+          "estimate": 8.26e-06,
+          "se": 2.01e-06,
+          "t_stat": 4.106
+        },
+        "rv_lag1": {
+          "estimate": 0.17548291,
+          "se": 0.02630095,
+          "t_stat": 6.6721
+        },
+        "rv_5d": {
+          "estimate": 0.17873445,
+          "se": 0.05564848,
+          "t_stat": 3.2118
+        },
+        "rv_22d": {
+          "estimate": 0.32824931,
+          "se": 0.06149302,
+          "t_stat": 5.338
+        },
+        "jump_size_5d": {
+          "estimate": 0.69987799,
+          "se": 0.33270044,
+          "t_stat": 2.1036
+        }
+      }
+    },
+    "HAR-RV-SignedJ": {
+      "model": "HAR-RV-SignedJ",
+      "n": 1952,
+      "R2": 0.178821,
+      "coefficients": {
+        "const": {
+          "estimate": 9.36e-06,
+          "se": 1.98e-06,
+          "t_stat": 4.7209
+        },
+        "rv_lag1": {
+          "estimate": 0.17901397,
+          "se": 0.02682126,
+          "t_stat": 6.6743
+        },
+        "rv_5d": {
+          "estimate": 0.25595717,
+          "se": 0.05209929,
+          "t_stat": 4.9129
+        },
+        "rv_22d": {
+          "estimate": 0.36236888,
+          "se": 0.06020654,
+          "t_stat": 6.0188
+        },
+        "pos_jump_lag1": {
+          "estimate": -0.68696989,
+          "se": 0.20948147,
+          "t_stat": -3.2794
+        },
+        "neg_jump_lag1": {
+          "estimate": -0.12650399,
+          "se": 0.18582213,
+          "t_stat": -0.6808
+        }
+      }
+    },
+    "HAR-RV-Full": {
+      "model": "HAR-RV-Full",
+      "n": 1952,
+      "R2": 0.182795,
+      "coefficients": {
+        "const": {
+          "estimate": 1.125e-05,
+          "se": 9e-06,
+          "t_stat": 1.2502
+        },
+        "rv_lag1": {
+          "estimate": 0.20112245,
+          "se": 0.0269914,
+          "t_stat": 7.4514
+        },
+        "rv_5d": {
+          "estimate": 0.15297743,
+          "se": 0.05661095,
+          "t_stat": 2.7023
+        },
+        "rv_22d": {
+          "estimate": 0.31757115,
+          "se": 0.06145179,
+          "t_stat": 5.1678
+        },
+        "jump_lag1": {
+          "estimate": -0.70248399,
+          "se": 0.17704488,
+          "t_stat": -3.9678
+        },
+        "jump_freq_22d": {
+          "estimate": -4.21e-06,
+          "se": 1.213e-05,
+          "t_stat": -0.3468
+        },
+        "jump_size_5d": {
+          "estimate": 1.51354104,
+          "se": 0.4148168,
+          "t_stat": 3.6487
+        }
+      }
+    }
+  },
+  "oos_metrics": {
+    "HAR-RV": {
+      "QLIKE": 0.180684,
+      "MSE": 1.07406e-08,
+      "MAE": 2.936353e-05,
+      "Spearman": 0.6471,
+      "Spearman_p": 1.2530834461148614e-173,
+      "n_oos": 1457
+    },
+    "HAR-RV-J": {
+      "QLIKE": 0.180195,
+      "MSE": 1.07723e-08,
+      "MAE": 2.951368e-05,
+      "Spearman": 0.6466,
+      "Spearman_p": 2.864515879846835e-173,
+      "n_oos": 1457
+    },
+    "HAR-RV-JFreq": {
+      "QLIKE": 0.18375,
+      "MSE": 1.07439e-08,
+      "MAE": 3.00085e-05,
+      "Spearman": 0.6289,
+      "Spearman_p": 3.182496792372624e-161,
+      "n_oos": 1457
+    },
+    "HAR-RV-JSize": {
+      "QLIKE": 0.180921,
+      "MSE": 1.080303e-08,
+      "MAE": 2.939052e-05,
+      "Spearman": 0.6481,
+      "Spearman_p": 2.587855271227622e-174,
+      "n_oos": 1457
+    },
+    "HAR-RV-SignedJ": {
+      "QLIKE": 0.178465,
+      "MSE": 1.065201e-08,
+      "MAE": 2.958793e-05,
+      "Spearman": 0.6431,
+      "Spearman_p": 7.597343579066612e-171,
+      "n_oos": 1457
+    },
+    "HAR-RV-Full": {
+      "QLIKE": 0.184538,
+      "MSE": 1.090253e-08,
+      "MAE": 3.015425e-05,
+      "Spearman": 0.627,
+      "Spearman_p": 5.1304624433592904e-160,
+      "n_oos": 1457
+    }
+  },
+  "dm_tests": {
+    "HAR-RV-J_vs_HAR-RV": {
+      "t_stat": -0.8286,
+      "p_value": 0.407465,
+      "Harvey_significant": false,
+      "direction": "BETTER"
+    },
+    "HAR-RV-JFreq_vs_HAR-RV": {
+      "t_stat": 1.6705,
+      "p_value": 0.095039,
+      "Harvey_significant": false,
+      "direction": "WORSE"
+    },
+    "HAR-RV-JSize_vs_HAR-RV": {
+      "t_stat": 0.2141,
+      "p_value": 0.830485,
+      "Harvey_significant": false,
+      "direction": "WORSE"
+    },
+    "HAR-RV-SignedJ_vs_HAR-RV": {
+      "t_stat": -1.1981,
+      "p_value": 0.231062,
+      "Harvey_significant": false,
+      "direction": "BETTER"
+    },
+    "HAR-RV-Full_vs_HAR-RV": {
+      "t_stat": 1.6454,
+      "p_value": 0.100099,
+      "Harvey_significant": false,
+      "direction": "WORSE"
+    },
+    "HAR-RV-Full_vs_HAR-RV-J": {
+      "t_stat": 1.7934,
+      "p_value": 0.073117,
+      "Harvey_significant": false,
+      "direction": "WORSE"
+    },
+    "HAR-RV-SignedJ_vs_HAR-RV-J": {
+      "t_stat": -1.028,
+      "p_value": 0.304127,
+      "Harvey_significant": false,
+      "direction": "BETTER"
+    }
+  },
+  "cross_oos_stability": {
+    "2020-2020": {
+      "HAR-RV": {
+        "QLIKE": 0.252452,
+        "Spearman": 0.531,
+        "n": 245
+      },
+      "HAR-RV-J": {
+        "QLIKE": 0.24964,
+        "Spearman": 0.5292,
+        "n": 245
+      },
+      "HAR-RV-JFreq": {
+        "QLIKE": 0.254097,
+        "Spearman": 0.5269,
+        "n": 245
+      },
+      "HAR-RV-JSize": {
+        "QLIKE": 0.256542,
+        "Spearman": 0.5375,
+        "n": 245
+      },
+      "HAR-RV-SignedJ": {
+        "QLIKE": 0.245074,
+        "Spearman": 0.5293,
+        "n": 245
+      },
+      "HAR-RV-Full": {
+        "QLIKE": 0.25656,
+        "Spearman": 0.5362,
+        "n": 245
+      }
+    },
+    "2021-2021": {
+      "HAR-RV": {
+        "QLIKE": 0.248619,
+        "Spearman": 0.6331,
+        "n": 243
+      },
+      "HAR-RV-J": {
+        "QLIKE": 0.248354,
+        "Spearman": 0.634,
+        "n": 243
+      },
+      "HAR-RV-JFreq": {
+        "QLIKE": 0.23886,
+        "Spearman": 0.6503,
+        "n": 243
+      },
+      "HAR-RV-JSize": {
+        "QLIKE": 0.243936,
+        "Spearman": 0.634,
+        "n": 243
+      },
+      "HAR-RV-SignedJ": {
+        "QLIKE": 0.241807,
+        "Spearman": 0.6415,
+        "n": 243
+      },
+      "HAR-RV-Full": {
+        "QLIKE": 0.237421,
+        "Spearman": 0.6491,
+        "n": 243
+      }
+    },
+    "2022-2022": {
+      "HAR-RV": {
+        "QLIKE": 0.130097,
+        "Spearman": 0.5127,
+        "n": 246
+      },
+      "HAR-RV-J": {
+        "QLIKE": 0.130384,
+        "Spearman": 0.5125,
+        "n": 246
+      },
+      "HAR-RV-JFreq": {
+        "QLIKE": 0.132396,
+        "Spearman": 0.4967,
+        "n": 246
+      },
+      "HAR-RV-JSize": {
+        "QLIKE": 0.12993,
+        "Spearman": 0.5129,
+        "n": 246
+      },
+      "HAR-RV-SignedJ": {
+        "QLIKE": 0.128031,
+        "Spearman": 0.5137,
+        "n": 246
+      },
+      "HAR-RV-Full": {
+        "QLIKE": 0.133564,
+        "Spearman": 0.4915,
+        "n": 246
+      }
+    },
+    "2023-2023": {
+      "HAR-RV": {
+        "QLIKE": 0.095741,
+        "Spearman": 0.5108,
+        "n": 239
+      },
+      "HAR-RV-J": {
+        "QLIKE": 0.0952,
+        "Spearman": 0.5077,
+        "n": 239
+      },
+      "HAR-RV-JFreq": {
+        "QLIKE": 0.119599,
+        "Spearman": 0.5082,
+        "n": 239
+      },
+      "HAR-RV-JSize": {
+        "QLIKE": 0.096704,
+        "Spearman": 0.5114,
+        "n": 239
+      },
+      "HAR-RV-SignedJ": {
+        "QLIKE": 0.094751,
+        "Spearman": 0.5263,
+        "n": 239
+      },
+      "HAR-RV-Full": {
+        "QLIKE": 0.120485,
+        "Spearman": 0.5053,
+        "n": 239
+      }
+    },
+    "2024-2024": {
+      "HAR-RV": {
+        "QLIKE": 0.176994,
+        "Spearman": 0.6895,
+        "n": 242
+      },
+      "HAR-RV-J": {
+        "QLIKE": 0.17719,
+        "Spearman": 0.6893,
+        "n": 242
+      },
+      "HAR-RV-JFreq": {
+        "QLIKE": 0.180755,
+        "Spearman": 0.6784,
+        "n": 242
+      },
+      "HAR-RV-JSize": {
+        "QLIKE": 0.177525,
+        "Spearman": 0.6884,
+        "n": 242
+      },
+      "HAR-RV-SignedJ": {
+        "QLIKE": 0.180987,
+        "Spearman": 0.6803,
+        "n": 242
+      },
+      "HAR-RV-Full": {
+        "QLIKE": 0.182455,
+        "Spearman": 0.6725,
+        "n": 242
+      }
+    }
+  },
+  "cross_oos_wins": {
+    "HAR-RV": 1,
+    "HAR-RV-J": 0,
+    "HAR-RV-JFreq": 0,
+    "HAR-RV-JSize": 0,
+    "HAR-RV-SignedJ": 3,
+    "HAR-RV-Full": 1
+  },
+  "conclusions": {
+    "best_model": "HAR-RV-SignedJ",
+    "best_qlike": 0.178465,
+    "baseline_qlike": 0.180684,
+    "improvement_pct": 1.23,
+    "any_harvey_significant": false,
+    "significant_models": []
+  },
+  "elapsed_seconds": 81.8
+}

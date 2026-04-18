@@ -1,0 +1,51 @@
+{
+  "experiment": "vix_term_structure_vol_prediction",
+  "oos_period": "2021-01-20 to 2025-12-12",
+  "n_windows_total": 68,
+  "n_windows_oos": 56,
+  "init_train_windows": 12,
+  "garch_window": 2000,
+  "results": {
+    "GARCH-only": {
+      "R2": -0.173072,
+      "RMSE": 0.079977,
+      "MAE": 0.056237,
+      "QLIKE": -2.573434
+    },
+    "VIX-only": {
+      "R2": 0.222021,
+      "RMSE": 0.06513,
+      "MAE": 0.038952,
+      "QLIKE": -2.609359
+    },
+    "VIX + Term Structure": {
+      "R2": -0.332826,
+      "RMSE": 0.085249,
+      "MAE": 0.061522,
+      "QLIKE": 1.030189
+    }
+  },
+  "dm_tests": {
+    "garch_vs_vix": {
+      "stat": 2.8482,
+      "p": 0.0044
+    },
+    "garch_vs_vix_ts": {
+      "stat": -0.5659,
+      "p": 0.5715
+    },
+    "vix_vs_vix_ts": {
+      "stat": -2.208,
+      "p": 0.0272
+    }
+  },
+  "full_sample_regression": {
+    "intercept": -0.670986,
+    "vix_coef": 0.395704,
+    "ts_ratio_coef": 0.848714,
+    "ts_ratio_t_stat": 4.4948,
+    "in_sample_r2": 0.499924
+  },
+  "conclusion": "VIX term structure does NOT add predictive power beyond VIX alone",
+  "created_at": "2026-03-16T23:54:06.166608"
+}

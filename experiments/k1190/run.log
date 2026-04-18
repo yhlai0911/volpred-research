@@ -1,0 +1,315 @@
+2026-04-17 20:08:09,482 - INFO - ======================================================================
+2026-04-17 20:08:09,482 - INFO - K1190: Paper 3 Sector Analysis — 11 SPDR ETFs Reproduce
+2026-04-17 20:08:09,482 - INFO - ======================================================================
+2026-04-17 20:08:09,482 - INFO - Paper claims: r=0.163, p=0.632, gamma [0.077, 0.16]
+2026-04-17 20:08:09,482 - INFO - KB reference: XLF gamma=0.251
+2026-04-17 20:08:09,482 - INFO - Downloading data from Yahoo Finance...
+2026-04-17 20:08:11,029 - INFO -   Downloaded 7104 rows, columns: ['SHY', 'XLB', 'XLC', 'XLE', 'XLF', 'XLI', 'XLK', 'XLP', 'XLRE', 'XLU', 'XLV', 'XLY', '^VIX']
+2026-04-17 20:08:11,031 - INFO - 
+--- XLB ---
+2026-04-17 20:08:11,031 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:08:11,031 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:08:12,568 - INFO -   omega=0.000003, alpha=0.0302, gamma=0.1047, beta=0.9071, loglik=20282.41, converged=True
+2026-04-17 20:08:12,610 - INFO -   BH Sharpe=0.5007, VT Sharpe=0.4347, Delta Sharpe=-0.0660
+2026-04-17 20:08:12,611 - INFO - 
+--- XLE ---
+2026-04-17 20:08:12,611 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:08:12,611 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:08:14,050 - INFO -   omega=0.000004, alpha=0.0302, gamma=0.1045, beta=0.9067, loglik=19086.20, converged=True
+2026-04-17 20:08:14,087 - INFO -   BH Sharpe=0.4900, VT Sharpe=0.4051, Delta Sharpe=-0.0849
+2026-04-17 20:08:14,088 - INFO - 
+--- XLF ---
+2026-04-17 20:08:14,088 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:08:14,088 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:08:16,356 - INFO -   omega=0.000002, alpha=0.0303, gamma=0.1054, beta=0.9080, loglik=20240.45, converged=True
+2026-04-17 20:08:16,394 - INFO -   BH Sharpe=0.3600, VT Sharpe=0.3874, Delta Sharpe=0.0274
+2026-04-17 20:08:16,394 - INFO - 
+--- XLI ---
+2026-04-17 20:08:16,394 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:08:16,395 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:08:18,908 - INFO -   omega=0.000002, alpha=0.0302, gamma=0.1034, beta=0.9050, loglik=21243.70, converged=True
+2026-04-17 20:08:18,947 - INFO -   BH Sharpe=0.5982, VT Sharpe=0.5801, Delta Sharpe=-0.0182
+2026-04-17 20:08:18,948 - INFO - 
+--- XLK ---
+2026-04-17 20:08:18,948 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:08:18,948 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:08:21,602 - INFO -   omega=0.000002, alpha=0.0303, gamma=0.1060, beta=0.9090, loglik=20104.18, converged=True
+2026-04-17 20:08:21,640 - INFO -   BH Sharpe=0.7073, VT Sharpe=0.6554, Delta Sharpe=-0.0520
+2026-04-17 20:08:21,641 - INFO - 
+--- XLP ---
+2026-04-17 20:08:21,641 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:08:21,641 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:08:23,528 - INFO -   omega=0.000001, alpha=0.0302, gamma=0.1035, beta=0.9053, loglik=23293.85, converged=True
+2026-04-17 20:08:23,567 - INFO -   BH Sharpe=0.6628, VT Sharpe=0.6028, Delta Sharpe=-0.0599
+2026-04-17 20:08:23,567 - INFO - 
+--- XLU ---
+2026-04-17 20:08:23,568 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:08:23,568 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:08:24,994 - INFO -   omega=0.000003, alpha=0.0300, gamma=0.1003, beta=0.9005, loglik=21769.12, converged=True
+2026-04-17 20:08:25,033 - INFO -   BH Sharpe=0.6177, VT Sharpe=0.6556, Delta Sharpe=0.0378
+2026-04-17 20:08:25,034 - INFO - 
+--- XLV ---
+2026-04-17 20:08:25,034 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:08:25,034 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:08:26,639 - INFO -   omega=0.000002, alpha=0.0300, gamma=0.1004, beta=0.8992, loglik=22157.81, converged=True
+2026-04-17 20:08:26,676 - INFO -   BH Sharpe=0.6194, VT Sharpe=0.5765, Delta Sharpe=-0.0429
+2026-04-17 20:08:26,677 - INFO - 
+--- XLY ---
+2026-04-17 20:08:26,677 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:08:26,677 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:08:29,182 - INFO -   omega=0.000002, alpha=0.0303, gamma=0.1061, beta=0.9092, loglik=20809.37, converged=True
+2026-04-17 20:08:29,220 - INFO -   BH Sharpe=0.5886, VT Sharpe=0.5325, Delta Sharpe=-0.0561
+2026-04-17 20:08:29,220 - INFO - 
+--- XLRE ---
+2026-04-17 20:08:29,221 - INFO -   Data: 2015-10-08 to 2026-03-31, 2634 days
+2026-04-17 20:08:29,221 - INFO -   Estimating GJR-GARCH on 2633 return obs...
+2026-04-17 20:08:29,810 - INFO -   omega=0.000003, alpha=0.0300, gamma=0.1002, beta=0.9003, loglik=8225.42, converged=True
+2026-04-17 20:08:29,830 - INFO -   BH Sharpe=0.4136, VT Sharpe=0.3448, Delta Sharpe=-0.0688
+2026-04-17 20:08:29,831 - INFO - 
+--- XLC ---
+2026-04-17 20:08:29,831 - INFO -   Data: 2018-06-19 to 2026-03-31, 1956 days
+2026-04-17 20:08:29,831 - INFO -   Estimating GJR-GARCH on 1955 return obs...
+2026-04-17 20:08:30,455 - INFO -   omega=0.000005, alpha=0.0297, gamma=0.1009, beta=0.8918, loglik=5857.05, converged=True
+2026-04-17 20:08:30,470 - INFO -   BH Sharpe=0.6151, VT Sharpe=0.5480, Delta Sharpe=-0.0671
+2026-04-17 20:08:30,470 - INFO - 
+======================================================================
+2026-04-17 20:08:30,470 - INFO - Cross-sectional correlation: gamma vs Delta Sharpe
+2026-04-17 20:08:30,472 - INFO -   N valid sectors = 11
+2026-04-17 20:08:30,472 - INFO -   Pearson r = -0.1051 (paper: 0.163)
+2026-04-17 20:08:30,472 - INFO -   p-value   = 0.7585 (paper: 0.632)
+2026-04-17 20:08:30,472 - INFO -   Gamma range: [0.1002, 0.1061]
+2026-04-17 20:08:30,472 - INFO -   Paper range: [0.077, 0.16]
+2026-04-17 20:08:30,472 - INFO - 
+KB reference check: XLF gamma = 0.1054 (KB: 0.251)
+2026-04-17 20:08:30,472 - INFO - 
+Match status: (a) DIVERGED
+2026-04-17 20:08:30,472 - INFO -   r diff: 0.2681, gamma_range_match: False
+2026-04-17 20:08:30,472 - INFO - 
+======================================================================
+2026-04-17 20:08:30,472 - INFO - Ticker      Gamma  BH Sharpe  VT Sharpe    Delta
+2026-04-17 20:08:30,472 - INFO - --------------------------------------------------
+2026-04-17 20:08:30,472 - INFO - XLB        0.1047     0.5007     0.4347  -0.0660
+2026-04-17 20:08:30,472 - INFO - XLE        0.1045     0.4900     0.4051  -0.0849
+2026-04-17 20:08:30,472 - INFO - XLF        0.1054     0.3600     0.3874   0.0274
+2026-04-17 20:08:30,472 - INFO - XLI        0.1034     0.5982     0.5801  -0.0182
+2026-04-17 20:08:30,472 - INFO - XLK        0.1060     0.7073     0.6554  -0.0520
+2026-04-17 20:08:30,472 - INFO - XLP        0.1035     0.6628     0.6028  -0.0599
+2026-04-17 20:08:30,472 - INFO - XLU        0.1003     0.6177     0.6556   0.0378
+2026-04-17 20:08:30,472 - INFO - XLV        0.1004     0.6194     0.5765  -0.0429
+2026-04-17 20:08:30,472 - INFO - XLY        0.1061     0.5886     0.5325  -0.0561
+2026-04-17 20:08:30,472 - INFO - XLRE       0.1002     0.4136     0.3448  -0.0688
+2026-04-17 20:08:30,472 - INFO - XLC        0.1009     0.6151     0.5480  -0.0671
+2026-04-17 20:08:30,473 - INFO - 
+Results written to /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a7880876/experiments/k1190/k1190_results.json
+2026-04-17 20:08:30,473 - INFO - 
+FINAL VERDICT: (a) DIVERGED
+2026-04-17 20:08:59,416 - INFO - ======================================================================
+2026-04-17 20:08:59,416 - INFO - K1190: Paper 3 Sector Analysis — 11 SPDR ETFs Reproduce
+2026-04-17 20:08:59,416 - INFO - ======================================================================
+2026-04-17 20:08:59,416 - INFO - Paper claims: r=0.163, p=0.632, gamma [0.077, 0.16]
+2026-04-17 20:08:59,416 - INFO - KB reference: XLF gamma=0.251
+2026-04-17 20:08:59,416 - INFO - Downloading data from Yahoo Finance...
+2026-04-17 20:09:00,752 - INFO -   Downloaded 7104 rows, columns: ['SHY', 'XLB', 'XLC', 'XLE', 'XLF', 'XLI', 'XLK', 'XLP', 'XLRE', 'XLU', 'XLV', 'XLY', '^VIX']
+2026-04-17 20:09:00,753 - INFO - 
+--- XLB ---
+2026-04-17 20:09:00,753 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:09:00,754 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:09:06,571 - INFO -   omega=0.000003, alpha=0.0304, gamma=0.0985, beta=0.9103, loglik=20282.59, converged=True
+2026-04-17 20:09:06,610 - INFO -   BH Sharpe=0.5007, VT Sharpe=0.4347, Delta Sharpe=-0.0660
+2026-04-17 20:09:06,611 - INFO - 
+--- XLE ---
+2026-04-17 20:09:06,611 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:09:06,611 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:09:12,436 - INFO -   omega=0.000003, alpha=0.0284, gamma=0.0766, beta=0.9241, loglik=19091.55, converged=True
+2026-04-17 20:09:12,476 - INFO -   BH Sharpe=0.4900, VT Sharpe=0.4051, Delta Sharpe=-0.0849
+2026-04-17 20:09:12,477 - INFO - 
+--- XLF ---
+2026-04-17 20:09:12,477 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:09:12,477 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:09:18,635 - INFO -   omega=0.000003, alpha=0.0296, gamma=0.1515, beta=0.8852, loglik=20248.41, converged=True
+2026-04-17 20:09:18,673 - INFO -   BH Sharpe=0.3600, VT Sharpe=0.3874, Delta Sharpe=0.0274
+2026-04-17 20:09:18,674 - INFO - 
+--- XLI ---
+2026-04-17 20:09:18,674 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:09:18,674 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:09:26,397 - INFO -   omega=0.000002, alpha=0.0000, gamma=0.1375, beta=0.9187, loglik=21258.29, converged=True
+2026-04-17 20:09:26,437 - INFO -   BH Sharpe=0.5982, VT Sharpe=0.5801, Delta Sharpe=-0.0182
+2026-04-17 20:09:26,437 - INFO - 
+--- XLK ---
+2026-04-17 20:09:26,437 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:09:26,437 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:09:31,790 - INFO -   omega=0.000003, alpha=0.0225, gamma=0.1318, beta=0.9039, loglik=20107.37, converged=True
+2026-04-17 20:09:31,829 - INFO -   BH Sharpe=0.7073, VT Sharpe=0.6554, Delta Sharpe=-0.0520
+2026-04-17 20:09:31,830 - INFO - 
+--- XLP ---
+2026-04-17 20:09:31,830 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:09:31,830 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:09:39,140 - INFO -   omega=0.000001, alpha=0.0300, gamma=0.1176, beta=0.8977, loglik=23294.66, converged=True
+2026-04-17 20:09:39,178 - INFO -   BH Sharpe=0.6628, VT Sharpe=0.6028, Delta Sharpe=-0.0599
+2026-04-17 20:09:39,179 - INFO - 
+--- XLU ---
+2026-04-17 20:09:39,179 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:09:39,179 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:09:45,595 - INFO -   omega=0.000002, alpha=0.0351, gamma=0.0728, beta=0.9127, loglik=21773.27, converged=True
+2026-04-17 20:09:45,634 - INFO -   BH Sharpe=0.6177, VT Sharpe=0.6556, Delta Sharpe=0.0378
+2026-04-17 20:09:45,635 - INFO - 
+--- XLV ---
+2026-04-17 20:09:45,635 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:09:45,635 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:09:51,827 - INFO -   omega=0.000003, alpha=0.0190, gamma=0.1442, beta=0.8895, loglik=22164.77, converged=True
+2026-04-17 20:09:51,864 - INFO -   BH Sharpe=0.6194, VT Sharpe=0.5765, Delta Sharpe=-0.0429
+2026-04-17 20:09:51,865 - INFO - 
+--- XLY ---
+2026-04-17 20:09:51,865 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:09:51,865 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:09:57,987 - INFO -   omega=0.000002, alpha=0.0272, gamma=0.1175, beta=0.9064, loglik=20810.01, converged=True
+2026-04-17 20:09:58,024 - INFO -   BH Sharpe=0.5886, VT Sharpe=0.5325, Delta Sharpe=-0.0561
+2026-04-17 20:09:58,025 - INFO - 
+--- XLRE ---
+2026-04-17 20:09:58,025 - INFO -   Data: 2015-10-08 to 2026-03-31, 2634 days
+2026-04-17 20:09:58,026 - INFO -   Estimating GJR-GARCH on 2633 return obs...
+2026-04-17 20:10:01,399 - INFO -   omega=0.000002, alpha=0.0274, gamma=0.0831, beta=0.9140, loglik=8226.30, converged=True
+2026-04-17 20:10:01,419 - INFO -   BH Sharpe=0.4136, VT Sharpe=0.3448, Delta Sharpe=-0.0688
+2026-04-17 20:10:01,419 - INFO - 
+--- XLC ---
+2026-04-17 20:10:01,419 - INFO -   Data: 2018-06-19 to 2026-03-31, 1956 days
+2026-04-17 20:10:01,419 - INFO -   Estimating GJR-GARCH on 1955 return obs...
+2026-04-17 20:10:03,251 - INFO -   omega=0.000007, alpha=0.0411, gamma=0.1630, beta=0.8474, loglik=5861.37, converged=True
+2026-04-17 20:10:03,267 - INFO -   BH Sharpe=0.6151, VT Sharpe=0.5480, Delta Sharpe=-0.0671
+2026-04-17 20:10:03,267 - INFO - 
+======================================================================
+2026-04-17 20:10:03,267 - INFO - Cross-sectional correlation: gamma vs Delta Sharpe
+2026-04-17 20:10:03,267 - INFO -   N valid sectors = 11
+2026-04-17 20:10:03,268 - INFO -   Pearson r = 0.0868 (paper: 0.163)
+2026-04-17 20:10:03,268 - INFO -   p-value   = 0.7997 (paper: 0.632)
+2026-04-17 20:10:03,268 - INFO -   Gamma range: [0.0728, 0.1630]
+2026-04-17 20:10:03,268 - INFO -   Paper range: [0.077, 0.16]
+2026-04-17 20:10:03,268 - INFO - 
+KB reference check: XLF gamma = 0.1515 (KB: 0.251)
+2026-04-17 20:10:03,268 - INFO - 
+Match status: (c) gamma_range_matched_r_diverges
+2026-04-17 20:10:03,268 - INFO -   r diff: 0.0762, gamma_range_match: True
+2026-04-17 20:10:03,268 - INFO - 
+======================================================================
+2026-04-17 20:10:03,268 - INFO - Ticker      Gamma  BH Sharpe  VT Sharpe    Delta
+2026-04-17 20:10:03,268 - INFO - --------------------------------------------------
+2026-04-17 20:10:03,268 - INFO - XLB        0.0985     0.5007     0.4347  -0.0660
+2026-04-17 20:10:03,268 - INFO - XLE        0.0766     0.4900     0.4051  -0.0849
+2026-04-17 20:10:03,268 - INFO - XLF        0.1515     0.3600     0.3874   0.0274
+2026-04-17 20:10:03,268 - INFO - XLI        0.1375     0.5982     0.5801  -0.0182
+2026-04-17 20:10:03,268 - INFO - XLK        0.1318     0.7073     0.6554  -0.0520
+2026-04-17 20:10:03,268 - INFO - XLP        0.1176     0.6628     0.6028  -0.0599
+2026-04-17 20:10:03,268 - INFO - XLU        0.0728     0.6177     0.6556   0.0378
+2026-04-17 20:10:03,268 - INFO - XLV        0.1442     0.6194     0.5765  -0.0429
+2026-04-17 20:10:03,268 - INFO - XLY        0.1175     0.5886     0.5325  -0.0561
+2026-04-17 20:10:03,268 - INFO - XLRE       0.0831     0.4136     0.3448  -0.0688
+2026-04-17 20:10:03,268 - INFO - XLC        0.1630     0.6151     0.5480  -0.0671
+2026-04-17 20:10:03,268 - INFO - 
+Results written to /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a7880876/experiments/k1190/k1190_results.json
+2026-04-17 20:10:03,268 - INFO - 
+FINAL VERDICT: (c) gamma_range_matched_r_diverges
+2026-04-17 20:12:22,348 - INFO - ======================================================================
+2026-04-17 20:12:22,349 - INFO - K1190: Paper 3 Sector Analysis — 11 SPDR ETFs Reproduce
+2026-04-17 20:12:22,349 - INFO - ======================================================================
+2026-04-17 20:12:22,349 - INFO - Paper claims: r=0.163, p=0.632, gamma [0.077, 0.16]
+2026-04-17 20:12:22,349 - INFO - KB reference: XLF gamma=0.251
+2026-04-17 20:12:22,349 - INFO - Downloading data from Yahoo Finance...
+2026-04-17 20:12:24,127 - INFO -   Downloaded 7357 rows, columns: ['SHY', 'XLB', 'XLC', 'XLE', 'XLF', 'XLI', 'XLK', 'XLP', 'XLRE', 'XLU', 'XLV', 'XLY', '^VIX']
+2026-04-17 20:12:24,128 - INFO - 
+--- XLB ---
+2026-04-17 20:12:24,128 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:12:24,128 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:12:24,548 - INFO -   omega=0.000003, alpha=0.0302, gamma=0.0972, beta=0.9103, loglik=-11299.70, converged=True
+2026-04-17 20:12:24,586 - INFO -   BH Sharpe=0.5007, VT Sharpe=0.4347, Delta Sharpe=-0.0660
+2026-04-17 20:12:24,586 - INFO - 
+--- XLE ---
+2026-04-17 20:12:24,586 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:12:24,586 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:12:24,609 - INFO -   omega=0.000003, alpha=0.0287, gamma=0.0771, beta=0.9241, loglik=-12490.53, converged=True
+2026-04-17 20:12:24,644 - INFO -   BH Sharpe=0.4900, VT Sharpe=0.4051, Delta Sharpe=-0.0849
+2026-04-17 20:12:24,645 - INFO - 
+--- XLF ---
+2026-04-17 20:12:24,645 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:12:24,645 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:12:24,667 - INFO -   omega=0.000003, alpha=0.0298, gamma=0.1519, beta=0.8851, loglik=-11333.97, converged=True
+2026-04-17 20:12:24,702 - INFO -   BH Sharpe=0.3600, VT Sharpe=0.3874, Delta Sharpe=0.0274
+2026-04-17 20:12:24,703 - INFO - 
+--- XLI ---
+2026-04-17 20:12:24,703 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:12:24,703 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:12:24,725 - INFO -   omega=0.000002, alpha=0.0000, gamma=0.1366, beta=0.9188, loglik=-10324.21, converged=True
+2026-04-17 20:12:24,762 - INFO -   BH Sharpe=0.5982, VT Sharpe=0.5801, Delta Sharpe=-0.0182
+2026-04-17 20:12:24,762 - INFO - 
+--- XLK ---
+2026-04-17 20:12:24,762 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:12:24,763 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:12:24,785 - INFO -   omega=0.000003, alpha=0.0218, gamma=0.1293, beta=0.9045, loglik=-11474.63, converged=True
+2026-04-17 20:12:24,821 - INFO -   BH Sharpe=0.7073, VT Sharpe=0.6554, Delta Sharpe=-0.0520
+2026-04-17 20:12:24,821 - INFO - 
+--- XLP ---
+2026-04-17 20:12:24,821 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:12:24,821 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:12:24,841 - INFO -   omega=0.000001, alpha=0.0292, gamma=0.1152, beta=0.8981, loglik=-8286.64, converged=True
+2026-04-17 20:12:24,877 - INFO -   BH Sharpe=0.6628, VT Sharpe=0.6028, Delta Sharpe=-0.0599
+2026-04-17 20:12:24,877 - INFO - 
+--- XLU ---
+2026-04-17 20:12:24,877 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:12:24,878 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:12:24,900 - INFO -   omega=0.000002, alpha=0.0343, gamma=0.0724, beta=0.9132, loglik=-9808.36, converged=True
+2026-04-17 20:12:24,935 - INFO -   BH Sharpe=0.6177, VT Sharpe=0.6556, Delta Sharpe=0.0378
+2026-04-17 20:12:24,936 - INFO - 
+--- XLV ---
+2026-04-17 20:12:24,936 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:12:24,936 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:12:24,958 - INFO -   omega=0.000003, alpha=0.0178, gamma=0.1417, beta=0.8906, loglik=-9416.28, converged=True
+2026-04-17 20:12:24,993 - INFO -   BH Sharpe=0.6194, VT Sharpe=0.5765, Delta Sharpe=-0.0429
+2026-04-17 20:12:24,994 - INFO - 
+--- XLY ---
+2026-04-17 20:12:24,994 - INFO -   Data: 1998-12-22 to 2026-03-31, 6859 days
+2026-04-17 20:12:24,994 - INFO -   Estimating GJR-GARCH on 6858 return obs...
+2026-04-17 20:12:25,018 - INFO -   omega=0.000002, alpha=0.0272, gamma=0.1167, beta=0.9065, loglik=-10772.54, converged=True
+2026-04-17 20:12:25,057 - INFO -   BH Sharpe=0.5886, VT Sharpe=0.5325, Delta Sharpe=-0.0561
+2026-04-17 20:12:25,057 - INFO - 
+--- XLRE ---
+2026-04-17 20:12:25,057 - INFO -   Data: 2015-10-08 to 2026-03-31, 2634 days
+2026-04-17 20:12:25,058 - INFO -   Estimating GJR-GARCH on 2633 return obs...
+2026-04-17 20:12:25,071 - INFO -   omega=0.000002, alpha=0.0282, gamma=0.0827, beta=0.9126, loglik=-3899.39, converged=True
+2026-04-17 20:12:25,090 - INFO -   BH Sharpe=0.4136, VT Sharpe=0.3448, Delta Sharpe=-0.0688
+2026-04-17 20:12:25,091 - INFO - 
+--- XLC ---
+2026-04-17 20:12:25,091 - INFO -   Data: 2018-06-19 to 2026-03-31, 1956 days
+2026-04-17 20:12:25,091 - INFO -   Estimating GJR-GARCH on 1955 return obs...
+2026-04-17 20:12:25,101 - INFO -   omega=0.000007, alpha=0.0418, gamma=0.1653, beta=0.8470, loglik=-3141.55, converged=True
+2026-04-17 20:12:25,115 - INFO -   BH Sharpe=0.6151, VT Sharpe=0.5480, Delta Sharpe=-0.0671
+2026-04-17 20:12:25,116 - INFO - 
+======================================================================
+2026-04-17 20:12:25,116 - INFO - Cross-sectional correlation: gamma vs Delta Sharpe
+2026-04-17 20:12:25,116 - INFO -   N valid sectors = 11
+2026-04-17 20:12:25,116 - INFO -   Pearson r = 0.0885 (paper: 0.163)
+2026-04-17 20:12:25,116 - INFO -   p-value   = 0.7958 (paper: 0.632)
+2026-04-17 20:12:25,116 - INFO -   Gamma range: [0.0724, 0.1653]
+2026-04-17 20:12:25,116 - INFO -   Paper range: [0.077, 0.16]
+2026-04-17 20:12:25,116 - INFO - 
+KB reference check: XLF gamma = 0.1519 (KB: 0.251)
+2026-04-17 20:12:25,116 - INFO - 
+Match status: (c) gamma_range_matched_r_diverges
+2026-04-17 20:12:25,116 - INFO -   r diff: 0.0745, gamma_range_match: True
+2026-04-17 20:12:25,116 - INFO - 
+======================================================================
+2026-04-17 20:12:25,116 - INFO - Ticker      Gamma  BH Sharpe  VT Sharpe    Delta
+2026-04-17 20:12:25,116 - INFO - --------------------------------------------------
+2026-04-17 20:12:25,116 - INFO - XLB        0.0972     0.5007     0.4347  -0.0660
+2026-04-17 20:12:25,116 - INFO - XLE        0.0771     0.4900     0.4051  -0.0849
+2026-04-17 20:12:25,116 - INFO - XLF        0.1519     0.3600     0.3874   0.0274
+2026-04-17 20:12:25,116 - INFO - XLI        0.1366     0.5982     0.5801  -0.0182
+2026-04-17 20:12:25,116 - INFO - XLK        0.1293     0.7073     0.6554  -0.0520
+2026-04-17 20:12:25,116 - INFO - XLP        0.1152     0.6628     0.6028  -0.0599
+2026-04-17 20:12:25,116 - INFO - XLU        0.0724     0.6177     0.6556   0.0378
+2026-04-17 20:12:25,116 - INFO - XLV        0.1417     0.6194     0.5765  -0.0429
+2026-04-17 20:12:25,116 - INFO - XLY        0.1167     0.5886     0.5325  -0.0561
+2026-04-17 20:12:25,116 - INFO - XLRE       0.0827     0.4136     0.3448  -0.0688
+2026-04-17 20:12:25,116 - INFO - XLC        0.1653     0.6151     0.5480  -0.0671
+2026-04-17 20:12:25,117 - INFO - 
+Results written to /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a7880876/experiments/k1190/k1190_results.json
+2026-04-17 20:12:25,117 - INFO - 
+FINAL VERDICT: (c) gamma_range_matched_r_diverges

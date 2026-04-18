@@ -1,0 +1,225 @@
+{
+  "calm (<15)": {
+    "shock_days": 34,
+    "shock_abs_r": 1.23,
+    "normal_abs_r": 0.39,
+    "ratio": 3.15
+  },
+  "normal (15-20)": {
+    "shock_days": 168,
+    "shock_abs_r": 1.44,
+    "normal_abs_r": 0.52,
+    "ratio": 2.77
+  },
+  "elevated (20-25)": {
+    "shock_days": 189,
+    "shock_abs_r": 1.65,
+    "normal_abs_r": 0.69,
+    "ratio": 2.37
+  },
+  "high (25-30)": {
+    "shock_days": 132,
+    "shock_abs_r": 1.93,
+    "normal_abs_r": 0.83,
+    "ratio": 2.32
+  },
+  "crisis (>30)": {
+    "shock_days": 244,
+    "shock_abs_r": 3.0,
+    "normal_abs_r": 1.23,
+    "ratio": 2.45
+  },
+  "regression_raw_slope": 0.0677,
+  "regression_normalized_slope": -0.00027,
+  "regression_t_stat": -1.77,
+  "regression_N": 767,
+  "regression_p_value": 0.0771,
+  "conclusion": "paralysis",
+  "seed": 42,
+  "data_source": "yfinance",
+  "data_start": "2006-01-01",
+  "data_end": "2026-03-31",
+  "note": "K1249 = K716 rebuild per K1231 option (a). Target: close 3.6% slope drift (-0.00027 vs paper -0.00028) via paper-canonical full VIX sample. Finding: with current yfinance 2026-04-17 vintage, SPY+VIX have zero missing-day gap, so the full-VIX fix does NOT lift N from 767 to the paper's 893. Slope drift persists at 3.6%; t-stat diverges 48%. Root cause: data vintage drift (yfinance VIX revision since original K716 run). Per K1231 rule, option (a) cannot achieve ALLCLOSE_PASS; main-thread must choose (b) paper revision or (c) errata disclosure.",
+  "allclose_checks": {
+    "calm (<15).shock_days": {
+      "k1249": 34,
+      "paper": 34,
+      "diff": 0,
+      "rel_pct": 0.0,
+      "pass": true
+    },
+    "calm (<15).shock_abs_r": {
+      "k1249": 1.23,
+      "paper": 1.24,
+      "diff": 0.01,
+      "rel_pct": 0.81,
+      "pass": true
+    },
+    "calm (<15).normal_abs_r": {
+      "k1249": 0.39,
+      "paper": 0.39,
+      "diff": 0.0,
+      "rel_pct": 0.0,
+      "pass": true
+    },
+    "calm (<15).ratio": {
+      "k1249": 3.15,
+      "paper": 3.16,
+      "diff": 0.01,
+      "rel_pct": 0.32,
+      "pass": true
+    },
+    "normal (15-20).shock_days": {
+      "k1249": 168,
+      "paper": 168,
+      "diff": 0,
+      "rel_pct": 0.0,
+      "pass": true
+    },
+    "normal (15-20).shock_abs_r": {
+      "k1249": 1.44,
+      "paper": 1.44,
+      "diff": 0.0,
+      "rel_pct": 0.0,
+      "pass": true
+    },
+    "normal (15-20).normal_abs_r": {
+      "k1249": 0.52,
+      "paper": 0.52,
+      "diff": 0.0,
+      "rel_pct": 0.0,
+      "pass": true
+    },
+    "normal (15-20).ratio": {
+      "k1249": 2.77,
+      "paper": 2.77,
+      "diff": 0.0,
+      "rel_pct": 0.0,
+      "pass": true
+    },
+    "elevated (20-25).shock_days": {
+      "k1249": 189,
+      "paper": 189,
+      "diff": 0,
+      "rel_pct": 0.0,
+      "pass": true
+    },
+    "elevated (20-25).shock_abs_r": {
+      "k1249": 1.65,
+      "paper": 1.64,
+      "diff": 0.01,
+      "rel_pct": 0.61,
+      "pass": true
+    },
+    "elevated (20-25).normal_abs_r": {
+      "k1249": 0.69,
+      "paper": 0.69,
+      "diff": 0.0,
+      "rel_pct": 0.0,
+      "pass": true
+    },
+    "elevated (20-25).ratio": {
+      "k1249": 2.37,
+      "paper": 2.37,
+      "diff": 0.0,
+      "rel_pct": 0.0,
+      "pass": true
+    },
+    "high (25-30).shock_days": {
+      "k1249": 132,
+      "paper": 132,
+      "diff": 0,
+      "rel_pct": 0.0,
+      "pass": true
+    },
+    "high (25-30).shock_abs_r": {
+      "k1249": 1.93,
+      "paper": 1.93,
+      "diff": 0.0,
+      "rel_pct": 0.0,
+      "pass": true
+    },
+    "high (25-30).normal_abs_r": {
+      "k1249": 0.83,
+      "paper": 0.83,
+      "diff": 0.0,
+      "rel_pct": 0.0,
+      "pass": true
+    },
+    "high (25-30).ratio": {
+      "k1249": 2.32,
+      "paper": 2.32,
+      "diff": 0.0,
+      "rel_pct": 0.0,
+      "pass": true
+    },
+    "crisis (>30).shock_days": {
+      "k1249": 244,
+      "paper": 244,
+      "diff": 0,
+      "rel_pct": 0.0,
+      "pass": true
+    },
+    "crisis (>30).shock_abs_r": {
+      "k1249": 3.0,
+      "paper": 2.99,
+      "diff": 0.01,
+      "rel_pct": 0.33,
+      "pass": true
+    },
+    "crisis (>30).normal_abs_r": {
+      "k1249": 1.23,
+      "paper": 1.23,
+      "diff": 0.0,
+      "rel_pct": 0.0,
+      "pass": true
+    },
+    "crisis (>30).ratio": {
+      "k1249": 2.45,
+      "paper": 2.43,
+      "diff": 0.02,
+      "rel_pct": 0.82,
+      "pass": true
+    },
+    "regression_raw_slope": {
+      "k1249": 0.0677,
+      "paper": 0.0669,
+      "diff": 0.0008,
+      "rel_pct": 1.2,
+      "pass": true
+    },
+    "regression_normalized_slope": {
+      "k1249": -0.00027,
+      "paper": -0.00028,
+      "diff": 1e-05,
+      "rel_pct": 3.57,
+      "pass": true
+    },
+    "regression_t_stat": {
+      "k1249": -1.77,
+      "paper": -3.42,
+      "diff": 1.65,
+      "rel_pct": 48.25,
+      "pass": false
+    },
+    "regression_N": {
+      "k1249": 767,
+      "paper": 893,
+      "diff": 126,
+      "rel_pct": 14.11,
+      "pass": false
+    }
+  },
+  "verdict": "RESIDUAL_DRIFT",
+  "slope_drift_pct_vs_paper": 3.57,
+  "vintage_diagnosis": {
+    "N_at_tau_2": 767,
+    "closest_tau_for_N893": {
+      "tau": 1.81,
+      "N": 896
+    },
+    "paper_N_target": 893,
+    "gap_absolute": 126,
+    "diagnosis": "Current yfinance 2026-04-17 vintage produces N=767 at \u03c4=2.0 for SPY+VIX joint sample. Paper N=893 cannot be reproduced with this vintage. The 126-day gap likely reflects yfinance VIX revision between original K716 run and 2026-04-17."
+  }
+}

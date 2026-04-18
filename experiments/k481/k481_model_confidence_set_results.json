@@ -1,0 +1,451 @@
+{
+  "experiment_id": "K481",
+  "title": "Model Confidence Set (MCS) \u2014 Formal Multi-Model Comparison",
+  "date": "2026-03-26T07:56:14.790309+00:00",
+  "references": [
+    "Hansen, Lunde, Nason (2011) \"The Model Confidence Set\" Econometrica 79(2):453-497",
+    "Corsi (2009) J Financial Econometrics \u2014 HAR-RV model",
+    "Patton (2011) J Econometrics \u2014 Volatility forecast evaluation",
+    "K468 \u2014 Yang-Zhang tautology check",
+    "K469 \u2014 HAR with r\u00b2 proxy",
+    "K475 \u2014 Validated ensemble"
+  ],
+  "method": {
+    "procedure": "Hansen-Lunde-Nason (2011) MCS with range statistic (T_R)",
+    "bootstrap": "Stationary bootstrap, B=5000, block_size=10",
+    "alpha": 0.1,
+    "loss_function": "QLIKE = proxy/forecast - log(proxy/forecast) - 1",
+    "implementation": "arch.bootstrap.MCS (Python arch package)",
+    "refit_interval": "63 trading days (quarterly) for GARCH models"
+  },
+  "asset": "SPY",
+  "data_source": "yfinance",
+  "diagnostics": {
+    "n_obs": 5591,
+    "date_range": "2004-01-05 to 2026-03-25",
+    "return_mean_pct": 0.031761936321078536,
+    "return_std_pct": 1.1823221733629763,
+    "return_skew": -0.3027546428037349,
+    "return_kurt": 14.866433013412387,
+    "r2_mean": 0.0001398644517949598,
+    "parkinson_mean": 9.055936232518048e-05,
+    "r2_over_parkinson_ratio": 1.5444504930670189
+  },
+  "models": {
+    "GJR-GARCH": "GJR-GARCH(1,1) Student-t, quarterly refit",
+    "GARCH": "GARCH(1,1) Normal, quarterly refit",
+    "EGARCH": "EGARCH(1,1) Normal, quarterly refit",
+    "HAR_logrange": "HAR log-range (1d+5d+21d), IS OLS calibration",
+    "Semivar_RS-": "HAR-style semivariance (RS\u207b_5 + RS\u207b_21 + RS\u207a_5 + RS\u207a_21)",
+    "EWMA": "EWMA (\u03bb=0.94)",
+    "GJR+HAR_Ens": "Equal-weight ensemble of GJR + HAR (scaled to r\u00b2 level)",
+    "Rolling_21d": "Rolling 21-day sample variance"
+  },
+  "main_results": {
+    "r2_proxy": {
+      "description": "MCS with r\u00b2 proxy (close-to-close squared return) \u2014 fair comparison",
+      "oos_period": "2023-01-01 to 2025-12-31",
+      "mean_qlike": {
+        "GJR+HAR_Ens": 1.498285473374388,
+        "Semivar_RS-": 1.5033565574953784,
+        "EGARCH": 1.5192432656031094,
+        "HAR_logrange": 1.521090183281435,
+        "GJR-GARCH": 1.52864232826461,
+        "GARCH": 1.5779650412210415,
+        "EWMA": 1.6170111099062,
+        "Rolling_21d": 1.6850331515498649
+      },
+      "mcs": {
+        "included_models": [
+          "EGARCH",
+          "GJR+HAR_Ens",
+          "GJR-GARCH",
+          "HAR_logrange",
+          "Semivar_RS-"
+        ],
+        "excluded_models": [
+          "EWMA",
+          "GARCH",
+          "Rolling_21d"
+        ],
+        "pvalues": {
+          "Pvalue": {
+            "GARCH": 0.0056,
+            "Rolling_21d": 0.0264,
+            "EWMA": 0.0338,
+            "HAR_logrange": 0.1414,
+            "GJR-GARCH": 0.186,
+            "EGARCH": 0.4614,
+            "Semivar_RS-": 0.785,
+            "GJR+HAR_Ens": 1.0
+          }
+        },
+        "n_obs": 751,
+        "alpha": 0.1,
+        "n_included": 5,
+        "n_excluded": 3
+      },
+      "interpretation": "Superior set contains 5 models: ['EGARCH', 'GJR+HAR_Ens', 'GJR-GARCH', 'HAR_logrange', 'Semivar_RS-']. These are statistically indistinguishable. Excluded models are significantly worse."
+    },
+    "parkinson_proxy": {
+      "description": "MCS with Parkinson proxy \u2014 tautology check (K468)",
+      "oos_period": "2023-01-01 to 2025-12-31",
+      "mean_qlike": {
+        "GJR+HAR_Ens": 0.36615015631784587,
+        "HAR_logrange": 0.3810393023237746,
+        "GJR-GARCH": 0.45393822131245937,
+        "EGARCH": 0.47031250982294276,
+        "GARCH": 0.5268490142405808,
+        "Semivar_RS-": 0.5292893553109204,
+        "EWMA": 0.5540906235181716,
+        "Rolling_21d": 0.5614332468980553
+      },
+      "mcs": {
+        "included_models": [
+          "GJR+HAR_Ens"
+        ],
+        "excluded_models": [
+          "EGARCH",
+          "EWMA",
+          "GARCH",
+          "GJR-GARCH",
+          "HAR_logrange",
+          "Rolling_21d",
+          "Semivar_RS-"
+        ],
+        "pvalues": {
+          "Pvalue": {
+            "GARCH": 0.0,
+            "Rolling_21d": 0.0,
+            "Semivar_RS-": 0.0,
+            "EGARCH": 0.0002,
+            "EWMA": 0.0002,
+            "GJR-GARCH": 0.0002,
+            "HAR_logrange": 0.0342,
+            "GJR+HAR_Ens": 1.0
+          }
+        },
+        "n_obs": 752,
+        "alpha": 0.1,
+        "n_included": 1,
+        "n_excluded": 7
+      },
+      "tautology_note": "Parkinson proxy naturally favors range-based models (HAR, Rolling)"
+    }
+  },
+  "pairwise_dm_tests": {
+    "GJR-GARCH_vs_GARCH": {
+      "dm_stat": -2.4482664000710406,
+      "p_value": 0.014582615135524835
+    },
+    "GJR-GARCH_vs_EGARCH": {
+      "dm_stat": 0.7093830014953948,
+      "p_value": 0.47830729793321947
+    },
+    "GJR-GARCH_vs_HAR_logrange": {
+      "dm_stat": 0.2986839319172056,
+      "p_value": 0.7652639539649388
+    },
+    "GJR-GARCH_vs_Semivar_RS-": {
+      "dm_stat": 0.8870240403851355,
+      "p_value": 0.3753503031655725
+    },
+    "GJR-GARCH_vs_EWMA": {
+      "dm_stat": -2.5296808808194573,
+      "p_value": 0.011620332961669533
+    },
+    "GJR-GARCH_vs_GJR+HAR_Ens": {
+      "dm_stat": 1.7760986112823298,
+      "p_value": 0.07612202751607766
+    },
+    "GJR-GARCH_vs_Rolling_21d": {
+      "dm_stat": -3.045570366664245,
+      "p_value": 0.0024037171334332363
+    },
+    "GARCH_vs_EGARCH": {
+      "dm_stat": 4.090981868480978,
+      "p_value": 4.7606347826523177e-05
+    },
+    "GARCH_vs_HAR_logrange": {
+      "dm_stat": 2.3917803424163315,
+      "p_value": 0.017012236789196056
+    },
+    "GARCH_vs_Semivar_RS-": {
+      "dm_stat": 3.060617966061023,
+      "p_value": 0.002287578684203595
+    },
+    "GARCH_vs_EWMA": {
+      "dm_stat": -1.4757390923296416,
+      "p_value": 0.1404336373686177
+    },
+    "GARCH_vs_GJR+HAR_Ens": {
+      "dm_stat": 3.569359715818548,
+      "p_value": 0.0003806380494417727
+    },
+    "GARCH_vs_Rolling_21d": {
+      "dm_stat": -1.971174609805878,
+      "p_value": 0.04907115442355314
+    },
+    "EGARCH_vs_HAR_logrange": {
+      "dm_stat": -0.0811244891081703,
+      "p_value": 0.9353645933901342
+    },
+    "EGARCH_vs_Semivar_RS-": {
+      "dm_stat": 0.7172134303959148,
+      "p_value": 0.47346571681045635
+    },
+    "EGARCH_vs_EWMA": {
+      "dm_stat": -3.1715992524611627,
+      "p_value": 0.001577750582308246
+    },
+    "EGARCH_vs_GJR+HAR_Ens": {
+      "dm_stat": 1.119579303719683,
+      "p_value": 0.2632514926716063
+    },
+    "EGARCH_vs_Rolling_21d": {
+      "dm_stat": -2.9009449351806236,
+      "p_value": 0.003829281173256094
+    },
+    "HAR_logrange_vs_Semivar_RS-": {
+      "dm_stat": 0.9352068288670663,
+      "p_value": 0.3499827294536795
+    },
+    "HAR_logrange_vs_EWMA": {
+      "dm_stat": -2.283582914435104,
+      "p_value": 0.02267485098933908
+    },
+    "HAR_logrange_vs_GJR+HAR_Ens": {
+      "dm_stat": 2.0981175009603996,
+      "p_value": 0.0362287552263747
+    },
+    "HAR_logrange_vs_Rolling_21d": {
+      "dm_stat": -2.527572266615602,
+      "p_value": 0.011689740284340555
+    },
+    "Semivar_RS-_vs_EWMA": {
+      "dm_stat": -2.733713667117858,
+      "p_value": 0.006410073569142805
+    },
+    "Semivar_RS-_vs_GJR+HAR_Ens": {
+      "dm_stat": 0.2518409627250773,
+      "p_value": 0.8012329865452033
+    },
+    "Semivar_RS-_vs_Rolling_21d": {
+      "dm_stat": -2.520317362880592,
+      "p_value": 0.011931366745131955
+    },
+    "EWMA_vs_GJR+HAR_Ens": {
+      "dm_stat": 2.9164944791519334,
+      "p_value": 0.0036455479890202813
+    },
+    "EWMA_vs_Rolling_21d": {
+      "dm_stat": -1.4401201364302916,
+      "p_value": 0.1502506961100767
+    },
+    "GJR+HAR_Ens_vs_Rolling_21d": {
+      "dm_stat": -3.0767190424661943,
+      "p_value": 0.002169030797603444
+    }
+  },
+  "subperiod_stability": [
+    {
+      "period": "2015-2016 (low vol)",
+      "n_oos": 504,
+      "mean_qlike": {
+        "GJR+HAR_Ens": 1.568178303372423,
+        "EGARCH": 1.5751520812523712,
+        "GJR-GARCH": 1.575217725146489,
+        "HAR_logrange": 1.5809096866964634,
+        "GARCH": 1.6272563183530178,
+        "EWMA": 1.7089601252464628,
+        "Rolling_21d": 1.8238370376943736,
+        "Semivar_RS-": 6553.744964555028
+      },
+      "best_model": "GJR+HAR_Ens",
+      "mcs_included": [
+        "EGARCH",
+        "GJR+HAR_Ens",
+        "GJR-GARCH",
+        "HAR_logrange",
+        "Semivar_RS-"
+      ],
+      "mcs_n_included": 5,
+      "mcs_pvalues": {
+        "EWMA": 0.029666666666666668,
+        "GARCH": 0.06166666666666667,
+        "Rolling_21d": 0.06166666666666667,
+        "Semivar_RS-": 0.536,
+        "HAR_logrange": 0.555,
+        "GJR-GARCH": 0.8626666666666667,
+        "EGARCH": 0.8626666666666667,
+        "GJR+HAR_Ens": 1.0
+      }
+    },
+    {
+      "period": "2017-2018 (Volmageddon)",
+      "n_oos": 502,
+      "mean_qlike": {
+        "GJR-GARCH": 1.6738010526162388,
+        "EGARCH": 1.6879389107522764,
+        "GJR+HAR_Ens": 1.6897207796588358,
+        "Semivar_RS-": 1.7187074439836232,
+        "HAR_logrange": 1.7469881800025464,
+        "GARCH": 1.7489568055753362,
+        "EWMA": 1.8349103112666731,
+        "Rolling_21d": 1.8787605195694388
+      },
+      "best_model": "GJR-GARCH",
+      "mcs_included": [
+        "EGARCH",
+        "EWMA",
+        "GJR+HAR_Ens",
+        "GJR-GARCH",
+        "Rolling_21d"
+      ],
+      "mcs_n_included": 5,
+      "mcs_pvalues": {
+        "HAR_logrange": 0.077,
+        "Semivar_RS-": 0.09566666666666666,
+        "GARCH": 0.09566666666666666,
+        "Rolling_21d": 0.18133333333333335,
+        "EWMA": 0.246,
+        "GJR+HAR_Ens": 0.7073333333333334,
+        "EGARCH": 0.7073333333333334,
+        "GJR-GARCH": 1.0
+      }
+    },
+    {
+      "period": "2019-2020 (COVID)",
+      "n_oos": 505,
+      "mean_qlike": {
+        "GJR+HAR_Ens": 1.4485467134464631,
+        "HAR_logrange": 1.4672219779000848,
+        "GARCH": 1.5122172204667328,
+        "GJR-GARCH": 1.63108203455687,
+        "EWMA": 1.653167219310171,
+        "EGARCH": 1.6783194226020735,
+        "Rolling_21d": 1.7138521773798323,
+        "Semivar_RS-": 15792.685781737764
+      },
+      "best_model": "GJR+HAR_Ens",
+      "mcs_included": [
+        "EGARCH",
+        "GARCH",
+        "GJR+HAR_Ens",
+        "GJR-GARCH",
+        "HAR_logrange",
+        "Semivar_RS-"
+      ],
+      "mcs_n_included": 6,
+      "mcs_pvalues": {
+        "EWMA": 0.04766666666666667,
+        "Rolling_21d": 0.04766666666666667,
+        "EGARCH": 0.20766666666666667,
+        "GJR-GARCH": 0.3,
+        "GARCH": 0.3466666666666667,
+        "Semivar_RS-": 0.3466666666666667,
+        "HAR_logrange": 0.7033333333333334,
+        "GJR+HAR_Ens": 1.0
+      }
+    },
+    {
+      "period": "2021-2022 (rate hikes)",
+      "n_oos": 503,
+      "mean_qlike": {
+        "GJR+HAR_Ens": 1.3223839096539118,
+        "HAR_logrange": 1.345945587139232,
+        "EGARCH": 1.3741107751154027,
+        "EWMA": 1.3768256772815715,
+        "GJR-GARCH": 1.393843134896575,
+        "Semivar_RS-": 1.3957797158009977,
+        "GARCH": 1.4078703639302,
+        "Rolling_21d": 1.4397542974637378
+      },
+      "best_model": "GJR+HAR_Ens",
+      "mcs_included": [
+        "EWMA",
+        "GJR+HAR_Ens",
+        "HAR_logrange"
+      ],
+      "mcs_n_included": 3,
+      "mcs_pvalues": {
+        "Semivar_RS-": 0.005666666666666667,
+        "GARCH": 0.033,
+        "GJR-GARCH": 0.033,
+        "Rolling_21d": 0.07366666666666667,
+        "EGARCH": 0.099,
+        "HAR_logrange": 0.17733333333333334,
+        "EWMA": 0.18866666666666668,
+        "GJR+HAR_Ens": 1.0
+      }
+    },
+    {
+      "period": "2023-2025 (post-COVID)",
+      "n_oos": 752,
+      "mean_qlike": {
+        "GJR+HAR_Ens": 1.498285473374388,
+        "Semivar_RS-": 1.5033565574953784,
+        "EGARCH": 1.5192432656031094,
+        "HAR_logrange": 1.521090183281435,
+        "GJR-GARCH": 1.52864232826461,
+        "GARCH": 1.5779650412210415,
+        "EWMA": 1.6170111099062,
+        "Rolling_21d": 1.6850331515498649
+      },
+      "best_model": "GJR+HAR_Ens",
+      "mcs_included": [
+        "EGARCH",
+        "GJR+HAR_Ens",
+        "GJR-GARCH",
+        "HAR_logrange",
+        "Semivar_RS-"
+      ],
+      "mcs_n_included": 5,
+      "mcs_pvalues": {
+        "GARCH": 0.004666666666666667,
+        "Rolling_21d": 0.024333333333333332,
+        "EWMA": 0.029,
+        "HAR_logrange": 0.14233333333333334,
+        "GJR-GARCH": 0.17866666666666667,
+        "EGARCH": 0.43933333333333335,
+        "Semivar_RS-": 0.7793333333333333,
+        "GJR+HAR_Ens": 1.0
+      }
+    }
+  ],
+  "cross_period_consistency": {
+    "n_periods": 5,
+    "model_mcs_count": {
+      "EGARCH": 4,
+      "GJR+HAR_Ens": 5,
+      "GJR-GARCH": 4,
+      "HAR_logrange": 4,
+      "Semivar_RS-": 3,
+      "EWMA": 2,
+      "Rolling_21d": 1,
+      "GARCH": 1
+    }
+  },
+  "proxy_sensitivity": {
+    "overlap": [
+      "GJR+HAR_Ens"
+    ],
+    "r2_only": [
+      "HAR_logrange",
+      "EGARCH",
+      "Semivar_RS-",
+      "GJR-GARCH"
+    ],
+    "parkinson_only": [],
+    "interpretation": "Overlap: ['GJR+HAR_Ens']. r\u00b2-only: ['HAR_logrange', 'EGARCH', 'Semivar_RS-', 'GJR-GARCH']. Parkinson-only: []. Models in Parkinson-only but not r\u00b2 set may benefit from tautological advantage."
+  },
+  "conclusion": "MCS (r\u00b2 proxy, \u03b1=0.1): 5 of 8 models in superior set. | Included: ['EGARCH', 'GJR+HAR_Ens', 'GJR-GARCH', 'HAR_logrange', 'Semivar_RS-'] | Excluded: ['EWMA', 'GARCH', 'Rolling_21d'] | Cross-period: most robust model(s) = [('GJR+HAR_Ens', 5), ('EGARCH', 4), ('GJR-GARCH', 4)]",
+  "limitations": [
+    "QLIKE loss only \u2014 other loss functions (MSE, MAE) may give different rankings",
+    "r\u00b2 is a noisy proxy for true latent variance",
+    "Quarterly refit for GARCH models \u2014 daily refit would be more accurate but prohibitively slow",
+    "HAR coefficients fixed from IS \u2014 could be updated rolling",
+    "Single asset (SPY) \u2014 generalization to other assets needs verification",
+    "Block size=10 chosen by convention \u2014 sensitivity to block size not tested"
+  ]
+}

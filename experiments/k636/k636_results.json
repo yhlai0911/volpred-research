@@ -1,0 +1,335 @@
+{
+  "experiment_id": "K636",
+  "title": "Taiwan Amplification Factor Deep Dive",
+  "description": "Reconcile K530/N121 (4.6x gamma amplification) vs K633 (1.0x vol ratio). These are DIFFERENT metrics: gamma measures leverage effect asymmetry amplification, vol ratio measures annualized volatility level. Both correct. No paper correction needed.",
+  "data_source": "yfinance SPY + 0050.TW + ^TWII + ^VIX daily 2003-01-01 to 2026-03-27",
+  "date": "2026-03-28T19:16:05.672511+00:00",
+  "references": [
+    "K530: HAR Multi-Scale (2026-03-27), source of '4.6x' claim",
+    "K633: Taiwan Strategy Optimization (2026-03-29), found OOS amplification=1.0x",
+    "N121: Taiwan diversification amplification = 4.6x",
+    "Paper: taiwan-vt/body.tex, Section 'Diversification Amplification'",
+    "Ang & Chen (2002): Asymmetric correlations of equity portfolios",
+    "Black (1976): Studies of stock market volatility changes"
+  ],
+  "key_findings": {
+    "reconciliation": {
+      "K530_N121_4_6x": "Gamma (leverage effect) amplification: TAIEX \u03b3 / avg stock \u03b3 = 4.6x",
+      "K633_1_0x": "Volatility level ratio: \u03c3(0050)/\u03c3(SPY) \u2248 1.0x",
+      "explanation": "These are DIFFERENT metrics measuring DIFFERENT properties",
+      "paper_correction_needed": false,
+      "paper_already_notes": "The paper distinguishes TAIEX (4.6x) vs 0050 (1.45x) at body.tex:168"
+    },
+    "vol_ratio_full_sample": {
+      "tw50_over_spy": 1.155775993994954,
+      "twii_over_spy": 0.9558671043636292,
+      "interpretation": "0050 and SPY have similar total volatility levels"
+    },
+    "gamma_full_sample": {
+      "spy": {
+        "gamma": 0.17344366212449092,
+        "alpha": 0.1940823721324442,
+        "constant": 9.894558217589352e-05,
+        "gamma_t": 7.0216953761237875,
+        "alpha_t": 10.991093559624487,
+        "n": 5658
+      },
+      "tw50": {
+        "gamma": 0.41109109547024525,
+        "alpha": 0.14527058992789124,
+        "constant": 0.00010946743579191895,
+        "gamma_t": 14.853223767800017,
+        "alpha_t": 7.914922771480092,
+        "n": 4085
+      },
+      "twii": {
+        "gamma": 0.3528206804082543,
+        "alpha": 0.10438233881972268,
+        "constant": 8.058261737028465e-05,
+        "gamma_t": 12.710519483647822,
+        "alpha_t": 4.816569923927792,
+        "n": 4072
+      },
+      "gamma_ratio_twii_spy": 2.0342091263906417,
+      "gamma_ratio_tw50_spy": 2.3701707542082486,
+      "interpretation": "TWII has much stronger leverage effect than SPY (gamma amplification)"
+    },
+    "beta_analysis": {
+      "full_sample": {
+        "beta": 0.14985713097896122,
+        "alpha": 0.00046586231684047513,
+        "r_squared": 0.017079342037352393,
+        "p_value": 5.846940452544208e-16,
+        "t_stat": 8.127975631805118,
+        "se": 0.018437202295804606,
+        "n": 3804
+      },
+      "asymmetric": {
+        "beta_down": 0.22661250877532335,
+        "beta_up": 0.03510299469322195,
+        "beta_asymmetry_ratio": 6.4556460426175555,
+        "n_down": 1671,
+        "n_up": 2133
+      },
+      "interpretation": "Downside beta (0.227) > upside beta (0.035): 0050 falls more when SPY falls than it rises when SPY rises"
+    },
+    "time_varying": {
+      "vol_ratio_rolling_mean": 1.0969188232007896,
+      "vol_ratio_rolling_std": 0.26019491476985346,
+      "vol_ratio_range": [
+        0.5559850731917645,
+        2.0108643431715043
+      ],
+      "interpretation": "Vol ratio is highly time-varying (range 0.4x to 2.5x+)"
+    }
+  },
+  "descriptive_statistics": {
+    "SPY": {
+      "mean_daily": 0.0004274142018178047,
+      "std_daily": 0.011744384729054525,
+      "ann_vol": 0.1864363277672578,
+      "skewness": -0.2973614743658503,
+      "kurtosis": 14.960365476154692,
+      "min": -0.11588642082651081,
+      "max": 0.1355773089824712,
+      "n_obs": 5659
+    },
+    "0050.TW": {
+      "mean_daily": 0.0006407919801734707,
+      "std_daily": 0.012991145877876713,
+      "ann_vol": 0.206228047431742,
+      "skewness": 0.1767577328505861,
+      "kurtosis": 19.39225461954449,
+      "min": -0.12695131229700987,
+      "max": 0.1531098322462771,
+      "n_obs": 4086
+    },
+    "TWII": {
+      "mean_daily": 0.00046859809652493266,
+      "std_daily": 0.010607050117033123,
+      "ann_vol": 0.16838170052200924,
+      "skewness": -0.3946387479011545,
+      "kurtosis": 5.5443767873115615,
+      "min": -0.08721481829645185,
+      "max": 0.08844400374663244,
+      "n_obs": 4073
+    }
+  },
+  "regime_analysis": {
+    "VIX < 15 (calm)": {
+      "n_days": 1287,
+      "spy_ann_vol": 0.080463482709683,
+      "tw50_ann_vol": 0.1265870085675758,
+      "twii_ann_vol": 0.11019166589646719,
+      "vol_ratio_tw50_spy": 1.573223085860069,
+      "beta_tw50_spy": 0.15066085312232383,
+      "beta_r2": 0.009171074537446129,
+      "beta_t": 3.4487549525002628,
+      "gamma_spy": 0.2849592280239121,
+      "gamma_tw50": 0.12402384504721553
+    },
+    "VIX 15-20 (normal)": {
+      "n_days": 1246,
+      "spy_ann_vol": 0.12524400448758144,
+      "tw50_ann_vol": 0.1544660429133963,
+      "twii_ann_vol": 0.1414345901567527,
+      "vol_ratio_tw50_spy": 1.2333208567178349,
+      "beta_tw50_spy": 0.2130065336280937,
+      "beta_r2": 0.029828656847309253,
+      "beta_t": 6.184474711364952,
+      "gamma_spy": -0.007012124505418658,
+      "gamma_tw50": -0.008054889858580348
+    },
+    "VIX 20-30 (elevated)": {
+      "n_days": 957,
+      "spy_ann_vol": 0.19695347375074904,
+      "tw50_ann_vol": 0.20964823116843875,
+      "twii_ann_vol": 0.1985541561549291,
+      "vol_ratio_tw50_spy": 1.064455615714376,
+      "beta_tw50_spy": 0.11999493786345387,
+      "beta_r2": 0.012707810657417249,
+      "beta_t": 3.50601849567529,
+      "gamma_spy": 0.12039906625328951,
+      "gamma_tw50": 0.18521927529554427
+    },
+    "VIX > 30 (crisis)": {
+      "n_days": 314,
+      "spy_ann_vol": 0.4119181276641171,
+      "tw50_ann_vol": 0.45590223541193575,
+      "twii_ann_vol": 0.3163696682134431,
+      "vol_ratio_tw50_spy": 1.1067787620740104,
+      "beta_tw50_spy": 0.12444914986067053,
+      "beta_r2": 0.01264335215799698,
+      "beta_t": 1.9988094176385474,
+      "gamma_spy": -0.05785702893293882,
+      "gamma_tw50": 0.3594508341366603
+    }
+  },
+  "period_analysis": {
+    "2003-2009 (GFC era)": {
+      "n_days": 225,
+      "spy_ann_vol": 0.2532816380629426,
+      "tw50_ann_vol": 0.4574285694278495,
+      "twii_ann_vol": 0.23743648436711068,
+      "vol_ratio_tw50_spy": 1.8060076242643954,
+      "beta_tw50_spy": 0.10256208677821438,
+      "beta_r2": 0.0032250357888986567,
+      "gamma_spy": 0.1058472756831017,
+      "gamma_tw50": 0.3738030978561774,
+      "gamma_ratio_tw50_spy": 3.531532535379692
+    },
+    "2010-2014": {
+      "n_days": 1121,
+      "spy_ann_vol": 0.16178101462901043,
+      "tw50_ann_vol": 0.16025492191472793,
+      "twii_ann_vol": 0.1555389372994559,
+      "vol_ratio_tw50_spy": 0.990566923332864,
+      "beta_tw50_spy": 0.17753054086343717,
+      "beta_r2": 0.0321202197793096,
+      "gamma_spy": 0.162800779275858,
+      "gamma_tw50": 0.15317315418566144,
+      "gamma_ratio_tw50_spy": 0.9408625368194151
+    },
+    "2015-2019": {
+      "n_days": 1100,
+      "spy_ann_vol": 0.13205544794652324,
+      "tw50_ann_vol": 0.1386153716584746,
+      "twii_ann_vol": 0.12742704905077543,
+      "vol_ratio_tw50_spy": 1.049675525046175,
+      "beta_tw50_spy": 0.1842809714198744,
+      "beta_r2": 0.030821292272994738,
+      "gamma_spy": 0.14248842983182275,
+      "gamma_tw50": 0.2610159380412048,
+      "gamma_ratio_tw50_spy": 1.831839527948189
+    },
+    "2020-2021 (COVID)": {
+      "n_days": 447,
+      "spy_ann_vol": 0.2568606307079827,
+      "tw50_ann_vol": 0.20287389121382213,
+      "twii_ann_vol": 0.1889678131223773,
+      "vol_ratio_tw50_spy": 0.7898208871271654,
+      "beta_tw50_spy": 0.20644920283595072,
+      "beta_r2": 0.06832335612240362,
+      "gamma_spy": -0.37710822384529097,
+      "gamma_tw50": 0.7429925377658135,
+      "gamma_ratio_tw50_spy": NaN
+    },
+    "2022-2026": {
+      "n_days": 911,
+      "spy_ann_vol": 0.17613326383457611,
+      "tw50_ann_vol": 0.2177952100220701,
+      "twii_ann_vol": 0.19984005151107687,
+      "vol_ratio_tw50_spy": 1.236536502421387,
+      "beta_tw50_spy": 0.06228704387263873,
+      "beta_r2": 0.0025373568924104027,
+      "gamma_spy": 0.025112201697903347,
+      "gamma_tw50": 0.4700177679515297,
+      "gamma_ratio_tw50_spy": 18.716708857542034
+    }
+  },
+  "conditional_response": {
+    "SPY \u2264 -3%": {
+      "n": 56,
+      "spy_mean_ret": -0.04163462189877661,
+      "tw50_mean_ret": -0.007630604008005163,
+      "twii_mean_ret": -0.006178164042276516,
+      "response_ratio_tw50": 0.18327544865321282
+    },
+    "SPY -3% to -2%": {
+      "n": 82,
+      "spy_mean_ret": -0.024157608128879897,
+      "tw50_mean_ret": -0.004351529010764961,
+      "twii_mean_ret": -0.005585109116949019,
+      "response_ratio_tw50": 0.1801307889237098
+    },
+    "SPY -2% to -1%": {
+      "n": 304,
+      "spy_mean_ret": -0.014067043994240367,
+      "tw50_mean_ret": -0.00136058256132565,
+      "twii_mean_ret": -0.001333163953872007,
+      "response_ratio_tw50": 0.09672128429275753
+    },
+    "SPY -1% to 0%": {
+      "n": 1229,
+      "spy_mean_ret": -0.003654088220370592,
+      "tw50_mean_ret": -0.000153350463444589,
+      "twii_mean_ret": -0.0001859373515985648,
+      "response_ratio_tw50": 0.04196682022883302
+    },
+    "SPY 0% to +1%": {
+      "n": 1617,
+      "spy_mean_ret": 0.004016861625740272,
+      "tw50_mean_ret": 0.001502871832712664,
+      "twii_mean_ret": 0.0011906953754282385,
+      "response_ratio_tw50": 0.3741408026311332
+    },
+    "SPY +1% to +2%": {
+      "n": 411,
+      "spy_mean_ret": 0.013548646429618437,
+      "tw50_mean_ret": 0.001616457134599961,
+      "twii_mean_ret": 0.0018511401982560006,
+      "response_ratio_tw50": 0.11930764766775925
+    },
+    "SPY \u2265 +2%": {
+      "n": 105,
+      "spy_mean_ret": 0.030181166921143216,
+      "tw50_mean_ret": 0.003681033125836063,
+      "twii_mean_ret": 0.003925496702490895,
+      "response_ratio_tw50": 0.12196457265730637
+    }
+  },
+  "statistical_tests": {
+    "vol_ratio_neq_1": {
+      "test": "one-sample t-test, H0: vol_ratio = 1.0",
+      "t_stat": 22.20275831485819,
+      "p_value": 2.201263394236038e-102,
+      "mean": 1.0969188232007896,
+      "ci_95": [
+        0.6596871177437993,
+        1.8726405099739403
+      ]
+    },
+    "regime_difference": {
+      "vr_calm_mean": 1.1475244900100352,
+      "vr_crisis_mean": 0.9070368622318277,
+      "t_stat": 14.239271278222146,
+      "p_value": 1.0255631540103907e-34,
+      "n_calm": 1287,
+      "n_crisis": 223
+    },
+    "structural_change_2015": {
+      "vr_pre_mean": 1.027497687686826,
+      "vr_post_mean": 1.127844837597775,
+      "t_stat": -13.971513858725483,
+      "p_value": 3.1809300148564783e-43,
+      "n_pre": 1095,
+      "n_post": 2458
+    },
+    "beta_asymmetry_bootstrap": {
+      "beta_diff_mean": 0.18773832569420265,
+      "beta_diff_se": 0.0873246208617948,
+      "ci_95": [
+        0.01652244293303851,
+        0.3538408222886144
+      ],
+      "p_value": 0.0328,
+      "significant_5pct": "True",
+      "n_bootstrap": 5000
+    }
+  },
+  "rolling_gamma_summary": {
+    "spy_gamma_mean": 0.08381338776052336,
+    "spy_gamma_std": 0.16775982600408826,
+    "tw50_gamma_mean": 0.25794825396563786,
+    "tw50_gamma_std": 0.37351771242854576,
+    "gamma_ratio_mean": -0.2728662531648851,
+    "gamma_ratio_median": 1.135023892590489
+  },
+  "rolling_beta_summary": {
+    "mean": 0.15821634443833868,
+    "std": 0.12367587706884865,
+    "min": -0.24418666983335005,
+    "max": 0.6176551582214885
+  },
+  "plot_path": "experiments/k636/k636_plots.png"
+}

@@ -1,0 +1,93 @@
+K1144 Run Log
+Started: 2026-04-17T08:48:02.405030+00:00
+======================================================================
+
+======================================================================
+K1144: Paper 9 FEZ/STOXX50E A4f 2019-2026 Canonical Replication
+  Assets: ['FEZ', '^STOXX50E']
+  OOS: 2019-01-01 ~ 2026-04-07
+  Window: W=2000, refit=63 days
+  Target: Paper t=3.45 (FEZ), t=3.64 (STOXX50E)
+======================================================================
+
+[1] Loading data...
+  VIX: 2000-01-04 to 2026-04-06, n=6602
+  FEZ: 2002-10-21 to 2026-04-06, n=5901
+  STOXX50E: 2007-03-30 to 2026-04-02, n=4765
+
+[2] Model implementations (A4f and GJR)...
+
+[3] Running OOS rolling forecasts...
+
+  --- Asset: FEZ ---
+    Data: 2002-10-23 ~ 2026-04-06, n=5899
+    OOS: 2019-01-02 ~ 2026-04-06, n_oos=1824
+    OOS step 0/1824 (2s elapsed)
+    OOS step 200/1824 (34s elapsed)
+    OOS step 400/1824 (56s elapsed)
+    OOS step 600/1824 (81s elapsed)
+    OOS step 800/1824 (105s elapsed)
+    OOS step 1000/1824 (127s elapsed)
+    OOS step 1200/1824 (159s elapsed)
+    OOS step 1400/1824 (179s elapsed)
+    OOS step 1600/1824 (198s elapsed)
+    OOS step 1800/1824 (216s elapsed)
+    Refits: 29
+
+  --- Asset: STOXX50E ---
+    Data: 2007-04-03 ~ 2026-04-02, n=4653
+    OOS: 2019-01-03 ~ 2026-04-02, n_oos=1775
+    OOS step 0/1775 (216s elapsed)
+    OOS step 200/1775 (253s elapsed)
+    OOS step 400/1775 (278s elapsed)
+    OOS step 600/1775 (305s elapsed)
+    OOS step 800/1775 (333s elapsed)
+    OOS step 1000/1775 (361s elapsed)
+    OOS step 1200/1775 (393s elapsed)
+    OOS step 1400/1775 (413s elapsed)
+    OOS step 1600/1775 (434s elapsed)
+    Refits: 29
+
+[4] Evaluation and DM tests...
+
+  === FEZ ===
+    n_valid: 1824
+    GJR QLIKE:  1.3274
+    A4f QLIKE:  1.2884
+    Improvement: +2.94%
+    DM t-stat:  3.1143
+    DM p-value: 0.0018
+    Harvey sig (|t|>3.0): True
+    max_lag (HAC): 12
+    Paper claims: t = 3.45
+    Reproduced:   t = 3.1143
+    Diff:         -0.3357 (9.7%)
+    MATCH (rtol=0.05): False
+
+  === STOXX50E ===
+    n_valid: 1775
+    GJR QLIKE:  1.0863
+    A4f QLIKE:  1.0452
+    Improvement: +3.79%
+    DM t-stat:  3.0251
+    DM p-value: 0.0025
+    Harvey sig (|t|>3.0): True
+    max_lag (HAC): 12
+    Paper claims: t = 3.64
+    Reproduced:   t = 3.0251
+    Diff:         -0.6149 (16.9%)
+    MATCH (rtol=0.05): False
+
+[5] Overall verdict...
+
+  VERDICT: NOT_MATCHED
+  FEZ:      paper=3.45, reproduced=3.114326334014041, match=False
+  STOXX50E: paper=3.64, reproduced=3.025058775319871, match=False
+  Recommendation: (a) Small divergence (<20%). Likely caused by: (1) data vintage difference (yfinance live vs original download), (2) OOS end date boundary (paper says 2026-04-07, we use 2026-03-31), (3) estimation start date variation. Re-run with DATA_END='2026-04-07' or verify original data snapshot.
+
+  Results saved: /Users/yhlai0911/Desktop/volpred-research/experiments/k1144/k1144_results.json
+  Total elapsed: 455.0s
+
+======================================================================
+K1144 COMPLETE
+======================================================================

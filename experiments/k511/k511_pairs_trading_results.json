@@ -1,0 +1,603 @@
+{
+  "experiment_id": "K511",
+  "title": "Pairs Trading Strategy (SPY-QQQ + Vol Regime)",
+  "timestamp": "2026-03-26T19:15:51.377023+00:00",
+  "runtime_seconds": 7.1,
+  "data": {
+    "source": "yfinance",
+    "assets": [
+      "SPY",
+      "QQQ",
+      "IWM",
+      "GLD",
+      "^VIX"
+    ],
+    "period": "2005-01-03 to 2025-12-30",
+    "n_observations": 5282,
+    "trading_period": "2006-04-03 to 2025-12-30",
+    "trading_days": 4968
+  },
+  "methodology": {
+    "spread": "log(A) - beta * log(B), rolling 252d OLS beta",
+    "z_score": "rolling 63d z-score",
+    "entry": "|z| > 2.0 (default)",
+    "exit": "|z| < 0.5",
+    "tx_cost": "0.10% round-trip",
+    "cross_oos": "5 periods (4-year rolling windows)"
+  },
+  "cointegration_diagnostics": {
+    "SPY-QQQ": {
+      "full_sample_pvalue": 0.4267014354360489,
+      "cointegrated_full": "False",
+      "rolling_pct_cointegrated": 5.88235294117647,
+      "correlation": 0.9200264238889145
+    },
+    "SPY-IWM": {
+      "full_sample_pvalue": 0.23678403263734782,
+      "cointegrated_full": "False",
+      "rolling_pct_cointegrated": 1.4705882352941175,
+      "correlation": 0.8955276276970094
+    },
+    "SPY-GLD": {
+      "full_sample_pvalue": 0.7702952618093302,
+      "cointegrated_full": "False",
+      "rolling_pct_cointegrated": 8.823529411764707,
+      "correlation": 0.055613044554675646
+    }
+  },
+  "strategies": {
+    "S1_Basic_Pairs_SQ": {
+      "name": "S1_Basic_Pairs_SQ",
+      "annual_return": -0.012660794030222225,
+      "annual_vol": 0.05427315516089827,
+      "sharpe": -0.9702917376759093,
+      "mdd": -0.36675112841180474,
+      "calmar": -0.03452148623250073,
+      "sortino": -0.929802294975514,
+      "win_rate": 0.4647507858105074,
+      "n_days_in_market": 2227,
+      "pct_time_in_market": 0.44826892109500804,
+      "trade_signals_per_year": 112.96376811594203,
+      "total_days": 4968
+    },
+    "S2_VolCond_Pairs_SQ": {
+      "name": "S2_VolCond_Pairs_SQ",
+      "annual_return": 0.0013243669009215342,
+      "annual_vol": 0.045372819340315874,
+      "sharpe": -0.8523965153894097,
+      "mdd": -0.26714265080175986,
+      "calmar": 0.004957526987722807,
+      "sortino": -0.4881091273918754,
+      "win_rate": 0.4750337381916329,
+      "n_days_in_market": 741,
+      "pct_time_in_market": 0.14915458937198067,
+      "trade_signals_per_year": 37.58695652173913,
+      "total_days": 4968
+    },
+    "S3_Pairs_VT_Overlay": {
+      "name": "S3_Pairs_VT_Overlay",
+      "annual_return": -0.010353586131097178,
+      "annual_vol": 0.028919078524983686,
+      "sharpe": -1.7411891629809664,
+      "mdd": -0.224166307721802,
+      "calmar": -0.046187075284954644,
+      "sortino": -1.8358101160532283,
+      "win_rate": 0.4647507858105074,
+      "n_days_in_market": 2227,
+      "pct_time_in_market": 0.44826892109500804,
+      "trade_signals_per_year": 112.96376811594203,
+      "total_days": 4968
+    },
+    "S4_MultiPair": {
+      "name": "S4_MultiPair",
+      "annual_return": -0.011915761520758744,
+      "annual_vol": 0.045539675333975425,
+      "sharpe": -1.1400116742164468,
+      "mdd": -0.31610809922737004,
+      "calmar": -0.0376952110682491,
+      "sortino": -1.1966939692172949,
+      "win_rate": 0.47666863555818073,
+      "n_days_in_market": 3386,
+      "pct_time_in_market": 0.6815619967793881,
+      "trade_signals_per_year": 171.7536231884058,
+      "total_days": 4968
+    },
+    "S5_SPY_GLD_Pair": {
+      "name": "S5_SPY_GLD_Pair",
+      "annual_return": -0.02235413863982621,
+      "annual_vol": 0.15376579257602824,
+      "sharpe": -0.40551372054350593,
+      "mdd": -0.5787613270255951,
+      "calmar": -0.0386241056476768,
+      "sortino": -0.3326606450182636,
+      "win_rate": 0.46851760039662865,
+      "n_days_in_market": 2017,
+      "pct_time_in_market": 0.4059983896940419,
+      "trade_signals_per_year": 102.31159420289856,
+      "total_days": 4968
+    }
+  },
+  "benchmarks": {
+    "BuyHold_SPY": {
+      "name": "BuyHold_SPY",
+      "annual_return": 0.10311089172570474,
+      "annual_vol": 0.19494351712126332,
+      "sharpe": 0.32373937157626553,
+      "mdd": -0.5957598673806527,
+      "calmar": 0.17307458486427962,
+      "sortino": 0.3847038528861614,
+      "win_rate": 0.5531786074672048,
+      "n_days_in_market": 4955,
+      "pct_time_in_market": 0.9973832528180354,
+      "trade_signals_per_year": 251.34057971014494,
+      "total_days": 4968
+    },
+    "VT_12VIX_SPY": {
+      "name": "VT_12VIX_SPY",
+      "annual_return": 0.06282144411500237,
+      "annual_vol": 0.09549697528228933,
+      "sharpe": 0.2389755701428461,
+      "mdd": -0.30814737999958297,
+      "calmar": 0.20386817540063912,
+      "sortino": 0.312804630705293,
+      "win_rate": 0.5531786074672048,
+      "n_days_in_market": 4955,
+      "pct_time_in_market": 0.9973832528180354,
+      "trade_signals_per_year": 251.34057971014494,
+      "total_days": 4968
+    }
+  },
+  "cross_oos": {
+    "S1_Basic_Pairs_SQ": {
+      "oos_sharpes": [
+        -0.4018896409099967,
+        -1.4578888799977736,
+        -1.775002051297706,
+        -0.7519267010831514,
+        -1.284198635707314
+      ],
+      "n_positive_oos": 0,
+      "n_total_oos": 5,
+      "mean_oos_sharpe": -1.1341811817991885,
+      "std_oos_sharpe": 0.4940268587881216,
+      "t_statistic": -5.133539151141009,
+      "details": [
+        {
+          "period": "2006-06-01 to 2010-05-31",
+          "sharpe": -0.4018896409099967,
+          "annual_return": 0.010831008341795558,
+          "mdd": -0.10973299558179923,
+          "n_days": 1006
+        },
+        {
+          "period": "2010-06-01 to 2014-05-31",
+          "sharpe": -1.4578888799977736,
+          "annual_return": -0.026787520422638832,
+          "mdd": -0.13242969075956723,
+          "n_days": 1007
+        },
+        {
+          "period": "2014-06-01 to 2018-05-31",
+          "sharpe": -1.775002051297706,
+          "annual_return": -0.023216567571460376,
+          "mdd": -0.10530610901472381,
+          "n_days": 1008
+        },
+        {
+          "period": "2018-06-01 to 2022-05-31",
+          "sharpe": -0.7519267010831514,
+          "annual_return": -0.010064370991447066,
+          "mdd": -0.18785671253286565,
+          "n_days": 1007
+        },
+        {
+          "period": "2022-06-01 to 2025-12-31",
+          "sharpe": -1.284198635707314,
+          "annual_return": -0.011416775893032322,
+          "mdd": -0.07802383796255584,
+          "n_days": 899
+        }
+      ]
+    },
+    "S2_VolCond_Pairs_SQ": {
+      "oos_sharpes": [
+        -0.2909508083528891,
+        -1.6019746790064229,
+        -2.3407152520371244,
+        -0.6811407431633996,
+        -1.4636904739815566
+      ],
+      "n_positive_oos": 0,
+      "n_total_oos": 5,
+      "mean_oos_sharpe": -1.2756943913082786,
+      "std_oos_sharpe": 0.7210110611804366,
+      "t_statistic": -3.956304599280851,
+      "details": [
+        {
+          "period": "2006-06-01 to 2010-05-31",
+          "sharpe": -0.2909508083528891,
+          "annual_return": 0.02026633260033804,
+          "mdd": -0.10973299558179966,
+          "n_days": 1006
+        },
+        {
+          "period": "2010-06-01 to 2014-05-31",
+          "sharpe": -1.6019746790064229,
+          "annual_return": -0.01021346096765163,
+          "mdd": -0.08599522163087968,
+          "n_days": 1007
+        },
+        {
+          "period": "2014-06-01 to 2018-05-31",
+          "sharpe": -2.3407152520371244,
+          "annual_return": -0.0026138793486267763,
+          "mdd": -0.02450226351928834,
+          "n_days": 1008
+        },
+        {
+          "period": "2018-06-01 to 2022-05-31",
+          "sharpe": -0.6811407431633996,
+          "annual_return": -0.0007633076911651118,
+          "mdd": -0.15766165239885152,
+          "n_days": 1007
+        },
+        {
+          "period": "2022-06-01 to 2025-12-31",
+          "sharpe": -1.4636904739815566,
+          "annual_return": -0.0001335699769940313,
+          "mdd": -0.04275835339565997,
+          "n_days": 899
+        }
+      ]
+    },
+    "S3_Pairs_VT_Overlay": {
+      "oos_sharpes": [
+        -1.1263776418078864,
+        -2.1444368949330053,
+        -1.959685259309178,
+        -1.523543582946913,
+        -1.999804257186073
+      ],
+      "n_positive_oos": 0,
+      "n_total_oos": 5,
+      "mean_oos_sharpe": -1.750769527236611,
+      "std_oos_sharpe": 0.3747358890111831,
+      "t_statistic": -10.446930199737029,
+      "details": [
+        {
+          "period": "2006-06-01 to 2010-05-31",
+          "sharpe": -1.1263776418078864,
+          "annual_return": 0.003910012053174568,
+          "mdd": -0.03857511948041912,
+          "n_days": 1006
+        },
+        {
+          "period": "2010-06-01 to 2014-05-31",
+          "sharpe": -2.1444368949330053,
+          "annual_return": -0.02081816976504716,
+          "mdd": -0.09921792539072666,
+          "n_days": 1007
+        },
+        {
+          "period": "2014-06-01 to 2018-05-31",
+          "sharpe": -1.959685259309178,
+          "annual_return": -0.01804781152441355,
+          "mdd": -0.08563396764729947,
+          "n_days": 1008
+        },
+        {
+          "period": "2018-06-01 to 2022-05-31",
+          "sharpe": -1.523543582946913,
+          "annual_return": -0.002613793532006504,
+          "mdd": -0.056596003332357286,
+          "n_days": 1007
+        },
+        {
+          "period": "2022-06-01 to 2025-12-31",
+          "sharpe": -1.999804257186073,
+          "annual_return": -0.012307108483604778,
+          "mdd": -0.06128024645101992,
+          "n_days": 899
+        }
+      ]
+    },
+    "S4_MultiPair": {
+      "oos_sharpes": [
+        -0.8917161078621779,
+        -1.7630753700907003,
+        -1.5070022106426673,
+        -1.3543783300032501,
+        -0.5433238231391102
+      ],
+      "n_positive_oos": 0,
+      "n_total_oos": 5,
+      "mean_oos_sharpe": -1.2118991683475813,
+      "std_oos_sharpe": 0.438335831729124,
+      "t_statistic": -6.1822208593142545,
+      "details": [
+        {
+          "period": "2006-06-01 to 2010-05-31",
+          "sharpe": -0.8917161078621779,
+          "annual_return": -0.007850787379687517,
+          "mdd": -0.08467092279040864,
+          "n_days": 1006
+        },
+        {
+          "period": "2010-06-01 to 2014-05-31",
+          "sharpe": -1.7630753700907003,
+          "annual_return": -0.013514636430253092,
+          "mdd": -0.08212070323572944,
+          "n_days": 1007
+        },
+        {
+          "period": "2014-06-01 to 2018-05-31",
+          "sharpe": -1.5070022106426673,
+          "annual_return": -0.005799012513807248,
+          "mdd": -0.0356479663718648,
+          "n_days": 1008
+        },
+        {
+          "period": "2018-06-01 to 2022-05-31",
+          "sharpe": -1.3543783300032501,
+          "annual_return": -0.046496205401990814,
+          "mdd": -0.22622777303954109,
+          "n_days": 1007
+        },
+        {
+          "period": "2022-06-01 to 2025-12-31",
+          "sharpe": -0.5433238231391102,
+          "annual_return": 0.018338378896432028,
+          "mdd": -0.04916672044783123,
+          "n_days": 899
+        }
+      ]
+    },
+    "S5_SPY_GLD_Pair": {
+      "oos_sharpes": [
+        -0.5452318409187582,
+        -0.6143465548085061,
+        -0.2765411118932384,
+        -0.1097505405571659,
+        -0.5783847151666794
+      ],
+      "n_positive_oos": 0,
+      "n_total_oos": 5,
+      "mean_oos_sharpe": -0.42485095266886963,
+      "std_oos_sharpe": 0.19761418789990157,
+      "t_statistic": -4.807324922208236,
+      "details": [
+        {
+          "period": "2006-06-01 to 2010-05-31",
+          "sharpe": -0.5452318409187582,
+          "annual_return": -0.06644952554783722,
+          "mdd": -0.4042621113719154,
+          "n_days": 1006
+        },
+        {
+          "period": "2010-06-01 to 2014-05-31",
+          "sharpe": -0.6143465548085061,
+          "annual_return": -0.04677002907599079,
+          "mdd": -0.3297910704751356,
+          "n_days": 1007
+        },
+        {
+          "period": "2014-06-01 to 2018-05-31",
+          "sharpe": -0.2765411118932384,
+          "annual_return": 0.013354242370423972,
+          "mdd": -0.13232157426214608,
+          "n_days": 1008
+        },
+        {
+          "period": "2018-06-01 to 2022-05-31",
+          "sharpe": -0.1097505405571659,
+          "annual_return": 0.01952880689784251,
+          "mdd": -0.3411331654051944,
+          "n_days": 1007
+        },
+        {
+          "period": "2022-06-01 to 2025-12-31",
+          "sharpe": -0.5783847151666794,
+          "annual_return": -0.03266487536251902,
+          "mdd": -0.2951582060872303,
+          "n_days": 899
+        }
+      ]
+    }
+  },
+  "dm_tests": {
+    "S1_Basic_Pairs_SQ": {
+      "t_stat": -2.6692742732798482,
+      "p_value": 0.007626259728980678,
+      "mean_diff": -0.00045941145141240866,
+      "significant_3": "False"
+    },
+    "S2_VolCond_Pairs_SQ": {
+      "t_stat": -2.3732111219890095,
+      "p_value": 0.017672019197386257,
+      "mean_diff": -0.0004039147810507271,
+      "significant_3": "False"
+    },
+    "S3_Pairs_VT_Overlay": {
+      "t_stat": -2.5910655173779933,
+      "p_value": 0.009595913390668898,
+      "mean_diff": -0.00045025586451111877,
+      "significant_3": "False"
+    },
+    "S4_MultiPair": {
+      "t_stat": -2.6864963007398703,
+      "p_value": 0.007244607969800088,
+      "mean_diff": -0.00045645497320025196,
+      "significant_3": "False"
+    },
+    "S5_SPY_GLD_Pair": {
+      "t_stat": -3.2026880923098826,
+      "p_value": 0.0013701076047312188,
+      "mean_diff": -0.0004978771046251229,
+      "significant_3": "True"
+    }
+  },
+  "regime_performance": {
+    "Low VIX (<15)": {
+      "annual_return": -0.03615219971508333,
+      "annual_vol": 0.03248981834719295,
+      "sharpe": -2.343878900808404,
+      "n_days": 1690,
+      "pct_nonzero": 0.45798816568047335
+    },
+    "Med VIX (15-20)": {
+      "annual_return": 0.004155938863131364,
+      "annual_vol": 0.036055700377035205,
+      "sharpe": -0.9941302141421897,
+      "n_days": 1544,
+      "pct_nonzero": 0.42422279792746115
+    },
+    "High VIX (20-30)": {
+      "annual_return": 0.002981318466099268,
+      "annual_vol": 0.057643630418494796,
+      "sharpe": -0.642198995190688,
+      "n_days": 1287,
+      "pct_nonzero": 0.42424242424242425
+    },
+    "Crisis VIX (>30)": {
+      "annual_return": -0.026969426608943557,
+      "annual_vol": 0.12129450752534433,
+      "sharpe": -0.5521224989923833,
+      "n_days": 447,
+      "pct_nonzero": 0.5637583892617449
+    }
+  },
+  "sensitivity": {
+    "entry=1.0,exit=0.0": {
+      "sharpe": -0.790628022371612,
+      "annual_return": -0.014992405921710717,
+      "mdd": -0.49147667630533803,
+      "pct_in_market": 0.821658615136876
+    },
+    "entry=2.5,exit=0.0": {
+      "sharpe": -0.8445707226029165,
+      "annual_return": -0.0056024792061417986,
+      "mdd": -0.26882856610084394,
+      "pct_in_market": 0.4327697262479871
+    },
+    "entry=1.5,exit=0.0": {
+      "sharpe": -0.8543865903613453,
+      "annual_return": -0.015685528605413983,
+      "mdd": -0.453332802637488,
+      "pct_in_market": 0.7107487922705314
+    },
+    "entry=2.5,exit=0.5": {
+      "sharpe": -0.8697238825878478,
+      "annual_return": -0.0008176221654494941,
+      "mdd": -0.23098905721168314,
+      "pct_in_market": 0.3134057971014493
+    },
+    "entry=2.5,exit=0.25": {
+      "sharpe": -0.9023414533524842,
+      "annual_return": -0.00532042941692004,
+      "mdd": -0.20806047121013807,
+      "pct_in_market": 0.37399355877616747
+    },
+    "entry=3.0,exit=0.0": {
+      "sharpe": -0.9050077445924661,
+      "annual_return": 0.0010903153805292044,
+      "mdd": -0.23097354172550702,
+      "pct_in_market": 0.21235909822866345
+    },
+    "entry=1.5,exit=0.25": {
+      "sharpe": -0.9064882383515974,
+      "annual_return": -0.01607654470920156,
+      "mdd": -0.39719472686977453,
+      "pct_in_market": 0.643719806763285
+    },
+    "entry=1.0,exit=0.25": {
+      "sharpe": -0.9164410647307667,
+      "annual_return": -0.020585193846610412,
+      "mdd": -0.4874334268630041,
+      "pct_in_market": 0.7590579710144928
+    },
+    "entry=2.0,exit=0.0": {
+      "sharpe": -0.9168436867991504,
+      "annual_return": -0.0161409584800597,
+      "mdd": -0.4555768903849606,
+      "pct_in_market": 0.5927938808373591
+    },
+    "entry=1.5,exit=0.5": {
+      "sharpe": -0.9385262557675377,
+      "annual_return": -0.014990662332809677,
+      "mdd": -0.3622923061032914,
+      "pct_in_market": 0.5617954911433173
+    }
+  },
+  "spread_dynamics": {
+    "spy_qqq_ar1_phi": 0.9864810591284363,
+    "spy_qqq_half_life_days": 50.924939351221326,
+    "spy_qqq_pct_z_gt_2": 0.14090177133655393,
+    "spy_qqq_pct_z_gt_1": 0.5223429951690821
+  },
+  "beta_stability": {
+    "mean": 0.7473684562011382,
+    "std": 0.17749657434580085,
+    "cv": 0.2374954052088485,
+    "range": [
+      0.20747117047591446,
+      1.3592759804254044
+    ]
+  },
+  "upload_assessment": [
+    {
+      "strategy": "S1_Basic_Pairs_SQ",
+      "full_sharpe": -0.9702917376759093,
+      "mean_oos_sharpe": -1.1341811817991885,
+      "positive_oos": "0/5",
+      "t_stat": -5.133539151141009,
+      "verdict": "FAIL"
+    },
+    {
+      "strategy": "S2_VolCond_Pairs_SQ",
+      "full_sharpe": -0.8523965153894097,
+      "mean_oos_sharpe": -1.2756943913082786,
+      "positive_oos": "0/5",
+      "t_stat": -3.956304599280851,
+      "verdict": "FAIL"
+    },
+    {
+      "strategy": "S3_Pairs_VT_Overlay",
+      "full_sharpe": -1.7411891629809664,
+      "mean_oos_sharpe": -1.750769527236611,
+      "positive_oos": "0/5",
+      "t_stat": -10.446930199737029,
+      "verdict": "FAIL"
+    },
+    {
+      "strategy": "S4_MultiPair",
+      "full_sharpe": -1.1400116742164468,
+      "mean_oos_sharpe": -1.2118991683475813,
+      "positive_oos": "0/5",
+      "t_stat": -6.1822208593142545,
+      "verdict": "FAIL"
+    },
+    {
+      "strategy": "S5_SPY_GLD_Pair",
+      "full_sharpe": -0.40551372054350593,
+      "mean_oos_sharpe": -0.42485095266886963,
+      "positive_oos": "0/5",
+      "t_stat": -4.807324922208236,
+      "verdict": "FAIL"
+    }
+  ],
+  "verdict": "FAIL \u2014 no strategy meets criteria",
+  "conclusion": "Pairs trading on ETFs (SPY-QQQ, SPY-IWM, SPY-GLD) fails to generate reliable alpha. All 5 strategies fail the upload criteria. Key findings: (1) SPY-QQQ cointegration is unstable (only cointegrated 6% of rolling windows), (2) VIX conditioning (S2) reduces time-in-market but doesn't improve risk-adjusted returns, (3) VT overlay (S3) helps but pairs trading itself adds nothing over standalone VT, (4) Multi-pair (S4) diversification doesn't save fundamental lack of alpha, (5) SPY-GLD pair has ~0% cointegration \u2014 structurally wrong for pairs trading. Confirms K115: ETF pairs trading profits have been arbitraged away. VIX regime conditioning cannot fix a broken cointegration relationship.",
+  "references": [
+    "Gatev, Goetzmann, Rouwenhorst (2006) 'Pairs Trading: Performance of a Relative-Value Arbitrage Rule' Review of Financial Studies",
+    "Springer (2025) 'ETF cointegration-based pairs' JAM, reported Sharpe 0.28-0.37",
+    "K115: GARCH-Enhanced Pairs Trading \u2014 all 7 ETF pairs failed cointegration, OOS Sharpe -0.19 to -1.65"
+  ],
+  "prior_knowledge": "K115 found ETF cointegration collapsed post-2010. K511 confirms with VIX conditioning.",
+  "limitations": [
+    "Only tested major US ETFs \u2014 sector/international pairs might differ",
+    "Rolling OLS beta assumes linear relationship (could use Kalman filter)",
+    "Fixed z-score thresholds \u2014 adaptive thresholds might help marginally",
+    "TX cost 10bps may be optimistic for retail, conservative for institutional",
+    "Does not test intraday pairs trading (different dynamics)"
+  ]
+}

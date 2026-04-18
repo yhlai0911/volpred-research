@@ -1,0 +1,2813 @@
+{
+  "experiment_id": "K1186",
+  "title": "K1186: Paper 1 Table 6 VaR Panel Pass-Rate Canonical Replication",
+  "assets": [
+    "SPY",
+    "QQQ",
+    "GLD",
+    "TLT",
+    "EEM",
+    "BTC-USD",
+    "IWM"
+  ],
+  "asset_display": [
+    "SPY",
+    "QQQ",
+    "GLD",
+    "TLT",
+    "EEM",
+    "BTC",
+    "IWM"
+  ],
+  "methods": [
+    "Normal",
+    "StudentT5",
+    "SkewedT",
+    "FHS",
+    "CFVaR"
+  ],
+  "alpha_levels": [
+    0.01,
+    0.025,
+    0.05
+  ],
+  "base_model": "GJR-GARCH(1,1)",
+  "roll_window": 504,
+  "trinity_tests": [
+    "Kupiec",
+    "Christoffersen",
+    "DQ"
+  ],
+  "trinity_threshold": 0.05,
+  "oos_start": "2020-01-01",
+  "oos_end": "2025-12-31",
+  "data_source": "yfinance (2000-01-01 to 2026-06-01)",
+  "refit_every": 63,
+  "hs_window": 500,
+  "fixed_student_t_df": 5.0,
+  "seed": 42,
+  "rtol": 0.05,
+  "paper_targets": {
+    "SkewedT": {
+      "rate": 76.2,
+      "fraction": [
+        16,
+        21
+      ]
+    },
+    "FHS": {
+      "rate": 76.2,
+      "fraction": [
+        16,
+        21
+      ]
+    },
+    "CFVaR": {
+      "rate": 66.7,
+      "fraction": [
+        14,
+        21
+      ]
+    },
+    "StudentT5": {
+      "rate": 57.1,
+      "fraction": [
+        12,
+        21
+      ]
+    },
+    "Normal": {
+      "rate": 57.1,
+      "fraction": [
+        12,
+        21
+      ]
+    }
+  },
+  "paper_check_marks": {
+    "SkewedT": {
+      "SPY": true,
+      "QQQ": true,
+      "GLD": true,
+      "TLT": false,
+      "EEM": true,
+      "BTC": true,
+      "IWM": true
+    },
+    "FHS": {
+      "SPY": true,
+      "QQQ": true,
+      "GLD": true,
+      "TLT": false,
+      "EEM": true,
+      "BTC": true,
+      "IWM": true
+    },
+    "CFVaR": {
+      "SPY": true,
+      "QQQ": true,
+      "GLD": false,
+      "TLT": false,
+      "EEM": true,
+      "BTC": true,
+      "IWM": true
+    },
+    "StudentT5": {
+      "SPY": true,
+      "QQQ": true,
+      "GLD": false,
+      "TLT": false,
+      "EEM": true,
+      "BTC": true,
+      "IWM": false
+    },
+    "Normal": {
+      "SPY": true,
+      "QQQ": false,
+      "GLD": false,
+      "TLT": false,
+      "EEM": true,
+      "BTC": true,
+      "IWM": true
+    }
+  },
+  "pass_rate_results": {
+    "Normal": {
+      "n_pass": 12,
+      "n_total": 21,
+      "rate_pct": 57.1,
+      "paper_rate_pct": 57.1,
+      "paper_fraction": [
+        12,
+        21
+      ],
+      "asset_check": {
+        "SPY": false,
+        "QQQ": false,
+        "GLD": false,
+        "TLT": true,
+        "EEM": false,
+        "BTC": false,
+        "IWM": true
+      },
+      "paper_check": {
+        "SPY": true,
+        "QQQ": false,
+        "GLD": false,
+        "TLT": false,
+        "EEM": true,
+        "BTC": true,
+        "IWM": true
+      },
+      "rate_matched": true
+    },
+    "StudentT5": {
+      "n_pass": 16,
+      "n_total": 21,
+      "rate_pct": 76.2,
+      "paper_rate_pct": 57.1,
+      "paper_fraction": [
+        12,
+        21
+      ],
+      "asset_check": {
+        "SPY": false,
+        "QQQ": false,
+        "GLD": true,
+        "TLT": true,
+        "EEM": false,
+        "BTC": true,
+        "IWM": true
+      },
+      "paper_check": {
+        "SPY": true,
+        "QQQ": true,
+        "GLD": false,
+        "TLT": false,
+        "EEM": true,
+        "BTC": true,
+        "IWM": false
+      },
+      "rate_matched": false
+    },
+    "SkewedT": {
+      "n_pass": 19,
+      "n_total": 21,
+      "rate_pct": 90.5,
+      "paper_rate_pct": 76.2,
+      "paper_fraction": [
+        16,
+        21
+      ],
+      "asset_check": {
+        "SPY": true,
+        "QQQ": true,
+        "GLD": false,
+        "TLT": true,
+        "EEM": true,
+        "BTC": false,
+        "IWM": true
+      },
+      "paper_check": {
+        "SPY": true,
+        "QQQ": true,
+        "GLD": true,
+        "TLT": false,
+        "EEM": true,
+        "BTC": true,
+        "IWM": true
+      },
+      "rate_matched": false
+    },
+    "FHS": {
+      "n_pass": 16,
+      "n_total": 21,
+      "rate_pct": 76.2,
+      "paper_rate_pct": 76.2,
+      "paper_fraction": [
+        16,
+        21
+      ],
+      "asset_check": {
+        "SPY": false,
+        "QQQ": false,
+        "GLD": true,
+        "TLT": true,
+        "EEM": true,
+        "BTC": false,
+        "IWM": true
+      },
+      "paper_check": {
+        "SPY": true,
+        "QQQ": true,
+        "GLD": true,
+        "TLT": false,
+        "EEM": true,
+        "BTC": true,
+        "IWM": true
+      },
+      "rate_matched": true
+    },
+    "CFVaR": {
+      "n_pass": 16,
+      "n_total": 21,
+      "rate_pct": 76.2,
+      "paper_rate_pct": 66.7,
+      "paper_fraction": [
+        14,
+        21
+      ],
+      "asset_check": {
+        "SPY": false,
+        "QQQ": true,
+        "GLD": false,
+        "TLT": true,
+        "EEM": true,
+        "BTC": false,
+        "IWM": true
+      },
+      "paper_check": {
+        "SPY": true,
+        "QQQ": true,
+        "GLD": false,
+        "TLT": false,
+        "EEM": true,
+        "BTC": true,
+        "IWM": true
+      },
+      "rate_matched": false
+    }
+  },
+  "match_summary": {
+    "Normal": true,
+    "StudentT5": false,
+    "SkewedT": false,
+    "FHS": true,
+    "CFVaR": false
+  },
+  "n_targets_matched": 2,
+  "cell_results": {
+    "Normal__SPY__0.01": {
+      "method": "Normal",
+      "asset": "SPY",
+      "alpha": 0.01,
+      "trinity_pass": false,
+      "n_violations": 31,
+      "n_total": 1508,
+      "violation_rate": 0.020557029177718834,
+      "kupiec": {
+        "stat": 13.0087,
+        "p": 0.0003,
+        "pass": false
+      },
+      "cc": {
+        "stat": 0.184,
+        "p": 0.668,
+        "pass": true
+      },
+      "dq": {
+        "stat": 12.8393,
+        "p": 0.0249,
+        "pass": false
+      }
+    },
+    "Normal__SPY__0.025": {
+      "method": "Normal",
+      "asset": "SPY",
+      "alpha": 0.025,
+      "trinity_pass": false,
+      "n_violations": 55,
+      "n_total": 1508,
+      "violation_rate": 0.03647214854111406,
+      "kupiec": {
+        "stat": 7.1484,
+        "p": 0.0075,
+        "pass": false
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 0.9957,
+        "pass": true
+      },
+      "dq": {
+        "stat": 8.4185,
+        "p": 0.1346,
+        "pass": true
+      }
+    },
+    "Normal__SPY__0.05": {
+      "method": "Normal",
+      "asset": "SPY",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 90,
+      "n_total": 1508,
+      "violation_rate": 0.05968169761273209,
+      "kupiec": {
+        "stat": 2.8097,
+        "p": 0.0937,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0796,
+        "p": 0.7779,
+        "pass": true
+      },
+      "dq": {
+        "stat": 10.2667,
+        "p": 0.068,
+        "pass": true
+      }
+    },
+    "Normal__QQQ__0.01": {
+      "method": "Normal",
+      "asset": "QQQ",
+      "alpha": 0.01,
+      "trinity_pass": false,
+      "n_violations": 31,
+      "n_total": 1508,
+      "violation_rate": 0.020557029177718834,
+      "kupiec": {
+        "stat": 13.0087,
+        "p": 0.0003,
+        "pass": false
+      },
+      "cc": {
+        "stat": 0.184,
+        "p": 0.668,
+        "pass": true
+      },
+      "dq": {
+        "stat": 13.288,
+        "p": 0.0208,
+        "pass": false
+      }
+    },
+    "Normal__QQQ__0.025": {
+      "method": "Normal",
+      "asset": "QQQ",
+      "alpha": 0.025,
+      "trinity_pass": false,
+      "n_violations": 52,
+      "n_total": 1508,
+      "violation_rate": 0.034482758620689655,
+      "kupiec": {
+        "stat": 4.9842,
+        "p": 0.0256,
+        "pass": false
+      },
+      "cc": {
+        "stat": 0.0244,
+        "p": 0.8757,
+        "pass": true
+      },
+      "dq": {
+        "stat": 13.7411,
+        "p": 0.0173,
+        "pass": false
+      }
+    },
+    "Normal__QQQ__0.05": {
+      "method": "Normal",
+      "asset": "QQQ",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 91,
+      "n_total": 1508,
+      "violation_rate": 0.0603448275862069,
+      "kupiec": {
+        "stat": 3.196,
+        "p": 0.0738,
+        "pass": true
+      },
+      "cc": {
+        "stat": 1.5076,
+        "p": 0.2195,
+        "pass": true
+      },
+      "dq": {
+        "stat": 7.4537,
+        "p": 0.189,
+        "pass": true
+      }
+    },
+    "Normal__GLD__0.01": {
+      "method": "Normal",
+      "asset": "GLD",
+      "alpha": 0.01,
+      "trinity_pass": false,
+      "n_violations": 27,
+      "n_total": 1508,
+      "violation_rate": 0.01790450928381963,
+      "kupiec": {
+        "stat": 7.7087,
+        "p": 0.0055,
+        "pass": false
+      },
+      "cc": {
+        "stat": 0.4403,
+        "p": 0.507,
+        "pass": true
+      },
+      "dq": {
+        "stat": 8.4419,
+        "p": 0.1335,
+        "pass": true
+      }
+    },
+    "Normal__GLD__0.025": {
+      "method": "Normal",
+      "asset": "GLD",
+      "alpha": 0.025,
+      "trinity_pass": false,
+      "n_violations": 45,
+      "n_total": 1508,
+      "violation_rate": 0.029840848806366047,
+      "kupiec": {
+        "stat": 1.3665,
+        "p": 0.2424,
+        "pass": true
+      },
+      "cc": {
+        "stat": 1.6357,
+        "p": 0.2009,
+        "pass": true
+      },
+      "dq": {
+        "stat": 11.4128,
+        "p": 0.0438,
+        "pass": false
+      }
+    },
+    "Normal__GLD__0.05": {
+      "method": "Normal",
+      "asset": "GLD",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 81,
+      "n_total": 1508,
+      "violation_rate": 0.05371352785145889,
+      "kupiec": {
+        "stat": 0.4279,
+        "p": 0.513,
+        "pass": true
+      },
+      "cc": {
+        "stat": 1.5459,
+        "p": 0.2137,
+        "pass": true
+      },
+      "dq": {
+        "stat": 5.5136,
+        "p": 0.3565,
+        "pass": true
+      }
+    },
+    "Normal__TLT__0.01": {
+      "method": "Normal",
+      "asset": "TLT",
+      "alpha": 0.01,
+      "trinity_pass": true,
+      "n_violations": 19,
+      "n_total": 1508,
+      "violation_rate": 0.012599469496021221,
+      "kupiec": {
+        "stat": 0.9509,
+        "p": 0.3295,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 1.8727,
+        "p": 0.8665,
+        "pass": true
+      }
+    },
+    "Normal__TLT__0.025": {
+      "method": "Normal",
+      "asset": "TLT",
+      "alpha": 0.025,
+      "trinity_pass": true,
+      "n_violations": 42,
+      "n_total": 1508,
+      "violation_rate": 0.027851458885941646,
+      "kupiec": {
+        "stat": 0.4854,
+        "p": 0.486,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 5.8232,
+        "p": 0.3238,
+        "pass": true
+      }
+    },
+    "Normal__TLT__0.05": {
+      "method": "Normal",
+      "asset": "TLT",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 74,
+      "n_total": 1508,
+      "violation_rate": 0.04907161803713528,
+      "kupiec": {
+        "stat": 0.0275,
+        "p": 0.8682,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.9562,
+        "p": 0.3281,
+        "pass": true
+      },
+      "dq": {
+        "stat": 1.2257,
+        "p": 0.9424,
+        "pass": true
+      }
+    },
+    "Normal__EEM__0.01": {
+      "method": "Normal",
+      "asset": "EEM",
+      "alpha": 0.01,
+      "trinity_pass": false,
+      "n_violations": 24,
+      "n_total": 1508,
+      "violation_rate": 0.015915119363395226,
+      "kupiec": {
+        "stat": 4.5183,
+        "p": 0.0335,
+        "pass": false
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 8.3093,
+        "p": 0.14,
+        "pass": true
+      }
+    },
+    "Normal__EEM__0.025": {
+      "method": "Normal",
+      "asset": "EEM",
+      "alpha": 0.025,
+      "trinity_pass": false,
+      "n_violations": 51,
+      "n_total": 1508,
+      "violation_rate": 0.033819628647214856,
+      "kupiec": {
+        "stat": 4.3416,
+        "p": 0.0372,
+        "pass": false
+      },
+      "cc": {
+        "stat": 0.382,
+        "p": 0.5365,
+        "pass": true
+      },
+      "dq": {
+        "stat": 4.1679,
+        "p": 0.5255,
+        "pass": true
+      }
+    },
+    "Normal__EEM__0.05": {
+      "method": "Normal",
+      "asset": "EEM",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 76,
+      "n_total": 1508,
+      "violation_rate": 0.050397877984084884,
+      "kupiec": {
+        "stat": 0.005,
+        "p": 0.9436,
+        "pass": true
+      },
+      "cc": {
+        "stat": 1.1586,
+        "p": 0.2818,
+        "pass": true
+      },
+      "dq": {
+        "stat": 4.9962,
+        "p": 0.4163,
+        "pass": true
+      }
+    },
+    "Normal__BTC__0.01": {
+      "method": "Normal",
+      "asset": "BTC",
+      "alpha": 0.01,
+      "trinity_pass": true,
+      "n_violations": 28,
+      "n_total": 2192,
+      "violation_rate": 0.012773722627737226,
+      "kupiec": {
+        "stat": 1.5661,
+        "p": 0.2108,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.8013,
+        "p": 0.3707,
+        "pass": true
+      },
+      "dq": {
+        "stat": 5.3703,
+        "p": 0.3724,
+        "pass": true
+      }
+    },
+    "Normal__BTC__0.025": {
+      "method": "Normal",
+      "asset": "BTC",
+      "alpha": 0.025,
+      "trinity_pass": true,
+      "n_violations": 51,
+      "n_total": 2192,
+      "violation_rate": 0.023266423357664233,
+      "kupiec": {
+        "stat": 0.2766,
+        "p": 0.599,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.4877,
+        "p": 0.485,
+        "pass": true
+      },
+      "dq": {
+        "stat": 4.9853,
+        "p": 0.4177,
+        "pass": true
+      }
+    },
+    "Normal__BTC__0.05": {
+      "method": "Normal",
+      "asset": "BTC",
+      "alpha": 0.05,
+      "trinity_pass": false,
+      "n_violations": 84,
+      "n_total": 2192,
+      "violation_rate": 0.03832116788321168,
+      "kupiec": {
+        "stat": 6.822,
+        "p": 0.009,
+        "pass": false
+      },
+      "cc": {
+        "stat": 0.9206,
+        "p": 0.3373,
+        "pass": true
+      },
+      "dq": {
+        "stat": 11.8057,
+        "p": 0.0375,
+        "pass": false
+      }
+    },
+    "Normal__IWM__0.01": {
+      "method": "Normal",
+      "asset": "IWM",
+      "alpha": 0.01,
+      "trinity_pass": true,
+      "n_violations": 21,
+      "n_total": 1508,
+      "violation_rate": 0.013925729442970823,
+      "kupiec": {
+        "stat": 2.0919,
+        "p": 0.1481,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 4.9918,
+        "p": 0.4169,
+        "pass": true
+      }
+    },
+    "Normal__IWM__0.025": {
+      "method": "Normal",
+      "asset": "IWM",
+      "alpha": 0.025,
+      "trinity_pass": true,
+      "n_violations": 46,
+      "n_total": 1508,
+      "violation_rate": 0.03050397877984085,
+      "kupiec": {
+        "stat": 1.7532,
+        "p": 0.1855,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.2394,
+        "p": 0.6246,
+        "pass": true
+      },
+      "dq": {
+        "stat": 5.6942,
+        "p": 0.3371,
+        "pass": true
+      }
+    },
+    "Normal__IWM__0.05": {
+      "method": "Normal",
+      "asset": "IWM",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 66,
+      "n_total": 1508,
+      "violation_rate": 0.04376657824933687,
+      "kupiec": {
+        "stat": 1.2854,
+        "p": 0.2569,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.42,
+        "p": 0.5169,
+        "pass": true
+      },
+      "dq": {
+        "stat": 8.9546,
+        "p": 0.1109,
+        "pass": true
+      }
+    },
+    "StudentT5__SPY__0.01": {
+      "method": "StudentT5",
+      "asset": "SPY",
+      "alpha": 0.01,
+      "trinity_pass": true,
+      "n_violations": 21,
+      "n_total": 1508,
+      "violation_rate": 0.013925729442970823,
+      "kupiec": {
+        "stat": 2.0919,
+        "p": 0.1481,
+        "pass": true
+      },
+      "cc": {
+        "stat": 1.0922,
+        "p": 0.296,
+        "pass": true
+      },
+      "dq": {
+        "stat": 7.2307,
+        "p": 0.204,
+        "pass": true
+      }
+    },
+    "StudentT5__SPY__0.025": {
+      "method": "StudentT5",
+      "asset": "SPY",
+      "alpha": 0.025,
+      "trinity_pass": false,
+      "n_violations": 51,
+      "n_total": 1508,
+      "violation_rate": 0.033819628647214856,
+      "kupiec": {
+        "stat": 4.3416,
+        "p": 0.0372,
+        "pass": false
+      },
+      "cc": {
+        "stat": 0.0445,
+        "p": 0.8329,
+        "pass": true
+      },
+      "dq": {
+        "stat": 5.7872,
+        "p": 0.3275,
+        "pass": true
+      }
+    },
+    "StudentT5__SPY__0.05": {
+      "method": "StudentT5",
+      "asset": "SPY",
+      "alpha": 0.05,
+      "trinity_pass": false,
+      "n_violations": 100,
+      "n_total": 1508,
+      "violation_rate": 0.06631299734748011,
+      "kupiec": {
+        "stat": 7.6974,
+        "p": 0.0055,
+        "pass": false
+      },
+      "cc": {
+        "stat": 0.3045,
+        "p": 0.5811,
+        "pass": true
+      },
+      "dq": {
+        "stat": 14.9145,
+        "p": 0.0107,
+        "pass": false
+      }
+    },
+    "StudentT5__QQQ__0.01": {
+      "method": "StudentT5",
+      "asset": "QQQ",
+      "alpha": 0.01,
+      "trinity_pass": true,
+      "n_violations": 18,
+      "n_total": 1508,
+      "violation_rate": 0.011936339522546418,
+      "kupiec": {
+        "stat": 0.5378,
+        "p": 0.4633,
+        "pass": true
+      },
+      "cc": {
+        "stat": 1.575,
+        "p": 0.2095,
+        "pass": true
+      },
+      "dq": {
+        "stat": 10.7047,
+        "p": 0.0576,
+        "pass": true
+      }
+    },
+    "StudentT5__QQQ__0.025": {
+      "method": "StudentT5",
+      "asset": "QQQ",
+      "alpha": 0.025,
+      "trinity_pass": false,
+      "n_violations": 50,
+      "n_total": 1508,
+      "violation_rate": 0.033156498673740056,
+      "kupiec": {
+        "stat": 3.7395,
+        "p": 0.0531,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0707,
+        "p": 0.7904,
+        "pass": true
+      },
+      "dq": {
+        "stat": 11.5008,
+        "p": 0.0423,
+        "pass": false
+      }
+    },
+    "StudentT5__QQQ__0.05": {
+      "method": "StudentT5",
+      "asset": "QQQ",
+      "alpha": 0.05,
+      "trinity_pass": false,
+      "n_violations": 99,
+      "n_total": 1508,
+      "violation_rate": 0.0656498673740053,
+      "kupiec": {
+        "stat": 7.1088,
+        "p": 0.0077,
+        "pass": false
+      },
+      "cc": {
+        "stat": 2.6363,
+        "p": 0.1044,
+        "pass": true
+      },
+      "dq": {
+        "stat": 10.6293,
+        "p": 0.0592,
+        "pass": true
+      }
+    },
+    "StudentT5__GLD__0.01": {
+      "method": "StudentT5",
+      "asset": "GLD",
+      "alpha": 0.01,
+      "trinity_pass": true,
+      "n_violations": 18,
+      "n_total": 1508,
+      "violation_rate": 0.011936339522546418,
+      "kupiec": {
+        "stat": 0.5378,
+        "p": 0.4633,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 1.4007,
+        "p": 0.9242,
+        "pass": true
+      }
+    },
+    "StudentT5__GLD__0.025": {
+      "method": "StudentT5",
+      "asset": "GLD",
+      "alpha": 0.025,
+      "trinity_pass": true,
+      "n_violations": 40,
+      "n_total": 1508,
+      "violation_rate": 0.026525198938992044,
+      "kupiec": {
+        "stat": 0.1411,
+        "p": 0.7071,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.7027,
+        "p": 0.4019,
+        "pass": true
+      },
+      "dq": {
+        "stat": 6.0197,
+        "p": 0.3043,
+        "pass": true
+      }
+    },
+    "StudentT5__GLD__0.05": {
+      "method": "StudentT5",
+      "asset": "GLD",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 88,
+      "n_total": 1508,
+      "violation_rate": 0.058355437665782495,
+      "kupiec": {
+        "stat": 2.1083,
+        "p": 0.1465,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.6918,
+        "p": 0.4056,
+        "pass": true
+      },
+      "dq": {
+        "stat": 5.2297,
+        "p": 0.3885,
+        "pass": true
+      }
+    },
+    "StudentT5__TLT__0.01": {
+      "method": "StudentT5",
+      "asset": "TLT",
+      "alpha": 0.01,
+      "trinity_pass": true,
+      "n_violations": 13,
+      "n_total": 1508,
+      "violation_rate": 0.008620689655172414,
+      "kupiec": {
+        "stat": 0.304,
+        "p": 0.5814,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 1.6731,
+        "p": 0.8923,
+        "pass": true
+      }
+    },
+    "StudentT5__TLT__0.025": {
+      "method": "StudentT5",
+      "asset": "TLT",
+      "alpha": 0.025,
+      "trinity_pass": true,
+      "n_violations": 36,
+      "n_total": 1508,
+      "violation_rate": 0.023872679045092837,
+      "kupiec": {
+        "stat": 0.0798,
+        "p": 0.7776,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 1.9721,
+        "p": 0.853,
+        "pass": true
+      }
+    },
+    "StudentT5__TLT__0.05": {
+      "method": "StudentT5",
+      "asset": "TLT",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 88,
+      "n_total": 1508,
+      "violation_rate": 0.058355437665782495,
+      "kupiec": {
+        "stat": 2.1083,
+        "p": 0.1465,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.3055,
+        "p": 0.5805,
+        "pass": true
+      },
+      "dq": {
+        "stat": 4.7759,
+        "p": 0.4438,
+        "pass": true
+      }
+    },
+    "StudentT5__EEM__0.01": {
+      "method": "StudentT5",
+      "asset": "EEM",
+      "alpha": 0.01,
+      "trinity_pass": true,
+      "n_violations": 18,
+      "n_total": 1508,
+      "violation_rate": 0.011936339522546418,
+      "kupiec": {
+        "stat": 0.5378,
+        "p": 0.4633,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 6.9386,
+        "p": 0.2252,
+        "pass": true
+      }
+    },
+    "StudentT5__EEM__0.025": {
+      "method": "StudentT5",
+      "asset": "EEM",
+      "alpha": 0.025,
+      "trinity_pass": true,
+      "n_violations": 48,
+      "n_total": 1508,
+      "violation_rate": 0.03183023872679045,
+      "kupiec": {
+        "stat": 2.6603,
+        "p": 0.1029,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.2209,
+        "p": 0.6384,
+        "pass": true
+      },
+      "dq": {
+        "stat": 3.0941,
+        "p": 0.6855,
+        "pass": true
+      }
+    },
+    "StudentT5__EEM__0.05": {
+      "method": "StudentT5",
+      "asset": "EEM",
+      "alpha": 0.05,
+      "trinity_pass": false,
+      "n_violations": 92,
+      "n_total": 1508,
+      "violation_rate": 0.0610079575596817,
+      "kupiec": {
+        "stat": 3.6057,
+        "p": 0.0576,
+        "pass": true
+      },
+      "cc": {
+        "stat": 1.6325,
+        "p": 0.2014,
+        "pass": true
+      },
+      "dq": {
+        "stat": 11.2691,
+        "p": 0.0463,
+        "pass": false
+      }
+    },
+    "StudentT5__BTC__0.01": {
+      "method": "StudentT5",
+      "asset": "BTC",
+      "alpha": 0.01,
+      "trinity_pass": true,
+      "n_violations": 19,
+      "n_total": 2192,
+      "violation_rate": 0.008667883211678832,
+      "kupiec": {
+        "stat": 0.4114,
+        "p": 0.5212,
+        "pass": true
+      },
+      "cc": {
+        "stat": 2.0115,
+        "p": 0.1561,
+        "pass": true
+      },
+      "dq": {
+        "stat": 9.9275,
+        "p": 0.0773,
+        "pass": true
+      }
+    },
+    "StudentT5__BTC__0.025": {
+      "method": "StudentT5",
+      "asset": "BTC",
+      "alpha": 0.025,
+      "trinity_pass": true,
+      "n_violations": 49,
+      "n_total": 2192,
+      "violation_rate": 0.022354014598540146,
+      "kupiec": {
+        "stat": 0.6525,
+        "p": 0.4192,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.6329,
+        "p": 0.4263,
+        "pass": true
+      },
+      "dq": {
+        "stat": 5.683,
+        "p": 0.3383,
+        "pass": true
+      }
+    },
+    "StudentT5__BTC__0.05": {
+      "method": "StudentT5",
+      "asset": "BTC",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 92,
+      "n_total": 2192,
+      "violation_rate": 0.041970802919708027,
+      "kupiec": {
+        "stat": 3.1394,
+        "p": 0.0764,
+        "pass": true
+      },
+      "cc": {
+        "stat": 1.1164,
+        "p": 0.2907,
+        "pass": true
+      },
+      "dq": {
+        "stat": 8.0471,
+        "p": 0.1537,
+        "pass": true
+      }
+    },
+    "StudentT5__IWM__0.01": {
+      "method": "StudentT5",
+      "asset": "IWM",
+      "alpha": 0.01,
+      "trinity_pass": true,
+      "n_violations": 13,
+      "n_total": 1508,
+      "violation_rate": 0.008620689655172414,
+      "kupiec": {
+        "stat": 0.304,
+        "p": 0.5814,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 2.0385,
+        "p": 0.8438,
+        "pass": true
+      }
+    },
+    "StudentT5__IWM__0.025": {
+      "method": "StudentT5",
+      "asset": "IWM",
+      "alpha": 0.025,
+      "trinity_pass": true,
+      "n_violations": 43,
+      "n_total": 1508,
+      "violation_rate": 0.028514588859416445,
+      "kupiec": {
+        "stat": 0.7316,
+        "p": 0.3924,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.4376,
+        "p": 0.5083,
+        "pass": true
+      },
+      "dq": {
+        "stat": 4.4464,
+        "p": 0.4871,
+        "pass": true
+      }
+    },
+    "StudentT5__IWM__0.05": {
+      "method": "StudentT5",
+      "asset": "IWM",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 85,
+      "n_total": 1508,
+      "violation_rate": 0.05636604774535809,
+      "kupiec": {
+        "stat": 1.238,
+        "p": 0.2659,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.3181,
+        "p": 0.5728,
+        "pass": true
+      },
+      "dq": {
+        "stat": 7.0592,
+        "p": 0.2163,
+        "pass": true
+      }
+    },
+    "SkewedT__SPY__0.01": {
+      "method": "SkewedT",
+      "asset": "SPY",
+      "alpha": 0.01,
+      "trinity_pass": true,
+      "n_violations": 21,
+      "n_total": 1508,
+      "violation_rate": 0.013925729442970823,
+      "kupiec": {
+        "stat": 2.0919,
+        "p": 0.1481,
+        "pass": true
+      },
+      "cc": {
+        "stat": 1.0922,
+        "p": 0.296,
+        "pass": true
+      },
+      "dq": {
+        "stat": 7.2307,
+        "p": 0.204,
+        "pass": true
+      }
+    },
+    "SkewedT__SPY__0.025": {
+      "method": "SkewedT",
+      "asset": "SPY",
+      "alpha": 0.025,
+      "trinity_pass": true,
+      "n_violations": 43,
+      "n_total": 1508,
+      "violation_rate": 0.028514588859416445,
+      "kupiec": {
+        "stat": 0.7316,
+        "p": 0.3924,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0473,
+        "p": 0.8278,
+        "pass": true
+      },
+      "dq": {
+        "stat": 2.307,
+        "p": 0.8052,
+        "pass": true
+      }
+    },
+    "SkewedT__SPY__0.05": {
+      "method": "SkewedT",
+      "asset": "SPY",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 74,
+      "n_total": 1508,
+      "violation_rate": 0.04907161803713528,
+      "kupiec": {
+        "stat": 0.0275,
+        "p": 0.8682,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.514,
+        "p": 0.4734,
+        "pass": true
+      },
+      "dq": {
+        "stat": 6.5211,
+        "p": 0.2588,
+        "pass": true
+      }
+    },
+    "SkewedT__QQQ__0.01": {
+      "method": "SkewedT",
+      "asset": "QQQ",
+      "alpha": 0.01,
+      "trinity_pass": true,
+      "n_violations": 16,
+      "n_total": 1508,
+      "violation_rate": 0.010610079575596816,
+      "kupiec": {
+        "stat": 0.0556,
+        "p": 0.8136,
+        "pass": true
+      },
+      "cc": {
+        "stat": 1.9742,
+        "p": 0.16,
+        "pass": true
+      },
+      "dq": {
+        "stat": 7.3867,
+        "p": 0.1934,
+        "pass": true
+      }
+    },
+    "SkewedT__QQQ__0.025": {
+      "method": "SkewedT",
+      "asset": "QQQ",
+      "alpha": 0.025,
+      "trinity_pass": true,
+      "n_violations": 36,
+      "n_total": 1508,
+      "violation_rate": 0.023872679045092837,
+      "kupiec": {
+        "stat": 0.0798,
+        "p": 0.7776,
+        "pass": true
+      },
+      "cc": {
+        "stat": 1.1716,
+        "p": 0.2791,
+        "pass": true
+      },
+      "dq": {
+        "stat": 7.3763,
+        "p": 0.1941,
+        "pass": true
+      }
+    },
+    "SkewedT__QQQ__0.05": {
+      "method": "SkewedT",
+      "asset": "QQQ",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 69,
+      "n_total": 1508,
+      "violation_rate": 0.045755968169761276,
+      "kupiec": {
+        "stat": 0.5878,
+        "p": 0.4433,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.5313,
+        "p": 0.4661,
+        "pass": true
+      },
+      "dq": {
+        "stat": 7.98,
+        "p": 0.1573,
+        "pass": true
+      }
+    },
+    "SkewedT__GLD__0.01": {
+      "method": "SkewedT",
+      "asset": "GLD",
+      "alpha": 0.01,
+      "trinity_pass": false,
+      "n_violations": 25,
+      "n_total": 1508,
+      "violation_rate": 0.016578249336870028,
+      "kupiec": {
+        "stat": 5.5014,
+        "p": 0.019,
+        "pass": false
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 6.5043,
+        "p": 0.2602,
+        "pass": true
+      }
+    },
+    "SkewedT__GLD__0.025": {
+      "method": "SkewedT",
+      "asset": "GLD",
+      "alpha": 0.025,
+      "trinity_pass": true,
+      "n_violations": 39,
+      "n_total": 1508,
+      "violation_rate": 0.02586206896551724,
+      "kupiec": {
+        "stat": 0.0455,
+        "p": 0.8311,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.807,
+        "p": 0.369,
+        "pass": true
+      },
+      "dq": {
+        "stat": 6.1534,
+        "p": 0.2916,
+        "pass": true
+      }
+    },
+    "SkewedT__GLD__0.05": {
+      "method": "SkewedT",
+      "asset": "GLD",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 80,
+      "n_total": 1508,
+      "violation_rate": 0.05305039787798409,
+      "kupiec": {
+        "stat": 0.2899,
+        "p": 0.5903,
+        "pass": true
+      },
+      "cc": {
+        "stat": 1.6982,
+        "p": 0.1925,
+        "pass": true
+      },
+      "dq": {
+        "stat": 5.064,
+        "p": 0.4081,
+        "pass": true
+      }
+    },
+    "SkewedT__TLT__0.01": {
+      "method": "SkewedT",
+      "asset": "TLT",
+      "alpha": 0.01,
+      "trinity_pass": true,
+      "n_violations": 16,
+      "n_total": 1508,
+      "violation_rate": 0.010610079575596816,
+      "kupiec": {
+        "stat": 0.0556,
+        "p": 0.8136,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 1.1824,
+        "p": 0.9466,
+        "pass": true
+      }
+    },
+    "SkewedT__TLT__0.025": {
+      "method": "SkewedT",
+      "asset": "TLT",
+      "alpha": 0.025,
+      "trinity_pass": true,
+      "n_violations": 33,
+      "n_total": 1508,
+      "violation_rate": 0.021883289124668436,
+      "kupiec": {
+        "stat": 0.6269,
+        "p": 0.4285,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 2.4722,
+        "p": 0.7807,
+        "pass": true
+      }
+    },
+    "SkewedT__TLT__0.05": {
+      "method": "SkewedT",
+      "asset": "TLT",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 72,
+      "n_total": 1508,
+      "violation_rate": 0.04774535809018567,
+      "kupiec": {
+        "stat": 0.1637,
+        "p": 0.6857,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.7722,
+        "p": 0.3795,
+        "pass": true
+      },
+      "dq": {
+        "stat": 1.1721,
+        "p": 0.9475,
+        "pass": true
+      }
+    },
+    "SkewedT__EEM__0.01": {
+      "method": "SkewedT",
+      "asset": "EEM",
+      "alpha": 0.01,
+      "trinity_pass": true,
+      "n_violations": 18,
+      "n_total": 1508,
+      "violation_rate": 0.011936339522546418,
+      "kupiec": {
+        "stat": 0.5378,
+        "p": 0.4633,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 6.9386,
+        "p": 0.2252,
+        "pass": true
+      }
+    },
+    "SkewedT__EEM__0.025": {
+      "method": "SkewedT",
+      "asset": "EEM",
+      "alpha": 0.025,
+      "trinity_pass": true,
+      "n_violations": 33,
+      "n_total": 1508,
+      "violation_rate": 0.021883289124668436,
+      "kupiec": {
+        "stat": 0.6269,
+        "p": 0.4285,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0998,
+        "p": 0.7521,
+        "pass": true
+      },
+      "dq": {
+        "stat": 1.8144,
+        "p": 0.8742,
+        "pass": true
+      }
+    },
+    "SkewedT__EEM__0.05": {
+      "method": "SkewedT",
+      "asset": "EEM",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 67,
+      "n_total": 1508,
+      "violation_rate": 0.04442970822281167,
+      "kupiec": {
+        "stat": 1.0218,
+        "p": 0.3121,
+        "pass": true
+      },
+      "cc": {
+        "stat": 1.8984,
+        "p": 0.1683,
+        "pass": true
+      },
+      "dq": {
+        "stat": 7.5032,
+        "p": 0.1858,
+        "pass": true
+      }
+    },
+    "SkewedT__BTC__0.01": {
+      "method": "SkewedT",
+      "asset": "BTC",
+      "alpha": 0.01,
+      "trinity_pass": true,
+      "n_violations": 28,
+      "n_total": 2192,
+      "violation_rate": 0.012773722627737226,
+      "kupiec": {
+        "stat": 1.5661,
+        "p": 0.2108,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.8013,
+        "p": 0.3707,
+        "pass": true
+      },
+      "dq": {
+        "stat": 5.3703,
+        "p": 0.3724,
+        "pass": true
+      }
+    },
+    "SkewedT__BTC__0.025": {
+      "method": "SkewedT",
+      "asset": "BTC",
+      "alpha": 0.025,
+      "trinity_pass": true,
+      "n_violations": 51,
+      "n_total": 2192,
+      "violation_rate": 0.023266423357664233,
+      "kupiec": {
+        "stat": 0.2766,
+        "p": 0.599,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.4877,
+        "p": 0.485,
+        "pass": true
+      },
+      "dq": {
+        "stat": 4.9853,
+        "p": 0.4177,
+        "pass": true
+      }
+    },
+    "SkewedT__BTC__0.05": {
+      "method": "SkewedT",
+      "asset": "BTC",
+      "alpha": 0.05,
+      "trinity_pass": false,
+      "n_violations": 84,
+      "n_total": 2192,
+      "violation_rate": 0.03832116788321168,
+      "kupiec": {
+        "stat": 6.822,
+        "p": 0.009,
+        "pass": false
+      },
+      "cc": {
+        "stat": 0.9206,
+        "p": 0.3373,
+        "pass": true
+      },
+      "dq": {
+        "stat": 11.8057,
+        "p": 0.0375,
+        "pass": false
+      }
+    },
+    "SkewedT__IWM__0.01": {
+      "method": "SkewedT",
+      "asset": "IWM",
+      "alpha": 0.01,
+      "trinity_pass": true,
+      "n_violations": 14,
+      "n_total": 1508,
+      "violation_rate": 0.009283819628647215,
+      "kupiec": {
+        "stat": 0.08,
+        "p": 0.7772,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 1.7834,
+        "p": 0.8782,
+        "pass": true
+      }
+    },
+    "SkewedT__IWM__0.025": {
+      "method": "SkewedT",
+      "asset": "IWM",
+      "alpha": 0.025,
+      "trinity_pass": true,
+      "n_violations": 35,
+      "n_total": 1508,
+      "violation_rate": 0.023209549071618037,
+      "kupiec": {
+        "stat": 0.2031,
+        "p": 0.6522,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0422,
+        "p": 0.8373,
+        "pass": true
+      },
+      "dq": {
+        "stat": 5.1971,
+        "p": 0.3923,
+        "pass": true
+      }
+    },
+    "SkewedT__IWM__0.05": {
+      "method": "SkewedT",
+      "asset": "IWM",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 61,
+      "n_total": 1508,
+      "violation_rate": 0.04045092838196287,
+      "kupiec": {
+        "stat": 3.0884,
+        "p": 0.0789,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.8801,
+        "p": 0.3482,
+        "pass": true
+      },
+      "dq": {
+        "stat": 8.3836,
+        "p": 0.1363,
+        "pass": true
+      }
+    },
+    "FHS__SPY__0.01": {
+      "method": "FHS",
+      "asset": "SPY",
+      "alpha": 0.01,
+      "trinity_pass": false,
+      "n_violations": 18,
+      "n_total": 1508,
+      "violation_rate": 0.011936339522546418,
+      "kupiec": {
+        "stat": 0.5378,
+        "p": 0.4633,
+        "pass": true
+      },
+      "cc": {
+        "stat": 1.575,
+        "p": 0.2095,
+        "pass": true
+      },
+      "dq": {
+        "stat": 11.4193,
+        "p": 0.0437,
+        "pass": false
+      }
+    },
+    "FHS__SPY__0.025": {
+      "method": "FHS",
+      "asset": "SPY",
+      "alpha": 0.025,
+      "trinity_pass": true,
+      "n_violations": 36,
+      "n_total": 1508,
+      "violation_rate": 0.023872679045092837,
+      "kupiec": {
+        "stat": 0.0798,
+        "p": 0.7776,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0228,
+        "p": 0.88,
+        "pass": true
+      },
+      "dq": {
+        "stat": 3.0786,
+        "p": 0.6879,
+        "pass": true
+      }
+    },
+    "FHS__SPY__0.05": {
+      "method": "FHS",
+      "asset": "SPY",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 68,
+      "n_total": 1508,
+      "violation_rate": 0.04509283819628647,
+      "kupiec": {
+        "stat": 0.7894,
+        "p": 0.3743,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.4605,
+        "p": 0.4974,
+        "pass": true
+      },
+      "dq": {
+        "stat": 7.8337,
+        "p": 0.1656,
+        "pass": true
+      }
+    },
+    "FHS__QQQ__0.01": {
+      "method": "FHS",
+      "asset": "QQQ",
+      "alpha": 0.01,
+      "trinity_pass": false,
+      "n_violations": 19,
+      "n_total": 1508,
+      "violation_rate": 0.012599469496021221,
+      "kupiec": {
+        "stat": 0.9509,
+        "p": 0.3295,
+        "pass": true
+      },
+      "cc": {
+        "stat": 1.4,
+        "p": 0.2367,
+        "pass": true
+      },
+      "dq": {
+        "stat": 11.4037,
+        "p": 0.0439,
+        "pass": false
+      }
+    },
+    "FHS__QQQ__0.025": {
+      "method": "FHS",
+      "asset": "QQQ",
+      "alpha": 0.025,
+      "trinity_pass": false,
+      "n_violations": 37,
+      "n_total": 1508,
+      "violation_rate": 0.02453580901856764,
+      "kupiec": {
+        "stat": 0.0134,
+        "p": 0.9078,
+        "pass": true
+      },
+      "cc": {
+        "stat": 1.0411,
+        "p": 0.3076,
+        "pass": true
+      },
+      "dq": {
+        "stat": 11.1965,
+        "p": 0.0476,
+        "pass": false
+      }
+    },
+    "FHS__QQQ__0.05": {
+      "method": "FHS",
+      "asset": "QQQ",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 68,
+      "n_total": 1508,
+      "violation_rate": 0.04509283819628647,
+      "kupiec": {
+        "stat": 0.7894,
+        "p": 0.3743,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.4605,
+        "p": 0.4974,
+        "pass": true
+      },
+      "dq": {
+        "stat": 8.1929,
+        "p": 0.1459,
+        "pass": true
+      }
+    },
+    "FHS__GLD__0.01": {
+      "method": "FHS",
+      "asset": "GLD",
+      "alpha": 0.01,
+      "trinity_pass": true,
+      "n_violations": 15,
+      "n_total": 1508,
+      "violation_rate": 0.009946949602122016,
+      "kupiec": {
+        "stat": 0.0004,
+        "p": 0.9835,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 8.0287,
+        "p": 0.1547,
+        "pass": true
+      }
+    },
+    "FHS__GLD__0.025": {
+      "method": "FHS",
+      "asset": "GLD",
+      "alpha": 0.025,
+      "trinity_pass": true,
+      "n_violations": 35,
+      "n_total": 1508,
+      "violation_rate": 0.023209549071618037,
+      "kupiec": {
+        "stat": 0.2031,
+        "p": 0.6522,
+        "pass": true
+      },
+      "cc": {
+        "stat": 1.3115,
+        "p": 0.2521,
+        "pass": true
+      },
+      "dq": {
+        "stat": 8.1564,
+        "p": 0.1478,
+        "pass": true
+      }
+    },
+    "FHS__GLD__0.05": {
+      "method": "FHS",
+      "asset": "GLD",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 74,
+      "n_total": 1508,
+      "violation_rate": 0.04907161803713528,
+      "kupiec": {
+        "stat": 0.0275,
+        "p": 0.8682,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0397,
+        "p": 0.8421,
+        "pass": true
+      },
+      "dq": {
+        "stat": 4.3583,
+        "p": 0.4991,
+        "pass": true
+      }
+    },
+    "FHS__TLT__0.01": {
+      "method": "FHS",
+      "asset": "TLT",
+      "alpha": 0.01,
+      "trinity_pass": true,
+      "n_violations": 13,
+      "n_total": 1508,
+      "violation_rate": 0.008620689655172414,
+      "kupiec": {
+        "stat": 0.304,
+        "p": 0.5814,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 0.9851,
+        "p": 0.9638,
+        "pass": true
+      }
+    },
+    "FHS__TLT__0.025": {
+      "method": "FHS",
+      "asset": "TLT",
+      "alpha": 0.025,
+      "trinity_pass": true,
+      "n_violations": 32,
+      "n_total": 1508,
+      "violation_rate": 0.021220159151193633,
+      "kupiec": {
+        "stat": 0.9309,
+        "p": 0.3346,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 3.6248,
+        "p": 0.6046,
+        "pass": true
+      }
+    },
+    "FHS__TLT__0.05": {
+      "method": "FHS",
+      "asset": "TLT",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 66,
+      "n_total": 1508,
+      "violation_rate": 0.04376657824933687,
+      "kupiec": {
+        "stat": 1.2854,
+        "p": 0.2569,
+        "pass": true
+      },
+      "cc": {
+        "stat": 1.7729,
+        "p": 0.183,
+        "pass": true
+      },
+      "dq": {
+        "stat": 4.22,
+        "p": 0.5182,
+        "pass": true
+      }
+    },
+    "FHS__EEM__0.01": {
+      "method": "FHS",
+      "asset": "EEM",
+      "alpha": 0.01,
+      "trinity_pass": true,
+      "n_violations": 17,
+      "n_total": 1508,
+      "violation_rate": 0.011273209549071617,
+      "kupiec": {
+        "stat": 0.2372,
+        "p": 0.6263,
+        "pass": true
+      },
+      "cc": {
+        "stat": 1.7659,
+        "p": 0.1839,
+        "pass": true
+      },
+      "dq": {
+        "stat": 9.5062,
+        "p": 0.0905,
+        "pass": true
+      }
+    },
+    "FHS__EEM__0.025": {
+      "method": "FHS",
+      "asset": "EEM",
+      "alpha": 0.025,
+      "trinity_pass": true,
+      "n_violations": 39,
+      "n_total": 1508,
+      "violation_rate": 0.02586206896551724,
+      "kupiec": {
+        "stat": 0.0455,
+        "p": 0.8311,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0001,
+        "p": 0.9924,
+        "pass": true
+      },
+      "dq": {
+        "stat": 4.8926,
+        "p": 0.4291,
+        "pass": true
+      }
+    },
+    "FHS__EEM__0.05": {
+      "method": "FHS",
+      "asset": "EEM",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 70,
+      "n_total": 1508,
+      "violation_rate": 0.046419098143236075,
+      "kupiec": {
+        "stat": 0.4166,
+        "p": 0.5186,
+        "pass": true
+      },
+      "cc": {
+        "stat": 2.2987,
+        "p": 0.1295,
+        "pass": true
+      },
+      "dq": {
+        "stat": 10.5274,
+        "p": 0.0616,
+        "pass": true
+      }
+    },
+    "FHS__BTC__0.01": {
+      "method": "FHS",
+      "asset": "BTC",
+      "alpha": 0.01,
+      "trinity_pass": false,
+      "n_violations": 29,
+      "n_total": 2192,
+      "violation_rate": 0.01322992700729927,
+      "kupiec": {
+        "stat": 2.0971,
+        "p": 0.1476,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.7096,
+        "p": 0.3996,
+        "pass": true
+      },
+      "dq": {
+        "stat": 15.3555,
+        "p": 0.0089,
+        "pass": false
+      }
+    },
+    "FHS__BTC__0.025": {
+      "method": "FHS",
+      "asset": "BTC",
+      "alpha": 0.025,
+      "trinity_pass": true,
+      "n_violations": 67,
+      "n_total": 2192,
+      "violation_rate": 0.030565693430656935,
+      "kupiec": {
+        "stat": 2.6041,
+        "p": 0.1066,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0012,
+        "p": 0.9718,
+        "pass": true
+      },
+      "dq": {
+        "stat": 8.8014,
+        "p": 0.1173,
+        "pass": true
+      }
+    },
+    "FHS__BTC__0.05": {
+      "method": "FHS",
+      "asset": "BTC",
+      "alpha": 0.05,
+      "trinity_pass": false,
+      "n_violations": 118,
+      "n_total": 2192,
+      "violation_rate": 0.053832116788321165,
+      "kupiec": {
+        "stat": 0.6619,
+        "p": 0.4159,
+        "pass": true
+      },
+      "cc": {
+        "stat": 3.1832,
+        "p": 0.0744,
+        "pass": true
+      },
+      "dq": {
+        "stat": 14.1151,
+        "p": 0.0149,
+        "pass": false
+      }
+    },
+    "FHS__IWM__0.01": {
+      "method": "FHS",
+      "asset": "IWM",
+      "alpha": 0.01,
+      "trinity_pass": true,
+      "n_violations": 13,
+      "n_total": 1508,
+      "violation_rate": 0.008620689655172414,
+      "kupiec": {
+        "stat": 0.304,
+        "p": 0.5814,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 2.8461,
+        "p": 0.7237,
+        "pass": true
+      }
+    },
+    "FHS__IWM__0.025": {
+      "method": "FHS",
+      "asset": "IWM",
+      "alpha": 0.025,
+      "trinity_pass": true,
+      "n_violations": 36,
+      "n_total": 1508,
+      "violation_rate": 0.023872679045092837,
+      "kupiec": {
+        "stat": 0.0798,
+        "p": 0.7776,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0228,
+        "p": 0.88,
+        "pass": true
+      },
+      "dq": {
+        "stat": 5.7169,
+        "p": 0.3347,
+        "pass": true
+      }
+    },
+    "FHS__IWM__0.05": {
+      "method": "FHS",
+      "asset": "IWM",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 69,
+      "n_total": 1508,
+      "violation_rate": 0.045755968169761276,
+      "kupiec": {
+        "stat": 0.5878,
+        "p": 0.4433,
+        "pass": true
+      },
+      "cc": {
+        "stat": 2.2702,
+        "p": 0.1319,
+        "pass": true
+      },
+      "dq": {
+        "stat": 10.2819,
+        "p": 0.0676,
+        "pass": true
+      }
+    },
+    "CFVaR__SPY__0.01": {
+      "method": "CFVaR",
+      "asset": "SPY",
+      "alpha": 0.01,
+      "trinity_pass": true,
+      "n_violations": 13,
+      "n_total": 1508,
+      "violation_rate": 0.008620689655172414,
+      "kupiec": {
+        "stat": 0.304,
+        "p": 0.5814,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 1.5086,
+        "p": 0.9121,
+        "pass": true
+      }
+    },
+    "CFVaR__SPY__0.025": {
+      "method": "CFVaR",
+      "asset": "SPY",
+      "alpha": 0.025,
+      "trinity_pass": false,
+      "n_violations": 27,
+      "n_total": 1508,
+      "violation_rate": 0.01790450928381963,
+      "kupiec": {
+        "stat": 3.4512,
+        "p": 0.0632,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.4403,
+        "p": 0.507,
+        "pass": true
+      },
+      "dq": {
+        "stat": 11.3845,
+        "p": 0.0443,
+        "pass": false
+      }
+    },
+    "CFVaR__SPY__0.05": {
+      "method": "CFVaR",
+      "asset": "SPY",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 70,
+      "n_total": 1508,
+      "violation_rate": 0.046419098143236075,
+      "kupiec": {
+        "stat": 0.4166,
+        "p": 0.5186,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0219,
+        "p": 0.8823,
+        "pass": true
+      },
+      "dq": {
+        "stat": 8.1124,
+        "p": 0.1501,
+        "pass": true
+      }
+    },
+    "CFVaR__QQQ__0.01": {
+      "method": "CFVaR",
+      "asset": "QQQ",
+      "alpha": 0.01,
+      "trinity_pass": true,
+      "n_violations": 10,
+      "n_total": 1508,
+      "violation_rate": 0.006631299734748011,
+      "kupiec": {
+        "stat": 1.9616,
+        "p": 0.1613,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 5.0222,
+        "p": 0.4132,
+        "pass": true
+      }
+    },
+    "CFVaR__QQQ__0.025": {
+      "method": "CFVaR",
+      "asset": "QQQ",
+      "alpha": 0.025,
+      "trinity_pass": true,
+      "n_violations": 35,
+      "n_total": 1508,
+      "violation_rate": 0.023209549071618037,
+      "kupiec": {
+        "stat": 0.2031,
+        "p": 0.6522,
+        "pass": true
+      },
+      "cc": {
+        "stat": 1.3115,
+        "p": 0.2521,
+        "pass": true
+      },
+      "dq": {
+        "stat": 8.3007,
+        "p": 0.1404,
+        "pass": true
+      }
+    },
+    "CFVaR__QQQ__0.05": {
+      "method": "CFVaR",
+      "asset": "QQQ",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 71,
+      "n_total": 1508,
+      "violation_rate": 0.047082228116710874,
+      "kupiec": {
+        "stat": 0.2754,
+        "p": 0.5997,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.6872,
+        "p": 0.4071,
+        "pass": true
+      },
+      "dq": {
+        "stat": 6.9364,
+        "p": 0.2254,
+        "pass": true
+      }
+    },
+    "CFVaR__GLD__0.01": {
+      "method": "CFVaR",
+      "asset": "GLD",
+      "alpha": 0.01,
+      "trinity_pass": false,
+      "n_violations": 12,
+      "n_total": 1508,
+      "violation_rate": 0.007957559681697613,
+      "kupiec": {
+        "stat": 0.6832,
+        "p": 0.4085,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 11.6488,
+        "p": 0.0399,
+        "pass": false
+      }
+    },
+    "CFVaR__GLD__0.025": {
+      "method": "CFVaR",
+      "asset": "GLD",
+      "alpha": 0.025,
+      "trinity_pass": true,
+      "n_violations": 34,
+      "n_total": 1508,
+      "violation_rate": 0.022546419098143235,
+      "kupiec": {
+        "stat": 0.3849,
+        "p": 0.535,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0678,
+        "p": 0.7946,
+        "pass": true
+      },
+      "dq": {
+        "stat": 6.1307,
+        "p": 0.2937,
+        "pass": true
+      }
+    },
+    "CFVaR__GLD__0.05": {
+      "method": "CFVaR",
+      "asset": "GLD",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 81,
+      "n_total": 1508,
+      "violation_rate": 0.05371352785145889,
+      "kupiec": {
+        "stat": 0.4279,
+        "p": 0.513,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.6295,
+        "p": 0.4276,
+        "pass": true
+      },
+      "dq": {
+        "stat": 3.2135,
+        "p": 0.6671,
+        "pass": true
+      }
+    },
+    "CFVaR__TLT__0.01": {
+      "method": "CFVaR",
+      "asset": "TLT",
+      "alpha": 0.01,
+      "trinity_pass": true,
+      "n_violations": 20,
+      "n_total": 1508,
+      "violation_rate": 0.013262599469496022,
+      "kupiec": {
+        "stat": 1.4707,
+        "p": 0.2252,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 2.6349,
+        "p": 0.7561,
+        "pass": true
+      }
+    },
+    "CFVaR__TLT__0.025": {
+      "method": "CFVaR",
+      "asset": "TLT",
+      "alpha": 0.025,
+      "trinity_pass": true,
+      "n_violations": 47,
+      "n_total": 1508,
+      "violation_rate": 0.03116710875331565,
+      "kupiec": {
+        "stat": 2.1848,
+        "p": 0.1394,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 6.7191,
+        "p": 0.2424,
+        "pass": true
+      }
+    },
+    "CFVaR__TLT__0.05": {
+      "method": "CFVaR",
+      "asset": "TLT",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 84,
+      "n_total": 1508,
+      "violation_rate": 0.05570291777188329,
+      "kupiec": {
+        "stat": 0.9973,
+        "p": 0.318,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.1166,
+        "p": 0.7327,
+        "pass": true
+      },
+      "dq": {
+        "stat": 2.7042,
+        "p": 0.7455,
+        "pass": true
+      }
+    },
+    "CFVaR__EEM__0.01": {
+      "method": "CFVaR",
+      "asset": "EEM",
+      "alpha": 0.01,
+      "trinity_pass": true,
+      "n_violations": 16,
+      "n_total": 1508,
+      "violation_rate": 0.010610079575596816,
+      "kupiec": {
+        "stat": 0.0556,
+        "p": 0.8136,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 5.584,
+        "p": 0.3488,
+        "pass": true
+      }
+    },
+    "CFVaR__EEM__0.025": {
+      "method": "CFVaR",
+      "asset": "EEM",
+      "alpha": 0.025,
+      "trinity_pass": true,
+      "n_violations": 32,
+      "n_total": 1508,
+      "violation_rate": 0.021220159151193633,
+      "kupiec": {
+        "stat": 0.9309,
+        "p": 0.3346,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.1385,
+        "p": 0.7098,
+        "pass": true
+      },
+      "dq": {
+        "stat": 2.5778,
+        "p": 0.7647,
+        "pass": true
+      }
+    },
+    "CFVaR__EEM__0.05": {
+      "method": "CFVaR",
+      "asset": "EEM",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 70,
+      "n_total": 1508,
+      "violation_rate": 0.046419098143236075,
+      "kupiec": {
+        "stat": 0.4166,
+        "p": 0.5186,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.6069,
+        "p": 0.436,
+        "pass": true
+      },
+      "dq": {
+        "stat": 7.2373,
+        "p": 0.2036,
+        "pass": true
+      }
+    },
+    "CFVaR__BTC__0.01": {
+      "method": "CFVaR",
+      "asset": "BTC",
+      "alpha": 0.01,
+      "trinity_pass": false,
+      "n_violations": 1,
+      "n_total": 2192,
+      "violation_rate": 0.0004562043795620438,
+      "kupiec": {
+        "stat": 35.8662,
+        "p": 0.0,
+        "pass": false
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 365.3166,
+        "p": 0.0,
+        "pass": false
+      }
+    },
+    "CFVaR__BTC__0.025": {
+      "method": "CFVaR",
+      "asset": "BTC",
+      "alpha": 0.025,
+      "trinity_pass": false,
+      "n_violations": 19,
+      "n_total": 2192,
+      "violation_rate": 0.008667883211678832,
+      "kupiec": {
+        "stat": 31.9448,
+        "p": 0.0,
+        "pass": false
+      },
+      "cc": {
+        "stat": 2.0115,
+        "p": 0.1561,
+        "pass": true
+      },
+      "dq": {
+        "stat": 75.608,
+        "p": 0.0,
+        "pass": false
+      }
+    },
+    "CFVaR__BTC__0.05": {
+      "method": "CFVaR",
+      "asset": "BTC",
+      "alpha": 0.05,
+      "trinity_pass": false,
+      "n_violations": 106,
+      "n_total": 2192,
+      "violation_rate": 0.048357664233576646,
+      "kupiec": {
+        "stat": 0.1258,
+        "p": 0.7228,
+        "pass": true
+      },
+      "cc": {
+        "stat": 4.1032,
+        "p": 0.0428,
+        "pass": false
+      },
+      "dq": {
+        "stat": 8.9741,
+        "p": 0.1101,
+        "pass": true
+      }
+    },
+    "CFVaR__IWM__0.01": {
+      "method": "CFVaR",
+      "asset": "IWM",
+      "alpha": 0.01,
+      "trinity_pass": true,
+      "n_violations": 11,
+      "n_total": 1508,
+      "violation_rate": 0.007294429708222812,
+      "kupiec": {
+        "stat": 1.2307,
+        "p": 0.2673,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 2.2158,
+        "p": 0.8185,
+        "pass": true
+      }
+    },
+    "CFVaR__IWM__0.025": {
+      "method": "CFVaR",
+      "asset": "IWM",
+      "alpha": 0.025,
+      "trinity_pass": true,
+      "n_violations": 33,
+      "n_total": 1508,
+      "violation_rate": 0.021883289124668436,
+      "kupiec": {
+        "stat": 0.6269,
+        "p": 0.4285,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.0,
+        "p": 1.0,
+        "pass": true
+      },
+      "dq": {
+        "stat": 6.2641,
+        "p": 0.2814,
+        "pass": true
+      }
+    },
+    "CFVaR__IWM__0.05": {
+      "method": "CFVaR",
+      "asset": "IWM",
+      "alpha": 0.05,
+      "trinity_pass": true,
+      "n_violations": 61,
+      "n_total": 1508,
+      "violation_rate": 0.04045092838196287,
+      "kupiec": {
+        "stat": 3.0884,
+        "p": 0.0789,
+        "pass": true
+      },
+      "cc": {
+        "stat": 0.8801,
+        "p": 0.3482,
+        "pass": true
+      },
+      "dq": {
+        "stat": 8.3865,
+        "p": 0.1362,
+        "pass": true
+      }
+    }
+  },
+  "elapsed_seconds": 8.0,
+  "timestamp": "2026-04-17T10:19:24.917112+00:00"
+}

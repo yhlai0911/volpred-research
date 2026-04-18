@@ -1,0 +1,225 @@
+{
+  "experiment_id": "K1227",
+  "date": "2026-04-17",
+  "seed": 42,
+  "status": "pre_decision_pre_production",
+  "purpose": "Extend K1217 (path b full draft only) to all 3 Paper 3 narrative pivot options so user selects from pre-produced materials in one review pass.",
+  "authority_sources": {
+    "k1205_synthesis_csv": "experiments/k1205/k1205_synthesis_table.csv",
+    "k1205_integrity_report": "experiments/k1205/k1205_integrity_report.txt",
+    "k1205_results_json": "experiments/k1205/k1205_results.json",
+    "k1217_path_b_full_draft": "experiments/k1217/k1217_paper_draft.md"
+  },
+  "canonical_4branch_numbers": {
+    "total_lm_jumps": 115,
+    "gumbel_threshold_alpha_01": 5.125598054567598,
+    "vix_tertile_cutoff_33": 12.069999694824219,
+    "vix_tertile_cutoff_67": 14.989999771118164,
+    "harvey_threshold": 3.0,
+    "methodological_threshold": 2.0
+  },
+  "branches": [
+    {
+      "branch": "K1128_tertile",
+      "focal_model": "M3_tertile_high",
+      "n_oos": 20060,
+      "n_oos_jumps": 32,
+      "auc_oos": 0.5926,
+      "ll_oos": 0.011963,
+      "brier_oos": 0.001592,
+      "dm_t_vs_baseline": 1.306,
+      "verdict": "NULL (partial only; OOS coverage 0/854/20060 degenerate)"
+    },
+    {
+      "branch": "K1131_spline",
+      "focal_model": "M_spline",
+      "n_oos": 20914,
+      "n_oos_jumps": 33,
+      "auc_oos": 0.4965,
+      "ll_oos": 0.012479,
+      "brier_oos": null,
+      "dm_t_vs_baseline": -3.934,
+      "verdict": "NULL (reverse direction)"
+    },
+    {
+      "branch": "K1142_volnorm",
+      "focal_model": "M_volnorm",
+      "n_oos": 20914,
+      "n_oos_jumps": 33,
+      "auc_oos": 0.594,
+      "ll_oos": 0.01165,
+      "brier_oos": 0.001574,
+      "dm_t_vs_baseline": 2.255,
+      "verdict": "PARTIAL_OOS_ONLY"
+    },
+    {
+      "branch": "K1199_expanding",
+      "focal_model": "M_expanding",
+      "n_oos": 20914,
+      "n_oos_jumps": 33,
+      "auc_oos": 0.5484,
+      "ll_oos": 0.011646,
+      "brier_oos": 0.001574,
+      "dm_t_vs_baseline": 1.143,
+      "verdict": "NULL"
+    }
+  ],
+  "paths": [
+    {
+      "id": "a",
+      "name": "Full K1142 vol-norm anchor",
+      "working_title": "Vol-Normalized Microstructure Signal: A Regime-Free OFI Forecast for TAIFEX 5-Minute Jumps",
+      "hero_result": {
+        "source_experiment": "K1142",
+        "auc_oos": 0.594,
+        "dm_t_vs_baseline": 2.255,
+        "ll_oos": 0.01165,
+        "brier_oos": 0.001574,
+        "n_oos_jumps": 33
+      },
+      "contribution_type": "methodological",
+      "draft_completeness": "outline_only_in_k1227",
+      "word_target": 4750,
+      "sections": [
+        {"title": "Introduction", "words": 700},
+        {"title": "Methodology", "words": 1200},
+        {"title": "Data", "words": 500},
+        {"title": "Results", "words": 1400},
+        {"title": "Discussion", "words": 600},
+        {"title": "Conclusion", "words": 300}
+      ],
+      "risks": [
+        {"risk": "Single positive cell among 4 branches", "severity": "HIGH"},
+        {"risk": "Realvol-tertile K1142-equivalent DM=+1.98 non-significant (alt spec weakness)", "severity": "HIGH"},
+        {"risk": "33 OOS jumps underpowered for Harvey |t|>3", "severity": "MEDIUM"},
+        {"risk": "Lag-12 robustness breaks", "severity": "MEDIUM"},
+        {"risk": "Reviewer ex-ante vs ex-post challenge", "severity": "HIGH"}
+      ],
+      "target_journals": ["International Review of Financial Analysis", "Finance Research Letters", "Pacific-Basin Finance Journal"],
+      "estimated_effort_weeks": 3,
+      "recommended_prereq": "K1220 cross-market replication",
+      "reviewer_risk": "HIGH"
+    },
+    {
+      "id": "b",
+      "name": "Hybrid null + K1142 partial positive (K1205 RECOMMENDED)",
+      "working_title": "Regime-Dependent Volatility Jump Prediction on TAIFEX: A Four-Branch Null with Vol-Normalized Partial Positive Signal",
+      "hero_result": {
+        "source_experiment": "K1205 + K1142",
+        "narrative": "Four-branch honest null (K1128/K1131/K1199) + vol-norm partial positive (K1142)"
+      },
+      "contribution_type": "methodological + honest_null",
+      "draft_completeness": "full_draft_in_k1217",
+      "draft_reference": "experiments/k1217/k1217_paper_draft.md",
+      "draft_word_count_approx": 4991,
+      "risks": [
+        {"risk": "Reviewer dismisses null-dominant paper as uninteresting", "severity": "MEDIUM"},
+        {"risk": "Vol-norm partial positive feels cherry-picked", "severity": "MEDIUM"},
+        {"risk": "Honest-null journal-fit issue at some venues", "severity": "LOW"}
+      ],
+      "target_journals": ["Journal of Empirical Finance", "International Review of Financial Analysis", "Pacific-Basin Finance Journal"],
+      "estimated_effort_weeks": 2,
+      "reviewer_risk": "MEDIUM",
+      "status": "CONDITIONAL_on_user_selection"
+    },
+    {
+      "id": "c",
+      "name": "Abandon Paper 3",
+      "rationale": [
+        "All 4 branches NULL or PARTIAL at borderline (|t|<3)",
+        "~1 year+ cumulative effort already",
+        "Marginal publication probability vs 2-3 weeks write-up cost",
+        "Submission pipeline has higher-EV candidates"
+      ],
+      "salvage_options": [
+        {
+          "option": "Standalone negative-result methodology note (JoE methodology section, 3-4 pages)",
+          "effort_weeks": 1
+        },
+        {
+          "option": "Donate K1142 + K1100g_d7 material as appendix to BTC-style negative paper (K1214 pattern)",
+          "effort_weeks": 0.2
+        },
+        {
+          "option": "Internal research memo (no external publication)",
+          "effort_weeks": 0.2
+        }
+      ],
+      "sunk_cost_preserved": {
+        "k1205_synthesis_knowledge_id": "aab5c94b",
+        "k1128_null_knowledge_id": "f63b6e01",
+        "k1142_partial_knowledge_id": "ae05df05"
+      },
+      "reviewer_risk": "LOW (no submission)",
+      "paper_count_delta": 0
+    }
+  ],
+  "decision_matrix": {
+    "dimensions": [
+      "paper_count_delta",
+      "draft_completeness",
+      "evidence_quality",
+      "reviewer_risk",
+      "contribution_strength",
+      "time_to_submission_weeks",
+      "target_journal_tier",
+      "sunk_cost_preservation",
+      "cross_market_dependency"
+    ],
+    "by_path": {
+      "a": {
+        "paper_count_delta": 1,
+        "draft_completeness": "outline_only_k1227",
+        "evidence_quality": "single_positive_cell",
+        "reviewer_risk": "HIGH",
+        "contribution_strength": "narrow_methodological",
+        "time_to_submission_weeks": 3,
+        "target_journal_tier": "B_tier_IRFA_FRL",
+        "sunk_cost_preservation": "partial_K1142_only",
+        "cross_market_dependency": "K1220_recommended_pre_submission"
+      },
+      "b": {
+        "paper_count_delta": 1,
+        "draft_completeness": "full_draft_K1217_4991w",
+        "evidence_quality": "4_branch_plus_partial_positive",
+        "reviewer_risk": "MEDIUM",
+        "contribution_strength": "methodological_plus_honest_null",
+        "time_to_submission_weeks": 2,
+        "target_journal_tier": "B_to_A_tier_JoE_IRFA_PBFJ",
+        "sunk_cost_preservation": "full_4_branches_reported",
+        "cross_market_dependency": "K1220_optional"
+      },
+      "c": {
+        "paper_count_delta": 0,
+        "draft_completeness": "n_a",
+        "evidence_quality": "n_a",
+        "reviewer_risk": "LOW_no_submission",
+        "contribution_strength": "null_or_minor_salvage",
+        "time_to_submission_weeks": 0,
+        "target_journal_tier": "n_a",
+        "sunk_cost_preservation": "full_no_publication",
+        "cross_market_dependency": "n_a"
+      }
+    }
+  },
+  "recommendation_as_of_k1227": {
+    "default": "b",
+    "default_rationale": "K1205 synthesis recommended (b); evidence quality highest; draft pre-written; target journal tier highest; reviewer risk moderate.",
+    "fallback_from_a": "If K1220 cross-market replication produces universal vol-norm result, path (a) single-cell weakness mitigated.",
+    "available_c": "If cognitive fatigue high, submission pipeline crowded, or marginal publication probability judged too low."
+  },
+  "constraints": {
+    "markdown_and_json_only": true,
+    "no_latex_body_authorized": true,
+    "no_new_estimation": true,
+    "no_random_sampling": true,
+    "seed_fixed": 42,
+    "worktree_scope": "experiments/k1227/ only",
+    "canonical_numbers_verbatim_from_k1205": true
+  },
+  "derived_directions": {
+    "if_path_a": ["K1228 build paper/prg-volnorm-anchor/ shell", "K1229 Codex adversarial review", "K1220 cross-market replication"],
+    "if_path_b": ["K1218 Codex review of K1217 draft", "K1219 .bib construction + citation verification", "K1220 cross-market K1142 robustness"],
+    "if_path_c": ["K1230 execute chosen salvage option", "research_program.md Paper 3 status=abandoned_with_salvage", "knowledge.json Paper 3 abandonment entry"]
+  }
+}

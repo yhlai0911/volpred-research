@@ -1,0 +1,92 @@
+{
+  "experiment": "transaction_cost_analysis_spy_hybrid_vt",
+  "date": "2026-03-16T11:36:32.727806",
+  "config": {
+    "asset": "SPY",
+    "model": "GJR-GARCH(1,1,1)",
+    "window": 2000,
+    "vix_threshold": 1.3,
+    "target_vol_annual": 0.1,
+    "max_leverage": 1.5,
+    "oos_start": "2014-01-02",
+    "oos_end": "2026-03-13",
+    "oos_days": 3067,
+    "cost_levels_bps": [
+      0,
+      2,
+      5,
+      10,
+      20
+    ]
+  },
+  "buy_and_hold": {
+    "sharpe": 0.3739,
+    "ann_return": 0.1106,
+    "ann_vol": 0.1736,
+    "max_dd": -0.341,
+    "total_growth": 3.59
+  },
+  "breakeven_bps": 37.2,
+  "results_by_cost": {
+    "0": {
+      "sharpe": 1.0377,
+      "ann_return": 0.1268,
+      "ann_vol": 0.0765,
+      "max_dd": -0.0915,
+      "calmar": 1.39,
+      "sortino": 1.74,
+      "ann_turnover": 13.62,
+      "trades_per_year": 249.0,
+      "cost_drag_annual": 0.0,
+      "total_growth": 4.28
+    },
+    "2": {
+      "sharpe": 1.0018,
+      "ann_return": 0.1237,
+      "ann_vol": 0.0765,
+      "max_dd": -0.0921,
+      "calmar": 1.34,
+      "sortino": 1.68,
+      "ann_turnover": 13.62,
+      "trades_per_year": 249.0,
+      "cost_drag_annual": 0.0027,
+      "total_growth": 4.14
+    },
+    "5": {
+      "sharpe": 0.948,
+      "ann_return": 0.1191,
+      "ann_vol": 0.0765,
+      "max_dd": -0.0931,
+      "calmar": 1.28,
+      "sortino": 1.58,
+      "ann_turnover": 13.62,
+      "trades_per_year": 249.0,
+      "cost_drag_annual": 0.0068,
+      "total_growth": 3.94
+    },
+    "10": {
+      "sharpe": 0.8583,
+      "ann_return": 0.1115,
+      "ann_vol": 0.0766,
+      "max_dd": -0.0947,
+      "calmar": 1.18,
+      "sortino": 1.42,
+      "ann_turnover": 13.62,
+      "trades_per_year": 249.0,
+      "cost_drag_annual": 0.0136,
+      "total_growth": 3.62
+    },
+    "20": {
+      "sharpe": 0.6793,
+      "ann_return": 0.0965,
+      "ann_vol": 0.0767,
+      "max_dd": -0.0978,
+      "calmar": 0.99,
+      "sortino": 1.12,
+      "ann_turnover": 13.62,
+      "trades_per_year": 249.0,
+      "cost_drag_annual": 0.0272,
+      "total_growth": 3.07
+    }
+  }
+}

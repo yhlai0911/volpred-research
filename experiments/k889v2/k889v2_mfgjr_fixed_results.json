@@ -1,0 +1,770 @@
+{
+  "experiment_id": "K889v2",
+  "title": "MF-GJR Bug-Fixed Verification (K889v2)",
+  "timestamp": "2026-04-05T14:04:49.080759+00:00",
+  "runtime_seconds": 205.9,
+  "bug_fixes": [
+    "FIX #1 [HIGH]: Replaced fake pairwise-DM MCS with proper Hansen-Lunde-Nason (2011) MCS from volpred.stats.mcs",
+    "FIX #2 [HIGH]: Removed 0050.TW VIX pre-shift (was causing double-lag VIX_{t-2})",
+    "FIX #3 [MEDIUM]: After refit, advance latent state one step with most recent return before using as forecast"
+  ],
+  "methodology": {
+    "models": [
+      "GJR-GARCH(1,1)",
+      "MF-GARCH",
+      "MF-GJR",
+      "EWMA-Factor",
+      "EWMA(0.94)"
+    ],
+    "mf_long_run": "tau_t = exp(theta_0 + theta_1 * log(VIX_{t-1}))",
+    "mf_short_run_garch": "g_t = (1-a-b) + a*u^2_{t-1} + b*g_{t-1}, u=r/sqrt(tau)",
+    "mf_short_run_gjr": "g_t = (1-a-g/2-b) + a*u^2_{t-1} + g*u^2_{t-1}*I(u<0) + b*g_{t-1}",
+    "ewma_factor": "tau=EWMA(0.99), g=EWMA(0.94) on standardized",
+    "estimation": "Rolling window (w=2000), refit every 63 days, MLE with multi-start",
+    "evaluation": "QLIKE on r^2 (Patton 2011), DM test (Harvey t>3.0), Spearman, proper MCS (HLN 2011), VaR Trinity"
+  },
+  "data": {
+    "source": "yfinance",
+    "assets": [
+      "SPY",
+      "QQQ",
+      "0050.TW"
+    ],
+    "period": "2005-01-01 to 2026-04-01",
+    "oos_start": "2019-01-01",
+    "window": 2000,
+    "refit_every": 63
+  },
+  "results": {
+    "SPY": {
+      "ticker": "SPY",
+      "n_oos": 1821,
+      "oos_start": "2019-01-02",
+      "oos_end": "2026-03-31",
+      "n_refits": 29,
+      "qlike": {
+        "GJR": 1.50844,
+        "MF-GARCH": 1.418452,
+        "MF-GJR": 1.409403,
+        "EWMA-Factor": 1.586667,
+        "EWMA": 1.56574
+      },
+      "qlike_pct_vs_gjr": {
+        "GJR": 0.0,
+        "MF-GARCH": -5.966,
+        "MF-GJR": -6.566,
+        "EWMA-Factor": 5.186,
+        "EWMA": 3.799
+      },
+      "spearman": {
+        "GJR": {
+          "rho": 0.3669,
+          "p": 0.0
+        },
+        "MF-GARCH": {
+          "rho": 0.4124,
+          "p": 0.0
+        },
+        "MF-GJR": {
+          "rho": 0.4215,
+          "p": 0.0
+        },
+        "EWMA-Factor": {
+          "rho": 0.3078,
+          "p": 0.0
+        },
+        "EWMA": {
+          "rho": 0.3075,
+          "p": 0.0
+        }
+      },
+      "dm_vs_gjr": {
+        "GJR": {
+          "t": 0.0,
+          "p": 1.0,
+          "significant_harvey": false
+        },
+        "MF-GARCH": {
+          "t": -2.265,
+          "p": 0.0236,
+          "significant_harvey": false
+        },
+        "MF-GJR": {
+          "t": -2.569,
+          "p": 0.0103,
+          "significant_harvey": false
+        },
+        "EWMA-Factor": {
+          "t": 1.803,
+          "p": 0.0716,
+          "significant_harvey": false
+        },
+        "EWMA": {
+          "t": 1.345,
+          "p": 0.1789,
+          "significant_harvey": false
+        }
+      },
+      "mcs": {
+        "best_model": "MF-GJR",
+        "survived": [
+          "GJR",
+          "MF-GARCH",
+          "MF-GJR"
+        ],
+        "eliminated": [
+          "EWMA-Factor",
+          "EWMA"
+        ],
+        "p_values": {
+          "EWMA-Factor": 0.0,
+          "EWMA": 0.0018,
+          "GJR": 0.112,
+          "MF-GARCH": 0.112,
+          "MF-GJR": 0.112
+        }
+      },
+      "var": {
+        "0.01": {
+          "GJR": {
+            "violations": 39,
+            "total": 1821,
+            "rate": 0.0214,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0,
+            "cc_p": 1.0,
+            "basel": "RED",
+            "trinity": "False"
+          },
+          "MF-GARCH": {
+            "violations": 32,
+            "total": 1821,
+            "rate": 0.0176,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0033,
+            "cc_p": 0.0117,
+            "basel": "RED",
+            "trinity": "False"
+          },
+          "MF-GJR": {
+            "violations": 34,
+            "total": 1821,
+            "rate": 0.0187,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0009,
+            "cc_p": 1.0,
+            "basel": "RED",
+            "trinity": "False"
+          },
+          "EWMA-Factor": {
+            "violations": 42,
+            "total": 1821,
+            "rate": 0.0231,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0,
+            "cc_p": 0.0,
+            "basel": "RED",
+            "trinity": "False"
+          },
+          "EWMA": {
+            "violations": 44,
+            "total": 1821,
+            "rate": 0.0242,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0,
+            "cc_p": 0.0,
+            "basel": "RED",
+            "trinity": "False"
+          }
+        },
+        "0.05": {
+          "GJR": {
+            "violations": 112,
+            "total": 1821,
+            "rate": 0.0615,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.0294,
+            "cc_p": 0.0933,
+            "basel": "RED",
+            "trinity": "False"
+          },
+          "MF-GARCH": {
+            "violations": 91,
+            "total": 1821,
+            "rate": 0.05,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.9957,
+            "cc_p": 0.9763,
+            "basel": "GREEN",
+            "trinity": true
+          },
+          "MF-GJR": {
+            "violations": 97,
+            "total": 1821,
+            "rate": 0.0533,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.5265,
+            "cc_p": 0.8157,
+            "basel": "YELLOW",
+            "trinity": false
+          },
+          "EWMA-Factor": {
+            "violations": 108,
+            "total": 1821,
+            "rate": 0.0593,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.0763,
+            "cc_p": 0.2016,
+            "basel": "RED",
+            "trinity": false
+          },
+          "EWMA": {
+            "violations": 109,
+            "total": 1821,
+            "rate": 0.0599,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.0609,
+            "cc_p": 0.1446,
+            "basel": "RED",
+            "trinity": false
+          }
+        }
+      },
+      "component_analysis": {
+        "MF-GARCH": {
+          "tau_var_pct": 96.9,
+          "g_var_pct": 4.4,
+          "g_autocorr_1": 0.9648,
+          "g_autocorr_5": 0.8749,
+          "tau_mean": 0.00018744,
+          "g_mean": 0.9561
+        },
+        "MF-GJR": {
+          "tau_var_pct": 77.5,
+          "g_var_pct": 6.1,
+          "g_autocorr_1": 0.8685,
+          "g_autocorr_5": 0.5314,
+          "tau_mean": 0.00016678,
+          "g_mean": 1.0017
+        }
+      },
+      "parameters": {
+        "GJR": {
+          "omega": 3.5987096906129335e-06,
+          "alpha": 0.07506030577861532,
+          "gamma": 0.0955095180915468,
+          "beta": 0.8466544663812573,
+          "persistence": 0.969469531205646
+        },
+        "MF-GARCH": {
+          "theta_0": -17.57899950360784,
+          "theta_1": 3.0,
+          "alpha": 0.02079384846124117,
+          "beta": 0.9779682670004499,
+          "persistence_g": 0.9987621154616911
+        },
+        "MF-GJR": {
+          "theta_0": -16.22235341365328,
+          "theta_1": 2.3417933461318916,
+          "alpha": 0.0001,
+          "gamma": 0.0928457187865257,
+          "beta": 0.8689281994922528,
+          "persistence_g": 0.9154510588855156
+        }
+      }
+    },
+    "QQQ": {
+      "ticker": "QQQ",
+      "n_oos": 1821,
+      "oos_start": "2019-01-02",
+      "oos_end": "2026-03-31",
+      "n_refits": 29,
+      "qlike": {
+        "GJR": 1.49734,
+        "MF-GARCH": 1.426855,
+        "MF-GJR": 1.419638,
+        "EWMA-Factor": 1.549613,
+        "EWMA": 1.533126
+      },
+      "qlike_pct_vs_gjr": {
+        "GJR": 0.0,
+        "MF-GARCH": -4.707,
+        "MF-GJR": -5.189,
+        "EWMA-Factor": 3.491,
+        "EWMA": 2.39
+      },
+      "spearman": {
+        "GJR": {
+          "rho": 0.3318,
+          "p": 0.0
+        },
+        "MF-GARCH": {
+          "rho": 0.3687,
+          "p": 0.0
+        },
+        "MF-GJR": {
+          "rho": 0.3758,
+          "p": 0.0
+        },
+        "EWMA-Factor": {
+          "rho": 0.2893,
+          "p": 0.0
+        },
+        "EWMA": {
+          "rho": 0.2884,
+          "p": 0.0
+        }
+      },
+      "dm_vs_gjr": {
+        "GJR": {
+          "t": 0.0,
+          "p": 1.0,
+          "significant_harvey": false
+        },
+        "MF-GARCH": {
+          "t": -2.258,
+          "p": 0.0241,
+          "significant_harvey": false
+        },
+        "MF-GJR": {
+          "t": -2.639,
+          "p": 0.0084,
+          "significant_harvey": false
+        },
+        "EWMA-Factor": {
+          "t": 1.568,
+          "p": 0.1171,
+          "significant_harvey": false
+        },
+        "EWMA": {
+          "t": 1.105,
+          "p": 0.2691,
+          "significant_harvey": false
+        }
+      },
+      "mcs": {
+        "best_model": "MF-GJR",
+        "survived": [
+          "MF-GARCH",
+          "MF-GJR"
+        ],
+        "eliminated": [
+          "EWMA-Factor",
+          "EWMA",
+          "GJR"
+        ],
+        "p_values": {
+          "EWMA-Factor": 0.0006,
+          "EWMA": 0.0048,
+          "GJR": 0.0992,
+          "MF-GARCH": 0.3594,
+          "MF-GJR": 0.3594
+        }
+      },
+      "var": {
+        "0.01": {
+          "GJR": {
+            "violations": 46,
+            "total": 1821,
+            "rate": 0.0253,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0,
+            "cc_p": 0.0,
+            "basel": "RED",
+            "trinity": "False"
+          },
+          "MF-GARCH": {
+            "violations": 35,
+            "total": 1821,
+            "rate": 0.0192,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0004,
+            "cc_p": 0.002,
+            "basel": "RED",
+            "trinity": "False"
+          },
+          "MF-GJR": {
+            "violations": 35,
+            "total": 1821,
+            "rate": 0.0192,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0004,
+            "cc_p": 1.0,
+            "basel": "RED",
+            "trinity": "False"
+          },
+          "EWMA-Factor": {
+            "violations": 39,
+            "total": 1821,
+            "rate": 0.0214,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0,
+            "cc_p": 0.0001,
+            "basel": "RED",
+            "trinity": "False"
+          },
+          "EWMA": {
+            "violations": 40,
+            "total": 1821,
+            "rate": 0.022,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0,
+            "cc_p": 0.0001,
+            "basel": "RED",
+            "trinity": "False"
+          }
+        },
+        "0.05": {
+          "GJR": {
+            "violations": 114,
+            "total": 1821,
+            "rate": 0.0626,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.0174,
+            "cc_p": 0.053,
+            "basel": "RED",
+            "trinity": "False"
+          },
+          "MF-GARCH": {
+            "violations": 100,
+            "total": 1821,
+            "rate": 0.0549,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.3431,
+            "cc_p": 0.3025,
+            "basel": "YELLOW",
+            "trinity": false
+          },
+          "MF-GJR": {
+            "violations": 106,
+            "total": 1821,
+            "rate": 0.0582,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.1168,
+            "cc_p": 0.2557,
+            "basel": "RED",
+            "trinity": false
+          },
+          "EWMA-Factor": {
+            "violations": 120,
+            "total": 1821,
+            "rate": 0.0659,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.0029,
+            "cc_p": 0.0089,
+            "basel": "RED",
+            "trinity": "False"
+          },
+          "EWMA": {
+            "violations": 117,
+            "total": 1821,
+            "rate": 0.0643,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.0074,
+            "cc_p": 0.0237,
+            "basel": "RED",
+            "trinity": "False"
+          }
+        }
+      },
+      "component_analysis": {
+        "MF-GARCH": {
+          "tau_var_pct": 88.5,
+          "g_var_pct": 6.4,
+          "g_autocorr_1": 0.9695,
+          "g_autocorr_5": 0.8822,
+          "tau_mean": 0.00025963,
+          "g_mean": 1.0087
+        },
+        "MF-GJR": {
+          "tau_var_pct": 59.5,
+          "g_var_pct": 13.7,
+          "g_autocorr_1": 0.9225,
+          "g_autocorr_5": 0.705,
+          "tau_mean": 0.00019358,
+          "g_mean": 1.0512
+        }
+      },
+      "parameters": {
+        "GJR": {
+          "omega": 5.887851584109117e-06,
+          "alpha": 0.07710747670147906,
+          "gamma": 0.09737051856291372,
+          "beta": 0.8480409866750429,
+          "persistence": 0.9738337226579789
+        },
+        "MF-GARCH": {
+          "theta_0": -15.743991871542914,
+          "theta_1": 2.4033259712202466,
+          "alpha": 0.04569383974931787,
+          "beta": 0.9289163324165195,
+          "persistence_g": 0.9746101721658373
+        },
+        "MF-GJR": {
+          "theta_0": -14.348944763647951,
+          "theta_1": 1.9100441813754656,
+          "alpha": 0.0062247274039758495,
+          "gamma": 0.08012261265803806,
+          "beta": 0.8987200176021699,
+          "persistence_g": 0.9450060513351648
+        }
+      }
+    },
+    "0050.TW": {
+      "ticker": "0050.TW",
+      "n_oos": 1754,
+      "oos_start": "2019-01-02",
+      "oos_end": "2026-03-31",
+      "n_refits": 28,
+      "qlike": {
+        "GJR": 1.463765,
+        "MF-GARCH": 1.444235,
+        "MF-GJR": 1.459281,
+        "EWMA-Factor": 1.521313,
+        "EWMA": 1.498411
+      },
+      "qlike_pct_vs_gjr": {
+        "GJR": 0.0,
+        "MF-GARCH": -1.334,
+        "MF-GJR": -0.306,
+        "EWMA-Factor": 3.932,
+        "EWMA": 2.367
+      },
+      "spearman": {
+        "GJR": {
+          "rho": 0.2028,
+          "p": 0.0
+        },
+        "MF-GARCH": {
+          "rho": 0.251,
+          "p": 0.0
+        },
+        "MF-GJR": {
+          "rho": 0.2571,
+          "p": 0.0
+        },
+        "EWMA-Factor": {
+          "rho": 0.1945,
+          "p": 0.0
+        },
+        "EWMA": {
+          "rho": 0.1958,
+          "p": 0.0
+        }
+      },
+      "dm_vs_gjr": {
+        "GJR": {
+          "t": 0.0,
+          "p": 1.0,
+          "significant_harvey": false
+        },
+        "MF-GARCH": {
+          "t": -0.627,
+          "p": 0.5306,
+          "significant_harvey": false
+        },
+        "MF-GJR": {
+          "t": -0.151,
+          "p": 0.8796,
+          "significant_harvey": false
+        },
+        "EWMA-Factor": {
+          "t": 2.78,
+          "p": 0.0055,
+          "significant_harvey": false
+        },
+        "EWMA": {
+          "t": 1.943,
+          "p": 0.0522,
+          "significant_harvey": false
+        }
+      },
+      "mcs": {
+        "best_model": "MF-GARCH",
+        "survived": [
+          "GJR",
+          "MF-GARCH",
+          "MF-GJR"
+        ],
+        "eliminated": [
+          "EWMA-Factor",
+          "EWMA"
+        ],
+        "p_values": {
+          "EWMA-Factor": 0.005,
+          "EWMA": 0.0414,
+          "GJR": 0.8506,
+          "MF-GARCH": 0.8506,
+          "MF-GJR": 0.8506
+        }
+      },
+      "var": {
+        "0.01": {
+          "GJR": {
+            "violations": 33,
+            "total": 1754,
+            "rate": 0.0188,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0009,
+            "cc_p": 0.0038,
+            "basel": "RED",
+            "trinity": "False"
+          },
+          "MF-GARCH": {
+            "violations": 20,
+            "total": 1754,
+            "rate": 0.0114,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.5637,
+            "cc_p": 0.4053,
+            "basel": "RED",
+            "trinity": false
+          },
+          "MF-GJR": {
+            "violations": 23,
+            "total": 1754,
+            "rate": 0.0131,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.2111,
+            "cc_p": 0.2716,
+            "basel": "RED",
+            "trinity": false
+          },
+          "EWMA-Factor": {
+            "violations": 32,
+            "total": 1754,
+            "rate": 0.0182,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0019,
+            "cc_p": 0.007,
+            "basel": "RED",
+            "trinity": "False"
+          },
+          "EWMA": {
+            "violations": 32,
+            "total": 1754,
+            "rate": 0.0182,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0019,
+            "cc_p": 0.007,
+            "basel": "RED",
+            "trinity": "False"
+          }
+        },
+        "0.05": {
+          "GJR": {
+            "violations": 90,
+            "total": 1754,
+            "rate": 0.0513,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.8019,
+            "cc_p": 0.9301,
+            "basel": "GREEN",
+            "trinity": true
+          },
+          "MF-GARCH": {
+            "violations": 64,
+            "total": 1754,
+            "rate": 0.0365,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.0065,
+            "cc_p": 0.0144,
+            "basel": "GREEN",
+            "trinity": "False"
+          },
+          "MF-GJR": {
+            "violations": 76,
+            "total": 1754,
+            "rate": 0.0433,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.19,
+            "cc_p": 0.278,
+            "basel": "GREEN",
+            "trinity": true
+          },
+          "EWMA-Factor": {
+            "violations": 77,
+            "total": 1754,
+            "rate": 0.0439,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.2317,
+            "cc_p": 0.4772,
+            "basel": "GREEN",
+            "trinity": true
+          },
+          "EWMA": {
+            "violations": 81,
+            "total": 1754,
+            "rate": 0.0462,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.4574,
+            "cc_p": 0.3866,
+            "basel": "GREEN",
+            "trinity": true
+          }
+        }
+      },
+      "component_analysis": {
+        "MF-GARCH": {
+          "tau_var_pct": 79.1,
+          "g_var_pct": 17.8,
+          "g_autocorr_1": 0.9709,
+          "g_autocorr_5": 0.8463,
+          "tau_mean": 0.00014236,
+          "g_mean": 1.1302
+        },
+        "MF-GJR": {
+          "tau_var_pct": 59.7,
+          "g_var_pct": 23.5,
+          "g_autocorr_1": 0.9132,
+          "g_autocorr_5": 0.6386,
+          "tau_mean": 0.00013875,
+          "g_mean": 1.0592
+        }
+      },
+      "parameters": {
+        "GJR": {
+          "omega": 1.229078223862661e-05,
+          "alpha": 0.05795746541741421,
+          "gamma": 0.10078627954861585,
+          "beta": 0.8124709199832951,
+          "persistence": 0.9208215251750173
+        },
+        "MF-GARCH": {
+          "theta_0": -13.264577330754653,
+          "theta_1": 1.505470806372628,
+          "alpha": 0.04933030634404389,
+          "beta": 0.915326721120784,
+          "persistence_g": 0.9646570274648278
+        },
+        "MF-GJR": {
+          "theta_0": -12.342934485685031,
+          "theta_1": 1.2057648508274978,
+          "alpha": 0.04008888370904478,
+          "gamma": 0.06762884965714977,
+          "beta": 0.8541503591404597,
+          "persistence_g": 0.9280536676780793
+        }
+      }
+    }
+  },
+  "k889_comparison": {
+    "k889_spy_mfgjr_dm_t": -3.302,
+    "k889v2_spy_mfgjr_dm_t": -2.569,
+    "conclusion_survives": false,
+    "significant_results": []
+  },
+  "conclusion": {
+    "any_mvf_significant_vs_gjr": false,
+    "k889_result_survives_bug_fixes": false,
+    "bug_fix_impact": "TBD \u2014 see comparison section above"
+  },
+  "references": [
+    "Engle, Ghysels & Sohn (2013) RES 95(3):776-797",
+    "Engle & Rangel (2008) RFS 21(3):1187-1222",
+    "Conrad & Engle (2025) Two-factor GARCH, J Applied Econometrics",
+    "Patton (2011) J Econometrics 160:246-256",
+    "Harvey et al. (2016) JBES 34:92-104",
+    "Hansen, Lunde & Nason (2011) Econometrica 79(2):453-497"
+  ]
+}

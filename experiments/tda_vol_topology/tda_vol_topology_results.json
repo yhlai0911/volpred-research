@@ -1,0 +1,135 @@
+{
+  "experiment_id": "K131",
+  "title": "Topological Data Analysis of Volatility Regimes",
+  "proposed_by": "Gemini G2",
+  "executed_by": "Claude",
+  "date": "2026-03-22",
+  "method": "Persistent Homology (Vietoris-Rips complex) on 3D volatility embeddings",
+  "data_period": "2006-02-03 to 2024-11-27",
+  "n_observations": 4737,
+  "n_windows": 897,
+  "embedding_A": {
+    "dims": "(VIX, ΔVIX, RV22)",
+    "raw_correlations": {
+      "H0_total_pers": {
+        "r": 0.2735420333594839,
+        "p": 7.382929948556833e-17
+      },
+      "H0_max_pers": {
+        "r": 0.11540498108689054,
+        "p": 0.0005339270734970023
+      },
+      "H0_entropy": {
+        "r": -0.0871502356763977,
+        "p": 0.009015221002048459
+      },
+      "H1_total_pers": {
+        "r": 0.22005542664041267,
+        "p": 2.6773771462241242e-11
+      },
+      "H1_max_pers": {
+        "r": 0.1257347201063137,
+        "p": 0.00015969264073282727
+      },
+      "H1_mean_pers": {
+        "r": 0.20347706066704319,
+        "p": 7.744303572200449e-10
+      },
+      "H1_count": {
+        "r": 0.020893269433412767,
+        "p": 0.5320050578004974
+      },
+      "H1_entropy": {
+        "r": 0.03941175193955653,
+        "p": 0.23832152148232516
+      }
+    },
+    "partial_correlations": {
+      "H0_total_pers": {
+        "partial_r": -0.22415211182117045,
+        "partial_p": 1.1466605442933542e-11
+      },
+      "H0_max_pers": {
+        "partial_r": -0.131920788358471,
+        "partial_p": 7.475280121926886e-05
+      },
+      "H0_entropy": {
+        "partial_r": 0.101437046148802,
+        "partial_p": 0.002366198714453871
+      },
+      "H1_total_pers": {
+        "partial_r": -0.14416281679554477,
+        "partial_p": 1.4783729006095925e-05
+      },
+      "H1_max_pers": {
+        "partial_r": -0.195821057571693,
+        "partial_p": 3.406674498052098e-09
+      },
+      "H1_mean_pers": {
+        "partial_r": -0.1852767869615971,
+        "partial_p": 2.3151378591990124e-08
+      },
+      "H1_count": {
+        "partial_r": 0.07927222566462443,
+        "partial_p": 0.0176299724544553
+      },
+      "H1_entropy": {
+        "partial_r": 0.12473674916951882,
+        "partial_p": 0.0001816962317633397
+      }
+    }
+  },
+  "embedding_B": {
+    "dims": "(VIX_t, VIX_t-5, VIX_t-22)",
+    "correlations": {
+      "H0_total_pers": {
+        "r": 0.24152712519104724,
+        "p": 2.5537330239107576e-13
+      },
+      "H0_max_pers": {
+        "r": 0.2775137059185373,
+        "p": 2.9675822507032494e-17
+      },
+      "H0_entropy": {
+        "r": -0.16158891769188294,
+        "p": 1.2102737204127384e-06
+      },
+      "H1_total_pers": {
+        "r": 0.201104466788514,
+        "p": 1.3339177516815531e-09
+      },
+      "H1_max_pers": {
+        "r": 0.12385748008109598,
+        "p": 0.00020696694854860438
+      },
+      "H1_mean_pers": {
+        "r": 0.1821356934176657,
+        "p": 4.227729236663874e-08
+      },
+      "H1_count": {
+        "r": -0.036306947009727863,
+        "p": 0.2784526064697162
+      },
+      "H1_entropy": {
+        "r": -0.029065713174136774,
+        "p": 0.38564594563921223
+      }
+    }
+  },
+  "incremental_r2": {
+    "r2_vix_only": 0.49571310143866887,
+    "r2_vix_plus_tda": 0.5187794169219422,
+    "delta_r2": 0.023066315483273314,
+    "f_stat": 14.252059682258988,
+    "f_pval": 4.453516666558244e-09
+  },
+  "regime_discrimination": {
+    "ks_stat": 0.6232500443026758,
+    "ks_pval": 4.27119525682885e-40,
+    "low_vix_H1_mean": 2.252428310349433,
+    "crisis_vix_H1_mean": 3.551862822246482
+  },
+  "vix_baseline_r": 0.7040689607124213,
+  "conclusion": "TDA provides statistically significant incremental information about future volatility beyond VIX. However, the ΔR² is small (0.0231), suggesting limited practical value for standalone prediction. The topological structure of volatility does encode meaningful regime information.",
+  "verdict": "marginal"
+}

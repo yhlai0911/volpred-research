@@ -1,0 +1,118 @@
+{
+  "experiment_id": "K795",
+  "title": "FRED STLFSI4 Macro Stress Regime for VT Strategy",
+  "description": "Tests 3 variants of STLFSI4-adjusted VT (expanding 75th pct threshold, binary regime switch, smooth target reduction) vs 12/VIX baseline. Key difference from K504: adaptive expanding threshold vs fixed thresholds.",
+  "data_source": "yfinance (SPY, GLD, ^VIX) + FRED (STLFSI4 weekly)",
+  "data_period": "1999-01-06 to 2025-12-31",
+  "n_obs_full": 6789,
+  "n_obs_oos": 502,
+  "tx_cost": 0.0005,
+  "regime_stats": {
+    "expanding_75pct_stress_days": 1235,
+    "expanding_75pct_stress_pct": 18.19,
+    "binary_stress_days": 2714,
+    "binary_stress_pct": 39.98
+  },
+  "full_period_metrics": {
+    "BH_SPY": {
+      "sharpe": 0.325643,
+      "cagr": 0.045294,
+      "mdd": -0.643942,
+      "crra_gamma5": -0.031891,
+      "n": 6789.0
+    },
+    "12/VIX": {
+      "sharpe": 0.312968,
+      "cagr": 0.025847,
+      "mdd": -0.363759,
+      "crra_gamma5": 0.006796,
+      "n": 6789.0
+    },
+    "STLFSI_Adj": {
+      "sharpe": 0.359195,
+      "cagr": 0.028595,
+      "mdd": -0.3089,
+      "crra_gamma5": 0.011983,
+      "n": 6789.0
+    },
+    "STLFSI_Bin": {
+      "sharpe": 0.465725,
+      "cagr": 0.050359,
+      "mdd": -0.366167,
+      "crra_gamma5": 0.019505,
+      "n": 6789.0
+    },
+    "STLFSI_Smo": {
+      "sharpe": 0.35793,
+      "cagr": 0.027836,
+      "mdd": -0.321841,
+      "crra_gamma5": 0.012072,
+      "n": 6789.0
+    }
+  },
+  "oos_2023_2024_metrics": {
+    "BH_SPY": {
+      "sharpe": 1.663802,
+      "cagr": 0.228674,
+      "mdd": -0.104676,
+      "crra_gamma5": 0.172437,
+      "n": 502.0
+    },
+    "12/VIX": {
+      "sharpe": 1.569957,
+      "cagr": 0.151812,
+      "mdd": -0.082502,
+      "crra_gamma5": 0.123958,
+      "n": 502.0
+    },
+    "STLFSI_Adj": {
+      "sharpe": 1.562097,
+      "cagr": 0.150548,
+      "mdd": -0.082502,
+      "crra_gamma5": 0.122957,
+      "n": 502.0
+    },
+    "STLFSI_Bin": {
+      "sharpe": 1.547849,
+      "cagr": 0.14891,
+      "mdd": -0.082502,
+      "crra_gamma5": 0.121562,
+      "n": 502.0
+    },
+    "STLFSI_Smo": {
+      "sharpe": 1.552505,
+      "cagr": 0.149377,
+      "mdd": -0.082502,
+      "crra_gamma5": 0.121973,
+      "n": 502.0
+    }
+  },
+  "cross_oos_wins_vs_baseline": {
+    "STLFSI_Adj": 3,
+    "STLFSI_Bin": 4,
+    "STLFSI_Smo": 3
+  },
+  "dm_test_vs_baseline": {
+    "STLFSI_Adj": {
+      "dm_stat": -0.673773,
+      "p_value": 0.500455
+    },
+    "STLFSI_Bin": {
+      "dm_stat": -2.162618,
+      "p_value": 0.030571
+    },
+    "STLFSI_Smo": {
+      "dm_stat": -0.268573,
+      "p_value": 0.788259
+    }
+  },
+  "harvey_threshold": 3.0,
+  "conclusion": "NULL at Harvey t>3.0 threshold. STLFSI4-Binary (stress→50/50 SPY/GLD) showed the best full-period Sharpe (0.466 vs baseline 0.313, DM=-2.16 p=0.031, Cross-OOS 4/5 wins) but failed Harvey t>3.0. All STLFSI4 variants slightly underperformed 12/VIX in OOS 2023-2024 (low-stress bull market). The STLFSI_Bin result is interesting but not statistically robust — the improvement comes from crisis-period GLD allocation (2007-2008, 2020) rather than systematic alpha. Extends K504's null result with adaptive thresholds. VIX remains the sufficient statistic for VT strategy design.",
+  "references": [
+    "Kliesen, Owyang, Vermann (2012) 'Disentangling Diverse Measures' Fed StL Review",
+    "Moreira & Muir (2017) 'Volatility-Managed Portfolios' JF",
+    "Harvey, Liu, Zhu (2016) '...and the Cross-Section of Expected Returns' RFS"
+  ],
+  "elapsed_sec": 1.67,
+  "author": "[提出: Gemini, 執行: Claude]"
+}

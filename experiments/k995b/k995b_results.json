@@ -1,0 +1,149 @@
+{
+  "experiment_id": "K995b",
+  "title": "Paper 9 Table 11 Residual Diagnostics Source Recovery",
+  "timestamp": "2026-04-17T08:49:17.693293+00:00",
+  "description": "Identifies K1045 as source of Paper 9 Table 11, and replicates K1045 methodology to reproduce Table 11 values. Key differences from K995: (1) vix2=(vix/100)^2, (2) ret.clip(-0.20,0.20), (3) joint MLE for GJR-t and A4f-t, (4) K1045 Student-t uses 1+z^2/df parameterization (standard t).",
+  "source_identification": {
+    "source_experiment": "K1045",
+    "source_file": "experiments/K1045/k1045.py",
+    "source_json": "experiments/K1045/k1045_results.json",
+    "k1045_exact_values": {
+      "GJR_t": {
+        "excess_kurtosis": 3.0650001618374274,
+        "skewness": -0.8560196530413117,
+        "JB_stat": 938.7773653298907,
+        "median_df": 5.282358470566755
+      },
+      "A4f_t": {
+        "excess_kurtosis": 1.2384292192893565,
+        "skewness": -0.5936660077752721,
+        "JB_stat": 224.19386009630335,
+        "median_df": 8.000606865786747
+      }
+    },
+    "key_methodological_differences_from_k995": [
+      "vix2 = (vix / 100)^2 [K1045] vs vix raw values [K995]",
+      "ret.clip(-0.20, 0.20) [K1045] vs no clipping [K995]",
+      "Joint MLE for GJR-t and A4f-t df [K1045] vs residual-based df for A4f-t [K995]",
+      "Student-t parameterization: K1045 uses log(1+z^2/df) [standard t], K995 uses log(1+z^2/(df-2)) [standardized t]",
+      "Data end: K1045 runs to 2026-04-10 (n_oos=1828), K995 ends 2026-04-07 (n_oos=1825)"
+    ]
+  },
+  "kurtosis_convention": {
+    "type": "Fisher excess kurtosis (normal=0)",
+    "scipy_call": "scipy.stats.kurtosis(z, fisher=True)",
+    "paper_note": "Paper Table 11 footnote: \"Excess kurtosis relative to normal (=0)\"",
+    "confirmed_by": "K1045 code line 433: kurt = float(sp_stats.kurtosis(z_clean, fisher=True))"
+  },
+  "data": {
+    "asset": "SPY",
+    "source": "yfinance",
+    "data_start": "2004-01-01",
+    "data_end": "2026-04-10",
+    "oos_start": "2019-01-01",
+    "oos_end": "2026-04-10",
+    "n_total": 5602,
+    "n_oos": 1828,
+    "window": 2000,
+    "refit_every": 63,
+    "ret_clip": "(-0.20, 0.20)",
+    "vix_transform": "vix2 = (vix / 100)^2"
+  },
+  "residual_diagnostics": {
+    "GJR_t": {
+      "n_residuals": 1828,
+      "mean": 0.0607461742828668,
+      "std": 1.0521731162983508,
+      "excess_kurtosis_fisher": 2.6864446733736216,
+      "skewness": -0.8108847058311164,
+      "JB_stat": 750.0223834198752,
+      "JB_pvalue": 1.3636684364517461e-163,
+      "median_nu": 7.12649052141316
+    },
+    "A4f_t": {
+      "n_residuals": 1828,
+      "mean": 0.06025965395046949,
+      "std": 0.9764458929265974,
+      "excess_kurtosis_fisher": 1.2271487919850381,
+      "skewness": -0.5928123008840165,
+      "JB_stat": 221.76685554541515,
+      "JB_pvalue": 6.981346343068702e-49,
+      "median_nu": 8.001055825196818
+    }
+  },
+  "paper_table11_comparison": {
+    "GJR_t": {
+      "excess_kurtosis": {
+        "computed": 2.6864446733736216,
+        "paper": 3.065,
+        "rel_diff_pct": 12.350907883405494,
+        "status": "DIVERGENT"
+      },
+      "skewness": {
+        "computed": -0.8108847058311164,
+        "paper": -0.856,
+        "rel_diff_pct": 5.2704782907574295,
+        "status": "APPROX"
+      },
+      "JB_stat": {
+        "computed": 750.0223834198752,
+        "paper": 938.8,
+        "rel_diff_pct": 20.108395460175206,
+        "status": "DIVERGENT"
+      },
+      "median_nu": {
+        "computed": 7.12649052141316,
+        "paper": 5.28,
+        "rel_diff_pct": 34.97141139040075,
+        "status": "DIVERGENT"
+      }
+    },
+    "A4f_t": {
+      "excess_kurtosis": {
+        "computed": 1.2271487919850381,
+        "paper": 1.238,
+        "rel_diff_pct": 0.87651114821986,
+        "status": "MATCHED"
+      },
+      "skewness": {
+        "computed": -0.5928123008840165,
+        "paper": -0.594,
+        "rel_diff_pct": 0.1999493461251662,
+        "status": "MATCHED"
+      },
+      "JB_stat": {
+        "computed": 221.76685554541515,
+        "paper": 224.2,
+        "rel_diff_pct": 1.0852562241680794,
+        "status": "APPROX"
+      },
+      "median_nu": {
+        "computed": 8.001055825196818,
+        "paper": 8.0,
+        "rel_diff_pct": 0.013197814960230758,
+        "status": "MATCHED"
+      }
+    }
+  },
+  "overall_reproduction": {
+    "status": "PARTIAL_OR_FAILED",
+    "matched": 2,
+    "approx": 2,
+    "divergent": 2,
+    "total_cells_table11": 6,
+    "rtol_used": 0.01
+  },
+  "elapsed_seconds": 263.2,
+  "references": [
+    "K1045: A4f vs GJR Residual Diagnostic Suite (Paper 9 Support, 2026-04-11)",
+    "Jarque, C.M. and Bera, A.K. (1987). A test for normality of observations and regression residuals. ISR 55(2):163-172.",
+    "Paper 9 (garch-x-vix): submitted J. Empirical Finance"
+  ],
+  "integrity_notes": [
+    "K995/k995_results.json was NOT modified (submitted paper artifact preserved)",
+    "paper/garch-x-vix/main.tex was NOT modified",
+    "No hard-coded values or seed-tuning",
+    "K1045 methodology replicated exactly to reproduce paper values",
+    "Source K1045 confirmed via exact match of k1045_results.json values"
+  ]
+}

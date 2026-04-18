@@ -1,0 +1,462 @@
+{
+  "experiment_id": "K665",
+  "title": "Can We Simplify 12/VIX to a Lookup Table?",
+  "proposer": "Claude",
+  "executor": "Claude",
+  "timestamp": "2026-03-29T08:14:28.872439",
+  "data_source": "yfinance",
+  "data_period": "2006-01-04 to 2026-03-27",
+  "trading_days": 5089,
+  "total_years": 20.2,
+  "rf_annual": 0.02,
+  "base_portfolio": "50/50 SPY/GLD",
+  "vix_statistics": {
+    "mean": 19.47,
+    "median": 17.12,
+    "min": 9.14,
+    "max": 82.69,
+    "std": 8.7,
+    "distribution": {
+      "<12": 9.3,
+      "12-15": 25.3,
+      "15-18": 21.0,
+      "18-22": 17.8,
+      "22-25": 9.4,
+      "25-28": 6.1,
+      "28-30": 2.3,
+      "30-35": 3.8,
+      ">35": 5.0
+    }
+  },
+  "lookup_tables": {
+    "table_A_5row": {
+      "rows": 5,
+      "rules": [
+        {
+          "vix_range": "< 12",
+          "allocation": "100%"
+        },
+        {
+          "vix_range": "12-16",
+          "allocation": "80%"
+        },
+        {
+          "vix_range": "16-22",
+          "allocation": "60%"
+        },
+        {
+          "vix_range": "22-30",
+          "allocation": "40%"
+        },
+        {
+          "vix_range": "> 30",
+          "allocation": "20%"
+        }
+      ]
+    },
+    "table_B_3row": {
+      "rows": 3,
+      "rules": [
+        {
+          "vix_range": "< 15",
+          "allocation": "100%"
+        },
+        {
+          "vix_range": "15-25",
+          "allocation": "50%"
+        },
+        {
+          "vix_range": "> 25",
+          "allocation": "20%"
+        }
+      ]
+    },
+    "table_C_7row": {
+      "rows": 7,
+      "rules": [
+        {
+          "vix_range": "< 12",
+          "allocation": "100%"
+        },
+        {
+          "vix_range": "12-15",
+          "allocation": "90%"
+        },
+        {
+          "vix_range": "15-18",
+          "allocation": "70%"
+        },
+        {
+          "vix_range": "18-22",
+          "allocation": "50%"
+        },
+        {
+          "vix_range": "22-28",
+          "allocation": "35%"
+        },
+        {
+          "vix_range": "28-35",
+          "allocation": "20%"
+        },
+        {
+          "vix_range": "> 35",
+          "allocation": "10%"
+        }
+      ]
+    },
+    "table_D_5row_opt": {
+      "rows": 5,
+      "rules": [
+        {
+          "vix_range": "< 14",
+          "allocation": "100%"
+        },
+        {
+          "vix_range": "14-18",
+          "allocation": "75%"
+        },
+        {
+          "vix_range": "18-25",
+          "allocation": "50%"
+        },
+        {
+          "vix_range": "25-32",
+          "allocation": "25%"
+        },
+        {
+          "vix_range": "> 32",
+          "allocation": "10%"
+        }
+      ]
+    }
+  },
+  "full_period_comparison": {
+    "continuous_12vix": {
+      "description": "12/VIX Continuous (reference)",
+      "sharpe": 0.7218,
+      "cagr_pct": 7.65,
+      "mdd_pct": -12.28,
+      "ann_vol_pct": 7.87,
+      "calmar": 0.623,
+      "sortino": 0.95,
+      "avg_weight_pct": 69.4,
+      "tracking_error_pct": 0.0,
+      "return_correlation": 1.0,
+      "weight_correlation": 1.0,
+      "weight_mae": 0.0,
+      "weight_changes_per_year": 231.2,
+      "retention_ratio": 1.0,
+      "passes_95pct_threshold": "True"
+    },
+    "table_A_5row": {
+      "description": "Table A: 5-row simple (<12/12-16/16-22/22-30/>30)",
+      "sharpe": 0.7421,
+      "cagr_pct": 7.31,
+      "mdd_pct": -11.33,
+      "ann_vol_pct": 7.16,
+      "calmar": 0.645,
+      "sortino": 0.974,
+      "avg_weight_pct": 63.1,
+      "tracking_error_pct": 1.184,
+      "return_correlation": 0.99208,
+      "weight_correlation": 0.95575,
+      "weight_mae": 0.0714,
+      "weight_changes_per_year": 39.9,
+      "retention_ratio": 1.028,
+      "passes_95pct_threshold": "True"
+    },
+    "table_B_3row": {
+      "description": "Table B: 3-row simplest (<15/15-25/>25)",
+      "sharpe": 0.703,
+      "cagr_pct": 7.0,
+      "mdd_pct": -10.82,
+      "ann_vol_pct": 7.14,
+      "calmar": 0.647,
+      "sortino": 0.888,
+      "avg_weight_pct": 62.1,
+      "tracking_error_pct": 1.95,
+      "return_correlation": 0.9709,
+      "weight_correlation": 0.91009,
+      "weight_mae": 0.1265,
+      "weight_changes_per_year": 23.3,
+      "retention_ratio": 0.9739,
+      "passes_95pct_threshold": "True"
+    },
+    "table_C_7row": {
+      "description": "Table C: 7-row granular",
+      "sharpe": 0.6705,
+      "cagr_pct": 6.69,
+      "mdd_pct": -11.32,
+      "ann_vol_pct": 7.05,
+      "calmar": 0.591,
+      "sortino": 0.851,
+      "avg_weight_pct": 62.8,
+      "tracking_error_pct": 1.663,
+      "return_correlation": 0.98119,
+      "weight_correlation": 0.97855,
+      "weight_mae": 0.0811,
+      "weight_changes_per_year": 56.3,
+      "retention_ratio": 0.9289,
+      "passes_95pct_threshold": "False"
+    },
+    "table_D_5row_opt": {
+      "description": "Table D: 5-row optimized (K652/K659 thresholds)",
+      "sharpe": 0.6618,
+      "cagr_pct": 6.82,
+      "mdd_pct": -12.43,
+      "ann_vol_pct": 7.35,
+      "calmar": 0.548,
+      "sortino": 0.83,
+      "avg_weight_pct": 65.3,
+      "tracking_error_pct": 1.708,
+      "return_correlation": 0.97716,
+      "weight_correlation": 0.96774,
+      "weight_mae": 0.0798,
+      "weight_changes_per_year": 43.3,
+      "retention_ratio": 0.9169,
+      "passes_95pct_threshold": "False"
+    }
+  },
+  "sub_period_analysis": {
+    "GFC (2008-2009)": {
+      "continuous_12vix": {
+        "sharpe": -0.002,
+        "cagr_pct": 1.73,
+        "mdd_pct": -12.28
+      },
+      "table_A_5row": {
+        "sharpe": -0.105,
+        "cagr_pct": 1.13,
+        "mdd_pct": -11.33
+      },
+      "table_B_3row": {
+        "sharpe": -0.348,
+        "cagr_pct": -0.27,
+        "mdd_pct": -10.7
+      },
+      "table_C_7row": {
+        "sharpe": -0.139,
+        "cagr_pct": 1.21,
+        "mdd_pct": -7.68
+      },
+      "table_D_5row_opt": {
+        "sharpe": -0.233,
+        "cagr_pct": 0.64,
+        "mdd_pct": -8.28
+      }
+    },
+    "Post-GFC Bull (2010-2014)": {
+      "continuous_12vix": {
+        "sharpe": 0.354,
+        "cagr_pct": 4.66,
+        "mdd_pct": -12.16
+      },
+      "table_A_5row": {
+        "sharpe": 0.43,
+        "cagr_pct": 5.0,
+        "mdd_pct": -9.74
+      },
+      "table_B_3row": {
+        "sharpe": 0.385,
+        "cagr_pct": 4.7,
+        "mdd_pct": -10.82
+      },
+      "table_C_7row": {
+        "sharpe": 0.285,
+        "cagr_pct": 3.93,
+        "mdd_pct": -11.32
+      },
+      "table_D_5row_opt": {
+        "sharpe": 0.238,
+        "cagr_pct": 3.62,
+        "mdd_pct": -12.43
+      }
+    },
+    "Low Vol (2017)": {
+      "continuous_12vix": {
+        "sharpe": 2.64,
+        "cagr_pct": 16.75,
+        "mdd_pct": -3.19
+      },
+      "table_A_5row": {
+        "sharpe": 2.588,
+        "cagr_pct": 16.01,
+        "mdd_pct": -3.16
+      },
+      "table_B_3row": {
+        "sharpe": 2.691,
+        "cagr_pct": 17.29,
+        "mdd_pct": -3.19
+      },
+      "table_C_7row": {
+        "sharpe": 2.652,
+        "cagr_pct": 16.71,
+        "mdd_pct": -3.17
+      },
+      "table_D_5row_opt": {
+        "sharpe": 2.628,
+        "cagr_pct": 16.69,
+        "mdd_pct": -3.19
+      }
+    },
+    "COVID (2020)": {
+      "continuous_12vix": {
+        "sharpe": 1.436,
+        "cagr_pct": 12.25,
+        "mdd_pct": -6.46
+      },
+      "table_A_5row": {
+        "sharpe": 1.353,
+        "cagr_pct": 10.24,
+        "mdd_pct": -5.54
+      },
+      "table_B_3row": {
+        "sharpe": 1.807,
+        "cagr_pct": 12.19,
+        "mdd_pct": -4.54
+      },
+      "table_C_7row": {
+        "sharpe": 1.248,
+        "cagr_pct": 7.89,
+        "mdd_pct": -3.92
+      },
+      "table_D_5row_opt": {
+        "sharpe": 1.822,
+        "cagr_pct": 10.93,
+        "mdd_pct": -3.57
+      }
+    },
+    "Rate Hikes (2022)": {
+      "continuous_12vix": {
+        "sharpe": -0.911,
+        "cagr_pct": -4.84,
+        "mdd_pct": -8.74
+      },
+      "table_A_5row": {
+        "sharpe": -1.033,
+        "cagr_pct": -4.7,
+        "mdd_pct": -8.21
+      },
+      "table_B_3row": {
+        "sharpe": -0.806,
+        "cagr_pct": -2.32,
+        "mdd_pct": -5.09
+      },
+      "table_C_7row": {
+        "sharpe": -1.23,
+        "cagr_pct": -4.67,
+        "mdd_pct": -6.99
+      },
+      "table_D_5row_opt": {
+        "sharpe": -0.981,
+        "cagr_pct": -3.55,
+        "mdd_pct": -5.93
+      }
+    },
+    "Recent (2024-2026)": {
+      "continuous_12vix": {
+        "sharpe": 1.837,
+        "cagr_pct": 20.09,
+        "mdd_pct": -7.47
+      },
+      "table_A_5row": {
+        "sharpe": 1.875,
+        "cagr_pct": 18.86,
+        "mdd_pct": -5.94
+      },
+      "table_B_3row": {
+        "sharpe": 1.701,
+        "cagr_pct": 16.75,
+        "mdd_pct": -5.34
+      },
+      "table_C_7row": {
+        "sharpe": 1.865,
+        "cagr_pct": 19.02,
+        "mdd_pct": -6.43
+      },
+      "table_D_5row_opt": {
+        "sharpe": 1.872,
+        "cagr_pct": 19.77,
+        "mdd_pct": -7.17
+      }
+    }
+  },
+  "spy_only_comparison": {
+    "continuous_12vix": {
+      "sharpe": 0.566,
+      "cagr_pct": 7.14,
+      "mdd_pct": -27.27
+    },
+    "table_A_5row": {
+      "sharpe": 0.565,
+      "cagr_pct": 6.65,
+      "mdd_pct": -22.87
+    },
+    "table_B_3row": {
+      "sharpe": 0.606,
+      "cagr_pct": 6.79,
+      "mdd_pct": -23.39
+    },
+    "table_C_7row": {
+      "sharpe": 0.544,
+      "cagr_pct": 6.21,
+      "mdd_pct": -18.71
+    },
+    "table_D_5row_opt": {
+      "sharpe": 0.547,
+      "cagr_pct": 6.41,
+      "mdd_pct": -19.16
+    }
+  },
+  "spy_only_retention": {
+    "table_A_5row": 0.9982,
+    "table_B_3row": 1.0707,
+    "table_C_7row": 0.9611,
+    "table_D_5row_opt": 0.9664
+  },
+  "key_findings": {
+    "best_table": "table_A_5row",
+    "best_retention_ratio": 1.028,
+    "simplest_table_passing_95pct": "table_B_3row",
+    "any_table_passes_95pct": true,
+    "recommended_action_card": {
+      "rows": 5,
+      "rules": [
+        {
+          "vix_range": "< 12",
+          "allocation": "100%"
+        },
+        {
+          "vix_range": "12-16",
+          "allocation": "80%"
+        },
+        {
+          "vix_range": "16-22",
+          "allocation": "60%"
+        },
+        {
+          "vix_range": "22-30",
+          "allocation": "40%"
+        },
+        {
+          "vix_range": "> 30",
+          "allocation": "20%"
+        }
+      ]
+    }
+  },
+  "conclusion": "Yes, 12/VIX can be simplified to a lookup table. 2 of 4 tables achieve >95% of continuous Sharpe. The simplest passing table is table_B_3row (3 rows) with retention ratio 97.4%. Best overall: table_A_5row (retention 102.8%). Weight changes/yr drop from 231 (continuous) to 23 (table_B_3row), reducing trading friction significantly.",
+  "limitations": [
+    "Backtest uses previous-day VIX (1-day lag) \u2014 realistic for retail",
+    "No transaction costs included (tables change less frequently, advantage for tables)",
+    "Risk-free rate assumed constant 2%/yr over entire period",
+    "GLD data starts mid-2004, full overlap from 2006",
+    "VIX is closing level; intraday VIX may differ"
+  ],
+  "references": [
+    "K568: 12/VIX mathematical optimality (427 function configs)",
+    "K569: Piecewise VT (highest Sharpe, lower CAGR)",
+    "K652/K659: VIX threshold optimization",
+    "Moreira & Muir (2017): Volatility-Managed Portfolios, JoF"
+  ]
+}

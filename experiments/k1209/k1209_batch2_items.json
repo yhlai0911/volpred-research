@@ -1,0 +1,193 @@
+{
+  "experiment_id": "K1209",
+  "title": "Paper 1 Batch 2 errata rewrite markdown draft (NOT .tex)",
+  "predecessor_batch1_commit": "0a442356",
+  "predecessor_batch1_scope": [
+    "Kupiec p 2-decimal (Sec 4.5 + 4.8)",
+    "GLD gamma -0.067 rolling-window forensic footnote",
+    "gamma_HM Sec 5.4 three-value disambiguation"
+  ],
+  "draft_status": "draft_ready",
+  "adoption_path": "Main thread reviews k1209_batch2_draft.md, cherry-picks accepted items into body_v4.tex + tables.tex + new experiments.md",
+  "output_policy": {
+    "worktree_scope": "experiments/k1209/ only",
+    "forbidden_edits": [
+      "paper/leverage-direction/*.tex",
+      "paper/leverage-direction/tables.tex",
+      "storage/memory/knowledge.json",
+      "storage/reports/feed.json"
+    ],
+    "allowed_outputs": ["*.md", "*.json"]
+  },
+  "items": [
+    {
+      "id": 1,
+      "title": "Table 3 vs Table 8 SPY 2023-24 GJR QLIKE inconsistency",
+      "source_k_experiments": ["K903", "K1188"],
+      "source_files": [
+        "experiments/k903/k903_vs_paper_diff.md",
+        "experiments/k1188/README.md"
+      ],
+      "action": "add_footnote",
+      "v3_location_pointer": "body_v3.tex line 219 (Table 3 narrative, SPY GJR -9.034 vs -8.985 sentence)",
+      "current_v3_number": "-9.034 (Table 3 value)",
+      "k903_replication_number": "-8.674",
+      "paper_table8_number": "-8.671",
+      "delta_pct": 4.1,
+      "rationale": "K903 matches Table 8 within 0.003; Table 3 differs by 0.363. Preserve narrative, add footnote on aggregation convention (in-sample+OOS concat vs pure OOS rolling).",
+      "status": "pending_rewrite",
+      "alternative_option": "1B: replace -9.034 with -8.671 and re-run all Table 3 DM p-values (requires new K experiment)",
+      "already_handled_by_batch1": false
+    },
+    {
+      "id": 2,
+      "title": "Table 6 VaR panel errata (3 cell updates)",
+      "source_k_experiments": ["K1186", "K1206"],
+      "source_files": [
+        "experiments/k1186/README.md",
+        "experiments/k1206/README.md",
+        "experiments/k1206/k1206_results.json"
+      ],
+      "action": "rewrite_table_rows_plus_sentence_plus_footnote",
+      "v3_location_pointer": "body_v3.tex line 249 (Trinity pass-rate sentence) + paper/leverage-direction/tables.tex tab:var_panel",
+      "cell_updates": {
+        "Normal": {"paper_v3": 57.1, "proposed_v4": 57.1, "unchanged": true},
+        "FHS": {"paper_v3": 76.2, "proposed_v4": 76.2, "unchanged": true},
+        "StudentT5": {"paper_v3": 57.1, "proposed_v4": 76.2, "delta_pp": 19.1},
+        "SkewedT": {"paper_v3": 76.2, "proposed_v4": 90.5, "delta_pp": 14.3},
+        "CFVaR": {"paper_v3": 66.7, "proposed_v4": 76.2, "delta_pp": 9.5}
+      },
+      "rationale": "K1206 forensic sensitivity (data vintage + Skewed-t bisection + CF-VaR variants) failed to reconstruct Paper 1 numbers. Decision: errata_recommended.",
+      "status": "pending_rewrite",
+      "secondary_task": "Regenerate per-asset checkmarks in tab:var_panel from K1186 cell-level JSON",
+      "already_handled_by_batch1": false
+    },
+    {
+      "id": 3,
+      "title": "Table 4 base = GARCH(1,1) not GJR methodology footnote",
+      "source_k_experiments": ["K1185"],
+      "source_files": ["experiments/k1185/README.md"],
+      "action": "add_footnote",
+      "v3_location_pointer": "body_v3.tex line 247 (after '(Table~\\ref{tab:var})')",
+      "k1185_reconstruction_summary": {
+        "Normal": {"paper_v3": 33, "k1185": 30, "delta": -3, "match": "diverged_data_revision"},
+        "StudentT5": {"paper_v3": 18, "k1185": 19, "delta": 1, "match": "matched"},
+        "Adaptive": {"paper_v3": 14, "k1185": 14, "delta": 0, "match": "exact"},
+        "JumpAugment": {"paper_v3": 14, "k1185": 14, "delta": 0, "match": "exact"}
+      },
+      "rationale": "Section 4.3 prescribes GJR for SPY but Table 4 attribution uses GARCH(1,1) baseline. K1185 explicitly flags as top reader-confusion source. Footnote clarifies + notes yfinance post-2025Q4 revision.",
+      "status": "pending_rewrite",
+      "already_handled_by_batch1": false
+    },
+    {
+      "id": 4,
+      "title": "Table 7 per-asset evaluation period disclosure",
+      "source_k_experiments": ["K1187"],
+      "source_files": ["experiments/k1187/README.md"],
+      "action": "amend_caption_plus_footnote",
+      "v3_location_pointer": "body_v3.tex line 279 (Table 5 cross-asset sentence) + paper/leverage-direction/tables.tex tab:vt caption",
+      "inferred_per_asset_periods": {
+        "SPY": "2014-2026",
+        "EEM": "2013-2025",
+        "TLT": "2010-2025",
+        "GLD": "2022-2026 (gold bull regime, body Section 4.2)",
+        "BTC-USD": "2019-2025"
+      },
+      "k1187_match_rate": "6/20 metrics (30%)",
+      "rationale": "Body text says '7-16 year periods' without per-asset disclosure. K1187 match rate 6/20 driven primarily by period mismatch. Disclose per-asset windows + acknowledge GLD regime focus.",
+      "status": "pending_rewrite",
+      "already_handled_by_batch1": false
+    },
+    {
+      "id": 5,
+      "title": "Table 7 GLD 1.56 Sharpe forensic footnote",
+      "source_k_experiments": ["K1187"],
+      "source_files": ["experiments/k1187/README.md"],
+      "action": "add_footnote",
+      "v3_location_pointer": "body_v3.tex line 294 ('buy-and-hold's 1.56')",
+      "canonical_numbers": {
+        "gld_bh_sharpe_paper_2022_2026": 1.56,
+        "gld_bh_sharpe_k1187_max_alt_period": 1.29,
+        "alt_periods_tested": ["2010-2026", "2014-2026", "2017-2026"]
+      },
+      "rationale": "1.56 is load-bearing and period-specific (2022-2026 only). Without footnote, a reader running a 16-year replication recovers 1.29 and flags the paper as wrong. Footnote frames 2022-2026 as the motivated regime-focus window.",
+      "status": "pending_rewrite",
+      "already_handled_by_batch1": false
+    },
+    {
+      "id": 6,
+      "title": "Create paper/leverage-direction/experiments.md",
+      "source_k_experiments": ["K903", "K1185", "K1186", "K1187", "K1188", "K1198", "K1206"],
+      "source_files": ["experiments/k*/README.md (7 experiments)"],
+      "action": "add_new_file",
+      "v3_location_pointer": "new file path paper/leverage-direction/experiments.md",
+      "content_outline": [
+        "Table-level replications (Tables 2,3,4,5,6,7,8,10,11,12 + §4.2.3)",
+        "Section-level supporting experiments (K799, K802, K824v2, K899)",
+        "Methodology & sensitivity experiments (K1185-K1206)",
+        "Status (v3 batch1 done, v4 batch2 pending)",
+        "Reproducibility (seed=42, canonical JSON per experiment)"
+      ],
+      "rationale": "Mandatory per paper-workflow rule. Folder lacks experiments.md. K1198 rescan already assumes this file exists.",
+      "status": "pending_add",
+      "already_handled_by_batch1": false
+    },
+    {
+      "id": 7,
+      "title": "Tables 10/11/12 + §4.2.3 pre-K unified rebuild footnote",
+      "source_k_experiments": ["K1198"],
+      "source_files": ["experiments/k1198/README.md"],
+      "action": "add_unified_footnote",
+      "v3_location_pointer": "First Table 10/11/12 or §4.2.3 value in reading order (main-thread chooses attach point)",
+      "rebuild_summary": {
+        "spy_avg_constituent_gamma": {"paper_v3": 0.076, "k1198": 0.0939, "match": "diverged", "reason": "N=20 vs N=50 constituents"},
+        "etf_vs_stock_t_stat": {"paper_v3": -16.92, "k1198": -10.53, "match": "diverged", "reason": "same as above"},
+        "bh_es_1pct": {"paper_v3": -4.68, "k1198": -4.53, "match": "matched_within_5pct_rtol"},
+        "bh_excess_kurtosis": {"paper_v3": 14.71, "k1198": 14.51, "match": "matched_within_5pct_rtol"},
+        "spearman_gamma_beta_trend": {"paper_v3": 1.000, "k1198": 1.000, "match": "exact"},
+        "gold_regime_t_stat": {"paper_v3": -4.71, "k1198": -3.79, "match": "diverged", "reason": "extended sample 2005-2026 vs 2010-2026"}
+      },
+      "match_count": "3/6",
+      "rationale": "6 values previously flagged KB_ONLY_PRE_K (no experiment JSON). K1198 provides formal rebuild. Preserves narrative with transparent divergence disclosure.",
+      "status": "pending_rewrite",
+      "already_handled_by_batch1": false
+    },
+    {
+      "id": 8,
+      "title": "gamma_HM Sec 4.7 second disambiguation",
+      "source_k_experiments": [],
+      "source_files": [],
+      "action": "none",
+      "v3_location_pointer": "Sec 4.7 (Batch 1 footnote in Sec 5.4 already covers all three gamma_HM values)",
+      "rationale": "Grep of body_v3.tex for second unfootnoted instance of gamma_HM / Henriksson-Merton in Sec 4.7 region returned no additional occurrence. Batch 1 commit 0a442356 Sec 5.4 footnote is sufficient.",
+      "status": "dropped",
+      "already_handled_by_batch1": true,
+      "drop_reason": "Batch 1 Sec 5.4 footnote covers all three reported values"
+    }
+  ],
+  "summary": {
+    "total_items": 8,
+    "pending_rewrite": 6,
+    "pending_add": 1,
+    "dropped": 1,
+    "already_handled_by_batch1": 1
+  },
+  "verification": {
+    "numbers_verbatim_from_canonical_sources": true,
+    "no_new_rng_runs": true,
+    "no_tex_edits_in_worktree": true,
+    "seed": 42,
+    "seed_notes": "N/A for synthesis task; declared for repo-rule compliance"
+  },
+  "post_adoption_commit_template": {
+    "title": "Paper 1 errata batch 2 (v4): Table 6 errata + Table 3/4/7 footnotes + experiments.md",
+    "body_bullets": [
+      "Table 6 Trinity pass-rate: StudentT5 57.1→76.2, Skewed-t 76.2→90.5, CF-VaR 66.7→76.2 (K1186/K1206)",
+      "Table 3 vs Table 8 QLIKE aggregation footnote (K903, K1188)",
+      "Table 4 GARCH(1,1) baseline footnote (K1185)",
+      "Table 7 per-asset period disclosure + GLD 1.56 forensic footnote (K1187)",
+      "Tables 10/11/12/C3 unified pre-K rebuild footnote (K1198: 3/6 matched)",
+      "New file: paper/leverage-direction/experiments.md (K-experiment index)"
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+[05:14:55] Loading market cache market_daily.parquet
+[05:14:55] Loading FRED cache fred_daily_pubshift.parquet
+[05:14:55] Merged: 4022 days, 2010-01-05 -> 2025-12-30
+[05:14:55] Jumps (primary_2sigma, thr=2.0σ): N=181
+[05:14:55] Jumps (robust_2p5sigma, thr=2.5σ): N=110
+[05:14:55] Jumps (robust_absVIX30): N=231
+[05:14:55] Matched 156 / 181 jumps (86.2%) exact_tol=153 loose_tol=3 no_match=25
+[05:14:55] Fitting GARCH(1,1) × ['vvix', 'USEPU', 'NFCI', 'ANFCI', 'STLFSI', 'WLEMU'] for 156 matched pairs...
+[05:14:57] Pairs with valid losses: 113
+[05:14:57] 
+=== Test results (BH-adj) ===
+[05:14:57] var           H1 t   H1 p_BH    H2 t   H2 p_BH   H3 p_BH
+[05:14:57] vvix         1.346     0.686  -0.019     0.985     0.896
+[05:14:57] USEPU        0.322     0.898  -0.391     0.985     0.896
+[05:14:57] NFCI         0.571     0.854   0.190     0.985     0.896
+[05:14:57] ANFCI        0.925     0.714   0.089     0.985     0.896
+[05:14:57] STLFSI       0.042     0.966  -0.394     0.985     0.896
+[05:14:57] WLEMU        1.211     0.686   0.556     0.985     0.950
+[05:14:57] 
+VERDICT: FULL_NULL
+[05:14:57] H1 passes (jump regime edge): []
+[05:14:57] H2 passes (non-jump regime edge): []
+[05:14:57] Jump-conditional (H1 PASS ∧ H2 FAIL): []
+[05:14:57] 
+=== Robustness: 2.5σ jumps ===
+[05:14:57]   robust_2p5sigma: matched 90/110 (81.8%)
+[05:14:57]   robust_2p5sigma H1 t-stats: vvix=+1.16, USEPU=-1.26, NFCI=-0.74, ANFCI=-0.57, STLFSI=+0.68, WLEMU=+0.40
+[05:14:57]   robust_absVIX30: matched 49/231 (21.2%)
+[05:14:57] Results saved -> /Users/yhlai0911/Desktop/volpred-research/experiments/k1117/k1117_results.json

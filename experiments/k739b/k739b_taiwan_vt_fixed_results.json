@@ -1,0 +1,510 @@
+{
+  "test1_vix_sufficiency": {
+    "model1_vix_only": {
+      "r2": 0.0364,
+      "adj_r2": 0.0362,
+      "vix_lag_beta": 0.4942,
+      "vix_lag_t": 12.57,
+      "vix_lag_sig": true
+    },
+    "model2_own_rv_only": {
+      "r2": 0.0134,
+      "adj_r2": 0.0131,
+      "own_rv_beta": 0.1087,
+      "own_rv_t": 7.52,
+      "own_rv_sig": true
+    },
+    "model3_combined": {
+      "r2": 0.0402,
+      "adj_r2": 0.0398,
+      "vix_lag_beta": 0.4445,
+      "vix_lag_t": 10.81,
+      "own_rv_beta": 0.0606,
+      "own_rv_t": 4.06
+    },
+    "r2_gain_from_own_rv": 0.0038,
+    "r2_gain_pct": 10.4,
+    "corr_vix_future_rv": 0.1909,
+    "corr_own_rv_future_rv": 0.1156,
+    "n_observations": 4180,
+    "vix_lag_method": "Most recent prior US VIX close (not shift(1) on union calendar)",
+    "rv_calendar": "TW trading days only (no synthetic zero returns)",
+    "conclusion": "VIX sufficient \u2014 adding own RV provides negligible improvement"
+  },
+  "test2_optimal_allocation": {
+    "0050+GLD": {
+      "best_static_weight": 0.3,
+      "best_static_sharpe": 0.6798,
+      "strategies": {
+        "bh_20_80": {
+          "name": "BH 20/80",
+          "ann_ret": 9.64,
+          "ann_vol": 14.46,
+          "sharpe": 0.6669,
+          "mdd": -41.41,
+          "calmar": 0.2329,
+          "sortino": 0.8282,
+          "n_days": 4077,
+          "n_years": 16.2
+        },
+        "bh_30_70": {
+          "name": "BH 30/70",
+          "ann_ret": 9.77,
+          "ann_vol": 14.37,
+          "sharpe": 0.6798,
+          "mdd": -42.66,
+          "calmar": 0.229,
+          "sortino": 0.7771,
+          "n_days": 4077,
+          "n_years": 16.2
+        },
+        "bh_40_60": {
+          "name": "BH 40/60",
+          "ann_ret": 9.75,
+          "ann_vol": 15.03,
+          "sharpe": 0.6489,
+          "mdd": -44.78,
+          "calmar": 0.2178,
+          "sortino": 0.681,
+          "n_days": 4077,
+          "n_years": 16.2
+        },
+        "bh_50_50": {
+          "name": "BH 50/50",
+          "ann_ret": 9.57,
+          "ann_vol": 16.34,
+          "sharpe": 0.5858,
+          "mdd": -47.56,
+          "calmar": 0.2013,
+          "sortino": 0.5771,
+          "n_days": 4077,
+          "n_years": 16.2
+        },
+        "bh_60_40": {
+          "name": "BH 60/40",
+          "ann_ret": 9.21,
+          "ann_vol": 18.17,
+          "sharpe": 0.5072,
+          "mdd": -51.38,
+          "calmar": 0.1793,
+          "sortino": 0.4789,
+          "n_days": 4077,
+          "n_years": 16.2
+        },
+        "bh_70_30": {
+          "name": "BH 70/30",
+          "ann_ret": 8.65,
+          "ann_vol": 20.37,
+          "sharpe": 0.4245,
+          "mdd": -57.67,
+          "calmar": 0.15,
+          "sortino": 0.3894,
+          "n_days": 4077,
+          "n_years": 16.2
+        },
+        "vt_8.63": {
+          "name": "VT 8.63/VIX",
+          "ann_ret": 7.99,
+          "ann_vol": 17.46,
+          "sharpe": 0.4573,
+          "mdd": -56.72,
+          "calmar": 0.1408,
+          "sortino": 0.4133,
+          "n_days": 4076,
+          "n_years": 16.2,
+          "ann_turnover_pct": 103.1,
+          "ann_tx_drag_pct": 0.206
+        }
+      }
+    },
+    "0050+SPY": {
+      "best_static_weight": 0.2,
+      "best_static_sharpe": 0.9064,
+      "strategies": {
+        "bh_20_80": {
+          "name": "BH 20/80",
+          "ann_ret": 14.47,
+          "ann_vol": 15.96,
+          "sharpe": 0.9064,
+          "mdd": -31.15,
+          "calmar": 0.4644,
+          "sortino": 1.051,
+          "n_days": 4077,
+          "n_years": 16.2
+        },
+        "bh_30_70": {
+          "name": "BH 30/70",
+          "ann_ret": 13.94,
+          "ann_vol": 15.9,
+          "sharpe": 0.8768,
+          "mdd": -30.04,
+          "calmar": 0.464,
+          "sortino": 0.9501,
+          "n_days": 4077,
+          "n_years": 16.2
+        },
+        "bh_40_60": {
+          "name": "BH 40/60",
+          "ann_ret": 13.28,
+          "ann_vol": 16.46,
+          "sharpe": 0.8066,
+          "mdd": -33.12,
+          "calmar": 0.4009,
+          "sortino": 0.8163,
+          "n_days": 4077,
+          "n_years": 16.2
+        },
+        "bh_50_50": {
+          "name": "BH 50/50",
+          "ann_ret": 12.46,
+          "ann_vol": 17.58,
+          "sharpe": 0.7088,
+          "mdd": -40.4,
+          "calmar": 0.3085,
+          "sortino": 0.681,
+          "n_days": 4077,
+          "n_years": 16.2
+        },
+        "bh_60_40": {
+          "name": "BH 60/40",
+          "ann_ret": 11.48,
+          "ann_vol": 19.17,
+          "sharpe": 0.599,
+          "mdd": -47.64,
+          "calmar": 0.241,
+          "sortino": 0.5595,
+          "n_days": 4077,
+          "n_years": 16.2
+        },
+        "bh_70_30": {
+          "name": "BH 70/30",
+          "ann_ret": 10.31,
+          "ann_vol": 21.12,
+          "sharpe": 0.4883,
+          "mdd": -54.85,
+          "calmar": 0.188,
+          "sortino": 0.4477,
+          "n_days": 4077,
+          "n_years": 16.2
+        },
+        "vt_8.63": {
+          "name": "VT 8.63/VIX",
+          "ann_ret": 11.09,
+          "ann_vol": 19.34,
+          "sharpe": 0.5736,
+          "mdd": -49.48,
+          "calmar": 0.2242,
+          "sortino": 0.5235,
+          "n_days": 4076,
+          "n_years": 16.2,
+          "ann_turnover_pct": 103.1,
+          "ann_tx_drag_pct": 0.206
+        }
+      }
+    },
+    "0050+Cash": {
+      "best_static_weight": 0.1,
+      "best_static_sharpe": 0.4808,
+      "strategies": {
+        "bh_10_90": {
+          "name": "BH 10/90",
+          "ann_ret": 1.35,
+          "ann_vol": 2.82,
+          "sharpe": 0.4808,
+          "mdd": -8.04,
+          "calmar": 0.1685,
+          "sortino": 0.4278,
+          "n_days": 4215,
+          "n_years": 16.7
+        },
+        "bh_20_80": {
+          "name": "BH 20/80",
+          "ann_ret": 2.64,
+          "ann_vol": 5.63,
+          "sharpe": 0.4686,
+          "mdd": -16.05,
+          "calmar": 0.1644,
+          "sortino": 0.4169,
+          "n_days": 4215,
+          "n_years": 16.7
+        },
+        "bh_30_70": {
+          "name": "BH 30/70",
+          "ann_ret": 3.84,
+          "ann_vol": 8.45,
+          "sharpe": 0.4551,
+          "mdd": -24.04,
+          "calmar": 0.1599,
+          "sortino": 0.4049,
+          "n_days": 4215,
+          "n_years": 16.7
+        },
+        "bh_40_60": {
+          "name": "BH 40/60",
+          "ann_ret": 4.96,
+          "ann_vol": 11.26,
+          "sharpe": 0.4401,
+          "mdd": -31.96,
+          "calmar": 0.1551,
+          "sortino": 0.3915,
+          "n_days": 4215,
+          "n_years": 16.7
+        },
+        "bh_50_50": {
+          "name": "BH 50/50",
+          "ann_ret": 5.96,
+          "ann_vol": 14.08,
+          "sharpe": 0.4233,
+          "mdd": -39.81,
+          "calmar": 0.1497,
+          "sortino": 0.3766,
+          "n_days": 4215,
+          "n_years": 16.7
+        },
+        "bh_60_40": {
+          "name": "BH 60/40",
+          "ann_ret": 6.83,
+          "ann_vol": 16.89,
+          "sharpe": 0.4043,
+          "mdd": -47.57,
+          "calmar": 0.1436,
+          "sortino": 0.3597,
+          "n_days": 4215,
+          "n_years": 16.7
+        },
+        "bh_70_30": {
+          "name": "BH 70/30",
+          "ann_ret": 7.54,
+          "ann_vol": 19.71,
+          "sharpe": 0.3825,
+          "mdd": -55.22,
+          "calmar": 0.1365,
+          "sortino": 0.3403,
+          "n_days": 4215,
+          "n_years": 16.7
+        },
+        "vt_8.63": {
+          "name": "VT 8.63/VIX",
+          "ann_ret": 3.85,
+          "ann_vol": 14.58,
+          "sharpe": 0.264,
+          "mdd": -48.73,
+          "calmar": 0.079,
+          "sortino": 0.2098,
+          "n_days": 4214,
+          "n_years": 16.7,
+          "ann_turnover_pct": 99.8,
+          "ann_tx_drag_pct": 0.2
+        }
+      }
+    }
+  },
+  "test3_calendar_anomaly": {
+    "monthly_avg_return_pct": {
+      "1": -2.34,
+      "2": 2.01,
+      "3": 0.3,
+      "4": 1.42,
+      "5": 1.32,
+      "6": 1.03,
+      "7": 3.71,
+      "8": -0.41,
+      "9": 0.77,
+      "10": 1.1,
+      "11": 1.72,
+      "12": 2.6
+    },
+    "monthly_n": {
+      "1": 18,
+      "2": 18,
+      "3": 18,
+      "4": 17,
+      "5": 17,
+      "6": 17,
+      "7": 17,
+      "8": 17,
+      "9": 17,
+      "10": 17,
+      "11": 17,
+      "12": 17
+    },
+    "winter_annualized_pct": 12.72,
+    "summer_annualized_pct": 14.95,
+    "diff_annualized_pct": -2.23,
+    "sell_in_may_t_stat": -0.162,
+    "sell_in_may_p_value": 0.8714,
+    "sell_in_may_significant_5pct": false,
+    "halloween_win_rate": 0.625,
+    "halloween_wins_total": "10/16",
+    "cny_window_annualized_pct": 0.36,
+    "non_cny_annualized_pct": 16.11,
+    "cny_diff_pct": -15.75,
+    "cny_t_stat": -0.801,
+    "cny_p_value": 0.423,
+    "cny_significant_5pct": false,
+    "vix_by_month": {
+      "1": 18.64,
+      "2": 19.48,
+      "3": 21.29,
+      "4": 19.34,
+      "5": 18.59,
+      "6": 18.85,
+      "7": 17.53,
+      "8": 18.8,
+      "9": 19.78,
+      "10": 21.49,
+      "11": 20.31,
+      "12": 19.39
+    },
+    "calendar_fix": "Returns computed on TW trading days only; no synthetic zeros from US holidays"
+  },
+  "test4_rebalancing_frequency": {
+    "strategies": {
+      "daily": {
+        "name": "VT daily",
+        "ann_ret": 5.88,
+        "ann_vol": 14.24,
+        "sharpe": 0.4129,
+        "mdd": -48.38,
+        "calmar": 0.1216,
+        "sortino": 0.3393,
+        "n_days": 4214,
+        "n_years": 16.7,
+        "ann_turnover_pct": 639.2,
+        "ann_tx_drag_pct": 1.278
+      },
+      "weekly": {
+        "name": "VT weekly",
+        "ann_ret": 3.4,
+        "ann_vol": 15.32,
+        "sharpe": 0.2217,
+        "mdd": -53.11,
+        "calmar": 0.064,
+        "sortino": 0.1726,
+        "n_days": 4214,
+        "n_years": 16.7,
+        "ann_turnover_pct": 272.1,
+        "ann_tx_drag_pct": 0.544
+      },
+      "monthly": {
+        "name": "VT monthly",
+        "ann_ret": 3.85,
+        "ann_vol": 14.58,
+        "sharpe": 0.264,
+        "mdd": -48.73,
+        "calmar": 0.079,
+        "sortino": 0.2098,
+        "n_days": 4214,
+        "n_years": 16.7,
+        "ann_turnover_pct": 99.8,
+        "ann_tx_drag_pct": 0.2
+      }
+    },
+    "baseline_bh_100": {
+      "name": "BH 100% 0050.TW",
+      "ann_ret": 8.07,
+      "ann_vol": 28.16,
+      "sharpe": 0.2867,
+      "mdd": -77.34,
+      "calmar": 0.1044,
+      "sortino": 0.2551,
+      "n_days": 4215,
+      "n_years": 16.7
+    },
+    "best_frequency": "daily",
+    "best_sharpe": 0.4129,
+    "monthly_sharpe": 0.264,
+    "daily_sharpe": 0.4129,
+    "us_monthly_optimal": true,
+    "taiwan_agrees_with_us": false,
+    "calendar_fix": "TX only on TW open days; no ghost trades on US-only days"
+  },
+  "bonus_insurance_cost_benefit": {
+    "taiwan": {
+      "vt_sharpe": 0.264,
+      "bh_sharpe": 0.2867,
+      "sharpe_cost": 0.0227,
+      "vt_mdd": -48.73,
+      "bh_mdd": -77.34,
+      "mdd_benefit_pp": -28.61,
+      "vt_cagr": 3.85,
+      "bh_cagr": 8.07,
+      "cagr_cost_pp": 4.22
+    },
+    "us_reference_k738": {
+      "sharpe_cost": 0.08,
+      "mdd_benefit_pp": 15.0
+    }
+  },
+  "comparison_k739_vs_k739b": {
+    "test1_conclusion_changed": "False",
+    "test1_r2_old": 0.0388,
+    "test1_r2_new": 0.0364,
+    "test2_allocation_changed": {
+      "0050+GLD": false,
+      "0050+SPY": false,
+      "0050+Cash": false
+    },
+    "test3_sell_in_may_p_old": 0.8382,
+    "test3_sell_in_may_p_new": 0.8714,
+    "test4_best_freq_old": "daily",
+    "test4_best_freq_new": "daily",
+    "test4_best_freq_changed": false,
+    "holiday_mismatch_days": 1150,
+    "holiday_mismatch_pct": 22.6
+  },
+  "cross_market_summary": {
+    "finding_1_vix_sufficiency": {
+      "us": "VIX sufficient for SPY vol prediction (R\u00b2 ~0.35)",
+      "taiwan_fixed": "VIX(prior US) R\u00b2=0.036, +own_rv R\u00b2=0.040, gain=0.0038",
+      "generalizes": "True"
+    },
+    "finding_2_optimal_allocation": {
+      "us": "50/50 SPY/GLD is optimal (K702)",
+      "taiwan_0050_gld": 0.3,
+      "taiwan_0050_spy": 0.2,
+      "taiwan_0050_cash": 0.1
+    },
+    "finding_3_calendar": {
+      "us": "VIX seasonal significant but return diff insignificant (K736)",
+      "taiwan_sell_in_may_sig": false,
+      "taiwan_halloween_win_rate": 0.625,
+      "taiwan_cny_effect_sig": false
+    },
+    "finding_4_rebalancing": {
+      "us": "Monthly optimal for 12/VIX (K733)",
+      "taiwan_best_fixed": "daily",
+      "generalizes": false
+    }
+  },
+  "experiment_id": "K739b",
+  "title": "Taiwan VT Cross-Validation \u2014 Holiday-Bug Fix (Codex Review)",
+  "data_source": "yfinance",
+  "assets": [
+    "0050.TW",
+    "SPY",
+    "GLD",
+    "^VIX"
+  ],
+  "period": "2009-01-02 to 2026-03-27",
+  "n_tw_trading_days": 4215,
+  "n_us_trading_days": 5089,
+  "n_both_open": 4077,
+  "n_holiday_mismatch": 1150,
+  "tx_cost_bps_taiwan": 10,
+  "vix_lag_method": "Most recent prior US VIX close for each TW trading day",
+  "bug_fixes": [
+    "BUG 1 FIXED: No longer ffill across calendars \u2014 returns computed on own market days only",
+    "BUG 2 FIXED: TX only charged on days when market is actually open (no ghost trades)",
+    "VIX lag: uses asof-style lookup (most recent prior US close) instead of shift(1) on union calendar"
+  ],
+  "references": [
+    "K739: Original (buggy) cross-validation",
+    "K82/K88: Taiwan VT guide",
+    "K636: Amplification 4.6x",
+    "K733: US monthly rebalancing optimal",
+    "K736: US calendar anomaly",
+    "K738: VT insurance cost-benefit"
+  ],
+  "timestamp": "2026-03-31T12:25:01.419111"
+}

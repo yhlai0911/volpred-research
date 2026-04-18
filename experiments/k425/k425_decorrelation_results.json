@@ -1,0 +1,48 @@
+{
+  "experiment": "K425",
+  "title": "Bond-Equity Decorrelation Regime Detection",
+  "timestamp": "2026-03-25T17:21:44.026943+00:00",
+  "data": {
+    "source": "yfinance",
+    "tickers": [
+      "SPY",
+      "TLT",
+      "GLD",
+      "VIX",
+      "TNX"
+    ],
+    "n": 5334
+  },
+  "correlation_stats": {
+    "SPY-TLT": {
+      "pre2022": -0.351,
+      "post2022": 0.075
+    },
+    "SPY-GLD": {
+      "pre2022": 0.041,
+      "post2022": 0.126
+    }
+  },
+  "drivers": {
+    "VIX Level": {
+      "r": -0.23,
+      "t": -17.16
+    },
+    "VIX Change": {
+      "r": 0.008,
+      "t": 0.55
+    },
+    "10yr Yield": {
+      "r": 0.522,
+      "t": 44.41
+    },
+    "Yield Change": {
+      "r": 0.019,
+      "t": 1.41
+    },
+    "|SPY ret|": {
+      "r": -0.191,
+      "t": -14.13
+    }
+  }
+}

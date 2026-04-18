@@ -1,0 +1,532 @@
+{
+  "experiment_id": "K777",
+  "title": "Multi-Target Fair Model Comparison \u2014 Each Model on Its Native Ground",
+  "proposer": "\u7528\u6236",
+  "executor": "Claude",
+  "timestamp": "2026-03-31T12:41:26.659505+00:00",
+  "data_source": "yfinance SPY 2007-2026",
+  "n_oos": 4326,
+  "min_window": 500,
+  "refit_freq": 63,
+  "diagnostics": {
+    "n_obs": 4839,
+    "mean": 0.0004598812951720197,
+    "std": 0.012403591920669697,
+    "skewness": 0.001021196040160335,
+    "excess_kurtosis": 14.552634634710834,
+    "jarque_bera_stat": 42699.97696239712,
+    "jarque_bera_p": 0.0,
+    "normality_rejected": true,
+    "empirical_abs_over_sigma": 0.6413980070663547,
+    "theoretical_abs_over_sigma": 0.7978845608028654,
+    "ratio_diff_pct": -19.612681009775052,
+    "empirical_sq_over_abs2": 2.4341166478818232,
+    "theoretical_sq_over_abs2": 1.5707963267948966,
+    "moment_diff_pct": 54.96067862906665
+  },
+  "empirical_ratios": {
+    "abs_over_sigma_mean": 0.693605476120355,
+    "abs_over_sigma_std": 0.05155767540437994,
+    "sq_over_abs2_mean": 2.123879813306623,
+    "sq_over_abs2_std": 0.33525133048850236,
+    "normal_abs_over_sigma": 0.7978845608028654,
+    "normal_sq_over_abs2": 1.5707963267948966
+  },
+  "target1_abs_return": {
+    "metrics": {
+      "amem": {
+        "qlike": 0.47284566320844207,
+        "mse": 5.0498829354583676e-05,
+        "spearman_r": 0.41989614916606777,
+        "spearman_p": 2.180315877597744e-184
+      },
+      "mem": {
+        "qlike": 0.49791582138956914,
+        "mse": 5.457328615200407e-05,
+        "spearman_r": 0.3502264793966911,
+        "spearman_p": 4.6718157526225956e-125
+      },
+      "har_abs": {
+        "qlike": 0.5016086828778488,
+        "mse": 5.5124742324722365e-05,
+        "spearman_r": 0.34795616801018286,
+        "spearman_p": 2.3289464136365962e-123
+      },
+      "ewma_abs": {
+        "qlike": 0.5055098018833267,
+        "mse": 5.684339995181822e-05,
+        "spearman_r": 0.3361275048977229,
+        "spearman_p": 9.703344891294261e-115
+      },
+      "gjr": {
+        "qlike": 0.48963443254606354,
+        "mse": 5.3876343746829426e-05,
+        "spearman_r": 0.38105871375369177,
+        "spearman_p": 1.5387238470868455e-149
+      },
+      "har_sq": {
+        "qlike": 0.5116653003519853,
+        "mse": 5.648975770431244e-05,
+        "spearman_r": 0.32505314904287974,
+        "spearman_p": 5.2527369441230356e-107
+      },
+      "ewma_var": {
+        "qlike": 0.5123761057698555,
+        "mse": 5.678500297381367e-05,
+        "spearman_r": 0.32856986046114073,
+        "spearman_p": 1.992425299044828e-109
+      }
+    },
+    "dm_tests": {
+      "amem_vs_mem": {
+        "dm_stat": -7.786310296317187,
+        "p_value": 6.8833827526759706e-15,
+        "harvey_pass": true,
+        "better": "amem"
+      },
+      "amem_vs_har_abs": {
+        "dm_stat": -7.462103129725928,
+        "p_value": 8.504308368628699e-14,
+        "harvey_pass": true,
+        "better": "amem"
+      },
+      "amem_vs_ewma_abs": {
+        "dm_stat": -7.1574995403799155,
+        "p_value": 8.215650382226158e-13,
+        "harvey_pass": true,
+        "better": "amem"
+      },
+      "amem_vs_gjr": {
+        "dm_stat": -6.774383322203009,
+        "p_value": 1.2493783785316737e-11,
+        "harvey_pass": true,
+        "better": "amem"
+      },
+      "amem_vs_har_sq": {
+        "dm_stat": -7.940704394132832,
+        "p_value": 1.9984014443252818e-15,
+        "harvey_pass": true,
+        "better": "amem"
+      },
+      "amem_vs_ewma_var": {
+        "dm_stat": -7.7385538782166226,
+        "p_value": 9.992007221626409e-15,
+        "harvey_pass": true,
+        "better": "amem"
+      },
+      "mem_vs_har_abs": {
+        "dm_stat": -1.8924267103615426,
+        "p_value": 0.058434150004186725,
+        "harvey_pass": false,
+        "better": "mem"
+      },
+      "mem_vs_ewma_abs": {
+        "dm_stat": -3.149640549337121,
+        "p_value": 0.0016347145593715862,
+        "harvey_pass": true,
+        "better": "mem"
+      },
+      "mem_vs_gjr": {
+        "dm_stat": 2.778732461171153,
+        "p_value": 0.0054571450788489795,
+        "harvey_pass": false,
+        "better": "gjr"
+      },
+      "mem_vs_har_sq": {
+        "dm_stat": -4.220774011205983,
+        "p_value": 2.434649179194892e-05,
+        "harvey_pass": true,
+        "better": "mem"
+      },
+      "mem_vs_ewma_var": {
+        "dm_stat": -3.8601706913515406,
+        "p_value": 0.00011330784762386692,
+        "harvey_pass": true,
+        "better": "mem"
+      },
+      "har_abs_vs_ewma_abs": {
+        "dm_stat": -1.4348398747578244,
+        "p_value": 0.15133273224827937,
+        "harvey_pass": false,
+        "better": "har_abs"
+      },
+      "har_abs_vs_gjr": {
+        "dm_stat": 3.3519450347439954,
+        "p_value": 0.0008024594903568438,
+        "harvey_pass": true,
+        "better": "gjr"
+      },
+      "har_abs_vs_har_sq": {
+        "dm_stat": -3.28910740683384,
+        "p_value": 0.0010050566173007702,
+        "harvey_pass": true,
+        "better": "har_abs"
+      },
+      "har_abs_vs_ewma_var": {
+        "dm_stat": -2.746467663914387,
+        "p_value": 0.0060240824122692604,
+        "harvey_pass": false,
+        "better": "har_abs"
+      },
+      "ewma_abs_vs_gjr": {
+        "dm_stat": 4.227002657386124,
+        "p_value": 2.3682487175991085e-05,
+        "harvey_pass": true,
+        "better": "gjr"
+      },
+      "ewma_abs_vs_har_sq": {
+        "dm_stat": -1.764866759231652,
+        "p_value": 0.07758616146989761,
+        "harvey_pass": false,
+        "better": "ewma_abs"
+      },
+      "ewma_abs_vs_ewma_var": {
+        "dm_stat": -2.790781056787842,
+        "p_value": 0.005258102694783773,
+        "harvey_pass": false,
+        "better": "ewma_abs"
+      },
+      "gjr_vs_har_sq": {
+        "dm_stat": -5.852834164193136,
+        "p_value": 4.832659383779969e-09,
+        "harvey_pass": true,
+        "better": "gjr"
+      },
+      "gjr_vs_ewma_var": {
+        "dm_stat": -6.403157939221426,
+        "p_value": 1.5219558946455436e-10,
+        "harvey_pass": true,
+        "better": "gjr"
+      },
+      "har_sq_vs_ewma_var": {
+        "dm_stat": -0.1763998920111098,
+        "p_value": 0.8599797894968102,
+        "harvey_pass": false,
+        "better": "har_sq"
+      }
+    },
+    "ranking_qlike": [
+      "amem",
+      "gjr",
+      "mem",
+      "har_abs",
+      "ewma_abs",
+      "har_sq",
+      "ewma_var"
+    ],
+    "ranking_spearman": [
+      "amem",
+      "gjr",
+      "mem",
+      "har_abs",
+      "ewma_abs",
+      "ewma_var",
+      "har_sq"
+    ]
+  },
+  "target2_squared_return": {
+    "metrics": {
+      "gjr": {
+        "qlike": 1.5384133826058273,
+        "mse": 1.5051513431225862e-07,
+        "spearman_r": 0.39014908107178914,
+        "spearman_p": 2.7828053035552997e-157
+      },
+      "har_sq": {
+        "qlike": 1.6544208595921128,
+        "mse": 1.6474948172534794e-07,
+        "spearman_r": 0.3381611438001064,
+        "spearman_p": 3.4013833639512866e-116
+      },
+      "ewma_var": {
+        "qlike": 1.626535412384367,
+        "mse": 1.6835967181510648e-07,
+        "spearman_r": 0.33317200835646366,
+        "spearman_p": 1.2087091457000145e-112
+      },
+      "amem": {
+        "qlike": 1.5344343463918684,
+        "mse": 2.0706635242493127e-07,
+        "spearman_r": 0.41954754168863556,
+        "spearman_p": 4.703319718863473e-184
+      },
+      "mem": {
+        "qlike": 1.6187667547048659,
+        "mse": 1.9397368290633213e-07,
+        "spearman_r": 0.34682296318145633,
+        "spearman_p": 1.6191407768691213e-122
+      },
+      "har_abs": {
+        "qlike": 1.635110014679281,
+        "mse": 2.201315790812545e-07,
+        "spearman_r": 0.3458060109946961,
+        "spearman_p": 9.16325581085932e-122
+      },
+      "ewma_abs": {
+        "qlike": 1.6463317509824482,
+        "mse": 2.1584375065977782e-07,
+        "spearman_r": 0.33265369915881016,
+        "spearman_p": 2.801674420747002e-112
+      }
+    },
+    "dm_tests": {
+      "gjr_vs_har_sq": {
+        "dm_stat": -6.140553764880315,
+        "p_value": 8.223428604736682e-10,
+        "harvey_pass": true,
+        "better": "gjr"
+      },
+      "gjr_vs_ewma_var": {
+        "dm_stat": -5.302832671550164,
+        "p_value": 1.1401942479061233e-07,
+        "harvey_pass": true,
+        "better": "gjr"
+      },
+      "gjr_vs_amem": {
+        "dm_stat": 0.46824800025556845,
+        "p_value": 0.6396072497798373,
+        "harvey_pass": false,
+        "better": "amem"
+      },
+      "gjr_vs_mem": {
+        "dm_stat": -6.90916875515318,
+        "p_value": 4.874989301129062e-12,
+        "harvey_pass": true,
+        "better": "gjr"
+      },
+      "gjr_vs_har_abs": {
+        "dm_stat": -7.040273452526682,
+        "p_value": 1.9186874311571955e-12,
+        "harvey_pass": true,
+        "better": "gjr"
+      },
+      "gjr_vs_ewma_abs": {
+        "dm_stat": -6.294676318078233,
+        "p_value": 3.080420363232861e-10,
+        "harvey_pass": true,
+        "better": "gjr"
+      },
+      "har_sq_vs_ewma_var": {
+        "dm_stat": 1.7736410983186097,
+        "p_value": 0.07612253506147715,
+        "harvey_pass": false,
+        "better": "ewma_var"
+      },
+      "har_sq_vs_amem": {
+        "dm_stat": 5.061016632894418,
+        "p_value": 4.170268290693002e-07,
+        "harvey_pass": true,
+        "better": "amem"
+      },
+      "har_sq_vs_mem": {
+        "dm_stat": 2.066213121481607,
+        "p_value": 0.03880836042203528,
+        "harvey_pass": false,
+        "better": "mem"
+      },
+      "har_sq_vs_har_abs": {
+        "dm_stat": 1.2385339829157538,
+        "p_value": 0.21551812954100624,
+        "harvey_pass": false,
+        "better": "har_abs"
+      },
+      "har_sq_vs_ewma_abs": {
+        "dm_stat": 0.4833988055108302,
+        "p_value": 0.6288125961668181,
+        "harvey_pass": false,
+        "better": "ewma_abs"
+      },
+      "ewma_var_vs_amem": {
+        "dm_stat": 4.214547647893476,
+        "p_value": 2.5027931182641794e-05,
+        "harvey_pass": true,
+        "better": "amem"
+      },
+      "ewma_var_vs_mem": {
+        "dm_stat": 0.5253257252970145,
+        "p_value": 0.5993567769769976,
+        "harvey_pass": false,
+        "better": "mem"
+      },
+      "ewma_var_vs_har_abs": {
+        "dm_stat": -0.5859709183433877,
+        "p_value": 0.5578950580303852,
+        "harvey_pass": false,
+        "better": "ewma_var"
+      },
+      "ewma_var_vs_ewma_abs": {
+        "dm_stat": -2.2034179660770494,
+        "p_value": 0.027565303055234747,
+        "harvey_pass": false,
+        "better": "ewma_var"
+      },
+      "amem_vs_mem": {
+        "dm_stat": -6.146720578541791,
+        "p_value": 7.910130328525611e-10,
+        "harvey_pass": true,
+        "better": "amem"
+      },
+      "amem_vs_har_abs": {
+        "dm_stat": -6.300102450642291,
+        "p_value": 2.974489543561276e-10,
+        "harvey_pass": true,
+        "better": "amem"
+      },
+      "amem_vs_ewma_abs": {
+        "dm_stat": -5.404030371949774,
+        "p_value": 6.515990391697812e-08,
+        "harvey_pass": true,
+        "better": "amem"
+      },
+      "mem_vs_har_abs": {
+        "dm_stat": -1.9214846142042235,
+        "p_value": 0.05467064023423385,
+        "harvey_pass": false,
+        "better": "mem"
+      },
+      "mem_vs_ewma_abs": {
+        "dm_stat": -2.478649411975765,
+        "p_value": 0.01318808629674284,
+        "harvey_pass": false,
+        "better": "mem"
+      },
+      "har_abs_vs_ewma_abs": {
+        "dm_stat": -0.986068057912811,
+        "p_value": 0.3240997168591062,
+        "harvey_pass": false,
+        "better": "har_abs"
+      }
+    },
+    "ranking_qlike": [
+      "amem",
+      "gjr",
+      "mem",
+      "ewma_var",
+      "har_abs",
+      "ewma_abs",
+      "har_sq"
+    ],
+    "ranking_spearman": [
+      "amem",
+      "gjr",
+      "mem",
+      "har_abs",
+      "har_sq",
+      "ewma_var",
+      "ewma_abs"
+    ]
+  },
+  "target3_rank_correlation": {
+    "metrics": {
+      "amem": {
+        "spearman_r": 0.41989614916606777,
+        "spearman_p": 2.180315877597744e-184
+      },
+      "mem": {
+        "spearman_r": 0.3502264793966911,
+        "spearman_p": 4.6718157526225956e-125
+      },
+      "har_abs": {
+        "spearman_r": 0.34795616801018286,
+        "spearman_p": 2.3289464136365962e-123
+      },
+      "ewma_abs": {
+        "spearman_r": 0.3361275048977229,
+        "spearman_p": 9.703344891294261e-115
+      },
+      "gjr": {
+        "spearman_r": 0.39014908107178914,
+        "spearman_p": 2.7828053035552997e-157
+      },
+      "har_sq": {
+        "spearman_r": 0.3381611438001064,
+        "spearman_p": 3.4013833639512866e-116
+      },
+      "ewma_var": {
+        "spearman_r": 0.33317200835646366,
+        "spearman_p": 1.2087091457000145e-112
+      }
+    },
+    "ranking": [
+      "amem",
+      "gjr",
+      "mem",
+      "har_abs",
+      "har_sq",
+      "ewma_abs",
+      "ewma_var"
+    ]
+  },
+  "fair_ranking": {
+    "model_ranks": {
+      "amem": {
+        "target1_rank": 1,
+        "target2_rank": 1,
+        "target3_rank": 1,
+        "avg_rank": 1.0
+      },
+      "mem": {
+        "target1_rank": 3,
+        "target2_rank": 3,
+        "target3_rank": 3,
+        "avg_rank": 3.0
+      },
+      "gjr": {
+        "target1_rank": 2,
+        "target2_rank": 2,
+        "target3_rank": 2,
+        "avg_rank": 2.0
+      },
+      "har_abs": {
+        "target1_rank": 4,
+        "target2_rank": 5,
+        "target3_rank": 4,
+        "avg_rank": 4.333333333333333
+      },
+      "har_sq": {
+        "target1_rank": 6,
+        "target2_rank": 7,
+        "target3_rank": 5,
+        "avg_rank": 6.0
+      },
+      "ewma_abs": {
+        "target1_rank": 5,
+        "target2_rank": 6,
+        "target3_rank": 6,
+        "avg_rank": 5.666666666666667
+      },
+      "ewma_var": {
+        "target1_rank": 7,
+        "target2_rank": 4,
+        "target3_rank": 7,
+        "avg_rank": 6.0
+      }
+    },
+    "order": [
+      "amem",
+      "gjr",
+      "mem",
+      "har_abs",
+      "ewma_abs",
+      "har_sq",
+      "ewma_var"
+    ],
+    "winner": "amem"
+  },
+  "normality_bias": {
+    "abs_native_home_advantage": 0.5,
+    "var_native_home_advantage": 0.666666666666667,
+    "normality_rejected": true,
+    "excess_kurtosis": 14.552634634710834,
+    "conversion_bias_abs_pct": -19.612681009775052,
+    "conversion_bias_sq_pct": 54.96067862906665
+  },
+  "references": [
+    "Engle & Gallo (2006) J.Econometrics 131, MEM framework",
+    "Glosten, Jagannathan, Runkle (1993) JoF 48, GJR-GARCH",
+    "Corsi (2009) J.Financial Econometrics 7, HAR model",
+    "Patton (2011) J.Econometrics 160, QLIKE robust loss",
+    "K770: OVERTURNED \u2014 QLIKE target mismatch",
+    "K770b: Fixed with sqrt(2/pi) \u2014 assumes Normality"
+  ]
+}

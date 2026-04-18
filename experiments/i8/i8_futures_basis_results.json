@@ -1,0 +1,52 @@
+{
+  "experiment": "I8",
+  "title": "Futures Basis Multi-Market Vol Prediction",
+  "timestamp": "2026-03-25T15:50:29.377901+00:00",
+  "data": {
+    "source": "yfinance",
+    "tickers": [
+      "SPY",
+      "ES=F",
+      "GLD",
+      "GC=F",
+      "TLT",
+      "ZN=F",
+      "^VIX"
+    ],
+    "period": "2010-01-04 to 2026-03-24",
+    "n_obs": 4075
+  },
+  "pair_results": [
+    {
+      "asset_class": "Equity",
+      "pair": "SPY-ES",
+      "n": 4052,
+      "r_simple": -0.045,
+      "r_partial": -0.042,
+      "t_partial": -2.67,
+      "harvey_pass": "False",
+      "oos_incr_r2": -0.0001
+    },
+    {
+      "asset_class": "Gold",
+      "pair": "GLD-GC",
+      "n": 4052,
+      "r_simple": -0.011,
+      "r_partial": -0.023,
+      "t_partial": -1.45,
+      "harvey_pass": "False",
+      "oos_incr_r2": -0.7372
+    },
+    {
+      "asset_class": "Bond",
+      "pair": "TLT-ZN",
+      "n": 4052,
+      "r_simple": 0.042,
+      "r_partial": 0.072,
+      "t_partial": 4.58,
+      "harvey_pass": "True",
+      "oos_incr_r2": -0.0687
+    }
+  ],
+  "conclusion": "MOSTLY NULL. TLT-ZN IS passes Harvey but OOS collapses. Sixth Law confirmed."
+}

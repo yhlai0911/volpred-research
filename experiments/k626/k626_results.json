@@ -1,0 +1,224 @@
+{
+  "experiment_id": "K626",
+  "title": "VIX Direction Predictability",
+  "timestamp": "2026-03-29T01:38:00.505210",
+  "data_source": "yfinance (SPY, ^VIX)",
+  "data_period": "2006-06-01 to 2026-03-26",
+  "total_observations": 4986,
+  "oos_period": "2023-01-01 to 2024-12-31",
+  "oos_observations": 502,
+  "rolling_window": 2000,
+  "refit_frequency": 63,
+  "descriptive_statistics": {
+    "vix_daily_change": {
+      "mean": 0.0026,
+      "std": 1.9701,
+      "skewness": 1.4016,
+      "kurtosis": 24.3421,
+      "min": -18.71,
+      "max": 24.86
+    },
+    "vix_level": {
+      "mean": 19.6121,
+      "std": 8.7261,
+      "min": 9.14,
+      "max": 82.69,
+      "median": 17.25
+    },
+    "class_balance": {
+      "vix_up_pct": 0.4541,
+      "vix_down_pct": 0.5459,
+      "total_observations": 4986
+    }
+  },
+  "vix_direction_autocorrelation": {
+    "lag_1": -0.0476,
+    "lag_2": -0.0251,
+    "lag_3": -0.0262,
+    "lag_5": -0.0157,
+    "lag_10": 0.0319,
+    "lag_22": -0.0164
+  },
+  "vix_up_base_rate": 0.4539,
+  "model_metrics": {
+    "logistic_regression": {
+      "accuracy": 0.5578,
+      "precision_vix_up": 0.4926,
+      "recall_vix_up": 0.4566,
+      "auc_roc": 0.5599
+    },
+    "random_forest": {
+      "accuracy": 0.5996,
+      "precision_vix_up": 0.5616,
+      "recall_vix_up": 0.3744,
+      "auc_roc": 0.6134
+    },
+    "naive_always_down": {
+      "accuracy": 0.5637,
+      "precision_vix_up": 0.0,
+      "recall_vix_up": 0.0
+    },
+    "momentum_baseline": {
+      "accuracy": 0.49,
+      "precision_vix_up": 0.4155,
+      "recall_vix_up": 0.4155
+    }
+  },
+  "feature_importance_rf": {
+    "day_of_week": 0.1515,
+    "spy_5d_ret": 0.1238,
+    "vix_percentile": 0.1126,
+    "vix_level": 0.112,
+    "spy_ret": 0.1111,
+    "vix_ma_ratio": 0.0989,
+    "vix_5d_change": 0.0899,
+    "vix_22d_change": 0.0879,
+    "spy_ret_abs": 0.0738,
+    "month": 0.0384
+  },
+  "calibration_logistic": [
+    {
+      "bin_lower": 0.1,
+      "bin_upper": 0.2,
+      "avg_predicted_prob": 0.1962,
+      "actual_frequency": 0.0,
+      "count": 1
+    },
+    {
+      "bin_lower": 0.2,
+      "bin_upper": 0.3,
+      "avg_predicted_prob": 0.2878,
+      "actual_frequency": 0.0,
+      "count": 4
+    },
+    {
+      "bin_lower": 0.3,
+      "bin_upper": 0.4,
+      "avg_predicted_prob": 0.363,
+      "actual_frequency": 0.3281,
+      "count": 64
+    },
+    {
+      "bin_lower": 0.4,
+      "bin_upper": 0.5,
+      "avg_predicted_prob": 0.4529,
+      "actual_frequency": 0.4261,
+      "count": 230
+    },
+    {
+      "bin_lower": 0.5,
+      "bin_upper": 0.6,
+      "avg_predicted_prob": 0.5396,
+      "actual_frequency": 0.4946,
+      "count": 186
+    },
+    {
+      "bin_lower": 0.6,
+      "bin_upper": 0.7,
+      "avg_predicted_prob": 0.6252,
+      "actual_frequency": 0.4706,
+      "count": 17
+    }
+  ],
+  "calibration_rf": [
+    {
+      "bin_lower": 0.2,
+      "bin_upper": 0.3,
+      "avg_predicted_prob": 0.2762,
+      "actual_frequency": 0.2857,
+      "count": 7
+    },
+    {
+      "bin_lower": 0.3,
+      "bin_upper": 0.4,
+      "avg_predicted_prob": 0.3672,
+      "actual_frequency": 0.3582,
+      "count": 134
+    },
+    {
+      "bin_lower": 0.4,
+      "bin_upper": 0.5,
+      "avg_predicted_prob": 0.4474,
+      "actual_frequency": 0.4047,
+      "count": 215
+    },
+    {
+      "bin_lower": 0.5,
+      "bin_upper": 0.6,
+      "avg_predicted_prob": 0.5357,
+      "actual_frequency": 0.4842,
+      "count": 95
+    },
+    {
+      "bin_lower": 0.6,
+      "bin_upper": 0.7,
+      "avg_predicted_prob": 0.6521,
+      "actual_frequency": 0.6452,
+      "count": 31
+    },
+    {
+      "bin_lower": 0.7,
+      "bin_upper": 0.8,
+      "avg_predicted_prob": 0.7314,
+      "actual_frequency": 0.7895,
+      "count": 19
+    },
+    {
+      "bin_lower": 0.8,
+      "bin_upper": 0.9,
+      "avg_predicted_prob": 0.8011,
+      "actual_frequency": 1.0,
+      "count": 1
+    }
+  ],
+  "economic_value": {
+    "standard_12vix": {
+      "annualized_return": 0.167,
+      "annualized_vol": 0.0921,
+      "sharpe_ratio": 1.8139,
+      "max_drawdown": -0.0771,
+      "total_return": 0.3829,
+      "n_days": 502
+    },
+    "direction_lr": {
+      "annualized_return": 0.1525,
+      "annualized_vol": 0.1007,
+      "sharpe_ratio": 1.5142,
+      "max_drawdown": -0.0928,
+      "total_return": 0.3412,
+      "n_days": 502
+    },
+    "direction_rf": {
+      "annualized_return": 0.1791,
+      "annualized_vol": 0.1043,
+      "sharpe_ratio": 1.7168,
+      "max_drawdown": -0.0992,
+      "total_return": 0.4132,
+      "n_days": 502
+    },
+    "perfect_foresight": {
+      "annualized_return": 0.334,
+      "annualized_vol": 0.0917,
+      "sharpe_ratio": 3.6428,
+      "max_drawdown": -0.0396,
+      "total_return": 0.9283,
+      "n_days": 502
+    }
+  },
+  "accuracy_lift_over_naive": 0.0359,
+  "sharpe_improvement": -0.0971,
+  "conclusion": "NO_ECONOMIC_VALUE",
+  "key_finding": "Best model accuracy: 0.5996 vs naive baseline: 0.5637 (lift: 0.0359). Direction-informed 12/VIX Sharpe: 1.7168 vs standard: 1.8139 (change: -0.0971). VIX direction has no economic value. Our strategies correctly use VIX level (not direction) for position sizing.",
+  "references": [
+    "Fernandes et al. (2014) Modeling and predicting the CBOE market volatility index, JBF",
+    "Konstantinidi et al. (2008) Can the evolution of implied volatility be forecast? JBF",
+    "Simon (2003) The VIX futures basis, Journal of Derivatives"
+  ],
+  "limitations": [
+    "Single OOS period (2023-2024) — results may differ in other regimes",
+    "Simple models only — deep learning or ensemble methods not tested",
+    "Features are basic — options-based features (term structure, skew) not included",
+    "Economic value calculation assumes zero transaction costs",
+    "Direction adjustment magnitude (+-20%) is arbitrary"
+  ]
+}

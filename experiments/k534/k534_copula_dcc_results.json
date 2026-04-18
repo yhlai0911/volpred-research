@@ -1,0 +1,327 @@
+{
+  "experiment_id": "K534",
+  "title": "Cross-Asset Correlation Regime Dependence and Portfolio Implications",
+  "data_source": "yfinance daily (SPY, GLD, ^VIX)",
+  "data_period": "2005-01-03 to 2026-03-26",
+  "sample_size": 5340,
+  "references": [
+    "Engle (2002) Dynamic Conditional Correlation, JBES",
+    "Patton (2006) Copula Methods for Time Series, IER",
+    "Baur & Lucey (2010) Is Gold a Hedge or a Safe Haven?, Financial Review"
+  ],
+  "prior_experiments": [
+    "K443 (Copula tail dependence)",
+    "K444 (DCC-GARCH portfolio vol)"
+  ],
+  "rolling_correlation_stats": {
+    "window_60d": {
+      "mean": 0.05795068779487974,
+      "std": 0.28201241557466783,
+      "min": -0.6264468509018561,
+      "max": 0.7020670596192558
+    }
+  },
+  "vix_regime_analysis": {
+    "regime_stats": {
+      "Low (VIX<15)": {
+        "n": 1930,
+        "mean": -0.00939592982204035,
+        "std": 0.261306477455754,
+        "median": -0.027378935548807333,
+        "q5": -0.43503009718041386,
+        "q95": 0.3940980086363387
+      },
+      "Medium (15-25)": {
+        "n": 2473,
+        "mean": 0.11515808743944485,
+        "std": 0.28637753604769994,
+        "median": 0.12358717725384313,
+        "q5": -0.3900043704160456,
+        "q95": 0.552437348691165
+      },
+      "High (25-35)": {
+        "n": 625,
+        "mean": 0.07603581596776507,
+        "std": 0.27262213789046585,
+        "median": 0.09086182086428543,
+        "q5": -0.38224181650093436,
+        "q95": 0.538607781650734
+      },
+      "Crisis (VIX>=35)": {
+        "n": 253,
+        "mean": -0.03216050757431837,
+        "std": 0.28166437220786894,
+        "median": -0.05306636259860796,
+        "q5": -0.4783210314935504,
+        "q95": 0.43245994607736565
+      }
+    },
+    "kruskal_wallis": {
+      "H": 242.0653203722668,
+      "p": 3.40308685509204e-52
+    },
+    "pairwise_tests": {
+      "Low (VIX<15) vs Medium (15-25)": {
+        "U": 1770884.0,
+        "p": 5.746539654226974e-49
+      },
+      "Low (VIX<15) vs High (25-35)": {
+        "U": 493438.0,
+        "p": 7.75672366546357e-12
+      },
+      "Low (VIX<15) vs Crisis (VIX>=35)": {
+        "U": 255478.0,
+        "p": 0.22931350443485443
+      },
+      "Medium (15-25) vs High (25-35)": {
+        "U": 836578.0,
+        "p": 0.0014148109270848664
+      },
+      "Medium (15-25) vs Crisis (VIX>=35)": {
+        "U": 401331.0,
+        "p": 1.1568646959837075e-13
+      },
+      "High (25-35) vs Crisis (VIX>=35)": {
+        "U": 95997.0,
+        "p": 6.500733128260856e-07
+      }
+    }
+  },
+  "regression": {
+    "linear": {
+      "intercept": 0.03566614747022832,
+      "beta_vix": 0.0011590290525846693,
+      "t_stat": 2.5798315499551254,
+      "p_value": 0.009911637821481412,
+      "r2": 0.0012591684772736977,
+      "t_stat_nw": 0.8684303533914511,
+      "p_value_nw": 0.38519826180384786,
+      "nw_lag": 9
+    },
+    "quadratic": {
+      "intercept": -0.14457426865673303,
+      "beta_vix": 0.01634809716033662,
+      "beta_vix2": -0.0002516807349474262,
+      "r2": 0.02420956554386333
+    },
+    "interpretation": "10-point VIX increase changes 60d corr by 0.0116"
+  },
+  "subperiod_stability": {
+    "2005-2009 (GFC)": {
+      "n": 1199,
+      "mean_corr": 0.1178206948113861,
+      "beta_vix": -0.0037391958130998937,
+      "t_stat": -6.02090253607283,
+      "p_value": 2.3036608176596474e-09,
+      "r2": 0.029394875406710375
+    },
+    "2010-2014 (Recovery)": {
+      "n": 1258,
+      "mean_corr": 0.11955312616553221,
+      "beta_vix": -0.01006721582695718,
+      "t_stat": -8.168364433490932,
+      "p_value": 6.661338147750939e-16,
+      "r2": 0.05044307765633982
+    },
+    "2015-2019 (Bull)": {
+      "n": 1258,
+      "mean_corr": -0.1460905633920647,
+      "beta_vix": 0.0035271844916430826,
+      "t_stat": 2.50739390474373,
+      "p_value": 0.0122879123351749,
+      "r2": 0.004980661349634485
+    },
+    "2020-2022 (COVID+)": {
+      "n": 756,
+      "mean_corr": 0.13057149645335608,
+      "beta_vix": 0.0001965109203304899,
+      "t_stat": 0.1753273054026396,
+      "p_value": 0.8608695290089587,
+      "r2": 4.0767123145935e-05
+    },
+    "2023-2026 (Recent)": {
+      "n": 810,
+      "mean_corr": 0.12276865910882553,
+      "beta_vix": 0.011211630239259068,
+      "t_stat": 5.717468546445054,
+      "p_value": 1.5214349780023895e-08,
+      "r2": 0.038884092946079085
+    }
+  },
+  "portfolio_backtest": {
+    "full_sample": {
+      "Fixed 50/50": {
+        "name": "Fixed 50/50",
+        "ann_return": 0.09673262781184455,
+        "ann_vol": 0.13511058055568326,
+        "sharpe": 0.7159515369854994,
+        "mdd": -0.3612124061022322,
+        "calmar": 0.2677998490020489,
+        "sortino": 0.8976235297646739,
+        "total_return": 6.0754535349282515
+      },
+      "Fixed 60/40": {
+        "name": "Fixed 60/40",
+        "ann_return": 0.09536451876677354,
+        "ann_vol": 0.13868400608732048,
+        "sharpe": 0.6876389099023328,
+        "mdd": -0.383726633196263,
+        "calmar": 0.24852202197286075,
+        "sortino": 0.8528564542392882,
+        "total_return": 5.890758591711279
+      },
+      "Fixed 70/30": {
+        "name": "Fixed 70/30",
+        "ann_return": 0.09328383115926231,
+        "ann_vol": 0.14666772780900666,
+        "sharpe": 0.636021519885671,
+        "mdd": -0.4327590355598496,
+        "calmar": 0.21555605659066907,
+        "sortino": 0.7804608286733276,
+        "total_return": 5.618645653567285
+      },
+      "Regime (VIX>25\u219240/60)": {
+        "name": "Regime (VIX>25\u219240/60)",
+        "ann_return": 0.0948552620876042,
+        "ann_vol": 0.13044620209599345,
+        "sharpe": 0.72716001358017,
+        "mdd": -0.3592233845417965,
+        "calmar": 0.2640564789750417,
+        "sortino": 0.9176444554772628,
+        "total_return": 5.823189396765229
+      },
+      "Regime Agg (VIX>25\u219230/70)": {
+        "name": "Regime Agg (VIX>25\u219230/70)",
+        "ann_return": 0.09418443893893391,
+        "ann_vol": 0.12909606135471577,
+        "sharpe": 0.7295686479554508,
+        "mdd": -0.3503391921862607,
+        "calmar": 0.2688378606777742,
+        "sortino": 0.9235531584274366,
+        "total_return": 5.735146279681554
+      }
+    },
+    "dm_tests_vs_fixed60_40": {
+      "Regime (VIX>25\u219240/60)": {
+        "dm_stat": 3.1557318098069302,
+        "p_value": 0.0016009599255266682
+      },
+      "Regime Agg (VIX>25\u219230/70)": {
+        "dm_stat": 2.8225626288359527,
+        "p_value": 0.0047641515833687365
+      },
+      "Fixed 50/50": {
+        "dm_stat": 2.1369185854054247,
+        "p_value": 0.03260461407204107
+      },
+      "Fixed 70/30": {
+        "dm_stat": -4.101736392571281,
+        "p_value": 4.1006128238985085e-05
+      }
+    },
+    "conclusion": "Regime-dependent allocation does NOT significantly outperform fixed allocation"
+  },
+  "cross_oos": [
+    {
+      "period": "OOS1: 2015-2017",
+      "is_beta_vix": -0.004915443994010854,
+      "oos_regime_sharpe": 0.9339888446821815,
+      "oos_fixed_sharpe": 0.9159128716209105,
+      "sharpe_diff": 0.018075973061270956,
+      "dm_stat": 1.3266948653381905,
+      "dm_p": 0.18460964018079196
+    },
+    {
+      "period": "OOS2: 2018-2020",
+      "is_beta_vix": -0.0005660539903052453,
+      "oos_regime_sharpe": 0.9170829516579594,
+      "oos_fixed_sharpe": 0.8359947122527496,
+      "sharpe_diff": 0.08108823940520982,
+      "dm_stat": 1.8234511825164585,
+      "dm_p": 0.06823508439828707
+    },
+    {
+      "period": "OOS3: 2021-2025",
+      "is_beta_vix": 0.000932648795972526,
+      "oos_regime_sharpe": 1.0885982226474227,
+      "oos_fixed_sharpe": 1.1451677490308256,
+      "sharpe_diff": -0.05656952638340296,
+      "dm_stat": 3.1974953033476403,
+      "dm_p": 0.0013862666879573826
+    }
+  ],
+  "quantile_analysis": {
+    "results": {
+      "Bottom 5%": {
+        "n": 267,
+        "corr": -0.015020742592714612,
+        "gld_ann_mean": -0.23809720586039526,
+        "gld_positive_pct": 0.43820224719101125
+      },
+      "Bottom 10%": {
+        "n": 534,
+        "corr": -0.004354884949988233,
+        "gld_ann_mean": -0.16611751170315903,
+        "gld_positive_pct": 0.4887640449438202
+      },
+      "Bottom 25%": {
+        "n": 1335,
+        "corr": 0.002698711661629545,
+        "gld_ann_mean": -0.14752329677656223,
+        "gld_positive_pct": 0.49138576779026216
+      },
+      "Middle 50%": {
+        "n": 2670,
+        "corr": 0.07201177741204202,
+        "gld_ann_mean": 0.14701895924036312,
+        "gld_positive_pct": 0.549438202247191
+      },
+      "Top 25%": {
+        "n": 1335,
+        "corr": 0.04839443820057705,
+        "gld_ann_mean": 0.27469312284984393,
+        "gld_positive_pct": 0.5393258426966292
+      },
+      "Top 10%": {
+        "n": 534,
+        "corr": 0.05570031283711795,
+        "gld_ann_mean": 0.3857150803721512,
+        "gld_positive_pct": 0.5655430711610487
+      },
+      "Top 5%": {
+        "n": 267,
+        "corr": 0.07816196491149663,
+        "gld_ann_mean": 0.37821933968373617,
+        "gld_positive_pct": 0.5430711610486891
+      }
+    },
+    "fisher_z_test": {
+      "r_bottom10": -0.004354884949988233,
+      "r_middle50": 0.07201177741204202,
+      "z_stat": -1.6096558505565108,
+      "p_value": 0.10747300821681915
+    }
+  },
+  "ewma_dcc_proxy": {
+    "lambda": 0.94,
+    "mean_corr": 0.061126573364906296,
+    "std_corr": 0.30067941016964334,
+    "corr_with_vix": 0.05133897813161635
+  },
+  "conclusions": {
+    "finding_1": "SPY-GLD 60d rolling correlation IS VIX-regime dependent (Kruskal-Wallis H=242, p<0.001). Low VIX: corr=-0.009, Medium: +0.115, High: +0.076, Crisis: -0.032",
+    "finding_2": "Full-sample linear regression: beta(VIX)=0.00116, OLS t=2.58. BUT Newey-West HAC: t_NW=0.868, p=0.385 — NOT significant after serial correlation correction",
+    "finding_3": "CRITICAL: Sub-period beta sign FLIPS. GFC/Recovery(2005-2014): beta NEGATIVE (higher VIX → LOWER corr). Bull/Recent(2015-2026): beta POSITIVE. The relationship is STRUCTURALLY UNSTABLE",
+    "finding_4": "Quadratic spec (R²=0.024) far better than linear (R²=0.001) — correlation peaks at medium VIX, drops in both tails. Inverted-U shape",
+    "finding_5": "Full-sample DM test: Regime beats Fixed 60/40 (DM=3.16, p=0.0016). BUT cross-OOS INCONSISTENT: OOS1 NS (p=0.18), OOS2 marginal (p=0.07), OOS3 REVERSED (regime WORSE, p=0.001). Classic in-sample overfitting",
+    "finding_6": "Tail analysis: On worst SPY days (bottom 5%), GLD positive only 43.8% — GLD is NOT a reliable crash hedge. Fisher z-test: tail vs center correlation difference NS (p=0.107)",
+    "finding_7": "EWMA dynamic correlation: mean=0.061, range [-0.81, 0.81]. Correlation with VIX only 0.051 — VIX explains almost nothing about cross-asset dependence",
+    "theoretical_contribution": "Explains WHY 50/50 is immovable: (1) correlation-VIX relationship is structurally unstable (sign flips), (2) even when present, effect too small (R²<3%), (3) cross-OOS confirms no exploitable pattern",
+    "practical_implication": "No actionable portfolio improvement from VIX-regime switching for SPY-GLD. The 8x confirmed 50/50 robustness is NOT because correlation is stable — it is because correlation dynamics are unpredictable",
+    "limitation_1": "Only 2-asset case (SPY-GLD); higher-dimensional portfolios with TLT/commodities may show stronger regime effects",
+    "limitation_2": "Monthly rebalancing; daily or weekly may differ but adds transaction costs",
+    "limitation_3": "VIX threshold (25) is one choice; continuous regime approach (e.g., smooth transition) may capture nonlinearity better",
+    "limitation_4": "60-day rolling window is a smoothed estimate; shorter windows capture regime shifts faster but are noisier"
+  },
+  "created_at": "2026-03-27T13:24:38.032091+00:00"
+}

@@ -1,0 +1,329 @@
+2026-04-17 20:37:49,259 INFO ======================================================================
+2026-04-17 20:37:49,259 INFO K1195: Paper 1 JBF Robustness Suite Activation
+2026-04-17 20:37:49,259 INFO ======================================================================
+2026-04-17 20:37:49,259 INFO seed=42, window=504, target_vol=0.1
+2026-04-17 20:37:49,259 INFO assets=['SPY', 'QQQ', 'GLD', 'EEM', 'BTC-USD', 'TLT', 'SLV']
+2026-04-17 20:37:49,259 INFO OOS primary: ('2023-01-01', '2024-12-31'), validation: ('2025-01-01', '2026-04-17')
+2026-04-17 20:37:49,259 INFO 
+[DATA] Downloading...
+2026-04-17 20:37:52,367 INFO   SPY: 2010-01-05 – 2026-04-16 (4095 obs)
+2026-04-17 20:37:52,685 INFO   QQQ: 2010-01-05 – 2026-04-16 (4095 obs)
+2026-04-17 20:37:52,891 INFO   GLD: 2010-01-05 – 2026-04-16 (4095 obs)
+2026-04-17 20:37:53,135 INFO   EEM: 2010-01-05 – 2026-04-16 (4095 obs)
+2026-04-17 20:37:53,371 INFO   BTC-USD: 2014-09-18 – 2026-04-16 (4229 obs)
+2026-04-17 20:37:53,724 INFO   TLT: 2010-01-05 – 2026-04-16 (4095 obs)
+2026-04-17 20:37:53,998 INFO   SLV: 2010-01-05 – 2026-04-16 (4095 obs)
+2026-04-17 20:37:54,206 INFO   ^VIX: 2010-01-04 – 2026-04-16
+2026-04-17 20:37:54,207 INFO 
+======================================================================
+2026-04-17 20:37:54,207 INFO T1: SUB-PERIOD GAMMA STABILITY
+2026-04-17 20:37:54,207 INFO   Claim: gamma direction stable across pre-/post-COVID sub-periods
+2026-04-17 20:37:54,207 INFO ======================================================================
+2026-04-17 20:38:02,500 INFO   SPY 2017-2019 (pre-COVID): γ=0.3313 (+), pct_neg=0%, n_quarterly=3
+2026-04-17 20:38:02,547 INFO   SPY 2020-2025 (COVID+): γ=0.2617 (+), pct_neg=0%, n_quarterly=3
+2026-04-17 20:38:02,591 INFO   QQQ 2017-2019 (pre-COVID): γ=0.2722 (+), pct_neg=0%, n_quarterly=3
+2026-04-17 20:38:02,643 INFO   QQQ 2020-2025 (COVID+): γ=0.2031 (+), pct_neg=0%, n_quarterly=3
+2026-04-17 20:38:02,681 INFO   GLD 2017-2019 (pre-COVID): γ=-0.0420 (-), pct_neg=67%, n_quarterly=3
+2026-04-17 20:38:02,736 INFO   GLD 2020-2025 (COVID+): γ=-0.0757 (-), pct_neg=100%, n_quarterly=3
+2026-04-17 20:38:02,790 INFO   EEM 2017-2019 (pre-COVID): γ=0.1779 (+), pct_neg=0%, n_quarterly=3
+2026-04-17 20:38:02,833 INFO   EEM 2020-2025 (COVID+): γ=0.1276 (+), pct_neg=33%, n_quarterly=3
+2026-04-17 20:38:02,887 INFO   BTC-USD 2017-2019 (pre-COVID): γ=-0.0004 (-), pct_neg=33%, n_quarterly=3
+2026-04-17 20:38:02,976 INFO   BTC-USD 2020-2025 (COVID+): γ=0.0079 (+), pct_neg=25%, n_quarterly=4
+2026-04-17 20:38:03,037 INFO   TLT 2017-2019 (pre-COVID): γ=-0.0303 (-), pct_neg=67%, n_quarterly=3
+2026-04-17 20:38:03,096 INFO   TLT 2020-2025 (COVID+): γ=0.0047 (+), pct_neg=0%, n_quarterly=3
+2026-04-17 20:38:03,156 INFO   SLV 2017-2019 (pre-COVID): γ=-0.0363 (-), pct_neg=100%, n_quarterly=3
+2026-04-17 20:38:03,209 INFO   SLV 2020-2025 (COVID+): γ=-0.0375 (-), pct_neg=67%, n_quarterly=3
+2026-04-17 20:38:03,209 INFO 
+  T1 STABILITY ASSESSMENT:
+2026-04-17 20:38:03,210 INFO   SPY: γ_early=0.3313, γ_late=0.2617 → STABLE
+2026-04-17 20:38:03,210 INFO   QQQ: γ_early=0.2722, γ_late=0.2031 → STABLE
+2026-04-17 20:38:03,210 INFO   GLD: γ_early=-0.0420, γ_late=-0.0757 → STABLE
+2026-04-17 20:38:03,210 INFO   EEM: γ_early=0.1779, γ_late=0.1276 → STABLE
+2026-04-17 20:38:03,210 INFO   BTC-USD: γ_early=-0.0004, γ_late=0.0079 → STABLE
+2026-04-17 20:38:03,210 INFO   TLT: γ_early=-0.0303, γ_late=0.0047 → STABLE
+2026-04-17 20:38:03,210 INFO   SLV: γ_early=-0.0363, γ_late=-0.0375 → STABLE
+2026-04-17 20:38:03,210 INFO 
+======================================================================
+2026-04-17 20:38:03,210 INFO T2: PROXY-ROBUST DIEBOLD-MARIANO
+2026-04-17 20:38:03,210 INFO   Claim: QLIKE rankings preserved under Parkinson proxy (DM p<0.001 for SPY)
+2026-04-17 20:38:03,210 INFO ======================================================================
+2026-04-17 20:38:03,210 INFO   SPY: rolling GJR + GARCH for proxy DM test...
+2026-04-17 20:38:03,231 INFO     SPY: OOS -551%
+2026-04-17 20:38:05,238 INFO     SPY: OOS -531%
+2026-04-17 20:38:07,117 INFO     SPY: OOS -511%
+2026-04-17 20:38:09,003 INFO     SPY: OOS -491%
+2026-04-17 20:38:10,963 INFO     SPY: OOS -471%
+2026-04-17 20:38:13,049 INFO     SPY: OOS -451%
+2026-04-17 20:38:15,057 INFO     SPY: OOS -431%
+2026-04-17 20:38:16,882 INFO     SPY: OOS -412%
+2026-04-17 20:38:18,680 INFO     SPY: OOS -392%
+2026-04-17 20:38:20,668 INFO     SPY: OOS -372%
+2026-04-17 20:38:22,859 INFO     SPY: OOS -352%
+2026-04-17 20:38:25,558 INFO     SPY: OOS -332%
+2026-04-17 20:38:27,843 INFO     SPY: OOS -312%
+2026-04-17 20:38:29,814 INFO     SPY: OOS -292%
+2026-04-17 20:38:31,870 INFO     SPY: OOS -272%
+2026-04-17 20:38:34,030 INFO     SPY: OOS -252%
+2026-04-17 20:38:36,032 INFO     SPY: OOS -232%
+2026-04-17 20:38:38,166 INFO     SPY: OOS -212%
+2026-04-17 20:38:40,249 INFO     SPY: OOS -192%
+2026-04-17 20:38:42,174 INFO     SPY: OOS -173%
+2026-04-17 20:38:43,934 INFO     SPY: OOS -153%
+2026-04-17 20:38:45,686 INFO     SPY: OOS -133%
+2026-04-17 20:38:47,476 INFO     SPY: OOS -113%
+2026-04-17 20:38:49,211 INFO     SPY: OOS -93%
+2026-04-17 20:38:50,838 INFO     SPY: OOS -73%
+2026-04-17 20:38:52,437 INFO     SPY: OOS -53%
+2026-04-17 20:38:54,225 INFO     SPY: OOS -33%
+2026-04-17 20:38:56,320 INFO     SPY: OOS -13%
+2026-04-17 20:38:58,359 INFO     SPY: OOS 7%
+2026-04-17 20:39:00,573 INFO     SPY: OOS 27%
+2026-04-17 20:39:03,189 INFO     SPY: OOS 47%
+2026-04-17 20:39:06,224 INFO     SPY: OOS 67%
+2026-04-17 20:39:08,799 INFO     SPY: OOS 86%
+2026-04-17 20:39:10,551 INFO   SPY r2: GJR=1.5214 GARCH=1.5545 wins=True DM t=2.21* p=0.02754452985145517
+2026-04-17 20:39:10,551 INFO   SPY abs_r: GJR=95.0753 GARCH=89.3857 wins=False DM t=-1.93 p=0.05374586058259845
+2026-04-17 20:39:10,551 INFO   SPY parkinson: GJR=0.4558 GARCH=0.4980 wins=True DM t=3.44** p=0.0006349803481355831
+2026-04-17 20:39:10,552 INFO   GLD: rolling GJR + GARCH for proxy DM test...
+2026-04-17 20:39:10,571 INFO     GLD: OOS -551%
+2026-04-17 20:39:12,477 INFO     GLD: OOS -531%
+2026-04-17 20:39:14,546 INFO     GLD: OOS -511%
+2026-04-17 20:39:16,483 INFO     GLD: OOS -491%
+2026-04-17 20:39:19,144 INFO     GLD: OOS -471%
+2026-04-17 20:39:22,393 INFO     GLD: OOS -451%
+2026-04-17 20:39:25,753 INFO     GLD: OOS -431%
+2026-04-17 20:39:29,338 INFO     GLD: OOS -412%
+2026-04-17 20:39:32,656 INFO     GLD: OOS -392%
+2026-04-17 20:39:35,462 INFO     GLD: OOS -372%
+2026-04-17 20:39:37,796 INFO     GLD: OOS -352%
+2026-04-17 20:39:40,056 INFO     GLD: OOS -332%
+2026-04-17 20:39:42,281 INFO     GLD: OOS -312%
+2026-04-17 20:39:44,422 INFO     GLD: OOS -292%
+2026-04-17 20:39:46,340 INFO     GLD: OOS -272%
+2026-04-17 20:39:48,858 INFO     GLD: OOS -252%
+2026-04-17 20:39:52,173 INFO     GLD: OOS -232%
+2026-04-17 20:39:54,387 INFO     GLD: OOS -212%
+2026-04-17 20:39:56,952 INFO     GLD: OOS -192%
+2026-04-17 20:39:59,266 INFO     GLD: OOS -173%
+2026-04-17 20:40:01,218 INFO     GLD: OOS -153%
+2026-04-17 20:40:03,395 INFO     GLD: OOS -133%
+2026-04-17 20:40:05,344 INFO     GLD: OOS -113%
+2026-04-17 20:40:07,212 INFO     GLD: OOS -93%
+2026-04-17 20:40:09,374 INFO     GLD: OOS -73%
+2026-04-17 20:40:11,483 INFO     GLD: OOS -53%
+2026-04-17 20:40:14,103 INFO     GLD: OOS -33%
+2026-04-17 20:40:16,918 INFO     GLD: OOS -13%
+2026-04-17 20:40:19,626 INFO     GLD: OOS 7%
+2026-04-17 20:40:22,134 INFO     GLD: OOS 27%
+2026-04-17 20:40:24,752 INFO     GLD: OOS 47%
+2026-04-17 20:40:27,740 INFO     GLD: OOS 67%
+2026-04-17 20:40:30,183 INFO     GLD: OOS 86%
+2026-04-17 20:40:31,542 INFO   GLD r2: GJR=1.5348 GARCH=1.5393 wins=True DM t=0.34 p=0.7345784361754357
+2026-04-17 20:40:31,542 INFO   GLD abs_r: GJR=78.9932 GARCH=81.6859 wins=True DM t=1.33 p=0.18409685038991142
+2026-04-17 20:40:31,542 INFO   GLD parkinson: GJR=0.7291 GARCH=0.7259 wins=False DM t=-0.20 p=0.8415248310910008
+2026-04-17 20:40:31,542 INFO   EEM: rolling GJR + GARCH for proxy DM test...
+2026-04-17 20:40:31,561 INFO     EEM: OOS -551%
+2026-04-17 20:40:33,382 INFO     EEM: OOS -531%
+2026-04-17 20:40:35,076 INFO     EEM: OOS -511%
+2026-04-17 20:40:36,931 INFO     EEM: OOS -491%
+2026-04-17 20:40:38,998 INFO     EEM: OOS -471%
+2026-04-17 20:40:41,034 INFO     EEM: OOS -451%
+2026-04-17 20:40:42,875 INFO     EEM: OOS -431%
+2026-04-17 20:40:44,745 INFO     EEM: OOS -412%
+2026-04-17 20:40:46,724 INFO     EEM: OOS -392%
+2026-04-17 20:40:48,859 INFO     EEM: OOS -372%
+2026-04-17 20:40:51,193 INFO     EEM: OOS -352%
+2026-04-17 20:40:53,878 INFO     EEM: OOS -332%
+2026-04-17 20:40:56,216 INFO     EEM: OOS -312%
+2026-04-17 20:40:58,181 INFO     EEM: OOS -292%
+2026-04-17 20:41:00,268 INFO     EEM: OOS -272%
+2026-04-17 20:41:02,354 INFO     EEM: OOS -252%
+2026-04-17 20:41:04,214 INFO     EEM: OOS -232%
+2026-04-17 20:41:06,054 INFO     EEM: OOS -212%
+2026-04-17 20:41:08,609 INFO     EEM: OOS -192%
+2026-04-17 20:41:11,261 INFO     EEM: OOS -173%
+2026-04-17 20:41:13,510 INFO     EEM: OOS -153%
+2026-04-17 20:41:15,507 INFO     EEM: OOS -133%
+2026-04-17 20:41:17,137 INFO     EEM: OOS -113%
+2026-04-17 20:41:18,732 INFO     EEM: OOS -93%
+2026-04-17 20:41:20,362 INFO     EEM: OOS -73%
+2026-04-17 20:41:22,140 INFO     EEM: OOS -53%
+2026-04-17 20:41:23,982 INFO     EEM: OOS -33%
+2026-04-17 20:41:25,866 INFO     EEM: OOS -13%
+2026-04-17 20:41:27,683 INFO     EEM: OOS 7%
+2026-04-17 20:41:29,333 INFO     EEM: OOS 27%
+2026-04-17 20:41:31,222 INFO     EEM: OOS 47%
+2026-04-17 20:41:33,467 INFO     EEM: OOS 67%
+2026-04-17 20:41:35,627 INFO     EEM: OOS 86%
+2026-04-17 20:41:36,871 INFO   EEM r2: GJR=1.5107 GARCH=1.5086 wins=False DM t=-0.15 p=0.8804011063219428
+2026-04-17 20:41:36,871 INFO   EEM abs_r: GJR=71.7737 GARCH=69.9633 wins=False DM t=-1.08 p=0.28097012437581514
+2026-04-17 20:41:36,871 INFO   EEM parkinson: GJR=0.8387 GARCH=0.8539 wins=True DM t=0.85 p=0.39634190800927294
+2026-04-17 20:41:36,871 INFO 
+======================================================================
+2026-04-17 20:41:36,871 INFO T3: EWMA(0.97) vs GJR-GARCH VT (KB J6)
+2026-04-17 20:41:36,871 INFO   Paper claims: EWMA Sharpe=0.828, GJR Sharpe=0.782
+2026-04-17 20:41:36,871 INFO   Paper claims: EWMA MDD=-12.3%, GJR MDD=-12.5%
+2026-04-17 20:41:36,871 INFO   Paper claims: DM p=0.73 (not significant)
+2026-04-17 20:41:36,871 INFO ======================================================================
+2026-04-17 20:41:36,871 INFO   SPY: rolling GJR forecast for OOS 2023-01-01–2024-12-31...
+2026-04-17 20:41:43,841 INFO     progress: 20%
+2026-04-17 20:41:51,306 INFO     progress: 40%
+2026-04-17 20:41:58,286 INFO     progress: 60%
+2026-04-17 20:42:05,111 INFO     progress: 80%
+2026-04-17 20:42:13,416 INFO     progress: 100%
+2026-04-17 20:42:13,428 INFO   SPY: GJR Sharpe=1.295 MDD=-7.6% | EWMA Sharpe=1.283 MDD=-8.3% | DM p=0.625(ns)
+2026-04-17 20:42:13,429 INFO   QQQ: rolling GJR forecast for OOS 2023-01-01–2024-12-31...
+2026-04-17 20:42:20,678 INFO     progress: 20%
+2026-04-17 20:42:27,582 INFO     progress: 40%
+2026-04-17 20:42:34,738 INFO     progress: 60%
+2026-04-17 20:42:42,042 INFO     progress: 80%
+2026-04-17 20:42:50,643 INFO     progress: 100%
+2026-04-17 20:42:50,658 INFO   QQQ: GJR Sharpe=1.514 MDD=-7.9% | EWMA Sharpe=1.459 MDD=-8.2% | DM p=0.603(ns)
+2026-04-17 20:42:50,658 INFO   GLD: rolling GJR forecast for OOS 2023-01-01–2024-12-31...
+2026-04-17 20:43:01,154 INFO     progress: 20%
+2026-04-17 20:43:09,662 INFO     progress: 40%
+2026-04-17 20:43:18,483 INFO     progress: 60%
+2026-04-17 20:43:27,295 INFO     progress: 80%
+2026-04-17 20:43:35,814 INFO     progress: 100%
+2026-04-17 20:43:35,828 INFO   GLD: GJR Sharpe=0.949 MDD=-7.8% | EWMA Sharpe=1.058 MDD=-9.3% | DM p=0.213(ns)
+2026-04-17 20:43:35,829 INFO   EEM: rolling GJR forecast for OOS 2023-01-01–2024-12-31...
+2026-04-17 20:43:43,094 INFO     progress: 20%
+2026-04-17 20:43:51,775 INFO     progress: 40%
+2026-04-17 20:44:00,346 INFO     progress: 60%
+2026-04-17 20:44:07,624 INFO     progress: 80%
+2026-04-17 20:44:15,217 INFO     progress: 100%
+2026-04-17 20:44:15,232 INFO   EEM: GJR Sharpe=0.071 MDD=-7.6% | EWMA Sharpe=0.122 MDD=-8.1% | DM p=0.535(ns)
+2026-04-17 20:44:15,233 INFO   BTC-USD: rolling GJR forecast for OOS 2023-01-01–2024-12-31...
+2026-04-17 20:44:23,966 INFO     progress: 20%
+2026-04-17 20:44:32,920 INFO     progress: 40%
+2026-04-17 20:44:43,829 INFO     progress: 60%
+2026-04-17 20:44:55,587 INFO     progress: 80%
+2026-04-17 20:45:07,883 INFO     progress: 100%
+2026-04-17 20:45:07,889 INFO   BTC-USD: GJR Sharpe=1.142 MDD=-5.1% | EWMA Sharpe=1.386 MDD=-6.7% | DM p=0.006**
+2026-04-17 20:45:07,889 INFO   TLT: rolling GJR forecast for OOS 2023-01-01–2024-12-31...
+2026-04-17 20:45:18,935 INFO     progress: 20%
+2026-04-17 20:45:30,379 INFO     progress: 40%
+2026-04-17 20:45:40,789 INFO     progress: 60%
+2026-04-17 20:45:51,184 INFO     progress: 80%
+2026-04-17 20:46:02,355 INFO     progress: 100%
+2026-04-17 20:46:02,373 INFO   TLT: GJR Sharpe=-0.806 MDD=-13.1% | EWMA Sharpe=-0.823 MDD=-13.9% | DM p=0.363(ns)
+2026-04-17 20:46:02,373 INFO   SLV: rolling GJR forecast for OOS 2023-01-01–2024-12-31...
+2026-04-17 20:46:14,546 INFO     progress: 20%
+2026-04-17 20:46:26,999 INFO     progress: 40%
+2026-04-17 20:46:36,521 INFO     progress: 60%
+2026-04-17 20:46:45,924 INFO     progress: 80%
+2026-04-17 20:46:53,430 INFO     progress: 100%
+2026-04-17 20:46:53,446 INFO   SLV: GJR Sharpe=0.206 MDD=-7.4% | EWMA Sharpe=0.217 MDD=-7.9% | DM p=0.813(ns)
+2026-04-17 20:46:53,446 INFO 
+  T3 vs KB J6 CLAIMS (SPY):
+2026-04-17 20:46:53,446 INFO     EWMA Sharpe: script=1.283 paper=0.828 match=False
+2026-04-17 20:46:53,446 INFO     GJR  Sharpe: script=1.295 paper=0.782
+2026-04-17 20:46:53,446 INFO     EWMA MDD:    script=-8.3% paper=-12.3% match=False
+2026-04-17 20:46:53,446 INFO     DM p-val:    script=0.625 paper=0.73 not-sig=True
+2026-04-17 20:46:53,446 INFO 
+======================================================================
+2026-04-17 20:46:53,446 INFO T4: CROSS-ASSET VT CONSISTENCY
+2026-04-17 20:46:53,446 INFO   Claim: VT improves MDD universally; Sharpe improvement asset-dependent
+2026-04-17 20:46:53,446 INFO ======================================================================
+2026-04-17 20:47:01,097 INFO     progress: 20%
+2026-04-17 20:47:08,782 INFO     progress: 40%
+2026-04-17 20:47:15,936 INFO     progress: 60%
+2026-04-17 20:47:23,732 INFO     progress: 80%
+2026-04-17 20:47:33,033 INFO     progress: 100%
+2026-04-17 20:47:33,044 INFO   SPY: VT Sharpe=1.295(-0.215) MDD=-7.6%(+2.7%) γ=0.109
+2026-04-17 20:47:40,767 INFO     progress: 20%
+2026-04-17 20:47:48,459 INFO     progress: 40%
+2026-04-17 20:47:56,250 INFO     progress: 60%
+2026-04-17 20:48:03,966 INFO     progress: 80%
+2026-04-17 20:48:12,866 INFO     progress: 100%
+2026-04-17 20:48:12,878 INFO   QQQ: VT Sharpe=1.514(-0.203) MDD=-7.9%(+5.7%) γ=0.071
+2026-04-17 20:48:23,679 INFO     progress: 20%
+2026-04-17 20:48:32,819 INFO     progress: 40%
+2026-04-17 20:48:41,535 INFO     progress: 60%
+2026-04-17 20:48:50,583 INFO     progress: 80%
+2026-04-17 20:48:59,548 INFO     progress: 100%
+2026-04-17 20:48:59,560 INFO   GLD: VT Sharpe=0.949(-0.167) MDD=-7.8%(+3.5%) γ=-0.069
+2026-04-17 20:49:07,619 INFO     progress: 20%
+2026-04-17 20:49:16,206 INFO     progress: 40%
+2026-04-17 20:49:25,147 INFO     progress: 60%
+2026-04-17 20:49:32,513 INFO     progress: 80%
+2026-04-17 20:49:40,187 INFO     progress: 100%
+2026-04-17 20:49:40,199 INFO   EEM: VT Sharpe=0.071(-0.116) MDD=-7.6%(+6.4%) γ=0.059
+2026-04-17 20:49:49,600 INFO     progress: 20%
+2026-04-17 20:49:58,781 INFO     progress: 40%
+2026-04-17 20:50:09,610 INFO     progress: 60%
+2026-04-17 20:50:22,447 INFO     progress: 80%
+2026-04-17 20:50:36,532 INFO     progress: 100%
+2026-04-17 20:50:36,535 INFO   BTC-USD: VT Sharpe=1.142(-0.292) MDD=-5.1%(+21.1%) γ=0.094
+2026-04-17 20:50:47,638 INFO     progress: 20%
+2026-04-17 20:50:59,082 INFO     progress: 40%
+2026-04-17 20:51:09,457 INFO     progress: 60%
+2026-04-17 20:51:19,721 INFO     progress: 80%
+2026-04-17 20:51:30,906 INFO     progress: 100%
+2026-04-17 20:51:30,921 INFO   TLT: VT Sharpe=-0.806(-0.283) MDD=-13.1%(+10.7%) γ=0.024
+2026-04-17 20:51:43,736 INFO     progress: 20%
+2026-04-17 20:51:56,322 INFO     progress: 40%
+2026-04-17 20:52:05,488 INFO     progress: 60%
+2026-04-17 20:52:14,641 INFO     progress: 80%
+2026-04-17 20:52:22,341 INFO     progress: 100%
+2026-04-17 20:52:22,354 INFO   SLV: VT Sharpe=0.206(-0.044) MDD=-7.4%(+12.2%) γ=-0.005
+2026-04-17 20:52:22,354 INFO 
+  T4: MDD improves in 7/7 assets (CONFIRMS universal claim)
+2026-04-17 20:52:22,354 INFO 
+======================================================================
+2026-04-17 20:52:22,354 INFO T5: REFIT FREQUENCY SENSITIVITY
+2026-04-17 20:52:22,354 INFO   Claim: 'monthly rebalancing produces highest Sharpe with w=504'
+2026-04-17 20:52:22,354 INFO          (body.tex sec 4.5.5: 'monthly 0.70 vs daily ... at w=504')
+2026-04-17 20:52:22,354 INFO ======================================================================
+2026-04-17 20:52:22,354 INFO   SPY refit_every=21d ...
+2026-04-17 20:52:22,713 INFO     progress: 20%
+2026-04-17 20:52:23,074 INFO     progress: 40%
+2026-04-17 20:52:23,397 INFO     progress: 60%
+2026-04-17 20:52:23,718 INFO     progress: 80%
+2026-04-17 20:52:24,114 INFO     progress: 100%
+2026-04-17 20:52:24,116 INFO     freq=21d: VT Sharpe=1.307 MDD=-8.2% (Δ_sharpe=-0.203)
+2026-04-17 20:52:24,116 INFO   SPY refit_every=63d ...
+2026-04-17 20:52:24,235 INFO     progress: 20%
+2026-04-17 20:52:24,349 INFO     progress: 40%
+2026-04-17 20:52:24,477 INFO     progress: 60%
+2026-04-17 20:52:24,583 INFO     progress: 80%
+2026-04-17 20:52:24,709 INFO     progress: 100%
+2026-04-17 20:52:24,711 INFO     freq=63d: VT Sharpe=1.359 MDD=-7.7% (Δ_sharpe=-0.151)
+2026-04-17 20:52:24,711 INFO   SPY refit_every=252d ...
+2026-04-17 20:52:24,742 INFO     progress: 20%
+2026-04-17 20:52:24,773 INFO     progress: 40%
+2026-04-17 20:52:24,806 INFO     progress: 60%
+2026-04-17 20:52:24,836 INFO     progress: 80%
+2026-04-17 20:52:24,874 INFO     progress: 100%
+2026-04-17 20:52:24,876 INFO     freq=252d: VT Sharpe=1.290 MDD=-8.1% (Δ_sharpe=-0.220)
+2026-04-17 20:52:24,876 INFO 
+  T5: Best refit freq = 63d (Sharpes: {21: 1.3069127679225074, 63: 1.3586604030818952, 252: 1.2898023009351915})
+2026-04-17 20:52:24,876 INFO 
+======================================================================
+2026-04-17 20:52:24,876 INFO T6: GLD INVERTED LEVERAGE (KB R11 proxy-robustness)
+2026-04-17 20:52:24,876 INFO   Paper claim: GLD gamma<0 in 93% of quarterly estimates
+2026-04-17 20:52:24,876 INFO ======================================================================
+2026-04-17 20:52:25,650 INFO   GLD: mean γ=-0.0350 pct_neg=79% n=57 t=-6.68 p=0.0000
+2026-04-17 20:52:26,253 INFO   SPY: mean γ=0.2830 pct_neg=0% n=57 t=20.81 p=0.0000
+2026-04-17 20:52:27,109 INFO   TLT: mean γ=-0.0152 pct_neg=49% n=57 t=-2.93 p=0.0049
+2026-04-17 20:52:27,109 INFO 
+  T6 GLD: pct_neg=79% (paper=93%, match=True), sign negative=True
+2026-04-17 20:52:27,109 INFO 
+======================================================================
+2026-04-17 20:52:27,109 INFO REPRODUCE ASSESSMENT (MATCHED / (a) / (b) / (c))
+2026-04-17 20:52:27,109 INFO ======================================================================
+2026-04-17 20:52:27,110 INFO 
+  MATCHED: 5/6
+2026-04-17 20:52:27,110 INFO     T1_sub_period_gamma_stability: MATCHED
+2026-04-17 20:52:27,110 INFO     T2_proxy_robust_dm: MATCHED
+2026-04-17 20:52:27,110 INFO     T3_ewma_vs_gjr_vt: (c)
+2026-04-17 20:52:27,110 INFO     T4_cross_asset_vt: MATCHED
+2026-04-17 20:52:27,110 INFO     T5_refit_sensitivity: MATCHED
+2026-04-17 20:52:27,110 INFO     T6_gld_inverted_leverage: MATCHED
+2026-04-17 20:52:27,113 INFO 
+Results saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a832f2dc/experiments/k1195/k1195_results.json
+2026-04-17 20:52:27,113 INFO Diff report saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a832f2dc/experiments/k1195/k1195_vs_paper1_robustness_diff.md
+2026-04-17 20:52:27,113 INFO 
+======================================================================
+2026-04-17 20:52:27,113 INFO K1195 COMPLETE. Matched 5/6 tests.
+2026-04-17 20:52:27,113 INFO ======================================================================

@@ -1,0 +1,70 @@
+======================================================================
+K1142 - Volatility-normalized OFI (bypass VIX-regime)
+======================================================================
+
+[1] Loading cached bars from _cache_bars_2017-01-01_2021-12-31.parquet
+    Loaded 73,203 bars, 1223 days, 2017-01-03 00:00:00 .. 2021-12-30 00:00:00
+
+[2] Lee-Mykland jump detection (K=16, alpha=0.01)
+    Gumbel threshold = 5.126
+    Jumps: 115 (0.214%)
+
+[3] Rolling realized sigma_hat_t (window=60 bars, STRICTLY past, cross-day)
+    sigma_hat finite: 73,143 / 73,203 (99.9%)
+    sigma_hat mean/std: 0.000803 / 0.000468
+
+[4] Valid N = 52,369  (jumps_next_1 = 114)
+    z_absOFI summary: mean=235.41  std=266.19  min=0.00  max=4479.77
+
+[5] IS: N=31,455 (2017-01-04..2019-12-31)  jumps=81
+    OOS: N=20,914 (2020-01-02..2021-12-30)  jumps=33
+
+[6] sigma_hat IS range: [0.000176, 0.002722] median=0.000578
+    sigma_hat OOS range: [0.000312, 0.006980] median=0.000920
+    IS sigma-tertile cutoffs: 33%=0.000512  67%=0.000662
+
+[7] Fitting M_base, M_volnorm, M_realvol_tertile on IS via MLE...
+    M_base: p=4   nll_is=556.9452  beta=[-6.2608, 2.2756, 1.5311, -0.885]  success=True
+    M_volnorm: p=4   nll_is=553.9152  beta=[-6.28, 2.2289, 0.0008, -0.0004]  success=True
+    M_realvol_tertile: p=8   nll_is=552.3241  beta=[-6.1369, 2.2467, 1.4031, -1.7223, -0.7539, -2.4925, 2.5151, 1.3678]  success=True
+
+[8] IS model fit:
+    LL(base)    = -556.9452
+    LL(volnorm) = -553.9152  (delta=+3.0299)
+    LL(realvolT)= -552.3241  (delta_vs_base=+4.6211)
+    LRT realvol_tertile vs base: chi^2=9.242, df=4, p=0.05532
+
+[9] OOS metrics:
+    log-loss:  base=0.011709  volnorm=0.011650  realvolT=0.011558
+    AUC     :  base=0.5542  volnorm=0.5940  realvolT=0.6663
+    Brier   :  base=0.001574  volnorm=0.001574  realvolT=0.001572
+
+[10] DM-HLN tests (positive t => 2nd model better):
+    IS  volnorm vs base : t=+1.454  (mean_d=+9.63e-05)
+    OOS volnorm vs base : t=+2.255  (mean_d=+5.86e-05)
+    IS  realvolT vs base: t=+1.693
+    OOS realvolT vs base: t=+1.982
+    OOS volnorm vs realvolT: t=-1.573
+
+[11] OOS Spearman(p_hat, y):
+    base=+0.0075 (p=0.2810)  volnorm=+0.0129 (p=0.0615)  realvolT=+0.0229 (p=0.0009)
+
+[12] Robustness: lag-12 (≈1 hour) sigma_hat
+    N_is_l12=31,455  N_oos_l12=20,914
+    lag12 DM volnorm vs base: t=-0.278  AUC: base=0.5542  volnorm=0.5920
+
+======================================================================
+K1142 VERDICT
+======================================================================
+M_volnorm vs base IS  DM t = +1.454
+M_volnorm vs base OOS DM t = +2.255
+M_realvol_tertile vs base OOS DM t = +1.982
+VERDICT: PARTIAL_OOS_ONLY
+Realvol tertile control: volnorm_unique
+
+[13] Saving results (runtime=0.7s)...
+    Saved /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a11a520c/experiments/k1142/k1142_results.json
+    Saved /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a11a520c/experiments/k1142/k1142_oos_roc.png
+    Saved /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a11a520c/experiments/k1142/k1142_cond_prob.png
+
+K1142 complete. Runtime: 0.7s  Verdict: PARTIAL_OOS_ONLY

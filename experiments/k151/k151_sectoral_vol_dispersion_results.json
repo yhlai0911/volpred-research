@@ -1,0 +1,443 @@
+{
+  "experiment": "K151_sectoral_vol_dispersion",
+  "attribution": "[\u63d0\u51fa: Gemini R5#4 (Behavioral), \u57f7\u884c: Claude]",
+  "timestamp": "2026-03-22T20:23:06.054219",
+  "parameters": {
+    "speculative": [
+      "ARKK",
+      "BITO"
+    ],
+    "defensive": [
+      "XLP",
+      "XLU",
+      "GLD"
+    ],
+    "market": "SPY",
+    "data_start": "2015-01-01",
+    "data_end": "2024-12-31",
+    "oos_start": "2020-01-01",
+    "oos_end": "2024-12-31",
+    "window": 504,
+    "vol_window": 22,
+    "csvd_change_window": 5,
+    "n_placebo": 1000
+  },
+  "descriptive": {
+    "csvd_raw_mean": 0.195,
+    "csvd_raw_std": 0.145,
+    "csvd_ratio_mean": 2.4095,
+    "spec_vol_mean": 0.337,
+    "def_vol_mean": 0.142
+  },
+  "regression_full_sample": {
+    "csvd_raw_to_spy_vol_fwd5": {
+      "slope": 0.342543,
+      "intercept": 0.07589,
+      "r": 0.4815,
+      "r2": 0.2318,
+      "p_value": 0.0,
+      "t_stat": 25.87,
+      "n": 2220
+    },
+    "csvd_change_to_spy_vol_fwd5": {
+      "slope": 0.299934,
+      "intercept": 0.148208,
+      "r": 0.1381,
+      "r2": 0.0191,
+      "p_value": 0.0,
+      "t_stat": 6.57,
+      "n": 2220
+    },
+    "csvd_ratio_to_spy_vol_fwd5": {
+      "slope": 0.018449,
+      "intercept": 0.101624,
+      "r": 0.1602,
+      "r2": 0.0257,
+      "p_value": 0.0,
+      "t_stat": 7.65,
+      "n": 2220
+    },
+    "csvd_raw_to_spy_vol_fwd22": {
+      "slope": 0.241209,
+      "intercept": 0.096527,
+      "r": 0.3393,
+      "r2": 0.1151,
+      "p_value": 0.0,
+      "t_stat": 16.99,
+      "n": 2220
+    },
+    "csvd_change_to_spy_vol_fwd22": {
+      "slope": 0.094669,
+      "intercept": 0.147497,
+      "r": 0.0436,
+      "r2": 0.0019,
+      "p_value": 0.039873,
+      "t_stat": 2.06,
+      "n": 2220
+    },
+    "csvd_ratio_to_spy_vol_fwd22": {
+      "slope": 0.023821,
+      "intercept": 0.087236,
+      "r": 0.207,
+      "r2": 0.0429,
+      "p_value": 0.0,
+      "t_stat": 9.97,
+      "n": 2220
+    },
+    "csvd_raw_to_spy_rv5_fwd": {
+      "slope": 0.079772,
+      "intercept": 0.015144,
+      "r": 0.1169,
+      "r2": 0.0137,
+      "p_value": 0.0,
+      "t_stat": 5.54,
+      "n": 2220
+    },
+    "csvd_change_to_spy_rv5_fwd": {
+      "slope": 0.105229,
+      "intercept": 0.031972,
+      "r": 0.0505,
+      "r2": 0.0026,
+      "p_value": 0.017316,
+      "t_stat": 2.38,
+      "n": 2220
+    },
+    "csvd_ratio_to_spy_rv5_fwd": {
+      "slope": -0.002658,
+      "intercept": 0.038741,
+      "r": -0.0241,
+      "r2": 0.0006,
+      "p_value": 0.257089,
+      "t_stat": -1.13,
+      "n": 2220
+    },
+    "csvd_raw_to_spy_rv22_fwd": {
+      "slope": 0.072072,
+      "intercept": 0.016689,
+      "r": 0.1358,
+      "r2": 0.0185,
+      "p_value": 0.0,
+      "t_stat": 6.46,
+      "n": 2220
+    },
+    "csvd_change_to_spy_rv22_fwd": {
+      "slope": 0.040577,
+      "intercept": 0.031913,
+      "r": 0.0251,
+      "r2": 0.0006,
+      "p_value": 0.238021,
+      "t_stat": 1.18,
+      "n": 2220
+    },
+    "csvd_ratio_to_spy_rv22_fwd": {
+      "slope": 0.005439,
+      "intercept": 0.018163,
+      "r": 0.0633,
+      "r2": 0.004,
+      "p_value": 0.002831,
+      "t_stat": 2.99,
+      "n": 2220
+    }
+  },
+  "partial_correlation": {
+    "csvd_raw_to_spy_vol_fwd5_given_VIX": {
+      "r_unconditional": 0.4815,
+      "r_partial": 0.1348,
+      "p_partial": 0.0,
+      "pct_reduction": 72.0,
+      "n": 2220
+    },
+    "csvd_change_to_spy_vol_fwd5_given_VIX": {
+      "r_unconditional": 0.1381,
+      "r_partial": 0.0647,
+      "p_partial": 0.002304,
+      "pct_reduction": 53.2,
+      "n": 2220
+    },
+    "csvd_ratio_to_spy_vol_fwd5_given_VIX": {
+      "r_unconditional": 0.1602,
+      "r_partial": -0.0084,
+      "p_partial": 0.692599,
+      "pct_reduction": 94.8,
+      "n": 2220
+    },
+    "csvd_raw_to_spy_vol_fwd22_given_VIX": {
+      "r_unconditional": 0.3393,
+      "r_partial": 0.0607,
+      "p_partial": 0.00423,
+      "pct_reduction": 82.1,
+      "n": 2220
+    },
+    "csvd_change_to_spy_vol_fwd22_given_VIX": {
+      "r_unconditional": 0.0436,
+      "r_partial": -0.0399,
+      "p_partial": 0.060056,
+      "pct_reduction": 8.5,
+      "n": 2220
+    },
+    "csvd_ratio_to_spy_vol_fwd22_given_VIX": {
+      "r_unconditional": 0.207,
+      "r_partial": 0.1184,
+      "p_partial": 0.0,
+      "pct_reduction": 42.8,
+      "n": 2220
+    },
+    "csvd_raw_to_spy_rv5_fwd_given_VIX": {
+      "r_unconditional": 0.1169,
+      "r_partial": -0.2122,
+      "p_partial": 0.0,
+      "pct_reduction": -81.6,
+      "n": 2220
+    },
+    "csvd_change_to_spy_rv5_fwd_given_VIX": {
+      "r_unconditional": 0.0505,
+      "r_partial": -0.0216,
+      "p_partial": 0.309948,
+      "pct_reduction": 57.3,
+      "n": 2220
+    },
+    "csvd_ratio_to_spy_rv5_fwd_given_VIX": {
+      "r_unconditional": -0.0241,
+      "r_partial": -0.1582,
+      "p_partial": 0.0,
+      "pct_reduction": -557.5,
+      "n": 2220
+    },
+    "csvd_raw_to_spy_rv22_fwd_given_VIX": {
+      "r_unconditional": 0.1358,
+      "r_partial": -0.0949,
+      "p_partial": 8e-06,
+      "pct_reduction": 30.2,
+      "n": 2220
+    },
+    "csvd_change_to_spy_rv22_fwd_given_VIX": {
+      "r_unconditional": 0.0251,
+      "r_partial": -0.0313,
+      "p_partial": 0.140054,
+      "pct_reduction": -25.0,
+      "n": 2220
+    },
+    "csvd_ratio_to_spy_rv22_fwd_given_VIX": {
+      "r_unconditional": 0.0633,
+      "r_partial": -0.0206,
+      "p_partial": 0.33278,
+      "pct_reduction": 67.5,
+      "n": 2220
+    }
+  },
+  "granger_causality": {
+    "csvd_raw_to_spy_vol": {
+      "1": {
+        "F": 3.374,
+        "p": 0.0664
+      },
+      "2": {
+        "F": 12.785,
+        "p": 0.0
+      },
+      "3": {
+        "F": 8.95,
+        "p": 0.0
+      },
+      "4": {
+        "F": 7.1,
+        "p": 0.0
+      },
+      "5": {
+        "F": 5.797,
+        "p": 0.0
+      }
+    },
+    "spy_vol_to_csvd_raw": {
+      "1": {
+        "F": 4.775,
+        "p": 0.029
+      },
+      "2": {
+        "F": 7.302,
+        "p": 0.0007
+      },
+      "3": {
+        "F": 8.055,
+        "p": 0.0
+      },
+      "4": {
+        "F": 6.417,
+        "p": 0.0
+      },
+      "5": {
+        "F": 4.943,
+        "p": 0.0002
+      }
+    },
+    "csvd_change_to_spy_vol": {
+      "1": {
+        "F": 9.711,
+        "p": 0.0019
+      },
+      "2": {
+        "F": 15.827,
+        "p": 0.0
+      },
+      "3": {
+        "F": 8.171,
+        "p": 0.0
+      },
+      "4": {
+        "F": 6.382,
+        "p": 0.0
+      },
+      "5": {
+        "F": 6.106,
+        "p": 0.0
+      }
+    }
+  },
+  "regime_fragile_calm": {
+    "5d": {
+      "rv_fragile_mean": 0.012,
+      "rv_normal_mean": 0.0359,
+      "rv_ratio": 0.333,
+      "rv_tstat": -4.3,
+      "rv_pval": 0.0,
+      "ret_fragile_mean": 0.002233,
+      "ret_normal_mean": 0.003104,
+      "ret_tstat": -0.65,
+      "ret_pval": 0.5147
+    },
+    "10d": {
+      "rv_fragile_mean": 0.0133,
+      "rv_normal_mean": 0.0356,
+      "rv_ratio": 0.372,
+      "rv_tstat": -4.44,
+      "rv_pval": 0.0,
+      "ret_fragile_mean": 0.00608,
+      "ret_normal_mean": 0.005915,
+      "ret_tstat": 0.09,
+      "ret_pval": 0.9296
+    },
+    "22d": {
+      "rv_fragile_mean": 0.0142,
+      "rv_normal_mean": 0.0354,
+      "rv_ratio": 0.401,
+      "rv_tstat": -4.9,
+      "rv_pval": 0.0,
+      "ret_fragile_mean": 0.013229,
+      "ret_normal_mean": 0.012714,
+      "ret_tstat": 0.19,
+      "ret_pval": 0.8509
+    },
+    "n_fragile": 364,
+    "pct_fragile": 16.4
+  },
+  "oos_regression": {
+    "n_oos": 1235,
+    "csvd_only": {
+      "oos_r2": -0.0341,
+      "qlike": 1.1037,
+      "mse": 0.016809
+    },
+    "vix_only": {
+      "oos_r2": 0.285,
+      "qlike": -1.7193,
+      "mse": 0.011622
+    },
+    "csvd_plus_vix": {
+      "oos_r2": 0.2811,
+      "qlike": -1.6852,
+      "mse": 0.011685
+    },
+    "dm_csvd_vs_vix": {
+      "se": {
+        "stat": 0.866,
+        "p": 0.3864
+      },
+      "qlike": {
+        "stat": 1.115,
+        "p": 0.2648
+      }
+    },
+    "dm_both_vs_vix": {
+      "se": {
+        "stat": 0.145,
+        "p": 0.8848
+      },
+      "qlike": {
+        "stat": 0.359,
+        "p": 0.7192
+      }
+    }
+  },
+  "vt_strategy": {
+    "buy_hold": {
+      "ann_return": 0.1361,
+      "ann_vol": 0.2109,
+      "sharpe": 0.6452,
+      "mdd": -0.3575,
+      "t_sharpe": 1.44,
+      "se_sharpe": 0.448,
+      "n_days": 1257
+    },
+    "vix_12_vt": {
+      "ann_return": 0.0775,
+      "ann_vol": 0.0966,
+      "sharpe": 0.8022,
+      "mdd": -0.1524,
+      "t_sharpe": 1.79,
+      "se_sharpe": 0.448,
+      "n_days": 1257
+    },
+    "vix_12_csvd_overlay": {
+      "ann_return": 0.0693,
+      "ann_vol": 0.093,
+      "sharpe": 0.7458,
+      "mdd": -0.1524,
+      "t_sharpe": 1.67,
+      "se_sharpe": 0.448,
+      "n_days": 1257
+    },
+    "sharpe_diff_csvd_vs_vix": -0.0564,
+    "harvey_test": {
+      "t_csvd_overlay": 1.67,
+      "passes_harvey_3": false
+    }
+  },
+  "placebo_test": {
+    "n_trials": 1000,
+    "real_partial_r_abs": 0.0647,
+    "placebo_mean_abs": 0.0854,
+    "placebo_std": 0.0525,
+    "placebo_p_value": 0.607,
+    "pctile_rank": 39.3
+  },
+  "bito_era": {
+    "period": "2021-10-20 to 2024-12-30",
+    "n_days": 793,
+    "r_unconditional": 0.1134,
+    "p_unconditional": 0.0014,
+    "r_partial": 0.1496,
+    "p_partial": 0.0
+  },
+  "garchx": {
+    "n_forecasts": 1256,
+    "qlike_garch": -7.9387,
+    "qlike_garchx": -7.9387,
+    "qlike_improvement": 0.0,
+    "dm_stat": 0.0,
+    "dm_p": 1.0
+  },
+  "verdict": "NULL \u2014 CSVD does not provide incremental value beyond VIX",
+  "verdict_detail": "In-sample partial correlations show small statistical significance (large N=2220 effect, |r|~0.06-0.13), but ALL operative tests are null: (1) OOS R\u00b2 CSVD+VIX=0.281 vs VIX=0.285 (worse), (2) DM p=0.88 (SE) / 0.72 (QLIKE), (3) GARCH-X 0% improvement, (4) strategy Sharpe worse by -0.056, (5) placebo p=0.61 (real signal at 39th percentile of random pairings). VIX is confirmed as sufficient statistic again. Bidirectional Granger causality suggests CSVD and SPY vol are contemporaneously driven by common factors rather than CSVD leading.",
+  "conclusions": {
+    "csvd_has_incremental_beyond_vix_insample": true,
+    "csvd_has_incremental_beyond_vix_oos": false,
+    "vix_sufficient_statistic_oos": true,
+    "csvd_improves_oos": false,
+    "csvd_sig_improve_oos": false,
+    "granger_significant_bidirectional": true,
+    "strategy_passes_harvey": false,
+    "placebo_survives": false,
+    "garchx_improvement_pct": 0.0,
+    "note": "In-sample partial r significant due to large N but magnitudes tiny (|r|<0.15). OOS is the definitive test and it is clearly null."
+  }
+}

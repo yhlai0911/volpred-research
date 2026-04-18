@@ -1,0 +1,802 @@
+{
+  "experiment_id": "K640",
+  "title": "Live Performance Audit (2025-01 to 2026-03)",
+  "description": "Comprehensive audit of all VolPred strategies using 15 months of live paper trading data. Compares live performance to backtest expectations and benchmarks.",
+  "data_source": "storage/paper_trading.json (live tracked), yfinance (benchmarks, VIX)",
+  "period": "2025-01-02 to 2026-03-27",
+  "methodology": "Performance metrics computed from actual tracked portfolio returns (not simulated). TX costs estimated at 10bps per round-trip with turnover-based calculation.",
+  "strategy_metrics_live": {
+    "slow_vt": {
+      "trading_days": 308,
+      "period_years": 1.22,
+      "cumulative_return_pct": 2.88,
+      "cagr_pct": 2.35,
+      "annualized_vol_pct": 9.22,
+      "sharpe": 0.255,
+      "sortino": 0.323,
+      "max_drawdown_pct": -10.69,
+      "max_drawdown_days": 136,
+      "calmar": 0.22,
+      "win_rate_pct": 54.5,
+      "var_95_pct": -1.08,
+      "cvar_95_pct": -1.45,
+      "best_day_pct": 1.96,
+      "worst_day_pct": -2.6,
+      "n_rebalances": 166,
+      "est_annual_tx_cost_pct": 4.075,
+      "net_sharpe": -0.187,
+      "latest_weights": {
+        "SPY": 0.44
+      }
+    },
+    "risk_parity": {
+      "trading_days": 308,
+      "period_years": 1.22,
+      "cumulative_return_pct": 41.82,
+      "cagr_pct": 33.09,
+      "annualized_vol_pct": 13.52,
+      "sharpe": 2.448,
+      "sortino": 3.091,
+      "max_drawdown_pct": -11.12,
+      "max_drawdown_days": 50,
+      "calmar": 2.975,
+      "win_rate_pct": 57.8,
+      "var_95_pct": -1.39,
+      "cvar_95_pct": -2.07,
+      "best_day_pct": 3.38,
+      "worst_day_pct": -3.68,
+      "n_rebalances": 68,
+      "est_annual_tx_cost_pct": 1.669,
+      "net_sharpe": 2.324,
+      "latest_weights": {
+        "SPY": 0.41,
+        "GLD": 0.22
+      }
+    },
+    "simple_12vix": {
+      "trading_days": 308,
+      "period_years": 1.22,
+      "cumulative_return_pct": 2.62,
+      "cagr_pct": 2.14,
+      "annualized_vol_pct": 9.23,
+      "sharpe": 0.232,
+      "sortino": 0.293,
+      "max_drawdown_pct": -10.75,
+      "max_drawdown_days": 106,
+      "calmar": 0.199,
+      "win_rate_pct": 54.5,
+      "var_95_pct": -0.99,
+      "cvar_95_pct": -1.43,
+      "best_day_pct": 2.41,
+      "worst_day_pct": -2.75,
+      "n_rebalances": 244,
+      "est_annual_tx_cost_pct": 5.989,
+      "net_sharpe": -0.417,
+      "latest_weights": {
+        "SPY": 0.44
+      }
+    },
+    "recommended_5050": {
+      "trading_days": 308,
+      "period_years": 1.22,
+      "cumulative_return_pct": 23.69,
+      "cagr_pct": 19.0,
+      "annualized_vol_pct": 9.52,
+      "sharpe": 1.995,
+      "sortino": 2.266,
+      "max_drawdown_pct": -7.67,
+      "max_drawdown_days": 61,
+      "calmar": 2.478,
+      "win_rate_pct": 60.4,
+      "var_95_pct": -0.96,
+      "cvar_95_pct": -1.54,
+      "best_day_pct": 2.02,
+      "worst_day_pct": -3.76,
+      "n_rebalances": 242,
+      "est_annual_tx_cost_pct": 5.94,
+      "net_sharpe": 1.372,
+      "latest_weights": {
+        "SPY": 0.22,
+        "GLD": 0.22
+      }
+    },
+    "taiwan_8.63vix": {
+      "trading_days": 286,
+      "period_years": 1.13,
+      "cumulative_return_pct": 30.54,
+      "cagr_pct": 26.47,
+      "annualized_vol_pct": 10.65,
+      "sharpe": 2.484,
+      "sortino": 3.469,
+      "max_drawdown_pct": -11.19,
+      "max_drawdown_days": 107,
+      "calmar": 2.366,
+      "win_rate_pct": 52.4,
+      "var_95_pct": -0.8,
+      "cvar_95_pct": -1.36,
+      "best_day_pct": 2.56,
+      "worst_day_pct": -4.01,
+      "n_rebalances": 208,
+      "est_annual_tx_cost_pct": 5.498,
+      "net_sharpe": 1.968,
+      "latest_weights": {
+        "0050.TW": 0.31
+      }
+    },
+    "vix_leading_guard": {
+      "trading_days": 285,
+      "period_years": 1.13,
+      "cumulative_return_pct": 27.38,
+      "cagr_pct": 23.86,
+      "annualized_vol_pct": 13.07,
+      "sharpe": 1.825,
+      "sortino": 2.463,
+      "max_drawdown_pct": -15.29,
+      "max_drawdown_days": 115,
+      "calmar": 1.56,
+      "win_rate_pct": 50.2,
+      "var_95_pct": -1.03,
+      "cvar_95_pct": -1.8,
+      "best_day_pct": 4.37,
+      "worst_day_pct": -4.84,
+      "n_rebalances": 21,
+      "est_annual_tx_cost_pct": 0.557,
+      "net_sharpe": 1.782,
+      "latest_weights": {
+        "0050.TW": 0.22
+      }
+    },
+    "vix_cond_leverage": {
+      "trading_days": 308,
+      "period_years": 1.22,
+      "cumulative_return_pct": 35.74,
+      "cagr_pct": 28.4,
+      "annualized_vol_pct": 10.05,
+      "sharpe": 2.827,
+      "sortino": 3.427,
+      "max_drawdown_pct": -6.41,
+      "max_drawdown_days": 39,
+      "calmar": 4.431,
+      "win_rate_pct": 60.4,
+      "var_95_pct": -0.88,
+      "cvar_95_pct": -1.45,
+      "best_day_pct": 2.56,
+      "worst_day_pct": -3.59,
+      "n_rebalances": 252,
+      "est_annual_tx_cost_pct": 6.185,
+      "net_sharpe": 2.211,
+      "latest_weights": {
+        "SPY": 0.22,
+        "GLD": 0.22
+      }
+    },
+    "taiwan_hybrid_leverage": {
+      "trading_days": 295,
+      "period_years": 1.17,
+      "cumulative_return_pct": 49.88,
+      "cagr_pct": 41.3,
+      "annualized_vol_pct": 10.98,
+      "sharpe": 3.762,
+      "sortino": 6.439,
+      "max_drawdown_pct": -8.5,
+      "max_drawdown_days": 85,
+      "calmar": 4.861,
+      "win_rate_pct": 53.2,
+      "var_95_pct": -0.82,
+      "cvar_95_pct": -1.28,
+      "best_day_pct": 3.39,
+      "worst_day_pct": -2.34,
+      "n_rebalances": 252,
+      "est_annual_tx_cost_pct": 6.458,
+      "net_sharpe": 3.174,
+      "latest_weights": {
+        "0050.TW": 0.34
+      }
+    },
+    "piecewise_conservative": {
+      "trading_days": 309,
+      "period_years": 1.23,
+      "cumulative_return_pct": 22.24,
+      "cagr_pct": 17.8,
+      "annualized_vol_pct": 4.48,
+      "sharpe": 3.975,
+      "sortino": 3.778,
+      "max_drawdown_pct": -2.48,
+      "max_drawdown_days": 56,
+      "calmar": 7.175,
+      "win_rate_pct": 45.3,
+      "var_95_pct": -0.23,
+      "cvar_95_pct": -0.6,
+      "best_day_pct": 1.08,
+      "worst_day_pct": -1.71,
+      "n_rebalances": 214,
+      "est_annual_tx_cost_pct": 5.236,
+      "net_sharpe": 2.806,
+      "latest_weights": {
+        "SPY": 0.0,
+        "GLD": 0.0
+      }
+    },
+    "fear_dca": {
+      "trading_days": 309,
+      "period_years": 1.23,
+      "cumulative_return_pct": 9.76,
+      "cagr_pct": 7.89,
+      "annualized_vol_pct": 18.46,
+      "sharpe": 0.427,
+      "sortino": 0.558,
+      "max_drawdown_pct": -18.76,
+      "max_drawdown_days": 86,
+      "calmar": 0.421,
+      "win_rate_pct": 55.0,
+      "var_95_pct": -1.65,
+      "cvar_95_pct": -2.58,
+      "best_day_pct": 10.5,
+      "worst_day_pct": -5.85,
+      "n_rebalances": 37,
+      "est_annual_tx_cost_pct": 0.905,
+      "net_sharpe": 0.378,
+      "latest_weights": {
+        "SPY": 1.5
+      }
+    },
+    "taiwan_spy_momentum": {
+      "trading_days": 286,
+      "period_years": 1.13,
+      "cumulative_return_pct": 83.76,
+      "cagr_pct": 70.94,
+      "annualized_vol_pct": 15.16,
+      "sharpe": 4.678,
+      "sortino": 6.199,
+      "max_drawdown_pct": -6.86,
+      "max_drawdown_days": 57,
+      "calmar": 10.342,
+      "win_rate_pct": 37.4,
+      "var_95_pct": -1.09,
+      "cvar_95_pct": -1.78,
+      "best_day_pct": 4.42,
+      "worst_day_pct": -4.27,
+      "n_rebalances": 44,
+      "est_annual_tx_cost_pct": 1.163,
+      "net_sharpe": 4.602,
+      "latest_weights": {
+        "0050.TW": 0.0
+      }
+    },
+    "tz_tw_jp_5050": {
+      "trading_days": 308,
+      "period_years": 1.22,
+      "cumulative_return_pct": 72.54,
+      "cagr_pct": 56.25,
+      "annualized_vol_pct": 10.4,
+      "sharpe": 5.41,
+      "sortino": 8.607,
+      "max_drawdown_pct": -4.78,
+      "max_drawdown_days": 67,
+      "calmar": 11.76,
+      "win_rate_pct": 39.6,
+      "var_95_pct": -0.72,
+      "cvar_95_pct": -1.13,
+      "best_day_pct": 2.95,
+      "worst_day_pct": -1.68,
+      "n_rebalances": 46,
+      "est_annual_tx_cost_pct": 1.129,
+      "net_sharpe": 5.301,
+      "latest_weights": {
+        "0050.TW": 0.0,
+        "^N225": 0.0
+      }
+    },
+    "global_vt_tz": {
+      "trading_days": 308,
+      "period_years": 1.22,
+      "cumulative_return_pct": 46.79,
+      "cagr_pct": 36.89,
+      "annualized_vol_pct": 9.14,
+      "sharpe": 4.036,
+      "sortino": 5.522,
+      "max_drawdown_pct": -4.3,
+      "max_drawdown_days": 67,
+      "calmar": 8.587,
+      "win_rate_pct": 62.3,
+      "var_95_pct": -0.68,
+      "cvar_95_pct": -1.16,
+      "best_day_pct": 2.54,
+      "worst_day_pct": -2.77,
+      "n_rebalances": 198,
+      "est_annual_tx_cost_pct": 4.86,
+      "net_sharpe": 3.505,
+      "latest_weights": {
+        "SPY": 0.11,
+        "GLD": 0.11,
+        "0050.TW": 0.0
+      }
+    },
+    "adaptive_tier": {
+      "trading_days": 309,
+      "period_years": 1.23,
+      "cumulative_return_pct": 40.41,
+      "cagr_pct": 31.89,
+      "annualized_vol_pct": 8.54,
+      "sharpe": 3.735,
+      "sortino": 3.503,
+      "max_drawdown_pct": -4.85,
+      "max_drawdown_days": 59,
+      "calmar": 6.581,
+      "win_rate_pct": 45.3,
+      "var_95_pct": -0.56,
+      "cvar_95_pct": -1.18,
+      "best_day_pct": 1.98,
+      "worst_day_pct": -3.59,
+      "n_rebalances": 190,
+      "est_annual_tx_cost_pct": 4.649,
+      "net_sharpe": 3.19,
+      "latest_weights": {
+        "SPY": 0.0,
+        "GLD": 0.0
+      }
+    }
+  },
+  "benchmarks": {
+    "spy_buy_and_hold": {
+      "trading_days": 308,
+      "period_years": 1.22,
+      "cumulative_return_pct": 10.03,
+      "cagr_pct": 8.14,
+      "annualized_vol_pct": 18.49,
+      "sharpe": 0.44,
+      "sortino": 0.573,
+      "max_drawdown_pct": -18.76,
+      "max_drawdown_days": 86,
+      "calmar": 0.434,
+      "win_rate_pct": 55.2,
+      "var_95_pct": -1.65,
+      "cvar_95_pct": -2.58,
+      "best_day_pct": 10.5,
+      "worst_day_pct": -5.85,
+      "n_rebalances": 0,
+      "est_annual_tx_cost_pct": 0.0,
+      "net_sharpe": 0.44,
+      "latest_weights": {}
+    },
+    "portfolio_60_40": {
+      "trading_days": 308,
+      "period_years": 1.22,
+      "cumulative_return_pct": 7.77,
+      "cagr_pct": 6.32,
+      "annualized_vol_pct": 12.55,
+      "sharpe": 0.503,
+      "sortino": 0.676,
+      "max_drawdown_pct": -11.34,
+      "max_drawdown_days": 86,
+      "calmar": 0.557,
+      "win_rate_pct": 53.9,
+      "var_95_pct": -1.18,
+      "cvar_95_pct": -1.79,
+      "best_day_pct": 6.54,
+      "worst_day_pct": -3.73,
+      "n_rebalances": 0,
+      "est_annual_tx_cost_pct": 0.0,
+      "net_sharpe": 0.503,
+      "latest_weights": {}
+    },
+    "meta_equal_weight": {
+      "trading_days": 320,
+      "period_years": 1.27,
+      "cumulative_return_pct": 23.11,
+      "cagr_pct": 17.79,
+      "annualized_vol_pct": 7.87,
+      "sharpe": 2.26,
+      "sortino": 2.881,
+      "max_drawdown_pct": -9.34,
+      "max_drawdown_days": 91,
+      "calmar": 1.904,
+      "win_rate_pct": 59.1,
+      "var_95_pct": -0.75,
+      "cvar_95_pct": -1.18,
+      "best_day_pct": 1.88,
+      "worst_day_pct": -2.42,
+      "n_rebalances": 0,
+      "est_annual_tx_cost_pct": 0.0,
+      "net_sharpe": 2.26,
+      "latest_weights": {}
+    }
+  },
+  "regime_analysis": {
+    "avg_vix": 19.2,
+    "median_vix": 17.44,
+    "max_vix": 52.33,
+    "min_vix": 13.47,
+    "max_vix_date": "2025-04-08",
+    "days_above_20": 90,
+    "days_above_25": 31,
+    "days_above_30": 13,
+    "days_above_35": 5,
+    "spike_periods_vix25": [
+      {
+        "start": "2025-03-10",
+        "end": "2025-03-11",
+        "days": 2,
+        "peak_vix": 27.9,
+        "peak_date": "2025-03-10"
+      },
+      {
+        "start": "2025-04-03",
+        "end": "2025-04-24",
+        "days": 15,
+        "peak_vix": 52.3,
+        "peak_date": "2025-04-08"
+      },
+      {
+        "start": "2025-04-28",
+        "end": "2025-04-28",
+        "days": 1,
+        "peak_vix": 25.1,
+        "peak_date": "2025-04-28"
+      },
+      {
+        "start": "2025-10-16",
+        "end": "2025-10-16",
+        "days": 1,
+        "peak_vix": 25.3,
+        "peak_date": "2025-10-16"
+      },
+      {
+        "start": "2025-11-20",
+        "end": "2025-11-20",
+        "days": 1,
+        "peak_vix": 26.4,
+        "peak_date": "2025-11-20"
+      },
+      {
+        "start": "2026-03-06",
+        "end": "2026-03-09",
+        "days": 2,
+        "peak_vix": 29.5,
+        "peak_date": "2026-03-06"
+      },
+      {
+        "start": "2026-03-12",
+        "end": "2026-03-13",
+        "days": 2,
+        "peak_vix": 27.3,
+        "peak_date": "2026-03-12"
+      },
+      {
+        "start": "2026-03-18",
+        "end": "2026-03-18",
+        "days": 1,
+        "peak_vix": 25.1,
+        "peak_date": "2026-03-18"
+      },
+      {
+        "start": "2026-03-20",
+        "end": "2026-03-27",
+        "days": 6,
+        "peak_vix": 31.0,
+        "peak_date": "2026-03-27"
+      }
+    ],
+    "strategy_spike_performance": {
+      "slow_vt": {
+        "spike_days": 30,
+        "spike_avg_return_pct": -0.342,
+        "spike_cum_return_pct": -9.87,
+        "normal_avg_return_pct": 0.048,
+        "spike_vs_normal_diff_bps": -39.0
+      },
+      "risk_parity": {
+        "spike_days": 30,
+        "spike_avg_return_pct": -0.226,
+        "spike_cum_return_pct": -6.81,
+        "normal_avg_return_pct": 0.155,
+        "spike_vs_normal_diff_bps": -38.1
+      },
+      "simple_12vix": {
+        "spike_days": 30,
+        "spike_avg_return_pct": -0.354,
+        "spike_cum_return_pct": -10.21,
+        "normal_avg_return_pct": 0.048,
+        "spike_vs_normal_diff_bps": -40.1
+      },
+      "recommended_5050": {
+        "spike_days": 30,
+        "spike_avg_return_pct": -0.155,
+        "spike_cum_return_pct": -4.61,
+        "normal_avg_return_pct": 0.097,
+        "spike_vs_normal_diff_bps": -25.1
+      },
+      "taiwan_8.63vix": {
+        "spike_days": 27,
+        "spike_avg_return_pct": -0.139,
+        "spike_cum_return_pct": -3.84,
+        "normal_avg_return_pct": 0.127,
+        "spike_vs_normal_diff_bps": -26.6
+      },
+      "vix_leading_guard": {
+        "spike_days": 27,
+        "spike_avg_return_pct": -0.185,
+        "spike_cum_return_pct": -5.19,
+        "normal_avg_return_pct": 0.121,
+        "spike_vs_normal_diff_bps": -30.6
+      },
+      "vix_cond_leverage": {
+        "spike_days": 30,
+        "spike_avg_return_pct": -0.085,
+        "spike_cum_return_pct": -2.59,
+        "normal_avg_return_pct": 0.121,
+        "spike_vs_normal_diff_bps": -20.6
+      },
+      "taiwan_hybrid_leverage": {
+        "spike_days": 28,
+        "spike_avg_return_pct": -0.039,
+        "spike_cum_return_pct": -1.19,
+        "normal_avg_return_pct": 0.163,
+        "spike_vs_normal_diff_bps": -20.3
+      },
+      "piecewise_conservative": {
+        "spike_days": 31,
+        "spike_avg_return_pct": 0.0,
+        "spike_cum_return_pct": 0.0,
+        "normal_avg_return_pct": 0.073,
+        "spike_vs_normal_diff_bps": -7.3
+      },
+      "fear_dca": {
+        "spike_days": 31,
+        "spike_avg_return_pct": -0.496,
+        "spike_cum_return_pct": -15.28,
+        "normal_avg_return_pct": 0.096,
+        "spike_vs_normal_diff_bps": -59.2
+      },
+      "taiwan_spy_momentum": {
+        "spike_days": 27,
+        "spike_avg_return_pct": 0.112,
+        "spike_cum_return_pct": 2.94,
+        "normal_avg_return_pct": 0.237,
+        "spike_vs_normal_diff_bps": -12.5
+      },
+      "tz_tw_jp_5050": {
+        "spike_days": 30,
+        "spike_avg_return_pct": 0.054,
+        "spike_cum_return_pct": 1.59,
+        "normal_avg_return_pct": 0.194,
+        "spike_vs_normal_diff_bps": -14.0
+      },
+      "global_vt_tz": {
+        "spike_days": 30,
+        "spike_avg_return_pct": 0.013,
+        "spike_cum_return_pct": 0.36,
+        "normal_avg_return_pct": 0.14,
+        "spike_vs_normal_diff_bps": -12.6
+      },
+      "adaptive_tier": {
+        "spike_days": 31,
+        "spike_avg_return_pct": 0.0,
+        "spike_cum_return_pct": 0.0,
+        "normal_avg_return_pct": 0.124,
+        "spike_vs_normal_diff_bps": -12.4
+      }
+    }
+  },
+  "net_sharpe_ranking": [
+    {
+      "rank": 1,
+      "strategy": "tz_tw_jp_5050",
+      "display_name": "TW+JP 50/50 TZ",
+      "net_sharpe": 5.301,
+      "sharpe": 5.41,
+      "is_active": false
+    },
+    {
+      "rank": 2,
+      "strategy": "taiwan_spy_momentum",
+      "display_name": "\u53f0\u80a1\u52d5\u91cf (0050.TW)",
+      "net_sharpe": 4.602,
+      "sharpe": 4.678,
+      "is_active": false
+    },
+    {
+      "rank": 3,
+      "strategy": "global_vt_tz",
+      "display_name": "Global US VT + TW TZ",
+      "net_sharpe": 3.505,
+      "sharpe": 4.036,
+      "is_active": false
+    },
+    {
+      "rank": 4,
+      "strategy": "adaptive_tier",
+      "display_name": "Adaptive Tier",
+      "net_sharpe": 3.19,
+      "sharpe": 3.735,
+      "is_active": false
+    },
+    {
+      "rank": 5,
+      "strategy": "taiwan_hybrid_leverage",
+      "display_name": "\u53f0\u80a1\u6df7\u5408\u69d3\u687f",
+      "net_sharpe": 3.174,
+      "sharpe": 3.762,
+      "is_active": true
+    },
+    {
+      "rank": 6,
+      "strategy": "piecewise_conservative",
+      "display_name": "\u4fdd\u5b88\u578b VT (Piecewise)",
+      "net_sharpe": 2.806,
+      "sharpe": 3.975,
+      "is_active": true
+    },
+    {
+      "rank": 7,
+      "strategy": "risk_parity",
+      "display_name": "Risk Parity (SPY+GLD)",
+      "net_sharpe": 2.324,
+      "sharpe": 2.448,
+      "is_active": true
+    },
+    {
+      "rank": 8,
+      "strategy": "vix_cond_leverage",
+      "display_name": "VIX \u689d\u4ef6\u69d3\u687f",
+      "net_sharpe": 2.211,
+      "sharpe": 2.827,
+      "is_active": true
+    },
+    {
+      "rank": 9,
+      "strategy": "taiwan_8.63vix",
+      "display_name": "\u53f0\u7063 VT (0050.TW)",
+      "net_sharpe": 1.968,
+      "sharpe": 2.484,
+      "is_active": true
+    },
+    {
+      "rank": 10,
+      "strategy": "vix_leading_guard",
+      "display_name": "VIX+\u666f\u6c23\u9818\u5148 (0050.TW)",
+      "net_sharpe": 1.782,
+      "sharpe": 1.825,
+      "is_active": true
+    },
+    {
+      "rank": 11,
+      "strategy": "recommended_5050",
+      "display_name": "50/50 SPY/GLD",
+      "net_sharpe": 1.372,
+      "sharpe": 1.995,
+      "is_active": true
+    },
+    {
+      "rank": 12,
+      "strategy": "fear_dca",
+      "display_name": "\u6050\u614c\u52a0\u78bc\u5b9a\u671f\u5b9a\u984d",
+      "net_sharpe": 0.378,
+      "sharpe": 0.427,
+      "is_active": true
+    },
+    {
+      "rank": 13,
+      "strategy": "slow_vt",
+      "display_name": "GARCH VT (SPY)",
+      "net_sharpe": -0.187,
+      "sharpe": 0.255,
+      "is_active": true
+    },
+    {
+      "rank": 14,
+      "strategy": "simple_12vix",
+      "display_name": "12/VIX (SPY)",
+      "net_sharpe": -0.417,
+      "sharpe": 0.232,
+      "is_active": true
+    }
+  ],
+  "backtest_vs_live": {
+    "slow_vt": {
+      "backtest_sharpe": 1.17,
+      "live_sharpe": 0.255,
+      "delta": -0.915,
+      "consistent": "YES"
+    },
+    "risk_parity": {
+      "backtest_sharpe": 2.04,
+      "live_sharpe": 2.448,
+      "delta": 0.408,
+      "consistent": "YES"
+    },
+    "simple_12vix": {
+      "backtest_sharpe": 1.16,
+      "live_sharpe": 0.232,
+      "delta": -0.928,
+      "consistent": "YES"
+    },
+    "recommended_5050": {
+      "backtest_sharpe": 1.87,
+      "live_sharpe": 1.995,
+      "delta": 0.125,
+      "consistent": "YES"
+    },
+    "taiwan_8.63vix": {
+      "backtest_sharpe": 2.05,
+      "live_sharpe": 2.484,
+      "delta": 0.434,
+      "consistent": "YES"
+    },
+    "vix_leading_guard": {
+      "backtest_sharpe": 1.52,
+      "live_sharpe": 1.825,
+      "delta": 0.305,
+      "consistent": "YES"
+    },
+    "vix_cond_leverage": {
+      "backtest_sharpe": 2.64,
+      "live_sharpe": 2.827,
+      "delta": 0.187,
+      "consistent": "YES"
+    },
+    "taiwan_hybrid_leverage": {
+      "backtest_sharpe": 2.5,
+      "live_sharpe": 3.762,
+      "delta": 1.262,
+      "consistent": "IMPROVED"
+    },
+    "piecewise_conservative": {
+      "backtest_sharpe": 3.16,
+      "live_sharpe": 3.975,
+      "delta": 0.815,
+      "consistent": "YES"
+    },
+    "fear_dca": {
+      "backtest_sharpe": 1.2,
+      "live_sharpe": 0.427,
+      "delta": -0.773,
+      "consistent": "YES"
+    },
+    "taiwan_spy_momentum": {
+      "backtest_sharpe": 3.06,
+      "live_sharpe": 4.678,
+      "delta": 1.618,
+      "consistent": "IMPROVED"
+    },
+    "tz_tw_jp_5050": {
+      "backtest_sharpe": 3.32,
+      "live_sharpe": 5.41,
+      "delta": 2.09,
+      "consistent": "IMPROVED"
+    },
+    "global_vt_tz": {
+      "backtest_sharpe": 2.84,
+      "live_sharpe": 4.036,
+      "delta": 1.196,
+      "consistent": "IMPROVED"
+    },
+    "adaptive_tier": {
+      "backtest_sharpe": 3.02,
+      "live_sharpe": 3.735,
+      "delta": 0.715,
+      "consistent": "YES"
+    }
+  },
+  "summary": {
+    "total_strategies_audited": 14,
+    "active_strategies": 10,
+    "strategies_beating_spy_sharpe": 11,
+    "strategies_beating_6040_sharpe": 11,
+    "avg_live_sharpe": 2.721,
+    "best_live_sharpe_strategy": "tz_tw_jp_5050",
+    "best_live_sharpe": 5.41,
+    "best_drawdown_protection": "piecewise_conservative",
+    "best_max_drawdown_pct": -2.48,
+    "spy_live_sharpe": 0.44,
+    "port6040_live_sharpe": 0.503,
+    "meta_ew_live_sharpe": 2.26,
+    "vix_avg": 19.2,
+    "vix_max": 52.33,
+    "vix_spike_days_gt25": 31
+  },
+  "references": [
+    "Harvey, C. R. (2016). Lucky factors. Journal of Investment Management.",
+    "DeMiguel, V., Garlappi, L., & Uppal, R. (2009). Optimal versus naive diversification. RFS, 22(5)."
+  ]
+}

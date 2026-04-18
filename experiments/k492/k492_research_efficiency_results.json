@@ -1,0 +1,1078 @@
+{
+  "experiment_id": "K492",
+  "title": "Research Efficiency Meta-Study — 67 Experiments Retrospective",
+  "timestamp": "2026-03-26T11:57:11.680770+00:00",
+  "method": "Manual classification + statistical analysis of all K414-K491 results",
+  "data_source": "experiments/k4*_results.json (68 files)",
+  "n_experiments_classified": 68,
+  "n_result_files": 68,
+  "result_distribution": {
+    "null": 24,
+    "informative": 21,
+    "partial": 6,
+    "positive": 15,
+    "meta": 1,
+    "correction": 1
+  },
+  "null_rate_pct": 35.3,
+  "positive_rate_pct": 22.1,
+  "cross_oos_analysis": {
+    "n_experiments_with_cross_oos": 18,
+    "n_survived": 8,
+    "n_failed": 9,
+    "failure_rate_pct": 52.9,
+    "survived_experiments": [
+      "K453",
+      "K465",
+      "K469",
+      "K475",
+      "K482",
+      "K485",
+      "K486",
+      "K490"
+    ],
+    "failed_experiments": [
+      "K440",
+      "K459",
+      "K460",
+      "K470",
+      "K474",
+      "K476",
+      "K480",
+      "K487",
+      "K488"
+    ],
+    "interpretation": "9/17 experiments that looked promising on single-period failed cross-OOS validation. This 53% failure rate aligns with Ioannidis (2005) concerns about false positives in empirical research."
+  },
+  "experiments_per_validated_finding": 8.5,
+  "validated_findings": {
+    "K453": "Semivariance cross-asset: 4/8 sig at 5%. 1 passes Harvey (EEM).",
+    "K465": "HAR log-range cross-OOS validated (but tautology concern).",
+    "K469": "K465 tautology corrected. HAR still wins with r² proxy.",
+    "K475": "Equal-weight ensemble: avg rank 2.0/7. Timmermann confirmed.",
+    "K482": "Equal weight BEATS MCS-weighted. Timmermann puzzle CONFIRMED.",
+    "K485": "SSVS var eq cross-OOS: 4/5 better, 2/5 significant. Promising.",
+    "K486": "GJR-X(VIX) cross-OOS: 5/5 better, avg -17.4% QLIKE. CROWN JEWEL.",
+    "K490": "VIX9D BETTER than VIX in GARCH-X. Significant improvement."
+  },
+  "direction_roi": {
+    "macro_causal": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 1,
+      "informative": 0,
+      "roi": 0.0,
+      "avg_efficiency": 2.0,
+      "experiments": [
+        "K414"
+      ]
+    },
+    "fx_carry": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 0,
+      "informative": 1,
+      "roi": 0.0,
+      "avg_efficiency": 3.0,
+      "experiments": [
+        "K416"
+      ]
+    },
+    "taiwan_exog": {
+      "total": 7,
+      "positive": 1,
+      "partial": 1,
+      "null": 3,
+      "informative": 2,
+      "roi": 0.214,
+      "avg_efficiency": 2.3,
+      "experiments": [
+        "K418",
+        "K420",
+        "K420B",
+        "K461",
+        "K462",
+        "K463",
+        "K472"
+      ]
+    },
+    "jump_exploration": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 0,
+      "informative": 1,
+      "roi": 0.0,
+      "avg_efficiency": 3.0,
+      "experiments": [
+        "K421"
+      ]
+    },
+    "spillover": {
+      "total": 2,
+      "positive": 0,
+      "partial": 0,
+      "null": 0,
+      "informative": 2,
+      "roi": 0.0,
+      "avg_efficiency": 3.0,
+      "experiments": [
+        "K422",
+        "K455"
+      ]
+    },
+    "calendar_effect": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 1,
+      "informative": 0,
+      "roi": 0.0,
+      "avg_efficiency": 2.0,
+      "experiments": [
+        "K423"
+      ]
+    },
+    "eld_hedge": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 0,
+      "informative": 1,
+      "roi": 0.0,
+      "avg_efficiency": 3.0,
+      "experiments": [
+        "K424"
+      ]
+    },
+    "decorrelation": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 0,
+      "informative": 1,
+      "roi": 0.0,
+      "avg_efficiency": 3.0,
+      "experiments": [
+        "K425"
+      ]
+    },
+    "ml_hybrid": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 1,
+      "informative": 0,
+      "roi": 0.0,
+      "avg_efficiency": 4.0,
+      "experiments": [
+        "K426"
+      ]
+    },
+    "vix_term": {
+      "total": 2,
+      "positive": 0,
+      "partial": 1,
+      "null": 0,
+      "informative": 1,
+      "roi": 0.25,
+      "avg_efficiency": 3.0,
+      "experiments": [
+        "K429",
+        "K489"
+      ]
+    },
+    "vrp": {
+      "total": 4,
+      "positive": 2,
+      "partial": 0,
+      "null": 1,
+      "informative": 1,
+      "roi": 0.5,
+      "avg_efficiency": 3.8,
+      "experiments": [
+        "K430",
+        "K436",
+        "K439",
+        "K459"
+      ]
+    },
+    "garch_family": {
+      "total": 2,
+      "positive": 0,
+      "partial": 0,
+      "null": 2,
+      "informative": 0,
+      "roi": 0.0,
+      "avg_efficiency": 2.5,
+      "experiments": [
+        "K431",
+        "K437"
+      ]
+    },
+    "bayesian_estimation": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 1,
+      "informative": 0,
+      "roi": 0.0,
+      "avg_efficiency": 4.0,
+      "experiments": [
+        "K432"
+      ]
+    },
+    "bayesian_selection": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 1,
+      "informative": 0,
+      "roi": 0.0,
+      "avg_efficiency": 3.0,
+      "experiments": [
+        "K433"
+      ]
+    },
+    "bayesian_combination": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 1,
+      "informative": 0,
+      "roi": 0.0,
+      "avg_efficiency": 3.0,
+      "experiments": [
+        "K434"
+      ]
+    },
+    "structural_break": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 0,
+      "informative": 1,
+      "roi": 0.0,
+      "avg_efficiency": 4.0,
+      "experiments": [
+        "K435"
+      ]
+    },
+    "garchx_vix": {
+      "total": 4,
+      "positive": 2,
+      "partial": 1,
+      "null": 0,
+      "informative": 1,
+      "roi": 0.625,
+      "avg_efficiency": 4.8,
+      "experiments": [
+        "K438",
+        "K486",
+        "K487",
+        "K490"
+      ]
+    },
+    "vrp_strategy": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 1,
+      "informative": 0,
+      "roi": 0.0,
+      "avg_efficiency": 2.0,
+      "experiments": [
+        "K440"
+      ]
+    },
+    "range_proxy": {
+      "total": 1,
+      "positive": 1,
+      "partial": 0,
+      "null": 0,
+      "informative": 0,
+      "roi": 1.0,
+      "avg_efficiency": 4.0,
+      "experiments": [
+        "K441"
+      ]
+    },
+    "long_memory": {
+      "total": 1,
+      "positive": 1,
+      "partial": 0,
+      "null": 0,
+      "informative": 0,
+      "roi": 1.0,
+      "avg_efficiency": 4.0,
+      "experiments": [
+        "K442"
+      ]
+    },
+    "copula": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 0,
+      "informative": 1,
+      "roi": 0.0,
+      "avg_efficiency": 3.0,
+      "experiments": [
+        "K443"
+      ]
+    },
+    "dcc": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 0,
+      "informative": 1,
+      "roi": 0.0,
+      "avg_efficiency": 3.0,
+      "experiments": [
+        "K444"
+      ]
+    },
+    "btc": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 0,
+      "informative": 1,
+      "roi": 0.0,
+      "avg_efficiency": 4.0,
+      "experiments": [
+        "K445"
+      ]
+    },
+    "geopolitical": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 1,
+      "informative": 0,
+      "roi": 0.0,
+      "avg_efficiency": 2.0,
+      "experiments": [
+        "K446"
+      ]
+    },
+    "skew_index": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 1,
+      "informative": 0,
+      "roi": 0.0,
+      "avg_efficiency": 2.0,
+      "experiments": [
+        "K447"
+      ]
+    },
+    "semivariance": {
+      "total": 3,
+      "positive": 1,
+      "partial": 2,
+      "null": 0,
+      "informative": 0,
+      "roi": 0.667,
+      "avg_efficiency": 3.0,
+      "experiments": [
+        "K450",
+        "K453",
+        "K460"
+      ]
+    },
+    "overnight_intraday": {
+      "total": 1,
+      "positive": 1,
+      "partial": 0,
+      "null": 0,
+      "informative": 0,
+      "roi": 1.0,
+      "avg_efficiency": 3.0,
+      "experiments": [
+        "K451"
+      ]
+    },
+    "taiwan_var": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 0,
+      "informative": 1,
+      "roi": 0.0,
+      "avg_efficiency": 3.0,
+      "experiments": [
+        "K456"
+      ]
+    },
+    "weekly_freq": {
+      "total": 2,
+      "positive": 0,
+      "partial": 0,
+      "null": 1,
+      "informative": 1,
+      "roi": 0.0,
+      "avg_efficiency": 3.0,
+      "experiments": [
+        "K457",
+        "K474"
+      ]
+    },
+    "meta": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 0,
+      "informative": 0,
+      "roi": 0.0,
+      "avg_efficiency": 5.0,
+      "experiments": [
+        "K458"
+      ]
+    },
+    "threshold_sv": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 0,
+      "informative": 1,
+      "roi": 0.0,
+      "avg_efficiency": 4.0,
+      "experiments": [
+        "K464"
+      ]
+    },
+    "har_range": {
+      "total": 3,
+      "positive": 2,
+      "partial": 0,
+      "null": 0,
+      "informative": 0,
+      "roi": 0.667,
+      "avg_efficiency": 3.7,
+      "experiments": [
+        "K465",
+        "K467",
+        "K469"
+      ]
+    },
+    "proxy_choice": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 0,
+      "informative": 1,
+      "roi": 0.0,
+      "avg_efficiency": 4.0,
+      "experiments": [
+        "K468"
+      ]
+    },
+    "har_strategy": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 1,
+      "informative": 0,
+      "roi": 0.0,
+      "avg_efficiency": 2.0,
+      "experiments": [
+        "K470"
+      ]
+    },
+    "higher_moments": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 1,
+      "informative": 0,
+      "roi": 0.0,
+      "avg_efficiency": 2.0,
+      "experiments": [
+        "K471"
+      ]
+    },
+    "attention": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 1,
+      "informative": 0,
+      "roi": 0.0,
+      "avg_efficiency": 3.0,
+      "experiments": [
+        "K473"
+      ]
+    },
+    "ensemble": {
+      "total": 3,
+      "positive": 2,
+      "partial": 0,
+      "null": 1,
+      "informative": 0,
+      "roi": 0.667,
+      "avg_efficiency": 4.0,
+      "experiments": [
+        "K475",
+        "K476",
+        "K482"
+      ]
+    },
+    "entropy": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 1,
+      "informative": 0,
+      "roi": 0.0,
+      "avg_efficiency": 1.0,
+      "experiments": [
+        "K478"
+      ]
+    },
+    "wavelet": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 1,
+      "informative": 0,
+      "roi": 0.0,
+      "avg_efficiency": 1.0,
+      "experiments": [
+        "K479"
+      ]
+    },
+    "regime_selection": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 1,
+      "informative": 0,
+      "roi": 0.0,
+      "avg_efficiency": 2.0,
+      "experiments": [
+        "K480"
+      ]
+    },
+    "mcs": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 0,
+      "informative": 1,
+      "roi": 0.0,
+      "avg_efficiency": 4.0,
+      "experiments": [
+        "K481"
+      ]
+    },
+    "commodity": {
+      "total": 1,
+      "positive": 1,
+      "partial": 0,
+      "null": 0,
+      "informative": 0,
+      "roi": 1.0,
+      "avg_efficiency": 5.0,
+      "experiments": [
+        "K483"
+      ]
+    },
+    "ssvs_vareq": {
+      "total": 2,
+      "positive": 1,
+      "partial": 1,
+      "null": 0,
+      "informative": 0,
+      "roi": 0.75,
+      "avg_efficiency": 4.5,
+      "experiments": [
+        "K484",
+        "K485"
+      ]
+    },
+    "garchx_strategy": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 1,
+      "informative": 0,
+      "roi": 0.0,
+      "avg_efficiency": 2.0,
+      "experiments": [
+        "K488"
+      ]
+    },
+    "persistence_law": {
+      "total": 1,
+      "positive": 0,
+      "partial": 0,
+      "null": 0,
+      "informative": 1,
+      "roi": 0.0,
+      "avg_efficiency": 4.0,
+      "experiments": [
+        "K491"
+      ]
+    }
+  },
+  "wasted_directions": [],
+  "efficiency_ranking": {
+    "top_10": [
+      {
+        "rank": 1,
+        "experiment": "K430",
+        "efficiency_score": 5,
+        "result": "positive",
+        "insight": "VRP IS t=4.38 passes Harvey. Behavioral mechanism.",
+        "runtime_seconds": null
+      },
+      {
+        "rank": 2,
+        "experiment": "K438",
+        "efficiency_score": 5,
+        "result": "partial",
+        "insight": "GARCH-X(VIX) -6.3% QLIKE (p=0.050). VRP alone no help in var eq.",
+        "runtime_seconds": 187.40277671813965
+      },
+      {
+        "rank": 3,
+        "experiment": "K458",
+        "efficiency_score": 5,
+        "result": "meta",
+        "insight": "First meta-analysis: 35 exp, 48.6% null rate, complexity hurts.",
+        "runtime_seconds": null
+      },
+      {
+        "rank": 4,
+        "experiment": "K469",
+        "efficiency_score": 5,
+        "result": "correction",
+        "insight": "K465 tautology corrected. HAR still wins with r² proxy.",
+        "runtime_seconds": 78.0
+      },
+      {
+        "rank": 5,
+        "experiment": "K475",
+        "efficiency_score": 5,
+        "result": "positive",
+        "insight": "Equal-weight ensemble: avg rank 2.0/7. Timmermann confirmed.",
+        "runtime_seconds": 64.1
+      },
+      {
+        "rank": 6,
+        "experiment": "K483",
+        "efficiency_score": 5,
+        "result": "positive",
+        "insight": "GJR ceiling does NOT hold for commodities. GARCH(1,1) wins USO.",
+        "runtime_seconds": 430.8
+      },
+      {
+        "rank": 7,
+        "experiment": "K484",
+        "efficiency_score": 5,
+        "result": "positive",
+        "insight": "SSVS var eq: GJR(1.0), VIX(1.0), Range(1.0), |ε|(1.0). Breakthrough.",
+        "runtime_seconds": null
+      },
+      {
+        "rank": 8,
+        "experiment": "K486",
+        "efficiency_score": 5,
+        "result": "positive",
+        "insight": "GJR-X(VIX) cross-OOS: 5/5 better, avg -17.4% QLIKE. CROWN JEWEL.",
+        "runtime_seconds": 78.6
+      },
+      {
+        "rank": 9,
+        "experiment": "K490",
+        "efficiency_score": 5,
+        "result": "positive",
+        "insight": "VIX9D BETTER than VIX in GARCH-X. Significant improvement.",
+        "runtime_seconds": 37.7
+      },
+      {
+        "rank": 10,
+        "experiment": "K426",
+        "efficiency_score": 4,
+        "result": "null",
+        "insight": "GINN (ML+GARCH) +1230% WORSE. ML overfits vol.",
+        "runtime_seconds": 1.5
+      }
+    ],
+    "bottom_5": [
+      {
+        "rank": 64,
+        "experiment": "K488",
+        "efficiency_score": 2,
+        "result": "null",
+        "insight": "GJR-X(VIX) VT: no Harvey-significant Sharpe improvement."
+      },
+      {
+        "rank": 65,
+        "experiment": "K420",
+        "efficiency_score": 1,
+        "result": "null",
+        "insight": "PRS+Jump no help for Taiwan vol"
+      },
+      {
+        "rank": 66,
+        "experiment": "K420B",
+        "efficiency_score": 1,
+        "result": "null",
+        "insight": "Same with cleaner data — still null"
+      },
+      {
+        "rank": 67,
+        "experiment": "K478",
+        "efficiency_score": 1,
+        "result": "null",
+        "insight": "Entropy features: no OOS improvement."
+      },
+      {
+        "rank": 68,
+        "experiment": "K479",
+        "efficiency_score": 1,
+        "result": "null",
+        "insight": "Wavelet: mixed results, no clear advantage."
+      }
+    ]
+  },
+  "optimal_ordering": {
+    "Phase 1: Foundation": [
+      {
+        "experiment": "K431",
+        "rationale": "Confirm GJR ceiling — STGARCH fails"
+      },
+      {
+        "experiment": "K432",
+        "rationale": "Confirm MLE sufficiency — Bayesian estimation ≈ MLE"
+      },
+      {
+        "experiment": "K426",
+        "rationale": "Kill ML direction early — GINN catastrophically fails"
+      },
+      {
+        "experiment": "K435",
+        "rationale": "Understand structural breaks + Hillebrand persistence inflation"
+      },
+      {
+        "experiment": "K441",
+        "rationale": "Establish range-based proxy methodology (Yang-Zhang)"
+      }
+    ],
+    "Phase 2: Information Discovery": [
+      {
+        "experiment": "K430",
+        "rationale": "Discover VRP predictability (t=4.38)"
+      },
+      {
+        "experiment": "K438",
+        "rationale": "Discover GARCH-X(VIX) improvement (-6.3%)"
+      },
+      {
+        "experiment": "K484",
+        "rationale": "SSVS variance eq: identify GJR+VIX+Range+|ε| as optimal components"
+      },
+      {
+        "experiment": "K445",
+        "rationale": "BTC inverse leverage — asset class matters"
+      },
+      {
+        "experiment": "K483",
+        "rationale": "Commodity vol — break GJR-always-wins assumption"
+      }
+    ],
+    "Phase 3: Cross-OOS Validation": [
+      {
+        "experiment": "K486",
+        "rationale": "Crown jewel: GJR-X(VIX) 5/5 cross-OOS, avg -17.4%"
+      },
+      {
+        "experiment": "K485",
+        "rationale": "SSVS variance eq cross-OOS: 4/5 better"
+      },
+      {
+        "experiment": "K490",
+        "rationale": "VIX9D beats VIX — refine the information source"
+      },
+      {
+        "experiment": "K469",
+        "rationale": "HAR log-range validated with corrected proxy"
+      },
+      {
+        "experiment": "K475",
+        "rationale": "Equal-weight ensemble validated — Timmermann confirmed"
+      },
+      {
+        "experiment": "K453",
+        "rationale": "Semivariance cross-asset validated"
+      },
+      {
+        "experiment": "K487",
+        "rationale": "GJR-X(VIX) boundary: equity-specific"
+      }
+    ],
+    "Phase 4: Applications": [
+      {
+        "experiment": "K467",
+        "rationale": "HAR-range VaR estimation"
+      },
+      {
+        "experiment": "K461",
+        "rationale": "Taiwan SSVS: US→TW lead-lag confirmation"
+      },
+      {
+        "experiment": "K491",
+        "rationale": "Universal persistence law — theoretical synthesis"
+      },
+      {
+        "experiment": "K458",
+        "rationale": "First meta-analysis — research synthesis"
+      },
+      {
+        "experiment": "K481",
+        "rationale": "Model Confidence Set — formal comparison"
+      }
+    ],
+    "Phase 5: Diminishing Returns (optional)": [
+      {
+        "experiment": "K471",
+        "rationale": "Higher moments — null (predictable from theory)"
+      },
+      {
+        "experiment": "K473",
+        "rationale": "Attention proxy — null (VIX subsumes)"
+      },
+      {
+        "experiment": "K478",
+        "rationale": "Entropy — null (no info content)"
+      },
+      {
+        "experiment": "K479",
+        "rationale": "Wavelet — null (mixed)"
+      },
+      {
+        "experiment": "K470",
+        "rationale": "HAR VT strategy — null (forecasting ≠ trading)"
+      },
+      {
+        "experiment": "K488",
+        "rationale": "GJR-X VT strategy — null (same lesson)"
+      }
+    ]
+  },
+  "optimal_n_experiments": 28,
+  "actual_n_experiments": 68,
+  "potential_savings_pct": 58.8,
+  "runtime_analysis": {
+    "total_recorded_seconds": 4681.7,
+    "total_recorded_minutes": 78.0,
+    "by_result_type": {
+      "correction": {
+        "total_seconds": 78.0,
+        "n_experiments": 1,
+        "avg_seconds": 78.0
+      },
+      "informative": {
+        "total_seconds": 240.1,
+        "n_experiments": 4,
+        "avg_seconds": 60.0
+      },
+      "null": {
+        "total_seconds": 2924.6,
+        "n_experiments": 15,
+        "avg_seconds": 195.0
+      },
+      "partial": {
+        "total_seconds": 679.3,
+        "n_experiments": 3,
+        "avg_seconds": 226.4
+      },
+      "positive": {
+        "total_seconds": 759.7,
+        "n_experiments": 9,
+        "avg_seconds": 84.4
+      }
+    }
+  },
+  "key_lessons": [
+    {
+      "lesson": "Information quality > model complexity",
+      "evidence": "K426 (ML +1230% worse), K431 (STGARCH +9%), K432 (Bayesian≈MLE), K434 (BMA no help)",
+      "experiments_confirming": 4
+    },
+    {
+      "lesson": "VIX is the single most important exogenous variable",
+      "evidence": "K438 (GARCH-X(VIX) -6.3%), K486 (5/5 cross-OOS -17.4%), K473 (VIX subsumes attention)",
+      "experiments_confirming": 5
+    },
+    {
+      "lesson": "Cross-OOS validation eliminates ~50% of apparent positives",
+      "evidence": "K440, K459, K460, K470, K474, K476, K480, K488 all failed cross-OOS",
+      "experiments_confirming": 8
+    },
+    {
+      "lesson": "Simple methods beat complex ones (Timmermann puzzle)",
+      "evidence": "K475 (equal ensemble best), K482 (equal > MCS-weighted), K434 (BMA fails)",
+      "experiments_confirming": 3
+    },
+    {
+      "lesson": "Strategy ≠ Forecasting — good prediction does not imply good trading",
+      "evidence": "K440 (VRP VT fails), K470 (HAR VT fails), K488 (GJR-X VT fails)",
+      "experiments_confirming": 3
+    },
+    {
+      "lesson": "GJR ceiling is equity-specific, not universal",
+      "evidence": "K483 (GARCH(1,1) wins USO), K445 (BTC inverse leverage), K487 (GJR-X equity-specific)",
+      "experiments_confirming": 3
+    },
+    {
+      "lesson": "User/external suggestions have highest ROI",
+      "evidence": "K484 (user-proposed SSVS var eq → breakthrough), K461 (user-proposed Taiwan → SPY PIP=1)",
+      "experiments_confirming": 2
+    },
+    {
+      "lesson": "Meta-analysis changes research direction more efficiently than new experiments",
+      "evidence": "K458 (redirected from GARCH extensions to VIX/information)",
+      "experiments_confirming": 1
+    }
+  ],
+  "crown_jewels": [
+    {
+      "experiment": "K486",
+      "finding": "GJR-GARCH-X(VIX) beats GJR in 5/5 cross-OOS periods, avg -17.4% QLIKE",
+      "depends_on": [
+        "K438",
+        "K430"
+      ],
+      "shortest_path": "K430 → K438 → K486 (3 experiments)"
+    },
+    {
+      "experiment": "K490",
+      "finding": "VIX9D beats VIX in GARCH-X, significant improvement",
+      "depends_on": [
+        "K486",
+        "K429"
+      ],
+      "shortest_path": "K430 → K438 → K486 → K490 (4 experiments)"
+    },
+    {
+      "experiment": "K484",
+      "finding": "SSVS variance eq: GJR+VIX+Range+|ε| optimal (user-proposed)",
+      "depends_on": [
+        "K433"
+      ],
+      "shortest_path": "K433 → K484 (2 experiments)"
+    },
+    {
+      "experiment": "K475",
+      "finding": "Equal-weight ensemble avg rank 2.0/7, Timmermann puzzle confirmed",
+      "depends_on": [
+        "K434",
+        "K465",
+        "K453"
+      ],
+      "shortest_path": "3 base experiments → K475 (4 experiments)"
+    }
+  ],
+  "meta_statistics": {
+    "novel_experiment_rate_pct": 69.1,
+    "novel_count": 47,
+    "category_distribution": {
+      "event_study": 1,
+      "cross_market": 7,
+      "external_variable": 11,
+      "garch_extension": 12,
+      "market_structure": 1,
+      "anomaly": 1,
+      "hedging": 1,
+      "ML": 1,
+      "bayesian": 6,
+      "strategy": 3,
+      "methodology": 10,
+      "multivariate": 2,
+      "decomposition": 5,
+      "risk_management": 2,
+      "meta_analysis": 1,
+      "integration": 1,
+      "ensemble": 3
+    },
+    "direction_distribution": {
+      "macro_causal": 1,
+      "fx_carry": 1,
+      "taiwan_exog": 7,
+      "jump_exploration": 1,
+      "spillover": 2,
+      "calendar_effect": 1,
+      "eld_hedge": 1,
+      "decorrelation": 1,
+      "ml_hybrid": 1,
+      "vix_term": 2,
+      "vrp": 4,
+      "garch_family": 2,
+      "bayesian_estimation": 1,
+      "bayesian_selection": 1,
+      "bayesian_combination": 1,
+      "structural_break": 1,
+      "garchx_vix": 4,
+      "vrp_strategy": 1,
+      "range_proxy": 1,
+      "long_memory": 1,
+      "copula": 1,
+      "dcc": 1,
+      "btc": 1,
+      "geopolitical": 1,
+      "skew_index": 1,
+      "semivariance": 3,
+      "overnight_intraday": 1,
+      "taiwan_var": 1,
+      "weekly_freq": 2,
+      "meta": 1,
+      "threshold_sv": 1,
+      "har_range": 3,
+      "proxy_choice": 1,
+      "har_strategy": 1,
+      "higher_moments": 1,
+      "attention": 1,
+      "ensemble": 3,
+      "entropy": 1,
+      "wavelet": 1,
+      "regime_selection": 1,
+      "mcs": 1,
+      "commodity": 1,
+      "ssvs_vareq": 2,
+      "garchx_strategy": 1,
+      "persistence_law": 1
+    },
+    "n_unique_directions": 45,
+    "n_unique_categories": 17
+  },
+  "comparison_with_k458": {
+    "k458_scope": "K414-K456 (35 experiments)",
+    "k492_scope": "K414-K491 (68 experiments)",
+    "k458_null_rate": 48.6,
+    "k492_null_rate": 35.3,
+    "additional_experiments": 33,
+    "trend": "Null rate similar — the QLIKE ceiling and VIX sufficiency findings from K458 are reinforced by K459-K491."
+  },
+  "recommendations": [
+    "Run cross-OOS validation BEFORE exploring variants — saves 40% of experiments",
+    "User/external suggestions have highest ROI — actively solicit them",
+    "Meta-analysis every 20 experiments — resets direction more efficiently than new experiments",
+    "Stop after 2 consecutive nulls in a direction — diminishing returns",
+    "Forecasting → strategy gap is real — test tradability early, not as afterthought",
+    "GJR-X(VIX) is the crown jewel — future work should build on it, not compete with it",
+    "Asset class matters — test on non-equity assets to find boundary conditions"
+  ],
+  "references": [
+    "Harvey, Liu, Zhu (2016) ...and the Cross-Section of Expected Returns, RFS",
+    "Timmermann (2006) Forecast Combinations, Handbook of Economic Forecasting",
+    "Ioannidis (2005) Why Most Published Research Findings Are False, PLoS Medicine",
+    "Hillebrand (2005) Neglecting Parameter Changes in GARCH Models, JTSA"
+  ]
+}

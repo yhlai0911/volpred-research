@@ -1,0 +1,320 @@
+{
+  "experiment_id": "K152",
+  "title": "Fiscal-Monetary Liquidity MS-GARCH",
+  "proposed_by": "Gemini R5#1",
+  "executed_by": "Claude",
+  "timestamp": "2026-03-22T20:35:08.092754",
+  "config": {
+    "assets": [
+      "SPY",
+      "GLD",
+      "TLT"
+    ],
+    "window": 2000,
+    "oos_start": "2020-01-01",
+    "oos_end": "2024-12-31",
+    "refit_freq": 22,
+    "netliq_change_window": 5,
+    "net_liq_formula": "WALCL - WTREGEN - RRPONTSYD"
+  },
+  "results_by_asset": {
+    "SPY": {
+      "n_oos": 1256,
+      "oos_start": "2020-01-02",
+      "oos_end": "2024-12-27",
+      "models": {
+        "GJR-GARCH (baseline)": {
+          "qlike": -7.899482335891495,
+          "mse": 3.7715032770342326e-07,
+          "dm_vs_gjr": null
+        },
+        "MS-GARCH (standard)": {
+          "qlike": -7.931720942932282,
+          "mse": 3.8803714672514305e-07,
+          "dm_vs_gjr": {
+            "statistic": -0.8893038499933684,
+            "p_value": 0.37383980295676666,
+            "mean_diff": -0.032461496003386964,
+            "better_model": 1
+          }
+        },
+        "MS-GARCH (liquidity)": {
+          "qlike": -7.892825074201094,
+          "mse": 3.820211371731597e-07,
+          "dm_vs_gjr": {
+            "statistic": 2.6366724637960828,
+            "p_value": 0.008372362858210414,
+            "mean_diff": 0.006647385763977678,
+            "better_model": 2
+          }
+        },
+        "GARCH-X (Net_Liq)": {
+          "qlike": -7.878088507256645,
+          "mse": 3.940563038696352e-07,
+          "dm_vs_gjr": {
+            "statistic": 4.100828970512272,
+            "p_value": 4.116727448755242e-05,
+            "mean_diff": 0.021340877101102856,
+            "better_model": 2
+          }
+        },
+        "Threshold GARCH": {
+          "qlike": -7.315258692689155,
+          "mse": 1.6707449501940314e+17,
+          "dm_vs_gjr": {
+            "statistic": 2.8578312079170454,
+            "p_value": 0.004265472226317568,
+            "mean_diff": 0.5845038766359452,
+            "better_model": 2
+          }
+        },
+        "persistence_test": {
+          "mean_expansion": 0.9408174318530421,
+          "mean_contraction": 0.9849337695273279,
+          "mean_full": 0.9702163578846352,
+          "delta": 0.0441163376742858,
+          "t_stat": 13.43895108632877,
+          "p_value": 1.4869065287909813e-25
+        },
+        "garch_x_regression": {
+          "mean_slope": 0.020612956133986234,
+          "mean_r_value": 0.00809957282117647,
+          "mean_p_value": 0.7027959020595347,
+          "n_significant": 0,
+          "n_fits": 58
+        },
+        "partial_correlation": {
+          "raw_corr_vol_netliq": 0.18731987364999902,
+          "raw_p_vol_netliq": 2.211405097032585e-11,
+          "raw_corr_vol_vix": 0.6306182539754901,
+          "raw_p_vol_vix": 3.19449683931047e-140,
+          "raw_corr_netliq_vix": 0.3575858472260176,
+          "raw_p_netliq_vix": 3.484682153312421e-39,
+          "partial_corr_vol_netliq_given_vix": -0.0526785903949206,
+          "partial_p": 0.06198946639843043,
+          "n_obs": 1256
+        }
+      }
+    },
+    "GLD": {
+      "n_oos": 1256,
+      "oos_start": "2020-01-02",
+      "oos_end": "2024-12-27",
+      "models": {
+        "GJR-GARCH (baseline)": {
+          "qlike": -8.20708775704816,
+          "mse": 4.3203776103695106e-08,
+          "dm_vs_gjr": null
+        },
+        "MS-GARCH (standard)": {
+          "qlike": -8.108965113950877,
+          "mse": 4.785068874399106e-08,
+          "dm_vs_gjr": {
+            "statistic": 4.091935177461063,
+            "p_value": 4.277882458647575e-05,
+            "mean_diff": 0.09790664229643012,
+            "better_model": 2
+          }
+        },
+        "MS-GARCH (liquidity)": {
+          "qlike": -8.205163284765389,
+          "mse": 4.313290730024919e-08,
+          "dm_vs_gjr": {
+            "statistic": 1.2474488448628382,
+            "p_value": 0.212232966146086,
+            "mean_diff": 0.001917774078992301,
+            "better_model": 2
+          }
+        },
+        "GARCH-X (Net_Liq)": {
+          "qlike": -8.191642929161004,
+          "mse": 4.4298886358805514e-08,
+          "dm_vs_gjr": {
+            "statistic": 1.7204039018021409,
+            "p_value": 0.08535904825195462,
+            "mean_diff": 0.015428397926720447,
+            "better_model": 2
+          }
+        },
+        "Threshold GARCH": {
+          "qlike": -8.240682076362331,
+          "mse": 4.2102410233355936e-08,
+          "dm_vs_gjr": {
+            "statistic": -2.8975571183736983,
+            "p_value": 0.003760812495526844,
+            "mean_diff": -0.03353397572635153,
+            "better_model": 1
+          }
+        },
+        "persistence_test": {
+          "mean_expansion": 0.9548095636562934,
+          "mean_contraction": 0.9717535741639935,
+          "mean_full": 0.9828952997281231,
+          "delta": 0.016944010507700114,
+          "t_stat": 4.986720626252536,
+          "p_value": 1.1081580664701257e-06
+        },
+        "garch_x_regression": {
+          "mean_slope": 0.004896004569006648,
+          "mean_r_value": 0.0019012122909084696,
+          "mean_p_value": 0.8026056216556047,
+          "n_significant": 0,
+          "n_fits": 58
+        },
+        "partial_correlation": {
+          "raw_corr_vol_netliq": 0.14562861975705668,
+          "raw_p_vol_netliq": 2.1763231021260817e-07,
+          "raw_corr_vol_vix": 0.23251353790838614,
+          "raw_p_vol_vix": 7.016847778330169e-17,
+          "raw_corr_netliq_vix": 0.3575858472260176,
+          "raw_p_netliq_vix": 3.484682153312421e-39,
+          "partial_corr_vol_netliq_given_vix": 0.06879451987380047,
+          "partial_p": 0.01474648785816479,
+          "n_obs": 1256
+        }
+      }
+    },
+    "TLT": {
+      "n_oos": 1256,
+      "oos_start": "2020-01-02",
+      "oos_end": "2024-12-27",
+      "models": {
+        "GJR-GARCH (baseline)": {
+          "qlike": -7.932969503319664,
+          "mse": 1.045047490647591e-07,
+          "dm_vs_gjr": null
+        },
+        "MS-GARCH (standard)": {
+          "qlike": -7.9101281589986145,
+          "mse": 9.858032066899746e-08,
+          "dm_vs_gjr": {
+            "statistic": 1.5826032374680774,
+            "p_value": 0.11351192514541819,
+            "mean_diff": 0.023300423327689827,
+            "better_model": 2
+          }
+        },
+        "MS-GARCH (liquidity)": {
+          "qlike": -7.929438641533582,
+          "mse": 1.024058318692483e-07,
+          "dm_vs_gjr": {
+            "statistic": 1.0967700189441718,
+            "p_value": 0.27274193929597,
+            "mean_diff": 0.003397551948343503,
+            "better_model": 2
+          }
+        },
+        "GARCH-X (Net_Liq)": {
+          "qlike": -8.006924196554492,
+          "mse": 1.1400325554666666e-07,
+          "dm_vs_gjr": {
+            "statistic": -1.6260112941097946,
+            "p_value": 0.1039472527814651,
+            "mean_diff": -0.07376809292322913,
+            "better_model": 1
+          }
+        },
+        "Threshold GARCH": {
+          "qlike": -7.906394688371017,
+          "mse": 1.0433749607297847e-07,
+          "dm_vs_gjr": {
+            "statistic": 1.4659425579540952,
+            "p_value": 0.1426639365205511,
+            "mean_diff": 0.026394031322396642,
+            "better_model": 2
+          }
+        },
+        "persistence_test": {
+          "mean_expansion": 0.9237149516815906,
+          "mean_contraction": 0.9929960658038621,
+          "mean_full": 0.9699788546278941,
+          "delta": 0.06928111412227156,
+          "t_stat": 14.642977354672484,
+          "p_value": 2.947485270993497e-28
+        },
+        "garch_x_regression": {
+          "mean_slope": 0.04475393202390427,
+          "mean_r_value": 0.01693569456062718,
+          "mean_p_value": 0.4673337684812352,
+          "n_significant": 3,
+          "n_fits": 58
+        },
+        "partial_correlation": {
+          "raw_corr_vol_netliq": 0.08220502056136118,
+          "raw_p_vol_netliq": 0.0035524663188372862,
+          "raw_corr_vol_vix": 0.33173999357684075,
+          "raw_p_vol_vix": 1.2049099683831074e-33,
+          "raw_corr_netliq_vix": 0.3575858472260176,
+          "raw_p_netliq_vix": 3.484682153312421e-39,
+          "partial_corr_vol_netliq_given_vix": -0.04134017579402713,
+          "partial_p": 0.1431210757203866,
+          "n_obs": 1256
+        }
+      }
+    }
+  },
+  "cross_asset_summary": {
+    "GJR-GARCH (baseline)": {
+      "qlikes": {
+        "SPY": -7.899482335891495,
+        "GLD": -8.20708775704816,
+        "TLT": -7.932969503319664
+      },
+      "avg_qlike": -8.013179865419774
+    },
+    "MS-GARCH (standard)": {
+      "qlikes": {
+        "SPY": -7.931720942932282,
+        "GLD": -8.108965113950877,
+        "TLT": -7.9101281589986145
+      },
+      "avg_qlike": -7.983604738627258
+    },
+    "MS-GARCH (liquidity)": {
+      "qlikes": {
+        "SPY": -7.892825074201094,
+        "GLD": -8.205163284765389,
+        "TLT": -7.929438641533582
+      },
+      "avg_qlike": -8.009142333500021
+    },
+    "GARCH-X (Net_Liq)": {
+      "qlikes": {
+        "SPY": -7.878088507256645,
+        "GLD": -8.191642929161004,
+        "TLT": -8.006924196554492
+      },
+      "avg_qlike": -8.02555187765738
+    },
+    "Threshold GARCH": {
+      "qlikes": {
+        "SPY": -7.315258692689155,
+        "GLD": -8.240682076362331,
+        "TLT": -7.906394688371017
+      },
+      "avg_qlike": -7.820778485807501
+    }
+  },
+  "hypothesis_test": {
+    "SPY": {
+      "delta": 0.0441163376742858,
+      "t_stat": 13.43895108632877,
+      "p_value": 1.4869065287909813e-25,
+      "confirmed": true
+    },
+    "GLD": {
+      "delta": 0.016944010507700114,
+      "t_stat": 4.986720626252536,
+      "p_value": 1.1081580664701257e-06,
+      "confirmed": true
+    },
+    "TLT": {
+      "delta": 0.06928111412227156,
+      "t_stat": 14.642977354672484,
+      "p_value": 2.947485270993497e-28,
+      "confirmed": true
+    }
+  },
+  "conclusion": "PARTIAL POSITIVE: Some liquidity-conditioned models improve vol forecasting for specific assets. Gemini hypothesis partially confirmed.",
+  "total_runtime_s": 72.12317395210266
+}

@@ -1,0 +1,142 @@
+{
+  "experiment_id": "K1108c",
+  "parent": "K1108b (H2 NULL with binary flag)",
+  "timestamp": "2026-04-17T15:48:20.746160+00:00",
+  "data_source": [
+    "experiments/k1108b/data/ (reused 4-firm frames: 2330.TW, 2303.TW, GFS, 0981.HK)",
+    "experiments/k1108c/data/pooled_capex_guidance_mag.csv (built from K1108/K1108b notes)",
+    "experiments/k1108/data/tsmc_capex_guidance.csv (TSMC midpoint/delta_pct originals)",
+    "experiments/k1104/data/*.parquet (prices + VIX)"
+  ],
+  "n_events_extracted_total": 136,
+  "n_events_matched_to_magnitude": 135,
+  "per_firm_summary": {
+    "2330.TW": {
+      "theta0": 0.00016762037404855485,
+      "theta1": 4.818042362739971e-07,
+      "theta_change_fitted": -3.395420727417256e-05,
+      "theta_stable_fitted": -5.712908055993329e-05,
+      "n_events_extracted": 48
+    },
+    "2303.TW": {
+      "theta0": 0.0002060298049348093,
+      "theta1": 3.5488718848908486e-07,
+      "theta_change_fitted": 0.0007235338801488167,
+      "theta_stable_fitted": 0.0003842648235393011,
+      "n_events_extracted": 48
+    },
+    "GFS": {
+      "theta0": 0.0007319444006964925,
+      "theta1": 1.6307141754842237e-06,
+      "theta_change_fitted": 0.0007029416032416556,
+      "theta_stable_fitted": 0.0007029442221314269,
+      "n_events_extracted": 17
+    },
+    "0981.HK": {
+      "theta0": 0.0018966456756047039,
+      "theta1": 2.974161040170382e-06,
+      "theta_change_fitted": 0.005680386621019778,
+      "theta_stable_fitted": 0.005460262035420908,
+      "n_events_extracted": 23
+    }
+  },
+  "primary_spec": {
+    "description": "\u03b8_EAV_empirical = \u03b2\u2080 + \u03b2\u2081\u00b7guide_delta_pct",
+    "n": 135,
+    "beta0": 0.001252424278262948,
+    "beta1": -1.285729882115079e-05,
+    "se_hac_beta1": 9.598656252776103e-06,
+    "t_hac_beta1": -1.3394894537901831,
+    "p_hac_beta1_two_sided": 0.18041138544669,
+    "ci_95_low": -3.167066507659195e-05,
+    "ci_95_high": 5.956067434290372e-06,
+    "R2": 0.0029727624521406204,
+    "newey_west_bw": 4
+  },
+  "winsorized_1_99": {
+    "beta1": -1.5936693236896677e-05,
+    "t_hac": -1.350727390491579,
+    "p_hac": 0.17678277480198212
+  },
+  "sign_asymmetry": {
+    "beta_pos": -2.319378097118023e-05,
+    "t_pos": -2.3291895154416173,
+    "p_pos": 0.019849028102820965,
+    "beta_neg": 1.728072472766069e-05,
+    "t_neg": 0.6463627513477004,
+    "p_neg": 0.5180444574841894
+  },
+  "block_bootstrap": {
+    "n_reps": 1000,
+    "block_size": 10,
+    "n_successful": 1000,
+    "mean": -2.3268494054187298e-06,
+    "sd": 8.696003246805527e-06,
+    "ci_95_low": -1.7904234894535128e-05,
+    "ci_95_high": 1.631603401784113e-05,
+    "p_value_two_sided": 0.728
+  },
+  "loo_by_firm": [
+    {
+      "dropped": "2330.TW",
+      "n": 88,
+      "beta1": -1.1851140525720143e-05,
+      "t_hac": -1.01082187790814,
+      "p_hac": 0.31210168996230614
+    },
+    {
+      "dropped": "2303.TW",
+      "n": 87,
+      "beta1": -1.5830230892260514e-05,
+      "t_hac": -1.009371921892871,
+      "p_hac": 0.3127962990865525
+    },
+    {
+      "dropped": "0981.HK",
+      "n": 112,
+      "beta1": -6.613687585559451e-06,
+      "t_hac": -1.0643783011781611,
+      "p_hac": 0.2871573595208212
+    },
+    {
+      "dropped": "GFS",
+      "n": 118,
+      "beta1": -2.0714820244960378e-05,
+      "t_hac": -1.5017581549421974,
+      "p_hac": 0.1331595787719424
+    }
+  ],
+  "magnitude_interpretation": {
+    "theta_eav_shift_plus10pct": -0.00012857298821150788,
+    "theta_eav_shift_minus10pct": 0.00012857298821150788
+  },
+  "verdict": {
+    "label": "H2_MAGNITUDE_NULL",
+    "bullets": [
+      "\u03b2\u2081 = -1.2857e-05  t_HAC = -1.339",
+      "bootstrap 95% CI = [-1.7904e-05, +1.6316e-05]",
+      "HAC SE = 9.5987e-06",
+      "H2 NULL: |t_HAC| < 2.0 \u2014 magnitude AND direction both null"
+    ],
+    "conclusion_vs_binary": "K1108b binary-null conclusion STRENGTHENED. Capex guidance has NO explanatory power for foundry \u03b8\u2082>0, whether as binary flag or signed continuous magnitude."
+  },
+  "comparison_to_k1108b": {
+    "k1108b_binary_verdict": "H2_MECHANISM_NULL",
+    "k1108b_pool_diff": -3.74e-08,
+    "k1108b_pool_wald_t": -0.0003,
+    "k1108c_continuous_beta1": -1.285729882115079e-05,
+    "k1108c_continuous_t_hac": -1.3394894537901831,
+    "conclusion": "K1108b binary-null conclusion STRENGTHENED. Capex guidance has NO explanatory power for foundry \u03b8\u2082>0, whether as binary flag or signed continuous magnitude."
+  },
+  "references": [
+    "K1108 (TSMC single-firm INCONCLUSIVE)",
+    "K1108b (pooled binary NULL)",
+    "K1104 (foundry \u03b8\u2082 > 0 rule)",
+    "Andrews (1991) automatic bandwidth",
+    "Newey & West (1987) HAC SE",
+    "Harvey et al. (2016) t > 3.0 multi-testing threshold",
+    "Politis & Romano (1994) stationary bootstrap"
+  ],
+  "random_seed": 42,
+  "runtime_seconds": 19.299121141433716
+}

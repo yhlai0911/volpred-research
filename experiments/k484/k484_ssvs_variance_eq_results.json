@@ -1,0 +1,257 @@
+{
+  "experiment_id": "K484",
+  "title": "SSVS for Variance Equation Component Selection",
+  "method": "Stochastic Search Variable Selection applied to GARCH variance equation",
+  "innovation": "K433 applied SSVS to mean equation (null result). K484 extends to variance equation: which GARCH extensions are worth keeping?",
+  "proposed_by": "User (creative extension of SSVS from mean eq to variance eq)",
+  "asset": "SPY",
+  "data_source": "yfinance (empirical)",
+  "data_period": "2015-01-02 to 2025-12-30",
+  "sample_split": {
+    "total": 2759,
+    "train": 2008,
+    "test": 751,
+    "oos_start": "2023-01-01"
+  },
+  "variance_equation_spec": {
+    "base": "h_t = ω + α·ε²_{t-1} + β·h_{t-1}",
+    "augmented": "h_t = base + Σ δ_k·λ_k·C_k(t)",
+    "components": {
+      "δ₁ GJR_asymmetry": "I(ε<0)·ε²_{t-1} — leverage effect",
+      "δ₂ VIX_implied_var": "VIX²/252 — GARCH-X style",
+      "δ₃ Parkinson_range": "(ln(H/L))²/(4ln2) — range-based info",
+      "δ₄ Neg_semivariance": "5-day rolling RS⁻ — downside risk",
+      "δ₅ Abs_shock_TGARCH": "|ε_{t-1}| — TGARCH/AVGARCH style"
+    },
+    "n_possible_configs": 32
+  },
+  "mcmc_settings": {
+    "total_iterations": 8000,
+    "burn_in": 3000,
+    "effective_samples": 5000,
+    "c_value": 10.0,
+    "prior_inclusion_prob": 0.5,
+    "tau_calibration": "MLE standard errors from augmented GARCH",
+    "sampler": "Component-wise MH (K433 lesson)"
+  },
+  "mcmc_diagnostics": {
+    "computation_time_seconds": 450.4404318332672,
+    "total_time_seconds": 455.3011691570282,
+    "final_garch_accept_rates": {
+      "omega": 1.0,
+      "alpha": 0.39680707828428546,
+      "beta": 0.32640892479322947
+    },
+    "final_lambda_accept_rates": {
+      "GJR_asymmetry": 0.3525678015002885,
+      "VIX_implied_var": 0.2946720523177534,
+      "Parkinson_range": 0.3702635122138873,
+      "Neg_semivariance": 0.4116176187728409,
+      "Abs_shock_TGARCH": 0.3214079630698211
+    }
+  },
+  "posterior_inclusion_probabilities": {
+    "GJR_asymmetry": {
+      "PIP": 1.0,
+      "lambda_mean": 0.24103739935776153,
+      "lambda_std": 0.05164154000097707,
+      "lambda_95CI": [
+        0.1515617392882291,
+        0.35531858538804995
+      ]
+    },
+    "VIX_implied_var": {
+      "PIP": 1.0,
+      "lambda_mean": 0.19267756789179857,
+      "lambda_std": 0.03323391454615671,
+      "lambda_95CI": [
+        0.13656008698042224,
+        0.260295049889207
+      ]
+    },
+    "Parkinson_range": {
+      "PIP": 1.0,
+      "lambda_mean": 2428.488246214307,
+      "lambda_std": 615.099321434118,
+      "lambda_95CI": [
+        1259.709359186307,
+        3581.1906211670625
+      ]
+    },
+    "Neg_semivariance": {
+      "PIP": 0.094,
+      "lambda_mean": 0.008503497767243968,
+      "lambda_std": 0.08789069843214689,
+      "lambda_95CI": [
+        -0.1704953634079982,
+        0.1796723571894326
+      ]
+    },
+    "Abs_shock_TGARCH": {
+      "PIP": 1.0,
+      "lambda_mean": -0.15431289101956405,
+      "lambda_std": 0.03221524270105156,
+      "lambda_95CI": [
+        -0.22055085718824707,
+        -0.0940001503804837
+      ]
+    }
+  },
+  "garch_posterior": {
+    "omega": {
+      "mean": 9.70915402496038e-07,
+      "std": 4.282976660262614e-08
+    },
+    "alpha": {
+      "mean": 0.04396554731374326,
+      "std": 0.032173308959272943
+    },
+    "beta": {
+      "mean": 0.5349602808511582,
+      "std": 0.060672774706239475
+    },
+    "persistence": 0.5789258281649015
+  },
+  "top_models": [
+    {
+      "rank": 1,
+      "posterior_probability": 0.906,
+      "n_components": 4,
+      "components": [
+        "GJR_asymmetry",
+        "VIX_implied_var",
+        "Parkinson_range",
+        "Abs_shock_TGARCH"
+      ]
+    },
+    {
+      "rank": 2,
+      "posterior_probability": 0.094,
+      "n_components": 5,
+      "components": [
+        "GJR_asymmetry",
+        "VIX_implied_var",
+        "Parkinson_range",
+        "Neg_semivariance",
+        "Abs_shock_TGARCH"
+      ]
+    }
+  ],
+  "oos_evaluation": {
+    "Base GARCH(1,1)": {
+      "QLIKE": 1.6196416686648674,
+      "MSE": 16.579711099932407,
+      "relative_QLIKE_pct": 0.0
+    },
+    "SSVS Median Model": {
+      "QLIKE": 1.4993132611662428,
+      "MSE": 13.763497855716178,
+      "relative_QLIKE_pct": -7.429322783342314
+    },
+    "SSVS Best Model": {
+      "QLIKE": 1.4993132611662428,
+      "MSE": 13.763497855716178,
+      "relative_QLIKE_pct": -7.429322783342314
+    },
+    "Kitchen Sink (all)": {
+      "QLIKE": 1.5061242344870667,
+      "MSE": 14.579535171189931,
+      "relative_QLIKE_pct": -7.008799314935968
+    },
+    "GJR-GARCH (MLE)": {
+      "QLIKE": 1.5724793830248638,
+      "MSE": 15.026331272368223,
+      "relative_QLIKE_pct": -2.9118962886946007
+    }
+  },
+  "dm_tests": {
+    "SSVS Median Model": {
+      "dm_stat": 4.305996915535006,
+      "p_value": 1.6623537242521635e-05,
+      "interpretation": "model BETTER*"
+    },
+    "SSVS Best Model": {
+      "dm_stat": 4.305996915535006,
+      "p_value": 1.6623537242521635e-05,
+      "interpretation": "model BETTER*"
+    },
+    "Kitchen Sink (all)": {
+      "dm_stat": 4.157244135116185,
+      "p_value": 3.221097162953157e-05,
+      "interpretation": "model BETTER*"
+    },
+    "GJR-GARCH (MLE)": {
+      "dm_stat": 3.296404558532104,
+      "p_value": 0.0009793088252982862,
+      "interpretation": "model BETTER*"
+    }
+  },
+  "bic_comparison": {
+    "Base_GARCH": 1570.0235573197367,
+    "GJR_GARCH": 1511.3931833644488,
+    "SSVS_Median": 1383.368865975592,
+    "Kitchen_Sink": 1387.1409214071768,
+    "best": "SSVS Median"
+  },
+  "conclusion": {
+    "strong_pip_components": [
+      "GJR_asymmetry",
+      "VIX_implied_var",
+      "Parkinson_range",
+      "Abs_shock_TGARCH"
+    ],
+    "moderate_pip_components": [],
+    "weak_pip_components": [
+      "Neg_semivariance"
+    ],
+    "ssvs_best_config": [
+      "GJR_asymmetry",
+      "VIX_implied_var",
+      "Parkinson_range",
+      "Abs_shock_TGARCH"
+    ],
+    "ssvs_best_config_prob": 0.906,
+    "best_oos_model": "SSVS Median Model",
+    "best_oos_qlike": 1.4993132611662428,
+    "baseline_qlike": 1.6196416686648674,
+    "interpretation": "SSVS selects {GJR_asymmetry, VIX_implied_var, Parkinson_range, Abs_shock_TGARCH} (PIP > 0.5) as valuable variance equation components for SPY. GJR asymmetry is confirmed as the most important extension. Multiple extensions improve upon base GARCH, suggesting the variance equation has more room for enrichment than the mean equation."
+  },
+  "references": [
+    "So, Chen, Liu (2006) Best Subset Selection of ARX-GARCH, JRSS-C 55(2):201-224",
+    "K433: SSVS for mean equation → null model wins (PIP all < 0.25)",
+    "K438: GARCH-X VIX borderline for SPY",
+    "K449/K460: Negative semivariance effective",
+    "K465/K469: HAR range-based models effective"
+  ],
+  "ess_diagnostics": {
+    "GJR_asymmetry": {
+      "ESS_lambda": 300.4144007571299,
+      "ESS_delta": 5000.0
+    },
+    "VIX_implied_var": {
+      "ESS_lambda": 27.626098129760084,
+      "ESS_delta": 5000.0
+    },
+    "Parkinson_range": {
+      "ESS_lambda": 89.217451004281,
+      "ESS_delta": 5000.0
+    },
+    "Neg_semivariance": {
+      "ESS_lambda": 930.9184544848669,
+      "ESS_delta": 410.5193005339666
+    },
+    "Abs_shock_TGARCH": {
+      "ESS_lambda": 30.846461905584903,
+      "ESS_delta": 5000.0
+    },
+    "GARCH_omega": {
+      "ESS": 7.918077205245973
+    },
+    "GARCH_alpha": {
+      "ESS": 55.366710955972316
+    },
+    "GARCH_beta": {
+      "ESS": 27.90227452771858
+    }
+  }
+}

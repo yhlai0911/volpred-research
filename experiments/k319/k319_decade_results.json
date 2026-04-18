@@ -1,0 +1,321 @@
+{
+  "experiment": "K319",
+  "title": "Decade-by-Decade Performance — The Complete Historical Record",
+  "run_date": "2026-03-25 07:24:51",
+  "data_source": "yfinance (SPY, GLD, ^VIX)",
+  "data_range": "2004-11-18 to 2026-03-24",
+  "total_trading_days": 5369,
+  "strategies": [
+    "SPY B&H",
+    "50/50 B&H",
+    "50/50 + VT (12/VIX)",
+    "50/50 + VT (Step)"
+  ],
+  "decades": {
+    "2005-2009 (GFC)": {
+      "SPY B&H": {
+        "CAGR": 0.49,
+        "Sharpe": 0.136,
+        "Ann_Vol": 24.01,
+        "MDD": -55.19,
+        "Worst_Month": -16.52,
+        "Worst_Month_Date": "2008-10",
+        "Best_Month": 9.93,
+        "Best_Month_Date": "2009-04",
+        "Total_Return": 2.46
+      },
+      "50/50 B&H": {
+        "CAGR": 11.25,
+        "Sharpe": 0.7,
+        "Ann_Vol": 16.96,
+        "MDD": -32.49,
+        "Worst_Month": -15.39,
+        "Worst_Month_Date": "2008-10",
+        "Best_Month": 9.45,
+        "Best_Month_Date": "2009-11",
+        "Total_Return": 70.36
+      },
+      "50/50 + VT (12/VIX)": {
+        "CAGR": 8.96,
+        "Sharpe": 0.934,
+        "Ann_Vol": 9.46,
+        "MDD": -12.65,
+        "Worst_Month": -4.69,
+        "Worst_Month_Date": "2008-10",
+        "Best_Month": 6.62,
+        "Best_Month_Date": "2006-04",
+        "Total_Return": 53.54
+      },
+      "50/50 + VT (Step)": {
+        "CAGR": 8.77,
+        "Sharpe": 0.96,
+        "Ann_Vol": 8.99,
+        "MDD": -13.04,
+        "Worst_Month": -4.66,
+        "Worst_Month_Date": "2008-10",
+        "Best_Month": 6.62,
+        "Best_Month_Date": "2006-04",
+        "Total_Return": 52.17
+      }
+    },
+    "2010-2014 (QE Recovery)": {
+      "SPY B&H": {
+        "CAGR": 14.98,
+        "Sharpe": 0.98,
+        "Ann_Vol": 15.88,
+        "MDD": -18.61,
+        "Worst_Month": -7.95,
+        "Worst_Month_Date": "2010-05",
+        "Best_Month": 10.91,
+        "Best_Month_Date": "2011-10",
+        "Total_Return": 100.74
+      },
+      "50/50 B&H": {
+        "CAGR": 8.32,
+        "Sharpe": 0.738,
+        "Ann_Vol": 12.42,
+        "MDD": -13.12,
+        "Worst_Month": -8.82,
+        "Worst_Month_Date": "2011-09",
+        "Best_Month": 8.48,
+        "Best_Month_Date": "2011-10",
+        "Total_Return": 49.0
+      },
+      "50/50 + VT (12/VIX)": {
+        "CAGR": 4.33,
+        "Sharpe": 0.602,
+        "Ann_Vol": 7.97,
+        "MDD": -10.37,
+        "Worst_Month": -4.6,
+        "Worst_Month_Date": "2013-06",
+        "Best_Month": 4.62,
+        "Best_Month_Date": "2013-07",
+        "Total_Return": 23.56
+      },
+      "50/50 + VT (Step)": {
+        "CAGR": 4.27,
+        "Sharpe": 0.646,
+        "Ann_Vol": 7.19,
+        "MDD": -8.81,
+        "Worst_Month": -3.75,
+        "Worst_Month_Date": "2013-06",
+        "Best_Month": 4.19,
+        "Best_Month_Date": "2014-06",
+        "Total_Return": 23.22
+      }
+    },
+    "2015-2019 (Low-Vol Bull)": {
+      "SPY B&H": {
+        "CAGR": 11.59,
+        "Sharpe": 0.884,
+        "Ann_Vol": 13.42,
+        "MDD": -19.35,
+        "Worst_Month": -8.8,
+        "Worst_Month_Date": "2018-12",
+        "Best_Month": 8.51,
+        "Best_Month_Date": "2015-10",
+        "Total_Return": 72.89
+      },
+      "50/50 B&H": {
+        "CAGR": 8.58,
+        "Sharpe": 1.028,
+        "Ann_Vol": 8.39,
+        "MDD": -11.56,
+        "Worst_Month": -3.23,
+        "Worst_Month_Date": "2015-11",
+        "Best_Month": 7.5,
+        "Best_Month_Date": "2019-06",
+        "Total_Return": 50.83
+      },
+      "50/50 + VT (12/VIX)": {
+        "CAGR": 6.41,
+        "Sharpe": 0.969,
+        "Ann_Vol": 6.66,
+        "MDD": -9.53,
+        "Worst_Month": -2.74,
+        "Worst_Month_Date": "2015-11",
+        "Best_Month": 4.72,
+        "Best_Month_Date": "2019-06",
+        "Total_Return": 36.33
+      },
+      "50/50 + VT (Step)": {
+        "CAGR": 6.27,
+        "Sharpe": 1.041,
+        "Ann_Vol": 6.04,
+        "MDD": -8.37,
+        "Worst_Month": -2.59,
+        "Worst_Month_Date": "2015-11",
+        "Best_Month": 4.45,
+        "Best_Month_Date": "2019-06",
+        "Total_Return": 35.46
+      }
+    },
+    "2020-2024 (COVID+Rates)": {
+      "SPY B&H": {
+        "CAGR": 14.27,
+        "Sharpe": 0.75,
+        "Ann_Vol": 20.99,
+        "MDD": -33.72,
+        "Worst_Month": -12.49,
+        "Worst_Month_Date": "2020-03",
+        "Best_Month": 12.7,
+        "Best_Month_Date": "2020-04",
+        "Total_Return": 94.58
+      },
+      "50/50 B&H": {
+        "CAGR": 13.43,
+        "Sharpe": 0.982,
+        "Ann_Vol": 14.01,
+        "MDD": -20.32,
+        "Worst_Month": -6.08,
+        "Worst_Month_Date": "2022-09",
+        "Best_Month": 10.12,
+        "Best_Month_Date": "2020-04",
+        "Total_Return": 87.6
+      },
+      "50/50 + VT (12/VIX)": {
+        "CAGR": 7.6,
+        "Sharpe": 1.025,
+        "Ann_Vol": 7.58,
+        "MDD": -11.1,
+        "Worst_Month": -4.35,
+        "Worst_Month_Date": "2023-09",
+        "Best_Month": 5.44,
+        "Best_Month_Date": "2024-03",
+        "Total_Return": 44.12
+      },
+      "50/50 + VT (Step)": {
+        "CAGR": 6.89,
+        "Sharpe": 1.003,
+        "Ann_Vol": 7.02,
+        "MDD": -9.93,
+        "Worst_Month": -3.8,
+        "Worst_Month_Date": "2023-09",
+        "Best_Month": 4.74,
+        "Best_Month_Date": "2024-03",
+        "Total_Return": 39.44
+      }
+    },
+    "2025-2026 (Current)": {
+      "SPY B&H": {
+        "CAGR": 10.87,
+        "Sharpe": 0.64,
+        "Ann_Vol": 18.4,
+        "MDD": -18.76,
+        "Worst_Month": -5.57,
+        "Worst_Month_Date": "2025-03",
+        "Best_Month": 6.28,
+        "Best_Month_Date": "2025-05",
+        "Total_Return": 13.34
+      },
+      "50/50 B&H": {
+        "CAGR": 30.79,
+        "Sharpe": 1.788,
+        "Ann_Vol": 15.99,
+        "MDD": -11.97,
+        "Worst_Month": -10.62,
+        "Worst_Month_Date": "2026-03",
+        "Best_Month": 7.61,
+        "Best_Month_Date": "2025-09",
+        "Total_Return": 38.53
+      },
+      "50/50 + VT (12/VIX)": {
+        "CAGR": 21.68,
+        "Sharpe": 1.935,
+        "Ann_Vol": 10.59,
+        "MDD": -7.51,
+        "Worst_Month": -6.06,
+        "Worst_Month_Date": "2026-03",
+        "Best_Month": 5.77,
+        "Best_Month_Date": "2026-01",
+        "Total_Return": 26.9
+      },
+      "50/50 + VT (Step)": {
+        "CAGR": 19.18,
+        "Sharpe": 1.931,
+        "Ann_Vol": 9.46,
+        "MDD": -7.23,
+        "Worst_Month": -5.42,
+        "Worst_Month_Date": "2026-03",
+        "Best_Month": 5.58,
+        "Best_Month_Date": "2026-01",
+        "Total_Return": 23.74
+      }
+    },
+    "Full Period (2004-2026)": {
+      "SPY B&H": {
+        "CAGR": 10.42,
+        "Sharpe": 0.615,
+        "Ann_Vol": 18.95,
+        "MDD": -55.19,
+        "Worst_Month": -16.52,
+        "Worst_Month_Date": "2008-10",
+        "Best_Month": 12.7,
+        "Best_Month_Date": "2020-04",
+        "Total_Return": 726.16
+      },
+      "50/50 B&H": {
+        "CAGR": 11.55,
+        "Sharpe": 0.88,
+        "Ann_Vol": 13.45,
+        "MDD": -32.49,
+        "Worst_Month": -15.39,
+        "Worst_Month_Date": "2008-10",
+        "Best_Month": 10.12,
+        "Best_Month_Date": "2020-04",
+        "Total_Return": 925.91
+      },
+      "50/50 + VT (12/VIX)": {
+        "CAGR": 7.67,
+        "Sharpe": 0.948,
+        "Ann_Vol": 8.14,
+        "MDD": -12.65,
+        "Worst_Month": -6.06,
+        "Worst_Month_Date": "2026-03",
+        "Best_Month": 6.62,
+        "Best_Month_Date": "2006-04",
+        "Total_Return": 383.08
+      },
+      "50/50 + VT (Step)": {
+        "CAGR": 7.27,
+        "Sharpe": 0.971,
+        "Ann_Vol": 7.51,
+        "MDD": -13.04,
+        "Worst_Month": -5.42,
+        "Worst_Month_Date": "2026-03",
+        "Best_Month": 6.62,
+        "Best_Month_Date": "2006-04",
+        "Total_Return": 345.8
+      }
+    }
+  },
+  "all_weather_test": {
+    "SPY B&H": {
+      "sharpe_wins": 1,
+      "total_decades": 4,
+      "is_all_weather": false
+    },
+    "50/50 B&H": {
+      "sharpe_wins": 0,
+      "total_decades": 4,
+      "is_all_weather": false
+    },
+    "50/50 + VT (12/VIX)": {
+      "sharpe_wins": 1,
+      "total_decades": 4,
+      "is_all_weather": false
+    },
+    "50/50 + VT (Step)": {
+      "sharpe_wins": 2,
+      "total_decades": 4,
+      "is_all_weather": false
+    }
+  },
+  "findings": {
+    "vt_always_beats_bh_sharpe": false,
+    "vt_always_beats_bh_mdd": true,
+    "avg_sharpe_improvement": 0.021,
+    "avg_mdd_improvement_pp": 8.5,
+    "formula_vs_step_sharpe_diff": -0.03
+  }
+}

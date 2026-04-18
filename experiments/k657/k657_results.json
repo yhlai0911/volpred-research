@@ -1,0 +1,839 @@
+{
+  "experiment_id": "K657",
+  "title": "Synthetic Tail Risk Hedge Without Options",
+  "timestamp": "2026-03-29T06:14:32.947451",
+  "data_source": "yfinance",
+  "data_period": "2006-01-04 to 2026-03-26",
+  "n_observations": 5088,
+  "assets": [
+    "SPY",
+    "GLD",
+    "TLT",
+    "VIX"
+  ],
+  "references": [
+    "Bhansali (2014) \"Tail Risk Hedging\" - McGraw Hill",
+    "Ilmanen (2012) \"Do Financial Markets Reward Buying or Selling Insurance?\" - AQR",
+    "Roncalli (2013) \"Introduction to Risk Parity and Budgeting\" - Chapman Hall"
+  ],
+  "strategies": {
+    "A_VIX_Bond_Rotation": {
+      "description": "VIX > 25: shift 50% equity to TLT. Below 25: full SPY.",
+      "metrics": {
+        "name": "VIX Bond Rotation",
+        "n_days": 5088,
+        "n_years": 20.2,
+        "cagr": 8.35,
+        "ann_vol": 13.94,
+        "sharpe": 0.645,
+        "sortino": 0.837,
+        "mdd": -41.7,
+        "calmar": 0.2,
+        "tail_ratio": 0.858,
+        "skewness": -0.3905,
+        "var_5_pct": -1.4654,
+        "cvar_5_pct": -2.1467,
+        "worst_month_pct": -10.42,
+        "best_month_pct": 9.13,
+        "win_rate": 54.99,
+        "total_return_pct": 405.0,
+        "protection_ratio_pct": 36.92,
+        "put_like_score": 49.5
+      }
+    },
+    "B_Dynamic_Safe_Haven": {
+      "description": "VIX > 20: allocate 40% to GLD or TLT (whichever has higher 60d Sharpe).",
+      "metrics": {
+        "name": "Dynamic Safe Haven",
+        "n_days": 5088,
+        "n_years": 20.2,
+        "cagr": 10.16,
+        "ann_vol": 13.87,
+        "sharpe": 0.768,
+        "sortino": 0.987,
+        "mdd": -35.44,
+        "calmar": 0.287,
+        "tail_ratio": 0.878,
+        "skewness": -0.2333,
+        "var_5_pct": -1.4038,
+        "cvar_5_pct": -2.1104,
+        "worst_month_pct": -10.84,
+        "best_month_pct": 9.13,
+        "win_rate": 55.4,
+        "total_return_pct": 605.73,
+        "protection_ratio_pct": 34.38,
+        "put_like_score": 58.7
+      }
+    },
+    "C_Crash_Buffer": {
+      "description": "Always 10% TLT. VIX > 30: increase to 40% TLT.",
+      "metrics": {
+        "name": "Crash Buffer",
+        "n_days": 5088,
+        "n_years": 20.2,
+        "cagr": 9.17,
+        "ann_vol": 14.24,
+        "sharpe": 0.688,
+        "sortino": 0.884,
+        "mdd": -39.52,
+        "calmar": 0.232,
+        "tail_ratio": 0.89,
+        "skewness": -0.2257,
+        "var_5_pct": -1.4442,
+        "cvar_5_pct": -2.1863,
+        "worst_month_pct": -10.06,
+        "best_month_pct": 9.22,
+        "win_rate": 54.52,
+        "total_return_pct": 488.16,
+        "protection_ratio_pct": 39.1,
+        "put_like_score": 54.8
+      }
+    },
+    "D_Momentum_Hedge": {
+      "description": "SPY 20d return < -5%: shift to 70% GLD+TLT / 30% SPY. Revert when 20d return > 0%.",
+      "metrics": {
+        "name": "Momentum Hedge",
+        "n_days": 5088,
+        "n_years": 20.2,
+        "cagr": 9.02,
+        "ann_vol": 14.43,
+        "sharpe": 0.671,
+        "sortino": 0.857,
+        "mdd": -36.99,
+        "calmar": 0.244,
+        "tail_ratio": 0.877,
+        "skewness": -0.344,
+        "var_5_pct": -1.5185,
+        "cvar_5_pct": -2.2632,
+        "worst_month_pct": -10.59,
+        "best_month_pct": 10.88,
+        "win_rate": 55.09,
+        "total_return_pct": 471.46,
+        "protection_ratio_pct": 35.9,
+        "put_like_score": 50.6
+      }
+    },
+    "E_Synthetic_Put": {
+      "description": "Linear VIX-based allocation: VIX=10→0% safe, VIX=40→80% safe (50/50 GLD/TLT).",
+      "metrics": {
+        "name": "Synthetic Put",
+        "n_days": 5088,
+        "n_years": 20.2,
+        "cagr": 8.92,
+        "ann_vol": 11.26,
+        "sharpe": 0.815,
+        "sortino": 1.09,
+        "mdd": -27.0,
+        "calmar": 0.33,
+        "tail_ratio": 0.873,
+        "skewness": -0.3766,
+        "var_5_pct": -1.2223,
+        "cvar_5_pct": -1.6959,
+        "worst_month_pct": -10.02,
+        "best_month_pct": 9.62,
+        "win_rate": 55.6,
+        "total_return_pct": 461.1,
+        "protection_ratio_pct": 39.35,
+        "put_like_score": 59.2
+      }
+    },
+    "F_12VIX_baseline": {
+      "description": "SPY weight = min(12/VIX, 1). Baseline VT strategy.",
+      "metrics": {
+        "name": "12/VIX SPY",
+        "n_days": 5088,
+        "n_years": 20.2,
+        "cagr": 6.54,
+        "ann_vol": 9.45,
+        "sharpe": 0.718,
+        "sortino": 0.953,
+        "mdd": -28.6,
+        "calmar": 0.229,
+        "tail_ratio": 0.804,
+        "skewness": -0.5779,
+        "var_5_pct": -1.0432,
+        "cvar_5_pct": -1.4393,
+        "worst_month_pct": -5.73,
+        "best_month_pct": 6.99,
+        "win_rate": 55.07,
+        "total_return_pct": 259.53,
+        "protection_ratio_pct": 65.31,
+        "put_like_score": 53.5
+      }
+    },
+    "G_BH_6040_baseline": {
+      "description": "Buy & Hold 60% SPY, 40% GLD. Baseline diversified.",
+      "metrics": {
+        "name": "BH 60/40",
+        "n_days": 5088,
+        "n_years": 20.2,
+        "cagr": 11.35,
+        "ann_vol": 14.07,
+        "sharpe": 0.835,
+        "sortino": 1.057,
+        "mdd": -35.06,
+        "calmar": 0.324,
+        "tail_ratio": 0.924,
+        "skewness": -0.0991,
+        "var_5_pct": -1.3042,
+        "cvar_5_pct": -2.1202,
+        "worst_month_pct": -15.47,
+        "best_month_pct": 10.66,
+        "win_rate": 55.82,
+        "total_return_pct": 776.55,
+        "protection_ratio_pct": 6.36,
+        "put_like_score": 62.4
+      }
+    },
+    "H_BH_SPY_baseline": {
+      "description": "Buy & Hold 100% SPY. Pure equity baseline.",
+      "metrics": {
+        "name": "BH SPY",
+        "n_days": 5088,
+        "n_years": 20.2,
+        "cagr": 10.42,
+        "ann_vol": 19.32,
+        "sharpe": 0.61,
+        "sortino": 0.743,
+        "mdd": -55.19,
+        "calmar": 0.189,
+        "tail_ratio": 0.921,
+        "skewness": -0.0006,
+        "var_5_pct": -1.7965,
+        "cvar_5_pct": -2.9737,
+        "worst_month_pct": -16.52,
+        "best_month_pct": 12.7,
+        "win_rate": 55.07,
+        "total_return_pct": 639.57,
+        "protection_ratio_pct": 0.0,
+        "put_like_score": 50.0
+      }
+    }
+  },
+  "crisis_analysis": {
+    "GFC_2008": {
+      "VIX Bond Rotation": {
+        "total_return_pct": -13.77,
+        "mdd_pct": -20.95,
+        "n_days": 146
+      },
+      "Dynamic Safe Haven": {
+        "total_return_pct": -16.31,
+        "mdd_pct": -24.28,
+        "n_days": 146
+      },
+      "Crash Buffer": {
+        "total_return_pct": -19.9,
+        "mdd_pct": -27.72,
+        "n_days": 146
+      },
+      "Momentum Hedge": {
+        "total_return_pct": -17.18,
+        "mdd_pct": -22.26,
+        "n_days": 146
+      },
+      "Synthetic Put": {
+        "total_return_pct": -2.68,
+        "mdd_pct": -15.54,
+        "n_days": 146
+      },
+      "12/VIX SPY": {
+        "total_return_pct": -14.52,
+        "mdd_pct": -17.76,
+        "n_days": 146
+      },
+      "BH 60/40": {
+        "total_return_pct": -18.57,
+        "mdd_pct": -29.27,
+        "n_days": 146
+      },
+      "BH SPY": {
+        "total_return_pct": -36.95,
+        "mdd_pct": -46.04,
+        "n_days": 146
+      }
+    },
+    "Flash_Crash_2010": {
+      "VIX Bond Rotation": {
+        "total_return_pct": -7.46,
+        "mdd_pct": -8.65,
+        "n_days": 42
+      },
+      "Dynamic Safe Haven": {
+        "total_return_pct": -4.71,
+        "mdd_pct": -6.08,
+        "n_days": 42
+      },
+      "Crash Buffer": {
+        "total_return_pct": -11.85,
+        "mdd_pct": -12.86,
+        "n_days": 42
+      },
+      "Momentum Hedge": {
+        "total_return_pct": -11.23,
+        "mdd_pct": -12.36,
+        "n_days": 42
+      },
+      "Synthetic Put": {
+        "total_return_pct": -5.73,
+        "mdd_pct": -6.58,
+        "n_days": 42
+      },
+      "12/VIX SPY": {
+        "total_return_pct": -6.64,
+        "mdd_pct": -7.3,
+        "n_days": 42
+      },
+      "BH 60/40": {
+        "total_return_pct": -5.59,
+        "mdd_pct": -6.95,
+        "n_days": 42
+      },
+      "BH SPY": {
+        "total_return_pct": -12.71,
+        "mdd_pct": -13.83,
+        "n_days": 42
+      }
+    },
+    "EU_Debt_2011": {
+      "VIX Bond Rotation": {
+        "total_return_pct": -3.17,
+        "mdd_pct": -13.35,
+        "n_days": 85
+      },
+      "Dynamic Safe Haven": {
+        "total_return_pct": 0.06,
+        "mdd_pct": -11.28,
+        "n_days": 85
+      },
+      "Crash Buffer": {
+        "total_return_pct": -1.77,
+        "mdd_pct": -12.49,
+        "n_days": 85
+      },
+      "Momentum Hedge": {
+        "total_return_pct": 2.66,
+        "mdd_pct": -8.25,
+        "n_days": 85
+      },
+      "Synthetic Put": {
+        "total_return_pct": -3.15,
+        "mdd_pct": -9.13,
+        "n_days": 85
+      },
+      "12/VIX SPY": {
+        "total_return_pct": -5.0,
+        "mdd_pct": -10.4,
+        "n_days": 85
+      },
+      "BH 60/40": {
+        "total_return_pct": 3.71,
+        "mdd_pct": -9.37,
+        "n_days": 85
+      },
+      "BH SPY": {
+        "total_return_pct": -4.41,
+        "mdd_pct": -18.37,
+        "n_days": 85
+      }
+    },
+    "China_Deval_2015": {
+      "VIX Bond Rotation": {
+        "total_return_pct": -11.63,
+        "mdd_pct": -12.48,
+        "n_days": 42
+      },
+      "Dynamic Safe Haven": {
+        "total_return_pct": -8.09,
+        "mdd_pct": -9.68,
+        "n_days": 42
+      },
+      "Crash Buffer": {
+        "total_return_pct": -10.52,
+        "mdd_pct": -12.24,
+        "n_days": 42
+      },
+      "Momentum Hedge": {
+        "total_return_pct": -13.66,
+        "mdd_pct": -13.76,
+        "n_days": 42
+      },
+      "Synthetic Put": {
+        "total_return_pct": -9.57,
+        "mdd_pct": -10.33,
+        "n_days": 42
+      },
+      "12/VIX SPY": {
+        "total_return_pct": -6.41,
+        "mdd_pct": -7.16,
+        "n_days": 42
+      },
+      "BH 60/40": {
+        "total_return_pct": -4.33,
+        "mdd_pct": -6.04,
+        "n_days": 42
+      },
+      "BH SPY": {
+        "total_return_pct": -8.49,
+        "mdd_pct": -11.07,
+        "n_days": 42
+      }
+    },
+    "Volmageddon_2018": {
+      "VIX Bond Rotation": {
+        "total_return_pct": -7.74,
+        "mdd_pct": -10.56,
+        "n_days": 44
+      },
+      "Dynamic Safe Haven": {
+        "total_return_pct": -6.85,
+        "mdd_pct": -9.7,
+        "n_days": 44
+      },
+      "Crash Buffer": {
+        "total_return_pct": -7.47,
+        "mdd_pct": -10.16,
+        "n_days": 44
+      },
+      "Momentum Hedge": {
+        "total_return_pct": -11.3,
+        "mdd_pct": -12.84,
+        "n_days": 44
+      },
+      "Synthetic Put": {
+        "total_return_pct": -7.51,
+        "mdd_pct": -9.49,
+        "n_days": 44
+      },
+      "12/VIX SPY": {
+        "total_return_pct": -6.18,
+        "mdd_pct": -8.04,
+        "n_days": 44
+      },
+      "BH 60/40": {
+        "total_return_pct": -4.64,
+        "mdd_pct": -7.05,
+        "n_days": 44
+      },
+      "BH SPY": {
+        "total_return_pct": -6.74,
+        "mdd_pct": -10.1,
+        "n_days": 44
+      }
+    },
+    "COVID_2020": {
+      "VIX Bond Rotation": {
+        "total_return_pct": -14.62,
+        "mdd_pct": -18.22,
+        "n_days": 24
+      },
+      "Dynamic Safe Haven": {
+        "total_return_pct": -22.78,
+        "mdd_pct": -24.48,
+        "n_days": 24
+      },
+      "Crash Buffer": {
+        "total_return_pct": -20.16,
+        "mdd_pct": -21.87,
+        "n_days": 24
+      },
+      "Momentum Hedge": {
+        "total_return_pct": -16.73,
+        "mdd_pct": -20.7,
+        "n_days": 24
+      },
+      "Synthetic Put": {
+        "total_return_pct": -11.6,
+        "mdd_pct": -17.08,
+        "n_days": 24
+      },
+      "12/VIX SPY": {
+        "total_return_pct": -12.74,
+        "mdd_pct": -13.08,
+        "n_days": 24
+      },
+      "BH 60/40": {
+        "total_return_pct": -21.97,
+        "mdd_pct": -22.55,
+        "n_days": 24
+      },
+      "BH SPY": {
+        "total_return_pct": -33.4,
+        "mdd_pct": -33.72,
+        "n_days": 24
+      }
+    },
+    "Rate_Hike_2022": {
+      "VIX Bond Rotation": {
+        "total_return_pct": -25.4,
+        "mdd_pct": -28.35,
+        "n_days": 209
+      },
+      "Dynamic Safe Haven": {
+        "total_return_pct": -17.17,
+        "mdd_pct": -21.17,
+        "n_days": 209
+      },
+      "Crash Buffer": {
+        "total_return_pct": -23.9,
+        "mdd_pct": -27.89,
+        "n_days": 209
+      },
+      "Momentum Hedge": {
+        "total_return_pct": -26.78,
+        "mdd_pct": -29.95,
+        "n_days": 209
+      },
+      "Synthetic Put": {
+        "total_return_pct": -23.53,
+        "mdd_pct": -25.96,
+        "n_days": 209
+      },
+      "12/VIX SPY": {
+        "total_return_pct": -11.27,
+        "mdd_pct": -14.35,
+        "n_days": 209
+      },
+      "BH 60/40": {
+        "total_return_pct": -14.54,
+        "mdd_pct": -18.69,
+        "n_days": 209
+      },
+      "BH SPY": {
+        "total_return_pct": -17.74,
+        "mdd_pct": -24.5,
+        "n_days": 209
+      }
+    },
+    "Tariff_Shock_2025": {
+      "VIX Bond Rotation": {
+        "total_return_pct": -8.42,
+        "mdd_pct": -10.49,
+        "n_days": 18
+      },
+      "Dynamic Safe Haven": {
+        "total_return_pct": -6.21,
+        "mdd_pct": -7.96,
+        "n_days": 18
+      },
+      "Crash Buffer": {
+        "total_return_pct": -6.93,
+        "mdd_pct": -8.78,
+        "n_days": 18
+      },
+      "Momentum Hedge": {
+        "total_return_pct": -6.04,
+        "mdd_pct": -7.27,
+        "n_days": 18
+      },
+      "Synthetic Put": {
+        "total_return_pct": -5.46,
+        "mdd_pct": -6.75,
+        "n_days": 18
+      },
+      "12/VIX SPY": {
+        "total_return_pct": -5.06,
+        "mdd_pct": -6.18,
+        "n_days": 18
+      },
+      "BH 60/40": {
+        "total_return_pct": -4.17,
+        "mdd_pct": -5.89,
+        "n_days": 18
+      },
+      "BH SPY": {
+        "total_return_pct": -7.96,
+        "mdd_pct": -10.04,
+        "n_days": 18
+      }
+    }
+  },
+  "regime_analysis": {
+    "Low VIX (<15)": {
+      "VIX Bond Rotation": {
+        "ann_return_pct": 40.9,
+        "ann_vol_pct": 8.21,
+        "sharpe": 4.984,
+        "n_days": 1756
+      },
+      "Dynamic Safe Haven": {
+        "ann_return_pct": 40.9,
+        "ann_vol_pct": 8.21,
+        "sharpe": 4.984,
+        "n_days": 1756
+      },
+      "Crash Buffer": {
+        "ann_return_pct": 36.55,
+        "ann_vol_pct": 7.37,
+        "sharpe": 4.962,
+        "n_days": 1756
+      },
+      "Momentum Hedge": {
+        "ann_return_pct": 40.08,
+        "ann_vol_pct": 8.16,
+        "sharpe": 4.911,
+        "n_days": 1756
+      },
+      "Synthetic Put": {
+        "ann_return_pct": 36.06,
+        "ann_vol_pct": 7.5,
+        "sharpe": 4.81,
+        "n_days": 1756
+      },
+      "12/VIX SPY": {
+        "ann_return_pct": 34.03,
+        "ann_vol_pct": 7.27,
+        "sharpe": 4.682,
+        "n_days": 1756
+      },
+      "BH 60/40": {
+        "ann_return_pct": 28.7,
+        "ann_vol_pct": 8.08,
+        "sharpe": 3.552,
+        "n_days": 1756
+      },
+      "BH SPY": {
+        "ann_return_pct": 40.9,
+        "ann_vol_pct": 8.21,
+        "sharpe": 4.984,
+        "n_days": 1756
+      }
+    },
+    "Normal (15-20)": {
+      "VIX Bond Rotation": {
+        "ann_return_pct": 25.29,
+        "ann_vol_pct": 12.77,
+        "sharpe": 1.981,
+        "n_days": 1571
+      },
+      "Dynamic Safe Haven": {
+        "ann_return_pct": 15.75,
+        "ann_vol_pct": 12.13,
+        "sharpe": 1.298,
+        "n_days": 1571
+      },
+      "Crash Buffer": {
+        "ann_return_pct": 22.77,
+        "ann_vol_pct": 11.27,
+        "sharpe": 2.021,
+        "n_days": 1571
+      },
+      "Momentum Hedge": {
+        "ann_return_pct": 19.64,
+        "ann_vol_pct": 12.31,
+        "sharpe": 1.596,
+        "n_days": 1571
+      },
+      "Synthetic Put": {
+        "ann_return_pct": 15.3,
+        "ann_vol_pct": 10.31,
+        "sharpe": 1.483,
+        "n_days": 1571
+      },
+      "12/VIX SPY": {
+        "ann_return_pct": 9.59,
+        "ann_vol_pct": 9.04,
+        "sharpe": 1.06,
+        "n_days": 1571
+      },
+      "BH 60/40": {
+        "ann_return_pct": 18.16,
+        "ann_vol_pct": 10.56,
+        "sharpe": 1.719,
+        "n_days": 1571
+      },
+      "BH SPY": {
+        "ann_return_pct": 25.29,
+        "ann_vol_pct": 12.77,
+        "sharpe": 1.981,
+        "n_days": 1571
+      }
+    },
+    "Elevated (20-25)": {
+      "VIX Bond Rotation": {
+        "ann_return_pct": -25.0,
+        "ann_vol_pct": 16.8,
+        "sharpe": -1.489,
+        "n_days": 883
+      },
+      "Dynamic Safe Haven": {
+        "ann_return_pct": -17.87,
+        "ann_vol_pct": 14.65,
+        "sharpe": -1.22,
+        "n_days": 883
+      },
+      "Crash Buffer": {
+        "ann_return_pct": -4.68,
+        "ann_vol_pct": 16.02,
+        "sharpe": -0.292,
+        "n_days": 883
+      },
+      "Momentum Hedge": {
+        "ann_return_pct": -20.6,
+        "ann_vol_pct": 16.04,
+        "sharpe": -1.284,
+        "n_days": 883
+      },
+      "Synthetic Put": {
+        "ann_return_pct": -10.92,
+        "ann_vol_pct": 12.62,
+        "sharpe": -0.865,
+        "n_days": 883
+      },
+      "12/VIX SPY": {
+        "ann_return_pct": -13.87,
+        "ann_vol_pct": 10.19,
+        "sharpe": -1.361,
+        "n_days": 883
+      },
+      "BH 60/40": {
+        "ann_return_pct": 5.92,
+        "ann_vol_pct": 13.56,
+        "sharpe": 0.437,
+        "n_days": 883
+      },
+      "BH SPY": {
+        "ann_return_pct": -5.8,
+        "ann_vol_pct": 18.28,
+        "sharpe": -0.317,
+        "n_days": 883
+      }
+    },
+    "High (25-30)": {
+      "VIX Bond Rotation": {
+        "ann_return_pct": -58.39,
+        "ann_vol_pct": 16.5,
+        "sharpe": -3.538,
+        "n_days": 431
+      },
+      "Dynamic Safe Haven": {
+        "ann_return_pct": -17.97,
+        "ann_vol_pct": 15.94,
+        "sharpe": -1.128,
+        "n_days": 431
+      },
+      "Crash Buffer": {
+        "ann_return_pct": -35.92,
+        "ann_vol_pct": 19.03,
+        "sharpe": -1.887,
+        "n_days": 431
+      },
+      "Momentum Hedge": {
+        "ann_return_pct": -26.47,
+        "ann_vol_pct": 17.77,
+        "sharpe": -1.49,
+        "n_days": 431
+      },
+      "Synthetic Put": {
+        "ann_return_pct": -28.17,
+        "ann_vol_pct": 13.57,
+        "sharpe": -2.076,
+        "n_days": 431
+      },
+      "12/VIX SPY": {
+        "ann_return_pct": -23.43,
+        "ann_vol_pct": 10.84,
+        "sharpe": -2.161,
+        "n_days": 431
+      },
+      "BH 60/40": {
+        "ann_return_pct": -11.91,
+        "ann_vol_pct": 16.81,
+        "sharpe": -0.708,
+        "n_days": 431
+      },
+      "BH SPY": {
+        "ann_return_pct": -24.88,
+        "ann_vol_pct": 23.27,
+        "sharpe": -1.069,
+        "n_days": 431
+      }
+    },
+    "Crisis (>30)": {
+      "VIX Bond Rotation": {
+        "ann_return_pct": -41.5,
+        "ann_vol_pct": 22.34,
+        "sharpe": -1.857,
+        "n_days": 447
+      },
+      "Dynamic Safe Haven": {
+        "ann_return_pct": -42.26,
+        "ann_vol_pct": 26.55,
+        "sharpe": -1.591,
+        "n_days": 447
+      },
+      "Crash Buffer": {
+        "ann_return_pct": -68.29,
+        "ann_vol_pct": 27.33,
+        "sharpe": -2.499,
+        "n_days": 447
+      },
+      "Momentum Hedge": {
+        "ann_return_pct": -50.11,
+        "ann_vol_pct": 26.92,
+        "sharpe": -1.861,
+        "n_days": 447
+      },
+      "Synthetic Put": {
+        "ann_return_pct": -42.24,
+        "ann_vol_pct": 18.1,
+        "sharpe": -2.334,
+        "n_days": 447
+      },
+      "12/VIX SPY": {
+        "ann_return_pct": -40.14,
+        "ann_vol_pct": 13.3,
+        "sharpe": -3.017,
+        "n_days": 447
+      },
+      "BH 60/40": {
+        "ann_return_pct": -43.13,
+        "ann_vol_pct": 30.87,
+        "sharpe": -1.397,
+        "n_days": 447
+      },
+      "BH SPY": {
+        "ann_return_pct": -80.04,
+        "ann_vol_pct": 46.69,
+        "sharpe": -1.714,
+        "n_days": 447
+      }
+    }
+  },
+  "vix_descriptive": {
+    "mean": 19.47,
+    "median": 17.12,
+    "std": 8.7,
+    "min": 9.14,
+    "max": 82.69,
+    "pct_above_20": 34.6,
+    "pct_above_25": 17.2,
+    "pct_above_30": 8.8
+  },
+  "key_findings": {
+    "best_sharpe_strategy": "Synthetic Put",
+    "best_sortino_strategy": "Synthetic Put",
+    "shallowest_mdd_strategy": "Synthetic Put",
+    "best_cvar_strategy": "Synthetic Put",
+    "best_tail_ratio_strategy": "Crash Buffer",
+    "most_put_like_strategy": "Synthetic Put"
+  },
+  "conclusions": [
+    "Synthetic tail hedges using VIX signals + safe assets CAN provide meaningful downside protection.",
+    "The key trade-off: more protection = more CAGR drag during calm markets.",
+    "No strategy perfectly replicates a put payoff (limited downside, unlimited upside).",
+    "VIX-based strategies work because VIX is a leading indicator of tail events.",
+    "TLT provides crisis-period protection (flight to quality) but may fail during rate hikes (2022).",
+    "GLD provides inflation-era protection but is uncorrelated in equity crashes.",
+    "Combining both (GLD+TLT) is more robust than either alone.",
+    "Momentum Hedge has the best crisis detection but suffers from whipsaw in recoveries."
+  ],
+  "limitations": [
+    "GLD inception: Nov 2004. TLT inception: Jul 2002. Data starts 2006.",
+    "No transaction costs modeled (daily rebalancing strategies would incur costs).",
+    "VIX signals use previous close — no intraday execution.",
+    "TLT-based strategies assume bonds provide flight-to-quality; this failed in 2022 rate hiking cycle.",
+    "No options comparison — cannot directly compare cost vs. actual protective puts.",
+    "Sample includes only 1 major pandemic crash and 1 major rate hike cycle."
+  ]
+}

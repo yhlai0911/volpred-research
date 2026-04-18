@@ -1,0 +1,470 @@
+{
+  "experiment_id": "K669",
+  "title": "Does VT Work Globally? Testing 12/VIX on International ETFs",
+  "timestamp": "2026-03-29 08:57:33",
+  "data_source": "yfinance",
+  "data_period": "2010-01-01 to 2026-03-27",
+  "methodology": "12/VIX allocation + vol-adjusted VT + bootstrap CI",
+  "markets_tested": [
+    "SPY",
+    "EFA",
+    "EWJ",
+    "EEM"
+  ],
+  "vix_target": 12.0,
+  "ma_window": 5,
+  "bootstrap_reps": 10000,
+  "descriptive_stats": {
+    "SPY": {
+      "name": "US (S&P 500)",
+      "n_obs": 4081,
+      "mean_daily": 0.0005558806592060586,
+      "std_daily": 0.010807260947241331,
+      "annualized_vol": 0.17155994892108542,
+      "skewness": -0.33214752983741636,
+      "kurtosis": 12.08538905996759,
+      "min": -0.1094234174516373,
+      "max": 0.1050193499563612
+    },
+    "EFA": {
+      "name": "Europe/EAFE",
+      "n_obs": 4081,
+      "mean_daily": 0.0003102355949388026,
+      "std_daily": 0.011574664741951233,
+      "annualized_vol": 0.1837421064969034,
+      "skewness": -0.5827890945697721,
+      "kurtosis": 9.25994113137843,
+      "min": -0.10990181951398215,
+      "max": 0.08473127277958481
+    },
+    "EWJ": {
+      "name": "Japan (Nikkei)",
+      "n_obs": 4081,
+      "mean_daily": 0.0003136446514614046,
+      "std_daily": 0.011252684870631503,
+      "annualized_vol": 0.1786308344968199,
+      "skewness": -0.3628066628786486,
+      "kurtosis": 5.098625990563461,
+      "min": -0.09804735891027483,
+      "max": 0.07607452487840383
+    },
+    "EEM": {
+      "name": "Emerging Markets",
+      "n_obs": 4081,
+      "mean_daily": 0.0002386623347025559,
+      "std_daily": 0.013458944034303708,
+      "annualized_vol": 0.21365411294582393,
+      "skewness": -0.36360415320628453,
+      "kurtosis": 5.925784749917305,
+      "min": -0.12479262766134991,
+      "max": 0.08052890205084706
+    }
+  },
+  "vix_correlation": {
+    "SPY": {
+      "market": "US (S&P 500)",
+      "pearson_vix_rv21": 0.813,
+      "pearson_vix_rv63": 0.7146,
+      "spearman_vix_rv21": 0.7508,
+      "pearson_changes": 0.1581,
+      "n_obs": 4019
+    },
+    "EFA": {
+      "market": "Europe/EAFE",
+      "pearson_vix_rv21": 0.7625,
+      "pearson_vix_rv63": 0.689,
+      "spearman_vix_rv21": 0.6856,
+      "pearson_changes": 0.16,
+      "n_obs": 4019
+    },
+    "EWJ": {
+      "market": "Japan (Nikkei)",
+      "pearson_vix_rv21": 0.6085,
+      "pearson_vix_rv63": 0.547,
+      "spearman_vix_rv21": 0.5468,
+      "pearson_changes": 0.1141,
+      "n_obs": 4019
+    },
+    "EEM": {
+      "market": "Emerging Markets",
+      "pearson_vix_rv21": 0.7118,
+      "pearson_vix_rv63": 0.6459,
+      "spearman_vix_rv21": 0.5822,
+      "pearson_changes": 0.1249,
+      "n_obs": 4019
+    }
+  },
+  "individual_market_results": {
+    "SPY": {
+      "market": "US (S&P 500)",
+      "buy_and_hold": {
+        "name": "BH SPY",
+        "sharpe": 0.8165,
+        "cagr_pct": 13.35,
+        "mdd_pct": -33.72,
+        "calmar": 0.3959,
+        "sortino": 1.0047,
+        "total_return_pct": 660.75,
+        "annualized_vol_pct": 17.16,
+        "n_days": 4081
+      },
+      "vt_12vix": {
+        "name": "12/VIX SPY",
+        "sharpe": 0.8526,
+        "cagr_pct": 7.91,
+        "mdd_pct": -14.62,
+        "calmar": 0.5409,
+        "sortino": 1.1153,
+        "total_return_pct": 242.51,
+        "annualized_vol_pct": 9.45,
+        "n_days": 4077,
+        "avg_weight": 0.709
+      },
+      "vt_voladj": {
+        "name": "VolAdj SPY",
+        "sharpe": 0.8468,
+        "cagr_pct": 7.86,
+        "mdd_pct": -14.62,
+        "calmar": 0.5378,
+        "sortino": 1.1096,
+        "total_return_pct": 234.21,
+        "annualized_vol_pct": 9.47,
+        "n_days": 4018,
+        "avg_weight": 0.711
+      },
+      "sharpe_diff_12vix": 0.8165,
+      "sharpe_improvement_12vix": 0.0361,
+      "mdd_improvement_12vix_pp": 19.1,
+      "sharpe_improvement_voladj": 0.0303,
+      "mdd_improvement_voladj_pp": 19.1,
+      "bootstrap_12vix": {
+        "observed_diff": 0.0396,
+        "ci_95_lower": -0.1433,
+        "ci_95_upper": 0.225,
+        "p_vt_worse": 0.3394,
+        "significant_at_5pct": false
+      },
+      "bootstrap_voladj": {
+        "observed_diff": 0.0401,
+        "ci_95_lower": -0.148,
+        "ci_95_upper": 0.2303,
+        "p_vt_worse": 0.3515,
+        "significant_at_5pct": false
+      }
+    },
+    "EFA": {
+      "market": "Europe/EAFE",
+      "buy_and_hold": {
+        "name": "BH EFA",
+        "sharpe": 0.4255,
+        "cagr_pct": 6.31,
+        "mdd_pct": -34.19,
+        "calmar": 0.1846,
+        "sortino": 0.5376,
+        "total_return_pct": 169.47,
+        "annualized_vol_pct": 18.37,
+        "n_days": 4081
+      },
+      "vt_12vix": {
+        "name": "12/VIX EFA",
+        "sharpe": 0.3222,
+        "cagr_pct": 2.9,
+        "mdd_pct": -22.94,
+        "calmar": 0.1265,
+        "sortino": 0.4345,
+        "total_return_pct": 58.86,
+        "annualized_vol_pct": 10.64,
+        "n_days": 4077,
+        "avg_weight": 0.709
+      },
+      "vt_voladj": {
+        "name": "VolAdj EFA",
+        "sharpe": 0.4064,
+        "cagr_pct": 3.49,
+        "mdd_pct": -20.42,
+        "calmar": 0.171,
+        "sortino": 0.5567,
+        "total_return_pct": 72.83,
+        "annualized_vol_pct": 9.57,
+        "n_days": 4018,
+        "avg_weight": 0.651
+      },
+      "sharpe_diff_12vix": 0.4255,
+      "sharpe_improvement_12vix": -0.1033,
+      "mdd_improvement_12vix_pp": 11.2,
+      "sharpe_improvement_voladj": -0.0191,
+      "mdd_improvement_voladj_pp": 13.8,
+      "bootstrap_12vix": {
+        "observed_diff": -0.1004,
+        "ci_95_lower": -0.2783,
+        "ci_95_upper": 0.0742,
+        "p_vt_worse": 0.868,
+        "significant_at_5pct": false
+      },
+      "bootstrap_voladj": {
+        "observed_diff": -0.0238,
+        "ci_95_lower": -0.2142,
+        "ci_95_upper": 0.1645,
+        "p_vt_worse": 0.5951,
+        "significant_at_5pct": false
+      }
+    },
+    "EWJ": {
+      "market": "Japan (Nikkei)",
+      "buy_and_hold": {
+        "name": "BH EWJ",
+        "sharpe": 0.4425,
+        "cagr_pct": 6.51,
+        "mdd_pct": -33.14,
+        "calmar": 0.1963,
+        "sortino": 0.5996,
+        "total_return_pct": 177.54,
+        "annualized_vol_pct": 17.86,
+        "n_days": 4081
+      },
+      "vt_12vix": {
+        "name": "12/VIX EWJ",
+        "sharpe": 0.3754,
+        "cagr_pct": 3.7,
+        "mdd_pct": -20.38,
+        "calmar": 0.1818,
+        "sortino": 0.5237,
+        "total_return_pct": 80.13,
+        "annualized_vol_pct": 11.44,
+        "n_days": 4077,
+        "avg_weight": 0.709
+      },
+      "vt_voladj": {
+        "name": "VolAdj EWJ",
+        "sharpe": 0.4015,
+        "cagr_pct": 3.52,
+        "mdd_pct": -20.18,
+        "calmar": 0.1746,
+        "sortino": 0.5658,
+        "total_return_pct": 73.72,
+        "annualized_vol_pct": 9.83,
+        "n_days": 4018,
+        "avg_weight": 0.613
+      },
+      "sharpe_diff_12vix": 0.4425,
+      "sharpe_improvement_12vix": -0.0671,
+      "mdd_improvement_12vix_pp": 12.8,
+      "sharpe_improvement_voladj": -0.041,
+      "mdd_improvement_voladj_pp": 13.0,
+      "bootstrap_12vix": {
+        "observed_diff": -0.0629,
+        "ci_95_lower": -0.2265,
+        "ci_95_upper": 0.0976,
+        "p_vt_worse": 0.7818,
+        "significant_at_5pct": false
+      },
+      "bootstrap_voladj": {
+        "observed_diff": -0.0251,
+        "ci_95_lower": -0.1619,
+        "ci_95_upper": 0.1159,
+        "p_vt_worse": 0.6352,
+        "significant_at_5pct": false
+      }
+    },
+    "EEM": {
+      "market": "Emerging Markets",
+      "buy_and_hold": {
+        "name": "BH EEM",
+        "sharpe": 0.2815,
+        "cagr_pct": 3.79,
+        "mdd_pct": -39.82,
+        "calmar": 0.0953,
+        "sortino": 0.3843,
+        "total_return_pct": 82.76,
+        "annualized_vol_pct": 21.37,
+        "n_days": 4081
+      },
+      "vt_12vix": {
+        "name": "12/VIX EEM",
+        "sharpe": 0.1004,
+        "cagr_pct": 0.46,
+        "mdd_pct": -39.54,
+        "calmar": 0.0116,
+        "sortino": 0.1452,
+        "total_return_pct": 7.66,
+        "annualized_vol_pct": 13.09,
+        "n_days": 4077,
+        "avg_weight": 0.709
+      },
+      "vt_voladj": {
+        "name": "VolAdj EEM",
+        "sharpe": 0.2132,
+        "cagr_pct": 1.61,
+        "mdd_pct": -28.43,
+        "calmar": 0.0566,
+        "sortino": 0.3147,
+        "total_return_pct": 28.99,
+        "annualized_vol_pct": 9.7,
+        "n_days": 4018,
+        "avg_weight": 0.528
+      },
+      "sharpe_diff_12vix": 0.2815,
+      "sharpe_improvement_12vix": -0.1811,
+      "mdd_improvement_12vix_pp": 0.3,
+      "sharpe_improvement_voladj": -0.0683,
+      "mdd_improvement_voladj_pp": 11.4,
+      "bootstrap_12vix": {
+        "observed_diff": -0.178,
+        "ci_95_lower": -0.3535,
+        "ci_95_upper": -0.0036,
+        "p_vt_worse": 0.9772,
+        "significant_at_5pct": true
+      },
+      "bootstrap_voladj": {
+        "observed_diff": -0.0642,
+        "ci_95_lower": -0.2283,
+        "ci_95_upper": 0.1022,
+        "p_vt_worse": 0.781,
+        "significant_at_5pct": false
+      }
+    }
+  },
+  "global_portfolio": {
+    "buy_and_hold": {
+      "name": "Global BH (EW)",
+      "sharpe": 0.521,
+      "cagr_pct": 7.74,
+      "mdd_pct": -31.33,
+      "calmar": 0.2472,
+      "sortino": 0.6715,
+      "total_return_pct": 234.66,
+      "annualized_vol_pct": 17.15,
+      "n_days": 4081
+    },
+    "vt_12vix": {
+      "name": "Global 12/VIX (EW)",
+      "sharpe": 0.4267,
+      "cagr_pct": 3.84,
+      "mdd_pct": -20.06,
+      "calmar": 0.1915,
+      "sortino": 0.5848,
+      "total_return_pct": 84.05,
+      "annualized_vol_pct": 10.01,
+      "n_days": 4077
+    },
+    "vt_voladj": {
+      "name": "Global VolAdj (EW)",
+      "sharpe": 0.5143,
+      "cagr_pct": 4.19,
+      "mdd_pct": -17.13,
+      "calmar": 0.2443,
+      "sortino": 0.7063,
+      "total_return_pct": 92.28,
+      "annualized_vol_pct": 8.71,
+      "n_days": 4018
+    },
+    "sharpe_improvement_12vix": -0.0943,
+    "mdd_improvement_12vix_pp": 11.3,
+    "sharpe_improvement_voladj": -0.0067,
+    "mdd_improvement_voladj_pp": 14.2,
+    "bootstrap_12vix": {
+      "observed_diff": -0.0906,
+      "ci_95_lower": -0.2724,
+      "ci_95_upper": 0.0893,
+      "p_vt_worse": 0.8323,
+      "significant_at_5pct": false
+    },
+    "bootstrap_voladj": {
+      "observed_diff": -0.0003,
+      "ci_95_lower": -0.158,
+      "ci_95_upper": 0.1615,
+      "p_vt_worse": 0.5059,
+      "significant_at_5pct": false
+    }
+  },
+  "crisis_analysis": {
+    "COVID_2020": {
+      "SPY": {
+        "bh_return_pct": -33.4,
+        "vt_return_pct": -13.4,
+        "protection_pp": 20.0
+      },
+      "EFA": {
+        "bh_return_pct": -32.4,
+        "vt_return_pct": -12.8,
+        "protection_pp": 19.5
+      },
+      "EWJ": {
+        "bh_return_pct": -22.5,
+        "vt_return_pct": -9.7,
+        "protection_pp": 12.7
+      },
+      "EEM": {
+        "bh_return_pct": -30.3,
+        "vt_return_pct": -11.3,
+        "protection_pp": 19.0
+      }
+    },
+    "Rate_Hike_2022": {
+      "SPY": {
+        "bh_return_pct": -24.1,
+        "vt_return_pct": -14.3,
+        "protection_pp": 9.8
+      },
+      "EFA": {
+        "bh_return_pct": -27.6,
+        "vt_return_pct": -15.5,
+        "protection_pp": 12.2
+      },
+      "EWJ": {
+        "bh_return_pct": -26.5,
+        "vt_return_pct": -14.9,
+        "protection_pp": 11.6
+      },
+      "EEM": {
+        "bh_return_pct": -28.5,
+        "vt_return_pct": -14.6,
+        "protection_pp": 13.9
+      }
+    },
+    "Iran_2026": {
+      "SPY": {
+        "bh_return_pct": -3.5,
+        "vt_return_pct": -1.8,
+        "protection_pp": 1.7
+      },
+      "EFA": {
+        "bh_return_pct": -8.6,
+        "vt_return_pct": -4.9,
+        "protection_pp": 3.7
+      },
+      "EWJ": {
+        "bh_return_pct": -9.8,
+        "vt_return_pct": -5.6,
+        "protection_pp": 4.1
+      },
+      "EEM": {
+        "bh_return_pct": -9.2,
+        "vt_return_pct": -5.4,
+        "protection_pp": 3.8
+      }
+    }
+  },
+  "key_finding": "VIX is a GLOBAL fear indicator. VIX-RV21 correlation: SPY=0.813, non-US avg=0.694. 12/VIX improves Sharpe for 1/4 markets, MDD for 4/4 markets. VT's primary value is UNIVERSAL MDD reduction, not Sharpe improvement. VIX is a global risk barometer but its VT benefit concentrates in US equities.",
+  "vix_is_global_indicator": "True",
+  "sharpe_improvement_count": "1/4",
+  "mdd_improvement_count": "4/4",
+  "references": [
+    "Moreira & Muir (2017) 'Volatility-Managed Portfolios' JoF",
+    "Bozovic (2024) IRFA: VIX-managed > realized-vol-managed",
+    "Cederburg et al. (2020) skeptical view of VT",
+    "Harvey et al. (2016) t>3.0 threshold"
+  ],
+  "prior_knowledge": [
+    "N84",
+    "K590",
+    "N87"
+  ],
+  "limitations": [
+    "VIX is SPY implied vol \u2014 inherent US bias",
+    "EFA/EWJ/EEM are USD-denominated \u2014 currency effects embedded",
+    "Cash at 0% (ignores money market returns ~4-5%)",
+    "No transaction costs modeled",
+    "Period 2010-2026 is mostly US bull market \u2014 may bias SPY results"
+  ]
+}

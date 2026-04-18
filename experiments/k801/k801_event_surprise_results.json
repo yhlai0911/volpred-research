@@ -1,0 +1,234 @@
+{
+  "experiment_id": "K801",
+  "title": "Event-Surprise Volatility Strategy: VIX Shock Guard",
+  "hypothesis": "VIX daily change > 2σ captures surprise events. Reducing equity after large VIX shocks should improve risk-adjusted returns.",
+  "data_source": "yfinance (SPY, GLD, ^VIX)",
+  "period": "2010-01-01 to 2025-12-31",
+  "oos_period": "2023-01-01 to 2025-12-31",
+  "n_total": 3960,
+  "n_oos": 751,
+  "shock_stats": {
+    "total_shocks": 192,
+    "spikes": 123,
+    "drops": 69,
+    "shock_pct": 4.848484848484849,
+    "threshold_sigma": 2.0,
+    "guard_days": 5
+  },
+  "guard_stats": {
+    "any_shock_guard_days": 619,
+    "spike_guard_days": 500,
+    "drop_guard_days": 268
+  },
+  "full_period_metrics": {
+    "Baseline_12VIX": {
+      "name": "Baseline_12VIX",
+      "cagr": 0.07393010277141121,
+      "sharpe": 0.8132799195875732,
+      "mdd": -0.14790606885637503,
+      "ann_vol": 0.09306962663800247,
+      "hit_rate": 0.5505050505050505,
+      "total_days": 3960,
+      "years": 15.714285714285714
+    },
+    "VIX_Shock_Guard_50pct": {
+      "name": "VIX_Shock_Guard_50pct",
+      "cagr": 0.06747317305214962,
+      "sharpe": 0.818517458942505,
+      "mdd": -0.14313504019205162,
+      "ann_vol": 0.08413170322296498,
+      "hit_rate": 0.548989898989899,
+      "total_days": 3960,
+      "years": 15.714285714285714
+    },
+    "VIX_Shock_Binary_Cash": {
+      "name": "VIX_Shock_Binary_Cash",
+      "cagr": 0.06022539859030296,
+      "sharpe": 0.7631857446693878,
+      "mdd": -0.16917696395998402,
+      "ann_vol": 0.08095605889726308,
+      "hit_rate": 0.4621212121212121,
+      "total_days": 3960,
+      "years": 15.714285714285714
+    },
+    "VIX_Spike_Only_50pct": {
+      "name": "VIX_Spike_Only_50pct",
+      "cagr": 0.0685468456675824,
+      "sharpe": 0.8159677387406422,
+      "mdd": -0.13686756954152432,
+      "ann_vol": 0.08580165218711554,
+      "hit_rate": 0.5492424242424242,
+      "total_days": 3960,
+      "years": 15.714285714285714
+    },
+    "VIX_Drop_Boost_100pct": {
+      "name": "VIX_Drop_Boost_100pct",
+      "cagr": 0.06968049274345445,
+      "sharpe": 0.6145925787359737,
+      "mdd": -0.3171557471085109,
+      "ann_vol": 0.12177309151346931,
+      "hit_rate": 0.5505050505050505,
+      "total_days": 3960,
+      "years": 15.714285714285714
+    },
+    "BuyAndHold_SPY": {
+      "name": "BuyAndHold_SPY",
+      "cagr": 0.13843735759903986,
+      "sharpe": 0.8379825518316849,
+      "mdd": -0.3371726149351546,
+      "ann_vol": 0.17257832201018533,
+      "hit_rate": 0.5525252525252525,
+      "total_days": 3960,
+      "years": 15.714285714285714
+    }
+  },
+  "oos_metrics": {
+    "Baseline_12VIX": {
+      "name": "Baseline_12VIX_OOS",
+      "cagr": 0.13561360925644705,
+      "sharpe": 1.412485018305187,
+      "mdd": -0.11046453642904282,
+      "ann_vol": 0.09312804027035049,
+      "hit_rate": 0.5712383488681758,
+      "total_days": 751,
+      "years": 2.9801587301587302
+    },
+    "VIX_Shock_Guard_50pct": {
+      "name": "VIX_Shock_Guard_50pct_OOS",
+      "cagr": 0.13302710171002086,
+      "sharpe": 1.4973443672342879,
+      "mdd": -0.09999133096052366,
+      "ann_vol": 0.0858936329832838,
+      "hit_rate": 0.5699067909454061,
+      "total_days": 751,
+      "years": 2.9801587301587302
+    },
+    "VIX_Shock_Binary_Cash": {
+      "name": "VIX_Shock_Binary_Cash_OOS",
+      "cagr": 0.12964107037531414,
+      "sharpe": 1.5038119768792528,
+      "mdd": -0.08997052933657315,
+      "ann_vol": 0.08339221111486184,
+      "hit_rate": 0.4966711051930759,
+      "total_days": 751,
+      "years": 2.9801587301587302
+    },
+    "VIX_Spike_Only_50pct": {
+      "name": "VIX_Spike_Only_50pct_OOS",
+      "cagr": 0.13270466001600445,
+      "sharpe": 1.464778012562414,
+      "mdd": -0.11237677271839377,
+      "ann_vol": 0.08771720998308245,
+      "hit_rate": 0.5712383488681758,
+      "total_days": 751,
+      "years": 2.9801587301587302
+    },
+    "VIX_Drop_Boost_100pct": {
+      "name": "VIX_Drop_Boost_100pct_OOS",
+      "cagr": 0.13464933685669234,
+      "sharpe": 1.2837322215911677,
+      "mdd": -0.14468034033145818,
+      "ann_vol": 0.10252894994118106,
+      "hit_rate": 0.5712383488681758,
+      "total_days": 751,
+      "years": 2.9801587301587302
+    },
+    "BuyAndHold_SPY": {
+      "name": "BuyAndHold_SPY_OOS",
+      "cagr": 0.2330448892605954,
+      "sharpe": 1.4417495101085336,
+      "mdd": -0.18755225458981634,
+      "ann_vol": 0.15347216916245313,
+      "hit_rate": 0.5739014647137151,
+      "total_days": 751,
+      "years": 2.9801587301587302
+    }
+  },
+  "dm_tests_full": {
+    "VIX_Shock_Guard_50pct": {
+      "t_stat": -1.1759,
+      "p_val": 0.2397,
+      "harvey_pass": "False"
+    },
+    "VIX_Shock_Binary_Cash": {
+      "t_stat": -1.1976,
+      "p_val": 0.2311,
+      "harvey_pass": "False"
+    },
+    "VIX_Spike_Only_50pct": {
+      "t_stat": -1.0785,
+      "p_val": 0.2809,
+      "harvey_pass": "False"
+    },
+    "VIX_Drop_Boost_100pct": {
+      "t_stat": -0.0573,
+      "p_val": 0.9543,
+      "harvey_pass": "False"
+    }
+  },
+  "dm_tests_oos": {
+    "VIX_Shock_Guard_50pct": {
+      "t_stat": -0.259173434640883,
+      "p_val": 0.7955014270646379,
+      "harvey_pass": false
+    },
+    "VIX_Shock_Binary_Cash": {
+      "t_stat": -0.27150178476102543,
+      "p_val": 0.7860051271996638,
+      "harvey_pass": false
+    },
+    "VIX_Spike_Only_50pct": {
+      "t_stat": -0.33792075397075505,
+      "p_val": 0.735422907202413,
+      "harvey_pass": false
+    },
+    "VIX_Drop_Boost_100pct": {
+      "t_stat": 0.007356888768053747,
+      "p_val": 0.9941301049866564,
+      "harvey_pass": false
+    }
+  },
+  "forward_return_analysis": {
+    "any_shock": {
+      "mean": 0.000787853038325799,
+      "std": 0.03795068676908238,
+      "n": 192,
+      "t_stat": 0.2869077359479957,
+      "p_val": 0.7744939694681993
+    },
+    "spike": {
+      "mean": 0.00231368155550984,
+      "std": 0.036981864935962346,
+      "n": 123,
+      "t_stat": 0.691026482944148,
+      "p_val": 0.49086165530994647
+    },
+    "drop": {
+      "mean": -0.0019321021444805354,
+      "std": 0.039472991607433144,
+      "n": 69,
+      "t_stat": -0.4036309839599549,
+      "p_val": 0.6877505865954165
+    },
+    "normal": {
+      "mean": 0.0029402461858054293,
+      "std": 0.021407583213188003,
+      "n": 3763
+    }
+  },
+  "parameters": {
+    "shock_window": 252,
+    "shock_threshold_sigma": 2.0,
+    "guard_days": 5,
+    "tx_cost_bps": 10.0,
+    "lag": "signal.shift(1) — yesterday's shock, today's action"
+  },
+  "conclusion": "NULL: VIX shock guard does not consistently improve on 12/VIX baseline (Guard Sharpe=0.819 vs Base=0.813). VIX already encodes surprise via its level; daily change adds no independent signal.",
+  "references": [
+    "K498 (calendar dummies NULL — motivates surprise-based approach)",
+    "Codex #5 suggestion: use surprise component not calendar dummy",
+    "Moreira & Muir (2017): volatility timing strategies"
+  ],
+  "run_date": "2026-04-01T10:40:28.351503",
+  "notes": "dm_tests_full uses paired t-test (HAC NaN fix); OOS uses HAC-NW(5 lags)"
+}

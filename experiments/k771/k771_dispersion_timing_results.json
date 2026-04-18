@@ -1,0 +1,182 @@
+{
+  "experiment_id": "K771",
+  "title": "Dispersion Timing \u2014 Index vs Sector Basket",
+  "proposer": "Codex GPT-5.4 8th suggestion #3",
+  "executor": "Claude",
+  "timestamp": "2026-03-31T10:54:28.486505+00:00",
+  "data_source": "yfinance",
+  "data_period": "2010-02-03 to 2026-03-30",
+  "n_trading_days": 4063,
+  "sectors_used": [
+    "XLK",
+    "XLF",
+    "XLV",
+    "XLE",
+    "XLI",
+    "XLC",
+    "XLY",
+    "XLP",
+    "XLU",
+    "XLRE",
+    "XLB"
+  ],
+  "n_sectors": 11,
+  "methodology": {
+    "dispersion_window": 20,
+    "percentile_thresholds": "25th/75th (expanding)",
+    "rebalancing": "monthly",
+    "signal_lag": "shift(1)",
+    "tx_cost_per_trade": 0.001
+  },
+  "dispersion_stats": {
+    "daily_mean": 0.006779,
+    "daily_std": 0.003558,
+    "rolling_20d_mean": 0.006773,
+    "rolling_20d_std": 0.002204,
+    "dispersion_vix_corr": 0.6582
+  },
+  "regime_distribution": {
+    "low_disp_pct": 12.4,
+    "medium_pct": 48.9,
+    "high_disp_pct": 38.6
+  },
+  "full_period_results": {
+    "Dispersion Timing (gross)": {
+      "name": "Dispersion Timing (gross)",
+      "n_days": 4063,
+      "ann_return": 0.1366,
+      "ann_vol": 0.1658,
+      "sharpe": 0.824,
+      "mdd": -0.3653,
+      "calmar": 0.3739,
+      "sortino": 0.9999
+    },
+    "Dispersion Timing (net TX)": {
+      "name": "Dispersion Timing (net TX)",
+      "n_days": 4063,
+      "ann_return": 0.1346,
+      "ann_vol": 0.1658,
+      "sharpe": 0.8118,
+      "mdd": -0.3657,
+      "calmar": 0.3681,
+      "sortino": 0.9855
+    },
+    "SPY B&H": {
+      "name": "SPY B&H",
+      "n_days": 4063,
+      "ann_return": 0.141,
+      "ann_vol": 0.1716,
+      "sharpe": 0.8217,
+      "mdd": -0.3372,
+      "calmar": 0.4182,
+      "sortino": 1.0108
+    },
+    "EW Sectors B&H": {
+      "name": "EW Sectors B&H",
+      "n_days": 4063,
+      "ann_return": 0.1304,
+      "ann_vol": 0.1645,
+      "sharpe": 0.7925,
+      "mdd": -0.3634,
+      "calmar": 0.3587,
+      "sortino": 0.9647
+    },
+    "50/50 SPY/GLD": {
+      "name": "50/50 SPY/GLD",
+      "n_days": 4063,
+      "ann_return": 0.1187,
+      "ann_vol": 0.122,
+      "sharpe": 0.9732,
+      "mdd": -0.2032,
+      "calmar": 0.5843,
+      "sortino": 1.2406
+    },
+    "12/VIX (SPY+GLD)": {
+      "name": "12/VIX (SPY+GLD)",
+      "n_days": 4062,
+      "ann_return": 0.1227,
+      "ann_vol": 0.1163,
+      "sharpe": 1.0544,
+      "mdd": -0.1989,
+      "calmar": 0.6168,
+      "sortino": 1.3767
+    }
+  },
+  "cross_oos": {
+    "periods": [
+      {
+        "period": "2011-01-01 to 2012-12-31",
+        "disp_sharpe": 0.5375,
+        "spy_sharpe": 0.5441,
+        "spygld_sharpe": 0.7352,
+        "beat_spy": "False",
+        "beat_5050": "False"
+      },
+      {
+        "period": "2013-01-01 to 2014-12-31",
+        "disp_sharpe": 1.8347,
+        "spy_sharpe": 1.8768,
+        "spygld_sharpe": 0.2247,
+        "beat_spy": "False",
+        "beat_5050": "True"
+      },
+      {
+        "period": "2015-01-01 to 2016-12-31",
+        "disp_sharpe": 0.5234,
+        "spy_sharpe": 0.511,
+        "spygld_sharpe": 0.3558,
+        "beat_spy": "True",
+        "beat_5050": "True"
+      },
+      {
+        "period": "2017-01-01 to 2018-12-31",
+        "disp_sharpe": 0.5582,
+        "spy_sharpe": 0.6445,
+        "spygld_sharpe": 0.8905,
+        "beat_spy": "False",
+        "beat_5050": "False"
+      },
+      {
+        "period": "2019-01-01 to 2020-12-31",
+        "disp_sharpe": 0.8365,
+        "spy_sharpe": 0.9983,
+        "spygld_sharpe": 1.477,
+        "beat_spy": "False",
+        "beat_5050": "False"
+      },
+      {
+        "period": "2021-01-01 to 2022-12-31",
+        "disp_sharpe": 0.5144,
+        "spy_sharpe": 0.2309,
+        "spygld_sharpe": 0.1155,
+        "beat_spy": "True",
+        "beat_5050": "True"
+      },
+      {
+        "period": "2023-01-01 to 2024-12-31",
+        "disp_sharpe": 1.5022,
+        "spy_sharpe": 1.8466,
+        "spygld_sharpe": 2.0832,
+        "beat_spy": "False",
+        "beat_5050": "False"
+      }
+    ],
+    "beat_spy": "2/7",
+    "beat_5050": "3/7"
+  },
+  "dm_test": {
+    "statistic": -4.361,
+    "p_value": 0.0
+  },
+  "sensitivity": {
+    "16": 0.8157,
+    "20": 0.8141,
+    "24": 0.8262
+  },
+  "verdict": "NULL \u2014 dispersion timing adds no value",
+  "references": [
+    "Solnik & Roulet (2000) Dispersion as cross-sectional volatility",
+    "Stivers (2003) Firm-level return dispersion and future volatility",
+    "Connolly & Stivers (2006) Information content of sector dispersion"
+  ]
+}

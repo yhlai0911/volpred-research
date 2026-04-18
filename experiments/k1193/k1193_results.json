@@ -1,0 +1,253 @@
+{
+  "experiment_id": "K1193",
+  "title": "Paper 3 Split-Sample (gamma 2007-2016 vs TSMOM_orth 2017-2026)",
+  "attribution": "[\u63d0\u51fa: nosource_rescan, \u57f7\u884c: worktree agent-af7c5b3e]",
+  "methodology": {
+    "gamma": "arch GJR-GARCH(1,1) on returns\u00d7100, first half 2007-2016",
+    "beta_tsmom_orth": "daily 12/VIX VT ~ BH_excess + TSMOM_orth (NW HAC lag=9), second half 2017-2026",
+    "mkt_factor": "asset-specific B&H excess return (verified vs K55 R2 values)",
+    "tsmom_factor": "sign(252d SPY cum return lagged) \u00d7 SPY daily return"
+  },
+  "paper_claim": {
+    "pearson_r": 0.487,
+    "pearson_p": 0.021,
+    "spearman_rho": 0.461,
+    "spearman_p": 0.031,
+    "ci_95_lo": 0.114,
+    "ci_95_hi": 0.737,
+    "source": "body_v2.tex Section 3.3 + Table tab:cross_section Panel B"
+  },
+  "config": {
+    "tickers": [
+      "SPY",
+      "QQQ",
+      "IWM",
+      "XLF",
+      "XLE",
+      "DIA",
+      "EEM",
+      "EFA",
+      "FXI",
+      "EWZ",
+      "GLD",
+      "TLT",
+      "USO",
+      "HYG",
+      "LQD",
+      "EWJ",
+      "EWG",
+      "EWU",
+      "EWA",
+      "INDA",
+      "VNQ",
+      "SLV"
+    ],
+    "half1": "2007-01-01 to 2016-12-31",
+    "half2": "2017-01-01 to 2026-03-20",
+    "vix_threshold": 12.0,
+    "tsmom_lookback": 252,
+    "nw_lags": 9,
+    "bootstrap_n": 5000,
+    "bootstrap_seed": 42
+  },
+  "cross_sectional_data": [
+    {
+      "ticker": "SPY",
+      "asset_class": "equity",
+      "gamma_half1": 0.21993193919641307,
+      "beta_tsmom_orth_half2": 0.09004743437195162
+    },
+    {
+      "ticker": "QQQ",
+      "asset_class": "equity",
+      "gamma_half1": 0.20875931368982215,
+      "beta_tsmom_orth_half2": 0.08571237729986245
+    },
+    {
+      "ticker": "IWM",
+      "asset_class": "equity",
+      "gamma_half1": 0.16129113324647404,
+      "beta_tsmom_orth_half2": 0.06743787642164106
+    },
+    {
+      "ticker": "XLF",
+      "asset_class": "equity",
+      "gamma_half1": 0.15004728709986373,
+      "beta_tsmom_orth_half2": 0.07817845644490373
+    },
+    {
+      "ticker": "XLE",
+      "asset_class": "equity",
+      "gamma_half1": 0.11784075643632563,
+      "beta_tsmom_orth_half2": 0.05028958752099912
+    },
+    {
+      "ticker": "DIA",
+      "asset_class": "equity",
+      "gamma_half1": 0.2357925672735855,
+      "beta_tsmom_orth_half2": 0.08320450057742207
+    },
+    {
+      "ticker": "EEM",
+      "asset_class": "equity",
+      "gamma_half1": 0.10252603383003459,
+      "beta_tsmom_orth_half2": 0.050721595700962775
+    },
+    {
+      "ticker": "EFA",
+      "asset_class": "equity",
+      "gamma_half1": 0.1319378063596046,
+      "beta_tsmom_orth_half2": 0.05573282214724245
+    },
+    {
+      "ticker": "FXI",
+      "asset_class": "equity",
+      "gamma_half1": 0.07152127931779007,
+      "beta_tsmom_orth_half2": 0.03049725729439192
+    },
+    {
+      "ticker": "EWZ",
+      "asset_class": "equity",
+      "gamma_half1": 0.0861295885005955,
+      "beta_tsmom_orth_half2": 0.03829190812932511
+    },
+    {
+      "ticker": "GLD",
+      "asset_class": "non_equity",
+      "gamma_half1": -0.003259379366506246,
+      "beta_tsmom_orth_half2": 0.012550652626332252
+    },
+    {
+      "ticker": "TLT",
+      "asset_class": "non_equity",
+      "gamma_half1": -0.0263707735203451,
+      "beta_tsmom_orth_half2": 0.004985883146889114
+    },
+    {
+      "ticker": "USO",
+      "asset_class": "non_equity",
+      "gamma_half1": 0.07799798064564652,
+      "beta_tsmom_orth_half2": -0.00592995168568756
+    },
+    {
+      "ticker": "HYG",
+      "asset_class": "non_equity",
+      "gamma_half1": 0.1438132124773572,
+      "beta_tsmom_orth_half2": 0.02493498872343784
+    },
+    {
+      "ticker": "LQD",
+      "asset_class": "non_equity",
+      "gamma_half1": 0.11122034019743077,
+      "beta_tsmom_orth_half2": 0.00618165708739824
+    },
+    {
+      "ticker": "EWJ",
+      "asset_class": "equity",
+      "gamma_half1": 0.12685744792560244,
+      "beta_tsmom_orth_half2": 0.03518263637833511
+    },
+    {
+      "ticker": "EWG",
+      "asset_class": "equity",
+      "gamma_half1": 0.12421990475811608,
+      "beta_tsmom_orth_half2": 0.05111038707926123
+    },
+    {
+      "ticker": "EWU",
+      "asset_class": "equity",
+      "gamma_half1": 0.11912119337966116,
+      "beta_tsmom_orth_half2": 0.05092030785759478
+    },
+    {
+      "ticker": "EWA",
+      "asset_class": "equity",
+      "gamma_half1": 0.10424435119937157,
+      "beta_tsmom_orth_half2": 0.08158819218389413
+    },
+    {
+      "ticker": "INDA",
+      "asset_class": "equity",
+      "gamma_half1": 0.08491401369303614,
+      "beta_tsmom_orth_half2": 0.05195199748775484
+    },
+    {
+      "ticker": "VNQ",
+      "asset_class": "non_equity",
+      "gamma_half1": 0.0921571276656065,
+      "beta_tsmom_orth_half2": 0.03901645479684255
+    },
+    {
+      "ticker": "SLV",
+      "asset_class": "non_equity",
+      "gamma_half1": -0.0006100444069198562,
+      "beta_tsmom_orth_half2": -0.014326532681011313
+    }
+  ],
+  "results": {
+    "n_assets": 22,
+    "pearson_r": 0.7934,
+    "pearson_p": 0.0,
+    "spearman_rho": 0.7493,
+    "spearman_p": 0.0001,
+    "ci_lo": 0.5887,
+    "ci_hi": 0.9195
+  },
+  "match_assessment": {
+    "r_match": false,
+    "p_match": false,
+    "ci_match": false,
+    "rho_match": false,
+    "n_matched": "0",
+    "status": "DIVERGED"
+  },
+  "gammas_h1": {
+    "SPY": 0.219932,
+    "QQQ": 0.208759,
+    "IWM": 0.161291,
+    "XLF": 0.150047,
+    "XLE": 0.117841,
+    "DIA": 0.235793,
+    "EEM": 0.102526,
+    "EFA": 0.131938,
+    "FXI": 0.071521,
+    "EWZ": 0.08613,
+    "GLD": -0.003259,
+    "TLT": -0.026371,
+    "USO": 0.077998,
+    "HYG": 0.143813,
+    "LQD": 0.11122,
+    "EWJ": 0.126857,
+    "EWG": 0.12422,
+    "EWU": 0.119121,
+    "EWA": 0.104244,
+    "INDA": 0.084914,
+    "VNQ": 0.092157,
+    "SLV": -0.00061
+  },
+  "betas_h2": {
+    "SPY": 0.090047,
+    "QQQ": 0.085712,
+    "IWM": 0.067438,
+    "XLF": 0.078178,
+    "XLE": 0.05029,
+    "DIA": 0.083205,
+    "EEM": 0.050722,
+    "EFA": 0.055733,
+    "FXI": 0.030497,
+    "EWZ": 0.038292,
+    "GLD": 0.012551,
+    "TLT": 0.004986,
+    "USO": -0.00593,
+    "HYG": 0.024935,
+    "LQD": 0.006182,
+    "EWJ": 0.035183,
+    "EWG": 0.05111,
+    "EWU": 0.05092,
+    "EWA": 0.081588,
+    "INDA": 0.051952,
+    "VNQ": 0.039016,
+    "SLV": -0.014327
+  },
+  "timestamp": "2026-04-17T12:24:59.007880+00:00"
+}

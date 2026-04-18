@@ -1,0 +1,511 @@
+{
+  "experiment_id": "K690",
+  "title": "Weight Smoothness and Lag Robustness \u2014 Why Simple Strategies Survive",
+  "date": "2026-03-29 13:24:19",
+  "data_source": "yfinance",
+  "data_period": "2006-01-01 to 2026-03-27",
+  "eval_period": "2007-01-03 to 2026-03-27",
+  "n_strategies": 5,
+  "lags_tested": [
+    0,
+    1,
+    2,
+    3,
+    5
+  ],
+  "tx_cost_bps": 5,
+  "rf_annual": 0.04,
+  "ewma_lambda": 0.94,
+  "target_vol": 0.1,
+  "elapsed_seconds": 2.5,
+  "smoothness_metrics": {
+    "12/VIX": {
+      "n_obs": 4838,
+      "n_years": 19.2,
+      "weight_autocorrelation": 0.974912,
+      "mean_abs_daily_change": 0.035256,
+      "median_abs_daily_change": 0.025784,
+      "max_abs_daily_change": 0.4209,
+      "std_daily_change": 0.049399,
+      "jumps_gt_5pct": 1147,
+      "jumps_gt_10pct": 230,
+      "jumps_gt_20pct": 22,
+      "jump_freq_10pct_per_year": 11.98,
+      "jump_freq_5pct_per_year": 59.74,
+      "annual_turnover": 8.8826,
+      "continuity_score": 0.2177,
+      "mean_weight": 0.6901,
+      "std_weight": 0.2205,
+      "min_weight": 0.1451,
+      "max_weight": 1.3129
+    },
+    "EWMA VT": {
+      "n_obs": 4838,
+      "n_years": 19.2,
+      "weight_autocorrelation": 0.989721,
+      "mean_abs_daily_change": 0.02578,
+      "median_abs_daily_change": 0.018842,
+      "max_abs_daily_change": 0.6225,
+      "std_daily_change": 0.045879,
+      "jumps_gt_5pct": 397,
+      "jumps_gt_10pct": 170,
+      "jumps_gt_20pct": 45,
+      "jump_freq_10pct_per_year": 8.85,
+      "jump_freq_5pct_per_year": 20.68,
+      "annual_turnover": 6.4952,
+      "continuity_score": 0.2836,
+      "mean_weight": 0.9498,
+      "std_weight": 0.32,
+      "min_weight": 0.1832,
+      "max_weight": 1.5
+    },
+    "Piecewise": {
+      "n_obs": 4838,
+      "n_years": 19.2,
+      "weight_autocorrelation": 0.95184,
+      "mean_abs_daily_change": 0.062492,
+      "median_abs_daily_change": 0.0,
+      "max_abs_daily_change": 1.0,
+      "std_daily_change": 0.137406,
+      "jumps_gt_5pct": 1407,
+      "jumps_gt_10pct": 1043,
+      "jumps_gt_20pct": 556,
+      "jump_freq_10pct_per_year": 54.33,
+      "jump_freq_5pct_per_year": 73.29,
+      "annual_turnover": 15.7446,
+      "continuity_score": 0.643,
+      "mean_weight": 0.4933,
+      "std_weight": 0.4428,
+      "min_weight": 0.0,
+      "max_weight": 1.0
+    },
+    "P3-AGG": {
+      "n_obs": 4838,
+      "n_years": 19.2,
+      "weight_autocorrelation": 0.90158,
+      "mean_abs_daily_change": 0.03314,
+      "median_abs_daily_change": 0.0,
+      "max_abs_daily_change": 0.35,
+      "std_daily_change": 0.10771,
+      "jumps_gt_5pct": 458,
+      "jumps_gt_10pct": 458,
+      "jumps_gt_20pct": 458,
+      "jump_freq_10pct_per_year": 23.86,
+      "jump_freq_5pct_per_year": 23.86,
+      "annual_turnover": 8.3496,
+      "continuity_score": 0.9053,
+      "mean_weight": 0.4983,
+      "std_weight": 0.2428,
+      "min_weight": 0.1,
+      "max_weight": 0.8
+    },
+    "VIX Pctile": {
+      "n_obs": 4836,
+      "n_years": 19.19,
+      "weight_autocorrelation": 0.947197,
+      "mean_abs_daily_change": 0.068331,
+      "median_abs_daily_change": 0.043651,
+      "max_abs_daily_change": 0.8016,
+      "std_daily_change": 0.103948,
+      "jumps_gt_5pct": 2179,
+      "jumps_gt_10pct": 1098,
+      "jumps_gt_20pct": 320,
+      "jump_freq_10pct_per_year": 57.22,
+      "jump_freq_5pct_per_year": 113.55,
+      "annual_turnover": 17.2159,
+      "continuity_score": 0.1673,
+      "mean_weight": 0.5313,
+      "std_weight": 0.3199,
+      "min_weight": 0.0,
+      "max_weight": 1.0
+    }
+  },
+  "lag_sensitivity": {
+    "12/VIX": {
+      "lag_0": {
+        "sharpe": 1.0989,
+        "cagr": 0.1265,
+        "mdd": -0.0904,
+        "ann_vol": 0.0746,
+        "sortino": 1.6018,
+        "n_valid": 4838
+      },
+      "lag_1": {
+        "sharpe": 0.4384,
+        "cagr": 0.0732,
+        "mdd": -0.1221,
+        "ann_vol": 0.0766,
+        "sortino": 0.5721,
+        "n_valid": 4838
+      },
+      "lag_2": {
+        "sharpe": 0.4423,
+        "cagr": 0.0736,
+        "mdd": -0.1225,
+        "ann_vol": 0.0769,
+        "sortino": 0.5733,
+        "n_valid": 4838
+      },
+      "lag_3": {
+        "sharpe": 0.4396,
+        "cagr": 0.0736,
+        "mdd": -0.1121,
+        "ann_vol": 0.0773,
+        "sortino": 0.5697,
+        "n_valid": 4838
+      },
+      "lag_5": {
+        "sharpe": 0.4625,
+        "cagr": 0.076,
+        "mdd": -0.1117,
+        "ann_vol": 0.0787,
+        "sortino": 0.5979,
+        "n_valid": 4838
+      }
+    },
+    "EWMA VT": {
+      "lag_0": {
+        "sharpe": 0.6947,
+        "cagr": 0.1068,
+        "mdd": -0.1583,
+        "ann_vol": 0.0951,
+        "sortino": 1.0296,
+        "n_valid": 4838
+      },
+      "lag_1": {
+        "sharpe": 0.5252,
+        "cagr": 0.0932,
+        "mdd": -0.1703,
+        "ann_vol": 0.1039,
+        "sortino": 0.7009,
+        "n_valid": 4838
+      },
+      "lag_2": {
+        "sharpe": 0.4841,
+        "cagr": 0.0892,
+        "mdd": -0.2052,
+        "ann_vol": 0.1054,
+        "sortino": 0.624,
+        "n_valid": 4838
+      },
+      "lag_3": {
+        "sharpe": 0.4773,
+        "cagr": 0.0886,
+        "mdd": -0.1939,
+        "ann_vol": 0.1059,
+        "sortino": 0.6153,
+        "n_valid": 4838
+      },
+      "lag_5": {
+        "sharpe": 0.4756,
+        "cagr": 0.0893,
+        "mdd": -0.1829,
+        "ann_vol": 0.1081,
+        "sortino": 0.6137,
+        "n_valid": 4838
+      }
+    },
+    "Piecewise": {
+      "lag_0": {
+        "sharpe": 1.464,
+        "cagr": 0.1319,
+        "mdd": -0.064,
+        "ann_vol": 0.0585,
+        "sortino": 1.6623,
+        "n_valid": 4838
+      },
+      "lag_1": {
+        "sharpe": 0.0677,
+        "cagr": 0.0432,
+        "mdd": -0.1606,
+        "ann_vol": 0.0614,
+        "sortino": 0.0675,
+        "n_valid": 4838
+      },
+      "lag_2": {
+        "sharpe": 0.0907,
+        "cagr": 0.0447,
+        "mdd": -0.1449,
+        "ann_vol": 0.0618,
+        "sortino": 0.0898,
+        "n_valid": 4838
+      },
+      "lag_3": {
+        "sharpe": 0.0854,
+        "cagr": 0.0443,
+        "mdd": -0.1721,
+        "ann_vol": 0.0628,
+        "sortino": 0.0843,
+        "n_valid": 4838
+      },
+      "lag_5": {
+        "sharpe": 0.1017,
+        "cagr": 0.0454,
+        "mdd": -0.1902,
+        "ann_vol": 0.0637,
+        "sortino": 0.098,
+        "n_valid": 4838
+      }
+    },
+    "P3-AGG": {
+      "lag_0": {
+        "sharpe": 1.2718,
+        "cagr": 0.113,
+        "mdd": -0.0659,
+        "ann_vol": 0.0539,
+        "sortino": 1.7757,
+        "n_valid": 4838
+      },
+      "lag_1": {
+        "sharpe": 0.3775,
+        "cagr": 0.0613,
+        "mdd": -0.0838,
+        "ann_vol": 0.0559,
+        "sortino": 0.4656,
+        "n_valid": 4838
+      },
+      "lag_2": {
+        "sharpe": 0.3805,
+        "cagr": 0.0616,
+        "mdd": -0.0752,
+        "ann_vol": 0.0562,
+        "sortino": 0.4645,
+        "n_valid": 4838
+      },
+      "lag_3": {
+        "sharpe": 0.3198,
+        "cagr": 0.058,
+        "mdd": -0.0873,
+        "ann_vol": 0.0562,
+        "sortino": 0.3901,
+        "n_valid": 4838
+      },
+      "lag_5": {
+        "sharpe": 0.348,
+        "cagr": 0.0602,
+        "mdd": -0.107,
+        "ann_vol": 0.0578,
+        "sortino": 0.4223,
+        "n_valid": 4838
+      }
+    },
+    "VIX Pctile": {
+      "lag_0": {
+        "sharpe": 1.6805,
+        "cagr": 0.1539,
+        "mdd": -0.0674,
+        "ann_vol": 0.0626,
+        "sortino": 2.2761,
+        "n_valid": 4836
+      },
+      "lag_1": {
+        "sharpe": 0.355,
+        "cagr": 0.0629,
+        "mdd": -0.1182,
+        "ann_vol": 0.0653,
+        "sortino": 0.4169,
+        "n_valid": 4835
+      },
+      "lag_2": {
+        "sharpe": 0.3737,
+        "cagr": 0.0643,
+        "mdd": -0.1076,
+        "ann_vol": 0.0654,
+        "sortino": 0.4349,
+        "n_valid": 4834
+      },
+      "lag_3": {
+        "sharpe": 0.3695,
+        "cagr": 0.0642,
+        "mdd": -0.1036,
+        "ann_vol": 0.066,
+        "sortino": 0.4296,
+        "n_valid": 4833
+      },
+      "lag_5": {
+        "sharpe": 0.4316,
+        "cagr": 0.0688,
+        "mdd": -0.112,
+        "ann_vol": 0.0668,
+        "sortino": 0.5099,
+        "n_valid": 4831
+      }
+    }
+  },
+  "robustness_ratios": {
+    "12/VIX": {
+      "ratio_lag_0": 1.0,
+      "ratio_lag_1": 0.3989,
+      "ratio_lag_2": 0.4025,
+      "ratio_lag_3": 0.4,
+      "ratio_lag_5": 0.4209,
+      "sharpe_decay_slope": -0.0936,
+      "sharpe_decay_r2": 0.3795,
+      "sharpe_decay_pvalue": 0.2685
+    },
+    "EWMA VT": {
+      "ratio_lag_0": 1.0,
+      "ratio_lag_1": 0.756,
+      "ratio_lag_2": 0.6968,
+      "ratio_lag_3": 0.6871,
+      "ratio_lag_5": 0.6846,
+      "sharpe_decay_slope": -0.0366,
+      "sharpe_decay_r2": 0.5671,
+      "sharpe_decay_pvalue": 0.1417
+    },
+    "Piecewise": {
+      "ratio_lag_0": 1.0,
+      "ratio_lag_1": 0.0462,
+      "ratio_lag_2": 0.062,
+      "ratio_lag_3": 0.0583,
+      "ratio_lag_5": 0.0695,
+      "sharpe_decay_slope": -0.2005,
+      "sharpe_decay_r2": 0.3916,
+      "sharpe_decay_pvalue": 0.2588
+    },
+    "P3-AGG": {
+      "ratio_lag_0": 1.0,
+      "ratio_lag_1": 0.2968,
+      "ratio_lag_2": 0.2992,
+      "ratio_lag_3": 0.2515,
+      "ratio_lag_5": 0.2736,
+      "sharpe_decay_slope": -0.1417,
+      "sharpe_decay_r2": 0.4416,
+      "sharpe_decay_pvalue": 0.2211
+    },
+    "VIX Pctile": {
+      "ratio_lag_0": 1.0,
+      "ratio_lag_1": 0.2112,
+      "ratio_lag_2": 0.2224,
+      "ratio_lag_3": 0.2199,
+      "ratio_lag_5": 0.2568,
+      "sharpe_decay_slope": -0.182,
+      "sharpe_decay_r2": 0.3628,
+      "sharpe_decay_pvalue": 0.2824
+    }
+  },
+  "smoothness_robustness_relationship": {
+    "strategies": [
+      "12/VIX",
+      "EWMA VT",
+      "Piecewise",
+      "P3-AGG",
+      "VIX Pctile"
+    ],
+    "data_points": 5,
+    "corr_autocorr_vs_robustness": 0.5582,
+    "pval_autocorr_vs_robustness": 0.3282,
+    "corr_mean_abs_dw_vs_robustness": -0.8008,
+    "pval_mean_abs_dw_vs_robustness": 0.1035,
+    "corr_continuity_vs_robustness": -0.3634,
+    "pval_continuity_vs_robustness": 0.5476,
+    "corr_turnover_vs_robustness": -0.8008,
+    "pval_turnover_vs_robustness": 0.1035,
+    "spearman_autocorr_vs_robustness": 0.6,
+    "spearman_pval_autocorr_vs_robustness": 0.2848,
+    "per_strategy": {
+      "12/VIX": {
+        "autocorrelation": 0.9749,
+        "mean_abs_daily_change": 0.035256,
+        "continuity_score": 0.2177,
+        "annual_turnover": 8.8826,
+        "lag_robustness_ratio_L1": 0.3989
+      },
+      "EWMA VT": {
+        "autocorrelation": 0.9897,
+        "mean_abs_daily_change": 0.02578,
+        "continuity_score": 0.2836,
+        "annual_turnover": 6.4952,
+        "lag_robustness_ratio_L1": 0.756
+      },
+      "Piecewise": {
+        "autocorrelation": 0.9518,
+        "mean_abs_daily_change": 0.062492,
+        "continuity_score": 0.643,
+        "annual_turnover": 15.7446,
+        "lag_robustness_ratio_L1": 0.0462
+      },
+      "P3-AGG": {
+        "autocorrelation": 0.9016,
+        "mean_abs_daily_change": 0.03314,
+        "continuity_score": 0.9053,
+        "annual_turnover": 8.3496,
+        "lag_robustness_ratio_L1": 0.2968
+      },
+      "VIX Pctile": {
+        "autocorrelation": 0.9472,
+        "mean_abs_daily_change": 0.068331,
+        "continuity_score": 0.1673,
+        "annual_turnover": 17.2159,
+        "lag_robustness_ratio_L1": 0.2112
+      }
+    }
+  },
+  "practical_implications": {
+    "ranking": [
+      {
+        "strategy": "EWMA VT",
+        "robustness_ratio": 0.756,
+        "sharpe_lag0": 0.6947,
+        "sharpe_lag1": 0.5252,
+        "sharpe_loss": 0.16949999999999998
+      },
+      {
+        "strategy": "12/VIX",
+        "robustness_ratio": 0.3989,
+        "sharpe_lag0": 1.0989,
+        "sharpe_lag1": 0.4384,
+        "sharpe_loss": 0.6605
+      },
+      {
+        "strategy": "P3-AGG",
+        "robustness_ratio": 0.2968,
+        "sharpe_lag0": 1.2718,
+        "sharpe_lag1": 0.3775,
+        "sharpe_loss": 0.8943000000000001
+      },
+      {
+        "strategy": "VIX Pctile",
+        "robustness_ratio": 0.2112,
+        "sharpe_lag0": 1.6805,
+        "sharpe_lag1": 0.355,
+        "sharpe_loss": 1.3255000000000001
+      },
+      {
+        "strategy": "Piecewise",
+        "robustness_ratio": 0.0462,
+        "sharpe_lag0": 1.464,
+        "sharpe_lag1": 0.0677,
+        "sharpe_loss": 1.3962999999999999
+      }
+    ],
+    "categories": {
+      "robust_geq_90pct": [],
+      "moderate_70_90pct": [
+        "EWMA VT"
+      ],
+      "fragile_lt_70pct": [
+        "12/VIX",
+        "P3-AGG",
+        "VIX Pctile",
+        "Piecewise"
+      ]
+    },
+    "best_practical_strategy": null
+  },
+  "references": [
+    "K687: Definitive lag-corrected strategy ranking",
+    "K689: Live vs backtest discrepancy (lag sensitivity discovery)",
+    "RiskMetrics (1996): EWMA \u03bb=0.94",
+    "Copeland & Copeland (1999): Market Timing with VIX",
+    "Kirby & Ostdiek (2012): It's All in the Timing",
+    "Harvey et al. (2016): ...and the Cross-Section of Expected Returns"
+  ],
+  "limitations": [
+    "Only 5 strategies \u2014 correlation with 5 points has low statistical power",
+    "Lag sensitivity does not account for intraday execution timing",
+    "TC model is simplified (fixed 5bps), real costs vary with urgency",
+    "VIX Percentile has fewer valid obs due to 252-day warmup",
+    "Results are specific to US equity + gold; may differ for other assets"
+  ]
+}

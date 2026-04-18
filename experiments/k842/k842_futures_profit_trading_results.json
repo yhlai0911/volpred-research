@@ -1,0 +1,1032 @@
+{
+  "experiment_id": "K842",
+  "title": "TAIFEX Night Session Directional Profit Trading (SPY Signals)",
+  "date": "2026-04-03",
+  "proposed_by": "User",
+  "executed_by": "Claude",
+  "data_source": {
+    "TX": "TAIFEX TX1 tick data (near-month, night session)",
+    "SPY": "yfinance daily",
+    "VIX": "yfinance ^VIX daily",
+    "0050.TW": "yfinance (clean_tw50_data applied)"
+  },
+  "data_period": "2017-05-16 to 2026-04-02",
+  "n_trading_days": 2158,
+  "n_with_spy_signal": 2075,
+  "hypothesis": "SPY daily return can signal profitable directional TX night trades",
+  "signal_lag_explanation": {
+    "conservative": "SPY(D-2) → TX night file-date D: strictly known before TX night opens",
+    "concurrent": "SPY(D-1) → TX night file-date D: SPY closes ~1h before TX night closes (overlap)"
+  },
+  "strategy_results": {
+    "S0_BH_0050": {
+      "name": "S0 BH 0050.TW",
+      "signal_col": "signal_s0",
+      "return_col": "tw50_return",
+      "n_days": 2152,
+      "n_active": 2152,
+      "n_trades": 1,
+      "ann_return_pct": 19.8197,
+      "ann_vol_pct": 19.7499,
+      "sharpe": 1.0035,
+      "max_dd_pct": -33.8276,
+      "win_rate": 0.5209,
+      "profit_factor": 1.2012,
+      "total_return_pct": 359.5789,
+      "yearly": {
+        "2017": {
+          "sharpe": 1.0179,
+          "total_return_pct": 6.07,
+          "n_days": 157,
+          "n_active": 157
+        },
+        "2018": {
+          "sharpe": -0.087,
+          "total_return_pct": -2.72,
+          "n_days": 242,
+          "n_active": 242
+        },
+        "2019": {
+          "sharpe": 2.4909,
+          "total_return_pct": 33.52,
+          "n_days": 241,
+          "n_active": 241
+        },
+        "2020": {
+          "sharpe": 1.315,
+          "total_return_pct": 31.14,
+          "n_days": 245,
+          "n_active": 245
+        },
+        "2021": {
+          "sharpe": 1.0865,
+          "total_return_pct": 18.57,
+          "n_days": 242,
+          "n_active": 242
+        },
+        "2022": {
+          "sharpe": -0.9963,
+          "total_return_pct": -21.22,
+          "n_days": 246,
+          "n_active": 246
+        },
+        "2023": {
+          "sharpe": 1.869,
+          "total_return_pct": 27.52,
+          "n_days": 239,
+          "n_active": 239
+        },
+        "2024": {
+          "sharpe": 1.771,
+          "total_return_pct": 48.64,
+          "n_days": 242,
+          "n_active": 242
+        },
+        "2025": {
+          "sharpe": 1.2749,
+          "total_return_pct": 31.06,
+          "n_days": 242,
+          "n_active": 242
+        },
+        "2026": {
+          "sharpe": 1.6039,
+          "total_return_pct": 9.62,
+          "n_days": 56,
+          "n_active": 56
+        }
+      }
+    },
+    "BH_Night": {
+      "name": "BH Night Session",
+      "signal_col": "signal_s0",
+      "return_col": "night_return",
+      "n_days": 2158,
+      "n_active": 2158,
+      "n_trades": 1,
+      "ann_return_pct": 11.9793,
+      "ann_vol_pct": 11.8704,
+      "sharpe": 1.0092,
+      "max_dd_pct": -17.0394,
+      "win_rate": 0.5718,
+      "profit_factor": 1.2104,
+      "total_return_pct": 162.5971,
+      "yearly": {
+        "2017": {
+          "sharpe": 2.3217,
+          "total_return_pct": 6.43,
+          "n_days": 159,
+          "n_active": 159
+        },
+        "2018": {
+          "sharpe": 0.1916,
+          "total_return_pct": 1.3,
+          "n_days": 244,
+          "n_active": 244
+        },
+        "2019": {
+          "sharpe": 1.945,
+          "total_return_pct": 13.26,
+          "n_days": 242,
+          "n_active": 242
+        },
+        "2020": {
+          "sharpe": 1.167,
+          "total_return_pct": 15.11,
+          "n_days": 245,
+          "n_active": 245
+        },
+        "2021": {
+          "sharpe": 1.8869,
+          "total_return_pct": 16.87,
+          "n_days": 243,
+          "n_active": 243
+        },
+        "2022": {
+          "sharpe": 0.2647,
+          "total_return_pct": 2.69,
+          "n_days": 246,
+          "n_active": 246
+        },
+        "2023": {
+          "sharpe": 1.9918,
+          "total_return_pct": 15.95,
+          "n_days": 239,
+          "n_active": 239
+        },
+        "2024": {
+          "sharpe": 0.6466,
+          "total_return_pct": 8.03,
+          "n_days": 242,
+          "n_active": 242
+        },
+        "2025": {
+          "sharpe": 1.3917,
+          "total_return_pct": 23.02,
+          "n_days": 242,
+          "n_active": 242
+        },
+        "2026": {
+          "sharpe": 0.3047,
+          "total_return_pct": 1.01,
+          "n_days": 56,
+          "n_active": 56
+        }
+      }
+    },
+    "s1_cons": {
+      "name": "S1 SPY Momentum (conservative)",
+      "signal_col": "signal_s1_cons",
+      "return_col": "night_return",
+      "n_days": 2158,
+      "n_active": 1062,
+      "n_trades": 1254,
+      "ann_return_pct": -9.0949,
+      "ann_vol_pct": 9.5734,
+      "sharpe": -0.95,
+      "max_dd_pct": -60.4122,
+      "win_rate": 0.4783,
+      "profit_factor": 0.7716,
+      "total_return_pct": -55.8966,
+      "yearly": {
+        "2017": {
+          "sharpe": -3.185,
+          "total_return_pct": -3.76,
+          "n_days": 159,
+          "n_active": 32
+        },
+        "2018": {
+          "sharpe": 0.7591,
+          "total_return_pct": 5.25,
+          "n_days": 244,
+          "n_active": 119
+        },
+        "2019": {
+          "sharpe": -0.2762,
+          "total_return_pct": -1.47,
+          "n_days": 242,
+          "n_active": 100
+        },
+        "2020": {
+          "sharpe": -1.7114,
+          "total_return_pct": -18.14,
+          "n_days": 245,
+          "n_active": 158
+        },
+        "2021": {
+          "sharpe": 0.0028,
+          "total_return_pct": -0.16,
+          "n_days": 243,
+          "n_active": 114
+        },
+        "2022": {
+          "sharpe": -0.7685,
+          "total_return_pct": -9.28,
+          "n_days": 246,
+          "n_active": 170
+        },
+        "2023": {
+          "sharpe": -0.9189,
+          "total_return_pct": -5.42,
+          "n_days": 239,
+          "n_active": 116
+        },
+        "2024": {
+          "sharpe": -2.1848,
+          "total_return_pct": -18.81,
+          "n_days": 242,
+          "n_active": 110
+        },
+        "2025": {
+          "sharpe": -1.3734,
+          "total_return_pct": -17.08,
+          "n_days": 242,
+          "n_active": 115
+        },
+        "2026": {
+          "sharpe": -1.3332,
+          "total_return_pct": -6.41,
+          "n_days": 56,
+          "n_active": 28
+        }
+      }
+    },
+    "s1_conc": {
+      "name": "S1 SPY Momentum (concurrent)",
+      "signal_col": "signal_s1_conc",
+      "return_col": "night_return",
+      "n_days": 2158,
+      "n_active": 1063,
+      "n_trades": 1255,
+      "ann_return_pct": 78.2884,
+      "ann_vol_pct": 9.6637,
+      "sharpe": 8.1013,
+      "max_dd_pct": -4.4577,
+      "win_rate": 0.8946,
+      "profit_factor": 16.1069,
+      "total_return_pct": 77533.4876,
+      "yearly": {
+        "2017": {
+          "sharpe": 6.709,
+          "total_return_pct": 13.53,
+          "n_days": 159,
+          "n_active": 32
+        },
+        "2018": {
+          "sharpe": 9.1809,
+          "total_return_pct": 93.26,
+          "n_days": 244,
+          "n_active": 120
+        },
+        "2019": {
+          "sharpe": 7.9421,
+          "total_return_pct": 50.37,
+          "n_days": 242,
+          "n_active": 100
+        },
+        "2020": {
+          "sharpe": 8.6973,
+          "total_return_pct": 154.09,
+          "n_days": 245,
+          "n_active": 157
+        },
+        "2021": {
+          "sharpe": 9.6864,
+          "total_return_pct": 81.98,
+          "n_days": 243,
+          "n_active": 114
+        },
+        "2022": {
+          "sharpe": 11.5978,
+          "total_return_pct": 231.59,
+          "n_days": 246,
+          "n_active": 171
+        },
+        "2023": {
+          "sharpe": 11.163,
+          "total_return_pct": 83.98,
+          "n_days": 239,
+          "n_active": 115
+        },
+        "2024": {
+          "sharpe": 7.5227,
+          "total_return_pct": 120.17,
+          "n_days": 242,
+          "n_active": 111
+        },
+        "2025": {
+          "sharpe": 7.0495,
+          "total_return_pct": 151.51,
+          "n_days": 242,
+          "n_active": 114
+        },
+        "2026": {
+          "sharpe": 9.9599,
+          "total_return_pct": 50.63,
+          "n_days": 56,
+          "n_active": 29
+        }
+      }
+    },
+    "s2_cons": {
+      "name": "S2 SPY+VIX Dual (conservative)",
+      "signal_col": "signal_s2_cons",
+      "return_col": "night_return",
+      "n_days": 2158,
+      "n_active": 876,
+      "n_trades": 1143,
+      "ann_return_pct": -8.3352,
+      "ann_vol_pct": 8.7674,
+      "sharpe": -0.9507,
+      "max_dd_pct": -55.4776,
+      "win_rate": 0.4795,
+      "profit_factor": 0.7489,
+      "total_return_pct": -52.6317,
+      "yearly": {
+        "2017": {
+          "sharpe": -2.1657,
+          "total_return_pct": -2.03,
+          "n_days": 159,
+          "n_active": 25
+        },
+        "2018": {
+          "sharpe": 0.2354,
+          "total_return_pct": 1.26,
+          "n_days": 244,
+          "n_active": 101
+        },
+        "2019": {
+          "sharpe": -0.8551,
+          "total_return_pct": -3.72,
+          "n_days": 242,
+          "n_active": 89
+        },
+        "2020": {
+          "sharpe": -1.6045,
+          "total_return_pct": -15.21,
+          "n_days": 245,
+          "n_active": 119
+        },
+        "2021": {
+          "sharpe": -0.0801,
+          "total_return_pct": -0.64,
+          "n_days": 243,
+          "n_active": 108
+        },
+        "2022": {
+          "sharpe": -0.4652,
+          "total_return_pct": -5.09,
+          "n_days": 246,
+          "n_active": 128
+        },
+        "2023": {
+          "sharpe": -1.255,
+          "total_return_pct": -6.46,
+          "n_days": 239,
+          "n_active": 93
+        },
+        "2024": {
+          "sharpe": -2.0733,
+          "total_return_pct": -15.64,
+          "n_days": 242,
+          "n_active": 88
+        },
+        "2025": {
+          "sharpe": -1.3987,
+          "total_return_pct": -17.02,
+          "n_days": 242,
+          "n_active": 101
+        },
+        "2026": {
+          "sharpe": -1.0796,
+          "total_return_pct": -5.27,
+          "n_days": 56,
+          "n_active": 24
+        }
+      }
+    },
+    "s2_conc": {
+      "name": "S2 SPY+VIX Dual (concurrent)",
+      "signal_col": "signal_s2_conc",
+      "return_col": "night_return",
+      "n_days": 2158,
+      "n_active": 877,
+      "n_trades": 1144,
+      "ann_return_pct": 69.7391,
+      "ann_vol_pct": 9.4112,
+      "sharpe": 7.4102,
+      "max_dd_pct": -4.4673,
+      "win_rate": 0.9076,
+      "profit_factor": 20.4538,
+      "total_return_pct": 37389.7608,
+      "yearly": {
+        "2017": {
+          "sharpe": 5.8619,
+          "total_return_pct": 11.33,
+          "n_days": 159,
+          "n_active": 25
+        },
+        "2018": {
+          "sharpe": 8.3774,
+          "total_return_pct": 81.7,
+          "n_days": 244,
+          "n_active": 101
+        },
+        "2019": {
+          "sharpe": 7.2889,
+          "total_return_pct": 44.32,
+          "n_days": 242,
+          "n_active": 90
+        },
+        "2020": {
+          "sharpe": 8.2564,
+          "total_return_pct": 129.71,
+          "n_days": 245,
+          "n_active": 118
+        },
+        "2021": {
+          "sharpe": 9.3337,
+          "total_return_pct": 77.83,
+          "n_days": 243,
+          "n_active": 108
+        },
+        "2022": {
+          "sharpe": 10.2425,
+          "total_return_pct": 176.85,
+          "n_days": 246,
+          "n_active": 129
+        },
+        "2023": {
+          "sharpe": 9.5171,
+          "total_return_pct": 65.69,
+          "n_days": 239,
+          "n_active": 92
+        },
+        "2024": {
+          "sharpe": 6.6833,
+          "total_return_pct": 97.62,
+          "n_days": 242,
+          "n_active": 89
+        },
+        "2025": {
+          "sharpe": 6.4922,
+          "total_return_pct": 131.91,
+          "n_days": 242,
+          "n_active": 100
+        },
+        "2026": {
+          "sharpe": 9.755,
+          "total_return_pct": 49.53,
+          "n_days": 56,
+          "n_active": 25
+        }
+      }
+    },
+    "s3_follow": {
+      "name": "S3a Large Vol Follow (conservative)",
+      "signal_col": "signal_s3_follow",
+      "return_col": "night_return",
+      "n_days": 2158,
+      "n_active": 528,
+      "n_trades": 775,
+      "ann_return_pct": -7.1198,
+      "ann_vol_pct": 7.9021,
+      "sharpe": -0.901,
+      "max_dd_pct": -50.2764,
+      "win_rate": 0.4754,
+      "profit_factor": 0.6945,
+      "total_return_pct": -47.1089,
+      "yearly": {
+        "2017": {
+          "sharpe": -1.9108,
+          "total_return_pct": -1.23,
+          "n_days": 159,
+          "n_active": 6
+        },
+        "2018": {
+          "sharpe": -0.0786,
+          "total_return_pct": -0.49,
+          "n_days": 244,
+          "n_active": 56
+        },
+        "2019": {
+          "sharpe": -1.3723,
+          "total_return_pct": -4.33,
+          "n_days": 242,
+          "n_active": 36
+        },
+        "2020": {
+          "sharpe": -1.3184,
+          "total_return_pct": -13.35,
+          "n_days": 245,
+          "n_active": 101
+        },
+        "2021": {
+          "sharpe": -0.7921,
+          "total_return_pct": -3.5,
+          "n_days": 243,
+          "n_active": 51
+        },
+        "2022": {
+          "sharpe": -0.5479,
+          "total_return_pct": -5.75,
+          "n_days": 246,
+          "n_active": 115
+        },
+        "2023": {
+          "sharpe": -0.7047,
+          "total_return_pct": -2.71,
+          "n_days": 239,
+          "n_active": 56
+        },
+        "2024": {
+          "sharpe": -1.0267,
+          "total_return_pct": -6.41,
+          "n_days": 242,
+          "n_active": 40
+        },
+        "2025": {
+          "sharpe": -1.4971,
+          "total_return_pct": -17.06,
+          "n_days": 242,
+          "n_active": 54
+        },
+        "2026": {
+          "sharpe": -1.409,
+          "total_return_pct": -5.5,
+          "n_days": 56,
+          "n_active": 13
+        }
+      }
+    },
+    "s3_contra": {
+      "name": "S3b Large Vol Contrarian (conservative)",
+      "signal_col": "signal_s3_contra",
+      "return_col": "night_return",
+      "n_days": 2158,
+      "n_active": 528,
+      "n_trades": 775,
+      "ann_return_pct": 5.0553,
+      "ann_vol_pct": 7.8931,
+      "sharpe": 0.6405,
+      "max_dd_pct": -8.6235,
+      "win_rate": 0.5246,
+      "profit_factor": 1.2944,
+      "total_return_pct": 50.1635,
+      "yearly": {
+        "2017": {
+          "sharpe": 1.5908,
+          "total_return_pct": 1.0,
+          "n_days": 159,
+          "n_active": 6
+        },
+        "2018": {
+          "sharpe": -0.2946,
+          "total_return_pct": -1.51,
+          "n_days": 244,
+          "n_active": 56
+        },
+        "2019": {
+          "sharpe": 0.9583,
+          "total_return_pct": 3.02,
+          "n_days": 242,
+          "n_active": 36
+        },
+        "2020": {
+          "sharpe": 1.0252,
+          "total_return_pct": 10.65,
+          "n_days": 245,
+          "n_active": 101
+        },
+        "2021": {
+          "sharpe": 0.3716,
+          "total_return_pct": 1.54,
+          "n_days": 243,
+          "n_active": 51
+        },
+        "2022": {
+          "sharpe": 0.198,
+          "total_return_pct": 1.47,
+          "n_days": 246,
+          "n_active": 115
+        },
+        "2023": {
+          "sharpe": 0.1618,
+          "total_return_pct": 0.54,
+          "n_days": 239,
+          "n_active": 56
+        },
+        "2024": {
+          "sharpe": 0.8115,
+          "total_return_pct": 4.99,
+          "n_days": 242,
+          "n_active": 40
+        },
+        "2025": {
+          "sharpe": 1.3274,
+          "total_return_pct": 16.35,
+          "n_days": 242,
+          "n_active": 54
+        },
+        "2026": {
+          "sharpe": 1.2831,
+          "total_return_pct": 4.65,
+          "n_days": 56,
+          "n_active": 13
+        }
+      }
+    },
+    "s3_follow_conc": {
+      "name": "S3a Large Vol Follow (concurrent)",
+      "signal_col": "signal_s3_follow_conc",
+      "return_col": "night_return",
+      "n_days": 2158,
+      "n_active": 528,
+      "n_trades": 775,
+      "ann_return_pct": 53.7572,
+      "ann_vol_pct": 9.0011,
+      "sharpe": 5.9723,
+      "max_dd_pct": -4.3917,
+      "win_rate": 0.9394,
+      "profit_factor": 25.5687,
+      "total_return_pct": 9502.1,
+      "yearly": {
+        "2017": {
+          "sharpe": 2.9223,
+          "total_return_pct": 4.06,
+          "n_days": 159,
+          "n_active": 6
+        },
+        "2018": {
+          "sharpe": 6.6186,
+          "total_return_pct": 60.42,
+          "n_days": 244,
+          "n_active": 56
+        },
+        "2019": {
+          "sharpe": 5.0602,
+          "total_return_pct": 27.26,
+          "n_days": 242,
+          "n_active": 36
+        },
+        "2020": {
+          "sharpe": 7.7585,
+          "total_return_pct": 121.26,
+          "n_days": 245,
+          "n_active": 101
+        },
+        "2021": {
+          "sharpe": 6.3008,
+          "total_return_pct": 42.29,
+          "n_days": 243,
+          "n_active": 51
+        },
+        "2022": {
+          "sharpe": 10.9824,
+          "total_return_pct": 189.5,
+          "n_days": 246,
+          "n_active": 116
+        },
+        "2023": {
+          "sharpe": 7.3014,
+          "total_return_pct": 43.12,
+          "n_days": 239,
+          "n_active": 55
+        },
+        "2024": {
+          "sharpe": 4.3017,
+          "total_return_pct": 50.14,
+          "n_days": 242,
+          "n_active": 41
+        },
+        "2025": {
+          "sharpe": 4.7199,
+          "total_return_pct": 80.99,
+          "n_days": 242,
+          "n_active": 53
+        },
+        "2026": {
+          "sharpe": 6.9177,
+          "total_return_pct": 27.5,
+          "n_days": 56,
+          "n_active": 13
+        }
+      }
+    },
+    "s3_contra_conc": {
+      "name": "S3b Large Vol Contrarian (concurrent)",
+      "signal_col": "signal_s3_contra_conc",
+      "return_col": "night_return",
+      "n_days": 2158,
+      "n_active": 528,
+      "n_trades": 775,
+      "ann_return_pct": -55.8218,
+      "ann_vol_pct": 9.0869,
+      "sharpe": -6.1431,
+      "max_dd_pct": -99.1947,
+      "win_rate": 0.0606,
+      "profit_factor": 0.0301,
+      "total_return_pct": -99.1947,
+      "yearly": {
+        "2017": {
+          "sharpe": -3.0206,
+          "total_return_pct": -4.17,
+          "n_days": 159,
+          "n_active": 6
+        },
+        "2018": {
+          "sharpe": -6.7923,
+          "total_return_pct": -39.16,
+          "n_days": 244,
+          "n_active": 56
+        },
+        "2019": {
+          "sharpe": -5.236,
+          "total_return_pct": -22.66,
+          "n_days": 242,
+          "n_active": 36
+        },
+        "2020": {
+          "sharpe": -7.9997,
+          "total_return_pct": -56.77,
+          "n_days": 245,
+          "n_active": 101
+        },
+        "2021": {
+          "sharpe": -6.5244,
+          "total_return_pct": -31.27,
+          "n_days": 243,
+          "n_active": 51
+        },
+        "2022": {
+          "sharpe": -11.2539,
+          "total_return_pct": -67.13,
+          "n_days": 246,
+          "n_active": 116
+        },
+        "2023": {
+          "sharpe": -7.5654,
+          "total_return_pct": -31.75,
+          "n_days": 239,
+          "n_active": 55
+        },
+        "2024": {
+          "sharpe": -4.4095,
+          "total_return_pct": -34.95,
+          "n_days": 242,
+          "n_active": 41
+        },
+        "2025": {
+          "sharpe": -4.8504,
+          "total_return_pct": -46.87,
+          "n_days": 242,
+          "n_active": 53
+        },
+        "2026": {
+          "sharpe": -7.0045,
+          "total_return_pct": -22.47,
+          "n_days": 56,
+          "n_active": 13
+        }
+      }
+    },
+    "hybrid_s1_cons": {
+      "name": "S4 Hybrid: 0050+TX SPY Momentum (cons)",
+      "n_days": 2152,
+      "n_active": 1058,
+      "ann_return_pct": 10.5809,
+      "ann_vol_pct": 21.0623,
+      "sharpe": 0.5024,
+      "max_dd_pct": -50.5328,
+      "total_return_pct": 104.0137,
+      "yearly": {
+        "2017": {
+          "sharpe": 0.3532,
+          "total_return_pct": 1.93,
+          "n_days": 157
+        },
+        "2018": {
+          "sharpe": 0.189,
+          "total_return_pct": 1.71,
+          "n_days": 242
+        },
+        "2019": {
+          "sharpe": 2.2184,
+          "total_return_pct": 31.6,
+          "n_days": 241
+        },
+        "2020": {
+          "sharpe": 0.4072,
+          "total_return_pct": 7.28,
+          "n_days": 245
+        },
+        "2021": {
+          "sharpe": 0.9902,
+          "total_return_pct": 18.22,
+          "n_days": 242
+        },
+        "2022": {
+          "sharpe": -1.2921,
+          "total_return_pct": -28.37,
+          "n_days": 246
+        },
+        "2023": {
+          "sharpe": 1.3555,
+          "total_return_pct": 20.62,
+          "n_days": 239
+        },
+        "2024": {
+          "sharpe": 0.9064,
+          "total_return_pct": 21.12,
+          "n_days": 242
+        },
+        "2025": {
+          "sharpe": 0.5005,
+          "total_return_pct": 9.45,
+          "n_days": 242
+        },
+        "2026": {
+          "sharpe": 0.5803,
+          "total_return_pct": 2.95,
+          "n_days": 56
+        }
+      }
+    },
+    "hybrid_s1_conc": {
+      "name": "S4 Hybrid: 0050+TX SPY Momentum (conc)",
+      "n_days": 2152,
+      "n_active": 1062,
+      "ann_return_pct": 98.2489,
+      "ann_vol_pct": 21.5313,
+      "sharpe": 4.5631,
+      "max_dd_pct": -14.3468,
+      "total_return_pct": 356734.2204,
+      "yearly": {
+        "2017": {
+          "sharpe": 2.9794,
+          "total_return_pct": 20.43,
+          "n_days": 157
+        },
+        "2018": {
+          "sharpe": 3.9553,
+          "total_return_pct": 88.47,
+          "n_days": 242
+        },
+        "2019": {
+          "sharpe": 5.5742,
+          "total_return_pct": 100.77,
+          "n_days": 241
+        },
+        "2020": {
+          "sharpe": 5.4212,
+          "total_return_pct": 234.71,
+          "n_days": 245
+        },
+        "2021": {
+          "sharpe": 4.5581,
+          "total_return_pct": 114.63,
+          "n_days": 242
+        },
+        "2022": {
+          "sharpe": 4.1861,
+          "total_return_pct": 161.76,
+          "n_days": 246
+        },
+        "2023": {
+          "sharpe": 5.6003,
+          "total_return_pct": 134.16,
+          "n_days": 239
+        },
+        "2024": {
+          "sharpe": 4.9531,
+          "total_return_pct": 228.38,
+          "n_days": 242
+        },
+        "2025": {
+          "sharpe": 4.1901,
+          "total_return_pct": 227.52,
+          "n_days": 242
+        },
+        "2026": {
+          "sharpe": 7.4516,
+          "total_return_pct": 65.35,
+          "n_days": 56
+        }
+      }
+    },
+    "hybrid_s2_cons": {
+      "name": "S4 Hybrid: 0050+TX SPY+VIX (cons)",
+      "n_days": 2152,
+      "n_active": 872,
+      "ann_return_pct": 11.3452,
+      "ann_vol_pct": 20.8884,
+      "sharpe": 0.5431,
+      "max_dd_pct": -45.0779,
+      "total_return_pct": 118.4546,
+      "yearly": {
+        "2017": {
+          "sharpe": 0.6534,
+          "total_return_pct": 3.77,
+          "n_days": 157
+        },
+        "2018": {
+          "sharpe": -0.0501,
+          "total_return_pct": -2.16,
+          "n_days": 242
+        },
+        "2019": {
+          "sharpe": 2.0714,
+          "total_return_pct": 28.59,
+          "n_days": 241
+        },
+        "2020": {
+          "sharpe": 0.535,
+          "total_return_pct": 10.89,
+          "n_days": 245
+        },
+        "2021": {
+          "sharpe": 0.9711,
+          "total_return_pct": 17.68,
+          "n_days": 242
+        },
+        "2022": {
+          "sharpe": -1.1192,
+          "total_return_pct": -25.16,
+          "n_days": 246
+        },
+        "2023": {
+          "sharpe": 1.3198,
+          "total_return_pct": 19.33,
+          "n_days": 239
+        },
+        "2024": {
+          "sharpe": 1.0723,
+          "total_return_pct": 25.8,
+          "n_days": 242
+        },
+        "2025": {
+          "sharpe": 0.5045,
+          "total_return_pct": 9.52,
+          "n_days": 242
+        },
+        "2026": {
+          "sharpe": 0.7597,
+          "total_return_pct": 4.2,
+          "n_days": 56
+        }
+      }
+    }
+  },
+  "dm_tests": {
+    "S1 SPY Momentum (conservative)": {
+      "dm_stat": 3.3769,
+      "p_value": 0.000746
+    },
+    "S1 SPY Momentum (concurrent)": {
+      "dm_stat": -12.6366,
+      "p_value": 0.0
+    },
+    "S2 SPY+VIX Dual (conservative)": {
+      "dm_stat": 3.4054,
+      "p_value": 0.000673
+    },
+    "S2 SPY+VIX Dual (concurrent)": {
+      "dm_stat": -11.1386,
+      "p_value": 0.0
+    },
+    "S3a Large Vol Follow (conservative)": {
+      "dm_stat": 3.4107,
+      "p_value": 0.00066
+    },
+    "S3b Large Vol Contrarian (conservative)": {
+      "dm_stat": 1.3375,
+      "p_value": 0.181189
+    },
+    "S3a Large Vol Follow (concurrent)": {
+      "dm_stat": -7.9955,
+      "p_value": 0.0
+    },
+    "S3b Large Vol Contrarian (concurrent)": {
+      "dm_stat": 13.8198,
+      "p_value": 0.0
+    }
+  },
+  "best_strategy": "S1 SPY Momentum (concurrent)",
+  "best_sharpe": 8.1013,
+  "conclusion": "NULL RESULT: Conservative (tradeable) signals all negative Sharpe | S1 Conservative Sharpe=-0.95, WinRate=0.4783 — WORSE than random | S1 Concurrent Sharpe=8.1013 — TAUTOLOGICAL (SPY & TX overlap in time, r=0.72) | Concurrent signals are NOT tradeable — they reflect same-window co-movement, not prediction | BH 0050 Sharpe=1.0035, BH Night (always long) Sharpe=1.0092 | Key insight: SPY info is already priced into TX by the time it becomes actionable (1-day lag too slow) | VIX regime: High VIX makes S1 cons WORSE (ann_ret=-29.1%), not better",
+  "limitations": [
+    "TX cost 1bp may understate retail costs (spread + slippage in night session)",
+    "Night session liquidity thinner than day session",
+    "Near-month rollover not modeled",
+    "Concurrent signal assumes mid-session entry (overstates opportunity)",
+    "No leverage/margin modeling",
+    "SPY daily return is crude proxy — intraday SPY data would be more precise"
+  ],
+  "references": [
+    "K838: Night momentum NULL (same-instrument prediction fails)",
+    "K817: US→Taiwan overnight gap captures 77-93% of alpha",
+    "K812v2: Lead-lag direction only 50.2% close-to-close",
+    "Barclay & Hendershott (2003): Price discovery in after-hours trading",
+    "Hasbrouck (1995): One security, many markets"
+  ],
+  "runtime_seconds": 264.2
+}

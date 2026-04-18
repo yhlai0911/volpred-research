@@ -1,0 +1,447 @@
+{
+  "experiment_id": "K451",
+  "title": "Overnight vs Intraday Volatility Decomposition",
+  "attribution": "[\u63d0\u51fa: \u7528\u6236, \u57f7\u884c: Claude]",
+  "timestamp": "2026-03-26T00:12:08.561013+00:00",
+  "data_source": "yfinance SPY OHLC (adjusted)",
+  "data_period": "2005-01-04 to 2026-03-25",
+  "sample_size": 5318,
+  "oos_period": "2023-01-01 to 2026-03-25",
+  "oos_size": 809,
+  "literature": [
+    "Hansen & Lunde (2005) JBES",
+    "Tsiakas (2008) J. Financial Markets",
+    "Ahoniemi & Lanne (2013) Int. J. Forecasting"
+  ],
+  "decomposition": {
+    "r_cc": "log(C_t / C_{t-1})",
+    "r_on": "log(O_t / C_{t-1})",
+    "r_id": "log(C_t / O_t)",
+    "identity": "r_cc = r_on + r_id (exact)"
+  },
+  "descriptive_statistics": {
+    "r_cc": {
+      "mean": 0.0003911283735935926,
+      "std": 0.011974743900304199,
+      "skew": -0.30380418499769296,
+      "kurtosis": 14.74305727342329,
+      "min": -0.11588663728615417,
+      "max": 0.1355768938902149,
+      "N": 5339
+    },
+    "r_on": {
+      "mean": 0.00029960474307298284,
+      "std": 0.0072120742406449855,
+      "skew": -1.473542815213615,
+      "kurtosis": 27.03670977032882,
+      "min": -0.11035687837426775,
+      "max": 0.05951865300917957,
+      "N": 5339
+    },
+    "r_id": {
+      "mean": 9.152363052060851e-05,
+      "std": 0.009285236075291952,
+      "skew": -0.22737442753960116,
+      "kurtosis": 12.688610945397361,
+      "min": -0.09420710612492118,
+      "max": 0.10600474949073482,
+      "N": 5339
+    }
+  },
+  "variance_decomposition": {
+    "total_cc_var": 0.00014352061495190175,
+    "overnight_var": 5.2094035578030816e-05,
+    "intraday_var": 8.620783727970012e-05,
+    "cov_2_on_id": 5.2187420941707815e-06,
+    "overnight_share": 0.3629724941987544,
+    "intraday_share": 0.600665188820373,
+    "covariance_share": 0.03636231698087237
+  },
+  "autocorrelation": {
+    "var_cc": {
+      "AC(1)": 0.2738512707539471,
+      "AC(5)": 0.3026920138762519,
+      "LB(10)_stat": 4574.101924737046,
+      "LB(10)_pval": 0.0
+    },
+    "var_on": {
+      "AC(1)": 0.2765534274562366,
+      "AC(5)": 0.2615114050608526,
+      "LB(10)_stat": 3102.6589525620784,
+      "LB(10)_pval": 0.0
+    },
+    "var_id": {
+      "AC(1)": 0.2316206667288023,
+      "AC(5)": 0.1875281723109869,
+      "LB(10)_stat": 3147.5802709735285,
+      "LB(10)_pval": 0.0
+    }
+  },
+  "adf_tests": {
+    "r_cc": {
+      "ADF_stat": -16.39807331114898,
+      "p_value": 2.6545096971004404e-29
+    },
+    "r_on": {
+      "ADF_stat": -15.33514382811291,
+      "p_value": 3.8980045838168147e-28
+    },
+    "r_id": {
+      "ADF_stat": -20.556716140356667,
+      "p_value": 0.0
+    }
+  },
+  "arch_lm_tests": {
+    "r_cc": {
+      "LM_stat": 1462.6723063507561,
+      "p_value": 2.906563283455951e-308
+    },
+    "r_on": {
+      "LM_stat": 1273.2740450398142,
+      "p_value": 2.239460597224671e-267
+    },
+    "r_id": {
+      "LM_stat": 1182.793704618199,
+      "p_value": 7.410672081191568e-248
+    }
+  },
+  "cross_correlation": {
+    "corr_r_on_r_id_sameday": 0.03856346621916731,
+    "corr_var_on_var_id_sameday": 0.20725377535882572,
+    "corr_r_id_lag1_r_on": -0.0215230553053054
+  },
+  "granger_causality": {
+    "var_on_to_var_id": {
+      "1": {
+        "F_stat": 180.99500932884283,
+        "p_value": 1.3408537864169381e-40
+      },
+      "2": {
+        "F_stat": 137.82862978861462,
+        "p_value": 4.342486073253141e-59
+      },
+      "5": {
+        "F_stat": 49.26863672696393,
+        "p_value": 4.970296431257781e-50
+      }
+    },
+    "var_id_to_var_on": {
+      "1": {
+        "F_stat": 101.47431923567973,
+        "p_value": 1.1768579108139559e-23
+      },
+      "2": {
+        "F_stat": 61.85324525660658,
+        "p_value": 2.781986358278003e-27
+      },
+      "5": {
+        "F_stat": 20.16940361168566,
+        "p_value": 5.463208068868372e-20
+      }
+    },
+    "var_on_to_var_cc": {
+      "1": {
+        "F_stat": 151.06217210288492,
+        "p_value": 2.942175061334603e-34
+      },
+      "2": {
+        "F_stat": 100.31299353447753,
+        "p_value": 1.7148912297516498e-43
+      },
+      "5": {
+        "F_stat": 33.00273640586751,
+        "p_value": 2.8268559710520496e-33
+      }
+    }
+  },
+  "forecasting_models": {
+    "M1_CC_baseline": {
+      "features": [
+        "var_cc_L1"
+      ],
+      "mse_train": 3.4785090317675267e-07,
+      "mse_test": 1.5589089956561002e-07,
+      "qlike": 1.799955244155562,
+      "r2_oos": 0.03818906214775608,
+      "he": 0.03818906214775608,
+      "coefficients": {
+        "var_cc_L1": 0.275817300715233,
+        "intercept": 0.00011113134939923859
+      }
+    },
+    "M2_ON_only": {
+      "features": [
+        "var_on_L1"
+      ],
+      "mse_train": 3.449412496472644e-07,
+      "mse_test": 1.4511533368316754e-07,
+      "qlike": 1.7724887433845031,
+      "r2_oos": 0.10467182128353691,
+      "he": 0.1046718212835368,
+      "coefficients": {
+        "var_on_L1": 0.5917833382107545,
+        "intercept": 0.00012071504786861635
+      }
+    },
+    "M3_ID_only": {
+      "features": [
+        "var_id_L1"
+      ],
+      "mse_train": 3.5807209764573193e-07,
+      "mse_test": 1.461994129808233e-07,
+      "qlike": 1.7540403858334026,
+      "r2_oos": 0.09798330175552139,
+      "he": 0.09798330175552128,
+      "coefficients": {
+        "var_id_L1": 0.43293374768555026,
+        "intercept": 0.00011448250501651684
+      }
+    },
+    "M4_ON_ID": {
+      "features": [
+        "var_on_L1",
+        "var_id_L1"
+      ],
+      "mse_train": 3.3534098186300375e-07,
+      "mse_test": 1.2870899205134877e-07,
+      "qlike": 1.6987606510806925,
+      "r2_oos": 0.20589516963545684,
+      "he": 0.20589516963545684,
+      "coefficients": {
+        "var_on_L1": 0.5156494424948318,
+        "var_id_L1": 0.32090008328112574,
+        "intercept": 9.603810564757746e-05
+      }
+    },
+    "M5_ON_ID_GJR": {
+      "features": [
+        "var_on_L1",
+        "var_id_L1",
+        "gjr_on_L1",
+        "gjr_id_L1"
+      ],
+      "mse_train": 3.3179990530203847e-07,
+      "mse_test": 1.1621279600071799e-07,
+      "qlike": 1.7008587341148285,
+      "r2_oos": 0.2829938205287007,
+      "he": 0.2829938205287007,
+      "coefficients": {
+        "var_on_L1": 0.8145068052391351,
+        "var_id_L1": 0.08279180727179486,
+        "gjr_on_L1": -0.3333101489871542,
+        "gjr_id_L1": 0.32397065933919045,
+        "intercept": 9.525947699464355e-05
+      }
+    },
+    "M6_HAR_ONID": {
+      "features": [
+        "var_on_L1",
+        "var_id_L1",
+        "var_on_5d_L1",
+        "var_id_5d_L1",
+        "var_on_21d_L1",
+        "var_id_21d_L1"
+      ],
+      "mse_train": 2.7281861704630797e-07,
+      "mse_test": 1.8951079979928747e-07,
+      "qlike": 286741.2348657366,
+      "r2_oos": -0.16923797730327306,
+      "he": -0.16923797730327306,
+      "coefficients": {
+        "var_on_L1": 0.07361659653784251,
+        "var_id_L1": -0.2932102158779195,
+        "var_on_5d_L1": 0.6487426303759445,
+        "var_id_5d_L1": 0.9722066485396842,
+        "var_on_21d_L1": 0.2318110759584835,
+        "var_id_21d_L1": 0.30226294618597943,
+        "intercept": 1.2433740881444229e-05
+      }
+    },
+    "M6b_HAR_CC": {
+      "features": [
+        "var_cc_L1",
+        "var_cc_5d_L1",
+        "var_cc_21d_L1"
+      ],
+      "mse_train": 2.8723732080605343e-07,
+      "mse_test": 1.5193060856364298e-07,
+      "qlike": 1.5918749558839063,
+      "r2_oos": 0.06262314530067681,
+      "he": 0.0626231453006767,
+      "coefficients": {
+        "var_cc_L1": -0.07175965315928569,
+        "var_cc_5d_L1": 0.5875248361054198,
+        "var_cc_21d_L1": 0.2756106636598645,
+        "intercept": 3.212624088477866e-05
+      }
+    },
+    "M6c_HAR_ONID_GJR": {
+      "features": [
+        "var_on_L1",
+        "var_id_L1",
+        "var_on_5d_L1",
+        "var_id_5d_L1",
+        "var_on_21d_L1",
+        "var_id_21d_L1",
+        "gjr_on_L1",
+        "gjr_id_L1"
+      ],
+      "mse_train": 2.680513206471136e-07,
+      "mse_test": 1.8599405380059034e-07,
+      "qlike": 2781599.993690674,
+      "r2_oos": -0.14754046464140358,
+      "he": -0.1475404646414038,
+      "coefficients": {
+        "var_on_L1": 0.13631887398874562,
+        "var_id_L1": -0.5772549620240726,
+        "var_on_5d_L1": 0.6291584738720646,
+        "var_id_5d_L1": 0.9927388924903389,
+        "var_on_21d_L1": 0.2354720042743261,
+        "var_id_21d_L1": 0.33179130227956827,
+        "gjr_on_L1": -0.037829595067929093,
+        "gjr_id_L1": 0.41059006638843243,
+        "intercept": 1.205075755863626e-05
+      }
+    }
+  },
+  "dm_tests_vs_baseline": {
+    "M2_ON_only": {
+      "DM_stat": 0.7081486270232645,
+      "p_value": 0.47885296487668105
+    },
+    "M3_ID_only": {
+      "DM_stat": 0.37656600217194414,
+      "p_value": 0.7064961572654893
+    },
+    "M4_ON_ID": {
+      "DM_stat": 0.9118290955446584,
+      "p_value": 0.36185869142446103
+    },
+    "M5_ON_ID_GJR": {
+      "DM_stat": 0.9675503139005648,
+      "p_value": 0.3332690018226523
+    },
+    "M6_HAR_ONID": {
+      "DM_stat": -0.9721404481196985,
+      "p_value": 0.330980682039852
+    },
+    "M6b_HAR_CC": {
+      "DM_stat": 0.2171254983331572,
+      "p_value": 0.828110543137027
+    },
+    "M6c_HAR_ONID_GJR": {
+      "DM_stat": -0.7293318171174544,
+      "p_value": 0.4657987142058957
+    }
+  },
+  "gjr_garch_comparison": {
+    "cc_model": {
+      "mse": 1.312615226020068e-07,
+      "qlike": -8.543310282272241,
+      "fit_info": {
+        "converged": true,
+        "persistence": 0.9851545981179871,
+        "omega": 0.020757926163528048,
+        "alpha": 1.4795999394641514e-10,
+        "gamma": 0.2544587623671515,
+        "beta": 0.8579252167864514
+      }
+    },
+    "id_plus_mean_on": {
+      "mse": 1.5621555501302266e-07,
+      "qlike": -8.451849482019474,
+      "mean_on_var_added": 5.534051090885305e-05,
+      "fit_info": {
+        "converged": true,
+        "persistence": 0.9826943029216925,
+        "omega": 0.012721701107979039,
+        "alpha": 0.03163564740587727,
+        "gamma": 0.16893876107145983,
+        "beta": 0.8665892749800853
+      }
+    },
+    "dm_test": {
+      "stat": -0.9687252731826086,
+      "p_value": 0.3326822792890831
+    },
+    "n_oos": 808
+  },
+  "rolling_decomposition": {
+    "overnight_share_rolling": {
+      "mean": 0.347607507388746,
+      "std": 0.09275929347163708,
+      "min": 0.1320401131134736,
+      "max": 0.6154269495887298
+    },
+    "intraday_share_rolling": {
+      "mean": 0.6469456200209854,
+      "std": 0.12381046476589058,
+      "min": 0.22811414001823846,
+      "max": 0.8829857825350443
+    },
+    "regime_comparison": {
+      "covid_overnight_share": 0.5637656955876986,
+      "normal_overnight_share": 0.2985658299359912
+    }
+  },
+  "subsample_robustness": {
+    "2005-2009 (GFC)": {
+      "N": 1237,
+      "overnight_share": 0.28732848083655527,
+      "intraday_share": 0.6563848945450198,
+      "corr_on_id": 0.06529940581119709,
+      "ac1_var_on": 0.17450445376556842,
+      "ac1_var_id": 0.2115478199134079
+    },
+    "2010-2014 (Recovery)": {
+      "N": 1258,
+      "overnight_share": 0.3668955894701947,
+      "intraday_share": 0.5674540757746418,
+      "corr_on_id": 0.0703762841522998,
+      "ac1_var_on": 0.13631887078830887,
+      "ac1_var_id": 0.27974536186108817
+    },
+    "2015-2019 (Bull)": {
+      "N": 1258,
+      "overnight_share": 0.3721835385588504,
+      "intraday_share": 0.6443199148180566,
+      "corr_on_id": -0.01791095492602783,
+      "ac1_var_on": 0.3074466687532206,
+      "ac1_var_id": 0.23950384219725823
+    },
+    "2020-2022 (COVID+)": {
+      "N": 756,
+      "overnight_share": 0.46184006803469535,
+      "intraday_share": 0.46645296728669294,
+      "corr_on_id": 0.07710955176530868,
+      "ac1_var_on": 0.31215980397493265,
+      "ac1_var_id": 0.19350960046716573
+    },
+    "2023-2025 (OOS)": {
+      "N": 752,
+      "overnight_share": 0.37883495856814164,
+      "intraday_share": 0.7285695231266862,
+      "corr_on_id": -0.10602930475147734,
+      "ac1_var_on": 0.27195909643211613,
+      "ac1_var_id": 0.23433395325238643
+    }
+  },
+  "best_model": {
+    "by_qlike": "M6b_HAR_CC",
+    "by_mse": "M5_ON_ID_GJR",
+    "qlike_improvement_pct": 11.560303454615912
+  },
+  "conclusions": {
+    "Q1_variance_ratio": "Overnight variance accounts for ~36% of total CC variance, intraday ~60%. This ratio is time-varying: COVID period ON share rose to 56% vs normal 30%.",
+    "Q2_overnight_predicts_intraday": "Granger causality ON\u2192ID at lag 1: F=181.00, p=1.3409e-40. Bidirectional: ID\u2192ON also significant (F=101.47).",
+    "Q3_decomposed_vs_cc": "Best QLIKE model is M6b_HAR_CC (HAR on close-to-close, QLIKE=1.5919). Best MSE model is M5_ON_ID_GJR (decomposed+GJR, MSE=1.1621e-07). However, NO decomposed model achieves statistically significant improvement over baseline (all DM p>0.33). HAR-style ON/ID decomposition (M6) overfits and produces negative OOS predictions. Overnight decomposition provides descriptive insight but limited forecasting gain."
+  },
+  "limitations": [
+    "Squared returns are noisy variance proxies (realized volatility from 5-min would be better)",
+    "Ridge regression is linear; nonlinear interactions not captured",
+    "GJR-GARCH comparison uses re-fitted full sample (not strictly expanding window)",
+    "Overnight return includes pre/post-market activity in some ETFs",
+    "Adj close ratios applied to Open may distort overnight return on dividend days"
+  ],
+  "elapsed_seconds": 1.0991017818450928
+}

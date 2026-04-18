@@ -1,0 +1,110 @@
+
+========================================================================
+K1148: EAV Continuous Surprise Refinement (N=30 TW)
+========================================================================
+
+[1/8] Fetching earnings surprise via yfinance (get_earnings_dates) ...
+  [surprise cache] loaded 31 tickers from earnings_dates_surprise.json
+
+  Quantile winsorization [0.05, 0.95]: lo=-91.22%, hi=75.84%, capped 176/1747 (10.1%); raw range=[-10802.5%, 1824.4%]
+
+[2/8] Loading stocks with continuous EAV ...
+    2330.TW: n_obs=3911, n_events=64
+    2303.TW: n_obs=3911, n_events=59
+    6239.TW: n_obs=3911, n_events=64
+    2454.TW: n_obs=3911, n_events=62
+    2379.TW: n_obs=3911, n_events=62
+    3034.TW: n_obs=3911, n_events=58
+    3035.TW: n_obs=3911, n_events=61
+    3443.TW: n_obs=3911, n_events=63
+    SKIP 2388.TW
+    2881.TW: n_obs=3911, n_events=64
+    2882.TW: n_obs=3911, n_events=61
+    SKIP 2883.TW
+    2886.TW: n_obs=3911, n_events=60
+    2887.TW: n_obs=3911, n_events=59
+    2603.TW: n_obs=3911, n_events=64
+    2615.TW: n_obs=3911, n_events=50
+    2609.TW: n_obs=3911, n_events=62
+    1301.TW: n_obs=3911, n_events=64
+    1303.TW: n_obs=3911, n_events=60
+    1326.TW: n_obs=3911, n_events=63
+    2002.TW: n_obs=3911, n_events=63
+    2027.TW: n_obs=3911, n_events=60
+    2317.TW: n_obs=3911, n_events=64
+    3045.TW: n_obs=3911, n_events=63
+    2382.TW: n_obs=3911, n_events=63
+    2912.TW: n_obs=3911, n_events=64
+    2637.TW: n_obs=3684, n_events=57
+    1215.TW: n_obs=3911, n_events=24
+    2347.TW: n_obs=3911, n_events=63
+    1210.TW: n_obs=3911, n_events=26
+    2892.TW: n_obs=3911, n_events=64
+  Loaded 29/31 stocks (continuous)
+
+[3/8] Pooled BCD fit (continuous EAV) ...
+    [BCD outer 0] θ_VIX=9.521e-08, θ_EAV=+2.5078e-04, pooled_negll=-309936.55, Δll=+inf, Δθ_eav=1.51e-04
+    [BCD outer 1] θ_VIX=9.409e-08, θ_EAV=+2.5973e-04, pooled_negll=-309956.51, Δll=+19.9616, Δθ_eav=8.95e-06
+    [BCD outer 2] θ_VIX=9.337e-08, θ_EAV=+2.6541e-04, pooled_negll=-309957.56, Δll=+1.0518, Δθ_eav=5.68e-06
+    [BCD outer 3] θ_VIX=9.320e-08, θ_EAV=+2.6677e-04, pooled_negll=-309958.99, Δll=+1.4334, Δθ_eav=1.36e-06
+    [BCD outer 4] θ_VIX=9.303e-08, θ_EAV=+2.6815e-04, pooled_negll=-309959.60, Δll=+0.6017, Δθ_eav=1.37e-06
+    [BCD outer 5] θ_VIX=9.303e-08, θ_EAV=+2.6815e-04, pooled_negll=-309960.60, Δll=+1.0010, Δθ_eav=0.00e+00
+    [BCD outer 6] θ_VIX=9.286e-08, θ_EAV=+2.6946e-04, pooled_negll=-309960.80, Δll=+0.2051, Δθ_eav=1.32e-06
+    [BCD outer 7] θ_VIX=9.286e-08, θ_EAV=+2.6946e-04, pooled_negll=-309961.10, Δll=+0.2936, Δθ_eav=2.93e-18
+
+  → θ_VIX_c = 9.2864e-08
+  → θ_EAV_c = +2.6946e-04
+  → pooled loglik = 309961.20
+  Hessian SE=2.584645013017152e-05, t=10.426, p=0
+
+[4/8] Stock-clustered block bootstrap (n_boot=150) ...
+  completed 150/150 (elapsed=384.7s)
+  bootstrap mean=0.00028382481386921086, SE=9.300026460206094e-05
+  bootstrap 95% CI = [0.00012656664258981254, 0.0005009166060519754]
+  bootstrap t=2.8974429145932317, p=0.0
+
+[5/8] LRT vs baseline GJR (no τ) ...
+  full_ll=309961.20, baseline_ll=308913.85, LRT=2094.69, p=0
+
+[6/8] Placebo (within-stock EAV permutation, n=60) ...
+  placebo completed 60/60 (elapsed=146.6s)
+  placebo mean=5.335729008088562e-06, SE=9.835175472446369e-06, distance=26.855365159311233σ
+  placebo one-sided p = 0.0
+  → /Users/yhlai0911/Desktop/volpred-research/experiments/k1148/k1148_placebo_results.json
+
+[7/8] OOS DM-HLN QLIKE (IS 2010-2019, OOS 2020-2025) ...
+  IS stocks: 29, OOS stocks: 29
+  Fitting continuous-EAV on IS ...
+  IS continuous θ_EAV = +2.2283e-04
+  Fitting pure GJR on IS ...
+  Per-stock DM stats: n=29, mean=-0.450, SE=0.388, bootstrap_one_sided_p=0.1225
+  OOS samples: pool n=42195
+  mean QLIKE cont = -7.091089
+  mean QLIKE gjr  = -7.084596
+  Panel DM (per-stock mean, bootstrap inference): t=-1.1580573545351538, p=0.1225
+
+[8/8] Compare to K1145 binary baseline ...
+  K1145 binary θ_EAV = +6.3622e-05, t(Hessian) = 14.14, t(boot) = 5.24
+  K1148 continuous θ_EAV = +2.6946e-04, t(Hessian) = 10.43, t(boot) = 2.8974429145932317
+  BH: hessian: raw_p=0, bh_adj_p=0
+  BH: bootstrap: raw_p=0, bh_adj_p=0
+  BH: lrt: raw_p=0, bh_adj_p=0
+
+  H1 (pooled t>3.0, BH): True
+  H2 (|boot_t_c| > |boot_t_binary|): False
+  H3 (DM-HLN t<=-2): False
+  OVERFIT_RISK: True
+
+  CORE VERDICT: H1_PASS_but_binary_stronger — continuous spec loses information | OVERFIT_RISK
+
+Generating plots ...
+  → /Users/yhlai0911/Desktop/volpred-research/experiments/k1148/k1148_binary_vs_continuous.png
+  → /Users/yhlai0911/Desktop/volpred-research/experiments/k1148/k1148_surprise_vs_absr.png
+  → /Users/yhlai0911/Desktop/volpred-research/experiments/k1148/k1148_placebo_distribution.png
+
+  Results → /Users/yhlai0911/Desktop/volpred-research/experiments/k1148/k1148_results.json
+  Placebo → /Users/yhlai0911/Desktop/volpred-research/experiments/k1148/k1148_placebo_results.json
+  Elapsed: 542.7s
+
+  CORE VERDICT: H1_PASS_but_binary_stronger — continuous spec loses information | OVERFIT_RISK
+

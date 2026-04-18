@@ -1,0 +1,331 @@
+{
+  "experiment_id": "K1133",
+  "title": "Regime-switching GAS-t on BTC \u2014 is K1129 reversal regime-dependent?",
+  "motivation": "K1129 found GAS-t on BTC has DM-HLN t=-4.58 vs GJR-Normal (GAS-t worse). Catania (2018, JFE) argues GAS needs regime-switching version in structurally shifting markets. BTC has clear eras: 2015-2020 pre-institutional, 2021-2023 FTX/Luna/BlockFi crashes, 2024-2026 post-spot-ETF. Test: is the GAS-t underperformance universal across periods or concentrated in one regime?",
+  "methodology": {
+    "approach_A": "Independent rolling-window OOS fit per sub-period (window=750, refit every 63, OOS = sub-period obs after first 750)",
+    "approach_B": "In-sample 2-state Markov-switching GAS-t (Hamilton filter) with LRT vs single-state GAS-t",
+    "models": [
+      "M1 GJR-GARCH Normal",
+      "M2 GJR-GARCH Student-t",
+      "M3 GAS-t"
+    ],
+    "sub_periods": [
+      {
+        "name": "Period1_preinstitutional",
+        "start": "2015-01-01",
+        "end": "2020-12-31"
+      },
+      {
+        "name": "Period2_FTX_Luna_era",
+        "start": "2021-01-01",
+        "end": "2023-12-31"
+      },
+      {
+        "name": "Period3_spotETF_era",
+        "start": "2024-01-01",
+        "end": "2026-04-15"
+      }
+    ],
+    "window_default": 750,
+    "window_min": 500,
+    "window_note": "Adaptive per sub-period: min(WINDOW_DEFAULT, n_sp-100), floored at WINDOW_MIN",
+    "refit_every": 63,
+    "evaluation_target": "r\u00b2 (squared returns; GARCH-native proxy)",
+    "metrics": [
+      "QLIKE (Patton 2011)",
+      "DM-HLN (Harvey et al 1997)",
+      "LRT (MS vs single-state GAS-t)"
+    ],
+    "thresholds": {
+      "DM_2": "|t| > 2 (two-sided p<0.05)",
+      "DM_3_Harvey": "|t| > 3.0 (Harvey 2016 multiple-testing)"
+    }
+  },
+  "data_source": "yfinance BTC-USD",
+  "date_range": "2015-01-01 \u2192 2026-04-15",
+  "n_total_obs": 4121,
+  "seed": 42,
+  "lookahead_check": "Assert train_data ends strictly before forecast index t_abs",
+  "references": [
+    "Catania (2018) \"Dynamic Adaptive Mixture Models...\" JFE 18(3):493-544",
+    "Creal, Koopman, Lucas (2013) JASA 108:1-18",
+    "Harvey (2013) Dynamic Models for Volatility & Heavy Tails, Cambridge UP",
+    "Harvey-Leybourne-Newbold (1997) IJF 13:281 \u2014 DM small-sample",
+    "Hamilton (1989) Econometrica \u2014 Markov-switching",
+    "Patton (2011) JoE 160:246 \u2014 QLIKE proxy-robust"
+  ],
+  "prior_experiments": {
+    "K1129_BTC": "DM_HLN t(M3 vs M1) = -4.58 full 2021-2026 OOS",
+    "K1038": "GAS-t NULL on SPY/QQQ/GLD/0050.TW"
+  },
+  "approach_A_results": {
+    "Period1_preinstitutional": {
+      "n_oos": 1441,
+      "oos_start": "2017-01-21",
+      "oos_end": "2020-12-31",
+      "sub_period_start": "2015-01-01",
+      "sub_period_end": "2020-12-31",
+      "preliminary_flag": false,
+      "model_metrics": {
+        "M1_GJR_N": {
+          "QLIKE": 1.9926090749966137,
+          "Spearman_rho": 0.32890608983397834,
+          "Spearman_p": 1.066689064649642e-37
+        },
+        "M2_GJR_t": {
+          "QLIKE": 2.2339231637114847,
+          "Spearman_rho": 0.3455324036866318,
+          "Spearman_p": 1.1298536893296715e-41
+        },
+        "M3_GAS_t": {
+          "QLIKE": 2.1903727194874993,
+          "Spearman_rho": 0.34853888885145834,
+          "Spearman_p": 2.0322307010664646e-42
+        }
+      },
+      "dm_tests": {
+        "M2_GJR_t_vs_M1": {
+          "DM_HLN_t": -3.3550132344851713,
+          "DM_HLN_p": 0.000814267686093606,
+          "n_used": 1440,
+          "QLIKE_rel_improvement_pct": -12.11045817982542,
+          "gate_DM": true,
+          "gate_Harvey": true,
+          "better": "M1_GJR_N"
+        },
+        "M3_GAS_t_vs_M1": {
+          "DM_HLN_t": -4.669249494856592,
+          "DM_HLN_p": 3.3048879699570932e-06,
+          "n_used": 1440,
+          "QLIKE_rel_improvement_pct": -9.924859169439532,
+          "gate_DM": true,
+          "gate_Harvey": true,
+          "better": "M1_GJR_N"
+        },
+        "M3_GAS_t_vs_M2_GJR_t": {
+          "DM_HLN_t": 0.5342334034641674,
+          "DM_HLN_p": 0.593262582756656,
+          "n_used": 1440,
+          "QLIKE_rel_improvement_pct": 1.9495050202008635,
+          "gate_DM": false,
+          "better": "M3_GAS_t"
+        }
+      }
+    },
+    "Period2_FTX_Luna_era": {
+      "n_oos": 345,
+      "oos_start": "2023-01-21",
+      "oos_end": "2023-12-31",
+      "sub_period_start": "2021-01-01",
+      "sub_period_end": "2023-12-31",
+      "preliminary_flag": true,
+      "model_metrics": {
+        "M1_GJR_N": {
+          "QLIKE": 2.289083497181468,
+          "Spearman_rho": 0.10730988854275644,
+          "Spearman_p": 0.04640249526152759
+        },
+        "M2_GJR_t": {
+          "QLIKE": 2.2958077925955958,
+          "Spearman_rho": 0.14786378487057053,
+          "Spearman_p": 0.005930106075611507
+        },
+        "M3_GAS_t": {
+          "QLIKE": 2.316196932884557,
+          "Spearman_rho": 0.11587841984371439,
+          "Spearman_p": 0.03141402083875507
+        }
+      },
+      "dm_tests": {
+        "M2_GJR_t_vs_M1": {
+          "DM_HLN_t": -0.2614665705930412,
+          "DM_HLN_p": 0.7938892010576752,
+          "n_used": 345,
+          "QLIKE_rel_improvement_pct": -0.29375492079721566,
+          "gate_DM": false,
+          "gate_Harvey": false,
+          "better": "M1_GJR_N"
+        },
+        "M3_GAS_t_vs_M1": {
+          "DM_HLN_t": -0.8151935984054965,
+          "DM_HLN_p": 0.41552553339726694,
+          "n_used": 345,
+          "QLIKE_rel_improvement_pct": -1.1844668722863643,
+          "gate_DM": false,
+          "gate_Harvey": false,
+          "better": "M1_GJR_N"
+        },
+        "M3_GAS_t_vs_M2_GJR_t": {
+          "DM_HLN_t": -0.8471874675321591,
+          "DM_HLN_p": 0.3974796499805693,
+          "n_used": 345,
+          "QLIKE_rel_improvement_pct": -0.888103104916703,
+          "gate_DM": false,
+          "better": "M2_GJR_t"
+        }
+      }
+    },
+    "Period3_spotETF_era": {
+      "n_oos": 100,
+      "oos_start": "2026-01-05",
+      "oos_end": "2026-04-14",
+      "sub_period_start": "2024-01-01",
+      "sub_period_end": "2026-04-15",
+      "preliminary_flag": true,
+      "model_metrics": {
+        "M1_GJR_N": {
+          "QLIKE": 1.975300218016628,
+          "Spearman_rho": 0.15194719471947193,
+          "Spearman_p": 0.131261514929602
+        },
+        "M2_GJR_t": {
+          "QLIKE": 1.9484138685486827,
+          "Spearman_rho": 0.1597119711971197,
+          "Spearman_p": 0.11245680007753446
+        },
+        "M3_GAS_t": {
+          "QLIKE": 2.0563240669207867,
+          "Spearman_rho": 0.10613861386138612,
+          "Spearman_p": 0.29325212552883756
+        }
+      },
+      "dm_tests": {
+        "M2_GJR_t_vs_M1": {
+          "DM_HLN_t": 0.7861108868804677,
+          "DM_HLN_p": 0.43368008795962143,
+          "n_used": 100,
+          "QLIKE_rel_improvement_pct": 1.3611272465175663,
+          "gate_DM": false,
+          "gate_Harvey": false,
+          "better": "M2_GJR_t"
+        },
+        "M3_GAS_t_vs_M1": {
+          "DM_HLN_t": -0.8031173886140709,
+          "DM_HLN_p": 0.42383086307023854,
+          "n_used": 100,
+          "QLIKE_rel_improvement_pct": -4.101849843641173,
+          "gate_DM": false,
+          "gate_Harvey": false,
+          "better": "M1_GJR_N"
+        },
+        "M3_GAS_t_vs_M2_GJR_t": {
+          "DM_HLN_t": -0.8322470564184522,
+          "DM_HLN_p": 0.40727259317858566,
+          "n_used": 100,
+          "QLIKE_rel_improvement_pct": -5.538361233924249,
+          "gate_DM": false,
+          "better": "M2_GJR_t"
+        }
+      }
+    }
+  },
+  "approach_B_results": {
+    "Period1_preinstitutional": {
+      "success": true,
+      "converged": true,
+      "neg_loglik": 5461.750857811771,
+      "state_0": {
+        "omega": 0.5277214446716567,
+        "alpha": 1.3581764631436837,
+        "beta": 0.8835375435232824,
+        "nu": 5.819114147316743
+      },
+      "state_1": {
+        "omega": -0.04321977383225789,
+        "alpha": 0.627080218325008,
+        "beta": 0.996253417294518,
+        "nu": 4.414270232295078
+      },
+      "p00": 0.3990594689539628,
+      "p11": 0.8191564629725888,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "LRT_vs_single_state": {
+        "single_state_nll": 5486.014243408524,
+        "ms_nll": 5461.750857811771,
+        "chi2": 48.52677119350483,
+        "df": 6,
+        "p_value": 9.272109524616212e-09
+      }
+    },
+    "Period2_FTX_Luna_era": {
+      "success": true,
+      "converged": true,
+      "neg_loglik": 2704.15302736328,
+      "state_0": {
+        "omega": 0.3987766119766468,
+        "alpha": 2.0,
+        "beta": 0.8906793084052576,
+        "nu": 18.076443603818035
+      },
+      "state_1": {
+        "omega": -0.018168996023661628,
+        "alpha": 0.22869480524507713,
+        "beta": 0.999,
+        "nu": 4.085334887630282
+      },
+      "p00": 0.47394518954469356,
+      "p11": 0.8384724394304011,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "LRT_vs_single_state": {
+        "single_state_nll": 2722.4701026603734,
+        "ms_nll": 2704.15302736328,
+        "chi2": 36.634150594186394,
+        "df": 6,
+        "p_value": 2.07496286663833e-06
+      }
+    },
+    "Period3_spotETF_era": {
+      "success": true,
+      "converged": true,
+      "neg_loglik": 1903.0470870084157,
+      "state_0": {
+        "omega": 0.2686745765299472,
+        "alpha": 2.0,
+        "beta": 0.9005727780666949,
+        "nu": 12.787535013314066
+      },
+      "state_1": {
+        "omega": -0.06860831521602263,
+        "alpha": 2.0,
+        "beta": 0.9360220578054199,
+        "nu": 80.67004840431107
+      },
+      "p00": 0.5873769652294504,
+      "p11": 0.32947459062790807,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "LRT_vs_single_state": {
+        "single_state_nll": 1911.003348761919,
+        "ms_nll": 1903.0470870084157,
+        "chi2": 15.912523507006426,
+        "df": 6,
+        "p_value": 0.014231270363755266
+      }
+    }
+  },
+  "charts": [
+    "k1133_qlike_by_period.png",
+    "k1133_dm_heatmap.png"
+  ],
+  "created_at": "2026-04-17T15:37:18.622977+00:00",
+  "headline_conclusion": {
+    "verdict": "Concentrated reversal: GAS-t underperformance concentrated in 1/3 period(s), neutral in rest. K1129 finding is driven by specific regime(s) rather than universal BTC property.",
+    "n_periods_reversal_DM_lt_neg2": 1,
+    "n_periods_neutral": 2,
+    "n_periods_favor_DM_gt_2": 0,
+    "signs_by_period": [
+      {
+        "period": "Period1_preinstitutional",
+        "DM_HLN_t_M3_vs_M1": -4.669249494856592
+      },
+      {
+        "period": "Period2_FTX_Luna_era",
+        "DM_HLN_t_M3_vs_M1": -0.8151935984054965
+      },
+      {
+        "period": "Period3_spotETF_era",
+        "DM_HLN_t_M3_vs_M1": -0.8031173886140709
+      }
+    ]
+  }
+}

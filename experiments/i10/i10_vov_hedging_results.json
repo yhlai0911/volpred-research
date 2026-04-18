@@ -1,0 +1,55 @@
+{
+  "experiment": "I10",
+  "title": "VOL/VOV State-Dependent Hedging Effectiveness",
+  "reference": "Li & Chen (2025) JFM",
+  "timestamp": "2026-03-25T16:07:38.784418+00:00",
+  "data": {
+    "source": "yfinance",
+    "tickers": [
+      "SPY",
+      "ES=F",
+      "^VIX",
+      "^VVIX"
+    ],
+    "period": "2010-01-05 to 2026-03-25",
+    "n_obs": 4069
+  },
+  "vix_median": 16.690000534057617,
+  "vvix_median": 92.77999877929688,
+  "regime_results": {
+    "Low VOL, Low VOV": {
+      "n": 1434,
+      "unhedged_vol": 8.6,
+      "HE": 0.9204,
+      "correlation": 0.9611,
+      "VaR1_reduction": 0.6922
+    },
+    "Low VOL, High VOV": {
+      "n": 595,
+      "unhedged_vol": 9.8,
+      "HE": 0.9613,
+      "correlation": 0.981,
+      "VaR1_reduction": 0.7764
+    },
+    "High VOL, Low VOV": {
+      "n": 600,
+      "unhedged_vol": 16.4,
+      "HE": 0.9654,
+      "correlation": 0.983,
+      "VaR1_reduction": 0.812
+    },
+    "High VOL, High VOV": {
+      "n": 1440,
+      "unhedged_vol": 24.3,
+      "HE": 0.946,
+      "correlation": 0.9734,
+      "VaR1_reduction": 0.786
+    }
+  },
+  "vvix_he_correlation": {
+    "simple_r": 0.062,
+    "partial_r_vix": 0.003,
+    "t_partial": 0.18,
+    "harvey_pass": "False"
+  }
+}

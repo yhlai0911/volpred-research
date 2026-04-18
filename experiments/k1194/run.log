@@ -1,0 +1,138 @@
+2026-04-17 18:09:43,593 INFO ======================================================================
+2026-04-17 18:09:43,593 INFO K1194: Paper 3 TSMOM Hedge 5-Implementation Forensic
+2026-04-17 18:09:43,594 INFO ======================================================================
+2026-04-17 18:09:43,594 INFO Period: 2005-01-03 to 2026-03-31
+2026-04-17 18:09:43,594 INFO Paper Table 3 SPY targets: Sharpe=0.737, MDD=-26.9%, Retention=93%
+2026-04-17 18:09:43,594 INFO Paper Table 6 SPY CI target: (86, 97)
+2026-04-17 18:09:43,594 INFO 
+2026-04-17 18:09:43,594 INFO Downloading ['SPY', 'GLD', '^VIX', 'SHY'] from 2003-12-01 to 2026-04-01
+2026-04-17 18:09:44,391 INFO Data: 2003-12-01 to 2026-03-31, shape=(5618, 4)
+2026-04-17 18:09:44,398 INFO BH: n=5344, Sharpe=0.610, MDD=-55.2%
+2026-04-17 18:09:44,398 INFO VT monthly: n=5344, Sharpe=0.675, MDD=-26.4%
+2026-04-17 18:09:44,399 INFO VT daily: n=5344, Sharpe=0.783, MDD=-24.7%
+2026-04-17 18:09:44,399 INFO 
+Computing TSMOM factors...
+2026-04-17 18:09:44,408 INFO TSMOM factors computed. beta_MKT (full-sample) = 0.0339
+2026-04-17 18:09:44,408 INFO 
+============================================================
+2026-04-17 18:09:44,408 INFO Running: Impl1_Raw_TSMOM_Monthly
+2026-04-17 18:09:44,408 INFO   constrain_beta=False
+2026-04-17 18:09:44,412 INFO   BH:    Sharpe=0.610, MDD=-55.2%
+2026-04-17 18:09:44,412 INFO   VT:    Sharpe=0.675, MDD=-26.4%
+2026-04-17 18:09:44,412 INFO   Hedged: Sharpe=0.625, MDD=-17.1%
+2026-04-17 18:09:44,412 INFO   Point MDD Retention: 132.4%
+2026-04-17 18:09:44,412 INFO   Running bootstrap (B=10000)...
+2026-04-17 18:09:46,496 INFO   Bootstrap: point=132.4%, CI=[105.5, 195.1]
+2026-04-17 18:09:46,497 INFO   Paper targets: retention=93%, CI=(86, 97)
+2026-04-17 18:09:46,497 INFO   VERDICT: DIRECTION_REVERSAL
+2026-04-17 18:09:46,497 INFO 
+============================================================
+2026-04-17 18:09:46,497 INFO Running: Impl2_Orth_TSMOM_Monthly
+2026-04-17 18:09:46,497 INFO   constrain_beta=False
+2026-04-17 18:09:46,500 INFO   BH:    Sharpe=0.610, MDD=-55.2%
+2026-04-17 18:09:46,500 INFO   VT:    Sharpe=0.675, MDD=-26.4%
+2026-04-17 18:09:46,500 INFO   Hedged: Sharpe=0.632, MDD=-17.2%
+2026-04-17 18:09:46,500 INFO   Point MDD Retention: 132.0%
+2026-04-17 18:09:46,500 INFO   Running bootstrap (B=10000)...
+2026-04-17 18:09:48,564 INFO   Bootstrap: point=132.0%, CI=[104.3, 194.7]
+2026-04-17 18:09:48,564 INFO   Paper targets: retention=93%, CI=(86, 97)
+2026-04-17 18:09:48,564 INFO   VERDICT: DIRECTION_REVERSAL
+2026-04-17 18:09:48,564 INFO 
+============================================================
+2026-04-17 18:09:48,564 INFO Running: Impl3_Orth_BH_Monthly
+2026-04-17 18:09:48,564 INFO   constrain_beta=False
+2026-04-17 18:09:48,568 INFO   BH:    Sharpe=0.610, MDD=-55.2%
+2026-04-17 18:09:48,569 INFO   VT:    Sharpe=0.675, MDD=-26.4%
+2026-04-17 18:09:48,569 INFO   Hedged: Sharpe=-0.239, MDD=-8070327022685883.0%
+2026-04-17 18:09:48,569 INFO   Point MDD Retention: -28039277756784008.0%
+2026-04-17 18:09:48,569 INFO   Running bootstrap (B=10000)...
+2026-04-17 18:09:50,710 INFO   Bootstrap: point=-2.803927775678402e+16%, CI=[-6.4647327254024136e+16, -750.2]
+2026-04-17 18:09:50,710 INFO   Paper targets: retention=93%, CI=(86, 97)
+2026-04-17 18:09:50,710 INFO   VERDICT: NO_MATCH
+2026-04-17 18:09:50,710 INFO 
+============================================================
+2026-04-17 18:09:50,710 INFO Running: Impl4_Orth_DeltaVIX_Monthly
+2026-04-17 18:09:50,710 INFO   constrain_beta=False
+2026-04-17 18:09:50,714 INFO   BH:    Sharpe=0.610, MDD=-55.2%
+2026-04-17 18:09:50,714 INFO   VT:    Sharpe=0.675, MDD=-26.4%
+2026-04-17 18:09:50,714 INFO   Hedged: Sharpe=0.577, MDD=-19.1%
+2026-04-17 18:09:50,714 INFO   Point MDD Retention: 125.3%
+2026-04-17 18:09:50,714 INFO   Running bootstrap (B=10000)...
+2026-04-17 18:09:52,786 INFO   Bootstrap: point=125.3%, CI=[68.9, 191.1]
+2026-04-17 18:09:52,786 INFO   Paper targets: retention=93%, CI=(86, 97)
+2026-04-17 18:09:52,786 INFO   VERDICT: DIRECTION_REVERSAL
+2026-04-17 18:09:52,786 INFO 
+============================================================
+2026-04-17 18:09:52,786 INFO Running: Impl5_Normalized_TSMOM_Monthly
+2026-04-17 18:09:52,786 INFO   constrain_beta=False
+2026-04-17 18:09:52,791 INFO   BH:    Sharpe=0.614, MDD=-55.2%
+2026-04-17 18:09:52,792 INFO   VT:    Sharpe=0.681, MDD=-26.4%
+2026-04-17 18:09:52,792 INFO   Hedged: Sharpe=0.599, MDD=-20.1%
+2026-04-17 18:09:52,792 INFO   Point MDD Retention: 122.0%
+2026-04-17 18:09:52,792 INFO   Running bootstrap (B=10000)...
+2026-04-17 18:09:54,807 INFO   Bootstrap: point=122.0%, CI=[100.9, 196.4]
+2026-04-17 18:09:54,807 INFO   Paper targets: retention=93%, CI=(86, 97)
+2026-04-17 18:09:54,807 INFO   VERDICT: DIRECTION_REVERSAL
+2026-04-17 18:09:54,807 INFO 
+============================================================
+2026-04-17 18:09:54,807 INFO Running: Impl6_Raw_Daily_K898style
+2026-04-17 18:09:54,807 INFO   constrain_beta=True
+2026-04-17 18:09:54,811 INFO   BH:    Sharpe=0.610, MDD=-55.2%
+2026-04-17 18:09:54,811 INFO   VT:    Sharpe=0.783, MDD=-24.7%
+2026-04-17 18:09:54,811 INFO   Hedged: Sharpe=0.791, MDD=-22.5%
+2026-04-17 18:09:54,811 INFO   Point MDD Retention: 107.2%
+2026-04-17 18:09:54,811 INFO   Running bootstrap (B=10000)...
+2026-04-17 18:09:57,031 INFO   Bootstrap: point=107.2%, CI=[95.7, 175.5]
+2026-04-17 18:09:57,031 INFO   Paper targets: retention=93%, CI=(86, 97)
+2026-04-17 18:09:57,031 INFO   VERDICT: DIRECTION_REVERSAL
+2026-04-17 18:09:57,031 INFO 
+================================================================================
+2026-04-17 18:09:57,031 INFO FORENSIC: Testing ADD (inverted sign) implementations
+2026-04-17 18:09:57,031 INFO Hypothesis: paper may intend VT + b*TSMOM instead of VT - b*TSMOM
+2026-04-17 18:09:57,031 INFO ================================================================================
+2026-04-17 18:09:57,035 INFO 
+  ADD_Raw_Daily_clip05:
+2026-04-17 18:09:57,035 INFO     Hedged: Sharpe=0.615, MDD=-28.8%
+2026-04-17 18:09:57,035 INFO     Retention: 86.3%
+2026-04-17 18:09:59,100 INFO     CI=[-70.2, 88.1], Verdict: PARTIAL
+2026-04-17 18:09:59,100 INFO     Paper: retention=93%, CI=[86,97]
+2026-04-17 18:09:59,104 INFO 
+  ADD_Raw_Daily_noclip:
+2026-04-17 18:09:59,104 INFO     Hedged: Sharpe=0.574, MDD=-38.4%
+2026-04-17 18:09:59,104 INFO     Retention: 54.8%
+2026-04-17 18:10:01,176 INFO     CI=[-109.5, 66.4], Verdict: NO_MATCH
+2026-04-17 18:10:01,176 INFO     Paper: retention=93%, CI=[86,97]
+2026-04-17 18:10:01,180 INFO 
+  ADD_Raw_Monthly_clip05:
+2026-04-17 18:10:01,180 INFO     Hedged: Sharpe=0.577, MDD=-33.9%
+2026-04-17 18:10:01,180 INFO     Retention: 73.8%
+2026-04-17 18:10:03,247 INFO     CI=[-92.7, 89.4], Verdict: NO_MATCH
+2026-04-17 18:10:03,247 INFO     Paper: retention=93%, CI=[86,97]
+2026-04-17 18:10:03,250 INFO 
+  ADD_Orth_Daily_clip05:
+2026-04-17 18:10:03,250 INFO     Hedged: Sharpe=0.612, MDD=-28.7%
+2026-04-17 18:10:03,250 INFO     Retention: 86.7%
+2026-04-17 18:10:05,350 INFO     CI=[-68.2, 88.5], Verdict: PARTIAL
+2026-04-17 18:10:05,350 INFO     Paper: retention=93%, CI=[86,97]
+2026-04-17 18:10:05,350 INFO 
+================================================================================
+2026-04-17 18:10:05,350 INFO SUMMARY: 5+1 Implementations vs Paper Table 3 + Table 6
+2026-04-17 18:10:05,350 INFO ================================================================================
+2026-04-17 18:10:05,350 INFO Paper targets: retention=93%, CI=(86, 97), Hedged Sharpe=0.737
+2026-04-17 18:10:05,351 INFO 
+2026-04-17 18:10:05,351 INFO Impl                                      Sharpe    MDD%    Ret%              CI Verdict                  
+2026-04-17 18:10:05,351 INFO ----------------------------------------------------------------------------------------------------
+2026-04-17 18:10:05,351 INFO   Impl1_Raw_TSMOM_Monthly                    0.625   -17.1   132.4  [105.5, 195.1] DIRECTION_REVERSAL       
+2026-04-17 18:10:05,351 INFO   Impl2_Orth_TSMOM_Monthly                   0.632   -17.2   132.0  [104.3, 194.7] DIRECTION_REVERSAL       
+2026-04-17 18:10:05,351 INFO   Impl3_Orth_BH_Monthly                     -0.239 -8070327022685883.0 -28039277756784008.0 [-6.4647327254024136e+16, -750.2] NO_MATCH                 
+2026-04-17 18:10:05,351 INFO   Impl4_Orth_DeltaVIX_Monthly                0.577   -19.1   125.3   [68.9, 191.1] DIRECTION_REVERSAL       
+2026-04-17 18:10:05,351 INFO   Impl5_Normalized_TSMOM_Monthly             0.599   -20.1   122.0  [100.9, 196.4] DIRECTION_REVERSAL       
+2026-04-17 18:10:05,351 INFO   Impl6_Raw_Daily_K898style                  0.791   -22.5   107.2   [95.7, 175.5] DIRECTION_REVERSAL       
+2026-04-17 18:10:05,351 INFO   ADD_Raw_Daily_clip05                       0.615   -28.8    86.3   [-70.2, 88.1] PARTIAL                  
+2026-04-17 18:10:05,351 INFO   ADD_Raw_Daily_noclip                       0.574   -38.5    54.8  [-109.5, 66.4] NO_MATCH                 
+2026-04-17 18:10:05,351 INFO   ADD_Raw_Monthly_clip05                     0.577   -34.0    73.8   [-92.7, 89.4] NO_MATCH                 
+2026-04-17 18:10:05,351 INFO   ADD_Orth_Daily_clip05                      0.612   -28.7    86.7   [-68.2, 88.5] PARTIAL                  
+2026-04-17 18:10:05,351 INFO 
+2026-04-17 18:10:05,351 INFO MIXED RESULTS: some implementations partial, none fully matched
+2026-04-17 18:10:05,352 INFO 
+Results saved to: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-abe87ed7/experiments/k1194/k1194_results.json

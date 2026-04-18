@@ -1,0 +1,290 @@
+{
+  "experiment_id": "K685",
+  "title": "VIX Percentile Strategy \u2014 Live Period Simulation (2025-2026)",
+  "date": "2026-03-29",
+  "type": "SIMULATION (not actual paper trading)",
+  "data_source": "yfinance (SPY, GLD, ^VIX)",
+  "data_period": "2006-01-01 to 2026-03-27",
+  "live_simulation_period": "2025-01-01 to 2026-03-27",
+  "n_live_days": 309,
+  "methodology": {
+    "strategies_simulated": {
+      "Percentile 50/50": "w = 1 - pct(VIX, 252d), 50/50 SPY/GLD (K679 original)",
+      "Percentile 70/30": "w = 1 - pct(VIX, 252d), 70/30 SPY/GLD, 2% threshold, 5% floor (K684 optimal)",
+      "P3-AGG Lookup": "VIX<15\u219280%, 15-25\u219245%, >25\u219210%, 50/50 SPY/GLD (K682)"
+    },
+    "comparison_strategies": {
+      "Piecewise Conservative": "From paper_trading.json (actual live)",
+      "12/VIX": "From paper_trading.json (actual live)",
+      "50/50 SPY/GLD": "From paper_trading.json (actual live)",
+      "Buy-Hold SPY": "100% SPY (simulated)"
+    },
+    "transaction_cost": "5 bps one-way",
+    "risk_free_rate": "4% annual",
+    "rolling_window": 252
+  },
+  "references": [
+    "K679: VIX Percentile Strategy (Sharpe 1.68 vs 12/VIX 1.08)",
+    "K680: Cross-OOS Validation (5/5 wins, DM t=3.157)",
+    "K682: P3-AGG Lookup Table",
+    "K684: Optimal Implementation (252d, 2%thresh, 70/30)",
+    "K640: Piecewise Conservative live audit (Sharpe 3.98)"
+  ],
+  "vix_live_stats": {
+    "mean": 19.2,
+    "std": 5.16,
+    "min": 13.47,
+    "max": 52.33,
+    "median": 17.44,
+    "n_days_above_25": 31,
+    "n_days_above_30": 13,
+    "n_days_below_15": 27
+  },
+  "simulated_strategy_metrics": {
+    "Percentile 50/50 (SIM)": {
+      "strategy": "Percentile 50/50 (SIM)",
+      "cagr_pct": 25.45,
+      "sharpe": 3.013,
+      "sortino": 3.348,
+      "mdd_pct": -3.47,
+      "calmar": 7.33,
+      "ann_vol_pct": 6.27,
+      "total_return_pct": 32.05,
+      "n_days": 309,
+      "avg_weight": 0.434
+    },
+    "Percentile 70/30 (SIM)": {
+      "strategy": "Percentile 70/30 (SIM)",
+      "cagr_pct": 23.95,
+      "sharpe": 3.572,
+      "sortino": 4.996,
+      "mdd_pct": -2.26,
+      "calmar": 10.59,
+      "ann_vol_pct": 4.93,
+      "total_return_pct": 30.12,
+      "n_days": 309,
+      "avg_weight": 0.435
+    },
+    "P3-AGG Lookup (SIM)": {
+      "strategy": "P3-AGG Lookup (SIM)",
+      "cagr_pct": 19.52,
+      "sharpe": 2.197,
+      "sortino": 2.537,
+      "mdd_pct": -3.13,
+      "calmar": 6.233,
+      "ann_vol_pct": 6.39,
+      "total_return_pct": 24.44,
+      "n_days": 309,
+      "avg_weight": 0.445
+    },
+    "Buy-Hold SPY (SIM)": {
+      "strategy": "Buy-Hold SPY (SIM)",
+      "cagr_pct": 7.89,
+      "sharpe": 0.286,
+      "sortino": 0.373,
+      "mdd_pct": -18.76,
+      "calmar": 0.421,
+      "ann_vol_pct": 18.46,
+      "total_return_pct": 9.76,
+      "n_days": 309,
+      "avg_weight": 1.0
+    }
+  },
+  "paper_trading_metrics": {
+    "piecewise_conservative": {
+      "strategy": "Piecewise Conservative (LIVE)",
+      "cagr_pct": 17.8,
+      "sharpe": 2.789,
+      "sortino": 2.65,
+      "mdd_pct": -2.48,
+      "calmar": 7.175,
+      "ann_vol_pct": 4.48,
+      "total_return_pct": 22.24,
+      "n_days": 309,
+      "source": "paper_trading.json (actual live)"
+    },
+    "simple_12vix": {
+      "strategy": "12/VIX (LIVE)",
+      "cagr_pct": 2.13,
+      "sharpe": -0.159,
+      "sortino": -0.201,
+      "mdd_pct": -10.75,
+      "calmar": 0.198,
+      "ann_vol_pct": 9.22,
+      "total_return_pct": 2.62,
+      "n_days": 309,
+      "source": "paper_trading.json (actual live)"
+    },
+    "recommended_5050": {
+      "strategy": "50/50 SPY/GLD (LIVE)",
+      "cagr_pct": 18.93,
+      "sharpe": 1.451,
+      "sortino": 1.646,
+      "mdd_pct": -7.67,
+      "calmar": 2.469,
+      "ann_vol_pct": 9.51,
+      "total_return_pct": 23.69,
+      "n_days": 309,
+      "source": "paper_trading.json (actual live)"
+    }
+  },
+  "tariff_shock_analysis": {
+    "vix_peak_date": "2025-04-08",
+    "vix_peak_value": 52.33,
+    "shock_window": "2025-03-25 to 2025-05-08",
+    "strategy_behavior": {
+      "Percentile 50/50": {
+        "weight_at_peak": 0.0,
+        "weight_1w_before": 0.0873,
+        "weight_2w_after": 0.0397,
+        "weight_1m_after": 0.1627,
+        "shock_window_return_pct": 0.98,
+        "days_to_50pct_weight": 59
+      },
+      "Percentile 70/30": {
+        "weight_at_peak": 0.05,
+        "weight_1w_before": 0.0913,
+        "weight_2w_after": 0.05,
+        "weight_1m_after": 0.1627,
+        "shock_window_return_pct": 0.72,
+        "days_to_50pct_weight": 59
+      },
+      "P3-AGG Lookup": {
+        "weight_at_peak": 0.1,
+        "weight_1w_before": 0.45,
+        "weight_2w_after": 0.1,
+        "weight_1m_after": 0.45,
+        "shock_window_return_pct": 1.32,
+        "days_to_50pct_weight": 108
+      },
+      "Buy-Hold SPY": {
+        "weight_at_peak": 1.0,
+        "weight_1w_before": 1.0,
+        "weight_2w_after": 1.0,
+        "weight_1m_after": 1.0,
+        "shock_window_return_pct": -1.57,
+        "days_to_50pct_weight": 1
+      }
+    }
+  },
+  "dm_test_results": [
+    {
+      "comparison": "Percentile 50/50 vs Buy-Hold SPY",
+      "mean_diff_bps_daily": 5.398,
+      "t_stat": 0.836,
+      "p_value": 0.4038,
+      "significant_5pct": false,
+      "harvey_pass": "False",
+      "n_obs": 309
+    },
+    {
+      "comparison": "Percentile 70/30 vs Buy-Hold SPY",
+      "mean_diff_bps_daily": 4.89,
+      "t_stat": 0.813,
+      "p_value": 0.4169,
+      "significant_5pct": false,
+      "harvey_pass": "False",
+      "n_obs": 309
+    },
+    {
+      "comparison": "P3-AGG Lookup vs Buy-Hold SPY",
+      "mean_diff_bps_daily": 3.478,
+      "t_stat": 0.569,
+      "p_value": 0.5701,
+      "significant_5pct": false,
+      "harvey_pass": "False",
+      "n_obs": 309
+    },
+    {
+      "comparison": "Percentile 70/30 vs Percentile 50/50",
+      "mean_diff_bps_daily": -0.508,
+      "t_stat": -0.592,
+      "p_value": 0.5541,
+      "significant_5pct": false,
+      "harvey_pass": "False",
+      "n_obs": 309
+    }
+  ],
+  "monthly_returns": {
+    "Percentile 50/50": {
+      "2025-01": 2.28,
+      "2025-02": 1.16,
+      "2025-03": 0.78,
+      "2025-04": 0.64,
+      "2025-05": 1.08,
+      "2025-06": 1.53,
+      "2025-07": 0.36,
+      "2025-08": 2.9,
+      "2025-09": 5.55,
+      "2025-10": 1.13,
+      "2025-11": 2.28,
+      "2025-12": 1.12,
+      "2026-01": 6.65,
+      "2026-02": 1.44,
+      "2026-03": -0.6
+    },
+    "Percentile 70/30": {
+      "2025-01": 2.16,
+      "2025-02": 0.97,
+      "2025-03": 0.57,
+      "2025-04": 0.5,
+      "2025-05": 1.69,
+      "2025-06": 2.21,
+      "2025-07": 0.99,
+      "2025-08": 2.82,
+      "2025-09": 4.6,
+      "2025-10": 1.68,
+      "2025-11": 1.93,
+      "2025-12": 0.95,
+      "2026-01": 4.98,
+      "2026-02": 1.04,
+      "2026-03": -0.37
+    },
+    "P3-AGG Lookup": {
+      "2025-01": 2.32,
+      "2025-02": 0.0,
+      "2025-03": 1.52,
+      "2025-04": 0.4,
+      "2025-05": 1.64,
+      "2025-06": 1.43,
+      "2025-07": 0.45,
+      "2025-08": 2.58,
+      "2025-09": 3.66,
+      "2025-10": 1.31,
+      "2025-11": 1.67,
+      "2025-12": 0.95,
+      "2026-01": 4.51,
+      "2026-02": 1.99,
+      "2026-03": -2.25
+    },
+    "Buy-Hold SPY": {
+      "2025-01": 2.69,
+      "2025-02": -1.27,
+      "2025-03": -5.57,
+      "2025-04": -0.87,
+      "2025-05": 6.28,
+      "2025-06": 5.14,
+      "2025-07": 2.3,
+      "2025-08": 2.05,
+      "2025-09": 3.56,
+      "2025-10": 2.38,
+      "2025-11": 0.2,
+      "2025-12": 0.08,
+      "2026-01": 1.47,
+      "2026-02": -0.86,
+      "2026-03": -7.31
+    }
+  },
+  "key_findings": [
+    "#1 Percentile 70/30 (SIM): Sharpe=3.572",
+    "#2 Percentile 50/50 (SIM): Sharpe=3.013",
+    "#3 Piecewise Conservative (LIVE): Sharpe=2.789",
+    "#4 P3-AGG Lookup (SIM): Sharpe=2.197",
+    "#5 50/50 SPY/GLD (LIVE): Sharpe=1.451",
+    "#6 Buy-Hold SPY (SIM): Sharpe=0.286",
+    "#7 12/VIX (LIVE): Sharpe=-0.159",
+    "Percentile 70/30 BEATS Piecewise (Sharpe 3.572 vs 2.789)",
+    "At VIX peak 52.33: Percentile 50/50 weight=0.0000, 70/30 weight=0.0500",
+    "Recovery to 50% weight: Percentile 50/50=59d, 70/30=59d"
+  ]
+}

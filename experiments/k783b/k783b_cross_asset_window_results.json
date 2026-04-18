@@ -1,0 +1,462 @@
+{
+  "experiment_id": "K783b",
+  "title": "Cross-Asset Window Size Sensitivity Validation",
+  "timestamp": "2026-03-31T14:20:19.105040+00:00",
+  "elapsed_seconds": 16.5,
+  "data_source": "yfinance",
+  "assets_tested": [
+    "QQQ",
+    "GLD",
+    "0050.TW",
+    "BTC-USD"
+  ],
+  "oos_period": "2023-01-01 to 2024-12-31",
+  "refit_every": 21,
+  "model": "GJR-GARCH(1,1)-t",
+  "windows_tested": [
+    "252",
+    "504",
+    "1000",
+    "2000",
+    "3000",
+    "5040",
+    "ALL"
+  ],
+  "harvey_threshold": 3.0,
+  "asset_descriptive_stats": {
+    "QQQ": {
+      "n_total": 5846,
+      "n_oos": 502,
+      "period": "2003-01-03 to 2026-03-30",
+      "mean_pct": 0.055768641361477675,
+      "std_pct": 1.3583435082279975,
+      "skew": -0.23713772884172798,
+      "kurt": 7.120611933404346
+    },
+    "GLD": {
+      "n_total": 5342,
+      "n_oos": 502,
+      "period": "2005-01-04 to 2026-03-30",
+      "mean_pct": 0.04241109683081805,
+      "std_pct": 1.1426473068142138,
+      "skew": -0.46431821630246867,
+      "kurt": 6.949507207510573
+    },
+    "0050.TW": {
+      "n_total": 4216,
+      "n_oos": 481,
+      "period": "2009-01-05 to 2026-03-30",
+      "mean_pct": 0.06333374846719876,
+      "std_pct": 1.3413260226976362,
+      "skew": 0.06394294850104779,
+      "kurt": 18.126254621094894
+    },
+    "BTC-USD": {
+      "n_total": 4106,
+      "n_oos": 731,
+      "period": "2015-01-02 to 2026-03-30",
+      "mean_pct": 0.13048334936040995,
+      "std_pct": 3.538379133793458,
+      "skew": -0.734680008394718,
+      "kurt": 11.92917335767884
+    }
+  },
+  "qlike_matrix": {
+    "QQQ": {
+      "252": 1.5709494813673048,
+      "504": 1.5662286781386838,
+      "1000": 1.5998199585500785,
+      "2000": 1.6662020738653232,
+      "3000": 1.6965080880182934,
+      "ALL": 1.6604295657428576
+    },
+    "GLD": {
+      "252": 1.5327334002689084,
+      "504": 1.5024227481830086,
+      "1000": 1.498105459862568,
+      "2000": 1.5019300136076161,
+      "3000": 1.495849184653975,
+      "ALL": 1.5026812520810793
+    },
+    "0050.TW": {
+      "252": 1.763593033309486,
+      "504": 1.772934633125882,
+      "1000": 1.7051543337627375,
+      "2000": 1.7210770071798924,
+      "3000": 1.75376614260554,
+      "ALL": 1.7578857929179428
+    },
+    "BTC-USD": {
+      "252": 2.0741360534173037,
+      "504": 2.0389525882598525,
+      "1000": 2.0200134394760054,
+      "2000": 2.0157738218341774,
+      "ALL": 2.0374530689723747
+    }
+  },
+  "full_results": {
+    "QQQ": {
+      "252": {
+        "window": "252",
+        "n_forecasts": 502,
+        "QLIKE": 1.5709494813673048,
+        "convergence_rate": 1.0,
+        "total_fits": 24,
+        "avg_persistence": 0.956090749465904,
+        "std_persistence": 0.03524358481380741
+      },
+      "504": {
+        "window": "504",
+        "n_forecasts": 502,
+        "QLIKE": 1.5662286781386838,
+        "convergence_rate": 1.0,
+        "total_fits": 24,
+        "avg_persistence": 0.9908180024864451,
+        "std_persistence": 0.009770911177523942
+      },
+      "1000": {
+        "window": "1000",
+        "n_forecasts": 502,
+        "QLIKE": 1.5998199585500785,
+        "convergence_rate": 1.0,
+        "total_fits": 24,
+        "avg_persistence": 0.9875080639215282,
+        "std_persistence": 0.004300969390058782
+      },
+      "2000": {
+        "window": "2000",
+        "n_forecasts": 502,
+        "QLIKE": 1.6662020738653232,
+        "convergence_rate": 1.0,
+        "total_fits": 24,
+        "avg_persistence": 0.9956310623890143,
+        "std_persistence": 0.0021331055717230553
+      },
+      "3000": {
+        "window": "3000",
+        "n_forecasts": 502,
+        "QLIKE": 1.6965080880182934,
+        "convergence_rate": 1.0,
+        "total_fits": 24,
+        "avg_persistence": 0.986214757814141,
+        "std_persistence": 0.0009413971030818054
+      },
+      "ALL": {
+        "window": "ALL",
+        "n_forecasts": 502,
+        "QLIKE": 1.6604295657428576,
+        "convergence_rate": 1.0,
+        "total_fits": 24,
+        "avg_persistence": 0.9853636061750516,
+        "std_persistence": 0.0007469253538872009
+      }
+    },
+    "GLD": {
+      "252": {
+        "window": "252",
+        "n_forecasts": 502,
+        "QLIKE": 1.5327334002689084,
+        "convergence_rate": 1.0,
+        "total_fits": 24,
+        "avg_persistence": 0.8828316962298229,
+        "std_persistence": 0.12152020768533196
+      },
+      "504": {
+        "window": "504",
+        "n_forecasts": 502,
+        "QLIKE": 1.5024227481830086,
+        "convergence_rate": 1.0,
+        "total_fits": 24,
+        "avg_persistence": 0.8714103528623912,
+        "std_persistence": 0.12565372437794856
+      },
+      "1000": {
+        "window": "1000",
+        "n_forecasts": 502,
+        "QLIKE": 1.498105459862568,
+        "convergence_rate": 1.0,
+        "total_fits": 24,
+        "avg_persistence": 0.9663752775056347,
+        "std_persistence": 0.011318464455080628
+      },
+      "2000": {
+        "window": "2000",
+        "n_forecasts": 502,
+        "QLIKE": 1.5019300136076161,
+        "convergence_rate": 1.0,
+        "total_fits": 24,
+        "avg_persistence": 0.9858628747865726,
+        "std_persistence": 0.0016053279082130665
+      },
+      "3000": {
+        "window": "3000",
+        "n_forecasts": 502,
+        "QLIKE": 1.495849184653975,
+        "convergence_rate": 1.0,
+        "total_fits": 24,
+        "avg_persistence": 0.9901466157546596,
+        "std_persistence": 0.0009463883653000022
+      },
+      "ALL": {
+        "window": "ALL",
+        "n_forecasts": 502,
+        "QLIKE": 1.5026812520810793,
+        "convergence_rate": 1.0,
+        "total_fits": 24,
+        "avg_persistence": 0.9956941657906239,
+        "std_persistence": 0.00023437406743179328
+      }
+    },
+    "0050.TW": {
+      "252": {
+        "window": "252",
+        "n_forecasts": 481,
+        "QLIKE": 1.763593033309486,
+        "convergence_rate": 1.0,
+        "total_fits": 23,
+        "avg_persistence": 0.9600446208824305,
+        "std_persistence": 0.03896524910682673
+      },
+      "504": {
+        "window": "504",
+        "n_forecasts": 481,
+        "QLIKE": 1.772934633125882,
+        "convergence_rate": 1.0,
+        "total_fits": 23,
+        "avg_persistence": 0.9824384894685126,
+        "std_persistence": 0.018234263166471875
+      },
+      "1000": {
+        "window": "1000",
+        "n_forecasts": 481,
+        "QLIKE": 1.7051543337627375,
+        "convergence_rate": 1.0,
+        "total_fits": 23,
+        "avg_persistence": 0.9435767274699222,
+        "std_persistence": 0.013430468495131364
+      },
+      "2000": {
+        "window": "2000",
+        "n_forecasts": 481,
+        "QLIKE": 1.7210770071798924,
+        "convergence_rate": 1.0,
+        "total_fits": 23,
+        "avg_persistence": 0.9673930631512242,
+        "std_persistence": 0.004343562425406849
+      },
+      "3000": {
+        "window": "3000",
+        "n_forecasts": 481,
+        "QLIKE": 1.75376614260554,
+        "convergence_rate": 1.0,
+        "total_fits": 23,
+        "avg_persistence": 0.984124426561539,
+        "std_persistence": 0.0011961719907130249
+      },
+      "ALL": {
+        "window": "ALL",
+        "n_forecasts": 481,
+        "QLIKE": 1.7578857929179428,
+        "convergence_rate": 1.0,
+        "total_fits": 23,
+        "avg_persistence": 0.9814326737546935,
+        "std_persistence": 0.00048495149126158145
+      }
+    },
+    "BTC-USD": {
+      "252": {
+        "window": "252",
+        "n_forecasts": 731,
+        "QLIKE": 2.0741360534173037,
+        "convergence_rate": 1.0,
+        "total_fits": 35,
+        "avg_persistence": 0.8635916652079488,
+        "std_persistence": 0.16001149143594315
+      },
+      "504": {
+        "window": "504",
+        "n_forecasts": 731,
+        "QLIKE": 2.0389525882598525,
+        "convergence_rate": 1.0,
+        "total_fits": 35,
+        "avg_persistence": 0.9752468337507993,
+        "std_persistence": 0.044680532543748604
+      },
+      "1000": {
+        "window": "1000",
+        "n_forecasts": 731,
+        "QLIKE": 2.0200134394760054,
+        "convergence_rate": 1.0,
+        "total_fits": 35,
+        "avg_persistence": 0.9992902237757576,
+        "std_persistence": 0.002603118378868576
+      },
+      "2000": {
+        "window": "2000",
+        "n_forecasts": 731,
+        "QLIKE": 2.0157738218341774,
+        "convergence_rate": 1.0,
+        "total_fits": 35,
+        "avg_persistence": 1.0000000001166842,
+        "std_persistence": 7.303807478585856e-10
+      },
+      "ALL": {
+        "window": "ALL",
+        "n_forecasts": 731,
+        "QLIKE": 2.0374530689723747,
+        "convergence_rate": 1.0,
+        "total_fits": 35,
+        "avg_persistence": 1.0000000230533148,
+        "std_persistence": 5.2131783354603164e-08
+      }
+    }
+  },
+  "dm_tests_vs_2000": {
+    "QQQ": {
+      "252": {
+        "dm_stat": 3.1093383887911994,
+        "p_value": 0.001981766210601643,
+        "harvey_pass": true,
+        "better": "W=252"
+      },
+      "504": {
+        "dm_stat": 3.5868341548226046,
+        "p_value": 0.0003675530243245628,
+        "harvey_pass": true,
+        "better": "W=504"
+      },
+      "1000": {
+        "dm_stat": 3.6590267693902194,
+        "p_value": 0.000280015273807388,
+        "harvey_pass": true,
+        "better": "W=1000"
+      },
+      "3000": {
+        "dm_stat": -3.112091236273703,
+        "p_value": 0.0019637297337147253,
+        "harvey_pass": true,
+        "better": "W=2000"
+      },
+      "ALL": {
+        "dm_stat": 0.9509501289207414,
+        "p_value": 0.34208821458021577,
+        "harvey_pass": false,
+        "better": "W=ALL"
+      }
+    },
+    "GLD": {
+      "252": {
+        "dm_stat": -1.2144536722822243,
+        "p_value": 0.22514778116214385,
+        "harvey_pass": false,
+        "better": "W=2000"
+      },
+      "504": {
+        "dm_stat": -0.03325626170649357,
+        "p_value": 0.973483503881932,
+        "harvey_pass": false,
+        "better": "W=2000"
+      },
+      "1000": {
+        "dm_stat": 0.3037868600614315,
+        "p_value": 0.7614166524598023,
+        "harvey_pass": false,
+        "better": "W=1000"
+      },
+      "3000": {
+        "dm_stat": 0.8377897140780661,
+        "p_value": 0.40254910529379684,
+        "harvey_pass": false,
+        "better": "W=3000"
+      },
+      "ALL": {
+        "dm_stat": -0.0993431153364527,
+        "p_value": 0.9209056628614616,
+        "harvey_pass": false,
+        "better": "W=2000"
+      }
+    },
+    "0050.TW": {
+      "252": {
+        "dm_stat": -1.2884287257282672,
+        "p_value": 0.19823884539813252,
+        "harvey_pass": false,
+        "better": "W=2000"
+      },
+      "504": {
+        "dm_stat": -2.117468759591547,
+        "p_value": 0.03475142006666054,
+        "harvey_pass": false,
+        "better": "W=2000"
+      },
+      "1000": {
+        "dm_stat": 0.6350574751839677,
+        "p_value": 0.5257039590513017,
+        "harvey_pass": false,
+        "better": "W=1000"
+      },
+      "3000": {
+        "dm_stat": -2.067074056722751,
+        "p_value": 0.03928120737854646,
+        "harvey_pass": false,
+        "better": "W=2000"
+      },
+      "ALL": {
+        "dm_stat": -2.279195084389731,
+        "p_value": 0.023108798115071716,
+        "harvey_pass": false,
+        "better": "W=2000"
+      }
+    },
+    "BTC-USD": {
+      "252": {
+        "dm_stat": -1.4185892159119498,
+        "p_value": 0.15644558777463846,
+        "harvey_pass": false,
+        "better": "W=2000"
+      },
+      "504": {
+        "dm_stat": -0.7300771323545137,
+        "p_value": 0.4655772524646502,
+        "harvey_pass": false,
+        "better": "W=2000"
+      },
+      "1000": {
+        "dm_stat": -0.18275045412917726,
+        "p_value": 0.8550445661558088,
+        "harvey_pass": false,
+        "better": "W=2000"
+      },
+      "ALL": {
+        "dm_stat": -1.2599367770513288,
+        "p_value": 0.20809480313443274,
+        "harvey_pass": false,
+        "better": "W=2000"
+      }
+    }
+  },
+  "best_window_per_asset": {
+    "QQQ": "504",
+    "GLD": "3000",
+    "0050.TW": "1000",
+    "BTC-USD": "2000"
+  },
+  "patterns": {
+    "QQQ": "ALL beats 2000",
+    "GLD": "2000 is optimal",
+    "0050.TW": "2000 is optimal",
+    "BTC-USD": "2000 is optimal"
+  },
+  "expanding_vs_2000_score": "1/4",
+  "conclusion": "MOSTLY ASSET-SPECIFIC: Expanding beats W=2000 only in few assets",
+  "references": [
+    "Feng & Zhang (2025) J.Forecasting \u2014 U-shape, W=1000-2000 optimal",
+    "Hillebrand (2005) \u2014 persistence bias in short windows",
+    "Hansen & Lunde (2005) J.Applied Econometrics \u2014 QLIKE",
+    "Patton (2011) JoE \u2014 imperfect proxy, r\u00b2 unbiased for \u03c3\u00b2",
+    "Harvey (2016) \u2014 t>3.0 threshold",
+    "K783: SPY expanding > w=2000 (DM=-3.23, Harvey PASS)",
+    "K591: Window Size Sweep (SPY)",
+    "K593: Cross-OOS Validation (SPY)"
+  ]
+}

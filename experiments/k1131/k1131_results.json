@@ -1,0 +1,230 @@
+{
+  "experiment_id": "K1131",
+  "title": "Continuous VIX-dependent beta via natural cubic spline (fix K1128 regime degeneracy)",
+  "timestamp": "2026-04-17T12:58:20.094820",
+  "seed": 42,
+  "runtime_sec": 1.757905,
+  "data_source": "TAIFEX TX 5-min bars 2017-2021 (K1124 cache)",
+  "is_period": "2017-2019",
+  "oos_period": "2020-2021",
+  "n_bars_valid": 52412,
+  "n_is": 31498,
+  "n_oos": 20914,
+  "n_is_jumps": 81,
+  "n_oos_jumps": 33,
+  "jump_detection": {
+    "method": "Lee-Mykland K=16 strictly-past BV (same as K1128)",
+    "gumbel_thresh_alpha_0.01": 5.125598054567598,
+    "n_jumps_total": 115
+  },
+  "spline": {
+    "type": "natural cubic spline (Ruppert-Wand-Carroll truncated cubic)",
+    "K_knots": 4,
+    "K_basis_cols": 3,
+    "knot_percentiles_IS": [
+      0.2,
+      0.4,
+      0.6,
+      0.8
+    ],
+    "knot_vix_values": [
+      11.048000144958507,
+      12.5,
+      14.25,
+      17.299999237060547
+    ],
+    "vix_is_median_centering": 13.109999656677246,
+    "basis_df_per_interaction": 3,
+    "total_params_spline": 10,
+    "total_params_tertile": 8,
+    "total_params_base": 4
+  },
+  "tertile_cutoffs_IS": {
+    "cutoff_33": 12.069999694824219,
+    "cutoff_67": 14.989999771118164
+  },
+  "oos_vix_range": {
+    "min": 12.319999694824219,
+    "max": 82.69000244140625,
+    "mean": 24.43031987211861
+  },
+  "is_vix_range": {
+    "min": 9.140000343322754,
+    "max": 37.31999969482422,
+    "mean": 14.344739332586041
+  },
+  "oos_tertile_counts_K1128_style": {
+    "low": 0,
+    "mid": 854,
+    "high": 20060
+  },
+  "models": {
+    "M_base": {
+      "n_params": 4,
+      "nll_is": 557.0556458071347,
+      "beta": [
+        -6.261803083749046,
+        2.276980104523164,
+        1.529129428130548,
+        -0.8859756470268693
+      ],
+      "features": [
+        "intercept",
+        "jump_curr",
+        "|OFI|",
+        "OFI"
+      ]
+    },
+    "M_tertile": {
+      "n_params": 8,
+      "nll_is": 554.8611340504539,
+      "beta": [
+        -6.227184229298453,
+        2.2308253169006798,
+        2.0836428657467643,
+        -0.4170860584742328,
+        -1.632016648548323,
+        -1.1935605671028855,
+        -1.8147529953845836,
+        0.04722706433117147
+      ],
+      "features": [
+        "intercept",
+        "jump_curr",
+        "|OFI|",
+        "OFI",
+        "mid*|OFI|",
+        "high*|OFI|",
+        "mid*OFI",
+        "high*OFI"
+      ]
+    },
+    "M_spline": {
+      "n_params": 10,
+      "nll_is": 553.03209019162,
+      "beta": [
+        -6.205050520276403,
+        2.217204425034402,
+        1.3303183778351542,
+        -2.8919632339554924,
+        -0.22188688297982653,
+        -16.95771537335282,
+        35.03002809570548,
+        -0.9446798861279655,
+        27.697678025228406,
+        -42.81297349108122
+      ],
+      "features": [
+        "intercept",
+        "jump_curr",
+        "|OFI|",
+        "OFI",
+        "spline_abs_0",
+        "spline_abs_1",
+        "spline_abs_2",
+        "spline_sgn_0",
+        "spline_sgn_1",
+        "spline_sgn_2"
+      ],
+      "beta_abs_main": 1.3303183778351542,
+      "beta_ofi_main": -2.8919632339554924,
+      "theta_abs": [
+        -0.22188688297982653,
+        -16.95771537335282,
+        35.03002809570548
+      ],
+      "theta_sgn": [
+        -0.9446798861279655,
+        27.697678025228406,
+        -42.81297349108122
+      ]
+    }
+  },
+  "H1_LRT_spline_vs_base": {
+    "chi2_stat": 8.047111231029476,
+    "df": 6,
+    "p_value": 0.23467210172997477,
+    "pass": false
+  },
+  "LRT_tertile_vs_base_reference": {
+    "chi2_stat": 4.389023513361735,
+    "df": 4,
+    "p_value": 0.3559099621814814
+  },
+  "H2_DM_spline_vs_tertile": {
+    "t": -3.936694237337927,
+    "t_plain": -3.9367883569567788,
+    "mean_d": -0.0007578513340819119,
+    "se": 0.00019250497242065284,
+    "n": 20914,
+    "pass": false
+  },
+  "DM_spline_vs_base": {
+    "t": -3.934465769448788,
+    "t_plain": -3.934559835788788,
+    "mean_d": -0.0007710508744829152,
+    "se": 0.00019596877583851445,
+    "n": 20914
+  },
+  "DM_tertile_vs_base": {
+    "t": -0.41572542480188585,
+    "t_plain": -0.4157353640849925,
+    "mean_d": -1.3199540401003372e-05,
+    "se": 3.174986191048417e-05,
+    "n": 20914
+  },
+  "OOS_log_loss": {
+    "base": 0.011707634471523584,
+    "tertile": 0.011720834011924587,
+    "spline": 0.012478685346006501
+  },
+  "OOS_AUC": {
+    "base": 0.5542707376431815,
+    "tertile": 0.5558859511256427,
+    "spline": 0.49645248036129697
+  },
+  "H3_economic_significance": {
+    "oos_mean_total_contrib_log_odds": 0.20197293496197985,
+    "oos_mean_abs_contrib": 0.20341513273121034,
+    "oos_mean_sgn_contrib": -0.0014421977692304741,
+    "oos_mean_abs_contrib_magnitude": 0.22139613768991925,
+    "oos_mean_sgn_contrib_magnitude": 0.07812406775655,
+    "tertile_mean_abs_contrib": 0.08862832860094172,
+    "tertile_mean_sgn_contrib": -0.01102221125651016,
+    "pass": true
+  },
+  "H4_shape": {
+    "description": "U-shape_or_single_turn",
+    "f_abs_range": [
+      -0.5756834698169568,
+      20.431985272293545
+    ],
+    "f_sgn_range": [
+      -1.9939066812984019,
+      6.520498675463161
+    ],
+    "f_abs_at_OOS_Q25Q50Q75": [
+      -0.06777530522175756,
+      1.2896153866367601,
+      3.034494278464762
+    ],
+    "oos_vix_quantiles": [
+      17.75,
+      22.049999237060547,
+      27.577499866485596
+    ],
+    "pass": true
+  },
+  "verdict": "NULL",
+  "h1_pass": false,
+  "h2_pass": false,
+  "h3_pass": true,
+  "h4_pass": true,
+  "references": [
+    "Lee & Mykland (2008) RFS 21(6), 2535-2563",
+    "Cont, Kukanov, Stoikov (2014) JFE 12(1), 47-88",
+    "Hastie & Tibshirani (1990) Generalized Additive Models",
+    "Ruppert, Wand, Carroll (2003) Semiparametric Regression",
+    "Harvey, Leybourne, Newbold (1997) IJF 13(2), 281-291"
+  ]
+}

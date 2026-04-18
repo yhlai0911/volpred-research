@@ -1,0 +1,119 @@
+
+========================================================================
+K1148_d3: PASS vs FAIL characteristics
+========================================================================
+
+[1/5] Loaded 29 stocks from K1148_d1
+
+  PASS (DM ≤ -2.0): n=9
+    ['2330.TW', '2303.TW', '3035.TW', '3443.TW', '2886.TW', '2603.TW', '2615.TW', '2002.TW', '2637.TW']
+  FAIL (DM > -2.0): n=20
+    ['6239.TW', '2454.TW', '2379.TW', '3034.TW', '2881.TW', '2882.TW', '2887.TW', '2609.TW', '1301.TW', '1303.TW', '1326.TW', '2027.TW', '2317.TW', '3045.TW', '2382.TW', '2912.TW', '1215.TW', '2347.TW', '1210.TW', '2892.TW']
+
+[sector] Fetching sector / marketCap from yfinance ...
+  2330.TW: sector=Technology, cap=52902349504512
+  2303.TW: sector=Technology, cap=926488264704
+  6239.TW: sector=Technology, cap=152561582080
+  2454.TW: sector=Technology, cap=3064531517440
+  2379.TW: sector=Technology, cap=274252382208
+  3034.TW: sector=Technology, cap=251923972096
+  3035.TW: sector=Technology, cap=41818324992
+  3443.TW: sector=Technology, cap=438215966720
+  2881.TW: sector=Financial Services, cap=1218640740352
+  2882.TW: sector=Financial Services, cap=1082587742208
+  2886.TW: sector=Financial Services, cap=587149279232
+  2887.TW: sector=Financial Services, cap=605493788672
+  2603.TW: sector=Industrials, cap=429761036288
+  2615.TW: sector=Industrials, cap=212705902592
+  2609.TW: sector=Industrials, cap=176351264768
+  1301.TW: sector=Basic Materials, cap=339293995008
+  1303.TW: sector=Basic Materials, cap=696326225920
+  1326.TW: sector=Basic Materials, cap=297714941952
+  2002.TW: sector=Basic Materials, cap=306403770368
+  2027.TW: sector=Basic Materials, cap=88268947456
+  2317.TW: sector=Technology, cap=2855380189184
+  3045.TW: sector=Consumer Cyclical, cap=338745131008
+  2382.TW: sector=Technology, cap=1245009412096
+  2912.TW: sector=Consumer Defensive, cap=245350858752
+  2637.TW: sector=Industrials, cap=56727085056
+  1215.TW: sector=Consumer Defensive, cap=42154971136
+  2347.TW: sector=Technology, cap=139440373760
+  1210.TW: sector=Consumer Defensive, cap=45433208832
+  2892.TW: sector=Financial Services, cap=412690776064
+[2/5] Loaded sector_info (29) + earnings_surprise (31)
+
+[3/5] Extracting features ...
+  2330.TW (PASS): sector=Technology, vol=0.229, n_surp=40
+  2303.TW (PASS): sector=Technology, vol=0.276, n_surp=35
+  6239.TW (FAIL): sector=Technology, vol=0.302, n_surp=40
+  2454.TW (FAIL): sector=Technology, vol=0.338, n_surp=39
+  2379.TW (FAIL): sector=Technology, vol=0.347, n_surp=39
+  3034.TW (FAIL): sector=Technology, vol=0.342, n_surp=34
+  3035.TW (PASS): sector=Technology, vol=0.405, n_surp=37
+  3443.TW (PASS): sector=Technology, vol=0.416, n_surp=39
+  2881.TW (FAIL): sector=Financial Services, vol=0.232, n_surp=40
+  2882.TW (FAIL): sector=Financial Services, vol=0.235, n_surp=38
+  2886.TW (PASS): sector=Financial Services, vol=0.209, n_surp=36
+  2887.TW (FAIL): sector=Financial Services, vol=0.221, n_surp=38
+  2603.TW (PASS): sector=Industrials, vol=0.302, n_surp=40
+  2615.TW (PASS): sector=Industrials, vol=0.308, n_surp=30
+  2609.TW (FAIL): sector=Industrials, vol=0.331, n_surp=38
+  1301.TW (FAIL): sector=Basic Materials, vol=0.215, n_surp=40
+  1303.TW (FAIL): sector=Basic Materials, vol=0.228, n_surp=36
+  1326.TW (FAIL): sector=Basic Materials, vol=0.228, n_surp=40
+  2002.TW (PASS): sector=Basic Materials, vol=0.158, n_surp=40
+  2027.TW (FAIL): sector=Basic Materials, vol=0.275, n_surp=38
+  2317.TW (FAIL): sector=Technology, vol=0.254, n_surp=40
+  3045.TW (FAIL): sector=Consumer Cyclical, vol=0.171, n_surp=39
+  2382.TW (FAIL): sector=Technology, vol=0.267, n_surp=40
+  2912.TW (FAIL): sector=Consumer Defensive, vol=0.249, n_surp=40
+  2637.TW (PASS): sector=Industrials, vol=0.160, n_surp=34
+  1215.TW (FAIL): sector=Consumer Defensive, vol=0.267, n_surp=19
+  2347.TW (FAIL): sector=Technology, vol=0.240, n_surp=40
+  1210.TW (FAIL): sector=Consumer Defensive, vol=0.229, n_surp=22
+  2892.TW (FAIL): sector=Financial Services, vol=0.175, n_surp=40
+
+  Feature DF: (29, 23)
+
+[4/5] Per-feature PASS vs FAIL comparison ...
+
+feature                        |             PASS (μ±σ) |             FAIL (μ±σ) |       d |      t_p |   t_p_BH |      u_p |   u_p_BH
+  market_cap_snapshot          |   +6.211e+12±+1.75e+13 |   +6.786e+11±+8.63e+11 |  +0.579 |   0.3711 |   0.8891 |   0.9436 |   0.9436
+  avg_dollar_vol_is            |   +7.826e+08±+1.64e+09 |   +4.107e+08±+5.26e+08 |  +0.373 |   0.5240 |   0.8891 |   0.9436 |   0.9436
+  is_annualized_vol            |   +2.736e-01±+9.47e-02 |   +2.572e-01±+5.18e-02 |  +0.243 |   0.6366 |   0.8891 |   0.8320 |   0.9436
+  is_annualized_return         |   +5.689e-02±+6.90e-02 |   +7.744e-02±+6.98e-02 |  -0.296 |   0.4703 |   0.8891 |   0.2293 |   0.9404
+  vol_of_vol                   |   +6.277e-03±+2.34e-03 |   +5.920e-03±+1.01e-03 |  +0.234 |   0.6693 |   0.8891 |   0.9436 |   0.9436
+  max_drawdown_is              |   -4.522e-01±+1.63e-01 |   -4.703e-01±+1.35e-01 |  +0.126 |   0.7747 |   0.8891 |   0.7954 |   0.9436
+  gjr_alpha                    |   +5.224e-02±+4.48e-02 |   +4.501e-02±+2.37e-02 |  +0.230 |   0.6579 |   0.8891 |   0.7954 |   0.9436
+  gjr_gamma                    |   +1.142e-02±+1.98e-02 |   +1.766e-02±+1.96e-02 |  -0.317 |   0.4436 |   0.8891 |   0.4525 |   0.9404
+  gjr_beta                     |   +9.054e-01±+1.06e-01 |   +9.161e-01±+4.78e-02 |  -0.152 |   0.7780 |   0.8891 |   0.5557 |   0.9404
+  gjr_persistence              |   +9.633e-01±+6.53e-02 |   +9.699e-01±+2.69e-02 |  -0.156 |   0.7773 |   0.8891 |   0.5877 |   0.9404
+  gjr_theta0                   |   +5.394e-05±+2.56e-05 |   +4.751e-05±+4.80e-05 |  +0.151 |   0.6434 |   0.8891 |   0.1376 |   0.9404
+  n_surprise_events_is         |   +3.678e+01±+3.42e+00 |   +3.700e+01±+5.88e+00 |  -0.042 |   0.8994 |   0.8994 |   0.3643 |   0.9404
+  earnings_freq_per_year_is    |   +3.679e+00±+3.42e-01 |   +3.702e+00±+5.88e-01 |  -0.042 |   0.8994 |   0.8994 |   0.3643 |   0.9404
+  avg_abs_surprise_pct_is      |   +7.043e+01±+9.28e+01 |   +5.442e+01±+9.12e+01 |  +0.175 |   0.6717 |   0.8891 |   0.5557 |   0.9404
+  mean_surprise_pct_is         |   -2.124e+01±+6.53e+01 |   -8.740e+00±+7.19e+01 |  -0.178 |   0.6501 |   0.8891 |   0.5245 |   0.9404
+  surprise_symmetry_ratio      |   +4.751e-01±+2.69e-01 |   +2.398e-01±+2.11e-01 |  +1.026 |   0.0374 |   0.5991 |   0.0359 |   0.5748
+
+  Sector distribution (PASS / FAIL):
+    Basic Materials          : PASS=1/9 (11%), FAIL=4/20 (20%), Fisher p=1.0
+    Consumer Cyclical        : PASS=0/9 (0%), FAIL=1/20 (5%), Fisher p=1.0
+    Consumer Defensive       : PASS=0/9 (0%), FAIL=3/20 (15%), Fisher p=0.5320197044334976
+    Financial Services       : PASS=1/9 (11%), FAIL=4/20 (20%), Fisher p=1.0
+    Industrials              : PASS=3/9 (33%), FAIL=1/20 (5%), Fisher p=0.07603890362511052
+    Technology               : PASS=4/9 (44%), FAIL=7/20 (35%), Fisher p=0.6941529235382308
+
+[5/5] Verdict evaluation:
+  → Option 3 REJECTED
+  Significant numeric features (BH adj p<0.1 AND |d|>0.5): 0
+  Significant sectors (Fisher BH adj p<0.1): 0
+
+[plot] pass_vs_fail_features.png ...
+  → /Users/yhlai0911/Desktop/volpred-research/experiments/k1148_d3/pass_vs_fail_features.png
+[plot] feature_importance.png ...
+  → /Users/yhlai0911/Desktop/volpred-research/experiments/k1148_d3/feature_importance.png
+
+  Results → /Users/yhlai0911/Desktop/volpred-research/experiments/k1148_d3/k1148_d3_results.json
+  Elapsed: 9.0s
+
+  FINAL VERDICT: Option 3 REJECTED

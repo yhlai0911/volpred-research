@@ -1,0 +1,451 @@
+{
+  "experiment_id": "K889b",
+  "title": "MF-GJR Cross-OOS Validation",
+  "timestamp": "2026-04-05T11:15:15.715168+00:00",
+  "runtime_seconds": 101.8,
+  "methodology": {
+    "models": [
+      "GJR-GARCH(1,1)",
+      "MF-GARCH",
+      "MF-GJR"
+    ],
+    "mf_long_run": "tau_t = exp(theta_0 + theta_1 * log(VIX_{t-1}))",
+    "mf_short_run_garch": "g_t = (1-a-b) + a*u^2_{t-1} + b*g_{t-1}, u=r/sqrt(tau)",
+    "mf_short_run_gjr": "g_t = (1-a-g/2-b) + a*u^2_{t-1} + g*u^2_{t-1}*I(u<0) + b*g_{t-1}",
+    "estimation": "Rolling window (w=2000), refit every 63 days, MLE with multi-start",
+    "evaluation": "QLIKE on r^2 (Patton 2011), DM test (Harvey t>3.0), Spearman",
+    "cross_oos": "5 non-overlapping 2-year OOS periods (2009-2024)",
+    "robustness_criterion": "Must win >= 3/5 periods by QLIKE to be considered robust"
+  },
+  "data": {
+    "source": "yfinance",
+    "asset": "SPY",
+    "period": "2000-01-01 to 2025-01-01",
+    "window": 2000,
+    "refit_every": 63
+  },
+  "k889_original": {
+    "oos_period": "2019-01-01 to 2026-04-01",
+    "mfgjr_dm_t": -3.302,
+    "mfgjr_qlike_pct": -6.078,
+    "mfgjr_harvey_pass": true
+  },
+  "periods": [
+    {
+      "name": "P1_Recovery",
+      "regime": "Post-GFC recovery",
+      "oos_start": "2009-01-02",
+      "oos_end": "2010-12-31",
+      "n_oos": 504,
+      "n_is": "2262",
+      "n_refits": 8,
+      "qlike": {
+        "GJR": 1.664132,
+        "MF-GARCH": 1.636315,
+        "MF-GJR": 1.622113
+      },
+      "qlike_pct_vs_gjr": {
+        "GJR": 0.0,
+        "MF-GARCH": -1.672,
+        "MF-GJR": -2.525
+      },
+      "spearman": {
+        "GJR": {
+          "rho": 0.3436,
+          "p": 0.0
+        },
+        "MF-GARCH": {
+          "rho": 0.3699,
+          "p": 0.0
+        },
+        "MF-GJR": {
+          "rho": 0.3854,
+          "p": 0.0
+        }
+      },
+      "dm_vs_gjr": {
+        "GJR": {
+          "t": 0.0,
+          "p": 1.0,
+          "significant_harvey": false
+        },
+        "MF-GARCH": {
+          "t": -1.549,
+          "p": 0.1219,
+          "significant_harvey": false
+        },
+        "MF-GJR": {
+          "t": -2.666,
+          "p": 0.0079,
+          "significant_harvey": false
+        }
+      },
+      "winner_qlike": "MF-GJR",
+      "mfgjr_wins": true,
+      "mfgarch_wins": true,
+      "parameters": {
+        "GJR": {
+          "omega": 1.34e-06,
+          "alpha": 0.049138,
+          "gamma": 0.049202,
+          "beta": 0.914076,
+          "persistence": 0.987815
+        },
+        "MF-GARCH": {
+          "theta_0": -15.8017,
+          "theta_1": 2.2077,
+          "alpha": 0.015765,
+          "beta": 0.954562,
+          "persistence_g": 0.970327
+        },
+        "MF-GJR": {
+          "theta_0": -15.3794,
+          "theta_1": 2.0554,
+          "alpha": 0.0001,
+          "gamma": 0.047552,
+          "beta": 0.917257,
+          "persistence_g": 0.941133
+        }
+      }
+    },
+    {
+      "name": "P2_EuroCrisis",
+      "regime": "Euro sovereign debt crisis",
+      "oos_start": "2011-01-03",
+      "oos_end": "2012-12-31",
+      "n_oos": 502,
+      "n_is": "2766",
+      "n_refits": 8,
+      "qlike": {
+        "GJR": 1.502939,
+        "MF-GARCH": 1.506645,
+        "MF-GJR": 1.486086
+      },
+      "qlike_pct_vs_gjr": {
+        "GJR": 0.0,
+        "MF-GARCH": 0.247,
+        "MF-GJR": -1.121
+      },
+      "spearman": {
+        "GJR": {
+          "rho": 0.3443,
+          "p": 0.0
+        },
+        "MF-GARCH": {
+          "rho": 0.3627,
+          "p": 0.0
+        },
+        "MF-GJR": {
+          "rho": 0.3757,
+          "p": 0.0
+        }
+      },
+      "dm_vs_gjr": {
+        "GJR": {
+          "t": 0.0,
+          "p": 1.0,
+          "significant_harvey": false
+        },
+        "MF-GARCH": {
+          "t": 0.185,
+          "p": 0.8529,
+          "significant_harvey": false
+        },
+        "MF-GJR": {
+          "t": -1.083,
+          "p": 0.2793,
+          "significant_harvey": false
+        }
+      },
+      "winner_qlike": "MF-GJR",
+      "mfgjr_wins": true,
+      "mfgarch_wins": false,
+      "parameters": {
+        "GJR": {
+          "omega": 2.65e-06,
+          "alpha": 0.0001,
+          "gamma": 0.20925,
+          "beta": 0.877149,
+          "persistence": 0.981874
+        },
+        "MF-GARCH": {
+          "theta_0": -15.9536,
+          "theta_1": 2.2651,
+          "alpha": 0.023149,
+          "beta": 0.939164,
+          "persistence_g": 0.962313
+        },
+        "MF-GJR": {
+          "theta_0": -15.1615,
+          "theta_1": 1.9857,
+          "alpha": 0.0001,
+          "gamma": 0.068657,
+          "beta": 0.907404,
+          "persistence_g": 0.941832
+        }
+      }
+    },
+    {
+      "name": "P3_ChinaOil",
+      "regime": "China devaluation + oil crash",
+      "oos_start": "2015-01-02",
+      "oos_end": "2016-12-30",
+      "n_oos": 504,
+      "n_is": "3772",
+      "n_refits": 8,
+      "qlike": {
+        "GJR": 1.588729,
+        "MF-GARCH": 1.498129,
+        "MF-GJR": 1.485424
+      },
+      "qlike_pct_vs_gjr": {
+        "GJR": 0.0,
+        "MF-GARCH": -5.703,
+        "MF-GJR": -6.502
+      },
+      "spearman": {
+        "GJR": {
+          "rho": 0.3178,
+          "p": 0.0
+        },
+        "MF-GARCH": {
+          "rho": 0.361,
+          "p": 0.0
+        },
+        "MF-GJR": {
+          "rho": 0.3762,
+          "p": 0.0
+        }
+      },
+      "dm_vs_gjr": {
+        "GJR": {
+          "t": 0.0,
+          "p": 1.0,
+          "significant_harvey": false
+        },
+        "MF-GARCH": {
+          "t": -4.097,
+          "p": 0.0,
+          "significant_harvey": true
+        },
+        "MF-GJR": {
+          "t": -4.694,
+          "p": 0.0,
+          "significant_harvey": true
+        }
+      },
+      "winner_qlike": "MF-GJR",
+      "mfgjr_wins": true,
+      "mfgarch_wins": true,
+      "parameters": {
+        "GJR": {
+          "omega": 4.12e-06,
+          "alpha": 0.047847,
+          "gamma": 0.203398,
+          "beta": 0.818412,
+          "persistence": 0.967958
+        },
+        "MF-GARCH": {
+          "theta_0": -16.6022,
+          "theta_1": 2.4543,
+          "alpha": 0.036363,
+          "beta": 0.831969,
+          "persistence_g": 0.868331
+        },
+        "MF-GJR": {
+          "theta_0": -16.2425,
+          "theta_1": 2.3274,
+          "alpha": 0.0001,
+          "gamma": 0.092916,
+          "beta": 0.831136,
+          "persistence_g": 0.877693
+        }
+      }
+    },
+    {
+      "name": "P4_COVID",
+      "regime": "Trade war + COVID crash",
+      "oos_start": "2019-01-02",
+      "oos_end": "2020-12-31",
+      "n_oos": 505,
+      "n_is": "4778",
+      "n_refits": 9,
+      "qlike": {
+        "GJR": 1.522581,
+        "MF-GARCH": 1.449019,
+        "MF-GJR": 1.419318
+      },
+      "qlike_pct_vs_gjr": {
+        "GJR": 0.0,
+        "MF-GARCH": -4.831,
+        "MF-GJR": -6.782
+      },
+      "spearman": {
+        "GJR": {
+          "rho": 0.4838,
+          "p": 0.0
+        },
+        "MF-GARCH": {
+          "rho": 0.5105,
+          "p": 0.0
+        },
+        "MF-GJR": {
+          "rho": 0.5223,
+          "p": 0.0
+        }
+      },
+      "dm_vs_gjr": {
+        "GJR": {
+          "t": 0.0,
+          "p": 1.0,
+          "significant_harvey": false
+        },
+        "MF-GARCH": {
+          "t": -0.831,
+          "p": 0.4066,
+          "significant_harvey": false
+        },
+        "MF-GJR": {
+          "t": -1.207,
+          "p": 0.2279,
+          "significant_harvey": false
+        }
+      },
+      "winner_qlike": "MF-GJR",
+      "mfgjr_wins": true,
+      "mfgarch_wins": true,
+      "parameters": {
+        "GJR": {
+          "omega": 4.63e-06,
+          "alpha": 0.108591,
+          "gamma": 0.263078,
+          "beta": 0.726814,
+          "persistence": 0.966944
+        },
+        "MF-GARCH": {
+          "theta_0": -17.5208,
+          "theta_1": 2.8134,
+          "alpha": 0.052069,
+          "beta": 0.809648,
+          "persistence_g": 0.861718
+        },
+        "MF-GJR": {
+          "theta_0": -16.8131,
+          "theta_1": 2.5533,
+          "alpha": 0.0001,
+          "gamma": 0.114426,
+          "beta": 0.781729,
+          "persistence_g": 0.839042
+        }
+      }
+    },
+    {
+      "name": "P5_AIBoom",
+      "regime": "AI boom + rate hikes",
+      "oos_start": "2023-01-03",
+      "oos_end": "2024-12-31",
+      "n_oos": 502,
+      "n_is": "5786",
+      "n_refits": 8,
+      "qlike": {
+        "GJR": 1.498225,
+        "MF-GARCH": 1.43788,
+        "MF-GJR": 1.434139
+      },
+      "qlike_pct_vs_gjr": {
+        "GJR": 0.0,
+        "MF-GARCH": -4.028,
+        "MF-GJR": -4.277
+      },
+      "spearman": {
+        "GJR": {
+          "rho": 0.1635,
+          "p": 0.000234
+        },
+        "MF-GARCH": {
+          "rho": 0.2433,
+          "p": 0.0
+        },
+        "MF-GJR": {
+          "rho": 0.2632,
+          "p": 0.0
+        }
+      },
+      "dm_vs_gjr": {
+        "GJR": {
+          "t": 0.0,
+          "p": 1.0,
+          "significant_harvey": false
+        },
+        "MF-GARCH": {
+          "t": -2.442,
+          "p": 0.015,
+          "significant_harvey": false
+        },
+        "MF-GJR": {
+          "t": -2.475,
+          "p": 0.0137,
+          "significant_harvey": false
+        }
+      },
+      "winner_qlike": "MF-GJR",
+      "mfgjr_wins": true,
+      "mfgarch_wins": true,
+      "parameters": {
+        "GJR": {
+          "omega": 2.31e-06,
+          "alpha": 0.080288,
+          "gamma": 0.100262,
+          "beta": 0.850195,
+          "persistence": 0.980614
+        },
+        "MF-GARCH": {
+          "theta_0": -18.1341,
+          "theta_1": 3.0,
+          "alpha": 0.019024,
+          "beta": 0.973566,
+          "persistence_g": 0.99259
+        },
+        "MF-GJR": {
+          "theta_0": -16.4682,
+          "theta_1": 2.4218,
+          "alpha": 0.0001,
+          "gamma": 0.092098,
+          "beta": 0.847934,
+          "persistence_g": 0.894083
+        }
+      }
+    }
+  ],
+  "summary": {
+    "n_periods": 5,
+    "mfgjr_wins_vs_gjr": 5,
+    "mfgarch_wins_vs_gjr": 4,
+    "mfgjr_harvey_passes": 1,
+    "mfgarch_harvey_passes": 1,
+    "mfgjr_robust": true,
+    "mfgarch_robust": true,
+    "k889_validated": true,
+    "avg_mfgjr_qlike_pct": -4.241,
+    "avg_mfgarch_qlike_pct": -3.197,
+    "std_mfgjr_qlike_pct": 2.202,
+    "std_mfgarch_qlike_pct": 2.183,
+    "avg_spearman": {
+      "GJR": 0.3306,
+      "MF-GARCH": 0.3695,
+      "MF-GJR": 0.3846
+    }
+  },
+  "conclusion": {
+    "k889_validated": true,
+    "mfgjr_robust": true,
+    "mfgarch_robust": true,
+    "note": "Cross-OOS validation of K889 MF-GJR result across 5 non-overlapping 2-year periods (2009-2024). MF-GJR wins 5/5, MF-GARCH wins 4/5."
+  },
+  "references": [
+    "Engle, Ghysels & Sohn (2013) RES 95(3):776-797",
+    "Conrad & Engle (2025) Two-factor GARCH, J Applied Econometrics",
+    "Patton (2011) J Econometrics 160:246-256",
+    "Harvey et al. (2016) JBES 34:92-104"
+  ]
+}

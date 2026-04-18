@@ -1,0 +1,351 @@
+{
+  "experiment": "K199",
+  "title": "VIX Futures Basis (Contango/Backwardation) as Vol Predictor",
+  "date": "2026-03-24T14:22:50.527857",
+  "data_sources": {
+    "SPY": "yfinance (^GSPC via SPY ETF)",
+    "VIX": "yfinance (^VIX, CBOE Volatility Index)",
+    "VIX3M": "yfinance (^VIX3M, CBOE 3-Month Volatility Index)",
+    "note": "VIX3M/VIX ratio used as proxy for futures basis (contango/backwardation)"
+  },
+  "sample": {
+    "full": "2007-01-05 to 2024-11-27",
+    "in_sample": "2007-01-05 to 2022-12-30",
+    "oos": "2023-01-01 to 2024-12-31",
+    "n_full": 4506,
+    "n_is": 4026,
+    "n_oos": 480
+  },
+  "basis_stats": {
+    "mean": 1.108647501467542,
+    "median": 1.1131364588193304,
+    "std": 0.09461652200114803,
+    "pct_backwardation": 0.11273857079449623,
+    "pct_strong_contango": 0.1648912561029738
+  },
+  "partial_correlations": {
+    "basis_ratio_rv_1d": {
+      "is_r": -0.11320332597232355,
+      "is_p": 5.856842600481888e-13,
+      "oos_r": -0.08558166567723452,
+      "oos_p": 0.06099244636059816
+    },
+    "basis_change_rv_1d": {
+      "is_r": 0.024495782709769733,
+      "is_p": 0.12017803447994861,
+      "oos_r": -0.01223579211531925,
+      "oos_p": 0.7891736406343335
+    },
+    "basis_ratio_rv_5d": {
+      "is_r": -0.18733833133426347,
+      "is_p": 4.0399877760194053e-33,
+      "oos_r": -0.16723868271675585,
+      "oos_p": 0.0002328550129313518
+    },
+    "basis_change_rv_5d": {
+      "is_r": 0.007842665454085256,
+      "is_p": 0.6188532303476251,
+      "oos_r": -0.01034908953706799,
+      "oos_p": 0.8210831412739562
+    },
+    "basis_ratio_rv_22d": {
+      "is_r": -0.21750228704558908,
+      "is_p": 2.589011078013286e-44,
+      "oos_r": -0.22210577366558126,
+      "oos_p": 8.881528715537002e-07
+    },
+    "basis_change_rv_22d": {
+      "is_r": -0.002378333638107955,
+      "is_p": 0.8800858001590472,
+      "oos_r": -0.031630800386924465,
+      "oos_p": 0.4893379019363476
+    }
+  },
+  "regime_analysis": {
+    "regime_stats": {
+      "strong_backwardation": {
+        "n": 204,
+        "pct": 4.527296937416778,
+        "mean_vix": 39.106323541379446,
+        "ann_return": -2.2270710560301032,
+        "ann_vol": 0.5546787861057944,
+        "mean_rv22": 0.021054132904387356
+      },
+      "mild_backwardation": {
+        "n": 304,
+        "pct": 6.746560142032846,
+        "mean_vix": 29.916842040262726,
+        "ann_return": -1.1283189231906103,
+        "ann_vol": 0.28796260706680454,
+        "mean_rv22": 0.0063310713514718505
+      },
+      "normal_contango": {
+        "n": 1491,
+        "pct": 33.08921438082557,
+        "mean_vix": 21.853232742555186,
+        "ann_return": 0.03452169569389612,
+        "ann_vol": 0.18750248359192614,
+        "mean_rv22": 0.003447586131982523
+      },
+      "moderate_contango": {
+        "n": 1764,
+        "pct": 39.14780292942743,
+        "mean_vix": 16.731014732330564,
+        "ann_return": 0.43682478491624865,
+        "ann_vol": 0.12043691397483729,
+        "mean_rv22": 0.0018315492796105207
+      },
+      "strong_contango": {
+        "n": 743,
+        "pct": 16.489125610297382,
+        "mean_vix": 14.023068642391651,
+        "ann_return": 0.570038546405058,
+        "ann_vol": 0.07232021106406959,
+        "mean_rv22": 0.0012024304456028185
+      }
+    },
+    "forward_returns": {
+      "fwd_ret_1d": {
+        "backwardation_mean": 0.0005134790712404317,
+        "contango_mean": 0.000381757076654475,
+        "t": 0.11311150210652023,
+        "p": 0.9099854581933277
+      },
+      "fwd_ret_5d": {
+        "backwardation_mean": 0.003476197073984572,
+        "contango_mean": 0.0017849892919644956,
+        "t": 0.7839987186379419,
+        "p": 0.43339029215071595
+      },
+      "fwd_ret_22d": {
+        "backwardation_mean": 0.013102434352308474,
+        "contango_mean": 0.008035156005001457,
+        "t": 1.3414733640949092,
+        "p": 0.1803292027024553
+      }
+    },
+    "forward_rv": {
+      "rv_1d": {
+        "backwardation_mean": 0.0006764225821181945,
+        "contango_mean": 8.999736642793345e-05,
+        "ratio": 7.51602640128196,
+        "t": 8.026777273876244,
+        "p": 6.967930214132111e-15
+      },
+      "rv_5d": {
+        "backwardation_mean": 0.0032987904661632753,
+        "contango_mean": 0.00046056514247505846,
+        "ratio": 7.162484004837424,
+        "t": 11.840322387573941,
+        "p": 9.805301233491367e-29
+      },
+      "rv_22d": {
+        "backwardation_mean": 0.012243481896343432,
+        "contango_mean": 0.002317311073812355,
+        "ratio": 5.2834865524553445,
+        "t": 12.565415974894847,
+        "p": 9.445114948712946e-32
+      }
+    }
+  },
+  "predictive_regression": {
+    "is_r2_vix_only": 0.23653929833777698,
+    "is_r2_vix_plus_basis": 0.2726565206999809,
+    "is_r2_vix_plus_bchange": 0.23654361683101466,
+    "is_r2_vix_plus_both": 0.27395964386631655,
+    "is_delta_r2_basis": 0.03611722236220394,
+    "is_delta_r2_bchange": 4.31849323767608e-06,
+    "is_basis_ratio_t": -3.51839831220596,
+    "is_basis_ratio_p": 0.000434160171624719,
+    "is_basis_change_t": -0.11939888117425193,
+    "is_basis_change_p": 0.9049593476487345,
+    "harvey_threshold_basis": "PASS",
+    "harvey_threshold_bchange": "FAIL",
+    "oos_r2_vix_only": -3.877938417365862,
+    "oos_r2_vix_plus_basis": -8.28989882493899,
+    "oos_r2_vix_plus_bchange": -3.9133915108151225,
+    "oos_delta_r2_basis": -4.411960407573129,
+    "oos_delta_r2_bchange": -0.03545309344926029,
+    "oos_dm_basis_t": -11.333486791255252,
+    "oos_dm_basis_p": 8.956674328654904e-30,
+    "oos_dm_bchange_t": -1.4031138910093623,
+    "oos_dm_bchange_p": 0.16058287952800254
+  },
+  "garch_x_comparison": {
+    "note": "GARCH-X with basis in VARIANCE equation (manual MLE, not arch x= which goes to mean)",
+    "delta_estimates": {
+      "ratio_delta": -0.4114169571451316,
+      "change_delta": -0.5
+    },
+    "losses": {
+      "GJR": {
+        "QLIKE": -8.649869668994826,
+        "MSE": 1.1720510845939711e-08
+      },
+      "GJR-X(ratio)": {
+        "QLIKE": -8.659052198492432,
+        "MSE": 1.176677832453306e-08
+      },
+      "GJR-X(change)": {
+        "QLIKE": -8.65986349341372,
+        "MSE": 1.147782808801116e-08
+      }
+    },
+    "dm_tests_qlike": {
+      "GJR_vs_GJR-X(ratio)": {
+        "t": 0.6805437744477131,
+        "p": 0.4961602143064011
+      },
+      "GJR_vs_GJR-X(change)": {
+        "t": 2.6369504438911604,
+        "p": 0.008365505166802551
+      },
+      "GJR-X(ratio)_vs_GJR-X(change)": {
+        "t": 0.05693448318142224,
+        "p": 0.954597385246631
+      }
+    },
+    "dm_tests_mse": {
+      "GJR_vs_GJR-X(ratio)": {
+        "t": -0.4848081901323997,
+        "p": 0.6278124124937473
+      },
+      "GJR_vs_GJR-X(change)": {
+        "t": 2.341202732975225,
+        "p": 0.01922172631870589
+      },
+      "GJR-X(ratio)_vs_GJR-X(change)": {
+        "t": 1.9980964536826276,
+        "p": 0.045706204151134515
+      }
+    }
+  },
+  "strategy_oos": {
+    "Buy & Hold SPY": {
+      "name": "Buy & Hold SPY",
+      "ann_return": 0.22827627233678077,
+      "ann_vol": 0.12813542861423355,
+      "sharpe": 1.4693537483970038,
+      "mdd": -0.10147343998320459,
+      "sortino": 2.1295958536786257,
+      "n_days": 502
+    },
+    "12/VIX (base)": {
+      "name": "12/VIX (base)",
+      "ann_return": 0.16086363614786028,
+      "ann_vol": 0.09213015716697288,
+      "sharpe": 1.3118791920523054,
+      "mdd": -0.07841311050627965,
+      "sortino": 1.915074037038455,
+      "n_days": 502
+    },
+    "12/VIX + Contrarian": {
+      "name": "12/VIX + Contrarian",
+      "ann_return": 0.1642700534050432,
+      "ann_vol": 0.0932728873488811,
+      "sharpe": 1.3323277207042947,
+      "mdd": -0.07841311050627965,
+      "sortino": 1.9362959259915098,
+      "n_days": 502
+    },
+    "12/VIX + Fear Reduce": {
+      "name": "12/VIX + Fear Reduce",
+      "ann_return": 0.15518627405255547,
+      "ann_vol": 0.09088467945373781,
+      "sharpe": 1.2673893415797068,
+      "mdd": -0.07841311050627965,
+      "sortino": 1.851779158604734,
+      "n_days": 502
+    },
+    "12/VIX * Basis Scaled": {
+      "name": "12/VIX * Basis Scaled",
+      "ann_return": 0.17201052156642313,
+      "ann_vol": 0.10124248654581475,
+      "sharpe": 1.3039043791825986,
+      "mdd": -0.08673599548180261,
+      "sortino": 1.8951724708886093,
+      "n_days": 502
+    }
+  },
+  "strategy_dm_tests": {
+    "base_vs_contrarian": {
+      "t": 0.9059633043490299,
+      "p": 0.3649552755876079
+    },
+    "base_vs_fear_reduce": {
+      "t": -0.9059633043490302,
+      "p": 0.36495527558760776
+    },
+    "base_vs_basis_scaled": {
+      "t": 1.5516695852816191,
+      "p": 0.12074130373716775
+    }
+  },
+  "cross_oos": {
+    "2015-2016": {
+      "base_sharpe": -0.25835683672673854,
+      "contrarian_sharpe": -0.2062473372745543,
+      "fear_sharpe": -0.34722098107499383,
+      "scaled_sharpe": -0.1696822756644171,
+      "bh_sharpe": 0.15932898652755806,
+      "base_mdd": -0.1179588822779218,
+      "contrarian_mdd": -0.12070492412220757,
+      "fear_mdd": -0.11364690004910545,
+      "scaled_mdd": -0.12247134832516304
+    },
+    "2017-2018": {
+      "base_sharpe": 0.4106876010330855,
+      "contrarian_sharpe": 0.3627339047079437,
+      "fear_sharpe": 0.488734815624857,
+      "scaled_sharpe": 0.3918068305991624,
+      "bh_sharpe": 0.27033987734862486,
+      "base_mdd": -0.1291649552541574,
+      "contrarian_mdd": -0.1364717773298562,
+      "fear_mdd": -0.11713865101004449,
+      "scaled_mdd": -0.131948799071187
+    },
+    "2019-2020": {
+      "base_sharpe": 0.8753778168210047,
+      "contrarian_sharpe": 0.8058866105965652,
+      "fear_sharpe": 0.9753167205772887,
+      "scaled_sharpe": 1.0088189875129403,
+      "bh_sharpe": 0.7074886968161425,
+      "base_mdd": -0.13708492974705894,
+      "contrarian_mdd": -0.1661844243142616,
+      "fear_mdd": -0.08697396819482413,
+      "scaled_mdd": -0.12750059755604018
+    },
+    "2021-2022": {
+      "base_sharpe": -0.42705780864912163,
+      "contrarian_sharpe": -0.37413927174307965,
+      "fear_sharpe": -0.5146396347235735,
+      "scaled_sharpe": -0.4217349699960109,
+      "bh_sharpe": -0.07173533347499145,
+      "base_mdd": -0.1524455589339591,
+      "contrarian_mdd": -0.14697419990247598,
+      "fear_mdd": -0.16192504036146368,
+      "scaled_mdd": -0.17354928442938827
+    },
+    "2023-2024": {
+      "base_sharpe": 1.3118791920523054,
+      "contrarian_sharpe": 1.3323277207042947,
+      "fear_sharpe": 1.2673893415797068,
+      "scaled_sharpe": 1.3039043791825986,
+      "bh_sharpe": 1.4693537483970038,
+      "base_mdd": -0.07841311050627965,
+      "contrarian_mdd": -0.07841311050627965,
+      "fear_mdd": -0.07841311050627965,
+      "scaled_mdd": -0.08673599548180261
+    }
+  },
+  "overlay_win_counts": {
+    "contrarian_vs_base_sharpe": "3/5",
+    "fear_vs_base_sharpe": "2/5",
+    "scaled_vs_base_sharpe": "3/5",
+    "contrarian_vs_base_mdd": "1/5",
+    "fear_vs_base_mdd": "3/5",
+    "scaled_vs_base_mdd": "1/5"
+  },
+  "conclusion": "MIXED -- Some statistical significance in GARCH-X or regression but no robust improvement",
+  "vix_sufficiency_note": "Another test of VIX sufficiency as vol predictor"
+}

@@ -1,0 +1,219 @@
+{
+  "experiment_id": "K1241",
+  "title": "Paper 10 \u00a76.1 Primary Fear-Channel Regression \u2014 BTC GARCH-X(VIX\u00b2)",
+  "paper": "crypto-fear-channel (Paper 10) \u00a76.1 Table 3",
+  "description": "Canonical fear-channel phi coefficient for Paper 10 Table 3. BTC log-return variance regressed on lagged VIX\u00b2 within GJR-GARCH(1,1) Student-t framework with Bollerslev-Wooldridge (1992) robust SE, LRT vs baseline, OOS DM-HLN (Harvey 1997), and Harvey (2016) |t|>3 verdict.",
+  "methodology": {
+    "assets": "BTC-USD daily (yfinance Adj Close), ^VIX daily close",
+    "sample_start": "2015-01-03",
+    "sample_end": "2026-04-14",
+    "n_obs": 4120,
+    "is_oos_split": "70/30 (IS n=2884, OOS n=1236)",
+    "oos_start": "2022-11-26",
+    "oos_end": "2026-04-14",
+    "models": {
+      "M1": "GJR-GARCH(1,1) Student-t  (baseline, no exog)",
+      "M2": "GJR-GARCH(1,1) Student-t + phi * VIX^2_{t-1}",
+      "M3": "GARCH(1,1)    Student-t + phi * VIX^2_{t-1}  (pure fear, no leverage)"
+    },
+    "estimation": "MLE via scipy L-BFGS-B (+ Nelder-Mead polish), multi-start",
+    "SE": "Bollerslev-Wooldridge (1992) sandwich V = H^-1 OPG H^-1 (numerical Hessian + per-obs score)",
+    "LRT_df": 1,
+    "OOS_QLIKE": "Patton (2011) QLIKE on r\u00b2 proxy",
+    "DM_test": "Harvey-Leybourne-Newbold (1997) HLN small-sample corrected DM",
+    "Harvey_threshold": 3.0,
+    "Lookahead_guard": "VIX\u00b2 shifted t-1 before estimation and forecasting; IS-estimated phi used for OOS (no refit leak)",
+    "seed": 42
+  },
+  "data_source": {
+    "BTC-USD": "yfinance",
+    "VIX": "yfinance ^VIX",
+    "alignment": "VIX reindexed to BTC calendar with forward-fill (weekends)"
+  },
+  "models_fit_full_sample": {
+    "M1_GJR_t": {
+      "params": {
+        "omega": 0.1531470084331843,
+        "alpha": 0.15378255715163405,
+        "gamma": 1.7511715247071926e-14,
+        "beta": 0.8941131168384608,
+        "nu": 2.7338073028827803
+      },
+      "se_BW": {
+        "omega": 0.0,
+        "alpha": 0.0,
+        "gamma": 3.7731329431906544e-20,
+        "beta": 0.0,
+        "log_nu_m2": 6.304064282766908e-38
+      },
+      "log_lik": -10135.929209218359,
+      "n_params": 5
+    },
+    "M2_GARCHX": {
+      "params": {
+        "omega": 0.15583550886359226,
+        "alpha": 0.15363011607458232,
+        "gamma": 1.1692368792073694e-13,
+        "beta": 0.8942466677126044,
+        "phi": -9.6743106794108e-06,
+        "nu": 2.733803349305452
+      },
+      "se_BW": {
+        "omega": 1.7170403722671577e-07,
+        "alpha": 6.193467955223848e-07,
+        "gamma": 3.17839456783952e-20,
+        "beta": 1.434534692265529e-06,
+        "phi": 7.781341733592703e-05,
+        "log_nu_m2": 6.844146870359286e-08
+      },
+      "phi_estimate": -9.6743106794108e-06,
+      "phi_se_BW": 7.781341733592703e-05,
+      "phi_t_BW": -0.1243270249608238,
+      "phi_p_BW": 0.9010563504750764,
+      "log_lik": -10135.926911246723,
+      "n_params": 6,
+      "LRT_vs_M1": {
+        "LR": 0.004595943271851866,
+        "df": 1,
+        "p_value": 0.9459501083504789
+      }
+    },
+    "M3_Fear_Only": {
+      "params": {
+        "omega": 0.15581171345256228,
+        "alpha": 0.15361941943005553,
+        "beta": 0.8942493149329478,
+        "phi": -9.665055471819148e-06,
+        "nu": 2.733869913263978
+      },
+      "se_BW": {
+        "omega": 0.07962678155285055,
+        "alpha": 0.028720905025186122,
+        "beta": 0.014698352384208494,
+        "phi": 0.00015643335629283262,
+        "log_nu_m2": 0.1793808153118745
+      },
+      "phi_estimate": -9.665055471819148e-06,
+      "phi_se_BW": 0.00015643335629283262,
+      "phi_t_BW": -0.06178385288701995,
+      "phi_p_BW": 0.9507349624486772,
+      "log_lik": -10135.926911088347,
+      "n_params": 5
+    }
+  },
+  "OOS_evaluation": {
+    "n_oos": 1236,
+    "QLIKE": {
+      "M1": 2.0130812674352536,
+      "M2": 2.0128781711184303,
+      "M3": 2.0128806354363507
+    },
+    "DM_HLN": {
+      "M2_vs_M1": {
+        "t": 0.7521364185739313,
+        "p": 0.45211234528879785,
+        "n": 1236
+      },
+      "M3_vs_M1": {
+        "t": 0.7424057689685712,
+        "p": 0.4579827006429702,
+        "n": 1236
+      },
+      "M2_vs_M3": {
+        "t": 7.19202262482543,
+        "p": 1.1035616864774056e-12,
+        "n": 1236
+      }
+    }
+  },
+  "sub_period_robustness": {
+    "P1_2015_2020": {
+      "n": 2190,
+      "date_start": "2015-01-03",
+      "date_end": "2020-12-31",
+      "omega": 0.1741562975500763,
+      "alpha": 0.24477598341751367,
+      "gamma": 1.006843652778824e-14,
+      "beta": 0.8708670496058057,
+      "phi": -7.830381640458968e-05,
+      "phi_se_BW": 0.00013143785397114172,
+      "phi_t_BW": -0.5957478309238216,
+      "nu": 2.5124536536553568,
+      "log_lik_M1": -5489.650329218275,
+      "log_lik_M2": -5489.58614625501,
+      "LRT_stat": 0.128365926530023,
+      "LRT_p": 0.7201323550228633
+    },
+    "P2_2021_2023": {
+      "n": 1095,
+      "date_start": "2021-01-01",
+      "date_end": "2023-12-31",
+      "omega": 3.837925214046303e-11,
+      "alpha": 0.05864763001057236,
+      "gamma": 5.2854768789253984e-11,
+      "beta": 0.9541304418381544,
+      "phi": 4.144551877259148e-05,
+      "phi_se_BW": 6.812064564400819e-05,
+      "phi_t_BW": 0.608413475544282,
+      "nu": 2.943150912454538,
+      "log_lik_M1": -2723.3073331352502,
+      "log_lik_M2": -2723.276732721114,
+      "LRT_stat": 0.061200828272376384,
+      "LRT_p": 0.8046079512776889
+    },
+    "P3_2024_2026": {
+      "n": 835,
+      "date_start": "2024-01-01",
+      "date_end": "2026-04-14",
+      "omega": 0.35191345179284905,
+      "alpha": 0.030857264518921283,
+      "gamma": 0.09112914342578651,
+      "beta": 0.8906399093630577,
+      "phi": -0.00013562247850926429,
+      "phi_se_BW": 0.00043826097826688,
+      "phi_t_BW": -0.3094559753998374,
+      "nu": 3.9233139821758534,
+      "log_lik_M1": -1905.2550345869054,
+      "log_lik_M2": -1905.1723751184375,
+      "LRT_stat": 0.16531893693581878,
+      "LRT_p": 0.6843059734001818
+    }
+  },
+  "verdict": {
+    "framework": "Harvey (2016) |t|>3 + LRT p<0.001 + DM-HLN |t|>2 + sub-period same-sign",
+    "M2_phi": -9.6743106794108e-06,
+    "M2_phi_t_BW": -0.1243270249608238,
+    "M3_phi": -9.665055471819148e-06,
+    "M3_phi_t_BW": -0.06178385288701995,
+    "harvey_phi_m2_pass": false,
+    "harvey_phi_m3_pass": false,
+    "lrt_m2_pass": false,
+    "dm_m2_pass": false,
+    "sub_period_same_sign_t2": "0/3",
+    "overall_verdict": "NULL"
+  },
+  "references": [
+    "Bollerslev & Wooldridge (1992) Econometric Reviews 11:143-172 \u2014 QMLE robust SE",
+    "Patton (2011) JoE 160:246-256 \u2014 QLIKE proxy-robust loss",
+    "Harvey-Leybourne-Newbold (1997) IJF 13:281-291 \u2014 DM small-sample correction",
+    "Harvey (2016) JF \u2014 |t|>3 multiple-testing threshold",
+    "Engle (2002) JBES \u2014 GARCH-X with exogenous variance drivers",
+    "Glosten-Jagannathan-Runkle (1993) JF 48:1779-1801 \u2014 GJR-GARCH",
+    "Creal, Koopman, Lucas (2013) JASA 108:1-18 \u2014 Student-t GARCH extension",
+    "Bouri, Moln\u00e1r, Azzi, Roubaud, Hagfors (2020) JIFMIM \u2014 BTC-VIX spillover",
+    "Matkovskyy & Jalan (2019) IREF \u2014 crypto-equity fear channel"
+  ],
+  "prior_experiments": {
+    "K949": "Cross-market MF-GJR with log-VIX multiplicative component (VIX as global risk)",
+    "K1129": "Commodity GAS-t on BTC (baseline GJR-t convergence precedent)",
+    "K1133": "BTC sub-period regime analysis (P1/P2/P3 convention)",
+    "K1025": "Paper 10 upstream: asymmetric Granger + QR + DY spillover",
+    "K746b": "Paper 10 upstream: BTC downside -> VIX asymmetric Granger",
+    "K639": "Paper 10 upstream: BTC -> SPY RV Granger lag 1-10"
+  },
+  "charts": [
+    "k1241_sigma_timeseries.png",
+    "k1241_phi_rolling.png"
+  ],
+  "created_at": "2026-04-17T23:43:31.818535+00:00"
+}
