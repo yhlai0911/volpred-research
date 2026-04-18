@@ -27830,5 +27830,27 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-04-18T08:19:19.558521"
+  },
+  {
+    "item_id": "03d1d60f",
+    "category": "K1250",
+    "content": "K1250 K718 rebuild per K1231 option (a) PARTIAL_TSTATS_RECOVERED. Drift 57.9%\u219226.32%, t-stats 0/4\u21924/4 recovered. Slopes vs paper: SPY -0.00027 (3.57% drift), GLD -0.00043 (0%), TLT -0.00045 (2.27%) \u2014 3/4 allclose; 0050.TW +0.00014 (26.32% drift) FAIL. t-stats (NW-10 HAC): paper SPY -3.42 vs K1250 -1.77; GLD -4.17 vs -2.87; TLT -3.89 vs -3.40; 0050.TW +1.62 vs +0.45. Fix: per-asset independent yf.download eliminates multi-ticker NaN cascade \u2192 US n_shocks exact 767/767/767. 0050.TW capped N=595 (yfinance 2009+ only vs paper 2006+ N=612). statsmodels HAC cross-check confirms K1250 math correct \u2014 residual gap = data vintage drift, not bug. Paper 8 K718 option (a) partial success; main thread still needs (b) Table 4 revise or (c) errata decision.",
+    "evidence": [
+      "experiments/k1250/",
+      "commit 46d263e3"
+    ],
+    "confidence": 0.88,
+    "created_at": "2026-04-18T12:37:46.428769"
+  },
+  {
+    "item_id": "5d5d8a1a",
+    "category": "K1251",
+    "content": "K1251 K719 rebuild per K1231 option (a) PARTIAL Table 8 3/9 allclose pass. Reconstructed 9 cells (3 regimes \u00d7 {Shock Loss, Hedge Cost, CB Ratio}) on RV=22 raw VRP primary + RV=20 + clipped-VRP robustness (27 cells JSON). Pass breakdown: Shock Loss column 3/3 YES (0.66-2.87% drift, pipeline sound); Hedge Cost 0/3 (systematic ~6\u00d7 drift, FLAT across regimes \u2192 paper formula/unit convention mismatch); CB Ratio 0/3 (hedge-cost denominator driven). Robustness RV=20 + clipped-VRP identical 3/9. Unblocks Table 8 traceability for Shock-Loss column (was 0/3). Main thread decision pending: path (b) paper hedge-cost formula revision vs (c) errata leveraging paper L492 'illustrative calculations' disclaimer. K719 original untouched. Paper 8 K719 option (a) partial success.",
+    "evidence": [
+      "experiments/k1251/",
+      "commit b6bfc043"
+    ],
+    "confidence": 0.88,
+    "created_at": "2026-04-18T12:37:46.556889"
   }
 ]
