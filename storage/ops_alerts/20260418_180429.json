@@ -1,0 +1,24 @@
+{
+  "timestamp": "2026-04-18T18:04:29Z",
+  "alerts": [
+    {
+      "type": "article_pool_low",
+      "severity": "high",
+      "detail": "total_draft=6, threshold=12. Pool critically low — need 6+ new articles immediately."
+    },
+    {
+      "type": "general_audience_low",
+      "severity": "high",
+      "detail": "general_draft=1, threshold=8. Only 1 general-audience draft (VIX決策指南). Need 7+ more general articles."
+    },
+    {
+      "type": "error_log_today",
+      "severity": "info",
+      "detail": "2026-04-18: BUG-001 FK cascade fix committed to supabase_sync.py. Tests on real impression-bearing draft still pending — should be verified next cleanup-post run."
+    }
+  ],
+  "action_required": [
+    "Spawn article-writing agents to refill general-audience draft pool (need ~7 new general drafts)",
+    "Verify BUG-001 FK cascade fix with a real cleanup-post test run"
+  ]
+}
