@@ -1,0 +1,115 @@
+{
+  "experiment_id": "K1247",
+  "title": "Paper 4 CONFLICT-A4 Decision Cheatsheet (2-min pick)",
+  "date": "2026-04-17",
+  "type": "decision_cheatsheet_markdown",
+  "status": "COMPLETED_AWAITING_USER_PICK",
+  "purpose": "Compress K1225 dual-framing A/B full guide (~2791 words) into a ~360-word 2-minute cheatsheet so user can pick Version A or Version B and unblock P2 gate.",
+  "seed": 42,
+  "rng_used": false,
+  "conflict_context": {
+    "conflict_id": "CONFLICT-A4",
+    "paper_id": "vix-sufficiency",
+    "user_commit": "7ecab636",
+    "user_commit_date": "2026-04-17",
+    "user_signal": "channel-specific pivot",
+    "k1203_gate_language": "UNIVERSAL_NULL_7_OF_7 with TLT caveat",
+    "k1208_draft_framing": "UNIVERSAL_NULL",
+    "resolution_approach": "cheatsheet summarises K1225 A/B + defaults to B"
+  },
+  "comparison_table_dimensions": [
+    "section_5_title_keyword",
+    "user_commit_7ecab636_match",
+    "session_k1203_gate_match",
+    "contribution_scope",
+    "reviewer_pushback_risk",
+    "claim_strength",
+    "main_v3_vocabulary_alignment",
+    "k1208_draft_reuse",
+    "expected_effort"
+  ],
+  "versions_summary": {
+    "A_channel_specific": {
+      "title_keyword": "Channels",
+      "user_commit_match": "yes",
+      "k1203_gate_match": "partial",
+      "contribution_scope": "asset_class_channel_taxonomy",
+      "reviewer_pushback_risk": "lower",
+      "claim_strength": "modest",
+      "main_v3_vocab_alignment": "strong",
+      "k1208_draft_reuse": "heavy_rewrite",
+      "expected_effort_hr": 2.5,
+      "pick_reasons": [
+        "Prior user commit 7ecab636 set channel-specific direction.",
+        "Asset-class channel taxonomy fits channel-literature journals.",
+        "Less claim-strong = smaller reviewer-attack surface."
+      ]
+    },
+    "B_universal_null": {
+      "title_keyword": "Universality",
+      "user_commit_match": "partial",
+      "k1203_gate_match": "yes",
+      "contribution_scope": "negative_result_methodology",
+      "reviewer_pushback_risk": "higher_but_data_backed",
+      "claim_strength": "strong",
+      "main_v3_vocab_alignment": "partial",
+      "k1208_draft_reuse": "verbatim_copy_paste",
+      "expected_effort_hr": 2.5,
+      "pick_reasons": [
+        "K1203 gate explicitly unlocked under UNIVERSAL_NULL_7_OF_7 language.",
+        "K1208 draft (1762 words) already written in B framing — zero reframing cost.",
+        "Strong negative-result methodology pattern (same pattern as BTC K1214 proposal)."
+      ]
+    }
+  },
+  "default_recommendation": {
+    "pick": "B",
+    "rationale": "K1208 draft already in B framing (verbatim copy-paste); K1203 session gate explicitly unlocks under UNIVERSAL_NULL_7_OF_7 language; minimises rewrite risk.",
+    "source": "K1225 dual_framing.json recommendation_if_no_user_pick"
+  },
+  "user_next_step": {
+    "action": "Tell main thread: 'Go with Version A' or 'Go with Version B'",
+    "main_thread_execution": [
+      "Copy paper/vix-sufficiency/body_v3.tex -> body_v4.tex",
+      "Apply chosen version's Section 5 rewrite from K1225 guide (A.1-A.5 or B.1-B.5)",
+      "Integrate shared Appendix A (K1218 template)",
+      "xelatex main_v4.tex twice",
+      "uv run volpred ops paper-update --paper-id vix-sufficiency",
+      "Commit with CONFLICT-A4 resolution tag"
+    ],
+    "main_thread_effort_hr": 2.5
+  },
+  "word_count": {
+    "source_k1225_guide": 2791,
+    "target_cheatsheet": 360,
+    "reduction_ratio_pct": 87,
+    "read_time_target_min": 2
+  },
+  "source_references": {
+    "k1225_guide": "experiments/k1225/k1225_dual_framing_guide.md",
+    "k1225_json": "experiments/k1225/k1225_dual_framing.json",
+    "k1226_snapshot": "experiments/k1226/k1226_decision_snapshot.json",
+    "k1236_gates": "experiments/k1236/k1236_decision_gates.json",
+    "k1208_draft": "experiments/k1208/k1208_draft.md",
+    "k1203_gate": "experiments/k1203/README.md",
+    "paper_body_v3": "paper/vix-sufficiency/body_v3.tex",
+    "paper_main_v3": "paper/vix-sufficiency/main_v3.tex"
+  },
+  "supersedes_for_decision_ux": "none (K1225 remains authoritative edit guide; K1247 is UX layer)",
+  "superseded_by": null,
+  "compliance": {
+    "output_formats": ["md", "json"],
+    "tex_output": false,
+    "shared_state_writes": false,
+    "worktree_scope": "experiments/k1247/",
+    "both_options_honestly_presented": true,
+    "default_recommendation_declared": true,
+    "both_directions_justified": true,
+    "seed_declared": 42
+  },
+  "files": {
+    "k1247_cheatsheet.md": "main deliverable (~360 words; 30-second comparison table + 3-bullet pick-A + 3-bullet pick-B + default B)",
+    "k1247_quick_pick.json": "this file (structured metadata)",
+    "README.md": "experiment documentation"
+  }
+}
