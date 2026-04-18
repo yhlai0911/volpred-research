@@ -957,13 +957,10 @@ def main():
 
     # --- Sync to Supabase (v2 website) ---
     try:
-        from article_backups import ensure_local_article_backups
+        # Contentlayer pattern (2026-04-18): feed.json is canonical; no
+        # mile_*.json singles to audit / repair. article_backups is a
+        # deprecation stub now — we drop the call entirely.
         from supabase_sync import sync_article, sync_risk_forecast, sync_strategy_signal, sync_paper_trade
-        backup_audit = ensure_local_article_backups("storage", repair=True)
-        if backup_audit.get("created_count"):
-            print(f"  Local article backups: repaired {backup_audit['created_count']} missing report files")
-        if backup_audit.get("bodyless_ids"):
-            print(f"  Local article backups: WARNING {len(backup_audit['bodyless_ids'])} article(s) still missing body content")
         # Heartbeat is in collect_us_data.py (runs 30min earlier at 05:30)
         # Retry any failed syncs from publish_milestone
         failed_path = Path("storage/.failed_supabase_syncs.json")
@@ -975,13 +972,9 @@ def main():
                 retried = 0
                 for fid in failed_ids:
                     if fid in feed_map:
-                        report_path = Path(f"storage/reports/{fid}.json")
-                        article = feed_map[fid]
-                        if report_path.exists():
-                            report = json.loads(report_path.read_text())
-                            if report.get('description'):
-                                article['content'] = report['description']
-                        if sync_article(article):
+                        # Content lives entirely in feed.json now; no
+                        # single-file fallback read.
+                        if sync_article(feed_map[fid]):
                             retried += 1
                 if retried:
                     print(f"  Supabase: retried {retried} failed syncs")
