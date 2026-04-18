@@ -473,22 +473,21 @@ Tag 規則：
 - [ ] 回答「為什麼這個結果重要？」
 - [ ] 回答「投資人可以怎麼用？」
 - [ ] content 欄位非空且 > 300 字
-- [ ] 寫入 `storage/reports/feed.json`（`storage/feed.json` 已廢除，不要使用）
-- [ ] 寫入 `storage/reports/{id}.json`，且**必須包含完整 content**（不可空白）
+- [ ] 寫入 `storage/reports/feed.json`（**Contentlayer 唯一 canonical source**；`storage/feed.json` + `mile_*.json` 單檔**皆已廢除**，不要寫也不要讀）
 - [ ] **圖片 URL 必須是 Supabase Storage**（`https://...supabase.co/storage/...`），不可用 `/tmp/` 本地路徑
-- [ ] 寫完後執行 `uv run python scripts/supabase_sync.py full`（確保同步到 Supabase）
+- [ ] 寫完後執行 `uv run volpred ops feed-sync --apply`（將 feed.json 變動推到 Supabase projection）
 - [ ] Badge：category=milestone, status=published
 - [ ] **tags 欄位**：包含資產代碼 + 方法 + 主題分類
 
 ## ⚠️ Agent Worktree 寫文章注意事項
 
-Agent 在 worktree 中寫文章時：
-1. **必須寫到 `storage/reports/feed.json`**（append to items array）
-2. **必須寫 `storage/reports/{id}.json`**，且包含完整 `content` 欄位
-3. worktree 的檔案會在 agent 完成後複製回主分支——**如果 report 檔案沒有 content，文章會以空白狀態發佈**
-4. 複製回主分支後，**必須執行 `supabase_sync.py full`** 確保 Supabase 有最新文章
+Agent 在 worktree 中寫文章時（Contentlayer 模式，2026-04-18 起）：
+1. **只寫 `storage/reports/feed.json`**（append to items array），content 欄位必須完整
+2. **不要寫 `storage/reports/{id}.json` 單檔** — 單檔模式已廢除，寫了會變 orphan（被 feed-sync --apply 清除）
+3. worktree merge 回主分支後，主線程跑 `uv run volpred ops feed-sync --apply` 把 feed 變動推到 Supabase
 
-**2026-03-29 教訓**：27 篇文章因寫到 `storage/feed.json`（而非 `reports/feed.json`）導致 7 小時不發文；2 篇文章因 report 個別檔案沒有 content 導致空白頁面發佈到線上。
+**2026-03-29 教訓**：27 篇文章因寫到 `storage/feed.json`（而非 `reports/feed.json`）導致 7 小時不發文。
+**2026-04-18 教訓**：廢除 3-source 架構（feed + mile_*.json + Supabase），改 Contentlayer 模式。publisher.py / release_pool 已移除單檔寫入；sync_article 已移除從單檔 fallback 讀 content — agent 再寫單檔是無效操作（會被下一輪 feed-sync 清掉）。
 
 ## 不該發佈的內容
 
@@ -500,12 +499,12 @@ Agent 在 worktree 中寫文章時：
 
 ## 資料同步
 
-發佈後必須同步：
-1. `storage/reports/feed.json` + `reports/{id}.json`（**唯一源頭**，不是 `storage/feed.json`）
-2. 執行 `uv run python scripts/supabase_sync.py full`（將 draft 同步到 Supabase）
-3. System crontab 每小時 `:03` 自動從 Supabase 釋出 draft → published
-3. `frontend-v2-fix` 與後台工作台讀取最新資料
-4. 依部署流程同步到線上站
+發佈後必須同步（Contentlayer 模式，單向 feed → Supabase）：
+1. **`storage/reports/feed.json` 是唯一 canonical 源**（`storage/feed.json` + `reports/mile_*.json` 單檔皆已廢除；單檔只保存在 `storage/reports/_archive_mile_files/` 作 audit 參考，不再被任何 code 讀寫）
+2. 執行 `uv run volpred ops feed-sync --apply`（將 feed.json 變動推到 Supabase projection；含 timestamp-normalized 差異偵測、idempotent upsert）
+3. System crontab `3 */2` 的 `release-pool-by-settings` 自動釋出 feed.json 的 draft → published，並連動推到 Supabase
+4. `frontend-v2-fix` 從 Supabase 直讀（`articles` 表 RLS 封死反向寫，service_role 才能寫入），所以 Supabase 對齊 = 前端即時看到
+5. 依部署流程同步到線上站
 
 ## 作者標注
 
