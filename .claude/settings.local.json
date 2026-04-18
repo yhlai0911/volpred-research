@@ -36,7 +36,11 @@
       "Bash(VERIFY_BASE_URL=https://volpred.zeabur.app node scripts/verify-regressions.mjs)",
       "Bash(awk '$6==\"Apr\" && $7==17 {print $6, $7, $8, $5, $NF}')",
       "Bash(awk '{print $1, $2}')",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(grep -nE \"^#{2,3} \" CLAUDE.md)",
+      "Bash(git commit -m ' *)",
+      "Bash(awk -F/ '{print $2}')",
+      "Bash(awk '{print $5, $6, $7, $8}')"
     ]
   }
 }

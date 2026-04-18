@@ -276,6 +276,27 @@
 
 可以直接新增補充內容；但**刪除或改寫既有治理規範前，先取得使用者同意。**
 
+## Compact Instructions
+
+Context compaction 時，**優先保留**：
+- 用戶明確的規則陳述 / feedback（「不要做 X」「應該做 Y」）— 任何優先，否則下次還會犯
+- 最近一次未回應用戶的問題（避免 compact 後忘記答）
+- 研究方向決策、Phase pivot、policy 變更
+- Experiment 結果摘要（K 編號 + verdict，**不含** per-step logs）
+- 未完成 agent 的 ID + task_type + task 狀態（至少 work_log 最近 5 筆）
+- 錯誤修復路徑（error_log 新增 lesson）+ 系統架構變更（CLAUDE.md / .claude/rules/ / .claude/skills/ 編輯）
+
+**優先丟棄**：
+- Bash 工具的完整 stdout（保留結論一句）
+- `jq` / `grep` 中間查詢結果（保留最終數字）
+- Read 大檔案的完整內容（保留 line 定位 + 關鍵段摘要）
+- 探索性 ls / find 列表（保留發現的關鍵檔）
+- 被推翻或撤回的 Edit 操作紀錄
+- 重複 skip 的 cron 觸發
+- Agent 派出 prompt 全文（保留 agent ID + task type + completion verdict）
+
+**格式要求**：compact 輸出用條列、不用段落敘述；每則 ≤ 30 字；分「當前狀態」/「未竟任務」/「最近規則」三區。
+
 ## 一句話版本
 
 - 系統由 AI 完全運營，執行階段不問用戶 — 遇問題自行修流程、優化邏輯。
