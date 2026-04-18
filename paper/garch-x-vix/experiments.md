@@ -48,6 +48,12 @@
 |---|-------|-------------|------|
 | K1001 | Conrad-Loch Macro GARCH-X vs VIX GARCH-X | **Section 5.3 source**: VIX dominates macroeconomic specifications. SPY OOS 2019-01-01, n=1,779. GJR-N vs A4f-VIX DM t=4.77 (Harvey PASS); all macro models (Macro_TermSpread/Unemployment/Combined, VIX_Macro) fail to beat GJR (best macro t=1.48). FRED sources: GS10, TB3MS, UNRATE. **Scope note**: tests 2 macro variables; paper narrative says "six" — K1001 covers the key conceptual result, broader macro comparison was planned but not fully run. | `experiments/k1001/` |
 
+## Summary Statistics / Diagnostics (Section 2 / Table 1)
+
+| K | Title | Contribution | Path |
+|---|-------|-------------|------|
+| K998 | VRP / Granger / g-series OOS diagnostics | **Table 1 summary-stat source**: OOS VRP autocorr(1) = 0.2034 (paper cites 0.20), mean 79.28 bps (ann.), std 1362.28 bps, skewness −13.58, kurtosis 241.40. OOS daily return mean 14.9 % / std 19.6 % (ann.). Data: SPY + ^VIX via yfinance, OOS start 2019-01-01. Diagnostics block added to `results[diagnostics]` on 2026-04-18 (previously only printed, un-sourced). Script mirrored to `paper/garch-x-vix/scripts/k998.py`; JSON in `paper/garch-x-vix/results/k998_results.json`. | `experiments/k998/` |
+
 ## Orphan/Placeholder K References in main.tex
 
 - **K889-original** (referred to as "A1 spec" in Table 2, line 207): this is the pilot run from `experiments/k889/` — labelled K889-original in the paper to distinguish from the corrected specs. The k889 README is currently a planning stub without full documentation. [TODO: verify k889 README completeness]

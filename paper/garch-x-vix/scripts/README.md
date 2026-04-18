@@ -7,6 +7,7 @@
 | Script | Location | Purpose | Runtime |
 |--------|----------|---------|---------|
 | `compute_mcs_dm.py` | `paper/garch-x-vix/` | Full 17-model MCS (Hansen-Lunde-Nason 2011) + pairwise DM matrix + Giacomini-White tests | ~28 min |
+| `k998.py` | `paper/garch-x-vix/scripts/` | K998 VRP / Granger / g-series OOS (sourced Table 1 VRP autocorr = 0.20, mean/std/skew/kurt). Output → `paper/garch-x-vix/results/k998_results.json` `diagnostics` block | ~90 s |
 
 ## Experiment Scripts (experiments/kXXX/)
 
@@ -20,6 +21,7 @@ All core model estimation and evaluation scripts live in the respective experime
 | `experiments/k1085/` (see README) | K1085 | GLD+GVZ cross-asset robustness |
 | `experiments/k1088/` (see README) | K1088 | USO+OVX cross-asset robustness |
 | `experiments/k1098/k1098_*.py` | K1098 | 0050.TW + VIXTWN 15-year Taiwan test |
+| `experiments/k998/k998.py` | K998 | VRP / Granger / OOS diagnostics (Table 1 summary stats source; **mirrored to `paper/garch-x-vix/scripts/k998.py` for self-contained replication**) |
 
 ## Full Reproduction Sequence
 
