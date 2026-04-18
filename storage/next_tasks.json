@@ -1199,5 +1199,19 @@
     ],
     "completed_at": "2026-04-18T07:19:44.086980",
     "outcome": "BORDERLINE: FEZ 3.11 + STOXX50E 3.92 both within Harvey ±0.5 of paper claims (3.45/3.64) + clear |t|>3. R2 path (b) footnote, errata NOT required. K1232 fully resolved."
+  },
+  {
+    "id": "K716_upgrade_to_errata",
+    "title": "K716 upgrade from option (a) to (c) errata disclosure per K1249 finding",
+    "priority": 3,
+    "description": "K1249 confirmed K716 (a) rebuild BLOCKED by yfinance data-vintage drift (N=767 vs paper 893 unreproducible; slope 3.57% drift; t-stat 48% divergence). SAR Table 3 preserves ≤0.82%. Recommended: option (c) errata disclosure in paper/volatility-absorption/README.md + docs/error_log.md. Qualitative paralysis claim + SAR Table 3 remain valid.",
+    "status": "pending",
+    "created_at": "2026-04-18T08:19:19.745834",
+    "tags": [
+      "K1249-followup",
+      "Paper8",
+      "errata",
+      "K716"
+    ]
   }
 ]

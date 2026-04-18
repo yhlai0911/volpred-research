@@ -27819,5 +27819,16 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-04-18T07:46:21.747852"
+  },
+  {
+    "item_id": "07e76e02",
+    "category": "K1249",
+    "content": "K1249 K716 rebuild option (a) BLOCKED due to data-vintage drift, recommend upgrade to option (c) errata disclosure. Slope K1249=-0.00027 vs paper -0.00028 drift 3.57% (>1% target). Allclose: SAR ratios 5 regimes all \u22640.82% PASS; normalized slope 3.57% rtol FAIL; t-stat -1.77 vs paper -3.42 (48% divergence); N K1249=767 vs paper 893 (126-day gap unreproducible with current yfinance vintage). Root cause: yfinance 2026-04-17 SPY+VIX sample differs from paper's original retrieval. tau=1.81 can approach N=896 but slope drifts further to -0.000231. Main thread recommendation: upgrade K716 from (a) rebuild to (c) errata disclosure in paper/volatility-absorption/README.md + docs/error_log.md (qualitative paralysis conclusion + SAR Table 3 \u22640.82% preserved). Option (b) paper revision cascades to Tables 4/6 GLD/TLT/0050.TW recompute \u2014 asymmetric cost/benefit not favorable.",
+    "evidence": [
+      "experiments/k1249/",
+      "commit e1421804"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-18T08:19:19.558521"
   }
 ]
