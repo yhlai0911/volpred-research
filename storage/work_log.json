@@ -1399,5 +1399,19 @@
     "task_id": null,
     "outcome": "done",
     "summary": "16:00 UTC check_alerts fire 預期行為確認: 'release-pool-auto: skip reason=interval_not_due_age=26min'。Piggy-back 自動 skip (gap 26<120, 距 15:33 UTC last release)。Pool 4 stable。Session state: 13 commits / 160 work_log / 4 papers GREEN / 6 papers 0 MISMATCH / K1091+K1092 memos ready / Codex quota 等 04-24 reset。系統穩定運作無需干預。"
+  },
+  {
+    "timestamp": "2026-04-20T00:05:55+08:00",
+    "task_type": "governance",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "Git commit e441083c pushed: 16:00 UTC piggy-back 2nd fire validation + heartbeat。Session 14 commits durable。"
+  },
+  {
+    "timestamp": "2026-04-20T00:09:57+08:00",
+    "task_type": "research",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "next_tasks.json inventory: 106 entries (legacy planning list per control-plane.md, 非 v12 canonical queue)。Top priorities mostly Paper 3 reframe decisions waiting user input。v12 不 mine 這清單派任務 — storage/ops/ + event_jobs 才是正式 source of truth。Session observation: cron 觸發頻率高, 無新 actionable work at current saturation level。"
   }
 ]
