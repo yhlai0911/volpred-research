@@ -1,3 +1,9 @@
+# ✅ CONSUMED 2026-04-19 15:47 UTC — published as mile_a1f7bfa8
+
+> **Status**: memo **used** — Claude agent `a5f08282` consumed this memo on 2026-04-19, producing `mile_a1f7bfa8` "K957: 37 個實驗蒸餾 5 條研究方法論教訓". 2,362 CJK chars + 2 real charts. Status=draft (pool supply). **Do NOT re-dispatch for K957** — topic now covered. Use K1091 or K1092 memo instead for next pool breach.
+>
+> **Agent-verified research-honest correction**: Memo claimed 37 experiments; actual K526-K566 range has 40 exp (K555 + K569 skip discovered during dispatch). Agent used 40 as canonical. Memo preserved below for template reference.
+
 # Next Draft Candidate: K957 Session Synthesis (E019-E023 Meta-Lessons)
 
 **Prepared 2026-04-19** as preemptive brief for next `draft_pool_low` remediation. Use when Claude agent is dispatched to补 pool from uncovered K candidates.
