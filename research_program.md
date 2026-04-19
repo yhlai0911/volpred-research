@@ -466,3 +466,19 @@ K519-K521 + K527 完成結果：見 archive。
 | P1 | leverage-direction | **gate FAIL RED 53.4%** | Sec 5.4 vs 4.7 paper-internal contradiction + 7 missing JSONs (task_069ddb253fda) |
 | P8 | volatility-absorption | gate 50.7% yellow + K716-722 script 缺 | - |
 | P10 | crypto-fear-channel | kickoff intro done | body pending |
+
+## Platform V3 Editorial Redesign COMPLETE (2026-04-19)
+
+**Status**: 上線 + RWD + 手機修正全部完成。`/v3/*` live 預覽、舊站 `/` byte-identical。
+**Mission 對齊**：目標 4「把網頁平台運營好」— 品牌視覺升級至 NYT/Economist 雜誌風。
+
+**交付**：
+- 27 `/v3/*` routes（home + feed + reports/[id] + 7 tools + 13 admin）
+- 8 Editorial primitives + 7 native 重繪（strategy-selector / risk-forecast / calculators / portfolio / me×3）
+- 13 admin editorial frame + contained dark dashboard
+- RWD at 768 / 480 breakpoints（useIsMobile hook + V3Shell hamburger drawer）
+- LeadIllustration chart mobile fix、market checkbox wire-up、overflow-x 修正
+
+**Deploy**: `d3ef25c` + `d202b4d` + `f4b0988` + `2f68833`。Zeabur `69e4aff350cfe9704d091e57` RUNNING。細節 `docs/frontend-v3-redesign.md`。
+
+**待主人決定**：何時切 `active_frontend = v3`（目前獨立預覽不影響舊站 SEO）。
