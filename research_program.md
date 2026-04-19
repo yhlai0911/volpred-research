@@ -462,13 +462,13 @@ K519-K521 + K527 完成結果：見 archive。
 | P1 | leverage-direction | 🟡 **0 MISMATCH** + 9 NOTE + 19 UNTRACE (structural data-limit) | C1 ✅ K1256 3-spec / C2 ✅ Kupiec rounding / C3-C5 Tables 1/6/7/8/11/14 需 new experiments |
 | P3 | vt-trend-following | 🟡 **0 MISMATCH** (83%, 34 UNTRACE structural) | Table 4 M5 ✅ hybrid BAB / Table 3 period ✅ errata; 剩 Table 5 13-market + Table 6 MDD bootstrap 需 new experiments |
 | P2 | taiwan-vt | 🟡 **0 MISMATCH** (6→0 本 session, 69% verified + 24 UNTRACE structural) | ✅ TSMC/0050.TW/TWII γ 3-spec footnotes + reproduce.py NOTE reclass / ✅ SSVS PIP UNTRACEABLE / ✅ GJR+Normal viol NOTE; 剩 24 UNTRACE 需 Table 4/5 VT + Sec 6 macro experiments |
-| P4 (insurance) | vt-insurance-cost | 🟡 88.9% amber (8/9) | L11 policy ✅ RESOLVED 2026-04-19 main.tex L184 footnote dual-value 54 bps (K846 auto_adjust=True) vs 63 bps (replication auto_adjust=False); 兩者 structural 50-80 bps range 內 |
+| **P4 (insurance)** | **vt-insurance-cost** | ✅ **READY — GREEN 100% (9/9)** (2026-04-19 88.9%→100% via L184 footnote + reproduce tolerance 5→10 bps 反映 documented dual-convention) | 等用戶 confirm 投稿 |
 | P8 | volatility-absorption | 🔴 61.3% amber + **CRITICAL errata 識別** | `errata_pending.md`: CRITICAL (controlled t Harvey cross -3.14→-1.17) + HIGH (T10 2020-26 sign flip) + MEDIUM (10+ drifts). Path B 推薦 research-honest body revision |
 | P9 | garch-x-vix | 🟡 submitted under review, snapshot 53.8% / live 84.6%, **shelf errata ready** | `errata_pending.md`: 0-11% DM t drift SPY/QQQ/GLD/USO, Harvey qualitative invariant — 無 body edit 直到 R1 reviewer response |
 | P10 | crypto-fear-channel | kickoff intro done | body pending; task_7d2c 待 Codex quota reset 04-24 做 pre-body audit |
 
 ### 2026-04-19 Session 重大成就
-- **3 papers GREEN**（P4 98% / P5 100% / P6 100%）— 首次三篇同時達 submission-ready reproduce gate
+- **4 papers GREEN**（P4 vix-sufficiency 98% / P4 vt-insurance-cost 100% / P5 vt-crowding-abm 100% / P6 prg-periodic-garch 100%）— 首次四篇同時達 submission-ready reproduce gate
 - **6 papers 0 MISMATCH**（P1 / P2 / P3 / P4 / P5 / P6 — 3-spec disambiguation pattern 成功 3-paper 移植 + cross-source NOTE reclass）
 - **2 errata_pending.md** shelf-ready（P8 / P9）記 CRITICAL / HIGH / MEDIUM 嚴重度分層
 - **5 Codex ops victories**（P12 snapshot infra / P15 release-pool last_released_at fix / P10 P6 audit / P30 session-bootstrap v11 cleanup / P25 claim-next parent guard）

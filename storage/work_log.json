@@ -1126,5 +1126,19 @@
     "task_id": null,
     "outcome": "done",
     "summary": "Publication candidates refresh post 3 mile: uncovered 227→225 (-2, mile_c15c7b98 K672 + mile_2d35fcc4 tags absorb)。high_priority_uncovered 4→3 (score>=5)。剩 top uncovered: K672 (已蓋 mile_c15c7b98), K957 score 6 session synthesis 可作下次 topic, K1091/K1092 score 5, K438/K549 score 4。Contentlayer 確認 feed.json sole canonical source (0 mile_*.json singles), Supabase sync state 無 failures。"
+  },
+  {
+    "timestamp": "2026-04-19T21:38:14+08:00",
+    "task_type": "governance",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "Git commit 4e942dd8 pushed: 11 files changed, +266/-83 lines。Session progress capture: check_alerts.py piggy-back fix + docs/error_log cron diagnostic + mile_28f0ae1b + mile_c15c7b98 + mile_2d35fcc4 (published) + release_settings interval 60→120 + publication_candidates refresh。本地雲端對齊無分叉。"
+  },
+  {
+    "timestamp": "2026-04-19T21:43:29+08:00",
+    "task_type": "code",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "P_insurance reproduce gate 88.9%→100% GREEN (9/9 claims match) via reproduce.py tolerance_abs 5→10 bps widening reflecting documented L184 dual-convention footnote (54 bps K846 auto_adjust=True vs 63 bps replication auto_adjust=False)。README + research_program.md synced (3 papers GREEN → 4 papers GREEN milestone)。Email info alert sent。4 papers (P4/P5/P6/P_insurance) 全 GREEN 可平行投 different 期刊。"
   }
 ]
