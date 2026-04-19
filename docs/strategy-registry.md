@@ -1,6 +1,6 @@
 # Strategy Registry
 
-## 目前 STRATEGY_REGISTRY（14 筆，10 個 active）
+## 目前 STRATEGY_REGISTRY（14 筆，11 個 active / 3 個 disabled；verified 2026-04-19 18:48 UTC 對齊 `scripts/daily_update.py:29-48`）
 
 | key | display_name | is_active | order |
 |-----|-------------|-----------|-------|

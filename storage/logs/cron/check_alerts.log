@@ -393,3 +393,24 @@ dispatched:
   - skipped: level=critical title=Release pool cron gap > 2h notif_id=d509b22e reason=dedup_24h
   - skipped: level=warn title=Draft pool below threshold (<4) notif_id=68da2566 reason=dedup_24h
 JSON: {"breach_count": 2, "sent_count": 0, "skipped_count": 2, "generated_at": "2026-04-19T18:00:20.623756+00:00"}
+=== ops check-alerts ===
+  release-pool-auto: skip reason=interval_not_due_age=60min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 2h
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-04-19T19:00:00.491454+00:00"}
+=== ops check-alerts ===
+  release-pool-auto: skip reason=interval_not_due_age=120min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 2h
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-04-19T20:00:00.498943+00:00"}
+=== ops check-alerts ===
+  release-pool-auto: skip reason=interval_not_due_age=57min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 2h
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-04-19T21:00:00.630138+00:00"}

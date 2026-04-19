@@ -1612,5 +1612,287 @@
     "task_id": "a4d6214f7da77711e",
     "outcome": "done",
     "summary": "K1091 agent complete → mile_a21a6e06 (2195 CJK + 2 real charts, audience=general, status=draft). Pool 3→4 breach resolved. K1091 memo CONSUMED banner added. Session memos: K957 consumed / K1091 consumed / K1092 ready. Agent 使用現有 K1091 assets 而非新 gen charts (節省 matplotlib overhead, valid reuse)。"
+  },
+  {
+    "timestamp": "2026-04-20T02:14:04+08:00",
+    "task_type": "governance",
+    "outcome": "done",
+    "summary": "Git commits 669a5b02 (K1091 mile + piggy-back auto-trigger + memo CONSUMED) + 7dbe50d1 (merge)。10 files +272/-40。Session 20 commits durable (7dbe50d1 + 669a5b02 + 15ea215b ops patrol auto + earlier)。"
+  },
+  {
+    "timestamp": "2026-04-20T02:17:44+08:00",
+    "task_type": "research",
+    "outcome": "observation",
+    "summary": "18:13 UTC - post K1091 dispatch + commit. Pool 4 stable. Next expected trigger 20:00 UTC (18:00 + 120 min, check_alerts 20:00 fire)."
+  },
+  {
+    "timestamp": "2026-04-20T02:21:34+08:00",
+    "task_type": "governance",
+    "outcome": "observation",
+    "summary": "18:15 UTC stable"
+  },
+  {
+    "timestamp": "2026-04-20T02:27:28+08:00",
+    "task_type": "experiment",
+    "outcome": "done",
+    "summary": "18:27 UTC K1174 memo written (general audience, score 10, research honesty angle, EU-JP gap 0.45→0.005 evaporation). Memo pipeline: K957✅K1091✅ consumed, K1092+K1174 ready."
+  },
+  {
+    "timestamp": "2026-04-20T02:30:19+08:00",
+    "task_type": "platform_ops",
+    "outcome": "audit",
+    "summary": "18:30 UTC pool health audit: 4 drafts all 2+ charts + 2000+ CJK ✓; audience 3 research / 1 general = imbalance; K1174 memo updated w/ general-priority annotation. Piggy-back next due 20:00 UTC. CronList verified 04-24 wake-up intact."
+  },
+  {
+    "timestamp": "2026-04-20T02:35:53+08:00",
+    "task_type": "research",
+    "outcome": "correction",
+    "summary": "18:36 UTC rebuild publication_candidates.json (stale 3h, now 18:35). uncovered 225→215 post K957+K1091 dispatch. SELF-CORRECTION: previous candidate list (K1174/K1150/K1157/K1147 as uncovered via tag-grep) was WRONG — these are covered via content/title K-ID matching in builder script (mile_45060685 已吸收 K1174 via 更新 footer). Truly uncovered K1100-K1224: only K1106 (score 3) + K1115 (score 1). K1174 memo DOWNGRADED. K1092 (score 5) remains #1 actionable uncovered memo."
+  },
+  {
+    "timestamp": "2026-04-20T02:41:04+08:00",
+    "task_type": "paper_review",
+    "outcome": "finding",
+    "summary": "18:45 UTC paper gate audit: P1/P2/P3 reproduce_report.json stale (07:00 UTC)—不被 reproduce.py 自動 regenerate. Re-ran P2 reproduce.py: exit 0, MISMATCH=0 ✓ confirms Paper Portfolio Status claim. P4/P4ins/P9 reproduce.py 有 json.dump, 其他沒有. Gap logged to error_log.md with 3 fix directions. Not a research blocker; infra fix deferred."
+  },
+  {
+    "timestamp": "2026-04-20T02:42:21+08:00",
+    "task_type": "strategy_lifecycle",
+    "outcome": "drift_fix",
+    "summary": "18:48 UTC strategy registry drift fix: docs/strategy-registry.md header 14/10 active → 實 14/11 active (disabled 3: taiwan_spy_momentum/tz_tw_jp_5050/global_vt_tz per scripts/daily_update.py:29-48). Updated header with verification timestamp."
+  },
+  {
+    "timestamp": "2026-04-20T02:47:08+08:00",
+    "task_type": "platform_ops",
+    "outcome": "bug_fix",
+    "summary": "18:46 UTC alerts.py bug fix: _parse_release_pool_state 對 piggy-back 失明 (只讀 release_pool.log 不讀 .release_settings.json). 補 settings fallback. check-alerts 驗證 breached=false gap=0.78h (前夜 stale=17h false-positive). error_log 加完整 section + 教訓."
+  },
+  {
+    "timestamp": "2026-04-20T02:52:33+08:00",
+    "task_type": "governance",
+    "outcome": "refresh",
+    "summary": "18:52 UTC experiments/INDEX.md rebuild: 5h30m stale → fresh. 1011→1012 K (+1), uncovered 736→735 (−1 post K957+K1091 coverage), PASS/FAIL/NULL 201/71/92 unchanged. 11 inserts + 10 deletions metadata delta. ls experiments shows 1045 folders but INDEX filters to valid K pattern (33 legacy folders)."
+  },
+  {
+    "timestamp": "2026-04-20T02:54:47+08:00",
+    "task_type": "research",
+    "outcome": "honesty_audit",
+    "summary": "18:56 UTC research-honesty audit: K957 knowledge.json 條目 vs article mile_a1f7bfa8 vs filesystem 3-way consistency check. Filesystem truth: K526-K566 = 40 exp (K555 唯一缺). Article 主敘述 40 ✓ 但 parenthetical 誤標 K569 skip (不在 range). KB 條目 37 + 誤列 K531/K546/K555/K559 缺. Severity LOW (不動結論). 已記 error_log 附下次 fix direction."
+  },
+  {
+    "timestamp": "2026-04-20T02:58:48+08:00",
+    "task_type": "member_qa",
+    "outcome": "cleanup",
+    "summary": "18:58 UTC member_qa cleanup: archived test-garbage question 54ba8732 (keyboard mash testtewtrwqetwqtewqtqwet from yhlai 2026-03-20). Used newly-added question-archive CLI (commit 8cb89fe8). Ranking workflow: active_ranked 1→0, 建議從「前 1 名中仍有未連文章」轉為「維持 6 小時評分節奏」. 下次 cron 不再把 test-garbage 當作需要 handle 的 ranked question."
+  },
+  {
+    "timestamp": "2026-04-20T03:02:42+08:00",
+    "task_type": "governance",
+    "outcome": "metadata_fix",
+    "summary": "18:59 UTC K957 knowledge.json metadata fix (last round research-honesty audit identified): 3 處 typo 修正 — title 37→40 Experiments / content line 1 改 40 + K555 唯一缺 + audit attribution / 研究效率觀察 37→40 + 5.4→5.0%. Article body edit deferred (published 內容 re-sync 觸 Supabase/Mirror, coordinated 下 session 處理). error_log 附 applied + deferred 標記."
+  },
+  {
+    "timestamp": "2026-04-20T03:07:51+08:00",
+    "task_type": "daily_article",
+    "outcome": "status_update",
+    "summary": "19:07 UTC docs/project_improvement_status.md 附加 post-compact saturation-round summary section — 本輪所有 Codex-blocked observation-mode 產出 bullet list (K1174 memo / pub_candidates rebuild / alerts.py fix / INDEX rebuild / strategy_lifecycle / question archive / K957 KB fix / error_log 3 sections / piggy-back production-validated). 符合活文件原則：專案優化進度 update."
+  },
+  {
+    "timestamp": "2026-04-20T03:10:42+08:00",
+    "task_type": "platform_ops",
+    "outcome": "audit_pass",
+    "summary": "19:09 UTC draft pool chart URL health audit: 4 drafts × 2 charts = 8 Supabase image URLs curl HEAD 全部 200 OK (mile_28f0ae1b binary_universality × 2 / mile_c15c7b98 k672 × 2 / mile_a1f7bfa8 k957 × 2 / mile_a21a6e06 k1091 × 2). 0 broken links. Pool release ready. Alert_dedup inspection: release_pool_gap dedup last_sent=05:41 UTC (+24h = ~10.5h 後), 若實 breach 會被 suppress — 但 fix applied 後不會真 breach (by design rule: 不手改 dedup json)."
+  },
+  {
+    "timestamp": "2026-04-20T03:14:55+08:00",
+    "task_type": "paper_review",
+    "outcome": "audit_observation",
+    "summary": "19:12 UTC paper data snapshot audit: 5/10 papers missing data/*.csv (P4 vix-sufficiency / P5 vt-crowding-abm / P6 prg-periodic-garch GREEN + P3 vt-trend-following yellow + P10 crypto-fear kickoff). 但 reproduce.py 源碼 check 顯 P4/P6 reproduce path 讀 bundled experiment JSONs 不 touch yfinance — snapshot rule spirit compliant (reviewer rerun 不需 raw fetch). 5/10 合規 has data/*.csv (P1/P2/P8/P9/P4ins). 結論: P4/P5/P6 primary reproduce 保護中, raw-data path 可補 data/ CSV 作 reviewer 深度復現用; 不是 submission blocker."
+  },
+  {
+    "timestamp": "2026-04-20T03:18:16+08:00",
+    "task_type": "governance",
+    "outcome": "health_check",
+    "summary": "19:14 UTC memory health check: 28 memory files (22 feedback / 3 project / 3 user+reference) + MEMORY.md index — 全 28 files 都在 index, 0 orphan 0 missing. 最新 3 個 (feedback_dont_ask_do / feedback_email_on_major_decisions / feedback_3spec_disambiguation) 結構 frontmatter + Why + How to apply 齊全. Memory 系統健康."
+  },
+  {
+    "timestamp": "2026-04-20T03:23:21+08:00",
+    "task_type": "daily_article",
+    "outcome": "memo_written",
+    "summary": "19:15 UTC 補 general-audience memo (5th in memo pipeline): cross_market_binary_sufficient EAV general-audience. K1150+K1151+K1152+K1153+K1157 (score 8-10) 已 covered research (mile_28f0ae1b) 但 missing general side. Pool 目前 3 research / 1 general 失衡, 此 memo 是 next draft_pool_low breach 的 general-priority refill. Pipeline: K957✅ K1091✅ consumed / K1092 ready / K1174 DOWNGRADED / cross_market_binary NEW (general). Skeleton 7 點 + 2 charts + hard rules brief ready."
+  },
+  {
+    "timestamp": "2026-04-20T03:26:51+08:00",
+    "task_type": "paper_review",
+    "outcome": "observation",
+    "summary": "19:18 UTC P10 crypto-fear-channel kickoff state verified: outline.md + body_v0_intro.tex + README.md (target JIMFIM→JEF→FRL) + reproducibility_audit/ subdir. Missing data/ scripts/ results/ tables/ figures/ but KICKOFF 階段 per paper-workflow rule 允許暫缺；body drafting 才需補齊. task_7d2c P25 pre-body audit 04-24 Codex 解 block 後派. JSON-parse K957 edit 驗證通過 (40 Experiments title 正確寫入)."
+  },
+  {
+    "timestamp": "2026-04-20T03:30:42+08:00",
+    "task_type": "research",
+    "outcome": "refresh",
+    "summary": "19:30 UTC docs/topic_diversity_audit.md rebuild (14h stale 05:08 → fresh 19:30). Feed tags 4665→4731 (+66 from K957+K1091+REIT articles), experiments 1132→1139 (+7). Rank shift: 跨資產 rank 15→14 (63→65, 今日活躍). 10 novelty candidates unchanged (feed_ct=0 keywords: RL vol / HFT / intraday seasonality / climate vol / REIT / crypto-stablecoin / BMA / MCS/SPA / retail flow). 20% novelty quota guidance fresh for 下次 new experiment selection."
+  },
+  {
+    "timestamp": "2026-04-20T03:34:29+08:00",
+    "task_type": "platform_ops",
+    "outcome": "refresh",
+    "summary": "19:34 UTC platform-cycle-summary refresh (2h23m stale → fresh). Confirmed: next release mile_28f0ae1b binary-universality research @ 20:00 UTC (oldest draft by created_at). Post-release pool=3, draft_pool_low will fire. 同時 mile_28f0ae1b 是 cross_market_binary memo 的 research parent — post-20:00 refill 順勢該用 general-audience memo 填補 (K1150/K1151/K1152/K1153/K1157 cluster). Timing 完美對齊."
+  },
+  {
+    "timestamp": "2026-04-20T03:38:21+08:00",
+    "task_type": "daily_article",
+    "outcome": "dispatched",
+    "summary": "19:36 UTC 派 Claude general-purpose agent abd65396be9d74740 (bg) 寫 cross_market_binary general-audience article (K1150+K1151+K1152+K1153+K1157 cluster, mile_28f0ae1b research parent). 提前於 20:00 UTC release 26 min — agent 完成後 pool 4→5, post-release pool=4 不觸發 draft_pool_low. Dedup check: experiments 有 data, 0 worktrees 0 active agents. Brief 附 memo reference + 10 hard rules + feed-publisher workflow + general audience 敘事原則."
+  },
+  {
+    "timestamp": "2026-04-20T03:42:37+08:00",
+    "task_type": "strategy_lifecycle",
+    "outcome": "metrics_refresh",
+    "summary": "19:42 UTC strategy_metrics refresh: 14 strategies recalc (8 之前缺 stats 欄位 paper_trading.json) via scripts/recalc_metrics.py → Sharpe/Ret/MDD 全計算 + frontend-v2-fix/data/strategy_metrics.json 同步 + Supabase strategy_metrics_cache 14/14 synced. Top 5 Sharpe: tz_tw_jp_5050 (3.48, disabled) / taiwan_spy_momentum (3.24, disabled) / piecewise_conservative (3.16) / global_vt_tz (3.06, disabled) / adaptive_tier (3.05). Trade dates latest 2026-04-18 Sat (Sun/Mon cron skip expected)."
+  },
+  {
+    "timestamp": "2026-04-20T03:45:06+08:00",
+    "task_type": "daily_article",
+    "outcome": "agent_done",
+    "summary": "19:43 UTC agent abd65396be9d74740 completed: mile_b9d5db50 published (audience=general, status=draft, 1644 CJK, 3443 raw char, 10 tags, 2 real matplotlib charts HTTP 200). 標題「財報日股價為什麼會大跳？四個國家的股市都給了同一個答案：不看 surprise 多大，只看有沒有事件」. Pool 4→5 post-agent. Pre-empted 20:00 UTC draft_pool_low breach. Memo CONSUMED banner updated. Agent used K1151+K1157 raw parquet 1356+1370 events + 4-market cluster-bootstrap SE/t-stat. Feed-publisher 一次通過 0 blocker."
+  },
+  {
+    "timestamp": "2026-04-20T03:47:00+08:00",
+    "task_type": "event_article",
+    "outcome": "calendar_mapping",
+    "summary": "19:47 UTC event article pipeline planning (WebSearch FOMC 2026 calendar verified): FOMC 2026-04-28/29 (8-9 days out). 已有 2 篇 (mile_f7bc6e6a 04-18 + mile_78d649c4 04-17) 都是 94.8% 不降息 thesis early-window (T-11/T-10). Rule budget: 最多 3-4 篇 (T-7/T-2/T+0/+1). 下一個 window 是 T-7 tomorrow (04-21) — event_article 需當日派. Slot unused: T-7, T-2, T+0, T+1. CPI 04 release mid-May (non-imminent). 0 scheduled articles in feed. 下次 cron 若 draft pool healthy, 可提前 T-7 計畫."
+  },
+  {
+    "timestamp": "2026-04-20T03:50:16+08:00",
+    "task_type": "platform_ops",
+    "outcome": "verify",
+    "summary": "19:48 UTC post-agent alert state verify: breach_count=0 全線綠 (release_pool_gap false / draft_pool_low false pool=5 / host_cron_fail false). Piggy-back fix (alerts.py last_released fallback) confirmed working. 20:00 UTC release 將降 pool 5→4 仍 ≥ threshold 不 breach. Mile_b9d5db50 new general-audience draft 進 pool 生效."
+  },
+  {
+    "timestamp": "2026-04-20T03:54:50+08:00",
+    "task_type": "governance",
+    "outcome": "milestone_update",
+    "summary": "19:50 UTC research_program.md 2026-04-19 session 成就更新: 加 4 daily articles 補池 (mile_28f0ae1b/a1f7bfa8/a21a6e06/b9d5db50 3 篇 research + 1 篇 general) + 1 section 記錄 post-compact saturation-round 10 項 ops/infra/governance 修復成果 + memo pipeline 狀態 (3 consumed / 1 ready / 1 DOWNGRADED). K1089/K1119 查 — 已測 BTC DVOL/VIX 皆 NULL, crypto meta-prediction 方向無新 K slot 可開. 活文件保持 current."
+  },
+  {
+    "timestamp": "2026-04-20T03:59:00+08:00",
+    "task_type": "research",
+    "outcome": "ops_audit",
+    "summary": "19:54 UTC ops/agents + executions state audit: 3 agent sessions (claude-supervisor/claude-worker/codex-worker) 皆 idle, heartbeat 8.8h stale — v12 legacy v11 artifact (不再 standing worker runtime). 49 execution runs (46 succeeded / 3 failed, 94% success rate). 3 failed: (1) K1125 re-queue deferral OK, (2) P9 garch-x-vix reproduce.py missing (error_log 已錄), (3) task_88dae agent-specs/guide.md missing — legacy scheduler-executor task, 後 send-alert infrastructure 補齊. 0 current blockers. Frontend metrics sync integrity verified: storage vs frontend JSON diff empty."
+  },
+  {
+    "timestamp": "2026-04-20T04:04:05+08:00",
+    "task_type": "platform_ops",
+    "outcome": "bug_fix",
+    "summary": "20:03 UTC 發現+修 piggy-back 1.5 秒 timing drift bug: release-pool-auto 在 hourly boundary (age=119.98 < 120) 總是 skip → 實際 cadence 3h (非 2h, 33% 流量損失). Fix: check_alerts.py skip condition age_min < interval_min → age_min < interval_min - 3 (3 min tolerance). 驗證: manual run → release-pool-auto ok age=123min, mile_28f0ae1b released 20:03:01 UTC, pool 5→4. error_log 加完整 section (根因/影響/教訓)."
+  },
+  {
+    "timestamp": "2026-04-20T04:05:59+08:00",
+    "task_type": "governance",
+    "outcome": "email_sent",
+    "summary": "20:05 UTC 依 feedback_email_on_major_decisions rule 寄 info email to yihao.lai@gmail.com. notif_id=d2fc89cc. 主題: piggy-back 1.5s timing bug fixed, 3h→2h cadence 恢復, 33% 流量影響期間 + fix details + 教訓. Body 用三段結構 (觸發條件/影響/建議行動) per alert rule."
+  },
+  {
+    "timestamp": "2026-04-20T04:10:27+08:00",
+    "task_type": "event_article",
+    "outcome": "memo_written",
+    "summary": "20:07 UTC 建立 FOMC T-7 event_article memo (next_draft_candidate_fomc_t7.md) 供明日 (2026-04-21 UTC) 自動 dispatch 用. Differentiation angle: 前 2 篇 (mile_78d649c4/f7bc6e6a) 都聚焦 94.8% 不降息 framing; T-7 切換主題軸為歷史 20 年 FOMC 前 7 天 SPY/VIX pattern + 2026 regime 對比 + position sizing recommendation. Skeleton 7 點 + 2 chart spec + event-driven hard rules (status=published 即發). Novelty guard: dispatch 前 grep 去重."
+  },
+  {
+    "timestamp": "2026-04-20T04:14:10+08:00",
+    "task_type": "experiment",
+    "outcome": "backlog_add",
+    "summary": "20:09 UTC research_program.md 面向 A 加 3 個 novelty-quota 候選 (topic_diversity_audit feed_ct=0 gap): (1) Bayesian Model Averaging (BMA) for vol — posterior-weighted GARCH/GJR/EGARCH combination, not data-blocked; (2) Model Confidence Set / SPA / Reality Check — Hansen-Lunde-Nason framework 取代 pairwise DM, K500+ results meta-analysis natural complement, not data-blocked; (3) Realized semivariance / signed jumps — BNS 分解 RV upside/downside, 需 5min 數據 2026 Q2 解鎖. 都補 feed_ct=0 gap + 服務 Mission 預測品質線."
+  },
+  {
+    "timestamp": "2026-04-20T04:19:27+08:00",
+    "task_type": "paper_review",
+    "outcome": "verify_pass",
+    "summary": "20:12 UTC re-run 3/4 GREEN papers reproduce.py post-session: P4 vix-sufficiency 98% green (98/100 match / 0 MISMATCH / 2 UNTRACEABLE), P4ins vt-insurance-cost 100% green (100% match), P5 vt-crowding-abm green (ALL KEY NUMBERS VERIFIED). 沒跑 P6 prg-periodic-garch (live run >15s 跳過). 3 個 GREEN papers 無 session regression. Ready to 投稿 (等用戶 confirm)."
+  },
+  {
+    "timestamp": "2026-04-20T04:22:46+08:00",
+    "task_type": "platform_ops",
+    "outcome": "observation",
+    "summary": "20:22 UTC 驗證 piggy-back next-fire timeline: last_released=20:03:01 (我 manual run 造成 alignment drift off :00 baseline), 22:00 UTC check age=116.99 min < 117 tolerance → skip by 0.6s, 23:00 UTC age=177 → fire. 本 cycle 3h gap 非 fix 失敗是我 manual run 造成 alignment skew. 下 cycle 起回歸 :00 alignment → 每 2h fire normal. Host cron  仍 18h40m 未 fire (Host cron selective skip bug unchanged, piggy-back 補上)."
+  },
+  {
+    "timestamp": "2026-04-20T04:26:31+08:00",
+    "task_type": "daily_article",
+    "outcome": "dispatched",
+    "summary": "20:24 UTC 派 Claude general-purpose agent ac37c2242d9a89660 (bg) 寫 K1092 Pareto-below-Harvey research-audience article. Brief: memo k1092 + 7-point research skeleton + 2 chart spec (Pareto frontier + VaR ts COVID). Dedup: 0 worktrees, 0 existing K1092 feed coverage. Pre-empt 23:00 UTC pool=3 breach. Memo pipeline: K957/K1091/cross_market_binary consumed, K1092 dispatched, fomc_t7 明日用."
+  },
+  {
+    "timestamp": "2026-04-20T04:30:51+08:00",
+    "task_type": "paper_review",
+    "outcome": "gap_observed",
+    "summary": "20:26 UTC platform PDF audit: 6 papers on frontend-v2-fix/public/paper/ (garch-x-vix / leverage-direction-matters / taiwan-vt-tz-arbitrage / vix-sufficiency / volatility-absorption / vt-trend-following), 但 3 GREEN papers 缺 public PDF: vt-insurance-cost main.pdf (7h old) / vt-crowding-abm main.pdf (37h old) / prg-periodic-garch main.pdf (7h old). 本地皆有 compiled PDF 但未走 paper-update CLI 上架. Mission 5 曝光流量: 3 submission-ready papers 讀者無法訪問 public PDF. 不自動 paper-update (user policy decision scope — 等 submission decision 同時做). Log gap 供下次 user confirm 時 batch 處理."
+  },
+  {
+    "timestamp": "2026-04-20T04:34:05+08:00",
+    "task_type": "daily_article",
+    "outcome": "agent_done",
+    "summary": "20:32 UTC agent ac37c2242d9a89660 completed: mile_4cf87cfc published (research draft, 2225 CJK, 17 tags, 2 real charts k1092_article_pareto_harvey + k1092_article_harvey_band HTTP 200). Title: K1092 Asset-Matched DCC-A4f SPY-VIX+GLD-GVZ Pareto-Dominant 但 Below Harvey. DM stats byte-match results.json (2.951/2.947/2.144 vs SYMM, 5.055/4.969/3.840 vs GJR Harvey PASS). Pool 4→5. Memo CONSUMED banner. Pipeline: K957/K1091/cross_market_binary/K1092 all consumed, fomc_t7 明日用, K1174 DOWNGRADED."
+  },
+  {
+    "timestamp": "2026-04-20T04:38:23+08:00",
+    "task_type": "governance",
+    "outcome": "milestone",
+    "summary": "20:34 UTC publication_candidates rebuild post K1092 publish: uncovered 215→213 (-2), HIGH-PRIORITY UNCOVERED 1→0 ✓ (K1092 was last high-score uncovered), missing_general_audience 32→26 (-6, cross_market_binary covers cluster), missing_research_audience 10→9. 平台進入 session 以來最健康狀態 — no >4-score uncovered K 等待文章. Next session refill 可 focus on: (a) 補其他 missing-general 的 K, (b) 事件驅動 (FOMC T-7 等), (c) novelty quota (BMA/MCS from backlog add)."
+  },
+  {
+    "timestamp": "2026-04-20T04:42:06+08:00",
+    "task_type": "research",
+    "outcome": "gap_mapping",
+    "summary": "20:36 UTC missing_research audience top 5 mapping: K623+K970 MF2-GARCH pair (bug fix + VIX long-term, 皆 general 版已有) / K1074 A4f-VT vs 12/VIX (statistical edge ≠ Sharpe methodology case) / K1118 FX IV-sufficiency (native IV works single-pair, basket fails) / K680 OVERTURNED lookahead (correction-story). 皆 score 5, 非 urgent 但適合之後 research 版補位. 不追加 memo file (已有 6 個 active memos — pipeline debt control), 記 log 供未來 session 參考."
+  },
+  {
+    "timestamp": "2026-04-20T04:46:50+08:00",
+    "task_type": "platform_ops",
+    "outcome": "sync_done",
+    "summary": "20:38 UTC supabase incremental sync done: articles 28 (含 mile_4cf87cfc K1092 research + mile_b9d5db50 cross-market general + mile_a21a6e06 K1091 + released articles state) / knowledge 102 (K957 40→37 metadata fix propagated) / risk_forecast 1. 0 errors. Platform state 與 local canonical 同步."
+  },
+  {
+    "timestamp": "2026-04-20T04:50:26+08:00",
+    "task_type": "governance",
+    "outcome": "state_refresh",
+    "summary": "20:40 UTC session_state.json manual refresh (post-saturation): pending_events 4 stale → 4 current (FOMC T-7 / Codex quota 04-24 / HAR-RV 5min accrual / memo pipeline status), papers 4 entries → 10 entries (全 10 篇含 4 GREEN submission-ready + 2 shelf errata + kickoff P10), metrics_age_hours 0 (just refreshed strategy_metrics), draft_count 4→5, saved_at fresh. 下次 compact 將 carry forward accurate snapshot 供 next session bootstrap."
+  },
+  {
+    "timestamp": "2026-04-20T04:54:07+08:00",
+    "task_type": "governance",
+    "outcome": "state_snapshot",
+    "summary": "20:53 UTC state snapshot: pool 5 drafts (audience 3 research / 2 general — 本 session 改善 3:1→3:2 per cross_market_binary dispatch), uncommitted 31 files, git sync cron 20:47 UTC 看似未 fire (下次 00:47 UTC+1). Cron 狀況: 8 active + 1 one-shot 04-24 Codex wake. Next time-anchor events: 23:00 UTC piggy-back release / 2026-04-21 T-7 FOMC preview window (fomc_t7 memo ready) / 04-24 10:27 UTC Codex quota reset."
+  },
+  {
+    "timestamp": "2026-04-20T04:57:59+08:00",
+    "task_type": "paper_review",
+    "outcome": "verify_complete",
+    "summary": "20:55 UTC P6 prg-periodic-garch reproduce.py --skip-live verify: alert_level=green, checks 15/15 = 100% match, 2 tables verified, target FRL. 4/4 GREEN papers 全部 post-session verify 通過 (P4 98% + P4ins 100% + P5 100% + P6 100%). All submission-ready state intact, 等用戶 confirm 投稿."
+  },
+  {
+    "timestamp": "2026-04-20T05:02:15+08:00",
+    "task_type": "strategy_lifecycle",
+    "outcome": "observation",
+    "summary": "20:57 UTC strategy sparkline 觀察: recalc_metrics.py 只 PATCH metrics field 到 Supabase strategy_metrics_cache, 不 update sparkline. Sparkline 只在 list_new_strategy.py 新策略上架時寫入 (_build_sparkline max_points=90 from paper_trading entries). 目前 14 策略 sparkline 為各自上架時 snapshot, 非當日動態. 影響: frontend 顯示 sparkline 可能落後 days/weeks, 但主 metrics (Sharpe/MDD) 是 current. Fix direction (非本次): 擴 recalc_metrics.py 加 _rebuild_sparkline 邏輯 + 每日 sync. 不急, 不 blocker."
+  },
+  {
+    "timestamp": "2026-04-20T05:06:28+08:00",
+    "task_type": "platform_ops",
+    "outcome": "infra_fix",
+    "summary": "20:59 UTC recalc_metrics.py 擴加 sparkline rebuild: 新增 build_sparkline() (ported from list_new_strategy.py:426-462) + main loop 產 sparklines dict + Supabase PATCH 多 sparkline field. 測試 run: 14 策略 sparkline 全 90pt rebuilt from current paper_trading entries (non-stale), Supabase strategy_metrics_cache 14/14 synced w/ sparkline. Fixes 上輪 observation 的 sparkline stale 問題 (上架 snapshot → daily-current). Frontend 將顯示當前累積報酬曲線."
+  },
+  {
+    "timestamp": "2026-04-20T05:11:14+08:00",
+    "task_type": "platform_ops",
+    "outcome": "verify_supabase",
+    "summary": "21:11 UTC Supabase sparkline post-fix verify: slow_vt sparkline_len=90 (from stale 60), first=0.4 last=49.52 (pct format matching 49.5% Sharpe-consistent cum return). 之前讀到 abs-equity format (1000000 → 1495186) 是 PostgREST 快取的 list-day 舊資料; 二次 run + 重讀得到我 PATCH 的新 pct format. Fix 確認生效, 14/14 strategies 當前 sparkline 反映真實 paper_trading entries 的累積報酬. updated_at cosmetic stale (我 PATCH payload 不含 updated_at) — non-issue, can add if frontend 依賴."
+  },
+  {
+    "timestamp": "2026-04-20T05:14:06+08:00",
+    "task_type": "platform_ops",
+    "outcome": "live_verify",
+    "summary": "21:13 UTC Live API sparkline cache trace: volpred.zeabur.app/api/strategy-overview 仍顯 len=60 abs-format (stale) 但 Supabase direct 已 90pt pct-format ✓. Next.js unstable_cache revalidate=300s on strategy-overview endpoint (frontend-v2-fix/src/lib/data-server.ts:1456-1457). 5 min 內 live API 自動 refresh 到我 PATCH 的新格式. 無需 manual revalidate. Platform 健康 200 OK."
   }
 ]

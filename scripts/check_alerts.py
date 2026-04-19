@@ -55,7 +55,13 @@ def _auto_trigger_release_pool_if_due() -> dict:
         return {"triggered": False, "reason": "last_released_at_parse_error"}
     now = datetime.now(timezone.utc)
     age_min = (now - last_dt).total_seconds() / 60
-    if age_min < interval_min:
+    # Tolerance: check_alerts cron fires hourly at :00:00 but release-pool CLI
+    # writes last_released_at at :00:01-02 UTC. On exactly-interval boundaries
+    # (age=119.98 min at hour-aligned check) this skips by ~2s and adds a full
+    # extra hour, making 120-min interval behave as 180-min. Allow 3-min slack
+    # so hourly checks at the interval boundary fire the release instead of
+    # deferring to the next hourly check.
+    if age_min < interval_min - 3:
         return {"triggered": False, "reason": f"interval_not_due_age={age_min:.0f}min"}
 
     # Due: attempt release via CLI. Use non-blocking subprocess to avoid

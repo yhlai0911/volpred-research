@@ -1,5 +1,7 @@
 # Next Draft Candidate: K1092 Asymmetric DCC-A4f Portfolio VaR
 
+> **🔒 CONSUMED 2026-04-19 20:32 UTC** — Article published as `mile_4cf87cfc`（audience=research, status=draft, 2225 CJK 超 2000 門檻, 17 tags, 2 real matplotlib charts HTTP 200 OK, DM/QLIKE 數字全部 byte-match `experiments/k1092/k1092_results.json`）. Dispatched via Claude general-purpose agent `ac37c2242d9a89660` proactively before 23:00 UTC release (pre-empted post-release pool=3 breach). Pool went 4→5. Keep this memo as audit/cross-link history. Do not re-dispatch.
+
 **Prepared 2026-04-19** as preemptive brief for future `draft_pool_low` remediation. Third memo in series (K957 / K1091 / K1092).
 
 ## K1092 Overview

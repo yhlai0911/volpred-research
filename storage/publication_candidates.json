@@ -1,28 +1,13 @@
 {
-  "generated_at": "2026-04-19T15:22:31.739291+00:00",
+  "generated_at": "2026-04-19T20:38:05.439320+00:00",
   "summary": {
     "total_k": 583,
-    "uncovered": 225,
-    "high_priority_uncovered": 3,
-    "missing_general_audience": 33,
-    "missing_research_audience": 10
+    "uncovered": 213,
+    "high_priority_uncovered": 0,
+    "missing_general_audience": 26,
+    "missing_research_audience": 9
   },
   "top_10_uncovered": [
-    {
-      "k_id": "K957",
-      "score": 6,
-      "title": "K957: ★★★★ K526-K566 Session Synthesis — 37 Experiments, 5 Meta-Lessons (E019-E023)"
-    },
-    {
-      "k_id": "K1091",
-      "score": 5,
-      "title": "K1091: Meta Prediction Out-of-Sample Test — Equities VGK/EWJ PASS Clean, Commodities CPER/SLV FAIL (No Matched IV)"
-    },
-    {
-      "k_id": "K1092",
-      "score": 5,
-      "title": "K1092: Asymmetric DCC-A4f (SPY-VIX + GLD-GVZ) — Strictly Pareto-Dominant but Below Harvey vs Symmetric"
-    },
     {
       "k_id": "K438",
       "score": 4,
@@ -57,25 +42,24 @@
       "k_id": "K1024",
       "score": 4,
       "title": "K1024: A4f Refit Frequency Insensitive ★ — QLIKE Spread 0.021%, 63d Optimal"
+    },
+    {
+      "k_id": "K1033",
+      "score": 4,
+      "title": "A4f Refit Frequency Sensitivity (Paper 9 Robustness)"
+    },
+    {
+      "k_id": "K1073",
+      "score": 4,
+      "title": "K1073: A4f Exog Sensitivity (VIX/VIX9D/VIX3M/VVIX) — VIX Baseline Stable, VIX9D Marginally Best"
+    },
+    {
+      "k_id": "K859",
+      "score": 4,
+      "title": "K859: Robust VT — Floor/Cap+EWMA(10) Best Combo, Sharpe 0.579, Turnover -30% vs Baseline"
     }
   ],
   "missing_general_top5": [
-    {
-      "k_id": "K1150",
-      "score": 10,
-      "title": "K1150 third-market validation: TOPIX N=30 Japan pooled θ_EAV PASS — three-market universal regularity confirmed",
-      "already_covered_for": [
-        "research"
-      ]
-    },
-    {
-      "k_id": "K1157",
-      "score": 10,
-      "title": "K1157 JP TOPIX continuous EAV — binary-sufficient universality confirmed cross-market",
-      "already_covered_for": [
-        "research"
-      ]
-    },
     {
       "k_id": "K1174",
       "score": 10,
@@ -85,17 +69,33 @@
       ]
     },
     {
-      "k_id": "K672",
+      "k_id": "K1077",
       "score": 9,
-      "title": "K672: ★★★ Definitive Conclusions — 7 proven, 6 strong, 5 emerging, 7 open questions",
+      "title": "K1077: A4f on 0050.TW Extended History NULL — Confirms Genuinely Weak Taiwan Transmission (θ₁ Unstable)",
       "already_covered_for": [
         "research"
       ]
     },
     {
-      "k_id": "K1077",
+      "k_id": "K1078",
       "score": 9,
-      "title": "K1077: A4f on 0050.TW Extended History NULL — Confirms Genuinely Weak Taiwan Transmission (θ₁ Unstable)",
+      "title": "K1078: ★★ QQQ A4f Extended PASS (t=+5.99) — A4f is US Liquid Equity Phenomenon (Not SPY-Specific)",
+      "already_covered_for": [
+        "research"
+      ]
+    },
+    {
+      "k_id": "K1067",
+      "score": 9,
+      "title": "K1067f VIX-only ablation H1 CLEAN: Paper 2 VIX channel independent of EAV, robustness chain complete",
+      "already_covered_for": [
+        "research"
+      ]
+    },
+    {
+      "k_id": "K1164",
+      "score": 7,
+      "title": "K1164 analyst × media mechanism REJECTED — EU > JP analyst but cluster inverted; θ_rel mechanism remains OPEN",
       "already_covered_for": [
         "research"
       ]
@@ -133,85 +133,15 @@
       ]
     },
     {
-      "k_id": "K558",
+      "k_id": "K680",
       "score": 4,
-      "title": "K558: ★★★★★ Taiwan Hybrid Leverage FULLY VALIDATED — t=4.79, 18/18 OOS, 0056 confirmed",
+      "title": "K680: ⚠️ OVERTURNED — Cross-OOS validation was on lookahead-biased results",
       "already_covered_for": [
         "general"
       ]
     }
   ],
   "candidates": [
-    {
-      "k_id": "K957",
-      "title": "K957: ★★★★ K526-K566 Session Synthesis — 37 Experiments, 5 Meta-Lessons (E019-E023)",
-      "score": 6,
-      "reasons": [
-        "PASS/Harvey-significant",
-        "cross-market/universal"
-      ],
-      "verdict_preview": "[提出: 用戶, 執行: Claude] K526-K566 meta-synthesis。37 個實驗（4 個 K-ID 缺失：K531/K546/K555/K559），產出 5 條 experience records (E019-E023)。\n\n**核心數字**：2 個 Harvey-pass 策略（K548/K551 leverage t=7.90、K553/K558 台灣 t=4.79）、7/7 HAR universal breakthrough、37+ VIX sufficiency 確認、3 個 daily-artifact 案例。\n\n**E019 Daily Artifact",
-      "covered_by": [],
-      "uncovered": true,
-      "audiences_covered": [],
-      "updated_at": "",
-      "tags": [
-        "synthesis",
-        "meta_analysis",
-        "experience_records",
-        "E019-E023",
-        "K526-K566",
-        "methodology"
-      ]
-    },
-    {
-      "k_id": "K1091",
-      "title": "K1091: Meta Prediction Out-of-Sample Test — Equities VGK/EWJ PASS Clean, Commodities CPER/SLV FAIL (No Matched IV)",
-      "score": 5,
-      "reasons": [
-        "PASS/Harvey-significant",
-        "methodology/mechanism lesson"
-      ],
-      "verdict_preview": "[提出: Claude, 執行: Claude] K1091 validates K1090 meta-regression by running A4f on 4 predicted-PASS assets. VGK (European): predicted +4.71, realized +4.46, |err|=0.25, Harvey PASS ⭐. EWJ (Japan): predicted +4.34, realized +4.81, |err|=0.47, Harvey PASS ⭐. CPER (Copper): predicted +3.58, realized +0.4",
-      "covered_by": [],
-      "uncovered": true,
-      "audiences_covered": [],
-      "updated_at": "",
-      "tags": [
-        "meta-validation",
-        "VGK",
-        "EWJ",
-        "CPER",
-        "SLV",
-        "out-of-sample",
-        "Paper9",
-        "commodity-matched-IV"
-      ]
-    },
-    {
-      "k_id": "K1092",
-      "title": "K1092: Asymmetric DCC-A4f (SPY-VIX + GLD-GVZ) — Strictly Pareto-Dominant but Below Harvey vs Symmetric",
-      "score": 5,
-      "reasons": [
-        "PASS/Harvey-significant",
-        "methodology/mechanism lesson"
-      ],
-      "verdict_preview": "[提出: Claude, 執行: Claude] K1092 applies asset-matched theory to portfolio VaR. Tests DCC-A4f-ASYM (SPY+VIX², GLD+GVZ²) vs DCC-A4f-SYMM (both VIX, K1041 original) vs DCC-GJR baseline. 50/50 SPY+GLD portfolio, OOS 2013-2026 n=3,234. RESULTS: DCC-A4f-ASYM vs DCC-GJR Harvey PASS on every metric: Portfoli",
-      "covered_by": [],
-      "uncovered": true,
-      "audiences_covered": [],
-      "updated_at": "",
-      "tags": [
-        "DCC-A4f",
-        "asymmetric",
-        "asset-matched",
-        "portfolio-VaR",
-        "Paper3",
-        "Paper9",
-        "GVZ",
-        "marginal-improvement"
-      ]
-    },
     {
       "k_id": "K438",
       "title": "K438: GARCH-X with VRP in Variance Equation",
@@ -579,26 +509,6 @@
       ]
     },
     {
-      "k_id": "K543",
-      "title": "K543: Drawdown-Conditional VT — Sharpe Null 但 MDD -28.6%→-15.4%（risk-return tradeoff）",
-      "score": 3,
-      "reasons": [
-        "PASS/Harvey-significant"
-      ],
-      "verdict_preview": "[提出: Claude, 執行: Claude] Drawdown 深度作 VT 調節信號。5090 天，5 期 cross-OOS。VIX-drawdown corr=-0.77（高度冗餘）。\n\nSharpe: 最佳 DD-Enhanced +0.012 (t=1.79, NS)。Harvey 全未通過。\n\n但 MDD 顯著改善：DD-Conditional -15.4% vs baseline -28.6%（幾乎減半）。Combined -17.4%。代價是 return 從 6.76% 降到 5.00%。\n\n結論：drawdown 調節不產生 alpha（VIX 已含 77% drawd",
-      "covered_by": [],
-      "uncovered": true,
-      "audiences_covered": [],
-      "updated_at": "",
-      "tags": [
-        "drawdown",
-        "VT_strategy",
-        "MDD",
-        "risk_return_tradeoff",
-        "null_sharpe"
-      ]
-    },
-    {
       "k_id": "K547",
       "title": "K547: Turn-of-Month VT — 效應在現代數據中消失，日曆 overlay 顯著傷害 VT",
       "score": 3,
@@ -620,26 +530,6 @@
       ]
     },
     {
-      "k_id": "K556",
-      "title": "K556: Momentum Crash Filter — CrashDetector t=3.14 5/5 OOS 但改善僅 +0.03 Sharpe（實質 null）",
-      "score": 3,
-      "reasons": [
-        "PASS/Harvey-significant"
-      ],
-      "verdict_preview": "[提出: Claude, 執行: Claude] 4 momentum strategies。CrashDetector 唯一 pass (DM t=3.14, boot CI [+0.017,+0.044], 5/5 OOS) 但 +0.03 Sharpe 太小。MomFilter t=4.42 是 trap（更多 equity exposure 不是更好 risk-adj）。TrendScaled 災難性 (Sharpe 0.75)。DualMom 確認 K247 degradation。\n\nMomentum break event (39 events): 5d forward -1.1",
-      "covered_by": [],
-      "uncovered": true,
-      "audiences_covered": [],
-      "updated_at": "",
-      "tags": [
-        "momentum",
-        "crash_filter",
-        "VT_strategy",
-        "marginal_positive",
-        "12VIX_kernel"
-      ]
-    },
-    {
       "k_id": "K561",
       "title": "K561: Bond-Equity Switch — Static GLD wins, TLT significantly worse (t=-4.60)",
       "score": 3,
@@ -658,28 +548,6 @@
         "bond",
         "null_result",
         "50_50_confirmed"
-      ]
-    },
-    {
-      "k_id": "K564",
-      "title": "K564: VIX Term Structure Derivative (Slope Change/Acceleration) — NULL, VIX Sufficiency #37",
-      "score": 3,
-      "reasons": [
-        "PASS/Harvey-significant"
-      ],
-      "verdict_preview": "[提出: 用戶, 執行: Claude] VIX term structure slope DERIVATIVE (rate of change, acceleration) as VT overlay signal. 4587 天 (2008-2026), 10 策略變體, 5 期 cross-OOS.\n\n核心差異: K429 測 slope 水平, K542 測 ratio on/off, K564 測 slope 的一階/二階導數(momentum/acceleration).\n\n關鍵發現:\n- slope_change 與 next-5d SPY return 相關僅 r=-0.029",
-      "covered_by": [],
-      "uncovered": true,
-      "audiences_covered": [],
-      "updated_at": "",
-      "tags": [
-        "term_structure",
-        "VIX",
-        "contango",
-        "slope_derivative",
-        "VIX_sufficiency",
-        "null_result",
-        "cross_OOS"
       ]
     },
     {
@@ -1278,28 +1146,6 @@
         "VIX9D",
         "ARX-GARCH",
         "So-Chen-Liu-2006"
-      ]
-    },
-    {
-      "k_id": "K1036",
-      "title": "K1036: ★★ A4f + CF-Rolling VaR — CF-Rolling 使模型選擇對 VaR 無關",
-      "score": 3,
-      "reasons": [
-        "PASS/Harvey-significant"
-      ],
-      "verdict_preview": "[提出: 賴奕豪, 執行: Claude] K1036 factorial design (2 model × 3 VaR method). Trinity PASS: GJR+Normal 0/6, GJR+t 1/6, GJR+CF 6/6, A4f+Normal 1/6, A4f+t 5/6, A4f+CF 6/6. 核心發現：(1) CF-Rolling 是 VaR 王者——不管用 GJR 或 A4f，CF-Rolling 都 6/6 PASS (2) A4f 對 Student-t 有巨大改善（1/6→5/6），但 CF-Rolling 已把 GJR 修到 6/6 (3) CF-Ro",
-      "covered_by": [],
-      "uncovered": true,
-      "audiences_covered": [],
-      "updated_at": "",
-      "tags": [
-        "VaR",
-        "CF-Rolling",
-        "A4f",
-        "GJR",
-        "Trinity",
-        "factorial",
-        "interaction"
       ]
     },
     {
@@ -2261,28 +2107,6 @@
       ]
     },
     {
-      "k_id": "K1090",
-      "title": "K1090: ★★ A4f Cross-Asset Meta-Regression — Paper 9 Gets Predictor Formula",
-      "score": 1,
-      "reasons": [
-        "robust inference"
-      ],
-      "verdict_preview": "[提出: Claude, 執行: Claude] K1090 performs meta-regression of A4f DM t on asset characteristics for 12 assets (K1075-K1089). COMPACT OLS FORMULA: DM_t ≈ -1.22 + 3.38·USD_dummy - 4.11·corr(ret,ΔVIX), SEs 1.79/1.90/1.88, R²=0.54, LOOCV R²=0.26, LOOCV RMSE=1.94. LASSO independently selects SAME 2 features",
-      "covered_by": [],
-      "uncovered": true,
-      "audiences_covered": [],
-      "updated_at": "",
-      "tags": [
-        "meta-regression",
-        "cross-asset",
-        "A4f",
-        "scope-prediction",
-        "Paper9",
-        "predictor-formula",
-        "LASSO"
-      ]
-    },
-    {
       "k_id": "K1115",
       "title": "K1115: SPY VaR breach clustering REJECTED — E055 condition (c) FAIL, Paper 3 完整死局",
       "score": 1,
@@ -2898,43 +2722,6 @@
       ]
     },
     {
-      "k_id": "K535",
-      "title": "K535: SKEW Index in HAR Framework — Null, VIX Sufficiency #34",
-      "score": 0,
-      "reasons": [],
-      "verdict_preview": "[提出: Claude, 執行: Claude] CBOE SKEW + Realized Skewness 在 HAR 框架中測試。HAR-VIX-SKEW vs HAR-VIX: DM=+1.11 (NS)。SKEW IS 顯著 (t=-3.01) 但 OOS 完全消失——sub-period t-stat 在 -0.63 到 -1.81 之間，從未在任何子期間顯著。Textbook IS overfitting。確認 K43/K447。HAR-VIX vs HAR-ABS: DM=-3.72 (p=0.0002) 再次確認 VIX 是關鍵 regressor。VIX sufficienc",
-      "covered_by": [],
-      "uncovered": true,
-      "audiences_covered": [],
-      "updated_at": "",
-      "tags": [
-        "SKEW",
-        "HAR",
-        "VIX_sufficiency",
-        "null_result",
-        "IS_overfitting"
-      ]
-    },
-    {
-      "k_id": "K541",
-      "title": "K541: Weekly Meta-Labeling — Practically Null, VT Edge 純粹是長期複利效應",
-      "score": 0,
-      "reasons": [],
-      "verdict_preview": "[提出: Claude(K538延伸), 執行: Claude] 週頻 meta-labeling。Feature r 比日頻好 4x (max 0.084 vs 0.02) 但仍太弱。XGBoost AUC=0.558（略好於 coin flip），regime-dependent（COVID 0.675, Bear 0.439）。\n\n最重要發現：VT 在所有 VIX regime 的週頻勝率都 <44%，weekly excess 全部為負（-0.2 到 -35.3 bps/wk）。VT edge 不在於「贏更多週」而是「贏的時候複利效果更大」——純粹的長期統計特性。\n\n簡單 VIX>25",
-      "covered_by": [],
-      "uncovered": true,
-      "audiences_covered": [],
-      "updated_at": "",
-      "tags": [
-        "meta_labeling",
-        "weekly",
-        "ML",
-        "VT_strategy",
-        "null_result",
-        "compounding_effect"
-      ]
-    },
-    {
       "k_id": "K544",
       "title": "K544: Tail Hedge Efficiency — 12/VIX VT 本身就是 tail hedge，雙重保險無效",
       "score": 0,
@@ -2968,43 +2755,6 @@
         "12VIX",
         "robustness",
         "null_result"
-      ]
-    },
-    {
-      "k_id": "K554",
-      "title": "K554: HMM Regime Detection — Null, HMM-VIX corr=0.71, partial R²=0.000169, kernel #9",
-      "score": 0,
-      "reasons": [],
-      "verdict_preview": "[提出: Claude, 執行: Claude] 2/3-state Gaussian HMM regime detection for VT。HMM-VIX agree 84.7%。4 策略全 DM NS。Partial R² after VIX = 0.000169 (F=0.38)——HMM 幾乎零增量信息。Weight corr 0.90-0.99。12/VIX kernel #9。",
-      "covered_by": [],
-      "uncovered": true,
-      "audiences_covered": [],
-      "updated_at": "",
-      "tags": [
-        "HMM",
-        "regime",
-        "VIX_sufficiency",
-        "null_result",
-        "12VIX_kernel"
-      ]
-    },
-    {
-      "k_id": "K566",
-      "title": "K566: Factor Timing VT — Null, factor ETFs corr 0.86-0.98 with SPY, daily artifact confirmed",
-      "score": 0,
-      "reasons": [],
-      "verdict_preview": "[提出: Claude, 執行: Claude] 5 factor ETFs (VLUE/MTUM/QUAL/IWM/USMV) monthly rotation + VT。全部 monthly DM negative (t=-0.18 to -2.99)。QUAL 最接近 (1.514 vs 1.545) 但 NS。Daily rebal 2.091 vs monthly 1.448——再次確認 microstructure artifact (K560/K562/K563 pattern)。Cross-OOS 0/3。Factor ETFs corr 0.86-0.98 with SPY，",
-      "covered_by": [],
-      "uncovered": true,
-      "audiences_covered": [],
-      "updated_at": "",
-      "tags": [
-        "factor",
-        "rotation",
-        "QUAL",
-        "USMV",
-        "null_result",
-        "microstructure_artifact"
       ]
     },
     {
@@ -4542,8 +4292,14 @@
         {
           "id": "mile_28f0ae1b",
           "title": "「財報事件對波動率的衝擊只分『有無』不分『大小』」——三市場齊一的 binary-sufficient 普遍定律",
-          "status": "draft",
+          "status": "published",
           "audience": "research"
+        },
+        {
+          "id": "mile_b9d5db50",
+          "title": "財報日股價為什麼會大跳？四個國家的股市都給了同一個答案：不看 surprise 多大，只看有沒有事件",
+          "status": "draft",
+          "audience": "general"
         },
         {
           "id": "mile_f7d35a20",
@@ -4566,6 +4322,7 @@
       ],
       "uncovered": false,
       "audiences_covered": [
+        "general",
         "research"
       ],
       "updated_at": "2026-04-13T23:30:00+08:00",
@@ -4596,12 +4353,19 @@
         {
           "id": "mile_28f0ae1b",
           "title": "「財報事件對波動率的衝擊只分『有無』不分『大小』」——三市場齊一的 binary-sufficient 普遍定律",
-          "status": "draft",
+          "status": "published",
           "audience": "research"
+        },
+        {
+          "id": "mile_b9d5db50",
+          "title": "財報日股價為什麼會大跳？四個國家的股市都給了同一個答案：不看 surprise 多大，只看有沒有事件",
+          "status": "draft",
+          "audience": "general"
         }
       ],
       "uncovered": false,
       "audiences_covered": [
+        "general",
         "research"
       ],
       "updated_at": "2026-04-14T00:20:00+08:00",
@@ -4662,6 +4426,18 @@
       "verdict_preview": "[提出: 研究總結, 執行: Claude] 1421 知識條目終極整理。Category A（定論 7）：VIX sufficiency 103+, 12/VIX kernel 178 entries, Pred≠App, QLIKE ceiling, leverage universality rho=1.000, GJR dominance DM t=-6.27, VT crisis protection 10/10。Category B（強證據 6）：50/50 robustness, monthly rebalance, target vol irrelevance, EGARCH ",
       "covered_by": [
         {
+          "id": "mile_a21a6e06",
+          "title": "K1091: 為什麼股指 meta-prediction 準、銅銀 FAIL？—— 跨資產波動率預測的類別不對稱性",
+          "status": "draft",
+          "audience": "general"
+        },
+        {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        },
+        {
           "id": "mile_c15c7b98",
           "title": "波動率預測研究的定論與開放問題：K672 對 1,421 條知識條目的四層證據地圖",
           "status": "draft",
@@ -4670,6 +4446,7 @@
       ],
       "uncovered": false,
       "audiences_covered": [
+        "general",
         "research"
       ],
       "updated_at": "",
@@ -4778,8 +4555,14 @@
         {
           "id": "mile_28f0ae1b",
           "title": "「財報事件對波動率的衝擊只分『有無』不分『大小』」——三市場齊一的 binary-sufficient 普遍定律",
-          "status": "draft",
+          "status": "published",
           "audience": "research"
+        },
+        {
+          "id": "mile_b9d5db50",
+          "title": "財報日股價為什麼會大跳？四個國家的股市都給了同一個答案：不看 surprise 多大，只看有沒有事件",
+          "status": "draft",
+          "audience": "general"
         },
         {
           "id": "mile_6028826a",
@@ -4843,8 +4626,14 @@
         {
           "id": "mile_28f0ae1b",
           "title": "「財報事件對波動率的衝擊只分『有無』不分『大小』」——三市場齊一的 binary-sufficient 普遍定律",
-          "status": "draft",
+          "status": "published",
           "audience": "research"
+        },
+        {
+          "id": "mile_b9d5db50",
+          "title": "財報日股價為什麼會大跳？四個國家的股市都給了同一個答案：不看 surprise 多大，只看有沒有事件",
+          "status": "draft",
+          "audience": "general"
         },
         {
           "id": "mile_aec9ce9b",
@@ -4855,6 +4644,7 @@
       ],
       "uncovered": false,
       "audiences_covered": [
+        "general",
         "research"
       ],
       "updated_at": "2026-04-13T23:50:00+08:00",
@@ -4882,6 +4672,12 @@
       "verdict_preview": "[提出: Claude, 執行: Claude] K1145 TW + K1147 US + K1150 JP 三市場 binary EAV pooled 全 PASS 後驗證第四市場 (EU DAX+CAC+FTSE)。資料限制: 12 支 CAC/FTSE yfinance earnings 過稀疏 skip，loaded N=18 (100% quarterly, DAX-biased 56%)。**結果**: pooled θ_EAV = +4.07e-5，bootstrap t=+4.19 PASS，95% CI [1.94e-5, 6.22e-5] 不含 0，BH-FDR p=0。",
       "covered_by": [
         {
+          "id": "mile_b9d5db50",
+          "title": "財報日股價為什麼會大跳？四個國家的股市都給了同一個答案：不看 surprise 多大，只看有沒有事件",
+          "status": "draft",
+          "audience": "general"
+        },
+        {
           "id": "mile_45060685",
           "title": "為什麼日本財報日波動比歐洲大 3 倍？答案不在公司，在媒體",
           "status": "published",
@@ -4908,6 +4704,7 @@
       ],
       "uncovered": false,
       "audiences_covered": [
+        "general",
         "research"
       ],
       "updated_at": "2026-04-14T00:30:00+08:00",
@@ -4985,8 +4782,14 @@
         {
           "id": "mile_28f0ae1b",
           "title": "「財報事件對波動率的衝擊只分『有無』不分『大小』」——三市場齊一的 binary-sufficient 普遍定律",
-          "status": "draft",
+          "status": "published",
           "audience": "research"
+        },
+        {
+          "id": "mile_b9d5db50",
+          "title": "財報日股價為什麼會大跳？四個國家的股市都給了同一個答案：不看 surprise 多大，只看有沒有事件",
+          "status": "draft",
+          "audience": "general"
         },
         {
           "id": "mile_1ea1005b",
@@ -5015,6 +4818,7 @@
       ],
       "uncovered": false,
       "audiences_covered": [
+        "general",
         "research"
       ],
       "updated_at": "2026-04-14T00:10:00+08:00",
@@ -5039,6 +4843,12 @@
       ],
       "verdict_preview": "[提出: Claude, 執行: Claude] K1164 panel coef β=-0.149 t=-4.55 (analyst NEGATIVELY 預測 θ_rel) 被診斷為 σ² tautology artifact。K1166 改用 per-stock θ_EAV_i refit (110 stocks, no shared pooling) 並採 Engle-Ghysels-Sohn (2013) E[g]=1 identification 修正 τ·g multiplicative degeneracy。**結果完全翻轉**: pooled Spearman ρ(log_a",
       "covered_by": [
+        {
+          "id": "mile_b9d5db50",
+          "title": "財報日股價為什麼會大跳？四個國家的股市都給了同一個答案：不看 surprise 多大，只看有沒有事件",
+          "status": "draft",
+          "audience": "general"
+        },
         {
           "id": "mile_d862ad6c",
           "title": "分析師給你的「目標價」幾乎都是錯的——但他們的「覆蓋數」這個小數字，其實才是最準的風險訊號",
@@ -5132,6 +4942,12 @@
       "verdict_preview": "[提出: Claude, 執行: Claude] K1167+K1168 後 EU 殘差 (institutions_pct EU 0.416 ≈ JP 0.425 但 θ_rel EU 0.14 vs JP 0.39) open。K1170 提 press concentration 假說 (媒體報導集中度: US/JP single-source dominant vs EU multi-language disperses)。**GDELT DOC API HTTP 429 rate-limited** all 4 probe windows → fallback hardcoded P",
       "covered_by": [
         {
+          "id": "mile_b9d5db50",
+          "title": "財報日股價為什麼會大跳？四個國家的股市都給了同一個答案：不看 surprise 多大，只看有沒有事件",
+          "status": "draft",
+          "audience": "general"
+        },
+        {
           "id": "mile_45060685",
           "title": "為什麼日本財報日波動比歐洲大 3 倍？答案不在公司，在媒體",
           "status": "published",
@@ -5146,6 +4962,7 @@
       ],
       "uncovered": false,
       "audiences_covered": [
+        "general",
         "research"
       ],
       "updated_at": "2026-04-14T04:00:00+08:00",
@@ -5220,13 +5037,19 @@
         {
           "id": "mile_28f0ae1b",
           "title": "「財報事件對波動率的衝擊只分『有無』不分『大小』」——三市場齊一的 binary-sufficient 普遍定律",
-          "status": "draft",
+          "status": "published",
           "audience": "research"
+        },
+        {
+          "id": "mile_b9d5db50",
+          "title": "財報日股價為什麼會大跳？四個國家的股市都給了同一個答案：不看 surprise 多大，只看有沒有事件",
+          "status": "draft",
+          "audience": "general"
         },
         {
           "id": "mile_1beaaa3f",
           "title": "REIT 波動率 vs SPY：VNQ-SPY 跨 regime 相關動態與 HAR-RV 可預測性實證",
-          "status": "draft",
+          "status": "published",
           "audience": "research"
         },
         {
@@ -5262,6 +5085,7 @@
       ],
       "uncovered": false,
       "audiences_covered": [
+        "general",
         "research"
       ],
       "updated_at": "2026-04-13T22:00:00+08:00",
@@ -5352,6 +5176,44 @@
       ]
     },
     {
+      "k_id": "K957",
+      "title": "K957: ★★★★ K526-K566 Session Synthesis — 40 Experiments, 5 Meta-Lessons (E019-E023)",
+      "score": 6,
+      "reasons": [
+        "PASS/Harvey-significant",
+        "cross-market/universal"
+      ],
+      "verdict_preview": "[提出: 用戶, 執行: Claude] K526-K566 meta-synthesis。40 個實驗（K555 唯一缺失；2026-04-19 filesystem audit 確認，先前寫 37/K531/K546/K555/K559 為 metadata typo），產出 5 條 experience records (E019-E023)。\n\n**核心數字**：2 個 Harvey-pass 策略（K548/K551 leverage t=7.90、K553/K558 台灣 t=4.79）、7/7 HAR universal breakthrough、37+ VIX sufficie",
+      "covered_by": [
+        {
+          "id": "mile_a21a6e06",
+          "title": "K1091: 為什麼股指 meta-prediction 準、銅銀 FAIL？—— 跨資產波動率預測的類別不對稱性",
+          "status": "draft",
+          "audience": "general"
+        },
+        {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        }
+      ],
+      "uncovered": false,
+      "audiences_covered": [
+        "general",
+        "research"
+      ],
+      "updated_at": "",
+      "tags": [
+        "synthesis",
+        "meta_analysis",
+        "experience_records",
+        "E019-E023",
+        "K526-K566",
+        "methodology"
+      ]
+    },
+    {
       "k_id": "K567",
       "title": "K567: International VT Leverage — VIX-Conditional Leverage has LIMITED Generalizability",
       "score": 6,
@@ -5361,6 +5223,12 @@
       ],
       "verdict_preview": "[提出: 用戶, 執行: Claude] K567: 國際市場 VIX-conditional leverage overlay 測試。6 市場（SPY/EFA/EWZ/EWJ/EWU/FXI）× 4 variants（Base VT、US-style VIX thresholds、VIX percentile、Local RV22）。50/50 Market/GLD + 12/VIX monthly rebalancing。\n\n**核心發現：leverage overlay 不具普遍性。** 0/6 市場通過 Harvey t>3.0，0/6 OOS majority wins。只有 3/6",
       "covered_by": [
+        {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        },
         {
           "id": "mile_ad838905",
           "title": "同一套波動率模型，為什麼美股大中小型股都能用，台股卻完全失靈？",
@@ -5842,6 +5710,12 @@
       "verdict_preview": "[提出: Claude, 執行: Claude] K1041 50/50 SPY/GLD portfolio VaR。DCC-A4f 是最佳模型：QLIKE -8.836（rank 1/4），Trinity 2/2 PASS，DM t=+3.826 vs CCC-GJR（Harvey PASS）。推翻 K891 的 NULL——差異是 A4f marginals（K891 用 GJR marginals）。A4f marginal 改善 > DCC correlation 改善：A4f +0.53% vs DCC +0.23%。改善是 additive（0.53%+0.23%=0.71%）。D",
       "covered_by": [
         {
+          "id": "mile_4cf87cfc",
+          "title": "K1092: Asset-Matched DCC-A4f (SPY-VIX + GLD-GVZ) — Pareto-Dominant 但 Below Harvey 的 Portfolio VaR Refinement",
+          "status": "draft",
+          "audience": "research"
+        },
+        {
           "id": "mile_a2718429",
           "title": "K1041: DCC-A4f Portfolio VaR — A4f Marginal 改善幅度勝過 DCC 相關性，推翻 K891 NULL Result",
           "status": "published",
@@ -5934,6 +5808,79 @@
         "Paper9",
         "FX-effect",
         "final-result"
+      ]
+    },
+    {
+      "k_id": "K1091",
+      "title": "K1091: Meta Prediction Out-of-Sample Test — Equities VGK/EWJ PASS Clean, Commodities CPER/SLV FAIL (No Matched IV)",
+      "score": 5,
+      "reasons": [
+        "PASS/Harvey-significant",
+        "methodology/mechanism lesson"
+      ],
+      "verdict_preview": "[提出: Claude, 執行: Claude] K1091 validates K1090 meta-regression by running A4f on 4 predicted-PASS assets. VGK (European): predicted +4.71, realized +4.46, |err|=0.25, Harvey PASS ⭐. EWJ (Japan): predicted +4.34, realized +4.81, |err|=0.47, Harvey PASS ⭐. CPER (Copper): predicted +3.58, realized +0.4",
+      "covered_by": [
+        {
+          "id": "mile_4cf87cfc",
+          "title": "K1092: Asset-Matched DCC-A4f (SPY-VIX + GLD-GVZ) — Pareto-Dominant 但 Below Harvey 的 Portfolio VaR Refinement",
+          "status": "draft",
+          "audience": "research"
+        },
+        {
+          "id": "mile_a21a6e06",
+          "title": "K1091: 為什麼股指 meta-prediction 準、銅銀 FAIL？—— 跨資產波動率預測的類別不對稱性",
+          "status": "draft",
+          "audience": "general"
+        }
+      ],
+      "uncovered": false,
+      "audiences_covered": [
+        "general",
+        "research"
+      ],
+      "updated_at": "",
+      "tags": [
+        "meta-validation",
+        "VGK",
+        "EWJ",
+        "CPER",
+        "SLV",
+        "out-of-sample",
+        "Paper9",
+        "commodity-matched-IV"
+      ]
+    },
+    {
+      "k_id": "K1092",
+      "title": "K1092: Asymmetric DCC-A4f (SPY-VIX + GLD-GVZ) — Strictly Pareto-Dominant but Below Harvey vs Symmetric",
+      "score": 5,
+      "reasons": [
+        "PASS/Harvey-significant",
+        "methodology/mechanism lesson"
+      ],
+      "verdict_preview": "[提出: Claude, 執行: Claude] K1092 applies asset-matched theory to portfolio VaR. Tests DCC-A4f-ASYM (SPY+VIX², GLD+GVZ²) vs DCC-A4f-SYMM (both VIX, K1041 original) vs DCC-GJR baseline. 50/50 SPY+GLD portfolio, OOS 2013-2026 n=3,234. RESULTS: DCC-A4f-ASYM vs DCC-GJR Harvey PASS on every metric: Portfoli",
+      "covered_by": [
+        {
+          "id": "mile_4cf87cfc",
+          "title": "K1092: Asset-Matched DCC-A4f (SPY-VIX + GLD-GVZ) — Pareto-Dominant 但 Below Harvey 的 Portfolio VaR Refinement",
+          "status": "draft",
+          "audience": "research"
+        }
+      ],
+      "uncovered": false,
+      "audiences_covered": [
+        "research"
+      ],
+      "updated_at": "",
+      "tags": [
+        "DCC-A4f",
+        "asymmetric",
+        "asset-matched",
+        "portfolio-VaR",
+        "Paper3",
+        "Paper9",
+        "GVZ",
+        "marginal-improvement"
       ]
     },
     {
@@ -6150,6 +6097,12 @@
       "verdict_preview": "[提出: Claude, 執行: Claude] K548 深度驗證——8 項全面測試。\n\n1. Harvey: DM t=7.90 (PASS), JKM z=6.05\n2. Cross-OOS: 11/11 wins (5/5 primary + 6/6 alternative)\n3. Sensitivity: 100% safe zone (25/25 VIX configs, all leverage 1.1-2.0x positive)\n4. TX: incremental breakeven 14bps (PASS, SPY bid-ask ~1-2bps)\n5. Borrowin",
       "covered_by": [
         {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        },
+        {
           "id": "mile_p205dqkc",
           "title": "Session K526-K618 研究總結——63 個實驗、6 個策略、3 篇論文",
           "status": "published",
@@ -6207,6 +6160,12 @@
       "verdict_preview": "[提出: Claude, 執行: Claude] K553 深度驗證 8 項 11 checks 全 PASS。Harvey t=4.79。Cross-OOS 18/18 (5/5+6/6+7/7)。Sensitivity 100/100 positive, 96% safe zone。TX breakeven 24bp (台灣 ETF ~5-10bp OK)。Borrowing >10% breakeven。MDD -48.4% 與 base 完全相同（零 MDD penalty）。0056.TW robustness t=5.67, 5/5 OOS。\n\nSharpe +0.162, CAG",
       "covered_by": [
         {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        },
+        {
           "id": "mile_p205dqkc",
           "title": "Session K526-K618 研究總結——63 個實驗、6 個策略、3 篇論文",
           "status": "published",
@@ -6221,7 +6180,8 @@
       ],
       "uncovered": false,
       "audiences_covered": [
-        "general"
+        "general",
+        "research"
       ],
       "updated_at": "",
       "tags": [
@@ -6243,6 +6203,12 @@
       ],
       "verdict_preview": "[提出: Claude, 執行: Claude] K560 深度驗證 8 項。Harvey NW t=10.87 PASS。Cross-OOS 10/10 PASS。Momentum window 全部 PASS (20d-252d safe zone)。Bootstrap daily P(win)=100%。Drawdown excellent (GFC +27.1%)。\n\n**CRITICAL FAIL: 月頻 Sharpe 1.228 < benchmark 1.344。** Bootstrap monthly P(win)=10.4%。Alpha 幾乎全部來自 daily rebala",
       "covered_by": [
+        {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        },
         {
           "id": "mile_c15c7b98",
           "title": "波動率預測研究的定論與開放問題：K672 對 1,421 條知識條目的四層證據地圖",
@@ -6273,6 +6239,12 @@
       ],
       "verdict_preview": "[提出: User, 執行: Claude] 8-check validation of Piecewise VT (w=1 if VIX<12, ramp to 0 at VIX=20, w=0 if VIX>20). From K568 IS optimization.\n\nFULL SAMPLE (2005-2026): Sharpe 1.327 vs 12/VIX 1.178 vs B&H 0.729. MDD -5.4% vs -10.2% vs -32.5%. CAGR 9.1% vs 11.4% vs 11.5%. Vol 5.2% vs 7.7% vs 13.5%.\n\nT1 Ha",
       "covered_by": [
+        {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        },
         {
           "id": "mile_p205dqkc",
           "title": "Session K526-K618 研究總結——63 個實驗、6 個策略、3 篇論文",
@@ -6769,6 +6741,18 @@
       "verdict_preview": "[提出: Claude, 執行: Claude] K1088 tests A4f on USO (oil) with OVX (CBOE oil VIX). n=2,960 OOS 2010-2026. ALL HYPOTHESES PASS: H1 USO+OVX Harvey PASS DM t=+4.475 (p<1e-5). H2 OVX beats VIX head-to-head DM t=+3.18 (OVX_SUPERIOR confirmed). H3 θ₁ stability reasonable (CV OVX 2.99 vs VIX 3.98). H4 COMBO be",
       "covered_by": [
         {
+          "id": "mile_4cf87cfc",
+          "title": "K1092: Asset-Matched DCC-A4f (SPY-VIX + GLD-GVZ) — Pareto-Dominant 但 Below Harvey 的 Portfolio VaR Refinement",
+          "status": "draft",
+          "audience": "research"
+        },
+        {
+          "id": "mile_a21a6e06",
+          "title": "K1091: 為什麼股指 meta-prediction 準、銅銀 FAIL？—— 跨資產波動率預測的類別不對稱性",
+          "status": "draft",
+          "audience": "general"
+        },
+        {
           "id": "mile_81b4713f",
           "title": "K1098：VIXTWN 救不回 0050.TW — 台灣結構性波動率缺口的確證",
           "status": "published",
@@ -6890,7 +6874,7 @@
         {
           "id": "mile_28f0ae1b",
           "title": "「財報事件對波動率的衝擊只分『有無』不分『大小』」——三市場齊一的 binary-sufficient 普遍定律",
-          "status": "draft",
+          "status": "published",
           "audience": "research"
         },
         {
@@ -7486,6 +7470,18 @@
       "verdict_preview": "[提出: Claude, 執行: Claude] GARCH-MIDAS 實驗。K=12 月 MIDAS lags，w=2000，OOS 2017-2024 (1773天，7年)。兩個 specs: MIDAS-RV (22日 realized variance) 和 MIDAS-VIX (22日平均 VIX)。Numba 加速，11 秒完成。\n\n結果: GJR-GARCH QLIKE=1.5172 最佳；MIDAS-VIX 1.5265 (-0.6%)、MIDAS-RV 1.5290 (-0.8%)。所有 DM t<0.5，遠低於 Harvey 3.0。\n\n有趣子期間發現: MIDAS 在 ",
       "covered_by": [
         {
+          "id": "mile_a21a6e06",
+          "title": "K1091: 為什麼股指 meta-prediction 準、銅銀 FAIL？—— 跨資產波動率預測的類別不對稱性",
+          "status": "draft",
+          "audience": "general"
+        },
+        {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        },
+        {
           "id": "mile_5de73d3f",
           "title": "MF-GJR：首個通過 Harvey 門檻與 Cross-OOS 驗證的 GJR 改進模型",
           "status": "published",
@@ -7500,6 +7496,7 @@
       ],
       "uncovered": false,
       "audiences_covered": [
+        "general",
         "research"
       ],
       "updated_at": "",
@@ -7521,6 +7518,12 @@
       ],
       "verdict_preview": "[提出: Claude, 執行: Claude] HAR 多尺度波動率預測。6 個 HAR 變體 + 3 個 benchmark，SPY + 0050.TW，OOS 2023-2024。\n\n**核心結果 (SPY)**:\n1. HAR-VIX: QLIKE 0.4629 (最佳)\n2. HAR-ABS: 0.4899\n3. HAR-LEVERAGE: 0.4927\n4. HAR-JUMP: 0.4951\n5. GJR-GARCH: 1.5067\n\nDM test: HAR-ABS vs GJR = -15.45***; HAR-ABS vs EWMA = -16.26***。**所有 4 個 ",
       "covered_by": [
+        {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        },
         {
           "id": "mile_daf56741",
           "title": "K530：HAR 多尺度 vs GARCH 家族 — 改變 proxy 就能讓排名翻轉 3 倍的波動率預測啟示",
@@ -7591,6 +7594,12 @@
       "verdict_preview": "[提出: Claude, 執行: Claude] K530 HAR 突破的跨資產驗證。7 資產 (SPY/QQQ/EFA/EWZ/GLD/TLT/0050.TW) 全部通過。\n\nHAR-ABS vs GJR DM: SPY -12.62, QQQ -21.74, EFA -11.11, EWZ -13.60, GLD -14.21, TLT -13.89, 0050.TW -12.78。**全部 p<0.001**。\n\nHAR-ABS 也 7/7 勝 EWMA。K530 claims 驗證：(1) ABS>>SQ proxy 7/7 確認 (2) HAR-VIX 最佳(SPY) 確認 (3) ",
       "covered_by": [
         {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        },
+        {
           "id": "mile_p205dqkc",
           "title": "Session K526-K618 研究總結——63 個實驗、6 個策略、3 篇論文",
           "status": "published",
@@ -7626,6 +7635,12 @@
       ],
       "verdict_preview": "[提出: Claude, 執行: Claude] HAR-based VT strategy 測試。3 期 cross-OOS (2020-21, 2021-22, 2023-24)。\n\nMean Sharpe: 12/VIX=1.748 > HAR-VIX=1.689 > Hybrid=1.409 > HAR-ABS=1.123 > B&H=0.971。HAR-ABS 是**最佳預測器但最差策略**——DM=-15.45(K530) 但 Sharpe 最低。\n\n0/9 Harvey test 通過。HAR-ABS turnover 1.9x higher (0.059 vs 0.032/da",
       "covered_by": [
+        {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        },
         {
           "id": "mile_8fa55b5a",
           "title": "最強預測模型為什麼不是最賺錢的策略？投資中最反直覺的發現",
@@ -7664,6 +7679,12 @@
       "verdict_preview": "[提出: Claude, 執行: Claude] EVT (Extreme Value Theory) VaR 實驗。GPD Peaks-over-Threshold + HAR/GJR vol models。OOS 2023-2024。\n\n**HAR-EVT score=10, 唯一雙 alpha PASS**: 1% viol=0.60% (PASS), 2.5% viol=1.79% (PASS)。GJR-Normal/GJR-EVT/GJR-t 都只 score=6（單 alpha pass）。HAR-Normal 災難性 4.58% viol。\n\n**關鍵洞見**: EVT 對 HA",
       "covered_by": [
         {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        },
+        {
           "id": "mile_7a318ab3",
           "title": "K536: 你的風險模型在騙你嗎？只有一個模型通過完整的 VaR 壓力測試",
           "status": "published",
@@ -7695,6 +7716,12 @@
       "verdict_preview": "[提出: Claude, 執行: Claude] VIX/VIX3M ratio timing。contango/backwardation 作 VT on/off 信號。4529 天, 5 期 cross-OOS。\n\n最佳策略 backwardation_deleverage Sharpe 0.819 vs 12/VIX 0.759 (+0.060)，但 Harvey t=2.34 未通過 3.0。Cross-OOS 只 3/5 wins。\n\n反直覺：VT 在 deep contango (+0.193 Sharpe delta) 比 backwardation (-0.179) 更好——因",
       "covered_by": [
         {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        },
+        {
           "id": "mile_p205dqkc",
           "title": "Session K526-K618 研究總結——63 個實驗、6 個策略、3 篇論文",
           "status": "published",
@@ -7702,7 +7729,9 @@
         }
       ],
       "uncovered": false,
-      "audiences_covered": [],
+      "audiences_covered": [
+        "research"
+      ],
       "updated_at": "",
       "tags": [
         "term_structure",
@@ -7714,6 +7743,35 @@
       ]
     },
     {
+      "k_id": "K543",
+      "title": "K543: Drawdown-Conditional VT — Sharpe Null 但 MDD -28.6%→-15.4%（risk-return tradeoff）",
+      "score": 3,
+      "reasons": [
+        "PASS/Harvey-significant"
+      ],
+      "verdict_preview": "[提出: Claude, 執行: Claude] Drawdown 深度作 VT 調節信號。5090 天，5 期 cross-OOS。VIX-drawdown corr=-0.77（高度冗餘）。\n\nSharpe: 最佳 DD-Enhanced +0.012 (t=1.79, NS)。Harvey 全未通過。\n\n但 MDD 顯著改善：DD-Conditional -15.4% vs baseline -28.6%（幾乎減半）。Combined -17.4%。代價是 return 從 6.76% 降到 5.00%。\n\n結論：drawdown 調節不產生 alpha（VIX 已含 77% drawd",
+      "covered_by": [
+        {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        }
+      ],
+      "uncovered": false,
+      "audiences_covered": [
+        "research"
+      ],
+      "updated_at": "",
+      "tags": [
+        "drawdown",
+        "VT_strategy",
+        "MDD",
+        "risk_return_tradeoff",
+        "null_sharpe"
+      ]
+    },
+    {
       "k_id": "K548",
       "title": "K548: ★★★★ VIX-Conditional Leverage — Sharpe +0.112, CAGR +5.4%, 5/5 Cross-OOS！",
       "score": 3,
@@ -7722,6 +7780,12 @@
       ],
       "verdict_preview": "[提出: Claude, 執行: Claude] Leveraged Risk Parity VT。5300 天，5 期 cross-OOS。\n\n固定槓桿（1.3x/1.5x）降低 Sharpe（borrowing cost）。Vol-targeting/Risk Parity 最差（pro-cyclical 放大 drawdown）。\n\n**VIX-Conditional Leverage 唯一勝出**：VIX<15 時 lever 1.5x，VIX>25 時 1.0x。Sharpe 1.497 (+0.112 vs base 1.385), CAGR 18.26% (+5.42%), MD",
       "covered_by": [
+        {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        },
         {
           "id": "mile_p205dqkc",
           "title": "Session K526-K618 研究總結——63 個實驗、6 個策略、3 篇論文",
@@ -7762,6 +7826,35 @@
       ]
     },
     {
+      "k_id": "K556",
+      "title": "K556: Momentum Crash Filter — CrashDetector t=3.14 5/5 OOS 但改善僅 +0.03 Sharpe（實質 null）",
+      "score": 3,
+      "reasons": [
+        "PASS/Harvey-significant"
+      ],
+      "verdict_preview": "[提出: Claude, 執行: Claude] 4 momentum strategies。CrashDetector 唯一 pass (DM t=3.14, boot CI [+0.017,+0.044], 5/5 OOS) 但 +0.03 Sharpe 太小。MomFilter t=4.42 是 trap（更多 equity exposure 不是更好 risk-adj）。TrendScaled 災難性 (Sharpe 0.75)。DualMom 確認 K247 degradation。\n\nMomentum break event (39 events): 5d forward -1.1",
+      "covered_by": [
+        {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        }
+      ],
+      "uncovered": false,
+      "audiences_covered": [
+        "research"
+      ],
+      "updated_at": "",
+      "tags": [
+        "momentum",
+        "crash_filter",
+        "VT_strategy",
+        "marginal_positive",
+        "12VIX_kernel"
+      ]
+    },
+    {
       "k_id": "K560",
       "title": "K560: Sector Rotation with VT — Momentum sector selection dramatically improves VT",
       "score": 3,
@@ -7771,6 +7864,12 @@
       "verdict_preview": "[提出: User, 執行: Claude] Sector SELECTION with VT (different from K58 which applied VT uniformly). 8 sector ETFs (XLK/XLF/XLV/XLE/XLI/XLY/XLP/XLU) + GLD, 2005-2026, N=5283 days. 50% equity (VT-scaled) + 50% GLD structure.\n\nMomentum top-1 (best 60d return sector): Sharpe 2.157 vs benchmark SPY VT+GLD 1",
       "covered_by": [
         {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        },
+        {
           "id": "mile_p205dqkc",
           "title": "Session K526-K618 研究總結——63 個實驗、6 個策略、3 篇論文",
           "status": "published",
@@ -7778,7 +7877,9 @@
         }
       ],
       "uncovered": false,
-      "audiences_covered": [],
+      "audiences_covered": [
+        "research"
+      ],
       "updated_at": "",
       "tags": [
         "sector_rotation",
@@ -7791,6 +7892,37 @@
       ]
     },
     {
+      "k_id": "K564",
+      "title": "K564: VIX Term Structure Derivative (Slope Change/Acceleration) — NULL, VIX Sufficiency #37",
+      "score": 3,
+      "reasons": [
+        "PASS/Harvey-significant"
+      ],
+      "verdict_preview": "[提出: 用戶, 執行: Claude] VIX term structure slope DERIVATIVE (rate of change, acceleration) as VT overlay signal. 4587 天 (2008-2026), 10 策略變體, 5 期 cross-OOS.\n\n核心差異: K429 測 slope 水平, K542 測 ratio on/off, K564 測 slope 的一階/二階導數(momentum/acceleration).\n\n關鍵發現:\n- slope_change 與 next-5d SPY return 相關僅 r=-0.029",
+      "covered_by": [
+        {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        }
+      ],
+      "uncovered": false,
+      "audiences_covered": [
+        "research"
+      ],
+      "updated_at": "",
+      "tags": [
+        "term_structure",
+        "VIX",
+        "contango",
+        "slope_derivative",
+        "VIX_sufficiency",
+        "null_result",
+        "cross_OOS"
+      ]
+    },
+    {
       "k_id": "K565",
       "title": "K565: ★★★ BTC 5% Harvey t=3.07 PASS，但 post-ETF 效益消失（correlation 0→0.35）",
       "score": 3,
@@ -7799,6 +7931,12 @@
       ],
       "verdict_preview": "[提出: Claude, 執行: Claude] K66 更新。5% BTC DM t=3.074 (PASS), Sharpe 1.320 vs 1.091 (+0.23), 3/3 OOS, rolling win 97%。\n\n但 POST-ETF (2024+): 5% BTC Sharpe 1.876 vs base 1.866 (+0.010 negligible)。10%/20% BTC 反而更差。SPY-BTC corr 從 pre-2020 的 0.008 升到 post-ETF 的 0.310——結構性轉變，非週期性。\n\nMomentum-conditional BTC (6",
       "covered_by": [
+        {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        },
         {
           "id": "mile_e2cbf790",
           "title": "比特幣有自己的 VIX——但我們實測後發現，它也救不了你的風控模型",
@@ -7820,7 +7958,8 @@
       ],
       "uncovered": false,
       "audiences_covered": [
-        "general"
+        "general",
+        "research"
       ],
       "updated_at": "",
       "tags": [
@@ -9574,7 +9713,7 @@
         {
           "id": "mile_93dfac28",
           "title": "把 VIX 期限結構拆成三個因子：Dynamic Nelson-Siegel 在波動率預測的新視角",
-          "status": "draft",
+          "status": "published",
           "audience": "research"
         },
         {
@@ -9821,6 +9960,37 @@
         "cross-market",
         "VIX-global",
         "Paper-9"
+      ]
+    },
+    {
+      "k_id": "K1036",
+      "title": "K1036: ★★ A4f + CF-Rolling VaR — CF-Rolling 使模型選擇對 VaR 無關",
+      "score": 3,
+      "reasons": [
+        "PASS/Harvey-significant"
+      ],
+      "verdict_preview": "[提出: 賴奕豪, 執行: Claude] K1036 factorial design (2 model × 3 VaR method). Trinity PASS: GJR+Normal 0/6, GJR+t 1/6, GJR+CF 6/6, A4f+Normal 1/6, A4f+t 5/6, A4f+CF 6/6. 核心發現：(1) CF-Rolling 是 VaR 王者——不管用 GJR 或 A4f，CF-Rolling 都 6/6 PASS (2) A4f 對 Student-t 有巨大改善（1/6→5/6），但 CF-Rolling 已把 GJR 修到 6/6 (3) CF-Ro",
+      "covered_by": [
+        {
+          "id": "mile_4cf87cfc",
+          "title": "K1092: Asset-Matched DCC-A4f (SPY-VIX + GLD-GVZ) — Pareto-Dominant 但 Below Harvey 的 Portfolio VaR Refinement",
+          "status": "draft",
+          "audience": "research"
+        }
+      ],
+      "uncovered": false,
+      "audiences_covered": [
+        "research"
+      ],
+      "updated_at": "",
+      "tags": [
+        "VaR",
+        "CF-Rolling",
+        "A4f",
+        "GJR",
+        "Trinity",
+        "factorial",
+        "interaction"
       ]
     },
     {
@@ -10136,7 +10306,7 @@
         {
           "id": "mile_28f0ae1b",
           "title": "「財報事件對波動率的衝擊只分『有無』不分『大小』」——三市場齊一的 binary-sufficient 普遍定律",
-          "status": "draft",
+          "status": "published",
           "audience": "research"
         },
         {
@@ -10346,7 +10516,7 @@
         {
           "id": "mile_28f0ae1b",
           "title": "「財報事件對波動率的衝擊只分『有無』不分『大小』」——三市場齊一的 binary-sufficient 普遍定律",
-          "status": "draft",
+          "status": "published",
           "audience": "research"
         },
         {
@@ -10941,7 +11111,7 @@
         {
           "id": "mile_28f0ae1b",
           "title": "「財報事件對波動率的衝擊只分『有無』不分『大小』」——三市場齊一的 binary-sufficient 普遍定律",
-          "status": "draft",
+          "status": "published",
           "audience": "research"
         }
       ],
@@ -11198,6 +11368,12 @@
       "verdict_preview": "[提出: Claude, 執行: Claude] K551 台灣失敗的修正。5 variants。\n\nVariant A (US VIX thresholds): FAIL (t=2.07)——VIX 絕對值對台灣無效。\n\n**Variant B (台灣 RV22)**: PASS t=4.61, Sharpe +0.201, 6/9 OOS。用 0050 自身 realized vol。\n**Variant D (VIX percentile)**: PASS t=6.11, 9/9 OOS, 100% bootstrap, Sharpe +0.229。Rolling percentile ",
       "covered_by": [
         {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        },
+        {
           "id": "mile_p205dqkc",
           "title": "Session K526-K618 研究總結——63 個實驗、6 個策略、3 篇論文",
           "status": "published",
@@ -11218,7 +11394,8 @@
       ],
       "uncovered": false,
       "audiences_covered": [
-        "general"
+        "general",
+        "research"
       ],
       "updated_at": "",
       "tags": [
@@ -11760,6 +11937,37 @@
       ]
     },
     {
+      "k_id": "K1090",
+      "title": "K1090: ★★ A4f Cross-Asset Meta-Regression — Paper 9 Gets Predictor Formula",
+      "score": 1,
+      "reasons": [
+        "robust inference"
+      ],
+      "verdict_preview": "[提出: Claude, 執行: Claude] K1090 performs meta-regression of A4f DM t on asset characteristics for 12 assets (K1075-K1089). COMPACT OLS FORMULA: DM_t ≈ -1.22 + 3.38·USD_dummy - 4.11·corr(ret,ΔVIX), SEs 1.79/1.90/1.88, R²=0.54, LOOCV R²=0.26, LOOCV RMSE=1.94. LASSO independently selects SAME 2 features",
+      "covered_by": [
+        {
+          "id": "mile_a21a6e06",
+          "title": "K1091: 為什麼股指 meta-prediction 準、銅銀 FAIL？—— 跨資產波動率預測的類別不對稱性",
+          "status": "draft",
+          "audience": "general"
+        }
+      ],
+      "uncovered": false,
+      "audiences_covered": [
+        "general"
+      ],
+      "updated_at": "",
+      "tags": [
+        "meta-regression",
+        "cross-asset",
+        "A4f",
+        "scope-prediction",
+        "Paper9",
+        "predictor-formula",
+        "LASSO"
+      ]
+    },
+    {
       "k_id": "K1113",
       "title": "K1113: Firm-level covariate rule STRONG NULL — Paper 2 firm-selection 路線耗盡",
       "score": 1,
@@ -11771,7 +11979,7 @@
         {
           "id": "mile_28f0ae1b",
           "title": "「財報事件對波動率的衝擊只分『有無』不分『大小』」——三市場齊一的 binary-sufficient 普遍定律",
-          "status": "draft",
+          "status": "published",
           "audience": "research"
         },
         {
@@ -12025,7 +12233,7 @@
         {
           "id": "mile_93dfac28",
           "title": "把 VIX 期限結構拆成三個因子：Dynamic Nelson-Siegel 在波動率預測的新視角",
-          "status": "draft",
+          "status": "published",
           "audience": "research"
         }
       ],
@@ -13697,6 +13905,12 @@
       "verdict_preview": "[提出: Claude, 執行: Claude] Rough volatility 實驗（跳躍式探索）。Gatheral variogram 確認 SPY log-vol H=0.1004 (R²=0.995)，100% 觀測期都是 'rough' (H<0.5)。但 DFA 給 H=1.01（long memory！）、wavelet 給 H=-0.07——三個 estimator 測量不同東西。\n\n5 個模型 OOS 2023-2024 (502天):\n1. HAR-Rough: QLIKE 0.3788 **最佳**\n2. EWMA(0.94): 0.3937\n3. RoughVol-C",
       "covered_by": [
         {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        },
+        {
           "id": "mile_daf56741",
           "title": "K530：HAR 多尺度 vs GARCH 家族 — 改變 proxy 就能讓排名翻轉 3 倍的波動率預測啟示",
           "status": "published",
@@ -13739,6 +13953,12 @@
       "verdict_preview": "[提出: Claude, 執行: Claude] SPY-GLD 跨資產相關性 regime 分析。5340 日數據。\n\n核心發現：(1) 相關性確實 VIX-regime 依賴 (Kruskal-Wallis H=242, p<0.001)：low VIX corr=-0.009, medium +0.115, high +0.076, crisis -0.032。(2) 但 Newey-West HAC 後不顯著 (t=0.87, p=0.39)——serial correlation 膨脹了 OLS t 值。\n\n最重要發現：**VIX-correlation beta sign 跨年代翻",
       "covered_by": [
         {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        },
+        {
           "id": "mile_5802118d",
           "title": "黃金不是用來賺錢的——它在你投資組合中的真正角色",
           "status": "published",
@@ -13753,7 +13973,8 @@
       ],
       "uncovered": false,
       "audiences_covered": [
-        "general"
+        "general",
+        "research"
       ],
       "updated_at": "",
       "tags": [
@@ -13767,12 +13988,45 @@
       ]
     },
     {
+      "k_id": "K535",
+      "title": "K535: SKEW Index in HAR Framework — Null, VIX Sufficiency #34",
+      "score": 0,
+      "reasons": [],
+      "verdict_preview": "[提出: Claude, 執行: Claude] CBOE SKEW + Realized Skewness 在 HAR 框架中測試。HAR-VIX-SKEW vs HAR-VIX: DM=+1.11 (NS)。SKEW IS 顯著 (t=-3.01) 但 OOS 完全消失——sub-period t-stat 在 -0.63 到 -1.81 之間，從未在任何子期間顯著。Textbook IS overfitting。確認 K43/K447。HAR-VIX vs HAR-ABS: DM=-3.72 (p=0.0002) 再次確認 VIX 是關鍵 regressor。VIX sufficienc",
+      "covered_by": [
+        {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        }
+      ],
+      "uncovered": false,
+      "audiences_covered": [
+        "research"
+      ],
+      "updated_at": "",
+      "tags": [
+        "SKEW",
+        "HAR",
+        "VIX_sufficiency",
+        "null_result",
+        "IS_overfitting"
+      ]
+    },
+    {
       "k_id": "K537",
       "title": "",
       "score": 0,
       "reasons": [],
       "verdict_preview": "[提出: Codex GPT-5.4, 執行: Claude] K537 Cross-Asset Volatility Momentum: NULL RESULT. Tested whether vol shocks in rates (TLT), credit (HYG-IEF), FX (UUP), commodities (GLD), and vol-of-vol (VVIX) can lead equity vol and improve timing over 12/VIX. 5 stress assets tracked, breadth = count above 75th pc",
       "covered_by": [
+        {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        },
         {
           "id": "mile_69681ef3",
           "title": "VIX 充分性的 11 維驗證：為什麼沒有任何信號能打敗恐慌指數",
@@ -13810,6 +14064,12 @@
       "verdict_preview": "[提出: Codex #3 延伸, 執行: Claude] Variance Risk Premium timing。4 策略 (VRP timing/percentile/combined/crash filter) vs 12/VIX，5 期 cross-OOS。\n\nVRP Timing Sharpe 0.40 vs 12/VIX 0.64——更差！VRP Crash Filter 4/5 OOS wins 但 Sharpe diff 僅 +0.008 (NS)。\n\n反直覺發現：VRP<0 (realized>implied) 的次日 annualized return +99.2% vs",
       "covered_by": [
         {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        },
+        {
           "id": "mile_793189e3",
           "title": "跨資產壓力訊號是假警報？為什麼 VIX 已經告訴你一切",
           "status": "published",
@@ -13818,7 +14078,8 @@
       ],
       "uncovered": false,
       "audiences_covered": [
-        "general"
+        "general",
+        "research"
       ],
       "updated_at": "",
       "tags": [
@@ -13838,6 +14099,12 @@
       "verdict_preview": "[提出: Codex #5, 執行: Claude] Meta-labeling (López de Prado 2018) for VT on/off。16 features (VIX/momentum/HAR/cross-asset/term structure)，3 models (Logistic/XGBoost/RF)。\n\nAll 16 features |r|<0.02 with next-day VT-vs-BH outcome。AUC 0.48-0.52（coin flip）。Walk-forward: Logistic Sharpe 0.89 (0% VT = pure B&",
       "covered_by": [
         {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        },
+        {
           "id": "mile_8fa55b5a",
           "title": "最強預測模型為什麼不是最賺錢的策略？投資中最反直覺的發現",
           "status": "published",
@@ -13846,7 +14113,8 @@
       ],
       "uncovered": false,
       "audiences_covered": [
-        "general"
+        "general",
+        "research"
       ],
       "updated_at": "",
       "tags": [
@@ -13859,12 +14127,73 @@
       ]
     },
     {
+      "k_id": "K541",
+      "title": "K541: Weekly Meta-Labeling — Practically Null, VT Edge 純粹是長期複利效應",
+      "score": 0,
+      "reasons": [],
+      "verdict_preview": "[提出: Claude(K538延伸), 執行: Claude] 週頻 meta-labeling。Feature r 比日頻好 4x (max 0.084 vs 0.02) 但仍太弱。XGBoost AUC=0.558（略好於 coin flip），regime-dependent（COVID 0.675, Bear 0.439）。\n\n最重要發現：VT 在所有 VIX regime 的週頻勝率都 <44%，weekly excess 全部為負（-0.2 到 -35.3 bps/wk）。VT edge 不在於「贏更多週」而是「贏的時候複利效果更大」——純粹的長期統計特性。\n\n簡單 VIX>25",
+      "covered_by": [
+        {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        }
+      ],
+      "uncovered": false,
+      "audiences_covered": [
+        "research"
+      ],
+      "updated_at": "",
+      "tags": [
+        "meta_labeling",
+        "weekly",
+        "ML",
+        "VT_strategy",
+        "null_result",
+        "compounding_effect"
+      ]
+    },
+    {
+      "k_id": "K554",
+      "title": "K554: HMM Regime Detection — Null, HMM-VIX corr=0.71, partial R²=0.000169, kernel #9",
+      "score": 0,
+      "reasons": [],
+      "verdict_preview": "[提出: Claude, 執行: Claude] 2/3-state Gaussian HMM regime detection for VT。HMM-VIX agree 84.7%。4 策略全 DM NS。Partial R² after VIX = 0.000169 (F=0.38)——HMM 幾乎零增量信息。Weight corr 0.90-0.99。12/VIX kernel #9。",
+      "covered_by": [
+        {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        }
+      ],
+      "uncovered": false,
+      "audiences_covered": [
+        "research"
+      ],
+      "updated_at": "",
+      "tags": [
+        "HMM",
+        "regime",
+        "VIX_sufficiency",
+        "null_result",
+        "12VIX_kernel"
+      ]
+    },
+    {
       "k_id": "K563",
       "title": "K563: Weekly Sector Momentum — Harvey t=2.73 FAIL, alpha 隨頻率遞減（microstructure artifact）",
       "score": 0,
       "reasons": [],
       "verdict_preview": "[提出: Claude, 執行: Claude] K562 延伸——weekly rebalancing。Best: Weekly Top-1 20d Sharpe 1.067, Harvey t=2.731 (FAIL <3.0)。Cross-OOS pooled t=4.019 但 individual periods weak。\n\nDaily 2.157 → weekly 1.067 → monthly 1.228。Alpha 與 rebalancing 頻率單調遞減——confirmed microstructure/noise trading artifact。\n\n結論：sector",
       "covered_by": [
+        {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        },
         {
           "id": "mile_p205dqkc",
           "title": "Session K526-K618 研究總結——63 個實驗、6 個策略、3 篇論文",
@@ -13873,7 +14202,9 @@
         }
       ],
       "uncovered": false,
-      "audiences_covered": [],
+      "audiences_covered": [
+        "research"
+      ],
       "updated_at": "",
       "tags": [
         "sector_momentum",
@@ -13881,6 +14212,41 @@
         "rebalancing_frequency",
         "null_result",
         "microstructure"
+      ]
+    },
+    {
+      "k_id": "K566",
+      "title": "K566: Factor Timing VT — Null, factor ETFs corr 0.86-0.98 with SPY, daily artifact confirmed",
+      "score": 0,
+      "reasons": [],
+      "verdict_preview": "[提出: Claude, 執行: Claude] 5 factor ETFs (VLUE/MTUM/QUAL/IWM/USMV) monthly rotation + VT。全部 monthly DM negative (t=-0.18 to -2.99)。QUAL 最接近 (1.514 vs 1.545) 但 NS。Daily rebal 2.091 vs monthly 1.448——再次確認 microstructure artifact (K560/K562/K563 pattern)。Cross-OOS 0/3。Factor ETFs corr 0.86-0.98 with SPY，",
+      "covered_by": [
+        {
+          "id": "mile_a21a6e06",
+          "title": "K1091: 為什麼股指 meta-prediction 準、銅銀 FAIL？—— 跨資產波動率預測的類別不對稱性",
+          "status": "draft",
+          "audience": "general"
+        },
+        {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        }
+      ],
+      "uncovered": false,
+      "audiences_covered": [
+        "general",
+        "research"
+      ],
+      "updated_at": "",
+      "tags": [
+        "factor",
+        "rotation",
+        "QUAL",
+        "USMV",
+        "null_result",
+        "microstructure_artifact"
       ]
     },
     {
@@ -14185,6 +14551,12 @@
       "reasons": [],
       "verdict_preview": "[提出: K590 文獻, 執行: Claude] KAN (B-spline activations) vs MLP vs GJR vs HAR-ABS。KAN QLIKE 1.096 vs GJR 0.515 (+113%)。DM t=+14.38 GJR wins。KAN 366 params (92x GJR) but far worse。HAR-ABS 仍是 champion (0.495)。ML cannot beat GARCH 再次確認（Branco 2024 + K600）。\n\n⚠️ CODEX REVIEW (GPT-5.4): 發現 2 個重大 bug：(1) GJR 輸",
       "covered_by": [
+        {
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+          "status": "draft",
+          "audience": "research"
+        },
         {
           "id": "mile_8cc5795b",
           "title": "11 實驗 Codex 審查 Meta-Analysis：18% 通過率與防止 false breakthrough 的系統機制",
@@ -15284,7 +15656,7 @@
         {
           "id": "mile_1beaaa3f",
           "title": "REIT 波動率 vs SPY：VNQ-SPY 跨 regime 相關動態與 HAR-RV 可預測性實證",
-          "status": "draft",
+          "status": "published",
           "audience": "research"
         },
         {
@@ -16565,6 +16937,12 @@
       "verdict_preview": "[提出: Claude, 執行: Claude] SPY/GLD 50/50 portfolio. DCC-GJR vs Constant-Corr GJR: QLIKE DM t=0.96 NS. DCC correlation mean=0.076 (range -0.47 to +0.53). All Normal VaR 1% FAIL. DCC+Student-t has 0 violations (too conservative). DCC improves correlation tracking but does not improve portfolio-level VaR",
       "covered_by": [
         {
+          "id": "mile_4cf87cfc",
+          "title": "K1092: Asset-Matched DCC-A4f (SPY-VIX + GLD-GVZ) — Pareto-Dominant 但 Below Harvey 的 Portfolio VaR Refinement",
+          "status": "draft",
+          "audience": "research"
+        },
+        {
           "id": "mile_a2718429",
           "title": "K1041: DCC-A4f Portfolio VaR — A4f Marginal 改善幅度勝過 DCC 相關性，推翻 K891 NULL Result",
           "status": "published",
@@ -17192,7 +17570,7 @@
         {
           "id": "mile_93dfac28",
           "title": "把 VIX 期限結構拆成三個因子：Dynamic Nelson-Siegel 在波動率預測的新視角",
-          "status": "draft",
+          "status": "published",
           "audience": "research"
         },
         {
@@ -17459,6 +17837,18 @@
       "reasons": [],
       "verdict_preview": "[提出: Claude, 執行: Claude] K1085 extends Paper 9 cross-asset to non-equity GLD (gold ETF). MAJOR THEORETICAL FINDING: A4f-VIX on GLD DM t=+1.83 FAIL Harvey (n=4848); A4f-GVZ (CBOE Gold VIX) DM t=+4.46 PASS Harvey (n=2645, 2013+). Head-to-head A4f-GVZ vs A4f-VIX DM t=+3.34 Harvey PASS — GVZ carries gol",
       "covered_by": [
+        {
+          "id": "mile_4cf87cfc",
+          "title": "K1092: Asset-Matched DCC-A4f (SPY-VIX + GLD-GVZ) — Pareto-Dominant 但 Below Harvey 的 Portfolio VaR Refinement",
+          "status": "draft",
+          "audience": "research"
+        },
+        {
+          "id": "mile_a21a6e06",
+          "title": "K1091: 為什麼股指 meta-prediction 準、銅銀 FAIL？—— 跨資產波動率預測的類別不對稱性",
+          "status": "draft",
+          "audience": "general"
+        },
         {
           "id": "mile_81b4713f",
           "title": "K1098：VIXTWN 救不回 0050.TW — 台灣結構性波動率缺口的確證",
@@ -17853,7 +18243,7 @@
         {
           "id": "mile_93dfac28",
           "title": "把 VIX 期限結構拆成三個因子：Dynamic Nelson-Siegel 在波動率預測的新視角",
-          "status": "draft",
+          "status": "published",
           "audience": "research"
         }
       ],

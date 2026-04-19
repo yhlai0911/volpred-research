@@ -558,3 +558,101 @@ K1114 修復只處理 `git log` vs `rev-list` 不一致的 silent failure，但�
 - 或在 publish pipeline 保證 audience 在 Supabase 與 feed.json 兩側同步
 
 **本次不動**（1 篇 drift 影響小，session 優先在 V3 polish 與研究任務）。
+
+## 2026-04-19 P1/P2/P3 reproduce_report.json 與 reproduce.py stdout desync
+
+**發現情境**：paper_review 輪跑 P2 taiwan-vt `uv run python reproduce.py` 得 **exit 0 / 0 MISMATCH / 75 VERIFIED + 2 CLOSE + 2 CONFLICT_RESOLVED + 23 UNTRACEABLE**（與 research_program.md Paper Portfolio Status「0 MISMATCH」一致），但 `paper/taiwan-vt/reproduce_report.json` 檔案仍停在 2026-04-19T07:00:55Z、mismatches=6、gate_status=fail。
+
+**根因**：
+- P1/P2/P3 的 `reproduce.py` 只印 stdout 與 `sys.exit(1 if n_mismatch > 0 else 0)`，**不 write `reproduce_report.json`**
+- P4/P4ins/P9 的 reproduce.py 才有 `json.dump(... reproduce_report.json ...)` 邏輯
+- 現存 P1/P2/P3 的 `reproduce_report.json` 是更早 infrastructure（手寫 or 另一份 wrapper）產物，已無自動同步機制
+
+**影響**：
+- Reproduce Gate 政策（CLAUDE.md `.claude/rules/paper-workflow.md`）規定「match≥95% + green 才進 review」，自動化 / review cycle 讀 `reproduce_report.json` 會**誤讀為 fail 狀態**
+- Paper Portfolio Status 自述「0 MISMATCH」雖然對（stdout-true），但審稿 / 自動 tooling **看 JSON 檔依然 red/yellow**
+- P1/P2/P3 可能被自動 gate 誤攔
+
+**Fix direction（非緊急）**：
+- (a) 擴展 P1/P2/P3 reproduce.py 末段加 `json.dump` 輸出與 P4/P4ins/P9 同 schema 的 `reproduce_report.json`（status_breakdown + alert_level + gate_status + traceable_match_rate_pct）
+- (b) 或建 `scripts/refresh_reproduce_reports.py` 統一跑所有 paper reproduce.py → 解析 stdout → 寫 canonical report
+- (c) Review cycle / paper-update gate 改成**呼叫 reproduce.py 並讀 exit code + 解析 stdout**，不信 stale JSON
+
+**本次不動**（不是 research blocker，下 session 做 infra fix）；記此以免將來誤判 P1/P2/P3 stage regression。
+
+## 2026-04-19 alerts.py release_pool_gap 對 piggy-back 失明 → false-positive
+
+**發現情境**：check_alerts 18:00 UTC 報 `release_pool_gap > 2h` (skipped dedup_24h) 但 `.release_settings.json.last_released_at=2026-04-19T18:00:01` — 明明 piggy-back 剛釋放過。進一步查 `storage/logs/cron/release_pool.log` 最後 entry 是 2026-04-19 09:30 CST（17h 前）。
+
+**根因**：
+- Host cron wrapper `scripts/cron_release_pool.sh` exec `uv run volpred ops release-pool-by-settings` 時會寫 `=== [release-pool] fire at ... ===` 到 `release_pool.log`
+- 但 2026-04-19 session 加的 piggy-back（`scripts/check_alerts.py:_auto_trigger_release_pool_if_due`）用 `subprocess.run(["uv","run","volpred","ops","release-pool-by-settings"])` 呼叫，**不透過 wrapper shell script**，因此不寫 log
+- `src/volpred/ops/alerts.py:_parse_release_pool_state` 只讀 `release_pool.log` 的 fire timestamp → 看不到 piggy-back 釋放 → false-positive 2h gap alert
+
+**影響**：
+- Alert email 每小時觸發 2h-gap（靠 24h dedup 壓住，但 noise 仍在）
+- 誤導下一位 session 以為 release pipeline 掛了去 debug cron
+- 違反 alert rule「dedup 是防 email spam，action 仍要做」原則 — 但此情境下 action 是 false alarm
+
+**Fix（2026-04-19 18:46 UTC applied）**：`alerts.py:_parse_release_pool_state` 除了讀 `release_pool.log` 外，也讀 `.release_settings.json.last_released_at` 作為 alternative truth source，取兩者較新者作 `last_fire_at`。
+
+**驗證**：fix 後 `check-alerts` 返 `release_pool_gap.breached=false` `gap_hours=0.78` `last_fire_at=2026-04-19T18:00:01+00:00`（來自 settings）。前 24h 的 false-positive 鏈結束。
+
+**教訓**：任何 CLI side-channel（piggy-back / manual trigger / session-bootstrap）執行同一動作時，**必須同步所有 observability signals**（log 檔 + settings + scheduler snapshot），否則 alert condition 就會對某條 path 失明。未來在 `check_alerts.py` 的 piggy-back 補 `release_pool.log` fire line 亦為 alternative fix（雙保險）。
+
+## 2026-04-19 knowledge.json K957 entry 數字與 article 不一致
+
+**發現情境**：paper_review audit 觸發 research-honesty 檢查 knowledge.json 內 K957 entry 與 article `mile_a1f7bfa8`（2026-04-19 15:46 UTC published）數字一致性。
+
+**filesystem canonical truth**：K526-K566 inclusive = 41 個 K-ID，`ls experiments/ | grep '^k5[2-6]'` 確認**只有 K555 缺失** → 實際 40 experiments。
+
+**Drift map**：
+| 位置 | 實驗總數 | 缺失 K 列表 |
+|---|---|---|
+| Filesystem | 40 | K555 (唯一) |
+| Article body `mile_a1f7bfa8` 主敘述 | 40 ✓ | "K555 / K569 被 skip" ❌（K569 不在 K526-K566 範圍內，錯誤 reference）|
+| Article 內文其他句 | 37 + 40 混用 | - |
+| knowledge.json K957 entry | 37 ❌ | "K531/K546/K555/K559" ❌（實際只有 K555 缺）|
+
+**嚴重度**：LOW — article 主敘述 "40 個實驗" 與 filesystem 一致；僅 parenthetical + KB 條目列出錯誤缺失 K。對結論（5 條 meta-lessons）無影響。
+
+**Fix direction（下次 session）**：
+- (a) 更新 `storage/memory/knowledge.json` K957 entry：「37 個實驗」→「40 個實驗」，缺失 list 改 `K555` only
+- (b) 更新 article body 去掉「K569 被 skip」錯誤 reference（只保留 K555）
+- (c) 統一其他散見的 37 / 40 混用（以 40 canonical）
+
+**本次不動**：非 research-finding-level error（結論未動），僅 metadata 漂移；記此以便下 session 做數字一致化掃描。等同 3-spec disambiguation 場景但反向：此為真·typo / 抄錯，屬「(a) 修論文 canonical value」分類。
+
+**2026-04-19 18:59 UTC 部分 applied**：
+- ✅ `storage/memory/knowledge.json` K957 entry 三處修：title 37→40 Experiments / 第一句 37 個實驗+4 個缺 K→40 個實驗 K555 唯一缺（附 audit attribution）/ 研究效率觀察 37→40 + 5.4%→5.0% 成功率
+- ⏭ article `mile_a1f7bfa8` feed.json content 的 "K555 / K569 被 skip" parenthetical 未動（published 內容 edit 觸 Supabase/Mirror re-sync，留下 session 做 coordinated update）
+- Residual "37+ VIX sufficiency 確認" 保留（非 K526-K566 specific，cumulative 跨 session 計數）
+
+## 2026-04-19 20:02 UTC piggy-back 1.5 秒 timing drift 導致 3h 週期 regression
+
+**發現情境**：20:02 UTC 驗證應在 20:00 UTC 觸發的 piggy-back 未 fire。讀 check_alerts.log：
+```
+release-pool-auto: skip reason=interval_not_due_age=120min
+JSON: ... generated_at=2026-04-19T20:00:00.498943+00:00
+```
+
+**根因**：
+- `release-pool-by-settings` CLI 寫 `last_released_at` 在 `:00:01-02.X` UTC（非 exactly :00:00）— 因為 CLI 執行有 subprocess+Python boot 的 ~1.5s 延遲
+- check_alerts cron fires at `:00:00.498` 每小時 reliable（launchd 精確）
+- Age at 20:00:00 check vs 18:00:01 last_released = 119.98 min < 120 → skip
+- 下次 check 在 21:00:00 → age=179.98 min → release
+- 實際 cadence **3h 而非 2h**，每日 release 從 12 次降到 8 次（**33% 流量損失**）
+
+**Fix applied 2026-04-19 20:03 UTC**：`scripts/check_alerts.py:_auto_trigger_release_pool_if_due()` 的 skip 條件從 `age_min < interval_min` 改為 `age_min < interval_min - 3`（3 分鐘 tolerance）。這讓 hourly boundary 的 release 正常 fire，不 defer 到下個 hourly cron。
+
+**驗證**：`uv run python scripts/check_alerts.py` → `release-pool-auto: ok age=123min reason=done` → pool 5→4 drafts, `last_released_at=20:03:01.374 UTC`, mile_28f0ae1b 成功 released。
+
+**影響**：
+- 前 ~14h 的 release 節奏實際為 3h（非預期 2h）— 4 次應有 release 被 skip（14/2=7 期望 vs 實得 4-5 次）
+- 對 Mission 第 5 條（曝光流量）有顯性影響 — 上架節奏慢於計畫 33%
+- 讀者端每 3h 才看到新文章而非 2h，短期影響曝光；fix 後回到 2h 節奏
+
+**教訓**：
+- 任何「fire every X min/hour」的 timer 必須考慮 **驅動 cron 的粒度**（這裡 check_alerts 是 hourly 粒度），不能假設 timer 精確
+- 嚴格 `<` 比較 + 浮點秒 → 近邊界情境（119.98 vs 120）總是 skip；應加 **tolerance** 或改 inequality 方向
+- 同樣 pattern 若出現在其他 cron + settings interval 互動場景（如 daily_update 8:03 + 其他時鐘），都該 audit

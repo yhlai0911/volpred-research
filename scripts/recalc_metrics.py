@@ -21,6 +21,32 @@ from volpred.config.runtime import get_strategy_metrics_sync_paths
 COMMON_START_DATE = "2023-01-04"
 
 
+def build_sparkline(entries: list, max_points: int = 90, start_date: str = COMMON_START_DATE) -> list:
+    """Build sparkline (cumulative return pct) from paper_trading entries.
+
+    Ported from scripts/list_new_strategy.py:_build_sparkline so recalc_metrics
+    can refresh sparklines daily instead of only at strategy listing time.
+    """
+    valid = [
+        e for e in entries
+        if (e.get("data_date") or e.get("date", "")) >= start_date
+        and e.get("portfolio_return") is not None
+    ]
+    if len(valid) < 10:
+        return []
+    cum = 1.0
+    cum_series = []
+    for e in valid:
+        cum *= (1 + e["portfolio_return"])
+        cum_series.append(round((cum - 1) * 100, 2))
+    if len(cum_series) <= max_points:
+        return cum_series
+    step = len(cum_series) / max_points
+    result = [cum_series[min(int(i * step), len(cum_series) - 1)] for i in range(max_points)]
+    result[-1] = cum_series[-1]
+    return result
+
+
 def calc_metrics(entries: list, initial_capital: int = 1000000) -> dict:
     """Calculate performance metrics from paper trading entries."""
     returns = []
@@ -117,6 +143,7 @@ def recalc_all():
 
     pt = json.loads(pt_path.read_text())
     metrics = {}
+    sparklines = {}
 
     for sid, strat in pt.items():
         entries = strat.get("entries", [])
@@ -135,7 +162,8 @@ def recalc_all():
         # Get display name from strategy_signals DB (or fallback to sid)
         m["display_name"] = sid
         metrics[sid] = m
-        print(f"  {sid:25s} Sharpe={m['sharpe']:.2f} Ret={m['cumulative_return']:.1f}% MDD={m['max_drawdown']:.1f}%")
+        sparklines[sid] = build_sparkline(entries)
+        print(f"  {sid:25s} Sharpe={m['sharpe']:.2f} Ret={m['cumulative_return']:.1f}% MDD={m['max_drawdown']:.1f}% sparkline={len(sparklines[sid])}pt")
 
     # Save
     out_path = PROJECT / "storage" / "strategy_metrics.json"
@@ -168,7 +196,11 @@ def recalc_all():
             }
             synced = 0
             for strat, m in metrics.items():
-                data = json.dumps({"metrics": m}).encode("utf-8")
+                payload = {"metrics": m}
+                sp = sparklines.get(strat)
+                if sp:
+                    payload["sparkline"] = sp
+                data = json.dumps(payload).encode("utf-8")
                 url = f"{SUPABASE_URL}/rest/v1/strategy_metrics_cache?strategy=eq.{strat}"
                 req = Request(url, data=data, headers=headers, method="PATCH")
                 try:
@@ -176,7 +208,8 @@ def recalc_all():
                     synced += 1
                 except HTTPError:
                     pass
-            print(f"  → Supabase strategy_metrics_cache: {synced}/{len(metrics)} synced")
+            sparkline_count = sum(1 for sp in sparklines.values() if sp)
+            print(f"  → Supabase strategy_metrics_cache: {synced}/{len(metrics)} synced (sparkline pushed for {sparkline_count} strategies)")
     except Exception as e:
         print(f"  → Supabase metrics sync skipped: {e}")
 

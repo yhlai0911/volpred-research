@@ -247,6 +247,16 @@ def _parse_release_pool_state(storage_dir: str, now: datetime) -> dict[str, Any]
         except OSError:
             last_fire_at = None
 
+    # Piggy-back release path (check_alerts.py `_auto_trigger_release_pool_if_due`)
+    # writes .release_settings.json.last_released_at but not release_pool.log.
+    # Fall back to settings-recorded timestamp so piggy-back releases are visible
+    # to the alert condition and don't false-positive release_pool_gap.
+    settings_path = project_path(storage_dir, ".release_settings.json")
+    settings_data = load_json(settings_path, {})
+    settings_last = _parse_iso_datetime(settings_data.get("last_released_at")) if isinstance(settings_data, dict) else None
+    if settings_last is not None and (last_fire_at is None or settings_last > last_fire_at):
+        last_fire_at = settings_last
+
     gap_hours = None
     if last_fire_at is not None:
         gap_hours = round((now - last_fire_at).total_seconds() / 3600.0, 2)

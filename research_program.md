@@ -45,6 +45,11 @@
 - Factor GARCH（共同因子驅動的波動率）
 - 跨資產 Granger 因果（vol spillover）
 
+**Under-explored methodologies (novelty quota 候選，feed_ct=0 per topic_diversity_audit 2026-04-19 19:30 UTC)**:
+- [ ] **Bayesian Model Averaging (BMA) for vol forecasting** — 多 GARCH spec (GARCH/GJR/EGARCH/TARCH) posterior-weighted combination；unlike simple 平均組合，根據 predictive likelihood 動態調權。對 Mission「最佳預測」線直接。0 feed coverage 目前。Not data-blocked。
+- [ ] **Model Confidence Set (MCS) / SPA / Reality Check** — Hansen-Lunde-Nason framework 正式檢驗 "a set of models 無法顯著優於彼此"；取代 single-DM-test 的 pairwise 方法，統計學上嚴謹。對現有 K500+ pairwise DM 結果 meta-analysis 是 natural complement。0 feed coverage。Not data-blocked。
+- [ ] **Realized semivariance / signed jumps** — Barndorff-Nielsen-Kinnebrock-Shephard 分解 RV 為 upside/downside 部分，測 asymmetric vol 更純粹。需 5-min 數據（2026 Q2 HAR-RV 解鎖後可開）。
+
 ### 面向 B: VaR/ES 風險管理
 - 分配選擇（Normal, Student-t, GED, Skewed-t, FHS）
 - Adaptive sigma floor
@@ -475,8 +480,23 @@ K519-K521 + K527 完成結果：見 archive。
 - **Data snapshot infra**（`scripts/snapshot_yfinance.py` + 5 paper data/ CSVs bundled yfinance drift 對策）
 - **Release cadence unified**（settings interval_minutes 60→120 對齊 cron 每 2h canonical）
 - Daily article 補池 **`mile_28f0ae1b`** 15,862 chars + 2 real charts（three-market binary-sufficient universality, Paper 2 連動）
+- Daily article 補池 **`mile_a1f7bfa8`** K957 40 個實驗蒸餾 5 條 meta-lessons (research, 10,610 CJK)
+- Daily article 補池 **`mile_a21a6e06`** K1091 meta-prediction OOS 股指 PASS 商品 FAIL (general, 6,828 CJK, 18:00 UTC 純 piggy-back auto-release 首例)
+- Daily article 補池 **`mile_b9d5db50`** 跨市場 binary-sufficient 四國財報事件 (general-audience 版, 3,443 CJK, pre-empted 20:00 UTC breach)
 - docs/error_log.md 加 2 entries (release-pool fix resolution + Codex quota blocker 2026-04-24)
-- Memory: feedback_dont_ask_do + feedback_email_on_major_decisions（session 新 rules 入 MEMORY.md）
+- Memory: feedback_dont_ask_do + feedback_email_on_major_decisions + feedback_3spec_disambiguation（session 新 rules 入 MEMORY.md）
+
+### 2026-04-19 18:00+ UTC post-compact saturation-round outcomes
+- ✅ **Piggy-back alerts.py bug fix**: false-positive release_pool_gap 消除（補 .release_settings.json fallback）
+- ✅ **experiments/INDEX.md rebuild** 1011→1012 K，uncovered 736→735
+- ✅ **publication_candidates.json rebuild** uncovered 225→215
+- ✅ **docs/strategy-registry.md drift fix** 14/10 active → 14/11 active verified
+- ✅ **Strategy metrics refresh** 14 策略 Sharpe/MDD + Supabase strategy_metrics_cache 14/14 synced
+- ✅ **docs/topic_diversity_audit.md refresh** 14h stale → fresh (feed tags 4665→4731)
+- ✅ **Question-archive** test-garbage 54ba8732 清
+- ✅ **K957 knowledge.json metadata fix** 37→40 Experiments (filesystem canonical)
+- 📝 **5 next_draft_candidate memos** pipeline: K957✅ K1091✅ cross_market_binary✅ consumed / K1092 ready / K1174 DOWNGRADED
+- 📝 **error_log.md** 5 新 sections (P1/P2/P3 reproduce stale / alerts piggy-back / K957 KB drift / applied-deferred markers)
 
 ## Platform V3 Editorial Redesign COMPLETE (2026-04-19)
 

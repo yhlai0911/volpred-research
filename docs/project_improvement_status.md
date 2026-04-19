@@ -17,6 +17,18 @@ Last updated: **2026-04-19 (v12 transition 進度 + 本日成果)**
 - 📝 **2 errata_pending.md** (P8 CRITICAL / P9 shelf-ready)
 - 📝 **Release cadence** unified to 120 min interval + 2h cron
 
+### 2026-04-19 18:00+ UTC post-compact saturation-round work (Codex-blocked observation mode)
+
+- ✅ **K1174 memo written + DOWNGRADED**（score 10 但 `mile_45060685` 已以 footer 吸收 — pivot-angle 用）
+- ✅ **publication_candidates.json rebuild** (stale 3h → fresh 18:35)；uncovered 225→215；真正 uncovered K1100-K1224 僅 K1106 + K1115（大部分已被 content/title-matching 覆蓋）
+- ✅ **alerts.py `release_pool_gap` false-positive fix**：`_parse_release_pool_state` 補 `.release_settings.json.last_released_at` 作 alternative truth source — 前 24h dedup-壓著的每小時 false-positive 鏈結束（驗證 `check-alerts` → `breached=false gap=0.78h`）
+- ✅ **experiments/INDEX.md rebuild**（5h30m stale → fresh；1011→1012 K，uncovered 736→735）
+- ✅ **docs/strategy-registry.md drift fix**（header 14/10 active → 實 14/11 active，附 verified timestamp + code line ref）
+- ✅ **Question archive**: 2026-03-20 keyboard-mash garbage question `54ba8732` (testtewtrwqetwqtewqtqwet) archived — 清 member_qa ranking 污染
+- ✅ **K957 knowledge.json metadata fix**（title 37→40 Experiments / 第一句 4 缺 K→K555 唯一缺 / 研究效率觀察 37→40 + 5.4→5.0%）
+- 📝 **error_log 3 新 section**: P1/P2/P3 reproduce_report stale / alerts piggy-back 失明 / K957 KB-article drift map
+- 📝 **Piggy-back production-validated** (18:00 UTC 純自動 trigger mile_1beaaa3f released — 第一次 auto-release 不靠主線程 intervention)
+
 ### Historical v11 context 保留於下方（不刪除，作為 architecture evolution reference）
 
 ---
