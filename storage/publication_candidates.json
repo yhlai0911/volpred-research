@@ -1,18 +1,13 @@
 {
-  "generated_at": "2026-04-19T13:07:18.265131+00:00",
+  "generated_at": "2026-04-19T13:35:01.260287+00:00",
   "summary": {
     "total_k": 583,
-    "uncovered": 227,
-    "high_priority_uncovered": 4,
-    "missing_general_audience": 31,
+    "uncovered": 225,
+    "high_priority_uncovered": 3,
+    "missing_general_audience": 33,
     "missing_research_audience": 10
   },
   "top_10_uncovered": [
-    {
-      "k_id": "K672",
-      "score": 9,
-      "title": "K672: ★★★ Definitive Conclusions — 7 proven, 6 strong, 5 emerging, 7 open questions"
-    },
     {
       "k_id": "K957",
       "score": 6,
@@ -39,11 +34,6 @@
       "title": "K549: Multi-Asset VT — 5 資產 EW Sharpe +0.20 但 Harvey NS（weak positive）"
     },
     {
-      "k_id": "K562",
-      "score": 4,
-      "title": "K562: ★★★ Sector Momentum Validation — Daily PASS (t=10.87, 10/10) but Monthly FAIL (Sharpe 1.23<1.34)"
-    },
-    {
       "k_id": "K593",
       "score": 4,
       "title": "K593: ★★★ Window Cross-OOS — No universal winner, regime-dependent. Keep W=2000 + add robustness."
@@ -57,6 +47,16 @@
       "k_id": "K1018",
       "score": 4,
       "title": "K1018: Robust VT (floor/cap/EWMA/weekly) — NOT worth listing (Sharpe insignificant vs baseline)"
+    },
+    {
+      "k_id": "K1021",
+      "score": 4,
+      "title": "K1021: A4f Student-t df Joint Estimation ★ — df≈8.5, VaR Calibration Critical"
+    },
+    {
+      "k_id": "K1024",
+      "score": 4,
+      "title": "K1024: A4f Refit Frequency Insensitive ★ — QLIKE Spread 0.021%, 63d Optimal"
     }
   ],
   "missing_general_top5": [
@@ -85,17 +85,17 @@
       ]
     },
     {
-      "k_id": "K1077",
+      "k_id": "K672",
       "score": 9,
-      "title": "K1077: A4f on 0050.TW Extended History NULL — Confirms Genuinely Weak Taiwan Transmission (θ₁ Unstable)",
+      "title": "K672: ★★★ Definitive Conclusions — 7 proven, 6 strong, 5 emerging, 7 open questions",
       "already_covered_for": [
         "research"
       ]
     },
     {
-      "k_id": "K1078",
+      "k_id": "K1077",
       "score": 9,
-      "title": "K1078: ★★ QQQ A4f Extended PASS (t=+5.99) — A4f is US Liquid Equity Phenomenon (Not SPY-Specific)",
+      "title": "K1077: A4f on 0050.TW Extended History NULL — Confirms Genuinely Weak Taiwan Transmission (θ₁ Unstable)",
       "already_covered_for": [
         "research"
       ]
@@ -142,30 +142,6 @@
     }
   ],
   "candidates": [
-    {
-      "k_id": "K672",
-      "title": "K672: ★★★ Definitive Conclusions — 7 proven, 6 strong, 5 emerging, 7 open questions",
-      "score": 9,
-      "reasons": [
-        "PASS/Harvey-significant",
-        "cross-market/universal",
-        "methodology/mechanism lesson",
-        "robust inference"
-      ],
-      "verdict_preview": "[提出: 研究總結, 執行: Claude] 1421 知識條目終極整理。Category A（定論 7）：VIX sufficiency 103+, 12/VIX kernel 178 entries, Pred≠App, QLIKE ceiling, leverage universality rho=1.000, GJR dominance DM t=-6.27, VT crisis protection 10/10。Category B（強證據 6）：50/50 robustness, monthly rebalance, target vol irrelevance, EGARCH ",
-      "covered_by": [],
-      "uncovered": true,
-      "audiences_covered": [],
-      "updated_at": "",
-      "tags": [
-        "definitive",
-        "knowledge-state",
-        "synthesis",
-        "Category-A",
-        "proven",
-        "research-program"
-      ]
-    },
     {
       "k_id": "K957",
       "title": "K957: ★★★★ K526-K566 Session Synthesis — 37 Experiments, 5 Meta-Lessons (E019-E023)",
@@ -277,27 +253,6 @@
         "portfolio",
         "weak_positive",
         "Harvey_NS"
-      ]
-    },
-    {
-      "k_id": "K562",
-      "title": "K562: ★★★ Sector Momentum Validation — Daily PASS (t=10.87, 10/10) but Monthly FAIL (Sharpe 1.23<1.34)",
-      "score": 4,
-      "reasons": [
-        "PASS/Harvey-significant",
-        "robust inference"
-      ],
-      "verdict_preview": "[提出: Claude, 執行: Claude] K560 深度驗證 8 項。Harvey NW t=10.87 PASS。Cross-OOS 10/10 PASS。Momentum window 全部 PASS (20d-252d safe zone)。Bootstrap daily P(win)=100%。Drawdown excellent (GFC +27.1%)。\n\n**CRITICAL FAIL: 月頻 Sharpe 1.228 < benchmark 1.344。** Bootstrap monthly P(win)=10.4%。Alpha 幾乎全部來自 daily rebala",
-      "covered_by": [],
-      "uncovered": true,
-      "audiences_covered": [],
-      "updated_at": "",
-      "tags": [
-        "sector_momentum",
-        "validation",
-        "rebalancing_frequency",
-        "daily_only",
-        "conditional"
       ]
     },
     {
@@ -4695,6 +4650,39 @@
       ]
     },
     {
+      "k_id": "K672",
+      "title": "K672: ★★★ Definitive Conclusions — 7 proven, 6 strong, 5 emerging, 7 open questions",
+      "score": 9,
+      "reasons": [
+        "PASS/Harvey-significant",
+        "cross-market/universal",
+        "methodology/mechanism lesson",
+        "robust inference"
+      ],
+      "verdict_preview": "[提出: 研究總結, 執行: Claude] 1421 知識條目終極整理。Category A（定論 7）：VIX sufficiency 103+, 12/VIX kernel 178 entries, Pred≠App, QLIKE ceiling, leverage universality rho=1.000, GJR dominance DM t=-6.27, VT crisis protection 10/10。Category B（強證據 6）：50/50 robustness, monthly rebalance, target vol irrelevance, EGARCH ",
+      "covered_by": [
+        {
+          "id": "mile_c15c7b98",
+          "title": "波動率預測研究的定論與開放問題：K672 對 1,421 條知識條目的四層證據地圖",
+          "status": "draft",
+          "audience": "research"
+        }
+      ],
+      "uncovered": false,
+      "audiences_covered": [
+        "research"
+      ],
+      "updated_at": "",
+      "tags": [
+        "definitive",
+        "knowledge-state",
+        "synthesis",
+        "Category-A",
+        "proven",
+        "research-program"
+      ]
+    },
+    {
       "k_id": "K1077",
       "title": "K1077: A4f on 0050.TW Extended History NULL — Confirms Genuinely Weak Taiwan Transmission (θ₁ Unstable)",
       "score": 9,
@@ -6246,6 +6234,36 @@
       ]
     },
     {
+      "k_id": "K562",
+      "title": "K562: ★★★ Sector Momentum Validation — Daily PASS (t=10.87, 10/10) but Monthly FAIL (Sharpe 1.23<1.34)",
+      "score": 4,
+      "reasons": [
+        "PASS/Harvey-significant",
+        "robust inference"
+      ],
+      "verdict_preview": "[提出: Claude, 執行: Claude] K560 深度驗證 8 項。Harvey NW t=10.87 PASS。Cross-OOS 10/10 PASS。Momentum window 全部 PASS (20d-252d safe zone)。Bootstrap daily P(win)=100%。Drawdown excellent (GFC +27.1%)。\n\n**CRITICAL FAIL: 月頻 Sharpe 1.228 < benchmark 1.344。** Bootstrap monthly P(win)=10.4%。Alpha 幾乎全部來自 daily rebala",
+      "covered_by": [
+        {
+          "id": "mile_c15c7b98",
+          "title": "波動率預測研究的定論與開放問題：K672 對 1,421 條知識條目的四層證據地圖",
+          "status": "draft",
+          "audience": "research"
+        }
+      ],
+      "uncovered": false,
+      "audiences_covered": [
+        "research"
+      ],
+      "updated_at": "",
+      "tags": [
+        "sector_momentum",
+        "validation",
+        "rebalancing_frequency",
+        "daily_only",
+        "conditional"
+      ]
+    },
+    {
       "k_id": "K569",
       "title": "K569: Piecewise VT Validation — 6/8 checks pass, deployment ready as conservative tier",
       "score": 4,
@@ -6634,7 +6652,7 @@
         {
           "id": "mile_2d35fcc4",
           "title": "Sub-5min 高頻微結構的三個實證觀察:SPY signature plot、bid-ask bounce、與 60 天近期窗口下的 noise footprint",
-          "status": "draft",
+          "status": "published",
           "audience": "research"
         }
       ],
@@ -15013,6 +15031,12 @@
       "verdict_preview": "[提出: 產品化/實務, 執行: Claude] 6 種月頻 DCA 策略（$1K/月，2010-2026）。Fear DCA IRR 13.6% $3.43/dollar 最佳報酬。VIX Table DCA MDD -22.5%（vs plain -33.4%，-11pp）最佳風控。Combined VIX Table+Fear 反而更差——cash-hoarding 抵銷 aggressive buying（內部矛盾）。Lump Sum 終端值 +71% 但多數人沒有一次投入能力。60/40 DCA 是中庸選擇。結論：報酬導向→Fear DCA，風控導向→VIX Table DCA，不要",
       "covered_by": [
         {
+          "id": "mile_c15c7b98",
+          "title": "波動率預測研究的定論與開放問題：K672 對 1,421 條知識條目的四層證據地圖",
+          "status": "draft",
+          "audience": "research"
+        },
+        {
           "id": "mile_1458be07",
           "title": "每月投資 1000 美元，16 年後你會有多少？六種方法大比拚",
           "status": "published",
@@ -15020,7 +15044,9 @@
         }
       ],
       "uncovered": false,
-      "audiences_covered": [],
+      "audiences_covered": [
+        "research"
+      ],
       "updated_at": "",
       "tags": [
         "DCA",

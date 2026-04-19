@@ -509,3 +509,38 @@ K1114 修復只處理 `git log` vs `rev-list` 不一致的 silent failure，但�
 **延後工作**: task_0658 release-task CLI 補齊 task state machine (手動 release claim-後-誤抓 task)
 
 **暫時 workaround**: 主線程 `finish-task --status failed` 仍是唯一 recover path until release-task CLI 上線。
+
+## 2026-04-19 13:20 UTC — Host cron selective skip: release_pool stalled while check_alerts working
+
+**症狀**: 兩 wrapper 同目錄 (`~/.volpred/bin/`)、同格式、同 owner、同 chmod +x，但 cron daemon 選擇性不 fire release_pool：
+
+| Cron entry | Expected fires today (dow=0 Sunday) | Actual fires | Status |
+|---|---|---|---|
+| `0 * * * * cron_check_alerts.sh` | 每小時 ~22 次 | 233 log lines ✓ | Working |
+| `3 */2 * * * cron_release_pool.sh` | 每 2h ~8 次 | 12 log lines，last 09:30 CST (stale 12h) | **Broken** |
+| `0 15 * * 1-5 cron_collect_tw.sh` | dow=1-5，Sunday skip | 0 lines | Expected skip |
+| `3 7 * * 2-6 cron_collect_us.sh` | dow=2-6，Sunday skip | 0 lines | Expected skip |
+| `3 8 * * 2-6 cron_daily_update.sh` | dow=2-6，Sunday skip | 0 lines | Expected skip |
+| `0 8 * * 1 cron_market_cal.sh` | Monday only | 0 lines | Expected skip |
+
+**已知 mitigations 無效**（本次 session 發現）：
+- wrapper 放在 `~/.volpred/bin/`（避開 Desktop FDA 限制）— 不夠
+- chmod +x 正確
+- Binary `uv` 絕對路徑（/opt/homebrew/bin/uv）
+- `cd` 到 repo root
+- Manual invocation 正常（本次 13:20 UTC 手動跑 released mile_2d35fcc4 成功）
+
+**alert_dedup 狀態**：`Release pool cron gap > 2h` 自 05:41 UTC 後 skip_count=12 — check_alerts 每小時偵測到問題但 24h 內 dedup 不 re-send email（anti-spam）。**User email inbox 不會再收到警報直到 dedup 過期**。
+
+**Root cause 假說**（需下 session 驗證）：
+1. macOS cron daemon 對 `*/2` 時間表達式有 bug（unlikely，常用 pattern）
+2. 系統休眠期間所有 cron job 跳過，`*/2` 遇到的 slot 剛好都是休眠（巧合？）
+3. release_pool.sh `exec uv run` 的 `exec` replaces shell，cron 認為 exit code 非零（但 uv exit 0 should OK）
+4. cron 有 stdin/tty issue 特定於 release_pool 的 terminal interactive prompts？（release-pool-by-settings 有時問 Supabase auth）
+
+**Workaround (current session)**: 每次 `*/4 繼續任務` cron tick 時主線程檢查 `last_released_at` age，若 > 150 min 主動跑 `~/.volpred/bin/cron_release_pool.sh` 手動補。本 session 已執行 1 次手動釋出 at 13:20 UTC。
+
+**Fix direction (next session)**:
+1. 改用 launchctl + launchd plist 代替 crontab（macOS 推薦）— deferred
+2. ✅ **IMPLEMENTED 2026-04-19 13:27 UTC**: `scripts/check_alerts.py` 加 `_auto_trigger_release_pool_if_due()` piggy-back。Hourly check_alerts cron（reliable）現會在 `last_released_at` age ≥ `interval_minutes` 時 subprocess run `uv run volpred ops release-pool-by-settings`。Test verified: 當前 gap < interval → correctly skip; 預期 16:00 UTC 起 effective cadence 穩定 2-3h（延遲 upper bound 1h = check_alerts hourly + interval boundary crossing 時間差）。
+3. 或改 cron 時間為 hourly（`3 */1 * * *`）避開 `*/2` 可能 parsing 問題 — deferred (option 2 已足夠)

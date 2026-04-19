@@ -27,11 +27,77 @@ if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
 
+def _auto_trigger_release_pool_if_due() -> dict:
+    """2026-04-19 workaround: host cron `3 */2 * * *` fires release_pool unreliably
+    on this machine (see docs/error_log.md 2026-04-19 "Host cron selective skip").
+    check_alerts cron (`0 * * * *`) fires reliably; piggy-back release-pool trigger
+    here so release cadence honors settings.interval_minutes even when the 2-hour
+    host cron is silently skipped by launchd.
+    """
+    from datetime import datetime, timezone
+    import subprocess
+
+    settings_path = PROJECT_ROOT / "storage" / ".release_settings.json"
+    if not settings_path.exists():
+        return {"triggered": False, "reason": "no_settings_file"}
+    try:
+        settings = json.loads(settings_path.read_text())
+    except Exception as exc:
+        return {"triggered": False, "reason": f"settings_read_error:{exc}"}
+
+    interval_min = int(settings.get("interval_minutes") or 120)
+    last_iso = settings.get("last_released_at")
+    if not last_iso:
+        return {"triggered": False, "reason": "no_last_released_at"}
+    try:
+        last_dt = datetime.fromisoformat(str(last_iso).replace("Z", "+00:00"))
+    except Exception:
+        return {"triggered": False, "reason": "last_released_at_parse_error"}
+    now = datetime.now(timezone.utc)
+    age_min = (now - last_dt).total_seconds() / 60
+    if age_min < interval_min:
+        return {"triggered": False, "reason": f"interval_not_due_age={age_min:.0f}min"}
+
+    # Due: attempt release via CLI. Use non-blocking subprocess to avoid
+    # any hang in hourly cron; limit runtime; don't fail alert run if this fails.
+    try:
+        result = subprocess.run(
+            ["/opt/homebrew/bin/uv", "run", "volpred", "ops", "release-pool-by-settings"],
+            cwd=str(PROJECT_ROOT),
+            capture_output=True,
+            text=True,
+            timeout=180,
+        )
+        ok = result.returncode == 0
+        return {
+            "triggered": True,
+            "ok": ok,
+            "returncode": result.returncode,
+            "age_min": round(age_min),
+            "stdout_tail": (result.stdout or "")[-200:],
+            "stderr_tail": (result.stderr or "")[-200:],
+        }
+    except Exception as exc:
+        return {"triggered": True, "ok": False, "error": str(exc)}
+
+
 def main() -> int:
     from volpred.ops import check_alert_conditions  # noqa: WPS433 (deferred for sys.path)
 
+    # 2026-04-19 auto-remediation piggy-back: host cron for release_pool is
+    # unreliable; check_alerts runs hourly and reliably, so trigger release
+    # here when interval_minutes threshold is exceeded.
+    release_trigger = _auto_trigger_release_pool_if_due()
+
     report = check_alert_conditions(storage_dir="storage")
     print("=== ops check-alerts ===")
+    if release_trigger.get("triggered"):
+        status = "ok" if release_trigger.get("ok") else "fail"
+        print(
+            f"  release-pool-auto: {status} "
+            f"age={release_trigger.get('age_min')}min "
+            f"reason={release_trigger.get('reason') or release_trigger.get('error') or 'done'}"
+        )
     print(
         f"breaches={report.get('breach_count')} "
         f"sent={report.get('sent_count')} "

@@ -1091,5 +1091,40 @@
     "summary": "K672 research synthesis draft (evidence hierarchy 7/6/5/7 + 6 meta + 5 single) - 2249 CJK chars + 2 real charts, proposer=Claude, audience=research, category=milestone, status=draft",
     "duration_min": 25,
     "derived_tasks": []
+  },
+  {
+    "timestamp": "2026-04-19T21:21:34+08:00",
+    "task_type": "platform_ops",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "Host cron 診斷 + 手動補釋: release_pool_cron log 最後 entry 09:30 CST 後 6+ fires missed (11:03/13:03 UTC cron should've fired but didn't)。check_alerts cron 仍正常每小時 fire (13:00 UTC log 有), 兩 scripts 都在 ~/.volpred/bin/ 同路徑 — 不明為何 release_pool 被 macOS 選擇性 skip。Alert 'Release pool cron gap > 2h' 已 dedup (skip_count 12, 表示 check_alerts 檢測到但 24h 內 re-send skip)。手動跑 wrapper `~/.volpred/bin/cron_release_pool.sh` 成功 release 1 篇 (published 13:20 UTC)，pool 5→4。last_released_at 11:07→13:20 更新。本 session 無法定位 cron 差異根因 (check_alerts vs release_pool)，留 error_log entry for next session 調查。"
+  },
+  {
+    "timestamp": "2026-04-19T21:23:13+08:00",
+    "task_type": "governance",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "docs/error_log.md 加 'Host cron selective skip' 診斷 entry (511→546 lines): release_pool 12 log lines (stale), check_alerts 233 lines (active), 同目錄同格式 wrapper 但 cron daemon 選擇性不 fire release_pool。4 possible root cause 假說 + 3 fix directions (launchctl plist / check_alerts hook reuse / `3 */1` 避 */2 parsing) 待 next session 驗證。Current workaround: */4 繼續任務 cron tick 主線程檢 last_released_at age > 150 min 主動補釋 (本 session 已跑 13:20 UTC)。"
+  },
+  {
+    "timestamp": "2026-04-19T21:26:33+08:00",
+    "task_type": "code",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "Cron reliability fix — check_alerts.py 加 _auto_trigger_release_pool_if_due() piggy-back: hourly check_alerts cron 現在 auto-trigger release-pool 若 gap>=interval_minutes (120min)。解決 host cron `3 */2` 選擇性 skip 問題 (check_alerts hourly cron 可靠)。Test run 確認：當前 gap 6min<120min → triggered=False skip 正常 (尚未 due)。下次 due 在 15:20 UTC，最早會被 16:00 UTC check_alerts fire 觸發。Effective cadence 2-3h (hourly tick 跨越 interval boundary 時間差)，可靠性大升。error_log 546 lines 記 fix direction 2 已實施。"
+  },
+  {
+    "timestamp": "2026-04-19T21:30:02+08:00",
+    "task_type": "governance",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "docs/error_log.md fix direction 2 標 ✅ IMPLEMENTED 2026-04-19 13:27 UTC: check_alerts.py piggy-back release-pool auto-trigger + test verified + predicted effective cadence 2-3h。Direction 1 (launchctl plist) 標 deferred。Direction 3 (hourly cron) 標 deferred (option 2 已足夠)。未來 session 讀 error_log 即知 cron selectivity 問題已用 option 2 workaround 解。"
+  },
+  {
+    "timestamp": "2026-04-19T21:35:22+08:00",
+    "task_type": "research",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "Publication candidates refresh post 3 mile: uncovered 227→225 (-2, mile_c15c7b98 K672 + mile_2d35fcc4 tags absorb)。high_priority_uncovered 4→3 (score>=5)。剩 top uncovered: K672 (已蓋 mile_c15c7b98), K957 score 6 session synthesis 可作下次 topic, K1091/K1092 score 5, K438/K549 score 4。Contentlayer 確認 feed.json sole canonical source (0 mile_*.json singles), Supabase sync state 無 failures。"
   }
 ]
