@@ -10,6 +10,14 @@
         "data/strategy_metrics.json"
       ],
       "paper_public_dir": "public/paper"
+    },
+    "frontend-v3-design": {
+      "path": "frontend-v3-design",
+      "kind": "static-prototype",
+      "status": "archived-design-source",
+      "deploy_service": null,
+      "live_url": "https://volpred.zeabur.app/v3/",
+      "notes": "原始 Claude Design handoff bundle（雜誌/期刊/終端 3 variant prototype）。正式實作已於 2026-04-19 merge 進 frontend-v2-fix 的 src/app/v3/ + src/components/v3/，commit 2f68833，部署 69e494fe50cfe9704d09132a。此目錄保留作為設計來源檔存檔；未來若要切 active_frontend 不用此路徑，改用 frontend-v2-fix 的 v3 子路由。"
     }
   },
   "deploy": {

@@ -1,0 +1,212 @@
+/* VolPred 設計系統 - 共用樣式 */
+
+/* ============ 字型 ============ */
+:root {
+  --font-sans: "Noto Sans TC", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-serif: "Source Serif 4", "Noto Serif TC", Georgia, serif;
+  --font-mono: "JetBrains Mono", "SF Mono", "Roboto Mono", ui-monospace, monospace;
+  --font-display: "Source Serif 4", "Noto Serif TC", Georgia, serif;
+}
+
+/* ============ V1: 雜誌編輯風（NYT/Economist）============ */
+.theme-editorial {
+  --bg: #f7f4ed;
+  --bg-2: #efeae0;
+  --surface: #fdfbf6;
+  --ink: #1a1715;
+  --ink-2: #3d3833;
+  --ink-3: #6b625a;
+  --ink-4: #9a9187;
+  --rule: #d8d0c0;
+  --rule-strong: #1a1715;
+  --accent: #8b1e1e; /* 深酒紅 - Economist 經典 */
+  --accent-2: #c9a961; /* 金色點綴 */
+  --positive: #2d5a3f;
+  --negative: #8b1e1e;
+}
+
+.theme-editorial.dark {
+  --bg: #1a1512;
+  --bg-2: #221c17;
+  --surface: #2a231d;
+  --ink: #f5ede0;
+  --ink-2: #d9cfbe;
+  --ink-3: #a89f8f;
+  --ink-4: #7a7266;
+  --rule: #3d342a;
+  --rule-strong: #f5ede0;
+  --accent: #d94a4a;
+  --accent-2: #e0b972;
+}
+
+/* ============ V2: 金融終端機風 ============ */
+.theme-terminal {
+  --bg: #0a0b0e;
+  --bg-2: #111318;
+  --surface: #161920;
+  --surface-2: #1c2029;
+  --ink: #e8ecf0;
+  --ink-2: #b8bec7;
+  --ink-3: #7a8290;
+  --ink-4: #4a5260;
+  --rule: #252a35;
+  --rule-strong: #3a4050;
+  --accent: #00d4aa; /* 薄荷綠 - 上漲 */
+  --accent-2: #ff5c6c; /* 紅色 - 下跌 */
+  --amber: #ffb454;
+  --blue: #5eb1ef;
+  --positive: #00d4aa;
+  --negative: #ff5c6c;
+}
+
+.theme-terminal.light {
+  --bg: #fafbfc;
+  --bg-2: #f1f3f6;
+  --surface: #ffffff;
+  --surface-2: #f7f8fa;
+  --ink: #0a0b0e;
+  --ink-2: #2a2e38;
+  --ink-3: #5a6270;
+  --ink-4: #8a9098;
+  --rule: #e4e7ec;
+  --rule-strong: #c8ccd4;
+  --accent: #00a37f;
+  --accent-2: #d0364a;
+}
+
+/* ============ V3: 現代學術期刊風 ============ */
+.theme-journal {
+  --bg: #ffffff;
+  --bg-2: #f6f5f2;
+  --surface: #ffffff;
+  --ink: #0f0f0f;
+  --ink-2: #2a2a2a;
+  --ink-3: #666666;
+  --ink-4: #a0a0a0;
+  --rule: #e8e6df;
+  --rule-strong: #0f0f0f;
+  --accent: #0047ab; /* 學術藍 */
+  --accent-2: #c7502b;
+  --positive: #1e7a3e;
+  --negative: #c7502b;
+}
+
+.theme-journal.dark {
+  --bg: #0f1012;
+  --bg-2: #16181c;
+  --surface: #1a1d22;
+  --ink: #f5f5f5;
+  --ink-2: #d0d0d0;
+  --ink-3: #9a9a9a;
+  --ink-4: #6a6a6a;
+  --rule: #2a2d34;
+  --rule-strong: #f5f5f5;
+  --accent: #6ba4ff;
+  --accent-2: #ff8a5e;
+}
+
+/* ============ Reset ============ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { min-height: 100vh; }
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-size: 15px;
+  line-height: 1.5;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+a { color: inherit; text-decoration: none; }
+button { font: inherit; background: none; border: none; cursor: pointer; color: inherit; }
+img, svg { display: block; max-width: 100%; }
+ul, ol { list-style: none; }
+input, select, textarea { font: inherit; }
+
+/* ============ Scrollbar ============ */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-4); }
+
+/* ============ Shared utility ============ */
+.monospace { font-family: var(--font-mono); font-feature-settings: "tnum", "zero"; }
+.serif { font-family: var(--font-serif); }
+.hide { display: none !important; }
+
+/* subtle anim */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes tickerFlash {
+  0% { background: color-mix(in srgb, var(--accent) 30%, transparent); }
+  100% { background: transparent; }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.live-dot {
+  display: inline-block;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 1.8s ease-in-out infinite;
+  vertical-align: middle;
+}
+
+/* Focus */
+*:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ============ Ticker (共用) ============ */
+.ticker-num {
+  font-family: var(--font-mono);
+  font-feature-settings: "tnum", "zero";
+  font-variant-numeric: tabular-nums;
+}
+
+.sparkline-path { fill: none; stroke-width: 1.5; }
+
+/* ============ 通用元件 ============ */
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--ink-3);
+  border: 1px solid var(--rule);
+  background: transparent;
+  border-radius: 2px;
+  white-space: nowrap;
+  transition: all 120ms ease;
+}
+.tag-chip:hover { color: var(--ink); border-color: var(--ink-2); }
+.tag-chip.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--rule-strong);
+  background: transparent;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 120ms ease;
+  border-radius: 2px;
+}
+.btn:hover { background: var(--ink); color: var(--bg); }
+.btn-primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.btn-primary:hover { background: var(--accent); border-color: var(--accent); }
+
+/* Shimmer for loading / live */
+.shimmer {
+  background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--ink) 8%, transparent) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }

@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VolPred — AI 驅動的波動率預測研究平台</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700;800;900&family=Noto+Serif+TC:wght@400;600;700;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;0,8..60,800;1,8..60,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles/base.css" />
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="data.js"></script>
+  <script type="text/babel" src="components/shared.jsx"></script>
+  <script type="text/babel" src="components/v1-editorial.jsx"></script>
+  <script type="text/babel" src="components/v2-terminal.jsx"></script>
+  <script type="text/babel" src="components/v3-journal.jsx"></script>
+
+  <script type="text/babel">
+    // ====== Tweaks (persisted via host) ======
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "variant": "editorial",
+      "darkMode": false,
+      "density": "comfortable",
+      "accent": "green"
+    }/*EDITMODE-END*/;
+
+    const VARIANTS = [
+      { id: "editorial", label: "雜誌編輯", subtitle: "NYT · Economist", Component: window.V1Editorial, themeClass: "theme-editorial" },
+      { id: "terminal", label: "金融終端", subtitle: "Bloomberg · TradingView", Component: window.V2Terminal, themeClass: "theme-terminal" },
+      { id: "journal", label: "學術期刊", subtitle: "Stripe Press · arXiv", Component: window.V3Journal, themeClass: "theme-journal" },
+    ];
+
+    const ACCENT_PRESETS = {
+      editorial: {
+        default: { light: "#8b1e1e", dark: "#d94a4a" },
+        green:   { light: "#1e5a3a", dark: "#5eb17a" },
+        blue:    { light: "#1a4a8a", dark: "#6ba4ff" },
+        amber:   { light: "#a66d12", dark: "#e0b972" },
+      },
+      terminal: {
+        default: { light: "#00a37f", dark: "#00d4aa" },
+        amber:   { light: "#c88a2a", dark: "#ffb454" },
+        blue:    { light: "#1a6fc7", dark: "#5eb1ef" },
+        red:     { light: "#d0364a", dark: "#ff5c6c" },
+      },
+      journal: {
+        default: { light: "#0047ab", dark: "#6ba4ff" },
+        green:   { light: "#1e7a3e", dark: "#5eb17a" },
+        red:     { light: "#c7502b", dark: "#ff8a5e" },
+        ink:     { light: "#0f0f0f", dark: "#f5f5f5" },
+      },
+    };
+
+    function App() {
+      const [tweaks, setTweaks] = React.useState(TWEAK_DEFAULTS);
+      const [tweaksOpen, setTweaksOpen] = React.useState(false);
+
+      const variant = VARIANTS.find(v => v.id === tweaks.variant) || VARIANTS[0];
+
+      // Edit mode listener
+      React.useEffect(() => {
+        const onMsg = (e) => {
+          if (!e.data) return;
+          if (e.data.type === "__activate_edit_mode") setTweaksOpen(true);
+          if (e.data.type === "__deactivate_edit_mode") setTweaksOpen(false);
+        };
+        window.addEventListener("message", onMsg);
+        window.parent.postMessage({ type: "__edit_mode_available" }, "*");
+        return () => window.removeEventListener("message", onMsg);
+      }, []);
+
+      const setKey = (k, v) => {
+        const next = { ...tweaks, [k]: v };
+        setTweaks(next);
+        window.parent.postMessage({ type: "__edit_mode_set_keys", edits: { [k]: v } }, "*");
+      };
+
+      // Apply accent override
+      const accentVal = ACCENT_PRESETS[tweaks.variant]?.[tweaks.accent];
+      const accentStyle = accentVal ? { "--accent-override": tweaks.darkMode ? accentVal.dark : accentVal.light } : {};
+
+      const themeClass = `${variant.themeClass} ${tweaks.darkMode ? "dark" : ""}`;
+      const densityClass = `density-${tweaks.density}`;
+      const V = variant.Component;
+
+      return (
+        <div className={`${themeClass} ${densityClass}`} style={{ minHeight: "100vh", ...accentStyle }}>
+          <style>{`
+            ${tweaks.accent !== "default" ? `.${variant.themeClass}${tweaks.darkMode ? ".dark" : ""} { --accent: var(--accent-override); }` : ""}
+            .density-compact { font-size: 13px; }
+            .density-spacious { font-size: 16px; }
+          `}</style>
+
+          {V ? <V /> : <div style={{ padding: 40 }}>Loading…</div>}
+
+          {tweaksOpen && (
+            <TweaksPanel
+              tweaks={tweaks}
+              setKey={setKey}
+              variant={variant}
+              onClose={() => setTweaksOpen(false)}
+            />
+          )}
+
+          {/* Floating variant switcher (always visible) */}
+          <VariantSwitcher tweaks={tweaks} setKey={setKey} openTweaks={() => setTweaksOpen(true)} />
+        </div>
+      );
+    }
+
+    function VariantSwitcher({ tweaks, setKey, openTweaks }) {
+      return (
+        <div style={{
+          position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)",
+          background: "var(--surface, #1a1a1a)",
+          color: "var(--ink, #fff)",
+          border: "1px solid var(--rule, #333)",
+          borderRadius: 100, padding: 4,
+          display: "flex", gap: 2, alignItems: "center",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.1)",
+          zIndex: 1000, fontFamily: "var(--font-sans)",
+        }}>
+          {VARIANTS.map(v => (
+            <button key={v.id} onClick={() => setKey("variant", v.id)} style={{
+              padding: "8px 16px", borderRadius: 100,
+              background: tweaks.variant === v.id ? "var(--accent, #5eb1ef)" : "transparent",
+              color: tweaks.variant === v.id ? "#fff" : "var(--ink, #fff)",
+              fontSize: 12, fontWeight: 600, transition: "all 150ms",
+              whiteSpace: "nowrap",
+            }} title={v.subtitle}>{v.label}</button>
+          ))}
+          <div style={{ width: 1, height: 20, background: "var(--rule, #333)", margin: "0 4px" }} />
+          <button onClick={() => setKey("darkMode", !tweaks.darkMode)} style={{
+            padding: "8px 12px", borderRadius: 100,
+            background: "transparent", color: "var(--ink, #fff)", fontSize: 13,
+          }} title="切換深淺色">{tweaks.darkMode ? "☾" : "☀"}</button>
+          <button onClick={openTweaks} style={{
+            padding: "8px 12px", borderRadius: 100,
+            background: "transparent", color: "var(--ink, #fff)", fontSize: 13,
+          }} title="更多 Tweaks">⚙</button>
+        </div>
+      );
+    }
+
+    function TweaksPanel({ tweaks, setKey, variant, onClose }) {
+      const accents = ACCENT_PRESETS[tweaks.variant] || {};
+      return (
+        <div style={{
+          position: "fixed", top: 24, right: 24, width: 300,
+          background: "var(--surface, #fff)",
+          border: "1px solid var(--rule, #ccc)",
+          borderRadius: 10, padding: 20,
+          boxShadow: "0 12px 40px rgba(0,0,0,0.15)",
+          zIndex: 1001, fontFamily: "var(--font-sans)",
+          color: "var(--ink)",
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, paddingBottom: 10, borderBottom: "1px solid var(--rule)" }}>
+            <span style={{ fontWeight: 700, fontSize: 15, letterSpacing: -0.2 }}>Tweaks</span>
+            <button onClick={onClose} style={{ color: "var(--ink-3)", fontSize: 18 }}>×</button>
+          </div>
+
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--ink-3)", letterSpacing: 1.5, marginBottom: 8 }}>VARIANT</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 6 }}>
+              {VARIANTS.map(v => (
+                <button key={v.id} onClick={() => setKey("variant", v.id)} style={{
+                  padding: "10px 12px", border: "1px solid var(--rule)", borderRadius: 6,
+                  background: tweaks.variant === v.id ? "var(--accent)" : "var(--bg-2)",
+                  color: tweaks.variant === v.id ? "var(--bg)" : "var(--ink)",
+                  textAlign: "left",
+                }}>
+                  <div style={{ fontWeight: 600, fontSize: 13 }}>{v.label}</div>
+                  <div style={{ fontSize: 11, opacity: 0.7, fontFamily: "var(--font-mono)" }}>{v.subtitle}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--ink-3)", letterSpacing: 1.5, marginBottom: 8 }}>THEME</div>
+            <div style={{ display: "flex", gap: 6 }}>
+              <button onClick={() => setKey("darkMode", false)} style={{ flex: 1, padding: "8px", border: "1px solid var(--rule)", borderRadius: 4, background: !tweaks.darkMode ? "var(--ink)" : "transparent", color: !tweaks.darkMode ? "var(--bg)" : "var(--ink)", fontSize: 12 }}>☀ 淺色</button>
+              <button onClick={() => setKey("darkMode", true)} style={{ flex: 1, padding: "8px", border: "1px solid var(--rule)", borderRadius: 4, background: tweaks.darkMode ? "var(--ink)" : "transparent", color: tweaks.darkMode ? "var(--bg)" : "var(--ink)", fontSize: 12 }}>☾ 深色</button>
+            </div>
+          </div>
+
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--ink-3)", letterSpacing: 1.5, marginBottom: 8 }}>ACCENT</div>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {Object.entries(accents).map(([name, val]) => (
+                <button key={name} onClick={() => setKey("accent", name)} title={name} style={{
+                  width: 28, height: 28, borderRadius: "50%",
+                  background: tweaks.darkMode ? val.dark : val.light,
+                  border: tweaks.accent === name ? "2px solid var(--ink)" : "2px solid transparent",
+                  outline: tweaks.accent === name ? "1px solid var(--bg)" : "none",
+                }} />
+              ))}
+            </div>
+          </div>
+
+          <div style={{ marginBottom: 8 }}>
+            <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--ink-3)", letterSpacing: 1.5, marginBottom: 8 }}>DENSITY</div>
+            <div style={{ display: "flex", gap: 6 }}>
+              {["compact", "comfortable", "spacious"].map(d => (
+                <button key={d} onClick={() => setKey("density", d)} style={{
+                  flex: 1, padding: "6px 4px", fontSize: 11,
+                  border: "1px solid var(--rule)", borderRadius: 4,
+                  background: tweaks.density === d ? "var(--ink)" : "transparent",
+                  color: tweaks.density === d ? "var(--bg)" : "var(--ink)",
+                }}>{d}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
