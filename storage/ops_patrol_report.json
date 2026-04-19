@@ -1,21 +1,21 @@
 {
-  "timestamp": "2026-04-18T18:04:29Z",
+  "timestamp": "2026-04-19T00:05:12Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "total_draft=6 (<12 threshold). research_audience=5 (ok, >=4). general_audience=1 (<8 threshold). Sample drafts: K1098 VIXTWN, TSMC Q1 法說會後驗, VIX決策指南 (only general draft)."
+      "detail": "total_draft=6 (<12 threshold). research_audience=5 (ok, >=4). general_audience=1 (<8 threshold). Breakdown: general=[1], research=[5]."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "strategy_metrics.json mtime=1776523420, patrol_time=1776535419, age=11999s (~3.3h, well under 26h threshold)."
+      "detail": "strategy_metrics.json mtime=1776523420, patrol_time=1776557099, age=33679s (~9.4h, well under 26h threshold)."
     },
     {
       "name": "ERROR_LOG",
       "status": "alert",
-      "detail": "Entry dated 2026-04-18 (today): [FIXED 2026-04-18] BUG-001 cleanup-post FK cascade — supabase_sync.py delete_article now pre-deletes article_impressions before articles DELETE; tests still pending. Entry dated 2026-04-13: merge_worktree.sh K1032 bug re-occurrence (K1114) — detect-new-commits false negative caused worktree force-delete; recovered via git reflog."
+      "detail": "Entry dated 2026-04-18 (yesterday): [FIXED 2026-04-18] BUG-001 cleanup-post FK cascade — supabase_sync.py delete_article now pre-deletes article_impressions before articles DELETE; tests still pending. Entry dated 2026-04-13: merge_worktree.sh K1032 bug re-occurrence (K1114) — detect-new-commits false negative caused worktree force-delete; recovered via git reflog."
     },
     {
       "name": "PAPER_TRADING_GAPS",
