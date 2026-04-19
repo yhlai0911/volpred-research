@@ -64,6 +64,19 @@ user-invocable: true
    - ⚠️ **不要在文章發佈前手動改問題狀態為 answered**——這是之前的 bug
 10. 回報：處理了哪個問題、發了什麼文章、問題狀態（researching=等待發佈 / answered=已完成）
 
+## 測試 / Spam 清理
+
+當 ranking 榜首被明顯的測試輸入（鍵盤亂按、重複字元 >70%、< 10 字、無語意）卡住時，先不做研究而是歸檔：
+
+```bash
+uv run volpred ops question-archive <question_id> --reason "<e.g. test_input_2026-04-20>"
+```
+
+- `question-archive` 無條件 force `status='archived'`（跟 `question-claim` 不同，不要求 status='ranked' 前提）
+- Archived 不會進 `active_ranked` 也不會出現在 summary，但 row 保留供 audit
+- 判斷標準依 CLAUDE.md 研究誠實原則 — 不對無意義 input 寫 1000-2000 字研究文章（= 虛構）
+- 建議同時通知 user 有 spam 被歸檔
+
 ## 詳細實作
 見 [references/evaluation-guide.md](references/evaluation-guide.md)：
 
