@@ -4,221 +4,1079 @@
   "date": "2026-04-18",
   "week_range": "2026-04-17 → 2026-04-24",
   "totals": {
-    "input_tokens": 9,
-    "output_tokens": 546,
-    "cache_read_tokens": 0,
-    "cache_create_tokens": 72750,
-    "billable_total": 73305,
-    "assistant_messages": 3,
-    "unique_sessions": 1,
-    "estimated_cost_usd": 0.281
+    "input_tokens": 51321,
+    "output_tokens": 3928955,
+    "cache_read_tokens": 1005160603,
+    "cache_create_tokens": 18216590,
+    "billable_total": 22196866,
+    "assistant_messages": 4748,
+    "unique_sessions": 95,
+    "estimated_cost_usd": 2060.9344
   },
   "by_model": {
-    "claude-sonnet-4-6": {
-      "input_tokens": 9,
-      "output_tokens": 546,
-      "cache_read_tokens": 0,
-      "cache_create_tokens": 72750,
-      "messages": 3,
-      "estimated_cost_usd": 0.281
+    "claude-opus-4-7": {
+      "input_tokens": 27432,
+      "output_tokens": 3861057,
+      "cache_read_tokens": 978237781,
+      "cache_create_tokens": 15939487,
+      "messages": 4164,
+      "estimated_cost_usd": 2056.2128
+    },
+    "claude-haiku-4-5-20251001": {
+      "input_tokens": 23889,
+      "output_tokens": 67898,
+      "cache_read_tokens": 26922822,
+      "cache_create_tokens": 2277103,
+      "messages": 584,
+      "estimated_cost_usd": 4.7216
     }
   },
   "by_category": {
     "text_only": {
-      "input_tokens": 6,
-      "output_tokens": 364,
-      "cache_read_tokens": 0,
-      "cache_create_tokens": 48500,
-      "messages": 2,
-      "billable_total": 48870,
-      "estimated_cost_usd": 0.1874,
+      "input_tokens": 11101,
+      "output_tokens": 1776151,
+      "cache_read_tokens": 527418399,
+      "cache_create_tokens": 4988086,
+      "messages": 1530,
+      "billable_total": 6775338,
+      "estimated_cost_usd": 1018.0321,
       "emoji": "💬",
       "description": "純文字回覆（無工具）"
     },
+    "bash_other": {
+      "input_tokens": 3965,
+      "output_tokens": 575113,
+      "cache_read_tokens": 144420053,
+      "cache_create_tokens": 3432988,
+      "messages": 888,
+      "billable_total": 4012066,
+      "estimated_cost_usd": 324.1916,
+      "emoji": "💭",
+      "description": "其他 Bash 操作"
+    },
+    "investigation": {
+      "input_tokens": 11833,
+      "output_tokens": 325915,
+      "cache_read_tokens": 96679914,
+      "cache_create_tokens": 4449940,
+      "messages": 963,
+      "billable_total": 4787688,
+      "estimated_cost_usd": 253.0774,
+      "emoji": "🔍",
+      "description": "閱讀 / 搜尋檔案"
+    },
+    "agent_delegation": {
+      "input_tokens": 9722,
+      "output_tokens": 143558,
+      "cache_read_tokens": 48003104,
+      "cache_create_tokens": 2996623,
+      "messages": 671,
+      "billable_total": 3149903,
+      "estimated_cost_usd": 139.104,
+      "emoji": "🤖",
+      "description": "Agent 派送（非實驗）"
+    },
+    "file_edit": {
+      "input_tokens": 6064,
+      "output_tokens": 338773,
+      "cache_read_tokens": 36324643,
+      "cache_create_tokens": 278755,
+      "messages": 128,
+      "billable_total": 623592,
+      "estimated_cost_usd": 85.2126,
+      "emoji": "📄",
+      "description": "其他檔案編輯"
+    },
+    "task_management": {
+      "input_tokens": 140,
+      "output_tokens": 99025,
+      "cache_read_tokens": 25458555,
+      "cache_create_tokens": 117615,
+      "messages": 75,
+      "billable_total": 216780,
+      "estimated_cost_usd": 47.8221,
+      "emoji": "📌",
+      "description": "任務管理（TaskCreate/Update）"
+    },
+    "git_sync": {
+      "input_tokens": 58,
+      "output_tokens": 30592,
+      "cache_read_tokens": 26939394,
+      "cache_create_tokens": 53218,
+      "messages": 53,
+      "billable_total": 83868,
+      "estimated_cost_usd": 43.7022,
+      "emoji": "🔄",
+      "description": "Git commit / pull / push"
+    },
+    "experiment": {
+      "input_tokens": 122,
+      "output_tokens": 240494,
+      "cache_read_tokens": 14748681,
+      "cache_create_tokens": 101437,
+      "messages": 67,
+      "billable_total": 342053,
+      "estimated_cost_usd": 42.0638,
+      "emoji": "🔬",
+      "description": "研究實驗（Agent 派送 K\\d+ / experiments/ 編輯）"
+    },
+    "script_dev": {
+      "input_tokens": 68,
+      "output_tokens": 78625,
+      "cache_read_tokens": 19117226,
+      "cache_create_tokens": 112954,
+      "messages": 58,
+      "billable_total": 191647,
+      "estimated_cost_usd": 36.6916,
+      "emoji": "💻",
+      "description": "腳本開發（scripts/ *.py）"
+    },
+    "research_planning": {
+      "input_tokens": 77,
+      "output_tokens": 69895,
+      "cache_read_tokens": 13469579,
+      "cache_create_tokens": 74368,
+      "messages": 27,
+      "billable_total": 144340,
+      "estimated_cost_usd": 26.842,
+      "emoji": "📋",
+      "description": "研究計劃（research_program.md / CLAUDE.md）"
+    },
+    "scheduling": {
+      "input_tokens": 128,
+      "output_tokens": 65318,
+      "cache_read_tokens": 7309647,
+      "cache_create_tokens": 552703,
+      "messages": 38,
+      "billable_total": 618149,
+      "estimated_cost_usd": 26.2284,
+      "emoji": "⏰",
+      "description": "Cron / Monitor 排程"
+    },
+    "worktree_merge": {
+      "input_tokens": 53,
+      "output_tokens": 26066,
+      "cache_read_tokens": 13060322,
+      "cache_create_tokens": 44164,
+      "messages": 27,
+      "billable_total": 70283,
+      "estimated_cost_usd": 22.3743,
+      "emoji": "🔀",
+      "description": "Worktree 合併與分支管理"
+    },
+    "article_writing": {
+      "input_tokens": 40,
+      "output_tokens": 37613,
+      "cache_read_tokens": 4380618,
+      "cache_create_tokens": 64473,
+      "messages": 30,
+      "billable_total": 102126,
+      "estimated_cost_usd": 10.6014,
+      "emoji": "✍️",
+      "description": "文章撰寫/發佈（publish-milestone / mile_*）"
+    },
+    "web_research": {
+      "input_tokens": 7647,
+      "output_tokens": 3959,
+      "cache_read_tokens": 1210357,
+      "cache_create_tokens": 399556,
+      "messages": 36,
+      "billable_total": 411162,
+      "estimated_cost_usd": 9.7188,
+      "emoji": "🌐",
+      "description": "WebSearch / WebFetch"
+    },
+    "knowledge_index": {
+      "input_tokens": 61,
+      "output_tokens": 8371,
+      "cache_read_tokens": 4684701,
+      "cache_create_tokens": 84163,
+      "messages": 31,
+      "billable_total": 92595,
+      "estimated_cost_usd": 9.2338,
+      "emoji": "📇",
+      "description": "知識索引更新"
+    },
+    "platform_ops": {
+      "input_tokens": 39,
+      "output_tokens": 26584,
+      "cache_read_tokens": 4143706,
+      "cache_create_tokens": 30346,
+      "messages": 17,
+      "billable_total": 56969,
+      "estimated_cost_usd": 8.7789,
+      "emoji": "🛡️",
+      "description": "平台運維（Supabase sync / daily_update）"
+    },
+    "skill_invoke": {
+      "input_tokens": 45,
+      "output_tokens": 26510,
+      "cache_read_tokens": 2277344,
+      "cache_create_tokens": 161268,
+      "messages": 30,
+      "billable_total": 187823,
+      "estimated_cost_usd": 8.4287,
+      "emoji": "⚡",
+      "description": "Skill 呼叫"
+    },
     "token_report": {
-      "input_tokens": 3,
-      "output_tokens": 182,
-      "cache_read_tokens": 0,
-      "cache_create_tokens": 24250,
-      "messages": 1,
-      "billable_total": 24435,
-      "estimated_cost_usd": 0.0937,
+      "input_tokens": 38,
+      "output_tokens": 4710,
+      "cache_read_tokens": 4500251,
+      "cache_create_tokens": 7108,
+      "messages": 13,
+      "billable_total": 11856,
+      "estimated_cost_usd": 7.2375,
       "emoji": "📈",
       "description": "Token 用量報告"
+    },
+    "tool_setup": {
+      "input_tokens": 38,
+      "output_tokens": 11905,
+      "cache_read_tokens": 2157411,
+      "cache_create_tokens": 129583,
+      "messages": 18,
+      "billable_total": 141526,
+      "estimated_cost_usd": 6.5592,
+      "emoji": "🛠️",
+      "description": "ToolSearch 載入工具"
+    },
+    "chart_generation": {
+      "input_tokens": 25,
+      "output_tokens": 18831,
+      "cache_read_tokens": 1835187,
+      "cache_create_tokens": 42388,
+      "messages": 25,
+      "billable_total": 61244,
+      "estimated_cost_usd": 4.9603,
+      "emoji": "📊",
+      "description": "圖表生成（matplotlib / upload_chart）"
+    },
+    "knowledge_recording": {
+      "input_tokens": 25,
+      "output_tokens": 13667,
+      "cache_read_tokens": 2084508,
+      "cache_create_tokens": 29992,
+      "messages": 10,
+      "billable_total": 43684,
+      "estimated_cost_usd": 4.7145,
+      "emoji": "📚",
+      "description": "知識記錄（knowledge.json / thinking_journal）"
+    },
+    "skill_edit": {
+      "input_tokens": 5,
+      "output_tokens": 5483,
+      "cache_read_tokens": 2611186,
+      "cache_create_tokens": 6639,
+      "messages": 5,
+      "billable_total": 12127,
+      "estimated_cost_usd": 4.4526,
+      "emoji": "🔧",
+      "description": "Skill 編輯"
+    },
+    "member_qa": {
+      "input_tokens": 23,
+      "output_tokens": 622,
+      "cache_read_tokens": 2127897,
+      "cache_create_tokens": 4079,
+      "messages": 4,
+      "billable_total": 4724,
+      "estimated_cost_usd": 3.3153,
+      "emoji": "❓",
+      "description": "會員問答研究"
+    },
+    "paper_work": {
+      "input_tokens": 4,
+      "output_tokens": 1175,
+      "cache_read_tokens": 197920,
+      "cache_create_tokens": 54144,
+      "messages": 4,
+      "billable_total": 55323,
+      "estimated_cost_usd": 1.4003,
+      "emoji": "📝",
+      "description": "論文撰寫/審查（paper/ *.tex 編輯）"
     }
   },
   "git_commits_context": [
     {
-      "sha": "474b4e5",
+      "sha": "550f8fd6",
+      "message": "Token usage daily report 2026-04-18"
+    },
+    {
+      "sha": "474b4e54",
       "message": "feed-publisher SKILL: align to Contentlayer pattern"
     },
     {
-      "sha": "6d30d59",
+      "sha": "6d30d594",
       "message": "4-hour sync: settings + session_state"
     },
     {
-      "sha": "a86ecc8",
+      "sha": "a86ecc8d",
       "message": "Phase 3 cleanup: archive 3 legacy mile_*.json that slipped past the initial 1010"
     },
     {
-      "sha": "1009918",
+      "sha": "1009918e",
       "message": "commit previously-untracked supervisor observability modules"
     },
     {
-      "sha": "58b2273",
+      "sha": "58b2273c",
       "message": "Paper 9: self-contain K998 (script + results + index)"
     },
     {
-      "sha": "36ff675",
+      "sha": "36ff6757",
       "message": "K998: persist diagnostics (autocorr lag1 etc.) to results JSON"
     },
     {
-      "sha": "3b78703",
+      "sha": "3b787038",
       "message": "Merge branch 'main' of https://github.com/yhlai0911/volpred-research"
     },
     {
-      "sha": "4c2b32b",
+      "sha": "4c2b32b1",
       "message": "Phase 5: document Contentlayer pattern in canonical + render docs"
     },
     {
-      "sha": "e74ab07",
+      "sha": "e74ab077",
       "message": "Phase 4: declarative articles RLS + daily_update dead-code cleanup"
     },
     {
-      "sha": "3eeeecc",
+      "sha": "3eeeecce",
       "message": "Phase 3: retire mile_*.json singles — Contentlayer cutover"
     },
     {
-      "sha": "8450e5f",
+      "sha": "8450e5f6",
       "message": "Rename cron「繼續研究」→「繼續任務」across all canonical + render docs"
     },
     {
-      "sha": "f497a87",
+      "sha": "f497a873",
       "message": "Phase 1-2: Contentlayer pattern — feed.json → Supabase one-way sync"
     },
     {
-      "sha": "f00fb28",
+      "sha": "f00fb286",
       "message": "BUG-001 FIX: cleanup-post FK cascade (article_impressions pre-delete)"
     },
     {
-      "sha": "588cf01",
+      "sha": "588cf019",
       "message": "2 articles published: mile_2c711833 (VIX 恐慌 Markov, general, released) + mile_da"
     },
     {
-      "sha": "eed7910",
+      "sha": "eed79108",
       "message": "CLAUDE.md 瘦身：10 類任務表搬 agent-delegation.md + 自動化段壓縮"
     },
     {
-      "sha": "9ae0b80",
+      "sha": "9ae0b807",
       "message": "Paper9 bib fix done + CLAUDE.md Compact Instructions + bug_backlog 建立"
     },
     {
-      "sha": "d2ac7c8",
+      "sha": "d2ac7c86",
       "message": "docs: cleanup-post FK bug 記錄 + 清 2 個 Supabase 殘留（mile_b8ab23a3, mile_71826160）"
     },
     {
-      "sha": "d483faa",
+      "sha": "d483faae",
       "message": "CLAUDE.md: 補 AI 完全運營宣告 + 明確邊界"
     },
     {
-      "sha": "144237f",
+      "sha": "144237fc",
       "message": "CLAUDE.md: 加「系統任務類型 × Skill 對應（10 類）」+ 主 agent 決策邏輯 research_program.md: 行為準則 9 "
     },
     {
-      "sha": "e64a190",
+      "sha": "e64a1907",
       "message": "架構簡化：移除 agent-specs canonical render + 3-terminal Codex worker"
     },
     {
-      "sha": "016f3be",
+      "sha": "016f3be1",
       "message": "Merge origin/main: complete conflict resolution"
     },
     {
-      "sha": "c2aaaa4",
+      "sha": "c2aaaa49",
       "message": "4-hour sync: resolve merge state + incremental session progress"
     },
     {
-      "sha": "327038d",
+      "sha": "327038dd",
       "message": "Merge agent worktree agent-afab0431 (1 commits)"
     },
     {
-      "sha": "f3ef80d",
+      "sha": "f3ef80dd",
       "message": "Auto-commit: save agent work before worktree merge"
     },
     {
-      "sha": "83e70af",
+      "sha": "83e70af7",
       "message": "Merge agent worktree agent-a7aac49d (1 commits)"
     },
     {
-      "sha": "461d23a",
+      "sha": "461d23ae",
       "message": "Copy experiments from worktree agent-a7aac49d (fallback)"
     },
     {
-      "sha": "b35c882",
+      "sha": "b35c8828",
       "message": "Auto-commit: save agent work before worktree merge"
     },
     {
-      "sha": "19ac8e4",
+      "sha": "19ac8e49",
       "message": "4-hour sync: canonical guide/skills/config state + auto-generated headers"
     },
     {
-      "sha": "2d8411c",
+      "sha": "2d8411c3",
       "message": "知識索引更新: K1250 K1251 補 knowledge + LanceDB rebuild (5220 entries)"
     },
     {
-      "sha": "e250c74",
+      "sha": "e250c74a",
       "message": "3-layer fix (canonical only): publish-milestone gate to prevent session-long zer"
     },
     {
-      "sha": "9b28eb9",
+      "sha": "9b28eb91",
       "message": "Merge commit 'b6bfc043'"
     },
     {
-      "sha": "b6bfc04",
+      "sha": "b6bfc043",
       "message": "K1251: K719 rebuild (option-a per K1231) — Paper 8 Table 8 CB structured script"
     },
     {
-      "sha": "25f09a2",
+      "sha": "25f09a29",
       "message": "K1249 K716 + K1250 K718 rebuild: both hit yfinance data-vintage drift (same root"
     },
     {
-      "sha": "6f36612",
+      "sha": "6f36612c",
       "message": "Merge commit '46d263e3'"
     },
     {
-      "sha": "734c943",
+      "sha": "734c943a",
       "message": "Merge commit 'e1421804'"
     },
     {
-      "sha": "46d263e",
+      "sha": "46d263e3",
       "message": "K1250: K718 rebuild per K1231 option (a) — Paper 8 cross-asset absorption"
     },
     {
-      "sha": "e142180",
+      "sha": "e1421804",
       "message": "K1249: K716 rebuild per K1231 option (a) — RESIDUAL_DRIFT, escalate to (c)"
     },
     {
-      "sha": "4df46d0",
+      "sha": "4df46d0e",
       "message": "Merge commit '60d0b16c'"
     },
     {
-      "sha": "60d0b16",
+      "sha": "60d0b16c",
       "message": "K1248: 1-page session execution playbook (~500 words, hour-budgeted, dependency "
     },
     {
-      "sha": "b15a825",
+      "sha": "b15a8251",
       "message": "Merge commit '56d993de'"
     },
     {
-      "sha": "cbb2a86",
+      "sha": "cbb2a863",
       "message": "Merge commit '5f4cd780'"
     },
     {
-      "sha": "5f4cd78",
+      "sha": "5f4cd780",
       "message": "K1247: Paper 4 CONFLICT-A4 decision cheatsheet (2-min pick)"
     },
     {
-      "sha": "56d993d",
+      "sha": "56d993de",
       "message": "K1246: Paper 10 repro package drafts (data_sources + experiments + scripts READM"
+    },
+    {
+      "sha": "ccc8e79a",
+      "message": "Merge commit '6f5d8e81'"
+    },
+    {
+      "sha": "6f5d8e81",
+      "message": "K1245: Paper 9 R2 Table 6 footnote LaTeX draft (FEZ+STOXX50E, A4f spec)"
+    },
+    {
+      "sha": "75ae614e",
+      "message": "Merge commit '59b45ea2'"
+    },
+    {
+      "sha": "59b45ea2",
+      "message": "K1244: Paper 10 §6 structure reframing (post-K1241 NULL)"
+    },
+    {
+      "sha": "fa31af45",
+      "message": "Merge commit '08232492'"
+    },
+    {
+      "sha": "08232492",
+      "message": "K1243 Paper 10 crypto-fear-channel final integration package"
+    },
+    {
+      "sha": "a4f74d2f",
+      "message": "K1241 NULL pooled-variance fear-channel but STRENGTHENS Paper 10 asymmetric thes"
+    },
+    {
+      "sha": "da13e1f3",
+      "message": "Merge commit 'de386885'"
+    },
+    {
+      "sha": "de386885",
+      "message": "K1241: Paper 10 §6.1 primary fear-channel regression — NULL verdict"
+    },
+    {
+      "sha": "007592cd",
+      "message": "Merge commit '5be3d4bf'"
+    },
+    {
+      "sha": "5be3d4bf",
+      "message": "K1242: Paper 10 §7 Robustness + §8 Discussion + §9 Conclusion Markdown drafts"
+    },
+    {
+      "sha": "f591afb7",
+      "message": "Merge commit '470dd555'"
+    },
+    {
+      "sha": "470dd555",
+      "message": "K1240: Paper 10 §5 Data Description complete + §6 Main Results skeleton"
+    },
+    {
+      "sha": "905a44a0",
+      "message": "Merge commit '227a4761'"
+    },
+    {
+      "sha": "227a4761",
+      "message": "K1239: Paper 10 §4 Methodology initial draft (fear-channel GARCH-X module)"
+    },
+    {
+      "sha": "ffb6b324",
+      "message": "Merge commit '9daf961b'"
+    },
+    {
+      "sha": "9daf961b",
+      "message": "K1238: Paper 10 §3 Data and Preliminaries initial Markdown draft"
+    },
+    {
+      "sha": "48748985",
+      "message": "Merge commit '77b689d8'"
+    },
+    {
+      "sha": "77b689d8",
+      "message": "K1237: Paper 10 crypto-fear-channel §2 LitRev initial markdown draft"
+    },
+    {
+      "sha": "b14bf1a4",
+      "message": "K1235b DECISIVE: Paper 9 R2 footnote sufficient; FEZ+STOXX50E within Harvey ±0.5"
+    },
+    {
+      "sha": "7bac1910",
+      "message": "Merge commit '1d92d256'"
+    },
+    {
+      "sha": "1d92d256",
+      "message": "K1235b: A4f spec replication on FEZ + STOXX50E → BORDERLINE, Paper 9 R2 path (b)"
+    },
+    {
+      "sha": "420ac596",
+      "message": "Merge commit '1bf58eaf'"
+    },
+    {
+      "sha": "1bf58eaf",
+      "message": "K1236: Session 2026-04-17 close-out briefing FINAL"
+    },
+    {
+      "sha": "c7af32da",
+      "message": "K1235 FEZ/STOXX50E MISMATCH paper (both more significant) - spec divergence; K12"
+    },
+    {
+      "sha": "66fd2324",
+      "message": "Merge commit '9bbca5b0'"
+    },
+    {
+      "sha": "9bbca5b0",
+      "message": "K1235: Paper 9 FEZ + STOXX50E K949 spec bundle (canonical t-stats)"
+    },
+    {
+      "sha": "23fe0ef8",
+      "message": "Merge commit 'f7c06c06'"
+    },
+    {
+      "sha": "f7c06c06",
+      "message": "K1234: Paper 10 crypto-fear-channel section 2-9 kickoff guide"
+    },
+    {
+      "sha": "2d3a4fc0",
+      "message": "Merge commit '6a55e39f'"
+    },
+    {
+      "sha": "6a55e39f",
+      "message": "K1233: Papers 5 + 7 small tex fix consolidation guide"
+    },
+    {
+      "sha": "459290bb",
+      "message": "Merge commit '61d8afb2'"
+    },
+    {
+      "sha": "61d8afb2",
+      "message": "K1232 Paper 9 citation + FEZ fix plan (planning only)"
+    },
+    {
+      "sha": "4d1b8d1e",
+      "message": "Merge commit '76acffdb'"
+    },
+    {
+      "sha": "76acffdb",
+      "message": "K1231: Paper 8 volatility-absorption K716-K722 reconstruction plan"
+    },
+    {
+      "sha": "d24f8c7b",
+      "message": "Merge commit 'a5765e74'"
+    },
+    {
+      "sha": "a5765e74",
+      "message": "K1230: research_program.md comprehensive update patch (supersedes K1212)"
+    },
+    {
+      "sha": "ad67f236",
+      "message": "K1229: 5-paper current-state audit (P5/P7/P8/P9/P10)"
+    },
+    {
+      "sha": "c5afa8dc",
+      "message": "Merge commit '9407c404'"
+    },
+    {
+      "sha": "9407c404",
+      "message": "K1228: BTC GAS negative paper repo init guide (5 phases, 24 steps)"
+    },
+    {
+      "sha": "502dcf01",
+      "message": "K1227: Paper 3 triple-path edit guide (paths a/b/c)"
+    },
+    {
+      "sha": "be6f200c",
+      "message": "Merge commit '69a244cc'"
+    },
+    {
+      "sha": "69a244cc",
+      "message": "K1226: Session 2026-04-17 master index (FINAL post-K1216c)"
+    },
+    {
+      "sha": "05712827",
+      "message": "Merge commit 'b61aee4a'"
+    },
+    {
+      "sha": "b61aee4a",
+      "message": "K1225: Paper 4 body_v4 dual-framing edit guide (CONFLICT-A4 resolver)"
+    },
+    {
+      "sha": "57f01d63",
+      "message": "Merge commit '85aacdf5'"
+    },
+    {
+      "sha": "85aacdf5",
+      "message": "K1222b: Paper 2 §5 post-K1216c FINAL revision guide (supersedes K1222)"
+    },
+    {
+      "sha": "3de3fe6e",
+      "message": "Merge commit 'a68fae0c'"
+    },
+    {
+      "sha": "a68fae0c",
+      "message": "K1224: Paper 1 body_v4 integration edit guide (7 items + 1 dropped)"
+    },
+    {
+      "sha": "866e559f",
+      "message": "Merge commit '9b4d454d'"
+    },
+    {
+      "sha": "9b4d454d",
+      "message": "K1223: Paper 6 body_v2 integration edit guide (K1218 + K1221 consolidated)"
+    },
+    {
+      "sha": "0e418545",
+      "message": "K1216c ROOT_CAUSE_METHODOLOGY + K1222 (based on K1216b artifact, NEEDS revision)"
+    },
+    {
+      "sha": "f739ad5f",
+      "message": "Merge commit '75df1c8f'"
+    },
+    {
+      "sha": "75df1c8f",
+      "message": "K1222: Paper 2 §5 post-K1216b major revision guide"
+    },
+    {
+      "sha": "3cf6bc84",
+      "message": "K1216c: DEV markets (US/EU/JP/TW) multistart fragility audit — ROOT_CAUSE_METHOD"
+    },
+    {
+      "sha": "eab2319e",
+      "message": "4-hour sync: session_state checkpoint"
+    },
+    {
+      "sha": "fc00c7aa",
+      "message": "K1221: Paper 6 pre-submission checklist audit — 3 blockers, NEEDS-MINOR-FIX"
+    },
+    {
+      "sha": "b34f2596",
+      "message": "K1100g_d8 STILL_BORDERLINE + K1220 briefing merged; K1100g_d9 cadence-verify que"
+    },
+    {
+      "sha": "ee5d56fc",
+      "message": "Merge commit 'f166de0a'"
+    },
+    {
+      "sha": "e1e161b1",
+      "message": "K1100g_d8 STILL_BORDERLINE (prelim): Hansen skewed-t innovation does not rescue "
+    },
+    {
+      "sha": "f166de0a",
+      "message": "K1220: session-end executive briefing + 6-gate decision matrix"
+    },
+    {
+      "sha": "c7f63341",
+      "message": "K1216b ALL_5_EM_FRAGILE: Paper 2 §5 cross-market ordering COLLAPSES to non-signi"
+    },
+    {
+      "sha": "fd39df91",
+      "message": "Merge commit 'ee923da1'"
+    },
+    {
+      "sha": "ee923da1",
+      "message": "K1216b ALL_5_EM_FRAGILE: CH + ID close 5-EM multistart audit"
+    },
+    {
+      "sha": "a706a3bd",
+      "message": "Merge commit '862e0584'"
+    },
+    {
+      "sha": "862e0584",
+      "message": "K1219: Unified main-thread cherry-pick dashboard consolidating 6 session drafts"
+    },
+    {
+      "sha": "57ed7575",
+      "message": "K1216 WIDESPREAD_FRAGILITY: 3/3 EM markets share K1213 AU pathology"
+    },
+    {
+      "sha": "41bd9d8e",
+      "message": "Merge commit 'cbc852ae'"
+    },
+    {
+      "sha": "cbc852ae",
+      "message": "K1216 WIDESPREAD_FRAGILITY: all 3 EM pools (BR/IN/MX) stuck in secondary minima"
+    },
+    {
+      "sha": "7de4bd90",
+      "message": "Merge commit '4b100d3b'"
+    },
+    {
+      "sha": "4b100d3b",
+      "message": "K1217: Paper 3 path (b) hybrid null+positive CONDITIONAL markdown draft"
+    },
+    {
+      "sha": "581be90f",
+      "message": "K1218: Paper 6 Appendix A markdown draft (K1200 clean-slate replication)"
+    },
+    {
+      "sha": "a3d95462",
+      "message": "Merge commit '45f621ee'"
+    },
+    {
+      "sha": "45f621ee",
+      "message": "K1215: Revise K1211 Paper 2 §5 markdown draft §5.5 to integrate K1213 AU resolut"
+    },
+    {
+      "sha": "6ee71993",
+      "message": "Merge commit '91e5ab1d'"
+    },
+    {
+      "sha": "91e5ab1d",
+      "message": "K1214: BTC GAS-t negative-result paper markdown draft"
+    },
+    {
+      "sha": "71cbb174",
+      "message": "K1213 ABOVE_LADDER_OVERTURNED: K1171 AU below-ladder framing retracted"
+    },
+    {
+      "sha": "d1b37dab",
+      "message": "Merge commit 'c34d0546'"
+    },
+    {
+      "sha": "c34d0546",
+      "message": "K1213: AU pooled multi-start MLE overturns below-ladder verdict"
+    },
+    {
+      "sha": "d2aa8faa",
+      "message": "Merge commit '1a23e22c'"
+    },
+    {
+      "sha": "1a23e22c",
+      "message": "K1212: research_program.md delta draft consolidating K1133-K1211 session"
+    },
+    {
+      "sha": "b4e2ebef",
+      "message": "Merge commit '9efffe4b'"
+    },
+    {
+      "sha": "9efffe4b",
+      "message": "K1211: Paper 2 §5 cross-market ladder rewrite markdown draft (main-thread cherry"
+    },
+    {
+      "sha": "b1e73df5",
+      "message": "K1210 AU forensic: NUMERICAL_FRAGILITY upgrade (pooled MLE secondary local minim"
+    },
+    {
+      "sha": "d54af952",
+      "message": "Merge commit '03a94d23'"
+    },
+    {
+      "sha": "03a94d23",
+      "message": "K1210: AU below-ladder forensic — H1 rejected, H2 supported, pooled-MLE fragilit"
+    },
+    {
+      "sha": "6454c714",
+      "message": "Merge commit '2ca9f2f8'"
+    },
+    {
+      "sha": "2ca9f2f8",
+      "message": "K1209: Paper 1 Batch 2 errata rewrite markdown draft (8 items, NOT .tex)"
+    },
+    {
+      "sha": "dc3eed77",
+      "message": "Merge commit 'af7b196a'"
+    },
+    {
+      "sha": "af7b196a",
+      "message": "K1208: Paper 4 §5 cross-asset panorama markdown rewrite draft"
+    },
+    {
+      "sha": "760ffb4e",
+      "message": "K1207 SECTOR_ORTHOGONAL_CONFIRMED: K1171 sector-as-independent-driver empiricall"
+    },
+    {
+      "sha": "adb3a146",
+      "message": "Merge commit 'bd365d27'"
+    },
+    {
+      "sha": "bd365d27",
+      "message": "K1207 GICS sector-FE decomposition of K1171 N=182 pool (SECTOR_ORTHOGONAL_CONFIR"
+    },
+    {
+      "sha": "b2a523b0",
+      "message": "K1200 complete: Paper 6 SPY Eq.(5)-(6) replication MINOR_DIVERGENT → defensibili"
+    },
+    {
+      "sha": "8380017b",
+      "message": "Merge commit '287de785'"
+    },
+    {
+      "sha": "287de785",
+      "message": "K1200: Paper 6 SPY replication under Eq.(5)-(6) two-phase timing → MINOR_DIVERGE"
+    },
+    {
+      "sha": "b00ac76b",
+      "message": "K1206 forensic: Paper 1 Table 6 errata_recommended (3 cell updates)"
+    },
+    {
+      "sha": "9dd46397",
+      "message": "Merge commit 'd8bdb205'"
+    },
+    {
+      "sha": "d8bdb205",
+      "message": "K1206: Forensic sensitivity for Paper 1 Table 6 3/5 divergent methods"
+    },
+    {
+      "sha": "82b5fdaf",
+      "message": "K1100g_d7 complete: DIRECTION_CONSISTENT_ALL_BORDERLINE 3-market overnight gap²"
+    },
+    {
+      "sha": "10c831d9",
+      "message": "Merge K1100g_d7 cross-market gap² replication (conflict resolved: take agent can"
+    },
+    {
+      "sha": "6e23e593",
+      "message": "K1204 synthesis complete: Paper 2 §5 rewrite materials ready"
+    },
+    {
+      "sha": "0ec96389",
+      "message": "K1100g_d7: Cross-market gap² replication — direction-consistent borderline"
+    },
+    {
+      "sha": "c37b23d0",
+      "message": "Merge commit 'cf5188eb'"
+    },
+    {
+      "sha": "cf5188eb",
+      "message": "K1204: Paper 2 §5 cross-market synthesis (7-exp, 32/32 integrity PASS)"
+    },
+    {
+      "sha": "3d55e496",
+      "message": "K1205 synthesis complete: Paper 3 K1128 4-branch recommends path (b) hybrid pape"
+    },
+    {
+      "sha": "b0718574",
+      "message": "Merge commit 'e7088770'"
+    },
+    {
+      "sha": "e7088770",
+      "message": "K1205: Paper 3 K1128 OFI-jump 4-branch regime synthesis"
+    },
+    {
+      "sha": "051e840b",
+      "message": "K1171 DATA_LIMITED: AU closes coverage gap but weakens primary ρ"
+    },
+    {
+      "sha": "dcb45480",
+      "message": "Merge commit '17436274'"
+    },
+    {
+      "sha": "17436274",
+      "message": "K1171 ASX +AU HAND_CODED close gap: N=13 rho=+0.385 DATA_LIMITED"
+    },
+    {
+      "sha": "c9f9e14b",
+      "message": "K1203 complete: EEM PIT NULL closes Paper 4 7-asset panorama; body rewrite UNLOC"
+    },
+    {
+      "sha": "7b305dd1",
+      "message": "Merge commit '477c504a'"
+    },
+    {
+      "sha": "477c504a",
+      "message": "K1203 complete: EEM PIT NULL closes Paper 4 7-asset panorama (7/7 UNLOCKED)"
+    },
+    {
+      "sha": "28867995",
+      "message": "K1202 FINAL_NULL: D2 coverage 8.9%→96.3%, Paper 2 industry-FE narrative finalize"
+    },
+    {
+      "sha": "c3df8bba",
+      "message": "Merge commit '851d5e91'"
+    },
+    {
+      "sha": "851d5e91",
+      "message": "K1202: transcript-scrape follow-up raises D2 coverage 8.9% -> 96.3%; FINAL_NULL"
+    },
+    {
+      "sha": "44c1b386",
+      "message": "K1201 NULL: Paper 4 universal native-IV sufficiency extends to 6/7 panorama"
+    },
+    {
+      "sha": "e68d6d9c",
+      "message": "Merge commit '87059567'"
+    },
+    {
+      "sha": "87059567",
+      "message": "K1201: QQQ + USO PIT alt-data NULL — Paper 4 6/7 panorama confirmed"
+    },
+    {
+      "sha": "5ea1ecf1",
+      "message": "K1163 ROBUST: full 30/30 EU coverage confirms K1153 low-cluster taxonomy"
+    },
+    {
+      "sha": "4df989c9",
+      "message": "Merge commit '158781aa'"
+    },
+    {
+      "sha": "158781aa",
+      "message": "K1163: EU refetch full-coverage refit — K1153 ROBUST verdict"
+    },
+    {
+      "sha": "e604ed70",
+      "message": "K1100g_d6 FAIL + K1173 NULL: two Paper 2/3 anchor audits settle"
+    },
+    {
+      "sha": "43f618a3",
+      "message": "Merge commit 'ea5c6340'"
+    },
+    {
+      "sha": "ea5c6340",
+      "message": "K1173 NULL: EM refined institutional proxy falsifies yfinance artefact hypothesi"
+    },
+    {
+      "sha": "ab89d028",
+      "message": "K1100g_d6: Sample extension 2017-2021 → 2017-2025 FAILs Harvey |t|>3 test"
+    },
+    {
+      "sha": "35bf94d7",
+      "message": "4-hour sync: canonical docs + skills + config state"
+    },
+    {
+      "sha": "af7d5035",
+      "message": "K1133b complete: BTC GAS-t reversal is Student-t artefact (~75%), not dynamics"
+    },
+    {
+      "sha": "88ad8398",
+      "message": "Merge commit '25be43b5'"
+    },
+    {
+      "sha": "25be43b5",
+      "message": "K1133b: BTC GAS-t decomposition — Student-t innovation drives P1 reversal"
+    },
+    {
+      "sha": "a837beaf",
+      "message": "K1172 PARTIAL: N=12 cross-market ladder, primary ρ decays but panel strengthens"
+    },
+    {
+      "sha": "bac9e237",
+      "message": "Merge commit '8c226669'"
+    },
+    {
+      "sha": "8c226669",
+      "message": "K1172: N>=13 cross-market ladder extension (MX + ZA + ID)"
+    },
+    {
+      "sha": "aa409226",
+      "message": "K1199 NULL: expanding-window FAILS to rescue K1128; 4-branch pivot gate met"
+    },
+    {
+      "sha": "6edbf463",
+      "message": "Merge commit 'b9a66c19'"
+    },
+    {
+      "sha": "e7abafe3",
+      "message": "K1108d D2 PRELIMINARY NULL: 6-layer NULL stack for Paper 2 foundry mechanism"
+    },
+    {
+      "sha": "b9a66c19",
+      "message": "K1199 NULL: expanding-window VIX quantile FAILS to rescue K1128 regime story"
+    },
+    {
+      "sha": "d016274b",
+      "message": "Merge commit 'b021b6da'"
+    },
+    {
+      "sha": "b021b6da",
+      "message": "K1108d NULL: non-capex guidance (util/ASP/R&D) does not rescue foundry θ_EAV"
+    },
+    {
+      "sha": "8ef7718e",
+      "message": "K1108e + K1108f complete: 5-layer NULL stack for Paper 2 foundry mechanism"
+    },
+    {
+      "sha": "db5151f1",
+      "message": "Merge commit '80f923ce'"
+    },
+    {
+      "sha": "94296a21",
+      "message": "Merge commit '4c569f52'"
+    },
+    {
+      "sha": "80f923ce",
+      "message": "K1108e: operating leverage is NOT the foundry theta_EAV mechanism (D3 NULL)"
+    },
+    {
+      "sha": "4c569f52",
+      "message": "K1108f: regime-split pool NULL CONFIRMED (4-layer null stack complete)"
+    },
+    {
+      "sha": "09a9f535",
+      "message": "K1142 complete: vol-normalized OFI PARTIAL_OOS_ONLY (Harvey fails, realvol-terti"
+    },
+    {
+      "sha": "3262f830",
+      "message": "Merge commit '6e3b764f'"
+    },
+    {
+      "sha": "6e3b764f",
+      "message": "K1142: vol-normalized OFI bypass VIX regime-switching (PARTIAL_OOS_ONLY)"
+    },
+    {
+      "sha": "37ab8fc2",
+      "message": "K1116f complete: PIT cross-asset confirms universal native-IV sufficiency (Paper"
+    },
+    {
+      "sha": "c25b997c",
+      "message": "Merge commit '885d7b0b'"
+    },
+    {
+      "sha": "885d7b0b",
+      "message": "K1116f: PIT alignment extension to GLD/TLT/BTC cross-asset cells"
     }
   ]
 }
