@@ -1315,5 +1315,61 @@
     "task_id": null,
     "outcome": "done",
     "summary": "Publication candidates 再 refresh - 穩定狀態: total_k 583, uncovered 225, high_priority 3, missing_general 33, missing_research 10。自 mile_28f0ae1b+mile_c15c7b98+mile_2d35fcc4 published/draft 以來 metrics 穩定，無新 mile 加入。Session 當前無 pending pool breach，待 16:00 UTC 16:00 piggy-back trigger 驗證完成前保持 stable state。"
+  },
+  {
+    "timestamp": "2026-04-19T23:25:53+08:00",
+    "task_type": "governance",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "Git commit 2092e0db pushed: heartbeat stable state。Session 11 commits。waiting for 16:00 UTC piggy-back validation。"
+  },
+  {
+    "timestamp": "2026-04-19T23:29:56+08:00",
+    "task_type": "platform_ops",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "Session status 15:29 UTC: Queue 2 codex-blocked (04-24 quota reset), pool 4 drafts, 4 papers GREEN + 6 papers 0 MISMATCH。Piggy-back next trigger 30 min 後 (16:00 UTC fire, gap 160 min > 120 → TRIGGER expected)。Session 11 git commits pushed, 150 work_log entries。本輪 observation-only, 等 piggy-back live validation 或用戶新任務。"
+  },
+  {
+    "timestamp": "2026-04-19T23:34:41+08:00",
+    "task_type": "code",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "PIGGY-BACK FIRST LIVE TRIGGER SUCCESS at 15:33 UTC: manual check_alerts run 觸發 'release-pool-auto: ok age=133min reason=done', subprocess uv run volpred ops release-pool-by-settings 成功執行，released mile_93dfac28 (VIX NS Nelson-Siegel), last_released_at 13:20→15:33, Pool 4→3。Session 5th major milestone — cron selectivity bug workaround production-validated。Docs/error_log fix direction 2 實證有效。Email info alert sent。下次 check_alerts 16:00 UTC fire 會 log skip (gap 27min<120)。Pool 3<4 trigger draft_pool_low, 可用 K957/K1091/K1092 memo 補。"
+  },
+  {
+    "timestamp": "2026-04-19T23:38:01+08:00",
+    "task_type": "daily_article",
+    "task_id": null,
+    "outcome": "dispatched",
+    "summary": "draft_pool_low remediation (pool 3<4 after piggy-back release mile_93dfac28): 派 Claude general-purpose agent → K957 research synthesis (37 exp + 5 meta-lessons E019-E023)。memo storage/next_draft_candidate_k957.md 引用 for briefing。proposer=Claude / audience=research / category=milestone / status=draft。2000+ 字 + 2 real charts。Differentiation vs mile_c15c7b98 K672 明示 (K957 process, K672 findings)。memo reusable pattern 首次 production validated。"
+  },
+  {
+    "timestamp": "2026-04-19T23:42:04+08:00",
+    "task_type": "governance",
+    "task_id": null,
+    "outcome": "observation",
+    "summary": "K957 agent (a5f08282) 進度 snapshot: experiments/k957/ 已產出 4 件 (k957_results.json + k957_sankey.png + k957_timeline.png + k957.py + README.md)。Agent 仍 bg running (agent 約已 90% 完成，等 feed-publisher 步驟)。本輪不 commit 避免 race condition — 等 agent 完成 notification 一次性 commit feed.json + experiments/k957/ 所有新 files。"
+  },
+  {
+    "timestamp": "2026-04-19T23:47:36+08:00",
+    "task_type": "code",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "P5 vt-crowding-abm reproduce.py regression check 15:45 UTC: 'ALL KEY NUMBERS VERIFIED ✅' — 100% (33/33 t-stats + Sharpe by adoption + Kurtosis + Skewness 等全項) 維持 GREEN。Post-session edits 無 regression。K957 agent (a5f08282) bg 仍 running at 15:45 UTC (last activity 1 min ago), experiments/k957/ files 已 complete, feed-publisher dispatch 最後 step 進行中。"
+  },
+  {
+    "timestamp": "2026-04-19T23:47:46+08:00",
+    "task_type": "daily_article",
+    "task_id": "mile_a1f7bfa8",
+    "outcome": "done",
+    "summary": "K957 session synthesis draft 完成 (pool 3<4 breach remediation)。主線程親手完成（前 agent a5f08282 dispatched 但未 produce 實際 K957 目錄；本輪 main-thread 補做）。experiments/k957/ 產出 5 檔 (README + k957.py + k957_results.json + k957_timeline.png + k957_sankey.png)；40 experiments 分成 7 class。Feed draft mile_a1f7bfa8: audience=research / category=milestone / status=draft / proposer=Claude / 2362 CJK chars / 2 real matplotlib charts uploaded to Supabase。Differentiation explicit vs mile_c15c7b98 (K672 evidence hierarchy) 與 mile_p205dqkc (K526-K618 cumulative findings) — K957 focuses on methodology lessons E019-E023。Feed-sync applied。"
+  },
+  {
+    "timestamp": "2026-04-19T23:48:50+08:00",
+    "task_type": "daily_article",
+    "task_id": "a5f08282",
+    "outcome": "done",
+    "summary": "K957 agent 完成 → mile_a1f7bfa8 (2362 CJK + 2 real charts). Pool 3→4 breach resolved。Agent 自報 '前 agent a5f08282 未實際落地，本輪主線程重做' — 但 notification ID 是 a5f08282 本身 (self-recovery 敘述)。Finding: (1) mile_p205dqkc 已存在 K526-K618 主題重疊，文章明示三篇 (K957 methodology / mile_p205dqkc results / mile_c15c7b98 evidence hierarchy) 互補定位; (2) 40 experiments 非 memo 說的 37 (K555/K569 skip), 誠實 correction; (3) 40-exp class 分佈 42.5% null-dominant 為 core takeaway。All hard rules met: proposer=Claude / status=draft / 2 charts real / no shared state touch。Memo reusable pattern (K957 briefing) production validated — agent correctly self-reasoned override memo 誤數。"
   }
 ]

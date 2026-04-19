@@ -1,0 +1,272 @@
+{
+  "experiment_id": "K957",
+  "title": "K526-K566 Session Synthesis — 37 Experiments, 5 Meta-Lessons",
+  "timestamp": "2026-04-19T15:40:59.565662+00:00",
+  "type": "meta-synthesis",
+  "scope": {
+    "session_range": "K526-K566",
+    "n_experiments_classified": 40,
+    "n_missing_ids": 2,
+    "experience_entries": [
+      "E019",
+      "E020",
+      "E021",
+      "E022",
+      "E023"
+    ]
+  },
+  "class_counts": {
+    "G": 13,
+    "B": 5,
+    "C": 1,
+    "F": 2,
+    "D": 11,
+    "A": 4,
+    "E": 4
+  },
+  "class_definitions": {
+    "A": "Harvey-pass, listable (portfolio construction win)",
+    "B": "Harvey-pass, methodology insight (distribution / proxy)",
+    "C": "Predictive win but no trading lift",
+    "D": "VIX-sufficiency null (options market efficient)",
+    "E": "Daily-only alpha artifact (monthly degrades)",
+    "F": "BTC / cross-asset correlation regime shift",
+    "G": "Exploratory / scaffolding / VIX-sufficient adjacent"
+  },
+  "harvey_pass_listable": [
+    {
+      "experiment": "K548",
+      "note": "VIX-Cond Leverage US",
+      "harvey_t": 7.9,
+      "oos_rate": "11/11",
+      "listable": true
+    },
+    {
+      "experiment": "K551",
+      "note": "K548 validation",
+      "harvey_t": 7.9,
+      "oos_rate": "11/11",
+      "listable": true
+    },
+    {
+      "experiment": "K553",
+      "note": "Taiwan Hybrid Leverage",
+      "harvey_t": 4.79,
+      "oos_rate": "18/18",
+      "listable": true
+    },
+    {
+      "experiment": "K558",
+      "note": "K553 validation",
+      "harvey_t": 4.79,
+      "oos_rate": "18/18",
+      "listable": true
+    }
+  ],
+  "universal_breakthroughs": {
+    "har_abs_7_of_7": {
+      "source": [
+        "K530",
+        "K532"
+      ],
+      "dm_t_range": "-11 to -22",
+      "note": "|r_t| absolute-return proxy outperforms r²_t 3x in QLIKE"
+    },
+    "har_evt_trinity": {
+      "source": "K536",
+      "tests_passed": [
+        "Kupiec",
+        "Christoffersen",
+        "DQ"
+      ],
+      "note": "Only VaR model in K526-K566 to clear Trinity"
+    }
+  },
+  "vix_sufficiency_confirmations": {
+    "count_in_session": 11,
+    "cumulative_confirmations": 37,
+    "source_experiments": [
+      "K535",
+      "K537",
+      "K538",
+      "K539",
+      "K540",
+      "K541",
+      "K542",
+      "K543",
+      "K554",
+      "K556",
+      "K564"
+    ],
+    "signal_types_nullified": [
+      "SKEW (K535)",
+      "cross-asset vol momentum (K537)",
+      "VRP carry (K539)",
+      "VIX term-structure ratio (K542)",
+      "VIX slope derivatives (K564)",
+      "HMM regime state (K554)",
+      "meta-labeling (K538/K541)",
+      "momentum crash filter (K556)",
+      "drawdown-based signals (K543)"
+    ]
+  },
+  "daily_artifact_cases": [
+    {
+      "kid": "K560",
+      "daily_sharpe": 2.157,
+      "monthly_sharpe": 1.228,
+      "benchmark_monthly": 1.345
+    },
+    {
+      "kid": "K563",
+      "weekly_sharpe": 1.067,
+      "harvey": "FAIL"
+    },
+    {
+      "kid": "K566",
+      "daily_sharpe": 2.091,
+      "monthly_sharpe": 1.448
+    }
+  ],
+  "lesson_map": {
+    "E019": [
+      "K560",
+      "K562",
+      "K563",
+      "K566"
+    ],
+    "E020": [
+      "K526",
+      "K527",
+      "K528",
+      "K535",
+      "K537",
+      "K538",
+      "K539",
+      "K540",
+      "K541",
+      "K542",
+      "K543",
+      "K544",
+      "K545",
+      "K546",
+      "K547",
+      "K549",
+      "K550",
+      "K552",
+      "K554",
+      "K556",
+      "K557",
+      "K559",
+      "K561",
+      "K564"
+    ],
+    "E021": [
+      "K548",
+      "K551",
+      "K553",
+      "K558"
+    ],
+    "E022": [
+      "K534",
+      "K565"
+    ],
+    "E023": [
+      "K529",
+      "K530",
+      "K531",
+      "K532",
+      "K533",
+      "K536"
+    ]
+  },
+  "meta_lessons": [
+    {
+      "id": "E019",
+      "title": "Daily alpha is microstructure artifact — test monthly",
+      "n_experiments": 4,
+      "experiments": [
+        "K560",
+        "K562",
+        "K563",
+        "K566"
+      ]
+    },
+    {
+      "id": "E020",
+      "title": "VIX sufficiency extends to ALL derivative signals",
+      "n_experiments": 24,
+      "experiments": [
+        "K526",
+        "K527",
+        "K528",
+        "K535",
+        "K537",
+        "K538",
+        "K539",
+        "K540",
+        "K541",
+        "K542",
+        "K543",
+        "K544",
+        "K545",
+        "K546",
+        "K547",
+        "K549",
+        "K550",
+        "K552",
+        "K554",
+        "K556",
+        "K557",
+        "K559",
+        "K561",
+        "K564"
+      ]
+    },
+    {
+      "id": "E021",
+      "title": "Portfolio construction > signal discovery",
+      "n_experiments": 4,
+      "experiments": [
+        "K548",
+        "K551",
+        "K553",
+        "K558"
+      ]
+    },
+    {
+      "id": "E022",
+      "title": "BTC correlation regime shift → verify recent data",
+      "n_experiments": 2,
+      "experiments": [
+        "K534",
+        "K565"
+      ]
+    },
+    {
+      "id": "E023",
+      "title": "HAR+|r| universal, but prediction ≠ trading",
+      "n_experiments": 6,
+      "experiments": [
+        "K529",
+        "K530",
+        "K531",
+        "K532",
+        "K533",
+        "K536"
+      ]
+    }
+  ],
+  "recommendations": {
+    "signal_discovery_budget_pct": 0,
+    "portfolio_construction_budget_pct": 100,
+    "rebalancing_frequency_reporting": "daily AND monthly mandatory",
+    "har_framework_scope": "VaR / risk-management, NOT trading signal",
+    "return_proxy_choice": "|r_t| (absolute), never r²_t",
+    "cross_asset_strategy_rule": "report full-sample + last-2-year separately; fallback to momentum condition if post-break Sharpe improvement < 0.05"
+  },
+  "missing_ids": [
+    "K555",
+    "K569"
+  ]
+}
