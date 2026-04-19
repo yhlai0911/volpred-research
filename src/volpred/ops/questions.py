@@ -82,6 +82,33 @@ def claim_question_for_research(question_id: str) -> dict:
     }
 
 
+def archive_question(question_id: str, reason: str = "manual") -> dict:
+    """Archive a question (remove from ranking pool).
+
+    Status transition: any → 'archived'. No status check (force archive)
+    so it works on test spam / accidental submissions regardless of
+    current state. Preserves the row for audit; question-ranking-summary
+    ignores status='archived'.
+    """
+    now = _utc_now()
+    affected = _patch_where_returning(
+        "questions",
+        {"id": question_id},
+        {"status": "archived", "updated_at": now},
+    )
+    if not affected:
+        return {"archived": False, "question_id": question_id, "reason": "not_found"}
+    # affected[0].status is post-patch ('archived'); read pre-patch state via
+    # a separate select before the patch if the caller wants true prev.
+    # Keeping this simple: return current (archived) status for audit.
+    return {
+        "archived": True,
+        "question_id": question_id,
+        "new_status": affected[0].get("status"),
+        "archive_reason": reason,
+    }
+
+
 def answer_internal_question(
     question_id: str,
     answer: str,
@@ -299,7 +326,7 @@ def get_member_question_ranking_summary(
 
     active_ranked = [
         row for row in question_rows
-        if str(row.get("status") or "") not in {"answered", "evaluating", "pending", "open"}
+        if str(row.get("status") or "") not in {"answered", "evaluating", "pending", "open", "archived"}
     ]
     active_ranked.sort(key=_active_rank_sort_key)
 

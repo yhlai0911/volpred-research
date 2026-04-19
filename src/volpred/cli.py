@@ -2166,6 +2166,26 @@ def ops_question_claim(question_id: str) -> None:
     console.print(f"[green]Claimed[/green] {question_id}")
 
 
+@ops.command("question-archive")
+@click.argument("question_id")
+@click.option("--reason", default="manual", show_default=True, help="Archive reason (audit)")
+def ops_question_archive(question_id: str, reason: str) -> None:
+    """Archive a question (force status → 'archived').
+
+    Use to remove test inputs / spam / accidental submissions from the
+    ranking pool. Unlike question-claim this is unconditional on current
+    status. Exit code 0 on success, 2 if not found.
+    """
+    from volpred.ops import archive_question
+
+    result = archive_question(question_id, reason=reason)
+    _print_json({"action": "question_archive", **result})
+    if not result.get("archived"):
+        console.print(f"[yellow]Archive failed:[/yellow] {question_id} — {result.get('reason','unknown')}")
+        raise SystemExit(2)
+    console.print(f"[green]Archived[/green] {question_id}")
+
+
 @ops.command("question-answer")
 @click.argument("question_id")
 @click.option("--answer", required=True, help="Answer content")

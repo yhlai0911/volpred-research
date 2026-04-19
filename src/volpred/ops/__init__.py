@@ -85,6 +85,7 @@ from .smoke import run_scheduler_live_smoke, run_scheduler_smoke
 from .scheduler import get_scheduler_state, scheduler_preview, scheduler_tick
 from .questions import (
     answer_internal_question,
+    archive_question,
     build_question_rerank_workflow,
     claim_question_for_research,
     get_member_question_ranking_summary,
@@ -107,6 +108,7 @@ __all__ = [
     "answer_internal_question",
     "build_question_rerank_workflow",
     "check_alert_conditions",
+    "archive_question",
     "claim_question_for_research",
     "build_platform_cycle_summary",
     "build_schedule_report",
