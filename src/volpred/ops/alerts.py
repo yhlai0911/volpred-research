@@ -1,0 +1,495 @@
+from __future__ import annotations
+
+import hashlib
+import re
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from typing import Any
+from zoneinfo import ZoneInfo
+
+from volpred.publisher.email_notifier import EmailNotifier
+
+from .common import dump_json, load_json, project_path
+from .scheduler import get_scheduler_state
+
+ALERT_RECIPIENT = "yihao.lai@gmail.com"
+ALERT_LEVELS = ("info", "warn", "critical")
+ALERT_DEDUP_WINDOW = timedelta(hours=24)
+SCHEDULER_STALE_WINDOW = timedelta(minutes=30)
+RELEASE_POOL_GAP_THRESHOLD = timedelta(hours=2)
+
+_TAIPEI_TZ = ZoneInfo("Asia/Taipei")
+_RELEASE_POOL_FIRE_RE = re.compile(r"^=== \[release-pool\] fire at (.+) ===$")
+_CRON_EXIT_RE = re.compile(r"^=== exit (\d+) at (.+) ===$")
+
+
+def _utc_now() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def _parse_iso_datetime(raw: str | None) -> datetime | None:
+    if not isinstance(raw, str) or not raw.strip():
+        return None
+    try:
+        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
+def _parse_shell_timestamp(raw: str | None) -> datetime | None:
+    if not isinstance(raw, str) or not raw.strip():
+        return None
+
+    trimmed = raw.strip()
+    iso_candidate = _parse_iso_datetime(trimmed)
+    if iso_candidate is not None:
+        return iso_candidate
+
+    normalized = re.sub(r"\s+[A-Z]{2,5}\s+", " ", trimmed, count=1)
+    try:
+        parsed = datetime.strptime(normalized, "%a %b %d %H:%M:%S %Y")
+    except ValueError:
+        return None
+    return parsed.replace(tzinfo=_TAIPEI_TZ).astimezone(timezone.utc)
+
+
+def _storage_root(storage_dir: str = "storage") -> Path:
+    return project_path(storage_dir)
+
+
+def _ops_path(storage_dir: str = "storage", *parts: str) -> Path:
+    return _storage_root(storage_dir).joinpath("ops", *parts)
+
+
+def _cron_logs_dir(storage_dir: str = "storage") -> Path:
+    return _storage_root(storage_dir).joinpath("logs", "cron")
+
+
+def _alert_dedup_path(storage_dir: str = "storage") -> Path:
+    return _ops_path(storage_dir, "alert_dedup.json")
+
+
+def _notification_path(storage_dir: str, notification_id: str) -> Path:
+    return _storage_root(storage_dir).joinpath("notifications", f"{notification_id}.json")
+
+
+def _relative_repo_path(path: Path) -> str:
+    try:
+        return str(path.relative_to(project_path()))
+    except ValueError:
+        return str(path)
+
+
+def _alert_key(level: str, title: str) -> str:
+    payload = f"{level.strip().lower()}\0{title.strip()}".encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
+def _load_alert_dedup(storage_dir: str = "storage") -> dict[str, Any]:
+    path = _alert_dedup_path(storage_dir)
+    data = load_json(path, {"updated_at": None, "alerts": {}})
+    alerts = data.get("alerts")
+    if not isinstance(alerts, dict):
+        alerts = {}
+    return {
+        "updated_at": data.get("updated_at"),
+        "alerts": alerts,
+    }
+
+
+def _save_alert_dedup(storage_dir: str, payload: dict[str, Any]) -> None:
+    payload["updated_at"] = _utc_now().isoformat()
+    dump_json(_alert_dedup_path(storage_dir), payload)
+
+
+def _dispatch_alert_email(
+    *,
+    level: str,
+    title: str,
+    body: str,
+    recipient: str,
+    storage_dir: str,
+) -> dict[str, Any]:
+    notifier = EmailNotifier(storage_dir=storage_dir)
+    subject = f"[VolPred Alert][{level.upper()}] {title}"
+    text_body = "\n".join(
+        [
+            f"Alert level: {level}",
+            f"Title: {title}",
+            "",
+            body.strip(),
+        ]
+    ).strip()
+    notification_id = notifier.notify(
+        subject=subject,
+        body=text_body,
+        level=level,
+        metadata={
+            "notification_type": "ops_alert",
+            "alert_level": level,
+            "alert_title": title,
+            "recipient": recipient,
+        },
+        recipients=[recipient],
+    )
+    notification = load_json(
+        _notification_path(storage_dir, notification_id),
+        {
+            "id": notification_id,
+            "sent": False,
+            "configured": False,
+            "send_error": None,
+        },
+    )
+    return {
+        "notification_id": notification_id,
+        "subject": subject,
+        "sent": bool(notification.get("sent")),
+        "configured": bool(notification.get("configured")),
+        "send_error": notification.get("send_error"),
+    }
+
+
+def send_alert(
+    level: str,
+    title: str,
+    body: str,
+    recipient: str = ALERT_RECIPIENT,
+    *,
+    storage_dir: str = "storage",
+    force_send: bool = False,
+) -> dict[str, Any]:
+    normalized_level = level.strip().lower()
+    normalized_title = title.strip()
+    normalized_recipient = recipient.strip() or ALERT_RECIPIENT
+    if normalized_level not in ALERT_LEVELS:
+        raise ValueError(f"Unsupported alert level: {level}")
+    if not normalized_title:
+        raise ValueError("Alert title must not be empty")
+
+    now = _utc_now()
+    dedup_key = _alert_key(normalized_level, normalized_title)
+    dedup_state = _load_alert_dedup(storage_dir)
+    existing = dedup_state["alerts"].get(dedup_key) or {}
+    last_sent_at = _parse_iso_datetime(existing.get("last_sent_at"))
+
+    if (
+        not force_send
+        and last_sent_at is not None
+        and now - last_sent_at < ALERT_DEDUP_WINDOW
+    ):
+        existing["last_skipped_at"] = now.isoformat()
+        existing["skip_count"] = int(existing.get("skip_count", 0) or 0) + 1
+        dedup_state["alerts"][dedup_key] = existing
+        _save_alert_dedup(storage_dir, dedup_state)
+        return {
+            "level": normalized_level,
+            "title": normalized_title,
+            "recipient": normalized_recipient,
+            "alert_key": dedup_key,
+            "sent": False,
+            "skipped": True,
+            "skip_reason": "dedup_24h",
+            "notification_id": existing.get("last_notification_id"),
+            "dedup_path": str(_alert_dedup_path(storage_dir)),
+            "last_sent_at": existing.get("last_sent_at"),
+        }
+
+    delivery = _dispatch_alert_email(
+        level=normalized_level,
+        title=normalized_title,
+        body=body,
+        recipient=normalized_recipient,
+        storage_dir=storage_dir,
+    )
+    result = {
+        "level": normalized_level,
+        "title": normalized_title,
+        "recipient": normalized_recipient,
+        "alert_key": dedup_key,
+        "sent": delivery["sent"],
+        "skipped": False,
+        "notification_id": delivery["notification_id"],
+        "subject": delivery["subject"],
+        "configured": delivery["configured"],
+        "send_error": delivery.get("send_error"),
+        "dedup_path": str(_alert_dedup_path(storage_dir)),
+        "timestamp": now.isoformat(),
+    }
+    if delivery["sent"]:
+        dedup_state["alerts"][dedup_key] = {
+            "level": normalized_level,
+            "title": normalized_title,
+            "recipient": normalized_recipient,
+            "first_sent_at": existing.get("first_sent_at") or now.isoformat(),
+            "last_sent_at": now.isoformat(),
+            "last_notification_id": delivery["notification_id"],
+            "send_count": int(existing.get("send_count", 0) or 0) + 1,
+            "last_skipped_at": existing.get("last_skipped_at"),
+            "skip_count": int(existing.get("skip_count", 0) or 0),
+        }
+        _save_alert_dedup(storage_dir, dedup_state)
+    return result
+
+
+def _parse_release_pool_state(storage_dir: str, now: datetime) -> dict[str, Any]:
+    log_path = _cron_logs_dir(storage_dir).joinpath("release_pool.log")
+    last_fire_at = None
+    if log_path.exists():
+        try:
+            for raw_line in log_path.read_text(encoding="utf-8").splitlines():
+                match = _RELEASE_POOL_FIRE_RE.match(raw_line.strip())
+                if match:
+                    last_fire_at = _parse_shell_timestamp(match.group(1))
+        except OSError:
+            last_fire_at = None
+
+    gap_hours = None
+    if last_fire_at is not None:
+        gap_hours = round((now - last_fire_at).total_seconds() / 3600.0, 2)
+
+    breached = last_fire_at is None or (now - last_fire_at) > RELEASE_POOL_GAP_THRESHOLD
+    if not breached:
+        return {
+            "id": "release_pool_gap",
+            "breached": False,
+            "level": "info",
+            "title": "Release pool cron gap > 2h",
+            "body": "",
+            "details": {
+                "last_fire_at": last_fire_at.isoformat() if last_fire_at else None,
+                "gap_hours": gap_hours,
+                "log_path": _relative_repo_path(log_path),
+            },
+        }
+
+    level = "critical" if last_fire_at is None or (now - last_fire_at) > timedelta(hours=4) else "warn"
+    last_fire_text = last_fire_at.isoformat() if last_fire_at else "missing"
+    body = "\n".join(
+        [
+            "## 觸發條件",
+            "release_pool host cron fire gap 已超過 2 小時門檻。",
+            f"- last_fire_at: {last_fire_text}",
+            f"- gap_hours: {gap_hours if gap_hours is not None else 'missing'}",
+            f"- log_path: {_relative_repo_path(log_path)}",
+            "",
+            "## 影響",
+            "文章釋出中斷 = 讀者端看到平台停滯、搜尋索引停滯；Mission 第 1 條（文章品質）",
+            "與第 5 條（曝光流量）直接受損。若持續 >4h 會累積多篇 draft 排隊延遲。",
+            "",
+            "## 建議行動",
+            "1. 立即手動釋出（最快復原）：",
+            "   VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings",
+            "2. 診斷 host cron 是否仍在跑：",
+            f"   tail -20 {_relative_repo_path(log_path)}",
+            "   crontab -l | grep release_pool",
+            "3. 若 cron daemon 卡住：重新 install crontab 或 launchd job",
+            "4. 若 draft 池也空（配合 draft_pool_low alert）：先補池，見 publish-checklist",
+            "   與 .claude/skills/publication-candidates/SKILL.md 的 5-step 選題流程。",
+        ]
+    )
+    return {
+        "id": "release_pool_gap",
+        "breached": True,
+        "level": level,
+        "title": "Release pool cron gap > 2h",
+        "body": body,
+        "details": {
+            "last_fire_at": last_fire_at.isoformat() if last_fire_at else None,
+            "gap_hours": gap_hours,
+            "log_path": _relative_repo_path(log_path),
+        },
+    }
+
+
+def _parse_draft_pool_state(storage_dir: str) -> dict[str, Any]:
+    feed_path = _storage_root(storage_dir).joinpath("reports", "feed.json")
+    feed = load_json(feed_path, [])
+    if not isinstance(feed, list):
+        feed = []
+    draft_count = sum(1 for item in feed if isinstance(item, dict) and item.get("status") == "draft")
+    scheduled_count = sum(1 for item in feed if isinstance(item, dict) and item.get("status") == "scheduled")
+    eligible_count = draft_count + scheduled_count
+    breached = draft_count < 4
+    level = "critical" if draft_count == 0 else "warn"
+    body = "\n".join(
+        [
+            "## 觸發條件",
+            "Draft 池已低於最小門檻（<4 篇）。",
+            f"- draft_count: {draft_count}",
+            f"- scheduled_count: {scheduled_count}",
+            f"- eligible_count: {eligible_count}",
+            f"- feed_path: {_relative_repo_path(feed_path)}",
+            "",
+            "## 影響",
+            "release_pool cron 即使正常 fire 也沒 content 可釋 → 發文節奏中斷。",
+            "draft_count=0 時下一次 release tick 會空轉，讀者看到平台無新內容；",
+            "Mission 第 1 條（內容產出）+ 第 5 條（流量）連動受損。",
+            "",
+            "## 建議行動",
+            "1. 跑選題 SOP（雙軌來源：研究驅動 + 事件驅動）：",
+            "   see .claude/skills/publication-candidates/SKILL.md 5-step flow",
+            "2. 快速選題（看未覆蓋的 K 編號）：",
+            "   grep '| - | - |' experiments/INDEX.md | head -10",
+            "3. 看 novelty 候選（20% contrarian quota）：",
+            "   head -60 docs/topic_diversity_audit.md",
+            "4. 派 general-purpose agent 寫 2-3 篇 draft（主題軸各異）：",
+            "   每篇 2000+ 字研究文 / 1500+ 字 general、2 張真實圖表、標數據來源 + K 編號。",
+            "5. 走正式入口 feed-publisher SKILL，不要繞路寫 feed.json。",
+        ]
+    )
+    return {
+        "id": "draft_pool_low",
+        "breached": breached,
+        "level": level if breached else "info",
+        "title": "Draft pool below threshold (<4)",
+        "body": body if breached else "",
+        "details": {
+            "draft_count": draft_count,
+            "scheduled_count": scheduled_count,
+            "eligible_count": eligible_count,
+            "feed_path": _relative_repo_path(feed_path),
+        },
+    }
+
+
+def _latest_cron_exit(log_path: Path) -> dict[str, Any] | None:
+    if not log_path.exists():
+        return None
+    last_exit: dict[str, Any] | None = None
+    try:
+        for raw_line in log_path.read_text(encoding="utf-8").splitlines():
+            match = _CRON_EXIT_RE.match(raw_line.strip())
+            if not match:
+                continue
+            last_exit = {
+                "log_path": _relative_repo_path(log_path),
+                "exit_code": int(match.group(1)),
+                "exited_at": _parse_shell_timestamp(match.group(2)),
+            }
+    except OSError:
+        return None
+    if last_exit and isinstance(last_exit.get("exited_at"), datetime):
+        last_exit["exited_at"] = last_exit["exited_at"].isoformat()
+    return last_exit
+
+
+def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
+    logs_dir = _cron_logs_dir(storage_dir)
+    failing_logs: list[dict[str, Any]] = []
+    if logs_dir.exists():
+        for log_path in sorted(logs_dir.glob("*.log")):
+            latest = _latest_cron_exit(log_path)
+            if latest and int(latest.get("exit_code", 0)) != 0:
+                failing_logs.append(latest)
+
+    # v12 (2026-04-19): shared_scheduler_tick cron removed; scheduler-tick now advisory-only.
+    # scheduler_state staleness 不再視為 host_cron_fail — checker 改只看實際 cron log exit codes。
+    # 保留 scheduler_state readout 供 body info，但不貢獻 breach judgement。
+    scheduler_state = get_scheduler_state(storage_dir=storage_dir)
+    scheduler_last_tick_at = _parse_iso_datetime(scheduler_state.get("last_tick_at"))
+    scheduler_last_status = str(scheduler_state.get("last_status") or "never")
+    scheduler_age_minutes = None
+    scheduler_issue = None  # v12: 永遠 None，scheduler-tick 不再作為 alert 條件
+    if scheduler_last_tick_at is not None:
+        scheduler_age = now - scheduler_last_tick_at
+        scheduler_age_minutes = round(scheduler_age.total_seconds() / 60.0, 1)
+
+    breached = bool(failing_logs)  # v12: 只看 cron log exit codes，不看 scheduler staleness
+    body_lines = [
+        "## 觸發條件",
+        "偵測到 host cron 失敗（最新 exit code != 0）。",
+        f"- scheduler_last_tick_at: {scheduler_last_tick_at.isoformat() if scheduler_last_tick_at else 'missing'}（僅供參考，v12 後不作為 breach 判準）",
+        f"- scheduler_last_status: {scheduler_last_status}",
+        f"- scheduler_age_minutes: {scheduler_age_minutes if scheduler_age_minutes is not None else 'missing'}",
+    ]
+    if scheduler_issue:
+        body_lines.append(f"- scheduler_issue: {scheduler_issue}")
+    if failing_logs:
+        body_lines.append("- failing_logs:")
+        for row in failing_logs:
+            body_lines.append(
+                f"  - {row['log_path']} exit={row['exit_code']} at {row.get('exited_at') or 'unknown'}"
+            )
+
+    body_lines.extend(
+        [
+            "",
+            "## 影響",
+            "資料收集 / daily_update / release_pool 等 host cron 斷鏈 → 下游 metrics、前端顯示、",
+            "Supabase mirror sync 可能顯示過期資料；若失敗的是 release_pool，會同步觸發",
+            "release_pool_gap alert，發文節奏中斷。",
+            "",
+            "## 建議行動",
+            "1. 查失敗 log： tail -20 <failing_log 路徑>",
+            "2. 權限問題（exit=126）： chmod +x scripts/<script>.sh",
+            "3. macOS Sequoia+ FDA（exit=1 + Operation not permitted）：",
+            "   System Settings > Privacy & Security > Full Disk Access 加 script 路徑",
+            "4. 手動跑 failed command 驗證修復： uv run <command>",
+            "5. 比對 canonical schedule： crontab -l  vs config/runtime_schedules.json",
+        ]
+    )
+
+    return {
+        "id": "host_cron_fail",
+        "breached": breached,
+        "level": "critical" if breached else "info",
+        "title": "Host cron failure detected",
+        "body": "\n".join(body_lines) if breached else "",
+        "details": {
+            "scheduler_last_tick_at": scheduler_last_tick_at.isoformat() if scheduler_last_tick_at else None,
+            "scheduler_last_status": scheduler_last_status,
+            "scheduler_age_minutes": scheduler_age_minutes,
+            "scheduler_issue": scheduler_issue,
+            "failing_logs": failing_logs,
+        },
+    }
+
+
+def build_alert_condition_report(
+    *,
+    storage_dir: str = "storage",
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    current = now.astimezone(timezone.utc) if now is not None else _utc_now()
+    conditions = [
+        _parse_release_pool_state(storage_dir, current),
+        _parse_draft_pool_state(storage_dir),
+        _parse_host_cron_state(storage_dir, current),
+    ]
+    return {
+        "generated_at": current.isoformat(),
+        "recipient": ALERT_RECIPIENT,
+        "conditions": conditions,
+        "breach_count": sum(1 for item in conditions if item.get("breached")),
+    }
+
+
+def check_alert_conditions(
+    *,
+    storage_dir: str = "storage",
+    recipient: str = ALERT_RECIPIENT,
+) -> dict[str, Any]:
+    report = build_alert_condition_report(storage_dir=storage_dir)
+    alerts: list[dict[str, Any]] = []
+    for condition in report["conditions"]:
+        if not condition.get("breached"):
+            continue
+        alerts.append(
+            send_alert(
+                str(condition["level"]),
+                str(condition["title"]),
+                str(condition["body"]),
+                recipient=recipient,
+                storage_dir=storage_dir,
+            )
+        )
+
+    report["alerts"] = alerts
+    report["sent_count"] = sum(1 for item in alerts if item.get("sent"))
+    report["skipped_count"] = sum(1 for item in alerts if item.get("skipped"))
+    report["dedup_path"] = str(_alert_dedup_path(storage_dir))
+    return report

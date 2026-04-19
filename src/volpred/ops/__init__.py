@@ -22,6 +22,12 @@ from .content import (
     send_daily_digest,
     unpublish_article,
 )
+from .alerts import (
+    ALERT_RECIPIENT,
+    build_alert_condition_report,
+    check_alert_conditions,
+    send_alert,
+)
 from .health import health_snapshot
 from .experiments import (
     adopt_experiment_files,
@@ -90,14 +96,17 @@ from .supervisor import build_supervisor_snapshot, load_supervisor_rules
 from .autotune import autotune_supervisor_rules
 
 __all__ = [
+    "ALERT_RECIPIENT",
     "activate_strategy",
     "admin_override_claim",
     "adopt_experiment_files",
     "autotune_supervisor_rules",
+    "build_alert_condition_report",
     "build_supervisor_snapshot",
     "load_supervisor_rules",
     "answer_internal_question",
     "build_question_rerank_workflow",
+    "check_alert_conditions",
     "claim_question_for_research",
     "build_platform_cycle_summary",
     "build_schedule_report",
@@ -164,6 +173,7 @@ __all__ = [
     "migrate_experiment_files",
     "scaffold_experiment",
     "send_article_notification",
+    "send_alert",
     "shared_state_lock",
     "send_daily_digest",
     "rerank_member_questions",

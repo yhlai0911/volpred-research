@@ -1,0 +1,105 @@
+{
+  "paper_id": "taiwan-vt",
+  "paper_title": "Taiwan VT (Volatility Targeting / Gamma Asymmetry in TW markets)",
+  "target_journal": "Pacific-Basin Finance Journal",
+  "timestamp": "2026-04-19T07:00:55Z",
+  "script": "paper/taiwan-vt/reproduce.py",
+  "exit_code": 1,
+  "runtime_seconds": 1,
+  "alert_level": "yellow",
+  "gate_status": "fail",
+  "gate_rule": ">=95% match rate + green alert",
+  "total_checks": 108,
+  "matched": 79,
+  "mismatches": 6,
+  "untraceable": 23,
+  "status_breakdown": {
+    "VERIFIED": 75,
+    "CLOSE": 2,
+    "CONFLICT_RESOLVED": 2,
+    "MISMATCH": 6,
+    "UNTRACEABLE": 23
+  },
+  "match_rate_pct": 73.1,
+  "traceable_match_rate_pct": 92.9,
+  "divergences": [
+    {
+      "table": "Table 2 (gamma)",
+      "cell": "TWII gamma",
+      "paper_value": "0.272",
+      "experiment_value": "K892 rolling max = 0.2360",
+      "severity": "high",
+      "note": "Paper value exceeds any K892 rolling window; source unidentified."
+    },
+    {
+      "table": "Table 2 (gamma)",
+      "cell": "TSMC gamma",
+      "paper_value": "0.039",
+      "experiment_value": "K892 full=0.0525, rolling_mean=0.0658",
+      "severity": "high",
+      "note": "Paper value below full-sample and rolling means; no matching window in K892."
+    },
+    {
+      "table": "Internal",
+      "cell": "0050 gamma: Table 2 vs Sec 4.5",
+      "paper_value": "Table 2: 0.087 vs Sec 4.5: 0.124",
+      "experiment_value": "K892 full=0.0970, rolling_mean=0.1064",
+      "severity": "high",
+      "note": "Paper-internal inconsistency; tables and text use different estimations without explicit note."
+    },
+    {
+      "table": "Internal",
+      "cell": "TSMC gamma: Table 2 vs Sec 4.5",
+      "paper_value": "Table 2: 0.039 vs Sec 4.5: 0.054",
+      "experiment_value": "K892 full=0.0525",
+      "severity": "high",
+      "note": "Paper-internal inconsistency; needs single consistent estimation."
+    },
+    {
+      "table": "Table 3 (SSVS)",
+      "cell": "Own return PIP",
+      "paper_value": "0.312",
+      "experiment_value": "K461 AR(1)=0.9994, AR(2)=0.9787",
+      "severity": "medium",
+      "note": "PIP format mismatch; paper and K461 report different specs."
+    },
+    {
+      "table": "Tab VaR (K852)",
+      "cell": "GJR+Normal violations",
+      "paper_value": "9/481",
+      "experiment_value": "11/481",
+      "severity": "medium",
+      "note": "Two-violation discrepancy; possibly different refit schedule."
+    }
+  ],
+  "conflict_resolution_summary": {
+    "gamma_conflict_critical": true,
+    "description": "Paper Table 2 reports 0050.TW gamma=0.087 (t=2.20). K892 finds NO single configuration producing gamma=0.087 AND t=2.20 simultaneously. Nearest candidates: Student-t full=0.0801/t=3.48, first 2000 obs=0.0888/t=3.81, 2018-2026 w=2000=0.1356/t=2.19.",
+    "diagnosis": "Paper likely mixes gamma from early/full-sample estimation with t-stat from recent w=2000 window (piecemeal table update).",
+    "recommended_fix": "Use single consistent estimation. Options: (a) Full-sample Normal gamma=0.097/t=3.60, (b) 2018-2026 w=2000 gamma=0.136/t=2.19, (c) Student-t full gamma=0.080/t=3.48."
+  },
+  "untraceable_summary": {
+    "count": 23,
+    "dominant_gaps": [
+      "Table 1 summary stats (TWII mean/std/skew/kurt) have no JSON",
+      "Table 4 VT strategy Sharpe (BH/EWMA/GARCH/GJR) have no JSON",
+      "Table 5 common-period values lack dedicated JSON",
+      "Table 2 individual gamma for Hon Hai/MediaTek/0056.TW: N121 averages only",
+      "Sec 6 macro correlations and Sec 4.5 TSMC VT Sharpe lack JSON",
+      "Appendix TZ (c2c Sharpe, TW+JP blend) lack JSON",
+      "Sec 3 TWD/USD test lacks JSON"
+    ]
+  },
+  "recommendations": {
+    "critical": [
+      "Resolve Table 2 vs Sec 4.5 gamma inconsistency by standardizing on ONE estimation for all reported 0050/TSMC gammas",
+      "Document which K892 window/spec each gamma comes from (currently mixes full-sample, rolling, and w=2000)"
+    ],
+    "high_priority": [
+      "Create dedicated experiment JSONs for Tables 1, 4, 5 to reduce 23 untraceable items",
+      "Reconcile GJR+Normal violations (9 vs 11) by re-running K852 with paper's exact configuration"
+    ]
+  },
+  "suggested_next_action": "Revise v2: (1) unify gamma estimation across Table 2 and Sec 4.5 (pick one window, note explicitly), (2) backfill JSONs for Tables 1/4/5, (3) re-run reproduce.py to target >=95% traceable match rate. Current 92.9% traceable is close but high-severity gamma inconsistencies make this NOT submission-ready.",
+  "audit_method": "Stdout parsed from reproduce.py run on 2026-04-19. Raw stdout = 438 lines (not embedded; regenerate via uv run python reproduce.py)."
+}

@@ -24,6 +24,7 @@ Author: Yi-Hao Lai / VolPred Research System
 """
 
 import json
+import os
 import warnings
 from datetime import datetime
 
@@ -33,6 +34,9 @@ import yfinance as yf
 from scipy import stats
 
 warnings.filterwarnings('ignore')
+
+# Fixed seed for reproducibility (bootstrap in absorption t-stat computation)
+np.random.seed(42)
 
 # ============================================================
 # DATA DOWNLOAD
@@ -609,8 +613,8 @@ for stype in type_order:
             for r in regime_order
         }
 
-# Save results
-output_path = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-aa0c111f/experiments/k903_paper8_robustness_results.json'
+# Save results — write to local experiment dir (the original worktree path was lost; see error_log E069)
+output_path = os.path.join(os.path.dirname(__file__), 'k903_paper8_robustness_results.json')
 with open(output_path, 'w') as f:
     json.dump(results, f, indent=2, ensure_ascii=False, default=str)
 

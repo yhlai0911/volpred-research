@@ -55,9 +55,9 @@ Volatility targeting (VT) has become a ubiquitous tool in dynamic portfolio mana
 
 Despite individual-level benefits, VT strategies embed a fundamentally procyclical mechanism: when volatility rises, all VT investors simultaneously reduce equity exposure, creating correlated selling pressure. The crowding risk literature warns of such procyclical dynamics---\citet{baltas2019} document crowding effects in alternative risk premia, and the European Central Bank \citep[ECB,][]{ecb2020} explicitly flagged VT procyclicality as a source of market fragility---but no study provides a quantitative threshold for VT crowding. Several commentators have drawn parallels to the portfolio insurance strategies implicated in the 1987 crash \citep{gennotte1990}. \citet{bookstaber2014} use agent-based modeling to study financial system fragility but do not specifically examine VT crowding. More broadly, ABMs have proven effective for studying feedback-driven market dynamics \citep{lebaron2006, danielsson2012}, though applications to volatility-targeting strategies remain absent from the literature.
 
-A critical gap remains: \emph{at what adoption level does VT crowding become destabilizing?} Existing analyses are either qualitative \citep{ecb2020}, focused on other strategy types \citep{baltas2019}, or lack a quantitative threshold. This matters because VT adoption is growing---from niche quantitative strategies a decade ago to mainstream institutional mandates today---yet no framework exists to assess whether or how the strategy might undermine itself.
+A critical gap remains: \emph{at what adoption level does VT crowding become destabilizing?} Existing analyses are either qualitative \citep{ecb2020}, focused on other strategy types \citep{baltas2019}, or lack a quantitative threshold. The empirical VT-alpha literature itself is contested---\citet{cederburg2020, barroso2021, liu2019} question whether VT's Sharpe improvement survives realistic implementation costs and out-of-sample tests---but this debate is orthogonal to our question: we study the crowding externality conditional on VT being used, not whether VT itself delivers alpha. This matters because VT adoption is growing---from niche quantitative strategies a decade ago to mainstream institutional mandates today---yet no framework exists to assess whether or how the strategy might undermine itself.
 
-We address this gap with an agent-based simulation that embeds VT agents within an endogenous market microstructure. Our contribution is fourfold. First, we identify a quantitative tipping point: VT strategy performance remains stable below 30\% adoption but degrades nonlinearly beyond 50\%, with collapse at 70\%. A design validation confirms that this threshold is a genuine crowding effect, not an artifact of liquidity evaporation. Second, we do not claim to \emph{discover} the positive feedback mechanism---which is encoded in the model structure---but rather \emph{quantify} its threshold behavior under controlled conditions, establishing a direct link to the \citet{brunnermeier2009} liquidity spiral framework. Third, we document the market-level consequences of excessive VT adoption, including volatility amplification, kurtosis explosion, and increased flash crash frequency. Fourth, a sensitivity analysis across 9 one-at-a-time (OAT) parameter variations shows that the tipping point shifts primarily with market impact ($\lambda$), while VIX dynamics are secondary---providing conditional robustness for the threshold estimate. These results are preliminary and model-dependent, but they provide a first quantitative benchmark for assessing VT crowding risk.
+We address this gap with an agent-based simulation that embeds VT agents within an endogenous market microstructure. Our contribution is threefold. First, we identify a \emph{quantitative tipping point}: VT strategy performance remains stable below 30\% adoption but degrades nonlinearly beyond 50\%, with collapse at 70\%, along with market-level consequences including volatility amplification, kurtosis explosion, and increased flash-crash frequency. Second, we introduce a \emph{design validation that isolates crowding from liquidity evaporation}---a fixed-liquidity control experiment that holds market depth constant across adoption levels, thereby identifying the threshold as a genuine crowding effect rather than an artifact of endogenous liquidity dynamics. This separation is the paper's most defensible methodological contribution. Third, we conduct a \emph{parameter sensitivity analysis} across 9 one-at-a-time (OAT) variations showing the tipping point shifts primarily with market impact ($\lambda$) while VIX dynamics are secondary, providing conditional robustness for the threshold estimate. Our framework quantifies---rather than discovers---the positive feedback mechanism encoded in the model structure, establishing a direct link to the \citet{brunnermeier2009} liquidity spiral framework (see \S\ref{sec:feedback}). These results are preliminary and model-dependent, but they provide a first quantitative benchmark for assessing VT crowding risk.
 
 %=================================================================
 \section{Model}
@@ -139,11 +139,25 @@ $\phi$ & Sharpe & 95\% CI & $\Delta$Sharpe & Ret.\ (\%) & $\Delta$Vol (\%) & Kur
 \end{threeparttable}
 \end{table}
 
-The nonlinearity is striking. Performance is essentially flat from 10\% to 30\%, then drops sharply: a linear extrapolation from the 10--30\% range would predict negligible degradation at 50\%, yet the actual decline is 28\%. By 70\%, the strategy is essentially destroyed. This pattern is consistent with a phase-transition-like threshold driven by the positive feedback structure encoded in the model (Section~\ref{sec:model}).
+The nonlinearity is striking. Performance is essentially flat from 10\% to 30\%, then drops sharply: a linear extrapolation from the 10--30\% range would predict negligible degradation at 50\%, yet the actual decline is 28\%. By 70\%, the strategy is essentially destroyed. Figure~\ref{fig:tipping} visualizes this threshold collapse with bootstrap 95\% confidence bands. This pattern is consistent with a phase-transition-like threshold driven by the positive feedback structure encoded in the model (Section~\ref{sec:model}).
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\linewidth]{figures/fig_tipping_point.png}
+\caption{VT tipping point: Sharpe ratio collapses non-linearly between 50--70\% adoption. Markers and whiskers are means and 95\% bootstrap CIs from 500 Monte Carlo simulations per adoption level. The red-shaded band marks the empirical tipping zone; the green-shaded band marks the safe zone.}
+\label{fig:tipping}
+\end{figure}
 
 \subsection{Market-Level Consequences}
 
-The crowding effects extend beyond strategy performance to market structure. Table~\ref{tab:market} reports detailed market stability metrics.
+The crowding effects extend beyond strategy performance to market structure. Table~\ref{tab:market} reports detailed market stability metrics. Figure~\ref{fig:kurtosis} shows the kurtosis spike on a log scale, illustrating the two-orders-of-magnitude jump between 70\% and 100\% adoption.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\linewidth]{figures/fig_kurtosis_spike.png}
+\caption{Excess kurtosis of daily market returns versus VT adoption (log scale). Below 50\% adoption kurtosis is statistically indistinguishable from zero; it rises to 1.41 at 70\% and jumps roughly two orders of magnitude to 61.4 at full adoption, matching the flash-crash frequency spike in Table~\ref{tab:main}.}
+\label{fig:kurtosis}
+\end{figure}
 
 \begin{table}[H]
 \centering
@@ -180,11 +194,12 @@ We assess statistical significance using Welch's $t$-test on the 500 simulation-
 
 \subsection{The Feedback Structure}
 
-We emphasize that the positive feedback mechanism is \emph{encoded in the model}, not discovered from the simulation output. The VIX responds to realized volatility (Eq.~\ref{eq:vix}), VT agents respond to VIX, and their trading affects prices (Eq.~\ref{eq:price}), which in turn affects realized volatility. This circular structure is a deliberate implementation of the \citet{brunnermeier2009} liquidity spiral framework. What the simulation \emph{does} reveal is the \emph{quantitative threshold behavior}: the feedback loop's consequences are negligible below 30\% adoption, become material at 50\%, and are catastrophic at 70\%. When VIX rises, the aggregate VT selling pressure is:
+We emphasize that the positive feedback mechanism is \emph{encoded in the model}, not discovered from the simulation output. The VIX responds to realized volatility (Eq.~\ref{eq:vix}), VT agents respond to VIX, and their trading affects prices (Eq.~\ref{eq:price}), which in turn affects realized volatility. This circular structure is a deliberate implementation of the \citet{brunnermeier2009} liquidity spiral framework. What the simulation \emph{does} reveal is the \emph{quantitative threshold behavior}: the feedback loop's consequences are negligible below 30\% adoption, become material at 50\%, and are catastrophic at 70\%. Making the feedback explicit, the aggregate VT order flow on day $t$ is $\phi N \Delta w_t^{\text{VT}}$, where the VT weight change uses the capped rule from \S\ref{subsec:vt_rule},
 \begin{equation}
-  \text{Sell pressure} \propto \phi \cdot N \cdot \left(\frac{12}{\text{VIX}_{t-1}} - \frac{12}{\text{VIX}_{t-2}}\right),
+  \Delta w_t^{\text{VT}} \;=\; \min\!\left(\frac{12}{\text{VIX}_{t-1}},\,1.5\right) - \min\!\left(\frac{12}{\text{VIX}_{t-2}},\,1.5\right).
+  \label{eq:vt_delta}
 \end{equation}
-which grows linearly in $\phi$ but produces \emph{nonlinear} market impact because the selling itself amplifies subsequent VIX increases. The simulation thus serves as a computational laboratory for quantifying a mechanism whose qualitative direction is known, but whose critical mass has not previously been estimated.
+Its contribution to the price via Eq.~\eqref{eq:price} is $\lambda \phi \Delta w_t^{\text{VT}}$, which is \emph{linear} in adoption $\phi$; the \emph{nonlinearity} observed in our results arises because this order flow itself amplifies subsequent VIX increases via Eq.~\eqref{eq:vix}, closing the loop endogenously. The simulation thus serves as a computational laboratory for quantifying a mechanism whose qualitative direction is known, but whose critical mass has not previously been estimated.
 
 \subsection{Sensitivity Analysis}
 
@@ -282,6 +297,12 @@ Baltas, N. (2019).
 \newblock The impact of crowding in alternative risk premia investing.
 \newblock \emph{Financial Analysts Journal}, 75(3), 89--104.
 
+\bibitem[Barroso and Detzel(2021)]{barroso2021}
+Barroso, P. and Detzel, A. (2021).
+\newblock Do limits to arbitrage explain the benefits of volatility-managed portfolios?
+\newblock \emph{Journal of Financial Economics}, 140(3), 744--767.
+\newblock \url{https://doi.org/10.1016/j.jfineco.2021.02.009}
+
 \bibitem[Bookstaber et~al.(2014)]{bookstaber2014}
 Bookstaber, R., Paddrik, M., and Tivnan, B. (2014).
 \newblock An agent-based model for financial vulnerability.
@@ -291,6 +312,12 @@ Bookstaber, R., Paddrik, M., and Tivnan, B. (2014).
 Brunnermeier, M.~K. and Pedersen, L.~H. (2009).
 \newblock Market liquidity and funding liquidity.
 \newblock \emph{Review of Financial Studies}, 22(6), 2201--2238.
+
+\bibitem[Cederburg et~al.(2020)]{cederburg2020}
+Cederburg, S., O'Doherty, M.~S., Wang, F., and Yan, X.~S. (2020).
+\newblock On the performance of volatility-managed portfolios.
+\newblock \emph{Journal of Financial Economics}, 138(1), 95--117.
+\newblock \url{https://doi.org/10.1016/j.jfineco.2020.04.015}
 
 \bibitem[{European Central Bank}(2020)]{ecb2020}
 {European Central Bank}. (2020).
@@ -341,6 +368,12 @@ Danielsson, J., Shin, H.~S., and Zigrand, J.-P. (2012).
 LeBaron, B. (2006).
 \newblock Agent-based computational finance.
 \newblock In L.~Tesfatsion and K.~L.~Judd (Eds.), \emph{Handbook of Computational Economics}, Vol.~2, pp.~1187--1233. Elsevier.
+
+\bibitem[Liu et~al.(2019)]{liu2019}
+Liu, F., Tang, X., and Zhou, G. (2019).
+\newblock Volatility-managed portfolio: Does it really work?
+\newblock \emph{Journal of Portfolio Management}, 46(1), 38--51.
+\newblock \url{https://doi.org/10.3905/jpm.2019.1.107}
 
 \end{thebibliography}
 

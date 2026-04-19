@@ -1,3 +1,5 @@
+> **⚠ DEPRECATED (2026-04-19, v12)**: 3-terminal 架構已棄用（git e64a1907）。目前架構見 `docs/architecture.md` v12 控制面段 + `.claude/rules/control-plane.md`。保留此檔作為歷史參考，請勿依此配置新 session。
+
 # 三 Terminal Supervisor / Worker 模式優化計劃（Codex）
 
 ## 文件定位

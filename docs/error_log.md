@@ -4,6 +4,7 @@
 
 | 日期 | 問題 | 現象 | 過程 | 解決方法 |
 |------|------|------|------|---------|
+| 2026-04-18 | Paper 4 reproduce match_rate 44% → 88.9%（yfinance `auto_adjust` 預設改變導致 bundled CSV Close 混淆 adjusted 與 raw） | `paper/vt-insurance-cost/reproduce.py` 以 bundled CSV 的 `Close` 欄位重算 S0 CAGR 得 12.497% 接近 paper 12.51%，但再往下展開 claim 只 match 4/9（44%）；深挖發現 bundled `spy_2012_2024.csv` 的「Close」實際上是 yfinance 新預設 `auto_adjust=True` 的 adjusted close（2012-01-03=99.31），而 paper canonical K811v2 用 raw Close (auto_adjust=False, 2012-01-03=127.50) | yfinance 近期版本 `auto_adjust` 從 False 改為 True，舊 bundle 腳本未顯式 pin `auto_adjust=False`，CSV 的「Close」欄位靜默變成 adjusted series。雖然 CAGR 層級差異小（adjusted 把 dividend 併入），但往下到 VT 比較（VT 用 raw price 算 vol + rebalance，混 adjusted 會錯位 signal／volatility scaling），整條 downstream pipeline 的 S1/S2/S3 比較全受污染 | 修 pipeline 不修 paper（研究誠實 §13）：(1) P4 Sub1 task `task_ff205abe31f0` — 用 `yf.download(..., auto_adjust=False)` 重抓 SPY + GLD 2012-01-03..2025-01-01，CSV 同時保留 `Adj Close` 與 `Close` 兩欄 (2) `paper/vt-insurance-cost/data_sources.md` 明標「raw Close (auto_adjust=False) canonical; K811v2 anchor」(3) `reproduce.py` 原本透過 column name match 讀 "close"，升級後的多欄 CSV 讀到的正是 raw Close，不需改腳本 (4) 重跑 `reproduce.py` → match 8/9 (88.9%)，S0 CAGR 12.497% vs paper 12.51%（Δ=0.013pp），S1 opp cost 4.200 vs paper 4.20 EXACT (5) 殘差 1 項：50/50 SPY/GLD 再平衡溢酬 paper 54 bps vs computed -66.81 bps — 此為 **sample coverage 問題**（paper 54 bps anchor 用 2006-2024，bundle 只含 2012-2024），orthogonal to auto_adjust，屬已知 pre-existing divergence。教訓：所有 yfinance 調用必須顯式 `auto_adjust=False`（或確實意圖 True 時註解說明），CSV bundler 應 commit 原始欄位（Adj Close + Close 兩者）避免歧義；reproduce 驗證應該先 assert bundle 第一筆 raw Close 對得上 paper canonical 數字再往下算 |
 | 2026-04-17 | market_daily Supabase sync 連續 5 天靜默 400 失敗（全 10 策略 /portfolio 頁價格空白） | 前端 /portfolio 所有 active 策略的「交易紀錄」欄位（SPY/GLD/0050.TW 價格、σ）從 4/14 起空白。Supabase `market_daily` 表最後日期停在 2026-04-11，但 `paper_trades` 已到 2026-04-17（56 筆 × 4 天正常 sync）| (1) `scripts/supabase_sync.py` 的 `CONFLICT_KEYS` 缺 `market_daily` → `_post` 走 POST 無 `on_conflict`，重複 trade_date 會 409 但 fallback 條件 `if code == 409 and conflict` 為 False，直接吞錯 (2) commit `3d2d3ab9` (2026-04-12) 把 `overnight_gap` / `gap_alert_level` 寫進 `_market_daily`，這兩個欄位不在 `market_daily` schema → PostgREST 回 400 "column does not exist" → `_post` except 吞錯只 print "Supabase market_daily error: 400" (3) `scripts/daily_update.py` 只 sync 今天一筆，歷史失敗永遠無法補 (4) **用戶原初誤判為「缺 portfolio_return / weights」**，但實測本機 + Supabase 所有 10 active 策略的 `weights / portfolio_return / cash_weight / trade_date / data_date` 皆 ≥99.9% 完整；真正缺的是前端 enrich 用的 `market_daily` join source | (1) `CONFLICT_KEYS["market_daily"] = "trade_date"` (2) 新增 `_MARKET_DAILY_COLUMNS` 白名單 + `sync_market_daily()` / `sync_market_daily_backfill()` helpers 剝除未知欄位 (3) `daily_update.py` 改為 backfill 最近 30 天市場數據（inline 版本），未來斷層自動修復 (4) 手動 backfill 2026-04-14..17 四天資料到 Supabase，驗證 ok=4 fail=0。教訓：**sync 失敗被 `except Exception` 吞掉數週**（同 2026-04-11 Mirror API sync bug 再犯），任何 `_post` 失敗都該留 warning；**Schema drift 沒 schema validation 就會炸**，未來新增欄位到 `_market_daily` 要同步更新 `_MARKET_DAILY_COLUMNS` 或 Supabase migration |
 | 2026-04-17 | Mirror incremental sync failure still silently drifted local vs remote | 重新驗證時發現 authenticated live `mirror-api` 已通，但 `knowledge.json` 本地 1929 entries、remote 1928 entries；舊版 `MemorySystem._sync_to_remote()` 仍用 `except: pass`，reconcile 也會誤報 `ok` | 2026-04-11 修過端點與 token，但 library path 的靜默吞錯仍未拔除，所以單筆 knowledge 寫入若失敗不會留下任何警告，直到 live smoke test 才暴露 drift | 修正：(1) `MemorySystem._sync_to_remote()` 改為只同步 mirror 支援的 4 個檔案 (2) sync 失敗改印 warning，不再靜默吞掉 (3) `reconcile_remote()` 改為真正回報失敗 (4) 2026-04-17 authenticated `mirror-api` `/health` + `/manifest` 已成功，證明本機 `.env.local` 的 token 與 Zeabur mirror-api 一致 (5) 同日已執行 full reconcile，remote counts 對齊 local（`knowledge.json=1929`）。教訓：**修了端點不等於修完流程，library path 的 silent failure 也要清乾淨** |
 | 2026-04-17 | `knowledge.json` 尾端 stray `]}` 導致全系統 JSON parse 失敗 | 檔案尾 3 行為 `]}\n]}\n]\n`（正常只需 `]\n`），python `json.load` 丟 `Extra data: line 26548`，1928 entries 無法讀取，所有 memory-dependent 腳本（daily_update/supabase_sync/memory add）全部會 crash | `MemorySystem._append_to_index` 本身是 atomic load→append→rewrite 不會產生此 pattern。推論：外部手動 jq/sed 操作 append 了 stray token，或某個一次性腳本 `>>` append 而非 `>` overwrite。mtime=Apr 16 16:36，HEAD 28fc3772（04-16）之後發生 | (1) 備份 `knowledge.json.bak_2026-04-17_corrupted` (2) 刪除 line 26548-26549 兩行 stray `]}` (3) python `json.load` 驗證 1928 entries 與 HEAD 一致 (4) 合法 diff 僅 i1b/i3/i9/i10 路徑更新 91 行。**防禦建議待實作**：`_append_to_index` 寫入後加 `json.loads(path.read_text())` sanity check，失敗即 rollback 並 raise。教訓：所有 JSON writer 都應該有 post-write validation |
@@ -382,6 +383,42 @@ K693 修改了 paper_trading.json 中 9,935 筆歷史 portfolio_return（same-da
 - 解決：當下用 reflog 救回；長期需修 merge_worktree.sh 改用 git rev-list --count main..<branch> 確切數新 commits（K1143 任務）
 - 經驗：E067（infrastructure 類）；worktree-merge-verification skill 必加「merge 後立即 ls experiments/<latest> 驗證」
 
+## 2026-04-19: merge_worktree.sh K1032 bug **第三次再現** → K1143-v2 systemic fix
+
+### 現象
+Paper 8 diagnostic session 發現 K903/K904 robustness scripts 的 `json.dump` 輸出寫到 `.claude/worktrees/agent-aa0c111f/experiments/...` 從未 merge 回 main；同 session agent-aa9aeb5d 也留下 untracked `experiments/k1100g_d9/` (refit-cadence robustness) 從未 commit。**跨 paper、跨 agent、跨 session 反覆發生** = systemic bug。
+
+### Root cause（K1143-v1 修復不夠）
+K1114 修復只處理 `git log` vs `rev-list` 不一致的 silent failure，但漏掉幾個路徑：
+
+1. **`--force` fallback 還在 line 126**：`git worktree remove "$wt_path" 2>/dev/null || git worktree remove --force "$wt_path" 2>/dev/null` — 違反 CLAUDE.md L168 明文禁止。當 auto-commit 漏偵時，script 走到 line 123「可安全移除」路徑 → 吞掉未 commit 的工作目錄。
+2. **`git status --porcelain 2>/dev/null || true`** (line 78)：status 失敗會變空字串 → `has_uncommitted=false` → skip auto-commit → rev-list=0 → line 126 `--force remove` → silent loss。
+3. **Auto-commit 成功但 HEAD 沒前進**：worktree 若 detached 或 add 無東西可 commit，舊 code 不檢查 HEAD 差異，後續 rev-list=0 誤判。
+4. **rev-list=0 不代表工作目錄乾淨**：auto-commit 失敗或 gitignore 吃掉檔的情況下，worktree `experiments/<kXXX>/` 仍有 orphan 但 rev-list 看不到。
+5. **Orphan branch cleanup `git branch --list | tr -d ' '`** (line 355)：不清 checked-out 標記 `+` → 產出 `+worktree-agent-xxx` 錯誤名稱，後續 rev-list / branch -d silent 失敗。
+
+### K1143-v2 fix (2026-04-19)
+1. 移除 `--force` fallback（line 126 區塊），remove 失敗直接 abort + 提示手動處理
+2. `git status` 失敗嚴格 abort，不 silent skip
+3. Auto-commit 後驗證 HEAD 前進，未前進 abort
+4. rev-list=0 path 加 pre-remove 掃 `experiments/<kXXX>/`，有 orphan 資料夾或 worktree-only 檔就 abort
+5. Orphan branch cleanup 改用 `git for-each-ref --format='%(refname:short)'`
+6. 新增 `scripts/tests/test_merge_worktree.sh`：4 cases / 7 assertions，含 K1100g_d9 bug reproducer（gitignore-hidden orphan）
+
+### 驗證
+- `bash scripts/tests/test_merge_worktree.sh` → 7/7 PASS
+- Dry-run `bash scripts/merge_worktree.sh --dry-run agent-aa9aeb5d` → 正確 ABORT 並指認 k1100g_d9 orphan
+- Orphan branch cleanup 正確列出 `worktree-agent-afab0431` (不是 `+worktree-agent-aa9aeb5d`)
+
+### Recovery actions needed
+- **K1100g_d9** (refit-cadence robustness, N225/SPY Hansen skewed-t DM rerun)：worktree `experiments/k1100g_d9/` 有完整 README + script + run.log，主目錄無 → 需 copy + commit 到 main (follow-up task)
+- **K903/K904** Paper 8 robustness：用戶稱 agent-aa0c111f 已經不在，若確認 worktree 已 remove 且 commit 未進 main → 需回溯檢查 reflog / git fsck --dangling 看能否找回；若無法救回 → 需重跑 robustness experiments
+- **K1032/K1114** 過去修復：已 cherry-pick 救回，無遺留問題
+
+### 經驗（E069 歸類）
+- E067 (K1032/K1114) 不夠徹底 — 第三次再現才發現 `--force` fallback + status silent skip + orphan workdir 三個 attack surface
+- 規則：**workflow script 修 bug 必須寫 test case 反覆驗證，不能只 patch 單一已知路徑**
+
 
 ## [FIXED 2026-04-18] BUG-001 cleanup-post FK cascade
 
@@ -394,3 +431,37 @@ K693 修改了 paper_trading.json 中 9,935 筆歷史 portfolio_return（same-da
 驗證：`article_reactions`、`question_articles`、`article_tags`、`comments` 都是 ON DELETE CASCADE，不需 manual cascade。
 
 **測試 TODO**（未執行）：下次 cleanup-post 用有 impression 的 draft 驗證 Supabase row 真刪。
+
+## 2026-04-19 Paper 4 Table 2 K732/K736 底層 pipeline bug
+
+**症狀**: Paper 4 vix-sufficiency main_v2.tex Table 2 的 K732/K736 行數字與 source JSON 明顯不 match。
+- K732 `IS t-stat=1.64` 實為 `dm_stat_oos=1.637` 抄錯格
+- K736 整列 composite salad：跨 3 sub-experiments 混搭欄位
+
+**底層 root cause**（非單一 paper bug）：
+1. **Paper body 寫作 pipeline 缺 reproduce gate**：改 body.tex 沒強制跑 reproduce check 比對 claimed numbers vs JSON
+2. **Table row 與 JSON source 無 traceable binding**：row column 來源是哪個 JSON / field 沒標，造成複製錯
+3. **Reproduce.py 驗證範圍不夠**：只檢 match rate 總體 %，沒做 claim-to-source strict mapping
+4. **Review 流程沒抓**：R1/R2 review cycle 沒要求作者提供 Table row → JSON field 對應表
+
+**底層修法**（進 paper-workflow rule）：
+- 新 gate：paper-update CLI 改 body.tex 時自動跑 reproduce_report.json + 驗證每個 claimed number **必有** source JSON field path (`experiments/kXXX/xxx_results.json` + `.field_name`)
+- Table row 旁加 `% source: experiments/kXXX/results.json.field_name` inline comment
+- reproduce.py 輸出 strict mapping: {table_row: {column: {paper_value, source_path, source_value, match}}}
+
+**未來踩坑預防**: 每個 Table 裡每個數字都要 self-contained traceable 到 JSON source。
+
+## 2026-04-19 release-pool-by-settings last_released_at 不更新
+
+**症狀**: 2026-04-19 15:17 `uv run volpred ops release-pool-by-settings` 成功 release mile_67b6a9a6，但 `storage/.release_settings.json last_released_at` 仍停在 09:27（前次實 release 時間）。
+16:03 host cron fire 時被 "interval_not_due" 誤判 skip。
+
+**根因**（推測，需 Codex 修）：release-pool-by-settings 命令實際 released article 後未更新 settings last_released_at；或 update 有 race condition。
+
+**影響**: cron 每 2h fire 但幾乎永遠 "interval_not_due" 因 settings stale → release cadence 斷鏈。
+
+**Fix 方向**:
+1. Audit `src/volpred/ops/release_pool.py` (或 corresponding) release 命令完成後應 `settings['last_released_at'] = now` + save
+2. 或 settings 動態從 feed.json 推（`max(published_at for status=published)` as last_released）— 避免 stale state
+
+**暫時 workaround**: 手動改 settings 當 release 後（違反「不手改資料」rule，不推薦）；或 Codex 修 code（推薦）。

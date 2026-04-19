@@ -1,10 +1,10 @@
 # 系統架構
 
-補充總覽文件：`docs/system_handbook.md`。若你要一次看完整系統架構、功能、資料流、排程、control plane、前後台與維運邏輯，先讀這份再回來查本檔細節。`2026-04-18` 後的校正 user story 以「VS Code supervisor + worker terminals」為準；repo 內仍保留部分 shared scheduler / headless path 作為過渡期能力。
+補充總覽文件：`docs/system_handbook.md`。若你要一次看完整系統架構、功能、資料流、排程、control plane、前後台與維運邏輯，先讀這份再回來查本檔細節。`2026-04-19` v12 架構已收斂為**單一主線程 Claude Code session 作為唯一 orchestrator**；不再有常駐 supervisor / worker terminal pool。舊的 3-terminal / supervisor-worker 構想（`docs/multi-agent-terminal-workflow-codex.md`）已 deprecated，僅保留歷史。
 
 ## 網站架構（v4 Supabase + Admin CMS + Mirror API）
 - **前端 target 設定**：`config/project_targets.json`（唯一來源；目前 `active_frontend=frontend-v2-fix`、`active_service=volpred-v3`）
-- **排程 target 設定**：`config/runtime_schedules.json`（唯一來源；shared scheduler / `event_jobs` / system crontab spec。若本機仍保留 session cron，只視為過渡期 monitor / reminder）
+- **排程 target 設定**：`config/runtime_schedules.json`（唯一來源；host crontab + session cron + `event_jobs` spec。v12 下 session cron 是正式的 queue 推進時鐘，host crontab 處理資料收集與外部世界 trigger）
 - **前端（目前線上版）**：`frontend-v2-fix/`（Next.js 15 + React 19 + Supabase，部署於 volpred-v3 服務）
 - **Legacy 前端快照**：舊版已自 root retire；如需參考請看 `archive/root-clutter/local/舊前端/`
 - **Mirror API**：`mirror-api.zeabur.app`（研究記憶檔案鏡像，減少 Supabase egress）
@@ -42,7 +42,7 @@
 - `scripts/daily_update.py` → 每日 08:03 台灣時間（crontab `3 8 * * 2-6`，美股收盤後）計算策略權重 + 同步 Supabase + 重算績效指標 + Supabase heartbeat
 - `scripts/recalc_metrics.py` → 從 paper_trading.json 重算 Sharpe/MDD 等（daily_update 自動呼叫）
 - `config/project_targets.json` + `src/volpred/config/runtime.py` → 控制 active frontend、Zeabur deploy service、paper public dir、strategy metrics local sync target、預設 remote/mirror URL
-- `config/runtime_schedules.json` + `src/volpred/config/schedules.py` → 控制 canonical shared scheduler / `event_jobs` / system crontab spec
+- `config/runtime_schedules.json` + `src/volpred/config/schedules.py` → 控制 canonical session cron / host crontab / `event_jobs` spec（v12 單主線程架構）
 - **Paper Trading 資料結構**：
   - `paper_trading.json` 是唯一源頭，不可手動修改歷史數據
   - `daily_update.py` 正確使用 next-day return（K692 驗證），forward tracking 自動修正
@@ -91,42 +91,71 @@
 6. 新增策略用 `add_strategy.py`（只寫 DB，不需部署）
 7. 測試貼文清理優先走 `uv run volpred ops cleanup-post <pub_id>`，不要手改 feed/DB
 
-### Agent-first Ops Layer
-- **本地唯一核心 orchestrator**：`Claude Code + shared scheduler`
-- 校正後的正式操作故事是：1 個 Claude supervisor + 1 個 Claude worker + 1 個 Codex worker，在已登入 OAuth 的 VS Code 終端機中協作
-- `shared_scheduler_tick` / cron 路徑目前仍存在，但應視為過渡期與輔助自動化，不是校正後的最終 worker runtime
-- 若本機仍保留 session cron，僅視為過渡期 monitor / reminder，不再作為正式執行時鐘
-- 後台最終形態是 **agent-first control plane**，不是只有真人點擊的 CMS
-- **核心原則**：同一套操作能力，同時暴露給本機 agent（CLI / job）與真人 UI
-- **CLI 首選入口**：`uv run volpred ops ...`
-- 已統一的操作：
-  - `ops publish-milestone`
-  - `ops release-pool-by-settings`
-  - `ops send-article-notification`
-  - `ops send-daily-digest`
-  - `ops unpublish`
-  - `ops cleanup-post`
-  - `ops sync-all`
-  - `ops daily-update`
-  - `ops recalc-metrics`
-  - `ops strategy-upsert`
-  - `ops strategy-set-active`
-  - `ops question-ranking-summary`
-  - `ops question-rerank`
-  - `ops question-answer`
-  - `ops health`
-- **Job Queue**（`src/volpred/ops/jobs.py`）：
-  - Supabase-backed 任務佇列（`ops_jobs` 表）
-  - lifecycle: `queued` → `running` → `succeeded|failed`
-  - 支持 dedupe key、dry-run、priority、worker ID
-  - CLI: `ops jobs` / `ops job-show` / `ops enqueue` / `ops worker`
-- **`ops worker` 定位**：工具/備援層，不代表另一個獨立核心 agent 身分
-- **Web Admin**（`frontend-v2-fix/src/app/admin/ops/`）：OpsConsole 瀏覽器端 job 管理
-- **Claude 可直接讀的 summary surfaces**：
-  - `/api/admin/analytics/summary`
-  - `/api/admin/questions/summary`
-  - `/api/admin/content`
-- 真人 UI 是監看與手動介入層；本機 agent 也走同一套核心流程
+### Agent-first Ops Layer（v12 單主線程架構，2026-04-19）
+
+**核心模型**：整個本地 control plane 只有**一個持久的執行者** — 主線程 Claude Code single session。v11 的 3-terminal worker pool（supervisor + claude-worker + codex-worker）已於 git commit `e64a1907` 拆除；不再有常駐 T2/T3 worker terminal、也不再依賴 headless `claude -p` / `codex exec` subprocess。舊架構詳見 `docs/multi-agent-terminal-workflow-codex.md`（已 DEPRECATED）。
+
+**角色分工**：
+
+- **主線程 Claude Code（唯一 orchestrator）**：負責研究、派工、審查、修文件、發佈、governance。所有正式執行一律發生在這個 session 內。
+- **Codex（ephemeral subagent）**：透過 `codex:codex-rescue` / `codex:review` 等 subagent 以 **ad-hoc** 方式被主線程派遣。共用 runtime、一次一個、任務結束即退出；**不是常駐 session，也不會主動 poll queue**。
+- **Worktree agents（ephemeral）**：僅產出 `experiments/kXXX/`，完成後由主線程 `scripts/merge_worktree.sh` 合併；不可寫共享狀態。
+- **Cloud triggers（遠端/host 層）**：Session cron 與 host crontab 只負責**把事件放進 queue**，不直接完成 task。
+
+**Queue 語意**：control-plane queue (`storage/ops/`, `event_jobs`, `storage/next_tasks.json`) 在 v12 下是 **proposal / backlog**，不是 worker poll target。主線程在每輪 cron 或 idle pass 時**主動消化** queue。沒有 worker daemon loop 去認領 task。
+
+**排程 / 時鐘層級**（全部 source of truth 在 `config/runtime_schedules.json`）：
+
+- **Session cron（Claude Code `CronCreate` durable）**：`*/4` 分鐘觸發「繼續任務」prompt，驅動主線程自動推進 queue。這是 v12 的正式執行時鐘。
+- **Host crontab（5 entries + 1 hourly）**：
+  - 資料收集：`collect_tw` / `collect_us`
+  - 每日更新：`daily_update`（08:03 TPE）
+  - Pool 釋出：`release_pool`
+  - 日曆同步：`market_cal`
+  - 每小時：`check_alerts`（email alert subsystem）
+- **Event jobs**：由 cron / signal 觸發的 one-shot 事件（例如 FOMC、CPI release），materialize 成 control-plane task 由主線程消化。
+
+**Alert subsystem**（`src/volpred/ops/alerts.py` + `.claude/rules/alert.md`）：
+
+- 3 條件：`release_pool_gap` / `draft_pool_low` / `host_cron_fail`
+- 三段 body：觸發條件 / 影響 / 建議行動
+- Dedup 避免重複轟炸；CLI 支援 `--force` 強制發信
+- 由 host crontab hourly `check_alerts` 入口驅動
+
+**CLI 首選入口**：`uv run volpred ops ...`（agent + 真人共用同一套操作）
+
+已統一的操作：
+- `ops publish-milestone`
+- `ops release-pool-by-settings`
+- `ops send-article-notification`
+- `ops send-daily-digest`
+- `ops unpublish`
+- `ops cleanup-post`
+- `ops sync-all`
+- `ops daily-update`
+- `ops recalc-metrics`
+- `ops strategy-upsert`
+- `ops strategy-set-active`
+- `ops question-ranking-summary`
+- `ops question-rerank`
+- `ops question-answer`
+- `ops health`
+
+**Job Queue**（`src/volpred/ops/jobs.py`）：
+- Supabase-backed 任務佇列（`ops_jobs` 表）
+- lifecycle: `queued` → `running` → `succeeded|failed`
+- 支援 dedupe key、dry-run、priority
+- CLI: `ops jobs` / `ops job-show` / `ops enqueue` / `ops worker`
+- **`ops worker` 定位（v12 更新）**：手動觸發用的本地執行 helper，不是常駐 daemon；主線程才是正式 orchestrator
+
+**Web Admin**（`frontend-v2-fix/src/app/admin/ops/`）：**Observer only**。OpsConsole 做瀏覽器端 job 監看；canonical control plane 是 `storage/ops/` + 主線程 session state，UI 不是 source of truth。
+
+**Claude 可直接讀的 summary surfaces**：
+- `/api/admin/analytics/summary`
+- `/api/admin/questions/summary`
+- `/api/admin/content`
+
+**核心原則重申**：同一套 `ops` CLI，真人與主線程 agent 共用；v12 下真人 UI 是監看層，主線程才是正式執行者，不再有第二個平行 Claude / Codex session 持續消化 queue。
 
 ## 程式碼架構
 - **Python CLI (volpred)**：研究引擎（實驗、評估、記憶、發佈）

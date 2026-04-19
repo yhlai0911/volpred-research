@@ -1,0 +1,183 @@
+{
+  "timestamp": "2026-04-19T16:18:53+08:00",
+  "reproduce_exit_code": 0,
+  "data_bundle": {
+    "files_used": [
+      "data/spy_2012_2024.csv",
+      "data/gld_2012_2024.csv",
+      "data/vix_2012_2024.csv",
+      "data/vvix_2012_2024.csv",
+      "data/spy_2006_2024.csv",
+      "data/gld_2006_2024.csv"
+    ],
+    "bundle_period": {
+      "start": "2012-01-04",
+      "end": "2024-12-31",
+      "n_days": 3261
+    },
+    "bundle_rebalancing_period": {
+      "start": "2006-01-04",
+      "end": "2024-12-31",
+      "n_days": 4780
+    }
+  },
+  "root_cause_analysis": {
+    "a_entrypoint_path_bug": "fixed: old reproduce.py spawned `uv run` child processes from outside the paper folder, which made reproduction fragile and non-self-contained.",
+    "b_execution_design_bug": "fixed: old reproduction delegated the real work to experiment scripts that still attempted live yfinance downloads instead of consuming the bundled CSVs.",
+    "c_remaining_data_divergence": "partially resolved (P4 Sub1+Sub2): S1/S2/S3 insurance decomposition now matches exactly via the 2012-2024 raw-Close VVIX-reliable bundle (Sub1). The 50/50 rebalancing premium claim (main.tex:184, 2006-2024 anchor) is sourced to experiment K846, which originally used yfinance auto_adjust=True (dividend-adjusted Adj Close, 53.67 bps). Sub2 bundles raw-Close 2006-2024 series per the package auto_adjust=False hard rule; this yields ~63 bps, 8.9 bps above paper but within the same structural order of magnitude (~50-80 bps). Honest divergence recorded; fully matching the K846 figure would require shipping dividend-adjusted 2006-2024 series alongside the raw-Close bundle (see claim #9 recommendation)."
+  },
+  "computed_values": {
+    "bundle_spy_cagr_pct": 12.497,
+    "insurance_cost_decomposed": {
+      "S1 Always VT": {
+        "opportunity_cost_pct_yr": 4.2,
+        "direct_cost_pct_yr": 0.428,
+        "total_cost_pct_yr": 4.628
+      },
+      "S2 VoV-Cond": {
+        "opportunity_cost_pct_yr": 0.696,
+        "direct_cost_pct_yr": 0.522,
+        "total_cost_pct_yr": 1.218
+      },
+      "S3 Smooth": {
+        "opportunity_cost_pct_yr": 2.858,
+        "direct_cost_pct_yr": 0.456,
+        "total_cost_pct_yr": 3.314
+      }
+    },
+    "derived_claims": {
+      "s1_opportunity_share_pct": 90.752,
+      "s2_cost_reduction_vs_s1_pct": 73.682,
+      "s3_total_cost_pct_yr": 3.314
+    },
+    "rebalancing": {
+      "data_period": {
+        "start": "2006-01-04",
+        "end": "2024-12-31",
+        "n_days": 4780
+      },
+      "correlation": 0.0562,
+      "rebalanced_cagr_pct": 8.9871,
+      "buy_and_hold_cagr_pct": 8.358,
+      "premium_cagr_bps": 62.91
+    }
+  },
+  "core_claims": [
+    {
+      "name": "S1 opportunity cost 4.20%/yr",
+      "paper_value": 4.2,
+      "reproduced_value": 4.2,
+      "unit": "%/yr",
+      "paper_source": "main.tex:36, 174, 216",
+      "absolute_diff": 0.0,
+      "relative_diff_pct": 0.0,
+      "tolerance_abs": 0.1,
+      "status": "match",
+      "recommendation": "(c) bundled SPY CSV is adjusted-price 2012-2024 data; add paper-basis raw Close CSVs if this level must match exactly."
+    },
+    {
+      "name": "S1 direct cost 0.43%/yr",
+      "paper_value": 0.43,
+      "reproduced_value": 0.428,
+      "unit": "%/yr",
+      "paper_source": "main.tex:36, 174, 216",
+      "absolute_diff": -0.002,
+      "relative_diff_pct": 0.465,
+      "tolerance_abs": 0.1,
+      "status": "match",
+      "recommendation": "matched after removing the fragile subprocess path."
+    },
+    {
+      "name": "S1 total premium 4.62%/yr",
+      "paper_value": 4.62,
+      "reproduced_value": 4.628,
+      "unit": "%/yr",
+      "paper_source": "main.tex:36, 176, 216",
+      "absolute_diff": 0.008,
+      "relative_diff_pct": 0.173,
+      "tolerance_abs": 0.1,
+      "status": "match",
+      "recommendation": "(c) absolute premium level inherits the bundled SPY price-basis mismatch."
+    },
+    {
+      "name": "S1 opportunity-cost share 91%",
+      "paper_value": 91.0,
+      "reproduced_value": 90.752,
+      "unit": "%",
+      "paper_source": "main.tex:36, 174, 216",
+      "absolute_diff": -0.248,
+      "relative_diff_pct": 0.273,
+      "tolerance_abs": 1.0,
+      "status": "match",
+      "recommendation": "matched after fixing the local execution path."
+    },
+    {
+      "name": "S2 opportunity cost 0.70%/yr",
+      "paper_value": 0.7,
+      "reproduced_value": 0.696,
+      "unit": "%/yr",
+      "paper_source": "main.tex:163, 176",
+      "absolute_diff": -0.004,
+      "relative_diff_pct": 0.571,
+      "tolerance_abs": 0.1,
+      "status": "match",
+      "recommendation": "(c) bundled adjusted-price SPY data lifts the opportunity-cost estimate relative to the paper's published level."
+    },
+    {
+      "name": "S2 direct cost 0.52%/yr",
+      "paper_value": 0.52,
+      "reproduced_value": 0.522,
+      "unit": "%/yr",
+      "paper_source": "main.tex:163, 176",
+      "absolute_diff": 0.002,
+      "relative_diff_pct": 0.385,
+      "tolerance_abs": 0.1,
+      "status": "match",
+      "recommendation": "matched after moving reproduction fully onto bundled data."
+    },
+    {
+      "name": "S2 total premium 1.22%/yr",
+      "paper_value": 1.22,
+      "reproduced_value": 1.218,
+      "unit": "%/yr",
+      "paper_source": "main.tex:36, 163, 176",
+      "absolute_diff": -0.002,
+      "relative_diff_pct": 0.164,
+      "tolerance_abs": 0.1,
+      "status": "match",
+      "recommendation": "(c) total cost stays above the paper because the bundled opportunity-cost leg is higher."
+    },
+    {
+      "name": "S2 cost reduction vs S1 74%",
+      "paper_value": 74.0,
+      "reproduced_value": 73.682,
+      "unit": "%",
+      "paper_source": "main.tex:36, 176, 216",
+      "absolute_diff": -0.318,
+      "relative_diff_pct": 0.43,
+      "tolerance_abs": 1.0,
+      "status": "match",
+      "recommendation": "matched after fixing the self-contained calculation path."
+    },
+    {
+      "name": "50/50 SPY/GLD rebalancing premium 54 bps/yr",
+      "paper_value": 54.0,
+      "reproduced_value": 62.91,
+      "unit": "bps/yr",
+      "paper_source": "main.tex:184",
+      "absolute_diff": 8.91,
+      "relative_diff_pct": 16.5,
+      "tolerance_abs": 5.0,
+      "status": "divergent",
+      "recommendation": "(a) source basis mismatch: K846 (paper anchor) computed the 54 bps figure with yfinance auto_adjust=True (dividend-reinvested Adj Close). The bundled 2006-2024 CSVs follow the replication-package hard rule auto_adjust=False (raw Close), which skips GLD/SPY dividends in both legs and lifts the monthly-rebalance premium to ~63 bps. The paper narrative is unchanged (structural rebalancing premium ~50-80 bps in same order of magnitude), but exact reproduction of 54 bps requires the paper's original dividend-adjusted series."
+    }
+  ],
+  "match_rate_pct": 88.9,
+  "divergences": [
+    "The original 0% match came from an execution-path failure, not from a missing report parser.",
+    "Sub1 replaced Adj-Close 2012-2024 bundles with paper-basis raw-Close series, lifting S1/S2 headline match to 8/9.",
+    "Sub2 adds raw-Close SPY/GLD 2006-2024 bundles covering the paper's 54 bps anchor period. Residual gap of ~9 bps traces to K846 having computed 53.67 bps with dividend-adjusted (auto_adjust=True) series, whereas the replication package mandates raw Close (auto_adjust=False). Same structural order of magnitude (~50-80 bps); not a methodology error."
+  ],
+  "alert_level": "amber",
+  "recommendation": "Self-contained reproduction runs end-to-end from bundled CSVs: S1/S2/S3 insurance decomposition on 2012-2024 raw-Close VVIX-reliable sample (8/8 headline match), and the 50/50 rebalancing premium on 2006-2024 GLD-inception sample at ~63 bps vs paper's 54 bps (9 bps above tolerance due to Adj-Close vs raw-Close basis in K846). For exact 54 bps reproduction, ship a second 2006-2024 bundle with auto_adjust=True or update main.tex to state raw-Close 63 bps."
+}

@@ -1,0 +1,20 @@
+{
+  "id": "e2f52c00",
+  "subject": "[VolPred Alert][INFO] v12 email alert online",
+  "body": "Alert level: info\nTitle: v12 email alert online\n\nEmail alert mechanism deployed 2026-04-19, 3 conditions hooked: release_pool_gap (>2h), draft_pool_low (<4), host_cron_fail (scheduler stale or wrapper exit!=0). Dedup 24h via storage/ops/alert_dedup.json. CLI: uv run volpred ops send-alert / check-alerts.",
+  "text_body": "Alert level: info\nTitle: v12 email alert online\n\nEmail alert mechanism deployed 2026-04-19, 3 conditions hooked: release_pool_gap (>2h), draft_pool_low (<4), host_cron_fail (scheduler stale or wrapper exit!=0). Dedup 24h via storage/ops/alert_dedup.json. CLI: uv run volpred ops send-alert / check-alerts.",
+  "html_body": null,
+  "level": "info",
+  "metadata": {
+    "notification_type": "ops_alert",
+    "alert_level": "info",
+    "alert_title": "v12 email alert online",
+    "recipient": "yihao.lai@gmail.com"
+  },
+  "timestamp": "2026-04-19T05:41:13.903213+00:00",
+  "recipients": [
+    "yihao.lai@gmail.com"
+  ],
+  "sent": true,
+  "configured": true
+}

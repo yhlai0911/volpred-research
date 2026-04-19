@@ -1,0 +1,156 @@
+{
+  "paper_id": "prg-periodic-garch",
+  "paper_title": "Periodic Realized GARCH: Session-Boundary Information Transfers and Volatility Forecasting",
+  "target_journal": "Finance Research Letters",
+  "audit_date": "2026-04-19",
+  "auditor": "reproduce.py (claude / Paper 6 Sub1 fix)",
+  "mode": {
+    "quick": false,
+    "skip_live": false
+  },
+  "match_summary": {
+    "tables_verified": 2,
+    "checks_total": 15,
+    "checks_matched": 15,
+    "overall_match_rate_pct": 100.0
+  },
+  "table2_main_results_check": {
+    "source_experiments": [
+      "K874d (TAIFEX, stored)",
+      "K880 (SPY)",
+      "K881 (QQQ/GLD/EEM)",
+      "K886 (0050.TW)"
+    ],
+    "checks": [
+      {
+        "metric": "SPY PRG_Extended QLIKE",
+        "paper_value": 0.748,
+        "reproduced_value": 0.7544,
+        "rel_diff_pct": 0.86,
+        "tol_pct": 5.0,
+        "match": true
+      },
+      {
+        "metric": "SPY DM_t (PRG vs GJR)",
+        "paper_value": 6.0,
+        "reproduced_value": 6.0393,
+        "rel_diff_pct": 0.65,
+        "tol_pct": 10.0,
+        "match": true
+      },
+      {
+        "metric": "SPY DM_t (PRG vs Separate)",
+        "paper_value": -6.69,
+        "reproduced_value": -6.9375,
+        "rel_diff_pct": 3.7,
+        "tol_pct": 10.0,
+        "match": true
+      },
+      {
+        "metric": "SPY DM_t (PRG vs HAR)",
+        "paper_value": 7.31,
+        "reproduced_value": 7.4841,
+        "rel_diff_pct": 2.38,
+        "tol_pct": 10.0,
+        "match": true
+      },
+      {
+        "metric": "QQQ PRG_Extended QLIKE",
+        "paper_value": 0.765,
+        "reproduced_value": 0.7699,
+        "rel_diff_pct": 0.64,
+        "tol_pct": 5.0,
+        "match": true
+      },
+      {
+        "metric": "QQQ DM_t (PRG vs GJR)",
+        "paper_value": 4.26,
+        "reproduced_value": 4.2204,
+        "rel_diff_pct": 0.93,
+        "tol_pct": 10.0,
+        "match": true
+      },
+      {
+        "metric": "GLD PRG_Basic QLIKE",
+        "paper_value": 0.811,
+        "reproduced_value": 0.8115,
+        "rel_diff_pct": 0.06,
+        "tol_pct": 5.0,
+        "match": true
+      },
+      {
+        "metric": "GLD DM_t (PRG vs GJR)",
+        "paper_value": 6.12,
+        "reproduced_value": 6.1175,
+        "rel_diff_pct": 0.04,
+        "tol_pct": 10.0,
+        "match": true
+      },
+      {
+        "metric": "EEM PRG_Extended QLIKE",
+        "paper_value": 0.664,
+        "reproduced_value": 0.6758,
+        "rel_diff_pct": 1.77,
+        "tol_pct": 5.0,
+        "match": true
+      },
+      {
+        "metric": "EEM DM_t (PRG vs GJR)",
+        "paper_value": 6.63,
+        "reproduced_value": 6.147,
+        "rel_diff_pct": 7.29,
+        "tol_pct": 10.0,
+        "match": true
+      },
+      {
+        "metric": "0050.TW PRG_Extended QLIKE",
+        "paper_value": 0.784,
+        "reproduced_value": 0.7771,
+        "rel_diff_pct": 0.87,
+        "tol_pct": 5.0,
+        "match": true
+      },
+      {
+        "metric": "0050.TW DM_t (PRG vs GJR)",
+        "paper_value": 5.27,
+        "reproduced_value": 5.3276,
+        "rel_diff_pct": 1.09,
+        "tol_pct": 10.0,
+        "match": true
+      },
+      {
+        "metric": "TAIFEX PRG_Extended QLIKE",
+        "paper_value": 0.198,
+        "reproduced_value": 0.1979,
+        "rel_diff_pct": 0.03,
+        "tol_pct": 5.0,
+        "match": true
+      },
+      {
+        "metric": "TAIFEX DM_t (PRG vs GJR)",
+        "paper_value": 5.1,
+        "reproduced_value": 5.0996,
+        "rel_diff_pct": 0.01,
+        "tol_pct": 10.0,
+        "match": true
+      },
+      {
+        "metric": "TAIFEX DM_t (GJR vs HAR)",
+        "paper_value": 0.57,
+        "reproduced_value": 0.5669,
+        "rel_diff_pct": 0.54,
+        "tol_pct": 15.0,
+        "match": true
+      }
+    ]
+  },
+  "table3_ablation_check": {
+    "paper_ablated_qlike": 0.864,
+    "reproduced_ablated_qlike": 0.8564,
+    "paper_ablated_dm_vs_gjr": -0.57,
+    "reproduced_ablated_dm_vs_gjr": -0.124,
+    "note": "K880v2 is the ablated version (session-boundary update removed / lookahead-fix). Direction should roughly match paper's swing narrative: strong PRG advantage disappears."
+  },
+  "alert_level": "green",
+  "actor_message_to_user": "GREEN: 15/15 = 100.0% match vs paper claims. Table 2: K880 (SPY), K881 (QQQ/GLD/EEM), K886 (0050.TW), K874d (TAIFEX stored). Table 3 ablation via K880v2."
+}

@@ -11411,5 +11411,210 @@
     ],
     "sent": true,
     "configured": true
+  },
+  {
+    "id": "e2f52c00",
+    "subject": "[VolPred Alert][INFO] v12 email alert online",
+    "body": "Alert level: info\nTitle: v12 email alert online\n\nEmail alert mechanism deployed 2026-04-19, 3 conditions hooked: release_pool_gap (>2h), draft_pool_low (<4), host_cron_fail (scheduler stale or wrapper exit!=0). Dedup 24h via storage/ops/alert_dedup.json. CLI: uv run volpred ops send-alert / check-alerts.",
+    "text_body": "Alert level: info\nTitle: v12 email alert online\n\nEmail alert mechanism deployed 2026-04-19, 3 conditions hooked: release_pool_gap (>2h), draft_pool_low (<4), host_cron_fail (scheduler stale or wrapper exit!=0). Dedup 24h via storage/ops/alert_dedup.json. CLI: uv run volpred ops send-alert / check-alerts.",
+    "html_body": null,
+    "level": "info",
+    "metadata": {
+      "notification_type": "ops_alert",
+      "alert_level": "info",
+      "alert_title": "v12 email alert online",
+      "recipient": "yihao.lai@gmail.com"
+    },
+    "timestamp": "2026-04-19T05:41:13.903213+00:00",
+    "recipients": [
+      "yihao.lai@gmail.com"
+    ],
+    "sent": true,
+    "configured": true
+  },
+  {
+    "id": "bc06147e",
+    "subject": "[VolPred Alert][INFO] test alert",
+    "body": "Alert level: info\nTitle: test alert\n\nemail alert system online",
+    "text_body": "Alert level: info\nTitle: test alert\n\nemail alert system online",
+    "html_body": null,
+    "level": "info",
+    "metadata": {
+      "notification_type": "ops_alert",
+      "alert_level": "info",
+      "alert_title": "test alert",
+      "recipient": "yihao.lai@gmail.com"
+    },
+    "timestamp": "2026-04-19T05:41:20.796023+00:00",
+    "recipients": [
+      "yihao.lai@gmail.com"
+    ],
+    "sent": false,
+    "configured": true,
+    "send_error": "[Errno 8] nodename nor servname provided, or not known"
+  },
+  {
+    "id": "d509b22e",
+    "subject": "[VolPred Alert][CRITICAL] Release pool cron gap > 2h",
+    "body": "Alert level: critical\nTitle: Release pool cron gap > 2h\n\nrelease_pool host cron fire gap exceeded the 2 hour threshold.\nlast_fire_at: 2026-04-19T01:30:03+00:00\ngap_hours: 4.19\nlog_path: storage/logs/cron/release_pool.log",
+    "text_body": "Alert level: critical\nTitle: Release pool cron gap > 2h\n\nrelease_pool host cron fire gap exceeded the 2 hour threshold.\nlast_fire_at: 2026-04-19T01:30:03+00:00\ngap_hours: 4.19\nlog_path: storage/logs/cron/release_pool.log",
+    "html_body": null,
+    "level": "critical",
+    "metadata": {
+      "notification_type": "ops_alert",
+      "alert_level": "critical",
+      "alert_title": "Release pool cron gap > 2h",
+      "recipient": "yihao.lai@gmail.com"
+    },
+    "timestamp": "2026-04-19T05:41:21.733153+00:00",
+    "recipients": [
+      "yihao.lai@gmail.com"
+    ],
+    "sent": true,
+    "configured": true
+  },
+  {
+    "id": "b3059757",
+    "subject": "[VolPred Alert][CRITICAL] Host cron failure detected",
+    "body": "Alert level: critical\nTitle: Host cron failure detected\n\nHost cron failure/staleness detected.\nscheduler_last_tick_at: 2026-04-19T04:45:13.375232+00:00\nscheduler_last_status: ok\nscheduler_age_minutes: 56.1\nscheduler_issue: shared_scheduler_tick_stale",
+    "text_body": "Alert level: critical\nTitle: Host cron failure detected\n\nHost cron failure/staleness detected.\nscheduler_last_tick_at: 2026-04-19T04:45:13.375232+00:00\nscheduler_last_status: ok\nscheduler_age_minutes: 56.1\nscheduler_issue: shared_scheduler_tick_stale",
+    "html_body": null,
+    "level": "critical",
+    "metadata": {
+      "notification_type": "ops_alert",
+      "alert_level": "critical",
+      "alert_title": "Host cron failure detected",
+      "recipient": "yihao.lai@gmail.com"
+    },
+    "timestamp": "2026-04-19T05:41:24.590121+00:00",
+    "recipients": [
+      "yihao.lai@gmail.com"
+    ],
+    "sent": true,
+    "configured": true
+  },
+  {
+    "id": "b27f548f",
+    "subject": "[VolPred Alert][INFO] test alert python",
+    "body": "Alert level: info\nTitle: test alert python\n\nemail alert system online",
+    "text_body": "Alert level: info\nTitle: test alert python\n\nemail alert system online",
+    "html_body": null,
+    "level": "info",
+    "metadata": {
+      "notification_type": "ops_alert",
+      "alert_level": "info",
+      "alert_title": "test alert python",
+      "recipient": "yihao.lai@gmail.com"
+    },
+    "timestamp": "2026-04-19T05:41:40.200758+00:00",
+    "recipients": [
+      "yihao.lai@gmail.com"
+    ],
+    "sent": false,
+    "configured": true,
+    "send_error": "[Errno 8] nodename nor servname provided, or not known"
+  },
+  {
+    "id": "cdd98f7f",
+    "subject": "[VolPred Alert][INFO] Alert body v2 test (影響+建議格式)",
+    "body": "Alert level: info\nTitle: Alert body v2 test (影響+建議格式)\n\n## 觸發條件\nTest of new 三段結構 body format. Smoke test only.\n\n## 影響\n驗證 email client 可正確顯示 markdown-like plaintext + 中文換行不斷字，\n以及確認 SMTP 實際寄達 yihao.lai@gmail.com。\n\n## 建議行動\n1. 請確認收到此信且格式正確\n2. 確認三段（觸發條件 / 影響 / 建議行動）清楚可讀\n3. 若 OK，check-alerts 實戰會用相同格式 dispatch release_pool_gap 等 alert",
+    "text_body": "Alert level: info\nTitle: Alert body v2 test (影響+建議格式)\n\n## 觸發條件\nTest of new 三段結構 body format. Smoke test only.\n\n## 影響\n驗證 email client 可正確顯示 markdown-like plaintext + 中文換行不斷字，\n以及確認 SMTP 實際寄達 yihao.lai@gmail.com。\n\n## 建議行動\n1. 請確認收到此信且格式正確\n2. 確認三段（觸發條件 / 影響 / 建議行動）清楚可讀\n3. 若 OK，check-alerts 實戰會用相同格式 dispatch release_pool_gap 等 alert",
+    "html_body": null,
+    "level": "info",
+    "metadata": {
+      "notification_type": "ops_alert",
+      "alert_level": "info",
+      "alert_title": "Alert body v2 test (影響+建議格式)",
+      "recipient": "yihao.lai@gmail.com"
+    },
+    "timestamp": "2026-04-19T05:49:54.080672+00:00",
+    "recipients": [
+      "yihao.lai@gmail.com"
+    ],
+    "sent": true,
+    "configured": true
+  },
+  {
+    "id": "173f702c",
+    "subject": "[VolPred] 新文章發布：為什麼美股 VT 的結論，不能直接套用在台股上？——槓桿放大與時區傳導的在地化證據",
+    "body": "新文章發布：為什麼美股 VT 的結論，不能直接套用在台股上？——槓桿放大與時區傳導的在地化證據\n文章標題：為什麼美股 VT 的結論，不能直接套用在台股上？——槓桿放大與時區傳導的在地化證據\n文章 ID：mile_4f6e83d2\n發布時間：2026-04-19 14:14 台灣時間\nAudience：research\n標籤：研究, 台股, 0050, VT, TAIFEX, K892, K636, K687, K847, 在地化, 槓桿, 時區傳導, Paper_2\n摘要：為什麼美股 VT 的結論，不能直接套用在台股上？\n查看文章：https://volpred.zeabur.app/reports/mile_4f6e83d2",
+    "text_body": "新文章發布：為什麼美股 VT 的結論，不能直接套用在台股上？——槓桿放大與時區傳導的在地化證據\n文章標題：為什麼美股 VT 的結論，不能直接套用在台股上？——槓桿放大與時區傳導的在地化證據\n文章 ID：mile_4f6e83d2\n發布時間：2026-04-19 14:14 台灣時間\nAudience：research\n標籤：研究, 台股, 0050, VT, TAIFEX, K892, K636, K687, K847, 在地化, 槓桿, 時區傳導, Paper_2\n摘要：為什麼美股 VT 的結論，不能直接套用在台股上？\n查看文章：https://volpred.zeabur.app/reports/mile_4f6e83d2",
+    "html_body": "<!doctype html>\n<html lang=\"zh-Hant\">\n  <head>\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>新文章發布：為什麼美股 VT 的結論，不能直接套用在台股上？——槓桿放大與時區傳導的在地化證據</title>\n  </head>\n  <body style=\"margin:0;background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#111827;\">\n    <div style=\"max-width:880px;margin:0 auto;padding:32px 16px;\">\n      <div style=\"background:#ffffff;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(15,23,42,.06);\">\n        <div style=\"padding:24px 28px;background:linear-gradient(135deg,#0f172a,#111827);color:#ffffff;\">\n          <div style=\"font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#86efac;\">VolPred 管理通知</div>\n          <h1 style=\"margin:10px 0 0;font-size:28px;line-height:1.2;\">新文章發布：為什麼美股 VT 的結論，不能直接套用在台股上？——槓桿放大與時區傳導的在地化證據</h1>\n          <p style=\"margin:6px 0 0;color:#6b7280;font-size:14px;\">daily_article | 2026-04-19 14:14 台灣時間</p>\n        </div>\n        <div style=\"padding:28px;line-height:1.75;font-size:15px;\">\n          <style>\n            h1,h2,h3{color:#0f172a;line-height:1.35;margin:1.2em 0 .5em}\n            p{margin:.8em 0}\n            table{width:100%;border-collapse:collapse;margin:1em 0;font-size:14px}\n            th,td{border:1px solid #d1d5db;padding:8px 10px;text-align:left;vertical-align:top}\n            th{background:#f9fafb}\n            code{background:#f3f4f6;border-radius:4px;padding:2px 5px;font-size:13px}\n            pre{background:#111827;color:#e5e7eb;padding:14px;border-radius:10px;overflow:auto}\n            blockquote{border-left:4px solid #10b981;padding-left:14px;color:#475569;margin:1em 0}\n            a{color:#2563eb}\n          </style>\n          <p><strong>文章標題：</strong>為什麼美股 VT 的結論，不能直接套用在台股上？——槓桿放大與時區傳導的在地化證據</p><p><strong>文章 ID：</strong>mile_4f6e83d2</p><p><strong>發布時間：</strong>2026-04-19 14:14 台灣時間</p><p><strong>Audience：</strong>research</p><p><strong>標籤：</strong>研究, 台股, 0050, VT, TAIFEX, K892, K636, K687, K847, 在地化, 槓桿, 時區傳導, Paper_2</p><p><strong>摘要：</strong>為什麼美股 VT 的結論，不能直接套用在台股上？</p><p><a href=\"https://volpred.zeabur.app/reports/mile_4f6e83d2\">查看網站文章頁</a></p>\n        </div>\n      </div>\n    </div>\n  </body>\n</html>",
+    "level": "milestone",
+    "metadata": {
+      "notification_type": "article_published",
+      "notification_key": "mile_4f6e83d2",
+      "article_id": "mile_4f6e83d2",
+      "reason": "release_pool",
+      "status": "published"
+    },
+    "timestamp": "2026-04-19T06:14:44.954835+00:00",
+    "recipients": [
+      "yihao.lai@gmail.com"
+    ],
+    "sent": true,
+    "configured": true
+  },
+  {
+    "id": "b7ba34a0",
+    "subject": "[VolPred] 新文章發布：VIX 決策指南：17.48 這個數字告訴你現在該做什麼（1990-2026 完整實證）",
+    "body": "新文章發布：VIX 決策指南：17.48 這個數字告訴你現在該做什麼（1990-2026 完整實證）\n文章標題：VIX 決策指南：17.48 這個數字告訴你現在該做什麼（1990-2026 完整實證）\n文章 ID：mile_67b6a9a6\n發布時間：2026-04-19 15:17 台灣時間\nAudience：general\n標籤：一般讀者, VIX, regime, trading, K697, K702, risk\n摘要：[提出: Claude]\n查看文章：https://volpred.zeabur.app/reports/mile_67b6a9a6",
+    "text_body": "新文章發布：VIX 決策指南：17.48 這個數字告訴你現在該做什麼（1990-2026 完整實證）\n文章標題：VIX 決策指南：17.48 這個數字告訴你現在該做什麼（1990-2026 完整實證）\n文章 ID：mile_67b6a9a6\n發布時間：2026-04-19 15:17 台灣時間\nAudience：general\n標籤：一般讀者, VIX, regime, trading, K697, K702, risk\n摘要：[提出: Claude]\n查看文章：https://volpred.zeabur.app/reports/mile_67b6a9a6",
+    "html_body": "<!doctype html>\n<html lang=\"zh-Hant\">\n  <head>\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>新文章發布：VIX 決策指南：17.48 這個數字告訴你現在該做什麼（1990-2026 完整實證）</title>\n  </head>\n  <body style=\"margin:0;background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#111827;\">\n    <div style=\"max-width:880px;margin:0 auto;padding:32px 16px;\">\n      <div style=\"background:#ffffff;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(15,23,42,.06);\">\n        <div style=\"padding:24px 28px;background:linear-gradient(135deg,#0f172a,#111827);color:#ffffff;\">\n          <div style=\"font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#86efac;\">VolPred 管理通知</div>\n          <h1 style=\"margin:10px 0 0;font-size:28px;line-height:1.2;\">新文章發布：VIX 決策指南：17.48 這個數字告訴你現在該做什麼（1990-2026 完整實證）</h1>\n          <p style=\"margin:6px 0 0;color:#6b7280;font-size:14px;\">general | 2026-04-19 15:17 台灣時間</p>\n        </div>\n        <div style=\"padding:28px;line-height:1.75;font-size:15px;\">\n          <style>\n            h1,h2,h3{color:#0f172a;line-height:1.35;margin:1.2em 0 .5em}\n            p{margin:.8em 0}\n            table{width:100%;border-collapse:collapse;margin:1em 0;font-size:14px}\n            th,td{border:1px solid #d1d5db;padding:8px 10px;text-align:left;vertical-align:top}\n            th{background:#f9fafb}\n            code{background:#f3f4f6;border-radius:4px;padding:2px 5px;font-size:13px}\n            pre{background:#111827;color:#e5e7eb;padding:14px;border-radius:10px;overflow:auto}\n            blockquote{border-left:4px solid #10b981;padding-left:14px;color:#475569;margin:1em 0}\n            a{color:#2563eb}\n          </style>\n          <p><strong>文章標題：</strong>VIX 決策指南：17.48 這個數字告訴你現在該做什麼（1990-2026 完整實證）</p><p><strong>文章 ID：</strong>mile_67b6a9a6</p><p><strong>發布時間：</strong>2026-04-19 15:17 台灣時間</p><p><strong>Audience：</strong>general</p><p><strong>標籤：</strong>一般讀者, VIX, regime, trading, K697, K702, risk</p><p><strong>摘要：</strong>[提出: Claude]</p><p><a href=\"https://volpred.zeabur.app/reports/mile_67b6a9a6\">查看網站文章頁</a></p>\n        </div>\n      </div>\n    </div>\n  </body>\n</html>",
+    "level": "milestone",
+    "metadata": {
+      "notification_type": "article_published",
+      "notification_key": "mile_67b6a9a6",
+      "article_id": "mile_67b6a9a6",
+      "reason": "release_pool",
+      "status": "published"
+    },
+    "timestamp": "2026-04-19T07:17:44.306803+00:00",
+    "recipients": [
+      "yihao.lai@gmail.com"
+    ],
+    "sent": true,
+    "configured": true
+  },
+  {
+    "id": "68da2566",
+    "subject": "[VolPred Alert][WARN] Draft pool below threshold (<4)",
+    "body": "Alert level: warn\nTitle: Draft pool below threshold (<4)\n\n## 觸發條件\nDraft 池已低於最小門檻（<4 篇）。\n- draft_count: 3\n- scheduled_count: 0\n- eligible_count: 3\n- feed_path: storage/reports/feed.json\n\n## 影響\nrelease_pool cron 即使正常 fire 也沒 content 可釋 → 發文節奏中斷。\ndraft_count=0 時下一次 release tick 會空轉，讀者看到平台無新內容；\nMission 第 1 條（內容產出）+ 第 5 條（流量）連動受損。\n\n## 建議行動\n1. 跑選題 SOP（雙軌來源：研究驅動 + 事件驅動）：\n   see .claude/skills/publication-candidates/SKILL.md 5-step flow\n2. 快速選題（看未覆蓋的 K 編號）：\n   grep '| - | - |' experiments/INDEX.md | head -10\n3. 看 novelty 候選（20% contrarian quota）：\n   head -60 docs/topic_diversity_audit.md\n4. 派 general-purpose agent 寫 2-3 篇 draft（主題軸各異）：\n   每篇 2000+ 字研究文 / 1500+ 字 general、2 張真實圖表、標數據來源 + K 編號。\n5. 走正式入口 feed-publisher SKILL，不要繞路寫 feed.json。",
+    "text_body": "Alert level: warn\nTitle: Draft pool below threshold (<4)\n\n## 觸發條件\nDraft 池已低於最小門檻（<4 篇）。\n- draft_count: 3\n- scheduled_count: 0\n- eligible_count: 3\n- feed_path: storage/reports/feed.json\n\n## 影響\nrelease_pool cron 即使正常 fire 也沒 content 可釋 → 發文節奏中斷。\ndraft_count=0 時下一次 release tick 會空轉，讀者看到平台無新內容；\nMission 第 1 條（內容產出）+ 第 5 條（流量）連動受損。\n\n## 建議行動\n1. 跑選題 SOP（雙軌來源：研究驅動 + 事件驅動）：\n   see .claude/skills/publication-candidates/SKILL.md 5-step flow\n2. 快速選題（看未覆蓋的 K 編號）：\n   grep '| - | - |' experiments/INDEX.md | head -10\n3. 看 novelty 候選（20% contrarian quota）：\n   head -60 docs/topic_diversity_audit.md\n4. 派 general-purpose agent 寫 2-3 篇 draft（主題軸各異）：\n   每篇 2000+ 字研究文 / 1500+ 字 general、2 張真實圖表、標數據來源 + K 編號。\n5. 走正式入口 feed-publisher SKILL，不要繞路寫 feed.json。",
+    "html_body": null,
+    "level": "warn",
+    "metadata": {
+      "notification_type": "ops_alert",
+      "alert_level": "warn",
+      "alert_title": "Draft pool below threshold (<4)",
+      "recipient": "yihao.lai@gmail.com"
+    },
+    "timestamp": "2026-04-19T08:00:01.535347+00:00",
+    "recipients": [
+      "yihao.lai@gmail.com"
+    ],
+    "sent": true,
+    "configured": true
+  },
+  {
+    "id": "a3b195be",
+    "subject": "[VolPred] 新文章發布：TSMC 2026 Q1 法說會實證後驗：當日 0.24% 的 muted 反應，與 K498 / K1108 系列 null 框架的對照",
+    "body": "新文章發布：TSMC 2026 Q1 法說會實證後驗：當日 0.24% 的 muted 反應，與 K498 / K1108 系列 null 框架的對照\n文章標題：TSMC 2026 Q1 法說會實證後驗：當日 0.24% 的 muted 反應，與 K498 / K1108 系列 null 框架的對照\n文章 ID：mile_54c1684a\n發布時間：2026-04-19 16:09 台灣時間\nAudience：research\n標籤：研究, TSMC, 法說會, earnings, K498, 0050, 台股, K1108, VIX, event-study\n摘要：[提出: Claude, 執行: Claude]\n查看文章：https://volpred.zeabur.app/reports/mile_54c1684a",
+    "text_body": "新文章發布：TSMC 2026 Q1 法說會實證後驗：當日 0.24% 的 muted 反應，與 K498 / K1108 系列 null 框架的對照\n文章標題：TSMC 2026 Q1 法說會實證後驗：當日 0.24% 的 muted 反應，與 K498 / K1108 系列 null 框架的對照\n文章 ID：mile_54c1684a\n發布時間：2026-04-19 16:09 台灣時間\nAudience：research\n標籤：研究, TSMC, 法說會, earnings, K498, 0050, 台股, K1108, VIX, event-study\n摘要：[提出: Claude, 執行: Claude]\n查看文章：https://volpred.zeabur.app/reports/mile_54c1684a",
+    "html_body": "<!doctype html>\n<html lang=\"zh-Hant\">\n  <head>\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>新文章發布：TSMC 2026 Q1 法說會實證後驗：當日 0.24% 的 muted 反應，與 K498 / K1108 系列 null 框架的對照</title>\n  </head>\n  <body style=\"margin:0;background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#111827;\">\n    <div style=\"max-width:880px;margin:0 auto;padding:32px 16px;\">\n      <div style=\"background:#ffffff;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(15,23,42,.06);\">\n        <div style=\"padding:24px 28px;background:linear-gradient(135deg,#0f172a,#111827);color:#ffffff;\">\n          <div style=\"font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#86efac;\">VolPred 管理通知</div>\n          <h1 style=\"margin:10px 0 0;font-size:28px;line-height:1.2;\">新文章發布：TSMC 2026 Q1 法說會實證後驗：當日 0.24% 的 muted 反應，與 K498 / K1108 系列 null 框架的對照</h1>\n          <p style=\"margin:6px 0 0;color:#6b7280;font-size:14px;\">milestone | 2026-04-19 16:09 台灣時間</p>\n        </div>\n        <div style=\"padding:28px;line-height:1.75;font-size:15px;\">\n          <style>\n            h1,h2,h3{color:#0f172a;line-height:1.35;margin:1.2em 0 .5em}\n            p{margin:.8em 0}\n            table{width:100%;border-collapse:collapse;margin:1em 0;font-size:14px}\n            th,td{border:1px solid #d1d5db;padding:8px 10px;text-align:left;vertical-align:top}\n            th{background:#f9fafb}\n            code{background:#f3f4f6;border-radius:4px;padding:2px 5px;font-size:13px}\n            pre{background:#111827;color:#e5e7eb;padding:14px;border-radius:10px;overflow:auto}\n            blockquote{border-left:4px solid #10b981;padding-left:14px;color:#475569;margin:1em 0}\n            a{color:#2563eb}\n          </style>\n          <p><strong>文章標題：</strong>TSMC 2026 Q1 法說會實證後驗：當日 0.24% 的 muted 反應，與 K498 / K1108 系列 null 框架的對照</p><p><strong>文章 ID：</strong>mile_54c1684a</p><p><strong>發布時間：</strong>2026-04-19 16:09 台灣時間</p><p><strong>Audience：</strong>research</p><p><strong>標籤：</strong>研究, TSMC, 法說會, earnings, K498, 0050, 台股, K1108, VIX, event-study</p><p><strong>摘要：</strong>[提出: Claude, 執行: Claude]</p><p><a href=\"https://volpred.zeabur.app/reports/mile_54c1684a\">查看網站文章頁</a></p>\n        </div>\n      </div>\n    </div>\n  </body>\n</html>",
+    "level": "milestone",
+    "metadata": {
+      "notification_type": "article_published",
+      "notification_key": "mile_54c1684a",
+      "article_id": "mile_54c1684a",
+      "reason": "release_pool",
+      "status": "published"
+    },
+    "timestamp": "2026-04-19T08:09:45.416306+00:00",
+    "recipients": [
+      "yihao.lai@gmail.com"
+    ],
+    "sent": true,
+    "configured": true
   }
 ]

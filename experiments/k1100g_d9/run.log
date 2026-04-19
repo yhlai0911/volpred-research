@@ -1,0 +1,24 @@
+  [sanity] Hansen skewed-t lam=0 matches scaled Student-t OK
+[18:29:15] K1100g_d9 cadence-robustness rerun start
+  REFIT_EVERY=5 (d7=5, d8=25)
+  N_RESTARTS_OOS_WARM=4 (d7=4, d8=2)
+  N_RESTARTS_OOS_COLD=6 (d7=6, d8=4)
+
+=== [N225] (^N225) ===
+  [cache] ^N225 -> n225_daily_2010-2026.parquet n=3971
+  Aligned rows (finite overnight): 3970
+  Date range: 2010-01-05 .. 2026-03-31
+  Train n=2447  Test n=1465
+  [18:29:15] IS fits (4 models) ...
+    IS elapsed: base_st=11.4s  gap_st=7.9s  base_sk=13.9s  gap_sk=13.8s
+    M_base_st  ll= 13582.961 df=5.12  success=True
+    M_gap_st   ll= 13614.148 df=6.61 ξ=+0.1403  success=True
+    M_base_sk  ll= 13576.723 η=7.60 λ=-0.078  success=True
+    M_gap_sk   ll= 13607.646 η=7.10 λ=-0.127 ξ=+0.0914  success=True
+  [18:30:02] OOS 4 models (refit_every=5, n_restarts_warm=4, cold=6) ...
+    [N225_base_st t=2547/3970 elapsed=44s refits=20]
+    [N225_base_st t=2647/3970 elapsed=85s refits=40]
+    [N225_base_st t=2747/3970 elapsed=131s refits=60]
+    [N225_base_st t=2847/3970 elapsed=183s refits=80]
+    [N225_base_st t=2947/3970 elapsed=239s refits=100]
+    [N225_base_st t=3047/3970 elapsed=294s refits=120]

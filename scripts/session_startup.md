@@ -83,9 +83,9 @@ scripts/install_scheduler_cron.sh
 
 ```python
 CronCreate(cron="3 9 * * *", prompt="每日任務審視與執行計劃：(1) 盤點 user queue / scheduled queue / approval backlog (2) 盤點草稿池與今日已發佈文章缺口 (3) 讀 research_program.md 事件日曆，確認今日是否有 CPI/NFP/FOMC/TSMC 等重要事件 (4) 有事件→立即建立或執行事件任務（必要時 status=published）(5) 檢查 research_program.md 行數(<700)、知識索引是否過期(>24h) (6) 用 uv run volpred ops assign 建立今日正式任務")
-CronCreate(cron="11 */2 * * *", prompt="繼續任務（每 2 小時，slot-aware）：任務類型不限於研究，涵蓋研究/發文/論文修訂/平台 ops/bug fix/會員問題/文件更新/重構。(1) slot check — `ls .claude/worktrees/ 2>/dev/null | grep -c agent-` + 背景 task；>= 3 slot 滿回「跳過：slot N/3」≤15字 (2) 讀 storage/next_tasks.json 取最高優先任務（P1>P2>P3>P4），不分類型 (3) 若是實驗類任務，分配新 K 編號前必 ls experiments/ + .claude/worktrees/ 確認不衝突 (4) 啟動 agent 或主線程執行（文件/ops 任務主線程做，實驗類派 agent）(5) 完成後從 research_program.md / bug_backlog / next_tasks 補充 (6) queue 空才做 discovery。反空轉：cron 觸發必有新 agent / git diff / 新 knowledge / research_program.md 更新，至少一項。")
+CronCreate(cron="11 */2 * * *", prompt="繼續任務（每 2 小時，slot-aware）：任務類型不限於研究，涵蓋研究/發文/論文修訂/平台 ops/bug fix/會員問題/文件更新/重構。(1) slot check — `ls .claude/worktrees/ 2>/dev/null | grep -c agent-` + 背景 task；>= 3 slot 滿回「跳過：slot N/3」≤15字 (2) 跑 `uv run volpred ops check-alerts --storage-dir storage`；若 breach 由 alert system 自動 dedup + 寄信 (3) 讀 storage/next_tasks.json 取最高優先任務（P1>P2>P3>P4），不分類型 (4) 若是實驗類任務，分配新 K 編號前必 ls experiments/ + .claude/worktrees/ 確認不衝突 (5) 啟動 agent 或主線程執行（文件/ops 任務主線程做，實驗類派 agent）(6) 完成後從 research_program.md / bug_backlog / next_tasks 補充 (7) queue 空才做 discovery。反空轉：cron 觸發必有新 agent / git diff / 新 knowledge / research_program.md 更新，至少一項。")
 CronCreate(cron="17 */6 * * *", prompt="會員問題研究")
-CronCreate(cron="37 */6 * * *", prompt="平台巡檢：先跑 health + platform-cycle-summary；只有異常或 release_due 才真正執行寫入")
+CronCreate(cron="37 */6 * * *", prompt="平台巡檢：先跑 health + platform-cycle-summary + check-alerts；若 alert breach 立即寄信（24h dedup），只有異常或 release_due 才真正執行寫入")
 CronCreate(cron="47 */4 * * *", prompt="每 4 小時 git commit + sync remote：(1) git status 看有意義變更 (2) git add 指定檔（不用 -A）(3) git commit (4) git pull --no-rebase origin main（merge 不 rebase，避免多 session 並行衝突）(5) git push origin main。必須 push，防本地與雲端巡檢分叉。遇 conflict 先 resolve 不可強推。")
 CronCreate(cron="7 */3 * * *", prompt="知識索引更新：先判斷是否真需更新（knowledge.json mtime 比 lancedb 新才做）；用 `uv run python scripts/build_knowledge_index.py update` 增量，不要 `build` 全量（炸 Gemini 額度）")
 CronCreate(cron="23 0,6,12,18 * * *", prompt="Token 用量日報：每 6 小時一次 --detailed；週五再補 --weekly；>40% 標記高消耗警告")
@@ -196,6 +196,12 @@ done"""
 |---------|-----------|---------|------|
 | `platform-ops-patrol` | `0 */6 * * *` | 每 6 小時 | 平台巡檢 `trig_01HzWX2ZUmsGHnzwciGpHeNz` |
 | `token-usage-daily-report` | `43 14 * * *` | 22:43 | Token 日報 `trig_015iaE6yv3V9V1opjUAA5R2V` |
+
+`platform-ops-patrol` 建議 prompt：
+
+```text
+平台巡檢摘要：先跑 ops health + platform-cycle-summary + check-alerts；若 alert breach 立即寄信（24h dedup），只有異常或 release_due 才建立/執行後續任務
+```
 
 ### 本機控制面入口
 - `uv run volpred ops assign ...`：建立正式 task

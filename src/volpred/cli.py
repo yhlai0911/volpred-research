@@ -13,6 +13,7 @@ from rich.table import Table
 console = Console()
 OPS_ACTION_CHOICES = (
     "article_local_backups",
+    "check_alerts",
     "cleanup_test_post",
     "daily_update",
     "health_check",
@@ -28,6 +29,7 @@ OPS_ACTION_CHOICES = (
     "release_article_pool",
     "release_article_pool_by_settings",
     "send_article_notification",
+    "send_alert",
     "send_daily_digest",
     "question_answer",
     "recalc_metrics",
@@ -1837,6 +1839,52 @@ def ops_send_daily_digest(target_date: str | None, force_send: bool, storage_dir
     else:
         console.print(f"[green]Daily digest prepared[/green] {result['date']} ({result['count']} articles)")
     _print_json({"action": "send_daily_digest", **result})
+
+
+@ops.command("send-alert")
+@click.option(
+    "--level",
+    required=True,
+    type=click.Choice(["info", "warn", "critical"], case_sensitive=False),
+    help="Alert level",
+)
+@click.option("--title", required=True, help="Alert title")
+@click.option("--body", required=True, help="Alert body")
+@click.option("--force", "force_send", is_flag=True, help="Bypass 24h dedup and resend once")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+def ops_send_alert(level: str, title: str, body: str, force_send: bool, storage_dir: str) -> None:
+    """Send a general-purpose ops alert email to the fixed admin recipient."""
+    from volpred.ops import ALERT_RECIPIENT, send_alert
+
+    result = send_alert(
+        level,
+        title,
+        body,
+        recipient=ALERT_RECIPIENT,
+        storage_dir=storage_dir,
+        force_send=force_send,
+    )
+    if result.get("skipped"):
+        console.print("[yellow]Alert skipped[/yellow] duplicate within 24h window")
+    elif result.get("sent"):
+        console.print(f"[green]Alert sent[/green] {result['notification_id']}")
+    else:
+        console.print("[red]Alert not delivered[/red]")
+    _print_json({"action": "send_alert", **result})
+
+
+@ops.command("check-alerts")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+def ops_check_alerts(storage_dir: str) -> None:
+    """Evaluate alert conditions and send deduped email notifications for breaches."""
+    from volpred.ops import check_alert_conditions
+
+    result = check_alert_conditions(storage_dir=storage_dir)
+    console.print(
+        "[green]Alert conditions checked[/green] "
+        f"breaches={result['breach_count']} sent={result['sent_count']} skipped={result['skipped_count']}"
+    )
+    _print_json({"action": "check_alerts", **result})
 
 
 @ops.command("paper-list")

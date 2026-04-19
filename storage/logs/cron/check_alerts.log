@@ -1,0 +1,102 @@
+/Users/yhlai0911/.local/share/uv/python/cpython-3.13.3-macos-x86_64-none/bin/python3.13: can't open file '/Users/yhlai0911/scripts/check_alerts.py': [Errno 2] No such file or directory
+/bin/bash: /Users/yhlai0911/Desktop/volpred-research/scripts/cron_check_alerts.sh: Operation not permitted
+=== ops check-alerts ===
+breaches=2 sent=1 skipped=1
+- [BREACH] release_pool_gap level=critical title=Release pool cron gap > 2h
+    ## 觸發條件
+    release_pool host cron fire gap 已超過 2 小時門檻。
+    - last_fire_at: 2026-04-19T01:30:03+00:00
+    - gap_hours: 6.5
+    - log_path: storage/logs/cron/release_pool.log
+    
+    ## 影響
+    文章釋出中斷 = 讀者端看到平台停滯、搜尋索引停滯；Mission 第 1 條（文章品質）
+    與第 5 條（曝光流量）直接受損。若持續 >4h 會累積多篇 draft 排隊延遲。
+    
+    ## 建議行動
+    1. 立即手動釋出（最快復原）：
+       VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings
+    2. 診斷 host cron 是否仍在跑：
+       tail -20 storage/logs/cron/release_pool.log
+       crontab -l | grep release_pool
+    3. 若 cron daemon 卡住：重新 install crontab 或 launchd job
+    4. 若 draft 池也空（配合 draft_pool_low alert）：先補池，見 publish-checklist
+       與 .claude/skills/publication-candidates/SKILL.md 的 5-step 選題流程。
+- [BREACH] draft_pool_low level=warn title=Draft pool below threshold (<4)
+    ## 觸發條件
+    Draft 池已低於最小門檻（<4 篇）。
+    - draft_count: 3
+    - scheduled_count: 0
+    - eligible_count: 3
+    - feed_path: storage/reports/feed.json
+    
+    ## 影響
+    release_pool cron 即使正常 fire 也沒 content 可釋 → 發文節奏中斷。
+    draft_count=0 時下一次 release tick 會空轉，讀者看到平台無新內容；
+    Mission 第 1 條（內容產出）+ 第 5 條（流量）連動受損。
+    
+    ## 建議行動
+    1. 跑選題 SOP（雙軌來源：研究驅動 + 事件驅動）：
+       see .claude/skills/publication-candidates/SKILL.md 5-step flow
+    2. 快速選題（看未覆蓋的 K 編號）：
+       grep '| - | - |' experiments/INDEX.md | head -10
+    3. 看 novelty 候選（20% contrarian quota）：
+       head -60 docs/topic_diversity_audit.md
+    4. 派 general-purpose agent 寫 2-3 篇 draft（主題軸各異）：
+       每篇 2000+ 字研究文 / 1500+ 字 general、2 張真實圖表、標數據來源 + K 編號。
+    5. 走正式入口 feed-publisher SKILL，不要繞路寫 feed.json。
+- [ok] host_cron_fail level=info title=Host cron failure detected
+dispatched:
+  - skipped: level=critical title=Release pool cron gap > 2h notif_id=d509b22e reason=dedup_24h
+  - sent: level=warn title=Draft pool below threshold (<4) notif_id=68da2566 reason=ok
+JSON: {"breach_count": 2, "sent_count": 1, "skipped_count": 1, "generated_at": "2026-04-19T08:00:01.496676+00:00"}
+=== ops check-alerts ===
+breaches=2 sent=0 skipped=2
+- [BREACH] release_pool_gap level=critical title=Release pool cron gap > 2h
+    ## 觸發條件
+    release_pool host cron fire gap 已超過 2 小時門檻。
+    - last_fire_at: 2026-04-19T01:30:03+00:00
+    - gap_hours: 7.5
+    - log_path: storage/logs/cron/release_pool.log
+    
+    ## 影響
+    文章釋出中斷 = 讀者端看到平台停滯、搜尋索引停滯；Mission 第 1 條（文章品質）
+    與第 5 條（曝光流量）直接受損。若持續 >4h 會累積多篇 draft 排隊延遲。
+    
+    ## 建議行動
+    1. 立即手動釋出（最快復原）：
+       VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings
+    2. 診斷 host cron 是否仍在跑：
+       tail -20 storage/logs/cron/release_pool.log
+       crontab -l | grep release_pool
+    3. 若 cron daemon 卡住：重新 install crontab 或 launchd job
+    4. 若 draft 池也空（配合 draft_pool_low alert）：先補池，見 publish-checklist
+       與 .claude/skills/publication-candidates/SKILL.md 的 5-step 選題流程。
+- [BREACH] draft_pool_low level=warn title=Draft pool below threshold (<4)
+    ## 觸發條件
+    Draft 池已低於最小門檻（<4 篇）。
+    - draft_count: 3
+    - scheduled_count: 0
+    - eligible_count: 3
+    - feed_path: storage/reports/feed.json
+    
+    ## 影響
+    release_pool cron 即使正常 fire 也沒 content 可釋 → 發文節奏中斷。
+    draft_count=0 時下一次 release tick 會空轉，讀者看到平台無新內容；
+    Mission 第 1 條（內容產出）+ 第 5 條（流量）連動受損。
+    
+    ## 建議行動
+    1. 跑選題 SOP（雙軌來源：研究驅動 + 事件驅動）：
+       see .claude/skills/publication-candidates/SKILL.md 5-step flow
+    2. 快速選題（看未覆蓋的 K 編號）：
+       grep '| - | - |' experiments/INDEX.md | head -10
+    3. 看 novelty 候選（20% contrarian quota）：
+       head -60 docs/topic_diversity_audit.md
+    4. 派 general-purpose agent 寫 2-3 篇 draft（主題軸各異）：
+       每篇 2000+ 字研究文 / 1500+ 字 general、2 張真實圖表、標數據來源 + K 編號。
+    5. 走正式入口 feed-publisher SKILL，不要繞路寫 feed.json。
+- [ok] host_cron_fail level=info title=Host cron failure detected
+dispatched:
+  - skipped: level=critical title=Release pool cron gap > 2h notif_id=d509b22e reason=dedup_24h
+  - skipped: level=warn title=Draft pool below threshold (<4) notif_id=68da2566 reason=dedup_24h
+JSON: {"breach_count": 2, "sent_count": 0, "skipped_count": 2, "generated_at": "2026-04-19T09:00:01.347933+00:00"}

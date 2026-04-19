@@ -37,6 +37,76 @@ paths:
 
 **類型 #6 包含**：research audience 研究文（含策略解讀、方法論複習、負面結果分享）、general audience 教育文、回顧綜述、市場觀察（非當日事件）。**不限「補池」**——不管池滿不滿都用這類，只要不是事件驅動即屬 #6。
 
+## Task Decomposition + Agent Team 分工（避免算力閒置）
+
+**硬規則**（用戶 2026-04-19 指示）：
+
+### 1. 主任務必先規劃子任務
+每次接到大 task（paper audit / feature build / 多篇文章補池 等），**先在主線程規劃子任務結構**，不直接派一個 agent 扛全部：
+
+```
+Main task: "Paper 4 vix-sufficiency 投稿準備"
+├─ Sub 1: Table 2 K732/K736 root cause 分析 (experiment, main thread)
+├─ Sub 2: 5 hard requirements 補齊 (paper_review, general-purpose agent)
+├─ Sub 3: reproduce.py full run + divergence report (code, Codex)
+├─ Sub 4: Body .tex 更新 + paper-update (paper_body, main thread only per L188)
+└─ Sub 5: Citation 驗證 (paper_review, citation-verifier skill)
+```
+
+**Schema**: `storage/ops/tasks/*.json` 有 `parent_task_id` 欄位 — 用它連 parent-child。
+
+### 2. Agent team 並行分工
+子任務**排程到時** → 派 agent team 平行執行（不同 type / skill）：
+- 每子任務對應 1 個 agent
+- 3-4 個 agent 同時跑是標準（Codex × 1 + Claude Agent tool × 2-3）
+- 各 subagent brief 6 要素 self-contained
+
+### 3. 不耗 token 的工作優先排滿
+**Low-cost tasks（主線程直接做，閒置時排入）**：
+- 單檔 Edit（rule / doc 短更新）
+- `jq` / `grep` queue / log 查詢
+- `finish-task` 收尾已實質完成的 stale claim
+- `work_log` append
+- Cron 裝/拆
+- `ops assign` 把提案入 queue
+- INDEX grep / 查重快查
+
+**中-high cost tasks**（派 agent）：
+- 多步驟 script / multi-file edit
+- 寫文章（需 chart + content）
+- Paper audit（多 .tex + script 讀）
+- 實驗跑 + 驗
+
+**規則**：
+- **Slot running < 4 可以繼續派**（CLAUDE.md L205）
+- **Claude session 整體閒置時，主線程應主動做 low-cost work 直到有事件觸發**（avoid stub skip + wait loop）
+- Stub skip 只在真無事可做（queue 全 stale codex + 無 low-cost 小活）時用
+
+### Anti-pattern（不要再犯）
+- 收大 task 直接派 1 agent 扛全部 → 子步驟耦合 agent 跑不動就全掛
+- Slot running 0-1 還 stub skip → 算力閒置，違反用戶指示
+- 低成本 1-行 edit 也派 agent → 反而消耗主線程 setup 成本
+
+## Codex subagent 併發限制（Shared runtime）
+
+**硬規則**：`sessionRuntime=shared` 模式下，**一 Claude session 一次只能派 1 個 `codex:codex-rescue` / Codex subagent**。第二個會搶同一 runtime → 後派者 claim ops task 但 `started_at=null` 永不實際跑（stale claim）。
+
+**驗證 runtime 狀態**：
+```bash
+node "/Users/yhlai0911/.claude/plugins/cache/openai-codex/codex/1.0.1/scripts/codex-companion.mjs" setup --json 2>&1 | jq '.sessionRuntime'
+```
+
+**派 Codex subagent 前必做**：
+1. 檢查 `storage/ops/tasks/*.json` 有無 `claimed_by=codex` 且 `started_at=null` 的 stale claim（>5 分鐘為警訊）
+2. 若無、且 Codex runtime idle（前一 Codex subagent completed）→ 才派下一個
+3. 若有 stale claim → 先 `finish-task --status failed` 清 + re-assign `preferred_agent=auto` 或 bypass 改派 `general-purpose` Agent tool
+
+**Bypass 策略**（Codex 卡住時）：
+- 簡單任務（Python script / CLI extension / Email send）→ 直接派 `Agent tool general-purpose`，不等 Codex
+- 複雜多檔 refactor / 大規模 audit → 必用 Codex，但嚴格 serialize 一次一個
+
+**教訓**（2026-04-19）：連派 `bavof8pa3` (v12 cleanup) + `task-mo5br0ye` (email alert) 違反 shared runtime 限制，後者 stale 5+ 分鐘沒跑；主線程 override 改派 Claude `a77622` 才真實運作。
+
 ## 派工前 Checklist（硬性，每次都做）
 
 **每次派 Agent tool 或 `codex:rescue` subagent 前，主線程必過三關**：

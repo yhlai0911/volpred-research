@@ -1085,6 +1085,9 @@ def main():
     # --- End-of-run sync health check (2026-04-17: catches silent 400/409 drift) ---
     _run_sync_health_check()
 
+    # --- Ops alert checks (2026-04-19: release_pool gap / draft pool low / host cron fail) ---
+    _run_alert_checks()
+
     print(f"\n✓ Done!")
 
 
@@ -1153,6 +1156,29 @@ def _run_sync_health_check() -> None:
 
     if alerts:
         print(f"\n⚠️  Sync health: {len(alerts)} table(s) drifted — investigate supabase_sync.py")
+
+
+def _run_alert_checks() -> None:
+    """Invoke ops alert checkers (release_pool / draft_pool / host_cron). Prints summary."""
+    print("\n--- Ops alert checks ---")
+    try:
+        sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+        from volpred.ops import check_alert_conditions  # noqa: WPS433
+    except Exception as exc:
+        print(f"  [alerts] skipped: cannot import check_alert_conditions ({exc})")
+        return
+    try:
+        report = check_alert_conditions(storage_dir="storage")
+    except Exception as exc:
+        print(f"  [alerts] check failed: {exc}")
+        return
+    print(
+        f"  breaches={report.get('breach_count')} "
+        f"sent={report.get('sent_count')} skipped={report.get('skipped_count')}"
+    )
+    for condition in report.get("conditions", []):
+        flag = "⚠️ BREACH" if condition.get("breached") else "ok"
+        print(f"  - [{flag}] {condition.get('id')} | {condition.get('title')}")
 
 
 if __name__ == "__main__":

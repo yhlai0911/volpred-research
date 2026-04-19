@@ -13,62 +13,95 @@
         "id": "collect_tw_data",
         "label": "台股/0050/VIXTWN 收集",
         "cron": "0 15 * * 1-5",
-        "command": "collect_tw_data.py",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_collect_tw.sh",
+        "log_path": "storage/logs/cron/collect_tw.log",
+        "command_deprecated": "collect_tw_data.py",
         "description": "15:00 台股收盤後收集台股日頻與 5min 資料。",
         "matchers": [
-          "collect_tw_data.py"
+          "collect_tw_data.py",
+          "cron_collect_tw.sh"
         ]
       },
       {
         "id": "collect_us_data",
         "label": "美股/SPY/GLD/VIX 收集",
         "cron": "3 7 * * 2-6",
-        "command": "collect_us_data.py",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_collect_us.sh",
+        "log_path": "storage/logs/cron/collect_us.log",
+        "command_deprecated": "collect_us_data.py",
         "description": "07:03 美股收盤後收集 SPY/GLD/TLT/QQQ/EEM/VIX/VIX3M/N225。",
         "matchers": [
-          "collect_us_data.py"
+          "collect_us_data.py",
+          "cron_collect_us.sh"
         ]
       },
       {
         "id": "daily_update",
         "label": "daily_update 每日更新與同步",
         "cron": "3 8 * * 2-6",
-        "command": "daily_update.py",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_daily_update.sh",
+        "log_path": "storage/logs/cron/daily_update.log",
+        "command_deprecated": "daily_update.py",
         "description": "08:03 策略計算、Supabase 同步、績效重算與 heartbeat。",
         "matchers": [
-          "daily_update.py"
+          "daily_update.py",
+          "cron_daily_update.sh"
         ]
       },
       {
         "id": "release_pool",
         "label": "文章池定時釋出",
         "cron": "3 */2 * * *",
-        "command": "release-pool-by-settings",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_release_pool.sh",
+        "log_path": "storage/logs/cron/release_pool.log",
+        "command_deprecated": "release-pool-by-settings",
         "description": "每 2 小時依節奏設定釋出文章池內容。",
         "matchers": [
-          "release-pool-by-settings"
+          "release-pool-by-settings",
+          "cron_release_pool.sh"
         ]
       },
       {
         "id": "market_calendar_sync",
         "label": "市場交易日曆同步",
         "cron": "0 8 * * 1",
-        "command": "volpred.market_calendar sync",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_market_cal.sh",
+        "log_path": "storage/logs/cron/market_cal.log",
+        "command_deprecated": "volpred.market_calendar sync",
         "description": "每週一同步市場交易日曆與 market status，作為 daily_update 之外的保守補強。",
         "matchers": [
           "volpred.market_calendar sync",
-          "market_status.log"
+          "market_status.log",
+          "cron_market_cal.sh"
         ]
       },
       {
         "id": "shared_scheduler_tick",
         "label": "shared scheduler tick",
         "cron": "*/10 * * * *",
-        "command": "run_scheduler_tick.sh",
+        "wrapper_script": "scripts/run_scheduler_tick.sh",
+        "log_path": "storage/logs/cron/scheduler_tick.log",
+        "command_deprecated": "run_scheduler_tick.sh",
         "description": "每 10 分鐘觸發一次 shared scheduler，由 Claude coordinator 調控 Claude/Codex 任務派工。",
+        "host_crontab_managed": false,
+        "note": "host_crontab_managed=false — 目前此 tick 不由 host crontab 管理（v12 降為 advisory）；install_host_crontab.sh 會略過。",
         "matchers": [
           "run_scheduler_tick.sh",
           "volpred-scheduler-tick"
+        ]
+      },
+      {
+        "id": "check_alerts",
+        "label": "ops alert checks (release_pool / draft / cron)",
+        "cron": "0 * * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_check_alerts.sh",
+        "log_path": "storage/logs/cron/check_alerts.log",
+        "command_deprecated": "scripts/check_alerts.py",
+        "description": "每小時檢查 release_pool_gap / draft_pool_low / host_cron_fail 並寄送 deduped email alert。",
+        "matchers": [
+          "scripts/check_alerts.py",
+          "ops check-alerts",
+          "cron_check_alerts.sh"
         ]
       }
     ]
@@ -84,6 +117,7 @@
         "timezone": "UTC",
         "local_time": "每 6 小時（台灣時間）",
         "description": "平台巡檢雲端 trigger。",
+        "prompt": "平台巡檢摘要：先跑 ops health + platform-cycle-summary + check-alerts；若 alert breach 立即寄信（24h dedup），只有異常或 release_due 才建立/執行後續任務",
         "trigger_id": "trig_01HzWX2ZUmsGHnzwciGpHeNz"
       },
       {
@@ -118,7 +152,7 @@
       {
         "id": "platform_patrol",
         "cron": "37 */6 * * *",
-        "prompt": "平台巡檢摘要：先跑 ops health + platform-cycle-summary；只有異常或 release_due 才建立/執行後續任務",
+        "prompt": "平台巡檢摘要：先跑 ops health + platform-cycle-summary + check-alerts；若 alert breach 立即寄信（24h dedup），只有異常或 release_due 才建立/執行後續任務",
         "recurring": true,
         "description": "每 6 小時的本地平台巡檢摘要。"
       },

@@ -14,15 +14,29 @@
 uv run python paper/vt-insurance-cost/reproduce.py
 ```
 
+### Reproduction Status (2026-04-19, diagnosis_v1 closed)
+
+| Metric | Pre-fix | Post-Sub1 | Post-Sub2+Sub3 |
+|---|---|---|---|
+| Match rate | 44.4% (4/9) | 88.9% (8/9) | **88.9% (8/9)** |
+| Alert level | red | amber | **amber** |
+| S1/S2 insurance decomposition (claims #1–#8) | 4/8 | 8/8 | **8/8 match** |
+| 50/50 SPY/GLD rebalancing premium (claim #9) | −121 bps (divergent) | n/a | **62.91 bps (divergent, +8.91 vs 54)** |
+
+**Residual divergence:** claim #9 only. Root cause = dividend convention asymmetry — K846 paper anchor used `yfinance auto_adjust=True` (Adj Close, 53.67 bps), replication package enforces `auto_adjust=False` raw Close (62.91 bps). **Pending L11 policy decision** between option (a) parallel adjusted-close 2006-2024 CSVs for claim #9 path vs option (b) update `main.tex:184` to "~63 bps raw Close".
+
+See `review_history/diagnosis_v1/resolution.md` for closing verdict and handoff. See `review_history/diagnosis_v1/divergence_breakdown.md` for original root-cause analysis. Commits: `a43d13d` (Sub1), `a5ca55e` (Sub2).
+
 ## Experiment Files
 | File | Description |
 |------|-------------|
 | k811v2_threshold_0.5.py | Insurance cost decomposition (main) |
 | k811v2_sensitivity_*.json | Sensitivity analysis results |
+| k846_rebalancing_premium.py | 2006-2024 rebalancing premium (paper claim #9 anchor) |
 
 ## Number Traceability
 See `reviews/audit_step1_2.md` for complete traceability table.
-All numbers verified — 0 mismatches.
+All paper-internal numbers verified against K811v2 + K846 experiment JSONs — 0 mismatches. Residual reproduce.py → paper gap on claim #9 is a dividend-convention packaging issue, not a paper-internal drift.
 
 ## Self-Contained Index (2026-04-17)
 

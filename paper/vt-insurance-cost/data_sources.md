@@ -8,10 +8,12 @@
 
 | Variable | Source | Ticker/Code | Sample Period | Frequency | Notes |
 |----------|--------|-------------|--------------|-----------|-------|
-| SPY returns | Yahoo Finance (yfinance) | SPY | 2012-01-01 – 2024-12-31 | Daily | Log-return; pre-cached as `data/spy_2012_2024.csv` |
-| GLD returns | Yahoo Finance (yfinance) | GLD | 2012-01-01 – 2024-12-31 | Daily | Gold ETF; cross-asset robustness |
+| SPY returns | Yahoo Finance (yfinance) | SPY | 2012-01-01 – 2024-12-31 | Daily | **raw Close (auto_adjust=False) canonical; K811v2 anchor**; pre-cached as `data/spy_2012_2024.csv` |
+| GLD returns | Yahoo Finance (yfinance) | GLD | 2012-01-01 – 2024-12-31 | Daily | **raw Close (auto_adjust=False) canonical; K811v2 anchor**; Gold ETF; cross-asset robustness |
 | VIX | Yahoo Finance (yfinance) | ^VIX | 2012-01-01 – 2024-12-31 | Daily | CBOE VIX; pre-cached as `data/vix_2012_2024.csv` |
 | VVIX | Yahoo Finance (yfinance) | ^VVIX | 2012-01-01 – 2024-12-31 | Daily | VIX of VIX; volatility-of-volatility proxy; pre-cached |
+
+> **Canonical raw Close convention** (2026-04-18): SPY and GLD CSVs contain both `Adj Close` (dividend-adjusted) and `Close` (raw). The `reproduce.py` pipeline and paper canonical statistics (K811v2 anchor) use the **raw Close** column (yfinance `auto_adjust=False`). A prior bundled snapshot used `auto_adjust=True` adjusted close in the `Close` column, which caused a 44% reproduce match rate; see `docs/error_log.md` entry for Paper 4 P4 Sub1 re-bundle. Downstream users must not substitute Adj Close for Close without re-anchoring all VT / buy-and-hold metrics.
 
 ---
 
@@ -21,8 +23,8 @@ Pre-downloaded CSV files are included in the paper folder (no external download 
 
 | File | Location | Contents |
 |------|----------|----------|
-| `spy_2012_2024.csv` | `paper/vt-insurance-cost/data/` | SPY adjusted close prices |
-| `gld_2012_2024.csv` | `paper/vt-insurance-cost/data/` | GLD adjusted close prices |
+| `spy_2012_2024.csv` | `paper/vt-insurance-cost/data/` | SPY raw Close (auto_adjust=False) + Adj Close + OHLCV |
+| `gld_2012_2024.csv` | `paper/vt-insurance-cost/data/` | GLD raw Close (auto_adjust=False) + Adj Close + OHLCV |
 | `vix_2012_2024.csv` | `paper/vt-insurance-cost/data/` | VIX daily level |
 | `vvix_2012_2024.csv` | `paper/vt-insurance-cost/data/` | VVIX daily level |
 

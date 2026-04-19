@@ -72,33 +72,54 @@ merge_one_worktree() {
     echo "  Branch: $branch"
 
     # 檢查 worktree 是否有未提交的變更
+    # K1143-v2 (2026-04-19): status 失敗必須 ABORT 不能 silent skip，
+    # 否則 has_uncommitted=false + rev-list=0 會進入 line 123 "no commits" path
+    # 觸發 remove --force，靜默吃掉工作目錄 (K903/K904/K1032/K1114/K1100g_d9)
     local has_uncommitted=false
-    if [[ -d "$wt_path" ]]; then
-        local status
-        status=$(cd "$wt_path" && git status --porcelain 2>/dev/null || true)
-        if [[ -n "$status" ]]; then
-            has_uncommitted=true
-            echo "  [!] 有未提交的變更："
-            echo "$status" | head -10 | sed 's/^/      /'
-            local total=$(echo "$status" | wc -l | tr -d ' ')
-            if [[ $total -gt 10 ]]; then
-                echo "      ... 共 $total 個檔案"
-            fi
+    if [[ ! -d "$wt_path" ]]; then
+        echo "  [ABORT] worktree 目錄不存在: $wt_path"
+        return 1
+    fi
+
+    local status
+    local status_rc=0
+    status=$(cd "$wt_path" && git status --porcelain 2>&1) || status_rc=$?
+    if [[ $status_rc -ne 0 ]]; then
+        echo "  [ABORT] git status 在 worktree 內失敗 (rc=$status_rc)；拒絕繼續以防 silent data loss"
+        echo "         output: $status"
+        return 1
+    fi
+    if [[ -n "$status" ]]; then
+        has_uncommitted=true
+        echo "  [!] 有未提交的變更："
+        echo "$status" | head -10 | sed 's/^/      /'
+        local total=$(echo "$status" | wc -l | tr -d ' ')
+        if [[ $total -gt 10 ]]; then
+            echo "      ... 共 $total 個檔案"
         fi
     fi
 
     # 如果有未提交變更，自動 commit
+    # K1143-v2: commit 後要驗證真的產生了新 commit（branch HEAD 前進），否則 abort
     if $has_uncommitted; then
         echo "  [ACTION] 自動提交未保存的變更..."
         if ! $DRY_RUN; then
+            local head_before_commit head_after_commit
+            head_before_commit=$(cd "$wt_path" && git rev-parse HEAD 2>/dev/null || echo "NONE")
             (cd "$wt_path" && git add -A && git commit -m "Auto-commit: save agent work before worktree merge
 
 Files saved from worktree $wt_name to prevent data loss.
 
 Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>") || {
-                echo "  [ERROR] 自動提交失敗"
+                echo "  [ERROR] 自動提交失敗（git add -A 或 git commit 出錯）"
                 return 1
             }
+            head_after_commit=$(cd "$wt_path" && git rev-parse HEAD 2>/dev/null || echo "NONE")
+            if [[ "$head_before_commit" == "$head_after_commit" ]]; then
+                echo "  [ABORT] auto-commit 聲稱成功但 HEAD 未前進 ($head_before_commit)；可能 detached 或其他異常"
+                return 1
+            fi
+            echo "  [OK] auto-commit: $head_before_commit → $head_after_commit"
         else
             echo "  [DRY-RUN] 會自動提交"
         fi
@@ -121,11 +142,65 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>") || {
     fi
 
     if [[ -z "$new_commits" ]] && [[ "$commit_count_verify" -eq 0 ]]; then
-        echo "  [OK] 沒有新的 commits（雙重確認 rev-list=0），可安全移除"
+        # K1143-v2 (2026-04-19): rev-list=0 不代表工作目錄也空。
+        # Auto-commit 失敗、detached HEAD、gitignore 吃掉檔案 → rev-list=0 但
+        # wt_path 底下仍有 experiments/<kXXX> 是**主目錄沒有的**。舊版在這裡執行
+        # `git worktree remove --force` 直接刪除整個目錄，是 K903/K904/K1032/K1114/K1100g_d9
+        # silent loss 的真正 smoking gun。
+        #
+        # 防禦：pre-remove 掃 worktree 下 experiments/<kXXX>/，凡是主目錄沒有的就 abort。
+        # 有相同 kXXX 的 common dir 也需要用 diff 檢查是否 worktree 版更新（不比 __pycache__）。
+        local orphan_exp_dirs=""
+        local updated_exp_dirs=""
+        if [[ -d "$wt_path/experiments" ]]; then
+            for exp_dir in "$wt_path/experiments/"*/; do
+                [[ -d "$exp_dir" ]] || continue
+                local exp_name
+                exp_name=$(basename "$exp_dir")
+                if [[ ! -d "$MAIN_DIR/experiments/$exp_name" ]]; then
+                    orphan_exp_dirs="$orphan_exp_dirs  $exp_name\n"
+                else
+                    # 共存資料夾：比對有無 worktree-only 的關鍵檔
+                    local wt_only
+                    wt_only=$(diff -rq "$MAIN_DIR/experiments/$exp_name" "$exp_dir" 2>/dev/null \
+                        | grep "^Only in $exp_dir" \
+                        | grep -v '__pycache__' \
+                        | head -5 || true)
+                    if [[ -n "$wt_only" ]]; then
+                        updated_exp_dirs="$updated_exp_dirs  $exp_name (worktree-only files):\n$wt_only\n"
+                    fi
+                fi
+            done
+        fi
+        if [[ -n "$orphan_exp_dirs" ]] || [[ -n "$updated_exp_dirs" ]]; then
+            echo "  [🛑 ABORT] rev-list=0 但 worktree experiments/ 有主目錄沒有的內容（auto-commit 漏掉或 gitignored）："
+            if [[ -n "$orphan_exp_dirs" ]]; then
+                echo "    主目錄不存在的實驗資料夾："
+                printf "%b" "$orphan_exp_dirs"
+            fi
+            if [[ -n "$updated_exp_dirs" ]]; then
+                echo "    主目錄有但 worktree 多出檔案的資料夾："
+                printf "%b" "$updated_exp_dirs"
+            fi
+            echo "  [🛑 ABORT] 拒絕 remove 以防 silent data loss"
+            echo "  [HINT] 手動處理建議："
+            echo "         1. cd $wt_path && git status && ls -la experiments/"
+            echo "         2. 把漏掉的檔手動 copy 到主目錄：cp -r $wt_path/experiments/<kXXX> $MAIN_DIR/experiments/"
+            echo "         3. 主目錄 git add + commit 後再跑 bash scripts/merge_worktree.sh $wt_name"
+            return 1
+        fi
+
+        echo "  [OK] 沒有新的 commits（雙重確認 rev-list=0）+ experiments/ 也空，可安全移除"
         if ! $DRY_RUN; then
-            git worktree remove "$wt_path" 2>/dev/null || git worktree remove --force "$wt_path" 2>/dev/null
+            # K1143-v2: 禁用 --force fallback (CLAUDE.md L168 禁止)。若 remove 失敗就 abort。
+            if ! git worktree remove "$wt_path" 2>&1; then
+                echo "  [ABORT] git worktree remove 失敗（拒絕 --force fallback，CLAUDE.md L168 禁止）"
+                echo "  [HINT] 手動檢查: ls $wt_path; git worktree list"
+                echo "         若確認無遺失，再手動: git worktree remove --force $wt_path"
+                return 1
+            fi
             # 用 -d (lowercase) 不 -D：refuse 未合併 commit, 防止 silent data loss
-            git branch -d "$branch" 2>/dev/null || {
+            git branch -d "$branch" 2>&1 || {
                 echo "  [WARN] branch -d 拒絕（branch 有未合併 commits），保留 branch 等待人工檢查"
             }
             echo "  [DONE] 已移除 worktree"
@@ -338,9 +413,11 @@ else
     echo ""
 
     # 用 for loop（非 pipe-while），避免子 shell 吞錯誤
+    # K1143-v2 (2026-04-19): 單個 worktree abort (return 1) 不該終止整個 script；
+    # 加 `|| true` 讓 main loop 繼續處理其他 worktree + orphan cleanup。
     for wt in "${wt_array[@]}"; do
         if [[ -n "$wt" ]]; then
-            merge_one_worktree "$wt"
+            merge_one_worktree "$wt" || echo "  [SKIP] 這個 worktree abort，繼續處理其他"
         fi
     done
 fi
@@ -350,9 +427,12 @@ echo "=== 完成 ==="
 echo ""
 
 # 清理 orphan worktree branches（worktree 已移除但 branch 殘留）
+# K1143-v2 (2026-04-19): 用 git for-each-ref 而不是 `git branch | tr -d ' '`，
+# 後者不會去掉 "currently checked out" 標記 `+` → 產出 `+worktree-agent-xxx`
+# 錯誤名稱，後續 rev-list / branch -d 都會 silent 失敗。
 echo "--- 清理 orphan worktree branches ---"
 orphan_count=0
-for branch in $(git branch --list 'worktree-agent-*' 2>/dev/null | tr -d ' '); do
+for branch in $(git for-each-ref --format='%(refname:short)' 'refs/heads/worktree-agent-*' 2>/dev/null); do
     # 檢查該 branch 是否還有 worktree 關聯
     if ! git worktree list --porcelain | grep -q "branch refs/heads/$branch"; then
         # 額外保護：檢查 branch 是否有未合併到 main 的 commits（防止 silent data loss）

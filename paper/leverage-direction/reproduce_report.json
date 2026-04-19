@@ -1,0 +1,119 @@
+{
+  "paper_id": "leverage-direction",
+  "paper_title": "Leverage Direction Matters: GJR-GARCH Gamma Taxonomy",
+  "target_journal": "JBF",
+  "timestamp": "2026-04-19T07:00:55Z",
+  "script": "paper/leverage-direction/reproduce.py",
+  "exit_code": 0,
+  "runtime_seconds": 1,
+  "alert_level": "red",
+  "gate_status": "fail",
+  "gate_rule": ">=95% match rate + green alert",
+  "total_checks": 58,
+  "matched": 31,
+  "mismatches": 8,
+  "untraceable": 19,
+  "status_breakdown": {
+    "MATCH": 20,
+    "ROUNDING": 1,
+    "VERIFIED_KB_ONLY": 9,
+    "NOTE": 1,
+    "MISMATCH": 8,
+    "UNTRACEABLE": 19
+  },
+  "match_rate_pct": 53.4,
+  "traceable_match_rate_pct": 79.5,
+  "divergences": [
+    {
+      "table": "Table 3",
+      "cell": "SPY 2023-24 DM p-value",
+      "paper_value": "0.001",
+      "experiment_value": "0.0035 (stat=-2.9326)",
+      "severity": "medium",
+      "note": "K799=0.0035; K802=0.0012. Paper p=0.001 matches K802 rounded."
+    },
+    {
+      "table": "Table 5",
+      "cell": "GJR+Normal violations",
+      "paper_value": "10 (from K799)",
+      "experiment_value": "9 / 1.79% (K802)",
+      "severity": "low",
+      "note": "Different refit schedules across K799/K802."
+    },
+    {
+      "table": "Table 5",
+      "cell": "GJR+Student-t Kupiec p",
+      "paper_value": "0.60",
+      "experiment_value": "0.6698",
+      "severity": "medium",
+      "note": "Aggressive rounding (0.67 -> 0.60)."
+    },
+    {
+      "table": "Table 5",
+      "cell": "GJR+HistSim Kupiec p",
+      "paper_value": "0.60",
+      "experiment_value": "0.6353",
+      "severity": "medium",
+      "note": "Aggressive rounding (0.64 -> 0.60)."
+    },
+    {
+      "table": "Table 5",
+      "cell": "GJR+HistSim violations (K802 cross-check)",
+      "paper_value": "4 (from K824v2)",
+      "experiment_value": "5 / 1.00% (K802 FHS)",
+      "severity": "low",
+      "note": "Different residual implementations."
+    },
+    {
+      "table": "Internal",
+      "cell": "HM gamma: Sec 5.4 vs Sec 4.7 (additions_jk.tex)",
+      "paper_value": "Sec 5.4: -0.043 (t=-4.06) vs Sec 4.7: -0.035 (t=-0.39)",
+      "experiment_value": "CONFLICT: two different values for same test",
+      "severity": "high",
+      "note": "Paper-internal inconsistency. Must resolve before submission."
+    },
+    {
+      "table": "Internal",
+      "cell": "Excess kurtosis: Table 11 (14.71) vs Table 1 (14.6)",
+      "paper_value": "Table 11: 14.71 | Table 1: 14.6",
+      "experiment_value": "Different periods: Table 11 = 2014-2026, Table 1 = 2017-2025",
+      "severity": "low",
+      "note": "Different sample periods; annotate explicitly."
+    },
+    {
+      "table": "In-text",
+      "cell": "Sec 4.4 DM p for GJR vs GARCH",
+      "paper_value": "0.001 (Table 3)",
+      "experiment_value": "p=0.0035, stat=-2.9326 (K799)",
+      "severity": "medium",
+      "note": "Paper's p=0.001 appears to come from K802 (rounded), not K799."
+    }
+  ],
+  "untraceable_summary": {
+    "count": 19,
+    "dominant_gaps": [
+      "Tables 1,2,6,7,8,11,14: no dedicated experiment JSON",
+      "QQQ/GLD/TLT/EEM/BTC QLIKE columns lack asset-period JSON",
+      "All 7 figures lack generation scripts",
+      "Abstract 6/6 OOS claim and rho=0.83 have no traceable JSON"
+    ]
+  },
+  "recommendations": {
+    "high_priority": [
+      "Resolve HM gamma conflict (-0.043 vs -0.035) before any submission",
+      "Standardize DM p-value source (K799 vs K802) and report consistent value",
+      "Fix Kupiec p rounding (Student-t 0.67 -> 0.60; HistSim 0.64 -> 0.60)"
+    ],
+    "medium_priority": [
+      "Hybrid VT Sharpe rounding 0.985 -> 0.99 is aggressive",
+      "Create dedicated experiments for Tables 1,2,6,7,8,11,14",
+      "Standardize Table 5 source across K799/K802/K824v2"
+    ],
+    "low_priority": [
+      "Annotate kurtosis difference (Table 11 vs Table 1) with period note",
+      "Save figure generation scripts alongside paper"
+    ]
+  },
+  "suggested_next_action": "Revise v3: (1) resolve Sec 5.4 vs Sec 4.7 HM gamma contradiction, (2) unify DM p-value source, (3) correct Kupiec rounding. Then re-run reproduce.py to recompute traceable match rate.",
+  "audit_method": "Stdout parsed from reproduce.py run on 2026-04-19. Raw stdout = 456 lines (not embedded; regenerate via uv run python reproduce.py)."
+}

@@ -103,11 +103,11 @@
 - Paper trading 歷史資料不可手補；讓 forward tracking / recalc 流程自然修正。
 - 前端 target、Zeabur service、paper public dir、Mirror 預設 URL 全看 `config/project_targets.json`。
 - 排程唯一來源是 `config/runtime_schedules.json`；不要從舊文件反推 cron。
-- v11 orchestration 的正式 task / schedule source of truth 是：
+- v12 orchestration 的正式 task / schedule source of truth 是：
   - `storage/ops/` 下的 control-plane `TaskRecord` / `AgentSession` / `ExecutionReceipt`
   - `config/runtime_schedules.json`
   - `event_jobs` + `storage/ops/event_ledger/`
-- `storage/next_tasks.json` 現在只視為 **legacy planning / working list**：
+- `storage/next_tasks.json` 現在只視為 **legacy planning / working list**（v11→v12 遺留）：
   - 可以當補充線索或人工待辦
   - 不是 shared scheduler 的正式 queue
   - 不是 canonical control-plane schema

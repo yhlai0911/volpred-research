@@ -1,7 +1,7 @@
 {
   "metadata": {
     "script": "compute_mcs_dm.py",
-    "timestamp": "2026-04-10T06:18:31.127669+00:00",
+    "timestamp": "2026-04-19T08:56:12.126566+00:00",
     "data_start": "2005-01-01",
     "data_end": "2026-04-08",
     "oos_start": "2019-01-01",
@@ -9,7 +9,7 @@
     "n_refits": 29,
     "window": 2000,
     "refit_every": 63,
-    "elapsed_seconds": 1669.5060217380524,
+    "elapsed_seconds": 1390.5617740154266,
     "references": [
       "Hansen, Lunde & Nason (2011). The Model Confidence Set. Econometrica 79(2):453-497.",
       "Diebold & Mariano (1995). Comparing Predictive Accuracy. JBES 13(3):253-263.",
@@ -22,103 +22,103 @@
     {
       "rank": 1,
       "model": "A4f_vix2_free_omega",
-      "qlike": -8.35979424907558,
+      "qlike": -8.360583353872407,
       "n_valid": 1825
     },
     {
       "rank": 2,
       "model": "A4_vix_squared",
-      "qlike": -8.358002835030069,
+      "qlike": -8.355386134810251,
       "n_valid": 1825
     },
     {
       "rank": 3,
       "model": "A2_consistent_tau_t",
-      "qlike": -8.355053623302911,
+      "qlike": -8.354769382706579,
       "n_valid": 1825
     },
     {
       "rank": 4,
-      "model": "A2f_free_omega",
-      "qlike": -8.354423795800294,
+      "model": "B1_MIDAS_K22",
+      "qlike": -8.35388793712678,
       "n_valid": 1825
     },
     {
       "rank": 5,
-      "model": "B1_MIDAS_K22",
-      "qlike": -8.35388810612655,
+      "model": "A2f_free_omega",
+      "qlike": -8.353495091291563,
       "n_valid": 1825
     },
     {
       "rank": 6,
       "model": "A3_consistent_tau_t1",
-      "qlike": -8.350426301886216,
+      "qlike": -8.352396750490453,
       "n_valid": 1825
     },
     {
       "rank": 7,
-      "model": "A2n_logexp_samplenorm",
-      "qlike": -8.349975843362383,
+      "model": "A4n_vix2_samplenorm",
+      "qlike": -8.350340835636755,
       "n_valid": 1825
     },
     {
       "rank": 8,
-      "model": "A4n_vix2_samplenorm",
-      "qlike": -8.349678866337364,
+      "model": "A2n_logexp_samplenorm",
+      "qlike": -8.34997715633641,
       "n_valid": 1825
     },
     {
       "rank": 9,
-      "model": "A1_K889_original",
-      "qlike": -8.348538687467926,
+      "model": "A3f_tau_t1_free_omega",
+      "qlike": -8.34924558595624,
       "n_valid": 1825
     },
     {
       "rank": 10,
-      "model": "A3f_tau_t1_free_omega",
-      "qlike": -8.34735662801633,
+      "model": "A1_K889_original",
+      "qlike": -8.34776732413586,
       "n_valid": 1825
     },
     {
       "rank": 11,
       "model": "B2_MIDAS_K65",
-      "qlike": -8.341764342927574,
+      "qlike": -8.341766845039569,
       "n_valid": 1825
     },
     {
       "rank": 12,
       "model": "B3_MIDAS_K125",
-      "qlike": -8.337409057167148,
+      "qlike": -8.337409437385318,
       "n_valid": 1825
     },
     {
       "rank": 13,
       "model": "A5_vix_level",
-      "qlike": -8.331779837535672,
+      "qlike": -8.331776864855467,
       "n_valid": 1825
     },
     {
       "rank": 14,
       "model": "C1_MIDAS_FS_K6",
-      "qlike": -8.309724727703495,
+      "qlike": -8.307969992460226,
       "n_valid": 1825
     },
     {
       "rank": 15,
       "model": "C3_MIDAS_FS_K24",
-      "qlike": -8.307173299564877,
+      "qlike": -8.307315714802494,
       "n_valid": 1825
     },
     {
       "rank": 16,
       "model": "C2_MIDAS_FS_K12",
-      "qlike": -8.301267917430435,
+      "qlike": -8.30231588391804,
       "n_valid": 1825
     },
     {
       "rank": 17,
       "model": "B0_GJR",
-      "qlike": -8.272503655198381,
+      "qlike": -8.276055350023253,
       "n_valid": 1825
     }
   ],
@@ -171,961 +171,961 @@
       "elimination_order": [
         {
           "model": "B0_GJR",
-          "p_value": 0.229,
-          "avg_qlike": -8.272503655198381
+          "p_value": 0.177,
+          "avg_qlike": -8.276055350023253
         }
       ]
     }
   },
   "dm_matrix": {
     "B0_GJR_vs_A1_K889_original": {
-      "t_stat": 2.9911643861088355,
-      "p_val": 0.002779158416266636,
+      "t_stat": 3.1188481510584287,
+      "p_val": 0.0018155950431428813,
       "winner": "A1_K889_original",
-      "significant_harvey": false,
+      "significant_harvey": true,
       "significant_5pct": true
     },
     "B0_GJR_vs_A2_consistent_tau_t": {
-      "t_stat": 3.2370482840458132,
-      "p_val": 0.0012077297536037257,
+      "t_stat": 3.4367647239494383,
+      "p_val": 0.000588706743384737,
       "winner": "A2_consistent_tau_t",
       "significant_harvey": true,
       "significant_5pct": true
     },
     "B0_GJR_vs_A3_consistent_tau_t1": {
-      "t_stat": 3.047497916534334,
-      "p_val": 0.0023075512576351542,
+      "t_stat": 3.2926733627475895,
+      "p_val": 0.0009923969450393866,
       "winner": "A3_consistent_tau_t1",
       "significant_harvey": true,
       "significant_5pct": true
     },
     "B0_GJR_vs_A4_vix_squared": {
-      "t_stat": 3.8046618716316516,
-      "p_val": 0.0001419980282575395,
+      "t_stat": 4.059841897353134,
+      "p_val": 4.9105955115313904e-05,
       "winner": "A4_vix_squared",
       "significant_harvey": true,
       "significant_5pct": true
     },
     "B0_GJR_vs_A5_vix_level": {
-      "t_stat": 1.8947472564543504,
-      "p_val": 0.05812589381588573,
+      "t_stat": 1.8770221785501682,
+      "p_val": 0.060515054192965545,
       "winner": "A5_vix_level",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "B0_GJR_vs_A2f_free_omega": {
-      "t_stat": 3.221111660935564,
-      "p_val": 0.0012769438639588238,
+      "t_stat": 3.3703805609574258,
+      "p_val": 0.0007506443888385395,
       "winner": "A2f_free_omega",
       "significant_harvey": true,
       "significant_5pct": true
     },
     "B0_GJR_vs_A4f_vix2_free_omega": {
-      "t_stat": 4.030378564428692,
-      "p_val": 5.568709305792119e-05,
+      "t_stat": 4.4779669968154,
+      "p_val": 7.535724782181674e-06,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": true,
       "significant_5pct": true
     },
     "B0_GJR_vs_A3f_tau_t1_free_omega": {
-      "t_stat": 2.922432433952835,
-      "p_val": 0.0034730896630823516,
+      "t_stat": 3.1716657984564045,
+      "p_val": 0.0015156732150563013,
       "winner": "A3f_tau_t1_free_omega",
-      "significant_harvey": false,
+      "significant_harvey": true,
       "significant_5pct": true
     },
     "B0_GJR_vs_A2n_logexp_samplenorm": {
-      "t_stat": 3.0691091697478803,
-      "p_val": 0.0021469811984713427,
+      "t_stat": 3.2843999949655753,
+      "p_val": 0.001021997610061609,
       "winner": "A2n_logexp_samplenorm",
       "significant_harvey": true,
       "significant_5pct": true
     },
     "B0_GJR_vs_A4n_vix2_samplenorm": {
-      "t_stat": 3.4482031743115305,
-      "p_val": 0.0005643293615678058,
+      "t_stat": 3.7197107441100385,
+      "p_val": 0.00019945106725671735,
       "winner": "A4n_vix2_samplenorm",
       "significant_harvey": true,
       "significant_5pct": true
     },
     "B0_GJR_vs_B1_MIDAS_K22": {
-      "t_stat": 3.209766863209129,
-      "p_val": 0.0013284267000635008,
+      "t_stat": 3.4125211127903596,
+      "p_val": 0.0006436494091253131,
       "winner": "B1_MIDAS_K22",
       "significant_harvey": true,
       "significant_5pct": true
     },
     "B0_GJR_vs_B2_MIDAS_K65": {
-      "t_stat": 2.9935599824019925,
-      "p_val": 0.002757433011952415,
+      "t_stat": 3.198596077885372,
+      "p_val": 0.001380985081367525,
       "winner": "B2_MIDAS_K65",
-      "significant_harvey": false,
+      "significant_harvey": true,
       "significant_5pct": true
     },
     "B0_GJR_vs_B3_MIDAS_K125": {
-      "t_stat": 3.062042852041633,
-      "p_val": 0.0021983197914627883,
+      "t_stat": 3.3015889853323594,
+      "p_val": 0.0009613883410437563,
       "winner": "B3_MIDAS_K125",
       "significant_harvey": true,
       "significant_5pct": true
     },
     "B0_GJR_vs_C1_MIDAS_FS_K6": {
-      "t_stat": 3.487136809467912,
-      "p_val": 0.0004882215400803247,
+      "t_stat": 2.323180555225434,
+      "p_val": 0.020169454909543028,
       "winner": "C1_MIDAS_FS_K6",
-      "significant_harvey": true,
-      "significant_5pct": true
-    },
-    "B0_GJR_vs_C2_MIDAS_FS_K12": {
-      "t_stat": 2.126782854913443,
-      "p_val": 0.03343812949575242,
-      "winner": "C2_MIDAS_FS_K12",
       "significant_harvey": false,
       "significant_5pct": true
     },
+    "B0_GJR_vs_C2_MIDAS_FS_K12": {
+      "t_stat": 1.5964606091522044,
+      "p_val": 0.11038599358920753,
+      "winner": "C2_MIDAS_FS_K12",
+      "significant_harvey": false,
+      "significant_5pct": false
+    },
     "B0_GJR_vs_C3_MIDAS_FS_K24": {
-      "t_stat": 2.6772952265312973,
-      "p_val": 0.007421920521908598,
+      "t_stat": 2.0632056230957505,
+      "p_val": 0.039093096125073945,
       "winner": "C3_MIDAS_FS_K24",
       "significant_harvey": false,
       "significant_5pct": true
     },
     "A1_K889_original_vs_A2_consistent_tau_t": {
-      "t_stat": 1.9504964533618563,
-      "p_val": 0.05111697569383966,
+      "t_stat": 2.11023184300706,
+      "p_val": 0.03483839099984776,
       "winner": "A2_consistent_tau_t",
       "significant_harvey": false,
-      "significant_5pct": false
+      "significant_5pct": true
     },
     "A1_K889_original_vs_A3_consistent_tau_t1": {
-      "t_stat": 0.5184189255559872,
-      "p_val": 0.6041660129737751,
+      "t_stat": 1.0226305944691565,
+      "p_val": 0.3064825384613268,
       "winner": "A3_consistent_tau_t1",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A1_K889_original_vs_A4_vix_squared": {
-      "t_stat": 1.3239664809187164,
-      "p_val": 0.18551417709044626,
+      "t_stat": 0.8714583411254738,
+      "p_val": 0.3835039426729274,
       "winner": "A4_vix_squared",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A1_K889_original_vs_A5_vix_level": {
-      "t_stat": -0.684658068408053,
-      "p_val": 0.49355971490499306,
+      "t_stat": -0.6530577011873367,
+      "p_val": 0.5137190802171268,
       "winner": "A1_K889_original",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A1_K889_original_vs_A2f_free_omega": {
-      "t_stat": 1.600690941805557,
-      "p_val": 0.10944538842238716,
+      "t_stat": 1.5309181398530873,
+      "p_val": 0.12578962541072758,
       "winner": "A2f_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A1_K889_original_vs_A4f_vix2_free_omega": {
-      "t_stat": 1.4685759840972414,
-      "p_val": 0.14194783274837142,
+      "t_stat": 1.6538913052913398,
+      "p_val": 0.09814959958336344,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A1_K889_original_vs_A3f_tau_t1_free_omega": {
-      "t_stat": -0.306474598608181,
-      "p_val": 0.7592433173165809,
-      "winner": "A1_K889_original",
+      "t_stat": 0.3923939918142757,
+      "p_val": 0.6947671246651399,
+      "winner": "A3f_tau_t1_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A1_K889_original_vs_A2n_logexp_samplenorm": {
-      "t_stat": 0.15824062197678276,
-      "p_val": 0.8742671952685708,
+      "t_stat": 0.24315018621761367,
+      "p_val": 0.8078890545506285,
       "winner": "A2n_logexp_samplenorm",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A1_K889_original_vs_A4n_vix2_samplenorm": {
-      "t_stat": 0.10123703883843882,
-      "p_val": 0.9193622950016607,
+      "t_stat": 0.2251136860976061,
+      "p_val": 0.8218908342519067,
       "winner": "A4n_vix2_samplenorm",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A1_K889_original_vs_B1_MIDAS_K22": {
-      "t_stat": 1.0172417726898375,
-      "p_val": 0.30903842860037845,
+      "t_stat": 1.169107395488889,
+      "p_val": 0.24236036466056632,
       "winner": "B1_MIDAS_K22",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A1_K889_original_vs_B2_MIDAS_K65": {
-      "t_stat": -0.9993155178884521,
-      "p_val": 0.31764187049490666,
+      "t_stat": -0.8881990052865082,
+      "p_val": 0.37443371376517876,
       "winner": "A1_K889_original",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A1_K889_original_vs_B3_MIDAS_K125": {
-      "t_stat": -1.3346460333144539,
-      "p_val": 0.1819922241370695,
+      "t_stat": -1.2448736588002105,
+      "p_val": 0.2131781948710163,
       "winner": "A1_K889_original",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A1_K889_original_vs_C1_MIDAS_FS_K6": {
-      "t_stat": -1.6730697022253005,
-      "p_val": 0.09431357516761896,
+      "t_stat": -1.7595526585798356,
+      "p_val": 0.07848368439433973,
       "winner": "A1_K889_original",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A1_K889_original_vs_C2_MIDAS_FS_K12": {
-      "t_stat": -1.8681024240153297,
-      "p_val": 0.06174779575113298,
+      "t_stat": -1.7994418509560652,
+      "p_val": 0.07194881441851786,
       "winner": "A1_K889_original",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A1_K889_original_vs_C3_MIDAS_FS_K24": {
-      "t_stat": -1.8250087870198968,
-      "p_val": 0.06799970334381067,
+      "t_stat": -1.7852210569919933,
+      "p_val": 0.07422546774758021,
       "winner": "A1_K889_original",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A2_consistent_tau_t_vs_A3_consistent_tau_t1": {
-      "t_stat": -2.273145182332225,
-      "p_val": 0.023017432425458173,
+      "t_stat": -0.6943440064112743,
+      "p_val": 0.48746649964494604,
       "winner": "A2_consistent_tau_t",
       "significant_harvey": false,
-      "significant_5pct": true
+      "significant_5pct": false
     },
     "A2_consistent_tau_t_vs_A4_vix_squared": {
-      "t_stat": 0.4747272321452744,
-      "p_val": 0.6349814051882048,
+      "t_stat": 0.07998183998730649,
+      "p_val": 0.9362516992836758,
       "winner": "A4_vix_squared",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A2_consistent_tau_t_vs_A5_vix_level": {
-      "t_stat": -0.9422486510249188,
-      "p_val": 0.3460653509309066,
+      "t_stat": -0.9307001596843442,
+      "p_val": 0.3520086870764376,
       "winner": "A2_consistent_tau_t",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A2_consistent_tau_t_vs_A2f_free_omega": {
-      "t_stat": -0.3763288254422044,
-      "p_val": 0.706672452115243,
+      "t_stat": -0.7255157783135994,
+      "p_val": 0.468135668722762,
       "winner": "A2_consistent_tau_t",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A2_consistent_tau_t_vs_A4f_vix2_free_omega": {
-      "t_stat": 0.7182909032353838,
-      "p_val": 0.4725779379486419,
+      "t_stat": 0.8545189447126665,
+      "p_val": 0.39281751712398205,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A2_consistent_tau_t_vs_A3f_tau_t1_free_omega": {
-      "t_stat": -2.984155725056829,
-      "p_val": 0.0028436200694241798,
+      "t_stat": -2.3037301551691955,
+      "p_val": 0.021237795982105956,
       "winner": "A2_consistent_tau_t",
       "significant_harvey": false,
       "significant_5pct": true
     },
     "A2_consistent_tau_t_vs_A2n_logexp_samplenorm": {
-      "t_stat": -0.6963260350146074,
-      "p_val": 0.48622467220744303,
+      "t_stat": -0.6558452347369905,
+      "p_val": 0.5119237081633408,
       "winner": "A2_consistent_tau_t",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A2_consistent_tau_t_vs_A4n_vix2_samplenorm": {
-      "t_stat": -0.5537446320459629,
-      "p_val": 0.5797536255241955,
+      "t_stat": -0.45001840540661064,
+      "p_val": 0.6526971693401236,
       "winner": "A2_consistent_tau_t",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A2_consistent_tau_t_vs_B1_MIDAS_K22": {
-      "t_stat": -0.24618817559384146,
-      "p_val": 0.8055365684385629,
+      "t_stat": -0.18707742775262512,
+      "p_val": 0.8515999257527345,
       "winner": "A2_consistent_tau_t",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A2_consistent_tau_t_vs_B2_MIDAS_K65": {
-      "t_stat": -2.153794039980386,
-      "p_val": 0.03125632732030259,
+      "t_stat": -2.1146114032830847,
+      "p_val": 0.03446308095817652,
       "winner": "A2_consistent_tau_t",
       "significant_harvey": false,
       "significant_5pct": true
     },
     "A2_consistent_tau_t_vs_B3_MIDAS_K125": {
-      "t_stat": -2.2590960765834582,
-      "p_val": 0.023877409152281537,
+      "t_stat": -2.2272942245797123,
+      "p_val": 0.025927616272415133,
       "winner": "A2_consistent_tau_t",
       "significant_harvey": false,
       "significant_5pct": true
     },
     "A2_consistent_tau_t_vs_C1_MIDAS_FS_K6": {
-      "t_stat": -1.913302291104987,
-      "p_val": 0.055709364606325584,
+      "t_stat": -2.0247049851117205,
+      "p_val": 0.04289766643912274,
       "winner": "A2_consistent_tau_t",
       "significant_harvey": false,
-      "significant_5pct": false
+      "significant_5pct": true
     },
     "A2_consistent_tau_t_vs_C2_MIDAS_FS_K12": {
-      "t_stat": -2.0762828472529726,
-      "p_val": 0.03786779877430435,
+      "t_stat": -2.028481668669586,
+      "p_val": 0.04251111236111371,
       "winner": "A2_consistent_tau_t",
       "significant_harvey": false,
       "significant_5pct": true
     },
     "A2_consistent_tau_t_vs_C3_MIDAS_FS_K24": {
-      "t_stat": -2.062445927209793,
-      "p_val": 0.039165300586706975,
+      "t_stat": -2.044740117832221,
+      "p_val": 0.04088048622556939,
       "winner": "A2_consistent_tau_t",
       "significant_harvey": false,
       "significant_5pct": true
     },
     "A3_consistent_tau_t1_vs_A4_vix_squared": {
-      "t_stat": 1.220693263740528,
-      "p_val": 0.22220217922643926,
+      "t_stat": 0.384361683421629,
+      "p_val": 0.7007103956337652,
       "winner": "A4_vix_squared",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A3_consistent_tau_t1_vs_A5_vix_level": {
-      "t_stat": -0.7530241960425501,
-      "p_val": 0.45143537430177316,
+      "t_stat": -0.8236688007702745,
+      "p_val": 0.41012777150378543,
       "winner": "A3_consistent_tau_t1",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A3_consistent_tau_t1_vs_A2f_free_omega": {
-      "t_stat": 1.6065492678974844,
-      "p_val": 0.10815327900864724,
+      "t_stat": 0.30266534917809745,
+      "p_val": 0.7621449072338542,
       "winner": "A2f_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A3_consistent_tau_t1_vs_A4f_vix2_free_omega": {
-      "t_stat": 1.3537628993154043,
-      "p_val": 0.17581203366261722,
+      "t_stat": 1.1494498787275262,
+      "p_val": 0.25037052279405203,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A3_consistent_tau_t1_vs_A3f_tau_t1_free_omega": {
-      "t_stat": -1.877600999437634,
-      "p_val": 0.06043576892280078,
+      "t_stat": -1.0876010557032207,
+      "p_val": 0.27677126450085376,
       "winner": "A3_consistent_tau_t1",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A3_consistent_tau_t1_vs_A2n_logexp_samplenorm": {
-      "t_stat": -0.058435589680508555,
-      "p_val": 0.953401666729464,
+      "t_stat": -0.2874029950587794,
+      "p_val": 0.7738037681706658,
       "winner": "A3_consistent_tau_t1",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A3_consistent_tau_t1_vs_A4n_vix2_samplenorm": {
-      "t_stat": -0.07409604471089659,
-      "p_val": 0.940933962474976,
+      "t_stat": -0.19661914630890653,
+      "p_val": 0.8441255864912784,
       "winner": "A3_consistent_tau_t1",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A3_consistent_tau_t1_vs_B1_MIDAS_K22": {
-      "t_stat": 0.7014019008564607,
-      "p_val": 0.48305223605552783,
+      "t_stat": 0.2521321860555074,
+      "p_val": 0.8009388925407659,
       "winner": "B1_MIDAS_K22",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A3_consistent_tau_t1_vs_B2_MIDAS_K65": {
-      "t_stat": -1.3465388143340549,
-      "p_val": 0.17812881147990867,
+      "t_stat": -1.4206778396194149,
+      "p_val": 0.15541043774094465,
       "winner": "A3_consistent_tau_t1",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A3_consistent_tau_t1_vs_B3_MIDAS_K125": {
-      "t_stat": -1.610675809231699,
-      "p_val": 0.10725040094466887,
+      "t_stat": -1.6527330915295815,
+      "p_val": 0.09838519650091193,
       "winner": "A3_consistent_tau_t1",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A3_consistent_tau_t1_vs_C1_MIDAS_FS_K6": {
-      "t_stat": -1.7185847499759772,
-      "p_val": 0.08569001045896374,
+      "t_stat": -1.8964972827720572,
+      "p_val": 0.05789431895619268,
       "winner": "A3_consistent_tau_t1",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A3_consistent_tau_t1_vs_C2_MIDAS_FS_K12": {
-      "t_stat": -1.9005513757393036,
-      "p_val": 0.0573607995872627,
+      "t_stat": -1.9099954674641517,
+      "p_val": 0.05613379691021381,
       "winner": "A3_consistent_tau_t1",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A3_consistent_tau_t1_vs_C3_MIDAS_FS_K24": {
-      "t_stat": -1.8666086226723135,
-      "p_val": 0.06195626258122422,
+      "t_stat": -1.9067666009761797,
+      "p_val": 0.05655081813998497,
       "winner": "A3_consistent_tau_t1",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A4_vix_squared_vs_A5_vix_level": {
-      "t_stat": -1.0722402863266374,
-      "p_val": 0.2836121198152355,
+      "t_stat": -1.013656142100073,
+      "p_val": 0.31074685844095873,
       "winner": "A4_vix_squared",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A4_vix_squared_vs_A2f_free_omega": {
-      "t_stat": -0.5908649388892389,
-      "p_val": 0.5546109196490749,
+      "t_stat": -0.24297899650028268,
+      "p_val": 0.808021668311278,
       "winner": "A4_vix_squared",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A4_vix_squared_vs_A4f_vix2_free_omega": {
-      "t_stat": 0.6398434397620807,
-      "p_val": 0.522274388135572,
+      "t_stat": 1.3617671672594611,
+      "p_val": 0.17327137630751865,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A4_vix_squared_vs_A3f_tau_t1_free_omega": {
-      "t_stat": -1.7363970561612336,
-      "p_val": 0.08249365243210072,
+      "t_stat": -0.7876036038431241,
+      "p_val": 0.43092860603890015,
       "winner": "A4_vix_squared",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A4_vix_squared_vs_A2n_logexp_samplenorm": {
-      "t_stat": -1.0209449675199396,
-      "p_val": 0.30728051274275625,
+      "t_stat": -0.616506745277031,
+      "p_val": 0.5375601214280601,
       "winner": "A4_vix_squared",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A4_vix_squared_vs_A4n_vix2_samplenorm": {
-      "t_stat": -1.1241329117475864,
-      "p_val": 0.2609566449968441,
+      "t_stat": -0.8317232048501886,
+      "p_val": 0.4055651995381355,
       "winner": "A4_vix_squared",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A4_vix_squared_vs_B1_MIDAS_K22": {
-      "t_stat": -0.6399378212919025,
-      "p_val": 0.5222130240932938,
+      "t_stat": -0.18901831552609838,
+      "p_val": 0.8500784618298556,
       "winner": "A4_vix_squared",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A4_vix_squared_vs_B2_MIDAS_K65": {
-      "t_stat": -2.5919386835777525,
-      "p_val": 0.00954367796790434,
+      "t_stat": -1.8115979624663634,
+      "p_val": 0.07004834001091997,
+      "winner": "A4_vix_squared",
+      "significant_harvey": false,
+      "significant_5pct": false
+    },
+    "A4_vix_squared_vs_B3_MIDAS_K125": {
+      "t_stat": -2.3311412421866264,
+      "p_val": 0.019745913215851063,
       "winner": "A4_vix_squared",
       "significant_harvey": false,
       "significant_5pct": true
     },
-    "A4_vix_squared_vs_B3_MIDAS_K125": {
-      "t_stat": -3.111129921747397,
-      "p_val": 0.0018637292051539855,
-      "winner": "A4_vix_squared",
-      "significant_harvey": true,
-      "significant_5pct": true
-    },
     "A4_vix_squared_vs_C1_MIDAS_FS_K6": {
-      "t_stat": -2.3036785072331525,
-      "p_val": 0.0212406972041983,
+      "t_stat": -2.303466418951904,
+      "p_val": 0.021252614469544406,
       "winner": "A4_vix_squared",
       "significant_harvey": false,
       "significant_5pct": true
     },
     "A4_vix_squared_vs_C2_MIDAS_FS_K12": {
-      "t_stat": -2.4173026570883347,
-      "p_val": 0.015636009979837384,
+      "t_stat": -2.2453351973122238,
+      "p_val": 0.02474662210595735,
       "winner": "A4_vix_squared",
       "significant_harvey": false,
       "significant_5pct": true
     },
     "A4_vix_squared_vs_C3_MIDAS_FS_K24": {
-      "t_stat": -2.462826426208159,
-      "p_val": 0.013784663059138502,
+      "t_stat": -2.3074706193186914,
+      "p_val": 0.02102859831569326,
       "winner": "A4_vix_squared",
       "significant_harvey": false,
       "significant_5pct": true
     },
     "A5_vix_level_vs_A2f_free_omega": {
-      "t_stat": 0.9213826765343386,
-      "p_val": 0.35685066995261705,
+      "t_stat": 0.879977926638401,
+      "p_val": 0.37887126742634836,
       "winner": "A2f_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A5_vix_level_vs_A4f_vix2_free_omega": {
-      "t_stat": 1.1574079357555593,
-      "p_val": 0.2471057333388118,
+      "t_stat": 1.185774599162289,
+      "p_val": 0.2357113251821854,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A5_vix_level_vs_A3f_tau_t1_free_omega": {
-      "t_stat": 0.6302159982665494,
-      "p_val": 0.5285532735354412,
+      "t_stat": 0.7065831759180438,
+      "p_val": 0.47982554712365744,
       "winner": "A3f_tau_t1_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A5_vix_level_vs_A2n_logexp_samplenorm": {
-      "t_stat": 0.7535416213264324,
-      "p_val": 0.4511245100871166,
+      "t_stat": 0.7536176000253133,
+      "p_val": 0.45107887300658844,
       "winner": "A2n_logexp_samplenorm",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A5_vix_level_vs_A4n_vix2_samplenorm": {
-      "t_stat": 0.7909919742849548,
-      "p_val": 0.428948674877192,
+      "t_stat": 0.8183792828506558,
+      "p_val": 0.4131406476113142,
       "winner": "A4n_vix2_samplenorm",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A5_vix_level_vs_B1_MIDAS_K22": {
-      "t_stat": 0.9125831759637009,
-      "p_val": 0.361461805996214,
+      "t_stat": 0.912564504065738,
+      "p_val": 0.36147163003924376,
       "winner": "B1_MIDAS_K22",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A5_vix_level_vs_B2_MIDAS_K65": {
-      "t_stat": 0.4117826231132837,
-      "p_val": 0.6804987590533067,
+      "t_stat": 0.41194818737495054,
+      "p_val": 0.6803774002471412,
       "winner": "B2_MIDAS_K65",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A5_vix_level_vs_B3_MIDAS_K125": {
-      "t_stat": 0.22934634783710073,
-      "p_val": 0.818599732962737,
+      "t_stat": 0.22945061683880916,
+      "p_val": 0.8185186987917517,
       "winner": "B3_MIDAS_K125",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A5_vix_level_vs_C1_MIDAS_FS_K6": {
-      "t_stat": -0.7283035663310468,
-      "p_val": 0.4664277797058354,
+      "t_stat": -0.7903167080776247,
+      "p_val": 0.4293428315555161,
       "winner": "A5_vix_level",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A5_vix_level_vs_C2_MIDAS_FS_K12": {
-      "t_stat": -0.9521977076873249,
-      "p_val": 0.340996723351201,
+      "t_stat": -0.9207258290774772,
+      "p_val": 0.35719358748452845,
       "winner": "A5_vix_level",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A5_vix_level_vs_C3_MIDAS_FS_K24": {
-      "t_stat": -0.8111949874172248,
-      "p_val": 0.4172537037599797,
+      "t_stat": -0.806239353435635,
+      "p_val": 0.42010485161660016,
       "winner": "A5_vix_level",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A2f_free_omega_vs_A4f_vix2_free_omega": {
-      "t_stat": 0.831101384894635,
-      "p_val": 0.40591635745597454,
+      "t_stat": 1.0241966147164385,
+      "p_val": 0.30574241741056585,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A2f_free_omega_vs_A3f_tau_t1_free_omega": {
-      "t_stat": -2.818067361432245,
-      "p_val": 0.004831367266550757,
+      "t_stat": -1.744991511836818,
+      "p_val": 0.08098634650002778,
       "winner": "A2f_free_omega",
       "significant_harvey": false,
-      "significant_5pct": true
+      "significant_5pct": false
     },
     "A2f_free_omega_vs_A2n_logexp_samplenorm": {
-      "t_stat": -0.6266624350278324,
-      "p_val": 0.5308805326600825,
+      "t_stat": -0.4770305644381723,
+      "p_val": 0.633340357272381,
       "winner": "A2f_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A2f_free_omega_vs_A4n_vix2_samplenorm": {
-      "t_stat": -0.49087423814940295,
-      "p_val": 0.6235153988544819,
+      "t_stat": -0.31617945868892555,
+      "p_val": 0.7518662981999702,
       "winner": "A2f_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A2f_free_omega_vs_B1_MIDAS_K22": {
-      "t_stat": -0.12432711457347304,
-      "p_val": 0.901056279524997,
-      "winner": "A2f_free_omega",
+      "t_stat": 0.08506550741956939,
+      "p_val": 0.9322093119722721,
+      "winner": "B1_MIDAS_K22",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A2f_free_omega_vs_B2_MIDAS_K65": {
-      "t_stat": -2.1896817528646744,
-      "p_val": 0.02854732533771487,
+      "t_stat": -1.9471261771162418,
+      "p_val": 0.051519609384456766,
       "winner": "A2f_free_omega",
       "significant_harvey": false,
-      "significant_5pct": true
+      "significant_5pct": false
     },
     "A2f_free_omega_vs_B3_MIDAS_K125": {
-      "t_stat": -2.2857495864433526,
-      "p_val": 0.02226891251984653,
+      "t_stat": -2.095448401177067,
+      "p_val": 0.03613115075387596,
       "winner": "A2f_free_omega",
       "significant_harvey": false,
       "significant_5pct": true
     },
     "A2f_free_omega_vs_C1_MIDAS_FS_K6": {
-      "t_stat": -1.8988605812132606,
-      "p_val": 0.05758280935661109,
+      "t_stat": -1.9725388980626755,
+      "p_val": 0.04854812038228151,
       "winner": "A2f_free_omega",
       "significant_harvey": false,
-      "significant_5pct": false
+      "significant_5pct": true
     },
     "A2f_free_omega_vs_C2_MIDAS_FS_K12": {
-      "t_stat": -2.0625471477547395,
-      "p_val": 0.039155673656368295,
+      "t_stat": -1.9806124574648194,
+      "p_val": 0.047634750828709826,
       "winner": "A2f_free_omega",
       "significant_harvey": false,
       "significant_5pct": true
     },
     "A2f_free_omega_vs_C3_MIDAS_FS_K24": {
-      "t_stat": -2.0488579311247093,
-      "p_val": 0.04047600904354076,
+      "t_stat": -1.9923018491327484,
+      "p_val": 0.0463379489443323,
       "winner": "A2f_free_omega",
       "significant_harvey": false,
       "significant_5pct": true
     },
     "A4f_vix2_free_omega_vs_A3f_tau_t1_free_omega": {
-      "t_stat": -1.8200834066623355,
-      "p_val": 0.06874630414317018,
+      "t_stat": -1.6083017687492673,
+      "p_val": 0.10776910347903779,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A4f_vix2_free_omega_vs_A2n_logexp_samplenorm": {
-      "t_stat": -1.309737113134889,
-      "p_val": 0.19028478382808567,
+      "t_stat": -1.3507740888005277,
+      "p_val": 0.17676781071962466,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A4f_vix2_free_omega_vs_A4n_vix2_samplenorm": {
-      "t_stat": -1.484219099785004,
-      "p_val": 0.13775080433975306,
+      "t_stat": -1.4435999415745209,
+      "p_val": 0.14885154138111023,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A4f_vix2_free_omega_vs_B1_MIDAS_K22": {
-      "t_stat": -0.8977396417344894,
-      "p_val": 0.369324370024787,
+      "t_stat": -0.9857437311162446,
+      "p_val": 0.32425888403485326,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A4f_vix2_free_omega_vs_B2_MIDAS_K65": {
-      "t_stat": -3.0396044033416927,
-      "p_val": 0.002368890809592461,
+      "t_stat": -3.0615958405792947,
+      "p_val": 0.0022016049801834026,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": true,
       "significant_5pct": true
     },
     "A4f_vix2_free_omega_vs_B3_MIDAS_K125": {
-      "t_stat": -3.731931337933167,
-      "p_val": 0.00019001730093548552,
+      "t_stat": -3.7375145369724367,
+      "p_val": 0.0001858483478289763,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": true,
       "significant_5pct": true
     },
     "A4f_vix2_free_omega_vs_C1_MIDAS_FS_K6": {
-      "t_stat": -2.4504644989245628,
-      "p_val": 0.014267203093893066,
+      "t_stat": -2.6248741242796236,
+      "p_val": 0.0086681005863527,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": false,
       "significant_5pct": true
     },
     "A4f_vix2_free_omega_vs_C2_MIDAS_FS_K12": {
-      "t_stat": -2.5484583987088523,
-      "p_val": 0.0108200191045571,
+      "t_stat": -2.5300246457518805,
+      "p_val": 0.011405451484574058,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": false,
       "significant_5pct": true
     },
     "A4f_vix2_free_omega_vs_C3_MIDAS_FS_K24": {
-      "t_stat": -2.599674534984572,
-      "p_val": 0.009331221351824182,
+      "t_stat": -2.6289451877664676,
+      "p_val": 0.008565016493049304,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": false,
       "significant_5pct": true
     },
     "A3f_tau_t1_free_omega_vs_A2n_logexp_samplenorm": {
-      "t_stat": 0.3514137379224502,
-      "p_val": 0.7252779774334122,
+      "t_stat": 0.0982920029231328,
+      "p_val": 0.9217004281757903,
       "winner": "A2n_logexp_samplenorm",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A3f_tau_t1_free_omega_vs_A4n_vix2_samplenorm": {
-      "t_stat": 0.23288922194009037,
-      "p_val": 0.8158474280016346,
+      "t_stat": 0.10823128827537044,
+      "p_val": 0.9138122262724888,
       "winner": "A4n_vix2_samplenorm",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A3f_tau_t1_free_omega_vs_B1_MIDAS_K22": {
-      "t_stat": 1.4153131637579757,
-      "p_val": 0.1569766970879216,
+      "t_stat": 0.9814694408672637,
+      "p_val": 0.3263612970282823,
       "winner": "B1_MIDAS_K22",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A3f_tau_t1_free_omega_vs_B2_MIDAS_K65": {
-      "t_stat": -0.8994591457541659,
-      "p_val": 0.3684081474176977,
+      "t_stat": -1.1844975926861643,
+      "p_val": 0.23621614866000185,
       "winner": "A3f_tau_t1_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A3f_tau_t1_free_omega_vs_B3_MIDAS_K125": {
-      "t_stat": -1.2538531375391566,
-      "p_val": 0.20989539093687481,
+      "t_stat": -1.4769605582925993,
+      "p_val": 0.13968621020852234,
       "winner": "A3f_tau_t1_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A3f_tau_t1_free_omega_vs_C1_MIDAS_FS_K6": {
-      "t_stat": -1.5889959126075774,
-      "p_val": 0.11206131551043885,
+      "t_stat": -1.786524087475208,
+      "p_val": 0.07401444069182106,
       "winner": "A3f_tau_t1_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A3f_tau_t1_free_omega_vs_C2_MIDAS_FS_K12": {
-      "t_stat": -1.7814904868959671,
-      "p_val": 0.07483235762209328,
+      "t_stat": -1.8129944554039505,
+      "p_val": 0.06983267649709624,
       "winner": "A3f_tau_t1_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A3f_tau_t1_free_omega_vs_C3_MIDAS_FS_K24": {
-      "t_stat": -1.7335576729214157,
-      "p_val": 0.08299659613107258,
+      "t_stat": -1.8072925286941044,
+      "p_val": 0.0707166803459005,
       "winner": "A3f_tau_t1_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A2n_logexp_samplenorm_vs_A4n_vix2_samplenorm": {
-      "t_stat": -0.042659616198399926,
-      "p_val": 0.9659728718494072,
-      "winner": "A2n_logexp_samplenorm",
+      "t_stat": 0.05143241627897836,
+      "p_val": 0.9589809544916772,
+      "winner": "A4n_vix2_samplenorm",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A2n_logexp_samplenorm_vs_B1_MIDAS_K22": {
-      "t_stat": 0.6500087473076701,
-      "p_val": 0.5156865713505947,
+      "t_stat": 0.6497655600256567,
+      "p_val": 0.5158436684126624,
       "winner": "B1_MIDAS_K22",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A2n_logexp_samplenorm_vs_B2_MIDAS_K65": {
-      "t_stat": -1.3171920557580812,
-      "p_val": 0.1877742561255049,
+      "t_stat": -1.3169386892739632,
+      "p_val": 0.18785917658485163,
       "winner": "A2n_logexp_samplenorm",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A2n_logexp_samplenorm_vs_B3_MIDAS_K125": {
-      "t_stat": -1.6927703908033456,
-      "p_val": 0.0904991807187776,
+      "t_stat": -1.6928434671590493,
+      "p_val": 0.09048526643584864,
       "winner": "A2n_logexp_samplenorm",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A2n_logexp_samplenorm_vs_C1_MIDAS_FS_K6": {
-      "t_stat": -1.6901737488023754,
-      "p_val": 0.09099471901554046,
+      "t_stat": -1.8058758465397249,
+      "p_val": 0.07093773468042586,
       "winner": "A2n_logexp_samplenorm",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A2n_logexp_samplenorm_vs_C2_MIDAS_FS_K12": {
-      "t_stat": -1.8638660532074867,
-      "p_val": 0.06234051696143794,
+      "t_stat": -1.8299639173862337,
+      "p_val": 0.06725533454173371,
       "winner": "A2n_logexp_samplenorm",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A2n_logexp_samplenorm_vs_C3_MIDAS_FS_K24": {
-      "t_stat": -1.833769579138133,
-      "p_val": 0.06668820522541785,
+      "t_stat": -1.8271704049313946,
+      "p_val": 0.06767415214274797,
       "winner": "A2n_logexp_samplenorm",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A4n_vix2_samplenorm_vs_B1_MIDAS_K22": {
-      "t_stat": 0.4483387991624173,
-      "p_val": 0.6539087032279058,
+      "t_stat": 0.37167432093611247,
+      "p_val": 0.710135346422049,
       "winner": "B1_MIDAS_K22",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A4n_vix2_samplenorm_vs_B2_MIDAS_K65": {
-      "t_stat": -0.9406747643907474,
-      "p_val": 0.3468715550536241,
+      "t_stat": -0.9824192428311743,
+      "p_val": 0.3258933501392107,
       "winner": "A4n_vix2_samplenorm",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A4n_vix2_samplenorm_vs_B3_MIDAS_K125": {
-      "t_stat": -1.474132371068296,
-      "p_val": 0.1404459542458747,
+      "t_stat": -1.4754381576175934,
+      "p_val": 0.14009478306449008,
       "winner": "A4n_vix2_samplenorm",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A4n_vix2_samplenorm_vs_C1_MIDAS_FS_K6": {
-      "t_stat": -1.878817850142824,
-      "p_val": 0.06026936886219114,
+      "t_stat": -2.0117126851221414,
+      "p_val": 0.04425023264874528,
       "winner": "A4n_vix2_samplenorm",
       "significant_harvey": false,
-      "significant_5pct": false
+      "significant_5pct": true
     },
     "A4n_vix2_samplenorm_vs_C2_MIDAS_FS_K12": {
-      "t_stat": -2.0491846475485898,
-      "p_val": 0.04044406271923817,
+      "t_stat": -2.0189081190860474,
+      "p_val": 0.04349677020420728,
       "winner": "A4n_vix2_samplenorm",
       "significant_harvey": false,
       "significant_5pct": true
     },
     "A4n_vix2_samplenorm_vs_C3_MIDAS_FS_K24": {
-      "t_stat": -2.037829036535369,
-      "p_val": 0.041567033423680844,
+      "t_stat": -2.033285011389019,
+      "p_val": 0.04202373658729153,
       "winner": "A4n_vix2_samplenorm",
       "significant_harvey": false,
       "significant_5pct": true
     },
     "B1_MIDAS_K22_vs_B2_MIDAS_K65": {
-      "t_stat": -3.566153332542132,
-      "p_val": 0.0003622594682324287,
+      "t_stat": -3.5646632948150048,
+      "p_val": 0.00036432357634841317,
       "winner": "B1_MIDAS_K22",
       "significant_harvey": true,
       "significant_5pct": true
     },
     "B1_MIDAS_K22_vs_B3_MIDAS_K125": {
-      "t_stat": -2.76972758161292,
-      "p_val": 0.005610319464615543,
+      "t_stat": -2.7693890930753753,
+      "p_val": 0.0056161521191298025,
       "winner": "B1_MIDAS_K22",
       "significant_harvey": false,
       "significant_5pct": true
     },
     "B1_MIDAS_K22_vs_C1_MIDAS_FS_K6": {
-      "t_stat": -1.9057068769675076,
-      "p_val": 0.0566882465740548,
+      "t_stat": -2.0345820201707743,
+      "p_val": 0.041892948017402176,
       "winner": "B1_MIDAS_K22",
       "significant_harvey": false,
-      "significant_5pct": false
+      "significant_5pct": true
     },
     "B1_MIDAS_K22_vs_C2_MIDAS_FS_K12": {
-      "t_stat": -2.0753833143783473,
-      "p_val": 0.0379510233653495,
+      "t_stat": -2.0394985022589096,
+      "p_val": 0.04140030055220212,
       "winner": "B1_MIDAS_K22",
       "significant_harvey": false,
       "significant_5pct": true
     },
     "B1_MIDAS_K22_vs_C3_MIDAS_FS_K24": {
-      "t_stat": -2.0738137491607884,
-      "p_val": 0.03809661175351731,
+      "t_stat": -2.0669430230788195,
+      "p_val": 0.03873952310599127,
       "winner": "B1_MIDAS_K22",
       "significant_harvey": false,
       "significant_5pct": true
     },
     "B2_MIDAS_K65_vs_B3_MIDAS_K125": {
-      "t_stat": -1.5335123209880395,
-      "p_val": 0.12514967322743376,
+      "t_stat": -1.5343540006634413,
+      "p_val": 0.12494258752578791,
       "winner": "B2_MIDAS_K65",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "B2_MIDAS_K65_vs_C1_MIDAS_FS_K6": {
-      "t_stat": -1.503150811480776,
-      "p_val": 0.13280015849454907,
+      "t_stat": -1.6266806358461015,
+      "p_val": 0.10380494348607217,
       "winner": "B2_MIDAS_K65",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "B2_MIDAS_K65_vs_C2_MIDAS_FS_K12": {
-      "t_stat": -1.7135500674647282,
-      "p_val": 0.08661139066764201,
+      "t_stat": -1.6747572524645395,
+      "p_val": 0.09398186921550389,
       "winner": "B2_MIDAS_K65",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "B2_MIDAS_K65_vs_C3_MIDAS_FS_K24": {
-      "t_stat": -1.6677144552347483,
-      "p_val": 0.09537242448028871,
+      "t_stat": -1.6604619730796946,
+      "p_val": 0.0968215517741573,
       "winner": "B2_MIDAS_K65",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "B3_MIDAS_K125_vs_C1_MIDAS_FS_K6": {
-      "t_stat": -1.414051090195774,
-      "p_val": 0.15734690222820502,
+      "t_stat": -1.5388116993119092,
+      "p_val": 0.12385027287059192,
       "winner": "B3_MIDAS_K125",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "B3_MIDAS_K125_vs_C2_MIDAS_FS_K12": {
-      "t_stat": -1.6388456015051067,
-      "p_val": 0.10124541931157327,
+      "t_stat": -1.5967396247139327,
+      "p_val": 0.11032375904350267,
       "winner": "B3_MIDAS_K125",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "B3_MIDAS_K125_vs_C3_MIDAS_FS_K24": {
-      "t_stat": -1.5779805914983291,
-      "p_val": 0.11457006866382935,
+      "t_stat": -1.5699124035857182,
+      "p_val": 0.11643549155114763,
       "winner": "B3_MIDAS_K125",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "C1_MIDAS_FS_K6_vs_C2_MIDAS_FS_K12": {
-      "t_stat": -1.6863877009828372,
-      "p_val": 0.09172114878725957,
+      "t_stat": -1.1647461071537564,
+      "p_val": 0.24412177957719794,
       "winner": "C1_MIDAS_FS_K6",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "C1_MIDAS_FS_K6_vs_C3_MIDAS_FS_K24": {
-      "t_stat": -0.5692975682165583,
-      "p_val": 0.5691542168351091,
+      "t_stat": -0.20941797068293178,
+      "p_val": 0.834121965199081,
       "winner": "C1_MIDAS_FS_K6",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "C2_MIDAS_FS_K12_vs_C3_MIDAS_FS_K24": {
-      "t_stat": 1.3333198194824938,
-      "p_val": 0.1824268723070428,
+      "t_stat": 1.1365710227470496,
+      "p_val": 0.2557176594623387,
       "winner": "C3_MIDAS_FS_K24",
       "significant_harvey": false,
       "significant_5pct": false
@@ -1133,113 +1133,113 @@
   },
   "a4f_pairwise_dm": {
     "B0_GJR_vs_A4f_vix2_free_omega": {
-      "t_stat": 4.030378564428692,
-      "p_val": 5.568709305792119e-05,
+      "t_stat": 4.4779669968154,
+      "p_val": 7.535724782181674e-06,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": true,
       "significant_5pct": true
     },
     "A1_K889_original_vs_A4f_vix2_free_omega": {
-      "t_stat": 1.4685759840972414,
-      "p_val": 0.14194783274837142,
+      "t_stat": 1.6538913052913398,
+      "p_val": 0.09814959958336344,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A2_consistent_tau_t_vs_A4f_vix2_free_omega": {
-      "t_stat": 0.7182909032353838,
-      "p_val": 0.4725779379486419,
+      "t_stat": 0.8545189447126665,
+      "p_val": 0.39281751712398205,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A3_consistent_tau_t1_vs_A4f_vix2_free_omega": {
-      "t_stat": 1.3537628993154043,
-      "p_val": 0.17581203366261722,
+      "t_stat": 1.1494498787275262,
+      "p_val": 0.25037052279405203,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A4_vix_squared_vs_A4f_vix2_free_omega": {
-      "t_stat": 0.6398434397620807,
-      "p_val": 0.522274388135572,
+      "t_stat": 1.3617671672594611,
+      "p_val": 0.17327137630751865,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A5_vix_level_vs_A4f_vix2_free_omega": {
-      "t_stat": 1.1574079357555593,
-      "p_val": 0.2471057333388118,
+      "t_stat": 1.185774599162289,
+      "p_val": 0.2357113251821854,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A2f_free_omega_vs_A4f_vix2_free_omega": {
-      "t_stat": 0.831101384894635,
-      "p_val": 0.40591635745597454,
+      "t_stat": 1.0241966147164385,
+      "p_val": 0.30574241741056585,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A4f_vix2_free_omega_vs_A3f_tau_t1_free_omega": {
-      "t_stat": -1.8200834066623355,
-      "p_val": 0.06874630414317018,
+      "t_stat": -1.6083017687492673,
+      "p_val": 0.10776910347903779,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A4f_vix2_free_omega_vs_A2n_logexp_samplenorm": {
-      "t_stat": -1.309737113134889,
-      "p_val": 0.19028478382808567,
+      "t_stat": -1.3507740888005277,
+      "p_val": 0.17676781071962466,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A4f_vix2_free_omega_vs_A4n_vix2_samplenorm": {
-      "t_stat": -1.484219099785004,
-      "p_val": 0.13775080433975306,
+      "t_stat": -1.4435999415745209,
+      "p_val": 0.14885154138111023,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A4f_vix2_free_omega_vs_B1_MIDAS_K22": {
-      "t_stat": -0.8977396417344894,
-      "p_val": 0.369324370024787,
+      "t_stat": -0.9857437311162446,
+      "p_val": 0.32425888403485326,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": false,
       "significant_5pct": false
     },
     "A4f_vix2_free_omega_vs_B2_MIDAS_K65": {
-      "t_stat": -3.0396044033416927,
-      "p_val": 0.002368890809592461,
+      "t_stat": -3.0615958405792947,
+      "p_val": 0.0022016049801834026,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": true,
       "significant_5pct": true
     },
     "A4f_vix2_free_omega_vs_B3_MIDAS_K125": {
-      "t_stat": -3.731931337933167,
-      "p_val": 0.00019001730093548552,
+      "t_stat": -3.7375145369724367,
+      "p_val": 0.0001858483478289763,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": true,
       "significant_5pct": true
     },
     "A4f_vix2_free_omega_vs_C1_MIDAS_FS_K6": {
-      "t_stat": -2.4504644989245628,
-      "p_val": 0.014267203093893066,
+      "t_stat": -2.6248741242796236,
+      "p_val": 0.0086681005863527,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": false,
       "significant_5pct": true
     },
     "A4f_vix2_free_omega_vs_C2_MIDAS_FS_K12": {
-      "t_stat": -2.5484583987088523,
-      "p_val": 0.0108200191045571,
+      "t_stat": -2.5300246457518805,
+      "p_val": 0.011405451484574058,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": false,
       "significant_5pct": true
     },
     "A4f_vix2_free_omega_vs_C3_MIDAS_FS_K24": {
-      "t_stat": -2.599674534984572,
-      "p_val": 0.009331221351824182,
+      "t_stat": -2.6289451877664676,
+      "p_val": 0.008565016493049304,
       "winner": "A4f_vix2_free_omega",
       "significant_harvey": false,
       "significant_5pct": true
@@ -1247,43 +1247,43 @@
   },
   "giacomini_white": {
     "A4f_vix2_free_omega_vs_B0_GJR": {
-      "chi2_stat": 16.278273536008857,
-      "p_value": 0.0002918890574870048,
+      "chi2_stat": 20.087972543771677,
+      "p_value": 4.3446238886080124e-05,
       "df": 2,
       "significant_5pct": true,
       "description": "A4f vs GJR"
     },
     "A4f_vix2_free_omega_vs_B1_MIDAS_K22": {
-      "chi2_stat": 3.7686055382555637,
-      "p_value": 0.1519349562499409,
+      "chi2_stat": 3.1297879284219707,
+      "p_value": 0.2091101851612246,
       "df": 2,
       "significant_5pct": false,
       "description": "A4f vs MIDAS-RW-K22"
     },
     "A4f_vix2_free_omega_vs_A2_consistent_tau_t": {
-      "chi2_stat": 5.5092320917561866,
-      "p_value": 0.06363344730330944,
+      "chi2_stat": 4.824795591512631,
+      "p_value": 0.08960019382695594,
       "df": 2,
       "significant_5pct": false,
       "description": "A4f vs A2"
     },
     "A4f_vix2_free_omega_vs_A4_vix_squared": {
-      "chi2_stat": 0.5934427440122138,
-      "p_value": 0.7432510740697331,
+      "chi2_stat": 2.1383101648877765,
+      "p_value": 0.3432984538058931,
       "df": 2,
       "significant_5pct": false,
       "description": "A4f vs A4"
     },
     "A2_consistent_tau_t_vs_B1_MIDAS_K22": {
-      "chi2_stat": 4.9681846242158505,
-      "p_value": 0.08340122244525217,
+      "chi2_stat": 4.912559962028272,
+      "p_value": 0.08575336248823173,
       "df": 2,
       "significant_5pct": false,
       "description": "A2 vs MIDAS-RW-K22"
     },
     "A4f_vix2_free_omega_vs_C1_MIDAS_FS_K6": {
-      "chi2_stat": 6.010033426003896,
-      "p_value": 0.04953792639406496,
+      "chi2_stat": 6.937501248797525,
+      "p_value": 0.03115593181596843,
       "df": 2,
       "significant_5pct": true,
       "description": "A4f vs MIDAS-FS-K6"

@@ -1,0 +1,102 @@
+{
+  "ticker": "SPY",
+  "seed": 42,
+  "run_time_utc": "2026-04-19T08:06:21.118640+00:00",
+  "data_source": "yfinance",
+  "windows": {
+    "1-min": "period=7d (yfinance hard cap)",
+    "5-min": "period=60d"
+  },
+  "signature_plot": {
+    "sub5_min_base": {
+      "1": {
+        "mean_ann_sigma_pct": 7.617967694685467,
+        "median_ann_sigma_pct": 7.917767370089843,
+        "n_days": 7
+      },
+      "2": {
+        "mean_ann_sigma_pct": 7.544022994578055,
+        "median_ann_sigma_pct": 7.390708430565983,
+        "n_days": 7
+      },
+      "3": {
+        "mean_ann_sigma_pct": 7.612542927688943,
+        "median_ann_sigma_pct": 7.6933120765984615,
+        "n_days": 7
+      }
+    },
+    "ge5_min_base": {
+      "5": {
+        "mean_ann_sigma_pct": 10.978716718242682,
+        "median_ann_sigma_pct": 11.180381477990508,
+        "n_days": 60
+      },
+      "10": {
+        "mean_ann_sigma_pct": 10.786804614737257,
+        "median_ann_sigma_pct": 10.721889761459813,
+        "n_days": 60
+      },
+      "15": {
+        "mean_ann_sigma_pct": 10.5859929955339,
+        "median_ann_sigma_pct": 11.147031680213992,
+        "n_days": 60
+      },
+      "30": {
+        "mean_ann_sigma_pct": 10.414452279539312,
+        "median_ann_sigma_pct": 10.397901705878349,
+        "n_days": 59
+      },
+      "65": {
+        "mean_ann_sigma_pct": 9.873155337645084,
+        "median_ann_sigma_pct": 9.448079570264936,
+        "n_days": 59
+      },
+      "130": {
+        "mean_ann_sigma_pct": 8.507117398202826,
+        "median_ann_sigma_pct": 7.7733329115311625,
+        "n_days": 58
+      }
+    },
+    "figure_path": "storage/figures/daily_2026_04_18_hf_microstructure_signature.png"
+  },
+  "autocorr_plot": {
+    "acf_by_freq": {
+      "1-min": {
+        "lag1_acf": -0.008965793003033204,
+        "n_obs": 2723,
+        "se": 0.019163559494160487
+      },
+      "2-min": {
+        "lag1_acf": -0.05933212344117414,
+        "n_obs": 1358,
+        "se": 0.027136267706462856
+      },
+      "3-min": {
+        "lag1_acf": -0.056693388645577866,
+        "n_obs": 903,
+        "se": 0.033277916281986085
+      },
+      "5-min": {
+        "lag1_acf": 0.014967930189535796,
+        "n_obs": 4499,
+        "se": 0.014908776472757504
+      },
+      "10-min": {
+        "lag1_acf": -0.008122537552609803,
+        "n_obs": 2220,
+        "se": 0.021223817998900444
+      },
+      "15-min": {
+        "lag1_acf": -0.032894936023927554,
+        "n_obs": 1461,
+        "se": 0.026162237992630243
+      },
+      "30-min": {
+        "lag1_acf": 0.027890024098200236,
+        "n_obs": 700,
+        "se": 0.03779644730092272
+      }
+    },
+    "figure_path": "storage/figures/daily_2026_04_18_hf_microstructure_autocorr.png"
+  }
+}

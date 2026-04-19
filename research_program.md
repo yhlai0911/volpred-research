@@ -420,3 +420,49 @@ K519-K521 + K527 完成結果：見 archive。
 
 ## 其他研究方向（詳細版）
 → MEM 文獻、Gemini/用戶建議（WVD/TE-VT/K770 修正版/Overnight component）、Hansen & Lunde Gold Standard 比較 → 見 `docs/research_archive/detailed_research_topics.md`
+
+## Paper 4 vix-sufficiency Table 2 — K732/K736 Decision (2026-04-19)
+
+**Root cause report**（`task_7100e5d03ec2` + `task_27ea42d3e0eb` a750dc agent）：
+
+- **K732 row**: Paper IS t-stat=1.64 實為 `dm_stat_oos=1.637` 抄錯格。真 IS t-stat = 5.58 (script) ≈ 5.29 (canonical)。
+- **K736 row**: Composite salad — 跨 3 sub-experiments 混搭欄位。
+
+**Decision**:
+- K732: **(b) 改 paper**，canonical values: partial_r=0.086, is_t_stat=5.29, r²_oos_ct=0.297, dm_abs_t=0.67, raw_p=0.50
+- K736: **(b) split 3 rows** by sub-experiment（VIX seasonality / SPY return seasonality / VT weight seasonality）或**(c) 單列 canonical** (is_t=-0.27, r²_oos=0.357, dm=0.21)
+
+**Next**: `task_729e70de0f66` Sub4 body_v3.tex 更新 — 主線程 L188 限做，分段 edit。
+
+## Paper 4 Citation Audit (2026-04-19, task_ced5ad598ae3)
+
+- Total: 38 inline cites / 40 bibitems
+- **MAJOR 1**: harvey2016 content mis-attribution in abstract L48 + intro L80（Sec 5.2 已 v2 改但前面段沒）— 投稿前必修
+- MED 5: bibliography 未 alphabetize、0 DOIs、luo2019 weak support (line 206)、2 orphan bibitems (bollerslev2020 / engle2006)
+- MINOR 2: Baruník / Božović diacritics
+- **Action**: 納入 Sub4 body_v3.tex 更新時一併修
+
+## Paper 5 vt-crowding-abm APPROVE FOR SUBMISSION (2026-04-19 af0c6b audit)
+
+- **alert_level: GREEN**, match 33/33 = 100%
+- Seed robustness 42/13/7 全 pass，tipping point 50-70% claim seed-robust
+- FRL 5 hard requirements 全 met
+- **Recommendation: APPROVE FOR SUBMISSION**
+- Minor non-blocking: results/README.md L42 cosmetic, reproduce.py 可 extend 到 33-cell check（optional）
+
+**Next**: 用戶 confirm 投稿 policy → `uv run volpred ops paper-update --paper-id vt-crowding-abm` + 正式投稿 flow（FRL 15p citations 13）
+
+## Paper Portfolio Status (2026-04-19 14:30)
+
+| # | Paper | Status | Blocker |
+|---|---|---|---|
+| **P9** | **garch-x-vix** | **NOT READY (RED)** | 缺 reproduce.py + match 0.0/7（2026-04-18 audit）。task_5529ea3c5dc5 派 Codex 補 reproduce 系統。README 誤標 "submitted under review" 亦需修 |
+| **P5** | **vt-crowding-abm** | **READY**（33/33 reproduce + seed robust + 4 MAJOR fix + 2 figures embedded 到 main.tex） | 等用戶 confirm 投稿；review v2 選擇性處理 10 MED / 10 MINOR |
+| P4 | vt-insurance-cost | **88.9% amber (8/9, Sub1+2+3 全 done)** | **L11 policy pending**: (a) parallel adjusted bundle for claim #9 → 54 bps exact；(b) 改 paper "54 bps" → "~63 bps raw Close" |
+| **P6** | **prg-periodic-garch** | **gate green + review v1 找 2 MAJOR/7 MED** | Revise first: MAJOR-1 (GJR-X benchmark) + MAJOR-2 (VT 6-market + TX cost) + 7 MED; ERR-C1 Lai DOI 剛補 |
+| P7 | vix-sufficiency | K732/K736 Sub4 body 待主線程 | L188 body edit |
+| P3 | vt-trend-following | **gate FAIL yellow 80.7%** | fastest fix: period 2005/2007 canonical + Table 4 M5 factor series (task_33e39563ca44) |
+| P2 | taiwan-vt | **gate FAIL yellow 73.1%** | Table 2 vs Sec 4.5 gamma unification + 23 untraceable JSONs (task_c2650c6be1b3) |
+| P1 | leverage-direction | **gate FAIL RED 53.4%** | Sec 5.4 vs 4.7 paper-internal contradiction + 7 missing JSONs (task_069ddb253fda) |
+| P8 | volatility-absorption | gate 50.7% yellow + K716-722 script 缺 | - |
+| P10 | crypto-fear-channel | kickoff intro done | body pending |
