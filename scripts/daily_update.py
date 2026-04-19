@@ -1061,6 +1061,27 @@ def main():
     except Exception as e:
         print(f"  Market status update failed: {e}")
 
+    # --- Rebuild feed index (INDEX.md + index.json) ---
+    # Context-hygiene rule: feed.json is forbidden from full read; the index is
+    # how downstream agents inspect the article library.
+    try:
+        from build_feed_index import build_feed_index
+        print("\n--- Rebuilding feed index ---")
+        build_feed_index()
+    except Exception as e:
+        print(f"  Feed index rebuild skipped: {e}")
+
+    # --- Rebuild experiments index (INDEX.md + index.json) ---
+    # Same context-hygiene rule as feed.json / knowledge.json: main thread
+    # needs a single-page view of all K experiments for dedup / topic picking
+    # without ever loading knowledge.json in full (CLAUDE.md L120 ban).
+    try:
+        from build_experiments_index import build_experiments_index
+        print("\n--- Rebuilding experiments index ---")
+        build_experiments_index(verbose=True)
+    except Exception as e:
+        print(f"  Experiments index rebuild skipped: {e}")
+
     # --- End-of-run sync health check (2026-04-17: catches silent 400/409 drift) ---
     _run_sync_health_check()
 

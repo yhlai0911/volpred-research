@@ -565,20 +565,21 @@ def list_agent_sessions(storage_dir: str = "storage") -> list[dict[str, Any]]:
                 session["session_key"] = agent_name
         if not session.get("role"):
             session["role"] = "worker"
-    return sessions
+    annotated = [_annotate_agent_session(session) for session in sessions]
+    return [session for session in annotated if session is not None]
 
 
 def get_agent_session(
     identifier: str, storage_dir: str = "storage"
 ) -> dict[str, Any] | None:
     """Fetch an agent session by session_key or (legacy) agent_name."""
-    return _load_agent(identifier, storage_dir=storage_dir)
+    return _annotate_agent_session(_load_agent(identifier, storage_dir=storage_dir))
 
 
 def get_agent_session_by_session_key(
     session_key: str, storage_dir: str = "storage"
 ) -> dict[str, Any] | None:
-    return _load_json(_agent_path(session_key, storage_dir=storage_dir))
+    return _annotate_agent_session(_load_json(_agent_path(session_key, storage_dir=storage_dir)))
 
 
 def create_task(
@@ -704,6 +705,20 @@ def _agent_is_stale(agent: dict[str, Any] | None) -> bool:
     if heartbeat_at == 0.0:
         return True
     return (datetime.now(timezone.utc).timestamp() - heartbeat_at) > AGENT_STALE_SECONDS
+
+
+def _annotate_agent_session(payload: dict[str, Any] | None) -> dict[str, Any] | None:
+    if payload is None:
+        return None
+    session = dict(payload)
+    stale = _agent_is_stale(session)
+    session["is_stale"] = stale
+    if stale:
+        heartbeat_at = str(session.get("heartbeat_at") or "")
+        session["stale_reason"] = "missing_heartbeat" if not heartbeat_at else "heartbeat_ttl_expired"
+    else:
+        session["stale_reason"] = None
+    return session
 
 
 def _agent_matches_task(

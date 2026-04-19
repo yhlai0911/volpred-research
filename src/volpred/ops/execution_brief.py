@@ -236,7 +236,7 @@ def _supervisor_brief_skeleton(task: dict[str, Any], *, storage_dir: str = "stor
         "prior_findings": _prior_findings(str(task.get("id") or ""), storage_dir=storage_dir),
         "rollback_point_id": task.get("rollback_point_id"),
         "why_this_agent": (
-            "Prepared by a supervisor Claude session for a VS Code worker terminal."
+            "Prepared by the main Claude control-plane session for direct execution or Codex rescue handoff."
         ),
     }
 

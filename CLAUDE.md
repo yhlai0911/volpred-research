@@ -238,6 +238,10 @@
 
 10 類任務（experiment / paper_decision / paper_body / paper_review / event_article / daily_article / member_qa / strategy_lifecycle / platform_ops / governance）× 對應 skill 映射 + 主 agent 依 `storage/work_log.json` 做多樣化決策的完整表格、schema、decision tree，全在 `.claude/rules/agent-delegation.md`（Claude 碰 `.claude/skills/**` 或 `scripts/agent_prompts/**` 時自動載入）。
 
+**跨類型歧義澄清**：
+- **交易策略研究**：設計階段（backtest/檢定）= 類型 1 experiment；上架階段（registry/metrics）= 類型 8 strategy_lifecycle
+- **一般文章**（類型 6 daily_article）：**所有非事件驅動**文章都算，包含 research/general/methodology/market-analysis/回顧，不只「補池」
+
 派工前先識別 task_type → 查 skill 表 → 依 work_log 最近 5 筆做多樣化（≥3 筆同 type 則換）→ 派。
 
 ## Subagent / Skill 使用準則

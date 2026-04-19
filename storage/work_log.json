@@ -114,5 +114,76 @@
       "task_vt_tf_package",
       "K1125"
     ]
+  },
+  {
+    "entry_id": "21a8f352",
+    "timestamp": "2026-04-19T12:46:00.507339+08:00",
+    "task_type": "governance",
+    "task_id": null,
+    "agent": "main",
+    "skill_used": null,
+    "outcome": "done",
+    "summary": "scheduler executor 改 advisory-only；不再 claim dead worker session；agents 讀取面新增 stale 標示；control-plane 規則同步單終端現況。",
+    "duration_min": 18,
+    "derived_tasks": [],
+    "state_files_changed": [
+      "src/volpred/ops/scheduler.py",
+      "src/volpred/ops/local_control_plane.py",
+      "src/volpred/ops/execution_brief.py",
+      ".claude/rules/control-plane.md"
+    ],
+    "dead_references_removed_count": 5,
+    "remaining_risks_or_open_questions": [
+      "docs/architecture.md 仍描述 supervisor + worker terminals，需 supervisor 決定何時同步更新 canonical 架構敘述。",
+      "session-key 相容層仍保留 claude-worker/codex-worker；若未來完全停用 bootstrapped session CLI，再評估第二階段刪除。"
+    ]
+  },
+  {
+    "entry_id": "775c18fa",
+    "timestamp": "2026-04-19T04:58:50+00:00",
+    "task_type": "governance",
+    "task_id": null,
+    "agent": "main-cron",
+    "skill_used": null,
+    "outcome": "skipped",
+    "summary": "*/4 繼續任務 cron skip: queue top 7 全 codex-preferred 但 Codex busy (bavof8pa3); 0 claude-preferred queued; 多樣化阻擋 governance. 手動 release mile_02333d01 已補 gap.",
+    "duration_min": 1,
+    "derived_tasks": []
+  },
+  {
+    "entry_id": "beb7a54a",
+    "timestamp": "2026-04-19T12:58:51.190183+08:00",
+    "task_type": "paper_review",
+    "task_id": "task_ac8f37f92d92",
+    "agent": "claude-worker",
+    "skill_used": null,
+    "outcome": "done",
+    "summary": "Paper 3 vt-trend-following self-contained replication package 補齊 5/5: 新增 data_sources.md (yfinance+FF+13市場清單), experiments.md (K55/54/79/898/1178/1192/1193 canonical + K488-697 supporting + K901 superseded), scripts/README.md (Table→K→script mapping + 復現序列), results/README.md (body→JSON traceability), 更新 README checklist. reproduce.py 未動且仍可跑.",
+    "duration_min": 20,
+    "derived_tasks": []
+  },
+  {
+    "entry_id": "e4977ea5",
+    "timestamp": "2026-04-19T13:08:34.202329+08:00",
+    "task_type": "governance",
+    "task_id": "task_338704da691e",
+    "agent": "claude-worker",
+    "skill_used": null,
+    "outcome": "done",
+    "summary": "新增 build_feed_index.py (daily_update hook, 933 篇 INDEX.md+index.json) + build_topic_diversity_audit.py (手動, 22 cluster + 10 novelty 候選).",
+    "duration_min": 15,
+    "derived_tasks": []
+  },
+  {
+    "entry_id": "7a40f123",
+    "timestamp": "2026-04-19T05:11:50.490295+00:00",
+    "task_type": "governance",
+    "task_id": null,
+    "agent": "main-claude",
+    "skill_used": null,
+    "outcome": "done",
+    "summary": "experiments/INDEX.md + index.json + scripts/build_experiments_index.py + daily_update.py hook. 1010 K rows; PASS=201 FAIL=71 NULL=92; uncovered=741.",
+    "duration_min": 12,
+    "derived_tasks": []
   }
 ]

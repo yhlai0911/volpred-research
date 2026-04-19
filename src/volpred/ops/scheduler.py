@@ -8,15 +8,11 @@ from typing import Any
 
 from .common import project_path
 from .event_jobs import expand_due_event_jobs, preview_event_jobs
-from .execution_brief import run_executor_task, task_requires_coordinator, task_unmet_preconditions
+from .execution_brief import task_requires_coordinator, task_unmet_preconditions
 from .local_control_plane import (
     _agent_is_stale,
-    claim_next_task,
-    complete_task,
-    fail_task,
     get_agent_session,
     get_task,
-    heartbeat_agent,
     list_tasks,
 )
 from .shared_lock import shared_state_lock
@@ -79,17 +75,28 @@ def _queued_tasks(storage_dir: str = "storage") -> list[dict[str, Any]]:
     return list_tasks(status="queued", storage_dir=storage_dir)
 
 
-def _agent_available_for_scheduler(agent_name: str, *, storage_dir: str) -> bool:
+def _session_dispatch_state(agent_name: str, *, storage_dir: str) -> tuple[str, dict[str, Any] | None]:
     session = get_agent_session(agent_name, storage_dir=storage_dir)
-    if session is None or _agent_is_stale(session):
-        return True
+    if session is None:
+        return "missing", None
+    if _agent_is_stale(session):
+        return "stale", session
     status = str(session.get("status") or "offline")
     if status == "offline":
-        return True
+        return "offline", session
     session_id = str(session.get("session_id") or "")
     if session_id.startswith("scheduler:"):
+        return "scheduler_owned", session
+    return "live_manual", session
+
+
+def _agent_available_for_scheduler(agent_name: str, *, storage_dir: str) -> bool:
+    session_state, session = _session_dispatch_state(agent_name, storage_dir=storage_dir)
+    if session_state in {"missing", "stale", "offline"}:
+        return True
+    if session_state == "scheduler_owned":
         claimed_task_id = str(session.get("claimed_task_id") or "")
-        if status == "busy" and claimed_task_id:
+        if str(session.get("status") or "offline") == "busy" and claimed_task_id:
             current_task = get_task(claimed_task_id, storage_dir=storage_dir)
             if current_task and str(current_task.get("status")) not in {"succeeded", "failed", "cancelled"}:
                 return False
@@ -121,16 +128,20 @@ def scheduler_preview(*, storage_dir: str = "storage") -> dict[str, Any]:
     decision: dict[str, Any] | None = None
     if selected is not None:
         requires_coordinator = _task_requires_coordinator(selected, storage_dir=storage_dir)
+        dispatch_mode = "coordinator" if requires_coordinator else "executor_advisory"
         decision = {
             "task_id": selected.get("id"),
             "title": selected.get("title"),
-            "mode": "coordinator" if requires_coordinator else "executor",
+            "mode": dispatch_mode,
             "agent": target_agent,
             "brief_status": selected.get("brief_status"),
+            "advisory_only": not requires_coordinator,
+            "would_write_claim": False if not requires_coordinator else None,
         }
     return {
         "events": preview_event_jobs(storage_dir=storage_dir),
         "queued_count": len(_queued_tasks(storage_dir)),
+        "queue_snapshot": _queue_snapshot(storage_dir=storage_dir),
         "decision": decision,
     }
 
@@ -163,86 +174,60 @@ def _run_coordinator_round(task: dict[str, Any], *, storage_dir: str) -> dict[st
         }
 
 
-def _run_executor_round(task: dict[str, Any], *, storage_dir: str) -> dict[str, Any]:
+def _queue_snapshot(*, storage_dir: str = "storage", limit: int = 5) -> list[dict[str, Any]]:
+    snapshot: list[dict[str, Any]] = []
+    for task in _queued_tasks(storage_dir)[: max(limit, 0)]:
+        requires_coordinator = _task_requires_coordinator(task, storage_dir=storage_dir)
+        target_agent = "claude" if requires_coordinator else str(task.get("preferred_agent") or "claude")
+        unmet = task_unmet_preconditions(task)
+        blocked_reason: str | None = None
+        if str(task.get("brief_status") or "") == "needs_manual_review":
+            blocked_reason = "needs_manual_review"
+        elif unmet:
+            blocked_reason = "waiting_on_preconditions"
+        elif not _agent_available_for_scheduler(target_agent, storage_dir=storage_dir):
+            blocked_reason = "agent_unavailable"
+        snapshot.append(
+            {
+                "task_id": task.get("id"),
+                "title": task.get("title"),
+                "source": task.get("source"),
+                "priority": task.get("priority"),
+                "preferred_agent": task.get("preferred_agent"),
+                "target_agent": target_agent,
+                "brief_status": task.get("brief_status"),
+                "dispatch_mode": "coordinator" if requires_coordinator else "executor_advisory",
+                "runnable": blocked_reason is None,
+                "blocked_reason": blocked_reason,
+            }
+        )
+    return snapshot
+
+
+def _build_executor_advisory(task: dict[str, Any], *, storage_dir: str) -> dict[str, Any]:
     logger = _logger(storage_dir)
     agent_name = str(task.get("preferred_agent") or "claude")
     task_id = str(task["id"])
-    logger.info("executor_round task_id=%s agent=%s", task_id, agent_name)
-    current = get_agent_session(agent_name, storage_dir=storage_dir) or {}
-    heartbeat_agent(
-        agent_name=agent_name,
-        status="idle",
-        session_id=str(current.get("session_id") or f"scheduler:{agent_name}"),
-        session_rollback_point_id=current.get("session_rollback_point_id") or task.get("rollback_point_id"),
-        storage_dir=storage_dir,
+    session_state, session = _session_dispatch_state(agent_name, storage_dir=storage_dir)
+    logger.info(
+        "executor_advisory task_id=%s agent=%s session_state=%s",
+        task_id,
+        agent_name,
+        session_state,
     )
-    claimed = claim_next_task(agent_name, storage_dir=storage_dir)
-    if claimed is None or str(claimed.get("id")) != task_id:
-        return {
-            "mode": "executor",
-            "task_id": task_id,
-            "agent": agent_name,
-            "result": "no_claim",
-        }
-    try:
-        executed = run_executor_task(task_id, agent_name=agent_name, storage_dir=storage_dir)
-        result = complete_task(
-            task_id,
-            agent_name=agent_name,
-            summary=executed["result"]["summary"],
-            commands_run=executed["result"]["commands_run"],
-            files_touched=executed["result"]["files_touched"],
-            storage_dir=storage_dir,
-        )
-        return {
-            "mode": "executor",
-            "task_id": task_id,
-            "agent": agent_name,
-            "result": "succeeded",
-            "receipt": result["receipt"],
-        }
-    except Exception as exc:  # pragma: no cover - exercised by scheduler tests via monkeypatch
-        current = get_task(task_id, storage_dir=storage_dir) or {}
-        current_status = str(current.get("status") or "")
-        claimed_by = current.get("claimed_by")
-        error_text = str(exc)
-        if current_status in {"blocked", "failed"} or (current_status == "queued" and claimed_by is None):
-            logger.warning(
-                "executor_round_preflight_exit task_id=%s agent=%s status=%s error=%s",
-                task_id,
-                agent_name,
-                current_status,
-                exc,
-            )
-            if current_status == "queued" and error_text == "preconditions_not_met":
-                result_label = "deferred_for_preconditions"
-            elif current_status == "queued":
-                result_label = "requeued_for_brief"
-            else:
-                result_label = "preflight_failed"
-            return {
-                "mode": "executor",
-                "task_id": task_id,
-                "agent": agent_name,
-                "result": result_label,
-                "task_status": current_status,
-                "brief_status": current.get("brief_status"),
-                "error": error_text,
-            }
-        result = fail_task(
-            task_id,
-            agent_name=agent_name,
-            error=str(exc),
-            summary="scheduler executor failure",
-            storage_dir=storage_dir,
-        )
-        return {
-            "mode": "executor",
-            "task_id": task_id,
-            "agent": agent_name,
-            "result": "failed",
-            "receipt": result["receipt"],
-        }
+    return {
+        "mode": "executor",
+        "task_id": task_id,
+        "agent": agent_name,
+        "result": "would_dispatch",
+        "dispatch_mode": "advisory_only",
+        "claim_written": False,
+        "task_status": task.get("status"),
+        "brief_status": task.get("brief_status"),
+        "session_state": session_state,
+        "session_key": session.get("session_key") if session else None,
+        "queued_count": len(_queued_tasks(storage_dir)),
+    }
 
 
 def scheduler_tick(*, storage_dir: str = "storage") -> dict[str, Any]:
@@ -262,6 +247,7 @@ def scheduler_tick(*, storage_dir: str = "storage") -> dict[str, Any]:
                 "status": "skipped",
                 "reason": reason,
                 "event_expansion": expanded,
+                "queue_snapshot": _queue_snapshot(storage_dir=storage_dir),
             }
             _write_scheduler_state(
                 {
@@ -277,11 +263,12 @@ def scheduler_tick(*, storage_dir: str = "storage") -> dict[str, Any]:
         if _task_requires_coordinator(selected, storage_dir=storage_dir):
             result = _run_coordinator_round(selected, storage_dir=storage_dir)
         else:
-            result = _run_executor_round(selected, storage_dir=storage_dir)
+            result = _build_executor_advisory(selected, storage_dir=storage_dir)
         payload = {
             "status": "ok",
             "event_expansion": expanded,
             "result": result,
+            "queue_snapshot": _queue_snapshot(storage_dir=storage_dir),
         }
         _write_scheduler_state(
             {
@@ -295,6 +282,8 @@ def scheduler_tick(*, storage_dir: str = "storage") -> dict[str, Any]:
                     "result": result.get("result"),
                     "task_status": result.get("task_status"),
                     "brief_status": result.get("brief_status"),
+                    "dispatch_mode": result.get("dispatch_mode"),
+                    "claim_written": result.get("claim_written"),
                 },
             },
             storage_dir=storage_dir,

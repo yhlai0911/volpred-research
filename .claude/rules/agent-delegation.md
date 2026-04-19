@@ -20,16 +20,43 @@ paths:
 
 | # | 任務類型 | 範例 | 對應 skill |
 |---|---|---|---|
-| 1 | 研究實驗 | K1132 bootstrap、K1100h tick-level、新 K 編號 | `autonomous-research` + `agent-result-verification` |
+| 1 | 研究實驗（含**交易策略設計階段**） | K1132 bootstrap、K1100h tick-level、新 K 編號、新策略 backtest/檢定/cross-OOS | `autonomous-research` + `agent-result-verification` |
 | 2 | 論文方向決策 | Paper3_reframe、Paper3_strategic_decision（blocked_user） | `paper-stage-classifier` + 主線程 |
 | 3 | 論文修稿（body） | K1146 pivot、K1169 rewrite、Paper6_start | `paper-update` + `finance-paper-quality` |
 | 4 | 論文審查 + citation | 每輪 review round、Paper9_bib_fix | `paper-review-cycle` + `citation-verifier` + `latex-academic-reviewer` |
-| 5 | 事件驅動文章 | TSMC_0416_post、FOMC_0428 | `feed-publisher` + `publication-candidates` |
-| 6 | 日常文章補草稿池 | general/research/daily 每日目標 | `feed-publisher` + `publication-candidates` |
+| 5 | 事件驅動文章 | TSMC_0416_post、FOMC_0428、CPI/NFP/財報/地緣政治 | `feed-publisher` + `publication-candidates` |
+| 6 | 一般/日常文章（非時效） | research 研究發現、general 教育、methodology、market-analysis、回顧、策略解讀 | `feed-publisher` + `publication-candidates` |
 | 7 | 會員問題研究 | 6h cron 觸發 | `member-questions` |
-| 8 | 策略生命週期 | STRATEGY_REGISTRY 新增/下架 | `admin-ops` + `admin-ops/references/strategy-lifecycle.md` |
+| 8 | 策略生命週期（**上架/下架/管理階段**） | STRATEGY_REGISTRY 新增/下架、metrics 重算、sparkline、ranking | `admin-ops` + `admin-ops/references/strategy-lifecycle.md` |
 | 9 | 平台 ops / 巡檢 | release-pool、cleanup、health、article-backups | `admin-ops` |
 | 10 | 系統 governance / 修復 | script bug fix、legacy cleanup、rules 重構、歸檔 | 無 skill（主線程做，參考 `.claude/rules/`）|
+
+**交易策略研究的兩階段**：
+- **設計階段** → 類型 #1（新策略 = 新 K 實驗：設計 signal → backtest → DM/Harvey 檢定 → cross-OOS）
+- **上架階段** → 類型 #8（通過 5 gate 後入 STRATEGY_REGISTRY → 上線 → 績效追蹤）
+
+**類型 #6 包含**：research audience 研究文（含策略解讀、方法論複習、負面結果分享）、general audience 教育文、回顧綜述、市場觀察（非當日事件）。**不限「補池」**——不管池滿不滿都用這類，只要不是事件驅動即屬 #6。
+
+## 派工前 Checklist（硬性，每次都做）
+
+**每次派 Agent tool 或 `codex:rescue` subagent 前，主線程必過三關**：
+
+### 關 1: Mission sanity（CLAUDE.md L5-24）
+這輪行動服務哪條 Mission？若全在 ops 類（補池、排程、governance），立刻警訊 — Mission L19 明寫「研究與論文永遠不輸給 ops」。token 分配要傾向研究/論文。
+
+### 關 2: 多樣化檢查
+檢 `storage/work_log.json` 最近 5 筆 task_type；若 **≥3 筆同 type，必須換 type**。10 類任務輪替避免 chamber echo。
+
+```bash
+jq '[.[-5:] | .[] | .task_type]' storage/work_log.json
+```
+
+### 關 3: 不問選擇題（CLAUDE.md L7）
+「要不要 X？」一律違規。要做就做，不做就不做，不要一句話自己問自己答還同時派出去。疑問「要不要 X」時：不問，直接決定。決定錯了事後修，好過浪費 token 等確認。
+
+**允許問用戶的例外**（CLAUDE.md L9-12）：真有破壞性風險、policy 決策（投稿/研究 pivot）、模糊到用邏輯推不出來。
+
+**違反代價**：2026-04-18/19 session token 用量 $1897，50.3% 是純文字回覆無工具 — 主因就是違反此三關（問選擇題 + 連派同 type + 選題偏向 comfort zone）。
 
 ## Delegation Threshold（何時派 vs 自己做）
 
