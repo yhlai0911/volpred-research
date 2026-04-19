@@ -544,3 +544,17 @@ K1114 修復只處理 `git log` vs `rev-list` 不一致的 silent failure，但�
 1. 改用 launchctl + launchd plist 代替 crontab（macOS 推薦）— deferred
 2. ✅ **IMPLEMENTED 2026-04-19 13:27 UTC**: `scripts/check_alerts.py` 加 `_auto_trigger_release_pool_if_due()` piggy-back。Hourly check_alerts cron（reliable）現會在 `last_released_at` age ≥ `interval_minutes` 時 subprocess run `uv run volpred ops release-pool-by-settings`。Test verified: 當前 gap < interval → correctly skip; 預期 16:00 UTC 起 effective cadence 穩定 2-3h（延遲 upper bound 1h = check_alerts hourly + interval boundary crossing 時間差）。
 3. 或改 cron 時間為 hourly（`3 */1 * * *`）避開 `*/2` 可能 parsing 問題 — deferred (option 2 已足夠)
+
+## 2026-04-20: Supabase articles vs feed.json 分類 drift（observability gap）
+
+**症狀**：feed.json 有 8 筆 `audience=member_qa`，Supabase articles 表（/api/publications/feed 分頁累加）只有 7 筆。`compute_diff` 顯示 `insert=0 update=0 real_delete=0 draft_only=1` → 完全沒標示這 1 筆差異。
+
+**根因假設**：`compute_diff` 的 `update` 判斷只比對 `title/status/published_at` 三欄，**不比對 `audience` / `category`**。這 1 筆 article 可能 title + status + published_at 都一致，但其中一邊的 audience 是 `member_qa` 另一邊是別的值（e.g. `general`），導致 V3 feed 顯示的分類跟 canonical feed.json 不一致。
+
+**影響**：低優先但會讓 V3 filter 結果少 1 筆 member_qa。不觸發警報。
+
+**Fix direction（非緊急）**：
+- 擴展 `compute_diff` 的 update 檢查比對 `audience`, `category`, `tags`（至少 category tags subset）
+- 或在 publish pipeline 保證 audience 在 Supabase 與 feed.json 兩側同步
+
+**本次不動**（1 篇 drift 影響小，session 優先在 V3 polish 與研究任務）。
