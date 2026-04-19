@@ -1,5 +1,7 @@
 # Next Draft Candidate: K1091 Meta-Prediction OOS Asset-Class Asymmetry
 
+> **🔒 CONSUMED 2026-04-20** — Article published as `mile_a21a6e06` (audience=general, status=draft, 2195 CJK, 2 real matplotlib charts embedded). Dispatched during 18:00 UTC piggy-back remediation when pool dropped to 3<4 after mile_1beaaa3f auto-release. Kept this memo for audit / cross-link history. Do not re-dispatch.
+
 **Prepared 2026-04-19** as preemptive brief for future `draft_pool_low` remediation. Alternative to K957 memo; pick whichever fits pool gap + user direction.
 
 ## K1091 Overview
