@@ -1,41 +1,41 @@
 {
-  "timestamp": "2026-04-19T12:09:05Z",
+  "timestamp": "2026-04-19T18:09:36.489787Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "total_draft=4 (<12 threshold). research_audience=4 (>=4 threshold, OK). general_audience=0 (<8 threshold, ALERT). All 4 drafts are research-audience; zero general-audience articles in pool."
+      "detail": "total=4 research=4 general=0 | article pool low (<12): total=4; general audience drafts low (<8): count=0"
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
-      "status": "ok",
-      "detail": "strategy_metrics.json mtime=1776523420, age=21h (under 26h threshold). OK."
+      "status": "alert",
+      "detail": "age=27.4h (threshold=26h)"
     },
     {
       "name": "ERROR_LOG",
-      "status": "alert",
-      "detail": "Entries dated 2026-04-19 (today): (1) Paper 4 K732/K736 table row source binding — IS t-stat=1.64 was dm_stat_oos=1.637 copied to wrong cell; K736 row composite from 3 sub-experiments with no binding. Root cause: no reproduce gate on body.tex edits. Fix: per-row % source: inline comments + paper-update CLI gate. (2) release-pool-by-settings last_released_at not updated after successful release — cron skips with 'interval_not_due'. Fix direction: audit src/volpred/ops/release_pool.py post-release settings save."
+      "status": "ok",
+      "detail": "2026-04-20 entry: Supabase articles vs feed.json 分類 drift (audience drift 1 article); 2026-04-19 entry: release_pool cron gap fix via check_alerts piggy-back"
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "Strategies checked: slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix. No strategy has >2 portfolio_return=null in last 3 entries. OK."
+      "detail": "no strategy has >2 null portfolio_return in last 3 entries; 15 strategies checked"
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold: >50). Working tree clean."
+      "detail": "uncommitted_files=0"
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "2043 entries in storage/memory/knowledge.json (27865 lines)."
+      "detail": "entries=2043"
     }
   ],
   "alerts": [
-    "article pool low (<12): total_draft=4",
-    "general audience drafts critically low: 0 drafts (<8 threshold) — no general-audience articles in pool",
-    "error_log has entries dated today (2026-04-19): paper 4 table row binding bug + release-pool-by-settings last_released_at stale bug"
+    "article pool low (<12): total=4",
+    "general audience drafts low (<8): count=0",
+    "metrics stale: age=27.4h > 26h"
   ]
 }
