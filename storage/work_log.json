@@ -1259,5 +1259,33 @@
     "task_id": null,
     "outcome": "done",
     "summary": "docs/project_improvement_status.md 加 v12 Transition Status section (2026-04-19): 5 Codex ops victories, 4 papers GREEN, 6 papers 0 MISMATCH, host cron workaround, session cleanup, 3 memos, 2 errata, release cadence 統一。v11 historical context 保留於下方為 architecture evolution reference。706→733 lines。下次 session 讀此 doc 即知 v11→v12 transition 進度。"
+  },
+  {
+    "timestamp": "2026-04-19T22:55:37+08:00",
+    "task_type": "governance",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "Git commit c02c842e + merge b1a27c67 pushed: v12 transition + K1092 memo + daily token report。Merge conflict on daily token report 解 with theirs (remote cron 同時 gen 版本)。6 files +313/-291。Session 累計 9 commits (含 auto cron)。"
+  },
+  {
+    "timestamp": "2026-04-19T22:58:31+08:00",
+    "task_type": "research",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "P9 reproduce_report 審視發現 12 個 divergences vs errata_pending.md 列 5 個。errata focuses on 核心 R1-response-worthy 5 metrics (SPY/QQQ/GLD+GVZ/GLD dual/0050.TW) + K1088 USO+OVX 為 null placeholder 非真 claim。當前 errata 已涵蓋最重要 5 個 Harvey-threshold claims, 額外 7 個 supplementary checks (K1085/K1088/K1098 多 variant) 暫不列入 (避免 errata 過長失 focus)。session 結尾狀態 checkup。"
+  },
+  {
+    "timestamp": "2026-04-19T23:01:54+08:00",
+    "task_type": "code",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "check_alerts piggy-back 首次 live cron 驗證 at 15:00:00.754 UTC: 'release-pool-auto: skip reason=interval_not_due_age=100min' 正確 log 出現。skip reason logging edit (c02c842e) 生效 — hourly cron daemon 讀 on-disk scripts/check_alerts.py fresh。Next fire 16:00 UTC 預期 age=160 > 120 → TRIGGER release。Piggy-back mechanism 首次真實 production cron 執行確認 working。"
+  },
+  {
+    "timestamp": "2026-04-19T23:06:52+08:00",
+    "task_type": "paper_body",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "Memory 加 feedback_3spec_disambiguation.md: Paper 內同 symbol 多 spec 數值差異的 footnote + reproduce.py NOTE tier resolution pattern (本 session P1 K1256 + P2 γ 成功驗證 6→0 MISMATCH)。含 3 個 NOT-apply 場景 (真抄錯格、sign flip、Harvey crossing) 避免未來誤用。MEMORY.md index 加連結。Pattern 可重用於任何 paper gate MISMATCH 審查。"
   }
 ]
