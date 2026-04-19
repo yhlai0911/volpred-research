@@ -1,23 +1,26 @@
 {
-  "timestamp": "2026-04-19T08:32:18.999618+00:00",
+  "timestamp": "2026-04-19T09:17:10.492484+00:00",
   "paper": "paper/garch-x-vix",
   "script": "paper/garch-x-vix/reproduce.py",
-  "quick_mode": true,
+  "quick_mode": false,
   "skip_live": false,
   "bundled_runs": {
     "compute_mcs_dm": {
       "script": "paper/garch-x-vix/compute_mcs_dm.py",
-      "live_attempted": false,
-      "live_ok": false,
-      "skipped": true,
-      "reason": "skip-live or quick mode"
+      "live_attempted": true,
+      "live_ok": true,
+      "timeout_seconds": 7200,
+      "elapsed_seconds": 1391.6,
+      "returncode": 0,
+      "stderr_tail": null,
+      "result_path": "paper/garch-x-vix/mcs_dm_results.json"
     },
     "k998": {
       "script": "paper/garch-x-vix/scripts/k998.py",
       "live_attempted": true,
       "live_ok": true,
       "timeout_seconds": 1800,
-      "elapsed_seconds": 83.94,
+      "elapsed_seconds": 81.43,
       "returncode": 0,
       "stderr_tail": null,
       "result_path": "paper/garch-x-vix/results/k998_results.json"
@@ -25,43 +28,43 @@
   },
   "live_metrics": {
     "k988_direct": {
-      "abs_dm_t": 3.5903952752366584,
+      "abs_dm_t": 3.7084098235763197,
       "n_valid": 1824,
-      "qlike_a4f": -8.350725937435426,
-      "qlike_gjr": -8.269363619985045
+      "qlike_a4f": -8.348078568222926,
+      "qlike_gjr": -8.265175114658442
     },
     "vrp_rho": {
       "models": {
         "A2n_logexp_samplenorm": {
-          "spearman": 0.8003857544416756,
+          "spearman": 0.8003932795885489,
           "p_value": 0.0,
           "n_valid": 1826
         },
         "A4n_vix2_samplenorm": {
-          "spearman": 0.7782142533781302,
+          "spearman": 0.776148959277164,
           "p_value": 0.0,
           "n_valid": 1826
         },
         "A3f_tau_t1_free_omega": {
-          "spearman": 0.8053914888430654,
+          "spearman": 0.8028324146292855,
           "p_value": 0.0,
           "n_valid": 1826
         }
       },
-      "median_spearman": 0.8003857544416756,
+      "median_spearman": 0.8003932795885489,
       "raw_ratio_reference": 0.1508960438175109
     },
     "qqq_paper": {
-      "abs_dm_t": 3.759662084865286,
+      "abs_dm_t": 3.8901449291520045,
       "n_valid": 1825,
-      "qlike_a4f": -7.763602178725038,
-      "qlike_gjr": -7.7031100811959385
+      "qlike_a4f": -7.763399233900805,
+      "qlike_gjr": -7.703491088404104
     },
     "tw_paper": {
-      "abs_dm_t": 1.6008058012263617,
+      "abs_dm_t": 1.3280024892105244,
       "n_valid": 1643,
-      "qlike_a4f": -7.766280412932674,
-      "qlike_gjr": -7.738800692465484
+      "qlike_a4f": -7.759637210268742,
+      "qlike_gjr": -7.732262448349382
     },
     "gld_paper": {
       "gld_gvz_abs_dm_t": 3.356831012013742,
@@ -80,7 +83,7 @@
         "tmp_result": "paper/garch-x-vix/.repro_tmp/k1085/k1085_results.json",
         "live_ok": true,
         "returncode": 0,
-        "elapsed_seconds": 394.75,
+        "elapsed_seconds": 395.43,
         "stderr_tail": null,
         "json": {
           "metadata": {
@@ -162,8 +165,8 @@
               ]
             ],
             "random_seed": 42,
-            "elapsed_seconds": 392.8733639717102,
-            "timestamp": "2026-04-19T08:27:21.271306+00:00",
+            "elapsed_seconds": 393.4393982887268,
+            "timestamp": "2026-04-19T09:12:13.278162+00:00",
             "proposer": "User (via K1085 brief)",
             "executor": "Claude",
             "references": [
@@ -1844,7 +1847,7 @@
         "tmp_result": "paper/garch-x-vix/.repro_tmp/k1098/k1098_results.json",
         "live_ok": true,
         "returncode": 0,
-        "elapsed_seconds": 148.43,
+        "elapsed_seconds": 147.92,
         "stderr_tail": null,
         "json": {
           "metadata": {
@@ -1865,8 +1868,8 @@
             "n_valid": 2199,
             "n_refits": 35,
             "random_seed": 42,
-            "elapsed_seconds": 146.66517114639282,
-            "timestamp": "2026-04-19T08:32:18.121126+00:00",
+            "elapsed_seconds": 146.2011959552765,
+            "timestamp": "2026-04-19T09:17:09.601158+00:00",
             "proposer": "Claude (Paper 10 side paper candidate)",
             "executor": "Claude",
             "references": [
@@ -2401,29 +2404,31 @@
       "metric": "A4f DM t vs GJR (canonical paper value)",
       "paper_value": 4.030379,
       "stored_source_value": 4.030379,
-      "live_value": 4.030379,
-      "rel_diff_pct_live_vs_paper": 0.0,
+      "live_value": 4.477967,
+      "rel_diff_pct_live_vs_paper": 11.105,
       "rel_diff_pct_stored_vs_paper": 0.0,
       "tol_pct": 1.0,
-      "match": true,
-      "status": "match",
+      "match": false,
+      "status": "mismatch",
       "paper_source": "main.tex abstract / introduction / conclusion",
       "stored_source": "paper/garch-x-vix/mcs_dm_results.json#a4f_pairwise_dm.B0_GJR_vs_A4f_vix2_free_omega.t_stat",
-      "live_source": "paper/garch-x-vix/compute_mcs_dm.py live run"
+      "live_source": "paper/garch-x-vix/compute_mcs_dm.py live run",
+      "recommendation": "(a) inspect live recomputation path / data alignment"
     },
     "Table6.QQQ.dm_t": {
       "metric": "QQQ DM t vs GJR",
       "paper_value": 3.71,
       "stored_source_value": 3.7081,
-      "live_value": 3.759662,
-      "rel_diff_pct_live_vs_paper": 1.339,
+      "live_value": 3.890145,
+      "rel_diff_pct_live_vs_paper": 4.856,
       "rel_diff_pct_stored_vs_paper": 0.051,
       "tol_pct": 3.0,
-      "match": true,
-      "status": "match",
+      "match": false,
+      "status": "mismatch",
       "paper_source": "main.tex Table 6 / abstract",
       "stored_source": "experiments/k994/k994_results.json#assets.QQQ.dm_tests.A4f_vs_GJR.dm_t",
-      "live_source": "targeted K994-style live recomputation"
+      "live_source": "targeted K994-style live recomputation",
+      "recommendation": "(a) inspect live recomputation path / data alignment"
     },
     "Table6.GLD_GVZ.dm_t": {
       "metric": "GLD with GVZ DM t vs GJR",
@@ -2458,8 +2463,8 @@
       "metric": "0050.TW DM t vs GJR (VIX lag+1)",
       "paper_value": 1.44,
       "stored_source_value": 1.4388,
-      "live_value": 1.600806,
-      "rel_diff_pct_live_vs_paper": 11.167,
+      "live_value": 1.328002,
+      "rel_diff_pct_live_vs_paper": 7.778,
       "rel_diff_pct_stored_vs_paper": 0.083,
       "tol_pct": 15.0,
       "match": true,
@@ -2472,8 +2477,8 @@
       "metric": "VRP Spearman rho approx 0.80",
       "paper_value": 0.8,
       "stored_source_value": 0.800845,
-      "live_value": 0.800386,
-      "rel_diff_pct_live_vs_paper": 0.048,
+      "live_value": 0.800393,
+      "rel_diff_pct_live_vs_paper": 0.049,
       "rel_diff_pct_stored_vs_paper": 0.106,
       "tol_pct": 5.0,
       "match": true,
@@ -2481,7 +2486,7 @@
       "paper_source": "main.tex abstract / Section 4.2 / conclusion",
       "stored_source": "experiments/k988/k988b_results.json#vrp_corr_A2n/A4n/A3f",
       "live_source": "targeted K988b-style live recomputation",
-      "note": "Live detail: A2n_logexp_samplenorm=0.8004, A3f_tau_t1_free_omega=0.8054, A4n_vix2_samplenorm=0.7782"
+      "note": "Live detail: A2n_logexp_samplenorm=0.8004, A3f_tau_t1_free_omega=0.8028, A4n_vix2_samplenorm=0.7761"
     }
   },
   "checks": [
@@ -2489,29 +2494,31 @@
       "metric": "A4f DM t vs GJR (canonical paper value)",
       "paper_value": 4.030379,
       "stored_source_value": 4.030379,
-      "live_value": 4.030379,
-      "rel_diff_pct_live_vs_paper": 0.0,
+      "live_value": 4.477967,
+      "rel_diff_pct_live_vs_paper": 11.105,
       "rel_diff_pct_stored_vs_paper": 0.0,
       "tol_pct": 1.0,
-      "match": true,
-      "status": "match",
+      "match": false,
+      "status": "mismatch",
       "paper_source": "main.tex abstract / introduction / conclusion",
       "stored_source": "paper/garch-x-vix/mcs_dm_results.json#a4f_pairwise_dm.B0_GJR_vs_A4f_vix2_free_omega.t_stat",
-      "live_source": "paper/garch-x-vix/compute_mcs_dm.py live run"
+      "live_source": "paper/garch-x-vix/compute_mcs_dm.py live run",
+      "recommendation": "(a) inspect live recomputation path / data alignment"
     },
     {
       "metric": "QQQ DM t vs GJR",
       "paper_value": 3.71,
       "stored_source_value": 3.7081,
-      "live_value": 3.759662,
-      "rel_diff_pct_live_vs_paper": 1.339,
+      "live_value": 3.890145,
+      "rel_diff_pct_live_vs_paper": 4.856,
       "rel_diff_pct_stored_vs_paper": 0.051,
       "tol_pct": 3.0,
-      "match": true,
-      "status": "match",
+      "match": false,
+      "status": "mismatch",
       "paper_source": "main.tex Table 6 / abstract",
       "stored_source": "experiments/k994/k994_results.json#assets.QQQ.dm_tests.A4f_vs_GJR.dm_t",
-      "live_source": "targeted K994-style live recomputation"
+      "live_source": "targeted K994-style live recomputation",
+      "recommendation": "(a) inspect live recomputation path / data alignment"
     },
     {
       "metric": "GLD with GVZ DM t vs GJR",
@@ -2546,8 +2553,8 @@
       "metric": "0050.TW DM t vs GJR (VIX lag+1)",
       "paper_value": 1.44,
       "stored_source_value": 1.4388,
-      "live_value": 1.600806,
-      "rel_diff_pct_live_vs_paper": 11.167,
+      "live_value": 1.328002,
+      "rel_diff_pct_live_vs_paper": 7.778,
       "rel_diff_pct_stored_vs_paper": 0.083,
       "tol_pct": 15.0,
       "match": true,
@@ -2560,8 +2567,8 @@
       "metric": "VRP Spearman rho approx 0.80",
       "paper_value": 0.8,
       "stored_source_value": 0.800845,
-      "live_value": 0.800386,
-      "rel_diff_pct_live_vs_paper": 0.048,
+      "live_value": 0.800393,
+      "rel_diff_pct_live_vs_paper": 0.049,
       "rel_diff_pct_stored_vs_paper": 0.106,
       "tol_pct": 5.0,
       "match": true,
@@ -2569,19 +2576,7 @@
       "paper_source": "main.tex abstract / Section 4.2 / conclusion",
       "stored_source": "experiments/k988/k988b_results.json#vrp_corr_A2n/A4n/A3f",
       "live_source": "targeted K988b-style live recomputation",
-      "note": "Live detail: A2n_logexp_samplenorm=0.8004, A3f_tau_t1_free_omega=0.8054, A4n_vix2_samplenorm=0.7782"
-    },
-    {
-      "metric": "K988 direct A4f vs GJR DM t",
-      "expected_value": 4.482554,
-      "live_value": 3.590395,
-      "rel_diff_pct_live_vs_expected": 19.903,
-      "tol_pct": 10.0,
-      "match": false,
-      "status": "mismatch",
-      "expected_source": "experiments/k988/k988_results.json#dm_tests.A4f_vix2_free_omega_vs_GJR.dm_t",
-      "live_source": "targeted K988-style live recomputation",
-      "recommendation": "(a) verify live recomputation and experiment config"
+      "note": "Live detail: A2n_logexp_samplenorm=0.8004, A3f_tau_t1_free_omega=0.8028, A4n_vix2_samplenorm=0.7761"
     },
     {
       "metric": "K1085 full OOS GLD+GVZ DM t",
@@ -2670,25 +2665,52 @@
       "reason": "README.md still advertises a submission/under-review status; task brief states the paper has not actually been submitted.",
       "recommendation": "(b) update README metadata outside this task's code-only scope",
       "path": "paper/garch-x-vix/README.md"
+    },
+    {
+      "code": "k988_direct_dm_drift",
+      "severity": "warning",
+      "reason": "K988's internal DM implementation is historically non-canonical for Paper 9. Reproduce gate uses compute_mcs_dm.py (4.03), not K988.py's direct DM.",
+      "stored_value": 4.482554,
+      "live_value": 3.70841,
+      "rel_diff_pct": 17.27,
+      "recommendation": "(c) keep as diagnostic note; do not use as primary paper-binding check"
     }
   ],
   "divergences": [
     {
-      "metric": "K988 direct A4f vs GJR DM t",
-      "expected_value": 4.482554,
-      "live_value": 3.590395,
-      "rel_diff_pct_live_vs_expected": 19.903,
-      "tol_pct": 10.0,
+      "metric": "A4f DM t vs GJR (canonical paper value)",
+      "paper_value": 4.030379,
+      "stored_source_value": 4.030379,
+      "live_value": 4.477967,
+      "rel_diff_pct_live_vs_paper": 11.105,
+      "rel_diff_pct_stored_vs_paper": 0.0,
+      "tol_pct": 1.0,
       "match": false,
       "status": "mismatch",
-      "expected_source": "experiments/k988/k988_results.json#dm_tests.A4f_vix2_free_omega_vs_GJR.dm_t",
-      "live_source": "targeted K988-style live recomputation",
-      "recommendation": "(a) verify live recomputation and experiment config"
+      "paper_source": "main.tex abstract / introduction / conclusion",
+      "stored_source": "paper/garch-x-vix/mcs_dm_results.json#a4f_pairwise_dm.B0_GJR_vs_A4f_vix2_free_omega.t_stat",
+      "live_source": "paper/garch-x-vix/compute_mcs_dm.py live run",
+      "recommendation": "(a) inspect live recomputation path / data alignment"
+    },
+    {
+      "metric": "QQQ DM t vs GJR",
+      "paper_value": 3.71,
+      "stored_source_value": 3.7081,
+      "live_value": 3.890145,
+      "rel_diff_pct_live_vs_paper": 4.856,
+      "rel_diff_pct_stored_vs_paper": 0.051,
+      "tol_pct": 3.0,
+      "match": false,
+      "status": "mismatch",
+      "paper_source": "main.tex Table 6 / abstract",
+      "stored_source": "experiments/k994/k994_results.json#assets.QQQ.dm_tests.A4f_vs_GJR.dm_t",
+      "live_source": "targeted K994-style live recomputation",
+      "recommendation": "(a) inspect live recomputation path / data alignment"
     }
   ],
-  "total_checks": 14,
-  "total_match": 13,
-  "match_rate": 0.9286,
+  "total_checks": 13,
+  "total_match": 11,
+  "match_rate": 0.8462,
   "alert_level": "yellow",
   "summary": {
     "core_claims_verified": [
