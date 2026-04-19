@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-04-19T12:09:05Z",
+  "alerts": [
+    {
+      "id": "article_pool_low",
+      "severity": "high",
+      "message": "article pool low (<12): total_draft=4. Immediate action: commission general-audience articles.",
+      "detail": "Total drafts=4, threshold=12. General-audience=0 (threshold=8). Research-audience=4 (OK>=4). Pool at critical low — publishing cadence will break within days."
+    },
+    {
+      "id": "general_audience_zero",
+      "severity": "high",
+      "message": "general audience drafts = 0 (<8 threshold). Zero general-audience articles queued.",
+      "detail": "All 4 drafts are research-audience. General readers have no scheduled content. Use publication-candidates skill to source 3+ general topics immediately."
+    },
+    {
+      "id": "error_log_today",
+      "severity": "medium",
+      "message": "error_log.md has entries dated 2026-04-19 (today): 2 open issues.",
+      "detail": "Issue 1 — Paper 4 K732/K736 table row source binding: IS t-stat wrong cell copy, K736 composite salad. Fix: paper-workflow gate + inline % source comments. Issue 2 — release-pool-by-settings last_released_at stale after successful release, cron 'interval_not_due' false-skip. Fix: audit src/volpred/ops/release_pool.py."
+    }
+  ]
+}

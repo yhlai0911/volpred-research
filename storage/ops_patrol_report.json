@@ -1,26 +1,26 @@
 {
-  "timestamp": "2026-04-19T06:23:11Z",
+  "timestamp": "2026-04-19T12:09:05Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "total_draft=4 (<12 threshold). research_audience=3 (<4 threshold). general_audience=1 (<8 threshold). Total articles in feed=933."
+      "detail": "total_draft=4 (<12 threshold). research_audience=4 (>=4 threshold, OK). general_audience=0 (<8 threshold, ALERT). All 4 drafts are research-audience; zero general-audience articles in pool."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "strategy_metrics.json mtime=1776523420, patrol_time=1776579734, age=56314s (~15.6h, under 26h threshold)."
+      "detail": "strategy_metrics.json mtime=1776523420, age=21h (under 26h threshold). OK."
     },
     {
       "name": "ERROR_LOG",
       "status": "alert",
-      "detail": "Entry dated 2026-04-18 (yesterday): [FIXED 2026-04-18] BUG-001 cleanup-post FK cascade — supabase_sync.py delete_article now pre-deletes article_impressions before articles DELETE; tests still pending. Entry dated 2026-04-13: merge_worktree.sh K1032 bug re-occurrence (K1114) — detect-new-commits false negative caused worktree force-delete; recovered via git reflog."
+      "detail": "Entries dated 2026-04-19 (today): (1) Paper 4 K732/K736 table row source binding — IS t-stat=1.64 was dm_stat_oos=1.637 copied to wrong cell; K736 row composite from 3 sub-experiments with no binding. Root cause: no reproduce gate on body.tex edits. Fix: per-row % source: inline comments + paper-update CLI gate. (2) release-pool-by-settings last_released_at not updated after successful release — cron skips with 'interval_not_due'. Fix direction: audit src/volpred/ops/release_pool.py post-release settings save."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "14 strategies checked (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, adaptive_tier). All have last_date=2026-04-17 (Friday, weekend gap expected). Each has exactly 1 null in last 3 entries. No strategy exceeds >2 nulls threshold."
+      "detail": "Strategies checked: slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix. No strategy has >2 portfolio_return=null in last 3 entries. OK."
     },
     {
       "name": "GIT_STATUS",
@@ -30,13 +30,12 @@
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "2043 entries in storage/memory/knowledge.json."
+      "detail": "2043 entries in storage/memory/knowledge.json (27865 lines)."
     }
   ],
   "alerts": [
     "article pool low (<12): total_draft=4",
-    "research audience low (<4): research_draft=3",
-    "general audience low (<8): general_draft=1",
-    "error_log: entry dated 2026-04-18 (yesterday) — BUG-001 FK cascade fix applied, test TODO still pending"
+    "general audience drafts critically low: 0 drafts (<8 threshold) — no general-audience articles in pool",
+    "error_log has entries dated today (2026-04-19): paper 4 table row binding bug + release-pool-by-settings last_released_at stale bug"
   ]
 }
