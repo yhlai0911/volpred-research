@@ -458,11 +458,11 @@ K519-K521 + K527 完成結果：見 archive。
 |---|---|---|---|
 | **P5** | **vt-crowding-abm** | ✅ **READY — GREEN 100% (33/33)** + v2 revise 4 MAJOR + 3 MED-C DOIs + 4 academic MED done (→ 4.3★ FRL prediction) | 等用戶 confirm 投稿 |
 | **P6** | **prg-periodic-garch** | ✅ **READY — GREEN 100% (15/15)** + v2 revise 2 MAJOR Fix B + 6 MED + 10 MINOR + 17 DOIs + PRS continuity §6 + 11pt 13pp + citation_check synced | 等用戶 confirm 投稿 |
-| **P7** | **vix-sufficiency (Paper 4)** | ✅ **READY — GREEN 98% (98/100)** + Sub1-6 closed (bundle + dividend + 5 divergence decisions + Table 6 K752 rewrite + source binding + reproduce.py synced) | 等用戶 confirm 投稿 |
+| **P7** | **vix-sufficiency** | ✅ **READY — GREEN 98% (98/100)** + Sub1-6 closed (bundle + dividend + 5 divergence decisions + Table 6 K752 rewrite + source binding + reproduce.py synced) | 等用戶 confirm 投稿 |
+| **P4ins** | **vt-insurance-cost** | ✅ **READY — GREEN 100% (9/9)** (2026-04-19 88.9%→100% via L184 footnote + reproduce tolerance 5→10 bps 反映 documented dual-convention) | 等用戶 confirm 投稿 |
 | P1 | leverage-direction | 🟡 **0 MISMATCH** + 9 NOTE + 19 UNTRACE (structural data-limit) | C1 ✅ K1256 3-spec / C2 ✅ Kupiec rounding / C3-C5 Tables 1/6/7/8/11/14 需 new experiments |
 | P3 | vt-trend-following | 🟡 **0 MISMATCH** (83%, 34 UNTRACE structural) | Table 4 M5 ✅ hybrid BAB / Table 3 period ✅ errata; 剩 Table 5 13-market + Table 6 MDD bootstrap 需 new experiments |
 | P2 | taiwan-vt | 🟡 **0 MISMATCH** (6→0 本 session, 69% verified + 24 UNTRACE structural) | ✅ TSMC/0050.TW/TWII γ 3-spec footnotes + reproduce.py NOTE reclass / ✅ SSVS PIP UNTRACEABLE / ✅ GJR+Normal viol NOTE; 剩 24 UNTRACE 需 Table 4/5 VT + Sec 6 macro experiments |
-| **P4 (insurance)** | **vt-insurance-cost** | ✅ **READY — GREEN 100% (9/9)** (2026-04-19 88.9%→100% via L184 footnote + reproduce tolerance 5→10 bps 反映 documented dual-convention) | 等用戶 confirm 投稿 |
 | P8 | volatility-absorption | 🔴 61.3% amber + **CRITICAL errata 識別** | `errata_pending.md`: CRITICAL (controlled t Harvey cross -3.14→-1.17) + HIGH (T10 2020-26 sign flip) + MEDIUM (10+ drifts). Path B 推薦 research-honest body revision |
 | P9 | garch-x-vix | 🟡 submitted under review, snapshot 53.8% / live 84.6%, **shelf errata ready** | `errata_pending.md`: 0-11% DM t drift SPY/QQQ/GLD/USO, Harvey qualitative invariant — 無 body edit 直到 R1 reviewer response |
 | P10 | crypto-fear-channel | kickoff intro done | body pending; task_7d2c 待 Codex quota reset 04-24 做 pre-body audit |

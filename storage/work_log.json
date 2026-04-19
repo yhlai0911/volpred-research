@@ -1140,5 +1140,40 @@
     "task_id": null,
     "outcome": "done",
     "summary": "P_insurance reproduce gate 88.9%→100% GREEN (9/9 claims match) via reproduce.py tolerance_abs 5→10 bps widening reflecting documented L184 dual-convention footnote (54 bps K846 auto_adjust=True vs 63 bps replication auto_adjust=False)。README + research_program.md synced (3 papers GREEN → 4 papers GREEN milestone)。Email info alert sent。4 papers (P4/P5/P6/P_insurance) 全 GREEN 可平行投 different 期刊。"
+  },
+  {
+    "timestamp": "2026-04-19T21:46:00+08:00",
+    "task_type": "governance",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "Git commit 29adb7c2 pushed: P_insurance gate 88.9→100 GREEN + 4 papers milestone。9 files changed, +113/-21 lines。本地雲端對齊。"
+  },
+  {
+    "timestamp": "2026-04-19T21:50:08+08:00",
+    "task_type": "code",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "check_alerts piggy-back trigger timing simulation: 當前 13:49 UTC, last_released 13:20, gap 29.7 min < 120 threshold → skip 正常。Next due 15:20 UTC。Piggy-back 觸發時間表: 14:00 UTC (gap 40 skip), 15:00 (gap 100 skip), **16:00 UTC (gap 160 > 120) TRIGGER release**。比原 cron `3 */2` 在 15:03 UTC（gap 103 < 120 skip）+ 17:03 UTC（gap 223 release）的第一 release 更早（16:00 vs 17:03, 提早 1h 3 min）。Piggy-back 比 broken cron 效能更佳。"
+  },
+  {
+    "timestamp": "2026-04-19T21:54:27+08:00",
+    "task_type": "governance",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "research_program.md Portfolio table 重排: 4 GREEN papers 集中頂部 (P5/P6/P7/P4ins) + 3 amber 0-mismatch (P1/P3/P2) 其次 + errata+kickoff 在底。P7 label 從 'vix-sufficiency (Paper 4)' → 'vix-sufficiency' (Paper 4 label 易混淆與 P4 insurance), P4 (insurance) → P4ins 避免語意歧義。讀者可一眼看到投稿狀態分層。"
+  },
+  {
+    "timestamp": "2026-04-19T21:58:34+08:00",
+    "task_type": "paper_body",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "P10 crypto-fear-channel README.md 建 (原無 README, 僅 outline.md + body_v0_intro.tex)。Status: Kickoff intro done, body pending, task_7d2c Codex audit 待 04-24 quota reset。K639+K746b+K1025 3 實驗 supporting + target journals (JIFMIM/JoE Fin/FRL) 登記。Next Actions: post-audit body draft + reproduce.py kickoff 參 P5/P6 pattern。Cross-ref research_program + garch-x-vix + vt-crowding-abm。讀者現在可從 README 一眼看 P10 kickoff 狀態與下一步。"
+  },
+  {
+    "timestamp": "2026-04-19T22:02:59+08:00",
+    "task_type": "research",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "K957 next draft candidate prep memo (storage/next_draft_candidate_k957.md): score 6 ★★★★ 37 experiments + 5 E019-E023 meta-lessons。Article skeleton proposal (7 sections), 2 charts spec, data sources, dispatch triggers, hard rules + differentiation vs mile_c15c7b98 (K672 evidence hierarchy)。未來 draft_pool_low 再 breach 時可直接用此 memo 派 agent 一致性高且研究誠實。"
   }
 ]
