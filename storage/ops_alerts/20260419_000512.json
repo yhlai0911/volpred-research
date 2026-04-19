@@ -1,0 +1,20 @@
+{
+  "timestamp": "2026-04-19T00:05:12Z",
+  "alerts": [
+    {
+      "code": "ARTICLE_POOL_LOW",
+      "severity": "high",
+      "detail": "Total draft articles=6, threshold=12. Pool critically low — schedule new article drafts immediately."
+    },
+    {
+      "code": "GENERAL_AUDIENCE_LOW",
+      "severity": "high",
+      "detail": "General audience drafts=1, threshold=8. Near-empty pool for general readers — prioritize 7+ new general articles."
+    },
+    {
+      "code": "ERROR_LOG_RECENT",
+      "severity": "info",
+      "detail": "Error log entry dated 2026-04-18: BUG-001 FK cascade fix applied to supabase_sync.py delete_article. Test TODO still open (verify with impression-bearing draft). Also: K1114 merge_worktree.sh false-negative bug still open for long-term fix (K1143)."
+    }
+  ]
+}
