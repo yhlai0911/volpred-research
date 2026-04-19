@@ -1175,5 +1175,40 @@
     "task_id": null,
     "outcome": "done",
     "summary": "K957 next draft candidate prep memo (storage/next_draft_candidate_k957.md): score 6 ★★★★ 37 experiments + 5 E019-E023 meta-lessons。Article skeleton proposal (7 sections), 2 charts spec, data sources, dispatch triggers, hard rules + differentiation vs mile_c15c7b98 (K672 evidence hierarchy)。未來 draft_pool_low 再 breach 時可直接用此 memo 派 agent 一致性高且研究誠實。"
+  },
+  {
+    "timestamp": "2026-04-19T22:06:07+08:00",
+    "task_type": "governance",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "Git commit b5b12974 pushed: P10 README + K957 prep memo + Portfolio reorder。5 files changed, +149/-5 lines。本地雲端對齊。Session 累計 commits: b5b12974 (this) / 29adb7c2 (P_insurance) / 4e942dd8 (cron piggy-back) / 37fbcd46 (session_state) / fec91997 (auto cron)。"
+  },
+  {
+    "timestamp": "2026-04-19T22:10:13+08:00",
+    "task_type": "research",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "K1091 next draft candidate prep memo (storage/next_draft_candidate_k1091.md): score 5 'Meta Prediction OOS Equities PASS Commodities FAIL'。Article skeleton 7 sections (methodology bridge + asset-class asymmetry), 2 charts (scatter predicted-vs-realized + error by class), differentiation vs K957/K672 memos, dual-audience (general + research)。兩 memo (K957 + K1091) 提供 next 2 draft 快速 dispatch 選項。"
+  },
+  {
+    "timestamp": "2026-04-19T22:15:50+08:00",
+    "task_type": "governance",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "Worktree agent-aa9aeb5d 診斷: merge_worktree.sh K1143-v2 hardened gate ABORT 於 shared JSON 變動 (worktree 落後 main 版本)。手動路徑：check cbdac102 commit 實際僅含 experiments/k1100g_d9/ 7 files (1755 insertions)。該 k1100g_d9 files 已於 45fcfb61 4-hour sync 進 main。Worktree cbdac102 commit 完全 redundant。Cherry-pick 測試確認 T-type changes (無新內容)。Working tree 還原 clean。Worktree 保留 locked 狀態（CLAUDE.md 禁 git worktree remove --force, 留 next session 正式 cleanup）。"
+  },
+  {
+    "timestamp": "2026-04-19T22:18:19+08:00",
+    "task_type": "governance",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "Worktree agent-aa9aeb5d cleanup COMPLETE (遵 CLAUDE.md 禁 --force): (1) git worktree unlock 解 lock, (2) git worktree remove (non-force) 成功, (3) git branch -D worktree-agent-aa9aeb5d 刪 orphan branch (cbdac102)。Safe because cbdac102 僅含 experiments/k1100g_d9/ 7 files 已於 45fcfb61 進 main，redundant no data loss。`.claude/worktrees/` 現完全乾淨。git branch list 無 worktree-* 剩。"
+  },
+  {
+    "timestamp": "2026-04-19T22:22:29+08:00",
+    "task_type": "code",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "_auto_trigger_release_pool_if_due() unit test 驗證: import check_alerts 模組→直接呼叫 function→return dict ok, triggered=False (gap 62min<120min interval), reason='interval_not_due_age=62min'。代表 piggy-back 邏輯在當前 state (13:20 UTC last release) 正確判斷 skip。Next 16:00 UTC check_alerts fire (gap 160min) 會 triggered=True + subprocess run release-pool-by-settings。"
   }
 ]
