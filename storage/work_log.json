@@ -1210,5 +1210,33 @@
     "task_id": null,
     "outcome": "done",
     "summary": "_auto_trigger_release_pool_if_due() unit test 驗證: import check_alerts 模組→直接呼叫 function→return dict ok, triggered=False (gap 62min<120min interval), reason='interval_not_due_age=62min'。代表 piggy-back 邏輯在當前 state (13:20 UTC last release) 正確判斷 skip。Next 16:00 UTC check_alerts fire (gap 160min) 會 triggered=True + subprocess run release-pool-by-settings。"
+  },
+  {
+    "timestamp": "2026-04-19T22:26:04+08:00",
+    "task_type": "governance",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "Git commit aad61964 pushed: K1091 memo + session state + cron heartbeat。4 files +128/-7。Session cumulative commits: aad61964 (this) / b5b12974 (P10 + K957) / 29adb7c2 (P_insurance) / 4e942dd8 (cron piggy-back) / 37fbcd46 / fec91997。本地雲端對齊。"
+  },
+  {
+    "timestamp": "2026-04-19T22:30:24+08:00",
+    "task_type": "research",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "P9 errata_pending.md 校正真實 drift 數字: 原表 SPY 4.03→4.48 (+11.2%) 估算值 → 改為 **4.030 → 4.148 (+2.9%)** per current reproduce_report.json actual live_value。其他 4 metrics (QQQ/GLD+GVZ/GLD dual/0050.TW) 標 TBD (live_value=null 需 compute_mcs_dm.py 每資產完整 rerun)。errata_pending 現反映 actual observed divergence 非 speculative drift estimate，更 research-honest。"
+  },
+  {
+    "timestamp": "2026-04-19T22:33:59+08:00",
+    "task_type": "paper_body",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "research_program.md P1 row 補全: 加 '28 MATCH' + '7 figure scripts bundled MATCH' 反映 post-session reproduce.py 的 per-figure check tier (前幾輪 code work 成果)。P1 portfolio 讀者現看 full gate state: 28 MATCH / 0 MISMATCH / 9 NOTE / 19 UNTRACE (60→66 total checks)。"
+  },
+  {
+    "timestamp": "2026-04-19T22:38:20+08:00",
+    "task_type": "code",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "scripts/check_alerts.py 加 skip reason logging: 原來 piggy-back trigger=False 時沉默，現加 'release-pool-auto: skip reason=interval_not_due_age=XXmin' 明示。Debug-friendly: cron log 可看 piggy-back 每小時 fire 健康狀態。Verified: current fire 顯示 78min<120 threshold → skip 正確。15:00 UTC / 16:00 UTC cron log 將自動記 skip→trigger 轉換點。"
   }
 ]

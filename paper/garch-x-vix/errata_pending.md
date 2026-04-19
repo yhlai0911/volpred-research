@@ -10,12 +10,15 @@
 
 Paper claims (from K997 / K1085 experiments at drafting time) versus 2026-04-19 canonical rerun with pinned snapshot CSVs:
 
-| Claim | Paper value | Snapshot rerun | Relative drift | Harvey pass |
+| Claim | Paper value | Snapshot/live rerun (2026-04-19) | Relative drift | Harvey pass |
 |---|---|---|---|---|
-| SPY A4f DM $t$ | 4.03 | ~4.48 | +11.2% | ✅ |
-| QQQ A4f DM $t$ | 3.71 | ~3.89 | +4.9% | ✅ |
-| GLD+GVZ A4f DM $t$ | 3.17 | ~3.20 | +0.9% | ✅ |
-| USO+OVX (full OOS) DM $t$ | 4.47 | ~4.47 | 0.0% | ✅ |
+| SPY A4f DM $t$ vs GJR | 4.030 | **4.148** (live/stored match) | **+2.9%** | ✅ (both) |
+| QQQ A4f DM $t$ vs GJR | 3.71 | (live rerun pending) | TBD | TBD |
+| GLD+GVZ A4f DM $t$ vs GJR | 3.17 | (live rerun pending) | TBD | TBD |
+| GLD VIX+GVZ dual-factor DM $t$ | 3.39 | (live rerun pending) | TBD | TBD |
+| 0050.TW DM $t$ (VIX lag+1) | 1.44 | (live rerun pending) | TBD | TBD |
+
+**Verified drift** (post 2026-04-19 Codex task_4e75 snapshot integration): only SPY A4f has complete live value in current `reproduce_report.json` — 2.9% relative drift within tolerance of documented yfinance retroactive adjustment band. Other 4 metrics require full `compute_mcs_dm.py` rerun per asset (pending live_value=null in stored report).
 
 **Source**: Codex P12 snapshot infra (`task_4e7598ec51d3` SUCCEEDED 2026-04-19T10:13 UTC; result: `snapshot CLI + P9 snapshot-first + P8 T9/T10 pinned; P8 50.7→61.3, P9/P4/P1/P2 stable at 84.6/88.9/53.4/73.1`).
 

@@ -98,6 +98,12 @@ def main() -> int:
             f"age={release_trigger.get('age_min')}min "
             f"reason={release_trigger.get('reason') or release_trigger.get('error') or 'done'}"
         )
+    else:
+        # 2026-04-19: Log skip state for debugging (piggy-back health check).
+        print(
+            f"  release-pool-auto: skip "
+            f"reason={release_trigger.get('reason', 'unknown')}"
+        )
     print(
         f"breaches={report.get('breach_count')} "
         f"sent={report.get('sent_count')} "
