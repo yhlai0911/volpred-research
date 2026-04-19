@@ -128,10 +128,25 @@ def compute_diff(storage_dir: str | Path = "storage") -> dict:
         ):
             to_update.append(slug)
 
+    # Split to_delete into real drift (published in DB but missing from feed)
+    # vs benign drafts (DB-only drafts that correctly don't belong in feed).
+    # feed.json canonically contains only published articles, so drafts in DB
+    # being "missing" from feed is expected state, not drift.
+    real_deletes: list[str] = []
+    draft_only: list[str] = []
+    for slug in to_delete:
+        db_status = (db_by_slug[slug].get("status") or "").lower()
+        if db_status in ("draft", "scheduled"):
+            draft_only.append(slug)
+        else:
+            real_deletes.append(slug)
+
     return {
         "insert": to_insert,
         "update": to_update,
         "delete": to_delete,
+        "real_delete": real_deletes,
+        "draft_only": draft_only,
         "feed_count": len(feed_by_slug),
         "db_count": len(db_by_slug),
     }
