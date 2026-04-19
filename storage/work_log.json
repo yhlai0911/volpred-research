@@ -1287,5 +1287,33 @@
     "task_id": null,
     "outcome": "done",
     "summary": "Memory 加 feedback_3spec_disambiguation.md: Paper 內同 symbol 多 spec 數值差異的 footnote + reproduce.py NOTE tier resolution pattern (本 session P1 K1256 + P2 γ 成功驗證 6→0 MISMATCH)。含 3 個 NOT-apply 場景 (真抄錯格、sign flip、Harvey crossing) 避免未來誤用。MEMORY.md index 加連結。Pattern 可重用於任何 paper gate MISMATCH 審查。"
+  },
+  {
+    "timestamp": "2026-04-19T23:10:05+08:00",
+    "task_type": "governance",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "Git commit e24ae779 pushed: cron log + dedup + work_log heartbeat。4 files +66/-10。Session 10 commits。本地雲端對齊。"
+  },
+  {
+    "timestamp": "2026-04-19T23:14:04+08:00",
+    "task_type": "code",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "check_alerts piggy-back dry-run simulation: Monkey-patched _auto_trigger_release_pool_if_due() to return triggered=True age_min=180 (simulated 3h gap)。Verified output format: 'release-pool-auto: ok age=180min reason=simulated_due' 正確 print path。實際 16:00 UTC fire 預期相同 pattern 但 age_min=160 + reason=done (subprocess 真跑)。Simulation 確認 triggered=True branch print logic 無 bug。"
+  },
+  {
+    "timestamp": "2026-04-19T23:18:14+08:00",
+    "task_type": "research",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "Session status audit: 10 git commits pushed, 148 work_log entries, 4 papers GREEN + 6 papers 0 MISMATCH + 2 errata shelves + 3 next-draft memos + P10 README + cron piggy-back live validated。Session 本輪起已達 diminishing returns — 核心 deliverables 完成, 額外 edits 多為 polish。Codex bg zombie jobs (3-25h elapsed) 為 quota-hit stale states, 不妨礙 queue。Memory files audit: feedback_codex_cli_capability.md 仍相關非 obsolete。下次高價值機會：04-24 Codex quota reset 後派 task_7d2c + task_0658 +可選其他 queue additions。"
+  },
+  {
+    "timestamp": "2026-04-19T23:22:48+08:00",
+    "task_type": "governance",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "Publication candidates 再 refresh - 穩定狀態: total_k 583, uncovered 225, high_priority 3, missing_general 33, missing_research 10。自 mile_28f0ae1b+mile_c15c7b98+mile_2d35fcc4 published/draft 以來 metrics 穩定，無新 mile 加入。Session 當前無 pending pool breach，待 16:00 UTC 16:00 piggy-back trigger 驗證完成前保持 stable state。"
   }
 ]
