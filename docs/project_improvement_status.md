@@ -1,6 +1,25 @@
 # Project Improvement Status
 
-Last updated: 2026-04-18
+Last updated: **2026-04-19 (v12 transition 進度 + 本日成果)**
+
+## v12 Transition Status (2026-04-19 update)
+
+> **v11 → v12**: 原 v11 3-terminal 架構（Claude supervisor + worker + Codex worker）已 retired (session cron decommissioned as execution clock)，**v12 模式**為 single main-thread Claude + ephemeral subagent dispatch（claude general-purpose / codex-rescue）。canonical source of truth = `storage/ops/` control plane + `config/runtime_schedules.json` + `event_jobs`。
+
+### 2026-04-19 v12 session outcomes
+- ✅ **5 Codex ops victories**（task_4e75 snapshot infra / task_fdf8 release-pool fix / task_361a P6 audit / task_9b07 session-bootstrap v11 cleanup / task_6e7c claim-next parent guard）
+- ✅ **4 papers GREEN**（P4 vix-sufficiency 98% / P4ins vt-insurance-cost 100% / P5 vt-crowding-abm 100% / P6 prg-periodic-garch 100%）— 首次四篇 submission-ready
+- ✅ **6 papers 0 MISMATCH**（+P1 / P2 / P3 cross-source NOTE reclass clean）
+- ✅ **Host cron selectivity bug workaround**: `scripts/check_alerts.py` `_auto_trigger_release_pool_if_due()` piggy-back（解 `3 */2` cron silent skip issue）
+- ✅ **Session cleanup**（0 stale claims / 0 orphan worktrees / 0 orphan worktree-* branches）
+- ⏸️ **Codex quota 耗盡** until 2026-04-24 10:27 UTC；wake-up cron + canonical schedule entry 已建（one-shot durable）
+- 📝 **3 reusable next-draft memos** (K957 / K1091 / K1092) for future pool-breach remediation
+- 📝 **2 errata_pending.md** (P8 CRITICAL / P9 shelf-ready)
+- 📝 **Release cadence** unified to 120 min interval + 2h cron
+
+### Historical v11 context 保留於下方（不刪除，作為 architecture evolution reference）
+
+---
 
 ## VolPred 雙 Agent 最終優化方案 v11
 

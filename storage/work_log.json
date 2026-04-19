@@ -1238,5 +1238,26 @@
     "task_id": null,
     "outcome": "done",
     "summary": "scripts/check_alerts.py 加 skip reason logging: 原來 piggy-back trigger=False 時沉默，現加 'release-pool-auto: skip reason=interval_not_due_age=XXmin' 明示。Debug-friendly: cron log 可看 piggy-back 每小時 fire 健康狀態。Verified: current fire 顯示 78min<120 threshold → skip 正確。15:00 UTC / 16:00 UTC cron log 將自動記 skip→trigger 轉換點。"
+  },
+  {
+    "timestamp": "2026-04-19T22:42:17+08:00",
+    "task_type": "governance",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "Git commit 19df3953 pushed: P9 errata actual drift + P1 row '28 MATCH' + check_alerts skip logging。5 files +46/-9。Session累計 7 commits: fec91997 (auto) / 37fbcd46 / 4e942dd8 / 29adb7c2 / b5b12974 / aad61964 / 19df3953 (this)。"
+  },
+  {
+    "timestamp": "2026-04-19T22:46:51+08:00",
+    "task_type": "research",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "K1092 third next-draft memo (storage/next_draft_candidate_k1092.md): Asymmetric DCC-A4f score 5 - 'Pareto-dominant but below Harvey' methodology nuance。Article skeleton 7 sections, 2 Pareto + time-series charts, differentiation vs K957 synthesis / K1091 FAIL-mechanism / K672 evidence-hierarchy。Session now has 3 reusable draft memos: K957 (synthesis) / K1091 (asset-class asymmetry) / K1092 (Harvey boundary nuance)。Coverage: 前 3 次 pool-breach 可 direct dispatch。"
+  },
+  {
+    "timestamp": "2026-04-19T22:50:33+08:00",
+    "task_type": "governance",
+    "task_id": null,
+    "outcome": "done",
+    "summary": "docs/project_improvement_status.md 加 v12 Transition Status section (2026-04-19): 5 Codex ops victories, 4 papers GREEN, 6 papers 0 MISMATCH, host cron workaround, session cleanup, 3 memos, 2 errata, release cadence 統一。v11 historical context 保留於下方為 architecture evolution reference。706→733 lines。下次 session 讀此 doc 即知 v11→v12 transition 進度。"
   }
 ]

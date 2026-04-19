@@ -4,111 +4,133 @@
   "date": "2026-04-19",
   "week_range": "2026-04-17 → 2026-04-24",
   "totals": {
-    "input_tokens": 81227,
-    "output_tokens": 3208079,
-    "cache_read_tokens": 1129241950,
-    "cache_create_tokens": 20939517,
-    "billable_total": 24228823,
-    "assistant_messages": 5342,
-    "unique_sessions": 63,
-    "estimated_cost_usd": 2328.3032
+    "input_tokens": 83817,
+    "output_tokens": 3939255,
+    "cache_read_tokens": 1807475205,
+    "cache_create_tokens": 22911620,
+    "billable_total": 26934692,
+    "assistant_messages": 6606,
+    "unique_sessions": 69,
+    "estimated_cost_usd": 3437.5071
   },
   "by_model": {
     "claude-opus-4-7": {
-      "input_tokens": 81227,
-      "output_tokens": 3208079,
-      "cache_read_tokens": 1129241950,
-      "cache_create_tokens": 20939517,
-      "messages": 5342,
-      "estimated_cost_usd": 2328.3032
+      "input_tokens": 83817,
+      "output_tokens": 3939255,
+      "cache_read_tokens": 1807475205,
+      "cache_create_tokens": 22911620,
+      "messages": 6606,
+      "estimated_cost_usd": 3437.5071
     }
   },
   "by_category": {
     "text_only": {
-      "input_tokens": 3991,
-      "output_tokens": 1134643,
-      "cache_read_tokens": 531849170,
-      "cache_create_tokens": 3398921,
-      "messages": 1222,
-      "billable_total": 4537555,
-      "estimated_cost_usd": 946.6616,
+      "input_tokens": 5321,
+      "output_tokens": 1444477,
+      "cache_read_tokens": 835680413,
+      "cache_create_tokens": 3884466,
+      "messages": 1742,
+      "billable_total": 5334264,
+      "estimated_cost_usd": 1434.7699,
       "emoji": "💬",
       "description": "純文字回覆（無工具）"
     },
     "bash_other": {
-      "input_tokens": 6146,
-      "output_tokens": 449873,
-      "cache_read_tokens": 204813039,
-      "cache_create_tokens": 2664257,
-      "messages": 1092,
-      "billable_total": 3120276,
-      "estimated_cost_usd": 391.007,
+      "input_tokens": 6821,
+      "output_tokens": 604208,
+      "cache_read_tokens": 384069291,
+      "cache_create_tokens": 3150555,
+      "messages": 1415,
+      "billable_total": 3761584,
+      "estimated_cost_usd": 680.5948,
       "emoji": "💭",
       "description": "其他 Bash 操作"
     },
     "investigation": {
-      "input_tokens": 33507,
-      "output_tokens": 267203,
-      "cache_read_tokens": 128730042,
-      "cache_create_tokens": 7517812,
-      "messages": 1227,
-      "billable_total": 7818522,
-      "estimated_cost_usd": 354.5969,
+      "input_tokens": 33765,
+      "output_tokens": 319941,
+      "cache_read_tokens": 206298149,
+      "cache_create_tokens": 8061039,
+      "messages": 1400,
+      "billable_total": 8414745,
+      "estimated_cost_usd": 485.0938,
       "emoji": "🔍",
       "description": "閱讀 / 搜尋檔案"
     },
     "agent_delegation": {
-      "input_tokens": 16990,
-      "output_tokens": 190730,
-      "cache_read_tokens": 83863639,
-      "cache_create_tokens": 3955599,
-      "messages": 929,
-      "billable_total": 4163319,
-      "estimated_cost_usd": 214.5225,
+      "input_tokens": 17058,
+      "output_tokens": 203284,
+      "cache_read_tokens": 88477655,
+      "cache_create_tokens": 4204094,
+      "messages": 978,
+      "billable_total": 4424436,
+      "estimated_cost_usd": 227.0454,
       "emoji": "🤖",
       "description": "Agent 派送（非實驗）"
     },
     "file_edit": {
-      "input_tokens": 408,
-      "output_tokens": 604046,
-      "cache_read_tokens": 47155478,
-      "cache_create_tokens": 1016672,
-      "messages": 350,
-      "billable_total": 1621126,
-      "estimated_cost_usd": 135.1054,
+      "input_tokens": 513,
+      "output_tokens": 718740,
+      "cache_read_tokens": 97954522,
+      "cache_create_tokens": 1123480,
+      "messages": 445,
+      "billable_total": 1842733,
+      "estimated_cost_usd": 221.9102,
       "emoji": "📄",
       "description": "其他檔案編輯"
     },
     "paper_work": {
-      "input_tokens": 93,
-      "output_tokens": 77202,
-      "cache_read_tokens": 39081070,
-      "cache_create_tokens": 84010,
-      "messages": 73,
-      "billable_total": 161305,
-      "estimated_cost_usd": 65.9883,
+      "input_tokens": 101,
+      "output_tokens": 81992,
+      "cache_read_tokens": 43540784,
+      "cache_create_tokens": 92444,
+      "messages": 81,
+      "billable_total": 174537,
+      "estimated_cost_usd": 73.1954,
       "emoji": "📝",
       "description": "論文撰寫/審查（paper/ *.tex 編輯）"
     },
+    "git_sync": {
+      "input_tokens": 84,
+      "output_tokens": 46008,
+      "cache_read_tokens": 29937319,
+      "cache_create_tokens": 118251,
+      "messages": 62,
+      "billable_total": 164343,
+      "estimated_cost_usd": 50.575,
+      "emoji": "🔄",
+      "description": "Git commit / pull / push"
+    },
+    "platform_ops": {
+      "input_tokens": 117,
+      "output_tokens": 56892,
+      "cache_read_tokens": 24094153,
+      "cache_create_tokens": 141701,
+      "messages": 74,
+      "billable_total": 198710,
+      "estimated_cost_usd": 43.0668,
+      "emoji": "🛡️",
+      "description": "平台運維（Supabase sync / daily_update）"
+    },
     "experiment": {
-      "input_tokens": 103,
-      "output_tokens": 108000,
-      "cache_read_tokens": 17197244,
-      "cache_create_tokens": 36601,
-      "messages": 33,
-      "billable_total": 144704,
-      "estimated_cost_usd": 34.5837,
+      "input_tokens": 107,
+      "output_tokens": 116941,
+      "cache_read_tokens": 19145750,
+      "cache_create_tokens": 38936,
+      "messages": 37,
+      "billable_total": 155984,
+      "estimated_cost_usd": 38.2209,
       "emoji": "🔬",
       "description": "研究實驗（Agent 派送 K\\d+ / experiments/ 編輯）"
     },
     "task_management": {
-      "input_tokens": 177,
-      "output_tokens": 106968,
-      "cache_read_tokens": 10899792,
-      "cache_create_tokens": 376020,
-      "messages": 92,
-      "billable_total": 483165,
-      "estimated_cost_usd": 31.4253,
+      "input_tokens": 183,
+      "output_tokens": 108325,
+      "cache_read_tokens": 11464458,
+      "cache_create_tokens": 376377,
+      "messages": 93,
+      "billable_total": 484885,
+      "estimated_cost_usd": 32.3809,
       "emoji": "📌",
       "description": "任務管理（TaskCreate/Update）"
     },
@@ -123,82 +145,82 @@
       "emoji": "🌐",
       "description": "WebSearch / WebFetch"
     },
-    "platform_ops": {
-      "input_tokens": 100,
-      "output_tokens": 45406,
-      "cache_read_tokens": 13596280,
-      "cache_create_tokens": 131846,
-      "messages": 57,
-      "billable_total": 177352,
-      "estimated_cost_usd": 26.2735,
-      "emoji": "🛡️",
-      "description": "平台運維（Supabase sync / daily_update）"
-    },
-    "script_dev": {
-      "input_tokens": 60,
-      "output_tokens": 100679,
-      "cache_read_tokens": 6321985,
-      "cache_create_tokens": 81195,
-      "messages": 60,
-      "billable_total": 181934,
-      "estimated_cost_usd": 18.5572,
-      "emoji": "💻",
-      "description": "腳本開發（scripts/ *.py）"
-    },
-    "git_sync": {
-      "input_tokens": 39,
-      "output_tokens": 17418,
-      "cache_read_tokens": 8705438,
-      "cache_create_tokens": 88555,
-      "messages": 27,
-      "billable_total": 106012,
-      "estimated_cost_usd": 16.0255,
-      "emoji": "🔄",
-      "description": "Git commit / pull / push"
-    },
     "research_planning": {
-      "input_tokens": 45,
-      "output_tokens": 14114,
-      "cache_read_tokens": 9596249,
-      "cache_create_tokens": 21997,
-      "messages": 15,
-      "billable_total": 36156,
-      "estimated_cost_usd": 15.866,
+      "input_tokens": 54,
+      "output_tokens": 24197,
+      "cache_read_tokens": 16171926,
+      "cache_create_tokens": 30614,
+      "messages": 24,
+      "billable_total": 54865,
+      "estimated_cost_usd": 26.6475,
       "emoji": "📋",
       "description": "研究計劃（research_program.md / CLAUDE.md）"
     },
+    "script_dev": {
+      "input_tokens": 63,
+      "output_tokens": 111886,
+      "cache_read_tokens": 7980682,
+      "cache_create_tokens": 85276,
+      "messages": 63,
+      "billable_total": 197225,
+      "estimated_cost_usd": 21.9623,
+      "emoji": "💻",
+      "description": "腳本開發（scripts/ *.py）"
+    },
+    "worktree_merge": {
+      "input_tokens": 53,
+      "output_tokens": 12632,
+      "cache_read_tokens": 10954601,
+      "cache_create_tokens": 50271,
+      "messages": 38,
+      "billable_total": 62956,
+      "estimated_cost_usd": 18.3227,
+      "emoji": "🔀",
+      "description": "Worktree 合併與分支管理"
+    },
     "scheduling": {
-      "input_tokens": 48,
-      "output_tokens": 29833,
-      "cache_read_tokens": 6345385,
-      "cache_create_tokens": 27115,
-      "messages": 23,
-      "billable_total": 56996,
-      "estimated_cost_usd": 12.2647,
+      "input_tokens": 60,
+      "output_tokens": 32165,
+      "cache_read_tokens": 7494560,
+      "cache_create_tokens": 29778,
+      "messages": 25,
+      "billable_total": 62003,
+      "estimated_cost_usd": 14.2135,
       "emoji": "⏰",
       "description": "Cron / Monitor 排程"
     },
     "knowledge_recording": {
-      "input_tokens": 38,
-      "output_tokens": 22546,
-      "cache_read_tokens": 3604058,
-      "cache_create_tokens": 16840,
-      "messages": 8,
-      "billable_total": 39424,
-      "estimated_cost_usd": 7.4134,
+      "input_tokens": 42,
+      "output_tokens": 25162,
+      "cache_read_tokens": 5982811,
+      "cache_create_tokens": 23605,
+      "messages": 12,
+      "billable_total": 48809,
+      "estimated_cost_usd": 11.3046,
       "emoji": "📚",
       "description": "知識記錄（knowledge.json / thinking_journal）"
     },
-    "worktree_merge": {
-      "input_tokens": 39,
-      "output_tokens": 9604,
-      "cache_read_tokens": 3669874,
-      "cache_create_tokens": 46122,
-      "messages": 29,
-      "billable_total": 55765,
-      "estimated_cost_usd": 7.0905,
-      "emoji": "🔀",
-      "description": "Worktree 合併與分支管理"
+    "knowledge_index": {
+      "input_tokens": 44,
+      "output_tokens": 2872,
+      "cache_read_tokens": 3009544,
+      "cache_create_tokens": 133172,
+      "messages": 14,
+      "billable_total": 136088,
+      "estimated_cost_usd": 7.2274,
+      "emoji": "📇",
+      "description": "知識索引更新"
+    },
+    "tool_setup": {
+      "input_tokens": 37,
+      "output_tokens": 4814,
+      "cache_read_tokens": 2616409,
+      "cache_create_tokens": 133245,
+      "messages": 17,
+      "billable_total": 138096,
+      "estimated_cost_usd": 6.7846,
+      "emoji": "🛠️",
+      "description": "ToolSearch 載入工具"
     },
     "member_qa": {
       "input_tokens": 40,
@@ -211,38 +233,27 @@
       "emoji": "❓",
       "description": "會員問答研究"
     },
-    "knowledge_index": {
-      "input_tokens": 31,
-      "output_tokens": 2341,
-      "cache_read_tokens": 2100961,
-      "cache_create_tokens": 117939,
-      "messages": 11,
-      "billable_total": 120311,
-      "estimated_cost_usd": 5.5388,
-      "emoji": "📇",
-      "description": "知識索引更新"
-    },
-    "tool_setup": {
-      "input_tokens": 30,
-      "output_tokens": 3962,
-      "cache_read_tokens": 1470044,
-      "cache_create_tokens": 130435,
-      "messages": 15,
-      "billable_total": 134427,
-      "estimated_cost_usd": 4.9483,
-      "emoji": "🛠️",
-      "description": "ToolSearch 載入工具"
-    },
     "chart_generation": {
-      "input_tokens": 15,
-      "output_tokens": 8830,
-      "cache_read_tokens": 1372653,
-      "cache_create_tokens": 12761,
-      "messages": 10,
-      "billable_total": 21606,
-      "estimated_cost_usd": 2.9607,
+      "input_tokens": 19,
+      "output_tokens": 9571,
+      "cache_read_tokens": 1750904,
+      "cache_create_tokens": 18642,
+      "messages": 14,
+      "billable_total": 28232,
+      "estimated_cost_usd": 3.694,
       "emoji": "📊",
       "description": "圖表生成（matplotlib / upload_chart）"
+    },
+    "token_report": {
+      "input_tokens": 14,
+      "output_tokens": 661,
+      "cache_read_tokens": 2219279,
+      "cache_create_tokens": 960,
+      "messages": 4,
+      "billable_total": 1635,
+      "estimated_cost_usd": 3.3967,
+      "emoji": "📈",
+      "description": "Token 用量報告"
     },
     "skill_invoke": {
       "input_tokens": 12,
@@ -265,79 +276,6 @@
       "estimated_cost_usd": 1.0235,
       "emoji": "🔧",
       "description": "Skill 編輯"
-    },
-    "token_report": {
-      "input_tokens": 6,
-      "output_tokens": 194,
-      "cache_read_tokens": 237554,
-      "cache_create_tokens": 106,
-      "messages": 1,
-      "billable_total": 306,
-      "estimated_cost_usd": 0.373,
-      "emoji": "📈",
-      "description": "Token 用量報告"
     }
-  },
-  "git_commits_context": [
-    {
-      "sha": "096e1297",
-      "message": "docs(research_program): record V3 Editorial redesign deployment"
-    },
-    {
-      "sha": "07457973",
-      "message": "4-hour sync: P9 garch-x-vix reproduce iter + session state"
-    },
-    {
-      "sha": "45fcfb61",
-      "message": "4-hour sync: rules + skills + paper reproduce + ops state"
-    },
-    {
-      "sha": "15de00e2",
-      "message": "Merge branch 'main' of https://github.com/yhlai0911/volpred-research"
-    },
-    {
-      "sha": "c7c1b7c9",
-      "message": "docs(v3): record V3 Editorial deploy + archive design source bundle"
-    },
-    {
-      "sha": "a4e9eab6",
-      "message": "Ops patrol report 2026-04-19T06:23Z"
-    },
-    {
-      "sha": "0802fb08",
-      "message": "4-hour sync: CLAUDE.md rules refinement + scheduler state + token daily"
-    },
-    {
-      "sha": "da8fe003",
-      "message": "Merge branch 'main' of https://github.com/yhlai0911/volpred-research"
-    },
-    {
-      "sha": "2fc2cc89",
-      "message": "4-hour sync: token daily update + session_state heartbeat"
-    },
-    {
-      "sha": "61b73f48",
-      "message": "Ops patrol report 2026-04-19T00:05Z"
-    },
-    {
-      "sha": "9d23469b",
-      "message": "Merge branch 'main' of https://github.com/yhlai0911/volpred-research"
-    },
-    {
-      "sha": "4edcc64a",
-      "message": "4-hour sync: session_state heartbeat"
-    },
-    {
-      "sha": "a598ae24",
-      "message": "Ops patrol report 2026-04-18T18:04Z"
-    },
-    {
-      "sha": "d513871f",
-      "message": "Merge branch 'main' of https://github.com/yhlai0911/volpred-research"
-    },
-    {
-      "sha": "45b03792",
-      "message": "4-hour sync: paper reproduce reports + ops logs + token daily"
-    }
-  ]
+  }
 }
