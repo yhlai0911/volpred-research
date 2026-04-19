@@ -1,0 +1,46 @@
+{
+  "timestamp": "2026-04-19T06:23:11Z",
+  "patrol_run": "20260419_062311",
+  "alerts": [
+    {
+      "type": "article_pool_low",
+      "severity": "high",
+      "message": "Article pool critically low: only 4 draft articles (threshold: 12). Feed publishing continuity at risk.",
+      "detail": {
+        "total_draft": 4,
+        "research_draft": 3,
+        "general_draft": 1,
+        "research_threshold": 4,
+        "general_threshold": 8,
+        "total_threshold": 12
+      }
+    },
+    {
+      "type": "research_audience_low",
+      "severity": "medium",
+      "message": "Research-audience draft pool below threshold: 3 drafts (<4).",
+      "detail": {
+        "research_draft": 3,
+        "threshold": 4
+      }
+    },
+    {
+      "type": "general_audience_low",
+      "severity": "high",
+      "message": "General-audience draft pool critically low: only 1 draft (<8).",
+      "detail": {
+        "general_draft": 1,
+        "threshold": 8
+      }
+    },
+    {
+      "type": "error_log_recent",
+      "severity": "low",
+      "message": "Error log has entry from yesterday (2026-04-18): BUG-001 FK cascade fix — test TODO still pending.",
+      "detail": {
+        "entry_date": "2026-04-18",
+        "entry": "BUG-001 cleanup-post FK cascade — supabase_sync.py delete_article updated; test with impression-bearing draft not yet executed"
+      }
+    }
+  ]
+}
