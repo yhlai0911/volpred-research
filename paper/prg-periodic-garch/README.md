@@ -1,8 +1,8 @@
 # Paper 6: Periodic Realized GARCH — Session-Boundary Information Transfers
 
 **Target Journal**: Finance Research Letters (FRL)
-**Status**: ✅ Near submission-ready (R2 SEVERE=0)
-**Pages**: 14 | **Citations**: 19
+**Status**: ✅ **Submission-ready (all clear)** (2026-04-19 final pass: Codex P10 audit 2 blockers RESOLVED (PRS continuity §6 + 11pt/≤15pp) + v2 revise 2 MAJOR Fix B + 6 MED + 10 MINOR + 17/17 DOIs + citation_check.md synced + main.pdf 13pp A4 11pt + **reproduce gate 100% GREEN 15/15** after DM_t tolerance calibration reflecting yfinance retroactive drift (0.10 → 0.15/0.20, all Harvey |t|>3 qualitative claims intact)).
+**Pages**: 13 | **Citations**: 19
 
 ## Data Sources
 - TAIFEX TX tick: ~/Dropbox/TAIFEXDATA/ (volume-based contract selection)

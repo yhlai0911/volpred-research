@@ -176,6 +176,13 @@
         "prompt": "更新 NDC 景氣指標：用 Chrome DevTools MCP 導航 NDC 網站提取最新領先指標和景氣對策信號，更新 storage/macro/tw_dgbas_bci_m.csv，git commit",
         "recurring": true,
         "description": "每月 28 日更新 NDC 景氣指標。"
+      },
+      {
+        "id": "codex_quota_resume_2026_04_24",
+        "cron": "30 10 24 4 *",
+        "prompt": "Codex quota 已於 2026-04-24 10:27 reset。依 queue 最高 priority 派 Codex:\n1. uv run volpred ops tasks --status queued\n2. 檢查 task_7d2c (P25 crypto-fear audit) + task_06584aeee667 (P30 release-task CLI)\n3. 若仍 queued → dispatch codex:codex-rescue subagent（shared runtime 一次限 1）\n4. 派工 brief 照 .claude/skills/autonomous-research/references/agent-brief-template.md\n5. Append work_log.json 記 quota-resumed event",
+        "recurring": false,
+        "description": "One-shot: Codex quota reset 後 resume 2 延後 tasks (2026-04-19 quota 耗盡對策)。fire 一次自動 delete。"
       }
     ]
   },
@@ -199,9 +206,18 @@
       "next_tasks 主動補滿：每次 cron tick check；若 P4 pending < 2 或 P3 pending < 5，從 research_program.md / knowledge.json / 最近 NULL 實驗衍生新任務補齊；不等 queue 清空才 refill。"
     ],
     "history": [
-      {"date": "2026-03-31", "change": "Deprecated */4 heartbeat; introduced queue-first sequential idle continuation."},
-      {"date": "2026-04-17", "change": "Relaxed to slot-aware concurrent execution (up to 3 parallel agents on M1 Max 10-core); priority ordering still enforced but no longer sequential."},
-      {"date": "2026-04-17", "change": "Raised max_concurrent_agents 3->4 (context still manageable, keeps ≥1 core headroom). Added proactive next_tasks refill: trigger when P4<2 or P3<5."}
+      {
+        "date": "2026-03-31",
+        "change": "Deprecated */4 heartbeat; introduced queue-first sequential idle continuation."
+      },
+      {
+        "date": "2026-04-17",
+        "change": "Relaxed to slot-aware concurrent execution (up to 3 parallel agents on M1 Max 10-core); priority ordering still enforced but no longer sequential."
+      },
+      {
+        "date": "2026-04-17",
+        "change": "Raised max_concurrent_agents 3->4 (context still manageable, keeps ≥1 core headroom). Added proactive next_tasks refill: trigger when P4<2 or P3<5."
+      }
     ]
   },
   "deprecated_patterns": [

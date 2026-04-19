@@ -1,8 +1,8 @@
 # Paper 5: When Volatility Targeting Crowds — Quantifying the Tipping Point via ABM
 
 **Target Journal**: Finance Research Letters (FRL)
-**Status**: ✅ Submission-ready (R3 SEVERE=0)
-**Pages**: 15 | **Citations**: 13
+**Status**: ✅ Submission-ready (R3 SEVERE=0; v2 revise completed 2026-04-19: 4 MAJOR + 3 MED-C DOIs + 4 academic MED done → 4.3★ predicted FRL acceptance; reproduce 33/33 100% GREEN)
+**Pages**: 15 | **Citations**: 16 (13 original + 3 new: barroso2021, cederburg2020, liu2019)
 
 ## Data Sources
 - Agent-based simulation (no external data needed)

@@ -1,0 +1,20 @@
+{
+  "id": "b98ef1be",
+  "subject": "[VolPred Alert][WARN] P8 volatility-absorption — CRITICAL errata identified: Harvey-threshold crossing + sign flip",
+  "body": "Alert level: warn\nTitle: P8 volatility-absorption — CRITICAL errata identified: Harvey-threshold crossing + sign flip\n\n## 觸發條件\nP8 K903/K904 snapshot rerun (2026-04-19 Codex task_4e75) 揭示 2 個嚴重 paper claim 問題：\n\n1. **CRITICAL — Harvey-threshold crossing**:\n   - Paper controlled regression t = -3.14 (declared Harvey-significant)\n   - Snapshot rerun t = -1.17 (FAILS Harvey |t|>3)\n   - Paper's '控制後仍顯著' 主張 under current yfinance snapshot 不成立\n\n2. **HIGH — T10 2020-2026 β sign flip**:\n   - Paper β = -0.00035 (absorption)\n   - Snapshot β = +0.000139 (inversion)\n   - Paper's 'absorption all periods' claim breaks for COVID/inflation era\n\n其他 10+ MEDIUM magnitude drifts (T9 tau-robustness, T10 sub-periods) 在 reasonable range 內。\n\nshelf-ready errata: paper/volatility-absorption/errata_pending.md (剛建).\n\n## 影響\n- Mission 3 (論文寫好): P8 現在 R1 review state, 需 decision 決定 revision 路徑\n- 不能當 'submission-ready' 直到 sign flip + Harvey boundary 處理完\n- 跟 P9 garch-x-vix 不同 — P9 是 submitted under review, 可 shelf errata 待 R1 response。P8 尚未投稿, 必須 body 修正或決策再提\n- P8 reproduce gate 61.3% AMBER 暫時無法升 GREEN 直到 body 決策執行\n\n## 建議行動\n請 review errata_pending.md 選 Path：\n- **Path A**: 嘗試 pull yfinance archive 恢復 paper drafting-time snapshot (可能無法 time-travel)\n- **Path B** (推薦 research-honest): 接受 current snapshot canonical, 修 body T10 + 加 crisis-era caveat, 調整 'absorption all periods' claim\n- **Path C**: Dual-report + prominent errata section 作 fall-back\n\n同時 review controlled-regression 是否有 alternative spec 讓 Harvey 仍 pass (例如 different covariate set / time window)。\n\n下個 session 可把 decision 轉成 sub-task 派主線程或 agent。",
+  "text_body": "Alert level: warn\nTitle: P8 volatility-absorption — CRITICAL errata identified: Harvey-threshold crossing + sign flip\n\n## 觸發條件\nP8 K903/K904 snapshot rerun (2026-04-19 Codex task_4e75) 揭示 2 個嚴重 paper claim 問題：\n\n1. **CRITICAL — Harvey-threshold crossing**:\n   - Paper controlled regression t = -3.14 (declared Harvey-significant)\n   - Snapshot rerun t = -1.17 (FAILS Harvey |t|>3)\n   - Paper's '控制後仍顯著' 主張 under current yfinance snapshot 不成立\n\n2. **HIGH — T10 2020-2026 β sign flip**:\n   - Paper β = -0.00035 (absorption)\n   - Snapshot β = +0.000139 (inversion)\n   - Paper's 'absorption all periods' claim breaks for COVID/inflation era\n\n其他 10+ MEDIUM magnitude drifts (T9 tau-robustness, T10 sub-periods) 在 reasonable range 內。\n\nshelf-ready errata: paper/volatility-absorption/errata_pending.md (剛建).\n\n## 影響\n- Mission 3 (論文寫好): P8 現在 R1 review state, 需 decision 決定 revision 路徑\n- 不能當 'submission-ready' 直到 sign flip + Harvey boundary 處理完\n- 跟 P9 garch-x-vix 不同 — P9 是 submitted under review, 可 shelf errata 待 R1 response。P8 尚未投稿, 必須 body 修正或決策再提\n- P8 reproduce gate 61.3% AMBER 暫時無法升 GREEN 直到 body 決策執行\n\n## 建議行動\n請 review errata_pending.md 選 Path：\n- **Path A**: 嘗試 pull yfinance archive 恢復 paper drafting-time snapshot (可能無法 time-travel)\n- **Path B** (推薦 research-honest): 接受 current snapshot canonical, 修 body T10 + 加 crisis-era caveat, 調整 'absorption all periods' claim\n- **Path C**: Dual-report + prominent errata section 作 fall-back\n\n同時 review controlled-regression 是否有 alternative spec 讓 Harvey 仍 pass (例如 different covariate set / time window)。\n\n下個 session 可把 decision 轉成 sub-task 派主線程或 agent。",
+  "html_body": null,
+  "level": "warn",
+  "metadata": {
+    "notification_type": "ops_alert",
+    "alert_level": "warn",
+    "alert_title": "P8 volatility-absorption — CRITICAL errata identified: Harvey-threshold crossing + sign flip",
+    "recipient": "yihao.lai@gmail.com"
+  },
+  "timestamp": "2026-04-19T12:31:49.253514+00:00",
+  "recipients": [
+    "yihao.lai@gmail.com"
+  ],
+  "sent": true,
+  "configured": true
+}

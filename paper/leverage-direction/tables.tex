@@ -90,9 +90,10 @@ Student-$t$ (df=5) & 18 & 1.2\% & $-$45.5\% \\
 \toprule
 GARCH Equation & Distribution & Violations & Rate & Kupiec $p$ & Basel Zone & Status \\
 \midrule
-GARCH(1,1) & Normal        & 7  & 1.39\% & 0.40 & Green & PASS \\
+% source: experiments/k799_grand_evaluation_results.json .evaluation_layers.layer_4 + experiments/k802_gjr_skewt_results.json .var_backtest_results (K802 Kupiec p)
+GARCH(1,1) & Normal        & 7  & 1.39\% & 0.64 & Green & PASS \\
 GJR-GARCH  & Normal        & 10 & 1.99\% & 0.049 & Yellow & \textbf{Borderline FAIL} \\
-GJR-GARCH  & Student-$t$(5) & 6  & 1.20\% & 0.60 & Green & PASS \\
+GJR-GARCH  & Student-$t$(5) & 6  & 1.20\% & 0.67 & Green & PASS \\
 \midrule
 \multicolumn{7}{l}{\textit{GJR wins QLIKE ($-3.8\%$, DM $p = 0.001$) but fails VaR under Normal.}} \\
 \multicolumn{7}{l}{\textit{Student-$t$ restores compliance: two optimization domains are independent.}} \\

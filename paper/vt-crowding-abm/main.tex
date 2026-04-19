@@ -33,7 +33,7 @@
 % --- Abstract ---
 \begin{abstract}
 \noindent
-Volatility targeting (VT) strategies---which scale equity exposure inversely to conditional volatility---are increasingly adopted by institutional investors, yet the systemic consequences of widespread adoption remain unquantified. We develop an agent-based model (ABM) with a Kyle (1985) market maker, endogenous VIX dynamics, and 1{,}000 heterogeneous agents to quantify crowding effects as VT adoption rises from 0\% to 100\%. A fixed pool of 200 noise traders provides constant background liquidity, ensuring that performance degradation reflects crowding rather than liquidity evaporation. Across 500 Monte Carlo simulations per adoption level ($500 \times 2{,}520$ days each), we identify a nonlinear tipping point: VT performance remains stable up to 30\% adoption (Sharpe~0.47), degrades meaningfully at 50\% (Sharpe~0.34, a 28\% decline), and collapses at 70\% (Sharpe~0.08, an 82\% decline). The model encodes a Brunnermeier--Pedersen (2009) positive feedback structure---correlated VT selling amplifies price declines, raises realized volatility, and triggers further selling---and we quantify its threshold behavior under controlled conditions. At 100\% adoption, VT Sharpe is $-0.27$ and market kurtosis reaches~61. Sensitivity analysis across 9 one-at-a-time (OAT) parameter variations confirms that the tipping point is conditionally stable: it shifts primarily with market impact ($\lambda$), while VIX dynamics ($\gamma$, $\kappa$) have limited influence. A design validation comparing fixed versus scaled liquidity shows that approximately half the degradation observed in a na\"ive design is attributable to liquidity evaporation rather than crowding per se. Current real-world VT adoption is estimated below 5\%, suggesting the strategy remains safe for individual adopters but highlighting a trajectory that warrants monitoring.
+Volatility targeting (VT) strategies---which scale equity exposure inversely to conditional volatility---are increasingly adopted by institutional investors, yet the systemic consequences of widespread adoption remain unquantified. We develop an agent-based model (ABM) with a Kyle (1985) market maker, endogenous VIX dynamics, and 1{,}000 heterogeneous agents to quantify crowding effects as VT adoption rises from 0\% to 100\%. A fixed pool of 200 noise traders provides constant background liquidity, ensuring that performance degradation reflects crowding rather than liquidity evaporation. Across 500 Monte Carlo simulations per adoption level ($500 \times 2{,}520$ days each), we identify a nonlinear tipping point: VT performance remains stable up to 30\% adoption (Sharpe~0.47), degrades meaningfully at 50\% (Sharpe~0.34, a 28\% decline), and collapses at 70\% (Sharpe~0.08, an 82\% decline). The model encodes a Brunnermeier--Pedersen (2009) positive feedback structure---correlated VT selling amplifies price declines, raises realized volatility, and triggers further selling---and we quantify its threshold behavior under controlled conditions. At 100\% adoption, VT Sharpe is $-0.27$ and market kurtosis reaches~61. OAT sensitivity analysis confirms that the tipping point is conditionally stable, shifting primarily with market impact ($\lambda$) rather than VIX dynamics. A design validation comparing fixed versus scaled liquidity attributes roughly 52\% of the degradation observed in a na\"ive design (0.13 of a 0.25 Sharpe-drop between 30\% and 50\% adoption) to liquidity evaporation rather than crowding per se. These results provide a first quantitative benchmark for assessing VT crowding risk.
 
 \medskip
 \noindent
@@ -190,7 +190,7 @@ Three patterns emerge. First, market volatility amplification is strongly nonlin
 
 \subsection{Statistical Significance}
 
-We assess statistical significance using Welch's $t$-test on the 500 simulation-level Sharpe ratios, applying the \citet{harvey2016} threshold of $|t| > 3.0$. The 10\% versus 30\% comparison yields $t = 0.05$ ($p = 0.96$), confirming that these two adoption levels are statistically indistinguishable---consistent with the ``safe zone'' interpretation below 30\%. The degradation at 50\% versus 10\% yields $t = 7.12$ ($p < 0.001$), far exceeding the Harvey threshold and confirming that the tipping point between 30\% and 50\% represents a genuine structural break rather than simulation noise.
+We assess statistical significance using Welch's $t$-test on the 500 simulation-level Sharpe ratios, applying the \citet{harvey2016} threshold of $|t| > 3.0$. The 10\% versus 30\% comparison yields $t = 0.05$ ($p = 0.96$), confirming that these two adoption levels are statistically indistinguishable---consistent with the ``safe zone'' interpretation below 30\%. The degradation at 50\% versus 10\% yields $t = 7.12$ ($p < 0.001$), far exceeding the Harvey threshold and confirming that the tipping point between 30\% and 50\% represents a genuine structural break rather than simulation noise. The further collapse at 70\% versus 50\% yields $t = 16.94$ ($p < 0.001$, Welch's $t$-test on 500 simulation-level Sharpes per adoption level, with $\bar{S}_{50\%} = 0.336$ vs.\ $\bar{S}_{70\%} = 0.084$), documenting the second transition as a distinctly larger structural break than the 30--50\% step.
 
 \subsection{The Feedback Structure}
 
@@ -243,7 +243,7 @@ The tipping point is \emph{conditionally} stable. Under fixed background liquidi
 
 An earlier version of this model scaled noise traders proportionally with $(1-\phi)$, so that at high VT adoption the number of background liquidity providers fell dramatically (from 300 to near zero at $\phi = 100\%$). This confounded two effects: crowding (correlated VT trading) and liquidity evaporation (fewer noise traders to absorb order flow). We address this by fixing $N_{\text{noise}} = 200$ across all adoption levels.
 
-The comparison is revealing. When noise traders are scaled with VT adoption, the threshold appears at 30--50\% (Sharpe collapses from 0.43 to 0.18 between 30\% and 50\%). Fixing background liquidity shifts the threshold to 50--70\% (Sharpe falls from 0.47 to 0.34 at 50\%, and only collapses to 0.08 at 70\%). This demonstrates that approximately half of the originally observed degradation was driven by liquidity evaporation rather than crowding per se. The fixed-liquidity design is more conservative---it attributes less degradation to crowding---and we regard these as the more reliable estimates.
+The comparison is revealing. When noise traders are scaled with VT adoption, the threshold appears at 30--50\% (Sharpe collapses from 0.43 to 0.18 between 30\% and 50\%). Fixing background liquidity shifts the threshold to 50--70\% (Sharpe falls from 0.47 to 0.34 at 50\%, and only collapses to 0.08 at 70\%). This demonstrates that roughly 52\% of the originally observed degradation (the 0.13 Sharpe-drop under fixed liquidity relative to the 0.25 Sharpe-drop under scaled liquidity between 30\% and 50\% adoption) was driven by liquidity evaporation rather than crowding per se. The fixed-liquidity design is more conservative---it attributes less degradation to crowding---and we regard these as the more reliable estimates.
 
 %=================================================================
 \section{Discussion}
@@ -312,6 +312,7 @@ Bookstaber, R., Paddrik, M., and Tivnan, B. (2014).
 Brunnermeier, M.~K. and Pedersen, L.~H. (2009).
 \newblock Market liquidity and funding liquidity.
 \newblock \emph{Review of Financial Studies}, 22(6), 2201--2238.
+\newblock \url{https://doi.org/10.1093/rfs/hhn098}
 
 \bibitem[Cederburg et~al.(2020)]{cederburg2020}
 Cederburg, S., O'Doherty, M.~S., Wang, F., and Yan, X.~S. (2020).
@@ -333,6 +334,7 @@ Gennotte, G. and Leland, H.~E. (1990).
 Harvey, C.~R., Liu, Y., and Zhu, H. (2016).
 \newblock \ldots and the cross-section of expected returns.
 \newblock \emph{Review of Financial Studies}, 29(1), 5--68.
+\newblock \url{https://doi.org/10.1093/rfs/hhv059}
 
 \bibitem[Harvey et~al.(2018)]{harvey2018}
 Harvey, C.~R., Hoyle, E., Korgaonkar, R., Rattray, S., Sargaison, M., and Van~Hemert, O. (2018).
@@ -348,6 +350,7 @@ Kyle, A.~S. (1985).
 Moreira, A. and Muir, T. (2017).
 \newblock Volatility-managed portfolios.
 \newblock \emph{Journal of Finance}, 72(4), 1611--1644.
+\newblock \url{https://doi.org/10.1111/jofi.12513}
 
 \bibitem[Perchet et~al.(2015)]{perchet2016}
 Perchet, R., de~Carvalho, R.~L., Heckel, T., and Moulin, P. (2015).

@@ -28,6 +28,15 @@ Pre-downloaded CSV files are included in the paper folder (no external download 
 | `vix_2012_2024.csv` | `paper/vt-insurance-cost/data/` | VIX daily level |
 | `vvix_2012_2024.csv` | `paper/vt-insurance-cost/data/` | VVIX daily level |
 
+### Snapshot Pinning
+
+- `snapshot_date`: `2026-04-19`
+- Existing canonical reproduction inputs remain the bundled single-purpose CSVs above.
+- Additional pinned manifests created on `2026-04-19`:
+  - `spy_gld_vix_vvix_2012-2024_snapshot.csv`
+  - `spy_gld_2006-2024_rebal_snapshot.csv`
+- `reproduce.py` remains local-data-only and continues to read the canonical per-claim bundles (`spy_2012_2024.csv`, `gld_2012_2024.csv`, `vix_2012_2024.csv`, `vvix_2012_2024.csv`, `spy_2006_2024.csv`, `gld_2006_2024.csv`).
+
 ---
 
 ## Strategy Definition

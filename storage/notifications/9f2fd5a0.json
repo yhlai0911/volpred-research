@@ -1,0 +1,20 @@
+{
+  "id": "9f2fd5a0",
+  "subject": "[VolPred Alert][INFO] P2 taiwan-vt MISMATCH 4→0 — 6 papers now 0 mismatch this session",
+  "body": "Alert level: info\nTitle: P2 taiwan-vt MISMATCH 4→0 — 6 papers now 0 mismatch this session\n\n## 觸發條件\nP2 taiwan-vt reproduce gate 4 個 γ disambiguation mismatch 全 reclass NOTE tier: (a) TWII γ 0.272 1997-2026 long-sample vs K892 2008-2026 subset rolling max 0.236 (body_v2 L146 P footnote); (b) TSMC γ 0.039 Zero-mean GJR 2008-26 vs K892 0.0525 Constant-mean (body_v2 L151 ddagger); (c) 0050.TW γ 0.087 vs 0.124 3-spec (body_v2 L147 S); (d) TSMC internal 3-spec。reproduce.py 更新 acknowledge body footnote disambiguation。\n\n## 影響\n本 session 累計達 **6 papers 0 MISMATCH**: P1 leverage-direction / P2 taiwan-vt / P3 vt-trend-following / P4 vix-sufficiency / P5 vt-crowding-abm / P6 prg-periodic-garch。\n\n- Mission 3（論文寫好）: 6/10 papers 到達「無 paper-vs-experiment 數值矛盾」狀態; 3 GREEN (P4/P5/P6) + 3 paper 0 MISMATCH 但 UNTRACEABLE drag (P1/P2/P3)\n- 剩 P8 有 CRITICAL errata（controlled t Harvey cross）、P9 shelf errata ready、P_insurance L11 policy pending、P10 kickoff + P_insurance\n- P2 從 6→0 mismatch 是 3-spec disambiguation pattern (源自 P1 K1256) 成功移植的最強驗證\n\n## 建議行動\n- research_program.md 已更新 P2 從 '4 MISMATCH' → '0 MISMATCH'（下次 session 讀 portfolio table 即見）\n- P2 狀態從 '🟡 yellow 73.1%' 實質升為 '🟡 amber/gold — 0 MISMATCH + 24 UNTRACE structural'\n- 下輪可針對 P2 24 UNTRACEABLE 分層 (哪些需 new experiment / 哪些可 reclass/accept errata)\n- 無需用戶立即行動",
+  "text_body": "Alert level: info\nTitle: P2 taiwan-vt MISMATCH 4→0 — 6 papers now 0 mismatch this session\n\n## 觸發條件\nP2 taiwan-vt reproduce gate 4 個 γ disambiguation mismatch 全 reclass NOTE tier: (a) TWII γ 0.272 1997-2026 long-sample vs K892 2008-2026 subset rolling max 0.236 (body_v2 L146 P footnote); (b) TSMC γ 0.039 Zero-mean GJR 2008-26 vs K892 0.0525 Constant-mean (body_v2 L151 ddagger); (c) 0050.TW γ 0.087 vs 0.124 3-spec (body_v2 L147 S); (d) TSMC internal 3-spec。reproduce.py 更新 acknowledge body footnote disambiguation。\n\n## 影響\n本 session 累計達 **6 papers 0 MISMATCH**: P1 leverage-direction / P2 taiwan-vt / P3 vt-trend-following / P4 vix-sufficiency / P5 vt-crowding-abm / P6 prg-periodic-garch。\n\n- Mission 3（論文寫好）: 6/10 papers 到達「無 paper-vs-experiment 數值矛盾」狀態; 3 GREEN (P4/P5/P6) + 3 paper 0 MISMATCH 但 UNTRACEABLE drag (P1/P2/P3)\n- 剩 P8 有 CRITICAL errata（controlled t Harvey cross）、P9 shelf errata ready、P_insurance L11 policy pending、P10 kickoff + P_insurance\n- P2 從 6→0 mismatch 是 3-spec disambiguation pattern (源自 P1 K1256) 成功移植的最強驗證\n\n## 建議行動\n- research_program.md 已更新 P2 從 '4 MISMATCH' → '0 MISMATCH'（下次 session 讀 portfolio table 即見）\n- P2 狀態從 '🟡 yellow 73.1%' 實質升為 '🟡 amber/gold — 0 MISMATCH + 24 UNTRACE structural'\n- 下輪可針對 P2 24 UNTRACEABLE 分層 (哪些需 new experiment / 哪些可 reclass/accept errata)\n- 無需用戶立即行動",
+  "html_body": null,
+  "level": "info",
+  "metadata": {
+    "notification_type": "ops_alert",
+    "alert_level": "info",
+    "alert_title": "P2 taiwan-vt MISMATCH 4→0 — 6 papers now 0 mismatch this session",
+    "recipient": "yihao.lai@gmail.com"
+  },
+  "timestamp": "2026-04-19T12:55:10.175744+00:00",
+  "recipients": [
+    "yihao.lai@gmail.com"
+  ],
+  "sent": true,
+  "configured": true
+}

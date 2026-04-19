@@ -30,66 +30,66 @@
       "n_is": 4620,
       "n_oos": 1981,
       "session_decomposition": {
-        "overnight_var_share_pct": 27.859907387456516,
-        "intraday_var_share_pct": 72.14009261254348,
-        "mean_sigma2_fullday": 0.0002895623089875337,
-        "mean_r2_overnight": 8.067179111290757e-05,
-        "mean_r2_intraday": 0.00020889051787462617
+        "overnight_var_share_pct": 27.859919004893808,
+        "intraday_var_share_pct": 72.14008099510619,
+        "mean_sigma2_fullday": 0.00028956235561864265,
+        "mean_r2_overnight": 8.067183774401641e-05,
+        "mean_r2_intraday": 0.00020889051787462612
       },
       "descriptive_stats": {
-        "c2c_return_mean": 0.0003015389680601814,
-        "c2c_return_std": 0.01687280292527456,
-        "overnight_return_mean": 0.00041086486234393957,
-        "overnight_return_std": 0.008973025052856434,
-        "intraday_return_mean": -0.00010932589428375945,
+        "c2c_return_mean": 0.00030153895359963845,
+        "c2c_return_std": 0.016872806278879108,
+        "overnight_return_mean": 0.00041086484788339657,
+        "overnight_return_std": 0.00897302765231713,
+        "intraday_return_mean": -0.00010932589428375747,
         "intraday_return_std": 0.014453726647166088,
-        "skewness": 0.006236478996087138,
-        "kurtosis": 6.9711582935896335
+        "skewness": 0.00623751253023049,
+        "kurtosis": 6.971136420348387
       },
       "layer1_loss_functions": {
         "GJR": {
-          "QLIKE": 0.8263778287493297,
-          "MSE": 2.552192366695679e-07,
-          "MAE": 0.00019564951353983457,
-          "HMSE": 2.6180002892754524,
-          "MZ_R2": 0.22168269079175063,
-          "MZ_b": 0.8076711381462572,
+          "QLIKE": 0.8234720263052088,
+          "MSE": 2.5467377660848663e-07,
+          "MAE": 0.00019563284377776592,
+          "HMSE": 2.557706807627304,
+          "MZ_R2": 0.22315695732615015,
+          "MZ_b": 0.8098059296013179,
           "n_obs": 1981
         },
         "HAR": {
-          "QLIKE": 1.3680533060383504,
-          "MSE": 3.033448456315815e-07,
-          "MAE": 0.00018026952805833712,
-          "HMSE": 15.265826835916565,
-          "MZ_R2": 0.16652988511388211,
-          "MZ_b": 2.372601157470046,
+          "QLIKE": 1.3680551731201989,
+          "MSE": 3.033438975095894e-07,
+          "MAE": 0.0001802694408704218,
+          "HMSE": 15.265732351139855,
+          "MZ_R2": 0.16652957936517954,
+          "MZ_b": 2.37259771156316,
           "n_obs": 1981
         },
         "PRG_Basic": {
-          "QLIKE": 0.7895306474202017,
-          "MSE": 2.440285390494265e-07,
-          "MAE": 0.00019668561283308792,
-          "HMSE": 2.052746757473613,
-          "MZ_R2": 0.29759802403640767,
-          "MZ_b": 0.7059886700712166,
+          "QLIKE": 0.8017286963689723,
+          "MSE": 2.444911441328917e-07,
+          "MAE": 0.00019469006147847633,
+          "HMSE": 2.132504728770313,
+          "MZ_R2": 0.24239117573480262,
+          "MZ_b": 1.0085764657962744,
           "n_obs": 1981
         },
         "PRG_Extended": {
-          "QLIKE": 0.7699032899989927,
-          "MSE": 2.3807841147179873e-07,
-          "MAE": 0.00019709808201053323,
-          "HMSE": 1.9045725882762958,
-          "MZ_R2": 0.3109554675467665,
-          "MZ_b": 0.7263976794596394,
+          "QLIKE": 0.7692947831648971,
+          "MSE": 2.3567963038489101e-07,
+          "MAE": 0.00019507416538821446,
+          "HMSE": 1.767349015349694,
+          "MZ_R2": 0.2854523513078542,
+          "MZ_b": 0.819624942457625,
           "n_obs": 1981
         },
         "Separate": {
-          "QLIKE": 0.841227132929015,
-          "MSE": 2.626596579551359e-07,
-          "MAE": 0.0002034893710560684,
-          "HMSE": 2.366816453172921,
-          "MZ_R2": 0.19126644496665723,
-          "MZ_b": 0.8619038298356216,
+          "QLIKE": 0.8413380926879286,
+          "MSE": 2.6272282989312467e-07,
+          "MAE": 0.00020368521446638963,
+          "HMSE": 2.3656104944076684,
+          "MZ_R2": 0.19118180032359144,
+          "MZ_b": 0.8608670474163094,
           "n_obs": 1981
         }
       },
@@ -106,38 +106,38 @@
       },
       "layer3_spearman": {
         "GJR": {
-          "rho": 0.45393298995257253,
-          "p": 2.7438620664296112e-101,
-          "ci_lo": 0.41584688033498696,
-          "ci_hi": 0.4897697398731655,
+          "rho": 0.456388561097728,
+          "p": 1.6764970655984361e-102,
+          "ci_lo": 0.4186373073552258,
+          "ci_hi": 0.49245374180051127,
           "n": 1981
         },
         "HAR": {
-          "rho": 0.43099720561862176,
-          "p": 2.034738577648346e-90,
-          "ci_lo": 0.3919883922199813,
-          "ci_hi": 0.4679971287727696,
+          "rho": 0.43099243288258915,
+          "p": 2.044959351969468e-90,
+          "ci_lo": 0.3919869028608905,
+          "ci_hi": 0.4679887057803169,
           "n": 1981
         },
         "PRG_Basic": {
-          "rho": 0.4883033545465396,
-          "p": 3.2390179889691353e-119,
-          "ci_lo": 0.4511772991485421,
-          "ci_hi": 0.5242382765345897,
+          "rho": 0.47344351037019683,
+          "p": 3.261555184125309e-111,
+          "ci_lo": 0.43560319687516447,
+          "ci_hi": 0.509212969811122,
           "n": 1981
         },
         "PRG_Extended": {
-          "rho": 0.507659045061034,
-          "p": 2.989418300528148e-130,
-          "ci_lo": 0.47140136880817535,
-          "ci_hi": 0.5431565728505976,
+          "rho": 0.5003723475021696,
+          "p": 5.168391167460111e-126,
+          "ci_lo": 0.4636033013446835,
+          "ci_hi": 0.5356854269579812,
           "n": 1981
         },
         "Separate": {
-          "rho": 0.4397151050133903,
-          "p": 1.883037482214972e-94,
-          "ci_lo": 0.40217045224259057,
-          "ci_hi": 0.4767572877887822,
+          "rho": 0.439875457830338,
+          "p": 1.5832691953532e-94,
+          "ci_lo": 0.40234492935384175,
+          "ci_hi": 0.4769609931461807,
           "n": 1981
         }
       },
@@ -159,14 +159,14 @@
           },
           "VaR_5pct": {
             "n": 1981,
-            "n_violations": 116,
-            "violation_rate": 0.0585562847046946,
+            "n_violations": 113,
+            "violation_rate": 0.057041898031297326,
             "expected_rate": 0.05,
-            "kupiec_LR": 2.901099497733526,
-            "kupiec_p": 0.0885191552301905,
+            "kupiec_LR": 1.9821094593328041,
+            "kupiec_p": 0.15916835590698275,
             "kupiec_pass": true,
-            "cc_LR": 4.399168632766315,
-            "cc_p": 0.1108492269942839,
+            "cc_LR": 3.1741878892664914,
+            "cc_p": 0.20451909277933034,
             "cc_pass": true,
             "basel": "Red",
             "basel_violations_250d": 13
@@ -205,61 +205,61 @@
         "PRG_Basic": {
           "VaR_1pct": {
             "n": 1981,
+            "n_violations": 33,
+            "violation_rate": 0.016658253407370014,
+            "expected_rate": 0.01,
+            "kupiec_LR": 7.3900752504481915,
+            "kupiec_p": 0.006558474475635512,
+            "kupiec_pass": false,
+            "cc_LR": 7.698393847805932,
+            "cc_p": 0.02129683254988246,
+            "cc_pass": false,
+            "basel": "Green",
+            "basel_violations_250d": 2
+          },
+          "VaR_5pct": {
+            "n": 1981,
+            "n_violations": 109,
+            "violation_rate": 0.05502271580010096,
+            "expected_rate": 0.05,
+            "kupiec_LR": 1.0203370765936484,
+            "kupiec_p": 0.3124390669798035,
+            "kupiec_pass": true,
+            "cc_LR": 1.8564286222129773,
+            "cc_p": 0.3952588899784183,
+            "cc_pass": true,
+            "basel": "Red",
+            "basel_violations_250d": 13
+          }
+        },
+        "PRG_Extended": {
+          "VaR_1pct": {
+            "n": 1981,
             "n_violations": 29,
             "violation_rate": 0.01463907117617365,
             "expected_rate": 0.01,
             "kupiec_LR": 3.7674513416750415,
             "kupiec_p": 0.0522592040670955,
             "kupiec_pass": true,
-            "cc_LR": 4.3529573213346024,
-            "cc_p": 0.11344028989980914,
-            "cc_pass": true,
+            "cc_LR": null,
+            "cc_p": null,
+            "cc_pass": null,
             "basel": "Green",
-            "basel_violations_250d": 2
+            "basel_violations_250d": 1
           },
           "VaR_5pct": {
             "n": 1981,
-            "n_violations": 100,
-            "violation_rate": 0.05047955577990914,
+            "n_violations": 107,
+            "violation_rate": 0.05401312468450278,
             "expected_rate": 0.05,
-            "kupiec_LR": 0.009562205199245,
-            "kupiec_p": 0.922101804636384,
+            "kupiec_LR": 0.6553000285639712,
+            "kupiec_p": 0.41822413009729087,
             "kupiec_pass": true,
-            "cc_LR": 0.2687995162683947,
-            "cc_p": 0.874240509984227,
-            "cc_pass": true,
-            "basel": "Yellow",
-            "basel_violations_250d": 8
-          }
-        },
-        "PRG_Extended": {
-          "VaR_1pct": {
-            "n": 1981,
-            "n_violations": 23,
-            "violation_rate": 0.011610297829379102,
-            "expected_rate": 0.01,
-            "kupiec_LR": 0.4933298930706229,
-            "kupiec_p": 0.4824456636739336,
-            "kupiec_pass": true,
-            "cc_LR": 1.7154420986406702,
-            "cc_p": 0.42412754753881166,
-            "cc_pass": true,
-            "basel": "Green",
-            "basel_violations_250d": 2
-          },
-          "VaR_5pct": {
-            "n": 1981,
-            "n_violations": 98,
-            "violation_rate": 0.04946996466431095,
-            "expected_rate": 0.05,
-            "kupiec_LR": 0.011756002706931667,
-            "kupiec_p": 0.9136584901277252,
-            "kupiec_pass": true,
-            "cc_LR": 2.3462742134853407,
-            "cc_p": 0.3093948126741801,
+            "cc_LR": 2.438739686677085,
+            "cc_p": 0.2954162668102478,
             "cc_pass": true,
             "basel": "Red",
-            "basel_violations_250d": 12
+            "basel_violations_250d": 11
           }
         },
         "Separate": {
@@ -295,7 +295,7 @@
       },
       "layer5_dm_tests": {
         "GJR_vs_HAR": {
-          "t_stat": -8.670883928142386,
+          "t_stat": -8.714473381228723,
           "p_value": 0.0,
           "n": 1981,
           "winner": "GJR",
@@ -303,31 +303,31 @@
           "interpretation": "GJR wins (Harvey PASS)"
         },
         "GJR_vs_PRG_Basic": {
-          "t_stat": 3.087148150854576,
-          "p_value": 0.002048881370204425,
+          "t_stat": 2.020541215565421,
+          "p_value": 0.043461667280350946,
           "n": 1981,
           "winner": "PRG_Basic",
-          "harvey_pass": true,
-          "interpretation": "PRG_Basic wins (Harvey PASS)"
+          "harvey_pass": false,
+          "interpretation": "PRG_Basic wins (Harvey FAIL, NS)"
         },
         "GJR_vs_PRG_Extended": {
-          "t_stat": 4.220443423073796,
-          "p_value": 2.548441095573395e-05,
+          "t_stat": 4.109981381863501,
+          "p_value": 4.1183397655908394e-05,
           "n": 1981,
           "winner": "PRG_Extended",
           "harvey_pass": true,
           "interpretation": "PRG_Extended wins (Harvey PASS)"
         },
         "GJR_vs_Separate": {
-          "t_stat": -1.6608792375077521,
-          "p_value": 0.0968960272407915,
+          "t_stat": -2.1060158649949674,
+          "p_value": 0.035328563517115,
           "n": 1981,
           "winner": "GJR",
           "harvey_pass": false,
           "interpretation": "GJR wins (Harvey FAIL, NS)"
         },
         "HAR_vs_PRG_Basic": {
-          "t_stat": 8.689120898332996,
+          "t_stat": 8.712027486405175,
           "p_value": 0.0,
           "n": 1981,
           "winner": "PRG_Basic",
@@ -335,7 +335,7 @@
           "interpretation": "PRG_Basic wins (Harvey PASS)"
         },
         "HAR_vs_PRG_Extended": {
-          "t_stat": 8.765418181840218,
+          "t_stat": 8.683584001810996,
           "p_value": 0.0,
           "n": 1981,
           "winner": "PRG_Extended",
@@ -343,7 +343,7 @@
           "interpretation": "PRG_Extended wins (Harvey PASS)"
         },
         "HAR_vs_Separate": {
-          "t_stat": 8.499985194125184,
+          "t_stat": 8.498130477607845,
           "p_value": 0.0,
           "n": 1981,
           "winner": "Separate",
@@ -351,24 +351,24 @@
           "interpretation": "Separate wins (Harvey PASS)"
         },
         "PRG_Basic_vs_PRG_Extended": {
-          "t_stat": 2.41309062799684,
-          "p_value": 0.015908198046633792,
+          "t_stat": 3.604538369347787,
+          "p_value": 0.0003204370571678883,
           "n": 1981,
           "winner": "PRG_Extended",
-          "harvey_pass": false,
-          "interpretation": "PRG_Extended wins (Harvey FAIL, NS)"
+          "harvey_pass": true,
+          "interpretation": "PRG_Extended wins (Harvey PASS)"
         },
         "PRG_Basic_vs_Separate": {
-          "t_stat": -4.666661167775715,
-          "p_value": 3.2663585625147817e-06,
+          "t_stat": -4.643312009977109,
+          "p_value": 3.6538051966239493e-06,
           "n": 1981,
           "winner": "PRG_Basic",
           "harvey_pass": true,
           "interpretation": "PRG_Basic wins (Harvey PASS)"
         },
         "PRG_Extended_vs_Separate": {
-          "t_stat": -5.6176971707578325,
-          "p_value": 2.2087849327334652e-08,
+          "t_stat": -5.358401352122664,
+          "p_value": 9.374283860275057e-08,
           "n": 1981,
           "winner": "PRG_Extended",
           "harvey_pass": true,
@@ -376,13 +376,13 @@
         }
       },
       "key_findings": [
-        "Best QLIKE: PRG_Extended (0.7699)",
-        "PRG_Ext vs GJR: DM t=4.22 (Harvey PASS)",
-        "Cross-recursion (PRG vs Separate): DM t=-5.62 (Harvey PASS)",
+        "Best QLIKE: PRG_Extended (0.7693)",
+        "PRG_Ext vs GJR: DM t=4.11 (Harvey PASS)",
+        "Cross-recursion (PRG vs Separate): DM t=-5.36 (Harvey PASS)",
         "MCS surviving: ['GJR', 'HAR', 'PRG_Basic', 'PRG_Extended', 'Separate']",
         "Overnight var share: 27.9%"
       ],
-      "runtime_seconds": 14.951757
+      "runtime_seconds": 14.874341
     },
     "GLD": {
       "ticker": "GLD",
@@ -746,7 +746,7 @@
         "MCS surviving: ['GJR', 'HAR', 'PRG_Basic', 'PRG_Extended', 'Separate']",
         "Overnight var share: 53.1%"
       ],
-      "runtime_seconds": 12.125916
+      "runtime_seconds": 11.989596
     },
     "EEM": {
       "ticker": "EEM",
@@ -758,66 +758,66 @@
       "n_is": 4044,
       "n_oos": 1734,
       "session_decomposition": {
-        "overnight_var_share_pct": 52.60859817554247,
-        "intraday_var_share_pct": 47.39140182445753,
-        "mean_sigma2_fullday": 0.00025587168069078365,
-        "mean_r2_overnight": 0.00013461050433962146,
+        "overnight_var_share_pct": 52.60860547471932,
+        "intraday_var_share_pct": 47.39139452528068,
+        "mean_sigma2_fullday": 0.000255871720099893,
+        "mean_r2_overnight": 0.0001346105437487308,
         "mean_r2_intraday": 0.00012126117635116217
       },
       "descriptive_stats": {
-        "c2c_return_mean": 0.0003204439325757621,
-        "c2c_return_std": 0.01679017828987417,
-        "overnight_return_mean": 0.00039515426576209727,
-        "overnight_return_std": 0.011596449091226231,
-        "intraday_return_mean": -7.471033318633717e-05,
-        "intraday_return_std": 0.011012564827868625,
-        "skewness": -0.291826730961258,
-        "kurtosis": 13.151501550983177
+        "c2c_return_mean": 0.00032044389231101263,
+        "c2c_return_std": 0.016790178163743116,
+        "overnight_return_mean": 0.000395154225497347,
+        "overnight_return_std": 0.011596450792081162,
+        "intraday_return_mean": -7.471033318633656e-05,
+        "intraday_return_std": 0.011012564827868622,
+        "skewness": -0.291827491087658,
+        "kurtosis": 13.151477788914747
       },
       "layer1_loss_functions": {
         "GJR": {
-          "QLIKE": 0.7872817892756588,
-          "MSE": 2.807214407416787e-07,
-          "MAE": 0.00017337408362184,
-          "HMSE": 2.3915453541038745,
-          "MZ_R2": 0.23370476006606988,
-          "MZ_b": 0.7785107696537575,
+          "QLIKE": 0.7903055625739256,
+          "MSE": 2.8677534207360565e-07,
+          "MAE": 0.00017483760100478474,
+          "HMSE": 2.437534147998014,
+          "MZ_R2": 0.21154568514614802,
+          "MZ_b": 0.7964087321588619,
           "n_obs": 1734
         },
         "HAR": {
-          "QLIKE": 1.234974608244953,
-          "MSE": 3.3617509444501886e-07,
-          "MAE": 0.00015026637882731574,
-          "HMSE": 15.536347611471877,
-          "MZ_R2": 0.16795116753739003,
-          "MZ_b": 3.1382811338819496,
+          "QLIKE": 1.2349781466751826,
+          "MSE": 3.361747432785429e-07,
+          "MAE": 0.00015026646181611112,
+          "HMSE": 15.536456611712888,
+          "MZ_R2": 0.1679493612011954,
+          "MZ_b": 3.1382827989716024,
           "n_obs": 1734
         },
         "PRG_Basic": {
-          "QLIKE": 0.6930819997705892,
-          "MSE": 1.8667030047631706e-07,
-          "MAE": 0.0001549457865380296,
-          "HMSE": 1.2726769904919246,
-          "MZ_R2": 0.48760507620905535,
-          "MZ_b": 1.1678866150381744,
+          "QLIKE": 0.6853652377542597,
+          "MSE": 1.8590421373408293e-07,
+          "MAE": 0.00015413981176692717,
+          "HMSE": 1.1847615879865283,
+          "MZ_R2": 0.48899183012168745,
+          "MZ_b": 1.1599937049106714,
           "n_obs": 1734
         },
         "PRG_Extended": {
-          "QLIKE": 0.6757519598176545,
-          "MSE": 1.793127474810771e-07,
-          "MAE": 0.00015595766299783504,
-          "HMSE": 1.0143666029560718,
-          "MZ_R2": 0.5033767751574003,
-          "MZ_b": 1.1046480478710776,
+          "QLIKE": 0.6554506915053877,
+          "MSE": 1.7520657994753324e-07,
+          "MAE": 0.00015257879882304612,
+          "HMSE": 0.9291008525727048,
+          "MZ_R2": 0.5109001537240947,
+          "MZ_b": 0.9807520118444308,
           "n_obs": 1734
         },
         "Separate": {
-          "QLIKE": 0.8001237283862542,
-          "MSE": 2.777159165674181e-07,
-          "MAE": 0.0001721618022073016,
-          "HMSE": 2.547131343052341,
-          "MZ_R2": 0.2226482399968358,
-          "MZ_b": 1.0126283711971487,
+          "QLIKE": 0.8000486415635082,
+          "MSE": 2.7771222283296085e-07,
+          "MAE": 0.00017249746832298223,
+          "HMSE": 2.5360309130942795,
+          "MZ_R2": 0.22269341894667172,
+          "MZ_b": 1.0144336767058726,
           "n_obs": 1734
         }
       },
@@ -834,38 +834,38 @@
       },
       "layer3_spearman": {
         "GJR": {
-          "rho": 0.3434735359636211,
-          "p": 3.4018011777681913e-49,
-          "ci_lo": 0.3002825623963927,
-          "ci_hi": 0.3866098769265478,
+          "rho": 0.344009818629896,
+          "p": 2.3648097120800776e-49,
+          "ci_lo": 0.3009865749362595,
+          "ci_hi": 0.3874941338452095,
           "n": 1734
         },
         "HAR": {
-          "rho": 0.31203839585214466,
-          "p": 1.8130465794439924e-40,
-          "ci_lo": 0.2675766629839668,
-          "ci_hi": 0.35763080244286927,
+          "rho": 0.3120480304442985,
+          "p": 1.8025625442016484e-40,
+          "ci_lo": 0.26757921111370947,
+          "ci_hi": 0.35764115060912866,
           "n": 1734
         },
         "PRG_Basic": {
-          "rho": 0.4343080634027284,
-          "p": 1.072402085373265e-80,
-          "ci_lo": 0.3949564805168624,
-          "ci_hi": 0.4746770936698291,
+          "rho": 0.44066712438651473,
+          "p": 2.7295863168156035e-83,
+          "ci_lo": 0.40116013204903556,
+          "ci_hi": 0.4809958684413883,
           "n": 1734
         },
         "PRG_Extended": {
-          "rho": 0.46271645242808784,
-          "p": 1.0030626595782635e-92,
-          "ci_lo": 0.42360890101227433,
-          "ci_hi": 0.5019569889506905,
+          "rho": 0.4823170957062834,
+          "p": 1.0297388992130286e-101,
+          "ci_lo": 0.44367879267504273,
+          "ci_hi": 0.5209907758326514,
           "n": 1734
         },
         "Separate": {
-          "rho": 0.331074510951664,
-          "p": 1.2503838596583796e-45,
-          "ci_lo": 0.2868367414986625,
-          "ci_hi": 0.37486901146788615,
+          "rho": 0.33199872980354234,
+          "p": 6.8691005200661946e-46,
+          "ci_lo": 0.2881139181633531,
+          "ci_hi": 0.37601356376049544,
           "n": 1734
         }
       },
@@ -873,17 +873,17 @@
         "GJR": {
           "VaR_1pct": {
             "n": 1734,
-            "n_violations": 28,
-            "violation_rate": 0.016147635524798153,
+            "n_violations": 27,
+            "violation_rate": 0.015570934256055362,
             "expected_rate": 0.01,
-            "kupiec_LR": 5.580891372624542,
-            "kupiec_p": 0.01815747873266149,
+            "kupiec_LR": 4.646789374855395,
+            "kupiec_p": 0.031111685734893868,
             "kupiec_pass": false,
             "cc_LR": null,
             "cc_p": null,
             "cc_pass": null,
             "basel": "Green",
-            "basel_violations_250d": 4
+            "basel_violations_250d": 3
           },
           "VaR_5pct": {
             "n": 1734,
@@ -933,12 +933,12 @@
         "PRG_Basic": {
           "VaR_1pct": {
             "n": 1734,
-            "n_violations": 10,
-            "violation_rate": 0.0057670126874279125,
+            "n_violations": 9,
+            "violation_rate": 0.005190311418685121,
             "expected_rate": 0.01,
-            "kupiec_LR": 3.702721764811294,
-            "kupiec_p": 0.05432378512948455,
-            "kupiec_pass": true,
+            "kupiec_LR": 4.916207433445685,
+            "kupiec_p": 0.02660586053530467,
+            "kupiec_pass": false,
             "cc_LR": null,
             "cc_p": null,
             "cc_pass": null,
@@ -947,47 +947,47 @@
           },
           "VaR_5pct": {
             "n": 1734,
-            "n_violations": 78,
-            "violation_rate": 0.04498269896193772,
+            "n_violations": 79,
+            "violation_rate": 0.04555940023068051,
             "expected_rate": 0.05,
-            "kupiec_LR": 0.9496383312757928,
-            "kupiec_p": 0.3298113740555816,
+            "kupiec_LR": 0.7409833322533075,
+            "kupiec_p": 0.38934606372107294,
             "kupiec_pass": true,
-            "cc_LR": 1.7826524371149102,
-            "cc_p": 0.4101114944548194,
+            "cc_LR": 1.6601271802225632,
+            "cc_p": 0.4360215587805022,
             "cc_pass": true,
             "basel": "Yellow",
-            "basel_violations_250d": 8
+            "basel_violations_250d": 7
           }
         },
         "PRG_Extended": {
           "VaR_1pct": {
             "n": 1734,
-            "n_violations": 5,
-            "violation_rate": 0.0028835063437139563,
+            "n_violations": 6,
+            "violation_rate": 0.0034602076124567475,
             "expected_rate": 0.01,
-            "kupiec_LR": 12.33271220163912,
-            "kupiec_p": 0.0004450892549049401,
+            "kupiec_LR": 10.019667917472326,
+            "kupiec_p": 0.0015487739013134716,
             "kupiec_pass": false,
             "cc_LR": null,
             "cc_p": null,
             "cc_pass": null,
             "basel": "Green",
-            "basel_violations_250d": 2
+            "basel_violations_250d": 3
           },
           "VaR_5pct": {
             "n": 1734,
-            "n_violations": 67,
-            "violation_rate": 0.03863898500576701,
+            "n_violations": 59,
+            "violation_rate": 0.034025374855824686,
             "expected_rate": 0.05,
-            "kupiec_LR": 5.094648577055608,
-            "kupiec_p": 0.02399977650973595,
+            "kupiec_LR": 10.443057469939575,
+            "kupiec_p": 0.0012311131200478664,
             "kupiec_pass": false,
-            "cc_LR": 5.251749993838176,
-            "cc_p": 0.07237640019258995,
-            "cc_pass": true,
+            "cc_LR": null,
+            "cc_p": null,
+            "cc_pass": null,
             "basel": "Yellow",
-            "basel_violations_250d": 7
+            "basel_violations_250d": 6
           }
         },
         "Separate": {
@@ -1007,14 +1007,14 @@
           },
           "VaR_5pct": {
             "n": 1734,
-            "n_violations": 85,
-            "violation_rate": 0.049019607843137254,
+            "n_violations": 82,
+            "violation_rate": 0.04728950403690888,
             "expected_rate": 0.05,
-            "kupiec_LR": 0.03530714242162958,
-            "kupiec_p": 0.850953514906019,
+            "kupiec_LR": 0.2729166972204382,
+            "kupiec_p": 0.6013819040331214,
             "kupiec_pass": true,
-            "cc_LR": 1.5536534957317407,
-            "cc_p": 0.4598629595684235,
+            "cc_LR": 1.4741573173542584,
+            "cc_p": 0.47850976600330053,
             "cc_pass": true,
             "basel": "Yellow",
             "basel_violations_250d": 9
@@ -1023,80 +1023,80 @@
       },
       "layer5_dm_tests": {
         "GJR_vs_HAR": {
-          "t_stat": -5.823797611911922,
-          "p_value": 6.8416239340507445e-09,
+          "t_stat": -5.835452468400143,
+          "p_value": 6.388700457549135e-09,
           "n": 1734,
           "winner": "GJR",
           "harvey_pass": true,
           "interpretation": "GJR wins (Harvey PASS)"
         },
         "GJR_vs_PRG_Basic": {
-          "t_stat": 5.696409560106492,
-          "p_value": 1.4347016463744922e-08,
+          "t_stat": 6.087346157993502,
+          "p_value": 1.4102501388890687e-09,
           "n": 1734,
           "winner": "PRG_Basic",
           "harvey_pass": true,
           "interpretation": "PRG_Basic wins (Harvey PASS)"
         },
         "GJR_vs_PRG_Extended": {
-          "t_stat": 6.146976041120765,
-          "p_value": 9.778797771531345e-10,
+          "t_stat": 6.800138516495996,
+          "p_value": 1.4338086273824047e-11,
           "n": 1734,
           "winner": "PRG_Extended",
           "harvey_pass": true,
           "interpretation": "PRG_Extended wins (Harvey PASS)"
         },
         "GJR_vs_Separate": {
-          "t_stat": -1.4488813144852228,
-          "p_value": 0.14755164252407105,
+          "t_stat": -1.1258821659652707,
+          "p_value": 0.26037128897519635,
           "n": 1734,
           "winner": "GJR",
           "harvey_pass": false,
           "interpretation": "GJR wins (Harvey FAIL, NS)"
         },
         "HAR_vs_PRG_Basic": {
-          "t_stat": 6.384309407818336,
-          "p_value": 2.2051582782012247e-10,
+          "t_stat": 6.303174505481863,
+          "p_value": 3.690450167681547e-10,
           "n": 1734,
           "winner": "PRG_Basic",
           "harvey_pass": true,
           "interpretation": "PRG_Basic wins (Harvey PASS)"
         },
         "HAR_vs_PRG_Extended": {
-          "t_stat": 6.379186040552939,
-          "p_value": 2.2784463205027805e-10,
+          "t_stat": 6.383139460853356,
+          "p_value": 2.221687278591844e-10,
           "n": 1734,
           "winner": "PRG_Extended",
           "harvey_pass": true,
           "interpretation": "PRG_Extended wins (Harvey PASS)"
         },
         "HAR_vs_Separate": {
-          "t_stat": 5.975608949481208,
-          "p_value": 2.7762323551172585e-09,
+          "t_stat": 5.957003398725774,
+          "p_value": 3.1042373116463295e-09,
           "n": 1734,
           "winner": "Separate",
           "harvey_pass": true,
           "interpretation": "Separate wins (Harvey PASS)"
         },
         "PRG_Basic_vs_PRG_Extended": {
-          "t_stat": 2.919009950286661,
-          "p_value": 0.003556758511471525,
+          "t_stat": 3.7697642116676664,
+          "p_value": 0.00016887868153347974,
           "n": 1734,
           "winner": "PRG_Extended",
-          "harvey_pass": false,
-          "interpretation": "PRG_Extended wins (Harvey FAIL, NS)"
+          "harvey_pass": true,
+          "interpretation": "PRG_Extended wins (Harvey PASS)"
         },
         "PRG_Basic_vs_Separate": {
-          "t_stat": -6.280414113892388,
-          "p_value": 4.259395058880955e-10,
+          "t_stat": -6.309049127149389,
+          "p_value": 3.5560998590256077e-10,
           "n": 1734,
           "winner": "PRG_Basic",
           "harvey_pass": true,
           "interpretation": "PRG_Basic wins (Harvey PASS)"
         },
         "PRG_Extended_vs_Separate": {
-          "t_stat": -6.363604407287928,
-          "p_value": 2.5162760763919323e-10,
+          "t_stat": -6.5330157514782545,
+          "p_value": 8.448797217397441e-11,
           "n": 1734,
           "winner": "PRG_Extended",
           "harvey_pass": true,
@@ -1104,24 +1104,24 @@
         }
       },
       "key_findings": [
-        "Best QLIKE: PRG_Extended (0.6758)",
-        "PRG_Ext vs GJR: DM t=6.15 (Harvey PASS)",
-        "Cross-recursion (PRG vs Separate): DM t=-6.36 (Harvey PASS)",
+        "Best QLIKE: PRG_Extended (0.6555)",
+        "PRG_Ext vs GJR: DM t=6.80 (Harvey PASS)",
+        "Cross-recursion (PRG vs Separate): DM t=-6.53 (Harvey PASS)",
         "MCS surviving: ['GJR', 'HAR', 'PRG_Basic', 'PRG_Extended', 'Separate']",
         "Overnight var share: 52.6%"
       ],
-      "runtime_seconds": 12.149962
+      "runtime_seconds": 12.121275
     }
   },
   "cross_market_summary": {
     "QQQ": {
-      "overnight_var_share_pct": 27.859907387456516,
+      "overnight_var_share_pct": 27.859919004893808,
       "best_model": "PRG_Extended",
-      "PRG_Extended_QLIKE": 0.7699032899989927,
-      "GJR_QLIKE": 0.8263778287493297,
-      "QLIKE_improvement_pct": 6.833985228743086,
-      "DM_t_PRGExt_vs_GJR": 4.220443423073796,
-      "DM_t_cross_recursion": -5.6176971707578325,
+      "PRG_Extended_QLIKE": 0.7692947831648971,
+      "GJR_QLIKE": 0.8234720263052088,
+      "QLIKE_improvement_pct": 6.579123687224274,
+      "DM_t_PRGExt_vs_GJR": 4.109981381863501,
+      "DM_t_cross_recursion": -5.358401352122664,
       "MCS_surviving": [
         "GJR",
         "HAR",
@@ -1147,13 +1147,13 @@
       ]
     },
     "EEM": {
-      "overnight_var_share_pct": 52.60859817554247,
+      "overnight_var_share_pct": 52.60860547471932,
       "best_model": "PRG_Extended",
-      "PRG_Extended_QLIKE": 0.6757519598176545,
-      "GJR_QLIKE": 0.7872817892756588,
-      "QLIKE_improvement_pct": 14.166443448491012,
-      "DM_t_PRGExt_vs_GJR": 6.146976041120765,
-      "DM_t_cross_recursion": -6.363604407287928,
+      "PRG_Extended_QLIKE": 0.6554506915053877,
+      "GJR_QLIKE": 0.7903055625739256,
+      "QLIKE_improvement_pct": 17.063636832990593,
+      "DM_t_PRGExt_vs_GJR": 6.800138516495996,
+      "DM_t_cross_recursion": -6.5330157514782545,
       "MCS_surviving": [
         "GJR",
         "HAR",
@@ -1178,7 +1178,7 @@
       "DM_t_PRGExt_vs_GJR": 5.1
     }
   },
-  "runtime_total_seconds": 39.891758,
+  "runtime_total_seconds": 39.635387,
   "references": [
     "Patton (2011): Volatility forecast comparison using imperfect proxies",
     "Hansen, Lunde & Nason (2011): Model Confidence Set",

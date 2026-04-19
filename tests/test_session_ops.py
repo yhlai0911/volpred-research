@@ -13,10 +13,6 @@ def patched_session_bootstrap(monkeypatch):
         "volpred.ops.session.create_rollback_point",
         lambda **kwargs: {"point_id": kwargs.get("point_id") or "rollback:test"},
     )
-    monkeypatch.setattr(
-        "volpred.ops.session.check_agent_specs",
-        lambda: {"clean": True, "issues": [], "targets": ["claude", "codex"]},
-    )
     monkeypatch.setattr("volpred.ops.execution_brief.check_agent_specs", lambda: {"clean": True, "issues": []})
 
 
@@ -92,10 +88,6 @@ why_this_agent: "code template"
         "volpred.ops.session.create_rollback_point",
         lambda **kwargs: {"point_id": kwargs.get("point_id") or "rollback:test"},
     )
-    monkeypatch.setattr(
-        "volpred.ops.session.check_agent_specs",
-        lambda: {"clean": True, "issues": [], "targets": ["claude", "codex"]},
-    )
     monkeypatch.setattr("volpred.ops.execution_brief.BRIEF_TEMPLATES_ROOT", templates_root)
     monkeypatch.setattr("volpred.ops.execution_brief.check_agent_specs", lambda: {"clean": True, "issues": []})
 
@@ -129,3 +121,90 @@ why_this_agent: "code template"
     assert supervisor_state["status"] == "queued"
     assert supervisor_state["claimed_by"] is None
     assert supervisor_state["brief_status"] == "stale"
+
+
+def test_session_bootstrap_prefers_legacy_agent_spec_path(tmp_path: Path, monkeypatch):
+    storage_dir = str(tmp_path / "storage")
+    legacy_root = tmp_path / "legacy-agent-specs"
+    legacy_root.mkdir(parents=True, exist_ok=True)
+    legacy_guide = legacy_root / "guide.md"
+    legacy_guide.write_text("# Legacy Guide\n\nUse legacy path first.\n", encoding="utf-8")
+    claude_rule = tmp_path / "agent-delegation.md"
+    claude_rule.write_text("# Claude Rule\n\nShould not be used when legacy exists.\n", encoding="utf-8")
+
+    monkeypatch.setenv("VOLPRED_ACTOR", "codex")
+    monkeypatch.setattr(
+        "volpred.ops.session.create_rollback_point",
+        lambda **kwargs: {"point_id": kwargs.get("point_id") or "rollback:test"},
+    )
+    monkeypatch.setattr("volpred.ops.session.LEGACY_AGENT_SPEC_GUIDE", tmp_path / "missing-guide.md")
+    monkeypatch.setattr("volpred.ops.session.CLAUDE_AGENT_DELEGATION_GUIDE", claude_rule)
+
+    bootstrap = session_bootstrap(
+        "codex",
+        storage_dir=storage_dir,
+        session_id="codex:legacy",
+        agent_spec_path=str(legacy_root),
+    )
+
+    assert bootstrap["guide"]["source"] == "legacy_agent_spec"
+    assert bootstrap["guide"]["path"] == str(legacy_guide)
+    assert bootstrap["agent_spec"]["path"] == str(legacy_guide)
+    assert bootstrap["agent_spec"]["exists"] is True
+
+
+def test_session_bootstrap_falls_back_to_claude_rule(tmp_path: Path, monkeypatch):
+    storage_dir = str(tmp_path / "storage")
+    claude_rule = tmp_path / "agent-delegation.md"
+    claude_rule.write_text("# Claude Rule\n\nFallback rule content.\n", encoding="utf-8")
+
+    monkeypatch.setenv("VOLPRED_ACTOR", "codex")
+    monkeypatch.setattr(
+        "volpred.ops.session.create_rollback_point",
+        lambda **kwargs: {"point_id": kwargs.get("point_id") or "rollback:test"},
+    )
+    monkeypatch.setattr("volpred.ops.session.LEGACY_AGENT_SPEC_GUIDE", tmp_path / "missing-guide.md")
+    monkeypatch.setattr("volpred.ops.session.CLAUDE_AGENT_DELEGATION_GUIDE", claude_rule)
+
+    bootstrap = session_bootstrap(
+        "codex",
+        storage_dir=storage_dir,
+        session_id="codex:claude-rule",
+    )
+
+    assert bootstrap["guide"]["source"] == "claude_rule"
+    assert bootstrap["guide"]["path"] == str(claude_rule)
+    assert bootstrap["guide"]["preview"] == "# Claude Rule Fallback rule content."
+
+
+def test_session_bootstrap_falls_back_to_inline_default_and_can_skip(tmp_path: Path, monkeypatch):
+    storage_dir = str(tmp_path / "storage")
+    missing_legacy = tmp_path / "missing-guide.md"
+    missing_rule = tmp_path / "missing-agent-delegation.md"
+
+    monkeypatch.setenv("VOLPRED_ACTOR", "codex")
+    monkeypatch.setattr(
+        "volpred.ops.session.create_rollback_point",
+        lambda **kwargs: {"point_id": kwargs.get("point_id") or "rollback:test"},
+    )
+    monkeypatch.setattr("volpred.ops.session.LEGACY_AGENT_SPEC_GUIDE", missing_legacy)
+    monkeypatch.setattr("volpred.ops.session.CLAUDE_AGENT_DELEGATION_GUIDE", missing_rule)
+
+    fallback = session_bootstrap(
+        "codex",
+        storage_dir=storage_dir,
+        session_id="codex:inline",
+    )
+    assert fallback["guide"]["source"] == "inline_default"
+    assert "Volpred Session Bootstrap" in fallback["guide"]["preview"]
+    assert fallback["agent_spec"]["exists"] is False
+
+    skipped = session_bootstrap(
+        "codex",
+        storage_dir=storage_dir,
+        session_id="codex:no-guide",
+        no_guide=True,
+    )
+    assert skipped["guide"]["source"] == "skipped"
+    assert skipped["guide"]["skipped"] is True
+    assert skipped["guide"]["loaded"] is False

@@ -1,0 +1,158 @@
+{
+  "experiment_id": "K1256",
+  "title": "Paper 1 T-HM: Canonical 3-spec Henriksson-Merton \u03b3_HM",
+  "paper_ref": {
+    "paper": "leverage-direction",
+    "body_tex": "body_v3.tex",
+    "line": 433,
+    "section_sec47": "\u00a74.7 Formal Market Timing Tests",
+    "section_sec54": "\u00a75.4 The Nature of VT Alpha",
+    "footnote_quote": "The three \u03b3_HM estimates reported in this paper share the same symbol but correspond to distinct Henriksson\u2013Merton regressions on different samples: \u03b3_HM=-0.035 (t=-0.39) for the pure-VT strategy over the full 2014\u20132026 sample (Section 4.7); \u03b3_HM=-0.068 (t=-4.63) for the pure-VT strategy conditional on high-VIX episodes (VIX>25); and \u03b3_HM=-0.043 (t=-4.06) for the Hybrid VT strategy over the full sample (this section)."
+  },
+  "naming_note": "Proposal \u00a76 T-HM tentatively named this task K1235; K1235 was already allocated to Paper 9 garch-x-vix (FEZ + STOXX50E Table 6). K1256 is the canonical K-ID for Paper 1 T-HM; reproduce.py must cite K1256.",
+  "created_at": "2026-04-19T09:37:48.520604+00:00",
+  "config": {
+    "seed": 42,
+    "risk_free_daily": 0.0,
+    "risk_free_note": "HM \u03b3 is invariant to a uniform rf shift (\u03b3-term is max(0, rf-r_m), which adds a constant-risk-free-rate offset absorbed by \u03b1). rf=0 is paper-innocuous and sidesteps T-bill data-source dependency.",
+    "oos_start": "2014-01-01",
+    "data_start": "2004-01-01",
+    "vt_target_annual_pure": 0.12,
+    "vt_target_annual_hybrid_garch_branch": 0.1,
+    "max_leverage": 1.5,
+    "vix_threshold_high": 25.0,
+    "hybrid_ratio_switch": 1.3,
+    "garch_window": 2000,
+    "garch_model": "GJR-GARCH(1,1,1), t-dist, mean=Zero, rescale=False",
+    "newey_west_lags": 10,
+    "yfinance_auto_adjust": false,
+    "vix_source": "/Users/yhlai0911/Desktop/volpred-research/paper/leverage-direction/data/vix_daily.csv"
+  },
+  "sample": {
+    "n_total_merged": 5607,
+    "n_oos": 3091,
+    "oos_date_start": "2014-01-02",
+    "oos_date_end": "2026-04-17"
+  },
+  "results": {
+    "pure_vt_full": {
+      "alpha_daily": 0.0002431140573779599,
+      "alpha_annual": 0.061264742459245895,
+      "alpha_t": 1.5792841003951483,
+      "alpha_p": 0.11427090710145806,
+      "beta": 0.4682720935134893,
+      "beta_t": 12.12503427800307,
+      "beta_p": 7.782763084813147e-34,
+      "gamma_HM": -0.05133300819666498,
+      "gamma_HM_se": 0.05083019171371931,
+      "gamma_HM_t": -1.0098920831496678,
+      "gamma_HM_p": 0.31254699606015357,
+      "n_obs": 3091,
+      "r_squared": 0.8363148703878661,
+      "nw_lags": 10,
+      "spec_label": "pure_vt_full",
+      "strategy": "12/VIX (w = clip(0.12/VIX_{t-1}, 0, 1.5))",
+      "sample_description": "Full OOS 2014-2026",
+      "fit_date_start": "2014-01-02",
+      "fit_date_end": "2026-04-17",
+      "paper_match": {
+        "paper_gamma": -0.035,
+        "paper_t": -0.39,
+        "paper_section": "4.7",
+        "gamma_rel_diff": 0.46665737704757076,
+        "t_abs_diff": 0.6198920831496678,
+        "sign_match": true,
+        "verdict": "DIVERGENT_SAME_SIGN"
+      }
+    },
+    "pure_vt_high_vix": {
+      "alpha_daily": 0.00021249183821974528,
+      "alpha_annual": 0.05354794323137581,
+      "alpha_t": 0.9061487241235575,
+      "alpha_p": 0.36485713880928117,
+      "beta": 0.30557529883562184,
+      "beta_t": 10.09960643429232,
+      "beta_p": 5.54643314468683e-24,
+      "gamma_HM": -0.030395076579074948,
+      "gamma_HM_se": 0.03825783569326322,
+      "gamma_HM_t": -0.7944797720072592,
+      "gamma_HM_p": 0.42691618031168277,
+      "n_obs": 391,
+      "r_squared": 0.9054217564575217,
+      "nw_lags": 10,
+      "spec_label": "pure_vt_high_vix",
+      "strategy": "12/VIX restricted to VIX_{t-1} > 25",
+      "sample_description": "OOS 2014-2026 conditional on VIX_{t-1} > 25.0",
+      "sample_fraction": 0.12649627952119055,
+      "fit_date_start": "2014-10-16",
+      "fit_date_end": "2026-04-08",
+      "paper_match": {
+        "paper_gamma": -0.068,
+        "paper_t": -4.63,
+        "paper_section": "4.7",
+        "gamma_rel_diff": 0.5530135797194861,
+        "t_abs_diff": 3.835520227992741,
+        "sign_match": true,
+        "verdict": "DIVERGENT_SAME_SIGN"
+      }
+    },
+    "hybrid_vt_full": {
+      "alpha_daily": 0.00020346127507529652,
+      "alpha_annual": 0.051272241318974725,
+      "alpha_t": 1.091313556364885,
+      "alpha_p": 0.27513493466958283,
+      "beta": 0.4129895593972945,
+      "beta_t": 10.089072580167809,
+      "beta_p": 6.175015180302506e-24,
+      "gamma_HM": -0.035692694330353686,
+      "gamma_HM_se": 0.06239913163535351,
+      "gamma_HM_t": -0.572006266672648,
+      "gamma_HM_p": 0.5673177291497267,
+      "n_obs": 3091,
+      "r_squared": 0.756541302280751,
+      "nw_lags": 10,
+      "spec_label": "hybrid_vt_full",
+      "strategy": "Hybrid VT: if VIX/\u03c3_GJR > 1.3 \u2192 12/VIX-branch, else \u03c3_target_10/\u03c3_GJR-branch",
+      "sample_description": "Full OOS 2014-2026",
+      "hybrid_vix_branch_share": 0.4707214493691362,
+      "fit_date_start": "2014-01-02",
+      "fit_date_end": "2026-04-17",
+      "paper_match": {
+        "paper_gamma": -0.043,
+        "paper_t": -4.06,
+        "paper_section": "5.4",
+        "gamma_rel_diff": 0.16993734115456538,
+        "t_abs_diff": 3.4879937333273516,
+        "sign_match": true,
+        "verdict": "DIVERGENT_SAME_SIGN"
+      }
+    }
+  },
+  "paper_targets": {
+    "pure_vt_full": {
+      "gamma": -0.035,
+      "t": -0.39,
+      "section": "4.7"
+    },
+    "pure_vt_high_vix": {
+      "gamma": -0.068,
+      "t": -4.63,
+      "section": "4.7"
+    },
+    "hybrid_vt_full": {
+      "gamma": -0.043,
+      "t": -4.06,
+      "section": "5.4"
+    }
+  },
+  "verdicts_summary": {
+    "pure_vt_full": "DIVERGENT_SAME_SIGN",
+    "pure_vt_high_vix": "DIVERGENT_SAME_SIGN",
+    "hybrid_vt_full": "DIVERGENT_SAME_SIGN"
+  },
+  "notes": {
+    "lookahead_guard": "All signals are t-1 (VIX_lag, sigma_gjr_lag). Strategy return at t is w_t \u00b7 r^m_t. No same-day signal \u00d7 same-day return.",
+    "divergence_policy": "Per CLAUDE.md \u00a7'\u7814\u7a76\u8aa0\u5be6\u539f\u5247' #1 and paper-workflow.md '\u8173\u672c/\u8cc7\u6599/\u8ad6\u6587\u6578\u5b57\u5fc5\u9808\u4e09\u65b9\u4e00\u81f4', any \u03b3_HM or t divergence beyond 5%/\u0394t=1.0 is reported as-is. Reconciliation (reproduce.py rewire, paper errata note, or spec-clarification) must happen on main thread, not by tuning this script.",
+    "hybrid_spec_caveat": "body_v3.tex does not fully pin the Hybrid VT rebalance cadence or the exact GARCH refit schedule used in Sec 5.4. Script uses daily rebalance + daily refit (same as experiments/multi_asset_hybrid_vt_v2). If spec-C divergence > 5%, main thread should pin the exact schedule in a v3 footnote or adopt path (a)/(b)/(c) per paper-workflow rules."
+  }
+}

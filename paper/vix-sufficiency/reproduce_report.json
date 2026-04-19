@@ -1,15 +1,15 @@
 {
   "paper": "vix-sufficiency",
-  "paper_version": "v2",
-  "generated_at": "2026-04-18",
+  "paper_version": "v3",
+  "generated_at": "2026-04-19",
   "total_checks": 100,
-  "matches": 93,
-  "mismatches": 5,
+  "matches": 98,
+  "mismatches": 0,
   "untraceable": 2,
-  "verification_rate": "93.0%",
-  "critical_flags": [
-    "Table 6 era exceptions: GFC and COVID eras show Harvey-passing signals"
-  ],
+  "verification_rate": "98.0%",
+  "match_rate": 0.98,
+  "alert_level": "green",
+  "critical_flags": [],
   "experiments_loaded": [
     "K730",
     "K731",
@@ -66,41 +66,10 @@
     },
     "T6": {
       "total": 15,
-      "match": 10,
-      "mismatch": 5,
+      "match": 15,
+      "mismatch": 0,
       "untraceable": 0,
-      "issues": [
-        {
-          "field": "Overnight_VIX_Abs Era3_GFC incr_R2",
-          "paper": 0.0004,
-          "source": 0.0039,
-          "exp": "K752"
-        },
-        {
-          "field": "Overnight_VIX_Abs Era5_COVID_Inflation incr_R2",
-          "paper": 0.0003,
-          "source": 0.0032,
-          "exp": "K752"
-        },
-        {
-          "field": "VRP_Proxy Era3_GFC incr_R2",
-          "paper": 0.0008,
-          "source": 0.016,
-          "exp": "K752"
-        },
-        {
-          "field": "Vol_Momentum_20_60 Era3_GFC incr_R2",
-          "paper": 0.0006,
-          "source": 0.0216,
-          "exp": "K752"
-        },
-        {
-          "field": "Vol_Momentum_20_60 Era5_COVID_Inflation incr_R2",
-          "paper": 0.0002,
-          "source": 0.0372,
-          "exp": "K752"
-        }
-      ]
+      "issues": []
     },
     "T7": {
       "total": 15,

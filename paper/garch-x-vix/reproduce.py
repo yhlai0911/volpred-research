@@ -4,17 +4,19 @@ Paper 9: Reproducibility Script
 ===============================
 
 This script verifies the core numeric claims for paper/garch-x-vix using:
-1. Bundled paper scripts/results under paper/garch-x-vix/
-2. Read-only experiment JSONs under experiments/kXXX/
-3. Fresh live recomputation written only to paper/garch-x-vix/
+1. Pinned local snapshots under paper/garch-x-vix/data/
+2. Bundled paper scripts/results under paper/garch-x-vix/
+3. Read-only experiment JSONs under experiments/kXXX/
+4. Optional fresh live recomputation written only to paper/garch-x-vix/
 
 Usage:
-  uv run python paper/garch-x-vix/reproduce.py [--quick] [--skip-live]
+  uv run python paper/garch-x-vix/reproduce.py [--quick] [--skip-live] [--live]
 
 Modes:
-  default    : run bundled live scripts + targeted live recomputations
+  default    : snapshot-first reproduction (local CSVs + stored bundled results)
   --quick    : skip the heaviest bundled live run (compute_mcs_dm.py)
   --skip-live: stored JSON verification only
+  --live     : opt into live yfinance / bundled live-script paths
 
 Output:
   paper/garch-x-vix/reproduce_report.json
@@ -61,12 +63,15 @@ from volpred.utils import clean_tw50_data
 
 quick_mode = "--quick" in sys.argv
 skip_live = "--skip-live" in sys.argv
+live_mode = "--live" in sys.argv
 
 README_PATH = PAPER_DIR / "README.md"
+DATA_DIR = PAPER_DIR / "data"
 RESULTS_DIR = PAPER_DIR / "results"
 REPRODUCE_REPORT = PAPER_DIR / "reproduce_report.json"
 MCS_RESULTS_PATH = PAPER_DIR / "mcs_dm_results.json"
 K998_PAPER_RESULTS_PATH = RESULTS_DIR / "k998_results.json"
+SNAPSHOT_CACHE: dict[Path, pd.DataFrame] = {}
 
 
 def now_iso() -> str:
@@ -77,6 +82,114 @@ def flatten_yf_columns(df: pd.DataFrame) -> pd.DataFrame:
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = df.columns.get_level_values(0)
     return df
+
+
+def snapshot_ticker_token(ticker: str) -> str:
+    token = ticker[1:] if ticker.startswith("^") else ticker
+    return re.sub(r"_+", "_", re.sub(r"[^A-Za-z0-9]+", "_", token)).strip("_").lower()
+
+
+def parse_snapshot_years(path: Path) -> tuple[int, int] | None:
+    match = re.search(r"_(\d{4})-(\d{4})(?:_|$)", path.stem)
+    if not match:
+        return None
+    return int(match.group(1)), int(match.group(2))
+
+
+def snapshot_candidates(ticker: str, start: str, end: str) -> list[Path]:
+    if not DATA_DIR.exists():
+        return []
+    token = snapshot_ticker_token(ticker)
+    start_year = int(start[:4])
+    end_year = int(end[:4])
+    ranked: list[tuple[tuple[int, int, str], Path]] = []
+    for path in DATA_DIR.glob("*.csv"):
+        years = parse_snapshot_years(path)
+        if years is None:
+            continue
+        file_start, file_end = years
+        if file_start > start_year or file_end < end_year:
+            continue
+        ticker_tokens = path.stem[: path.stem.rfind(f"_{file_start}-{file_end}")].split("_")
+        if token not in ticker_tokens:
+            continue
+        rank = (file_end - file_start, len(ticker_tokens), path.name)
+        ranked.append((rank, path))
+    return [path for _rank, path in sorted(ranked)]
+
+
+def load_snapshot_frame(path: Path) -> pd.DataFrame:
+    cached = SNAPSHOT_CACHE.get(path)
+    if cached is not None:
+        return cached
+    frame = pd.read_csv(path)
+    if "date" not in frame.columns:
+        raise ValueError(f"{path} missing date column")
+    frame["date"] = pd.to_datetime(frame["date"])
+    frame = frame.set_index("date").sort_index()
+    SNAPSHOT_CACHE[path] = frame
+    return frame
+
+
+def extract_snapshot_series(
+    frame: pd.DataFrame,
+    ticker: str,
+    *,
+    price_field: str,
+    prefer_adj_close: bool,
+) -> pd.Series:
+    token = snapshot_ticker_token(ticker)
+    field_token = re.sub(r"_+", "_", re.sub(r"[^A-Za-z0-9]+", "_", price_field)).strip("_").lower()
+    single_field_candidates = []
+    if prefer_adj_close:
+        single_field_candidates.append("adj_close")
+    single_field_candidates.append(field_token)
+    prefixed_candidates = [f"{token}_{candidate}" for candidate in single_field_candidates]
+
+    for column in prefixed_candidates + single_field_candidates:
+        if column in frame.columns:
+            series = pd.to_numeric(frame[column], errors="coerce")
+            series.name = ticker
+            return series
+
+    if token in frame.columns:
+        series = pd.to_numeric(frame[token], errors="coerce")
+        series.name = ticker
+        return series
+
+    data_columns = [column for column in frame.columns if column != "date"]
+    if len(data_columns) == 1:
+        series = pd.to_numeric(frame[data_columns[0]], errors="coerce")
+        series.name = ticker
+        return series
+
+    raise KeyError(f"No snapshot column found for {ticker} ({price_field})")
+
+
+def load_snapshot_history(
+    ticker: str,
+    start: str,
+    end: str,
+    *,
+    price_field: str,
+    prefer_adj_close: bool,
+) -> tuple[pd.Series, Path]:
+    for candidate in snapshot_candidates(ticker, start, end):
+        frame = load_snapshot_frame(candidate)
+        try:
+            series = extract_snapshot_series(
+                frame,
+                ticker,
+                price_field=price_field,
+                prefer_adj_close=prefer_adj_close,
+            )
+        except KeyError:
+            continue
+        series = series.loc[(series.index >= pd.Timestamp(start)) & (series.index <= pd.Timestamp(end))]
+        series = series.dropna()
+        if not series.empty:
+            return series, candidate
+    raise FileNotFoundError(f"No local snapshot found for {ticker} covering {start}..{end}")
 
 
 def rel_diff(expected: float | None, observed: float | None) -> float | None:
@@ -210,11 +323,25 @@ def download_history(
     prefer_adj_close: bool = False,
     auto_adjust: bool | None = None,
 ) -> pd.Series:
-    import yfinance as yf
+    if not live_mode:
+        try:
+            series, source_path = load_snapshot_history(
+                ticker,
+                start,
+                end,
+                price_field=price_field,
+                prefer_adj_close=prefer_adj_close,
+            )
+            print(f"[snapshot] {ticker} <- {source_path.relative_to(PROJECT)}")
+            return series
+        except FileNotFoundError:
+            pass
 
     kwargs = {"progress": False}
     if auto_adjust is not None:
         kwargs["auto_adjust"] = auto_adjust
+    import yfinance as yf
+
     raw = yf.download(ticker, start=start, end=end, **kwargs)
     raw = flatten_yf_columns(raw)
     if prefer_adj_close and "Adj Close" in raw.columns:
@@ -1166,7 +1293,7 @@ def main() -> int:
     print("=" * 70)
     print("PAPER 9 REPRODUCIBILITY CHECK")
     print("=" * 70)
-    print(f"quick_mode={quick_mode} skip_live={skip_live}")
+    print(f"quick_mode={quick_mode} skip_live={skip_live} live_mode={live_mode}")
 
     warnings_out = readme_status_warning()
 
@@ -1174,7 +1301,7 @@ def main() -> int:
     stored_k998_before = load_json(K998_PAPER_RESULTS_PATH) if K998_PAPER_RESULTS_PATH.exists() else {}
 
     bundled_runs = {}
-    if not skip_live and not quick_mode:
+    if live_mode and not skip_live and not quick_mode:
         print("\n[1/6] Running bundled compute_mcs_dm.py (heavy)...")
         bundled_runs["compute_mcs_dm"] = run_bundled_script(
             PAPER_DIR / "compute_mcs_dm.py",
@@ -1187,10 +1314,10 @@ def main() -> int:
             "live_attempted": False,
             "live_ok": False,
             "skipped": True,
-            "reason": "skip-live or quick mode",
+            "reason": "snapshot mode / skip-live / quick mode",
         }
 
-    if not skip_live:
+    if live_mode and not skip_live:
         print("[2/6] Running bundled scripts/k998.py...")
         bundled_runs["k998"] = run_bundled_script(
             PAPER_DIR / "scripts" / "k998.py",
@@ -1203,7 +1330,7 @@ def main() -> int:
             "live_attempted": False,
             "live_ok": False,
             "skipped": True,
-            "reason": "skip-live mode",
+            "reason": "snapshot mode or skip-live mode",
         }
 
     print("[3/6] Loading stored JSON references...")
@@ -1218,8 +1345,10 @@ def main() -> int:
     current_mcs = load_json(MCS_RESULTS_PATH) if MCS_RESULTS_PATH.exists() else stored_mcs_before
     current_k998 = load_json(K998_PAPER_RESULTS_PATH) if K998_PAPER_RESULTS_PATH.exists() else stored_k998_before
 
+    prior_report = load_json(REPRODUCE_REPORT) if REPRODUCE_REPORT.exists() else {}
+
     live_metrics = {}
-    if not skip_live:
+    if not skip_live and live_mode:
         print("[4/6] Live recompute: K988 direct and VRP rho...")
         live_metrics["k988_direct"] = reproduce_k988_direct()
         live_metrics["vrp_rho"] = reproduce_vrp_spearman()
@@ -1230,9 +1359,15 @@ def main() -> int:
         live_metrics["gld_paper"] = reproduce_k997_gld_claims()
 
         print("[6/6] Live recompute: K1085 / K1088 / K1098...")
-        live_metrics["k1085_full_oos"] = reproduce_k1085_exact() or reproduce_k1085_full_oos()
+        live_metrics["k1085_full_oos"] = (
+            reproduce_k1085_exact() if live_mode else None
+        ) or reproduce_k1085_full_oos()
         live_metrics["k1088_full_oos"] = reproduce_k1088_full_oos()
-        live_metrics["k1098"] = reproduce_k1098_exact() or reproduce_k1098()
+        live_metrics["k1098"] = (
+            reproduce_k1098_exact() if live_mode else None
+        ) or reproduce_k1098()
+    elif not skip_live:
+        live_metrics = prior_report.get("live_metrics", {})
     else:
         live_metrics = {}
 
@@ -1477,6 +1612,8 @@ def main() -> int:
         "script": "paper/garch-x-vix/reproduce.py",
         "quick_mode": quick_mode,
         "skip_live": skip_live,
+        "live_mode": live_mode,
+        "data_mode": "live" if live_mode else "snapshot-first",
         "bundled_runs": bundled_runs,
         "live_metrics": live_metrics,
         "table_row_mapping": table_row_mapping,

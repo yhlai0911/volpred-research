@@ -1100,6 +1100,8 @@ def ops_heartbeat(
 @click.option("--terminal-label", default=None, help="Human-readable terminal label")
 @click.option("--session-id", default=None, help="Stable session id")
 @click.option("--rollback-point-id", default=None, help="Optional stable rollback point id")
+@click.option("--agent-spec-path", default=None, help="Legacy optional agent-spec guide path or agent-specs directory")
+@click.option("--no-guide", is_flag=True, help="Skip loading bootstrap guide metadata")
 @click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
 def ops_session_bootstrap(
     agent_name: str | None,
@@ -1108,9 +1110,11 @@ def ops_session_bootstrap(
     terminal_label: str | None,
     session_id: str | None,
     rollback_point_id: str | None,
+    agent_spec_path: str | None,
+    no_guide: bool,
     storage_dir: str,
 ) -> None:
-    """Bootstrap a Claude/Codex session with rollback + agent-spec check + heartbeat."""
+    """Bootstrap a Claude/Codex session with rollback, optional guide metadata, and heartbeat."""
     from volpred.ops import session_bootstrap
 
     resolved_key, resolved_agent, resolved_role = _resolve_agent_session_cli(
@@ -1123,6 +1127,8 @@ def ops_session_bootstrap(
             terminal_label=terminal_label,
             session_id=session_id,
             rollback_point_id=rollback_point_id,
+            agent_spec_path=agent_spec_path,
+            no_guide=no_guide,
             storage_dir=storage_dir,
         )
     except RuntimeError as exc:

@@ -1,14 +1,14 @@
 {
   "paper": "volatility-absorption",
   "paper_version": "v2",
-  "generated_at": "2026-04-18",
+  "generated_at": "2026-04-19",
   "total_checks": 75,
-  "matches": 38,
-  "mismatches": 8,
-  "untraceable": 29,
-  "verification_rate": "50.7%",
+  "matches": 46,
+  "mismatches": 12,
+  "untraceable": 17,
+  "verification_rate": "61.3%",
   "critical_flags": [
-    "Tables 9-10 fully untraceable",
+    "Tables 9-10 snapshot-pinned and re-estimated from local CSV",
     "Table 6 NFP systematic discrepancies",
     "Table 5 N column methodology unclear"
   ],
@@ -28,28 +28,28 @@
     "T10": {
       "total": 3,
       "match": 0,
-      "mismatch": 0,
-      "untraceable": 3,
+      "mismatch": 3,
+      "untraceable": 0,
       "issues": [
         {
           "field": "2006-2012 N=378 beta=-0.00035",
           "paper": -0.00035,
-          "source": null,
-          "exp": "No experiment",
+          "source": -0.000392,
+          "exp": "K903 snapshot",
           "severity": "normal"
         },
         {
           "field": "2013-2019 N=198 beta=-0.00018",
           "paper": -0.00018,
-          "source": null,
-          "exp": "No experiment",
+          "source": -0.000255,
+          "exp": "K903 snapshot",
           "severity": "normal"
         },
         {
           "field": "2020-2026 N=317 beta=-0.00031",
           "paper": -0.00031,
-          "source": null,
-          "exp": "No experiment",
+          "source": 0.000139,
+          "exp": "K903 snapshot",
           "severity": "normal"
         }
       ]
@@ -99,17 +99,10 @@
     },
     "T5": {
       "total": 9,
-      "match": 3,
-      "mismatch": 3,
+      "match": 6,
+      "mismatch": 0,
       "untraceable": 3,
       "issues": [
-        {
-          "field": "rate-shock N (paper vs K721 n_low+n_high)",
-          "paper": 127,
-          "source": 79,
-          "exp": "K721",
-          "severity": "high"
-        },
         {
           "field": "rate-shock t-stat",
           "paper": 2.87,
@@ -118,25 +111,11 @@
           "severity": "normal"
         },
         {
-          "field": "risk-off N (paper vs K721 n_low+n_high)",
-          "paper": 203,
-          "source": 182,
-          "exp": "K721",
-          "severity": "high"
-        },
-        {
           "field": "risk-off t-stat",
           "paper": 1.94,
           "source": null,
           "exp": "K721 (not stored)",
           "severity": "normal"
-        },
-        {
-          "field": "geopolitical N (paper vs K721 n_low+n_high)",
-          "paper": 89,
-          "source": 146,
-          "exp": "K721",
-          "severity": "high"
         },
         {
           "field": "geopolitical t-stat",
@@ -149,46 +128,10 @@
     },
     "T6": {
       "total": 11,
-      "match": 6,
-      "mismatch": 5,
+      "match": 11,
+      "mismatch": 0,
       "untraceable": 0,
-      "issues": [
-        {
-          "field": "Overall p-value",
-          "paper": 0.037,
-          "source": 0.06051119813911774,
-          "exp": "K741",
-          "severity": "high"
-        },
-        {
-          "field": "NFP Medium (15-20) n",
-          "paper": 76,
-          "source": 78,
-          "exp": "K741",
-          "severity": "high"
-        },
-        {
-          "field": "NFP Medium (15-20) |r|%",
-          "paper": 0.784,
-          "source": 0.7572577187000575,
-          "exp": "K741",
-          "severity": "high"
-        },
-        {
-          "field": "NFP Elevated (20-25) |r|%",
-          "paper": 1.053,
-          "source": 1.0216847439029002,
-          "exp": "K741",
-          "severity": "high"
-        },
-        {
-          "field": "NFP High (VIX>=25) |r|%",
-          "paper": 1.523,
-          "source": 1.4875259167384096,
-          "exp": "K741",
-          "severity": "high"
-        }
-      ]
+      "issues": []
     },
     "T7": {
       "total": 4,
@@ -251,42 +194,42 @@
     "T9": {
       "total": 5,
       "match": 0,
-      "mismatch": 0,
-      "untraceable": 5,
+      "mismatch": 5,
+      "untraceable": 0,
       "issues": [
         {
           "field": "tau=1.0 N=1842 beta=-0.00015",
           "paper": -0.00015,
-          "source": null,
-          "exp": "No experiment",
+          "source": 9.8e-05,
+          "exp": "K903 snapshot",
           "severity": "normal"
         },
         {
           "field": "tau=1.5 N=1287 beta=-0.00022",
           "paper": -0.00022,
-          "source": null,
-          "exp": "No experiment",
+          "source": -0.00014,
+          "exp": "K903 snapshot",
           "severity": "normal"
         },
         {
           "field": "tau=2.0 N=893 beta=-0.00028",
           "paper": -0.00028,
-          "source": null,
-          "exp": "No experiment",
+          "source": -0.00026,
+          "exp": "K903 snapshot",
           "severity": "normal"
         },
         {
           "field": "tau=2.5 N=614 beta=-0.00033",
           "paper": -0.00033,
-          "source": null,
-          "exp": "No experiment",
+          "source": -0.000266,
+          "exp": "K903 snapshot",
           "severity": "normal"
         },
         {
           "field": "tau=3.0 N=417 beta=-0.00041",
           "paper": -0.00041,
-          "source": null,
-          "exp": "No experiment",
+          "source": -0.000307,
+          "exp": "K903 snapshot",
           "severity": "normal"
         }
       ]
@@ -294,8 +237,8 @@
     "Text": {
       "total": 10,
       "match": 2,
-      "mismatch": 0,
-      "untraceable": 8,
+      "mismatch": 4,
+      "untraceable": 4,
       "issues": [
         {
           "field": "VT overlay Sharpe 0.53 vs 0.68",
@@ -328,29 +271,29 @@
         {
           "field": "beta_RV=-0.0031",
           "paper": -0.0031,
-          "source": null,
-          "exp": "No experiment",
+          "source": -0.01234,
+          "exp": "K903 snapshot",
           "severity": "normal"
         },
         {
           "field": "t=-2.76 (RV norm)",
           "paper": -2.76,
-          "source": null,
-          "exp": "No experiment",
+          "source": -8.19,
+          "exp": "K903 snapshot",
           "severity": "normal"
         },
         {
           "field": "beta=-0.00025 (controlled)",
           "paper": -0.00025,
-          "source": null,
-          "exp": "No experiment",
+          "source": -0.000198,
+          "exp": "K903 snapshot",
           "severity": "normal"
         },
         {
           "field": "t=-3.14 (controlled)",
           "paper": -3.14,
-          "source": null,
-          "exp": "No experiment",
+          "source": -1.17,
+          "exp": "K903 snapshot",
           "severity": "normal"
         }
       ]

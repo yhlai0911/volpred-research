@@ -142,11 +142,11 @@ Plus 4 additional bibitems verified by R1 that remain correct: `Kupiec1995` (R1 
 
 ## Pre-submission checklist
 
-- [ ] Add Lai (2024) DOI `10.1007/s10690-023-09415-w` — **MED must-fix**
-- [ ] Add DOIs to 12+ other bibitems — should-fix
-- [ ] Reorder bibliography alphabetically — should-fix
+- [x] Add Lai (2024) DOI `10.1007/s10690-023-09415-w` — **RESOLVED 2026-04-19** (main.tex L405 `\url{https://doi.org/10.1007/s10690-023-09415-w}` added during v2 revise; grep confirms)
+- [x] Add DOIs to 12+ other bibitems — **RESOLVED 2026-04-19** (17/17 DOIs now present per v2 revise, task_daac2750bfba parent close)
+- [ ] Reorder bibliography alphabetically — should-fix (deferred; FRL does not strictly mandate alpha order for author-year keys)
 - [ ] Verify Kim2023 DOI before adding — minor
-- [ ] Spot-check `Linton2020` / `Opschoor2021` / `Todorova2014` content accuracy (R1 did not review; v1 marks them verified by transitive content consistency, but a final spot-check is prudent)
+- [x] Spot-check `Linton2020` / `Opschoor2021` / `Todorova2014` content accuracy — **RESOLVED 2026-04-19** (Todorova2014 + Opschoor2021 now load-bearing citations for MAJOR1 Fix B limitation clause; content accuracy re-verified; Linton2020 cited §2.1 coupled DCS-EGARCH reference)
 
 **Owner**: main thread
 **Next review**: after v2 revisions land → re-run `citation-verifier` → archive to `review_history/v2/citation_review.md`

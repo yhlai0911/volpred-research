@@ -86,7 +86,7 @@ We employ three asset samples. The \textit{primary sample} comprises 22 assets a
 
 The \textit{international sample} consists of 13 country-level equity ETFs: 7~developed markets (EFA, EWJ, EWG, EWU, EWA, EWC, VGK) and 6~emerging markets (EEM, FXI, EWZ, INDA, EWT, MCHI). The \textit{sector sample} comprises 11 SPDR sector ETFs (XLB, XLE, XLF, XLI, XLK, XLP, XLU, XLV, XLY, XLRE, XLC) with data from December 1998 to March 2026.
 
-VIX data are obtained from the CBOE. The risk-free rate is the daily 13-week Treasury bill rate (IRX), time-varying throughout the sample. Fama--French five-factor data (MKT, SMB, HML, RMW, CMA), the momentum factor (MOM), and the betting-against-beta factor (BAB) are obtained from Kenneth French's data library and AQR, respectively.
+VIX data are obtained from the CBOE. The risk-free rate is the daily 13-week Treasury bill rate (IRX), time-varying throughout the sample. Fama--French five-factor data (MKT, SMB, HML, RMW, CMA) and the momentum factor (MOM) are obtained from Kenneth French's data library. The betting-against-beta (BAB) factor is constructed from a hybrid ETF proxy---SPLV$-$SPHB for the post-May-2011 subperiod when both low-volatility (SPLV) and high-beta (SPHB) ETFs are available, and IWD$-$QQQ for the pre-May-2011 subperiod (value vs.\ growth as a complementary low-beta proxy)---yielding continuous coverage over the full 2005--2026 sample.
 
 \subsection{Volatility Targeting Construction}
 
@@ -285,7 +285,7 @@ MDD protection retained & \multicolumn{3}{c}{28.3 pp (93\%)} & \multicolumn{3}{c
 \end{tabular}
 \begin{tablenotes}
 \small
-\item \textit{Notes:} Full-sample results over 2005--2026. VT uses 12/VIX with monthly rebalancing and lagged weights. TSMOM-Hedged VT removes TSMOM exposure via a rolling 252-day regression. Pure TSMOM is a standalone 252-day momentum strategy. MDD protection is the reduction in maximum drawdown relative to buy-and-hold. The percentage in parentheses represents the fraction of Sharpe improvement attributable to TSMOM (for $\Delta$Sharpe) or the fraction of MDD protection surviving TSMOM removal.
+\item \textit{Notes:} Strategy evaluation window is 2007-01-01 to 2026-03-21 (full sample includes 2005--2026 data, with 2005--2006 reserved as the 252-day rolling-window warmup required for TSMOM and VT strategy calibration). Sharpe ratios and MDD statistics are computed over the 2007--2026 evaluation window. VT uses 12/VIX with monthly rebalancing and lagged weights. TSMOM-Hedged VT removes TSMOM exposure via a rolling 252-day regression. Pure TSMOM is a standalone 252-day momentum strategy. MDD protection is the reduction in maximum drawdown relative to buy-and-hold. The percentage in parentheses represents the fraction of Sharpe improvement attributable to TSMOM (for $\Delta$Sharpe) or the fraction of MDD protection surviving TSMOM removal. Raw values: SPY B\&H Sharpe 0.611 (2005--2026) $\to$ 0.541 (2007--2026); SPY VT Sharpe 0.797 $\to$ 0.618; SPY Hedged VT Sharpe 0.737 $\to$ 0.574---the rank ordering and qualitative conclusions are unchanged under either window. Source binding: \texttt{experiments/paper3\_fixes.json} (\texttt{config.start=2007-01-01}, \texttt{config.data\_start=2005-01-01}).
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -336,12 +336,13 @@ $\beta_{\text{BAB}}$ & --- & --- & --- & --- & $-$0.022$^{***}$ \\
 $R^2$    & 0.787 & 0.849 & 0.852 & 0.852 & 0.853 \\
 $\Delta R^2$ & --- & +0.063 & +0.002 & +0.000 & +0.001 \\
 AIC     & $-$45339 & $-$47092 & $-$47160 & $-$47171 & $-$47213 \\
-$N$     & 5,049 & 5,049 & 5,049 & 5,049 & 3,740$^{\dagger}$ \\
+% source: experiments/ff5_factor_controls.json .config.bab_proxy ("SPLV-SPHB (post-2011), IWD-QQQ (pre-2011)") -- full 2005-2026 hybrid-BAB period, N=5049
+$N$     & 5,049 & 5,049 & 5,049 & 5,049 & 5,049$^{\dagger}$ \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
 \small
-\item \textit{Notes:} Nested factor model regressions for the SPY 12/VIX strategy (January 2005--March 2026). TSMOM$^{\perp}$ is orthogonalized to MKT. FF5 factors (SMB, HML, RMW, CMA) are from Kenneth French's library. MOM is the Fama--French momentum factor. BAB is proxied by SPLV$-$SPHB; this ETF-based proxy is available only from May 2011. $^{\dagger}$M5 is estimated over the post-2011 subsample ($N = 3{,}740$). All $t$-statistics are Newey--West HAC. $^{***}$, $^{**}$, $^{*}$ denote significance at the 1\%, 5\%, 10\% levels.
+\item \textit{Notes:} Nested factor model regressions for the SPY 12/VIX strategy (January 2005--March 2026). TSMOM$^{\perp}$ is orthogonalized to MKT. FF5 factors (SMB, HML, RMW, CMA) are from Kenneth French's library. MOM is the Fama--French momentum factor. BAB is proxied by a hybrid ETF construction (SPLV$-$SPHB post-May-2011, IWD$-$QQQ pre-May-2011), providing continuous coverage over the full 2005--2026 sample. $^{\dagger}$M5 is estimated over the full 2005--2026 sample ($N = 5{,}049$) using the hybrid BAB proxy specified in \texttt{experiments/ff5\_factor\_controls.json} (field \texttt{bab\_proxy}). All $t$-statistics are Newey--West HAC. $^{***}$, $^{**}$, $^{*}$ denote significance at the 1\%, 5\%, 10\% levels.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}

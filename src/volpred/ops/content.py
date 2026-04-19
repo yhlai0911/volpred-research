@@ -88,30 +88,64 @@ def _normalize_release_settings(row: dict | None = None) -> dict:
     }
 
 
-def _local_release_settings_path() -> Path:
-    return project_path("storage", ".release_settings.json")
+def _local_release_settings_path(storage_dir: str = "storage") -> Path:
+    return project_path(storage_dir, ".release_settings.json")
 
 
-def get_content_release_settings() -> dict:
+def _derived_last_released_at_from_feed(storage_dir: str = "storage") -> str | None:
+    latest_published_at: datetime | None = None
+    for item in load_feed(storage_dir):
+        if item.get("status") != "published":
+            continue
+        if str(item.get("category") or "").strip() == "member_qa":
+            continue
+        published_at = _parse_datetime(item.get("published_at"))
+        if published_at is None:
+            continue
+        if latest_published_at is None or published_at > latest_published_at:
+            latest_published_at = published_at
+    return latest_published_at.isoformat() if latest_published_at is not None else None
+
+
+def get_content_release_settings(storage_dir: str = "storage") -> dict:
     """Read release settings from local JSON (no Supabase hit)."""
-    local = _local_release_settings_path()
+    local = _local_release_settings_path(storage_dir)
     data = load_json(local, None)
     if data is not None:
-        return _normalize_release_settings(data)
-    # First run or missing file: try Supabase once, then cache locally
-    try:
-        rows = _select_rows("content_release_settings", id="default")
-        row = rows[0] if rows else None
-    except Exception:
-        row = None
-    settings = _normalize_release_settings(row)
-    dump_json(local, settings)
+        settings = _normalize_release_settings(data)
+    else:
+        # First run or missing file: try Supabase once, then cache locally
+        try:
+            rows = _select_rows("content_release_settings", id="default")
+            row = rows[0] if rows else None
+        except Exception:
+            row = None
+        settings = _normalize_release_settings(row)
+        dump_json(local, settings)
+
+    # Backward compatibility: if last_released_at is missing/invalid, keep the
+    # legacy "first run always fires" behavior instead of deriving from feed.
+    stored_last_released = settings.get("last_released_at")
+    stored_last_released_at = _parse_datetime(stored_last_released)
+    if stored_last_released_at is None:
+        return settings
+
+    derived_last_released = _derived_last_released_at_from_feed(storage_dir)
+    derived_last_released_at = _parse_datetime(derived_last_released)
+    if derived_last_released_at is None or derived_last_released_at == stored_last_released_at:
+        return settings
+
+    settings["last_released_at"] = derived_last_released_at.isoformat()
+    _update_content_release_settings(
+        {"last_released_at": settings["last_released_at"]},
+        storage_dir=storage_dir,
+    )
     return settings
 
 
-def _update_content_release_settings(fields: dict) -> bool:
+def _update_content_release_settings(fields: dict, *, storage_dir: str = "storage") -> bool:
     """Update release settings in local JSON and optionally sync to Supabase."""
-    local = _local_release_settings_path()
+    local = _local_release_settings_path(storage_dir)
     current = load_json(local, {**DEFAULT_RELEASE_SETTINGS})
     payload = {**current, **fields, "updated_at": datetime.now(timezone.utc).isoformat()}
     dump_json(local, payload)
@@ -224,7 +258,10 @@ def release_pool_articles(
         dump_json(_feed_path(storage_dir), feed)
         publisher._sync_feed_to_remote()
         if update_last_released:
-            _update_content_release_settings({"last_released_at": released_at})
+            _update_content_release_settings(
+                {"last_released_at": released_at},
+                storage_dir=storage_dir,
+            )
 
     return {
         "requested_id": pub_id,
@@ -242,7 +279,7 @@ def release_pool_by_settings(
     force: bool = False,
     storage_dir: str = "storage",
 ) -> dict:
-    settings = get_content_release_settings()
+    settings = get_content_release_settings(storage_dir=storage_dir)
     now = datetime.now(timezone.utc)
     last_released_at = _parse_datetime(settings.get("last_released_at"))
     next_release_at = None
@@ -282,12 +319,17 @@ def release_pool_by_settings(
         update_last_released=True,
         storage_dir=storage_dir,
     )
+    refreshed_settings = (
+        get_content_release_settings(storage_dir=storage_dir)
+        if result.get("released_count")
+        else settings
+    )
     return {
         **result,
         "mode": settings["mode"],
         "force": force,
         "skipped": False,
-        "settings": settings,
+        "settings": refreshed_settings,
     }
 
 
@@ -295,7 +337,7 @@ def preview_release_pool_by_settings(
     *,
     storage_dir: str = "storage",
 ) -> dict:
-    settings = get_content_release_settings()
+    settings = get_content_release_settings(storage_dir=storage_dir)
     now = datetime.now(timezone.utc)
     last_released_at = _parse_datetime(settings.get("last_released_at"))
     next_release_at = None

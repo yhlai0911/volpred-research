@@ -1,0 +1,88 @@
+{
+  "meta": {
+    "tickers": [
+      "VNQ",
+      "SPY"
+    ],
+    "period": "2015-01-02 -> 2026-04-17",
+    "n_obs": 2838,
+    "data_source": "yfinance auto_adjust=False (data snapshot rule 2026-04-19)",
+    "seed": 42,
+    "created_at": "2026-04-19T17:23:51.729095+08:00"
+  },
+  "fullsample_stats": {
+    "ann_ret_VNQ_pct": 5.413327603236964,
+    "ann_ret_SPY_pct": 12.688163351981906,
+    "ann_vol_VNQ_pct": 20.541181431188104,
+    "ann_vol_SPY_pct": 17.752584569251123,
+    "sharpe_VNQ_naive": 0.2635353580499414,
+    "sharpe_SPY_naive": 0.7147220339937885,
+    "corr_VNQ_SPY_full": 0.7236524431503538,
+    "mean_rolling_corr_63d": 0.582992015168532,
+    "min_rolling_corr_63d": 0.04271343292832344,
+    "max_rolling_corr_63d": 0.9382653241112197
+  },
+  "subperiod_stats": {
+    "COVID_crash": {
+      "n": 24,
+      "start": "2020-02-19",
+      "end": "2020-03-23",
+      "ann_vol_VNQ_pct": 95.22921764072345,
+      "ann_vol_SPY_pct": 76.38667127421817,
+      "mean_ret_VNQ_ann_pct": -577.9305541442328,
+      "mean_ret_SPY_ann_pct": -426.7944043085778,
+      "corr_VNQ_SPY": 0.9406817191886432
+    },
+    "post_COVID_calm": {
+      "n": 150,
+      "start": "2021-06-01",
+      "end": "2021-12-31",
+      "ann_vol_VNQ_pct": 14.480536970167861,
+      "ann_vol_SPY_pct": 12.013129125848513,
+      "mean_ret_VNQ_ann_pct": 28.951255540679316,
+      "mean_ret_SPY_ann_pct": 22.319214807436225,
+      "corr_VNQ_SPY": 0.6479566746859621
+    },
+    "Fed_hike_2022_23": {
+      "n": 342,
+      "start": "2022-03-16",
+      "end": "2023-07-26",
+      "ann_vol_VNQ_pct": 23.542570585738957,
+      "ann_vol_SPY_pct": 21.033223868241375,
+      "mean_ret_VNQ_ann_pct": -8.86009203843065,
+      "mean_ret_SPY_ann_pct": 6.645529186039058,
+      "corr_VNQ_SPY": 0.7968152229433135
+    }
+  },
+  "har_rv_oos": {
+    "VNQ": {
+      "qlike": 1.5199379991410806,
+      "rmse": 2.552373417408163,
+      "n_oos": 824,
+      "beta": [
+        0.5685529718236885,
+        0.03833884388624522,
+        0.5300886372296032,
+        0.12889925137332076
+      ]
+    },
+    "SPY": {
+      "qlike": 1.6058594846880465,
+      "rmse": 3.8602741574279897,
+      "n_oos": 824,
+      "beta": [
+        0.33483848651061787,
+        0.14632891444583884,
+        0.5475336552999892,
+        0.06540686695459745
+      ]
+    },
+    "QLIKE_ratio_VNQ_over_SPY": 0.9464950163035859
+  },
+  "dm_test_qlike_VNQ_minus_SPY": {
+    "t": -0.8789862332753909,
+    "p_value": 0.37966529834995355,
+    "n": 824
+  },
+  "dm_interpretation": "t>0 = VNQ QLIKE > SPY QLIKE（VNQ 預測較難）；|t|>1.96 視為統計顯著（p<0.05）"
+}

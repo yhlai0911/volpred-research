@@ -38,6 +38,14 @@ See `experiments/k716/k716_results.json` for regime counts.
 | `experiments/k718/data/` | Cross-asset data (QQQ/GLD/EEM) |
 | `experiments/k897/data/` | SAR null simulation synthetic data |
 
+### Snapshot Pinning
+
+- `snapshot_date`: `2026-04-19`
+- Pinned yfinance reviewer-package snapshot:
+  - `paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv`
+- This snapshot covers the SPY / GLD / TLT / VIX inputs used by K903/K904-style robustness reruns plus the QQQ/EEM cross-asset panel.
+- Current `reproduce.py` still reads stored experiment JSONs by default; the snapshot is the pinned market-data base for future local reruns instead of live yfinance re-fetch.
+
 ---
 
 ## Notes

@@ -1,7 +1,7 @@
 # Paper 4: The True Cost of Volatility Targeting — Insurance Premium Decomposition
 
 **Target Journal**: Finance Research Letters (FRL)
-**Status**: ✅ Submission-ready (R3 SEVERE=0)
+**Status**: ✅ Submission-ready (R3 SEVERE=0) | Reproduce gate 88.9% amber (8/9 claims match); L11 policy RESOLVED 2026-04-19 via main.tex L184 footnote disambiguating 54 bps (K846 auto_adjust=True original) vs ~63 bps (replication package auto_adjust=False) — both within structural 50-80 bps range reported in paper
 **Pages**: 14 | **Citations**: 17
 
 ## Data Sources

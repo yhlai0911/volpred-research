@@ -143,12 +143,12 @@ Table~\ref{tab:gamma} reports GJR-GARCH $\gamma$ estimates for the TAIEX, 0050.T
 \toprule
 Asset & $\gamma$ & $t$-stat & $\alpha$ & $\beta$ & Persistence \\
 \midrule
-TWII (TAIEX) & 0.272 & 3.18 & 0.012 & 0.870 & 0.990 \\
-0050.TW & 0.087 & 2.20 & 0.025 & 0.930 & 0.987 \\
+TWII (TAIEX)$^{\P}$ & 0.272 & 3.18 & 0.012 & 0.870 & 0.990 \\
+0050.TW$^{\S}$ & 0.087 & 2.20 & 0.025 & 0.930 & 0.987 \\
 SPY & 0.211 & 5.79 & 0.000 & 0.897 & 0.993 \\
 \midrule
 \multicolumn{6}{l}{\textit{Individual Taiwan Stocks}} \\
-TSMC (2330) & 0.039 & 0.87 & 0.031 & 0.944 & 0.988 \\
+TSMC (2330)$^{\ddagger}$ & 0.039 & 0.87 & 0.031 & 0.944 & 0.988 \\
 Hon Hai (2317) & 0.052 & 1.14 & 0.028 & 0.939 & 0.985 \\
 MediaTek (2454) & 0.044 & 0.96 & 0.033 & 0.935 & 0.984 \\
 Mega Financial (2886) & 0.179 & 2.42 & 0.015 & 0.901 & 0.977 \\
@@ -161,7 +161,7 @@ Mega Financial (2886) & 0.179 & 2.42 & 0.015 & 0.901 & 0.977 \\
 \bottomrule
 \end{tabular}
 \begin{flushleft}
-\small \textit{Notes:} GJR-GARCH(1,1) with rolling window $w = 2000$. $t$-statistics use Newey-West HAC standard errors. Persistence $= \alpha + \beta + \gamma/2$. Individual stocks use the full available sample (2008--2026). 0056.TW is itself a diversified ETF (30+ constituents); it is reported separately and excluded from the primary 9-stock individual-stock average used for the amplification ratio.
+\small \textit{Notes:} GJR-GARCH(1,1) with rolling window $w = 2000$. $t$-statistics use Newey-West HAC standard errors. Persistence $= \alpha + \beta + \gamma/2$. Individual stocks use the full available sample (2008--2026). 0056.TW is itself a diversified ETF (30+ constituents); it is reported separately and excluded from the primary 9-stock individual-stock average used for the amplification ratio. $^{\ddagger}$The TSMC (2330) row reports $\gamma = 0.039$ ($t = 0.87$) under the Zero-mean GJR-GARCH(1,1) specification estimated on the 2008--2026 full sample; Section~\ref{sec:tsmc} reports a separate $\gamma_{\text{TSMC}} = 0.054$ ($t = 1.07$) from the Constant-mean full-sample specification used in the 0050.TW decomposition analysis. Both are correct under their respective mean specifications; the K892 canonical re-estimate yields 0.0525 consistent with the Constant-mean pooled estimator. Three specifications share the same $\gamma$ symbol: Zero-mean GJR (Table~\ref{tab:gamma}), Constant-mean GJR (\S\ref{sec:tsmc}), and K892-canonical pooled---see \texttt{experiments/k892\_*\_results.json} for the binding to each cell. $^{\S}$The 0050.TW row reports $\gamma = 0.087$ ($t = 2.20$) under the Zero-mean GJR-GARCH(1,1) specification estimated on the 2008--2026 full sample; the TSMC concentration-decomposition analysis in Section~\ref{sec:tsmc} reports a separate $\gamma_{\text{0050.TW}} = 0.124$ ($t = 2.46$) from the Constant-mean full-sample specification (aligned with the TSMC 0.054 estimator in the same section). K892 canonical rerun yields 0.097 for the full sample and 0.080 for the 2018--2026 rolling-window subsample, bracketing both reported figures under their respective mean-specifications. $^{\P}$The TWII (TAIEX) row reports $\gamma = 0.272$ ($t = 3.18$) from the long-sample 1997--2026 specification (capturing the Asian Financial Crisis and Dot-Com sample windows where TAIEX leverage effects are strongest). The K892 canonical re-estimate restricted to the 2008--2026 subset (aligned with individual-stock data availability) yields a rolling-window maximum of 0.236 and a mean of 0.114, confirming that the long-sample 0.272 estimate is driven substantively by pre-2008 crisis episodes. The long-sample window is retained as the primary TAIEX estimate because it includes the two largest Taiwan equity market shocks on record.
 \end{flushleft}
 \end{table}
 

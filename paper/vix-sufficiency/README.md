@@ -1,8 +1,16 @@
 # Paper 4 (Paper 7): Can Anything Beat VIX? A Systematic Out-of-Sample Evaluation
 
 **Target Journal**: Journal of Forecasting
-**Status**: Near submission-ready (R2 SEVERE=0) | active integration of 9 new experiments (2026-04-17)
+**Status**: Reproduce gate GREEN (98.0% match, alert_level=green; 2026-04-19 gate_fix_v1 Sub1–Sub6 closed) | Near submission-ready (R2 SEVERE=0) | active integration of 9 new experiments (2026-04-17)
 **Pages**: 39 | **Citations**: 40
+
+### 2026-04-19 gate_fix_v1 outcome
+- Sub1 bundle SPY/GLD: 44%→88.9% (auto_adjust=False fix)
+- Sub2 dividend convention documented
+- Sub3 5 divergence decisions: all (b) 修論文 to K752 source (see `decisions/sub3_5_divergence_decisions.md`)
+- Sub4 main_v3.tex Table 6 L583–585 K752 raw values + L595 narrative rewrite ('uniformly tiny' → 'non-crisis vs crisis-regime exceptions; OOS HB-corrected preserves core VIX-sufficiency claim')
+- Sub5 `% source: experiments/k752_...` inline source binding on Table 6 rows
+- Sub6 reproduce.py 93%→98% GREEN, critical_flags cleared
 
 ---
 

@@ -271,30 +271,30 @@ def main():
 
     if k752:
         part_d = k752.get("part_d_competing_signals_by_era", {})
-        # Paper claims all incr R2 < 0.001 and no signal passes Harvey
-        # But K752 shows GFC and COVID exceptions
-
+        # 2026-04-19 Sub4: paper main_v3.tex Table 6 updated to K752 raw incremental_R2
+        # per Sub3 (b) 修論文 decision (paper/vix-sufficiency/decisions/sub3_5_divergence_decisions.md).
+        # Values below = current main_v3.tex L583-585 (K752 source bindings).
         paper_table6 = {
             "Overnight_VIX_Abs": {
                 "Era1_DotCom": 0.0002,
                 "Era2_PostDotCom": 0.0001,
-                "Era3_GFC": 0.0004,  # PAPER VALUE
-                "Era4_LowVol_QE": 0.0001,
-                "Era5_COVID_Inflation": 0.0003,
+                "Era3_GFC": 0.0039,  # Sub4: paper = K752 source (prev 0.0004)
+                "Era4_LowVol_QE": 0.0006,  # Sub4: paper = K752 (prev 0.0001)
+                "Era5_COVID_Inflation": 0.0032,  # Sub4: paper = K752 (prev 0.0003)
             },
             "VRP_Proxy": {
                 "Era1_DotCom": 0.0005,
                 "Era2_PostDotCom": 0.0002,
-                "Era3_GFC": 0.0008,  # PAPER VALUE
-                "Era4_LowVol_QE": 0.0003,
-                "Era5_COVID_Inflation": 0.0004,
+                "Era3_GFC": 0.0160,  # Sub4: paper = K752 (prev 0.0008)
+                "Era4_LowVol_QE": 0.0008,  # Sub4: paper = K752 (prev 0.0003)
+                "Era5_COVID_Inflation": 0.0005,  # Sub4: paper = K752 (prev 0.0004)
             },
             "Vol_Momentum_20_60": {
                 "Era1_DotCom": 0.0001,
-                "Era2_PostDotCom": 0.0001,
-                "Era3_GFC": 0.0006,  # PAPER VALUE
-                "Era4_LowVol_QE": 0.0002,
-                "Era5_COVID_Inflation": 0.0002,
+                "Era2_PostDotCom": 0.0004,  # Sub4: paper = K752 (prev 0.0001)
+                "Era3_GFC": 0.0216,  # Sub4: paper = K752 (prev 0.0006)
+                "Era4_LowVol_QE": 0.0001,  # Sub4: paper = K752 (prev 0.0002)
+                "Era5_COVID_Inflation": 0.0372,  # Sub4: paper = K752 (prev 0.0002)
             },
         }
 
@@ -482,11 +482,13 @@ def main():
     print(f"  TOTAL: {total_match} MATCH, {total_mismatch} MISMATCH, "
           f"{total_untraceable} UNTRACEABLE out of {len(checks)} checks")
 
-    # ── Table 6 special flag ────────────────────────────────────────────────
+    # ── Table 6 resolved note (2026-04-19 Sub4) ─────────────────────────────
     print(f"\n{'─' * 72}")
-    print("  CRITICAL FLAG — Table 6 Era Exceptions:")
-    print("  The paper claims 'No signal passes Harvey |t|>3.0 in any era'")
-    print("  but K752 data shows:")
+    print("  Table 6 Era Exceptions — RESOLVED (2026-04-19 Sub3+Sub4):")
+    print("  Paper main_v3.tex updated per (b) 修論文 decision to match K752 raw")
+    print("  incremental_R2. Narrative L595 now acknowledges 4 in-sample Harvey")
+    print("  crossings in Era 3 (GFC) + Era 5 (COVID), with OOS DM Harvey-fail")
+    print("  preserving the paper's core VIX-sufficiency claim on average.")
     if k752:
         part_d = k752.get("part_d_competing_signals_by_era", {})
         for era_key in ["Era3_GFC", "Era5_COVID_Inflation"]:
@@ -497,21 +499,24 @@ def main():
                     passes.append(f"{sig_name} (t={sig_data.get('signal_t')}, "
                                   f"incr_R2={sig_data.get('incremental_R2'):.4f})")
             if passes:
-                print(f"    {era_key}: {len(passes)} Harvey passes:")
+                print(f"    {era_key}: {len(passes)} Harvey crossings (in-sample):")
                 for p in passes:
                     print(f"      - {p}")
 
     # ── Save verification report ────────────────────────────────────────────
+    match_rate = total_match / len(checks) if checks else 0.0
     report = {
         "paper": "vix-sufficiency",
-        "paper_version": "v2",
+        "paper_version": "v3",
         "generated_at": date.today().isoformat(),
         "total_checks": len(checks),
         "matches": total_match,
         "mismatches": total_mismatch,
         "untraceable": total_untraceable,
-        "verification_rate": f"{total_match / len(checks) * 100:.1f}%",
-        "critical_flags": ["Table 6 era exceptions: GFC and COVID eras show Harvey-passing signals"],
+        "verification_rate": f"{match_rate * 100:.1f}%",
+        "match_rate": match_rate,
+        "alert_level": "green" if match_rate >= 0.95 else ("amber" if match_rate >= 0.85 else "red"),
+        "critical_flags": [],  # Cleared 2026-04-19 Sub4: main_v3.tex now honestly reports in-sample Harvey crossings with OOS DM HB-corrected preservation of core claim
         "experiments_loaded": [k for k, v in results.items() if v is not None],
         "experiments_missing": missing,
         "table_details": {},

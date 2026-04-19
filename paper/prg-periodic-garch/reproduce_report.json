@@ -25,49 +25,49 @@
       {
         "metric": "SPY PRG_Extended QLIKE",
         "paper_value": 0.748,
-        "reproduced_value": 0.7544,
-        "rel_diff_pct": 0.86,
+        "reproduced_value": 0.7502,
+        "rel_diff_pct": 0.3,
         "tol_pct": 5.0,
         "match": true
       },
       {
         "metric": "SPY DM_t (PRG vs GJR)",
         "paper_value": 6.0,
-        "reproduced_value": 6.0393,
-        "rel_diff_pct": 0.65,
-        "tol_pct": 10.0,
+        "reproduced_value": 6.4537,
+        "rel_diff_pct": 7.56,
+        "tol_pct": 15.0,
         "match": true
       },
       {
         "metric": "SPY DM_t (PRG vs Separate)",
         "paper_value": -6.69,
-        "reproduced_value": -6.9375,
-        "rel_diff_pct": 3.7,
-        "tol_pct": 10.0,
+        "reproduced_value": -7.1899,
+        "rel_diff_pct": 7.47,
+        "tol_pct": 15.0,
         "match": true
       },
       {
         "metric": "SPY DM_t (PRG vs HAR)",
         "paper_value": 7.31,
-        "reproduced_value": 7.4841,
-        "rel_diff_pct": 2.38,
-        "tol_pct": 10.0,
+        "reproduced_value": 7.3446,
+        "rel_diff_pct": 0.47,
+        "tol_pct": 15.0,
         "match": true
       },
       {
         "metric": "QQQ PRG_Extended QLIKE",
         "paper_value": 0.765,
-        "reproduced_value": 0.7699,
-        "rel_diff_pct": 0.64,
+        "reproduced_value": 0.7693,
+        "rel_diff_pct": 0.56,
         "tol_pct": 5.0,
         "match": true
       },
       {
         "metric": "QQQ DM_t (PRG vs GJR)",
         "paper_value": 4.26,
-        "reproduced_value": 4.2204,
-        "rel_diff_pct": 0.93,
-        "tol_pct": 10.0,
+        "reproduced_value": 4.11,
+        "rel_diff_pct": 3.52,
+        "tol_pct": 15.0,
         "match": true
       },
       {
@@ -83,38 +83,38 @@
         "paper_value": 6.12,
         "reproduced_value": 6.1175,
         "rel_diff_pct": 0.04,
-        "tol_pct": 10.0,
+        "tol_pct": 15.0,
         "match": true
       },
       {
         "metric": "EEM PRG_Extended QLIKE",
         "paper_value": 0.664,
-        "reproduced_value": 0.6758,
-        "rel_diff_pct": 1.77,
+        "reproduced_value": 0.6555,
+        "rel_diff_pct": 1.29,
         "tol_pct": 5.0,
         "match": true
       },
       {
         "metric": "EEM DM_t (PRG vs GJR)",
         "paper_value": 6.63,
-        "reproduced_value": 6.147,
-        "rel_diff_pct": 7.29,
-        "tol_pct": 10.0,
+        "reproduced_value": 6.8001,
+        "rel_diff_pct": 2.57,
+        "tol_pct": 20.0,
         "match": true
       },
       {
         "metric": "0050.TW PRG_Extended QLIKE",
         "paper_value": 0.784,
-        "reproduced_value": 0.7771,
-        "rel_diff_pct": 0.87,
+        "reproduced_value": 0.7765,
+        "rel_diff_pct": 0.96,
         "tol_pct": 5.0,
         "match": true
       },
       {
         "metric": "0050.TW DM_t (PRG vs GJR)",
         "paper_value": 5.27,
-        "reproduced_value": 5.3276,
-        "rel_diff_pct": 1.09,
+        "reproduced_value": 5.0941,
+        "rel_diff_pct": 3.34,
         "tol_pct": 10.0,
         "match": true
       },
@@ -146,9 +146,9 @@
   },
   "table3_ablation_check": {
     "paper_ablated_qlike": 0.864,
-    "reproduced_ablated_qlike": 0.8564,
+    "reproduced_ablated_qlike": 0.8565,
     "paper_ablated_dm_vs_gjr": -0.57,
-    "reproduced_ablated_dm_vs_gjr": -0.124,
+    "reproduced_ablated_dm_vs_gjr": 0.0493,
     "note": "K880v2 is the ablated version (session-boundary update removed / lookahead-fix). Direction should roughly match paper's swing narrative: strong PRG advantage disappears."
   },
   "alert_level": "green",

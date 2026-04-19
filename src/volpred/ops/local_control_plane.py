@@ -539,6 +539,18 @@ def list_tasks(
     return tasks
 
 
+def _parent_ids_with_queued_children(tasks: Iterable[dict[str, Any]]) -> set[str]:
+    parent_ids: set[str] = set()
+    for task in tasks:
+        parent_id = str(task.get("parent_task_id") or "").strip()
+        if not parent_id:
+            continue
+        if str(task.get("status") or "") != "queued":
+            continue
+        parent_ids.add(parent_id)
+    return parent_ids
+
+
 def get_task(task_id: str, storage_dir: str = "storage") -> dict[str, Any] | None:
     task = _load_task(task_id, storage_dir=storage_dir)
     if task is None:
@@ -871,9 +883,14 @@ def claim_next_task(
                 and str(existing.get("role") or "worker") != "worker"
             ):
                 sessions[name] = session
-        tasks = list_tasks(status="queued", storage_dir=storage_dir)
+        all_tasks = list_tasks(storage_dir=storage_dir)
+        queued_parent_ids = _parent_ids_with_queued_children(all_tasks)
+        tasks = [task for task in all_tasks if str(task.get("status") or "") == "queued"]
         for task in tasks:
-            if str(task.get("id") or "") in skipped:
+            task_id = str(task.get("id") or "")
+            if task_id in skipped:
+                continue
+            if task_id in queued_parent_ids:
                 continue
             if not _agent_matches_task(
                 task,

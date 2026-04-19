@@ -1,0 +1,33 @@
+==============================================================================
+K1256: 3-spec Henriksson-Merton γ_HM canonical JSON
+Paper 1 (leverage-direction) body_v3.tex L433 footnote T-HM
+==============================================================================
+Seed:            42
+OOS start:       2014-01-01
+Newey-West lags: 10
+GARCH window:    2000
+
+[1/5] Loading SPY + VIX data...
+  SPY × VIX merged rows:  5607
+  Date range:             2004-01-05  →  2026-04-17
+
+[2/5] Rolling GJR-GARCH(1,1,1) forecast for Hybrid VT...
+  GJR forecasts filled: 3607 / 5607 days
+
+[3/5] Building strategy weights (signal_t-1 → return_t lookahead-safe)...
+  OOS rows after lagging + GJR warmup: 3091
+  OOS date range: 2014-01-02  →  2026-04-17
+  Pure VT weight:   mean=0.737, median=0.738, pct at MAX_LEV=0.0%
+  Hybrid VT weight: mean=0.695, VIX-branch share=47.1%
+
+[4/5] Running 3 Henriksson-Merton regressions (Newey-West HAC, 10 lags)...
+  [A] pure_vt_full        γ = -0.0513  t = -1.010  α_ann = +6.13%  N = 3091
+  [B] pure_vt_high_vix    γ = -0.0304  t = -0.794  N = 391 (12.6% of full)
+  [C] hybrid_vt_full      γ = -0.0357  t = -0.572  α_ann = +5.13%  N = 3091
+
+[5/5] Paper-MATCH verdicts (tolerance: γ rel-diff <5% + sign match)...
+  [pure_vt_full        ] γ_est=-0.0513 vs paper -0.0350  t_est=-1.010 vs -0.390  Δγ_rel= 46.7%  Δt= 0.62  → DIVERGENT_SAME_SIGN
+  [pure_vt_high_vix    ] γ_est=-0.0304 vs paper -0.0680  t_est=-0.794 vs -4.630  Δγ_rel= 55.3%  Δt= 3.84  → DIVERGENT_SAME_SIGN
+  [hybrid_vt_full      ] γ_est=-0.0357 vs paper -0.0430  t_est=-0.572 vs -4.060  Δγ_rel= 17.0%  Δt= 3.49  → DIVERGENT_SAME_SIGN
+
+Wrote /Users/yhlai0911/Desktop/volpred-research/experiments/k1256/k1256_results.json

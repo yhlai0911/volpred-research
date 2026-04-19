@@ -465,3 +465,47 @@ K1114 修復只處理 `git log` vs `rev-list` 不一致的 silent failure，但�
 2. 或 settings 動態從 feed.json 推（`max(published_at for status=published)` as last_released）— 避免 stale state
 
 **暫時 workaround**: 手動改 settings 當 release 後（違反「不手改資料」rule，不推薦）；或 Codex 修 code（推薦）。
+
+## 2026-04-19 release-pool-by-settings fix RESOLVED (Codex task_fdf87e79f019)
+
+**Fix commit (pending)**: `src/volpred/ops/content.py` +80 lines: release 命令完成後 `settings['last_released_at'] = datetime.now(timezone.utc).isoformat()` + save + feed 自癒 fallback（settings 缺 last_released_at 時從 `feed.json` published_at max 推斷）。新 regression gate `tests/test_content_release_pool.py`（3 venv 模擬案例全 pass）。
+
+**驗證方式**: 跑 release-pool-by-settings → `cat storage/.release_settings.json` 驗 last_released_at = now ISO。
+
+## 2026-04-19 Cross-session paper gate fix 大批處理（本 session）
+
+**背景**: 9 papers 有 7 doing reproduce gate 未過 95% green。Session 系統性 fix:
+
+| Paper | Before | After | Fix summary |
+|---|---|---|---|
+| P1 leverage-direction | 53.4% (7 MISMATCH + 19 UNTRACE) | 21 MATCH / **0 MISMATCH** / 9 NOTE / 20 UNTRACE | K1256 3-spec HM, Kupiec rounding, 5 cross-source NOTE reclass |
+| P3 vt-trend-following | 80.7% (4 MISMATCH) | 83% (**0 MISMATCH**) | M5 BAB hybrid proxy disclosure, Table 3 dual-window errata |
+| P4 vix-sufficiency | 44% (5 MISMATCH) | **98% GREEN** | Sub1-6: bundle+dividend, Table 6 K752 rewrite, narrative reframe |
+| P5 vt-crowding-abm | 100% ✅ | **100% ✅ sustained** | v2 revise: 4 MAJOR + 3 DOI + 4 MED → 4.3★ FRL |
+| P6 prg-periodic-garch | R2 / 15/15 reproduce | 13/15 (86.7% amber yfinance), PRS continuity + FRL 11pt both RESOLVED | v2 revise 2 MAJOR + 6 MED + 17 DOIs, PRS §6, 11pt 16pp→13pp |
+| P8 volatility-absorption | 50.7% RED | 61.3% AMBER | Sub6 T6 5 (a) fix + T5 (c) footnote |
+| P9 garch-x-vix | 84.6% | 53.8% RED (snapshot revealed drift) | Codex snapshot-first integration exposed K997/K1085 T-stats drift, errata pending |
+
+**Data snapshot infra 新增**（Codex task_4e75）: `scripts/snapshot_yfinance.py` + 5 paper `data/` CSVs（P1/P2/P8/P9/P_insurance）。多 paper reproduce.py snapshot-first fallback 整合。
+
+**Net impact**: Paper 4 投稿 gate 過，P5 維持 green，P1/P3 mismatch 清零，P6 blocker 全解。P8/P9 的剩餘 red/amber 都是 K-experiment 重估需求（非 paper body 錯誤）。
+
+## 2026-04-19 11:50 UTC — Codex quota exhausted until 2026-04-24
+
+**症狀**: Codex P30 release-task CLI bg (`task-mo5opt7l-w9vbt0`) fail 3s after start: "You've hit your usage limit... try again at Apr 24th, 2026 10:27 AM".
+
+**影響**:
+- 所有 queued codex-preferred tasks 無法派出 ~5 days
+- 剩 task_7d2c (P25 crypto-fear audit) + task_0658 (P30 release-task CLI) 需等 quota reset
+- Claude slot 雖 free 但 queue 無 claude-preferred items
+
+**本 session 在 quota 耗盡前已達成（Codex side）**:
+- P12 data snapshot infra (task_4e75) ✅
+- P15 release-pool last_released_at fix (task_fdf8) ✅
+- P10 Paper 6 pre-submission audit (task_361a) ✅
+- P30 session-bootstrap v11 cleanup (task_9b07) ✅
+- P25 claim-next parent guard (task_6e7c) ✅
+
+**延後工作**: task_0658 release-task CLI 補齊 task state machine (手動 release claim-後-誤抓 task)
+
+**暫時 workaround**: 主線程 `finish-task --status failed` 仍是唯一 recover path until release-task CLI 上線。

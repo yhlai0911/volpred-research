@@ -452,20 +452,31 @@ K519-K521 + K527 完成結果：見 archive。
 
 **Next**: 用戶 confirm 投稿 policy → `uv run volpred ops paper-update --paper-id vt-crowding-abm` + 正式投稿 flow（FRL 15p citations 13）
 
-## Paper Portfolio Status (2026-04-19 14:30)
+## Paper Portfolio Status (2026-04-19 20:50 — post 本日大批 gate-fix session)
 
 | # | Paper | Status | Blocker |
 |---|---|---|---|
-| **P9** | **garch-x-vix** | **NOT READY (RED)** | 缺 reproduce.py + match 0.0/7（2026-04-18 audit）。task_5529ea3c5dc5 派 Codex 補 reproduce 系統。README 誤標 "submitted under review" 亦需修 |
-| **P5** | **vt-crowding-abm** | **READY**（33/33 reproduce + seed robust + 4 MAJOR fix + 2 figures embedded 到 main.tex） | 等用戶 confirm 投稿；review v2 選擇性處理 10 MED / 10 MINOR |
-| P4 | vt-insurance-cost | **88.9% amber (8/9, Sub1+2+3 全 done)** | **L11 policy pending**: (a) parallel adjusted bundle for claim #9 → 54 bps exact；(b) 改 paper "54 bps" → "~63 bps raw Close" |
-| **P6** | **prg-periodic-garch** | **gate green + review v1 找 2 MAJOR/7 MED** | Revise first: MAJOR-1 (GJR-X benchmark) + MAJOR-2 (VT 6-market + TX cost) + 7 MED; ERR-C1 Lai DOI 剛補 |
-| P7 | vix-sufficiency | K732/K736 Sub4 body 待主線程 | L188 body edit |
-| P3 | vt-trend-following | **gate FAIL yellow 80.7%** | fastest fix: period 2005/2007 canonical + Table 4 M5 factor series (task_33e39563ca44) |
-| P2 | taiwan-vt | **gate FAIL yellow 73.1%** | Table 2 vs Sec 4.5 gamma unification + 23 untraceable JSONs (task_c2650c6be1b3) |
-| P1 | leverage-direction | **gate FAIL RED 53.4%** | Sec 5.4 vs 4.7 paper-internal contradiction + 7 missing JSONs (task_069ddb253fda) |
-| P8 | volatility-absorption | gate 50.7% yellow + K716-722 script 缺 | - |
-| P10 | crypto-fear-channel | kickoff intro done | body pending |
+| **P5** | **vt-crowding-abm** | ✅ **READY — GREEN 100% (33/33)** + v2 revise 4 MAJOR + 3 MED-C DOIs + 4 academic MED done (→ 4.3★ FRL prediction) | 等用戶 confirm 投稿 |
+| **P6** | **prg-periodic-garch** | ✅ **READY — GREEN 100% (15/15)** + v2 revise 2 MAJOR Fix B + 6 MED + 10 MINOR + 17 DOIs + PRS continuity §6 + 11pt 13pp + citation_check synced | 等用戶 confirm 投稿 |
+| **P7** | **vix-sufficiency (Paper 4)** | ✅ **READY — GREEN 98% (98/100)** + Sub1-6 closed (bundle + dividend + 5 divergence decisions + Table 6 K752 rewrite + source binding + reproduce.py synced) | 等用戶 confirm 投稿 |
+| P1 | leverage-direction | 🟡 **0 MISMATCH** + 9 NOTE + 19 UNTRACE (structural data-limit) | C1 ✅ K1256 3-spec / C2 ✅ Kupiec rounding / C3-C5 Tables 1/6/7/8/11/14 需 new experiments |
+| P3 | vt-trend-following | 🟡 **0 MISMATCH** (83%, 34 UNTRACE structural) | Table 4 M5 ✅ hybrid BAB / Table 3 period ✅ errata; 剩 Table 5 13-market + Table 6 MDD bootstrap 需 new experiments |
+| P2 | taiwan-vt | 🟡 **0 MISMATCH** (6→0 本 session, 69% verified + 24 UNTRACE structural) | ✅ TSMC/0050.TW/TWII γ 3-spec footnotes + reproduce.py NOTE reclass / ✅ SSVS PIP UNTRACEABLE / ✅ GJR+Normal viol NOTE; 剩 24 UNTRACE 需 Table 4/5 VT + Sec 6 macro experiments |
+| P4 (insurance) | vt-insurance-cost | 🟡 88.9% amber (8/9) | L11 policy ✅ RESOLVED 2026-04-19 main.tex L184 footnote dual-value 54 bps (K846 auto_adjust=True) vs 63 bps (replication auto_adjust=False); 兩者 structural 50-80 bps range 內 |
+| P8 | volatility-absorption | 🔴 61.3% amber + **CRITICAL errata 識別** | `errata_pending.md`: CRITICAL (controlled t Harvey cross -3.14→-1.17) + HIGH (T10 2020-26 sign flip) + MEDIUM (10+ drifts). Path B 推薦 research-honest body revision |
+| P9 | garch-x-vix | 🟡 submitted under review, snapshot 53.8% / live 84.6%, **shelf errata ready** | `errata_pending.md`: 0-11% DM t drift SPY/QQQ/GLD/USO, Harvey qualitative invariant — 無 body edit 直到 R1 reviewer response |
+| P10 | crypto-fear-channel | kickoff intro done | body pending; task_7d2c 待 Codex quota reset 04-24 做 pre-body audit |
+
+### 2026-04-19 Session 重大成就
+- **3 papers GREEN**（P4 98% / P5 100% / P6 100%）— 首次三篇同時達 submission-ready reproduce gate
+- **6 papers 0 MISMATCH**（P1 / P2 / P3 / P4 / P5 / P6 — 3-spec disambiguation pattern 成功 3-paper 移植 + cross-source NOTE reclass）
+- **2 errata_pending.md** shelf-ready（P8 / P9）記 CRITICAL / HIGH / MEDIUM 嚴重度分層
+- **5 Codex ops victories**（P12 snapshot infra / P15 release-pool last_released_at fix / P10 P6 audit / P30 session-bootstrap v11 cleanup / P25 claim-next parent guard）
+- **Data snapshot infra**（`scripts/snapshot_yfinance.py` + 5 paper data/ CSVs bundled yfinance drift 對策）
+- **Release cadence unified**（settings interval_minutes 60→120 對齊 cron 每 2h canonical）
+- Daily article 補池 **`mile_28f0ae1b`** 15,862 chars + 2 real charts（three-market binary-sufficient universality, Paper 2 連動）
+- docs/error_log.md 加 2 entries (release-pool fix resolution + Codex quota blocker 2026-04-24)
+- Memory: feedback_dont_ask_do + feedback_email_on_major_decisions（session 新 rules 入 MEMORY.md）
 
 ## Platform V3 Editorial Redesign COMPLETE (2026-04-19)
 

@@ -580,19 +580,20 @@ Table~\ref{tab:competing_eras} presents the incremental $R^2$ of three represent
 \toprule
 Signal & Era 1 & Era 2 & Era 3 & Era 4 & Era 5 & Harvey Pass? \\
 \midrule
-Overnight VIX (abs) & 0.0002 & 0.0001 & 0.0004 & 0.0001 & 0.0003 & 0/5 \\
-VRP proxy & 0.0005 & 0.0002 & 0.0008 & 0.0003 & 0.0004 & 0/5 \\
-Vol momentum 20/60 & 0.0001 & 0.0001 & 0.0006 & 0.0002 & 0.0002 & 0/5 \\
+% source: experiments/k752_vix_sufficiency_eras_results.json .part_d_competing_signals_by_era.Era<k>.signals.<signal>.incremental_R2
+Overnight VIX (abs) & 0.0002 & 0.0001 & 0.0039$^{\dagger}$ & 0.0006 & 0.0032 & 1/5 \\
+VRP proxy & 0.0005 & 0.0002 & 0.0160$^{\dagger}$ & 0.0008 & 0.0005 & 1/5 \\
+Vol momentum 20/60 & 0.0001 & 0.0004 & 0.0216$^{\dagger}$ & 0.0001 & 0.0372$^{\dagger}$ & 2/5 \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
 \small
-\item \textit{Notes}: Incremental $R^2$ from adding the signal to a VIX-only regression of 22-day forward realized volatility. No signal passes the Harvey (2016) $|t|>3.0$ threshold in any era. Values are consistently near zero across all regimes, reinforcing VIX sufficiency.
+\item \textit{Notes}: Incremental $R^2$ from adding the signal to a VIX-only regression of 22-day forward realized volatility. Values are near zero in non-crisis eras (Era 1 DotCom, Era 2 PostDotCom, Era 4 LowVol/QE), confirming VIX sufficiency in normal regimes. $^{\dagger}$Denotes an in-sample Harvey $|t|>3.0$ threshold crossing in the indicated era; four such crossings occur---three in Era 3 (GFC: all three signals) and one in Era 5 (COVID/Inflation: Vol momentum 20/60). These in-sample crisis-era exceptions do not survive out-of-sample Diebold--Mariano testing with Holm--Bonferroni correction (Table~\ref{tab:horse_race}), consistent with the paper's core VIX-sufficiency finding on average while identifying well-defined crisis-regime boundary conditions.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
 
-The pattern is striking: incremental $R^2$ values are uniformly tiny (all below 0.001) across all eras and all signals. VIX sufficiency is not an artifact of any particular market regime.
+The pattern is nuanced: during the three non-crisis eras (DotCom, PostDotCom, LowVol/QE), incremental $R^2$ values are uniformly tiny (all below 0.001) across all signals, confirming VIX sufficiency in normal market regimes. However, during the GFC (Era 3) and COVID/Inflation (Era 5) eras, three signals---Overnight VIX absolute change, VRP proxy, and Vol momentum 20/60---exhibit materially larger incremental $R^2$ values (up to 0.037 for Vol momentum in Era 5), with four in-sample cells crossing the Harvey threshold: all three signals in Era 3 GFC, and Vol momentum 20/60 in Era 5. This in-sample crisis-era exception is consistent with the paper's core out-of-sample finding, however: all era-pooled OOS Diebold--Mariano tests remain $|t|<3$ even after Holm--Bonferroni correction (Table~\ref{tab:horse_race}). The refined reading is that VIX sufficiency is robust on average but has identified, well-defined crisis-regime boundary conditions where the option-market information set may be partially incomplete during extreme volatility episodes.
 
 \subsection{Criterion-Dependent Model Rankings}
 \label{sec:criterion_dependent}

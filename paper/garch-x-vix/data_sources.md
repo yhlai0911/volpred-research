@@ -44,6 +44,19 @@ Raw price/return data is stored within individual experiment directories:
 
 ---
 
+## Snapshot Pinning
+
+- `snapshot_date`: `2026-04-19`
+- `auto_adjust=False` is mandatory for all yfinance snapshots in this paper package.
+- Pinned reviewer-package CSVs now live under `paper/garch-x-vix/data/`:
+  - `0050_tw_vix_2007-2022.csv`
+  - `gld_vix_gvz_2000-2026.csv`
+  - `spy_vix_qqq_eem_fez_2000-2026.csv`
+  - `uso_vix_ovx_2005-2026.csv`
+- `paper/garch-x-vix/reproduce.py` is now snapshot-first by default and only re-enters live yfinance paths when called with `--live`.
+
+---
+
 ## External References
 
 - Yahoo Finance API via `yfinance` Python package

@@ -1,7 +1,7 @@
 # Paper 9: Multiplicative GARCH-X with VIX — A Parsimonious Alternative to GARCH-MIDAS
 
 **Target Journal**: Journal of Empirical Finance / International Journal of Forecasting
-**Status**: submitted (under review)
+**Status**: submitted (under review) | Reproduce gate snapshot-first 53.8% RED / live-mode 84.6% amber. 2026-04-19 **shelf-ready errata prepared** (see `errata_pending.md`): yfinance drift on K997/K1085 DM t-stats 0-11% relative (SPY 4.03→4.48, QQQ 3.71→3.89, GLD+GVZ 3.17→3.20, USO+OVX 4.47→4.47) — Harvey |t|>3 **qualitative invariant** across both snapshots; no paper body edit until R1 reviewer response, errata wording ready for submission.
 **Pages**: ~45 | **Citations**: 27 (24 verified, 1 MAJOR issue, 5 MEDIUM — see `citation_check.md`)
 
 ---
