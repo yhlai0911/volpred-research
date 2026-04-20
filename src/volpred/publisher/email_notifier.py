@@ -249,6 +249,25 @@ class EmailNotifier:
         html_body: str | None,
         recipients: list[str],
     ) -> None:
+        # 2026-04-20 fix: hard gate against tests + ephemeral runs leaking into
+        # user inbox. User reported receiving "First run scheduled article" and
+        # "Scheduled article 1" admin notifications — traced to
+        # tests/test_content_release_pool.py fixtures `mile_first_run` /
+        # `mile_sched_1` triggering release_pool_by_settings → real SMTP send.
+        # VOLPRED_NO_EMAIL=1 disables all outbound; honored at send layer so
+        # notification bookkeeping (dedup log, notif_id) still records the
+        # skip without actually sending. Set automatically in pytest via
+        # conftest.py to protect against future test-fixture leaks.
+        if os.environ.get("VOLPRED_NO_EMAIL", "").strip() in {"1", "true", "yes"}:
+            return
+
+        # 2026-04-20: secondary guard — if storage_dir lives under /tmp/ or
+        # pytest-typical tmp paths, skip send. Defense-in-depth in case
+        # VOLPRED_NO_EMAIL env is forgotten in new test files.
+        storage_str = str(self.storage_dir).lower()
+        if any(marker in storage_str for marker in ("/tmp/", "/private/tmp/", "pytest-", "test_")):
+            return
+
         message = EmailMessage()
         message["Subject"] = subject
         message["From"] = formataddr((self.from_name, self.from_email))
