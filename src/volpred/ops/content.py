@@ -144,14 +144,22 @@ def get_content_release_settings(storage_dir: str = "storage") -> dict:
 
 
 def _update_content_release_settings(fields: dict, *, storage_dir: str = "storage") -> bool:
-    """Update release settings in local JSON and optionally sync to Supabase."""
+    """Update release settings in local JSON and optionally sync to Supabase.
+
+    2026-04-20: PATCH payload narrowed to (fields | updated_at) instead of full
+    current-settings merge. Prior behavior sent all 8 settings fields each cron
+    fire, triggering recurring Supabase HTTP 400 when table schema lacks a
+    local-only column (e.g. include_drafts). Delta PATCH reduces schema-mismatch
+    surface and is semantically correct — the caller only wanted `fields` updated.
+    """
     local = _local_release_settings_path(storage_dir)
     current = load_json(local, {**DEFAULT_RELEASE_SETTINGS})
-    payload = {**current, **fields, "updated_at": datetime.now(timezone.utc).isoformat()}
-    dump_json(local, payload)
-    # Best-effort Supabase sync (don't fail if DB is down)
+    now_iso = datetime.now(timezone.utc).isoformat()
+    local_payload = {**current, **fields, "updated_at": now_iso}
+    dump_json(local, local_payload)
+    remote_payload = {**fields, "updated_at": now_iso}
     try:
-        return _patch_where("content_release_settings", {"id": "default"}, payload)
+        return _patch_where("content_release_settings", {"id": "default"}, remote_payload)
     except Exception:
         return False
 
