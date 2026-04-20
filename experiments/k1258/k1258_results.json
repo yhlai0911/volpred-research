@@ -1,0 +1,654 @@
+{
+  "experiment_id": "K1258",
+  "title": "K1258: Forgetting-Factor BMA Volatility Forecast \u2014 extending K1257 with exponentially-discounted log-posterior",
+  "proposer": "Claude",
+  "executor": "Claude sub-agent (main-thread direct run)",
+  "oos_period": "2020-2026",
+  "data_period": "2010-01-01 to 2026-04-18",
+  "window": 1250,
+  "refit": 63,
+  "seed": 42,
+  "models": [
+    "GARCH_N",
+    "GJR_N",
+    "GJR_t",
+    "EGARCH_N",
+    "HAR_ABS",
+    "A4f_IV2"
+  ],
+  "lambdas": [
+    1.0,
+    0.99,
+    0.975,
+    0.95,
+    0.9
+  ],
+  "assets": [
+    "SPY",
+    "GLD",
+    "0050.TW"
+  ],
+  "results": {
+    "SPY": {
+      "1.0": {
+        "qlike": -8.227435934021337,
+        "mse": 3.0462359357490005e-07,
+        "fz_1pct": -3.1320026833131616,
+        "fz_2_5pct": -3.478289961928801,
+        "per_regime_qlike": {
+          "VIX<15": {
+            "n_days": 283,
+            "qlike": -9.218281080414876
+          },
+          "15-20": {
+            "n_days": 595,
+            "qlike": -8.845472962032357
+          },
+          "20-25": {
+            "n_days": 355,
+            "qlike": -7.988614452199555
+          },
+          ">25": {
+            "n_days": 348,
+            "qlike": -6.608586560316749
+          }
+        },
+        "weight_switch_freq": 0.010759493670886076,
+        "posterior_avg_max_weight": 0.9286954494905095,
+        "final_weights": {
+          "GARCH_N": 6.536740674824288e-31,
+          "GJR_N": 1.3550526220086262e-33,
+          "GJR_t": 1.6438714903624272e-09,
+          "EGARCH_N": 5.030848547850371e-34,
+          "HAR_ABS": 9.519980913026068e-50,
+          "A4f_IV2": 0.9999999983561285
+        },
+        "harvey_dm_vs_lambda1": 0.0,
+        "harvey_p_vs_lambda1": 1.0,
+        "harvey_pass_vs_lambda1": false
+      },
+      "0.99": {
+        "qlike": -8.215358475506546,
+        "mse": 3.1419168791918873e-07,
+        "fz_1pct": -3.1294277668207733,
+        "fz_2_5pct": -3.4837340144532947,
+        "per_regime_qlike": {
+          "VIX<15": {
+            "n_days": 283,
+            "qlike": -9.169673624437566
+          },
+          "15-20": {
+            "n_days": 595,
+            "qlike": -8.848649163519118
+          },
+          "20-25": {
+            "n_days": 355,
+            "qlike": -7.9848095039633336
+          },
+          ">25": {
+            "n_days": 348,
+            "qlike": -6.5916968041929795
+          }
+        },
+        "weight_switch_freq": 0.039873417721518985,
+        "posterior_avg_max_weight": 0.6846131749320389,
+        "final_weights": {
+          "GARCH_N": 0.001325474600737877,
+          "GJR_N": 0.005626681710089214,
+          "GJR_t": 0.0900269682987978,
+          "EGARCH_N": 0.06281737367066806,
+          "HAR_ABS": 0.001061410052631087,
+          "A4f_IV2": 0.839142091667076
+        },
+        "harvey_dm_vs_lambda1": 1.3466074171368319,
+        "harvey_p_vs_lambda1": 0.17829983583197162,
+        "harvey_pass_vs_lambda1": false
+      },
+      "0.975": {
+        "qlike": -8.212287084793255,
+        "mse": 3.13467024185318e-07,
+        "fz_1pct": -3.126827770538391,
+        "fz_2_5pct": -3.482195140859768,
+        "per_regime_qlike": {
+          "VIX<15": {
+            "n_days": 283,
+            "qlike": -9.166234486241514
+          },
+          "15-20": {
+            "n_days": 595,
+            "qlike": -8.848480680173514
+          },
+          "20-25": {
+            "n_days": 355,
+            "qlike": -7.972742681188761
+          },
+          ">25": {
+            "n_days": 348,
+            "qlike": -6.593137542892345
+          }
+        },
+        "weight_switch_freq": 0.07721518987341772,
+        "posterior_avg_max_weight": 0.4831011419826827,
+        "final_weights": {
+          "GARCH_N": 0.03028574647657549,
+          "GJR_N": 0.06388674332984184,
+          "GJR_t": 0.08449915538644952,
+          "EGARCH_N": 0.305032368032315,
+          "HAR_ABS": 0.035253383591635074,
+          "A4f_IV2": 0.48104260318318287
+        },
+        "harvey_dm_vs_lambda1": 1.3345446687020064,
+        "harvey_p_vs_lambda1": 0.18221770336556742,
+        "harvey_pass_vs_lambda1": false
+      },
+      "0.95": {
+        "qlike": -8.207354764022913,
+        "mse": 3.1302799731005734e-07,
+        "fz_1pct": -3.115131223509954,
+        "fz_2_5pct": -3.478113747550493,
+        "per_regime_qlike": {
+          "VIX<15": {
+            "n_days": 283,
+            "qlike": -9.16214059674891
+          },
+          "15-20": {
+            "n_days": 595,
+            "qlike": -8.845131006268236
+          },
+          "20-25": {
+            "n_days": 355,
+            "qlike": -7.965485548605553
+          },
+          ">25": {
+            "n_days": 348,
+            "qlike": -6.587189007343997
+          }
+        },
+        "weight_switch_freq": 0.1291139240506329,
+        "posterior_avg_max_weight": 0.36799055735896535,
+        "final_weights": {
+          "GARCH_N": 0.05164098727875388,
+          "GJR_N": 0.08989159782553838,
+          "GJR_t": 0.08921012827534797,
+          "EGARCH_N": 0.3299148485992223,
+          "HAR_ABS": 0.06857875565241273,
+          "A4f_IV2": 0.37076368236872476
+        },
+        "harvey_dm_vs_lambda1": 1.5584478931744172,
+        "harvey_p_vs_lambda1": 0.11932737768457691,
+        "harvey_pass_vs_lambda1": false
+      },
+      "0.9": {
+        "qlike": -8.204780495298065,
+        "mse": 3.1170443786532374e-07,
+        "fz_1pct": -3.113564082064568,
+        "fz_2_5pct": -3.4771264689598915,
+        "per_regime_qlike": {
+          "VIX<15": {
+            "n_days": 283,
+            "qlike": -9.15921071814829
+          },
+          "15-20": {
+            "n_days": 595,
+            "qlike": -8.84011743523249
+          },
+          "20-25": {
+            "n_days": 355,
+            "qlike": -7.9642109111512775
+          },
+          ">25": {
+            "n_days": 348,
+            "qlike": -6.587748800023678
+          }
+        },
+        "weight_switch_freq": 0.19873417721518988,
+        "posterior_avg_max_weight": 0.2903697035903259,
+        "final_weights": {
+          "GARCH_N": 0.0766930857088293,
+          "GJR_N": 0.10987064893257738,
+          "GJR_t": 0.11617958430782106,
+          "EGARCH_N": 0.28655372903232396,
+          "HAR_ABS": 0.10074217673131082,
+          "A4f_IV2": 0.30996077528713756
+        },
+        "harvey_dm_vs_lambda1": 1.6049764021503743,
+        "harvey_p_vs_lambda1": 0.10869884020469067,
+        "harvey_pass_vs_lambda1": false
+      }
+    },
+    "GLD": {
+      "1.0": {
+        "qlike": -8.181168443888822,
+        "mse": 1.456246122854869e-07,
+        "fz_1pct": -3.3075067221406087,
+        "fz_2_5pct": -3.579806077820079,
+        "per_regime_qlike": {
+          "VIX<15": {
+            "n_days": 283,
+            "qlike": -8.544917946073095
+          },
+          "15-20": {
+            "n_days": 595,
+            "qlike": -8.283560884005555
+          },
+          "20-25": {
+            "n_days": 355,
+            "qlike": -8.126662046159469
+          },
+          ">25": {
+            "n_days": 348,
+            "qlike": -7.76589591574605
+          }
+        },
+        "weight_switch_freq": 0.024683544303797468,
+        "posterior_avg_max_weight": 0.9216559318043045,
+        "final_weights": {
+          "GARCH_N": 1.9221005271668736e-25,
+          "GJR_N": 1.1996802616042778e-32,
+          "GJR_t": 8.532804261802114e-09,
+          "EGARCH_N": 1.059306806229151e-34,
+          "HAR_ABS": 1.6320177921489692e-42,
+          "A4f_IV2": 0.9999999914671958
+        },
+        "harvey_dm_vs_lambda1": 0.0,
+        "harvey_p_vs_lambda1": 1.0,
+        "harvey_pass_vs_lambda1": false
+      },
+      "0.99": {
+        "qlike": -8.160435670460085,
+        "mse": 1.4644154146196453e-07,
+        "fz_1pct": -3.2360351578568185,
+        "fz_2_5pct": -3.5480715186564145,
+        "per_regime_qlike": {
+          "VIX<15": {
+            "n_days": 283,
+            "qlike": -8.52657045568606
+          },
+          "15-20": {
+            "n_days": 595,
+            "qlike": -8.264332675143617
+          },
+          "20-25": {
+            "n_days": 355,
+            "qlike": -8.10412501755617
+          },
+          ">25": {
+            "n_days": 348,
+            "qlike": -7.742491474411924
+          }
+        },
+        "weight_switch_freq": 0.04493670886075949,
+        "posterior_avg_max_weight": 0.6098853929727458,
+        "final_weights": {
+          "GARCH_N": 8.845936205717792e-07,
+          "GJR_N": 3.1395781461892306e-07,
+          "GJR_t": 0.08029351650088365,
+          "EGARCH_N": 5.76940581132454e-08,
+          "HAR_ABS": 2.269197567778285e-08,
+          "A4f_IV2": 0.9197052045616474
+        },
+        "harvey_dm_vs_lambda1": 2.526200067934313,
+        "harvey_p_vs_lambda1": 0.01162738431016308,
+        "harvey_pass_vs_lambda1": false
+      },
+      "0.975": {
+        "qlike": -8.15525354571396,
+        "mse": 1.4738792216120133e-07,
+        "fz_1pct": -3.2089571279842652,
+        "fz_2_5pct": -3.5345691363380856,
+        "per_regime_qlike": {
+          "VIX<15": {
+            "n_days": 283,
+            "qlike": -8.512277262255337
+          },
+          "15-20": {
+            "n_days": 595,
+            "qlike": -8.262807695257973
+          },
+          "20-25": {
+            "n_days": 355,
+            "qlike": -8.10704806996603
+          },
+          ">25": {
+            "n_days": 348,
+            "qlike": -7.730197548962861
+          }
+        },
+        "weight_switch_freq": 0.07278481012658228,
+        "posterior_avg_max_weight": 0.42686156903002065,
+        "final_weights": {
+          "GARCH_N": 0.0022619319191162146,
+          "GJR_N": 0.001970696532328761,
+          "GJR_t": 0.32865246699725015,
+          "EGARCH_N": 9.072982941987045e-05,
+          "HAR_ABS": 0.0005902951124311861,
+          "A4f_IV2": 0.6664338796094538
+        },
+        "harvey_dm_vs_lambda1": 2.6590736493221385,
+        "harvey_p_vs_lambda1": 0.007914730842358386,
+        "harvey_pass_vs_lambda1": false
+      },
+      "0.95": {
+        "qlike": -8.152973065930555,
+        "mse": 1.4812023006475087e-07,
+        "fz_1pct": -3.1898585587582295,
+        "fz_2_5pct": -3.5208774218238506,
+        "per_regime_qlike": {
+          "VIX<15": {
+            "n_days": 283,
+            "qlike": -8.502825972321993
+          },
+          "15-20": {
+            "n_days": 595,
+            "qlike": -8.261596990172611
+          },
+          "20-25": {
+            "n_days": 355,
+            "qlike": -8.114538973801334
+          },
+          ">25": {
+            "n_days": 348,
+            "qlike": -7.7219515006233
+          }
+        },
+        "weight_switch_freq": 0.14810126582278482,
+        "posterior_avg_max_weight": 0.32706722019395895,
+        "final_weights": {
+          "GARCH_N": 0.08606153080362099,
+          "GJR_N": 0.0842653785999272,
+          "GJR_t": 0.35555011013309884,
+          "EGARCH_N": 0.00739721650902833,
+          "HAR_ABS": 0.06419801905265841,
+          "A4f_IV2": 0.40252774490166643
+        },
+        "harvey_dm_vs_lambda1": 2.6149622375437347,
+        "harvey_p_vs_lambda1": 0.009008631280143398,
+        "harvey_pass_vs_lambda1": false
+      },
+      "0.9": {
+        "qlike": -8.15077020300906,
+        "mse": 1.492753181112122e-07,
+        "fz_1pct": -3.169677429123294,
+        "fz_2_5pct": -3.51055241732196,
+        "per_regime_qlike": {
+          "VIX<15": {
+            "n_days": 283,
+            "qlike": -8.502202698304263
+          },
+          "15-20": {
+            "n_days": 595,
+            "qlike": -8.257778152689081
+          },
+          "20-25": {
+            "n_days": 355,
+            "qlike": -8.118351423404206
+          },
+          ">25": {
+            "n_days": 348,
+            "qlike": -7.71509072177793
+          }
+        },
+        "weight_switch_freq": 0.24050632911392406,
+        "posterior_avg_max_weight": 0.2647553959630924,
+        "final_weights": {
+          "GARCH_N": 0.16586481278122514,
+          "GJR_N": 0.1701803168597882,
+          "GJR_t": 0.23654735806577942,
+          "EGARCH_N": 0.0598004178081851,
+          "HAR_ABS": 0.19086863904242532,
+          "A4f_IV2": 0.17673845544259686
+        },
+        "harvey_dm_vs_lambda1": 2.6456808022573184,
+        "harvey_p_vs_lambda1": 0.008233544052972608,
+        "harvey_pass_vs_lambda1": false
+      }
+    },
+    "0050.TW": {
+      "1.0": {
+        "qlike": -7.679046170988067,
+        "mse": 3.0400116723005046e-07,
+        "fz_1pct": -2.805872304468146,
+        "fz_2_5pct": -3.2277391179466455,
+        "per_regime_qlike": {
+          "VIX<15": {
+            "n_days": 284,
+            "qlike": -8.068220839494519
+          },
+          "15-20": {
+            "n_days": 565,
+            "qlike": -7.961858957707948
+          },
+          "20-25": {
+            "n_days": 334,
+            "qlike": -7.4102698265086
+          },
+          ">25": {
+            "n_days": 341,
+            "qlike": -7.1495930000308165
+          }
+        },
+        "weight_switch_freq": 0.0026263952724885093,
+        "posterior_avg_max_weight": 0.9926323968024705,
+        "final_weights": {
+          "GARCH_N": 4.868144659115422e-35,
+          "GJR_N": 1.8977299476804574e-32,
+          "GJR_t": 1.0,
+          "EGARCH_N": 2.2808892200004294e-35,
+          "HAR_ABS": 6.683190141333795e-65,
+          "A4f_IV2": 5.481476228766304e-32
+        },
+        "harvey_dm_vs_lambda1": 0.0,
+        "harvey_p_vs_lambda1": 1.0,
+        "harvey_pass_vs_lambda1": false
+      },
+      "0.99": {
+        "qlike": -7.690959125932014,
+        "mse": 3.0331307622582933e-07,
+        "fz_1pct": -2.855044787380885,
+        "fz_2_5pct": -3.2625736392950473,
+        "per_regime_qlike": {
+          "VIX<15": {
+            "n_days": 284,
+            "qlike": -8.071962984305662
+          },
+          "15-20": {
+            "n_days": 565,
+            "qlike": -7.963866710002259
+          },
+          "20-25": {
+            "n_days": 334,
+            "qlike": -7.42552584439968
+          },
+          ">25": {
+            "n_days": 341,
+            "qlike": -7.181448378876278
+          }
+        },
+        "weight_switch_freq": 0.01969796454366382,
+        "posterior_avg_max_weight": 0.8166849959979237,
+        "final_weights": {
+          "GARCH_N": 0.04252892776751233,
+          "GJR_N": 0.028868068080842104,
+          "GJR_t": 0.011233224202411216,
+          "EGARCH_N": 0.18235619134900014,
+          "HAR_ABS": 0.024845724927705325,
+          "A4f_IV2": 0.7101678636725288
+        },
+        "harvey_dm_vs_lambda1": -1.803488207445241,
+        "harvey_p_vs_lambda1": 0.07150912984124003,
+        "harvey_pass_vs_lambda1": false
+      },
+      "0.975": {
+        "qlike": -7.691557192465576,
+        "mse": 3.0357475876342197e-07,
+        "fz_1pct": -2.8466912352386027,
+        "fz_2_5pct": -3.2588488995663267,
+        "per_regime_qlike": {
+          "VIX<15": {
+            "n_days": 284,
+            "qlike": -8.06557427478439
+          },
+          "15-20": {
+            "n_days": 565,
+            "qlike": -7.967613506613675
+          },
+          "20-25": {
+            "n_days": 334,
+            "qlike": -7.440619450526658
+          },
+          ">25": {
+            "n_days": 341,
+            "qlike": -7.168450262657305
+          }
+        },
+        "weight_switch_freq": 0.0479317137229153,
+        "posterior_avg_max_weight": 0.5771991218297406,
+        "final_weights": {
+          "GARCH_N": 0.07905248980661718,
+          "GJR_N": 0.05130331770020833,
+          "GJR_t": 0.009894538569399921,
+          "EGARCH_N": 0.15888374253254745,
+          "HAR_ABS": 0.07368663640080927,
+          "A4f_IV2": 0.6271792749904179
+        },
+        "harvey_dm_vs_lambda1": -2.0028981669275225,
+        "harvey_p_vs_lambda1": 0.04536516742689001,
+        "harvey_pass_vs_lambda1": false
+      },
+      "0.95": {
+        "qlike": -7.692078117384389,
+        "mse": 2.9654394464464495e-07,
+        "fz_1pct": -2.84034605000269,
+        "fz_2_5pct": -3.258653267599318,
+        "per_regime_qlike": {
+          "VIX<15": {
+            "n_days": 284,
+            "qlike": -8.065056735060516
+          },
+          "15-20": {
+            "n_days": 565,
+            "qlike": -7.969724166564283
+          },
+          "20-25": {
+            "n_days": 334,
+            "qlike": -7.428641372229766
+          },
+          ">25": {
+            "n_days": 341,
+            "qlike": -7.179444474202525
+          }
+        },
+        "weight_switch_freq": 0.1247537754432042,
+        "posterior_avg_max_weight": 0.41136647978041146,
+        "final_weights": {
+          "GARCH_N": 0.10381355537620826,
+          "GJR_N": 0.09189551776620973,
+          "GJR_t": 0.03309538354158941,
+          "EGARCH_N": 0.1937039277127546,
+          "HAR_ABS": 0.11131865328244848,
+          "A4f_IV2": 0.4661729623207895
+        },
+        "harvey_dm_vs_lambda1": -1.6237455040062225,
+        "harvey_p_vs_lambda1": 0.10463707099301622,
+        "harvey_pass_vs_lambda1": false
+      },
+      "0.9": {
+        "qlike": -7.695027520908228,
+        "mse": 2.9464293790430747e-07,
+        "fz_1pct": -2.846397890342042,
+        "fz_2_5pct": -3.26821203828509,
+        "per_regime_qlike": {
+          "VIX<15": {
+            "n_days": 284,
+            "qlike": -8.063620501154414
+          },
+          "15-20": {
+            "n_days": 565,
+            "qlike": -7.974227641246498
+          },
+          "20-25": {
+            "n_days": 334,
+            "qlike": -7.420826058633937
+          },
+          ">25": {
+            "n_days": 341,
+            "qlike": -7.194015245302876
+          }
+        },
+        "weight_switch_freq": 0.2153644123440578,
+        "posterior_avg_max_weight": 0.3127781667959957,
+        "final_weights": {
+          "GARCH_N": 0.12207246971005054,
+          "GJR_N": 0.13242824668954964,
+          "GJR_t": 0.08359283457278684,
+          "EGARCH_N": 0.1967560522631381,
+          "HAR_ABS": 0.14643196694878272,
+          "A4f_IV2": 0.318718429815692
+        },
+        "harvey_dm_vs_lambda1": -1.5899123441271754,
+        "harvey_p_vs_lambda1": 0.11206210885950973,
+        "harvey_pass_vs_lambda1": false
+      }
+    }
+  },
+  "hypotheses": {
+    "H1": {
+      "null": "ff-BMA QLIKE >= standard BMA (lambda=1) QLIKE",
+      "alt": "At least one lambda<1 variant has Harvey |t|>3 AND lower QLIKE",
+      "verdict": "FAIL",
+      "passing_cells": []
+    },
+    "H2": {
+      "null": "Weight-switch-frequency not higher for lambda<1 than lambda=1",
+      "alt": "lambda<1 substantially increases switch-freq (>=2x baseline)",
+      "verdict": "PASS",
+      "evidence": {
+        "SPY": {
+          "baseline_switch_freq": 0.010759493670886076,
+          "0.99": 0.039873417721518985,
+          "0.975": 0.07721518987341772,
+          "0.95": 0.1291139240506329,
+          "0.9": 0.19873417721518988
+        },
+        "GLD": {
+          "baseline_switch_freq": 0.024683544303797468,
+          "0.99": 0.04493670886075949,
+          "0.975": 0.07278481012658228,
+          "0.95": 0.14810126582278482,
+          "0.9": 0.24050632911392406
+        },
+        "0050.TW": {
+          "baseline_switch_freq": 0.0026263952724885093,
+          "0.99": 0.01969796454366382,
+          "0.975": 0.0479317137229153,
+          "0.95": 0.1247537754432042,
+          "0.9": 0.2153644123440578
+        }
+      }
+    },
+    "H3": {
+      "null": "Optimal lambda universal across assets",
+      "alt": "Optimal lambda is asset-specific",
+      "verdict": "PASS",
+      "optimal_per_asset": {
+        "SPY": 1.0,
+        "GLD": 1.0,
+        "0050.TW": 0.9
+      }
+    },
+    "H4": {
+      "verdict": "lambda=1.0 (standard BMA); no forgetting variant improves QLIKE",
+      "rationale": "Chosen by combining H1 (which lambdas actually beat baseline QLIKE with Harvey |t|>3) and H3 (whether the optimum is shared across assets)."
+    }
+  },
+  "provenance": {
+    "k1257_forecast_cache_reuse": true,
+    "cache_paths": [
+      "forecasts_SPY.parquet",
+      "forecasts_GLD.parquet",
+      "forecasts_0050_TW.parquet"
+    ],
+    "runtime_min": 5.83,
+    "quick_mode": false
+  }
+}
