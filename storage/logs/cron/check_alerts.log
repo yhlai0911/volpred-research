@@ -521,3 +521,35 @@ breaches=1 sent=0 skipped=1
 dispatched:
   - skipped: level=warn title=Release pool cron gap > 2h notif_id=e1311d3e reason=dedup_24h
 JSON: {"breach_count": 1, "sent_count": 0, "skipped_count": 1, "generated_at": "2026-04-20T05:00:00.918939+00:00"}
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=5 ids=[]
+  release-pool-auto: skip reason=interval_not_due_age=290min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 12.5h (interval=720min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-04-20T06:00:00.863412+00:00"}
+=== ops check-alerts ===
+  run-due-jobs: fired=1 skipped=4 ids=['collect_tw_data']
+  release-pool-auto: skip reason=interval_not_due_age=350min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 12.5h (interval=720min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-04-20T07:00:06.039192+00:00"}
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=5 ids=[]
+  release-pool-auto: skip reason=interval_not_due_age=410min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 12.5h (interval=720min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-04-20T08:00:01.412941+00:00"}
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=5 ids=[]
+  release-pool-auto: skip reason=interval_not_due_age=470min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 12.5h (interval=720min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-04-20T09:00:00.962306+00:00"}
