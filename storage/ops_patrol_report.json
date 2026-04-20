@@ -1,40 +1,41 @@
 {
-  "timestamp": "2026-04-20T12:31:00Z",
+  "timestamp": "2026-04-20T18:02:47.257846Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "Total drafts: 8 (<12 threshold). Breakdown: general=6 (<8 threshold), research=2 (<4 threshold). All three thresholds breached."
+      "detail": "Total drafts: 7 (<12 threshold). By audience: general=5 (<8 threshold, alert), research=2 (<4 threshold, alert)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "strategy_metrics.json mtime age: 45.7 hours (>26h threshold). Last modified: 2026-04-18T18:43Z approx."
+      "detail": "storage/strategy_metrics.json is 51.3 hours old (threshold: 26h). Last modified: ~2026-04-17T22:30 UTC."
     },
     {
       "name": "ERROR_LOG",
-      "status": "info",
-      "detail": "Entry dated 2026-04-20 found. Summary: macOS cron scheduler failure causing stale data/metrics. Fix applied 2026-04-20 08:50 CST via universal piggy-back scheduler (scripts/run_due_jobs.py). Entry tagged cron/scheduler/architecture."
+      "status": "alert",
+      "detail": "Entry dated 2026-04-20 found in docs/error_log.md: universal piggy-back scheduler fix for macOS cron failure. Key lesson: single reliable trigger (check_alerts hourly) + dispatch-fanout is the only robust pattern on macOS."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "Checked 14 strategies. All have nulls_in_last3=1 (threshold: >2). No strategy exceeds threshold. _market_daily has 0 entries (insufficient_data). No alert triggered."
+      "detail": "All strategies checked. No strategy has >2 nulls in last 3 portfolio_return entries."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files. Clean working tree."
+      "detail": "0 uncommitted files (threshold: 50)."
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "knowledge.json contains 2043 entries."
+      "detail": "storage/memory/knowledge.json has 2043 entries."
     }
   ],
   "alerts": [
-    "article pool low (<12): total=8, research=2 (<4), general=6 (<8)",
-    "metrics stale: strategy_metrics.json is 45.7 hours old (>26h threshold)"
+    "article pool low (<12): total=7, general=5 (<8), research=2 (<4)",
+    "metrics stale: strategy_metrics.json is 51.3h old (threshold 26h)",
+    "error log: today entry found (2026-04-20) — macOS cron failure + universal piggy-back scheduler fix applied"
   ]
 }
