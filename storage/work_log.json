@@ -2692,5 +2692,11 @@
     "task_type": "platform_ops",
     "outcome": "platform_patrol_alert_threshold_root_fix",
     "summary": "05:08 UTC platform_patrol: ops health legacy-advisory blocked (v11 coordinator contract) = 不 actionable per CLAUDE.md. platform-cycle-summary OK (8 drafts, next 13:10 UTC). check-alerts 發現 release_pool_gap warn-level breach dedup_24h skipped — 根因 alerts.py hardcoded RELEASE_POOL_GAP_THRESHOLD=2h 與新 12h cadence 不相容, 每次 check 都踩雷. ROOT fix: threshold 改 derive from settings.interval_minutes + 30min grace; critical tier = 2x interval. Verified post-fix check-alerts: breached=false level=info warn_threshold_hours=12.5 正確反映 720min. Title 動態 'Release pool cron gap > 12.5h (interval=720min)'. 活文件原則 - 若未來 interval 再變, alert 自動 adapt. Commit pending. Type platform_ops (governance 太多輪換過來)."
+  },
+  {
+    "timestamp": "2026-04-21T00:45:02+08:00",
+    "task_type": "experiment",
+    "outcome": "k1258_agent_result_verification",
+    "summary": "round18 v12: K1258 agent-result-verification per CLAUDE.md rule (防 K1016 agent 虛報). Cross-check report vs experiments/k1258/k1258_results.json: (a) H1 FAIL passing_cells=[] ✓, GLD λ=0.975 Harvey=+2.66 ΔQLIKE=+0.0259 byte-exact ✓, 0050.TW λ=0.975 Harvey=-2.00 ΔQLIKE=-0.0125 ✓ (b) H2 PASS weight_switch_freq λ=0.9 byte-exact: SPY 19.87% / GLD 24.05% / 0050.TW 21.54% ✓, λ=1 baseline 1.08/2.47/0.26% ✓ (c) H3 PASS optimal_per_asset {SPY:1.0, GLD:1.0, 0050.TW:0.9} ✓ (d) H4 λ=1.0 default ✓. All agent claims match JSON byte-for-byte. Codex 04-24 review 可信 base data 無 K1016-type 虛報風險. Release_pool 14:00 UTC 成功 fired mile_a21a6e06 (K1091, draft pool 8→7). Queue: 3 codex-blocked 04-24. Slot 0/4."
   }
 ]
