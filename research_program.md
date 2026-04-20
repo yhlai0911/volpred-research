@@ -47,7 +47,7 @@
 
 **Under-explored methodologies (novelty quota 候選，feed_ct=0 per topic_diversity_audit 2026-04-19 19:30 UTC)**:
 - [x] ~~Bayesian Model Averaging (BMA) for vol forecasting~~ → **K1257 完成 2026-04-20**：6-model pool × 3 assets × OOS 2020-2026。**H1 PARTIAL**（SPY/GLD Harvey PASS t=-3.40/-3.38, 0050.TW FAIL posterior→GJR-t），**H2 FAIL** no asset 過 equal-weight Harvey（確認 K482 equal-weight-puzzle 延伸到 Bayesian），**H3 FAIL** posterior 500 天內 concentrate 指數收斂→ standard BMA cannot forget/track regime。下步：forgetting-factor BMA 或 sliding-window posterior。**等候 Codex 04-24 code review 才 finalize knowledge.json 寫入**（CLAUDE.md §實驗後必做 L1）。
-- [ ] **Model Confidence Set (MCS) / SPA / Reality Check** — Hansen-Lunde-Nason framework 正式檢驗 "a set of models 無法顯著優於彼此"；取代 single-DM-test 的 pairwise 方法，統計學上嚴謹。對現有 K500+ pairwise DM 結果 meta-analysis 是 natural complement。0 feed coverage。Not data-blocked。
+- [x] ~~**Model Confidence Set (MCS) / SPA / Reality Check**~~ → **K1259 完成 2026-04-20**：Phase 1 ledger 2741 DM rows from 236 K / 16 assets；Phase 1.5 main-thread asset backfill 38%→78%；Phase 2 HLN-2011 Variant A (parametric bootstrap seed=42, B=1000) 18/20 runs (0050.TW MSE 空 — 全 K400-K1258 無 TW MSE DM rows = new gap)。**關鍵發現**：(a) **SPY QLIKE α=0.10 88/100 models survive** — A4f family 全入 superior set (A4f-VIX9D-N/t, A4f_Local, A4f_N, A4f_VIX, A4f_t_2step, A4f_t_joint)，HAR/EWMA/GJR-t/MEM decisively eliminated；(b) **GLD MSE 窄 set {M2_GJR_t, M3_GAS_t, M4_HAR_RV_X}** — MSE 比 QLIKE discriminative 因 ledger 薄；(c) **α=0.10 vs 0.20 sets identical** everywhere（stopping-p ≥ 0.23）— marginal relaxation 無效；(d) **CF-Rolling 不在 ledger** — K500+ 敘事王者模型命名不一致錯過抽取（follow-up: 命名 canonicalization）；(e) Variant B (reconstructed per-day loss + stationary bootstrap) skipped — <20% per-day loss coverage。Commits: def4695b (Phase 1), efd370f4 (Phase 1.5), 5314dbd3 (Phase 2). Parent task_6055e98ca841 子任務 A+B 完成；Phase 3 (feed general-audience article) 獨立 queue。**等候 Codex 04-24 code review 才 finalize knowledge.json 寫入**（K1257 同規則）。
 - [ ] **Realized semivariance / signed jumps** — Barndorff-Nielsen-Kinnebrock-Shephard 分解 RV 為 upside/downside 部分，測 asymmetric vol 更純粹。需 5-min 數據（2026 Q2 HAR-RV 解鎖後可開）。
 
 ### 面向 B: VaR/ES 風險管理
@@ -457,7 +457,7 @@ K519-K521 + K527 完成結果：見 archive。
 
 **Next**: 用戶 confirm 投稿 policy → `uv run volpred ops paper-update --paper-id vt-crowding-abm` + 正式投稿 flow（FRL 15p citations 13）
 
-## Paper Portfolio Status (2026-04-19 20:50 — post 本日大批 gate-fix session)
+## Paper Portfolio Status (2026-04-20 02:14 — post K1257 BMA + P10 reproduce scaffold)
 
 | # | Paper | Status | Blocker |
 |---|---|---|---|
@@ -470,7 +470,7 @@ K519-K521 + K527 完成結果：見 archive。
 | P2 | taiwan-vt | 🟡 **0 MISMATCH** (6→0 本 session, 69% verified + 24 UNTRACE structural) | ✅ TSMC/0050.TW/TWII γ 3-spec footnotes + reproduce.py NOTE reclass / ✅ SSVS PIP UNTRACEABLE / ✅ GJR+Normal viol NOTE; 剩 24 UNTRACE 需 Table 4/5 VT + Sec 6 macro experiments |
 | P8 | volatility-absorption | 🔴 61.3% amber + **CRITICAL errata 識別** | `errata_pending.md`: CRITICAL (controlled t Harvey cross -3.14→-1.17) + HIGH (T10 2020-26 sign flip) + MEDIUM (10+ drifts). Path B 推薦 research-honest body revision |
 | P9 | garch-x-vix | 🟡 submitted under review, snapshot 53.8% / live 84.6%, **shelf errata ready** | `errata_pending.md`: 0-11% DM t drift SPY/QQQ/GLD/USO, Harvey qualitative invariant — 無 body edit 直到 R1 reviewer response |
-| P10 | crypto-fear-channel | kickoff intro done | body pending; task_7d2c 待 Codex quota reset 04-24 做 pre-body audit |
+| **P10** | **crypto-fear-channel** | ✅ **NEW GREEN — reproduce gate 100% (7/7)** + Claude pre-body review 5H/8M/5L/6-Codex-gaps 歸檔 review_history/pre_body_v0/ + body_v0_intro.tex H1+H3 fixes applied (lag 1-5 asym distinct from symmetric 1-10 + QR sign-reversal 4-quantile enumerate 8.5× reframe) | body drafting（Sec 2-6 主體）待 Codex 04-24 wake handles Gap A-F (claim-to-JSON / k1025.py read / lit review 15-20 DOIs / outline reconcile / reproduce scaffold ✓ done / data snapshot) |
 
 ### 2026-04-19 Session 重大成就
 - **4 papers GREEN**（P4 vix-sufficiency 98% / P4 vt-insurance-cost 100% / P5 vt-crowding-abm 100% / P6 prg-periodic-garch 100%）— 首次四篇同時達 submission-ready reproduce gate
