@@ -4,100 +4,60 @@ description: "部署 VolPred 網站到 Zeabur 或更新本地端。用法: /depl
 
 # VolPred 網站部署
 
-## 架構
+## Canonical source of truth
 
-```
-本地端（即時）                    Zeabur（每小時更新）
-┌──────────────┐                ┌──────────────────┐
-│ Next.js dev  │                │ 靜態 HTML (out/)  │
-│ port 3737    │                │ volpred-research  │
-│   ↓ proxy    │                │ .zeabur.app       │
-│ FastAPI      │                │                   │
-│ port 8787    │                │ 讀 public/data/   │
-│   ↓          │                │ (build 時打包)     │
-│ storage/     │                └──────────────────┘
-│ (JSON files) │                        ↑
-└──────────────┘                  每小時 rebuild
-        ↑                        + deploy
-  Publisher 即時寫入
-```
+Active frontend、Zeabur project / service、站點網址一律以
+`config/project_targets.json` 為準。**不要**在 skill / 程式中 hardcode 任何 ID。
+若要切換 target，先改 config，再改程式與文件。
 
-## 本地端（即時更新）
+目前 active target（2026-04）：
+- active_frontend: `frontend-v2-fix`（Next.js SSR，Docker 部署）
+- deploy.active_service: `volpred-v3`
+- 站點：`https://volpred.zeabur.app`
 
-Publisher 寫入 `storage/` → FastAPI 讀取 → 前端 SWR 30 秒自動刷新。
-**不需要 rebuild，不需要 deploy。**
+## Zeabur 部署（唯一安全入口）
 
-### 啟動本地端
 ```bash
-# 1. 啟動 API 後端
+cd frontend-v2-fix
+./scripts/deploy-zeabur-safe.sh
+```
+
+這支腳本做了：
+1. 驗 `frontend-v2-fix/.env.production` 存在且含所有 required keys
+2. 複製到 staging dir，繞過 `.gitignore` 對 `.env.production` 的排除
+3. 同步 Zeabur service env vars（build-time 也需要 `NEXT_PUBLIC_*`）
+4. 上傳到 Zeabur 並輪詢到 `RUNNING`
+5. 實打 `/api/publications/feed` 與 `/api/strategy-overview` 驗證非空後才宣告成功
+
+完整緣由與 fail-mode 請讀：`docs/zeabur-safe-deploy.md`。
+
+### 絕對不要
+
+- 不要直接 `npx zeabur@latest deploy --project-id ... --service-id ...`
+  — 會踩到 2026-03-24 的 `.env.production` 0-byte image 問題。
+- 不要從 `config/project_targets.json` 以外的地方複製 service ID。
+- 不要跳過 `./scripts/deploy-zeabur-safe.sh`，就算只是「小改」。
+
+### 查目前 active target
+
+```bash
+jq '.active_frontend, .deploy.active_service, .deploy.services[.deploy.active_service], .site.default_remote_url' config/project_targets.json
+```
+
+## 本地端（不需要 deploy）
+
+Publisher 寫 `storage/` → FastAPI 讀 → 前端 SWR 自動刷新。發文不用 rebuild。
+
+```bash
+# API
 PYTHONPATH=src uv run uvicorn api.main:app --host 127.0.0.1 --port 8787 &
 
-# 2. 啟動前端（dev 模式，proxy 到 API）
-cd frontend && npx next dev -p 3737 &
-
-# 前端: http://localhost:3737
-# API:  http://localhost:8787
+# Frontend
+cd frontend-v2-fix && npm run dev
 ```
 
-### 發佈新內容（即時出現在本地端）
-```python
-from volpred.publisher.publisher import Publisher
-pub = Publisher()
-pub.publish_milestone(title='...', description='...', phase='...', details={...})
-# → 即時出現在 http://localhost:3737（SWR 30 秒刷新）
-```
+## Troubleshooting
 
-## Zeabur（每小時靜態部署）
-
-### Zeabur 配置
-- **Project ID**: `69b5743e75c26871ff4c5e61`
-- **Service ID**: `69b5744875c26871ff4c5e63`
-- **Domain**: `volpred-research.zeabur.app`
-- **Region**: Taipei (tpe1)
-
-### 部署流程（每小時一次或手動）
-```bash
-# 1. 同步 storage/ 到 frontend/public/data/
-uv run python scripts/daily_update.py
-
-# 2. Build 靜態網站（需要 STATIC_EXPORT=1）
-cd frontend
-STATIC_EXPORT=1 npm run build
-
-# 3. 從 out/ 目錄部署到 Zeabur
-cd out
-npx zeabur@latest deploy \
-  --project-id 69b5743e75c26871ff4c5e61 \
-  --service-id 69b5744875c26871ff4c5e63 \
-  --json
-```
-
-### 一鍵部署腳本
-```bash
-# 從專案根目錄執行
-uv run python scripts/daily_update.py && \
-cd frontend && STATIC_EXPORT=1 npm run build && \
-cd out && npx zeabur@latest deploy \
-  --project-id 69b5743e75c26871ff4c5e61 \
-  --service-id 69b5744875c26871ff4c5e63 \
-  --json
-```
-
-## next.config.js 雙模式
-
-```javascript
-// STATIC_EXPORT=1 → 靜態導出（Zeabur）
-// 無環境變數 → dev 模式（API proxy 到 localhost:8787）
-```
-
-前端 `api.ts` 自動偵測：
-1. 先嘗試 `/api/...`（API 模式，本地端）
-2. 失敗則讀 `/data/...`（靜態模式，Zeabur）
-
-## 重要注意事項
-
-1. **本地端發佈是即時的** — 不需要 rebuild
-2. **Zeabur 更新有延遲** — 需要手動觸發或每小時 cron
-3. **靜態導出要用 `STATIC_EXPORT=1`** — 否則會是 dev 模式（有 API proxy）
-4. **`generateStaticParams`** 在 `reports/[id]/page.tsx` 中從 `feed.json` 讀取 ID 列表
-5. **新發佈的報告** 要在 Zeabur rebuild 後才有獨立頁面（在此之前 feed 卡片仍可點開）
+- 部署後 `/api/*` 回空資料 → 先看 `docs/zeabur-safe-deploy.md` 的「0-byte env.production」節。
+- `deploy-zeabur-safe.sh` 找不到 required env key → 補進 `frontend-v2-fix/.env.production`，不要 bypass。
+- 想部到別的 service → 先 PR 改 `config/project_targets.json` 的 `active_service`，再跑 deploy。

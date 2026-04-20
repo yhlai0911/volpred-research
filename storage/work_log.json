@@ -2530,5 +2530,167 @@
     "task_type": "experiment",
     "outcome": "tests_added",
     "summary": "02:08 UTC tests/test_feed_sync.py 新增 — 4 regression cases covering compute_diff content-hash fix: (1) content change without metadata change triggers UPDATE, (2) identical content + metadata no-op, (3) title change still detected (regression), (4) description fallback matches content. All 4 pass. Full suite: 111 passed / 5 skipped / 0 failed (from 107/5/0). Fix now under pytest coverage."
+  },
+  {
+    "timestamp": "2026-04-20T10:18:02+08:00",
+    "task_type": "governance",
+    "outcome": "git_sync",
+    "summary": "02:09 UTC commit 8694453d pushed main: feed_sync content-hash fix + K1257 BMA experiment + 4 tests (11 files 546/-85). Session post-compact commits total: 5 (145ae731/7ea315d2/a5573c81/1574b1d2/8694453d). K1257 research article mile_5173955c + experiment artifacts all committed."
+  },
+  {
+    "timestamp": "2026-04-20T10:22:36+08:00",
+    "task_type": "experiment",
+    "outcome": "k1258_spec",
+    "summary": "02:10 UTC K1258 spec 建立 — Forgetting-Factor BMA 承接 K1257 H3 FAIL insight. 加 exponential forgetting λ ∈ {0.99, 0.975, 0.95, 0.90} 到 posterior update 防 concentration. Reference: Raftery-Karny-Ettler 2010 dynamic model averaging. Method: log w_t+1 = λ·log w_t + log p(y_t|M_i). 4 hypotheses H1 beats standard, H2 regime tracking 恢復, H3 optimal λ by asset, H4 production recommendation. 兌現 mile_5173955c article 的 forgetting-factor 承諾. Pending Codex 04-24 wake 或主線程手動跑 (~30 min reuse K1257 forecasts)."
+  },
+  {
+    "timestamp": "2026-04-20T10:30:22+08:00",
+    "task_type": "platform_ops",
+    "outcome": "email_leak_fix",
+    "summary": "02:12 UTC 用戶報 mile_first_run/mile_sched_1 admin email — 根因 tests/test_content_release_pool.py fixture 觸 release_pool_by_settings→真 SMTP. 2-layer fix: (1) _send_email 加 VOLPRED_NO_EMAIL env + /tmp/ pytest-/test_ path gate, (2) tests/conftest.py 自動 os.environ[VOLPRED_NO_EMAIL]=1. Verified: test_content_release_pool 3/3 PASS, full 111/5skip/0fail. Commit 8d4c7b06 pushed. K1258 spec earlier + pending execution. Session commits 6: 145ae731/7ea315d2/a5573c81/1574b1d2/8694453d/8d4c7b06."
+  },
+  {
+    "timestamp": "2026-04-20T10:31:11+08:00",
+    "task_type": "paper_review",
+    "outcome": "portfolio_update",
+    "summary": "02:14 UTC research_program.md Paper Portfolio table 更新: P10 crypto-fear-channel kickoff → NEW GREEN (reproduce 7/7 100% 我 scaffold 貢獻) + pre-body review archive + body H1+H3 fixes. Total 5 GREEN papers submission-ready (P4 vix-sufficiency / P4ins vt-insurance-cost / P5 vt-crowding-abm / P6 prg-periodic-garch / P10 crypto-fear-channel). 從 session-start 4 GREEN 進步到 5 GREEN."
+  },
+  {
+    "timestamp": "2026-04-20T10:44:47+08:00",
+    "task_type": "experiment",
+    "outcome": "k1259_phase1_complete",
+    "summary": "02:44 UTC task_5489ff87e3e6 finished (parent task_6055e98ca841 MCS/SPA). Phase 1 DM pair ledger: 2741 rows / 236 unique K / 16 assets / |dm|>3 830 (30.3%). Commit def4695b. Gaps: 62% rows missing asset tag (Phase 2 backfill needed), model name case normalization (811 unique is overcount), Harvey adjustment ambiguous (apply HLN 1997 self). Agent a9937dcb in 315s. Next: create Phase 2 (MCS algorithm impl) queue entry."
+  },
+  {
+    "timestamp": "2026-04-20T10:47:08+08:00",
+    "task_type": "platform_ops",
+    "outcome": "k1259_phase1_5_asset_backfill",
+    "summary": "02:50 UTC main-thread low-cost: K1259 DM ledger asset-tag backfill. Scan 181 K folders READMEs+JSONs, infer tickers via regex. Result: 15 singleton K (67 rows exact), 90 multi-asset K (1023 rows pipe-delim union), 76 no-ticker K (605 rows still empty methodology-only). Coverage 38%→78% (+40pp). Commit efd370f4. Phase 2 MCS algorithm unblocked for per-asset superior-set computation. Type diversified from experiment→platform_ops. Queue: 3 queued / 0 running / slot 0/4."
+  },
+  {
+    "timestamp": "2026-04-20T10:56:08+08:00",
+    "task_type": "experiment",
+    "outcome": "k1259_phase2_mcs_complete",
+    "summary": "02:56 UTC task_53c388f27488 finished (Phase 2 MCS). 18/20 runs: SPY QLIKE α=0.10 88/100 survive (全 A4f family in); GLD MSE narrow set {M2_GJR_t, M3_GAS_t, M4_HAR_RV_X}; 0050.TW MSE empty (no TW MSE DM ledger rows). Key findings: (a) A4f 家族 dominant 橫跨 assets, HAR/EWMA/GJR-t 顯著淘汰 (b) α=0.10 vs 0.20 sets identical (c) MSE 更 discriminative 因 ledger 薄 (d) CF-Rolling 不在 ledger (K500+ 敘事模型可能命名不一致). Variant A ledger-based; Variant B skipped <20% per-day loss coverage. Commit 5314dbd3. Agent ab4a9cdc in 316s. Parent task_6055 可選 Phase 3 (feed article 一般版 MCS 結果解讀) 或結束."
+  },
+  {
+    "timestamp": "2026-04-20T10:58:36+08:00",
+    "task_type": "governance",
+    "outcome": "k1259_parent_phase3_queue_rp_update",
+    "summary": "02:58 UTC main-thread closeout: (a) research_program.md line 50 MCS/SPA entry [ ]→[x] with full K1259 Phase 1/1.5/2 completion summary commit 7e59xxx (b) Phase 3 child task_c28b0ac6a506 queued for K1259 general-audience feed article (c) Phase 3 immediate hold with audit error msg awaiting Codex 04-24 K1259 code review per CLAUDE.md L1. Parent task_6055 stays queued until Phase 3 completes. 3-layer dedup noted: K1002 mile_4cefbe56 (2026-04-10) covered 7-model single-run MCS; K1259 differentiated = 2741 pairs scale-up. Type diversified from experiment→governance."
+  },
+  {
+    "timestamp": "2026-04-20T11:03:13+08:00",
+    "task_type": "platform_ops",
+    "outcome": "supabase_400_root_fix",
+    "summary": "03:02 UTC root-fix Supabase content_release_settings 400 on each release_pool fire. src/volpred/ops/content.py _update_content_release_settings now splits local-payload (full settings merge, preserves shape) vs remote-payload (delta fields + updated_at only). Schema-mismatch surface from 8 fields → 2 fields per PATCH; semantically correct since callers only want to update fields they pass. 3/3 test_content_release_pool regression PASS. Detected via release_pool.log piggy-back 03:00:00 fire. Commit pending. Rule: 永遠修流程不修資料 — 修 PATCH 流程不是 silence log."
+  },
+  {
+    "timestamp": "2026-04-20T11:06:57+08:00",
+    "task_type": "governance",
+    "outcome": "error_log_update_+event_jobs_gap_audit",
+    "summary": "03:08 UTC docs/error_log.md 新增 2 entries (2026-04-20): (1) Supabase content_release_settings PATCH 400 root fix 記錄 — schema-mismatch 流程修 commit 8ef0d67b (2) 發現 config/runtime_schedules.json event_jobs.items=[] + storage/ops/event_ledger/ 無檔 → canonical 事件驅動文章 pipeline 完全空。2026-04-26 FOMC 若不 populate 則無 automated trigger。本輪只記錄不動 data（避免缺 schema 驗證誤塞）。下步建議 populate event_jobs 含 max_articles_per_event=3-4 cap (防 2026-04-13 TSMC 04/16 5-fold overdispatch re-regression)。"
+  },
+  {
+    "timestamp": "2026-04-20T11:11:43+08:00",
+    "task_type": "experiment",
+    "outcome": "k1258_forgetting_factor_bma_dispatched",
+    "summary": "03:11 UTC (a) task_6055 parent finished with consolidated K1259 summary (A+B commits def4695b/efd370f4/5314dbd3 + Phase 3 held) (b) task_1836ebc37e32 K1258 forgetting-factor BMA queued + claimed (c) Agent a09ba983 dispatched BACKGROUND — 5 λ × 3 assets × 6 models, seed 42, reuse K1257 forecasts if cached, estimated 30-60 min. Goal: test if forgetting factor fixes K1257 H3 FAIL (posterior cannot track regime). Type diversified governance→experiment."
+  },
+  {
+    "timestamp": "2026-04-20T11:15:25+08:00",
+    "task_type": "paper_review",
+    "outcome": "p8_reproduce_reverify_no_drift",
+    "summary": "03:13 UTC paper_review: low-cost re-run paper/volatility-absorption/reproduce.py. Result stable: 46 MATCH / 12 MISMATCH / 17 UNTRACE / 75 total = 61.3% = identical to 2026-04-19 baseline. No new regression since errata write. research_program.md P8 row augmented with '2026-04-20 re-verified no drift' + 'still awaiting user Path A/B/C decision' label. CRITICAL (controlled t -3.14→-1.17 Harvey cross) + HIGH (T10 2020-26 sign flip) + MED (10+ drifts) all unchanged. Commit 82f9c449. Type diversified experiment→paper_review while K1258 agent a09ba983 runs BG."
+  },
+  {
+    "timestamp": "2026-04-20T11:19:40+08:00",
+    "task_type": "experiment",
+    "outcome": "k1259_cf_rolling_gap_analysis",
+    "summary": "03:16 UTC main-thread K1259 CF-Rolling missing root cause analysis. (a) Feed draft pool audit: 8 drafts (6 gen/2 res) all healthy 3.4K-16K content all charted; ~16h runway at 120min cadence - adequate. (b) K1259 name canonicalization pass: 811→797 unique (8 collision groups GJR/HAR/GARCH/EWMA/A4f/RV/BMA/VIX) — genuine distinct specs not case artifacts. (c) CF-Rolling真正 absent from full ledger (0 hits CF/cornish patterns) + FZ/ES subset (71 rows, only DCC/Copula/GJR_variants). Root: CF-Rolling evaluated via Trinity K1034+ not DM → never pairwise-comparable in K corpus. Phase 3 article must disclose VaR MCS incomplete. Follow-up K1260 would fill gap but not blocking. k1259_README_phase2_appendix.md §7 added. Commit pending. Type diversified paper_review→experiment."
+  },
+  {
+    "timestamp": "2026-04-20T11:23:23+08:00",
+    "task_type": "platform_ops",
+    "outcome": "session_health_sweep",
+    "summary": "03:19 UTC platform_ops sweep: (1) cron_last_run.json: release_pool fresh 0.4h, market_calendar 2.6h; 5 other canonical items (collect_tw/us, daily_update, shared_scheduler_tick, check_alerts) not tracked because not-yet-due or managed-upstream — verified via `run-due-jobs: fired=1 skipped=4 ids=[release_pool]` 03:00 UTC log line. (2) alerts: 3/3 gauges info-level green (release_pool_gap, draft_pool_low, host_cron_fail). (3) knowledge.json K1258/K1259 correctly absent pending Codex review (rule compliant); total 2043 unchanged since 2026-04-18. (4) K1257 article mile_5173955c state=draft, audience=research, content 11415chars/2107CJK md5=169a4333, articles_last_ts=2026-04-20T02:02:14 matches. (5) supabase_sync_state consistent knowledge_count=2043. System healthy. Type diversified experiment→platform_ops."
+  },
+  {
+    "timestamp": "2026-04-20T11:24:07+08:00",
+    "task_type": "experiment",
+    "outcome": "k1258_forgetting_factor_bma_complete",
+    "summary": "03:23 UTC task_1836ebc37e32 finished. K1258 5.83 min runtime commit b6c6225f (not pushed). Hypothesis verdicts: H1 FAIL, H2 PASS, H3 PASS, H4 default λ=1.0. Structural insight: forgetting factor FIXES regime concentration (weight-switch-freq 10-80x, posterior max-weight 0.92-0.99→0.27-0.31) but switching DOES NOT translate to predictive gain (QLIKE un-improved at Harvey threshold). BMA family structurally insufficient for regime adaptivity — need switching-model/mixture-of-experts. Important null-result for paper narrative: Raftery-Kárný-Ettler 2010 fix structurally works but empirically underwhelming for vol forecasting. K1257/K1258 paired narrative: standard BMA concentrates (K1257 H3 fail) → forgetting un-concentrates (K1258 H2 pass) → but gain doesn't materialize (K1258 H1 fail) → regime adaptivity via weight discounting alone is insufficient. Agent a09ba983 718s. Apples-to-apples K1257 byte-identical confirmed. K1258 knowledge.json entry pending Codex 04-24 review."
+  },
+  {
+    "timestamp": "2026-04-20T11:27:46+08:00",
+    "task_type": "content",
+    "outcome": "fomc_t2_dispatch_memo_prepared",
+    "summary": "03:25 UTC content: drafted storage/next_draft_candidate_fomc_t2.md for FOMC 04/28-29 T-2 window (2026-04-26 dispatch). Context: T-12/T-11/T-7 already published (mile_78d649c4/mile_f7bc6e6a/mile_a0dccb21). Differentiation axis = scenario-conditional number grid (94.8% hold vs 4.2% surprise cut SPY/VIX 1-day moves past 20 yr) + T-2→T+0 position sizing rules citing mile_fa23c3b2. 3-layer dedup checklist embedded. 1-2 slot remaining in per-event 3-4 cap. Type diversified experiment→content. Feed pool status 8 drafts healthy. Commit pending."
+  },
+  {
+    "timestamp": "2026-04-20T11:30:24+08:00",
+    "task_type": "platform_ops",
+    "outcome": "feed_index_refresh",
+    "summary": "03:30 UTC platform_ops: refresh storage/reports/INDEX.md via scripts/build_feed_index.py. 944→949 articles (+5), last30 551→556, published 934→936, drafts 5→8 reflecting session pool growth (K1257 BMA draft mile_5173955c et al.). feed.json mtime 02:03 UTC vs previous INDEX 00:36 UTC = 1.5h drift now closed. Total chars 2,110,890→2,146,525. System healthy. Type diversified content→platform_ops."
+  },
+  {
+    "timestamp": "2026-04-20T11:35:54+08:00",
+    "task_type": "governance",
+    "outcome": "event_jobs_populated_fomc_t2_t0",
+    "summary": "03:36 UTC governance: populate config/runtime_schedules.json event_jobs.items 從 [] → 2 entries. (1) fomc-2026-04-29-t2 not_before 2026-04-26 00:00 CST deadline 04-27 priority 20 preferred_agent claude wires storage/next_draft_candidate_fomc_t2.md. (2) fomc-2026-04-29-t0 not_before 2026-04-29 21:00 CST post-announce deadline 04-30 requires_websearch for actual decision. Schema verified via preview_event_jobs() both items recognized status=pending. 當 not_before 到期 shared_scheduler_tick → expand_due_event_jobs 會 materialize 成 control-plane task, 主線程下輪 v12 claim 派. 閉合 round-6 發現的 event_jobs empty gap. Commit pending. Type diversified platform_ops→governance."
+  },
+  {
+    "timestamp": "2026-04-20T11:40:47+08:00",
+    "task_type": "platform_ops",
+    "outcome": "scheduler_tick_dead_event_jobs_piggyback_fix",
+    "summary": "03:42 UTC platform_ops ROOT fix: shared_scheduler_tick 被 v12 降級 advisory 但 host crontab 沒裝它 (scheduler_tick.log size=0 since 2026-04-19) → round 13 populate 的 event_jobs entries 永遠停 pending. Fix: scripts/run_due_jobs.py 尾端加 expand_due_event_jobs() call + gc_event_ledger 自動跑. 驗證 manual run event_expansion 正確 skip pending entries. 當 2026-04-26 00:00 CST not_before 到達, 下一次 check_alerts hourly fire (04-26 00:00 UTC = 08:00 CST) 會 materialize T-2 task. 母本更新: docs/error_log.md (新 entry 記 scheduler_tick 死亡+fix) + .claude/rules/control-plane.md (piggy-back §step6 + event_jobs populate schema rules 完整). 活文件原則落實. Type diversified governance→platform_ops."
+  },
+  {
+    "timestamp": "2026-04-20T11:42:23+08:00",
+    "task_type": "governance",
+    "outcome": "event_jobs_standard_pattern_doc",
+    "summary": "03:45 UTC 活文件原則修正: 前輪 chat 提及 'CPI/NFP/TSMC 依相同 schema 加入 → 標準 pattern' 但沒寫進母本 (.claude/rules/control-plane.md)。本輪補完 §Event_jobs 補充 的 'Standard event pattern' 大段: canonical naming (id/event_key/dedupe_key), T-series slot 表 (T-7/T-2/T+0/T+1 with not_before/deadline/priority/audience/差異化軸), 6 種 event-type 檢查清單 (FOMC/US CPI/US NFP/Earnings/央行/Geo), 配額 cap 4 per event_key, 6-step populate workflow, ROI priority ordering. 未來任何新 event 只要查此段 + copy template 即可 populate, 不再 session-level reinvent. Commit pending. Type = governance."
+  },
+  {
+    "timestamp": "2026-04-20T11:43:50+08:00",
+    "task_type": "platform_ops",
+    "outcome": "next_tasks_legacy_prune",
+    "summary": "03:47 UTC platform_ops: prune storage/next_tasks.json legacy list 106→82 entries, remove 21 completed + 3 done (24 GC). CLAUDE.md 明示此 file 為 legacy planning/working list 非 canonical queue. Active status 保留: pending_main_thread 38, pending 37, decision/blocked/partial 7. Effect: 減 298 行 JSON, 人工閱讀壓力降低. Canonical queue storage/ops/ 未動. Commit 待 verify. Type diversified governance→platform_ops."
+  },
+  {
+    "timestamp": "2026-04-20T11:47:16+08:00",
+    "task_type": "governance",
+    "outcome": "project_improvement_status_2026_04_20_session_summary",
+    "summary": "03:50 UTC governance 活文件同步: docs/project_improvement_status.md 新增頂段 '2026-04-20 v12 continuation session outcomes (16 commits)' 含 Research (K1259 3-phase + K1258 BMA structural null) / Platform (event_jobs full pipeline + Supabase 400 + P8 reverify + next_tasks GC) / Content (K1257 draft + FOMC T-2 memo + event_job entries) / Meta (standard event pattern + rule path-trigger timing) 四大區分類. 保留 2026-04-19 v11/v12 歷史上下文不刪. 強制 rule 6 type 切換 platform_ops 兩輪後→governance. Commit pending."
+  },
+  {
+    "timestamp": "2026-04-20T11:50:49+08:00",
+    "task_type": "governance",
+    "outcome": "cadence_change_user_request_release_12h_continuation_12h",
+    "summary": "03:55 UTC 用戶指示 cadence 調整: (1) release_pool 2h→12h (storage/.release_settings.json interval_minutes 120→720, config/runtime_schedules.json '3 */2'→'7 */12', install_host_crontab.sh 重裝, 6 entries verified) (2) continuation research cron b94696c6 'Every 4 minutes' deleted, 新 b604e1af 'Every 12 hours at :13' recurring session-only 7d auto-expire. Minute :07/:13 off :00 per cron fleet jitter guidance. Effective: 每日 2 次 article release + 2 次 v12 continuation fire; idle 期間依賴用戶交互 drive. Commit pending."
+  },
+  {
+    "timestamp": "2026-04-20T12:34:54+08:00",
+    "task_type": "member_qa",
+    "outcome": "question_ranking_no_pending_skip",
+    "summary": "04:34 UTC member-questions cron: pending=0 ranked=0 candidates=0 (answered=12, scored_questions=13, latest_member_question_at=2026-04-10, latest_answered_at=2026-04-11). Health OK. Suggestion: 維持 6h 節奏無 action. 無 pending_questions → skip 任務建立 per skill SOP. Type = member_qa (diversified from governance)."
+  },
+  {
+    "timestamp": "2026-04-20T12:37:40+08:00",
+    "task_type": "platform_ops",
+    "outcome": "knowledge_index_check_skip_fresh",
+    "summary": "04:35 UTC knowledge_index_check cron: knowledge.json mtime 2026-04-20 03:02:04 vs lance research_memory.lance latest data file mtime 2026-04-20 06:37:07. Diff +12903s ~3.6h (index 比 knowledge.json 新) → SKIP update per feedback_knowledge_index_update.md rule (mtime 新才更新). 無需派 build_knowledge_index.py 避免炸 Gemini/OpenAI embedding quota. Type = platform_ops."
+  },
+  {
+    "timestamp": "2026-04-20T12:44:22+08:00",
+    "task_type": "governance",
+    "outcome": "feed_publisher_skill_crosslink_templates",
+    "summary": "04:39 UTC governance: linter post-round-15 把 Standard event pattern 內容 from .claude/rules/control-plane.md 移到 .claude/skills/feed-publisher/references/event-article-templates.md (progressive-disclosure 正確). control-plane.md + publishing.md 都已 reference, 但 feed-publisher SKILL.md 本身沒 cross-link — 補上一行 pointer 在 事件驅動 段. 完成 reference chain (rule→skill→reference). Commit pending. 不動內容, 只加 link. Type = governance."
+  },
+  {
+    "timestamp": "2026-04-20T13:08:50+08:00",
+    "task_type": "platform_ops",
+    "outcome": "platform_patrol_alert_threshold_root_fix",
+    "summary": "05:08 UTC platform_patrol: ops health legacy-advisory blocked (v11 coordinator contract) = 不 actionable per CLAUDE.md. platform-cycle-summary OK (8 drafts, next 13:10 UTC). check-alerts 發現 release_pool_gap warn-level breach dedup_24h skipped — 根因 alerts.py hardcoded RELEASE_POOL_GAP_THRESHOLD=2h 與新 12h cadence 不相容, 每次 check 都踩雷. ROOT fix: threshold 改 derive from settings.interval_minutes + 30min grace; critical tier = 2x interval. Verified post-fix check-alerts: breached=false level=info warn_threshold_hours=12.5 正確反映 720min. Title 動態 'Release pool cron gap > 12.5h (interval=720min)'. 活文件原則 - 若未來 interval 再變, alert 自動 adapt. Commit pending. Type platform_ops (governance 太多輪換過來)."
   }
 ]

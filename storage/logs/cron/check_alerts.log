@@ -447,3 +447,77 @@ breaches=0 sent=0 skipped=0
 - [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
 - [ok] host_cron_fail level=info title=Host cron failure detected
 JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-04-20T01:00:01.546041+00:00"}
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=5 ids=[]
+  release-pool-auto: skip reason=interval_not_due_age=82min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 2h
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-04-20T02:00:01.062373+00:00"}
+=== ops check-alerts ===
+  run-due-jobs: fired=1 skipped=4 ids=['release_pool']
+  release-pool-auto: skip reason=interval_not_due_age=110min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 2h
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-04-20T03:00:02.022499+00:00"}
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=5 ids=[]
+  release-pool-auto: skip reason=interval_not_due_age=170min
+breaches=1 sent=0 skipped=1
+- [BREACH] release_pool_gap level=warn title=Release pool cron gap > 2h
+    ## 觸發條件
+    release_pool host cron fire gap 已超過 2 小時門檻。
+    - last_fire_at: 2026-04-20T01:10:09.607224+00:00
+    - gap_hours: 2.83
+    - log_path: storage/logs/cron/release_pool.log
+    
+    ## 影響
+    文章釋出中斷 = 讀者端看到平台停滯、搜尋索引停滯；Mission 第 1 條（文章品質）
+    與第 5 條（曝光流量）直接受損。若持續 >4h 會累積多篇 draft 排隊延遲。
+    
+    ## 建議行動
+    1. 立即手動釋出（最快復原）：
+       VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings
+    2. 診斷 host cron 是否仍在跑：
+       tail -20 storage/logs/cron/release_pool.log
+       crontab -l | grep release_pool
+    3. 若 cron daemon 卡住：重新 install crontab 或 launchd job
+    4. 若 draft 池也空（配合 draft_pool_low alert）：先補池，見 publish-checklist
+       與 .claude/skills/publication-candidates/SKILL.md 的 5-step 選題流程。
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+dispatched:
+  - skipped: level=warn title=Release pool cron gap > 2h notif_id=e1311d3e reason=dedup_24h
+JSON: {"breach_count": 1, "sent_count": 0, "skipped_count": 1, "generated_at": "2026-04-20T04:00:01.140260+00:00"}
+=== ops check-alerts ===
+  run-due-jobs: fired=1 skipped=4 ids=['release_pool']
+  release-pool-auto: skip reason=interval_not_due_age=230min
+breaches=1 sent=0 skipped=1
+- [BREACH] release_pool_gap level=warn title=Release pool cron gap > 2h
+    ## 觸發條件
+    release_pool host cron fire gap 已超過 2 小時門檻。
+    - last_fire_at: 2026-04-20T01:10:09.607224+00:00
+    - gap_hours: 3.83
+    - log_path: storage/logs/cron/release_pool.log
+    
+    ## 影響
+    文章釋出中斷 = 讀者端看到平台停滯、搜尋索引停滯；Mission 第 1 條（文章品質）
+    與第 5 條（曝光流量）直接受損。若持續 >4h 會累積多篇 draft 排隊延遲。
+    
+    ## 建議行動
+    1. 立即手動釋出（最快復原）：
+       VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings
+    2. 診斷 host cron 是否仍在跑：
+       tail -20 storage/logs/cron/release_pool.log
+       crontab -l | grep release_pool
+    3. 若 cron daemon 卡住：重新 install crontab 或 launchd job
+    4. 若 draft 池也空（配合 draft_pool_low alert）：先補池，見 publish-checklist
+       與 .claude/skills/publication-candidates/SKILL.md 的 5-step 選題流程。
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+dispatched:
+  - skipped: level=warn title=Release pool cron gap > 2h notif_id=e1311d3e reason=dedup_24h
+JSON: {"breach_count": 1, "sent_count": 0, "skipped_count": 1, "generated_at": "2026-04-20T05:00:00.918939+00:00"}
