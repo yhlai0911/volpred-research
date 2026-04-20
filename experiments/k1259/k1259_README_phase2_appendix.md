@@ -228,3 +228,63 @@ GJR-N (p = .037), DMEM (p = .052). Rest (88 models) survive.
   spanning K460 … K1258 (see Phase-1 summary top-contributor table).
 - Phase-3 research (full per-day loss reconstruction + stationary
   bootstrap) tracked in `research_program.md` backlog.
+
+---
+
+## 7. Addendum 2026-04-20 — CF-Rolling 真正 absent from ledger（not naming artifact）
+
+Phase 2 agent initial report flagged *"CF-Rolling is not in ledger"* and hypothesized it was a naming-canonicalization gap. Main-thread follow-up audit (same day, post-commit 5314dbd3):
+
+### Ledger name canonicalization pass
+
+Running a string-normalization map (`GJR-GARCH` → `GJR`, `HAR-RV` → `HAR`, case unification `gjr` → `GJR` etc.) over all `model_a`/`model_b` values:
+
+- Before: 811 unique names
+- After: 797 unique names
+- Reduction: 14 names collapse into 8 canonical groups
+
+The 811 over-count flagged earlier is **mostly genuine distinct model specs**, not case artifacts. The 8 observed collision groups are:
+
+```
+GJR  ← {GJR, GJR-GARCH, GJR_GARCH, gjr, gjr_garch}
+HAR  ← {HAR, HAR-RV, HAR_RV, har}
+GARCH ← {GARCH, GARCH(1,1), garch}
+EWMA  ← {EWMA, ewma}
+A4f   ← {A4f, a4f}
+RV    ← {RV, rv}
+BMA   ← {BMA, bma}
+VIX   ← {VIX, vix}
+```
+
+### CF-Rolling presence test
+
+Exhaustive substring search for `CF`, `cornish`, `Rolling` patterns in ledger `model_a`/`model_b`:
+
+| Pattern | Hits in full ledger | Hits in FZ/ES subset (71 rows) |
+|---|---:|---:|
+| Literal `CF-Rolling` / `CF_Rolling` | 0 | 0 |
+| Any name containing `CF` | 0 | 0 |
+| Any name containing `cornish` (case-insensitive) | 0 | 0 |
+| Any name containing `Rolling` | 5 (Rolling OLS, Rolling_OLS, Rolling_21d, S4_Rolling_Corr_Blend, rolling_r2) | 0 |
+
+**None of these Rolling variants are Cornish-Fisher Rolling VaR.**
+
+### Root cause
+
+CF-Rolling is documented in `storage/memory/knowledge.json` (14 mentions) and `research_program.md` as the K1034+ VaR leader (6/6 Trinity PASS). Its evaluation methodology is **Trinity (Kupiec unconditional + Christoffersen independence + Engle-Manganelli dynamic)**, not the pairwise Diebold-Mariano test that feeds this ledger. So CF-Rolling has **never been DM-compared against peer VaR methods** in stored K experiment results. The Phase-2 MCS over FZ/ES loss rows (71 total) includes only methods that have been put through pairwise DM in some K:
+
+- DCC-GJR / DCC-A4f-ASYM / DCC-A4f-SYMM (bivariate-VaR K series)
+- GJR_HistSim / GJR_StudentT / GJR_SkewedT / GJR_AdaptiveFloor (univariate K700s-800s)
+- Copula-t-A4f-ASYM / Copula-Clayton-A4f-ASYM (Copula-VaR K1100s)
+- Bayes_Mean / Bayes_Median / Bayes_BMA (K882-ish Bayesian)
+- MLE / clayton_fz_1pct / h3_t (residual)
+
+### Implication for Phase-2 MSE/MSE-FZ superior set interpretation
+
+The VaR-loss (FZ/ES) superior sets reported in `k1259_mcs_results.json` are **unavoidably missing CF-Rolling even though knowledge-base evidence suggests it would likely survive**. Any Phase-3 write-up must disclose this: "Superior set among DM-compared methods; Cornish-Fisher Rolling VaR is excluded because it was evaluated only via Trinity, not DM, in the K corpus."
+
+### Suggested follow-up (not this phase)
+
+A targeted new experiment K1260 (say) could run pairwise DM on FZ1% loss between CF-Rolling vs DCC-A4f-ASYM vs Copula-t-A4f-ASYM on SPY/GLD over OOS 2020-2026. Result would populate the gap and enable true CF-Rolling-inclusive MCS. This is not blocking Phase 3 article.
+
+**File added 2026-04-20 main-thread low-cost round.**
