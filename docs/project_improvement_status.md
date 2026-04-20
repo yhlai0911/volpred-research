@@ -1,6 +1,32 @@
 # Project Improvement Status
 
-Last updated: **2026-04-19 (v12 transition 進度 + 本日成果)**
+Last updated: **2026-04-20 (v12 continuation rounds — event_jobs wiring + K1257/K1258/K1259 arc)**
+
+## 2026-04-20 v12 continuation session outcomes（16 commits）
+
+### Research
+- ✅ **K1259 MCS/SPA meta-analysis 3-phase 完整落地**：Phase 1 ledger 2741 DM rows/236 K/16 assets (commit def4695b) → Phase 1.5 main-thread asset backfill 38%→78% (efd370f4) → Phase 2 HLN-2011 Variant A 18/20 per-asset MCS runs (5314dbd3) + CF-Rolling absence 分析 appendix (5bbeb48e)。**Key finding**: SPY QLIKE α=0.10 88/100 survive, A4f family dominant; GLD MSE 窄 set; α=0.10=0.20 identical; CF-Rolling 真正 absent（Trinity-only evaluation，never DM-compared pairwise）。
+- ✅ **K1258 forgetting-factor BMA completed** (commit b6c6225f, agent a09ba983 5.83 min)：H1 FAIL (no Harvey pass), H2 PASS (regime switching restored 10-80x), H3 PASS (optimal λ asset-specific), H4 λ=1.0 default。Structural insight: forgetting 修好 K1257 H3 concentration 但 switching 不 translate 為 predictive gain → BMA family 對 vol forecasting 結構性不足，regime gains 需 switching-model / mixture-of-experts。
+- ⏸️ **K1258/K1259 knowledge.json + feed pending Codex 04-24 review**（依 CLAUDE.md L1 實驗後先 review 再 finalize）。
+
+### Platform / Infrastructure
+- ✅ **event_jobs full pipeline wired**（round 6 發現 empty → round 13 populate FOMC T-2/T+0 commit aebaeab4 → round 14 root-fix run_due_jobs piggy-back expand_due_event_jobs commit cac18c1a → round 15 standard pattern doc commit 4d7d787c）。完整鏈：host cron `0 * * * *` → check_alerts → run_due_jobs → expand_due_event_jobs → materialize task → 下輪 claim-next。scheduler_tick.log 自 2026-04-19 size=0 的 dead scheduler 被 piggy-back 接管。
+- ✅ **Supabase `content_release_settings` PATCH 400 root fix** (commit 8ef0d67b)：`_update_content_release_settings` 拆 local_payload (8 fields 保 shape) vs remote_payload (delta fields only)；schema-mismatch 面積 8→2 fields。3/3 test_content_release_pool PASS。
+- ✅ **P8 volatility-absorption reproduce re-verified** (commit 82f9c449)：46 MATCH / 12 MISMATCH / 17 UNTRACE / 75 total = 61.3% consistent since 2026-04-19 errata；no drift。Still awaiting user Path A/B/C decision.
+- ✅ **活文件更新**: `.claude/rules/control-plane.md` universal piggy-back §step 6 + event_jobs populate 規範 + standard event pattern (CPI/NFP/FOMC/Earnings T-series); `docs/error_log.md` scheduler_tick dead incident + Supabase PATCH delta-payload root-fix entries。
+- ✅ **`storage/next_tasks.json` legacy list GC** (commit e3732d3e)：106→82 entries, -298 行，24 completed/done 清除，canonical queue 不動。
+- ✅ **feed INDEX refresh** (commit ce9a6a78)：944→949 articles, draft 5→8。
+
+### Content
+- ✅ **K1257 BMA draft mile_5173955c queued** (audience=research, 11415 chars, 2107 CJK)。
+- ✅ **FOMC T-2 dispatch memo** (commit 15b6c27c)：`storage/next_draft_candidate_fomc_t2.md` 含 scenario-conditional number grid 主題軸 + 3-layer dedup checklist；wired to event_jobs entry fomc-2026-04-29-t2 (2026-04-26 00:00 CST not_before)。
+- ✅ **FOMC T+0 event_job entry**（fomc-2026-04-29-t0, 2026-04-29 21:00 CST post-announce, requires_websearch）。
+
+### Meta / Governance
+- ✅ **Standard event pattern** 寫入 .claude/rules/control-plane.md — 6 種 event-type (FOMC/CPI/NFP/Earnings/央行/Geo) 檢查清單 + T-series slot 表 + 配額 cap + 6-step populate workflow + ROI 排序。未來任何新事件 populate 只查此段 + copy template。
+- ✅ **Rule path-trigger timing principle** (pre-session commit a5573c81) — 寫規則時必檢查 paths 是否 cover planning/selection phase 而不只 execution。
+
+---
 
 ## v12 Transition Status (2026-04-19 update)
 
