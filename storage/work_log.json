@@ -2422,5 +2422,65 @@
     "task_type": "daily_article",
     "outcome": "agent_done",
     "summary": "01:16 UTC agent a29c965e9d2faafd8 (K886) completed: mile_f8d2ffb9 (general draft 2070 CJK, 4730 total chars, 8 tags, 2 real charts HTTP 200). Title: 0050 一天的波動有一半發生在你睡覺時 PRG 模型 17 年實證揭開台股隔夜黑洞. Data byte-match: overnight 46.1% / intraday 53.9% / PRG-Ext QLIKE 0.784 vs GJR 0.981 / DM t=5.27 Harvey PASS / VaR 1% violations GJR 2.13% FAIL vs PRG-Ext 1.34% PASS / n_total=4217 n_oos=1266. Topic 查重 LanceDB dist=0.705 clear. Pool 4→5. Session total 5 agents completed: K1091/cross-market/K1092/K1077-K1078/FOMC T-7/K886."
+  },
+  {
+    "timestamp": "2026-04-20T09:26:24+08:00",
+    "task_type": "governance",
+    "outcome": "rule_architecture_fix",
+    "summary": "01:24 UTC 根因 fix 用戶 rule-trigger 指正: publish-checklist.md paths 補 3 path class (publication_candidates / next_draft_candidate / experiments results) → rule 現在選題階段就 auto-load. CLAUDE.md §Bootstrap 加 Rule path-trigger 時序原則 3 問框架. 3-layer dedup 親做: K623+K970 MF2-GARCH 本可派 research-missing 但 layer-3 theme matrix 發現跟 K1092 Pareto-below-Harvey 軟重疊 → 決定不派. Commit a5573c81 push main."
+  },
+  {
+    "timestamp": "2026-04-20T09:28:02+08:00",
+    "task_type": "daily_article",
+    "outcome": "dispatched",
+    "summary": "01:26 UTC 派 agent a14214390d8eeaf60 for K567 International VT Leverage general-audience article. 3-layer dedup passed: covered_by 只 research (mile_a1f7bfa8 / mile_ad838905); theme axis 不同 recent 5 drafts (strategy generalization vs meta-prediction/events/DCC/model-matching/session). K567 verdict: 6 markets only SPY marginal improvement +3.6% t=2.47 未過 Harvey, 其他 5 markets flat/negative. Differentiation instructions + Chart spec + cross-link to mile_7c87b159 research 版 N58."
+  },
+  {
+    "timestamp": "2026-04-20T09:30:19+08:00",
+    "task_type": "paper_body",
+    "outcome": "dispatched",
+    "summary": "01:28 UTC 2nd parallel agent aa6ba9bb310d93327 dispatched (paper_body) — apply P10 pre-review H1+H3 body fixes to body_v0_intro.tex: H1 asymmetric Granger lag 1-10 → 1-5 + source binding inline comment; H3 QR beta sign reversal reframe (negative at τ=0.05/0.25, positive τ=0.5 onwards, 8.5× relative to median not absolute). Scope 嚴格限 2 HIGH, 不擴散 H2/H4/H5/MED/LOW (留 Codex 04-24). Slot 2/4: K567 general article + P10 body fix."
+  },
+  {
+    "timestamp": "2026-04-20T09:32:04+08:00",
+    "task_type": "paper_body",
+    "outcome": "agent_done",
+    "summary": "01:30 UTC agent aa6ba9bb310d93327 (P10 body H1+H3) completed: body_v0_intro.tex +7/-3 lines, 3 inline % source: comments added. H1 lag 1-10 → 1-5 asymmetric context distinct; symmetric 1-10 corroboration note. H3 tail paragraph renamed Tail concentration with sign reversal, 4 quantile enumerate -2.86/-2.34/+2.61/+22.31, 8.5× reframe as upper-tail vs median ratio. Scope preserved no H2/H4/H5/MED/LOW touched. Reproduce.py rerun verify: 7/7 match 100% green gate pass ✓. Slot: K567 agent a14214390d8eeaf60 still running."
+  },
+  {
+    "timestamp": "2026-04-20T09:32:20+08:00",
+    "task_type": "daily_article",
+    "outcome": "agent_done",
+    "summary": "01:31 UTC agent a14214390d8eeaf60 (K567) completed: mile_1d8652b5 published (general draft, 1705 CJK, 3855 raw, 2 real charts HTTP 200). Title: 別人的 VIX 策略不是你的 VIX 策略 6 個市場 18 個測試的殘酷真相. Agent 研究誠實 correction: brief markets SPY/EFA/EEM/TLT/GLD/IWM vs JSON 實為 SPY/EFA/EWZ/EWJ/EWU/FXI — agent 改依 JSON 真 markets (equity ETFs not TLT/GLD) 避造假. LanceDB dist ≥0.626 clear. Pool 5→6. Session agent total: K1091/cross-market/K1092/K1077-K1078/FOMC T-7/K886/P10-pre-review/P10-body-H1H3/K567 = 9 agents completed post-compact."
+  },
+  {
+    "timestamp": "2026-04-20T09:35:30+08:00",
+    "task_type": "daily_article",
+    "outcome": "dispatched",
+    "summary": "01:35 UTC 派 agent a05868fe15ebf2163 for K1164 analyst-media REJECTED general article. 3-layer dedup: layer 1 missing_general_top5 score 7, layer 2 grep 0 competing articles, layer 3 new axis 研究誠實 self-correction story 不重疊 recent 7 drafts (meta-prediction/events/DCC/model-matching/session/FOMC/leverage). K1164 verdict: analyst 排序 US>EU>JP>TW 與 θ_rel 分群預期相反 → REJECTED. Meta narrative: 假說 A→B→C 連環死 + OPEN problem 保留. 10th session agent dispatched."
+  },
+  {
+    "timestamp": "2026-04-20T09:38:28+08:00",
+    "task_type": "paper_review",
+    "outcome": "observation",
+    "summary": "01:36 UTC P9 garch-x-vix reproduce.py rerun: match_rate=7.7% / alert=red / 12 mismatches / 13 total, all rel_diff_pct=null in this run mode (vs earlier run had values populated). 我 2026-04-19 21:20 errata update 引用「stored_source_value」是 live-mode 特定 state snapshot，離 reproduce.py 一般 run-mode 會 null. Not session blocker — P9 errata_pending.md 仍指向 only-SPY-is-real-errata 結論; 精確 rel_diff 需 --live rerun 驗. Codex 04-24 wake 會 clean up."
+  },
+  {
+    "timestamp": "2026-04-20T09:39:32+08:00",
+    "task_type": "daily_article",
+    "outcome": "agent_done",
+    "summary": "01:39 UTC agent a05868fe15ebf2163 (K1164) completed: mile_5d6a77fc (general draft, 1757 CJK, 3564 raw, 8 tags, 2 real charts HTTP 200). Title: 連兩週自己推翻自己-台股財報反應比美股小的第二個解釋也不成立. 研究誠實 meta narrative: 假說 A→B→C 連續死. θ_rel: TW 0.167/EU 0.137/JP 0.388/US 0.586, analyst median TW 7.5/EU 21.0/JP 14.5/US 32.5 → 排序 mismatch. Pool 6→7 drafts. Session agent total: 10 dispatched post-compact, 10 completed."
+  },
+  {
+    "timestamp": "2026-04-20T09:42:58+08:00",
+    "task_type": "experiment",
+    "outcome": "k_next_spec",
+    "summary": "01:40 UTC K1257 spec 建立 — Bayesian Model Averaging (BMA) volatility forecast. Novelty quota backlog 具體化 (per research_program.md 面向 A + topic_diversity_audit feed_ct=0). 7 model pool (GARCH/GJR/GJR-t/EGARCH/HAR-RV/A4f-VIX²/RealGARCH), posterior-weighted combination, rolling 1250 window, refit 63. 3 assets SPY/GLD/0050.TW 2010-2026. H1 BMA vs GJR baseline / H2 vs equal weight / H3 regime-weight shift. README 完整 prototype 含 防錯 checklist. Pending: script + execute (Codex 04-24 or 主線程). Session agent state unchanged (slot 0/4, pool 7 drafts)."
+  },
+  {
+    "timestamp": "2026-04-20T09:46:22+08:00",
+    "task_type": "experiment",
+    "outcome": "dispatched",
+    "summary": "01:42 UTC K1257 BMA agent af701b910b6227bae dispatched — execute spec (7-model pool BMA, 3 assets SPY/GLD/0050.TW, rolling 1250 / refit 63 / OOS 2020-2026). Scope: 只動 experiments/k1257/, 產 k1257_bma_volatility.py + k1257_results.json + 2 charts + README results section. 不產 feed article (pool 7 已滿). Research honesty mandate: NULL as-is, 固定 seed 42, 不 fabricate. 11th agent session total. Slot 1/4."
   }
 ]

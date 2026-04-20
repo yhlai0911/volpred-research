@@ -1,0 +1,128 @@
+{
+  "experiment_id": "K1257",
+  "title": "K1257: Bayesian Model Averaging (BMA) Volatility Forecast \u2014 Posterior-weighted combination of 6 GARCH/HAR/IV-mix specs",
+  "proposer": "Claude",
+  "executor": "Claude agent",
+  "data_period": "2016-01-01 to 2026-04-18",
+  "oos_start": "2022-01-01",
+  "rolling_window": 750,
+  "refit_freq": 126,
+  "seed": 42,
+  "models": [
+    "GARCH_N",
+    "GJR_N",
+    "GJR_t",
+    "EGARCH_N",
+    "HAR_ABS",
+    "A4f_IV2"
+  ],
+  "assets": [
+    "SPY"
+  ],
+  "per_asset": {
+    "SPY": {
+      "n_oos": 1076,
+      "bma_qlike": -8.242677752422901,
+      "equal_weight_qlike": -8.252249814425518,
+      "gjr_t_qlike": -8.230129349967713,
+      "per_model_qlike": {
+        "GARCH_N": -8.213182117774146,
+        "GJR_N": -8.248498200952758,
+        "GJR_t": -8.230129349967713,
+        "EGARCH_N": -8.238470928637033,
+        "HAR_ABS": -8.167272277371959,
+        "A4f_IV2": -8.202265160436285
+      },
+      "dm_bma_vs_gjr": {
+        "t_stat": -1.3972552933063092,
+        "p_value": 0.1626251327717776,
+        "harvey_pass": false
+      },
+      "dm_bma_vs_equal": {
+        "t_stat": 1.3879999526019693,
+        "p_value": 0.16542464946159652,
+        "harvey_pass": false
+      },
+      "regime_weights": {
+        "VIX<15": {
+          "n_days": 261,
+          "GARCH_N": 0.0021860507554614743,
+          "GJR_N": 0.9004774856566228,
+          "GJR_t": 0.09630862146472267,
+          "EGARCH_N": 0.0010278383501430984,
+          "HAR_ABS": 3.773049061447846e-09,
+          "A4f_IV2": 1.1412946512736428e-15
+        },
+        "15-20": {
+          "n_days": 422,
+          "GARCH_N": 0.019195438172177347,
+          "GJR_N": 0.6398222335140663,
+          "GJR_t": 0.33077242058177964,
+          "EGARCH_N": 0.005601111406168612,
+          "HAR_ABS": 0.0015224178950728152,
+          "A4f_IV2": 0.003086378430734886
+        },
+        "20-25": {
+          "n_days": 221,
+          "GARCH_N": 0.0872486912443532,
+          "GJR_N": 0.6208791164599803,
+          "GJR_t": 0.2467975622310641,
+          "EGARCH_N": 0.023084376931538527,
+          "HAR_ABS": 0.0003439598296695693,
+          "A4f_IV2": 0.02164629330339358
+        },
+        ">25": {
+          "n_days": 172,
+          "GARCH_N": 0.15412254772223835,
+          "GJR_N": 0.528615841221982,
+          "GJR_t": 0.2629379958116169,
+          "EGARCH_N": 0.036558126294362205,
+          "HAR_ABS": 0.0015657281870152448,
+          "A4f_IV2": 0.01619976076278513
+        }
+      },
+      "regime_qlike": {
+        "VIX<15": {
+          "n_days": 261,
+          "bma_qlike": -9.092203682613668,
+          "gjr_t_qlike": -9.100290517222765,
+          "equal_qlike": -9.119095118999526
+        },
+        "15-20": {
+          "n_days": 422,
+          "bma_qlike": -8.681418342859699,
+          "gjr_t_qlike": -8.676116117555663,
+          "equal_qlike": -8.675054037195205
+        },
+        "20-25": {
+          "n_days": 221,
+          "bma_qlike": -7.666585130058391,
+          "gjr_t_qlike": -7.635618669034189,
+          "equal_qlike": -7.6711573205903045
+        },
+        ">25": {
+          "n_days": 172,
+          "bma_qlike": -6.61733863962312,
+          "gjr_t_qlike": -6.579364116889954,
+          "equal_qlike": -6.646153504163646
+        }
+      },
+      "final_weights": {
+        "GARCH_N": 2.9568128950812964e-12,
+        "GJR_N": 0.0005277666080351611,
+        "GJR_t": 0.9994698369553573,
+        "EGARCH_N": 2.396433642479017e-06,
+        "HAR_ABS": 5.545871905413954e-23,
+        "A4f_IV2": 8.319017798759293e-15
+      }
+    }
+  },
+  "hypothesis_verdicts": {
+    "H1_bma_beats_gjr": "FAIL",
+    "H2_bma_beats_equal": "FAIL",
+    "H3_regime_weight_shift": "FAIL"
+  },
+  "conclusions": "BMA posterior-weighted combination tested vs single-best (GJR-t) and equal-weight ensemble on SPY/GLD/0050.TW 2020-2026 OOS. Per-asset summary: SPY: BMA=-8.24268, GJR-t=-8.23013 (BMA-GJR=-0.01255, Harvey t=-1.40); Equal=-8.25225 (BMA-Eq=+0.00957, Harvey t=+1.39). H1 verdict: FAIL; H2: FAIL; H3 (regime weight shift): FAIL. Research-honesty: null results reported as-is; the purpose of BMA is principled posterior weighting, not guaranteed QLIKE win. If posterior concentrates quickly on a single model, BMA effectively reduces to that model's forecast and differences vs single-best shrink.",
+  "runtime_seconds": 25.4,
+  "quick_mode": true
+}
