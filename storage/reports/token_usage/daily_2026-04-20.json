@@ -1,0 +1,216 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-04-20",
+  "week_range": "2026-04-17 → 2026-04-24",
+  "totals": {
+    "input_tokens": 9,
+    "output_tokens": 666,
+    "cache_read_tokens": 0,
+    "cache_create_tokens": 70491,
+    "billable_total": 71166,
+    "assistant_messages": 3,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.2744
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 9,
+      "output_tokens": 666,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 70491,
+      "messages": 3,
+      "estimated_cost_usd": 0.2744
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 6,
+      "output_tokens": 444,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 46994,
+      "messages": 2,
+      "billable_total": 47444,
+      "estimated_cost_usd": 0.1829,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "token_report": {
+      "input_tokens": 3,
+      "output_tokens": 222,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 23497,
+      "messages": 1,
+      "billable_total": 23722,
+      "estimated_cost_usd": 0.0915,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "a1cb5b4",
+      "message": "Merge branch 'main' of https://github.com/yhlai0911/volpred-research"
+    },
+    {
+      "sha": "5858f9c",
+      "message": "session heartbeat: platform patrol + alerts snapshots"
+    },
+    {
+      "sha": "58e68fe",
+      "message": "Ops patrol report 2026-04-20T12:31Z"
+    },
+    {
+      "sha": "3ee34b5",
+      "message": "Merge branch 'main' of https://github.com/yhlai0911/volpred-research"
+    },
+    {
+      "sha": "aabc869",
+      "message": "session heartbeat: cron logs + ops state tick"
+    },
+    {
+      "sha": "e0ae701",
+      "message": "Ops patrol report 2026-04-20T06:07Z"
+    },
+    {
+      "sha": "87a43d9",
+      "message": "Session sync: rule/command doc updates + ops state + work_log 363 + cron logs"
+    },
+    {
+      "sha": "d2972be",
+      "message": "alerts: release_pool_gap threshold derives from settings.interval_minutes (not h"
+    },
+    {
+      "sha": "8c7f987",
+      "message": "feed-publisher SKILL: cross-link references/event-article-templates.md"
+    },
+    {
+      "sha": "faa254a",
+      "message": "rules: merge publish-checklist + storage-and-publishing into publishing.md"
+    },
+    {
+      "sha": "52d9c7d",
+      "message": "rules: slim control-plane + move event templates to feed-publisher skill ref"
+    },
+    {
+      "sha": "6590346",
+      "message": "rules: slim paper-workflow + restore CLAUDE.md 一句話版本"
+    },
+    {
+      "sha": "2843082",
+      "message": "claude.md: slim redundant sections (token optimization step C)"
+    },
+    {
+      "sha": "0450edb",
+      "message": "rules: slim agent-delegation + merge model-selection into single rule"
+    },
+    {
+      "sha": "b9c5375",
+      "message": "release_pool + continuation cron: 2h/4min → 12h interval (user request)"
+    },
+    {
+      "sha": "413a949",
+      "message": "project_improvement_status: 2026-04-20 session outcomes (16 commits summary)"
+    },
+    {
+      "sha": "e3732d3",
+      "message": "next_tasks.json: prune 24 completed/done entries (legacy list GC, 106->82)"
+    },
+    {
+      "sha": "4d7d787",
+      "message": "control-plane: document event_jobs standard pattern (CPI/NFP/FOMC/Earnings)"
+    },
+    {
+      "sha": "cac18c1",
+      "message": "run_due_jobs: piggy-back expand_due_event_jobs so event_jobs materialize"
+    },
+    {
+      "sha": "aebaeab",
+      "message": "event_jobs: populate FOMC 04/28-29 T-2 + T+0 entries (closes round-6 empty-canon"
+    },
+    {
+      "sha": "ce9a6a7",
+      "message": "feed INDEX refresh: 944→949 articles, drafts 5→8 reflecting session session pool"
+    },
+    {
+      "sha": "15b6c27",
+      "message": "FOMC T-2 memo: dispatch brief for 2026-04-26 event article"
+    },
+    {
+      "sha": "b6c6225",
+      "message": "K1258: Forgetting-factor BMA execution (λ sweep 0.90-1.0, seed=42, 3 assets)"
+    },
+    {
+      "sha": "5bbeb48",
+      "message": "K1259 Phase 2 appendix: CF-Rolling truly absent from ledger (methodology gap, no"
+    },
+    {
+      "sha": "82f9c44",
+      "message": "P8 volatility-absorption: re-verify reproduce 61.3% consistent since 2026-04-19"
+    },
+    {
+      "sha": "e8cdd1e",
+      "message": "error_log: add 2026-04-20 entries (Supabase 400 fix + event_jobs empty observati"
+    },
+    {
+      "sha": "8ef0d67",
+      "message": "content.py: narrow Supabase PATCH payload to delta fields"
+    },
+    {
+      "sha": "f517847",
+      "message": "research_program.md: mark MCS/SPA methodology [x] with K1259 completion summary"
+    },
+    {
+      "sha": "5314dbd",
+      "message": "K1259 Phase 2: MCS algorithm + per-asset superior sets (Variant A)"
+    },
+    {
+      "sha": "07967bf",
+      "message": "paper(leverage-direction): v3 revision closes 7 HIGH + 3 MED from review v2"
+    },
+    {
+      "sha": "efd370f",
+      "message": "K1259 Phase 1.5: asset-tag backfill (+40pp coverage, 38%→78%)"
+    },
+    {
+      "sha": "def4695",
+      "message": "K1259 Phase 1: DM pair ledger (N=2741 rows)"
+    },
+    {
+      "sha": "8d4c7b0",
+      "message": "fix: hard gate email send against test fixtures leaking to user inbox"
+    },
+    {
+      "sha": "8694453",
+      "message": "feed_sync.py compute_diff content-hash drift detection + K1257 BMA experiment"
+    },
+    {
+      "sha": "1574b1d",
+      "message": "post-user-feedback session: K1164/K567/K1257 + P10 H1+H3 body + 10 agents"
+    },
+    {
+      "sha": "a5573c8",
+      "message": "rule path-trigger timing fix + CLAUDE.md principle + P10 pre-review archive"
+    },
+    {
+      "sha": "cb765a1",
+      "message": "root-cause fix for macOS cron + session work commit"
+    },
+    {
+      "sha": "4c4e37f",
+      "message": "chore(work_log): backfill 18 entries for session V3 editorial port"
+    },
+    {
+      "sha": "0b69873",
+      "message": "Merge branch 'main' of https://github.com/yhlai0911/volpred-research"
+    },
+    {
+      "sha": "e107242",
+      "message": "fix(session-cron): knowledge-index mtime check uses find, not stat"
+    },
+    {
+      "sha": "e988b15",
+      "message": "Ops patrol report 2026-04-20T00:30Z"
+    }
+  ]
+}
