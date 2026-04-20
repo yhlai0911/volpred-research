@@ -189,7 +189,79 @@
   "event_jobs": {
     "source_label": "Canonical one-shot and event-relative task spec",
     "note": "Materialize due event windows into control-plane tasks with dedupe ledger protection.",
-    "items": []
+    "items": [
+      {
+        "id": "fomc-2026-04-29-t2",
+        "event_key": "FOMC_2026_04_29",
+        "trigger_mode": "one_shot",
+        "dedupe_key": "fomc-2026-04-29-t2:one_shot",
+        "not_before": "2026-04-26T00:00:00+08:00",
+        "deadline": "2026-04-27T00:00:00+08:00",
+        "preferred_agent": "claude",
+        "public_effect": "published",
+        "task_template": {
+          "title": "Event article: FOMC 04/28-29 T-2 (scenario number grid + position sizing)",
+          "description": "Dispatch per brief storage/next_draft_candidate_fomc_t2.md. Differentiation axis: scenario-conditional SPY/VIX 1-day move grid (94.8% hold vs 4.2% surprise cut vs hawkish hold) + T-2 to T+0 position sizing rules citing mile_fa23c3b2. status=published immediate (event-driven), 2 real matplotlib charts, general audience 1500+ CJK, 3-layer dedup pre-run required (grep feed for 'T-2 FOMC', publication_candidates, theme matrix). Event cap: 3/3-4 used (T-12/T-11/T-7), this is slot 4/4. Skip if T+0 slot must be reserved.",
+          "task_family": "content",
+          "priority": 20,
+          "preferred_agent": "claude",
+          "fallback_allowed": false,
+          "approval_mode": "auto",
+          "risk_level": "safe",
+          "public_effect": "published",
+          "preconditions": [],
+          "payload_patch": {
+            "memo_path": "storage/next_draft_candidate_fomc_t2.md",
+            "audience": "general",
+            "event_series_slot": "T-2",
+            "event_date": "2026-04-29",
+            "prior_articles": [
+              "mile_78d649c4",
+              "mile_f7bc6e6a",
+              "mile_a0dccb21"
+            ]
+          }
+        }
+      },
+      {
+        "id": "fomc-2026-04-29-t0",
+        "event_key": "FOMC_2026_04_29",
+        "trigger_mode": "one_shot",
+        "dedupe_key": "fomc-2026-04-29-t0:one_shot",
+        "not_before": "2026-04-29T21:00:00+08:00",
+        "deadline": "2026-04-30T23:59:59+08:00",
+        "preferred_agent": "claude",
+        "public_effect": "published",
+        "task_template": {
+          "title": "Event article: FOMC 04/28-29 T+0 immediate reaction",
+          "description": "Dispatch within 24h of FOMC decision announcement (29 Apr 14:00 ET = 30 Apr 02:00 UTC). Content: actual decision vs expected (94.8% hold prior), dot-plot update surprise/alignment, post-announce SPY/VIX intraday path vs historical conditional, next-FOMC implied prob shift. status=published immediate (event-driven), 2 real matplotlib charts (intraday vs conditional expectation / FFR curve pre-vs-post), general audience 1500+ CJK. 3-layer dedup against the T-12/T-11/T-7/T-2 series. Differentiation: ex-post reality check vs prior scenario forecasts. Event cap: 4/4 final slot of this FOMC cycle.",
+          "task_family": "content",
+          "priority": 15,
+          "preferred_agent": "claude",
+          "fallback_allowed": false,
+          "approval_mode": "auto",
+          "risk_level": "safe",
+          "public_effect": "published",
+          "preconditions": [],
+          "payload_patch": {
+            "audience": "general",
+            "event_series_slot": "T+0",
+            "event_date": "2026-04-29",
+            "prior_articles": [
+              "mile_78d649c4",
+              "mile_f7bc6e6a",
+              "mile_a0dccb21",
+              "pending_t2_mile"
+            ],
+            "requires_websearch": [
+              "Actual FOMC decision 2026-04-29",
+              "Updated FedFunds futures probabilities post-announce",
+              "Dot plot median path"
+            ]
+          }
+        }
+      }
+    ]
   },
   "idle_policy": {
     "source_label": "Slot-aware idle continuation policy (updated 2026-04-17 for M1 Max 10-core, cap raised 3->4)",
