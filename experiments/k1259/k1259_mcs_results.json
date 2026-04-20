@@ -1,0 +1,2143 @@
+{
+  "experiment_id": "K1259",
+  "phase": "2_mcs_algorithm",
+  "variant": "A_ledger_only",
+  "variant_rationale": "Phase-1 ledger stores pairwise DM statistics but not per-day loss series; variant A treats DM stats as studentized loss differentials and uses Gaussian null for T_max bootstrap. Variant B (reconstruct loss series from source JSON + stationary bootstrap) was evaluated but <50% asset coverage would have per-day losses available in ledger source files; see appendix.",
+  "config": {
+    "bootstrap_B": 1000,
+    "seed": 42,
+    "alphas": [
+      0.1,
+      0.2
+    ],
+    "loss_fns": [
+      "QLIKE",
+      "MSE"
+    ],
+    "assets": [
+      "SPY",
+      "QQQ",
+      "GLD",
+      "0050.TW",
+      "USO"
+    ],
+    "min_pairs_per_model": 2,
+    "min_candidate_models": 3
+  },
+  "results": {
+    "SPY": {
+      "QLIKE": {
+        "n_models_input": 100,
+        "candidate_models": [
+          "A4f-VIX-t",
+          "A4f-VIX9D-N",
+          "A4f-VIX9D-t",
+          "A4f_Local",
+          "A4f_N",
+          "A4f_VIX",
+          "A4f_t_2step",
+          "A4f_t_joint",
+          "AMEM",
+          "AR1",
+          "B1_Normal",
+          "B2_StudentT",
+          "B3_HistSim",
+          "BH_SPY",
+          "BMA",
+          "Best_Single",
+          "C1_Naive_Conformal",
+          "C2_Proxy_Robust",
+          "C3_Exch_Conformal",
+          "CARR_YZ",
+          "DMEM",
+          "EGARCH",
+          "EGARCH(1,1)-N",
+          "EWA",
+          "EWMA",
+          "Equal_Weight",
+          "FIGARCH",
+          "GARCH",
+          "GJR",
+          "GJR+HAR_Ens",
+          "GJR-N",
+          "GJR-X",
+          "GJR-t",
+          "HAR",
+          "HAR-ABS",
+          "HAR-LOGRANGE",
+          "HAR-VIX",
+          "HAR-YZ",
+          "HAR_PD",
+          "Inv_QLIKE",
+          "Inv_QLIKE_Prev",
+          "KAN_MIDAS",
+          "M0",
+          "M1_Normal",
+          "M1_qlike",
+          "M1_rv21_only",
+          "M2",
+          "M2_StudentT",
+          "M2_vrp_only",
+          "M3",
+          "M3_FHS_1pct",
+          "M3_FHS_5pct",
+          "M3_semi_only",
+          "M4",
+          "M4_CAViaR",
+          "M4_qlike",
+          "M4_vrp_semi_combined",
+          "M5_QuantHAR",
+          "MCS_PValue",
+          "MCS_Subperiod",
+          "MEM",
+          "MF2",
+          "MIDAS_Linear",
+          "NAIVE",
+          "Normal",
+          "RV21",
+          "Rolling_21d",
+          "Semivar_RS-",
+          "THRESHOLD",
+          "adaptive",
+          "amem_abs",
+          "base",
+          "dm",
+          "dm_base",
+          "dm_bma",
+          "ewa",
+          "gjr_conv",
+          "gjrx_vix",
+          "har_plus_wavelet",
+          "hier",
+          "high_freq_only",
+          "low_freq_only",
+          "mem_abs",
+          "mf2",
+          "mf2_ewma_0.995",
+          "mf2_ewma_0.997",
+          "mf2_ewma_0.999",
+          "mf2_mem",
+          "mfgjr",
+          "middle",
+          "postbreak",
+          "skewt",
+          "standard",
+          "t-fixed5",
+          "t-fixed8",
+          "t-joint",
+          "th_spy",
+          "th_vix",
+          "vix",
+          "wavelet_har"
+        ],
+        "n_pairs_total": 161,
+        "alpha_0.10": {
+          "superior_set": [
+            "A4f-VIX9D-N",
+            "A4f-VIX9D-t",
+            "A4f_Local",
+            "A4f_N",
+            "A4f_VIX",
+            "A4f_t_2step",
+            "A4f_t_joint",
+            "AMEM",
+            "AR1",
+            "B1_Normal",
+            "B2_StudentT",
+            "B3_HistSim",
+            "BH_SPY",
+            "BMA",
+            "Best_Single",
+            "C1_Naive_Conformal",
+            "C3_Exch_Conformal",
+            "CARR_YZ",
+            "EGARCH",
+            "EGARCH(1,1)-N",
+            "EWA",
+            "Equal_Weight",
+            "FIGARCH",
+            "GARCH",
+            "GJR+HAR_Ens",
+            "GJR-X",
+            "HAR-LOGRANGE",
+            "HAR-VIX",
+            "HAR-YZ",
+            "HAR_PD",
+            "Inv_QLIKE",
+            "Inv_QLIKE_Prev",
+            "KAN_MIDAS",
+            "M0",
+            "M1_Normal",
+            "M1_qlike",
+            "M1_rv21_only",
+            "M2",
+            "M2_StudentT",
+            "M2_vrp_only",
+            "M3",
+            "M3_FHS_1pct",
+            "M3_FHS_5pct",
+            "M3_semi_only",
+            "M4",
+            "M4_CAViaR",
+            "M4_qlike",
+            "M4_vrp_semi_combined",
+            "M5_QuantHAR",
+            "MCS_PValue",
+            "MCS_Subperiod",
+            "MF2",
+            "MIDAS_Linear",
+            "NAIVE",
+            "Normal",
+            "RV21",
+            "Rolling_21d",
+            "Semivar_RS-",
+            "THRESHOLD",
+            "adaptive",
+            "amem_abs",
+            "base",
+            "dm",
+            "dm_base",
+            "dm_bma",
+            "ewa",
+            "gjr_conv",
+            "gjrx_vix",
+            "har_plus_wavelet",
+            "hier",
+            "low_freq_only",
+            "mem_abs",
+            "mf2",
+            "mf2_ewma_0.995",
+            "mf2_ewma_0.997",
+            "mf2_ewma_0.999",
+            "mfgjr",
+            "middle",
+            "postbreak",
+            "skewt",
+            "standard",
+            "t-fixed5",
+            "t-fixed8",
+            "t-joint",
+            "th_spy",
+            "th_vix",
+            "vix",
+            "wavelet_har"
+          ],
+          "eliminated_ordered": [
+            {
+              "model": "HAR",
+              "T_max_at_elim": 9.534126,
+              "p_value": 0.000999
+            },
+            {
+              "model": "EWMA",
+              "T_max_at_elim": 8.708476,
+              "p_value": 0.000999
+            },
+            {
+              "model": "C2_Proxy_Robust",
+              "T_max_at_elim": 8.12305,
+              "p_value": 0.000999
+            },
+            {
+              "model": "MEM",
+              "T_max_at_elim": 7.78814,
+              "p_value": 0.000999
+            },
+            {
+              "model": "HAR-ABS",
+              "T_max_at_elim": 7.463336,
+              "p_value": 0.000999
+            },
+            {
+              "model": "GJR-t",
+              "T_max_at_elim": 6.18,
+              "p_value": 0.000999
+            },
+            {
+              "model": "GJR",
+              "T_max_at_elim": 4.904573,
+              "p_value": 0.003996
+            },
+            {
+              "model": "A4f-VIX-t",
+              "T_max_at_elim": 4.662,
+              "p_value": 0.015984
+            },
+            {
+              "model": "mf2_mem",
+              "T_max_at_elim": 4.579038,
+              "p_value": 0.018981
+            },
+            {
+              "model": "high_freq_only",
+              "T_max_at_elim": 4.556255,
+              "p_value": 0.017982
+            },
+            {
+              "model": "GJR-N",
+              "T_max_at_elim": 4.444,
+              "p_value": 0.036963
+            },
+            {
+              "model": "DMEM",
+              "T_max_at_elim": 4.346119,
+              "p_value": 0.051948
+            }
+          ],
+          "n_models_input": 100,
+          "n_models_survived": 88,
+          "final_stopping_p": 0.475524,
+          "bootstrap_B": 1000,
+          "seed": 42,
+          "trace": [
+            {
+              "surviving_n": 100,
+              "T_max": 9.534126,
+              "worst_model": "HAR",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 99,
+              "T_max": 8.708476,
+              "worst_model": "EWMA",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 98,
+              "T_max": 8.12305,
+              "worst_model": "C2_Proxy_Robust",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 97,
+              "T_max": 7.78814,
+              "worst_model": "MEM",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 96,
+              "T_max": 7.463336,
+              "worst_model": "HAR-ABS",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 95,
+              "T_max": 6.18,
+              "worst_model": "GJR-t",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 94,
+              "T_max": 4.904573,
+              "worst_model": "GJR",
+              "p_value": 0.003996
+            },
+            {
+              "surviving_n": 93,
+              "T_max": 4.662,
+              "worst_model": "A4f-VIX-t",
+              "p_value": 0.015984
+            },
+            {
+              "surviving_n": 92,
+              "T_max": 4.579038,
+              "worst_model": "mf2_mem",
+              "p_value": 0.018981
+            },
+            {
+              "surviving_n": 91,
+              "T_max": 4.556255,
+              "worst_model": "high_freq_only",
+              "p_value": 0.017982
+            },
+            {
+              "surviving_n": 90,
+              "T_max": 4.444,
+              "worst_model": "GJR-N",
+              "p_value": 0.036963
+            },
+            {
+              "surviving_n": 89,
+              "T_max": 4.346119,
+              "worst_model": "DMEM",
+              "p_value": 0.051948
+            },
+            {
+              "surviving_n": 88,
+              "T_max": 3.779,
+              "worst_model": "t-fixed5",
+              "p_value": 0.475524
+            }
+          ]
+        },
+        "alpha_0.20": {
+          "superior_set": [
+            "A4f-VIX9D-N",
+            "A4f-VIX9D-t",
+            "A4f_Local",
+            "A4f_N",
+            "A4f_VIX",
+            "A4f_t_2step",
+            "A4f_t_joint",
+            "AMEM",
+            "AR1",
+            "B1_Normal",
+            "B2_StudentT",
+            "B3_HistSim",
+            "BH_SPY",
+            "BMA",
+            "Best_Single",
+            "C1_Naive_Conformal",
+            "C3_Exch_Conformal",
+            "CARR_YZ",
+            "EGARCH",
+            "EGARCH(1,1)-N",
+            "EWA",
+            "Equal_Weight",
+            "FIGARCH",
+            "GARCH",
+            "GJR+HAR_Ens",
+            "GJR-X",
+            "HAR-LOGRANGE",
+            "HAR-VIX",
+            "HAR-YZ",
+            "HAR_PD",
+            "Inv_QLIKE",
+            "Inv_QLIKE_Prev",
+            "KAN_MIDAS",
+            "M0",
+            "M1_Normal",
+            "M1_qlike",
+            "M1_rv21_only",
+            "M2",
+            "M2_StudentT",
+            "M2_vrp_only",
+            "M3",
+            "M3_FHS_1pct",
+            "M3_FHS_5pct",
+            "M3_semi_only",
+            "M4",
+            "M4_CAViaR",
+            "M4_qlike",
+            "M4_vrp_semi_combined",
+            "M5_QuantHAR",
+            "MCS_PValue",
+            "MCS_Subperiod",
+            "MF2",
+            "MIDAS_Linear",
+            "NAIVE",
+            "Normal",
+            "RV21",
+            "Rolling_21d",
+            "Semivar_RS-",
+            "THRESHOLD",
+            "adaptive",
+            "amem_abs",
+            "base",
+            "dm",
+            "dm_base",
+            "dm_bma",
+            "ewa",
+            "gjr_conv",
+            "gjrx_vix",
+            "har_plus_wavelet",
+            "hier",
+            "low_freq_only",
+            "mem_abs",
+            "mf2",
+            "mf2_ewma_0.995",
+            "mf2_ewma_0.997",
+            "mf2_ewma_0.999",
+            "mfgjr",
+            "middle",
+            "postbreak",
+            "skewt",
+            "standard",
+            "t-fixed5",
+            "t-fixed8",
+            "t-joint",
+            "th_spy",
+            "th_vix",
+            "vix",
+            "wavelet_har"
+          ],
+          "eliminated_ordered": [
+            {
+              "model": "HAR",
+              "T_max_at_elim": 9.534126,
+              "p_value": 0.000999
+            },
+            {
+              "model": "EWMA",
+              "T_max_at_elim": 8.708476,
+              "p_value": 0.000999
+            },
+            {
+              "model": "C2_Proxy_Robust",
+              "T_max_at_elim": 8.12305,
+              "p_value": 0.000999
+            },
+            {
+              "model": "MEM",
+              "T_max_at_elim": 7.78814,
+              "p_value": 0.000999
+            },
+            {
+              "model": "HAR-ABS",
+              "T_max_at_elim": 7.463336,
+              "p_value": 0.000999
+            },
+            {
+              "model": "GJR-t",
+              "T_max_at_elim": 6.18,
+              "p_value": 0.000999
+            },
+            {
+              "model": "GJR",
+              "T_max_at_elim": 4.904573,
+              "p_value": 0.003996
+            },
+            {
+              "model": "A4f-VIX-t",
+              "T_max_at_elim": 4.662,
+              "p_value": 0.015984
+            },
+            {
+              "model": "mf2_mem",
+              "T_max_at_elim": 4.579038,
+              "p_value": 0.018981
+            },
+            {
+              "model": "high_freq_only",
+              "T_max_at_elim": 4.556255,
+              "p_value": 0.017982
+            },
+            {
+              "model": "GJR-N",
+              "T_max_at_elim": 4.444,
+              "p_value": 0.036963
+            },
+            {
+              "model": "DMEM",
+              "T_max_at_elim": 4.346119,
+              "p_value": 0.051948
+            }
+          ],
+          "n_models_input": 100,
+          "n_models_survived": 88,
+          "final_stopping_p": 0.475524,
+          "bootstrap_B": 1000,
+          "seed": 42,
+          "trace": [
+            {
+              "surviving_n": 100,
+              "T_max": 9.534126,
+              "worst_model": "HAR",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 99,
+              "T_max": 8.708476,
+              "worst_model": "EWMA",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 98,
+              "T_max": 8.12305,
+              "worst_model": "C2_Proxy_Robust",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 97,
+              "T_max": 7.78814,
+              "worst_model": "MEM",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 96,
+              "T_max": 7.463336,
+              "worst_model": "HAR-ABS",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 95,
+              "T_max": 6.18,
+              "worst_model": "GJR-t",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 94,
+              "T_max": 4.904573,
+              "worst_model": "GJR",
+              "p_value": 0.003996
+            },
+            {
+              "surviving_n": 93,
+              "T_max": 4.662,
+              "worst_model": "A4f-VIX-t",
+              "p_value": 0.015984
+            },
+            {
+              "surviving_n": 92,
+              "T_max": 4.579038,
+              "worst_model": "mf2_mem",
+              "p_value": 0.018981
+            },
+            {
+              "surviving_n": 91,
+              "T_max": 4.556255,
+              "worst_model": "high_freq_only",
+              "p_value": 0.017982
+            },
+            {
+              "surviving_n": 90,
+              "T_max": 4.444,
+              "worst_model": "GJR-N",
+              "p_value": 0.036963
+            },
+            {
+              "surviving_n": 89,
+              "T_max": 4.346119,
+              "worst_model": "DMEM",
+              "p_value": 0.051948
+            },
+            {
+              "surviving_n": 88,
+              "T_max": 3.779,
+              "worst_model": "t-fixed5",
+              "p_value": 0.475524
+            }
+          ]
+        }
+      },
+      "MSE": {
+        "n_models_input": 17,
+        "candidate_models": [
+          "EWMA",
+          "GARCH",
+          "GJR",
+          "HAR",
+          "M1",
+          "M1_mse",
+          "M2",
+          "M3",
+          "M4_HAR_RV_X",
+          "M4_mse",
+          "M5_HAR_RV",
+          "amem_r2",
+          "ewma_r2",
+          "gjr_r2",
+          "mem_r2",
+          "mf2",
+          "rolling_r2"
+        ],
+        "n_pairs_total": 20,
+        "alpha_0.10": {
+          "superior_set": [
+            "EWMA",
+            "GJR",
+            "M1",
+            "M1_mse",
+            "M2",
+            "M3",
+            "M4_HAR_RV_X",
+            "M4_mse",
+            "M5_HAR_RV",
+            "amem_r2",
+            "ewma_r2",
+            "gjr_r2",
+            "mf2",
+            "rolling_r2"
+          ],
+          "eliminated_ordered": [
+            {
+              "model": "HAR",
+              "T_max_at_elim": 5.795791,
+              "p_value": 0.000999
+            },
+            {
+              "model": "GARCH",
+              "T_max_at_elim": 4.35087,
+              "p_value": 0.000999
+            },
+            {
+              "model": "mem_r2",
+              "T_max_at_elim": 3.777676,
+              "p_value": 0.015984
+            }
+          ],
+          "n_models_input": 17,
+          "n_models_survived": 14,
+          "final_stopping_p": 0.917083,
+          "bootstrap_B": 1000,
+          "seed": 42,
+          "trace": [
+            {
+              "surviving_n": 17,
+              "T_max": 5.795791,
+              "worst_model": "HAR",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 16,
+              "T_max": 4.35087,
+              "worst_model": "GARCH",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 15,
+              "T_max": 3.777676,
+              "worst_model": "mem_r2",
+              "p_value": 0.015984
+            },
+            {
+              "surviving_n": 14,
+              "T_max": 2.192585,
+              "worst_model": "GJR",
+              "p_value": 0.917083
+            }
+          ]
+        },
+        "alpha_0.20": {
+          "superior_set": [
+            "EWMA",
+            "GJR",
+            "M1",
+            "M1_mse",
+            "M2",
+            "M3",
+            "M4_HAR_RV_X",
+            "M4_mse",
+            "M5_HAR_RV",
+            "amem_r2",
+            "ewma_r2",
+            "gjr_r2",
+            "mf2",
+            "rolling_r2"
+          ],
+          "eliminated_ordered": [
+            {
+              "model": "HAR",
+              "T_max_at_elim": 5.795791,
+              "p_value": 0.000999
+            },
+            {
+              "model": "GARCH",
+              "T_max_at_elim": 4.35087,
+              "p_value": 0.000999
+            },
+            {
+              "model": "mem_r2",
+              "T_max_at_elim": 3.777676,
+              "p_value": 0.015984
+            }
+          ],
+          "n_models_input": 17,
+          "n_models_survived": 14,
+          "final_stopping_p": 0.917083,
+          "bootstrap_B": 1000,
+          "seed": 42,
+          "trace": [
+            {
+              "surviving_n": 17,
+              "T_max": 5.795791,
+              "worst_model": "HAR",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 16,
+              "T_max": 4.35087,
+              "worst_model": "GARCH",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 15,
+              "T_max": 3.777676,
+              "worst_model": "mem_r2",
+              "p_value": 0.015984
+            },
+            {
+              "surviving_n": 14,
+              "T_max": 2.192585,
+              "worst_model": "GJR",
+              "p_value": 0.917083
+            }
+          ]
+        }
+      }
+    },
+    "QQQ": {
+      "QLIKE": {
+        "n_models_input": 43,
+        "candidate_models": [
+          "A4",
+          "A4f",
+          "A4f-VIX-t",
+          "A4f-VIX9D-N",
+          "A4f-VIX9D-t",
+          "A4f_Local",
+          "A4f_VIX",
+          "CARR_YZ",
+          "EGARCH",
+          "EWMA",
+          "GARCH",
+          "GJR",
+          "GJR-X",
+          "GJR-t",
+          "HAR",
+          "HAR-YZ",
+          "M0",
+          "M1_qlike",
+          "M1_rv21_only",
+          "M2",
+          "M2_vrp_only",
+          "M3",
+          "M3_semi_only",
+          "M4",
+          "M4_qlike",
+          "M4_vrp_semi_combined",
+          "NAIVE",
+          "Normal",
+          "PRG_Basic",
+          "PRG_Extended",
+          "Separate",
+          "all",
+          "base",
+          "dm_base",
+          "epu",
+          "finstress",
+          "hier",
+          "iv",
+          "skewt",
+          "t-fixed5",
+          "t-fixed8",
+          "t-joint",
+          "vix"
+        ],
+        "n_pairs_total": 56,
+        "alpha_0.10": {
+          "superior_set": [
+            "A4",
+            "A4f",
+            "A4f-VIX-t",
+            "A4f-VIX9D-N",
+            "A4f-VIX9D-t",
+            "A4f_Local",
+            "A4f_VIX",
+            "EGARCH",
+            "EWMA",
+            "GARCH",
+            "GJR-X",
+            "HAR-YZ",
+            "M0",
+            "M1_qlike",
+            "M1_rv21_only",
+            "M2",
+            "M2_vrp_only",
+            "M3",
+            "M3_semi_only",
+            "M4",
+            "M4_qlike",
+            "M4_vrp_semi_combined",
+            "NAIVE",
+            "Normal",
+            "PRG_Basic",
+            "PRG_Extended",
+            "all",
+            "base",
+            "dm_base",
+            "epu",
+            "finstress",
+            "hier",
+            "iv",
+            "skewt",
+            "t-fixed5",
+            "t-fixed8",
+            "t-joint",
+            "vix"
+          ],
+          "eliminated_ordered": [
+            {
+              "model": "HAR",
+              "T_max_at_elim": 8.840449,
+              "p_value": 0.000999
+            },
+            {
+              "model": "Separate",
+              "T_max_at_elim": 5.468294,
+              "p_value": 0.000999
+            },
+            {
+              "model": "GJR-t",
+              "T_max_at_elim": 5.026,
+              "p_value": 0.000999
+            },
+            {
+              "model": "GJR",
+              "T_max_at_elim": 4.257153,
+              "p_value": 0.017982
+            },
+            {
+              "model": "CARR_YZ",
+              "T_max_at_elim": 4.048932,
+              "p_value": 0.032967
+            }
+          ],
+          "n_models_input": 43,
+          "n_models_survived": 38,
+          "final_stopping_p": 0.855145,
+          "bootstrap_B": 1000,
+          "seed": 42,
+          "trace": [
+            {
+              "surviving_n": 43,
+              "T_max": 8.840449,
+              "worst_model": "HAR",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 42,
+              "T_max": 5.468294,
+              "worst_model": "Separate",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 41,
+              "T_max": 5.026,
+              "worst_model": "GJR-t",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 40,
+              "T_max": 4.257153,
+              "worst_model": "GJR",
+              "p_value": 0.017982
+            },
+            {
+              "surviving_n": 39,
+              "T_max": 4.048932,
+              "worst_model": "CARR_YZ",
+              "p_value": 0.032967
+            },
+            {
+              "surviving_n": 38,
+              "T_max": 2.977693,
+              "worst_model": "PRG_Basic",
+              "p_value": 0.855145
+            }
+          ]
+        },
+        "alpha_0.20": {
+          "superior_set": [
+            "A4",
+            "A4f",
+            "A4f-VIX-t",
+            "A4f-VIX9D-N",
+            "A4f-VIX9D-t",
+            "A4f_Local",
+            "A4f_VIX",
+            "EGARCH",
+            "EWMA",
+            "GARCH",
+            "GJR-X",
+            "HAR-YZ",
+            "M0",
+            "M1_qlike",
+            "M1_rv21_only",
+            "M2",
+            "M2_vrp_only",
+            "M3",
+            "M3_semi_only",
+            "M4",
+            "M4_qlike",
+            "M4_vrp_semi_combined",
+            "NAIVE",
+            "Normal",
+            "PRG_Basic",
+            "PRG_Extended",
+            "all",
+            "base",
+            "dm_base",
+            "epu",
+            "finstress",
+            "hier",
+            "iv",
+            "skewt",
+            "t-fixed5",
+            "t-fixed8",
+            "t-joint",
+            "vix"
+          ],
+          "eliminated_ordered": [
+            {
+              "model": "HAR",
+              "T_max_at_elim": 8.840449,
+              "p_value": 0.000999
+            },
+            {
+              "model": "Separate",
+              "T_max_at_elim": 5.468294,
+              "p_value": 0.000999
+            },
+            {
+              "model": "GJR-t",
+              "T_max_at_elim": 5.026,
+              "p_value": 0.000999
+            },
+            {
+              "model": "GJR",
+              "T_max_at_elim": 4.257153,
+              "p_value": 0.017982
+            },
+            {
+              "model": "CARR_YZ",
+              "T_max_at_elim": 4.048932,
+              "p_value": 0.032967
+            }
+          ],
+          "n_models_input": 43,
+          "n_models_survived": 38,
+          "final_stopping_p": 0.855145,
+          "bootstrap_B": 1000,
+          "seed": 42,
+          "trace": [
+            {
+              "surviving_n": 43,
+              "T_max": 8.840449,
+              "worst_model": "HAR",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 42,
+              "T_max": 5.468294,
+              "worst_model": "Separate",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 41,
+              "T_max": 5.026,
+              "worst_model": "GJR-t",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 40,
+              "T_max": 4.257153,
+              "worst_model": "GJR",
+              "p_value": 0.017982
+            },
+            {
+              "surviving_n": 39,
+              "T_max": 4.048932,
+              "worst_model": "CARR_YZ",
+              "p_value": 0.032967
+            },
+            {
+              "surviving_n": 38,
+              "T_max": 2.977693,
+              "worst_model": "PRG_Basic",
+              "p_value": 0.855145
+            }
+          ]
+        }
+      },
+      "MSE": {
+        "n_models_input": 7,
+        "candidate_models": [
+          "M1",
+          "M1_mse",
+          "M2",
+          "M3",
+          "M4_HAR_RV_X",
+          "M4_mse",
+          "M5_HAR_RV"
+        ],
+        "n_pairs_total": 6,
+        "alpha_0.10": {
+          "superior_set": [
+            "M1_mse",
+            "M2",
+            "M3",
+            "M4_HAR_RV_X",
+            "M4_mse",
+            "M5_HAR_RV"
+          ],
+          "eliminated_ordered": [
+            {
+              "model": "M1",
+              "T_max_at_elim": 3.371211,
+              "p_value": 0.018981
+            }
+          ],
+          "n_models_input": 7,
+          "n_models_survived": 6,
+          "final_stopping_p": 0.507493,
+          "bootstrap_B": 1000,
+          "seed": 42,
+          "trace": [
+            {
+              "surviving_n": 7,
+              "T_max": 3.371211,
+              "worst_model": "M1",
+              "p_value": 0.018981
+            },
+            {
+              "surviving_n": 6,
+              "T_max": 1.99148,
+              "worst_model": "M2",
+              "p_value": 0.507493
+            }
+          ]
+        },
+        "alpha_0.20": {
+          "superior_set": [
+            "M1_mse",
+            "M2",
+            "M3",
+            "M4_HAR_RV_X",
+            "M4_mse",
+            "M5_HAR_RV"
+          ],
+          "eliminated_ordered": [
+            {
+              "model": "M1",
+              "T_max_at_elim": 3.371211,
+              "p_value": 0.018981
+            }
+          ],
+          "n_models_input": 7,
+          "n_models_survived": 6,
+          "final_stopping_p": 0.507493,
+          "bootstrap_B": 1000,
+          "seed": 42,
+          "trace": [
+            {
+              "surviving_n": 7,
+              "T_max": 3.371211,
+              "worst_model": "M1",
+              "p_value": 0.018981
+            },
+            {
+              "surviving_n": 6,
+              "T_max": 1.99148,
+              "worst_model": "M2",
+              "p_value": 0.507493
+            }
+          ]
+        }
+      }
+    },
+    "GLD": {
+      "QLIKE": {
+        "n_models_input": 32,
+        "candidate_models": [
+          "A4",
+          "A4f",
+          "A4f_Local",
+          "A4f_VIX",
+          "AMEM",
+          "CARR_YZ",
+          "EGARCH",
+          "EWMA",
+          "Ensemble",
+          "GARCH",
+          "GJR",
+          "GJR-X",
+          "HAR",
+          "HAR-ABS",
+          "HAR_LR",
+          "HAR_PD",
+          "M0",
+          "M1",
+          "M2",
+          "M2_AR1_IV",
+          "M2_GJR_t",
+          "M3_AR1_EPU",
+          "M3_GAS_t",
+          "M4_AR1_FinStress",
+          "M5_AR1_All",
+          "MEM",
+          "PRG_Basic",
+          "PRG_Extended",
+          "Semivar",
+          "Separate",
+          "dm_bma",
+          "hier"
+        ],
+        "n_pairs_total": 64,
+        "alpha_0.10": {
+          "superior_set": [
+            "A4",
+            "A4f",
+            "A4f_Local",
+            "A4f_VIX",
+            "AMEM",
+            "CARR_YZ",
+            "EGARCH",
+            "Ensemble",
+            "GARCH",
+            "HAR-ABS",
+            "HAR_PD",
+            "M0",
+            "M2",
+            "M2_AR1_IV",
+            "M2_GJR_t",
+            "M3_AR1_EPU",
+            "M3_GAS_t",
+            "M4_AR1_FinStress",
+            "M5_AR1_All",
+            "MEM",
+            "PRG_Basic",
+            "PRG_Extended",
+            "Semivar",
+            "dm_bma",
+            "hier"
+          ],
+          "eliminated_ordered": [
+            {
+              "model": "GJR",
+              "T_max_at_elim": 13.970818,
+              "p_value": 0.000999
+            },
+            {
+              "model": "EWMA",
+              "T_max_at_elim": 8.729675,
+              "p_value": 0.000999
+            },
+            {
+              "model": "HAR_LR",
+              "T_max_at_elim": 8.727,
+              "p_value": 0.000999
+            },
+            {
+              "model": "HAR",
+              "T_max_at_elim": 6.873419,
+              "p_value": 0.000999
+            },
+            {
+              "model": "GJR-X",
+              "T_max_at_elim": 6.4783,
+              "p_value": 0.000999
+            },
+            {
+              "model": "Separate",
+              "T_max_at_elim": 5.164383,
+              "p_value": 0.000999
+            },
+            {
+              "model": "M1",
+              "T_max_at_elim": 4.379043,
+              "p_value": 0.003996
+            }
+          ],
+          "n_models_input": 32,
+          "n_models_survived": 25,
+          "final_stopping_p": 0.595405,
+          "bootstrap_B": 1000,
+          "seed": 42,
+          "trace": [
+            {
+              "surviving_n": 32,
+              "T_max": 13.970818,
+              "worst_model": "GJR",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 31,
+              "T_max": 8.729675,
+              "worst_model": "EWMA",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 30,
+              "T_max": 8.727,
+              "worst_model": "HAR_LR",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 29,
+              "T_max": 6.873419,
+              "worst_model": "HAR",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 28,
+              "T_max": 6.4783,
+              "worst_model": "GJR-X",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 27,
+              "T_max": 5.164383,
+              "worst_model": "Separate",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 26,
+              "T_max": 4.379043,
+              "worst_model": "M1",
+              "p_value": 0.003996
+            },
+            {
+              "surviving_n": 25,
+              "T_max": 2.99,
+              "worst_model": "Ensemble",
+              "p_value": 0.595405
+            }
+          ]
+        },
+        "alpha_0.20": {
+          "superior_set": [
+            "A4",
+            "A4f",
+            "A4f_Local",
+            "A4f_VIX",
+            "AMEM",
+            "CARR_YZ",
+            "EGARCH",
+            "Ensemble",
+            "GARCH",
+            "HAR-ABS",
+            "HAR_PD",
+            "M0",
+            "M2",
+            "M2_AR1_IV",
+            "M2_GJR_t",
+            "M3_AR1_EPU",
+            "M3_GAS_t",
+            "M4_AR1_FinStress",
+            "M5_AR1_All",
+            "MEM",
+            "PRG_Basic",
+            "PRG_Extended",
+            "Semivar",
+            "dm_bma",
+            "hier"
+          ],
+          "eliminated_ordered": [
+            {
+              "model": "GJR",
+              "T_max_at_elim": 13.970818,
+              "p_value": 0.000999
+            },
+            {
+              "model": "EWMA",
+              "T_max_at_elim": 8.729675,
+              "p_value": 0.000999
+            },
+            {
+              "model": "HAR_LR",
+              "T_max_at_elim": 8.727,
+              "p_value": 0.000999
+            },
+            {
+              "model": "HAR",
+              "T_max_at_elim": 6.873419,
+              "p_value": 0.000999
+            },
+            {
+              "model": "GJR-X",
+              "T_max_at_elim": 6.4783,
+              "p_value": 0.000999
+            },
+            {
+              "model": "Separate",
+              "T_max_at_elim": 5.164383,
+              "p_value": 0.000999
+            },
+            {
+              "model": "M1",
+              "T_max_at_elim": 4.379043,
+              "p_value": 0.003996
+            }
+          ],
+          "n_models_input": 32,
+          "n_models_survived": 25,
+          "final_stopping_p": 0.595405,
+          "bootstrap_B": 1000,
+          "seed": 42,
+          "trace": [
+            {
+              "surviving_n": 32,
+              "T_max": 13.970818,
+              "worst_model": "GJR",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 31,
+              "T_max": 8.729675,
+              "worst_model": "EWMA",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 30,
+              "T_max": 8.727,
+              "worst_model": "HAR_LR",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 29,
+              "T_max": 6.873419,
+              "worst_model": "HAR",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 28,
+              "T_max": 6.4783,
+              "worst_model": "GJR-X",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 27,
+              "T_max": 5.164383,
+              "worst_model": "Separate",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 26,
+              "T_max": 4.379043,
+              "worst_model": "M1",
+              "p_value": 0.003996
+            },
+            {
+              "surviving_n": 25,
+              "T_max": 2.99,
+              "worst_model": "Ensemble",
+              "p_value": 0.595405
+            }
+          ]
+        }
+      },
+      "MSE": {
+        "n_models_input": 6,
+        "candidate_models": [
+          "M1",
+          "M2_GJR_t",
+          "M3_GARCH_MIDAS_X",
+          "M3_GAS_t",
+          "M4_HAR_RV_X",
+          "M5_HAR_RV"
+        ],
+        "n_pairs_total": 8,
+        "alpha_0.10": {
+          "superior_set": [
+            "M2_GJR_t",
+            "M3_GAS_t",
+            "M4_HAR_RV_X"
+          ],
+          "eliminated_ordered": [
+            {
+              "model": "M1",
+              "T_max_at_elim": 8.202402,
+              "p_value": 0.000999
+            },
+            {
+              "model": "M3_GARCH_MIDAS_X",
+              "T_max_at_elim": 7.48308,
+              "p_value": 0.000999
+            },
+            {
+              "model": "M5_HAR_RV",
+              "T_max_at_elim": 2.504708,
+              "p_value": 0.088911
+            }
+          ],
+          "n_models_input": 6,
+          "n_models_survived": 3,
+          "final_stopping_p": 0.793207,
+          "bootstrap_B": 1000,
+          "seed": 42,
+          "trace": [
+            {
+              "surviving_n": 6,
+              "T_max": 8.202402,
+              "worst_model": "M1",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 5,
+              "T_max": 7.48308,
+              "worst_model": "M3_GARCH_MIDAS_X",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 4,
+              "T_max": 2.504708,
+              "worst_model": "M5_HAR_RV",
+              "p_value": 0.088911
+            },
+            {
+              "surviving_n": 3,
+              "T_max": 0.804629,
+              "worst_model": "M2_GJR_t",
+              "p_value": 0.793207
+            }
+          ]
+        },
+        "alpha_0.20": {
+          "superior_set": [
+            "M2_GJR_t",
+            "M3_GAS_t",
+            "M4_HAR_RV_X"
+          ],
+          "eliminated_ordered": [
+            {
+              "model": "M1",
+              "T_max_at_elim": 8.202402,
+              "p_value": 0.000999
+            },
+            {
+              "model": "M3_GARCH_MIDAS_X",
+              "T_max_at_elim": 7.48308,
+              "p_value": 0.000999
+            },
+            {
+              "model": "M5_HAR_RV",
+              "T_max_at_elim": 2.504708,
+              "p_value": 0.088911
+            }
+          ],
+          "n_models_input": 6,
+          "n_models_survived": 3,
+          "final_stopping_p": 0.793207,
+          "bootstrap_B": 1000,
+          "seed": 42,
+          "trace": [
+            {
+              "surviving_n": 6,
+              "T_max": 8.202402,
+              "worst_model": "M1",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 5,
+              "T_max": 7.48308,
+              "worst_model": "M3_GARCH_MIDAS_X",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 4,
+              "T_max": 2.504708,
+              "worst_model": "M5_HAR_RV",
+              "p_value": 0.088911
+            },
+            {
+              "surviving_n": 3,
+              "T_max": 0.804629,
+              "worst_model": "M2_GJR_t",
+              "p_value": 0.793207
+            }
+          ]
+        }
+      }
+    },
+    "0050.TW": {
+      "QLIKE": {
+        "n_models_input": 39,
+        "candidate_models": [
+          "A4",
+          "A4f",
+          "A4f_Local",
+          "A4f_VIX",
+          "AMEM",
+          "CARR_YZ",
+          "EWMA",
+          "GARCH",
+          "GJR",
+          "HAR",
+          "HAR-ABS",
+          "HAR-RV",
+          "HAR_PD",
+          "MEM",
+          "MF2-EMA",
+          "MF2-RV",
+          "MF2-VIX",
+          "NAIVE",
+          "PRG_Basic",
+          "PRG_Extended",
+          "RealGARCH-Log",
+          "RealGARCH-Simple",
+          "S1_8.63_VIX",
+          "S2_12_VIXTWN",
+          "S3_Static_Blend",
+          "S4_Rolling_Corr_Blend",
+          "S5_BuyHold",
+          "Separate",
+          "avg",
+          "control",
+          "day_of",
+          "dm_bma",
+          "filled",
+          "hier",
+          "notfilled_vol",
+          "post",
+          "post_near",
+          "pre",
+          "pre_near"
+        ],
+        "n_pairs_total": 60,
+        "alpha_0.10": {
+          "superior_set": [
+            "A4",
+            "A4f",
+            "A4f_Local",
+            "A4f_VIX",
+            "AMEM",
+            "CARR_YZ",
+            "GARCH",
+            "HAR-ABS",
+            "HAR-RV",
+            "HAR_PD",
+            "MEM",
+            "MF2-EMA",
+            "MF2-RV",
+            "MF2-VIX",
+            "NAIVE",
+            "PRG_Basic",
+            "PRG_Extended",
+            "S1_8.63_VIX",
+            "S2_12_VIXTWN",
+            "S3_Static_Blend",
+            "S4_Rolling_Corr_Blend",
+            "S5_BuyHold",
+            "avg",
+            "control",
+            "day_of",
+            "dm_bma",
+            "filled",
+            "hier",
+            "notfilled_vol",
+            "post_near",
+            "pre",
+            "pre_near"
+          ],
+          "eliminated_ordered": [
+            {
+              "model": "GJR",
+              "T_max_at_elim": 15.100996,
+              "p_value": 0.000999
+            },
+            {
+              "model": "RealGARCH-Log",
+              "T_max_at_elim": 9.93795,
+              "p_value": 0.000999
+            },
+            {
+              "model": "RealGARCH-Simple",
+              "T_max_at_elim": 7.1128,
+              "p_value": 0.000999
+            },
+            {
+              "model": "post",
+              "T_max_at_elim": 4.644673,
+              "p_value": 0.001998
+            },
+            {
+              "model": "Separate",
+              "T_max_at_elim": 4.594883,
+              "p_value": 0.005994
+            },
+            {
+              "model": "HAR",
+              "T_max_at_elim": 4.513488,
+              "p_value": 0.007992
+            },
+            {
+              "model": "EWMA",
+              "T_max_at_elim": 4.176337,
+              "p_value": 0.013986
+            }
+          ],
+          "n_models_input": 39,
+          "n_models_survived": 32,
+          "final_stopping_p": 0.68032,
+          "bootstrap_B": 1000,
+          "seed": 42,
+          "trace": [
+            {
+              "surviving_n": 39,
+              "T_max": 15.100996,
+              "worst_model": "GJR",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 38,
+              "T_max": 9.93795,
+              "worst_model": "RealGARCH-Log",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 37,
+              "T_max": 7.1128,
+              "worst_model": "RealGARCH-Simple",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 36,
+              "T_max": 4.644673,
+              "worst_model": "post",
+              "p_value": 0.001998
+            },
+            {
+              "surviving_n": 35,
+              "T_max": 4.594883,
+              "worst_model": "Separate",
+              "p_value": 0.005994
+            },
+            {
+              "surviving_n": 34,
+              "T_max": 4.513488,
+              "worst_model": "HAR",
+              "p_value": 0.007992
+            },
+            {
+              "surviving_n": 33,
+              "T_max": 4.176337,
+              "worst_model": "EWMA",
+              "p_value": 0.013986
+            },
+            {
+              "surviving_n": 32,
+              "T_max": 3.040649,
+              "worst_model": "post_near",
+              "p_value": 0.68032
+            }
+          ]
+        },
+        "alpha_0.20": {
+          "superior_set": [
+            "A4",
+            "A4f",
+            "A4f_Local",
+            "A4f_VIX",
+            "AMEM",
+            "CARR_YZ",
+            "GARCH",
+            "HAR-ABS",
+            "HAR-RV",
+            "HAR_PD",
+            "MEM",
+            "MF2-EMA",
+            "MF2-RV",
+            "MF2-VIX",
+            "NAIVE",
+            "PRG_Basic",
+            "PRG_Extended",
+            "S1_8.63_VIX",
+            "S2_12_VIXTWN",
+            "S3_Static_Blend",
+            "S4_Rolling_Corr_Blend",
+            "S5_BuyHold",
+            "avg",
+            "control",
+            "day_of",
+            "dm_bma",
+            "filled",
+            "hier",
+            "notfilled_vol",
+            "post_near",
+            "pre",
+            "pre_near"
+          ],
+          "eliminated_ordered": [
+            {
+              "model": "GJR",
+              "T_max_at_elim": 15.100996,
+              "p_value": 0.000999
+            },
+            {
+              "model": "RealGARCH-Log",
+              "T_max_at_elim": 9.93795,
+              "p_value": 0.000999
+            },
+            {
+              "model": "RealGARCH-Simple",
+              "T_max_at_elim": 7.1128,
+              "p_value": 0.000999
+            },
+            {
+              "model": "post",
+              "T_max_at_elim": 4.644673,
+              "p_value": 0.001998
+            },
+            {
+              "model": "Separate",
+              "T_max_at_elim": 4.594883,
+              "p_value": 0.005994
+            },
+            {
+              "model": "HAR",
+              "T_max_at_elim": 4.513488,
+              "p_value": 0.007992
+            },
+            {
+              "model": "EWMA",
+              "T_max_at_elim": 4.176337,
+              "p_value": 0.013986
+            }
+          ],
+          "n_models_input": 39,
+          "n_models_survived": 32,
+          "final_stopping_p": 0.68032,
+          "bootstrap_B": 1000,
+          "seed": 42,
+          "trace": [
+            {
+              "surviving_n": 39,
+              "T_max": 15.100996,
+              "worst_model": "GJR",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 38,
+              "T_max": 9.93795,
+              "worst_model": "RealGARCH-Log",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 37,
+              "T_max": 7.1128,
+              "worst_model": "RealGARCH-Simple",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 36,
+              "T_max": 4.644673,
+              "worst_model": "post",
+              "p_value": 0.001998
+            },
+            {
+              "surviving_n": 35,
+              "T_max": 4.594883,
+              "worst_model": "Separate",
+              "p_value": 0.005994
+            },
+            {
+              "surviving_n": 34,
+              "T_max": 4.513488,
+              "worst_model": "HAR",
+              "p_value": 0.007992
+            },
+            {
+              "surviving_n": 33,
+              "T_max": 4.176337,
+              "worst_model": "EWMA",
+              "p_value": 0.013986
+            },
+            {
+              "surviving_n": 32,
+              "T_max": 3.040649,
+              "worst_model": "post_near",
+              "p_value": 0.68032
+            }
+          ]
+        }
+      },
+      "MSE": {
+        "status": "insufficient_models",
+        "n_models_input": 0,
+        "message": "only 0 candidates (need >=3); MCS skipped",
+        "candidate_models": []
+      }
+    },
+    "USO": {
+      "QLIKE": {
+        "n_models_input": 18,
+        "candidate_models": [
+          "EGARCH",
+          "EWMA",
+          "Ensemble",
+          "GARCH",
+          "GJR",
+          "GJR-X",
+          "HAR_LR",
+          "M0",
+          "M1",
+          "M2",
+          "M2_GJR_t",
+          "M3_GAS_t",
+          "Semivar",
+          "all",
+          "base",
+          "epu",
+          "finstress",
+          "iv"
+        ],
+        "n_pairs_total": 35,
+        "alpha_0.10": {
+          "superior_set": [
+            "EGARCH",
+            "EWMA",
+            "Ensemble",
+            "GARCH",
+            "GJR",
+            "GJR-X",
+            "M0",
+            "M1",
+            "M2",
+            "M2_GJR_t",
+            "M3_GAS_t",
+            "Semivar",
+            "base",
+            "finstress",
+            "iv"
+          ],
+          "eliminated_ordered": [
+            {
+              "model": "HAR_LR",
+              "T_max_at_elim": 6.499,
+              "p_value": 0.000999
+            },
+            {
+              "model": "epu",
+              "T_max_at_elim": 5.11358,
+              "p_value": 0.000999
+            },
+            {
+              "model": "all",
+              "T_max_at_elim": 3.431755,
+              "p_value": 0.088911
+            }
+          ],
+          "n_models_input": 18,
+          "n_models_survived": 15,
+          "final_stopping_p": 0.226773,
+          "bootstrap_B": 1000,
+          "seed": 42,
+          "trace": [
+            {
+              "surviving_n": 18,
+              "T_max": 6.499,
+              "worst_model": "HAR_LR",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 17,
+              "T_max": 5.11358,
+              "worst_model": "epu",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 16,
+              "T_max": 3.431755,
+              "worst_model": "all",
+              "p_value": 0.088911
+            },
+            {
+              "surviving_n": 15,
+              "T_max": 3.048851,
+              "worst_model": "base",
+              "p_value": 0.226773
+            }
+          ]
+        },
+        "alpha_0.20": {
+          "superior_set": [
+            "EGARCH",
+            "EWMA",
+            "Ensemble",
+            "GARCH",
+            "GJR",
+            "GJR-X",
+            "M0",
+            "M1",
+            "M2",
+            "M2_GJR_t",
+            "M3_GAS_t",
+            "Semivar",
+            "base",
+            "finstress",
+            "iv"
+          ],
+          "eliminated_ordered": [
+            {
+              "model": "HAR_LR",
+              "T_max_at_elim": 6.499,
+              "p_value": 0.000999
+            },
+            {
+              "model": "epu",
+              "T_max_at_elim": 5.11358,
+              "p_value": 0.000999
+            },
+            {
+              "model": "all",
+              "T_max_at_elim": 3.431755,
+              "p_value": 0.088911
+            }
+          ],
+          "n_models_input": 18,
+          "n_models_survived": 15,
+          "final_stopping_p": 0.226773,
+          "bootstrap_B": 1000,
+          "seed": 42,
+          "trace": [
+            {
+              "surviving_n": 18,
+              "T_max": 6.499,
+              "worst_model": "HAR_LR",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 17,
+              "T_max": 5.11358,
+              "worst_model": "epu",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 16,
+              "T_max": 3.431755,
+              "worst_model": "all",
+              "p_value": 0.088911
+            },
+            {
+              "surviving_n": 15,
+              "T_max": 3.048851,
+              "worst_model": "base",
+              "p_value": 0.226773
+            }
+          ]
+        }
+      },
+      "MSE": {
+        "n_models_input": 6,
+        "candidate_models": [
+          "M1",
+          "M2_GJR_t",
+          "M3_GARCH_MIDAS_X",
+          "M3_GAS_t",
+          "M4_HAR_RV_X",
+          "M5_HAR_RV"
+        ],
+        "n_pairs_total": 8,
+        "alpha_0.10": {
+          "superior_set": [
+            "M2_GJR_t",
+            "M3_GAS_t",
+            "M4_HAR_RV_X",
+            "M5_HAR_RV"
+          ],
+          "eliminated_ordered": [
+            {
+              "model": "M3_GARCH_MIDAS_X",
+              "T_max_at_elim": 3.895975,
+              "p_value": 0.001998
+            },
+            {
+              "model": "M1",
+              "T_max_at_elim": 3.78929,
+              "p_value": 0.000999
+            }
+          ],
+          "n_models_input": 6,
+          "n_models_survived": 4,
+          "final_stopping_p": 0.502498,
+          "bootstrap_B": 1000,
+          "seed": 42,
+          "trace": [
+            {
+              "surviving_n": 6,
+              "T_max": 3.895975,
+              "worst_model": "M3_GARCH_MIDAS_X",
+              "p_value": 0.001998
+            },
+            {
+              "surviving_n": 5,
+              "T_max": 3.78929,
+              "worst_model": "M1",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 4,
+              "T_max": 1.588345,
+              "worst_model": "M4_HAR_RV_X",
+              "p_value": 0.502498
+            }
+          ]
+        },
+        "alpha_0.20": {
+          "superior_set": [
+            "M2_GJR_t",
+            "M3_GAS_t",
+            "M4_HAR_RV_X",
+            "M5_HAR_RV"
+          ],
+          "eliminated_ordered": [
+            {
+              "model": "M3_GARCH_MIDAS_X",
+              "T_max_at_elim": 3.895975,
+              "p_value": 0.001998
+            },
+            {
+              "model": "M1",
+              "T_max_at_elim": 3.78929,
+              "p_value": 0.000999
+            }
+          ],
+          "n_models_input": 6,
+          "n_models_survived": 4,
+          "final_stopping_p": 0.502498,
+          "bootstrap_B": 1000,
+          "seed": 42,
+          "trace": [
+            {
+              "surviving_n": 6,
+              "T_max": 3.895975,
+              "worst_model": "M3_GARCH_MIDAS_X",
+              "p_value": 0.001998
+            },
+            {
+              "surviving_n": 5,
+              "T_max": 3.78929,
+              "worst_model": "M1",
+              "p_value": 0.000999
+            },
+            {
+              "surviving_n": 4,
+              "T_max": 1.588345,
+              "worst_model": "M4_HAR_RV_X",
+              "p_value": 0.502498
+            }
+          ]
+        }
+      }
+    }
+  },
+  "summary": {
+    "total_rows_consumed": 1048,
+    "total_mcs_runs": 18,
+    "rows_dropped_multi_asset": 1023,
+    "rows_dropped_empty_asset": 605,
+    "rows_dropped_bad_model_name": 65,
+    "rows_dropped_same_model_pair": 0,
+    "rows_dropped_invalid_dm": 0,
+    "model_name_normalization_map": {
+      "GJR_N": "GJR-N",
+      "GJR_t": "GJR-t",
+      "HAR_ABS": "HAR-ABS",
+      "best_single": "Best_Single",
+      "GJR-GARCH": "GJR",
+      "gjr": "GJR",
+      "bma": "BMA",
+      "GJR-GARCH(1,1)": "GJR",
+      "EGARCH(1,1)": "EGARCH",
+      "ar1": "AR1",
+      "har": "HAR",
+      "threshold": "THRESHOLD",
+      "rv21_baseline": "RV21",
+      "HAR_logrange": "HAR-LOGRANGE",
+      "GARCH(1,1)": "GARCH",
+      "ewma": "EWMA",
+      "garch": "GARCH",
+      "har_vix": "HAR-VIX",
+      "mem": "MEM",
+      "amem": "AMEM",
+      "har_abs": "HAR-ABS",
+      "dmem": "DMEM",
+      "gjr_garch": "GJR",
+      "GJR_GARCH": "GJR",
+      "naive": "NAIVE",
+      "HAR_RV": "HAR-RV",
+      "equal_weight": "Equal_Weight"
+    }
+  }
+}
