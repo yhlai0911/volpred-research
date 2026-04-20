@@ -1,0 +1,108 @@
+=== Daily Update: 2026-04-20 ===
+  TLT 66d momentum: -0.7% (negative, SPY-only recommended)
+  GLD regime: BULL (inverted leverage → GARCH) (252d ret=+45.0%)
+  VIX/GARCH ratio: 1.41 (normal)
+  VIX term structure: contango (0.852)
+  SPY: $710.14 (+1.20%), σ=12.4%
+  GLD: $445.93, σ=22.8%
+  🔄 Hybrid VT active (VIX-based weight, ratio=1.41)
+  Slow VT: 69% SPY, 31% cash
+  Risk Parity: 69% SPY, 37% GLD, 0% cash
+  12/VIX Simple: 69% SPY, 31% cash (SHY)
+  ★ 50/50 SPY/GLD: 34% SPY, 34% GLD, 32% SHY
+  台灣 8.63/VIX: 49% 0050.TW, 51% 短債 (NT$84.15)
+  ⚠️ 10d SPY Momentum [BIASED c2c, o2o FAIL]: SPY 10d avg=+0.801% → HOLD 0050
+  ⚠️ TW+JP 50/50 TZ [BIASED]: TW ON, JP ON (^N225 ¥58839.98)
+  ⚠️ Global VT+TZ [50% BIASED]: SPY 17%, GLD 17%, 0050 50%
+  VIX+景氣領先: 34% 0050.TW (↓保守k=6, MoM=+0.0)
+  VIX條件槓桿: SPY 34%, GLD 34%, cash 32% (1.0x 標準, VIX=17.5)
+  台股混合槓桿: 49% 0050.TW, 51% cash (1.0x 標準, RV22=32.9%, VIX pctl=0.51)
+  保守型VT(Piecewise): SPY 16%, GLD 16%, cash 68% (VIX=17.5, 漸退)
+  恐慌加碼DCA: 正常投入 1.0x (VIX=17.5, 本月建議投入 100% 正常金額)
+  自適應三階VT: SPY 34%, GLD 34%, cash 32% (標準 12/VIX (15≤VIX=17.5≤20))
+  ⚠️ 數據未更新（spy_date=2026-04-17 與上次相同），跳過發布
+  跳過發布（數據與上次相同）
+  Published locally. Feed: 944 items (no configured local data mirrors)
+  Mirror API: RESEARCH_MIRROR_TOKEN not set, skipping
+  Supabase: article synced
+  Supabase: risk_forecast synced
+  Supabase: 14 strategy signals synced
+  Supabase: 420 paper trades synced (last 30d × 14 strategies)
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  ⚠️ Supabase: market_daily synced 10/30 (FAILED 20)
+
+--- Generating risk forecast ---
+=== Risk Forecast: 2026-04-20 ===
+  SPY: σ_ann=12.4% | regime=正常 | VaR(skewt) 1d=2.24% | VaR(CF) 1d=2.59% | VaR(t) 1d=2.03% | Basel GREEN (1/73)
+  QQQ: σ_ann=16.3% | regime=正常 | VaR(skewt) 1d=2.90% | VaR(CF) 1d=3.11% | VaR(t) 1d=2.68% | Basel GREEN (0/73)
+  GLD: σ_ann=25.2% | regime=高波動 | VaR(skewt) 1d=4.39% | VaR(CF) 1d=4.66% | VaR(t) 1d=4.14% | Basel GREEN (2/73)
+  TLT: σ_ann=11.2% | regime=低波動 | VaR(skewt) 1d=1.75% | VaR(CF) 1d=1.74% | VaR(t) 1d=1.84% | Basel GREEN (1/73)
+  0050.TW: σ_ann=22.1% | regime=高波動 | VaR(skewt) 1d=3.81% | VaR(CF) 1d=4.66% | VaR(t) 1d=3.62% | Basel GREEN (1/66)
+  EEM: σ_ann=19.9% | regime=正常 | VaR(skewt) 1d=3.37% | VaR(CF) 1d=3.51% | VaR(t) 1d=3.27% | Basel GREEN (1/73)
+
+Saved to storage/risk_forecast.json
+  ✓ risk_forecast.json updated
+
+--- Recalculating strategy metrics ---
+  slow_vt                   Sharpe=1.33 Ret=49.5% MDD=-10.7% sparkline=90pt
+  risk_parity               Sharpe=2.18 Ret=150.4% MDD=-11.5% sparkline=90pt
+  simple_12vix              Sharpe=1.32 Ret=47.1% MDD=-11.0% sparkline=90pt
+  recommended_5050          Sharpe=2.00 Ret=72.2% MDD=-7.7% sparkline=90pt
+  taiwan_8.63vix            Sharpe=2.15 Ret=98.5% MDD=-11.2% sparkline=90pt
+  taiwan_spy_momentum       Sharpe=3.24 Ret=310.4% MDD=-8.1% sparkline=90pt
+  tz_tw_jp_5050             Sharpe=3.48 Ret=260.0% MDD=-6.7% sparkline=90pt
+  global_vt_tz              Sharpe=3.06 Ret=137.6% MDD=-5.5% sparkline=90pt
+  vix_leading_guard         Sharpe=1.58 Ret=78.7% MDD=-16.0% sparkline=90pt
+  vix_cond_leverage         Sharpe=2.74 Ret=139.7% MDD=-6.5% sparkline=90pt
+  taiwan_hybrid_leverage    Sharpe=2.58 Ret=151.6% MDD=-10.3% sparkline=90pt
+  piecewise_conservative    Sharpe=3.16 Ret=71.2% MDD=-2.5% sparkline=90pt
+  fear_dca                  Sharpe=1.45 Ret=99.7% MDD=-18.8% sparkline=90pt
+  adaptive_tier             Sharpe=3.05 Ret=146.1% MDD=-5.1% sparkline=90pt
+
+✓ 14 strategies updated → strategy_metrics.json
+  → frontend metrics synced: frontend-v2-fix/data/strategy_metrics.json
+  → Supabase strategy_metrics_cache: 14/14 synced (metrics only; sparkline owned by frontend buildSparkline)
+
+--- Updating market status ---
+  Trading calendar synced: 30 days (2026-04-20 ~ 2026-05-19)
+  Today: 美股正常開盤、台股正常開盤
+
+--- Rebuilding feed index ---
+[feed-index] wrote INDEX.md + index.json (944 articles, last30=551)
+
+--- Rebuilding experiments index ---
+[index] wrote experiments/INDEX.md (1012 K rows; uncovered=732, PASS=201 FAIL=71 NULL=92)
+
+--- Sync health check ---
+  paper_trades: OK (trade_date=2026-04-18)
+  ⚠️  market_daily: remote trade_date=2026-04-20 local trade_date=2026-04-18
+  ⚠️  strategy_signals: remote updated_at=2026-04-20T00:35:09.724949+00:00 local trade_date=2026-04-18
+
+⚠️  Sync health: 2 table(s) drifted — investigate supabase_sync.py
+
+--- Ops alert checks ---
+  breaches=1 sent=0 skipped=1
+  - [⚠️ BREACH] release_pool_gap | Release pool cron gap > 2h
+  - [ok] draft_pool_low | Draft pool below threshold (<4)
+  - [ok] host_cron_fail | Host cron failure detected
+
+✓ Done!

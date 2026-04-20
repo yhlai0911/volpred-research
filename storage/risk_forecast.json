@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-18T08:04:53.600640",
+  "generated_at": "2026-04-20T08:36:05.229163",
   "model": "GJR-GARCH(1,1) + Skewed-t(MLE) + CF-VaR + Student-t(df=5)",
   "assets": {
     "SPY": {
@@ -1326,10 +1326,10 @@
     },
     "0050.TW": {
       "name": "元大台灣50 ETF",
-      "price": 85.0,
-      "last_date": "2026-04-16",
-      "sigma_daily_pct": 1.41,
-      "sigma_ann_pct": 22.5,
+      "price": 84.15,
+      "last_date": "2026-04-17",
+      "sigma_daily_pct": 1.39,
+      "sigma_ann_pct": 22.1,
       "regime": {
         "level": "high",
         "label": "高波動",
@@ -1337,67 +1337,63 @@
       },
       "forecasts": {
         "daily": {
-          "var_pct": 3.69,
-          "es_pct": 4.88,
-          "var_dollar": 36875.0,
-          "es_dollar": 48793.0,
-          "cf_var_pct": 4.75,
-          "cf_es_pct": 6.28,
-          "cf_var_dollar": 47478.0,
-          "cf_es_dollar": 62822.0,
-          "skewt_var_pct": 3.88,
-          "skewt_es_pct": 5.14,
-          "skewt_var_dollar": 38834.0,
-          "skewt_es_dollar": 51384.0
+          "var_pct": 3.62,
+          "es_pct": 4.79,
+          "var_dollar": 36232.0,
+          "es_dollar": 47942.0,
+          "cf_var_pct": 4.66,
+          "cf_es_pct": 6.17,
+          "cf_var_dollar": 46626.0,
+          "cf_es_dollar": 61696.0,
+          "skewt_var_pct": 3.81,
+          "skewt_es_pct": 5.04,
+          "skewt_var_dollar": 38117.0,
+          "skewt_es_dollar": 50435.0
         },
         "weekly": {
-          "var_pct": 8.17,
-          "es_pct": 10.81,
-          "var_dollar": 81728.0,
-          "es_dollar": 108141.0,
-          "cf_var_pct": 10.52,
-          "cf_es_pct": 13.92,
-          "cf_var_dollar": 105227.0,
-          "cf_es_dollar": 139235.0,
-          "skewt_var_pct": 8.61,
-          "skewt_es_pct": 11.39,
-          "skewt_var_dollar": 86069.0,
-          "skewt_es_dollar": 113885.0
+          "var_pct": 8.05,
+          "es_pct": 10.65,
+          "var_dollar": 80484.0,
+          "es_dollar": 106495.0,
+          "cf_var_pct": 10.36,
+          "cf_es_pct": 13.7,
+          "cf_var_dollar": 103572.0,
+          "cf_es_dollar": 137046.0,
+          "skewt_var_pct": 8.47,
+          "skewt_es_pct": 11.2,
+          "skewt_var_dollar": 84669.0,
+          "skewt_es_dollar": 112033.0
         },
         "monthly": {
-          "var_pct": 16.75,
-          "es_pct": 22.16,
-          "var_dollar": 167486.0,
-          "es_dollar": 221615.0,
-          "cf_var_pct": 21.56,
-          "cf_es_pct": 28.53,
-          "cf_var_dollar": 215645.0,
-          "cf_es_dollar": 285338.0,
-          "skewt_var_pct": 17.64,
-          "skewt_es_pct": 23.34,
-          "skewt_var_dollar": 176382.0,
-          "skewt_es_dollar": 233387.0
+          "var_pct": 16.59,
+          "es_pct": 21.96,
+          "var_dollar": 165941.0,
+          "es_dollar": 219571.0,
+          "cf_var_pct": 21.35,
+          "cf_es_pct": 28.26,
+          "cf_var_dollar": 213545.0,
+          "cf_es_dollar": 282560.0,
+          "skewt_var_pct": 17.46,
+          "skewt_es_pct": 23.1,
+          "skewt_var_dollar": 174570.0,
+          "skewt_es_dollar": 230989.0
         }
       },
       "residual_stats": {
-        "skewness": -0.4207,
-        "excess_kurtosis": 3.3657,
-        "cf_1pct_quantile": -3.3559,
+        "skewness": -0.4182,
+        "excess_kurtosis": 3.3626,
+        "cf_1pct_quantile": -3.3542,
         "skewt_eta": 4.76,
-        "skewt_lambda": -0.0696
+        "skewt_lambda": -0.0682
       },
       "basel_zone": {
         "year": 2026,
         "violations": 1,
-        "days": 65,
+        "days": 66,
         "zone": "GREEN",
         "rate": 1.5
       },
       "sigma_history": [
-        {
-          "date": "2026-01-09",
-          "sigma_ann": 18.1
-        },
         {
           "date": "2026-01-12",
           "sigma_ann": 17.5
@@ -1633,23 +1629,27 @@
         {
           "date": "2026-04-16",
           "sigma_ann": 23.9
+        },
+        {
+          "date": "2026-04-17",
+          "sigma_ann": 22.5
         }
       ],
-      "sigma_vs_5y_avg": 2.2,
+      "sigma_vs_5y_avg": 0.4,
       "hist_avg_sigma_ann": 22.0,
       "alerts": [
         {
           "type": "regime",
-          "message": "當前處於高波動環境（22.5%）",
+          "message": "當前處於高波動環境（22.1%）",
           "severity": "medium"
         }
       ],
       "model": "GJR-GARCH(1,1) w=2000",
       "params": {
-        "omega": 0.140022,
-        "alpha[1]": 0.04626,
-        "gamma[1]": 0.144509,
-        "beta[1]": 0.80202
+        "omega": 0.140326,
+        "alpha[1]": 0.045928,
+        "gamma[1]": 0.144922,
+        "beta[1]": 0.801874
       },
       "model_note": "台灣波動率放大 4.6x（vs US 2.8x），VIX proxy 有效",
       "articles": [

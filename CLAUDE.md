@@ -49,6 +49,23 @@
 - `.claude/skills/`：工作流與 task-specific reference
 - `.claude/rules/`：Claude 觸發對應 paths 時自動載入的規則
 
+### Rule path-trigger 時序原則（2026-04-20 補）
+
+**規則只在 Claude 真正 touch `paths:` frontmatter 列出的 path 時 auto-load**。若規則 intent 是「在 X 階段就要提醒」但 paths 只匹配「執行 X 之後」才會 touch 的 path，規則永遠不 load — silent failure。
+
+**寫新規則或改現有規則 paths 時，強制問三個問題**：
+1. 這規則**應該在什麼 workflow 階段** auto-load？（planning / selection / execution / verification）
+2. 在該階段我會 **touch 哪些 path**？（query / grep / read / jq / read memo 等）
+3. 規則的 `paths:` 是否 covers 那些 pre-action touches？若否 → **補 paths**
+
+**典型 path class 對應 workflow 階段**：
+- Planning/selection → `storage/publication_candidates.json` / `storage/next_draft_candidate_*.md` / `.claude/skills/*/SKILL.md` / `research_program.md` / `docs/error_log.md`
+- Data query → `experiments/*/*_results.json` / `storage/memory/knowledge.json` / `storage/reports/feed.json`
+- Execution → 對應寫入目標（`feed.json`, `paper/*.tex`, `config/*.json`）
+- Verification → test 檔、reproduce_report.json、sync log
+
+**歷史 incident**（2026-04-20）：`.claude/rules/publish-checklist.md` 原 paths 只覆蓋 feed.json/supabase_sync.py 等「已經在寫 feed」的路徑 — 主線程**派 agent 前** query publication_candidates / read memo / ls experiments 時規則完全不 load，3-layer dedup rule 在最需要它的選題階段 silent skip。session 6 次 dispatch，5/6 沒做 3-layer dedup 就是因為規則 never surfaced. Fix: 補 `storage/publication_candidates.json`, `storage/next_draft_candidate_*.md`, `.claude/skills/publication-candidates/**`, `experiments/*/*_results.json` 到 paths。
+
 ## 研究誠實原則（最高優先，不可違反）
 
 **一切結果必須真實、嚴謹、可驗證。違反任何一條即視為研究失敗。**

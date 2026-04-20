@@ -6,11 +6,28 @@ paths:
   - "scripts/supabase_sync.py"
   - "src/volpred/publisher/**"
   - ".claude/skills/feed-publisher/**"
+  # 2026-04-20 path-trigger 補洞（user 指正：rules 依 path 觸發，若寫文前
+  # 都沒 touch 這些 path，規則永不 auto-load，3-layer dedup 永遠遺忘）：
+  # 加 topic-selection + experiment-query 階段會 touch 的 paths。
+  - "storage/publication_candidates.json"
+  - "storage/next_draft_candidate_*.md"
+  - ".claude/skills/publication-candidates/**"
+  # 寫文 agent dispatch 前必讀 experiment results 取數字，experiments/** 是
+  # 最早 touch path。此處用 results.json 而非全 experiments/ 避免修代碼
+  # 時也 auto-load publish rule。
+  - "experiments/*/results.json"
+  - "experiments/*/*_results.json"
 ---
 
 # 發佈 Checklist
 
-當 Claude 觸及 feed / publisher / mile_ 或 feed-publisher skill 路徑時自動觸發。對應 Mission 第 1 條「把文章寫好」+ 第 5 條「把曝光流量拉高」。
+當 Claude 觸及 feed / publisher / mile_ / feed-publisher skill / publication-candidates / experiment results / next_draft_candidate memo 路徑時自動觸發。對應 Mission 第 1 條「把文章寫好」+ 第 5 條「把曝光流量拉高」。
+
+**觸發時機對應 workflow 階段**：
+- 選題階段 → `publication_candidates.json` / `next_draft_candidate_*.md` / `publication-candidates skill` → **規則在我挑主題時就 auto-load** 提醒 3-layer dedup
+- 查數字階段 → `experiments/*/results.json` → **規則在 agent brief 引用 K 數字前 auto-load**
+- 寫文階段 → `feed-publisher skill` / `feed.json` / `mile_*.json` → 規則照舊觸發
+- Pipeline 校驗 → `supabase_sync.py` / `publisher/**` → 照舊
 
 ## 硬規則
 
