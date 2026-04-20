@@ -61,10 +61,18 @@ def _load_feed(storage_dir: str | Path = "storage") -> list[dict]:
 
 
 def _fetch_supabase_articles() -> dict[str, dict]:
-    """Return slug -> minimal row for diff comparison."""
+    """Return slug -> minimal row for diff comparison.
+
+    2026-04-20: added `content` to projection so compute_diff can detect
+    content drift — previously only title/status/published_at were compared,
+    meaning post-publish content extensions (e.g. K1257 article 1625→2107
+    CJK) would never trigger Supabase UPDATE. Cost trade-off: content per
+    article averages ~5KB so ~5MB total for 1000 articles per sync pass,
+    acceptable vs the correctness gain.
+    """
     rows = _select_rows(
         "articles",
-        select="slug,status,title,published_at,updated_at",
+        select="slug,status,title,published_at,updated_at,content",
     )
     return {r["slug"]: r for r in rows if r.get("slug")}
 
@@ -121,10 +129,19 @@ def compute_diff(storage_dir: str | Path = "storage") -> dict:
     for slug in sorted(feed_keys & db_keys):
         f = feed_by_slug[slug]
         d = db_by_slug[slug]
+        # 2026-04-20: include content hash in diff so post-publish content
+        # extensions propagate to Supabase (K1257 article incident).
+        feed_content = (f.get("content") or f.get("description") or "")
+        db_content = d.get("content") or ""
+        content_changed = (
+            hashlib.md5(feed_content.encode("utf-8")).hexdigest()
+            != hashlib.md5(db_content.encode("utf-8")).hexdigest()
+        )
         if (
             (f.get("title") or "") != (d.get("title") or "")
             or (f.get("status") or "") != (d.get("status") or "")
             or _norm_ts(f.get("published_at")) != _norm_ts(d.get("published_at"))
+            or content_changed
         ):
             to_update.append(slug)
 

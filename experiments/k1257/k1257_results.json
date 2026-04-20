@@ -3,10 +3,10 @@
   "title": "K1257: Bayesian Model Averaging (BMA) Volatility Forecast \u2014 Posterior-weighted combination of 6 GARCH/HAR/IV-mix specs",
   "proposer": "Claude",
   "executor": "Claude agent",
-  "data_period": "2016-01-01 to 2026-04-18",
-  "oos_start": "2022-01-01",
-  "rolling_window": 750,
-  "refit_freq": 126,
+  "data_period": "2010-01-01 to 2026-04-18",
+  "oos_start": "2020-01-01",
+  "rolling_window": 1250,
+  "refit_freq": 63,
   "seed": 42,
   "models": [
     "GARCH_N",
@@ -17,112 +17,306 @@
     "A4f_IV2"
   ],
   "assets": [
-    "SPY"
+    "SPY",
+    "GLD",
+    "0050.TW"
   ],
   "per_asset": {
     "SPY": {
-      "n_oos": 1076,
-      "bma_qlike": -8.242677752422901,
-      "equal_weight_qlike": -8.252249814425518,
-      "gjr_t_qlike": -8.230129349967713,
+      "n_oos": 1581,
+      "bma_qlike": -8.227435934021337,
+      "equal_weight_qlike": -8.204426515519783,
+      "gjr_t_qlike": -8.174852779117515,
       "per_model_qlike": {
-        "GARCH_N": -8.213182117774146,
-        "GJR_N": -8.248498200952758,
-        "GJR_t": -8.230129349967713,
-        "EGARCH_N": -8.238470928637033,
-        "HAR_ABS": -8.167272277371959,
-        "A4f_IV2": -8.202265160436285
+        "GARCH_N": -8.154045379478035,
+        "GJR_N": -8.146190701632813,
+        "GJR_t": -8.174852779117515,
+        "EGARCH_N": -8.144335135176284,
+        "HAR_ABS": -8.099141887473873,
+        "A4f_IV2": -8.241646799418408
       },
       "dm_bma_vs_gjr": {
-        "t_stat": -1.3972552933063092,
-        "p_value": 0.1626251327717776,
-        "harvey_pass": false
+        "t_stat": -3.3974966985713597,
+        "p_value": 0.000696941134322504,
+        "harvey_pass": true
       },
       "dm_bma_vs_equal": {
-        "t_stat": 1.3879999526019693,
-        "p_value": 0.16542464946159652,
+        "t_stat": -1.3628259739255082,
+        "p_value": 0.17313156033180843,
         "harvey_pass": false
       },
       "regime_weights": {
         "VIX<15": {
-          "n_days": 261,
-          "GARCH_N": 0.0021860507554614743,
-          "GJR_N": 0.9004774856566228,
-          "GJR_t": 0.09630862146472267,
-          "EGARCH_N": 0.0010278383501430984,
-          "HAR_ABS": 3.773049061447846e-09,
-          "A4f_IV2": 1.1412946512736428e-15
+          "n_days": 283,
+          "GARCH_N": 0.010653444827535715,
+          "GJR_N": 0.01216562386677135,
+          "GJR_t": 0.009537728585847035,
+          "EGARCH_N": 0.011217125796062407,
+          "HAR_ABS": 0.008851026783169685,
+          "A4f_IV2": 0.9475750501406138
         },
         "15-20": {
-          "n_days": 422,
-          "GARCH_N": 0.019195438172177347,
-          "GJR_N": 0.6398222335140663,
-          "GJR_t": 0.33077242058177964,
-          "EGARCH_N": 0.005601111406168612,
-          "HAR_ABS": 0.0015224178950728152,
-          "A4f_IV2": 0.003086378430734886
+          "n_days": 595,
+          "GARCH_N": 0.001863328920792028,
+          "GJR_N": 0.0019387005888778842,
+          "GJR_t": 0.1696982403869051,
+          "EGARCH_N": 0.003418152357113513,
+          "HAR_ABS": 0.0011156944647148356,
+          "A4f_IV2": 0.8219658832815966
         },
         "20-25": {
-          "n_days": 221,
-          "GARCH_N": 0.0872486912443532,
-          "GJR_N": 0.6208791164599803,
-          "GJR_t": 0.2467975622310641,
-          "EGARCH_N": 0.023084376931538527,
-          "HAR_ABS": 0.0003439598296695693,
-          "A4f_IV2": 0.02164629330339358
+          "n_days": 355,
+          "GARCH_N": 6.262531429724264e-07,
+          "GJR_N": 1.0271300933524298e-10,
+          "GJR_t": 0.2957834844177551,
+          "EGARCH_N": 8.184423737959148e-08,
+          "HAR_ABS": 4.730696114121115e-11,
+          "A4f_IV2": 0.7042158073348449
         },
         ">25": {
-          "n_days": 172,
-          "GARCH_N": 0.15412254772223835,
-          "GJR_N": 0.528615841221982,
-          "GJR_t": 0.2629379958116169,
-          "EGARCH_N": 0.036558126294362205,
-          "HAR_ABS": 0.0015657281870152448,
-          "A4f_IV2": 0.01619976076278513
+          "n_days": 348,
+          "GARCH_N": 0.00012328055664668472,
+          "GJR_N": 0.00010589266574273966,
+          "GJR_t": 0.21181766167975025,
+          "EGARCH_N": 0.0024760999628168556,
+          "HAR_ABS": 7.456581803521207e-05,
+          "A4f_IV2": 0.7854024993170083
         }
       },
       "regime_qlike": {
         "VIX<15": {
-          "n_days": 261,
-          "bma_qlike": -9.092203682613668,
-          "gjr_t_qlike": -9.100290517222765,
-          "equal_qlike": -9.119095118999526
+          "n_days": 283,
+          "bma_qlike": -9.218281080414876,
+          "gjr_t_qlike": -9.137595986934356,
+          "equal_qlike": -9.149782504605785
         },
         "15-20": {
-          "n_days": 422,
-          "bma_qlike": -8.681418342859699,
-          "gjr_t_qlike": -8.676116117555663,
-          "equal_qlike": -8.675054037195205
+          "n_days": 595,
+          "bma_qlike": -8.845472962032357,
+          "gjr_t_qlike": -8.838961309161025,
+          "equal_qlike": -8.833134691434866
         },
         "20-25": {
-          "n_days": 221,
-          "bma_qlike": -7.666585130058391,
-          "gjr_t_qlike": -7.635618669034189,
-          "equal_qlike": -7.6711573205903045
+          "n_days": 355,
+          "bma_qlike": -7.988614452199555,
+          "gjr_t_qlike": -7.947400955199811,
+          "equal_qlike": -7.973409005697536
         },
         ">25": {
-          "n_days": 172,
-          "bma_qlike": -6.61733863962312,
-          "gjr_t_qlike": -6.579364116889954,
-          "equal_qlike": -6.646153504163646
+          "n_days": 348,
+          "bma_qlike": -6.608586560316749,
+          "gjr_t_qlike": -6.488486383435704,
+          "equal_qlike": -6.596363602893586
         }
       },
       "final_weights": {
-        "GARCH_N": 2.9568128950812964e-12,
-        "GJR_N": 0.0005277666080351611,
-        "GJR_t": 0.9994698369553573,
-        "EGARCH_N": 2.396433642479017e-06,
-        "HAR_ABS": 5.545871905413954e-23,
-        "A4f_IV2": 8.319017798759293e-15
+        "GARCH_N": 8.425100611178495e-31,
+        "GJR_N": 1.69428829463743e-33,
+        "GJR_t": 1.8033486675362302e-09,
+        "EGARCH_N": 3.907987660172589e-34,
+        "HAR_ABS": 1.1930781674838524e-49,
+        "A4f_IV2": 0.9999999981966514
+      }
+    },
+    "GLD": {
+      "n_oos": 1581,
+      "bma_qlike": -8.181168443888822,
+      "equal_weight_qlike": -8.137113249478231,
+      "gjr_t_qlike": -8.09042062066809,
+      "per_model_qlike": {
+        "GARCH_N": -8.116791287137037,
+        "GJR_N": -8.095806033905006,
+        "GJR_t": -8.09042062066809,
+        "EGARCH_N": -8.089845927350694,
+        "HAR_ABS": -8.067091230865335,
+        "A4f_IV2": -8.188748199815198
+      },
+      "dm_bma_vs_gjr": {
+        "t_stat": -3.379418886794974,
+        "p_value": 0.0007440728883547632,
+        "harvey_pass": true
+      },
+      "dm_bma_vs_equal": {
+        "t_stat": -2.6910171453012945,
+        "p_value": 0.007198560003328192,
+        "harvey_pass": false
+      },
+      "regime_weights": {
+        "VIX<15": {
+          "n_days": 283,
+          "GARCH_N": 0.012227726940036543,
+          "GJR_N": 0.010456956383929532,
+          "GJR_t": 0.00863273744125372,
+          "EGARCH_N": 0.016018944370787568,
+          "HAR_ABS": 0.003912912225379617,
+          "A4f_IV2": 0.948750722638613
+        },
+        "15-20": {
+          "n_days": 595,
+          "GARCH_N": 0.0030571689049818784,
+          "GJR_N": 0.0027704728061341373,
+          "GJR_t": 0.08300844835166557,
+          "EGARCH_N": 0.0034925008423960804,
+          "HAR_ABS": 0.0008424064309191672,
+          "A4f_IV2": 0.9068290026639045
+        },
+        "20-25": {
+          "n_days": 355,
+          "GARCH_N": 0.009677578083053742,
+          "GJR_N": 0.00791793854135104,
+          "GJR_t": 0.0769105592827347,
+          "EGARCH_N": 1.2105177114694357e-13,
+          "HAR_ABS": 1.0456274090770994e-09,
+          "A4f_IV2": 0.9054939230471116
+        },
+        ">25": {
+          "n_days": 348,
+          "GARCH_N": 0.02167699355314238,
+          "GJR_N": 0.021458735501770087,
+          "GJR_t": 0.05200235281064376,
+          "EGARCH_N": 0.0019805248753855522,
+          "HAR_ABS": 0.00029910109829857785,
+          "A4f_IV2": 0.9025822921607606
+        }
+      },
+      "regime_qlike": {
+        "VIX<15": {
+          "n_days": 283,
+          "bma_qlike": -8.544917946073095,
+          "gjr_t_qlike": -8.49630228000812,
+          "equal_qlike": -8.506880296576753
+        },
+        "15-20": {
+          "n_days": 595,
+          "bma_qlike": -8.283560884005555,
+          "gjr_t_qlike": -8.193522316025339,
+          "equal_qlike": -8.232540546866492
+        },
+        "20-25": {
+          "n_days": 355,
+          "bma_qlike": -8.126662046159469,
+          "gjr_t_qlike": -8.079687713923189,
+          "equal_qlike": -8.1191156173095
+        },
+        ">25": {
+          "n_days": 348,
+          "bma_qlike": -7.76589591574605,
+          "gjr_t_qlike": -7.595018791827999,
+          "equal_qlike": -7.691612798745476
+        }
+      },
+      "final_weights": {
+        "GARCH_N": 1.9791903456139303e-25,
+        "GJR_N": 1.2360747267708316e-32,
+        "GJR_t": 8.044263861987218e-09,
+        "EGARCH_N": 1.111429217645314e-34,
+        "HAR_ABS": 1.7138459571683856e-42,
+        "A4f_IV2": 0.9999999919557361
+      }
+    },
+    "0050.TW": {
+      "n_oos": 1524,
+      "bma_qlike": -7.679046170988067,
+      "equal_weight_qlike": -7.69397775929242,
+      "gjr_t_qlike": -7.682462845493507,
+      "per_model_qlike": {
+        "GARCH_N": -7.66806331024713,
+        "GJR_N": -7.675993232483801,
+        "GJR_t": -7.682462845493507,
+        "EGARCH_N": -7.667318887560695,
+        "HAR_ABS": -7.5779968884754725,
+        "A4f_IV2": -7.6774473829611445
+      },
+      "dm_bma_vs_gjr": {
+        "t_stat": 0.9798308714158286,
+        "p_value": 0.3273252272783327,
+        "harvey_pass": false
+      },
+      "dm_bma_vs_equal": {
+        "t_stat": 1.684115202317569,
+        "p_value": 0.09236431537654255,
+        "harvey_pass": false
+      },
+      "regime_weights": {
+        "VIX<15": {
+          "n_days": 284,
+          "GARCH_N": 0.007599274141012112,
+          "GJR_N": 0.007700501501617424,
+          "GJR_t": 0.96013367845483,
+          "EGARCH_N": 0.007924409101730468,
+          "HAR_ABS": 0.007710525846134998,
+          "A4f_IV2": 0.008931610954674886
+        },
+        "15-20": {
+          "n_days": 565,
+          "GARCH_N": 0.0002633364270966886,
+          "GJR_N": 0.0002776016589545393,
+          "GJR_t": 0.9984363353170984,
+          "EGARCH_N": 0.0002817027692191763,
+          "HAR_ABS": 0.0003274570559177582,
+          "A4f_IV2": 0.0004135667717133406
+        },
+        "20-25": {
+          "n_days": 334,
+          "GARCH_N": 1.660413178820629e-10,
+          "GJR_N": 9.333158109272646e-08,
+          "GJR_t": 0.9999999033934402,
+          "EGARCH_N": 2.1330447365207777e-11,
+          "HAR_ABS": 1.2090330000324436e-19,
+          "A4f_IV2": 3.0876063218376793e-09
+        },
+        ">25": {
+          "n_days": 341,
+          "GARCH_N": 2.023317459215848e-09,
+          "GJR_N": 3.2031523673076304e-07,
+          "GJR_t": 0.9999995630266201,
+          "EGARCH_N": 4.146680288513118e-08,
+          "HAR_ABS": 1.4497518853616963e-11,
+          "A4f_IV2": 7.315352559589892e-08
+        }
+      },
+      "regime_qlike": {
+        "VIX<15": {
+          "n_days": 284,
+          "bma_qlike": -8.068220839494519,
+          "gjr_t_qlike": -8.067026383012154,
+          "equal_qlike": -8.0636793991055
+        },
+        "15-20": {
+          "n_days": 565,
+          "bma_qlike": -7.961858957707948,
+          "gjr_t_qlike": -7.971675307906155,
+          "equal_qlike": -7.977760045081666
+        },
+        "20-25": {
+          "n_days": 334,
+          "bma_qlike": -7.4102698265086,
+          "gjr_t_qlike": -7.410269829369396,
+          "equal_qlike": -7.427867945792361
+        },
+        ">25": {
+          "n_days": 341,
+          "bma_qlike": -7.1495930000308165,
+          "gjr_t_qlike": -7.149592996423162,
+          "equal_qlike": -7.176524447067148
+        }
+      },
+      "final_weights": {
+        "GARCH_N": 4.2354457268351926e-35,
+        "GJR_N": 1.7830654326880769e-32,
+        "GJR_t": 1.0,
+        "EGARCH_N": 2.4018481028296523e-35,
+        "HAR_ABS": 6.622202183509736e-65,
+        "A4f_IV2": 5.399987830894686e-32
       }
     }
   },
   "hypothesis_verdicts": {
-    "H1_bma_beats_gjr": "FAIL",
+    "H1_bma_beats_gjr": "PARTIAL",
     "H2_bma_beats_equal": "FAIL",
     "H3_regime_weight_shift": "FAIL"
   },
-  "conclusions": "BMA posterior-weighted combination tested vs single-best (GJR-t) and equal-weight ensemble on SPY/GLD/0050.TW 2020-2026 OOS. Per-asset summary: SPY: BMA=-8.24268, GJR-t=-8.23013 (BMA-GJR=-0.01255, Harvey t=-1.40); Equal=-8.25225 (BMA-Eq=+0.00957, Harvey t=+1.39). H1 verdict: FAIL; H2: FAIL; H3 (regime weight shift): FAIL. Research-honesty: null results reported as-is; the purpose of BMA is principled posterior weighting, not guaranteed QLIKE win. If posterior concentrates quickly on a single model, BMA effectively reduces to that model's forecast and differences vs single-best shrink.",
-  "runtime_seconds": 25.4,
-  "quick_mode": true
+  "conclusions": "BMA posterior-weighted combination tested vs single-best (GJR-t) and equal-weight ensemble on SPY/GLD/0050.TW 2020-2026 OOS. Per-asset summary: SPY: BMA=-8.22744, GJR-t=-8.17485 (BMA-GJR=-0.05258, Harvey t=-3.40); Equal=-8.20443 (BMA-Eq=-0.02301, Harvey t=-1.36) | GLD: BMA=-8.18117, GJR-t=-8.09042 (BMA-GJR=-0.09075, Harvey t=-3.38); Equal=-8.13711 (BMA-Eq=-0.04406, Harvey t=-2.69) | 0050.TW: BMA=-7.67905, GJR-t=-7.68246 (BMA-GJR=+0.00342, Harvey t=+0.98); Equal=-7.69398 (BMA-Eq=+0.01493, Harvey t=+1.68). H1 verdict: PARTIAL; H2: FAIL; H3 (regime weight shift): FAIL. Research-honesty: null results reported as-is; the purpose of BMA is principled posterior weighting, not guaranteed QLIKE win. If posterior concentrates quickly on a single model, BMA effectively reduces to that model's forecast and differences vs single-best shrink.",
+  "runtime_seconds": 343.8,
+  "quick_mode": false
 }

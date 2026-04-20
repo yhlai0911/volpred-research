@@ -2482,5 +2482,53 @@
     "task_type": "experiment",
     "outcome": "dispatched",
     "summary": "01:42 UTC K1257 BMA agent af701b910b6227bae dispatched — execute spec (7-model pool BMA, 3 assets SPY/GLD/0050.TW, rolling 1250 / refit 63 / OOS 2020-2026). Scope: 只動 experiments/k1257/, 產 k1257_bma_volatility.py + k1257_results.json + 2 charts + README results section. 不產 feed article (pool 7 已滿). Research honesty mandate: NULL as-is, 固定 seed 42, 不 fabricate. 11th agent session total. Slot 1/4."
+  },
+  {
+    "timestamp": "2026-04-20T09:50:14+08:00",
+    "task_type": "governance",
+    "outcome": "git_sync",
+    "summary": "01:43 UTC git commit 1574b1d2 pushed main (13 files: P10 body H1+H3 + reproduce green + K567 + K1164 articles + K1257 spec + cron logs). Session post-compact commit total: 4 (145ae731 4hr-sync / 7ea315d2 session_state / a5573c81 rule path-trigger / 1574b1d2 this). Local/remote synced. K1257 execution agent af701 still bg running."
+  },
+  {
+    "timestamp": "2026-04-20T09:54:45+08:00",
+    "task_type": "paper_review",
+    "outcome": "p8_state_check",
+    "summary": "01:44 UTC P8 volatility-absorption state: 46/75 match 61.3% / 12 mismatches / 17 untraceable / 3 critical flags (Tables 9-10 snapshot pinned ✓ / Table 6 NFP / Table 5 N column unclear). errata_pending.md 內 CRITICAL (Harvey cross -3.14→-1.17) + HIGH (T10 sign flip) + MEDIUM 多項 user Path A/B/C decision pending. 無法 session 內自動 advance. Pool audience imbalance: 6 general / 1 research — next release (oldest=mile_a21a6e06 general) 後更 imbalanced. Consider 下輪 dispatch research 但 K1257 agent bg running, slot 1/4."
+  },
+  {
+    "timestamp": "2026-04-20T09:57:39+08:00",
+    "task_type": "experiment",
+    "outcome": "agent_done",
+    "summary": "01:50 UTC K1257 BMA agent af701b910b6227bae completed: 3 files produced (py/json/2 charts/README done-status). H1 PARTIAL (SPY/GLD Harvey PASS t=-3.40/-3.38, 0050.TW FAIL), H2 FAIL (no asset passes Harvey vs equal-weight, confirms K482 equal-weight puzzle extends to Bayesian posterior), H3 FAIL (posterior concentrates within 500 days, not regime-adaptive). Runtime 344s. Genuine research finding — equal-weight puzzle generalizes + standard BMA cannot forget hence fails regime-adaptivity claim. 6 models (no Realized-GARCH 因無 5-min data). 下步: K1257 research-audience article 可 dispatch (pool 7 general-heavy 需 research 平衡)."
+  },
+  {
+    "timestamp": "2026-04-20T09:58:59+08:00",
+    "task_type": "daily_article",
+    "outcome": "dispatched",
+    "summary": "01:52 UTC K1257 research article agent a71e26388442b88e1 dispatched. Topic: BMA methodology honest NULL reporting + equal-weight puzzle extension + posterior concentration rationale. Pool balance: 6 general / 1 research → 6 general / 2 research. 3-layer dedup PASS (ensemble axis 新主題, no 既有 BMA article, differentiates from K482 MCS). 12th agent session total."
+  },
+  {
+    "timestamp": "2026-04-20T10:02:05+08:00",
+    "task_type": "governance",
+    "outcome": "research_program_update",
+    "summary": "01:53 UTC research_program.md §面向 A backlog 更新: [ ] BMA for vol forecasting → [x] K1257 完成 with 3-verdict summary (H1 PARTIAL / H2 FAIL confirming K482 equal-weight puzzle 延伸 / H3 FAIL posterior-cannot-forget). 標記等 Codex 04-24 code review 才寫 knowledge.json per CLAUDE.md §實驗後必做. 下步建議: forgetting-factor BMA or sliding-window posterior. K1257 research article agent a71e26388442b88e1 bg running."
+  },
+  {
+    "timestamp": "2026-04-20T10:06:00+08:00",
+    "task_type": "daily_article",
+    "outcome": "agent_done",
+    "summary": "02:05 UTC K1257 research article agent a71e26388442b88e1 completed: mile_5173955c (research draft, 2107 CJK / 11415 raw, 13 tags incl K1257/K482/K1002/K593, 2 charts reused from k1257 experiment). Title: K1257 BMA 波動率預測 posterior concentration BMA 退化等權 puzzle 擴展 Bayesian. Byte-match verified (QLIKE -8.2274/-8.1812/-7.6790, Harvey t -3.40/-3.38/+0.98). Pool balance: 6 general/1 research → 6 general/2 research ✓. Agent flagged feed-sync compute_diff not detecting content changes — downstream governance ticket. Session agent total 12/12 completed."
+  },
+  {
+    "timestamp": "2026-04-20T10:10:47+08:00",
+    "task_type": "platform_ops",
+    "outcome": "infra_fix",
+    "summary": "02:07 UTC feed_sync.py compute_diff content-hash detection fix (per K1257 agent downstream ticket): (1) _fetch_supabase_articles SELECT 加 content field, (2) compute_diff 比對 md5(content) 若 hash 不同 → mark for UPDATE. 未來 post-publish content 擴寫（如 K1257 1625→2107 CJK case）會自動 detect + propagate Supabase. Manual test: feed=949 db=950 update=0 (當下無 drift, fix preventive). 成本 ~5MB per 1000 articles sync pass, 可接受 vs 正確性."
+  },
+  {
+    "timestamp": "2026-04-20T10:15:09+08:00",
+    "task_type": "experiment",
+    "outcome": "tests_added",
+    "summary": "02:08 UTC tests/test_feed_sync.py 新增 — 4 regression cases covering compute_diff content-hash fix: (1) content change without metadata change triggers UPDATE, (2) identical content + metadata no-op, (3) title change still detected (regression), (4) description fallback matches content. All 4 pass. Full suite: 111 passed / 5 skipped / 0 failed (from 107/5/0). Fix now under pytest coverage."
   }
 ]

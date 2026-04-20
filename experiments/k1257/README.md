@@ -1,9 +1,11 @@
 # K1257 — Bayesian Model Averaging (BMA) Volatility Forecast
 
 - **Experiment ID**: `k1257`
-- **Status**: **spec-only**（designed 2026-04-20；pending execution 等 Codex 04-24 quota reset 或主線程手動跑）
+- **Status**: **done**（executed 2026-04-20；runtime 343.8s, 3 assets, 6 models, 2020-2026 OOS）
 - **Created At**: 2026-04-20T01:40:00+08:00
+- **Executed At**: 2026-04-20T09:55:00+08:00
 - **Proposer**: Claude (novelty-quota backlog from `research_program.md` 面向 A「Under-explored methodologies」)
+- **Executor**: Claude agent
 
 ## 問題描述
 
@@ -85,8 +87,53 @@ $$\hat\sigma^2_{t+1}^{BMA} = \sum_i w_{i,t+1} \hat\sigma^2_{t+1}^{(i)}$$
 ## 實驗三件套
 
 - [x] `README.md`（本檔）
-- [ ] `k1257_bma_volatility.py`（待 Codex 04-24 或主線程手動寫）
-- [ ] `k1257_results.json`（跑完生）
+- [x] `k1257_bma_volatility.py`
+- [x] `k1257_results.json`
+- [x] `k1257_weight_evolution.png`
+- [x] `k1257_qlike_comparison.png`
+
+## Results (executed 2026-04-20)
+
+### Per-asset OOS QLIKE (2020-2026, n_oos≈1580)
+
+| Asset | BMA | GJR-t (single best) | Equal-weight | DM BMA vs GJR-t | DM BMA vs Equal |
+|-------|-----|---------------------|--------------|------------------|------------------|
+| SPY | **-8.2274** | -8.1749 | -8.2044 | t=-3.40, p=0.0007, **Harvey PASS** | t=-1.36, p=0.17 |
+| GLD | **-8.1812** | -8.0904 | -8.1371 | t=-3.38, p=0.0007, **Harvey PASS** | t=-2.69, p=0.007 |
+| 0050.TW | -7.6790 | -7.6825 | **-7.6940** | t=+0.98, p=0.33 | t=+1.68, p=0.09 |
+
+### Hypothesis verdicts
+
+- **H1 (BMA beats GJR-t, Harvey |t|>3)**: **PARTIAL** — SPY + GLD PASS; 0050.TW FAIL (posterior concentrates on GJR-t so BMA≈GJR-t by construction)
+- **H2 (BMA beats equal-weight, Harvey |t|>3)**: **FAIL** — no asset passes Harvey threshold; BMA only marginally beats equal on SPY/GLD (t≈-1.4 / -2.7), 0050.TW equal-weight actually wins point-estimate
+- **H3 (regime-dependent weight shift)**: **FAIL** — posterior concentrates on 1 model per asset (A4f_IV2 for SPY/GLD, GJR-t for 0050.TW) and never reverses; weights are effectively regime-invariant
+
+### Key findings (one-liner per hypothesis)
+
+- H1: BMA PARTIAL — posterior correctly identifies IV-augmented A4f as superior for US/US-linked assets, but posterior concentration means BMA gain over GJR-t only when single best ≠ GJR-t.
+- H2: BMA FAIL — no Harvey-significant gain over equal-weight; supports K482's "equal-weight ensemble puzzle" for SPY/GLD, and on 0050.TW equal-weight is numerically best.
+- H3: Regime-adaptive weighting hypothesis rejected — cumulative likelihood update drives posterior to a single model within ~500 days and it never un-concentrates, so BMA ≠ regime-adaptive in this implementation.
+
+### Interpretation
+
+- Posterior concentration is a known feature of product-of-likelihood BMA updates: after ~n log-lik accumulations, the best model's weight → 1 exponentially. Forgetting factor / sliding-window posterior would be needed to preserve regime-adaptive behavior.
+- A4f-IV² dominant on SPY/GLD confirms IV-augmented variance specs remain the workhorse — consistent with K1002 A4f-t being MCS-only-survivor.
+- 0050.TW's VIX is actually SPY's VIX (no GVZ-equivalent for Taiwan); if a Taiwan-specific IV index (e.g. TAIEX VIX) were substituted, A4f might also dominate there.
+- **Null result on H2/H3 is reported as-is per research-honesty principle**; H1 PARTIAL is the headline.
+
+### Research-program linkage
+
+- Confirms K482 "equal-weight beats MCS-weighted" generalizes to Bayesian posterior weighting: BMA does not dominate equal-weight on OOS QLIKE.
+- Adds to K593 "no universal winner" — BMA's attempted regime-adaptive weighting fails because standard BMA cannot forget, so it cannot track regimes.
+
+### Methodology notes
+
+- 6 models (Realized-GARCH excluded — no 5-min data for these 3 assets)
+- Rolling window W=1250, refit every 63 days, seed=42
+- BMA posterior updated via `log w_{t+1} = log w_t + log p(y_t | M_i, F_{t-1})` with logsumexp normalization
+- Harvey (2016) corrected DM t-stat, |t|>3 threshold
+- Full raw results: `k1257_results.json`
+- Charts: `k1257_weight_evolution.png` (posterior weight paths by asset), `k1257_qlike_comparison.png` (QLIKE bars + DM t-stat bars)
 
 ## 相關 K
 

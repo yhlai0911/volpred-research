@@ -46,7 +46,7 @@
 - 跨資產 Granger 因果（vol spillover）
 
 **Under-explored methodologies (novelty quota 候選，feed_ct=0 per topic_diversity_audit 2026-04-19 19:30 UTC)**:
-- [ ] **Bayesian Model Averaging (BMA) for vol forecasting** — 多 GARCH spec (GARCH/GJR/EGARCH/TARCH) posterior-weighted combination；unlike simple 平均組合，根據 predictive likelihood 動態調權。對 Mission「最佳預測」線直接。0 feed coverage 目前。Not data-blocked。
+- [x] ~~Bayesian Model Averaging (BMA) for vol forecasting~~ → **K1257 完成 2026-04-20**：6-model pool × 3 assets × OOS 2020-2026。**H1 PARTIAL**（SPY/GLD Harvey PASS t=-3.40/-3.38, 0050.TW FAIL posterior→GJR-t），**H2 FAIL** no asset 過 equal-weight Harvey（確認 K482 equal-weight-puzzle 延伸到 Bayesian），**H3 FAIL** posterior 500 天內 concentrate 指數收斂→ standard BMA cannot forget/track regime。下步：forgetting-factor BMA 或 sliding-window posterior。**等候 Codex 04-24 code review 才 finalize knowledge.json 寫入**（CLAUDE.md §實驗後必做 L1）。
 - [ ] **Model Confidence Set (MCS) / SPA / Reality Check** — Hansen-Lunde-Nason framework 正式檢驗 "a set of models 無法顯著優於彼此"；取代 single-DM-test 的 pairwise 方法，統計學上嚴謹。對現有 K500+ pairwise DM 結果 meta-analysis 是 natural complement。0 feed coverage。Not data-blocked。
 - [ ] **Realized semivariance / signed jumps** — Barndorff-Nielsen-Kinnebrock-Shephard 分解 RV 為 upside/downside 部分，測 asymmetric vol 更純粹。需 5-min 數據（2026 Q2 HAR-RV 解鎖後可開）。
 
