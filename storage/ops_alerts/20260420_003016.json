@@ -1,0 +1,25 @@
+{
+  "timestamp": "2026-04-20T00:30:16Z",
+  "alerts": [
+    {
+      "type": "article_pool_low",
+      "severity": "high",
+      "detail": "Total draft articles=5, threshold=12. Immediate action: queue new articles."
+    },
+    {
+      "type": "article_pool_research_low",
+      "severity": "medium",
+      "detail": "Research audience drafts=3, threshold=4. Queue at least 1 research article."
+    },
+    {
+      "type": "article_pool_general_low",
+      "severity": "high",
+      "detail": "General audience drafts=2, threshold=8. Queue at least 6 general articles."
+    },
+    {
+      "type": "metrics_stale",
+      "severity": "medium",
+      "detail": "storage/strategy_metrics.json is 33.8h old (threshold 26h). Run recalc_metrics or daily_update."
+    }
+  ]
+}
