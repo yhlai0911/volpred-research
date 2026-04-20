@@ -16,7 +16,7 @@ ALERT_RECIPIENT = "yihao.lai@gmail.com"
 ALERT_LEVELS = ("info", "warn", "critical")
 ALERT_DEDUP_WINDOW = timedelta(hours=24)
 SCHEDULER_STALE_WINDOW = timedelta(minutes=30)
-RELEASE_POOL_GAP_THRESHOLD = timedelta(hours=2)
+RELEASE_POOL_GAP_BUFFER = timedelta(minutes=30)  # grace on top of configured interval
 
 _TAIPEI_TZ = ZoneInfo("Asia/Taipei")
 _RELEASE_POOL_FIRE_RE = re.compile(r"^=== \[release-pool\] fire at (.+) ===$")
@@ -261,34 +261,53 @@ def _parse_release_pool_state(storage_dir: str, now: datetime) -> dict[str, Any]
     if last_fire_at is not None:
         gap_hours = round((now - last_fire_at).total_seconds() / 3600.0, 2)
 
-    breached = last_fire_at is None or (now - last_fire_at) > RELEASE_POOL_GAP_THRESHOLD
+    # 2026-04-20: threshold derives from configured release interval + buffer
+    # (was hardcoded 2h, which false-positived every fire after user changed
+    # cadence 2h→12h). Alert fires only when gap exceeds the cadence the user
+    # actually chose. Critical tier = 2x interval (genuine silent outage).
+    interval_minutes = 120  # default fallback
+    if isinstance(settings_data, dict):
+        try:
+            interval_minutes = int(settings_data.get("interval_minutes") or 120)
+        except (TypeError, ValueError):
+            interval_minutes = 120
+    interval_td = timedelta(minutes=max(5, interval_minutes))
+    warn_threshold = interval_td + RELEASE_POOL_GAP_BUFFER
+    critical_threshold = interval_td * 2
+
+    breached = last_fire_at is None or (now - last_fire_at) > warn_threshold
+    threshold_hours = round(warn_threshold.total_seconds() / 3600.0, 2)
+    title = f"Release pool cron gap > {threshold_hours}h (interval={interval_minutes}min)"
     if not breached:
         return {
             "id": "release_pool_gap",
             "breached": False,
             "level": "info",
-            "title": "Release pool cron gap > 2h",
+            "title": title,
             "body": "",
             "details": {
                 "last_fire_at": last_fire_at.isoformat() if last_fire_at else None,
                 "gap_hours": gap_hours,
+                "interval_minutes": interval_minutes,
+                "warn_threshold_hours": threshold_hours,
                 "log_path": _relative_repo_path(log_path),
             },
         }
 
-    level = "critical" if last_fire_at is None or (now - last_fire_at) > timedelta(hours=4) else "warn"
+    level = "critical" if last_fire_at is None or (now - last_fire_at) > critical_threshold else "warn"
     last_fire_text = last_fire_at.isoformat() if last_fire_at else "missing"
     body = "\n".join(
         [
             "## 觸發條件",
-            "release_pool host cron fire gap 已超過 2 小時門檻。",
+            f"release_pool host cron fire gap 已超過 {threshold_hours} 小時門檻 (interval={interval_minutes}min + 30min grace)。",
             f"- last_fire_at: {last_fire_text}",
             f"- gap_hours: {gap_hours if gap_hours is not None else 'missing'}",
+            f"- configured_interval_minutes: {interval_minutes}",
             f"- log_path: {_relative_repo_path(log_path)}",
             "",
             "## 影響",
             "文章釋出中斷 = 讀者端看到平台停滯、搜尋索引停滯；Mission 第 1 條（文章品質）",
-            "與第 5 條（曝光流量）直接受損。若持續 >4h 會累積多篇 draft 排隊延遲。",
+            f"與第 5 條（曝光流量）直接受損。若持續 >{round(critical_threshold.total_seconds() / 3600, 1)}h 會累積多篇 draft 排隊延遲。",
             "",
             "## 建議行動",
             "1. 立即手動釋出（最快復原）：",
@@ -305,11 +324,13 @@ def _parse_release_pool_state(storage_dir: str, now: datetime) -> dict[str, Any]
         "id": "release_pool_gap",
         "breached": True,
         "level": level,
-        "title": "Release pool cron gap > 2h",
+        "title": title,
         "body": body,
         "details": {
             "last_fire_at": last_fire_at.isoformat() if last_fire_at else None,
             "gap_hours": gap_hours,
+            "interval_minutes": interval_minutes,
+            "warn_threshold_hours": threshold_hours,
             "log_path": _relative_repo_path(log_path),
         },
     }
