@@ -70,28 +70,14 @@
 
 **一切結果必須真實、嚴謹、可驗證。違反任何一條即視為研究失敗。**
 
-1. **不可造假、不可虛構**：所有數據、統計量、圖表必須來自實際計算。
-2. **數據來源透明**：每個實驗必須標明資料來源、期間、樣本數。
-3. **實驗三件套不可缺**：
-   - `experiments/<experiment_id>/README.md`
-   - `experiments/<experiment_id>/<experiment_id>.py`
-   - `experiments/<experiment_id>/<experiment_id>_results.json`
-   - 另加圖表、參考文獻、專屬資料（如有）
-4. **知識庫與經驗庫要同步**：
-   - `storage/memory/knowledge.json` 記錄發現了什麼
-   - `storage/memory/experiment_experiences.json` 記錄學到了什麼
-5. **文獻先於特定主題實驗**：非純探索任務，先做知識庫檢索與學術文獻搜尋，再設計實驗。
-6. **觀察先於計算**：先做資料診斷與描述統計，再做估計、收斂與殘差檢查。
-7. **方法論必須有正式檢定**：不要只看圖下結論；遵守 Harvey / DM / bootstrap / Patton 標準。
-8. **區分實證、理論、模擬**：不可混用口徑。
-9. **Null result 如實報告**：失敗也是結果。
-10. **承認局限，不可過度宣稱**：結論強度不能超過證據。
-11. **Lookahead bias 是最高風險**：
-   - `signal from t-1, return at t`
-   - 禁止 same-day 訊號乘 same-day 報酬
-   - 代碼裡要有明確 `signal.shift(1)` 或等效 lag
-12. **隨機程序必須固定 seed**：bootstrap、Monte Carlo、抽樣、MCMC、train/test split 都一樣。
-13. **推翻舊結論時必須回溯更正**：更新文章、feed / report JSON、同步平台、寫入 `docs/error_log.md`。
+1. **不可造假/虛構**：所有數據、統計量、圖表來自實際計算；每個實驗須標來源、期間、樣本數。
+2. **實驗三件套**：`experiments/<id>/{README.md, <id>.py, <id>_results.json}` + 圖表/refs/專屬資料（如有）。知識庫與經驗庫同步寫 `storage/memory/{knowledge,experiment_experiences}.json`。
+3. **觀察 + 文獻先於計算**：非探索任務先查知識庫 + 至少 3 篇文獻；先做資料診斷 + 描述統計再估計。
+4. **方法論正式檢定**：不看圖下結論；Harvey / DM / bootstrap / Patton 標準。實證/理論/模擬不混口徑。
+5. **Lookahead 最高風險 + 隨機程序固定 seed**：代碼要有明確 `signal.shift(1)` 或等效 lag；bootstrap/MC/抽樣/train-test split 都 seed。
+6. **Null result 如實報告、不過度宣稱、推翻舊結論必回溯更正**：失敗也是結果；結論強度不超過證據；更新文章、feed/report JSON、同步平台、寫 `docs/error_log.md`。
+
+詳細版（13 條原版）在 git history commit 4d7d787c 之前；實驗規則另見 `.claude/rules/experiments.md`。
 
 ## 專案地圖
 
@@ -116,19 +102,10 @@
 
 ### Source of Truth
 
-- `storage/` 是本地唯一源頭；不要手改歷史 JSON 來「修結果」。
-- Paper trading 歷史資料不可手補；讓 forward tracking / recalc 流程自然修正。
-- 前端 target、Zeabur service、paper public dir、Mirror 預設 URL 全看 `config/project_targets.json`。
-- 排程唯一來源是 `config/runtime_schedules.json`；不要從舊文件反推 cron。
-- v12 orchestration 的正式 task / schedule source of truth 是：
-  - `storage/ops/` 下的 control-plane `TaskRecord` / `AgentSession` / `ExecutionReceipt`
-  - `config/runtime_schedules.json`
-  - `event_jobs` + `storage/ops/event_ledger/`
-- `storage/next_tasks.json` 現在只視為 **legacy planning / working list**（v11→v12 遺留）：
-  - 可以當補充線索或人工待辦
-  - 不是 shared scheduler 的正式 queue
-  - 不是 canonical control-plane schema
-  - 不可拿它覆蓋 `storage/ops/` 或 `event_jobs` 的狀態
+- `storage/` 是本地唯一源頭 — 不手改歷史 JSON 修結果；paper_trading 不手補，讓 forward tracking / recalc 自然修正
+- Frontend target / Zeabur service / paper public dir / Mirror 預設 URL → `config/project_targets.json`；排程 → `config/runtime_schedules.json`（不反推 cron）
+- v12 canonical task/schedule source：`storage/ops/`（TaskRecord / AgentSession / ExecutionReceipt）+ `config/runtime_schedules.json` + `event_jobs` + `storage/ops/event_ledger/`
+- `storage/next_tasks.json` = legacy planning list（v11→v12 遺留），**不是** shared scheduler queue / canonical schema；不可覆蓋 `storage/ops/` 或 `event_jobs`
 
 ### 永遠修流程，不修資料
 
@@ -162,47 +139,26 @@
 
 ## 實驗與研究流程
 
-### 實驗前必做
+### 實驗前
 
-1. 先讀 `docs/error_log.md`
-2. 搜尋 `storage/memory/knowledge.json`，確認是否已有相似 K
-3. 搜尋相關文獻（至少 3 篇）
-4. 讀 `.claude/skills/autonomous-research/references/experiment-preamble.md`
-5. 在 agent brief 中寫清楚：
-   - 動機
-   - 差異化
-   - 相關 K 編號
-   - 防錯規則
-   - 成功標準
+讀 `docs/error_log.md` → 搜 `storage/memory/knowledge.json` 查相似 K → 至少 3 篇文獻 → 讀 `.claude/skills/autonomous-research/references/experiment-preamble.md` → agent brief 寫清動機/差異化/相關 K/防錯規則/成功標準。
 
-### 實驗中必守
+### 實驗中
 
-- 每個實驗一律用 `experiments/<experiment_id>/` 收納。
-- `README.md` 是必備，不可省略。
-- 策略回測要明確 lag；baseline 與新策略要用同一個 lag 慣例。
-- 公平比較遵守 `research_program.md` 的 Patton / VaR+ES 標準。
-- Sharpe 遠高於 baseline 時先懷疑 bug，不要先慶祝。
+- 一律收 `experiments/<id>/`；`README.md` 必備
+- 策略回測明確 lag；baseline 與新策略同 lag 慣例
+- 公平比較遵守 `research_program.md` Patton / VaR+ES 標準
+- Sharpe 遠高於 baseline 時先懷疑 bug
 
-### 實驗後必做
+### 實驗後
 
-1. **先做 Codex 審查代碼，再信結果**
-2. 通過後才寫入 `knowledge.json`
-3. 每 5-10 個實驗彙整一條 `experiment_experiences.json`
-4. 有可發佈價值的結果，立刻排入文章或論文工作流
-5. 新方向回寫 `research_program.md`
+Codex 審代碼 → 通過才寫 `knowledge.json` → 每 5-10 實驗彙整一條 `experiment_experiences.json` → 可發佈的排入文章/論文 workflow → 新方向回寫 `research_program.md`。
 
-### Worktree / Agent 規則
+### Worktree / Agent
 
-- Worktree agent 只應產出 `experiments/kXXX/` 內檔案。
-- Worktree agent **禁止修改共享狀態**：
-  - `storage/reports/feed.json`
-  - `storage/memory/knowledge.json`
-  - `storage/memory/thinking_journal.json`
-  - `storage/memory/experiment_experiences.json`
-  - Supabase / Mirror sync 流程
-- Worktree agent 完成後要 commit。
-- 主線程再用 `bash scripts/merge_worktree.sh` 合併。
-- **絕對禁止** `git worktree remove --force`。
+- Worktree agent 只產 `experiments/kXXX/` 檔；**禁改共享狀態**（`feed.json`、`storage/memory/*.json`、Supabase/Mirror sync）
+- 完成後 agent commit，主線程用 `bash scripts/merge_worktree.sh` 合併
+- **絕對禁止** `git worktree remove --force`
 
 ## 發佈、論文、策略
 
@@ -273,15 +229,7 @@
 
 ## 活文件原則
 
-以下內容變了，就應該更新對應母本：
-
-- 架構 / runtime target / 資料流：`docs/architecture.md`、`config/project_targets.json`
-- 排程：`config/runtime_schedules.json`
-- 研究方向與重大發現：`research_program.md`
-- 根因修正與教訓：`docs/error_log.md`
-- 專案優化進度：`docs/project_improvement_status.md`
-- 重複性 SOP：`.claude/skills/`
-- Claude rules：`.claude/rules/`
+內容變了就更新對應母本：架構 → `docs/architecture.md` + `config/project_targets.json`；排程 → `config/runtime_schedules.json`；研究方向 → `research_program.md`；根因/教訓 → `docs/error_log.md`；優化進度 → `docs/project_improvement_status.md`；重複性 SOP → `.claude/skills/`；Claude rules → `.claude/rules/`。
 
 可以直接新增補充內容；但**刪除或改寫既有治理規範前，先取得使用者同意。**
 
@@ -306,10 +254,3 @@ Context compaction 時，**優先保留**：
 
 **格式要求**：compact 輸出用條列、不用段落敘述；每則 ≤ 30 字；分「當前狀態」/「未竟任務」/「最近規則」三區。
 
-## 一句話版本
-
-- 系統由 AI 完全運營，執行階段不問用戶 — 遇問題自行修流程、優化邏輯。
-- 先查 error log、知識庫、文獻，再做實驗。
-- 先修流程，不修資料。
-- 先讓 Codex 審代碼，再信結果。
-- 任務無關當前上下文時，開乾淨 sub-agent，不要污染主線程。
