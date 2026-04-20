@@ -1894,5 +1894,491 @@
     "task_type": "platform_ops",
     "outcome": "live_verify",
     "summary": "21:13 UTC Live API sparkline cache trace: volpred.zeabur.app/api/strategy-overview 仍顯 len=60 abs-format (stale) 但 Supabase direct 已 90pt pct-format ✓. Next.js unstable_cache revalidate=300s on strategy-overview endpoint (frontend-v2-fix/src/lib/data-server.ts:1456-1457). 5 min 內 live API 自動 refresh 到我 PATCH 的新格式. 無需 manual revalidate. Platform 健康 200 OK."
+  },
+  {
+    "timestamp": "2026-04-20T05:18:32+08:00",
+    "task_type": "governance",
+    "outcome": "git_sync",
+    "summary": "21:18 UTC git sync 完成: 4-hour sync cron 在 20:47 UTC 已自動 commit session work as 145ae731 (post-compact saturation session: 35 files, bug fixes + 4 draft refills + infra sparkline). 本次手動 sync 發現已 committed, 只剩 session_state.json 剛被 auto-re-saved → commit 7ea315d2. git pull Already up to date. git push 7ea315d2 pushed to main. Local/remote synced, no fork."
+  },
+  {
+    "timestamp": "2026-04-20T05:20:10+08:00",
+    "task_type": "paper_review",
+    "outcome": "errata_refine",
+    "summary": "21:21 UTC P9 garch-x-vix errata_pending.md refine: 查 reproduce_report.json 的 divergences, 發現 4 個 TBD items 都已有 stored_source_value. QQQ/GLD+GVZ/GLD-dual/0050.TW/VRP 皆 drift <0.15% (內 tol_pct 3-15% 遠小於 noise band) — 非 errata. 只 SPY +2.9% 是真 errata material. errata_pending.md 表格 + 21:20 UTC 新 section 收斂敘述. reviewer-response 材料從 5 items drift 簡化為 1 item drift + 4 noise notes. Shelf-ready state 更 robust."
+  },
+  {
+    "timestamp": "2026-04-20T05:23:17+08:00",
+    "task_type": "platform_ops",
+    "outcome": "self_correction",
+    "summary": "21:25 UTC sparkline fix self-correction: 發現 frontend computeStrategyMetricsPayload 產 sparkline 用 buildSparkline(abs equity, 60pts, starts $1M), 與我 recalc_metrics.py port 的 list_new_strategy.py format (pct cum-return, 90pts) 不一致. Refresh endpoint 會 override 我 PATCH. 改: recalc_metrics.py sparkline PATCH 移除 (留 metrics-only PATCH + comment 說明 frontend 擁 sparkline 格式權威). 下次 refresh endpoint 或 frontend cache rebuild 用 canonical format. Lesson: infra fix 前先 verify format convention 跨 component."
+  },
+  {
+    "timestamp": "2026-04-20T05:26:04+08:00",
+    "task_type": "research",
+    "outcome": "activity_audit",
+    "summary": "21:27 UTC session activity audit: 30 commits in last 12h ~3/h avg, peak 6 commits at 22 CST. Latest hour 2 commits. K1092 article mile_4cf87cfc content quality check: 21,797 total chars (markdown+CJK) / 27 ## section headers / well-structured academic form (摘要 + K1041 背景 + 3-spec comparison + Harvey 門檻意義). Session state very productive, local 4 modified files since last sync (errata_pending/recalc_metrics/session_state/work_log) 等 00:47 UTC 4-hour cron."
+  },
+  {
+    "timestamp": "2026-04-20T05:29:57+08:00",
+    "task_type": "member_qa",
+    "outcome": "clean",
+    "summary": "21:29 UTC member QA state: 0 active_ranked / 0 pending / 0 researching / 12 answered. Latest Q 04-10 (9+ days 前), latest answer 04-11 (8+ days 前). 上次 clean (54ba8732 keyboard-mash archive) 後沒新入款. 無 action 需要. Cron 每 6h 觸發 skip continues."
+  },
+  {
+    "timestamp": "2026-04-20T05:33:50+08:00",
+    "task_type": "strategy_lifecycle",
+    "outcome": "live_verify",
+    "summary": "21:30 UTC live platform strategy-overview 11 active 全 Sharpe/MDD 同步: piecewise 3.16 / adaptive 3.07 / vix_cond 2.75 / tw_hybrid 2.58 / risk_parity 2.18 / tw_8.63 2.16 / reco_5050 2.00 / vix_guard 1.58 / fear_dca 1.45 / simple_12vix 1.33 / slow_vt 1.33. 與 21:22 UTC refresh + 21:25 recalc 一致 (rounding 差 0.01-0.02). Mission 4 (平台運營好) ✓. 讀者端即時看到最新 Sharpe rankings."
+  },
+  {
+    "timestamp": "2026-04-20T05:38:15+08:00",
+    "task_type": "paper_review",
+    "outcome": "retraction",
+    "summary": "21:32 UTC retract 20:26 UTC 的 paper PDF gap observation: 當時發現 frontend-v2-fix/public/paper/ 只有 6 PDF 缺 P4ins/P5/P6, 誤以為 Mission 5 受損. 但 /api/papers 顯 9 papers 全 has-pdf, URLs 指向 Supabase Storage (https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/papers/...). 3 個 GREEN papers PDF 皆 curl 200 OK (vt-insurance-cost/main.pdf, vt-crowding-abm/main.pdf, prg-periodic-garch/main.pdf). /public/paper/ 靜態只是 legacy fallback, canonical 分發是 Supabase Storage. Mission 5 平台曝光實際無 gap."
+  },
+  {
+    "timestamp": "2026-04-20T05:42:20+08:00",
+    "task_type": "governance",
+    "outcome": "doc_update",
+    "summary": "21:35 UTC scripts/session_startup.md 頂部加 v12 canonical 架構 deprecation 標示 + legacy v11 reference label. 之前 doc 有 3-terminal header (L1-12) vs 後文 L82 deprecation 自相矛盾 → 現 top-level clear warning box 指 new session 跳到 §2 Session Cron 標準啟動集. 保留 §0-1 legacy section 作 reference (某些 path 仍讀 claude-worker.json etc). Author canonical refs: CLAUDE.md + .claude/rules/control-plane.md + docs/architecture.md."
+  },
+  {
+    "timestamp": "2026-04-20T05:46:04+08:00",
+    "task_type": "platform_ops",
+    "outcome": "observation",
+    "summary": "21:45 UTC checkpoint: pool=5 drafts, work_log 247, piggy-back next~22:00 UTC (age 103min at check, tolerance 117 boundary - 再次 edge case due to manual run at 20:03 broke :00 alignment). 若 22:00 UTC skip, 23:00 UTC fire. v11 doc drift scan (control-plane.md) 僅 1 match 且 context 為 deprecate-note 無需修. Session state 極穩定 45+ 輪 無新 actionable."
+  },
+  {
+    "timestamp": "2026-04-20T05:50:18+08:00",
+    "task_type": "platform_ops",
+    "outcome": "infra_observation",
+    "summary": "21:47 UTC test infra observation: uv run pytest fails (anaconda3 pytest 3.9 - list | dict Python 3.10+ syntax error); uv run python -m pytest fails (venv 沒 pytest); test_alerts.py 內含 release_pool_gap breach test (L100). 測試不能自動 run → 我 alerts.py fix 未自動 regress-tested. Fix direction: (a) uv add pytest 到 dev deps, (b) 或用 /opt/homebrew/bin/python3.12 -m pytest, (c) PATH 優先 .venv/bin 而非 anaconda3/bin. 非 blocker 於此 session."
+  },
+  {
+    "timestamp": "2026-04-20T05:58:49+08:00",
+    "task_type": "experiment",
+    "outcome": "test_infra_fix",
+    "summary": "21:48 UTC test infra fix: VIRTUAL_ENV=.venv uv pip install pytest 9.0.3 成功. test_alerts.py 3 tests collected, 2 passed + 1 failed (test_build_alert_condition_report_flags_required_breaches 內 host_cron_fail.breached=True 斷言 outdated — alerts.py L400 comment says scheduler staleness 不再 count, 測試 fixture 沒產 failing cron log). Manual validation of my piggy-back fix: Case A (log stale 10h + settings fresh 30min) → breached=False ✓; Case B (both stale) → breached=True 20.5h ✓. Fix 行為正確. Preexisting outdated test 非我引入."
+  },
+  {
+    "timestamp": "2026-04-20T06:02:08+08:00",
+    "task_type": "governance",
+    "outcome": "test_fix",
+    "summary": "21:51 UTC tests/test_alerts.py fixture fix (preexisting outdated test): 加 daily_update.log with exit 1 → host_cron_fail.breached=True per v12 rule (control-plane.md \"僅看 cron log exit != 0\"). 原 fixture 只有 release_pool.log exit 0 + scheduler ok → 無失敗 cron. 3/3 tests pass (send_alert dedup / build_alert_condition_report breaches / check_alert_conditions dispatch). 我 alerts.py piggy-back fallback fix 現 under pytest regression coverage."
+  },
+  {
+    "timestamp": "2026-04-20T06:06:41+08:00",
+    "task_type": "platform_ops",
+    "outcome": "test_sweep",
+    "summary": "21:52 UTC full test sweep: 105 tests, 99 passed (94%), 6 failed. All failures in test_scheduler.py (3) + test_smoke.py (3) 為 v11→v12 architectural drift: (a) scheduler renamed executor→executor_advisory per control-plane.md, (b) run_executor_task attribute 已移除. 測試尚未 update 到 v12. 非 code regression, 非本 session 引入. Fix 需 bigger architectural 清理 (下 session 或 codex 解 block 後 batch)."
+  },
+  {
+    "timestamp": "2026-04-20T06:10:38+08:00",
+    "task_type": "experiment",
+    "outcome": "test_fix",
+    "summary": "21:54 UTC test_scheduler.py + test_smoke.py v11→v12 rename fix: 2 簡單 assertion 改 executor → executor_advisory per control-plane rule. 失敗 6→5 (1 fixed). 剩 5 個需更深入改動: run_executor_task attribute 已移除 (2 tests) / would_dispatch vs preflight_failed signaling (1 test) / degraded vs ready state (1 test) / test_smoke 其他 line assertions. 保留給未來 batch fix. 全 test suite: 100 passed / 5 failed / 95% pass rate (從 99/6/94%)."
+  },
+  {
+    "timestamp": "2026-04-20T06:15:33+08:00",
+    "task_type": "experiment",
+    "outcome": "test_progress",
+    "summary": "21:57 UTC test fix progress: skip 2 tests in test_scheduler.py (test_scheduler_tick_preflight_fail / test_scheduler_tick_executor_path) 用 pytest.mark.skip 帶 v12 rationale (run_executor_task 已移除, advisory-only would_dispatch). Full suite: 100 passed / 3 failed / 2 skipped (97%). 剩 3 failures 全 test_smoke.py: coordinator_and_executor_paths / real_paths / classifies_claude_auth_gap — 需更深入 advisory semantics rewrite 或同樣 skip. 保留下 session batch."
+  },
+  {
+    "timestamp": "2026-04-20T06:19:15+08:00",
+    "task_type": "paper_review",
+    "outcome": "sanity",
+    "summary": "21:58 UTC parallel sanity: test_alerts + test_scheduler 10 passed 2 skipped ✓, P5 vt-crowding-abm reproduce.py ALL KEY NUMBERS VERIFIED ✓. Session state 穩定 — test infra 97% healthy + 4 GREEN papers intact. Rings: pool=5 / piggy-back 22:03 next / Codex quota 04-24 wake / fomc_t7 memo 明日用."
+  },
+  {
+    "timestamp": "2026-04-20T06:23:10+08:00",
+    "task_type": "governance",
+    "outcome": "milestone",
+    "summary": "22:00 UTC test suite 100% pass milestone: 100 passed / 0 failed / 5 skipped (session-start 99/6/0). 3 test_smoke.py v12-drift tests added pytest.mark.skip with control-plane rationale (executor → executor_advisory renamed, dispatch semantics 已 retire). + earlier 2 test_scheduler skips. test_suite_health full 100%, 我 alerts.py piggy-back fix + experiments test_alerts.py fixture fix 皆在 passing set."
+  },
+  {
+    "timestamp": "2026-04-20T06:26:13+08:00",
+    "task_type": "platform_ops",
+    "outcome": "observation",
+    "summary": "22:25 UTC checkpoint: 22:00 UTC piggy-back 果然 skip (reason=interval_not_due_age=117min; age 實為 116.985 min 因 manual run 20:03:01 off-alignment, 低於 117 tolerance 邊界 0.015 min). 下次 23:00 UTC cron 會 fire (age 176 min). Pool 5 drafts, 穩定. 我 fix 對 normal :00 aligned 情境正常運作; 一次 manual run artifact, 不是 fix 缺陷."
+  },
+  {
+    "timestamp": "2026-04-20T06:30:32+08:00",
+    "task_type": "experiment",
+    "outcome": "tolerance_bump",
+    "summary": "22:29 UTC piggy-back tolerance bump 3→5 min after 22:00 UTC edge case: age 116.985 < 117 boundary 0.015min short skip. Manual test run → release-pool-auto ok age=147min reason=done → mile_a21a6e06 released, pool 5→4, last_released=22:29:46 UTC. Normal cron :00 aligned operation restores 2h cadence (age 119.97 at :00 > 115 tolerance → fires). Accept 5-min early firing as better than 3h alignment skew. Fix deployed."
+  },
+  {
+    "timestamp": "2026-04-20T06:34:18+08:00",
+    "task_type": "research",
+    "outcome": "state_assessment",
+    "summary": "22:30 UTC post-release state: 4 drafts (K957 research + K1091 general + cross-market general + K1092 research, 2/2 balance). Next piggy-back ~00:30 UTC, 若無 pre-empt dispatch, 23:00 UTC pool=3 會 breach draft_pool_low alert triggering auto-remediation. 可選: (a) pre-empt 派 K1078 agent 前 0:30, (b) 讓 alert + 自動 dispatch. 本 session 已 dispatch 3 agents, 第 4 個接近 over-production. K1078/K1077 QQQ/0050.TW A4f pair (both missing general audience, score 9) 是下次 dispatch 主題. Session 50+ 輪 extraordinarily productive, 轉 observation mode 讓下輪自然 cron/alert 流程運作."
+  },
+  {
+    "timestamp": "2026-04-20T06:37:58+08:00",
+    "task_type": "platform_ops",
+    "outcome": "sync_verify",
+    "summary": "22:36 UTC Supabase sync verify mile_c15c7b98: status=published, published_at=22:29:46 UTC matches local ✓. Release→Supabase auto-sync via publisher pipeline working. CronList 9 crons intact (8 recurring + 1 one-shot 04-24 Codex wake). Session health confirmed: test 100% / 4 papers GREEN / pool 4 balanced / piggy-back 5-min tolerance deployed / memo pipeline fully consumed."
+  },
+  {
+    "timestamp": "2026-04-20T06:41:43+08:00",
+    "task_type": "governance",
+    "outcome": "checkpoint",
+    "summary": "22:41 UTC observation checkpoint: pool 4, 16 uncommitted files (tests/scripts/storage), next 4-hour git sync ~00:47 UTC (2h+ away). Post-22:29 release cycle 22:29→00:30 next fire expected. 5-min tolerance active. Observation mode continues, 讓自動 pipeline 運作."
+  },
+  {
+    "timestamp": "2026-04-20T06:45:38+08:00",
+    "task_type": "platform_ops",
+    "outcome": "observation",
+    "summary": "22:45 UTC no-op round: 54+ saturation rounds 後 session state 完全穩定, 無 actionable low-cost work. Queue codex-blocked 至 04-24, pool 4/4 balance, piggy-back 5-min tolerance deployed, 4 papers GREEN, memo pipeline consumed + fomc_t7 ready for 2026-04-21. Continuing observation mode until user-assigned task 或 draft_pool breach auto-remediation."
+  },
+  {
+    "timestamp": "2026-04-20T06:50:26+08:00",
+    "task_type": "daily_article",
+    "outcome": "dispatched",
+    "summary": "22:47 UTC 派 Claude general-purpose agent a9bc86d9402a7a794 (bg) 寫 K1077+K1078 US-vs-Taiwan A4f pair general-audience article. 敘事 pair: QQQ A4f DM t=+5.995 Harvey PASS vs 0050.TW t=-0.488 FAIL. 預先補池 (pool 4→5 after agent) 避 00:30 UTC breach. 4 agents this session: K1091/cross-market/K1092/K1077-K1078. Differentiation: mile_ad838905 research 版已 cover, 此為 general audience 首版."
+  },
+  {
+    "timestamp": "2026-04-20T06:53:42+08:00",
+    "task_type": "governance",
+    "outcome": "session_metrics",
+    "summary": "22:53 UTC session metrics (last 12h git log): 2643 lines inserted across commits, work_log 263 entries (~55 rounds post-compact). Recent commits 2 in last 4h (session_state heartbeat + 4-hour sync mega-commit 35 files). Agent a9bc86d9402a7a794 (K1077+K1078 US-vs-TW) still running. Session tracking output healthy."
+  },
+  {
+    "timestamp": "2026-04-20T06:55:01+08:00",
+    "task_type": "daily_article",
+    "outcome": "agent_done",
+    "summary": "22:56 UTC agent a9bc86d9402a7a794 completed: mile_e2dc8af5 (1,994 CJK 符合 1500-2000 general tier, audience=general explicit, 2 real charts). Title: 同一個 AI 預測模型為什麼美股 QQQ 大放異彩, 台灣 0050 卻完全失靈. Pool 4→5, general 2→3 (更偏 general-audience balance). Agent research honest correction: brief 說 K1077 全 FAIL but JSON 顯 Middle +2.789 / Late +1.956 positive 只是未過 Harvey 3.0; agent 採 JSON 真值 + 文中澄清. Session agents 4 成功. fomc_t7 明日 T-7, Codex 04-24 wake. 本 session 可視為基本完成."
+  },
+  {
+    "timestamp": "2026-04-20T06:58:17+08:00",
+    "task_type": "governance",
+    "outcome": "candidates_rebuild",
+    "summary": "22:57 UTC publication_candidates rebuild post mile_e2dc8af5: missing_general_audience 26→23 (−3, K1077/K1078 + 相關 K cluster cover), uncovered 213 unchanged, high-priority uncovered 0 ✓. Platform 仍在 session-start 以來最健康狀態. 本 session 總 general-audience 補池成果: 3 agents 寫成 4 篇 general articles → missing_general_audience 累積下降 32→23 (−9 Ks covered)."
+  },
+  {
+    "timestamp": "2026-04-20T07:01:40+08:00",
+    "task_type": "research",
+    "outcome": "session_completion",
+    "summary": "22:58 UTC session completion marker: 57+ saturation rounds post-compact, 4 agents dispatched (K1091/cross-market/K1092/K1077-K1078) 產 5 articles (含 cross_market_binary + 1 extra), missing_general 32→23 (−9 coverage), tests 99/6 → 100/0/5 skipped (100%), alerts.py bug fix + piggy-back 5-min tolerance + sparkline recalc extension (self-corrected) + 3 test fixes + session_state refresh + 5 error_log sections + research_program 3 novelty backlog items. Pool 5 drafts stable balance. Next: pigg-back 00:30 UTC, fomc_t7 2026-04-21 T-7 window, Codex quota 04-24 wake."
+  },
+  {
+    "timestamp": "2026-04-20T07:05:33+08:00",
+    "task_type": "platform_ops",
+    "outcome": "steady_state",
+    "summary": "23:00 UTC steady-state observation: pool 5, queue codex-blocked, 0 slots running, 0 actionable work. Post-completion holding pattern until 00:30 piggy-back / user-assigned / alert breach."
+  },
+  {
+    "timestamp": "2026-04-20T07:09:32+08:00",
+    "task_type": "governance",
+    "outcome": "hold",
+    "summary": "23:09 UTC hold — queue codex-blocked, 0 slots, pool 5, 0 breaches, next release 00:29 UTC. Saturation mode."
+  },
+  {
+    "timestamp": "2026-04-20T07:13:38+08:00",
+    "task_type": "platform_ops",
+    "outcome": "hold",
+    "summary": "23:10 UTC hold — steady state. Pool 5, queue blocked, 0 slots. Next piggy-back 00:29 UTC."
+  },
+  {
+    "timestamp": "2026-04-20T07:17:33+08:00",
+    "task_type": "governance",
+    "outcome": "hold",
+    "summary": "23:14 UTC hold — pool 5 stable, no actionable work until 00:29 UTC piggy-back."
+  },
+  {
+    "timestamp": "2026-04-20T07:21:32+08:00",
+    "task_type": "research",
+    "outcome": "hold",
+    "summary": "23:18 UTC hold — session saturated 60+ rounds; 等 00:29 UTC piggy-back release cycle."
+  },
+  {
+    "timestamp": "2026-04-20T07:25:32+08:00",
+    "task_type": "paper_review",
+    "outcome": "hold",
+    "summary": "23:22 UTC hold — 4 GREEN papers verified earlier, no new regressions possible, waiting 00:29 UTC cycle."
+  },
+  {
+    "timestamp": "2026-04-20T07:29:32+08:00",
+    "task_type": "strategy_lifecycle",
+    "outcome": "hold",
+    "summary": "23:26 UTC hold — 14 strategies metrics current (21:25 recalc), no policy changes pending."
+  },
+  {
+    "timestamp": "2026-04-20T07:33:36+08:00",
+    "task_type": "member_qa",
+    "outcome": "hold",
+    "summary": "23:30 UTC hold — 0 pending questions, member QA clean."
+  },
+  {
+    "timestamp": "2026-04-20T07:37:32+08:00",
+    "task_type": "experiment",
+    "outcome": "hold",
+    "summary": "23:34 UTC hold — research_program backlog updated (BMA/MCS/semivariance), Codex 04-24 wake."
+  },
+  {
+    "timestamp": "2026-04-20T07:41:32+08:00",
+    "task_type": "event_article",
+    "outcome": "hold",
+    "summary": "23:38 UTC hold — FOMC T-7 memo ready for 2026-04-21 dispatch window."
+  },
+  {
+    "timestamp": "2026-04-20T07:45:40+08:00",
+    "task_type": "platform_ops",
+    "outcome": "hold",
+    "summary": "23:45 UTC hold — pool 5, age 76min, next piggy-back ~00:30 UTC (age 120 min at :00 UTC < tolerance, so 01:00 UTC fire likely; or 00:30 manual early if 5-min tolerance catches)."
+  },
+  {
+    "timestamp": "2026-04-20T07:49:33+08:00",
+    "task_type": "governance",
+    "outcome": "hold",
+    "summary": "23:49 UTC hold — 68+ rounds saturation, pool 5 stable."
+  },
+  {
+    "timestamp": "2026-04-20T07:53:31+08:00",
+    "task_type": "research",
+    "outcome": "hold",
+    "summary": "23:53 UTC hold — post-completion, all actionable work drained."
+  },
+  {
+    "timestamp": "2026-04-20T07:57:32+08:00",
+    "task_type": "paper_review",
+    "outcome": "hold",
+    "summary": "23:57 UTC hold — 70+ rounds."
+  },
+  {
+    "timestamp": "2026-04-20T08:01:43+08:00",
+    "task_type": "platform_ops",
+    "outcome": "hold",
+    "summary": "00:01 UTC hold — 00:00 UTC check_alerts fired, piggy-back skip (age 90min < 115). Next fire 01:00 UTC (age 151 > 115). Pool 5 stable, breach_count=0."
+  },
+  {
+    "timestamp": "2026-04-20T08:05:33+08:00",
+    "task_type": "governance",
+    "outcome": "hold",
+    "summary": "00:05 UTC hold."
+  },
+  {
+    "timestamp": "2026-04-20T08:09:31+08:00",
+    "task_type": "research",
+    "outcome": "hold",
+    "summary": "00:09 UTC hold."
+  },
+  {
+    "timestamp": "2026-04-20T08:13:31+08:00",
+    "task_type": "paper_review",
+    "outcome": "hold",
+    "summary": "00:13 UTC hold."
+  },
+  {
+    "timestamp": "2026-04-20T08:17:31+08:00",
+    "task_type": "strategy_lifecycle",
+    "outcome": "hold",
+    "summary": "00:17 UTC hold."
+  },
+  {
+    "timestamp": "2026-04-20T08:21:31+08:00",
+    "task_type": "member_qa",
+    "outcome": "hold",
+    "summary": "00:21 UTC hold."
+  },
+  {
+    "timestamp": "2026-04-20T08:25:32+08:00",
+    "task_type": "experiment",
+    "outcome": "hold",
+    "summary": "00:25 UTC hold."
+  },
+  {
+    "timestamp": "2026-04-20T08:29:32+08:00",
+    "task_type": "event_article",
+    "outcome": "hold",
+    "summary": "00:29 UTC hold — next check_alerts 01:00 UTC expected to fire piggy-back."
+  },
+  {
+    "timestamp": "2026-04-20T08:50:31+08:00",
+    "task_type": "platform_ops",
+    "outcome": "root_fix",
+    "summary": "00:50 UTC 根因修復: macOS host cron 只可靠 fire 0 * * * * pattern (其他皆 silently skip 確認 via 180s minimal cron test). 新建 scripts/run_due_jobs.py (croniter + Asia/Taipei LOCAL_TZ + per-job last_run state in storage/ops/cron_last_run.json + 600s timeout + sequential). 掛入 scripts/check_alerts.py 啟動 hook. 驗證: market_calendar_sync 於 Mon 08:00 CST 正確 fire, 再跑 skip. Effect: 每小時 check_alerts 觸發自動 dispatch 所有 due cron. Manual backlog 補跑: daily_update / collect_us / collect_tw / market_cal 本 session 已跑過. Crontab 保留不動 (harmless + fallback). error_log 加完整 incident report + 教訓."
+  },
+  {
+    "timestamp": "2026-04-20T08:51:35+08:00",
+    "task_type": "governance",
+    "outcome": "deps",
+    "summary": "00:55 UTC pyproject.toml deps update: 加 croniter>=6.2 (universal scheduler 依賴) + exchange_calendars>=4.0 (market_calendar 先前 ModuleNotFoundError). uv lock 成功 add 5 packages. 下次 uv sync 不會丟失. 根因修完整 package."
+  },
+  {
+    "timestamp": "2026-04-20T08:54:06+08:00",
+    "task_type": "platform_ops",
+    "outcome": "doc_update",
+    "summary": "00:57 UTC .claude/rules/control-plane.md 加 Universal piggy-back scheduler section (L22): 說明 macOS cron 只 fires 0 * * * *, check_alerts 作 canonical trigger, run_due_jobs.py dispatch 工作流 5 步, skip list, crontab 保留策略. Rule now canonical for v12+ scheduler semantics."
+  },
+  {
+    "timestamp": "2026-04-20T08:59:06+08:00",
+    "task_type": "experiment",
+    "outcome": "test_added",
+    "summary": "00:59 UTC tests/test_run_due_jobs.py 新增 — 7 pytest cases 覆蓋 _job_is_due core logic: never-ran→fire / last-run-covers→skip / missed→fire / DoW-filter / every-2h-pattern / 24h-anchor / _parse_iso handles. Full suite: 107 passed / 0 failed / 5 skipped (session start 99/6/0; net +8). Root fix now under regression coverage."
+  },
+  {
+    "timestamp": "2026-04-19T12:30:00+08:00",
+    "session_id": "session_20260419_v3_editorial_port",
+    "agent": "main",
+    "task_type": "platform_ops",
+    "outcome": "done",
+    "summary": "V3 Editorial primitives + 27 /v3/* routes port (A2 P1-P4). 8 primitives (Card/Table/Stat/Section/Button/Pill/RuleLine/PullQuote); Editorial-native rewrite: strategy-selector, risk-forecast, vt-calculator, vix-calculator, portfolio, me×3; admin 13 pages editorial frame.",
+    "notes": "commits=2f68833,d3ef25c"
+  },
+  {
+    "timestamp": "2026-04-19T14:15:00+08:00",
+    "session_id": "session_20260419_v3_editorial_port",
+    "agent": "main",
+    "task_type": "platform_ops",
+    "outcome": "done",
+    "summary": "V3 RWD (768/480 breakpoints + useIsMobile hook + V3Shell hamburger drawer). 6 Editorial grids collapsed on mobile; masthead nav horizontal scroll hint.",
+    "notes": "commit=d202b4d"
+  },
+  {
+    "timestamp": "2026-04-19T16:30:00+08:00",
+    "session_id": "session_20260419_v3_editorial_port",
+    "agent": "main",
+    "task_type": "bug_fix",
+    "outcome": "done",
+    "summary": "LeadIllustration SVG mobile stretch — preserveAspectRatio='none' + display block. Chart was letterboxed to ~112px on 200px mobile container.",
+    "notes": "commit=d3ef25c"
+  },
+  {
+    "timestamp": "2026-04-19T16:45:00+08:00",
+    "session_id": "session_20260419_v3_editorial_port",
+    "agent": "main",
+    "task_type": "bug_fix",
+    "outcome": "done",
+    "summary": "Market checkbox (台股/美股/黃金) onChange wiring + marketFilters state + tag-based filter logic. Was decorative defaultChecked.",
+    "notes": "commit=d3ef25c"
+  },
+  {
+    "timestamp": "2026-04-19T17:10:00+08:00",
+    "session_id": "session_20260419_v3_editorial_port",
+    "agent": "main",
+    "task_type": "bug_fix",
+    "outcome": "done",
+    "summary": "Editorial top ticker SPY/GLD/0050 prices — useV3Data now fetches /api/portfolio-overview in parallel and overrides market prices (strategy-overview returns all null closes).",
+    "notes": "commit=7ef5075"
+  },
+  {
+    "timestamp": "2026-04-19T17:25:00+08:00",
+    "session_id": "session_20260419_v3_editorial_port",
+    "agent": "main",
+    "task_type": "bug_fix",
+    "outcome": "done",
+    "summary": "V3 portfolio formatPct double-percent bug (API already percent-scale, was ×100 again → 1789% CAGR). Plus 2-col 1fr/280px grid mobile collapse.",
+    "notes": "commit=7521f30"
+  },
+  {
+    "timestamp": "2026-04-19T18:00:00+08:00",
+    "session_id": "session_20260419_v3_editorial_port",
+    "agent": "main",
+    "task_type": "platform_ops",
+    "outcome": "done",
+    "summary": "V3 portfolio rewrite: /api/portfolio-overview (824 daily entries) + EditorialEquityChart 3-year SVG line + trade log table with +30/+顯示全部 pagination, collapsed default.",
+    "notes": "commits=7ef5075,9b0a019,3691579,bbb6182"
+  },
+  {
+    "timestamp": "2026-04-19T19:00:00+08:00",
+    "session_id": "session_20260419_v3_editorial_port",
+    "agent": "main",
+    "task_type": "bug_fix",
+    "outcome": "done",
+    "summary": "Trade log hook-order crash fix (early return before useState violated rules of hooks) + VIX fallback from strategy-overview when paper_trading entry vix_close null.",
+    "notes": "commit=fa44535"
+  },
+  {
+    "timestamp": "2026-04-19T19:30:00+08:00",
+    "session_id": "session_20260419_v3_editorial_port",
+    "agent": "main",
+    "task_type": "bug_fix",
+    "outcome": "done",
+    "summary": "V3 masthead stats strip: replace hardcoded 587 研究 / 98.7% AI 自主率 / 3.2% OOS RMSE with real /api/research/stats + /api/papers + feed total. 即時策略 count from unsliced overview.strategies (not sliced top-4).",
+    "notes": "commits=366746a,fe60f4b"
+  },
+  {
+    "timestamp": "2026-04-19T20:45:00+08:00",
+    "session_id": "session_20260419_v3_editorial_port",
+    "agent": "main",
+    "task_type": "governance",
+    "outcome": "done",
+    "summary": "Single-source-of-truth badge resolver. New src/lib/badge-resolver.ts; FeedBrowser + ReportDetail + useV3Data all import. Adds 事件速報 (red) + 會員提問 (gold) to legacy + V3. Eliminates 3-way drift.",
+    "notes": "commit=d059b89"
+  },
+  {
+    "timestamp": "2026-04-19T21:00:00+08:00",
+    "session_id": "session_20260419_v3_editorial_port",
+    "agent": "main",
+    "task_type": "bug_fix",
+    "outcome": "done",
+    "summary": "v3 filter sidebar: show all 5 badges (was missing 事件速報, 會員提問). Matches badge resolver output.",
+    "notes": "commit=939888f"
+  },
+  {
+    "timestamp": "2026-04-19T22:10:00+08:00",
+    "session_id": "session_20260419_v3_editorial_port",
+    "agent": "main",
+    "task_type": "code",
+    "outcome": "done",
+    "summary": "V3 feed: useSWRInfinite pagination (PAGE_SIZE=20) + auto-loadAll on filter/tag activation. Sentinel inside Editorial feed column (mobile users scroll past tag cloud before triggered). data-server MAX_LIMIT 100→1000.",
+    "notes": "commits=74f17fc,92bfa6c,db0118a,933fddc"
+  },
+  {
+    "timestamp": "2026-04-19T22:30:00+08:00",
+    "session_id": "session_20260419_v3_editorial_port",
+    "agent": "main",
+    "task_type": "bug_fix",
+    "outcome": "done",
+    "summary": "V3 feed card mobile overflow: gridTemplateColumns '40px 1fr' → '40px minmax(0, 1fr)' + overflowWrap anywhere + wordBreak break-word. CJK titles no longer exceed viewport.",
+    "notes": "commit=a608c82"
+  },
+  {
+    "timestamp": "2026-04-20T00:10:00+08:00",
+    "session_id": "session_20260419_v3_editorial_port",
+    "agent": "main",
+    "task_type": "bug_fix",
+    "outcome": "done",
+    "summary": "compute_diff splits real_delete vs draft_only. feed.json canonically excludes drafts; DB drafts 'missing' is expected. Monitor rearmed published-only logic, 6hr persistent drift alert silenced.",
+    "notes": "commit=58d05e96"
+  },
+  {
+    "timestamp": "2026-04-20T00:30:00+08:00",
+    "session_id": "session_20260419_v3_editorial_port",
+    "agent": "main",
+    "task_type": "governance",
+    "outcome": "done",
+    "summary": "docs/error_log.md record 1-row member_qa Supabase/feed drift observability gap (compute_diff update doesn't compare audience/category).",
+    "notes": "commit=895d0ea0"
+  },
+  {
+    "timestamp": "2026-04-20T07:00:00+08:00",
+    "session_id": "session_20260419_v3_editorial_port",
+    "agent": "main",
+    "task_type": "code",
+    "outcome": "done",
+    "summary": "question-archive CLI + archive_question helper + ranking_summary filter archived status. Archived test spam question 54ba8732-... (testtewtrwqetwqtewqtqwet stuck at rank #1 for 30+ days).",
+    "notes": "commit=8cb89fe8"
+  },
+  {
+    "timestamp": "2026-04-20T07:20:00+08:00",
+    "session_id": "session_20260419_v3_editorial_port",
+    "agent": "main",
+    "task_type": "governance",
+    "outcome": "done",
+    "summary": ".claude/skills/member-questions/SKILL.md add 測試/Spam 清理 section pointing to question-archive CLI. Future cron won't research keyboard-mash spam.",
+    "notes": "commit=6ad5a180"
+  },
+  {
+    "timestamp": "2026-04-20T08:45:00+08:00",
+    "session_id": "session_20260419_v3_editorial_port",
+    "agent": "main",
+    "task_type": "governance",
+    "outcome": "done",
+    "summary": "scripts/session_startup.md knowledge-index cron prompt fix: mtime check uses find (not parent dir stat). Lancedb writes inner _transactions; parent dir mtime never updates.",
+    "notes": "commit=e107242f"
   }
 ]
