@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-04-20T12:31:00Z",
+  "alerts": [
+    {
+      "id": "article_pool_low",
+      "severity": "warning",
+      "message": "article pool low (<12): total drafts=8. research=2 (<4 threshold), general=6 (<8 threshold).",
+      "recommended_action": "Run publication-candidates skill to identify new article topics and dispatch feed-publisher agents."
+    },
+    {
+      "id": "metrics_stale",
+      "severity": "warning",
+      "message": "metrics stale: storage/strategy_metrics.json is 45.7 hours old (>26h threshold).",
+      "recommended_action": "Run uv run volpred ops update-metrics or trigger daily_update job via scripts/run_due_jobs.py."
+    }
+  ]
+}
