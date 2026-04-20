@@ -1,23 +1,29 @@
 # Feed Index
 
-_Last built: 2026-04-20 00:36 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-04-20 03:30 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
-- Total articles: **944**  (with thumbnail: 20)
-- Last 30 days: **551**
-- Total chars (content): 2,110,890
+- Total articles: **949**  (with thumbnail: 20)
+- Last 30 days: **556**
+- Total chars (content): 2,146,525
 
-**Status**: published=934, draft=5, unpublished=5
+**Status**: published=936, draft=8, unpublished=5
 
-**Audience**: research=560, general=266, unknown=77, daily=33, member_qa=8
+**Audience**: research=562, general=269, unknown=77, daily=33, member_qa=8
 
-**Category**: milestone=586, general=253, unknown=73, daily_article=8, member_qa=8, research=6, qa=5, experiment=3, event_article=1, diary=1
+**Category**: milestone=591, general=253, unknown=73, daily_article=8, member_qa=8, research=6, qa=5, experiment=3, event_article=1, diary=1
 
-## 最近 30 天 (551)
+## 最近 30 天 (556)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-04-20 | `mile_5173955c` | K1257: Bayesian Model Averaging 波動率預測 — posterior concentration 讓 BMA 退化為單一模型，等權 puzzle 擴展到 Bayesian 框架 | research | milestone | draft | 11415 |  | 研究, K1257, K482, K1002, K593, BMA |
+| 2026-04-20 | `mile_5d6a77fc` | 連兩週自己推翻自己：「台股財報反應比美股小」的第二個解釋也不成立 | general | milestone | draft | 3564 |  | 一般讀者, K1164, 研究誠實, 假說推翻, analyst-coverage, cross-market |
+| 2026-04-20 | `mile_1d8652b5` | 別人的 VIX 策略不是你的 VIX 策略——6 個市場 18 個測試的殘酷真相 | general | milestone | draft | 3855 |  | 一般讀者, K567, VIX, 條件槓桿, 國際市場, 跨市場驗證 |
+| 2026-04-20 | `mile_f8d2ffb9` | 0050 一天的波動，有一半發生在你睡覺時：PRG 模型 17 年實證揭開台股「隔夜黑洞」 | general | milestone | draft | 4730 |  | 一般讀者, K886, 0050.TW, PRG, 台股, 隔夜波動 |
+| 2026-04-20 | `mile_a0dccb21` | FOMC 04/28-29 T-7 定位：20 年 173 場 FOMC 資料揭示「會前 5 天波動率不會放大」，2026 當前 regime 最像 2010/2016/2019 三場 hold 會議 | research | milestone | published | 12071 |  | 研究, FOMC, 2026-04-28, T-7, event-driven, VIX |
+| 2026-04-20 | `mile_a1f7bfa8` | K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis | research | milestone | published | 10610 |  | 研究, K957, K526-K566, K548, K553, meta-synthesis |
 | 2026-04-19 | `mile_e2dc8af5` | 同一個 AI 預測模型，為什麼在美股 QQQ 大放異彩，在台灣 0050 卻完全失靈？ | general | milestone | draft | 4068 |  | 一般讀者, K1077, K1078, QQQ, 0050.TW, A4f |
 | 2026-04-19 | `mile_c15c7b98` | 波動率預測研究的定論與開放問題：K672 對 1,421 條知識條目的四層證據地圖 | research | milestone | published | 13123 |  | 研究, K672, knowledge-synthesis, evidence-hierarchy, VIX, GJR-GARCH |
 | 2026-04-19 | `mile_4cf87cfc` | K1092: Asset-Matched DCC-A4f (SPY-VIX + GLD-GVZ) — Pareto-Dominant 但 Below Harvey 的 Portfolio VaR Refinement | research | milestone | draft | 16030 |  | 研究, K1092, K1041, K1085, K1088, K1091 |
@@ -25,7 +31,6 @@ _Last built: 2026-04-20 00:36 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-04-19 | `mile_b9d5db50` | 財報日股價為什麼會大跳？四個國家的股市都給了同一個答案：不看 surprise 多大，只看有沒有事件 | general | milestone | draft | 3443 |  | 一般讀者, 財報, 跨市場, binary-sufficient, K1150, K1151 |
 | 2026-04-19 | `mile_a21a6e06` | K1091: 為什麼股指 meta-prediction 準、銅銀 FAIL？—— 跨資產波動率預測的類別不對稱性 | general | milestone | draft | 6828 |  | 一般讀者, K1091, K1090, meta-prediction, VGK, EWJ |
 | 2026-04-19 | `mile_1beaaa3f` | REIT 波動率 vs SPY：VNQ-SPY 跨 regime 相關動態與 HAR-RV 可預測性實證 | research | daily_article | published | 9832 |  | 研究, REIT, VNQ, SPY, 波動率預測, HAR-RV |
-| 2026-04-19 | `mile_a1f7bfa8` | K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis | research | milestone | draft | 10610 |  | 研究, K957, K526-K566, K548, K553, meta-synthesis |
 | 2026-04-19 | `mile_93dfac28` | 把 VIX 期限結構拆成三個因子：Dynamic Nelson-Siegel 在波動率預測的新視角 | research | daily_article | published | 9403 |  | 研究, Dynamic-Nelson-Siegel, VIX-term-structure, factor-decomposition, VIX9D, VIX3M |
 | 2026-04-19 | `mile_2d35fcc4` | Sub-5min 高頻微結構的三個實證觀察:SPY signature plot、bid-ask bounce、與 60 天近期窗口下的 noise footprint | research | daily_article | published | 10055 |  | 研究, SPY, HF微結構, sub-5min, realized volatility, bid-ask bounce |
 | 2026-04-19 | `mile_2223d781` | 氣候事件與能源波動率傳導：17 次 Cat 3-5 颶風如何推升 OVX 但不動 VIX（USO / XLE / OVX 2004-2024） | research | daily_article | published | 5117 |  | 研究, 氣候, 颶風, 能源波動, USO, XLE |
