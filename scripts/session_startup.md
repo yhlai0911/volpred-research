@@ -2,7 +2,9 @@
 
 SessionStart hook 會提醒讀這份。這裡只放**每次新 session 要執行的具體指令**——不是原則、不是教訓（那些留在 CLAUDE.md）。
 
-校正後的標準 user story 是：
+> **⚠️ 2026-04-19 架構更新（v12 canonical）**：3-terminal supervisor/worker workflow **已廢棄**（見 `.claude/rules/control-plane.md` + `docs/architecture.md`）。目前正式 runtime = **單一主線程 Claude Code + 按需 subagent dispatch**（claude general-purpose / codex-rescue）。下方第 0 段「三終端機」+ 第 1 段「session-bootstrap 指令」**保留作為歷史 reference 不刪除**（某些 legacy path 仍讀 `storage/ops/agents/claude-worker.json` 等檔），但**新 session 直接跳到 §2「Session Cron 標準啟動集」**。CLAUDE.md §系統定位 + §專案地圖 + `.claude/rules/*` 為最高權威。
+
+校正後的標準 user story（legacy v11，保留 reference）：
 
 1. VS Code 開 3 個終端機
 2. 終端機 A：Claude Code supervisor
@@ -11,7 +13,7 @@ SessionStart hook 會提醒讀這份。這裡只放**每次新 session 要執行
 
 這 3 個終端機都應該是**已完成 OAuth / 人工認證**的互動 session。
 
-## 0. 三終端機最小啟動方式
+## 0. 三終端機最小啟動方式（legacy v11，參考用）
 
 ### A. Claude supervisor terminal
 
@@ -87,7 +89,7 @@ CronCreate(cron="11 */2 * * *", prompt="繼續任務（每 2 小時，slot-aware
 CronCreate(cron="17 */6 * * *", prompt="會員問題研究")
 CronCreate(cron="37 */6 * * *", prompt="平台巡檢：先跑 health + platform-cycle-summary + check-alerts；若 alert breach 立即寄信（24h dedup），只有異常或 release_due 才真正執行寫入")
 CronCreate(cron="47 */4 * * *", prompt="每 4 小時 git commit + sync remote：(1) git status 看有意義變更 (2) git add 指定檔（不用 -A）(3) git commit (4) git pull --no-rebase origin main（merge 不 rebase，避免多 session 並行衝突）(5) git push origin main。必須 push，防本地與雲端巡檢分叉。遇 conflict 先 resolve 不可強推。")
-CronCreate(cron="7 */3 * * *", prompt="知識索引更新：先判斷是否真需更新（knowledge.json mtime 比 lancedb 新才做）；用 `uv run python scripts/build_knowledge_index.py update` 增量，不要 `build` 全量（炸 Gemini 額度）")
+CronCreate(cron="7 */3 * * *", prompt="知識索引更新：真需更新檢查用 `find storage/knowledge_index -type f -newer storage/memory/knowledge.json 2>/dev/null | head -1`（lancedb 寫內層 _transactions/_versions，parent dir mtime 不會更新；用 find 找新檔才正確）；若 find 有輸出 = lancedb 內已有更新，SKIP；若無輸出 = 真需 update，跑 `uv run python scripts/build_knowledge_index.py update` 增量，不要 `build` 全量（炸 Gemini 額度）")
 CronCreate(cron="23 0,6,12,18 * * *", prompt="Token 用量日報：每 6 小時一次 --detailed；週五再補 --weekly；>40% 標記高消耗警告")
 
 CronCreate(cron="0 10 28 * *", prompt="更新 NDC 景氣指標：用 Chrome DevTools MCP 導航 NDC 網站提取最新領先指標和景氣對策信號，更新 storage/macro/tw_dgbas_bci_m.csv，git commit")
