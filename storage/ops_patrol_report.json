@@ -1,26 +1,26 @@
 {
-  "timestamp": "2026-04-20T00:30:16Z",
+  "timestamp": "2026-04-20T06:07:50Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "total=5 research=3 general=2 | article pool low (<12): total=5; research audience low (<4): count=3; general audience low (<8): count=2"
+      "detail": "total=8 research=2 general=6 | article pool low (<12): total=8; research audience low (<4): count=2; general audience low (<8): count=6"
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "age=33.8h (threshold=26h)"
+      "detail": "age=39.4h (threshold=26h)"
     },
     {
       "name": "ERROR_LOG",
-      "status": "info",
-      "detail": "2026-04-19 entry: piggy-back 1.5s timing drift caused 3h release cycle instead of 2h; fix applied in check_alerts.py (tolerance=3min). ~4 releases skipped over ~14h (33% flow loss)."
+      "status": "alert",
+      "detail": "2026-04-20 entry: cron scheduler silent-failure root cause fixed via universal piggy-back scheduler (scripts/run_due_jobs.py + check_alerts.py). 2026-04-19 entry: piggy-back 1.5s timing drift fixed."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "14 strategies checked; all have null_count=1/3 in last 3 entries (last trading day pending); no strategy exceeds >2 nulls threshold"
+      "detail": "No strategy has >2 null portfolio_return in the last 3 entries."
     },
     {
       "name": "GIT_STATUS",
@@ -34,9 +34,10 @@
     }
   ],
   "alerts": [
-    "article pool low (<12): total=5",
-    "article pool research audience low (<4): research=3",
-    "article pool general audience low (<8): general=2",
-    "metrics stale: age=33.8h > 26h"
+    "article pool low (<12): total=8",
+    "article pool research audience low (<4): research=2",
+    "article pool general audience low (<8): general=6",
+    "metrics stale: age=39.4h > 26h",
+    "error log: entries dated 2026-04-20 present — cron scheduler silent-failure root cause fixed today"
   ]
 }

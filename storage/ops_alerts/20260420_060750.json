@@ -1,0 +1,30 @@
+{
+  "timestamp": "2026-04-20T06:07:50Z",
+  "alerts": [
+    {
+      "code": "ARTICLE_POOL_LOW",
+      "severity": "warning",
+      "detail": "Total draft articles=8, threshold <12. Action: publish-candidates or new research articles needed."
+    },
+    {
+      "code": "ARTICLE_POOL_RESEARCH_LOW",
+      "severity": "warning",
+      "detail": "Research audience drafts=2, threshold <4. Action: queue 2+ research articles."
+    },
+    {
+      "code": "ARTICLE_POOL_GENERAL_LOW",
+      "severity": "warning",
+      "detail": "General audience drafts=6, threshold <8. Action: queue 2+ general articles."
+    },
+    {
+      "code": "METRICS_STALE",
+      "severity": "warning",
+      "detail": "strategy_metrics.json age=39.4h, threshold 26h. Action: trigger daily_update or metrics recalc."
+    },
+    {
+      "code": "ERROR_LOG_TODAY",
+      "severity": "info",
+      "detail": "error_log.md has entries for 2026-04-20: cron scheduler silent-failure fixed via universal piggy-back scheduler. Monitor for recurrence."
+    }
+  ]
+}
