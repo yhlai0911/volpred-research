@@ -1,35 +1,44 @@
 ---
 paths:
+  # 原 publish-checklist.md 觸發路徑
   - "storage/reports/feed.json"
   - "storage/reports/mile_*.json"
   - "scripts/publish_*.py"
   - "scripts/supabase_sync.py"
   - "src/volpred/publisher/**"
   - ".claude/skills/feed-publisher/**"
-  # 2026-04-20 path-trigger 補洞（user 指正：rules 依 path 觸發，若寫文前
-  # 都沒 touch 這些 path，規則永不 auto-load，3-layer dedup 永遠遺忘）：
-  # 加 topic-selection + experiment-query 階段會 touch 的 paths。
+  # 選題階段 path-trigger（避免 rule 在需要 3-layer dedup 時 silent skip）
   - "storage/publication_candidates.json"
   - "storage/next_draft_candidate_*.md"
   - ".claude/skills/publication-candidates/**"
-  # 寫文 agent dispatch 前必讀 experiment results 取數字，experiments/** 是
-  # 最早 touch path。此處用 results.json 而非全 experiments/ 避免修代碼
-  # 時也 auto-load publish rule。
+  # 寫文前引用實驗數字
   - "experiments/*/results.json"
   - "experiments/*/*_results.json"
+  # 原 storage-and-publishing.md 觸發路徑（收窄：僅 daily / supabase / recalc 腳本）
+  - "scripts/daily_update.py"
+  - "scripts/recalc_metrics.py"
+  - "storage/paper_trading.json"
 ---
 
-# 發佈 Checklist
+# 發佈 + Storage 規則（合併 publish-checklist + storage-and-publishing）
 
-當 Claude 觸及 feed / publisher / mile_ / feed-publisher skill / publication-candidates / experiment results / next_draft_candidate memo 路徑時自動觸發。對應 Mission 第 1 條「把文章寫好」+ 第 5 條「把曝光流量拉高」。
+觸及 feed / publisher / mile_ / feed-publisher skill / publication-candidates / experiment results / next_draft_candidate / paper_trading / daily_update / supabase_sync / recalc_metrics 路徑時 auto-load。對應 Mission 第 1 條「把文章寫好」+ 第 5 條「把曝光流量拉高」。
 
-**觸發時機對應 workflow 階段**：
-- 選題階段 → `publication_candidates.json` / `next_draft_candidate_*.md` / `publication-candidates skill` → **規則在我挑主題時就 auto-load** 提醒 3-layer dedup
-- 查數字階段 → `experiments/*/results.json` → **規則在 agent brief 引用 K 數字前 auto-load**
-- 寫文階段 → `feed-publisher skill` / `feed.json` / `mile_*.json` → 規則照舊觸發
-- Pipeline 校驗 → `supabase_sync.py` / `publisher/**` → 照舊
+## 觸發時機對應 workflow 階段
 
-## 硬規則
+- **選題階段** → `publication_candidates.json` / `next_draft_candidate_*.md` / `publication-candidates skill` → 規則在主線程挑主題時 auto-load，提醒 3-layer dedup
+- **查數字階段** → `experiments/*/results.json` → 規則在 agent brief 引用 K 數字前 auto-load
+- **寫文階段** → `feed-publisher skill` / `feed.json` / `mile_*.json` → 規則照舊觸發
+- **Pipeline 校驗** → `supabase_sync.py` / `publisher/**` → 照舊
+- **Storage 維護** → `daily_update.py` / `recalc_metrics.py` / `paper_trading.json` → 規則提醒 sync/recalc 不手改資料
+
+## Storage 硬規則（合併自 storage-and-publishing.md）
+
+- `storage/` 是本地唯一資料源；**不手改歷史 JSON 補洞**（補洞 = 掩蓋產生它的流程缺陷）
+- `paper_trading.json` **不手改歷史值**；回補與績效重算走既有流程（`recalc_metrics.py` / forward tracking）
+- Supabase / Mirror sync **是流程責任**；不手動 PATCH 當正式修復 — 任何 sync 錯誤都要追到 `supabase_sync.py` 或 mirror 端
+
+## 發佈硬規則
 
 1. **一律走 `feed-publisher` SKILL**。不要自己拼 Write feed.json 或繞路 supabase_sync（會漏 LanceDB embed + notification + dedup）。
 2. **thinking ≠ content**。`m.think()` 內部決策邏輯不是 Markdown 文章內容。文章必須是讀者能直接讀的 Markdown（標題 + 段落 + 表格 + 圖 + 結論）。
@@ -98,6 +107,8 @@ grep -i "K<id>" storage/reports/feed.json | grep title
 
 一個事件最多 3-4 篇（T-7 + T-2 + T+0 + 可選 T+1）；TSMC 2026-04-13 單事件 5+ 篇是踩過坑的反面教材。
 
+完整 FOMC / CPI / NFP / Earnings populate playbook 見 `.claude/skills/feed-publisher/references/event-article-templates.md`（feed-publisher skill 觸發時載）。
+
 ## 失敗模式（不要再犯）
 
 - 把 thinking/reasoning 當成文章 content publish
@@ -106,9 +117,12 @@ grep -i "K<id>" storage/reports/feed.json | grep title
 - 非時效文章直接 published（繞過池節奏，壓縮未來 release slot）
 - 事件驅動文章設 draft（時效性流失）
 - 不標 K 編號或數據來源（讀者無法追溯 / 審稿人無法驗證）
+- 手改 `paper_trading.json` 歷史值（應走 `recalc_metrics.py` 流程）
+- 手動 PATCH Supabase / Mirror 補 sync 斷點（應修 `supabase_sync.py`）
 
 ## 交叉參考
 
 - `.claude/skills/feed-publisher/SKILL.md`（發佈 SOP 完整版）
+- `.claude/skills/feed-publisher/references/event-article-templates.md`（事件驅動文章 populate playbook）
 - `.claude/skills/publication-candidates/SKILL.md`（選題雙軌機制）
 - `docs/architecture.md` 發佈流程區塊

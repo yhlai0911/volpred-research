@@ -4,6 +4,10 @@ paths:
   - "experiments/**/*"
   - "research_program.md"
   - "docs/error_log.md"
+  # 2026-04-20 加：查 knowledge 即為「實驗前查相似 K」階段，規則此刻 load
+  # 才能在設計實驗前提醒 lookahead / seed / 文獻先於主題 等防錯規則。
+  - "storage/memory/knowledge.json"
+  - "storage/memory/experiment_experiences.json"
 ---
 
 # Experiments / Research Rules
