@@ -36,8 +36,16 @@ paths:
 3. Iterate canonical schedule, croniter 評估每 job 的 prev scheduled fire vs last_run
 4. Due → subprocess-invoke wrapper，log 寫同檔案、exit code 同 semantics
 5. Success 更新 last_run；failure 不更新（下小時再評估、避免 silent skip whole day）
+6. **`run_due_jobs` 尾端再呼叫 `expand_due_event_jobs`**（2026-04-20 新增）— 把 `event_jobs.items` 中 `not_before ≤ now ≤ deadline` 的條目 materialize 成 control-plane task。原設計這由 `shared_scheduler_tick` 呼叫但該項目被降級 advisory 後 host 端並未真 fire（`storage/logs/cron/scheduler_tick.log` 自 2026-04-19 起 size=0），缺 trigger → event_jobs populate 後永遠停 pending。Piggy-back 接管後 ~60min latency materialize，下一輪 v12 主線程 claim-next 即派。
 
 **Crontab entries 保留**：不刪除，harmless（永不 fire），兼 fallback。不需 install_host_crontab.sh 重跑。
+
+**Event_jobs 補充**（2026-04-20 新增）：
+- Populate schema 見 `src/volpred/ops/event_jobs.py::_materialize_task`（必填：`id`、`dedupe_key`、`not_before`、`deadline`、`task_template.{title,description,task_family,priority,preferred_agent,approval_mode,risk_level,public_effect,payload_patch}`）。
+- 單一事件 entries ≤ 3-4 篇（防 2026-04-13 TSMC 5-fold overdispatch 教訓）；透過 `payload_patch.event_series_slot` 或 priority ordering 控制 slot 衝突。
+- `_materialize_task` 自動抓 `deadline + 7d` 寫 `gc_after` 到 `storage/ops/event_ledger/<sha256(dedupe_key)>.json`；`gc_event_ledger` 在下次 piggy-back 清過期 ledger，不用手動。
+- `preview_event_jobs()` 可隨時讀 pending/due/materialized 狀態，不會改 state（dry-run 安全）。
+- 已 populate 範例：`fomc-2026-04-29-t2`、`fomc-2026-04-29-t0`（round 13）。
 
 ## Host crontab 維運規則（2026-04-19 確立，防反覆 TCC prompt）
 

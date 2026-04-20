@@ -196,12 +196,34 @@ def run_due_jobs(subprocess_timeout: int = DEFAULT_SUBPROCESS_TIMEOUT_SEC) -> di
             results.append({"job_id": job_id, "action": "fired", "ok": False, "reason": f"error:{exc}"})
 
     _save_last_run(state)
+
+    # 2026-04-20: also expand event_jobs entries whose `not_before` has
+    # arrived. `shared_scheduler_tick` was the intended call site for this
+    # but v12 downgraded it to advisory-only (CLAUDE.md §control-plane) and
+    # its wrapper never runs on this host (scheduler_tick.log size=0 since
+    # 2026-04-19). Piggy-backing on hourly check_alerts ensures one_shot
+    # event jobs (e.g. FOMC T-2 windows) materialize as control-plane tasks
+    # within ~60 min of their `not_before` timestamp. Cost is cheap: iterates
+    # event_jobs.items and no-ops pending/expired entries.
+    event_expansion: dict[str, Any] = {"ok": False, "reason": "not_attempted"}
+    try:
+        import sys as _sys
+        _src = PROJECT_ROOT / "src"
+        if str(_src) not in _sys.path:
+            _sys.path.insert(0, str(_src))
+        from volpred.ops.event_jobs import expand_due_event_jobs  # type: ignore
+        event_expansion = expand_due_event_jobs(storage_dir=str(PROJECT_ROOT / "storage"))
+        event_expansion["ok"] = True
+    except Exception as exc:  # noqa: BLE001
+        event_expansion = {"ok": False, "reason": f"error:{exc}"}
+
     summary = {
         "ok": True,
         "ran_at": now.isoformat(timespec="seconds"),
         "fired_count": sum(1 for r in results if r.get("action") == "fired"),
         "skipped_count": sum(1 for r in results if r.get("action") == "skip"),
         "jobs": results,
+        "event_expansion": event_expansion,
     }
     return summary
 
