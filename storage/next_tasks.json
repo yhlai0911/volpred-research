@@ -59,30 +59,12 @@
     "last_note": "[session-restart-2026-04-18] cleared stale in_progress: no agent claim"
   },
   {
-    "id": "leverage_direction_review_v2",
-    "title": "leverage-direction v3 修正 (7 HIGH + 3 MED issues, 修完進 ready)",
-    "priority": 1,
-    "description": "v2 review 完成 (citation 0 MAJOR + academic 3★, 7 HIGH)。v3 修正待主線程：7 HIGH (gamma 矛盾/H-M 衝突/Proposition fragile/abstract qualifier/ES backtest/BTC rule/citation 缺失) + 3 MED citation issues。詳 paper/leverage-direction/review_history/v2/README.md。",
-    "status": "done",
-    "completed_at": "2026-04-20T02:50:00Z",
-    "resolution": "v3 修正完成：HIGH 3 Proposition→Empirical Regularity / HIGH 4 abstract in-sample qualifier / HIGH 5 ES subsection FRTB-acknowledged / HIGH 6 BTC significance-based rule / HIGH 7 +5 cites -3 orphans / MED 1-3 hou2020+demiguel2024+xu2024 fixed. 65 pages, 57 cites, compile clean."
-  },
-  {
     "id": "vix_sufficiency_expansion",
     "title": "Paper vix-sufficiency 擴充：integrate K1116/K1118/K1116b/K1121 + K504/K1098",
     "priority": 1,
     "description": "Agent a90f872c29a03c25d 產出 integration_plan_v2.md。今日 6+ 實驗直接擴大 paper evidence base，從 SPY-only 升級為 cross-asset universal compendium。最佳 paper 排名第 1 (貢獻度 × 完成度)。",
     "status": "pending",
     "last_note": "[session-restart-2026-04-18] cleared stale in_progress: no agent claim"
-  },
-  {
-    "id": "K1133",
-    "title": "K1133: Regime-switching GAS-t (Markov or 2021-23 vs 2024-26 split)",
-    "priority": 3,
-    "description": "K1129 衍生: BTC DM t=-4.58 反向可能 regime-dependent。Catania 2018 Markov-switching GAS 或 sub-period split 測。",
-    "status": "completed",
-    "completed_at": "2026-04-17T23:41:20.635360",
-    "outcome": "K1129 BTC reversal regime-concentrated (P1 t=-4.67, P2/P3 NS, MS-GAS in-sample LRT significant, OOS pending K1133b)"
   },
   {
     "id": "K1139",
@@ -113,47 +95,11 @@
     "status": "pending"
   },
   {
-    "id": "K1163",
-    "title": "K1163: EU earnings via BaFin/AMF/FCA local filings (K1153 follow-up)",
-    "priority": 3,
-    "description": "K1153 EU yfinance earnings 資料稀疏 (12/30 skip)，N=18 DAX-biased。改用 BaFin (DE)/AMF (FR)/FCA (UK) 本地 filing API 取完整 CAC+FTSE earnings，N=30 重測是否改變 θ_rel=0.137 cluster 歸屬。",
-    "status": "completed",
-    "completed_at": "2026-04-18T01:29:22.302596",
-    "outcome": "ROBUST: 30/30 coverage. θ_rel 0.137→0.194 still low-cluster. Bootstrap t +4.19→+4.81; placebo z +14.77σ→+22.27σ. Paper 2 §5 two-cluster taxonomy robust."
-  },
-  {
     "id": "K1169",
     "title": "K1169: Paper 2 §5 narrative rewrite (main thread, K1166 correction)",
     "priority": 1,
     "description": "K1164 REJECTED 已被 K1166 翻轉為 within-market CONFIRMED + cross-market open。Paper 2 §5 必須改寫: K1164 從 main result 降為 'shared-pooled-coef σ² tautology demonstration', K1166 升為 main mechanism test。主線程改 paper/2/body.tex。",
     "status": "pending"
-  },
-  {
-    "id": "K1171",
-    "title": "K1171: ASX earnings via Alpha Vantage (yfinance failed K1165)",
-    "priority": 3,
-    "description": "K1165 AU 0/10 stocks earnings via yfinance 不足。改 Alpha Vantage EARNINGS endpoint 或 ASX official disclosures 取得 ASX top-10 earnings dates, 加入 K1168 N≥10 panel。",
-    "status": "completed",
-    "completed_at": "2026-04-18T01:56:27.370249",
-    "outcome": "DATA_LIMITED: AU 10/10 HAND_CODED, θ_rel=0.150 below-ladder mirror of BR/IN/MX above-ladder. N=13 ρ=+0.385 p=0.194 (K1172 N=12 +0.441). Panel Harvey t 3.81 strengthens monotonically. Sector composition orthogonal to inst ownership implied."
-  },
-  {
-    "id": "K1172",
-    "title": "K1172: Extend to N≥13 markets +LatAm/ZA/ID for true CONFIRMED",
-    "priority": 3,
-    "description": "K1168 N=10 ρ=+0.612 p=0.060 卡在門檻外。+MX (Bovespa-like Bolsa Mexicana), ZA (JSE Top 40), ID (IDX Composite) 至 N≥13 增 power。yfinance earnings 可能稀疏，預期 N=11-13 final。",
-    "status": "completed",
-    "completed_at": "2026-04-18T01:06:17.178865",
-    "outcome": "PARTIAL: rho=+0.441 p=0.152 N=12 (ZA dropped UNDERPOWERED). Decay K1165 0.75→K1168 0.61→K1172 0.44. Panel Harvey t=+3.79 STRENGTHENED. Paper 2 §5 keeps STRENGTHENED language + EM scale residual caveat."
-  },
-  {
-    "id": "K1173",
-    "title": "K1173: Refine institutional-share proxy for emerging markets",
-    "priority": 3,
-    "description": "K1168 BR/CH/IN θ_rel residuals 主因 yfinance institutional% 對新興市場不準: CH state-owned undercounted, IN promoter+FII inflated, BR control-shareholder ambiguous. 用 BCBS/CSRC/SEBI/CVM 官方數據 separate state-owned vs private institutions, 重做 N=10 cross-market regression。",
-    "status": "completed",
-    "completed_at": "2026-04-18T01:24:11.388618",
-    "outcome": "NULL: refined rho=+0.385 p=0.217 (vs yfinance +0.441). EM off-ladder is STRUCTURAL cost-of-capital scale factor, not proxy artefact. Paper 2 §5 sharpens EM caveat."
   },
   {
     "id": "K1175",
@@ -170,42 +116,6 @@
     "status": "pending"
   },
   {
-    "id": "K1116f",
-    "title": "K1116f: PIT alignment 套用 GLD/TLT/BTC cross-asset Paper 4 cells",
-    "priority": 3,
-    "description": "K1116c SPY 已 ROBUST NULL。擴展 PIT 套用到 K1118 cross-asset (GLD/TLT/BTC), 確認 alt-data NULL universality 跨資產 (K1118 原用 shift(1))。",
-    "status": "completed",
-    "completed_at": "2026-04-18T00:01:53.945552",
-    "outcome": "Cross-asset NULL universality CONFIRMED (GLD+BTC); TLT finstress +3.74 single-cell triple-gate FAIL (QLIKE +0.50%, subperiod 2/3 NS, all-aug overfit t=-5.67). Paper 4 universal native-IV claim STRENGTHENED."
-  },
-  {
-    "id": "K1108c",
-    "title": "K1108c: Continuous guide_delta_pct as capex covariate (replace binary)",
-    "priority": 3,
-    "description": "K1108 binary flag direction-only. 改用 continuous guide_delta_pct (-32.5% to +60.6% range) 作 θ_EAV covariate, 看 signed magnitude 是否 PASS。",
-    "status": "completed",
-    "completed_at": "2026-04-17T23:51:54.221344",
-    "outcome": "DECISIVE NULL: continuous guide_delta_pct β1=-1.29e-05 HAC t=-1.34 p=0.18, bootstrap p=0.728. 3-layer null (K1108→K1108b→K1108c) confirms capex guidance NOT foundry θ₂>0 mechanism."
-  },
-  {
-    "id": "K1100g_d6",
-    "title": "K1100g_d6: Extend 2022-2025 N double for Harvey threshold",
-    "priority": 3,
-    "description": "K1100g_d3/d4/d5 在 2017-2021 n=1071 下 DM t=1.5-2.0 borderline。擴 2022-2025 至 n~1800+ 測是否跨 Harvey 3.0。",
-    "status": "completed",
-    "completed_at": "2026-04-18T01:24:11.388624",
-    "outcome": "FAIL: max |DM_t|=1.99 < Harvey and weak |t|>2. sqrt(N) scaling only 54-57% (not i.i.d.). COVID 2020-21 drives all; 2022-25 near-zero. Paper 3 TAIFEX anchor NOT established."
-  },
-  {
-    "id": "K1100g_d7",
-    "title": "K1100g_d7: Cross-market replicate (SPY overnight, N225 morning→afternoon)",
-    "priority": 3,
-    "description": "K1100g_d5 確認信號方向穩但 borderline。跨市場複製: SPY overnight gap→intraday, N225 morning session→afternoon session asymmetry。若 universal 則 Paper 3 reframe 真 anchor。",
-    "status": "completed",
-    "completed_at": "2026-04-18T02:07:02.413821",
-    "outcome": "DIRECTION_CONSISTENT_ALL_BORDERLINE: TAIFEX +1.49 / SPY +0.66 / N225 +2.32. 3/3 positive direction consistent but 0/3 Harvey pass. Paper 3 narrative candidate: \"weak-but-universal overnight gap² info carrier\"."
-  },
-  {
     "id": "K1108d",
     "title": "K1108d: Non-capex foundry signal — utilisation rate + wafer ASP",
     "priority": 3,
@@ -218,24 +128,6 @@
     "priority": 1,
     "status": "decision_made_awaiting_body_rewrite",
     "description": "**DECISION (2026-04-17): Option 4 CONFIRMED by user**. Execute Paper 2 §5 rewrite: (a) keep universal-magnitude claim as IS-identified panel regularity across TW+US; (b) US cross-market OOS validation as main confirmatory evidence (K1148_d2 t=-5.58 p<0.0001, 19/30 stock PASS); (c) TW OOS heterogeneity as subsection (K1148_d1 t=-1.46, 9/29 stock PASS, framed as market-microstructure anomaly); (d) firm-level attribution REJECTED (K1148_d3 no robust differentiator under BH correction, report as exploratory footnote). 主線程執行 body_v2.tex rewrite，須 read 現有 paper/<paper2-dir>/body.tex 和 §5 相關 data tables。 | K1149 (2026-04-17) MAJOR UPGRADE: PCA factor absorption test both markets PASS Harvey joint (US OOS DM t=-3.31, TW t=-2.48). TW OOS heterogeneity reframe: K1148_d1 FAIL was baseline choice artifact. New Opt 4+: claim universal-magnitude is TRUE firm-event effect orthogonal to market factor, surviving both IS and OOS in US+TW. Optional interaction subsection with US-vs-TW sign opposition caveat. | 2026-04-17 REALITY CHECK: 目前 paper/ 沒有 Paper 2 目錄 (EAV universal-magnitude) - 這其實是「start a new paper」不是「rewrite section 5」. 主線程需要先建立 paper/eav-universal-magnitude/ + outline + literature review 才有 body 可寫. Decision 已 confirmed Opt4, 但 paper kick-off is separate P1."
-  },
-  {
-    "id": "K1133_expanding_window",
-    "title": "K1133: Expanding-window adaptive VIX quantile for K1128 OFI-jump",
-    "priority": 3,
-    "status": "completed",
-    "description": "K1131 NULL. Try error_log fix #2: expanding-window rolling quantile so VIX tertile cutoffs update each OOS period with latest info. Bypasses both discrete-cutoff degeneracy and IS-extrapolation explosion. Test if regime-switching beta can be identified under adaptive quantile.",
-    "completed_at": "2026-04-18T00:54:17.549836",
-    "outcome": "NULL: AUC 0.548, DM t=+1.14. Structural failure — IS 2017-19 VIX 9-37 disjoint from COVID OOS 12-83. K1128 regime story 4-branch pivot gate satisfied (K1128/K1131/K1142/K1199)."
-  },
-  {
-    "id": "K1142_vol_normalized_ofi",
-    "title": "K1142: Volatility-normalized OFI (alternative specification, no VIX-regime)",
-    "priority": 3,
-    "status": "completed",
-    "description": "K1131 agent suggested alt-direction: instead of VIX-conditional beta, normalize OFI by rolling realized vol. |OFI|/sigma_t_hat provides regime-free standardization. Test if this 繞過 regime-switching 本身. If PASS → K1128 story changes from \"regime-dependent\" to \"vol-normalized signal\". [Renumbered from K1134_vol_normalized_ofi: collision with existing experiments/k1134]",
-    "completed_at": "2026-04-18T00:34:41.286222",
-    "outcome": "PARTIAL_OOS_ONLY: DM t=+2.255 OOS (Harvey fail), AUC +0.040. Realvol-tertile equivalent. Lag-12 breaks. 33 jumps underpowered. Narrative pivot viable but needs more power."
   },
   {
     "id": "Paper4_channel_specific_pivot",
@@ -306,21 +198,6 @@
       "submission-critical",
       "multi-paper"
     ]
-  },
-  {
-    "id": "K1100e_cross_asset_threshold_test",
-    "title": "K1100e: 10-15 pairs cross-asset λ_L threshold test (K1100c follow-up)",
-    "status": "completed",
-    "priority": 3,
-    "created_at": "2026-04-17T16:09:43+08:00",
-    "description": "K1100c (2026-04-17, Scenario C MIXED) 發現 copula advantage 在 λ_L<0.05 的 flight-to-safety pairs (TLT/GLD) 顯著. N=5 下 Spearman(λ_L, DM)=-0.600 p=0.285 underpowered. K1100e 擴展到 N=10-15 pairs 跨 asset-class: equity-equity x 3 (K1100b baseline), equity-bond x 3 (SPY-TLT/IEF/TIP), equity-commodity x 3 (SPY-GLD/SLV/USO), equity-FX x 2 (SPY-UUP/FXE), equity-credit x 2 (SPY-LQD/HYG). 檢驗 H1: Spearman(λ_L, DM_copula-vs-DCC) < 0, Harvey significant. 若 confirm → Paper 3 最有力主張 + 可發表到 J. Financial Econometrics. Joe copula 主力（K1100c 證實上尾為 driver）. 重用 k1100c 腳本延伸. [DONE commit 348b827f: H1 CONFIRMED Spearman=-0.791 p=0.001. 9/13 Harvey sig. Paper 3 pivot 可發表.]",
-    "tags": [
-      "paper-3",
-      "copula",
-      "threshold-test",
-      "follow-up-K1100c"
-    ],
-    "completed_at": "2026-04-17T21:27:55+08:00"
   },
   {
     "id": "VolAbsorption_errata_decision",
@@ -559,22 +436,6 @@
       "body-rewrite",
       "main-thread"
     ]
-  },
-  {
-    "id": "K998_add_vrp_autocorr_to_json",
-    "title": "K998: 小 fix — vrp_autocorr_lag1 寫入 JSON (解 Paper 9 1 個 no-source)",
-    "status": "done",
-    "priority": 2,
-    "created_at": "2026-04-17T17:12:12+08:00",
-    "description": "K998.py 第 129 行 compute autocorr 但只 print, 未寫入 JSON. 主線程一行 fix: results['vrp_autocorr_lag1'] = float(np.corrcoef(oos_vrp[1:], oos_vrp[:-1])[0,1]). 然後重跑 K998 產 JSON. 解 Paper 9 autocorr=0.20 no-source.",
-    "tags": [
-      "paper-9",
-      "k998",
-      "small-fix",
-      "main-thread"
-    ],
-    "completed_at": "2026-04-18T20:44:39.840185",
-    "last_note": "Done 2026-04-18 cron 21:11: added results[\"diagnostics\"] with oos_vrp_autocorr_lag1=0.2034 (matches Paper 9 claim 0.20) + skew/kurt/mean/std"
   },
   {
     "id": "Data_summary_script_SPY_VIX",
@@ -914,87 +775,6 @@
     ]
   },
   {
-    "id": "K1133b",
-    "title": "K1133b: MS-GAS OOS forecasting + GAS-Normal/GAS-t innovation decomposition",
-    "priority": 3,
-    "description": "K1133 finding: BTC reversal concentrated in P1 2017-2020 (n=1441 t=-4.67). GJR-t also reversal (t=-3.36) suggests Student-t innovation not GAS dynamics. (a) Implement MS-GAS OOS forecast with Gray 1996/Klaassen 2002 state-probability tracking. (b) Add GAS-Normal as baseline to isolate innovation-distribution vs score-driven contribution. agent-launchable 3-4h.",
-    "status": "completed",
-    "created_at": "2026-04-17T23:41:20.635375",
-    "tags": [
-      "K1133-followup",
-      "BTC",
-      "GAS",
-      "regime-switching"
-    ],
-    "completed_at": "2026-04-18T01:08:17.057754",
-    "outcome": "~75% P1 reversal from Student-t innovation, ~25% GAS dynamics NS. M4 GAS-Normal DM=-1.90 NS. MS-GAS-t rescues single-state (+5.97) but no edge vs GJR-N. Catania 2018 does not generalize BTC. Paper pivot: negative-result methodology paper feasible."
-  },
-  {
-    "id": "K1108d_D2_noncapex",
-    "title": "K1108d: Non-capex guidance (utilisation/wafer-price/R&D) as foundry mechanism",
-    "priority": 3,
-    "description": "K1108/b/c 三層 capex NULL. 測 D2 candidate: non-capex guidance — capacity utilisation rate, wafer ASP/pricing guidance, R&D spend guidance. Reuse K1108c continuous regression framework. Need scrape legal-disclosure 重大訊息 + earnings call transcripts for non-capex guidance tokens. Agent-launchable 4-6h.",
-    "status": "completed",
-    "created_at": "2026-04-17T23:51:54.221353",
-    "tags": [
-      "K1108-followup",
-      "foundry",
-      "Paper2",
-      "D2"
-    ],
-    "completed_at": "2026-04-18T00:53:30.983837",
-    "outcome": "D2 PRELIMINARY NULL (partial-F p=0.791 at 8.9% coverage). 6-layer NULL stack. Paper 2 narrative = PROVISIONAL_INDUSTRY_FE_FRAMING. Pre-submission need MOPS/10-Q scrape to >=60% coverage."
-  },
-  {
-    "id": "K1108e_D3_opleverage",
-    "title": "K1108e: Operating leverage (fixed-cost:sales ratio) as foundry mechanism",
-    "priority": 3,
-    "description": "K1108c capex NULL. D3 candidate: Foundry high fixed-cost structure (fab depreciation) → operating leverage amplifies vol on earnings surprise. Test θ_EAV ~ β * op_leverage (debt/equity + PP&E/sales) on same 5-foundry pool. Firm-FE + year-FE. Agent-launchable 3-4h.",
-    "status": "completed",
-    "created_at": "2026-04-17T23:51:54.221355",
-    "tags": [
-      "K1108-followup",
-      "foundry",
-      "Paper2",
-      "D3"
-    ],
-    "completed_at": "2026-04-18T00:40:22.229686",
-    "outcome": "D3 NULL: max HAC |t|=1.58, partial-F p=0.102. Firm-FE absorbs SMIC level confound. Balance-sheet is NOT foundry mechanism."
-  },
-  {
-    "id": "K1108f_D4_regime",
-    "title": "K1108f: Regime-aware spec (up-cycle vs down-cycle) for foundry θ₂",
-    "priority": 3,
-    "description": "K1108c pooled NULL 可能 regime-contaminated. D4: split 5-foundry pool by semi cycle (up 2020-2021 2024-26 vs down 2022-2023) and re-estimate. Cross-reference TSMC revenue YoY as regime indicator. Agent-launchable 2-3h.",
-    "status": "completed",
-    "created_at": "2026-04-17T23:51:54.221356",
-    "tags": [
-      "K1108-followup",
-      "foundry",
-      "Paper2",
-      "D4",
-      "regime"
-    ],
-    "completed_at": "2026-04-18T00:40:22.229696",
-    "outcome": "D4 NULL: Wald(β_up=β_down) p=0.849. Same-sign same-magnitude across regimes confirms K1108c pooled NULL is genuine not masking."
-  },
-  {
-    "id": "K1108d_transcript_scrape",
-    "title": "K1108d_transcript_scrape: 補 MOPS/10-Q transcript coverage to >=60% before Paper 2 final submission",
-    "priority": 3,
-    "description": "K1108d coverage 8.9% below 60% gate. Scrape TSMC/UMC MOPS 重大訊息 + TSM/GFS/SMIC 10-Q earnings calls for utilisation/ASP/R&D tokens pre-2024. Rerun K1108d spec with ≥60% coverage; finalize industry-FE commitment only after this.",
-    "status": "completed",
-    "created_at": "2026-04-18T00:53:30.983850",
-    "tags": [
-      "K1108d-followup",
-      "Paper2",
-      "coverage",
-      "submission-gate"
-    ],
-    "completed_at": "2026-04-18T01:41:26.568249",
-    "outcome": "FINAL_NULL with UNCERTAIN_SCRAPE: coverage 8.9%→96.3% via LLM extraction (79.3% LLM share). Partial-F p=0.320. Paper 2 narrative upgraded to INDUSTRY_FIXED_EFFECT_NO_ATTRIBUTABLE_CHANNEL_FINAL. Submission caveat: reviewer may challenge LLM provenance."
-  },
-  {
     "id": "Paper3_K1128_pivot_decision",
     "title": "Paper 3 K1128 narrative pivot decision: abandon VIX-regime → adopt pooled microstructure signal (K1142 anchor)",
     "priority": 4,
@@ -1023,22 +803,6 @@
       "negative-result",
       "methodology"
     ]
-  },
-  {
-    "id": "K1203_EEM_PIT",
-    "title": "K1203: EEM PIT alt-data test — complete Paper 4 7/7 panorama",
-    "priority": 3,
-    "description": "K1201 completed QQQ+USO PIT NULL; Paper 4 panorama now 6/7 (SPY/GLD/TLT/BTC/QQQ/USO). EEM remaining. Test weekly AR(1)+IV vs +alt-data (epu/finstress/all) with K1116f PIT lags for ^EEM (or VXEEM proxy if available). agent-launchable 2h.",
-    "status": "completed",
-    "created_at": "2026-04-18T01:34:47.609307",
-    "tags": [
-      "K1116-followup",
-      "Paper4",
-      "EEM",
-      "PIT"
-    ],
-    "completed_at": "2026-04-18T01:46:41.583067",
-    "outcome": "UNIVERSAL_NULL_7_OF_7: EEM DM max |t|=3.54 (epu), zero Harvey pass. Paper 4 body gate UNLOCKED."
   },
   {
     "id": "K1202b_primary_source_verify",
@@ -1096,23 +860,6 @@
     ]
   },
   {
-    "id": "K1213_AU_multistart",
-    "title": "K1213: AU pooled multi-start refit to escape secondary local minimum (K1210 NUMERICAL_FRAGILITY follow-up)",
-    "priority": 3,
-    "description": "K1210 diagnosed AU pooled theta_EAV 3.2e-5 stuck in secondary local minimum (per-stock mean 1.8e-4, 6x divergence; jitter bimodal 2/10 explode; drop-BHP LOO 0.150->1.37 amplification). Run multi-start pooled MLE on K1171 AU 10-stock pool with 50-100 random initializations, keep best by LL. Compare basin-A (current 0.150) vs basin-B (likely closer to per-stock mean). If basin-B is global → AU below-ladder CONFIRMED or OVERTURNED depending on new rho direction.",
-    "status": "completed",
-    "created_at": "2026-04-18T02:35:58.757216",
-    "tags": [
-      "K1210-followup",
-      "Paper2",
-      "AU",
-      "numerical-fragility",
-      "pooled-MLE"
-    ],
-    "completed_at": "2026-04-18T02:50:33.770850",
-    "outcome": "ABOVE_LADDER_OVERTURNED: basin-B θ_rel=1.476 LR vs K1171 >>χ²(1). K1171 stuck in neither local max — it was artifact. AU sits ABOVE US in ladder. K1211 draft §5.5 revision required."
-  },
-  {
     "id": "K1211_revise_AU",
     "title": "K1211 Paper 2 §5 draft: revise §5.5 AU from below-ladder to above-ladder (K1213 result)",
     "priority": 3,
@@ -1124,21 +871,6 @@
       "Paper2",
       "AU-overturned"
     ]
-  },
-  {
-    "id": "K1216b_CH_ID_multistart",
-    "title": "K1216b: CH/ID multistart completion (EM widespread fragility verification)",
-    "priority": 4,
-    "description": "Complete EM fragility audit: K1216 covered BR/IN/MX. CH (K1168) + ID (K1172) remaining. Same 100-start L-BFGS-B+NM+DE pattern. If also fragile → Paper 2 §5 certain 6-market-EM revision.",
-    "status": "completed",
-    "created_at": "2026-04-18T03:13:18.883452",
-    "tags": [
-      "K1216-followup",
-      "Paper2",
-      "numerical-fragility"
-    ],
-    "completed_at": "2026-04-18T03:23:32.609931",
-    "outcome": "ALL_5_EM_FRAGILE: CH LR=598, ID LR=365. Primary ρ N=13 collapses to -0.071 p=0.817 (from K1172 +0.441). Paper 2 §5 cross-market ordering VANISHES at global optimum."
   },
   {
     "id": "K1216c_developed_multistart",
@@ -1193,21 +925,6 @@
     ]
   },
   {
-    "id": "K1235b_A4f_spec_replication",
-    "title": "K1235b: A4f spec replication on FEZ + STOXX50E to vindicate paper Table 6 claimed t=3.45/3.64",
-    "priority": 3,
-    "description": "K1235 with K949 log-exp spec gave FEZ t=4.03 / STOXX50E t=5.01 (MISMATCH paper 3.45/3.64). Paper 9 Table 6 uses A4f spec (VIX², free ω, OOS 2019-2026, refit=63). K1235b replicates A4f spec on same 2 tickers. If A4f matches 3.45/3.64 → paper claim vindicated (path a), no errata needed. If also MISMATCH → path (a) full Table 6 replacement required.",
-    "status": "completed",
-    "created_at": "2026-04-18T07:10:12.244743",
-    "tags": [
-      "K1235-followup",
-      "Paper9",
-      "A4f-spec"
-    ],
-    "completed_at": "2026-04-18T07:19:44.086980",
-    "outcome": "BORDERLINE: FEZ 3.11 + STOXX50E 3.92 both within Harvey ±0.5 of paper claims (3.45/3.64) + clear |t|>3. R2 path (b) footnote, errata NOT required. K1232 fully resolved."
-  },
-  {
     "id": "K716_upgrade_to_errata",
     "title": "K716 upgrade from option (a) to (c) errata disclosure per K1249 finding",
     "priority": 3,
@@ -1219,20 +936,6 @@
       "Paper8",
       "errata",
       "K716"
-    ]
-  },
-  {
-    "id": "Paper9_bib_fix",
-    "title": "Paper 9 bibliography fix per citation_check_report v1 (1 MAJOR + 5 MED + 4 MINOR)",
-    "priority": 2,
-    "status": "done",
-    "created_at": "2026-04-18T10:08:44.461415+00:00",
-    "auto_closed_at": "2026-04-18T10:08:44.461415+00:00",
-    "description": "Fix conrad2015 wrong-journal MAJOR (JAE 30(7):1090-1114 + DOI 10.1002/jae.2404); add DOIs to bollerslev1986/engle1982/glosten1993/han2014/francq2019 (MED); standardize JBES ampersand + acerbi2014 URL + conrad2020/kupiec1995 DOIs (MINOR). Verified via xelatex 2 passes, no undefined refs, 39-page main.pdf regenerated.",
-    "tags": [
-      "paper-9",
-      "citation-verifier",
-      "main-thread"
     ]
   },
   {
