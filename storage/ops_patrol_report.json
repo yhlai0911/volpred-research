@@ -1,43 +1,40 @@
 {
-  "timestamp": "2026-04-20T06:07:50Z",
+  "timestamp": "2026-04-20T12:31:00Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "total=8 research=2 general=6 | article pool low (<12): total=8; research audience low (<4): count=2; general audience low (<8): count=6"
+      "detail": "Total drafts: 8 (<12 threshold). Breakdown: general=6 (<8 threshold), research=2 (<4 threshold). All three thresholds breached."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "age=39.4h (threshold=26h)"
+      "detail": "strategy_metrics.json mtime age: 45.7 hours (>26h threshold). Last modified: 2026-04-18T18:43Z approx."
     },
     {
       "name": "ERROR_LOG",
-      "status": "alert",
-      "detail": "2026-04-20 entry: cron scheduler silent-failure root cause fixed via universal piggy-back scheduler (scripts/run_due_jobs.py + check_alerts.py). 2026-04-19 entry: piggy-back 1.5s timing drift fixed."
+      "status": "info",
+      "detail": "Entry dated 2026-04-20 found. Summary: macOS cron scheduler failure causing stale data/metrics. Fix applied 2026-04-20 08:50 CST via universal piggy-back scheduler (scripts/run_due_jobs.py). Entry tagged cron/scheduler/architecture."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "No strategy has >2 null portfolio_return in the last 3 entries."
+      "detail": "Checked 14 strategies. All have nulls_in_last3=1 (threshold: >2). No strategy exceeds threshold. _market_daily has 0 entries (insufficient_data). No alert triggered."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "uncommitted_files=0"
+      "detail": "0 uncommitted files. Clean working tree."
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "entries=2043"
+      "detail": "knowledge.json contains 2043 entries."
     }
   ],
   "alerts": [
-    "article pool low (<12): total=8",
-    "article pool research audience low (<4): research=2",
-    "article pool general audience low (<8): general=6",
-    "metrics stale: age=39.4h > 26h",
-    "error log: entries dated 2026-04-20 present — cron scheduler silent-failure root cause fixed today"
+    "article pool low (<12): total=8, research=2 (<4), general=6 (<8)",
+    "metrics stale: strategy_metrics.json is 45.7 hours old (>26h threshold)"
   ]
 }
