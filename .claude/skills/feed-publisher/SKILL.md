@@ -55,6 +55,8 @@ Do **not** use this skill for：
 - 正式事件來源仍是 `config/runtime_schedules.json` 的 `event_jobs`、`storage/ops/` control plane 與 `storage/ops/event_ledger/`。
 - 若 `next_tasks.json` 與 control plane / `event_jobs` 不一致，以後者為準。
 
+**事件驅動文章 populate playbook**（FOMC/CPI/NFP/Earnings template、T-series slot 配額表、ROI 優先序、populate workflow）：見 `references/event-article-templates.md`。
+
 詳見 `publication-candidates` skill。
 
 ## 發文前必做：主題重複檢查（不可跳過）
