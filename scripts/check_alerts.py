@@ -25,6 +25,9 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 SRC_DIR = PROJECT_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
+# Allow importing sibling script `run_due_jobs.py` (universal scheduler).
+if str(PROJECT_ROOT / "scripts") not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
 
 def _auto_trigger_release_pool_if_due() -> dict:
@@ -58,10 +61,12 @@ def _auto_trigger_release_pool_if_due() -> dict:
     # Tolerance: check_alerts cron fires hourly at :00:00 but release-pool CLI
     # writes last_released_at at :00:01-02 UTC. On exactly-interval boundaries
     # (age=119.98 min at hour-aligned check) this skips by ~2s and adds a full
-    # extra hour, making 120-min interval behave as 180-min. Allow 3-min slack
+    # extra hour, making 120-min interval behave as 180-min. Allow 5-min slack
+    # (2026-04-19 22:27 UTC bump: 3→5 min after 22:00 UTC edge case where
+    # manual run 20:03:01 off-alignment gave age=116.985 < 117 boundary)
     # so hourly checks at the interval boundary fire the release instead of
     # deferring to the next hourly check.
-    if age_min < interval_min - 3:
+    if age_min < interval_min - 5:
         return {"triggered": False, "reason": f"interval_not_due_age={age_min:.0f}min"}
 
     # Due: attempt release via CLI. Use non-blocking subprocess to avoid
@@ -90,13 +95,35 @@ def _auto_trigger_release_pool_if_due() -> dict:
 def main() -> int:
     from volpred.ops import check_alert_conditions  # noqa: WPS433 (deferred for sys.path)
 
-    # 2026-04-19 auto-remediation piggy-back: host cron for release_pool is
-    # unreliable; check_alerts runs hourly and reliably, so trigger release
-    # here when interval_minutes threshold is exceeded.
+    # 2026-04-20 universal piggy-back scheduler: macOS host cron daemon only
+    # reliably fires `0 * * * *` pattern on this machine (confirmed via
+    # 180s diagnostic test of `* * * * *` that never fired). All other cron
+    # patterns (`3 */2`, `0 8 * * 1`, `3 7 * * 2-6`, etc.) silently skip
+    # despite `crontab -l` showing the entries. Root-cause fix: since
+    # check_alerts (`0 * * * *`) fires reliably hourly, it serves as the
+    # canonical scheduler — iterate `config/runtime_schedules.json` via
+    # `scripts/run_due_jobs.py` and invoke due jobs' wrappers directly.
+    try:
+        from run_due_jobs import run_due_jobs as _run_due_jobs  # noqa: WPS433
+        due_summary = _run_due_jobs()
+    except Exception as exc:  # noqa: BLE001
+        due_summary = {"ok": False, "error": str(exc), "jobs": []}
+
+    # 2026-04-19 release-pool piggy-back (interval-based, independent of cron
+    # schedule). Kept alongside run_due_jobs because release_pool honors
+    # settings.interval_minutes not fixed crontab, and catches drift between
+    # cron :03 boundaries and .release_settings.json last_released_at.
     release_trigger = _auto_trigger_release_pool_if_due()
 
     report = check_alert_conditions(storage_dir="storage")
     print("=== ops check-alerts ===")
+    if due_summary.get("ok"):
+        fired = due_summary.get("fired_count", 0)
+        skipped = due_summary.get("skipped_count", 0)
+        fired_ids = [j["job_id"] for j in due_summary.get("jobs", []) if j.get("action") == "fired"]
+        print(f"  run-due-jobs: fired={fired} skipped={skipped} ids={fired_ids}")
+    else:
+        print(f"  run-due-jobs: error reason={due_summary.get('reason') or due_summary.get('error')}")
     if release_trigger.get("triggered"):
         status = "ok" if release_trigger.get("ok") else "fail"
         print(

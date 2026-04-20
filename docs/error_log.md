@@ -656,3 +656,55 @@ JSON: ... generated_at=2026-04-19T20:00:00.498943+00:00
 - 任何「fire every X min/hour」的 timer 必須考慮 **驅動 cron 的粒度**（這裡 check_alerts 是 hourly 粒度），不能假設 timer 精確
 - 嚴格 `<` 比較 + 浮點秒 → 近邊界情境（119.98 vs 120）總是 skip；應加 **tolerance** 或改 inequality 方向
 - 同樣 pattern 若出現在其他 cron + settings interval 互動場景（如 daily_update 8:03 + 其他時鐘），都該 audit
+
+## 2026-04-20 macOS host cron 只可靠執行 `0 * * * *`，其他 pattern 全部 silently fail
+
+**發現情境**：user 發現「6:03 daily_update 沒更新資料」。診斷：
+- All cron logs (`collect_us`, `collect_tw`, `daily_update`, `market_cal`) 自 2026-04-18 21:45 install 後 **0 bytes stale**
+- Only `check_alerts.log` (pattern `0 * * * *`) 持續 17 次 cron fire，每小時一次
+- `release_pool.log` 只有 1 次 entry（且那是 Apr 19 09:30 CST on `:30` 分，不匹配 `3 */2` = minute :03，判斷為手動測試）
+- **Minimal diagnostic**：建立 test cron `* * * * * /tmp/volpred_crontest.sh`（最簡 pattern），180s monitor timeout — **從未 fire**
+- `log show --predicate 'process == "cron"'` 顯示 cron daemon 有 wake up（user lookup activity 在 06:00, 06:03, 07:00, 08:00, 08:03 CST）但只 `0 * * * *` 命令 actually exec
+
+**根因**：macOS built-in `/usr/sbin/cron` daemon on this 特定 machine **只可靠 exec `0 * * * *` pattern**。任何帶 minute-offset (`:03`, `:47`)、DoW filter (`1-5`, `2-6`)、或 interval wildcard (`*/2`)、以及 even 最簡 `* * * * *` 皆 silently skip。未找到 Apple 官方 doc 說明此行為；可能是 launchd 整合 bug 或 TCC 相關 quirk。系統 cron 已被 Apple 標示 legacy，建議用 launchd — 這是最底層原因。
+
+**不是**：
+- PATH 問題（cron 帶 `PATH=/usr/bin:/bin`，手動 `env -i HOME=$HOME PATH=/usr/bin:/bin ~/.volpred/bin/wrapper.sh` 都 work）
+- TCC/FDA 問題（check_alerts 同 path 同 pattern 能 work；Desktop 寫入 OK；`/opt/homebrew/bin/uv` exec OK）
+- Script 問題（wrapper 本身手動都能跑）
+
+**影響**：
+- 自 install 以來 **所有 daily_update / collect_us / collect_tw / market_cal / release_pool 都沒執行過**
+- strategy_metrics.json stale 2026 分鐘（≈ Apr 18 22:00 CST）
+- FRED series 停在 Apr 17 之前
+- 台股日線 close 停在 Apr 17
+- 讀者端看到 stale Sharpe + 無 market_calendar 更新
+- Mission 第 4（平台運營）+ 第 5（曝光流量）完全受損
+- 先前 release_pool piggy-back workaround（2026-04-19）只救到 release，未救其他 job
+
+**Fix applied 2026-04-20 08:50 CST** — universal piggy-back scheduler:
+
+1. **New file `scripts/run_due_jobs.py`**：
+   - 讀 `config/runtime_schedules.json` canonical source
+   - Per-job last_run 持久化於 `storage/ops/cron_last_run.json`
+   - 使用 `croniter` 正確評估 cron expression（帶 LOCAL_TZ=Asia/Taipei 因 host crontab 是 local time）
+   - Sequential invocation with 600s timeout per job
+   - 輸出 JSON summary: `fired_count`, `skipped_count`, per-job result + duration
+
+2. **Modified `scripts/check_alerts.py`**：啟動 hook 加 `run_due_jobs()` call 在 release_pool 檢查 + alert 檢查之前。check_alerts 本身仍由 host cron `0 * * * *` 觸發（唯一可靠 pattern）。
+
+3. **Net effect**：每小時一次 check_alerts fire 時，universal scheduler 檢視所有 jobs 的 cron expression 判斷是否 due。Due 則 subprocess-invoke wrapper（等同 host cron 本該做的）。Log 寫入同路徑、exit code 同 semantics、cost same。
+
+4. **Verified**：manual run `uv run python scripts/run_due_jobs.py` fired `market_calendar_sync` (Mon 08:00 CST 當時 due)；subsequent rerun correctly skipped（last_run updated）。`uv run python scripts/check_alerts.py` integrates — output `run-due-jobs: fired=0 skipped=5 ids=[]`。
+
+**Crontab entries 保留不動** — harmless (永不 fire)，兼作 fallback 若未來 macOS cron 修好。
+
+**後續工作**（非本 session）：
+- 補跑 backlog：手動已跑 `daily_update` + `collect_us` + `collect_tw` + `market_calendar` 把 stale 資料全部更新
+- Monitoring：觀察未來 hourly check_alerts log 是否正常觸發 due jobs
+- 文件：更新 `docs/architecture.md` + `.claude/rules/control-plane.md` 說明 universal piggy-back canonical mode
+
+**教訓**：
+- macOS cron 不是 production-grade scheduler；任何跨 `0 * * * *` 以外的 pattern 都需要 fallback 機制
+- **Single point of reliable trigger + dispatch-fanout** 是 macOS 上唯一穩健 pattern（check_alerts 作中樞）
+- `install_host_crontab.sh` 成功寫入 crontab 不等於 cron 會執行 — 要做 fire-through 測試確認

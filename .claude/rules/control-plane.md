@@ -19,6 +19,26 @@ paths:
 - Session cron 與 system crontab 需與 canonical runtime schedule 一致。
 - Admin UI 目前是 observer；如果 UI 與 canonical spec 不一致，以 canonical spec / local state 為準。
 
+## Universal piggy-back scheduler（2026-04-20 canonical）
+
+**macOS host cron daemon 只可靠執行 `0 * * * *` pattern**（驗證於此 machine，所有其他 pattern 包括 `* * * * *`、`3 */2`、`0 8 * * 1`、`3 7 * * 2-6` 皆 silently skip）。根本解 = 把 **check_alerts** (`0 * * * *`) 當作唯一可靠 trigger，在其啟動 hook 呼叫 **`scripts/run_due_jobs.py`** 作 universal dispatcher。
+
+- Canonical schedule source: `config/runtime_schedules.json`（不變）
+- Per-job last-run state: `storage/ops/cron_last_run.json`（UTC ISO timestamps）
+- Timezone: host crontab 使用 local time (`Asia/Taipei`)；scheduler 評估 due 必須用 LOCAL_TZ
+- Subprocess timeout: 600s per job
+- Sequential invocation: 避免同時跑多個 yfinance / heavy job
+- Skip list: `check_alerts`（recurse）、`shared_scheduler_tick`（advisory）、`host_crontab_managed: false`
+
+**工作流**：
+1. Host cron `0 * * * *` fires `cron_check_alerts.sh`（唯一可靠）
+2. `check_alerts.py` main() 啟動先呼叫 `run_due_jobs()` 
+3. Iterate canonical schedule, croniter 評估每 job 的 prev scheduled fire vs last_run
+4. Due → subprocess-invoke wrapper，log 寫同檔案、exit code 同 semantics
+5. Success 更新 last_run；failure 不更新（下小時再評估、避免 silent skip whole day）
+
+**Crontab entries 保留**：不刪除，harmless（永不 fire），兼 fallback。不需 install_host_crontab.sh 重跑。
+
 ## Host crontab 維運規則（2026-04-19 確立，防反覆 TCC prompt）
 
 - Host crontab 的 volpred 區段**只能**透過 `bash scripts/install_host_crontab.sh` 重建；禁止手動 `crontab -e`、`sed` in-place 改、或直接 `crontab <file>` 塞客製內容。

@@ -194,13 +194,14 @@ def recalc_all():
                 "Content-Type": "application/json",
                 "Prefer": "return=minimal",
             }
+            # NOTE (2026-04-19 21:24 UTC): sparkline field is owned by frontend
+            # `computeStrategyMetricsPayload()` (data-server.ts buildSparkline ->
+            # absolute equity, 60 pts, starts $1M). recalc_metrics PATCH 只 update
+            # metrics field; sparkline 由 frontend refresh endpoint 或下次 cache
+            # rebuild 以 canonical format 產。
             synced = 0
             for strat, m in metrics.items():
-                payload = {"metrics": m}
-                sp = sparklines.get(strat)
-                if sp:
-                    payload["sparkline"] = sp
-                data = json.dumps(payload).encode("utf-8")
+                data = json.dumps({"metrics": m}).encode("utf-8")
                 url = f"{SUPABASE_URL}/rest/v1/strategy_metrics_cache?strategy=eq.{strat}"
                 req = Request(url, data=data, headers=headers, method="PATCH")
                 try:
@@ -208,8 +209,7 @@ def recalc_all():
                     synced += 1
                 except HTTPError:
                     pass
-            sparkline_count = sum(1 for sp in sparklines.values() if sp)
-            print(f"  → Supabase strategy_metrics_cache: {synced}/{len(metrics)} synced (sparkline pushed for {sparkline_count} strategies)")
+            print(f"  → Supabase strategy_metrics_cache: {synced}/{len(metrics)} synced (metrics only; sparkline owned by frontend buildSparkline)")
     except Exception as e:
         print(f"  → Supabase metrics sync skipped: {e}")
 

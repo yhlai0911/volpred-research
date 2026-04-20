@@ -1,0 +1,83 @@
+{
+  "paper_id": "crypto-fear-channel",
+  "paper_title": "The Crypto Fear Channel — Asymmetric BTC-Equity Volatility Spillover",
+  "target_journal": "JIMFIM / JEF / FRL",
+  "alert_level": "green",
+  "gate_status": "pass",
+  "match_rate_pct": 100.0,
+  "matched": 7,
+  "total_checks": 7,
+  "checks": [
+    {
+      "metric": "QR beta at tau=0.5 (VIX|BTC vol quantile slope, median)",
+      "paper_value": 2.61,
+      "actual_value": 2.6129602121402797,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.11341808966589507,
+      "status": "match",
+      "source_path": "k1025.quantile_regression['0.5'].beta"
+    },
+    {
+      "metric": "QR beta at tau=0.95 (upper-tail amplification)",
+      "paper_value": 22.31,
+      "actual_value": 22.307901048914943,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.009408117817374271,
+      "status": "match",
+      "source_path": "k1025.quantile_regression['0.95'].beta"
+    },
+    {
+      "metric": "QR beta at tau=0.05 (low-quantile — H3 sign reversal)",
+      "paper_value": -2.86,
+      "actual_value": -2.8627503375583814,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.09616564889445803,
+      "status": "match",
+      "source_path": "k1025.quantile_regression['0.05'].beta"
+    },
+    {
+      "metric": "DM test t-statistic (BTC-ext vs BTC-AR baseline)",
+      "paper_value": -0.98,
+      "actual_value": -0.9802532026128447,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.025837001310680795,
+      "status": "match",
+      "source_path": "k1025.forecast_evaluation.dm_stat"
+    },
+    {
+      "metric": "COVID subperiod Granger F-statistic (structural watershed)",
+      "paper_value": 11.05,
+      "actual_value": 11.050869872012079,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.007872144905686263,
+      "status": "match",
+      "source_path": "k1025.subperiod_granger['2020 (COVID)'].F"
+    },
+    {
+      "metric": "COVID subperiod n (small-sample caveat per M2)",
+      "paper_value": 253,
+      "actual_value": 253,
+      "tol_pct": 0.5,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k1025.subperiod_granger['2020 (COVID)'].n"
+    },
+    {
+      "metric": "DY net spillover index for BTC (net receiver)",
+      "paper_value": -76.89,
+      "actual_value": -76.88571578482524,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.00557187563371507,
+      "status": "match",
+      "source_path": "k1025.spillover_index.mean_net_btc"
+    }
+  ],
+  "generated_at": "2026-04-20T01:15:15+00:00",
+  "stage": "kickoff (body pending)",
+  "notes": [
+    "Scaffolded per pre-body review Gap E (claude_pre_review.md).",
+    "Covers K1025 only; extend to K639 + K746b when body sections cite them.",
+    "Pre-review H3 flagged QR beta sign reversal — paper body revision may change tau=0.5 framing.",
+    "Pre-review H1 flagged asymmetric Granger lag coverage (1-5 not 1-10); body_v0_intro.tex abstract needs fix."
+  ]
+}

@@ -1,5 +1,7 @@
 # Next Draft Candidate: FOMC 04/28-29 T-7 Preview (Event-Driven)
 
+> **🔒 CONSUMED 2026-04-20 01:10 UTC** — Article published as `mile_a0dccb21` (audience=research, status=**published** event-driven, 2,339 CJK, 2 real matplotlib charts HTTP 200 OK, phase=Event_FOMC_2026_04). Dispatched via Claude general-purpose agent `a9b6291b1ed401ba2` per user's "stop hold, dispatch" feedback. **差異化敘事**: 20 年 173 場 FOMC × 8-day event window = 1,384 obs（超 brief 預期 20 年 pattern 規模）；findings: T-6..T-2 無 pre-meeting vol build-up、2026 regime 最像 2010/2016/2019 三場 hold；含 position sizing decision tree + 跨三子期間 robustness + T-2/T+0 預告. Supabase synced via feed-sync --apply (updated=1).
+
 **Prepared 2026-04-19 20:07 UTC** as agent brief for **event_article** dispatch tomorrow (2026-04-20 UTC = 2026-04-21 CST, T-7 window for FOMC 2026-04-28/29).
 
 ## Event Overview

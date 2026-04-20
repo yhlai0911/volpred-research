@@ -1,0 +1,20 @@
+{
+  "id": "e1311d3e",
+  "subject": "[VolPred Alert][WARN] Release pool cron gap > 2h",
+  "body": "Alert level: warn\nTitle: Release pool cron gap > 2h\n\n## 觸發條件\nrelease_pool host cron fire gap 已超過 2 小時門檻。\n- last_fire_at: 2026-04-19T22:29:46.995334+00:00\n- gap_hours: 2.1\n- log_path: storage/logs/cron/release_pool.log\n\n## 影響\n文章釋出中斷 = 讀者端看到平台停滯、搜尋索引停滯；Mission 第 1 條（文章品質）\n與第 5 條（曝光流量）直接受損。若持續 >4h 會累積多篇 draft 排隊延遲。\n\n## 建議行動\n1. 立即手動釋出（最快復原）：\n   VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings\n2. 診斷 host cron 是否仍在跑：\n   tail -20 storage/logs/cron/release_pool.log\n   crontab -l | grep release_pool\n3. 若 cron daemon 卡住：重新 install crontab 或 launchd job\n4. 若 draft 池也空（配合 draft_pool_low alert）：先補池，見 publish-checklist\n   與 .claude/skills/publication-candidates/SKILL.md 的 5-step 選題流程。",
+  "text_body": "Alert level: warn\nTitle: Release pool cron gap > 2h\n\n## 觸發條件\nrelease_pool host cron fire gap 已超過 2 小時門檻。\n- last_fire_at: 2026-04-19T22:29:46.995334+00:00\n- gap_hours: 2.1\n- log_path: storage/logs/cron/release_pool.log\n\n## 影響\n文章釋出中斷 = 讀者端看到平台停滯、搜尋索引停滯；Mission 第 1 條（文章品質）\n與第 5 條（曝光流量）直接受損。若持續 >4h 會累積多篇 draft 排隊延遲。\n\n## 建議行動\n1. 立即手動釋出（最快復原）：\n   VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings\n2. 診斷 host cron 是否仍在跑：\n   tail -20 storage/logs/cron/release_pool.log\n   crontab -l | grep release_pool\n3. 若 cron daemon 卡住：重新 install crontab 或 launchd job\n4. 若 draft 池也空（配合 draft_pool_low alert）：先補池，見 publish-checklist\n   與 .claude/skills/publication-candidates/SKILL.md 的 5-step 選題流程。",
+  "html_body": null,
+  "level": "warn",
+  "metadata": {
+    "notification_type": "ops_alert",
+    "alert_level": "warn",
+    "alert_title": "Release pool cron gap > 2h",
+    "recipient": "yihao.lai@gmail.com"
+  },
+  "timestamp": "2026-04-20T00:35:34.667204+00:00",
+  "recipients": [
+    "yihao.lai@gmail.com"
+  ],
+  "sent": true,
+  "configured": true
+}

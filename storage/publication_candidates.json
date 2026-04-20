@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-04-19T20:38:05.439320+00:00",
+  "generated_at": "2026-04-19T22:58:03.038543+00:00",
   "summary": {
     "total_k": 583,
     "uncovered": 213,
     "high_priority_uncovered": 0,
-    "missing_general_audience": 26,
+    "missing_general_audience": 23,
     "missing_research_audience": 9
   },
   "top_10_uncovered": [
@@ -69,22 +69,6 @@
       ]
     },
     {
-      "k_id": "K1077",
-      "score": 9,
-      "title": "K1077: A4f on 0050.TW Extended History NULL — Confirms Genuinely Weak Taiwan Transmission (θ₁ Unstable)",
-      "already_covered_for": [
-        "research"
-      ]
-    },
-    {
-      "k_id": "K1078",
-      "score": 9,
-      "title": "K1078: ★★ QQQ A4f Extended PASS (t=+5.99) — A4f is US Liquid Equity Phenomenon (Not SPY-Specific)",
-      "already_covered_for": [
-        "research"
-      ]
-    },
-    {
       "k_id": "K1067",
       "score": 9,
       "title": "K1067f VIX-only ablation H1 CLEAN: Paper 2 VIX channel independent of EAV, robustness chain complete",
@@ -96,6 +80,22 @@
       "k_id": "K1164",
       "score": 7,
       "title": "K1164 analyst × media mechanism REJECTED — EU > JP analyst but cluster inverted; θ_rel mechanism remains OPEN",
+      "already_covered_for": [
+        "research"
+      ]
+    },
+    {
+      "k_id": "K567",
+      "score": 6,
+      "title": "K567: International VT Leverage — VIX-Conditional Leverage has LIMITED Generalizability",
+      "already_covered_for": [
+        "research"
+      ]
+    },
+    {
+      "k_id": "K886",
+      "score": 6,
+      "title": "K886: PRG on 0050.TW Daily — DM t=5.27 Harvey PASS, overnight share 46.1%",
       "already_covered_for": [
         "research"
       ]
@@ -4426,6 +4426,12 @@
       "verdict_preview": "[提出: 研究總結, 執行: Claude] 1421 知識條目終極整理。Category A（定論 7）：VIX sufficiency 103+, 12/VIX kernel 178 entries, Pred≠App, QLIKE ceiling, leverage universality rho=1.000, GJR dominance DM t=-6.27, VT crisis protection 10/10。Category B（強證據 6）：50/50 robustness, monthly rebalance, target vol irrelevance, EGARCH ",
       "covered_by": [
         {
+          "id": "mile_c15c7b98",
+          "title": "波動率預測研究的定論與開放問題：K672 對 1,421 條知識條目的四層證據地圖",
+          "status": "published",
+          "audience": "research"
+        },
+        {
           "id": "mile_a21a6e06",
           "title": "K1091: 為什麼股指 meta-prediction 準、銅銀 FAIL？—— 跨資產波動率預測的類別不對稱性",
           "status": "draft",
@@ -4434,12 +4440,6 @@
         {
           "id": "mile_a1f7bfa8",
           "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
-          "status": "draft",
-          "audience": "research"
-        },
-        {
-          "id": "mile_c15c7b98",
-          "title": "波動率預測研究的定論與開放問題：K672 對 1,421 條知識條目的四層證據地圖",
           "status": "draft",
           "audience": "research"
         }
@@ -4472,6 +4472,12 @@
       "verdict_preview": "[提出: Claude, 執行: Claude] K1077 applies K1075 methodology to 0050.TW 2010-2025 (n=3,913), directly testing if K1058's NS (2019-2025 only) was short-OOS artifact. RESULT: CONFIRMS GENUINE NULL. Full OOS DM t=-0.488 (A4f slightly WORSE than GJR, +0.33% QLIKE). Compare SPY K1075: +7.92. Per-window: Earl",
       "covered_by": [
         {
+          "id": "mile_e2dc8af5",
+          "title": "同一個 AI 預測模型，為什麼在美股 QQQ 大放異彩，在台灣 0050 卻完全失靈？",
+          "status": "draft",
+          "audience": "general"
+        },
+        {
           "id": "mile_81b4713f",
           "title": "K1098：VIXTWN 救不回 0050.TW — 台灣結構性波動率缺口的確證",
           "status": "published",
@@ -4492,6 +4498,7 @@
       ],
       "uncovered": false,
       "audiences_covered": [
+        "general",
         "research"
       ],
       "updated_at": "",
@@ -4519,6 +4526,12 @@
       "verdict_preview": "[提出: Claude, 執行: Claude] K1078 tests QQQ 2007-2026 (n=4,848) with K1075 methodology. FULL OOS Harvey PASS: DM t=+5.995 (p≈2e-9), bootstrap CI [+0.031, +0.062] fully positive, QLIKE -0.59%. Per-window: Early +2.16 (FAIL), Middle +4.12 PASS, Late +3.93 PASS. GFC n=505 QLIKE -0.30% but DM t=+0.93 direc",
       "covered_by": [
         {
+          "id": "mile_e2dc8af5",
+          "title": "同一個 AI 預測模型，為什麼在美股 QQQ 大放異彩，在台灣 0050 卻完全失靈？",
+          "status": "draft",
+          "audience": "general"
+        },
+        {
           "id": "mile_ad838905",
           "title": "同一套波動率模型，為什麼美股大中小型股都能用，台股卻完全失靈？",
           "status": "published",
@@ -4527,6 +4540,7 @@
       ],
       "uncovered": false,
       "audiences_covered": [
+        "general",
         "research"
       ],
       "updated_at": "",
@@ -5894,6 +5908,12 @@
       "verdict_preview": "[提出: Claude, 執行: Claude] K1098 tests Paper 10 hypothesis: can TAIFEX VIXTWN rescue K1077 NULL on 0050.TW? Used 15 years of official Dropbox data (2007-2021), OOS 2013-2021 (~8 yrs). ALL 4 HYPOTHESES FAIL. A4f-VIXTWN DM t=+1.86 below Harvey. Head-to-head vs A4f-VIX: t=-0.99 (VIX slightly BETTER). COM",
       "covered_by": [
         {
+          "id": "mile_e2dc8af5",
+          "title": "同一個 AI 預測模型，為什麼在美股 QQQ 大放異彩，在台灣 0050 卻完全失靈？",
+          "status": "draft",
+          "audience": "general"
+        },
+        {
           "id": "mile_81b4713f",
           "title": "K1098：VIXTWN 救不回 0050.TW — 台灣結構性波動率缺口的確證",
           "status": "published",
@@ -5902,6 +5922,7 @@
       ],
       "uncovered": false,
       "audiences_covered": [
+        "general",
         "research"
       ],
       "updated_at": "",
@@ -6204,14 +6225,14 @@
       "verdict_preview": "[提出: Claude, 執行: Claude] K560 深度驗證 8 項。Harvey NW t=10.87 PASS。Cross-OOS 10/10 PASS。Momentum window 全部 PASS (20d-252d safe zone)。Bootstrap daily P(win)=100%。Drawdown excellent (GFC +27.1%)。\n\n**CRITICAL FAIL: 月頻 Sharpe 1.228 < benchmark 1.344。** Bootstrap monthly P(win)=10.4%。Alpha 幾乎全部來自 daily rebala",
       "covered_by": [
         {
-          "id": "mile_a1f7bfa8",
-          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
-          "status": "draft",
+          "id": "mile_c15c7b98",
+          "title": "波動率預測研究的定論與開放問題：K672 對 1,421 條知識條目的四層證據地圖",
+          "status": "published",
           "audience": "research"
         },
         {
-          "id": "mile_c15c7b98",
-          "title": "波動率預測研究的定論與開放問題：K672 對 1,421 條知識條目的四層證據地圖",
+          "id": "mile_a1f7bfa8",
+          "title": "K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
           "status": "draft",
           "audience": "research"
         }
@@ -15405,7 +15426,7 @@
         {
           "id": "mile_c15c7b98",
           "title": "波動率預測研究的定論與開放問題：K672 對 1,421 條知識條目的四層證據地圖",
-          "status": "draft",
+          "status": "published",
           "audience": "research"
         },
         {

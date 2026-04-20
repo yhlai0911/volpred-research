@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from volpred.ops.local_control_plane import create_task, get_task, heartbeat_agent
 from volpred.ops.scheduler import get_scheduler_state, scheduler_preview, scheduler_tick
 from volpred.ops.shared_lock import shared_state_lock
@@ -63,7 +65,9 @@ why_this_agent: "ops template"
     preview = scheduler_preview(storage_dir=storage_dir)
     assert preview["decision"] is not None
     assert preview["decision"]["task_id"] == task["id"]
-    assert preview["decision"]["mode"] == "executor"
+    # v12: executor lane renamed to executor_advisory (advisory-only snapshot,
+    # not canonical dispatch). See .claude/rules/control-plane.md.
+    assert preview["decision"]["mode"] == "executor_advisory"
     assert preview["decision"]["agent"] == "codex"
 
     task_state = get_task(task["id"], storage_dir=storage_dir)
@@ -72,6 +76,11 @@ why_this_agent: "ops template"
     assert task_state["brief_payload"] is None
 
 
+@pytest.mark.skip(
+    reason="v12 removed run_executor_task; executor lane is advisory-only "
+    "(would_dispatch snapshots). Canonical dispatch happens via main-thread "
+    "subagents. Test preserved for historical reference."
+)
 def test_scheduler_tick_executor_path_completes_task(tmp_path: Path, monkeypatch):
     templates_root = tmp_path / "brief_templates"
     _write_template(
@@ -254,6 +263,12 @@ why_this_agent: "ops template"
     assert task_state["status"] == "queued"
 
 
+@pytest.mark.skip(
+    reason="v12 retired executor lane's real preflight-fail path (executor_advisory "
+    "only reports would_dispatch). Test preserved for when v12 advisory semantics "
+    "are formalized; currently expects v11 'preflight_failed' + task_status='failed' "
+    "which no longer applies. See .claude/rules/control-plane.md."
+)
 def test_scheduler_tick_preflight_fail_does_not_double_fail(tmp_path: Path, monkeypatch):
     templates_root = tmp_path / "brief_templates"
     _write_template(

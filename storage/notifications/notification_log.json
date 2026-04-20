@@ -11862,5 +11862,88 @@
     ],
     "sent": true,
     "configured": true
+  },
+  {
+    "id": "d6a91df4",
+    "subject": "[VolPred] 新文章發布：波動率預測研究的定論與開放問題：K672 對 1,421 條知識條目的四層證據地圖",
+    "body": "新文章發布：波動率預測研究的定論與開放問題：K672 對 1,421 條知識條目的四層證據地圖\n文章標題：波動率預測研究的定論與開放問題：K672 對 1,421 條知識條目的四層證據地圖\n文章 ID：mile_c15c7b98\n發布時間：2026-04-20 06:29 台灣時間\nAudience：research\n標籤：研究, K672, knowledge-synthesis, evidence-hierarchy, VIX, GJR-GARCH, VT, leverage-effect, meta-analysis\n摘要：[提出: Claude]\n查看文章：https://volpred.zeabur.app/reports/mile_c15c7b98",
+    "text_body": "新文章發布：波動率預測研究的定論與開放問題：K672 對 1,421 條知識條目的四層證據地圖\n文章標題：波動率預測研究的定論與開放問題：K672 對 1,421 條知識條目的四層證據地圖\n文章 ID：mile_c15c7b98\n發布時間：2026-04-20 06:29 台灣時間\nAudience：research\n標籤：研究, K672, knowledge-synthesis, evidence-hierarchy, VIX, GJR-GARCH, VT, leverage-effect, meta-analysis\n摘要：[提出: Claude]\n查看文章：https://volpred.zeabur.app/reports/mile_c15c7b98",
+    "html_body": "<!doctype html>\n<html lang=\"zh-Hant\">\n  <head>\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>新文章發布：波動率預測研究的定論與開放問題：K672 對 1,421 條知識條目的四層證據地圖</title>\n  </head>\n  <body style=\"margin:0;background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#111827;\">\n    <div style=\"max-width:880px;margin:0 auto;padding:32px 16px;\">\n      <div style=\"background:#ffffff;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(15,23,42,.06);\">\n        <div style=\"padding:24px 28px;background:linear-gradient(135deg,#0f172a,#111827);color:#ffffff;\">\n          <div style=\"font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#86efac;\">VolPred 管理通知</div>\n          <h1 style=\"margin:10px 0 0;font-size:28px;line-height:1.2;\">新文章發布：波動率預測研究的定論與開放問題：K672 對 1,421 條知識條目的四層證據地圖</h1>\n          <p style=\"margin:6px 0 0;color:#6b7280;font-size:14px;\">milestone | 2026-04-20 06:29 台灣時間</p>\n        </div>\n        <div style=\"padding:28px;line-height:1.75;font-size:15px;\">\n          <style>\n            h1,h2,h3{color:#0f172a;line-height:1.35;margin:1.2em 0 .5em}\n            p{margin:.8em 0}\n            table{width:100%;border-collapse:collapse;margin:1em 0;font-size:14px}\n            th,td{border:1px solid #d1d5db;padding:8px 10px;text-align:left;vertical-align:top}\n            th{background:#f9fafb}\n            code{background:#f3f4f6;border-radius:4px;padding:2px 5px;font-size:13px}\n            pre{background:#111827;color:#e5e7eb;padding:14px;border-radius:10px;overflow:auto}\n            blockquote{border-left:4px solid #10b981;padding-left:14px;color:#475569;margin:1em 0}\n            a{color:#2563eb}\n          </style>\n          <p><strong>文章標題：</strong>波動率預測研究的定論與開放問題：K672 對 1,421 條知識條目的四層證據地圖</p><p><strong>文章 ID：</strong>mile_c15c7b98</p><p><strong>發布時間：</strong>2026-04-20 06:29 台灣時間</p><p><strong>Audience：</strong>research</p><p><strong>標籤：</strong>研究, K672, knowledge-synthesis, evidence-hierarchy, VIX, GJR-GARCH, VT, leverage-effect, meta-analysis</p><p><strong>摘要：</strong>[提出: Claude]</p><p><a href=\"https://volpred.zeabur.app/reports/mile_c15c7b98\">查看網站文章頁</a></p>\n        </div>\n      </div>\n    </div>\n  </body>\n</html>",
+    "level": "milestone",
+    "metadata": {
+      "notification_type": "article_published",
+      "notification_key": "mile_c15c7b98",
+      "article_id": "mile_c15c7b98",
+      "reason": "release_pool",
+      "status": "published"
+    },
+    "timestamp": "2026-04-19T22:29:49.352559+00:00",
+    "recipients": [
+      "yihao.lai@gmail.com"
+    ],
+    "sent": true,
+    "configured": true
+  },
+  {
+    "id": "e1311d3e",
+    "subject": "[VolPred Alert][WARN] Release pool cron gap > 2h",
+    "body": "Alert level: warn\nTitle: Release pool cron gap > 2h\n\n## 觸發條件\nrelease_pool host cron fire gap 已超過 2 小時門檻。\n- last_fire_at: 2026-04-19T22:29:46.995334+00:00\n- gap_hours: 2.1\n- log_path: storage/logs/cron/release_pool.log\n\n## 影響\n文章釋出中斷 = 讀者端看到平台停滯、搜尋索引停滯；Mission 第 1 條（文章品質）\n與第 5 條（曝光流量）直接受損。若持續 >4h 會累積多篇 draft 排隊延遲。\n\n## 建議行動\n1. 立即手動釋出（最快復原）：\n   VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings\n2. 診斷 host cron 是否仍在跑：\n   tail -20 storage/logs/cron/release_pool.log\n   crontab -l | grep release_pool\n3. 若 cron daemon 卡住：重新 install crontab 或 launchd job\n4. 若 draft 池也空（配合 draft_pool_low alert）：先補池，見 publish-checklist\n   與 .claude/skills/publication-candidates/SKILL.md 的 5-step 選題流程。",
+    "text_body": "Alert level: warn\nTitle: Release pool cron gap > 2h\n\n## 觸發條件\nrelease_pool host cron fire gap 已超過 2 小時門檻。\n- last_fire_at: 2026-04-19T22:29:46.995334+00:00\n- gap_hours: 2.1\n- log_path: storage/logs/cron/release_pool.log\n\n## 影響\n文章釋出中斷 = 讀者端看到平台停滯、搜尋索引停滯；Mission 第 1 條（文章品質）\n與第 5 條（曝光流量）直接受損。若持續 >4h 會累積多篇 draft 排隊延遲。\n\n## 建議行動\n1. 立即手動釋出（最快復原）：\n   VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings\n2. 診斷 host cron 是否仍在跑：\n   tail -20 storage/logs/cron/release_pool.log\n   crontab -l | grep release_pool\n3. 若 cron daemon 卡住：重新 install crontab 或 launchd job\n4. 若 draft 池也空（配合 draft_pool_low alert）：先補池，見 publish-checklist\n   與 .claude/skills/publication-candidates/SKILL.md 的 5-step 選題流程。",
+    "html_body": null,
+    "level": "warn",
+    "metadata": {
+      "notification_type": "ops_alert",
+      "alert_level": "warn",
+      "alert_title": "Release pool cron gap > 2h",
+      "recipient": "yihao.lai@gmail.com"
+    },
+    "timestamp": "2026-04-20T00:35:34.667204+00:00",
+    "recipients": [
+      "yihao.lai@gmail.com"
+    ],
+    "sent": true,
+    "configured": true
+  },
+  {
+    "id": "c9e7c36b",
+    "subject": "[VolPred] 新文章發布：K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis",
+    "body": "新文章發布：K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis\n文章標題：K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis\n文章 ID：mile_a1f7bfa8\n發布時間：2026-04-20 08:38 台灣時間\nAudience：research\n標籤：研究, K957, K526-K566, K548, K553, meta-synthesis, 方法論, E019-E023, Harvey-pass, VIX sufficiency, portfolio construction\n摘要：[提出: Claude] 本文把 2026-03 下旬 K526 至 K566 共 40 個實驗（扣除 K555 / K569 被 skip 後實際分類 40 個；memo 原稱 37 個核心）蒸餾為 5 條研究方法論教訓（經驗條目 E019–E023），並給出可被後續實驗直接引用的決策規則。\n查看文章：https://volpred.zeabur.app/reports/mile_a1f7bfa8",
+    "text_body": "新文章發布：K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis\n文章標題：K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis\n文章 ID：mile_a1f7bfa8\n發布時間：2026-04-20 08:38 台灣時間\nAudience：research\n標籤：研究, K957, K526-K566, K548, K553, meta-synthesis, 方法論, E019-E023, Harvey-pass, VIX sufficiency, portfolio construction\n摘要：[提出: Claude] 本文把 2026-03 下旬 K526 至 K566 共 40 個實驗（扣除 K555 / K569 被 skip 後實際分類 40 個；memo 原稱 37 個核心）蒸餾為 5 條研究方法論教訓（經驗條目 E019–E023），並給出可被後續實驗直接引用的決策規則。\n查看文章：https://volpred.zeabur.app/reports/mile_a1f7bfa8",
+    "html_body": "<!doctype html>\n<html lang=\"zh-Hant\">\n  <head>\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>新文章發布：K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis</title>\n  </head>\n  <body style=\"margin:0;background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#111827;\">\n    <div style=\"max-width:880px;margin:0 auto;padding:32px 16px;\">\n      <div style=\"background:#ffffff;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(15,23,42,.06);\">\n        <div style=\"padding:24px 28px;background:linear-gradient(135deg,#0f172a,#111827);color:#ffffff;\">\n          <div style=\"font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#86efac;\">VolPred 管理通知</div>\n          <h1 style=\"margin:10px 0 0;font-size:28px;line-height:1.2;\">新文章發布：K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis</h1>\n          <p style=\"margin:6px 0 0;color:#6b7280;font-size:14px;\">milestone | 2026-04-20 08:38 台灣時間</p>\n        </div>\n        <div style=\"padding:28px;line-height:1.75;font-size:15px;\">\n          <style>\n            h1,h2,h3{color:#0f172a;line-height:1.35;margin:1.2em 0 .5em}\n            p{margin:.8em 0}\n            table{width:100%;border-collapse:collapse;margin:1em 0;font-size:14px}\n            th,td{border:1px solid #d1d5db;padding:8px 10px;text-align:left;vertical-align:top}\n            th{background:#f9fafb}\n            code{background:#f3f4f6;border-radius:4px;padding:2px 5px;font-size:13px}\n            pre{background:#111827;color:#e5e7eb;padding:14px;border-radius:10px;overflow:auto}\n            blockquote{border-left:4px solid #10b981;padding-left:14px;color:#475569;margin:1em 0}\n            a{color:#2563eb}\n          </style>\n          <p><strong>文章標題：</strong>K957: 37 個實驗蒸餾 5 條研究方法論教訓——K526-K566 Session Meta-Synthesis</p><p><strong>文章 ID：</strong>mile_a1f7bfa8</p><p><strong>發布時間：</strong>2026-04-20 08:38 台灣時間</p><p><strong>Audience：</strong>research</p><p><strong>標籤：</strong>研究, K957, K526-K566, K548, K553, meta-synthesis, 方法論, E019-E023, Harvey-pass, VIX sufficiency, portfolio construction</p><p><strong>摘要：</strong>[提出: Claude] 本文把 2026-03 下旬 K526 至 K566 共 40 個實驗（扣除 K555 / K569 被 skip 後實際分類 40 個；memo 原稱 37 個核心）蒸餾為 5 條研究方法論教訓（經驗條目 E019–E023），並給出可被後續實驗直接引用的決策規則。</p><p><a href=\"https://volpred.zeabur.app/reports/mile_a1f7bfa8\">查看網站文章頁</a></p>\n        </div>\n      </div>\n    </div>\n  </body>\n</html>",
+    "level": "milestone",
+    "metadata": {
+      "notification_type": "article_published",
+      "notification_key": "mile_a1f7bfa8",
+      "article_id": "mile_a1f7bfa8",
+      "reason": "release_pool",
+      "status": "published"
+    },
+    "timestamp": "2026-04-20T00:38:21.223297+00:00",
+    "recipients": [
+      "yihao.lai@gmail.com"
+    ],
+    "sent": true,
+    "configured": true
+  },
+  {
+    "id": "acc87a2f",
+    "subject": "[VolPred] 新文章發布：FOMC 04/28-29 T-7 定位：20 年 173 場 FOMC 資料揭示「會前 5 天波動率不會放大」，2026 當前 regime 最像 2010/2016/2019 三場 hold 會議",
+    "body": "新文章發布：FOMC 04/28-29 T-7 定位：20 年 173 場 FOMC 資料揭示「會前 5 天波動率不會放大」，2026 當前 regime 最像 2010/2016/2019 三場 hold 會議\n文章標題：FOMC 04/28-29 T-7 定位：20 年 173 場 FOMC 資料揭示「會前 5 天波動率不會放大」，2026 當前 regime 最像 2010/2016/2019 三場 hold 會議\n文章 ID：mile_a0dccb21\n發布時間：2026-04-20 09:08 台灣時間\nAudience：research\n標籤：研究, FOMC, 2026-04-28, T-7, event-driven, VIX, SPY, 風險管理\n摘要：FOMC 2026-04-28/29 會議剩 8-9 個交易日。\n查看文章：https://volpred.zeabur.app/reports/mile_a0dccb21",
+    "text_body": "新文章發布：FOMC 04/28-29 T-7 定位：20 年 173 場 FOMC 資料揭示「會前 5 天波動率不會放大」，2026 當前 regime 最像 2010/2016/2019 三場 hold 會議\n文章標題：FOMC 04/28-29 T-7 定位：20 年 173 場 FOMC 資料揭示「會前 5 天波動率不會放大」，2026 當前 regime 最像 2010/2016/2019 三場 hold 會議\n文章 ID：mile_a0dccb21\n發布時間：2026-04-20 09:08 台灣時間\nAudience：research\n標籤：研究, FOMC, 2026-04-28, T-7, event-driven, VIX, SPY, 風險管理\n摘要：FOMC 2026-04-28/29 會議剩 8-9 個交易日。\n查看文章：https://volpred.zeabur.app/reports/mile_a0dccb21",
+    "html_body": "<!doctype html>\n<html lang=\"zh-Hant\">\n  <head>\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>新文章發布：FOMC 04/28-29 T-7 定位：20 年 173 場 FOMC 資料揭示「會前 5 天波動率不會放大」，2026 當前 regime 最像 2010/2016/2019 三場 hold 會議</title>\n  </head>\n  <body style=\"margin:0;background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#111827;\">\n    <div style=\"max-width:880px;margin:0 auto;padding:32px 16px;\">\n      <div style=\"background:#ffffff;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(15,23,42,.06);\">\n        <div style=\"padding:24px 28px;background:linear-gradient(135deg,#0f172a,#111827);color:#ffffff;\">\n          <div style=\"font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#86efac;\">VolPred 管理通知</div>\n          <h1 style=\"margin:10px 0 0;font-size:28px;line-height:1.2;\">新文章發布：FOMC 04/28-29 T-7 定位：20 年 173 場 FOMC 資料揭示「會前 5 天波動率不會放大」，2026 當前 regime 最像 2010/2016/2019 三場 hold 會議</h1>\n          <p style=\"margin:6px 0 0;color:#6b7280;font-size:14px;\">milestone | 2026-04-20 09:08 台灣時間</p>\n        </div>\n        <div style=\"padding:28px;line-height:1.75;font-size:15px;\">\n          <style>\n            h1,h2,h3{color:#0f172a;line-height:1.35;margin:1.2em 0 .5em}\n            p{margin:.8em 0}\n            table{width:100%;border-collapse:collapse;margin:1em 0;font-size:14px}\n            th,td{border:1px solid #d1d5db;padding:8px 10px;text-align:left;vertical-align:top}\n            th{background:#f9fafb}\n            code{background:#f3f4f6;border-radius:4px;padding:2px 5px;font-size:13px}\n            pre{background:#111827;color:#e5e7eb;padding:14px;border-radius:10px;overflow:auto}\n            blockquote{border-left:4px solid #10b981;padding-left:14px;color:#475569;margin:1em 0}\n            a{color:#2563eb}\n          </style>\n          <p><strong>文章標題：</strong>FOMC 04/28-29 T-7 定位：20 年 173 場 FOMC 資料揭示「會前 5 天波動率不會放大」，2026 當前 regime 最像 2010/2016/2019 三場 hold 會議</p><p><strong>文章 ID：</strong>mile_a0dccb21</p><p><strong>發布時間：</strong>2026-04-20 09:08 台灣時間</p><p><strong>Audience：</strong>research</p><p><strong>標籤：</strong>研究, FOMC, 2026-04-28, T-7, event-driven, VIX, SPY, 風險管理</p><p><strong>摘要：</strong>FOMC 2026-04-28/29 會議剩 8-9 個交易日。</p><p><a href=\"https://volpred.zeabur.app/reports/mile_a0dccb21\">查看網站文章頁</a></p>\n        </div>\n      </div>\n    </div>\n  </body>\n</html>",
+    "level": "milestone",
+    "metadata": {
+      "notification_type": "article_published",
+      "notification_key": "mile_a0dccb21",
+      "article_id": "mile_a0dccb21",
+      "reason": "publish_milestone",
+      "status": "published"
+    },
+    "timestamp": "2026-04-20T01:08:45.138731+00:00",
+    "recipients": [
+      "yihao.lai@gmail.com"
+    ],
+    "sent": true,
+    "configured": true
   }
 ]

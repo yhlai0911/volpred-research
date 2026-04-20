@@ -2380,5 +2380,47 @@
     "outcome": "done",
     "summary": "scripts/session_startup.md knowledge-index cron prompt fix: mtime check uses find (not parent dir stat). Lancedb writes inner _transactions; parent dir mtime never updates.",
     "notes": "commit=e107242f"
+  },
+  {
+    "timestamp": "2026-04-20T09:01:48+08:00",
+    "task_type": "platform_ops",
+    "outcome": "production_verified",
+    "summary": "01:01 UTC 根因修復 production-verified: host cron @01:00:01 UTC fired check_alerts.sh, output 含 run-due-jobs: fired=0 skipped=5 ids=[] ✓. uv auto-install 2 packages (croniter + exchange_calendars) on first run. breaches=0. Universal piggy-back scheduler 每小時自動檢視 + dispatch due jobs. cron_last_run.json state persist. 整套 root-cause fix + deps + tests + docs + production verification 完成."
+  },
+  {
+    "timestamp": "2026-04-20T09:04:04+08:00",
+    "task_type": "event_article",
+    "outcome": "dispatched",
+    "summary": "01:04 UTC 用戶指正 hold 空轉不是 valid 產出 → 救正: 1) saved feedback_dispatch_over_diversity memory (type 多樣性不凌駕派工原則), 2) 立即 dispatch Claude agent a9b6291b1ed401ba2 for FOMC 04/28-29 T-7 preview event-driven article (research audience, status=published 立即發, 歷史 20 年 pattern + 2026 regime 對比 framing 避重 mile_78d649c4/f7bc6e6a 94.8% 框架). 差異化角度 + 2 chart spec + feed-publisher workflow. 行為已 change."
+  },
+  {
+    "timestamp": "2026-04-20T09:06:46+08:00",
+    "task_type": "paper_review",
+    "outcome": "dispatched",
+    "summary": "01:06 UTC 派 2nd agent ad7deab7c9390278f (feature-dev:code-reviewer subagent) 作 P10 crypto-fear-channel body_v0_intro.tex pre-review — 為 Codex task_7d2c (04-24 wake) 打底. Review 5-section structured output (overall / HIGH / MEDIUM / LOW / Codex-focus-gaps) + read-only (不 touch paper file). 驗證行為改變: slot 2/4 used (FOMC T-7 agent a9b6291 + P10 pre-review ad7deab) parallel dispatch."
+  },
+  {
+    "timestamp": "2026-04-20T09:09:48+08:00",
+    "task_type": "paper_review",
+    "outcome": "agent_done",
+    "summary": "01:09 UTC agent ad7deab7c9390278f (P10 pre-review) completed: 5 HIGH + 8 MEDIUM + 5 LOW + 6 Codex-gaps. 關鍵 findings: H1 asymmetric Granger lag 1-10 actually 1-5 (JSON mismatch), H2 Hatemi-J 2012 misattribution, H3 QR beta sign reversal unexplained, H4 BTC exchange未標+yfinance drift risk, H5 no reproduce.py 阻 review gate. 歸檔 paper/crypto-fear-channel/review_history/pre_body_v0/claude_pre_review.md. Codex 04-24 有 concrete focus list (Gap A-F: claim check / k1025.py read / lit review / outline-body reconcile / reproduce scaffold / data snapshot)."
+  },
+  {
+    "timestamp": "2026-04-20T09:11:48+08:00",
+    "task_type": "event_article",
+    "outcome": "agent_done",
+    "summary": "01:11 UTC agent a9b6291b1ed401ba2 completed: mile_a0dccb21 published (research, status=published event-driven, 2339 CJK, 2 real charts HTTP 200, phase=Event_FOMC_2026_04). 20 年 173 FOMC × 8-day window = 1384 obs analysis. 核心 findings: T-6..T-2 無 vol build-up, 2026 regime 似 2010/2016/2019 三 hold 會議, position sizing decision tree. Supabase synced feed-sync updated=1. FOMC memo CONSUMED banner. Slot: agent a29c965e9d2faafd8 (K886) 還 running."
+  },
+  {
+    "timestamp": "2026-04-20T09:15:28+08:00",
+    "task_type": "paper_body",
+    "outcome": "reproduce_scaffolded",
+    "summary": "01:15 UTC P10 crypto-fear-channel/reproduce.py scaffold 完成 (per pre-review Gap E): K1025 讀 7 核心 paper claims (QR beta τ=0.05/0.5/0.95, DM stat, COVID F+n, DY net spillover). Run: 7/7 match 100% green gate PASS. 寫 reproduce_report.json. P10 現 unblocks review-stage gate per paper-workflow rule (原阻 P9 garch-x-vix 相同 pattern). Codex task_7d2c 04-24 wake 會找到 scaffold already done, 可 focus Gap A-D/F. K886 agent a29c965e9d2faafd8 still running bg."
+  },
+  {
+    "timestamp": "2026-04-20T09:16:02+08:00",
+    "task_type": "daily_article",
+    "outcome": "agent_done",
+    "summary": "01:16 UTC agent a29c965e9d2faafd8 (K886) completed: mile_f8d2ffb9 (general draft 2070 CJK, 4730 total chars, 8 tags, 2 real charts HTTP 200). Title: 0050 一天的波動有一半發生在你睡覺時 PRG 模型 17 年實證揭開台股隔夜黑洞. Data byte-match: overnight 46.1% / intraday 53.9% / PRG-Ext QLIKE 0.784 vs GJR 0.981 / DM t=5.27 Harvey PASS / VaR 1% violations GJR 2.13% FAIL vs PRG-Ext 1.34% PASS / n_total=4217 n_oos=1266. Topic 查重 LanceDB dist=0.705 clear. Pool 4→5. Session total 5 agents completed: K1091/cross-market/K1092/K1077-K1078/FOMC T-7/K886."
   }
 ]

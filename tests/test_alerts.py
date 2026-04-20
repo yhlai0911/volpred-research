@@ -84,6 +84,19 @@ def test_build_alert_condition_report_flags_required_breaches(tmp_path: Path):
             ]
         ),
     )
+    # Simulate a failing host cron so host_cron_fail breach triggers.
+    # Per control-plane rule (v12): host_cron_fail 只看 storage/logs/cron/*.log 最新
+    # "=== exit N ===" 非 0。scheduler_state staleness 不再 count (advisory only).
+    _write_text(
+        storage_dir / "logs" / "cron" / "daily_update.log",
+        "\n".join(
+            [
+                "=== [daily-update] fire at Sun Apr 19 13:00:00 CST 2026 ===",
+                "ERROR: yfinance rate limit exceeded",
+                "=== exit 1 at Sun Apr 19 13:00:10 CST 2026 ===",
+            ]
+        ),
+    )
     _write_json(
         storage_dir / "ops" / "scheduler_state.json",
         {
