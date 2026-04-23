@@ -1,26 +1,26 @@
 {
-  "timestamp": "2026-04-20T18:02:47.257846Z",
+  "timestamp": "2026-04-23T18:03:31Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "Total drafts: 7 (<12 threshold). By audience: general=5 (<8 threshold, alert), research=2 (<4 threshold, alert)."
+      "detail": "Total drafts: 7 (<12). research audience: 2 (<4). general audience: 5 (<8). Both sub-thresholds breached."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json is 51.3 hours old (threshold: 26h). Last modified: ~2026-04-17T22:30 UTC."
+      "detail": "storage/strategy_metrics.json last modified 123.3 hours ago (>26h threshold). mtime=1776523420."
     },
     {
       "name": "ERROR_LOG",
-      "status": "alert",
-      "detail": "Entry dated 2026-04-20 found in docs/error_log.md: universal piggy-back scheduler fix for macOS cron failure. Key lesson: single reliable trigger (check_alerts hourly) + dispatch-fanout is the only robust pattern on macOS."
+      "status": "ok",
+      "detail": "No entries dated 2026-04-22 or 2026-04-23 found in docs/error_log.md. Most recent entry: 2026-04-20 (universal piggy-back scheduler fix)."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All strategies checked. No strategy has >2 nulls in last 3 portfolio_return entries."
+      "detail": "storage/paper_trading.json contains no strategy entries with data (empty result set). No null-gap alerts triggered."
     },
     {
       "name": "GIT_STATUS",
@@ -30,12 +30,13 @@
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json has 2043 entries."
+      "detail": "storage/memory/knowledge.json contains 2043 entries."
     }
   ],
   "alerts": [
-    "article pool low (<12): total=7, general=5 (<8), research=2 (<4)",
-    "metrics stale: strategy_metrics.json is 51.3h old (threshold 26h)",
-    "error log: today entry found (2026-04-20) — macOS cron failure + universal piggy-back scheduler fix applied"
+    "article pool low (<12): total 7 drafts",
+    "research audience low (<4): only 2 research drafts in pool",
+    "general audience low (<8): only 5 general drafts in pool",
+    "strategy metrics stale: storage/strategy_metrics.json is 123.3 hours old (>26h threshold)"
   ]
 }

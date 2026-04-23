@@ -1,0 +1,30 @@
+{
+  "timestamp": "2026-04-23T18:03:31Z",
+  "source": "ops_patrol",
+  "alerts": [
+    {
+      "id": "article_pool_low",
+      "severity": "high",
+      "message": "article pool low (<12): total 7 drafts",
+      "detail": "Total draft articles: 7. Threshold: 12. research=2 (threshold 4), general=5 (threshold 8)."
+    },
+    {
+      "id": "research_audience_low",
+      "severity": "high",
+      "message": "research audience draft count low (<4): only 2",
+      "detail": "Need at least 4 research-audience drafts. Currently: 2."
+    },
+    {
+      "id": "general_audience_low",
+      "severity": "medium",
+      "message": "general audience draft count low (<8): only 5",
+      "detail": "Need at least 8 general-audience drafts. Currently: 5."
+    },
+    {
+      "id": "strategy_metrics_stale",
+      "severity": "high",
+      "message": "strategy metrics stale: storage/strategy_metrics.json is 123.3 hours old",
+      "detail": "Last modified: unix timestamp 1776523420. Age exceeds 26-hour threshold by ~97 hours. Run daily_update or metrics refresh job."
+    }
+  ]
+}
