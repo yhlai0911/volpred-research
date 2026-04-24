@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-24T00:09:04Z",
+  "timestamp": "2026-04-24T06:31:15Z",
   "all_ok": false,
   "checks": [
     {
@@ -10,7 +10,7 @@
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json is 129.4 hours old (mtime=2026-04-18T18:03:40Z). Threshold: 26 hours."
+      "detail": "storage/strategy_metrics.json is ~135.8 hours old (mtime epoch 1776523420, now 1777012240). Threshold: 26 hours."
     },
     {
       "name": "ERROR_LOG",
@@ -37,6 +37,6 @@
     "article pool low: total=7 (<12 required)",
     "article pool low: research audience=2 (<4 required)",
     "article pool low: general audience=5 (<8 required)",
-    "metrics stale: strategy_metrics.json is 129.4 hours old (>26h threshold)"
+    "metrics stale: strategy_metrics.json is ~135.8 hours old (>26h threshold)"
   ]
 }
