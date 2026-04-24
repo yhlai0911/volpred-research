@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-24T06:31:15Z",
+  "timestamp": "2026-04-24T12:17:56Z",
   "all_ok": false,
   "checks": [
     {
@@ -10,17 +10,17 @@
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json is ~135.8 hours old (mtime epoch 1776523420, now 1777012240). Threshold: 26 hours."
+      "detail": "storage/strategy_metrics.json is ~141.6 hours old (mtime epoch 1776523420, now 1777033039). Threshold: 26 hours."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated today (2026-04-24) or yesterday (2026-04-23). Note: 2026-04-19 entry references Codex quota expiry on 2026-04-24 — Codex may be available again today."
+      "detail": "No entries dated today (2026-04-24) or yesterday (2026-04-23). Note: 2026-04-19 entry references Codex quota expiry on 2026-04-24 — Codex may be available again today. Last section: 2026-04-20 universal piggy-back scheduler fix."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "15 strategies checked. No strategy has >2 portfolio_return=null in last 3 entries."
+      "detail": "All strategies checked. No strategy has >2 portfolio_return=null in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
@@ -37,6 +37,6 @@
     "article pool low: total=7 (<12 required)",
     "article pool low: research audience=2 (<4 required)",
     "article pool low: general audience=5 (<8 required)",
-    "metrics stale: strategy_metrics.json is ~135.8 hours old (>26h threshold)"
+    "metrics stale: strategy_metrics.json is ~141.6 hours old (>26h threshold)"
   ]
 }

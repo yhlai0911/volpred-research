@@ -1,0 +1,46 @@
+{
+  "timestamp": "2026-04-24T12:17:56Z",
+  "source": "ops_patrol",
+  "alerts": [
+    {
+      "type": "article_pool_low",
+      "severity": "high",
+      "message": "Total draft articles: 7 (threshold: 12). Article pool is critically low.",
+      "detail": {
+        "total_drafts": 7,
+        "threshold": 12,
+        "research_drafts": 2,
+        "general_drafts": 0
+      }
+    },
+    {
+      "type": "article_pool_research_audience_low",
+      "severity": "high",
+      "message": "Research audience drafts: 2 (threshold: 4). Insufficient research content in pool.",
+      "detail": {
+        "research_drafts": 2,
+        "threshold": 4
+      }
+    },
+    {
+      "type": "article_pool_general_audience_low",
+      "severity": "critical",
+      "message": "General audience drafts: 0 (threshold: 8). Zero general audience content in pool.",
+      "detail": {
+        "general_drafts": 0,
+        "threshold": 8
+      }
+    },
+    {
+      "type": "metrics_stale",
+      "severity": "medium",
+      "message": "strategy_metrics.json is 141.6 hours old (threshold: 26h). Metrics need refresh.",
+      "detail": {
+        "file": "storage/strategy_metrics.json",
+        "hours_old": 141.6,
+        "threshold_hours": 26,
+        "last_modified": "2026-04-18T18:03:40Z"
+      }
+    }
+  ]
+}
