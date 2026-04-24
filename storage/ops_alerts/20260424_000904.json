@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-04-24T00:09:04Z",
+  "alerts": [
+    {
+      "type": "article_pool_low",
+      "severity": "high",
+      "detail": "Total draft articles=7, below threshold of 12. research=2 (need >=4), general=5 (need >=8). Action: commission new articles via feed-publisher or publication-candidates skill."
+    },
+    {
+      "type": "metrics_stale",
+      "severity": "medium",
+      "detail": "storage/strategy_metrics.json last updated 2026-04-18T18:03:40Z, 129.4 hours ago. Exceeds 26-hour threshold. Action: run `uv run volpred ops update-metrics` or equivalent."
+    }
+  ]
+}
