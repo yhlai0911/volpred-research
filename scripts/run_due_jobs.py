@@ -50,6 +50,7 @@ LOCAL_TZ = ZoneInfo("Asia/Taipei")
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 CONFIG_PATH = PROJECT_ROOT / "config" / "runtime_schedules.json"
 LAST_RUN_PATH = PROJECT_ROOT / "storage" / "ops" / "cron_last_run.json"
+PENDING_SESSIONS_PATH = PROJECT_ROOT / "storage" / "ops" / "pending_sessions.json"
 
 # Jobs handled specially elsewhere (check_alerts itself + shared_scheduler_tick
 # advisory) or that should not be invoked by this piggy-back.
@@ -94,6 +95,92 @@ def _parse_iso(raw: str | None) -> datetime | None:
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=timezone.utc)
     return parsed.astimezone(timezone.utc)
+
+
+def _load_pending_sessions() -> dict[str, Any]:
+    if not PENDING_SESSIONS_PATH.exists():
+        return {
+            "schema_version": 1,
+            "description": "Due session_crons recorded while Claude Code session is offline; replay on next session startup.",
+            "jobs": {},
+        }
+    try:
+        data = json.loads(PENDING_SESSIONS_PATH.read_text())
+        if "jobs" not in data or not isinstance(data.get("jobs"), dict):
+            data["jobs"] = {}
+        return data
+    except (OSError, ValueError):
+        return {"schema_version": 1, "jobs": {}}
+
+
+def _save_pending_sessions(state: dict[str, Any]) -> None:
+    PENDING_SESSIONS_PATH.parent.mkdir(parents=True, exist_ok=True)
+    PENDING_SESSIONS_PATH.write_text(json.dumps(state, indent=2, ensure_ascii=False) + "\n")
+
+
+def _write_pending_sessions(
+    session_items: list[dict[str, Any]],
+    last_run_state: dict[str, str],
+    now_local: datetime,
+    now_utc: datetime,
+) -> dict[str, Any]:
+    """Scan session_crons.items; record due entries to pending_sessions.json.
+
+    De-dupe: a job records only if either (a) it has never fired in
+    `cron_last_run.json` or per-job pending history, or (b) its most recent
+    cron fire time is newer than the last recorded `replayed_at` for that
+    job. This prevents the hourly piggy-back from rewriting the same due
+    window every hour when session is offline for multiple cron fires.
+    """
+    pending = _load_pending_sessions()
+    jobs_state = pending.get("jobs") or {}
+    updates: list[str] = []
+    skipped: list[str] = []
+
+    for item in session_items:
+        job_id = item.get("id")
+        cron_expr = item.get("cron")
+        if not job_id or not cron_expr:
+            continue
+        if not item.get("recurring", True):
+            continue  # one-shot (e.g. codex_quota_resume) handled separately
+
+        job_pending = jobs_state.get(job_id) or {}
+        # reference: prefer last replayed_at if any, else last fire recorded
+        # in cron_last_run.json (rare for session crons but harmless), else None
+        last_ref_iso = (
+            job_pending.get("replayed_at")
+            or job_pending.get("recorded_at")
+            or last_run_state.get(job_id)
+        )
+        last_ref = _parse_iso(last_ref_iso)
+        if not _job_is_due(cron_expr, last_ref, now_local):
+            skipped.append(job_id)
+            continue
+
+        jobs_state[job_id] = {
+            "cron": cron_expr,
+            "prompt": (item.get("prompt") or "")[:500],
+            "description": item.get("description"),
+            "recorded_at": now_utc.isoformat(timespec="seconds"),
+            "replayed_at": job_pending.get("replayed_at"),
+            "recorded_count": int(job_pending.get("recorded_count", 0)) + 1,
+        }
+        updates.append(job_id)
+
+    pending["jobs"] = jobs_state
+    pending["last_scanned_at"] = now_utc.isoformat(timespec="seconds")
+    _save_pending_sessions(pending)
+
+    return {
+        "ok": True,
+        "recorded": updates,
+        "skipped": skipped,
+        "total_pending_jobs": sum(
+            1 for j in jobs_state.values()
+            if (j.get("recorded_at") or "") > (j.get("replayed_at") or "")
+        ),
+    }
 
 
 def _job_is_due(cron_expr: str, last_run: datetime | None, now_local: datetime) -> bool:
@@ -197,6 +284,19 @@ def run_due_jobs(subprocess_timeout: int = DEFAULT_SUBPROCESS_TIMEOUT_SEC) -> di
 
     _save_last_run(state)
 
+    # 2026-04-25: session_crons drift coverage. `session_crons.items` in
+    # runtime_schedules.json describes 9 recurring crons (daily_planning /
+    # continue_task / question_research / platform_patrol / git_sync /
+    # knowledge_index_check / token_usage_daily / ndc_indicator_refresh /
+    # codex_quota_resume) that depend on a live Claude Code session to fire
+    # (CronCreate-backed). macOS CronCreate is unreliable and sessions close,
+    # so these can silently miss for days. Piggy-back records each due session
+    # cron to pending_sessions.json so the next session startup can replay
+    # missed windows. Like continue_task_stub, this writes intent, not code
+    # execution — the main-thread (or session_startup.md) decides how to act.
+    session_items = (config.get("session_crons") or {}).get("items") or []
+    session_pending = _write_pending_sessions(session_items, state, now_local, now)
+
     # 2026-04-20: also expand event_jobs entries whose `not_before` has
     # arrived. `shared_scheduler_tick` was the intended call site for this
     # but v12 downgraded it to advisory-only (CLAUDE.md §control-plane) and
@@ -224,6 +324,7 @@ def run_due_jobs(subprocess_timeout: int = DEFAULT_SUBPROCESS_TIMEOUT_SEC) -> di
         "skipped_count": sum(1 for r in results if r.get("action") == "skip"),
         "jobs": results,
         "event_expansion": event_expansion,
+        "session_pending": session_pending,
     }
     return summary
 

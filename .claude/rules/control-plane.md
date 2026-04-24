@@ -40,8 +40,11 @@ paths:
 4. Due → subprocess-invoke wrapper，log 寫同檔案、exit code 同 semantics
 5. Success 更新 last_run；**failure 不更新**（下小時再評估、避免 silent skip whole day）
 6. `run_due_jobs` 尾端再呼叫 `expand_due_event_jobs`（2026-04-20 新增）— 把 `event_jobs.items` 中 `not_before ≤ now ≤ deadline` 的條目 materialize 成 control-plane task
+7. `run_due_jobs` 再呼叫 `_write_pending_sessions`（2026-04-25 新增）— 掃 `session_crons.items`，把當下 due 但 session 離線未 fire 的 job 記入 `storage/ops/pending_sessions.json`；下次 session 啟動由 `scripts/session_startup.md §2.0` replay
 
 Why 第 6 步：原設計這由 `shared_scheduler_tick` 呼叫但該項目降級 advisory 後 host 端並未真 fire（`scheduler_tick.log` 自 2026-04-19 起 size=0），缺 trigger → event_jobs populate 後永遠停 pending。Piggy-back 接管後 ~60min latency materialize。
+
+Why 第 7 步：session cron（`CronCreate`）只在 Claude Code session alive 時 fire。macOS CronCreate 本就不可靠，session 又會被 `/exit` 或閒置關閉 → 8 條 session cron 中 spec 列 9 但實務上常只 1 條存活（2026-04-24 觀察）。Piggy-back 雖不能「代替 session 執行」（prompt 型 workflow 需主線程），但能記錄 pending，避免整個 window 靜默漏掉；下次 session 啟動的 replay 機制恢復 continuity。
 
 ### Crontab entries 保留
 不刪除（harmless，永不 fire，兼 fallback）。不需 `install_host_crontab.sh` 重跑。
