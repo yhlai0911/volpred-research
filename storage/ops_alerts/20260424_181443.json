@@ -1,0 +1,30 @@
+{
+  "timestamp": "2026-04-24T18:14:43Z",
+  "patrol_run": "ops_patrol_report.json",
+  "alerts": [
+    {
+      "type": "article_pool_low",
+      "severity": "warning",
+      "message": "article pool low (<12): total drafts=7",
+      "detail": "Draft pool has only 7 articles. Minimum is 12. Recommend dispatching daily_article or event_article agents to replenish pool."
+    },
+    {
+      "type": "article_pool_research_low",
+      "severity": "warning",
+      "message": "research audience critically low (<4): only 2 research drafts",
+      "detail": "Research-audience draft count=2, below threshold of 4. Consider running autonomous-research to generate research articles."
+    },
+    {
+      "type": "article_pool_general_low",
+      "severity": "warning",
+      "message": "general audience low (<8): only 5 general drafts",
+      "detail": "General-audience draft count=5, below threshold of 8. Need at least 3 more general articles."
+    },
+    {
+      "type": "metrics_stale",
+      "severity": "warning",
+      "message": "metrics stale: strategy_metrics.json is 147 hours old (>26h)",
+      "detail": "storage/strategy_metrics.json has not been updated in ~6 days. Run daily_update or strategy metrics refresh job."
+    }
+  ]
+}

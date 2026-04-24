@@ -1,31 +1,31 @@
 {
-  "timestamp": "2026-04-24T12:17:56Z",
+  "timestamp": "2026-04-24T18:14:43Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "Total draft=7 (<12 threshold). Breakdown: general=5 (<8 threshold), research=2 (<4 threshold). All three thresholds breached."
+      "detail": "Total drafts=7 (<12 threshold). Breakdown: general=5 (threshold>=8), research=2 (threshold>=4). Both audience buckets below minimum."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json is ~141.6 hours old (mtime epoch 1776523420, now 1777033039). Threshold: 26 hours."
+      "detail": "storage/strategy_metrics.json is 147 hours old (>26h threshold). Last modified: mtime=1776523420."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated today (2026-04-24) or yesterday (2026-04-23). Note: 2026-04-19 entry references Codex quota expiry on 2026-04-24 — Codex may be available again today. Last section: 2026-04-20 universal piggy-back scheduler fix."
+      "detail": "No entries dated 2026-04-23 or 2026-04-24. Most recent entry: 2026-04-20 (macOS host cron only reliable at 0 * * * *, universal piggy-back fix applied)."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All strategies checked. No strategy has >2 portfolio_return=null in last 3 entries."
+      "detail": "Checked 15 strategies. No strategy has >2 consecutive null portfolio_return in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold: 50). Clean working tree."
+      "detail": "0 uncommitted files (well below 50 threshold)."
     },
     {
       "name": "KNOWLEDGE_SIZE",
@@ -34,9 +34,9 @@
     }
   ],
   "alerts": [
-    "article pool low: total=7 (<12 required)",
-    "article pool low: research audience=2 (<4 required)",
-    "article pool low: general audience=5 (<8 required)",
-    "metrics stale: strategy_metrics.json is ~141.6 hours old (>26h threshold)"
+    "article pool low (<12): total drafts=7",
+    "article pool: research audience critically low (<4): only 2 research drafts",
+    "article pool: general audience low (<8): only 5 general drafts",
+    "metrics stale: strategy_metrics.json is 147 hours old (>26h)"
   ]
 }
