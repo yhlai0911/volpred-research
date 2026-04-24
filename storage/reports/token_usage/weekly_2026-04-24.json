@@ -1,0 +1,60 @@
+{
+  "report_type": "weekly",
+  "source": "claude_code_jsonl",
+  "week_range": "2026-04-24 → 2026-05-01",
+  "totals": {
+    "input_tokens": 12,
+    "output_tokens": 1668,
+    "cache_read_tokens": 0,
+    "cache_create_tokens": 89472,
+    "billable_total": 91152,
+    "assistant_messages": 4,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.3606
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 12,
+      "output_tokens": 1668,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 89472,
+      "messages": 4,
+      "estimated_cost_usd": 0.3606
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 6,
+      "output_tokens": 834,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 44736,
+      "messages": 2,
+      "billable_total": 45576,
+      "estimated_cost_usd": 0.1803,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "token_report": {
+      "input_tokens": 6,
+      "output_tokens": 834,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 44736,
+      "messages": 2,
+      "billable_total": 45576,
+      "estimated_cost_usd": 0.1803,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    }
+  },
+  "daily_breakdown": {
+    "2026-04-24": {
+      "input_tokens": 12,
+      "output_tokens": 1668,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 89472,
+      "messages": 4,
+      "billable_total": 91152,
+      "estimated_cost_usd": 0.3606
+    }
+  }
+}
