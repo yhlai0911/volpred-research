@@ -1,0 +1,26 @@
+{
+  "timestamp": "2026-04-25T06:06:45Z",
+  "patrol_run": "2026-04-25T06:06:45Z",
+  "severity": "high",
+  "alerts": [
+    {
+      "id": "article_pool_low",
+      "severity": "high",
+      "message": "article pool low (<12): 7 draft articles total",
+      "detail": "Total draft=7. general=5 (<8 threshold). research=2 (<4 threshold). Both audience segments below threshold."
+    },
+    {
+      "id": "metrics_stale",
+      "severity": "high",
+      "message": "metrics stale: strategy_metrics.json is 159 hours old",
+      "detail": "Last updated 2026-04-18T00:03:40Z. Threshold is 26h. Readers see stale Sharpe ratios and performance metrics."
+    },
+    {
+      "id": "paper_trading_gap_market_daily",
+      "severity": "medium",
+      "message": "paper trading gap: _market_daily last 3 entries all have portfolio_return=null",
+      "detail": "_market_daily strategy has 3/3 null portfolio_return in most recent entries. All other 14 strategies have only 1/3 null (weekend gap, likely OK)."
+    }
+  ],
+  "ok_checks": ["ERROR_LOG", "GIT_STATUS", "KNOWLEDGE_SIZE"]
+}

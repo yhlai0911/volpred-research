@@ -1,26 +1,26 @@
 {
-  "timestamp": "2026-04-25T00:13:24Z",
+  "timestamp": "2026-04-25T06:06:45Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "Total drafts=7 (<12 threshold). By audience: research=2 (<4 threshold), general=5 (<8 threshold). Both sub-audiences below minimum."
+      "detail": "Total draft: 7 (<12 threshold). Breakdown: general=5 (<8 threshold, ALERT), research=2 (<4 threshold, ALERT)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json is 153.5 hours old (>26h threshold). Last modified epoch 1776523420."
+      "detail": "strategy_metrics.json mtime=2026-04-18T00:03:40Z, age=159h (>26h threshold)."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No error_log.md entries dated 2026-04-24 or 2026-04-25 in last 30 lines. Most recent entry: 2026-04-20 (universal piggy-back scheduler fix). Note: '2026-04-24' appears in line 495 only as Codex quota expiry text, not a new entry."
+      "detail": "Last 30 lines contain entries through 2026-04-20 only. No entries dated today (2026-04-25) or yesterday (2026-04-24)."
     },
     {
       "name": "PAPER_TRADING_GAPS",
-      "status": "ok",
-      "detail": "Checked 15 strategies (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, _market_daily, adaptive_tier). No strategy has >2 portfolio_return=null in last 3 entries."
+      "status": "alert",
+      "detail": "_market_daily: last 3 entries all have portfolio_return=null (3 nulls). All other 14 strategies: 1 null in last 3 (OK)."
     },
     {
       "name": "GIT_STATUS",
@@ -34,7 +34,10 @@
     }
   ],
   "alerts": [
-    "article pool low (7 total drafts < 12): research audience=2 (<4), general audience=5 (<8)",
-    "metrics stale: storage/strategy_metrics.json is 153.5 hours old (> 26 hour threshold)"
+    "article pool low (<12): 7 draft articles total",
+    "research audience low (<4): only 2 draft research articles",
+    "general audience low (<8): only 5 draft general articles",
+    "metrics stale: strategy_metrics.json is 159 hours old (threshold: 26h)",
+    "paper trading gap: _market_daily last 3 entries all have portfolio_return=null"
   ]
 }
