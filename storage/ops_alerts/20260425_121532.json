@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-04-25T12:15:32Z",
+  "alerts": [
+    {
+      "type": "article_pool_low",
+      "severity": "high",
+      "message": "Article pool low (<12): 7 total drafts. research=2 (<4), general=5 (<8). Both audience targets breached.",
+      "action_required": "Publish more research and general articles to replenish draft pool."
+    },
+    {
+      "type": "metrics_stale",
+      "severity": "medium",
+      "message": "strategy_metrics.json is ~165.5 hours old (threshold: 26h). Last updated ~2026-04-18T23:03 UTC.",
+      "action_required": "Run strategy metrics update job: uv run volpred ops update-metrics or trigger daily_update."
+    }
+  ]
+}

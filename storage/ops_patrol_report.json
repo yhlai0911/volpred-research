@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-25T06:06:45Z",
+  "timestamp": "2026-04-25T12:15:32Z",
   "all_ok": false,
   "checks": [
     {
@@ -10,22 +10,22 @@
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "strategy_metrics.json mtime=2026-04-18T00:03:40Z, age=159h (>26h threshold)."
+      "detail": "strategy_metrics.json mtime=1776523420 (~2026-04-18T23:03 UTC), age ~165.5h (>26h threshold)."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Last 30 lines contain entries through 2026-04-20 only. No entries dated today (2026-04-25) or yesterday (2026-04-24)."
+      "detail": "Last 30 lines contain entries through 2026-04-20 only. No entries dated today (2026-04-25) or yesterday (2026-04-24). Most recent lesson: universal piggy-back scheduler for macOS cron reliability."
     },
     {
       "name": "PAPER_TRADING_GAPS",
-      "status": "alert",
-      "detail": "_market_daily: last 3 entries all have portfolio_return=null (3 nulls). All other 14 strategies: 1 null in last 3 (OK)."
+      "status": "ok",
+      "detail": "14 array-type strategies checked. No strategy has >2 portfolio_return=null in last 3 entries. _market_daily is object-type (date-keyed), not subject to this check."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold: 50)."
+      "detail": "0 uncommitted files (threshold: 50). Working tree clean."
     },
     {
       "name": "KNOWLEDGE_SIZE",
@@ -37,7 +37,6 @@
     "article pool low (<12): 7 draft articles total",
     "research audience low (<4): only 2 draft research articles",
     "general audience low (<8): only 5 draft general articles",
-    "metrics stale: strategy_metrics.json is 159 hours old (threshold: 26h)",
-    "paper trading gap: _market_daily last 3 entries all have portfolio_return=null"
+    "metrics stale: strategy_metrics.json is ~165.5 hours old (threshold: 26h)"
   ]
 }
