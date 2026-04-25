@@ -1,0 +1,64 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-04-25",
+  "week_range": "2026-04-24 → 2026-05-01",
+  "totals": {
+    "input_tokens": 9,
+    "output_tokens": 1389,
+    "cache_read_tokens": 0,
+    "cache_create_tokens": 67104,
+    "billable_total": 68502,
+    "assistant_messages": 3,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.2725
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 9,
+      "output_tokens": 1389,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 67104,
+      "messages": 3,
+      "estimated_cost_usd": 0.2725
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 6,
+      "output_tokens": 926,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 44736,
+      "messages": 2,
+      "billable_total": 45668,
+      "estimated_cost_usd": 0.1817,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "token_report": {
+      "input_tokens": 3,
+      "output_tokens": 463,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 22368,
+      "messages": 1,
+      "billable_total": 22834,
+      "estimated_cost_usd": 0.0908,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "0235f46",
+      "message": "Ops patrol report 2026-04-25T12:15Z"
+    },
+    {
+      "sha": "9b76ab4",
+      "message": "Ops patrol report 2026-04-25T06:06Z"
+    },
+    {
+      "sha": "1eb1449",
+      "message": "Ops patrol report 2026-04-25T00:13Z"
+    }
+  ]
+}
