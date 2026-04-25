@@ -27862,5 +27862,20 @@
     "created_at": "2026-04-18T06:07:39.896514+00:00",
     "codex_reviewed": true,
     "source_task_id": "task_a2ad5cff36e9"
+  },
+  {
+    "item_id": "727e23ee",
+    "category": "K1258",
+    "content": "K1258 Forgetting-Factor BMA volatility forecast (extending K1257 with exponentially-discounted log-posterior, Raftery-Karny-Ettler 2010). 3 assets × 5 lambdas (1.0/0.99/0.975/0.95/0.9), window=1250, refit=63, seed=42. H1 FAIL: no lambda<1 variant satisfies Harvey |t|>3 AND lower QLIKE (passing_cells=[]). H2 PASS (descriptive): lambda<1 substantially increases weight-switch-freq vs lambda=1 baseline — SPY 0.0108→0.199 (18.4×), GLD 0.0247→0.241 (9.8×), 0050.TW 0.0026→0.215 (82.7×) at lambda=0.9. H3 PASS: optimal lambda asset-specific {SPY:1.0, GLD:1.0, 0050.TW:0.9} — not universal. H4 production decision: lambda=1.0 (standard BMA), no forgetting variant Harvey-passes. Lambda=1 byte-identical K1257 BMA QLIKE confirmed (round-18 main-thread agent-result-verification): SPY=-8.2274, GLD=-8.1812, 0050.TW=-7.6790. Implication: forgetting-factor mechanism (model uncertainty kept high) generates faster weight switching but no QLIKE improvement → posterior concentration in K1257 was correct optimum, not over-confidence artifact. Code review: main-thread 10-check fallback (Codex blocked by gpt-5.5 config) — 0 CRITICAL/HIGH/MEDIUM, 1 CAVEAT (H2 descriptive-ratio not Harvey-gated). Approved as alternative integrity gate per CLAUDE.md §實驗後必做 L1.",
+    "evidence": [
+      "experiments/k1258/k1258_results.json",
+      "experiments/k1258/codex_review.md",
+      "commit 9e924653 (main-thread review)"
+    ],
+    "confidence": 0.88,
+    "created_at": "2026-04-25T16:45:46.904969+00:00",
+    "main_thread_reviewed": true,
+    "codex_reviewed": false,
+    "review_note": "Codex blocked by ~/.codex/config.toml gpt-5.5 unavailable; main-thread 10-check used as alternative integrity gate (codex_review.md commit 9e924653)."
   }
 ]

@@ -2731,5 +2731,10 @@
     "at": "2026-04-25T08:16:56+00:00",
     "task_type": "platform_ops",
     "summary": "08:15 UTC ROOT-CAUSE FIX: release_pool starvation. _derived_last_released_at_from_feed (content.py L95) was treating daily-audience articles (daily strategy + position emitted by daily_update.py at 09:00 CST) as pool releases → permanently reset 12h interval timer → real research/general drafts (4 in pool) never released. Fix: exclude audience=daily in addition to category=member_qa. Verified: pre-fix last_released_at=04-25T01:00 (daily); post-fix=04-24T13:00 (true last pool release); manual release-pool-by-settings released mile_1d8652b5 (VIX 6 markets general article). Test added test_preview_release_pool_self_heals_ignores_daily_audience_articles."
+  },
+  {
+    "at": "2026-04-25T16:45:57+00:00",
+    "task_type": "event_article",
+    "summary": "16:43 UTC v12: FOMC 04/29 T-2 task_4decc24a0b63 claimed (claude-supervisor) → Agent a6972465c0530771a dispatched (claude general-purpose, bg). Memo storage/next_draft_candidate_fomc_t2.md with 3-scenario prob grid + position sizing axis, prior 3 articles (T-7/T-3/T-11) listed for footer cross-link. Pre-dispatch dedup: feed grep 4 prior FOMC 04/29 entries all distinct angles. Slot 1/4. Low-cost: K1258 knowledge.json appended (item_id 727e23ee, total=2044) with main-thread review note since Codex gpt-5.5 blocked."
   }
 ]
