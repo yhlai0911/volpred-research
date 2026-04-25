@@ -93,11 +93,23 @@ def _local_release_settings_path(storage_dir: str = "storage") -> Path:
 
 
 def _derived_last_released_at_from_feed(storage_dir: str = "storage") -> str | None:
+    """Return the latest published_at among items released BY release_pool.
+
+    Excludes:
+    - member_qa: never goes through the release pool
+    - audience=daily: daily strategy / position articles are emitted directly
+      by daily_update.py at fixed cron times (08:03 CST), never enter the
+      draft pool, never count as a pool release. (2026-04-25 fix: prior
+      behavior treated daily publishes as pool releases, which permanently
+      reset the 12h interval timer and starved real research/general drafts.)
+    """
     latest_published_at: datetime | None = None
     for item in load_feed(storage_dir):
         if item.get("status") != "published":
             continue
         if str(item.get("category") or "").strip() == "member_qa":
+            continue
+        if str(item.get("audience") or "").strip() == "daily":
             continue
         published_at = _parse_datetime(item.get("published_at"))
         if published_at is None:

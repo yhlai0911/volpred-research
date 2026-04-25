@@ -146,6 +146,70 @@ def test_preview_release_pool_self_heals_stale_settings_from_feed_ignoring_membe
     assert preview["due_now"] is True
 
 
+def test_preview_release_pool_self_heals_ignores_daily_audience_articles(
+    tmp_path: Path,
+    monkeypatch,
+):
+    """2026-04-25 fix: daily strategy/position articles are emitted by
+    daily_update.py at fixed cron times, never enter the release pool.
+    They must NOT count toward last_released_at, otherwise they perpetually
+    reset the 12h pool interval and starve real research/general drafts.
+    """
+    storage_dir = tmp_path / "storage"
+    frozen_now = datetime(2026, 4, 25, 8, 0, tzinfo=timezone.utc)
+    _freeze_content_now(monkeypatch, frozen_now)
+    _stub_release_side_effects(monkeypatch)
+
+    published_general_at = datetime(2026, 4, 24, 13, 0, tzinfo=timezone.utc)
+    published_daily_newer_at = datetime(2026, 4, 25, 1, 0, tzinfo=timezone.utc)
+    _write_json(
+        storage_dir / ".release_settings.json",
+        {
+            "mode": "auto",
+            "interval_minutes": 720,
+            "max_articles_per_run": 1,
+            "due_only": True,
+            "include_drafts": True,
+            "preferred_audiences": [],
+            "last_released_at": "2026-04-24T13:00:00+00:00",
+            "updated_at": "2026-04-24T13:00:01+00:00",
+        },
+    )
+    _write_json(
+        storage_dir / "reports" / "feed.json",
+        [
+            {
+                "id": "mile_general_pool_release",
+                "title": "Real pool release (general)",
+                "status": "published",
+                "published_at": published_general_at.isoformat(),
+                "created_at": published_general_at.isoformat(),
+                "category": "general",
+                "audience": "general",
+            },
+            {
+                "id": "mile_daily_strategy",
+                "title": "每日策略建議",
+                "status": "published",
+                "published_at": published_daily_newer_at.isoformat(),
+                "created_at": published_daily_newer_at.isoformat(),
+                "category": "general",
+                "audience": "daily",
+            },
+        ],
+    )
+
+    preview = content.preview_release_pool_by_settings(storage_dir=str(storage_dir))
+    settings = json.loads((storage_dir / ".release_settings.json").read_text(encoding="utf-8"))
+
+    # last_released_at must reflect the general (pool) release at 04-24 13:00,
+    # NOT the daily article at 04-25 01:00 — even though the daily is newer.
+    assert settings["last_released_at"] == published_general_at.isoformat()
+    assert preview["settings"]["last_released_at"] == published_general_at.isoformat()
+    # 12h interval: 04-24 13:00 + 12h = 04-25 01:00; frozen now = 04-25 08:00 → due
+    assert preview["due_now"] is True
+
+
 def test_release_pool_by_settings_keeps_legacy_missing_last_released_first_run_behavior(
     tmp_path: Path,
     monkeypatch,

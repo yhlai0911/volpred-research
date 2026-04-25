@@ -2726,5 +2726,10 @@
     "at": "2026-04-25T04:44:57+00:00",
     "task_type": "event_article",
     "summary": "04:45 UTC v12 cron: 2026-05 NFP event_jobs populated. Added nfp-2026-05-01-t2 (not_before 04-29 00:00 CST) + nfp-2026-05-01-t0 (not_before 05-01 21:00 CST = 1h post-release). preview_event_jobs status=pending verified. Memo storage/next_draft_candidate_nfp_t2.md written with consensus + surprise-bucket angle. T-7 missed due to populate gap (today 04-25 already past 04-24 T-7 deadline). check_alerts piggy-back will materialize T-2 task at 04-29 hourly window. Type diversification: event_article (last 5: experiment/paper_review/governance/paper_review/daily_article)."
+  },
+  {
+    "at": "2026-04-25T08:16:56+00:00",
+    "task_type": "platform_ops",
+    "summary": "08:15 UTC ROOT-CAUSE FIX: release_pool starvation. _derived_last_released_at_from_feed (content.py L95) was treating daily-audience articles (daily strategy + position emitted by daily_update.py at 09:00 CST) as pool releases → permanently reset 12h interval timer → real research/general drafts (4 in pool) never released. Fix: exclude audience=daily in addition to category=member_qa. Verified: pre-fix last_released_at=04-25T01:00 (daily); post-fix=04-24T13:00 (true last pool release); manual release-pool-by-settings released mile_1d8652b5 (VIX 6 markets general article). Test added test_preview_release_pool_self_heals_ignores_daily_audience_articles."
   }
 ]
