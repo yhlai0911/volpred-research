@@ -1,0 +1,41 @@
+{
+  "timestamp": "2026-04-25T18:09:49Z",
+  "severity": "warning",
+  "alerts": [
+    {
+      "name": "article_pool_low",
+      "message": "Total draft articles = 7, below threshold of 12.",
+      "detail": {
+        "total_drafts": 7,
+        "general_drafts": 5,
+        "research_drafts": 2,
+        "thresholds": {
+          "total": 12,
+          "general": 8,
+          "research": 4
+        }
+      }
+    },
+    {
+      "name": "article_pool_research_audience_low",
+      "message": "Research-audience drafts = 2, below threshold of 4.",
+      "detail": {
+        "research_drafts": 2,
+        "threshold": 4
+      }
+    },
+    {
+      "name": "article_pool_general_audience_low",
+      "message": "General-audience drafts = 5, below threshold of 8.",
+      "detail": {
+        "general_drafts": 5,
+        "threshold": 8
+      }
+    }
+  ],
+  "recommended_actions": [
+    "Run /research on a new asset or topic to generate experiment-backed draft articles.",
+    "Use feed-publisher to promote existing experiment findings (K1213–K1216 series) into draft articles.",
+    "Priority: 2 more research-audience articles + 3 more general-audience articles to clear thresholds."
+  ]
+}
