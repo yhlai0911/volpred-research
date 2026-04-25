@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-04-25T00:13:24Z",
+  "alerts": [
+    {
+      "id": "article_pool_low",
+      "severity": "high",
+      "message": "Article pool low (7 total drafts < 12): research audience=2 (<4 threshold), general audience=5 (<8 threshold).",
+      "action": "Publish new research or general articles to refill draft pool. Priority: research audience (2 articles short of minimum)."
+    },
+    {
+      "id": "metrics_stale",
+      "severity": "medium",
+      "message": "storage/strategy_metrics.json is 153.5 hours old (> 26 hour threshold).",
+      "action": "Trigger strategy metrics refresh via 'uv run volpred ops daily-update' or equivalent metrics recalc job."
+    }
+  ]
+}
