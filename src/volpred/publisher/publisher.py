@@ -14,6 +14,33 @@ from volpred.config.runtime import get_default_remote_url
 # because only audience field was checked, not content-vs-audience match.
 # These constants define what "general" audience MUST NOT contain.
 _K_ID_TAG_PATTERN = re.compile(r'^K\d+[a-zA-Z_]?\d*$')
+
+# 2026-04-26: audience badge canonicalization. Frontend badge renders the
+# Chinese canonical name; agents in briefs / past code used English literals
+# ("general", "research") or mixed (Chinese + English) interchangeably →
+# 21 articles in feed.json had redundant or conflicting audience tags
+# (e.g. ["研究", "一般讀者"], ["研究", "general"]). Map every known alias to
+# the canonical Chinese tag; strip ALL aliases at publish time and re-insert
+# exactly one matching the article's audience field.
+_AUDIENCE_TAG_CANONICAL = {
+    # English audience values (publisher API convention)
+    'general': '一般讀者',
+    'research': '研究',
+    'daily': '每日建議',
+    'member_qa': '會員提問',
+    # Chinese canonical (the badge value itself)
+    '一般讀者': '一般讀者',
+    '研究': '研究',
+    '每日建議': '每日建議',
+    '會員提問': '會員提問',
+    # Common variants seen in historical feed
+    'General': '一般讀者',
+    'Research': '研究',
+    'Daily': '每日建議',
+    'daily-update': '每日建議',
+    'member-qa': '會員提問',
+}
+_AUDIENCE_TAG_ALL_ALIASES = frozenset(_AUDIENCE_TAG_CANONICAL.keys())
 _GENERAL_FORBIDDEN_PATTERNS = [
     (re.compile(r'\bt\s*=\s*-?\d'), 't=value (use 「統計顯著」白話)'),
     (re.compile(r'\bp\s*=\s*\d'), 'p=value (use 「達顯著水準」)'),
@@ -376,22 +403,15 @@ class Publisher:
             else:
                 category = 'milestone'
 
-        # Ensure audience-specific category tag is present and first
-        # (frontend-v2 badge uses tags to determine display)
-        _audience_tag_map = {
-            'general': '一般讀者',
-            'research': '研究',
-            'daily': '每日建議',
-            'member_qa': '會員提問',
-        }
-        required_tag = _audience_tag_map.get(audience)
+        # 2026-04-26: enforce single canonical audience badge tag.
+        # Strip ALL audience aliases (Chinese / English / variants) regardless
+        # of whether they match the desired audience — this prevents the
+        # historical bug where ["研究", "general"] or ["研究", "一般讀者"]
+        # passed through silently. Then insert exactly one canonical Chinese
+        # tag for the article's audience.
+        tag_list = [t for t in tag_list if t not in _AUDIENCE_TAG_ALL_ALIASES]
+        required_tag = _AUDIENCE_TAG_CANONICAL.get(audience)
         if required_tag:
-            # Remove any mismatched category tags first
-            category_tags = set(_audience_tag_map.values())
-            tag_list = [t for t in tag_list if t not in category_tags or t == required_tag]
-            # Ensure required tag is first
-            if required_tag in tag_list:
-                tag_list.remove(required_tag)
             tag_list.insert(0, required_tag)
 
         # 2026-04-26: split K-id tags into details.experiment_refs metadata.

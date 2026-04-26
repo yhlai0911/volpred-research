@@ -129,6 +129,74 @@ def test_publish_milestone_strict_passes_clean_general(
     assert pub_id.startswith("mile_")
 
 
+def test_publish_milestone_strips_redundant_audience_aliases(
+    tmp_path: Path, monkeypatch
+):
+    """Tag list must end with exactly one canonical Chinese audience badge.
+    Historical bug: brief had ["一般讀者", "general"] or ["研究",
+    "一般讀者", "general"]; old strip logic only knew Chinese values, so
+    English 'general' / 'research' / 'daily-update' leaked through.
+    """
+    import json
+    monkeypatch.setenv("VOLPRED_ACTOR", "claude")
+    monkeypatch.setattr(Publisher, "REMOTE_URL", "", raising=False)
+    monkeypatch.setattr(Publisher, "_sync_feed_to_remote", lambda self: None, raising=False)
+    monkeypatch.setattr(Publisher, "_sync_report_to_remote", lambda self, *a, **kw: None, raising=False)
+
+    pub = Publisher(storage_dir=str(tmp_path))
+
+    pub_id = pub.publish_milestone(
+        title="散戶可讀的方法論文章",
+        description="一個白話故事，不含 jargon。",
+        phase="research",
+        audience="general",
+        # Polluted brief: Chinese + English audience tags + wrong-audience tag
+        tags=["一般讀者", "general", "研究", "Research", "FOMC", "macro"],
+        status="draft",
+    )
+    feed = json.loads((tmp_path / "reports" / "feed.json").read_text())
+    item = next(i for i in feed if i["id"] == pub_id)
+
+    audience_aliases = {"一般讀者", "general", "研究", "research", "Research",
+                        "General", "每日建議", "daily", "daily-update", "Daily",
+                        "會員提問", "member_qa", "member-qa"}
+    found_audience = [t for t in item["tags"] if t in audience_aliases]
+    # Exactly one canonical Chinese audience tag
+    assert found_audience == ["一般讀者"], f"got {found_audience}"
+    # User-facing topic tags preserved
+    assert "FOMC" in item["tags"]
+    assert "macro" in item["tags"]
+
+
+def test_publish_milestone_research_canonical_strips_general_alias(
+    tmp_path: Path, monkeypatch
+):
+    """audience='research' brief with stray 'general' tag must yield only '研究'."""
+    import json
+    monkeypatch.setenv("VOLPRED_ACTOR", "claude")
+    monkeypatch.setattr(Publisher, "REMOTE_URL", "", raising=False)
+    monkeypatch.setattr(Publisher, "_sync_feed_to_remote", lambda self: None, raising=False)
+    monkeypatch.setattr(Publisher, "_sync_report_to_remote", lambda self, *a, **kw: None, raising=False)
+
+    pub = Publisher(storage_dir=str(tmp_path))
+
+    pub_id = pub.publish_milestone(
+        title="完整研究報告",
+        description="包含完整方法論、表格與限制。" * 50,  # long enough
+        phase="research",
+        audience="research",
+        tags=["研究", "general", "BMA", "波動率"],
+        status="draft",
+        audit_strict=False,  # research bypass not required, just here for clarity
+    )
+    feed = json.loads((tmp_path / "reports" / "feed.json").read_text())
+    item = next(i for i in feed if i["id"] == pub_id)
+
+    audience_aliases = {"一般讀者", "general", "研究", "research"}
+    found_audience = [t for t in item["tags"] if t in audience_aliases]
+    assert found_audience == ["研究"]
+
+
 def test_publish_milestone_extracts_k_ids_to_metadata(
     tmp_path: Path, monkeypatch
 ):
