@@ -1,47 +1,46 @@
 {
-  "timestamp": "2026-04-26T12:20:59.429622Z",
+  "timestamp": "2026-04-26T18:17:19Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "Total drafts: 4 (<12). General: 1/8, Research: 3/4."
+      "detail": "Total drafts: 6 (<12 threshold → ALERT). Research audience: 4 (threshold <4 → ok, boundary). General audience: 2 (<8 threshold → ALERT)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "strategy_metrics.json is 18.2h old (<26h threshold)"
+      "detail": "storage/strategy_metrics.json mtime ~2026-04-26T18:17:00Z, age ~19 seconds. Well within 26-hour threshold."
     },
     {
       "name": "ERROR_LOG",
       "status": "alert",
-      "detail": "3 entries dated today (2026-04-26)",
+      "detail": "3 entries dated 2026-04-26 (today)",
       "entries": [
-        "2026-04-26: knowledge-index-summary returns status=broken (lancedb list_tables API shape change; fixed)",
-        "2026-04-26: Member Q&A pending 5-day silent gap for q=29cbeb5c; evaluated and ranked",
-        "2026-04-26: Codex CLI gpt-5.5 model requires upgrade; fallback to main thread audit"
+        "2026-04-26: knowledge-index-summary always returned status=broken due to lancedb list_tables() API shape change — patched with try-open pattern; status=fresh, 5337 entries confirmed",
+        "2026-04-26: Member Q&A 5-day silent gap — q 29cbeb5c from yaoxk1431 stuck in evaluating; resolved with score=3, ranked; cron prompt + alerts updated",
+        "2026-04-26: Codex CLI outdated — gpt-5.5 requires newer version, all codex dispatches 400-failing; fallback to main-thread read-only audit; Codex CLI upgrade pending"
       ]
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 15 strategies have <=2 nulls in last 3 entries"
+      "detail": "Checked 15 strategies. No strategy has >2 null portfolio_return values in the most recent 3 entries."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files"
+      "detail": "0 uncommitted files. Working tree is clean."
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "2044 entries in knowledge.json"
+      "detail": "storage/memory/knowledge.json contains 2044 entries."
     }
   ],
   "alerts": [
-    "article pool low (<12)",
-    "article pool research audience low (3<4)",
-    "article pool general audience low (1<8)",
-    "error_log has 3 entries dated today/yesterday"
+    "article pool low (<12): total drafts = 6",
+    "general audience article pool low (<8): general audience drafts = 2",
+    "error_log_today: 3 entries dated 2026-04-26 — lancedb API fix, member_qa 5-day gap resolved, Codex CLI gpt-5.5 incompatibility"
   ]
 }
