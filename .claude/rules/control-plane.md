@@ -20,6 +20,23 @@ paths:
 - Session cron 與 system crontab **需與 canonical runtime schedule 一致**
 - Admin UI 目前是 **observer**；UI 與 canonical spec 不一致時以 canonical spec / local state 為準
 
+### release-task：claimed → queued 退回（2026-04-26 新增）
+
+當 agent claim-next 拉到非預期 task（誤抓 / 優先序變動 / 派工的 agent 工具壞了），**用 `release-task` 不要用 `finish-task --status failed`**：
+
+```
+uv run volpred ops release-task <task_id> --reason "claim 誤抓 / codex CLI 過時 / pivot 中" --actor supervisor
+```
+
+- claimed | running → queued，`claimed_by*` 全清空，**priority 維持原值**
+- 不寫 execution receipt（保留 receipt 純度，false-fail 不污染 audit trail）
+- 走 writer log 留 audit（result=`released_from_claimed`）+ `last_error` 記原因
+- 對應 P30 task `task_06584aeee667` 修整。
+
+**何時用 `release-task` vs `finish-task --status failed`**：
+- `release-task`：task brief 沒問題，但**這次** agent / 時機不對 — 留給未來重派
+- `finish-task --status failed`：task brief 本身有問題或無法完成（schema 錯、missing data、constraint violation）— 真實失敗
+
 ## Universal piggy-back scheduler（2026-04-20 canonical）
 
 **macOS host cron daemon 只可靠執行 `0 * * * *` pattern**（驗證於此 machine；所有其他 pattern 含 `* * * * *`、`3 */2`、`0 8 * * 1`、`3 7 * * 2-6` 皆 silently skip）。根本解 = **check_alerts** (`0 * * * *`) 當唯一可靠 trigger，啟動 hook 呼叫 `scripts/run_due_jobs.py` 作 universal dispatcher。

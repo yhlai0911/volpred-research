@@ -1391,6 +1391,37 @@ def ops_fail(
     _print_json(result)
 
 
+@ops.command("release-task")
+@click.argument("task_id")
+@click.option("--reason", required=True, help="Why this task is being released back to the queue (logged in last_error + writer log).")
+@click.option("--actor", default=None, help="Who is releasing the task (default 'supervisor').")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+def ops_release_task(
+    task_id: str,
+    reason: str,
+    actor: str | None,
+    storage_dir: str,
+) -> None:
+    """Release a claimed/running task back to queued without writing a fail receipt.
+
+    Use when claim-next pulled the wrong task or the assigned agent is
+    blocked (e.g. external CLI broken). Preserves priority and original
+    brief so the next claim-next picks it up cleanly. Avoids the
+    finish-task --status=failed anti-pattern that pollutes execution
+    receipts with false-fails.
+    """
+    from volpred.ops import release_task
+
+    result = release_task(
+        task_id,
+        reason=reason,
+        actor=actor,
+        storage_dir=storage_dir,
+    )
+    console.print(f"[green]Released task[/green] {task_id} -> queued")
+    _print_json({"action": "release_task", "task": result})
+
+
 @ops.command("session-shutdown")
 @click.option("--agent", "agent_name", default=None, type=click.Choice(LOCAL_AGENT_CHOICES), help="Agent name (legacy)")
 @click.option("--session-key", default=None, type=click.Choice(LOCAL_SESSION_KEY_CHOICES), help="Canonical session key")
