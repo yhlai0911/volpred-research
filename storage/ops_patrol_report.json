@@ -1,26 +1,26 @@
 {
-  "timestamp": "2026-04-25T18:09:49Z",
+  "timestamp": "2026-04-26T00:32:52Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "Total draft: 7 (<12 threshold). Breakdown: general=5 (<8 threshold, ALERT), research=2 (<4 threshold, ALERT)."
+      "detail": "Total drafts: 7 (threshold: 12). By audience — research: 2 (threshold: 4), general: 5 (threshold: 8). All three sub-checks fail."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "strategy_metrics.json mtime ~10 seconds old (just refreshed). Well within 26-hour threshold."
+      "detail": "storage/strategy_metrics.json age: ~6.4 hours (threshold: 26h). OK."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Last 30 lines contain entries through 2026-04-20 only. No entries dated today (2026-04-25) or yesterday (2026-04-24). Most recent lesson: universal piggy-back scheduler for macOS cron reliability."
+      "detail": "Last 30 lines of docs/error_log.md contain entries dated 2026-04-20 only. No entries from today (2026-04-26) or yesterday (2026-04-25)."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "14 strategies checked. Each has exactly 1 null in last 3 entries (likely weekend/holiday gap). No strategy exceeds threshold of >2 nulls."
+      "detail": "15 strategies found. All strategies have only 1 entry each (all with portfolio_return=null). Checklist alert condition requires >2 nulls in last 3 entries — with only 1 entry per strategy the condition is not met. Note: all single entries have portfolio_return=null, suggesting paper trading data has not yet been populated."
     },
     {
       "name": "GIT_STATUS",
@@ -34,8 +34,8 @@
     }
   ],
   "alerts": [
-    "article pool low (<12): 7 draft articles total",
-    "research audience low (<4): only 2 draft research articles",
-    "general audience low (<8): only 5 draft general articles"
+    "article pool low (<12): total drafts=7",
+    "research audience low (<4): research drafts=2",
+    "general audience low (<8): general drafts=5"
   ]
 }
