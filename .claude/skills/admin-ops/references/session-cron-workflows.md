@@ -214,4 +214,4 @@ CronCreate(cron="23 22 * * *", prompt="Token 用量日報（token-usage-maintain
 - 寫入前先建立正式 queue task（`uv run python -m volpred.cli ops assign ...`）
 - 寫入後留可觀測結果（snapshot / execution receipt 存 `storage/ops/`）
 
-**標準「繼續任務」cron 為 `13 */4 * * *`（每 4 小時 slot-aware heartbeat；2026-04-26 用戶指定 12h→4h 以維持發文與研究節奏）**。任務類型不限於研究（涵蓋發文/論文/ops/bug fix/會員問題/文件/重構）。禁止高於 `*/2` 的密度，避免資源爆衝。
+**標準「繼續任務」cron 為 `*/30 * * * *`（嚴格每 30 分鐘等距 fire；2026-04-26 用戶指定 4h→30min，對齊 Claude Code Max $200 plan 1-hour prompt cache TTL — 已於 Anthropic 'Using Claude Code with your Pro or Max plan' support article 驗證；30min 永遠落在 cache window 中央，cache 命中率最佳，避免 cold miss 同時維持發文與研究節奏）**。任務類型不限於研究（涵蓋發文/論文/ops/bug fix/會員問題/文件/重構）。禁止高於 `*/2` 的密度，避免資源爆衝。

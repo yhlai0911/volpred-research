@@ -25,7 +25,7 @@
 ## 標準 Session Cron（每次新 session 重建）
 ```
 CronCreate(cron="3 9 * * *", prompt="每日任務審視：執行 daily-planning-maintain --stub-if-no-work；若有 planning gap 再建立正式 task")
-CronCreate(cron="13 */4 * * *", prompt="繼續任務（slot-aware）：執行 continue-task-maintain --stub-if-no-work；若有 dispatch candidate 再處理 1 個正式 task")
+CronCreate(cron="*/30 * * * *", prompt="繼續任務（slot-aware）：執行 continue-task-maintain --stub-if-no-work；若有 dispatch candidate 再處理 1 個正式 task")
 CronCreate(cron="17 */6 * * *", prompt="會員問題研究：執行 question-ops-maintain --stub-if-no-work；若有 pending 再看 workflow")
 CronCreate(cron="37 */6 * * *", prompt="平台巡檢：執行 platform-patrol-maintain --stub-if-no-work；若有訊號再看 detail CLI")
 CronCreate(cron="7 */6 * * *", prompt="知識索引維護：執行 knowledge-index-maintain --stub-if-no-work；若有動作再回報 after summary")
@@ -34,7 +34,7 @@ CronCreate(cron="0 10 28 * *", prompt="更新 NDC 景氣指標：執行 ndc-indi
 ```
 
 ## Idle-driven continuation（取代高頻 heartbeat）
-- 不再建立 `*/2 * * * *` 或更密的「繼續任務」heartbeat cron（標準是 `13 */4` 每 4 小時 slot-aware；2026-04-26 12h→4h）
+- 不再建立 `*/2 * * * *` 或更密的「繼續任務」heartbeat cron（標準是 `*/30 * * * *` 嚴格每 30 分鐘等距 fire；2026-04-26 4h→30min 對齊 Claude Code Max $200 plan 1-hour prompt cache TTL，已於 Anthropic 'Using Claude Code with your Pro or Max plan' support article 驗證）
 - agent 完成主任務後，先檢查 `user queue`
 - `user queue` 為空，再檢查 `scheduled queue`
 - queue 都空了，才允許做一輪 discovery / research continuation

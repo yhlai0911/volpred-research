@@ -3,7 +3,7 @@
     "canonical_path": "config/runtime_schedules.json",
     "timezone": "Asia/Taipei",
     "updated_at": "2026-04-26",
-    "policy_summary": "Queue-first local control plane. Session-only work should be recreated from this spec; continue_task heartbeat 設為 13 */4（每 4 小時 slot-aware）。The formal clock is the cron-driven shared scheduler, while idle_policy only governs slot-aware continuation/selection."
+    "policy_summary": "Queue-first local control plane. Session-only work should be recreated from this spec; continue_task heartbeat 設為 */30 * * * *（嚴格 30 分鐘等距，對齊 Claude Code Max $200/月 plan 1-hour prompt cache TTL，已於 2026-04-26 經 Anthropic support article 驗證）。The formal clock is the cron-driven shared scheduler, while idle_policy only governs slot-aware continuation/selection."
   },
   "system_crontab": {
     "source_label": "Canonical system crontab spec",
@@ -111,7 +111,7 @@
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_continue_task_stub.sh",
         "log_path": "storage/logs/cron/continue_task_stub.log",
         "command_deprecated": "scripts/continue_task_stub.py",
-        "description": "Host-cron fallback for session cron `continue_task`（13 */4）；session 關閉期間仍寫入 storage/ops/pending_continue.json，下次 session 開啟 replay。錯開 17 分鐘避免雙路徑衝突。",
+        "description": "Host-cron fallback for session cron `continue_task`（session 端 `*/30 * * * *`）；session 關閉期間仍寫入 storage/ops/pending_continue.json，下次 session 開啟 replay。本 host wrapper 維持 `30 */4 * * *`（macOS host cron 只可靠執行整點 / 整 N 小時 pattern，無法跟進 30 分鐘節奏；session 在線時 piggy-back scheduler 才真正承擔 30 分鐘 heartbeat）。",
         "matchers": [
           "scripts/continue_task_stub.py",
           "cron_continue_task_stub.sh"
@@ -157,10 +157,10 @@
       },
       {
         "id": "continue_task",
-        "cron": "13 */4 * * *",
+        "cron": "*/30 * * * *",
         "prompt": "繼續任務（slot-aware）：執行 continue-task-maintain --stub-if-no-work；若有 dispatch candidate 再處理 1 個正式 task",
         "recurring": true,
-        "description": "每 4 小時一次的 slot-aware continuation heartbeat（2026-04-26 用戶指定 12h→4h，以維持文章池與研究節奏）。"
+        "description": "Slot-aware continuation heartbeat。cron `*/30` 嚴格每 30 分鐘等距 fire（每小時 :00 / :30），永遠落在 Claude Code Max $200 plan 1-hour prompt cache window 中央，cache 命中率最佳。2026-04-26 用戶指定 4h→30min；先嘗試 50min 但發現 `*/50` 標準 cron 解析為 :00 / :50（50/10 不等距），改用 `*/30` 才是真正等距。Cache TTL 已於 Anthropic support article 'Using Claude Code with your Pro or Max plan' 確認 Max plan = 1h；Pro / API key = 5min。注意：2026-03 初 default TTL 曾悄悄從 1h 降到 5min（GH issue #46829），Max 訂閱保持 1h 但需監控未來變動，若降級則本 cadence 失效。"
       },
       {
         "id": "question_research",
