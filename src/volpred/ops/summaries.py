@@ -932,10 +932,21 @@ def _knowledge_index_table_summary(index_dir: Path) -> dict[str, Any]:
 
     try:
         db = lancedb.connect(str(index_dir))
-        table_names = list(db.list_tables()) if hasattr(db, "list_tables") else list(db.table_names())
-        if "research_memory" not in table_names:
+        # Robust against lancedb API drift: newer list_tables() returns a
+        # paginated structure like [('tables', ['research_memory']),
+        # ('page_token', None)], while older list_tables() / table_names()
+        # return a flat list of strings. Skip the listing step entirely and
+        # just attempt to open the table — that surfaces a real "table missing"
+        # error without depending on the listing API shape.
+        try:
+            table = db.open_table("research_memory")
+        except FileNotFoundError:
             return {"available": False, "error": "research_memory_table_missing"}
-        table = db.open_table("research_memory")
+        except Exception as exc:
+            msg = str(exc).lower()
+            if "not found" in msg or "does not exist" in msg or "no such" in msg:
+                return {"available": False, "error": "research_memory_table_missing"}
+            raise
         frame = table.to_pandas()
     except Exception as exc:
         return {"available": False, "error": f"index_open_failed: {exc}"}
