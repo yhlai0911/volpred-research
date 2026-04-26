@@ -1,0 +1,109 @@
+{
+  "experiment_id": "K1260",
+  "title": "GJR-X (Fair-Info Baseline) vs PRG vs GJR on SPY OOS",
+  "type": "empirical",
+  "research_question": "Is PRG's advantage just information gain (reading overnight separately) or genuinely the cross-session bridge mechanism? GJR-X is a fair-info baseline that reads the same two pieces of info as PRG but flattens them into one GJR recursion via exogenous regressor.",
+  "data_source": "yfinance (SPY)",
+  "period": "2000-01-04 to 2026-04-02",
+  "is_period": "2000-01-04 to 2018-12-31",
+  "oos_period": "2019-01-02 to 2026-04-02",
+  "n_total": 6601,
+  "n_is": 4778,
+  "n_oos": 1823,
+  "n_eval": 1823,
+  "target": "sigma2_fullday = r2_overnight + r2_intra (Patton 2011)",
+  "loss": "QLIKE",
+  "test": "Diebold-Mariano (Harvey 1997 small-sample correction)",
+  "lookahead_check": "GJR-X uses returns[t-1] and r2_overnight[t-1] to forecast h_t \u2014 explicit signal.shift(1) equivalent. r2_overnight[t-1] is (log(open_{t-1}/close_{t-2}))^2, observable by close of t-1. No t-day info used to forecast t. See gjrx_oos_forecast() and _gjrx_negll() / _gjrx_propagate() for r2_ov[t-1] indexing.",
+  "seed": 42,
+  "n_starts_gjr": 3,
+  "n_starts_gjr_x": 3,
+  "n_starts_prg": 5,
+  "refit_freq_gjr": 63,
+  "refit_freq_gjr_x": 63,
+  "refit_freq_prg": 126,
+  "models": {
+    "GJR": "h_t = w + a*r2_{t-1} + g*I(r<0)*r2_{t-1} + b*h_{t-1}",
+    "GJR_X": "h_t = w + a*r2_{t-1} + g*I(r<0)*r2_{t-1} + b*h_{t-1} + d*r2_overnight_{t-1}  (NEW: + delta * yesterday's overnight squared return)",
+    "PRG_Extended": "Periodic GARCH with leverage; cross-session h propagation. Reuses K880 canonical implementation."
+  },
+  "qlike": {
+    "GJR": 0.8544340830430441,
+    "GJR_X": 0.8607142931032818,
+    "PRG_Extended": 0.7559297449498216
+  },
+  "dm_tests": {
+    "PRG_vs_GJR": {
+      "t_stat": 5.236176003002506,
+      "p_value": 1.8290557024513987e-07,
+      "harvey_pass": true,
+      "winner": "PRG",
+      "interpretation": "PRG vs GJR: DM t=5.24 (winner: PRG, Harvey PASS)"
+    },
+    "PRG_vs_GJR_X": {
+      "t_stat": 7.724875527342961,
+      "p_value": 1.84297022087776e-14,
+      "harvey_pass": true,
+      "winner": "PRG",
+      "interpretation": "PRG vs GJR-X: DM t=7.72 (winner: PRG, Harvey PASS)"
+    },
+    "GJR_X_vs_GJR": {
+      "t_stat": -0.5308530933500076,
+      "p_value": 0.595585283597075,
+      "harvey_pass": false,
+      "winner": "GJR",
+      "interpretation": "GJR-X vs GJR: DM t=-0.53 (winner: GJR, Harvey FAIL)"
+    }
+  },
+  "is_lr_diagnostic": {
+    "gjr_is_nll": -15486.935152693357,
+    "gjrx_is_nll": -15511.620691098919,
+    "gjr_params": {
+      "omega": 3.7157058089218685e-06,
+      "alpha": 0.08030047970061242,
+      "gamma": 0.06022535995576085,
+      "beta": 0.8531925958475498
+    },
+    "gjrx_params": {
+      "omega": 2.365311280847757e-06,
+      "alpha": 0.06614988451377296,
+      "gamma": 0.06964469535003404,
+      "beta": 0.8442838476542857,
+      "delta": 0.12883793566450158
+    },
+    "LR_stat": 49.3710768111232,
+    "p_value": 2.118416553287261e-12,
+    "df": 1,
+    "delta_significant_IS": true,
+    "n_starts_used": 16,
+    "interpretation": "IS LR test \u03b4=0 vs \u03b4>0: LR=49.37, p=0.0000. \u03b4 significant IS \u2014 overnight info contains predictive content"
+  },
+  "notebooklm_argument_A": {
+    "predicted_range_GJR_X_DM_t": [
+      2.0,
+      4.0
+    ],
+    "observed_GJR_X_DM_t": -0.5308530933500076,
+    "in_predicted_range": false,
+    "prg_still_beats_gjrx": true,
+    "argument_A_supported": false,
+    "narrative": "Argument A: PRG advantage = session-boundary BRIDGE, not just additional information. Confirmed if (a) GJR-X moderately beats GJR (more info helps) AND (b) PRG still beats GJR-X (bridge has value beyond raw info)."
+  },
+  "harvey_threshold": 3.0,
+  "session_decomposition_share": {
+    "overnight_pct": 34.46639488058095,
+    "intraday_pct": 65.53360511941908
+  },
+  "references": [
+    "Hansen, Huang & Shek (2012): Realized GARCH (exogenous regressor)",
+    "Glosten, Jagannathan & Runkle (1993): GJR-GARCH",
+    "Bollerslev & Ghysels (1996): Periodic GARCH (PRG ancestor)",
+    "Patton (2011): Volatility forecast comparison",
+    "Diebold & Mariano (1995); Harvey, Leybourne & Newbold (1997)",
+    "Lai et al. (2024): PRS / PRG concept",
+    "Todorova (2014); Opschoor et al. (2021): overnight modeling"
+  ],
+  "paper_link": "P6 prg-periodic-garch \u00a76 limitation line 311 \u2014 closes the 'GJR-X comparison left for future work' gap. Provides fair-info baseline for v3 manuscript revision.",
+  "runtime_seconds": 6.397855043411255,
+  "completed_at": "2026-04-26T19:13:14.329307Z"
+}
