@@ -165,9 +165,9 @@
       {
         "id": "question_research",
         "cron": "17 */6 * * *",
-        "prompt": "會員問題研究：執行 question-ops-maintain --stub-if-no-work；若有 pending 再看 workflow 並建立/執行後續任務",
+        "prompt": "會員問題研究：執行 question-ops-maintain --stub-if-no-work。若 pending>0 且 ranked=0：(a) 跑 question-ranking-workflow --source user --output-json /tmp/q_workflow.json；(b) 主線程逐題 4 維度評分（研究可行性/讀者價值/研究相關性/預期影響力 各 1-10）寫 evaluation JSON 到 /tmp/q_evals.json；(c) 跑 question-rerank --evaluations-json /tmp/q_evals.json。若 ranked>0 且 researching=0：dispatch claude general-purpose subagent 走 question-claim → research → answer → question-finish 路徑。**不可僅 review report 就停**（5 天 silent gap 教訓 2026-04-26）。",
         "recurring": true,
-        "description": "每 6 小時執行會員問題低噪音 gate；只有有 pending 才展開 workflow。"
+        "description": "每 6 小時執行會員問題評分與研究 pipeline。actionable not review-only — pending 必走 evaluate→rerank→claim→research，避免 5 天 silent gap (lesson 2026-04-26 question 29cbeb5c)。"
       },
       {
         "id": "platform_patrol",

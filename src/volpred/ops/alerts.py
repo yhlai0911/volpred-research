@@ -480,6 +480,101 @@ def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
     }
 
 
+def _parse_member_qa_state(storage_dir: str, now: datetime) -> dict[str, Any]:
+    """Detect member questions stuck in pending/evaluating > 24h.
+
+    Lesson 2026-04-26: question 29cbeb5c (proposer=yaoxk1431) sat in
+    `evaluating` status for 5 days because the question_research cron
+    prompt was review-only ("若有 pending 再看 workflow") and no alert
+    surfaced the gap. After this fix, pending older than 24h is `warn`
+    and older than 72h is `critical`, with auto-action listed in
+    .claude/rules/alert.md so the main thread runs evaluate→rerank
+    immediately on the next tick instead of paging the user.
+    """
+    try:
+        from .questions import get_member_question_ranking_summary
+
+        summary = get_member_question_ranking_summary(source="user", limit=20)
+    except Exception as exc:  # noqa: BLE001 — alert pipeline must not crash
+        return {
+            "id": "member_qa_stale",
+            "breached": False,
+            "level": "info",
+            "title": "Member Q&A pending check unavailable",
+            "body": "",
+            "details": {"error": str(exc)},
+        }
+
+    pending = summary.get("pending_questions") or []
+    stale: list[dict[str, Any]] = []
+    for item in pending:
+        created = _parse_iso_datetime(item.get("created_at"))
+        if created is None:
+            continue
+        age_h = (now - created).total_seconds() / 3600.0
+        if age_h >= 24:
+            stale.append(
+                {
+                    "question_id": item.get("question_id"),
+                    "proposer": item.get("proposer"),
+                    "age_hours": round(age_h, 1),
+                    "status": item.get("status"),
+                }
+            )
+
+    if not stale:
+        return {
+            "id": "member_qa_stale",
+            "breached": False,
+            "level": "info",
+            "title": "Member Q&A pending stale",
+            "body": "",
+            "details": {
+                "stale_count": 0,
+                "pending_total": len(pending),
+            },
+        }
+
+    max_age = max(s["age_hours"] for s in stale)
+    level = "critical" if max_age >= 72 else "warn"
+    examples_lines = [
+        f"- {s['question_id']} (proposer={s['proposer']}, age={s['age_hours']:.1f}h, status={s['status']})"
+        for s in stale[:5]
+    ]
+    body = "\n".join(
+        [
+            "## 觸發條件",
+            f"有 {len(stale)} 個 member question pending 超過 24h 未進入 ranked。",
+            f"- max_age_hours: {max_age:.1f}",
+            *examples_lines,
+            "",
+            "## 影響",
+            "Mission 第 1 條（內容產出）+ 第 4 條（平台運營）受損：member 提問長時間無回應 = 平台失信號。",
+            "Question pipeline 卡在 evaluating → 不進 researching → 不進 answered → user 看不到答覆。",
+            "",
+            "## 建議行動",
+            "1. 主線程立即跑 4 維度評分：",
+            "   uv run volpred ops question-ranking-workflow --source user --output-json /tmp/q_workflow.json",
+            "2. 寫 evaluation JSON（每題 4 維度 1-10 score）→ /tmp/q_evals.json",
+            "3. uv run volpred ops question-rerank --evaluations-json /tmp/q_evals.json",
+            "4. ranked>0 後 dispatch claude subagent 跑 research stage（claim → answer → finish）",
+        ]
+    )
+    return {
+        "id": "member_qa_stale",
+        "breached": True,
+        "level": level,
+        "title": f"Member Q&A pending stale (max {max_age:.0f}h)",
+        "body": body,
+        "details": {
+            "stale_count": len(stale),
+            "pending_total": len(pending),
+            "max_age_hours": max_age,
+            "examples": stale[:5],
+        },
+    }
+
+
 def build_alert_condition_report(
     *,
     storage_dir: str = "storage",
@@ -490,6 +585,7 @@ def build_alert_condition_report(
         _parse_release_pool_state(storage_dir, current),
         _parse_draft_pool_state(storage_dir),
         _parse_host_cron_state(storage_dir, current),
+        _parse_member_qa_state(storage_dir, current),
     ]
     return {
         "generated_at": current.isoformat(),

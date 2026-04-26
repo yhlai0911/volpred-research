@@ -25,6 +25,7 @@ paths:
   2. `draft_pool_low` — `feed.json` 中 `draft` 文章數 < 4 → warn（=0 升級為 critical）
   3. `host_cron_fail` — **v12 後僅看** `storage/logs/cron/*.log` 最新 `=== exit N ===` 非 0 → critical。
      scheduler-tick staleness 在 v12 已降級為 advisory-only（body 內 readout 供參考，不貢獻 breach judgement）。
+  4. `member_qa_stale` — `questions` 表 pending（status=`evaluating`/`pending`/未 ranked）`created_at` 距 now 超過 24h → warn / 超過 72h → critical（2026-04-26 新增；防 5 天 silent gap 再現）。
 
 ## Alert 觸發 → 主線程 auto-remediation（2026-04-19 用戶要求）
 
@@ -41,6 +42,7 @@ paths:
 | `重大 K PASS / paradigm shift` | 通知用戶 + 派 publication-candidates + 進投稿 / paper body 更新 pipeline |
 | `Paper reviewer response` | 派 paper-review-cycle skill + 進 revision workflow |
 | `策略 MDD > 20%` | 暫停策略上架 + 派 strategy lifecycle review agent |
+| `member_qa_stale` (pending >24h / >72h) | 主線程**立即**跑 question-ranking-workflow → 4 維度評分 → question-rerank（不等下一個 6h cron tick）；ranked>0 後 dispatch claude subagent 走 research → answer → finish |
 
 **無 auto-action 情境**：alert 條件不明 / 需用戶 policy decision → 明標 "L11 policy pending" 於 signal_payload，**主線程立記 pending** 並每輪 check 是否用戶已回覆。
 
