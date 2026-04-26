@@ -5,6 +5,8 @@ description: >
   merge_worktree.sh 判斷「no commits」但 reflog 有 commit，導致實驗檔案遺失）。
   Trigger: 每次 worktree agent 完成返回後自動執行。
   Do not use for general research design or article writing.
+model: sonnet
+effort: low
 user-invocable: false
 ---
 

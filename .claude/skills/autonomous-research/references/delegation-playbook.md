@@ -29,7 +29,7 @@
 
 ---
 
-## Task Decomposition + Agent Team 並行分工
+## Task Decomposition + 平行派工
 
 **硬規則**（用戶 2026-04-19 指示）：
 
@@ -47,11 +47,13 @@ Main task: "Paper 4 vix-sufficiency 投稿準備"
 
 **Schema**：`storage/ops/tasks/*.json` 有 `parent_task_id` 欄位連 parent-child。
 
-### 2. Agent team 並行分工
-子任務排程到時 → 派 agent team 平行執行（不同 type / skill）：
+### 2. 預設用獨立 subagent 平行分工
+子任務排程到時，**先用互不耦合的 subagent 平行執行**（不同 type / skill）：
 - 每子任務對應 1 agent
-- 3-4 agent 同時跑是標準（Codex × 1 + Claude Agent tool × 2-3）
-- 各 subagent brief 6 要素 self-contained
+- 3-4 個獨立 agent 可同時跑，但只在寫入範圍不重疊時開
+- 各 subagent brief 6 要素必須 self-contained
+
+只有當子任務之間需要直接互相討論、交叉審查、整理分歧並形成共識時，才升級成 `agent team`
 
 ### 3. 不耗 token 的工作優先排滿（主線程閒置時）
 
@@ -64,7 +66,7 @@ Main task: "Paper 4 vix-sufficiency 投稿準備"
 - `ops assign` 把提案入 queue
 - INDEX grep / 查重快查
 
-**中-high cost tasks**（派 agent）：
+**中-high cost tasks**（派 agent / subagent）：
 - 多步驟 script / multi-file edit
 - 寫文章（需 chart + content）
 - Paper audit（多 .tex + script 讀）

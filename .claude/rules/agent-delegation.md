@@ -8,35 +8,36 @@ paths:
 
 # Agent Delegation + Model Selection（主線程派工節奏）
 
-**核心原則**：主線程 context 有限且昂貴；sub agent 的 context 用完即丟。把會燒 context 的工作外包給 agent team，主線程只保留 **規劃 / synthesis / 驗證 / 決策 / 記錄**。這是 session-level token 節約最大槓桿。
+**核心原則**：主線程 context 有限且昂貴；能在主線程完成的小事就別派，會污染主線但可 self-contained 的 side task 才 fork subagent。`agent team` 只留給真的需要多 session 協作、互相討論或交叉挑戰假說的任務，不作日常預設。
 
 **詳細 playbook**（10 類任務 × skill 對照表、6 要素 brief 範本、task decomposition 範例、work_log schema、decision tree、場景例子）：`.claude/skills/autonomous-research/references/delegation-playbook.md`（skill 觸發時才載）。
 
+**快速路由入口**：先看 `docs/workflow-index.md` 決定 workflow / 執行模式 / 預設 model，再按需讀對應 skill。
+
 ## 模型選擇（合併自舊 model-selection.md）
 
-| 任務類型 | 模型 | 原因 |
+| 任務類型 | 預設模型 / effort | 原因 |
 |---|---|---|
-| 研究實驗（GARCH、統計檢定、策略回測） | `opus` | 精確性與專業性要求高 |
-| 程式開發（前端、後端、bug 修復） | `opus` | 程式碼正確性關鍵 |
-| 統計分析（DM、bootstrap、cross-OOS） | `opus` | 數學嚴謹性不可妥協 |
-| 論文寫作 / 審查 | `opus` | 學術品質要求 |
-| 知識合成（meta-analysis、投資指南） | `opus` | 需要深度推理 |
-| 簡單搜尋（grep、檔案查找） | `Explore` subagent | 快速唯讀 |
-| 簡單文章撰寫（feed 文章） | `sonnet` 可接受 | 創意寫作彈性較大 |
-| 規劃與架構 | `Plan` subagent | 結構化思考 |
+| 研究實驗 / 方法論 / 高風險論文判斷 | `opus / high` | 精確性與專業性要求高 |
+| 平台 ops / 發文 / paper-update 類程序型工作 | `sonnet / medium` | 結構化流程明確，不必全程重模型 |
+| 驗證 / merge safety / publication scan 類短流程 | `sonnet / low` | 核心是精準比對與 checklist |
+| lookup / classification / data-source 查詢 | `haiku / low` | 參考型工作，應優先便宜快速 |
+| 需要讀很多背景但與主線脈絡可分離的任務 | `context: fork` + 對應 skill 預設 | 降低主線 context 汙染 |
 
-**規則**：不確定時預設 `opus`；研究/統計/程式/論文精確性工作絕不降級 sonnet 省 token。簡單唯讀探索才用 Explore / Plan subagent。
+**規則**：先尊重 skill frontmatter；只有在 skill 沒定義或任務明顯升級時才手動覆寫。高風險研究/統計/論文判斷不可為省 token 降到 Sonnet 以下。
 
 ## Delegation Threshold（何時派 vs 自己做）
 
-**派 agent**：多步流程（≥3 步）、需 WebSearch / 外部資料、實驗腳本 + 跑、寫文章（需 chart + content）、批次改 >5 檔、可 brief 化獨立任務、反覆試錯 debug。
+**派 subagent**：大量搜尋 / log / docs、需 WebSearch / 外部資料、實驗腳本 + 跑、寫文章（需 chart + content）、批次改 >5 檔、可 brief 化獨立任務、反覆試錯 debug。
+
+**派 agent team**：只有子任務彼此需要互相溝通、交叉審查、共同形成共識，且單純多個獨立 subagent 不夠時才用。
 
 **主線程自己做**：單一 grep/jq/ls、簡單 Edit（單檔、明確 old_string）、驗證 agent 回報、agent 結果 synthesis、寫 knowledge/experience/log、判斷要不要派下一個 agent。
 
 **判斷法則**：
-- 「這件事如果我做，會燒 3000+ tokens 嗎？」→ 會 → 派 agent
+- 「這件事會污染主線 context，但結果可以摘要回來嗎？」→ 會 → 派 subagent
 - 「這件事需要我的對話記憶才能做嗎？」→ 會 → 自己做
-- 「成功標準能一句話寫清楚嗎？」→ 能 → 派 agent 最快
+- 「成功標準能一句話寫清楚，而且子任務彼此不必互聊嗎？」→ 能 → 不必開 team，subagent 即可
 
 ## 派工前 Checklist 三關（硬性，每次都做）
 
@@ -50,7 +51,12 @@ paths:
 
 ## Codex subagent 併發限制（Shared runtime）
 
-**硬規則**：一 Claude session 一次只能派 1 個 `codex:codex-rescue` / Codex subagent。第二個會搶 runtime → stale claim（started_at=null）。派前檢 `storage/ops/tasks/*.json` 有無 `claimed_by=codex` 且 `started_at=null` >5min 的 stale；有則先 `finish-task --status failed` 清，或 bypass 改派 `general-purpose` Agent tool。詳細見 delegation-playbook.md。
+**本專案預設**：`codex:codex-rescue` 預設一次派 1 個。若任務完全獨立、寫入範圍不重疊、且不共享同一續跑 thread，可放寬到同一 session **最多 3 個**。**不要設成不限制**。
+
+補充：
+- Codex plugin 有 background job queue，工具層不是絕對單工；但續跑 thread、claim state、shared 檔案寫入仍可能互相干擾。
+- 只要看到 `started_at=null`、stale claim、或兩個 Codex 任務開始碰同一檔，就立刻降回 serialize。
+- 派前檢 `storage/ops/tasks/*.json` 有無 `claimed_by=codex` 且 `started_at=null` >5min 的 stale；有則先 `finish-task --status failed` 清，或 bypass 改派 `general-purpose` Agent tool。
 
 ## Sub Agent self-contained brief 必備 6 要素
 

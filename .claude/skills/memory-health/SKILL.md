@@ -6,6 +6,10 @@ description: >
   膨脹到 54.5MB（50,304 筆中 96.4% 是重複），根因是 merge_worktree.sh
   的 jq 去重 bug。Trigger: 每週一次自動檢查，或手動觸發。
   Do not use for normal experiment execution or publishing.
+model: sonnet
+effort: medium
+context: fork
+agent: fresh-context-worker
 user-invocable: true
 ---
 
@@ -23,6 +27,21 @@ Do **not** use this skill for：
 
 - 一般研究與實驗執行 → `autonomous-research`
 - 發文與排程 → `feed-publisher` / `admin-ops`
+
+## 先看 Compact 摘要
+
+日常入口先用：
+
+```bash
+uv run volpred ops memory-health-summary
+```
+
+判讀原則：
+
+- `overall_status = ok` 且 `duplicates = 0` 且 `orphan_count = 0`：通常可直接結束，不必展開完整檢查
+- 任一檔 `status = warn / danger / invalid_json / missing`：再做對應細部檢查
+- `knowledge_duplicates.duplicates > 0`：再進去重分析或修復
+- `worktrees.orphan_count > 0`：再人工確認 `.claude/worktrees/`
 
 ## 定期檢查（建議每週一次）
 

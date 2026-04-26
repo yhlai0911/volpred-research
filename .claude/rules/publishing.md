@@ -60,8 +60,10 @@ paths:
 
 ### 層 1: publication-candidates skill
 ```bash
+uv run volpred ops publication-candidates-summary
+# 若 unavailable 或過期再重建：
 uv run python scripts/build_publication_candidates.py
-jq '.top_10_uncovered, .missing_general_top5, .missing_research_top5' storage/publication_candidates.json
+uv run volpred ops publication-candidates-summary
 ```
 **只選 uncovered 或 missing_audience 的 K**。session_state.json 記得的 K 可能已有覆蓋。
 
