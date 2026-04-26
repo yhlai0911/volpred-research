@@ -100,7 +100,7 @@ jq '.jobs | to_entries | map(select(.value.replayed_at == null or .value.recorde
 
 ```python
 CronCreate(cron="3 9 * * *", prompt="每日任務審視：執行 daily-planning-maintain --stub-if-no-work；若有 planning gap 再建立正式 task")
-CronCreate(cron="13 */12 * * *", prompt="繼續任務（slot-aware）：執行 continue-task-maintain --stub-if-no-work；若有 dispatch candidate 再處理 1 個正式 task")
+CronCreate(cron="13 */4 * * *", prompt="繼續任務（slot-aware）：執行 continue-task-maintain --stub-if-no-work；若有 dispatch candidate 再處理 1 個正式 task")
 CronCreate(cron="17 */6 * * *", prompt="會員問題研究：執行 question-ops-maintain --stub-if-no-work；若有 pending 再看 workflow")
 CronCreate(cron="37 */6 * * *", prompt="平台巡檢：執行 platform-patrol-maintain --stub-if-no-work；若有訊號再看 detail CLI")
 CronCreate(cron="47 */4 * * *", prompt="Git sync：執行 git-sync-maintain --stub-if-no-work；若需同步再依 wrapper 建議處理 commit / pull / push")
@@ -109,7 +109,7 @@ CronCreate(cron="23 22 * * *", prompt="Token 用量日報：執行 token-usage-m
 CronCreate(cron="0 10 28 * *", prompt="更新 NDC 景氣指標：執行 ndc-indicator-maintain --stub-if-no-work；只有 canonical CSV 落後時才展開人工更新流程")
 ```
 
-**繼續任務 cron 規則（`13 */12 * * *` 低頻 heartbeat + slot-aware，任務類型不限於研究）**：
+**繼續任務 cron 規則（`13 */4 * * *` 每 4 小時 slot-aware heartbeat，任務類型不限於研究）**：
 1. 每次觸發先 count 當前 running agents（`.claude/worktrees/` + 背景 task id 數）
 2. 若 running >= **3**（建議上限）→ 直接跳過本次，回「跳過：slot N/3」≤15 字
 3. 有 slot 就挑新任務，優先序：(1) user-assigned pending (2) scheduled (3) discovery
@@ -117,7 +117,7 @@ CronCreate(cron="0 10 28 * *", prompt="更新 NDC 景氣指標：執行 ndc-indi
 5. discovery pass 整體節奏最多每 30 分鐘一次（對整個系統的限速）
 6. 同一個 K 編號 / task id 不得同時被兩個 agent 執行（啟動前 `ls experiments/<k>` + `ls .claude/worktrees/` 檢查）
 7. user-assigned pending 永遠優先於 discovery
-8. **禁止**建立 `*/4` 或更密的高頻 heartbeat；目前為控制 token 耗用，正式頻率是 `13 */12`
+8. **禁止**建立 `*/2` 或更密的高頻 heartbeat；目前正式頻率是 `13 */4`（2026-04-26 用戶指定 12h→4h 以維持節奏）
 9. **反空轉**：每次 cron 觸發必須真的產出（新 agent / git diff / 新 knowledge / research_program.md 更新），只回 status check 視為 cron 失敗
 
 ## 3. Monitor 啟動（persistent，每 60 分鐘檢查 feed↔Supabase 漂移，只異常通知）

@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Host-cron fallback for continue_task session cron.
 
-Session cron `b604e1af continue_task 13 */12` 只在此 Claude Code session 活著時 fire。
+Session cron `continue_task 13 */4` 只在此 Claude Code session 活著時 fire。
 Session 關閉後，此 host-cron stub 會在預定時間寫入 pending_continue.json；
 下次 session 開啟時由 scripts/session_startup.md 的 replay 機制補跑 continue_task。
 
 用意：確保「自動繼續研究」在 session 斷線時不完全靜默。
 
-Schedule：host crontab `30 */12 * * *`（與 session cron `13 */12` 錯開 17 分鐘，
-避免同 session 活著時雙路徑同時觸發）。
+Schedule：host crontab `30 */4 * * *`（與 session cron `13 */4` 錯開 17 分鐘，
+避免同 session 活著時雙路徑同時觸發；2026-04-26 用戶將 continue_task 12h→4h）。
 
 Replay 規則（session 啟動時）：
 - 讀 storage/ops/pending_continue.json

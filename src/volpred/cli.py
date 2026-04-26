@@ -1486,6 +1486,429 @@ def ops_control_plane_summary(storage_dir: str) -> None:
     _print_json(summary)
 
 
+@ops.command("queue-summary")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+def ops_queue_summary(storage_dir: str) -> None:
+    """Show a compact queue summary for token-light routine checks."""
+    from volpred.ops import build_queue_summary
+
+    summary = build_queue_summary(storage_dir=storage_dir)
+    console.print("[green]Queue summary[/green]")
+    _print_json(summary)
+
+
+@ops.command("continue-task-maintain")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+@click.option("--stub-if-no-work", is_flag=True, help="Emit a tiny JSON stub when there is no runnable continuation work")
+def ops_continue_task_maintain(storage_dir: str, stub_if_no_work: bool) -> None:
+    """Run the canonical continuation gate before opening queue/alert detail."""
+    from volpred.ops import build_continue_task_maintenance
+
+    result = build_continue_task_maintenance(storage_dir=storage_dir)
+    if stub_if_no_work and result.get("skip"):
+        _print_json(
+            {
+                "skip": True,
+                "reason": result.get("reason"),
+                "busy": f"{result.get('busy_agent_count', 0)}/{result.get('max_concurrent_agents', 0)}",
+            }
+        )
+        return
+
+    console.print("[green]Continue task maintenance[/green]")
+    console.print(
+        "  mode={mode} action={action} reason={reason} busy={busy} queued={queued}".format(
+            mode=result.get("mode", "unknown"),
+            action=result.get("action", "unknown"),
+            reason=result.get("reason", "unknown"),
+            busy=f"{result.get('busy_agent_count', 0)}/{result.get('max_concurrent_agents', 0)}",
+            queued=result.get("queued_count", 0),
+        )
+    )
+    _print_json(result)
+
+
+@ops.command("daily-planning-maintain")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+@click.option("--source", default="user", show_default=True, help="Question source to inspect")
+@click.option("--limit", default=5, show_default=True, type=int, help="Max rows per compact platform section")
+@click.option("--stub-if-no-work", is_flag=True, help="Emit a tiny JSON stub when there are no planning gaps to review")
+def ops_daily_planning_maintain(storage_dir: str, source: str, limit: int, stub_if_no_work: bool) -> None:
+    """Run the canonical daily-planning gate before opening queue/scheduler/platform detail."""
+    from volpred.ops import build_daily_planning_maintenance
+
+    result = build_daily_planning_maintenance(storage_dir=storage_dir, source=source, limit=limit)
+    if stub_if_no_work and result.get("skip"):
+        _print_json(
+            {
+                "skip": True,
+                "action": result.get("action"),
+                "reasons": result.get("trigger_reasons", []),
+            }
+        )
+        return
+
+    console.print("[green]Daily planning maintenance[/green]")
+    console.print(
+        "  mode={mode} action={action} reasons={reasons} queued={queued} missing={missing}".format(
+            mode=result.get("mode", "unknown"),
+            action=result.get("action", "unknown"),
+            reasons=len(result.get("trigger_reasons") or []),
+            queued=((result.get("queue") or {}).get("queued") or 0),
+            missing=((result.get("scheduler") or {}).get("missing_system_task_count") or 0),
+        )
+    )
+    _print_json(result)
+
+
+@ops.command("scheduler-summary")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+def ops_scheduler_summary(storage_dir: str) -> None:
+    """Show a compact scheduler + canonical schedule snapshot."""
+    from volpred.ops import build_scheduler_summary
+
+    summary = build_scheduler_summary(storage_dir=storage_dir)
+    console.print("[green]Scheduler summary[/green]")
+    _print_json(summary)
+
+
+@ops.command("token-summary")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+@click.option("--days", default=7, show_default=True, type=int, help="Rolling daily-report window")
+def ops_token_summary(storage_dir: str, days: int) -> None:
+    """Show a compact token/cost summary from stored daily reports."""
+    from volpred.ops import build_token_summary
+
+    summary = build_token_summary(storage_dir=storage_dir, days=days)
+    console.print("[green]Token summary[/green]")
+    _print_json(summary)
+
+
+@ops.command("token-usage-maintain")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+@click.option("--days", default=7, show_default=True, type=int, help="Rolling daily-report window")
+@click.option("--tail-lines", default=6, show_default=True, type=int, help="Tail lines to keep from generated report commands")
+@click.option("--check-only", is_flag=True, help="Plan the maintenance action without generating missing reports")
+@click.option("--stub-if-no-work", is_flag=True, help="Emit a tiny JSON stub when daily/weekly token reports are already fresh")
+def ops_token_usage_maintain(storage_dir: str, days: int, tail_lines: int, check_only: bool, stub_if_no_work: bool) -> None:
+    """Run the canonical token-usage daily/weekly report maintenance loop with optional no-work stub output."""
+    from volpred.ops import run_token_usage_maintenance
+
+    result = run_token_usage_maintenance(
+        storage_dir=storage_dir,
+        days=days,
+        execute=not check_only,
+        tail_lines=tail_lines,
+    )
+    if stub_if_no_work and result.get("skip"):
+        _print_json(
+            {
+                "skip": True,
+                "action": result.get("action"),
+                "target_date": ((result.get("before") or {}).get("target_date")),
+            }
+        )
+        return
+
+    console.print("[green]Token usage maintenance[/green]")
+    console.print(
+        "  mode={mode} action={action} before={before} after={after} runs={runs}".format(
+            mode=result.get("mode", "unknown"),
+            action=result.get("action", "unknown"),
+            before=((result.get("before") or {}).get("action") or "unknown"),
+            after=result.get("after_action", "unknown"),
+            runs=len(result.get("runs") or []),
+        )
+    )
+    _print_json(result)
+
+
+@ops.command("token-policy-summary")
+@click.option("--policy-path", default="config/token_policy.json", show_default=True, help="Token/context policy config")
+def ops_token_policy_summary(policy_path: str) -> None:
+    """Show the canonical token/context threshold policy used by active workflow guides."""
+    from volpred.ops import build_token_policy_summary
+
+    summary = build_token_policy_summary(policy_path=policy_path)
+    console.print("[green]Token policy summary[/green]")
+    if summary.get("available"):
+        digest = summary.get("policy_digest") or {}
+        console.print(
+            "  direct<{direct} compact>={compact} clear>={clear} statusline={colors}".format(
+                direct=digest.get("direct_start_below_pct"),
+                compact=digest.get("compact_at_or_above_pct"),
+                clear=digest.get("clear_at_or_above_pct"),
+                colors="/".join(str(item) for item in digest.get("statusline_colors") or []),
+            )
+        )
+    _print_json(summary)
+
+
+@ops.command("git-sync-maintain")
+@click.option("--stub-if-no-work", is_flag=True, help="Emit a tiny JSON stub when the branch is already clean and synced")
+def ops_git_sync_maintain(stub_if_no_work: bool) -> None:
+    """Run the canonical git-sync preflight gate before opening full status/diff output."""
+    from volpred.ops import build_git_sync_maintenance
+
+    result = build_git_sync_maintenance()
+    if stub_if_no_work and result.get("skip"):
+        _print_json(
+            {
+                "skip": True,
+                "action": result.get("action"),
+                "branch": result.get("branch"),
+            }
+        )
+        return
+
+    console.print("[green]Git sync maintenance[/green]")
+    console.print(
+        "  mode={mode} action={action} branch={branch} changes={changes} ahead={ahead} behind={behind}".format(
+            mode=result.get("mode", "unknown"),
+            action=result.get("action", "unknown"),
+            branch=result.get("branch") or "unknown",
+            changes=result.get("working_tree_changes", 0),
+            ahead=result.get("ahead", 0),
+            behind=result.get("behind", 0),
+        )
+    )
+    _print_json(result)
+
+
+@ops.command("ndc-indicator-maintain")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+@click.option("--stub-if-no-work", is_flag=True, help="Emit a tiny JSON stub when the NDC canonical CSV is already fresh")
+def ops_ndc_indicator_maintain(storage_dir: str, stub_if_no_work: bool) -> None:
+    """Run the canonical NDC business-cycle freshness gate before manual update work."""
+    from volpred.ops import build_ndc_indicator_maintenance
+
+    result = build_ndc_indicator_maintenance(storage_dir=storage_dir)
+    if stub_if_no_work and result.get("skip"):
+        _print_json(
+            {
+                "skip": True,
+                "action": result.get("action"),
+                "expected_period": result.get("expected_period"),
+            }
+        )
+        return
+
+    console.print("[green]NDC indicator maintenance[/green]")
+    console.print(
+        "  mode={mode} action={action} expected={expected} stale={stale}".format(
+            mode=result.get("mode", "unknown"),
+            action=result.get("action", "unknown"),
+            expected=result.get("expected_period", "unknown"),
+            stale=result.get("stale_series_count", 0),
+        )
+    )
+    _print_json(result)
+
+
+@ops.command("log-summary")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+@click.option("--limit", default=3, show_default=True, type=int, help="Max recent logs per group")
+@click.option("--tail-lines", default=3, show_default=True, type=int, help="Tail lines per log entry")
+def ops_log_summary(storage_dir: str, limit: int, tail_lines: int) -> None:
+    """Show a compact snapshot of the latest cron/hook logs."""
+    from volpred.ops import build_log_summary
+
+    summary = build_log_summary(storage_dir=storage_dir, limit=limit, tail_lines=tail_lines)
+    console.print("[green]Log summary[/green]")
+    _print_json(summary)
+
+
+@ops.command("knowledge-index-summary")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+def ops_knowledge_index_summary(storage_dir: str) -> None:
+    """Show a compact knowledge-index freshness/drift snapshot before opening update tooling."""
+    from volpred.ops import build_knowledge_index_summary
+
+    summary = build_knowledge_index_summary(storage_dir=storage_dir)
+    console.print("[green]Knowledge index summary[/green]")
+    console.print(
+        "  status={status} entries={entries} changed={changed} action={action}".format(
+            status=summary.get("status", "unknown"),
+            entries=summary.get("total_entries", 0),
+            changed=summary.get("changed_files_count", 0),
+            action=summary.get("recommended_action", "unknown"),
+        )
+    )
+    _print_json(summary)
+
+
+@ops.command("knowledge-index-maintain")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+@click.option("--tail-lines", default=6, show_default=True, type=int, help="Tail lines to keep from executed command output")
+@click.option("--check-only", is_flag=True, help="Plan the maintenance action without executing auto/build")
+@click.option("--stub-if-no-work", is_flag=True, help="Emit a tiny JSON stub when the recommended action is skip")
+def ops_knowledge_index_maintain(storage_dir: str, tail_lines: int, check_only: bool, stub_if_no_work: bool) -> None:
+    """Run the canonical knowledge-index maintenance decision loop with optional no-work stub output."""
+    from volpred.ops import run_knowledge_index_maintenance
+
+    result = run_knowledge_index_maintenance(
+        storage_dir=storage_dir,
+        execute=not check_only,
+        tail_lines=tail_lines,
+    )
+    if stub_if_no_work and result.get("skip"):
+        _print_json(
+            {
+                "skip": True,
+                "status": result.get("before_status"),
+                "action": result.get("action"),
+            }
+        )
+        return
+
+    console.print("[green]Knowledge index maintenance[/green]")
+    console.print(
+        "  mode={mode} action={action} before={before} after={after} followup={followup}".format(
+            mode=result.get("mode", "unknown"),
+            action=result.get("action", "unknown"),
+            before=result.get("before_status", "unknown"),
+            after=result.get("after_status", "unknown"),
+            followup="yes" if result.get("needs_followup") else "no",
+        )
+    )
+    _print_json(result)
+
+
+@ops.command("publication-candidates-summary")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+@click.option("--limit", default=5, show_default=True, type=int, help="Max rows per candidate bucket")
+def ops_publication_candidates_summary(storage_dir: str, limit: int) -> None:
+    """Show a compact publication-candidates snapshot for topic selection checks."""
+    from volpred.ops import build_publication_candidates_summary
+
+    summary = build_publication_candidates_summary(storage_dir=storage_dir, limit=limit)
+    console.print("[green]Publication candidates summary[/green]")
+    _print_json(summary)
+
+
+@ops.command("platform-patrol-summary")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+@click.option("--source", default="user", show_default=True, help="Question source to inspect")
+@click.option("--limit", default=5, show_default=True, type=int, help="Max rows per compact section")
+def ops_platform_patrol_summary(storage_dir: str, source: str, limit: int) -> None:
+    """Show a compact platform patrol snapshot before opening detailed ops tooling."""
+    from volpred.ops import build_platform_patrol_summary
+
+    summary = build_platform_patrol_summary(storage_dir=storage_dir, source=source, limit=limit)
+    console.print("[green]Platform patrol summary[/green]")
+    console.print(
+        "  release_due={release_due} alert_breaches={breaches} pending_questions={pending}".format(
+            release_due="yes" if summary.get("release_due") else "no",
+            breaches=summary.get("alert_breach_count", 0),
+            pending=summary.get("pending_questions", 0),
+        )
+    )
+    _print_json(summary)
+
+
+@ops.command("platform-patrol-maintain")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+@click.option("--source", default="user", show_default=True, help="Question source to inspect")
+@click.option("--limit", default=5, show_default=True, type=int, help="Max rows per compact section")
+@click.option("--stub-if-no-work", is_flag=True, help="Emit a tiny JSON stub when no follow-up inspection is needed")
+def ops_platform_patrol_maintain(storage_dir: str, source: str, limit: int, stub_if_no_work: bool) -> None:
+    """Run the canonical platform patrol gate with optional no-work stub output."""
+    from volpred.ops import build_platform_patrol_maintenance
+
+    result = build_platform_patrol_maintenance(storage_dir=storage_dir, source=source, limit=limit)
+    if stub_if_no_work and result.get("skip"):
+        _print_json(
+            {
+                "skip": True,
+                "action": result.get("action"),
+                "reasons": result.get("trigger_reasons", []),
+            }
+        )
+        return
+
+    console.print("[green]Platform patrol maintenance[/green]")
+    console.print(
+        "  mode={mode} action={action} release_due={release_due} breaches={breaches} pending={pending}".format(
+            mode=result.get("mode", "unknown"),
+            action=result.get("action", "unknown"),
+            release_due="yes" if result.get("release_due") else "no",
+            breaches=result.get("alert_breach_count", 0),
+            pending=result.get("pending_questions", 0),
+        )
+    )
+    _print_json(result)
+
+
+@ops.command("question-ops-summary")
+@click.option("--source", default="user", show_default=True, help="Question source to inspect")
+@click.option("--limit", default=5, show_default=True, type=int, help="Max rows per compact section")
+def ops_question_ops_summary(source: str, limit: int) -> None:
+    """Show a compact question-ops snapshot before loading the full rerank workflow."""
+    from volpred.ops import build_question_ops_summary
+
+    summary = build_question_ops_summary(source=source, limit=limit)
+    console.print("[green]Question ops summary[/green]")
+    console.print(
+        "  pending={pending} ranked={ranked} candidates={candidates}".format(
+            pending=summary.get("pending_questions", 0),
+            ranked=summary.get("active_ranked_questions", 0),
+            candidates=summary.get("candidate_pool", 0),
+        )
+    )
+    _print_json(summary)
+
+
+@ops.command("question-ops-maintain")
+@click.option("--source", default="user", show_default=True, help="Question source to inspect")
+@click.option("--limit", default=5, show_default=True, type=int, help="Max rows per compact section")
+@click.option("--stub-if-no-work", is_flag=True, help="Emit a tiny JSON stub when there are no pending questions")
+def ops_question_ops_maintain(source: str, limit: int, stub_if_no_work: bool) -> None:
+    """Run the canonical member-question gate with optional no-work stub output."""
+    from volpred.ops import build_question_ops_maintenance
+
+    result = build_question_ops_maintenance(source=source, limit=limit)
+    if stub_if_no_work and result.get("skip"):
+        _print_json(
+            {
+                "skip": True,
+                "action": result.get("action"),
+                "pending_questions": result.get("pending_questions", 0),
+            }
+        )
+        return
+
+    console.print("[green]Question ops maintenance[/green]")
+    console.print(
+        "  mode={mode} action={action} pending={pending} ranked={ranked} candidates={candidates}".format(
+            mode=result.get("mode", "unknown"),
+            action=result.get("action", "unknown"),
+            pending=result.get("pending_questions", 0),
+            ranked=result.get("active_ranked_questions", 0),
+            candidates=result.get("candidate_pool", 0),
+        )
+    )
+    _print_json(result)
+
+
+@ops.command("memory-health-summary")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+def ops_memory_health_summary(storage_dir: str) -> None:
+    """Show a compact memory-health snapshot before opening the full maintenance workflow."""
+    from volpred.ops import build_memory_health_summary
+
+    summary = build_memory_health_summary(storage_dir=storage_dir)
+    console.print("[green]Memory health summary[/green]")
+    console.print(
+        "  overall={overall} knowledge={knowledge} duplicates={duplicates} orphan_worktrees={orphans}".format(
+            overall=summary.get("overall_status", "unknown"),
+            knowledge=((summary.get("highlights") or {}).get("knowledge") or {}).get("status"),
+            duplicates=((summary.get("knowledge_duplicates") or {}).get("duplicates") or 0),
+            orphans=((summary.get("worktrees") or {}).get("orphan_count") or 0),
+        )
+    )
+    _print_json(summary)
+
+
 @ops.command("supervisor-report")
 @click.option("--days", default=7, show_default=True, type=int, help="Rolling window in days")
 @click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")

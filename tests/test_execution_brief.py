@@ -8,7 +8,9 @@ from pathlib import Path
 from volpred.ops.execution_brief import (
     BriefContent,
     ExecutorResult,
+    _coordinator_prompt,
     _codex_output_schema,
+    _executor_prompt,
     build_execution_brief,
     preview_execution_brief,
     preflight_executor_task,
@@ -104,6 +106,7 @@ why_this_agent: "ops template"
     brief = build_execution_brief(task["id"], storage_dir=str(storage_dir))
     assert brief is not None
     assert brief["source_type"] == "template"
+    assert brief["workflow_id"] == "ops-triage"
     assert brief["prior_findings"] == [
         "latest summary",
         "new summary",
@@ -360,6 +363,7 @@ def test_supervisor_can_preview_and_set_manual_brief(tmp_path: Path, monkeypatch
     assert preview["requires_supervisor"] is True
     assert preview["brief"] is None
     assert preview["suggested_brief"]["task_summary"] == "Manual brief task"
+    assert preview["suggested_brief"]["workflow_id"] == "research-design"
 
     stored = set_execution_brief(
         task["id"],
@@ -513,6 +517,78 @@ def test_run_coordinator_brief_unwraps_claude_json_envelope(tmp_path: Path, monk
 
     brief = run_coordinator_brief(task["id"], storage_dir=str(storage_dir))
     assert brief["task_summary"] == "Envelope brief"
+
+
+def test_coordinator_prompt_uses_compact_task_context(tmp_path: Path):
+    storage_dir = tmp_path / "storage"
+    task = create_task(
+        title="Compact coordinator task",
+        description="reduce prompt payload",
+        task_family="ops",
+        preferred_agent="claude",
+        payload={
+            "governance_area": "schedule",
+            "schedule_proposal": {"action": "adjust_cron", "cron": "*/20 * * * *"},
+        },
+        storage_dir=str(storage_dir),
+    )
+
+    prompt = _coordinator_prompt(task)
+
+    assert '"workflow_id": "schedule-governance"' in prompt
+    assert '"payload_hints"' in prompt
+    assert '"status"' not in prompt
+    assert '"updated_at"' not in prompt
+
+
+def test_executor_prompt_uses_compact_execution_packet(tmp_path: Path, monkeypatch):
+    templates_root = tmp_path / "brief_templates"
+    _write_template(
+        templates_root,
+        "ops.yaml",
+        """
+task_summary: "{{title}}"
+goal: "{{description}}"
+success_criteria:
+  - "done"
+repo_root: "/Users/yhlai0911/Desktop/volpred-research"
+required_files:
+  - "docs/project_improvement_status.md"
+recommended_files:
+  - "AGENTS.md"
+forbidden_large_files:
+  - "storage/reports/feed.json"
+relevant_commands:
+  - "uv run volpred ops health"
+why_this_agent: "ops template"
+""".strip(),
+    )
+    monkeypatch.setattr("volpred.ops.execution_brief.BRIEF_TEMPLATES_ROOT", templates_root)
+
+    storage_dir = tmp_path / "storage"
+    task = create_task(
+        title="Compact executor task",
+        description="use compact packet only",
+        task_family="ops",
+        preferred_agent="claude",
+        storage_dir=str(storage_dir),
+    )
+
+    brief = build_execution_brief(task["id"], storage_dir=str(storage_dir))
+    task_state = get_task(task["id"], storage_dir=str(storage_dir))
+
+    assert brief is not None
+    assert task_state is not None
+
+    prompt = _executor_prompt("claude", task_state, brief)
+
+    assert '"workflow_id": "ops-triage"' in prompt
+    assert '"required_files"' in prompt
+    assert '"success_criteria"' in prompt
+    assert '"generated_at"' not in prompt
+    assert '"template_hash"' not in prompt
+    assert '"source_type"' not in prompt
+    assert '"updated_at"' not in prompt
 
 
 def test_run_coordinator_brief_surfaces_claude_json_envelope_errors(tmp_path: Path, monkeypatch):

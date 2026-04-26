@@ -148,7 +148,7 @@ def test_check_alert_conditions_sends_each_breached_condition_once(tmp_path: Pat
     assert result["breach_count"] == 3
     assert result["sent_count"] == 3
     assert sent_titles == [
-        "Release pool cron gap > 2h",
+        "Release pool cron gap > 2.5h (interval=120min)",
         "Draft pool below threshold (<4)",
         "Host cron failure detected",
     ]
