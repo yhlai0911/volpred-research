@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-26T00:32:52Z",
+  "timestamp": "2026-04-26T06:06:33Z",
   "all_ok": false,
   "checks": [
     {
@@ -10,17 +10,17 @@
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json age: ~6.4 hours (threshold: 26h). OK."
+      "detail": "storage/strategy_metrics.json age: ~11.9 hours (threshold: 26h). OK."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Last 30 lines of docs/error_log.md contain entries dated 2026-04-20 only. No entries from today (2026-04-26) or yesterday (2026-04-25)."
+      "detail": "Last 30 lines of docs/error_log.md contain entries dated 2026-04-20 only. No entries from today (2026-04-26) or yesterday (2026-04-25). Most recent lessons: scheduler_tick dead-entry fix + yfinance auto_adjust=False fix."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "15 strategies found. All strategies have only 1 entry each (all with portfolio_return=null). Checklist alert condition requires >2 nulls in last 3 entries — with only 1 entry per strategy the condition is not met. Note: all single entries have portfolio_return=null, suggesting paper trading data has not yet been populated."
+      "detail": "15 strategies checked. All strategies have exactly 1 null portfolio_return in last 3 entries (most recent date not yet settled). No strategy exceeds threshold of >2 nulls. Strategies: adaptive_tier, fear_dca, global_vt_tz, piecewise_conservative, recommended_5050, risk_parity, simple_12vix, slow_vt, taiwan_8.63vix, taiwan_hybrid_leverage, taiwan_spy_momentum, tz_tw_jp_5050, vix_cond_leverage, vix_leading_guard."
     },
     {
       "name": "GIT_STATUS",
