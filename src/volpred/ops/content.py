@@ -4,7 +4,11 @@ from pathlib import Path
 from datetime import datetime, timedelta, timezone
 
 from scripts.article_backups import ensure_local_article_backups
-from volpred.publisher.publisher import Publisher
+from volpred.publisher.publisher import (
+    Publisher,
+    _audit_general_content,
+    _extract_experiment_refs,
+)
 
 from .common import dump_json, load_json, project_path, write_ops_snapshot
 from scripts.supabase_sync import _delete_where, _get_article_id, _patch_where, _select_rows, delete_article, sync_article
@@ -244,11 +248,61 @@ def release_pool_articles(
 
     selected = candidates[: max(int(limit), 1)]
     released: list[dict] = []
+    audit_skipped: list[dict] = []
     released_at = now.isoformat()
 
+    # Re-audit at release time (2026-04-26 hardening): pre-d9921152 drafts
+    # were built before publish_milestone gained audience-content gates, so
+    # release_pool used to silently promote drafts containing K-id tags or
+    # research-density forbidden terms in audience='general' bodies. Auto-fix
+    # K-id pollution (lossless) and skip-with-log on hard audit failures so
+    # main thread can clean them up without polluting the live feed.
+    selected_ids = {id(item) for item in selected}
     for item in feed:
-        if item not in selected:
+        if id(item) not in selected_ids:
             continue
+
+        # Lossless auto-fix: relocate K-id tags to details.experiment_refs.
+        raw_tags = item.get("tags") or []
+        if isinstance(raw_tags, list):
+            cleaned_tags, extracted_refs = _extract_experiment_refs(raw_tags)
+            if extracted_refs:
+                item["tags"] = cleaned_tags
+                details = item.get("details")
+                if not isinstance(details, dict):
+                    details = {}
+                    item["details"] = details
+                merged_refs = sorted(
+                    set((details.get("experiment_refs") or []) + extracted_refs)
+                )
+                details["experiment_refs"] = merged_refs
+
+        # Hard audit gate for general audience: forbidden statistical
+        # terminology + tag count cap. audit_strict effectively False here
+        # so we don't crash the cron loop, but we DO refuse to flip status.
+        audience = str(item.get("audience") or "").lower()
+        body_text = (
+            item.get("description")
+            or item.get("content")
+            or item.get("summary")
+            or ""
+        )
+        audit_issues = _audit_general_content(
+            audience,
+            list(item.get("tags") or []),
+            str(body_text),
+        )
+        if audit_issues:
+            audit_skipped.append(
+                {
+                    "id": item.get("id"),
+                    "title": item.get("title"),
+                    "audience": audience,
+                    "issues": audit_issues,
+                }
+            )
+            continue
+
         item["status"] = "published"
         item["published_at"] = released_at
         # Contentlayer pattern (2026-04-18): feed.json is canonical; no
@@ -287,6 +341,7 @@ def release_pool_articles(
         "requested_id": pub_id,
         "released_count": len(released),
         "released": released,
+        "audit_skipped": audit_skipped,
         "due_only": due_only,
         "include_drafts": effective_include_drafts,
         "preferred_audiences": list(preferred_audiences or []),
