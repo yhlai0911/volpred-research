@@ -1,41 +1,47 @@
 {
-  "timestamp": "2026-04-26T06:06:33Z",
+  "timestamp": "2026-04-26T12:20:59.429622Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "Total drafts: 7 (threshold: 12). By audience — research: 2 (threshold: 4), general: 5 (threshold: 8). All three sub-checks fail."
+      "detail": "Total drafts: 4 (<12). General: 1/8, Research: 3/4."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json age: ~11.9 hours (threshold: 26h). OK."
+      "detail": "strategy_metrics.json is 18.2h old (<26h threshold)"
     },
     {
       "name": "ERROR_LOG",
-      "status": "ok",
-      "detail": "Last 30 lines of docs/error_log.md contain entries dated 2026-04-20 only. No entries from today (2026-04-26) or yesterday (2026-04-25). Most recent lessons: scheduler_tick dead-entry fix + yfinance auto_adjust=False fix."
+      "status": "alert",
+      "detail": "3 entries dated today (2026-04-26)",
+      "entries": [
+        "2026-04-26: knowledge-index-summary returns status=broken (lancedb list_tables API shape change; fixed)",
+        "2026-04-26: Member Q&A pending 5-day silent gap for q=29cbeb5c; evaluated and ranked",
+        "2026-04-26: Codex CLI gpt-5.5 model requires upgrade; fallback to main thread audit"
+      ]
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "15 strategies checked. All strategies have exactly 1 null portfolio_return in last 3 entries (most recent date not yet settled). No strategy exceeds threshold of >2 nulls. Strategies: adaptive_tier, fear_dca, global_vt_tz, piecewise_conservative, recommended_5050, risk_parity, simple_12vix, slow_vt, taiwan_8.63vix, taiwan_hybrid_leverage, taiwan_spy_momentum, tz_tw_jp_5050, vix_cond_leverage, vix_leading_guard."
+      "detail": "All 15 strategies have <=2 nulls in last 3 entries"
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold: 50). Working tree clean."
+      "detail": "0 uncommitted files"
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json contains 2043 entries."
+      "detail": "2044 entries in knowledge.json"
     }
   ],
   "alerts": [
-    "article pool low (<12): total drafts=7",
-    "research audience low (<4): research drafts=2",
-    "general audience low (<8): general drafts=5"
+    "article pool low (<12)",
+    "article pool research audience low (3<4)",
+    "article pool general audience low (1<8)",
+    "error_log has 3 entries dated today/yesterday"
   ]
 }
