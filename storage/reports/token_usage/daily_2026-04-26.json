@@ -1,0 +1,227 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-04-26",
+  "week_range": "2026-04-24 → 2026-05-01",
+  "totals": {
+    "input_tokens": 9,
+    "output_tokens": 699,
+    "cache_read_tokens": 0,
+    "cache_create_tokens": 68997,
+    "billable_total": 69705,
+    "assistant_messages": 3,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.2693
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 9,
+      "output_tokens": 699,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 68997,
+      "messages": 3,
+      "estimated_cost_usd": 0.2693
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 6,
+      "output_tokens": 466,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 45998,
+      "messages": 2,
+      "billable_total": 46470,
+      "estimated_cost_usd": 0.1795,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "token_report": {
+      "input_tokens": 3,
+      "output_tokens": 233,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 22999,
+      "messages": 1,
+      "billable_total": 23235,
+      "estimated_cost_usd": 0.0898,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 2,
+      "billable_total": 46470,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 2,
+          "billable_total": 46470
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "non-text assistant message",
+          "messages": 1,
+          "billable_total": 23235
+        },
+        {
+          "name": "other",
+          "messages": 1,
+          "billable_total": 23235
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 1,
+          "billable_total": 23235
+        },
+        {
+          "name": "今天是週日，執行每日 Token 報告。",
+          "messages": 1,
+          "billable_total": 23235
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 0,
+      "billable_total": 0,
+      "family_breakdown": [],
+      "prefix_breakdown": [],
+      "top_first_lines": []
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 1,
+      "cache_create_tokens": 68997,
+      "billable_total": 69705,
+      "cache_create_share_pct": 99.0,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "4feaabf7-11ef-4043-afa9-ed9debb9f688",
+          "messages": 3,
+          "billable_total": 69705,
+          "cache_create_tokens": 68997,
+          "cache_read_tokens": 0,
+          "duration_minutes": 0.0,
+          "cache_create_share_pct": 99.0,
+          "first_ts": "2026-04-26T14:44:03.061000+00:00",
+          "last_ts": "2026-04-26T14:44:04.266000+00:00"
+        }
+      ]
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "33b0b33",
+      "message": "feed: K970 research-tier draft (mile_0056089e, audience=research)"
+    },
+    {
+      "sha": "4ab6244",
+      "message": "fix(memory): always write JSON with ensure_ascii=False (CJK round-trip)"
+    },
+    {
+      "sha": "c6dae12",
+      "message": "Ops patrol report 2026-04-26T12:21Z"
+    },
+    {
+      "sha": "54b80e7",
+      "message": "chore(docs): split error_log into main (recent ≤30d) + monthly archive"
+    },
+    {
+      "sha": "bf24763",
+      "message": "fix(feed-sync): detect tags + details.experiment_refs drift"
+    },
+    {
+      "sha": "9bd4a56",
+      "message": "feat(ops): release-task CLI — claimed/running -> queued without false-fail"
+    },
+    {
+      "sha": "7b663ec",
+      "message": "fix(knowledge-index): try-open instead of list_tables (lancedb API drift)"
+    },
+    {
+      "sha": "5065d8e",
+      "message": "feed: 2 drafts refilled — K623 MF2-GARCH bugs (research) + K1174 GDELT (general)"
+    },
+    {
+      "sha": "659e374",
+      "message": "fix(release_pool): re-audit drafts at release time, not just at publish"
+    },
+    {
+      "sha": "3bd929d",
+      "message": "data(feed): retroactive K-id tag extraction (80 articles, 152 refs moved)"
+    },
+    {
+      "sha": "f7c3c48",
+      "message": "fix(member-qa): close 5-day silent-gap loophole — actionable cron + stale alert"
+    },
+    {
+      "sha": "2e17ccb",
+      "message": "data: experiments index + reports refresh + event ledger + vixtwn daily"
+    },
+    {
+      "sha": "fd0a5f9",
+      "message": "chore(harness): workflow-index routing + skill frontmatter + bash optimizer"
+    },
+    {
+      "sha": "289ca1b",
+      "message": "feat(ops): summaries CLI + maintain commands + scripts hardening"
+    },
+    {
+      "sha": "9835a7e",
+      "message": "docs+config: token-optimization plan, workflow index, token policy"
+    },
+    {
+      "sha": "aae5bc7",
+      "message": "docs: P10 outline audit + Codex CLI blocker lesson"
+    },
+    {
+      "sha": "e16cb19",
+      "message": "fix(publisher): single canonical audience badge — strip all aliases"
+    },
+    {
+      "sha": "d992115",
+      "message": "fix(publisher): hard-gate audience-content consistency + extract K-ids"
+    },
+    {
+      "sha": "89b15f6",
+      "message": "feed: FOMC 04/29 T-2 article (mile_4fa40750, published)"
+    },
+    {
+      "sha": "78df8e0",
+      "message": "knowledge: K1258 forgetting-factor BMA entry (main-thread review)"
+    },
+    {
+      "sha": "49724dd",
+      "message": "fix(release_pool): exclude audience=daily from last_released_at derivation"
+    },
+    {
+      "sha": "6b18a20",
+      "message": "ops: populate NFP 2026-05-01 event_jobs (T-2 + T+0)"
+    },
+    {
+      "sha": "41fd9e1",
+      "message": "feed: K438 GARCH-X VRP methodology article (mile_f3475a6f, draft)"
+    },
+    {
+      "sha": "b27719a",
+      "message": "ops: piggy-back session_crons drift into pending_sessions.json"
+    },
+    {
+      "sha": "d8ddf78",
+      "message": "ops: add continue_task_stub host-cron fallback"
+    },
+    {
+      "sha": "68d8a80",
+      "message": "K1258 code review (main-thread fallback): PASS-with-caveats, 0 CRITICAL/HIGH"
+    },
+    {
+      "sha": "b83e485",
+      "message": "Ops patrol report 2026-04-26T06:06Z"
+    },
+    {
+      "sha": "dd71ade",
+      "message": "Ops patrol report 2026-04-26T00:32Z"
+    }
+  ]
+}
