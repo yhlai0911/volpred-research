@@ -162,6 +162,23 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>") || {
         done <<< "$file_presence_unique"
     fi
 
+    # K1262-v5 (2026-04-27) EXTRA-DEFENSE: 若 git diff-tree 回空但 worktree 有實際檔案 not in
+    # MAIN_DIR，純文件系統 fallback。處理 git plumbing 全 silent fail 的 K1262-actual case
+    # (rev-list=0, log=empty, diff-tree=empty, 但檔案實在 worktree 裡)。
+    if [[ -z "$worktree_only_exp_files" ]] && [[ -d "$wt_path/experiments" ]]; then
+        local fs_only_files=""
+        while IFS= read -r -d '' wf; do
+            local rel="${wf#$wt_path/}"
+            if [[ ! -e "$MAIN_DIR/$rel" ]]; then
+                fs_only_files="${fs_only_files}${rel}"$'\n'
+            fi
+        done < <(find "$wt_path/experiments" -type f -not -path '*/__pycache__/*' -print0 2>/dev/null)
+        if [[ -n "$fs_only_files" ]]; then
+            echo "  [🚨 K1262-v5 FS-DEFENSE] git plumbing 全空但 filesystem 顯示 worktree experiments/ 有 main 沒有的檔案"
+            worktree_only_exp_files="$fs_only_files"
+        fi
+    fi
+
     if [[ -z "$new_commits" ]] && [[ "$commit_count_verify" -eq 0 ]] && [[ -n "$worktree_only_exp_files" ]]; then
         echo "  [🚨 K1262-v4 PRIMARY] rev-list 報 0 commits 但 file-presence diff 顯示 worktree branch 含 main 沒有的 experiments/ 檔："
         echo "$worktree_only_exp_files" | head -10 | sed 's/^/      /'
@@ -194,13 +211,17 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>") || {
                 [[ -d "$exp_dir" ]] || continue
                 local exp_name
                 exp_name=$(basename "$exp_dir")
+                # K1262-v5 (2026-04-27): glob 給的 $exp_dir 帶 trailing slash，但 diff -rq 輸出
+                # `Only in /path:` 不帶 trailing slash → grep `^Only in $exp_dir` (with /) NEVER matches
+                # → wt_only 永遠空 → updated_exp_dirs 永遠空 → silent drop. 修：strip trailing /.
+                local exp_dir_no_slash="${exp_dir%/}"
                 if [[ ! -d "$MAIN_DIR/experiments/$exp_name" ]]; then
                     orphan_exp_dirs="$orphan_exp_dirs  $exp_name\n"
                 else
                     # 共存資料夾：比對有無 worktree-only 的關鍵檔
                     local wt_only
-                    wt_only=$(diff -rq "$MAIN_DIR/experiments/$exp_name" "$exp_dir" 2>/dev/null \
-                        | grep "^Only in $exp_dir" \
+                    wt_only=$(diff -rq "$MAIN_DIR/experiments/$exp_name" "$exp_dir_no_slash" 2>/dev/null \
+                        | grep "^Only in $exp_dir_no_slash" \
                         | grep -v '__pycache__' \
                         | head -5 || true)
                     if [[ -n "$wt_only" ]]; then
