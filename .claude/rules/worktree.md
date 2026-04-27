@@ -28,7 +28,7 @@ paths:
 3. **絕對禁止** `git worktree remove --force` — 以免未 merge 的 commits 消失（2026-04-18 K1032 教訓有記）。
 4. Merge 後**主線程手動 check**：`git log --oneline -5` 驗證 commits 真的進了 main。
 5. **K1143-v2 (2026-04-19) hardening**：script 若偵測到 `rev-list=0` 但 worktree `experiments/` 仍有主目錄沒有的檔，會主動 ABORT 並顯示手動 copy 指令。**看到 ABORT 不是 bug，是防禦**；按 hint 執行即可。
-6. Regression test：`bash scripts/tests/test_merge_worktree.sh`（修 script 後必跑；預期 7/7 PASS）。
+6. Regression test：`bash scripts/tests/test_merge_worktree.sh`（修 script 後必跑；預期 PASS 7/7 cases / 17 assertions，K1262-v4 後新增 case 5/6/7）。
 
 ## Agent brief 規範
 
@@ -49,4 +49,11 @@ paths:
   4. rev-list=0 path 加 pre-remove 掃 `experiments/<kXXX>/`：orphan 資料夾或 worktree-only 檔就 abort
   5. Orphan branch cleanup 用 `git for-each-ref` 取代 `git branch | tr -d ' '`（後者不清 `+` 標記）
   6. 新增 `scripts/tests/test_merge_worktree.sh`：4 cases / 7 assertions，合併流程的 regression gate
+- **K1261** (2026-04-27) `-X ours` 對 experiments/ 內 fork 檔同樣坑（不只 shared JSON）→ 加 K1261-v3 post-merge -X-ours-dropped detection layer。
+- **K1262-v4** (2026-04-27) `merge_worktree.sh` silent drop bug **第三次重現**（K1032 same root cause）：
+  1. **rev-list cd-context fix** — 所有 ref 比較強制 `git -C "$MAIN_DIR"`（rev-list、log、diff-tree、diff），不再依賴 cwd-relative 解析。過去 cwd-shift 是 silent drop 主因。
+  2. **Primary file-presence diff layer**（最高優先）— 在原 rev-list double-check 之前先跑 `git -C "$MAIN_DIR" diff-tree --diff-filter=A main..branch -- experiments/`，發現 worktree-only 檔就強制走 merge path（不信 rev-list false negative）。
+  3. **K1262-v4 post-merge file-presence verification** — merge 後逐檔 `git cat-file -e HEAD:<path>` 驗證 K-experiment 真在 main HEAD git tree（不只 working tree）。失敗時 ABORT loud + 列 cherry-pick hint + 保留 worktree。
+  4. **Locked worktree hint** — `git worktree remove` 失敗時印 unlock + remove + branch -D 三段式 recovery hint，**禁止** `--force` fallback (CLAUDE.md L168)。原 L444-458 的 `--force` / `unlock + -f -f` 階梯已移除。
+  5. **Test gate 擴充** — `scripts/tests/test_merge_worktree.sh` 新增 case 5/6/7（rev-list false negative / post-merge verification / locked worktree hint），現為 7 cases / 17 assertions PASS 7/7。
 - Session 停止時 `git worktree remove --force` 清掉未 merge worktree → 重要 session recovery 永遠走 reflog 不走 remove force。

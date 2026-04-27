@@ -126,19 +126,56 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>") || {
     fi
 
     # 找出 worktree 分支上的新 commits（相對於 main）
+    # K1262-v4 (2026-04-27): 所有 ref 比較**強制** `git -C "$MAIN_DIR"` —
+    # 過去用 cwd-relative `git log` / `git rev-list` 在某些 path 下會把
+    # working-tree HEAD 解錯，產生 rev-list=0 false negative。
+    # 詳：docs/error_log.md 2026-04-27 K1262 entry。
     local main_branch
-    main_branch=$(git rev-parse --abbrev-ref HEAD)
+    main_branch=$(git -C "$MAIN_DIR" rev-parse --abbrev-ref HEAD)
 
     local new_commits
-    new_commits=$(git log --oneline "$main_branch..$branch" 2>/dev/null || true)
+    new_commits=$(git -C "$MAIN_DIR" log --oneline "$main_branch..$branch" 2>/dev/null || true)
 
     # 雙重驗證：rev-list --count 防止 git log 靜默失敗（K1032/K1114/E067 教訓）
     local commit_count_verify
-    commit_count_verify=$(git rev-list --count "$main_branch..$branch" 2>/dev/null || echo "ERROR")
+    commit_count_verify=$(git -C "$MAIN_DIR" rev-list --count "$main_branch..$branch" 2>/dev/null || echo "ERROR")
 
     if [[ "$commit_count_verify" == "ERROR" ]]; then
         echo "  [ABORT] git rev-list 失敗，無法確認 commit 狀態。手動處理。"
         return 1
+    fi
+
+    # K1262-v4 (2026-04-27): **PRIMARY 防線** — file-presence diff 不依賴 rev-list count。
+    # 即使 rev-list 報 0（false negative，K1032/K1114/K1262 same root cause），
+    # 只要 worktree branch tip 含 main 沒有的 experiments/<kXXX>/ 檔，就強制走 merge path。
+    # 這條 layer 在 K1262 silent drop bug 第三次重現後新增。
+    local file_presence_unique=""
+    file_presence_unique=$(git -C "$MAIN_DIR" diff-tree --diff-filter=A --name-only -r "$main_branch" "$branch" -- experiments/ 2>/dev/null | grep -v '^$' || true)
+    # 過濾出真正只在 worktree branch 有的（main HEAD 不存在）
+    local worktree_only_exp_files=""
+    if [[ -n "$file_presence_unique" ]]; then
+        while IFS= read -r f; do
+            [[ -z "$f" ]] && continue
+            if ! git -C "$MAIN_DIR" cat-file -e "$main_branch:$f" 2>/dev/null; then
+                worktree_only_exp_files="$worktree_only_exp_files$f"$'\n'
+            fi
+        done <<< "$file_presence_unique"
+    fi
+
+    if [[ -z "$new_commits" ]] && [[ "$commit_count_verify" -eq 0 ]] && [[ -n "$worktree_only_exp_files" ]]; then
+        echo "  [🚨 K1262-v4 PRIMARY] rev-list 報 0 commits 但 file-presence diff 顯示 worktree branch 含 main 沒有的 experiments/ 檔："
+        echo "$worktree_only_exp_files" | head -10 | sed 's/^/      /'
+        echo "  [🚨 K1262-v4] 強制走 merge path（不信 rev-list false negative）"
+        # 重建 new_commits 與 commit_count_verify 從另一條路徑（git log --all 跨 worktree）
+        new_commits=$(git -C "$MAIN_DIR" log --oneline --all "^$main_branch" "$branch" 2>/dev/null | head -50 || true)
+        if [[ -z "$new_commits" ]]; then
+            # 仍找不到 — 可能 branch ref 對不上但檔案在 working tree（gitignored）
+            # 沿用既有 K1143-v2 abort path：file-presence layer fall through 到下面 if
+            :
+        else
+            commit_count_verify=$(echo "$new_commits" | grep -c '^' || echo 0)
+            echo "  [K1262-v4] 從 git log --all 重建 commit list: $commit_count_verify commits"
+        fi
     fi
 
     if [[ -z "$new_commits" ]] && [[ "$commit_count_verify" -eq 0 ]]; then
@@ -241,10 +278,11 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>") || {
         fi
 
         # 檢查 agent 是否修改了共享 JSON（違反規則的早期警告）
+        # K1262-v4 (2026-04-27): git diff 用 -C "$MAIN_DIR" 強制 ref 解析在主 repo
         local shared_json_modified=false
         local shared_files=""
         for shared_f in "storage/reports/feed.json" "storage/memory/knowledge.json" "storage/memory/thinking_journal.json" "storage/memory/experiment_experiences.json"; do
-            if git diff --name-only "$main_branch..$branch" -- "$shared_f" 2>/dev/null | grep -q .; then
+            if git -C "$MAIN_DIR" diff --name-only "$main_branch..$branch" -- "$shared_f" 2>/dev/null | grep -q .; then
                 shared_json_modified=true
                 shared_files="$shared_files $shared_f"
             fi
@@ -284,8 +322,9 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>" 2>&1; then
             # 不用 diff --name-only（會列所有差異，包含 agent 從未動過但 main 領先的檔，
             # 會導致 worktree 舊版覆蓋 main 新版 — 2026-04-18 agent-a7aac49d 教訓）
             echo "  [FALLBACK] 只複製 agent 新增的 experiments/ 檔案..."
+            # K1262-v4: 強制 git -C "$MAIN_DIR"，不再 cd 進 wt_path（過去 cwd-shift 是 silent drop 根因）
             local exp_files
-            exp_files=$(cd "$wt_path" && git log --diff-filter=A --name-only --pretty=format: "$main_branch..$branch" -- experiments/ 2>/dev/null | grep -v '^$' | sort -u || true)
+            exp_files=$(git -C "$MAIN_DIR" log --diff-filter=A --name-only --pretty=format: "$main_branch..$branch" -- experiments/ 2>/dev/null | grep -v '^$' | sort -u || true)
             if [[ -n "$exp_files" ]]; then
                 local copy_count=0
                 echo "$exp_files" | while IFS= read -r f; do
@@ -333,11 +372,12 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>" 2>/dev/nul
         fi
 
         # 合併後驗證：確認 agent 的 experiments/ 檔案全部到位
+        # K1262-v4 (2026-04-27): 所有 git log/diff 強制 git -C "$MAIN_DIR"
         if $merge_ok; then
             echo "  [VERIFY] 檢查 experiments/ 檔案完整性..."
             local missing_files=0
             local agent_exp_files
-            agent_exp_files=$(git log --diff-filter=A --name-only --pretty=format: "$main_branch_orig..$branch" -- "experiments/" 2>/dev/null | grep -v '^$' || true)
+            agent_exp_files=$(git -C "$MAIN_DIR" log --diff-filter=A --name-only --pretty=format: "$main_branch_orig..$branch" -- "experiments/" 2>/dev/null | grep -v '^$' || true)
             if [[ -n "$agent_exp_files" ]]; then
                 while IFS= read -r exp_file; do
                     if [[ ! -f "$MAIN_DIR/$exp_file" ]]; then
@@ -352,11 +392,48 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>" 2>/dev/nul
                 fi
             fi
 
+            # K1262-v4 (2026-04-27): POST-MERGE FILE-PRESENCE VERIFICATION (defensive layer)
+            # 不只看 working tree 是否有檔（上面那段），還必須驗證 main:HEAD（git tree object）
+            # 真的含 K-experiment 檔。working tree 有 ≠ commit 進 main HEAD（可能 untracked、
+            # 可能在 stash、可能 -X ours drop 而 working tree 留 worktree 版本）。
+            # 用 cat-file -e 確認檔案在 main:HEAD git object tree 裡。
+            local k1262v4_missing_in_main=0
+            local k1262v4_missing_files=""
+            if [[ -n "$agent_exp_files" ]]; then
+                while IFS= read -r exp_file; do
+                    [[ -z "$exp_file" ]] && continue
+                    # 確認檔案在 worktree branch 上存在
+                    if git -C "$MAIN_DIR" cat-file -e "$branch:$exp_file" 2>/dev/null; then
+                        # 確認 main HEAD 上也存在
+                        if ! git -C "$MAIN_DIR" cat-file -e "HEAD:$exp_file" 2>/dev/null; then
+                            k1262v4_missing_in_main=$((k1262v4_missing_in_main + 1))
+                            k1262v4_missing_files="$k1262v4_missing_files  $exp_file"$'\n'
+                        fi
+                    fi
+                done <<< "$agent_exp_files"
+            fi
+            if [[ $k1262v4_missing_in_main -gt 0 ]]; then
+                echo ""
+                echo "  🚨 ============================================="
+                echo "  🚨 [CRITICAL] K1262-v4 detection: $k1262v4_missing_in_main 個 K-experiment 檔在 worktree-branch 但 NOT 在 main HEAD."
+                echo "  🚨 Silent drop pattern detected. 缺檔："
+                printf "%b" "$k1262v4_missing_files"
+                echo "  🚨 必須手動 cherry-pick 救回："
+                local last_branch_commit
+                last_branch_commit=$(git -C "$MAIN_DIR" rev-parse "$branch" 2>/dev/null || echo "<branch-tip>")
+                echo "  🚨   git -C \"$MAIN_DIR\" cherry-pick $last_branch_commit"
+                echo "  🚨 Worktree NOT removed; 先 investigate 才能 retry."
+                echo "  🚨 ============================================="
+                echo ""
+                # 標記 merge 沒真正成功，跳過 worktree 移除
+                merge_ok=false
+            fi
+
             # K1261-v3 (2026-04-27): 檢查 -X ours 是否靜默 drop 了 agent 對既有檔的修改
             # K1032 教訓 framing 限於 shared JSON, 但同 root cause 對 experiments/ 內 fork 檔同樣坑：
             # 主線程已 commit skeleton, agent 修改同檔 → -X ours 取 main = agent 版本 silent drop。
             local agent_modified_files
-            agent_modified_files=$(git log --diff-filter=M --name-only --pretty=format: "$main_branch_orig..$branch" -- "experiments/" 2>/dev/null | grep -v '^$' | sort -u || true)
+            agent_modified_files=$(git -C "$MAIN_DIR" log --diff-filter=M --name-only --pretty=format: "$main_branch_orig..$branch" -- "experiments/" 2>/dev/null | grep -v '^$' | sort -u || true)
             if [[ -n "$agent_modified_files" ]]; then
                 local ours_dropped=0
                 local dropped_files=""
@@ -365,7 +442,7 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>" 2>/dev/nul
                     # 比較 main HEAD（merge 後）vs main_branch_orig（merge 前）：
                     # - 若同 = -X ours 取 main = agent 修改靜默 drop
                     # - 若異 = merge 取了 worktree 版本（或合併版本）= OK
-                    if git diff --quiet "$main_branch_orig" HEAD -- "$mod_file" 2>/dev/null; then
+                    if git -C "$MAIN_DIR" diff --quiet "$main_branch_orig" HEAD -- "$mod_file" 2>/dev/null; then
                         # main HEAD 對此檔內容與 merge 前相同 → -X ours 取了 main → worktree 變更被 drop
                         echo "  [🛑 -X ours DROPPED] $mod_file"
                         echo "      Agent 修改了此檔但 main 版本被保留（worktree branch 對此檔的變更靜默丟失）"
@@ -398,30 +475,27 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>" 2>/dev/nul
             exp_dirs_on_main=$(ls -d experiments/K*/ 2>/dev/null | wc -l | tr -d ' ')
             echo "  [VERIFY] main 上 experiments/ 目錄數: $exp_dirs_on_main"
 
-            # loud remove — 不吞錯誤，remove 失敗必須讓使用者知道
+            # K1262-v4 (2026-04-27): loud remove，**禁止** --force fallback (CLAUDE.md L168)。
+            # 失敗時印明確 hint：unlock + remove + branch -D；保留 worktree 待人工處理。
             local remove_ok=false
-            if git worktree remove "$wt_path" 2>&1; then
-                remove_ok=true
-            else
-                echo "  [WARN] worktree remove 拒絕（可能仍有 untracked 檔）；嘗試 --force..."
-                if git worktree remove --force "$wt_path" 2>&1; then
-                    remove_ok=true
-                else
-                    echo "  [WARN] --force 也失敗（常見是 claude agent lock）；嘗試 unlock + -f -f..."
-                    git worktree unlock "$wt_path" 2>&1 || true
-                    if git worktree remove -f -f "$wt_path" 2>&1; then
-                        remove_ok=true
-                    else
-                        echo "  🚨 [ERROR] unlock + -f -f 也失敗。手動處理："
-                        echo "  🚨   ls $wt_path                              # 看殘留"
-                        echo "  🚨   rm -rf $wt_path && git worktree prune   # 強制清"
-                        echo "  🚨   git branch -D $branch                   # 再刪 branch"
-                    fi
-                fi
-            fi
+            local remove_err
+            remove_err=$(git -C "$MAIN_DIR" worktree remove "$wt_path" 2>&1) && remove_ok=true || true
             if $remove_ok; then
-                git branch -D "$branch" 2>&1 || echo "  [WARN] branch $branch 刪除失敗（可能已被 remove 連帶處理）"
+                git -C "$MAIN_DIR" branch -D "$branch" 2>&1 || echo "  [WARN] branch $branch 刪除失敗（可能已被 remove 連帶處理）"
                 echo "  [DONE] 已移除 worktree 和 branch"
+            else
+                # 解析 stale pid（typical: "lock file ... is locked by ... pid NNN"）
+                local locked_pid
+                locked_pid=$(echo "$remove_err" | grep -oE 'pid [0-9]+' | head -1 | awk '{print $2}' || true)
+                echo "  [WARN] git worktree remove 失敗（拒絕 --force fallback，CLAUDE.md L168 禁止）"
+                echo "  [WARN] err: $remove_err"
+                echo ""
+                echo "  [HINT] Worktree locked by stale process${locked_pid:+ (pid $locked_pid)}. Recovery:"
+                echo "         git -C \"$MAIN_DIR\" worktree unlock $wt_path"
+                echo "         git -C \"$MAIN_DIR\" worktree remove $wt_path"
+                echo "         git -C \"$MAIN_DIR\" branch -D $branch"
+                echo "  [HINT] 若 commits 已 merge 進 main 而 worktree 殘留檔不可信任，"
+                echo "         確認 git -C \"$MAIN_DIR\" log --oneline -5 含 agent commits 後再清。"
             fi
         else
             echo "  [SKIP] 合併失敗，保留 worktree 待手動處理: $wt_path"

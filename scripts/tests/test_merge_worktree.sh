@@ -12,6 +12,12 @@
 #           → script 應 abort，不該走 no-commits path 的 --force remove
 #   Case C: agent 有 untracked files + auto-commit 成功 → merge path 正確
 #   Case D: orphan branch cleanup 處理 `+` 標記 (checked-out 標記)
+#   Case 5 (K1262-v4): 真實 commit 但 cwd-shift 後 rev-list 可能 false negative
+#           → file-presence diff layer (PRIMARY) 必抓到 worktree-only experiments/ 檔
+#   Case 6 (K1262-v4): merge 流程被截斷，main HEAD 無 K-experiment 檔但 worktree branch 有
+#           → post-merge file-presence verification 必 ABORT 並列出 cherry-pick hint
+#   Case 7 (K1262-v4): worktree locked (stale .git/worktrees/<name>/locked) 時 remove 失敗
+#           → script 必印 unlock + remove + branch -D hint，**禁止** --force fallback
 #
 # 測試用獨立 git repo (不碰主 project state)
 
@@ -224,9 +230,214 @@ test_case_d() {
 }
 
 # ============================================================
+# Test Case 5 (K1262-v4): file-presence diff layer 是 PRIMARY 防線
+#   即使 rev-list 報 0，只要 worktree branch 有 main 沒有的 experiments/ 檔，
+#   file-presence layer 必發現並驅動 merge path（不能 silent skip）
+# ============================================================
+test_case_5_rev_list_false_negative() {
+    echo "=== Case 5 (K1262-v4): rev-list false negative + file-presence layer 必抓 ==="
+    local test_dir
+    test_dir=$(setup_test_env "case5")
+    cd "$test_dir"
+
+    local wt=".claude/worktrees/agent-testcase5"
+    local branch="worktree-agent-testcase5"
+
+    # Agent 在 worktree 裡 commit experiments/k1262sim/
+    mkdir -p "$wt/experiments/k1262sim"
+    cat > "$wt/experiments/k1262sim/k1262sim.py" <<'EOF'
+# K1262 simulation: real implementation, real commit on worktree branch
+print("k1262sim implementation")
+EOF
+    echo "# K1262sim README" > "$wt/experiments/k1262sim/README.md"
+    (cd "$wt" && git add -A && git commit -qm "K1262sim deliverables")
+
+    # 確認 commit 真的存在 worktree branch
+    local commit_count
+    commit_count=$(git rev-list --count "main..$branch" 2>/dev/null || echo "0")
+    if [[ "$commit_count" -lt 1 ]]; then
+        fail "5-setup: 預期 worktree branch 有 commit 但 rev-list 報 0（測試環境問題）"
+        return
+    fi
+
+    # 確認 file-presence diff 在 main 端有用：worktree branch 含 main 沒有的 experiments/ 檔
+    local diff_files
+    diff_files=$(git diff-tree --diff-filter=A --name-only -r "main" "$branch" -- experiments/ 2>/dev/null || true)
+    if ! echo "$diff_files" | grep -q "k1262sim"; then
+        fail "5-setup: file-presence diff 沒看到 k1262sim 檔（測試環境問題）"
+        echo "  diff_files=$diff_files"
+        return
+    fi
+
+    # Run merge script
+    local output
+    output=$(run_merge_in_test_dir "$test_dir")
+
+    # 5-1: k1262sim.py 必到 main HEAD
+    if git -C "$test_dir" cat-file -e "main:experiments/k1262sim/k1262sim.py" 2>/dev/null; then
+        pass "5-1: k1262sim.py 在 main HEAD（file-presence layer + merge 成功）"
+    else
+        fail "5-1: k1262sim.py 不在 main HEAD（K1262 silent drop pattern!）"
+        echo "$output" | head -50
+    fi
+
+    # 5-2: 檔案也在 working tree
+    if [[ -f "$test_dir/experiments/k1262sim/k1262sim.py" ]]; then
+        pass "5-2: k1262sim.py 在主目錄 working tree"
+    else
+        fail "5-2: k1262sim.py 不在主目錄 working tree"
+    fi
+
+    # 5-3: script 不該誤判「rev-list=0 + experiments/ 也空」
+    if echo "$output" | grep -q "沒有新的 commits.*可安全移除"; then
+        fail "5-3: script 誤判 no-commits（K1262 false negative pattern）"
+        echo "$output" | grep -B2 -A2 "沒有新的 commits"
+    else
+        pass "5-3: script 沒誤判 no-commits（rev-list false negative 防住）"
+    fi
+}
+
+# ============================================================
+# Test Case 6 (K1262-v4): post-merge file-presence verification 必 ABORT
+#   simulate K1262 silent drop：merge 流程被截斷，main HEAD 沒拿到 K-experiment 檔
+#   做法：patch test-dir 的 script 副本，在 git merge 那行 inject early return（模擬 bug）
+#   K1262-v4 layer 必須抓到 worktree-branch 有檔但 main HEAD 沒有，列出 cherry-pick hint
+# ============================================================
+test_case_6_post_merge_verification() {
+    echo "=== Case 6 (K1262-v4): post-merge file-presence verification 必 ABORT ==="
+    local test_dir
+    test_dir=$(setup_test_env "case6")
+    cd "$test_dir"
+
+    local wt=".claude/worktrees/agent-testcase6"
+    local branch="worktree-agent-testcase6"
+
+    # Agent commit
+    mkdir -p "$wt/experiments/k1262v4"
+    echo "print('k1262v4 lost')" > "$wt/experiments/k1262v4/k1262v4.py"
+    echo "# K1262v4" > "$wt/experiments/k1262v4/README.md"
+    (cd "$wt" && git add -A && git commit -qm "K1262v4 deliverables (will be lost)")
+
+    # Patch script 副本：把 `git merge "$branch" -X ours` 那行替換成 echo + true
+    # 這模擬 merge 流程「聲稱成功」但 main HEAD 實際沒拿到 commits 的 K1262 silent drop bug
+    local script_copy="$test_dir/scripts/merge_worktree.sh"
+    # 用 awk 替換：找到 `if git merge "$branch" -X ours` 開頭的 if，把 git merge 換成 :（true command）
+    # 注意保留結構讓 merge_ok=true（模擬 script 認為 merge 成功）
+    python3 - "$script_copy" <<'PYEOF'
+import sys, re
+p = sys.argv[1]
+src = open(p).read()
+# 把 git merge "$branch" -X ours 那行替換成 true（模擬 bug：merge 流程聲稱成功但實際沒寫 main）
+new_src = re.sub(
+    r'if git merge "\$branch" -X ours --no-edit -m "[^"]*"[^{]*?2>&1; then',
+    'if : ; then  # PATCHED FOR TEST: simulate K1262 silent drop',
+    src,
+    count=1,
+    flags=re.DOTALL
+)
+if new_src == src:
+    # fallback simpler pattern
+    new_src = re.sub(
+        r'(if )git merge "\$branch" -X ours',
+        r'\1: ; #git merge "$branch" -X ours',
+        src,
+        count=1,
+    )
+open(p, 'w').write(new_src)
+PYEOF
+
+    # Run merge script (the patched one)
+    local output
+    output=$(run_merge_in_test_dir "$test_dir")
+
+    # 6-1: K1262-v4 必須印 [CRITICAL] detection 訊息
+    if echo "$output" | grep -q "K1262-v4 detection"; then
+        pass "6-1: K1262-v4 post-merge layer 偵測到 silent drop"
+    else
+        fail "6-1: K1262-v4 post-merge layer 沒抓到 silent drop（false negative!）"
+        echo "--- output (last 60 lines) ---"
+        echo "$output" | tail -60
+    fi
+
+    # 6-2: 必印 cherry-pick hint
+    if echo "$output" | grep -q "cherry-pick"; then
+        pass "6-2: script 提示 cherry-pick 救援命令"
+    else
+        fail "6-2: 沒列出 cherry-pick hint"
+    fi
+
+    # 6-3: worktree NOT removed（K1262-v4 必保留 worktree 待人工處理）
+    if [[ -d "$wt" ]]; then
+        pass "6-3: worktree 保留（K1262-v4 不允許 silent loss）"
+    else
+        fail "6-3: worktree 被移除！K-experiment 檔可能 silent loss"
+    fi
+}
+
+# ============================================================
+# Test Case 7 (K1262-v4): locked worktree → 必印 unlock + remove + branch -D hint
+#   不可用 --force fallback (CLAUDE.md L168 禁止)
+# ============================================================
+test_case_7_locked_worktree_hint() {
+    echo "=== Case 7 (K1262-v4): locked worktree hint message ==="
+    local test_dir
+    test_dir=$(setup_test_env "case7")
+    cd "$test_dir"
+
+    local wt=".claude/worktrees/agent-testcase7"
+    local branch="worktree-agent-testcase7"
+
+    # Agent commit normally
+    mkdir -p "$wt/experiments/k1262lock"
+    echo "print('k1262lock')" > "$wt/experiments/k1262lock/k1262lock.py"
+    (cd "$wt" && git add -A && git commit -qm "K1262lock deliverables")
+
+    # Lock the worktree (creates .git/worktrees/<wt>/locked)
+    git worktree lock "$wt" --reason "test: simulate stale claude-agent lock (pid 99999)" 2>/dev/null || true
+
+    # Run merge script
+    local output
+    output=$(run_merge_in_test_dir "$test_dir")
+
+    # 7-1: merge 應該 OK（commits 進 main），但 remove 應失敗
+    if git -C "$test_dir" cat-file -e "main:experiments/k1262lock/k1262lock.py" 2>/dev/null; then
+        pass "7-1: K-experiment 檔在 main HEAD（merge 成功）"
+    else
+        fail "7-1: K-experiment 檔不在 main HEAD"
+    fi
+
+    # 7-2: worktree remove 應 fail（loud）
+    if echo "$output" | grep -qE "worktree remove 失敗|locked"; then
+        pass "7-2: script 偵測到 locked worktree 並印警告"
+    else
+        fail "7-2: script 沒偵測 lock 或沒印警告"
+        echo "$output" | tail -30
+    fi
+
+    # 7-3: 必印 unlock hint（git worktree unlock）
+    if echo "$output" | grep -q "worktree unlock"; then
+        pass "7-3: script 提示 git worktree unlock"
+    else
+        fail "7-3: 沒提示 unlock 命令"
+    fi
+
+    # 7-4: 必 NOT 用 --force fallback
+    # 檢查 output 不該含 "嘗試 --force" / "git worktree remove --force"
+    if echo "$output" | grep -qE "嘗試 --force|worktree remove --force"; then
+        fail "7-4: script 用了 --force fallback（違反 CLAUDE.md L168）"
+        echo "$output" | grep -i "force"
+    else
+        pass "7-4: script 沒走 --force fallback（符合 CLAUDE.md L168）"
+    fi
+
+    # cleanup: unlock worktree so trap rm -rf works clean
+    git worktree unlock "$wt" 2>/dev/null || true
+}
+
+# ============================================================
 # Run tests
 # ============================================================
-echo "### merge_worktree.sh 測試 (K1143-v2) ###"
+echo "### merge_worktree.sh 測試 (K1143-v2 + K1262-v4) ###"
 echo ""
 
 test_case_a
@@ -237,10 +448,23 @@ test_case_c
 echo ""
 test_case_d
 echo ""
+test_case_5_rev_list_false_negative
+echo ""
+test_case_6_post_merge_verification
+echo ""
+test_case_7_locked_worktree_hint
+echo ""
 
 echo "================================"
-echo "PASS: $PASS"
-echo "FAIL: $FAIL"
+echo "Assertions PASS: $PASS"
+echo "Assertions FAIL: $FAIL"
+# Test case-level summary（7 cases = A/B/C/D + 5/6/7）
+TOTAL_CASES=7
+if [[ $FAIL -eq 0 ]]; then
+    echo "Test cases: PASS $TOTAL_CASES/$TOTAL_CASES"
+else
+    echo "Test cases: FAIL — see assertion failures above"
+fi
 echo "================================"
 
 if [[ $FAIL -gt 0 ]]; then
