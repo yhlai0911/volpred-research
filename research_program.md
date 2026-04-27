@@ -447,21 +447,30 @@ K519-K521 + K527 完成結果：見 archive。
 - MINOR 2: Baruník / Božović diacritics
 - **Action**: 納入 Sub4 body_v3.tex 更新時一併修
 
-## Paper 5 vt-crowding-abm APPROVE FOR SUBMISSION (2026-04-19 af0c6b audit)
+## Paper 5 vt-crowding-abm — 2026-04-27 UPDATE: 撤回 APPROVE FOR SUBMISSION
 
-- **alert_level: GREEN**, match 33/33 = 100%
-- Seed robustness 42/13/7 全 pass，tipping point 50-70% claim seed-robust
-- FRL 5 hard requirements 全 met
-- **Recommendation: APPROVE FOR SUBMISSION**
-- Minor non-blocking: results/README.md L42 cosmetic, reproduce.py 可 extend 到 33-cell check（optional）
+**舊 audit (2026-04-19 af0c6b)**: GREEN 33/33 / Seed robust / FRL 5 hard requirements met → APPROVE FOR SUBMISSION（**已撤回 2026-04-27**）
 
-**Next**: 用戶 confirm 投稿 policy → `uv run volpred ops paper-update --paper-id vt-crowding-abm` + 正式投稿 flow（FRL 15p citations 13）
+**新 verdict（2026-04-27 v2 round + cross-paper meta-eval addendum）**:
+- single-paper latex agent 4.4★ → **NotebookLM cross-paper meta-eval 撤回到 3.5-3.8★**（per memory `feedback_paper_cross_paper_meta_eval`）
+- FRL 預期：85-90% → **40-50%**（desk-reject 風險不可忽略）
+- 根因：ABM 70% 崩盤閾值是 λ/γ 數學結果不是 emergent finding；single-paper agent 看不到「設計性 vs emergent」誠實 framing 問題；portfolio overlap risk
+- Paper 自己 §1 L60-61 + §2 L97 已部分 acknowledge "quantifies---rather than discovers" 但 reviewer 仍可能challenge threshold magnitude IS λ/γ-determined
+
+**v3 必修**（升級 action plan，per `paper/vt-crowding-abm/review_history/v2/README.md` L⚠️ addendum）:
+- ABM mechanism framing 重寫（誠實「parameter sensitivity + crowding cost bounding」）
+- 補「非 VT 策略也有的擁擠效應」對照組（NotebookLM 建議）
+- 加 dataset/methodology portfolio 區隔段
+- 既有 M1-M9 v2 fix list（broken cross-ref / abstract trim / barroso2021 reframe / harvey2018 DOI 等）仍要修
+- 不升 ready stage 直到 v3 round 含 cross-paper meta-evaluation 通過
+
+**Next**: 主線程 P5 v3 round 含 ABM framing rewrite — Tier B，effort 估 1-2 週（不是 quick fix）。短期不投稿。
 
 ## Paper Portfolio Status (2026-04-20 02:14 — post K1257 BMA + P10 reproduce scaffold)
 
 | # | Paper | Status | Blocker |
 |---|---|---|---|
-| **P5** | **vt-crowding-abm** | ✅ **READY — GREEN 100% (33/33)** + v2 revise 4 MAJOR + 3 MED-C DOIs + 4 academic MED done (→ 4.3★ FRL prediction) | 等用戶 confirm 投稿 |
+| **P5** | **vt-crowding-abm** | 🟡 **撤回 READY (2026-04-27 cross-paper meta-eval)** — v1 reproduce GREEN 33/33 + v2 latex 4.4★ + citation 0/2/5 仍 valid，但 NotebookLM portfolio-lens 揭露 ABM 設計性問題（70% threshold = λ/γ 數學結果非 emergent）→ verdict 撤回到 3.5-3.8★ + FRL 40-50%。v3 必修 ABM framing rewrite + 非VT對照 + portfolio 區隔 (1-2 週 fundamental refactor) | 不投稿；v3 round Tier B 推進，per memory `project_paper_portfolio_decisions_2026_04_27` |
 | **P6** | **prg-periodic-garch** | ✅ **READY_FOR_SUBMISSION 全 gate PASS (2026-04-27, 9 paper 首篇)** — v1-v4 完整 4 輪 paper-review-cycle + v4.1 batch fix 收斂; supabase status `ready_for_submission`; 6/6 gate PASS (latex 4.2★ + citation GREEN + cross-paper meta + FRL desk-accept 35-45% + K1260 fair-info + no tautology). **Reproduce gate 全 PASS**: reproduce.py 22 checks (15→22 加 K1260 §4.5 GJR-X 7 checks) / reproduce_report.json `match_rate=100%` / `alert_level=green` / audit_date 2026-04-27. PDF=15p / bibitems=22 / abstract=184 words / 5 tables / 7 equations. SUBMISSION_READY.md + send-alert df592119 已發 user. **主線程準備就緒** — 等用戶 confirm 投稿 FRL → status `submitted` | 等用戶 confirm 投稿 FRL；或維持 ready + 每月 continuous review loop |
 | **P7** | **vix-sufficiency** | ✅ **READY — GREEN 98% (98/100)** + Sub1-6 closed (bundle + dividend + 5 divergence decisions + Table 6 K752 rewrite + source binding + reproduce.py synced) | 等用戶 confirm 投稿 |
 | **P4ins** | **vt-insurance-cost** | ✅ **READY — GREEN 100% (9/9)** (2026-04-19 88.9%→100% via L184 footnote + reproduce tolerance 5→10 bps 反映 documented dual-convention) | 等用戶 confirm 投稿 |
@@ -473,7 +482,7 @@ K519-K521 + K527 完成結果：見 archive。
 | **P10** | **crypto-fear-channel** | ✅ **NEW GREEN — reproduce gate 100% (7/7)** + Claude pre-body review 5H/8M/5L/6-Codex-gaps 歸檔 review_history/pre_body_v0/ + body_v0_intro.tex H1+H3 fixes applied (lag 1-5 asym distinct from symmetric 1-10 + QR sign-reversal 4-quantile enumerate 8.5× reframe) | body drafting（Sec 2-6 主體）待 Codex 04-24 wake handles Gap A-F (claim-to-JSON / k1025.py read / lit review 15-20 DOIs / outline reconcile / reproduce scaffold ✓ done / data snapshot) |
 
 ### 2026-04-19 Session 重大成就
-- **4 papers GREEN**（P4 vix-sufficiency 98% / P4 vt-insurance-cost 100% / P5 vt-crowding-abm 100% / P6 prg-periodic-garch 100%）— 首次四篇同時達 submission-ready reproduce gate
+- **4 papers reproduce GREEN**（P4 vix-sufficiency 98% / P4 vt-insurance-cost 100% / P5 vt-crowding-abm 100% / P6 prg-periodic-garch 100%）— reproduce gate 達標但**reproduce GREEN ≠ submit-ready**（per memory `feedback_paper_multi_round_review`）；P5 經 NotebookLM cross-paper meta-eval 撤回 READY；P6 經 4 輪 review + 6/6 gate 升 ready_for_submission（首篇 portfolio）
 - **6 papers 0 MISMATCH**（P1 / P2 / P3 / P4 / P5 / P6 — 3-spec disambiguation pattern 成功 3-paper 移植 + cross-source NOTE reclass）
 - **2 errata_pending.md** shelf-ready（P8 / P9）記 CRITICAL / HIGH / MEDIUM 嚴重度分層
 - **5 Codex ops victories**（P12 snapshot infra / P15 release-pool last_released_at fix / P10 P6 audit / P30 session-bootstrap v11 cleanup / P25 claim-next parent guard）
