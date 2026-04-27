@@ -66,17 +66,37 @@ We address this gap with an agent-based simulation in which the same Kyle-micros
 
 We construct an agent-based model with $N = 1{,}000$ heterogeneous agents operating in a single risky asset over $T = 2{,}520$ trading days (approximately 10~years).
 
-\subsection{Agent Types}
+\subsection{Agent Types and Strategy Treatments}
+\label{sec:agents}
 
-Agents are partitioned into three classes:
+The model supports four interchangeable \emph{strategy treatments} operating under identical microstructure (Eqs.~\ref{eq:price}--\ref{eq:vix}). For a given experimental run, the population is partitioned as $N_{\text{BH}} = (1 - \phi) N - N_{\text{noise}}$ Buy-and-Hold (BH) agents with constant weight $w^{\text{BH}} = 1.0$, $\phi N$ strategy-treatment agents, and $N_{\text{noise}} = 200$ noise traders with weight increments $\Delta w \sim N(0, 0.02)$ clipped to $[0, 1.5]$ providing background liquidity. The composition is well-defined as long as $\phi < 1 - N_{\text{noise}}/N = 80\%$; at the saturated adoption levels $\phi \in \{100\%\}$ all non-noise agents are strategy-treatment agents.
 
-\begin{enumerate}
-  \item \textbf{Buy-and-Hold (BH)} agents maintain a constant equity weight of $w^{\text{BH}} = 1.0$.
-  \item \textbf{12/VIX Volatility Targeting (VT)} agents set their equity weight as $w_t^{\text{VT}} = \min(12/\text{VIX}_{t-1},\; 1.5)$, using the lagged VIX to avoid lookahead bias. This rule is a widely-used practitioner heuristic \citep{perchet2016}.
-  \item \textbf{Noise traders} adjust their weights by a random increment $\Delta w \sim N(0, 0.02)$, clipped to $[0, 1.5]$, providing background liquidity.
-\end{enumerate}
+The strategy treatment is one of four classes:
 
-The key experimental variable is the VT adoption fraction $\phi$, tested at seven levels: 0\%, 10\%, 20\%, 30\%, 50\%, 70\%, and 100\%. As $\phi$ increases, BH agents are replaced by VT agents while noise traders remain fixed at $N_{\text{noise}} = 200$. This design isolates the crowding mechanism from liquidity effects: because the noise-trader population is constant across all adoption levels, any performance degradation is attributable to correlated VT trading rather than to the mechanical reduction of background liquidity providers. Section~\ref{sec:validation} reports a design validation confirming that this distinction is quantitatively important.
+\paragraph{Volatility targeting (VT).} The canonical 12/VIX rule \citep{perchet2016},
+\begin{equation}
+  w_t^{\text{VT}} = \min\!\bigl(12 / \text{VIX}_{t-1},\; 1.5\bigr),
+  \label{eq:vt_rule}
+\end{equation}
+with the lagged VIX ensuring lookahead-safe execution.
+
+\paragraph{Trend-following (TF).} Momentum-based weight update,
+\begin{equation}
+  w_t^{\text{TF}} = \mathrm{clip}\!\bigl(0.5 + s \cdot \tilde{r}^{(W)}_{t-1},\; 0,\; 1.5\bigr),
+  \label{eq:tf_rule}
+\end{equation}
+where $\tilde{r}^{(W)}_{t-1}$ is the $W$-day cumulative log-return up to $t-1$ (lookahead-safe), $s$ is a scaling intensity, and the clip enforces the same $[0, 1.5]$ rail as VT. Baseline values $s = 10$ and $W = 22$ correspond to one-month time-series momentum at intermediate scaling consistent with cross-asset CTA practice \citep{moskowitz2012}; the strategy-spec robustness analysis (\S\ref{sec:cross_strategy}) sweeps $s \in \{1, 3, 5, 10\}$ and $W \in \{10, 22, 60\}$.
+
+\paragraph{Mean-reversion (MR).} Sign-flipped momentum,
+\begin{equation}
+  w_t^{\text{MR}} = \mathrm{clip}\!\bigl(0.5 - s \cdot \tilde{r}^{(W)}_{t-1},\; 0,\; 1.5\bigr),
+  \label{eq:mr_rule}
+\end{equation}
+with the same baseline $s = 10$, $W = 22$. The negative coefficient captures the short-horizon reversal documented by \citet{lehmann1990} and \citet{lo1990}. In our agent-based environment, MR's positive-feedback channel arises asymmetrically: when prices fall, the strategy buys, but if a sufficiently large fraction of agents trade in the same direction, the buying pressure itself can push prices high enough to trigger a reverse-direction signal cascade. This produces episodic price-collapse-and-recovery behavior at intermediate adoption (e.g.\ final prices on the order of $10^{-23}$ at $\phi = 30\%$ in 500/500 simulations from the Phase~1 run --- a legitimate simulation finding rather than a numerical artifact, documented in the threshold caveats of \S\ref{sec:cross_strategy}).
+
+\paragraph{NoiseControl (NC).} Falsifiability anchor with deterministic weight $w^{\text{NC}}_t = 0.5$. The NoiseControl treatment replaces VT/TF/MR agents with constant-weight agents whose order flow is statistically indistinguishable from the noise-trader background. Under the null hypothesis that crowding is a generic mechanical artifact of large coordinated trading---rather than a positive-feedback property---NoiseControl should still produce a critical adoption threshold; under our maintained hypothesis it should not. The Phase~1 run (\S\ref{sec:cross_strategy}) confirms NoiseControl produces no detectable threshold across $\phi \in \{0\%, \ldots, 100\%\}$, establishing that the cross-treatment threshold differences reflect the strategies' positive-feedback structure rather than their headcount.
+
+The experimental adoption variable $\phi$ now denotes the fraction of $N$ agents using the \emph{active} strategy treatment, tested at seven levels: 0\%, 10\%, 20\%, 30\%, 50\%, 70\%, and 100\%. As $\phi$ rises, BH agents are replaced by treatment agents while noise traders remain fixed at $N_{\text{noise}} = 200$. This design isolates the crowding mechanism from liquidity effects: because the noise-trader population is constant across all adoption levels, any performance degradation is attributable to correlated strategy-treatment trading rather than to the mechanical reduction of background liquidity providers. Section~\ref{sec:validation} reports a design validation confirming that this distinction is quantitatively important. Cross-treatment seed pairing is enforced---$\text{seed}(i) = \lfloor \phi \cdot 10^{5} \rfloor + i + 42$---so that Monte-Carlo sampling noise is paired across VT, TF, and MR comparisons within each adoption level.
 
 \subsection{Market Microstructure}
 
@@ -196,7 +216,7 @@ We assess statistical significance using Welch's $t$-test on the 500 simulation-
 
 \subsection{The Feedback Structure}
 
-We emphasize that the positive feedback mechanism is \emph{encoded in the model}, not discovered from the simulation output. The VIX responds to realized volatility (Eq.~\ref{eq:vix}), VT agents respond to VIX, and their trading affects prices (Eq.~\ref{eq:price}), which in turn affects realized volatility. This circular structure is a deliberate implementation of the \citet{brunnermeier2009} liquidity spiral framework. What the simulation \emph{does} reveal is the \emph{quantitative threshold behavior}: the feedback loop's consequences are negligible below 30\% adoption, become material at 50\%, and are catastrophic at 70\%. Making the feedback explicit, the aggregate VT order flow on day $t$ is $\phi N \Delta w_t^{\text{VT}}$, where the VT weight change uses the capped rule from \S\ref{subsec:vt_rule},
+We emphasize that the positive feedback mechanism is \emph{encoded in the model}, not discovered from the simulation output. The VIX responds to realized volatility (Eq.~\ref{eq:vix}), VT agents respond to VIX, and their trading affects prices (Eq.~\ref{eq:price}), which in turn affects realized volatility. This circular structure is a deliberate implementation of the \citet{brunnermeier2009} liquidity spiral framework. What the simulation \emph{does} reveal is the \emph{quantitative threshold behavior}: the feedback loop's consequences are negligible below 30\% adoption, become material at 50\%, and are catastrophic at 70\%. Making the feedback explicit, the aggregate VT order flow on day $t$ is $\phi N \Delta w_t^{\text{VT}}$, where the VT weight change uses the capped rule from Eq.~(\ref{eq:vt_rule}),
 \begin{equation}
   \Delta w_t^{\text{VT}} \;=\; \min\!\left(\frac{12}{\text{VIX}_{t-1}},\,1.5\right) - \min\!\left(\frac{12}{\text{VIX}_{t-2}},\,1.5\right).
   \label{eq:vt_delta}
