@@ -29,7 +29,7 @@ NotebookLM portfolio-level lens 對 P5 v2 round 4.4★ 撤回到 3.5-3.8★，�
 
 ## Experimental Design
 
-### Baseline (replicate P5 K1031 / paper Table 2)
+### Baseline (replicate P5 K110 / `vt_crowding_simulation.py` / paper Table 2)
 
 - 1,000 heterogeneous agents（800 strategy agents + 200 fixed noise traders）
 - 7 VT adoption levels: 0%, 10%, 20%, 30%, 50%, 70%, 100%
@@ -89,7 +89,7 @@ Expected mechanism: MR provides counter-pressure → 應該 **dampen** crowding,
 **Worktree agent dispatch（後續 slot）**:
 - Brief: per `.claude/skills/autonomous-research/references/agent-brief-template.md` 6-element brief
 - Skills referenced: `.claude/skills/autonomous-research/SKILL.md` + `.claude/rules/experiments.md`
-- Code base: replicate P5 K1031 ABM framework（讀 `experiments/k1031/` or `paper/vt-crowding-abm/scripts/`）
+- Code base: replicate P5 K110 ABM framework（讀 `experiments/vt_crowding_simulation/vt_crowding_simulation.py` 736 lines, baseline; K110 uses 5 adoption levels, paper expanded to 7 — fork to `k1261_non_vt_ablation.py` 用 7 levels per paper Table 2）。Note: K1031 是 GARCH-X SSVS 不是 ABM, 之前 cross-link 寫錯
 - Output: `experiments/k1261/{k1261_non_vt_ablation.py, k1261_results.json, threshold_comparison.png}`
 - Codex review **PASS** before writing knowledge.json (per experiments.md SOP)
 - Estimated runtime: 10,500 simulations × ~2 min each ≈ 350 hours single-thread → must parallelize（multiprocessing pool 8-16 workers → 22-44 hours wall）
@@ -103,7 +103,8 @@ Expected mechanism: MR provides counter-pressure → 應該 **dampen** crowding,
 
 - `paper/vt-crowding-abm/main.tex` (target paper, §3 ABM specs L85-100, OAT details L101)
 - `paper/vt-crowding-abm/review_history/v2/README.md` ⚠️ addendum (cross-paper meta-eval verdict)
-- `experiments/k1031/` (P5 main ABM experiment, baseline replication source)
+- `experiments/vt_crowding_simulation/` (P5 K110 ABM baseline, 736-line canonical script; replication source for K1261 fork)
+- `experiments/k827/` (earlier ABM iteration, 397 lines, supersededed by K110)
 - Memory: `project_paper_portfolio_decisions_2026_04_27.md` (Tier B P5 推進 priority 1)
 - Memory: `feedback_paper_cross_paper_meta_eval.md` (cross-paper meta-eval methodology)
 - `.claude/rules/experiments.md` (Pooled-MLE 100+ multistart, lookahead `signal.shift(1)`, seed required)
@@ -112,7 +113,17 @@ Expected mechanism: MR provides counter-pressure → 應該 **dampen** crowding,
 
 ## Open Questions（design 待釐清）
 
-1. **N (momentum window)** for TF/MR: 22 days conventional but P5 paper σ window is 20 days；should align?
-2. **Noise trader 共同 baseline**: TF/MR experiments 也保持 200 fixed noise traders？（推薦 yes for fair comparison with VT baseline）
-3. **Is VIX feedback loop VT-specific?** P5 ABM 的 VIX 演化方程依賴 ΔΣ (realized vol)。TF/MR 不直接讀 VIX，但 VIX 仍會 endogenously evolve。需 confirm 模型 VIX 演化在 TF/MR adoption 下仍合理（VIX 沒人讀但仍 positive-feedback 影響 fundamental 價格 σ_f？）
-4. **OAT sensitivity scope**: full 9 OAT × 3 adoption × 200 sims = +5,400 sims per treatment = +16,200 total. 是否 phase 1 跑 baseline，phase 2 才 OAT？
+### Resolved 2026-04-27（主線程 K1261 design refinement）
+
+1. ~~**N (momentum window)** for TF/MR~~: **N=22 days**。理由：(a) conventional CTA window；(b) 接近 P5 paper σ 計算 20-day rolling window，差異 2 days 不致 mechanism qualitative shift；(c) `vt_crowding_simulation.py` baseline 已用 22 left as-is for return aggregation logic。**Robustness check**: phase 2 加跑 N=20 + N=66（quarterly momentum）兩組驗證 threshold qualitative 不依賴 N=22 specifically。
+
+2. ~~**Noise trader 共同 baseline**~~: **是, 200 noise traders fixed across all 3 treatments + control**（per K110 baseline + paper §3 design rationale: "fixed liquidity isolates crowding from liquidity evaporation"）. TF / MR / pure-noise treatments 都保持 N_noise=200 ensures cross-treatment comparison apple-to-apple.
+
+### Pending（dispatch worktree agent 前必 resolve）
+
+3. **VIX feedback loop under non-VT**: P5 ABM 的 VIX 演化方程 (paper L90) 是 `VIX_t = max(0, VIX_{t-1} + κ(V̄ + γ·ΔΣ - VIX_{t-1}) + η_t)`。TF/MR 不直接讀 VIX exposure scaling 但 ΔΣ (realized vol) 仍會 evolve as agent flow 改變 σ_real。問題: 在 TF/MR scenario 下保留 γ=200 VIX feedback 是 fair comparison（all treatments share same VIX dynamics）還是 unfair（VIX 對 TF/MR 不該 feedback）？**Tentative resolution**: 保留 γ=200 across all treatments — VIX 演化是 market 內生 dynamics, 不該因 strategy mix 改變。Worktree agent brief 必明寫此 design choice 並 sensitivity check (γ=0 disabled VIX feedback subset, 看 threshold 是否消失 → 若消失則 confirm threshold IS γ-driven 不是 strategy-driven, NotebookLM critique 站得住).
+
+4. **OAT sensitivity scope phasing**: full 9 OAT × 3 treatments × 3 adoption levels × 200 sims = 16,200 sims +baseline 10,500 = 26,700 total. **Resolution**: **2-phase plan**:
+   - **Phase 1 (K1261)**: baseline + 3 treatments × 7 adoption × 500 MC = 10,500 sims（threshold detection 主結果，~22-44 hrs wall）
+   - **Phase 2 (K1261b)**: OAT sensitivity λ ±50% × 3 treatments × 3 adoption × 200 sims = 5,400 sims（only if Phase 1 finds non-VT threshold, else NS no need OAT）— 等 Phase 1 results decide whether OAT meaningful
+   - 不 single-shot dispatch all 26,700 sims，避免 phase 1 無 finding 時 phase 2 浪費 compute
