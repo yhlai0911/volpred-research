@@ -462,7 +462,7 @@ K519-K521 + K527 完成結果：見 archive。
 | # | Paper | Status | Blocker |
 |---|---|---|---|
 | **P5** | **vt-crowding-abm** | ✅ **READY — GREEN 100% (33/33)** + v2 revise 4 MAJOR + 3 MED-C DOIs + 4 academic MED done (→ 4.3★ FRL prediction) | 等用戶 confirm 投稿 |
-| **P6** | **prg-periodic-garch** | ✅ **READY — GREEN 100% (15/15)** + v2 revise 2 MAJOR Fix B + 6 MED + 10 MINOR + 17 DOIs + PRS continuity §6 + 11pt 13pp + citation_check synced | 等用戶 confirm 投稿 |
+| **P6** | **prg-periodic-garch** | 🟢 **v4 batch done, v4 review-cycle pending (2026-04-27)** — v3 round 4.1★ (latex) + GREEN PASS (citation) + 5/6 gate PASS → **v4 batch 4 actions main-thread apply**: §4.5 K1260 GJR-X subsection (eq:gjrx + tab:gjrx, 最高 leverage) / §2.2 dense paragraph break / Hansen2012 disambiguation + bibitem (Realized=RV proxy 1-sentence) / abstract trim 209→~184 words / bonus §5 third limitation 濃縮 cross-ref §4.5. PDF=15 頁, citations=21, 0 undefined, paper-update sync ✅. **v4 paper-review-cycle 即將啟動** (predict 4.4-4.6★ + FRL desk-accept 35-45% + 6/6 gate PASS) | 不直投稿（per memory feedback_paper_multi_round_review）；v4 review pass + 6/6 gate 後升 ready_for_submission |
 | **P7** | **vix-sufficiency** | ✅ **READY — GREEN 98% (98/100)** + Sub1-6 closed (bundle + dividend + 5 divergence decisions + Table 6 K752 rewrite + source binding + reproduce.py synced) | 等用戶 confirm 投稿 |
 | **P4ins** | **vt-insurance-cost** | ✅ **READY — GREEN 100% (9/9)** (2026-04-19 88.9%→100% via L184 footnote + reproduce tolerance 5→10 bps 反映 documented dual-convention) | 等用戶 confirm 投稿 |
 | P1 | leverage-direction | 🟡 **0 MISMATCH** + 28 MATCH + 9 NOTE + 19 UNTRACE (structural data-limit) | C1 ✅ K1256 3-spec / C2 ✅ Kupiec rounding / ✅ 7 figure scripts bundled MATCH / C3-C5 Tables 1/6/7/8/11/14 需 new experiments |
