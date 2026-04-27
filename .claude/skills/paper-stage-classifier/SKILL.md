@@ -42,6 +42,11 @@ Do **not** use this skill for：
 2. 對照上表判斷 stage
 3. 用 `volpred ops paper-upsert --paper-id <id> --stage <stage>` 寫入 DB（若有 --stage 欄位；無則寫 details JSON）
 4. 同步更新 `next_tasks.json` 的對應任務 description
+5. **⚠️ Frontend dependency check**（2026-04-27 P6 incident 教訓）：
+   - 若新 stage value 在 supabase 為新 enum（例如首次升 `ready_for_submission`），**必須** check `frontend-v2-fix/src/app/paper/page.tsx` + `src/app/v3/paper/page.tsx` 的 `Paper.status` type union 是否包含
+   - 若沒包含 → frontend client-side crash（`STATUS_CONFIG[status] = undefined`），**整頁 https://volpred.zeabur.app/paper 掛掉**
+   - 必跑：grep `frontend-v2-fix/src/app/**/paper*.tsx` 確認 5 stages (working / ready_for_submission / submitted / accepted / published) 全 covered
+   - frontend-v2-fix 是獨立 git repo（main repo gitignored），改完 cd 進去 commit + 跑 `bash scripts/deploy-zeabur-safe.sh` deploy
 
 補充：
 - 這裡同步 `next_tasks.json` 的目的，只是維持 paper working list / human-readable plan。
