@@ -1,6 +1,8 @@
 # K1261 — P5 Non-VT Crowding ABM Ablation (Design Proposal)
 
-**Status**: ✅ **Phase 1.0 sanity PASS (2026-04-27)** — worktree agent (a5229c1e09551ce2f) implemented 4 strategy classes + ran VT_baseline × 7 adoption × 100 MC = 700 sims (25.4s wall). **Byte-exact single-seed cross-check vs K827v3: diff=0.000000**（ann_return / ann_vol / kurtosis / vt_sharpe / vix_spike_pct / final_price all match）。z-score gate 7/7 PASS（all cells |z|<2 within MC sampling noise）。Implementation file `k1261_non_vt_ablation.py` (38KB), sanity results `k1261_sanity_results.json` (42KB), full verdict in `k1261_sanity_verification.md`。**Ready for Phase 1 scale-up** (4 treatments × 7 × 500 = 14,000 sims, ~22-44 hr wall) — 待下一輪 dispatch.
+**Status**: ✅ **Phase 1 main DONE (2026-04-27)** — worktree agent (ab6a1ce4991cf48db) ran 4 treatments × 7 adoption × 500 MC + sanity = **10,500 sims in 132.3s wall** (vs 22-44 hr estimate). **Verdict: H1+** (positive-feedback crowding is generic, NOT VT-specific). Critical adoption thresholds (strict detector: Sharpe drop >50% AND kurt >10 AND vol amp >50%): TF @ 20%, MR @ 50%, NoiseControl null, VT_baseline @ 100%. 4 critical caveats inline in `k1261_phase1_verdict.md` (strict criterion vs P5 70% softer; MR 30% legitimate price collapse; TF 50% extreme runaway vol×1500; **Codex code review of phase1_main.py pending before knowledge.json write**). Phase 2 robustness sweep (TF/MR scaling ∈ {1,3,5,10} × window ∈ {10,22,60}) + softer detector + λ/γ OAT 待下一輪 dispatch.
+
+**Phase 1.0 sanity PASS (2026-04-27)** — worktree agent (a5229c1e09551ce2f) implemented 4 strategy classes + ran VT_baseline × 7 × 100 MC = 700 sims (25.4s wall). Byte-exact vs K827v3: diff=0.000000. z-score gate 7/7 PASS. See `k1261_sanity_verification.md`.
 
 **Date proposed**: 2026-04-27
 **Target paper**: P5 vt-crowding-abm
@@ -99,9 +101,43 @@ Expected mechanism: MR provides counter-pressure → 應該 **dampen** crowding,
 
 ---
 
+## Phase 1 Main Results (2026-04-27, 10,500 sims)
+
+| Treatment | Critical Adoption (strict detector) | Notes |
+|---|---|---|
+| VT_baseline (K827v3 stored 500 MC) | 100% | matches P5 paper Table 2 |
+| TF (Trend-Following) | **20%** | 50% adoption: vol = 242 (1500× baseline), kurt = 1412, 40,199 price clamps |
+| MR (Mean-Reversion) | **50%** (per detector) | 20% Sharpe = -60.16, vol = 5.85 (37×); 30% all 500 sims price collapse to 1e-23. **True instability ~20-30%**; detector understates due to NaN gate |
+| NoiseControl | null | Sharpe = 0.50, kurt = 0.001 at 100% — validates framework |
+
+**Hypothesis verdict**: H1+ (both TF and MR show critical thresholds with worse-than-VT instability at lower adoption + NoiseControl null). Strong evidence crowding is generic positive-feedback property.
+
+**Caveats** (per `k1261_phase1_verdict.md`):
+1. Strict detector vs P5 paper 70% threshold (P5 likely uses softer criterion: kurt >1 + Sharpe sign flip)
+2. MR 30% price collapse is legitimate finding, not bug
+3. TF 50% extreme runaway = self-sustaining feedback (TF buys uptrend → price up → bigger momentum → bigger Kyle impact)
+4. **Codex review of `k1261_phase1_main.py` pending** (threshold detector sign-aware logic + NaN-as-finding gate) — not yet writing knowledge.json per `.claude/rules/experiments.md` SOP
+
+**Internal consistency** (all PASS):
+- VT_baseline sanity gate byte-exact match vs K827v3 stored
+- 0% adoption identical across all 4 treatments (no strategy agents)
+- Cross-treatment seed pairing: `int(adoption*100000) + sim_idx + 42`
+- NoiseControl 100% adoption produces no crowding by construction
+
+**Pending before P5 paper rewrite**:
+1. Codex review pass of phase1 main script
+2. Phase 2 robustness sweep: TF/MR scaling ∈ {1, 3, 5, 10} × window ∈ {10, 22, 60} — current scaling=10 may be too aggressive
+3. Apply softer threshold detector matching P5 paper criterion → recompute TF/MR threshold
+4. Phase 2 OAT λ/γ ±50% on TF (deferred per design)
+5. **用戶 confirm narrative shift** to「positive-feedback crowding family, VT 是 representative case」
+
 ## Cross-link
 
 - `paper/vt-crowding-abm/main.tex` (target paper, §3 ABM specs L85-100, OAT details L101)
+- `experiments/k1261/k1261_phase1_main.py` Phase 1 runner (757 lines)
+- `experiments/k1261/k1261_phase1_verdict.md` (full verdict + 4 caveats)
+- `experiments/k1261/k1261_results.json` Phase 1 raw aggregates
+- `experiments/k1261/k1261_threshold_comparison.md` cross-treatment table
 - `paper/vt-crowding-abm/review_history/v2/README.md` ⚠️ addendum (cross-paper meta-eval verdict)
 - `paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity.py` (**P5 K827v3 canonical baseline**, fixed-liquidity ABM, K1261 fork source)
 - `paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity_results.json` (byte-match P5 Table 2 verified)
