@@ -29,7 +29,7 @@ NotebookLM portfolio-level lens 對 P5 v2 round 4.4★ 撤回到 3.5-3.8★，�
 
 ## Experimental Design
 
-### Baseline (replicate P5 K110 / `vt_crowding_simulation.py` / paper Table 2)
+### Baseline (replicate P5 **K827v3** / `paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity.py` / paper Table 2)
 
 - 1,000 heterogeneous agents（800 strategy agents + 200 fixed noise traders）
 - 7 VT adoption levels: 0%, 10%, 20%, 30%, 50%, 70%, 100%
@@ -89,7 +89,7 @@ Expected mechanism: MR provides counter-pressure → 應該 **dampen** crowding,
 **Worktree agent dispatch（後續 slot）**:
 - Brief: per `.claude/skills/autonomous-research/references/agent-brief-template.md` 6-element brief
 - Skills referenced: `.claude/skills/autonomous-research/SKILL.md` + `.claude/rules/experiments.md`
-- Code base: replicate P5 K110 ABM framework（讀 `experiments/vt_crowding_simulation/vt_crowding_simulation.py` 736 lines, baseline; K110 uses 5 adoption levels, paper expanded to 7 — fork to `k1261_non_vt_ablation.py` 用 7 levels per paper Table 2）。Note: K1031 是 GARCH-X SSVS 不是 ABM, 之前 cross-link 寫錯
+- Code base: replicate P5 **K827v3** ABM framework（讀 `paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity.py`, P5 reproduce.py 跑此 script；fork to `experiments/k1261/k1261_non_vt_ablation.py`）。已驗證 K827v3 7 adoption levels (10/20/30/50/70/100%) Sharpe 數值 byte-match paper Table 2（baseline_check_2026_04_27.md）。Note: K1031=GARCH-X SSVS, K110/`vt_crowding_simulation`=placeholder draft, 之前都寫錯 cross-link
 - Output: `experiments/k1261/{k1261_non_vt_ablation.py, k1261_results.json, threshold_comparison.png}`
 - Codex review **PASS** before writing knowledge.json (per experiments.md SOP)
 - Estimated runtime: 10,500 simulations × ~2 min each ≈ 350 hours single-thread → must parallelize（multiprocessing pool 8-16 workers → 22-44 hours wall）
@@ -103,8 +103,11 @@ Expected mechanism: MR provides counter-pressure → 應該 **dampen** crowding,
 
 - `paper/vt-crowding-abm/main.tex` (target paper, §3 ABM specs L85-100, OAT details L101)
 - `paper/vt-crowding-abm/review_history/v2/README.md` ⚠️ addendum (cross-paper meta-eval verdict)
-- `experiments/vt_crowding_simulation/` (P5 K110 ABM baseline, 736-line canonical script; replication source for K1261 fork)
-- `experiments/k827/` (earlier ABM iteration, 397 lines, supersededed by K110)
+- `paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity.py` (**P5 K827v3 canonical baseline**, fixed-liquidity ABM, K1261 fork source)
+- `paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity_results.json` (byte-match P5 Table 2 verified)
+- `experiments/k1261/baseline_check_2026_04_27.md` (本 slot baseline 驗證 + Q3 VIX feedback resolution)
+- `experiments/vt_crowding_simulation/` (placeholder draft, 不 actual run, ignore)
+- `experiments/k827/` (initial 397-line iteration, superseded by K827v3)
 - Memory: `project_paper_portfolio_decisions_2026_04_27.md` (Tier B P5 推進 priority 1)
 - Memory: `feedback_paper_cross_paper_meta_eval.md` (cross-paper meta-eval methodology)
 - `.claude/rules/experiments.md` (Pooled-MLE 100+ multistart, lookahead `signal.shift(1)`, seed required)
