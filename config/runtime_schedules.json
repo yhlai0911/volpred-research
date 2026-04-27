@@ -51,11 +51,11 @@
       {
         "id": "release_pool",
         "label": "文章池定時釋出",
-        "cron": "7 */12 * * *",
+        "cron": "7 */6 * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_release_pool.sh",
         "log_path": "storage/logs/cron/release_pool.log",
         "command_deprecated": "release-pool-by-settings",
-        "description": "每 12 小時依節奏設定釋出文章池內容（2026-04-20 用戶指定 2h→12h）。",
+        "description": "每 6 小時依節奏設定釋出文章池內容（2026-04-27 用戶指定 12h→6h，配合 draft pool 補充節奏）。對應 .release_settings.json interval_minutes=360。",
         "matchers": [
           "release-pool-by-settings",
           "cron_release_pool.sh"
@@ -115,6 +115,19 @@
         "matchers": [
           "scripts/continue_task_stub.py",
           "cron_continue_task_stub.sh"
+        ]
+      },
+      {
+        "id": "memory_health_daily",
+        "label": "Memory health 日檢",
+        "cron": "30 5 * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_memory_health.sh",
+        "log_path": "storage/logs/cron/memory_health.log",
+        "command_deprecated": "volpred ops memory-health-summary",
+        "description": "每日 05:30 跑 memory-health-summary；overall_status != ok 時觸發 send-alert (24h dedup)。防 2026-04-10 knowledge.json 膨脹 pattern (54.5MB / 50,304 dup) 復發；merge_worktree.sh jq 去重 bug 修後仍維持 daily 監控。Piggy-back via check_alerts hourly fire（host cron 只可靠 0 * * * * pattern）。",
+        "matchers": [
+          "memory_health",
+          "cron_memory_health.sh"
         ]
       }
     ]
