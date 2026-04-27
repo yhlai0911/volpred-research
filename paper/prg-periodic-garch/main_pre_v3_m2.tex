@@ -38,7 +38,7 @@ Email: yhlai@mail.dyu.edu.tw}}
 \maketitle
 
 \begin{abstract}
-This paper proposes the Periodic Realized GARCH (PRG) model, which maintains a single GARCH variance recursion while allowing session-specific parameters for overnight and intraday periods. The key mechanism is that the conditional variance $h_{n-1}$ from one session carries into the next, creating an information bridge across session boundaries. Using tick-level data from Taiwan futures (TAIFEX), daily OHLC data from four U.S. exchange-traded funds (SPY, QQQ, GLD, EEM), and the Taiwan 0050 ETF, the PRG model significantly outperforms GJR-GARCH in all six markets under the QLIKE loss function, with Diebold--Mariano test statistics of 6.63 (EEM), 6.12 (GLD), 6.00 (SPY), 5.27 (0050.TW), 5.10 (TAIFEX), and 4.26 (QQQ)---all exceeding the \citet{Harvey2016} threshold of $|t|>3.0$. An ablation removing the session-boundary update collapses the advantage (DM $t = 6.00 \to -0.57$), and a fair-information GJR-X benchmark on SPY confirms PRG's dominance is structural, not informational (PRG vs GJR-X DM $t = 7.72$; GJR-X vs GJR DM $t = -0.53$, NS). PRG also dominates in VaR and Expected Shortfall evaluations and yields economic gains in TAIFEX volatility timing.
+This paper proposes the Periodic Realized GARCH (PRG) model, which maintains a single GARCH variance recursion while allowing session-specific parameters for overnight and intraday periods. The key mechanism is that the conditional variance $h_{n-1}$ from one session carries into the next, creating an information bridge across session boundaries. This design captures the empirical regularity that overnight and intraday sessions exhibit distinct volatility dynamics yet are linked through a common latent variance process. Using tick-level data from Taiwan futures (TAIFEX), daily OHLC data from four U.S. exchange-traded funds (SPY, QQQ, GLD, EEM), and the Taiwan 0050 ETF, the PRG model significantly outperforms GJR-GARCH in all six markets under the QLIKE loss function, with Diebold--Mariano test statistics of 6.63 (EEM), 6.12 (GLD), 6.00 (SPY), 5.27 (0050.TW), 5.10 (TAIFEX), and 4.26 (QQQ)---all exceeding the \citet{Harvey2016} threshold of $|t|>3.0$. An ablation study removing the session-boundary update causes the advantage to collapse entirely (DM $t = 6.00 \to -0.57$), confirming that periodic information transfer---not additional parameters---drives the improvement. The PRG model also dominates in VaR and Expected Shortfall evaluations, and generates economically meaningful gains in a volatility-timing strategy on TAIFEX futures.
 
 \medskip\noindent
 \textbf{Keywords:} Volatility forecasting; Periodic GARCH; Session decomposition; Overnight variance; Cross-session information transfer
@@ -56,11 +56,11 @@ This paper proposes the Periodic Realized GARCH (PRG) model, which maintains a s
 
 Financial markets operate across distinct trading sessions---an overnight period when exchanges are closed yet information arrives continuously, and an intraday period characterized by active price discovery. \citet{Blanc2014} demonstrate that overnight and intraday returns exhibit fundamentally different volatility feedback structures: past intraday returns affect both future sessions symmetrically, while past overnight returns primarily feed back into future overnight volatility. This asymmetry motivates session-specific modeling, yet the standard approach treats close-to-close returns as a single process, discarding the information embedded in session boundaries.
 
-Several approaches have been proposed to exploit session-level information. \citet{Bollerslev1996} introduce periodic structures into GARCH models for calendar-based variation. \citet{Linton2020} develop a coupled component DCS-EGARCH model that allows cross-session feedback with approximately twelve parameters. \citet{Kim2023} propose an Overnight GARCH-It\^{o} model using continuous-time diffusions for each session. \citet{Todorova2014} show that treating overnight information separately improves realized volatility forecasts, while \citet{Opschoor2021} apply score-driven models to realized variances with overnight returns for VaR and ES forecasting. These models are theoretically rich but typically require complex estimation procedures, limiting practitioner adoption. The PRG framework proposed in this paper takes a different route: we extend the periodic GARCH structure of \citet{Bollerslev1996} from calendar periodicity (e.g., day-of-week) to session-frequency periodicity (overnight versus intraday), retaining its parsimony while embedding a single cross-session variance recursion.
+Several approaches have been proposed to exploit session-level information. \citet{Bollerslev1996} introduce periodic structures into GARCH models for calendar-based variation. \citet{Linton2020} develop a coupled component DCS-EGARCH model that allows cross-session feedback with approximately twelve parameters. \citet{Kim2023} propose an Overnight GARCH-It\^{o} model using continuous-time diffusions for each session. \citet{Todorova2014} show that treating overnight information separately improves realized volatility forecasts, while \citet{Opschoor2021} apply score-driven models to realized variances with overnight returns for VaR and ES forecasting. These models are theoretically rich but typically require complex estimation procedures, limiting practitioner adoption.
 
 \citet{Lai2024} address the session decomposition problem with the Periodic Regime-Switching (PRS) model, which uses Markov switching to capture session-specific dynamics. However, the PRS model's regime-switching mechanism introduces substantial estimation complexity and raises concerns about overfitting in moderate samples. This paper proposes a parsimonious alternative---the Periodic Realized GARCH (PRG)---that retains the key insight of session-specific parameters while eliminating the Markov-switching apparatus entirely.
 
-The PRG model makes three contributions. First, it introduces a single GARCH recursion with session-periodic parameters (6--8 total), where the conditional variance from one session carries directly into the next---creating a \emph{session-boundary information transfer}. This parsimonious specification stands in deliberate contrast to existing session-aware models requiring substantially more parameters: \citet{Bollerslev1996}'s original calendar-based periodic GARCH and its session-extended variants, coupled DCS-EGARCH systems with approximately twelve parameters \citep{Linton2020}, continuous-time Overnight GARCH-It\^{o} diffusions \citep{Kim2023}, and Markov regime-switching mechanisms \citep{Lai2024}---each of which complicates estimation and risks overfitting in moderate samples. Second, it develops a fair comparison framework following \citet{Hansen2005} and \citet{Patton2011}: all forecasts are converted to a common target ($\sigma^2_{\text{full}} = r^2_{\text{overnight}} + r^2_{\text{intraday}}$), revealing that previously documented HAR dominance over GJR is largely a target-mismatch artifact (DM $t = 0.57$ on the common target)---an evaluation methodology bias systematically obscured in prior literature. Third, it provides cross-asset evidence spanning six markets, all surpassing the \citet{Harvey2016} threshold of $|t| > 3.0$.
+The PRG model makes three contributions. First, it introduces a single GARCH recursion with session-periodic parameters (6--8 total), where the conditional variance from one session carries directly into the next---creating a \emph{session-boundary information transfer}. Second, it develops a fair comparison framework following \citet{Hansen2005} and \citet{Patton2011}: all forecasts are converted to a common target ($\sigma^2_{\text{full}} = r^2_{\text{overnight}} + r^2_{\text{intraday}}$), revealing that previously documented HAR dominance over GJR is largely a target-mismatch artifact (DM $t = 0.57$ on the common target). Third, it provides cross-asset evidence spanning six markets, all surpassing the \citet{Harvey2016} threshold of $|t| > 3.0$.
 
 
 %% =====================================================================
@@ -91,7 +91,7 @@ The Periodic Realized GARCH operates a single variance recursion that alternates
     h_n = \omega_{s_n} + \alpha_{s_n} \, x_{n-1} + \beta_{s_n} \, h_{n-1},
     \label{eq:prg_basic}
 \end{equation}
-where $h_n = E[r^2_n \mid \mathcal{F}_{n-1}]$ is the conditional variance for session $n$, and $(\omega_s, \alpha_s, \beta_s)$ are session-specific parameters. The label ``Realized'' here denotes that the session-frequency squared return $x_n = r^2_n$ is a realized (observed) volatility proxy entering the recursion, distinct from the daily Realized GARCH framework of \citet{Hansen2012} that augments a GARCH equation with a high-frequency realized variance measurement equation. The information set $\mathcal{F}_{n-1} = \sigma(r_1, \ldots, r_{n-1})$ contains all returns from sessions that have \emph{completed} before session $n$ begins. Crucially, sessions are temporally ordered: the overnight session closes before the intraday session opens. When $n$ indexes an intraday session, $\mathcal{F}_{n-1}$ includes the just-completed overnight return $r_{n-1}$, so $x_{n-1} = r^2_{n-1}$ is a realized quantity---not a forecast. This session-by-session conditioning is what creates a cross-session information bridge with only 6 parameters total. We assume $r_n \mid \mathcal{F}_{n-1} \sim N(0, h_n)$; all parameters are estimated by maximizing the Gaussian quasi-log-likelihood, which produces consistent estimates even under non-Gaussian innovations \citep{Bollerslev1996}.
+where $h_n = E[r^2_n \mid \mathcal{F}_{n-1}]$ is the conditional variance for session $n$, and $(\omega_s, \alpha_s, \beta_s)$ are session-specific parameters. The information set $\mathcal{F}_{n-1} = \sigma(r_1, \ldots, r_{n-1})$ contains all returns from sessions that have \emph{completed} before session $n$ begins. Crucially, sessions are temporally ordered: the overnight session closes before the intraday session opens. When $n$ indexes an intraday session, $\mathcal{F}_{n-1}$ includes the just-completed overnight return $r_{n-1}$, so $x_{n-1} = r^2_{n-1}$ is a realized quantity---not a forecast. This session-by-session conditioning is what creates a cross-session information bridge with only 6 parameters total. We assume $r_n \mid \mathcal{F}_{n-1} \sim N(0, h_n)$; all parameters are estimated by maximizing the Gaussian quasi-log-likelihood, which produces consistent estimates even under non-Gaussian innovations \citep{Bollerslev1996}.
 
 The PRG Extended specification adds a leverage term:
 \begin{equation}
@@ -119,9 +119,7 @@ The session ordering dictates a two-phase forecasting protocol for full-day vari
     = \omega_{1} + \alpha_{1}\, r^2_{d,0} + \gamma_{1}\, r^2_{d,0}\, \mathbb{1}(r_{d,0} < 0) + \beta_{1}\, \hat{h}_{d,0}.
     \label{eq:prg_in_forecast}
 \end{align}
-Equation~(\ref{eq:prg_ov_forecast}) is a standard one-step-ahead forecast issued at the day-$(d-1)$ close. Equation~(\ref{eq:prg_in_forecast}) is a \emph{conditional} forecast issued at the day-$d$ open: the input $r^2_{d,0}$ is the realized (not forecasted) overnight squared return and is therefore an element of $\mathcal{F}_{d}^{\,o}$. This timing convention is standard in the session-based volatility literature \citep{Linton2020,Opschoor2021} and mirrors how overnight information is exploited in practice: a market participant observes the realized overnight return at the day-$d$ open and adjusts risk exposure or initiates positions at the opening price accordingly. Acting at the open on fully realized overnight information is a legitimate and routinely implementable timing convention, not a look-ahead construct.
-
-Practical implementation requires only two conditions: (i) the overnight return is observed at the session boundary, and (ii) the intraday forecast update is computed before the first tradable opening price. Both conditions are routinely satisfied in modern exchange infrastructure, where opening prints are published in sub-milliseconds and standard volatility-targeting systems complete the update within the opening auction window. The timing protocol is therefore directly implementable in live risk-management workflows without specialized execution technology. The full-day forecast is the sum
+Equation~(\ref{eq:prg_ov_forecast}) is a standard one-step-ahead forecast issued at the day-$(d-1)$ close. Equation~(\ref{eq:prg_in_forecast}) is a \emph{conditional} forecast issued at the day-$d$ open: the input $r^2_{d,0}$ is the realized (not forecasted) overnight squared return and is therefore an element of $\mathcal{F}_{d}^{\,o}$. This timing convention is standard in the session-based volatility literature \citep{Linton2020,Opschoor2021} and mirrors how overnight information is exploited in practice: a market participant observes the realized overnight return at the day-$d$ open and adjusts risk exposure or initiates positions at the opening price accordingly. Acting at the open on fully realized overnight information is a legitimate and routinely implementable timing convention, not a look-ahead construct. In practical implementation the two-phase recursion requires only that (i) the overnight return be observed at the session boundary---automatically available in all exchanges publishing opening prints---and (ii) the intraday forecast update be computed before the first tradable opening price; modern exchange infrastructure provides sub-millisecond opening prints and standard volatility-targeting systems complete the update within the opening auction window, so the timing protocol is directly implementable in live risk-management workflows without specialized execution technology. The full-day forecast is the sum
 \begin{equation}
     \hat{\sigma}^2_{\text{full},d} = \hat{h}_{d,0} + \hat{h}_{d,1},
     \label{eq:prg_fullday}
@@ -236,9 +234,7 @@ PRG-Ablated            & 0.864 & $-$0.57      & 0.474 & 0.264 \\[2pt]
 \end{flushleft}
 \end{table}
 
-The result is striking: removing the session-boundary update causes QLIKE to deteriorate from 0.748 to 0.864, and the DM statistic against GJR collapses from $6.00$ to $-0.57$---a swing of $6.57$ standard deviations. The ablated PRG is statistically indistinguishable from GJR, confirming that the session-boundary information transfer is the sole driver of PRG's forecasting advantage. The Mincer--Zarnowitz $R^2$ drops from 0.464 to 0.264, indicating that the cross-session update explains nearly half of the variance captured by the full model.
-
-\paragraph{Cross-market generalization.} We report the explicit ablation on SPY because it provides the longest continuous high-quality OHLC sample and a well-studied benchmark. However, the PRG-vs-Separate-GARCH comparisons in Table~\ref{tab:main_results} serve as the \emph{implicit} cross-market ablation: Separate GARCH uses identical session-specific parameterization but lacks the cross-session information bridge, so the PRG-vs-Separate gap isolates exactly the bridge effect. The Harvey-significant gaps span DM $t = -4.07$ (TAIFEX) to $-6.69$ (SPY) across all six markets, confirming that the SPY ablation result generalizes.
+The result is striking: removing the session-boundary update causes QLIKE to deteriorate from 0.748 to 0.864, and the DM statistic against GJR collapses from $6.00$ to $-0.57$---a swing of $6.57$ standard deviations. The ablated PRG is statistically indistinguishable from GJR, confirming that the session-boundary information transfer is the sole driver of PRG's forecasting advantage. The Mincer--Zarnowitz $R^2$ drops from 0.464 to 0.264, indicating that the cross-session update explains nearly half of the variance captured by the full model. We report the ablation on SPY because it provides the longest continuous high-quality OHLC sample and a well-studied benchmark; the PRG-vs-Separate-GARCH comparisons in Table~\ref{tab:main_results} (DM $t = -4.07$ to $-6.69$ across all six markets, including TAIFEX) serve as the implicit cross-market ablation, since Separate GARCH uses identical session-specific parameterization but lacks the cross-session information bridge. The consistency of Harvey-significant PRG-vs-Separate gaps across markets confirms that the SPY ablation result generalizes.
 
 \subsection{VaR and Expected Shortfall evaluation}
 
@@ -294,47 +290,11 @@ PRG Extended    & 1.66 & 23.6 & $-$11.5 & 1.65 \\
 \end{tabular}
 \begin{flushleft}
 \footnotesize
-\emph{Notes:} Sharpe and Sortino ratios are annualized. CAGR is the compound annual growth rate. MDD is the maximum drawdown, reported as a negative percentage by convention (more negative values indicate deeper drawdowns). The VT strategy scales exposure inversely to conditional volatility, with a cap at 100\% weight. Average daily turnover ranges from 4.5\% (HAR) to 6.6\% (GJR), implying roughly 1{,}100--1{,}650\% annualized two-way turnover. At a conservative TAIFEX TX one-way cost of $\sim$1.5--2.5 basis points (including exchange fees and typical bid--ask half-spread), this translates to an annual TX cost drag of approximately 35--80 bps. Deducting 35 bps uniformly leaves the PRG Extended Sharpe at $\sim$1.63 (versus 1.66 gross) and preserves the ordering across all five rows: PRG Extended's economic advantage over buy-and-hold and over GJR/HAR benchmarks is robust to realistic execution costs. Position rebalancing is executed at the day-$d$ open, using the PRG full-day variance forecast from Eq.~(\ref{eq:prg_fullday}); this timing is implementable in practice, as the realized overnight return entering $\hat{h}_{d,1}$ is observed at the open and the opening price itself is a tradable reference.
+\emph{Notes:} Sharpe and Sortino ratios are annualized. CAGR is the compound annual growth rate. MDD is the maximum drawdown. The VT strategy scales exposure inversely to conditional volatility, with a cap at 100\% weight. Average daily turnover ranges from 4.5\% (HAR) to 6.6\% (GJR), implying roughly 1{,}100--1{,}650\% annualized two-way turnover. At a conservative TAIFEX TX one-way cost of $\sim$1.5--2.5 basis points (including exchange fees and typical bid--ask half-spread), this translates to an annual TX cost drag of approximately 35--80 bps. Deducting 35 bps uniformly leaves the PRG Extended Sharpe at $\sim$1.63 (versus 1.66 gross) and preserves the ordering across all five rows: PRG Extended's economic advantage over buy-and-hold and over GJR/HAR benchmarks is robust to realistic execution costs. Position rebalancing is executed at the day-$d$ open, using the PRG full-day variance forecast from Eq.~(\ref{eq:prg_fullday}); this timing is implementable in practice, as the realized overnight return entering $\hat{h}_{d,1}$ is observed at the open and the opening price itself is a tradable reference.
 \end{flushleft}
 \end{table}
 
 The PRG Extended strategy achieves a Sharpe ratio of 1.66 with a maximum drawdown of only $-11.5\%$, compared to 1.01 and $-31.7\%$ for buy-and-hold. This represents a 64\% improvement in risk-adjusted returns alongside a 64\% reduction in tail risk. The improvement arises because PRG's session-specific forecasts more accurately detect intraday volatility spikes that trigger timely position reductions.
-
-\subsection{Fair-information benchmark: GJR-X}
-\label{sec:gjrx}
-
-To isolate whether PRG's advantage stems from session-level information access or from the session-bridge architecture itself, we estimate a fair-information benchmark---GJR augmented with the lagged overnight squared return as an exogenous regressor (denoted GJR-X)---on the SPY out-of-sample window ($n=1{,}823$, 2019-01-02 to 2026-04-08). The conditional variance equation is
-\begin{equation}
-    h_t = \omega + \alpha\, r^2_{t-1} + \gamma\, \mathbb{1}(r_{t-1} < 0)\, r^2_{t-1} + \beta\, h_{t-1} + \delta\, r^2_{\text{overnight},t-1},
-    \label{eq:gjrx}
-\end{equation}
-where $r^2_{\text{overnight},t-1}$ is the lagged overnight squared return. By construction, PRG and GJR-X consume identical session-level information; only the architecture differs.
-
-Table~\ref{tab:gjrx} reports OOS QLIKE losses and pairwise Diebold--Mariano tests. PRG Extended yields the lowest QLIKE (0.7559), followed by standard GJR (0.8544) and GJR-X (0.8607). The GJR-X-vs-GJR comparison yields DM $t = -0.53$ (not significant), indicating that the exogenous-regressor structure is not out-of-sample robust despite an in-sample log-likelihood ratio test that is decisive ($\hat{\delta} = 0.13$, $\mathrm{LR} = 49.37$, $p < 0.0001$ over 4{,}778 in-sample days with 16 random initializations). PRG-vs-GJR-X yields DM $t = 7.72$ ($p = 1.84 \times 10^{-14}$, Harvey PASS), the strongest single DM statistic in the paper. The asymmetry---in-sample significance for $\delta$ but no out-of-sample improvement, alongside PRG's decisive OOS dominance over GJR-X---demonstrates that PRG's advantage cannot be reduced to overnight information access. The session-level recursion architecture itself, not the information set, drives the forecasting gain.
-
-\begin{table}[ht]
-\centering
-\caption{Fair-information GJR-X benchmark (SPY OOS, $n=1{,}823$)}
-\label{tab:gjrx}
-\small
-\begin{tabular}{lcc}
-\toprule
-Comparison & DM $t$-statistic & Harvey verdict \\
-\midrule
-GJR-X vs GJR          & $-0.53$       & FAIL \\
-PRG Extended vs GJR   & $5.24^{***}$  & PASS \\
-PRG Extended vs GJR-X & $7.72^{***}$  & PASS \\
-\midrule
-\multicolumn{1}{l}{Model} & \multicolumn{2}{c}{OOS QLIKE} \\
-\midrule
-GJR (close-to-close)        & \multicolumn{2}{c}{0.8544} \\
-GJR-X (overnight regressor) & \multicolumn{2}{c}{0.8607} \\
-PRG Extended                & \multicolumn{2}{c}{\textbf{0.7559}} \\
-\bottomrule
-\end{tabular}
-\\[4pt]
-\emph{Notes:} OOS period 2019-01-02 to 2026-04-08; loss function is QLIKE; DM tests use Newey--West HAC standard errors with \citet{Harvey1997} small-sample correction; the Harvey threshold is $|t|>3.0$ \citep{Harvey2016}. ${}^{***}$ denotes Harvey PASS. In-sample LR test for the GJR-X exogenous regressor: $\hat{\delta}=0.13$, $\mathrm{LR}=49.37$, $p<0.0001$ ($n_{\text{IS}}=4{,}778$ days, $n_{\text{starts}}=16$).
-\end{table}
 
 
 %% =====================================================================
@@ -348,7 +308,7 @@ An important methodological consideration is that the PRG and GJR models operate
 
 The PRG simplifies the PRS model of \citet{Lai2024} by replacing Markov switching with a deterministic session index. The switching is observed, not latent, eliminating the Hamilton filter and avoiding well-known GARCH--Markov estimation difficulties \citep{Haas2004}. Compared to the coupled DCS-EGARCH of \citet{Linton2020} ($\sim$12 parameters) and the Overnight GARCH-It\^{o} of \citet{Kim2023} ($\sim$10 parameters requiring continuous-time estimation), the PRG achieves competitive or superior forecasting with 6--8 parameters and standard MLE.
 
-Three limitations merit acknowledgment. First, the OHLC-based session decomposition uses squared returns rather than realized variance; tick-level validation for U.S. markets would strengthen the conclusions, though our TAIFEX tick-level analysis indicates that tick-level realized variance and the OHLC-based proxy yield quantitatively similar PRG estimates and the same DM $t$-ranking, mitigating this concern for markets with comparable session microstructure. Second, the VT strategy results do not account for transaction costs; the Table~\ref{tab:economic} footnote quantifies the expected drag at roughly 35--80 bps per annum under conservative TAIFEX execution assumptions, which preserves the PRG Extended ordering against all benchmarks and against buy-and-hold. Third, the fair-information GJR-X benchmark in Section~\ref{sec:gjrx} is currently estimated only for SPY; cross-asset GJR-X extension to the remaining five markets is left for follow-up work. The SPY result aligns with \citet{Todorova2014} and \citet{Opschoor2021}, who report that session-level parameterization dominates exogenous overnight regressors for realized variance and tail-risk forecasting.
+Three limitations merit acknowledgment. First, the OHLC-based session decomposition uses squared returns rather than realized variance; tick-level validation for U.S. markets would strengthen the conclusions, though the TAIFEX tick-level analysis in Section~4.5 already confirms that tick-level realized variance and the OHLC-based proxy yield quantitatively similar PRG estimates and the same DM $t$-ranking, mitigating this concern for markets with comparable session microstructure. Second, the VT strategy results do not account for transaction costs; the Table~\ref{tab:economic} footnote quantifies the expected drag at roughly 35--80 bps per annum under conservative TAIFEX execution assumptions, which preserves the PRG Extended ordering against all benchmarks and against buy-and-hold. Third, while we do not directly benchmark PRG against a GJR augmented with overnight returns as an exogenous regressor (GJR-X), prior evidence suggests the expected ordering. \citet{Todorova2014} find that modeling overnight and intraday components separately---rather than collapsing overnight information into a single regressor---yields superior realized variance forecasts, and \citet{Opschoor2021} reach an analogous conclusion in their score-driven realized variance framework: session-level parameterization dominates exogenous overnight regressors for VaR and ES forecasting. PRG's single-recursion, session-specific structure operationalizes precisely this parameterization advantage, and a direct GJR-X comparison is left for future work.
 
 
 %% =====================================================================
@@ -376,12 +336,6 @@ The PRG extends the Periodic Regime-Switching (PRS) model of \citet{Lai2024} by 
 Acerbi, C. and Szekely, B. (2014).
 \newblock Back-testing expected shortfall.
 \newblock \emph{Risk}, 27(11), 76--81.
-
-\bibitem[Blanc et~al.(2014)]{Blanc2014}
-Blanc, P., Chicheportiche, R., and Bouchaud, J.-P. (2014).
-\newblock The fine structure of volatility feedback II: Overnight and intra-day effects.
-\newblock \emph{Physica A}, 402, 58--75.
-\newblock \url{https://doi.org/10.1016/j.physa.2014.01.047}
 
 \bibitem[Bollerslev and Ghysels(1996)]{Bollerslev1996}
 Bollerslev, T. and Ghysels, E. (1996).
@@ -437,11 +391,11 @@ Hansen, P.~R., Lunde, A., and Nason, J.~M. (2011).
 \newblock \emph{Econometrica}, 79(2), 453--497.
 \newblock \url{https://doi.org/10.3982/ECTA5771}
 
-\bibitem[Hansen et~al.(2012)]{Hansen2012}
-Hansen, P.~R., Huang, Z., and Shek, H.~H. (2012).
-\newblock Realized GARCH: A joint model for returns and realized measures of volatility.
-\newblock \emph{Journal of Applied Econometrics}, 27(6), 877--906.
-\newblock \url{https://doi.org/10.1002/jae.1234}
+\bibitem[Harvey et~al.(2016)]{Harvey2016}
+Harvey, C.~R., Liu, Y., and Zhu, H. (2016).
+\newblock ...and the cross-section of expected returns.
+\newblock \emph{The Review of Financial Studies}, 29(1), 5--68.
+\newblock \url{https://doi.org/10.1093/rfs/hhv059}
 
 \bibitem[Harvey et~al.(1997)]{Harvey1997}
 Harvey, D., Leybourne, S., and Newbold, P. (1997).
@@ -449,17 +403,18 @@ Harvey, D., Leybourne, S., and Newbold, P. (1997).
 \newblock \emph{International Journal of Forecasting}, 13(2), 281--291.
 \newblock \url{https://doi.org/10.1016/S0169-2070(96)00719-4}
 
-\bibitem[Harvey et~al.(2016)]{Harvey2016}
-Harvey, C.~R., Liu, Y., and Zhu, H. (2016).
-\newblock ...and the cross-section of expected returns.
-\newblock \emph{The Review of Financial Studies}, 29(1), 5--68.
-\newblock \url{https://doi.org/10.1093/rfs/hhv059}
+\bibitem[Lai et~al.(2024)]{Lai2024}
+Lai, Y.-H., Wang, Y.-C., and Chang, Y.-C. (2024).
+\newblock Forecasting trading-session return volatility in Taiwan futures market:
+A periodic regime switching with jump approach.
+\newblock \emph{Asia-Pacific Financial Markets}, 31(2), 285--305.
+\newblock \url{https://doi.org/10.1007/s10690-023-09415-w}
 
-\bibitem[Kim et~al.(2023)]{Kim2023}
-Kim, D., Shin, M., and Wang, Y. (2023).
-\newblock Overnight GARCH-It\^{o} volatility models.
-\newblock \emph{Journal of Business \& Economic Statistics}, 41(4), 1215--1227.
-\newblock \url{https://doi.org/10.1080/07350015.2022.2116027}
+\bibitem[Blanc et~al.(2014)]{Blanc2014}
+Blanc, P., Chicheportiche, R., and Bouchaud, J.-P. (2014).
+\newblock The fine structure of volatility feedback II: Overnight and intra-day effects.
+\newblock \emph{Physica A}, 402, 58--75.
+\newblock \url{https://doi.org/10.1016/j.physa.2014.01.047}
 
 \bibitem[Kupiec(1995)]{Kupiec1995}
 Kupiec, P.~H. (1995).
@@ -467,12 +422,11 @@ Kupiec, P.~H. (1995).
 \newblock \emph{The Journal of Derivatives}, 3(2), 73--84.
 \newblock \url{https://doi.org/10.3905/jod.1995.407942}
 
-\bibitem[Lai et~al.(2024)]{Lai2024}
-Lai, Y.-H., Wang, Y.-C., and Chang, Y.-C. (2024).
-\newblock Forecasting trading-session return volatility in Taiwan futures market:
-A periodic regime switching with jump approach.
-\newblock \emph{Asia-Pacific Financial Markets}, 31(2), 285--305.
-\newblock \url{https://doi.org/10.1007/s10690-023-09415-w}
+\bibitem[Kim et~al.(2023)]{Kim2023}
+Kim, D., Shin, M., and Wang, Y. (2023).
+\newblock Overnight GARCH-It\^{o} volatility models.
+\newblock \emph{Journal of Business \& Economic Statistics}, 41(4), 1215--1227.
+\newblock \url{https://doi.org/10.1080/07350015.2022.2116027}
 
 \bibitem[Linton and Wu(2020)]{Linton2020}
 Linton, O. and Wu, J. (2020).
@@ -496,7 +450,6 @@ Patton, A.~J. (2011).
 Todorova, N. and Soucek, M. (2014).
 \newblock Overnight information flow and realized volatility forecasting.
 \newblock \emph{Finance Research Letters}, 11(4), 420--428.
-\newblock \url{https://doi.org/10.1016/j.frl.2014.07.001}
 
 \end{thebibliography}
 
