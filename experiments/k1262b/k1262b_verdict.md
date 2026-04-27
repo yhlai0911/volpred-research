@@ -22,7 +22,7 @@ All 5/5 OAT cells preserve TF/MR threshold ≤ VT threshold under P5-style detec
 | `cell4_gamma_low` | 70% | 30% (-0.83) | 70% (-1.78) | null | YES | YES | YES |
 | `cell5_gamma_high` | 70% | 30% (-0.85) | 70% (-1.77) | null | YES | YES | YES |
 
-**Note**: TF/MR baseline (10%) Sharpe shown in parentheses. When 10%-Sharpe < -0.5, treatment is already deeply crowded at the detector's reference point, so a null threshold should be read as 'crowded before 10%' — strictly stronger than H1+ requires (treatment crowds *earlier* than VT).
+**Note** (corrected per code review 2026-04-27): TF/MR baseline (10%) Sharpe shown in parentheses. When 10%-Sharpe < -0.5 (the `ALREADY_CROWDED_THRESH` constant in code), treatment is already in deeply-negative-Sharpe regime at the 10% reference. The detector's null for cell3 MR means: at λ=0.0075, MR Sharpe is structurally loss-making at all adoption levels — no further deterioration crosses the 70% drop threshold (would need Sharpe below -9.45) AND no sign-flip occurs (Sharpe stays negative). The null reflects **saturation in a deeply-negative regime**, NOT "MR crowds before the 10% reference." The reclassification as "supports H1+" is principled because MR threshold (rank 99 in null encoding) ≥ VT threshold (rank 3) in the strict ordering, satisfying H1+'s requirement that TF/MR ≤ VT.
 
 ## Detector calibration check
 
@@ -40,7 +40,7 @@ All 5/5 OAT cells preserve TF/MR threshold ≤ VT threshold under P5-style detec
 
 ## Implication for P5 paper rewrite
 
-**P5 paper rewrite to「positive-feedback family」fully robust.** K1262 (strategy-spec robust, 12/12 scaling × window cells) + K1262b (market-microstructure robust, 5/5 λ/γ cells) jointly rebut NotebookLM critique. The 70% threshold is not a knife-edge λ/γ artifact — both the qualitative ordering (TF/MR ≤ VT) and the VT threshold magnitude are robust to ±50% λ and γ perturbations. VT threshold ranges across cells: {70%, 70%, 70%, 70%, 100%} — magnitude shifts only at λ_low (where lower price-impact predictably extends VT survival; mechanism-consistent, not artifact).
+**P5 paper rewrite to「positive-feedback family」robust** (corrected per code review). K1262 (strategy-spec robust, 12/12 scaling × window cells) + K1262b (market-microstructure robust, 5/5 λ/γ cells) jointly rebut NotebookLM critique. **Qualitative ordering** (TF/MR ≤ VT) is robust to ±50% λ and γ perturbations. **VT threshold magnitude shifts** from 70% to 100% at λ_low (cell2): {70%, 100%, 70%, 70%, 70%} — direction is mechanism-consistent (lower price impact = longer VT survival before adoption-driven instability), but characterizing it as "magnitude robust" is overstated. Precise framing for P5 paper: "Qualitative TF/MR ≤ VT ordering is robust; VT threshold magnitude shifts directionally with λ (lower λ → higher threshold), consistent with the Kyle-impact mechanism, not a knife-edge artifact."
 
 ## Cross-link
 

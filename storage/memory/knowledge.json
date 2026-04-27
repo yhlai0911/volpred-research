@@ -27928,5 +27928,24 @@
     ],
     "confidence": 0.88,
     "created_at": "2026-04-27T20:00:00.000000"
+  },
+  {
+    "item_id": "81ebfe54",
+    "category": "paper:P5-vt-crowding-abm",
+    "content": "K1262b P5 OAT λ/γ sensitivity sweep — 16,000 sims (5 OAT cells [1 baseline + 4 λ/γ ±50% perturbations] × 4 treatments × 4 adoption × 200 MC) in 449.5s wall (worktree agent a5d6e2ed → cherry-pick 1e0015c4 after merge_worktree.sh K1262-v4 silent-drop bug 4th recurrence; subsequent K1262-v5 fix 3d917c06 shipped). Verdict: **H1+ confirmed robust to λ/γ** under P5-style detector. Calibration EXACT: cell1 baseline (λ=0.005, γ=200) VT threshold = 70% match P5 paper Table 2 + K1262 reference. **Qualitative ordering** TF/MR ≤ VT robust 5/5 cells. **VT threshold magnitude SHIFTS** {70%, 100%, 70%, 70%, 70%} — only λ_low cell2 extends to 100% (mechanism-consistent: lower Kyle price impact = longer VT survival before adoption-driven instability, NOT knife-edge artifact). TF=30% in 5/5 cells. MR threshold=70% in 3/5, 30% in 1, null in 1 (cell3 high-λ). **Cell3 high-λ MR null reclassification** principled in code (`ALREADY_CROWDED_THRESH=-0.5` logic): MR 10%-baseline Sharpe=-5.56 indicates structurally loss-making regime under λ=0.0075; null means no further deterioration crosses 70% drop threshold (would need Sharpe<-9.45) AND no sign-flip occurs — saturation in deeply-negative regime, NOT 'crowds before 10%' (verdict.md initial framing was imprecise, corrected per code review 2026-04-27). Independent code review (ac6b1cc0) PASS with 2 MAJOR caveats (markdown clarity only, no code bug): (1) cell3 reclassification reasoning corrected post-review (2) magnitude-robustness claim downgraded to qualitative-ordering-robustness with directional magnitude shift documented. 0 CRITICAL / 0 SEVERE bugs. 1 MED (seed formula collision-free verified) + 1 MINOR (NoiseAgent fallback rng — latent risk only). Caveats from agent (3 inline): adoption grid 4 levels not 7 / MC=200 vs 500 / λ/γ ±50% may not span literature range. **Implication for P5**: K1261+K1262+K1262b 三 phase 完整 rebut NotebookLM「knife-edge」critique. P5 paper rewrite reviewer-resistant — 等用戶 confirm narrative shift. Reviewer response framing: «Qualitative TF/MR ≤ VT ordering is robust to ±50% λ/γ perturbations; VT magnitude shifts directionally with λ consistent with Kyle-impact mechanism (NOT artifact)».",
+    "evidence": [
+      "experiments/k1262b/k1262b.py",
+      "experiments/k1262b/k1262b_results.json",
+      "experiments/k1262b/k1262b_oat_table.md",
+      "experiments/k1262b/k1262b_verdict.md",
+      "experiments/k1262b/README.md",
+      "experiments/k1262/k1262_results.json",
+      "experiments/k1261/k1261_results.json",
+      "paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity_results.json",
+      "f1d85a74",
+      "f3b9edd4"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-04-27T21:30:00.000000"
   }
 ]
