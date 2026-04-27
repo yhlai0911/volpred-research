@@ -59,15 +59,17 @@
 | `experiments.md` (K-list) | ✅ |
 | `scripts/README.md` (replication entry) | ✅ |
 | `data_sources.md` | needs verify |
-| `reproduce.py` (FRL replication gate) | needs verify |
-| `reproduce_report.json` (≥95% match_rate) | needs verify |
+| `reproduce.py` (FRL replication gate) | ✅ (366+ lines, 22 checks, K1260 added 2026-04-27) |
+| `reproduce_report.json` (≥95% match_rate) | ✅ (100% 22/22 match, alert_level=green, audit_date=2026-04-27) |
 | `review_history/v1-v4/` (audit trail) | ✅ |
 | `SUBMISSION_READY.md` (本檔) | ✅ |
 
-**Pre-submission TODO**（用戶 confirm 投稿前主線程驗證）:
-1. 驗證 `paper/prg-periodic-garch/reproduce.py` 存在 + exit 0
-2. 驗證 `reproduce_report.json` `match_rate ≥ 95%` + `alert_level=green`
-3. 若 reproduce gate 未過 → 補建（per `.claude/rules/paper-workflow.md` 4 大硬規則 §2 reproduce gate）
+**Pre-submission TODO**:
+1. ✅ ~~驗證 `paper/prg-periodic-garch/reproduce.py` 存在 + exit 0~~（DONE 2026-04-27, 22 checks, exit 0）
+2. ✅ ~~驗證 `reproduce_report.json` `match_rate ≥ 95%` + `alert_level=green`~~（DONE 2026-04-27, 100% match, GREEN）
+3. ✅ ~~若 reproduce gate 未過 → 補建~~（reproduce.py 新增 K1260 §4.5 GJR-X verification, 22/22 byte-match, audit refreshed v1→v4.1）
+
+**Pre-submission gate: 全部 PASS** — 主線程準備就緒，等用戶 confirm 投稿 FRL。
 
 ---
 

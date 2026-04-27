@@ -2,16 +2,16 @@
   "paper_id": "prg-periodic-garch",
   "paper_title": "Periodic Realized GARCH: Session-Boundary Information Transfers and Volatility Forecasting",
   "target_journal": "Finance Research Letters",
-  "audit_date": "2026-04-19",
-  "auditor": "reproduce.py (claude / Paper 6 Sub1 fix)",
+  "audit_date": "2026-04-27",
+  "auditor": "reproduce.py (claude / Paper 6 v4.1 ready_for_submission)",
   "mode": {
     "quick": false,
     "skip_live": true
   },
   "match_summary": {
-    "tables_verified": 2,
-    "checks_total": 15,
-    "checks_matched": 15,
+    "tables_verified": 3,
+    "checks_total": 22,
+    "checks_matched": 22,
     "overall_match_rate_pct": 100.0
   },
   "table2_main_results_check": {
@@ -151,6 +151,69 @@
     "reproduced_ablated_dm_vs_gjr": 0.0493,
     "note": "K880v2 is the ablated version (session-boundary update removed / lookahead-fix). Direction should roughly match paper's swing narrative: strong PRG advantage disappears."
   },
+  "table5_gjrx_check": {
+    "source_experiments": [
+      "K1260 (SPY fair-info GJR-X, stored)"
+    ],
+    "checks": [
+      {
+        "metric": "K1260 GJR QLIKE",
+        "paper_value": 0.8544,
+        "reproduced_value": 0.8544,
+        "rel_diff_pct": 0.0,
+        "tol_pct": 5.0,
+        "match": true
+      },
+      {
+        "metric": "K1260 GJR-X QLIKE",
+        "paper_value": 0.8607,
+        "reproduced_value": 0.8607,
+        "rel_diff_pct": 0.0,
+        "tol_pct": 5.0,
+        "match": true
+      },
+      {
+        "metric": "K1260 PRG_Extended QLIKE",
+        "paper_value": 0.7559,
+        "reproduced_value": 0.7559,
+        "rel_diff_pct": 0.0,
+        "tol_pct": 5.0,
+        "match": true
+      },
+      {
+        "metric": "K1260 DM_t (GJR-X vs GJR)",
+        "paper_value": -0.53,
+        "reproduced_value": -0.5309,
+        "rel_diff_pct": 0.16,
+        "tol_pct": 30.0,
+        "match": true
+      },
+      {
+        "metric": "K1260 DM_t (PRG vs GJR-X)",
+        "paper_value": 7.72,
+        "reproduced_value": 7.7249,
+        "rel_diff_pct": 0.06,
+        "tol_pct": 15.0,
+        "match": true
+      },
+      {
+        "metric": "K1260 IS LR delta_hat",
+        "paper_value": 0.13,
+        "reproduced_value": 0.1288,
+        "rel_diff_pct": 0.89,
+        "tol_pct": 10.0,
+        "match": true
+      },
+      {
+        "metric": "K1260 IS LR_stat",
+        "paper_value": 49.37,
+        "reproduced_value": 49.3711,
+        "rel_diff_pct": 0.0,
+        "tol_pct": 10.0,
+        "match": true
+      }
+    ]
+  },
   "alert_level": "green",
-  "actor_message_to_user": "GREEN: 15/15 = 100.0% match vs paper claims. Table 2: K880 (SPY), K881 (QQQ/GLD/EEM), K886 (0050.TW), K874d (TAIFEX stored). Table 3 ablation via K880v2."
+  "actor_message_to_user": "GREEN: 22/22 = 100.0% match vs paper claims. Table 2: K880 (SPY), K881 (QQQ/GLD/EEM), K886 (0050.TW), K874d (TAIFEX stored). Table 3 ablation via K880v2. Table 5 (\u00a74.5 fair-info GJR-X): K1260 (SPY OOS, stored)."
 }
