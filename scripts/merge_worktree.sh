@@ -346,9 +346,47 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>" 2>/dev/nul
                     fi
                 done <<< "$agent_exp_files"
                 if [[ $missing_files -eq 0 ]]; then
-                    echo "  [✓] 所有 experiments/ 檔案已正確合併"
+                    echo "  [✓] 所有 experiments/ 新增檔案已正確合併"
                 else
                     echo "  [⚠️ WARNING] $missing_files 個檔案遺漏！請手動檢查"
+                fi
+            fi
+
+            # K1261-v3 (2026-04-27): 檢查 -X ours 是否靜默 drop 了 agent 對既有檔的修改
+            # K1032 教訓 framing 限於 shared JSON, 但同 root cause 對 experiments/ 內 fork 檔同樣坑：
+            # 主線程已 commit skeleton, agent 修改同檔 → -X ours 取 main = agent 版本 silent drop。
+            local agent_modified_files
+            agent_modified_files=$(git log --diff-filter=M --name-only --pretty=format: "$main_branch_orig..$branch" -- "experiments/" 2>/dev/null | grep -v '^$' | sort -u || true)
+            if [[ -n "$agent_modified_files" ]]; then
+                local ours_dropped=0
+                local dropped_files=""
+                while IFS= read -r mod_file; do
+                    [[ -z "$mod_file" ]] && continue
+                    # 比較 main HEAD（merge 後）vs main_branch_orig（merge 前）：
+                    # - 若同 = -X ours 取 main = agent 修改靜默 drop
+                    # - 若異 = merge 取了 worktree 版本（或合併版本）= OK
+                    if git diff --quiet "$main_branch_orig" HEAD -- "$mod_file" 2>/dev/null; then
+                        # main HEAD 對此檔內容與 merge 前相同 → -X ours 取了 main → worktree 變更被 drop
+                        echo "  [🛑 -X ours DROPPED] $mod_file"
+                        echo "      Agent 修改了此檔但 main 版本被保留（worktree branch 對此檔的變更靜默丟失）"
+                        ours_dropped=$((ours_dropped + 1))
+                        dropped_files="$dropped_files $mod_file"
+                    fi
+                done <<< "$agent_modified_files"
+                if [[ $ours_dropped -gt 0 ]]; then
+                    echo ""
+                    echo "  🚨 ============================================="
+                    echo "  🚨 K1032/K1261 PATTERN: -X ours 靜默 drop $ours_dropped 個 modified file"
+                    echo "  🚨 不阻擋 merge（merge 已完成）但強烈建議手動恢復："
+                    for df in $dropped_files; do
+                        echo "  🚨   git checkout $branch -- $df"
+                    done
+                    echo "  🚨   git add$dropped_files"
+                    echo "  🚨   git commit -m \"fix: restore agent modifications dropped by -X ours\""
+                    echo "  🚨 ============================================="
+                    echo ""
+                else
+                    echo "  [✓] 所有 experiments/ modified files 都採 worktree 版本（無 silent drop）"
                 fi
             fi
         fi
