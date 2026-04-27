@@ -1,6 +1,6 @@
 # K1261 — P5 Non-VT Crowding ABM Ablation (Design Proposal)
 
-**Status**: 🟡 **DESIGN ONLY** — no code / no run yet。本 slot 主線程 design proposal，後續 slot dispatch worktree agent 實作 + 跑。
+**Status**: ✅ **Phase 1.0 sanity PASS (2026-04-27)** — worktree agent (a5229c1e09551ce2f) implemented 4 strategy classes + ran VT_baseline × 7 adoption × 100 MC = 700 sims (25.4s wall). **Byte-exact single-seed cross-check vs K827v3: diff=0.000000**（ann_return / ann_vol / kurtosis / vt_sharpe / vix_spike_pct / final_price all match）。z-score gate 7/7 PASS（all cells |z|<2 within MC sampling noise）。Implementation file `k1261_non_vt_ablation.py` (38KB), sanity results `k1261_sanity_results.json` (42KB), full verdict in `k1261_sanity_verification.md`。**Ready for Phase 1 scale-up** (4 treatments × 7 × 500 = 14,000 sims, ~22-44 hr wall) — 待下一輪 dispatch.
 
 **Date proposed**: 2026-04-27
 **Target paper**: P5 vt-crowding-abm
