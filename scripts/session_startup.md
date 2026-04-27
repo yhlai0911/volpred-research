@@ -83,20 +83,25 @@ scripts/install_scheduler_cron.sh
 
 **2026-04-18 回復 4/11 版本 — supervisor 3-terminal workflow 已廢棄。**
 
-### 2.0 Session 啟動前：replay pending_sessions.json（2026-04-25）
+### 2.0 Session 啟動前：replay pending_sessions.json（2026-04-25, 2026-04-27 新增 helper script）
 
-新 session 開啟時**先讀** `storage/ops/pending_sessions.json`。該檔由 host-cron piggy-back（每小時 `check_alerts` → `run_due_jobs`）記錄 session 關閉期間「原本應該 session cron 觸發但沒跑」的 job。replay 流程：
+新 session 開啟時**第一步**跑：
 
 ```bash
-jq '.jobs | to_entries | map(select(.value.replayed_at == null or .value.recorded_at > .value.replayed_at)) | map({id: .key, cron: .value.cron, prompt: .value.prompt})' storage/ops/pending_sessions.json
+uv run python scripts/session_replay_pending.py
 ```
 
-對每個 pending job：
-1. 判斷是否仍須 replay（ndc 這類月頻可能已過期；continue_task 這類高頻可合併只跑 1 次）
-2. 主線程執行對應 maintain prompt（或等效動作）
-3. **標記 replayed**：將該 job 的 `replayed_at` 更新為當下 UTC ISO（主線程用 jq/Edit 更新）
+該 script 自動 mark 所有 `recorded_count > 0` 且 `replayed_at < recorded_at` 的 job `replayed_at = now`。session 內 in-process cron 會自動 fire 高頻 cron（continue_task / question_research 等）— mark 等於聲明「session 已 catch up」，piggy-back recorder 不再重複累積同 window。
 
-跳過 replay 的情境：`pending.jobs[id].recorded_count == 0`（從未 fire）或所有 job `replayed_at >= recorded_at`（session 關得短）。
+**Edge case（低頻 cron）**: ndc-indicator-maintain (月頻) 等若有 pending fire 表示真實 missed work — 主線程必先執行對應 maintain command，再跑 script mark replayed。Dry-run 先 audit：
+
+```bash
+uv run python scripts/session_replay_pending.py --dry-run
+```
+
+歷史背景（2026-04-27 修流程 incident）：本 SOP 原為主線程手動 jq + Edit 更新 replayed_at，缺乏 enforcement → 連續 3 天 session 啟動沒人跑 replay → pending_sessions.json 累積 110 個 missed fire（continue_task=52 / git_sync=12 / 等）即使 session active 期間 in-process cron 已實質 catch up。Helper script automate 此 step 後，主線程只需記得「啟動跑一次」即可，不必每次手 jq。
+
+該檔由 host-cron piggy-back（每小時 `check_alerts` → `run_due_jobs._write_pending_sessions`）記錄 session 關閉期間 due 但沒 fire 的 session_cron。每個 record 含 `recorded_at` (last fire window) + `replayed_at` (last main-thread acknowledge)。
 
 ```python
 CronCreate(cron="3 9 * * *", prompt="每日任務審視：執行 daily-planning-maintain --stub-if-no-work；若有 planning gap 再建立正式 task")
