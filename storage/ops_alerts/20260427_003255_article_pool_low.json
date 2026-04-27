@@ -1,0 +1,14 @@
+{
+  "timestamp": "2026-04-27T00:32:55Z",
+  "alert_type": "article_pool_low",
+  "severity": "critical",
+  "detail": "Total draft articles = 6, below threshold of 12. General audience drafts = 2 (threshold: 8). Research audience drafts = 4 (threshold: 4, boundary OK). Immediate action: commission general-audience articles to replenish pool.",
+  "thresholds": {
+    "total_min": 12,
+    "total_actual": 6,
+    "research_min": 4,
+    "research_actual": 4,
+    "general_min": 8,
+    "general_actual": 2
+  }
+}

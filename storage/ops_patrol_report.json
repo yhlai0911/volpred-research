@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-26T18:17:19Z",
+  "timestamp": "2026-04-27T00:32:55Z",
   "all_ok": false,
   "checks": [
     {
@@ -10,13 +10,14 @@
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json mtime ~2026-04-26T18:17:00Z, age ~19 seconds. Well within 26-hour threshold."
+      "detail": "storage/strategy_metrics.json age ~10s at check time. Well within 26-hour threshold."
     },
     {
       "name": "ERROR_LOG",
       "status": "alert",
-      "detail": "3 entries dated 2026-04-26 (today)",
+      "detail": "4 entries dated 2026-04-26 (yesterday)",
       "entries": [
+        "2026-04-26: Audience-content 錯位 silent publish — audience='general' article (mile_4fa40750) with research jargon + K-id tag pollution (9+ articles affected); publisher.py audit gate added, K-id moved to details.experiment_refs",
         "2026-04-26: knowledge-index-summary always returned status=broken due to lancedb list_tables() API shape change — patched with try-open pattern; status=fresh, 5337 entries confirmed",
         "2026-04-26: Member Q&A 5-day silent gap — q 29cbeb5c from yaoxk1431 stuck in evaluating; resolved with score=3, ranked; cron prompt + alerts updated",
         "2026-04-26: Codex CLI outdated — gpt-5.5 requires newer version, all codex dispatches 400-failing; fallback to main-thread read-only audit; Codex CLI upgrade pending"
@@ -41,6 +42,6 @@
   "alerts": [
     "article pool low (<12): total drafts = 6",
     "general audience article pool low (<8): general audience drafts = 2",
-    "error_log_today: 3 entries dated 2026-04-26 — lancedb API fix, member_qa 5-day gap resolved, Codex CLI gpt-5.5 incompatibility"
+    "error_log_yesterday: 4 entries dated 2026-04-26 — audience-content misalignment (publisher gate added), lancedb API fix, member_qa 5-day gap resolved, Codex CLI gpt-5.5 incompatibility"
   ]
 }
