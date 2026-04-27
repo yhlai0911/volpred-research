@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-27T06:17:48Z",
+  "timestamp": "2026-04-27T12:36:38Z",
   "all_ok": false,
   "checks": [
     {
@@ -10,12 +10,12 @@
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json age ~10s at check time. Well within 26-hour threshold."
+      "detail": "storage/strategy_metrics.json age ~36s at check time. Well within 26-hour threshold."
     },
     {
       "name": "ERROR_LOG",
       "status": "alert",
-      "detail": "3 entries visible in last 30 lines dated 2026-04-26 (yesterday); earlier entries may exist",
+      "detail": "3 entries visible in last 30 lines dated 2026-04-26 (yesterday)",
       "entries": [
         "2026-04-26: knowledge-index-summary always returned status=broken due to lancedb list_tables() API shape change — patched with try-open pattern; status=fresh, 5337 entries confirmed",
         "2026-04-26: Member Q&A 5-day silent gap — q 29cbeb5c from yaoxk1431 stuck in evaluating; resolved with score=3, ranked; cron prompt + alerts updated",
@@ -25,7 +25,7 @@
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "Checked 15 strategies. No strategy has >2 null portfolio_return values in the most recent 3 entries."
+      "detail": "Checked 15 strategies. All strategies have exactly 1 null in most recent 3 entries (latest day awaiting update). No strategy exceeds >2 null threshold. _market_daily has 0 entries."
     },
     {
       "name": "GIT_STATUS",
@@ -41,6 +41,6 @@
   "alerts": [
     "article pool low (<12): total drafts = 6",
     "general audience article pool low (<8): general audience drafts = 2",
-    "error_log_yesterday: 4 entries dated 2026-04-26 — audience-content misalignment (publisher gate added), lancedb API fix, member_qa 5-day gap resolved, Codex CLI gpt-5.5 incompatibility"
+    "error_log_yesterday: 3 entries dated 2026-04-26 — lancedb API fix, member_qa 5-day gap resolved, Codex CLI gpt-5.5 incompatibility"
   ]
 }
