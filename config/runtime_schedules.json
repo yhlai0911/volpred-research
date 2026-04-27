@@ -107,16 +107,15 @@
       {
         "id": "continue_task_stub",
         "label": "continue_task host fallback stub",
-        "cron": "*/30 * * * *",
+        "cron": "30 5 * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_continue_task_stub.sh",
         "log_path": "storage/logs/cron/continue_task_stub.log",
         "command_deprecated": "scripts/continue_task_stub.py",
-        "description": "每 50 分鐘執行 continue_task_stub（launchd 用 launchd_interval_minutes=50 cadence；cron `*/50` 在 cron 語法不正確會 reset 在 :00，故用 launchd 專屬 explicit minute/hour list 表達。User 2026-04-27 指定 30→50 min）。",
+        "description": "每日 05:30 UTC 跑 continue_task_stub 一次（host 心跳 + 給 check_alerts host_cron_fail 偵測用）。Session 離線時此 stub 寫 pending_continue.json，但 session resume 後 replay 只觸發 1 次 continue_task 補跑（不論離線期間 fire 過幾次），所以高頻 cadence 無價值。Active 50-min 繼續任務由 SESSION cron 處理（用戶 2026-04-27 指定 50min），離線時就讓它真的離線。",
         "matchers": [
           "scripts/continue_task_stub.py",
           "cron_continue_task_stub.sh"
-        ],
-        "launchd_interval_minutes": 50
+        ]
       },
       {
         "id": "memory_health_daily",
