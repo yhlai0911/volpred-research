@@ -11,9 +11,9 @@
 
 All from VolPred experiments (2015-02 ~ 2026-04, N=2,812 daily obs):
 
-- **K639** — Confirmed BTC → SPY RV Granger causality at lag 1-10.
-- **K746b** — BTC volatility asymmetrically Granger-causes VIX (negative-BTC branch dominates).
-- **K1025** — Full spillover framework: asymmetric Granger, quantile regression, rolling Diebold-Yilmaz spillover index, EWMA correlation by VIX regime, 5-subperiod structural change.
+- **K639** — Confirmed BTC → SPY RV Granger causality at lag 2-10 (lag 1 not significant, p=0.560; lag 2 p=0.024 onwards all p<0.05).
+- **K746b** — Reverse direction lemma: VIX → BTC absret Granger causality (lag 4-9 p<0.05) plus AIC-optimal lag selection + Andrews (1993) sup-Wald breakpoint test.
+- **K1025** — Primary spillover framework: asymmetric Granger (BTC negative-branch → VIX dominates; positive branch null), quantile regression, rolling Diebold-Yilmaz spillover index, EWMA correlation by VIX regime, 5-subperiod structural change.
 
 ## Central claim
 
@@ -65,8 +65,8 @@ All from VolPred experiments (2015-02 ~ 2026-04, N=2,812 daily obs):
 
 | Claim | Source | Key stat |
 |-------|--------|----------|
-| BTC downside Granger-causes VIX | K746b | F(5) = [from asymmetric_granger.btc_neg_to_vix] |
-| BTC upside does not | K746b | F(5) not significant |
+| BTC downside Granger-causes VIX | K1025 | F(5) = [from asymmetric_granger.btc_neg_to_vix] |
+| BTC upside does not | K1025 | F(5) not significant (asymmetric_granger.btc_pos_to_vix) |
 | Tail dependence amplification | K1025 | QR β ratio (τ=0.95 / τ=0.5) = 8.5× |
 | COVID-only Granger | K1025 | F(5)=11.05 in 2020; NS in other sub-periods |
 | Crisis correlation rise | K1025 | corr(BTC, SPY) by VIX regime |
