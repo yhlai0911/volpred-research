@@ -106,6 +106,6 @@ All from VolPred experiments (2015-02 ~ 2026-04, N=2,812 daily obs):
 - Engle, R.F. (2002). *JBES*, 20(3), 339-350. "Dynamic Conditional Correlation"
 - Koenker, R. & Bassett, G. (1978). *Econometrica*, 46(1), 33-50. "Regression Quantiles"
 - Harvey, C.R., Liu, Y., Zhu, H. (2016). *RFS*, 29(1), 5-68. "... and the Cross-Section of Expected Returns"
-- Bouri, E. et al. (2020). *Finance Research Letters*, 37, 101764. "Cryptocurrencies and stock market indices"
+- Bouri, E. et al. (2020). *The Quarterly Review of Economics and Finance*, 77, 156--164. "Bitcoin, gold, and commodities as safe havens for stocks: New insight through wavelet analysis" (DOI 10.1016/j.qref.2020.03.004; 之前 outline 誤標 FRL 37, 101764, lit review 2026-04-27 verified 修正)
 - Corbet, S. et al. (2018). *Economics Letters*, 165, 28-34. "Cryptocurrency reaction to FOMC Announcements"
 - Matkovskyy, R. & Jalan, A. (2019). *Finance Research Letters*, 31, 388-393.
