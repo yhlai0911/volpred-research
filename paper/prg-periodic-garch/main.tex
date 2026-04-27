@@ -91,7 +91,7 @@ The Periodic Realized GARCH operates a single variance recursion that alternates
     h_n = \omega_{s_n} + \alpha_{s_n} \, x_{n-1} + \beta_{s_n} \, h_{n-1},
     \label{eq:prg_basic}
 \end{equation}
-where $h_n = E[r^2_n \mid \mathcal{F}_{n-1}]$ is the conditional variance for session $n$, and $(\omega_s, \alpha_s, \beta_s)$ are session-specific parameters. The label ``Realized'' here denotes that the session-frequency squared return $x_n = r^2_n$ is a realized (observed) volatility proxy entering the recursion, distinct from the daily Realized GARCH framework of \citet{Hansen2012} that augments a GARCH equation with a high-frequency realized variance measurement equation. The information set $\mathcal{F}_{n-1} = \sigma(r_1, \ldots, r_{n-1})$ contains all returns from sessions that have \emph{completed} before session $n$ begins. Crucially, sessions are temporally ordered: the overnight session closes before the intraday session opens. When $n$ indexes an intraday session, $\mathcal{F}_{n-1}$ includes the just-completed overnight return $r_{n-1}$, so $x_{n-1} = r^2_{n-1}$ is a realized quantity---not a forecast. This session-by-session conditioning is what creates a cross-session information bridge with only 6 parameters total. We assume $r_n \mid \mathcal{F}_{n-1} \sim N(0, h_n)$; all parameters are estimated by maximizing the Gaussian quasi-log-likelihood, which produces consistent estimates even under non-Gaussian innovations \citep{Bollerslev1996}.
+where $h_n = E[r^2_n \mid \mathcal{F}_{n-1}]$ is the conditional variance for session $n$, and $(\omega_s, \alpha_s, \beta_s)$ are session-specific parameters. The label ``Realized'' here denotes that the session-frequency squared return $x_n = r^2_n$ is a realized (observed) volatility proxy entering the recursion, distinct from the daily Realized GARCH framework of \citet{Hansen2012} that augments a GARCH equation with a high-frequency realized variance measurement equation. The information set $\mathcal{F}_{n-1} = \sigma(r_1, \ldots, r_{n-1})$ contains all returns from sessions that have \emph{completed} before session $n$ begins. Crucially, sessions are temporally ordered: the overnight session closes before the intraday session opens. When $n$ indexes an intraday session, $\mathcal{F}_{n-1}$ includes the just-completed overnight return $r_{n-1}$, so $x_{n-1} = r^2_{n-1}$ is a realized quantity---not a forecast. This session-by-session conditioning is what creates a cross-session information bridge with only 6 parameters total. We assume $r_n \mid \mathcal{F}_{n-1} \sim N(0, h_n)$; all parameters are estimated by maximizing the Gaussian quasi-log-likelihood, which produces consistent estimates even under non-Gaussian innovations \citep{BollerslevWooldridge1992}.
 
 The PRG Extended specification adds a leverage term:
 \begin{equation}
@@ -310,7 +310,7 @@ To isolate whether PRG's advantage stems from session-level information access o
 \end{equation}
 where $r^2_{\text{overnight},t-1}$ is the lagged overnight squared return. By construction, PRG and GJR-X consume identical session-level information; only the architecture differs.
 
-Table~\ref{tab:gjrx} reports OOS QLIKE losses and pairwise Diebold--Mariano tests. PRG Extended yields the lowest QLIKE (0.7559), followed by standard GJR (0.8544) and GJR-X (0.8607). The GJR-X-vs-GJR comparison yields DM $t = -0.53$ (not significant), indicating that the exogenous-regressor structure is not out-of-sample robust despite an in-sample log-likelihood ratio test that is decisive ($\hat{\delta} = 0.13$, $\mathrm{LR} = 49.37$, $p < 0.0001$ over 4{,}778 in-sample days with 16 random initializations). PRG-vs-GJR-X yields DM $t = 7.72$ ($p = 1.84 \times 10^{-14}$, Harvey PASS), the strongest single DM statistic in the paper. The asymmetry---in-sample significance for $\delta$ but no out-of-sample improvement, alongside PRG's decisive OOS dominance over GJR-X---demonstrates that PRG's advantage cannot be reduced to overnight information access. The session-level recursion architecture itself, not the information set, drives the forecasting gain.
+Table~\ref{tab:gjrx} reports OOS QLIKE losses and the two K1260-specific Diebold--Mariano contrasts; the canonical PRG-vs-GJR comparison for SPY is reported in Table~\ref{tab:main_results} ($t = 6.00$). PRG Extended yields the lowest QLIKE (0.7559), followed by standard GJR (0.8544) and GJR-X (0.8607). The GJR-X-vs-GJR comparison yields DM $t = -0.53$ (not significant), indicating that the exogenous-regressor structure is not out-of-sample robust despite an in-sample log-likelihood ratio test that is decisive ($\hat{\delta} = 0.13$, $\mathrm{LR} = 49.37$, $p < 0.0001$ over 4{,}778 in-sample days, with 16 random initializations used in the LR diagnostic's internal grid search to verify basin stability). PRG-vs-GJR-X yields DM $t = 7.72$ ($p = 1.84 \times 10^{-14}$, Harvey PASS), the strongest single DM statistic in the paper. The asymmetry---in-sample significance for $\delta$ but no out-of-sample improvement, alongside PRG's decisive OOS dominance over GJR-X---demonstrates that PRG's advantage cannot be reduced to overnight information access. The session-level recursion architecture itself, not the information set, drives the forecasting gain.
 
 \begin{table}[ht]
 \centering
@@ -322,7 +322,6 @@ Table~\ref{tab:gjrx} reports OOS QLIKE losses and pairwise Diebold--Mariano test
 Comparison & DM $t$-statistic & Harvey verdict \\
 \midrule
 GJR-X vs GJR          & $-0.53$       & FAIL \\
-PRG Extended vs GJR   & $5.24^{***}$  & PASS \\
 PRG Extended vs GJR-X & $7.72^{***}$  & PASS \\
 \midrule
 \multicolumn{1}{l}{Model} & \multicolumn{2}{c}{OOS QLIKE} \\
@@ -333,7 +332,7 @@ PRG Extended                & \multicolumn{2}{c}{\textbf{0.7559}} \\
 \bottomrule
 \end{tabular}
 \\[4pt]
-\emph{Notes:} OOS period 2019-01-02 to 2026-04-08; loss function is QLIKE; DM tests use Newey--West HAC standard errors with \citet{Harvey1997} small-sample correction; the Harvey threshold is $|t|>3.0$ \citep{Harvey2016}. ${}^{***}$ denotes Harvey PASS. In-sample LR test for the GJR-X exogenous regressor: $\hat{\delta}=0.13$, $\mathrm{LR}=49.37$, $p<0.0001$ ($n_{\text{IS}}=4{,}778$ days, $n_{\text{starts}}=16$).
+\emph{Notes:} OOS period 2019-01-02 to 2026-04-08; loss function is QLIKE; DM tests use Newey--West HAC standard errors with \citet{Harvey1997} small-sample correction; the Harvey threshold is $|t|>3.0$ \citep{Harvey2016}. ${}^{***}$ denotes Harvey PASS. The canonical PRG-vs-GJR comparison for SPY is reported in Table~\ref{tab:main_results}; this fair-information table presents only the two contrasts unique to the GJR-X benchmark. In-sample LR test for the GJR-X exogenous regressor: $\hat{\delta}=0.13$, $\mathrm{LR}=49.37$, $p<0.0001$ ($n_{\text{IS}}=4{,}778$ days; $n_{\text{LR starts}}=16$ random initializations used in the LR diagnostic's internal grid search to verify basin stability, distinct from the model-estimation multistart counts).
 \end{table}
 
 
@@ -385,9 +384,15 @@ Blanc, P., Chicheportiche, R., and Bouchaud, J.-P. (2014).
 
 \bibitem[Bollerslev and Ghysels(1996)]{Bollerslev1996}
 Bollerslev, T. and Ghysels, E. (1996).
-\newblock Periodic autoregressive conditional heteroscedasticity.
+\newblock Periodic autoregressive conditional heteroskedasticity.
 \newblock \emph{Journal of Business \& Economic Statistics}, 14(2), 139--151.
 \newblock \url{https://doi.org/10.1080/07350015.1996.10524640}
+
+\bibitem[Bollerslev and Wooldridge(1992)]{BollerslevWooldridge1992}
+Bollerslev, T. and Wooldridge, J.~M. (1992).
+\newblock Quasi-maximum likelihood estimation and inference in dynamic models with time-varying covariances.
+\newblock \emph{Econometric Reviews}, 11(2), 143--172.
+\newblock \url{https://doi.org/10.1080/07474939208800229}
 
 \bibitem[Christoffersen(1998)]{Christoffersen1998}
 Christoffersen, P.~F. (1998).
@@ -492,8 +497,8 @@ Patton, A.~J. (2011).
 \newblock \emph{Journal of Econometrics}, 160(1), 246--256.
 \newblock \url{https://doi.org/10.1016/j.jeconom.2010.03.034}
 
-\bibitem[Todorova and Soucek(2014)]{Todorova2014}
-Todorova, N. and Soucek, M. (2014).
+\bibitem[Todorova and Sou\v{c}ek(2014)]{Todorova2014}
+Todorova, N. and Sou\v{c}ek, M. (2014).
 \newblock Overnight information flow and realized volatility forecasting.
 \newblock \emph{Finance Research Letters}, 11(4), 420--428.
 \newblock \url{https://doi.org/10.1016/j.frl.2014.07.001}
