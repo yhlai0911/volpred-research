@@ -19,7 +19,7 @@ SCRIPTS_DIR = PROJECT / "scripts"
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-from run_due_jobs import _job_is_due, _parse_iso  # noqa: E402
+from run_due_jobs import _job_is_due, _parse_iso, _write_pending_sessions  # noqa: E402
 
 TAIPEI = ZoneInfo("Asia/Taipei")
 
@@ -77,3 +77,51 @@ def test_parse_iso_handles_z_suffix_and_naive():
     assert _parse_iso("2026-04-20T00:00:00") is not None
     assert _parse_iso(None) is None
     assert _parse_iso("not-a-date") is None
+
+
+def test_write_pending_sessions_records_due_and_dedupes(tmp_path, monkeypatch):
+    """Session cron piggy-back writer: records due items, skips on re-scan
+    within same fire window. Replays on next fire after last_ref moves."""
+    import run_due_jobs as rdj
+
+    pending_path = tmp_path / "pending_sessions.json"
+    monkeypatch.setattr(rdj, "PENDING_SESSIONS_PATH", pending_path)
+
+    items = [
+        {"id": "daily_planning", "cron": "3 9 * * *", "prompt": "p1", "recurring": True, "description": "d1"},
+        {"id": "hourly_fake", "cron": "0 * * * *", "prompt": "p2", "recurring": True},
+        {"id": "oneshot_foo", "cron": "0 0 1 1 *", "prompt": "p3", "recurring": False},
+    ]
+
+    # 10:00 Mon CST — daily_planning fired at 09:03 today (in last 24h, due).
+    now_local = datetime(2026, 4, 20, 10, 0, tzinfo=TAIPEI)
+    now_utc = now_local.astimezone(timezone.utc)
+
+    r1 = _write_pending_sessions(items, last_run_state={}, now_local=now_local, now_utc=now_utc)
+    assert "daily_planning" in r1["recorded"]
+    assert "hourly_fake" in r1["recorded"]
+    assert "oneshot_foo" not in r1["recorded"]  # recurring=False → skipped
+    assert "oneshot_foo" not in r1["skipped"]
+
+    # Re-scan 5 min later (same fire window for daily_planning 9:03 and hourly_fake 10:00):
+    # daily_planning: prev_fire_today 09:03 < recorded_at 10:00 → not due → skip
+    # hourly_fake: prev_fire 10:00 < recorded_at 10:00? need newer now for re-fire
+    now2_local = datetime(2026, 4, 20, 10, 5, tzinfo=TAIPEI)
+    now2_utc = now2_local.astimezone(timezone.utc)
+    r2 = _write_pending_sessions(items, last_run_state={}, now_local=now2_local, now_utc=now2_utc)
+    assert "daily_planning" in r2["skipped"]  # already recorded this window
+    assert "daily_planning" not in r2["recorded"]
+
+    # Next day 10:00 — new daily_planning 09:03 fire happened, should re-record.
+    now3_local = datetime(2026, 4, 21, 10, 0, tzinfo=TAIPEI)
+    now3_utc = now3_local.astimezone(timezone.utc)
+    r3 = _write_pending_sessions(items, last_run_state={}, now_local=now3_local, now_utc=now3_utc)
+    assert "daily_planning" in r3["recorded"]
+
+    # Verify persisted schema
+    import json
+    data = json.loads(pending_path.read_text())
+    assert data["schema_version"] == 1
+    assert "daily_planning" in data["jobs"]
+    assert data["jobs"]["daily_planning"]["recorded_count"] >= 2
+    assert data["jobs"]["daily_planning"]["replayed_at"] is None

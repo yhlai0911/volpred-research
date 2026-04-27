@@ -1,0 +1,37 @@
+{
+  "timestamp": "2026-04-26T06:06:33Z",
+  "patrol_run": "20260426_060633",
+  "alerts": [
+    {
+      "type": "article_pool_low",
+      "severity": "high",
+      "message": "article pool low (<12): total drafts=7",
+      "detail": {
+        "total_drafts": 7,
+        "threshold": 12,
+        "research_drafts": 2,
+        "research_threshold": 4,
+        "general_drafts": 5,
+        "general_threshold": 8
+      }
+    },
+    {
+      "type": "article_pool_research_low",
+      "severity": "high",
+      "message": "research audience low (<4): research drafts=2",
+      "detail": {
+        "research_drafts": 2,
+        "research_threshold": 4
+      }
+    },
+    {
+      "type": "article_pool_general_low",
+      "severity": "medium",
+      "message": "general audience low (<8): general drafts=5",
+      "detail": {
+        "general_drafts": 5,
+        "general_threshold": 8
+      }
+    }
+  ]
+}

@@ -117,8 +117,8 @@ class MemorySystem:
 
         # Save individual result
         result_file = self.results_dir / f"{result.experiment_id}.json"
-        with open(result_file, "w") as f:
-            json.dump(record, f, indent=2, default=str)
+        with open(result_file, "w", encoding="utf-8") as f:
+            json.dump(record, f, indent=2, default=str, ensure_ascii=False)
 
         # Append to experiment index
         self._append_to_index("experiments.json", record)
@@ -212,8 +212,8 @@ class MemorySystem:
                 q["answered_at"] = datetime.now().isoformat()
                 break
         filepath = self.memory_dir / "open_questions.json"
-        with open(filepath, "w") as f:
-            json.dump(questions, f, indent=2, default=str)
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(questions, f, indent=2, default=str, ensure_ascii=False)
         self._sync_to_remote("open_questions.json")
 
     def get_open_questions(self, status: str | None = None) -> list[dict]:
@@ -262,8 +262,8 @@ class MemorySystem:
                 }
             )
         fcast_file = self.results_dir / f"{experiment_id}_forecasts.json"
-        with open(fcast_file, "w") as f:
-            json.dump(data, f, indent=2)
+        with open(fcast_file, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
 
     # --- Internal helpers ---
     def _append_to_index(self, filename: str, record: dict) -> None:
@@ -284,8 +284,8 @@ class MemorySystem:
                 data = self._load_index(filename)
                 data.append(record)
                 tmp_path = filepath.with_name(f".{filepath.name}.tmp")
-                with open(tmp_path, "w") as f:
-                    json.dump(data, f, indent=2, default=str)
+                with open(tmp_path, "w", encoding="utf-8") as f:
+                    json.dump(data, f, indent=2, default=str, ensure_ascii=False)
                 # Post-write sanity: reject write if result is not parseable (2026-04-17 guard)
                 with open(tmp_path) as f:
                     json.load(f)

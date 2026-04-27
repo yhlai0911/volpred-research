@@ -1,0 +1,36 @@
+{
+  "auto_compact_pct_override": 62,
+  "context_boundaries": {
+    "normal_max_pct": 55,
+    "compact_min_pct": 62,
+    "clear_min_pct": 70
+  },
+  "statusline_colors": {
+    "compact_warn_pct": 62,
+    "warn_pct": 75,
+    "danger_pct": 90
+  },
+  "session_health": {
+    "lifetime_cost_usd": 200.0,
+    "lifetime_hours": 24.0,
+    "cache_read_tokens": 1000000000,
+    "messages": 1500,
+    "active_window_minutes": 60
+  },
+  "canonical_sources": {
+    "runtime_schedules": "config/runtime_schedules.json",
+    "workflow_index": "docs/workflow-index.md",
+    "commands": [
+      ".claude/commands/task-start.md",
+      ".claude/commands/task-done.md",
+      ".claude/commands/research.md",
+      ".claude/commands/publish.md",
+      ".claude/commands/deploy.md"
+    ]
+  },
+  "guidance": {
+    "between_normal_and_compact": "Avoid opening a new noisy side task; prefer fork or compact first.",
+    "between_compact_and_clear": "Compact before starting a new workflow or loading a long skill.",
+    "above_clear": "Prefer clear or a new session when switching workflow families."
+  }
+}

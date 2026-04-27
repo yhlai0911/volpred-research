@@ -1,6 +1,6 @@
 # Session 啟動必建集（VS Code supervisor / worker terminals）
 
-SessionStart hook 會提醒讀這份。這裡只放**每次新 session 要執行的具體指令**——不是原則、不是教訓（那些留在 CLAUDE.md）。
+需要手動做 session 初始化、恢復或檢查 legacy cron 路徑時再讀這份。這裡只放**每次新 session 要執行的具體指令**——不是原則、不是教訓（那些留在 CLAUDE.md）。
 
 > **⚠️ 2026-04-19 架構更新（v12 canonical）**：3-terminal supervisor/worker workflow **已廢棄**（見 `.claude/rules/control-plane.md` + `docs/architecture.md`）。目前正式 runtime = **單一主線程 Claude Code + 按需 subagent dispatch**（claude general-purpose / codex-rescue）。下方第 0 段「三終端機」+ 第 1 段「session-bootstrap 指令」**保留作為歷史 reference 不刪除**（某些 legacy path 仍讀 `storage/ops/agents/claude-worker.json` 等檔），但**新 session 直接跳到 §2「Session Cron 標準啟動集」**。CLAUDE.md §系統定位 + §專案地圖 + `.claude/rules/*` 為最高權威。
 
@@ -79,23 +79,37 @@ scripts/install_scheduler_cron.sh
 **Canonical source**：`config/runtime_schedules.json`
 若本檔和其他文件不一致，以該檔為準；本檔只是方便複製執行的操作手冊。
 
-## 2. Session Cron 標準啟動集（7 條，台灣時間，直接複製執行）
+## 2. Session Cron 標準啟動集（8 條 recurring，台灣時間，直接複製執行）
 
 **2026-04-18 回復 4/11 版本 — supervisor 3-terminal workflow 已廢棄。**
 
-```python
-CronCreate(cron="3 9 * * *", prompt="每日任務審視與執行計劃：(1) 盤點 user queue / scheduled queue / approval backlog (2) 盤點草稿池與今日已發佈文章缺口 (3) 讀 research_program.md 事件日曆，確認今日是否有 CPI/NFP/FOMC/TSMC 等重要事件 (4) 有事件→立即建立或執行事件任務（必要時 status=published）(5) 檢查 research_program.md 行數(<700)、知識索引是否過期(>24h) (6) 用 uv run volpred ops assign 建立今日正式任務")
-CronCreate(cron="11 */2 * * *", prompt="繼續任務（每 2 小時，slot-aware）：任務類型不限於研究，涵蓋研究/發文/論文修訂/平台 ops/bug fix/會員問題/文件更新/重構。(1) slot check — `ls .claude/worktrees/ 2>/dev/null | grep -c agent-` + 背景 task；>= 3 slot 滿回「跳過：slot N/3」≤15字 (2) 跑 `uv run volpred ops check-alerts --storage-dir storage`；若 breach 由 alert system 自動 dedup + 寄信 (3) 讀 storage/next_tasks.json 取最高優先任務（P1>P2>P3>P4），不分類型 (4) 若是實驗類任務，分配新 K 編號前必 ls experiments/ + .claude/worktrees/ 確認不衝突 (5) 啟動 agent 或主線程執行（文件/ops 任務主線程做，實驗類派 agent）(6) 完成後從 research_program.md / bug_backlog / next_tasks 補充 (7) queue 空才做 discovery。反空轉：cron 觸發必有新 agent / git diff / 新 knowledge / research_program.md 更新，至少一項。")
-CronCreate(cron="17 */6 * * *", prompt="會員問題研究")
-CronCreate(cron="37 */6 * * *", prompt="平台巡檢：先跑 health + platform-cycle-summary + check-alerts；若 alert breach 立即寄信（24h dedup），只有異常或 release_due 才真正執行寫入")
-CronCreate(cron="47 */4 * * *", prompt="每 4 小時 git commit + sync remote：(1) git status 看有意義變更 (2) git add 指定檔（不用 -A）(3) git commit (4) git pull --no-rebase origin main（merge 不 rebase，避免多 session 並行衝突）(5) git push origin main。必須 push，防本地與雲端巡檢分叉。遇 conflict 先 resolve 不可強推。")
-CronCreate(cron="7 */3 * * *", prompt="知識索引更新：真需更新檢查用 `find storage/knowledge_index -type f -newer storage/memory/knowledge.json 2>/dev/null | head -1`（lancedb 寫內層 _transactions/_versions，parent dir mtime 不會更新；用 find 找新檔才正確）；若 find 有輸出 = lancedb 內已有更新，SKIP；若無輸出 = 真需 update，跑 `uv run python scripts/build_knowledge_index.py update` 增量，不要 `build` 全量（炸 Gemini 額度）")
-CronCreate(cron="23 0,6,12,18 * * *", prompt="Token 用量日報：每 6 小時一次 --detailed；週五再補 --weekly；>40% 標記高消耗警告")
+### 2.0 Session 啟動前：replay pending_sessions.json（2026-04-25）
 
-CronCreate(cron="0 10 28 * *", prompt="更新 NDC 景氣指標：用 Chrome DevTools MCP 導航 NDC 網站提取最新領先指標和景氣對策信號，更新 storage/macro/tw_dgbas_bci_m.csv，git commit")
+新 session 開啟時**先讀** `storage/ops/pending_sessions.json`。該檔由 host-cron piggy-back（每小時 `check_alerts` → `run_due_jobs`）記錄 session 關閉期間「原本應該 session cron 觸發但沒跑」的 job。replay 流程：
+
+```bash
+jq '.jobs | to_entries | map(select(.value.replayed_at == null or .value.recorded_at > .value.replayed_at)) | map({id: .key, cron: .value.cron, prompt: .value.prompt})' storage/ops/pending_sessions.json
 ```
 
-**繼續任務 cron 規則（`11 */2 * * *` 低頻 heartbeat + slot-aware，任務類型不限於研究）**：
+對每個 pending job：
+1. 判斷是否仍須 replay（ndc 這類月頻可能已過期；continue_task 這類高頻可合併只跑 1 次）
+2. 主線程執行對應 maintain prompt（或等效動作）
+3. **標記 replayed**：將該 job 的 `replayed_at` 更新為當下 UTC ISO（主線程用 jq/Edit 更新）
+
+跳過 replay 的情境：`pending.jobs[id].recorded_count == 0`（從未 fire）或所有 job `replayed_at >= recorded_at`（session 關得短）。
+
+```python
+CronCreate(cron="3 9 * * *", prompt="每日任務審視：執行 daily-planning-maintain --stub-if-no-work；若有 planning gap 再建立正式 task")
+CronCreate(cron="*/30 * * * *", prompt="繼續任務（slot-aware）：執行 continue-task-maintain --stub-if-no-work；若有 dispatch candidate 再處理 1 個正式 task")
+CronCreate(cron="17 */6 * * *", prompt="會員問題研究：執行 question-ops-maintain --stub-if-no-work；若有 pending 再看 workflow")
+CronCreate(cron="37 */6 * * *", prompt="平台巡檢：執行 platform-patrol-maintain --stub-if-no-work；若有訊號再看 detail CLI")
+CronCreate(cron="47 */4 * * *", prompt="Git sync：執行 git-sync-maintain --stub-if-no-work；若需同步再依 wrapper 建議處理 commit / pull / push")
+CronCreate(cron="7 */6 * * *", prompt="知識索引維護：執行 knowledge-index-maintain --stub-if-no-work；若有動作再回報 after summary")
+CronCreate(cron="23 22 * * *", prompt="Token 用量日報：執行 token-usage-maintain --stub-if-no-work；只有缺日報或週報時才生成並回報 after summary")
+CronCreate(cron="0 10 28 * *", prompt="更新 NDC 景氣指標：執行 ndc-indicator-maintain --stub-if-no-work；只有 canonical CSV 落後時才展開人工更新流程")
+```
+
+**繼續任務 cron 規則（`*/30 * * * *` 嚴格每 30 分鐘等距 fire，slot-aware heartbeat，任務類型不限於研究）**：
 1. 每次觸發先 count 當前 running agents（`.claude/worktrees/` + 背景 task id 數）
 2. 若 running >= **3**（建議上限）→ 直接跳過本次，回「跳過：slot N/3」≤15 字
 3. 有 slot 就挑新任務，優先序：(1) user-assigned pending (2) scheduled (3) discovery
@@ -103,7 +117,7 @@ CronCreate(cron="0 10 28 * *", prompt="更新 NDC 景氣指標：用 Chrome DevT
 5. discovery pass 整體節奏最多每 30 分鐘一次（對整個系統的限速）
 6. 同一個 K 編號 / task id 不得同時被兩個 agent 執行（啟動前 `ls experiments/<k>` + `ls .claude/worktrees/` 檢查）
 7. user-assigned pending 永遠優先於 discovery
-8. **禁止**建立 `*/4` 或更密的高頻 heartbeat — `*/20` 曾被試但節奏過密、`11 */2` 才是正確頻率
+8. **禁止**建立 `*/2` 或更密的高頻 heartbeat；目前正式頻率是 `*/30 * * * *`（2026-04-26 用戶指定 4h→30min 等距，對齊 Claude Code Max $200 plan 1-hour prompt cache TTL — 已於 Anthropic support article 確認 Max=1h、Pro/API=5min；30min 永遠落在 cache window 中央，避免 cache cold miss 同時維持文章池與研究節奏。先試 50min 因 `*/50` 解析為 :00/:50 不等距才改 30min）
 9. **反空轉**：每次 cron 觸發必須真的產出（新 agent / git diff / 新 knowledge / research_program.md 更新），只回 status check 視為 cron 失敗
 
 ## 3. Monitor 啟動（persistent，每 60 分鐘檢查 feed↔Supabase 漂移，只異常通知）
@@ -202,7 +216,7 @@ done"""
 `platform-ops-patrol` 建議 prompt：
 
 ```text
-平台巡檢摘要：先跑 ops health + platform-cycle-summary + check-alerts；若 alert breach 立即寄信（24h dedup），只有異常或 release_due 才建立/執行後續任務
+平台巡檢摘要：先跑 platform-patrol-maintain --stub-if-no-work；若有訊號，再看 check-alerts / platform-cycle-summary / scheduler-summary / log-summary 細節並建立後續任務
 ```
 
 ### 本機控制面入口

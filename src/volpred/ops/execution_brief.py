@@ -35,6 +35,25 @@ COORDINATOR_TIMEOUT_SECONDS = 90
 EXECUTOR_TIMEOUT_SECONDS = 180
 CLAUDE_PRINT_EXTRA_ARGS: tuple[str, ...] = ()
 CODEX_EXEC_EXTRA_ARGS: tuple[str, ...] = ("--full-auto",)
+WORKFLOW_ID_BY_TEMPLATE = {
+    "code.yaml": "code-implement",
+    "content.yaml": "feed-write",
+    "member.yaml": "member-qa",
+    "ops.yaml": "ops-triage",
+    "research.yaml": "research-design",
+    "review.yaml": "code-review",
+    "schedule-governance.yaml": "schedule-governance",
+    "strategy.yaml": "strategy-lifecycle",
+}
+WORKFLOW_ID_BY_FAMILY = {
+    "code": "code-implement",
+    "content": "feed-write",
+    "member": "member-qa",
+    "ops": "ops-triage",
+    "research": "research-design",
+    "review": "code-review",
+    "strategy": "strategy-lifecycle",
+}
 
 
 class BriefContent(BaseModel):
@@ -42,6 +61,7 @@ class BriefContent(BaseModel):
 
     task_summary: str
     goal: str
+    workflow_id: str = ""
     success_criteria: list[str] = Field(default_factory=list)
     repo_root: str
     required_files: list[str] = Field(default_factory=list)
@@ -159,6 +179,110 @@ def _template_mapping(task: dict[str, Any]) -> dict[str, str]:
     }
 
 
+def _infer_workflow_id(task: dict[str, Any], template_name: str | None = None) -> str:
+    payload = task.get("payload")
+    if isinstance(payload, dict):
+        explicit = str(payload.get("workflow_id") or "").strip()
+        if explicit:
+            return explicit
+    normalized_template = ""
+    if template_name:
+        normalized_template = template_name if template_name.endswith(".yaml") else f"{template_name}.yaml"
+    if normalized_template:
+        workflow_id = WORKFLOW_ID_BY_TEMPLATE.get(normalized_template)
+        if workflow_id:
+            return workflow_id
+    family = str(task.get("task_family") or "").strip()
+    return WORKFLOW_ID_BY_FAMILY.get(family, family or "unknown")
+
+
+def _brief_dump_with_workflow_id(
+    task: dict[str, Any],
+    validated: BriefContent,
+    *,
+    template_name: str | None = None,
+) -> dict[str, Any]:
+    payload = validated.model_dump()
+    if not str(payload.get("workflow_id") or "").strip():
+        payload["workflow_id"] = _infer_workflow_id(task, template_name)
+    return payload
+
+
+def _compact_payload_hints(task: dict[str, Any]) -> dict[str, Any] | None:
+    payload = task.get("payload")
+    if not isinstance(payload, dict):
+        return None
+    preferred_keys = (
+        "brief_template",
+        "workflow_id",
+        "governance_area",
+        "preconditions",
+        "schedule_proposal",
+        "requires_websearch",
+        "event_key",
+        "event_id",
+    )
+    hints: dict[str, Any] = {}
+    for key in preferred_keys:
+        value = payload.get(key)
+        if value in (None, "", [], {}):
+            continue
+        hints[str(key)] = value
+    if hints:
+        return hints
+    for key, value in payload.items():
+        if value in (None, "", [], {}):
+            continue
+        hints[str(key)] = value
+        if len(hints) >= 6:
+            break
+    return hints or None
+
+
+def _compact_task_prompt_context(task: dict[str, Any]) -> dict[str, Any]:
+    template_name = _family_template_name(task)
+    context: dict[str, Any] = {
+        "task_id": str(task.get("id") or ""),
+        "workflow_id": _infer_workflow_id(task, template_name),
+        "title": str(task.get("title") or ""),
+        "description": str(task.get("description") or ""),
+        "task_family": str(task.get("task_family") or ""),
+        "preferred_agent": str(task.get("preferred_agent") or ""),
+    }
+    for key in ("approval_mode", "risk_level", "public_effect"):
+        value = str(task.get(key) or "").strip()
+        if value:
+            context[key] = value
+    payload_hints = _compact_payload_hints(task)
+    if payload_hints:
+        context["payload_hints"] = payload_hints
+    return context
+
+
+def _compact_brief_prompt_context(task: dict[str, Any], brief: dict[str, Any]) -> dict[str, Any]:
+    packet = {
+        "task_id": str(task.get("id") or ""),
+        "workflow_id": str(brief.get("workflow_id") or _infer_workflow_id(task, brief.get("template_id"))),
+        "task_summary": str(brief.get("task_summary") or task.get("title") or ""),
+        "goal": str(brief.get("goal") or task.get("description") or ""),
+        "required_files": list(brief.get("required_files") or []),
+        "recommended_files": list(brief.get("recommended_files") or []),
+        "success_criteria": list(brief.get("success_criteria") or []),
+        "forbidden_large_files": list(brief.get("forbidden_large_files") or []),
+        "relevant_commands": list(brief.get("relevant_commands") or []),
+    }
+    prior_findings = list(brief.get("prior_findings") or [])
+    if prior_findings:
+        packet["prior_findings"] = prior_findings
+    why_this_agent = str(brief.get("why_this_agent") or "").strip()
+    if why_this_agent:
+        packet["why_this_agent"] = why_this_agent
+    rollback_point_id = str(brief.get("rollback_point_id") or "").strip()
+    if rollback_point_id:
+        packet["rollback_point_id"] = rollback_point_id
+    return packet
+
+
 def _task_preconditions(task: dict[str, Any]) -> list[Any]:
     payload = task.get("payload")
     if not isinstance(payload, dict):
@@ -208,6 +332,7 @@ def _render_template_brief(task: dict[str, Any], template_name: str, template_pa
     rendered = _render_template_value(template_payload, _template_mapping(task))
     if not isinstance(rendered, dict):
         raise RuntimeError(f"Rendered brief template must be an object: {template_name}")
+    rendered.setdefault("workflow_id", _infer_workflow_id(task, template_name))
     rendered.setdefault("repo_root", str(project_path()))
     rendered.setdefault("forbidden_large_files", list(DEFAULT_FORBIDDEN_LARGE_FILES))
     rendered["prior_findings"] = _prior_findings(str(task.get("id")), storage_dir=storage_dir)
@@ -219,7 +344,7 @@ def _render_template_brief(task: dict[str, Any], template_name: str, template_pa
         "template_id": template_name,
         "template_hash": _template_hash(template_payload),
         "coordinator_run_id": None,
-        **validated.model_dump(),
+        **_brief_dump_with_workflow_id(task, validated, template_name=template_name),
     }
 
 
@@ -227,6 +352,7 @@ def _supervisor_brief_skeleton(task: dict[str, Any], *, storage_dir: str = "stor
     return {
         "task_summary": str(task.get("title") or ""),
         "goal": str(task.get("description") or ""),
+        "workflow_id": _infer_workflow_id(task, _family_template_name(task)),
         "success_criteria": [],
         "repo_root": str(project_path()),
         "required_files": [],
@@ -454,17 +580,19 @@ def _load_prompt(name: str) -> str:
 
 def _coordinator_prompt(task: dict[str, Any]) -> str:
     base = _load_prompt("claude_coordinator.txt")
-    return base.replace("{{TASK_JSON}}", json.dumps(task, ensure_ascii=False, indent=2)).replace(
-        "{{REPO_ROOT}}", str(project_path())
+    task_context = _compact_task_prompt_context(task)
+    return (
+        base.replace("{{TASK_CONTEXT_JSON}}", json.dumps(task_context, ensure_ascii=False, indent=2))
+        .replace("{{REPO_ROOT}}", str(project_path()))
     )
 
 
 def _executor_prompt(agent_name: str, task: dict[str, Any], brief: dict[str, Any]) -> str:
     prompt_name = "claude_executor.txt" if agent_name == "claude" else "codex_executor.txt"
     base = _load_prompt(prompt_name)
+    packet = _compact_brief_prompt_context(task, brief)
     return (
-        base.replace("{{TASK_JSON}}", json.dumps(task, ensure_ascii=False, indent=2))
-        .replace("{{BRIEF_JSON}}", json.dumps(brief, ensure_ascii=False, indent=2))
+        base.replace("{{EXECUTION_PACKET_JSON}}", json.dumps(packet, ensure_ascii=False, indent=2))
         .replace("{{REPO_ROOT}}", str(project_path()))
     )
 
@@ -516,7 +644,7 @@ def run_coordinator_brief(task_id: str, *, storage_dir: str = "storage") -> dict
             "template_id": None,
             "template_hash": None,
             "coordinator_run_id": f"coord_{uuid.uuid4().hex[:12]}",
-            **validated.model_dump(),
+            **_brief_dump_with_workflow_id(task, validated),
         }
         _set_task_brief(task_id, brief_status="ready", brief_payload=brief_payload, storage_dir=storage_dir)
         return brief_payload
@@ -602,7 +730,7 @@ def set_execution_brief(
         "template_id": None,
         "template_hash": None,
         "coordinator_run_id": coordinator_run_id or f"supervisor_{actor}_{uuid.uuid4().hex[:8]}",
-        **validated.model_dump(),
+        **_brief_dump_with_workflow_id(task, validated, template_name=_family_template_name(task)),
     }
     _set_task_brief(task_id, brief_status="ready", brief_payload=payload, storage_dir=storage_dir)
     refreshed = _load_task(task_id, storage_dir=storage_dir)

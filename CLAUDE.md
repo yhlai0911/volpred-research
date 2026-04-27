@@ -1,6 +1,5 @@
 # 自主波動率預測研究系統
 原則上使用繁體中文互動
-完成任務後，使用bash say "主人 {任務簡短名稱} 任務已完成"
 
 ## 最高指導原則（Mission & Vision）— 凌駕其他一切
 
@@ -134,8 +133,14 @@
 - **禁止整檔讀取** `storage/reports/feed.json`；用 `grep`、`jq`、單篇 `storage/reports/<id>.json`。
 - `storage/memory/knowledge.json` 同理，禁止整檔讀取。
 - 重複性流程靠 skill，不要每次把長 SOP 貼進主對話。
+- 先看 [`docs/workflow-index.md`](/Users/yhlai0911/Desktop/volpred-research/docs/workflow-index.md) 判斷 workflow / 執行模式，再按需讀對應 skill 全文；不要一開始就把多份長 SOP 全載入。
 - **若新任務與當前上下文、已載入 skills、或目前正在處理的專案文件無直接關聯，必須另開一個乾淨的 sub-agent 處理。**
 - 用 sub-agent 的目的是隔離大搜尋、大量 logs、文件探索與無關 side task，減少 context 汙染與 token 損耗。
+- `context_window.used_percentage` 行為邊界：
+  - `<55%`：正常工作
+  - `55-62%`：避免開新 noisy side task；優先 fork subagent 或先收斂
+  - `62%+`：優先 `/compact`
+  - `70%+`：除非正在收尾，停止開新主題；跨 task family 時優先新 session / `/clear`
 
 ## 實驗與研究流程
 
@@ -215,14 +220,30 @@ Codex 審代碼 → 通過才寫 `knowledge.json` → 每 5-10 實驗彙整一�
 - **交易策略研究**：設計階段（backtest/檢定）= 類型 1 experiment；上架階段（registry/metrics）= 類型 8 strategy_lifecycle
 - **一般文章**（類型 6 daily_article）：**所有非事件驅動**文章都算，包含 research/general/methodology/market-analysis/回顧，不只「補池」
 
-派工前先識別 task_type → 查 skill 表 → 依 work_log 最近 5 筆做多樣化（≥3 筆同 type 則換）→ 派。
+### Subagent vs Agent Team
 
-## Subagent / Skill 使用準則
+`subagent` = 1 個 bounded task。用在單一實驗審查、單篇草稿、單一路徑資料診斷、單次 code review、與主線無關的大搜尋。
+
+`agent team` = 1 個 parent task 拆成多個 bounded subtasks，由 lead 協調；teammates 共享任務脈絡，可互相溝通、分析、挑戰假說、整理分歧與形成共識，但本專案的 canonical 寫入、研究結論採信與最終裁決仍由主線程負責。
+
+本專案判斷規則：
+- 單一 `grep` / `jq` / 小 edit / 一次驗證：主線程自己做。
+- 預設先選 `單一主 session` 或 `forked subagent`；`agent team` 是特例，不是預設。
+- 單一研究任務、單篇文章、單一 bug / code path：用 `subagent`。
+- 跨多模組事故、paper synthesis、策略上架評審、需要分工、交叉審查或多方討論收斂：用 `agent team`。
+- 若多個 agent 會同時碰同一檔，先不要開 team；先由主線程拆順序或指定唯一 owner。
+- Codex 類 subagent 預設 serialize；若任務完全獨立且寫入範圍不重疊，可放寬到同一 session 最多 3 個。不要設成不限制。
+- Agent team 為 experimental；啟用前先確認版本、成本與 runtime 限制。
+
+## Subagent / Agent Team / Skill 使用準則
 
 - 常見重複流程優先做成 skill，不要讓主 guide 膨脹。
 - 任務若只需要探索或驗證，優先用 read-only subagent。
 - 任務若與目前對話主線無關，優先用 fresh-context subagent。
+- 任務若天然可分工且子任務互不共享寫入目標，才用 agent team。
+- 需要 agents 彼此討論、交叉分析或形成共識時，可用 agent team。
 - Agent prompt 必須包含必要路徑、K 編號、error log 規則、成功標準與要讀的 skill。
+- Agent 結果不可直接視為 canonical；涉及 `knowledge.json`、`feed.json`、paper body、shared ops 狀態，一律主線程驗證後再寫入。
 - 標準模板：
   - brief：`.claude/skills/autonomous-research/references/agent-brief-template.md`
   - result：`.claude/skills/autonomous-research/references/agent-result-template.md`
@@ -261,4 +282,3 @@ Context compaction 時，**優先保留**：
 - 先修流程，不修資料。
 - 先讓 Codex 審代碼，再信結果。
 - 任務無關當前上下文時，開乾淨 sub-agent，不要污染主線程。
-

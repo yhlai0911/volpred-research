@@ -11,6 +11,8 @@ description: >
   empirical results, or verifying that claims match evidence scope.
   This skill should NOT be used for: LaTeX formatting/structure review (use
   latex-academic-reviewer), citation verification (use citation-verifier), or feed publishing.
+model: opus
+effort: high
 ---
 
 # Finance Paper Quality Standards

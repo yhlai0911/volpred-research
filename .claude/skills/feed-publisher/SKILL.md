@@ -9,6 +9,8 @@ description: >
   research milestone, or when the user explicitly requests a feed publication.
   This skill should NOT be used for: internal memory recording (use m.think/m.add_knowledge),
   running experiments (use autonomous-research), or paper writing (use finance-paper-quality).
+model: sonnet
+effort: medium
 ---
 
 # Feed 研究文章發佈規範
@@ -47,7 +49,7 @@ Do **not** use this skill for：
 
 **主題不是憑記憶挑——用 `publication-candidates` skill 系統化選。**
 
-1. **研究驅動**：`cat storage/publication_candidates.json | jq '.top_10_uncovered, .missing_general_top5, .missing_research_top5'`
+1. **研究驅動**：`uv run volpred ops publication-candidates-summary`
 2. **事件驅動**：WebSearch 近期 CPI/NFP/FOMC/TSMC/earnings season；`grep '財報公告日.txt'`；讀 `next_tasks.json` 事件任務
 
 補充：

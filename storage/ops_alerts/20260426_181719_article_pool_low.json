@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-04-26T18:17:19Z",
+  "alert": "article pool low (<12)",
+  "severity": "warning",
+  "detail": {
+    "total_drafts": 6,
+    "threshold": 12,
+    "research_audience": 4,
+    "general_audience": 2,
+    "targeted_alerts": [
+      "general audience drafts = 2, below threshold of 8"
+    ]
+  },
+  "recommended_action": "Dispatch feed-publisher agent to write at least 6 new general-audience draft articles. Priority: general audience. Use publication-candidates skill to select topics."
+}
