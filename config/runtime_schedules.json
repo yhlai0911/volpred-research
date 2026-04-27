@@ -107,11 +107,11 @@
       {
         "id": "continue_task_stub",
         "label": "continue_task host fallback stub",
-        "cron": "30 */4 * * *",
+        "cron": "*/30 * * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_continue_task_stub.sh",
         "log_path": "storage/logs/cron/continue_task_stub.log",
         "command_deprecated": "scripts/continue_task_stub.py",
-        "description": "Host-cron fallback for session cron `continue_task`（session 端 `*/30 * * * *`）；session 關閉期間仍寫入 storage/ops/pending_continue.json，下次 session 開啟 replay。本 host wrapper 維持 `30 */4 * * *`（macOS host cron 只可靠執行整點 / 整 N 小時 pattern，無法跟進 30 分鐘節奏；session 在線時 piggy-back scheduler 才真正承擔 30 分鐘 heartbeat）。",
+        "description": "每 30 分鐘執行 continue_task_stub（與 session cron `*/30 * * * *` 同 cadence；launchd 可靠 30 分鐘 fire，不再需 host fallback 退化到 4h）。Session 在線時 piggy-back 也會 fire；session 離線時 host launchd 確保不間斷。2026-04-27 launchd migration 後 cadence 從 host 4h 升回 30min canonical.",
         "matchers": [
           "scripts/continue_task_stub.py",
           "cron_continue_task_stub.sh"
