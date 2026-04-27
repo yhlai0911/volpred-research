@@ -1,6 +1,15 @@
 # K1262b — P5 Phase 2 OAT Sensitivity (λ × γ)
 
-**Status**: 🟡 **DESIGN proposed (2026-04-27)** — worktree dispatch pending.
+**Status**: ✅ **DONE (2026-04-27)** — Verdict **H1+ confirmed robust to λ/γ**. 16,000 sims in 449.5s wall (worktree agent a5d6e2ed → cherry-pick `1e0015c4` after merge_worktree.sh K1262-v4 silent-drop bug recurrence; subsequent K1262-v5 fix `3d917c06` shipped). Code review pending (subagent ac6b1cc0 in flight). knowledge.json entry deferred to post-review per `.claude/rules/experiments.md` SOP. See `k1262b_verdict.md` for full breakdown.
+
+**Key findings**:
+- Cell1 (baseline λ=0.005, γ=200) VT threshold = **70% EXACT match** to K1262 reference (calibration PASS)
+- TF threshold = 30% in 5/5 cells (consistently faster than VT)
+- MR threshold = 70% in 3/5, 30% in 1, null* in 1 (deeply crowded pre-baseline)
+- All 5/5 cells: TF/MR ≤ VT under P5-style detector
+- VT range: {70%, 70%, 70%, 70%, 100%} — only λ_low extends VT to 100% (mechanism-consistent, lower price impact = longer survival; not artifact)
+
+*Cell 3 high-λ MR null reclassified as "supports H1+ (deep pre-baseline crowding)" — main thread judgment pending code review confirmation.
 
 **Date**: 2026-04-27
 **Target paper**: P5 vt-crowding-abm
