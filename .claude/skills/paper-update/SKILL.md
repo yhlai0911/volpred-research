@@ -1,11 +1,11 @@
 ---
 name: paper-update
 description: >
-  論文修訂操作 SOP — body_v(n+1).tex → xelatex → paper-update CLI → commit
-  → 驗證 API。只負責修訂操作；review 由 paper-review-cycle 負責，stage 由
-  paper-stage-classifier 負責。Trigger phrases: 'paper-update', '更新論文',
-  '同步論文平台'. Do not use for review orchestration（use paper-review-cycle）
-  或 stage 判定（use paper-stage-classifier）。
+  論文修訂操作 SOP — body_v(n+1).tex → xelatex → paper-update CLI → NotebookLM
+  source refresh → commit → 驗證 API。只負責修訂操作；review 由 paper-review-cycle
+  負責，stage 由 paper-stage-classifier 負責。Trigger phrases: 'paper-update',
+  '更新論文', '同步論文平台'. Do not use for review orchestration（use
+  paper-review-cycle）或 stage 判定（use paper-stage-classifier）。
 model: sonnet
 effort: medium
 user-invocable: true
@@ -49,6 +49,17 @@ review_history/v(n)/README.md action plan 已就緒，主線程要把 v(n+1) 修
    - uv run volpred ops paper-update --paper-id <id>
    - 自動：計算 pages + citations → 上傳 PDF → 更新 metadata → 複製到前端
 
+3.5 NotebookLM source refresh（每次 main.tex 修改 必跑）：
+   - 找對應 notebooks: notebooklm list（typically：「<paper> Prior Literature
+     RAG」+「VolPred Research Papers — VT & GARCH」portfolio collection）
+   - 對每個含此 paper 的 notebook 跑：
+       notebooklm source list -n <notebook-id> --json | grep <paper-slug>
+       notebooklm source refresh <source-id-prefix> -n <notebook-id>
+   - Supabase URL 不變但內容已被 paper-update 覆蓋；NotebookLM cache 需 forced
+     refresh 才會 re-index 新版（`source stale` 可能誤報 fresh — 直接 refresh）
+   - 目前 P6 對應 2 notebooks: 5d8707e3 (P6 Prior Lit RAG) + f0210e90 (VolPred
+     Research Papers Portfolio)
+
 4. Git commit：
    - 含 review_history/v(n)/* + body_v(n+1).tex + main_v(n+1).tex + diff
    - Message: "Paper <id> v(n+1): <核心修正主題>"
@@ -64,6 +75,9 @@ review_history/v(n)/README.md action plan 已就緒，主線程要把 v(n+1) 修
 
 - **agent 禁止寫 .tex**（per CLAUDE.md）—— 修訂必須主線程
 - **修正完不跑 step 3 = 沒修**——paper-update CLI 取代手動 upload + metadata update
+- **跑完 step 3 不跑 step 3.5 = NotebookLM RAG 仍是舊版**——supabase URL 不變但
+  NotebookLM 不會自動重 index，導致下次 RAG query 拿到舊內容（2026-04-27 P6 v4.1
+  教訓：`source stale` 誤報 fresh 但實際 supabase 已被覆蓋；direct refresh 才有效）
 - 每次 commit 必含 review_history/v(n)/ 全部檔案
 - v(n+1).tex 完成後立即觸發新一輪 review（→ paper-review-cycle）
 
