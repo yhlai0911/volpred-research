@@ -1,42 +1,42 @@
 {
-  "timestamp": "2026-04-25T12:15:32Z",
+  "timestamp": "2026-04-27T18:10:36Z",
   "all_ok": false,
   "checks": [
     {
-      "name": "ARTICLE_POOL",
+      "name": "article_pool",
       "status": "alert",
-      "detail": "Total draft: 7 (<12 threshold). Breakdown: general=5 (<8 threshold, ALERT), research=2 (<4 threshold, ALERT)."
+      "detail": "total_draft=7 (research=2, general=5) | article pool low (7/12 drafts); research audience low (2/4); general audience low (5/8)"
     },
     {
-      "name": "STRATEGY_METRICS_FRESHNESS",
+      "name": "strategy_metrics_freshness",
       "status": "alert",
-      "detail": "strategy_metrics.json mtime=1776523420 (~2026-04-18T23:03 UTC), age ~165.5h (>26h threshold)."
+      "detail": "age=48.0h (threshold=26h)"
     },
     {
-      "name": "ERROR_LOG",
+      "name": "error_log_recent",
       "status": "ok",
-      "detail": "Last 30 lines contain entries through 2026-04-20 only. No entries dated today (2026-04-25) or yesterday (2026-04-24). Most recent lesson: universal piggy-back scheduler for macOS cron reliability."
+      "detail": "no entries dated 2026-04-27 or 2026-04-26 as standalone log entries; 2 references to 2026-04-26 exist within 2026-04-20 entries (context only)"
     },
     {
-      "name": "PAPER_TRADING_GAPS",
+      "name": "paper_trading_gaps",
       "status": "ok",
-      "detail": "14 array-type strategies checked. No strategy has >2 portfolio_return=null in last 3 entries. _market_daily is object-type (date-keyed), not subject to this check."
+      "detail": "no strategy has >2 null portfolio_return in last 3 entries"
     },
     {
-      "name": "GIT_STATUS",
+      "name": "git_status",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold: 50). Working tree clean."
+      "detail": "uncommitted_files=0"
     },
     {
-      "name": "KNOWLEDGE_SIZE",
+      "name": "knowledge_size",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json contains 2043 entries."
+      "detail": "entries=2043"
     }
   ],
   "alerts": [
-    "article pool low (<12): 7 draft articles total",
-    "research audience low (<4): only 2 draft research articles",
-    "general audience low (<8): only 5 draft general articles",
-    "metrics stale: strategy_metrics.json is ~165.5 hours old (threshold: 26h)"
+    "article pool low (7/12 drafts)",
+    "research audience low (2/4)",
+    "general audience low (5/8)",
+    "metrics stale (48.0h old)"
   ]
 }
