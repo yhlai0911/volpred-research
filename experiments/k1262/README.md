@@ -1,6 +1,8 @@
 # K1262 — P5 Phase 2 Robustness Sweep (TF/MR scaling × window + softer detector)
 
-**Status**: 🟡 **DESIGN proposed (2026-04-27)** — Phase 2 worktree dispatch pending.
+**Status**: ✅ **DONE (2026-04-27)** — Phase 2 verdict **H1+ STRONGLY SUPPORTED**. 16,800 sims in 599.7s wall (worktree agent ab9402a6 → cherry-pick `0e216ca4`). Code review CONDITIONAL PASS (`feature-dev:code-reviewer` fallback for broken Codex CLI), 0 CRITICAL, 2 MAJOR (disclosure gaps, not bugs). knowledge.json item_id `f3b9edd4`. P5 paper rewrite to「positive-feedback family」STRONGLY SUPPORTED — pending 用戶 confirm narrative shift. See `k1262_verdict.md` for full breakdown.
+
+**Key calibration finding**: P5-style (Sharpe-only) detector applied to K827v3 VT 500-MC reproduces VT_baseline = **70% EXACT match to P5 paper Table 2**. Under same detector TF=20%, MR=20%, NoiseControl=null — both faster threshold than VT, direction robust across all 12 (scaling × window) cells.
 
 **Date**: 2026-04-27
 **Target paper**: P5 vt-crowding-abm

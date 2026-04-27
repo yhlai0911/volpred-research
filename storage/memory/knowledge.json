@@ -27909,5 +27909,24 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-04-27T19:00:00.000000"
+  },
+  {
+    "item_id": "f3b9edd4",
+    "category": "paper:P5-vt-crowding-abm",
+    "content": "K1262 P5 Phase 2 robustness sweep — 16,800 sims (TF/MR × scaling {1,3,5,10} × window {10,22,60} × 7 adoption × 100 MC) in 599.7s wall (worktree agent ab9402a6). Tests K1261 caveat #4 (H1+ direction robust but threshold magnitudes scaling-dependent). Verdict: H1+ STRONGLY SUPPORTED — TF threshold < VT threshold across 12/12 cells under softer detector; MR threshold < VT across 12/12 cells. Direction robust to scaling ∈ {1,3,5,10} and window ∈ {10,22,60}, NOT a knife-edge artifact. TF crit ranges 20%–70% (lower scaling → higher crit, but always < VT 100%); MR crit ranges 50%–70%. Detector calibration: P5-style (Sharpe-only: sign flip OR drop > 70%) detector applied to K827v3 VT 500-MC reproduces VT_baseline = 70% EXACT match to P5 paper Table 2. Under same P5-style detector: TF=20%, MR=20%, NoiseControl=null — both faster threshold than VT. Independent code review (a84b56fb fallback for broken Codex CLI) CONDITIONAL PASS: 0 CRITICAL, 2 MAJOR (P5-style detector loop includes baseline level — math self-cancels but semantically should start at '20%'; VT Sharpe origin is K827v3 500-MC VIX-backout formula vs TF/MR 100-MC weight-trajectory formula — apples-to-different-sample-size disclosed but origin difference not), 2 MED (adoption=0% seeds differ across scaling/window cells, minor variance inflation; 168 Pool spawns vs 1-per-cell explains 2.8× per-sim slowdown — correctness unaffected), 1 MINOR (kurt>1 in softer detector trivially satisfied at scaling=1 → at scaling=1 H1+ may be driven by trivial kurt criterion not genuine crowding kurtosis). Phase 2 aggregates omit bootstrap CIs (only mean/std/median/n_valid) — limitation when citing Phase 2 numbers in P5 paper. Implication: P5 paper rewrite to «positive-feedback crowding family» STRONGLY SUPPORTED. Recommended: position VT as one representative of family, acknowledge generic threshold mechanism (TF, MR), keep VT as empirically dominant case (real-world adoption + λ/γ amplification). K1262b λ/γ OAT becomes confirmatory not essential. Pending 用戶 confirm narrative shift before P5 v3 rewrite.",
+    "evidence": [
+      "experiments/k1262/k1262.py",
+      "experiments/k1262/k1262_results.json",
+      "experiments/k1262/k1262_softer_detector_table.md",
+      "experiments/k1262/k1262_threshold_matrix.md",
+      "experiments/k1262/k1262_verdict.md",
+      "experiments/k1262/README.md",
+      "experiments/k1261/k1261_results.json",
+      "experiments/k1261/k1261_phase1_verdict.md",
+      "paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity_results.json",
+      "f1d85a74"
+    ],
+    "confidence": 0.88,
+    "created_at": "2026-04-27T20:00:00.000000"
   }
 ]
