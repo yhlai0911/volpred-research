@@ -36,8 +36,24 @@ mkdir -p "$LAUNCH_AGENTS_DIR" "$LAUNCHD_LOG_DIR"
 #   "M * * * *"       every hour at minute M (multi-dict array, all hours)
 cron_to_calendar_xml() {
     local cron="$1"
+    local interval_minutes="${2:-}"  # If non-empty, override cron with N-minute cadence
     local m h dom mon dow
     read -r m h dom mon dow <<< "$cron"
+
+    # launchd_interval_minutes override (handles non-60-divisor cadences like 50)
+    if [[ -n "$interval_minutes" ]] && [[ "$interval_minutes" =~ ^[0-9]+$ ]]; then
+        local out="<key>StartCalendarInterval</key>\n    <array>"
+        local cum=0
+        while [[ $cum -lt 1440 ]]; do  # 1440 = 24*60 minutes per day
+            local hh=$((cum / 60))
+            local mm=$((cum % 60))
+            out+="\n        <dict><key>Minute</key><integer>$mm</integer><key>Hour</key><integer>$hh</integer></dict>"
+            cum=$((cum + interval_minutes))
+        done
+        out+="\n    </array>"
+        printf '%b' "$out"
+        return
+    fi
 
     # Special case: "*/N * * * *" — every N minutes
     if [[ "$m" == "*/"* ]] && [[ "$h" == "*" ]]; then
@@ -172,7 +188,8 @@ while IFS= read -r item; do
     label="com.volpred.${id//_/-}"
     logbase=$(basename "$log_path" .log)
 
-    schedule_xml=$(cron_to_calendar_xml "$cron")
+    interval_minutes=$(echo "$item" | jq -r '.launchd_interval_minutes // empty')
+    schedule_xml=$(cron_to_calendar_xml "$cron" "$interval_minutes")
     if [[ -z "$schedule_xml" ]]; then
         echo "[ERROR] could not parse cron '$cron' for $id" >&2
         continue

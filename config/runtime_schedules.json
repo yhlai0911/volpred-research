@@ -111,11 +111,12 @@
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_continue_task_stub.sh",
         "log_path": "storage/logs/cron/continue_task_stub.log",
         "command_deprecated": "scripts/continue_task_stub.py",
-        "description": "每 30 分鐘執行 continue_task_stub（與 session cron `*/30 * * * *` 同 cadence；launchd 可靠 30 分鐘 fire，不再需 host fallback 退化到 4h）。Session 在線時 piggy-back 也會 fire；session 離線時 host launchd 確保不間斷。2026-04-27 launchd migration 後 cadence 從 host 4h 升回 30min canonical.",
+        "description": "每 50 分鐘執行 continue_task_stub（launchd 用 launchd_interval_minutes=50 cadence；cron `*/50` 在 cron 語法不正確會 reset 在 :00，故用 launchd 專屬 explicit minute/hour list 表達。User 2026-04-27 指定 30→50 min）。",
         "matchers": [
           "scripts/continue_task_stub.py",
           "cron_continue_task_stub.sh"
-        ]
+        ],
+        "launchd_interval_minutes": 50
       },
       {
         "id": "memory_health_daily",
