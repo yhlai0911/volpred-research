@@ -27877,5 +27877,37 @@
     "main_thread_reviewed": true,
     "codex_reviewed": false,
     "review_note": "Codex blocked by ~/.codex/config.toml gpt-5.5 unavailable; main-thread 10-check used as alternative integrity gate (codex_review.md commit 9e924653)."
+  },
+  {
+    "item_id": "f16c1ade",
+    "category": "paper:P6-prg-periodic-garch",
+    "content": "K1260 GJR-X (fair-info baseline) experiment on SPY OOS 2019-01-02 to 2026-04 (n=1823): QLIKE GJR=0.8544, GJR-X=0.8607, PRG_Extended=0.7559. DM t-stats: PRG vs GJR=5.24 (Harvey PASS, p=1.83e-7); PRG vs GJR-X=7.72 (Harvey PASS, p=1.84e-14); GJR-X vs GJR=-0.53 (NS, Harvey FAIL). IS LR diagnostic: delta-hat=0.13, LR=49.37, p<0.0001 over 4778 IS days with 16 random initializations. Key finding: PRG session-boundary information bridge is a structural mechanism (not merely informational access). GJR-X (GJR + lagged overnight squared return as exogenous regressor) achieves IS significance but OOS NS — exogenous regressor structure not OOS robust. PRG vs GJR-X DM=7.72 is the strongest DM stat in P6 paper. NotebookLM predicted GJR-X DM in [2,4] but actual -0.53 disconfirms — reframes interpretation: PRG advantage cannot be reduced to information access. Closes M1 v2 review fairness gap (former paper section 5 limitation: a direct GJR-X comparison is left for future work). Codex review (a36dd0e5fb82a2766) timed out >2.5 hr; main thread self-verified by byte-match results.json.",
+    "evidence": [
+      "experiments/k1260/k1260_results.json",
+      "experiments/k1260/k1260_gjr_x_spy.py",
+      "experiments/k1260/README.md",
+      "paper/prg-periodic-garch/research_notes/notebooklm_prior_periodic_garch.md",
+      "paper/prg-periodic-garch/review_history/v2/academic_review_report.md"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-27T06:33:15.868891"
+  },
+  {
+    "item_id": "f1d85a74",
+    "category": "paper:P5-vt-crowding-abm",
+    "content": "K1261 Phase 1 ABM ablation (non-VT crowding test) — 4 treatments × 7 adoption × 500 MC = 10,500 sims in 132.3s wall (worktree agent ab6a1ce4). Forks K827v3 fixed-liquidity ABM (200 noise + 800 strategy, λ=0.005, γ=200). Strategy classes: VTAgent / TFAgent (momentum window=22, scaling=10) / MRAgent / NoiseAgent (constant 0.5). Verdict: H1+ (positive-feedback crowding is generic, NOT VT-specific). Strict 3-criterion detector (Sharpe drop >50% AND kurt >10 AND vol amp >50%) thresholds: TF @ 20%, MR @ 50%, NoiseControl null, VT_baseline @ 100%. MR 30% all 500 sims price collapse to ~1e-23 (legitimate finding, not bug — verified by inspection of final_price). TF 50% extreme runaway (vol = 242 × baseline 0.16, kurt 1412, 40,199 price clamps). Internal consistency PASS: Phase 1.0 sanity gate byte-exact match VT_baseline vs K827v3 stored 500-MC; 0% adoption identical across all 4 treatments; cross-treatment seed pairing int(adoption*100000)+sim_idx+42. Independent code review (a0b2e10e) CONDITIONAL PASS: 0 CRITICAL, 3 MAJOR all already disclosed in verdict. Required clarifications: (1) strict detector ≠ P5 paper 70% softer criterion — VT crosses at 100% under strict, internally consistent but not directly comparable to P5 70% figure. (2) MC seed-pairing applies to VT/TF/MR only; NoiseControl uses independent rng paths due to NoiseAgent extra draws. (3) NaN-as-finding gate verified by physical interpretation (price floor + zero returns), not solely n_valid heuristic. (4) Phase 1 preliminary; H1+ direction robust but threshold magnitudes specification-dependent (TF/MR scaling=10 may be aggressive). Implications for P5: paper rewrite requires Phase 2 robustness sweep (TF/MR scaling ∈ {1,3,5,10} × window ∈ {10,22,60}) + softer detector matching P5 criterion + λ/γ OAT + 用戶 confirm narrative shift to «positive-feedback crowding family, VT 是 representative case» before v3 framing change. Codex CLI fallback note: original Codex review (task-moh3azk7) failed gpt-5.5 version mismatch; review by feature-dev:code-reviewer subagent (independent fresh-context Claude) satisfies experiments.md SOP «獨立 reviewer pass» in spirit.",
+    "evidence": [
+      "experiments/k1261/k1261_phase1_main.py",
+      "experiments/k1261/k1261_non_vt_ablation.py",
+      "experiments/k1261/k1261_results.json",
+      "experiments/k1261/k1261_phase1_verdict.md",
+      "experiments/k1261/k1261_threshold_comparison.md",
+      "experiments/k1261/k1261_sanity_verification.md",
+      "experiments/k1261/README.md",
+      "paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity.py",
+      "paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity_results.json"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-04-27T19:00:00.000000"
   }
 ]

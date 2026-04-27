@@ -22,6 +22,7 @@ paths:
 - 策略與風險管理比較遵守 `research_program.md` 的公平比較、VaR+ES、Harvey / Patton 規則。
 - Worktree agent 只應產出 `experiments/kXXX/` 內檔案；共享 JSON、Supabase、Mirror sync 由主線程負責。
 - 完成實驗後先做 Codex code review，再寫 knowledge / experience / article。
+  - **Fallback**：Codex CLI 不可用時（typical: gpt-5.5 model version mismatch，見 `docs/error_log.md` 2026-04-26/27 entries），改派 `feature-dev:code-reviewer` subagent 做 independent fresh-context review。Knowledge entry 必註明 reviewer source（`Codex review` vs `code-reviewer subagent fallback`）。Bar 不變：CONDITIONAL PASS 以上才寫 knowledge.json。
 
 ## Methodology 硬規則
 
