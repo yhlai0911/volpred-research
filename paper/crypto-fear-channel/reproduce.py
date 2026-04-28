@@ -46,6 +46,7 @@ def _approx(actual: float, paper: float, tol_pct: float = 1.0) -> bool:
 def main() -> int:
     checks = []
     k1025 = _load("k1025/k1025_results.json")
+    k1025b = _load("k1025b/k1025b_results.json")
 
     # Table of paper claims sourced from body_v5.tex (9-section draft 2026-04-28).
     # Each entry maps a body claim (table row, abstract number, or %-source comment)
@@ -261,6 +262,63 @@ def main() -> int:
             "source_path": "k1025.forecast_evaluation.oos_n",
             "actual": k1025["forecast_evaluation"]["oos_n"],
             "tol_pct": 0.0,
+        },
+        # === T7 K1025b multi-asset robustness (§6.4) ===
+        {
+            "metric": "T7 K1025b: BTC- → VXN lag 1 F-stat",
+            "paper_value": 24.31,
+            "source_path": "k1025b.asymmetric_granger.btc_neg_to_vix.1.F",
+            "actual": k1025b["asymmetric_granger"]["btc_neg_to_vix"]["1"]["F"],
+            "tol_pct": 1.0,
+        },
+        {
+            "metric": "T7 K1025b: QR β τ=0.05",
+            "paper_value": -1.46,
+            "source_path": "k1025b.quantile_regression['0.05'].beta",
+            "actual": k1025b["quantile_regression"]["0.05"]["beta"],
+            "tol_pct": 1.0,
+        },
+        {
+            "metric": "T7 K1025b: QR β τ=0.50 (median)",
+            "paper_value": 2.83,
+            "source_path": "k1025b.quantile_regression['0.5'].beta",
+            "actual": k1025b["quantile_regression"]["0.5"]["beta"],
+            "tol_pct": 1.0,
+        },
+        {
+            "metric": "T7 K1025b: QR β τ=0.95",
+            "paper_value": 16.29,
+            "source_path": "k1025b.quantile_regression['0.95'].beta",
+            "actual": k1025b["quantile_regression"]["0.95"]["beta"],
+            "tol_pct": 1.0,
+        },
+        {
+            "metric": "T7 K1025b: 2020 COVID Granger F",
+            "paper_value": 13.41,
+            "source_path": "k1025b.subperiod_granger['2020 (COVID)'].F",
+            "actual": k1025b["subperiod_granger"]["2020 (COVID)"]["F"],
+            "tol_pct": 1.0,
+        },
+        {
+            "metric": "T7 K1025b: DY total spillover (%)",
+            "paper_value": 90.09,
+            "source_path": "k1025b.spillover_index.mean_total",
+            "actual": k1025b["spillover_index"]["mean_total"],
+            "tol_pct": 0.5,
+        },
+        {
+            "metric": "T7 K1025b: DY net BTC (receiver)",
+            "paper_value": -76.64,
+            "source_path": "k1025b.spillover_index.mean_net_btc",
+            "actual": k1025b["spillover_index"]["mean_net_btc"],
+            "tol_pct": 1.0,
+        },
+        {
+            "metric": "T7 K1025b: OOS DM t-stat",
+            "paper_value": -0.43,
+            "source_path": "k1025b.forecast_evaluation.dm_stat",
+            "actual": k1025b["forecast_evaluation"]["dm_stat"],
+            "tol_pct": 5.0,
         },
     ]
 

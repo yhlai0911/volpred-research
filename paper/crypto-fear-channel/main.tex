@@ -309,7 +309,7 @@ The U.S.\ approval of spot BTC ETFs in January 2024 plausibly altered the BTC ma
 
 The headline analysis pairs BTC realized volatility with the S\&P 500 fear gauge (VIX) and the corresponding equity ETF (SPY). To probe whether the asymmetric / tail-conditional / regime-dependent structure is specific to the S\&P 500 index or generalizes across U.S.\ equity-fear gauges, we re-run the four core building blocks on a parallel asset pair: the NASDAQ-100 fear gauge VXN and the corresponding NASDAQ-100 ETF QQQ. The BTC series and sample window are identical to the headline analysis; the only ticker swaps are SPY $\to$ QQQ and \^VIX $\to$ \^VXN. We refer to this as the K1025b run, with full source script and JSON output at \texttt{experiments/k1025b/}.
 
-Table~\ref{tab:multiasset} reports the headline parameters of each finding under the two channel specifications. The qualitative pattern is preserved across the BTC$\to$VIX (S\&P) and BTC$\to$VXN (NASDAQ) channels: BTC downside vol Granger-causes the equity fear gauge in 5/5 lags under both specifications; the QR coefficient sign-reverses between lower and upper quantiles in both; the COVID-2020 subperiod is the only window with significant Granger predictability in both; the Diebold-Yilmaz net-receiver decomposition for BTC is essentially identical ($-76.89$pp vs $-76.64$pp); and the OOS DM test fails the Harvey threshold under both specifications. Quantitative magnitudes shift modestly: the upper-tail amplification ratio is $8.5\times$ for VIX vs roughly $11\times$ for VXN, the OOS DM statistic is $-0.98$ vs $-0.43$ (both non-significant), and the 2020 in-sample Granger $F$ is $11.05$ vs $13.41$. These shifts are consistent with the empirical variation expected when changing from broad-market S\&P 500 to tech-concentrated NASDAQ-100 equity-fear gauges.
+Table~\ref{tab:multiasset} reports the headline parameters of each finding under the two channel specifications. The qualitative pattern is preserved across the BTC$\to$VIX (S\&P) and BTC$\to$VXN (NASDAQ) channels: BTC downside vol Granger-causes the equity fear gauge in 5/5 lags under both specifications; the QR coefficient sign-reverses between lower and upper quantiles in both; the COVID-2020 subperiod is the only window with significant Granger predictability in both; the Diebold-Yilmaz net-receiver decomposition for BTC is essentially identical ($-76.89$pp vs $-76.64$pp); and the OOS DM test fails the Harvey threshold under both specifications. Quantitative magnitudes shift modestly: the upper-tail amplification ratio is $8.54\times$ for VIX versus $5.76\times$ for VXN (both well above unity, with VIX exhibiting the stronger sign-reversing tail amplification of the two), the OOS DM statistic is $-0.98$ vs $-0.43$ (both non-significant), and the 2020 in-sample Granger $F$ is $11.05$ vs $13.41$. The broader-market S\&P 500 fear gauge thus displays a stronger upper-tail response to BTC volatility than the more sector-concentrated NASDAQ-100 fear gauge --- a finding consistent with the broad-market index's wider range of constituents responding to coordinated risk-off flows. These shifts are realistic empirical variation across the two equity-fear gauges and do not reverse the qualitative direction of any of the five stylized facts.
 
 \begin{table}[H]
 \centering
@@ -319,11 +319,12 @@ Table~\ref{tab:multiasset} reports the headline parameters of each finding under
 \toprule
 Finding & K1025 (S\&P 500) & K1025b (NASDAQ-100) \\
 \midrule
-Asymmetric Granger BTC$^-$ best $F$ (lags 1--5)        & 18.96 & $\sim$15 \\
+Asymmetric Granger BTC$^-$ best $F$ (lags 1--5)        & 18.96 (lag 1) & 24.31 (lag 1) \\
 Asymmetric Granger BTC$^+$ p (all lags 1--5)            & 0.16--0.95 (NS) & 0.14+ (NS) \\
 QR $\beta_{0.05}$                                       & $-2.86$ & $-1.46$ \\
+QR $\beta_{0.5}$                                        & $+2.61$ & $+2.83$ \\
 QR $\beta_{0.95}$                                       & $+22.31$ & $+16.29$ \\
-QR upper-tail amplification ($\beta_{0.95}/\beta_{0.5}$) & $8.5\times$ & $\sim 11\times$ \\
+QR upper-tail amplification ($\beta_{0.95}/\beta_{0.5}$) & $8.54\times$ & $5.76\times$ \\
 Sub-period 2020 Granger $F$                              & 11.05 & 13.41 \\
 DY total spillover (\%)                                  & 90.11 & 90.09 \\
 DY net BTC (pp)                                          & $-76.89$ & $-76.64$ \\

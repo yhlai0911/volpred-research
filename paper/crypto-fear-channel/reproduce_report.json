@@ -5,8 +5,8 @@
   "alert_level": "green",
   "gate_status": "pass",
   "match_rate_pct": 100.0,
-  "matched": 29,
-  "total_checks": 29,
+  "matched": 37,
+  "total_checks": 37,
   "checks": [
     {
       "metric": "Sample N (§3.1, abstract)",
@@ -268,9 +268,81 @@
       "rel_diff_pct": 0.0,
       "status": "match",
       "source_path": "k1025.forecast_evaluation.oos_n"
+    },
+    {
+      "metric": "T7 K1025b: BTC- → VXN lag 1 F-stat",
+      "paper_value": 24.31,
+      "actual_value": 24.306453717594106,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.01458775156681406,
+      "status": "match",
+      "source_path": "k1025b.asymmetric_granger.btc_neg_to_vix.1.F"
+    },
+    {
+      "metric": "T7 K1025b: QR β τ=0.05",
+      "paper_value": -1.46,
+      "actual_value": -1.462797757519013,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.19162722732965828,
+      "status": "match",
+      "source_path": "k1025b.quantile_regression['0.05'].beta"
+    },
+    {
+      "metric": "T7 K1025b: QR β τ=0.50 (median)",
+      "paper_value": 2.83,
+      "actual_value": 2.832582760822447,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.09126363330201864,
+      "status": "match",
+      "source_path": "k1025b.quantile_regression['0.5'].beta"
+    },
+    {
+      "metric": "T7 K1025b: QR β τ=0.95",
+      "paper_value": 16.29,
+      "actual_value": 16.292566497406085,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.01575504853336982,
+      "status": "match",
+      "source_path": "k1025b.quantile_regression['0.95'].beta"
+    },
+    {
+      "metric": "T7 K1025b: 2020 COVID Granger F",
+      "paper_value": 13.41,
+      "actual_value": 13.414732673514786,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.03529212166134154,
+      "status": "match",
+      "source_path": "k1025b.subperiod_granger['2020 (COVID)'].F"
+    },
+    {
+      "metric": "T7 K1025b: DY total spillover (%)",
+      "paper_value": 90.09,
+      "actual_value": 90.09306761512974,
+      "tol_pct": 0.5,
+      "rel_diff_pct": 0.0034050561990643558,
+      "status": "match",
+      "source_path": "k1025b.spillover_index.mean_total"
+    },
+    {
+      "metric": "T7 K1025b: DY net BTC (receiver)",
+      "paper_value": -76.64,
+      "actual_value": -76.63887102684745,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.0014730860549929071,
+      "status": "match",
+      "source_path": "k1025b.spillover_index.mean_net_btc"
+    },
+    {
+      "metric": "T7 K1025b: OOS DM t-stat",
+      "paper_value": -0.43,
+      "actual_value": -0.43247544505968744,
+      "tol_pct": 5.0,
+      "rel_diff_pct": 0.5756848976017308,
+      "status": "match",
+      "source_path": "k1025b.forecast_evaluation.dm_stat"
     }
   ],
-  "generated_at": "2026-04-28T03:25:14+00:00",
+  "generated_at": "2026-04-28T04:10:46+00:00",
   "stage": "body draft complete (v5, 9 sections, 15 pages)",
   "notes": [
     "Expanded 2026-04-28 from 7 → 25 checks covering all 6 tables in body_v5.tex.",
