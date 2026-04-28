@@ -1,42 +1,40 @@
 {
-  "timestamp": "2026-04-27T18:10:36Z",
+  "timestamp": "2026-04-28T00:13:42Z",
   "all_ok": false,
   "checks": [
     {
-      "name": "article_pool",
+      "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "total_draft=7 (research=2, general=5) | article pool low (7/12 drafts); research audience low (2/4); general audience low (5/8)"
+      "detail": "Total draft=6 (<12 threshold). Breakdown: general=2 (<8 threshold), research=4 (at threshold, not below 4)."
     },
     {
-      "name": "strategy_metrics_freshness",
-      "status": "alert",
-      "detail": "age=48.0h (threshold=26h)"
-    },
-    {
-      "name": "error_log_recent",
+      "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "no entries dated 2026-04-27 or 2026-04-26 as standalone log entries; 2 references to 2026-04-26 exist within 2026-04-20 entries (context only)"
+      "detail": "strategy_metrics.json updated ~12 seconds ago (well within 26h threshold)."
     },
     {
-      "name": "paper_trading_gaps",
+      "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "no strategy has >2 null portfolio_return in last 3 entries"
+      "detail": "Last 30 lines checked. Most recent entries dated 2026-04-26. No entries for today (2026-04-28) or yesterday (2026-04-27)."
     },
     {
-      "name": "git_status",
+      "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "uncommitted_files=0"
+      "detail": "All 15 strategies have 0 nulls in last 3 portfolio_return entries."
     },
     {
-      "name": "knowledge_size",
+      "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "entries=2043"
+      "detail": "0 uncommitted files (threshold: >50)."
+    },
+    {
+      "name": "KNOWLEDGE_SIZE",
+      "status": "ok",
+      "detail": "storage/memory/knowledge.json contains 2044 entries."
     }
   ],
   "alerts": [
-    "article pool low (7/12 drafts)",
-    "research audience low (2/4)",
-    "general audience low (5/8)",
-    "metrics stale (48.0h old)"
+    "article pool low (<12): total draft=6",
+    "general audience pool low (<8): general draft=2"
   ]
 }
