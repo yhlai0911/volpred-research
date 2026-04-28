@@ -1084,5 +1084,20 @@
     "recommendation": "撰 paper table 時: (1) 表頭註明 sample window + 來源 K; (2) Ranking / dominance claim 必用同一 K 或強制跨 K pooled OOS window; (3) 若 fair 比較不可得, 明寫 'not directly comparable' 而非 rank.",
     "source_task_id": "task_a2ad5cff36e9",
     "created_at": "2026-04-18T06:08:02.931591+00:00"
+  },
+  {
+    "id": "E078",
+    "title": "Subagent fallback PASS ≠ primary-path Codex PASS：Codex 恢復後必須 re-review；audit 必 re-walk full population",
+    "category": "review_methodology",
+    "lesson": "Codex CLI 4 天（2026-04-26 至 04-28）不可用導致 K1259/K1261/K1262 三 experiments 走 feature-dev:code-reviewer subagent fallback gate。Codex 恢復後（2026-04-28T21:58），re-review K1259 同份 audit code 發現 subagent v1 PASS-with-caveats verdict 漏看 12 個 residual non-DM rows（statistical_tests/stat_test/welch/vs_zero patterns 全 keyed via t_stat priority-5 field）。subagent 漏看根因兩條：(1) audit subset-only — v1 audit 只 re-walk 'first matched key 是 t 或 stat' 的 393 rows，忽略 t_stat 子群；(2) _vs_ heuristic 把非 DM 的 adaptive_vs_fixed / vt_spy_vs_vt_only 誤視 DM-evidence。這是 LLM-vs-LLM review 的可重複盲區：同架構、trained-on-similar-data 的 reviewer 易共享 blind spots；cross-model（Codex OpenAI 後端 vs feature-dev:code-reviewer Anthropic claude-sonnet）才能突破。",
+    "examples": [
+      "K1259 v1 (2026-04-28 subagent claude-sonnet-4-6): 0 CRIT/0 SEV/3 MAJOR/2 MED/3 MINOR；PASS-with-caveats；knowledge entry 0.80→0.88；closure declared.",
+      "K1259 v2 (2026-04-29 Codex CLI 0.121.0 gpt-5.4 primary-path): 同份 code 0 CRIT/0 SEV/2 NEW MAJOR/1 MED/1 MINOR；FAIL verdict；12 residual non-DM rows 列出 (K528/K594/K658/K975/K990/K1006)；knowledge confidence 0.88 retracted to 0.75.",
+      "Fix path: extend NON_DM_PATH_TOKENS 5 → 9 tokens (Option A surgical)；Phase 2 MCS 100% identical superior_sets pre-vs-post (12 removed rows had 0 MCS signal due to MIN_PAIRS_PER_MODEL=2 filter)；knowledge restored 0.90.",
+      "K1261/K1262/K1257/K1258 also went through subagent fallback during the 4-day Codex blocker window — Codex restoration today enables re-review of all 5 if any flag issues later."
+    ],
+    "recommendation": "(1) Codex 是 primary review path，subagent 是 unavailable-only fallback，不是平行替代品。(2) 任何 audit 必 re-walk full population — 子集 audit 必含「blind-spot analysis」field 說明子集外可能漏掉什麼。(3) Codex 從不可用恢復後，必須補 re-review 期間 fallback gate 過的 closures — 不是補審查所有 K，是補審查那些 subagent 過了 gate 寫了 knowledge entry 的。(4) Closure 標 ✅ 前必 audit 盲區清楚：「已掃 X 範圍 / X 排除原因 / 驗證 evidence」三件齊。",
+    "source_task_id": "K1259_v2_review_2026_04_29",
+    "created_at": "2026-04-29T03:00:00+00:00"
   }
 ]
