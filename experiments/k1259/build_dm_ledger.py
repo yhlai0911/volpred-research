@@ -221,6 +221,21 @@ def find_asset_in_context(context: Iterable[str]) -> str:
 
 
 # ------ core extraction ------
+# Path segments containing these tokens are NOT Diebold-Mariano tests even
+# though they may have {t, p} or {stat, p_value} fields that get_dm_stat
+# could match via generic "t" / "stat" keys. Skipping them prevents
+# false-positive ledger rows. (Audit 2026-04-28 found 5 such rows from
+# K744 / K789 / K1059 — see generic_key_audit.md.)
+NON_DM_PATH_TOKENS = ("ttest", "mcnemar", "wilcoxon", "kstest", "kruskal")
+
+
+def _path_is_non_dm(ctx_path: list[str]) -> bool:
+    return any(
+        any(tok in seg.lower() for tok in NON_DM_PATH_TOKENS)
+        for seg in ctx_path
+    )
+
+
 def iter_pair_entries(node: Any, context: list[str]):
     """Yield (pair_dict, context_label_for_pair, ctx_path) for everything that looks like a DM pair comparison.
 
@@ -229,7 +244,7 @@ def iter_pair_entries(node: Any, context: list[str]):
     """
     if isinstance(node, dict):
         # Case A: dict is itself a DM pair entry (has dm_stat + p_value and NOT just container)
-        if get_dm_stat(node) is not None:
+        if get_dm_stat(node) is not None and not _path_is_non_dm(context):
             p, _ = get_p_value(node)
             # include pair entry; model names from context
             yield (node, context[-1] if context else "", context)
@@ -237,7 +252,8 @@ def iter_pair_entries(node: Any, context: list[str]):
             for k, v in node.items():
                 new_ctx = context + [str(k)]
                 # Case B: a dict mapping "A_vs_B" -> pair dict
-                if isinstance(v, dict) and get_dm_stat(v) is not None:
+                if isinstance(v, dict) and get_dm_stat(v) is not None \
+                        and not _path_is_non_dm(new_ctx):
                     yield (v, str(k), new_ctx)
                 elif isinstance(v, list):
                     for i, item in enumerate(v):

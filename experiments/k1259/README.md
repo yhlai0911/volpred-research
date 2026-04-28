@@ -19,6 +19,7 @@
 | `phase15_asset_map.json` | Phase 1.5 pinned asset map（K_id → ticker / pipe-union），105 K |
 | `dm_ledger.json` | 結構化 DM ledger（Phase 1.5 已 applied；rows array，strict schema + `asset_source`） |
 | `dm_ledger_summary.md` | 人類可讀摘要（coverage、distribution、gaps） |
+| `generic_key_audit.md` | Codex MAJOR-2 audit — 11 false-positive rows (ttest/mcnemar) 已從 ledger 移除；Phase 2 MCS 結果差異僅 `middle` 一 model（cosmetic） |
 
 ### 完整重現指令（Phase 1 + 1.5）
 

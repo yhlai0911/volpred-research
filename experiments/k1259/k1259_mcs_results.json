@@ -27,7 +27,7 @@
   "results": {
     "SPY": {
       "QLIKE": {
-        "n_models_input": 100,
+        "n_models_input": 99,
         "candidate_models": [
           "A4f-VIX-t",
           "A4f-VIX9D-N",
@@ -118,7 +118,6 @@
           "mf2_ewma_0.999",
           "mf2_mem",
           "mfgjr",
-          "middle",
           "postbreak",
           "skewt",
           "standard",
@@ -210,7 +209,6 @@
             "mf2_ewma_0.997",
             "mf2_ewma_0.999",
             "mfgjr",
-            "middle",
             "postbreak",
             "skewt",
             "standard",
@@ -256,117 +254,117 @@
             {
               "model": "GJR",
               "T_max_at_elim": 4.904573,
-              "p_value": 0.003996
+              "p_value": 0.002997
             },
             {
               "model": "A4f-VIX-t",
               "T_max_at_elim": 4.662,
-              "p_value": 0.015984
+              "p_value": 0.010989
             },
             {
               "model": "mf2_mem",
               "T_max_at_elim": 4.579038,
-              "p_value": 0.018981
+              "p_value": 0.026973
             },
             {
               "model": "high_freq_only",
               "T_max_at_elim": 4.556255,
-              "p_value": 0.017982
+              "p_value": 0.026973
             },
             {
               "model": "GJR-N",
               "T_max_at_elim": 4.444,
-              "p_value": 0.036963
+              "p_value": 0.023976
             },
             {
               "model": "DMEM",
               "T_max_at_elim": 4.346119,
-              "p_value": 0.051948
+              "p_value": 0.067932
             }
           ],
-          "n_models_input": 100,
-          "n_models_survived": 88,
-          "final_stopping_p": 0.475524,
+          "n_models_input": 99,
+          "n_models_survived": 87,
+          "final_stopping_p": 0.467532,
           "bootstrap_B": 1000,
           "seed": 42,
           "trace": [
             {
-              "surviving_n": 100,
+              "surviving_n": 99,
               "T_max": 9.534126,
               "worst_model": "HAR",
               "p_value": 0.000999
             },
             {
-              "surviving_n": 99,
+              "surviving_n": 98,
               "T_max": 8.708476,
               "worst_model": "EWMA",
               "p_value": 0.000999
             },
             {
-              "surviving_n": 98,
+              "surviving_n": 97,
               "T_max": 8.12305,
               "worst_model": "C2_Proxy_Robust",
               "p_value": 0.000999
             },
             {
-              "surviving_n": 97,
+              "surviving_n": 96,
               "T_max": 7.78814,
               "worst_model": "MEM",
               "p_value": 0.000999
             },
             {
-              "surviving_n": 96,
+              "surviving_n": 95,
               "T_max": 7.463336,
               "worst_model": "HAR-ABS",
               "p_value": 0.000999
             },
             {
-              "surviving_n": 95,
+              "surviving_n": 94,
               "T_max": 6.18,
               "worst_model": "GJR-t",
               "p_value": 0.000999
             },
             {
-              "surviving_n": 94,
+              "surviving_n": 93,
               "T_max": 4.904573,
               "worst_model": "GJR",
-              "p_value": 0.003996
-            },
-            {
-              "surviving_n": 93,
-              "T_max": 4.662,
-              "worst_model": "A4f-VIX-t",
-              "p_value": 0.015984
+              "p_value": 0.002997
             },
             {
               "surviving_n": 92,
-              "T_max": 4.579038,
-              "worst_model": "mf2_mem",
-              "p_value": 0.018981
+              "T_max": 4.662,
+              "worst_model": "A4f-VIX-t",
+              "p_value": 0.010989
             },
             {
               "surviving_n": 91,
-              "T_max": 4.556255,
-              "worst_model": "high_freq_only",
-              "p_value": 0.017982
+              "T_max": 4.579038,
+              "worst_model": "mf2_mem",
+              "p_value": 0.026973
             },
             {
               "surviving_n": 90,
-              "T_max": 4.444,
-              "worst_model": "GJR-N",
-              "p_value": 0.036963
+              "T_max": 4.556255,
+              "worst_model": "high_freq_only",
+              "p_value": 0.026973
             },
             {
               "surviving_n": 89,
-              "T_max": 4.346119,
-              "worst_model": "DMEM",
-              "p_value": 0.051948
+              "T_max": 4.444,
+              "worst_model": "GJR-N",
+              "p_value": 0.023976
             },
             {
               "surviving_n": 88,
+              "T_max": 4.346119,
+              "worst_model": "DMEM",
+              "p_value": 0.067932
+            },
+            {
+              "surviving_n": 87,
               "T_max": 3.779,
               "worst_model": "t-fixed5",
-              "p_value": 0.475524
+              "p_value": 0.467532
             }
           ]
         },
@@ -449,7 +447,6 @@
             "mf2_ewma_0.997",
             "mf2_ewma_0.999",
             "mfgjr",
-            "middle",
             "postbreak",
             "skewt",
             "standard",
@@ -495,117 +492,117 @@
             {
               "model": "GJR",
               "T_max_at_elim": 4.904573,
-              "p_value": 0.003996
+              "p_value": 0.002997
             },
             {
               "model": "A4f-VIX-t",
               "T_max_at_elim": 4.662,
-              "p_value": 0.015984
+              "p_value": 0.010989
             },
             {
               "model": "mf2_mem",
               "T_max_at_elim": 4.579038,
-              "p_value": 0.018981
+              "p_value": 0.026973
             },
             {
               "model": "high_freq_only",
               "T_max_at_elim": 4.556255,
-              "p_value": 0.017982
+              "p_value": 0.026973
             },
             {
               "model": "GJR-N",
               "T_max_at_elim": 4.444,
-              "p_value": 0.036963
+              "p_value": 0.023976
             },
             {
               "model": "DMEM",
               "T_max_at_elim": 4.346119,
-              "p_value": 0.051948
+              "p_value": 0.067932
             }
           ],
-          "n_models_input": 100,
-          "n_models_survived": 88,
-          "final_stopping_p": 0.475524,
+          "n_models_input": 99,
+          "n_models_survived": 87,
+          "final_stopping_p": 0.467532,
           "bootstrap_B": 1000,
           "seed": 42,
           "trace": [
             {
-              "surviving_n": 100,
+              "surviving_n": 99,
               "T_max": 9.534126,
               "worst_model": "HAR",
               "p_value": 0.000999
             },
             {
-              "surviving_n": 99,
+              "surviving_n": 98,
               "T_max": 8.708476,
               "worst_model": "EWMA",
               "p_value": 0.000999
             },
             {
-              "surviving_n": 98,
+              "surviving_n": 97,
               "T_max": 8.12305,
               "worst_model": "C2_Proxy_Robust",
               "p_value": 0.000999
             },
             {
-              "surviving_n": 97,
+              "surviving_n": 96,
               "T_max": 7.78814,
               "worst_model": "MEM",
               "p_value": 0.000999
             },
             {
-              "surviving_n": 96,
+              "surviving_n": 95,
               "T_max": 7.463336,
               "worst_model": "HAR-ABS",
               "p_value": 0.000999
             },
             {
-              "surviving_n": 95,
+              "surviving_n": 94,
               "T_max": 6.18,
               "worst_model": "GJR-t",
               "p_value": 0.000999
             },
             {
-              "surviving_n": 94,
+              "surviving_n": 93,
               "T_max": 4.904573,
               "worst_model": "GJR",
-              "p_value": 0.003996
-            },
-            {
-              "surviving_n": 93,
-              "T_max": 4.662,
-              "worst_model": "A4f-VIX-t",
-              "p_value": 0.015984
+              "p_value": 0.002997
             },
             {
               "surviving_n": 92,
-              "T_max": 4.579038,
-              "worst_model": "mf2_mem",
-              "p_value": 0.018981
+              "T_max": 4.662,
+              "worst_model": "A4f-VIX-t",
+              "p_value": 0.010989
             },
             {
               "surviving_n": 91,
-              "T_max": 4.556255,
-              "worst_model": "high_freq_only",
-              "p_value": 0.017982
+              "T_max": 4.579038,
+              "worst_model": "mf2_mem",
+              "p_value": 0.026973
             },
             {
               "surviving_n": 90,
-              "T_max": 4.444,
-              "worst_model": "GJR-N",
-              "p_value": 0.036963
+              "T_max": 4.556255,
+              "worst_model": "high_freq_only",
+              "p_value": 0.026973
             },
             {
               "surviving_n": 89,
-              "T_max": 4.346119,
-              "worst_model": "DMEM",
-              "p_value": 0.051948
+              "T_max": 4.444,
+              "worst_model": "GJR-N",
+              "p_value": 0.023976
             },
             {
               "surviving_n": 88,
+              "T_max": 4.346119,
+              "worst_model": "DMEM",
+              "p_value": 0.067932
+            },
+            {
+              "surviving_n": 87,
               "T_max": 3.779,
               "worst_model": "t-fixed5",
-              "p_value": 0.475524
+              "p_value": 0.467532
             }
           ]
         }
@@ -2103,10 +2100,10 @@
     }
   },
   "summary": {
-    "total_rows_consumed": 1048,
+    "total_rows_consumed": 1046,
     "total_mcs_runs": 18,
-    "rows_dropped_multi_asset": 1023,
-    "rows_dropped_empty_asset": 605,
+    "rows_dropped_multi_asset": 1021,
+    "rows_dropped_empty_asset": 598,
     "rows_dropped_bad_model_name": 65,
     "rows_dropped_same_model_pair": 0,
     "rows_dropped_invalid_dm": 0,
