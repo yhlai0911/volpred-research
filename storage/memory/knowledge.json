@@ -27965,7 +27965,7 @@
   {
     "item_id": "c4db347a",
     "category": "K1259/meta-analysis-MCS",
-    "content": "K1259 MCS/SPA Meta-Analysis (Phase 1+2) completed and post-review-audit cleaned. Phase 1 DM ledger 2730 rows / 236 K experiments / 16 assets (after 2026-04-28 generic-key false-positive sweep removed 11 rows: K649×4, K706×2, K744×2, K1059×2, K789×1 — all ttest/mcnemar non-DM hypothesis tests masquerading as DM via generic t/stat keys). Phase 1.5 main-thread asset backfill (105 K_ids, 67 singleton + 1023 multi → coverage 38%→78%) now reproducible via pinned phase15_asset_map.json + apply_phase15_backfill.py applier. Phase 2 Hansen-Lunde-Nason 2011 Variant A MCS: 18/20 per-asset runs (5 assets × 2 loss_fns × 2 alphas, with 0050.TW/MSE excluded due to insufficient_models). Post-audit MCS re-run with same seed=42, B=1000 confirmed superior_set stability — only difference is SPY/QLIKE drops cosmetic middle (K744 intraday-window pseudonym, NOT a vol model; had MIN_PAIRS_PER_MODEL rows but 0 valid pairs vs other candidates, contributed zero information). All real vol-model conclusions unchanged. Reviewer source: feature-dev:code-reviewer subagent fallback (claude-sonnet-4-6, 2026-04-28) per .claude/rules/experiments.md Codex CLI fallback clause; original verdict PASS-with-caveats (0 CRIT/0 SEV/3 MAJOR/2 MED/3 MINOR). All 3 MAJORs now resolved (commits d4c2faf1 / 53c1d559 / aff7b4a5): MAJOR-1 Phase 1.5 backfill scripted; MAJOR-2 generic-key false-positive filter via NON_DM_PATH_TOKENS; MAJOR-3 load_ledger docstring fix. Phase 3 article can cite K1259 as fully reviewed and provenance-clean. Lookahead protection: Phase 1 retrospective aggregation no temporal structure; Phase 2 consumes static ledger no forecast contamination.",
+    "content": "K1259 MCS/SPA Meta-Analysis (Phase 1+2) closure RETRACTED 2026-04-29 after Codex primary-path review (task task-moiszyai-2sik97, session 019dd4c9, 5m 5s) FAIL'ed the subagent-fallback PASS verdict. Subagent (claude-sonnet-4-6) reviewed 2026-04-28 PASS-with-caveats; restored Codex CLI 2026-04-28T21:58 + re-reviewed today found 2 NEW MAJORs that the subagent missed: (1) NON_DM_PATH_TOKENS blacklist (ttest/mcnemar/wilcoxon/kstest/kruskal) is undercovered — ledger STILL contains ~12 residual non-DM rows from statistical_tests×10 (K528/K594/K990/K1006), stat_test×1 (K658), welch×1 (K975), vs_zero×3 (K1006), all keyed via t_stat field which falls outside the original audit's generic-key (t/stat) subpopulation; (2) generic_key_audit.md methodology too narrow — only re-walked rows where first matched key was t or stat; _vs_ heuristic incorrectly treats non-DM tests like adaptive_vs_fixed as DM-evidence. MED finding: phase15_asset_map.json has target-asset semantic ambiguity for K1128/K1130/K1131 (TAIFEX TX experiments using VIX as lagged regime variable, not target). MINOR: inline comment 5 rows vs actual 11 rows. Phase 1 ledger row count 2741→2730 is correct given current filter implementation but 2730 is NOT DM-clean. Phase 2 MCS results still hold for the 12 residual non-DM rows because they would be filtered by MIN_PAIRS_PER_MODEL=2 (most appear ≤2 times) — but provenance-clean claim and 0.88 confidence are NOT supported. Pending: (a) implement MAJOR-1 fix in build_dm_ledger.py — choose positive DM gate (path must contain dm/harvey/hln) or extended blacklist (add welch/stat_test/statistical_test/vs_zero); (b) full-population re-audit of 2730 rows; (c) update knowledge entry + research_program.md + project_improvement_status.md to reflect post-fix state. Reviewer source: Codex CLI 0.121.0 primary path (post-restoration).",
     "evidence": [
       "experiments/k1259/build_dm_ledger.py (NON_DM_PATH_TOKENS filter)",
       "experiments/k1259/apply_phase15_backfill.py (Phase 1.5 applier)",
@@ -27975,9 +27975,10 @@
       "experiments/k1259/k1259_mcs_results.json (18/20 cells, post-audit)",
       "experiments/k1259/k1259_README_phase2_appendix.md",
       "experiments/k1259/codex_review.md (subagent fallback verdict + 3 MAJORs)",
-      "experiments/k1259/generic_key_audit.md (MAJOR-2 audit + filter)"
+      "experiments/k1259/generic_key_audit.md (MAJOR-2 audit + filter)",
+      "experiments/k1259/codex_review_v2.md (Codex primary-path FAIL verdict 2026-04-29)"
     ],
-    "confidence": 0.88,
+    "confidence": 0.75,
     "created_at": "2026-04-28T15:25:45.873634"
   }
 ]
