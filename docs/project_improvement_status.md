@@ -44,7 +44,9 @@ Last updated: **2026-04-23 (token optimization planning)**
 ### Research
 - ✅ **K1259 MCS/SPA meta-analysis 3-phase 完整落地**：Phase 1 ledger 2741 DM rows/236 K/16 assets (commit def4695b) → Phase 1.5 main-thread asset backfill 38%→78% (efd370f4) → Phase 2 HLN-2011 Variant A 18/20 per-asset MCS runs (5314dbd3) + CF-Rolling absence 分析 appendix (5bbeb48e)。**Key finding**: SPY QLIKE α=0.10 88/100 survive, A4f family dominant; GLD MSE 窄 set; α=0.10=0.20 identical; CF-Rolling 真正 absent（Trinity-only evaluation，never DM-compared pairwise）。
 - ✅ **K1258 forgetting-factor BMA completed** (commit b6c6225f, agent a09ba983 5.83 min)：H1 FAIL (no Harvey pass), H2 PASS (regime switching restored 10-80x), H3 PASS (optimal λ asset-specific), H4 λ=1.0 default。Structural insight: forgetting 修好 K1257 H3 concentration 但 switching 不 translate 為 predictive gain → BMA family 對 vol forecasting 結構性不足，regime gains 需 switching-model / mixture-of-experts。
-- ⏸️ **K1258/K1259 knowledge.json + feed pending Codex 04-24 review**（依 CLAUDE.md L1 實驗後先 review 再 finalize）。
+- ✅ **K1258 knowledge.json done** (entry 727e23ee, 2026-04-24 main-thread fallback `codex_review.md` PASS-with-caveats)。
+- ✅ **K1259 knowledge.json done** (entry c4db347a, 2026-04-28 subagent fallback `codex_review.md` PASS-with-caveats; agent a9496102fadd8a804, commit 7c0013b6)。
+- ⏸️ **K1258/K1259 feed publication** 推延至 Phase 3 article 階段（meta-analysis 完整 narrative 需 Phase 1+2 結果整合，非單獨 K-finding 文章）。
 
 ### Platform / Infrastructure
 - ✅ **event_jobs full pipeline wired**（round 6 發現 empty → round 13 populate FOMC T-2/T+0 commit aebaeab4 → round 14 root-fix run_due_jobs piggy-back expand_due_event_jobs commit cac18c1a → round 15 standard pattern doc commit 4d7d787c）。完整鏈：host cron `0 * * * *` → check_alerts → run_due_jobs → expand_due_event_jobs → materialize task → 下輪 claim-next。scheduler_tick.log 自 2026-04-19 size=0 的 dead scheduler 被 piggy-back 接管。
