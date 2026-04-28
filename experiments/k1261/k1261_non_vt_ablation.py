@@ -447,7 +447,15 @@ def bootstrap_ci(values, n_boot=N_BOOTSTRAP, ci=0.95):
 
 
 def aggregate_metrics(sim_results):
-    """Aggregate simulation results with bootstrap CI. K827v3 L261-307 (renamed n_vt → n_strategy)."""
+    """Aggregate simulation results with bootstrap CI. K827v3 L261-307 (renamed n_vt → n_strategy).
+
+    Two-tier counter (Codex review v2 MAJOR-2 fix, 2026-04-29): `n_total` counts
+    non-None values; `n_valid` counts only finite (`np.isfinite`) values; `n_collapse`
+    = n_total - n_valid flags cells where simulator produced inf/NaN (price-clamp
+    saturation, divide-by-zero, etc.). Aggregates (mean/std/median/q5/q95/min/max
+    /bootstrap_ci_95) computed only over finite subset to avoid inf contamination.
+    See `experiments/k1261/codex_review_v2.md` MAJOR-2 for full rationale.
+    """
     if not sim_results:
         return {}
 
@@ -457,22 +465,34 @@ def aggregate_metrics(sim_results):
 
     agg = {}
     for key in metric_keys:
-        values = [m[key] for m in sim_results if m[key] is not None]
-        if len(values) > 0:
-            ci_lo, ci_hi = bootstrap_ci(values)
+        raw_values = [m[key] for m in sim_results if m[key] is not None]
+        finite_values = [v for v in raw_values if np.isfinite(v)]
+        n_total = len(raw_values)
+        n_finite = len(finite_values)
+        if n_finite > 0:
+            ci_lo, ci_hi = bootstrap_ci(finite_values)
             agg[key] = {
-                'mean': float(np.mean(values)),
-                'std': float(np.std(values)),
-                'median': float(np.median(values)),
-                'q5': float(np.percentile(values, 5)),
-                'q95': float(np.percentile(values, 95)),
-                'min': float(np.min(values)),
-                'max': float(np.max(values)),
+                'mean': float(np.mean(finite_values)),
+                'std': float(np.std(finite_values)),
+                'median': float(np.median(finite_values)),
+                'q5': float(np.percentile(finite_values, 5)),
+                'q95': float(np.percentile(finite_values, 95)),
+                'min': float(np.min(finite_values)),
+                'max': float(np.max(finite_values)),
                 'bootstrap_ci_95': [ci_lo, ci_hi],
-                'n_valid': len(values),
+                'n_valid': n_finite,
+                'n_total': n_total,
+                'n_collapse': n_total - n_finite,
             }
         else:
-            agg[key] = None
+            agg[key] = {
+                'mean': None, 'std': None, 'median': None,
+                'q5': None, 'q95': None, 'min': None, 'max': None,
+                'bootstrap_ci_95': [None, None],
+                'n_valid': 0,
+                'n_total': n_total,
+                'n_collapse': n_total,
+            } if n_total > 0 else None
 
     total_nan = sum(m.get('n_nan_events', 0) for m in sim_results)
     total_clamp = sum(m.get('n_price_clamp', 0) for m in sim_results)
