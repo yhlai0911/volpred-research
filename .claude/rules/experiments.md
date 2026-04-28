@@ -30,6 +30,8 @@ paths:
     5. 若 default model PASS 就改回 config 鎖定（如 `model = "gpt-5.4"`）；若 default 仍 fail 才考慮 plugin 升級
   - **Fallback**：上述 diagnostic 全 fail 仍無法恢復 Codex 時，改派 `feature-dev:code-reviewer` subagent 做 independent fresh-context review（K1259 / K1261 / K1262 已走過此 path）。Knowledge entry 必註明 reviewer source（`Codex review` vs `code-reviewer subagent fallback`）。Bar 不變：CONDITIONAL PASS 以上才寫 knowledge.json。
   - **Codex 已於 2026-04-28 21:58 CST production-path 端到端驗證恢復**（`docs/error_log.md` RESOLVED entry；session `019dd462`，task `task-moioyr49-g0dg9v`）— primary path 是 Codex review，不是 fallback。
+  - **Subagent fallback PASS ≠ primary-path Codex PASS**（2026-04-29 K1259 教訓）：subagent 走過 PASS-with-caveats 後若 Codex 恢復可用，**必須**用 primary-path Codex 二次驗證 — 不可只靠 subagent verdict 標 closure。K1259 案例：subagent v1 PASS 標「provenance-clean」，1 天後 Codex v2 在同份 code 找到 12 個 residual non-DM rows（`statistical_tests`/`stat_test`/`welch`/`vs_zero` patterns 全 keyed via `t_stat` 欄位，落在原 audit subset 之外）。Closure 才能立。
+  - **Audit methodology hard rule**（2026-04-29 K1259 v2 教訓）：任何 ledger / dataset / output JSON 的 quality audit **必須 re-walk full population**，不可只 sample suspect subset。子集 audit 把 false negative 限在子集外的盲區（K1259 v1 只 audit `t`/`stat`-keyed rows，漏看 `t_stat` priority-5 keyed 的 12 residuals）。Audit doc 須明記：(a) 掃描範圍（全 population 或 subset criteria）、(b) blind-spot 分析（子集外有什麼可能漏掉）、(c) verification 方法（jq / hash / row-count invariant 等可驗證的 evidence）。
 
 ## Methodology 硬規則
 
