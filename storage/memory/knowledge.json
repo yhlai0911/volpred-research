@@ -27895,7 +27895,7 @@
   {
     "item_id": "f1d85a74",
     "category": "paper:P5-vt-crowding-abm",
-    "content": "K1261 Phase 1 ABM ablation (non-VT crowding test) — 4 treatments × 7 adoption × 500 MC = 10,500 sims in 132.3s wall (worktree agent ab6a1ce4). Forks K827v3 fixed-liquidity ABM (200 noise + 800 strategy, λ=0.005, γ=200). Strategy classes: VTAgent / TFAgent (momentum window=22, scaling=10) / MRAgent / NoiseAgent (constant 0.5). Verdict: H1+ (positive-feedback crowding is generic, NOT VT-specific). Strict 3-criterion detector (Sharpe drop >50% AND kurt >10 AND vol amp >50%) thresholds: TF @ 20%, MR @ 50%, NoiseControl null, VT_baseline @ 100%. MR 30% all 500 sims price collapse to ~1e-23 (legitimate finding, not bug — verified by inspection of final_price). TF 50% extreme runaway (vol = 242 × baseline 0.16, kurt 1412, 40,199 price clamps). Internal consistency PASS: Phase 1.0 sanity gate byte-exact match VT_baseline vs K827v3 stored 500-MC; 0% adoption identical across all 4 treatments; cross-treatment seed pairing int(adoption*100000)+sim_idx+42. Independent code review (a0b2e10e) CONDITIONAL PASS: 0 CRITICAL, 3 MAJOR all already disclosed in verdict. Required clarifications: (1) strict detector ≠ P5 paper 70% softer criterion — VT crosses at 100% under strict, internally consistent but not directly comparable to P5 70% figure. (2) MC seed-pairing applies to VT/TF/MR only; NoiseControl uses independent rng paths due to NoiseAgent extra draws. (3) NaN-as-finding gate verified by physical interpretation (price floor + zero returns), not solely n_valid heuristic. (4) Phase 1 preliminary; H1+ direction robust but threshold magnitudes specification-dependent (TF/MR scaling=10 may be aggressive). Implications for P5: paper rewrite requires Phase 2 robustness sweep (TF/MR scaling ∈ {1,3,5,10} × window ∈ {10,22,60}) + softer detector matching P5 criterion + λ/γ OAT + 用戶 confirm narrative shift to «positive-feedback crowding family, VT 是 representative case» before v3 framing change. Codex CLI fallback note: original Codex review (task-moh3azk7) failed gpt-5.5 version mismatch; review by feature-dev:code-reviewer subagent (independent fresh-context Claude) satisfies experiments.md SOP «獨立 reviewer pass» in spirit.",
+    "content": "K1261 P5 ABM Phase 1 ablation closure RETRACTED 2026-04-29 after Codex primary-path re-review (task task-moj1k5b2-lozeuq, session 019dd5a5, 2m 29s) caught 3 NEW MAJORs that 2026-04-27 subagent fallback (a0b2e10e CONDITIONAL PASS) missed. Original setup: 4 treatments (VT/TF/MR/NoiseControl) × 7 adoption × 500 MC = 14,000 sims, fork from K827v3 ABM (worktree agent ab6a1ce4). NEW MAJORs verified by main-thread jq audit: (1) MAJOR-1 threshold detector negative-baseline counterintuitive — k1261_phase1_main.py:243 computes (new-base)/abs(base)<-50% which is magnitude-aware not sign-aware; for TF baseline ~-0.83 / MR baseline ~-1.77 any '更負' Sharpe satisfies crit_a regardless of meaningful collapse. Verdict tables may misinterpret bad-strategy-getting-worse as crowding-induced collapse. (2) MAJOR-2 aggregate_metrics admits NaN/Inf as valid — verified MR 30% cell has ann_return.mean = 1.7976931348623157e+308 (sys.float_info.max ≈ inf) + ann_vol/kurtosis all null but n_valid=500 claims fully populated. Threshold detector treats non-finite as False → systematic instability underestimation. (3) MAJOR-3 vt_* field naming for non-VT treatments — TF/MR/NoiseControl results.json all write vt_sharpe/vt_return/vt_vol but values are each treatment's own strategy Sharpe, not VT's; provenance mislabel risk. MED: NoiseControl breaks common-random-number pairing claim. Pending fixes: MAJOR-2 most critical (re-run MR 30% with two-tier n_total/n_finite counter), MAJOR-1 rewrite criteria for negative baselines OR monotone loss function, MAJOR-3 rename vt_*->strategy_*, MED document NoiseControl RNG draw caveat. P5 paper citations need re-examination after fixes. K1261 review-cycle CLOSED → REOPENED. Reviewer source: Codex CLI 0.121.0 primary path.",
     "evidence": [
       "experiments/k1261/k1261_phase1_main.py",
       "experiments/k1261/k1261_non_vt_ablation.py",
@@ -27905,9 +27905,10 @@
       "experiments/k1261/k1261_sanity_verification.md",
       "experiments/k1261/README.md",
       "paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity.py",
-      "paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity_results.json"
+      "paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity_results.json",
+      "experiments/k1261/codex_review_v2.md (Codex primary-path FAIL verdict 2026-04-29)"
     ],
-    "confidence": 0.85,
+    "confidence": 0.65,
     "created_at": "2026-04-27T19:00:00.000000"
   },
   {
@@ -27978,7 +27979,7 @@
       "experiments/k1259/codex_review_v2.md (Codex primary-path FAIL verdict 2026-04-29)",
       "experiments/k1259/generic_key_audit.md (v1 + v2 closure block)"
     ],
-    "confidence": 0.90,
+    "confidence": 0.9,
     "created_at": "2026-04-28T15:25:45.873634"
   }
 ]
