@@ -1,31 +1,31 @@
 {
-  "timestamp": "2026-04-28T00:13:42Z",
+  "timestamp": "2026-04-28T06:28:35Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "Total draft=6 (<12 threshold). Breakdown: general=2 (<8 threshold), research=4 (at threshold, not below 4)."
+      "detail": "Total draft=6 (<12 threshold). Breakdown: research=4 (OK, threshold <4), general=2 (ALERT, threshold <8)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "strategy_metrics.json updated ~12 seconds ago (well within 26h threshold)."
+      "detail": "strategy_metrics.json mtime age ~9 seconds. Well within 26-hour threshold."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Last 30 lines checked. Most recent entries dated 2026-04-26. No entries for today (2026-04-28) or yesterday (2026-04-27)."
+      "detail": "No entries dated 2026-04-28 (today) or 2026-04-27 (yesterday) found in last 30 lines of docs/error_log.md. Most recent entries are from 2026-04-26."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 15 strategies have 0 nulls in last 3 portfolio_return entries."
+      "detail": "All 15 strategies have 0 nulls in last 3 portfolio_return entries. Strategies checked: slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, _market_daily, adaptive_tier."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold: >50)."
+      "detail": "0 uncommitted files. Threshold is >50."
     },
     {
       "name": "KNOWLEDGE_SIZE",
