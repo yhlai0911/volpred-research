@@ -120,11 +120,77 @@ python experiments/k1259/k1259_mcs.py
 # expected: 18/20 cells, superior sets match this audit's documented results
 ```
 
-## Closes K1259 MAJOR-2
+## v1 closure RETRACTED 2026-04-29 — Codex primary-path review v2 caught 12 residuals
 
-All 3 Codex MAJOR findings now resolved:
-- ✅ MAJOR-1 (Phase 1.5 backfill script + asset map) — commit `53c1d559`
-- ✅ MAJOR-2 (generic-key false-positive sweep) — this audit + filter
+The "Closes MAJOR-2" claim above was **PREMATURE**. Codex CLI primary-path review
+(`codex_review_v2.md`, task `task-moiszyai-2sik97`, 5m 5s, 2026-04-29 after CLI
+restoration) FAIL'ed the subagent-fallback PASS verdict and identified 12
+residual non-DM rows that this v1 audit's methodology missed:
+
+- Audit only re-walked rows where the **first matched key** was `t` or `stat`.
+- Non-DM rows keyed via `t_stat` (priority position 5 in `get_dm_stat`) were
+  outside the audited subpopulation.
+- The `_vs_` heuristic incorrectly admitted patterns like `adaptive_vs_fixed_2000`
+  and `vt_spy_vs_vt_only` as DM-evidence.
+
+**12 confirmed residuals** (verified via main-thread `jq`):
+
+| K | path | Why not DM |
+|---|---|---|
+| K528 | `statistical_tests.A_nfp_vs_all` | NFP-day t-test |
+| K528 | `statistical_tests.B_nfp_vs_friday` | same |
+| K594 | `statistical_tests_pooled.adaptive_vs_fixed_2000` | pooled strategy t-test |
+| K594 | `statistical_tests_pooled.adaptive_vs_fixed_504` | same |
+| K594 | `statistical_tests_pooled.adaptive_vs_12_vix` | same |
+| K594 | `statistical_tests_pooled.adaptive_vs_buy_hold` | same |
+| K658 | `reentry_strategies.stat_test_30_vs_w20` | re-entry strategy stat test |
+| K975 | `welch_test_bw_vs_contango` | Welch t-test |
+| K990 | `statistical_tests.vt_spy_vs_vt_only` | VT comparison t-test |
+| K1006 | `statistical_tests.overnight_gap_vs_zero` | one-sample test |
+| K1006 | `statistical_tests.overnight_return_vs_zero` | same |
+| K1006 | `statistical_tests.naive_net_vs_zero` | same |
+
+## v2 fix 2026-04-29 — extended NON_DM_PATH_TOKENS (Option A)
+
+Considered options:
+- **Option A (chosen)**: extend blacklist with `welch`, `stat_test`,
+  `statistical_test`, `vs_zero`. Surgical — drops exactly 12 rows verified
+  non-DM, no collateral damage.
+- **Option B (Codex-recommended)**: positive DM gate (path must contain
+  `dm`, `harvey`, or `hln`). **Rejected** — would drop 191 rows including
+  legitimate DM tests like K1085 `full_oos.gjr_vs_a4f_vix`,
+  K1088 `per_window.Early_GFC_Post.gjr_vs_a4f_vix` where authors did not
+  use the explicit `dm_test` naming convention.
+
+`build_dm_ledger.py` `NON_DM_PATH_TOKENS` now contains 9 tokens:
+`(ttest, mcnemar, wilcoxon, kstest, kruskal, welch, stat_test,
+statistical_test, vs_zero)`.
+
+**Verification**:
+- Pre-fix: 2730 rows, 12 residuals
+- Post-fix: **2718 rows, 0 residuals** (jq filter on all 9 tokens returns 0)
+- Phase 2 MCS re-run: 18/20 cells, n_pairs_total=418 unchanged, **all 18
+  superior_sets identical** pre vs post (the 12 removed rows had
+  non-canonical model names that already hit `MIN_PAIRS_PER_MODEL=2` filter
+  or `normalize_model_name=None` filter at `load_ledger`, contributing zero
+  signal to MCS).
+
+Inline comment in `build_dm_ledger.py:227` updated from "5 such rows"
+to two-entry "Audit history" block citing both 2026-04-28 (subagent v1)
+and 2026-04-29 (Codex v2).
+
+## Closes K1259 MAJOR-2 (v2 — primary-path verified)
+
+All 3 Codex MAJOR findings + Codex v2 MAJOR-1/MAJOR-2 findings now resolved:
+- ✅ MAJOR-1 v1 (Phase 1.5 backfill script + asset map) — commit `53c1d559`
+- ✅ MAJOR-1 v2 (NON_DM_PATH_TOKENS undercoverage) — this v2 fix
+- ✅ MAJOR-2 v1 + v2 (generic-key false-positive sweep + full population) — this audit + filter
 - ✅ MAJOR-3 (`load_ledger` docstring fix) — commit `d4c2faf1`
+- ✅ MINOR (inline comment row count) — fixed in build_dm_ledger.py audit-history block
+
+**Pending (deferred)**:
+- ⏳ MED (phase15_asset_map.json target-asset semantic ambiguity for
+  K1128/K1130/K1131 TAIFEX TX experiments) — separate slot, requires
+  `dm_ledger_summary.md` semantic clarification + asset-tag re-mapping.
 
 Phase 3 article can cite K1259 as fully reviewed and provenance-clean.

@@ -223,10 +223,21 @@ def find_asset_in_context(context: Iterable[str]) -> str:
 # ------ core extraction ------
 # Path segments containing these tokens are NOT Diebold-Mariano tests even
 # though they may have {t, p} or {stat, p_value} fields that get_dm_stat
-# could match via generic "t" / "stat" keys. Skipping them prevents
-# false-positive ledger rows. (Audit 2026-04-28 found 5 such rows from
-# K744 / K789 / K1059 — see generic_key_audit.md.)
-NON_DM_PATH_TOKENS = ("ttest", "mcnemar", "wilcoxon", "kstest", "kruskal")
+# could match via generic "t" / "stat" / "t_stat" keys. Skipping them prevents
+# false-positive ledger rows.
+#
+# Audit history:
+#   2026-04-28 (subagent fallback) — initial 5 tokens caught 11 rows from
+#     K649 / K706 / K744 / K789 / K1059. See generic_key_audit.md.
+#   2026-04-29 (Codex primary-path review v2) — caught 12 residual rows
+#     extracted via t_stat field (priority 5 in get_dm_stat) from K528 /
+#     K594 / K658 / K975 / K990 / K1006 under containers
+#     `statistical_tests*` / `stat_test_*` / `welch_test*` / `*_vs_zero`.
+#     Tokens extended below. See codex_review_v2.md.
+NON_DM_PATH_TOKENS = (
+    "ttest", "mcnemar", "wilcoxon", "kstest", "kruskal",
+    "welch", "stat_test", "statistical_test", "vs_zero",
+)
 
 
 def _path_is_non_dm(ctx_path: list[str]) -> bool:

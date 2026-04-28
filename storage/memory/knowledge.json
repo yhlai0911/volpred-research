@@ -27965,20 +27965,20 @@
   {
     "item_id": "c4db347a",
     "category": "K1259/meta-analysis-MCS",
-    "content": "K1259 MCS/SPA Meta-Analysis (Phase 1+2) closure RETRACTED 2026-04-29 after Codex primary-path review (task task-moiszyai-2sik97, session 019dd4c9, 5m 5s) FAIL'ed the subagent-fallback PASS verdict. Subagent (claude-sonnet-4-6) reviewed 2026-04-28 PASS-with-caveats; restored Codex CLI 2026-04-28T21:58 + re-reviewed today found 2 NEW MAJORs that the subagent missed: (1) NON_DM_PATH_TOKENS blacklist (ttest/mcnemar/wilcoxon/kstest/kruskal) is undercovered — ledger STILL contains ~12 residual non-DM rows from statistical_tests×10 (K528/K594/K990/K1006), stat_test×1 (K658), welch×1 (K975), vs_zero×3 (K1006), all keyed via t_stat field which falls outside the original audit's generic-key (t/stat) subpopulation; (2) generic_key_audit.md methodology too narrow — only re-walked rows where first matched key was t or stat; _vs_ heuristic incorrectly treats non-DM tests like adaptive_vs_fixed as DM-evidence. MED finding: phase15_asset_map.json has target-asset semantic ambiguity for K1128/K1130/K1131 (TAIFEX TX experiments using VIX as lagged regime variable, not target). MINOR: inline comment 5 rows vs actual 11 rows. Phase 1 ledger row count 2741→2730 is correct given current filter implementation but 2730 is NOT DM-clean. Phase 2 MCS results still hold for the 12 residual non-DM rows because they would be filtered by MIN_PAIRS_PER_MODEL=2 (most appear ≤2 times) — but provenance-clean claim and 0.88 confidence are NOT supported. Pending: (a) implement MAJOR-1 fix in build_dm_ledger.py — choose positive DM gate (path must contain dm/harvey/hln) or extended blacklist (add welch/stat_test/statistical_test/vs_zero); (b) full-population re-audit of 2730 rows; (c) update knowledge entry + research_program.md + project_improvement_status.md to reflect post-fix state. Reviewer source: Codex CLI 0.121.0 primary path (post-restoration).",
+    "content": "K1259 MCS/SPA Meta-Analysis (Phase 1+2) review-cycle TRULY closed 2026-04-29 after Codex primary-path review v2 caught 12 residual non-DM rows that 2026-04-28 subagent fallback missed. Phase 1 ledger 2718 rows / 236 K experiments / 16 assets (post v1 + v2 audit; original 2741 → −11 ttest/mcnemar v1 → −12 statistical_tests/welch/stat_test/vs_zero v2 → 2718 final). NON_DM_PATH_TOKENS now contains 9 tokens covering all known false-positive patterns. Phase 1.5 main-thread asset backfill (105 K_ids, scripted via apply_phase15_backfill.py + phase15_asset_map.json) reproducible. Phase 2 HLN-2011 Variant A MCS: 18/20 per-asset runs (5 assets × 2 loss_fns × 2 alphas, 0050.TW/MSE excluded insufficient_models). Post-v2 MCS re-run with seed=42, B=1000: superior_sets ALL 18 cells IDENTICAL to pre-v2 (the 12 removed rows had non-canonical model names that already hit MIN_PAIRS_PER_MODEL=2 or normalize_model_name=None filter, contributing zero MCS signal). n_pairs_total = 418 unchanged. All real vol-model conclusions UNCHANGED across both v1 and v2 audits — only cosmetic middle (K744 intraday-window pseudonym) removed from SPY/QLIKE in v1. Reviewer: Codex CLI 0.121.0 primary-path (post-restoration; session 019dd4c9 task task-moiszyai-2sik97), comparison vs subagent fallback v1 (claude-sonnet-4-6 2026-04-28). All 3 v1 MAJORs + 2 v2 MAJORs + MINOR resolved (commits d4c2faf1 / 53c1d559 / aff7b4a5 / 218f350c retraction / this commit fix). MED finding (phase15_asset_map.json target-asset semantic ambiguity for K1128/K1130/K1131 TAIFEX TX with VIX as conditioning variable) deferred to separate slot — requires dm_ledger_summary.md semantic clarification + asset-tag re-mapping. Phase 3 article can NOW cite K1259 as fully reviewed and provenance-clean. Lookahead protection: Phase 1 retrospective; Phase 2 static ledger consumption; no temporal contamination.",
     "evidence": [
-      "experiments/k1259/build_dm_ledger.py (NON_DM_PATH_TOKENS filter)",
+      "experiments/k1259/build_dm_ledger.py (NON_DM_PATH_TOKENS 9 tokens v2)",
       "experiments/k1259/apply_phase15_backfill.py (Phase 1.5 applier)",
-      "experiments/k1259/phase15_asset_map.json (105-K asset map)",
+      "experiments/k1259/phase15_asset_map.json (105-K asset map; MED note pending)",
       "experiments/k1259/k1259_mcs.py (HLN 2011 Variant A MCS)",
-      "experiments/k1259/dm_ledger.json (2730 rows, audit-clean)",
-      "experiments/k1259/k1259_mcs_results.json (18/20 cells, post-audit)",
+      "experiments/k1259/dm_ledger.json (2718 rows, post v2 audit)",
+      "experiments/k1259/k1259_mcs_results.json (18/20 cells, post-v2 superior_sets identical to v1)",
       "experiments/k1259/k1259_README_phase2_appendix.md",
-      "experiments/k1259/codex_review.md (subagent fallback verdict + 3 MAJORs)",
-      "experiments/k1259/generic_key_audit.md (MAJOR-2 audit + filter)",
-      "experiments/k1259/codex_review_v2.md (Codex primary-path FAIL verdict 2026-04-29)"
+      "experiments/k1259/codex_review.md (subagent v1 fallback verdict)",
+      "experiments/k1259/codex_review_v2.md (Codex primary-path FAIL verdict 2026-04-29)",
+      "experiments/k1259/generic_key_audit.md (v1 + v2 closure block)"
     ],
-    "confidence": 0.75,
+    "confidence": 0.90,
     "created_at": "2026-04-28T15:25:45.873634"
   }
 ]

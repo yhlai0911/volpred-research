@@ -4,21 +4,21 @@
 
 ## Overview
 
-- **Total DM rows**: 2730
-- **Unique K experiments contributing rows**: 233
-- **Unique model names**: 797
+- **Total DM rows**: 2718
+- **Unique K experiments contributing rows**: 228
+- **Unique model names**: 781
 - **Unique assets**: 16
 - **Loss functions observed**: ES, FZ, FZ1%, MSE, Parkinson, QLIKE
-- **Files scanned**: 711 | **without DM content**: 476
+- **Files scanned**: 711 | **without DM content**: 481
 
 ## DM statistic distribution
 
-- Mean dm_stat: 0.3164
-- Median dm_stat: 0.1933
-- Std dm_stat: 4.2161
-- Mean |dm_stat|: 2.7485
-- Share |dm_stat| > 3 (Harvey-sig): 828/2730 = 30.3%
-- p-values available: 2469/2730
+- Mean dm_stat: 0.3123
+- Median dm_stat: 0.1866
+- Std dm_stat: 4.2242
+- Mean |dm_stat|: 2.7547
+- Share |dm_stat| > 3 (Harvey-sig): 827/2718 = 30.4%
+- p-values available: 2457/2718
 
 ## Top 20 models by row frequency
 
@@ -49,7 +49,7 @@
 
 | Asset | Row count |
 |---|---:|
-| SPY | 463 |
+| SPY | 459 |
 | QQQ | 140 |
 | GLD | 112 |
 | 0050.TW | 73 |
@@ -65,13 +65,13 @@
 | SLV | 3 |
 | EWZ | 3 |
 | 2330.TW | 1 |
-| (no asset tag) | 1686 |
+| (no asset tag) | 1678 |
 
 ## Loss function coverage
 
 | Loss | Row count |
 |---|---:|
-| QLIKE | 2252 |
+| QLIKE | 2240 |
 | MSE | 321 |
 | Parkinson | 86 |
 | FZ | 64 |
@@ -130,10 +130,7 @@
 - `SLV` : 3 rows
 - `EWZ` : 3 rows
 
-**Models appearing in <=2 DM rows**: 345 (listing first 40)
-- overnight_gap
-- overnight_return
-- naive_net
+**Models appearing in <=2 DM rows**: 330 (listing first 40)
 - dm_gjr
 - dm_test_base
 - ssvs
@@ -171,9 +168,12 @@
 - A4f_sum
 - GJR_oc__r2_close
 - GJR_oc__r2_oc
-- ... (+305 more)
+- A4f_close__r2_close
+- A4f_close__r2_oc
+- HAR-RSk
+- ... (+290 more)
 
-**1686 rows have no asset tag.** These inherit single-asset K defaults (often SPY) but were not machine-tagged. Phase 2 MCS should re-inspect and backfill.
+**1678 rows have no asset tag.** These inherit single-asset K defaults (often SPY) but were not machine-tagged. Phase 2 MCS should re-inspect and backfill.
 
 ## 3 representative rows
 
