@@ -129,7 +129,7 @@ As a baseline we test whether BTC realized volatility Granger-causes VIX in a st
 \text{VIX}_t = \alpha_0 + \sum_{j=1}^{\ell} \alpha_j \text{VIX}_{t-j} + \sum_{j=1}^{\ell} \beta_j \text{RV}^{(20)}_{\text{btc}, t-j} + \varepsilon_t
 \label{eq:granger_unrestricted}
 \end{equation}
-and the restricted regression that drops the $\beta_j$ terms; the joint null $H_0: \beta_1 = \cdots = \beta_\ell = 0$ is tested with a standard $F$-test under heteroskedasticity- and autocorrelation-consistent (HAC) standard errors using the Newey-West kernel with the automatic bandwidth selection rule of \citet{andrews1991}, the default specification used by the \texttt{statsmodels.tsa.stattools.grangercausalitytests} routine that generates our $F$-statistics. We tabulate $F$-statistics and $p$-values across lags 1 through 10 and treat the symmetric Granger result as the linear-causality benchmark against which the asymmetric and tail-conditional specifications below are compared.
+and the restricted regression that drops the $\beta_j$ terms. The joint null $H_0: \beta_1 = \cdots = \beta_\ell = 0$ is tested with a standard $F$-test under heteroskedasticity- and autocorrelation-consistent (HAC) standard errors. We use the Newey-West kernel with the automatic bandwidth selection rule of \citet{andrews1991}, which is the default specification of the \texttt{statsmodels.tsa.stattools.grangercausalitytests} routine that generates our $F$-statistics. We tabulate $F$-statistics and $p$-values across lags 1 through 10 and treat the symmetric Granger result as the linear-causality benchmark against which the asymmetric and tail-conditional specifications below are compared.
 
 \subsection{Asymmetric Granger causality (Hatemi-J)}
 \label{subsec:granger_asym}
@@ -309,7 +309,7 @@ The U.S.\ approval of spot BTC ETFs in January 2024 plausibly altered the BTC ma
 
 The three in-sample results in \S\ref{sec:results} establish that the BTC-to-VIX channel is asymmetric, tail-concentrated with sign reversal, and concentrated in the COVID-2020 subperiod. The natural next question is whether this in-sample structure translates into out-of-sample forecasting power. We test the augmented specification of Eq.~(\ref{eq:oos_aug}) against the AR baseline over the 1{,}826-day OOS window 2019-01-01 to 2026-04-08.
 
-Before reporting the DM test, we briefly summarize the in-sample behavior of the augmenting coefficient $\gamma$ in Eq.~(\ref{eq:oos_aug}). Across the rolling re-estimations covering the OOS window, the in-sample $t$-statistic for $\gamma$ is small in absolute value (median below 1.5) and changes sign across windows: $\gamma$ is positive in roughly half the rolling windows and negative in the remainder, with no monotonic time-trend in the sign. The absence of a stable in-sample sign for $\gamma$ is itself diagnostic --- a robust point-forecast contribution would require a stable, statistically significant in-sample sign that the rolling estimation does not deliver. The Diebold-Mariano test under squared-error loss therefore returns $t = -0.98$ with $p = 0.33$, both well below the \citet{harvey2016} $|t| > 3$ threshold for newly proposed predictors and even below the conventional $|t| > 1.96$ benchmark.% source: experiments/k1025/k1025_results.json .forecast_evaluation
+The Diebold-Mariano test under squared-error loss returns $t = -0.98$ with $p = 0.33$, both well below the \citet{harvey2016} $|t| > 3$ threshold for newly proposed predictors and even below the conventional $|t| > 1.96$ benchmark.\footnote{The Online-replication archive reports the single rolling DM statistic and pooled MSE/MAE/QLIKE losses (Table~\ref{tab:oos}); diagnostics on the rolling-window in-sample $\hat\gamma$ path (sign stability, $t$-statistic distribution across re-estimations) are left to a follow-up extension. The pooled DM null does not by itself rule out a stable, sign-conditional $\gamma$; what we report is a discipline-level no-improvement result on average loss, not a structural rejection of the underlying $\gamma$.}% source: experiments/k1025/k1025_results.json .forecast_evaluation
  The augmented specification's MSE is 4.478 versus the AR baseline's 4.467 --- a 0.24\% \emph{deterioration} rather than improvement. Under MAE, the augmented specification deteriorates by 0.34\%; under QLIKE, the two specifications are statistically indistinguishable to four decimals.
 
 \begin{table}[H]
@@ -378,17 +378,17 @@ Adrian, T. and Brunnermeier, M.K. (2016).
 \newblock {\em American Economic Review}, 106(7):1705--1741.
 \newblock \url{https://doi.org/10.1257/aer.20120555}
 
-\bibitem[Andrews, 1991]{andrews1991}
-Andrews, D.W.K. (1991).
-\newblock Heteroskedasticity and autocorrelation consistent covariance matrix estimation.
-\newblock {\em Econometrica}, 59(3):817--858.
-\newblock \url{https://doi.org/10.2307/2938229}
-
 \bibitem[Akyildirim et al., 2020]{akyildirim2020}
 Akyildirim, E., Corbet, S., Lucey, B., Sensoy, A., and Yarovaya, L. (2020).
 \newblock The relationship between implied volatility and cryptocurrency returns.
 \newblock {\em Finance Research Letters}, 33:101212.
 \newblock \url{https://doi.org/10.1016/j.frl.2019.06.010}
+
+\bibitem[Andrews, 1991]{andrews1991}
+Andrews, D.W.K. (1991).
+\newblock Heteroskedasticity and autocorrelation consistent covariance matrix estimation.
+\newblock {\em Econometrica}, 59(3):817--858.
+\newblock \url{https://doi.org/10.2307/2938229}
 
 \bibitem[Bouri et al., 2020]{bouri2020}
 Bouri, E., Shahzad, S.J.H., Roubaud, D., Kristoufek, L., and Lucey, B. (2020).
