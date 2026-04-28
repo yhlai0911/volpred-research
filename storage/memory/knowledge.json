@@ -27965,16 +27965,19 @@
   {
     "item_id": "c4db347a",
     "category": "K1259/meta-analysis-MCS",
-    "content": "K1259 MCS/SPA Meta-Analysis (Phase 1+2) completed; Phase 1 DM ledger built (2741 rows, 236 K experiments, 16 assets) + Phase 1.5 main-thread asset backfill (coverage 38%→78%) + Phase 2 Hansen-Lunde-Nason 2011 Variant A MCS 18/20 per-asset runs (5 assets × 2 loss_fns × 2 alphas, with 0050.TW/MSE excluded due to insufficient_models). Key findings (per k1259_README_phase2_appendix.md): SPY QLIKE α=0.10 Superior Set 88/100 models survived (very weak elimination); A4f family dominant; α=0.10=0.20 yield identical superior sets (independent bootstraps but algorithm stops at same p); GLD MSE narrow set; CF-Rolling truly absent from ledger (Trinity-only evaluation, never DM-compared pairwise). Reviewer source: feature-dev:code-reviewer subagent fallback (claude-sonnet-4-6, 2026-04-28) per .claude/rules/experiments.md Codex CLI fallback clause; verdict PASS-with-caveats (0 CRIT/0 SEV/3 MAJOR/2 MED/3 MINOR). 3 MAJORs are documentation/provenance issues (Phase 1.5 backfill script not committed; get_dm_stat false-positive risk on generic 't'/'stat' keys; load_ledger docstring/code mismatch on loss_fn filter) — non-blocking for knowledge.json. MCS algorithm + bootstrap + seed + lookahead protection all PASS. Lookahead protection: Phase 1 retrospective aggregation no temporal structure; Phase 2 consumes static ledger no forecast contamination.",
+    "content": "K1259 MCS/SPA Meta-Analysis (Phase 1+2) completed and post-review-audit cleaned. Phase 1 DM ledger 2730 rows / 236 K experiments / 16 assets (after 2026-04-28 generic-key false-positive sweep removed 11 rows: K649×4, K706×2, K744×2, K1059×2, K789×1 — all ttest/mcnemar non-DM hypothesis tests masquerading as DM via generic t/stat keys). Phase 1.5 main-thread asset backfill (105 K_ids, 67 singleton + 1023 multi → coverage 38%→78%) now reproducible via pinned phase15_asset_map.json + apply_phase15_backfill.py applier. Phase 2 Hansen-Lunde-Nason 2011 Variant A MCS: 18/20 per-asset runs (5 assets × 2 loss_fns × 2 alphas, with 0050.TW/MSE excluded due to insufficient_models). Post-audit MCS re-run with same seed=42, B=1000 confirmed superior_set stability — only difference is SPY/QLIKE drops cosmetic middle (K744 intraday-window pseudonym, NOT a vol model; had MIN_PAIRS_PER_MODEL rows but 0 valid pairs vs other candidates, contributed zero information). All real vol-model conclusions unchanged. Reviewer source: feature-dev:code-reviewer subagent fallback (claude-sonnet-4-6, 2026-04-28) per .claude/rules/experiments.md Codex CLI fallback clause; original verdict PASS-with-caveats (0 CRIT/0 SEV/3 MAJOR/2 MED/3 MINOR). All 3 MAJORs now resolved (commits d4c2faf1 / 53c1d559 / aff7b4a5): MAJOR-1 Phase 1.5 backfill scripted; MAJOR-2 generic-key false-positive filter via NON_DM_PATH_TOKENS; MAJOR-3 load_ledger docstring fix. Phase 3 article can cite K1259 as fully reviewed and provenance-clean. Lookahead protection: Phase 1 retrospective aggregation no temporal structure; Phase 2 consumes static ledger no forecast contamination.",
     "evidence": [
-      "experiments/k1259/build_dm_ledger.py",
-      "experiments/k1259/k1259_mcs.py",
-      "experiments/k1259/dm_ledger.json (Phase 1.5 backfilled)",
-      "experiments/k1259/k1259_mcs_results.json",
+      "experiments/k1259/build_dm_ledger.py (NON_DM_PATH_TOKENS filter)",
+      "experiments/k1259/apply_phase15_backfill.py (Phase 1.5 applier)",
+      "experiments/k1259/phase15_asset_map.json (105-K asset map)",
+      "experiments/k1259/k1259_mcs.py (HLN 2011 Variant A MCS)",
+      "experiments/k1259/dm_ledger.json (2730 rows, audit-clean)",
+      "experiments/k1259/k1259_mcs_results.json (18/20 cells, post-audit)",
       "experiments/k1259/k1259_README_phase2_appendix.md",
-      "experiments/k1259/codex_review.md (subagent fallback verdict)"
+      "experiments/k1259/codex_review.md (subagent fallback verdict + 3 MAJORs)",
+      "experiments/k1259/generic_key_audit.md (MAJOR-2 audit + filter)"
     ],
-    "confidence": 0.8,
+    "confidence": 0.88,
     "created_at": "2026-04-28T15:25:45.873634"
   }
 ]
