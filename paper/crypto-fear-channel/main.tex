@@ -1,6 +1,7 @@
 % Paper 10: The Crypto Fear Channel — Asymmetric BTC-Equity Volatility Spillover
-% main.tex: canonical full body draft (renamed from body_v5.tex 2026-04-28)
-% 9 sections, 15 pages, 6 tables, 19 bibitems, ~4,887 body words.
+% main.tex: canonical full body draft (renamed from body_v5.tex 2026-04-28;
+%           v2.2 batch fix 2026-04-28 — 11 issues from v1 review closed)
+% 9 sections, 16+ pages, 6 tables, 22 bibitems, ~4,900+ body words.
 % Numbers all sourced from experiments/k1025/k1025_results.json
 % (verified by reproduce.py 29/29 byte-match, alert_level=green).
 
@@ -24,7 +25,7 @@
 
 \begin{abstract}
 \noindent Using daily returns on SPY, BTC-USD, and VIX from 2015-02 to 2026-04 ($N = 2{,}812$), we document three stylized facts about the crypto-to-equity volatility spillover. First, the spillover is \emph{asymmetric}: Bitcoin downside volatility Granger-causes VIX at lags 1--5, whereas Bitcoin upside volatility does not (symmetric Granger tests covering lags 1--10 corroborate the broader directional result).% source: experiments/k1025/k1025_results.json .asymmetric_granger (lags 1-5) + .granger_causality.btc_rv_to_vix (symmetric 1-10)
- Second, the spillover is \emph{tail-concentrated with sign reversal}: the quantile-regression coefficient of VIX on BTC realized variance is significantly \emph{negative} at lower quantiles ($-2.86$ at $\tau = 0.05$; $-2.34$ at $\tau = 0.25$), indicating bull-market decoupling, then turns positive at the median ($+2.61$) and amplifies to $+22.31$ at the 95th percentile, yielding an $8.5\times$ upper-tail amplification relative to the median. Third, the spillover is \emph{regime-dependent}: in a five-subperiod breakdown, Granger causality is statistically significant only during 2020 ($F = 11.05$, $p < 0.001$) and non-significant in 2015--2017, 2018--2019, 2021--2022, and 2023--2026. In the Diebold-Yilmaz framework, Bitcoin is a \emph{net receiver}, rehabilitating the narrative from ``crypto as a fear originator'' to ``crypto as a fear amplifier'' conditional on pre-existing equity stress. Out-of-sample forecasts, however, show that adding BTC realized volatility does not statistically improve an AR model of VIX (Diebold-Mariano $t = -0.98$, $p = 0.33$), highlighting that Granger causality is a necessary but not sufficient condition for forecastability. Taken together, our findings reframe the crypto-equity spillover as a \emph{crisis-time amplifier}: informative for ex-post risk attribution and margin design, but inadequate as an ex-ante predictor of equity fear. \\
+ Second, the spillover is \emph{tail-concentrated with sign reversal}: the quantile-regression coefficient of VIX on BTC realized variance is significantly \emph{negative} at lower quantiles ($-2.86$ at $\tau = 0.05$; $-2.34$ at $\tau = 0.25$), indicating bull-market decoupling, then turns positive at the median ($+2.61$ at $\tau = 0.5$), continues climbing through the upper interquartile range ($+8.76$ at $\tau = 0.75$), and amplifies to $+22.31$ at the 95th percentile, yielding an $8.5\times$ upper-tail amplification relative to the median. Third, the spillover is \emph{regime-dependent}: in a five-subperiod breakdown, Granger causality is statistically significant only during 2020 ($F = 11.05$, $p < 0.001$) and non-significant in the other four subperiods (2015--2017, 2018--2019, 2021--2022, and 2023--2026). In the Diebold-Yilmaz framework, Bitcoin is a \emph{net receiver}, rehabilitating the narrative from ``crypto as a fear originator'' to ``crypto as a fear amplifier'' conditional on pre-existing equity stress. Out-of-sample forecasts, however, show that adding BTC realized volatility does not statistically improve an AR model of VIX (Diebold-Mariano $t = -0.98$, $p = 0.33$), highlighting that Granger causality is a necessary but not sufficient condition for forecastability. Taken together, our findings reframe the crypto-equity spillover as a \emph{crisis-time amplifier}: informative for ex-post risk attribution and margin design, but inadequate as an ex-ante predictor of equity fear. \\
 
 \noindent\textbf{Keywords:} volatility spillover, Bitcoin, VIX, asymmetric causality, quantile regression, Diebold-Yilmaz, crypto-equity linkage \\
 \textbf{JEL:} G11, G15, G17, C22
@@ -49,7 +50,7 @@ We resolve this tension by decomposing the spillover along three dimensions that
 
 We make three contributions to the literature. First, by combining asymmetric Granger causality, quantile regression for tail dependence, Diebold-Yilmaz spillover direction, and an honest out-of-sample forecasting test in a single framework, we show that each dimension tells a distinct story that prior single-technique studies have missed. Second, the regime-dependent finding --- that COVID-2020 is a structural watershed --- implies that volatility spillover from crypto is a \emph{crisis-time amplifier} rather than a steady-state channel, with direct implications for margin and capital requirements during regime transitions. Third, the predictive-power null, reported transparently rather than hidden, contributes to a growing methodological awareness in the volatility forecasting literature that in-sample significance and out-of-sample usefulness can diverge substantially \citep{harvey2016, conrad2020}.
 
-The remainder of the paper is organized as follows. Section~\ref{sec:lit} surveys the crypto-equity spillover literature and positions our contribution. Section~\ref{sec:data} describes the data and preliminary diagnostics. Section~\ref{sec:methodology} details the five methodological building blocks. Sections~\ref{sec:results} and~\ref{sec:robustness} present the main results and robustness checks. Section~\ref{sec:oos} reports the out-of-sample forecasting evaluation. Section~\ref{sec:discussion} discusses mechanisms and policy implications. Section~\ref{sec:conclusion} concludes.
+The remainder of the paper is organized as follows. Section~\ref{sec:lit} surveys the crypto-equity spillover literature and positions our contribution. Section~\ref{sec:data} describes the data and preliminaries. Section~\ref{sec:methodology} details the four core methodological building blocks (asymmetric Granger, quantile regression, Diebold-Yilmaz, Diebold-Mariano), preceded by a symmetric-Granger baseline. Sections~\ref{sec:results} and~\ref{sec:robustness} present the main results and robustness checks. Section~\ref{sec:oos} reports the out-of-sample forecasting evaluation. Section~\ref{sec:discussion} discusses mechanisms and policy implications. Section~\ref{sec:conclusion} concludes.
 
 \section{Literature Review}
 \label{sec:lit}
@@ -146,7 +147,7 @@ We test the two null hypotheses, $H_0^+: \beta^{+}_1 = \cdots = \beta^{+}_\ell =
 \subsection{Quantile regression for tail dependence}
 \label{subsec:qr}
 
-Linear regression measures the conditional mean response of VIX to BTC RV; conditional on the documented heavy tails of both series and the sign-reversing structure we will document, the conditional mean is uninformative about regime-specific transmission. We follow \citet{koenker1978} and estimate quantile regressions of VIX on BTC realized variance at four representative quantiles $\tau \in \{0.05, 0.25, 0.50, 0.95\}$:
+Linear regression measures the conditional mean response of VIX to BTC RV; conditional on the documented heavy tails of both series and the sign-reversing structure we will document, the conditional mean is uninformative about regime-specific transmission. We follow \citet{koenker1978} and estimate quantile regressions of VIX on BTC realized variance at five representative quantiles $\tau \in \{0.05, 0.25, 0.50, 0.75, 0.95\}$:
 \begin{equation}
 Q_{\tau}(\text{VIX}_t \mid \text{RV}^{(20)}_{\text{btc}, t-1}) = \alpha_\tau + \beta_\tau \cdot \text{RV}^{(20)}_{\text{btc}, t-1},
 \label{eq:qr}
@@ -166,7 +167,7 @@ We test whether the in-sample asymmetry, tail-amplification, and regime-stabilit
 \text{VIX}_t = \alpha_0 + \sum_{j=1}^{p} \alpha_j \text{VIX}_{t-j} + \gamma \cdot \text{RV}^{(20)}_{\text{btc}, t-1} + u_t.
 \label{eq:oos_aug}
 \end{equation}
-Both models are re-estimated on a rolling basis, and one-day-ahead point forecasts are generated for each day in the OOS window 2019-01-01 to 2026-04-08 (1{,}826 observations). Forecast errors are evaluated under squared-error loss, and the difference in loss between the two specifications is tested with the \citet{diebold1995} test of equal predictive accuracy under the \citet{harvey2016} threshold $|t| > 3$ for newly proposed predictors --- a tighter discipline than the conventional $|t| > 1.96$ benchmark, motivated by the multiple-testing concerns reviewed in \citet{conrad2020}. Failure to reject the null at this threshold is interpreted as a transparent signal that, despite in-sample causal structure, BTC realized volatility does not improve VIX point forecasts on average over the long OOS sample.
+Both models are re-estimated on a rolling basis, and one-day-ahead point forecasts are generated for each day in the OOS window 2019-01-01 to 2026-04-08 (1{,}826 observations). Forecast errors are evaluated under squared-error loss, and the difference in loss between the two specifications is tested with the \citet{diebold1995} test of equal predictive accuracy with the small-sample adjustment of \citet{harvey1997}, evaluated under the \citet{harvey2016} threshold $|t| > 3$ for newly proposed predictors --- a tighter discipline than the conventional $|t| > 1.96$ benchmark, motivated by the multiple-testing concerns reviewed in \citet{conrad2020}. Failure to reject the null at this threshold is interpreted as a transparent signal that, despite in-sample causal structure, BTC realized volatility does not improve VIX point forecasts on average over the long OOS sample.
 
 \section{Main Results}
 \label{sec:results}
@@ -201,7 +202,9 @@ Lag & $F$ & $p$ & $F$ & $p$ \\
 \end{table}
 
 The asymmetry is corroborated by symmetric Granger tests over a broader lag window. Pooling the positive and negative innovations into a single specification, the symmetric BTC RV $\to$ VIX test rejects the joint null at lags 2 through 10 with $p$-values from $0.021$ down to $10^{-7}$; the lag-1 specification is non-significant ($F = 0.64$, $p = 0.42$).% source: experiments/k1025/k1025_results.json .granger_causality.btc_rv_to_vix (lags 1-10)
- The lag-1 non-rejection is consistent with a same-day-and-overnight propagation horizon: the asymmetric-decomposition test, which extracts the negative-branch signal directly, recovers significance at lag 1 precisely because it isolates the downside component that the symmetric test cannot disentangle. Reading the two tables jointly: BTC RV does Granger-cause VIX, but the entire signal lives in the downside half of the BTC innovation distribution.
+
+
+\paragraph{Asymmetric vs.\ symmetric Granger: reading the lag-1 result.} The lag-1 contrast is the cleanest diagnostic in our test battery for why asymmetric decomposition matters. The symmetric specification at lag 1 averages over the (small, possibly zero) upside coefficient and the (large, positive) downside coefficient, producing the pooled $F = 0.64$ ($p = 0.42$) non-rejection. Once the two branches are estimated separately as in Eq.~(\ref{eq:granger_asym}), the downside-branch test recovers $F = 18.96$ ($p < 10^{-5}$): the lag-1 BTC-to-VIX channel is real but mechanically invisible to a sign-pooled symmetric test. Reading the two tables jointly: BTC RV does Granger-cause VIX, but the entire signal lives in the downside half of the BTC innovation distribution. This is a clean illustration of why asymmetric and symmetric Granger are not interchangeable diagnostics; using only the symmetric test would have led us to mis-time the predictive horizon by one lag.
 
 \subsection{Tail dependence with sign reversal}
 \label{subsec:r_qr}
@@ -254,7 +257,7 @@ Subperiod & $N$ & Best lag & $F$ & $p$ \\
 \end{flushleft}
 \end{table}
 
-The DCC correlation by VIX regime corroborates the regime-dependence finding from a different angle. Sorting trading days into four VIX regimes (Low: VIX $\le$ 15; Normal: 15 $<$ VIX $\le$ 22; High: 22 $<$ VIX $\le$ 30; Crisis: VIX $>$ 30), the mean BTC-SPY DCC correlation rises monotonically from 0.07 in the Low regime to 0.27 in Normal, 0.45 in High, and 0.41 in Crisis (Table~\ref{tab:dcc}). The percentage of days with positive correlation rises from 62\% in Low to 95\% in High and 98\% in Crisis. Bitcoin's purported diversification value relative to equities is therefore essentially absent precisely when investors most need it.
+The DCC correlation by VIX regime corroborates the regime-dependence finding from a different angle. Sorting trading days into four VIX regimes (Low: VIX $\le$ 15; Normal: 15 $<$ VIX $\le$ 22; High: 22 $<$ VIX $\le$ 30; Crisis: VIX $>$ 30), the mean BTC-SPY DCC correlation rises near-monotonically from 0.07 in the Low regime to 0.27 in Normal, peaking at 0.45 in High, and remaining elevated at 0.41 in Crisis (Table~\ref{tab:dcc}; the slight Crisis dip from 0.45 to 0.41 reflects the small Crisis-regime sample of $n = 63$). The percentage of days with positive correlation rises from 62\% in Low to 95\% in High and 98\% in Crisis. Bitcoin's purported diversification value relative to equities is therefore essentially absent precisely when investors most need it.
 
 \begin{table}[H]
 \centering
@@ -275,7 +278,7 @@ Crisis (VIX$>$30)       & 63    & 0.409 & 0.488 & 0.162 & 98.4 \\
 \end{flushleft}
 \end{table}
 
-Finally, the Diebold-Yilmaz spillover analysis quantifies directionality. Across the 512 rolling 252-day windows in the sample, the total spillover index averages 90.1\% with very low variation (std.\ 0.21\%), indicating that volatility shocks among $\{$VIX, $\text{RV}^{(20)}_{\text{spy}}$, $\text{RV}^{(20)}_{\text{btc}}\}$ are persistently and almost completely cross-transmitted. The decomposition reveals, however, that BTC is a \emph{net receiver}: the average shock contribution \emph{from} BTC to the system is 21.5\%, while BTC's average net spillover is $-76.9$ percentage points.% source: experiments/k1025/k1025_results.json .spillover_index
+Finally, the Diebold-Yilmaz spillover analysis quantifies directionality. Across the 512 rolling 252-day windows in the sample, the total spillover index averages 90.1\% with very low variation (standard deviation 0.21~percentage points; min 89.79\%, max 90.81\%), indicating that volatility shocks among $\{$VIX, $\text{RV}^{(20)}_{\text{spy}}$, $\text{RV}^{(20)}_{\text{btc}}\}$ are persistently and almost completely cross-transmitted. The decomposition reveals, however, that BTC is a \emph{net receiver}: the average shock contribution \emph{from} BTC to the system is 21.5\%, while BTC's average net spillover is $-76.9$ percentage points.% source: experiments/k1025/k1025_results.json .spillover_index
  Combined with the Granger and quantile-regression results, the directional finding reframes the crypto-equity link from ``crypto as fear originator'' to ``crypto as fear amplifier conditional on pre-existing equity stress'' --- a refinement that has direct implications for prudential policy (\S\ref{sec:discussion}).
 
 \section{Robustness}
@@ -286,8 +289,8 @@ This section reports three robustness checks on the headline findings of \S\ref{
 \subsection{Spillover-index stability across rolling windows}
 \label{subsec:r_spillover}
 
-The Diebold-Yilmaz total spillover index is computed on each of 512 rolling 252-trading-day windows. The mean is 90.11\% with a standard deviation of only 0.21\%, ranging from a minimum of 89.79\% to a maximum of 90.81\% across the entire sample.% source: experiments/k1025/k1025_results.json .spillover_index
- The remarkable stability of the total index --- a swing of just 1.0~percentage point across an 11-year period that includes COVID-2020, the 2022 inflation regime, and the 2024 ETF approval --- indicates that the \emph{cross-asset variance-decomposition geometry} of the BTC--SPY--VIX system is essentially constant, even as individual pairwise correlations and Granger structures shift dramatically. The corollary is that the regime-dependence we document in \S\ref{subsec:r_regime} is \emph{not} an artifact of structural breaks in the underlying VAR system: the variance-decomposition shares move by less than 1~percentage point even as the within-period Granger $F$-statistic ranges from 0.23 (crypto winter) to 11.05 (COVID-2020). The spillover index and the Granger test are measuring different objects --- aggregate connectedness vs.\ directed predictability --- and the regime story belongs to the latter.
+The Diebold-Yilmaz total spillover index is computed on each of 512 rolling 252-trading-day windows. The mean is 90.11\% with a standard deviation of only 0.21~percentage points (i.e., the rolling spillover ranges from 89.79\% to 90.81\%, a peak-to-trough swing of about 1~percentage point across the entire sample).% source: experiments/k1025/k1025_results.json .spillover_index
+ The remarkable stability of the total index --- a swing of just 1.0~percentage point across an 11-year period that includes COVID-2020, the 2022 inflation regime, and the 2024 ETF approval --- indicates that the \emph{cross-asset variance-decomposition geometry} of the BTC--SPY--VIX system is essentially constant, even as individual pairwise correlations and Granger structures shift dramatically. The corollary is that the regime-dependence we document in \S\ref{subsec:r_regime} is \emph{not} an artifact of structural breaks in the underlying VAR system: the variance-decomposition shares move by less than 1~percentage point even as the within-period Granger $F$-statistic ranges from a minimum of 0.23 (2018--2019 crypto winter) to a maximum of 11.05 (COVID-2020) --- a 48-fold spread. The spillover index and the Granger test are measuring different objects --- aggregate connectedness vs.\ directed predictability --- and the regime story belongs to the latter.
 
 The directional decomposition is similarly stable. BTC's average ``from-system'' spillover (the share of BTC RV variance attributable to VIX and SPY shocks) is 21.5\% across the rolling windows; the average net spillover (to minus from) is $-76.9$ percentage points. BTC remains a net receiver in every window: in no rolling 252-day subsample does the variance-decomposition flip BTC into a net-sender position. The ``crypto as fear amplifier conditional on equity stress'' interpretation is therefore a structural feature, not a window-specific finding.
 
@@ -441,17 +444,17 @@ Diks, C. and Panchenko, V. (2006).
 \newblock {\em Journal of Economic Dynamics and Control}, 30(9--10):1647--1669.
 \newblock \url{https://doi.org/10.1016/j.jedc.2005.08.008}
 
-\bibitem[Harvey et al., 2016]{harvey2016}
-Harvey, C.R., Liu, Y., and Zhu, H. (2016).
-\newblock \ldots and the cross-section of expected returns.
-\newblock {\em Review of Financial Studies}, 29(1):5--68.
-\newblock \url{https://doi.org/10.1093/rfs/hhv059}
-
 \bibitem[Harvey et al., 1997]{harvey1997}
 Harvey, D., Leybourne, S., and Newbold, P. (1997).
 \newblock Testing the equality of prediction mean squared errors.
 \newblock {\em International Journal of Forecasting}, 13(2):281--291.
 \newblock \url{https://doi.org/10.1016/S0169-2070(96)00719-4}
+
+\bibitem[Harvey et al., 2016]{harvey2016}
+Harvey, C.R., Liu, Y., and Zhu, H. (2016).
+\newblock \ldots and the cross-section of expected returns.
+\newblock {\em Review of Financial Studies}, 29(1):5--68.
+\newblock \url{https://doi.org/10.1093/rfs/hhv059}
 
 \bibitem[Hatemi-J, 2012]{hatemi2012}
 Hatemi-J, A. (2012).
