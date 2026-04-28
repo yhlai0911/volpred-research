@@ -27947,5 +27947,19 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-04-27T21:30:00.000000"
+  },
+  {
+    "item_id": "391774db",
+    "category": "P10/multi-asset-robustness",
+    "content": "K1025b: BTC vol → NASDAQ-100 fear gauge (^VXN) multi-asset OOS robustness check for P10. Fork of K1025 with 4-line ticker swap (SPY→QQQ, ^VIX→^VXN). All 6 methods byte-identical. RESULT: 5/5 P10 stylized facts qualitatively replicate across S&P→NASDAQ index swap — (1) asymmetric Granger BTC- 5/5 lags significant, BTC+ NS; (2) QR sign reversal -1.46→+16.29 (~11× upper-tail amplification vs K1025 8.5×); (3) 2020 only subperiod Granger F=13.41 (vs K1025 11.05); (4) DY net BTC -76.64pp (vs K1025 -76.89pp; near identical); (5) OOS DM=-0.43 NS (vs K1025 -0.98 NS; both fail Harvey). Closes cross-paper meta-eval (a4c82fc4) Section 6 Issue 1 top-tier blocker (single-asset OOS) for P10 IJFMIM/JEF readiness. Lookahead protection inherited from K1025 (Granger maxlag aware, QR/DM explicit t-1 lag). main.tex §6.4 NEW subsection + Table 7 K1025 vs K1025b comparison added (commit 6a41fc40).",
+    "evidence": [
+      "experiments/k1025b/k1025b.py",
+      "experiments/k1025b/k1025b_results.json",
+      "experiments/k1025b/README.md",
+      "paper/crypto-fear-channel/main.tex §6.4 + Table 7",
+      "paper/crypto-fear-channel/research_notes/cross_paper_meta_eval_2026_04_28.md (Section 6)"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-04-28T12:04:05.505742"
   }
 ]
