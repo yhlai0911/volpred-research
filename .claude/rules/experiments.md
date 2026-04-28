@@ -22,7 +22,14 @@ paths:
 - 策略與風險管理比較遵守 `research_program.md` 的公平比較、VaR+ES、Harvey / Patton 規則。
 - Worktree agent 只應產出 `experiments/kXXX/` 內檔案；共享 JSON、Supabase、Mirror sync 由主線程負責。
 - 完成實驗後先做 Codex code review，再寫 knowledge / experience / article。
-  - **Fallback**：Codex CLI 不可用時（typical: gpt-5.5 model version mismatch，見 `docs/error_log.md` 2026-04-26/27 entries），改派 `feature-dev:code-reviewer` subagent 做 independent fresh-context review。Knowledge entry 必註明 reviewer source（`Codex review` vs `code-reviewer subagent fallback`）。Bar 不變：CONDITIONAL PASS 以上才寫 knowledge.json。
+  - **Codex CLI 故障 diagnostic 順序**（2026-04-28 教訓寫入；2026-04-26/27 兩 entries 因順序錯誤花 4 天才修）。Codex error 時**先**這 5 步，不直接懷疑 plugin 版本：
+    1. `codex --version` — 看 CLI binary 真正版本（**不**是 `~/.claude/plugins/cache/openai-codex/codex/<x>/` 目錄名，後者是 marketplace plugin 版號）
+    2. `codex login status` — 確認 auth mode（ChatGPT account vs API key 接受不同 model whitelist）
+    3. `cat ~/.codex/config.toml` 看 `model =` 欄位
+    4. **暫時移除** `model = ` line → CLI auto-pick default（目前 0.121.0 default = `gpt-5.4`）→ smoke test `codex exec --skip-git-repo-check "echo TEST"`
+    5. 若 default model PASS 就改回 config 鎖定（如 `model = "gpt-5.4"`）；若 default 仍 fail 才考慮 plugin 升級
+  - **Fallback**：上述 diagnostic 全 fail 仍無法恢復 Codex 時，改派 `feature-dev:code-reviewer` subagent 做 independent fresh-context review（K1259 / K1261 / K1262 已走過此 path）。Knowledge entry 必註明 reviewer source（`Codex review` vs `code-reviewer subagent fallback`）。Bar 不變：CONDITIONAL PASS 以上才寫 knowledge.json。
+  - **Codex 已於 2026-04-28 21:58 CST production-path 端到端驗證恢復**（`docs/error_log.md` RESOLVED entry；session `019dd462`，task `task-moioyr49-g0dg9v`）— primary path 是 Codex review，不是 fallback。
 
 ## Methodology 硬規則
 
