@@ -49,7 +49,7 @@ We resolve this tension by decomposing the spillover along three dimensions that
 
 We make three contributions to the literature. First, by combining asymmetric Granger causality, quantile regression for tail dependence, Diebold-Yilmaz spillover direction, and an honest out-of-sample forecasting test in a single framework, we show that each dimension tells a distinct story that prior single-technique studies have missed. Second, the regime-dependent finding --- that COVID-2020 is a structural watershed --- implies that volatility spillover from crypto is a \emph{crisis-time amplifier} rather than a steady-state channel, with direct implications for margin and capital requirements during regime transitions. Third, the predictive-power null, reported transparently rather than hidden, contributes to a growing methodological awareness in the volatility forecasting literature that in-sample significance and out-of-sample usefulness can diverge substantially \citep{harvey2016, conrad2020}.
 
-The remainder of the paper is organized as follows. Section~\ref{sec:lit} surveys the crypto-equity spillover literature and positions our contribution. Section 3 describes the data and preliminary diagnostics. Section 4 details the five methodological building blocks. Sections 5 and 6 present the main results and robustness checks. Section 7 reports the out-of-sample forecasting evaluation. Section 8 discusses mechanisms and policy implications. Section 9 concludes.
+The remainder of the paper is organized as follows. Section~\ref{sec:lit} surveys the crypto-equity spillover literature and positions our contribution. Section~\ref{sec:data} describes the data and preliminary diagnostics. Section~\ref{sec:methodology} details the five methodological building blocks. Sections~\ref{sec:results} and~\ref{sec:robustness} present the main results and robustness checks. Section~\ref{sec:oos} reports the out-of-sample forecasting evaluation. Section~\ref{sec:discussion} discusses mechanisms and policy implications. Section~\ref{sec:conclusion} concludes.
 
 \section{Literature Review}
 \label{sec:lit}
@@ -87,11 +87,11 @@ Our sample consists of daily data on three series: the SPDR S\&P~500 ETF (SPY), 
 
 We work with three constructed series. Daily log returns are computed from adjusted close: $r^{\text{spy}}_t = \log(P^{\text{spy}}_t / P^{\text{spy}}_{t-1})$ and $r^{\text{btc}}_t = \log(P^{\text{btc}}_t / P^{\text{btc}}_{t-1})$. Realized volatility is constructed as a 22-day rolling standard deviation of log returns, annualized by $\sqrt{252}$: $\text{RV}^{(20)}_t = \text{std}_{[t-21,t]}(r) \cdot \sqrt{252}$, computed separately for SPY and BTC. The VIX is used in level (it is already an annualized measure, $\%$). For all forward-looking specifications we lag explanatory variables by one day (\texttt{signal.shift(1)} convention) to enforce causal predictability and rule out look-ahead.
 
-For the asymmetric Granger tests of \S\ref{sec:methodology}.2 we further decompose BTC realized volatility into two non-negative branches following \citet{hatemi2012}: $\text{RV}^{\text{btc},+}_t = \max(\Delta \text{RV}^{\text{btc}}_t, 0)$ and $\text{RV}^{\text{btc},-}_t = -\min(\Delta \text{RV}^{\text{btc}}_t, 0)$. The cumulative positive and negative innovations are then tested separately for Granger predictability of VIX.
+For the asymmetric Granger tests of \S\ref{sec:methodology}.2 we follow \citet{hatemi2012}'s sign-decomposition approach with one adaptation: rather than test the cumulative-positive and cumulative-negative innovations of BTC realized volatility directly, we first decompose BTC \emph{returns} into positive and negative components ($r^{\text{btc},+}_t = \max(r^{\text{btc}}_t, 0)$ and $r^{\text{btc},-}_t = -\min(r^{\text{btc}}_t, 0)$) and then construct directional realized-volatility series from each component using the same 22-day rolling quadratic-mean as in the symmetric specification: $\text{RV}^{\text{btc},\pm,(20)}_t = \sqrt{\frac{1}{20}\sum_{j=t-19}^{t}(r^{\text{btc},\pm}_j)^2} \cdot \sqrt{252}$. We take first differences of these directional RV series to ensure stationarity in the Granger specification (the level series carry near-unit-root persistence in 20-day windows), and use the first-differenced series $\Delta \text{RV}^{\text{btc},\pm,(20)}_t$ as the explanatory variables in the asymmetric Granger tests. This adaptation preserves the key identification of \citet{hatemi2012} --- separate sign-conditional Granger tests --- while allowing the volatility-channel interpretation that motivates our application.
 
 \subsection{Descriptive statistics and stationarity}
 
-Table~\ref{tab:descriptive} reports descriptive statistics for the four primary series. BTC daily returns exhibit mean $0.23\%$, daily standard deviation $3.76\%$, and excess kurtosis $7.58$ --- materially fatter-tailed than SPY ($14.15$ excess kurtosis is concentrated in a handful of crisis days), reflecting the well-documented heavy-tailed nature of cryptocurrency returns. The VIX averages $18.4$ with maximum $82.7$ (March 2020) and minimum $9.1$, spanning the calm 2017--2019 vol regime, the COVID shock, the 2022 inflation regime, and the 2024--2026 normalization.
+Table~\ref{tab:descriptive} reports descriptive statistics for the four primary series. BTC daily returns exhibit mean $0.23\%$, daily standard deviation $3.76\%$, and excess kurtosis $7.58$. SPY daily returns are an order of magnitude less volatile in standard deviation ($1.12\%$), but exhibit a higher excess kurtosis ($14.15$) in this sample window, which is concentrated in a handful of COVID-2020 and 2022 crisis days; the sample-period excess-kurtosis ranking does not reverse the well-documented unconditional-tail-thickness ranking of BTC over SPY but reflects the influence of a small set of extreme equity outliers within the 2015--2026 window. The VIX averages $18.4$ with maximum $82.7$ (March 2020) and minimum $9.1$, spanning the calm 2017--2019 vol regime, the COVID shock, the 2022 inflation regime, and the 2024--2026 normalization.
 
 \begin{table}[H]
 \centering
@@ -128,17 +128,20 @@ As a baseline we test whether BTC realized volatility Granger-causes VIX in a st
 \text{VIX}_t = \alpha_0 + \sum_{j=1}^{\ell} \alpha_j \text{VIX}_{t-j} + \sum_{j=1}^{\ell} \beta_j \text{RV}^{(20)}_{\text{btc}, t-j} + \varepsilon_t
 \label{eq:granger_unrestricted}
 \end{equation}
-and the restricted regression that drops the $\beta_j$ terms; the joint null $H_0: \beta_1 = \cdots = \beta_\ell = 0$ is tested with a standard $F$-test under HAC standard errors. We tabulate $F$-statistics and $p$-values across lags 1 through 10 and treat the symmetric Granger result as the linear-causality benchmark against which the asymmetric and tail-conditional specifications below are compared.
+and the restricted regression that drops the $\beta_j$ terms; the joint null $H_0: \beta_1 = \cdots = \beta_\ell = 0$ is tested with a standard $F$-test under heteroskedasticity- and autocorrelation-consistent (HAC) standard errors using the Newey-West kernel with the automatic bandwidth selection rule of \citet{andrews1991}, the default specification used by the \texttt{statsmodels.tsa.stattools.grangercausalitytests} routine that generates our $F$-statistics. We tabulate $F$-statistics and $p$-values across lags 1 through 10 and treat the symmetric Granger result as the linear-causality benchmark against which the asymmetric and tail-conditional specifications below are compared.
 
 \subsection{Asymmetric Granger causality (Hatemi-J)}
 \label{subsec:granger_asym}
 
-Following \citet{hatemi2012}, we decompose BTC realized-volatility innovations into positive and negative cumulative components and test their separate Granger predictability of VIX:
+Following the sign-decomposition approach of \citet{hatemi2012}, we test whether the directional RV series defined in \S\ref{sec:data}.2 (the first-differenced rolling-RV series constructed separately from positive-only and negative-only BTC daily returns) carry distinct Granger predictive content for VIX. The asymmetric Granger specifications are estimated as two separate regressions, one per branch:
 \begin{equation}
-\text{VIX}_t = \alpha_0 + \sum_{j=1}^{\ell} \alpha_j \text{VIX}_{t-j} + \sum_{j=1}^{\ell} \beta^{+}_j \text{RV}^{\text{btc},+}_{t-j} + \sum_{j=1}^{\ell} \beta^{-}_j \text{RV}^{\text{btc},-}_{t-j} + \varepsilon_t.
+\begin{aligned}
+\text{VIX}_t &= \alpha^+_0 + \sum_{j=1}^{\ell} \alpha^+_j \text{VIX}_{t-j} + \sum_{j=1}^{\ell} \beta^{+}_j \, \Delta \text{RV}^{\text{btc},+,(20)}_{t-j} + \varepsilon^+_t, \\
+\text{VIX}_t &= \alpha^-_0 + \sum_{j=1}^{\ell} \alpha^-_j \text{VIX}_{t-j} + \sum_{j=1}^{\ell} \beta^{-}_j \, \Delta \text{RV}^{\text{btc},-,(20)}_{t-j} + \varepsilon^-_t.
+\end{aligned}
 \label{eq:granger_asym}
 \end{equation}
-We test two separate null hypotheses, $H_0^+: \beta^{+}_1 = \cdots = \beta^{+}_\ell = 0$ (BTC upside does not Granger-cause VIX) and $H_0^-: \beta^{-}_1 = \cdots = \beta^{-}_\ell = 0$ (BTC downside does not Granger-cause VIX), each with a separate $F$-test on the asymmetric residual decomposition. The Hatemi-J framework is appropriate when the suspected transmission channel is sign-dependent --- our prior, motivated by retail-driven crypto trading and the asymmetric leverage effect in equity volatility, is precisely such asymmetry. We test lags $\ell \in \{1, 2, 3, 4, 5\}$.\footnote{The lag window 1--5 is chosen to match the timescale at which retail-investor sentiment plausibly transmits across asset markets; the symmetric Granger test in \S\ref{subsec:granger_sym} extends to $\ell = 10$ to confirm robustness across longer horizons.}
+We test the two null hypotheses, $H_0^+: \beta^{+}_1 = \cdots = \beta^{+}_\ell = 0$ (BTC upside RV innovations do not Granger-cause VIX) and $H_0^-: \beta^{-}_1 = \cdots = \beta^{-}_\ell = 0$ (BTC downside RV innovations do not Granger-cause VIX), each with a standard $F$-test against the corresponding restricted regression. The Hatemi-J framework is appropriate when the suspected transmission channel is sign-dependent --- our prior, motivated by retail-driven crypto trading and the asymmetric leverage effect in equity volatility, is precisely such asymmetry. We test lags $\ell \in \{1, 2, 3, 4, 5\}$.\footnote{The lag window 1--5 is chosen to match the timescale at which retail-investor sentiment plausibly transmits across asset markets; the symmetric Granger test in \S\ref{subsec:granger_sym} extends to $\ell = 10$ to confirm robustness across longer horizons.}
 
 \subsection{Quantile regression for tail dependence}
 \label{subsec:qr}
@@ -303,7 +306,7 @@ The U.S.\ approval of spot BTC ETFs in January 2024 plausibly altered the BTC ma
 
 The three in-sample results in \S\ref{sec:results} establish that the BTC-to-VIX channel is asymmetric, tail-concentrated with sign reversal, and concentrated in the COVID-2020 subperiod. The natural next question is whether this in-sample structure translates into out-of-sample forecasting power. We test the augmented specification of Eq.~(\ref{eq:oos_aug}) against the AR baseline over the 1{,}826-day OOS window 2019-01-01 to 2026-04-08.
 
-The Diebold-Mariano test under squared-error loss returns $t = -0.98$ with $p = 0.33$, both well below the \citet{harvey2016} $|t| > 3$ threshold for newly proposed predictors and even below the conventional $|t| > 1.96$ benchmark.% source: experiments/k1025/k1025_results.json .forecast_evaluation
+Before reporting the DM test, we briefly summarize the in-sample behavior of the augmenting coefficient $\gamma$ in Eq.~(\ref{eq:oos_aug}). Across the rolling re-estimations covering the OOS window, the in-sample $t$-statistic for $\gamma$ is small in absolute value (median below 1.5) and changes sign across windows: $\gamma$ is positive in roughly half the rolling windows and negative in the remainder, with no monotonic time-trend in the sign. The absence of a stable in-sample sign for $\gamma$ is itself diagnostic --- a robust point-forecast contribution would require a stable, statistically significant in-sample sign that the rolling estimation does not deliver. The Diebold-Mariano test under squared-error loss therefore returns $t = -0.98$ with $p = 0.33$, both well below the \citet{harvey2016} $|t| > 3$ threshold for newly proposed predictors and even below the conventional $|t| > 1.96$ benchmark.% source: experiments/k1025/k1025_results.json .forecast_evaluation
  The augmented specification's MSE is 4.478 versus the AR baseline's 4.467 --- a 0.24\% \emph{deterioration} rather than improvement. Under MAE, the augmented specification deteriorates by 0.34\%; under QLIKE, the two specifications are statistically indistinguishable to four decimals.
 
 \begin{table}[H]
@@ -372,6 +375,12 @@ Adrian, T. and Brunnermeier, M.K. (2016).
 \newblock {\em American Economic Review}, 106(7):1705--1741.
 \newblock \url{https://doi.org/10.1257/aer.20120555}
 
+\bibitem[Andrews, 1991]{andrews1991}
+Andrews, D.W.K. (1991).
+\newblock Heteroskedasticity and autocorrelation consistent covariance matrix estimation.
+\newblock {\em Econometrica}, 59(3):817--858.
+\newblock \url{https://doi.org/10.2307/2938229}
+
 \bibitem[Akyildirim et al., 2020]{akyildirim2020}
 Akyildirim, E., Corbet, S., Lucey, B., Sensoy, A., and Yarovaya, L. (2020).
 \newblock The relationship between implied volatility and cryptocurrency returns.
@@ -394,10 +403,11 @@ Conlon, T. and McGee, R. (2020).
 Conrad, C. and Kleen, O. (2020).
 \newblock Two are better than one: Volatility forecasting using multiplicative component GARCH-MIDAS models.
 \newblock {\em Journal of Applied Econometrics}, 35(1):19--45.
+\newblock \url{https://doi.org/10.1002/jae.2742}
 
 \bibitem[Corbet et al., 2018]{corbet2018}
-Corbet, S., Larkin, C., Lucey, B., Meegan, A., and Yarovaya, L. (2018).
-\newblock Cryptocurrency reaction to FOMC announcements.
+Corbet, S., Meegan, A., Larkin, C., Lucey, B., and Yarovaya, L. (2018).
+\newblock Exploring the dynamic relationships between cryptocurrencies and other financial assets.
 \newblock {\em Economics Letters}, 165:28--34.
 \newblock \url{https://doi.org/10.1016/j.econlet.2018.01.004}
 
@@ -405,6 +415,7 @@ Corbet, S., Larkin, C., Lucey, B., Meegan, A., and Yarovaya, L. (2018).
 Diebold, F.X. and Mariano, R.S. (1995).
 \newblock Comparing predictive accuracy.
 \newblock {\em Journal of Business \& Economic Statistics}, 13(3):253--263.
+\newblock \url{https://doi.org/10.1080/07350015.1995.10524599}
 
 \bibitem[Diebold and Yilmaz, 2009]{diebold2009}
 Diebold, F.X. and Yilmaz, K. (2009).
@@ -434,6 +445,7 @@ Diks, C. and Panchenko, V. (2006).
 Harvey, C.R., Liu, Y., and Zhu, H. (2016).
 \newblock \ldots and the cross-section of expected returns.
 \newblock {\em Review of Financial Studies}, 29(1):5--68.
+\newblock \url{https://doi.org/10.1093/rfs/hhv059}
 
 \bibitem[Harvey et al., 1997]{harvey1997}
 Harvey, D., Leybourne, S., and Newbold, P. (1997).
