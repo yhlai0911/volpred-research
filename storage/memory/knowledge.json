@@ -27961,5 +27961,20 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-04-28T12:04:05.505742"
+  },
+  {
+    "item_id": "c4db347a",
+    "category": "K1259/meta-analysis-MCS",
+    "content": "K1259 MCS/SPA Meta-Analysis (Phase 1+2) completed; Phase 1 DM ledger built (2741 rows, 236 K experiments, 16 assets) + Phase 1.5 main-thread asset backfill (coverage 38%→78%) + Phase 2 Hansen-Lunde-Nason 2011 Variant A MCS 18/20 per-asset runs (5 assets × 2 loss_fns × 2 alphas, with 0050.TW/MSE excluded due to insufficient_models). Key findings (per k1259_README_phase2_appendix.md): SPY QLIKE α=0.10 Superior Set 88/100 models survived (very weak elimination); A4f family dominant; α=0.10=0.20 yield identical superior sets (independent bootstraps but algorithm stops at same p); GLD MSE narrow set; CF-Rolling truly absent from ledger (Trinity-only evaluation, never DM-compared pairwise). Reviewer source: feature-dev:code-reviewer subagent fallback (claude-sonnet-4-6, 2026-04-28) per .claude/rules/experiments.md Codex CLI fallback clause; verdict PASS-with-caveats (0 CRIT/0 SEV/3 MAJOR/2 MED/3 MINOR). 3 MAJORs are documentation/provenance issues (Phase 1.5 backfill script not committed; get_dm_stat false-positive risk on generic 't'/'stat' keys; load_ledger docstring/code mismatch on loss_fn filter) — non-blocking for knowledge.json. MCS algorithm + bootstrap + seed + lookahead protection all PASS. Lookahead protection: Phase 1 retrospective aggregation no temporal structure; Phase 2 consumes static ledger no forecast contamination.",
+    "evidence": [
+      "experiments/k1259/build_dm_ledger.py",
+      "experiments/k1259/k1259_mcs.py",
+      "experiments/k1259/dm_ledger.json (Phase 1.5 backfilled)",
+      "experiments/k1259/k1259_mcs_results.json",
+      "experiments/k1259/k1259_README_phase2_appendix.md",
+      "experiments/k1259/codex_review.md (subagent fallback verdict)"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-04-28T15:25:45.873634"
   }
 ]
