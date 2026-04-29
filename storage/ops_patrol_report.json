@@ -1,40 +1,40 @@
 {
-  "timestamp": "2026-04-29T06:07:17Z",
+  "timestamp": "2026-04-29T12:06:58Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "Total drafts: 6 (<12 threshold). Breakdown: research=4 (OK, threshold <4), general=2 (ALERT, threshold <8). Both total and general audience thresholds breached."
+      "detail": "total_drafts=6 (threshold <12 triggers alert); by_audience: research=4, general=2 (general <8 triggers targeted alert)"
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json age: ~16 seconds. Well within 26-hour threshold."
+      "detail": "storage/strategy_metrics.json age=0.01h — well within 26h threshold"
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated today (2026-04-29) or yesterday (2026-04-28) in last 30 lines of docs/error_log.md. Most recent entries dated 2026-04-26: (1) shared_scheduler_tick never fired on host + event_jobs expansion fix via run_due_jobs.py; (2) Member Q&A 5-day silent gap (q 29cbeb5c) — fixed via alert.py + cron prompt; (3) Codex CLI gpt-5.5 400 error — fallback to read-only audit."
+      "detail": "Last 30 lines scanned. Most recent entries dated 2026-04-26 (3 days ago). No entries dated today (2026-04-29) or yesterday (2026-04-28)."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 15 strategies checked. None have >2 null portfolio_return values in their last 3 entries."
+      "detail": "15 strategies checked. 0 strategies have >2 null portfolio_return in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files. Working tree clean. Threshold is >50."
+      "detail": "0 uncommitted files — clean working tree"
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json contains 2044 entries."
+      "detail": "storage/memory/knowledge.json contains 2044 entries"
     }
   ],
   "alerts": [
-    "article pool low (<12): total draft=6",
-    "general audience pool low (<8): general draft=2"
+    "article pool low (<12): total 6 draft articles",
+    "general audience low (<8): only 2 general-audience draft articles"
   ]
 }
