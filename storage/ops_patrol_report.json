@@ -1,40 +1,39 @@
 {
-  "timestamp": "2026-04-29T12:06:58Z",
+  "timestamp": "2026-04-29T18:11:28Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "total_drafts=6 (threshold <12 triggers alert); by_audience: research=4, general=2 (general <8 triggers targeted alert)"
+      "detail": "total_draft=6 (<12 threshold). research=4 (OK, threshold<4). general=2 (<8 threshold). Both pool total and general sub-pool are low."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json age=0.01h — well within 26h threshold"
+      "detail": "strategy_metrics.json is 0.0 hours old (threshold: 26h). Fresh."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Last 30 lines scanned. Most recent entries dated 2026-04-26 (3 days ago). No entries dated today (2026-04-29) or yesterday (2026-04-28)."
+      "detail": "No entries dated today (2026-04-29) or yesterday (2026-04-28). Most recent entries dated 2026-04-26: (1) knowledge-index false-positive fixed (lancedb list_tables API shape change); (2) member Q&A 5-day silent gap fixed (cron prompt was advisory not imperative); (3) Codex CLI gpt-5.5 400 error — fallback to read-only main-thread audit used."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "15 strategies checked. 0 strategies have >2 null portfolio_return in last 3 entries."
+      "detail": "14 strategies checked (excluding _market_daily). All have empty entry lists (0 entries each) — no portfolio_return=null entries detected by threshold rule (>2 nulls in last 3 entries). NOTE: zero entries across all strategies may indicate paper trading tracking is inactive."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files — clean working tree"
+      "detail": "0 uncommitted files. Working tree clean."
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json contains 2044 entries"
+      "detail": "knowledge.json contains 2044 entries."
     }
   ],
   "alerts": [
-    "article pool low (<12): total 6 draft articles",
-    "general audience low (<8): only 2 general-audience draft articles"
+    "article pool low (<12): total draft=6, general draft=2 (<8 threshold)"
   ]
 }
