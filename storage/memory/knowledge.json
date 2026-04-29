@@ -27983,5 +27983,20 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-04-28T15:25:45.873634"
+  },
+  {
+    "item_id": "f63a3a42",
+    "category": "K1257/methodology-BMA",
+    "content": "K1257 Bayesian Model Averaging (BMA) volatility forecast — gate-closing review completed 2026-04-29 via Codex CLI primary path (task task-moje58sy-9qtdx6, session 019dd6e7, 2m 37s) — verdict CONDITIONAL PASS (0 CRIT/0 SEV/1 MAJOR/2 MED/2 MINOR). Closure pending since 2026-04-20 because Codex CLI 4-day blocker started 2026-04-26; this is FIRST review (not re-verification). Setup: 6 candidate models (GARCH/GJR-N/GJR-t/EGARCH/HAR_ABS/A4f_IV2) × 3 assets (SPY/GLD/0050.TW) × OOS 2020-2026, with GLD using ^GVZ not VIX (README claims 7 models incl. HAR-RV/A4f-VIX2/Realized-GARCH but implementation actually 6 — see Codex MED-2). Primary conclusions ACCEPTED: H1 PARTIAL (SPY/GLD Harvey PASS t=-3.40/-3.38, 0050.TW FAIL posterior collapse to GJR-t), H2 FAIL (no asset passes Harvey vs equal-weight ensemble — confirms K482 equal-weight-puzzle extends to Bayesian), H3 FAIL (posterior degenerates within ~500 days; ~500 from visual inspection, not computed metric). Codex MAJOR caveat: invalid-model posterior contamination risk — when a model's h_pred is invalid on day t, the code skips likelihood update but preserves prior log_weight and re-normalizes alongside valid models (k1257_bma_volatility.py:551). Pre-update support != post-normalize support → silent posterior bias if any model had convergence failure or NaN forecast. results.json does NOT log convergence counts so unknown how often this fired. K1258 inherits same structure. MED-1 non-convergence handling: scipy.optimize.minimize res.success=False not treated as unavailable. MED-2 README drift: 6 vs 7 models / HAR_ABS vs HAR-RV / A4f_IV2 vs A4f-VIX2 / GLD GVZ-not-VIX. MINOR README time-index ambiguity + '~500 days' not byte-computed metric. Lookahead PASS: returns[s:t] uses t-1; forecast formed before y_t observed. Likelihood normalization PASS: logsumexp correct. Refit cadence symmetric: 6 models all 63-day. Cross-family pattern check (vs K1259/K1261/K1262/K1262b all FAIL): K1257 is BMA family with different code base; bug class is family-specific (stale-posterior vs P5-ABM negative-baseline threshold). Subagent never reviewed K1257 (was blocked by Codex CLI from 2026-04-20); Codex caught MAJOR on first pass — consistent with E078 'cross-model review NOT optional' principle. Pending fixes (subsequent slot, K1257+K1258 family fix): (a) invalid-model day -> log_weight=-inf before normalize OR strict valid mask for both forecast and posterior, (b) treat res.success=False as unavailable, (c) log convergence counts to results.json, (d) align README with implementation, (e) compute explicit concentration-hitting-time metric. After fixes + re-run identical numbers → confidence can raise to 0.85+. Reviewer source: Codex CLI 0.121.0 primary path (gate-closing review).",
+    "evidence": [
+      "experiments/k1257/k1257_bma_volatility.py",
+      "experiments/k1257/k1257_results.json",
+      "experiments/k1257/k1257_qlike_comparison.png",
+      "experiments/k1257/k1257_weight_evolution.png",
+      "experiments/k1257/README.md",
+      "experiments/k1257/codex_review.md (Codex primary-path CONDITIONAL PASS verdict 2026-04-29)"
+    ],
+    "confidence": 0.75,
+    "created_at": "2026-04-29T02:35:17.815224+00:00"
   }
 ]
