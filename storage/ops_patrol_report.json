@@ -1,31 +1,31 @@
 {
-  "timestamp": "2026-04-28T12:01:45Z",
+  "timestamp": "2026-04-29T00:39:02Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "Total draft=6 (<12 threshold). Breakdown: research=4 (OK, threshold <4), general=2 (ALERT, threshold <8)."
+      "detail": "Total drafts: 6 (<12 threshold). Breakdown: research=4 (OK, threshold <4), general=2 (ALERT, threshold <8). Both total and general audience thresholds breached."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "strategy_metrics.json mtime age ~9 seconds. Well within 26-hour threshold."
+      "detail": "storage/strategy_metrics.json age: ~16 seconds. Well within 26-hour threshold."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated 2026-04-28 (today) or 2026-04-27 (yesterday) found in last 30 lines of docs/error_log.md. Most recent entries are from 2026-04-26."
+      "detail": "No entries dated today (2026-04-29) or yesterday (2026-04-28) in last 30 lines of docs/error_log.md. Most recent entries dated 2026-04-26: (1) shared_scheduler_tick never fired on host + event_jobs expansion fix via run_due_jobs.py; (2) Member Q&A 5-day silent gap (q 29cbeb5c) — fixed via alert.py + cron prompt; (3) Codex CLI gpt-5.5 400 error — fallback to read-only audit."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 15 strategies have 0 nulls in last 3 portfolio_return entries. Strategies checked: slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, _market_daily, adaptive_tier."
+      "detail": "All 15 strategies checked. None have >2 null portfolio_return values in their last 3 entries."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files. Threshold is >50."
+      "detail": "0 uncommitted files. Working tree clean. Threshold is >50."
     },
     {
       "name": "KNOWLEDGE_SIZE",
