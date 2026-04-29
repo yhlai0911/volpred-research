@@ -577,6 +577,34 @@ class Publisher:
         # Ensure content is not empty (use description as fallback)
         if not item.get('content') and item.get('description'):
             item['content'] = item['description']
+        # Auto-escape unescaped statistical-notation pipes inside markdown
+        # tables. Architectural fix 2026-04-29: K549 mile_5c662be0 broke
+        # frontend table rendering because agent didn't escape `|t|>3.0`
+        # (Harvey threshold) inside table cells; pipe count > header count
+        # → renderer split row into wrong number of cells. K1018 same-day
+        # parallel agent escaped some rows but missed line 28. Behavioral
+        # inconsistency proves manual escape unenforceable; sanitize at
+        # the canonical write site so feed.json is always clean.
+        if item.get('content'):
+            from volpred.publisher.markdown_table_sanitizer import (
+                sanitize_markdown_tables,
+            )
+            sanitized, report = sanitize_markdown_tables(item['content'])
+            if report.changed:
+                item['content'] = sanitized
+                print(
+                    f"  [feed_publisher] markdown_table_sanitizer auto-fixed "
+                    f"{len(report.fixed_lines)} table row(s) for "
+                    f"{item.get('id', 'unknown')}: {report.summary()}"
+                )
+            if report.has_unfixed:
+                # Surface but do not block — caller can decide. The unfixed
+                # rows still pass through; renderer may degrade but content
+                # is preserved.
+                print(
+                    f"  [feed_publisher] WARN unfixable table rows for "
+                    f"{item.get('id', 'unknown')}: lines={report.unfixed_lines}"
+                )
         # Serialize concurrent writers (Claude Code, Codex, cron workers)
         # against feed.json. Lock name follows docs/agent-collab-invariants.md.
         from volpred.ops.shared_lock import shared_state_lock

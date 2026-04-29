@@ -122,6 +122,23 @@ grep -i "K<id>" storage/reports/feed.json | grep title
 - 手改 `paper_trading.json` 歷史值（應走 `recalc_metrics.py` 流程）
 - 手動 PATCH Supabase / Mirror 補 sync 斷點（應修 `supabase_sync.py`）
 
+## Markdown 表格 cell 內 `|` 必跳脫（2026-04-29 K549 教訓）
+
+統計符號常用 `|t|`, `|z|`, `|r|`, `|p|`, `|t-stat|`, `|F|` 表 |statistic|。**這些 pipe 在 markdown 表格 cell 內若未跳脫會炸渲染** — GFM/CommonMark renderer 把 cell 內 pipe 當 cell 分隔符 → row 的 pipe count 不對 header → 整張 table broken。
+
+**架構性自動防護**（不靠 agent 自律）：
+- **PRIMARY** `volpred.publisher.publisher._append_to_feed` 寫 feed.json 前呼叫 `markdown_table_sanitizer.sanitize_markdown_tables()` → 自動 escape `|<token>|` 為 `\|<token>\|`（短 alphanumeric token 才匹配，不會誤傷散文）
+- **SECONDARY** `scripts/supabase_sync.py::sync_article` 寫 Supabase 前再跑同 sanitizer（belt-and-suspenders；catch 繞過 publisher 的 path）
+- 兩層 print warning 列 fix-line / unfix-line
+
+**Agent / 主線程寫文時仍建議**主動寫 `\|t\| ≥ 3.0` — 但忘了 sanitizer 會兜底。
+
+**Test gate**：`tests/test_markdown_table_sanitizer.py`（9 cases，含 K549 verbatim regression case）。改 sanitizer 必跑。
+
+**反面教材**：
+- K549 `mile_5c662be0` line 32 / line 70 寫 `|t|>3.0` / `Pass |t|>3?` 沒跳脫
+- K1018 `mile_b4cf48f9` 同 session 並行 agent 部分跳脫但 line 28 漏了 — agent 行為不一致證明 manual escape 不可靠
+
 ## 交叉參考
 
 - `.claude/skills/feed-publisher/SKILL.md`（發佈 SOP 完整版）

@@ -360,8 +360,35 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
     Contentlayer pattern (2026-04-18): feed.json is canonical and now
     holds the complete content directly (post reconcile_content_from_singles).
     We no longer read mile_*.json singles as a content fallback.
+
+    Defensive markdown-table sanitization (2026-04-29): even though
+    publisher._append_to_feed is the primary sanitizer, this is the
+    secondary belt-and-suspenders catch for content that bypassed the
+    publisher path (legacy entries, manual edits, hot-fix scripts).
+    Auto-escapes unescaped statistical-notation pipes like `|t|` inside
+    markdown table cells before Supabase write.
     """
     content = item.get("content") or item.get("description") or ""
+    if content:
+        try:
+            from volpred.publisher.markdown_table_sanitizer import (
+                sanitize_markdown_tables,
+            )
+            sanitized, report = sanitize_markdown_tables(content)
+            if report.changed:
+                content = sanitized
+                print(
+                    f"  [supabase_sync] markdown_table_sanitizer auto-fixed "
+                    f"{len(report.fixed_lines)} row(s) for "
+                    f"{item.get('id', 'unknown')}: {report.summary()}"
+                )
+            if report.has_unfixed:
+                print(
+                    f"  [supabase_sync] WARN unfixable table rows for "
+                    f"{item.get('id', 'unknown')}: lines={report.unfixed_lines}"
+                )
+        except Exception as exc:
+            print(f"  [supabase_sync] markdown_table_sanitizer error: {exc}")
     row = {
         "slug": item.get("id", ""),
         "title": item.get("title", ""),
