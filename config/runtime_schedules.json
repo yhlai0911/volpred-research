@@ -158,7 +158,7 @@
       {
         "id": "continue_task",
         "cron": "*/30 * * * *",
-        "prompt": "繼續任務（slot-aware）：執行 continue-task-maintain --stub-if-no-work；若有 dispatch candidate 再處理 1 個正式 task",
+        "prompt": "繼續任務（slot-aware）：執行 continue-task-maintain --stub-if-no-work。**先看 heartbeat 回傳的 alerts.items**：若 critical_count > 0（draft_pool=0 / release_pool gap / member_qa stale / host_cron_fail 等），**alert auto-remediation 優先於 dispatch candidate**——照 .claude/rules/alert.md 對應 action 立即執行，不可 skip。alerts 處理完才看 dispatch candidate 處理 1 個正式 task。",
         "recurring": true,
         "description": "Slot-aware continuation heartbeat。cron `*/30` 嚴格每 30 分鐘等距 fire（每小時 :00 / :30），永遠落在 Claude Code Max $200 plan 1-hour prompt cache window 中央，cache 命中率最佳。2026-04-26 用戶指定 4h→30min；先嘗試 50min 但發現 `*/50` 標準 cron 解析為 :00 / :50（50/10 不等距），改用 `*/30` 才是真正等距。Cache TTL 已於 Anthropic support article 'Using Claude Code with your Pro or Max plan' 確認 Max plan = 1h；Pro / API key = 5min。注意：2026-03 初 default TTL 曾悄悄從 1h 降到 5min（GH issue #46829），Max 訂閱保持 1h 但需監控未來變動，若降級則本 cadence 失效。"
       },
