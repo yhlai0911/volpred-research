@@ -1,40 +1,40 @@
 {
-  "timestamp": "2026-04-30T00:16:00Z",
+  "timestamp": "2026-04-30T12:33:44Z",
   "all_ok": false,
   "checks": [
     {
-      "name": "ARTICLE_POOL",
+      "name": "article_pool",
       "status": "alert",
-      "detail": "total_draft=6 (<12 threshold). research=4 (OK, threshold 4). general=2 (<8 threshold). Both pool total and general sub-pool are low."
+      "detail": "total_drafts=6, research=4, general=2; alerts: article pool low (<12): only 6 drafts total; general audience pool low: only 2 (threshold <8)"
     },
     {
-      "name": "STRATEGY_METRICS_FRESHNESS",
+      "name": "strategy_metrics_freshness",
       "status": "ok",
-      "detail": "strategy_metrics.json is ~13s old (threshold: 26h). Fresh."
+      "detail": "age=10s (0.00h), file fresh"
     },
     {
-      "name": "ERROR_LOG",
+      "name": "error_log",
       "status": "ok",
-      "detail": "No entries dated today (2026-04-30) or yesterday (2026-04-29). Most recent entries dated 2026-04-26: (1) knowledge-index false-positive fixed (lancedb list_tables API shape change); (2) member Q&A 5-day silent gap fixed (cron prompt was advisory not imperative); (3) Codex CLI gpt-5.5 400 error — fallback to read-only main-thread audit used."
+      "detail": "last 30 lines checked; most recent entries dated 2026-04-26 (not today/yesterday). No entries from 2026-04-29 or 2026-04-30."
     },
     {
-      "name": "PAPER_TRADING_GAPS",
+      "name": "paper_trading_gaps",
       "status": "ok",
-      "detail": "No strategy has >2 null portfolio_return values in last 3 entries."
+      "detail": "all 14 strategies checked; each has exactly 1 null in last 3 entries (likely most recent trading day gap); no strategy exceeds threshold of >2 nulls"
     },
     {
-      "name": "GIT_STATUS",
+      "name": "git_status",
       "status": "ok",
-      "detail": "0 uncommitted files. Working tree clean."
+      "detail": "0 uncommitted files"
     },
     {
-      "name": "KNOWLEDGE_SIZE",
+      "name": "knowledge_size",
       "status": "ok",
-      "detail": "knowledge.json contains 2044 entries."
+      "detail": "knowledge.json has 2044 entries"
     }
   ],
   "alerts": [
-    "article pool low (<12): total draft=6, general draft=2 (<8 threshold)",
-    "general audience pool low (<8): general=2 (research=4 ok)"
+    "article pool low (<12): only 6 drafts total",
+    "general audience pool low: only 2"
   ]
 }
