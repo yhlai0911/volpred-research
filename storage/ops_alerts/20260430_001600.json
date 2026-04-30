@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-04-30T00:16:00Z",
+  "severity": "warning",
+  "alerts": [
+    {
+      "name": "article_pool_low",
+      "message": "article pool low (<12): total draft=6, threshold=12",
+      "detail": "Total draft articles in feed: 6. Minimum required: 12. Pool needs at least 6 new articles."
+    },
+    {
+      "name": "general_audience_pool_low",
+      "message": "general audience pool low (<8): general=2, threshold=8",
+      "detail": "Only 2 general-audience draft articles. Minimum required: 8. Recommend writing 6+ general-audience articles. Research-audience count is 4 (meets threshold of 4)."
+    }
+  ]
+}
