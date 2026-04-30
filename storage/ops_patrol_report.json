@@ -1,26 +1,26 @@
 {
-  "timestamp": "2026-04-29T18:11:28Z",
+  "timestamp": "2026-04-30T00:11:48Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "total_draft=6 (<12 threshold). research=4 (OK, threshold<4). general=2 (<8 threshold). Both pool total and general sub-pool are low."
+      "detail": "total_draft=6 (<12 threshold). research=4 (OK, threshold 4). general=2 (<8 threshold). Both pool total and general sub-pool are low."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "strategy_metrics.json is 0.0 hours old (threshold: 26h). Fresh."
+      "detail": "strategy_metrics.json is ~13s old (threshold: 26h). Fresh."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated today (2026-04-29) or yesterday (2026-04-28). Most recent entries dated 2026-04-26: (1) knowledge-index false-positive fixed (lancedb list_tables API shape change); (2) member Q&A 5-day silent gap fixed (cron prompt was advisory not imperative); (3) Codex CLI gpt-5.5 400 error — fallback to read-only main-thread audit used."
+      "detail": "No entries dated today (2026-04-30) or yesterday (2026-04-29). Most recent entries dated 2026-04-26: (1) knowledge-index false-positive fixed (lancedb list_tables API shape change); (2) member Q&A 5-day silent gap fixed (cron prompt was advisory not imperative); (3) Codex CLI gpt-5.5 400 error — fallback to read-only main-thread audit used."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "14 strategies checked (excluding _market_daily). All have empty entry lists (0 entries each) — no portfolio_return=null entries detected by threshold rule (>2 nulls in last 3 entries). NOTE: zero entries across all strategies may indicate paper trading tracking is inactive."
+      "detail": "No strategy has >2 null portfolio_return values in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
@@ -34,6 +34,7 @@
     }
   ],
   "alerts": [
-    "article pool low (<12): total draft=6, general draft=2 (<8 threshold)"
+    "article pool low (<12): total draft=6, general draft=2 (<8 threshold)",
+    "general audience pool low (<8): general=2 (research=4 ok)"
   ]
 }
