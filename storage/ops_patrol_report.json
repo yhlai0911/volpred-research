@@ -1,40 +1,40 @@
 {
-  "timestamp": "2026-04-30T12:33:44Z",
+  "timestamp": "2026-04-30T00:00:44Z",
   "all_ok": false,
   "checks": [
     {
       "name": "article_pool",
       "status": "alert",
-      "detail": "total_drafts=6, research=4, general=2; alerts: article pool low (<12): only 6 drafts total; general audience pool low: only 2 (threshold <8)"
+      "detail": "total_drafts=6 (threshold <12 → ALERT). Breakdown: research=4 (threshold <4 → OK), general=2 (threshold <8 → ALERT)."
     },
     {
       "name": "strategy_metrics_freshness",
       "status": "ok",
-      "detail": "age=10s (0.00h), file fresh"
+      "detail": "storage/strategy_metrics.json mtime age ~0 hours (well within 26h threshold)."
     },
     {
       "name": "error_log",
       "status": "ok",
-      "detail": "last 30 lines checked; most recent entries dated 2026-04-26 (not today/yesterday). No entries from 2026-04-29 or 2026-04-30."
+      "detail": "Last 30 lines checked. No entries for 2026-04-30 or 2026-04-29. Most recent entries dated 2026-04-26: Codex CLI gpt-5.5 breakage, knowledge-index lancedb false-positive fix, member Q&A 5-day gap root cause."
     },
     {
       "name": "paper_trading_gaps",
       "status": "ok",
-      "detail": "all 14 strategies checked; each has exactly 1 null in last 3 entries (likely most recent trading day gap); no strategy exceeds threshold of >2 nulls"
+      "detail": "All 15 strategies checked (_market_daily, adaptive_tier, fear_dca, global_vt_tz, piecewise_conservative, recommended_5050, risk_parity, simple_12vix, slow_vt, taiwan_8.63vix, taiwan_hybrid_leverage, taiwan_spy_momentum, tz_tw_jp_5050, vix_cond_leverage, vix_leading_guard). No strategy exceeds >2 null portfolio_return in last 3 entries."
     },
     {
       "name": "git_status",
       "status": "ok",
-      "detail": "0 uncommitted files"
+      "detail": "0 uncommitted files (threshold >50)."
     },
     {
       "name": "knowledge_size",
       "status": "ok",
-      "detail": "knowledge.json has 2044 entries"
+      "detail": "storage/memory/knowledge.json contains 2044 entries."
     }
   ],
   "alerts": [
-    "article pool low (<12): only 6 drafts total",
-    "general audience pool low: only 2"
+    "article pool low (<12): only 6 draft articles total",
+    "article pool general audience low (<8): only 2 general-audience drafts"
   ]
 }

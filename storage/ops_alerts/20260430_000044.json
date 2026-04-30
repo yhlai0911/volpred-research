@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-04-30T00:00:44Z",
+  "alerts": [
+    {
+      "type": "article_pool_low",
+      "severity": "warning",
+      "message": "Article pool low (<12): only 6 draft articles total (research=4, general=2). Immediate content generation recommended.",
+      "detail": "Total drafts: 6. Thresholds: total <12, research <4 (OK at 4), general <8 (ALERT at 2)."
+    },
+    {
+      "type": "article_pool_general_low",
+      "severity": "warning",
+      "message": "General-audience article pool critically low (<8): only 2 general-audience drafts.",
+      "detail": "General-audience drafts: 2 out of minimum 8. Action: dispatch daily_article agent to generate 6+ general-audience articles."
+    }
+  ]
+}
