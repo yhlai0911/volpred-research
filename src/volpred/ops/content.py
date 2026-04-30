@@ -309,13 +309,25 @@ def release_pool_articles(
         # mile_*.json singles to read back / rewrite. feed entry already
         # holds the full content since reconcile_content_from_singles().
         article_slug = str(item.get("id", ""))
+        # K1021 incident (2026-04-30): sync_article return value used to be
+        # ignored → release_pool flipped local status to 'published' while
+        # Supabase silently kept 'draft'. Capture the result so we can
+        # surface failures via the released dict + heartbeat alerts can
+        # detect divergence (status_synced=False).
+        sync_ok = sync_article(item, storage_dir=publisher.reports_dir.parent)
         released.append({
             "id": article_slug,
             "title": item.get("title"),
             "status": item.get("status"),
             "published_at": item.get("published_at"),
+            "supabase_synced": bool(sync_ok),
         })
-        sync_article(item, storage_dir=publisher.reports_dir.parent)
+        if not sync_ok:
+            print(
+                f"  [release_pool] WARN Supabase sync failed for {article_slug} -- "
+                f"local feed.json shows published but Supabase status may diverge. "
+                f"Run scripts/supabase_sync.py sync-article {article_slug} to retry."
+            )
         # Auto-mark linked questions as answered now that article is published
         _mark_questions_answered_on_publish(article_slug)
         try:

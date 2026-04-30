@@ -473,19 +473,32 @@ class Publisher:
         self._append_to_feed(item)
         self._sync_to_remote(title, description, phase, details)
 
-        # Sync to Supabase DB (so website shows article immediately)
+        # Sync to Supabase DB (so website shows article immediately).
+        # K1021 incident (2026-04-30): the previous implementation swallowed
+        # the sync_article return value AND swallowed exceptions silently,
+        # so a row written as draft to Supabase would never get its
+        # status='published' updated when release_pool flipped it. We now
+        # capture the boolean return AND treat False as a recordable failure
+        # (joins the same .failed_supabase_syncs.json + alerts pipeline as
+        # raised exceptions did).
+        sync_ok = False
         try:
             import sys
             sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent / "scripts"))
             from supabase_sync import sync_article
-            sync_article(item, storage_dir=self.reports_dir.parent)
+            sync_ok = bool(sync_article(item, storage_dir=self.reports_dir.parent))
         except Exception as e:
-            # Record failed sync with error for later diagnosis
+            print(f"  Supabase sync exception for {pub_id}: {e}")
+        if not sync_ok:
             failed_path = self.reports_dir.parent / ".failed_supabase_syncs.json"
-            failed = json.loads(failed_path.read_text()) if failed_path.exists() else []
-            failed.append(pub_id)
-            failed_path.write_text(json.dumps(failed))
-            print(f"  Supabase sync failed for {pub_id}: {e}")
+            try:
+                failed = json.loads(failed_path.read_text()) if failed_path.exists() else []
+            except Exception:
+                failed = []
+            if pub_id not in failed:
+                failed.append(pub_id)
+                failed_path.write_text(json.dumps(failed))
+            print(f"  Supabase sync FAILED for {pub_id} -- recorded to .failed_supabase_syncs.json")
 
         if normalized_status == 'published':
             try:

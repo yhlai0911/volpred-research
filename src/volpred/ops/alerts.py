@@ -575,6 +575,66 @@ def _parse_member_qa_state(storage_dir: str, now: datetime) -> dict[str, Any]:
     }
 
 
+def _parse_supabase_sync_state(storage_dir: str) -> dict[str, Any]:
+    """Detect failed Supabase syncs queued in `.failed_supabase_syncs.json`.
+
+    Wired 2026-04-30 after K1021 incident where release_pool's sync_article
+    silently lost status='published' updates. Both publisher.publish_milestone
+    and release_pool now record failed pub_ids here; this alert surfaces them
+    for main-thread reconciliation.
+    """
+    failed_path = _storage_root(storage_dir).joinpath(".failed_supabase_syncs.json")
+    failed = load_json(failed_path, [])
+    if not isinstance(failed, list):
+        failed = []
+    pending = [str(x) for x in failed if x]
+    breached = len(pending) > 0
+    level = "critical" if len(pending) >= 3 else ("warn" if breached else "info")
+    body = ""
+    if breached:
+        body = "\n".join(
+            [
+                "## 觸發條件",
+                f".failed_supabase_syncs.json 累積 {len(pending)} 篇 article sync 失敗。",
+                f"- pending_ids (前 5): {pending[:5]}",
+                f"- queue_path: {_relative_repo_path(failed_path)}",
+                "",
+                "## 影響",
+                "本地 feed.json 已更新（status=published / draft）但 Supabase 行可能停在舊狀態，",
+                "造成讀者讀到的網站 status 與本地真值不一致。Mission 第 4 條（平台運營）+",
+                "第 1 條（文章正確）受損。",
+                "",
+                "## 建議行動",
+                "1. 看單篇 divergence：",
+                "   uv run python -c \"from scripts.supabase_sync import _select_rows; "
+                "print(_select_rows('articles', select='slug,status,published_at', slug='<id>'))\"",
+                "2. 對齊本地 feed -> Supabase：",
+                "   uv run python -c \"import json; from pathlib import Path; "
+                "from scripts.supabase_sync import sync_article; "
+                "feed=json.loads(Path('storage/reports/feed.json').read_text()); "
+                "[sync_article(it, 'storage') for it in feed if it.get('id') in <list>]\"",
+                "3. sync 成功後從 .failed_supabase_syncs.json 移除對應 id。",
+                "4. 若連續 3 次 retry 仍 fail，查 supabase_sync log + Supabase service status。",
+            ]
+        )
+    return {
+        "id": "supabase_sync_fail",
+        "breached": breached,
+        "level": level,
+        "title": (
+            f"Supabase sync queue has {len(pending)} pending"
+            if breached
+            else "Supabase sync queue clean"
+        ),
+        "body": body,
+        "details": {
+            "pending_count": len(pending),
+            "pending_ids": pending[:10],
+            "queue_path": _relative_repo_path(failed_path),
+        },
+    }
+
+
 def build_alert_condition_report(
     *,
     storage_dir: str = "storage",
@@ -586,6 +646,7 @@ def build_alert_condition_report(
         _parse_draft_pool_state(storage_dir),
         _parse_host_cron_state(storage_dir, current),
         _parse_member_qa_state(storage_dir, current),
+        _parse_supabase_sync_state(storage_dir),
     ]
     return {
         "generated_at": current.isoformat(),

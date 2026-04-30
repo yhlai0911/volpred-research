@@ -404,6 +404,55 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
         "published_at": item.get("published_at"),
     }
     ok = _post("articles", row)
+    # Single retry on _post failure (transient HTTP error / network blip)
+    # before falling through to read-back verification. release_pool used to
+    # silently lose K1021 here because _post returned False and nobody
+    # checked the value.
+    if not ok and row["slug"]:
+        print(f"  [supabase_sync] _post failed for {row['slug']}, retrying once")
+        ok = _post("articles", row)
+        if not ok:
+            print(f"  [supabase_sync] _post retry FAILED for {row['slug']} -- caller must handle")
+    # Read-back verification (2026-04-30 architectural fix): _post returns
+    # True on HTTP 2xx but PostgREST upsert with `Prefer: return=minimal` does
+    # not echo body, so we cannot confirm row state from POST alone. K1021
+    # incident (release_pool's second sync_article call left Supabase status
+    # at 'draft' while local feed was 'published') showed _post can succeed
+    # at the HTTP layer while the row state diverges. Read the row back and
+    # if `status` / `published_at` mismatch the row we sent, force an
+    # explicit PATCH via _patch_where as recovery.
+    if ok and row["slug"]:
+        try:
+            actual = _select_rows(
+                "articles",
+                select="slug,status,published_at",
+                slug=row["slug"],
+            )
+            if actual:
+                got = actual[0]
+                want_status = row["status"]
+                want_pub = row.get("published_at")
+                status_diverged = got.get("status") != want_status
+                pub_diverged = (
+                    want_pub is not None and got.get("published_at") != want_pub
+                )
+                if status_diverged or pub_diverged:
+                    print(
+                        f"  [supabase_sync] read-back diverged for {row['slug']}: "
+                        f"got status={got.get('status')!r} published_at={got.get('published_at')!r} "
+                        f"want status={want_status!r} published_at={want_pub!r} -- patching"
+                    )
+                    fix = {"status": want_status}
+                    if want_pub is not None:
+                        fix["published_at"] = want_pub
+                    patched = _patch_where("articles", {"slug": row["slug"]}, fix)
+                    if not patched:
+                        print(
+                            f"  [supabase_sync] read-back PATCH fallback FAILED for {row['slug']}"
+                        )
+                        ok = False
+        except Exception as exc:
+            print(f"  [supabase_sync] read-back verification error for {row['slug']}: {exc}")
     if ok:
         # Sync tags
         tags = item.get("tags") or []
