@@ -1,40 +1,40 @@
 {
-  "timestamp": "2026-05-01T00:19:33Z",
+  "timestamp": "2026-05-01T06:27:12Z",
   "all_ok": false,
   "checks": [
     {
-      "name": "article_pool",
+      "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "Total drafts: 6 (< threshold 12). Breakdown: research=4 (at threshold, OK), general=2 (< threshold 8, ALERT)."
+      "detail": "Total drafts: 6 (threshold <12). Breakdown: research=4 (OK, threshold <4), general=2 (ALERT, threshold <8). Pool critically low across both categories."
     },
     {
-      "name": "strategy_metrics_freshness",
+      "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json last modified ~34 seconds ago. Well within 26-hour threshold."
+      "detail": "storage/strategy_metrics.json mtime is ~12 seconds before check — well within 26-hour threshold."
     },
     {
-      "name": "error_log_recent",
+      "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated today (2026-05-01) or yesterday (2026-04-30). Most recent entries from 2026-04-26: Codex CLI gpt-5.5 upgrade fail; lancedb list_tables shape change fix; member Q&A 5-day silent gap root cause."
+      "detail": "No entries dated today (2026-05-01) or yesterday (2026-04-30). Most recent entries are from 2026-04-26: (1) Codex CLI 400 error gpt-5.5 upgrade; (2) lancedb list_tables shape change false-positive fix; (3) member Q&A 5-day silent gap root cause & fix."
     },
     {
-      "name": "paper_trading_gaps",
+      "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 15 strategies checked. No strategy has >2 null portfolio_return in last 3 entries."
+      "detail": "14 strategies with list entries checked. Each has exactly 1 null in last 3 entries (today's market data not yet settled — expected pattern). No strategy exceeds >2 null threshold. _market_daily has non-list structure (skipped)."
     },
     {
-      "name": "git_status",
+      "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files. Clean working tree."
+      "detail": "0 uncommitted files. Working tree clean."
     },
     {
-      "name": "knowledge_size",
+      "name": "KNOWLEDGE_SIZE",
       "status": "ok",
       "detail": "storage/memory/knowledge.json contains 2044 entries."
     }
   ],
   "alerts": [
-    "article pool low (<12): only 6 draft articles in feed",
-    "general audience pool low (<8): only 2 general audience draft articles"
+    "article pool low (<12): only 6 draft articles (research=4, general=2)",
+    "general audience pool low (<8): only 2 general-audience draft articles"
   ]
 }
