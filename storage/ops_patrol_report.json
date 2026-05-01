@@ -1,26 +1,26 @@
 {
-  "timestamp": "2026-05-01T12:37:47Z",
+  "timestamp": "2026-05-01T18:27:15Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "Total drafts: 6 (threshold <12). Breakdown: research=4 (OK, threshold <4), general=2 (ALERT, threshold <8). Pool critically low across both categories."
+      "detail": "Total drafts: 6 (threshold <12, ALERT). Research audience drafts: 4 (OK, threshold <4). General audience drafts: 0 (ALERT, threshold <8)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json mtime is ~12 seconds before check — well within 26-hour threshold."
+      "detail": "storage/strategy_metrics.json age: ~0.00 hours — well within 26h threshold."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated today (2026-05-01) or yesterday (2026-04-30). Most recent entries are from 2026-04-26: (1) Codex CLI 400 error gpt-5.5 upgrade; (2) lancedb list_tables shape change false-positive fix; (3) member Q&A 5-day silent gap root cause & fix."
+      "detail": "No entries dated today (2026-05-01) or yesterday (2026-04-30). Most recent entries are from 2026-04-26: (1) Codex CLI 400 error gpt-5.5 incompatibility; (2) lancedb list_tables shape change false-positive fix; (3) member Q&A 5-day silent gap root cause & fix."
     },
     {
       "name": "PAPER_TRADING_GAPS",
-      "status": "ok",
-      "detail": "14 strategies with list entries checked. Each has exactly 1 null in last 3 entries (today's market data not yet settled — expected pattern). No strategy exceeds >2 null threshold. _market_daily has non-list structure (skipped)."
+      "status": "alert",
+      "detail": "_market_daily: 3/3 nulls in last 3 portfolio_return entries (ALERT). All other 14 strategies (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, adaptive_tier) passed."
     },
     {
       "name": "GIT_STATUS",
@@ -34,7 +34,8 @@
     }
   ],
   "alerts": [
-    "article pool low (<12): only 6 draft articles (research=4, general=2)",
-    "general audience pool low (<8): only 2 general-audience draft articles"
+    "article pool low (<12): only 6 draft articles",
+    "general audience drafts low (<8): 0 general audience drafts",
+    "paper trading null: _market_daily has 3/3 nulls in last 3 entries"
   ]
 }
