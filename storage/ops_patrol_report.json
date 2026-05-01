@@ -1,31 +1,31 @@
 {
-  "timestamp": "2026-04-30T00:00:44Z",
+  "timestamp": "2026-05-01T00:19:33Z",
   "all_ok": false,
   "checks": [
     {
       "name": "article_pool",
       "status": "alert",
-      "detail": "total_drafts=6 (threshold <12 → ALERT). Breakdown: research=4 (threshold <4 → OK), general=2 (threshold <8 → ALERT)."
+      "detail": "Total drafts: 6 (< threshold 12). Breakdown: research=4 (at threshold, OK), general=2 (< threshold 8, ALERT)."
     },
     {
       "name": "strategy_metrics_freshness",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json mtime age ~0 hours (well within 26h threshold)."
+      "detail": "storage/strategy_metrics.json last modified ~34 seconds ago. Well within 26-hour threshold."
     },
     {
-      "name": "error_log",
+      "name": "error_log_recent",
       "status": "ok",
-      "detail": "Last 30 lines checked. No entries for 2026-04-30 or 2026-04-29. Most recent entries dated 2026-04-26: Codex CLI gpt-5.5 breakage, knowledge-index lancedb false-positive fix, member Q&A 5-day gap root cause."
+      "detail": "No entries dated today (2026-05-01) or yesterday (2026-04-30). Most recent entries from 2026-04-26: Codex CLI gpt-5.5 upgrade fail; lancedb list_tables shape change fix; member Q&A 5-day silent gap root cause."
     },
     {
       "name": "paper_trading_gaps",
       "status": "ok",
-      "detail": "All 15 strategies checked (_market_daily, adaptive_tier, fear_dca, global_vt_tz, piecewise_conservative, recommended_5050, risk_parity, simple_12vix, slow_vt, taiwan_8.63vix, taiwan_hybrid_leverage, taiwan_spy_momentum, tz_tw_jp_5050, vix_cond_leverage, vix_leading_guard). No strategy exceeds >2 null portfolio_return in last 3 entries."
+      "detail": "All 15 strategies checked. No strategy has >2 null portfolio_return in last 3 entries."
     },
     {
       "name": "git_status",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold >50)."
+      "detail": "0 uncommitted files. Clean working tree."
     },
     {
       "name": "knowledge_size",
@@ -34,7 +34,7 @@
     }
   ],
   "alerts": [
-    "article pool low (<12): only 6 draft articles total",
-    "article pool general audience low (<8): only 2 general-audience drafts"
+    "article pool low (<12): only 6 draft articles in feed",
+    "general audience pool low (<8): only 2 general audience draft articles"
   ]
 }
