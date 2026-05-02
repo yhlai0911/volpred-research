@@ -1,4 +1,4 @@
-# 硬體資源與 Agent Team 工作分派
+# 硬體資源與執行模式
 
 ## 硬體規格
 
@@ -16,43 +16,58 @@
 - 64GB RAM 足以載入全部資產的完整歷史（~500MB total）
 - Agent worktree 每個 ~800MB，同時 4 個 = 3.2GB（無壓力）
 
-## Agent Team 工作分派
+## 執行模式選擇
 
-Claude Code 的 Agent 工具可啟動獨立子程序（subagent），有自己的 context window 和工具權限。
-**優先使用 agent team 並行分派任務**，同時推進 3-4 個方向以最大化效率。
+Claude Code 的 Agent 工具可啟動獨立子程序（subagent），有自己的 context window 和工具權限。這個 repo 的預設不是「把所有工作丟給 agent team」，而是依 task shape 選最便宜、最乾淨的模式。
 
-### 模型選擇原則（必須遵守）
-**根據任務複雜度與難易度選擇適當模型：**
+### 1. 單一主 session
 
-| 任務類型 | 模型 | 原因 |
-|---------|------|------|
-| **研究實驗**（GARCH、統計檢定、策略回測） | `model: "opus"` | 精確性與專業性要求高 |
-| **程式開發**（前端、後端、bug 修復） | `model: "opus"` | 程式碼正確性關鍵 |
-| **統計分析**（DM test、bootstrap、cross-OOS） | `model: "opus"` | 數學嚴謹性不可妥協 |
-| **論文寫作/審查** | `model: "opus"` | 學術品質要求 |
-| **知識合成**（meta-analysis、投資指南） | `model: "opus"` | 需要深度推理 |
-| 簡單搜尋（grep、檔案查找） | `subagent_type: "Explore"` | 快速唯讀，不需重模型 |
-| 簡單文章撰寫（feed 文章） | `model: "sonnet"` 可接受 | 創意寫作彈性較大 |
-| 規劃與架構 | `subagent_type: "Plan"` | 結構化思考 |
+適合：
+- 單一 `grep` / `jq` / 小 edit / 一次驗證
+- 需要保留完整決策鏈的主線任務
+- agent 回報後的 synthesis / 驗證 / canonical 寫入
 
-**規則：研究、分析、程式等精確性與專業性工作，務必使用 opus 模型。不確定時預設 opus。**
+### 2. Forked subagent
 
-### 核心參數
-- **`isolation: "worktree"`**：在獨立 git worktree 執行，不影響主分支檔案
-- **`run_in_background: true`**：背景執行，主對話可繼續其他工作，完成時自動通知
-- **`model: "opus"`**：指定使用 Opus 4.6 (1M context) 模型（研究/分析/程式必用）
-- **`subagent_type`**：`general-purpose`（預設，可寫檔）、`Explore`（唯讀，快速搜尋）、`Plan`（規劃）
-- **`resume: "agentId"`**：用之前的 agent ID 恢復已完成 agent 的 context 繼續工作
-- 多個獨立 Agent 可在同一訊息中**並行啟動**，大幅提升效率
+預設用在：
+- 大量搜尋、log 過濾、docs lookup
+- 與主線無關的 side task
+- 可 self-contained 的局部寫入或唯讀探索
 
-### 任務對應設定
+這是本專案的**主要平行化手段**，不是 agent team。
 
-| 任務類型 | Agent 設定 | 說明 |
-|----------|-----------|------|
-| 研究實驗 | `isolation="worktree"`, `model="opus"` | 跑 GARCH、統計測試，不影響主目錄 |
-| 並行實驗 | 多個 `isolation="worktree"`, `model="opus"` 同時發送 | 同時跑多資產/多模型 |
-| 背景部署 | `run_in_background=true` | upload-codebase frontend-v2，不阻塞研究 |
-| 代碼探索 | `subagent_type="Explore"` | 快速搜尋代碼結構（唯讀） |
-| AI 協作 | `/codex-cli`, `/gemini-cli` | 研究建議、審查、新方向 |
-| 文獻搜尋 | `Agent + WebSearch` | 最新方法、論文 |
-| 高品質發文 | 用 `feed-publisher` skill | Agent 寫完整文章再發佈 |
+### 3. Agent team
+
+只在以下情況啟用：
+- 多個 session 之間需要直接討論、交叉審查或挑戰假說
+- 單純多個獨立 subagent 不足以完成任務
+- 跨多模組事故 / paper synthesis / 策略上架評審等真實協作場景
+
+若子任務彼此不必互相溝通，就不要開 team。
+
+## 模型與 workflow 路由
+
+先看 [`docs/workflow-index.md`](/Users/yhlai0911/Desktop/volpred-research/docs/workflow-index.md)，再讀對應 skill。預設矩陣如下：
+
+| 工作類型 | 預設模式 | 預設 model / effort | 備註 |
+|---------|------|------|------|
+| 研究實驗、統計檢定、核心方法論判斷 | inline 主線程，side task 再 fork | `opus / high` | 高風險任務，不為省 token 降級 |
+| 平台 ops、發文、paper-update 類程序型工作 | inline | `sonnet / medium` | 流程明確，優先依 skill frontmatter 跑 |
+| 驗證、merge safety、publication scan、member QA ranking | inline 或 forked subagent | `sonnet / low` 或 `medium` | 以精準比對與 checklist 為主 |
+| data-source lookup、paper stage 判定、分類型任務 | inline | `haiku / low` | 便宜快速即可 |
+| 大量 docs / log / 無關 side task | forked subagent | 跟隨對應 skill | 先隔離 context，再摘要回主線 |
+
+## 平行 slot 原則
+
+- M1 Max 10 核可支援 3-4 個獨立 agent / worktree，但**不是每次都要塞滿**。
+- 平行化的前提是寫入範圍不重疊、brief self-contained、主線程仍能驗證結果。
+- Codex 類 subagent 預設 serialize；只有完全獨立時才放寬到同一 session 最多 3 個。
+
+## Context 邊界
+
+Context / status line 門檻以 `config/token_policy.json` 為準：
+
+- `< normal_max_pct`：正常工作
+- `normal_max_pct - compact_min_pct`：避免開新 noisy side task；優先 fork 或收斂
+- `compact_min_pct+`：優先 `/compact`
+- `clear_min_pct+`：除非正在收尾，不開新主題；跨 workflow 時優先新 session

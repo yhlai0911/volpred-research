@@ -49,6 +49,46 @@ from supabase_sync import (  # noqa: E402
 )
 
 
+def _fetch_supabase_article_tags() -> dict[str, list[str]]:
+    """Return slug -> sorted list of tag names for every article.
+
+    Tags live in a separate `article_tags` join table on Supabase, so
+    title/status/published_at projections never reflect tag drift on
+    their own. compute_diff needs explicit tag comparison or it will
+    silently miss tag-only changes (e.g. K-id retroactive migration on
+    2026-04-26 moved K-ids from tags into details.experiment_refs but
+    feed-sync reported update=0 because no projected field changed).
+    """
+    article_rows = _select_rows("articles", select="id,slug")
+    article_id_to_slug: dict[str, str] = {
+        str(row["id"]): row["slug"]
+        for row in article_rows
+        if row.get("id") and row.get("slug")
+    }
+    if not article_id_to_slug:
+        return {}
+
+    join_rows = _select_rows("article_tags", select="article_id,tag_id")
+    tag_rows = _select_rows("tags", select="id,name")
+    tag_id_to_name: dict[str, str] = {
+        str(row["id"]): str(row["name"])
+        for row in tag_rows
+        if row.get("id") and row.get("name") is not None
+    }
+
+    slug_to_tags: dict[str, list[str]] = {}
+    for join in join_rows:
+        article_id = str(join.get("article_id") or "")
+        tag_id = str(join.get("tag_id") or "")
+        slug = article_id_to_slug.get(article_id)
+        name = tag_id_to_name.get(tag_id)
+        if not slug or not name:
+            continue
+        slug_to_tags.setdefault(slug, []).append(name)
+
+    return {slug: sorted(names) for slug, names in slug_to_tags.items()}
+
+
 def _feed_path(storage_dir: str | Path = "storage") -> Path:
     return Path(storage_dir) / "reports" / "feed.json"
 
@@ -69,10 +109,15 @@ def _fetch_supabase_articles() -> dict[str, dict]:
     CJK) would never trigger Supabase UPDATE. Cost trade-off: content per
     article averages ~5KB so ~5MB total for 1000 articles per sync pass,
     acceptable vs the correctness gain.
+
+    2026-04-26: added `details` so compute_diff also catches changes inside
+    the `details` jsonb (notably `experiment_refs` after the K-id retroactive
+    migration). tags live in a separate join table — fetched by
+    _fetch_supabase_article_tags().
     """
     rows = _select_rows(
         "articles",
-        select="slug,status,title,published_at,updated_at,content",
+        select="slug,status,title,published_at,updated_at,content,details",
     )
     return {r["slug"]: r for r in rows if r.get("slug")}
 
@@ -104,12 +149,27 @@ def _row_fingerprint(row: dict) -> str:
     return hashlib.md5("|".join(parts).encode("utf-8")).hexdigest()[:16]
 
 
+def _experiment_refs(details: object) -> list[str]:
+    """Extract sorted experiment_refs from a details jsonb payload.
+
+    Tolerates None, missing key, or non-list value so the diff stays
+    robust against legacy rows.
+    """
+    if not isinstance(details, dict):
+        return []
+    refs = details.get("experiment_refs")
+    if not isinstance(refs, list):
+        return []
+    return sorted(str(ref) for ref in refs if ref)
+
+
 def compute_diff(storage_dir: str | Path = "storage") -> dict:
     """Compare feed.json (canonical) against Supabase articles (projection).
 
     Returns dict with:
       - insert: slugs in feed but not DB
-      - update: slugs in both but differ on (status/title/published_at)
+      - update: slugs in both but differ on
+        (status/title/published_at/content/tags/experiment_refs)
       - delete: slugs in DB but not feed
       - feed_count, db_count
     """
@@ -118,6 +178,7 @@ def compute_diff(storage_dir: str | Path = "storage") -> dict:
         a["id"]: a for a in feed if isinstance(a, dict) and a.get("id")
     }
     db_by_slug = _fetch_supabase_articles()
+    db_tags_by_slug = _fetch_supabase_article_tags()
 
     feed_keys = set(feed_by_slug)
     db_keys = set(db_by_slug)
@@ -137,11 +198,29 @@ def compute_diff(storage_dir: str | Path = "storage") -> dict:
             hashlib.md5(feed_content.encode("utf-8")).hexdigest()
             != hashlib.md5(db_content.encode("utf-8")).hexdigest()
         )
+
+        # 2026-04-26: detect tag drift (article_tags join table) and
+        # details.experiment_refs drift (jsonb on the row). Without these
+        # the K-id retroactive migration's tag/details changes never sync.
+        feed_tags = sorted(
+            str(t)
+            for t in (f.get("tags") or [])
+            if isinstance(t, str) and t.strip()
+        )
+        db_tags = db_tags_by_slug.get(slug, [])
+        tags_changed = feed_tags != db_tags
+
+        feed_refs = _experiment_refs(f.get("details"))
+        db_refs = _experiment_refs(d.get("details"))
+        refs_changed = feed_refs != db_refs
+
         if (
             (f.get("title") or "") != (d.get("title") or "")
             or (f.get("status") or "") != (d.get("status") or "")
             or _norm_ts(f.get("published_at")) != _norm_ts(d.get("published_at"))
             or content_changed
+            or tags_changed
+            or refs_changed
         ):
             to_update.append(slug)
 

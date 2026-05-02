@@ -5,6 +5,8 @@ description: >
   continuous review loop 觸發頻率。決定資源分配。Trigger phrases:
   'paper stage', '論文 stage', 'ready_for_submission', 'submitted'. Do not use
   for實際跑審查（use paper-review-cycle）或修訂操作（use paper-update）。
+model: haiku
+effort: low
 user-invocable: true
 ---
 

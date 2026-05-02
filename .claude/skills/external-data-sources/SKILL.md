@@ -6,6 +6,8 @@ description: >
   注意事項、已知陷阱。新增或移除數據來源時更新此 skill。
   Trigger phrases: '數據來源', 'data source', '怎麼抓資料', 'FRED', 'yfinance',
   'TAIFEX', '台指期資料', '外部資料'
+model: haiku
+effort: low
 ---
 
 # 外部數據來源操作手冊

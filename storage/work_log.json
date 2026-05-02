@@ -2698,5 +2698,43 @@
     "task_type": "experiment",
     "outcome": "k1258_agent_result_verification",
     "summary": "round18 v12: K1258 agent-result-verification per CLAUDE.md rule (防 K1016 agent 虛報). Cross-check report vs experiments/k1258/k1258_results.json: (a) H1 FAIL passing_cells=[] ✓, GLD λ=0.975 Harvey=+2.66 ΔQLIKE=+0.0259 byte-exact ✓, 0050.TW λ=0.975 Harvey=-2.00 ΔQLIKE=-0.0125 ✓ (b) H2 PASS weight_switch_freq λ=0.9 byte-exact: SPY 19.87% / GLD 24.05% / 0050.TW 21.54% ✓, λ=1 baseline 1.08/2.47/0.26% ✓ (c) H3 PASS optimal_per_asset {SPY:1.0, GLD:1.0, 0050.TW:0.9} ✓ (d) H4 λ=1.0 default ✓. All agent claims match JSON byte-for-byte. Codex 04-24 review 可信 base data 無 K1016-type 虛報風險. Release_pool 14:00 UTC 成功 fired mile_a21a6e06 (K1091, draft pool 8→7). Queue: 3 codex-blocked 04-24. Slot 0/4."
+  },
+  {
+    "timestamp": "2026-04-24T12:46:30+08:00",
+    "task_type": "paper_review",
+    "outcome": "codex_k1258_review_dispatched",
+    "summary": "04:43 UTC 2026-04-24 session resume. Codex quota reset confirmed via node codex-companion.mjs setup (ready=true, authenticated, sessionRuntime=direct available). task_d0c8e2ce75c0 claimed for codex-worker. Dispatched codex-rescue subagent a51bedce 10-check review of K1258 forgetting-factor BMA (commit b6c6225f). First attempt returned no output in 79s — likely auth/runtime issue. SendMessage resume kicked. Waiting for response. Queue remaining: task_7d2c24 (P10 audit pri=25), task_06584a (P30 CLI pri=30). Slot 1/4."
+  },
+  {
+    "timestamp": "2026-04-24T12:47:51+08:00",
+    "task_type": "governance",
+    "outcome": "codex_infrastructure_blocker_documented",
+    "summary": "04:47 UTC 根因 identified: ~/.codex/config.toml line 1 `model = gpt-5.5`, account 無該 model 存取權 → codex task-mocffgjn-ydq0m4 reconnect 5x 後 failed. task_d0c8e2ce75c0 finish-failed logged. 替代路徑: (a) 主線程 round-18 agent-result-verification 已 byte-exact 驗過 K1258 所有 claims; (b) 新 task (pri=23 needs_approval) 留待用戶決策 model 切換. **不自行動 ~/.codex/config.toml** 因屬 user global scope. Codex 其他 2 task (7d2c24/06584a) 同樣 blocked. 主線程可繼續 non-codex low-cost work."
+  },
+  {
+    "timestamp": "2026-04-24T14:02:02+08:00",
+    "task_type": "paper_review",
+    "outcome": "k1258_main_thread_code_review_fallback",
+    "summary": "04:51 UTC Codex blocked by gpt-5.5 config → main-thread 10-check code review 替代 integrity gate. Verdicts: PASS-with-caveats (0 CRITICAL / 0 HIGH / 0 MED / 1 CAVEAT=H2 descriptive-not-inferential). Code reviewed: ffbma_posterior L568-600 (decay→floor→update→lsum correct order), dm_harvey L606-629 (HLN 1997 + Newey-West cube-root lag), returns lag shift(1) L140, VIX regime attribution-only L139 (not lookahead signal), seed=42 L82, REFIT_EVERY=63 L95, switch_freq L735 argmax-change count, results schema completeness. Commit pending. File experiments/k1258/codex_review.md. Type = paper_review diversified governance→paper_review."
+  },
+  {
+    "at": "2026-04-24T17:22:38+00:00",
+    "task_type": "daily_article",
+    "summary": "01:25 UTC v12 cron: K438 GARCH-X VRP article draft dispatched (agent aad4bdd6be1d6df69, claude general-purpose, bg). 3-layer dedup PASS: no feed hit, theme matrix novel (regression-vs-variance-equation asymmetry, avoids VT dominant cluster). Queue 2 codex-blocked tasks (gpt-5.5 config) so diversified to daily_article (last 5 types: paper_review/governance/paper_review/experiment/platform_ops)."
+  },
+  {
+    "at": "2026-04-25T04:44:57+00:00",
+    "task_type": "event_article",
+    "summary": "04:45 UTC v12 cron: 2026-05 NFP event_jobs populated. Added nfp-2026-05-01-t2 (not_before 04-29 00:00 CST) + nfp-2026-05-01-t0 (not_before 05-01 21:00 CST = 1h post-release). preview_event_jobs status=pending verified. Memo storage/next_draft_candidate_nfp_t2.md written with consensus + surprise-bucket angle. T-7 missed due to populate gap (today 04-25 already past 04-24 T-7 deadline). check_alerts piggy-back will materialize T-2 task at 04-29 hourly window. Type diversification: event_article (last 5: experiment/paper_review/governance/paper_review/daily_article)."
+  },
+  {
+    "at": "2026-04-25T08:16:56+00:00",
+    "task_type": "platform_ops",
+    "summary": "08:15 UTC ROOT-CAUSE FIX: release_pool starvation. _derived_last_released_at_from_feed (content.py L95) was treating daily-audience articles (daily strategy + position emitted by daily_update.py at 09:00 CST) as pool releases → permanently reset 12h interval timer → real research/general drafts (4 in pool) never released. Fix: exclude audience=daily in addition to category=member_qa. Verified: pre-fix last_released_at=04-25T01:00 (daily); post-fix=04-24T13:00 (true last pool release); manual release-pool-by-settings released mile_1d8652b5 (VIX 6 markets general article). Test added test_preview_release_pool_self_heals_ignores_daily_audience_articles."
+  },
+  {
+    "at": "2026-04-25T16:45:57+00:00",
+    "task_type": "event_article",
+    "summary": "16:43 UTC v12: FOMC 04/29 T-2 task_4decc24a0b63 claimed (claude-supervisor) → Agent a6972465c0530771a dispatched (claude general-purpose, bg). Memo storage/next_draft_candidate_fomc_t2.md with 3-scenario prob grid + position sizing axis, prior 3 articles (T-7/T-3/T-11) listed for footer cross-link. Pre-dispatch dedup: feed grep 4 prior FOMC 04/29 entries all distinct angles. Slot 1/4. Low-cost: K1258 knowledge.json appended (item_id 727e23ee, total=2044) with main-thread review note since Codex gpt-5.5 blocked."
   }
 ]

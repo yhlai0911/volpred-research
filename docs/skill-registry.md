@@ -9,6 +9,8 @@
 3. 需要轉交給哪個 skill
 4. 它承接 `CLAUDE.md` 的哪一段治理或操作規則
 
+快速路由請先看 [`docs/workflow-index.md`](/Users/yhlai0911/Desktop/volpred-research/docs/workflow-index.md)；本表保留較完整的 scope / handoff 對照。
+
 ## Top-Level Skills
 
 | Skill | Trigger Phrases | 使用範圍 | 不該處理的內容 | Handoff | 對應 `CLAUDE.md` 段落 |

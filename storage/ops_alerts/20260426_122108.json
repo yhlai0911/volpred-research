@@ -1,0 +1,31 @@
+{
+  "timestamp": "2026-04-26T12:21:08.661168Z",
+  "alert_type": "ops_patrol",
+  "severity": "warning",
+  "alerts": [
+    {
+      "name": "article_pool_low",
+      "message": "Article pool low (<12): total=4 drafts",
+      "detail": "Total drafts: 4. Threshold: 12. Action: schedule more articles or publish queued research."
+    },
+    {
+      "name": "article_pool_research_low",
+      "message": "Research audience draft pool low (3<4)",
+      "detail": "3 research-audience drafts. Threshold: 4. Action: convert experiment result into research article."
+    },
+    {
+      "name": "article_pool_general_low",
+      "message": "General audience draft pool critically low (1<8)",
+      "detail": "1 general-audience draft. Threshold: 8. Action: publish pending research findings as general articles."
+    },
+    {
+      "name": "error_log_today",
+      "message": "3 error log entries dated 2026-04-26",
+      "entries": [
+        "2026-04-26: knowledge-index-summary broken (lancedb list_tables API shape change; fixed)",
+        "2026-04-26: Member QnA 5-day silent gap; resolved",
+        "2026-04-26: Codex CLI gpt-5.5 upgrade required; fallback used"
+      ]
+    }
+  ]
+}

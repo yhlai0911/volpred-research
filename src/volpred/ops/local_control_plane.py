@@ -1205,6 +1205,72 @@ def fail_task(
     return {"task": task, "receipt": receipt.to_dict()}
 
 
+def release_task(
+    task_id: str,
+    *,
+    reason: str,
+    actor: str | None = None,
+    storage_dir: str = "storage",
+) -> dict[str, Any]:
+    """Release a claimed task back to the queue without writing a fail receipt.
+
+    Use case (P30): an agent claim-next pulled a task that the supervisor
+    didn't intend to dispatch (e.g. wrong priority window, codex CLI broken,
+    pivot mid-flight). Before this CLI existed, the only escape was
+    finish-task --status failed, which polluted execution_receipts with a
+    false-fail and lost the original priority.
+
+    State machine: claimed | running -> queued. claimed_by* fields cleared,
+    started_at preserved (transparency that a claim happened), priority
+    preserved verbatim. Releases are logged in last_error and the writer log
+    so the audit trail stays intact without an execution receipt.
+    """
+    from .writer_log import append_writer_log
+
+    with _plane_lock(storage_dir):
+        task = _load_task(task_id, storage_dir=storage_dir)
+        if task is None:
+            raise ValueError(f"Unknown task: {task_id}")
+        prior_status = str(task.get("status") or "")
+        if prior_status not in ("claimed", "running"):
+            raise ValueError(
+                f"Cannot release task {task_id} from status={prior_status}; "
+                "only claimed or running tasks may be released back to the queue."
+            )
+
+        prior_session_key = (
+            task.get("claimed_by_session_key") or task.get("claimed_by") or ""
+        )
+        now = _utc_now()
+        task["status"] = "queued"
+        task["claimed_by"] = None
+        task["claimed_by_session_key"] = None
+        task["claimed_by_role"] = None
+        task["claimed_at"] = None
+        task["last_error"] = (
+            f"released_from_{prior_status}_at_{now}_by_{actor or 'unknown'}: {reason}"
+        )
+        task["updated_at"] = now
+        _atomic_write_json(_task_path(task_id, storage_dir=storage_dir), task)
+
+        # Free the agent session that held this task so the next claim-next
+        # can proceed without thinking it's still busy.
+        if prior_session_key:
+            _close_agent_claim(
+                session_key=str(prior_session_key), storage_dir=storage_dir
+            )
+
+        append_writer_log(
+            subsystem="control_plane",
+            target=f"ops/tasks/{task_id}",
+            record_id=str(task_id),
+            result=f"released_from_{prior_status}",
+            actor=actor or "supervisor",
+            storage_dir=storage_dir,
+        )
+    return task
+
+
 def list_pending_curations(
     *, limit: int | None = None, storage_dir: str = "storage"
 ) -> list[dict[str, Any]]:

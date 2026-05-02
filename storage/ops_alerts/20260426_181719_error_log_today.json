@@ -1,0 +1,27 @@
+{
+  "timestamp": "2026-04-26T18:17:19Z",
+  "alert": "error_log entries dated today",
+  "severity": "info",
+  "detail": {
+    "date": "2026-04-26",
+    "entry_count": 3,
+    "entries": [
+      {
+        "issue": "knowledge-index-summary always returned status=broken",
+        "root_cause": "lancedb list_tables() API shape changed to paginated tuples; legacy string-list assumption broke table detection",
+        "status": "fixed — try-open pattern applied, status=fresh, 5337 entries confirmed"
+      },
+      {
+        "issue": "Member Q&A 5-day silent gap — q 29cbeb5c from yaoxk1431 stuck in evaluating",
+        "root_cause": "cron prompt advisory language + alert system missing member_qa stale condition + session-inactive cron = zero execution",
+        "status": "resolved — score=3 ranked; alerts + cron prompt + rules updated"
+      },
+      {
+        "issue": "Codex CLI outdated — gpt-5.5 requires newer version, all codex dispatches failing with 400",
+        "root_cause": "local plugin version 1.0.1 does not support gpt-5.5 model",
+        "status": "mitigated — main-thread fallback used; upgrade Codex CLI plugin pending"
+      }
+    ]
+  },
+  "recommended_action": "Upgrade Codex CLI plugin (claude plugin update openai-codex). Monitor member_qa alert rule for future stale detection."
+}

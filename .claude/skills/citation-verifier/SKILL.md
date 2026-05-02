@@ -11,6 +11,10 @@ description: >
   submission, or when citation accuracy is questioned.
   This skill should NOT be used for: general paper quality review (use finance-paper-quality),
   LaTeX formatting review (use latex-academic-reviewer), or writing new content.
+model: sonnet
+effort: medium
+context: fork
+agent: docs-researcher
 ---
 
 # Citation Verifier

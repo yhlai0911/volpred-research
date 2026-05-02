@@ -1,0 +1,28 @@
+{
+  "timestamp": "2026-04-27T00:32:55Z",
+  "alert_type": "error_log_recent",
+  "severity": "info",
+  "detail": "4 error log entries recorded on 2026-04-26 (yesterday)",
+  "entries": [
+    {
+      "date": "2026-04-26",
+      "issue": "Audience-content 錯位 silent publish",
+      "summary": "audience='general' article mile_4fa40750 contained research jargon + K-id tags. 9+ articles affected. Fix: publisher.py audit gate added, K-id moved to details.experiment_refs."
+    },
+    {
+      "date": "2026-04-26",
+      "issue": "knowledge-index-summary false positive broken",
+      "summary": "lancedb list_tables() API shape changed to paginated; legacy code caused permanent broken status. Fix: try-open pattern; status=fresh confirmed."
+    },
+    {
+      "date": "2026-04-26",
+      "issue": "Member Q&A 5-day silent gap",
+      "summary": "q 29cbeb5c from yaoxk1431 stuck in evaluating for 5 days. Resolved: score=3, ranked. Alerts and cron prompt updated."
+    },
+    {
+      "date": "2026-04-26",
+      "issue": "Codex CLI outdated — gpt-5.5 400 errors",
+      "summary": "All codex:codex-rescue dispatches failing. Fallback to main-thread audit. Codex CLI upgrade to latest version required."
+    }
+  ]
+}

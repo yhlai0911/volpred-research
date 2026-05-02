@@ -24,16 +24,17 @@
 
 ## 標準 Session Cron（每次新 session 重建）
 ```
-CronCreate(cron="3 9 * * *", prompt="每日任務審視與執行計劃：(1) 盤點 user queue / scheduled queue / approval backlog (2) 盤點草稿池與今日已發佈文章缺口 (3) 讀 research_program.md 事件日曆，確認今日是否有 CPI/NFP/FOMC/TSMC 等重要事件 (4) 有事件→立即建立或執行事件任務（必要時 status=published）(5) 檢查 research_program.md 行數(<700)、知識索引是否過期(>24h) (6) 用 uv run volpred ops assign 建立今日正式任務")
-CronCreate(cron="17 */6 * * *", prompt="會員問題研究摘要：先跑 question-ranking-workflow；只有 pending_questions > 0 才建立/執行後續任務")
-CronCreate(cron="37 */6 * * *", prompt="平台巡檢摘要：先跑 ops health + platform-cycle-summary；只有異常或 release_due 才建立/執行後續任務")
-CronCreate(cron="7 */6 * * *", prompt="知識索引檢查：先判斷是否真的需要更新")
-CronCreate(cron="23 22 * * *", prompt="Token 用量日報：每日一次 detailed；週五再補 weekly")
-CronCreate(cron="0 10 28 * *", prompt="更新 NDC 景氣指標：用 Chrome DevTools MCP 導航 NDC 網站提取最新領先指標和景氣對策信號，更新 storage/macro/tw_dgbas_bci_m.csv，git commit")
+CronCreate(cron="3 9 * * *", prompt="每日任務審視：執行 daily-planning-maintain --stub-if-no-work；若有 planning gap 再建立正式 task")
+CronCreate(cron="*/30 * * * *", prompt="繼續任務（slot-aware）：執行 continue-task-maintain --stub-if-no-work；若有 dispatch candidate 再處理 1 個正式 task")
+CronCreate(cron="17 */6 * * *", prompt="會員問題研究：執行 question-ops-maintain --stub-if-no-work；若有 pending 再看 workflow")
+CronCreate(cron="37 */6 * * *", prompt="平台巡檢：執行 platform-patrol-maintain --stub-if-no-work；若有訊號再看 detail CLI")
+CronCreate(cron="7 */6 * * *", prompt="知識索引維護：執行 knowledge-index-maintain --stub-if-no-work；若有動作再回報 after summary")
+CronCreate(cron="23 22 * * *", prompt="Token 用量日報：執行 token-usage-maintain --stub-if-no-work；只有缺日報或週報時才生成並回報 after summary")
+CronCreate(cron="0 10 28 * *", prompt="更新 NDC 景氣指標：執行 ndc-indicator-maintain --stub-if-no-work；只有 canonical CSV 落後時才展開人工更新流程")
 ```
 
 ## Idle-driven continuation（取代高頻 heartbeat）
-- 不再建立 `*/4 * * * *` 或更密的「繼續任務」heartbeat cron（標準是 `11 */2` 每 2 小時 slot-aware）
+- 不再建立 `*/2 * * * *` 或更密的「繼續任務」heartbeat cron（標準是 `*/30 * * * *` 嚴格每 30 分鐘等距 fire；2026-04-26 4h→30min 對齊 Claude Code Max $200 plan 1-hour prompt cache TTL，已於 Anthropic 'Using Claude Code with your Pro or Max plan' support article 驗證）
 - agent 完成主任務後，先檢查 `user queue`
 - `user queue` 為空，再檢查 `scheduled queue`
 - queue 都空了，才允許做一輪 discovery / research continuation

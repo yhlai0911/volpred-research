@@ -20,7 +20,7 @@ import re
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from collections import defaultdict
+from collections import Counter, defaultdict
 
 def _detect_claude_projects_dir() -> Path:
     """動態偵測正確的 Claude Code projects 目錄（跨 Mac/Linux 環境）"""
@@ -208,8 +208,169 @@ PRICING = {
 }
 
 
+def _empty_bucket():
+    return {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "cache_read_tokens": 0,
+        "cache_create_tokens": 0,
+        "messages": 0,
+    }
+
+
+def _usage_breakdown(usage):
+    return {
+        "input_tokens": usage.get("input_tokens", 0) or 0,
+        "output_tokens": usage.get("output_tokens", 0) or 0,
+        "cache_read_tokens": usage.get("cache_read_input_tokens", 0) or 0,
+        "cache_create_tokens": usage.get("cache_creation_input_tokens", 0) or 0,
+    }
+
+
+def _billable_total(usage_or_bucket):
+    return (
+        (usage_or_bucket.get("input_tokens", 0) or 0)
+        + (usage_or_bucket.get("output_tokens", 0) or 0)
+        + (usage_or_bucket.get("cache_create_tokens", 0) or 0)
+    )
+
+
+def _extract_text_content(content):
+    if isinstance(content, str):
+        return content
+    if not isinstance(content, list):
+        return ""
+    texts = []
+    for item in content:
+        if not isinstance(item, dict):
+            continue
+        if item.get("type") in {"text", "output_text"}:
+            text = item.get("text") or item.get("content") or ""
+            if isinstance(text, str) and text.strip():
+                texts.append(text.strip())
+    return "\n".join(texts)
+
+
+def _normalize_text_signature(text, limit=160):
+    cleaned = " ".join(text.split())
+    if not cleaned:
+        return "(empty)"
+    return cleaned[:limit]
+
+
+def _text_length_bucket(text):
+    length = len(text)
+    if length < 200:
+        return "<200 chars"
+    if length < 800:
+        return "200-800 chars"
+    if length < 2000:
+        return "800-2000 chars"
+    return "2000+ chars"
+
+
+def _classify_text_only_reason(text):
+    low = text.lower()
+    if not low.strip():
+        return "non-text assistant message"
+    if "/compact" in low or "context 已滿" in text or "precompact" in low or "context full" in low:
+        return "context/compact"
+    if (
+        "rate limit" in low
+        or "quota" in low
+        or "spending cap" in low
+        or "api key" in low
+        or "額度" in text
+        or "重設" in text
+        or "reset" in low
+        or "429" in low
+    ):
+        return "quota/rate-limit"
+    if "review" in low or "finding" in low or "審查" in text or "回歸" in text or "風險" in text:
+        return "reviews/findings"
+    if "下一步" in text or "follow-up" in low or "next step" in low or "接下來" in text:
+        return "planning/follow-up"
+    if "summary" in low or "總結" in text or "摘要" in text or "待辦" in text or "backlog" in low or "狀態" in text:
+        return "status/summary"
+    if "paper" in low or "論文" in text:
+        return "paper prose"
+    if "setup" in low or "auth" in low or "登入" in text or "就緒" in text:
+        return "setup/auth"
+    if "experiment" in low or re.search(r"\bK\d{3,4}\b", text):
+        return "experiment/result narration"
+    return "other"
+
+
+def _content_signature(content):
+    if isinstance(content, list):
+        content_types = sorted({
+            str(item.get("type"))
+            for item in content
+            if isinstance(item, dict) and item.get("type")
+        })
+        if content_types:
+            return f"(content types: {', '.join(content_types)})"
+    return "(empty)"
+
+
+def _bash_signature(cmd):
+    cmd = cmd.strip()
+    if not cmd:
+        return "(empty)"
+    first_line = cmd.splitlines()[0].strip()
+    if not first_line:
+        return "(empty)"
+    tokens = first_line.split()
+    if not tokens:
+        return "(empty)"
+    head = tokens[0]
+    if head in {
+        "git", "uv", "python3", "python", "npm", "npx", "jq", "gh", "bash",
+        "sh", "ls", "cat", "tail", "head", "cd", "find", "grep", "rg", "wc",
+        "awk", "sed", "echo", "date", "test", "cp", "mv",
+    }:
+        return " ".join(tokens[:3])[:100]
+    return head[:100]
+
+
+def _bash_first_line(cmd, limit=180):
+    first_line = cmd.strip().splitlines()[0] if cmd.strip() else ""
+    return first_line[:limit] or "(empty)"
+
+
+def _classify_bash_family(cmd):
+    line = _bash_first_line(cmd)
+    low = cmd.lower()
+    if line.startswith("cd "):
+        return "repo navigation"
+    if line.startswith("git status") or line.startswith("git log") or line.startswith("git diff") or line.startswith("git rev-parse"):
+        return "git inspection"
+    if (
+        "next_tasks.json" in cmd
+        or "storage/ops/tasks" in cmd
+        or "scheduler_state" in cmd
+        or line.startswith("jq ")
+        or line.startswith("python3 -c ")
+        or line.startswith("uv run python -c ")
+        or line.startswith("python3 <<")
+        or line.startswith("python3 <<'")
+    ):
+        return "inline parsing/json inspection"
+    if "crontab" in line or "scheduler.log" in cmd or "check_alerts" in low or line.startswith("date "):
+        return "scheduler/cron inspection"
+    if line.startswith("tail ") or ".output" in low or "/tmp/" in low or "run.log" in low:
+        return "log tailing"
+    if line.startswith("cat "):
+        return "file dumps"
+    if line.startswith("echo ") or line.startswith("test ") or line.startswith("cp "):
+        return "shell glue"
+    if "npx tsc" in low or "npm run" in low or "deploy" in low or "uv run volpred ops" in low:
+        return "ops/build runners"
+    return "other bash"
+
+
 def _scan_jsonl(jsonl_path, session_id, is_subagent, target_date_start, target_date_end):
-    """Scan a single JSONL file and yield usage entries"""
+    """Scan a single JSONL file and yield assistant message records."""
     try:
         with open(jsonl_path, "r") as f:
             for line in f:
@@ -250,16 +411,23 @@ def _scan_jsonl(jsonl_path, session_id, is_subagent, target_date_start, target_d
                 # Subagents: mark as delegated work but keep category for what they do
                 if is_subagent and category == "text_only":
                     category = "agent_delegation"
-                yield (ts_date, session_id, model, usage, category, is_subagent)
+                yield {
+                    "timestamp": ts,
+                    "date": ts_date,
+                    "session_id": session_id,
+                    "model": model,
+                    "usage": usage,
+                    "category": category,
+                    "is_subagent": is_subagent,
+                    "content": msg.get("content", []),
+                    "text_content": _extract_text_content(msg.get("content", [])),
+                }
     except IOError:
         return
 
 
-def iter_session_usage(target_date_start=None, target_date_end=None):
-    """
-    遍歷所有 JSONL session files（主 session + subagents），
-    yield (timestamp_date, session_id, model, usage_dict, category, is_subagent).
-    """
+def iter_session_records(target_date_start=None, target_date_end=None):
+    """遍歷所有 assistant message records（主 session + subagents）。"""
     if not CLAUDE_PROJECTS_DIR.exists():
         return
 
@@ -282,25 +450,23 @@ def iter_session_usage(target_date_start=None, target_date_end=None):
 
 def aggregate_usage(date_start, date_end):
     """聚合指定日期區間的 token 用量"""
-    def empty_bucket():
-        return {
-            "input_tokens": 0,
-            "output_tokens": 0,
-            "cache_read_tokens": 0,
-            "cache_create_tokens": 0,
-            "messages": 0,
-        }
+    totals = {**_empty_bucket(), "unique_sessions": set(), "subagent_messages": 0, "main_messages": 0}
+    by_model = defaultdict(_empty_bucket)
+    by_date = defaultdict(_empty_bucket)
+    by_category = defaultdict(_empty_bucket)
 
-    totals = {**empty_bucket(), "unique_sessions": set(), "subagent_messages": 0, "main_messages": 0}
-    by_model = defaultdict(empty_bucket)
-    by_date = defaultdict(empty_bucket)
-    by_category = defaultdict(empty_bucket)
+    for record in iter_session_records(date_start, date_end):
+        ts_date = record["date"]
+        session_id = record["session_id"]
+        model = record["model"]
+        usage = _usage_breakdown(record["usage"])
+        category = record["category"]
+        is_subagent = record["is_subagent"]
 
-    for ts_date, session_id, model, usage, category, is_subagent in iter_session_usage(date_start, date_end):
-        inp = usage.get("input_tokens", 0) or 0
-        out = usage.get("output_tokens", 0) or 0
-        cr = usage.get("cache_read_input_tokens", 0) or 0
-        cc = usage.get("cache_creation_input_tokens", 0) or 0
+        inp = usage["input_tokens"]
+        out = usage["output_tokens"]
+        cr = usage["cache_read_tokens"]
+        cc = usage["cache_create_tokens"]
 
         for bucket in (totals, by_model[model], by_date[ts_date.isoformat()], by_category[category]):
             bucket["input_tokens"] += inp
@@ -318,6 +484,163 @@ def aggregate_usage(date_start, date_end):
     totals["unique_sessions"] = len(totals["unique_sessions"])
 
     return totals, dict(by_model), dict(by_date), dict(by_category)
+
+
+def generate_drilldown(date_start, date_end):
+    """更細地拆解 text_only / bash_other 與 cache-create 線索。"""
+    text_only = {
+        "messages": 0,
+        "billable_total": 0,
+        "length_buckets": defaultdict(lambda: {"messages": 0, "billable_total": 0}),
+        "reason_groups": defaultdict(lambda: {"messages": 0, "billable_total": 0}),
+        "top_signatures": defaultdict(lambda: {"messages": 0, "billable_total": 0}),
+    }
+    bash_other = {
+        "messages": 0,
+        "billable_total": 0,
+        "family_breakdown": defaultdict(lambda: {"messages": 0, "billable_total": 0}),
+        "prefix_breakdown": defaultdict(lambda: {"messages": 0, "billable_total": 0}),
+        "top_first_lines": defaultdict(lambda: {"messages": 0, "billable_total": 0}),
+    }
+    sessions = {}
+
+    for record in iter_session_records(date_start, date_end):
+        usage = _usage_breakdown(record["usage"])
+        billable = _billable_total(usage)
+        session_bucket = sessions.setdefault(
+            record["session_id"],
+            {
+                "messages": 0,
+                "billable_total": 0,
+                "cache_create_tokens": 0,
+                "cache_read_tokens": 0,
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "first_ts": record["timestamp"],
+                "last_ts": record["timestamp"],
+            },
+        )
+        session_bucket["messages"] += 1
+        session_bucket["billable_total"] += billable
+        session_bucket["cache_create_tokens"] += usage["cache_create_tokens"]
+        session_bucket["cache_read_tokens"] += usage["cache_read_tokens"]
+        session_bucket["input_tokens"] += usage["input_tokens"]
+        session_bucket["output_tokens"] += usage["output_tokens"]
+        if record["timestamp"] < session_bucket["first_ts"]:
+            session_bucket["first_ts"] = record["timestamp"]
+        if record["timestamp"] > session_bucket["last_ts"]:
+            session_bucket["last_ts"] = record["timestamp"]
+
+        if record["category"] == "text_only":
+            text = record["text_content"] or ""
+            length_bucket = _text_length_bucket(text)
+            reason = _classify_text_only_reason(text)
+            signature = _normalize_text_signature(text) if text.strip() else _content_signature(record["content"])
+
+            text_only["messages"] += 1
+            text_only["billable_total"] += billable
+            text_only["length_buckets"][length_bucket]["messages"] += 1
+            text_only["length_buckets"][length_bucket]["billable_total"] += billable
+            text_only["reason_groups"][reason]["messages"] += 1
+            text_only["reason_groups"][reason]["billable_total"] += billable
+            text_only["top_signatures"][signature]["messages"] += 1
+            text_only["top_signatures"][signature]["billable_total"] += billable
+
+        elif record["category"] == "bash_other":
+            commands = []
+            if isinstance(record["content"], list):
+                for item in record["content"]:
+                    if not isinstance(item, dict) or item.get("type") != "tool_use" or item.get("name") != "Bash":
+                        continue
+                    inp = item.get("input", {}) if isinstance(item.get("input"), dict) else {}
+                    cmd = str(inp.get("command", "")).strip()
+                    if cmd:
+                        commands.append(cmd)
+
+            if not commands:
+                continue
+
+            bash_other["messages"] += 1
+            bash_other["billable_total"] += billable
+            seen_families = set()
+            seen_prefixes = set()
+            seen_first_lines = set()
+            for cmd in commands:
+                family = _classify_bash_family(cmd)
+                prefix = _bash_signature(cmd)
+                first_line = _bash_first_line(cmd)
+
+                if family not in seen_families:
+                    bash_other["family_breakdown"][family]["messages"] += 1
+                    seen_families.add(family)
+                bash_other["family_breakdown"][family]["billable_total"] += billable
+
+                if prefix not in seen_prefixes:
+                    bash_other["prefix_breakdown"][prefix]["messages"] += 1
+                    seen_prefixes.add(prefix)
+                bash_other["prefix_breakdown"][prefix]["billable_total"] += billable
+
+                if first_line not in seen_first_lines:
+                    bash_other["top_first_lines"][first_line]["messages"] += 1
+                    seen_first_lines.add(first_line)
+                bash_other["top_first_lines"][first_line]["billable_total"] += billable
+
+    def _sorted_items(mapping, limit=10):
+        return [
+            {"name": key, **value}
+            for key, value in sorted(
+                mapping.items(),
+                key=lambda item: (-item[1]["billable_total"], -item[1]["messages"], item[0]),
+            )[:limit]
+        ]
+
+    total_cache_create = sum(bucket["cache_create_tokens"] for bucket in sessions.values())
+    total_billable = sum(bucket["billable_total"] for bucket in sessions.values())
+    top_sessions = []
+    for session_id, bucket in sorted(
+        sessions.items(),
+        key=lambda item: (-item[1]["cache_create_tokens"], -item[1]["billable_total"], item[0]),
+    )[:10]:
+        duration_minutes = (bucket["last_ts"] - bucket["first_ts"]).total_seconds() / 60 if bucket["messages"] > 1 else 0.0
+        top_sessions.append(
+            {
+                "session_id": session_id,
+                "messages": bucket["messages"],
+                "billable_total": bucket["billable_total"],
+                "cache_create_tokens": bucket["cache_create_tokens"],
+                "cache_read_tokens": bucket["cache_read_tokens"],
+                "duration_minutes": round(duration_minutes, 1),
+                "cache_create_share_pct": round(
+                    100 * bucket["cache_create_tokens"] / bucket["billable_total"], 1
+                ) if bucket["billable_total"] else 0.0,
+                "first_ts": bucket["first_ts"].isoformat(),
+                "last_ts": bucket["last_ts"].isoformat(),
+            }
+        )
+
+    return {
+        "text_only": {
+            "messages": text_only["messages"],
+            "billable_total": text_only["billable_total"],
+            "length_buckets": _sorted_items(text_only["length_buckets"], limit=10),
+            "reason_groups": _sorted_items(text_only["reason_groups"], limit=10),
+            "top_signatures": _sorted_items(text_only["top_signatures"], limit=12),
+        },
+        "bash_other": {
+            "messages": bash_other["messages"],
+            "billable_total": bash_other["billable_total"],
+            "family_breakdown": _sorted_items(bash_other["family_breakdown"], limit=10),
+            "prefix_breakdown": _sorted_items(bash_other["prefix_breakdown"], limit=12),
+            "top_first_lines": _sorted_items(bash_other["top_first_lines"], limit=12),
+        },
+        "cache_diagnostics": {
+            "sessions_in_window": len(sessions),
+            "cache_create_tokens": total_cache_create,
+            "billable_total": total_billable,
+            "cache_create_share_pct": round(100 * total_cache_create / total_billable, 1) if total_billable else 0.0,
+            "top_sessions_by_cache_create": top_sessions,
+        },
+    }
 
 
 def compute_cost_usd(usage, model):
@@ -380,6 +703,7 @@ def generate_daily_report(target_date=None, include_commits=False):
     date_end = target_date + timedelta(days=1)
 
     totals, by_model, by_date, by_category = aggregate_usage(date_start, date_end)
+    drilldown = generate_drilldown(date_start, date_end)
 
     # 計算各模型成本
     cost_by_model = {}
@@ -427,13 +751,14 @@ def generate_daily_report(target_date=None, include_commits=False):
         "by_category": {
             cat: {
                 **usage,
-                "billable_total": usage["input_tokens"] + usage["output_tokens"] + usage["cache_create_tokens"],
+                "billable_total": _billable_total(usage),
                 "estimated_cost_usd": round(cost_by_category[cat], 4),
                 "emoji": CATEGORY_META.get(cat, ("❔", cat))[0],
                 "description": CATEGORY_META.get(cat, ("❔", cat))[1],
             }
             for cat, usage in sorted(by_category.items(), key=lambda x: -cost_by_category.get(x[0], 0))
         },
+        "drilldown": drilldown,
     }
 
     if include_commits:
@@ -453,6 +778,7 @@ def generate_weekly_report(week_start=None):
 
     week_end = week_start + timedelta(days=7)
     totals, by_model, by_date, by_category = aggregate_usage(week_start, week_end)
+    drilldown = generate_drilldown(week_start, week_end)
 
     cost_by_model = {}
     total_cost_usd = 0.0
@@ -509,7 +835,7 @@ def generate_weekly_report(week_start=None):
         "by_category": {
             cat: {
                 **usage,
-                "billable_total": usage["input_tokens"] + usage["output_tokens"] + usage["cache_create_tokens"],
+                "billable_total": _billable_total(usage),
                 "estimated_cost_usd": round(cost_by_category[cat], 4),
                 "emoji": CATEGORY_META.get(cat, ("❔", cat))[0],
                 "description": CATEGORY_META.get(cat, ("❔", cat))[1],
@@ -517,6 +843,7 @@ def generate_weekly_report(week_start=None):
             for cat, usage in sorted(by_category.items(), key=lambda x: -cost_by_category.get(x[0], 0))
         },
         "daily_breakdown": daily_breakdown,
+        "drilldown": drilldown,
     }
 
     return report
@@ -582,6 +909,77 @@ def format_report_text(report):
                 f"| {u['emoji']} {u['description']} | {u['messages']:,} | "
                 f"{u['billable_total']:,} | ${u['estimated_cost_usd']} | {pct:.1f}% {bar} |"
             )
+        lines.append("")
+
+    drilldown = report.get("drilldown") or {}
+    text_only = drilldown.get("text_only") or {}
+    if text_only:
+        lines.append("## Drilldown: 純文字回覆")
+        lines.append(
+            f"- Messages: {text_only.get('messages', 0):,}"
+            f" | Billable: {format_number(text_only.get('billable_total', 0))}"
+        )
+        if text_only.get("reason_groups"):
+            lines.append("- Top reasons:")
+            for item in text_only["reason_groups"][:6]:
+                lines.append(
+                    f"  - {item['name']}: {item['messages']:,} msgs / "
+                    f"{format_number(item['billable_total'])} billable"
+                )
+        if text_only.get("length_buckets"):
+            lines.append("- Length buckets:")
+            for item in text_only["length_buckets"][:4]:
+                lines.append(
+                    f"  - {item['name']}: {item['messages']:,} msgs / "
+                    f"{format_number(item['billable_total'])} billable"
+                )
+        if text_only.get("top_signatures"):
+            lines.append("- Top repeated signatures:")
+            for item in text_only["top_signatures"][:6]:
+                lines.append(
+                    f"  - {item['messages']:,} msgs / {format_number(item['billable_total'])} billable"
+                    f" — {item['name']}"
+                )
+        lines.append("")
+
+    bash_other = drilldown.get("bash_other") or {}
+    if bash_other:
+        lines.append("## Drilldown: 其他 Bash 操作")
+        lines.append(
+            f"- Messages: {bash_other.get('messages', 0):,}"
+            f" | Billable: {format_number(bash_other.get('billable_total', 0))}"
+        )
+        if bash_other.get("family_breakdown"):
+            lines.append("- Top families:")
+            for item in bash_other["family_breakdown"][:6]:
+                lines.append(
+                    f"  - {item['name']}: {item['messages']:,} msgs / "
+                    f"{format_number(item['billable_total'])} billable"
+                )
+        if bash_other.get("prefix_breakdown"):
+            lines.append("- Top prefixes:")
+            for item in bash_other["prefix_breakdown"][:8]:
+                lines.append(
+                    f"  - {item['messages']:,} msgs / {format_number(item['billable_total'])} billable"
+                    f" — `{item['name']}`"
+                )
+        lines.append("")
+
+    cache_diag = drilldown.get("cache_diagnostics") or {}
+    if cache_diag:
+        lines.append("## Cache Diagnostics")
+        lines.append(
+            f"- Sessions in window: {cache_diag.get('sessions_in_window', 0):,}"
+            f" | Cache Create share: {cache_diag.get('cache_create_share_pct', 0):.1f}%"
+        )
+        if cache_diag.get("top_sessions_by_cache_create"):
+            lines.append("- Top sessions by cache create:")
+            for item in cache_diag["top_sessions_by_cache_create"][:5]:
+                lines.append(
+                    f"  - `{item['session_id'][:8]}`: {format_number(item['cache_create_tokens'])} cache_create, "
+                    f"{item['messages']:,} msgs, {item['duration_minutes']:.1f}m, "
+                    f"{item['cache_create_share_pct']:.1f}% of billable"
+                )
         lines.append("")
 
     # Weekly: daily breakdown

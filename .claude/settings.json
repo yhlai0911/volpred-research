@@ -1,4 +1,7 @@
 {
+  "env": {
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "62"
+  },
   "hooks": {
     "Stop": [
       {
@@ -7,36 +10,6 @@
             "type": "command",
             "command": "cd /Users/yhlai0911/Desktop/volpred-research && bash scripts/save_session_state.sh 2>/dev/null || true",
             "timeout": 30
-          }
-        ]
-      }
-    ],
-    "SubagentStop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo 'AGENT COMPLETED: (1) Check results immediately (2) Record to knowledge+feed (3) Dispatch next agent (4) Do your own analysis too — all in the SAME turn. Never have an empty turn.'"
-          }
-        ]
-      }
-    ],
-    "SessionStart": [
-      {
-        "matcher": "startup|resume",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo 'SESSION START: (1) Set session crons + persistent Monitor per scripts/session_startup.md (copy-paste blocks) (2) Reconstruct knowledge index (3) Read research_program.md (4) Start research immediately.'"
-          }
-        ]
-      },
-      {
-        "matcher": "compact",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cat /Users/yhlai0911/Desktop/volpred-research/research_program.md | head -50 && echo '---COMPACTED: Re-read above for current state. Continue research immediately.'"
           }
         ]
       }
@@ -52,44 +25,13 @@
         ]
       }
     ],
-    "PostCompact": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cd /Users/yhlai0911/Desktop/volpred-research && cat storage/session_state.json 2>/dev/null | python3 -c \"import json,sys; d=json.load(sys.stdin); print(json.dumps({'systemMessage': f'SESSION RECOVERED: {d.get(\\\"knowledge_count\\\",\\\"?\\\") } knowledge, last={d.get(\\\"last_experiment\\\",\\\"?\\\")}, drafts={d.get(\\\"draft_count\\\",\\\"?\\\")}, metrics age={d.get(\\\"metrics_age_hours\\\",\\\"?\\\")}h. Read storage/session_state.json for full state. Resume unfinished tasks immediately.'}))\""
-          }
-        ]
-      }
-    ],
-    "Notification": [
-      {
-        "matcher": "idle_prompt",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo 'IDLE DETECTED: You should not be idle. Launch an agent or do an analysis. Check: (1) Any agents to dispatch? (2) Any open questions to explore? (3) Any market data to update?'"
-          }
-        ]
-      }
-    ],
-    "TaskCompleted": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo 'TASK DONE: Record findings (thinking+knowledge+feed), then immediately start the next task. Research never stops.'"
-          }
-        ]
-      }
-    ],
     "PreToolUse": [
       {
         "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_input.command // \"\"' | grep -qE 'python.*(experiments/|scripts/k)' && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"additionalContext\":\"⚠️ 實驗代碼執行前檢查：\\n1) signal.shift(1) 確認了嗎？（lag 必須在代碼裡）\\n2) Codex 審過這份代碼了嗎？（寫完先審再跑）\\n3) baseline 用同樣 lag 嗎？\\n4) 結果好得不像真的 = 90% 有 bug\\n如果以上任何一項沒做，先停下來做完再跑。\"}}' || true"
+            "command": "bash /Users/yhlai0911/Desktop/volpred-research/.claude/hooks/pretooluse-bash-optimizer.sh"
           }
         ]
       }

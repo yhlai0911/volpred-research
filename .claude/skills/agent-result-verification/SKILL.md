@@ -5,6 +5,8 @@ description: >
   防止 agent 回報不準確的數字（K1016 教訓：agent 聲稱 QLIKE 改善 +13.7%
   但 JSON 顯示惡化）。Trigger: 每次 agent 返回實驗結果後自動執行。
   Do not use for research design, article writing, or generic platform ops.
+model: sonnet
+effort: low
 user-invocable: false
 ---
 

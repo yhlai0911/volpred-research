@@ -30,6 +30,32 @@ if str(PROJECT_ROOT / "scripts") not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
 
+def _record_release_pool_fallback_fire(*, start_iso: str, end_iso: str, returncode: int) -> None:
+    """Keep fallback-triggered release runs visible in the canonical observability files.
+
+    The actual release still runs through `volpred ops release-pool-by-settings`;
+    this helper only mirrors the fire into the same log/state surfaces that the
+    host cron path updates, so operators don't misdiagnose a successful fallback
+    run as a skipped cron.
+    """
+    log_path = PROJECT_ROOT / "storage" / "logs" / "cron" / "release_pool.log"
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    with log_path.open("a", encoding="utf-8") as handle:
+        handle.write(f"=== [release_pool] check_alerts fallback fire at {start_iso} ===\n")
+        handle.write(f"=== [release_pool] exit {returncode} at {end_iso} (fallback) ===\n")
+
+    state_path = PROJECT_ROOT / "storage" / "ops" / "cron_last_run.json"
+    state_path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        state = json.loads(state_path.read_text(encoding="utf-8")) if state_path.exists() else {}
+    except Exception:
+        state = {}
+    if not isinstance(state, dict):
+        state = {}
+    state["release_pool"] = end_iso
+    state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
 def _auto_trigger_release_pool_if_due() -> dict:
     """2026-04-19 workaround: host cron `3 */2 * * *` fires release_pool unreliably
     on this machine (see docs/error_log.md 2026-04-19 "Host cron selective skip").
@@ -72,6 +98,7 @@ def _auto_trigger_release_pool_if_due() -> dict:
     # Due: attempt release via CLI. Use non-blocking subprocess to avoid
     # any hang in hourly cron; limit runtime; don't fail alert run if this fails.
     try:
+        start = datetime.now(timezone.utc)
         result = subprocess.run(
             ["/opt/homebrew/bin/uv", "run", "volpred", "ops", "release-pool-by-settings"],
             cwd=str(PROJECT_ROOT),
@@ -79,12 +106,21 @@ def _auto_trigger_release_pool_if_due() -> dict:
             text=True,
             timeout=180,
         )
+        end = datetime.now(timezone.utc)
         ok = result.returncode == 0
+        if ok:
+            _record_release_pool_fallback_fire(
+                start_iso=start.isoformat(timespec="seconds"),
+                end_iso=end.isoformat(timespec="seconds"),
+                returncode=result.returncode,
+            )
         return {
             "triggered": True,
             "ok": ok,
             "returncode": result.returncode,
             "age_min": round(age_min),
+            "start_at": start.isoformat(),
+            "end_at": end.isoformat(),
             "stdout_tail": (result.stdout or "")[-200:],
             "stderr_tail": (result.stderr or "")[-200:],
         }

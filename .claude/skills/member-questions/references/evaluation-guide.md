@@ -100,6 +100,12 @@
 先讀：
 
 ```bash
+uv run volpred ops question-ops-summary --limit 5
+```
+
+若 `pending_questions > 0` 再跑：
+
+```bash
 uv run python -m volpred.cli ops question-ranking-summary --limit 20
 ```
 
@@ -111,9 +117,9 @@ uv run python -m volpred.cli ops question-ranking-workflow --limit 20
 
 你應該拿到：
 
-- `ranked_questions`
+- `top_ranked`
 - `pending_questions`
-- `evaluation_template`
+- `evaluation_template`（來自 `question-ranking-workflow`）
 - 建議下一步
 
 ### Step 2: 評估 `pending_questions`

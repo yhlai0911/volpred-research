@@ -13,6 +13,24 @@ uv run python scripts/recalc_metrics.py              # 手動重算績效指標
 uv run python scripts/supabase_sync.py full          # 手動 incremental sync
 uv run python scripts/supabase_sync.py force-full    # 強制全量同步（慎用，IO 大）
 uv run volpred ops health                            # 本地營運健康檢查
+uv run volpred ops queue-summary                     # 緊湊 queue 摘要（低 token 巡檢首選）
+uv run volpred ops daily-planning-maintain --stub-if-no-work  # 每日規劃 gate；沒 gap 直接 tiny stub
+uv run volpred ops continue-task-maintain --stub-if-no-work   # continuation gate；沒 runnable work 直接 tiny stub
+uv run volpred ops scheduler-summary                 # 緊湊 scheduler / crontab 摘要
+uv run volpred ops token-summary                     # 緊湊 token / cost 摘要（讀既有 daily reports）
+uv run volpred ops token-usage-maintain --stub-if-no-work  # token 日報/週報 wrapper；已新鮮時直接 tiny stub
+uv run volpred ops token-policy-summary              # token / context canonical 門檻摘要
+uv run volpred ops log-summary                       # 緊湊 cron / hook log 摘要
+uv run volpred ops git-sync-maintain --stub-if-no-work      # git sync preflight；clean branch 直接 tiny stub
+uv run volpred ops ndc-indicator-maintain --stub-if-no-work # NDC 月度 freshness gate；CSV 已新鮮時直接 tiny stub
+uv run volpred ops knowledge-index-summary           # 緊湊知識索引 freshness / drift 摘要（含 recommended_action）
+uv run volpred ops knowledge-index-maintain --stub-if-no-work  # 知識索引維護 wrapper；沒事只回 tiny stub
+uv run volpred ops publication-candidates-summary    # 緊湊 publication 候選摘要（寫文前先看）
+uv run volpred ops platform-patrol-summary           # 緊湊平台巡檢摘要（先看 release / alerts / questions）
+uv run volpred ops platform-patrol-maintain --stub-if-no-work  # 平台巡檢 wrapper；沒事只回 tiny stub
+uv run volpred ops question-ops-summary              # 緊湊會員問題摘要（先看 pending，再決定是否開完整 workflow）
+uv run volpred ops question-ops-maintain --stub-if-no-work     # 會員問題 gate；沒 pending 直接 tiny stub
+uv run volpred ops memory-health-summary             # 緊湊記憶健康摘要（先看大小 / duplicates / orphan worktrees）
 uv run volpred ops scheduler-preview                 # 預覽 shared scheduler 下一輪會做什麼
 uv run volpred ops scheduler-tick                    # 手動跑一輪 shared scheduler
 uv run volpred ops scheduler-smoke --cleanup         # 隔離 mock smoke，不碰真實 Claude/Codex CLI
@@ -71,6 +89,7 @@ uv run volpred ops unpublish mile_xxxxxxxx
 uv run volpred ops cleanup-post mile_xxxxxxxx --hard-delete
 
 # 會員問題排行
+uv run volpred ops question-ops-summary
 uv run volpred ops question-ranking-summary --limit 20
 uv run volpred ops question-rerank --evaluations-json '[...]'
 ```

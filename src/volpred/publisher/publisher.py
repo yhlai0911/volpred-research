@@ -1,10 +1,102 @@
 from __future__ import annotations
 import json
 import os
+import re
 from datetime import date, datetime, timezone
 from pathlib import Path
 
 from volpred.config.runtime import get_default_remote_url
+
+
+# 2026-04-26: audience-content consistency gate. Prior bug: agent dispatched
+# with audience='general' brief, wrote research-style content (K-id tags,
+# t-stats, Harvey thresholds, 14-tag pollution); publisher silently accepted
+# because only audience field was checked, not content-vs-audience match.
+# These constants define what "general" audience MUST NOT contain.
+_K_ID_TAG_PATTERN = re.compile(r'^K\d+[a-zA-Z_]?\d*$')
+
+# 2026-04-26: audience badge canonicalization. Frontend badge renders the
+# Chinese canonical name; agents in briefs / past code used English literals
+# ("general", "research") or mixed (Chinese + English) interchangeably →
+# 21 articles in feed.json had redundant or conflicting audience tags
+# (e.g. ["研究", "一般讀者"], ["研究", "general"]). Map every known alias to
+# the canonical Chinese tag; strip ALL aliases at publish time and re-insert
+# exactly one matching the article's audience field.
+_AUDIENCE_TAG_CANONICAL = {
+    # English audience values (publisher API convention)
+    'general': '一般讀者',
+    'research': '研究',
+    'daily': '每日建議',
+    'member_qa': '會員提問',
+    # Chinese canonical (the badge value itself)
+    '一般讀者': '一般讀者',
+    '研究': '研究',
+    '每日建議': '每日建議',
+    '會員提問': '會員提問',
+    # Common variants seen in historical feed
+    'General': '一般讀者',
+    'Research': '研究',
+    'Daily': '每日建議',
+    'daily-update': '每日建議',
+    'member-qa': '會員提問',
+}
+_AUDIENCE_TAG_ALL_ALIASES = frozenset(_AUDIENCE_TAG_CANONICAL.keys())
+_GENERAL_FORBIDDEN_PATTERNS = [
+    (re.compile(r'\bt\s*=\s*-?\d'), 't=value (use 「統計顯著」白話)'),
+    (re.compile(r'\bp\s*=\s*\d'), 'p=value (use 「達顯著水準」)'),
+    (re.compile(r'p\s*[<>]\s*0\.\d'), 'p<X.XX (use 「達顯著水準」)'),
+    (re.compile(r'\bHarvey\b'), 'Harvey threshold (use 「嚴格統計檢驗」)'),
+    (re.compile(r'\bDiebold-Mariano\b'), 'Diebold-Mariano (use 「兩模型比較顯著」)'),
+    (re.compile(r'\bDM\s*test\b', re.IGNORECASE), 'DM test (use 「比較檢定」)'),
+    (re.compile(r'\|t\|'), '|t| stat (use 白話)'),
+    (re.compile(r'\bt-stat\b', re.IGNORECASE), 't-stat (use 白話)'),
+    (re.compile(r'bootstrap\s+p[\s_=-]'), 'bootstrap p (use 白話)'),
+]
+_GENERAL_MAX_TAG_COUNT = 8
+
+
+def _extract_experiment_refs(tag_list: list[str]) -> tuple[list[str], list[str]]:
+    """Split K-id tags out of user-facing tags into metadata refs.
+
+    K-id tags (K438, K1258, K1100g, etc.) are research-internal identifiers.
+    They belong in details.experiment_refs as metadata, not in the user-facing
+    tags field that drives badge rendering and reader navigation. Pre-2026-04-26
+    code mixed them together → general articles ended up with 14 tags including
+    4 K-ids, polluting frontend tag clouds and search.
+    """
+    refs = []
+    cleaned = []
+    for t in tag_list:
+        if _K_ID_TAG_PATTERN.match(t.strip()):
+            refs.append(t.strip().upper())
+        else:
+            cleaned.append(t)
+    return cleaned, refs
+
+
+def _audit_general_content(audience: str, tags: list[str], content: str) -> list[str]:
+    """Return list of audience-content consistency issues. Empty list = clean.
+
+    Only enforces rules for audience='general' (散戶讀者). research/daily/
+    member_qa have their own conventions and are exempt.
+    """
+    if audience != 'general':
+        return []
+    issues = []
+    if len(tags) > _GENERAL_MAX_TAG_COUNT:
+        issues.append(
+            f"general tag count {len(tags)} > {_GENERAL_MAX_TAG_COUNT} "
+            f"(SKILL.md L308: ≤2-3 表格 → ≤8 tags)"
+        )
+    forbidden_hits = []
+    for pattern, hint in _GENERAL_FORBIDDEN_PATTERNS:
+        if pattern.search(content or ''):
+            forbidden_hits.append(hint)
+    if forbidden_hits:
+        issues.append(
+            f"general 內容含禁用統計術語 (SKILL.md L306): {forbidden_hits}"
+        )
+    return issues
 
 class Publisher:
     """Publishes research results to storage/reports/ for Web platform consumption.
@@ -218,12 +310,19 @@ class Publisher:
                          publish_at: str | None = None,
                          audience: str | None = None,
                          category: str | None = None,
-                         proposer: str | None = None) -> str:
+                         proposer: str | None = None,
+                         audit_strict: bool = True) -> str:
         """Publish a research milestone.
 
         audience: 'general' (一般讀者), 'research' (研究), 'daily' (每日建議), 'member_qa'
         category: 'general', 'milestone', 'experiment', 'comparison', 'qa'
         If not provided, auto-detected from tags.
+        audit_strict: When True (default) and audience='general', the
+            audience-content consistency gate (`_audit_general_content`) raises
+            ValueError on issues — K-id tags in user-facing list are
+            auto-extracted to details.experiment_refs first, but t-stat /
+            Harvey / p-value etc. in content require rewrite. Set False only
+            for batch migrations; never for live agent dispatch.
         """
         import uuid
         import re
@@ -304,23 +403,36 @@ class Publisher:
             else:
                 category = 'milestone'
 
-        # Ensure audience-specific category tag is present and first
-        # (frontend-v2 badge uses tags to determine display)
-        _audience_tag_map = {
-            'general': '一般讀者',
-            'research': '研究',
-            'daily': '每日建議',
-            'member_qa': '會員提問',
-        }
-        required_tag = _audience_tag_map.get(audience)
+        # 2026-04-26: enforce single canonical audience badge tag.
+        # Strip ALL audience aliases (Chinese / English / variants) regardless
+        # of whether they match the desired audience — this prevents the
+        # historical bug where ["研究", "general"] or ["研究", "一般讀者"]
+        # passed through silently. Then insert exactly one canonical Chinese
+        # tag for the article's audience.
+        tag_list = [t for t in tag_list if t not in _AUDIENCE_TAG_ALL_ALIASES]
+        required_tag = _AUDIENCE_TAG_CANONICAL.get(audience)
         if required_tag:
-            # Remove any mismatched category tags first
-            category_tags = set(_audience_tag_map.values())
-            tag_list = [t for t in tag_list if t not in category_tags or t == required_tag]
-            # Ensure required tag is first
-            if required_tag in tag_list:
-                tag_list.remove(required_tag)
             tag_list.insert(0, required_tag)
+
+        # 2026-04-26: split K-id tags into details.experiment_refs metadata.
+        # K-ids are research-internal references; they pollute frontend tag
+        # clouds and confuse general-audience readers. Always extract; never
+        # leave K-ids in the user-facing tag list.
+        tag_list, experiment_refs = _extract_experiment_refs(tag_list)
+
+        # 2026-04-26: audience-content consistency gate. Audit BEFORE building
+        # the item so we fail fast and avoid writing a polluted record.
+        audit_issues = _audit_general_content(audience, tag_list, description)
+        if audit_issues and audit_strict:
+            issue_text = '\n  - '.join(audit_issues)
+            raise ValueError(
+                f"audience='general' content consistency violations:\n  - {issue_text}\n"
+                f"Fix the brief or set audit_strict=False (batch migrations only)."
+            )
+        elif audit_issues:
+            print(f"  ⚠️ general audit issues (audit_strict=False bypass):")
+            for issue in audit_issues:
+                print(f"     - {issue}")
 
         # Build related_articles list for metadata
         related_articles = []
@@ -330,6 +442,15 @@ class Publisher:
                 for s in similar if s.get('status') in ('published', 'draft') and s['similarity'] > 0.2
             ][:5]
 
+        details_clean = {k: v for k, v in (details or {}).items() if k not in ('content', 'description', 'title')}
+        # Merge auto-extracted experiment_refs (K-ids removed from tags)
+        if experiment_refs:
+            existing_refs = details_clean.get('experiment_refs') or []
+            if isinstance(existing_refs, list):
+                merged = list(dict.fromkeys(existing_refs + experiment_refs))
+                details_clean['experiment_refs'] = merged
+            else:
+                details_clean['experiment_refs'] = experiment_refs
         item = {
             'id': pub_id,
             'title': title,
@@ -338,7 +459,7 @@ class Publisher:
             'category': category,
             'audience': audience,
             'phase': phase,
-            'details': {k: v for k, v in (details or {}).items() if k not in ('content', 'description', 'title')},
+            'details': details_clean,
             'tags': tag_list,
             'related_articles': related_articles,
             'created_at': now,

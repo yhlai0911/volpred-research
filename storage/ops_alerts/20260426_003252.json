@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-04-26T00:32:52Z",
+  "alerts": [
+    {
+      "type": "article_pool_low",
+      "severity": "high",
+      "detail": "Total draft articles: 7 (minimum required: 12). Pipeline is underfilled.",
+      "action": "Run autonomous-research or feed-publisher to generate new draft articles."
+    },
+    {
+      "type": "research_audience_low",
+      "severity": "medium",
+      "detail": "Research-audience draft articles: 2 (minimum required: 4).",
+      "action": "Publish or write more research-targeted articles from recent experiments."
+    },
+    {
+      "type": "general_audience_low",
+      "severity": "high",
+      "detail": "General-audience draft articles: 5 (minimum required: 8).",
+      "action": "Write additional general-audience articles covering market analysis or methodology."
+    }
+  ]
+}

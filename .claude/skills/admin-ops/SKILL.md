@@ -10,6 +10,8 @@ description: >
   'paper-upsert', 'paper-upload-pdf', 'paper-migrate-storage'.
   Do not use for core experiments, paper writing, or deep research analysis unless the task
   clearly crosses into platform execution.
+model: sonnet
+effort: medium
 user-invocable: true
 ---
 

@@ -13,6 +13,9 @@ description: >
   This skill should NOT be used for: content-level quality checks like claim-evidence
   matching (use finance-paper-quality), citation-only verification (use citation-verifier),
   or publishing to the website feed.
+model: opus
+effort: high
+context: fork
 ---
 
 # LaTeX 學術文件全面審查與修訂

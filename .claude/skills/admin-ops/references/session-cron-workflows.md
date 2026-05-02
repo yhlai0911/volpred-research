@@ -18,23 +18,22 @@
 建議節奏：
 
 - 每 6 小時跑一次
-- 先讀工作包
+- 先讀 compact 摘要
 - 只有 `pending_questions > 0` 時才進入評分
 
-### Step 1: 讀工作包
+### Step 1: 先讀 compact 摘要
 
 ```bash
-uv run python -m volpred.cli ops question-ranking-workflow --limit 20
+uv run volpred ops question-ops-summary --limit 5
 ```
 
 回傳重點：
 
-- `ranked_table`
+- `top_ranked`
 - `pending_questions`
-- `candidate_pool`
-- `evaluation_template`
-- `workflow_steps`
-- `next_commands`
+- `pending_preview`
+- `candidate_preview`
+- `detail_hints`
 
 ### Step 2: 用 LLM 評分待評分題目
 
@@ -58,11 +57,12 @@ uv run python -m volpred.cli ops question-rerank --evaluations-json /path/to/eva
 
 ### 建議的 session cron prompt 骨架
 
-1. 跑 `question-ranking-workflow`
+1. 先跑 `question-ops-summary`
 2. 若 `pending_questions` 為 0，記錄略過原因後結束
-3. 若大於 0，依 `evaluation_template` 產生 `evaluations.json`
-4. 執行 `question-rerank`
-5. 檢查回傳：
+3. 若大於 0，再跑 `question-ranking-workflow`
+4. 依 `evaluation_template` 產生 `evaluations.json`
+5. 執行 `question-rerank`
+6. 檢查回傳：
    - `evaluated`
    - `updated`
    - 是否有異常題目未寫回
@@ -140,9 +140,13 @@ uv run python -m volpred.cli ops send-daily-digest --target-date YYYY-MM-DD
 
 若 session cron 當前要做的是「平台層巡檢」，建議順序：
 
-1. `uv run python -m volpred.cli ops health`
-2. `uv run python -m volpred.cli ops platform-cycle-summary --storage-dir storage --limit 20`
-3. 必要時讀：
+1. `uv run volpred ops platform-patrol-summary`
+2. 若 `alert_breach_count > 0`、`release_due = true` 或 `pending_questions > 0`，再讀：
+   - `uv run volpred ops check-alerts`
+   - `uv run volpred ops platform-cycle-summary --storage-dir storage --limit 20`
+   - `uv run volpred ops scheduler-summary`
+   - `uv run volpred ops log-summary`
+3. 必要時再讀：
    - `/api/admin/analytics/summary`
    - `/api/admin/questions/summary`
    - `/api/admin/health`
@@ -196,18 +200,18 @@ uv run python -m volpred.cli ops paper-upload-pdf --paper-id <id> --file paper/<
 v2 建議的最小啟動集：
 
 ```
-CronCreate(cron="13 */6 * * *", prompt="會員問題研究")     # 6 小時重排
-CronCreate(cron="37 */6 * * *", prompt="平台巡檢")         # 6 小時巡檢（health + cycle summary）
+CronCreate(cron="17 */6 * * *", prompt="會員問題研究")     # 6 小時重排
+CronCreate(cron="37 */6 * * *", prompt="平台巡檢")         # 6 小時巡檢（compact patrol summary）
 CronCreate(cron="3 9 * * *", prompt="每日任務審視與執行計劃") # 每日計劃與 queue 補單
 CronCreate(cron="7 */6 * * *", prompt="知識索引檢查")         # 6 小時檢查
-CronCreate(cron="23 22 * * *", prompt="Token 用量日報")      # 每日一次
+CronCreate(cron="23 22 * * *", prompt="Token 用量日報（token-usage-maintain）")      # 每日一次
 ```
 
 先讓本機 agent 養成：
 
-- 先讀摘要（`platform-cycle-summary` / `question-ranking-workflow`）
+- 先讀摘要（`platform-patrol-summary` / `question-ops-summary`）
 - 再決定是否寫入
 - 寫入前先建立正式 queue task（`uv run python -m volpred.cli ops assign ...`）
 - 寫入後留可觀測結果（snapshot / execution receipt 存 `storage/ops/`）
 
-**標準「繼續任務」cron 為 `11 */2 * * *`（每 2 小時 slot-aware heartbeat）**。任務類型不限於研究（涵蓋發文/論文/ops/bug fix/會員問題/文件/重構）。禁止高於 `*/20` 的密度，避免資源爆衝。
+**標準「繼續任務」cron 為 `*/30 * * * *`（嚴格每 30 分鐘等距 fire；2026-04-26 用戶指定 4h→30min，對齊 Claude Code Max $200 plan 1-hour prompt cache TTL — 已於 Anthropic 'Using Claude Code with your Pro or Max plan' support article 驗證；30min 永遠落在 cache window 中央，cache 命中率最佳，避免 cold miss 同時維持發文與研究節奏）**。任務類型不限於研究（涵蓋發文/論文/ops/bug fix/會員問題/文件/重構）。禁止高於 `*/2` 的密度，避免資源爆衝。

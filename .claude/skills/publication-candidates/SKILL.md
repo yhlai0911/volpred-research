@@ -5,6 +5,10 @@ description: >
   (2) 事件驅動 — 近期時事、數據公佈、重大財報日、地緣政治。
   Trigger phrases: '選題', '寫什麼文章', 'publication candidates', '文章候選',
   '補草稿池', '時事文章', '事件文章'. Do not use for 實際寫作（use feed-publisher）。
+model: sonnet
+effort: low
+context: fork
+agent: fresh-context-worker
 user-invocable: true
 ---
 
@@ -44,7 +48,9 @@ Do **not** use for：
    - `missing_general_top5`（有研究版但缺一般讀者版）
    - `missing_research_top5`（有一般版但缺研究版）
 
-**執行**：`uv run python scripts/build_publication_candidates.py`
+**日常讀取**：`uv run volpred ops publication-candidates-summary`
+
+**重建**：`uv run python scripts/build_publication_candidates.py`
 
 **使用時機**：
 - 每週一次自動（正式時鐘以 shared scheduler / canonical runtime schedule 為準；若本機仍保留 session cron，只視為過渡期便利）
@@ -113,9 +119,9 @@ grep -i "事件關鍵詞" storage/reports/feed.json | grep title | head -10
 
 **1-A 候選庫 `storage/publication_candidates.json`**（主要軌道 A 來源）：
 ```bash
-jq '.top_10_uncovered, .missing_general_top5, .missing_research_top5' storage/publication_candidates.json
+uv run volpred ops publication-candidates-summary
 ```
-若過期 → `uv run python scripts/build_publication_candidates.py` re-build。
+若 `available=false` 或 `source_age_hours` 過高 → `uv run python scripts/build_publication_candidates.py` re-build，再重跑一次 summary。
 
 **1-B 實驗庫索引 `experiments/INDEX.md`**（1010 K 單頁索引）：
 ```bash
@@ -179,7 +185,7 @@ jq '.[] | {lesson_id, domain, summary: .summary[0:200]}' storage/memory/experime
 ## 雙軌合併排序（簡化版，急用時）
 
 ```
-1. 先看 storage/publication_candidates.json (軌道 A 候選)
+1. 先跑 `uv run volpred ops publication-candidates-summary`（軌道 A 候選）
 2. 檢查今日日期 + 未來 7 天（軌道 B 事件）
 3. 合併排序：
    - T+0 / T-2 事件必寫（時效高）
@@ -212,18 +218,18 @@ jq '.[] | {lesson_id, domain, summary: .summary[0:200]}' storage/memory/experime
 
 `.claude/skills/feed-publisher/SKILL.md` 於「主題查重」段之前新增：
 
-> 寫文章前先 `cat storage/publication_candidates.json | jq '.top_10_uncovered, .missing_general_top5, .missing_research_top5'` 看候選。
+> 寫文章前先跑 `uv run volpred ops publication-candidates-summary` 看候選；若 unavailable 或太舊再 rebuild。
 
 ## 自動化
 
 正式時鐘應由 shared scheduler / canonical runtime schedule 觸發；以下若仍存在，只視為 legacy session convenience：
 ```
-7 */3 * * *  知識索引更新
+7 */6 * * *  知識索引維護（執行 knowledge-index-maintain --stub-if-no-work；有動作再看 after summary）
 ```
 
 加掛：每週一 9:00 自動掃 publication candidates：
 ```python
-CronCreate(cron="0 9 * * 1", prompt="執行 uv run python scripts/build_publication_candidates.py 並回報 summary；告訴用戶 uncovered high-priority / missing audience 的 K 清單")
+CronCreate(cron="0 9 * * 1", prompt="publication 候選巡檢：先跑 publication-candidates-summary；必要時 rebuild；回報候選缺口")
 ```
 
 （若本機尚有 session 版 convenience，可保留作提醒；但 v11 canonical orchestration 以 shared scheduler 為準）

@@ -92,17 +92,15 @@ Sources: [Hwang & Valls Pereira 2006](https://www.tandfonline.com/doi/abs/10.108
 
 ## Claude Model / Agent 選擇原則
 
-| 任務類型 | 模型 | 原因 |
+| 任務類型 | 預設模型 / effort | 原因 |
 |---------|------|------|
-| **研究實驗**（GARCH、統計檢定、策略回測） | `model: "opus"` | 精確性與專業性要求高 |
-| **程式開發**（前端、後端、bug 修復） | `model: "opus"` | 程式碼正確性關鍵 |
-| **統計分析**（DM test、bootstrap、cross-OOS） | `model: "opus"` | 數學嚴謹性不可妥協 |
-| **論文寫作/審查** | `model: "opus"` | 學術品質要求 |
-| 簡單搜尋（grep、檔案查找） | `subagent_type: "Explore"` | 快速唯讀 |
-| 簡單文章撰寫（feed 文章） | `model: "sonnet"` 可接受 | 創意寫作彈性較大 |
-| 規劃與架構 | `subagent_type: "Plan"` | 結構化思考 |
+| **研究實驗 / 方法論 / 高風險論文判斷** | `opus / high` | 精確性與專業性要求高 |
+| **平台 ops / 發文 / paper-update 類程序型工作** | `sonnet / medium` | 流程明確，不必全程重模型 |
+| **驗證 / merge safety / publication scan** | `sonnet / low` | 以精準比對與 checklist 為主 |
+| **資料來源 lookup / stage 分類** | `haiku / low` | 參考型工作，優先便宜快速 |
+| **大量 docs / log / 無關 side task** | `forked subagent` | 先隔離 context，再把摘要帶回主線 |
 
-**規則：研究、分析、程式等精確性工作，務必使用 opus。不確定時預設 opus。**
+**規則**：先看 `docs/workflow-index.md` 與 skill frontmatter，再決定要不要手動升級。高風險研究、統計與論文判斷不可為省 token 降到 Sonnet 以下。
 
 ## 硬體資源
 

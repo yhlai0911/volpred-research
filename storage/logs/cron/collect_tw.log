@@ -47,3 +47,107 @@
 
 ✓ 台股數據收集完成
 === [collect_tw_data] exit 0 at 2026-04-20T07:00:06.034295+00:00 (duration=4.8s) ===
+=== [collect_tw_data] piggy-back fire at 2026-04-21T07:00:01.357898+00:00 ===
+=== VIXTWN Daily Collector: 2026-04-21 ===
+  Existing records: 88
+  202601: 21 days (2026-01-02 to 2026-01-30)
+  202602: 12 days (2026-02-02 to 2026-02-26)
+  202603: 22 days (2026-03-02 to 2026-03-31)
+  202604: 14 days (2026-04-01 to 2026-04-20)
+
+  New records: 1
+  Total records: 89
+  Saved to: data/vixtwn/vixtwn_daily.csv
+  Latest VIXTWN: 29.99 (2026-04-20)
+=== 台股數據收集: 2026-04-21 15:00 ===
+
+--- VIXTWN ---
+
+--- 0050.TW 日線 ---
+  0050.TW: 2026-04-21 close=86.00 (1525 rows)
+
+--- 0050.TW 5-min ---
+  Auto-detected: fetching 59 days back for 0050.TW
+  0050.TW 5-min RV: 53 days total
+
+✓ 台股數據收集完成
+=== [collect_tw_data] exit 0 at 2026-04-21T07:00:06.769136+00:00 (duration=5.4s) ===
+=== [collect_tw_data] piggy-back fire at 2026-04-22T07:00:00.895692+00:00 ===
+=== VIXTWN Daily Collector: 2026-04-22 ===
+  Existing records: 89
+  202511: fetch failed (HTTPSConnectionPool(host='www.taifex.com.tw', port=443): Max retries exceeded with url: /file/taifex/Dailydownload/vix/log2data/202511new.txt (Caused by NameResolutionError("HTTPSConnection(host='www.taifex.com.tw', port=443): Failed to resolve 'www.taifex.com.tw' ([Errno 8] nodename nor servname provided, or not known)")))
+  202512: fetch failed (HTTPSConnectionPool(host='www.taifex.com.tw', port=443): Max retries exceeded with url: /file/taifex/Dailydownload/vix/log2data/202512new.txt (Caused by NameResolutionError("HTTPSConnection(host='www.taifex.com.tw', port=443): Failed to resolve 'www.taifex.com.tw' ([Errno 8] nodename nor servname provided, or not known)")))
+  202601: fetch failed (HTTPSConnectionPool(host='www.taifex.com.tw', port=443): Max retries exceeded with url: /file/taifex/Dailydownload/vix/log2data/202601new.txt (Caused by NameResolutionError("HTTPSConnection(host='www.taifex.com.tw', port=443): Failed to resolve 'www.taifex.com.tw' ([Errno 8] nodename nor servname provided, or not known)")))
+  202602: fetch failed (HTTPSConnectionPool(host='www.taifex.com.tw', port=443): Max retries exceeded with url: /file/taifex/Dailydownload/vix/log2data/202602new.txt (Caused by NameResolutionError("HTTPSConnection(host='www.taifex.com.tw', port=443): Failed to resolve 'www.taifex.com.tw' ([Errno 8] nodename nor servname provided, or not known)")))
+  202603: fetch failed (HTTPSConnectionPool(host='www.taifex.com.tw', port=443): Max retries exceeded with url: /file/taifex/Dailydownload/vix/log2data/202603new.txt (Caused by NameResolutionError("HTTPSConnection(host='www.taifex.com.tw', port=443): Failed to resolve 'www.taifex.com.tw' ([Errno 8] nodename nor servname provided, or not known)")))
+  202604: fetch failed (HTTPSConnectionPool(host='www.taifex.com.tw', port=443): Max retries exceeded with url: /file/taifex/Dailydownload/vix/log2data/202604new.txt (Caused by NameResolutionError("HTTPSConnection(host='www.taifex.com.tw', port=443): Failed to resolve 'www.taifex.com.tw' ([Errno 8] nodename nor servname provided, or not known)")))
+
+  New records: 0
+  Total records: 89
+  Saved to: data/vixtwn/vixtwn_daily.csv
+=== 台股數據收集: 2026-04-22 15:00 ===
+
+--- VIXTWN ---
+
+--- 0050.TW 日線 ---
+  0050.TW: 2026-04-22 close=86.35 (1526 rows)
+
+--- 0050.TW 5-min ---
+  Auto-detected: fetching 59 days back for 0050.TW
+  Saved 0050_TW_5min_2026-04-21.csv (53 bars)
+  0050.TW 5-min RV: 54 days total
+
+✓ 台股數據收集完成
+=== [collect_tw_data] exit 0 at 2026-04-22T07:00:03.945333+00:00 (duration=3.0s) ===
+=== [collect_tw_data] piggy-back fire at 2026-04-23T07:00:00.624796+00:00 ===
+=== VIXTWN Daily Collector: 2026-04-23 ===
+  Existing records: 89
+  202601: 21 days (2026-01-02 to 2026-01-30)
+  202602: 12 days (2026-02-02 to 2026-02-26)
+  202603: 22 days (2026-03-02 to 2026-03-31)
+  202604: 14 days (2026-04-01 to 2026-04-22)
+
+  New records: 2
+  Total records: 91
+  Saved to: data/vixtwn/vixtwn_daily.csv
+  Latest VIXTWN: 29.52 (2026-04-22)
+=== 台股數據收集: 2026-04-23 15:00 ===
+
+--- VIXTWN ---
+
+--- 0050.TW 日線 ---
+  0050.TW: 2026-04-23 close=86.35 (1527 rows)
+
+--- 0050.TW 5-min ---
+  Auto-detected: fetching 59 days back for 0050.TW
+  Saved 0050_TW_5min_2026-04-22.csv (53 bars)
+  0050.TW 5-min RV: 55 days total
+
+✓ 台股數據收集完成
+=== [collect_tw_data] exit 0 at 2026-04-23T07:00:05.943200+00:00 (duration=5.3s) ===
+=== [collect_tw_data] piggy-back fire at 2026-04-24T07:00:00.456350+00:00 ===
+=== VIXTWN Daily Collector: 2026-04-24 ===
+  Existing records: 91
+  202601: 21 days (2026-01-02 to 2026-01-30)
+  202602: 12 days (2026-02-02 to 2026-02-26)
+  202603: 22 days (2026-03-02 to 2026-03-31)
+  202604: 15 days (2026-04-01 to 2026-04-23)
+
+  New records: 1
+  Total records: 92
+  Saved to: data/vixtwn/vixtwn_daily.csv
+  Latest VIXTWN: 32.81 (2026-04-23)
+=== 台股數據收集: 2026-04-24 15:00 ===
+
+--- VIXTWN ---
+
+--- 0050.TW 日線 ---
+  0050.TW: 2026-04-24 close=89.95 (1528 rows)
+
+--- 0050.TW 5-min ---
+  Auto-detected: fetching 59 days back for 0050.TW
+  Saved 0050_TW_5min_2026-04-23.csv (53 bars)
+  0050.TW 5-min RV: 56 days total
+
+✓ 台股數據收集完成
+=== [collect_tw_data] exit 0 at 2026-04-24T07:00:04.717394+00:00 (duration=4.3s) ===
