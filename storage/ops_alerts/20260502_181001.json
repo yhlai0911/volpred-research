@@ -1,0 +1,20 @@
+{
+  "timestamp": "2026-05-02T00:00:00Z",
+  "patrol_run": true,
+  "alerts": [
+    {
+      "id": "article_pool_low",
+      "severity": "warning",
+      "message": "article pool low (<12): 6 total draft articles",
+      "detail": "Total drafts=6 (threshold 12). General audience=2 (threshold 8, ALERT). Research audience=4 (threshold 4, OK).",
+      "recommended_action": "Publish at least 6 new draft articles, prioritizing general-audience content (need +6 minimum). Run /research or feed-publisher to generate new drafts."
+    },
+    {
+      "id": "general_audience_pool_low",
+      "severity": "warning",
+      "message": "general audience pool low (<8): only 2 general-audience draft articles",
+      "detail": "general_count=2, target>=8. 6 more general-audience articles needed.",
+      "recommended_action": "Commission 6 general-audience articles via feed-publisher skill targeting accessible volatility/market content."
+    }
+  ]
+}
