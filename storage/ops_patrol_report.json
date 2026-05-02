@@ -1,26 +1,26 @@
 {
-  "timestamp": "2026-05-01T18:27:15Z",
+  "timestamp": "2026-05-02T00:29:10Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "Total drafts: 6 (threshold <12, ALERT). Research audience drafts: 4 (OK, threshold <4). General audience drafts: 0 (ALERT, threshold <8)."
+      "detail": "Total drafts: 6 (<12 threshold: ALERT). By audience: research=4 (threshold <4: OK, at boundary), general=2 (threshold <8: ALERT). General audience pool critically low."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json age: ~0.00 hours — well within 26h threshold."
+      "detail": "storage/strategy_metrics.json last modified ~18 seconds ago. Well within 26-hour threshold."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated today (2026-05-01) or yesterday (2026-04-30). Most recent entries are from 2026-04-26: (1) Codex CLI 400 error gpt-5.5 incompatibility; (2) lancedb list_tables shape change false-positive fix; (3) member Q&A 5-day silent gap root cause & fix."
+      "detail": "Last 30 lines of docs/error_log.md contain no entries dated today (2026-05-02) or yesterday (2026-05-01). Most recent entry is 2026-04-26: Codex CLI gpt-5.5 400 error; lancedb list_tables shape change false-positive fix; member Q&A 5-day silent gap root cause."
     },
     {
       "name": "PAPER_TRADING_GAPS",
-      "status": "alert",
-      "detail": "_market_daily: 3/3 nulls in last 3 portfolio_return entries (ALERT). All other 14 strategies (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, adaptive_tier) passed."
+      "status": "ok",
+      "detail": "14 active strategies checked. All have exactly 1 null in last 3 entries (most recent trading day pending). No strategy exceeds >2 nulls threshold. _market_daily has 0 entries, skipped. No alerts."
     },
     {
       "name": "GIT_STATUS",
@@ -34,8 +34,7 @@
     }
   ],
   "alerts": [
-    "article pool low (<12): only 6 draft articles",
-    "general audience drafts low (<8): 0 general audience drafts",
-    "paper trading null: _market_daily has 3/3 nulls in last 3 entries"
+    "article pool low (<12): only 6 draft articles in pool",
+    "general audience pool low (<8): only 2 general-audience drafts available"
   ]
 }
