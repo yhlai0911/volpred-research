@@ -1,0 +1,165 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-05-02",
+  "week_range": "2026-05-01 → 2026-05-08",
+  "totals": {
+    "input_tokens": 76,
+    "output_tokens": 1230,
+    "cache_read_tokens": 45900,
+    "cache_create_tokens": 92372,
+    "billable_total": 93678,
+    "assistant_messages": 6,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.3788
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 76,
+      "output_tokens": 1230,
+      "cache_read_tokens": 45900,
+      "cache_create_tokens": 92372,
+      "messages": 6,
+      "estimated_cost_usd": 0.3788
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 38,
+      "output_tokens": 615,
+      "cache_read_tokens": 22950,
+      "cache_create_tokens": 46186,
+      "messages": 3,
+      "billable_total": 46839,
+      "estimated_cost_usd": 0.1894,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "token_report": {
+      "input_tokens": 35,
+      "output_tokens": 383,
+      "cache_read_tokens": 22950,
+      "cache_create_tokens": 23236,
+      "messages": 2,
+      "billable_total": 23654,
+      "estimated_cost_usd": 0.0999,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    },
+    "bash_other": {
+      "input_tokens": 3,
+      "output_tokens": 232,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 22950,
+      "messages": 1,
+      "billable_total": 23185,
+      "estimated_cost_usd": 0.0896,
+      "emoji": "💭",
+      "description": "其他 Bash 操作"
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 3,
+      "billable_total": 46839,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 3,
+          "billable_total": 46839
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "other",
+          "messages": 2,
+          "billable_total": 23654
+        },
+        {
+          "name": "non-text assistant message",
+          "messages": 1,
+          "billable_total": 23185
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 1,
+          "billable_total": 23185
+        },
+        {
+          "name": "先確認腳本與目錄是否存在。",
+          "messages": 1,
+          "billable_total": 23185
+        },
+        {
+          "name": "腳本存在，今天是週六（不是週五，跳過週報）。執行日報。",
+          "messages": 1,
+          "billable_total": 469
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 1,
+      "billable_total": 23185,
+      "family_breakdown": [
+        {
+          "name": "scheduler/cron inspection",
+          "messages": 1,
+          "billable_total": 23185
+        }
+      ],
+      "prefix_breakdown": [
+        {
+          "name": "date +%A",
+          "messages": 1,
+          "billable_total": 23185
+        }
+      ],
+      "top_first_lines": [
+        {
+          "name": "date +%A",
+          "messages": 1,
+          "billable_total": 23185
+        }
+      ]
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 1,
+      "cache_create_tokens": 92372,
+      "billable_total": 93678,
+      "cache_create_share_pct": 98.6,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "e4051241-7b57-4b9b-b037-2b79b44a6052",
+          "messages": 6,
+          "billable_total": 93678,
+          "cache_create_tokens": 92372,
+          "cache_read_tokens": 45900,
+          "duration_minutes": 0.1,
+          "cache_create_share_pct": 98.6,
+          "first_ts": "2026-05-02T14:43:56.525000+00:00",
+          "last_ts": "2026-05-02T14:44:01.194000+00:00"
+        }
+      ]
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "bf3dc07",
+      "message": "Merge branch 'main' of http://127.0.0.1:35871/git/yhlai0911/volpred-research"
+    },
+    {
+      "sha": "e4bd1b6",
+      "message": "Ops patrol report 2026-05-02T12:17Z"
+    },
+    {
+      "sha": "0883dc2",
+      "message": "Ops patrol report 2026-05-02T06:10Z"
+    },
+    {
+      "sha": "5405da0",
+      "message": "Ops patrol report 2026-05-02T00:29Z"
+    }
+  ]
+}
