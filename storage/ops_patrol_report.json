@@ -1,31 +1,31 @@
 {
-  "timestamp": "2026-05-03T06:16:55Z",
+  "timestamp": "2026-05-03T12:37:06Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "Total drafts: 6 (threshold: 12, ALERT). By audience: research=4 (threshold <4, OK), general=2 (threshold <8, ALERT). Both total pool and general pool are below thresholds."
+      "detail": "Total drafts: 6 (threshold <12, ALERT). By audience: research=4 (threshold <4, OK), general=2 (threshold <8, ALERT)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json age: 5.92 hours (threshold: 26 hours). OK."
+      "detail": "storage/strategy_metrics.json age: 12.28 hours (threshold 26h). OK."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated 2026-05-03 (today) or 2026-05-02 (yesterday) in last 30 lines. Most recent entries are 2026-04-26: (1) universal piggy-back scheduler fix; (2) lancedb list_tables() shape-change false-positive fix; (3) member Q&A 5-day silent gap fixed; (4) Codex CLI gpt-5.5 400 error fallback."
+      "detail": "No entries dated 2026-05-03 (today) or 2026-05-02 (yesterday) in last 30 lines. Most recent entries are 2026-04-26: (1) universal piggy-back scheduler fix; (2) lancedb list_tables() shape-change false-positive fix; (3) member Q&A 5-day silent gap; (4) Codex CLI gpt-5.5 400 error fallback."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "14 active strategies checked. All have exactly 1 null portfolio_return in last 3 entries (likely today's not-yet-filled entry). No strategy exceeds the >2 null threshold. _market_daily skipped (unexpected structure: no 'entries' sub-key)."
+      "detail": "14 active strategies checked. No strategy has >2 null portfolio_return in last 3 entries. _market_daily skipped (non-list structure)."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold: 50). Working tree clean."
+      "detail": "0 uncommitted files (threshold 50). Working tree clean."
     },
     {
       "name": "KNOWLEDGE_SIZE",
@@ -34,7 +34,7 @@
     }
   ],
   "alerts": [
-    "article pool low (<12): only 6 total draft articles (research=4, general=2)",
-    "general audience pool low (<8): only 2 general-audience draft articles"
+    "article pool low (<12): total=6",
+    "general audience pool low (<8): general=2"
   ]
 }
