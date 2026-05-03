@@ -1,0 +1,19 @@
+{
+  "timestamp": "2026-05-03T18:22:29Z",
+  "alerts": [
+    {
+      "id": "article_pool_low",
+      "severity": "warning",
+      "message": "article pool low (<12): total drafts=6",
+      "detail": "Total draft articles: 6, below minimum threshold of 12. Immediate content production recommended.",
+      "affected": "storage/reports/feed.json"
+    },
+    {
+      "id": "general_audience_pool_low",
+      "severity": "warning",
+      "message": "general audience drafts low (<8): general=2",
+      "detail": "General audience draft articles: 2, below threshold of 8. Research audience drafts: 4 (OK). Need 6+ more general audience drafts.",
+      "affected": "storage/reports/feed.json"
+    }
+  ]
+}
