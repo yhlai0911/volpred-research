@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-05-02T18:10:01Z",
+  "timestamp": "2026-05-03T00:21:36Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "Total draft articles: 6 (< 12 threshold: ALERT). By audience: research=4 (OK, threshold <4), general=2 (ALERT, threshold <8). Drafts: mile_3eb8657c (general), mile_0056089e (research), mile_cc5abfb8 (general), mile_bc4864f5 (research), mile_f3475a6f (research), mile_5173955c (research)."
+      "detail": "Total draft articles: 6 (< 12 threshold: ALERT). By audience: research=4 (OK, threshold <4), general=0 (ALERT, threshold <8). General pool has dropped from 2 to 0 since last patrol (2026-05-02T18:10:01Z)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
@@ -15,12 +15,12 @@
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated 2026-05-02 (today) or 2026-05-01 (yesterday) in last 30 lines. Most recent entries are 2026-04-26: (1) universal piggy-back scheduler fix; (2) lancedb list_tables() shape-change false-positive fix (try-open pattern); (3) member Q&A 5-day silent gap fixed; (4) Codex CLI gpt-5.5 400 error — fallback to main-thread read-only audit."
+      "detail": "No entries dated 2026-05-03 (today) or 2026-05-02 (yesterday) in last 30 lines. Most recent entries are 2026-04-26: (1) universal piggy-back scheduler fix; (2) lancedb list_tables() shape-change false-positive fix; (3) member Q&A 5-day silent gap fixed; (4) Codex CLI gpt-5.5 400 error fallback."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 15 strategies checked (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, adaptive_tier, _market_daily). 0 nulls in last 3 entries for every strategy. No alert triggered."
+      "detail": "All 15 strategies checked (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, adaptive_tier, _market_daily). 0 strategies with >2 nulls in last 3 entries. No alert triggered."
     },
     {
       "name": "GIT_STATUS",
@@ -35,6 +35,6 @@
   ],
   "alerts": [
     "article pool low (<12): 6 total draft articles",
-    "general audience pool low (<8): only 2 general-audience draft articles (target ≥8)"
+    "general audience pool low (<8): 0 general-audience draft articles (target >=8)"
   ]
 }
