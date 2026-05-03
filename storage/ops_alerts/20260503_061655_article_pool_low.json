@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-05-03T06:16:55Z",
+  "alert_type": "article_pool_low",
+  "severity": "warning",
+  "message": "article pool low (<12): only 6 total draft articles",
+  "detail": {
+    "total_drafts": 6,
+    "threshold": 12,
+    "by_audience": {
+      "research": 4,
+      "general": 2
+    }
+  },
+  "recommended_action": "Publish or create new articles to refill the draft pool. Priority: general-audience articles (need 6 more to reach threshold of 8)."
+}
