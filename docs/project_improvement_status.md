@@ -62,11 +62,11 @@ Last updated: **2026-05-04 (system audit + 4-phase improvement plan)**
 - [x] B2.3: `publisher.py::_append_to_feed` 加 post-write read-back（解 #8）— commit `bb0e3705`
 - [x] B2.4: `content.py::release_pool_articles` sync_article 失敗寫 `.failed_supabase_syncs.json` 觸 alert（解 #9）— commit `bb0e3705`
 - [x] B2.5: `gc_event_ledger` verified no-op — 機制 work，gc_after=deadline+7d 是設計（4 個 expired event_jobs 5-7/5-9 才該清，今 5-4 不該動，is finding #14 over-warning）
-- [ ] B2.6: 補 `tests/test_email_notifier.py` + `tests/test_event_jobs.py` 完整 fixture（解 #10）— 留下批 commit
+- [x] B2.6: `tests/test_email_notifier.py` 7 cases + `tests/test_event_jobs.py` 擴 3 cases（gc preserve unexpired / past_deadline skip / payload_patch overlay）（解 #10）
 
 #### Phase 3（架構級，需 review，分批 commit）
 
-- [ ] B3.1: 補完 11 個 skill 死 reference（admin-ops / autonomous-research / feed-publisher / paper-review-cycle 等）（解 #3）
+- [x] B3.1: 已於 B2.2 commit 修完所有可解 ref；2026-05-04 重跑 `check_skills_complete.sh` 報 `all references/*.md mentions in SKILL.md exist`；原 audit「11 個」是 over-counting includes legacy `.agents/` paths and same-skill self-refs（解 #3）
 - [x] B3.2: 確認 `scheduler_state.json` vs `cron_last_run.json` 為不同 domain（K cluster 訓練 state vs piggy-back run state），#5 為 audit over-warning，無需拆
 - [x] B3.3: `supabase_sync.py::sync_market_daily` 加 stripped-keys warning（解 #4）— commit `9f6e5045`
 - [x] B3.4: `content.py` L362+L693 兩個 unlocked feed.json write 統一加 `shared_state_lock("publisher_feed")`（解 #17）— commit `450d26a7`
