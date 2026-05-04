@@ -663,6 +663,16 @@ def sync_market_daily(trade_date: str, market: dict) -> bool:
     if not SUPABASE_KEY or not trade_date or not isinstance(market, dict):
         return False
     row = {k: v for k, v in market.items() if k in _MARKET_DAILY_COLUMNS}
+    # 2026-05-04 finding #4 修整：whitelist 早已 enforce (上面 row=)，但 stripped 欄位
+    # 不可見導致 audit agent 誤判「未 enforce」+ caller 不知 schema mismatch。
+    # 補 print warning 提升可觀察性 — caller 可看到 daily_update 在塞 unknown keys。
+    stripped = {k for k in market.keys() if k not in _MARKET_DAILY_COLUMNS and k != "trade_date"}
+    if stripped:
+        print(
+            f"  [sync_market_daily] schema-mismatch warning: trade_date={trade_date} "
+            f"stripped {len(stripped)} unknown keys (not in _MARKET_DAILY_COLUMNS): "
+            f"{sorted(stripped)} — update _MARKET_DAILY_COLUMNS if these should sync"
+        )
     row["trade_date"] = trade_date
     return _post("market_daily", row)
 
