@@ -34,7 +34,13 @@ EXPERIMENTS = ROOT / "experiments"
 
 K_ID_RE = re.compile(r"^K\d+[a-z_]*$")
 STATUS_LINE_RE = re.compile(
-    r"^\*?\*?Status\*?\*?\s*:\s*(?P<status>PASS|FAIL|NULL_RESULT|NULL|COMPLETE|COMPLETED|DONE|SUCCEEDED|REPLICATED|VERIFIED)\b",
+    # Match three forms:
+    #   Status: PASS                       (plain)
+    #   **Status**: PASS                   (bold)
+    #   | Status | PASS ... |              (markdown table cell — K1108d, K1108e patterns)
+    r"(?:^\*?\*?Status\*?\*?\s*:\s*|\|\s*Status\s*\|\s*)"
+    r"(?P<status>PASS|FAIL|NULL_RESULT|NULL|COMPLETE|COMPLETED|DONE|SUCCEEDED|REPLICATED|VERIFIED|"
+    r"LOW_COVERAGE_PRELIMINARY|LOW_COVERAGE|PRELIMINARY)\b",
     re.IGNORECASE | re.MULTILINE,
 )
 
@@ -62,7 +68,7 @@ def detect_completion(exp_dir: Path) -> dict | None:
     # Map token to canonical status
     if status_token in {"PASS", "REPLICATED", "VERIFIED", "COMPLETE", "COMPLETED", "DONE", "SUCCEEDED"}:
         canonical = "succeeded"
-    elif status_token in {"FAIL", "NULL_RESULT", "NULL"}:
+    elif status_token in {"FAIL", "NULL_RESULT", "NULL", "LOW_COVERAGE_PRELIMINARY", "LOW_COVERAGE", "PRELIMINARY"}:
         canonical = "succeeded_null_result"
     else:
         canonical = "succeeded"

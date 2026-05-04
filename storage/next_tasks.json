@@ -105,11 +105,12 @@
     "status": "pending"
   },
   {
-    "id": "K1175",
+    "id": "K1175_gdelt_fullscan",
     "title": "K1175: Full 96-files-per-day GDELT scan OR GCP-authed BigQuery rerun",
     "priority": 2,
     "description": "K1174 only 1/96 slice coverage (1.04%) + 131/413 events. Need full-day (96 files) scan or GCP BigQuery (if user can provide auth) for N≥10 per market decisive PCR test. Current K1170 press concentration claim hangs on this.",
-    "status": "pending"
+    "status": "pending",
+    "note_2026_05_04": "K-id renamed: existing experiments/k1175/ used for Paper 2 Table 3 canonical replication. This GDELT fullscan task is a K1174 follow-up; K-id collision detected during 2026-05-04 dispatch audit."
   },
   {
     "id": "K1116d",
@@ -123,7 +124,10 @@
     "title": "K1108d: Non-capex foundry signal — utilisation rate + wafer ASP",
     "priority": 3,
     "description": "K1108b 否證 capex 為 foundry mechanism。嘗試 utilisation rate (TSMC 75-80%/UMC 60-70% quarterly disclosures) + wafer ASP (industry report) 作為 alternative foundry-specific signals 預測 θ_EAV。",
-    "status": "pending"
+    "status": "succeeded_null_result",
+    "completed_at": "2026-04-18",
+    "synced_from_experiments_at": "2026-05-04T09:26:47.263681+00:00",
+    "result_summary": "| 欄位 | 內容 |\n|------|------|\n| 實驗編號 | K1108d |\n| 提出者 | 賴奕豪 |\n| 執行者 | Claude (worktree agent-ae315a15) |\n| 日期 | 2026-04-17 |\n| Parent chain | K1108 → K1108b → K1108c → K1108e → K1108f |\n| Paper mapping "
   },
   {
     "id": "Paper2_section5_decision",
@@ -443,7 +447,7 @@
   {
     "id": "Data_summary_script_SPY_VIX",
     "title": "建 data summary script 輸出 SPY std + VIX means (解 Paper 9 3 個 no-source)",
-    "status": "pending",
+    "status": "succeeded",
     "priority": 2,
     "created_at": "2026-04-17T17:12:12+08:00",
     "description": "Paper 9 Table 1 summary stats 3 values 無 script source: SPY ann.std 0.188, OOS VIX mean 22.14, full VIX mean 18.97. 建小腳本導出 descriptive stats JSON.",
@@ -451,7 +455,10 @@
       "paper-9",
       "data-summary",
       "quick-build"
-    ]
+    ],
+    "completed_at": "2026-05-04",
+    "completion_artifact": "paper/garch-x-vix/scripts/summary_stats.py + paper/garch-x-vix/results/summary_stats.json",
+    "completion_note": "5 discrepancies vs paper Table 1 surfaced (VIX OOS mean +1.92, SPY std OOS +0.017, etc); paper edit / errata cycle needed"
   },
   {
     "id": "Other_papers_nosource_rescan_extension",
