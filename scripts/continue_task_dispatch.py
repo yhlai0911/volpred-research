@@ -105,7 +105,16 @@ def load_pending_tasks() -> list[dict]:
 
 
 def is_main_thread_only(task: dict) -> bool:
-    """Detect main-thread-only markers in title or description."""
+    """Detect main-thread-only markers in title, description, or tags.
+
+    Triple-check: regex over text fields (covers descriptions phrased
+    naturally with "main thread" / "NOT agent") AND explicit
+    tags=['main-thread-only'] (covers cases where the task author wants
+    to mark explicitly without relying on free-text phrasing).
+    """
+    tags = task.get("tags") or []
+    if isinstance(tags, list) and "main-thread-only" in tags:
+        return True
     blob = " ".join(
         str(task.get(k, "") or "") for k in ("title", "description", "notes")
     )

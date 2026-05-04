@@ -80,7 +80,9 @@
     "title": "K1139: Intraday 5-min RV as target",
     "priority": 4,
     "description": "Hansen-Lunde 高頻標準。K1136 改用 5-min 彙總 RV 當 target，檢驗 daily proxy 是否仍為 NULL。資料需 yfinance/polygon 5-min 回抓。",
-    "status": "pending"
+    "status": "succeeded",
+    "completed_at": "2026-05-04",
+    "completion_note": "experiment dir has results.json + README verdict (Scenario B_AGGREGATOR); article task will surface via auto-refill if needed"
   },
   {
     "id": "K1144",
@@ -1242,5 +1244,20 @@
     ],
     "created_at": "2026-05-04T11:34:25+00:00",
     "completed_at": "2026-05-04"
+  },
+  {
+    "id": "K1086_article_general",
+    "title": "K1086: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1086 has verdict signal (score=6, reasons=None) but no general article. Verdict preview: ",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1086",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "created_at": "2026-05-04T12:24:22+00:00"
   }
 ]
