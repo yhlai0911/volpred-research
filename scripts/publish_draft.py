@@ -53,7 +53,9 @@ GENERAL_BAN_REPLACEMENTS = [
     (re.compile(r'\bDiebold-Mariano(?:\s+test)?\b'), r'兩模型比較顯著'),
     (re.compile(r'\bDM\s*test\b', re.IGNORECASE), r'比較檢定'),
     (re.compile(r'\\\|t\\\|', re.IGNORECASE), r'統計強度'),
+    (re.compile(r'\|t\|'), r'統計強度'),
     (re.compile(r'\bt-stat\b', re.IGNORECASE), r'統計強度'),
+    (re.compile(r'bootstrap\s+p[\s_=-]'), r'重抽樣比較'),
 ]
 
 
