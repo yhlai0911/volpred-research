@@ -1131,7 +1131,7 @@
     "title": "K547: write general-audience article (auto-discovered uncovered K)",
     "description": "K K547 has verdict signal (score=3, reasons=None) but no general article. Verdict preview: ",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K547",
@@ -1139,7 +1139,9 @@
       "auto-discovered",
       "audience-general"
     ],
-    "created_at": "2026-05-04T10:24:23+00:00"
+    "created_at": "2026-05-04T10:24:23+00:00",
+    "completed_at": "2026-05-04",
+    "completion_note": "agent confirmed DEAD verdict + flagged lookahead concern in article TODO (weights*ret no shift(1); direction robust but magnitude may revise)"
   },
   {
     "id": "K561_article_general",
@@ -1155,5 +1157,53 @@
       "audience-general"
     ],
     "created_at": "2026-05-04T10:24:23+00:00"
+  },
+  {
+    "id": "K1067_article_general",
+    "title": "K1067: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1067 has verdict signal (score=9, reasons=None) but no general article. Verdict preview: ",
+    "priority": 1,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1067",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "created_at": "2026-05-04T10:43:22+00:00"
+  },
+  {
+    "id": "K957_article_general",
+    "title": "K957: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K957 has verdict signal (score=6, reasons=None) but no general article. Verdict preview: ",
+    "priority": 1,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K957",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "created_at": "2026-05-04T11:24:29+00:00"
+  },
+  {
+    "id": "K547_lookahead_audit_fix",
+    "title": "K547: lookahead bug fix — port_ret = weights * spy_ret needs .shift(1) on weights",
+    "description": "K547 script L280 `port_ret = weights * spy_ret` directly applies same-day weights to same-day SPY return without shift(1). Confirmed during 2026-05-04 K547 article writing (agent flagged, main thread verified). Fix: weights.shift(1) * spy_ret per .claude/rules/experiments.md lookahead protection. Re-run all 5 strategies (Daily VT, ToM Enhanced, ToM Aggressive, ToM DualFreq, BH). Direction (ToM dead) likely robust per agent bootstrap; magnitudes may revise. Update results.json + flag article mile_53983530 as 'numbers TBD' or revise after rerun. Main thread (NOT agent): need to also audit other K-experiments using same `weights * ret` pattern (sibling K-ids in TOM family).",
+    "priority": 2,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "lookahead_audit_finding",
+    "tags": [
+      "lookahead",
+      "research-integrity",
+      "K547",
+      "audit",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-04T11:28:31+00:00",
+    "related_artifact": "mile_53983530 (K547 article — direction robust, magnitudes pending rerun)"
   }
 ]
