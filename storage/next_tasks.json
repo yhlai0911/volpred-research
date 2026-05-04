@@ -127,7 +127,11 @@
     "title": "K1116d: True ALFRED vintage when FRED_API_KEY obtained",
     "priority": 4,
     "description": "K1116c ALFRED Akamai-blocked + fredapi 需 FRED_API_KEY。用戶取得 FRED_API_KEY 後補 true first-release vintage 替代 PIT-revised (K1116c upper bound 下限驗證)。",
-    "status": "pending"
+    "status": "pending",
+    "blocked_reason": "awaiting_external_data",
+    "blocked_at": "2026-05-04T09:57:06+00:00",
+    "blocked_note": "K1116c ALFRED Akamai-blocked + fredapi requires FRED_API_KEY. Awaiting user-provided API key; until then K1116c PIT-revised upper-bound stands.",
+    "blocked_until": "2026-06-15"
   },
   {
     "id": "K1108d",

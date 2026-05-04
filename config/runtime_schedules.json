@@ -118,6 +118,19 @@
         ]
       },
       {
+        "id": "refresh_paper_snapshots",
+        "label": "Paper data snapshot weekly refresh",
+        "cron": "0 6 * * 1",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_refresh_paper_snapshots.sh",
+        "log_path": "storage/logs/cron/refresh_paper_snapshots.log",
+        "command_deprecated": "python scripts/refresh_paper_snapshots.py --apply",
+        "description": "週一 06:00 CST 自動 append 新的 daily rows 到 paper/<id>/data/*.csv（yfinance auto_adjust=False）。Append-only：絕不重寫 historical rows（pandas to_csv 會 lose float precision 改變 byte content → 破壞 reproduce）。Frozen-by-token (snapshot/frozen/pinned/locked/errata/v1/v2) 與 frozen-by-end-year (filename _YYYY-YYYY 的 end-year < 今年) 自動 skip。歷史教訓 2026-05-04：第一版誤把 spy_gld_2006-2024_rebal_snapshot.csv 自動延伸；第二版 pandas roundtrip lose float 精度；第三版改 csv 模組 append mode 才達真 byte-stable。",
+        "matchers": [
+          "refresh_paper_snapshots",
+          "cron_refresh_paper_snapshots.sh"
+        ]
+      },
+      {
         "id": "release_settings_audit",
         "label": "Release settings drift audit",
         "cron": "17 */6 * * *",

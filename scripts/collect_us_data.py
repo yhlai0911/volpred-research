@@ -38,16 +38,26 @@ def main():
     sys.path.insert(0, str(PROJECT / "src"))
     sys.path.insert(0, str(PROJECT / "scripts"))
 
+    # 2026-05-04 silent-fail fix: track per-section ok/fail so cron exit
+    # code surfaces real failures to check_alerts host_cron_fail. Previously
+    # all errors were caught and main() returned None → exit 0 even on
+    # full network outage.
+    section_ok: dict[str, bool] = {}
+
     # 0. Supabase heartbeat (prevent free-tier auto-pause)
     try:
         from supabase_sync import _request_json, SUPABASE_URL
         _request_json(f"{SUPABASE_URL}/rest/v1/articles?select=count&limit=1")
         print("  Supabase heartbeat OK")
+        section_ok["supabase_heartbeat"] = True
     except Exception:
         print("  Supabase heartbeat failed (DB may be paused)")
+        section_ok["supabase_heartbeat"] = False
 
     # 1. 日線數據（force_refresh=True 強制從 yfinance 拉最新）
     print("\n--- 日線數據 ---")
+    daily_ok = 0
+    daily_total = len(DAILY_TICKERS)
     try:
         from volpred.data.manager import DataManager
         dm = DataManager()
@@ -55,31 +65,50 @@ def main():
             try:
                 data = dm.get_model_data(ticker, "2020-01-01", "2026-12-31", force_refresh=True)
                 print(f"  {ticker:8s}: {data.index[-1].date()} close={float(data.iloc[-1]['close']):.2f} ({len(data)} rows)")
+                daily_ok += 1
             except Exception as e:
                 print(f"  {ticker:8s}: error ({e})")
+        section_ok["daily_us"] = daily_ok > 0
+        print(f"  daily_us: {daily_ok}/{daily_total} tickers ok")
     except Exception as e:
         print(f"  DataManager error: {e}")
+        section_ok["daily_us"] = False
 
     # 2. SPY 5-min data（Realized Volatility 用）
     print("\n--- SPY 5-min ---")
     try:
-        subprocess.run(
+        result = subprocess.run(
             [str(VENV_PYTHON), str(PROJECT / "scripts" / "collect_5min_data.py")],
             cwd=str(PROJECT),
             timeout=120,
         )
+        section_ok["spy_5min"] = result.returncode == 0
     except Exception as e:
         print(f"  5-min error: {e}")
+        section_ok["spy_5min"] = False
 
     # 3. FRED 總經指標（每週一更新，其他天跳過以節省 API）
     weekday = now.weekday()  # 0=Monday
     if weekday == 0:  # 只在週一更新
         print("\n--- FRED 總經指標（週一更新）---")
-        _collect_fred()
+        try:
+            _collect_fred()
+            section_ok["fred"] = True
+        except Exception as e:
+            print(f"  FRED error: {e}")
+            section_ok["fred"] = False
     else:
         print(f"\n--- FRED: 跳過（週{weekday+1}，只在週一更新）---")
 
     print("\n✓ 美股數據收集完成")
+    # Total-failure exit: if no section succeeded → cron exit 1.
+    # Partial failures are exit 0 (normal — a single ticker error or
+    # weekend FRED skip should not page the operator).
+    if section_ok and not any(section_ok.values()):
+        print(f"\n  [collect_us_data] FAIL: all sections failed: {section_ok}",
+              file=sys.stderr)
+        return 1
+    return 0
 
 
 def _collect_fred():
@@ -112,4 +141,4 @@ def _collect_fred():
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main() or 0)
