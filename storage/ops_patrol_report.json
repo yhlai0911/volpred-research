@@ -1,26 +1,26 @@
 {
-  "timestamp": "2026-05-03T18:22:29Z",
+  "timestamp": "2026-05-04T00:47:54Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "Total drafts: 6 (threshold <12, ALERT). By audience: research=4 (threshold >=4, OK), general=2 (threshold <8, ALERT)."
+      "detail": "Total drafts: 6 (threshold <12, ALERT). By audience: research=4 (threshold >=4, OK), general=0 (threshold <8, ALERT). General pool is empty."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json age: ~18.0 hours (threshold 26h). OK."
+      "detail": "storage/strategy_metrics.json age: ~24.4 hours (mtime=1777767641, now=1777855636, delta=87995s, threshold 26h=93600s). OK."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated 2026-05-03 (today) or 2026-05-02 (yesterday) in last 30 lines. Most recent entries are 2026-04-26: (1) universal piggy-back scheduler fix; (2) lancedb list_tables() shape-change false-positive fix; (3) member Q&A 5-day silent gap; (4) Codex CLI gpt-5.5 400 error fallback."
+      "detail": "No entries dated 2026-05-04 (today) or 2026-05-03 (yesterday) in last 30 lines. Most recent entries are 2026-04-26: (1) universal piggy-back scheduler fix; (2) lancedb list_tables() shape-change false-positive fix; (3) member Q&A 5-day silent gap root cause; (4) Codex CLI gpt-5.5 400 error fallback."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "14 active strategies checked. No strategy has >2 null portfolio_return in last 3 entries (each has 1 null for most recent pending entry). _market_daily skipped (non-list structure)."
+      "detail": "storage/paper_trading.json uses flat dict structure (one current-state entry per strategy, not a time-series list). All 15 strategies have portfolio_return=null in their single entry. The 'last 3 entries >2 nulls' check requires list format — structurally cannot trigger. No list-format alert raised. Strategies with null returns: slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, _market_daily, adaptive_tier."
     },
     {
       "name": "GIT_STATUS",
@@ -35,6 +35,6 @@
   ],
   "alerts": [
     "article pool low (<12): total drafts=6",
-    "general audience pool low (<8): general=2"
+    "general audience pool low (<8): general=0 (empty)"
   ]
 }
