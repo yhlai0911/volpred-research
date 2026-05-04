@@ -14,8 +14,8 @@ paths:
 - 優先順序固定：`user-assigned > scheduled > agent-discovered`
 - 正式 runtime：**單一主線程 Claude Code** + **按需啟動的 Codex rescue / subagent**；不把 `claude-worker` / `codex-worker` 視為 standing worker runtime
 - 排程唯一來源 `config/runtime_schedules.json`；不讓舊 guide / 歷史報告成為另類 source of truth
-- `storage/ops/` 內 task / approval / execution / rollback 檔案是控制面資料，**不手動亂改收尾**
-- `storage/next_tasks.json` = legacy planning / working list，**不是 canonical queue**，不可覆蓋 `storage/ops/` 狀態
+- `storage/ops/` 內 task / approval / execution / rollback 檔案是控制面資料，**不手動亂改收尾**；`storage/ops/tasks/` 內 TaskRecord 是 **execution receipts / audit trail**（已完成 history），**不是 pending queue**
+- `storage/next_tasks.json` = de-facto **pending queue**（2026-05-04 audit 後確認的實際分工：唯一有 pending P1-P4 的池，dispatcher `scripts/continue_task_dispatch.py` 從這挑工）— 完成的 task 同步靠 `scripts/sync_next_tasks_status.py` 反查 experiments + knowledge.json 標 succeeded；原 v12 設計把它標 legacy 但 `storage/ops/tasks/` 從未被任何 caller 用作 pending queue（全是 receipts）→ 2026-05-04 改規則承認此分工
 - `uv run volpred ops scheduler-tick` executor lane **目前只做 advisory snapshot**；正式 task claim/finish 必須來自主線程 direct dispatch 或明確 bootstrapped session
 - Session cron 與 system crontab **需與 canonical runtime schedule 一致**
 - Admin UI 目前是 **observer**；UI 與 canonical spec 不一致時以 canonical spec / local state 為準

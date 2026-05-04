@@ -103,8 +103,12 @@
 
 - `storage/` 是本地唯一源頭 — 不手改歷史 JSON 修結果；paper_trading 不手補，讓 forward tracking / recalc 自然修正
 - Frontend target / Zeabur service / paper public dir / Mirror 預設 URL → `config/project_targets.json`；排程 → `config/runtime_schedules.json`（不反推 cron）
-- v12 canonical task/schedule source：`storage/ops/`（TaskRecord / AgentSession / ExecutionReceipt）+ `config/runtime_schedules.json` + `event_jobs` + `storage/ops/event_ledger/`
-- `storage/next_tasks.json` = legacy planning list（v11→v12 遺留），**不是** shared scheduler queue / canonical schema；不可覆蓋 `storage/ops/` 或 `event_jobs`
+- v12 task/schedule sources（雙軌實際分工，2026-05-04 audit 後明確）：
+  - **`storage/next_tasks.json`** = de-facto **pending queue**（priority sorted；37+ pending P1-P4），dispatcher 從這挑下個任務派工 — 由 `scripts/continue_task_dispatch.py` 讀
+  - **`storage/ops/`**（TaskRecord / AgentSession / ExecutionReceipt）= **execution receipts / audit trail**（已 claim/run/finish 的歷史，56 succeeded + 7 failed + 1 awaiting_approval），dispatch 完成後寫入
+  - 完成的 task 同步：`scripts/sync_next_tasks_status.py` 反查 experiments/<id>/results.json + knowledge.json，把 next_tasks 已實際完成的 K 標 succeeded（避免 stale pending 被 dispatcher 誤再派）
+  - `config/runtime_schedules.json` + `event_jobs` + `storage/ops/event_ledger/` = canonical schedule spec
+  - **歷史背景**：原 v12 設計把 `next_tasks.json` 標 legacy，但 `storage/ops/tasks/` 從未被任何 caller 用作 pending queue（全是 receipts），導致 next_tasks 是唯一有 pending 的池。2026-05-04 audit 確認此實際分工 + `continue_task_dispatch.py` 落地 + 規則改成符合現實。原 「不可覆蓋 storage/ops/」改為「dispatch 完成後寫入 storage/ops/ 作 receipt」
 
 ### 永遠修流程，不修資料
 
