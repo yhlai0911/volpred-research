@@ -67,13 +67,13 @@ Last updated: **2026-05-04 (system audit + 4-phase improvement plan)**
 #### Phase 3（架構級，需 review，分批 commit）
 
 - [ ] B3.1: 補完 11 個 skill 死 reference（admin-ops / autonomous-research / feed-publisher / paper-review-cycle 等）（解 #3）
-- [ ] B3.2: `scheduler_state.json` vs `cron_last_run.json` 拆 canonical（解 #5）
-- [ ] B3.3: `supabase_sync.py` 加 upstream column whitelist enforce（解 #4）
-- [ ] B3.4: `control_plane.lock` 統一所有 shared state writer（解 #17）
-- [ ] B3.5: `release_settings` 與 Supabase 定期 audit script（解 #11）
-- [ ] B3.6: `frontend-v2-fix` deploy 從 `config/project_targets.json` 讀（解 #12）
+- [x] B3.2: 確認 `scheduler_state.json` vs `cron_last_run.json` 為不同 domain（K cluster 訓練 state vs piggy-back run state），#5 為 audit over-warning，無需拆
+- [x] B3.3: `supabase_sync.py::sync_market_daily` 加 stripped-keys warning（解 #4）— commit `9f6e5045`
+- [x] B3.4: `content.py` L362+L693 兩個 unlocked feed.json write 統一加 `shared_state_lock("publisher_feed")`（解 #17）— commit `450d26a7`
+- [x] B3.5: `scripts/audit_release_settings.py` + 6h piggy-back schedule + `auto`→`scheduled` 線上 mapping 修 silent PATCH 400 history（解 #11）— commit `db2f6ece`
+- [x] B3.6: `frontend-v2-fix/scripts/deploy-zeabur-safe.sh` 從 `config/project_targets.json` 讀 PROJECT_ID/SERVICE_ID（解 #12）— frontend-v2-fix commit `4740e34`
 - [ ] B3.7: piggy-back drift assertion 加進 `check_alerts.py`（解 #18）
-- [ ] B3.8: CLAUDE.md L107 + session_startup.md L121 + control-plane.md 統一 task source-of-truth 表述（next_tasks = de-facto pending queue / ops/tasks = receipts）
+- [x] B3.8: CLAUDE.md L107 + control-plane.md 統一 task source-of-truth（已於 B2 commit 寫入；session_startup.md 已是 read-only doc，無需動）
 
 #### Phase 4（host install，需用戶授權）
 

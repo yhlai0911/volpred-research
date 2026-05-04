@@ -141,6 +141,83 @@ def _auto_trigger_release_pool_if_due() -> dict:
         return {"triggered": True, "ok": False, "error": str(exc)}
 
 
+def _check_piggy_back_drift(due_summary: dict) -> dict:
+    """Detect piggy-back scheduler health drift (B3.7 / finding #18).
+
+    Signals:
+    - run_due_jobs returned ok=False (croniter / config / import error)
+    - any wrapper_script reported missing
+    - any non-skipped job's cron_last_run is older than 2× its cron period
+      (host cron alone could not reliably fire that cadence — piggy-back is
+      our only safety net; if last_run goes stale, the safety net is broken)
+
+    Print warnings inline; return summary dict for log scrapers. Does NOT
+    escalate to alert (avoids alert noise; observability-only for now).
+    """
+    from datetime import datetime, timezone
+
+    drifts: list[str] = []
+
+    if not due_summary.get("ok") and due_summary.get("reason"):
+        drifts.append(f"run_due_jobs error: {due_summary.get('reason')}")
+
+    for job in due_summary.get("jobs", []) or []:
+        if job.get("action") == "skip" and job.get("reason") == "wrapper_missing":
+            drifts.append(f"wrapper_missing: {job.get('job_id')} path={job.get('path')}")
+
+    # Stale last_run check
+    state_path = PROJECT_ROOT / "storage" / "ops" / "cron_last_run.json"
+    config_path = PROJECT_ROOT / "config" / "runtime_schedules.json"
+    try:
+        state = json.loads(state_path.read_text()) if state_path.exists() else {}
+        config = json.loads(config_path.read_text()) if config_path.exists() else {}
+    except Exception:
+        state = {}
+        config = {}
+
+    items = (config.get("system_crontab") or {}).get("items") or []
+    now = datetime.now(timezone.utc)
+    period_map = {
+        "0 * * * *": 60,
+        "0 */2 * * *": 120,
+        "3 */2 * * *": 120,
+        "0 */6 * * *": 360,
+        "17 */6 * * *": 360,
+        "0 0 * * *": 1440,
+        "30 5 * * *": 1440,
+    }
+    for item in items:
+        job_id = item.get("id")
+        cron = item.get("cron")
+        if item.get("host_crontab_managed") is False:
+            continue
+        if job_id in {"check_alerts"}:
+            continue
+        last_iso = state.get(job_id)
+        if not last_iso:
+            continue
+        try:
+            last_dt = datetime.fromisoformat(str(last_iso).replace("Z", "+00:00"))
+        except Exception:
+            continue
+        period_min = period_map.get(cron)
+        if period_min is None:
+            continue
+        age_min = (now - last_dt).total_seconds() / 60
+        if age_min > 2 * period_min:
+            drifts.append(
+                f"stale_last_run: {job_id} age={age_min:.0f}min period={period_min}min"
+            )
+
+    if drifts:
+        print("  piggy-back-drift:")
+        for entry in drifts:
+            print(f"    - {entry}")
+    else:
+        print("  piggy-back-drift: none")
+    return {"drift_count": len(drifts), "drifts": drifts}
+
+
 def main() -> int:
     from volpred.ops import check_alert_conditions  # noqa: WPS433 (deferred for sys.path)
 
@@ -173,6 +250,9 @@ def main() -> int:
         print(f"  run-due-jobs: fired={fired} skipped={skipped} ids={fired_ids}")
     else:
         print(f"  run-due-jobs: error reason={due_summary.get('reason') or due_summary.get('error')}")
+
+    # 2026-05-04 finding #18 / B3.7: piggy-back scheduler drift assertion
+    _check_piggy_back_drift(due_summary)
     if release_trigger.get("triggered"):
         status = "ok" if release_trigger.get("ok") else "fail"
         print(
