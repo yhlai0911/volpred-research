@@ -103,11 +103,15 @@ def _kids_with_general_article() -> set[str]:
 
 
 def _score_to_priority(score: int) -> int:
-    if score >= 5:
-        return 1
+    """Article-task priority cap (2026-05-04 fix).
+
+    Original mapping (5+→P1) caused auto-discovered article tasks to fall
+    into the dispatcher's P1-conservative-main-thread bucket — they
+    weren't actually critical-tier (just popular K-experiments needing
+    write-up). Cap at P3 so they stay agentable. P4 floor for low-score
+    candidates.
+    """
     if score >= 4:
-        return 2
-    if score >= 3:
         return 3
     return 4
 

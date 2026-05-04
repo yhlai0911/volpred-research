@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-04T09:43:16.952783+00:00",
+  "generated_at": "2026-05-04T11:35:13.206929+00:00",
   "slot_cap": 4,
   "slot_state": {
     "worktrees": [],
@@ -7,30 +7,30 @@
     "occupied": 0
   },
   "free_slots": 4,
-  "pending_total": 36,
-  "pending_agentable": 4,
-  "pending_main_thread": 28,
-  "pending_blocked": 4,
+  "pending_total": 40,
+  "pending_agentable": 6,
+  "pending_main_thread": 29,
+  "pending_blocked": 5,
   "dispatch_candidates": [
     {
-      "id": "K1033_article_general",
-      "priority": 2,
-      "title": "K1033: write general-audience article (auto-discovered uncovered K)"
-    },
-    {
-      "id": "K195_article_general",
+      "id": "K1032_article_general",
       "priority": 3,
-      "title": "K195: write general-audience article (auto-discovered uncovered K)"
+      "title": "K1032: write general-audience article (auto-discovered uncovered K)"
     },
     {
-      "id": "K1116d",
-      "priority": 4,
-      "title": "K1116d: True ALFRED vintage when FRED_API_KEY obtained"
+      "id": "K1067_article_general",
+      "priority": 3,
+      "title": "K1067: write general-audience article (auto-discovered uncovered K)"
     },
     {
-      "id": "K1139",
-      "priority": 4,
-      "title": "K1139: Intraday 5-min RV as target"
+      "id": "K1080_article_general",
+      "priority": 3,
+      "title": "K1080: write general-audience article (auto-discovered uncovered K)"
+    },
+    {
+      "id": "K561_article_general",
+      "priority": 3,
+      "title": "K561: write general-audience article (auto-discovered uncovered K)"
     }
   ],
   "main_thread_queue_top5": [
@@ -55,9 +55,9 @@
       "title": "K1144: Paper 2 narrative pivot to dual-NULL (after K1140 confirmation)"
     },
     {
-      "id": "Paper10_start",
+      "id": "K547_lookahead_audit_fix",
       "priority": 2,
-      "title": "Paper 10 Crypto Fear Channel 論文"
+      "title": "K547: lookahead bug fix — port_ret = weights * spy_ret needs .shift(1) on weights"
     }
   ],
   "refill": null,
@@ -93,6 +93,14 @@
       "title": "TSMC 法說 04/17 深度追蹤（optional）",
       "blocked_at": "2026-05-04T09:40:24+00:00",
       "blocked_until": null
+    },
+    {
+      "id": "K1116d",
+      "priority": 4,
+      "reason": "awaiting_external_data",
+      "title": "K1116d: True ALFRED vintage when FRED_API_KEY obtained",
+      "blocked_at": "2026-05-04T09:57:06+00:00",
+      "blocked_until": "2026-06-15"
     }
   ]
 }
