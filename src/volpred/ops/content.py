@@ -359,7 +359,12 @@ def release_pool_articles(
             pass
 
     if released:
-        dump_json(_feed_path(storage_dir), feed)
+        # 2026-05-04 finding #17 修整：feed.json 寫入須與 publisher._append_to_feed
+        # 同一 lock namespace 防 race（之前直接 dump_json 沒 lock，並發時可能與
+        # publisher 的 lock-protected write 互相覆蓋）
+        from volpred.ops.shared_lock import shared_state_lock
+        with shared_state_lock("publisher_feed", storage_dir=storage_dir):
+            dump_json(_feed_path(storage_dir), feed)
         publisher._sync_feed_to_remote()
         if update_last_released:
             _update_content_release_settings(
@@ -684,7 +689,11 @@ def cleanup_test_post(pub_id: str, *, hard_delete: bool = False, storage_dir: st
 
     trimmed_feed = [item for item in feed if item.get("id") != pub_id]
     if len(trimmed_feed) != len(feed):
-        dump_json(_feed_path(storage_dir), trimmed_feed)
+        # 2026-05-04 finding #17 修整：feed.json 寫入須與 publisher._append_to_feed
+        # 同一 lock namespace 防 race
+        from volpred.ops.shared_lock import shared_state_lock
+        with shared_state_lock("publisher_feed", storage_dir=storage_dir):
+            dump_json(_feed_path(storage_dir), trimmed_feed)
         result["local_feed_removed"] = True
         publisher._sync_feed_to_remote()  # internal use: keep remote feed in sync
 
