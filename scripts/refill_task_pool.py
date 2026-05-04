@@ -1,0 +1,184 @@
+"""Refill storage/next_tasks.json from existing research-gap signal.
+
+Triggered by continue_task_dispatch when agentable + main_thread < threshold.
+Pulls from canonical research-gap sources already maintained by the system:
+
+1. storage/publication_candidates.json
+   - top_10_uncovered: K-experiments with passing verdict but no published article
+   - missing_general_top5 / missing_research_top5: audience gaps
+2. (future) research_program.md backlog section
+
+Each refill entry carries `task_type='daily_article'` (audience-driven write
+task) or `task_type='experiment'` (follow-up K) and `source='auto_discovered'`
+so the dispatcher's existing P1-conservative gate doesn't drag everything to
+main_thread.
+
+Hard rules:
+- Skip K-ids already present in next_tasks (any status) to avoid dup
+- Skip K-ids whose experiments/<id>/ already has results.json AND is in
+  publication_candidates as uncovered (article task only — don't re-run
+  the experiment)
+- Default priority: derive from candidate score (3+ → P3; 4+ → P2; 5+ → P1)
+- Write new tasks with status='pending' and `created_at` = now
+- Idempotent: rerunning is safe (dup-skip prevents double-add)
+
+Usage:
+  uv run python scripts/refill_task_pool.py --dry-run
+  uv run python scripts/refill_task_pool.py --apply --target 6
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
+CANDIDATES = ROOT / "storage" / "publication_candidates.json"
+
+
+def _load_tasks() -> tuple[dict | list, list]:
+    if not NEXT_TASKS.exists():
+        return [], []
+    data = json.loads(NEXT_TASKS.read_text(encoding="utf-8"))
+    if isinstance(data, dict):
+        return data, data.get("tasks", [])
+    return data, data
+
+
+def _save_tasks(payload: dict | list, tasks: list) -> None:
+    if isinstance(payload, dict) and "tasks" in payload:
+        payload["tasks"] = tasks
+        out = payload
+    else:
+        out = tasks
+    NEXT_TASKS.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def _existing_ids(tasks: list) -> set[str]:
+    ids: set[str] = set()
+    for t in tasks:
+        for key in ("id", "k_id", "experiment_id"):
+            v = t.get(key)
+            if v:
+                ids.add(str(v))
+    return ids
+
+
+def _score_to_priority(score: int) -> int:
+    if score >= 5:
+        return 1
+    if score >= 4:
+        return 2
+    if score >= 3:
+        return 3
+    return 4
+
+
+def _make_article_task(cand: dict, priority: int) -> dict:
+    k_id = cand["k_id"]
+    audiences_covered = cand.get("audiences_covered") or []
+    needed_audience = "general" if "general" not in audiences_covered else "research"
+    return {
+        "id": f"{k_id}_article_{needed_audience}",
+        "title": f"{k_id}: write {needed_audience}-audience article (auto-discovered uncovered K)",
+        "description": (
+            f"K {k_id} has verdict signal (score={cand.get('score')}, reasons={cand.get('reasons')}) "
+            f"but no {needed_audience} article. Verdict preview: {(cand.get('verdict_preview') or '')[:280]}"
+        ),
+        "priority": priority,
+        "status": "pending",
+        "task_type": "daily_article",
+        "source": "auto_discovered",
+        "k_id": k_id,
+        "tags": (cand.get("tags") or []) + ["auto-discovered", f"audience-{needed_audience}"],
+        "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }
+
+
+def refill(target: int, dry_run: bool = False) -> dict:
+    if not CANDIDATES.exists():
+        return {"ok": False, "reason": "publication_candidates.json missing", "added": 0}
+
+    cand_data = json.loads(CANDIDATES.read_text(encoding="utf-8"))
+    payload, tasks = _load_tasks()
+    existing = _existing_ids(tasks)
+
+    # Compose ranked candidate list: top_10_uncovered first (highest signal),
+    # then missing_research_top5 (prefer research over general for novelty),
+    # then missing_general_top5.
+    pool = []
+    seen_in_pool: set[str] = set()
+    for source_key in ("top_10_uncovered", "missing_research_top5", "missing_general_top5"):
+        for cand in cand_data.get(source_key, []) or []:
+            kid = cand.get("k_id")
+            if not kid or kid in seen_in_pool:
+                continue
+            seen_in_pool.add(kid)
+            pool.append(cand)
+
+    new_entries = []
+    for cand in pool:
+        if len(new_entries) >= target:
+            break
+        kid = cand["k_id"]
+        # Skip if K-id already in next_tasks under ANY status — even completed
+        # tasks shouldn't trigger duplicate article entries (they may have an
+        # article task already, just not visible via covered_by).
+        article_id = f"{kid}_article_general"
+        if (kid in existing or article_id in existing
+                or f"{kid}_article_research" in existing):
+            continue
+        priority = _score_to_priority(int(cand.get("score") or 0))
+        new_entries.append(_make_article_task(cand, priority))
+
+    if not new_entries:
+        return {"ok": True, "added": 0, "reason": "no_new_candidates_passing_filter"}
+
+    if dry_run:
+        return {
+            "ok": True,
+            "dry_run": True,
+            "would_add": len(new_entries),
+            "preview_ids": [e["id"] for e in new_entries],
+        }
+
+    tasks.extend(new_entries)
+    _save_tasks(payload, tasks)
+    return {
+        "ok": True,
+        "added": len(new_entries),
+        "added_ids": [e["id"] for e in new_entries],
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--target", type=int, default=4,
+                        help="number of new tasks to attempt to add (default 4)")
+    parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--apply", action="store_true")
+    parser.add_argument("--json", action="store_true")
+    args = parser.parse_args()
+
+    if not (args.dry_run or args.apply):
+        print("error: must specify --dry-run or --apply", file=sys.stderr)
+        return 2
+
+    result = refill(args.target, dry_run=args.dry_run)
+    if args.json:
+        print(json.dumps(result, ensure_ascii=False))
+    else:
+        if result.get("dry_run"):
+            print(f"[refill] would add {result['would_add']} tasks: {result.get('preview_ids')}")
+        elif result.get("added"):
+            print(f"[refill] added {result['added']} tasks: {result['added_ids']}")
+        else:
+            print(f"[refill] no add — {result.get('reason')}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

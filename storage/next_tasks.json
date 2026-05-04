@@ -18,7 +18,10 @@
     "title": "K1100h: Tick-level PRG on TAIFEX TX (Dropbox 2017-2021)",
     "priority": 3,
     "description": "K1100f agent 衍生：only tick-level reveals true periodic structure。Daily DOW dummies 太粗。",
-    "status": "pending"
+    "status": "pending",
+    "blocked_reason": "awaiting_external_data",
+    "blocked_at": "2026-05-04T09:40:24+00:00",
+    "blocked_note": "Needs Dropbox tick data 2017-2021 access; user must provide path or API auth."
   },
   {
     "id": "Paper9_dual_target_integration",
@@ -48,7 +51,10 @@
     "title": "TSMC 法說 04/17 深度追蹤（optional）",
     "priority": 3,
     "description": "只有真新發現才寫。否則跳過避免重複。",
-    "status": "pending"
+    "status": "pending",
+    "blocked_reason": "self_tagged_optional",
+    "blocked_at": "2026-05-04T09:40:24+00:00",
+    "blocked_note": "Task description self-flags '只有真新發現才寫，否則跳過避免重複。'"
   },
   {
     "id": "K1125",
@@ -110,7 +116,11 @@
     "priority": 2,
     "description": "K1174 only 1/96 slice coverage (1.04%) + 131/413 events. Need full-day (96 files) scan or GCP BigQuery (if user can provide auth) for N≥10 per market decisive PCR test. Current K1170 press concentration claim hangs on this.",
     "status": "pending",
-    "note_2026_05_04": "K-id renamed: existing experiments/k1175/ used for Paper 2 Table 3 canonical replication. This GDELT fullscan task is a K1174 follow-up; K-id collision detected during 2026-05-04 dispatch audit."
+    "note_2026_05_04": "K-id renamed: existing experiments/k1175/ used for Paper 2 Table 3 canonical replication. This GDELT fullscan task is a K1174 follow-up; K-id collision detected during 2026-05-04 dispatch audit.",
+    "blocked_reason": "awaiting_external_data",
+    "blocked_at": "2026-05-04T09:40:24+00:00",
+    "blocked_note": "Needs GCP BigQuery auth (40K files raw scan exceeds agent runtime). Main thread or specific worker with GCP credentials.",
+    "blocked_until": "2026-06-01"
   },
   {
     "id": "K1116d",
@@ -919,7 +929,10 @@
       "K1100g-followup",
       "Paper3",
       "cadence-verify"
-    ]
+    ],
+    "blocked_reason": "compute_runtime_incompatible",
+    "blocked_at": "2026-05-04T09:40:24+00:00",
+    "blocked_note": "Prior background agent (a8dedb02034744cc7) IS-fits subprocess killed when agent timeout exited; cold-start MLE on 4 models × 2 markets exceeds agent runtime. Main thread or dedicated long-runtime worker."
   },
   {
     "id": "K1222b_revise_post_K1216c",
@@ -971,5 +984,35 @@
     "description": "paper/vt-trend-following/ 缺 scripts/ results/ data_sources.md experiments.md — 補齊 self-contained 5 項必備。",
     "created_at": "2026-04-18T20:51:21.640074",
     "note": "2026-04-18 audit: Paper folder missing CLAUDE.md self-contained requirements"
+  },
+  {
+    "id": "K1033_article_general",
+    "title": "K1033: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1033 has verdict signal (score=4, reasons=None) but no general article. Verdict preview: ",
+    "priority": 2,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1033",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "created_at": "2026-05-04T09:42:07+00:00"
+  },
+  {
+    "id": "K195_article_general",
+    "title": "K195: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K195 has verdict signal (score=3, reasons=None) but no general article. Verdict preview: ",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K195",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "created_at": "2026-05-04T09:42:07+00:00"
   }
 ]

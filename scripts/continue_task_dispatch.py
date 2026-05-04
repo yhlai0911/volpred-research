@@ -32,9 +32,39 @@ WORKTREES_DIR = ROOT / ".claude" / "worktrees"
 AGENTS_DIR = ROOT / "storage" / "ops" / "agents"
 REPORT_PATH = ROOT / "storage" / "ops" / "dispatch_report_latest.json"
 SLOT_CAP = 4
+# Refill threshold: when agentable count drops below this, dispatcher
+# auto-runs refill_task_pool.py to top up. Keeps the rule "任務池永遠要有
+# 待辦任務" enforceable by mechanism, not by main-thread discipline.
+REFILL_FLOOR = 4
 
 MAIN_THREAD_MARKERS = re.compile(
     r"main\s*thread|NOT\s*agent|main-thread|主線程",
+    re.IGNORECASE,
+)
+
+# 2026-05-04 finding: dispatcher previously had no concept of "blocked".
+# Tasks that can never be dispatched (awaiting external auth, prior compute
+# failures, self-tagged optional, K-id collision, etc.) sat in `pending`
+# and got recommended every cycle, forcing main thread into a skip-loop.
+#
+# Hard blocks are persisted on the task itself via `blocked_reason` (set
+# by scripts/mark_task_blocked.py or schema-level edits). Soft blocks are
+# auto-detected from title/description patterns below; they can be
+# upgraded to hard blocks on first encounter so the dispatcher is
+# self-correcting.
+BLOCKED_REASONS = {
+    "awaiting_external_data",       # auth / data not yet available (Dropbox, GCP)
+    "compute_runtime_incompatible", # background agent timeout < experiment runtime
+    "self_tagged_optional",         # task self-flags itself as optional / skippable
+    "kid_collision",                # K-id reuse — needs rename before dispatch
+    "prior_attempts_failed",        # repeated failures; needs main-thread debug
+    "deprecated",                   # superseded by another task / no longer relevant
+}
+
+SELF_OPTIONAL_PATTERN = re.compile(
+    r"\(\s*optional\s*\)|（\s*optional\s*）|"
+    r"only\s+if\s+truly\s+new|"
+    r"否則跳過|skip\s+if\s+already",
     re.IGNORECASE,
 )
 
@@ -82,6 +112,39 @@ def is_main_thread_only(task: dict) -> bool:
     return bool(MAIN_THREAD_MARKERS.search(blob))
 
 
+def detect_block_reason(task: dict) -> str | None:
+    """Return blocked reason if task should be filtered from dispatch, else None.
+
+    Priority order:
+    1. Explicit task.blocked_reason field (hard block, set via CLI)
+    2. blocked_until timestamp still in future
+    3. Auto-detected from title/description (soft block — caller may
+       optionally promote to hard block)
+    """
+    explicit = (task.get("blocked_reason") or "").strip().lower()
+    if explicit:
+        # Honor blocked_until expiry (auto-recheck): if blocked_until is in
+        # the past, treat block as expired and let task return to pending.
+        unblock_at = task.get("blocked_until")
+        if unblock_at:
+            try:
+                deadline = datetime.fromisoformat(str(unblock_at).replace("Z", "+00:00"))
+                if deadline.tzinfo is None:
+                    deadline = deadline.replace(tzinfo=timezone.utc)
+                if datetime.now(timezone.utc) >= deadline:
+                    return None
+            except Exception:
+                pass
+        return explicit
+
+    blob = " ".join(
+        str(task.get(k, "") or "") for k in ("title", "description", "notes")
+    )
+    if SELF_OPTIONAL_PATTERN.search(blob):
+        return "self_tagged_optional"
+    return None
+
+
 def is_paper_task(task: dict) -> bool:
     """Paper writing tasks are main-thread-only per CLAUDE.md."""
     blob = " ".join(
@@ -100,7 +163,16 @@ def is_paper_task(task: dict) -> bool:
 def categorize(tasks: list[dict]) -> dict:
     agentable = []
     main_thread = []
+    blocked = []
     for t in tasks:
+        # Block check first — blocked tasks never enter dispatch or main_thread
+        # queue (they're surfaced separately so the user/main thread can
+        # periodically review and unblock).
+        block_reason = detect_block_reason(t)
+        if block_reason:
+            blocked.append({"task": t, "reason": block_reason})
+            continue
+
         # P1 conservative default: P1 tasks are critical-tier, main-thread owns.
         # Override only via explicit task_type=experiment (agent-runnable K-experiments).
         priority = t.get("priority", 999)
@@ -116,13 +188,40 @@ def categorize(tasks: list[dict]) -> dict:
 
     agentable.sort(key=lambda t: (t.get("priority", 999), t.get("id", "")))
     main_thread.sort(key=lambda t: (t.get("priority", 999), t.get("id", "")))
-    return {"agentable": agentable, "main_thread": main_thread}
+    blocked.sort(key=lambda b: (b["task"].get("priority", 999), b["task"].get("id", "")))
+    return {"agentable": agentable, "main_thread": main_thread, "blocked": blocked}
 
 
-def build_report() -> dict:
+def _maybe_refill(agentable_count: int, *, auto_refill: bool) -> dict | None:
+    """Auto-trigger refill_task_pool.py when agentable < REFILL_FLOOR.
+
+    Returns the refill result dict if refill ran, else None. Refill is
+    quiet-on-no-add to avoid log noise in healthy steady state.
+    """
+    if not auto_refill:
+        return None
+    if agentable_count >= REFILL_FLOOR:
+        return None
+    try:
+        # Inline import to keep dispatcher importable even if refill script
+        # is missing or has import errors.
+        sys.path.insert(0, str(ROOT / "scripts"))
+        from refill_task_pool import refill as _refill_fn  # type: ignore
+        return _refill_fn(target=REFILL_FLOOR - agentable_count, dry_run=False)
+    except Exception as exc:  # noqa: BLE001
+        return {"ok": False, "error": str(exc)}
+
+
+def build_report(*, auto_refill: bool = True) -> dict:
     slots = count_active_slots()
     pending = load_pending_tasks()
     cats = categorize(pending)
+
+    refill_result = _maybe_refill(len(cats["agentable"]), auto_refill=auto_refill)
+    if refill_result and refill_result.get("added"):
+        # Reload after refill so the report shows the fresh tasks
+        pending = load_pending_tasks()
+        cats = categorize(pending)
 
     free_slots = max(0, SLOT_CAP - slots["occupied"])
     candidates_to_dispatch = cats["agentable"][:free_slots]
@@ -135,6 +234,7 @@ def build_report() -> dict:
         "pending_total": len(pending),
         "pending_agentable": len(cats["agentable"]),
         "pending_main_thread": len(cats["main_thread"]),
+        "pending_blocked": len(cats["blocked"]),
         "dispatch_candidates": [
             {
                 "id": t.get("id"),
@@ -151,6 +251,18 @@ def build_report() -> dict:
             }
             for t in cats["main_thread"][:5]
         ],
+        "refill": refill_result,
+        "blocked_tasks": [
+            {
+                "id": b["task"].get("id"),
+                "priority": b["task"].get("priority"),
+                "reason": b["reason"],
+                "title": (b["task"].get("title") or b["task"].get("description") or "")[:120],
+                "blocked_at": b["task"].get("blocked_at"),
+                "blocked_until": b["task"].get("blocked_until"),
+            }
+            for b in cats["blocked"]
+        ],
     }
 
 
@@ -164,7 +276,8 @@ def print_report(report: dict) -> None:
     )
     print(
         f"[dispatch] pending: total={report['pending_total']} "
-        f"agentable={report['pending_agentable']} main_thread={report['pending_main_thread']}"
+        f"agentable={report['pending_agentable']} main_thread={report['pending_main_thread']} "
+        f"blocked={report.get('pending_blocked', 0)}"
     )
 
     if report["dispatch_candidates"]:
@@ -180,15 +293,32 @@ def print_report(report: dict) -> None:
         for c in report["main_thread_queue_top5"]:
             print(f"  - P{c['priority']} {c['id']} :: {c['title']}")
 
+    refill = report.get("refill") or {}
+    if refill.get("added"):
+        print(f"[dispatch] auto-refill: +{refill['added']} tasks {refill.get('added_ids')}")
+    elif refill.get("ok") is False:
+        print(f"[dispatch] auto-refill error: {refill.get('error') or refill.get('reason')}")
+
+    blocked = report.get("blocked_tasks") or []
+    if blocked:
+        print(f"[dispatch] blocked ({len(blocked)}):")
+        for b in blocked[:8]:
+            until = f" until={b['blocked_until']}" if b.get("blocked_until") else ""
+            print(f"  - P{b['priority']} {b['id']} reason={b['reason']}{until}")
+        if len(blocked) > 8:
+            print(f"  ... and {len(blocked) - 8} more")
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dry-run", action="store_true", help="只列 candidates，不派工")
     parser.add_argument("--report", action="store_true", help="寫 report 到 dispatch_report_latest.json")
     parser.add_argument("--execute", action="store_true", help="reserved (尚未實作 actual spawn)")
+    parser.add_argument("--no-refill", action="store_true",
+                        help="skip auto-refill even if agentable < floor (debug only)")
     args = parser.parse_args()
 
-    report = build_report()
+    report = build_report(auto_refill=not args.no_refill)
     print_report(report)
 
     if args.report:

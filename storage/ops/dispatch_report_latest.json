@@ -1,0 +1,98 @@
+{
+  "generated_at": "2026-05-04T09:43:16.952783+00:00",
+  "slot_cap": 4,
+  "slot_state": {
+    "worktrees": [],
+    "active_agents": [],
+    "occupied": 0
+  },
+  "free_slots": 4,
+  "pending_total": 36,
+  "pending_agentable": 4,
+  "pending_main_thread": 28,
+  "pending_blocked": 4,
+  "dispatch_candidates": [
+    {
+      "id": "K1033_article_general",
+      "priority": 2,
+      "title": "K1033: write general-audience article (auto-discovered uncovered K)"
+    },
+    {
+      "id": "K195_article_general",
+      "priority": 3,
+      "title": "K195: write general-audience article (auto-discovered uncovered K)"
+    },
+    {
+      "id": "K1116d",
+      "priority": 4,
+      "title": "K1116d: True ALFRED vintage when FRED_API_KEY obtained"
+    },
+    {
+      "id": "K1139",
+      "priority": 4,
+      "title": "K1139: Intraday 5-min RV as target"
+    }
+  ],
+  "main_thread_queue_top5": [
+    {
+      "id": "K1146",
+      "priority": 1,
+      "title": "K1146: Paper 2 manuscript pivot to universal-magnitude (main thread, NOT agent)"
+    },
+    {
+      "id": "K1169",
+      "priority": 1,
+      "title": "K1169: Paper 2 §5 narrative rewrite (main thread, K1166 correction)"
+    },
+    {
+      "id": "vix_sufficiency_expansion",
+      "priority": 1,
+      "title": "Paper vix-sufficiency 擴充：integrate K1116/K1118/K1116b/K1121 + K504/K1098"
+    },
+    {
+      "id": "K1144",
+      "priority": 2,
+      "title": "K1144: Paper 2 narrative pivot to dual-NULL (after K1140 confirmation)"
+    },
+    {
+      "id": "Paper10_start",
+      "priority": 2,
+      "title": "Paper 10 Crypto Fear Channel 論文"
+    }
+  ],
+  "refill": null,
+  "blocked_tasks": [
+    {
+      "id": "K1175_gdelt_fullscan",
+      "priority": 2,
+      "reason": "awaiting_external_data",
+      "title": "K1175: Full 96-files-per-day GDELT scan OR GCP-authed BigQuery rerun",
+      "blocked_at": "2026-05-04T09:40:24+00:00",
+      "blocked_until": "2026-06-01"
+    },
+    {
+      "id": "K1100g_d9_cadence_verify",
+      "priority": 3,
+      "reason": "compute_runtime_incompatible",
+      "title": "K1100g_d9: rerun K1100g_d8 with d7 cadence (refit_every=5 n_restarts=10) to disambiguate sign flip",
+      "blocked_at": "2026-05-04T09:40:24+00:00",
+      "blocked_until": null
+    },
+    {
+      "id": "K1100h",
+      "priority": 3,
+      "reason": "awaiting_external_data",
+      "title": "K1100h: Tick-level PRG on TAIFEX TX (Dropbox 2017-2021)",
+      "blocked_at": "2026-05-04T09:40:24+00:00",
+      "blocked_until": null
+    },
+    {
+      "id": "TSMC_0417_optional",
+      "priority": 3,
+      "reason": "self_tagged_optional",
+      "title": "TSMC 法說 04/17 深度追蹤（optional）",
+      "blocked_at": "2026-05-04T09:40:24+00:00",
+      "blocked_until": null
+    }
+  ]
+}

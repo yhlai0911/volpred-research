@@ -20,6 +20,42 @@ paths:
 - Session cron 與 system crontab **需與 canonical runtime schedule 一致**
 - Admin UI 目前是 **observer**；UI 與 canonical spec 不一致時以 canonical spec / local state 為準
 
+## Task pool 三軌：agentable / main_thread / blocked（2026-05-04 修流程）
+
+**問題**：dispatcher 原本只分 `agentable / main_thread`，stale candidates（auth-blocked / prior-failure / self-optional）反覆被推薦、main thread 反覆 silent skip → slot 永遠空、pool 看似有工實際無工可派。
+
+**修整**：
+
+1. **`blocked` bucket** — `scripts/continue_task_dispatch.py::categorize` 新增第三類，filter 掉再列 candidates
+2. **Hard block schema** — 任務帶 `blocked_reason` (controlled vocab) + `blocked_at` + `blocked_until` (auto-recheck) + `blocked_note`
+3. **Soft block 自動偵測** — title/description 含 `(optional)` / `否則跳過` / `only if truly new` → 自動歸類 `self_tagged_optional`
+4. **Hard-block CLI** — `scripts/mark_task_blocked.py --id <id> --reason <vocab> --note "..." [--until YYYY-MM-DD]`；`--unblock` 反向
+
+**Controlled vocabulary**（`BLOCKED_REASONS`）：
+- `awaiting_external_data` — 缺 auth / credentials / 原始資料（GCP, Dropbox 等）
+- `compute_runtime_incompatible` — experiment runtime > background agent timeout（K1100g_d9 IS-fits hang 案例）
+- `self_tagged_optional` — task 自標 optional / skippable
+- `kid_collision` — K-id 重用，需改名才能派
+- `prior_attempts_failed` — 反覆失敗，需主線程 debug
+- `deprecated` — 被其他 task 取代 / 失去 relevance
+
+**Skip-dispatch 必須 mark blocked**（硬規則，不可 silent skip）— 否則 candidate 永遠回到下一輪 dispatch，無限迴圈。
+
+## Pool 永遠有工：自動 refill 機制（2026-05-04 用戶硬規則）
+
+**用戶要求**：「任務池永遠要有待辦任務；定時繼續任務時 取出任務執行 並補進新任務」。流程責任，不靠主線程紀律。
+
+**機制**（`continue_task_dispatch.py::_maybe_refill`）：
+- 當 `agentable < REFILL_FLOOR (=4)` 時，dispatcher 自動 invoke `scripts/refill_task_pool.py` 補 `(floor - agentable)` 個新 pending tasks
+- Refill source: `storage/publication_candidates.json` 的 `top_10_uncovered` + `missing_research_top5` + `missing_general_top5`（已 184+ uncovered K's，永不缺源）
+- 新 task `task_type='daily_article'`、`source='auto_discovered'`、priority 由 candidate score 推導（5+→P1 / 4+→P2 / 3+→P3）
+- Idempotent：dup-skip by K-id；重跑安全
+- Quiet on no-add：steady-state 不 print noise
+
+**Manual override**：`uv run python scripts/refill_task_pool.py --apply --target N` 強制補 N 個；`--dry-run` 預覽。
+
+**對 Mission 的服務**：池永遠滿 = 連續性研究產出 = Mission #2 (research) + #1 (articles) 不間斷。Pool 空 = 系統空轉 = 違反運營承諾。
+
 ### release-task：claimed → queued 退回（2026-04-26 新增）
 
 當 agent claim-next 拉到非預期 task（誤抓 / 優先序變動 / 派工的 agent 工具壞了），**用 `release-task` 不要用 `finish-task --status failed`**：
