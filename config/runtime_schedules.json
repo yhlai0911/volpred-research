@@ -38,11 +38,11 @@
       {
         "id": "daily_update",
         "label": "daily_update 每日更新與同步",
-        "cron": "3 8 * * 2-6",
+        "cron": "3 8 * * 1-6",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_daily_update.sh",
         "log_path": "storage/logs/cron/daily_update.log",
         "command_deprecated": "daily_update.py",
-        "description": "08:03 策略計算、Supabase 同步、績效重算與 heartbeat。",
+        "description": "08:03 策略計算、Supabase 同步、績效重算與 heartbeat。週一也跑（用週五美股收盤資料生成週一建議）。",
         "matchers": [
           "daily_update.py",
           "cron_daily_update.sh"
@@ -115,6 +115,19 @@
         "matchers": [
           "memory_health",
           "cron_memory_health.sh"
+        ]
+      },
+      {
+        "id": "release_settings_audit",
+        "label": "Release settings drift audit",
+        "cron": "17 */6 * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_release_settings_audit.sh",
+        "log_path": "storage/logs/cron/release_settings_audit.log",
+        "command_deprecated": "python scripts/audit_release_settings.py --fix --json",
+        "description": "每 6 小時 audit storage/.release_settings.json 與 Supabase content_release_settings.id=default drift。--fix 直接 PATCH 修；mode='auto' 自動映射為 remote 'scheduled'（Supabase CHECK constraint 預先存在）。歷史教訓 2026-05-04 finding #B3.5：silent PATCH fail 累積後 admin UI / cross-session readers 看到 stale 值。",
+        "matchers": [
+          "audit_release_settings",
+          "cron_release_settings_audit.sh"
         ]
       }
     ]

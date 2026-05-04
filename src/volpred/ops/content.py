@@ -175,6 +175,14 @@ def _update_content_release_settings(fields: dict, *, storage_dir: str = "storag
     local_payload = {**current, **fields, "updated_at": now_iso}
     dump_json(local, local_payload)
     remote_payload = {**fields, "updated_at": now_iso}
+    # 2026-05-04 finding #B3.5: Supabase content_release_settings.mode CHECK
+    # constraint predates the client-side 'auto' mode and only accepts
+    # ('manual','scheduled'). 'auto' is semantically a scheduled fire that
+    # bypasses force checks (see release_pool_by_settings L404), so map
+    # 'auto'→'scheduled' on the wire. Local payload keeps 'auto' as-is so
+    # release_pool_articles still bypasses the force check.
+    if remote_payload.get("mode") == "auto":
+        remote_payload["mode"] = "scheduled"
     try:
         return _patch_where("content_release_settings", {"id": "default"}, remote_payload)
     except Exception:
