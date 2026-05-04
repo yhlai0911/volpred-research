@@ -67,6 +67,41 @@ def _existing_ids(tasks: list) -> set[str]:
     return ids
 
 
+def _kids_with_general_article() -> set[str]:
+    """Return set of K-ids that already have a non-unpublished general article.
+
+    Without this guard, refill_task_pool reads publication_candidates' uncovered
+    flag and proposes article tasks for K-ids that DO have an article — that
+    flag is computed against covered_by metadata which can lag feed.json reality
+    (2026-05-04 K518 incident). Belt-and-suspenders dedup.
+    """
+    import re
+    kids: set[str] = set()
+    feed_path = ROOT / "storage" / "reports" / "feed.json"
+    if not feed_path.exists():
+        return kids
+    try:
+        feed = json.loads(feed_path.read_text(encoding="utf-8"))
+    except Exception:
+        return kids
+    for art in feed:
+        if not isinstance(art, dict):
+            continue
+        if art.get("audience") != "general":
+            continue
+        if art.get("status") not in ("draft", "published", "scheduled"):
+            continue
+        details = art.get("details") or {}
+        refs = details.get("experiment_refs") if isinstance(details, dict) else []
+        if isinstance(refs, list):
+            for r in refs:
+                kids.add(str(r).upper())
+        title = art.get("title", "") or ""
+        for m in re.findall(r"\bK\d{2,5}[a-z_]*\b", title):
+            kids.add(m.upper())
+    return kids
+
+
 def _score_to_priority(score: int) -> int:
     if score >= 5:
         return 1
@@ -105,6 +140,7 @@ def refill(target: int, dry_run: bool = False) -> dict:
     cand_data = json.loads(CANDIDATES.read_text(encoding="utf-8"))
     payload, tasks = _load_tasks()
     existing = _existing_ids(tasks)
+    already_covered = _kids_with_general_article()
 
     # Compose ranked candidate list: top_10_uncovered first (highest signal),
     # then missing_research_top5 (prefer research over general for novelty),
@@ -130,6 +166,10 @@ def refill(target: int, dry_run: bool = False) -> dict:
         article_id = f"{kid}_article_general"
         if (kid in existing or article_id in existing
                 or f"{kid}_article_research" in existing):
+            continue
+        # Belt-and-suspenders: skip if a general article already exists in
+        # feed.json (publication_candidates' uncovered flag can lag).
+        if kid.upper() in already_covered:
             continue
         priority = _score_to_priority(int(cand.get("score") or 0))
         new_entries.append(_make_article_task(cand, priority))

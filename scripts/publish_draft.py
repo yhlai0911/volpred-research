@@ -41,8 +41,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 GENERAL_BAN_REPLACEMENTS = [
-    (re.compile(r'\bp\s*=\s*(\d[\d.]*)'), r'達顯著水準（p≈\1）'),
-    (re.compile(r'\bp\s*<\s*(\d[\d.]*)'), r'達顯著水準（p<\1）'),
+    # IMPORTANT: replacements must NOT regenerate any banned pattern.
+    # Earlier bug: `p<\1` and `p≈\1` both contained `p` adjacent to digits
+    # which the publisher's `\bp\s*=\s*\d` / `\bp\s*<\s*\d` regex re-flagged.
+    # Solution: drop the `p` operator entirely from replacement text.
+    (re.compile(r'\bp\s*=\s*(\d[\d.]*)'), r'達顯著水準（顯著性 \1）'),
+    (re.compile(r'\bp\s*<\s*(\d[\d.]*)'), r'達顯著水準（顯著性低於 \1）'),
     (re.compile(r'\bt\s*=\s*(-?\d[\d.]*)'), r'統計強度 \1'),
     (re.compile(r'\bHarvey\s+threshold\b'), r'嚴格統計檢驗門檻'),
     (re.compile(r'\bHarvey\b'), r'嚴格統計'),
@@ -133,6 +137,43 @@ def parse_draft(path: Path) -> dict:
     }
 
 
+def check_kid_audience_duplicate(kid: str, audience: str) -> list[dict]:
+    """Return existing feed articles matching (K-id, audience) where status != unpublished.
+
+    The publisher has no built-in (K-id, audience) dedup — only mile_id
+    uniqueness. Without this check, auto-discovered article tasks can
+    re-cover the same K twice. (2026-05-04 K518 incident: refilled article
+    task re-published a K that already had a general article from a prior
+    session.)
+    """
+    feed_path = ROOT / "storage" / "reports" / "feed.json"
+    if not feed_path.exists():
+        return []
+    feed = json.loads(feed_path.read_text(encoding="utf-8"))
+    matches = []
+    for art in feed:
+        if not isinstance(art, dict):
+            continue
+        if art.get("audience") != audience:
+            continue
+        if art.get("status") not in ("draft", "published", "scheduled"):
+            continue
+        details = art.get("details") or {}
+        refs = details.get("experiment_refs") if isinstance(details, dict) else []
+        if not isinstance(refs, list):
+            refs = []
+        # Also check title for K-id mention (covers older articles without
+        # experiment_refs metadata)
+        title = art.get("title", "") or ""
+        if kid in refs or re.search(rf"\b{re.escape(kid)}\b", title):
+            matches.append({
+                "id": art.get("id"),
+                "status": art.get("status"),
+                "title": title[:80],
+            })
+    return matches
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("draft_path", help="path to markdown draft (relative or absolute)")
@@ -147,6 +188,9 @@ def main() -> int:
                         help="K-id for experiment_refs; overrides frontmatter")
     parser.add_argument("--no-sanitize", action="store_true",
                         help="skip ban-list sanitizer (default applies for audience=general)")
+    parser.add_argument("--force-duplicate", action="store_true",
+                        help="bypass (K-id, audience) duplicate gate (use only when "
+                             "intentionally publishing a follow-up / errata)")
     parser.add_argument("--dry-run", action="store_true",
                         help="print metadata + sanitize report; do not invoke CLI")
     args = parser.parse_args()
@@ -178,6 +222,19 @@ def main() -> int:
     if applied:
         for p in applied:
             print(f"  - replaced pattern: {p}")
+
+    # Pre-publish dedup gate per (K-id, audience). Skip if --force-duplicate.
+    if not args.force_duplicate and refs:
+        for kid in refs:
+            existing = check_kid_audience_duplicate(kid, audience)
+            if existing:
+                print(f"\n[publish_draft] DUPLICATE GATE: ({kid}, {audience}) "
+                      f"already has {len(existing)} article(s):", file=sys.stderr)
+                for m in existing:
+                    print(f"  - {m['id']} [{m['status']}] {m['title']}", file=sys.stderr)
+                print(f"\n  Refusing to publish. Use --force-duplicate if this is "
+                      f"an intentional follow-up / errata.", file=sys.stderr)
+                return 3
 
     if args.dry_run:
         print("[publish_draft] dry-run: not invoking CLI")
