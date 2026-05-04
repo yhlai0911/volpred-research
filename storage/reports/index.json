@@ -1,37 +1,926 @@
 {
-  "generated_at": "2026-04-25T01:02:17.613274+00:00",
+  "generated_at": "2026-05-04T04:01:30.441173+00:00",
   "source": "storage/reports/feed.json",
   "summary": {
-    "total": 960,
-    "last_30_days": 427,
+    "total": 1003,
+    "last_30_days": 265,
     "status": {
-      "published": 951,
-      "unpublished": 5,
-      "draft": 4
+      "published": 993,
+      "draft": 5,
+      "unpublished": 5
     },
     "audience": {
-      "research": 564,
-      "general": 268,
+      "research": 582,
+      "general": 280,
       "unknown": 77,
-      "daily": 43,
-      "member_qa": 8
+      "daily": 55,
+      "member_qa": 9
     },
     "category": {
-      "milestone": 597,
-      "general": 258,
+      "milestone": 630,
+      "general": 267,
       "unknown": 73,
+      "member_qa": 9,
       "daily_article": 8,
-      "member_qa": 8,
       "research": 6,
       "qa": 5,
       "experiment": 3,
       "event_article": 1,
       "diary": 1
     },
-    "with_thumbnail": 25,
-    "total_chars": 2169436
+    "with_thumbnail": 32,
+    "total_chars": 2423596
   },
   "articles": [
+    {
+      "id": "mile_8d8d864f",
+      "title": "每日策略建議：VIX 16.99（正常）— 2026-05-04",
+      "date": "2026-05-04T03:53:15.119011+00:00",
+      "audience": "daily",
+      "category": "general",
+      "status": "published",
+      "tags": [
+        "每日建議",
+        "VIX",
+        "策略配置"
+      ],
+      "length_chars": 1446,
+      "thumbnail_url": "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/daily_equity_2026-05-04_5f2419.png"
+    },
+    {
+      "id": "mile_93993100",
+      "title": "2026-05-04 本日持倉比率建議（依據 2026-05-01 收盤數據）",
+      "date": "2026-05-04T03:52:57.706828+00:00",
+      "audience": "daily",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "每日建議",
+        "持倉建議",
+        "12/VIX",
+        "SPY",
+        "GLD",
+        "0050.TW",
+        "VT策略"
+      ],
+      "length_chars": 820,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_40fbffbb",
+      "title": "你以為 VIX 訊號越複雜越好？8 個投資期限告訴你：簡單的 60/40 才是長期王者",
+      "date": "2026-05-04T03:00:01.986911+00:00",
+      "audience": "general",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "horizon",
+        "60/40",
+        "buy-and-hold",
+        "simplicity",
+        "SPY",
+        "GLD",
+        "配置策略"
+      ],
+      "length_chars": 4412,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_7de1c5a2",
+      "title": "K195：Copula 尾部依賴不對稱多配對深度驗證 — Bonferroni 修正後 26/66 配對 OOS 仍顯著",
+      "date": "2026-05-03T21:00:03.954421+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "研究",
+        "copula",
+        "tail-dependence",
+        "Bonferroni",
+        "GJR-GARCH",
+        "leverage-effect",
+        "VIX",
+        "SPY"
+      ],
+      "length_chars": 8474,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_67169c30",
+      "title": "5 個熱門均線/趨勢策略，27 年實測有 4 個輸給長抱、最好的 1 個也通不過嚴格檢驗",
+      "date": "2026-05-03T15:00:06.005430+00:00",
+      "audience": "general",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "SPY",
+        "趨勢追蹤",
+        "均線策略",
+        "黃金交叉",
+        "投資策略",
+        "風險管理"
+      ],
+      "length_chars": 4202,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_caaaaaf5",
+      "title": "Moreira-Muir 反常識：30 年 SPY 樣本上 vol-managed 砍半 MDD 但 Sharpe 進步是雜訊（K1265 NULL with findings）",
+      "date": "2026-05-03T12:45:53.303142+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "draft",
+      "tags": [
+        "研究",
+        "SPY",
+        "VIX",
+        "Moreira_Muir",
+        "vol_managed",
+        "MDD",
+        "risk_management"
+      ],
+      "length_chars": 11906,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_cbbf35cb",
+      "title": "兩年研究、25 個結論：波動率投資的這些事，現在「穩了」、「快穩了」、「還沒答案」",
+      "date": "2026-05-03T09:00:02.826517+00:00",
+      "audience": "general",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "波動率",
+        "VT策略",
+        "VIX",
+        "GARCH",
+        "研究綜述",
+        "風險管理",
+        "證據地圖"
+      ],
+      "length_chars": 3676,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_50030b56",
+      "title": "多資產分散投資真的有用嗎？21 年實測：看得到、量不到、還會被 2022 咬一口",
+      "date": "2026-05-03T03:00:05.529757+00:00",
+      "audience": "general",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "SPY",
+        "GLD",
+        "TLT",
+        "EFA",
+        "VNQ",
+        "多資產",
+        "分散投資"
+      ],
+      "length_chars": 4166,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_930ff436",
+      "title": "5 資產全天候 VT：Sharpe 升、CAGR 降、回撤砍半 — 一個誠實的取捨故事",
+      "date": "2026-05-02T21:00:06.198446+00:00",
+      "audience": "general",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "VT策略",
+        "All-Weather",
+        "多資產",
+        "SPY",
+        "GLD",
+        "TLT",
+        "風險管理"
+      ],
+      "length_chars": 5560,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_5e6f3c4f",
+      "title": "K1264：台指期 overnight 看似年化 15.6%，5bp 成本後只剩 0.2 Sharpe — 並揭露假期持有反向虧損",
+      "date": "2026-05-02T18:13:35.039475+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "draft",
+      "tags": [
+        "研究",
+        "台指期",
+        "期貨",
+        "overnight",
+        "交易策略",
+        "成本分析"
+      ],
+      "length_chars": 8113,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_1e57c478",
+      "title": "K1263：把 2024 諾獎熱門架構 KAN 接上宏觀基本面 MIDAS，QLIKE 反而比 30 年前 GJR-GARCH 差 33%",
+      "date": "2026-05-02T17:55:19.211347+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "draft",
+      "tags": [
+        "研究",
+        "ML ceiling",
+        "KAN",
+        "GARCH-MIDAS",
+        "GJR-GARCH",
+        "macro-fundamentals",
+        "SPY",
+        "QQQ"
+      ],
+      "length_chars": 9691,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_75eac2cf",
+      "title": "BTC 上 Student-t 反而更差？K1129 商品市場 GAS-t 全面 NULL 與比特幣 Harvey-significant 反向",
+      "date": "2026-05-02T17:37:01.690140+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "draft",
+      "tags": [
+        "研究",
+        "GAS-t",
+        "GJR-GARCH",
+        "commodity",
+        "BTC",
+        "Harvey",
+        "QLIKE",
+        "VaR"
+      ],
+      "length_chars": 11027,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_a4311ba7",
+      "title": "越複雜真的越穩嗎？四道保險加在波動率策略上 — 二十年實測差距小到看不見",
+      "date": "2026-05-02T14:39:59.072102+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "VT",
+        "SPY",
+        "GLD",
+        "volatility-targeting",
+        "風險管理",
+        "投資策略",
+        "負面結果"
+      ],
+      "length_chars": 2608,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_1abbf66e",
+      "title": "Ariel (1987) Turn-of-Month 日曆效應已消失：硬套到波動率擇時還會反咬一口",
+      "date": "2026-05-02T12:34:15.591541+00:00",
+      "audience": "general",
+      "category": "milestone",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "SPY",
+        "日曆效應",
+        "波動率擇時",
+        "Turn-of-Month",
+        "工程派疊加",
+        "異常消失"
+      ],
+      "length_chars": 5047,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_fef2e0b2",
+      "title": "FOMC 2026-04-29 事後檢視：實際走向 vs 12 天前市場 prior 的對帳",
+      "date": "2026-05-02T08:08:58.381088+00:00",
+      "audience": "general",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "FOMC",
+        "SPY",
+        "VIX",
+        "事件研究",
+        "宏觀經濟",
+        "美股"
+      ],
+      "length_chars": 7043,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_0d86ebfb",
+      "title": "K680 RETRACTED：Cross-OOS 5/5 全勝是 lookahead artifact——研究誠實流程的一個範例",
+      "date": "2026-05-02T03:00:05.833155+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "研究",
+        "研究誠實",
+        "lookahead-bias",
+        "cross-OOS",
+        "方法論",
+        "retraction",
+        "VIX-percentile"
+      ],
+      "length_chars": 14179,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_31054aaf",
+      "title": "每日策略建議：VIX 16.99（正常）— 2026-05-02",
+      "date": "2026-05-02T00:03:22.936209+00:00",
+      "audience": "daily",
+      "category": "general",
+      "status": "published",
+      "tags": [
+        "每日建議",
+        "VIX",
+        "策略配置"
+      ],
+      "length_chars": 1446,
+      "thumbnail_url": "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/daily_equity_2026-05-02_670acc.png"
+    },
+    {
+      "id": "mile_a5412e28",
+      "title": "2026-05-02 本日持倉比率建議（依據 2026-05-01 收盤數據）",
+      "date": "2026-05-02T00:03:06.028046+00:00",
+      "audience": "daily",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "每日建議",
+        "持倉建議",
+        "12/VIX",
+        "SPY",
+        "GLD",
+        "0050.TW",
+        "VT策略"
+      ],
+      "length_chars": 820,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_20dc85a1",
+      "title": "Alt-data 在預測上失敗，那 allocation 上呢？K1121 給出同樣的答案 — Null",
+      "date": "2026-05-01T21:00:05.873316+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "研究",
+        "portfolio-allocation",
+        "alt-data",
+        "NFCI",
+        "EPU",
+        "Paper4",
+        "null-result"
+      ],
+      "length_chars": 7329,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_839322eb",
+      "title": "策略 regime 切換用百分位數還是分段線性？K683 給出明確答案 (DM t=3.74 Harvey PASS)",
+      "date": "2026-05-01T15:00:03.911636+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "研究",
+        "方法論",
+        "VIX-regime",
+        "percentile",
+        "DM-test",
+        "Harvey-2016",
+        "regime-classification"
+      ],
+      "length_chars": 9312,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_f9ca978f",
+      "title": "貨幣對自家的隱含波動率有用，但 basket-FX 失靈、VIX 預測 EUR 反而拖累 — K1118b 解構 FX IV 的有效範圍",
+      "date": "2026-05-01T09:00:04.108583+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "研究",
+        "FX",
+        "隱含波動率",
+        "波動率預測",
+        "EUR-USD",
+        "JPY-USD",
+        "DXY",
+        "VIX"
+      ],
+      "length_chars": 12947,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_da2d61d7",
+      "title": "K1006: 台指期隔夜跳空累計 83.6% 卻無法穩定獲利 — 解構 overnight gap 的可交易性界限",
+      "date": "2026-05-01T03:00:06.130142+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "研究",
+        "台指期",
+        "TX",
+        "overnight-gap",
+        "TAIFEX",
+        "日盤",
+        "microstructure"
+      ],
+      "length_chars": 8980,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_f39bc890",
+      "title": "每日策略建議：VIX 16.89（正常）— 2026-05-01",
+      "date": "2026-05-01T00:03:28.605026+00:00",
+      "audience": "daily",
+      "category": "general",
+      "status": "published",
+      "tags": [
+        "每日建議",
+        "VIX",
+        "策略配置"
+      ],
+      "length_chars": 1447,
+      "thumbnail_url": "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/daily_equity_2026-05-01_07bae2.png"
+    },
+    {
+      "id": "mile_f7a7cf81",
+      "title": "2026-05-01 本日持倉比率建議（依據 2026-04-30 收盤數據）",
+      "date": "2026-05-01T00:03:11.177912+00:00",
+      "audience": "daily",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "每日建議",
+        "持倉建議",
+        "12/VIX",
+        "SPY",
+        "GLD",
+        "0050.TW",
+        "VT策略"
+      ],
+      "length_chars": 820,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_4583cbb6",
+      "title": "我們嘗試重做「歐日新聞落差 3.28σ」實驗,結果發現故事可能站不住腳",
+      "date": "2026-04-30T21:00:03.137737+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "新聞集中度",
+        "GDELT",
+        "歐洲股市",
+        "日本股市",
+        "複製危機",
+        "研究誠實",
+        "財報事件"
+      ],
+      "length_chars": 4613,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_a9ce7cd4",
+      "title": "K1024: A4f Refit Cadence Insensitive — QLIKE Spread 0.021%, 季度 refit 為 compute / accuracy sweet spot",
+      "date": "2026-04-30T15:00:05.655074+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "研究",
+        "A4f",
+        "GARCH",
+        "refit-cadence",
+        "QLIKE",
+        "SPY",
+        "robustness"
+      ],
+      "length_chars": 11285,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_b8efe3f8",
+      "title": "K1073: A4f-GARCH 外生變數選擇敏感度 — VIX9D / VIX / VIX3M / VVIX 在 SPY 的橫向比較",
+      "date": "2026-04-30T08:51:24.144906+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "研究",
+        "SPY",
+        "A4f-GARCH",
+        "VIX9D",
+        "VIX3M",
+        "VVIX",
+        "波動率預測",
+        "敏感度分析"
+      ],
+      "length_chars": 11878,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_2e5a7661",
+      "title": "K1021: A4f Student-t df Joint Estimation — df ≈ 8.5, VaR Calibration Critical",
+      "date": "2026-04-30T02:20:45.128554+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "研究",
+        "A4f",
+        "Student-t",
+        "VaR-calibration",
+        "SPY",
+        "QQQ",
+        "VIX9D",
+        "distributional-axis"
+      ],
+      "length_chars": 10733,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_98d7d598",
+      "title": "每日策略建議：VIX 18.81（正常）— 2026-04-30",
+      "date": "2026-04-30T00:03:31.142578+00:00",
+      "audience": "daily",
+      "category": "general",
+      "status": "published",
+      "tags": [
+        "每日建議",
+        "VIX",
+        "策略配置"
+      ],
+      "length_chars": 1444,
+      "thumbnail_url": "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/daily_equity_2026-04-30_f09b28.png"
+    },
+    {
+      "id": "mile_347c3daf",
+      "title": "2026-04-30 本日持倉比率建議（依據 2026-04-29 收盤數據）",
+      "date": "2026-04-30T00:03:12.497673+00:00",
+      "audience": "daily",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "每日建議",
+        "持倉建議",
+        "12/VIX",
+        "SPY",
+        "GLD",
+        "0050.TW",
+        "VT策略"
+      ],
+      "length_chars": 818,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_b4cf48f9",
+      "title": "K1018: Robust VT 變體（floor/cap/EWMA/weekly）全數 null — 直覺穩健 ≠ 統計穩健",
+      "date": "2026-04-29T14:00:05.123292+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "研究",
+        "VT",
+        "Robust-VT",
+        "Null-Result",
+        "Harvey-2016",
+        "Bootstrap-CI",
+        "DM-Test",
+        "SPY-GLD"
+      ],
+      "length_chars": 9208,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_5c662be0",
+      "title": "K549: 多資產 VT — 5 ETF 等權 Sharpe 1.517 vs 50/50 基準 1.318，Harvey NS（weak positive）",
+      "date": "2026-04-29T08:00:05.237732+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "研究",
+        "SPY",
+        "GLD",
+        "TLT",
+        "EFA",
+        "VNQ",
+        "volatility-targeting",
+        "multi-asset"
+      ],
+      "length_chars": 10180,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_24f14e42",
+      "title": "拿掉「財報事件」之後，VIX 還是同一條 VIX 嗎？",
+      "date": "2026-04-29T02:00:02.359289+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "VIX",
+        "EAV",
+        "波動率預測",
+        "研究方法論"
+      ],
+      "length_chars": 2755,
+      "thumbnail_url": "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1067f_scatter_noEAV_vs_full.png"
+    },
+    {
+      "id": "mile_c5a65884",
+      "title": "每日策略建議：VIX 17.83（正常）— 2026-04-29",
+      "date": "2026-04-29T00:03:29.030281+00:00",
+      "audience": "daily",
+      "category": "general",
+      "status": "published",
+      "tags": [
+        "每日建議",
+        "VIX",
+        "策略配置"
+      ],
+      "length_chars": 1446,
+      "thumbnail_url": "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/daily_equity_2026-04-29_cd994b.png"
+    },
+    {
+      "id": "mile_ff026a65",
+      "title": "2026-04-29 本日持倉比率建議（依據 2026-04-28 收盤數據）",
+      "date": "2026-04-29T00:03:10.427152+00:00",
+      "audience": "daily",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "每日建議",
+        "持倉建議",
+        "12/VIX",
+        "SPY",
+        "GLD",
+        "0050.TW",
+        "VT策略"
+      ],
+      "length_chars": 820,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_3eb8657c",
+      "title": "K908: 最強預測模型加上 HistSim — 跨三資產 6/6 通過 Trinity 的 Universal VaR 解",
+      "date": "2026-04-28T20:00:05.416369+00:00",
+      "audience": "general",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "MF-GJR",
+        "HistSim",
+        "Student-t",
+        "VaR",
+        "風險管理",
+        "Trinity",
+        "0050.TW"
+      ],
+      "length_chars": 3737,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_0056089e",
+      "title": "K970: Proxy 路線 MF2-GARCH 在 SPY 取得 9.55% QLIKE 改善——VIX 作為 τ 繞過 K623 收斂瓶頸",
+      "date": "2026-04-28T14:00:02.148941+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "研究",
+        "MF2-GARCH",
+        "VIX",
+        "Conrad-Engle",
+        "methodology",
+        "QLIKE",
+        "SPY",
+        "DM-test",
+        "VaR",
+        "Patton-2011"
+      ],
+      "length_chars": 17440,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_cc5abfb8",
+      "title": "你以為的「市場特性」，可能只是文獻幫你腦補出來的——一份新聞數據實測",
+      "date": "2026-04-28T08:00:06.198667+00:00",
+      "audience": "general",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "新聞數據",
+        "媒體集中度",
+        "跨市場",
+        "研究方法論",
+        "GDELT",
+        "財報",
+        "投資思考"
+      ],
+      "length_chars": 2931,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_bc4864f5",
+      "title": "K623: MF2-GARCH 三項實作 bug 修正後重估——SPY 上 QLIKE 顯著勝 GJR，但收斂率僅 25%",
+      "date": "2026-04-28T02:00:06.376209+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "研究",
+        "MF2-GARCH",
+        "Conrad-Engle",
+        "methodology",
+        "SPY",
+        "QLIKE",
+        "convergence"
+      ],
+      "length_chars": 5619,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_bdf5e34f",
+      "title": "每日策略建議：VIX 18.02（正常）— 2026-04-28",
+      "date": "2026-04-28T00:03:28.196037+00:00",
+      "audience": "daily",
+      "category": "general",
+      "status": "published",
+      "tags": [
+        "每日建議",
+        "VIX",
+        "策略配置"
+      ],
+      "length_chars": 1446,
+      "thumbnail_url": "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/daily_equity_2026-04-28_e63ff6.png"
+    },
+    {
+      "id": "mile_f3450103",
+      "title": "2026-04-28 本日持倉比率建議（依據 2026-04-27 收盤數據）",
+      "date": "2026-04-28T00:03:09.981906+00:00",
+      "audience": "daily",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "每日建議",
+        "持倉建議",
+        "12/VIX",
+        "SPY",
+        "GLD",
+        "0050.TW",
+        "VT策略"
+      ],
+      "length_chars": 820,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_f3475a6f",
+      "title": "K438: Regression 顯著不等於 GARCH-X 顯著——VRP 在變異數方程式的方法論 asymmetry",
+      "date": "2026-04-27T20:00:06.263490+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "研究",
+        "GARCH-X",
+        "VRP",
+        "methodology",
+        "conditional-variance",
+        "SPY",
+        "VIX"
+      ],
+      "length_chars": 11602,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_5173955c",
+      "title": "K1257: Bayesian Model Averaging 波動率預測 — posterior concentration 讓 BMA 退化為單一模型，等權 puzzle 擴展到 Bayesian 框架",
+      "date": "2026-04-27T14:00:07.261799+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "研究",
+        "BMA",
+        "posterior",
+        "ensemble",
+        "方法論",
+        "QLIKE",
+        "equal-weight-puzzle",
+        "SPY",
+        "GLD",
+        "0050.TW"
+      ],
+      "length_chars": 11415,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_74d796a2",
+      "title": "[會員問題] 波浪理論 + 分型 + GRI 205 反貪腐 vs 股價波動：為什麼這三者很難在同一框架回答",
+      "date": "2026-04-26T10:03:55.796347+00:00",
+      "audience": "member_qa",
+      "category": "member_qa",
+      "status": "published",
+      "tags": [
+        "會員提問",
+        "reframe",
+        "研究誠實",
+        "ESG-G",
+        "技術分析"
+      ],
+      "length_chars": 3875,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_5d6a77fc",
+      "title": "連兩週自己推翻自己：「台股財報反應比美股小」的第二個解釋也不成立",
+      "date": "2026-04-26T05:00:01.350297+00:00",
+      "audience": "general",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "研究誠實",
+        "假說推翻",
+        "analyst-coverage",
+        "cross-market",
+        "方法論",
+        "台股"
+      ],
+      "length_chars": 3564,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_4fa40750",
+      "title": "FOMC 04/28-29 T-2 倒數兩天：三情境機率 × 條件 SPY/VIX 動量 grid，以及 T-2→T+0 部位調整 rule",
+      "date": "2026-04-25T16:49:14.649424+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "研究",
+        "FOMC",
+        "T-2",
+        "macro-event",
+        "position-sizing",
+        "scenario",
+        "VIX",
+        "SPY",
+        "event-driven"
+      ],
+      "length_chars": 7641,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_1d8652b5",
+      "title": "別人的 VIX 策略不是你的 VIX 策略——6 個市場 18 個測試的殘酷真相",
+      "date": "2026-04-25T08:15:30.205732+00:00",
+      "audience": "general",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "VIX",
+        "條件槓桿",
+        "國際市場",
+        "跨市場驗證",
+        "SPY",
+        "EFA",
+        "資產配置"
+      ],
+      "length_chars": 3855,
+      "thumbnail_url": null
+    },
     {
       "id": "mile_64e1009c",
       "title": "每日策略建議：VIX 18.71（正常）— 2026-04-25",
@@ -57,7 +946,6 @@
       "tags": [
         "每日建議",
         "持倉建議",
-        "daily-update",
         "12/VIX",
         "SPY",
         "GLD",
@@ -65,26 +953,6 @@
         "VT策略"
       ],
       "length_chars": 818,
-      "thumbnail_url": null
-    },
-    {
-      "id": "mile_f3475a6f",
-      "title": "K438: Regression 顯著不等於 GARCH-X 顯著——VRP 在變異數方程式的方法論 asymmetry",
-      "date": "2026-04-24T17:25:36.262544+00:00",
-      "audience": "research",
-      "category": "milestone",
-      "status": "draft",
-      "tags": [
-        "研究",
-        "K438",
-        "GARCH-X",
-        "VRP",
-        "methodology",
-        "conditional-variance",
-        "SPY",
-        "VIX"
-      ],
-      "length_chars": 11602,
       "thumbnail_url": null
     },
     {
@@ -96,7 +964,6 @@
       "status": "published",
       "tags": [
         "一般讀者",
-        "K886",
         "0050.TW",
         "PRG",
         "台股",
@@ -132,7 +999,6 @@
       "tags": [
         "每日建議",
         "持倉建議",
-        "daily-update",
         "12/VIX",
         "SPY",
         "GLD",
@@ -151,8 +1017,6 @@
       "status": "published",
       "tags": [
         "一般讀者",
-        "K1077",
-        "K1078",
         "QQQ",
         "0050.TW",
         "A4f",
@@ -191,7 +1055,6 @@
       "tags": [
         "每日建議",
         "持倉建議",
-        "daily-update",
         "12/VIX",
         "SPY",
         "GLD",
@@ -210,11 +1073,6 @@
       "status": "published",
       "tags": [
         "研究",
-        "K1092",
-        "K1041",
-        "K1085",
-        "K1088",
-        "K1091",
         "SPY",
         "GLD",
         "VIX",
@@ -255,7 +1113,6 @@
       "tags": [
         "每日建議",
         "持倉建議",
-        "daily-update",
         "12/VIX",
         "SPY",
         "GLD",
@@ -277,11 +1134,6 @@
         "財報",
         "跨市場",
         "binary-sufficient",
-        "K1150",
-        "K1151",
-        "K1152",
-        "K1153",
-        "K1157",
         "事件研究"
       ],
       "length_chars": 3443,
@@ -312,7 +1164,6 @@
       "tags": [
         "每日建議",
         "持倉建議",
-        "daily-update",
         "12/VIX",
         "SPY",
         "GLD",
@@ -330,8 +1181,7 @@
       "category": "milestone",
       "status": "published",
       "tags": [
-        "K1091",
-        "K1090",
+        "研究",
         "meta-prediction",
         "VGK",
         "EWJ",
@@ -343,73 +1193,6 @@
         "研究筆記"
       ],
       "length_chars": 6831,
-      "thumbnail_url": null
-    },
-    {
-      "id": "mile_5173955c",
-      "title": "K1257: Bayesian Model Averaging 波動率預測 — posterior concentration 讓 BMA 退化為單一模型，等權 puzzle 擴展到 Bayesian 框架",
-      "date": "2026-04-20T02:02:14.282342+00:00",
-      "audience": "research",
-      "category": "milestone",
-      "status": "draft",
-      "tags": [
-        "研究",
-        "K1257",
-        "K482",
-        "K1002",
-        "K593",
-        "BMA",
-        "posterior",
-        "ensemble",
-        "方法論",
-        "QLIKE",
-        "equal-weight-puzzle",
-        "SPY",
-        "GLD",
-        "0050.TW"
-      ],
-      "length_chars": 11415,
-      "thumbnail_url": null
-    },
-    {
-      "id": "mile_5d6a77fc",
-      "title": "連兩週自己推翻自己：「台股財報反應比美股小」的第二個解釋也不成立",
-      "date": "2026-04-20T01:38:14.054875+00:00",
-      "audience": "general",
-      "category": "milestone",
-      "status": "draft",
-      "tags": [
-        "一般讀者",
-        "K1164",
-        "研究誠實",
-        "假說推翻",
-        "analyst-coverage",
-        "cross-market",
-        "方法論",
-        "台股"
-      ],
-      "length_chars": 3564,
-      "thumbnail_url": null
-    },
-    {
-      "id": "mile_1d8652b5",
-      "title": "別人的 VIX 策略不是你的 VIX 策略——6 個市場 18 個測試的殘酷真相",
-      "date": "2026-04-20T01:30:53.106942+00:00",
-      "audience": "general",
-      "category": "milestone",
-      "status": "draft",
-      "tags": [
-        "一般讀者",
-        "K567",
-        "VIX",
-        "條件槓桿",
-        "國際市場",
-        "跨市場驗證",
-        "SPY",
-        "EFA",
-        "資產配置"
-      ],
-      "length_chars": 3855,
       "thumbnail_url": null
     },
     {
@@ -441,10 +1224,7 @@
       "status": "published",
       "tags": [
         "研究",
-        "K957",
         "K526-K566",
-        "K548",
-        "K553",
         "meta-synthesis",
         "方法論",
         "E019-E023",
@@ -464,7 +1244,6 @@
       "status": "published",
       "tags": [
         "研究",
-        "K672",
         "knowledge-synthesis",
         "evidence-hierarchy",
         "VIX",
@@ -485,12 +1264,6 @@
       "status": "published",
       "tags": [
         "研究",
-        "K1145",
-        "K1147",
-        "K1150",
-        "K1151",
-        "K1152",
-        "K1157",
         "Paper2",
         "pooled-panel",
         "EAV",
@@ -566,7 +1339,6 @@
         "realized volatility",
         "bid-ask bounce",
         "signature plot",
-        "K1072",
         "microstructure noise"
       ],
       "length_chars": 10055,
@@ -608,7 +1380,6 @@
         "0050",
         "VIXTWN",
         "A4f",
-        "K1098",
         "結構性",
         "Paper 9",
         "Paper 10",
@@ -629,10 +1400,8 @@
         "TSMC",
         "法說會",
         "earnings",
-        "K498",
         "0050",
         "台股",
-        "K1108",
         "VIX",
         "event-study"
       ],
@@ -651,8 +1420,6 @@
         "VIX",
         "regime",
         "trading",
-        "K697",
-        "K702",
         "risk"
       ],
       "length_chars": 5589,
@@ -671,10 +1438,6 @@
         "0050",
         "VT",
         "TAIFEX",
-        "K892",
-        "K636",
-        "K687",
-        "K847",
         "在地化",
         "槓桿",
         "時區傳導",
@@ -692,8 +1455,6 @@
       "status": "published",
       "tags": [
         "研究",
-        "K687",
-        "K688",
         "VT",
         "drawdown",
         "CRRA",
@@ -720,8 +1481,6 @@
         "除息",
         "事件研究",
         "波動率",
-        "K512",
-        "K498",
         "台股"
       ],
       "length_chars": 6260,
@@ -740,10 +1499,6 @@
         "VIX",
         "SPY",
         "VT",
-        "K513",
-        "K687",
-        "K688",
-        "K1004",
         "event_article",
         "風險管理"
       ],
@@ -759,7 +1514,6 @@
       "status": "published",
       "tags": [
         "研究",
-        "K530",
         "HAR-RV",
         "GJR-GARCH",
         "QLIKE",
@@ -832,7 +1586,6 @@
       "tags": [
         "每日建議",
         "持倉建議",
-        "daily-update",
         "12/VIX",
         "SPY",
         "GLD",
@@ -875,10 +1628,7 @@
         "OFI",
         "Paper 4",
         "Paper 2",
-        "cross-asset",
-        "K1127",
-        "K1148",
-        "K1149"
+        "cross-asset"
       ],
       "length_chars": 10379,
       "thumbnail_url": null
@@ -1022,7 +1772,6 @@
       "tags": [
         "每日建議",
         "持倉建議",
-        "daily-update",
         "12/VIX",
         "SPY",
         "GLD",
@@ -1057,7 +1806,6 @@
       "tags": [
         "每日建議",
         "持倉建議",
-        "daily-update",
         "12/VIX",
         "SPY",
         "GLD",
@@ -1091,10 +1839,6 @@
       "status": "published",
       "tags": [
         "一般讀者",
-        "K1166",
-        "K1168",
-        "K1165",
-        "K1167",
         "analyst-coverage",
         "TradingView",
         "投資實務",
@@ -1112,8 +1856,6 @@
       "status": "published",
       "tags": [
         "研究",
-        "K1104",
-        "K1107",
         "IC設計",
         "fabless",
         "聯發科",
@@ -1135,11 +1877,7 @@
       "category": "milestone",
       "status": "published",
       "tags": [
-        "general",
-        "研究",
-        "K1116",
-        "K1121",
-        "K1122",
+        "一般讀者",
         "Paper4",
         "alt-data",
         "EPU",
@@ -1159,10 +1897,7 @@
       "category": "milestone",
       "status": "published",
       "tags": [
-        "general",
-        "研究",
-        "K1120",
-        "K1120b",
+        "一般讀者",
         "TLT",
         "NFCI",
         "FinStress",
@@ -1183,11 +1918,7 @@
       "category": "milestone",
       "status": "published",
       "tags": [
-        "general",
-        "研究",
-        "K1118b",
-        "K1119",
-        "K1116",
+        "一般讀者",
         "VIX",
         "跨資產",
         "EUR",
@@ -1208,12 +1939,7 @@
       "category": "milestone",
       "status": "published",
       "tags": [
-        "general",
-        "研究",
-        "K1119",
-        "K1116",
-        "K1118",
-        "K916",
+        "一般讀者",
         "BTC",
         "DVOL",
         "Deribit",
@@ -1235,7 +1961,6 @@
       "tags": [
         "每日建議",
         "持倉建議",
-        "daily-update",
         "12/VIX",
         "SPY",
         "GLD",
@@ -1254,9 +1979,6 @@
       "status": "published",
       "tags": [
         "研究",
-        "K1166",
-        "K1168",
-        "K1165",
         "analyst-coverage",
         "台積電",
         "聯電",
@@ -1276,8 +1998,6 @@
       "status": "published",
       "tags": [
         "研究",
-        "K1167",
-        "K1170",
         "press-concentration",
         "EU",
         "JP",
@@ -1297,10 +2017,6 @@
       "status": "published",
       "tags": [
         "研究",
-        "K1153",
-        "K1166",
-        "K1167",
-        "K1165",
         "機構持股",
         "retail-vs-institutional",
         "財報日",
@@ -1320,9 +2036,6 @@
       "status": "published",
       "tags": [
         "研究",
-        "K1150",
-        "K1145",
-        "K1147",
         "TOPIX",
         "JP",
         "pooled-panel",
@@ -1342,8 +2055,6 @@
       "status": "published",
       "tags": [
         "研究",
-        "K1140",
-        "K1114",
         "rolling-window",
         "HAC",
         "block-bootstrap",
@@ -1365,9 +2076,6 @@
       "status": "published",
       "tags": [
         "研究",
-        "K887",
-        "K862",
-        "K208",
         "VIX",
         "FSI",
         "bid-ask",
@@ -1387,10 +2095,6 @@
       "status": "published",
       "tags": [
         "研究",
-        "K1075",
-        "K1077",
-        "K1078",
-        "K1080",
         "A4f",
         "VIX",
         "SPY",
@@ -1413,13 +2117,11 @@
       "status": "published",
       "tags": [
         "研究",
-        "K1152",
         "Paper2",
         "cross-market",
         "TW",
         "US",
         "JP",
-        "general",
         "earnings",
         "財報日",
         "波動率",
@@ -1511,7 +2213,6 @@
       "tags": [
         "每日建議",
         "持倉建議",
-        "daily-update",
         "12/VIX",
         "SPY",
         "GLD",
@@ -1568,8 +2269,6 @@
       "status": "published",
       "tags": [
         "研究",
-        "K1145",
-        "K1147",
         "Paper2",
         "pooled-panel",
         "EAV",
@@ -1623,8 +2322,6 @@
         "跳水",
         "jump",
         "Cont-Tankov",
-        "K1124",
-        "K1125",
         "台指期",
         "微結構"
       ],
@@ -1643,7 +2340,6 @@
         "Taiwan",
         "microstructure",
         "OFI",
-        "K1124",
         "stylized-fact",
         "US-vs-Taiwan",
         "TAIFEX",
@@ -1685,8 +2381,7 @@
         "一般讀者",
         "財報季",
         "個股選擇",
-        "Paper_2",
-        "K1067c"
+        "Paper_2"
       ],
       "length_chars": 2373,
       "thumbnail_url": null
@@ -2701,8 +3396,8 @@
       "category": "milestone",
       "status": "published",
       "tags": [
+        "每日建議",
         "持倉建議",
-        "daily-update",
         "12/VIX",
         "SPY",
         "GLD",
@@ -2793,7 +3488,6 @@
         "分位數預測",
         "風險管理",
         "SPY",
-        "K967",
         "GARCH",
         "Kupiec"
       ],
@@ -3098,9 +3792,7 @@
         "波動率預測",
         "GARCH",
         "VIX",
-        "SPY",
-        "K940",
-        "K944"
+        "SPY"
       ],
       "length_chars": 2211,
       "thumbnail_url": null
@@ -3327,8 +4019,7 @@
         "VIX",
         "宏觀經濟",
         "風險管理",
-        "投資策略",
-        "K927"
+        "投資策略"
       ],
       "length_chars": 2590,
       "thumbnail_url": null
@@ -4036,8 +4727,7 @@
         "50/50",
         "再平衡",
         "投資策略",
-        "被動投資",
-        "K846"
+        "被動投資"
       ],
       "length_chars": 2338,
       "thumbnail_url": null
@@ -4055,8 +4745,7 @@
         "50/50",
         "Shannon demon",
         "structural premium",
-        "Booth-Fama",
-        "K846"
+        "Booth-Fama"
       ],
       "length_chars": 4419,
       "thumbnail_url": null
@@ -4596,8 +5285,7 @@
         "VaR",
         "FHS",
         "歷史模擬法",
-        "SPY",
-        "K824v2"
+        "SPY"
       ],
       "length_chars": 2623,
       "thumbnail_url": null
@@ -4634,8 +5322,7 @@
         "風險管理",
         "歷史模擬",
         "SPY",
-        "巴塞爾協議",
-        "K824v2"
+        "巴塞爾協議"
       ],
       "length_chars": 2617,
       "thumbnail_url": null
@@ -4671,9 +5358,6 @@
         "方法論",
         "隔夜gap",
         "跨市場",
-        "K812v2",
-        "K817",
-        "K818",
         "台股",
         "0050.TW",
         "lead-lag",
@@ -4735,7 +5419,6 @@
         "STOCK Act",
         "congressional trading",
         "SPY",
-        "K823",
         "市場效率"
       ],
       "length_chars": 3986,
@@ -4824,7 +5507,6 @@
       "tags": [
         "每日建議",
         "持倉建議",
-        "daily-update",
         "12/VIX",
         "SPY",
         "GLD",
@@ -4921,8 +5603,7 @@
         "台灣",
         "0050",
         "隔夜gap",
-        "美股",
-        "K812v2"
+        "美股"
       ],
       "length_chars": 2019,
       "thumbnail_url": null
@@ -4977,8 +5658,7 @@
         "VT",
         "系統性風險",
         "公有地悲劇",
-        "SPY",
-        "K815"
+        "SPY"
       ],
       "length_chars": 3232,
       "thumbnail_url": null
@@ -5017,7 +5697,6 @@
         "VIXY",
         "contango",
         "波動率交易",
-        "K822",
         "SPY",
         "波動率預測"
       ],
@@ -5058,8 +5737,7 @@
         "NFP",
         "SPY",
         "GLD",
-        "50/50配置",
-        "K820"
+        "50/50配置"
       ],
       "length_chars": 2248,
       "thumbnail_url": null
@@ -5160,8 +5838,7 @@
         "0050",
         "VIX",
         "跨市場",
-        "0050.TW",
-        "K817"
+        "0050.TW"
       ],
       "length_chars": 2426,
       "thumbnail_url": null
@@ -5361,8 +6038,7 @@
         "GJR-GARCH",
         "SPY",
         "DM-test",
-        "Harvey-2016",
-        "K799"
+        "Harvey-2016"
       ],
       "length_chars": 4279,
       "thumbnail_url": null
@@ -5632,8 +6308,7 @@
         "波動率",
         "投資策略",
         "SPY",
-        "GARCH",
-        "K772"
+        "GARCH"
       ],
       "length_chars": 2250,
       "thumbnail_url": null
@@ -5648,7 +6323,6 @@
       "tags": [
         "每日建議",
         "持倉建議",
-        "daily-update",
         "12/VIX",
         "SPY",
         "GLD",
@@ -5666,6 +6340,7 @@
       "category": "milestone",
       "status": "published",
       "tags": [
+        "研究",
         "MEM",
         "AMEM",
         "HAR",
@@ -5676,8 +6351,7 @@
         "0050.TW",
         "波動率預測",
         "方法論",
-        "自我修正",
-        "研究"
+        "自我修正"
       ],
       "length_chars": 5800,
       "thumbnail_url": null
@@ -5739,8 +6413,7 @@
         "信用利差",
         "VIX",
         "風險管理",
-        "早期預警",
-        "K766"
+        "早期預警"
       ],
       "length_chars": 2490,
       "thumbnail_url": null
@@ -5761,8 +6434,7 @@
         "波動率預測",
         "SPY",
         "GLD",
-        "0050.TW",
-        "K764"
+        "0050.TW"
       ],
       "length_chars": 3189,
       "thumbnail_url": null
@@ -5821,8 +6493,7 @@
         "SPY",
         "跨境投資",
         "0050",
-        "GLD",
-        "K758"
+        "GLD"
       ],
       "length_chars": 2712,
       "thumbnail_url": null
@@ -5904,8 +6575,7 @@
         "傳染效應",
         "加密貨幣",
         "SPY",
-        "BTC",
-        "K746b"
+        "BTC"
       ],
       "length_chars": 2477,
       "thumbnail_url": null
@@ -5948,8 +6618,7 @@
         "VIX",
         "波動率",
         "恐慌",
-        "SPY",
-        "K754"
+        "SPY"
       ],
       "length_chars": 2122,
       "thumbnail_url": null
@@ -5969,8 +6638,6 @@
         "GARCH",
         "波動率預測",
         "SPY",
-        "K744",
-        "K745",
         "實現波動率"
       ],
       "length_chars": 5467,
@@ -5990,8 +6657,7 @@
         "投資策略",
         "群眾效應",
         "SPY",
-        "VIX",
-        "K742"
+        "VIX"
       ],
       "length_chars": 2549,
       "thumbnail_url": null
@@ -6101,8 +6767,7 @@
         "50/50",
         "投資組合",
         "SPY",
-        "GLD",
-        "K747"
+        "GLD"
       ],
       "length_chars": 5959,
       "thumbnail_url": null
@@ -6176,7 +6841,6 @@
       "tags": [
         "每日建議",
         "持倉建議",
-        "daily-update",
         "12/VIX",
         "SPY",
         "GLD",
@@ -7003,7 +7667,6 @@
         "台股",
         "台積電",
         "事件研究",
-        "K617",
         "0050.TW",
         "2330.TW",
         "波動率"
@@ -7044,9 +7707,7 @@
         "事件研究",
         "0050.TW",
         "波動率",
-        "法說會",
-        "K512",
-        "K513"
+        "法說會"
       ],
       "length_chars": 3387,
       "thumbnail_url": null
@@ -7183,9 +7844,7 @@
         "槓桿",
         "VIX",
         "0050",
-        "波動率管理",
-        "K553",
-        "K558"
+        "波動率管理"
       ],
       "length_chars": 2981,
       "thumbnail_url": null
@@ -7204,11 +7863,7 @@
         "VIX",
         "波動率",
         "SPY",
-        "GLD",
-        "K548",
-        "K551",
-        "K574",
-        "K577"
+        "GLD"
       ],
       "length_chars": 4178,
       "thumbnail_url": null
@@ -7224,7 +7879,6 @@
         "一般讀者",
         "保守",
         "風險管理",
-        "K569",
         "Piecewise"
       ],
       "length_chars": 2243,
@@ -7241,7 +7895,6 @@
         "研究",
         "12VIX",
         "最適化",
-        "K568",
         "VT策略"
       ],
       "length_chars": 2294,
@@ -7257,9 +7910,7 @@
       "tags": [
         "一般讀者",
         "槓桿",
-        "VIX",
-        "K548",
-        "K551"
+        "VIX"
       ],
       "length_chars": 1854,
       "thumbnail_url": null
@@ -7308,7 +7959,6 @@
       "tags": [
         "每日建議",
         "持倉建議",
-        "daily-update",
         "12/VIX",
         "SPY",
         "GLD",
@@ -7554,7 +8204,6 @@
         "12/VIX",
         "暴力搜索",
         "簡單",
-        "K524",
         "第100實驗"
       ],
       "length_chars": 2463,
@@ -7646,8 +8295,7 @@
         "波動率",
         "SPY",
         "VIX",
-        "總體經濟",
-        "K513"
+        "總體經濟"
       ],
       "length_chars": 3917,
       "thumbnail_url": null
@@ -7662,7 +8310,6 @@
       "tags": [
         "每日建議",
         "持倉建議",
-        "daily-update",
         "12/VIX",
         "SPY",
         "GLD",
@@ -7706,8 +8353,7 @@
         "NFP",
         "事件",
         "波動率",
-        "SPY",
-        "K513"
+        "SPY"
       ],
       "length_chars": 2304,
       "thumbnail_url": null
@@ -7811,7 +8457,6 @@
       "status": "published",
       "tags": [
         "研究",
-        "K500",
         "回顧",
         "方法論",
         "119實驗"
@@ -7983,9 +8628,7 @@
         "SPY",
         "陳婉淑",
         "Bayesian",
-        "lead-lag",
-        "K433",
-        "K461"
+        "lead-lag"
       ],
       "length_chars": 5457,
       "thumbnail_url": null
@@ -8133,8 +8776,7 @@
         "一般讀者",
         "波動率",
         "資產配置",
-        "投資組合",
-        "K383"
+        "投資組合"
       ],
       "length_chars": 2120,
       "thumbnail_url": null
@@ -8150,9 +8792,7 @@
         "研究",
         "波動率",
         "期限結構",
-        "可預測性",
-        "K365",
-        "K366"
+        "可預測性"
       ],
       "length_chars": 1940,
       "thumbnail_url": null
@@ -8167,7 +8807,6 @@
       "tags": [
         "每日建議",
         "持倉建議",
-        "daily-update",
         "12/VIX",
         "SPY",
         "GLD",
@@ -8188,8 +8827,7 @@
         "一般讀者",
         "波動率",
         "散戶",
-        "槓桿效應",
-        "K392"
+        "槓桿效應"
       ],
       "length_chars": 1525,
       "thumbnail_url": null
@@ -8477,7 +9115,6 @@
       "status": "published",
       "tags": [
         "研究",
-        "一般讀者",
         "效率市場",
         "資產配置",
         "投資策略"
@@ -8494,7 +9131,6 @@
       "status": "published",
       "tags": [
         "研究",
-        "一般讀者",
         "VIX",
         "因果推論",
         "風險管理"
@@ -8544,7 +9180,6 @@
       "tags": [
         "每日建議",
         "持倉建議",
-        "daily-update",
         "12/VIX",
         "SPY",
         "GLD",
@@ -8614,8 +9249,7 @@
       "tags": [
         "一般讀者",
         "資產配置",
-        "投資組合",
-        "研究"
+        "投資組合"
       ],
       "length_chars": 627,
       "thumbnail_url": null
@@ -8630,8 +9264,7 @@
       "tags": [
         "一般讀者",
         "策略",
-        "統計",
-        "研究"
+        "統計"
       ],
       "length_chars": 694,
       "thumbnail_url": null
@@ -8833,12 +9466,12 @@
       "category": "general",
       "status": "published",
       "tags": [
+        "一般讀者",
         "FOMC",
         "VIX",
         "波動率",
         "聯準會",
-        "事件研究",
-        "一般讀者"
+        "事件研究"
       ],
       "length_chars": 2913,
       "thumbnail_url": null
@@ -8851,11 +9484,11 @@
       "category": "general",
       "status": "published",
       "tags": [
+        "一般讀者",
         "VIX",
         "SKEW",
         "波動率",
-        "風險指標",
-        "一般讀者"
+        "風險指標"
       ],
       "length_chars": 2310,
       "thumbnail_url": null
@@ -8868,11 +9501,11 @@
       "category": "general",
       "status": "published",
       "tags": [
+        "一般讀者",
         "volatility",
         "GARCH",
         "HAR",
-        "模型比較",
-        "一般讀者"
+        "模型比較"
       ],
       "length_chars": 2217,
       "thumbnail_url": null
@@ -8947,7 +9580,6 @@
       "tags": [
         "每日建議",
         "持倉建議",
-        "daily-update",
         "12/VIX",
         "SPY",
         "GLD",
@@ -8965,8 +9597,8 @@
       "category": "general",
       "status": "published",
       "tags": [
-        "再平衡",
         "一般讀者",
+        "再平衡",
         "50/50",
         "SPY",
         "GLD",
@@ -9002,9 +9634,9 @@
       "category": "general",
       "status": "published",
       "tags": [
+        "一般讀者",
         "投資心理",
         "行為金融",
-        "一般讀者",
         "50/50",
         "VT",
         "無聊"
@@ -9038,10 +9670,10 @@
       "category": "general",
       "status": "published",
       "tags": [
+        "一般讀者",
         "BTC",
         "加密貨幣",
         "數位黃金",
-        "一般讀者",
         "投資策略",
         "分散投資"
       ],
@@ -9095,9 +9727,9 @@
       "category": "general",
       "status": "published",
       "tags": [
+        "一般讀者",
         "投資心理",
         "drawdown",
-        "一般讀者",
         "50/50",
         "VT",
         "誠實揭露"
@@ -9211,10 +9843,10 @@
       "category": "general",
       "status": "published",
       "tags": [
+        "一般讀者",
         "50/50",
         "SPY",
         "GLD",
-        "一般讀者",
         "進場時機",
         "投資策略"
       ],
@@ -9268,8 +9900,8 @@
       "category": "general",
       "status": "published",
       "tags": [
-        "投資策略",
         "一般讀者",
+        "投資策略",
         "VIX",
         "regime",
         "50/50",
@@ -9327,11 +9959,11 @@
       "category": "general",
       "status": "published",
       "tags": [
+        "一般讀者",
         "台灣",
         "0050",
         "GLD",
         "VT",
-        "一般讀者",
         "投資策略",
         "懶人包"
       ],
@@ -9366,10 +9998,10 @@
       "category": "general",
       "status": "published",
       "tags": [
+        "一般讀者",
         "台灣",
         "0050",
         "TSMC",
-        "一般讀者",
         "投資策略",
         "分散投資"
       ],
@@ -9444,11 +10076,11 @@
       "category": "general",
       "status": "published",
       "tags": [
+        "一般讀者",
         "投資策略",
         "50/50",
         "GLD",
         "SPY",
-        "一般讀者",
         "黃金",
         "配置"
       ],
@@ -9601,9 +10233,9 @@
       "category": "general",
       "status": "published",
       "tags": [
+        "一般讀者",
         "投資策略",
         "系統性風險",
-        "一般讀者",
         "CoVaR",
         "SPY",
         "QQQ",
@@ -9726,13 +10358,12 @@
       "category": "general",
       "status": "published",
       "tags": [
-        "投資策略",
         "一般讀者",
+        "投資策略",
         "EWMA",
         "Excel",
         "波動率管理",
-        "retail",
-        "general"
+        "retail"
       ],
       "length_chars": 2591,
       "thumbnail_url": null
@@ -9745,14 +10376,13 @@
       "category": "general",
       "status": "published",
       "tags": [
-        "投資策略",
         "一般讀者",
+        "投資策略",
         "60/40",
         "SPY",
         "GLD",
         "TLT",
-        "portfolio",
-        "general"
+        "portfolio"
       ],
       "length_chars": 1923,
       "thumbnail_url": null
@@ -9823,8 +10453,7 @@
         "behavioral-finance",
         "loss-aversion",
         "volatility-targeting",
-        "retail-investing",
-        "general"
+        "retail-investing"
       ],
       "length_chars": 1349,
       "thumbnail_url": null
@@ -10060,7 +10689,6 @@
       "status": "published",
       "tags": [
         "研究",
-        "research",
         "geopolitical",
         "vix",
         "volatility",
@@ -10134,10 +10762,10 @@
       "category": "general",
       "status": "published",
       "tags": [
+        "一般讀者",
         "VT策略",
         "FAQ",
         "投資策略",
-        "一般讀者",
         "完整指南",
         "VIX"
       ],
@@ -10202,8 +10830,7 @@
         "台灣",
         "實戰指南",
         "VIX",
-        "投資教學",
-        "general"
+        "投資教學"
       ],
       "length_chars": 5508,
       "thumbnail_url": null
@@ -10237,11 +10864,11 @@
       "category": "general",
       "status": "published",
       "tags": [
+        "一般讀者",
         "retirement",
         "4%_rule",
         "VT策略",
         "投資策略",
-        "一般讀者",
         "退休金",
         "Monte_Carlo",
         "序列風險",
@@ -10331,7 +10958,6 @@
         "DCA",
         "retirement",
         "BTC",
-        "K78",
         "general-reader"
       ],
       "length_chars": 5056,
@@ -10594,12 +11220,12 @@
       "category": "general",
       "status": "published",
       "tags": [
+        "一般讀者",
         "50/50",
         "SPY",
         "GLD",
         "VT策略",
         "投資組合",
-        "一般讀者",
         "audience=general",
         "黃金",
         "風險管理"
@@ -10677,11 +11303,11 @@
       "category": "general",
       "status": "published",
       "tags": [
+        "一般讀者",
         "12/VIX",
         "VIX",
         "VT策略",
         "投資策略",
-        "一般讀者",
         "風險管理"
       ],
       "length_chars": 1489,
@@ -10717,11 +11343,11 @@
       "category": "general",
       "status": "published",
       "tags": [
+        "一般讀者",
         "VT策略",
         "趨勢交易",
         "風險管理",
         "VIX",
-        "一般讀者",
         "投資策略",
         "audience=general"
       ],
@@ -10778,7 +11404,6 @@
       "tags": [
         "每日建議",
         "持倉建議",
-        "daily-update",
         "12/VIX",
         "SPY",
         "GLD",
@@ -10798,7 +11423,6 @@
       "tags": [
         "每日建議",
         "持倉建議",
-        "daily-update",
         "12/VIX",
         "SPY",
         "GLD",
@@ -10818,7 +11442,6 @@
       "tags": [
         "每日建議",
         "持倉建議",
-        "daily-update",
         "12/VIX",
         "SPY",
         "GLD",
@@ -10921,6 +11544,7 @@
       "category": "general",
       "status": "published",
       "tags": [
+        "一般讀者",
         "市場分析",
         "私人信貸",
         "VIX",
@@ -10930,8 +11554,7 @@
         "SPY",
         "GLD",
         "MOVE",
-        "Morgan Stanley",
-        "一般讀者"
+        "Morgan Stanley"
       ],
       "length_chars": 3372,
       "thumbnail_url": null
@@ -11315,7 +11938,6 @@
       "tags": [
         "每日建議",
         "持倉建議",
-        "daily-update",
         "12/VIX",
         "SPY",
         "GLD",
@@ -11457,7 +12079,6 @@
       "status": "published",
       "tags": [
         "每日建議",
-        "daily-update",
         "12/VIX",
         "SPY",
         "GLD",
@@ -11587,9 +12208,9 @@
       "category": "general",
       "status": "published",
       "tags": [
+        "一般讀者",
         "VIX",
         "情緒指標",
-        "一般讀者",
         "Phase G"
       ],
       "length_chars": 2592,
@@ -11735,14 +12356,13 @@
       "category": "general",
       "status": "published",
       "tags": [
+        "一般讀者",
         "GLD",
         "gold",
         "market-update",
         "correlation",
         "hedge",
-        "2025",
-        "general",
-        "一般讀者"
+        "2025"
       ],
       "length_chars": 1172,
       "thumbnail_url": null
@@ -11755,6 +12375,7 @@
       "category": "general",
       "status": "published",
       "tags": [
+        "一般讀者",
         "Taiwan",
         "0050.TW",
         "0056.TW",
@@ -11762,8 +12383,6 @@
         "decision-tree",
         "VIX",
         "GLD",
-        "general",
-        "一般讀者",
         "portfolio"
       ],
       "length_chars": 1694,
@@ -11777,14 +12396,13 @@
       "category": "general",
       "status": "published",
       "tags": [
+        "一般讀者",
         "BTC",
         "Bitcoin",
         "correlation",
         "hedge",
         "GLD",
-        "portfolio",
-        "general",
-        "一般讀者"
+        "portfolio"
       ],
       "length_chars": 1088,
       "thumbnail_url": null
@@ -11837,13 +12455,12 @@
       "category": "general",
       "status": "published",
       "tags": [
+        "一般讀者",
         "TLT",
         "GLD",
         "hedge",
         "correlation",
         "structural-break",
-        "general",
-        "一般讀者",
         "portfolio"
       ],
       "length_chars": 1172,
@@ -11876,13 +12493,12 @@
       "category": "general",
       "status": "published",
       "tags": [
+        "一般讀者",
         "VIX",
         "MOVE",
         "credit-spread",
         "yield-curve",
-        "strategy",
-        "general",
-        "一般讀者"
+        "strategy"
       ],
       "length_chars": 1336,
       "thumbnail_url": null
@@ -11895,14 +12511,13 @@
       "category": "general",
       "status": "published",
       "tags": [
+        "一般讀者",
         "Taiwan",
         "0050.TW",
         "0056.TW",
         "SPY",
         "momentum",
-        "strategy",
-        "general",
-        "一般讀者"
+        "strategy"
       ],
       "length_chars": 1473,
       "thumbnail_url": null
