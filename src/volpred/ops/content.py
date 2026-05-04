@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
 
@@ -314,7 +315,11 @@ def release_pool_articles(
         # Supabase silently kept 'draft'. Capture the result so we can
         # surface failures via the released dict + heartbeat alerts can
         # detect divergence (status_synced=False).
-        sync_ok = sync_article(item, storage_dir=publisher.reports_dir.parent)
+        sync_ok = False
+        try:
+            sync_ok = bool(sync_article(item, storage_dir=publisher.reports_dir.parent))
+        except Exception as exc:
+            print(f"  [release_pool] sync_article exception for {article_slug}: {exc}")
         released.append({
             "id": article_slug,
             "title": item.get("title"),
@@ -323,9 +328,22 @@ def release_pool_articles(
             "supabase_synced": bool(sync_ok),
         })
         if not sync_ok:
+            # 2026-05-04 finding #9 修整：sync_article 失敗必寫
+            # `.failed_supabase_syncs.json`，否則 alerts.py 的
+            # `_parse_supabase_sync_state` 抓不到 → silent gap K1021 pattern。
+            # 與 publisher.publish_milestone path 同一機制（
+            # src/volpred/publisher/publisher.py:484-501）。
+            failed_path = publisher.reports_dir.parent / ".failed_supabase_syncs.json"
+            try:
+                failed = json.loads(failed_path.read_text()) if failed_path.exists() else []
+            except Exception:
+                failed = []
+            if article_slug not in failed:
+                failed.append(article_slug)
+                failed_path.write_text(json.dumps(failed))
             print(
                 f"  [release_pool] WARN Supabase sync failed for {article_slug} -- "
-                f"local feed.json shows published but Supabase status may diverge. "
+                f"recorded to .failed_supabase_syncs.json. "
                 f"Run scripts/supabase_sync.py sync-article {article_slug} to retry."
             )
         # Auto-mark linked questions as answered now that article is published

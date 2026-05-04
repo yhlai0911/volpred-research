@@ -638,6 +638,18 @@ class Publisher:
                 with open(tmp_file) as f:
                     json.load(f)
                 tmp_file.replace(self._feed_file)
+                # Read-back verification: confirm record_id 真的在 persisted feed 裡
+                # （2026-05-04 finding #8 修整：tmp_file.replace 雖是 atomic rename，
+                # 但 disk fault / partial write / TOCTOU 仍可能讓 item 沒寫進去。
+                # K1021 同 pattern — write 回 success ≠ row 真寫入）
+                _record_id = item.get('id')
+                if _record_id:
+                    verify_feed = self._load_feed()
+                    if not any(rec.get("id") == _record_id for rec in verify_feed):
+                        raise RuntimeError(
+                            f"_append_to_feed read-back failed: id={_record_id} "
+                            f"not present in persisted feed (entries={len(verify_feed)})"
+                        )
                 self._sync_feed_to_remote()
         except Exception as exc:
             result_label = f"error: {type(exc).__name__}: {exc}"[:200]
