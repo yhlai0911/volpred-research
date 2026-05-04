@@ -93,6 +93,19 @@ def _auto_trigger_release_pool_if_due() -> dict:
     # so hourly checks at the interval boundary fire the release instead of
     # deferring to the next hourly check.
     if age_min < interval_min - 5:
+        # 2026-05-04 finding #18 修整：drift defensive log。
+        # 2026-04-19 incident: piggy-back 1.5s drift 致 age=119.985 < interval-3
+        # → not-due → 整輪 hour 跳過 → 實際 interval 變 180min（流量損失 33%）。
+        # tolerance 從 3→5 已修，但若 drift 累積至接近 tolerance edge
+        # （interval-7 ≤ age < interval-5）log warning，operator 可監控 drift
+        # 是否單調增長（symptom of cron schedule 與 interval 漂移）。
+        if age_min >= interval_min - 7:
+            print(
+                f"  [release_pool drift-watch] near-tolerance: "
+                f"expected_interval={interval_min}min actual_age={age_min:.1f}min "
+                f"gap_to_tolerance={interval_min - 5 - age_min:.1f}min — "
+                f"check if drift accumulates across hourly fires"
+            )
         return {"triggered": False, "reason": f"interval_not_due_age={age_min:.0f}min"}
 
     # Due: attempt release via CLI. Use non-blocking subprocess to avoid
