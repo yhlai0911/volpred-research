@@ -47,22 +47,22 @@ Last updated: **2026-05-04 (system audit + 4-phase improvement plan)**
 
 對應 Mission 5 條目標 priority：(1)文章 + (4)網頁 ← sync robustness；(2)實驗 ← skill references；(3)論文 ← paper workflow 整潔；(5)流量 ← 由 1+4 derived。
 
-#### Phase 1（in-flight，commit-safe，主線程立即執行）
+#### Phase 1（commit-safe，已完成）
 
-- [x] B1.1: `scripts/continue_task_dispatch.py` slot-aware report + candidate list（已寫 + dry-run pass）
-- [x] B1.2: `scripts/cron_continue_task_stub.sh` 補 call dispatch.py（既有 stub.py + 新 dispatch.py double pipe）
-- [x] B1.3: in-process CronCreate replace stale `/loop` heartbeat（id 3e643940 hourly :17）
-- [ ] B1.4: 寫 `docs/error_log.md` entry「2026-05-04 工作池 auto-fill 全鏈路斷裂」
-- [ ] B1.5: commit Phase 1 (dispatch.py + cron stub + this plan + error_log entry)
+- [x] B1.1: `scripts/continue_task_dispatch.py` slot-aware report + candidate list — commit `00bbce4e`
+- [x] B1.2: `scripts/cron_continue_task_stub.sh` 補 call dispatch.py — commit `00bbce4e`
+- [x] B1.3: in-process CronCreate replace stale `/loop` heartbeat（id 3e643940 hourly :17）— session-only
+- [x] B1.4: `docs/error_log.md` 「2026-05-04 工作池 auto-fill 全鏈路斷裂」entry — commit `00bbce4e`
+- [x] B1.5: commit Phase 1 — `00bbce4e`
 
 #### Phase 2（中度修整，commit batch）
 
-- [ ] B2.1: `scripts/sync_next_tasks_status.py` — 從 experiments/<id>/results.json + knowledge.json 反查，把 next_tasks 已完成 K 標 succeeded（解 #13）
-- [ ] B2.2: `scripts/check_skills_complete.sh` — weekly audit skill SKILL.md 存在 + frontmatter valid + reference path 存在（解 #16）
-- [ ] B2.3: `publisher.py` 加 post-write read-back sanity check（解 #8）
-- [ ] B2.4: `content.py::release_pool_articles` 接收 `sync_article` 回傳 + 失敗寫 pending_syncs.json + 觸 alert（解 #9）
-- [ ] B2.5: event_ledger GC：跑 `uv run volpred ops gc-event-ledger` 清過期 4 個 event_jobs（解 #14）
-- [ ] B2.6: 補 `tests/test_email_notifier.py` + `tests/test_event_jobs.py` 完整 fixture（解 #10）
+- [x] B2.1: `scripts/sync_next_tasks_status.py` — 從 experiments/<id>/README.md 反查，把 next_tasks 已完成 K 標 succeeded（解 #13）— commit `51c8f4a2`，K1125 已標 succeeded_null_result
+- [x] B2.2: `scripts/check_skills_complete.sh` — audit skill SKILL.md + reference paths（解 #16）— commit `9f6e5045`，4 dead refs 修（paper-review-cycle .agents→.claude × 3, external-data-sources 移除 missing taiwan-macro-data 提及）
+- [x] B2.3: `publisher.py::_append_to_feed` 加 post-write read-back（解 #8）— commit `bb0e3705`
+- [x] B2.4: `content.py::release_pool_articles` sync_article 失敗寫 `.failed_supabase_syncs.json` 觸 alert（解 #9）— commit `bb0e3705`
+- [x] B2.5: `gc_event_ledger` verified no-op — 機制 work，gc_after=deadline+7d 是設計（4 個 expired event_jobs 5-7/5-9 才該清，今 5-4 不該動，is finding #14 over-warning）
+- [ ] B2.6: 補 `tests/test_email_notifier.py` + `tests/test_event_jobs.py` 完整 fixture（解 #10）— 留下批 commit
 
 #### Phase 3（架構級，需 review，分批 commit）
 
