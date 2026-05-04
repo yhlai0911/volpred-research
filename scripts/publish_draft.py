@@ -72,19 +72,56 @@ def parse_draft(path: Path) -> dict:
         raise SystemExit(f"error: no YAML frontmatter in {path}")
     fm_block, body = m.group(1), m.group(2).lstrip()
 
-    fm = {}
-    for line in fm_block.splitlines():
-        if ":" in line and not line.lstrip().startswith("#"):
+    # Manual two-pass YAML parse: scalar `key: value` pairs + multi-line
+    # list form `key:\n  - item1\n  - item2`. PyYAML would be cleaner but
+    # we keep the script dependency-light.
+    fm: dict[str, object] = {}
+    lines = fm_block.splitlines()
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        if not line.strip() or line.lstrip().startswith("#"):
+            i += 1
+            continue
+        if ":" in line:
             k, _, v = line.partition(":")
-            fm[k.strip()] = v.strip().strip('"').strip("'")
+            key = k.strip()
+            val = v.strip().strip('"').strip("'")
+            if val:
+                fm[key] = val
+                i += 1
+                continue
+            # Empty value → look ahead for `  - item` lines
+            collected: list[str] = []
+            j = i + 1
+            while j < len(lines):
+                nxt = lines[j]
+                stripped = nxt.lstrip()
+                if stripped.startswith("- "):
+                    collected.append(stripped[2:].strip().strip('"').strip("'"))
+                    j += 1
+                elif not nxt.strip():
+                    j += 1
+                else:
+                    break
+            if collected:
+                fm[key] = collected
+            i = j
+        else:
+            i += 1
 
-    tags_raw = fm.get("tags", "[]").strip("[]")
-    tags = [t.strip().strip('"').strip("'") for t in tags_raw.split(",") if t.strip()]
+    def _list_from(field: str) -> list[str]:
+        v = fm.get(field, [])
+        if isinstance(v, list):
+            return v
+        # Inline form: "[a, b, c]"
+        s = str(v).strip().strip("[]")
+        return [t.strip().strip('"').strip("'") for t in s.split(",") if t.strip()]
+
+    tags = _list_from("tags")
     # Drop any K-id tags — publisher auto-extracts to details.experiment_refs
     tags = [t for t in tags if not re.match(r"^K\d", t)]
-
-    refs_raw = fm.get("experiment_refs", "[]").strip("[]")
-    refs = [r.strip().strip('"').strip("'") for r in refs_raw.split(",") if r.strip()]
+    refs = _list_from("experiment_refs")
 
     return {
         "title": fm.get("title", "").strip('"').strip("'"),
