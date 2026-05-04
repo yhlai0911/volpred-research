@@ -1198,8 +1198,8 @@
   },
   {
     "id": "K547_lookahead_audit_fix",
-    "title": "K547 + K561 + sibling: lookahead audit sweep — same `signal × same-day return` pattern across switching/timing strategies",
-    "description": "Two confirmed cases (K547 L280 weights*spy_ret no shift; K561 L90-256 VIX/TNX/GLD/TLT.iloc[i] × returns[*].iloc[i] no shift) suggest pattern. Need: (1) grep `\\biloc\\[i\\]\\s*\\*\\b` and `weights\\s*\\*\\s*\\w*ret` across all experiments/k*.py to enumerate suspects; (2) for each: rerun with lag fix; (3) for negative-direction results (K547/K561), update results.json magnitudes but article direction stays valid (lookahead inflates strategy → removing inflates against strategy → null gets MORE null); (4) for any positive-direction K, halt + reassess; (5) update mile_53983530 (K547) and K561 article post-fix as needed.",
+    "title": "K547 + K561 + K570 + sibling: lookahead audit sweep — same-day weights*ret pattern across switching/timing strategies",
+    "description": "Three confirmed cases (2026-05-04 article batch flagged):\n  K547 L280 port_ret = weights * spy_ret (no shift)\n  K561 L90-256 prices.iloc[i]-based switching × returns.iloc[i] (no shift)\n  K570 L200 port_ret = weights * simple_ret (no shift)\nPattern: same-day weight × same-day return. Need: (1) grep `weights\\s*\\*\\s*\\w*ret` and `iloc\\[i\\]\\s*\\*\\b` across all experiments/k*.py; (2) for each suspect: rerun with .shift(1) on weights side; (3) all 3 confirmed cases have null/negative direction → removing lookahead inflates AGAINST the strategy → null gets MORE null → article direction stays robust BUT magnitudes need rerun before any errata; (4) for direction-positive K's discovered, halt + reassess; (5) update mile_53983530/mile_0bdb89aa/mile_<K570> as needed.",
     "priority": 2,
     "status": "pending",
     "task_type": "experiment",
@@ -1213,7 +1213,7 @@
     ],
     "created_at": "2026-05-04T11:28:31+00:00",
     "related_artifact": "K547 mile_53983530 + K561 mile_just_published",
-    "updated_at": "2026-05-04T11:39:59+00:00"
+    "updated_at": "2026-05-04T13:29:07+00:00"
   },
   {
     "id": "K1032_article_general",
@@ -1261,6 +1261,71 @@
       "audience-general"
     ],
     "created_at": "2026-05-04T12:24:22+00:00",
+    "completed_at": "2026-05-04"
+  },
+  {
+    "id": "K570_article_general",
+    "title": "K570: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K570 has verdict signal (score=3, reasons=None) but no general article. Verdict preview: ",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K570",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "created_at": "2026-05-04T13:25:26+00:00",
+    "completed_at": "2026-05-04",
+    "completion_note": "lookahead pattern (3rd occurrence) flagged — added to K547 audit sweep"
+  },
+  {
+    "id": "K592_article_general",
+    "title": "K592: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K592 has verdict signal (score=3, reasons=None) but no general article. Verdict preview: ",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K592",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "created_at": "2026-05-04T13:25:26+00:00",
+    "completed_at": "2026-05-04"
+  },
+  {
+    "id": "K620_article_general",
+    "title": "K620: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K620 has verdict signal (score=3, reasons=None) but no general article. Verdict preview: ",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K620",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "created_at": "2026-05-04T13:25:26+00:00",
+    "completed_at": "2026-05-04"
+  },
+  {
+    "id": "K629_article_general",
+    "title": "K629: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K629 has verdict signal (score=3, reasons=None) but no general article. Verdict preview: ",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K629",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "created_at": "2026-05-04T13:25:26+00:00",
     "completed_at": "2026-05-04"
   }
 ]
