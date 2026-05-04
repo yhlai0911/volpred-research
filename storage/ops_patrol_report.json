@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-04T06:33:35Z",
+  "timestamp": "2026-05-04T12:16:40Z",
   "all_ok": false,
   "checks": [
     {
@@ -10,7 +10,7 @@
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json age: ~30.2 hours (mtime=1777767641, now=1777876389, delta=108748s, threshold 26h=93600s). STALE."
+      "detail": "storage/strategy_metrics.json age: ~35.9 hours (mtime=1777767641, now=1777896966, delta=129325s, threshold 26h=93600s). STALE."
     },
     {
       "name": "ERROR_LOG",
@@ -20,7 +20,7 @@
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "storage/paper_trading.json uses flat dict structure (one current-state entry per strategy, not a time-series list). The 'last 3 entries >2 nulls' check requires list format — structurally cannot trigger. Strategies found: slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, _market_daily, adaptive_tier. No alert raised."
+      "detail": "15 strategies checked (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, _market_daily, adaptive_tier). Each has exactly 1 null in last 3 entries — consistent with most-recent trading day pending settlement. Max nulls=1, threshold=2. No alert."
     },
     {
       "name": "GIT_STATUS",
@@ -36,6 +36,6 @@
   "alerts": [
     "article pool low (<12): total drafts=6 (research=4, general=2)",
     "general audience pool low (<8): general_drafts=2",
-    "metrics stale: strategy_metrics.json ~30.2h old (>26h threshold)"
+    "metrics stale: strategy_metrics.json ~35.9h old (>26h threshold)"
   ]
 }
