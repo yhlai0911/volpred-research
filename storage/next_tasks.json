@@ -1148,7 +1148,7 @@
     "title": "K561: write general-audience article (auto-discovered uncovered K)",
     "description": "K K561 has verdict signal (score=3, reasons=None) but no general article. Verdict preview: ",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K561",
@@ -1156,14 +1156,16 @@
       "auto-discovered",
       "audience-general"
     ],
-    "created_at": "2026-05-04T10:24:23+00:00"
+    "created_at": "2026-05-04T10:24:23+00:00",
+    "completed_at": "2026-05-04",
+    "completion_note": "lookahead bug confirmed (signal × same-day return); direction robust (NEGATIVE strengthens with lag fix)"
   },
   {
     "id": "K1067_article_general",
     "title": "K1067: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1067 has verdict signal (score=9, reasons=None) but no general article. Verdict preview: ",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1067",
@@ -1171,7 +1173,9 @@
       "auto-discovered",
       "audience-general"
     ],
-    "created_at": "2026-05-04T10:43:22+00:00"
+    "created_at": "2026-05-04T10:43:22+00:00",
+    "completed_at": "2026-05-04",
+    "completion_note": "TSMC single-stock H_vix vs H_div NULL — distinct from K1067E/F mile_24f14e42 (cross-market channel-independence). Agent confirmed topic non-overlap."
   },
   {
     "id": "K957_article_general",
@@ -1190,8 +1194,8 @@
   },
   {
     "id": "K547_lookahead_audit_fix",
-    "title": "K547: lookahead bug fix — port_ret = weights * spy_ret needs .shift(1) on weights",
-    "description": "K547 script L280 `port_ret = weights * spy_ret` directly applies same-day weights to same-day SPY return without shift(1). Confirmed during 2026-05-04 K547 article writing (agent flagged, main thread verified). Fix: weights.shift(1) * spy_ret per .claude/rules/experiments.md lookahead protection. Re-run all 5 strategies (Daily VT, ToM Enhanced, ToM Aggressive, ToM DualFreq, BH). Direction (ToM dead) likely robust per agent bootstrap; magnitudes may revise. Update results.json + flag article mile_53983530 as 'numbers TBD' or revise after rerun. Main thread (NOT agent): need to also audit other K-experiments using same `weights * ret` pattern (sibling K-ids in TOM family).",
+    "title": "K547 + K561 + sibling: lookahead audit sweep — same `signal × same-day return` pattern across switching/timing strategies",
+    "description": "Two confirmed cases (K547 L280 weights*spy_ret no shift; K561 L90-256 VIX/TNX/GLD/TLT.iloc[i] × returns[*].iloc[i] no shift) suggest pattern. Need: (1) grep `\\biloc\\[i\\]\\s*\\*\\b` and `weights\\s*\\*\\s*\\w*ret` across all experiments/k*.py to enumerate suspects; (2) for each: rerun with lag fix; (3) for negative-direction results (K547/K561), update results.json magnitudes but article direction stays valid (lookahead inflates strategy → removing inflates against strategy → null gets MORE null); (4) for any positive-direction K, halt + reassess; (5) update mile_53983530 (K547) and K561 article post-fix as needed.",
     "priority": 2,
     "status": "pending",
     "task_type": "experiment",
@@ -1204,14 +1208,15 @@
       "main-thread-only"
     ],
     "created_at": "2026-05-04T11:28:31+00:00",
-    "related_artifact": "mile_53983530 (K547 article — direction robust, magnitudes pending rerun)"
+    "related_artifact": "K547 mile_53983530 + K561 mile_just_published",
+    "updated_at": "2026-05-04T11:39:59+00:00"
   },
   {
     "id": "K1032_article_general",
     "title": "K1032: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1032 has verdict signal (score=6, reasons=None) but no general article. Verdict preview: ",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1032",
@@ -1219,14 +1224,15 @@
       "auto-discovered",
       "audience-general"
     ],
-    "created_at": "2026-05-04T11:34:25+00:00"
+    "created_at": "2026-05-04T11:34:25+00:00",
+    "completed_at": "2026-05-04"
   },
   {
     "id": "K1080_article_general",
     "title": "K1080: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1080 has verdict signal (score=6, reasons=None) but no general article. Verdict preview: ",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1080",
@@ -1234,6 +1240,7 @@
       "auto-discovered",
       "audience-general"
     ],
-    "created_at": "2026-05-04T11:34:25+00:00"
+    "created_at": "2026-05-04T11:34:25+00:00",
+    "completed_at": "2026-05-04"
   }
 ]
