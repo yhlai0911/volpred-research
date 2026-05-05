@@ -1,41 +1,52 @@
 {
-  "timestamp": "2026-05-05T06:05:27Z",
+  "timestamp": "2026-05-05T12:15:36Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "Total drafts: 6 (threshold <12, ALERT). By audience: research=4 (meets minimum of 4, OK), general=2 (threshold <8, ALERT)."
+      "detail": "total_drafts=6, research=4, general=2",
+      "alerts": [
+        "article pool low (<12)",
+        "general audience drafts low (<8): 2"
+      ]
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json age: ~53.7 hours (mtime=1777767641, now=1777961082, delta=193441s, threshold 26h=93600s). STALE."
+      "detail": "age=59.9h",
+      "alerts": [
+        "metrics stale (59.9h old)"
+      ]
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated 2026-05-05 (today) or 2026-05-04 (yesterday) in last 30 lines. Most recent entries are 2026-04-26: (1) universal piggy-back scheduler fix; (2) lancedb list_tables() shape-change false-positive fix; (3) member Q&A 5-day silent gap root cause; (4) Codex CLI gpt-5.5 400 error fallback."
+      "detail": "Last entries dated 2026-04-26; no entries from today (2026-05-05) or yesterday (2026-05-04)",
+      "recent_entries": []
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "Checked strategies: slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix. No strategy has >2 null portfolio_return in last 3 entries. No alert."
+      "detail": "14 active strategies, all have <=1 null in last 3 entries (0 entries for _market_daily). No strategy exceeds 2 nulls.",
+      "alerts": []
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold >50). Working tree clean."
+      "detail": "uncommitted_files=0",
+      "alerts": []
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json contains 2044 entries."
+      "detail": "entries=2044",
+      "alerts": []
     }
   ],
   "alerts": [
-    "article pool low (<12): total drafts=6 (research=4, general=2)",
-    "general audience pool low (<8): general_drafts=2",
-    "metrics stale: strategy_metrics.json ~53.7h old (>26h threshold)"
+    "article pool low (<12)",
+    "general audience drafts low (<8): 2",
+    "metrics stale (59.9h old)"
   ]
 }
