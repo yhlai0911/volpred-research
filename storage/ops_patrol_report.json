@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-05T00:10:27Z",
+  "timestamp": "2026-05-05T06:05:27Z",
   "all_ok": false,
   "checks": [
     {
@@ -10,7 +10,7 @@
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json age: ~47.8 hours (mtime=1777767641, now=1777939754, delta=172113s, threshold 26h=93600s). STALE."
+      "detail": "storage/strategy_metrics.json age: ~53.7 hours (mtime=1777767641, now=1777961082, delta=193441s, threshold 26h=93600s). STALE."
     },
     {
       "name": "ERROR_LOG",
@@ -20,7 +20,7 @@
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "14 active strategies checked (_market_daily is date-keyed market data, skipped). No strategy has >2 nulls in last 3 portfolio_return entries. Max nulls=1 per strategy. No alert."
+      "detail": "Checked strategies: slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix. No strategy has >2 null portfolio_return in last 3 entries. No alert."
     },
     {
       "name": "GIT_STATUS",
@@ -36,6 +36,6 @@
   "alerts": [
     "article pool low (<12): total drafts=6 (research=4, general=2)",
     "general audience pool low (<8): general_drafts=2",
-    "metrics stale: strategy_metrics.json ~47.8h old (>26h threshold)"
+    "metrics stale: strategy_metrics.json ~53.7h old (>26h threshold)"
   ]
 }
