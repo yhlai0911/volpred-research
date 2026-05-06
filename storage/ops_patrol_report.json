@@ -1,16 +1,16 @@
 {
-  "timestamp": "2026-05-06T06:10:43Z",
+  "timestamp": "2026-05-06T12:05:47Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "total_drafts=6 (threshold <12 ALERT); research=4 (>=4 OK); general=2 (<8 ALERT). All 6 drafts are category=milestone."
+      "detail": "total_drafts=6 (threshold <12 ALERT); research=4 (>=4 OK); general=2 (<8 ALERT)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json mtime=1777767641, age=280168s (~77.8h) > 26h threshold. Metrics stale."
+      "detail": "storage/strategy_metrics.json mtime=1777767641, age=301476s (~83.7h) > 26h threshold. Metrics stale."
     },
     {
       "name": "ERROR_LOG",
@@ -20,7 +20,7 @@
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "15 strategies checked (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, _market_daily, adaptive_tier). All have null_count=0 in last 3 entries."
+      "detail": "15 strategies checked. All have null_count<=1 in last 3 entries; no strategy exceeds threshold >2."
     },
     {
       "name": "GIT_STATUS",
@@ -36,6 +36,6 @@
   "alerts": [
     "article pool low (<12): currently 6 draft articles",
     "general audience pool low (<8): currently 2 general audience drafts",
-    "metrics stale: strategy_metrics.json is ~77.8h old (threshold 26h)"
+    "metrics stale: strategy_metrics.json is ~83.7h old (threshold 26h)"
   ]
 }
