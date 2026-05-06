@@ -1,41 +1,41 @@
 {
-  "timestamp": "2026-05-06T12:05:47Z",
+  "timestamp": "2026-05-06T18:05:41.208011Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "total_drafts=6 (threshold <12 ALERT); research=4 (>=4 OK); general=2 (<8 ALERT)."
+      "detail": "Total drafts: 6 | research: 4 | general: 2 | ALERTS: article pool low: 6 drafts total (< 12 threshold); general audience articles low: 2 drafts (< 8)"
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json mtime=1777767641, age=301476s (~83.7h) > 26h threshold. Metrics stale."
+      "detail": "strategy_metrics.json age: 89.7 hours (> 26h threshold)"
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Last entries in docs/error_log.md dated 2026-04-26. No entries from today (2026-05-06) or yesterday (2026-05-05). Recent lessons: lancedb list_tables() API shape change fix, member Q&A 5-day gap root cause, Codex CLI gpt-5.5 400 error."
+      "detail": "No entries dated today (2026-05-06) or yesterday (2026-05-05). Most recent entries from 2026-04-26: 2026-04-26: knowledge-index-summary status=broken false positive — lancedb list_tables() API shape changed; fixed with try-open-or-fail pattern | 2026-04-26: Member Q&A 5-day silent gap — q 29cbeb5c stuck in evaluating; fixed cron prompt + alert coverage"
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "15 strategies checked. All have null_count<=1 in last 3 entries; no strategy exceeds threshold >2."
+      "detail": "15 strategies checked; none have >2 null portfolio_return in last 3 entries"
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "uncommitted_files=0 (threshold 50). Working tree clean."
+      "detail": "0 uncommitted files"
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json entries=2044."
+      "detail": "knowledge.json contains 2044 entries"
     }
   ],
   "alerts": [
-    "article pool low (<12): currently 6 draft articles",
-    "general audience pool low (<8): currently 2 general audience drafts",
-    "metrics stale: strategy_metrics.json is ~83.7h old (threshold 26h)"
+    "article pool low: 6 drafts total (< 12 threshold)",
+    "general audience articles low: 2 drafts (< 8)",
+    "metrics stale: strategy_metrics.json is 89.7 hours old (> 26h)"
   ]
 }
