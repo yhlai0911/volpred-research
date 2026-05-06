@@ -1,0 +1,24 @@
+{
+  "timestamp": "2026-05-06T06:10:43Z",
+  "severity": "warning",
+  "alerts": [
+    {
+      "id": "article_pool_low",
+      "severity": "warning",
+      "message": "article pool low (<12): currently 6 draft articles",
+      "detail": "Total draft=6 < threshold 12. All 6 are category=milestone. Breakdown: research=4 (OK, threshold <4), general=2 (ALERT, threshold <8)."
+    },
+    {
+      "id": "general_audience_pool_low",
+      "severity": "warning",
+      "message": "general audience pool low (<8): currently 2 general audience drafts",
+      "detail": "general drafts=2, threshold=8. Need 6 more general-audience draft articles to meet minimum."
+    },
+    {
+      "id": "metrics_stale",
+      "severity": "warning",
+      "message": "metrics stale: strategy_metrics.json is ~77.8h old (>26h threshold)",
+      "detail": "storage/strategy_metrics.json last modified at unix=1777767641, current=1778047809, age=280168s (~77.8h). Exceeds 26h stale threshold."
+    }
+  ]
+}
