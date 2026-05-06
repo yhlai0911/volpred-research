@@ -1,0 +1,20 @@
+{
+  "timestamp": "2026-05-06T00:14:07Z",
+  "alerts": [
+    {
+      "type": "article_pool_low",
+      "severity": "warning",
+      "detail": "Total draft articles: 6, threshold: 12. Need 6 more drafts to reach minimum pool."
+    },
+    {
+      "type": "general_pool_low",
+      "severity": "warning",
+      "detail": "General audience drafts: 2, threshold: 8. Need 6 more general-audience drafts."
+    },
+    {
+      "type": "metrics_stale",
+      "severity": "warning",
+      "detail": "storage/strategy_metrics.json last updated 71.9 hours ago (threshold: 26 hours). Run strategy metrics refresh."
+    }
+  ]
+}

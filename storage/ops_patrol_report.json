@@ -1,52 +1,41 @@
 {
-  "timestamp": "2026-05-05T12:15:36Z",
+  "timestamp": "2026-05-06T00:14:07Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "total_drafts=6, research=4, general=2",
-      "alerts": [
-        "article pool low (<12)",
-        "general audience drafts low (<8): 2"
-      ]
+      "detail": "total_drafts=6 (threshold <12); research=4 (OK, threshold <4); general=2 (threshold <8). Alerts: article pool low, general audience pool low."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "age=59.9h",
-      "alerts": [
-        "metrics stale (59.9h old)"
-      ]
+      "detail": "storage/strategy_metrics.json mtime=1777767641, age=71.9h (threshold 26h). Metrics stale."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Last entries dated 2026-04-26; no entries from today (2026-05-05) or yesterday (2026-05-04)",
-      "recent_entries": []
+      "detail": "Last entries in docs/error_log.md dated 2026-04-26 (10 days ago). No entries from today (2026-05-06) or yesterday (2026-05-05). Recent lessons: lancedb list_tables() API shape change fix, member Q&A 5-day gap root cause, Codex CLI gpt-5.5 400 error."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "14 active strategies, all have <=1 null in last 3 entries (0 entries for _market_daily). No strategy exceeds 2 nulls.",
-      "alerts": []
+      "detail": "14 active strategies checked. All have exactly 1 null in last 3 entries (most recent entry). _market_daily has 0 entries. No strategy exceeds threshold of >2 nulls."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "uncommitted_files=0",
-      "alerts": []
+      "detail": "uncommitted_files=0 (threshold 50). Working tree clean."
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "entries=2044",
-      "alerts": []
+      "detail": "storage/memory/knowledge.json entries=2044."
     }
   ],
   "alerts": [
-    "article pool low (<12)",
-    "general audience drafts low (<8): 2",
-    "metrics stale (59.9h old)"
+    "article pool low (<12): currently 6 draft articles",
+    "general audience pool low (<8): currently 2 general audience drafts",
+    "metrics stale: strategy_metrics.json is 71.9h old (threshold 26h)"
   ]
 }
