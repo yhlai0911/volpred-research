@@ -1,0 +1,14 @@
+{
+  "timestamp": "2026-05-07T06:03:33Z",
+  "alert_type": "metrics_stale",
+  "severity": "warning",
+  "message": "strategy_metrics.json is ~101.7 hours old (threshold: 26h)",
+  "detail": {
+    "file": "storage/strategy_metrics.json",
+    "mtime_epoch": 1777767641,
+    "mtime_approx": "2026-04-30T07:14Z",
+    "age_hours": 101.7,
+    "threshold_hours": 26
+  },
+  "recommended_action": "Run: uv run volpred ops update-strategy-metrics to refresh."
+}
