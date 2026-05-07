@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-06T18:05:41.208011Z",
+  "timestamp": "2026-05-07T00:06:28Z",
   "all_ok": false,
   "checks": [
     {
@@ -10,22 +10,22 @@
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "strategy_metrics.json age: 89.7 hours (> 26h threshold)"
+      "detail": "strategy_metrics.json age: ~95.8 hours (> 26h threshold)"
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated today (2026-05-06) or yesterday (2026-05-05). Most recent entries from 2026-04-26: 2026-04-26: knowledge-index-summary status=broken false positive — lancedb list_tables() API shape changed; fixed with try-open-or-fail pattern | 2026-04-26: Member Q&A 5-day silent gap — q 29cbeb5c stuck in evaluating; fixed cron prompt + alert coverage"
+      "detail": "No entries dated today (2026-05-07) or yesterday (2026-05-06). Most recent entries from 2026-04-26: lancedb list_tables() API shape change fix; Member Q&A 5-day silent gap fix (q 29cbeb5c)."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "15 strategies checked; none have >2 null portfolio_return in last 3 entries"
+      "detail": "14 strategies checked; all have exactly 1 null in last 3 entries (today's data pending). None exceed >2 null threshold."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files"
+      "detail": "0 uncommitted files (threshold: 50)"
     },
     {
       "name": "KNOWLEDGE_SIZE",
@@ -36,6 +36,6 @@
   "alerts": [
     "article pool low: 6 drafts total (< 12 threshold)",
     "general audience articles low: 2 drafts (< 8)",
-    "metrics stale: strategy_metrics.json is 89.7 hours old (> 26h)"
+    "metrics stale: strategy_metrics.json is ~95.8 hours old (> 26h)"
   ]
 }
