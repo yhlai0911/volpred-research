@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-08T06:12:15Z",
+  "timestamp": "2026-05-08T12:07:40Z",
   "all_ok": false,
   "checks": [
     {
@@ -10,7 +10,7 @@
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json is 125.85 hours old (>26h threshold). Metrics severely stale."
+      "detail": "storage/strategy_metrics.json is 131 hours old (>26h threshold). Metrics severely stale."
     },
     {
       "name": "ERROR_LOG",
@@ -20,7 +20,7 @@
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All strategies checked; no strategy has >2 portfolio_return=null in last 3 entries. No gaps detected."
+      "detail": "14 strategies checked (excl. _market_daily). No strategy has >2 portfolio_return=null in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
@@ -36,6 +36,6 @@
   "alerts": [
     "article pool low (<12): 6 total drafts",
     "general audience pool low (<8): 2 general drafts",
-    "metrics stale: strategy_metrics.json is 125.85 hours old (>26h threshold)"
+    "metrics stale: strategy_metrics.json is 131 hours old (>26h threshold)"
   ]
 }
