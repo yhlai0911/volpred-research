@@ -5350,5 +5350,22 @@
     "task_id": "K630_article_general",
     "verdict": "dedup_conflict_terminated",
     "note": "mile_3fd1dc7e \"你睡覺的時候，市場在做什麼？答案可能嚇到你\" (general, published 2026-03-29) 已完整覆蓋 K630 ground-truth 數字 (36.6% / 55.7% COVID / V-shape 3.77x 3.08x). publication_candidates.covered_by 已標 mile_3fd1dc7e. auto-discovery 未檢查 covered_by 即建立 task — K852-pattern. next_tasks K630_article_general 改 superseded. 未派寫作 agent，未發新文。"
+  },
+  {
+    "timestamp": "2026-05-10T17:43:00Z",
+    "task_type": "governance",
+    "task_id": "refill_audience_null_dedup_fix",
+    "verdict": "systemic_fix_applied",
+    "commit": "6e57b64b",
+    "note": "K622+K630 dedup_conflict 2 incidents 24h: refill_task_pool audience filter dropped pre-2026-04-14 audience=null articles. Fix: include None/empty audience in dedup set. Smoke test: would-add many → 2 legit (K665, K667)."
+  },
+  {
+    "timestamp": "2026-05-10T17:55:51Z",
+    "task_type": "experiment",
+    "task_id": "K1268_gdelt_fullscan",
+    "verdict": "FAIL_NO_DATA",
+    "review_source": "Codex primary-path 2026-05-11 (6 issues caught + fixed)",
+    "commit": "b8595765",
+    "note": "GDELT 2.0 public bulk 864 files/3min production-ready. Core SPY 5-min RV proposition untested due to yfinance high-freq lookback limit. Honest FAIL framing (no fabricated data substitute). Lesson to error_log. K1268b queued with paid-data prereq."
   }
 ]

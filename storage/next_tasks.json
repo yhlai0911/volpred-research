@@ -6593,7 +6593,7 @@
     "title": "K1176: Full 96-files-per-day GDELT scan via public bulk (replaces K1175 due to kid_collision)",
     "description": "Original K1175_gdelt_fullscan re-IDed as K1176 because experiments/k1175/ 已被 Paper 2 Table 3 audit 占用。任務內容不變: K1174 only 1/96 slice (1.04%, 131 files) → need full 96-files scan via http://data.gdeltproject.org/gdeltv2/ public endpoint (no GCP auth needed) for N≥10 per market decisive PCR test. K1170 EU-JP press concentration claim 待 K1176 confirm/refute.",
     "priority": 2,
-    "status": "pending",
+    "status": "fail_no_data_data_source_blocker",
     "task_type": "experiment",
     "source": "K1175_kid_collision_repivot_2026_05_10",
     "tags": [
@@ -6603,7 +6603,8 @@
       "press-concentration"
     ],
     "created_at": "2026-05-10T16:30:00+00:00",
-    "last_note": "[2026-05-11] Re-IDed from K1176_gdelt_fullscan due to ANOTHER kid_collision (K1176 already occupied by Paper 2 Table 4 replication, completed 2026-04-17 PARTIAL_MATCH). K1175→K1176→K1268 chain: queue tasks need pre-dispatch K-id existence check."
+    "last_note": "[2026-05-11] Re-IDed from K1176_gdelt_fullscan due to ANOTHER kid_collision (K1176 already occupied by Paper 2 Table 4 replication, completed 2026-04-17 PARTIAL_MATCH). K1175→K1176→K1268 chain: queue tasks need pre-dispatch K-id existence check.",
+    "closure_note": "Codex primary-path verified working; 6 issues caught + fixed by agent. Core proposition untested due to yfinance 1m/5m lookback 30/60-day limit (2020/2023/2024 historical backtest periods all out of window). Honest FAIL_NO_DATA. K1268b queued with paid-data-source prereq. GDELT 2.0 public bulk 864 files/3min validated production-ready. Commit b8595765. Lesson written to docs/error_log.md (yfinance high-freq backtest blocker)."
   },
   {
     "id": "paper2_table3_canonical_K1175_completed",
@@ -6855,5 +6856,25 @@
       "audience-general"
     ],
     "created_at": "2026-05-10T17:38:09+00:00"
+  },
+  {
+    "id": "K1268b_gdelt_with_paid_intraday",
+    "title": "K1268b: GDELT 5-min vs SPY 5-min RV — re-run with backtest-grade intraday data",
+    "priority": 3,
+    "description": "K1268 FAIL_NO_DATA blocker: yfinance 1m/5m limited to last 30/60 days. Re-run with: (a) Polygon Stocks API (paid, ~/mo), (b) Databento, (c) self-hosted SPY 1-min rolling archive (start collecting now to cover future event days), or (d) IBKR TWS API historical. GDELT 5-min raw parquet (experiments/k1268/gdelt_5min_bars.parquet 864 bars × 3 event days) already cached — re-use directly. Test cross-correlation event-density / sentiment vs SPY 5-min RV with Bonferroni multiple-testing correction (3 signals × 4 lags = 12 tests/day).",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "K1268_followup",
+    "tags": [
+      "experiment",
+      "gdelt",
+      "high-frequency",
+      "paid-data-source",
+      "follow-up"
+    ],
+    "prerequisites": "paid_intraday_data_source_decision",
+    "blocked_reason": "paid_data_source_decision_pending",
+    "last_note": "[2026-05-11] Queued as K1268 FAIL_NO_DATA follow-up. GDELT raw cached. Need user/admin policy on paid data source.",
+    "created_at": "2026-05-10T17:55:51Z"
   }
 ]
