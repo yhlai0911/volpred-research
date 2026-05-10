@@ -1,9 +1,45 @@
-# K1100h — TAIFEX TX tick-level PRG (Phase 0 Scoping)
+# K1100h — TAIFEX TX tick-level PRG (Phase 1 完成 / BORDERLINE)
 
-[提出: Claude 自主研究（K1100g_d6-d8 daily borderline 衍生假說）/ 執行: Claude worker / 2026-04-18]
+[提出: Claude 自主研究（K1100g_d6-d8 daily borderline 衍生假說）/ 執行: Claude worker / 2026-04-18 (Phase 0)、2026-05-09 (Phase 1)]
 
-**Status**: Phase 0 **Scoping only** — data readiness + experimental design.
-**不**跑 estimation、**不** commit、**不**動 `knowledge.json` / `research_program.md`。
+**Status**: **Phase 1 完成** — daily PRG with tick-derived intraday exog estimated;
+verdict **BORDERLINE** (secondary 5% pass, Harvey |t|>3 fail);
+等主線程 Codex review。
+**未動** `knowledge.json` / `research_program.md` / `feed.json` (worktree-only output).
+
+---
+
+## Phase 1 結果摘要 (2026-05-09 跑完)
+
+**OOS test window**: 2020-01-01 ~ 2021-12-31, n_test = 464 (is_roll filtered)
+
+| Model | QLIKE | improv | DM-t (HLN) | p | Boot 95% CI | Harvey |t|>3 | 5% |t|>1.96 |
+|-------|------:|-------:|-----------:|--:|:------------|:-----------:|:----------:|
+| M1 baseline (PRG, no exog) | 1.6425 | 0% | — | — | — | — | — |
+| M2 + lag(1) RV-5min | 1.5530 | +5.45% | **+2.833** | 0.0046 | [+0.039, +0.159] | ✗ | **✓** |
+| M3 + lag(1) RV-5min + Parkinson | 1.5527 | **+5.47%** | **+2.849** | 0.0044 | [+0.040, +0.159] | ✗ | **✓** |
+| M4 + lag(1) full intraday (5 exog) | 1.9154 | **−16.6%** | −1.437 | 0.151 | [−0.825, +0.056] | ✗ | ✗ |
+
+**IS LRT (highly significant for all 3 ladders)**:
+- M2 vs M1: chi²=19.76, p=8.8e-6 (dof=1)
+- M3 vs M1: chi²=20.07, p=4.4e-5 (dof=2)
+- M4 vs M1: chi²=26.99, p=5.7e-5 (dof=5)
+
+**Verdict: BORDERLINE** — M2 和 M3 通過 secondary 5% threshold (|t|>1.96)，
+**未通過 Harvey 2016 |t|>3 主判準**。Bootstrap 95% CI 不含 0 → effect is real and positive.
+M4 overfits — adding 5 exog 比 M3 增加 noise (curse of dimensionality 在 small n=464 OOS test).
+
+**對比 K1100g_d5/d6 daily**：
+- K1100g_d5 (gap²): n=464, DM=+1.49 (borderline)
+- K1100g_d6 (gap² 2017-2025): n=1385, DM≈+1.5 (regime sensitive)
+- **K1100h M3 (RV-5min + Parkinson): n=464, DM=+2.85** ← 同期間 sample size 下，tick-derived exog DM t-stat **比 gap² 提升 91%**
+
+→ tick-level intraday features 確實**比純 close-to-close gap² 帶 incremental information**，
+   但仍未過 Harvey threshold。Phase 2 路徑：full intraday 15-min grid PRG (per Phase 0 plan §4.1)。
+
+---
+
+**Phase 0 原 README** (Scoping，2026-04-18):
 完成 criteria：本 README 7 節齊備、每項 Risk 配具體 mitigation、Phase 1 入口明確。
 
 ---

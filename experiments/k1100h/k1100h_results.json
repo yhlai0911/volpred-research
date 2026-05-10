@@ -1,0 +1,243 @@
+{
+  "experiment_id": "K1100h",
+  "phase": "Phase 1 (daily PRG with tick-derived intraday exog)",
+  "date_run": "2026-05-11 00:22:06",
+  "elapsed_sec": 154.6459038257599,
+  "seed": 42,
+  "data": {
+    "train_window": [
+      "2017-05-16",
+      "2019-12-31"
+    ],
+    "test_window": [
+      "2020-01-01",
+      "2021-12-31"
+    ],
+    "n_total": 1082,
+    "n_train": 618,
+    "n_test": 464
+  },
+  "models": {
+    "M1_baseline": {
+      "description": "Student-t PRG, no exog"
+    },
+    "M2_rv5min": {
+      "description": "M1 + lag(1) day_rv_5min"
+    },
+    "M3_rv5_park": {
+      "description": "M1 + lag(1) day_rv_5min + lag(1) day_rv_parkinson"
+    },
+    "M4_full_intraday": {
+      "description": "M1 + lag(1) [rv_5min, rv_parkinson, intraday_mom, hod_rv_ratio, bipower_var]"
+    }
+  },
+  "is_fits": {
+    "M1_baseline": {
+      "success": true,
+      "nll": -3904.067712333246,
+      "log_lik": 3904.067712333246,
+      "aic": -7788.135424666492,
+      "bic": -7738.2790064901,
+      "k_params": 10,
+      "df_est": 5.118019869033498,
+      "xn_coefs": null,
+      "params": [
+        4.624580688708877e-05,
+        0.0699606691334075,
+        3.869515124736219e-06,
+        -6.883033690252275e-06,
+        3.5665794836562965e-06,
+        -5.421339799175699e-06,
+        0.05099831529610409,
+        0.043066275447289554,
+        0.8364991274015927,
+        5.118019869033498
+      ]
+    },
+    "M2_rv5min": {
+      "success": true,
+      "nll": -3913.9465322933247,
+      "log_lik": 3913.9465322933247,
+      "aic": -7805.893064586649,
+      "bic": -7751.0510045926185,
+      "k_params": 11,
+      "df_est": 7.999999999696367,
+      "xn_coefs": [
+        1.380519637211401e-05
+      ],
+      "params": [
+        4.009216936197036e-05,
+        0.049999979677313657,
+        -1.954910648243104e-06,
+        -5.575930880640896e-06,
+        6.43205765406879e-06,
+        -5.134375024082566e-06,
+        0.04999996755328447,
+        0.04999998025740259,
+        0.7999999976078476,
+        1.380519637211401e-05,
+        7.999999999696367
+      ]
+    },
+    "M3_rv5_park": {
+      "success": true,
+      "nll": -3914.1015261793546,
+      "log_lik": 3914.1015261793546,
+      "aic": -7804.203052358709,
+      "bic": -7744.375350547039,
+      "k_params": 12,
+      "df_est": 7.999999999737156,
+      "xn_coefs": [
+        1.3865009038467e-05,
+        -6.534762374084309e-07
+      ],
+      "params": [
+        4.004080601423936e-05,
+        0.04999998227743241,
+        -1.945757032476505e-06,
+        -5.577695226522324e-06,
+        6.40081384845859e-06,
+        -4.878353054794481e-06,
+        0.04999997160445222,
+        0.049999982710626,
+        0.7999999978190402,
+        1.3865009038467e-05,
+        -6.534762374084309e-07,
+        7.999999999737156
+      ]
+    },
+    "M4_full_intraday": {
+      "success": true,
+      "nll": -3917.564607173325,
+      "log_lik": 3917.564607173325,
+      "aic": -7805.12921434665,
+      "bic": -7730.3445870820615,
+      "k_params": 15,
+      "df_est": 7.99999999951948,
+      "xn_coefs": [
+        -1.0948198367131736e-07,
+        -7.791672183000818e-07,
+        -5.888178694620977e-06,
+        -1.4423296216681903e-06,
+        1.3997940203549635e-05
+      ],
+      "params": [
+        4.1891388369170796e-05,
+        0.049999959812127626,
+        -2.152254747303076e-06,
+        -7.906720779031365e-06,
+        4.202742596452173e-06,
+        -5.816140941492634e-06,
+        0.04999994184692217,
+        0.049999952329022095,
+        0.79999999885143,
+        -1.0948198367131736e-07,
+        -7.791672183000818e-07,
+        -5.888178694620977e-06,
+        -1.4423296216681903e-06,
+        1.3997940203549635e-05,
+        7.99999999951948
+      ]
+    }
+  },
+  "is_lrt": {
+    "M2_rv5min": {
+      "chi2": 19.75763992015709,
+      "p_value": 8.790957791271481e-06,
+      "dof": 1
+    },
+    "M3_rv5_park": {
+      "chi2": 20.067627692216774,
+      "p_value": 4.389044803820852e-05,
+      "dof": 2
+    },
+    "M4_full_intraday": {
+      "chi2": 26.993789680157533,
+      "p_value": 5.720152086918784e-05,
+      "dof": 5
+    }
+  },
+  "oos_metrics": {
+    "M1_baseline": {
+      "n_valid": 464,
+      "qlike_mean": 1.642509713713279,
+      "qlike_improv_vs_base": 0.0,
+      "dm_t": null,
+      "dm_p": null,
+      "boot_diff_ci_lo": 0.0,
+      "boot_diff_ci_hi": 0.0,
+      "harvey_pass": false,
+      "secondary_pass": false
+    },
+    "M2_rv5min": {
+      "n_valid": 464,
+      "qlike_mean": 1.5529572983688091,
+      "qlike_improv_vs_base": 0.05452169603430565,
+      "dm_t": 2.8330129727929148,
+      "dm_p": 0.00461115145942026,
+      "boot_diff_ci_lo": 0.03902522096557595,
+      "boot_diff_ci_hi": 0.15936255327337343,
+      "harvey_pass": false,
+      "secondary_pass": true
+    },
+    "M3_rv5_park": {
+      "n_valid": 464,
+      "qlike_mean": 1.552650636941699,
+      "qlike_improv_vs_base": 0.05470839899535958,
+      "dm_t": 2.8490617065942416,
+      "dm_p": 0.004384837511268724,
+      "boot_diff_ci_lo": 0.03986293894791422,
+      "boot_diff_ci_hi": 0.15941759272550302,
+      "harvey_pass": false,
+      "secondary_pass": true
+    },
+    "M4_full_intraday": {
+      "n_valid": 464,
+      "qlike_mean": 1.9154403809490832,
+      "qlike_improv_vs_base": -0.16616685122596955,
+      "dm_t": -1.437403166468138,
+      "dm_p": 0.15060346959251802,
+      "boot_diff_ci_lo": -0.8251478649827229,
+      "boot_diff_ci_hi": 0.05567728341760031,
+      "harvey_pass": false,
+      "secondary_pass": false
+    }
+  },
+  "sanity": {
+    "r_day_mean": 0.00019714720682339264,
+    "r_day_std": 0.007399570162566025,
+    "r_day_kurt_excess": 6.830876206128178,
+    "n_total": 1082,
+    "n_train": 618,
+    "n_test": 464,
+    "test_start": "2020-01-01",
+    "test_end": "2021-12-31",
+    "exog_means_pre_z_train": {
+      "rv5min": 2.6832340671789677e-05,
+      "rv_parkinson": 3.866947947321969e-05,
+      "intraday_mom": 0.0001593633410007271,
+      "hod_rv_ratio": 0.7436256941586824,
+      "bipower_var": 2.5457838161364282e-05
+    }
+  },
+  "best_dm_model": "M3_rv5_park",
+  "best_dm_t": 2.8490617065942416,
+  "verdict": "BORDERLINE — secondary 5% but fail Harvey |t|>3",
+  "harvey_threshold": 3.0,
+  "lookahead_check": {
+    "exog_lag_in_kernel": "exog[t-1] always (multi-exog kernel forces lag-1)",
+    "r_day_target": "intraday_ret = log(day_close/day_open) at day t",
+    "info_set": "exog at t-1 = day session t-1 features, all realized before day t opens at 08:45 — legal predictive lag",
+    "baseline_uses_same_lag": true,
+    "is_roll_filtered": true
+  },
+  "references": [
+    "Andersen & Bollerslev (1998) IER — realized volatility",
+    "Parkinson (1980) JBus — high-low range estimator",
+    "Barndorff-Nielsen & Shephard (2004) JFEC — bipower variation",
+    "Engle & Rangel (2008) RFS — PRG tau*g",
+    "Bollerslev (1987) RESTAT — Student-t GARCH",
+    "Harvey, Leybourne & Newbold (1997) IJF — HLN DM correction",
+    "Harvey (2016) JF — |t|>3 threshold"
+  ]
+}
