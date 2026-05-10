@@ -75,8 +75,8 @@
     "title": "Paper vix-sufficiency 擴充：integrate K1116/K1118/K1116b/K1121 + K504/K1098",
     "priority": 1,
     "description": "Agent a90f872c29a03c25d 產出 integration_plan_v2.md。今日 6+ 實驗直接擴大 paper evidence base，從 SPY-only 升級為 cross-asset universal compendium。最佳 paper 排名第 1 (貢獻度 × 完成度)。",
-    "status": "pending",
-    "last_note": "[session-restart-2026-04-18] cleared stale in_progress: no agent claim",
+    "status": "in_progress_addendum_added",
+    "last_note": "[2026-05-11] integration_plan_v2 addendum: K1116d 7th piece (vintage retest) — NULL robust. main_v3.tex body edit deferred to dedicated session. Plan now covers 7 pieces: K1116/b/c/d, K1118, K1121, K504, K1098.",
     "task_type": "paper_body"
   },
   {
@@ -6698,7 +6698,7 @@
     "title": "K1100h Phase 1 v2: 修 Codex primary-path FAIL 2 MAJOR + 2 MINOR",
     "description": "Codex primary-path review FAIL (2026-05-10). MAJOR-3 Bar aggregation: session endpoint 08:45<=ts<=13:45 + floor(\"5min\") 把 13:45:00 tick 放進 13:45 bin → 423/1138 days 有 61 bars (應 60). Fix: 改 strict less-than `08:45 <= ts < 13:45`. MAJOR-5 Roll-over: loader 讀 TX1.csv 但 K1100g is_roll mask 是 TX.csv volume-picked → 沒 catch TX1 expiring settlement day (2018-03-21 / 2021-11-17 等) microstructure 污染. Fix: 自實作 TX1 contract-month transition 偵測 (從 TX1 文件名/header 提取 contract_month, 標 expiring day 為 settlement). MINOR-2 Big5 column 硬覆蓋 → 加 header validation. MINOR-4 HAC lag floor vs README ceil 對齊 + bootstrap 名稱改為「mean loss diff CI」非 DM t-stat CI. 修完 re-run + Codex 二次 primary-path review 才能進 knowledge.json.",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "K1100h_codex_FAIL_2026_05_10",
     "tags": [
@@ -6707,14 +6707,15 @@
       "bar-aggregation",
       "roll-handling"
     ],
-    "created_at": "2026-05-10T17:00:00+00:00"
+    "created_at": "2026-05-10T17:00:00+00:00",
+    "closure_note": "Codex CONDITIONAL PASS 2026-05-11 (0 MAJOR/0 MINOR). v2 fixes 4 issues: bar agg, settlement filter, encoding, HAC lag. BORDERLINE verdict (DM-t=2.21 secondary 5% pass, Harvey |t|>3 fail). Knowledge entry K1100h written. Follow-up P3 candidate: TX volume-picker."
   },
   {
     "id": "K1116d_v2_fetch_chunk_fix",
     "title": "K1116d v2: fix daily vintage chunk boundary bug + re-fetch USEPU/WLEMU",
     "description": "Codex primary-path CONDITIONAL PASS (2026-05-10). MAJOR: k1116d_fetch_alfred.py L92-103 把 realtime_start/end 預設成 obs_start/end → yearly chunk 拿同一邊界 call API → chunk 尾端「觀測日落 chunk 內但 first release 落 chunk 外」資料漏掉. 系統性缺日 USEPU/WLEMU 都缺 2018-12-01, 2020-12-03, 2021-12-03/04, 2022-12-05, 2023-12-06, 2024-12-06/07, 2025-12-08. Fix: realtime_end 向後 buffer 幾天 (e.g. +30d) 或改 realtime window chunk 而非 observation window chunk. 修完 re-fetch USEPU/WLEMU vintage_with_release_date + weekly_pit (4 CSVs). MINOR STLFSI chain manual concatenate 結果 OK 但機制不 self-証 robust 可後續加 explicit release-date splice. 修完 quick re-Codex review (CONDITIONAL→PASS) → 主線程跑 k1116d.py 主 script → 寫 knowledge.json.",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "K1116d_codex_CONDITIONAL_PASS_2026_05_10",
     "tags": [
@@ -6723,14 +6724,15 @@
       "chunk-boundary",
       "fetch"
     ],
-    "created_at": "2026-05-10T17:10:00+00:00"
+    "created_at": "2026-05-10T17:10:00+00:00",
+    "closure_note": "Codex PASS (fetch v2) + CONDITIONAL PASS (main battery, MINOR addressed by sensitivity). Master verdict H2_ROBUST_NULL_VINTAGE_CONFIRMED. Paper 4 alt-data NULL robust to true vintage. Knowledge entry K1116d written. Commits 5c94a2e1 + b3967920."
   },
   {
     "id": "K871_article_general",
     "title": "K871: write general-audience article (auto-discovered uncovered K)",
     "description": "K K871 has verdict signal (score=0, reasons=[]) but no general article. Verdict preview: [提出: Claude, 執行: Claude] K871 tests yield curve (T10Y2Y/T10Y3M from FRED) as vol predictor. 6,554 days (2000-2026). Partial corr slope→fwd_rv|VIX = -0.087 (tiny). OOS: adding slope REDUCES R² from 0.275 to 0.264. DM all NS. Counterintuitive: inverted periods have LOWER mean fwd v",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K871",
@@ -6744,7 +6746,9 @@
       "auto-discovered",
       "audience-general"
     ],
-    "created_at": "2026-05-10T16:44:01+00:00"
+    "created_at": "2026-05-10T16:44:01+00:00",
+    "completed_at": "2026-05-11T00:00:00+00:00",
+    "completion_note": "mile_b10348ee published as draft"
   },
   {
     "id": "K872_article_general",
@@ -6766,5 +6770,66 @@
       "audience-general"
     ],
     "created_at": "2026-05-10T16:44:01+00:00"
+  },
+  {
+    "id": "K878_article_general",
+    "title": "K878: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K878 has verdict signal (score=0, reasons=[]) but no general article. Verdict preview: [提出: Claude, 執行: Claude] K878 tests DXY as vol predictor. DXY vol unconditional corr 0.45 with fwd RV but VIX captures it all. IS incremental F=26.1 (p<1e-16) but OOS best DM t=0.39 NS. DXY-VIX lag-0 corr=0.086 (contemporaneous, not leading). DXY alone: negative OOS R². Regime: D",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K878",
+    "tags": [
+      "DXY",
+      "dollar_index",
+      "VIX_sufficiency",
+      "null_result",
+      "overfitting",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "created_at": "2026-05-10T17:08:08+00:00"
+  },
+  {
+    "id": "K622_article_general",
+    "title": "K622: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K622 has verdict signal (score=0, reasons=[]) but no general article. Verdict preview: [提出: 文獻掃描 K590 (Feng & Zhang 2025), 執行: Claude] GJR-GARCH window sweep w∈{252-3000}，OOS 2023-2024。SPY QLIKE range 僅 1.86%。GLD 弱 U 形 min@1500。0050.TW U 形 min@1500，w≥2500 崩潰。w=1000-1500 三資產最平衡。結論：window 對 QLIKE 影響有限(<2% SPY)但對短歷史資產影響巨大。",
+    "priority": 4,
+    "status": "succeeded_already_covered",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K622",
+    "tags": [
+      "window-size",
+      "sensitivity-analysis",
+      "GJR-GARCH",
+      "methodology",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "created_at": "2026-05-10T17:08:08+00:00",
+    "closure_note": "Agent dedup_conflict 2026-05-11: mile_bfec968d (general-audience) + mile_54a80b14 (research) 已 published 2026-03-29. publication_candidates audiences_covered 之前 stale=[] 因 pre-2026-04-14 audience metadata 未分流"
+  },
+  {
+    "id": "K630_article_general",
+    "title": "K630: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K630 has verdict signal (score=0, reasons=[]) but no general article. Verdict preview: [提出: Codex 建議 #2, 執行: Claude] SPY 隔夜/日內分解。隔夜佔日方差 36.6%（COVID 期間 55.7%）。隔夜 return 強左偏(-1.44)極峰(25.9)。大幅隔夜缺口→V 形日內波動反應（負缺口 3.77x，正缺口 3.08x）。r_on 與 r_id 幾乎不相關(0.039)但 r²相關(0.206)。OOS：GJR-GARCH baseline QLIKE=1.519 最佳。HAR-OI +1.54%（NS）。GJR-X(overnight) +5.68%（marginally worse DM p=0.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K630",
+    "tags": [
+      "overnight-gap",
+      "intraday",
+      "decomposition",
+      "market-microstructure",
+      "null-result",
+      "SPY",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "created_at": "2026-05-10T17:08:08+00:00"
   }
 ]

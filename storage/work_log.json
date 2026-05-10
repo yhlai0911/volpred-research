@@ -5290,5 +5290,49 @@
     "audience": "general",
     "status": "draft",
     "summary": "K868 day/night RV decomposition NULL — HAR-DN overfits OOS QLIKE 33.6, HAR-DN-Ratio NS (t=-0.66). Night share trend 23.9%→53.9% (2017→2025) is real structural shift, but standard HAR-RV remains best baseline. Article 3,988 chars, 2 charts (yearly trend + QLIKE comparison), tags include K868 + experiment_refs auto-stripped. 3-layer dedup PASS (no K868 collision in feed; distinct from K451 SPY day/night)."
+  },
+  {
+    "timestamp": "2026-05-10T16:57:28Z",
+    "task_type": "experiment",
+    "task_id": "K1100h_v2_codex_fix",
+    "verdict": "BORDERLINE_CONDITIONAL_PASS",
+    "review_source": "Codex primary-path 2026-05-11",
+    "commit": "4d1821aa",
+    "note": "K1100h Phase 1 v2 — 4 fixes resolved (bar agg + settlement filter + encoding + HAC). Codex 0 MAJOR/0 MINOR. DM-t=2.21 BORDERLINE. Knowledge entry written."
+  },
+  {
+    "timestamp": "2026-05-10T17:01:09Z",
+    "task_type": "experiment",
+    "task_id": "K1116d_v2_fetch_chunk_fix",
+    "verdict": "H2_ROBUST_NULL_VINTAGE_CONFIRMED",
+    "review_source": "Codex primary-path 2026-05-11",
+    "commits": [
+      "5c94a2e1",
+      "b3967920"
+    ],
+    "note": "K1116d v2 — ALFRED chunk-boundary fix + true vintage 6×5 retest. 0/24 cells pass both cycles. DM t=-5.21 worst. Paper 4 alt-data NULL robust to vintage. Knowledge entry written."
+  },
+  {
+    "timestamp": "2026-05-11T00:00:00Z",
+    "task_type": "daily_article",
+    "task_id": "K871_article_general",
+    "verdict": "PUBLISHED_DRAFT",
+    "mile_id": "mile_b10348ee",
+    "audience": "general",
+    "note": "K871 yield curve null-result published as draft. 3-layer dedup PASS (no audience covered, 0 yield-curve articles in feed, related mile_65e624d4 TW yield curve only 19% similarity). 2 PNG charts uploaded to Supabase. Sanitizer applied 1 replacement (Harvey)."
+  },
+  {
+    "timestamp": "2026-05-10T17:10:05Z",
+    "task_type": "governance",
+    "task_id": "K622_article_general",
+    "verdict": "dedup_conflict_terminated",
+    "note": "mile_bfec968d general + mile_54a80b14 research 已覆蓋 K622 (2026-03-29). Agent identified stale audiences_covered=[] in publication_candidates (pre-2026-04-14 metadata gap). Closed without writing new article."
+  },
+  {
+    "timestamp": "2026-05-10T17:10:05Z",
+    "task_type": "paper_body",
+    "task_id": "vix_sufficiency_expansion",
+    "verdict": "addendum_added",
+    "note": "integration_plan_v2.md addendum: K1116d (7th piece) — true ALFRED first-release vintage retest. NULL robust to vintage. +0.5 page in §publication-delay-robustness. main_v3.tex body edit still pending (38 pages → ~48.5 projected)."
   }
 ]

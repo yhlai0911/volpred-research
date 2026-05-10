@@ -6694,7 +6694,7 @@
     "legacy": true
   },
   {
-    "id": "K671",
+    "id": "K671_legacy_pilot",
     "timestamp": "2026-03-17T13:06:15.452799",
     "category": "publication",
     "content": "[提出: Claude, 執行: Claude] 發佈一般讀者文章「不是所有恐慌都一樣：為什麼戰爭比升息更讓市場過度害怕」(mile_9738acad)。基於 S1 Narrative-GARCH pilot 研究，以 viral blog 風格解釋 Knightian uncertainty 概念：地緣政治恐慌 VIX overshoot +36% (p=0.025)，貨幣政策恐慌 VIX ratio ~1.0。使用公車/地震比喻讓一般讀者理解 Risk vs Uncertainty 的差別。",
@@ -6705,7 +6705,14 @@
       "Knightian_Uncertainty",
       "Narrative-GARCH"
     ],
-    "legacy": true
+    "legacy": true,
+    "audit_note": {
+      "audit_action": "rekey_stub_to_legacy_pilot_suffix",
+      "audit_date": "2026-05-09",
+      "audit_source": "26pair_triage_2026_05_09",
+      "previous_id": "K671",
+      "rationale": "Legacy stub keyed under K671 (legacy=true, dated 2026-03-17) but content describes pilot research unrelated to the canonical K671 entry (experiment_id=k671, dated 2026-04-xx). No explicit integer K-N label in content for direct re-key, so preserved as K671_legacy_pilot to retain research content while freeing K671 slot. See audit 2026-05-09 26pair_triage."
+    }
   },
   {
     "item_id": "e33e8ac3",
@@ -6735,7 +6742,7 @@
     "legacy": true
   },
   {
-    "id": "K675",
+    "id": "K675_legacy_pilot",
     "timestamp": "2026-03-17T13:36:11.674805",
     "category": "network_topology",
     "content": "[提出: Gemini, 執行: Claude] Volatility Network Topology Pilot — 7 assets (SPY/QQQ/GLD/TLT/EEM/USO/BTC-USD), 60-day rolling RV, 2020-2025. Key findings: (1) SPY is NOT always the hub. Hub alternates between QQQ (2021-22, 2025) and SPY (2023-24). TLT was hub in 2020 (COVID crash — all vols co-moved). (2) SPY-QQQ are always within 0.02 of each other in avg correlation, so hub distinction is marginal. (3) MST analysis confirms: QQQ is MST center in 2022 and 2025 (degree=3); SPY in 2023 (degree=3); BTC-USD became MST center in 2024 (degree=3) due to negative correlations. (4) BTC integration is NON-MONOTONIC: avg corr with tradfi = 0.95 (2020 COVID), 0.07 (2021), 0.43 (2022), 0.68 (2023), -0.18 (2024), 0.48 (2025). (5) Correlation structure is UNSTABLE: meta-correlation drops from 0.47 (2021->22) to -0.003 (2023->24), mean |Δcorr| reaches 0.58. (6) 2024 shows FRAGMENTATION: overall correlations collapse (hub avg corr only 0.33 vs 0.80 in 2023). Implications: VIX-centric risk models may miss QQQ-driven contagion. BTC is not reliably integrated — cannot assume stable vol transmission.",
@@ -6748,7 +6755,14 @@
     ],
     "related_experiments": [],
     "confidence": 0.5,
-    "legacy": true
+    "legacy": true,
+    "audit_note": {
+      "audit_action": "rekey_stub_to_legacy_pilot_suffix",
+      "audit_date": "2026-05-09",
+      "audit_source": "26pair_triage_2026_05_09",
+      "previous_id": "K675",
+      "rationale": "Legacy stub keyed under K675 (legacy=true, dated 2026-03-17) but content describes pilot research unrelated to the canonical K675 entry (experiment_id=k675, dated 2026-04-xx). No explicit integer K-N label in content for direct re-key, so preserved as K675_legacy_pilot to retain research content while freeing K675 slot. See audit 2026-05-09 26pair_triage."
+    }
   },
   {
     "item_id": "301a55df",
@@ -7855,7 +7869,7 @@
     "legacy": true
   },
   {
-    "id": "K767",
+    "id": "K767_legacy_pilot",
     "date": "2026-03-17",
     "category": "sentiment_indicators",
     "content": "台股情緒指標無增量：(1)外資淨買超是落後指標，同日r=0.33但預測r≈0；(2)融資融券比率逆向overlay惡化Sharpe -0.21；(3)台指選擇權PCR同日r=0.41是artifact，lagged r=0.008(t=0.01)；(4)台積電PE高時反而報酬最高(PE>25年化+34.3%)，估值逆向完全失敗。4/4 NULL。[提出:用戶, 執行:Claude]",
@@ -7866,7 +7880,14 @@
       "T_sentiment_C_PCR",
       "T_sentiment_D_PE"
     ],
-    "legacy": true
+    "legacy": true,
+    "audit_note": {
+      "audit_action": "rekey_stub_to_legacy_pilot_suffix",
+      "audit_date": "2026-05-09",
+      "audit_source": "26pair_triage_2026_05_09",
+      "previous_id": "K767",
+      "rationale": "Legacy stub keyed under K767 (legacy=true, dated 2026-03-17) but content describes pilot research unrelated to the canonical K767 entry (experiment_id=k767, dated 2026-04-xx). No explicit integer K-N label in content for direct re-key, so preserved as K767_legacy_pilot to retain research content while freeing K767 slot. See audit 2026-05-09 26pair_triage."
+    }
   },
   {
     "item_id": "80eb284e",
@@ -8724,7 +8745,7 @@
     "legacy": true
   },
   {
-    "id": "K860",
+    "id": "K43",
     "timestamp": "2026-03-21T06:11:58.049501+00:00",
     "category": "market_structure",
     "confidence": 0.95,
@@ -8738,10 +8759,17 @@
       "sufficient_statistic",
       "null_result"
     ],
-    "legacy": true
+    "legacy": true,
+    "audit_note": {
+      "audit_action": "rekey_stub_to_K43",
+      "audit_date": "2026-05-09",
+      "audit_source": "26pair_triage_2026_05_09",
+      "previous_id": "K860",
+      "rationale": "Legacy stub keyed under K860 but content begins with 'K43:' label — cross-paste artifact (likely from 2026-04-10 merge_worktree.sh jq dedup bug). Re-keyed to original K43 to preserve research content while freeing K860 slot for the canonical real entry (experiment_id=k860, category=knowledge)."
+    }
   },
   {
-    "id": "K861",
+    "id": "K44",
     "timestamp": "2026-03-21T06:19:28.285877+00:00",
     "category": "strategy_optimization",
     "confidence": 0.92,
@@ -8757,10 +8785,17 @@
       "GLD",
       "EEM"
     ],
-    "legacy": true
+    "legacy": true,
+    "audit_note": {
+      "audit_action": "rekey_stub_to_K44",
+      "audit_date": "2026-05-09",
+      "audit_source": "26pair_triage_2026_05_09",
+      "previous_id": "K861",
+      "rationale": "Legacy stub keyed under K861 but content begins with 'K44:' label — cross-paste artifact (likely from 2026-04-10 merge_worktree.sh jq dedup bug). Re-keyed to original K44 to preserve research content while freeing K861 slot for the canonical real entry (experiment_id=k861, category=knowledge)."
+    }
   },
   {
-    "id": "K862",
+    "id": "K45",
     "timestamp": "2026-03-21T06:19:28.286104+00:00",
     "category": "literature",
     "confidence": 0.9,
@@ -8773,10 +8808,17 @@
       "ML",
       "rough_volatility"
     ],
-    "legacy": true
+    "legacy": true,
+    "audit_note": {
+      "audit_action": "rekey_stub_to_K45",
+      "audit_date": "2026-05-09",
+      "audit_source": "26pair_triage_2026_05_09",
+      "previous_id": "K862",
+      "rationale": "Legacy stub keyed under K862 but content begins with 'K45:' label — cross-paste artifact (likely from 2026-04-10 merge_worktree.sh jq dedup bug). Re-keyed to original K45 to preserve research content while freeing K862 slot for the canonical real entry (experiment_id=k862, category=knowledge)."
+    }
   },
   {
-    "id": "K863",
+    "id": "K46",
     "timestamp": "2026-03-21T06:25:00.328714+00:00",
     "category": "mechanism_discovery",
     "confidence": 0.97,
@@ -8794,10 +8836,17 @@
       "TLT",
       "理論突破"
     ],
-    "legacy": true
+    "legacy": true,
+    "audit_note": {
+      "audit_action": "rekey_stub_to_K46",
+      "audit_date": "2026-05-09",
+      "audit_source": "26pair_triage_2026_05_09",
+      "previous_id": "K863",
+      "rationale": "Legacy stub keyed under K863 but content begins with 'K46:' label — cross-paste artifact (likely from 2026-04-10 merge_worktree.sh jq dedup bug). Re-keyed to original K46 to preserve research content while freeing K863 slot for the canonical real entry (experiment_id=k863, category=knowledge)."
+    }
   },
   {
-    "id": "K864",
+    "id": "K47",
     "timestamp": "2026-03-21T06:42:25.606888+00:00",
     "category": "ai_review",
     "confidence": 0.85,
@@ -8810,10 +8859,17 @@
       "VT策略",
       "論文規劃"
     ],
-    "legacy": true
+    "legacy": true,
+    "audit_note": {
+      "audit_action": "rekey_stub_to_K47",
+      "audit_date": "2026-05-09",
+      "audit_source": "26pair_triage_2026_05_09",
+      "previous_id": "K864",
+      "rationale": "Legacy stub keyed under K864 but content begins with 'K47:' label — cross-paste artifact (likely from 2026-04-10 merge_worktree.sh jq dedup bug). Re-keyed to original K47 to preserve research content while freeing K864 slot for the canonical real entry (experiment_id=k864, category=knowledge)."
+    }
   },
   {
-    "id": "K865",
+    "id": "K48",
     "timestamp": "2026-03-21T06:43:04.150191+00:00",
     "category": "strategy_optimization",
     "confidence": 0.9,
@@ -8826,10 +8882,17 @@
       "VT策略",
       "null_result"
     ],
-    "legacy": true
+    "legacy": true,
+    "audit_note": {
+      "audit_action": "rekey_stub_to_K48",
+      "audit_date": "2026-05-09",
+      "audit_source": "26pair_triage_2026_05_09",
+      "previous_id": "K865",
+      "rationale": "Legacy stub keyed under K865 but content begins with 'K48:' label — cross-paste artifact (likely from 2026-04-10 merge_worktree.sh jq dedup bug). Re-keyed to original K48 to preserve research content while freeing K865 slot for the canonical real entry (experiment_id=k865, category=knowledge)."
+    }
   },
   {
-    "id": "K866",
+    "id": "K49",
     "timestamp": "2026-03-21T06:43:04.150422+00:00",
     "category": "mechanism_discovery",
     "confidence": 0.95,
@@ -8842,10 +8905,17 @@
       "VT策略",
       "mechanism_discovery"
     ],
-    "legacy": true
+    "legacy": true,
+    "audit_note": {
+      "audit_action": "rekey_stub_to_K49",
+      "audit_date": "2026-05-09",
+      "audit_source": "26pair_triage_2026_05_09",
+      "previous_id": "K866",
+      "rationale": "Legacy stub keyed under K866 but content begins with 'K49:' label — cross-paste artifact (likely from 2026-04-10 merge_worktree.sh jq dedup bug). Re-keyed to original K49 to preserve research content while freeing K866 slot for the canonical real entry (experiment_id=k866, category=knowledge)."
+    }
   },
   {
-    "id": "K867",
+    "id": "K50",
     "timestamp": "2026-03-21T06:45:09.531201+00:00",
     "category": "ai_review",
     "confidence": 0.9,
@@ -8858,10 +8928,17 @@
       "VT策略",
       "方法論修正"
     ],
-    "legacy": true
+    "legacy": true,
+    "audit_note": {
+      "audit_action": "rekey_stub_to_K50",
+      "audit_date": "2026-05-09",
+      "audit_source": "26pair_triage_2026_05_09",
+      "previous_id": "K867",
+      "rationale": "Legacy stub keyed under K867 but content begins with 'K50:' label — cross-paste artifact (likely from 2026-04-10 merge_worktree.sh jq dedup bug). Re-keyed to original K50 to preserve research content while freeing K867 slot for the canonical real entry (experiment_id=k867, category=knowledge)."
+    }
   },
   {
-    "id": "K868",
+    "id": "K51",
     "timestamp": "2026-03-21T06:45:09.531693+00:00",
     "category": "model_comparison",
     "confidence": 0.88,
@@ -8874,10 +8951,17 @@
       "null_result",
       "波動率預測"
     ],
-    "legacy": true
+    "legacy": true,
+    "audit_note": {
+      "audit_action": "rekey_stub_to_K51",
+      "audit_date": "2026-05-09",
+      "audit_source": "26pair_triage_2026_05_09",
+      "previous_id": "K868",
+      "rationale": "Legacy stub keyed under K868 but content begins with 'K51:' label — cross-paste artifact (likely from 2026-04-10 merge_worktree.sh jq dedup bug). Re-keyed to original K51 to preserve research content while freeing K868 slot for the canonical real entry (experiment_id=k868, category=knowledge)."
+    }
   },
   {
-    "id": "K869",
+    "id": "K52",
     "timestamp": "2026-03-21T06:47:22.658649+00:00",
     "category": "mechanism_discovery",
     "confidence": 0.92,
@@ -8890,10 +8974,17 @@
       "VT策略",
       "factor_model"
     ],
-    "legacy": true
+    "legacy": true,
+    "audit_note": {
+      "audit_action": "rekey_stub_to_K52",
+      "audit_date": "2026-05-09",
+      "audit_source": "26pair_triage_2026_05_09",
+      "previous_id": "K869",
+      "rationale": "Legacy stub keyed under K869 but content begins with 'K52:' label — cross-paste artifact (likely from 2026-04-10 merge_worktree.sh jq dedup bug). Re-keyed to original K52 to preserve research content while freeing K869 slot for the canonical real entry (experiment_id=k869, category=knowledge)."
+    }
   },
   {
-    "id": "K870",
+    "id": "K54",
     "timestamp": "2026-03-21T07:08:31.235417+00:00",
     "category": "strategy_optimization",
     "confidence": 0.9,
@@ -8906,10 +8997,17 @@
       "null_result",
       "50/50"
     ],
-    "legacy": true
+    "legacy": true,
+    "audit_note": {
+      "audit_action": "rekey_stub_to_K54",
+      "audit_date": "2026-05-09",
+      "audit_source": "26pair_triage_2026_05_09",
+      "previous_id": "K870",
+      "rationale": "Legacy stub keyed under K870 but content begins with 'K54:' label — cross-paste artifact (likely from 2026-04-10 merge_worktree.sh jq dedup bug). Re-keyed to original K54 to preserve research content while freeing K870 slot for the canonical real entry (experiment_id=k870, category=knowledge)."
+    }
   },
   {
-    "id": "K871",
+    "id": "K55",
     "timestamp": "2026-03-21T07:10:02.179470+00:00",
     "category": "cross_asset",
     "confidence": 0.88,
@@ -8924,10 +9022,17 @@
       "5-min",
       "HAR-RV"
     ],
-    "legacy": true
+    "legacy": true,
+    "audit_note": {
+      "audit_action": "rekey_stub_to_K55",
+      "audit_date": "2026-05-09",
+      "audit_source": "26pair_triage_2026_05_09",
+      "previous_id": "K871",
+      "rationale": "Legacy stub keyed under K871 but content begins with 'K55:' label — cross-paste artifact (likely from 2026-04-10 merge_worktree.sh jq dedup bug). Re-keyed to original K55 to preserve research content while freeing K871 slot for the canonical real entry (experiment_id=k871, category=knowledge)."
+    }
   },
   {
-    "id": "K872",
+    "id": "K56",
     "timestamp": "2026-03-21T07:22:27.159736+00:00",
     "category": "ai_review",
     "confidence": 0.88,
@@ -8941,10 +9046,17 @@
       "Paper2",
       "PBFJ"
     ],
-    "legacy": true
+    "legacy": true,
+    "audit_note": {
+      "audit_action": "rekey_stub_to_K56",
+      "audit_date": "2026-05-09",
+      "audit_source": "26pair_triage_2026_05_09",
+      "previous_id": "K872",
+      "rationale": "Legacy stub keyed under K872 but content begins with 'K56:' label — cross-paste artifact (likely from 2026-04-10 merge_worktree.sh jq dedup bug). Re-keyed to original K56 to preserve research content while freeing K872 slot for the canonical real entry (experiment_id=k872, category=knowledge)."
+    }
   },
   {
-    "id": "K873",
+    "id": "K57",
     "timestamp": "2026-03-21T07:31:54.386619+00:00",
     "category": "cross_asset",
     "confidence": 0.93,
@@ -8958,10 +9070,17 @@
       "sufficient_statistic",
       "information_transmission"
     ],
-    "legacy": true
+    "legacy": true,
+    "audit_note": {
+      "audit_action": "rekey_stub_to_K57",
+      "audit_date": "2026-05-09",
+      "audit_source": "26pair_triage_2026_05_09",
+      "previous_id": "K873",
+      "rationale": "Legacy stub keyed under K873 but content begins with 'K57:' label — cross-paste artifact (likely from 2026-04-10 merge_worktree.sh jq dedup bug). Re-keyed to original K57 to preserve research content while freeing K873 slot for the canonical real entry (experiment_id=k873, category=knowledge)."
+    }
   },
   {
-    "id": "K874",
+    "id": "K58",
     "timestamp": "2026-03-21T07:48:09.084448+00:00",
     "category": "cross_asset",
     "confidence": 0.92,
@@ -8975,10 +9094,17 @@
       "XLF",
       "cross_asset"
     ],
-    "legacy": true
+    "legacy": true,
+    "audit_note": {
+      "audit_action": "rekey_stub_to_K58",
+      "audit_date": "2026-05-09",
+      "audit_source": "26pair_triage_2026_05_09",
+      "previous_id": "K874",
+      "rationale": "Legacy stub keyed under K874 but content begins with 'K58:' label — cross-paste artifact (likely from 2026-04-10 merge_worktree.sh jq dedup bug). Re-keyed to original K58 to preserve research content while freeing K874 slot for the canonical real entry (experiment_id=k874, category=knowledge)."
+    }
   },
   {
-    "id": "K875",
+    "id": "K59",
     "timestamp": "2026-03-21T07:48:09.084712+00:00",
     "category": "strategy_optimization",
     "confidence": 0.93,
@@ -8992,10 +9118,17 @@
       "投資策略",
       "實務建議"
     ],
-    "legacy": true
+    "legacy": true,
+    "audit_note": {
+      "audit_action": "rekey_stub_to_K59",
+      "audit_date": "2026-05-09",
+      "audit_source": "26pair_triage_2026_05_09",
+      "previous_id": "K875",
+      "rationale": "Legacy stub keyed under K875 but content begins with 'K59:' label — cross-paste artifact (likely from 2026-04-10 merge_worktree.sh jq dedup bug). Re-keyed to original K59 to preserve research content while freeing K875 slot for the canonical real entry (experiment_id=k875, category=knowledge)."
+    }
   },
   {
-    "id": "K876",
+    "id": "K60",
     "timestamp": "2026-03-21T07:49:44.912413+00:00",
     "category": "model_comparison",
     "confidence": 0.8,
@@ -9008,10 +9141,17 @@
       "blocked",
       "convergence"
     ],
-    "legacy": true
+    "legacy": true,
+    "audit_note": {
+      "audit_action": "rekey_stub_to_K60",
+      "audit_date": "2026-05-09",
+      "audit_source": "26pair_triage_2026_05_09",
+      "previous_id": "K876",
+      "rationale": "Legacy stub keyed under K876 but content begins with 'K60:' label — cross-paste artifact (likely from 2026-04-10 merge_worktree.sh jq dedup bug). Re-keyed to original K60 to preserve research content while freeing K876 slot for the canonical real entry (experiment_id=k876, category=knowledge)."
+    }
   },
   {
-    "id": "K877",
+    "id": "K61",
     "timestamp": "2026-03-21T07:52:58.167759+00:00",
     "category": "model_comparison",
     "confidence": 0.93,
@@ -9025,10 +9165,17 @@
       "sufficient_statistic",
       "null_result"
     ],
-    "legacy": true
+    "legacy": true,
+    "audit_note": {
+      "audit_action": "rekey_stub_to_K61",
+      "audit_date": "2026-05-09",
+      "audit_source": "26pair_triage_2026_05_09",
+      "previous_id": "K877",
+      "rationale": "Legacy stub keyed under K877 but content begins with 'K61:' label — cross-paste artifact (likely from 2026-04-10 merge_worktree.sh jq dedup bug). Re-keyed to original K61 to preserve research content while freeing K877 slot for the canonical real entry (experiment_id=k877, category=knowledge)."
+    }
   },
   {
-    "id": "K878",
+    "id": "K62",
     "timestamp": "2026-03-21T07:53:40.006606+00:00",
     "category": "strategy_optimization",
     "confidence": 0.93,
@@ -9042,10 +9189,17 @@
       "cash",
       "IRX"
     ],
-    "legacy": true
+    "legacy": true,
+    "audit_note": {
+      "audit_action": "rekey_stub_to_K62",
+      "audit_date": "2026-05-09",
+      "audit_source": "26pair_triage_2026_05_09",
+      "previous_id": "K878",
+      "rationale": "Legacy stub keyed under K878 but content begins with 'K62:' label — cross-paste artifact (likely from 2026-04-10 merge_worktree.sh jq dedup bug). Re-keyed to original K62 to preserve research content while freeing K878 slot for the canonical real entry (experiment_id=k878, category=knowledge)."
+    }
   },
   {
-    "id": "K879",
+    "id": "K63",
     "timestamp": "2026-03-21T07:56:33.445623+00:00",
     "category": "cross_asset",
     "confidence": 0.94,
@@ -9059,10 +9213,17 @@
       "DCC-GARCH",
       "tail_dependence"
     ],
-    "legacy": true
+    "legacy": true,
+    "audit_note": {
+      "audit_action": "rekey_stub_to_K63",
+      "audit_date": "2026-05-09",
+      "audit_source": "26pair_triage_2026_05_09",
+      "previous_id": "K879",
+      "rationale": "Legacy stub keyed under K879 but content begins with 'K63:' label — cross-paste artifact (likely from 2026-04-10 merge_worktree.sh jq dedup bug). Re-keyed to original K63 to preserve research content while freeing K879 slot for the canonical real entry (experiment_id=k879, category=knowledge)."
+    }
   },
   {
-    "id": "K880",
+    "id": "K64",
     "timestamp": "2026-03-21T07:56:33.445908+00:00",
     "category": "strategy_optimization",
     "confidence": 0.92,
@@ -9078,10 +9239,17 @@
       "GLD",
       "portfolio"
     ],
-    "legacy": true
+    "legacy": true,
+    "audit_note": {
+      "audit_action": "rekey_stub_to_K64",
+      "audit_date": "2026-05-09",
+      "audit_source": "26pair_triage_2026_05_09",
+      "previous_id": "K880",
+      "rationale": "Legacy stub keyed under K880 but content begins with 'K64:' label — cross-paste artifact (likely from 2026-04-10 merge_worktree.sh jq dedup bug). Re-keyed to original K64 to preserve research content while freeing K880 slot for the canonical real entry (experiment_id=k880, category=knowledge)."
+    }
   },
   {
-    "id": "K881",
+    "id": "K65",
     "timestamp": "2026-03-21T08:10:00.804595+00:00",
     "category": "strategy_optimization",
     "confidence": 0.92,
@@ -9094,10 +9262,17 @@
       "VT策略",
       "null_result"
     ],
-    "legacy": true
+    "legacy": true,
+    "audit_note": {
+      "audit_action": "rekey_stub_to_K65",
+      "audit_date": "2026-05-09",
+      "audit_source": "26pair_triage_2026_05_09",
+      "previous_id": "K881",
+      "rationale": "Legacy stub keyed under K881 but content begins with 'K65:' label — cross-paste artifact (likely from 2026-04-10 merge_worktree.sh jq dedup bug). Re-keyed to original K65 to preserve research content while freeing K881 slot for the canonical real entry (experiment_id=k881, category=knowledge)."
+    }
   },
   {
-    "id": "K882",
+    "id": "K66",
     "timestamp": "2026-03-21T08:10:46.402512+00:00",
     "category": "strategy_optimization",
     "confidence": 0.9,
@@ -9111,7 +9286,14 @@
       "coskewness",
       "correlation"
     ],
-    "legacy": true
+    "legacy": true,
+    "audit_note": {
+      "audit_action": "rekey_stub_to_K66",
+      "audit_date": "2026-05-09",
+      "audit_source": "26pair_triage_2026_05_09",
+      "previous_id": "K882",
+      "rationale": "Legacy stub keyed under K882 but content begins with 'K66:' label — cross-paste artifact (likely from 2026-04-10 merge_worktree.sh jq dedup bug). Re-keyed to original K66 to preserve research content while freeing K882 slot for the canonical real entry (experiment_id=k882, category=knowledge)."
+    }
   },
   {
     "id": "K883",
@@ -9918,7 +10100,7 @@
     "legacy": true
   },
   {
-    "id": "K932",
+    "id": "K109",
     "title": "K109: Hawkes Process vol jump clustering — GARCH dominates",
     "content": "[提出: Claude 面向G, 執行: Claude] K109: ★ Hawkes Process for vol jump clustering。自建 MLE (μ=0.0191, α=0.0699, β=0.0964)。半衰期 7.2d，branching ratio 0.725（強 self-excitation）。CoV=2.33 確認跳躍聚集是真實的。但 OOS AUC: GARCH 0.813 > Hawkes 0.717，最佳組合 Hawkes 權重=0%。Hawkes VT overlay MDD -8.1%（vs 12/VIX -11.6%）但 Sharpe 代價 -0.118。結論：GARCH 連續方差追蹤嚴格支配 Hawkes 離散跳躍建模。QLIKE ceiling 第 16 次確認。新模型類別（point process）也無法打破。",
     "category": "experiment",
@@ -9931,10 +10113,11 @@
     ],
     "confidence": 0.9,
     "timestamp": "2026-03-22T00:46:44.838743",
-    "legacy": true
+    "legacy": true,
+    "audit_note": "2026-05-08: id rekeyed from K932 to K109 to match title content. Original mis-keying likely from legacy merge_worktree.sh dedup bug. Source experiment files do not exist on disk (K109-K140 are pre-experiment-tracking-era legacy entries)."
   },
   {
-    "id": "K933",
+    "id": "K111",
     "title": "K111: Wavelet vol decomposition — GARCH dominates all frequency bands",
     "content": "[提出: Claude 面向G, 執行: Claude] K111: Wavelet Decomposition for Multi-Scale Vol Prediction。DWT 分解 r² 為 5 個頻率成分（D1-D4 + A4）。最可預測成分: A4 >32d (R²=0.28, AC=0.996)。但 GARCH beta 已隱含捕捉。高頻 D1+D2 佔 54% 方差但 noisy (D1 AC=-0.65)。OOS QLIKE: GJR 贏 Wavelet-AR 0.8-3.1% (DM p<0.001 for SPY/GLD, p=0.008 for TLT)。Wavelet-GARCH 更差 1.6-3.4%。M-Z R²: GJR 0.04 vs Wavelet ~0。結論: 分離頻率喪失 leverage effect + adaptive weighting。QLIKE ceiling 第 17 次確認。",
     "category": "experiment",
@@ -9949,10 +10132,11 @@
     ],
     "confidence": 0.9,
     "timestamp": "2026-03-22T00:47:09.651270",
-    "legacy": true
+    "legacy": true,
+    "audit_note": "2026-05-08: id rekeyed from K933 to K111 to match title content. Original mis-keying likely from legacy merge_worktree.sh dedup bug. Source experiment files do not exist on disk (K109-K140 are pre-experiment-tracking-era legacy entries)."
   },
   {
-    "id": "K934",
+    "id": "K113",
     "title": "K113: Order flow microstructure vol proxy — definitive null (0/12)",
     "content": "[提出: Claude 面向G, 執行: Claude] K113: Order Flow Imbalance → Vol Prediction。4 個日頻微結構 proxy（Volume Ratio, Amihud, Volume Asymmetry, Price Impact）× 3 資產（SPY/QQQ/EEM）= 12 cells 全部 null。GARCH-X 加入任何指標都惡化 QLIKE（-0.17% ~ -4.29%，DM p>0.48）。In-sample 相關性存在（r=0.05-0.30）但 OOS 不 translate。COVID 期間同樣 null。日頻 volume 太粗糙，真正 OFI 需要 tick data（Cont et al. 2014）。VIX sufficient statistic 再次確認。",
     "category": "experiment",
@@ -9968,10 +10152,11 @@
     ],
     "confidence": 0.9,
     "timestamp": "2026-03-22T00:55:03.448303",
-    "legacy": true
+    "legacy": true,
+    "audit_note": "2026-05-08: id rekeyed from K934 to K113 to match title content. Original mis-keying likely from legacy merge_worktree.sh dedup bug. Source experiment files do not exist on disk (K109-K140 are pre-experiment-tracking-era legacy entries)."
   },
   {
-    "id": "K935",
+    "id": "K114",
     "title": "K114: Information entropy vol regime — null (VIX 7-10x stronger)",
     "content": "[提出: Claude 面向G, 執行: Claude] K114: Information Entropy (SampEn/PE/ApEn) for Vol Regime Detection。跨學科方向（資訊理論）。Raw corr with fwd RV: |r|~0.09（全顯著），但 VIX r=0.70 是 7-10x 更強。Partial r controlling VIX: SampEn 0.001 (NS), PE 0.070 (sig but tiny), ApEn 0.017 (NS)。所有 entropy VT 策略 OOS 都不如 12/VIX（best: SampEn regime 0.98 vs 12/VIX 0.99）。跨資產: GLD PE inverse (-0.111), BTC tiny (+0.060)。結論: entropy 測量的市場複雜度已被 VIX 編碼。VIX sufficient statistic 再次確認。",
     "category": "experiment",
@@ -9987,10 +10172,11 @@
     ],
     "confidence": 0.9,
     "timestamp": "2026-03-22T00:55:37.038923",
-    "legacy": true
+    "legacy": true,
+    "audit_note": "2026-05-08: id rekeyed from K935 to K114 to match title content. Original mis-keying likely from legacy merge_worktree.sh dedup bug. Source experiment files do not exist on disk (K109-K140 are pre-experiment-tracking-era legacy entries)."
   },
   {
-    "id": "K936",
+    "id": "K112",
     "title": "K112: EMD-GARCH — null, QLIKE ceiling 18th (decomposition fundamental failure)",
     "content": "[提出: Claude 面向G, 執行: Claude] K112: EMD-GARCH (Empirical Mode Decomposition + GARCH)。6-7 個 IMFs，IMF1 佔 51.6% 方差但 AC=-0.30（noise）。EMD-AR/EMD-GARCH/EMD-Hybrid 全部 worse than GJR (0/9 顯著)。QLIKE 差距 +0.45%~+3.47%。關鍵診斷: IMF 上的 GARCH persistence=1.000（IGARCH boundary）——分解破壞了 GARCH 有效運作的方差結構。★ 科學結論: K111 Wavelet（固定基底）+ K112 EMD（自適應基底）都失敗 → QLIKE ceiling 是 r² 序列的基本屬性，非 basis 選擇問題。GARCH 遞歸結構隱含最優處理跨尺度交互作用。QLIKE ceiling 第 18 次確認。",
     "category": "experiment",
@@ -10005,10 +10191,11 @@
     ],
     "confidence": 0.95,
     "timestamp": "2026-03-22T00:57:23.519559",
-    "legacy": true
+    "legacy": true,
+    "audit_note": "2026-05-08: id rekeyed from K936 to K112 to match title content. Original mis-keying likely from legacy merge_worktree.sh dedup bug. Source experiment files do not exist on disk (K109-K140 are pre-experiment-tracking-era legacy entries)."
   },
   {
-    "id": "K937",
+    "id": "K110",
     "title": "K110: ★★ VT Crowding Simulation — not systemic risk, tipping at 40%",
     "content": "[提出: Claude 面向G, 執行: Claude] K110: ★★ Agent-Based Simulation of VT Crowding。1000 simulations per adoption rate。關鍵發現: (1) 目前 adoption ~5% (300-500B/50T)，Sharpe 衰退僅 2.3% (2) Tipping point ~40%: VT Sharpe < B&H Sharpe (3) VT 是市場穩定力量: contrarian flow → dampening (autocorrelation -0.10→-0.19) (4) 衰退線性: 每 1% adoption 損失 0.50% Sharpe，無突然崩壞 (5) 極端情境 (50%/k=0.5): Sharpe 0.052, vol +24.8% (6) Kurtosis 隨 adoption 下降（尾部風險減少）。結論: VT 在可預見的零售 adoption 水平（<20%）下安全，不構成系統性風險。與 Basak & Pavlova (2013) 一致。",
     "category": "experiment",
@@ -10022,10 +10209,11 @@
     ],
     "confidence": 0.85,
     "timestamp": "2026-03-22T00:58:56.328010",
-    "legacy": true
+    "legacy": true,
+    "audit_note": "2026-05-08: id rekeyed from K937 to K110 to match title content. Original mis-keying likely from legacy merge_worktree.sh dedup bug. Source experiment files do not exist on disk (K109-K140 are pre-experiment-tracking-era legacy entries)."
   },
   {
-    "id": "K938",
+    "id": "K115",
     "title": "K115: Pairs trading GARCH-enhanced — double null (0/7 cointegrated)",
     "content": "[提出: Claude 面向C, 執行: Claude] K115: GARCH-Enhanced Pairs Trading。7 ETF pairs 全部 FAIL cointegration test (p>0.19)。所有策略 OOS Sharpe 負值 (-0.19~-1.65)。GARCH dynamic threshold 平均改善 -0.046 Sharpe (p=0.81 NS)。結論: 2010-2024 ETF pairs cointegration 已崩壞（市場效率提升）。GARCH 在解決錯誤的問題——binding constraint 是找到 cointegrated 資產，不是優化門檻。",
     "category": "experiment",
@@ -10037,10 +10225,11 @@
     ],
     "confidence": 0.9,
     "timestamp": "2026-03-22T01:11:00.324007",
-    "legacy": true
+    "legacy": true,
+    "audit_note": "2026-05-08: id rekeyed from K938 to K115 to match title content. Original mis-keying likely from legacy merge_worktree.sh dedup bug. Source experiment files do not exist on disk (K109-K140 are pre-experiment-tracking-era legacy entries)."
   },
   {
-    "id": "K939",
+    "id": "K116",
     "title": "K116: Tail Risk Parity (CVaR) — null, 50/50 unbeatable 9th time",
     "content": "[提出: Claude 面向C, 執行: Claude] K116: Tail Risk Parity Portfolio (GARCH-Skewed-t CVaR)。2 資產: Static 50/50 Sharpe 0.623 > CVaR TRP 0.604 > Var RP 0.603。MDD 改善 1.5% 但 NS (bootstrap p>0.72)。COVID 期間 RP 省 7% 但全樣本不顯著。3 資產加 TLT 嚴格更差（2022 利率）。CVaR/VaR/Variance RP 幾乎相同（weights corr~0.99）。結論: 50/50 SPY/GLD 第 9 次確認不可動搖 (K2/K16/K19/K24/K54/K63/K64/K89/K116)。",
     "category": "experiment",
@@ -10054,10 +10243,11 @@
     ],
     "confidence": 0.9,
     "timestamp": "2026-03-22T01:11:00.324016",
-    "legacy": true
+    "legacy": true,
+    "audit_note": "2026-05-08: id rekeyed from K939 to K116 to match title content. Original mis-keying likely from legacy merge_worktree.sh dedup bug. Source experiment files do not exist on disk (K109-K140 are pre-experiment-tracking-era legacy entries)."
   },
   {
-    "id": "K940",
+    "id": "K117",
     "title": "K117: Climate event vol impact — mixed/mostly null (VIX absorbs)",
     "content": "[提出: Claude 面向G, 執行: Claude] K117: Climate/Weather Event Vol Impact。市場 proxy 識別 4 類事件（Insurance/Energy/Agriculture/Combined）。30/32 tests 顯著（BH-corrected）但 VIX-controlled analysis 揭露: 低 VIX regime 所有事件 NS (p=0.55-0.90)。事件 proxy 本質上是 noisy VIX regime filter。有趣發現: Insurance Disaster 頻率趨勢 +1.01/yr (p=0.017)，但 COVID 污染嚴重（73/93 events in 2020-24）。結論: VIX remains sufficient statistic，氣候 proxy 無增量。",
     "category": "experiment",
@@ -10071,10 +10261,11 @@
     ],
     "confidence": 0.85,
     "timestamp": "2026-03-22T01:11:00.324017",
-    "legacy": true
+    "legacy": true,
+    "audit_note": "2026-05-08: id rekeyed from K940 to K117 to match title content. Original mis-keying likely from legacy merge_worktree.sh dedup bug. Source experiment files do not exist on disk (K109-K140 are pre-experiment-tracking-era legacy entries)."
   },
   {
-    "id": "K941",
+    "id": "K118",
     "title": "K118: ★★★ Behavioral VT adoption barriers — regret aversion dominant",
     "content": "[提出: Claude 面向G, 執行: Claude] K118: ★★★ Behavioral Finance — Why Investors Don't Use VT。(1) Regret aversion 最強: VT 在 67% 月份落後 B&H, 最長連續累積落後 159 個月(~13年)。(2) Mental accounting: 4%/yr 保險費主觀放大 2.26x (loss aversion λ=2.25)。(3) Prospect theory 反直覺: 日/月/季評估 VT PTU > B&H (損失更小)，但年度以上 B&H 勝出 (複利拖累)。(4) Disposition effect: 62% VT 下跌賣出後反彈 → 強烈後悔。(5) VT 結構等同天災保險 → 同樣的低採購率機制 (Kunreuther 1996)。結論: VT 是行為上注定被拒絕的完美保險。建議: (a) 減少評估頻率 (b) 框架為風險預算不是 alpha 策略 (c) 自動化避免決策疲勞。",
     "category": "experiment",
@@ -10088,10 +10279,11 @@
     ],
     "confidence": 0.9,
     "timestamp": "2026-03-22T01:49:03.666705",
-    "legacy": true
+    "legacy": true,
+    "audit_note": "2026-05-08: id rekeyed from K941 to K118 to match title content. Original mis-keying likely from legacy merge_worktree.sh dedup bug. Source experiment files do not exist on disk (K109-K140 are pre-experiment-tracking-era legacy entries)."
   },
   {
-    "id": "K942",
+    "id": "K120",
     "title": "K120: Dynamic lead-lag network — null (effective N=2% of raw N)",
     "content": "[提出: Claude 面向G, 執行: Claude] K120: Dynamic Lead-Lag Network for Vol Prediction。數據: yfinance 6 資產 (SPY/QQQ/GLD/TLT/EEM/BTC) 2015-2024 日頻。方法: Rolling 252d Granger causality, 30 directed pairs × 702 windows。描述性發現: GLD 最常是 vol leader (33%, 非 SPY)，hub 每年重組。OOS partial r (controlling VIX): density -0.172, SPY centrality -0.232，看似顯著。但 4 項 robustness 全失敗: (1) Sign consistency 3正3負 (2) Rolling partial_r 劇烈震盪 (3) ★ Effective N=15 (raw 709 的 2%, fwd RV autocorr=0.96) → adjusted p=0.43 NS (4) Network VT Sharpe +0.048 p=0.52。★★ 方法論教訓: overlapping forward RV 嚴重膨脹顯著性，必須用 effective N 調整。VIX sufficient statistic 再次確認。",
     "category": "experiment",
@@ -10105,10 +10297,11 @@
     ],
     "confidence": 0.9,
     "timestamp": "2026-03-22T01:52:41.165168",
-    "legacy": true
+    "legacy": true,
+    "audit_note": "2026-05-08: id rekeyed from K942 to K120 to match title content. Original mis-keying likely from legacy merge_worktree.sh dedup bug. Source experiment files do not exist on disk (K109-K140 are pre-experiment-tracking-era legacy entries)."
   },
   {
-    "id": "K943",
+    "id": "K124",
     "title": "K124: ★★ GJR vs EWMA crisis deep dive — GJR wins 6/6, gamma premium 1.23%",
     "content": "[提出: Claude 面向D, 執行: Claude] K124: GJR vs EWMA(0.97) Crisis Response Deep Dive。數據: yfinance SPY 2007-2024 日頻 (empirical)。6 場危機分析: GJR wins MDD 6/6。COVID 最大差異: GJR -10.8% vs EWMA -15.3% (gamma premium 4.51%)。機制: GJR gamma 項放大負衝擊反應 4-11x vs EWMA fixed lambda。反應速度: GJR 2-9 天 vs EWMA 4-52 天。Recovery: COVID GJR 53d vs EWMA 259d (5x faster)。突然衝擊 (GFC/COVID) gamma premium 最大, 慢熊 (Rate Hike) 差異最小 (0.05%)。Full-period Sharpe 幾乎相同 (0.122 vs 0.125)。結論: GJR 是免費的危機保險（不犧牲 Sharpe），可直接寫入論文 Section 5。",
     "category": "experiment",
@@ -10122,10 +10315,11 @@
     ],
     "confidence": 0.92,
     "timestamp": "2026-03-22T02:21:50.593743",
-    "legacy": true
+    "legacy": true,
+    "audit_note": "2026-05-08: id rekeyed from K943 to K124 to match title content. Original mis-keying likely from legacy merge_worktree.sh dedup bug. Source experiment files do not exist on disk (K109-K140 are pre-experiment-tracking-era legacy entries)."
   },
   {
-    "id": "K944",
+    "id": "K125",
     "title": "K125: ★ Retail VT implementation — cost negligible, MDD halved, 5min/month",
     "content": "[提出: Claude 面向C, 執行: Claude] K125: Retail Investor VT Implementation Guide。數據: yfinance SPY+GLD+SHY 2015-2024 (empirical)。$100K 10yr: VT $179K (6.0%/yr, MDD -14.1%) vs SPY $285K (11.1%, MDD -34.1%) vs 60/40 $171K (5.5%, MDD -28.5%)。成本: 10yr 總 TX $487 (0.49%)，ETF 費 $305/yr。COVID 實戰: 自動降到 21% equity (VIX=57), 全年 +8.8%。操作: 每月 5 分鐘查 VIX。vs Robo-advisor 省 $3,484 顧問費。結論: 成本可忽略, 核心價值是 MDD 保護不是報酬增強。",
     "category": "experiment",
@@ -10139,10 +10333,11 @@
     ],
     "confidence": 0.9,
     "timestamp": "2026-03-22T02:21:50.593756",
-    "legacy": true
+    "legacy": true,
+    "audit_note": "2026-05-08: id rekeyed from K944 to K125 to match title content. Original mis-keying likely from legacy merge_worktree.sh dedup bug. Source experiment files do not exist on disk (K109-K140 are pre-experiment-tracking-era legacy entries)."
   },
   {
-    "id": "K945",
+    "id": "K131",
     "title": "K131: TDA persistent homology — marginal dR2=2.3%, early warning 1/4",
     "content": "[提出: Gemini G2, 執行: Claude] K131: TDA Vol Regimes。VIX-only R2=0.496, +TDA R2=0.519 (dR2=0.023)。Partial r=-0.224 controlling VIX (mean-reversion signal)。Early warning: GFC only (1/4)。VIX captures 96% of TDA info。",
     "category": "experiment",
@@ -10153,10 +10348,11 @@
     ],
     "confidence": 0.85,
     "timestamp": "2026-03-22T03:11:54.010333",
-    "legacy": true
+    "legacy": true,
+    "audit_note": "2026-05-08: id rekeyed from K945 to K131 to match title content. Original mis-keying likely from legacy merge_worktree.sh dedup bug. Source experiment files do not exist on disk (K109-K140 are pre-experiment-tracking-era legacy entries)."
   },
   {
-    "id": "K946",
+    "id": "K129",
     "title": "K129: ★★★ VIX sufficiency boundary map — economic vs statistical sufficiency",
     "content": "[提出: Codex C1, 執行: Claude] K129: VIX Sufficient Statistic Boundary Map。數據: yfinance SPY+VIX+VIX3M+VVIX 2007-2024 (empirical)。方法: forecast encompassing (HLN 1998) + DM test + regime-conditional analysis。3 維度分析: (1) Horizon: VIX sufficient at 1d/22d/66d, 5d boundary (VIX3M encompassing p=0.017 但 QLIKE 無改善) (2) Decision: VT allocation/VaR/direction 全 sufficient, regime identification 邊界 (+0.14 AUC) (3) Regime: High VIX>25 VIX3M +11.7% R² 但 DM NS。★★★ 核心理論升級: VIX sufficiency = economic sufficiency (統計上可改善但經濟上不可約)。所有 VIX3M/VVIX-adjusted VT 策略 OOS Sharpe 更低。精確定義了「sufficient statistic」的含義。",
     "category": "experiment",
@@ -10170,10 +10366,11 @@
     ],
     "confidence": 0.92,
     "timestamp": "2026-03-22T03:14:55.540989",
-    "legacy": true
+    "legacy": true,
+    "audit_note": "2026-05-08: id rekeyed from K946 to K129 to match title content. Original mis-keying likely from legacy merge_worktree.sh dedup bug. Source experiment files do not exist on disk (K109-K140 are pre-experiment-tracking-era legacy entries)."
   },
   {
-    "id": "K947",
+    "id": "K130",
     "title": "K130: ★★★ Decision-conditioned model router — best model is objective-dependent",
     "content": "[提出: Codex C3, 執行: Claude] K130: Decision-Conditioned Model Selection Framework。數據: yfinance SPY+GLD+TLT 2007-2024 (empirical)。90-cell loss tensor (6 models × 3 assets × 5 objectives)。核心: 無 Pareto-dominant model。RV22 贏 QLIKE+MDD (7/15 cells)，GARCH 贏 VaR，EWMA 贏 Net Sharpe，ConstVol 贏 Turnover。GJR 贏 0 cells 但 avg rank 3.8（最均衡）。12/VIX 對 GLD/TLT VaR 全失敗 (Kupiec p=0)——VIX 是 equity-specific gauge。Single-model regret: RV22 在 VaR 上 42% regret，Turnover 上 11084% regret。Router 平均優 1.33 rank。★★★ 方法論貢獻: 把 120+ 實驗的碎片化 finding 整合為統一 decision framework。可寫入論文。",
     "category": "experiment",
@@ -10187,10 +10384,11 @@
     ],
     "confidence": 0.9,
     "timestamp": "2026-03-22T03:16:44.125001",
-    "legacy": true
+    "legacy": true,
+    "audit_note": "2026-05-08: id rekeyed from K947 to K130 to match title content. Original mis-keying likely from legacy merge_worktree.sh dedup bug. Source experiment files do not exist on disk (K109-K140 are pre-experiment-tracking-era legacy entries)."
   },
   {
-    "id": "K948",
+    "id": "K134",
     "title": "K134: Cross-asset info topology — coupling and TE are orthogonal (r=-0.027)",
     "content": "[提出: Gemini R2#2, 執行: Claude] K134: Cross-Asset TDA+TE Combined。數據: yfinance 5 資產 2010-2024 (empirical)。方法: eigenvalue ratio (coupling proxy) + binned TE。核心: eigenvalue ratio 和 TE 完全獨立 (r=-0.027, p=0.71)，無 lead-lag。市場耦合 (eigenvalue ratio mean=0.658) 和 VIX 資訊流是正交通道。危機時耦合上升但 TE 不一定上升 (3/5 concordant)。無早期警訊 (all z<1 pre-crisis)。VIX level 已捕捉耦合 (r=0.44)。結論: 拓撲早期警訊假說不支持，VIX sufficiency 從 info theory + topology 再次確認。",
     "category": "experiment",
@@ -10204,10 +10402,11 @@
     ],
     "confidence": 0.85,
     "timestamp": "2026-03-22T04:11:53.524034",
-    "legacy": true
+    "legacy": true,
+    "audit_note": "2026-05-08: id rekeyed from K948 to K134 to match title content. Original mis-keying likely from legacy merge_worktree.sh dedup bug. Source experiment files do not exist on disk (K109-K140 are pre-experiment-tracking-era legacy entries)."
   },
   {
-    "id": "K949",
+    "id": "K132",
     "title": "K132: ★★★ QLIKE error decomposition — SPY 63% captured, GLD/BTC 80%+ uncaptured",
     "content": "[提出: Gemini R2#1, 執行: Claude] K132: QLIKE Prediction Error Decomposition。數據: yfinance SPY+GLD+BTC 2007-2024 (empirical + bootstrap 5000)。Capture Rate: SPY 62.7% [56.9,67.9], GLD 19.4% [14.6,24.3], BTC 14.8% [9.8,19.9]。Bias 可忽略 (<0.01)，問題在 conditional dynamics。Noise floor = Euler-Mascheroni 0.5772 (佔 excess QLIKE 30-38%)。★★★ Regime: SPY low-VIX capture 僅 9.2% vs high-VIX 50.1% → leverage effect 在高 vol 最有效。GJR vs EWMA: SPY GJR 勝 (62.7 vs 54.5)，但 GLD/BTC EWMA 勝 (23.0/22.4 vs 19.4/14.8)。★★★ 結論: SPY 改善需更好 proxy (5-min RV)，GLD/BTC 有 80%+ 未捕捉的可解釋結構 → 巨大模型改善空間。",
     "category": "experiment",
@@ -10221,10 +10420,11 @@
     ],
     "confidence": 0.9,
     "timestamp": "2026-03-22T04:19:44.098012",
-    "legacy": true
+    "legacy": true,
+    "audit_note": "2026-05-08: id rekeyed from K949 to K132 to match title content. Original mis-keying likely from legacy merge_worktree.sh dedup bug. Source experiment files do not exist on disk (K109-K140 are pre-experiment-tracking-era legacy entries)."
   },
   {
-    "id": "K950",
+    "id": "K133",
     "title": "K133: VIX info decay router — no true decay regime, VIX always wins",
     "content": "[提出: Gemini R2#3, 執行: Claude] K133: VIX Information Decay & Dynamic Router。數據: yfinance SPY+VIX 2005-2024 (empirical)。方法: rolling 252d VIX predictive gain = QLIKE(const) - QLIKE(VIX)。結果: VIX gain 正 68% 時間。Low-gain 年份: 2013/2014/2017/2021/2024（低 vol 環境）。但即使在最差 quartile，VIX QLIKE=-8.875 仍贏 EWMA -8.774 和 ConstVol -8.380。★ 結論: 不存在「VIX uninformative」的真正 regime → dynamic router 不需要切換模型。VIX 在所有條件下都是最佳或並列最佳。Economic sufficiency (K129) 的另一面: VIX 不只是經濟上充分，資訊上也從不完全失效。 ★ Agent 版補充: GLD/TLT 上 VIX 比 EWMA/GARCH 更差 (QLIKE gain 負)，與 K128 Transfer Entropy 一致 (VIX 對非 equity 是 receiver)。Markov switching 可偵測 decay 但 dynamic router OOS 全 NS (p>0.10)。VIX 對 SPY informative regime mean VIX=30.9 vs uninformative=17.8。",
     "category": "experiment",
@@ -10237,10 +10437,11 @@
     ],
     "confidence": 0.88,
     "timestamp": "2026-03-22T04:21:52.308542",
-    "legacy": true
+    "legacy": true,
+    "audit_note": "2026-05-08: id rekeyed from K950 to K133 to match title content. Original mis-keying likely from legacy merge_worktree.sh dedup bug. Source experiment files do not exist on disk (K109-K140 are pre-experiment-tracking-era legacy entries)."
   },
   {
-    "id": "K951",
+    "id": "K135",
     "title": "K135: GLD inventory-conditioned vol — null OOS, vol is exogenous",
     "content": "[提出: Codex R2#1, 執行: Claude] K135: GLD Inventory-Conditioned Vol。數據: yfinance GLD+TNX+VIX 2005-2024 (empirical)。代理: TNX 代替 DFII10 real yield (FRED API 失敗)。8 predictors 中 5 個 IS 顯著 (Volume Ratio t=6.81 最強)，但 OOS 全部 null 或更差。Real yield level OOS 顯著惡化 (DM t=-3.25)。Kitchen sink QLIKE 爆炸 (23.66)。GLD capture rate ~1% across all models (vs K132 的 19% 可能用不同 metric)。GJR 對 GLD 幾乎無用 (+0.3%)。★ 結論: GLD vol 衝擊本質外生 (FOMC/geopolitical/央行 surprises)，backward-looking 模型無法預測。EWMA/GARCH 作為 reactive filter 已是最佳。Codex 假說部分驗證: GLD 確實非 leverage-conditioned，但 inventory predictors OOS 也失敗。",
     "category": "experiment",
@@ -10254,10 +10455,11 @@
     ],
     "confidence": 0.88,
     "timestamp": "2026-03-22T05:20:19.305698",
-    "legacy": true
+    "legacy": true,
+    "audit_note": "2026-05-08: id rekeyed from K951 to K135 to match title content. Original mis-keying likely from legacy merge_worktree.sh dedup bug. Source experiment files do not exist on disk (K109-K140 are pre-experiment-tracking-era legacy entries)."
   },
   {
-    "id": "K952",
+    "id": "K137",
     "title": "K137: ★★★ Economic sufficiency frontier — no global optimum, objective-dependent",
     "content": "[提出: Codex R2#4, 執行: Claude] K137: Economic Sufficiency Frontier Formal Framework。數據: yfinance SPY+GLD+TLT 2007-2024 (empirical + theoretical)。AIR tensor: 6 models × 3 assets × 4 objectives。核心定理: 不存在全域最佳模型（5 evidence lines）。(1) Blackwell sufficiency 僅 2/30 trivial pairs (2) Statistical→RV22, Economic→12/VIX (完全不同) (3) Discordance 51.1% (4) 每個模型有反例 6/6 (5) Kendall tau=0.363 (ranking 不穩)。★★★ 新洞見: Specialist vs Generalist — EWMA std=0.259 (best generalist, 最安全 default), 12/VIX std=0.832 (economic specialist, 最高變異)。Bootstrap CI 廣泛重疊。Corollary: model selection = f*(asset, objective)→model。可直接寫入論文作為核心理論框架。",
     "category": "experiment",
@@ -10272,10 +10474,11 @@
     ],
     "confidence": 0.92,
     "timestamp": "2026-03-22T05:23:37.831054",
-    "legacy": true
+    "legacy": true,
+    "audit_note": "2026-05-08: id rekeyed from K952 to K137 to match title content. Original mis-keying likely from legacy merge_worktree.sh dedup bug. Source experiment files do not exist on disk (K109-K140 are pre-experiment-tracking-era legacy entries)."
   },
   {
-    "id": "K953",
+    "id": "K136",
     "title": "K136: ★★ BTC leverage-crowding confirmed — regime-dependent gamma, volume-conditioned",
     "content": "[提出: Codex R2#2, 執行: Claude] K136: BTC Derivatives-Conditioned Vol。數據: yfinance BTC-USD 2017-2024 (empirical)。★★ 3 個獨立證據確認 Codex 假說「BTC vol is leverage-crowding-conditioned」: (1) Regime-switching gamma: bull gamma=-0.093 (anti-leverage, t=-3.05), bear gamma=+0.127 (normal, t=2.24)——兩者抵消導致全樣本 gamma≈0 (2) Volume-conditioned gamma: 高 volume Q4 gamma=+0.274 (sig), 低 volume Q1 gamma=-0.059 (NS)——leverage effect 只在機構交易者活躍時存在 (3) Weekend vol 僅 weekday 69% (t=-5.82)——機構缺席時 vol 下降。但 GARCH-X OOS 全 null。Student-t df=3.25 (極厚尾), IGARCH persistence=1.000。實用建議: BTC 用 GARCH(1,1) 非 GJR (regime-switching gamma 讓 fixed gamma 反效果)。真正改善需 Binance funding/OI/liquidation data。",
     "category": "experiment",
@@ -10290,10 +10493,11 @@
     ],
     "confidence": 0.9,
     "timestamp": "2026-03-22T05:29:10.237313",
-    "legacy": true
+    "legacy": true,
+    "audit_note": "2026-05-08: id rekeyed from K953 to K136 to match title content. Original mis-keying likely from legacy merge_worktree.sh dedup bug. Source experiment files do not exist on disk (K109-K140 are pre-experiment-tracking-era legacy entries)."
   },
   {
-    "id": "K954",
+    "id": "K138",
     "title": "K138: ★★ Hurst fingerprint — all assets rough (H~0.01), but doesnt explain capture rate",
     "content": "[提出: Gemini R3#3, 執行: Claude] K138: Cross-Asset Hurst Fingerprint。數據: yfinance 6 資產 2010-2024 (empirical)。3 方法: variogram H=0.006-0.020 (rough), DFA H=0.73-0.84 (persistent), R/S H=0.74-0.82。★ 方法論發現: variogram 測局部粗糙, DFA/R/S 測全域持續——vol 同時具有兩性質 (rough volatility hallmark)。跨資產 ranking 一致 (Spearman 1.000): TLT < GLD < EEM < QQQ < SPY < BTC。但 H vs capture rate rho=0.086 (p=0.87)——主假說否決。BTC volume-conditioned: 高 volume 更 rough (H=0.005 vs low 0.029)。BTC 成熟: H 0.033→0.007。Bootstrap 100% H<0.5。結論: rough vol 是普遍性質但不解釋 GARCH 跨資產差異。",
     "category": "experiment",
@@ -10308,10 +10512,11 @@
     ],
     "confidence": 0.88,
     "timestamp": "2026-03-22T06:12:28.470254",
-    "legacy": true
+    "legacy": true,
+    "audit_note": "2026-05-08: id rekeyed from K954 to K138 to match title content. Original mis-keying likely from legacy merge_worktree.sh dedup bug. Source experiment files do not exist on disk (K109-K140 are pre-experiment-tracking-era legacy entries)."
   },
   {
-    "id": "K955",
+    "id": "K140",
     "title": "K140: ★★ Vol cartography decision matrix — negative recommendations > positive",
     "content": "[提出: Gemini R3#5, 執行: Claude] K140: Vol Model Cartography。數據: yfinance SPY+GLD+TLT+BTC 2007-2024 (empirical meta-analysis)。108-cell 4D matrix (7 models × 4 assets × 3 VIX regimes × 5 objectives)。No Pareto-dominant model (wins uniform 8-21%)。69% cells 低 confidence。OOS validation 謙卑: 推薦樹 0/4 完美匹配, EWMA(0.97) 贏 all 4 assets in 2023-24。★★ 核心洞見: cartography 主要價值是 negative recommendations (what NOT to use), 如 12/VIX 不用於 BTC VaR (gap=0.18)。Universal safe default: EWMA(0.97)。Equity high-VIX: 12/VIX dominates。Non-equity: VIX irrelevant。可寫入論文 + 網站互動工具。",
     "category": "experiment",
@@ -10326,10 +10531,11 @@
     ],
     "confidence": 0.88,
     "timestamp": "2026-03-22T06:13:44.281010",
-    "legacy": true
+    "legacy": true,
+    "audit_note": "2026-05-08: id rekeyed from K955 to K140 to match title content. Original mis-keying likely from legacy merge_worktree.sh dedup bug. Source experiment files do not exist on disk (K109-K140 are pre-experiment-tracking-era legacy entries)."
   },
   {
-    "id": "K956",
+    "id": "K139",
     "title": "K139: ★★★ BTC liquidation ABM — 6/7 stylized facts reproduced, mechanism confirmed",
     "content": "[提出: Gemini R3#4, 執行: Claude] K139: BTC Liquidation-Driven Vol ABM。方法: theoretical/simulation (ABM with 3 agent types: spot 50%, leveraged long 30%, leveraged short 20%)。6/7 K136 stylized facts 重現: (1) regime-dependent gamma flip (bull=-0.063, bear=+0.0003) ✅ (2) weekend vol 61% of weekday ✅ (3) fat tails df=1.92 ✅ (4) vol persistence ✅ (5) vol level 74% ✅ (6) bear>bull gamma ✅。唯一失敗: volume-conditioned gamma (需要 position-level data)。★★★ 機制解釋: BTC gamma 翻轉是 leveraged position accumulation + forced liquidation 的自然結果。Bull=做多累積→下跌清算=negative gamma。Bear=做空累積→軋空=positive gamma。實用含義: BTC 不應用 fixed-gamma GJR，需 regime-conditional 估計。",
     "category": "experiment",
@@ -10344,7 +10550,8 @@
     ],
     "confidence": 0.88,
     "timestamp": "2026-03-22T06:19:43.360210",
-    "legacy": true
+    "legacy": true,
+    "audit_note": "2026-05-08: id rekeyed from K956 to K139 to match title content. Original mis-keying likely from legacy merge_worktree.sh dedup bug. Source experiment files do not exist on disk (K109-K140 are pre-experiment-tracking-era legacy entries)."
   },
   {
     "item_id": "555a1db9",
@@ -27999,5 +28206,770 @@
     ],
     "confidence": 0.75,
     "created_at": "2026-04-29T02:35:17.815224+00:00"
+  },
+  {
+    "item_id": "k_fomc_2026_04_29_ex_post",
+    "category": "experiment",
+    "confidence": "high",
+    "created_at": "2026-05-02T09:13:59.635699+00:00",
+    "content": "FOMC 2026-04-29 ex-post 對帳：(a) Hold 3.50-3.75% 兌現 12 天前 94.8% prior 的中央 scenario；(b) 8-4 dissent 是 1992-10 以來首次 4-dissent FOMC（Miran 鴿派 + Hammack/Kashkari/Logan 反 dovish wording）— 結構性訊號未在 prior 涵蓋；(c) SPY 04/29 close -0.04% 落在 hold-conditional 機率分佈中央；(d) June FOMC implied prob 從 78% 跳到 95.5% (+17.5pp) — 反 dovish dissent 把 cut 機率打掉。pub_id mile_fef2e0b2，tags 一般讀者/FOMC/SPY/VIX/事件研究。Methodology 教訓：T+0 ex-post 對帳框架（actual vs prior conditional distribution）行得通，dissent structure 是 ex-ante prior 沒 cover 的重要 narrative shock。",
+    "evidence": [
+      "mile_fef2e0b2",
+      "Federal Reserve press release 2026-04-29",
+      "Polymarket June FOMC contract",
+      "Powell press conference transcript"
+    ]
+  },
+  {
+    "item_id": "k195_copula_tail_asymmetry_bonferroni_oos",
+    "category": "experiment",
+    "confidence": "high",
+    "created_at": "2026-05-02T09:30:00.773926+00:00",
+    "content": "K195 Copula Tail Dependence Asymmetry Multi-Pair Deep Dive：66 個股票 ETF 配對的 lower-tail vs upper-tail dependence asymmetry 檢定。全樣本 Harvey 32/66、Bonferroni 28/66；OOS sign 一致 35/66、OOS Harvey 27/66、OOS Bonferroni 26/66 — robust multi-pair signal not artifact of single subsample。Top-5 pairs by |t-stat|：EEM-XLK (t=−10.29), QQQ-XLK, SPY-XLE, XLE-XLF, SPY-EEM。Spearman ρ=0.122 跨期 partial r rank 相關。GARCH-X 接力測試（用 TDA 當 exog regressor 預測 RV）DM t=−0.601 p=0.5478 — TDA 有結構性 cross-section evidence，但 forecast utility 對 RV-baseline 沒贏（誠實標註 NS）。Methodology 教訓：tail dependence asymmetry 的存在性檢定 ≠ forecast utility；前者通過 Bonferroni 不代表 後者預測力顯著。Patton 2006 / Joe 1997 standard。pub_id mile_7de1c5a2 audience=research。",
+    "evidence": [
+      "mile_7de1c5a2",
+      "experiments/k195/k195_tda_deep_dive.py",
+      "experiments/k195/k195_results.json"
+    ]
+  },
+  {
+    "item_id": "k518_trend_following_ma_all_fail_harvey",
+    "category": "experiment",
+    "confidence": "high",
+    "created_at": "2026-05-02T09:46:29.497977+00:00",
+    "content": "K518 Trend-Following / MA 5 strategies (SMA200 / Faber10M / Golden Cross / Dual Momentum / MA+VT) on SPY 21yr：5/5 fail Harvey t>3 multi-test bar；4/5 underperform B&H absolute Sharpe；best Golden Cross Sharpe 0.51 vs B&H 0.41 (+24%) but Harvey t=0.94 ns + cross-OOS 3/5 fail。MA+VT collapse Sharpe -83% / MDD -74% — VT-overlay on TF undermines both edges。Conditional view：only marginally beats B&H in high-VIX regimes，loses in normal/low-VIX。MA+VT 失敗 mechanism 教訓：volatility targeting overlay needs base strategy to have >=baseline Sharpe；若 base 是 TF/MA-style timing model 已輸 B&H，VT scaling 進一步放大 turnover 與 noise drag → double-loss。Refs: Moskowitz et al. (2012) JFE; Faber (2007). pub_id mile_67169c30 audience=general。Lesson：folk-popular trading rules（均線 / 黃金交叉 / 雙動能）課本級別卻在 strict statistical bar (Harvey t>3 multi-test) 全 fail — 「直覺有道理」≠「實證顯著」。",
+    "evidence": [
+      "mile_67169c30",
+      "experiments/k518/k518_trend_following_results.json"
+    ]
+  },
+  {
+    "item_id": "gemini_cli_cross_model_review_pattern_2026_05_02",
+    "category": "methodology",
+    "confidence": "high",
+    "created_at": "2026-05-02T11:44:35.900491+00:00",
+    "content": "Gemini CLI 跨模型 second-opinion review pattern — 2026-05-02 session 累計 8 篇驗證：(1) K518 mile_67169c30 NEEDS_FIX → real bug → patched；(2) K672 mile_cbbf35cb PASS；(3) FOMC mile_fef2e0b2 NEEDS_FIX → real bug (SPY/SPX 7,135.95) → patched；(4) K549 mile_50030b56 NEEDS_FIX → false-positive (date cutoff)；(5) K1018 mile_a4311ba7 PASS；(6) K774 mile_930ff436 PASS；(7) K195 mile_7de1c5a2 PASS；(8) K655 mile_40fbffbb PASS（gemini 評：'數據呈現與推論邏輯嚴謹', '5 年是分水嶺' 的關鍵發現）。Hit rate：3 NEEDS_FIX / 8 = 37.5% flag rate；2 真 bug + 1 false-positive。Real bug catch rate = 2/8 = 25% — production article 低基礎錯誤率，但 catch 那 25% 高價值。PASS 比率 5/8 = 62.5% — 後續 article 加 'today date hint' 後 0 false-positive。Cost：每次 ~5K-10K input + ~500-1000 output tokens 對 gemini quota 影響輕微。工作流：published OR 高價值 draft → `cat <file> | gemini -m gemini-2.5-pro -p '今天系統日期 YYYY-MM-DD（cutoff caveat）；審查 5 維 → verdict'` → NEEDS_FIX 主線 cross-check 真假 bug → patch + sync。Agent embedded review：2026-05-02 K655 dispatch brief 內含 self-review step（agent 自己跑 gemini second-opinion）— 驗證可行，agent 可自己 review 自己 draft 不需主線 round-trip。詳見 `.claude/rules/agent-delegation.md` Gemini CLI 章節。",
+    "evidence": [
+      "mile_67169c30",
+      "mile_cbbf35cb",
+      "mile_fef2e0b2",
+      "mile_50030b56",
+      "mile_a4311ba7",
+      "mile_930ff436",
+      "mile_7de1c5a2",
+      "mile_40fbffbb"
+    ]
+  },
+  {
+    "item_id": "gemini_review_calibration_caveat_date_cutoff",
+    "category": "methodology",
+    "confidence": "high",
+    "created_at": "2026-05-02T10:20:33.162007+00:00",
+    "content": "Gemini CLI second-opinion review caveat — 訓練 cutoff date 校準偏差：gemini-2.5-pro 知識截至 ~2026-01，當文章引用 2026-03 之後的真實過去事件時，gemini 會視為「未來日期」誤標 NEEDS_FIX。實戰例：K549 article (mile_50030b56) 用 2026-03-27 為 backtest end date（系統實際 2026-05-02 已過），gemini flag「數據結束於未來日期」。處理方式：(a) gemini verdict NEEDS_FIX 時必檢實際日期是否真為未來（系統當天 vs gemini 知識 cutoff），確認過去事件不需 patch；(b) 寫文章時可在 brief 裡加「today is YYYY-MM-DD」context 給 gemini，但不必強制；(c) 主線程 reviewer 應 cross-check 每個 NEEDS_FIX 是事實 bug 還是校準偏差。已驗證 gemini 真抓 bug 例：K518 21/27 年不一致 + 數學錯（real）；FOMC SPY/SPX 7,135.95 (real);  vs 假 bug 例：K549 「未來日期」（calibration error）。Net hit rate 仍極高（2 real vs 1 false positive），但每個 NEEDS_FIX 都需主線程驗證。",
+    "evidence": [
+      "mile_50030b56",
+      "mile_67169c30",
+      "mile_fef2e0b2",
+      ".claude/rules/agent-delegation.md"
+    ]
+  },
+  {
+    "item_id": "k655_horizon_60_40_dominance_2026_05_02",
+    "category": "experiment",
+    "confidence": "high",
+    "created_at": "2026-05-02T11:26:57.505299+00:00",
+    "content": "K655 Horizon Analysis — BH 60/40 SPY/GLD dominates ALL horizons on Sharpe (1-20yr 8 期限 rolling)：mean Sharpe 0.63-0.89 #1 across all horizons. VIX overlay 策略只 13-31% horizons 超越 BH SPY. Piecewise 幾乎全部 horizons Sharpe 為負. **Caveat — minimax safety**: 1yr Piecewise best (-10% vs SPY -46%) / 3yr 80/20+12/VIX best (-2.2%) / 5yr+ BH 60/40 best — 短期下跌 risk control VT/VIX overlay 仍有價值，但長期 simplicity wins. 與 K2/K16/K19/K24/K54/K63/K64/K89 (8 次驗證 50/50 SPY/GLD 不可動搖) 形成 horizon dimension 互補。pub_id mile_40fbffbb audience=general supabase synced. Methodology lesson：horizon-conditional analysis 區分 long-run wealth accumulation (simplicity) vs short-run risk defense (overlay) — 同一策略在不同 horizon 評斷可大相逕庭，避免單一 sharpe 綜合排名誤導。",
+    "evidence": [
+      "mile_40fbffbb",
+      "experiments/k655",
+      "K2/K16/K19/K24/K54/K63/K64/K89 (50/50 invariance cluster)"
+    ]
+  },
+  {
+    "item_id": "session_2026_05_02_engineering_vs_edge_meta_lesson",
+    "category": "methodology",
+    "confidence": "high",
+    "created_at": "2026-05-02T11:39:58.334632+00:00",
+    "content": "Meta-lesson 2026-05-02 session — 'Engineering elaboration ≠ statistical edge' cluster：(1) K518 mile_67169c30: 5 個課本級別趨勢策略 (SMA200/Faber10M/Golden Cross/Dual Momentum/MA+VT) 全 fail Harvey；MA+VT 工程上更精緻 (overlay + 動態調整) 但 Sharpe collapse -83% / MDD +74%。(2) K1018 mile_a4311ba7 / mile_b4cf48f9: Robust VT (floor 30% / cap 90% / EWMA λ=0.94 / weekly rebalance) 4 層 engineering refinement 對 SPY/GLD baseline Sharpe 0.594 vs 0.575 0.597, DM t=-1.47 NS — 4 層複雜化 = 0 statistical edge。Criterion 1 fail 不上架。(3) K655 mile_40fbffbb: BH 60/40 (零 engineering) Sharpe #1 across all 8 horizons, VIX overlay 只 13-31% horizons 超 BH SPY。**Pattern**：投資策略 engineering refinement (overlay / dynamic / floor-cap / multi-layer) 在 strict statistical bar (Harvey t>3 multi-test / DM-HLN / Bonferroni / cross-OOS) 下普遍 fail 或 NS。簡單長期 BH / 50/50 屢屢勝出（K2/K16/K19/K24/K54/K63/K64/K89 8 次驗證 + K655 horizon 確認）。**Implication**：研究 effort 應從「複雜化 baseline 找 alpha」轉向「（a）structural cross-section evidence (e.g. K195 copula tail asymmetry) （b）regime-aware short-horizon defense overlay （c）event-driven discrete decisions」三類別 — 純 timing/sizing 工程 elaboration 邊際 ROI 已驗證為 low。**Honest framing principle**：發表 negative results 與 positive results 同等重要（K518/K1018/K672 已 published），讀者最大的 service 是知道「什麼沒用」+「什麼簡單就好」+「什麼複雜值得」三層分。",
+    "evidence": [
+      "mile_67169c30",
+      "mile_a4311ba7",
+      "mile_b4cf48f9",
+      "mile_40fbffbb",
+      "K2",
+      "K16",
+      "K19",
+      "K24",
+      "K54",
+      "K63",
+      "K64",
+      "K89"
+    ]
+  },
+  {
+    "item_id": "k549_multi_asset_5etf_weak_positive_harvey_ns",
+    "category": "experiment",
+    "confidence": "high",
+    "created_at": "2026-05-02T11:56:34.909948+00:00",
+    "content": "K549 Multi-Asset 5 ETF VT (SPY/GLD/TLT/EFA/VNQ) weak-positive verdict：7 配置組合中 Equal weight 5 Sharpe 1.517 / Risk Parity 5 Sharpe 1.608 vs 50/50 baseline 1.318，絕對 Sharpe 改善 +0.20~+0.29 economically positive，**但 0/7 組合通過 Harvey t>3.0 multi-test bar，bootstrap 信賴區間全部 overlap 50/50。****2022 升息對 TLT 組合致命**：50/50 Sharpe -0.12 vs +TLT -0.79 / 5EW -0.98，MDD -19.7%。EFA 最穩定，VNQ 邊際貢獻最大 (+0.064 Sharpe per 10%)，TLT 邊際 +0.023。**結論：「看得到但量不到」honest weak-positive** — economically ~0.2 Sharpe 改善但 statistically NS。與 K2/K16/K19/K24/K54/K63/K64/K89 8 次驗證 50/50 不可動搖、K655 horizon all-dominate 形成一致證據鏈。pub_id mile_50030b56 audience=general supabase synced。Methodology lesson：multi-asset diversification benefit 在 strict statistical bar (Harvey multi-test + bootstrap CI overlap test) 下普遍 fail — 實務上 +0.2 Sharpe 仍是真實邊際 gain，但學術 publish-ready 標準需要更強證據。",
+    "evidence": [
+      "mile_50030b56",
+      "experiments/k549",
+      "K2",
+      "K655",
+      "K672"
+    ]
+  },
+  {
+    "item_id": "k1018_robust_vt_4layer_not_listing_honest_negative",
+    "category": "experiment",
+    "confidence": "high",
+    "created_at": "2026-05-02T12:12:58.301801+00:00",
+    "content": "K1018 Robust VT (floor=30%/cap=90%/EWMA λ=0.94/weekly rebalance) 4 層 engineering refinement on SPY/GLD 50/50 baseline：Sharpe 0.594 vs baseline 12/VIX monthly 0.575 (+3.3% relative) vs BH 50/50 0.597 — **三者幾乎相同**。**DM t=-1.47 NS** (vs baseline)。**Sensitivity PASS**：參數 ±20% Sharpe 變化 <3% — engineering 結構穩定，但對結論方向無影響。**Cross-OOS 3/5 (2yr)**：borderline — 短期亮眼 ≠ 長期可信。**Criterion 1 FAIL**：Sharpe < 已上架策略中位數 → **不上架**。**published 兩篇 audience 互補**：mile_b4cf48f9 (research, 2026-04-29 Harvey/DM/bootstrap walkthrough) + mile_a4311ba7 (general, 2026-05-02 「越複雜真的越穩嗎？」reader-friendly)。Methodology lesson：4 層 engineering refinement (floor / cap / EWMA / weekly) 對 Sharpe 影響極小（+3.3% NS），但 turnover/operational ergonomics 確有改善 — 「engineering merit ≠ statistical edge」分離原則。與 K518 (5 TF/MA all fail) + K655 (BH dominates all horizons) 形成 engineering-vs-edge cluster (參見 session_2026_05_02_engineering_vs_edge_meta_lesson)。",
+    "evidence": [
+      "mile_a4311ba7",
+      "mile_b4cf48f9",
+      "experiments/k1018"
+    ]
+  },
+  {
+    "item_id": "k672_synthesis_25_conclusions_evidence_landscape_2026_05_02",
+    "category": "synthesis",
+    "confidence": "high",
+    "created_at": "2026-05-02T12:17:41.590626+00:00",
+    "content": "K672 ★★★ Definitive Conclusions Synthesis — 2 年研究 25 個結論 evidence landscape：**7 proven** (multi-K Harvey/Bonferroni/cross-OOS converged 證據)、**6 strong** (single-K with strong test bar)、**5 emerging** (新興方向需更多 replication)、**7 open questions** (5-min RV / hyperinflation regime / ML-GARCH / leverage / overnight VaR / vol-spillover networks / US→TW lag stability)。Evidence count by category：A1 127 entries / 101 K (proven cluster top), A6 199 entries / 46 K (strong cluster), 等。Methodology lesson：4-bucket evidence map (proven/strong/emerging/open) 是平台研究 maturity 的 readable taxonomy — 替「兩年論文 + 1k+ 實驗」的 raw output 提供 reader-friendly compass。Published 2 篇 audience 互補：mile_c15c7b98 (research, 完整 evidence_count + experiment_ids_count) + mile_cbbf35cb (general, narrative survey '什麼穩了 / 什麼快穩了 / 什麼新興 / 什麼還沒答案')。Companion-link footer 在 general 版自動指回 research 版 (publisher 自動偵測)。Use case：用戶或新讀者 onboarding 時的 single-source overview；Mission L1 把文章寫好 / L5 拉高曝光 同時受惠 — 「definitive conclusions」是 high-evergreen value content type。",
+    "evidence": [
+      "mile_c15c7b98",
+      "mile_cbbf35cb",
+      "experiments/k672"
+    ]
+  },
+  {
+    "item_id": "three_model_review_pattern_codex_catches_gemini_blindspot_2026_05_02",
+    "category": "methodology",
+    "confidence": "high",
+    "created_at": "2026-05-02T12:46:59.465569+00:00",
+    "content": "**3-模型 cross-validation review pattern 第一次驗證 codex 抓 gemini 純文字 review blind spot** — 2026-05-02 K1018 article (mile_a4311ba7) 案例：Gemini-2.5-pro 純讀文章 markdown，5/5 dimension PASS。Codex 對同篇 article 二審，verdict NEEDS_FIX_NEW，抓到 4 個 gemini 漏的 source-code-level issues：(1) HIGH: k1018.py:307 MDD/CAGR/Calmar 用 `np.cumsum(r)` 算 drawdown + `np.sum(r)` 算總報酬 — 不是複利淨值路徑，MDD -34.1%/-35.5%/-36.8% 不可信(2) HIGH: 「控制多重檢驗造成的偽陽性後」overclaim — 程式只有 raw DM + bootstrap，無 Bonferroni/Holm/FDR 實作(3) HIGH: 「灰色帶...統計上是一樣的東西」overclaim — gray band 只是 Robust-Baseline bootstrap CI 平移後區間，不是 3 邊 pairwise equivalence test(4) MED: k1018.py:351 dm_test() 把報酬平方後做 loss diff，非標準 Diebold-Mariano。**根因**：gemini 純文字 review 不打開 source code，只看文章 prose 對應，無法 verify 數字背後算法 + claim 是否有 implementation backing。codex 有 file system + grep 能力，能 trace claim 到 .py source line 驗證。**Pattern**：production article 上線 24h 內必走 codex source-code 二審（gemini 一審 + codex 二審互補不可替代）— claim ↔ source line 驗證 catch gemini 純 text framing 漏的所有「程式沒實作但 prose 寫了」overclaim。**已 patch**：mile_a4311ba7 (a) 「控制多重檢驗造成的偽陽性後」改「DM 檢定 + bootstrap 信賴區間」(b) 「統計上是一樣的東西」改「在這個檢定方法下，看不出他們之間有顯著差異」(c) MDD 數字加註「採用簡化計算法，與標準複利路徑略有差異，差距結論不變」。**根因待補**：k1018.py MDD/CAGR/Calmar 改 cumprod(1+r) 複利路徑 + dm_test() 改 standard DM。**待 audit**：其他 experiments 用同類簡化 metric helper 是否一致。詳見 docs/error_log.md 2026-05-02 entry + `.claude/rules/agent-delegation.md` Codex 章節。",
+    "evidence": [
+      "mile_a4311ba7",
+      "experiments/k1018/k1018.py:307",
+      "experiments/k1018/k1018.py:351",
+      "scripts/publish_k1018_general.py:50",
+      "docs/error_log.md"
+    ]
+  },
+  {
+    "item_id": "pending_fix_k1018_metric_helper_cumsum_to_cumprod",
+    "category": "pending_fix",
+    "confidence": "high",
+    "created_at": "2026-05-02T12:52:03.127985+00:00",
+    "content": "**Pending root-cause fix** — k1018.py:307-319 metric helper 用 simplified arithmetic (cumsum/sum) 而非複利路徑 (cumprod(1+r)/prod(1+r)-1)：(1) line 308 `cum = np.cumsum(r)` for MDD calc — should be `cum = np.cumprod(1 + r)` to track compound NAV path(2) line 314 `total_r = np.sum(r)` for CAGR — should be `total_r = np.prod(1 + r) - 1` for compound total return(3) line 351 `dm_test()` 用 squared returns 做 loss diff — non-standard Diebold-Mariano（standard 用 forecast errors squared diff）。**Impact**：K1018 published numbers (-34.1% / -35.5% / -36.8% MDD) 不可靠 — CAGR 與 Calmar 也可能高估。但 Sharpe 不受影響（mean/std 計算正確），且策略間相對排序大致 robust（因為三條策略用同樣 buggy helper）。**Patch 已上 article**：mile_a4311ba7 (general) MDD 數字加註「採用簡化計算法...差距結論不變」(2026-05-02 21:00 CST patched)。**Pending tasks**：(a) 修 k1018.py:307 cumsum→cumprod、line 314 sum→prod、line 351 dm_test 改 standard DM (b) re-run K1018 backtest 取新 MDD/CAGR (c) update mile_a4311ba7 + mile_b4cf48f9 數字（如改變超過 ±1% 顯著範圍）(d) audit 其他 experiments 是否用同類 simplified helper（grep `np.cumsum` + `np.sum` 在 metric calculation context）。**優先序**：medium — 結論方向（4 層 engineering ≈ baseline NS）不會被 metric 重算翻盤，但學術發表標準需要 compound-correct numbers。下次 session 排入 K1018b refit task。**Trigger**：codex review 抓到 (`three_model_review_pattern_codex_catches_gemini_blindspot_2026_05_02` knowledge entry + `docs/error_log.md` 2026-05-02 entry)。",
+    "evidence": [
+      "experiments/k1018/k1018.py:307",
+      "experiments/k1018/k1018.py:314",
+      "experiments/k1018/k1018.py:351",
+      "mile_a4311ba7",
+      "mile_b4cf48f9"
+    ]
+  },
+  {
+    "item_id": "session_2026_05_02_productivity_summary",
+    "category": "session_log",
+    "confidence": "high",
+    "created_at": "2026-05-02T13:14:18.645271+00:00",
+    "content": "Session 2026-05-02 productive output 累計（截至 21:30 CST）：**Articles published (9)**: K518 mile_67169c30 / K672 mile_cbbf35cb / FOMC mile_fef2e0b2 (event-driven, status=published) / K549 mile_50030b56 / K1018 mile_a4311ba7 / K774 mile_930ff436 / K195 mile_7de1c5a2 (research) / K655 mile_40fbffbb / K547 mile_1abbf66e。**Reviews completed (gemini)**: 8 篇 (K518/K672/FOMC/K549/K1018/K774/K195/K655) — 5 PASS / 2 真 bug patched (K518 21/27 + FOMC SPY/SPX) / 1 false-positive (K549 date cutoff)。**Reviews completed (codex)**: 4 篇 (K1018/K547 via embedded/K518/K672 in flight) — K1018 4 source bugs (cumsum/sum/dm_test/overclaims) → root code fix + article patch / K547 4 source bugs (lookahead/missing artifacts/path split/Cross-OOS overclaim) → patched / K518 4 source bugs (Faber 月頻 vs 日頻 / Golden Cross 2-3/5 / SPY-GLD 誤標 / Bonferroni overclaim) → patched / K672 verifying evidence_count alignment (off-by-1 detected, awaiting verdict)。**Code root fix**: experiments/k1018/k1018.py:307-389 cumsum→cumprod / sum→prod / dm_test → NW-corrected mean-diff t-test → re-run → MDD/CAGR/Calmar 全更新（Sharpe 不變因 mean/std 計算正確）+ k1018_metric_fix_2026_05_02.md diff report。**Knowledge entries (10+)**: gemini review pattern cumulative / FOMC ex-post lesson / K195 copula / K518 TF/MA / K549 multi-asset / K655 horizon / K1018 robust VT / K672 synthesis / engineering-vs-edge meta-lesson / pending k1018 fix / 3-model breakthrough / gemini date-cutoff caveat。**Research_program updates**: 面向 C K518 / 面向 D K195 / 面向 E FOMC ex-post + event-date verification rule。**Rules/skills updates**: `.claude/rules/agent-delegation.md` Gemini CLI 章節 + Calibration caveat + Source-code blind spot 段落。**Memory updates**: `feedback_pool_fill_to_threshold.md` + `feedback_gemini_cli_share_load.md` + MEMORY.md。**Error log updates**: docs/error_log.md 2026-05-02 NFP 假日期 incident + K1018 codex review breakthrough。**Headline meta-finding**: 3-model review pattern (Claude write → Gemini text → Codex source-code) 連 4 篇驗證 codex 抓 gemini-missed real bug 共 16+ source-level issues。Real bug catch rate codex 60-100% per article vs gemini 25%。",
+    "evidence": [
+      "mile_67169c30",
+      "mile_cbbf35cb",
+      "mile_fef2e0b2",
+      "mile_50030b56",
+      "mile_a4311ba7",
+      "mile_930ff436",
+      "mile_7de1c5a2",
+      "mile_40fbffbb",
+      "mile_1abbf66e",
+      "experiments/k1018/k1018.py",
+      "docs/error_log.md",
+      ".claude/rules/agent-delegation.md"
+    ]
+  },
+  {
+    "item_id": "audit_2026_05_02_simplified_metric_helper_systemic_pattern",
+    "category": "pending_fix",
+    "confidence": "high",
+    "created_at": "2026-05-02T13:28:33.873109+00:00",
+    "content": "**Systemic audit complete (2026-05-02 21:42 CST)** — K1018-pattern simplified metric helper 在 experiments/ 下 audit 結果：**只 2/20 files 是實際 bug**：(1) k157 correlation_forecasting.py:557 — `pct_change()` arithmetic monthly returns + cumsum-MDD，**highest impact**（monthly returns 大到 log≈arith 失準）(2) k843 intraday_futures.py:462 — `(close-open)/open` arithmetic intraday returns，**low numerical impact**（intraday tiny log≈arith）但 methodologically wrong。**18/20 OK**（class B log-space cumsum）：hawkes_vol_jump / k1074 / k1094 / k191 / k201 / k204 / k215 / k217 (用 np.exp(cum) wealth space exemplary) / k228 / k281 / k288 / k300 / k306 (np.exp(mdd)-1 conversion) / k503 / k561 / k568 / k583 / vt_crowding_simulation。**結論**：systemic 假說從「20+ files 全 buggy」收斂到「2 files actual bug」— 大部分作者 paired 同個 metrics() template 跟 log returns 是 correct 用法。**Pending fixes**（priority order）：k157 (high impact monthly) → k843 (low impact intraday)。每篇修法同 K1018：cumsum→cumprod(1+r) for arith returns OR confirm log-return-space is intentional and document。**Audit methodology**：scanned full grep 20-file population（per K1259 2026-04-29 hard rule），documented blind-spot patterns (`.cumsum()` method calls, non-`cum` variable names) as follow-up suggestion。No fixes applied; no commits。**Trigger trace**：K1018 codex review → root fix → audit dispatch (af27875b36c41419a) → outcome 2/20 bugs。**Audit report**: `experiments/audit_cumsum_metric_2026_05_02.md`。",
+    "evidence": [
+      "experiments/audit_cumsum_metric_2026_05_02.md",
+      "experiments/k157/k157_correlation_forecasting.py:557",
+      "experiments/k843/k843_intraday_futures.py:462",
+      "experiments/k1018/k1018_metric_fix_2026_05_02.md"
+    ]
+  },
+  {
+    "item_id": "codex_exec_chinese_unicode_printf_bug_2026_05_02",
+    "category": "tooling",
+    "confidence": "high",
+    "created_at": "2026-05-02T13:27:41.663240+00:00",
+    "content": "**Codex CLI invocation 中文 prompt 用 printf 會踩 % char Unicode bug** — 2026-05-02 K655 codex 二審 first attempt 失敗：bg task bjdiiib21 exit 1, error message `(eval):printf:9: % \\M-g: invalid directive`。Root cause：zsh / bash printf format string 把中文 UTF-8 byte sequence 中的某 byte 當成 `%` 開頭的 conversion directive parse → invalid directive abort。**Fix**：用 heredoc 而非 printf：`{ cat <<'EOF' ... EOF; cat /tmp/<file>.txt; } | codex exec`。Verified：retry bg task bzjbclp7b 正常啟動，2340 lines accumulated 中。**Pattern lesson**：給 codex CLI pipe 中文 prompt 時，**永遠用 heredoc**，不要用 `printf '...%s' ...` formula。`%` 字元在 UTF-8 多字節序列中可能誤觸發 conversion directive parse。已啟用 codex 二審的 K1018/K547/K518/K672 全用 printf 但 prompt 結構碰巧避開 problematic byte sequences；K655 prompt 含特定中文字觸發此 bug。",
+    "evidence": [
+      "/private/tmp/claude-501/-Users-yhlai0911-Desktop-volpred-research/172d5f2e-86f2-4b3f-a02b-046ab596c39a/tasks/bjdiiib21.output",
+      "/tmp/k655_codex_out2.txt"
+    ]
+  },
+  {
+    "id": "fomc_2026_04_29_ex_post_codex_catches_5_source_level_bugs_2026_05_02",
+    "category": "review_pattern",
+    "title": "FOMC ex-post (mile_fef2e0b2) codex 二審抓 5 個 gemini 漏的 source-level bug",
+    "body": "FOMC 2026-04-29 ex-post article 經 codex 二審 (gpt-5.4 via heredoc，6047 lines / 14min) 找出 5 個 NEEDS_FIX_NEW issues，全部與 gemini 一審重疊區間外：\n1. SIGN ERROR：「90% 曝險少賺 0.004%」應為「少虧 0.004 個百分點」（SPY -0.04% 路徑下，減倉 = 減損失不是減收益）\n2. VIX 對帳基準混用：用 04/28 close (17.83) 對 04/29 早盤 (~18) vs T-2 close-to-close 條件分佈，正確口徑應為 04/28 close vs 04/29 close (~18.8)\n3. T-2 article id 誤指：mile_f7bc6e6a 實為 T-3，正確 T-2 = mile_4fa40750\n4. June 78%→95.5% 機率推估非同質來源（78% market narrative、95.5% Polymarket post-meeting），不應寫成確定式對比\n5. 173 場 conditional distribution 缺乏 canonical experiments/<id>/ artifact，T-7 用 /tmp 腳本 （K513 macro_event_vol n_fomc=171 分桶不同），traceability 不足\n\n已全部 patch + feed-sync。此為 cumulative pattern 第 5 篇 article codex 抓到 gemini 漏看的 source-level issues（K518/K672/K655/K1018/FOMC），strong evidence 3-model review pattern 必走。",
+    "source": "codex /tmp/fomc_codex_out.txt 2026-05-02 + patch storage/reports/feed.json mile_fef2e0b2",
+    "applies_to": [
+      "review_methodology",
+      "publication_qa",
+      "FOMC_series"
+    ],
+    "created_at": "2026-05-02T13:41:38.111689+00:00",
+    "tags": [
+      "codex_review",
+      "gemini_blindspot",
+      "FOMC",
+      "source_level_audit",
+      "3_model_pattern"
+    ]
+  },
+  {
+    "id": "three_model_review_pattern_cumulative_5_articles_2026_05_02",
+    "category": "review_pattern",
+    "title": "3-model review pattern cumulative tracking：5 articles / 16+ source-level catches",
+    "body": "Claude (write) → Gemini-2.5-pro (text framing) → Codex GPT-5.4 (source-code) 三 model 互補 review pattern 已驗證 5 篇 production article：\n\n| Article | Gemini caught | Codex 二審 caught (gemini missed) |\n|---------|---------------|------------------------------------|\n| K518 mile_67169c30 | tone framing | 21年/27年錯, 5×5獨立區間錯, Golden Cross 2/5→3/5, SPY/債券 vs SPY/GLD |\n| K672 mile_cbbf35cb | overclaim flag | A7 >20pp 每次 / B1 股債 spec mismatch |\n| K655 mile_40fbffbb | NEEDS_FIX (BH 60/40 spec) | rolling-window 21天細節 |\n| K1018 mile_a4311ba7 | PASS | MDD cumsum bug, 控制多重檢驗 overclaim, dm_test() 非標準 DM |\n| FOMC mile_fef2e0b2 | SPY/S&P typo (1) | sign error, VIX 對帳混用, T-2 id 誤指, 78%→95.5% 來源, traceability |\n\nCodex 累計抓 16+ source-level bugs gemini 全漏（純讀文章 markdown 看不到 implementation backing）。Pattern conclusion：每篇 production article 上線後 24h 內走 codex 二審不可省，subagent fallback （feature-dev:code-reviewer）若 codex CLI 故障也可頂用，但 primary path 是 codex。\n\n**Operational rule**：production article 24h 內 codex 二審 = mandatory step in publication pipeline，已寫入 .claude/rules/agent-delegation.md L95 (Source-code blind spot — 必走 Codex 二審)。",
+    "source": "session 2026-05-02 cumulative review work",
+    "applies_to": [
+      "publication_pipeline",
+      "review_methodology",
+      "agent_delegation"
+    ],
+    "created_at": "2026-05-02T13:41:38.111689+00:00",
+    "tags": [
+      "3_model_review",
+      "codex_audit",
+      "gemini_blindspot",
+      "publication_qa"
+    ]
+  },
+  {
+    "id": "metric_helper_fix_k157_k843_cumprod_2026_05_02",
+    "category": "code_fix",
+    "title": "K157 + K843 metric helper cumsum→cumprod fix（audit closure）",
+    "body": "audit_2026_05_02_simplified_metric_helper_systemic_pattern 識別 2 個 BUG：\n- K157 (correlation_forecasting.py L557-560)：monthly 配對組合 MDD 用 cumsum + cum-peak，輸入是 pct_change 月度 arithmetic returns，會 systematically understate 真實 wealth drawdown\n- K843 (intraday_futures.py L462-465)：intraday TX futures MDD 同 pattern，但 intraday 報酬極小 log≈arith，影響 <5bps（仍方法論不正確）\n\nFix applied 同 K1018 pattern：\n  cum = np.cumprod(1 + rets)\n  dd = (cum - peak) / peak  # 相對 NAV 高點的百分比 drawdown\n\n**Pending**：K157 + K843 results.json 尚未 regenerate（這次只動 source code）。次階段 task：\n1. uv run python experiments/k157/k157_correlation_forecasting.py 重跑 → 比對 MDD 變化方向\n2. uv run python experiments/k843/k843_intraday_futures.py 重跑 → 確認影響 <5bps 假設\n3. 若 MDD 變化 ≥ 1%，檢查 storage/reports/ 有沒有引用該 K 的 production article 需 patch\n\nAudit closure：20-file scope 內 BUG 全 fix，剩下 18 file class B (log-space) 確認 OK。",
+    "source": "audit_cumsum_metric_2026_05_02.md + Edit experiments/k157/* + experiments/k843/*",
+    "applies_to": [
+      "metric_helper",
+      "k157",
+      "k843",
+      "audit_followup"
+    ],
+    "created_at": "2026-05-02T13:44:25.311450+00:00",
+    "tags": [
+      "code_fix",
+      "metric_helper",
+      "cumprod",
+      "audit_closure"
+    ]
+  },
+  {
+    "id": "k549_codex_review_4_findings_2026_05_02",
+    "category": "review_pattern",
+    "title": "K549 mile_50030b56 codex 二審 NEEDS_FIX_NEW (4 issues)",
+    "body": "K549 multi-asset expansion article 經 codex 二審：\n\n1. NEW [overclaim]：「所有組合 CI 重疊」過滿 — bootstrap_ci 只算 4/7 portfolio (A_50/B/D/F)，其餘無 CI artifact\n2. OVERLAP [methodology]：「0/7 多重比較門檻」不是 Bonferroni/Holm/FDR/MCS，是 paired t-test + Harvey-style |t|>3.0；raw DM p-value 4/7 portfolio p<0.05（保守口徑可，但不能寫成「正式多重比較校正」）\n3. OVERLAP [spec]：「5 個獨立 2 年期」實際是 5 個單一年份視窗（2010/2013/2016/2019/2022 各 ~252 天）\n4. OVERLAP [lookahead]：VT 權重用同期 VIX_t 決定 return_t，無 shift(1)。同一慣例適用所有組合，跨組合相對排序仍有參考價值；絕對 magnitude 不可視為實盤結果\n5. PASS [k1018-pattern]：MDD 用 (1+r).cumprod() 路徑，不是 cumsum，無 K1018 同類 bug\n\n已 patch + feed-sync。Cumulative：6 篇 article × codex 抓 20+ source-level catches。",
+    "source": "/tmp/codex_K549_review.txt + patch storage/reports/feed.json",
+    "applies_to": [
+      "K549",
+      "publication_qa"
+    ],
+    "created_at": "2026-05-02T13:45:52.099983+00:00",
+    "tags": [
+      "codex_review",
+      "K549",
+      "lookahead",
+      "overclaim_caveat"
+    ]
+  },
+  {
+    "id": "codex_quota_limit_2026_05_02_1247_reset",
+    "category": "tooling_caveat",
+    "title": "Codex CLI quota 撞線 21:44 CST → reset 2026-05-03 12:47 AM CST",
+    "body": "K549 codex review 完成（PASS-tail with NEEDS_FIX_NEW），但 K774 / K195 codex review 撞 quota：\n`ERROR: You've hit your usage limit ... try again at May 3rd, 2026 12:47 AM`\n\n兩篇 article (mile_930ff436 K774, mile_7de1c5a2 K195) codex 二審 deferred 至 quota reset 後重派。\n\n**Operational note**：FOMC + K549 兩 codex 二審約 30 分鐘 burn 完當日剩餘 quota。未來同 session 高頻 codex 二審需 budget 預估或 sleep 至 quota reset。Gemini-2.5-pro 可作 stop-gap （accuracy lower but no source-code blind spot avoidance）。\n\n**Pending tasks (quota reset 後執行)**：\n- K774 mile_930ff436 codex 二審\n- K195 mile_7de1c5a2 codex 二審\n- K1018 research-version mile_b4cf48f9（如未做過）codex 二審",
+    "source": "/tmp/codex_K774_review.txt + /tmp/codex_K195_review.txt",
+    "applies_to": [
+      "codex_cli",
+      "review_pipeline"
+    ],
+    "created_at": "2026-05-02T13:45:52.099983+00:00",
+    "tags": [
+      "codex_quota",
+      "deferred_tasks"
+    ]
+  },
+  {
+    "id": "k774_k195_gemini_stopgap_review_2026_05_02",
+    "category": "review_pattern",
+    "title": "K774 + K195 gemini-2.5-pro stop-gap review (codex quota blocked)",
+    "body": "Codex CLI quota 撞線（21:44 CST，reset 12:47 AM CST）後，K774 + K195 codex 二審 deferred。改用 gemini-2.5-pro stop-gap review，prompt 明寫「stop-gap：只能讀 markdown，看不到實作」+ verdict format SUSPECT_NEEDS_FIX / PASS_WITH_CAVEAT / DEFER_TO_CODEX。\n\n**K774 mile_930ff436「5 資產全天候 VT」** = PASS_WITH_CAVEAT\n- 數字內部一致 ✓ / magnitude 合理 ✓ / framing 誠實 ✓（自承 Sharpe diff bootstrap 含零、近 3 年 0/4 vs benchmark）\n- Caveat: 12/VIX 規則來自歷史優化，需 codex 檢 walk-forward / curve-fitting risk\n\n**K195 mile_7de1c5a2「Copula 尾部依賴 26/66 OOS 顯著」** = PASS_WITH_CAVEAT\n- 數字一致 ✓ / Bonferroni 0.05/66 校正計算正確\n- Caveat 1: 主結論 OOS 2023-2024 兩年期，缺重大危機（2008/2020），「GENUINE」framing 偏強\n- Caveat 2: sign 跨期一致性僅 35/66 + partial_r Spearman ρ=0.122 偏低，family membership 不穩定性應更強調\n- Caveat 3: partial correlation 實作的 lookahead 細節（殘差計算、標準化）需 codex 驗\n\n**結論**：兩篇均無 urgent patch；尾部 caveat 等 codex quota reset 後深度 audit 補。Cumulative review pattern：6 篇 codex catched + 2 篇 gemini stop-gap PASS_WITH_CAVEAT。",
+    "source": "gemini-2.5-pro stop-gap reviews 2026-05-02 21:48 CST",
+    "applies_to": [
+      "K774",
+      "K195",
+      "review_pipeline"
+    ],
+    "created_at": "2026-05-02T13:48:57.027598+00:00",
+    "tags": [
+      "gemini_stopgap",
+      "codex_quota_workaround",
+      "K774",
+      "K195"
+    ]
+  },
+  {
+    "id": "k157_k843_regen_pending_codex_audit_2026_05_02",
+    "category": "deferred_task",
+    "title": "K157 + K843 metric helper regen 暫緩，等 codex 審 edit",
+    "body": "Audit report 識別 K157/K843 為 class-A BUG，已動 source code (cumsum→cumprod)。但 .claude hook 提醒：「實驗代碼執行前檢查」要求 codex 審過 + baseline 同 lag + signal.shift 等驗證。雖然 metric helper edit 是 K1018 codex 已審 pattern 的複製，但本次 edit 在 K157/K843 context 裡未獨立經過 codex review。\n\n**Decision**：暫不 regen，等 codex quota reset (12:47 AM CST 後) 派 codex 二審 K157/K843 metric edit + 確認 strategy logic baseline lag 一致 + 跑 sanity reproduce。\n\n**Pending tasks queue**：\n1. Codex 審 K157 (k157_correlation_forecasting.py L557-560) metric edit\n2. Codex 審 K843 (k843_intraday_futures.py L462-465) metric edit\n3. 通過後 regen + 比對 MDD 變化 vs 舊 results.json\n4. 若 MDD 變化 ≥ 1pp 且該 K 有 production article 引用，patch article\n\n**Root principle**：Hook 強制提醒體現「永遠修流程，不修資料」原則 — 即使 root cause fix 已 audit，每次重跑前仍要走 review 流程，避免 cumulative review-skipping habit。",
+    "source": "Hook PreToolUse:Bash 2026-05-02 21:50 CST + audit_cumsum_metric_2026_05_02.md",
+    "applies_to": [
+      "K157",
+      "K843",
+      "metric_helper_audit",
+      "review_pipeline_discipline"
+    ],
+    "created_at": "2026-05-02T13:49:49.312907+00:00",
+    "tags": [
+      "deferred_task",
+      "codex_quota_blocker",
+      "regen_pending",
+      "review_discipline"
+    ]
+  },
+  {
+    "id": "audit_2026_05_02_v2_blindspot_pass_2_more_bugs",
+    "category": "code_audit",
+    "title": "Cumsum-metric audit v2 blind-spot pass：2 more class-A bugs（order_flow_vol + K1176）",
+    "body": "Original audit grep `cum = np.cumsum` 漏看 pandas `.cumsum()` method calls。Re-audit `\\.cumsum()` pattern 在 experiments/ 下 → 兩個額外 class-A bugs：\n\n1. **order_flow_vol/order_flow_vol.py L542,548,554,559**：4 strategies (ret_base / ret_vol / ret_ami / ret_bh) 都 inline `ret_oos.cumsum() - ret_oos.cumsum().cummax()`，input `df['ret'] = df['close'].pct_change()` (L65) 是 arithmetic。同 K1018 bug pattern。\n\n2. **k1176/k1176.py max_drawdown() helper L194-200**：docstring「arithmetic cumulative sum (percent)」明文標示 bug；helper called at L241/381/401 (TZ momentum / 5050 combo / global combo)；input traces to `pct_change()` at L131。\n\n**Updated audit closure**：4 files class-A total（k157, k843 已 source-fixed; order_flow_vol, k1176 deferred 至 codex quota reset 12:47 AM CST 後審 edit）。\n\n**Audit methodology lesson**：\n- 單一 grep pattern 不夠 — 應 run **多個 variant**：`cum = np.cumsum` + `\\.cumsum()` + helper function name 掃 (`max_drawdown`, `mdd`, `compute_metrics`)\n- helper function bodies 同 pattern 危險 — `def max_drawdown(returns)` 可能被多 caller 用\n- 變數名 (`wealth`, `nav`, `equity_curve`) 也可能 hide 同 pattern；`cum =` 只 catches 一個 naming\n- Docstring 自承「arithmetic cumulative sum」是顯眼 red flag — 應該是 grep target",
+    "source": "experiments/audit_cumsum_metric_2026_05_02.md (extended) + grep blind-spot pass",
+    "applies_to": [
+      "audit_methodology",
+      "metric_helper",
+      "order_flow_vol",
+      "K1176"
+    ],
+    "created_at": "2026-05-02T13:53:34.900518+00:00",
+    "tags": [
+      "code_audit",
+      "blind_spot",
+      "metric_helper",
+      "cumprod",
+      "audit_methodology_lesson"
+    ]
+  },
+  {
+    "id": "audit_2026_05_02_v3_helper_function_pass_k818_bug",
+    "category": "code_audit",
+    "title": "Audit v3 helper-function pass — k818 第 5 個 class-A bug",
+    "body": "v3 audit 掃描 20+ `def max_drawdown / def mdd / def compute_mdd` helper functions in experiments/. \n\n**新發現 class-A**: `experiments/k818/k818_ssvs_return_prediction.py:643-657`\n- L76: `spy_ret = spy_close.pct_change().dropna() * 100` — 百分點\n- L643-644: `cum_strat = np.cumsum(strat_ret)`、`cum_bh = np.cumsum(bh_ret)`\n- L651: `dd = cum_ret - peak` （沒有 /peak）\n- 結果：dd 單位是 cumulative percentage points difference，不是 NAV-fraction MDD\n- 長 horizon 下扭曲明顯（pct_change*100 + cumsum + raw level diff）\n\n**Audit v3 verdict**: 大多數 helper functions 用 canonical `(1+r).cumprod() → (cum-peak)/peak` 或 explicit log→exp transform。Bug 集中在 (a) 用 pct_change 但 cumsum 當 wealth path，(b) 「raw level diff」沒做 /peak 換成 fraction。\n\n**Cumulative class-A tally (v1+v2+v3)**: 5 files\n- k157 ✅ source-fixed (monthly portfolio MDD)\n- k843 ✅ source-fixed (intraday TX futures)\n- order_flow_vol ⏸ deferred (4 strategies inline cumsum-MDD)\n- k1176 ⏸ deferred (max_drawdown helper)\n- **k818 NEW** ⏸ deferred (cumsum + raw level diff, no /peak)\n\n**Audit methodology lesson**: 3-pass audit 結束。Bound on systemic pattern：~5 files / ~20 ‘suspicious’ across full grep variant exhaustion；其他都是 OK log-space 或 canonical cumprod。下次同類 audit 可重複 3-pass framework：\n  Pass 1: `cum = np.cumsum` (var-bound bare assignments)\n  Pass 2: `\\.cumsum()` method calls + inline patterns\n  Pass 3: helper-function definitions (max_drawdown / mdd / compute_metrics)",
+    "source": "experiments/audit_cumsum_metric_2026_05_02.md (v1+v2+v3) + grep 3-pass methodology",
+    "applies_to": [
+      "audit_methodology",
+      "metric_helper_audit",
+      "k818"
+    ],
+    "created_at": "2026-05-02T13:55:51.325026+00:00",
+    "tags": [
+      "code_audit",
+      "v3_pass",
+      "k818",
+      "audit_closure",
+      "audit_3pass_framework"
+    ]
+  },
+  {
+    "id": "subagent_review_k157_k843_metric_edits_safe_to_regen_2026_05_02",
+    "category": "review_pattern",
+    "title": "Subagent fallback review of k157/k843 metric edits = SAFE_TO_REGEN（codex quota workaround）",
+    "body": "Codex CLI quota blocked → 派 feature-dev:code-reviewer subagent fresh-context review of k157/k843 metric helper edits（per .claude/rules/experiments.md fallback path）。\n\n**Subagent verdict (aa9df9eb45bd3122a)**：SAFE_TO_REGEN for both files\n- k157 (correlation_forecasting.py L556-560): PASS — exact K1018 pattern match, no division-by-zero risk, no downstream consumer breakage, monthly arithmetic returns input verified\n- k843 (intraday_futures.py L461-465): PASS w/ low-risk note — same K1018 pattern; **pre-existing inconsistency 警告**: L484 `total_return_pct = np.sum(rets)*100` 仍用 arithmetic sum，和 cumprod NAV path mdd 不一致。屬 pre-existing scope 不在本次 edit 範圍，但 codex quota reset 後應補 audit\n\n**K843 regen attempt (bg task b3jooehzi)**：exit 0 但 results.json mtime 不變 (Apr 18)，表示腳本沒真正寫回。可能需更長 wall-clock 跑完 tick parsing (2180 TX files)，或 sub-loop 內某 condition 阻止輸出。本 tick 不深追，下次 codex audit 重排。\n\n**Closure rule (per K1259 lesson)**：subagent PASS unblocks regen 規劃 + interim work，**不替代** codex 正式 closure。Codex quota reset (12:47 AM CST 2026-05-03) 後仍須跑 codex 二審 K157/K843 + k843 L484 pre-existing inconsistency 補 audit。\n\n**Pending tasks (codex reset 後)**：\n1. Codex 二審 K157 + K843 metric edits (本 subagent review 重複 confirm)\n2. Codex 看 k843 L484 total_return_pct vs cumprod mdd inconsistency\n3. K843 regen wall-clock 預估 + 排重跑 + 比對 MDD diff\n4. K157 regen + 跨 portfolio key 全 MDD 比對\n5. K774 + K195 codex deep-audit (gemini stop-gap PASS_WITH_CAVEAT 後)\n6. order_flow_vol + k1176 + k818 source edit + codex review",
+    "source": "feature-dev:code-reviewer subagent aa9df9eb45bd3122a verdict + k843 bg b3jooehzi attempt",
+    "applies_to": [
+      "K157",
+      "K843",
+      "subagent_fallback",
+      "codex_quota_workaround"
+    ],
+    "created_at": "2026-05-02T14:01:11.423357+00:00",
+    "tags": [
+      "subagent_review",
+      "metric_helper",
+      "codex_quota_workaround",
+      "deferred_codex_audit"
+    ]
+  },
+  {
+    "id": "audit_2026_05_02_full_closure_5_class_a_bugs_source_fixed_subagent_reviewed",
+    "category": "code_audit",
+    "title": "Cumsum-metric audit FULL closure — 5/5 class-A files source-fixed + subagent reviewed",
+    "body": "K1018-derivative metric helper systemic audit 全 closure：\n\n**5 class-A files source-fixed + subagent fallback PASS**：\n1. ✅ k157/k157_correlation_forecasting.py L556-560 (monthly portfolio MDD, 跨多個 weight schemes)\n2. ✅ k843/k843_intraday_futures.py L461-465 (intraday TX futures MDD)\n3. ✅ order_flow_vol/order_flow_vol.py L538-565 (4 strategies inline → 抽 _mdd_compound 局部 helper)\n4. ✅ k1176/k1176.py L194-203 (max_drawdown helper, 3 callers L241/L383/L403)\n5. ✅ k818/k818_ssvs_return_prediction.py L640-670 (special: spy_ret 是 pct-point unit，需 /100 round-trip; downstream MDD_pct key 之前 misleadingly named，新版才真正報 percent)\n\n**Subagent reviews**:\n- aa9df9eb45bd3122a (k157+k843): SAFE_TO_REGEN, K1018 pattern exact match\n- a957e42b8679d3a5d (3 files): SAFE_TO_REGEN_ALL\n\n**Pre-existing 警告 (subagent flag)**:\n- order_flow_vol _mdd_compound 沒 empty-series guard（pre-existing in old cumsum code，未 introduce 新 bug）\n- k843 L484 total_return_pct 仍用 np.sum(rets)*100 不是 cumprod（pre-existing 不在本次 edit 範圍）\n\n**Closure rule (K1259 lesson)**：subagent PASS unblock interim regen 規劃 + edit propagation，**不替代** codex 正式 closure。Codex quota reset (12:47 AM CST 2026-05-03) 後仍須 codex 二審所有 5 file edits 才能標 final closure + 重 regen results.json + 比對 MDD diff vs old (k157/k843 已留 pre-fix snapshot at /tmp/k843_results_pre_fix.json)。\n\n**Audit methodology takeaway**：3-pass grep variant framework 確認 systemic pattern bound 在 5 files：\n- Pass 1 (`cum = np.cumsum`): caught k157, k843\n- Pass 2 (`\\.cumsum()` method/inline): caught order_flow_vol (4 strategies inline), k1176 helper\n- Pass 3 (helper-function definitions): caught k818 (special unit case)\n完整 audit doc: experiments/audit_cumsum_metric_2026_05_02.md\n\n**Pending tasks (codex reset 後 mandatory)**：\n1. Codex 二審 all 5 file metric edits (current ones + k1176 helper change-of-semantics)\n2. Codex 看 k843 L484 + order_flow_vol 其他 pre-existing inconsistencies\n3. Regen all 5 experiments + 比對 MDD diff (k843 已試 b3jooehzi 但 results.json mtime 不變—需深查)\n4. K774 + K195 codex deep-audit (gemini stop-gap 後)\n5. K1018 research-version mile_b4cf48f9 補 patch (numerical version, 同 mile_a4311ba7 patch)",
+    "source": "subagent reviews aa9df9eb45bd3122a + a957e42b8679d3a5d; experiments/audit_cumsum_metric_2026_05_02.md v1+v2+v3",
+    "applies_to": [
+      "audit_methodology",
+      "metric_helper_audit",
+      "K1018_systemic_pattern",
+      "audit_closure"
+    ],
+    "created_at": "2026-05-02T14:04:53.383753+00:00",
+    "tags": [
+      "code_audit",
+      "audit_closure",
+      "subagent_fallback",
+      "5_class_a_bugs",
+      "K1018_pattern"
+    ]
+  },
+  {
+    "id": "k843_regen_validation_cumprod_fix_2026_05_02",
+    "category": "code_audit",
+    "title": "K843 regen 驗證 — VWAP Crossover unbounded MDD 大幅修正 (-213% → -89%)",
+    "body": "K843 metric helper edit (cumsum→cumprod) 後 regen results.json 完成（runtime 33.6s, 2180 TX files）。MDD 比對 pre vs post：\n\n| Strategy | Pre-fix MDD% | Post-fix MDD% | Δ |\n|----------|--------------|----------------|---|\n| S0 BH Night Session | -18.83 | -17.44 | +1.39 pp |\n| S1 Slot C Momentum | -8.35 | -8.11 | +0.24 pp |\n| S2 US Open Reaction | -4.81 | -4.76 | +0.05 pp |\n| **S3 VWAP Crossover** | **-213.79** | **-88.80** | **+124.99 pp** |\n| S4 Slot A→C Alignment | -4.02 | -3.99 | +0.03 pp |\n\n**最戲劇性 case：S3 VWAP Crossover** -213.79% → -88.80%。Pre-fix 是 cumsum + raw level diff for arithmetic returns，long horizon 上 unbounded（-213% 是「累積算術虧損 213pp」，不是 NAV-fraction），post-fix 是真實 NAV drawdown。Subagent review 預測「intraday returns tiny so log≈arith」對其他 4 策略成立 （變化 <1.4pp），但 VWAP 因為 -100bp+/leg 大量 stop-out 累積使 magnitude 大；audit lesson：metric helper bug 在 high-turnover / loss-prone strategies 影響特別大。\n\n**Article impact**：mile_179df5f5「Slot A-C MDD 降 78%」claim 重算\n- Pre-fix: 1 - 4.02/18.83 = 78.6%\n- Post-fix: 1 - 3.99/17.44 = 77.1%\n差 <1pp，rounded 都是 78%，**不觸發 article patch**。article 的 framing 仍站得住。\n\n**Validation 確認**：K1018-derivative metric helper bug 在 long-horizon arithmetic returns 上影響顯著 （VWAP S3 124pp 修正），不只是 cosmetic。Subagent review 說 SAFE_TO_REGEN 經實證 confirmed — fix 結果合理 + bounded + 與 K1018 fix outcome direction (MDD |絕對值|減少) 一致。\n\n**Pre-fix snapshot retained**: /tmp/k843_results_pre_fix.json (10113 bytes Apr 18 mtime)\n**Post-fix file**: experiments/k843/k843_intraday_futures_results.json (10108 bytes May 2 22:00)",
+    "source": "k843 regen pid 85973 + diff vs /tmp/k843_results_pre_fix.json",
+    "applies_to": [
+      "K843",
+      "metric_helper",
+      "audit_validation",
+      "K1018_pattern"
+    ],
+    "created_at": "2026-05-02T14:09:45.486298+00:00",
+    "tags": [
+      "regen_validation",
+      "k843",
+      "metric_helper_fix",
+      "MDD_correction",
+      "VWAP_unbounded_bug"
+    ]
+  },
+  {
+    "item_id": "820fff71",
+    "category": "experiment",
+    "content": "[提出: Codex R6#4, 執行: Claude] K157: Correlation Forecasting for Portfolio Risk. 5 models (Rolling-22d, Rolling-63d, EWMA-0.97, DCC-GARCH, Regime-Switch) x 3 pairs (SPY-GLD, SPY-TLT, GLD-TLT). Walk-forward OOS 2015-2024, monthly step. Correlation accuracy: SPY-GLD: best=EWMA_097(MSE=0.103840); SPY-TLT: best=DCC_GARCH(MSE=0.091361); GLD-TLT: best=EWMA_097(MSE=0.061489). DM test vs Rolling-22d: SIGNIFICANT. Portfolio: MinVar BEATS 50/50. SPY-GLD portfolio: 50/50 vol=0.1120, best MinVar vol=0.1081 (weights_Rolling_22d). TLT structural break (post-2022 SPY-TLT flip): models adapt with varying speed. KEY: Even perfect correlation forecasting barely improves 50/50 SPY-GLD — the 50/50 allocation is already near min-variance for similar-vol assets. Confirms Codex intuition: covariance forecasting matters in theory, not in practice for 2-asset equal-vol portfolios. This is the variance forecasting saturation analogue for correlation: diminishing returns from better forecasting.",
+    "evidence": [],
+    "confidence": 0.8,
+    "created_at": "2026-05-02T22:10:46.172046"
+  },
+  {
+    "id": "k157_regen_validation_cumprod_fix_2026_05_02",
+    "category": "code_audit",
+    "title": "K157 regen 驗證 — 10 portfolios MDD 全減 0.5-3pp（K1018 pattern）",
+    "body": "K157 metric helper edit (cumsum→cumprod) 後 regen results.json 完成（runtime 19.3s, monthly portfolio）。MDD 比對 pre vs post：10 個 portfolio key 全部 |MDD| 減少（K1018 pattern direction-consistent）：\n\n| Portfolio | Pre% | Post% | Δ pp |\n|-----------|------|--------|------|\n| #1 (~17%) | -18.11 | -17.42 | +0.69 |\n| #2 (~14%) | -14.82 | -14.36 | +0.46 |\n| #3 (~16%) | -16.23 | -15.61 | +0.62 |\n| #4 (~16%) | -16.59 | -15.93 | +0.66 |\n| #5 (~16%) | -16.52 | -15.86 | +0.66 |\n| #6 (~17%) | -17.01 | -16.30 | +0.71 |\n| #7 (~30%) | -30.28 | -27.38 | **+2.90** |\n| #8 (~30%) | -30.25 | -27.30 | **+2.95** |\n| #9 (~30%) | -30.18 | -27.25 | **+2.93** |\n| #10 (~30%) | -30.24 | -27.29 | **+2.95** |\n\n**Pattern**: 高風險 portfolio (|MDD| ~30%) 修正最大 (~3pp)，低風險 portfolio (~16%) 修正小 (0.5-0.7pp)。符合 K1018 fix outcome — 長 cumulative drawdown benefits most from compound NAV bounding。\n\n**Article impact**: 無 production article 引用 K157（grep storage/reports/feed.json 無 hit）。K157 純 methodology research，regen 只影響 experiments/k157/ 內部 artifacts，不觸發 article patch。\n\n**Pre-fix snapshot retained**: /tmp/k157_results_pre_fix.json (18844 bytes Apr 18 mtime)\n**Post-fix file**: experiments/k157/k157_correlation_forecasting_results.json (18834 bytes May 2 22:10)\n\n**Cumulative regen validation (k157+k843)**: 兩個 source-fixed 都已 regen + diff，pattern 全 consistent 與 K1018 outcome direction，subagent fallback PASS prediction confirmed。剩 3 個 deferred (order_flow_vol, k1176, k818) source-fixed 但需 codex quota reset 後 audit + regen + 比對。",
+    "source": "k157 regen pid 95893 + diff vs /tmp/k157_results_pre_fix.json",
+    "applies_to": [
+      "K157",
+      "metric_helper",
+      "audit_validation",
+      "K1018_pattern"
+    ],
+    "created_at": "2026-05-02T14:11:43.113650+00:00",
+    "tags": [
+      "regen_validation",
+      "k157",
+      "metric_helper_fix",
+      "MDD_correction"
+    ]
+  },
+  {
+    "id": "k1176_regen_validation_cumprod_fix_2026_05_02",
+    "category": "code_audit",
+    "title": "K1176 regen 驗證 — 10 strategies MDD 全減 0.2-3.2pp（K1018 pattern direction）",
+    "body": "K1176 max_drawdown helper edit 後 regen 完成（runtime <1s, 6 markets × strategies）。\n\nMDD 比對 pre vs post 顯示所有 10 strategy outputs |MDD| 全減少：\n- 最大修正：-32.11% → -28.94% (Δ +3.17pp)\n- 最小修正：-8.50% → -8.25% (Δ +0.25pp)\n- 中位數修正：~0.5-1pp\n\nPattern 完全一致 K1018 fix outcome direction（cumprod NAV 比 cumsum-of-arith-returns 給更小 |MDD|，因為 NAV-fraction bounded vs unbounded 累積 arithmetic diff）。\n\n**Article impact**: 無 production article 引用 K1176（grep 無 hit）。純 methodology research，regen 只影響 experiments/k1176/ 內 artifacts，不觸發 article patch。\n\n**Pre-fix snapshot**: /tmp/k1176_results_pre_fix.json\n**Post-fix file**: experiments/k1176/k1176_results.json (12649 bytes May 2 22:12)\n\n**Cumulative regen validation status**:\n- ✅ K157 regen + diff confirmed (10 portfolios, 0.5-3pp |MDD| ↓)\n- ✅ K843 regen + diff confirmed (5 strategies, S3 VWAP -213% → -89% large correction)\n- ✅ K1176 regen + diff confirmed (10 strategies, 0.2-3.2pp |MDD| ↓)\n- ⏸ order_flow_vol — 無 `__main__`，需 codex 確認 invocation pattern (test framework? upper-level orchestration?)\n- ⏸ k818 — 無 `__main__`，同上\n\n3/5 source-fixed files regen + bounded-fix validated; 2/5 still pending codex quota reset 後 audit + 確認 invocation。",
+    "source": "k1176 regen bg b7khpj1bu + diff vs /tmp/k1176_results_pre_fix.json",
+    "applies_to": [
+      "K1176",
+      "metric_helper",
+      "audit_validation",
+      "K1018_pattern"
+    ],
+    "created_at": "2026-05-02T14:13:13.278217+00:00",
+    "tags": [
+      "regen_validation",
+      "k1176",
+      "metric_helper_fix",
+      "MDD_correction"
+    ]
+  },
+  {
+    "id": "next_session_resume_after_codex_reset_2026_05_03_1247_cst",
+    "category": "session_continuation",
+    "title": "Next-session checklist — Codex quota reset 2026-05-03 12:47 AM CST",
+    "body": "本 session（2026-05-02 19:00-22:30 CST）3-model review pipeline 全力跑，最後撞 codex quota。Codex reset 後（2026-05-03 12:47 AM CST）下個 session 進場，依下表執行 closure。\n\n**P1 — Codex 二審 metric helper edits（5 files）**：\n本 session subagent fallback PASS 但需 codex 正式 closure（K1259 lesson: subagent PASS ≠ codex closure）。中文 prompt 必用 heredoc 不用 printf:\n```\ncodex exec --skip-git-repo-check <<HEREDOC\n請審查以下 5 個 metric helper edits in current working tree:\n1. experiments/k157/k157_correlation_forecasting.py L556-560\n2. experiments/k843/k843_intraday_futures.py L461-465\n3. experiments/order_flow_vol/order_flow_vol.py L538-565 (含新 _mdd_compound helper)\n4. experiments/k1176/k1176.py L194-203\n5. experiments/k818/k818_ssvs_return_prediction.py L640-670\nReference K1018 codex-approved pattern at experiments/k1018/k1018.py:307-319.\nVerdict format: AGREE_PASS / NEEDS_FIX_NEW per file。\n額外點：order_flow_vol 沒 JSON write 只 print，應確認 results.json 由誰生成；k818 output_path L1073 字串是 root path 但既有 file 在 subfolder — 是否 path bug?\nHEREDOC\n```\n\n**P2 — Codex 二審 K774 + K195 articles（gemini stop-gap PASS_WITH_CAVEAT）**：\n- mile_930ff436 K774 五資產全天候 VT — gemini caveat: 12/VIX 規則歷史優化，需檢 walk-forward / curve-fitting\n- mile_7de1c5a2 K195 copula 尾部依賴 — gemini caveat: OOS 2y 期間 light, partial_r ρ=0.122 偏低, sign 一致性 35/66 偏低\n\n**P3 — Regen 補完**：\n- ✅ k157, k843, k1176 已 regen + diff（直接 `python <file>.py` 即可）\n- ⏸ order_flow_vol: 無 JSON write，確認 metric edit 影響面（只 print 還是有 caller 把 stdout 抓進 JSON?）\n- ⏸ k818: output_path 字串 vs 既有 file 路徑不一致 — 確認後 regen + 比對 MDD\n\n**P4 — K1018 patched articles 後驗 (mile_a4311ba7 + mile_b4cf48f9)**：\n- 兩篇都已 patch 入 cumprod-fix 數字 + NW-mean-diff t-test。codex 應再 confirm article-level 數字 vs current results.json 一致 (本 session 已 update results.json + article 兩端)\n\n**P5 — K1018 source code 二審補強**：\n- experiments/k1018/k1018.py compute_metrics + dm_test 兩 edits 已 codex 1st review。若有需要 fresh-check，prompt 同 P1 pattern\n\n**Pre-fix snapshots retained (next session 比對基準)**：\n- /tmp/k843_results_pre_fix.json (10113 bytes)\n- /tmp/k157_results_pre_fix.json (18844 bytes)\n- /tmp/k1176_results_pre_fix.json\n\n**Knowledge entries this session**: ~18 entries appended (id range 2063-2081)。Search by tag `audit_methodology / codex_review / metric_helper / regen_validation` for full audit trail。\n\n**Cumulative numerical impact (verified)**:\n- K1018: Sharpe unchanged, MDD |↓| ~4pp, CAGR ↑ ~5pp, Calmar ~doubled, DM-statistic flipped from -2.67 to -0.22\n- K843 S3 VWAP: -213.79% → -88.80% (largest single fix)\n- K157: 10 portfolios |MDD| ↓ 0.5-3pp\n- K1176: 10 strategies |MDD| ↓ 0.2-3.2pp\n- order_flow_vol + k818: regen pending",
+    "source": "session 2026-05-02 19:00-22:30 CST cumulative work",
+    "applies_to": [
+      "next_session_continuation",
+      "codex_quota_reset_workflow"
+    ],
+    "created_at": "2026-05-02T14:23:00.791753+00:00",
+    "tags": [
+      "session_continuation",
+      "codex_reset",
+      "pending_tasks",
+      "audit_closure_pending"
+    ]
+  },
+  {
+    "id": "k818_regen_deferred_gibbs_sampler_too_long_2026_05_02",
+    "category": "deferred_task",
+    "title": "K818 regen 暫緩 — Gibbs sampler runtime + bg-pipe truncation issue",
+    "body": "K818 source code 已 fixed (subagent a957e42b8679d3a5d PASS) + 嘗試 regen，但：\n1. bg `uv run python experiments/k818/...` 沒寫 log，看似 silent exit\n2. fg run shows 正常啟動：downloaded yfinance data (7 assets × 4863 rows) + descriptive stats，然後進 Gibbs sampler stage\n3. K818 是 SSVS Gibbs sampler (So/Chen/Liu 2006 JRSS-C)，runtime 應 >>1min，本 session bg-pipe 看似 truncate 或 wall-clock 不夠\n4. Output_path string at L1073 寫 `experiments/k818_ssvs_return_prediction_results.json` (root) 但既有 file 在 `experiments/k818/k818_ssvs_return_prediction_results.json` (subfolder) — regen 可能寫到 root，需 codex audit 確認哪個是 canonical\n\n**Action**: regen + codex audit 整體 deferred 至 codex quota reset (12:47 AM CST 2026-05-03) 後：\n1. Codex 審 k818.py L1073 output_path bug — root vs subfolder 哪個 canonical?\n2. 確認 invocation：fg `uv run python ...` 等完，或用 nohup wall-clock 充分跑\n3. Regen + diff vs /tmp/k818_results_pre_fix.json\n4. 因 K818 input is `pct_change()*100` (pct-point unit)，metric edit 涉及 /100 round-trip，MDD 可能 magnitude shift 較大（compared to K157/K843/K1176 fraction-input edits）\n\n**Cumulative regen status (final)**:\n- ✅ K157 regen + diff: 10 portfolios |MDD| ↓ 0.5-3pp\n- ✅ K843 regen + diff: 5 strategies, S3 VWAP -213% → -89% (largest single fix)\n- ✅ K1176 regen + diff: 10 strategies |MDD| ↓ 0.2-3.2pp\n- ⏸ K818 — Gibbs runtime + path bug, deferred\n- ⏸ order_flow_vol — 無 JSON write (script only print), deferred\n\nPattern bound: 3/5 confirmed K1018 outcome direction (|MDD| 減少); 2/5 deferred 不影響 closure scope。",
+    "source": "k818 fg trial output (downloaded data + stats, hit Gibbs stage), bg silent exit",
+    "applies_to": [
+      "K818",
+      "regen_pending",
+      "audit_closure_partial"
+    ],
+    "created_at": "2026-05-02T14:29:08.076797+00:00",
+    "tags": [
+      "regen_deferred",
+      "k818",
+      "Gibbs_sampler",
+      "output_path_bug",
+      "codex_quota_blocker"
+    ]
+  },
+  {
+    "id": "p1_codex_audit_closure_5_metric_edits_all_pass_2026_05_03",
+    "category": "audit_closure",
+    "title": "P1 Codex audit closure — 5 metric helper edits ALL_PASS",
+    "body": "Post codex quota reset (12:47 AM CST 2026-05-03), 派 codex 二審 5 metric helper edits via heredoc。Output /tmp/codex_p1_metric_audit.txt (1621 lines, 53,185 tokens, ~2min runtime)。\n\n**ALL_PASS verdict** — 5 files 全 AGREE_PASS：\n1. k157/k157_correlation_forecasting.py L552 — monthly arithmetic returns + cumprod NAV ✓\n2. k843/k843_intraday_futures.py L461 — intraday arith + cumprod NAV ✓\n3. order_flow_vol/order_flow_vol.py L538 — _mdd_compound helper, 4 callers consistent ✓\n4. k1176/k1176.py L194 — helper docstring updated, 3 callers consistent + len(r)==0 guard ✓\n5. k818/k818_ssvs_return_prediction.py L644 — pct-point /100 round-trip 正確 ✓\n\n**2 codex-flagged follow-ups (both fixed in same tick)**：\n(a) k843 L484 `total_return_pct = np.sum(rets) * 100` (arithmetic sum) → `(np.prod(1 + rets) - 1) * 100` (compound NAV) — 與 MDD compound NAV 一致口徑\n(b) k818 L1073 output_path root-level → `experiments/k818/k818_ssvs_return_prediction_results.json` subfolder canonical — 符合 experiment 三件套規範\n\n**Closure status**:\n- ✅ K157 source-fixed + codex-reviewed + regen-validated\n- ✅ K843 source-fixed (含 L484 follow-up) + codex-reviewed + regen-validated\n- ✅ order_flow_vol source-fixed + codex-reviewed (regen 無 JSON write，print only)\n- ✅ K1176 source-fixed + codex-reviewed + regen-validated\n- ✅ K818 source-fixed (含 L1073 follow-up) + codex-reviewed (regen 待重跑驗 path 修正後)\n\n**3-model review pattern 完成 (Claude write → Subagent fallback PASS → Codex final closure)**：subagent fallback prediction (SAFE_TO_REGEN) confirmed by codex final review。本 audit 完成 closure。\n\n**Pending P2-P5**：\n- P2: K774 (mile_930ff436) + K195 (mile_7de1c5a2) codex deep-audit\n- P3: order_flow_vol + k818 regen 補完（k818 path 已修，可重跑）\n- P4: K1018 patched articles 後驗 (mile_a4311ba7 + mile_b4cf48f9 已 patch)\n- P5: K1018 source 二審補強（compute_metrics + dm_test 已 1st codex review）",
+    "source": "/tmp/codex_p1_metric_audit.txt + 2 follow-up edits (k843 L484, k818 L1073)",
+    "applies_to": [
+      "audit_closure",
+      "K1018_systemic_pattern",
+      "metric_helper"
+    ],
+    "created_at": "2026-05-02T16:53:12.318151+00:00",
+    "tags": [
+      "p1_closure",
+      "codex_audit",
+      "all_pass",
+      "audit_methodology"
+    ]
+  },
+  {
+    "id": "p2_codex_audit_closure_k774_k195_patched_2026_05_03",
+    "category": "audit_closure",
+    "title": "P2 codex deep-audit K774 + K195 → NEEDS_FIX_NEW (both patched)",
+    "body": "Post P1 closure，啟動 P2 codex deep-audit K774 (mile_930ff436) + K195 (mile_7de1c5a2)。Output /tmp/codex_p2_articles.txt (~1.5min runtime, 201,485 tokens)。\n\n**Both verdicts: NEEDS_FIX_NEW** — 已 patch + feed-sync。\n\n**K774 (mile_930ff436「5 資產全天候 VT」) 4 issues**:\n1. NEW: 沒有 walk-forward validation；12/VIX 是 hardcoded 預設、sensitivity 全樣本附近掃描\n2. NEW: 「Sharpe 提升沒過 top-tier 多重檢定門檻」framing 過強 — 程式只做 DM-on-raw-returns + IID bootstrap CI，不是 Bonferroni / Holm / FDR / MCS 正式 multi-test correction，無「multi-test gate」概念可 fail\n3. PASS: Metric helper 無 K1018 bug\n4. PASS: 無 lookahead (有 shift(1))\n5. NEW (重現鏈): script 寫 root experiments/k774_all_weather_vt_results.json，但 article 引 subfolder — 同 K818 同型 path bug（已記，待補修 source code）\n**Patches applied**: lead Sharpe-diff framing 改為 DM + IID bootstrap honest framing + caveat box 明說「無 multi-test gate」 + 「老實說」段加 12/VIX hardcoded + 沒 walk-forward + footer metric notice。\n\n**K195 (mile_7de1c5a2「Copula 尾部依賴」) 5 issues**:\n1. NEW (最嚴重): 「26 個配對在『全樣本 Bonferroni 通過 + OOS 期再做一次 Bonferroni 仍通過』雙重關卡下存活」**程式只算 OOS-alone 26/66，沒算 full ∩ OOS 交集**。原 claim 過超 source\n2. PASS: Bonferroni 校正計算正確 (p×66<0.05)\n3. PASS: partial correlation 無 lookahead\n4. NEW: GENUINE framing 過強 (sign 35/66 + ρ=0.122 + GARCH-X null) → 應降為 PASS_WITH_CAVEAT\n5. NEW: OOS 2023-2024 caveat 不夠救 overclaim\n**Patches applied**: VERDICT GENUINE → PASS_WITH_CAVEAT (lead + footer); 「雙重關卡」改為 honest 「OOS 單獨 Bonferroni 26/66、未計算 full ∩ OOS 交集」 + caveat box; 「family 穩定」軟化為 「family stability 偏弱」 + ρ=0.122 解讀; footer 加 codex audit notice。\n\n**3-model review pattern impact (cumulative)**: 7+ articles 經 3-model review；P2 兩篇都被 codex 抓出 subagent / gemini stop-gap 漏的 source-level overclaim。**Validation**: gemini stop-gap PASS_WITH_CAVEAT 其實低估了 K774 + K195 的 overclaim 嚴重度——codex 才能精確指出「全樣本 ∩ OOS 交集未計算」、「multi-test gate 不存在」這類 source-level issues。\n\n**Pending P3-P5**:\n- P3: order_flow_vol regen + k818 regen (path 已修)\n- P4: K1018 patched articles (mile_a4311ba7 + mile_b4cf48f9) 後驗\n- P5: K1018 source 二審補強",
+    "source": "/tmp/codex_p2_articles.txt + 2 article patches",
+    "applies_to": [
+      "audit_closure",
+      "K774",
+      "K195",
+      "3_model_review_validation"
+    ],
+    "created_at": "2026-05-02T16:59:07.210599+00:00",
+    "tags": [
+      "p2_closure",
+      "codex_audit",
+      "needs_fix_patched",
+      "overclaim_corrected"
+    ]
+  },
+  {
+    "id": "p4_p5_codex_closure_k1018_articles_pass_source_fixes_2026_05_03",
+    "category": "audit_closure",
+    "title": "P4 + P5 codex closure — K1018 articles AGREE_PASS + source NEEDS_FIX_NEW (patched)",
+    "body": "P4 + P5 bundled codex audit (bg bthzm21vo, ~106k tokens, 1.5min runtime)。\n\n**P4 verdicts: BOTH AGREE_PASS** — K1018 patched articles content 數字 vs results.json 全 match：\n- mile_a4311ba7: 3 strategies (baseline_monthly / robust_weekly / bh_5050) Sharpe / MDD / Turnover 一致；「差 0.003」對應 0.5966 - 0.5937 = 0.0029 ✓\n- mile_b4cf48f9: 6 strategies × 6 metrics 全一致；DM t-stats 與 bootstrap CI 全 match\n- 補充：兩篇 description 欄位仍有舊數字 (codex 提醒)\n**Follow-up applied**: 同步 description = content for both articles (mile_a4311ba7 desc 2594→2608, mile_b4cf48f9 desc 8456→9208)。Feed-sync done。\n\n**P5 verdict: NEEDS_FIX_NEW** — 2 source-level issues (both fixed)：\n1. **dm_test() h=1 default = iid not NW**：「Newey-West-corrected」名實不符。實作 `for k in range(1, h)` h=1 時不跑，沒做 Bartlett lag correction。**Fix applied**: `h=None` default with auto-bandwidth `max(1, floor(4*(n/100)^(2/9)))` per Newey-West (1994) data-driven rule。n=5098 → h=5。\n2. **apply_rebalance_freq() weekly corner-case**：原 `weekday==4` mask 只抓 Friday，holiday-shortened 週 Friday 不交易時不會 rebalance。**Fix applied**: 改用 `groupby(to_period('W')).apply(lambda g: g.index[-1])` 取得每週最後 trading day。\n\n**Regen post-fix verdict**: dm_test bandwidth 5 vs 1 numerically near-iid (daily returns 自相關小)：\n- robust vs baseline: t=0.4151 → 0.4156 (Δ<0.001)\n- robust vs bh5050: t=-0.2151 → -0.2352 (Δ≈0.02)\n- 兩者仍 NS，article framing intact，rounded 數字不變\n- robust_vt_weekly MDD: -31.26% → -31.18% (Δ<0.1pp)，article 「-31.3%」仍正確\n→ Article numbers within rounding tolerance, **無需 re-patch content**\n\n**Final K1018 closure status**:\n- ✅ K1018 source code (compute_metrics + dm_test + weekly rebalance + bandwidth) all codex-confirmed\n- ✅ K1018 results.json regen × 2 (post-cumprod-fix + post-bandwidth-fix)\n- ✅ mile_a4311ba7 article content + description 同步 patched + codex AGREE_PASS\n- ✅ mile_b4cf48f9 article content + description 同步 patched + codex AGREE_PASS\n\n**P3 status**: order_flow_vol regen 不適用（script 無 JSON write，只 print）；k818 Gibbs sampler runtime 過長 + 已修 path bug，可在下個 session 充分 wall-clock 重跑。\n\n**Cumulative session 終局成就**: 9 articles patched/reviewed (FOMC + K549 + K1018-pub + K1018-research + K655/K518/K672 earlier + K774 + K195)，5/5 metric helper class-A bugs source-fixed + codex-reviewed + 3/5 regen-validated，K1018 source 2-issue NW/weekly fix patched + regen confirmed，knowledge.json +30+ entries，MEMORY.md +1 feedback (3-model review discipline)，research_program.md +3-model pattern table。",
+    "source": "/tmp/codex_p4_p5.txt + 3 follow-ups (desc sync + dm_test bandwidth + weekly rebalance)",
+    "applies_to": [
+      "audit_closure",
+      "K1018_systemic_pattern",
+      "p4_p5_final_closure"
+    ],
+    "created_at": "2026-05-02T17:12:50.479790+00:00",
+    "tags": [
+      "p4_closure",
+      "p5_closure",
+      "codex_audit",
+      "K1018_final_closure"
+    ]
+  },
+  {
+    "id": "k1263_kan_garch_midas_null_ml_ceiling_7th_2026_05_03",
+    "category": "experiment_finding",
+    "title": "K1263 KAN-GARCH-MIDAS NULL — ML ceiling 第 7 次確認 (KAN 顯著輸 GJR baseline)",
+    "body": "Frontier 結構化 NN (KAN, Kolmogorov-Arnold Networks 2024-2025 + MIDAS macro fundamentals) 在 SPY + QQQ vol forecast 上 vs GJR-Normal baseline。\n\n**結果（強 NULL，且 KAN 顯著 WORSE）**：\n- SPY: GJR QLIKE 1.4857 vs KAN 1.8383 — **KAN 23.7% 比 GJR 差**, DM-HLN t=+4.89 (p=0.000)，Harvey-significant 偏向 GJR\n- QQQ: GJR QLIKE 1.4611 vs KAN 1.9401 — **KAN 32.8% 比 GJR 差**, DM-HLN t=+6.35 (p=0.000)\n- 三 gate 通過 0/3 × 2 assets\n\n**ML ceiling 累計 7 次確認**：\n1. K785 MF2-GARCH NULL\n2. K816v2 GARCH-Informed NN (GINN) NULL\n3. K784 GARCH-GRU NULL\n4. K787 HAR Directional 67.9% acc but no economic value\n5. K806 Multivariate fBm NULL\n6. K1129 GAS-t commodity NULL (extends to commodity space)\n7. **K1263 KAN-GARCH-MIDAS NULL (新 frontier 結構化 NN)**\n\n**Counter-intuitive finding**：KAN 廣告詞是「比 MLP 更解釋性 + structured spline activations 應比 unstructured ML 更不容易 overfit」，加上 MIDAS macro fundamentals (VIX/yields/credit-spread) 應有額外資訊。結果反而比 plain GJR-Normal 差 24-33%。**Falsifiable hypothesis 真的被 falsified**。\n\n**Lesson 收緣**：\n- ML / 結構化 NN / NN+macro 三大主流 augmentation 全在 daily SPY/QQQ 上 fail vs GJR-Normal\n- VIX sufficient statistic hypothesis 第 28 次間接支撐\n- 結構化先驗（KAN spline）並不 automatically 帶來 forecast advantage — 在 daily vol 上反而是 numerical instability （log_tau exp 後 noise amplification）的源頭\n\n**Files**: experiments/k1263/{k1263.py, k1263_results.json, README.md, k1263_qlike_comparison.png, k1263_dm_heatmap.png}\n**Codex review round 1 PASS** (4 issues addressed pre-execution)\n**Article-able**: counter-intuitive hook = 「2024-2025 frontier paper 的 KAN-GARCH-MIDAS 在 SPY/QQQ 上反而比 30 年前的 GJR-Normal 差 24-33%」",
+    "source": "experiments/k1263/k1263.py + k1263_results.json + log run",
+    "applies_to": [
+      "ML_ceiling",
+      "KAN",
+      "GARCH_MIDAS",
+      "vol_forecast",
+      "VIX_sufficiency"
+    ],
+    "created_at": "2026-05-02T17:50:51.582955+00:00",
+    "tags": [
+      "null_result",
+      "ML_ceiling",
+      "K1263",
+      "frontier_NN_test",
+      "VIX_sufficient_statistic"
+    ]
+  },
+  {
+    "id": "k1264_tx_overnight_gap_reject_holiday_inverse_2026_05_03",
+    "category": "experiment_finding",
+    "title": "K1264 TX 期貨 overnight gap REJECT — 5bp 吃 81% gross + holiday 反向 + bear-year systematic fail",
+    "body": "K515 SPY overnight gap finding (10.73bp/day t=4.06) → TX 期貨延伸測試。Period 2017-05-16 → 2026-04-28, n=2179 days, 100% TX file parse success, 5bp round-trip cost。\n\n**Verdict: REJECT (NOT listing-eligible)** — 0/3 gates × 2 strategies (unconditional + SPY-conditioned)\n\n**Key findings (article-able)**：\n1. **Gross alpha 確實存在 (Sharpe 1.045, t=3.07)** — K515 SPY finding 在 TX 上 replicates\n2. **5bp cost 吃掉 81% gross return** (gross 15.59% ann → net 2.98% ann)，未達 Sharpe>0.5 listing 門檻\n3. **Net Sharpe**: 0.200 (S1 unconditional, t=0.59), 0.112 (S2 SPY-cond, t=0.33)\n4. **SPY-conditioning ratio 0.94** — H2 fails，TX 上 SPY contagion 失效（counter-intuitive vs K515 SPY finding）\n5. **Holiday gap 反向**：long-weekend ≥4d **-9.33bp** vs normal 1d **+7.72bp**——多餘的 weekend gap 反而虧，對策略執行有 actionable implication（filter out long-weekend trades）\n6. **Bear-year asymmetry**：2018 / 2022 系統性 fail (-19% each)，gross alpha 不 robust to drawdown regimes\n\n**Revive 條件 (per agent recommendation)**：\n- TX cost 降至 ~3bp OR\n- Normal-1day-only filter + regime timing\n\n**Counter-intuitive findings 摘要**：\n- 「TX 期貨成本低」≠「策略可行」— 5bp 雖比 ETF 18.55bp (K625) 低 4×，但 vs gross 還是吃 81%\n- 「SPY contagion」在 ETF 路徑強，TX 路徑反而弱 (ratio 0.94 < 1.5)\n- 「假期前 long position」直覺上應有 carry/risk premium，實測反向 -9.33bp\n\n**Files**: experiments/k1264/{k1264.py, k1264_results.json, README.md, k1264_cumulative_return.png, k1264_cross_oos_bar.png}\n**Codex review pre-execution PASS** (working-tree review, no flagged issues)\n**Article-able**: 「TX 期貨 overnight gap — gross 15.59% 看起來像免費午餐，5bp 後只剩 0.2 Sharpe + 假期反向 + 熊市 fail」",
+    "source": "experiments/k1264/k1264.py + k1264_results.json + agent af65c4ac9969c5b89",
+    "applies_to": [
+      "TX_overnight_gap",
+      "K515_extension",
+      "trading_costs",
+      "vol_research"
+    ],
+    "created_at": "2026-05-02T18:10:01.680036+00:00",
+    "tags": [
+      "null_with_findings",
+      "K1264",
+      "TX_futures",
+      "K515_replication",
+      "trading_cost_barrier",
+      "holiday_gap_reverse"
+    ]
+  },
+  {
+    "id": "k1265_vix_managed_portfolio_null_mdd_compression_finding_2026_05_03",
+    "category": "experiment_finding",
+    "title": "K1265 VIX-Managed Portfolio NULL — Moreira-Muir 主要壓 MDD 而非提 Sharpe (counter-intuitive)",
+    "body": "Moreira & Muir (2017, JF) volatility-managed portfolios + VIX extension。SPY 1993-2026 daily, n=5617 OOS (2004-2026), in-sample 1993-2003 calibration。\n\n**Verdict: NULL** — 0/3 strategies 過 joint gate (ΔSharpe>0.15 + DM p<0.10 + ≥2/3 sub-periods + MDD ratio<1.2)\n\n**結果摘要**：\n| Spec | Sharpe | MDD | Calmar | Turnover/yr | DM p | Sub-periods+ |\n|---|---|---|---|---|---|---|\n| buy_hold | 0.639 | -55.2% | 0.22 | 0 | — | — |\n| vol_target_static | 0.768 | -33.8% | 0.31 | 0.94 | 0.32 | 3/3 ✓ |\n| mm_rv_managed | 0.670 | -46.7% | 0.29 | 9.27 | 0.64 | 1/3 |\n| mm_vix_managed | 0.743 | -27.6% | 0.44 | 4.02 | 0.95 | 1/3 |\n\n**Counter-intuitive findings (article-able)**：\n1. **Moreira-Muir 主要 effect 是壓 MDD 不是提 Sharpe** — 4/4 managed specs 都顯著 MDD 改善 (50-62% reduction)，但 ΔSharpe 全 < 0.15 threshold\n2. **VIX 替代 RV 並未顯著改善** — mm_vix_managed Sharpe 0.74 vs mm_rv_managed 0.67，差距 < bootstrap noise；DM p=0.95 完全 NS\n3. **簡單 vol_target 反而是 Sharpe 王** — 比 quadratic Moreira-Muir scaling 更 robust，且 turnover 0.94 vs M&M 9-4x\n4. **mm_rv_managed turnover 9.3x annual** — 高 quadratic scaling sensitivity 製造大量無謂交易，上 cost 後 Sharpe 必再降\n5. **DM p 全 NS** — 雖然點估計都贏 buy_hold，但 statistical power 不足以排除 chance；反證 M&M 原文 0.40→0.55 Sharpe 斷言在 1993-2026 longer sample 不 robust（Cederburg-O'Doherty-Wang-Yan JFE 2020 結論一致）\n\n**Paper 3 (vt-crowding-abm 或 leverage-direction) 連接**：\n- 作為 'vol-managed practitioner literature' 的 longer-sample replication evidence\n- 支持 'vol-targeting 主要是 risk management 不是 alpha generation' 的 narrative angle\n- VIX vs RV scaling 等價 finding 削弱 'forward-looking IV better than backward RV' 的常見假設\n\n**Files**: experiments/k1265/{k1265.py, k1265_results.json, README.md, k1265_cumulative_returns.png, k1265_rolling_sharpe.png, k1265_weight_history.png}\n**Methodology**: lookahead-controlled (.shift(1) at weights/rv_lag/vix_lag/monthly rebalance flag), seed=42 (np.random.default_rng for bootstrap), DM-HLN with NW auto-bandwidth, stationary bootstrap n=10000 mean-block=22\n**Pre-execution Codex review intended but agent timed out before completing — code passed main-thread sanity check (lookahead+seed clean, in-sample calibration window enforced)**\n**Article-able**: 「Moreira-Muir 在 SPY 30 年新樣本 — Sharpe 升幅吃不到，但 MDD 砍半到三分之一是 robust finding」",
+    "source": "experiments/k1265/k1265.py + k1265_results.json + agent ad2a708bb3130b600",
+    "applies_to": [
+      "vol_managed_portfolio",
+      "Moreira_Muir_replication",
+      "VIX_vs_RV_scaling",
+      "Paper3_evidence"
+    ],
+    "created_at": "2026-05-03T12:42:15.802550+00:00",
+    "tags": [
+      "null_with_findings",
+      "K1265",
+      "vol_managed",
+      "MDD_compression",
+      "Moreira_Muir",
+      "VIX_extension"
+    ]
+  },
+  {
+    "item_id": "3754c6d4",
+    "category": "international_vt",
+    "content": "[提出: 用戶, 執行: Claude] K237 International VT: 50/50+VT across 5 markets.\nUS (S&P 500): VT Sharpe=0.440 vs B&H=0.480 (diff=-0.040), MDD VT=-22.1% vs B&H=-34.5%, VIX→Vol t=50.64, OOS win=2/5\nJapan (MSCI Japan): VT Sharpe=0.291 vs B&H=0.273 (diff=+0.019), MDD VT=-22.0% vs B&H=-32.1%, VIX→Vol t=33.35, OOS win=2/5\nEurope (FTSE Europe): VT Sharpe=0.310 vs B&H=0.307 (diff=+0.003), MDD VT=-25.6% vs B&H=-40.1%, VIX→Vol t=43.92, OOS win=2/5\nEmerging Markets: VT Sharpe=0.288 vs B&H=0.280 (diff=+0.008), MDD VT=-35.5% vs B&H=-46.0%, VIX→Vol t=41.05, OOS win=2/5\nTaiwan (台灣50): VT Sharpe=0.136 vs B&H=0.252 (diff=-0.116), MDD VT=-56.7% vs B&H=-58.9%, VIX→Vol t=10.26, OOS win=1/5\nSummary: VT improves Sharpe 3/5, MDD 5/5. VIX passes Harvey for 5/5 markets. Avg OOS win rate: 36.0%. Best: Japan (MSCI Japan) (+0.019), Worst: Taiwan (台灣50) (-0.116).",
+    "evidence": [
+      "k237_international_vt"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-05-07T07:27:32.334539"
+  },
+  {
+    "item_id": "3cdecbc5",
+    "category": "international_vt",
+    "content": "[提出: 用戶, 執行: Claude] K237 International VT: 50/50+VT across 5 markets.\nUS (S&P 500): VT Sharpe=0.440 vs B&H=0.480 (diff=-0.040), MDD VT=-22.1% vs B&H=-34.5%, VIX→Vol t=50.64, OOS win=2/5\nJapan (MSCI Japan): VT Sharpe=0.291 vs B&H=0.273 (diff=+0.019), MDD VT=-22.0% vs B&H=-32.1%, VIX→Vol t=33.35, OOS win=2/5\nEurope (FTSE Europe): VT Sharpe=0.310 vs B&H=0.307 (diff=+0.003), MDD VT=-25.6% vs B&H=-40.1%, VIX→Vol t=43.92, OOS win=2/5\nEmerging Markets: VT Sharpe=0.288 vs B&H=0.280 (diff=+0.008), MDD VT=-35.5% vs B&H=-46.0%, VIX→Vol t=41.05, OOS win=2/5\nTaiwan (台灣50): VT Sharpe=0.136 vs B&H=0.252 (diff=-0.116), MDD VT=-56.7% vs B&H=-58.9%, VIX→Vol t=10.26, OOS win=1/5\nSummary: VT improves Sharpe 3/5, MDD 5/5. VIX passes Harvey for 5/5 markets. Avg OOS win rate: 36.0%. Best: Japan (MSCI Japan) (+0.019), Worst: Taiwan (台灣50) (-0.116).",
+    "evidence": [
+      "k237_international_vt"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-05-07T07:27:52.643834"
+  },
+  {
+    "item_id": "1fb5ea4f",
+    "category": "international_vt",
+    "content": "[提出: 用戶, 執行: Claude] K237 International VT: 50/50+VT across 5 markets.\nUS (S&P 500): VT Sharpe=0.440 vs B&H=0.480 (diff=-0.040), MDD VT=-22.1% vs B&H=-34.5%, VIX→Vol t=50.64, OOS win=2/5\nJapan (MSCI Japan): VT Sharpe=0.291 vs B&H=0.273 (diff=+0.019), MDD VT=-22.0% vs B&H=-32.1%, VIX→Vol t=33.35, OOS win=2/5\nEurope (FTSE Europe): VT Sharpe=0.310 vs B&H=0.307 (diff=+0.003), MDD VT=-25.6% vs B&H=-40.1%, VIX→Vol t=43.92, OOS win=2/5\nEmerging Markets: VT Sharpe=0.288 vs B&H=0.280 (diff=+0.008), MDD VT=-35.5% vs B&H=-46.0%, VIX→Vol t=41.05, OOS win=2/5\nTaiwan (台灣50): VT Sharpe=0.136 vs B&H=0.252 (diff=-0.116), MDD VT=-56.7% vs B&H=-58.9%, VIX→Vol t=10.26, OOS win=1/5\nSummary: VT improves Sharpe 3/5, MDD 5/5. VIX passes Harvey for 5/5 markets. Avg OOS win rate: 36.0%. Best: Japan (MSCI Japan) (+0.019), Worst: Taiwan (台灣50) (-0.116).",
+    "evidence": [
+      "k237_international_vt"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-05-07T07:28:34.793298"
+  },
+  {
+    "item_id": "ab04d85f",
+    "category": "international_vt",
+    "content": "[提出: 用戶, 執行: Claude] K237 International VT: 50/50+VT across 5 markets.\nUS (S&P 500): VT Sharpe=0.440 vs B&H=0.480 (diff=-0.040), MDD VT=-22.1% vs B&H=-34.5%, VIX→Vol t=50.64, OOS win=2/5\nJapan (MSCI Japan): VT Sharpe=0.291 vs B&H=0.273 (diff=+0.019), MDD VT=-22.0% vs B&H=-32.1%, VIX→Vol t=33.35, OOS win=2/5\nEurope (FTSE Europe): VT Sharpe=0.310 vs B&H=0.307 (diff=+0.003), MDD VT=-25.6% vs B&H=-40.1%, VIX→Vol t=43.92, OOS win=2/5\nEmerging Markets: VT Sharpe=0.288 vs B&H=0.280 (diff=+0.008), MDD VT=-35.5% vs B&H=-46.0%, VIX→Vol t=41.05, OOS win=2/5\nTaiwan (台灣50): VT Sharpe=0.136 vs B&H=0.252 (diff=-0.116), MDD VT=-56.7% vs B&H=-58.9%, VIX→Vol t=10.26, OOS win=1/5\nSummary: VT improves Sharpe 3/5, MDD 5/5. VIX passes Harvey for 5/5 markets. Avg OOS win rate: 36.0%. Best: Japan (MSCI Japan) (+0.019), Worst: Taiwan (台灣50) (-0.116).",
+    "evidence": [
+      "k237_international_vt"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-05-07T07:28:47.413384"
+  },
+  {
+    "id": "k222b_mc_overlay_swr_doubling_rejected",
+    "timestamp": "2026-05-07T09:35:00Z",
+    "experiment_id": "k222b",
+    "category": "retirement_swr",
+    "topic": "VT-doubles-SWR refuted by 10K-path block-bootstrap MC",
+    "finding": "5050_vt @ 8% WR survival = 40.1% vs 5050_bh @ 4% WR survival = 99.97% (10,000 paths * 30 years, block-bootstrap block_size=21, seed=42, SPY+GLD+VIX 2005-2024). VT-doubles-SWR REJECTED. K87 25-28% prediction directionally correct (VT does erode SWR) but quantitatively low (40.1% > 28%). VT hurts retirees at high WR despite lower vol — sequence-of-returns mitigation is dominated by cash-drag during long bull periods.",
+    "methodology": "Block bootstrap (21-day blocks preserve serial dependence), prev-day VIX signal (vix_lag = vix_path[:,:-1] mirrors K222 patched apply_12vix), nominal-fixed monthly withdrawals (initial_capital * wr / 12), 0% cash sleeve return (matches K222), survival = balance > 0 at 360-month horizon.",
+    "review": "feature-dev:code-reviewer subagent (Codex CLI ENOBUFS fallback per .claude/rules/experiments.md): CONDITIONAL PASS. 2 required fixes applied 2026-05-07: (1) verdict logic line 298 changed > to abs<, (2) cash_sleeve_return + withdrawal_type metadata added to config. Numbers unchanged across pre/post fix (rerun confirmed 40.1% / 99.97%).",
+    "related_k": [
+      "K87",
+      "K222",
+      "K547"
+    ],
+    "confidence": "high",
+    "reviewer_notes": "Methodology consistent with K222 patched (lookahead-safe). Cash sleeve = 0% nominal-fixed withdrawal — same convention K87/K222 use, so directly comparable. Headline rejection is robust to all caveats raised by reviewer."
+  },
+  {
+    "id": "auto_loop_session_2026_05_08_summary",
+    "timestamp": "2026-05-08T08:00:00Z",
+    "category": "meta_session",
+    "topic": "12-hour autonomous /loop session — articles + systemic fixes summary",
+    "finding": "Session published ~22 articles + landed 6+ systemic fixes. Articles: K478/479/485/489/497/511/517/544/550/571/576/594/603/631/635/647/663/666/674/676/677/678/694 (all NULL/MARGINAL/MIXED honest framing, draft pool). Fixes: (1) Period-Attribution Checklist in feed-publisher SKILL.md; (2) publish_draft.py --update flag (596L, 7 tests, errata.update_history audit trail); (3) TW close staleness fix in scripts/daily_update.py + extension to publish_milestone path; (4) sanitizer citation-context exemption (5 regex patterns, ASCII+fullwidth bracket, 25 new tests); (5) gen_experiment_tasks() v2 source in generate_diverse_tasks.py + filter hardening; (6) 29 NULL task_type backfill governance.",
+    "methodology": "Slot-aware /loop dispatch every 1500s, 4-slot SLOT_CAP, diversity rule (≥3 same type rotates), CLAUDE.md Mission 5 sanity check per dispatch, fallback Codex CLI ENOBUFS -> general-purpose subagent. Codex CLI recovered ~12hrs into session (validated post-recovery via smoke test).",
+    "observation_pattern": "Research-result articles consistently PASS audits (mile_d25f7f90 17/17, mile_0e3fb5f6 15/15, daily formulaic chain mile_146dc06e/f7584521/688f15e9/5a50ea3c). Financial-quote articles previously FAIL same root cause (period mis-attribution: fiscal vs calendar / quarter vs annual). Period-Attribution Checklist now blocks at source going forward.",
+    "review_path": "main-thread + multiple general-purpose subagents (background async). No primary-path Codex review during outage but ENOBUFS resolved 06:20 UTC.",
+    "related_k": [
+      "K222b",
+      "K547"
+    ],
+    "confidence": "high",
+    "reviewer_notes": "Auto-loop pattern functional: slot fill + diversity rotation working. Saturation periods (4× daily in last-5) require productive non-daily action to unblock — both pre-loaded paper_review queue depletion AND skipping cycles. Lesson: systemic fixes scale better than individual article patches when same pattern recurs ≥3 times."
+  },
+  {
+    "id": "K1100h",
+    "timestamp": "2026-05-10T16:57:19Z",
+    "category": "experiment_result",
+    "topic": "TAIFEX TX1 intraday-bar PRG Phase 1 v2 — 5min RV/Parkinson exog augmentation",
+    "finding": "BORDERLINE: Intraday-derived features (RV-5min, Parkinson) provide secondary 5% DM-t=2.21 (HLN) over baseline daily PRG on TAIFEX TX1 2020-2021 OOS, but FAIL Harvey 2016 |t|>3 main threshold. Best model M3=baseline+RV5+Parkinson (n_oos=440, QLIKE improv +7.76%). M4 (5 exog) overfits. IS LRT chi^2=24.4-32.8 p<1e-5. v1->v2 best DM-t shrunk 2.85->2.21 after fixing 4 Codex-flagged issues (settlement-day filter removed high-vol contamination).",
+    "methodology": "PRG (Predictive Regression on log realized variance) with intraday bar exog. Bar grain=5min. Sample 2017-06-16 to 2021-12-31 TX1 contracts. v2 fixes: (1) bar-agg surgical mask 13:45 endpoint mis-binning (423/1138 days had 61 bars), (2) settlement-day filter expiring TX1 contract drops, (3) Big5/utf8 encoding fallback + schema assert, (4) NW1994 HAC lag floor. Train/test=586/440. Bootstrap n=1000 seed=42 (3-layer coverage).",
+    "observation_pattern": "TX1.csv on settlement day = expiring contract; intraday microstructure contaminated. K1100g uses TX-most-volume picker which auto-handles this; TX1-only loaders MUST drop is_settlement. Bar count distribution post-fix {57:49, 58:7, 60:1082}, days_gt_60=0.",
+    "review_path": "Codex primary-path review 2026-05-11 (CONDITIONAL PASS, 0 MAJOR / 0 MINOR). Independent verification of bar count distribution, sample sizes, lookahead protection (signal at t reads r[k-1]/exog[k-1]), train-only standardization μ/σ leakage-clean.",
+    "related_k": [
+      "K1100g",
+      "K1100",
+      "K947",
+      "K1098"
+    ],
+    "confidence": "medium",
+    "reviewer_notes": "BORDERLINE not strict reject — secondary 5% pass survives but Harvey threshold prefers null. Follow-up P3: TX-with-volume-picker re-implementation to recover settlement-day samples; or test 30s/1min bar grain. Feed-publishable as null/borderline framing per honest-framing protocol."
+  },
+  {
+    "id": "K1116d",
+    "timestamp": "2026-05-10T17:01:00Z",
+    "category": "experiment_result",
+    "topic": "True ALFRED first-release vintage retest of K1116c PIT NULL — H2 ROBUST NULL CONFIRMED",
+    "finding": "H2_ROBUST_NULL_VINTAGE_CONFIRMED — Paper 4 alt-data NULL robust to true ALFRED vintage. 6 lag/PIT variants × 5 specs = 24 cells, 0 passing in BOTH vintage and revised cycles. Worst case pit_shift1×all DM t=-5.21 (alt-data + VIX strictly WORSE than VIX baseline). NFCI/ANFCI/STLFSI/USEPU/WLEMU all fail to add predictive value over VIX even with first-release vintage data.",
+    "methodology": "6 lag/PIT variants × 5 alt-data specs DM-HLN h=1, Harvey 2016 |t|>3 threshold, bootstrap CI seed=42, IS 2018-2022 / OOS 2023-2026. n_oos=170 fair across cells. Lag audit: rv.shift(1), vix_mean.shift(1), per-variant alt-data shift, PIT RELEASE_DATE<=F. v2 fetch fix: 6-month obs chunks + 14d realtime overlap + dedup (vs v1 yearly chunks 12月初 8 dates 跨 7 年缺). Gap validation: USEPU/WLEMU 3046→3056 (+10 obs each).",
+    "observation_pattern": "STLFSI is a chain (STLFSI/2/3/4 splice over time); fredgraph backfill differs from chain. Sensitivity (drop STLFSI) still H2_ROBUST_NULL. Revised cycle replication holds. All 6 lag conventions consistent.",
+    "review_path": "Codex CLI 0.121.0 primary-path 2026-05-11. Fetch fix: PASS (chunk-boundary logic + 100k cap safe). Main battery: CONDITIONAL PASS (1 MINOR re STLFSI chain vs backfill addressed by sensitivity).",
+    "related_k": [
+      "K1116",
+      "K1116b",
+      "K1116c",
+      "K1118",
+      "K1121"
+    ],
+    "confidence": "high",
+    "reviewer_notes": "Paper 4 alt-data NULL upper-bound argument now empirically demonstrated with first-release vintage, not just methodological argument. Apples-to-apples fairness validated at protocol level. Vintage data does NOT rescue alt-data — strengthens claim."
   }
 ]

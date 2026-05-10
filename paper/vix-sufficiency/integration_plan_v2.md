@@ -322,3 +322,53 @@ Execute in this order. Each item is atomic and testable.
 ## End of integration plan v2
 
 **Deliverable**: Integration plan ready for main-thread execution. No .tex edited. No git commit.
+
+---
+
+## Addendum 2026-05-11 — K1116d (7th piece): True ALFRED first-release vintage retest
+
+### Why this strengthens the integration story
+
+K1116/K1116b/K1118/K1121 demonstrated NULL using **revised** FRED data (today's snapshot of historical series). A natural reviewer pushback: "perhaps revisions wash out the signal that was visible in real time." K1116d removes this objection by retesting with **first-release vintage** — the data a forecaster would actually have seen on the publication date.
+
+### K1116d 1-liner (to add to §2.1 inventory)
+
+| ID | One-line | Asset(s) | Application | Verdict | Key stat |
+|----|----------|----------|-------------|---------|----------|
+| **K1116d** | True ALFRED first-release vintage retest of K1116c PIT NULL | SPY | Forecasting (methodology robustness) | **H2_ROBUST_NULL_VINTAGE_CONFIRMED** | 6×5 grid: 0/24 cells pass both vintage + revised cycles. Worst pit_shift1×all DM t=−5.21 (alt-data + VIX strictly WORSE than VIX-only baseline). |
+
+### Insertion point
+
+Slot into the **§4.x or §7.x Publication-Delay Robustness** subsection (already planned for K1116b). Extend the subsection from a 2-table layout to a 3-table layout:
+
+1. K1116b table — same-snapshot publication-delay shift (shift(1) vs shift(2) vs shift(5))
+2. **NEW**: K1116d table — first-release vintage vs revised-snapshot, for the 6 lag/PIT variants × 5 specs grid
+3. Combined verdict statement: "The alt-data NULL is robust to both publication-delay convention AND revision content. No combination of timing choice and data vintage produces statistically significant improvement over the VIX-only baseline."
+
+### Page budget impact
+
++0.5 page (1 new compact table + 1 paragraph). Total projected paper length: 39 → 48.5 pages → still within Section 6.1 risk note (need to trim or compress K1116b to appendix).
+
+### Sensitivity check already done in K1116d
+
+Drop-STLFSI sensitivity (chain vs backfill artifact concern): NULL holds in both vintage and revised cycles after STLFSI exclusion. Addresses Codex MINOR re STLFSI/2/3/4 splice timing.
+
+### Citation status
+
+K1116d uses no new external references beyond ALFRED (already cited via FRED data section). No bibliography expansion needed.
+
+### Recommendation
+
+Promote K1116d alongside K1116b in the publication-delay robustness subsection; do NOT downgrade to footnote — first-release vintage retest is methodologically distinctive enough to warrant a named result.
+
+### Dependency for execution
+
+K1116d data files are in `experiments/k1116d/`:
+- `k1116d_results.json` — main 6×5 battery
+- `k1116d_sensitivity_no_stlfsi.json` — sensitivity
+- `data/gap_validation_v2.json` — chunk-boundary fix audit (USEPU/WLEMU 3046→3056 obs each)
+
+Knowledge entry: `storage/memory/knowledge.json` id=K1116d (written 2026-05-11 by main thread post-Codex CONDITIONAL PASS).
+
+Commits: `5c94a2e1` (fetch fix) + `b3967920` (main results).
+
