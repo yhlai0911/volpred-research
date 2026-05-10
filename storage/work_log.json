@@ -5389,5 +5389,15 @@
     "task_id": "bulk_close_stale_audience_null_article_tasks",
     "verdict": "cleanup_applied",
     "note": "Closed 7 stale article_general tasks (K637, K872 + K729, K708, K711, K723, K1023) after a2f9b434 audiences_covered backfill. Each had covered_by audience=null legacy article. Saved from dedup_conflict rounds. Remaining legit uncovered = 10 candidates (K644, K705, K921, K200, K650, K691, K267, K898, K904, K878). 5 of those self_tagged_optional or kid_collision blocked."
+  },
+  {
+    "timestamp": "2026-05-11T07:00:00Z",
+    "task_type": "daily_article",
+    "task_id": "K878_article_general",
+    "verdict": "published_draft",
+    "mile_id": "mile_410450e4",
+    "audience": "general",
+    "title": "美元指數能不能預測美股波動?樣本內看起來很可以,樣本外現出原形",
+    "note": "K878 DXY null-result general-audience article. 3-layer dedup CLEAR (no DXY/美元指數 in feed, no K878 cross-refs, no audience=null legacy). 2 charts uploaded to Supabase (OOS QLIKE comparison + IS-vs-OOS R²). sanitize_applied=0 clean. content_chars=5281. status=draft (pool release)."
   }
 ]
