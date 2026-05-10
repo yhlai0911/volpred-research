@@ -446,6 +446,18 @@ if _k1181_path.exists():
 else:
     print("  WARN: K1181 results JSON not found at", _k1181_path)
 
+# K558 Sec 4.4 0056.TW robustness binding (2026-05-11).
+_k558 = load_json("k558_k553_taiwan_validation_results.json")
+if _k558:
+    _t8 = _k558.get("test_8_robustness_0056", {})
+    _hdm = _t8.get("harvey_dm", {})
+    _t_stat = _hdm.get("t_stat")
+    if _t_stat is not None:
+        add("Sec 4.4", "0056.TW robustness t=5.67", "5.67", "K558",
+            f"{_t_stat:.4f} (paper rounds 5.67) n={_t8.get('n_days')} nw_lags={_hdm.get('nw_lags')}",
+            "VERIFIED" if abs(_t_stat - 5.67) < 0.01 else "MISMATCH")
+        print("  K558 Sec 4.4 0056 robustness t-stat binding checked.")
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  5. HIGH-FREQUENCY: RV STATISTICS (K848)
@@ -1015,7 +1027,7 @@ untraceable_items = [
     ("Sec 4.5", "TSMC 52.5% of 0050 return variance", "No experiment JSON"),
     # Sec 2.5 VIXTWN/VIX ratio — bound to K1181 inline check below (2026-05-11).
     ("Sec 3", "TWD/USD not significant p=0.08", "No experiment JSON"),
-    ("Sec 4.4", "0056.TW robustness t=5.67", "No experiment JSON"),
+    # Sec 4.4 0056.TW robustness — bound to K558 test_8 inline check below (2026-05-11).
     ("Table 2 (gamma)", "Hon Hai gamma=0.052, t=1.14", "N121 average only, no individual JSON"),
     ("Table 2 (gamma)", "MediaTek gamma=0.044, t=0.96", "N121 average only, no individual JSON"),
     ("Table 2 (gamma)", "0056.TW gamma=0.112, t=1.87", "N121 average only, no individual JSON"),
