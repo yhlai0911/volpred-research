@@ -5740,7 +5740,7 @@
     "id": "task-k950-codex-review-postpub",
     "task_type": "paper_review",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "K950_post_publish_codex_review",
     "created_at": "2026-05-09",
     "description": "Codex review for K950 post-publish article (mile_06d37aff): verify (a) byte-accurate sharpe/MDD/turnover citations against experiments/k950/k950_results.json, (b) framing of NULL result is honest (not over-claimed nor under-claimed), (c) K946 prior framing (now market-specific) properly contextualized, (d) image embed URLs are HTTPS Supabase, (e) no overclaim of VT being completely useless — utility framing per K688 preserved.",
@@ -5752,7 +5752,12 @@
       "K687",
       "K688",
       "K949"
-    ]
+    ],
+    "completed_at": "2026-05-11T07:45:00+00:00",
+    "reviewer_source": "main-thread fallback (Codex quota blocked)",
+    "verdict": "CONDITIONAL PASS",
+    "review_path": "experiments/k950/k950_post_publish_codex_review.md",
+    "followup": "task-k950-codex-review-primary-reverify queued post-2026-05-13"
   },
   {
     "id": "paper_review_mile_86e39d05",
@@ -6969,5 +6974,22 @@
     "created_at": "2026-05-10T22:12:46Z",
     "blocks": [],
     "blocked_by": []
+  },
+  {
+    "id": "task-k950-codex-review-primary-reverify",
+    "task_type": "paper_review",
+    "priority": 4,
+    "status": "pending",
+    "source": "K950_post_publish_codex_review_followup",
+    "created_at": "2026-05-11",
+    "not_before": "2026-05-13",
+    "description": "Primary-path Codex re-verification of K950 mile_06d37aff post-publish review. Initial review on 2026-05-11 ran main-thread fallback because Codex daily quota was exhausted (resets 2026-05-12 19:46 PT). Per K1259 rule, fallback PASS ≠ primary Codex PASS — re-run codex exec with same prompt at /tmp/k950_codex_review_prompt.txt (regenerate if /tmp gone). Confirm or revise verdict in experiments/k950/k950_post_publish_codex_review.md.",
+    "mile_id": "mile_06d37aff",
+    "experiment_refs": [
+      "K950"
+    ],
+    "depends_on": [
+      "task-k950-codex-review-postpub"
+    ]
   }
 ]

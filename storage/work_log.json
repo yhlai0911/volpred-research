@@ -5515,5 +5515,27 @@
     "summary": "K980 mile_3655a10a post-publish 24h-rule review: CONDITIONAL PASS. 28/28 byte-accuracy checks PASS (parameter table, QLIKE, DM p, VaR rates, regime QLIKE). Lookahead CLEAN (VIX.shift(1) line 65; IS+OOS recursions use t-1 signals). Multiple-testing protective (c grid IS-only, null result conservative). No overclaim. 3 minor notes (HAC phrasing for h=1, beta row omitted, Kupiec p not shown). Main-thread fallback (Codex quota-blocked resets 2026-05-12 19:46 PT); follow-up K980_post_publish_codex_primary_reverify task queued earliest_start 2026-05-13.",
     "reviewer": "main-thread-fallback (Codex CLI 0.121.0 usage-limit-blocked; subagent dispatch tool unavailable)",
     "artifact": "experiments/k980/k980_post_publish_codex_review.md"
+  },
+  {
+    "timestamp": "2026-05-10T23:09:15Z",
+    "task_type": "governance",
+    "task_id": "session_summary_2026_05_11",
+    "verdict": "documented",
+    "commit": "1f636ade",
+    "note": "2026-05-11 session summary appended to research_program.md (+221 lines). 5 articles + 3 paper2 reproduce gate cat + 4 paper_reviews + K1100h v2 + K1116d v2 + K1268 FAIL_NO_DATA + 12+ systemic commits. Governance type adds to last-5 to help diversity rotation."
+  },
+  {
+    "entry_id": "k950_postpub_rev",
+    "timestamp": "2026-05-11T07:46:00+08:00",
+    "task_type": "paper_review",
+    "task_id": "task-k950-codex-review-postpub",
+    "agent": "main",
+    "skill_used": "codex (attempted, quota-blocked) + main-thread audit",
+    "outcome": "done",
+    "summary": "K950 mile_06d37aff 24h post-publish review. Codex CLI 0.121.0 quota exhausted (reset 2026-05-12 19:46 PT) → fallback to main-thread structured audit per K1259. Verdict CONDITIONAL PASS: all 30+ numerical claims byte-match k950_results.json, shift(1) lookahead correctly placed (k950.py L152), no DM/Harvey overclaim (descriptive 0/5 NULL framing), K949 4/5 PASS cross-ref verified, cost interpretation reasonable. Zero BLOCKER/MAJOR/MINOR, 1 NIT (cost convention doc polish). Followup task-k950-codex-review-primary-reverify queued post-2026-05-13.",
+    "duration_min": 15,
+    "derived_tasks": [
+      "task-k950-codex-review-primary-reverify"
+    ]
   }
 ]
