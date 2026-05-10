@@ -420,6 +420,32 @@ if _k1175_path.exists():
 else:
     print("  WARN: K1175 results JSON not found at", _k1175_path)
 
+# K1181 Sec 2.5 VIXTWN/VIX ratio + Steiger Z binding (2026-05-11).
+_k1181_path = _Path(__file__).resolve().parent.parent.parent / "experiments" / "k1181" / "k1181_results.json"
+if _k1181_path.exists():
+    _k1181 = _json.loads(_k1181_path.read_text(encoding="utf-8"))
+    _targets = _k1181.get("targets", {})
+    _ratio = _targets.get("VIXTWN_VIX_ratio")
+    _corr_vix = _targets.get("corr_VIX_RV_050")
+    _corr_vxeem = _targets.get("corr_VXEEM_RV_050")
+    _steiger = _targets.get("Steiger_Z")
+    if _ratio is not None:
+        add("Sec 2.5", "VIXTWN/VIX ratio 1.393", "1.393", "K1181",
+            f"{_ratio} (paper claims 1.393)",
+            "VERIFIED" if abs(_ratio - 1.393) < 0.001 else "MISMATCH")
+    if _corr_vix is not None:
+        add("Sec 2.5", "Spearman VIX-RV 0.595", "0.595", "K1181",
+            f"{_corr_vix}", "VERIFIED" if abs(_corr_vix - 0.595) < 0.005 else "MISMATCH")
+    if _corr_vxeem is not None:
+        add("Sec 2.5", "Spearman VXEEM-RV 0.459", "0.459", "K1181",
+            f"{_corr_vxeem}", "VERIFIED" if abs(_corr_vxeem - 0.459) < 0.005 else "MISMATCH")
+    if _steiger is not None:
+        add("Sec 2.5", "Steiger Z 16.2", "16.2", "K1181",
+            f"{_steiger}", "VERIFIED" if abs(_steiger - 16.2) < 0.05 else "MISMATCH")
+    print("  K1181 Sec 2.5 bindings checked (VIXTWN ratio + Spearman + Steiger Z).")
+else:
+    print("  WARN: K1181 results JSON not found at", _k1181_path)
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  5. HIGH-FREQUENCY: RV STATISTICS (K848)
@@ -987,7 +1013,7 @@ untraceable_items = [
     ("Appendix TZ", "TW+JP 50/50 Sharpe 1.810", "No experiment JSON"),
     ("Sec 4.5", "TSMC VT Sharpe 1.121", "No experiment JSON"),
     ("Sec 4.5", "TSMC 52.5% of 0050 return variance", "No experiment JSON"),
-    ("Sec 2.5", "VIXTWN/VIX ratio 1.393 (CV 10%)", "No experiment JSON"),
+    # Sec 2.5 VIXTWN/VIX ratio — bound to K1181 inline check below (2026-05-11).
     ("Sec 3", "TWD/USD not significant p=0.08", "No experiment JSON"),
     ("Sec 4.4", "0056.TW robustness t=5.67", "No experiment JSON"),
     ("Table 2 (gamma)", "Hon Hai gamma=0.052, t=1.14", "N121 average only, no individual JSON"),
