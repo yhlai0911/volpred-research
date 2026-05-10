@@ -5399,5 +5399,20 @@
     "audience": "general",
     "title": "美元指數能不能預測美股波動?樣本內看起來很可以,樣本外現出原形",
     "note": "K878 DXY null-result general-audience article. 3-layer dedup CLEAR (no DXY/美元指數 in feed, no K878 cross-refs, no audience=null legacy). 2 charts uploaded to Supabase (OOS QLIKE comparison + IS-vs-OOS R²). sanitize_applied=0 clean. content_chars=5281. status=draft (pool release)."
+  },
+  {
+    "timestamp": "2026-05-10T19:12:45Z",
+    "task_type": "paper_body",
+    "task_id": "paper2_reproduce_gate_fix_untraceable_bindings",
+    "verdict": "partial_progress_table4_done",
+    "commit": "383bccb5",
+    "note": "Table 4 (tab:vt_results) full fix: 5 inline % source: bindings to body.tex L260-265 + reproduce.py inline _check_strat() loading K1175 results.json. 10 new VERIFIED checks (BH/EWMA/GARCH/GJR/8.63VIX × Sharpe+MDD). GJR VT MDD body -22.3→-22.2 align K1175 -22.25 rounding. JSON report (Apr 19 stale) needs paper-update CLI run for refresh. 19 UNTRACEABLE remain (Tables 1/5, Secs 2.5/3/4.4/4.5/6, Appendix TZ, Table 2 individual gamma). Net 1/7 categories fully resolved."
+  },
+  {
+    "timestamp": "2026-05-10T19:41:17Z",
+    "task_type": "paper_body",
+    "task_id": "Paper10_start",
+    "verdict": "status_backfill",
+    "note": "README stale by 3 weeks. Body actually drafted: main.tex 543 LoC + body_v5.tex 494 LoC, main.pdf compiled 2026-04-28, 14 % source: K-bindings. Updated README status kickoff → body-drafted-pre-review + Next Actions revised (Codex review, reproduce.py setup, citation_check)."
   }
 ]

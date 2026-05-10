@@ -1,9 +1,9 @@
 # Paper 10: The Crypto Fear Channel — Asymmetric BTC–Equity Volatility Spillover
 
 **Target Journal**: Journal of International Financial Markets, Institutions & Money (1st) / Journal of Empirical Finance (2nd) / Finance Research Letters (backup)
-**Status**: **Kickoff — intro drafted, main body pending** (2026-04-17 outline + body_v0_intro.tex; 2026-04-19 Codex P25 `task_7d2c` pre-body audit queued awaiting quota reset 2026-04-24)
-**Pages**: TBD (body pending)
-**Citations**: TBD
+**Status**: **Body drafted v5 — pre-review** (2026-04-28 main.tex compiled to main.pdf; full body in main.tex 543 LoC, body_v5.tex 494 LoC; 14 `% source:` inline bindings to K639/K746b/K1025; sections Intro/LitReview/Data/Methodology/Results/Robustness drafted)
+**Pages**: ~30 (target met)
+**Citations**: TBD (citation_check.md pending)
 
 ## Central claim
 
@@ -39,13 +39,11 @@ Underlying daily data: BTC-USD / SPY / VIX from yfinance (`auto_adjust=False` pe
 
 ## Next Actions
 
-- **Blocked until 2026-04-24 10:27 UTC**: Codex `task_7d2cdf...` pre-body audit (queued, awaiting quota reset per `docs/error_log.md` 2026-04-19 Codex quota blocker)
-- **Post-quota-resume**: Codex audit produces:
-  - Experimental claim cross-check vs `K639/K746b/K1025` JSONs
-  - Citation candidates (Diebold-Yilmaz 2012 / Forbes-Rigobon 2002 / Bouri et al. 2017 / Corbet et al. 2018)
-  - Outline-to-body gap analysis
-- **Main-thread post-audit**: Draft body sections §3 methodology + §4 results (L188 rule — `.tex` body writing stays on main thread, not Codex)
-- **Reproduce.py kickoff**: Follow P5/P6 green pattern
+- **Codex review** of main.tex v5 body (paper-review-cycle skill — `latex-academic-reviewer` + `citation-verifier`; Codex CLI primary-path verified working since 2026-04-28). Bar: CONDITIONAL PASS minimum before submission prep.
+- **reproduce.py setup**: scaffold per `paper-workflow.md` rule 2 — must exist, exit 0, ≥95% match_rate, alert_level=green BEFORE submission. Self-contained replication package (data/ + scripts/ + results/ + experiments.md + README.md). Use K1268d-style structure as template.
+- **citation_check.md**: populate after Codex first pass (Diebold-Yilmaz 2012 / Forbes-Rigobon 2002 / Bouri 2017 / Corbet 2018 / Hatemi-J 2012 / Patton 2011 likely candidates).
+- **data_sources.md**: already exists — verify covers BTC-USD / SPY / VIX yfinance with `auto_adjust=False` (paper-workflow.md rule 1 data snapshot pinning).
+- **3-spec footnote disambiguation** if quote-numbers diverge across body sections (per user 2026-04-29 K1256 lesson).
 
 ## Cross-reference
 
