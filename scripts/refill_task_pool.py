@@ -87,7 +87,13 @@ def _kids_with_general_article() -> set[str]:
     for art in feed:
         if not isinstance(art, dict):
             continue
-        if art.get("audience") != "general":
+        # Pre-2026-04-14 articles have audience=None (metadata gap); treat
+        # them as 'general' for dedup purposes since they were the platform's
+        # default-audience tone before explicit research/general split.
+        # 2026-05-11 K622/K630 incidents: dropped audience=None coverage and
+        # auto-discovery re-queued already-covered Ks two days in a row.
+        audience = art.get("audience")
+        if audience not in (None, "", "general"):
             continue
         if art.get("status") not in ("draft", "published", "scheduled"):
             continue
@@ -148,7 +154,11 @@ def refill(target: int, dry_run: bool = False) -> dict:
 
     # Compose ranked candidate list: top_10_uncovered first (highest signal),
     # then missing_research_top5 (prefer research over general for novelty),
-    # then missing_general_top5.
+    # then missing_general_top5. Then a 4th fallback tier (2026-05-07 fix):
+    # all `candidates` array entries that are uncovered_for_general but score
+    # too low (≤1) to make top_10 — without this fallback, ~97 K-experiments
+    # silently never refill into next_tasks even though they need articles.
+    # Sort fallback by score desc so least-bad-priority surface first.
     pool = []
     seen_in_pool: set[str] = set()
     for source_key in ("top_10_uncovered", "missing_research_top5", "missing_general_top5"):
@@ -158,6 +168,18 @@ def refill(target: int, dry_run: bool = False) -> dict:
                 continue
             seen_in_pool.add(kid)
             pool.append(cand)
+
+    # Fallback tier — score-0/1 uncovered K's from full candidates array.
+    fallback_pool = []
+    for cand in cand_data.get("candidates", []) or []:
+        kid = cand.get("k_id")
+        if not kid or kid in seen_in_pool:
+            continue
+        if (cand.get("audiences_covered") or []):
+            continue  # already has some audience coverage
+        fallback_pool.append(cand)
+    fallback_pool.sort(key=lambda c: c.get("score") or 0, reverse=True)
+    pool.extend(fallback_pool)
 
     new_entries = []
     for cand in pool:
