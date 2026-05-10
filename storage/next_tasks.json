@@ -6589,7 +6589,7 @@
     "findings": "mile_8cc3dfe9 K865 Volatility Spillover Network 2026 Tariff Crisis. 5548 chars body. 2 PNGs HTTPS (動態生成 TSI rolling + SPY role flip). sanitize=0. Aggregate TSI t=0.924 p=0.178 NS (Harvey 沒通過). SPY net spillover -42.56→-50.92→-35.57→-37.64→**+14.37** (4 calm windows = receiver, tariff_crisis = transmitter 角色翻轉). Asymmetric impact: OIL +66.43%/GLD -11.23%/股債-3~-4%; vol multiplier OIL 2.83x. 主敘事「整體 NULL + 結構顯著」雙面平衡. dedup 既有 spillover 文章但無 2026 tariff focus, 差異化 PASS."
   },
   {
-    "id": "K1176_gdelt_fullscan",
+    "id": "K1268_gdelt_fullscan",
     "title": "K1176: Full 96-files-per-day GDELT scan via public bulk (replaces K1175 due to kid_collision)",
     "description": "Original K1175_gdelt_fullscan re-IDed as K1176 because experiments/k1175/ 已被 Paper 2 Table 3 audit 占用。任務內容不變: K1174 only 1/96 slice (1.04%, 131 files) → need full 96-files scan via http://data.gdeltproject.org/gdeltv2/ public endpoint (no GCP auth needed) for N≥10 per market decisive PCR test. K1170 EU-JP press concentration claim 待 K1176 confirm/refute.",
     "priority": 2,
@@ -6602,7 +6602,8 @@
       "paper2",
       "press-concentration"
     ],
-    "created_at": "2026-05-10T16:30:00+00:00"
+    "created_at": "2026-05-10T16:30:00+00:00",
+    "last_note": "[2026-05-11] Re-IDed from K1176_gdelt_fullscan due to ANOTHER kid_collision (K1176 already occupied by Paper 2 Table 4 replication, completed 2026-04-17 PARTIAL_MATCH). K1175→K1176→K1268 chain: queue tasks need pre-dispatch K-id existence check."
   },
   {
     "id": "paper2_table3_canonical_K1175_completed",
@@ -6816,7 +6817,7 @@
     "title": "K630: write general-audience article (auto-discovered uncovered K)",
     "description": "K K630 has verdict signal (score=0, reasons=[]) but no general article. Verdict preview: [提出: Codex 建議 #2, 執行: Claude] SPY 隔夜/日內分解。隔夜佔日方差 36.6%（COVID 期間 55.7%）。隔夜 return 強左偏(-1.44)極峰(25.9)。大幅隔夜缺口→V 形日內波動反應（負缺口 3.77x，正缺口 3.08x）。r_on 與 r_id 幾乎不相關(0.039)但 r²相關(0.206)。OOS：GJR-GARCH baseline QLIKE=1.519 最佳。HAR-OI +1.54%（NS）。GJR-X(overnight) +5.68%（marginally worse DM p=0.",
     "priority": 4,
-    "status": "pending",
+    "status": "superseded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K630",
@@ -6830,6 +6831,29 @@
       "auto-discovered",
       "audience-general"
     ],
-    "created_at": "2026-05-10T17:08:08+00:00"
+    "created_at": "2026-05-10T17:08:08+00:00",
+    "closure_note": "dedup_conflict 2026-05-11: mile_3fd1dc7e '你睡覺的時候，市場在做什麼？答案可能嚇到你' (general audience, published 2026-03-29) 已完整覆蓋 K630 全部 ground-truth 數字（隔夜佔日方差 36.6%、COVID 期間 55.7%、V-shape 倍數 3.77x/3.08x）。publication_candidates.json covered_by 已標 mile_3fd1dc7e。auto-discovery 未檢查 covered_by 即建立此 task — K852-pattern bug。同議題 same-audience 不發第 2 篇。"
+  },
+  {
+    "id": "K637_article_general",
+    "title": "K637: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K637 has verdict signal (score=0, reasons=[]) but no general article. Verdict preview: [提出: 方法論/策略探索, 執行: Claude] Unsupervised clustering（K-Means/GMM/HMM）識別波動 regime。Silhouette 強烈支持 k=2（calm vs stressed）。固定 VIX brackets [15/20/30] silhouette 僅 0.043（vs K-Means 0.37, HMM 0.41）——不是自然邊界。HMM 2-state 策略 Sharpe 0.93-1.08 vs baseline 0.77（+0.15-0.31）。HMM 3-state：calm(49% ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K637",
+    "tags": [
+      "regime",
+      "clustering",
+      "HMM",
+      "K-Means",
+      "GMM",
+      "VIX-brackets",
+      "strategy",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "created_at": "2026-05-10T17:38:09+00:00"
   }
 ]

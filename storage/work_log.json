@@ -5343,5 +5343,12 @@
     "mile_id": "mile_b10348ee",
     "audience": "general",
     "note": "K871 yield curve null-result published as draft. 3-layer dedup PASS (no audience covered, 0 yield-curve articles in feed, related mile_65e624d4 TW yield curve only 19% similarity). 2 PNG charts uploaded to Supabase. Sanitizer applied 1 replacement (Harvey)."
+  },
+  {
+    "timestamp": "2026-05-11T01:25:00Z",
+    "task_type": "daily_article",
+    "task_id": "K630_article_general",
+    "verdict": "dedup_conflict_terminated",
+    "note": "mile_3fd1dc7e \"你睡覺的時候，市場在做什麼？答案可能嚇到你\" (general, published 2026-03-29) 已完整覆蓋 K630 ground-truth 數字 (36.6% / 55.7% COVID / V-shape 3.77x 3.08x). publication_candidates.covered_by 已標 mile_3fd1dc7e. auto-discovery 未檢查 covered_by 即建立 task — K852-pattern. next_tasks K630_article_general 改 superseded. 未派寫作 agent，未發新文。"
   }
 ]
