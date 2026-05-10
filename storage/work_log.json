@@ -5485,5 +5485,26 @@
     "summary": "K1040 mile_b4774629 post-publish review: Codex primary-path quota-blocked → Gemini fallback PASS. Byte-accuracy + lookahead audit + statistical-overclaim all pass; 3 LOW recommendations. Primary-path Codex re-verify queued after quota reset 2026-05-12.",
     "artifact": "experiments/k1040/k1040_post_publish_codex_review.md",
     "reviewer": "gemini-cli (Codex fallback per .claude/rules/experiments.md hierarchy)"
+  },
+  {
+    "entry_id": "wl_20260511_k971_post_publish_review",
+    "timestamp": "2026-05-11T00:00:00Z",
+    "task_id": "K971_post_publish_codex_review",
+    "task_type": "paper_review",
+    "agent": "main-thread",
+    "skill_used": "codex:review (fallback to main-thread audit)",
+    "summary": "K971/mile_8c3829e5 post-publish review: CONDITIONAL PASS. Byte-accuracy/lookahead PASS; DM CONDITIONAL (h=1 defensible, all |t|>4.5 pass Bonferroni-4); 1 MAJOR overclaim found (crisis 0.7pp universal claim — 2022 Bear actually 1.69pp). Codex primary path quota-blocked at 019e13f0; main-thread structured audit substituted per error_log fallback policy.",
+    "outcome": "CONDITIONAL_PASS",
+    "duration_min": 15,
+    "derived_tasks": []
+  },
+  {
+    "timestamp": "2026-05-11T00:00:00+00:00",
+    "task_id": "K1035_post_publish_codex_review",
+    "task_type": "paper_review",
+    "status": "succeeded",
+    "summary": "K1035 mile_052ed9e4 (EVT-VaR with A4f residuals) post-publish 24h review: Codex primary-path quota-blocked → Gemini fallback PASS. All numeric claims A-F byte-verified; lookahead clean (lines 425/568/404/546); seed adequate; multiple-testing handled via Harvey 3.0 threshold; period figure 19yr is conservative underclaim vs actual 21.3yr (MINOR). Causal interpretation (A4f internalizes tail risk via VIX, ξ 0.103→0.055) methodologically supported. 3 MINOR findings, 0 MAJOR, 0 CRITICAL. Codex re-verify queued post quota reset 2026-05-12 19:46.",
+    "artifact": "experiments/k1035/k1035_post_publish_codex_review.md",
+    "reviewer": "gemini-cli-0.33.1 (Codex fallback per .claude/rules/experiments.md hierarchy)"
   }
 ]

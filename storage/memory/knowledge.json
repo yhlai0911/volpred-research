@@ -23335,7 +23335,20 @@
     ],
     "data_source": "yfinance SPY + ^VIX 2006-2026",
     "created_at": "2026-04-07T13:06:22.575522+00:00",
-    "experiment_date": "2026-04-07"
+    "experiment_date": "2026-04-07",
+    "post_publish_review": {
+      "reviewer": "main-thread audit (Codex quota fallback 2026-05-11)",
+      "review_path": "experiments/k971/k971_post_publish_codex_review.md",
+      "verdict": "CONDITIONAL PASS",
+      "review_date": "2026-05-11",
+      "article_id": "mile_8c3829e5",
+      "major_issues": [
+        "crisis 0.7pp universal-quantifier overclaim (2022 Bear actually 1.69pp)"
+      ],
+      "byte_accuracy": "PASS",
+      "lookahead_free": "PASS",
+      "dm_usage": "CONDITIONAL (h=1 bandwidth defensible; all t>4.5 pass Bonferroni-4)"
+    }
   },
   {
     "id": "know_20260407131358_k972",
@@ -24372,7 +24385,23 @@
       "K1000",
       "K1034"
     ],
-    "legacy": true
+    "legacy": true,
+    "review_path": {
+      "type": "post_publish_review",
+      "reviewer": "gemini-cli-0.33.1",
+      "reviewer_source": "codex-fallback-subagent",
+      "primary_path_status": "quota-exceeded-2026-05-12-19-46-reset",
+      "verdict": "PASS",
+      "review_date": "2026-05-11",
+      "article_id": "mile_052ed9e4",
+      "review_doc": "experiments/k1035/k1035_post_publish_codex_review.md",
+      "issues": [
+        "MINOR: 19yr underclaim vs actual 21.3yr",
+        "MINOR: Basel test uses last-250d only (not rolling)",
+        "MINOR: DM HLN-1997 small-sample adj unverified (negligible at n=1827)"
+      ],
+      "codex_reverify_required": true
+    }
   },
   {
     "id": "know_20260410182451_k1036",
@@ -24695,7 +24724,23 @@
     ],
     "data_source": "yfinance: SPY, QQQ (2005-2026)",
     "created_at": "2026-04-11T01:18:00Z",
-    "source": "recovered_from_readme"
+    "source": "recovered_from_readme",
+    "review_path": {
+      "type": "post_publish_review",
+      "reviewer": "gemini-cli-0.33.1",
+      "reviewer_source": "codex-fallback-subagent",
+      "primary_path_status": "quota-exceeded-2026-05-12-19-46-reset",
+      "verdict": "PASS",
+      "review_date": "2026-05-11",
+      "article_id": "mile_052ed9e4",
+      "review_doc": "experiments/k1035/k1035_post_publish_codex_review.md",
+      "issues": [
+        "MINOR: 19yr underclaim vs actual 21.3yr",
+        "MINOR: Basel test uses last-250d only (not rolling)",
+        "MINOR: DM HLN-1997 small-sample adj unverified (negligible at n=1827)"
+      ],
+      "codex_reverify_required": true
+    }
   },
   {
     "id": "know_20260411165145_k1049",
@@ -28995,5 +29040,23 @@
     ],
     "confidence": "high",
     "reviewer_notes": "Gemini PASS verdict; main thread pre-audit independently confirmed all numeric claims. Closure NOT complete until primary-path Codex re-verification within 48h. Article remains 'draft' status in feed.json — review caveats can be addressed by minor article edits before status flip to 'published' if desired."
+  },
+  {
+    "id": "K980_review",
+    "timestamp": "2026-05-10T22:12:24Z",
+    "category": "post_publish_review",
+    "topic": "K980 mile_3655a10a post-publish 24h-rule review — main-thread fallback CONDITIONAL PASS (Codex primary quota-blocked)",
+    "finding": "Article byte-accurate vs k980_threshold_garch_results.json: 28/28 numeric claims PASS within rounding (parameter table omega/alpha/gamma/persistence × low/high × value/ratio = 12 PASS; OOS QLIKE GJR 1.4989, TGJR 1.5032, Dummy 1.5048 PASS; DM p=0.75 PASS; OOS obs 1824 PASS; regime-conditional QLIKE 4 PASS; VaR1 + VaR5 violation rates 6 PASS; pct diff 0.29% PASS). 85% high-VIX OOS share back-computes to 84.65% (PASS within rounding). Lookahead CLEAN: VIX.shift(1) at line 65; both IS (L272-282) and OOS (L309-323) recursions consistently use vix_lag_*[t]=VIX_{t-1} and r_prev=t-1 return. No overclaim: article correctly reports point-estimate 0.29% worse vs DM p=0.75 not significant; explicitly disclaims 'cannot claim split-model significantly worse'. Null result honestly reported.",
+    "methodology": "Multiple-testing: c grid {14,16,18,20,22,24,26,28} searched on IS QLIKE only; best_c=14 chosen before OOS eval. Selection bias in protective direction for null finding (TGJR loses even with IS-favorable c) — no SPA/Harvey adjustment needed. DM test h=1: HAC-capable function but for h=1 the lag loop is empty, reducing to plain sample variance (standard for 1-step-ahead). Article phrasing 'HAC 修正' technically correct but trivially reduces — minor wording note.",
+    "observation_pattern": "Article transparently discloses null result with three honest qualifications: (a) point-estimate 0.29% worse, (b) statistically insignificant p=0.75, (c) regime-conditional view shows TGJR wins on low-VIX days (15% of OOS) but loses on high-VIX days (85% of OOS). Pedagogical narrative for retail audience preserves methodological honesty. Three MINOR notes: (1) 'HAC 修正' phrasing trivial for h=1, (2) beta row omitted from param table (persistence row encodes it), (3) Kupiec p-values for VaR not shown numerically though qualitatively 'FAIL' noted.",
+    "review_path": "Main-thread fallback byte-accuracy + methodology audit (Codex CLI 0.121.0 primary blocked by 'usage limit, try again 2026-05-12 19:46'; feature-dev:code-reviewer subagent dispatch tool not in session tool surface). 28-point Python numeric verification + line-by-line source-code lookahead trace + multiple-testing/DM/overclaim audits. Per K1259 2026-04-29 lesson: main-thread/secondary-reviewer PASS != primary-path Codex PASS; REQUIRED follow-up: re-run Codex primary after quota resets 2026-05-12 19:46 to upgrade CONDITIONAL PASS to full PASS.",
+    "related_k": [
+      "K970",
+      "K1020",
+      "K1040",
+      "K1018"
+    ],
+    "confidence": "high",
+    "reviewer_notes": "Verdict CONDITIONAL PASS pending Codex primary re-verification. No Critical/Major issues. Review file: experiments/k980/k980_post_publish_codex_review.md."
   }
 ]

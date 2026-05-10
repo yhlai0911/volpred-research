@@ -5798,7 +5798,7 @@
     "title": "K971 mile_8c3829e5 24h-rule Codex post-publish review",
     "description": "Run Codex source-code review on mile_8c3829e5 (CAViaR-VT general article). Verify: (1) all numbers byte-aligned to experiments/k971/k971_caviar_vt_results.json (2) DM test framing not misused as Sharpe-significance claim (3) shift(1) lag verified (4) provenance complete. Skill: codex:codex-rescue + paper-review-cycle pattern.",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "K971_post_publish_codex_review",
     "k_id": "K971",
@@ -5808,7 +5808,11 @@
       "K971",
       "mile_8c3829e5"
     ],
-    "created_at": "2026-05-09T08:43:54.646660Z"
+    "created_at": "2026-05-09T08:43:54.646660Z",
+    "completed_at": "2026-05-11T00:00:00Z",
+    "verdict": "CONDITIONAL PASS",
+    "review_path": "experiments/k971/k971_post_publish_codex_review.md",
+    "reviewer": "main-thread audit (Codex quota fallback)"
   },
   {
     "id": "paper_review_mile_0bdb89aa",
@@ -6447,10 +6451,13 @@
     "title": "Codex 24h-rule review: K1035 mile_052ed9e4 EVT-VaR with A4f residuals article",
     "priority": 3,
     "description": "Within 24h of publish (mile_052ed9e4), run Codex review per source-code-blind-spot rule. Verify: (1) byte-accurate stats vs experiments/k1035/k1035_results.json (Trinity 0/4 GJR-t, 4/4 GJR-EVT, 4/4 A4f-t, 4/4 A4f-EVT), (2) violation rate quotes (QQQ 1% VaR GJR-t 0.0186, A4f-t 0.0142, A4f-EVT 0.0082), (3) GPD xi 0.103 vs 0.055 SPY values, (4) McNeil & Frey (2000) Journal of Empirical Finance 7(3-4):271-300 citation accuracy, (5) no overclaim re EVT being useless (only no-incremental-on-A4f, still rescues GJR), (6) cross-ref K159/K988/K1000/K770b/K995 accuracy, (7) verify VaR vs vol-forecast distinction framing matches K770b lesson.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "K1035_post_publish_codex_review",
-    "created_at": "2026-05-10T12:45:29.791260Z"
+    "created_at": "2026-05-10T12:45:29.791260Z",
+    "completed_at": "2026-05-11T00:00:00Z",
+    "result": "PASS (Gemini fallback; Codex primary quota-exceeded; reverify post 2026-05-12 19:46)",
+    "review_doc": "experiments/k1035/k1035_post_publish_codex_review.md"
   },
   {
     "id": "K1096_article_general",
@@ -6541,9 +6548,12 @@
     "title": "K980 mile_3655a10a 發布後 Codex review (24h-rule)",
     "priority": 3,
     "description": "Codex source-code-level review on mile_3655a10a (K980 threshold GJR-GARCH general article). Check: (1) numerical accuracy vs k980_threshold_garch_results.json byte-for-byte, (2) DM NS interpretation correctness (no over-claim), (3) lookahead lag claim verification (signal.shift(1)), (4) param ratio table sign convention, (5) regime-conditional QLIKE claim consistency. Source: K980_post_publish_codex_review.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
-    "source": "K980_post_publish_codex_review"
+    "source": "K980_post_publish_codex_review",
+    "completed_at": "2026-05-10T22:12:37Z",
+    "verdict": "CONDITIONAL PASS (main-thread fallback; Codex primary re-verification pending quota reset 2026-05-12 19:46 PT)",
+    "review_file": "experiments/k980/k980_post_publish_codex_review.md"
   },
   {
     "id": "K863_article_general",
