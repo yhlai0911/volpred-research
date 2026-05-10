@@ -5460,5 +5460,30 @@
     "status": "draft",
     "executor": "Claude",
     "notes": "Paper 8 reproducibility audit (Table 5/6) — N differs from paper (87/186/150 vs 127/203/89), geo shocks ARE absorbed (t=2.36), NFP overall NS (p=0.074) but VIX-stratified shows clean monotone decline 1.23→0.98. Honest research integrity angle for general audience."
+  },
+  {
+    "timestamp": "2026-05-10T21:10:31Z",
+    "task_type": "paper_body",
+    "task_id": "paper2_reproduce_gate_fix_untraceable_bindings",
+    "verdict": "progress_sec25_done",
+    "commit": "687478ff",
+    "note": "Sec 2.5 (VIXTWN/VIX ratio + Steiger Z) full fix: 2 inline % source: bindings to body.tex L118/L120 + reproduce.py inline check loading K1181 results. 4 new VERIFIED checks (VIXTWN_VIX_ratio=1.393, Spearman VIX-RV=0.595, Spearman VXEEM-RV=0.459, Steiger Z=16.2). Net 2/7 cat resolved (Table 4 + Sec 2.5)."
+  },
+  {
+    "timestamp": "2026-05-10T21:37:19Z",
+    "task_type": "paper_body",
+    "task_id": "paper2_reproduce_gate_fix_untraceable_bindings",
+    "verdict": "progress_sec44_done",
+    "commit": "98cec6bf",
+    "note": "Sec 4.4 (0056.TW robustness t=5.67) full fix via K558 test_8_robustness_0056.harvey_dm.t_stat=5.6664 byte-match. 1 new VERIFIED. Cumulative: 3/7 cat resolved (Table 4 + Sec 2.5 + Sec 4.4)."
+  },
+  {
+    "timestamp": "2026-05-10T22:10:55.414789+00:00",
+    "task_id": "K1040_post_publish_codex_review",
+    "task_type": "paper_review",
+    "status": "succeeded",
+    "summary": "K1040 mile_b4774629 post-publish review: Codex primary-path quota-blocked → Gemini fallback PASS. Byte-accuracy + lookahead audit + statistical-overclaim all pass; 3 LOW recommendations. Primary-path Codex re-verify queued after quota reset 2026-05-12.",
+    "artifact": "experiments/k1040/k1040_post_publish_codex_review.md",
+    "reviewer": "gemini-cli (Codex fallback per .claude/rules/experiments.md hierarchy)"
   }
 ]

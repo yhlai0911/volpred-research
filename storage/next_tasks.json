@@ -6412,10 +6412,12 @@
     "title": "Codex 24h-rule review: K1040 mile_b4774629 VRP/g_t/VIX return predictability article",
     "priority": 3,
     "description": "Within 24h of publish (mile_b4774629), run Codex review per source-code-blind-spot rule. Verify: (1) byte-accurate stats vs experiments/k1040/k1040_results.json, (2) Clark-West interpretation correctness, (3) IS vs OOS R^2 framing, (4) long-short Sharpe -0.118/-0.001/-0.074 quotes correct, (5) Bollerslev (2009) RFS citation accuracy, (6) g_t-VRP rho 0.80 (K1023) cross-ref, (7) no overclaim re VIX-only h=22d significance.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "K1040_post_publish_codex_review",
-    "created_at": "2026-05-10T12:09:52.866680Z"
+    "created_at": "2026-05-10T12:09:52.866680Z",
+    "completed_at": "2026-05-10T22:10:55.414789+00:00",
+    "findings": "Codex CLI quota-blocked (reset 2026-05-12 19:46) → fallback Gemini CLI PASS. Article mile_b4774629 byte-accurate vs k1040_results.json (5 R², 5 CW p, 6 Sharpe, 2 HAC t-stats); lookahead-free (X_t→r_{t+1..t+h}); CW vs DM defensible (CW correct for nested); 1,805 OOS days verified. 3 LOW recommendations: (a) add longshort chart gen to k1040.py for full reproducibility, (b) Bonferroni footnote, (c) tighten lag wording. REQUIRED follow-up: primary-path Codex re-verification after quota reset (K1259 lesson — subagent/secondary PASS ≠ primary Codex PASS). Review doc: experiments/k1040/k1040_post_publish_codex_review.md"
   },
   {
     "id": "K1035_article_general",
@@ -6928,5 +6930,21 @@
     ],
     "created_at": "2026-05-10T20:10:48Z",
     "closure_note": "Added abstract extraction to _count_tex_metrics regex /\\begin{abstract}...\\end{abstract}/ + passthrough in update_paper_full kwargs. E2E test PASS: paper-update --paper-id taiwan-vt now pushes K1175 canonical 0.799 abstract automatically. Commit pending."
+  },
+  {
+    "id": "paper_review_mile_7ba7ee54",
+    "title": "Paper review (Codex 24h-rule): 看似有效、其實只是搭了多頭便車——台積電財報事件交易策略的誠實檢視",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_7ba7ee54 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_7ba7ee54",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-10T22:06:09+00:00"
   }
 ]
