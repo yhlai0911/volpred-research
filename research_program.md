@@ -82,6 +82,9 @@
 - **International VT universal**（K68: 13/13 市場 MDD 改善，US VIX 通用）
 - **Rebalancing: 月度最佳**（K48/K65/K75: 週/季/年全 NS）
 - **VT 季節性 NULL**（K80）、**槓桿 NULL**（K81）、**Stop-loss NULL**（K83）
+- **TF / MA 5 strategies all fail Harvey**（K518: SMA200 / Faber10M / Golden Cross / Dual Momentum / MA+VT, 1999-2025 SPY 27yr; 5/5 fail Harvey t>3 multi-test bar; 4/5 sub-B&H absolute Sharpe; best Golden Cross Sharpe 0.51 vs B&H 0.41 NS; MA+VT collapse Sharpe -83% / MDD +74% ↑; refs Moskowitz 2012 JFE / Faber 2007. mile_67169c30）— "課本級別" trend-following folk rules 全通不過嚴格統計 bar
+- **K1018 4-layer engineering ≈ baseline NS**（robust_vt vs 12/VIX baseline; metric helper 修 cumsum→cumprod 後：Sharpe 0.5937 vs 0.5364 vs 0.5966 (bh_5050) all DM-NS; MDD -31.26% vs -30.17% vs -32.49%; 4 layers 工程加值 ≈ 0. mile_a4311ba7）— **methodology lesson**: 簡化版 metric helper (cumsum + cum-peak) 對 arithmetic returns 系統性 understate MDD + understate CAGR；須改 (1+r).cumprod() NAV path + (cum-peak)/peak relative drawdown，否則 Calmar 報導 ~half 失真
+- **K549 multi-asset 5-asset VT all weather**（A_50/50, B_TLT, D_4-asset, F_5-asset; bootstrap 95% CI 4 portfolios 完全重疊；Harvey-style |t|>3.0 跨 5 個年份視窗 (2010/2013/2016/2019/2022) 0/7 portfolios 通過；EFA 跨期間最一致，TLT 2022 災難性。mile_50030b56）— **lesson**: 多資產分散沒有「免費 Sharpe」；TLT 升息週期變毒藥；VIX_t 同期決權重 lookahead disclaimer 必加
 - **Factor tilts NULL**（K89: MTUM/VLUE/QUAL/USMV 全不改善 50/50）
 - 台灣市場：**K55/K82/K88 台灣 VT 指南 + TSMC 集中度測試**
 
@@ -92,12 +95,15 @@
 - Anti-tautology 驗證
 - **VIX sufficient statistic**（25+ 次確認：K43/K48/K57/K61/K65/K80/K84 + K730 cross-asset + K731 term structure + K732 behavioral sentiment + 歷史 15 次）
 - **VT 保險費定價**（K41: ~4%/yr 恆定，K62: 利率依賴，K74: 80% 時間落後是正常的）
+- **Copula tail dependence asymmetry — multi-pair Bonferroni-robust evidence**（K195: 66 配對股票/行業 ETF, OOS Bonferroni 26/66 通過, full-sample 28/66；Top-5 EEM-XLK t=-10.29 / QQQ-XLK / SPY-XLE / XLE-XLF / SPY-EEM；leverage effect 確認下尾依賴強於上尾。**Methodology caveat**: GARCH-X 用 TDA 當 exog regressor 預測 RV → DM t=-0.601 NS — "cross-section structural evidence ≠ forecast utility"；refs Patton 2006 / Joe 1997 / Embrechts copula textbook. mile_7de1c5a2）
 
 ### 面向 E: 即時市場分析
 - Hormuz 危機追蹤
 - 危機類型分類（financial/pandemic/monetary/oil）
 - 即時 VaR/ES 預報
 - Paper trading 績效追蹤
+- **FOMC / 重大事件 ex-ante prior + ex-post 對帳**（2026-04-29 FOMC: HOLD 3.50-3.75% 兌現 12 天前 94.8% prior 中央 scenario; 但 8-4 dissent (1992-10 以來首次 4-dissent) 是 prior 沒涵蓋的 narrative shock，把 June implied prob 從 78% → 95.5% (+17.5pp); SPY 04/29 收盤 -0.04% 落在 hold-conditional 中位附近. mile_fef2e0b2 published）— **methodology lesson**: T+0 ex-post 對帳框架 (actual vs prior conditional distribution) 行得通；dissent structure / vote-split 是 ex-ante prior 應 cover 但常忽略的維度，未來事件 prior 模板需加 vote-split scenario branch
+- **Event date 必驗證外部官方 calendar**（2026-05-02 NFP 假日期 incident: scheduler 把 first-Friday-of-month heuristic 算成 NFP 日期，實際 BLS 是 first Friday _after_ 12th of month. event_expander 必須抓 BLS / FOMC 官方 schedule URL 對齊，否則 silent date drift 會堆積到 publish 階段才被研究誠實 net 抓到. docs/error_log.md 2026-05-02 entry）
 
 ### 面向 F: 網站與系統
 - 前端功能（12/VIX 計算器, Feed 品質, Paper 下載）
@@ -285,6 +291,7 @@
 - [ ] Vision Transformer for RV — arXiv:2511.03046（需 IV surface 圖像）
 
 ### ML-GARCH 混合
+- [x] ~~KAN-GARCH-MIDAS~~ → **K1263 完成 NULL (2026-05-03)**: SPY KAN QLIKE 23.7% 比 GJR 差 (DM t=+4.89 p=0.000), QQQ 32.8% 差 (DM t=+6.35)，0/3 gates × 2 assets。**ML ceiling 第 7 次確認**。Counter-intuitive：2024-2025 frontier 結構化 NN + MIDAS macro fundamentals 反而比 30 年前 GJR-Normal 差 24-33%。
 - [x] ~~GARCH-Informed NN (GINN)~~ → **K816v2 完成 NULL**。修正 GJR state propagation 後 DM=2.96→0.64（完全 NS）。GJR baseline 改善 8.56%，DM 是 artifact。**ML ceiling 第 6 次確認**。
 - [x] ★ ~~GARCH-GRU~~ → **K784 完成 NULL**：QLIKE 排 #1 但 vs GJR DM=-0.51 不顯著。ML 額外複雜度不帶來改善。
 - [x] ~~HAR Directional Prediction~~ → **K787 完成**：67.9% 方向準確率(z=8.03)但無經濟價值（timing +33% vs B&H +58%）。VIX 對方向無用(49.6%)。
@@ -414,14 +421,29 @@ K519-K521 + K527 完成結果：見 archive。
 **結論**：上架暫停——需要找到在 5AM-9AM 之間可執行的交易機制才能重啟。
 
 #### 台指期貨 Overnight Gap Strategy（K515 延伸，高優先）
-- [ ] K515 發現 overnight gap alpha 真實（SPY-conditioned 10.73bp/day, t=4.06）但 ETF TX 18.55bp 致命（K625 更正）
-- [ ] **台指期貨（TX futures）TX cost 只有 ~2-3bp** → 可能可行！
-- [ ] 需要：台指期貨歷史日頻數據（TAIFEX 或 yfinance TWF=F?）
-- [ ] 測試：buy TX futures at close, sell at open, SPY-conditioned
-- [ ] 如果 Net Sharpe > 0.5 + cross-OOS 4/5 → 第一個可能上架的新策略
+- [x] **K1264 完成 REJECT (2026-05-03)**：n=2179 days (2017-05-16~2026-04-28), 5bp round-trip cost。Gross Sharpe 1.045 (t=3.07) replicates K515 SPY finding，但 5bp 吃 81% gross → Net Sharpe 0.200 (t=0.59) << 0.5 listing 門檻。SPY-conditioning ratio 0.94 (H2 fail)。**Holiday gap 反向 finding**: long-weekend ≥4d -9.33bp vs normal 1d +7.72bp。Bear-year asymmetry: 2018/2022 systematic -19%。Revive 條件: cost ≤3bp OR normal-1day filter + regime timing。**NOT listing-eligible**.
 
 ## Codex 論文審查記錄
 → 完整審查詳見 `docs/research_archive/codex_paper_reviews.md`
+
+## Article 三模 Review Pattern（2026-05-02 立）
+
+**Production article 出 publication pipeline 後 24h 內必走 3-model review**（Claude write → Gemini-2.5-pro text framing → Codex GPT-5.4 source-code）。實證 6 篇 article × 20+ source-level catches gemini 純 markdown review 漏看：
+
+| Article | Gemini caught | Codex 二審 caught (gemini missed) |
+|---------|---------------|----------------------------------|
+| K518 mile_67169c30 | tone framing | 21年/27年錯, 5×5獨立區間錯, Golden Cross 2/5→3/5, SPY/債券 vs SPY/GLD |
+| K672 mile_cbbf35cb | overclaim flag | A7 >20pp 每次 / B1 股債 spec mismatch |
+| K655 mile_40fbffbb | NEEDS_FIX (BH 60/40 spec) | rolling-window 21天細節 |
+| K1018 mile_a4311ba7 | PASS | MDD cumsum bug, 控制多重檢驗 overclaim, dm_test() 非標準 DM |
+| FOMC mile_fef2e0b2 | SPY/S&P typo (1) | sign error, VIX 對帳混用, T-2 id 誤指, 78%→95.5% 來源, traceability |
+| K549 mile_50030b56 | (skipped → codex direct) | 所有 CI 重疊 (只算 4/7), 多重比較 framing, 5 個 2 年期 vs 5 個年份視窗, VIX 同期 lookahead |
+
+**Operational caveats**：
+- **Codex CLI quota**：高頻 review 易撞 OpenAI usage limit (e.g. 2026-05-02 21:44 CST 撞，reset ~3h 後)
+- **Codex 中文 prompt 用 heredoc**（避免 printf UTF-8 % char bug：K655 first attempt 撞）
+- **Stop-gap：Gemini-2.5-pro PASS_WITH_CAVEAT** 可暫代但不可省 codex（gemini 無法看 implementation backing）
+- **Hook discipline**：metric helper edit 即使是 K1018 同 pattern，重跑前仍要走獨立 codex review 流程
 
 ## 其他研究方向（詳細版）
 → MEM 文獻、Gemini/用戶建議（WVD/TE-VT/K770 修正版/Overnight component）、Hansen & Lunde Gold Standard 比較 → 見 `docs/research_archive/detailed_research_topics.md`
@@ -522,3 +544,197 @@ K519-K521 + K527 完成結果：見 archive。
 **Deploy**: `d3ef25c` + `d202b4d` + `f4b0988` + `2f68833`。Zeabur `69e4aff350cfe9704d091e57` RUNNING。細節 `docs/frontend-v3-redesign.md`。
 
 **待主人決定**：何時切 `active_frontend = v3`（目前獨立預覽不影響舊站 SEO）。
+
+## 2026-05-08 自主 /loop session: 集中 systemic fixes
+
+12-hour autonomous /loop 期間累積 **8 篇 articles published** + **5 systemic fixes**:
+
+**Articles** (P4 daily_article published as draft, all real-data + 4-dimension quality):
+- mile_4df2d060 (K479 wavelet vol mixed)
+- mile_b6249667 (K485 SSVS PROMISING)
+- mile_b79e0701 (K489 VIX term structure)
+- mile_09c3dbf6 (K497 Patton loss sensitivity ρ=0.71)
+- mile_21cf034d (K511 ETF pairs 5/5 FAIL)
+- mile_0aa76d4d (K517 monthly conditioning ALL FAIL)
+- mile_1ed654f4 (K544 tail hedge NEGATIVE confirms Israelov 2017)
+- mile_fffc6147 (K550 adaptive VIX threshold NUANCED)
+- mile_c5127413 (K571 VIX mean-reversion MARGINAL)
+- mile_e8d99cf3 (K576 vol clustering NULL)
+- mile_6dc01de9 (K594 adaptive window NULL)
+- mile_340972b5 (K603 dynamic target MARGINAL)
+- mile_257ddc69 (K635 fixed-vs-rolling GARCH)
+- mile_f5714212 (K647 strategy-matcher v2)
+- mile_bdf75de2 (K631 day-of-week ALL NULL)
+- mile_4c1045ea (K663 rate environment GLD/TLT)
+
+**Systemic fixes** (per "永遠修流程，不修資料"):
+1. **Period-Attribution Checklist** in feed-publisher SKILL.md (3rd-occurrence trigger after d716099a/c496072f/ed9e4626 financial-quote audits all FAIL'd) — fiscal-year boundary table 7 公司 + mandatory checklist + BAD/GOOD examples
+2. **publish_draft.py --update flag** (replaces 3rd one-off patch script) — 596L (+285), `errata.update_history[]` audit trail, 7 smoke tests PASS, 2x dogfood validated (major +5259c + light +694c)
+3. **TW close staleness fix** in scripts/daily_update.py (rich article path) — 0050.TW 1-session lag explicit date stamp + warning when stale, 18 tests PASS
+4. **TW staleness extension** to publish_milestone path — `build_milestone_description()` helper extracted, byte-for-byte text consistency enforced via test
+5. **Task type backfill governance** — 29 NULL task_type pending tasks classified (paper_body 12 / experiment 9 / paper_decision 8)
+
+**Important pattern**: Research-result articles consistently PASS audits (mile_d25f7f90 17/17, mile_0e3fb5f6 15/15, mile_146dc06e/f7584521/688f15e9/5a50ea3c daily formulaic chain). FAIL pattern was systematic to financial-quote articles only — Period-Attribution Checklist now blocks at source.
+
+**Codex CLI**: ENOBUFS persistent through session, fallback to general-purpose subagent for all paper_review tasks (per .claude/rules/experiments.md).
+
+---
+
+## 2026-05-08 / 09 Session — Memory Integrity + Image-Fix + 3-Model Review Saga
+
+**14 daily articles published**: K709 / K715 ★★★ / K717 / K722 / K852 / K719 self-correction / K726 K727-rejected / K753 / K890 / K928 / K936 / K911 / K945 / K947.
+
+**Systemic fixes** (per "永遠修流程，不修資料"):
+
+1. **Image-fix saga (102 articles)**: User-reported mile_53983530 K547 broken image → audit found 101 articles with relative-path images. Bulk fix 60 + 5 PNG regen for K438/K681 = **102 total**. Root cause: agent inconsistency. **P2 structural fix** in publish_draft.py: `normalize_image_paths` + `normalize_image_url_field` auto-upload local paths or fail (245 LOC + 15 tests).
+
+2. **publish_draft.py P3 polish** (180 LOC + 20 tests, 99/99 suite PASS): tag-cap priority eviction (frontmatter > audience > K-id) + CLI UX (--draft alias, --phase default, /tmp path tolerance).
+
+3. **Citation regex root-cause** (K928 footgun): sanitizer protection 3+ author citations from `and`-only to `(?:and|&amp;|&)`. publish_draft.py + publisher.py both patched + 2 regression tests.
+
+4. **Knowledge.json memory integrity (51 entries)**:
+   - **K936 audit (25 entries)**: K932-K956 ids carrying K109-K140 legacy content. All re-keyed batch.
+   - **26-pair audit**: 23 Case B re-key K860-K882 → K43-K66 **RESTORED 23 lost early research entries** + 3 Case C preserved as `K<id>_legacy_pilot`. 0 deletion. Same root cause as 2026-04-10 bloat (merge_worktree.sh jq dedup bug).
+
+5. **merge_worktree.sh dedup regression gate**: 446 LOC integrity gate + 171 LOC pytest (12 tests) + delta-mode integration (pre-merge baseline + post-merge check + `git reset --hard` on new corruption).
+
+6. **memory-health SKILL.md +section 5** ID-vs-title 對齊檢查: jq one-liner + 4-step fix protocol — weekly cron will catch future regressions.
+
+7. **mile_c4c73ed9 K1032 LIVE article**: Codex 24h-rule FAIL (2 CRIT + 1 SEVERE + 2 MAJOR + 2 MED + 1 MINOR). 7 fixes applied via publish_draft.py --update + errata 段落. **3-model review pattern saved LIVE article from prod hallucination** (per K1018 教訓 validated).
+
+8. **feed-publisher SKILL.md +4 dogfood best practices**: proactive Supabase upload / dry-run sanitizer pre-check / image_url frontmatter scalar / tag count cap behavior.
+
+9. **k947_results.json conclusion field** disambiguated (pair-specific DM verdicts replacing single "Yes").
+
+**4 CRITICAL agent catches today** (Mission 2「研究誠實」直接 demonstrated):
+- K719 cross-sectional vs rolling RV → self-correction story
+- K726 K727-rejected timezone hypothesis → self-correction
+- K936 knowledge.json id="K936" had K112 content → cross-check experiments/k112/ DNE → wrote about real K936
+- K947 brief "PASS at Harvey" misled by conclusion field → DM table verified T-GJR FAIL → honest NULL
+
+**Pattern**: Agents that cross-check `experiments/<id>/{README.md, results.json}` against knowledge.json/brief catch hallucinations. Pattern P4 queued to encode in agent-brief-template.md.
+
+**Codex CLI**: smoke test `echo TEST` PASS but adversarial-review fails on git ENOBUFS (large diff). `codex exec --skip-git-repo-check` with stdin pipe works. Fallback path documented.
+
+
+---
+
+## 2026-05-09 / 10 Session — Daily Articles + 3-Model Review Pattern Continuation
+
+**12 articles published** (10 K + 2 errata v2):
+
+- **新文章**：K950 (cross-asset VT 0/5 NULL) / K953 (HAR-RV pilot PRELIMINARY) / K971 (CAViaR-VT 11yr OOS NULL) / K973 (Hurst rough vol NULL @ daily) / K979 research v1 (SKEW NULL Harvey 3.0) / K982 (sector dispersion VIX-suff) / K984 (SPY→TW50 daily lead-lag NULL net-of-cost) / K986 (Adaptive HAR LASSO/Ridge NULL) / K989 (MF2-VIX + VIX² synthesis NULL) / K990 (SPY→TW50 monthly NULL — 信號蒸發 daily 0.40 → monthly 0.03) / K981 (HAR + Wavelet NULL) / K1020 (MS(2)-A4f synthesis NULL — information substitution)
+- **Errata v2 (Codex review fixes)**：K979 research mile_f46b6320 (Harvey ref + mechanical artifact 軟化 + quintile timing + DM sign + M7M8 n=1780) / K986 mile_912dd699 (CV-leakage caveat + GARCH ceiling 軟化) / K982 mile_9ed87beb (sample size 1936→1913 + high-corr t=13.7 framing + gross-of-cost + lookahead 細化)
+
+**Systemic fixes** (per "永遠修流程，不修資料"):
+
+1. **Dedup Layer-2 K-id title-test 補強**：feed-publisher SKILL.md + agent-brief-template.md 同步加 `jq title-test` 強制兜底 (K852 incident — grep -c 對中文夾雜上下文不可靠). 後續 K979 incident 用 audience-pivot 救援 (general → research) — dedup 不是禁令而是換角度提示。
+2. **build_publication_candidates topic-family clustering**：對每個 K candidate 計算 ≥2 domain-tag overlap per audience，excludes K-id 不重複但 topic family 已 covered cases. missing_general 從 ~50 → 1 (K1018), missing_research → 1 (K1122). 跨語言 tag normalization (vix-sufficiency vs VIX 充分性) 留 P5 follow-up.
+3. **gen_paper_review filter audience=daily + experiment_refs empty**：mile_d4a3b5c0/0347be08 等 formulaic cron output 不再被誤撈進 Codex 24h-rule 池.
+4. **K728/K924 dead-end close + P5 build_publication_candidates results.json existence check queued**：避免 dispatcher 反覆 surface 無 source K.
+5. **2× feed-sync 推 12 articles + 3 errata 上 Supabase**：214 inserted + 968 updated + 0 failed (total).
+
+**3-Model Review Pattern 連續 4 次成功實戰**:
+
+| Article | Codex catches |
+|---|---|
+| K979 research mile_f46b6320 | 2 MAJOR (Harvey framing + Q1-Q5 mechanical over-claim) + 2 MINOR (DM sign + M7/M8 n size) — 全 errata v2 修正 |
+| K986 mile_912dd699 | 1 MAJOR (sklearn CV plain KFold within-window α leakage) + 1 MINOR (GARCH ceiling 過度打包) — errata v2 修 |
+| K982 mile_9ed87beb | 2 MAJOR (sample size 1936→1913 + high-corr 22-day overlap autocorr) + 2 MINOR (gross-of-cost + regime same-day observable) — errata v2 修 |
+
+**Pattern confirmed**: Codex source-code review 系統性抓出 Gemini text-framing review 漏的：(a) numerical-vs-narrative drift (b) statistical convention misuse (c) sample-size effective vs nominal (d) hyperparameter leakage (e) reference attribution. 全在 LIVE article 上線 24h 內捕獲 + 主線程 errata flow 修正。每篇 v2 errata 增加 ~400-1100 chars 的方法論誠實標記 — Mission 2 (research 嚴謹) + 研究誠實 #6 (推翻舊結論回溯更正) compliant.
+
+**Diversity rule (CLAUDE.md 關 2) 實戰反思**：
+- 「≥3 同 type 必換」rule 導致長 plateau (queue 全 P4 daily candidates)
+- 用 ops/governance/paper_review 主線程任務手動 inject diversity 是必要 valve
+- feedback_dispatch_over_diversity「不能 hold 空轉」與此 rule 之間需 case-by-case 判斷
+- 主線程 Codex review (paper_review type) 是 daily article batch 的天然 partner — 每寫完一波 daily 接著 codex review push pr 入 last-5 解 daily 鎖
+
+**今 session 數據**:
+- 12 articles published (general audience), avg 5,300 chars
+- 4 Codex primary-path reviews completed (K979 / K982 / K986 + 一筆早先 audit)
+- 3 errata v2 完整修正
+- 6+ systemic improvements (5 listed above + minor patches)
+- 79 → 80 entries in experiment_experiences.json (dedup pattern entry)
+- 363 → 366+ pending tasks in next_tasks.json (mostly auto-discovered + Codex 24h queue)
+
+**遺留 backlog** (next session priorities):
+- K1146 / K1169 / vix_sufficiency_expansion (P1 paper main-thread, awaiting policy direction)
+- 11+ paper_review (Codex 24h-rule) for today's articles
+- P5 multi_source_task_generator_v2 (5 task type generators)
+- P5 cross-language tag normalization (topic_family_collision)
+
+---
+
+## 2026-05-11 Session — Dispatch / Refill / Paper2-Reproduce Gate Progress
+
+**Session theme**: 5-layer dispatcher / refill / dedup hardening + paper2 reproduce gate 3/7 cat closure.
+
+### Articles published
+
+- mile_d1b23190 — K868 day/night RV decomposition (general)
+- mile_b10348ee — K871 yield curve null vs SPY vol (general, null result)
+- mile_410450e4 — K878 DXY null-result (general)
+- mile_193a0d90 — K898 Paper 3 Table 3 reproducibility audit (general)
+- mile_3b689404 — K904 Paper 8 reproducibility (honest plot twist, general)
+
+### Paper 2 reproduce gate (3/7 cat closed)
+
+- **Table 4 (tab:vt_results)** — K1175 byte-match bindings 10 VERIFIED checks (BH/EWMA/GARCH/GJR/8.63VIX × Sharpe+MDD). GJR VT MDD -22.3→-22.2 align K1175 -22.25 rounding.
+- **Sec 2.5 (VIXTWN ratio + Steiger Z)** — K1181 4 VERIFIED checks (ratio=1.393, Spearman VIX-RV=0.595, Spearman VXEEM-RV=0.459, Steiger Z=16.2).
+- **Sec 4.4 (0056.TW robustness)** — K558 test_8_robustness_0056.harvey_dm.t_stat=5.6664 byte-match paper 5.67.
+
+### Codex post-publish reviews (4 articles, Codex quota fallback)
+
+- K1035 EVT-VaR (mile_052ed9e4) — PASS via Gemini fallback
+- K1040 VRP/g_t (mile_b4774629) — PASS via Gemini fallback
+- K971 CAViaR-VT (mile_8c3829e5) — CONDITIONAL PASS main-thread audit (1 MAJOR overclaim L51)
+- K980 TGJR (mile_3655a10a) — CONDITIONAL PASS main-thread (28/28 numeric, 0 Critical/Major)
+
+Codex CLI 0.121.0 daily quota exhausted at session 019e13ef—reset 2026-05-12 19:46 PT. All 4 reviews queued primary-path re-verify post-reset per K1259 lesson (subagent/secondary PASS ≠ primary-path PASS).
+
+### Experiments
+
+- **K1100h v2** Phase 1 — Codex CONDITIONAL PASS (0 MAJOR/0 MINOR, 4 v1 issues fixed: bar-agg 13:45 endpoint + settlement-day filter + Big5 fallback + HAC lag). Verdict BORDERLINE (DM-t=2.21 secondary 5% but Harvey |t|>3 fail). Knowledge entry written.
+- **K1116d v2** ALFRED first-release vintage — Codex PASS (fetch v2) + CONDITIONAL PASS (main battery). Master verdict H2_ROBUST_NULL_VINTAGE_CONFIRMED (0/24 cells pass both vintage + revised cycles; worst pit_shift1×all DM t=-5.21). Paper 4 alt-data NULL upper-bound argument empirically robust to first-release vintage data.
+- **K1268 GDELT** — FAIL_NO_DATA. GDELT 2.0 public bulk endpoint production-ready (864 files/3min, no auth) but yfinance 1m/5m limited to last 30/60 days — historical backtest periods (2020 COVID, 2024 Nikkei flash crash, 2023 SVB) all out of window. Honest FAIL framing; K1268b queued with paid data prereq.
+
+### Systemic fixes (12+ commits)
+
+1. **refill_task_pool 4-layer dedup** (commits 6e57b64b + 0503155e + a2f9b434):
+   - audience=null legacy articles included in dedup set
+   - candidate.covered_by direct honor
+   - build_publication_candidates audiences_covered backfill (None → 'general')
+2. **continue_task_dispatch is_paper_task exemptions** (commits 3f0eaa6d + 05e98ee5):
+   - task_type=daily_article (K898/K904 had "[Paper 3 R1]" verdict_preview triggering)
+   - task_type=paper_review (id `paper_review_mile_*` triggers `paper_` regex)
+   - Effect: agentable 0 → 7 paper_reviews unblocked
+3. **vix-sufficiency K1116d addendum** (commit 86ae71f7): integration_plan_v2 §publication-delay-robustness extended to 7 pieces (K1116/b/c/d + K1118 + K1121 + K504 + K1098).
+4. **Paper 10 README backfill** (commit b2558f75): Status updated from "kickoff" → "Body drafted v5 — pre-review" (body_v5.tex 494 LoC + main.pdf 2026-04-28 + 14 % source K-bindings).
+5. **taiwan-vt abstract sync** (commits 02b0ac14 + e707c232):
+   - main.tex + main_v3.tex abstract OLD 0.729/0.796/-41.3/-18.4 → K1175 canonical 0.799/0.701/-33.8/-21.2
+   - Supabase synced via upsert_paper_metadata
+   - paper-update CLI feature: _count_tex_metrics now extracts abstract from main_v3.tex regex (止 future drift)
+6. **error_log yfinance high-freq lesson** (commit 3478f4c6): yfinance 1m/5m 30/60-day lookback documented as backtest blocker; K1268b prereq.
+
+### Closed K-id collision incidents
+
+- K1175 (kid_collision Paper 2 Table 3 audit) → K1176 collision again (Paper 2 Table 4) → K1268 (free, GDELT scan).
+- K637/K872/K729/K708/K711/K723/K1023 article tasks bulk-closed as audience-null-fix superseded (7 stale before they hit dedup_conflict round).
+
+### Reviewer ecosystem state
+
+Codex CLI 0.121.0 production-path proven 2026-04-28; daily quota fully consumed 2026-05-11 by K1035/K1040/K971/K980 reviews. Gemini CLI fallback exercised twice (K1035 K1040 PASS) + main-thread audit fallback exercised twice (K971 K980 CONDITIONAL PASS). Subagent fallback path remains untested this session (tool not surfaced).
+
+### Outstanding paper2 reproduce gate work (4 cat deferred)
+
+- **Table 1 TWII summary stats** (4): TWII mean/std/skew/kurt — needs descriptive_stats experiment
+- **Table 5 vt_common** (1 lumped): K1175 doesn't byte-match (1.108 paper vs 1.0742 K1175); needs dedicated 2020-2026 common-period strategy battery
+- **Sec 6 macro** (2): K1179 verdict NO_MATCH (paper r=0.214 vs K1179 r=0.189, 11.7% rel diff); needs body revision OR re-run
+- **Appendix TZ** (2): Taiwan c2c Sharpe 1.473 / TW+JP 50/50 Sharpe 1.810 — K1176 has 1.91 not 1.473 (different spec)
+- **Sec 4.5 TSMC** (2): VT Sharpe 1.121 + 52.5% return variance — no clean JSON source
+- **Sec 3 TWD/USD** (1): p=0.08 — K461 has FX as regressor but no Granger test extracted
+- **Table 2 individual gamma** (3): Hon Hai 0.052/MediaTek 0.044/0056 0.112 — paper spec doesn't match any existing K (K1060 Hon Hai=0.105)
+
+Each cat needs dedicated session work; not iterative one-cycle fixes.
+
