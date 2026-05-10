@@ -155,7 +155,20 @@ def detect_block_reason(task: dict) -> str | None:
 
 
 def is_paper_task(task: dict) -> bool:
-    """Paper writing tasks are main-thread-only per CLAUDE.md."""
+    """Paper writing tasks are main-thread-only per CLAUDE.md.
+
+    2026-05-11 K898/K904 incident: daily_article tasks whose description
+    cited a paper source (e.g. "[提出: Paper 3 R1 A.1, 執行: Claude]")
+    were misclassified as paper writing — the regex `paper\\s*\\d+` matched
+    in the verdict_preview but the task itself was a feed article about a
+    K experiment, not body.tex editing.
+
+    Fix: short-circuit when task_type=='daily_article' (articles about
+    papers are still articles, not paper writing work). Other task_types
+    follow the original regex.
+    """
+    if (task.get("task_type") or "").lower() == "daily_article":
+        return False
     blob = " ".join(
         str(task.get(k, "") or "") for k in ("title", "description", "id", "task_type")
     )
@@ -202,23 +215,53 @@ def categorize(tasks: list[dict]) -> dict:
 
 
 def _maybe_refill(agentable_count: int, *, auto_refill: bool) -> dict | None:
-    """Auto-trigger refill_task_pool.py when agentable < REFILL_FLOOR.
+    """Auto-trigger pool refill when agentable < REFILL_FLOOR.
 
-    Returns the refill result dict if refill ran, else None. Refill is
-    quiet-on-no-add to avoid log noise in healthy steady state.
+    Two-stage refill (2026-05-06 diversity fix):
+    1. `generate_diverse_tasks.generate()` — non-article sources (paper_review,
+       platform_ops, governance). Quota-capped, won't dominate pool, but ensures
+       pool isn't 100% daily_article (CLAUDE.md 關 2 diversity rule).
+    2. `refill_task_pool.refill()` — backfill remaining gap with auto-discovered
+       daily_article tasks from publication_candidates.
+
+    Returns combined result dict; quiet-on-no-add for healthy steady state.
     """
     if not auto_refill:
         return None
     if agentable_count >= REFILL_FLOOR:
         return None
+    sys.path.insert(0, str(ROOT / "scripts"))
+    combined: dict = {"ok": True, "added": 0, "added_ids": [], "by_type": {}}
     try:
-        # Inline import to keep dispatcher importable even if refill script
-        # is missing or has import errors.
-        sys.path.insert(0, str(ROOT / "scripts"))
-        from refill_task_pool import refill as _refill_fn  # type: ignore
-        return _refill_fn(target=REFILL_FLOOR - agentable_count, dry_run=False)
+        from generate_diverse_tasks import generate as _diverse_gen  # type: ignore
+        diverse = _diverse_gen(dry_run=False)
+        if diverse.get("added"):
+            combined["added"] += diverse["added"]
+            combined["added_ids"].extend(diverse.get("added_ids") or [])
+            combined["by_type"].update(diverse.get("by_type") or {})
     except Exception as exc:  # noqa: BLE001
-        return {"ok": False, "error": str(exc)}
+        combined.setdefault("warnings", []).append(f"diverse_gen: {exc}")
+
+    try:
+        from refill_task_pool import refill as _refill_fn  # type: ignore
+        gap = max(0, REFILL_FLOOR - agentable_count - combined["added"])
+        if gap > 0:
+            article = _refill_fn(target=gap, dry_run=False)
+            if article.get("added"):
+                combined["added"] += article["added"]
+                combined["added_ids"].extend(article.get("added_ids") or [])
+                combined["by_type"]["daily_article"] = article["added"]
+            elif article.get("ok") is False:
+                combined.setdefault("warnings", []).append(
+                    f"article_refill: {article.get('reason') or article.get('error')}"
+                )
+    except Exception as exc:  # noqa: BLE001
+        combined.setdefault("warnings", []).append(f"article_refill: {exc}")
+        combined["ok"] = combined.get("ok", True)
+
+    if combined["added"] == 0 and not combined.get("warnings"):
+        return {"ok": True, "added": 0, "reason": "no_new_signal"}
+    return combined
 
 
 def build_report(*, auto_refill: bool = True) -> dict:
