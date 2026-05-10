@@ -165,12 +165,58 @@ smoothing destroyed signal — physically dubious for a Fed-published macro indi
 - `data/<alias>_revised_snapshot.csv` — fredgraph current revised
 - `data/fetch_log.json` — fetch audit + chain breakdown
 
-## 7. Pending (to be filled after Codex review + main run)
+## 7. Results (2026-05-11 main run, post v2 fetch fix)
 
-- `k1116d_results.json` — full results with DM tables, verdicts, bootstrap CIs
-- `k1116d_dm_heatmap.png` — vintage cycle 6×4 heatmap with Harvey threshold
-- `k1116d_vintage_vs_revised_diff.png` — per-indicator value-level diff plots
-- README §8 Results, §9 Verdict, §10 Paper 4 implications, §11 Limitations
+**Master verdict**: `H2_ROBUST_NULL_VINTAGE_CONFIRMED`
+- Vintage cycle: 0/24 challenger cells reach Harvey |t|>3 — all DM t-stats negative vs M2_vix
+- Revised cycle: 0/24 cells pass — replicates K1116c
+- Vintage-vs-revised PIT correlations: USEPU 0.77, WLEMU 0.81, NFCI 0.83, ANFCI 0.83, STLFSI 0.41
+
+### Vintage DM t-stats (vs M2_vix baseline)
+| Variant | base | epu | finstress | all |
+|---|---|---|---|---|
+| orig_shift1 | -3.021 | -2.218 | -2.966 | -4.567 |
+| corrected_shift2 | -3.021 | -2.218 | -3.081 | -4.465 |
+| conservative_shift2 | -3.021 | -2.015 | -3.081 | -4.297 |
+| pit_shift0 | -3.021 | -1.906 | -2.964 | -3.872 |
+| pit_shift1 | -3.021 | -3.267 | -3.081 | -5.213 |
+| multi_lag_3 | -3.021 | -2.070 | -3.120 | -3.606 |
+
+All cells negative; the largest negative (`pit_shift1` × all = -5.21) is the strongest evidence
+that adding alt-data on top of VIX **hurts** the model. Bootstrap CIs (n_boot=1000, seed=42)
+in `k1116d_results.json`.
+
+### Sensitivity: drop STLFSI (Codex MINOR)
+Codex 2026-05-11 review CONDITIONAL PASS flagged that the STLFSI vintage chain
+(STLFSI→STLFSI2→STLFSI3→STLFSI4) and the revised STLFSI4 fredgraph backfill are not
+a pure same-series revision comparator (corr=0.41). `k1116d_sensitivity_no_stlfsi.py`
+re-runs finstress + all without STLFSI signal:
+- vintage no_stlfsi: **H2_ROBUST_NULL**, 0 passing
+- revised no_stlfsi: **H2_ROBUST_NULL**, 0 passing
+
+Verdict robust to STLFSI exclusion → chain comparator concern does not drive the NULL.
+
+### Codex review summary
+- v2 fetch fix: **PASS** (2 MINOR addressed)
+- Main 6×5 battery: **CONDITIONAL PASS** (1 MINOR — STLFSI comparator caveat — addressed by sensitivity)
+
+## 8. Paper 4 implications
+
+K1116c's "noisier vintage cannot reveal hidden signal" upper-bound argument is now
+**empirically demonstrated**, not just methodological. The Paper 4 alt-data NULL stands:
+EPU + financial-stress indices add no incremental value over VIX for SPY weekly volatility,
+across 6 lag/PIT conventions × 5 specs × 2 data backbones (vintage + revised) × STLFSI on/off.
+
+## 9. Limitations
+
+- IS/OOS windows fixed at 2018-2022 / 2023-2026; no rolling re-estimation.
+- Asset is SPY; the NULL may be index-specific (cf. K1118/K1121 cross-asset).
+- STLFSI vintage uses predecessor chain; the underlying methodology shifted across
+  STLFSI/2/3/4 (Brave-Butters smoothing changes), so STLFSI vintage values are not
+  identical-construct across the chain. This is documented as a caveat, mitigated by
+  the no_STLFSI sensitivity above.
+- Bootstrap CI uses stationary bootstrap with seed=42; results sensitive to block-length
+  choice not formally tested (but H2 is direction-of-effect, not boundary case).
 
 ## 8. Scope guardrails
 
