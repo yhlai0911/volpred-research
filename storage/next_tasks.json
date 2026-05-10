@@ -1412,7 +1412,7 @@
     "title": "K729: write general-audience article (auto-discovered uncovered K)",
     "description": "K K729 has verdict signal (score=3, reasons=None) but no general article. Verdict preview: ",
     "priority": 4,
-    "status": "pending",
+    "status": "superseded_audience_null_fix",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K729",
@@ -1424,7 +1424,8 @@
     "blocked_reason": "awaiting_external_data",
     "blocked_at": "2026-05-04T14:24:46+00:00",
     "blocked_note": "experiments/k729/ missing — no README/py/results.json. Source experiment was never created or got removed; refill should not have surfaced this.",
-    "blocked_until": "2026-06-01"
+    "blocked_until": "2026-06-01",
+    "closure_note": "[2026-05-11] Bulk close after a2f9b434 audiences_covered backfill: covered_by audience=null legacy article. Stale pending entry. Saved from another dedup_conflict round."
   },
   {
     "id": "K761_article_general",
@@ -2264,7 +2265,7 @@
     "title": "K708: write general-audience article (auto-discovered uncovered K)",
     "description": "K K708 has verdict signal (score=2, reasons=None) but no general article. Verdict preview: ",
     "priority": 4,
-    "status": "pending",
+    "status": "superseded_audience_null_fix",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K708",
@@ -2275,7 +2276,8 @@
     "created_at": "2026-05-05T03:24:21+00:00",
     "blocked_reason": "self_tagged_optional",
     "blocked_at": "2026-05-05T03:24:34+00:00",
-    "blocked_note": "K708 is internal next-session roadmap planning, not publishable research"
+    "blocked_note": "K708 is internal next-session roadmap planning, not publishable research",
+    "closure_note": "[2026-05-11] Bulk close after a2f9b434 audiences_covered backfill: covered_by audience=null legacy article. Stale pending entry. Saved from another dedup_conflict round."
   },
   {
     "id": "K921_article_general",
@@ -4780,7 +4782,7 @@
     "title": "K711: write general-audience article (auto-discovered uncovered K)",
     "description": "K K711 has verdict signal (score=0, reasons=[]) but no general article. Verdict preview: [提出: K638 方向角度, 執行: Claude] VIX3M/VIX slope lag-1 vs next-day SPY return corr=-0.010。Quintile 無單調（Q3 +31.2% Q4 +1.2%——random）。Contango-only Sharpe 0.589 < BH 0.601（-0.011）。結論：term structure 不預測方向（K638 已知不預測 vol beyond VIX，現確認也不預測 direction）。VIX sufficiency 又一次確認。",
     "priority": 4,
-    "status": "pending",
+    "status": "superseded_audience_null_fix",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K711",
@@ -4793,7 +4795,8 @@
       "auto-discovered",
       "audience-general"
     ],
-    "created_at": "2026-05-08T08:38:10+00:00"
+    "created_at": "2026-05-08T08:38:10+00:00",
+    "closure_note": "[2026-05-11] Bulk close after a2f9b434 audiences_covered backfill: covered_by audience=null legacy article. Stale pending entry. Saved from another dedup_conflict round."
   },
   {
     "id": "fix_publish_draft_update_description_sync",
@@ -5022,7 +5025,7 @@
     "title": "K723: write general-audience article (auto-discovered uncovered K)",
     "description": "K K723 has verdict signal (score=0, reasons=[]) but no general article. Verdict preview: [提出: Codex 審查, 執行: Codex] Paper 4 Volatility Absorption 審查。(1)Absorption sign convention 反：正值應=更大衝擊但論文解讀為更吸收。(2)SAR 數字跟 K716 不匹配——K716 有 5 bin 不是 3，且不嚴格單調。(3)NFP 過度宣稱——K661 VIX<15 p=0.069, K528 p=0.128，不能說 fully consistent。(4)NSI 方法論：VIX 同時在分母和 regressor → 機械性相關。需要：fix sign conve",
     "priority": 4,
-    "status": "pending",
+    "status": "superseded_audience_null_fix",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K723",
@@ -5035,7 +5038,8 @@
       "auto-discovered",
       "audience-general"
     ],
-    "created_at": "2026-05-08T11:35:27+00:00"
+    "created_at": "2026-05-08T11:35:27+00:00",
+    "closure_note": "[2026-05-11] Bulk close after a2f9b434 audiences_covered backfill: covered_by audience=null legacy article. Stale pending entry. Saved from another dedup_conflict round."
   },
   {
     "id": "K726_article_general",
@@ -6357,7 +6361,7 @@
     "title": "K1023: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1023 has verdict signal (score=0, reasons=[]) but no general article. Verdict preview: [提出: Claude, 執行: Claude] Paper 9 source decomposition 理論基礎。3 個命題：(1) E(σ²)=E(τ)E(g)+Cov(τ,g) 精確成立（誤差<0.003%），但 Corr(τ,g)=0.48 非可忽略。(2) Constrained θ₁ ratio=0.78，自動校正 21.9% VRP discount。Free ω 分裂 VRP 到 θ₁(1.96)+E(g)(0.48)。(3) Direct g vs VRP 弱（τ 吸收 VRP signal by construction），g-pr",
     "priority": 4,
-    "status": "pending",
+    "status": "superseded_audience_null_fix",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1023",
@@ -6370,7 +6374,8 @@
       "auto-discovered",
       "audience-general"
     ],
-    "created_at": "2026-05-10T10:38:10+00:00"
+    "created_at": "2026-05-10T10:38:10+00:00",
+    "closure_note": "[2026-05-11] Bulk close after a2f9b434 audiences_covered backfill: covered_by audience=null legacy article. Stale pending entry. Saved from another dedup_conflict round."
   },
   {
     "id": "K1040_article_general",
@@ -6758,7 +6763,7 @@
     "title": "K872: write general-audience article (auto-discovered uncovered K)",
     "description": "K K872 has verdict signal (score=0, reasons=[]) but no general article. Verdict preview: [提出: Claude, 執行: Claude] K872 tests FRED HY OAS (BAMLH0A0HYM2) for vol prediction. Raw corr with fwd vol r=0.55 but VIX r=0.71. HY-VIX corr=0.77 (redundant). Delta-R² after VIX control = 0.0003. OOS: best credit model QLIKE 0.088 vs VIX 0.090, DM t=0.57 NS. HY OAS leads VIX by ~7",
     "priority": 4,
-    "status": "pending",
+    "status": "superseded_audience_null_fix",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K872",
@@ -6772,7 +6777,8 @@
       "auto-discovered",
       "audience-general"
     ],
-    "created_at": "2026-05-10T16:44:01+00:00"
+    "created_at": "2026-05-10T16:44:01+00:00",
+    "closure_note": "[2026-05-11] Same as K637: audiences_covered=[general] post-fix, covered_by populated. Closed without dispatch."
   },
   {
     "id": "K878_article_general",
@@ -6841,7 +6847,7 @@
     "title": "K637: write general-audience article (auto-discovered uncovered K)",
     "description": "K K637 has verdict signal (score=0, reasons=[]) but no general article. Verdict preview: [提出: 方法論/策略探索, 執行: Claude] Unsupervised clustering（K-Means/GMM/HMM）識別波動 regime。Silhouette 強烈支持 k=2（calm vs stressed）。固定 VIX brackets [15/20/30] silhouette 僅 0.043（vs K-Means 0.37, HMM 0.41）——不是自然邊界。HMM 2-state 策略 Sharpe 0.93-1.08 vs baseline 0.77（+0.15-0.31）。HMM 3-state：calm(49% ",
     "priority": 4,
-    "status": "pending",
+    "status": "superseded_audience_null_fix",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K637",
@@ -6856,7 +6862,8 @@
       "auto-discovered",
       "audience-general"
     ],
-    "created_at": "2026-05-10T17:38:09+00:00"
+    "created_at": "2026-05-10T17:38:09+00:00",
+    "closure_note": "[2026-05-11] publication_candidates audiences_covered backfilled (a2f9b434): K637 covered_by audience=null legacy article. Stale next_tasks entry — would have hit 4th dedup_conflict. Closed before dispatch."
   },
   {
     "id": "K1268b_gdelt_with_paid_intraday",

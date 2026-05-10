@@ -5374,5 +5374,20 @@
     "task_id": "K665_article_general",
     "verdict": "DEDUP_CONFLICT_TERMINATED",
     "note": "K665 daily article terminated at 3-layer dedup gate. Layer 1 (publication_candidates): covered_by=mile_b5fe2026 already populated. Layer 2 (feed grep): existing article \"不會算數也能用的投資策略——一張三行表格就夠了\" published 2026-03-30 cites K665 by name with identical 3-row table (VIX<15→100%, 15-25→50%, >25→20%), 97.4% retention, 23/yr vs 231/yr trading, 102.8% 5-row finding, 2 real PNG charts. Layer 3 (audience=null legacy check, per workflow step 1d new rule): caught — covered_by has audience=null legacy. New general-audience K665 article would be near-byte-duplicate. Coverage already satisfies. next_tasks K665_article_general → dedup_conflict. No commit, no feed-sync. Validates step 1d new check from K852 / K622/K630 教訓."
+  },
+  {
+    "timestamp": "2026-05-10T18:39:35Z",
+    "task_type": "platform_ops",
+    "task_id": "build_publication_candidates_audience_null_fix",
+    "verdict": "systemic_fix_applied",
+    "commit": "a2f9b434",
+    "note": "4th-layer data fix: build_publication_candidates audiences_covered now treats audience=None as general (pre-2026-04-14 default-tone). K622/K630/K665 incidents root-data-layer closed. Combined with refill 6e57b64b + 0503155e: full chain dedup hardening."
+  },
+  {
+    "timestamp": "2026-05-10T18:41:07Z",
+    "task_type": "governance",
+    "task_id": "bulk_close_stale_audience_null_article_tasks",
+    "verdict": "cleanup_applied",
+    "note": "Closed 7 stale article_general tasks (K637, K872 + K729, K708, K711, K723, K1023) after a2f9b434 audiences_covered backfill. Each had covered_by audience=null legacy article. Saved from dedup_conflict rounds. Remaining legit uncovered = 10 candidates (K644, K705, K921, K200, K650, K691, K267, K898, K904, K878). 5 of those self_tagged_optional or kid_collision blocked."
   }
 ]
