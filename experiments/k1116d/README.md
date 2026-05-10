@@ -1,9 +1,37 @@
 # K1116d: True ALFRED First-Release Vintage Retest of K1116c PIT NULL Verdict
 
-**Status**: PENDING CODEX REVIEW (code written, not yet executed)
-**Date**: 2026-05-09
+**Status**: v2 FETCH-FIX APPLIED, vintage data gap-free; main 6×5 PIT battery still pending
+**Date**: 2026-05-09 (v1) / 2026-05-11 (v2 chunk-boundary fix)
 **Trigger**: K1116c (2026-04-13) flagged true ALFRED vintage as future work; FRED API key
 became available 2026-05-10. Hook discipline: code written first → Codex review → main run.
+
+## v2 (2026-05-11) — Chunk-boundary fix
+
+Codex 2026-05-11 audit found 1 MAJOR: yearly chunking in `k1116d_fetch_alfred.py`
+dropped 8 USEPU/WLEMU obs dates across 7 years (chunk boundaries `12-01..12-08`).
+Root cause: yearly chunks set `realtime_end == obs_end`. For daily series with
+D+1 publication delay, the boundary obs date X has `realtime_start = X+1` falling
+outside the chunk's realtime window; next chunk starts at X+1 (obs_start) so X is
+also missing there.
+
+**Fix** (`fetch_chained_first_release`):
+- Chunks shortened from yearly → **6-month obs windows** (8 -> 17 chunks per daily series)
+- `realtime_end` extended **+14 days** beyond chunk's obs_end so D+1..D+14
+  first releases of boundary obs are reachable
+- Existing `seen_release_dates` set de-dups overlap region; same-DATE multiple-
+  release rows kept earliest release (true first publication)
+
+**Verification** (`data/gap_validation_v2.json`):
+| Series | Before | After | Δ | Gap >5bd |
+|---|---|---|---|---|
+| USEPU | 3046 | **3056** | +10 | 0 |
+| WLEMU | 3046 | **3056** | +10 | 0 |
+| NFCI | 436 | 436 | 0 (unaffected, weekly) | 0 |
+| ANFCI | 436 | 436 | 0 (unaffected, weekly) | 0 |
+| STLFSI | 432 | 432 | 0 (3 chain-transition gaps, intrinsic) | 3 (intrinsic) |
+
+December year-boundary spot check: all 9 years (2017-2025) now have full 12-01..12-10
+weekday coverage for both USEPU and WLEMU.
 
 ## 1. Motivation
 

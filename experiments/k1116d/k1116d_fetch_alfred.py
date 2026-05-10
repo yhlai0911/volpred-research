@@ -107,7 +107,17 @@ def fred_first_release(series_id: str, obs_start: str, obs_end: str,
         try:
             r = requests.get(BASE_URL, params=params, timeout=30)
             if r.status_code == 200:
-                return r.json().get("observations", [])
+                obs = r.json().get("observations", [])
+                # Codex 2026-05-11 MINOR (b): explicit cap防呆 — if response size approaches
+                # FRED's 100000 cap, warn loudly. Daily 6-month chunk should be ~130-140 obs;
+                # anything >50000 means the chunk strategy needs revisiting before silent
+                # truncation eats data.
+                if len(obs) >= 50_000:
+                    print(
+                        f"    WARNING {series_id} {obs_start}..{obs_end} returned "
+                        f"{len(obs)} obs — approaching FRED limit=100000. Reduce chunk size."
+                    )
+                return obs
             last_err = f"HTTP {r.status_code}: {r.text[:300]}"
         except Exception as exc:
             last_err = str(exc)
@@ -116,27 +126,62 @@ def fred_first_release(series_id: str, obs_start: str, obs_end: str,
 
 
 def fetch_chained_first_release(plan: dict) -> pd.DataFrame:
-    """Fetch first-release vintage for one alias, possibly chaining predecessor series."""
+    """Fetch first-release vintage for one alias, possibly chaining predecessor series.
+
+    Chunk-boundary fix (K1116d-v2, 2026-05-11)
+    -----------------------------------------
+    The original implementation used **yearly** obs/realtime chunks
+    (`obs_start..obs_end == realtime_start..realtime_end`). For daily series with
+    publication delay (USEPUINDXD/WLEMUINDXD release on D+1), an obs date X near
+    the chunk boundary has `realtime_start = X+1` which falls **outside** the
+    chunk's realtime window when `obs_end == X`. The next chunk starts at
+    `X+1` (obs_start) so X is also missing there. Net result: 8 obs dates
+    across 7 years dropped at chunk boundaries (Codex 2026-05-11 audit MAJOR).
+
+    Fix: switch to **6-month obs chunks** AND extend `realtime_end` by a
+    **14-day overlap** beyond the chunk's obs_end. obs windows themselves are
+    non-overlapping (`cur = nxt + 1 day`), so cross-chunk same-DATE duplicates
+    are not the main concern — the 14d overlap reaches into the post-window
+    realtime span where late first-releases live. The `seen_release_dates`
+    set primarily de-dups chain-transition overlaps (STLFSI/STLFSI2/...) and
+    catches any stray repeated (release_date, obs_date) pairs. 6-month is
+    short enough to keep each call's vintage count well under FRED's 100k
+    cap (~ 130 vintages/chunk for daily; assert-style warning in
+    `fred_first_release` triggers if response approaches 50000).
+    """
     rows: list[dict] = []
     seen_release_dates: set = set()  # de-dup across chain overlap zones
 
     chunk_yearly = plan.get("chunk_years", False)
     for series_id, obs_start, obs_end in plan["chain"]:
         if chunk_yearly:
-            # split into yearly realtime windows (matches obs window for first release)
+            # 6-month obs chunks, with 14-day realtime_end overlap into the next obs
+            # window so observations at the boundary (whose first release is D+1+)
+            # are still captured.
             ranges = []
             cur = pd.to_datetime(obs_start)
             end = pd.to_datetime(obs_end)
             while cur < end:
-                nxt = min(cur + pd.DateOffset(years=1), end)
-                ranges.append((cur.strftime("%Y-%m-%d"), nxt.strftime("%Y-%m-%d")))
+                nxt = min(cur + pd.DateOffset(months=6), end)
+                # observation window: cur..nxt (inclusive on both ends per FRED API)
+                # realtime window: cur..nxt+14d so D+1..D+14 first releases of obs
+                # near nxt are reachable. Overlap is de-duped via seen_release_dates.
+                rt_end = min(nxt + pd.DateOffset(days=14), end + pd.DateOffset(days=14))
+                ranges.append((
+                    cur.strftime("%Y-%m-%d"),
+                    nxt.strftime("%Y-%m-%d"),
+                    cur.strftime("%Y-%m-%d"),
+                    rt_end.strftime("%Y-%m-%d"),
+                ))
+                # advance: next chunk starts day after nxt to avoid duplicate obs
+                # boundary; seen_release_dates handles any residual overlap.
                 cur = nxt + pd.DateOffset(days=1)
         else:
-            ranges = [(obs_start, obs_end)]
+            ranges = [(obs_start, obs_end, obs_start, obs_end)]
 
-        for s, e in ranges:
-            print(f"    {series_id}  obs {s}..{e}", flush=True)
-            obs = fred_first_release(series_id, s, e)
+        for s, e, rs, re_ in ranges:
+            print(f"    {series_id}  obs {s}..{e}  rt {rs}..{re_}", flush=True)
+            obs = fred_first_release(series_id, s, e, rt_start=rs, rt_end=re_)
             for o in obs:
                 # de-dup on (release_date, observation_date) — chain overlaps possible
                 key = (o["realtime_start"], o["date"])
@@ -158,7 +203,9 @@ def fetch_chained_first_release(plan: dict) -> pd.DataFrame:
             time.sleep(0.3)
 
     df = pd.DataFrame(rows).sort_values(["RELEASE_DATE", "DATE"]).reset_index(drop=True)
-    # if same DATE appears with multiple RELEASE_DATEs (chain transition), keep earliest release
+    # if same DATE appears with multiple RELEASE_DATEs (chain transition or
+    # 14-day chunk overlap zone), keep earliest release — that is the true
+    # first publication.
     df = df.drop_duplicates(subset=["DATE"], keep="first").reset_index(drop=True)
     return df
 

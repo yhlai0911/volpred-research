@@ -1,44 +1,102 @@
 {
-  "attempt_timestamp": "2026-05-11T00:01:58.007442",
+  "attempt_timestamp": "2026-05-11T00:45:03.787358",
   "fred_api_key_present": true,
   "method": "FRED API output_type=4 (first release per observation date)",
   "indicators": {
     "STLFSI": {
       "rows_vintage": 432,
       "rows_pit_weekly": 437,
-      "cached": true
+      "obs_range": [
+        "2017-12-01",
+        "2026-04-03"
+      ],
+      "release_range": [
+        "2017-12-07",
+        "2026-04-08"
+      ],
+      "chain": [
+        "STLFSI",
+        "STLFSI2",
+        "STLFSI3",
+        "STLFSI4"
+      ],
+      "source_breakdown": {
+        "STLFSI": 120,
+        "STLFSI2": 93,
+        "STLFSI3": 41,
+        "STLFSI4": 178
+      }
     },
     "NFCI": {
       "rows_vintage": 436,
       "rows_pit_weekly": 437,
-      "cached": true
+      "obs_range": [
+        "2017-12-01",
+        "2026-04-03"
+      ],
+      "release_range": [
+        "2017-12-06",
+        "2026-04-08"
+      ],
+      "chain": [
+        "NFCI"
+      ],
+      "source_breakdown": {
+        "NFCI": 436
+      }
     },
     "ANFCI": {
       "rows_vintage": 436,
       "rows_pit_weekly": 437,
-      "cached": true
+      "obs_range": [
+        "2017-12-01",
+        "2026-04-03"
+      ],
+      "release_range": [
+        "2017-12-06",
+        "2026-04-08"
+      ],
+      "chain": [
+        "ANFCI"
+      ],
+      "source_breakdown": {
+        "ANFCI": 436
+      }
     },
     "USEPU": {
-      "rows_vintage": 3046,
-      "rows_pit_weekly": 439,
-      "cached": true
-    },
-    "WLEMU": {
-      "rows_vintage": 3046,
+      "rows_vintage": 3056,
       "rows_pit_weekly": 439,
       "obs_range": [
         "2017-12-01",
-        "2026-04-12"
+        "2026-04-13"
       ],
       "release_range": [
         "2017-12-01",
+        "2026-04-14"
+      ],
+      "chain": [
+        "USEPUINDXD"
+      ],
+      "source_breakdown": {
+        "USEPUINDXD": 3056
+      }
+    },
+    "WLEMU": {
+      "rows_vintage": 3056,
+      "rows_pit_weekly": 439,
+      "obs_range": [
+        "2017-12-01",
         "2026-04-13"
+      ],
+      "release_range": [
+        "2017-12-01",
+        "2026-04-14"
       ],
       "chain": [
         "WLEMUINDXD"
       ],
       "source_breakdown": {
-        "WLEMUINDXD": 3046
+        "WLEMUINDXD": 3056
       }
     }
   }
