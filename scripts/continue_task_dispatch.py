@@ -167,7 +167,11 @@ def is_paper_task(task: dict) -> bool:
     papers are still articles, not paper writing work). Other task_types
     follow the original regex.
     """
-    if (task.get("task_type") or "").lower() == "daily_article":
+    task_type = (task.get("task_type") or "").lower()
+    # daily_article + paper_review are both agentable; their ids may contain
+    # `paper_` (paper_review_mile_*) or descriptions may cite paper sources.
+    # 2026-05-11 incidents: K898/K904 daily_article + paper_review_mile_7ba7ee54.
+    if task_type in ("daily_article", "paper_review"):
         return False
     blob = " ".join(
         str(task.get(k, "") or "") for k in ("title", "description", "id", "task_type")
