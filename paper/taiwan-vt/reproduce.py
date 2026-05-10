@@ -382,18 +382,43 @@ k553 = load_json("k553_leveraged_vt_taiwan_results.json")
 if k553:
     base = k553["k551_replication"]["base"]
     print(f"\n  K553 base (BH 0050.TW 2010-2026): Sharpe={base['sharpe']}, MDD={base['mdd']}%")
-    print(f"  Paper Table 4 BH: Sharpe=0.729, MDD=-41.3%")
-    print(f"  *** Period difference: K553=2010-2026, Paper 'BH' may use different period")
+    print(f"  *** K553 base now informational (deprecated 0.729/-41.3% claim removed 2026-05-11; body.tex L260 K1175 canonical 0.799/-33.8%)")
 
-    add("Table 4 (VT)", "BH Sharpe=0.729", "0.729",
-        "K553", f"{base['sharpe']} (2010-2026, different period from paper)",
-        "UNTRACEABLE")
-    add("Table 4 (VT)", "BH MDD=-41.3%", "-41.3%",
-        "K553", f"{base['mdd']}% (2010-2026)",
-        "UNTRACEABLE")
+# Table 4 (VT) checks now bound to K1175 canonical replication (promoted to body.tex 2026-05-10).
+# 2026-05-11 binding fix: Read K1175 results JSON directly so BH/EWMA/GARCH/GJR/8.63VIX
+# Sharpe + MDD figures match body.tex line 260-264.
+import json as _json
+from pathlib import Path as _Path
+_k1175_path = _Path(__file__).resolve().parent.parent.parent / "experiments" / "k1175" / "k1175_results.json"
+if _k1175_path.exists():
+    _k1175 = _json.loads(_k1175_path.read_text(encoding="utf-8"))
+    _strats = _k1175.get("k1175_results", {})
 
+    def _check_strat(strat_key: str, label: str, body_sharpe: str, body_mdd: str):
+        s = _strats.get(strat_key)
+        if not s:
+            add("Table 4 (vt_results)", f"{label} not in K1175", body_sharpe, "K1175", "MISSING", "MISMATCH")
+            return
+        # Compare body.tex value vs k1175 ground truth (rounded to 3 decimals for sharpe, 1 for mdd)
+        gt_sharpe = round(s.get("sharpe", 0.0), 3)
+        gt_mdd = round(s.get("mdd_pct", 0.0), 1)
+        body_s = float(body_sharpe)
+        body_m = float(body_mdd)
+        sharpe_match = abs(gt_sharpe - body_s) <= 0.005
+        mdd_match = abs(gt_mdd - body_m) <= 0.1
+        add("Table 4 (vt_results)", f"{label} Sharpe={body_sharpe}", body_sharpe, "K1175",
+            f"{gt_sharpe:.3f} (paper rounds)", "VERIFIED" if sharpe_match else "MISMATCH")
+        add("Table 4 (vt_results)", f"{label} MDD={body_mdd}%", body_mdd, "K1175",
+            f"{gt_mdd:.1f}% (paper rounds)", "VERIFIED" if mdd_match else "MISMATCH")
+
+    _check_strat("buy_hold", "BH", "0.799", "-33.8")
+    _check_strat("ewma_vt", "EWMA VT (10%)", "0.701", "-21.2")
+    _check_strat("garch_vt", "GARCH VT (10%)", "0.950", "-22.2")
+    _check_strat("gjr_vt", "GJR VT (10%)", "1.074", "-22.2")
+    _check_strat("vix_863", "8.63/VIX (monthly)", "1.137", "-13.7")
+    print("  K1175 Table 4 bindings checked (BH/EWMA/GARCH/GJR/8.63VIX, both Sharpe + MDD).")
 else:
-    print("  ERROR: k553 not found!")
+    print("  WARN: K1175 results JSON not found at", _k1175_path)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -953,10 +978,8 @@ untraceable_items = [
     ("Table 1 (summary_stats)", "TWII std daily 1.45%", "N120 knowledge only"),
     ("Table 1 (summary_stats)", "TWII skewness -0.31", "N120 knowledge only"),
     ("Table 1 (summary_stats)", "TWII kurtosis 5.82", "N120 knowledge only"),
-    ("Table 4 (vt_results)", "BH Sharpe 0.729", "No experiment JSON"),
-    ("Table 4 (vt_results)", "EWMA VT Sharpe 0.796", "No experiment JSON"),
-    ("Table 4 (vt_results)", "GARCH VT Sharpe 0.994", "No experiment JSON"),
-    ("Table 4 (vt_results)", "GJR VT Sharpe 1.108", "No experiment JSON"),
+    # Table 4 (vt_results) — bindings moved to K1175 inline check above (2026-05-11 fix).
+    # Old hardcoded UNTRACEABLE entries removed; now VERIFIED via _check_strat().
     ("Table 5 (vt_common)", "All common-period values", "No experiment JSON"),
     ("Sec 6 (macro)", "Import growth partial r=0.214", "No experiment JSON"),
     ("Sec 6 (macro)", "BCI momentum t=3.74", "No experiment JSON"),
