@@ -5367,5 +5367,12 @@
     "review_source": "Codex primary-path 2026-05-11 (6 issues caught + fixed)",
     "commit": "b8595765",
     "note": "GDELT 2.0 public bulk 864 files/3min production-ready. Core SPY 5-min RV proposition untested due to yfinance high-freq lookback limit. Honest FAIL framing (no fabricated data substitute). Lesson to error_log. K1268b queued with paid-data prereq."
+  },
+  {
+    "timestamp": "2026-05-10T18:09:46Z",
+    "task_type": "daily_article",
+    "task_id": "K665_article_general",
+    "verdict": "DEDUP_CONFLICT_TERMINATED",
+    "note": "K665 daily article terminated at 3-layer dedup gate. Layer 1 (publication_candidates): covered_by=mile_b5fe2026 already populated. Layer 2 (feed grep): existing article \"不會算數也能用的投資策略——一張三行表格就夠了\" published 2026-03-30 cites K665 by name with identical 3-row table (VIX<15→100%, 15-25→50%, >25→20%), 97.4% retention, 23/yr vs 231/yr trading, 102.8% 5-row finding, 2 real PNG charts. Layer 3 (audience=null legacy check, per workflow step 1d new rule): caught — covered_by has audience=null legacy. New general-audience K665 article would be near-byte-duplicate. Coverage already satisfies. next_tasks K665_article_general → dedup_conflict. No commit, no feed-sync. Validates step 1d new check from K852 / K622/K630 教訓."
   }
 ]

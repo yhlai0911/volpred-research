@@ -197,6 +197,13 @@ def refill(target: int, dry_run: bool = False) -> dict:
         # feed.json (publication_candidates' uncovered flag can lag).
         if kid.upper() in already_covered:
             continue
+        # 3rd belt: candidates may have populated `covered_by` but stale
+        # `audiences_covered=[]` (pre-2026-04-14 audience metadata gap).
+        # 2026-05-11 K665 incident: candidate had covered_by=mile_b5fe2026 but
+        # audiences_covered=[] because covered article was audience=null legacy.
+        # Honor covered_by directly — if any milestone covers this K, skip.
+        if cand.get("covered_by"):
+            continue
         priority = _score_to_priority(int(cand.get("score") or 0))
         new_entries.append(_make_article_task(cand, priority))
 

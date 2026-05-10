@@ -6643,7 +6643,7 @@
   {
     "id": "paper2_reproduce_gate_fix_untraceable_bindings",
     "title": "Paper 2 reproduce.py gate fix — 108 checks 中多項 UNTRACEABLE source binding",
-    "description": "Per paper-workflow.md 規則 2 + .claude/skills/paper-update/SKILL.md SOP step 2.5: gate_status=fail (alert=yellow) 阻擋 paper-update CLI sync. UNTRACEABLE 範例: Appendix TZ Taiwan c2c Sharpe 1.473 / TW+JP 50/50 Sharpe 1.810 / Sec 4.5 TSMC VT Sharpe 1.121 / Sec 4.5 TSMC 52.5% / Sec 2.5 VIXTWN/VIX ratio 1.393 / Sec 3 TWD/USD p=0.08 / Sec 4.4 0056.TW t=5.67 / Table 2 individual gammas (Hon Hai/MediaTek/0056). 都 pre-existing 缺 source binding 非 K1175 引入. Fix: 為每個 UNTRACEABLE 加 `% source: experiments/kXXX/results.json:field_path` inline marker + extend reproduce.py byte-match check, 或軟化為 qualitative claims (per rule 2 \"若 JSON 無對應 field → 兩條路：軟化為 qualitative OR 擴 K-experiment 重跑 export\"). 完成後 gate 應達 alert=green status=pass match_rate≥95%, 才能跑 paper-update CLI sync。",
+    "description": "Paper 2 reproduce.py gate FAIL (alert=yellow). Stats: 79/108 VERIFIED (73.1%), 75 VERIFIED + 2 CLOSE + 2 CONFLICT_RESOLVED + 6 MISMATCH + 23 UNTRACEABLE. traceable_match=92.9% (need ≥95% gate). 7 dominant gaps: (1) Table 1 TWII summary stats (mean/std/skew/kurt) no JSON; (2) Table 4 VT strategy Sharpe BH/EWMA/GARCH/GJR no JSON; (3) Table 5 common-period values no dedicated JSON; (4) Table 2 individual gamma Hon Hai/MediaTek/0056.TW (N121 averages only); (5) Sec 6 macro corr + Sec 4.5 TSMC VT Sharpe no JSON; (6) Appendix TZ c2c Sharpe TW+JP blend no JSON; (7) Sec 3 TWD/USD test p=0.08 no JSON. Suggested action per reproduce_report: (1) unify gamma estimation across Table 2 + Sec 4.5 (pick window, note explicitly), (2) backfill JSONs for Tables 1/4/5, (3) re-run reproduce.py target ≥95%. Each gap needs: identify source experiment(s), find/compute JSON, write inline % source: in body.tex, validate. Estimated 4-6 hours dedicated session. paper-workflow.md rule: body.tex edits stay main-thread, but JSON backfill + source identification can be agent-prep. Body.tex was promoted from body_v3.tex on 2026-05-10 with K1175 canonical Sharpe 0.799/MDD -33.8% — that work resolved Table 3 audit but not 7 other gap categories.",
     "priority": 1,
     "status": "pending",
     "task_type": "paper_body",
@@ -6654,7 +6654,8 @@
       "source-binding",
       "main-thread"
     ],
-    "created_at": "2026-05-10T16:50:00+00:00"
+    "created_at": "2026-05-10T16:50:00+00:00",
+    "last_note": "[2026-05-11] Updated description with 7-category gap breakdown after reproduce_report.json inspection. 23 UNTRACEABLE clustered: Tables 1/4/5 entire missing JSON; Table 2 gamma sub-panel; Appendix TZ/Sec 6/Sec 4.5/Sec 3 misc. Suggested split into 2-3 sub-tasks (Tables backfill + Sections backfill + gamma unification) for tractable session work."
   },
   {
     "id": "paper_review_mile_5061e209",
@@ -6876,5 +6877,28 @@
     "blocked_reason": "paid_data_source_decision_pending",
     "last_note": "[2026-05-11] Queued as K1268 FAIL_NO_DATA follow-up. GDELT raw cached. Need user/admin policy on paid data source.",
     "created_at": "2026-05-10T17:55:51Z"
+  },
+  {
+    "id": "K665_article_general",
+    "title": "K665: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K665 has verdict signal (score=0, reasons=[]) but no general article. Verdict preview: [提出: 產品化/簡化, 執行: Claude] 12/VIX 連續公式簡化為 lookup table。Table B（3 行）：VIX<15→100%, 15-25→50%, >25→20%。Sharpe 0.703 vs continuous 0.722（retention 97.4%），weight changes 23/yr vs 231/yr（10x 減少）。Table A（5 行）甚至勝過 continuous（102.8%）。反直覺：越細越差（7 行 92.9%）——粗略離散化恰好產生更好的平均配置。VIX Action Card: 3 ",
+    "priority": 4,
+    "status": "dedup_conflict",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K665",
+    "tags": [
+      "lookup-table",
+      "simplification",
+      "VIX-action-card",
+      "practical",
+      "product",
+      "retail-investor",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "created_at": "2026-05-10T18:08:09+00:00",
+    "last_note": "[2026-05-10T18:09:36Z] HARD CONFLICT: K665 already covered by mile_b5fe2026 (\"不會算數也能用的投資策略——一張三行表格就夠了\", published 2026-03-30, audience=null legacy). Article body cites K665 by name, identical 3-row table + 97.4% retention + 23/yr trading + 102.8% 5-row finding + 2 real charts. New general-audience K665 article would be near-byte-duplicate. Layer-3 legacy null-audience check caught it (per K852 / K622/K630 教訓).",
+    "updated_at": "2026-05-10T18:09:36Z"
   }
 ]
