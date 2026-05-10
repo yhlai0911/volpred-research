@@ -1,0 +1,39 @@
+[00:19:32] Loading caches ...
+  Pre-filter rows=1138  Post-filter rows=1082
+
+[00:19:32] === IS fits ===
+  [00:19:32] M1_baseline (K=0) ...
+    ll=3904.068 df=5.12  success=True
+  [00:19:35] M2_rv5min (K=1) ...
+    ll=3913.947 df=8.00 xn=[0.0]  success=True
+  [00:19:35] M3_rv5_park (K=2) ...
+    ll=3914.102 df=8.00 xn=[0.0, -0.0]  success=True
+  [00:19:36] M4_full_intraday (K=5) ...
+    ll=3917.565 df=8.00 xn=[-0.0, -0.0, -0.0, -0.0, 0.0]  success=True
+
+[00:19:38] === IS LRT (vs M1_baseline) ===
+  M2_rv5min vs M1: chi2=19.758  p=8.791e-06  dof=1
+  M3_rv5_park vs M1: chi2=20.068  p=4.389e-05  dof=2
+  M4_full_intraday vs M1: chi2=26.994  p=5.72e-05  dof=5
+
+[00:19:38] === OOS expanding-window ===
+  Train: n=618  Test: n=464
+[00:19:38] OOS M1_baseline ...
+  refits=93  elapsed=99.9s
+[00:21:17] OOS M2_rv5min ...
+  refits=93  elapsed=19.9s
+[00:21:37] OOS M3_rv5_park ...
+  refits=93  elapsed=27.1s
+[00:22:04] OOS M4_full_intraday ...
+  refits=93  elapsed=1.8s
+  M1_baseline: QLIKE=1.6425  improv=0.00%  DM-t=nan  p=nan  boot95%CI=[0.0000e+00, 0.0000e+00]
+  M2_rv5min: QLIKE=1.5530  improv=5.45%  DM-t=2.833  p=0.004611  boot95%CI=[3.9025e-02, 1.5936e-01]
+  M3_rv5_park: QLIKE=1.5527  improv=5.47%  DM-t=2.849  p=0.004385  boot95%CI=[3.9863e-02, 1.5942e-01]
+  M4_full_intraday: QLIKE=1.9154  improv=-16.62%  DM-t=-1.437  p=0.1506  boot95%CI=[-8.2515e-01, 5.5677e-02]
+
+[00:22:06] === Plots ===
+
+[00:22:06] Done. elapsed=154.6s
+  Verdict: BORDERLINE — secondary 5% but fail Harvey |t|>3
+  Best DM model: M3_rv5_park  t=2.849
+  Results: /Users/yhlai0911/Desktop/volpred-research/experiments/k1100h/k1100h_results.json

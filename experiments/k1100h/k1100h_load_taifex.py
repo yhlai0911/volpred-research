@@ -46,7 +46,7 @@ import re
 import time
 import warnings
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 import pandas as pd
@@ -89,8 +89,29 @@ COLS_RAW = [
 
 
 def load_one_file(fn: Path) -> pd.DataFrame:
-    """Read one Daily_*TX1.csv with Big5 encoding, return clean tick frame."""
-    df = pd.read_csv(fn, encoding="big5", low_memory=False, na_values=["-"])
+    """Read one Daily_*TX1.csv with Big5 encoding, return clean tick frame.
+
+    K1100h-v2 MINOR 1 fix: try big5 encoding first; if UnicodeDecodeError,
+    fallback to utf-8 (some recent files exported as utf-8). Assert column
+    count matches expected (10 cols) — schema sanity check.
+    """
+    last_err: Optional[Exception] = None
+    df = None
+    for enc in ("big5", "cp950", "utf-8"):
+        try:
+            df = pd.read_csv(fn, encoding=enc, low_memory=False, na_values=["-"])
+            break
+        except UnicodeDecodeError as e:
+            last_err = e
+            continue
+    if df is None:
+        raise RuntimeError(f"Could not decode {fn.name} with big5/cp950/utf-8: {last_err}")
+
+    # Schema sanity: TAIFEX TX1.csv since 2017-05-16 has 10 cols matching COLS_RAW.
+    if df.shape[1] != len(COLS_RAW):
+        raise RuntimeError(
+            f"{fn.name}: expected {len(COLS_RAW)} cols, got {df.shape[1]}"
+        )
     df.columns = COLS_RAW
 
     # Drop 集合競價 ticks (boundary, not tradable in our resample)
@@ -171,8 +192,23 @@ def build_5min_bars(tick_df: pd.DataFrame, file_date: pd.Timestamp) -> pd.DataFr
     if tick_df.empty:
         return pd.DataFrame()
 
-    # 5-min bins by ts floor
+    # K1100h-v2 MAJOR 1 fix: bar aggregation endpoint mis-binning.
+    # `dt.floor("5min")` puts the 13:45:00.000 endpoint tick into its OWN
+    # bar (bar_start=13:45) → 61-bar days for 423/1138 day-sessions in v1.
+    # The 13:45:00 close is the FINAL tick of the day session and belongs
+    # logically to the (13:40, 13:45] bar (last 5-min interval).
+    # Fix: floor normally, then collapse any day-session bar_start at or after
+    # 13:45:00 of the file_date back to 13:40:00. (Day session is exactly
+    # 08:45 → 13:45; opening tick at 08:45:00 → bar_start=08:45 ✓; closing
+    # tick at exactly 13:45:00 must be merged into the (13:40, 13:45] bar.)
     tick_df["bar_start"] = tick_df["ts"].dt.floor("5min")
+    day_close_ts = file_date.normalize() + pd.Timedelta(hours=13, minutes=45)
+    is_day_close_endpoint = (
+        (tick_df["session"] == "day") & (tick_df["bar_start"] >= day_close_ts)
+    )
+    if is_day_close_endpoint.any():
+        last_day_bar = day_close_ts - pd.Timedelta(minutes=5)
+        tick_df.loc[is_day_close_endpoint, "bar_start"] = last_day_bar
 
     g = tick_df.groupby(["session", "bar_start"], sort=True)
     bars = g.agg(

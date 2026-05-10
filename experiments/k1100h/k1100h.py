@@ -311,14 +311,21 @@ def qlike_loss(h_hat: np.ndarray, r2: np.ndarray) -> np.ndarray:
 
 
 def dm_test_hln(loss1: np.ndarray, loss2: np.ndarray) -> Tuple[float, float]:
-    """HLN-corrected DM test. Positive t = loss1 > loss2 (model 2 better)."""
+    """HLN-corrected DM test. Positive t = loss1 > loss2 (model 2 better).
+
+    K1100h-v2 MINOR 2 fix: use Newey-West lag schedule
+    `floor(4 * (T/100)^(2/9))` (Newey & West 1994 automatic bandwidth) with
+    a hard floor of lag=1 to avoid degenerate kernel sum (gamma_0 only) when
+    T<100. The original `floor(T^(1/3))` is fine for T>27 but the new schedule
+    is the academic standard reported in Diebold & Mariano (1995) follow-ups.
+    """
     d = loss1 - loss2
     d = d[np.isfinite(d)]
     if len(d) < 20:
         return np.nan, np.nan
     n = len(d)
     d_bar = float(np.mean(d))
-    lag = int(np.floor(n ** (1 / 3)))
+    lag = max(1, int(np.floor(4.0 * (n / 100.0) ** (2.0 / 9.0))))
     dev = d - d_bar
     gamma0 = float(np.mean(dev * dev))
     s = gamma0
@@ -481,20 +488,33 @@ def run():
     # intraday_mom should match K1100g intraday_ret but use cache version
     # for direct comparability with K1100g_d5/d6 baselines).
     df = pd.merge(
-        feats, k1100g[["date", "intraday_ret", "dow", "is_roll"]],
+        feats, k1100g[["date", "intraday_ret", "dow", "is_roll", "is_settlement"]],
         on="date", how="inner"
     )
     df = df.sort_values("date").reset_index(drop=True)
 
-    # Filter: drop roll days (K1100g_d5 convention) + drop rows missing features
+    # K1100h-v2 MAJOR 2 fix: TX1.csv represents the EXPIRING contract on
+    # settlement day (3rd Wednesday). Liquidity is fragmented and intraday
+    # microstructure is contaminated by cash-settle flow → tick-derived
+    # features for settlement days are not comparable to normal sessions.
+    # Drop both is_roll==True (K1100g convention: contract switch day, day
+    # AFTER settlement when most-volume becomes new near) AND is_settlement
+    # ==True (TX1 = expiring contract that day).
     pre_filter = len(df)
     df = df.dropna(subset=[
         "intraday_ret", "day_rv_5min", "day_rv_parkinson",
         "day_intraday_mom", "day_hod_rv_ratio", "day_bipower_var", "dow",
     ])
-    df = df[df["is_roll"] == False].copy()  # K1100g_d5 convention
+    n_before_roll = len(df)
+    df = df[df["is_roll"] == False].copy()
+    n_after_roll = len(df)
+    df = df[df["is_settlement"] == False].copy()  # K1100h-v2 MAJOR 2
+    n_after_settle = len(df)
     df = df.reset_index(drop=True)
-    print(f"  Pre-filter rows={pre_filter}  Post-filter rows={len(df)}")
+    print(f"  Pre-filter rows={pre_filter}  "
+          f"after_roll_drop={n_after_roll} (-{n_before_roll - n_after_roll})  "
+          f"after_settle_drop={n_after_settle} (-{n_after_roll - n_after_settle})  "
+          f"Post-filter rows={len(df)}")
 
     dates_ts = pd.to_datetime(df["date"])
     dow_arr = df["dow"].values.astype(int)
