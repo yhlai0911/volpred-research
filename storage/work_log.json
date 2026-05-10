@@ -5506,5 +5506,14 @@
     "summary": "K1035 mile_052ed9e4 (EVT-VaR with A4f residuals) post-publish 24h review: Codex primary-path quota-blocked → Gemini fallback PASS. All numeric claims A-F byte-verified; lookahead clean (lines 425/568/404/546); seed adequate; multiple-testing handled via Harvey 3.0 threshold; period figure 19yr is conservative underclaim vs actual 21.3yr (MINOR). Causal interpretation (A4f internalizes tail risk via VIX, ξ 0.103→0.055) methodologically supported. 3 MINOR findings, 0 MAJOR, 0 CRITICAL. Codex re-verify queued post quota reset 2026-05-12 19:46.",
     "artifact": "experiments/k1035/k1035_post_publish_codex_review.md",
     "reviewer": "gemini-cli-0.33.1 (Codex fallback per .claude/rules/experiments.md hierarchy)"
+  },
+  {
+    "timestamp": "2026-05-10T22:12:57Z",
+    "task_id": "K980_post_publish_codex_review",
+    "task_type": "paper_review",
+    "status": "succeeded",
+    "summary": "K980 mile_3655a10a post-publish 24h-rule review: CONDITIONAL PASS. 28/28 byte-accuracy checks PASS (parameter table, QLIKE, DM p, VaR rates, regime QLIKE). Lookahead CLEAN (VIX.shift(1) line 65; IS+OOS recursions use t-1 signals). Multiple-testing protective (c grid IS-only, null result conservative). No overclaim. 3 minor notes (HAC phrasing for h=1, beta row omitted, Kupiec p not shown). Main-thread fallback (Codex quota-blocked resets 2026-05-12 19:46 PT); follow-up K980_post_publish_codex_primary_reverify task queued earliest_start 2026-05-13.",
+    "reviewer": "main-thread-fallback (Codex CLI 0.121.0 usage-limit-blocked; subagent dispatch tool unavailable)",
+    "artifact": "experiments/k980/k980_post_publish_codex_review.md"
   }
 ]
