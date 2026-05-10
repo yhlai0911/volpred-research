@@ -134,7 +134,15 @@ def main():
             "verdict_preview": entry.get("content", "")[:300],
             "covered_by": covering_articles,
             "uncovered": len(covering_articles) == 0,
-            "audiences_covered": sorted({a["audience"] for a in covering_articles if a.get("audience")}),
+            # Treat audience=None/empty as 'general' (pre-2026-04-14 articles
+            # had no audience metadata; platform default-tone was general).
+            # 2026-05-11 K665/K630/K622 incidents: dropping audience=null from
+            # this set caused refill_task_pool to mistakenly queue articles
+            # for K-experiments that already had audience=null legacy coverage.
+            "audiences_covered": sorted({
+                (a.get("audience") or "general")
+                for a in covering_articles
+            }),
             "updated_at": entry.get("updated_at", ""),
             "tags": entry.get("tags", []),
         })
@@ -153,13 +161,64 @@ def main():
     total = len(candidates)
     uncovered = sum(1 for c in candidates if c["uncovered"])
     high_uncovered = [c for c in candidates if c["uncovered"] and c["score"] >= 5]
+
+    # 2026-05-09 K979 incident: missing_audience 須 cluster by topic family，非僅 K-id
+    # K979 was tagged missing_general because no article mentioned "K979", but K447's
+    # mile_1b2ad1f8 (general SKEW article from 2026-05-05) covered the same topic family.
+    # Fix: compute tag-overlap between candidate K and existing articles in target audience;
+    # if ≥2 domain tags overlap, mark as topic_family_collision and exclude from missing list.
+    GENERIC_TAGS = {
+        "一般讀者", "研究", "general", "research", "深度研究",
+        "波動率預測", "vol-prediction", "volatility", "金融研究",
+    }
+
+    def _norm_tag(t: str) -> str:
+        return t.strip().lower().replace("_", "-")
+
+    def _domain_tags(tags: list) -> set[str]:
+        return {_norm_tag(t) for t in (tags or []) if t and t not in GENERIC_TAGS}
+
+    def _topic_family_collision(cand_tags: set[str], audience: str) -> list[dict]:
+        """Find feed articles in target audience sharing ≥2 domain tags with candidate K."""
+        if not cand_tags:
+            return []
+        hits = []
+        for art in feed:
+            if not isinstance(art, dict):
+                continue
+            if (art.get("audience") or (art.get("details") or {}).get("audience")) != audience:
+                continue
+            art_tags = _domain_tags(art.get("tags") or [])
+            overlap = cand_tags & art_tags
+            if len(overlap) >= 2:
+                hits.append({
+                    "id": art.get("id"),
+                    "title": art.get("title", "")[:80],
+                    "shared_tags": sorted(overlap),
+                })
+        return hits
+
+    # Annotate each candidate with topic_family_collision per audience
+    for c in candidates:
+        cand_tags = _domain_tags(c.get("tags") or [])
+        c["topic_family_collisions"] = {
+            "general": _topic_family_collision(cand_tags, "general"),
+            "research": _topic_family_collision(cand_tags, "research"),
+        }
+
     missing_general = [
         c for c in candidates
-        if c["covered_by"] and "general" not in c["audiences_covered"] and c["score"] >= 4
+        if c["covered_by"]
+        and "general" not in c["audiences_covered"]
+        and c["score"] >= 4
+        and not c["topic_family_collisions"]["general"]  # exclude topic-family clashes
     ]
     missing_research = [
         c for c in candidates
-        if c["covered_by"] and "research" not in c["audiences_covered"] and c["score"] >= 4
+        if c["covered_by"]
+        and "research" not in c["audiences_covered"]
+        and c["score"] >= 4
+        and not c["topic_family_collisions"]["research"]
     ]
 
     output = {
