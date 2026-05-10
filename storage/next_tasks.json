@@ -6908,5 +6908,21 @@
     "created_at": "2026-05-10T18:08:09+00:00",
     "last_note": "[2026-05-10T18:09:36Z] HARD CONFLICT: K665 already covered by mile_b5fe2026 (\"不會算數也能用的投資策略——一張三行表格就夠了\", published 2026-03-30, audience=null legacy). Article body cites K665 by name, identical 3-row table + 97.4% retention + 23/yr trading + 102.8% 5-row finding + 2 real charts. New general-audience K665 article would be near-byte-duplicate. Layer-3 legacy null-audience check caught it (per K852 / K622/K630 教訓).",
     "updated_at": "2026-05-10T18:09:36Z"
+  },
+  {
+    "id": "fix_paper_update_cli_extract_abstract_from_tex",
+    "title": "paper-update CLI: auto-extract abstract from main_v3.tex (止 stale Supabase abstract)",
+    "priority": 4,
+    "description": "2026-05-11 taiwan-vt 教訓：paper-update CLI 只 refresh pages/citations/pdf_url，不 extract abstract — body.tex 更新到 K1175 canonical 但 Supabase 還推 OLD 0.729/0.796。手動 upsert_paper_metadata(abstract=...) 才同步。Fix: update_paper_full() 加 abstract auto-extract from main_*.tex (regex /\begin{abstract}...\\end{abstract}/) + 推 supabase + log diff。",
+    "status": "succeeded",
+    "task_type": "platform_ops",
+    "source": "lesson_from_taiwan_vt_abstract_sync",
+    "tags": [
+      "platform_ops",
+      "paper-update-cli",
+      "supabase-sync"
+    ],
+    "created_at": "2026-05-10T20:10:48Z",
+    "closure_note": "Added abstract extraction to _count_tex_metrics regex /\\begin{abstract}...\\end{abstract}/ + passthrough in update_paper_full kwargs. E2E test PASS: paper-update --paper-id taiwan-vt now pushes K1175 canonical 0.799 abstract automatically. Commit pending."
   }
 ]

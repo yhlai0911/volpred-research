@@ -268,6 +268,21 @@ def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
         except Exception:
             pass
 
+    # Extract abstract from \begin{abstract} … \end{abstract} (2026-05-11:
+    # taiwan-vt incident — body.tex promoted to K1175 canonical but Supabase
+    # still pushed pre-K1175 abstract because CLI didn't extract from .tex).
+    abstract_match = re.search(
+        r"\\begin\{abstract\}\s*(?:\\noindent\s*)?(.*?)\\end\{abstract\}",
+        content,
+        re.DOTALL,
+    )
+    if abstract_match:
+        raw = abstract_match.group(1).strip()
+        # Collapse internal whitespace runs to single space for tidy display.
+        cleaned = re.sub(r"\s+", " ", raw)
+        if cleaned:
+            metrics["abstract"] = cleaned
+
     return metrics
 
 
@@ -316,6 +331,8 @@ def update_paper_full(
         kwargs["pages"] = metrics["pages"]
     if "citations" in metrics:
         kwargs["citations"] = metrics["citations"]
+    if "abstract" in metrics:
+        kwargs["abstract"] = metrics["abstract"]
 
     if len(kwargs) > 1:  # has something beyond paper_id
         paper = upsert_paper_metadata(**kwargs)
