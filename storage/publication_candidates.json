@@ -1,18 +1,13 @@
 {
-  "generated_at": "2026-05-11T02:12:46.180653+00:00",
+  "generated_at": "2026-05-11T02:16:24.884812+00:00",
   "summary": {
     "total_k": 584,
-    "uncovered": 12,
+    "uncovered": 11,
     "high_priority_uncovered": 0,
     "missing_general_audience": 0,
     "missing_research_audience": 1
   },
   "top_10_uncovered": [
-    {
-      "k_id": "K1106",
-      "score": 3,
-      "title": "K1106b: Sector-diversified firm θ₂ — fabless SIG, ANOVA underpowered, cherry-pick warning"
-    },
     {
       "k_id": "K644",
       "score": 2,
@@ -57,6 +52,11 @@
       "k_id": "K728",
       "score": 0,
       "title": "K728: Codex Review 2 Paper 4 — Fix 1 OK, 2 HIGH + 3 MEDIUM remaining"
+    },
+    {
+      "k_id": "K924",
+      "score": 0,
+      "title": "K924: Bayesian SSVS Mean Equation — NULL (All 10 Variables PIP<0.5, SPY Return Unpredictable)"
     }
   ],
   "missing_general_top5": [],
@@ -71,46 +71,6 @@
     }
   ],
   "candidates": [
-    {
-      "k_id": "K1106",
-      "title": "K1106b: Sector-diversified firm θ₂ — fabless SIG, ANOVA underpowered, cherry-pick warning",
-      "score": 3,
-      "reasons": [
-        "methodology/mechanism lesson",
-        "paradigm/decisive null",
-        "mixed/non-novel"
-      ],
-      "verdict_preview": "[提出: 用戶指 sector overconcentration, 執行: Claude] N=14 跨 7 sectors (foundry/fabless/financials/shipping/trad_mfg/consumer/electronics)。**ANOVA F(6,5)=6.87, p=0.026 nominally sig** 但 dof=5 underpowered 屬探索性。**Sector ranking (mean θ₂)**: fabless -1.997e-3 (only SIG, β=-2.29e-3 t=-5.16 **p=0.004 *** 重現 K1",
-      "covered_by": [],
-      "uncovered": true,
-      "audiences_covered": [],
-      "updated_at": "2026-04-13T05:41:47.102518+00:00",
-      "tags": [
-        "Paper_2",
-        "A4f-EAV",
-        "sector-heterogeneity",
-        "ANOVA-underpowered",
-        "cherry-pick-bias",
-        "K1104-replicability",
-        "cross-sectional",
-        "Taiwan",
-        "K1067-series",
-        "K1109-invalidated"
-      ],
-      "topic_family_collisions": {
-        "general": [],
-        "research": [
-          {
-            "id": "mile_5ae55a22",
-            "title": "Paper 2 完整 7 實驗 Null Arc：Pre-Registration 如何終結 Fabless 假說",
-            "shared_tags": [
-              "paper-2",
-              "taiwan"
-            ]
-          }
-        ]
-      }
-    },
     {
       "k_id": "K644",
       "title": "K644: ★★ Session Meta-Analysis — 24 experiments, 39% null, 5 actionable improvements",
@@ -1551,6 +1511,12 @@
           "audience": "general"
         },
         {
+          "id": "mile_24f14e42",
+          "title": "拿掉「財報事件」之後，VIX 還是同一條 VIX 嗎？",
+          "status": "published",
+          "audience": "general"
+        },
+        {
           "id": "mile_aec9ce9b",
           "title": "K1145 + K1147 跨市場 pooled panel：被個股雜訊掩蓋的 announcement-day 變異常數",
           "status": "published",
@@ -1561,6 +1527,12 @@
           "title": "Paper 2 完整 7 實驗 Null Arc：Pre-Registration 如何終結 Fabless 假說",
           "status": "published",
           "audience": "research"
+        },
+        {
+          "id": "mile_e6f2e2a3",
+          "title": "財報季選股的迷思：為什麼波動最大的個股，不一定是財報受益股？",
+          "status": "published",
+          "audience": "general"
         },
         {
           "id": "mile_3f3c6fd7",
@@ -7638,6 +7610,12 @@
         {
           "id": "mile_8d3bcedc",
           "title": "我們花了一整年想打敗 50/50 SPY/GLD — 連最新的 alt-data 武器都輸給它 0.15 個 Sharpe",
+          "status": "published",
+          "audience": "general"
+        },
+        {
+          "id": "mile_caccf211",
+          "title": "別再隨便把 VIX 丟進你的風控模型——我們發現它對歐元有害、對加密貨幣沒用、對美股大盤才真正有效",
           "status": "published",
           "audience": "general"
         },
@@ -46216,6 +46194,55 @@
             "shared_tags": [
               "gld",
               "qqq"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "k_id": "K1106",
+      "title": "K1106b: Sector-diversified firm θ₂ — fabless SIG, ANOVA underpowered, cherry-pick warning",
+      "score": 3,
+      "reasons": [
+        "methodology/mechanism lesson",
+        "paradigm/decisive null",
+        "mixed/non-novel"
+      ],
+      "verdict_preview": "[提出: 用戶指 sector overconcentration, 執行: Claude] N=14 跨 7 sectors (foundry/fabless/financials/shipping/trad_mfg/consumer/electronics)。**ANOVA F(6,5)=6.87, p=0.026 nominally sig** 但 dof=5 underpowered 屬探索性。**Sector ranking (mean θ₂)**: fabless -1.997e-3 (only SIG, β=-2.29e-3 t=-5.16 **p=0.004 *** 重現 K1",
+      "covered_by": [
+        {
+          "id": "mile_334a3f26",
+          "title": "跨產業檢驗個股波動率的 VIX 敏感度：誠實的負面結果",
+          "status": "draft",
+          "audience": "general"
+        }
+      ],
+      "uncovered": false,
+      "audiences_covered": [
+        "general"
+      ],
+      "updated_at": "2026-04-13T05:41:47.102518+00:00",
+      "tags": [
+        "Paper_2",
+        "A4f-EAV",
+        "sector-heterogeneity",
+        "ANOVA-underpowered",
+        "cherry-pick-bias",
+        "K1104-replicability",
+        "cross-sectional",
+        "Taiwan",
+        "K1067-series",
+        "K1109-invalidated"
+      ],
+      "topic_family_collisions": {
+        "general": [],
+        "research": [
+          {
+            "id": "mile_5ae55a22",
+            "title": "Paper 2 完整 7 實驗 Null Arc：Pre-Registration 如何終結 Fabless 假說",
+            "shared_tags": [
+              "paper-2",
+              "taiwan"
             ]
           }
         ]

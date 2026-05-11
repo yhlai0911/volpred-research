@@ -75,24 +75,44 @@ def score_priority(entry: dict) -> tuple[int, list[str]]:
     return max(0, min(10, score)), reasons
 
 
+def _k_id_family(kid: str) -> str:
+    """Strip trailing letter suffix to get K-family base (K1106b → K1106, K852b → K852).
+
+    K-experiment sub-variants (K1106 vs K1106b vs K1106c) cover the same
+    underlying study. For dedup purposes, treat them as the same family.
+    """
+    # Strip trailing letters case-insensitively, then uppercase for comparison.
+    return re.sub(r"[a-zA-Z]+$", "", kid, count=1).upper() if re.match(r"^[Kk]\d", kid) else kid.upper()
+
+
 def k_covered_by_article(k_id: str, article: dict) -> bool:
-    """Check whether article covers this K via tags/title/content/experiment_refs."""
+    """Check whether article covers this K via tags/title/content/experiment_refs.
+
+    Matches K-family (K1106 ↔ K1106b ↔ K1106c) via _k_id_family().
+    """
     k_lower = k_id.lower()
-    k_upper = k_id.upper()
-    # 1. tags
+    k_family = _k_id_family(k_id)
+    # 1. tags — exact + family match
     tags = [str(t).lower() for t in article.get("tags", [])]
     if k_lower in tags:
         return True
+    for t in tags:
+        if t.upper().startswith(k_family) and _k_id_family(t) == k_family:
+            return True
     # 2. details.experiment_refs (canonical structured field per feed-publisher
     # SKILL.md K-id stripping; titles get K-id stripped to experiment_refs).
     # 2026-05-11 K869 incident: mile_4ec7b75e covered K869 but build script
     # only checked tags/title/content, missed structured refs → K869 stayed
     # falsely uncovered for 6 days.
+    # 2026-05-11 K1106 follow-up: family-match needed since refs may use
+    # K1106b sub-variant while candidate is K1106 base.
     details = article.get("details") or {}
     if isinstance(details, dict):
         refs = details.get("experiment_refs") or []
-        if isinstance(refs, list) and any(str(r).upper() == k_upper for r in refs):
-            return True
+        if isinstance(refs, list):
+            for r in refs:
+                if _k_id_family(str(r)) == k_family:
+                    return True
     # 3. title
     title = str(article.get("title", "")).lower()
     if k_lower in title:

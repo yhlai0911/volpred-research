@@ -2195,7 +2195,7 @@
     "title": "K1106: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1106 has verdict signal (score=3, reasons=None) but no general article. Verdict preview: ",
     "priority": 4,
-    "status": "succeeded",
+    "status": "succeeded_already_covered_by_mile_334a3f26",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1106",
@@ -2205,7 +2205,9 @@
     ],
     "created_at": "2026-05-05T02:25:11+00:00",
     "completed_at": "2026-05-05",
-    "completion_artifact": "mile_334a3f26"
+    "completion_artifact": "mile_334a3f26",
+    "last_note": "[2026-05-11] Re-opened: sync_next_tasks_status falsely marked succeeded based on knowledge.json experiment entry; actual feed has NO article covering K1106. Verified post build_publication_candidates fix 0d9f31a1.",
+    "closure_note": "[2026-05-11] mile_334a3f26 (2026-05-05) experiment_refs=K1106b family-match. build_publication_candidates dedup now honors K-family (K1106 ↔ K1106b/c). agent identified this dedup_conflict before publish; my reopen earlier was based on incomplete dedup."
   },
   {
     "id": "K644_article_general",
