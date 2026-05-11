@@ -6979,7 +6979,10 @@
     "earliest_start": "2026-05-13T03:50:00Z",
     "created_at": "2026-05-10T22:12:46Z",
     "blocks": [],
-    "blocked_by": []
+    "blocked_by": [],
+    "blocked_reason": "codex_quota_reset_pending",
+    "blocked_until": "2026-05-13T02:46:00Z",
+    "blocked_note": "Codex CLI 0.121.0 ChatGPT-account daily quota exhausted 2026-05-11 by 7 paper_reviews. Quota resets 2026-05-12 19:46 PT. Per K1259 lesson, primary-path re-verify needed to upgrade fallback CONDITIONAL/PASS → canonical PASS."
   },
   {
     "id": "task-k950-codex-review-primary-reverify",
@@ -6996,14 +6999,17 @@
     ],
     "depends_on": [
       "task-k950-codex-review-postpub"
-    ]
+    ],
+    "blocked_reason": "codex_quota_reset_pending",
+    "blocked_until": "2026-05-13T02:46:00Z",
+    "blocked_note": "Codex CLI 0.121.0 ChatGPT-account daily quota exhausted 2026-05-11 by 7 paper_reviews. Quota resets 2026-05-12 19:46 PT. Per K1259 lesson, primary-path re-verify needed to upgrade fallback CONDITIONAL/PASS → canonical PASS."
   },
   {
     "id": "task-k981-codex-review-primary-reverify",
     "task_type": "paper_review",
     "title": "K981 mile_ec876702 Codex primary-path re-verify (post-quota-reset)",
     "description": "Codex CLI 0.121.0 quota resets 2026-05-12 19:46 PT. Re-run primary-path Codex review of mile_ec876702 against k981_wavelet_har_results.json + k981_wavelet_har.py to upgrade Gemini fallback CONDITIONAL PASS to full PASS. Verify Gemini's 2 Major / 4 Minor findings + scan for residual non-coverage outside Gemini scan. Per K1259 lesson.",
-    "priority": "P3",
+    "priority": 3,
     "status": "pending",
     "scheduled_after": "2026-05-13T00:00:00Z",
     "blocked_by": [
@@ -7012,6 +7018,9 @@
     "depends_on": [
       "K981_post_publish_codex_review"
     ],
-    "created_at": "2026-05-11T00:12:33Z"
+    "created_at": "2026-05-11T00:12:33Z",
+    "blocked_reason": "codex_quota_reset_pending",
+    "blocked_until": "2026-05-13T02:46:00Z",
+    "blocked_note": "Codex CLI 0.121.0 ChatGPT-account daily quota exhausted 2026-05-11 by 7 paper_reviews. Quota resets 2026-05-12 19:46 PT. Per K1259 lesson, primary-path re-verify needed to upgrade fallback CONDITIONAL/PASS → canonical PASS."
   }
 ]

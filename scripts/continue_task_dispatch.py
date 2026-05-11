@@ -59,6 +59,8 @@ BLOCKED_REASONS = {
     "kid_collision",                # K-id reuse — needs rename before dispatch
     "prior_attempts_failed",        # repeated failures; needs main-thread debug
     "deprecated",                   # superseded by another task / no longer relevant
+    "codex_quota_reset_pending",    # ChatGPT-account daily quota exhausted — paired with blocked_until
+    "paid_data_source_decision_pending",  # task gated on user/admin paid-API decision
 }
 
 SELF_OPTIONAL_PATTERN = re.compile(
