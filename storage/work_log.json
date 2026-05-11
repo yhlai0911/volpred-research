@@ -5551,5 +5551,19 @@
     "derived_tasks": [
       "task-k981-codex-review-primary-reverify"
     ]
+  },
+  {
+    "entry_id": "k989_postpub_rev",
+    "timestamp": "2026-05-11T08:12:30+0800",
+    "task_type": "paper_review",
+    "task_id": "paper_review_mile_ecb736a6",
+    "agent": "main",
+    "skill_used": "codex (attempted, quota-blocked) + gemini-cli fallback (gemini 0.33.1) + main-thread full-population audit",
+    "outcome": "done",
+    "summary": "K989 mile_ecb736a6 (MF2-VIX + VIX² convexity NULL) 24h post-publish review. Codex CLI 0.121.0 quota exhausted (reset 2026-05-12 19:46 PT) → Gemini fallback + main-thread audit per K1259 full-population walk methodology. VERDICT: PASS. Audit: (1) byte-accuracy 6 QLIKE rows + 5 improvement% + sample 5093/3269/1824 + IS/OOS periods + seed=42 + Piecewise δ=0.001 + OOS R² (-0.82/-0.99) all match k989_mf2_vix2_results.json; (2) lookahead clean at py L41 (seed), L62 (return), L88 (tau_vix shift(1)), L93 (vix_shifted); (3) additivity claim '+9.5% + +9.5% = +9.5%' mathematically rigorous (K970 tau=(VIX/√252)² IS K987 VIX² convexity — same squared transformation; Piecewise δ≈0 confirms empirically); (4) DM/Harvey |t|≥3 properly applied (Piecewise t=0.815 null, VIX² t=-2.265 |t|<3 null, Poly t=-3.78 sig worse, GJR-X t=-4.45 sig worse — all correctly framed); (5) cost-model N/A (pure QLIKE forecasting); (6) null-result tone honest. No required fixes. Report: experiments/k989/k989_post_publish_codex_review.md. CAVEAT (K1259): subagent fallback PASS ≠ Codex primary PASS — re-verify queued post-2026-05-13.",
+    "duration_min": 12,
+    "derived_tasks": [
+      "task-k989-codex-review-primary-reverify"
+    ]
   }
 ]
