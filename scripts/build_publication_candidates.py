@@ -76,14 +76,28 @@ def score_priority(entry: dict) -> tuple[int, list[str]]:
 
 
 def k_covered_by_article(k_id: str, article: dict) -> bool:
-    """Check whether article covers this K via tags/title/content."""
+    """Check whether article covers this K via tags/title/content/experiment_refs."""
     k_lower = k_id.lower()
+    k_upper = k_id.upper()
+    # 1. tags
     tags = [str(t).lower() for t in article.get("tags", [])]
     if k_lower in tags:
         return True
+    # 2. details.experiment_refs (canonical structured field per feed-publisher
+    # SKILL.md K-id stripping; titles get K-id stripped to experiment_refs).
+    # 2026-05-11 K869 incident: mile_4ec7b75e covered K869 but build script
+    # only checked tags/title/content, missed structured refs → K869 stayed
+    # falsely uncovered for 6 days.
+    details = article.get("details") or {}
+    if isinstance(details, dict):
+        refs = details.get("experiment_refs") or []
+        if isinstance(refs, list) and any(str(r).upper() == k_upper for r in refs):
+            return True
+    # 3. title
     title = str(article.get("title", "")).lower()
     if k_lower in title:
         return True
+    # 4. description + content body
     content = str(article.get("description", "") + article.get("content", "")).lower()
     # Match K1145 or k1145 but not K114 inside K1145
     pattern = rf"\b{re.escape(k_lower)}\b"
