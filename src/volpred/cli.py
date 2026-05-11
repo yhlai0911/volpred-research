@@ -2477,6 +2477,28 @@ def ops_paper_update(paper_id: str, paper_dir: str | None) -> None:
     _print_json({"action": "paper_update", "item": paper})
 
 
+@ops.command("paper-sync-all")
+@click.option("--dry-run", is_flag=True, help="Show what would be synced without invoking Supabase")
+@click.option("--force", is_flag=True, help="Sync every paper even if Supabase updated_at is already newer than local files")
+def ops_paper_sync_all(dry_run: bool, force: bool) -> None:
+    """Auto-sync every paper/ directory to Supabase when local .tex/.pdf is newer.
+
+    Fixes the recurring drift where main-thread edits update local .tex but the
+    website still shows old dates because paper-update CLI is per-paper and
+    manual. Designed for cron schedule (idempotent: skips papers where Supabase
+    updated_at is newer than local files).
+    """
+    from volpred.ops.papers import sync_all_papers
+
+    results = sync_all_papers(only_stale=not force, dry_run=dry_run)
+    actions: dict[str, int] = {}
+    for r in results:
+        actions[r["action"]] = actions.get(r["action"], 0) + 1
+        console.print(f"  {r['paper_id']:<25} {r['action']:<16} {r.get('reason') or r.get('updated_at', '')}")
+    console.print(f"[green]Sync complete[/green] {actions}")
+    _print_json({"action": "paper_sync_all", "summary": actions, "results": results})
+
+
 @ops.command("paper-migrate-storage")
 @click.option("--paper-id", required=True, help="Stable paper id")
 @click.option("--file", "file_path", default=None, type=click.Path(exists=True), help="Optional local PDF path; defaults to current static paper URL")

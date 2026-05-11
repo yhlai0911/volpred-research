@@ -142,6 +142,19 @@
           "audit_release_settings",
           "cron_release_settings_audit.sh"
         ]
+      },
+      {
+        "id": "paper_sync_all",
+        "label": "Paper Supabase metadata + PDF auto-sync",
+        "cron": "0 */6 * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_paper_sync_all.sh",
+        "log_path": "storage/logs/cron/paper_sync_all.log",
+        "description": "每 6 小時自動 detect stale papers (local .tex/.pdf mtime > Supabase updated_at) 並 push 最新 metadata + PDF。Idempotent — only stale 才實際更新。2026-05-11 用戶反饋：6 papers updated_at 仍停在 April 因為 paper-update CLI 只能 per-paper manual trigger。本 cron 從根 close drift gap。",
+        "matchers": [
+          "paper-sync-all",
+          "cron_paper_sync_all.sh",
+          "sync_all_papers"
+        ]
       }
     ]
   },
@@ -184,9 +197,9 @@
       {
         "id": "continue_task",
         "cron": "*/30 * * * *",
-        "prompt": "繼續任務（slot-aware）：執行 continue-task-maintain --stub-if-no-work。**先看 heartbeat 回傳的 alerts.items**：若 critical_count > 0（draft_pool=0 / release_pool gap / member_qa stale / host_cron_fail 等），**alert auto-remediation 優先於 dispatch candidate**——照 .claude/rules/alert.md 對應 action 立即執行，不可 skip。alerts 處理完才看 dispatch candidate 處理 1 個正式 task。",
+        "prompt": "繼續任務（slot-aware）：執行 continue-task-maintain --stub-if-no-work。**先看 heartbeat 回傳的 alerts.items**：若 critical_count > 0（draft_pool=0 / release_pool gap / member_qa stale / host_cron_fail 等），**alert auto-remediation 優先於 dispatch candidate**——照 .claude/rules/alert.md 對應 action 立即執行，不可 skip。alerts 處理完才看 dispatch candidate **並 fill 至 slot=4 上限（slot<4 時派 (4-current) 個 parallel）**；不一次一個。",
         "recurring": true,
-        "description": "Slot-aware continuation heartbeat。cron `*/30` 嚴格每 30 分鐘等距 fire（每小時 :00 / :30），永遠落在 Claude Code Max $200 plan 1-hour prompt cache window 中央，cache 命中率最佳。2026-04-26 用戶指定 4h→30min；先嘗試 50min 但發現 `*/50` 標準 cron 解析為 :00 / :50（50/10 不等距），改用 `*/30` 才是真正等距。Cache TTL 已於 Anthropic support article 'Using Claude Code with your Pro or Max plan' 確認 Max plan = 1h；Pro / API key = 5min。注意：2026-03 初 default TTL 曾悄悄從 1h 降到 5min（GH issue #46829），Max 訂閱保持 1h 但需監控未來變動，若降級則本 cadence 失效。"
+        "description": "Slot-aware continuation heartbeat。cron `*/30` 嚴格每 30 分鐘等距 fire（每小時 :00 / :30），永遠落在 Claude Code Max $200 plan 1-hour prompt cache window 中央，cache 命中率最佳。2026-04-26 用戶指定 4h→30min；先嘗試 50min 但發現 `*/50` 標準 cron 解析為 :00 / :50（50/10 不等距），改用 `*/30` 才是真正等距。Cache TTL 已於 Anthropic support article 'Using Claude Code with your Pro or Max plan' 確認 Max plan = 1h；Pro / API key = 5min。**單一 cron 行表達等距 cadence 的限制**：只能用 60 的因數（1/2/3/4/5/6/10/12/15/20/30/60）；45 無法用單一 `*/45` 等距表達（會解析為 :00 / :45 = 45/15 gap）；要真等距 45min 需 3 條 entries cycle 過 3-hour period。歷史 2026-05-10 用戶問 45min，回答 vanilla cron 限制，最終保持 `*/30`（或可選 hourly `0 * * * *` 真減頻）。注意：2026-03 初 default TTL 曾悄悄從 1h 降到 5min（GH issue #46829），Max 訂閱保持 1h 但需監控未來變動，若降級則本 cadence 失效。Slot fill rule (per feedback_pool_fill_to_threshold): cron fire 時 slot < 4 派 (4-current) 個 agent 並行補滿，不一次一個。"
       },
       {
         "id": "question_research",
