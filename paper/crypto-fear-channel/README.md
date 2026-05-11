@@ -1,7 +1,7 @@
 # Paper 10: The Crypto Fear Channel — Asymmetric BTC–Equity Volatility Spillover
 
 **Target Journal**: Journal of International Financial Markets, Institutions & Money (1st) / Journal of Empirical Finance (2nd) / Finance Research Letters (backup)
-**Status**: **Body drafted v5 — pre-review** (2026-04-28 main.tex compiled to main.pdf; full body in main.tex 543 LoC, body_v5.tex 494 LoC; 14 `% source:` inline bindings to K639/K746b/K1025; sections Intro/LitReview/Data/Methodology/Results/Robustness drafted)
+**Status**: **Body drafted v5 + reproduce gate GREEN** (2026-04-28 main.tex compiled to main.pdf; full body in main.tex 543 LoC, body_v5.tex 494 LoC; 14 `% source:` inline bindings to K639/K746b/K1025; sections Intro/LitReview/Data/Methodology/Results/Robustness drafted; reproduce.py exit 0 / 37/37 byte-match / 100% match_rate / alert_level=green / gate_status=pass per paper-workflow.md rule 2)
 **Pages**: ~30 (target met)
 **Citations**: TBD (citation_check.md pending)
 
@@ -39,8 +39,8 @@ Underlying daily data: BTC-USD / SPY / VIX from yfinance (`auto_adjust=False` pe
 
 ## Next Actions
 
-- **Codex review** of main.tex v5 body (paper-review-cycle skill — `latex-academic-reviewer` + `citation-verifier`; Codex CLI primary-path verified working since 2026-04-28). Bar: CONDITIONAL PASS minimum before submission prep.
-- **reproduce.py setup**: scaffold per `paper-workflow.md` rule 2 — must exist, exit 0, ≥95% match_rate, alert_level=green BEFORE submission. Self-contained replication package (data/ + scripts/ + results/ + experiments.md + README.md). Use K1268d-style structure as template.
+- **Codex review** of main.tex v5 body (paper-review-cycle skill — `latex-academic-reviewer` + `citation-verifier`; Codex CLI primary-path verified working since 2026-04-28, currently waiting 2026-05-12 19:46 PT quota reset). Bar: CONDITIONAL PASS minimum before submission prep.
+- ~~**reproduce.py setup**~~ — **DONE** (2026-05-11 verified): 37/37 byte-match, 100% match_rate, alert_level=green, gate_status=pass; covers 6 tables × 25+ key claims to K639/K746b/K1025/K1025b JSONs.
 - **citation_check.md**: populate after Codex first pass (Diebold-Yilmaz 2012 / Forbes-Rigobon 2002 / Bouri 2017 / Corbet 2018 / Hatemi-J 2012 / Patton 2011 likely candidates).
 - **data_sources.md**: already exists — verify covers BTC-USD / SPY / VIX yfinance with `auto_adjust=False` (paper-workflow.md rule 1 data snapshot pinning).
 - **3-spec footnote disambiguation** if quote-numbers diverge across body sections (per user 2026-04-29 K1256 lesson).
