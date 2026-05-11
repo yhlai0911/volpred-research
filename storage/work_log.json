@@ -5537,5 +5537,19 @@
     "derived_tasks": [
       "task-k950-codex-review-primary-reverify"
     ]
+  },
+  {
+    "entry_id": "k981_postpub_rev",
+    "timestamp": "2026-05-11T08:12:33+0800",
+    "task_type": "paper_review",
+    "task_id": "K981_post_publish_codex_review",
+    "agent": "main",
+    "skill_used": "codex (attempted, quota-blocked) + gemini-cli fallback (gemini-2.5-pro)",
+    "outcome": "done",
+    "summary": "K981 mile_ec876702 (wavelet+HAR NULL) 24h post-publish review. Codex CLI 0.121.0 quota exhausted (reset 2026-05-12 19:46 PT) → Gemini CLI fallback per K1259. Verdict CONDITIONAL PASS: byte-accuracy on 6 models × 5 metrics matches JSON within rounding; lookahead clean (shift(1)+expanding window+seed=42 verified at py L36/L178-184); cross-K refs K973/K986/K188/K744/K953 all dir-exist. 2 MAJOR: GJR-GARCH champion framing risks Harvey-3σ over-claim (DM t=-2.65 below threshold); WHAR_HAR_db4 QLIKE=474.48 should be flagged as numerical-artifact (max(pred,0.0001) floor) not comparable loss. 4 MINOR: 1824/1823 OOS off-by-one; IS R²=0.126 missing from JSON; multiple-testing not disclosed; HAR-vs-WHAR DM only in stdout. 2 NIT. Follow-up task-k981-codex-review-primary-reverify queued post-2026-05-13.",
+    "duration_min": 18,
+    "derived_tasks": [
+      "task-k981-codex-review-primary-reverify"
+    ]
   }
 ]

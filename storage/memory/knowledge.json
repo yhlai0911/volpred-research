@@ -29072,5 +29072,46 @@
     ],
     "confidence": "high",
     "reviewer_notes": "Verdict CONDITIONAL PASS pending Codex primary re-verification. No Critical/Major issues. Review file: experiments/k980/k980_post_publish_codex_review.md."
+  },
+  {
+    "id": "know_20260511001203_k989_pp_review",
+    "experiment_id": "K989",
+    "title": "K989 mile_ecb736a6 post-publish review: PASS (Gemini fallback; Codex primary queued post-2026-05-13)",
+    "content": "[執行: Claude main-thread + Gemini CLI fallback] 24h post-publish audit for article mile_ecb736a6 (published 2026-05-09). Codex CLI quota exhausted (resets 2026-05-12 19:46 PT); fallback to (a) main-thread fresh-context full-population audit + (b) Gemini CLI 0.33.1 second opinion. VERDICT: PASS. Audit dimensions: (1) Byte-accuracy: all 7 QLIKE rows + 5 improvement% + sample sizes + IS/OOS periods + seed=42 + delta=0.001 + OOS R² (-0.82/-0.99) verified vs k989_mf2_vix2_results.json full population. (2) Lookahead: shift(1) on tau_vix (line 88) and vix_shifted (line 93) confirmed. (3) Additivity claim audit: headline thesis '+9.5% + +9.5% = +9.5%' mathematically rigorous — K970 tau=(VIX/√252)² IS the K987 VIX² convexity (same squared transformation); both findings reflect single underlying nonlinearity; Piecewise δ≈0.001 confirms zero residual signal. (4) DM/Harvey: |t|<3 properly applied to Piecewise(t=0.815) and VIX²(t=-2.265) nulls; Poly/GJR-X significant negatives correctly reported. (5) Cost-model: N/A — pure QLIKE forecasting comparison, no portfolio/round-trip claims. (6) Tone: null result honestly reported, rejects nominal +0.01% Piecewise win, aligns with 研究誠實原則. Report: experiments/k989/k989_post_publish_codex_review.md. CAVEAT (K1259 lesson): subagent fallback PASS ≠ primary-path Codex PASS — Codex re-verify queued post-quota-reset; this entry may be retracted if Codex finds residual issues.",
+    "tags": [
+      "post-publish-review",
+      "K989",
+      "mile_ecb736a6",
+      "audit",
+      "PASS",
+      "gemini-fallback",
+      "codex-queued"
+    ],
+    "phase": "publishing",
+    "importance": 3,
+    "data_source": "storage/reports/feed.json (mile_ecb736a6) + experiments/k989/k989_mf2_vix2_results.json",
+    "created_at": "2026-05-11T00:12:03.023977+00:00",
+    "experiment_date": "2026-05-11"
+  },
+  {
+    "id": "K981_review",
+    "timestamp": "2026-05-11T00:12:33Z",
+    "category": "post_publish_review",
+    "topic": "K981 mile_ec876702 post-publish 24h-rule review — Gemini fallback CONDITIONAL PASS (Codex primary quota-blocked)",
+    "finding": "Article (wavelet+HAR NULL) byte-accurate vs k981_wavelet_har_results.json on all 6 model QLIKE/MSE/R2/MZ_R2/Corr (within rounding); 6 IS wavelet t-stats match; DM HAR-vs-AR1 t=-3.30 / GJR-vs-AR1 t=-2.65 / HAR-vs-WHAR t≈5.98 all consistent. Lookahead CLEAN: seed=42 at module top, shift(1) on r2/r2_5/r2_22 + all D1-A5 bands (py L178-184); wavelet rolling window uses values[t-window:t] strictly pre-t then shift(1) double-protect; rolling_oos_forecast uses df.index<date expanding window; target=r2.shift(-1) consumes last obs (n_oos=1823 vs article-stated 1824 — Minor #3 off-by-one). Two MAJOR: (M1) GJR-GARCH 冠軍 framing risks over-claim — DM t=-2.65 passes 1% single-test but BELOW Harvey-3σ threshold under 7-test family; (M2) WHAR_HAR_db4 QLIKE=474.48 should be flagged as numerical-artifact (max(pred,0.0001) floor lets log(a/p) explode) not comparable loss. Minor: IS R²=0.126 in README/article but missing from results JSON; HAR-vs-WHAR DM stored only in stdout print not dm_tests dict; multiple-testing (Bonferroni/SPA/MCS) not disclosed.",
+    "methodology": "Wavelet spec audit: pywt.wavedec db4 + Haar, window=64≥2^5=32 ✓, energy=sum(c**2)/len(c) (L2-normalized) — article correctly notes 'twice-quadratic statistic' caveat. QLIKE filter (a>0)&(p>0) standard. DM own-impl with HAC truncation (h=1 reduces to sample variance; trivially correct). OLS SE via XtX_inv·MSE_resid standard. Cross-K refs K973/K986/K188/K744/K953 all exist as experiments/ dirs.",
+    "observation_pattern": "Three-NULL convergence framing (K973 Hurst rough vol + K986 LASSO/Ridge HAR + K981 wavelet) on daily r² target is honest and well-positioned: all 3 fancy transforms lose to GJR-GARCH ceiling. Article correctly limits conclusion to daily setting, explicitly defers to potential intraday-RV future work. NULL result reported without over-claim. Pedagogical retail framing preserved; IS-significance/OOS-failure contrast clearly explained as overfitting indicator.",
+    "review_path": "Gemini CLI 0.33.1 fallback (gemini-2.5-pro) — Codex CLI 0.121.0 primary quota-blocked 'try again 2026-05-12 19:46 PT'. Structured byte-accuracy table + lookahead source-walk + DM/Harvey audit + wavelet-specific spec audit. Per K1259 2026-04-29 lesson: subagent/fallback PASS ≠ Codex primary PASS; REQUIRED follow-up: re-run Codex primary post-2026-05-13 to upgrade CONDITIONAL PASS to full PASS.",
+    "related_k": [
+      "K973",
+      "K986",
+      "K188",
+      "K744",
+      "K953",
+      "K1018",
+      "K980"
+    ],
+    "confidence": "high",
+    "reviewer_notes": "Verdict CONDITIONAL PASS pending Codex primary re-verification. 2 Major (GJR significance framing + QLIKE 474 artifact disclosure), 4 Minor, 2 Nit. Review file: experiments/k981/k981_post_publish_codex_review.md. Recommended article patch: temper GJR-GARCH 'champion' language to point-estimate framing; add QLIKE 474 numerical-artifact 1-line caveat; footnote 1824/1823 OOS row/forecast distinction."
   }
 ]

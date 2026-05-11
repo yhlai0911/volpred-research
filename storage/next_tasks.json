@@ -6197,10 +6197,14 @@
     "title": "Paper review (Codex 24h-rule): 兩個各有 +9.5% 的好點子加在一起，會變 +19% 嗎？(K989)",
     "description": "Codex 24h post-publish review of mile_ecb736a6 (K989 MF2-VIX + VIX² convexity synthesis general article). source=K989_post_publish_codex_review. Verify (a) byte-accurate alignment with experiments/k989/k989_mf2_vix2_results.json, (b) DM significance claims only cite |t|>3 pairs (MF2-VIX vs MF2-Poly, MF2-VIX vs GJR-X), (c) no over-claim that VIX² is useless (it is informative independently per K987/K986, only substitutable when stacked with MF2-VIX), (d) general-audience tone compliance (no t-stat / Harvey threshold leakage), (e) shift(1) lookahead asserted in code path.",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-05-09T17:45:08.417172Z",
     "source": "K989_post_publish_codex_review",
-    "related_mile_id": "mile_ecb736a6"
+    "related_mile_id": "mile_ecb736a6",
+    "completed_at": "2026-05-11T00:12:03.023977+00:00",
+    "verdict": "PASS",
+    "reviewer_source": "gemini-cli-fallback+main-thread-audit (Codex primary queued post-2026-05-13)",
+    "review_report": "experiments/k989/k989_post_publish_codex_review.md"
   },
   {
     "id": "K990_article_general",
@@ -6317,7 +6321,9 @@
     "description": "Codex review article mile_ec876702 (K981 wavelet HAR NULL on SPY 2006-2026, 5278 chars, audience=general). Verify (1) numbers byte-match k981_wavelet_har_results.json, (2) no overclaim of statistical significance/causation, (3) source-code level: confirm shift(1) lag in k981_wavelet_har.py, (4) IS-OOS framing accurate, (5) wavelet-not-useless caveat preserved. Source: K981_post_publish_codex_review per CLAUDE.md 24h-rule.",
     "task_type": "paper_review",
     "priority": 3,
-    "status": "pending"
+    "status": "succeeded",
+    "completed_at": "2026-05-11T00:12:33Z",
+    "outcome": "CONDITIONAL_PASS (Gemini fallback; Codex primary re-verify queued post-2026-05-13)"
   },
   {
     "id": "K995_article_general",
@@ -6991,5 +6997,21 @@
     "depends_on": [
       "task-k950-codex-review-postpub"
     ]
+  },
+  {
+    "id": "task-k981-codex-review-primary-reverify",
+    "task_type": "paper_review",
+    "title": "K981 mile_ec876702 Codex primary-path re-verify (post-quota-reset)",
+    "description": "Codex CLI 0.121.0 quota resets 2026-05-12 19:46 PT. Re-run primary-path Codex review of mile_ec876702 against k981_wavelet_har_results.json + k981_wavelet_har.py to upgrade Gemini fallback CONDITIONAL PASS to full PASS. Verify Gemini's 2 Major / 4 Minor findings + scan for residual non-coverage outside Gemini scan. Per K1259 lesson.",
+    "priority": "P3",
+    "status": "pending",
+    "scheduled_after": "2026-05-13T00:00:00Z",
+    "blocked_by": [
+      "codex_quota_reset_2026_05_12_19_46_PT"
+    ],
+    "depends_on": [
+      "K981_post_publish_codex_review"
+    ],
+    "created_at": "2026-05-11T00:12:33Z"
   }
 ]
