@@ -520,6 +520,40 @@ The skewed Student-$t$ distribution passes the \citet{kupiec1995} test for all s
 
 An important caveat for the Taiwanese market is that the Cornish-Fisher (CF) VaR expansion diverges when using a rolling window of $w = 2000$ for 0050.TW. The issue is that kurtosis estimates become extremely large (up to 545 in some windows) due to occasional extreme returns that are not washed out by the long window. With $w = 504$, CF-VaR performs well ($p = 0.88$), but the shorter window introduces persistence bias in the GARCH estimates. Winsorization of extreme kurtosis values resolves the divergence, but this adds an ad hoc element that undermines the method's theoretical appeal. For practical purposes, we recommend the skewed Student-$t$ approach for Taiwan VaR, which is both theoretically principled and computationally stable.
 
+\subsection{Expected Shortfall Analysis}\label{sec:es_analysis}
+
+% source: experiments/k896/k896_taiwan_es_supplement_results.json
+
+Basel~III (2016--2019) mandates Expected Shortfall (ES) as the primary tail-risk metric for internal model approval, superseding VaR. We compute ES backtests over 2019--2026 ($n = 1{,}756$ trading days) using the \citet{acerbi2014} $Z_2$ statistic, which tests whether the conditional mean of excess losses equals the ES forecast, with $p$-values from 1,000 bootstrap replications. We also report the \citet{fissler2016} consistent joint VaR+ES scoring function (lower is better), which provides a coherent ranking of tail forecast accuracy.% source: experiments/k896/k896_taiwan_es_supplement_results.json .n_oos=1756 .oos_period="2019-01-01 to 2026-04-02"
+
+Table~\ref{tab:es_backtest} reports results at the 1\% level. A key finding is that \emph{all four distributional specifications pass the Acerbi-Sz\'{e}kely ES test}, including GJR+Normal, which fails both the Kupiec VaR test and the Basel~III Trinity. This pattern reflects a distributional complementarity: VaR tests quantile coverage (frequency of exceedance), while ES tests conditional mean severity given exceedance. A model miscalibrated in quantile frequency can remain well-calibrated in the expected magnitude of tail losses.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Expected Shortfall Backtest: 0050.TW, 2019--2026}
+\label{tab:es_backtest}
+\begin{tabular}{lccccc}
+\toprule
+Model & Mean VaR & Mean ES & ES/VaR & $Z_2$ stat & FZ \\
+      & (\%)     & (\%)    & ratio  & ($p$-value)  & score \\
+\midrule
+GJR + Normal            & 2.71 & 3.11 & 1.15 & 3.01 (0.52) & 4.055 \\
+GJR + Student-$t$       & 3.03 & 4.00 & 1.32 & 2.07 (0.55) & 4.025 \\
+GJR + Hist.\ Sim.       & 3.04 & 4.02 & 1.32 & 2.08 (0.46) & 4.011 \\
+GJR + Cornish-Fisher    & 3.83 & 5.33 & 1.39 & 1.49 (0.54) & 3.913 \\
+\bottomrule
+\end{tabular}
+\begin{minipage}{\textwidth}
+\smallskip
+\footnotesize
+\textit{Notes:} OOS period 2019-01-01 to 2026-04-02 ($n = 1{,}756$ days). Mean VaR and Mean ES at the 1\% level expressed as percentage of daily portfolio value. $Z_2$: \citet{acerbi2014} expected shortfall test; all models fail to reject the null of correct ES calibration at the 5\% level. FZ score: \citet{fissler2016} consistent joint VaR+ES scoring function (lower = better). Source: \texttt{k896\_taiwan\_es\_supplement\_results.json}.
+\end{minipage}
+\end{table}
+
+The Cornish-Fisher specification achieves the lowest Fissler-Ziegel score (3.91), indicating the highest joint accuracy in estimating tail severity, despite failing the Kupiec VaR test due to over-conservatism (9 violations, 0.5\%, below the 1\% target).% source: experiments/k896/k896_taiwan_es_supplement_results.json .results["1%"]["GJR+Cornish-Fisher"].fissler_ziegel_score=3.912835, .n_violations=9
+GJR+Student-$t$ remains the recommended specification for practical use: it achieves VaR Trinity pass, ES acceptance ($Z_2 = 2.07$, $p = 0.55$), and a mean ES of 4.00\%, providing a well-calibrated upper bound on expected tail losses for Taiwan investors.% source: experiments/k896/k896_taiwan_es_supplement_results.json .results["1%"]["GJR+Student-t"].mean_es_pct=4.0047, .acerbi_szekely.Z2=2.069645, .acerbi_szekely.p_value_Z2=0.548
+
 
 % ─── Section 8: Discussion ──────────────────────────────────────
 
