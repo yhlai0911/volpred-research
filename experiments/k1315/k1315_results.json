@@ -1,0 +1,122 @@
+{
+  "experiment_id": "K1315",
+  "title": "Forecast Combination: Anti-QLIKE Weighted Ensemble of HAR-ABS + HAR-VIX",
+  "asset": "SPY",
+  "data_source": "yfinance",
+  "is_period": "2005-01-04 to 2018-12-31",
+  "oos_period": "2019-01-02 to 2024-12-30",
+  "n_is": 3522,
+  "n_oos": 1509,
+  "har_coefficients": {
+    "HAR-ABS": {
+      "const": 0.0009871310862189994,
+      "rv1": -0.0976397356782922,
+      "rv5": 0.480465031973416,
+      "rv22": 0.48762940030693436,
+      "note": "static, fit on IS 2005-2018 only (consistent with K530)"
+    },
+    "HAR-VIX": {
+      "const": -0.0034116317929970535,
+      "rv1": -0.12911567156458267,
+      "rv5": 0.27515201568347947,
+      "rv22": -0.19059174354611372,
+      "vix": 0.0006011497922647903,
+      "note": "static, fit on IS 2005-2018 only (consistent with K530)"
+    }
+  },
+  "model_metrics": {
+    "HAR-ABS": {
+      "qlike": -3.89181919,
+      "mse": 6.42112e-05
+    },
+    "HAR-VIX": {
+      "qlike": -3.91697348,
+      "mse": 6.03705e-05
+    },
+    "Equal-Weight": {
+      "qlike": -3.91382481,
+      "mse": 6.05792e-05
+    },
+    "Anti-QLIKE": {
+      "qlike": -3.9166946,
+      "mse": 6.04553e-05
+    },
+    "Bates-Granger": {
+      "qlike": -3.91807995,
+      "mse": 6.08589e-05
+    }
+  },
+  "dm_tests": {
+    "Anti-QLIKE vs HAR-VIX": {
+      "dm_stat": 1.0841,
+      "p_value": 0.278484,
+      "harvey_pass": false
+    },
+    "Equal-Weight vs HAR-VIX": {
+      "dm_stat": 1.0425,
+      "p_value": 0.297338,
+      "harvey_pass": false
+    },
+    "Bates-Granger vs HAR-VIX": {
+      "dm_stat": -0.6876,
+      "p_value": 0.491806,
+      "harvey_pass": false
+    },
+    "Anti-QLIKE vs HAR-ABS": {
+      "dm_stat": -3.9782,
+      "p_value": 7.3e-05,
+      "harvey_pass": true
+    },
+    "Equal-Weight vs HAR-ABS": {
+      "dm_stat": -5.962,
+      "p_value": 0.0,
+      "harvey_pass": true
+    },
+    "Bates-Granger vs HAR-ABS": {
+      "dm_stat": -4.5872,
+      "p_value": 5e-06,
+      "harvey_pass": true
+    },
+    "Anti-QLIKE vs Equal-Weight": {
+      "dm_stat": -0.9494,
+      "p_value": 0.342565,
+      "harvey_pass": false
+    },
+    "Anti-QLIKE vs Bates-Granger": {
+      "dm_stat": 0.8641,
+      "p_value": 0.387683,
+      "harvey_pass": false
+    },
+    "Bates-Granger vs Equal-Weight": {
+      "dm_stat": -1.6152,
+      "p_value": 0.106475,
+      "harvey_pass": false
+    }
+  },
+  "anti_qlike_weights_final": {
+    "HAR-ABS": 4e-05,
+    "HAR-VIX": 0.99996
+  },
+  "harvey_threshold_met": false,
+  "verdict": "PASS_NULL",
+  "conclusions": [
+    "QLIKE ranking: Bates-Granger=-3.9181, HAR-VIX=-3.9170, Anti-QLIKE=-3.9167, Equal-Weight=-3.9138, HAR-ABS=-3.8918",
+    "No combination significantly outperforms HAR-VIX at Harvey 3\u03c3 threshold. VIX is a sufficient statistic for SPY daily |r| forecasting over 2019-2024. Best combo Bates-Granger: QLIKE=-3.9181 vs HAR-VIX=-3.9170.",
+    "Final Anti-QLIKE weights: HAR-ABS=0.000, HAR-VIX=1.000. HAR-VIX dominates the combination."
+  ],
+  "lookahead_prevention": {
+    "rv1": "abs_r.shift(1)  \u2014 uses only t-1 return",
+    "rv5": "abs_r.rolling(5).mean().shift(1) \u2014 uses t-5..t-1",
+    "rv22": "abs_r.rolling(22).mean().shift(1) \u2014 uses t-22..t-1",
+    "vix": "vix_level.ffill().shift(1) \u2014 uses t-1 closing VIX",
+    "combination_weights": "expanding window over OOS[0..t-2] QLIKE losses only"
+  },
+  "notes": [
+    "HAR coefficients static (IS 2005-2018), consistent with K530 approach",
+    "Bates-Granger constrained OLS: \u03b21+\u03b22=1, \u03b21\u2208[0,1], expanding window",
+    "Anti-QLIKE weighting: w_i \u221d 1/(excess_i + EPS) where excess_i = mean_QLIKE_i - min(mean_QLIKE_abs, mean_QLIKE_vix); always positive even when raw QLIKE is negative",
+    "Forecast floor: max(yhat, 1e-6) to prevent log(0) in QLIKE",
+    "DM-HLN Harvey threshold: |t| > 3.0 (Harvey et al. 1997); h=1 (1-step-ahead), NW bandwidth=T^(1/3) kept separate from h",
+    "VIX forward-fill for missing market holidays; >5 consecutive triggers warning"
+  ]
+}
