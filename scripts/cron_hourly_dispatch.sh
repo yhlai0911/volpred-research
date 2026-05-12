@@ -21,7 +21,7 @@ echo "=== hourly-dispatch $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
 # Headless invocation. The prompt is self-contained: dispatch rules
 # (hourly cadence, diversity, monetization sanity, compute queue split) are
 # loaded from CLAUDE.md + .claude/rules + memory automatically.
-/Users/yhlai0911/.local/bin/claude -p "Hourly dispatch trigger (OS cron). 規則 (token-conserving split architecture)：
+timeout 1800 /Users/yhlai0911/.local/bin/claude -p --dangerously-skip-permissions "Hourly dispatch trigger (OS cron). 規則 (token-conserving split architecture)：
 
 PHASE A — 檢查 compute queue 有無 completed 待 followup：
 1. 跑 \`uv run python scripts/compute_queue.py list --completed-pending-followup --json\`。
