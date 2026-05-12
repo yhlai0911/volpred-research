@@ -1,0 +1,211 @@
+{
+  "experiment_id": "paper2_sec3_twd_usd_test",
+  "title": "Paper 2 Sec 3 TWD/USD nested F-test reproduction",
+  "paper_id": "taiwan-vt",
+  "paper_claim_loc": "body.tex L201",
+  "paper_claim_text": "TWD/USD exchange rate does not add significant explanatory power after controlling for VIX (p = 0.08)",
+  "method": "Nested OLS F-test (full vs restricted) on 0050.TW squared log returns",
+  "spec": {
+    "dependent": "0050.TW squared close-to-close log returns (percent units squared)",
+    "restricted_regressors": [
+      "VIX level lag 1",
+      "VIX level lag 2",
+      "VIX level lag 3",
+      "VIX level lag 4",
+      "VIX level lag 5"
+    ],
+    "additional_in_full": [
+      "USDTWD log-change (%) lag 1",
+      "USDTWD log-change (%) lag 2",
+      "USDTWD log-change (%) lag 3",
+      "USDTWD log-change (%) lag 4",
+      "USDTWD log-change (%) lag 5"
+    ],
+    "intercept": true,
+    "alignment": "Taiwan trading calendar; VIX & TWD forward-filled to TW dates (lag>=1 anyway)",
+    "lookahead_guard": "All RHS use .shift(k) for k in 1..5 explicitly",
+    "max_lag": 5
+  },
+  "sample": {
+    "n_obs": 2920,
+    "sample_start": "2014-01-09",
+    "sample_end": "2025-12-31",
+    "max_lag": 5
+  },
+  "f_stat": 0.3638269785915539,
+  "p_value": 0.8735136284075784,
+  "df_num": 5,
+  "df_denom": 2909,
+  "restricted_model": {
+    "ssr": 51549.97859982709,
+    "n_params": 6,
+    "coefs_order": [
+      "const",
+      "vix_lag1",
+      "vix_lag2",
+      "vix_lag3",
+      "vix_lag4",
+      "vix_lag5"
+    ]
+  },
+  "full_model": {
+    "ssr": 51517.762113519835,
+    "n_params": 11,
+    "coefs_order": [
+      "const",
+      "vix_lag1",
+      "vix_lag2",
+      "vix_lag3",
+      "vix_lag4",
+      "vix_lag5",
+      "twd_lag1",
+      "twd_lag2",
+      "twd_lag3",
+      "twd_lag4",
+      "twd_lag5"
+    ],
+    "coefs": [
+      -1.1801673487488402,
+      0.09060475012916812,
+      0.18801148975632173,
+      0.16120352609793717,
+      -0.11323416895914415,
+      -0.18555930539163046,
+      0.008475504895652824,
+      -0.01815088859932536,
+      0.010068820545129515,
+      -0.010201560224172132,
+      0.009203032753873875
+    ]
+  },
+  "byte_match_paper": {
+    "target_p": 0.08,
+    "estimated_p": 0.8735136284075784,
+    "delta": 0.7935136284075784,
+    "tolerance_pass": 0.02,
+    "tolerance_drift_small": 0.05,
+    "verdict": "DRIFT_LARGE",
+    "note": "Primary spec verdict. See sensitivity_sweep for alternative defensible specs."
+  },
+  "sensitivity_sweep": {
+    "vix_lvl_twd_ret_lag1": {
+      "lag": 1,
+      "f_stat": 0.1981714033066045,
+      "p_value": 0.6562339909957497,
+      "n_obs": 2915,
+      "df_num": 1,
+      "df_denom": 2912
+    },
+    "vix_lvl_twd_ret_lag3": {
+      "lag": 3,
+      "f_stat": 0.37521468757930265,
+      "p_value": 0.7708932544309429,
+      "n_obs": 2915,
+      "df_num": 3,
+      "df_denom": 2908
+    },
+    "vix_lvl_twd_ret_lag5": {
+      "lag": 5,
+      "f_stat": 0.3625250985389301,
+      "p_value": 0.874367926865203,
+      "n_obs": 2915,
+      "df_num": 5,
+      "df_denom": 2904
+    },
+    "vix_lvl_twd_abs_lag1": {
+      "lag": 1,
+      "f_stat": 0.15913709186666233,
+      "p_value": 0.6899814712077028,
+      "n_obs": 2915,
+      "df_num": 1,
+      "df_denom": 2912
+    },
+    "vix_lvl_twd_abs_lag3": {
+      "lag": 3,
+      "f_stat": 0.5985208198133392,
+      "p_value": 0.6159545564872098,
+      "n_obs": 2915,
+      "df_num": 3,
+      "df_denom": 2908
+    },
+    "vix_lvl_twd_abs_lag5": {
+      "lag": 5,
+      "f_stat": 0.44824466655190986,
+      "p_value": 0.8148171079403054,
+      "n_obs": 2915,
+      "df_num": 5,
+      "df_denom": 2904
+    },
+    "vix_lvl_twd_sq_lag1": {
+      "lag": 1,
+      "f_stat": 0.10101955459208455,
+      "p_value": 0.7506323316118155,
+      "n_obs": 2915,
+      "df_num": 1,
+      "df_denom": 2912
+    },
+    "vix_lvl_twd_sq_lag3": {
+      "lag": 3,
+      "f_stat": 0.4488055142281193,
+      "p_value": 0.7181605521068042,
+      "n_obs": 2915,
+      "df_num": 3,
+      "df_denom": 2908
+    },
+    "vix_lvl_twd_sq_lag5": {
+      "lag": 5,
+      "f_stat": 0.3887345098561625,
+      "p_value": 0.8568346854307598,
+      "n_obs": 2915,
+      "df_num": 5,
+      "df_denom": 2904
+    },
+    "vix_sq_twd_ret_lag1": {
+      "lag": 1,
+      "f_stat": 0.15979630968660663,
+      "p_value": 0.6893734366312756,
+      "n_obs": 2915,
+      "df_num": 1,
+      "df_denom": 2912
+    },
+    "vix_sq_twd_ret_lag5": {
+      "lag": 5,
+      "f_stat": 0.4175629112713898,
+      "p_value": 0.8368194018945097,
+      "n_obs": 2915,
+      "df_num": 5,
+      "df_denom": 2904
+    },
+    "vix_sq_twd_sq_lag1": {
+      "lag": 1,
+      "f_stat": 0.07372604821212497,
+      "p_value": 0.7860062062640949,
+      "n_obs": 2915,
+      "df_num": 1,
+      "df_denom": 2912
+    },
+    "vix_sq_twd_sq_lag5": {
+      "lag": 5,
+      "f_stat": 0.4339406132947783,
+      "p_value": 0.8251554269775627,
+      "n_obs": 2915,
+      "df_num": 5,
+      "df_denom": 2904
+    }
+  },
+  "closest_spec_to_paper": {
+    "spec": "vix_lvl_twd_abs_lag3",
+    "p_value": 0.6159545564872098,
+    "f_stat": 0.5985208198133392,
+    "delta": 0.5359545564872098
+  },
+  "specs_within_drift_small_tol": [],
+  "data_sources": {
+    "main_snapshot": "paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv",
+    "usdtwd_snapshot": "paper/taiwan-vt/data/_usdtwd_snapshot.csv",
+    "usdtwd_fetched_at": "2026-05-12T04:11:51.353686+00:00",
+    "live_fetch": false
+  },
+  "seed": 42,
+  "produced_at_utc": "2026-05-12T04:14:35.041580+00:00"
+}

@@ -446,6 +446,43 @@ if _k1181_path.exists():
 else:
     print("  WARN: K1181 results JSON not found at", _k1181_path)
 
+# Paper2-Sec3 TWD/USD nested F-test binding (2026-05-12).
+# Paper claims body.tex L201: "TWD/USD ... does not add significant explanatory
+# power after controlling for VIX (p = 0.08)". Reproduction across 13 defensible
+# specs all yields p > 0.6 — qualitative direction PASSES (TWD/USD genuinely
+# not significant) but the specific number 0.08 is unsupported. We bind the
+# row as CONFLICT_RESOLVED (qualitative match, numeric drift) analogous to
+# K892's 0050.TW γ=0.087/t=2.20 handling.
+_p2_twd_path = _Path(__file__).resolve().parent.parent.parent / "experiments" / "paper2_sec3_twd_usd_test" / "twd_usd_granger_test_results.json"
+if _p2_twd_path.exists():
+    _p2_twd = _json.loads(_p2_twd_path.read_text(encoding="utf-8"))
+    _p_est = _p2_twd.get("p_value")
+    _verdict = _p2_twd.get("byte_match_paper", {}).get("verdict")
+    _f = _p2_twd.get("f_stat")
+    _n = _p2_twd.get("sample", {}).get("n_obs")
+    _swp = _p2_twd.get("sensitivity_sweep", {})
+    _sweep_p_max = max((s["p_value"] for s in _swp.values()), default=None)
+    _sweep_p_min = min((s["p_value"] for s in _swp.values()), default=None)
+    if _p_est is not None:
+        # Paper claim: "not significant" — qualitatively reproduces (p > 0.05 across all specs).
+        # Specific number 0.08 does not reproduce: we mark CONFLICT_RESOLVED.
+        _qualitative_match = _p_est > 0.05
+        _numeric_match = abs(_p_est - 0.08) <= 0.05
+        if _numeric_match:
+            _status = "VERIFIED"
+        elif _qualitative_match:
+            _status = "CONFLICT_RESOLVED"
+        else:
+            _status = "MISMATCH"
+        add("Sec 3 (spillover)", "TWD/USD nested-F p=0.08",
+            "0.08",
+            "paper2_sec3_twd_usd_test",
+            f"primary p={_p_est:.4f} F={_f:.4f} N={_n} | sweep p in [{_sweep_p_min:.3f}, {_sweep_p_max:.3f}] across 13 specs (none within 0.05 of 0.08; qualitative direction matches: not significant)",
+            _status)
+        print(f"  paper2_sec3_twd_usd_test bound: primary p={_p_est:.4f}, paper p=0.08, verdict={_verdict}, row status={_status}")
+else:
+    print("  WARN: paper2_sec3_twd_usd_test results JSON not found at", _p2_twd_path)
+
 # K558 Sec 4.4 0056.TW robustness binding (2026-05-11).
 _k558 = load_json("k558_k553_taiwan_validation_results.json")
 if _k558:
@@ -1025,9 +1062,10 @@ untraceable_items = [
     ("Appendix TZ", "TW+JP 50/50 Sharpe 1.810", "No experiment JSON"),
     ("Sec 4.5", "TSMC VT Sharpe 1.121", "No experiment JSON"),
     ("Sec 4.5", "TSMC 52.5% of 0050 return variance", "No experiment JSON"),
-    # Sec 2.5 VIXTWN/VIX ratio — bound to K1181 inline check below (2026-05-11).
-    ("Sec 3", "TWD/USD not significant p=0.08", "No experiment JSON"),
-    # Sec 4.4 0056.TW robustness — bound to K558 test_8 inline check below (2026-05-11).
+    # Sec 2.5 VIXTWN/VIX ratio — bound to K1181 inline check above (2026-05-11).
+    # Sec 3 TWD/USD nested-F — bound to paper2_sec3_twd_usd_test inline check above
+    # (2026-05-12; CONFLICT_RESOLVED: qualitative claim correct, p=0.08 specific number unsupported).
+    # Sec 4.4 0056.TW robustness — bound to K558 test_8 inline check above (2026-05-11).
     ("Table 2 (gamma)", "Hon Hai gamma=0.052, t=1.14", "N121 average only, no individual JSON"),
     ("Table 2 (gamma)", "MediaTek gamma=0.044, t=0.96", "N121 average only, no individual JSON"),
     ("Table 2 (gamma)", "0056.TW gamma=0.112, t=1.87", "N121 average only, no individual JSON"),
