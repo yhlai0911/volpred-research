@@ -168,6 +168,19 @@
           "cron_populate_events.sh",
           "populate_events"
         ]
+      },
+      {
+        "id": "research_backlog_daily",
+        "label": "Auto-generate K-experiment briefs from research_program.md gaps",
+        "cron": "0 8 * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_research_backlog.sh",
+        "log_path": "storage/logs/cron/research_backlog.log",
+        "description": "每日 08:00 掃 research_program.md unchecked 條目，自動 generate K-experiment briefs (max 5/day) 進 next_tasks.json。Idempotent dedup by K-id + keyword similarity。2026-05-12 用戶反饋: dispatcher 過去 12+ hours idle 因 pool 沒新研究 — 從根 close 這個 gap。",
+        "matchers": [
+          "generate_research_backlog.py",
+          "cron_research_backlog.sh",
+          "research_backlog"
+        ]
       }
     ]
   },
