@@ -29,9 +29,15 @@ PHASE A — 檢查 compute queue 有無 completed 待 followup：
 3. 若無待 followup → 進 PHASE B。
 
 PHASE B — 派新工：
+
+**本週優先方向（2026-05-12 audit 後鎖定）**：4 篇 paper R1 待修堆 3 週沒動（taiwan-vt 6 SEVERE / vt-trend-following 7 HIGH / leverage-direction 2 CRITICAL / volatility-absorption 5 SEVERE）= 直接 M3 + monetization 護城河阻塞。本週剩 4 天 + 56% quota，**全力推 paper R1 修正**，不再 reactive 派 K-experiment autogen brief（90% 是垃圾 NULL ML / 缺資料 / duplicate id）。
+
 1. 跑 \`uv run python scripts/continue_task_dispatch.py --report\` 看 dispatch state + agentable candidates。
 2. 多樣性檢查：\`jq '[.[-5:] | .[] | .task_type]' storage/work_log.json\` — 從 10 type 池選**不在 last-3** 的 type（experiment / paper_decision / paper_body / paper_review / event_article / daily_article / member_qa / strategy_lifecycle / platform_ops / governance）。
-3. 為該 type 找最高 monetization-leverage task。Mission 5-sanity (M1/M2/M3/M4/M5) 必考量。
+3. **優先序（per 2026-05-12 audit）**：
+   a. 若 last-3 沒包 paper_review / paper_body / paper_decision → **強制挑 paper_* 類**，派 agent 修一篇 R1 reviewer feedback（worktree=false; main repo + 一個 specific SEVERE/HIGH/CRITICAL issue）。每 paper R1 issue 拆 brief 派 1 agent。**這是本週 M3 monetization 主軸**。
+   b. 否則為 type 找最高 monetization-leverage task — Mission 5-sanity 必考量，**M3 (paper) 永遠優先於 M1/M2/M4/M5**（per audit finding 1）。
+4. **嚴禁**：reactive 派 K-experiment autogen brief（K1310-K1314 GARCH-to-Neural / HAR-GNN 等 ML novel-method NULL 4 連後 diversity decline）。**Override**：若 candidate id ∈ {K1310..K1330} 且 title 含 GARCH-Neural / GNN / Transformer / KAN / Conformal → skip 改派 paper_review。
 4. **分流決策（重要 token 節省規則）**：
    - 若任務本質是 **heavy compute**（GARCH MLE / Bootstrap / data fetch / 全期 backtest / pooled-MLE multistart 等 CPU 密集純運算）→ **NOT** 派 Claude agent，改 \`uv run python scripts/compute_queue.py enqueue --script <path> --title <T> --result-artifact <path> --followup-brief '<解讀任務 brief>' --followup-task-type paper_review --timeout 3600\`。Compute worker cron */15 min 會接手；產生 result.json 後下次 hourly fire 自動派 interpretation agent（**省 60-70% tokens**）。注意：腳本必須**完整已寫**才能 enqueue（不能讓 worker 寫 script）。需要先寫 script 的也派 Claude agent（一次性，包含 design + run + interpret）。
    - 若任務是 **decision / writing / narrative** → 派 Claude agent 正常流程（worktree for experiments；main repo for articles/paper body）。
