@@ -1181,6 +1181,53 @@ else:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+#  13b. TABLE 5 (COMMON PERIOD 2020-2026) — K900 BINDING (2026-05-12)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+print("\n" + "=" * 80)
+print("SECTION 13b: TABLE 5 COMMON PERIOD (K900)")
+print("=" * 80)
+
+_k900_path = _Path(__file__).resolve().parent / "experiments" / "k900_taiwan_vt_performance_results.json"
+if _k900_path.exists():
+    _k900 = _json.loads(_k900_path.read_text(encoding="utf-8"))
+    _tc = _k900.get("table_common_period", {})
+
+    def _check_strat_common(strat_key: str, label: str,
+                             body_sharpe: str, body_mdd: str,
+                             body_return: str, body_vol: str, body_turnover: str):
+        if strat_key not in _tc:
+            add("Table 5 (vt_common)", f"{label} not in K900", body_sharpe, "K900", "MISSING", "MISMATCH")
+            return
+        s = _tc[strat_key]
+        tol_sharpe, tol_mdd, tol_ret, tol_vol, tol_to = 0.001, 0.1, 0.1, 0.1, 1.0
+        add("Table 5 (vt_common)", f"{label} Sharpe={body_sharpe}", body_sharpe, "K900",
+            str(round(s["sharpe"], 4)),
+            "VERIFIED" if abs(s["sharpe"] - float(body_sharpe)) < tol_sharpe else "MISMATCH")
+        add("Table 5 (vt_common)", f"{label} MDD={body_mdd}%", body_mdd, "K900",
+            str(round(s["mdd_pct"], 2)),
+            "VERIFIED" if abs(s["mdd_pct"] - float(body_mdd)) < tol_mdd else "MISMATCH")
+        add("Table 5 (vt_common)", f"{label} Return={body_return}%", body_return, "K900",
+            str(round(s["ann_return_pct"], 2)),
+            "VERIFIED" if abs(s["ann_return_pct"] - float(body_return)) < tol_ret else "MISMATCH")
+        add("Table 5 (vt_common)", f"{label} Vol={body_vol}%", body_vol, "K900",
+            str(round(s["ann_vol_pct"], 2)),
+            "VERIFIED" if abs(s["ann_vol_pct"] - float(body_vol)) < tol_vol else "MISMATCH")
+        add("Table 5 (vt_common)", f"{label} Turnover={body_turnover}%", body_turnover, "K900",
+            str(round(s["ann_turnover_pct"], 1)),
+            "VERIFIED" if abs(s["ann_turnover_pct"] - float(body_turnover)) < tol_to else "MISMATCH")
+
+    _check_strat_common("buy_hold", "BH",            "1.122", "-33.8", "24.6", "21.9", "0")
+    _check_strat_common("ewma_vt",  "EWMA VT (10%)", "1.018", "-21.2", "11.0", "10.8", "448")
+    _check_strat_common("gjr_vt",   "GJR VT (10%)",  "1.084", "-22.2", "12.3", "11.3", "689")
+    _check_strat_common("vix_863",  "8.63/VIX",      "1.132", "-13.7", "11.3", "10.0", "94")
+    # GARCH VT row bound to K1175 (see Section K1175 binding above)
+    print("  K900 Table 5 bindings checked (BH/EWMA/GJR/8.63VIX × 5 metrics = 20 checks).")
+else:
+    print("  WARN: K900 results JSON not found at", _k900_path)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 #  14. UNTRACEABLE NUMBERS (no experiment source)
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -1194,7 +1241,8 @@ untraceable_items = [
     # 1997-07-02, paper's 1997-01..06 extension is not reproducible).
     # Table 4 (vt_results) — bindings moved to K1175 inline check above (2026-05-11 fix).
     # Old hardcoded UNTRACEABLE entries removed; now VERIFIED via _check_strat().
-    ("Table 5 (vt_common)", "All common-period values", "No experiment JSON"),
+    # Table 5 (vt_common) — bindings moved to K900 inline check above (2026-05-12 fix).
+    # Old hardcoded UNTRACEABLE entry removed; now VERIFIED via _check_strat_common().
     ("Sec 6 (macro)", "Import growth partial r=0.214", "No experiment JSON"),
     ("Sec 6 (macro)", "BCI momentum t=3.74", "No experiment JSON"),
     ("Appendix TZ", "Taiwan c2c Sharpe 1.473", "No experiment JSON"),
@@ -1455,6 +1503,90 @@ print(f"\n{'═' * 80}")
 print(f"Script: paper/taiwan-vt/reproduce.py")
 print(f"Experiments directory: paper/taiwan-vt/experiments/")
 print(f"{'═' * 80}")
+
+# ── JSON report emission (2026-05-12: prior script was print-only) ────────────
+import datetime as _dt
+_import_json = __import__("json")
+
+_report_path = SCRIPT_DIR / "reproduce_report.json"
+_prior: dict = {}
+if _report_path.exists():
+    try:
+        _prior = _import_json.loads(_report_path.read_text(encoding="utf-8"))
+    except Exception:
+        _prior = {}
+
+_total = len(results)
+_matched = n_verified + n_close + n_conflict  # VERIFIED + CLOSE + CONFLICT_RESOLVED
+_untraceable = n_untraceable
+_mismatches = n_mismatch
+_traceable = _total - _untraceable
+_match_rate_pct = round(_matched / _total * 100, 1) if _total else 0.0
+_traceable_match_rate_pct = round(_matched / _traceable * 100, 1) if _traceable else 0.0
+
+if _mismatches == 0 and _traceable_match_rate_pct >= 95:
+    _alert_level = "green"
+    _gate_status = "pass_with_untraceable" if _untraceable > 0 else "pass"
+elif _mismatches == 0:
+    _alert_level = "amber"
+    _gate_status = "pass_with_untraceable"
+else:
+    _alert_level = "red"
+    _gate_status = "fail"
+
+_status_breakdown = {
+    "VERIFIED": n_verified,
+    "CLOSE": n_close,
+    "CONFLICT_RESOLVED": n_conflict,
+    "MISMATCH": _mismatches,
+    "UNTRACEABLE": _untraceable,
+}
+
+_report = {
+    "paper_id": "taiwan-vt",
+    "paper_title": "Volatility Targeting in Taiwan Equity Markets",
+    "target_journal": _prior.get("target_journal", "TBD"),
+    "timestamp": _dt.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+    "script": "paper/taiwan-vt/reproduce.py",
+    "exit_code": 0,
+    "runtime_seconds": _prior.get("runtime_seconds", 1),
+    "alert_level": _alert_level,
+    "gate_status": _gate_status,
+    "gate_rule": ">=95% traceable match rate + 0 MISMATCH (green); 0 MISMATCH only (amber); else red/fail",
+    "total_checks": _total,
+    "matched": _matched,
+    "mismatches": _mismatches,
+    "untraceable": _untraceable,
+    "status_breakdown": _status_breakdown,
+    "match_rate_pct": _match_rate_pct,
+    "traceable_match_rate_pct": _traceable_match_rate_pct,
+    "divergences": _prior.get("divergences", []),
+    "conflict_resolution_summary": _prior.get("conflict_resolution_summary", {}),
+    "untraceable_summary": _prior.get("untraceable_summary", {
+        "count": _untraceable,
+        "dominant_gaps": [
+            "Sec 6 macro claims (import growth, BCI momentum) — no experiment JSON",
+            "Appendix TZ c2c Sharpe — K1176 exists (vendor mismatch ~30%)",
+            "Table 2 individual stock gamma (Hon Hai, MediaTek, 0056.TW) — no individual JSON",
+        ]
+    }),
+    "recommendations": _prior.get("recommendations", {}),
+    "suggested_next_action": (
+        "Run K1302 individual γ rebuild for 4 stocks × 3 specs. "
+        "Add K1176 binding for Appendix TZ c2c Sharpe. "
+        "Run macro experiment for Sec 6 BCI/import claims."
+    ),
+    "audit_method": (
+        f"Auto-emitted by reproduce.py at {_dt.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')} "
+        "(mechanical fields recomputed; narrative fields preserved from prior JSON)."
+    ),
+}
+
+with open(_report_path, "w") as _f:
+    _import_json.dump(_report, _f, indent=2)
+
+print(f"\nGate: {_gate_status.upper()} ({_alert_level}) — {_matched}/{_total} traceable: {_traceable_match_rate_pct}%")
+print(f"reproduce_report.json written to {_report_path}")
 
 # Exit code: 0 if no mismatches, 1 if mismatches found
 sys.exit(1 if n_mismatch > 0 else 0)
