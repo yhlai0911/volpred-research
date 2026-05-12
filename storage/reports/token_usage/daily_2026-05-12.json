@@ -1,0 +1,127 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-05-12",
+  "week_range": "2026-05-08 → 2026-05-15",
+  "totals": {
+    "input_tokens": 9,
+    "output_tokens": 1308,
+    "cache_read_tokens": 0,
+    "cache_create_tokens": 70905,
+    "billable_total": 72222,
+    "assistant_messages": 3,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.2855
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 9,
+      "output_tokens": 1308,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 70905,
+      "messages": 3,
+      "estimated_cost_usd": 0.2855
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 6,
+      "output_tokens": 872,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 47270,
+      "messages": 2,
+      "billable_total": 48148,
+      "estimated_cost_usd": 0.1904,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "token_report": {
+      "input_tokens": 3,
+      "output_tokens": 436,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 23635,
+      "messages": 1,
+      "billable_total": 24074,
+      "estimated_cost_usd": 0.0952,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 2,
+      "billable_total": 48148,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 2,
+          "billable_total": 48148
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "non-text assistant message",
+          "messages": 1,
+          "billable_total": 24074
+        },
+        {
+          "name": "other",
+          "messages": 1,
+          "billable_total": 24074
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 1,
+          "billable_total": 24074
+        },
+        {
+          "name": "2026-05-12 是星期二，不需要週報。先執行日報腳本。",
+          "messages": 1,
+          "billable_total": 24074
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 0,
+      "billable_total": 0,
+      "family_breakdown": [],
+      "prefix_breakdown": [],
+      "top_first_lines": []
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 1,
+      "cache_create_tokens": 70905,
+      "billable_total": 72222,
+      "cache_create_share_pct": 98.2,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "7fd6623e-f761-40f9-8de8-be2bee0f9b87",
+          "messages": 3,
+          "billable_total": 72222,
+          "cache_create_tokens": 70905,
+          "cache_read_tokens": 0,
+          "duration_minutes": 0.0,
+          "cache_create_share_pct": 98.2,
+          "first_ts": "2026-05-12T14:44:49.522000+00:00",
+          "last_ts": "2026-05-12T14:44:49.534000+00:00"
+        }
+      ]
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "2278388",
+      "message": "hourly-cloud: paper8 reproduce.py alert_level flow fix (part 3/3)"
+    },
+    {
+      "sha": "8d9d071",
+      "message": "hourly-cloud: paper8 reproduce.py + JSON alert_level (part 2/2)"
+    },
+    {
+      "sha": "c402134",
+      "message": "hourly-cloud: paper8 volatility-absorption alert_level schema gap fix"
+    }
+  ]
+}
