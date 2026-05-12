@@ -7024,5 +7024,222 @@
     "blocked_reason": "codex_quota_reset_pending",
     "blocked_until": "2026-05-13T02:46:00Z",
     "blocked_note": "Codex CLI 0.121.0 ChatGPT-account daily quota exhausted 2026-05-11 by 7 paper_reviews. Quota resets 2026-05-12 19:46 PT. Per K1259 lesson, primary-path re-verify needed to upgrade fallback CONDITIONAL/PASS → canonical PASS."
+  },
+  {
+    "id": "paper_review_mile_073884fd",
+    "title": "Paper review (Codex 24h-rule): VIX 百分位策略走出美國：四個市場的真實成績單",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_073884fd needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_073884fd",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-11T04:08:25+00:00"
+  },
+  {
+    "id": "paper_review_mile_27038b04",
+    "title": "Paper review (Codex 24h-rule): VIX 是全球恐慌指標，但 12/VIX 策略只在美股奏效——四大市場實證",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_27038b04 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_27038b04",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-11T10:11:26+00:00"
+  },
+  {
+    "id": "paper_review_mile_0c6b4e0c",
+    "title": "Paper review (Codex 24h-rule): 三種投資人、七大原則：證據導向 VIX 波動率擇時完整指南",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_0c6b4e0c needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_0c6b4e0c",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-11T16:08:12+00:00"
+  },
+  {
+    "id": "paper_review_mile_50a70b23",
+    "title": "Paper review (Codex 24h-rule): 把波動率拆成長期與短期，真的會比較準嗎？DMEM 雙乘子模型實測",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_50a70b23 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_50a70b23",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-11T22:08:18+00:00"
+  },
+  {
+    "id": "K1307",
+    "title": "K1307: Realized semivariance / signed jumps** — Barndorff-Nielsen-Kinnebrock-Shephard 分解 RV 為 upside/downside 部分，測 asymmetric v",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 51). Original: Realized semivariance / signed jumps** — Barndorff-Nielsen-Kinnebrock-Shephard 分解 RV 為 upside/downside 部分，測 asymmetric vol 更純粹。需 5-min 數據（2026 Q2 HAR-RV 解鎖後可開）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1307.py with signal.shift(1) + seed=42, (c) K1307_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-05-12T02:47:48Z"
+  },
+  {
+    "id": "K1308",
+    "title": "K1308: 修正 review_v2 的 5 HIGH",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 155). Original: 修正 review_v2 的 5 HIGH\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1308.py with signal.shift(1) + seed=42, (c) K1308_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-05-12T02:47:48Z"
+  },
+  {
+    "id": "K1309",
+    "title": "K1309: Codex adversarial review",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 199). Original: Codex adversarial review\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1309.py with signal.shift(1) + seed=42, (c) K1309_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-05-12T02:47:48Z"
+  },
+  {
+    "id": "K1310",
+    "title": "K1310: I4: VIX futures roll yield 策略 — contango 環境下的 roll yield 收割 vs 尾部風險保護 ⚠️ **BLOCKED: 需要 VIX futures 歷史數據（yfinance 無）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 221). Original: I4: VIX futures roll yield 策略 — contango 環境下的 roll yield 收割 vs 尾部風險保護 ⚠️ **BLOCKED: 需要 VIX futures 歷史數據（yfinance 無）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1310.py with signal.shift(1) + seed=42, (c) K1310_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-05-12T02:47:48Z"
+  },
+  {
+    "id": "K1311",
+    "title": "K1311: VIXTWN 數據累積到 252 天後驗證 ratio 穩定性（Q6）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 245). Original: VIXTWN 數據累積到 252 天後驗證 ratio 穩定性（Q6）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1311.py with signal.shift(1) + seed=42, (c) K1311_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-05-12T02:47:48Z"
+  },
+  {
+    "id": "K1302_paper2_individual_gamma_json",
+    "title": "K1302: Paper 2 Table 2 individual γ JSON rebuild (4 stocks × 3 specs)",
+    "description": "Rebuild Paper 2 Table 2 individual-stock γ for 2317.TW / 2454.TW / 2383.TW / 0056.TW under 3-spec disambiguation (TWA/TWB/TWC). Currently 4 rows lack canonical results.json backing — P2 cannot move to ready_for_submission without provenance closure. Brief: experiments/k1302/README.md. Mission: 3 (paper) primary.",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "autonomous_backlog_gen",
+    "tags": [
+      "paper-2",
+      "provenance",
+      "individual-stocks",
+      "3-spec-pattern"
+    ],
+    "created_at": "2026-05-12T02:50:12+00:00"
+  },
+  {
+    "id": "K1303_har_cj_jump_component",
+    "title": "K1303: HAR-CJ jump-component vs HAR-RV — 4 assets × 5-min RV",
+    "description": "First Barndorff-Nielsen-Shephard jump-decomposition test in this repo. SPY/QQQ/GLD/TX 5-min RV, BPV jump test, HAR-CJ vs HAR-RV DM-Harvey gate, regime-conditional asymmetry exploration. Builds on K1255 intraday infra. Brief: experiments/k1303/README.md. Mission: 2 (research) primary; 3 if PASS.",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "autonomous_backlog_gen",
+    "tags": [
+      "intraday",
+      "jump-component",
+      "har-cj",
+      "bpv",
+      "barndorff-nielsen"
+    ],
+    "created_at": "2026-05-12T02:50:12+00:00"
+  },
+  {
+    "id": "K1304_bma_taiwan_h1_decomposition",
+    "title": "K1304: K1257 BMA 0050.TW H1 FAIL decomposition (micro vs sample vs pool)",
+    "description": "Decompose why 0050.TW alone failed K1257 H1 (SPY/GLD PASS, 0050.TW FAIL posterior-collapse). 3 hypotheses: TAIFEX microstructure / OOS sample asymmetry / candidate-pool fit asymmetry. Treatments: SPY-window-matched + leave-one-out × 6 + per-candidate LL-per-day diagnostic. Feeds Paper 2 §5 rewrite. Brief: experiments/k1304/README.md. Mission: 2+3.",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "autonomous_backlog_gen",
+    "tags": [
+      "bma",
+      "taiwan",
+      "k1257-followup",
+      "paper-2-section-5"
+    ],
+    "created_at": "2026-05-12T02:50:12+00:00"
+  },
+  {
+    "id": "K1305_paper4_vintage_cross_asset",
+    "title": "K1305: Paper 4 vix-sufficiency post-K1116d vintage retest GLD/TLT/BTC",
+    "description": "Fill the K1116d × {GLD/TLT/BTC} boundary cell — true ALFRED PIT vintage on non-SPY assets, 45 cells (3 assets × 5 alt-data × 3 specs). Pre-empts R1 reviewer cross-paper meta-eval question on Paper 4. Brief: experiments/k1305/README.md. Mission: 3 (Paper 4 R1 risk reduction).",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "autonomous_backlog_gen",
+    "tags": [
+      "paper-4",
+      "vix-sufficiency",
+      "alfred-vintage",
+      "cross-asset",
+      "boundary-case"
+    ],
+    "created_at": "2026-05-12T02:50:12+00:00"
+  },
+  {
+    "id": "K1306_sec_edgar_10k_pilot",
+    "title": "K1306: SEC EDGAR 10-K text-sentiment pilot — unblock SEC direction",
+    "description": "30-firm × 10-year Loughran-McDonald sentiment pilot on free SEC EDGAR. Tests whether 10-K MD&A tone delta predicts post-filing monthly RV beyond VIX. Unblocks the SEC research direction listed BLOCKED in research_program.md L411. Both PASS and NULL publishable. Brief: experiments/k1306/README.md. Mission: 1+2.",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "autonomous_backlog_gen",
+    "tags": [
+      "sec-edgar",
+      "10-k",
+      "loughran-mcdonald",
+      "firm-level-text",
+      "data-unblock"
+    ],
+    "created_at": "2026-05-12T02:50:12+00:00"
   }
 ]

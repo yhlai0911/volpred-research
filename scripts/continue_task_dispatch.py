@@ -261,6 +261,24 @@ def _maybe_refill(agentable_count: int, *, auto_refill: bool) -> dict | None:
                 combined.setdefault("warnings", []).append(
                     f"article_refill: {article.get('reason') or article.get('error')}"
                 )
+
+        # Stage 3 (2026-05-12 fix): If pool still below floor, auto-spawn
+        # K-experiment briefs from research_program.md unchecked items. Closes
+        # the recurring `agentable=0` plateau where publication_candidates
+        # is fully covered but research_program.md still has open questions.
+        # The dispatcher must NEVER idle when the project has unfinished
+        # research — pool stays full via autonomous research generation.
+        gap = max(0, REFILL_FLOOR - agentable_count - combined["added"])
+        if gap > 0:
+            try:
+                from generate_research_backlog import generate as _research_gen  # type: ignore
+                research = _research_gen(dry_run=False, max_new=gap)
+                if research.get("added"):
+                    combined["added"] += research["added"]
+                    combined["added_ids"].extend(research.get("added_ids") or [])
+                    combined["by_type"]["experiment_autonomous"] = research["added"]
+            except Exception as exc:  # noqa: BLE001
+                combined.setdefault("warnings", []).append(f"research_backlog: {exc}")
     except Exception as exc:  # noqa: BLE001
         combined.setdefault("warnings", []).append(f"article_refill: {exc}")
         combined["ok"] = combined.get("ok", True)
