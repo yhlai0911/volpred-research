@@ -710,6 +710,16 @@
       "canonical_script": "scripts/cron_hourly_dispatch.sh",
       "tcc_bypass_copy": "~/.volpred/bin/cron_hourly_dispatch.sh",
       "installed_at": "2026-05-12T06:18:11Z"
+    },
+    {
+      "id": "volpred-compute-worker",
+      "schedule": "*/15 * * * *",
+      "command": "/Users/yhlai0911/.volpred/bin/cron_compute_worker.sh",
+      "log": "storage/logs/cron/compute_worker.log",
+      "description": "Compute queue worker — picks 1 queued heavy-CPU job (MLE/bootstrap/data fetch), runs without Claude tokens. Token-conserving split: feeds interpretation agents via hourly_dispatch PHASE A.",
+      "canonical_script": "scripts/cron_compute_worker.sh",
+      "tcc_bypass_copy": "~/.volpred/bin/cron_compute_worker.sh",
+      "installed_at": "2026-05-12T06:41:51Z"
     }
   ]
 }
