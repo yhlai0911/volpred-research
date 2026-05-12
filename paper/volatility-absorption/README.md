@@ -1,7 +1,7 @@
 # Paper 8: The Volatility Absorption Hypothesis
 
 **Target Journal**: TBD
-**Status**: R1 review — 5 SEVERE, needs major revision | Reproduce gate 61.3% amber. **2026-04-19 CRITICAL errata identified** (see `errata_pending.md`):
+**Status**: R1 review — 5 SEVERE, needs major revision | Reproduce gate 61.3% **red** (canonical threshold: <80% match → red; previously mislabelled "amber" prior to alert_level schema fix 2026-05-12). **2026-04-19 CRITICAL errata identified** (see `errata_pending.md`):
 - **CRITICAL**: controlled regression $t = -3.14 \to -1.17$ crosses Harvey boundary under K903 snapshot rerun
 - **HIGH**: T10 2020-2026 $\beta$ sign flip (paper -0.00035 vs snapshot +0.000139) — "absorption all periods" claim breaks for COVID/inflation era
 - **MEDIUM**: 10+ T9/T10 magnitude drifts within acceptable yfinance drift range
