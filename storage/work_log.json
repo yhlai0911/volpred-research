@@ -5743,5 +5743,25 @@
     "description": "K1316+K1315 VIX boundary theorem general-audience article",
     "result": "mile_b46e313f published (draft)",
     "agent": "worktree-agent-a4b49587faed3fb26"
+  },
+  {
+    "timestamp": "2026-05-12T23:52:50.688209+00:00",
+    "task_type": "experiment",
+    "task_id": "K1061_EAV_TWSE50",
+    "description": "K1061: TWSE 50 EAV Binomial Test T+1 — code-reviewer CONDITIONAL PASS, survivorship bias note applied, knowledge.json written",
+    "result": "SUPPORT (binom p=0.0005, t=+5.616, p=4.55e-07, 37/50 stocks). Conditions: survivorship_bias_note + README Limitations added.",
+    "agent": "main-thread + code-reviewer subagent review",
+    "knowledge_written": true,
+    "codex_review": "CONDITIONAL PASS (subagent fallback) — primary Codex path verification pending"
+  },
+  {
+    "timestamp": "2026-05-12T23:52:50.688209+00:00",
+    "task_type": "experiment",
+    "task_id": "K1304_BMA_decomposition",
+    "description": "K1304: BMA 0050.TW H1 FAIL decomposition — code merged, compute queue enqueued, await execution",
+    "result": "CODE_MERGED_AWAITING_EXECUTION — enqueued as compute-k1304-bma-0050-tw-h1-fail-decomposition-*",
+    "agent": "worktree-agent-ae3608cb6dea16faa (code written), compute queue (execution pending)",
+    "knowledge_written": false,
+    "notes": "k1304.py 1174 lines committed to main. assemble_results.py (fabricated values) discarded. Execution via cron */15 compute worker."
   }
 ]

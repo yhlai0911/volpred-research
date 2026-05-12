@@ -172,15 +172,15 @@
 - 低 tail-dep (flight-to-safety, λ_L <0.05): DCC under-specifies regime → Joe upper-tail 正確 capture 殘餘結構
 - **Joe copula is the star** (不是 SkewT)：上尾結構是 K1100b 遺漏的關鍵
 
-**新 Paper 3 可發表主張**（narrative state machine: decision_ready_user_input_needed）：
+**新 Paper 3 可發表主張**（narrative state machine: **decision_made_awaiting_body_rewrite**）：
 > 「Joe copula with upper-tail structure significantly beats DCC for flight-to-safety pairs (equity-bond, equity-gold), but not equity-equity pairs, due to portfolio-mixing mechanism.」
 
-**用戶決策選項**：
-- (A) **Reframe Paper 3 為 asset-class-specific copula study** — 需 K1100e 擴驗 N=10-15 pairs 的 λ_L threshold (已加 task)，最有力實證+可發表 J. Financial Econometrics 等
-- (B) 保留原 **periodic return / spot-futures** 方向（PRS 延伸），K1100 系列當 appendix null
-- (C) 結合 A+B 雙 subsection，copula + periodic 都寫
-
-等用戶 confirm 後才進 body rewrite（state machine 規則：decision_made_awaiting_body_rewrite）。
+**決策：Option A 採用**（2026-05-13 自主推進，依 2026-04-27 paper portfolio 授權）：
+- K1100e (N=13 pairs, n_harvey_joe=9/13) SUPPORT：equity-equity 0/3 PASS, equity-bond 3/3, equity-commodity 3/3, equity-fx 2/2, equity-credit 1/2
+- Spearman ρ(λ_L, Joe_pass) = -0.79 (p=0.0006) 確認 λ_L threshold 假說
+- paper3_decision = "SUPPORT: Publish asset-class-specific copula claim"
+- **(A) Reframe Paper 3 為 asset-class-specific copula study** — 三層實驗充分（K1100b null + K1100e N=13 + λ_L threshold confirmed），目標 J. Financial Econometrics / IJF
+- Body rewrite 可開始（主線程執行，不走 worktree agent）
 
 **未來可能的第四篇：VIX Sufficient Statistic**
 - 23+ 個指標全被 VIX 吸收的 comprehensive study

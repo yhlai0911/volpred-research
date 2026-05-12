@@ -29174,5 +29174,62 @@
     "category": "knowledge",
     "created_at": "2026-05-12T11:18:00+00:00",
     "updated_at": "2026-05-12T11:18:00+00:00"
+  },
+  {
+    "id": "K1316",
+    "experiment_id": "K1316",
+    "title": "K1316: HAR-VIX vs HAR-RV on TX1 — US VIX is NOT a Sufficient Statistic Cross-Market",
+    "content": "[Claude main thread verified, 2026-05-13] K1316 tests cross-market replication of K1315: K1315 confirmed VIX is sufficient statistic for SPY daily RV (Anti-QLIKE weight HAR-VIX=1.0, HAR-ABS=0.0). K1316 hypothesis: does US VIX dominate own-RV persistence for TAIFEX TX1? Method: HAR-RV (3 regressors: log(RV) d/w/m) vs HAR-VIX (3 regressors: log(VIX²) d/w/m), both predict log(RV_{t+1}). TX1 TAIFEX tick data 2017-2026, inner-join merged with ^VIX (n=2085 after merge, n_train=1459, n_test=626). DM-HLN Harvey h=1 on QLIKE, seed=42. VERDICT: NULL. HAR-VIX QLIKE=-8.654 vs HAR-RV QLIKE=-6.156 (HAR-VIX directionally better, +40.6%), but DM-HLN t=1.041, p=0.298, well below Harvey 3σ gate. Bootstrap 95% CI on QLIKE diff: [-0.265, 7.587] — spans zero. Verdict components: pass_3sigma_dm_qlike=False, vix_lower_qlike=True, bootstrap_ci_excludes_zero=False → NULL. Codex (gpt-5.4) pre-run review fixed: (1) lag construction moved to pre-merge to avoid holiday-induced lag compression; (2) bootstrap label corrected from 'block' to 'iid'. Note on QLIKE: computed on log(RV) scale (produces negative values); both models use same formula so comparison valid, but not strictly Patton (2011) proxy-robust on original scale. Boundary finding (K1315+K1316 pair): VIX sufficient statistic property is MARKET-SPECIFIC — strong within-market (SPY own-market fear gauge), absent cross-market (TX1, despite high US-Taiwan volatility spillover via global fear). Domestic RV persistence (HAR-RV) sufficient for Taiwan futures. Implication for Paper 9: A4f model's VIX term is validated for US-listed assets but cross-market extension requires local IV (VIXTWN); aligns with K1098 (VIXTWN NULL on 0050.TW — even local IV insufficient on daily GARCH scale). Together K1315+K1316+K1098 define the VIX/IV channel boundary.",
+    "tags": [
+      "HAR-VIX",
+      "HAR-RV",
+      "TAIFEX",
+      "null_result",
+      "cross_market",
+      "VIX_sufficient_statistic",
+      "K1315_followup",
+      "Mission2_research"
+    ],
+    "data_source": "TAIFEX TX1 tick (cached parquet 2017-2026, 2085 merged days), ^VIX yfinance daily",
+    "category": "knowledge",
+    "verdict": "NULL",
+    "confidence": 0.92,
+    "codex_review": "PASS (gpt-5.4) — fixed lag construction + bootstrap label before execution",
+    "related_experiments": [
+      "K1315",
+      "K1098",
+      "K1301",
+      "K1303",
+      "K1309"
+    ],
+    "created_at": "2026-05-12T19:26:21.321152+00:00",
+    "updated_at": "2026-05-12T19:26:21.321152+00:00"
+  },
+  {
+    "id": "K1061",
+    "experiment_id": "K1061",
+    "title": "K1061: TWSE 50 EAV Binomial Test — T+1 Earnings Announcement Volatility Confirmed at Portfolio Level",
+    "content": "[code-reviewer subagent CONDITIONAL PASS, 2026-05-13; primary-path Codex verification pending per experiments.md] K1061 extends K1060 (10-stock EAV, binom underpowered 6/10 p=0.377) to full TWSE 50 constituents (N=50). Method: |return| proxy, T+0=announcement date (Taiwan post-close, non-tradeable), T+1=next trading day (first reactable day), non-event baseline excludes [T-5,T+5]. Binomial test H0: p(ratio_t1>1)=0.5, one-sided. Data: 財報公告日.txt (Big5, 2411 companies, 1986-2025) matched to 50 TWSE tickers via yfinance 2010-2025. VERDICT: SUPPORT. Results: 37/50 stocks ratio_t1>1 (proportion=0.740), binomial p=0.0005 (<0.05); portfolio mean ratio_t1=1.294, one-sample t=+5.616, p=4.55e-07 (highly significant). K1060 T+1 hypothesis strongly confirmed at larger N. Review conditions applied: (1) survivorship_bias_note added to results JSON — ticker list uses current constituents, historical changes 2010-2025 not tracked, may moderately overstate EAV; (2) Limitations section added to README.md. Lookahead check CLEAN: T+1 return computed via index+1 offset on event_positions_t0 (not date arithmetic), no future return used at T+0. Non-event definition correctly excludes [-EVENT_WINDOW, +EVENT_WINDOW] centred on T+0 positions. Mechanism confirmed: Taiwan earnings released post-close → volatility shock deferred to T+1 (K1060 hypothesis, now formally supported). Link to Paper 2/3 potential: cross-sectional EAV heterogeneity (TSMC NULL per K1059 ETF, but majority of TWSE 50 PASS) suggests firm-size or index-weight effect worth exploring.",
+    "tags": [
+      "EAV",
+      "TWSE50",
+      "binomial_test",
+      "Taiwan",
+      "earnings_announcement",
+      "T+1_effect",
+      "Mission2_research",
+      "SUPPORT"
+    ],
+    "data_source": "財報公告日.txt (Big5, 2411 companies 1986-2025), yfinance 50×.TW daily 2010-2025",
+    "category": "knowledge",
+    "verdict": "SUPPORT",
+    "confidence": 0.82,
+    "codex_review": "CONDITIONAL PASS (code-reviewer subagent fallback, 2026-05-13) — survivorship bias disclosed, Codex primary-path verification pending",
+    "related_experiments": [
+      "K1059",
+      "K1060"
+    ],
+    "created_at": "2026-05-12T23:52:33.311168+00:00",
+    "updated_at": "2026-05-12T23:52:33.311168+00:00"
   }
 ]

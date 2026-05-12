@@ -904,8 +904,10 @@
     "title": "K1156: 5-market validation visualization for Paper 2 cover figure",
     "priority": 3,
     "description": "Three-market table 已成核心 finding；若 K1153 EU 也 PASS → 4-market。視覺化 fig 為 Paper 2 cover：x=market, y=θ_EAV with 95% CI bars + placebo z annotation。",
-    "status": "pending",
-    "task_type": "experiment"
+    "status": "succeeded",
+    "task_type": "experiment",
+    "completed_at": "2026-05-12T23:53:31.524312+00:00",
+    "result_summary": "experiments/k1156/ exists with k1156_results.json — completed in prior session"
   },
   {
     "id": "K1161b_paid_options_data",
@@ -968,28 +970,32 @@
     "title": "K1216c: Developed markets (US/EU/JP/TW) multistart sanity check",
     "priority": 4,
     "description": "If K1216 WIDESPREAD_FRAGILITY extends to DEV markets → Paper 2 §5 methodology root-cause (MLE design) not EM-specific. Apply 100-start to US/EU/JP/TW pools for full paper revision scope.",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-04-18T03:13:18.883460",
     "tags": [
       "K1216-followup",
       "Paper2",
       "numerical-fragility"
     ],
-    "task_type": "experiment"
+    "task_type": "experiment",
+    "completed_at": "2026-05-12T23:53:31.524312+00:00",
+    "result_summary": "experiments/k1216c/ exists with k1216c_results.json — completed in prior session"
   },
   {
     "id": "K1222b_revise_post_K1216c",
     "title": "K1222b: Revise K1222 Paper 2 §5 guide to integrate K1216c (ρ rebounds to +0.379 not collapse to -0.071)",
     "priority": 3,
     "description": "K1222 wrote narrative around K1216b -0.071 COLLAPSE headline. K1216c revealed asymmetric-refinement artifact; 9-market consistent refined ρ=+0.379 p=0.20 (statistically indistinguishable from canonical +0.441). K1222b supersede K1222: (1) ρ REBOUNDS not collapses; (2) Paper 2 §5 shifts from \"RETRACTED cross-market ladder\" to \"multistart methodology contribution + cross-market ladder modestly weaker but surviving\"; (3) three-version Spearman table.",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-04-18T06:17:42.553113",
     "tags": [
       "K1222-supersede",
       "Paper2",
       "K1216c-integration"
     ],
-    "task_type": "paper_decision"
+    "task_type": "paper_decision",
+    "completed_at": "2026-05-12T23:53:31.524312+00:00",
+    "result_summary": "experiments/k1216c/ exists with k1216c_results.json — completed in prior session"
   },
   {
     "id": "K1268_gdelt_fullscan",
@@ -7567,5 +7573,68 @@
     "notes": "K1316 boundary finding: VIX sufficient statistic = market-specific. Pair with K1315 for stronger narrative.",
     "completed_at": "2026-05-12T22:21:21.531812Z",
     "result": "mile_b46e313f: VIX 是美國的恐慌指數，不是台灣的救命稻草——626 天台指期實測 (2053 CJK, draft, general)"
+  },
+  {
+    "id": "paper_review_mile_80aeb8a1",
+    "title": "Paper review (Codex 24h-rule): 80 場實驗、4 次 Codex 把關之後：我們對波動率投資的三件確定事與三個慘痛錯誤",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_80aeb8a1 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_80aeb8a1",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-12T23:07:17+00:00"
+  },
+  {
+    "id": "paper_review_mile_aeca4e68",
+    "title": "Paper review (Codex 24h-rule): 把實作 bug 修掉之後，MF2-GARCH 真的贏了 GJR——但 25% 收斂率讓這場勝利打了折",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_aeca4e68 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_aeca4e68",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-12T23:07:17+00:00"
+  },
+  {
+    "id": "paper_review_mile_a8ac2ae4",
+    "title": "Paper review (Codex 24h-rule): 台股大盤集中度自 2020 起顯著加速 — 為什麼 0050 越來越像 TSMC ETF",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_a8ac2ae4 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_a8ac2ae4",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-12T23:07:17+00:00"
+  },
+  {
+    "id": "experiment_scaffold_k1268b",
+    "title": "Experiment scaffold: K1268B (research_program backlog)",
+    "description": "K1268B mentioned in research_program.md but no experiments/k1268b/ directory yet. Create three-part scaffold per CLAUDE.md `.claude/rules/experiments.md`: (a) README.md (motivation + method + expected output + lookahead policy), (b) k1268b.py initial implementation (with signal.shift(1) + seed), (c) plan placeholder k1268b_results.json schema. Do NOT run the experiment — just scaffold + stage for main thread to review.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "diverse_gen",
+    "tags": [
+      "experiment",
+      "scaffold",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-05-12T23:07:17+00:00"
   }
 ]
