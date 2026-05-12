@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.volpred.compute-worker</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/yhlai0911/.volpred/bin/cron_compute_worker.sh</string>
+    </array>
+
+    <key>StartCalendarInterval</key>
+    <array>
+        <dict><key>Minute</key><integer>0</integer></dict>
+        <dict><key>Minute</key><integer>15</integer></dict>
+        <dict><key>Minute</key><integer>30</integer></dict>
+        <dict><key>Minute</key><integer>45</integer></dict>
+    </array>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/compute_worker_launchd.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/compute_worker_launchd.err</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/Users/yhlai0911/.nvm/versions/node/v22.20.0/bin:/Users/yhlai0911/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>HOME</key>
+        <string>/Users/yhlai0911</string>
+    </dict>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/yhlai0911/Desktop/volpred-research</string>
+</dict>
+</plist>
