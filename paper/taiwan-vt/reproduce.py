@@ -1279,6 +1279,86 @@ else:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+#  16. R1 SEVERE 2 LINEAR SCALING (paper2_R1_linear_scaling_fix)
+# ═══════════════════════════════════════════════════════════════════════════════
+print(f"\n{'═' * 80}")
+print("SECTION 16: R1 SEVERE 2 — VIXTWN/VIX LINEARITY (paper2_R1_linear_scaling_fix)")
+print(f"{'═' * 80}")
+
+# Source: experiments/paper2_R1_linear_scaling_fix/results.json
+# Inline rows added (2026-05-12) to bind body_addition_proposal Table
+# tab:ratio_linearity to JSON source. Tolerance ±0.005 on bucket means
+# (deterministic given seed=42; no rebuild drift expected).
+lin_fix = None
+_p_lin = (Path("experiments") / "paper2_R1_linear_scaling_fix" / "results.json")
+if not _p_lin.exists():
+    _p_lin = (Path(__file__).parent.parent.parent / "experiments"
+              / "paper2_R1_linear_scaling_fix" / "results.json")
+if _p_lin.exists():
+    with open(_p_lin) as _f:
+        lin_fix = _json.load(_f)
+
+if lin_fix:
+    # Row A: Overall ratio mean (long-history K1098 sample)
+    _overall = get_nested(lin_fix, "paired_data_summary", "overall_ratio_mean")
+    if _overall is not None:
+        proposed_overall = 0.981
+        status = "VERIFIED" if abs(_overall - proposed_overall) <= 0.005 else "MISMATCH"
+        add("Table ratio_linearity",
+            "Overall ratio mean 2008-2021 post-warmup (proposed body Table)",
+            f"{proposed_overall:.3f}",
+            "paper2_R1_linear_scaling_fix",
+            f"{_overall:.4f}",
+            status)
+        print(f"  Overall ratio: proposed={proposed_overall:.3f}  "
+              f"JSON={_overall:.4f}  [{status}]")
+
+    # Row B: Q4 (high-VIX) bucket mean — the key tail-regime number
+    _q4 = get_nested(lin_fix, "amplification_per_quantile", "Q4", "mean_ratio")
+    if _q4 is not None:
+        proposed_q4 = 0.824
+        status = "VERIFIED" if abs(_q4 - proposed_q4) <= 0.005 else "MISMATCH"
+        add("Table ratio_linearity",
+            "Q4 (VIX > Q75) mean ratio (proposed body cell)",
+            f"{proposed_q4:.3f}",
+            "paper2_R1_linear_scaling_fix",
+            f"{_q4:.4f}",
+            status)
+        print(f"  Q4 ratio: proposed={proposed_q4:.3f}  "
+              f"JSON={_q4:.4f}  [{status}]")
+
+    # Row C: Tail bucket mean (|Δlog VIX| > 2σ)
+    _tail = get_nested(lin_fix, "amplification_per_quantile", "Tail", "mean_ratio")
+    if _tail is not None:
+        proposed_tail = 0.877
+        status = "VERIFIED" if abs(_tail - proposed_tail) <= 0.005 else "MISMATCH"
+        add("Table ratio_linearity",
+            "Tail (|Δlog VIX| > 2σ) mean ratio (proposed body cell)",
+            f"{proposed_tail:.3f}",
+            "paper2_R1_linear_scaling_fix",
+            f"{_tail:.4f}",
+            status)
+        print(f"  Tail ratio: proposed={proposed_tail:.3f}  "
+              f"JSON={_tail:.4f}  [{status}]")
+
+    # Row D: Verdict — must be linearity_BREAKS or linearity_HOLDS
+    _verdict = lin_fix.get("verdict")
+    if _verdict is not None:
+        proposed_verdict = "linearity_BREAKS"
+        status = "VERIFIED" if _verdict == proposed_verdict else "MISMATCH"
+        add("Sec linearity_robustness",
+            "SEVERE 2 verdict (proposed body narrative)",
+            proposed_verdict,
+            "paper2_R1_linear_scaling_fix",
+            _verdict,
+            status)
+        print(f"  Verdict: proposed={proposed_verdict}  "
+              f"JSON={_verdict}  [{status}]")
+else:
+    print("  paper2_R1_linear_scaling_fix/results.json not found; SKIPPED")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 #  FINAL REPORT
 # ═══════════════════════════════════════════════════════════════════════════════
 
