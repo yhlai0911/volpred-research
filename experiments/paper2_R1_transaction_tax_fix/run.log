@@ -1,0 +1,53 @@
+========================================================================
+Paper 2 R1 SEVERE 1 fix — Transaction Tax Sensitivity
+========================================================================
+
+[1] Loading pinned snapshot: 0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv
+  0050.TW (CLEAN): 4229 days  [2009-01-02 .. 2026-04-17]
+  ^VIX            : 4622 days
+  VIX-for-Taiwan  : 4229 days (US close strictly < TW date; lag-safe)
+
+[2] EWMA vol (fast)...
+[2] GARCH(1,1) OOS recursion (this takes 2-5 min)...
+[2] GJR-GARCH OOS recursion (this takes 2-5 min)...
+
+[3] Running TX sensitivity sweep across 4 rates...
+    buy_hold @ TX=0.100%  Sharpe=0.6558  Ret=11.97%  MDD=-36.38%  Turnover=0%  TX-drag=0.0bps
+    buy_hold @ TX=0.150%  Sharpe=0.6558  Ret=11.97%  MDD=-36.38%  Turnover=0%  TX-drag=0.0bps
+    buy_hold @ TX=0.186%  Sharpe=0.6558  Ret=11.97%  MDD=-36.38%  Turnover=0%  TX-drag=0.0bps
+    buy_hold @ TX=0.300%  Sharpe=0.6558  Ret=11.97%  MDD=-36.38%  Turnover=0%  TX-drag=0.0bps
+
+     ewma_vt @ TX=0.100%  Sharpe=0.5643  Ret=5.97%  MDD=-22.35%  Turnover=489%  TX-drag=48.9bps
+     ewma_vt @ TX=0.150%  Sharpe=0.5399  Ret=5.71%  MDD=-22.47%  Turnover=489%  TX-drag=73.3bps
+     ewma_vt @ TX=0.186%  Sharpe=0.5223  Ret=5.52%  MDD=-22.56%  Turnover=489%  TX-drag=91.0bps
+     ewma_vt @ TX=0.300%  Sharpe=0.4668  Ret=4.94%  MDD=-22.83%  Turnover=489%  TX-drag=146.7bps
+
+    garch_vt @ TX=0.100%  Sharpe=0.8479  Ret=9.48%  MDD=-23.27%  Turnover=634%  TX-drag=63.5bps
+    garch_vt @ TX=0.150%  Sharpe=0.8169  Ret=9.13%  MDD=-23.47%  Turnover=634%  TX-drag=95.2bps
+    garch_vt @ TX=0.186%  Sharpe=0.7947  Ret=8.88%  MDD=-23.61%  Turnover=634%  TX-drag=118.0bps
+    garch_vt @ TX=0.300%  Sharpe=0.7246  Ret=8.10%  MDD=-24.07%  Turnover=634%  TX-drag=190.3bps
+
+      gjr_vt @ TX=0.100%  Sharpe=0.9545  Ret=10.98%  MDD=-23.57%  Turnover=662%  TX-drag=66.2bps
+      gjr_vt @ TX=0.150%  Sharpe=0.9227  Ret=10.62%  MDD=-23.79%  Turnover=662%  TX-drag=99.3bps
+      gjr_vt @ TX=0.186%  Sharpe=0.8998  Ret=10.35%  MDD=-23.95%  Turnover=662%  TX-drag=123.1bps
+      gjr_vt @ TX=0.300%  Sharpe=0.8277  Ret=9.52%  MDD=-24.87%  Turnover=662%  TX-drag=198.5bps
+
+     vix_863 @ TX=0.100%  Sharpe=0.9665  Ret=9.21%  MDD=-15.05%  Turnover=104%  TX-drag=10.4bps
+     vix_863 @ TX=0.150%  Sharpe=0.9606  Ret=9.16%  MDD=-15.09%  Turnover=104%  TX-drag=15.6bps
+     vix_863 @ TX=0.186%  Sharpe=0.9564  Ret=9.12%  MDD=-15.12%  Turnover=104%  TX-drag=19.3bps
+     vix_863 @ TX=0.300%  Sharpe=0.9430  Ret=8.99%  MDD=-15.20%  Turnover=104%  TX-drag=31.1bps
+
+[4] Comparison vs K1175 stored values at TX=0.186% (snapshot-drift transparency)...
+    buy_hold: 4/5 fields show drift vs K1175 stored
+     ewma_vt: 4/5 fields show drift vs K1175 stored
+    garch_vt: 5/5 fields show drift vs K1175 stored
+      gjr_vt: 5/5 fields show drift vs K1175 stored
+     vix_863: 5/5 fields show drift vs K1175 stored
+
+[5] VT-vs-BH claim survival across TX grid...
+
+========================================================================
+Saved: /Users/yhlai0911/Desktop/volpred-research/experiments/paper2_R1_transaction_tax_fix/results.json
+========================================================================
+VERDICT: ewma_vt: Sharpe range across TX 0.10%-0.30% = 0.0975 | garch_vt: Sharpe range across TX 0.10%-0.30% = 0.1233 | gjr_vt: Sharpe range across TX 0.10%-0.30% = 0.1268 | vix_863: Sharpe range across TX 0.10%-0.30% = 0.0235 | At TX=0.30% (worst case, hypothetical common-stock rate): 0/4 VT strategies retain higher net Sharpe than BH in own window | At TX=0.30%: 4/4 VT strategies retain MDD improvement (less negative drawdown) vs BH
+========================================================================

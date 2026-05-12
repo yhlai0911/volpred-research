@@ -1218,6 +1218,67 @@ for table, claim, note in untraceable_items:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+#  15. R1 SEVERE 1 TX SENSITIVITY (paper2_R1_transaction_tax_fix)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+print("\n" + "=" * 80)
+print("SECTION 15: R1 SEVERE 1 — TX SENSITIVITY (paper2_R1_transaction_tax_fix)")
+print("=" * 80)
+
+# Source: experiments/paper2_R1_transaction_tax_fix/results.json
+# Two inline-binding rows added (2026-05-12) to bind Table tx_sensitivity
+# proposed in body_addition_proposal.tex back to the experiment JSON.
+tx_fix = load_json("results.json") or load_json(
+    "paper2_R1_transaction_tax_fix/results.json"
+)
+# Direct path-fallback (REPO_EXP_DIR lookup may not find subdir);
+# robust against either experiments/ or experiments/paper2_R1_transaction_tax_fix/
+import json as _json
+_p = (SCRIPT_DIR.parent.parent / "experiments"
+      / "paper2_R1_transaction_tax_fix" / "results.json")
+if tx_fix is None and _p.exists():
+    with open(_p) as _f:
+        tx_fix = _json.load(_f)
+
+if tx_fix:
+    # Row 1: Annualised turnover (8.63/VIX monthly, identical across TX rates)
+    vix_canon = get_nested(tx_fix, "tx_sensitivity_sweep", "vix_863", "paper_canonical")
+    if vix_canon:
+        json_turnover = vix_canon.get("ann_turnover_pct")
+        # Body addition proposal Table tx_sensitivity Notes reports 104%/yr
+        # for 8.63/VIX (paper canonical TX=0.186%). Tolerance ±2%/yr to absorb
+        # snapshot drift on rebalance dates near month boundaries.
+        proposed_turnover = 104.0
+        status = "VERIFIED" if abs(json_turnover - proposed_turnover) <= 2.0 else "MISMATCH"
+        add("Table tx_sensitivity",
+            "8.63/VIX annual turnover (proposed body Notes)",
+            f"{proposed_turnover}%/yr",
+            "paper2_R1_transaction_tax_fix",
+            f"{json_turnover}%/yr",
+            status)
+        print(f"  Turnover (8.63/VIX): proposed={proposed_turnover}%/yr  "
+              f"JSON={json_turnover}%/yr  [{status}]")
+
+    # Row 2: Net Sharpe at paper canonical TX=0.186% (GJR VT — the headline VT spec)
+    gjr_canon = get_nested(tx_fix, "tx_sensitivity_sweep", "gjr_vt", "paper_canonical")
+    if gjr_canon:
+        json_sharpe = gjr_canon.get("sharpe")
+        # Body addition proposal Table tx_sensitivity GJR VT col TX=0.186% = 0.900
+        proposed_sharpe = 0.900
+        status = "VERIFIED" if abs(json_sharpe - proposed_sharpe) <= 0.01 else "MISMATCH"
+        add("Table tx_sensitivity",
+            "GJR VT net Sharpe at TX=0.186% (proposed body cell)",
+            f"{proposed_sharpe:.3f}",
+            "paper2_R1_transaction_tax_fix",
+            f"{json_sharpe:.4f}",
+            status)
+        print(f"  GJR VT @ TX=0.186%: proposed={proposed_sharpe:.3f}  "
+              f"JSON={json_sharpe:.4f}  [{status}]")
+else:
+    print("  paper2_R1_transaction_tax_fix/results.json not found; SKIPPED")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 #  FINAL REPORT
 # ═══════════════════════════════════════════════════════════════════════════════
 
