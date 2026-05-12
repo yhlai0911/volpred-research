@@ -49,5 +49,8 @@ PHASE B — 派新工：
 echo "=== hourly-dispatch end $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
 
 # 通知用戶 — 解決「系統有跑但看不到 = 等於沒跑」的信任問題
-LATEST_COMMIT=$(/usr/bin/git -C /Users/yhlai0911/Desktop/volpred-research log -1 --pretty=format:'%h %s' 2>&1 | head -c 100)
-/usr/bin/osascript -e "display notification \"$LATEST_COMMIT\" with title \"volpred hourly-dispatch $(date '+%H:%M')\" sound name \"Pop\"" 2>/dev/null || true
+LATEST_COMMIT=$(/usr/bin/git -C /Users/yhlai0911/Desktop/volpred-research log -1 --pretty=format:'%h %s' 2>&1 | head -c 100 | tr -d '"\\')
+NOW=$(date '+%H:%M')
+/usr/bin/osascript <<OSAEND 2>/dev/null || true
+display notification "${LATEST_COMMIT}" with title "volpred hourly-dispatch ${NOW}" sound name "Pop"
+OSAEND
