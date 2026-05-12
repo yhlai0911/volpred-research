@@ -1,0 +1,343 @@
+{
+  "experiment_id": "K1309",
+  "title": "HAR-PD (Path-Dependent HAR) vs HAR-RV on TX1 + SPY/QQQ/GLD",
+  "arxiv_source": "arXiv:2503.00851v2 \u2014 Liu/Fu/Hong (2025) 'Forecasting realized volatility in the stock market: a path-dependent perspective'",
+  "date_run": "2026-05-12 11:27:22",
+  "seed": 42,
+  "methodology": {
+    "path_features": {
+      "r_tilde_def": "r\u0303_{t-i} = (S_{t-1} - S_{t-1-i}) / S_{t-1-i}  (daily-level signed return)",
+      "kernel": "K_lambda(tau) = lambda * exp(-lambda * tau), tau = 1..N (days)",
+      "R1_def": "trend feature: R1 = sum_i K_lambda(i) * r\u0303_{t-i}",
+      "R2_def": "path-vol feature: R2 = sum_i K_lambda(i) * r\u0303_{t-i}^2",
+      "lambdas": {
+        "d_fast": 4.0,
+        "w_med": 1.0,
+        "m_slow": 0.25
+      },
+      "max_lag_days": 22,
+      "weight_normalization": "weights normalized to sum=1 within each \u03bb band"
+    },
+    "har_rv_features": [
+      "log RV_{t-1}",
+      "log mean RV_{[t-5,t-1]}",
+      "log mean RV_{[t-22,t-1]}"
+    ],
+    "har_pd_features": [
+      "log R2_{d,t-1}",
+      "log R2_{w,t-1}",
+      "log R2_{m,t-1}"
+    ],
+    "primary_spec_note": "Paper eq. 11 (HAR-PD-RV) uses R2 only at 3 horizons; R1 reserved for HAR-PD-RS/CJ extensions.",
+    "target": "log(RV_{t+1})",
+    "split": "70/30 chronological",
+    "test": "DM-HLN h=1 on squared errors + 500x bootstrap CI on MSE diff (seed=42)",
+    "pass_rule": "sample_trust=TRUSTED AND |DM_HLN_t|>3 AND HAR-PD lower MSE AND bootstrap 95% CI excludes 0",
+    "sample_trust_rule": "n_train >= 30 * (n_params=4) = 120 \u2192 TRUSTED, else UNTRUSTWORTHY",
+    "lookahead_guard": "close series .shift(1)'d before constructing r\u0303; HAR-RV .shift(1)+rolling on lagged RV; target via .shift(-1) on RV only"
+  },
+  "arxiv_extracted_path_feature_summary": "Paper eq. 4: R1,t := sum_{i<t} K_lambda1(t-i) * r\u0303_{t-i}, with r\u0303_{t-i} = (S_t - S_{t-i})/S_{t-i}. Paper eq. 5: R2,t := sum_{i<t} K_lambda2(t-i) * r\u0303_{t-i}^2. Paper eq. 11 (HAR-PD-RV, primary): RV_t = \u03b20 + \u03b21\u00b7R2_{t-1,d} + \u03b22\u00b7R2_{t-1,w} + \u03b23\u00b7R2_{t-1,m} + \u03b5. Kernel K_lambda(\u03c4) = \u03bb\u00b7exp(-\u03bb\u03c4). \u03bb values estimated via non-linear LS in paper Table 1 (intraday Chinese stock data). We use fixed \u03bb=(4.0, 1.0, 0.25) at daily frequency to match HAR's 1d/5d/22d effective memory and ensure apples-to-apples comparison.",
+  "data_sources": {
+    "TX1": "TAIFEX tick CSV 2017-05-16..2026-05-08, day session 08:45-13:45, 5-min bars, daily close = last 5-min bar close",
+    "SPY": "yfinance 5m, last 60d cap, regular session 09:30-16:00 ET, daily close = last 5-min bar close",
+    "QQQ": "yfinance 5m, last 60d cap, regular session 09:30-16:00 ET",
+    "GLD": "yfinance 5m, last 60d cap, regular session 09:30-16:00 ET"
+  },
+  "results": {
+    "TX1": {
+      "asset": "TX1",
+      "n_daily_rows": 2186,
+      "n_har_rows": 2162,
+      "n_train": 1513,
+      "n_test": 649,
+      "n_params": 4,
+      "trust_threshold_n_train": 120,
+      "sample_trust_flag": "TRUSTED",
+      "date_range": [
+        "2017-06-19 00:00:00",
+        "2026-05-07 00:00:00"
+      ],
+      "har_rv": {
+        "beta": {
+          "intercept": -1.757216839479502,
+          "rv_d": 0.23966728077800253,
+          "rv_w": 0.42306339069932536,
+          "rv_m": 0.17255230899484766
+        },
+        "mse_oos": 1.4711834021441377,
+        "mae_oos": 0.4891707522026301,
+        "r2_is": 0.5171167796499048,
+        "r2_oos": 0.04305550429351401
+      },
+      "har_pd": {
+        "beta": {
+          "intercept": -6.998312023811055,
+          "R2_d": 0.01646855242102219,
+          "R2_w": 0.09379055640379909,
+          "R2_m": 0.27576858928918546
+        },
+        "mse_oos": 1.5023348342634653,
+        "mae_oos": 0.5774007366891954,
+        "r2_is": 0.27762003714506267,
+        "r2_oos": 0.02279277467291163,
+        "lambdas": [
+          4.0,
+          1.0,
+          0.25
+        ],
+        "max_lag": 22
+      },
+      "dm_hln": {
+        "loss": "squared_error",
+        "h": 1,
+        "t_stat": -0.34634730484756665,
+        "p_value": 0.7291941505517503,
+        "interpretation_sign": "positive => HAR-RV worse => HAR-PD preferred",
+        "harvey_threshold": 3.0
+      },
+      "bootstrap": {
+        "n_boot": 500,
+        "seed": 42,
+        "mse_diff_point_har_minus_pd": -0.031151432119327582,
+        "mse_diff_ci95": [
+          -0.1749931072850865,
+          0.17194983474378042
+        ],
+        "ci_excludes_zero": false
+      },
+      "verdict": "NULL",
+      "verdict_components": {
+        "pass_3sigma": false,
+        "pd_lower_mse": false,
+        "bootstrap_ci_excludes_zero": false,
+        "sample_trust_flag": "TRUSTED"
+      }
+    },
+    "SPY": {
+      "asset": "SPY",
+      "n_daily_rows": 60,
+      "n_har_rows": 36,
+      "n_train": 25,
+      "n_test": 11,
+      "n_params": 4,
+      "trust_threshold_n_train": 120,
+      "sample_trust_flag": "UNTRUSTWORTHY",
+      "date_range": [
+        "2026-03-19 00:00:00",
+        "2026-05-08 00:00:00"
+      ],
+      "har_rv": {
+        "beta": {
+          "intercept": -13.324100634680773,
+          "rv_d": 0.782605058805184,
+          "rv_w": 0.2286210002109972,
+          "rv_m": -1.3759837572032165
+        },
+        "mse_oos": 1.3319168333646056,
+        "mae_oos": 0.898902891134129,
+        "r2_is": 0.5553323575517572,
+        "r2_oos": -6.180886325398228
+      },
+      "har_pd": {
+        "beta": {
+          "intercept": -12.499238142772588,
+          "R2_d": 0.10009908668206119,
+          "R2_w": 0.19376449124693196,
+          "R2_m": -0.6991020839403056
+        },
+        "mse_oos": 1.0762800814305227,
+        "mae_oos": 0.8972835079244225,
+        "r2_is": 0.4757507049315304,
+        "r2_oos": -4.802648277610027,
+        "lambdas": [
+          4.0,
+          1.0,
+          0.25
+        ],
+        "max_lag": 22
+      },
+      "dm_hln": {
+        "loss": "squared_error",
+        "h": 1,
+        "t_stat": 0.7616820488025152,
+        "p_value": 0.4638344813760522,
+        "interpretation_sign": "positive => HAR-RV worse => HAR-PD preferred",
+        "harvey_threshold": 3.0
+      },
+      "bootstrap": {
+        "n_boot": 500,
+        "seed": 42,
+        "mse_diff_point_har_minus_pd": 0.255636751934083,
+        "mse_diff_ci95": [
+          -0.30398973043852084,
+          0.9724839009377931
+        ],
+        "ci_excludes_zero": false
+      },
+      "verdict": "UNTRUSTWORTHY",
+      "verdict_components": {
+        "pass_3sigma": false,
+        "pd_lower_mse": true,
+        "bootstrap_ci_excludes_zero": false,
+        "sample_trust_flag": "UNTRUSTWORTHY"
+      }
+    },
+    "QQQ": {
+      "asset": "QQQ",
+      "n_daily_rows": 60,
+      "n_har_rows": 36,
+      "n_train": 25,
+      "n_test": 11,
+      "n_params": 4,
+      "trust_threshold_n_train": 120,
+      "sample_trust_flag": "UNTRUSTWORTHY",
+      "date_range": [
+        "2026-03-19 00:00:00",
+        "2026-05-08 00:00:00"
+      ],
+      "har_rv": {
+        "beta": {
+          "intercept": 7.751268020114291,
+          "rv_d": 0.727865340613944,
+          "rv_w": -0.4598288995962539,
+          "rv_m": 1.5855224783019901
+        },
+        "mse_oos": 0.5696141384024096,
+        "mae_oos": 0.5713505851086939,
+        "r2_is": 0.45810735352135934,
+        "r2_oos": -2.258546785603464
+      },
+      "har_pd": {
+        "beta": {
+          "intercept": -10.918232601991404,
+          "R2_d": 0.0684747365915703,
+          "R2_w": 0.11269170690339954,
+          "R2_m": -0.4131602981895398
+        },
+        "mse_oos": 0.2611214322775599,
+        "mae_oos": 0.35934107713873187,
+        "r2_is": 0.3541041998740667,
+        "r2_oos": -0.49377683318510845,
+        "lambdas": [
+          4.0,
+          1.0,
+          0.25
+        ],
+        "max_lag": 22
+      },
+      "dm_hln": {
+        "loss": "squared_error",
+        "h": 1,
+        "t_stat": 1.0028556151198689,
+        "p_value": 0.3395793601110444,
+        "interpretation_sign": "positive => HAR-RV worse => HAR-PD preferred",
+        "harvey_threshold": 3.0
+      },
+      "bootstrap": {
+        "n_boot": 500,
+        "seed": 42,
+        "mse_diff_point_har_minus_pd": 0.3084927061248497,
+        "mse_diff_ci95": [
+          -0.18842989971393043,
+          0.9659398158853181
+        ],
+        "ci_excludes_zero": false
+      },
+      "verdict": "UNTRUSTWORTHY",
+      "verdict_components": {
+        "pass_3sigma": false,
+        "pd_lower_mse": true,
+        "bootstrap_ci_excludes_zero": false,
+        "sample_trust_flag": "UNTRUSTWORTHY"
+      }
+    },
+    "GLD": {
+      "asset": "GLD",
+      "n_daily_rows": 60,
+      "n_har_rows": 36,
+      "n_train": 25,
+      "n_test": 11,
+      "n_params": 4,
+      "trust_threshold_n_train": 120,
+      "sample_trust_flag": "UNTRUSTWORTHY",
+      "date_range": [
+        "2026-03-19 00:00:00",
+        "2026-05-08 00:00:00"
+      ],
+      "har_rv": {
+        "beta": {
+          "intercept": -24.3324581850996,
+          "rv_d": 0.5121681066499335,
+          "rv_w": 0.23741352682956338,
+          "rv_m": -2.4952375477225064
+        },
+        "mse_oos": 3.6135125159578494,
+        "mae_oos": 1.7461443411260127,
+        "r2_is": 0.6443273691815934,
+        "r2_oos": -14.56996301226376
+      },
+      "har_pd": {
+        "beta": {
+          "intercept": -5.38675476086837,
+          "R2_d": 0.05803957462925114,
+          "R2_w": 0.20933092147644203,
+          "R2_m": 0.261886944778158
+        },
+        "mse_oos": 0.48869231847932576,
+        "mae_oos": 0.6102122660352677,
+        "r2_is": 0.6481377086593313,
+        "r2_oos": -1.1056856146196559,
+        "lambdas": [
+          4.0,
+          1.0,
+          0.25
+        ],
+        "max_lag": 22
+      },
+      "dm_hln": {
+        "loss": "squared_error",
+        "h": 1,
+        "t_stat": 3.7536241896174376,
+        "p_value": 0.0037613471358304285,
+        "interpretation_sign": "positive => HAR-RV worse => HAR-PD preferred",
+        "harvey_threshold": 3.0
+      },
+      "bootstrap": {
+        "n_boot": 500,
+        "seed": 42,
+        "mse_diff_point_har_minus_pd": 3.1248201974785235,
+        "mse_diff_ci95": [
+          1.5997896553587923,
+          4.766520604278652
+        ],
+        "ci_excludes_zero": true
+      },
+      "verdict": "UNTRUSTWORTHY",
+      "verdict_components": {
+        "pass_3sigma": true,
+        "pd_lower_mse": true,
+        "bootstrap_ci_excludes_zero": true,
+        "sample_trust_flag": "UNTRUSTWORTHY"
+      }
+    }
+  },
+  "verdict_lines": [
+    "TX1: DM_HLN_t=-0.346  p=0.7292  MSE_RV=1.4712  MSE_PD=1.5023  n_train=1513  trust=TRUSTED  verdict=NULL",
+    "SPY: DM_HLN_t=0.762  p=0.4638  MSE_RV=1.3319  MSE_PD=1.0763  n_train=25  trust=UNTRUSTWORTHY  verdict=UNTRUSTWORTHY",
+    "QQQ: DM_HLN_t=1.003  p=0.3396  MSE_RV=0.5696  MSE_PD=0.2611  n_train=25  trust=UNTRUSTWORTHY  verdict=UNTRUSTWORTHY",
+    "GLD: DM_HLN_t=3.754  p=0.0038  MSE_RV=3.6135  MSE_PD=0.4887  n_train=25  trust=UNTRUSTWORTHY  verdict=UNTRUSTWORTHY"
+  ],
+  "overall_verdict": "NULL",
+  "h1_tx1_pass": false,
+  "h2_trusted_passes": [],
+  "h2_trusted_pass_count": 0,
+  "trusted_nulls": [
+    "TX1"
+  ],
+  "untrusted_assets": [
+    "SPY",
+    "QQQ",
+    "GLD"
+  ],
+  "interpretation": "H1 (TX1 primary, n_train=1513, trust=TRUSTED): DM_HLN=-0.346, verdict=NULL. H2 trusted PASS = 0/4. Untrusted (n_train < 120 sample-size guard): ['SPY', 'QQQ', 'GLD']. Joins K1301 (HAR-RS NULL) / K1303 (HAR-CJ NULL) / K868 (Day-Night NULL) \u2014 4th HAR-family decomposition / encoding that fails to beat plain HAR-RV on TX1. Suggests on this TAIFEX 5-min/daily dataset, magnitude-pooled HAR-RV is forecast-sufficient; neither sign decomp, jump decomp, session decomp, nor path-dependent kernel encoding adds marginal info."
+}
