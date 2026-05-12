@@ -5611,5 +5611,40 @@
     "derived_tasks": [
       "future: Polygon/IEX US 5-min long sample to retest H2 (>=1 year)"
     ]
+  },
+  {
+    "timestamp": "2026-05-12T13:16:01.361831Z",
+    "task_type": "paper_body",
+    "task_id": "taiwan-vt-H2-k892-gamma",
+    "description": "taiwan-vt body_v2.tex: integrate K892 canonical gamma values — TSMC now significant, amplification 1.8x",
+    "status": "completed",
+    "commit": "b5a1c0dc"
+  },
+  {
+    "timestamp": "2026-05-12T14:20:06Z",
+    "task_type": "paper_review",
+    "task_id": "taiwan-vt-R4-review",
+    "description": "taiwan-vt R4 review: confirmed SEVERE=0, found N1/N2/N3 HIGH issues, fixed all in eb9ef353",
+    "status": "completed",
+    "commit": "eb9ef353",
+    "paper": "taiwan-vt",
+    "result": "HIGH=0 MEDIUM=5 MINOR=6; Table 5 replaced with K900 canonical values; conclusion stale numbers fixed; platform synced"
+  },
+  {
+    "timestamp": "2026-05-12T15:12:38Z",
+    "task_type": "daily_article",
+    "task_id": "K868_K1301_K1303_K1309_article_general",
+    "agent_id": "har-article-writer",
+    "status": "completed",
+    "note": "HAR decomposition NULL synthesis article — 4 orthogonal decompositions (Day/Night, RS, CJ, PD) all fail Harvey gate on TX1. Draft target: storage/drafts/k868_k1301_k1303_k1309_har_null_synthesis_draft.md",
+    "completed_at": "2026-05-12T15:27:43Z",
+    "article_id": "mile_379b51cc"
+  },
+  {
+    "task_type": "experiment",
+    "title": "K1315: Forecast Combination — Anti-QLIKE ensemble HAR-ABS+HAR-VIX (SPY)",
+    "timestamp": "2026-05-12T16:53:09.302264+00:00",
+    "verdict": "PASS_NULL",
+    "notes": "VIX sufficient statistic confirmed. No combo beats HAR-VIX Harvey 3sig. Anti-QLIKE weights converge to HAR-VIX=1.0."
   }
 ]
