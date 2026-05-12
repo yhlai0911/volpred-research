@@ -64,14 +64,19 @@ Same as P9: yfinance retroactive adjustments. K903/K904 snapshot rerun (Codex `t
 2. reproduce.py snapshot-first path integrated.
 3. Sub6 Table 6 NFP section fixed with (a) 修論文 approach (p=0.037 → 0.061, etc.).
 
-## Decision pending (main thread next session)
+## Path B Implemented (2026-05-13)
 
-Options for T10 2020-2026 sign flip:
-- **Path A**: Pull historical yfinance archive (if available) to reproduce paper's original values — research-honest restoration of original claim.
-- **Path B**: Accept current snapshot as canonical, revise body + "absorption all periods" claim to crisis-era caveat.
-- **Path C**: Dual-report both values with errata acknowledgement.
+**main_v3.tex created** with Path B changes:
+- Line 67 (intro): Added footnote disclosing snapshot sensitivity of baseline t-stat (-3.42 → -1.77)
+- Lines 538-563 (threshold table): Updated all τ rows to K903 snapshot values; τ=1.0 sign flip disclosed; text softened from "significant for all thresholds" to "directionally negative for τ≥1.5"
+- Lines 567-588 (sub-period text + table): Complete rewrite disclosing 2020-2026 sign reversal and insignificance of 2013-2019; table updated to K903 values (316/182/270 N, new β/t)
+- Line 597 (RV normalization): Updated to K903 values (β=-0.01249, t=-8.2) — stronger result
+- Line 606 (controlled regression): Updated to K903 values (β=-0.000216, t=-1.26) with Harvey-boundary footnote
+- Lines 618, 633 (conclusion/limitations): Softened sub-period stability claim; added snapshot caveat
 
-**Recommendation**: Path B (research-honest) — yfinance archive is not a reliable time-travel source, and acknowledging the 2020-2026 regime-dependence strengthens the paper (shows the author rigorously re-checks under current data). Path C is fall-back if reviewer insists on original values.
+**Outstanding (next session)**:
+- Cross-asset table (lines 801-804): GLD/TLT/0050.TW snapshot rerun needed (K903 only covers SPY)
+- paper-update sync: `uv run volpred ops paper-update --paper-id volatility-absorption`
 
 ## Cross-reference
 
