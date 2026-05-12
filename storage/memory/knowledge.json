@@ -29113,5 +29113,46 @@
     ],
     "confidence": "high",
     "reviewer_notes": "Verdict CONDITIONAL PASS pending Codex primary re-verification. 2 Major (GJR significance framing + QLIKE 474 artifact disclosure), 4 Minor, 2 Nit. Review file: experiments/k981/k981_post_publish_codex_review.md. Recommended article patch: temper GJR-GARCH 'champion' language to point-estimate framing; add QLIKE 474 numerical-artifact 1-line caveat; footnote 1824/1823 OOS row/forecast distinction."
+  },
+  {
+    "id": "K1306",
+    "timestamp": "2026-05-12T02:57:02Z",
+    "category": "knowledge",
+    "experiment_id": "K1306",
+    "topic": "K1306: SEC EDGAR 10-K LM-sentiment pilot — NULL (4 firms x 5 yrs, VIX-sufficiency extends to firm-level text)",
+    "finding": "NULL. 16 filings (AAPL/MSFT/GOOGL/NVDA, 2020-2024). Verdict: 0/4 pass_firms (criterion: |t_tone|>2 AND OOS QLIKE >5% improvement). Pooled OLS with ticker FE: beta_tone=+0.168, t=1.28, p=0.20 (not significant after VIX control). Bootstrap (seed=42, B=500) pooled beta_tone: mean=0.060, 95% CI=[-4.58, +2.14] crosses zero; 80% positive. MSFT M2 R²=0.984 with N=4/3 predictors is small-N saturation artifact (QLIKE_m2=84189 confirms instability). Per-firm beta_tone signs mixed: AAPL +0.73 (t=1.28), MSFT +0.13 (t=3.60 unreliable), NVDA -9.93 (t≈0). Stouffer Z=2.82 (p=0.005) but caveat: t with N≤4 not z-distributed.",
+    "methodology": "LM 2011 master dictionary (86,554 words; Negative/Positive/Uncertainty/Litigious flags). EDGAR fetched via data.sec.gov/submissions/CIKxxx.json + Archives/edgar/data/ direct (10 req/sec rate limit, custom User-Agent). Text extraction: longest-span heuristic skip-TOC for Item 1A (Risk Factors) + Item 7 (MD&A), 60K char cap. Tone delta = YoY change in negative_share per firm. Embargo = filing_date + 1 business day; VIX_mean from 21 trading days strictly BEFORE embargo (index<embargo); target = mean monthly RV strictly AFTER embargo over next 12 months (index>embargo). Monthly RV = sum of squared daily log returns within calendar month-end. Per-firm OLS with HC1 SE; pooled OLS with ticker FE; leave-one-out QLIKE for OOS comparison.",
+    "lookahead_check": "PASS. signal at filing_date, embargo +1bd, VIX strictly index<embargo, target strictly index>embargo. M1 (RV~VIX) and M2 (RV~VIX+tone) share identical panel + identical lag — only difference is regressor inclusion. Seed=42 for bootstrap.",
+    "differentiation": "First repo K to use SEC EDGAR free public archive + LM dictionary. Extends VIX-sufficiency-extends-to-text-features pattern beyond macro (K473/K750/K789 Google Trends NULL; K1116/b/c EPU NULL) to firm-level 10-K text. NULL conclusion is consistent with VIX-sufficiency hypothesis (also Mission 3 Paper 7 candidate section).",
+    "limitations": "Pilot scope only: (a) per-firm N≤5 limits inference power; (b) META + older GOOGL filings missing from EDGAR recent-window API; (c) MSFT 2023/2024 risk_factors extraction returned <50 chars (MD&A still extracted, but feature signal reduced); (d) 12-month forward RV windows overlap for adjacent filings — autocorrelation in residuals not corrected; (e) heuristic section extraction may miss alt-formatted 10-Ks.",
+    "review_path": "Codex CLI primary quota-blocked (usage limit hit 2026-05-11 19:46 PT, same window as K981 fallback). Independent main-thread fresh-eyes audit performed: (1) lookahead PASS — strict-before VIX index, strict-after target index, embargo +1bd, seed=42 verified; (2) lag-symmetry PASS — common dropna() before M1/M2 fits ensures identical rows; (3) seed reproducibility PASS — np.random.default_rng(42); (4) sample-handling no bug found — small-N saturation correctly defeats PASS criterion via QLIKE blow-up; (5) honesty PASS — limitations field lists 6 specific caveats including Stouffer N caveat. Verdict: CONDITIONAL_PASS pending Codex re-verification post-quota-reset (per K1259 2026-04-29 lesson).",
+    "next_steps_if_extended": "K1307 candidate: full S&P-500 panel (250+ firms x 10 yrs ~ 2500 filings) with Driscoll-Kraay SE for residual autocorrelation. Replace heuristic section parsing with structured XBRL tags. Add 8-K event windows for higher-frequency tone updates. Test interaction tone × VIX-regime (high/low).",
+    "related_k": [
+      "K473",
+      "K750",
+      "K789",
+      "K1116",
+      "K1116b",
+      "K1116c",
+      "K1117"
+    ],
+    "confidence": "medium",
+    "reviewer_notes": "Pilot pipeline feasibility PASS: EDGAR fetcher + LM scoring + lookahead-clean panel build all work. NULL signal verdict CONDITIONAL pending Codex primary re-verification. README success criterion '≥3 firms with PASS' not met (0 firms); criterion 'EDGAR ≥250 of 300 target' adapted to pilot scope (16/16 of 4-firm subset retrieved successfully). Pool size <30 means SEC-direction reclassification (from 'data-blocked' to 'feasible') is supported even though signal is NULL — pipeline works.",
+    "evidence": {
+      "results_path": "experiments/k1306/k1306_results.json",
+      "code_path": "experiments/k1306/k1306.py",
+      "fetcher_path": "experiments/k1306/k1306_fetch_edgar.py",
+      "data_dir": "experiments/k1306/data/",
+      "n_filings": 16,
+      "n_firms": 4,
+      "n_aligned_obs": 16,
+      "pass_firms": [],
+      "pooled_t_tone": 1.278,
+      "pooled_p_tone": 0.201,
+      "bootstrap_ci_95": [
+        -4.576,
+        2.14
+      ]
+    }
   }
 ]

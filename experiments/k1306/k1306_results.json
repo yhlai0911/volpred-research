@@ -1,0 +1,158 @@
+{
+  "experiment_id": "K1306",
+  "title": "SEC EDGAR 10-K LM-sentiment pilot",
+  "verdict": "NULL",
+  "verdict_rule": "PASS if >=3 firms have |t_tone|>2 AND OOS QLIKE improvement >5%",
+  "seed": 42,
+  "n_boot": 500,
+  "n_filings": 16,
+  "n_firms": 4,
+  "n_aligned_obs": 16,
+  "pass_firms": [],
+  "tickers": [
+    "AAPL",
+    "GOOGL",
+    "MSFT",
+    "NVDA"
+  ],
+  "filing_years": [
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "ols": {
+    "per_firm": {
+      "AAPL": {
+        "n_obs": 4,
+        "m1_r2": 0.17755523415601793,
+        "m2_r2": 0.6021288316168179,
+        "m1_adj_r2": -0.23366714876597316,
+        "m2_adj_r2": -0.19361350514954645,
+        "beta_vix": -0.0002561681963863027,
+        "beta_tone": 0.7338040341291125,
+        "t_tone": 1.2803891629445099,
+        "p_tone": 0.20040830338774362,
+        "qlike_m1": 0.13772359167011095,
+        "qlike_m2": 0.44832251003114376,
+        "qlike_improvement_pct": -225.52339406382157
+      },
+      "GOOGL": {
+        "n_obs": 1,
+        "skipped": "n<3"
+      },
+      "MSFT": {
+        "n_obs": 4,
+        "m1_r2": 0.8284401239371809,
+        "m2_r2": 0.9840347178302346,
+        "m1_adj_r2": 0.7426601859057713,
+        "m2_adj_r2": 0.9521041534907037,
+        "beta_vix": 0.00029066033896420424,
+        "beta_tone": 0.129915902638346,
+        "t_tone": 3.599095572162428,
+        "p_tone": 0.00031932582630608846,
+        "qlike_m1": 0.053935487276386695,
+        "qlike_m2": 84189.34731748211,
+        "qlike_improvement_pct": -156092579.54892612
+      },
+      "NVDA": {
+        "n_obs": 3,
+        "m1_r2": 0.276848487072732,
+        "m2_r2": 1.0,
+        "m1_adj_r2": -0.44630302585453596,
+        "m2_adj_r2": NaN,
+        "beta_vix": 0.0024381496343111103,
+        "beta_tone": -9.93316497256542,
+        "t_tone": -0.0,
+        "p_tone": 1.0,
+        "qlike_m1": 29.56781325725552,
+        "qlike_m2": 29.47194786943086,
+        "qlike_improvement_pct": 0.3242221093273963
+      }
+    },
+    "pooled": {
+      "n_obs": 11,
+      "m1_r2": 0.8536373836434663,
+      "m2_r2": 0.858513154710197,
+      "beta_tone": 0.167607179616429,
+      "t_tone": 1.278380050005599,
+      "p_tone": 0.20111545483108695
+    },
+    "stouffer": {
+      "n_firms": 3,
+      "combined_z": 2.8171718253206603,
+      "p_value_two_sided": 0.004844859865903661,
+      "caveat": "t-stats treated as z; valid only for N>=30 per firm — small-sample pilot"
+    }
+  },
+  "bootstrap_pooled_beta_tone": {
+    "n_boot": 500,
+    "mean": 0.060430643085429156,
+    "ci_2_5": -4.575972694239203,
+    "ci_97_5": 2.1402353382119195,
+    "frac_positive": 0.8
+  },
+  "panel_summary": {
+    "vix_mean_lag": {
+      "count": 16.0,
+      "mean": 20.9552083554722,
+      "std": 6.012130170215196,
+      "min": 13.395238149733771,
+      "25%": 16.71142872174581,
+      "50%": 19.76642858414423,
+      "75%": 25.770952406383696,
+      "max": 30.27904782976423
+    },
+    "tone_delta_neg": {
+      "count": 12.0,
+      "mean": -0.0009112358533662099,
+      "std": 0.00523814337496279,
+      "min": -0.01628807163448004,
+      "25%": -0.0012484692278110733,
+      "50%": -0.00043496774831083135,
+      "75%": 0.0014797693610501556,
+      "max": 0.004609252598795736
+    },
+    "rv_fwd_12m": {
+      "count": 16.0,
+      "mean": 0.010796724093093716,
+      "std": 0.008776557053212813,
+      "min": 0.003367710756273784,
+      "25%": 0.0053262515794955745,
+      "50%": 0.007259920574185685,
+      "75%": 0.011381303245386028,
+      "max": 0.03333289637291265
+    }
+  },
+  "lookahead_check": {
+    "embargo_business_days": 1,
+    "vix_mean_window": "21 trading days strictly BEFORE embargo_date",
+    "target_window": "next 12 monthly RV strictly AFTER embargo_date",
+    "baseline_lag_match": true,
+    "challenger_lag_match": true
+  },
+  "limitations": [
+    "Pilot sample only: 5 firms x 5 years, recent EDGAR-API window",
+    "META filings missing (CIK submissions API recent-window cutoff)",
+    "GOOGL 2020-2022 missing (Alphabet CIK reorg / API window)",
+    "MSFT 2023/2024 risk_factors extraction returned <50 chars (heuristic miss; MD&A still extracted)",
+    "Per-firm N <=5: t-stats unreliable as z-stats; Stouffer caveated",
+    "12-month forward RV window overlaps for adjacent filings — autocorrelation in residuals not corrected"
+  ],
+  "next_steps_if_PASS": [
+    "K1307: full S&P-500 panel with proper FE + Driscoll-Kraay SE",
+    "Replace heuristic section extraction with structured XBRL filings tags",
+    "Add 8-K event windows for higher-frequency tone updates"
+  ],
+  "data_files": {
+    "filings_index": "experiments/k1306/data/filings_index.json",
+    "lm_dictionary": "experiments/k1306/data/dict/LM_MasterDictionary.csv",
+    "raw_sections": "experiments/k1306/data/raw/"
+  },
+  "git_metadata": {
+    "code": "experiments/k1306/k1306.py",
+    "fetcher": "experiments/k1306/k1306_fetch_edgar.py",
+    "readme": "experiments/k1306/README.md"
+  }
+}
