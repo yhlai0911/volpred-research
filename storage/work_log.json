@@ -5565,5 +5565,37 @@
     "derived_tasks": [
       "task-k989-codex-review-primary-reverify"
     ]
+  },
+  {
+    "timestamp": "2026-05-11T01:36:47Z",
+    "task_type": "paper_body",
+    "task_id": "paper10_citation_check_scaffold",
+    "verdict": "documented",
+    "commit": "f955d5e0",
+    "note": "Paper 10 citation_check.md inventory: 24 unique cites grouped by topic cluster (spillover/Granger/QR/DY/OOS). VERIFY tags for citation-verifier sub-agent post-quota-reset. NotebookLM-RAG plan for 5 core cites."
+  },
+  {
+    "timestamp": "2026-05-11T02:13:27Z",
+    "task_type": "platform_ops",
+    "task_id": "fix_build_candidates_experiment_refs_dedup",
+    "verdict": "systemic_fix_applied",
+    "commit": "0d9f31a1",
+    "note": "K869 incident: mile_4ec7b75e covered K869 (2026-05-05 commit) but experiment_refs only listed K560 + build_publication_candidates only checked tags/title/content. 6-day false-uncovered state. Fix: extend k_covered_by_article to also check details.experiment_refs. Also patched mile_4ec7b75e to add K869 to refs. K869 now correctly covered. K1106 re-opened to pending (sync script false-success)."
+  },
+  {
+    "timestamp": "2026-05-11T02:16:47Z",
+    "task_type": "platform_ops",
+    "task_id": "fix_build_candidates_k_family_alias",
+    "verdict": "systemic_fix_applied",
+    "commit": "91c88dba",
+    "note": "K1106 incident: mile_334a3f26 had experiment_refs=K1106b but K1106 candidate did not match because sub-variant suffix broke equality. Fix: _k_id_family() strips trailing letters case-insensitively + apply family normalization. K1106 now correctly covered. Same root pattern as K869 incident this morning."
+  },
+  {
+    "timestamp": "2026-05-12T02:51:13Z",
+    "task_type": "event_article",
+    "task_id": "cpi_2026_05_12_t2_scenario_grid",
+    "verdict": "published",
+    "milestone_id": "mile_ae145f60",
+    "note": "US April CPI 2026-05-12 T-2 event article published immediately (status=published, force-duplicate justified: distinct event date vs K513/K925 historical articles). 2 charts uploaded to Supabase (scenario grid + K925 historical reaction). audience=general, 4331 chars, refs K925 K513. Time-sensitive until 20:30 CST tonight (CPI release). Mission objectives 1 (article quality) + 4 (web platform ops timing)."
   }
 ]
