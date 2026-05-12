@@ -29154,5 +29154,25 @@
         2.14
       ]
     }
+  },
+  {
+    "id": "K1303",
+    "experiment_id": "K1303",
+    "title": "K1303: HAR-CJ (BNS Jump-Decomposition) NULL on TAIFEX TX1 — Jump Component Does NOT Improve over HAR-RV",
+    "content": "[Claude main thread, 2026-05-12] K1303 tests Barndorff-Nielsen-Shephard (2004 JBES; ABD 2007 RFS) jump-decomposition: RV_t = CV_t + J_t where J_t = max(RV_t - BPV_t, 0), BPV = (pi/2)*(M/(M-1))*sum |r_k|*|r_{k-1}|. HAR-CJ (6 regressors: log CV_d/w/m + log1p J_d/w/m) vs HAR-RV (3 regressors) on TAIFEX TX1 day-session 5-min bars 2017-05-16 to 2026-05-08 (n=2186 daily, n_train=1514, n_test=649). Result (gateable primary): DM_HLN=-0.910, p=0.363, MSE_RV=1.4709, MSE_CJ=1.4890 (CJ worse); Harvey |t|>3 gate FAIL; H1 NULL. Mean jump share = 7.1% of RV; 40.9% of days have J=0 (BPV >= RV due to noise). HAR-CJ jump betas have inflated magnitudes (j_d=2224, j_w=4203, j_m=-8416) because log1p(J~1e-6) produces tiny features and OLS scales coefs to compensate (math correct, signal/noise poor). US ETFs (SPY/QQQ/GLD, n_test=12, NON-gateable): 60d yfinance cap forces n_train=25 vs 7 params; R^2_oos < -7 confirms OLS extrapolation pathology. SPY DM_HLN=3.33 is exploratory artifact NOT a true H2 PASS. Need Polygon/IEX 5-min for >=1-year US sample. Connection to prior K: NULL consistent with K1301 (HAR-RS semivariance NULL DM_HLN=1.29 same data) and K868 (Day/Night decomposition NULL). Three orthogonal RV decompositions (sign / session / continuous-jump) all fail to beat pooled HAR-RV on TAIFEX 5-min day session - suggests this dataset's structure is fully captured by aggregate RV at HAR-class lag windows. Codex review: primary path quota-blocked (ChatGPT usage limit until 19:46 CST); fallback in-thread self-audit CONDITIONAL_PASS (0 CRIT / 0 MAJOR / 3 MINOR descriptives) covering all 8 focus areas including lookahead/BPV formula/DM-HLN correction. Per K1259 fallback bar, stands at CONDITIONAL since (a) result is NULL not too-good, (b) self-audit covered focus checklist. Re-verification with Codex recommended at quota refresh.",
+    "tags": [
+      "HAR-CJ",
+      "BPV",
+      "Barndorff-Nielsen",
+      "jump-decomposition",
+      "TAIFEX",
+      "null_result",
+      "Mission2_research",
+      "K1301_consistent"
+    ],
+    "data_source": "TAIFEX TX1 tick (Dropbox 2017-2026, 2186 days), SPY/QQQ/GLD yfinance 5m 60d (non-gateable)",
+    "category": "knowledge",
+    "created_at": "2026-05-12T11:18:00+00:00",
+    "updated_at": "2026-05-12T11:18:00+00:00"
   }
 ]

@@ -5597,5 +5597,19 @@
     "verdict": "published",
     "milestone_id": "mile_ae145f60",
     "note": "US April CPI 2026-05-12 T-2 event article published immediately (status=published, force-duplicate justified: distinct event date vs K513/K925 historical articles). 2 charts uploaded to Supabase (scenario grid + K925 historical reaction). audience=general, 4331 chars, refs K925 K513. Time-sensitive until 20:30 CST tonight (CPI release). Mission objectives 1 (article quality) + 4 (web platform ops timing)."
+  },
+  {
+    "entry_id": "k1303_001",
+    "timestamp": "2026-05-12T11:20:00+08:00",
+    "task_type": "experiment",
+    "task_id": "K1303_har_cj_jump_component",
+    "agent": "main",
+    "skill_used": "autonomous-research",
+    "outcome": "completed_null",
+    "summary": "K1303 HAR-CJ vs HAR-RV: TX1 primary (n_test=649, gateable) DM_HLN=-0.910 NULL; US ETFs (SPY/QQQ/GLD, n_test=12) flagged non-gateable due to 60d yfinance cap + OLS pathology (R2_oos<-7). Consistent with K1301 (HAR-RS NULL) + K868 (Day/Night NULL): TAIFEX 5-min day session fully captured by pooled HAR-RV. Codex review quota-blocked, fallback in-thread self-audit CONDITIONAL_PASS. Knowledge.json entry written.",
+    "duration_min": 35,
+    "derived_tasks": [
+      "future: Polygon/IEX US 5-min long sample to retest H2 (>=1 year)"
+    ]
   }
 ]

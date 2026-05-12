@@ -7180,7 +7180,7 @@
     "title": "K1303: HAR-CJ jump-component vs HAR-RV — 4 assets × 5-min RV",
     "description": "First Barndorff-Nielsen-Shephard jump-decomposition test in this repo. SPY/QQQ/GLD/TX 5-min RV, BPV jump test, HAR-CJ vs HAR-RV DM-Harvey gate, regime-conditional asymmetry exploration. Builds on K1255 intraday infra. Brief: experiments/k1303/README.md. Mission: 2 (research) primary; 3 if PASS.",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "autonomous_backlog_gen",
     "tags": [
@@ -7190,7 +7190,10 @@
       "bpv",
       "barndorff-nielsen"
     ],
-    "created_at": "2026-05-12T02:50:12+00:00"
+    "created_at": "2026-05-12T02:50:12+00:00",
+    "completed_at": "2026-05-12T11:15:00+00:00",
+    "verdict": "NULL",
+    "verdict_notes": "TX1 DM_HLN=-0.910 NULL (gateable); SPY/QQQ/GLD non-gateable due to 60d yfinance cap"
   },
   {
     "id": "K1304_bma_taiwan_h1_decomposition",
