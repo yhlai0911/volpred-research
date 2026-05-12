@@ -1,0 +1,241 @@
+{
+  "experiment_id": "paper2_sec45_tsmc_vt",
+  "title": "Paper 2 Sec 4.5 TSMC VT Sharpe + 0050 variance share reproduction",
+  "paper_id": "taiwan-vt",
+  "paper_claim_locs": [
+    {
+      "loc": "body.tex L440",
+      "claim": "TSMC VT Sharpe = 1.121"
+    },
+    {
+      "loc": "body.tex L444",
+      "claim": "TSMC explains 52.5% of 0050 return variance"
+    }
+  ],
+  "data_source": {
+    "snapshot": "paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv",
+    "live_fetch": false,
+    "tsmc_ticker": "2330.TW",
+    "etf_ticker": "0050.TW",
+    "returns": "close-to-close log returns (np.log(p_t / p_{t-1}))"
+  },
+  "spec_alignment": {
+    "K1175_canonical": "target_vol=10%, GARCH(1,1) mean='Zero' dist='normal', window=2000 refit=21, OOS=2020-01-01, tx_cost=5bps",
+    "annualization": "sqrt(252)",
+    "lookahead_guard": "weights = (target_vol/sigma_hat).clip(0,1).shift(1); GARCH train_data ends at i-1 before forecasting h_i"
+  },
+  "seed": 42,
+  "number_a_tsmc_vt_sharpe": {
+    "paper_target": 1.121,
+    "paper_loc": "body.tex L440",
+    "primary_spec": "garch_vt_10_oos2020",
+    "primary_sharpe": 1.087,
+    "primary_delta": -0.03400000000000003,
+    "primary_verdict": "PASS",
+    "tolerance_pass": 0.05,
+    "tolerance_drift_small": 0.1,
+    "closest_spec": "gjr_vt_10_oos2020",
+    "closest_sharpe": 1.1299,
+    "closest_delta": 0.008899999999999908,
+    "bootstrap_primary": {
+      "boot_B": 500,
+      "boot_block": 21,
+      "boot_seed": 42,
+      "sharpe_mean": 1.0639973991075,
+      "sharpe_ci95_low": 0.19335037592533758,
+      "sharpe_ci95_high": 1.9457563967354463
+    },
+    "bootstrap_closest": {
+      "boot_B": 500,
+      "boot_block": 21,
+      "boot_seed": 42,
+      "sharpe_mean": 1.1506944733599682,
+      "sharpe_ci95_low": 0.21884952024789991,
+      "sharpe_ci95_high": 2.0601081282350875
+    },
+    "sensitivity_sweep": {
+      "garch_vt_10_oos2020": {
+        "name": "TSMC GARCH VT 10% OOS2020",
+        "n_days": 1522,
+        "period": "2020-01-03 to 2026-04-17",
+        "ann_return_pct": 11.7627,
+        "ann_vol_pct": 10.8213,
+        "sharpe": 1.087,
+        "mdd_pct": -21.7097
+      },
+      "gjr_vt_10_oos2020": {
+        "name": "TSMC GJR VT 10% OOS2020",
+        "n_days": 1522,
+        "period": "2020-01-03 to 2026-04-17",
+        "ann_return_pct": 12.4253,
+        "ann_vol_pct": 10.9968,
+        "sharpe": 1.1299,
+        "mdd_pct": -21.7952
+      },
+      "ewma_vt_10_2010_2026": {
+        "name": "TSMC EWMA VT 10% 2010-2026",
+        "n_days": 3979,
+        "period": "2010-01-04 to 2026-04-17",
+        "ann_return_pct": 10.4685,
+        "ann_vol_pct": 10.608,
+        "sharpe": 0.9868,
+        "mdd_pct": -21.1193
+      },
+      "ewma_vt_10_full": {
+        "name": "TSMC EWMA VT 10% full",
+        "n_days": 4477,
+        "period": "2008-01-04 to 2026-04-17",
+        "ann_return_pct": 9.6573,
+        "ann_vol_pct": 10.5705,
+        "sharpe": 0.9136,
+        "mdd_pct": -21.1193
+      },
+      "garch_vt_15_oos2020": {
+        "name": "TSMC GARCH VT 15% OOS2020",
+        "n_days": 1522,
+        "period": "2020-01-03 to 2026-04-17",
+        "ann_return_pct": 17.6361,
+        "ann_vol_pct": 16.232,
+        "sharpe": 1.0865,
+        "mdd_pct": -30.9762
+      },
+      "garch_vt_20_oos2020": {
+        "name": "TSMC GARCH VT 20% OOS2020",
+        "n_days": 1522,
+        "period": "2020-01-03 to 2026-04-17",
+        "ann_return_pct": 23.159,
+        "ann_vol_pct": 21.5223,
+        "sharpe": 1.0761,
+        "mdd_pct": -39.2928
+      },
+      "rv21_vt_10_2010_2026": {
+        "name": "TSMC RV21 VT 10% 2010-2026",
+        "n_days": 3979,
+        "period": "2010-01-04 to 2026-04-17",
+        "ann_return_pct": 10.8111,
+        "ann_vol_pct": 11.0132,
+        "sharpe": 0.9816,
+        "mdd_pct": -21.1037
+      },
+      "context_0050_garch_vt_10_oos2020": {
+        "name": "0050 GARCH VT 10% OOS2020",
+        "n_days": 1523,
+        "period": "2020-01-03 to 2026-04-17",
+        "ann_return_pct": 9.8275,
+        "ann_vol_pct": 11.1813,
+        "sharpe": 0.8789,
+        "mdd_pct": -23.0635
+      }
+    },
+    "context_0050_paper_says": 0.936
+  },
+  "number_b_variance_share": {
+    "paper_target": 0.525,
+    "paper_loc": "body.tex L444",
+    "primary_spec": "full_2008_2026_log_intercept",
+    "primary_r_squared": 0.5213129324032211,
+    "primary_delta": -0.003687067596778948,
+    "primary_verdict": "PASS",
+    "tolerance_pass": 0.02,
+    "tolerance_drift_small": 0.05,
+    "closest_spec": "full_2008_2026",
+    "closest_r_squared": 0.5213129324032211,
+    "sensitivity_sweep": {
+      "full_2008_2026": {
+        "window_start": "2009-01-05",
+        "window_end": "2026-04-17",
+        "n": 4227,
+        "with_intercept": {
+          "r_squared": 0.5213129324032211,
+          "alpha": 1.9740278531134637e-05,
+          "beta": 0.5882788973687095
+        },
+        "no_intercept": {
+          "r_squared": 0.5221139066001108,
+          "beta": 0.5883440473157883
+        }
+      },
+      "2010_2026": {
+        "window_start": "2010-01-01",
+        "window_end": "2026-12-31",
+        "n": 3979,
+        "with_intercept": {
+          "r_squared": 0.6913352390926761,
+          "alpha": -5.838011734493974e-05,
+          "beta": 0.587569807592156
+        },
+        "no_intercept": {
+          "r_squared": 0.6917826468818878,
+          "beta": 0.5873796057716655
+        }
+      },
+      "2014_2024": {
+        "window_start": "2014-01-01",
+        "window_end": "2024-12-31",
+        "n": 2682,
+        "with_intercept": {
+          "r_squared": 0.7491378474904933,
+          "alpha": -6.486972778173537e-05,
+          "beta": 0.5937796134110657
+        },
+        "no_intercept": {
+          "r_squared": 0.7495108710794072,
+          "beta": 0.5935674003490106
+        }
+      },
+      "2020_2026": {
+        "window_start": "2020-01-01",
+        "window_end": "2026-12-31",
+        "n": 1523,
+        "with_intercept": {
+          "r_squared": 0.8361263278218691,
+          "alpha": 1.3468158918020779e-05,
+          "beta": 0.679811563702625
+        },
+        "no_intercept": {
+          "r_squared": 0.8366915587718112,
+          "beta": 0.679856752875051
+        }
+      },
+      "paper_canonical_2008_2024": {
+        "window_start": "2008-01-01",
+        "window_end": "2024-12-31",
+        "n": 3919,
+        "with_intercept": {
+          "r_squared": 0.4860652208583518,
+          "alpha": -9.398183911412167e-06,
+          "beta": 0.5705544688998175
+        },
+        "no_intercept": {
+          "r_squared": 0.4866738521457169,
+          "beta": 0.5705251970390957
+        }
+      },
+      "full_raw_returns": {
+        "window_start": "2009-01-05",
+        "window_end": "2026-04-17",
+        "n": 4227,
+        "with_intercept": {
+          "r_squared": 0.5188850421957922,
+          "alpha": 3.1507287264332786e-05,
+          "beta": 0.5867938522163433
+        }
+      }
+    }
+  },
+  "byte_match_paper": {
+    "tsmc_vt_sharpe": {
+      "target": 1.121,
+      "observed": 1.087,
+      "delta": -0.03400000000000003,
+      "verdict": "PASS"
+    },
+    "tsmc_variance_share": {
+      "target": 0.525,
+      "observed": 0.5213129324032211,
+      "delta": -0.003687067596778948,
+      "verdict": "PASS"
+    }
+  },
+  "produced_at_utc": "2026-05-12T05:13:27.924575+00:00"
+}

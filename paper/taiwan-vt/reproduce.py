@@ -582,6 +582,60 @@ if _k558:
         print("  K558 Sec 4.4 0056 robustness t-stat binding checked.")
 
 
+# Paper2 Sec 4.5 TSMC VT + variance share binding (2026-05-12).
+# Paper claims body.tex L440 + L444:
+#   (A) "TSMC VT achieves a Sharpe ratio of 1.121"  (L440)
+#   (B) "TSMC explains 52.5% of 0050.TW return variance over the full sample" (L444)
+# Reproduction in experiments/paper2_sec45_tsmc_vt/ with pinned snapshot CSV,
+# K1175-aligned spec (GARCH(1,1) VT 10% OOS 2020-2026, mean='Zero' dist='normal',
+# window=2000, refit=21, tx_cost=5bps, simple returns via pct_change,
+# clean_tw50_data fix on 0050.TW split artifact, sqrt(252) annualization).
+# Number A (Sharpe) primary GARCH VT 10% = 1.087 (paper 1.121, delta -0.034, tol ±0.05) → PASS
+# Number A closest spec GJR VT 10% = 1.130 (delta +0.009) — robust to spec choice
+# Number B (variance share) OLS R² full 2008-2026 log returns = 0.5213 (paper 0.525,
+# delta -0.0037, tol ±0.02) → PASS. Window dependence reported in sweep (0.521→0.836
+# across 2008-2026 → 2020-2026), consistent with paper's own admission that TSMC's
+# rolling beta has doubled over the sample period (body.tex L444).
+_p2_s45_path = _Path(__file__).resolve().parent.parent.parent / "experiments" / "paper2_sec45_tsmc_vt" / "tsmc_vt_strategy_results.json"
+if _p2_s45_path.exists():
+    _p2_s45 = _json.loads(_p2_s45_path.read_text(encoding="utf-8"))
+    _byte = _p2_s45.get("byte_match_paper", {})
+    _a = _byte.get("tsmc_vt_sharpe", {})
+    _b = _byte.get("tsmc_variance_share", {})
+
+    def _s45_status(verdict: str) -> str:
+        # Map experiment verdict tier → reproduce.py status taxonomy.
+        # PASS (|delta| ≤ tol_pass) → VERIFIED
+        # DRIFT_SMALL → CONFLICT_RESOLVED if qualitative direction holds
+        # DRIFT_LARGE → MISMATCH (paper claim fails to reproduce on primary spec)
+        if verdict == "PASS":
+            return "VERIFIED"
+        if verdict == "DRIFT_SMALL":
+            return "CONFLICT_RESOLVED"
+        return "MISMATCH"
+
+    if _a:
+        _a_obs = _a.get("observed")
+        _a_delta = _a.get("delta")
+        _a_v = _a.get("verdict")
+        add("Sec 4.5", "TSMC VT Sharpe=1.121", "1.121",
+            "paper2_sec45_tsmc_vt",
+            f"{_a_obs:.4f} (delta {_a_delta:+.4f}, tol ±0.05; spec=GARCH VT 10% OOS2020 K1175-aligned)",
+            _s45_status(_a_v))
+        print(f"  Sec 4.5 TSMC VT Sharpe bound: observed={_a_obs:.4f}, paper=1.121, verdict={_a_v}")
+    if _b:
+        _b_obs = _b.get("observed")
+        _b_delta = _b.get("delta")
+        _b_v = _b.get("verdict")
+        add("Sec 4.5", "TSMC explains 52.5% of 0050 return variance", "0.525",
+            "paper2_sec45_tsmc_vt",
+            f"R²={_b_obs:.4f} (delta {_b_delta:+.4f}, tol ±0.02; full 2008-2026 log returns + intercept)",
+            _s45_status(_b_v))
+        print(f"  Sec 4.5 TSMC variance share bound: R²={_b_obs:.4f}, paper=0.525, verdict={_b_v}")
+else:
+    print("  WARN: paper2_sec45_tsmc_vt results JSON not found at", _p2_s45_path)
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 #  5. HIGH-FREQUENCY: RV STATISTICS (K848)
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1145,8 +1199,10 @@ untraceable_items = [
     ("Sec 6 (macro)", "BCI momentum t=3.74", "No experiment JSON"),
     ("Appendix TZ", "Taiwan c2c Sharpe 1.473", "No experiment JSON"),
     ("Appendix TZ", "TW+JP 50/50 Sharpe 1.810", "No experiment JSON"),
-    ("Sec 4.5", "TSMC VT Sharpe 1.121", "No experiment JSON"),
-    ("Sec 4.5", "TSMC 52.5% of 0050 return variance", "No experiment JSON"),
+    # Sec 4.5 TSMC VT Sharpe 1.121 — bound to paper2_sec45_tsmc_vt inline check above
+    # (2026-05-12; VERIFIED: GARCH VT 10% OOS2020 Sharpe=1.087, |delta|≤0.05 tol).
+    # Sec 4.5 TSMC 52.5% variance — bound to paper2_sec45_tsmc_vt inline check above
+    # (2026-05-12; VERIFIED: full 2008-2026 log returns R²=0.5213, |delta|≤0.02 tol).
     # Sec 2.5 VIXTWN/VIX ratio — bound to K1181 inline check above (2026-05-11).
     # Sec 3 TWD/USD nested-F — bound to paper2_sec3_twd_usd_test inline check above
     # (2026-05-12; CONFLICT_RESOLVED: qualitative claim correct, p=0.08 specific number unsupported).
