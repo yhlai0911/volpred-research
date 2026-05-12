@@ -48,7 +48,7 @@
 **Under-explored methodologies (novelty quota 候選，feed_ct=0 per topic_diversity_audit 2026-04-19 19:30 UTC)**:
 - [x] ~~Bayesian Model Averaging (BMA) for vol forecasting~~ → **K1257 完成 2026-04-20**：6-model pool × 3 assets × OOS 2020-2026。**H1 PARTIAL**（SPY/GLD Harvey PASS t=-3.40/-3.38, 0050.TW FAIL posterior→GJR-t），**H2 FAIL** no asset 過 equal-weight Harvey（確認 K482 equal-weight-puzzle 延伸到 Bayesian），**H3 FAIL** posterior 500 天內 concentrate 指數收斂→ standard BMA cannot forget/track regime。下步：forgetting-factor BMA 或 sliding-window posterior。**等候 Codex 04-24 code review 才 finalize knowledge.json 寫入**（CLAUDE.md §實驗後必做 L1）。
 - [x] ~~**Model Confidence Set (MCS) / SPA / Reality Check**~~ → **K1259 完成 2026-04-20，review-cycle 真正全結 2026-04-29**（Codex primary-path review v2 closure，1 day after 2026-04-28 subagent-fallback premature closure RETRACTED）：Phase 1 ledger **2718 DM rows** from 236 K / 16 assets（v1 −11 ttest/mcnemar + v2 −12 statistical_tests/stat_test/welch/vs_zero = 23 false-positives 全濾除；原 2741 → 2718 final）。NON_DM_PATH_TOKENS 9 tokens 包覆所有已知 non-DM patterns（Option A 擴展 blacklist；Option B positive DM gate `dm`/`harvey`/`hln` 拒絕 — 會誤刪 K1085/K1088 等 191 legit DM rows）。see `experiments/k1259/codex_review_v2.md` for full FAIL verdict +Phase 1.5 main-thread asset backfill 38%→78%（**已 scripted** as `apply_phase15_backfill.py` + `phase15_asset_map.json` 105 K_ids，two-step pipeline 完整可重現）；Phase 2 HLN-2011 Variant A (parametric bootstrap seed=42, B=1000) 18/20 runs (0050.TW MSE 空 — 全 K400-K1258 無 TW MSE DM rows = new gap)。**關鍵發現**：(a) **SPY QLIKE α=0.10 87/100 models survive**（post-audit；原 88，cosmetic "middle" 移除）— A4f family 全入 superior set (A4f-VIX9D-N/t, A4f_Local, A4f_N, A4f_VIX, A4f_t_2step, A4f_t_joint)，HAR/EWMA/GJR-t/MEM decisively eliminated；(b) **GLD MSE 窄 set {M2_GJR_t, M3_GAS_t, M4_HAR_RV_X}** — MSE 比 QLIKE discriminative 因 ledger 薄；(c) **α=0.10 vs 0.20 sets identical** everywhere（stopping-p ≥ 0.23）— marginal relaxation 無效；(d) **CF-Rolling 不在 ledger** — K500+ 敘事王者模型命名不一致錯過抽取（follow-up: 命名 canonicalization）；(e) Variant B (reconstructed per-day loss + stationary bootstrap) skipped — <20% per-day loss coverage。Commits: def4695b (Phase 1), efd370f4 (Phase 1.5), 5314dbd3 (Phase 2), 7c0013b6 (review entry), d4c2faf1 (MAJOR-3 docstring), 53c1d559 (MAJOR-1 backfill scripted), aff7b4a5 (MAJOR-2 generic-key filter), b1f85845 (knowledge refresh)。**Codex review fallback** (Codex CLI blocked → `feature-dev:code-reviewer` subagent per `.claude/rules/experiments.md`)：PASS-with-caveats (0 CRIT/0 SEV/3 MAJOR/2 MED/3 MINOR)；**v1 + v2 audit 全 5 finding closed**：MAJOR-1 v1 (Phase 1.5 backfill scripted + map) / MAJOR-1 v2 (NON_DM_PATH_TOKENS 9 tokens) / MAJOR-2 v1 + v2 (full-population audit) / MAJOR-3 (docstring) / MINOR (inline comment row count)。MED (phase15_asset_map K1128/K1130/K1131 TAIFEX TX with VIX as conditioning variable target-asset semantic ambiguity) 留 separate slot 處理 — orthogonal to extraction correctness。Knowledge entry `c4db347a` confidence **0.88 → 0.75 (retracted v1) → 0.90 (v2 closure verified)** finalized — Codex primary-path 二次驗證 + 18/20 MCS cells superior_sets 100% identical pre-v2 vs post-v2 (12 removed rows had 0 MCS signal due to MIN_PAIRS_PER_MODEL=2 filter)。Phase 3 (feed research-tier article) 仍獨立 queue（uncovered；未在 publication_candidates）。
-- [ ] **Realized semivariance / signed jumps** — Barndorff-Nielsen-Kinnebrock-Shephard 分解 RV 為 upside/downside 部分，測 asymmetric vol 更純粹。需 5-min 數據（2026 Q2 HAR-RV 解鎖後可開）。
+- [x] ~~**Realized semivariance / signed jumps**~~ → **K1301 完成 2026-05-11 NULL on TAIFEX TX1 day session**：BNKS RS+/RS- 分解，HAR-RS vs HAR-RV n_test=649 DM-HLN t=1.29 (p=0.197) fail Harvey 3σ；MSE 方向 favors HAR-RS (1.4503 vs 1.4709) 但量級不足。Joins NULL quartet K868/K1301/K1303/K1309 (sign/jump/session/path 四類 HAR decomp all NULL on TX1)。Closure: provisional_pending_codex_reverify; synthesis article `mile_42e7131c` published (research-tier) 2026-05-12。
 
 ### 面向 B: VaR/ES 風險管理
 - 分配選擇（Normal, Student-t, GED, Skewed-t, FHS）
@@ -93,7 +93,7 @@
 - Diversification amplification（index vs stock gamma）
 - MDD vs Sharpe 區分（mechanical vs skill）— **K49: 雙通道分離**
 - Anti-tautology 驗證
-- **VIX sufficient statistic**（25+ 次確認：K43/K48/K57/K61/K65/K80/K84 + K730 cross-asset + K731 term structure + K732 behavioral sentiment + 歷史 15 次）
+- **VIX sufficient statistic**（25+ 次確認：K43/K48/K57/K61/K65/K80/K84 + K730 cross-asset + K731 term structure + K732 behavioral sentiment + 歷史 15 次）— **K1315+K1316+K1098 boundary characterization**：此效應為 **market-specific**，不可跨市場推論。K1315（SPY, within-market）：HAR-VIX QLIKE 改善 +28.7%，DM=4.58 Harvey-significant PASS；K1316（TX1 台指期，cross-market VIX）：QLIKE 差異 DM=1.041 p=0.298 NULL；K1098（0050.TW + VIXTWN）：cross-market channel NULL。結論：VIX 做 SPY 波動率的 sufficient statistic 有強力支持，但 cross-market IV channel（用美股 VIX 預測台灣市場）在 DM-HLN 標準下不成立。
 - **VT 保險費定價**（K41: ~4%/yr 恆定，K62: 利率依賴，K74: 80% 時間落後是正常的）
 - **Copula tail dependence asymmetry — multi-pair Bonferroni-robust evidence**（K195: 66 配對股票/行業 ETF, OOS Bonferroni 26/66 通過, full-sample 28/66；Top-5 EEM-XLK t=-10.29 / QQQ-XLK / SPY-XLE / XLE-XLF / SPY-EEM；leverage effect 確認下尾依賴強於上尾。**Methodology caveat**: GARCH-X 用 TDA 當 exog regressor 預測 RV → DM t=-0.601 NS — "cross-section structural evidence ≠ forecast utility"；refs Patton 2006 / Joe 1997 / Embrechts copula textbook. mile_7de1c5a2）
 
@@ -683,6 +683,18 @@ K519-K521 + K527 完成結果：見 archive。
 - **Table 4 (tab:vt_results)** — K1175 byte-match bindings 10 VERIFIED checks (BH/EWMA/GARCH/GJR/8.63VIX × Sharpe+MDD). GJR VT MDD -22.3→-22.2 align K1175 -22.25 rounding.
 - **Sec 2.5 (VIXTWN ratio + Steiger Z)** — K1181 4 VERIFIED checks (ratio=1.393, Spearman VIX-RV=0.595, Spearman VXEEM-RV=0.459, Steiger Z=16.2).
 - **Sec 4.4 (0056.TW robustness)** — K558 test_8_robustness_0056.harvey_dm.t_stat=5.6664 byte-match paper 5.67.
+
+### Paper 2 body_v3 review (v4, 2026-05-13) — MAJOR REVISION NEEDED
+
+Previous HIGH issues H1/H2/H3/M2 all **RESOLVED** (HF section removed from body_v3). But 3 **new HIGH (BLOCKER)** issues found:
+
+- **NEW-H1**: 8.63/VIX Sharpe = 1.137 (Table 3) vs 0.690 (Table 5 Reconciliation) — Table 5 cites Table 3 as source; root cause = Table 3 footnote claims daily vs monthly rebalancing simultaneously
+- **NEW-H2**: GJR VT Sharpe increment stated as +0.114 (Intro+Conclusion) but arithmetic = 1.074−0.950 = +0.124; Table 3 shows 1.074 but Table 4 (same period) shows 1.084
+- **NEW-H3**: 8.63/VIX MDD = −13.7% (Table 3) vs −15.3% (Section 4.3 narrative), same 2016–2026 period
+- **Broken `\ref{sec:hf}`** in Introduction road map → compiles as "??" (HF section removed but ref not cleaned)
+- **M1 still OPEN**: Section 4 → next section bridging paragraph missing
+
+Full review at `paper/taiwan-vt/review_v4.md`. Traceback to K900/K1175 needed before any submission.
 
 ### Codex post-publish reviews (4 articles, Codex quota fallback)
 
