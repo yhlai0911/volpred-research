@@ -47,3 +47,7 @@ PHASE B — 派新工：
 8. 嚴禁: force push, --no-verify, 寫 knowledge.json from agent (K1259), 假數字。研究誠實 > 一切。"
 
 echo "=== hourly-dispatch end $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
+
+# 通知用戶 — 解決「系統有跑但看不到 = 等於沒跑」的信任問題
+LATEST_COMMIT=$(/usr/bin/git -C /Users/yhlai0911/Desktop/volpred-research log -1 --pretty=format:'%h %s' 2>&1 | head -c 100)
+/usr/bin/osascript -e "display notification \"$LATEST_COMMIT\" with title \"volpred hourly-dispatch $(date '+%H:%M')\" sound name \"Pop\"" 2>/dev/null || true
