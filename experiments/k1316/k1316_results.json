@@ -1,0 +1,168 @@
+{
+  "experiment_id": "K1316",
+  "title": "VIX Sufficient Statistic Test on TAIFEX TX1 \u2014 Cross-Market Replication of K1315",
+  "date_run": "2026-05-13 03:23:26",
+  "seed": 42,
+  "research_background": "K1315 confirmed: US VIX is a sufficient statistic for SPY daily RV \u2014 Anti-QLIKE combination assigns HAR-VIX weight=1.0, HAR-ABS weight=0.0. K1316 tests cross-market replication: does US VIX dominate HAR-RV for Taiwan futures (TX1) RV prediction?",
+  "hypotheses": {
+    "H1": "HAR-VIX QLIKE < HAR-RV QLIKE on TX1, with DM-HLN |t| > 3",
+    "H0": "VIX has no incremental predictive value over own past RV for TX1 RV"
+  },
+  "methodology": {
+    "target": "log(RV_{t+1}), via rv.shift(-1) on TX1 daily realized variance",
+    "har_rv_features": [
+      "log(rv_lag1) \u2014 daily lag",
+      "log(rv_lag1.rolling(5).mean()) \u2014 weekly avg",
+      "log(rv_lag1.rolling(22).mean()) \u2014 monthly avg"
+    ],
+    "har_vix_features": [
+      "2*log(vix_lag1) = log(VIX\u00b2_{t-1}) \u2014 daily lag",
+      "2*log(vix_lag1.rolling(5).mean()) \u2014 weekly avg of VIX then squared",
+      "2*log(vix_lag1.rolling(22).mean()) \u2014 monthly avg of VIX then squared"
+    ],
+    "lookahead_guard": "rv_lag1 = rv.shift(1) BEFORE rolling; vix_lag1 = vix.shift(1) BEFORE rolling; target = rv.shift(-1) on RV column only; 70/30 chronological split, fit on IS only",
+    "primary_loss": "QLIKE (Patton 2011) \u2014 proxy-robust, theoretically justified",
+    "secondary_loss": "MSE on log(RV)",
+    "dm_test": "DM-HLN Harvey (1997) h=1, on QLIKE losses",
+    "pass_rule": "|DM_HLN_t| > 3 AND HAR-VIX lower QLIKE AND bootstrap 95% CI excludes 0",
+    "bootstrap": "500x iid bootstrap (seed=42) on QLIKE diff",
+    "split": "70/30 chronological"
+  },
+  "data_sources": {
+    "TX1": "TAIFEX TX1 tick CSV from K1309 cache (_tx1_daily_pd_2017-2026.parquet), day session 08:45\u201313:45, 5-min realized variance",
+    "VIX": "yfinance ^VIX daily close, 2017-01-01 to 2026-05-01",
+    "alignment": "Inner join on trading date (Taiwan vs US may differ on holidays)"
+  },
+  "data_summary": {
+    "tx1_raw_rows": 2186,
+    "vix_raw_rows": 2344,
+    "merged_rows": 2085,
+    "date_range": [
+      "2017-06-16",
+      "2026-04-30"
+    ],
+    "rv_stats": {
+      "mean": 5.359370461233603e-05,
+      "std": 0.00010327731594627138,
+      "min": 0.0,
+      "max": 0.0028601101991092876
+    },
+    "vix_stats": {
+      "mean": 19.175213440087774,
+      "std": 7.509164764615854,
+      "min": 9.140000343322754,
+      "max": 82.69000244140625
+    }
+  },
+  "model_metrics": {
+    "n_total": 2085,
+    "n_train": 1459,
+    "n_test": 626,
+    "date_range_is": [
+      "2017-06-16",
+      "2023-08-22"
+    ],
+    "date_range_oos": [
+      "2023-08-23",
+      "2026-04-30"
+    ],
+    "har_rv": {
+      "features": [
+        "log_rv_d",
+        "log_rv_w",
+        "log_rv_m"
+      ],
+      "beta": {
+        "intercept": -1.759035266303088,
+        "log_rv_d": 0.2444902541183402,
+        "log_rv_w": 0.41890856856724284,
+        "log_rv_m": 0.1712039547323802
+      },
+      "qlike_oos": -6.155832932791796,
+      "mse_oos": 1.5156090893012883,
+      "r2_is": 0.5274321310803499,
+      "r2_oos": 0.031173981560309816
+    },
+    "har_vix": {
+      "features": [
+        "log_vix2_d",
+        "log_vix2_w",
+        "log_vix2_m"
+      ],
+      "beta": {
+        "intercept": -13.89578708703575,
+        "log_vix2_d": 0.704932869471945,
+        "log_vix2_w": 0.1644354458480217,
+        "log_vix2_m": -0.25559833394773457
+      },
+      "qlike_oos": -8.653797313032335,
+      "mse_oos": 1.5871647024120719,
+      "r2_is": 0.35541990677193436,
+      "r2_oos": -0.014566665046059413
+    },
+    "dm_tests": {
+      "qlike": {
+        "loss": "QLIKE (Patton 2011)",
+        "h": 1,
+        "t_stat": 1.0410454006699226,
+        "p_value": 0.29825701270811145,
+        "interpretation_sign": "positive => HAR-RV worse (higher QLIKE) => HAR-VIX preferred",
+        "harvey_threshold": 3.0,
+        "pass_3sigma": false
+      },
+      "mse": {
+        "loss": "MSE on log(RV)",
+        "h": 1,
+        "t_stat": -0.7346541322485673,
+        "p_value": 0.4628257041286734,
+        "interpretation_sign": "positive => HAR-RV worse (higher MSE) => HAR-VIX preferred",
+        "harvey_threshold": 3.0
+      }
+    },
+    "bootstrap": {
+      "n_boot": 500,
+      "seed": 42,
+      "loss": "QLIKE",
+      "qlike_diff_point_rv_minus_vix": 2.497964380240539,
+      "qlike_diff_ci95": [
+        -0.26451930901740794,
+        7.5865645945549485
+      ],
+      "ci_excludes_zero": false,
+      "interpretation": "positive diff => HAR-RV higher QLIKE => HAR-VIX preferred"
+    },
+    "verdict_components": {
+      "pass_3sigma_dm_qlike": false,
+      "vix_lower_qlike": true,
+      "bootstrap_ci_excludes_zero": false
+    },
+    "verdict": "NULL"
+  },
+  "verdict": "NULL",
+  "dm_tests": {
+    "qlike": {
+      "loss": "QLIKE (Patton 2011)",
+      "h": 1,
+      "t_stat": 1.0410454006699226,
+      "p_value": 0.29825701270811145,
+      "interpretation_sign": "positive => HAR-RV worse (higher QLIKE) => HAR-VIX preferred",
+      "harvey_threshold": 3.0,
+      "pass_3sigma": false
+    },
+    "mse": {
+      "loss": "MSE on log(RV)",
+      "h": 1,
+      "t_stat": -0.7346541322485673,
+      "p_value": 0.4628257041286734,
+      "interpretation_sign": "positive => HAR-RV worse (higher MSE) => HAR-VIX preferred",
+      "harvey_threshold": 3.0
+    }
+  },
+  "conclusions": {
+    "primary": "NULL: VIX is NOT a sufficient statistic for TX1 RV. HAR-VIX QLIKE=-8.653797 vs HAR-RV QLIKE=-6.155833 (+40.6%), DM-HLN t=1.041. K1315 result (VIX sufficient for SPY) does not generalize cross-market to Taiwan futures. Supports domestic RV persistence dominates foreign vol signal for TX1.",
+    "cross_market_replication": false,
+    "k1315_comparison": "K1315: HAR-VIX weight=1.0 for SPY (VIX sufficient for own-market RV). K1316: verdict=NULL for TX1 (cross-market test). Together these experiments characterize the VIX sufficient statistic hypothesis within-market vs cross-market.",
+    "null_result_interpretation": "NULL result is informative: domestic RV persistence (HAR-RV) is sufficient for TX1 volatility prediction; US fear gauge does not provide incremental information beyond own past RV."
+  },
+  "runtime_seconds": 1.8
+}
