@@ -699,5 +699,17 @@
       "pattern": "*/4 * * * * continue research heartbeat",
       "reason": "2026-03-31 後改為 queue-first idle-driven continuation，避免空轉。"
     }
+  ],
+  "cron_jobs": [
+    {
+      "id": "volpred-hourly-dispatch",
+      "schedule": "7 * * * *",
+      "command": "/Users/yhlai0911/.volpred/bin/cron_hourly_dispatch.sh",
+      "log": "storage/logs/cron/hourly_dispatch.log",
+      "description": "Hourly dispatch trigger — spawns fresh claude -p session for slot-aware dispatch with diversity + 1-agent-per-hour rule. Replaces unreliable session ScheduleWakeup.",
+      "canonical_script": "scripts/cron_hourly_dispatch.sh",
+      "tcc_bypass_copy": "~/.volpred/bin/cron_hourly_dispatch.sh",
+      "installed_at": "2026-05-12T06:18:11Z"
+    }
   ]
 }
