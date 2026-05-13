@@ -7256,7 +7256,7 @@
     "title": "K1301 Codex primary-path review (post quota reset)",
     "priority": 3,
     "description": "K1301 HAR-RS (BNKS semivariance decomp) 已 Gemini CLI fallback CONDITIONAL PASS + 已實作 sample_trust_flag + clip diagnostics。Verdict = NULL (TX1 DM-HLN t=1.29, p=0.197, fails Harvey 3σ)。Per K1259 教訓 + K1262/K1262b fallback 連 fail 教訓：Gemini fallback PASS ≠ Codex primary-path PASS，closure_status=provisional_pending_codex_reverify。Codex CLI quota reset 2026-05-13 02:46 UTC 後派 `codex exec` 對 experiments/k1301/k1301_har_rs.py + k1301_results.json 做 primary-path review。通過 CONDITIONAL_PASS bar 才補寫 storage/memory/knowledge.json entry（已有 suggested entry in agent report）。Commit 26489588。",
-    "status": "pending",
+    "status": "running",
     "task_type": "paper_review",
     "blocked_reason": "codex_quota_reset_pending",
     "blocked_until": "2026-05-13T02:46:00Z",
@@ -7266,7 +7266,8 @@
       "primary-path-verify",
       "post-quota-reset"
     ],
-    "created_at": "2026-05-12T02:55:17Z"
+    "created_at": "2026-05-12T02:55:17Z",
+    "started_at": "2026-05-13T13:36:24.035491"
   },
   {
     "id": "task-k1302-codex-review-primary",
@@ -7290,7 +7291,7 @@
     "title": "K1303 Codex primary-path review + knowledge.json closure_status fix",
     "priority": 3,
     "description": "K1303 HAR-CJ NULL (DM-HLN t=-0.91 on TX1)。Agent 在 Codex blocked + 無 Task tool 情況下仍寫 knowledge.json，誤讀 K1259 規則為「NULL 不算 too-good 所以可寫」。實際 K1259 教訓：任何 fallback PASS 都不算 final closure。修正動作：(a) Codex 恢復後 (2026-05-13 02:46 UTC) 對 experiments/k1303/k1303.py + results.json 做 primary review；(b) 若 PASS 則更新 knowledge.json K1303 entry 加 reviewer_source 欄位；若 FAIL 則 revert entry 或補 closure_status=requires_revision。Commit cdef3718。",
-    "status": "pending",
+    "status": "running",
     "task_type": "paper_review",
     "blocked_reason": "codex_quota_reset_pending",
     "blocked_until": "2026-05-13T02:46:00Z",
@@ -7300,7 +7301,8 @@
       "primary-path-verify",
       "k1259-violation-cleanup"
     ],
-    "created_at": "2026-05-12T03:00:49Z"
+    "created_at": "2026-05-12T03:00:49Z",
+    "started_at": "2026-05-13T13:36:24.035491"
   },
   {
     "id": "task-k1306-codex-review-primary",
