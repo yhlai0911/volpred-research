@@ -4737,7 +4737,7 @@
   {
     "id": "Other_papers_nosource_rescan_extension",
     "title": "其他 paper 做同樣 no-source rescan (K1045 pattern generalization)",
-    "status": "running",
+    "status": "succeeded",
     "priority": 3,
     "created_at": "2026-04-17T17:12:12+08:00",
     "description": "Paper 9 rescan 發現 34.8% no-source 大半是 documentation gap (19 UNDOCUMENTED / 26 可 source). Paper 1 (24% no-source), Paper 2 (51%), Paper 3 (18%), Paper 4 (3%) 可能也有同樣 pattern. **動作**: 對每個已 audit 的 paper 啟 rescan agent 找未登錄 K. 可大幅降低每 paper 的 apparent no-source count.",
@@ -4746,7 +4746,8 @@
       "pattern-generalization"
     ],
     "task_type": "experiment",
-    "started_at": "2026-05-13T13:28:53.553757"
+    "started_at": "2026-05-13T13:28:53.553757",
+    "completed_at": "2026-05-13T13:38:27.087603"
   },
   {
     "id": "Paper10_start",
@@ -7668,5 +7669,55 @@
     "created_at": "2026-05-13T00:07:17+00:00",
     "started_at": "2026-05-13T13:28:53.553780",
     "completed_at": "2026-05-13T13:34:01.189269"
+  },
+  {
+    "id": "document_K1137_kb_entry",
+    "title": "K1137 HAR regime-invariant KB entry — Paper4 Channel 1 core claim",
+    "status": "pending",
+    "priority": 2,
+    "task_type": "experiment",
+    "created_at": "2026-05-13T13:38:27.087603",
+    "description": "K1137 has 60KB results, verdict=C_HAR_REGIME_INVARIANT. HAR+VIX passes all 3 VIX regimes. Paper 4 Channel 1 regime-invariant claim needs this KB entry. Document in knowledge.json with proper experiment_id, verdict, and all required fields.",
+    "source": "nosource_rescan_extension_top5"
+  },
+  {
+    "id": "document_K1138_kb_entry",
+    "title": "K1138 equity compendium MIXED result KB entry — Paper4",
+    "status": "pending",
+    "priority": 2,
+    "task_type": "experiment",
+    "created_at": "2026-05-13T13:38:27.087603",
+    "description": "K1138 has 35KB results, verdict=MIXED. Equity portfolio (SPY/QQQ/IWM) has PASS cases. Research honesty requires documenting which (asset, model) combinations pass. Document in knowledge.json.",
+    "source": "nosource_rescan_extension_top5"
+  },
+  {
+    "id": "document_K1135_kb_entry",
+    "title": "K1135 Skew-t GAS commodities Scenario B KB entry — Paper4",
+    "status": "pending",
+    "priority": 3,
+    "task_type": "experiment",
+    "created_at": "2026-05-13T13:38:27.087603",
+    "description": "K1135 has 23KB results, Scenario B verdict — Skew-t GAS commodities experiment; only VaR/ES improvement. Supports Paper 4 commodities sub-chapter. Document in knowledge.json.",
+    "source": "nosource_rescan_extension_top5"
+  },
+  {
+    "id": "document_K1123_kb_entry",
+    "title": "K1123 cross-asset alt-data allocation FAIL KB entry",
+    "status": "pending",
+    "priority": 3,
+    "task_type": "experiment",
+    "created_at": "2026-05-13T13:38:27.087603",
+    "description": "K1123 has 21KB results, verdict=FAIL. Cross-asset alt-data allocation failed. Null results must be documented per research honesty principle. Document in knowledge.json.",
+    "source": "nosource_rescan_extension_top5"
+  },
+  {
+    "id": "document_K901_kb_entry",
+    "title": "K901 13-market international VT KB entry — Paper3 parent",
+    "status": "pending",
+    "priority": 3,
+    "task_type": "experiment",
+    "created_at": "2026-05-13T13:38:27.087603",
+    "description": "K901 has 29KB results, 13-market international VT: MDD improvement 13/13, Sharpe 0/13, GJR gamma>0 13/13. Is parent experiment for K1178 (Paper 3 Table 5). Document in knowledge.json.",
+    "source": "nosource_rescan_extension_top5"
   }
 ]
