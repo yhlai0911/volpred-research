@@ -685,7 +685,7 @@
     "title": "Codex 24h-rule review for K1096 BTC regime A4f mile_36690fbd",
     "description": "Per K1018 lesson + 3-model review pattern, run Codex source-code review on mile_36690fbd within 24h. Focus: (1) DM t-stat byte-aligned vs results.json hypothesis_verdicts; (2) H5 DAMAGE_REDUCED claim (-2.90 → -0.54/-0.10) source-code methodology valid?; (3) adaptive variant -3.50 worse — bug or feature?; (4) shift(1) lookahead for all 5 model specs in k1096.py; (5) 4 hypothesis testing 順序 Bonferroni / Holm correction 是否需要 (multiple hypothesis 但全 FAIL → conservative)?",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "mile_id": "mile_36690fbd",
     "source": "K1096_post_publish_codex_review",
@@ -695,7 +695,9 @@
       "K1096",
       "main-thread-only"
     ],
-    "created_at": "2026-05-10T13:55:00+00:00"
+    "created_at": "2026-05-10T13:55:00+00:00",
+    "completed_at": "2026-05-13T02:28:37.795754Z",
+    "result": "CONDITIONAL PASS → PASS after fixes. Issues: H5 narrative attenuated (Medium), DM naming already correct. Lookahead clean. Bonferroni not needed."
   },
   {
     "id": "K1100g_d9_cadence_verify",
@@ -7410,7 +7412,7 @@
     "title": "NULL quartet synthesis (mile_42e7131c) — 24h three-model review",
     "priority": 2,
     "description": "mile_42e7131c (NULL quartet synthesis, audience=research, 10114 chars) 24h 內走 Claude→Gemini→Codex 三模 review (per memory feedback_3model_review_discipline + K1018 教訓 Gemini source-code blind spot)。Gemini pro 審 honest framing / numerical accuracy / tone (with `today is 2026-05-12` 校準); Codex 審 source-code-level — K868/K1301/K1303/K1309 4 個 source results.json 數字一致性 + DM-HLN 算法 + ref DOI 正確。Codex blocked until 2026-05-13 02:46 UTC → 先跑 Gemini pre-publish-release，Codex 跑 post-quota-reset。三模 verdict 合一才 promote synthesis 為 evergreen content + 為 knowledge.json synthesis-row 鋪路 (K1259 鐵律)。",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "blocked_reason": "codex_quota_reset_pending",
     "blocked_until": "2026-05-13T02:46:00Z",
@@ -7420,7 +7422,8 @@
       "synthesis-article",
       "premium-content"
     ],
-    "created_at": "2026-05-12T03:44:14Z"
+    "created_at": "2026-05-12T03:44:14Z",
+    "completed_at": "2026-05-13T03:22:35.972332+00:00"
   },
   {
     "id": "update_swr_articles_with_k222b_mc_numbers",
