@@ -148,8 +148,20 @@ def main():
             by_k[k_id] = entry
 
     # For each K, check feed coverage
+    incomplete_research_count = 0
     candidates = []
     for k_id, entry in by_k.items():
+        # 2026-05-09 K728/K924 incidents: K experiments without *_results.json are
+        # incomplete research and must not enter article candidate pool.
+        k_lower = k_id.lower()
+        exp_dir = ROOT / "experiments" / k_lower
+        has_results = bool(
+            (exp_dir / f"{k_lower}_results.json").exists()
+            or (exp_dir.exists() and any(exp_dir.glob("*_results.json")))
+        )
+        if not has_results:
+            incomplete_research_count += 1
+            continue
         covering_articles = []
         for article in feed:
             if k_covered_by_article(k_id, article):
@@ -206,8 +218,34 @@ def main():
         "波動率預測", "vol-prediction", "volatility", "金融研究",
     }
 
+    # 2026-05-09 K979 incident fix: cross-language synonyms were missed by pure
+    # lowercase+hyphen normalisation (tail-risk ↔ 尾端風險, vix-sufficiency ↔ VIX充分性).
+    CROSS_LANG_SYNONYMS: dict[str, str] = {
+        "尾端風險": "tail-risk", "尾部風險": "tail-risk",
+        "tail-risk": "tail-risk", "tailrisk": "tail-risk",
+        "vix充分性": "vix-sufficiency", "vix-充分性": "vix-sufficiency",
+        "vix-sufficiency": "vix-sufficiency",
+        "波動率模型": "garch", "garch模型": "garch", "波動率預測模型": "garch",
+        "動能": "momentum", "動量": "momentum",
+        "類股輪動": "sector-rotation", "板塊輪動": "sector-rotation",
+        "sector-rotation": "sector-rotation",
+        "風險平價": "risk-parity", "risk-parity": "risk-parity",
+        "機制轉換": "regime-switching", "體制轉換": "regime-switching",
+        "regime-switching": "regime-switching",
+        "跨資產": "cross-asset", "cross-asset": "cross-asset",
+        "避險": "hedging", "對沖": "hedging",
+        "槓桿": "leverage",
+        "最大回撤": "max-drawdown", "最大跌幅": "max-drawdown", "mdd": "max-drawdown",
+        "期權": "options", "選擇權": "options",
+        "隱含波動率": "implied-volatility", "implied-volatility": "implied-volatility",
+        "加密貨幣": "crypto", "比特幣": "bitcoin",
+        "台股": "taiwan", "台灣市場": "taiwan",
+        "國際市場": "international", "跨國": "international",
+    }
+
     def _norm_tag(t: str) -> str:
-        return t.strip().lower().replace("_", "-")
+        normed = t.strip().lower().replace("_", "-").replace(" ", "-")
+        return CROSS_LANG_SYNONYMS.get(normed, normed)
 
     def _domain_tags(tags: list) -> set[str]:
         return {_norm_tag(t) for t in (tags or []) if t and t not in GENERIC_TAGS}
@@ -259,6 +297,7 @@ def main():
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "summary": {
             "total_k": total,
+            "incomplete_research_filtered": incomplete_research_count,
             "uncovered": uncovered,
             "high_priority_uncovered": len(high_uncovered),
             "missing_general_audience": len(missing_general),
@@ -284,7 +323,7 @@ def main():
     OUTPUT_PATH.write_text(json.dumps(output, ensure_ascii=False, indent=2))
 
     # Print concise summary
-    print(f"Scanned {total} K experiments.")
+    print(f"Scanned {total} K experiments ({incomplete_research_count} filtered: no results JSON).")
     print(f"  Uncovered: {uncovered}")
     print(f"  High-priority uncovered (score≥5): {len(high_uncovered)}")
     print(f"  Covered but missing general audience: {len(missing_general)}")
