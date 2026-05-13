@@ -5941,5 +5941,42 @@
     "task_type": "platform_ops",
     "status": "completed",
     "notes": "Cleaned 3 worktrees (K1303/K1137/K1138) + 2 orphan branches (a4b49587/ad1b2ebb). All worktrees had shared JSON violations (feed.json/knowledge.json/experiment_experiences.json). Content verified in main before cleanup."
+  },
+  {
+    "timestamp": "2026-05-13T06:20:51.549327+00:00",
+    "task_type": "experiment",
+    "task_id": "K1303-v2-review-pass",
+    "status": "completed",
+    "agent": "code-reviewer subagent fallback",
+    "summary": "K1303-v2 review CONDITIONAL PASS → PASS (REPO_ROOT parents[3]→parents[2]/src fix applied same session). ABD1 scaling fixed (J/RV ratio), ABD2 QLIKE+HAC confirmed, ABD3 1-step lag confirmed. TX1 NULL (t=1.002, p=0.317). knowledge.json K1303 updated from v1 superseded result.",
+    "outputs": [
+      "experiments/k1303/k1303_v2_review.md",
+      "experiments/k1303/k1303.py (line 67 fix)",
+      "storage/memory/knowledge.json (K1303 updated)"
+    ]
+  },
+  {
+    "timestamp": "2026-05-13T06:20:51.549327+00:00",
+    "task_type": "experiment",
+    "task_id": "K1137-v2-review-pass",
+    "status": "completed",
+    "agent": "code-reviewer subagent fallback",
+    "summary": "K1137-v2 review PASS. Both blocking v1 issues resolved: (1) regime window v_orig unshifted for quantile gives VIX[t-252..t-1]; (2) 10% coverage guard is hard abort (continue). 17/54 PASS, C_HAR_REGIME_INVARIANT. knowledge.json K1137 entry written.",
+    "outputs": [
+      "experiments/k1137/k1137_v2_review.md",
+      "storage/memory/knowledge.json (K1137 appended)"
+    ]
+  },
+  {
+    "timestamp": "2026-05-13T06:20:51.549327+00:00",
+    "task_type": "experiment",
+    "task_id": "K1138-v2-review-pass",
+    "status": "completed",
+    "agent": "code-reviewer subagent fallback",
+    "summary": "K1138-v2 review PASS. BH-FDR dual-gate (t>2.0 AND p_BH<0.05) enforced at all 3 levels. IWM correctly NULL (t=2.064, p_BH=0.071). SPY/QQQ PASS (p_BH=0.000137). 2/9 cells PASS MIXED. knowledge.json K1138 entry written.",
+    "outputs": [
+      "experiments/k1138/k1138_v2_review.md",
+      "storage/memory/knowledge.json (K1138 appended)"
+    ]
   }
 ]

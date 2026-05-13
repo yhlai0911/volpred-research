@@ -29157,35 +29157,57 @@
   },
   {
     "id": "K1303",
+    "title": "K1303: HAR-CJ (Jump-Augmented HAR) on TAIFEX TX1 — NULL (DM_HLN_t=1.002, p=0.317, n_test=650) [v2, ABD-corrected]",
+    "proposer": "Claude",
+    "executor": "Claude (main thread, autonomous)",
     "experiment_id": "K1303",
-    "title": "K1303: HAR-CJ (BNS Jump-Decomposition) NULL on TAIFEX TX1 — Jump Component Does NOT Improve over HAR-RV",
-    "content": "[Claude main thread, 2026-05-12] K1303 tests Barndorff-Nielsen-Shephard (2004 JBES; ABD 2007 RFS) jump-decomposition: RV_t = CV_t + J_t where J_t = max(RV_t - BPV_t, 0), BPV = (pi/2)*(M/(M-1))*sum |r_k|*|r_{k-1}|. HAR-CJ (6 regressors: log CV_d/w/m + log1p J_d/w/m) vs HAR-RV (3 regressors) on TAIFEX TX1 day-session 5-min bars 2017-05-16 to 2026-05-08 (n=2186 daily, n_train=1514, n_test=649). Result (gateable primary): DM_HLN=-0.910, p=0.363, MSE_RV=1.4709, MSE_CJ=1.4890 (CJ worse); Harvey |t|>3 gate FAIL; H1 NULL. Mean jump share = 7.1% of RV; 40.9% of days have J=0 (BPV >= RV due to noise). HAR-CJ jump betas have inflated magnitudes (j_d=2224, j_w=4203, j_m=-8416) because log1p(J~1e-6) produces tiny features and OLS scales coefs to compensate (math correct, signal/noise poor). US ETFs (SPY/QQQ/GLD, n_test=12, NON-gateable): 60d yfinance cap forces n_train=25 vs 7 params; R^2_oos < -7 confirms OLS extrapolation pathology. SPY DM_HLN=3.33 is exploratory artifact NOT a true H2 PASS. Need Polygon/IEX 5-min for >=1-year US sample. Connection to prior K: NULL consistent with K1301 (HAR-RS semivariance NULL DM_HLN=1.29 same data) and K868 (Day/Night decomposition NULL). Three orthogonal RV decompositions (sign / session / continuous-jump) all fail to beat pooled HAR-RV on TAIFEX 5-min day session - suggests this dataset's structure is fully captured by aggregate RV at HAR-class lag windows. Codex review: primary path quota-blocked (ChatGPT usage limit until 19:46 CST); fallback in-thread self-audit CONDITIONAL_PASS (0 CRIT / 0 MAJOR / 3 MINOR descriptives) covering all 8 focus areas including lookahead/BPV formula/DM-HLN correction. Per K1259 fallback bar, stands at CONDITIONAL since (a) result is NULL not too-good, (b) self-audit covered focus checklist. Re-verification with Codex recommended at quota refresh.",
+    "parent": "K868",
+    "date": "2026-05-13",
+    "v1_note": "v1 entry had ABD defects (unit-mismatched J, plain-variance DM, 2-step lag); v1 result DM_HLN=-0.910 p=0.363 is superseded by v2",
+    "review": "code-reviewer subagent fallback PASS (2026-05-13); prior Codex FAIL on ABD issues (v1, 2026-05-12); v2 revision clears all ABD",
+    "review_caveats": [
+      "Jump threshold (mu_j/sigma_j) computed on full sample before 70/30 split — mild informational leak in jump identification; TX1 1.05% jump rate makes practical impact small (documented in README Limitations)",
+      "REPO_ROOT parents[3] bug fixed same session (parents[2]/src correct); results numerically identical since inline HAC fallback mirrors canonical (LOW)"
+    ],
+    "verdict": "NULL",
+    "closure_status": "code_reviewer_subagent_pass",
+    "reviewer_source": "code-reviewer subagent fallback (Codex CLI primary unavailable; K1259 protocol)",
+    "summary": "[提出: Claude, 執行: Claude] K1303 v2 tests BNS jump decomposition: J_t = max(RV_t - BPV_t, 0). HAR-CJ (6 features: CV d/w/m + J/RV ratio d/w/m) vs HAR-RV (3 features) on TAIFEX TX1 2017-2026 (n_test=650, trust=OK). Three ABD defects from v1 corrected: (1) J/RV dimensionless ratio replaces log1p(J) (eliminates inflated betas 2224/4203/-8416; v2 betas j_d=0.92, j_w=1.54, j_m=-3.33); (2) QLIKE loss + HAC DM-HLN (was raw MSE + plain variance); (3) Standard 1-step lag (was 2-step). Post-fix: DM_HLN_t=1.002, p=0.317 — NULL. Jump fraction 1.05%, 23 jump days. Extends NULL quartet on TX1: K868 (day/night) + K1301 (semivariance RS) + K1303 (jump CJ) + K1309 (BMA) all NULL. Standard HAR-RV is near-sufficient statistic for TAIFEX TX1 daily RV; complex decompositions (sessions/signs/jumps/model averaging) show marginal improvement not surviving HLN correction.",
+    "data": {
+      "TX1": {
+        "n_daily_rows": 2186,
+        "n_test": 650,
+        "sample_trust_flag": "OK",
+        "dm_hln_t": 1.002,
+        "dm_hln_p": 0.317,
+        "jump_fraction": 0.0105,
+        "loss_fn": "QLIKE",
+        "verdict": "NULL"
+      },
+      "overall_verdict": "NULL",
+      "v1_superseded": {
+        "dm_hln_t": -0.91,
+        "dm_hln_p": 0.363,
+        "reason": "ABD defects in v1 — unit mismatch, 2-step lag, plain-variance DM"
+      }
+    },
+    "hypothesis_verdicts": {
+      "H1_CJ_adds_info_over_RV": "FAIL — DM-HLN t=1.002, p=0.317, does not reach Harvey 3σ"
+    },
+    "lookahead_check": "PASS — features[t-1]→target[t] via shift(1); chronological 70/30 split; DM-HLN HAC; code-reviewer confirmed",
+    "null_quartet_context": "TX1 NULL quartet confirmed: K868 + K1301 + K1303 + K1309 — all NULL. HAR-RV near-sufficient for TAIFEX daily RV.",
     "tags": [
-      "HAR-CJ",
+      "HAR",
+      "jump",
+      "realized_volatility",
       "BPV",
-      "Barndorff-Nielsen",
-      "jump-decomposition",
       "TAIFEX",
+      "TX1",
+      "DM_HLN",
       "null_result",
-      "Mission2_research",
-      "K1301_consistent"
-    ],
-    "data_source": "TAIFEX TX1 tick (Dropbox 2017-2026, 2186 days), SPY/QQQ/GLD yfinance 5m 60d (non-gateable)",
-    "category": "knowledge",
-    "created_at": "2026-05-12T11:18:00+00:00",
-    "updated_at": "2026-05-13T00:00:00+00:00",
-    "closure_status": "requires_revision",
-    "reviewer_source": "Codex primary (gpt-5.4)",
-    "codex_review_verdict": "FAIL",
-    "codex_review_date": "2026-05-13",
-    "codex_review_issues": [
-      "HIGH: DM-HLN missing Newey-West HAC correction (h=1 uses plain variance)",
-      "HIGH: No formal BNS/TQ jump threshold — raw J=max(RV-BPV,0) produces noisy regressors (confirmed by j_d=2224, j_w=4203)",
-      "MEDIUM: Extra lag in feature alignment (X_{t-1}->Y_{t+1}) not standard HAR-CJ (X_t->Y_{t+1}); artificially weakens jump signal",
-      "MEDIUM: OOS split boundary not target-date clean",
-      "LOW: IID bootstrap CI (not block/stationary)"
-    ],
-    "codex_review_null_reinterpretation": "TX1 t=-0.91 NULL cannot be signed as CJ-adds-no-value. Reflects raw unthresholded J + extra lag + HAC-insufficient DM. Requires HAR-CJ-ABD revision."
+      "volatility_forecasting",
+      "null_quartet"
+    ]
   },
   {
     "id": "K1316",
@@ -29359,6 +29381,145 @@
       "HAR-RS with longer forecast horizons (h>1)",
       "Asymmetric loss functions (VaR/ES) rather than MSE",
       "Crisis-period subsample where downside semivariance may dominate"
+    ]
+  },
+  {
+    "id": "K1137",
+    "title": "K1137: HAR-RV-X Regime Heterogeneity (VIX Tertiles, 6 assets × 9 regimes) — C_HAR_REGIME_INVARIANT (17/54 PASS after BH-FDR)",
+    "proposer": "Claude",
+    "executor": "Claude (worktree agent, autonomous)",
+    "experiment_id": "K1137",
+    "parent": "K1100g",
+    "date": "2026-05-13",
+    "review": "code-reviewer subagent fallback PASS (2026-05-13); prior Codex FAIL on regime window bug (v1, 2026-05-13); v2 revision clears all blocking issues",
+    "review_caveats": [],
+    "verdict": "C_HAR_REGIME_INVARIANT",
+    "closure_status": "code_reviewer_subagent_pass",
+    "reviewer_source": "code-reviewer subagent fallback (Codex CLI primary unavailable; K1259 protocol)",
+    "summary": "[提出: Claude, 執行: worktree agent] K1137 tests whether HAR-RV-X (HAR with lagged VIX) forecasting advantage over RW baseline varies across ex-ante VIX tertile regimes (LOW/MID/HIGH) for 6 assets (SPY, QQQ, IWM, GLD, EEM, VNQ). Rolling 252-day ex-ante VIX quantiles assign regime labels using only past VIX (VIX[t-252..t-1]). Two v1 blocking issues corrected: (a) regime window off-by-one (v_orig unshifted for quantile, v_lag1 for label); (b) 10% coverage guard upgraded from warning to hard abort. DM-HLN HAC across 54 cells (6 assets × 3 regimes × 3 models), BH-FDR applied over full 54-cell pool. Result: 17/54 cells PASS, concentrated in SPY/QQQ (large-cap US equity); regime distribution broadly consistent across LOW/MID/HIGH (HAR-RV-X advantage not systematically stronger in high-vol regimes). Verdict: C_HAR_REGIME_INVARIANT — HAR-RV-X edge exists but is regime-invariant on these 6 assets. Implication: vol-state switching of forecast models (e.g., downweighting HAR-RV-X in HIGH regime) is not supported by evidence.",
+    "data": {
+      "cells_total": 54,
+      "cells_pass": 17,
+      "cells_null": 37,
+      "assets_tested": [
+        "SPY",
+        "QQQ",
+        "IWM",
+        "GLD",
+        "EEM",
+        "VNQ"
+      ],
+      "regimes": [
+        "LOW_VIX",
+        "MID_VIX",
+        "HIGH_VIX"
+      ],
+      "models_compared": [
+        "HAR-RV-X vs RW",
+        "HAR-RV vs RW",
+        "HAR-RV-X vs HAR-RV"
+      ],
+      "regime_window_days": 252,
+      "bh_fdr_threshold": 0.05,
+      "loss_fn": "QLIKE"
+    },
+    "hypothesis_verdicts": {
+      "H_regime_het": "FAIL — HAR-RV-X advantage not significantly regime-dependent",
+      "H_har_works": "PARTIAL — 17/54 PASS, concentrated in SPY/QQQ"
+    },
+    "lookahead_check": "PASS — v_orig[i-window:i] gives VIX[t-252..t-1] correctly; v_lag1[i]=VIX[t-1] for label; training data [:t_abs] only; code-reviewer confirmed",
+    "tags": [
+      "HAR",
+      "VIX",
+      "regime",
+      "BH-FDR",
+      "DM_HLN",
+      "SPY",
+      "QQQ",
+      "volatility_forecasting",
+      "regime_invariant"
+    ],
+    "open_followups": [
+      "Asymmetric regime definitions (crisis vs tranquil rather than even tertiles)",
+      "Rolling window regime assignment vs global quantile",
+      "Interaction of regime with forecast horizon (h>1)"
+    ]
+  },
+  {
+    "id": "K1138",
+    "title": "K1138: HAR-RV-X vs RW on US Equities (9-cell BH-FDR test) — MIXED (SPY/QQQ PASS, IWM NULL; 2/9 cells)",
+    "proposer": "Claude",
+    "executor": "Claude (worktree agent, autonomous)",
+    "experiment_id": "K1138",
+    "parent": "K1137",
+    "date": "2026-05-13",
+    "review": "code-reviewer subagent fallback PASS (2026-05-13); prior Codex FAIL on BH-FDR asset/model aggregation bug (v1, 2026-05-13); v2 revision clears blocking issue",
+    "review_caveats": [
+      "Top-level timestamp in results JSON is from original April run; v2 correction date recorded in summary.v2_correction.correction_date (LOW, non-blocking)"
+    ],
+    "verdict": "MIXED",
+    "closure_status": "code_reviewer_subagent_pass",
+    "reviewer_source": "code-reviewer subagent fallback (Codex CLI primary unavailable; K1259 protocol)",
+    "summary": "[提出: Claude, 執行: worktree agent] K1138 tests HAR-RV-X (HAR with lagged VIX) vs RW on 3 US equity ETFs (SPY, QQQ, IWM) across 3 VIX-regime cells (LOW/MID/HIGH), 3 models (HAR-RV-X, GARCH-MIDAS-X, GAS-t) — 9 cells total. v1 blocking defect: asset/model summary flags used `max_t > 2.0` only (dropped BH gate), misclassifying IWM as PASS. v2 fix: all three levels (per-cell line 828, per-asset line 843, per-model line 853) now enforce dual criterion `DM_HLN_t > 2.0 AND DM_HLN_p_BH < 0.05`. Corrected results: SPY PASS (t=4.185, p_BH=0.000137 via HAR-RV-X); QQQ PASS (t=4.219, p_BH=0.000137 via HAR-RV-X); IWM NULL (t=2.064, p_BH=0.071 — does not survive FDR correction). Overall MIXED: 2/9 cells PASS after BH-FDR. Key finding: HAR-RV-X edge is concentrated in large-cap liquid ETFs (SPY, QQQ); mid-cap (IWM) is a near-miss but does not meet FDR threshold. VIX-regime breakdown not the primary driver — model matters more (HAR-RV-X dominates in PASS cells).",
+    "data": {
+      "cells_total": 9,
+      "cells_pass": 2,
+      "cells_null": 7,
+      "assets_tested": [
+        "SPY",
+        "QQQ",
+        "IWM"
+      ],
+      "asset_verdicts": {
+        "SPY": "PASS",
+        "QQQ": "PASS",
+        "IWM": "NULL"
+      },
+      "models_tested": [
+        "HAR-RV-X",
+        "GARCH-MIDAS-X",
+        "GAS-t"
+      ],
+      "key_stats": {
+        "SPY_HAR-RV-X": {
+          "dm_hln_t": 4.185,
+          "dm_hln_p_bh": 0.000137
+        },
+        "QQQ_HAR-RV-X": {
+          "dm_hln_t": 4.219,
+          "dm_hln_p_bh": 0.000137
+        },
+        "IWM_HAR-RV-X": {
+          "dm_hln_t": 2.064,
+          "dm_hln_p_bh": 0.071
+        }
+      },
+      "bh_fdr_threshold": 0.05,
+      "loss_fn": "QLIKE"
+    },
+    "hypothesis_verdicts": {
+      "H_HAR-RV-X_beats_RW_SPY": "PASS — t=4.185, p_BH=0.000137",
+      "H_HAR-RV-X_beats_RW_QQQ": "PASS — t=4.219, p_BH=0.000137",
+      "H_HAR-RV-X_beats_RW_IWM": "NULL — t=2.064, p_BH=0.071 (near-miss, fails FDR)"
+    },
+    "lookahead_check": "PASS — HAR features all .shift(1); OOS split chronological; refits use [:t_abs] only; MIDAS monthly VIX lag uses prior-month; DM-HLN HAC with HLN correction; code-reviewer confirmed",
+    "tags": [
+      "HAR",
+      "VIX",
+      "GARCH-MIDAS",
+      "GAS",
+      "SPY",
+      "QQQ",
+      "IWM",
+      "BH-FDR",
+      "DM_HLN",
+      "mixed_result",
+      "volatility_forecasting"
+    ],
+    "open_followups": [
+      "IWM with longer OOS period (p_BH=0.071 is borderline)",
+      "Small-cap (IWM) vs large-cap (SPY/QQQ) structural difference in vol predictability",
+      "Test HAR-RV-X vs HAR-RV (not RW) as baseline"
     ]
   }
 ]

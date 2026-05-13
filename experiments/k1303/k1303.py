@@ -64,9 +64,10 @@ DATA_DIR = SCRIPT_DIR / "data"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # Add volpred to path for dm_test (HAC Newey-West)
-REPO_ROOT = Path(__file__).resolve().parents[3]  # experiments/k1303/ -> repo root
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
+# parents[2] = volpred-research repo root; src/ contains the volpred package
+_SRC_DIR = Path(__file__).resolve().parents[2] / "src"
+if str(_SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(_SRC_DIR))
 
 # Reuse existing TX1 cache (built by v1)
 TAIFEX_DIR = Path.home() / "Dropbox/TAIFEXDATA/TAIFEXDATA/python"

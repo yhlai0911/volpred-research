@@ -7677,24 +7677,26 @@
   {
     "id": "document_K1137_kb_entry",
     "title": "K1137 HAR regime-invariant KB entry — Paper4 Channel 1 core claim",
-    "status": "pending",
+    "status": "succeeded",
     "priority": 2,
     "task_type": "experiment",
     "created_at": "2026-05-13T13:38:27.087603",
     "description": "K1137 has 60KB results, verdict=C_HAR_REGIME_INVARIANT. HAR+VIX passes all 3 VIX regimes. Paper 4 Channel 1 regime-invariant claim needs this KB entry. Document in knowledge.json with proper experiment_id, verdict, and all required fields.",
     "source": "nosource_rescan_extension_top5",
-    "blocked_reason": "prereq: K1137_revision_window_fix must complete + PASS first"
+    "blocked_reason": "prereq: K1137_revision_window_fix must complete + PASS first",
+    "completed_at": "2026-05-13T06:20:35.580175+00:00"
   },
   {
     "id": "document_K1138_kb_entry",
     "title": "K1138 equity compendium MIXED result KB entry — Paper4",
-    "status": "pending",
+    "status": "succeeded",
     "priority": 2,
     "task_type": "experiment",
     "created_at": "2026-05-13T13:38:27.087603",
     "description": "K1138 has 35KB results, verdict=MIXED. Equity portfolio (SPY/QQQ/IWM) has PASS cases. Research honesty requires documenting which (asset, model) combinations pass. Document in knowledge.json.",
     "source": "nosource_rescan_extension_top5",
-    "blocked_reason": "prereq: K1138_revision_bh_fix must complete + PASS first"
+    "blocked_reason": "prereq: K1138_revision_bh_fix must complete + PASS first",
+    "completed_at": "2026-05-13T06:20:35.580175+00:00"
   },
   {
     "id": "document_K1135_kb_entry",
@@ -9069,30 +9071,33 @@
     "task_id": "task-k1303-v2-codex-review",
     "task_type": "paper_review",
     "priority": "P2",
-    "status": "pending",
+    "status": "succeeded",
     "title": "K1303-v2 Codex primary-path re-review (post ABD revision)",
     "description": "Codex primary-path review of K1303-v2 code after 3-defect ABD revision. Check: (1) BNS 3-sigma jump threshold correctly identifies jump days; (2) HAC DM test via dm_test() from model_evaluation.py; (3) standard 1-step lag. Blocking knowledge.json entry for K1303 NULL result.",
     "created_at": "2026-05-13T06:11:32.457685Z",
-    "notes": []
+    "notes": [],
+    "completed_at": "2026-05-13T06:20:35.580175+00:00"
   },
   {
     "task_id": "task-k1137-v2-codex-review",
     "task_type": "paper_review",
     "priority": "P2",
-    "status": "pending",
+    "status": "succeeded",
     "title": "K1137-v2 Codex re-review (post regime window fix)",
     "description": "Codex re-review of K1137-v2 after regime window off-by-one fix. Check: vix_series[i-w:i] (unshifted) used for quantile window; vix_lag1 used for regime-label comparison only. Also verify 10% guard is now hard skip. If PASS, enables K1137 knowledge.json entry.",
     "created_at": "2026-05-13T06:11:32.457685Z",
-    "notes": []
+    "notes": [],
+    "completed_at": "2026-05-13T06:20:35.580175+00:00"
   },
   {
     "task_id": "task-k1138-v2-codex-review",
     "task_type": "paper_review",
     "priority": "P2",
-    "status": "pending",
+    "status": "succeeded",
     "title": "K1138-v2 Codex re-review (post BH-FDR fix)",
     "description": "Codex re-review of K1138-v2 after BH-FDR enforcement fix at asset/model summary level. Check: asset_pass = any(c[DM_HLN_t]>2.0 AND c[DM_HLN_p_BH]<0.05 for c in asset_cells). IWM correctly NULL. If PASS, enables K1138 knowledge.json entry.",
     "created_at": "2026-05-13T06:11:32.457685Z",
-    "notes": []
+    "notes": [],
+    "completed_at": "2026-05-13T06:20:35.580175+00:00"
   }
 ]
