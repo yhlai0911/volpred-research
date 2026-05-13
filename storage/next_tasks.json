@@ -5972,7 +5972,7 @@
     "title": "topic_family_collision: 跨語言 tag normalization (vix-sufficiency↔VIX充分性 / tail-risk↔尾端風險)",
     "description": "2026-05-09 K979 incident: K979 entry tags [\"SKEW\",\"CBOE\",\"tail-risk\",\"vix-sufficiency\"] 與 K447 mile_1b2ad1f8 tags [\"SKEW\",\"VIX\",\"尾端風險\",\"期權市場\"] 共享 SKEW 但 tail-risk vs 尾端風險 + vix-sufficiency vs VIX 充分性 跨語言相同概念被 miss。Fix: 在 build_publication_candidates.py 加 cross-language synonym map (small dict ~30 entries 涵蓋本平台高頻概念)。或更通用：用 LanceDB 對 candidate K title vs feed article titles 做 semantic dist <0.5 二次防線。P5 follow-up.",
     "priority": 5,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "platform_ops",
     "source": "topic_family_clustering_cross_lang_2026_05_09",
     "tags": [
@@ -5980,7 +5980,8 @@
       "cross-language",
       "tag-normalization"
     ],
-    "created_at": "2026-05-09T12:50:00+00:00"
+    "created_at": "2026-05-09T12:50:00+00:00",
+    "completed_at": "2026-05-13T00:20:00Z"
   },
   {
     "id": "fix_tw_close_lag_in_daily_update",
@@ -7636,5 +7637,20 @@
       "research-program-backlog"
     ],
     "created_at": "2026-05-12T23:07:17+00:00"
+  },
+  {
+    "id": "K1306_article_general",
+    "title": "K1306: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1306 has verdict signal (score=0, reasons=None) but no general article. Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1306",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "created_at": "2026-05-13T00:07:17+00:00"
   }
 ]

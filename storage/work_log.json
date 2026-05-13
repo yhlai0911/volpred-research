@@ -5763,5 +5763,15 @@
     "agent": "worktree-agent-ae3608cb6dea16faa (code written), compute queue (execution pending)",
     "knowledge_written": false,
     "notes": "k1304.py 1174 lines committed to main. assemble_results.py (fabricated values) discarded. Execution via cron */15 compute worker."
+  },
+  {
+    "task_type": "platform_ops",
+    "task_id": "fix_topic_family_cross_language_tag_normalization",
+    "title": "topic_family_collision: cross-language tag normalisation fix",
+    "status": "succeeded",
+    "started_at": "2026-05-13T00:07:00Z",
+    "completed_at": "2026-05-13T00:20:00Z",
+    "commit": "6fd2496b",
+    "notes": "Added CROSS_LANG_SYNONYMS dict (26 pairs) to build_publication_candidates.py _norm_tag. K979 incident fix."
   }
 ]
