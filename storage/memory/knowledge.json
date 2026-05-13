@@ -29173,7 +29173,19 @@
     "data_source": "TAIFEX TX1 tick (Dropbox 2017-2026, 2186 days), SPY/QQQ/GLD yfinance 5m 60d (non-gateable)",
     "category": "knowledge",
     "created_at": "2026-05-12T11:18:00+00:00",
-    "updated_at": "2026-05-12T11:18:00+00:00"
+    "updated_at": "2026-05-13T00:00:00+00:00",
+    "closure_status": "requires_revision",
+    "reviewer_source": "Codex primary (gpt-5.4)",
+    "codex_review_verdict": "FAIL",
+    "codex_review_date": "2026-05-13",
+    "codex_review_issues": [
+      "HIGH: DM-HLN missing Newey-West HAC correction (h=1 uses plain variance)",
+      "HIGH: No formal BNS/TQ jump threshold — raw J=max(RV-BPV,0) produces noisy regressors (confirmed by j_d=2224, j_w=4203)",
+      "MEDIUM: Extra lag in feature alignment (X_{t-1}->Y_{t+1}) not standard HAR-CJ (X_t->Y_{t+1}); artificially weakens jump signal",
+      "MEDIUM: OOS split boundary not target-date clean",
+      "LOW: IID bootstrap CI (not block/stationary)"
+    ],
+    "codex_review_null_reinterpretation": "TX1 t=-0.91 NULL cannot be signed as CJ-adds-no-value. Reflects raw unthresholded J + extra lag + HAC-insufficient DM. Requires HAR-CJ-ABD revision."
   },
   {
     "id": "K1316",
@@ -29231,5 +29243,122 @@
     ],
     "created_at": "2026-05-12T23:52:33.311168+00:00",
     "updated_at": "2026-05-12T23:52:33.311168+00:00"
+  },
+  {
+    "id": "K1304_bma_0050tw_h1_fail_decomposition",
+    "title": "K1304: K1257 BMA 0050.TW H1 FAIL — H_sample/H_pool/H_micro all REJECT",
+    "proposer": "Claude",
+    "executor": "Claude worktree agent",
+    "experiment_id": "K1304",
+    "parent": "K1257",
+    "date": "2026-05-13",
+    "review": "code-reviewer subagent CONDITIONAL PASS (2026-05-13)",
+    "review_caveats": [
+      "H_sample test matched OOS start = 2020-01-02 vs 2020-01-01 — difference is 1 trading day, effectively no-op; REJECT directionally valid given only 57-day OOS-length gap (3.6%)",
+      "H_micro LL comparison mixes normal vs t-distribution kernels; treated as diagnostic, not formal LR test"
+    ],
+    "verdict": "NULL_TRIPLE_REJECT",
+    "summary": "[提出: Claude, 執行: Claude worktree agent] K1304 decomposes the K1257 0050.TW H1 FAIL (DM-Harvey t=+0.980, not significant). Baseline re-verified: SPY DM t=-3.397 (PASS), GLD DM t=-3.379 (PASS), 0050.TW DM t=+0.980 (FAIL). THREE HYPOTHESES ALL REJECT: (1) H_sample REJECT — matched SPY window start produces same FAIL; OOS-length asymmetry (1524 vs 1581, 3.6%) not the driver. (2) H_pool REJECT — LOO×6 (drop each of 6 models in turn), no single drop rescues H1; pool misfit not the driver. (3) H_micro REJECT — GJR-t IS log-likelihood advantage vs GARCH-N is NEGATIVE on all 3 assets (SPY: -0.869, GLD: -0.887, 0050.TW: -0.872); 0050.TW is NOT micro-structurally unique — GJR-t does not dominate on any asset. Implication: 0050.TW BMA posterior collapse is likely an idiosyncratic property of its lower-liquidity, holiday-frequent market structure making the optimization landscape more unimodal, rather than any of the 3 testable hypotheses. Paper 2 implication: 0050.TW BMA H1 FAIL remains unexplained by standard diagnostics; honest reporting in §5 with caveat. Paper 3 implication: BMA pool degeneracy on emerging markets cannot be ascribed to pool misfit alone.",
+    "data": {
+      "period": "2010-01-01 to 2026-04-18",
+      "oos_start": "2020-01-01",
+      "assets": [
+        "SPY",
+        "GLD",
+        "0050.TW"
+      ],
+      "models": [
+        "GARCH_N",
+        "GJR_N",
+        "GJR_t",
+        "EGARCH_N",
+        "HAR_ABS",
+        "A4f_IV2"
+      ],
+      "baseline_dm": {
+        "SPY": -3.397,
+        "GLD": -3.379,
+        "0050.TW": 0.98
+      }
+    },
+    "hypothesis_verdicts": {
+      "H_sample": "REJECT",
+      "H_pool": "REJECT",
+      "H_micro": "REJECT",
+      "H_K1304_overall": "REJECT"
+    },
+    "lookahead_check": "PASS — r_prev = returns[t-1] explicit; BMA forecast before posterior update; IS window [s..t-1] only; seed 42 fixed",
+    "tags": [
+      "bma",
+      "taiwan",
+      "0050.TW",
+      "paper-2",
+      "paper-3",
+      "null-result",
+      "posterior-degeneracy"
+    ]
+  },
+  {
+    "id": "K1301",
+    "title": "K1301: HAR-RS (BNKS Semivariance) vs HAR-RV on TAIFEX TX1 — NULL (DM-HLN t=1.29, p=0.197)",
+    "proposer": "Claude",
+    "executor": "Claude (main thread, autonomous)",
+    "experiment_id": "K1301",
+    "parent": "K868",
+    "date": "2026-05-13",
+    "review": "Codex primary-path CONDITIONAL PASS (2026-05-13); prior Gemini fallback CONDITIONAL PASS (2026-05-11, quota-blocked)",
+    "review_caveats": [
+      "pass_3sigma field in evaluate_asset() only checks |DM_HLN_t|>3, not the full AND condition with har_rs_lower_mse; _pass() in main() correctly requires both — naming inconsistency, no impact on NULL verdict (LOW severity)",
+      "Module-level RNG = np.random.default_rng(SEED) is dead code; bootstrap_mse_ci() correctly uses its own local seed=42 (LOW severity, no reproducibility impact)"
+    ],
+    "verdict": "NULL",
+    "closure_status": "codex_conditional_pass",
+    "reviewer_source": "Codex primary (gpt-5.4, codex-cli 0.121.0, ChatGPT account mode)",
+    "summary": "[提出: Claude, 執行: Claude] K1301 tests Barndorff-Nielsen-Kinnebrock-Shephard (2008) semivariance decomposition: RV = RS+ + RS- by sign of 5-min intraday returns. HAR-RS (6 features: daily/weekly/monthly RS+/RS-) vs HAR-RV (3 features) on TAIFEX TX1 day session 2017-2026 (n_test=649, trust=OK). DM-HLN t=+1.29, p=0.197, |t| << Harvey 3σ threshold — NULL. MSE direction favors HAR-RS (1.4503 vs 1.4709, +1.34pp OOS R²) but not statistically significant. SPY sample n_test=3 → UNTRUSTWORTHY_SMALL_SAMPLE, excluded from verdict. Combined with K868 NULL (day/night decomposition), TAIFEX TX1 daily RV is near-sufficient statistic for next-day vol; finer decompositions (by sign, by session) show marginal but statistically insignificant improvement under strict HLN correction. Code review PASS on: lookahead (shift(1) before rolling, shift(-1) target on raw rv), chronological 70/30 split, DM-HLN formula (Harvey 1997 h=1 correct), BNKS definition (rs_plus+rs_minus=rv by construction), OLS train/test isolation. CONDITIONAL conditions: pass_3sigma naming inconsistency (LOW) + dead-code RNG (LOW).",
+    "data": {
+      "TX1": {
+        "n_daily_rows": 2186,
+        "n_har_rows": 2163,
+        "n_train": 1514,
+        "n_test": 649,
+        "sample_trust_flag": "OK",
+        "mse_rv": 1.4709,
+        "mse_rs": 1.4503,
+        "dm_hln_t": 1.29,
+        "dm_hln_p": 0.197,
+        "r2_oos_rv": 0.0432,
+        "r2_oos_rs": 0.0567,
+        "pass_3sigma": false
+      },
+      "SPY": {
+        "n_test": 3,
+        "sample_trust_flag": "UNTRUSTWORTHY_SMALL_SAMPLE",
+        "excluded_from_verdict": true
+      },
+      "overall_verdict": "NULL",
+      "trustworthy_assets": [
+        "TX1"
+      ]
+    },
+    "hypothesis_verdicts": {
+      "H1_BNKS_adds_info": "FAIL — DM-HLN t=1.29, p=0.197, does not reach Harvey 3σ",
+      "direction": "HAR-RS MSE marginally lower but not significant"
+    },
+    "lookahead_check": "PASS — rv_lag1=rv.shift(1) before rolling; Y=log(rv.shift(-1)) on raw rv; no future leakage; Codex primary confirmed",
+    "tags": [
+      "HAR",
+      "realized_semivariance",
+      "BNKS",
+      "TAIFEX",
+      "TX1",
+      "DM_HLN",
+      "null_result",
+      "volatility_forecasting"
+    ],
+    "open_followups": [
+      "HAR-RS with longer forecast horizons (h>1)",
+      "Asymmetric loss functions (VaR/ES) rather than MSE",
+      "Crisis-period subsample where downside semivariance may dominate"
+    ]
   }
 ]

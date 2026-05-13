@@ -7257,7 +7257,7 @@
     "title": "K1301 Codex primary-path review (post quota reset)",
     "priority": 3,
     "description": "K1301 HAR-RS (BNKS semivariance decomp) 已 Gemini CLI fallback CONDITIONAL PASS + 已實作 sample_trust_flag + clip diagnostics。Verdict = NULL (TX1 DM-HLN t=1.29, p=0.197, fails Harvey 3σ)。Per K1259 教訓 + K1262/K1262b fallback 連 fail 教訓：Gemini fallback PASS ≠ Codex primary-path PASS，closure_status=provisional_pending_codex_reverify。Codex CLI quota reset 2026-05-13 02:46 UTC 後派 `codex exec` 對 experiments/k1301/k1301_har_rs.py + k1301_results.json 做 primary-path review。通過 CONDITIONAL_PASS bar 才補寫 storage/memory/knowledge.json entry（已有 suggested entry in agent report）。Commit 26489588。",
-    "status": "running",
+    "status": "succeeded",
     "task_type": "paper_review",
     "blocked_reason": "codex_quota_reset_pending",
     "blocked_until": "2026-05-13T02:46:00Z",
@@ -7268,7 +7268,9 @@
       "post-quota-reset"
     ],
     "created_at": "2026-05-12T02:55:17Z",
-    "started_at": "2026-05-13T13:36:24.035491"
+    "started_at": "2026-05-13T13:36:24.035491",
+    "completed_at": "2026-05-13T13:40:35.372170",
+    "result": "Codex CONDITIONAL PASS; 2 LOW severity issues (neither affects NULL verdict); knowledge.json entry 2107 written"
   },
   {
     "id": "task-k1302-codex-review-primary",

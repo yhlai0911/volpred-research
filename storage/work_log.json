@@ -5848,5 +5848,31 @@
     "status": "running",
     "agent": "k1303-codex-review",
     "description": "K1303 HAR-CJ Codex primary-path code review; verify premature knowledge.json entry"
+  },
+  {
+    "task_id": "task-k1301-codex-review-primary",
+    "task_type": "paper_review",
+    "started_at": "2026-05-13T00:00:00",
+    "completed_at": "2026-05-13T13:39:47.912116",
+    "status": "succeeded",
+    "agent": "k1301-codex-review",
+    "description": "K1301 HAR-RS Codex primary-path code review — CONDITIONAL PASS. NULL verdict confirmed (TX1 DM-HLN t=1.29, p=0.197). knowledge.json K1301 entry written with closure_status=codex_conditional_pass. k1301_codex_review.md created.",
+    "verdict": "CONDITIONAL PASS",
+    "closure_status": "codex_conditional_pass",
+    "reviewer_source": "Codex primary (gpt-5.4, codex-cli 0.121.0)"
+  },
+  {
+    "timestamp": "2026-05-13T00:00:00+00:00",
+    "task_id": "task-k1303-codex-review-primary",
+    "task_type": "paper_review",
+    "experiment": "K1303",
+    "action": "Codex primary-path code review",
+    "verdict": "FAIL",
+    "status": "completed",
+    "summary": "Codex (gpt-5.4) reviewed k1303.py. FAIL: 2 HIGH issues (DM-HLN missing HAC; no formal BNS/TQ jump threshold), 2 MEDIUM (extra lag in feature alignment; OOS boundary not target-date clean), 1 LOW (IID bootstrap). NULL result t=-0.91 cannot be signed as definitive CJ-adds-no-value. K1303 knowledge.json marked requires_revision. Revision path: implement HAR-CJ-ABD with BNS/TQ formal jump test + standard X_t->Y_{t+1} alignment + HAC-DM.",
+    "files_modified": [
+      "experiments/k1303/k1303_codex_review.md",
+      "storage/memory/knowledge.json"
+    ]
   }
 ]
