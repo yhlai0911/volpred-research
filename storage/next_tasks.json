@@ -7682,7 +7682,8 @@
     "task_type": "experiment",
     "created_at": "2026-05-13T13:38:27.087603",
     "description": "K1137 has 60KB results, verdict=C_HAR_REGIME_INVARIANT. HAR+VIX passes all 3 VIX regimes. Paper 4 Channel 1 regime-invariant claim needs this KB entry. Document in knowledge.json with proper experiment_id, verdict, and all required fields.",
-    "source": "nosource_rescan_extension_top5"
+    "source": "nosource_rescan_extension_top5",
+    "blocked_reason": "prereq: task-k1137-codex-review-primary must PASS first"
   },
   {
     "id": "document_K1138_kb_entry",
@@ -7692,7 +7693,8 @@
     "task_type": "experiment",
     "created_at": "2026-05-13T13:38:27.087603",
     "description": "K1138 has 35KB results, verdict=MIXED. Equity portfolio (SPY/QQQ/IWM) has PASS cases. Research honesty requires documenting which (asset, model) combinations pass. Document in knowledge.json.",
-    "source": "nosource_rescan_extension_top5"
+    "source": "nosource_rescan_extension_top5",
+    "blocked_reason": "prereq: task-k1138-codex-review-primary must PASS first"
   },
   {
     "id": "document_K1135_kb_entry",
@@ -7702,7 +7704,8 @@
     "task_type": "experiment",
     "created_at": "2026-05-13T13:38:27.087603",
     "description": "K1135 has 23KB results, Scenario B verdict — Skew-t GAS commodities experiment; only VaR/ES improvement. Supports Paper 4 commodities sub-chapter. Document in knowledge.json.",
-    "source": "nosource_rescan_extension_top5"
+    "source": "nosource_rescan_extension_top5",
+    "blocked_reason": "prereq: task-k1135-codex-review-primary must PASS first"
   },
   {
     "id": "document_K1123_kb_entry",
@@ -7712,7 +7715,8 @@
     "task_type": "experiment",
     "created_at": "2026-05-13T13:38:27.087603",
     "description": "K1123 has 21KB results, verdict=FAIL. Cross-asset alt-data allocation failed. Null results must be documented per research honesty principle. Document in knowledge.json.",
-    "source": "nosource_rescan_extension_top5"
+    "source": "nosource_rescan_extension_top5",
+    "blocked_reason": "prereq: task-k1123-codex-review-primary must PASS first"
   },
   {
     "id": "document_K901_kb_entry",
@@ -7722,17 +7726,96 @@
     "task_type": "experiment",
     "created_at": "2026-05-13T13:38:27.087603",
     "description": "K901 has 29KB results, 13-market international VT: MDD improvement 13/13, Sharpe 0/13, GJR gamma>0 13/13. Is parent experiment for K1178 (Paper 3 Table 5). Document in knowledge.json.",
-    "source": "nosource_rescan_extension_top5"
+    "source": "nosource_rescan_extension_top5",
+    "blocked_reason": "prereq: task-k901-codex-review-primary must PASS first"
   },
   {
     "id": "K1303_revision_har_cj_abd",
     "title": "K1303 HAR-CJ revision: ABD jump threshold + HAC DM + standard 1-step lag",
-    "status": "pending",
+    "status": "running",
     "priority": 3,
     "task_type": "experiment",
     "created_at": "2026-05-13T13:41:06.316016",
     "description": "Codex FAIL found 3 issues in K1303 HAR-CJ: (1) DM-HLN missing HAC/Newey-West correction (use src/volpred/stats/model_evaluation.py:83 HAC version); (2) jump identification uses naive max(RV-BPV,0) with no BNS/TQ z-test threshold (beta magnitudes j_d=2224, j_w=4203, j_m=-8416 confirm noisy regressors); (3) feature X_t-1 vs target Y_t+1 = 2-step-ahead, not standard HAR-CJ 1-step. Fix: implement ABD/BNS z-test thresholded jump identification + correct HAC DM + standard 1-step. NULL verdict pending re-evaluation after fix.",
     "source": "K1303_codex_review_fail",
-    "prerequisite": "task-k1303-codex-review-primary"
+    "prerequisite": "task-k1303-codex-review-primary",
+    "claimed_at": "2026-05-13T05:49"
+  },
+  {
+    "id": "task-k1137-codex-review-primary",
+    "title": "K1137 Codex primary-path review (Gemini-only at run time)",
+    "status": "running",
+    "priority": 2,
+    "task_type": "paper_review",
+    "created_at": "2026-05-13T05:51:16",
+    "description": "K1137 had Gemini-only review (Codex quota exhausted 2026-04-17). Per K1259 protocol: subagent/Gemini PASS ≠ Codex primary closure. Run Codex primary review of experiments/k1137/k1137.py before writing knowledge.json. Prereq for document_K1137_kb_entry.",
+    "tags": [
+      "codex-review",
+      "K1137",
+      "paper4",
+      "har-regime"
+    ],
+    "claimed_at": "2026-05-13T05:51"
+  },
+  {
+    "id": "task-k1138-codex-review-primary",
+    "title": "K1138 Codex primary-path review (Gemini-only at run time)",
+    "status": "running",
+    "priority": 2,
+    "task_type": "paper_review",
+    "created_at": "2026-05-13T05:51:16",
+    "description": "K1138 had Gemini-only review (Codex quota exhausted 2026-04-17). Per K1259 protocol: subagent/Gemini PASS ≠ Codex primary closure. Run Codex primary review of experiments/k1138/k1138.py before writing knowledge.json. Prereq for document_K1138_kb_entry.",
+    "tags": [
+      "codex-review",
+      "K1138",
+      "paper4",
+      "equity-compendium"
+    ],
+    "claimed_at": "2026-05-13T05:51"
+  },
+  {
+    "id": "task-k1135-codex-review-primary",
+    "title": "K1135 Codex primary-path review (Gemini-only at run time)",
+    "status": "pending",
+    "priority": 3,
+    "task_type": "paper_review",
+    "created_at": "2026-05-13T05:51:16",
+    "description": "K1135 had Gemini-only review (Codex quota exhausted 2026-04-17). Per K1259 protocol: Gemini PASS ≠ Codex primary closure. Run Codex primary review of experiments/k1135/k1135.py before writing knowledge.json. Prereq for document_K1135_kb_entry.",
+    "tags": [
+      "codex-review",
+      "K1135",
+      "skew-t-gas",
+      "commodities"
+    ]
+  },
+  {
+    "id": "task-k1123-codex-review-primary",
+    "title": "K1123 Codex primary-path review (Gemini-only at run time)",
+    "status": "pending",
+    "priority": 3,
+    "task_type": "paper_review",
+    "created_at": "2026-05-13T05:51:16",
+    "description": "K1123 had Gemini-only review (Codex quota exhausted 2026-04-17). Per K1259 protocol: Gemini PASS ≠ Codex primary closure. Run Codex primary review of experiments/k1123/k1123.py before writing knowledge.json. Prereq for document_K1123_kb_entry.",
+    "tags": [
+      "codex-review",
+      "K1123",
+      "alt-data",
+      "allocation"
+    ]
+  },
+  {
+    "id": "task-k901-codex-review-primary",
+    "title": "K901 Codex primary-path review (no code review recorded)",
+    "status": "pending",
+    "priority": 3,
+    "task_type": "paper_review",
+    "created_at": "2026-05-13T05:51:16",
+    "description": "K901 (international VT 13 markets) ran 2026-04-05 with no code review recorded in README. Per experiments.md: all experiments need Codex review before knowledge.json write. Run Codex primary review of experiments/k901/k901_international_vt_13markets.py. Prereq for document_K901_kb_entry.",
+    "tags": [
+      "codex-review",
+      "K901",
+      "international",
+      "paper3"
+    ]
   }
 ]
