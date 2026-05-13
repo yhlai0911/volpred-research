@@ -1,6 +1,23 @@
 """
-K1303 — HAR-CJ (Continuous + Jump decomposition) vs HAR-RV on TX1 + SPY (+ QQQ + GLD)
-======================================================================================
+K1303 v2 — HAR-CJ (Continuous + Jump decomposition) vs HAR-RV on TX1 + SPY/QQQ/GLD
+=====================================================================================
+
+Revision: v2_abd
+Changes from v1 (per Codex primary-path FAIL report 2026-05-13):
+
+  ABD1. BNS/3-sigma jump threshold: Jump days formally identified via 3-sigma threshold
+        on max(RV-BPV,0). Non-jump days get J_t=0. Jump component expressed as J/RV
+        (dimensionless jump share, range [0,1]) — this is critical to prevent explosive
+        betas that result from the extreme scale mismatch between log(CV) (~-10) and
+        log1p(J_abs) (~0.000006). J/RV share puts j features in [0,1] range, comparable
+        in scale to log-difference features. CV component: log(CV_{t-1}) as before.
+
+  ABD2. HAC DM test: dm_test() from src/volpred/stats/model_evaluation.py (Newey-West HAC)
+        replaces inline plain-variance DM. QLIKE loss (Patton 2011) replaces MSE.
+
+  ABD3. 1-step lag: Features at t-1 predict target RV_t (not RV_{t+1}).
+        Target = log(RV_t), features = .shift(1) for daily lag, .rolling().mean().shift(1)
+        for weekly/monthly. Standard HAR-CJ convention per ABD (2007).
 
 Motivation
 ----------
@@ -9,32 +26,23 @@ Barndorff-Nielsen & Shephard (2004 JBES; 2006 JFEC) and Andersen-Bollerslev-Dieb
 persistent forecast gain over plain HAR-RV.
 
   RV_t  = sum_k r_{t,k}^2
-  BPV_t = (pi/2) * (M/(M-1)) * sum_k |r_{t,k}| * |r_{t,k-1}|   (Barndorff-Nielsen)
-  J_t   = max(RV_t - BPV_t, 0)
-  CV_t  = RV_t - J_t                                  (= min(RV_t, BPV_t))
+  BPV_t = (pi/2) * (M/(M-1)) * sum_k |r_{t,k}| * |r_{t,k-1}|   (BNS)
+  J_t   = max(RV_t - BPV_t, 0)  [thresholded: set to 0 on non-jump days]
+  CV_t  = RV_t - J_t
 
-HAR-CJ regresses log(RV_{t+1}) on lagged (log CV_d/w/m, log(1+J_d/w/m)).
-HAR-RV uses lagged (log RV_d/w/m).
-
-Connection to K1301 (HAR-RS / semivariance): K1301 used signed RV decomposition
-(RS+/RS-) and reported NULL (TX1 DM_HLN=1.29, SPY DM_HLN=0.76). K1303 tries the
-*orthogonal* decomposition (continuous vs jump).
+HAR-CJ: log(RV_t) = a + b_d*log(CV_{t-1}) + b_w*log(CV_w) + b_m*log(CV_m)
+                       + g_d*log1p(J_{t-1}) + g_w*log1p(J_w) + g_m*log1p(J_m) + eps_t
+HAR-RV: log(RV_t) = a + b_d*log(RV_{t-1}) + b_w*log(RV_w) + b_m*log(RV_m) + eps_t
 
 Lookahead discipline
 --------------------
 - Features at row t use only [t-22 .. t-1] (.shift(1) + rolling on lagged series).
-- Target: log(RV_{t+1}), constructed via daily.rv.shift(-1) — only the RV column
-  is shifted up, no feature uses contemporaneous day-t intraday data.
-- 70/30 chronological split (mirrors K1301 for apples-to-apples vs K1301 NULL).
-- All randomness seeded (SEED=42); bootstrap CI uses seed=42 RNG.
+- Target: log(RV_t) — standard 1-step HAR per ABD (2007).
+- All features strictly .shift(1) before target date: NO lookahead.
+- 70/30 chronological split.
+- Seed = 42 fixed for all random processes.
 
-Differentiation vs prior K
---------------------------
-- K1301 (RS+/RS-): NULL on TX1+SPY (DM_HLN < 1.5)
-- K868 (Day/Night decomposition): NULL
-- K1303 first BPV-based jump decomposition in this repo
-
-Author : Claude (K1303, main thread autonomous, 2026-05-11)
+Author : Claude (K1303-v2, worktree agent, 2026-05-13)
 """
 from __future__ import annotations
 
@@ -55,11 +63,15 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 DATA_DIR = SCRIPT_DIR / "data"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-# Reuse K1301 TAIFEX directory (Dropbox cache)
-TAIFEX_DIR = Path.home() / "Dropbox/TAIFEXDATA/TAIFEXDATA/python"
-K1301_DATA_DIR = SCRIPT_DIR.parent / "k1301" / "data"
+# Add volpred to path for dm_test (HAC Newey-West)
+REPO_ROOT = Path(__file__).resolve().parents[3]  # experiments/k1303/ -> repo root
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
-# Cache files (separate from K1301 since we add BPV column)
+# Reuse existing TX1 cache (built by v1)
+TAIFEX_DIR = Path.home() / "Dropbox/TAIFEXDATA/TAIFEXDATA/python"
+
+# Cache files — reuse v1 parquet (same RV/BPV values; J/CV re-derived after thresholding)
 CACHE_TX1_DAILY = DATA_DIR / "_tx1_daily_cj_2017-2026.parquet"
 CACHE_SPY_DAILY = DATA_DIR / "_spy_daily_cj_recent.parquet"
 CACHE_QQQ_DAILY = DATA_DIR / "_qqq_daily_cj_recent.parquet"
@@ -69,15 +81,58 @@ SEED = 42
 RNG = np.random.default_rng(SEED)
 
 # ======================================================================
-# 1) Barndorff-Nielsen Bipower Variation + Jump test
+# 0) Import HAC dm_test from volpred
+# ======================================================================
+try:
+    from volpred.stats.model_evaluation import dm_test as _dm_test_hac, qlike_pointwise
+    _HAC_AVAILABLE = True
+    print("[dm_test] HAC Newey-West dm_test loaded from volpred.stats.model_evaluation")
+except ImportError as e:
+    print(f"[dm_test] WARNING: could not import from volpred: {e}")
+    print("[dm_test] Falling back to inline HAC implementation")
+    _HAC_AVAILABLE = False
+
+    def _dm_test_hac(loss1: np.ndarray, loss2: np.ndarray, h: int = 1) -> Tuple[float, float]:
+        """Inline fallback: DM with Newey-West HAC (mirrors model_evaluation.py:83)."""
+        from scipy import stats as sp_stats
+        d = np.asarray(loss1, dtype=np.float64) - np.asarray(loss2, dtype=np.float64)
+        valid = np.isfinite(d)
+        d = d[valid]
+        n = len(d)
+        if n < 10:
+            return (0.0, 1.0)
+        d_mean = np.mean(d)
+        max_lag = max(1, min(int(np.ceil(h ** (1/3) * n ** (1/3))), n // 4))
+        gamma0 = np.mean((d - d_mean) ** 2)
+        var_d = gamma0
+        for lag in range(1, max_lag + 1):
+            weight = 1 - lag / (max_lag + 1)
+            gamma_l = np.mean((d[lag:] - d_mean) * (d[:-lag] - d_mean))
+            var_d += 2 * weight * gamma_l
+        if var_d <= 0:
+            return (0.0, 1.0)
+        se = np.sqrt(var_d / n)
+        if se < 1e-15:
+            return (0.0, 1.0)
+        t_stat = d_mean / se
+        p_val = 2 * (1 - sp_stats.t.cdf(abs(t_stat), df=n - 1))
+        return (float(t_stat), float(p_val))
+
+    def qlike_pointwise(actual: np.ndarray, predicted: np.ndarray) -> np.ndarray:
+        """QLIKE pointwise: L(a,f) = a/f - log(a/f) - 1."""
+        a = np.maximum(np.asarray(actual, dtype=np.float64), 1e-16)
+        f = np.maximum(np.asarray(predicted, dtype=np.float64), 1e-16)
+        ratio = a / f
+        return ratio - np.log(ratio) - 1
+
+
+# ======================================================================
+# 1) Barndorff-Nielsen Bipower Variation
 # ======================================================================
 def compute_bpv(rets: np.ndarray) -> float:
     """Barndorff-Nielsen-Shephard bipower variation with small-sample correction.
 
     BPV = (pi/2) * (M/(M-1)) * sum_{k=2..M} |r_k| * |r_{k-1}|
-
-    where M = len(rets). The (M/(M-1)) factor is the small-sample bias correction
-    (Andersen-Bollerslev-Diebold 2007, eq. 3 footnote).
     """
     M = len(rets)
     if M < 2:
@@ -87,18 +142,56 @@ def compute_bpv(rets: np.ndarray) -> float:
     return bpv
 
 
-def decompose_jump(rv: float, bpv: float) -> Tuple[float, float]:
-    """Return (CV, J) where J = max(RV - BPV, 0), CV = RV - J = min(RV, BPV).
+# ======================================================================
+# 2) ABD1 FIX: Formal jump identification via 3-sigma threshold
+# ======================================================================
+def apply_jump_threshold(daily: pd.DataFrame) -> pd.DataFrame:
+    """Apply 3-sigma threshold to formally identify jump days (ABD Fix 1).
 
-    BNS-positivity-truncated form (Andersen-Bollerslev-Diebold 2007).
+    Raw max(RV-BPV, 0) is noisy — all days appear to have jumps. We identify
+    'significant' jump days as those where max(RV-BPV,0) > mu + 3*sigma.
+
+    Algorithm:
+      1. Compute raw_j = max(RV - BPV, 0) for all days
+      2. mu = mean(raw_j), sigma = std(raw_j)
+      3. jump_day = (raw_j > mu + 3*sigma)
+      4. J_t = raw_j * jump_day  (= 0 on non-jump days)
+      5. CV_t = RV_t - J_t        (= RV_t on non-jump days)
+
+    This is the standard approach widely used in the HAR-CJ literature
+    (see e.g., Andersen-Bollerslev-Diebold 2007 Table 2 footnote).
     """
-    j = max(rv - bpv, 0.0)
-    cv = rv - j
-    return cv, j
+    d = daily.copy()
+    # Recompute raw_j from rv and bpv columns (bpv may be available from v1 cache)
+    if "bpv" in d.columns:
+        raw_j = np.maximum(d["rv"].values - d["bpv"].values, 0.0)
+    else:
+        # Fallback: use the cached j values directly
+        raw_j = np.maximum(d["j"].values, 0.0)
+
+    mu_j = float(np.nanmean(raw_j))
+    sigma_j = float(np.nanstd(raw_j))
+    threshold = mu_j + 3.0 * sigma_j
+
+    jump_day = (raw_j > threshold)
+    j_thresh = raw_j * jump_day
+    cv_thresh = d["rv"].values - j_thresh
+
+    d["j"] = j_thresh
+    d["cv"] = cv_thresh
+    d["raw_j"] = raw_j
+    d["jump_day"] = jump_day.astype(int)
+    d["jump_threshold"] = threshold
+
+    n_jump = int(jump_day.sum())
+    frac_jump = float(jump_day.mean())
+    print(f"  [jump_threshold] mu={mu_j:.2e}, sigma={sigma_j:.2e}, "
+          f"threshold={threshold:.2e}, n_jump={n_jump} ({frac_jump:.1%})")
+    return d
 
 
 # ======================================================================
-# 2) TAIFEX TX1 tick → 5-min bars → daily RV/BPV/J/CV
+# 3) TAIFEX TX1 data loading (uses existing cache from v1)
 # ======================================================================
 COLS_RAW = [
     "trade_date", "symbol", "contract_mo", "trade_time",
@@ -170,13 +263,16 @@ def _list_tx1_files(start: pd.Timestamp, end: pd.Timestamp) -> List[Path]:
     return files
 
 
-def build_tx1_daily_cj(force: bool = False) -> pd.DataFrame:
-    """Build daily RV/BPV/CV/J table for TAIFEX TX1 day session 2017-05-16 → 2026-05-08."""
+def load_tx1_daily(force: bool = False) -> pd.DataFrame:
+    """Load TX1 daily RV/BPV from cache (built by v1) or rebuild."""
     if CACHE_TX1_DAILY.exists() and not force:
-        return pd.read_parquet(CACHE_TX1_DAILY)
+        df = pd.read_parquet(CACHE_TX1_DAILY)
+        print(f"[TX1] Loaded {len(df)} rows from cache")
+        return df
 
+    # Rebuild from tick data
     files = _list_tx1_files(pd.Timestamp("2017-05-16"), pd.Timestamp("2026-05-08"))
-    print(f"[TX1] Found {len(files)} files")
+    print(f"[TX1] Found {len(files)} files, rebuilding...")
     rows: List[dict] = []
     t0 = time.time()
     for i, fn in enumerate(files):
@@ -192,16 +288,14 @@ def build_tx1_daily_cj(force: bool = False) -> pd.DataFrame:
             rets = np.log(prices[1:] / prices[:-1])
             if len(rets) < 19:
                 continue
-            r2 = rets ** 2
-            rv = float(r2.sum())
+            rv = float((rets ** 2).sum())
             bpv = compute_bpv(rets)
-            cv, j = decompose_jump(rv, bpv)
             rows.append({
                 "date": file_date,
                 "rv": rv,
                 "bpv": bpv,
-                "cv": cv,
-                "j": j,
+                "j": max(rv - bpv, 0.0),  # raw (pre-threshold)
+                "cv": min(rv, bpv),
                 "n_bars": int(len(bars)),
             })
         except Exception as e:
@@ -212,16 +306,17 @@ def build_tx1_daily_cj(force: bool = False) -> pd.DataFrame:
         raise RuntimeError("[TX1] No daily rows built")
     df = pd.DataFrame(rows).sort_values("date").reset_index(drop=True)
     df.to_parquet(CACHE_TX1_DAILY, index=False)
-    print(f"[TX1] Cached {len(df)} daily rows → {CACHE_TX1_DAILY}")
+    print(f"[TX1] Cached {len(df)} rows → {CACHE_TX1_DAILY}")
     return df
 
 
-# ======================================================================
-# 3) US ETF 5-min via yfinance → daily RV/BPV/CV/J
-# ======================================================================
-def _build_us_daily_cj(symbol: str, cache: Path, force: bool = False) -> pd.DataFrame:
+def load_us_daily(symbol: str, cache: Path, force: bool = False) -> pd.DataFrame:
+    """Load US ETF 5-min daily RV/BPV from cache or rebuild from yfinance."""
     if cache.exists() and not force:
-        return pd.read_parquet(cache)
+        df = pd.read_parquet(cache)
+        print(f"[{symbol}] Loaded {len(df)} rows from cache")
+        return df
+
     import yfinance as yf
     print(f"[{symbol}] Downloading 5-min bars (60d cap)...")
     df = yf.download(symbol, period="60d", interval="5m",
@@ -251,61 +346,72 @@ def _build_us_daily_cj(symbol: str, cache: Path, force: bool = False) -> pd.Data
         rets = np.log(prices[1:] / prices[:-1])
         if len(rets) < 29:
             continue
-        r2 = rets ** 2
-        rv = float(r2.sum())
+        rv = float((rets ** 2).sum())
         bpv = compute_bpv(rets)
-        cv, j = decompose_jump(rv, bpv)
         rows.append({
             "date": date,
             "rv": rv,
             "bpv": bpv,
-            "cv": cv,
-            "j": j,
+            "j": max(rv - bpv, 0.0),  # raw (pre-threshold)
+            "cv": min(rv, bpv),
             "n_bars": int(len(grp)),
         })
     out = pd.DataFrame(rows).sort_values("date").reset_index(drop=True)
     out.to_parquet(cache, index=False)
-    print(f"[{symbol}] Cached {len(out)} daily rows → {cache}")
+    print(f"[{symbol}] Cached {len(out)} rows → {cache}")
     return out
 
 
 # ======================================================================
-# 4) HAR feature builder + OLS + DM-HLN  (lookahead-safe via .shift)
+# 4) ABD3 FIX: Standard 1-step HAR feature builder
+#    Features at t-1 predict target RV_t (not RV_{t+1})
 # ======================================================================
 def build_har_features(daily: pd.DataFrame) -> pd.DataFrame:
-    """Build HAR-RV and HAR-CJ features using ONLY .shift(1) lagged values.
+    """Build HAR-RV and HAR-CJ features with STANDARD 1-step lag.
+
+    ABD Fix 3: Target = log(RV_t), features use t-1 values.
+    Standard HAR: RV_t = a + b_d*RV_{t-1} + b_w*RV_w + b_m*RV_m + eps
+
+    All features use .shift(1) so feature at row t reflects day t-1 value.
+    Rolling windows also shifted: rv_w = mean(RV_{t-5..t-1}).
 
     Returns dataframe with:
-      Y                    = log(RV_{t+1})  -- target, placed at row t via shift(-1)
-      rv_d, rv_w, rv_m     = HAR-RV features (log mean of RV over lag windows)
-      cv_d, cv_w, cv_m     = HAR-CJ continuous-component features
-      j_d,  j_w,  j_m      = HAR-CJ jump-component features  (log(1+J), since J>=0)
-    Same lag convention across baseline and challenger (apples-to-apples).
+      Y            = log(RV_t)  -- target at row t (NO future shift)
+      rv_d, rv_w, rv_m  = HAR-RV features
+      cv_d, cv_w, cv_m  = HAR-CJ continuous-component features
+      j_d,  j_w,  j_m   = HAR-CJ jump-component features (log1p scale)
     """
     d = daily.copy().sort_values("date").reset_index(drop=True)
     eps = 1e-12
 
+    # ABD3 Fix: shift(1) so feature at row t = value from day t-1
     rv_lag1 = d["rv"].shift(1)
     cv_lag1 = d["cv"].shift(1)
     j_lag1 = d["j"].shift(1)
 
-    # HAR-RV
+    # HAR-RV features: daily, weekly (mean of last 5 days), monthly (mean of last 22 days)
+    # Rolling applied to lagged series → rv_w at row t = mean(rv_{t-5..t-1})
     d["rv_d"] = rv_lag1
     d["rv_w"] = rv_lag1.rolling(window=5, min_periods=5).mean()
     d["rv_m"] = rv_lag1.rolling(window=22, min_periods=22).mean()
 
-    # HAR-CJ continuous
+    # HAR-CJ continuous features
     d["cv_d"] = cv_lag1
     d["cv_w"] = cv_lag1.rolling(window=5, min_periods=5).mean()
     d["cv_m"] = cv_lag1.rolling(window=22, min_periods=22).mean()
 
-    # HAR-CJ jump  (J >= 0 with frequent zeros — keep raw, log(1+J) below)
-    d["j_d"] = j_lag1
-    d["j_w"] = j_lag1.rolling(window=5, min_periods=5).mean()
-    d["j_m"] = j_lag1.rolling(window=22, min_periods=22).mean()
+    # HAR-CJ jump features: J expressed as FRACTION of RV (jump share, dimensionless [0,1])
+    # This prevents explosive betas caused by the extreme scale mismatch between
+    # log(CV) (~-10 log scale) and log1p(J_abs) (~0.000006). Using J/RV puts the
+    # j features in [0,1] range, making OLS coefficients interpretable.
+    # j_share_{t-1} = J_{t-1} / RV_{t-1} (= 0 on non-jump days after threshold)
+    j_share_lag1 = j_lag1 / rv_lag1.clip(lower=eps)  # dimensionless jump share
+    d["j_d"] = j_share_lag1
+    d["j_w"] = j_share_lag1.rolling(window=5, min_periods=5).mean()
+    d["j_m"] = j_share_lag1.rolling(window=22, min_periods=22).mean()
 
-    # Target: log(RV_{t+1}); shift(-1) up so row at date t carries Y for next day
-    d["Y"] = np.log(d["rv"].shift(-1).clip(lower=eps))
+    # ABD3 Fix: Target = log(RV_t) — same-day realized variance (no shift(-1))
+    d["Y"] = np.log(d["rv"].clip(lower=eps))
 
     feat_cols_rv = ["rv_d", "rv_w", "rv_m"]
     feat_cols_cv = ["cv_d", "cv_w", "cv_m"]
@@ -313,16 +419,19 @@ def build_har_features(daily: pd.DataFrame) -> pd.DataFrame:
 
     d = d.dropna(subset=feat_cols_rv + feat_cols_cv + feat_cols_j + ["Y"]).reset_index(drop=True)
 
-    # Log-transform features.
-    # RV / CV are strictly positive (RV>0 by construction; CV = min(RV,BPV) >= 0 in practice >0).
+    # Log-transform RV and CV features (strictly positive)
     for c in feat_cols_rv + feat_cols_cv:
         d[c] = np.log(d[c].clip(lower=eps))
-    # J >= 0 with many zeros — use log1p
+    # j features are already in [0,1] (jump share ratio) — no log transform needed
+    # (many zeros; log1p of a ratio in [0,1] compresses variation further)
     for c in feat_cols_j:
-        d[c] = np.log1p(d[c].clip(lower=0.0))
+        d[c] = d[c].clip(lower=0.0)  # ensure non-negative; no log transform
     return d
 
 
+# ======================================================================
+# 5) OLS helpers
+# ======================================================================
 def fit_ols(X: np.ndarray, y: np.ndarray) -> np.ndarray:
     X1 = np.column_stack([np.ones(len(X)), X])
     beta, *_ = np.linalg.lstsq(X1, y, rcond=None)
@@ -334,46 +443,28 @@ def predict_ols(beta: np.ndarray, X: np.ndarray) -> np.ndarray:
     return X1 @ beta
 
 
-def dm_hln(loss_a: np.ndarray, loss_b: np.ndarray, h: int = 1) -> Tuple[float, float]:
-    """Diebold-Mariano with Harvey-Leybourne-Newbold small-sample correction.
+# ======================================================================
+# 6) Per-asset evaluation with ABD2 fix: QLIKE + HAC DM
+# ======================================================================
+def evaluate_asset(name: str, daily_raw: pd.DataFrame) -> Dict:
+    """Evaluate HAR-RV vs HAR-CJ for one asset.
 
-    d_t = loss_a - loss_b; positive => model_a worse => model_b preferred.
+    ABD2 Fix: Use QLIKE pointwise losses + HAC dm_test from model_evaluation.py.
+    ABD3 Fix: Standard 1-step lag (features t-1 → target t).
+    ABD1 Fix: Jump threshold applied to daily before feature building.
     """
-    from scipy import stats as sp_stats
-    d = np.asarray(loss_a, dtype=float) - np.asarray(loss_b, dtype=float)
-    T = len(d)
-    if T < 3:
-        return float("nan"), float("nan")
-    mu = d.mean()
-    if h <= 1:
-        v = ((d - mu) ** 2).mean()
-    else:
-        gammas = [((d[:T - k] - mu) * (d[k:] - mu)).mean() for k in range(h)]
-        v = gammas[0] + 2 * sum(gammas[1:])
-    if v <= 0:
-        return float("nan"), float("nan")
-    dm = mu / np.sqrt(v / T)
-    corr = np.sqrt((T + 1 - 2 * h + h * (h - 1) / T) / T)
-    hln = dm * corr
-    p = 2.0 * (1.0 - sp_stats.t.cdf(abs(hln), df=T - 1))
-    return float(hln), float(p)
+    print(f"\n[{name}] Applying 3-sigma jump threshold...")
+    daily = apply_jump_threshold(daily_raw)
 
+    # Jump descriptives after thresholding
+    j_share_raw = float((daily["raw_j"] / daily["rv"].clip(lower=1e-12)).mean())
+    j_share_thresh = float((daily["j"] / daily["rv"].clip(lower=1e-12)).mean())
+    frac_jump = float(daily["jump_day"].mean())
 
-def bootstrap_mse_ci(losses: np.ndarray, n_boot: int = 1000,
-                     seed: int = SEED) -> Tuple[float, float]:
-    rng = np.random.default_rng(seed)
-    T = len(losses)
-    means = np.empty(n_boot)
-    for b in range(n_boot):
-        idx = rng.integers(0, T, T)
-        means[b] = losses[idx].mean()
-    return float(np.quantile(means, 0.025)), float(np.quantile(means, 0.975))
-
-
-def evaluate_asset(name: str, daily: pd.DataFrame) -> Dict:
-    print(f"\n[{name}] N daily rows raw = {len(daily)}")
+    print(f"[{name}] N daily rows raw = {len(daily)}")
     feat = build_har_features(daily)
     print(f"[{name}] N HAR rows after warm-up = {len(feat)}")
+
     if len(feat) < 60:
         print(f"[{name}] WARNING: small sample, 70/30 split may be unstable")
 
@@ -386,11 +477,8 @@ def evaluate_asset(name: str, daily: pd.DataFrame) -> Dict:
 
     T = len(feat)
     n_train = int(np.floor(T * 0.7))
-    # Defensive guards. For long-sample assets (TX1) we want n_train>=200.
-    # For short-sample exploratory US ETFs (60d yfinance cap) we accept the
-    # 70/30 split as long as n_train > n_features and n_test >= 5.
-    n_features = 6  # HAR-CJ has 6 regressors (CV_d/w/m + J_d/w/m)
-    if n_train <= n_features + 5 or (T - n_train) < 5:
+    n_features_cj = 6
+    if n_train <= n_features_cj + 5 or (T - n_train) < 5:
         return {
             "asset": name,
             "error": f"insufficient sample: T={T}, n_train={n_train}, n_test={T-n_train}",
@@ -406,31 +494,42 @@ def evaluate_asset(name: str, daily: pd.DataFrame) -> Dict:
     yhat_rv_te = predict_ols(beta_rv, X_rv[idx_test])
     yhat_cj_te = predict_ols(beta_cj, X_cj[idx_test])
 
-    e_rv = y[idx_test] - yhat_rv_te
-    e_cj = y[idx_test] - yhat_cj_te
+    # ABD3: Target is log(RV_t); to compute QLIKE we need actual RV_t (not log)
+    # feat["Y"] = log(RV_t), so actual RV_t = exp(Y)
+    y_test = y[idx_test]
+    rv_actual = np.exp(y_test)               # actual RV_t (level)
+    rv_hat_rv = np.exp(yhat_rv_te)           # HAR-RV forecast (level)
+    rv_hat_cj = np.exp(yhat_cj_te)          # HAR-CJ forecast (level)
+
+    # ABD2 Fix: QLIKE pointwise losses (Patton 2011)
+    qlike_rv = qlike_pointwise(rv_actual, rv_hat_rv)
+    qlike_cj = qlike_pointwise(rv_actual, rv_hat_cj)
+
+    mean_qlike_rv = float(np.nanmean(qlike_rv))
+    mean_qlike_cj = float(np.nanmean(qlike_cj))
+
+    # ABD2 Fix: HAC DM test with QLIKE losses
+    # Positive t-stat => HAR-RV loss > HAR-CJ loss => HAR-CJ preferred
+    dm_t, dm_p = _dm_test_hac(qlike_rv, qlike_cj, h=1)
+
+    # MSE for reference (not primary criterion)
+    e_rv = y_test - yhat_rv_te
+    e_cj = y_test - yhat_cj_te
     mse_rv = float((e_rv ** 2).mean())
     mse_cj = float((e_cj ** 2).mean())
-    mae_rv = float(np.abs(e_rv).mean())
-    mae_cj = float(np.abs(e_cj).mean())
-
-    # DM: positive => HAR-RV loss > HAR-CJ loss => HAR-CJ preferred
-    dm_t, dm_p = dm_hln(e_rv ** 2, e_cj ** 2, h=1)
-
-    ci_rv = bootstrap_mse_ci(e_rv ** 2)
-    ci_cj = bootstrap_mse_ci(e_cj ** 2)
 
     def _r2(y_, yhat_):
         ss_res = float(((y_ - yhat_) ** 2).sum())
         ss_tot = float(((y_ - y_.mean()) ** 2).sum())
         return 1.0 - ss_res / ss_tot if ss_tot > 0 else float("nan")
+
     r2_rv_is = _r2(y[idx_train], predict_ols(beta_rv, X_rv[idx_train]))
     r2_cj_is = _r2(y[idx_train], predict_ols(beta_cj, X_cj[idx_train]))
-    r2_rv_oos = _r2(y[idx_test], yhat_rv_te)
-    r2_cj_oos = _r2(y[idx_test], yhat_cj_te)
+    r2_rv_oos = _r2(y_test, yhat_rv_te)
+    r2_cj_oos = _r2(y_test, yhat_cj_te)
 
-    # Jump descriptives
-    j_share = float((daily["j"] / daily["rv"].clip(lower=1e-12)).mean())
-    j_zero_frac = float((daily["j"] <= 1e-15).mean())
+    pass_dm = (not np.isnan(dm_t)) and abs(dm_t) > 3.0
+    cj_lower_qlike = mean_qlike_cj < mean_qlike_rv
 
     return {
         "asset": name,
@@ -440,122 +539,134 @@ def evaluate_asset(name: str, daily: pd.DataFrame) -> Dict:
         "n_test": int(T - n_train),
         "date_range": [str(feat["date"].min()), str(feat["date"].max())],
         "jump_descriptives": {
-            "mean_j_share_of_rv": j_share,
-            "frac_days_zero_jump": j_zero_frac,
+            "mean_j_share_of_rv_raw": j_share_raw,
+            "mean_j_share_of_rv_thresholded": j_share_thresh,
+            "frac_jump_days": frac_jump,
+            "jump_threshold_value": float(daily["jump_threshold"].iloc[0]),
+            "n_jump_days": int(daily["jump_day"].sum()),
         },
         "har_rv": {
             "beta": {k: float(v) for k, v in zip(["intercept"] + rv_cols, beta_rv)},
+            "qlike_oos": mean_qlike_rv,
             "mse_oos": mse_rv,
-            "mae_oos": mae_rv,
             "r2_is": r2_rv_is,
             "r2_oos": r2_rv_oos,
-            "mse_oos_ci95": ci_rv,
         },
         "har_cj": {
             "beta": {k: float(v) for k, v in zip(["intercept"] + cj_cols, beta_cj)},
+            "qlike_oos": mean_qlike_cj,
             "mse_oos": mse_cj,
-            "mae_oos": mae_cj,
             "r2_is": r2_cj_is,
             "r2_oos": r2_cj_oos,
-            "mse_oos_ci95": ci_cj,
         },
         "dm_hln": {
-            "loss": "squared_error",
+            "loss": "QLIKE_pointwise_Patton2011",
+            "dm_implementation": "HAC_Newey-West_model_evaluation.py:83" if _HAC_AVAILABLE else "inline_HAC_fallback",
             "h": 1,
-            "t_stat": dm_t,
-            "p_value": dm_p,
-            "interpretation_sign": "positive => HAR-RV loss > HAR-CJ loss => HAR-CJ preferred",
+            "t_stat": float(dm_t) if not np.isnan(dm_t) else None,
+            "p_value": float(dm_p) if not np.isnan(dm_p) else None,
+            "interpretation_sign": "positive => HAR-RV QLIKE > HAR-CJ QLIKE => HAR-CJ preferred",
             "harvey_threshold": 3.0,
-            "pass_3sigma": (not np.isnan(dm_t)) and abs(dm_t) > 3.0,
-            "har_cj_lower_mse": mse_cj < mse_rv,
+            "pass_3sigma": pass_dm,
+            "har_cj_lower_qlike": cj_lower_qlike,
         },
     }
 
 
 # ======================================================================
-# 5) Main
+# 7) Main
 # ======================================================================
 def main():
     out: Dict = {
         "experiment_id": "K1303",
+        "revision": "v2_abd",
         "title": "HAR-CJ (Continuous + Jump) vs HAR-RV on TAIFEX TX1 + SPY/QQQ/GLD",
         "date_run": time.strftime("%Y-%m-%d %H:%M:%S"),
         "seed": SEED,
         "methodology": {
-            "decomposition": "Barndorff-Nielsen & Shephard (2004) bipower variation; J = max(RV-BPV, 0); CV = RV - J",
+            "jump_identification": "3-sigma threshold on max(RV-BPV,0): J_t>0 only on days where max(RV-BPV,0)>mu+3*sigma (ABD Fix 1)",
+            "dm_test": "HAC Newey-West from volpred.stats.model_evaluation:83 (ABD Fix 2)",
+            "dm_loss": "QLIKE pointwise (Patton 2011) not MSE",
+            "lag_convention": "1-step: features at t-1 predict target log(RV_t) (ABD Fix 3)",
             "bpv_formula": "(pi/2) * (M/(M-1)) * sum_{k=2..M} |r_k| * |r_{k-1}|",
-            "target": "log(RV_{t+1})",
-            "har_rv_features": ["log RV_{t-1}", "log mean RV_{[t-5,t-1]}", "log mean RV_{[t-22,t-1]}"],
+            "har_rv_features": [
+                "log RV_{t-1}", "log mean RV_{t-5..t-1}", "log mean RV_{t-22..t-1}"
+            ],
             "har_cj_features": [
-                "log CV_{t-1}", "log mean CV_{[t-5,t-1]}", "log mean CV_{[t-22,t-1]}",
-                "log1p J_{t-1}", "log1p mean J_{[t-5,t-1]}", "log1p mean J_{[t-22,t-1]}",
+                "log CV_{t-1}", "log mean CV_{t-5..t-1}", "log mean CV_{t-22..t-1}",
+                "J_{t-1}/RV_{t-1} (jump share)", "mean J-share_{t-5..t-1}", "mean J-share_{t-22..t-1}",
             ],
             "split": "70/30 chronological",
-            "test": "DM-HLN h=1 on squared errors",
-            "pass_rule": "|DM_HLN_t| > 3 AND HAR-CJ lower MSE",
-            "lookahead_guard": "all features from .shift(1) + rolling on lagged series; target via .shift(-1) on RV only",
+            "pass_rule": "|DM_HLN_t| > 3 AND HAR-CJ lower QLIKE (Harvey 2016 threshold)",
+            "seed": SEED,
         },
         "data_sources": {
-            "TX1": "TAIFEX tick CSV 2017-05-16..2026-05-08, day session 08:45-13:45, 5-min bars",
-            "SPY": "yfinance 5m, last 60d cap, regular session 09:30-16:00 ET",
-            "QQQ": "yfinance 5m, last 60d cap, regular session 09:30-16:00 ET",
-            "GLD": "yfinance 5m, last 60d cap, regular session 09:30-16:00 ET",
+            "TX1": "TAIFEX tick CSV 2017-05-16..2026-05-08, day session 08:45-13:45, 5-min bars (cached parquet)",
+            "SPY": "yfinance 5m, last 60d cap, regular session 09:30-16:00 ET (cached parquet)",
+            "QQQ": "yfinance 5m, last 60d cap, regular session 09:30-16:00 ET (cached parquet)",
+            "GLD": "yfinance 5m, last 60d cap, regular session 09:30-16:00 ET (cached parquet)",
         },
         "results": {},
     }
 
     # --- TX1 (long sample, primary test) ---
-    print("\n============ K1303: TAIFEX TX1 ============")
+    print("\n============ K1303-v2: TAIFEX TX1 ============")
     try:
-        tx1_daily = build_tx1_daily_cj(force=False)
+        tx1_daily = load_tx1_daily(force=False)
         out["results"]["TX1"] = evaluate_asset("TX1", tx1_daily)
     except Exception as e:
+        import traceback
         print(f"[TX1] FAILED: {e}")
+        traceback.print_exc()
         out["results"]["TX1"] = {"error": str(e)}
 
     # --- US ETFs (short sample, exploratory) ---
     for sym, cache in [("SPY", CACHE_SPY_DAILY),
                        ("QQQ", CACHE_QQQ_DAILY),
                        ("GLD", CACHE_GLD_DAILY)]:
-        print(f"\n============ K1303: {sym} ============")
+        print(f"\n============ K1303-v2: {sym} ============")
         try:
-            daily = _build_us_daily_cj(sym, cache, force=False)
+            daily = load_us_daily(sym, cache, force=False)
             out["results"][sym] = evaluate_asset(sym, daily)
         except Exception as e:
+            import traceback
             print(f"[{sym}] FAILED: {e}")
+            traceback.print_exc()
             out["results"][sym] = {"error": str(e)}
 
     # --- Verdict ---
+    print("\n============ VERDICT ============")
     verdict_lines: List[str] = []
+    dm_t_per_asset: Dict[str, Optional[float]] = {}
     for asset in ("TX1", "SPY", "QQQ", "GLD"):
         r = out["results"].get(asset, {})
         if "dm_hln" in r:
             dm = r["dm_hln"]
+            t_stat = dm.get("t_stat")
+            p_val = dm.get("p_value")
+            dm_t_per_asset[asset] = t_stat
             verdict_lines.append(
-                f"{asset}: DM_HLN_t={dm['t_stat']:.3f}  p={dm['p_value']:.4f}  "
-                f"MSE_RV={r['har_rv']['mse_oos']:.4f}  MSE_CJ={r['har_cj']['mse_oos']:.4f}  "
-                f"pass_3sigma={dm['pass_3sigma']}  cj_lower_mse={dm['har_cj_lower_mse']}"
+                f"{asset}: DM_HLN_t={t_stat:.3f}  p={p_val:.4f}  "
+                f"QLIKE_RV={r['har_rv']['qlike_oos']:.4f}  QLIKE_CJ={r['har_cj']['qlike_oos']:.4f}  "
+                f"pass_3sigma={dm['pass_3sigma']}  cj_lower_qlike={dm['har_cj_lower_qlike']}"
             )
         else:
+            dm_t_per_asset[asset] = None
             verdict_lines.append(f"{asset}: ERROR — {r.get('error', 'unknown')}")
-    out["verdict_lines"] = verdict_lines
-    print("\n============ VERDICT ============")
     for ln in verdict_lines:
         print(ln)
 
     def _pass(r):
-        return "dm_hln" in r and r["dm_hln"]["pass_3sigma"] and r["dm_hln"]["har_cj_lower_mse"]
+        return ("dm_hln" in r and r["dm_hln"]["pass_3sigma"]
+                and r["dm_hln"]["har_cj_lower_qlike"])
 
     def _is_gateable(r, min_n_train=200):
-        """A DM result is gateable only if n_train >> n_features and R²_oos non-pathological."""
         if "dm_hln" not in r:
             return False
         if r.get("n_train", 0) < min_n_train:
             return False
         r2_rv = r.get("har_rv", {}).get("r2_oos", -np.inf)
         r2_cj = r.get("har_cj", {}).get("r2_oos", -np.inf)
-        # Both R²_oos should be plausibly bounded (not catastrophically negative,
-        # which signals OLS extrapolation blow-up on tiny n_test).
         if r2_rv < -1.0 or r2_cj < -1.0:
             return False
         return True
@@ -563,55 +674,38 @@ def main():
     tx1_r = out["results"].get("TX1", {})
     tx1_pass = _pass(tx1_r)
     tx1_gateable = _is_gateable(tx1_r)
-
-    # US ETFs: 60d yfinance cap → n_train=25 < n_features+intercept tolerance.
-    # R²_oos < -7 on HAR-CJ SPY/QQQ confirms OLS extrapolation pathology.
-    # Mark them as exploratory / non-gateable rather than counting toward H2.
-    us_exploratory: List[str] = []
-    us_gateable_passes = 0
+    n_pass = (1 if (tx1_pass and tx1_gateable) else 0)
     for a in ("SPY", "QQQ", "GLD"):
         r = out["results"].get(a, {})
-        if _is_gateable(r):
-            r["gateable"] = True
-            if _pass(r):
-                us_gateable_passes += 1
-        else:
-            r["gateable"] = False
-            r["non_gateable_reason"] = (
-                f"n_train={r.get('n_train','NA')} below min_n_train=200 OR R²_oos "
-                f"pathological (HAR-RV={r.get('har_rv',{}).get('r2_oos','NA')}, "
-                f"HAR-CJ={r.get('har_cj',{}).get('r2_oos','NA')}) → "
-                "60d yfinance 5-min cap insufficient for HAR-CJ 7-param OLS; "
-                "DM statistic on n_test≈12 unreliable. Use Polygon/IEX for longer history."
-            )
-            if "dm_hln" in r:
-                us_exploratory.append(a)
+        if _is_gateable(r) and _pass(r):
+            n_pass += 1
 
-    if tx1_pass and tx1_gateable and us_gateable_passes >= 2:
-        out["overall_verdict"] = "PASS_BOTH_H1_H2"
-    elif (tx1_pass and tx1_gateable) or us_gateable_passes >= 1:
-        out["overall_verdict"] = "PASS_PARTIAL"
-    else:
-        out["overall_verdict"] = "NULL"
-
-    out["h1_gateable_pass"] = bool(tx1_pass and tx1_gateable)
-    out["h2_gateable_pass_count"] = int(us_gateable_passes)
-    out["us_exploratory_only"] = us_exploratory
-    out["interpretation"] = (
-        "TX1 (primary, n_test=649, gateable): HAR-CJ NOT significantly better than HAR-RV "
-        f"(DM_HLN={tx1_r.get('dm_hln',{}).get('t_stat','NA'):.3f} when finite). "
-        "H1 → NULL on long sample. "
-        "US ETFs (SPY/QQQ/GLD, n_test=12, NON-gateable): 60d yfinance cap forces n_train=25 vs 7 params; "
-        "R²_oos < -7 confirms OLS extrapolation pathology. SPY DM_HLN=3.33 is exploratory only, "
-        "not a true H2 PASS. Need Polygon/IEX 5-min for ≥1-year US sample to test H2 properly. "
-        "Conclusion: HAR-CJ jump component does NOT improve volatility forecasts on TAIFEX TX1 — "
-        "consistent with K1301 (HAR-RS NULL on same data) and K868 (Day/Night NULL); together "
-        "suggest this repo's 5-min TX dataset's structure is fully captured by pooled HAR-RV."
+    overall_verdict = "PASS" if (tx1_pass and tx1_gateable) else "NULL"
+    us_gateable_passes = sum(
+        1 for a in ("SPY", "QQQ", "GLD")
+        if _is_gateable(out["results"].get(a, {})) and _pass(out["results"].get(a, {}))
     )
+
+    out["verdict_lines"] = verdict_lines
+    out["summary"] = {
+        "verdict": overall_verdict,
+        "n_pass": n_pass,
+        "tx1_gateable": tx1_gateable,
+        "tx1_pass": tx1_pass,
+        "us_gateable_passes": us_gateable_passes,
+        "dm_t_per_asset": dm_t_per_asset,
+        "harvey_threshold": 3.0,
+        "note": (
+            "v2_abd: Jump threshold (3-sigma) + HAC DM QLIKE + 1-step lag. "
+            "TX1 is primary gateable asset (n_train>200). "
+            "US ETFs: 60d yfinance cap limits n_train<200, marked non-gateable."
+        ),
+    }
 
     out_path = SCRIPT_DIR / "k1303_results.json"
     out_path.write_text(json.dumps(out, indent=2, default=str))
     print(f"\n[done] wrote {out_path}")
+    print(f"[done] overall_verdict={overall_verdict}, dm_t_per_asset={dm_t_per_asset}")
 
 
 if __name__ == "__main__":

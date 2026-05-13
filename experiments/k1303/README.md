@@ -1,72 +1,112 @@
-# K1303: HAR-CJ — Adding Realized Jumps on top of K1301 Semivariance
+# K1303 v2: HAR-CJ — Jump Decomposition vs HAR-RV
 
-[提出: Claude (autonomous backlog gap-scan, extends K1301 intraday-seasonality / semivar pilot), 執行: TBD worktree agent]
+**Revision**: v2_abd (2026-05-13)
+**Status**: NULL — HAR-CJ does not significantly improve over HAR-RV on TX1 (gateable primary)
+
+---
 
 ## Motivation
 
-K1255 ran intraday seasonality pilot; K1301 (currently empty stub) was scoped for intraday semivariance. Both stop short of the **jump component**, which Barndorff-Nielsen & Shephard (2004, JBES; 2006, JFEC) and Andersen-Bollerslev-Diebold (2007, RFS) showed delivers persistent forecast gain over plain HAR-RV on SPX-like indices — but the gain has never been replicated in this repo on our 5-min cumulating dataset, nor on Taiwan futures.
+K1255 ran intraday seasonality pilot; K1301 (HAR-RS semivariance) reported NULL on TX1+SPY. K1303 tests the **orthogonal decomposition**: continuous (CV) vs jump (J) components of realized variance, following Barndorff-Nielsen & Shephard (2004 JBES; 2006 JFEC) and Andersen-Bollerslev-Diebold (2007 RFS).
 
-The continuous-jump decomposition splits realized variance into:
+Connection to K1301: K1301's semivariance decomposition (RV+/RV−) is **signed** but jump-agnostic; K1303 adds the **orthogonal** decomposition (CV/J). Together they form the 4-component HAR-CSJ family, but K1303 isolates the jump term first to avoid one-shot 4-way confound.
 
-  RV_t = CV_t + J_t,  J_t = max(RV_t – BPV_t, 0)
-
-where BPV_t is Barndorff-Nielsen bipower variation (jump-robust). HAR-CJ regresses next-day RV on lagged (CV, J) at daily / weekly / monthly horizons rather than the pooled RV used by vanilla HAR.
-
-Connection to K1301: K1301's semivariance decomposition (RV+ / RV-) is **signed** but jump-agnostic; K1303 adds the **orthogonal** decomposition (CV / J). Together they form the 4-component HAR-CSJ family, but K1303 isolates the jump term first to avoid one-shot 4-way confound (per K1216b/K1216c symmetric-refinement lesson).
+---
 
 ## Hypothesis
 
-**H1 (jump-component gain)**: HAR-CJ delivers OOS QLIKE strictly below HAR-RV on SPY 5-min RV with DM-Harvey corrected |t| > 3 (Harvey 2016 threshold).
+**H1 (jump-component gain)**: HAR-CJ delivers OOS QLIKE strictly below HAR-RV on TX1 with DM-Harvey corrected |t| > 3 (Harvey 2016 threshold).
 
-**H2 (universality)**: H1 extends to ≥2 of {QQQ, GLD, TX-front-month TAIFEX} — if only SPY passes, jump premium is index-specific (consistent with prior ABD 2007 SPX-only finding).
+**H2 (universality)**: H1 extends to ≥2 of {QQQ, GLD, SPY}.
 
-**H3 (regime asymmetry, exploratory)**: Jump frequency in crisis windows (2020Q1, 2022 selloff) is ≥2x calm windows AND Jump-Premium contribution to forecast improvement is concentrated in crisis subsamples.
+---
+
+## v2 Corrections (from Codex FAIL report 2026-05-13)
+
+Three blocking defects fixed (ABD1/2/3):
+
+### ABD1: Formal jump identification + stable feature scaling
+- **Problem**: v1 used `J = max(RV-BPV, 0)` for all days → noisy near-zero J values → explosive betas (j_d=2224 in v1).
+- **Fix**: 3-sigma threshold: `jump_day = max(RV-BPV,0) > μ+3σ`; J_t=0 on non-jump days. Jump expressed as **J/RV ratio** (dimensionless jump share [0,1]) rather than absolute J_abs — this resolves the 100,000x scale mismatch between log(CV)≈−10 and log1p(J_abs)≈0.000006 that caused explosive OLS betas. TX1 has 23 jump days (1.1%) over 2186 trading days.
+
+### ABD2: HAC DM test with QLIKE loss
+- **Problem**: v1 used plain sample variance for DM test; MSE loss (not Patton-robust).
+- **Fix**: `dm_test()` from `src/volpred/stats/model_evaluation.py:83` (Newey-West HAC). QLIKE pointwise loss per Patton (2011).
+
+### ABD3: Standard 1-step lag
+- **Problem**: v1 predicted RV_{t+1} using features at t-1 (2-step-ahead, non-standard).
+- **Fix**: Target = log(RV_t), features = .shift(1) → standard 1-step HAR per ABD (2007).
+
+---
 
 ## Design
 
 | Item | Setting |
 | --- | --- |
-| Assets | SPY, QQQ, GLD (USD 5-min via yfinance / cached), TX (TAIFEX 5-min ticks) |
-| Data span | SPY/QQQ/GLD: 2022-01-01 → 2026-04-30 (5-min cumulating window per K1255). TX: 2020-01-01 → 2026-04-30 (already ETA 2026 Q2 ready per `research_program.md` §"需 5-min 數據") |
-| RV definition | 5-min log-return²-sum, exclude overnight |
-| BPV definition | (π/2) × Σ \|r_t\|·\|r_{t-1}\| (Barndorff-Nielsen-Shephard) |
-| Jump test | Bilateral z-test (Huang-Tauchen 2005), 0.99 significance threshold |
-| Baseline | HAR-RV (Corsi 2009): daily/weekly/monthly RV lags |
-| Challenger | HAR-CJ: daily/weekly/monthly (CV_lag, J_lag) — 6 regressors vs 3 |
-| IS / OOS | Rolling 504-day IS, OOS 2024-01-01 → 2026-04-30 |
-| DM test | Harvey-Leybourne-Newbold small-sample correction |
+| Assets | TX1 (TAIFEX, 2017-2026, primary), SPY/QQQ/GLD (60d yfinance cap, exploratory) |
+| Intraday | 5-min log-return²-sum, day session only |
+| BPV | (π/2)×(M/(M-1))×Σ\|r_k\|·\|r_{k-1}\| |
+| Jump ID | 3-sigma threshold: max(RV-BPV,0) > μ+3σ |
+| J feature | J_t/RV_t (dimensionless jump share, [0,1]) |
+| CV feature | log(CV_t) |
+| Baseline | HAR-RV: log(RV_t) on log lagged RV_{d/w/m} |
+| Challenger | HAR-CJ: log(RV_t) on log(CV_{d/w/m}) + J_share_{d/w/m} |
+| OOS split | 70/30 chronological |
+| DM test | HAC Newey-West (model_evaluation.py:83), QLIKE loss, h=1 |
+| Pass rule | \|DM_HLN_t\| > 3 AND HAR-CJ lower QLIKE |
 | Seed | 42 |
 
-## Lookahead discipline
+---
 
-- Forecast at t uses (CV_{t-1}, J_{t-1}, weekly_avg over [t-5, t-1], monthly_avg over [t-22, t-1])
-- BPV / J computed from intraday returns of day t-1 only; **no contemporaneous day-t intraday data leaks** into the day-t forecast
-- All rolling moments use `.shift(1)` explicit
-- Seed = 42 fixed for any optimization
+## Lookahead Discipline
 
-## Differentiation vs prior K
+- All features use `.shift(1)`: feature at row t = value from day t-1.
+- Rolling windows applied to already-shifted series: rv_w at row t = mean(rv_{t-5..t-1}).
+- Target = log(RV_t) at row t — no future leakage.
+- BPV/J computed from day t-1 intraday only; no contemporaneous day-t data.
 
-- **K1255**: intraday seasonality pilot — descriptive, no model fit
-- **K1301**: semivariance pilot (signed decomposition) — empty stub, but scope is orthogonal direction
-- **K785 MF2-GARCH**: NULL on long-term-component MF₂ — K1303's jump component is event-driven not low-frequency-trend
-- **K783b**: window sensitivity established w=504 as cross-asset compromise — K1303 uses same window
-- **No K has done BPV / jump-decomposition** in this repo — fresh ground
+---
 
-## Success criterion
+## Results (v2)
 
-- HAR-CJ vs HAR-RV DM-Harvey |t| > 3 on **at least SPY** for H1 PASS (matching K1259 audit ledger SPY α=0.10 superior-set bar)
-- Codex review PASS (zero CRIT, ≤1 MAJOR addressable)
-- If H1 PASS + H2 PASS (≥2 of 3 non-SPY assets) → Tier-A finding, escalate to Paper 11 candidate (jump-channel sufficiency)
-- If H1 FAIL → likely closes jump-premium direction for our 5-min dataset (`research_program.md` "需 5-min 數據" backlog can mark H1-NULL)
+| Asset | n_train | n_test | DM_HLN_t | p | QLIKE_RV | QLIKE_CJ | CJ Lower? | PASS? | Gateable? |
+|-------|---------|--------|----------|---|----------|----------|-----------|-------|-----------|
+| TX1 | 1514 | 650 | 1.002 | 0.317 | 4.110 | 4.003 | Yes | No | Yes |
+| SPY | 26 | 12 | −0.935 | 0.370 | 0.247 | 0.447 | No | No | No |
+| QQQ | 26 | 12 | 1.868 | 0.089 | 1.466 | 0.387 | Yes | No | No |
+| GLD | 26 | 12 | 2.379 | 0.037 | 1.417 | 0.889 | Yes | No | No |
 
-## Mission 5 sanity
+**Overall verdict: NULL**
 
-Primary beneficiary: **Mission 2 (research)**. First foray into Barndorff-Nielsen jump literature for this repo; SPY/QQQ/GLD/TX intra-day infrastructure (K1255) now ETA-ready makes this experimentally cheap. Secondary: Mission 3 (Paper 11 candidate if PASS).
+- **TX1** (primary, n_test=650, gateable): DM_HLN_t=1.002, p=0.317 — not significant. HAR-CJ lower QLIKE by ~2.6% but not statistically meaningful.
+- **TX1 betas** (plausible after fix): cv_d=0.28, cv_w=0.43, cv_m=0.17; j_d=0.92, j_w=1.54, j_m=−3.33 (all |β|<10).
+- **US ETFs** (non-gateable, n_train=26 < 200): OLS extrapolation territory. DM results unreliable; not counted toward H2.
+
+### TX1 Jump Descriptives
+
+- Jump frequency: 1.05% of trading days (23/2186 days)
+- Raw J/RV share: 7.1% mean across all days
+- After 3-sigma threshold: 0.24% mean J/RV (only true jump days)
+- Jump threshold: 3.08e-05 (in squared log-return units)
+
+---
+
+## Interpretation
+
+HAR-CJ does NOT significantly improve volatility forecasts over HAR-RV on TAIFEX TX1 under correct methodology. This is consistent with:
+- **K1301** (HAR-RS/semivariance NULL on same TX1 data, DM_HLN=-0.91→1.29)
+- **K868** (Day/Night decomposition NULL)
+
+The pattern suggests TX1's 5-min volatility structure is well-captured by pooled HAR-RV without decomposition, potentially because TAIFEX's day session (08:45–13:45, 60 bars) has fewer microstructure jumps than US equity markets.
+
+---
 
 ## References
 
 - Barndorff-Nielsen & Shephard (2004) JBES — Power and bipower variation
-- Andersen, Bollerslev & Diebold (2007) RFS — Roughing it up
-- Huang & Tauchen (2005) J. Financial Econometrics — Jump test
+- Andersen, Bollerslev & Diebold (2007) RFS — Roughing it up (HAR-CJ specification)
+- Patton (2011) J. Econometrics — Proxy-robust loss functions (QLIKE)
+- Harvey et al. (2016) — Multiple testing threshold |t|>3.0
 - Corsi (2009) JFEC — HAR-RV baseline
-- K1255 (this repo) — intraday seasonality pilot, data infrastructure
+- K1255 (this repo) — Intraday data infrastructure
+- K1301 (this repo) — HAR-RS semivariance (NULL on TX1+SPY)

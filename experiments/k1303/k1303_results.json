@@ -1,297 +1,283 @@
 {
   "experiment_id": "K1303",
+  "revision": "v2_abd",
   "title": "HAR-CJ (Continuous + Jump) vs HAR-RV on TAIFEX TX1 + SPY/QQQ/GLD",
-  "date_run": "2026-05-12 10:58:20",
+  "date_run": "2026-05-13 13:56:53",
   "seed": 42,
   "methodology": {
-    "decomposition": "Barndorff-Nielsen & Shephard (2004) bipower variation; J = max(RV-BPV, 0); CV = RV - J",
+    "jump_identification": "3-sigma threshold on max(RV-BPV,0): J_t>0 only on days where max(RV-BPV,0)>mu+3*sigma (ABD Fix 1)",
+    "dm_test": "HAC Newey-West from volpred.stats.model_evaluation:83 (ABD Fix 2)",
+    "dm_loss": "QLIKE pointwise (Patton 2011) not MSE",
+    "lag_convention": "1-step: features at t-1 predict target log(RV_t) (ABD Fix 3)",
     "bpv_formula": "(pi/2) * (M/(M-1)) * sum_{k=2..M} |r_k| * |r_{k-1}|",
-    "target": "log(RV_{t+1})",
     "har_rv_features": [
       "log RV_{t-1}",
-      "log mean RV_{[t-5,t-1]}",
-      "log mean RV_{[t-22,t-1]}"
+      "log mean RV_{t-5..t-1}",
+      "log mean RV_{t-22..t-1}"
     ],
     "har_cj_features": [
       "log CV_{t-1}",
-      "log mean CV_{[t-5,t-1]}",
-      "log mean CV_{[t-22,t-1]}",
-      "log1p J_{t-1}",
-      "log1p mean J_{[t-5,t-1]}",
-      "log1p mean J_{[t-22,t-1]}"
+      "log mean CV_{t-5..t-1}",
+      "log mean CV_{t-22..t-1}",
+      "J_{t-1}/RV_{t-1} (jump share)",
+      "mean J-share_{t-5..t-1}",
+      "mean J-share_{t-22..t-1}"
     ],
     "split": "70/30 chronological",
-    "test": "DM-HLN h=1 on squared errors",
-    "pass_rule": "|DM_HLN_t| > 3 AND HAR-CJ lower MSE",
-    "lookahead_guard": "all features from .shift(1) + rolling on lagged series; target via .shift(-1) on RV only"
+    "pass_rule": "|DM_HLN_t| > 3 AND HAR-CJ lower QLIKE (Harvey 2016 threshold)",
+    "seed": 42
   },
   "data_sources": {
-    "TX1": "TAIFEX tick CSV 2017-05-16..2026-05-08, day session 08:45-13:45, 5-min bars",
-    "SPY": "yfinance 5m, last 60d cap, regular session 09:30-16:00 ET",
-    "QQQ": "yfinance 5m, last 60d cap, regular session 09:30-16:00 ET",
-    "GLD": "yfinance 5m, last 60d cap, regular session 09:30-16:00 ET"
+    "TX1": "TAIFEX tick CSV 2017-05-16..2026-05-08, day session 08:45-13:45, 5-min bars (cached parquet)",
+    "SPY": "yfinance 5m, last 60d cap, regular session 09:30-16:00 ET (cached parquet)",
+    "QQQ": "yfinance 5m, last 60d cap, regular session 09:30-16:00 ET (cached parquet)",
+    "GLD": "yfinance 5m, last 60d cap, regular session 09:30-16:00 ET (cached parquet)"
   },
   "results": {
     "TX1": {
       "asset": "TX1",
       "n_daily_rows": 2186,
-      "n_har_rows": 2163,
+      "n_har_rows": 2164,
       "n_train": 1514,
-      "n_test": 649,
+      "n_test": 650,
       "date_range": [
         "2017-06-16 00:00:00",
-        "2026-05-07 00:00:00"
+        "2026-05-08 00:00:00"
       ],
       "jump_descriptives": {
-        "mean_j_share_of_rv": 0.07132036486807498,
-        "frac_days_zero_jump": 0.409423604757548
+        "mean_j_share_of_rv_raw": 0.07132036486807498,
+        "mean_j_share_of_rv_thresholded": 0.0024254785963848066,
+        "frac_jump_days": 0.010521500457456541,
+        "jump_threshold_value": 3.07525365503944e-05,
+        "n_jump_days": 23
       },
       "har_rv": {
         "beta": {
-          "intercept": -1.7501000927267794,
-          "rv_d": 0.23930636193361468,
-          "rv_w": 0.42293660885715134,
-          "rv_m": 0.1737725881848046
+          "intercept": -1.3410699154101862,
+          "rv_d": 0.2824967186890579,
+          "rv_w": 0.4455764912093527,
+          "rv_m": 0.1474836567452983
         },
-        "mse_oos": 1.4709108750371849,
-        "mae_oos": 0.4891716636907093,
-        "r2_is": 0.517619146974871,
-        "r2_oos": 0.04323277200503739,
-        "mse_oos_ci95": [
-          0.3347633455823805,
-          3.0871288242442074
-        ]
+        "qlike_oos": 4.110418178909838,
+        "mse_oos": 1.4833792123653773,
+        "r2_is": 0.5765512704613635,
+        "r2_oos": 0.03372248353580909
       },
       "har_cj": {
         "beta": {
-          "intercept": -1.7642410107839661,
-          "cv_d": 0.236760280858225,
-          "cv_w": 0.379267455476873,
-          "cv_m": 0.21234808552092452,
-          "j_d": 2224.3359586777938,
-          "j_w": 4202.827314297114,
-          "j_m": -8416.295397990867
+          "intercept": -1.261032122052038,
+          "cv_d": 0.28079717522823544,
+          "cv_w": 0.4348234543202889,
+          "cv_m": 0.16758654066897935,
+          "j_d": 0.9247296993325186,
+          "j_w": 1.5423949160718549,
+          "j_m": -3.326758300299195
         },
-        "mse_oos": 1.4890153333617222,
-        "mae_oos": 0.4906736991056544,
-        "r2_is": 0.5169760045617631,
-        "r2_oos": 0.03145656401073593,
-        "mse_oos_ci95": [
-          0.3343330813556043,
-          3.1464615748946017
-        ]
+        "qlike_oos": 4.0028259516747395,
+        "mse_oos": 1.483016907307254,
+        "r2_is": 0.577007842574788,
+        "r2_oos": 0.033958490100312266
       },
       "dm_hln": {
-        "loss": "squared_error",
+        "loss": "QLIKE_pointwise_Patton2011",
+        "dm_implementation": "HAC_Newey-West_model_evaluation.py:83",
         "h": 1,
-        "t_stat": -0.9097711927675589,
-        "p_value": 0.36328145134249157,
-        "interpretation_sign": "positive => HAR-RV loss > HAR-CJ loss => HAR-CJ preferred",
+        "t_stat": 1.0020557539522121,
+        "p_value": 0.31669012368327465,
+        "interpretation_sign": "positive => HAR-RV QLIKE > HAR-CJ QLIKE => HAR-CJ preferred",
         "harvey_threshold": 3.0,
         "pass_3sigma": false,
-        "har_cj_lower_mse": false
+        "har_cj_lower_qlike": true
       }
     },
     "SPY": {
       "asset": "SPY",
       "n_daily_rows": 60,
-      "n_har_rows": 37,
-      "n_train": 25,
+      "n_har_rows": 38,
+      "n_train": 26,
       "n_test": 12,
       "date_range": [
         "2026-03-18 00:00:00",
-        "2026-05-08 00:00:00"
+        "2026-05-11 00:00:00"
       ],
       "jump_descriptives": {
-        "mean_j_share_of_rv": 0.05600434341439502,
-        "frac_days_zero_jump": 0.48333333333333334
+        "mean_j_share_of_rv_raw": 0.05600434341439502,
+        "mean_j_share_of_rv_thresholded": 0.0030886295488251575,
+        "frac_jump_days": 0.016666666666666666,
+        "jump_threshold_value": 1.2687563288307732e-05,
+        "n_jump_days": 1
       },
       "har_rv": {
         "beta": {
-          "intercept": -24.273249929773257,
-          "rv_d": 0.5921720038253856,
-          "rv_w": 0.6897570584001927,
-          "rv_m": -2.7856091232858415
+          "intercept": -7.350163150774534,
+          "rv_d": -0.00406027101723431,
+          "rv_w": 0.7672557703125988,
+          "rv_m": -0.5016307645972563
         },
-        "mse_oos": 2.827163644234808,
-        "mae_oos": 1.4622481729672463,
-        "r2_is": 0.4555951216766009,
-        "r2_oos": -15.606188226902638,
-        "mse_oos_ci95": [
-          1.375085775610977,
-          4.4519033910891475
-        ]
+        "qlike_oos": 0.24650710554381564,
+        "mse_oos": 0.6849386704149728,
+        "r2_is": 0.21764655403008792,
+        "r2_oos": -3.0231914088135436
       },
       "har_cj": {
         "beta": {
-          "intercept": -11.94114065976934,
-          "cv_d": 0.3599098890279363,
-          "cv_w": 0.21712878720984904,
-          "cv_m": -1.0164174956181864,
-          "j_d": 36791.22821000031,
-          "j_w": 44403.74945636566,
-          "j_m": -968653.4359662097
+          "intercept": -13.059237180491417,
+          "cv_d": -0.30511443539367433,
+          "cv_w": -0.38042707075309734,
+          "cv_m": 0.33344616120887016,
+          "j_d": 2.331896666522063,
+          "j_w": 21.93859390861038,
+          "j_m": -186.436742426114
         },
-        "mse_oos": 1.4105496209321338,
-        "mae_oos": 0.9741699465605302,
-        "r2_is": 0.6552557261803542,
-        "r2_oos": -7.285283576121046,
-        "mse_oos_ci95": [
-          0.5678406999050263,
-          2.3427239119575094
-        ]
+        "qlike_oos": 0.44688990508323406,
+        "mse_oos": 1.5690017014151234,
+        "r2_is": 0.5389410344311358,
+        "r2_oos": -8.215999093353522
       },
       "dm_hln": {
-        "loss": "squared_error",
+        "loss": "QLIKE_pointwise_Patton2011",
+        "dm_implementation": "HAC_Newey-West_model_evaluation.py:83",
         "h": 1,
-        "t_stat": 3.326641511693809,
-        "p_value": 0.006751327133865059,
-        "interpretation_sign": "positive => HAR-RV loss > HAR-CJ loss => HAR-CJ preferred",
+        "t_stat": -0.9353974727580288,
+        "p_value": 0.3696643378211586,
+        "interpretation_sign": "positive => HAR-RV QLIKE > HAR-CJ QLIKE => HAR-CJ preferred",
         "harvey_threshold": 3.0,
-        "pass_3sigma": true,
-        "har_cj_lower_mse": true
-      },
-      "gateable": false,
-      "non_gateable_reason": "n_train=25 below min_n_train=200 OR R\u00b2_oos pathological (HAR-RV=-15.606188226902638, HAR-CJ=-7.285283576121046) \u2192 60d yfinance 5-min cap insufficient for HAR-CJ 7-param OLS; DM statistic on n_test\u224812 unreliable. Use Polygon/IEX for longer history."
+        "pass_3sigma": false,
+        "har_cj_lower_qlike": false
+      }
     },
     "QQQ": {
       "asset": "QQQ",
       "n_daily_rows": 60,
-      "n_har_rows": 37,
-      "n_train": 25,
+      "n_har_rows": 38,
+      "n_train": 26,
       "n_test": 12,
       "date_range": [
         "2026-03-18 00:00:00",
-        "2026-05-08 00:00:00"
+        "2026-05-11 00:00:00"
       ],
       "jump_descriptives": {
-        "mean_j_share_of_rv": 0.05871448138435438,
-        "frac_days_zero_jump": 0.43333333333333335
+        "mean_j_share_of_rv_raw": 0.05871448138435438,
+        "mean_j_share_of_rv_thresholded": 0.0043908847255630925,
+        "frac_jump_days": 0.016666666666666666,
+        "jump_threshold_value": 2.561912862038536e-05,
+        "n_jump_days": 1
       },
       "har_rv": {
         "beta": {
-          "intercept": 35.96500449996495,
-          "rv_d": 0.6964344274151849,
-          "rv_w": -1.104837662038808,
-          "rv_m": 5.302106453619306
+          "intercept": 21.89802792763917,
+          "rv_d": -0.004851234719812527,
+          "rv_w": -0.1899997006485498,
+          "rv_m": 3.5794816746520395
         },
-        "mse_oos": 3.1314540952444303,
-        "mae_oos": 1.5591659911900895,
-        "r2_is": 0.41897509448868964,
-        "r2_oos": -18.465917046883487,
-        "mse_oos_ci95": [
-          1.4211004575819264,
-          5.214445647811757
-        ]
+        "qlike_oos": 1.4654522582938962,
+        "mse_oos": 1.4830500047706916,
+        "r2_is": 0.18401643795807465,
+        "r2_oos": -8.219016945861705
       },
       "har_cj": {
         "beta": {
-          "intercept": 9.860595946437584,
-          "cv_d": 0.3759749203766585,
-          "cv_w": -0.8849442579958802,
-          "cv_m": 2.475963570203294,
-          "j_d": 15994.932067514053,
-          "j_w": 17830.60785060638,
-          "j_m": -350481.5077779391
+          "intercept": -22.461744135158487,
+          "cv_d": -0.30762386090812405,
+          "cv_w": -0.3127327391872682,
+          "cv_m": -0.7952063327550981,
+          "j_d": 1.7958150245728246,
+          "j_w": 16.31580143636549,
+          "j_m": -115.35205325921285
         },
-        "mse_oos": 0.9002320924293871,
-        "mae_oos": 0.881599209396117,
-        "r2_is": 0.561511956456775,
-        "r2_oos": -4.596072208366492,
-        "mse_oos_ci95": [
-          0.5695154177202095,
-          1.339668117763047
-        ]
+        "qlike_oos": 0.38703119289490373,
+        "mse_oos": 1.2659533268111827,
+        "r2_is": 0.47969860724046554,
+        "r2_oos": -6.869488645021673
       },
       "dm_hln": {
-        "loss": "squared_error",
+        "loss": "QLIKE_pointwise_Patton2011",
+        "dm_implementation": "HAC_Newey-West_model_evaluation.py:83",
         "h": 1,
-        "t_stat": 2.5227528969607143,
-        "p_value": 0.028336416464445513,
-        "interpretation_sign": "positive => HAR-RV loss > HAR-CJ loss => HAR-CJ preferred",
+        "t_stat": 1.8675709895644643,
+        "p_value": 0.0886762347422716,
+        "interpretation_sign": "positive => HAR-RV QLIKE > HAR-CJ QLIKE => HAR-CJ preferred",
         "harvey_threshold": 3.0,
         "pass_3sigma": false,
-        "har_cj_lower_mse": true
-      },
-      "gateable": false,
-      "non_gateable_reason": "n_train=25 below min_n_train=200 OR R\u00b2_oos pathological (HAR-RV=-18.465917046883487, HAR-CJ=-4.596072208366492) \u2192 60d yfinance 5-min cap insufficient for HAR-CJ 7-param OLS; DM statistic on n_test\u224812 unreliable. Use Polygon/IEX for longer history."
+        "har_cj_lower_qlike": true
+      }
     },
     "GLD": {
       "asset": "GLD",
       "n_daily_rows": 60,
-      "n_har_rows": 37,
-      "n_train": 25,
+      "n_har_rows": 38,
+      "n_train": 26,
       "n_test": 12,
       "date_range": [
         "2026-03-18 00:00:00",
-        "2026-05-08 00:00:00"
+        "2026-05-11 00:00:00"
       ],
       "jump_descriptives": {
-        "mean_j_share_of_rv": 0.07319743649162128,
-        "frac_days_zero_jump": 0.4
+        "mean_j_share_of_rv_raw": 0.07319743649162128,
+        "mean_j_share_of_rv_thresholded": 0.002014816674223193,
+        "frac_jump_days": 0.016666666666666666,
+        "jump_threshold_value": 4.360966564274482e-05,
+        "n_jump_days": 1
       },
       "har_rv": {
         "beta": {
-          "intercept": -35.485088572616256,
-          "rv_d": 0.2576898007508492,
-          "rv_w": 0.45904289404442705,
-          "rv_m": -3.733378968820642
+          "intercept": -29.72982643138591,
+          "rv_d": -0.07942426697989995,
+          "rv_w": 0.9654568630033705,
+          "rv_m": -3.247325981646208
         },
-        "mse_oos": 6.87054026755792,
-        "mae_oos": 2.467123384224583,
-        "r2_is": 0.6720798317714355,
-        "r2_oos": -30.67595553667585,
-        "mse_oos_ci95": [
-          4.399807312503774,
-          9.53751556115179
-        ]
+        "qlike_oos": 1.4165077371850519,
+        "mse_oos": 5.799945726445131,
+        "r2_is": 0.5336989763463041,
+        "r2_oos": -25.740083864075878
       },
       "har_cj": {
         "beta": {
-          "intercept": -19.83798954971346,
-          "cv_d": 0.31404272067189565,
-          "cv_w": -0.6263306461783138,
-          "cv_m": -1.16321778425042,
-          "j_d": 696.8754124973655,
-          "j_w": 75807.84696746223,
-          "j_m": -290906.23598535213
+          "intercept": -1.9829713709757362,
+          "cv_d": -0.31784381214125246,
+          "cv_w": 1.0482788231857867,
+          "cv_m": -0.07758291392520095,
+          "j_d": 5.401948547939817,
+          "j_w": -4.945717568186721,
+          "j_m": -275.20943292858726
         },
-        "mse_oos": 7.35189326248588,
-        "mae_oos": 2.5211151076307217,
-        "r2_is": 0.7191946754517151,
-        "r2_oos": -32.895186553598975,
-        "mse_oos_ci95": [
-          4.777861362079651,
-          10.290358467752114
-        ]
+        "qlike_oos": 0.8886187308809547,
+        "mse_oos": 3.0986889433521476,
+        "r2_is": 0.6146306430642342,
+        "r2_oos": -13.286203030507783
       },
       "dm_hln": {
-        "loss": "squared_error",
+        "loss": "QLIKE_pointwise_Patton2011",
+        "dm_implementation": "HAC_Newey-West_model_evaluation.py:83",
         "h": 1,
-        "t_stat": -1.5525715746948212,
-        "p_value": 0.1488052421117867,
-        "interpretation_sign": "positive => HAR-RV loss > HAR-CJ loss => HAR-CJ preferred",
+        "t_stat": 2.3790373910968237,
+        "p_value": 0.03656326180848324,
+        "interpretation_sign": "positive => HAR-RV QLIKE > HAR-CJ QLIKE => HAR-CJ preferred",
         "harvey_threshold": 3.0,
         "pass_3sigma": false,
-        "har_cj_lower_mse": false
-      },
-      "gateable": false,
-      "non_gateable_reason": "n_train=25 below min_n_train=200 OR R\u00b2_oos pathological (HAR-RV=-30.67595553667585, HAR-CJ=-32.895186553598975) \u2192 60d yfinance 5-min cap insufficient for HAR-CJ 7-param OLS; DM statistic on n_test\u224812 unreliable. Use Polygon/IEX for longer history."
+        "har_cj_lower_qlike": true
+      }
     }
   },
   "verdict_lines": [
-    "TX1: DM_HLN_t=-0.910  p=0.3633  MSE_RV=1.4709  MSE_CJ=1.4890  pass_3sigma=False  cj_lower_mse=False",
-    "SPY: DM_HLN_t=3.327  p=0.0068  MSE_RV=2.8272  MSE_CJ=1.4105  pass_3sigma=True  cj_lower_mse=True",
-    "QQQ: DM_HLN_t=2.523  p=0.0283  MSE_RV=3.1315  MSE_CJ=0.9002  pass_3sigma=False  cj_lower_mse=True",
-    "GLD: DM_HLN_t=-1.553  p=0.1488  MSE_RV=6.8705  MSE_CJ=7.3519  pass_3sigma=False  cj_lower_mse=False"
+    "TX1: DM_HLN_t=1.002  p=0.3167  QLIKE_RV=4.1104  QLIKE_CJ=4.0028  pass_3sigma=False  cj_lower_qlike=True",
+    "SPY: DM_HLN_t=-0.935  p=0.3697  QLIKE_RV=0.2465  QLIKE_CJ=0.4469  pass_3sigma=False  cj_lower_qlike=False",
+    "QQQ: DM_HLN_t=1.868  p=0.0887  QLIKE_RV=1.4655  QLIKE_CJ=0.3870  pass_3sigma=False  cj_lower_qlike=True",
+    "GLD: DM_HLN_t=2.379  p=0.0366  QLIKE_RV=1.4165  QLIKE_CJ=0.8886  pass_3sigma=False  cj_lower_qlike=True"
   ],
-  "overall_verdict": "NULL",
-  "h1_gateable_pass": false,
-  "h2_gateable_pass_count": 0,
-  "us_exploratory_only": [
-    "SPY",
-    "QQQ",
-    "GLD"
-  ],
-  "interpretation": "TX1 (primary, n_test=649, gateable): HAR-CJ NOT significantly better than HAR-RV (DM_HLN=-0.910 when finite). H1 \u2192 NULL on long sample. US ETFs (SPY/QQQ/GLD, n_test=12, NON-gateable): 60d yfinance cap forces n_train=25 vs 7 params; R\u00b2_oos < -7 confirms OLS extrapolation pathology. SPY DM_HLN=3.33 is exploratory only, not a true H2 PASS. Need Polygon/IEX 5-min for \u22651-year US sample to test H2 properly. Conclusion: HAR-CJ jump component does NOT improve volatility forecasts on TAIFEX TX1 \u2014 consistent with K1301 (HAR-RS NULL on same data) and K868 (Day/Night NULL); together suggest this repo's 5-min TX dataset's structure is fully captured by pooled HAR-RV."
+  "summary": {
+    "verdict": "NULL",
+    "n_pass": 0,
+    "tx1_gateable": true,
+    "tx1_pass": false,
+    "us_gateable_passes": 0,
+    "dm_t_per_asset": {
+      "TX1": 1.0020557539522121,
+      "SPY": -0.9353974727580288,
+      "QQQ": 1.8675709895644643,
+      "GLD": 2.3790373910968237
+    },
+    "harvey_threshold": 3.0,
+    "note": "v2_abd: Jump threshold (3-sigma) + HAC DM QLIKE + 1-step lag. TX1 is primary gateable asset (n_train>200). US ETFs: 60d yfinance cap limits n_train<200, marked non-gateable."
+  }
 }

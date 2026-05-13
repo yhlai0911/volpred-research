@@ -1,9 +1,63 @@
 # K1137 — Regime-conditional robust vol models (rolling ex-ante VIX tertile)
 
-**Status**: PASS (Verdict C — `C_HAR_REGIME_INVARIANT`).
-**Date**: 2026-04-17
+**Status**: PASS (Verdict C — `C_HAR_REGIME_INVARIANT`). **v2 corrected 2026-05-13.**
+**Date**: 2026-04-17 (v1); 2026-05-13 (v2 correction — regime window off-by-one fix)
 **Author**: Claude (main-thread; user-direction)
 **Data**: yfinance daily OHLC for 6 assets (SPY/QQQ/IWM/USO/GLD/TLT) + ^VIX, 2000-2026
+
+## v2 Correction (2026-05-13)
+
+**Defect identified by**: Codex primary-path review (gpt-5.4, codex-cli 0.121.0) — verdict FAIL.
+**Fix applied**: Regime quantile window off-by-one in `build_rolling_vix_regimes()`.
+
+### What was wrong
+
+The original code set `v = vix_lag1.values` (where `vix_lag1 = vix_series.shift(1)`) and then
+sliced `past = v[i-window:i]`. Because `v` was already shifted by 1, this gave
+`past = VIX[t-253 .. t-2]` — one extra lag beyond the spec's required `VIX[t-252 .. t-1]`.
+This was not a lookahead violation, but it mis-implemented the stated regime definition, meaning
+all regime labels, cell counts, and downstream DM/BH results were not the intended K1137 design.
+
+A second medium issue was also fixed: the 10% regime coverage guard was changed from a
+warning-only message to a hard `continue` (skip the asset) as the spec and README stated.
+
+### Fix
+
+```python
+# BEFORE (incorrect — quantile window was double-shifted):
+v = vix_lag1.values          # VIX[t-1], but used as the window base
+past = v[i - window:i]       # gave VIX[t-253..t-2] ✗
+
+# AFTER (correct):
+v_lag1 = vix_lag1.values     # for regime-label comparison: VIX[t-1]
+v_orig = vix_series.values   # for quantile window: unshifted
+past = v_orig[i - window:i]  # gives VIX[t-252..t-1] ✓
+# Regime label still compares v_lag1[i] = VIX[t-1] against percentiles
+```
+
+### Impact on results
+
+The corrected v2 results are nearly identical to v1 (same verdict, same PASS count = 17/54,
+Harvey-threshold count 15/54 vs 14/54 in v1). The tiny numerical differences arise because the
+quantile window is now shifted by exactly one day forward — the trailing 252-day VIX window
+is now `VIX[t-252..t-1]` as specified rather than `VIX[t-253..t-2]`. Given that consecutive
+VIX values are highly autocorrelated (ρ > 0.95), the percentile boundaries barely change,
+and all 17 PASS cells remain PASS. The overall narrative and channel conclusions are unchanged.
+
+| Metric | v1 (buggy) | v2 (corrected) |
+|---|---|---|
+| Total PASS / 54 | 17 | **17** |
+| Harvey-threshold PASS / 54 | 14 | **15** |
+| HAR 3/3-PASS equity | 2 (QQQ, IWM) | **2 (QQQ, IWM)** |
+| GAS-t rescued | 1/6 (TLT) | **1/6 (TLT)** |
+| MIDAS conditional PASS | 0/6 | **0/6** |
+| Verdict | C_HAR_REGIME_INVARIANT | **C_HAR_REGIME_INVARIANT** |
+
+### Reviewer notes
+
+All remaining anti-lookahead protections confirmed correct by Codex review: HAR uses lagged
+RV and lagged VIX features; DM-HLN uses Newey-West HAC variance; BH-FDR applied before
+thresholding; underpowered cells (n < 30) skipped; refits use only pre-`t_abs` data.
 
 ## Problem and Motivation
 

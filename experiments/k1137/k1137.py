@@ -506,25 +506,35 @@ def build_rolling_vix_regimes(vix_series, window=252):
     """For each date t, assign 'low'/'mid'/'high' based on VIX_{t-1} vs
     rolling percentile of VIX[t-252 .. t-1]. Lag-1 throughout.
     Returns pd.Series of regime labels aligned to vix_series, with NaN
-    for the first `window` dates."""
+    for the first `window` dates.
+
+    v2 correction (2026-05-13): quantile window now uses the *original*
+    unshifted vix_series so that past = VIX[t-252..t-1] as specified.
+    The regime label for day t still uses vix_lag1.iloc[i] = VIX[t-1]
+    (via shift(1)) for the predictor comparison, which is correct.
+    Previously the code used v = vix_lag1.values so past = VIX[t-253..t-2]
+    — one extra lag — a misimplementation of the spec without lookahead risk.
+    """
     vix_lag1 = vix_series.shift(1)  # use lag-1 VIX as the regressor
     regimes = pd.Series(index=vix_series.index, dtype=object)
-    v = vix_lag1.values
-    idx = vix_lag1.index
-    for i in range(len(v)):
-        if i < window or not np.isfinite(v[i]):
+    v_lag1 = vix_lag1.values        # for regime label comparison: VIX[t-1]
+    v_orig = vix_series.values      # for quantile window: unshifted VIX
+    for i in range(len(v_lag1)):
+        if i < window or not np.isfinite(v_lag1[i]):
             regimes.iloc[i] = None
             continue
-        past = v[i - window:i]  # last `window` days strictly before t
+        # Use unshifted series so past = VIX[t-252..t-1] (correctly lag-1)
+        past = v_orig[i - window:i]  # VIX[t-252..t-1] ✓
         past = past[np.isfinite(past)]
         if len(past) < window * 0.8:
             regimes.iloc[i] = None
             continue
         q33 = np.percentile(past, 33.33)
         q67 = np.percentile(past, 66.67)
-        if v[i] <= q33:
+        # Compare VIX[t-1] against rolling quantiles from VIX[t-252..t-1]
+        if v_lag1[i] <= q33:
             regimes.iloc[i] = 'low'
-        elif v[i] > q67:
+        elif v_lag1[i] > q67:
             regimes.iloc[i] = 'high'
         else:
             regimes.iloc[i] = 'mid'
@@ -691,8 +701,16 @@ for ticker, d in asset_data.items():
     min_cov = min(regime_pct.values())
     coverage_ok = min_cov >= 0.10
     if not coverage_ok:
-        print(f"  WARNING: min regime coverage {min_cov:.1%} < 10% — "
-              f"per-regime DM may be underpowered or unreliable.")
+        # Abort per spec: < 10% regime coverage makes per-regime DM unreliable.
+        # v2 correction (2026-05-13): changed from warning-only to hard skip.
+        print(f"  ABORT: min regime coverage {min_cov:.1%} < 10% — "
+              f"skipping asset {ticker} (regime DM would be unreliable).")
+        all_results[ticker] = {
+            'error': f'regime_coverage_too_low: min={min_cov:.4f}',
+            'regime_counts': regime_counts,
+            'regime_pct': regime_pct,
+        }
+        continue
 
     actual_r2 = (returns[oos_start_idx:] ** 2)[valid_mask]
     actual_park = park.reindex(oos_dates).values[valid_mask]
