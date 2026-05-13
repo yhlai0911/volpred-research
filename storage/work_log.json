@@ -5913,5 +5913,33 @@
     "task_id": "task-k1138-revision-worktree",
     "status": "running",
     "description": "K1138_revision_bh_fix: fix BH-FDR in asset/model conclusion logic + re-run summary"
+  },
+  {
+    "timestamp": "2026-05-13T06:10:31.125945Z",
+    "task_id": "K1303_revision_har_cj_abd",
+    "task_type": "experiment",
+    "status": "completed",
+    "notes": "K1303-v2 worktree merged (via staging sweep into K1137 commit 00e09ed6). NULL result: TX1 DM_HLN_t=1.00, p=0.317. 3 ABD defects fixed. Worktrees cleaned. Pending Codex primary-path review."
+  },
+  {
+    "timestamp": "2026-05-13T06:10:31.125945Z",
+    "task_id": "K1137_revision_window_fix",
+    "task_type": "experiment",
+    "status": "completed",
+    "notes": "K1137-v2 committed as 00e09ed6. Regime window off-by-one fixed. Results: 17/54 PASS (Harvey 15/54), verdict C_HAR_REGIME_INVARIANT unchanged."
+  },
+  {
+    "timestamp": "2026-05-13T06:10:31.125945Z",
+    "task_id": "K1138_revision_bh_fix",
+    "task_type": "experiment",
+    "status": "completed",
+    "notes": "K1138-v2 committed as 0c307ded. BH-FDR dual-gate enforced at asset/model summary level. IWM reclassified PASS→NULL. Overall verdict MIXED (unchanged but IWM corrected)."
+  },
+  {
+    "timestamp": "2026-05-13T06:10:31.125945Z",
+    "task_id": "worktree_cleanup_3x_shared_json_violation",
+    "task_type": "platform_ops",
+    "status": "completed",
+    "notes": "Cleaned 3 worktrees (K1303/K1137/K1138) + 2 orphan branches (a4b49587/ad1b2ebb). All worktrees had shared JSON violations (feed.json/knowledge.json/experiment_experiences.json). Content verified in main before cleanup."
   }
 ]

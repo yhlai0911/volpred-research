@@ -7732,14 +7732,18 @@
   {
     "id": "K1303_revision_har_cj_abd",
     "title": "K1303 HAR-CJ revision: ABD jump threshold + HAC DM + standard 1-step lag",
-    "status": "running",
+    "status": "succeeded",
     "priority": 3,
     "task_type": "experiment",
     "created_at": "2026-05-13T13:41:06.316016",
     "description": "Codex FAIL found 3 issues in K1303 HAR-CJ: (1) DM-HLN missing HAC/Newey-West correction (use src/volpred/stats/model_evaluation.py:83 HAC version); (2) jump identification uses naive max(RV-BPV,0) with no BNS/TQ z-test threshold (beta magnitudes j_d=2224, j_w=4203, j_m=-8416 confirm noisy regressors); (3) feature X_t-1 vs target Y_t+1 = 2-step-ahead, not standard HAR-CJ 1-step. Fix: implement ABD/BNS z-test thresholded jump identification + correct HAC DM + standard 1-step. NULL verdict pending re-evaluation after fix.",
     "source": "K1303_codex_review_fail",
     "prerequisite": "task-k1303-codex-review-primary",
-    "claimed_at": "2026-05-13T05:49"
+    "claimed_at": "2026-05-13T05:49",
+    "completed_at": "2026-05-13T06:10:20.154933Z",
+    "notes": [
+      "K1303-v2 NULL result: DM_HLN_t=1.00, p=0.317. ABD fixes applied. Pending Codex primary review."
+    ]
   },
   {
     "id": "task-k1137-codex-review-primary",
@@ -7756,9 +7760,12 @@
       "har-regime"
     ],
     "claimed_at": "2026-05-13T05:51",
-    "completed_at": "2026-05-13T05:55",
+    "completed_at": "2026-05-13T06:10:20.154933Z",
     "codex_verdict": "FAIL",
-    "codex_issue": "build_rolling_vix_regimes() off-by-one: vix_lag1.shift(1) + past=v[i-w:i] → VIX[t-253..t-2] not VIX[t-252..t-1] (k1137.py:510-518)"
+    "codex_issue": "build_rolling_vix_regimes() off-by-one: vix_lag1.shift(1) + past=v[i-w:i] → VIX[t-253..t-2] not VIX[t-252..t-1] (k1137.py:510-518)",
+    "notes": [
+      "Codex FAIL: off-by-one window bug detected. Revision dispatched and completed."
+    ]
   },
   {
     "id": "task-k1138-codex-review-primary",
@@ -7775,9 +7782,12 @@
       "equity-compendium"
     ],
     "claimed_at": "2026-05-13T05:51",
-    "completed_at": "2026-05-13T05:54",
+    "completed_at": "2026-05-13T06:10:20.154933Z",
     "codex_verdict": "FAIL",
-    "codex_issue": "BH-FDR not enforced in asset/model conclusion logic (lines 840, 848); IWM misclassified PASS"
+    "codex_issue": "BH-FDR not enforced in asset/model conclusion logic (lines 840, 848); IWM misclassified PASS",
+    "notes": [
+      "Codex FAIL: BH-FDR not enforced at summary level. Revision dispatched and completed."
+    ]
   },
   {
     "id": "task-k1135-codex-review-primary",
@@ -9000,7 +9010,7 @@
   {
     "id": "K1138_revision_bh_fix",
     "title": "K1138 revision: fix BH-FDR enforcement in asset/model conclusion logic",
-    "status": "running",
+    "status": "succeeded",
     "priority": 2,
     "task_type": "experiment",
     "created_at": "2026-05-13T05:54",
@@ -9012,12 +9022,16 @@
       "paper4",
       "equity-compendium"
     ],
-    "claimed_at": "2026-05-13T05:56"
+    "claimed_at": "2026-05-13T05:56",
+    "completed_at": "2026-05-13T06:10:20.154933Z",
+    "notes": [
+      "K1138-v2: BH-FDR dual-gate enforced. IWM reclassified NULL. Verdict MIXED (was overstated PASS)."
+    ]
   },
   {
     "id": "K1137_revision_window_fix",
     "title": "K1137 revision: fix regime rolling window off-by-one (VIX lag indexing)",
-    "status": "running",
+    "status": "succeeded",
     "priority": 2,
     "task_type": "experiment",
     "created_at": "2026-05-13T05:55",
@@ -9029,6 +9043,56 @@
       "paper4",
       "har-regime"
     ],
-    "claimed_at": "2026-05-13T05:56"
+    "claimed_at": "2026-05-13T05:56",
+    "completed_at": "2026-05-13T06:10:20.154933Z",
+    "notes": [
+      "K1137-v2: regime window off-by-one fixed. 17/54 PASS, verdict unchanged C_HAR_REGIME_INVARIANT."
+    ]
+  },
+  {
+    "id": "K1302_paper2_table2_erratum_decision",
+    "title": "K1302 result: Paper 2 Table 2 γ erratum/update decision (4 stocks large drift)",
+    "status": "pending",
+    "priority": 2,
+    "task_type": "paper_decision",
+    "created_at": "2026-05-13T05:58",
+    "description": "K1302 byte-match FAIL: 4/4 Table 2 stocks show large drift (2886.TW Δγ=0.135 worst). Root cause: original paper values from uncanonicalized scratch scripts. K1302 canonical estimates diverge significantly. Per K1256 3-spec precedent + research honesty: (A) Update Table 2 to K1302 canonical values + 3-spec TWA/TWB/TWC footnote, OR (B) reproduce.py NOTE classification (if SE-method explains most of Δt). Main-thread must investigate SE method gap (paper NW-HAC vs K1302 inverse-Hessian) before deciding. 2454.TW: Δγ=0.0008 (within tolerance) but Δt=4.1 → SE-method likely culprit. 2886.TW: Δγ=0.135 → fundamental methodology/data discrepancy needs root cause.",
+    "tags": [
+      "K1302",
+      "paper2",
+      "erratum",
+      "table2",
+      "gamma-estimation"
+    ]
+  },
+  {
+    "task_id": "task-k1303-v2-codex-review",
+    "task_type": "paper_review",
+    "priority": "P2",
+    "status": "pending",
+    "title": "K1303-v2 Codex primary-path re-review (post ABD revision)",
+    "description": "Codex primary-path review of K1303-v2 code after 3-defect ABD revision. Check: (1) BNS 3-sigma jump threshold correctly identifies jump days; (2) HAC DM test via dm_test() from model_evaluation.py; (3) standard 1-step lag. Blocking knowledge.json entry for K1303 NULL result.",
+    "created_at": "2026-05-13T06:11:32.457685Z",
+    "notes": []
+  },
+  {
+    "task_id": "task-k1137-v2-codex-review",
+    "task_type": "paper_review",
+    "priority": "P2",
+    "status": "pending",
+    "title": "K1137-v2 Codex re-review (post regime window fix)",
+    "description": "Codex re-review of K1137-v2 after regime window off-by-one fix. Check: vix_series[i-w:i] (unshifted) used for quantile window; vix_lag1 used for regime-label comparison only. Also verify 10% guard is now hard skip. If PASS, enables K1137 knowledge.json entry.",
+    "created_at": "2026-05-13T06:11:32.457685Z",
+    "notes": []
+  },
+  {
+    "task_id": "task-k1138-v2-codex-review",
+    "task_type": "paper_review",
+    "priority": "P2",
+    "status": "pending",
+    "title": "K1138-v2 Codex re-review (post BH-FDR fix)",
+    "description": "Codex re-review of K1138-v2 after BH-FDR enforcement fix at asset/model summary level. Check: asset_pass = any(c[DM_HLN_t]>2.0 AND c[DM_HLN_p_BH]<0.05 for c in asset_cells). IWM correctly NULL. If PASS, enables K1138 knowledge.json entry.",
+    "created_at": "2026-05-13T06:11:32.457685Z",
+    "notes": []
   }
 ]
