@@ -1,0 +1,39 @@
+{
+  "experiment_id": "task_generator_v2",
+  "title": "Multi-source task generator v2 — implementation and dry-run",
+  "sources_implemented": [
+    "experiment",
+    "paper_decision",
+    "paper_body",
+    "event_article",
+    "daily_article"
+  ],
+  "dry_run_counts": {
+    "experiment": 60,
+    "paper_decision": 5,
+    "paper_body": 5,
+    "event_article": 1,
+    "daily_article": 68
+  },
+  "dry_run_total": 139,
+  "existing_tasks_at_run_time": 436,
+  "status": "implemented",
+  "script_path": "scripts/task_generator_v2.py",
+  "dry_run_output": "experiments/task_gen_v2/dry_run_output.txt",
+  "dry_run_log": "experiments/task_gen_v2/dry_run_log.json",
+  "generated_at": "2026-05-13T00:00:00+00:00",
+  "notes": {
+    "experiment": "Parsed 60 unchecked [ ] items from research_program.md (skipping BLOCKED/latex-reviewer/citation-verifier structural items). Includes HAR variants, ML models, conformal VaR, hedging extensions, Taiwan-specific studies.",
+    "paper_decision": "Found 5 papers in amber/red state from Portfolio Status table: P1 (leverage-direction, 0-MISMATCH but 19-UNTRACE), P2 (taiwan-vt, structural gaps), P3 (vt-trend-following, Table 5/6 experiments pending), P8 (volatility-absorption, CRITICAL errata + Path A/B/C decision pending), P9 (garch-x-vix, submitted under review + shelf errata).",
+    "paper_body": "Found 5 paper .tex files with TODO/\\todo{}/PLACEHOLDER markers: prg-periodic-garch/main (4 markers), prg-periodic-garch/main_pre_v3_m2 (4 markers), volatility-absorption/main_v2 (5 markers), volatility-absorption/main_v3 (5 markers), vt-insurance-cost/main (3 markers).",
+    "event_article": "Only 1 event within 7-day window from today 2026-05-13: BLS CPI release today (2026-05-13). Next FOMC is 2026-06-18 (36 days away). Event calendar covers FOMC + BLS CPI + Jobs through end of 2026.",
+    "daily_article": "Found 68 K experiments with non-null verdict not covered by feed.json and not already in next_tasks.json. Includes older K-series (K151, K159, K181...) and recent sub-experiments (K1100G_D3/D5/D6/D8, K1108D/E/F, K1116B/C/F, K1148_D1/D2/D3).",
+    "dedup_logic": "All 5 sources check against existing next_tasks.json IDs + k_id fields before generating. Within-run deduplication also applied (later sources see already-generated tasks from earlier sources in same run)."
+  },
+  "cli_usage": {
+    "dry_run_all": "python3 scripts/task_generator_v2.py --source all --dry-run",
+    "run_single_source": "python3 scripts/task_generator_v2.py --source experiment --limit 5",
+    "commit_to_tasks": "python3 scripts/task_generator_v2.py --source daily_article --limit 3 --commit",
+    "json_log": "python3 scripts/task_generator_v2.py --source all --dry-run --json-output path/to/log.json"
+  }
+}
