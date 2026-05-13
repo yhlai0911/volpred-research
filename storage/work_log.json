@@ -5790,5 +5790,39 @@
     "started_at": "2026-05-13T03:22:35.979060+00:00",
     "completed_at": "2026-05-13T03:22:35.979064+00:00",
     "notes": "3-model review (Claude+Gemini+Codex) CONDITIONAL PASS → applied 2 minor content fixes (K868 sample period end date + n_har_rows clarification) → promoted mile_42e7131c to published"
+  },
+  {
+    "timestamp": "2026-05-13T04:30:08.107631+00:00",
+    "task_type": "experiment",
+    "task_id": "K1304_bma_0050tw_h1_fail",
+    "verdict": "NULL_TRIPLE_REJECT",
+    "note": "K1304 completed + CONDITIONAL PASS + knowledge written. H_sample/H_pool/H_micro all REJECT. 0050.TW BMA degeneracy unexplained by testable hypotheses."
+  },
+  {
+    "task_id": "K1306_article_general",
+    "task_type": "daily_article",
+    "started_at": "2026-05-13T13:28:49.222042",
+    "status": "running",
+    "agent": "k1306-article-agent",
+    "worktree": "agent-k1306-article",
+    "description": "K1306 SEC EDGAR NULL result article - VIX sufficiency extends to firm-level 10-K text"
+  },
+  {
+    "task_id": "Other_papers_nosource_rescan_extension",
+    "task_type": "experiment",
+    "started_at": "2026-05-13T13:28:49.222042",
+    "status": "running",
+    "agent": "nosource-rescan-agent",
+    "worktree": "agent-nosource-rescan",
+    "description": "Papers 1-4 no-source documentation gap rescan"
+  },
+  {
+    "task_id": "multi_source_task_generator_v2",
+    "task_type": "governance",
+    "started_at": "2026-05-13T13:28:49.222042",
+    "status": "running",
+    "agent": "task-gen-v2-agent",
+    "worktree": "agent-task-gen-v2",
+    "description": "Implement 5-source task generator v2 (experiment/paper_decision/paper_body/event_article/daily_article)"
   }
 ]
