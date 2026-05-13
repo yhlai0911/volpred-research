@@ -882,6 +882,38 @@ background reviewers 後設 polling loop 等 v3/ 出檔，自己 exit。但 Code
 
 ---
 
+## 2026-05-13: K1137 + K1138 Codex retroactive review — 兩個 April 2026 實驗各有 blocking defect
+
+**Incident**: K1137 (regime-conditional robust vol) 和 K1138 (equity compendium) 均於 2026-04-17 以
+Gemini-only review 結束（Codex quota exhausted at time）。K1259 protocol 追溯要求 Codex primary review，
+2026-05-13 執行後兩者均 FAIL：
+
+**K1137 defect**: `build_rolling_vix_regimes()` (k1137.py:510-518) 先對 VIX 做 `.shift(1)` 得到
+`v[t] = VIX[t-1]`，再取 `past = v[i-window:i]` → 實際使用 VIX[t-253..t-2]，但設計規格是 VIX[t-252..t-1]。
+Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不符，54 cells 的 DM/BH 結論
+不能直接對應 README 宣稱的設計。需重跑實驗。
+**Fix**: `past = vix_series[i-window:i]`（不用 shifted series）；保留 `.shift(1)` 僅用於 t-day predictor。
+
+**K1138 defect**: `asset_null` / `model_null` 結論邏輯 (k1138.py:840, 848) 只用 `max_t > 2.0`
+判斷，未重新套用 BH-adjusted p-value gate（`DM_HLN_p_BH < 0.05`）。IWM DM_t=2.064 > 2 但 p_BH=0.071 > 0.05
+→ 應標 NULL 卻被標 PASS。9-cell PASS 邏輯 (k1138.py:828) 正確使用 BH gate，但 summary 層沒有。
+**Fix**: line 840/848 改為 `max_t > 2.0 AND best_p_BH < 0.05`；重跑 summary（不需重跑 DM test）。
+
+**Root cause（共同）**: 兩個實驗都因 Codex 當天 quota 耗盡改用 Gemini review，但 Gemini 未能抓到
+這兩個細節。K1259 protocol 正確 — Gemini PASS ≠ Codex primary closure。
+
+**Lessons**:
+1. **BH-FDR 兩層審查**：9-cell 或 54-cell 設計中，PASS 判斷必須在**所有**輸出層（per-cell + per-asset + per-model + summary）一致使用 BH-adjusted p-value，不只在最底層矩陣。寫聚合代碼時用同一個 `is_bh_pass` flag 傳遞，不要重新以 raw t 判斷。
+2. **Rolling window + pre-shift 陷阱**：對已 `.shift(1)` 的 series 再取 `v[i-w:i]` 等同再多 lag 一格。凡 rolling 實驗有 pre-shift，窗口邊界計算需明確標示 `v[t]=VIX[t-?]` 並單元測試邊界值。
+3. **Retroactive Codex review 是必要的**：兩個 P2 實驗差點進入 knowledge.json — Codex 才發現 blocking defects。從此所有 Gemini-only review 的舊實驗排入 Codex retroactive review 佇列。
+
+**Fix path**:
+- K1137_revision_window_fix: P2 experiment，fix + 重跑（已加 next_tasks）
+- K1138_revision_bh_fix: P2 experiment，fix summary aggregation + 部分重跑（已加 next_tasks）
+- document_ tasks for K1137/K1138 blocked until respective revision PASS
+
+---
+
 ## 2026-05-13: K1303 HAR-CJ 實作三重缺陷 → Codex primary-path FAIL
 
 **Incident**: K1303 worktree agent 完成 HAR-CJ 實驗並自行寫入 `knowledge.json`（closure_status=closed），

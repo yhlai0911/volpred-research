@@ -5886,14 +5886,18 @@
     "timestamp": "2026-05-13T05:52",
     "task_type": "paper_review",
     "task_id": "task-k1137-codex-review-primary",
-    "status": "running",
-    "description": "K1137 regime-conditional robust vol models — Codex primary-path review (Gemini-only at run time)"
+    "status": "completed",
+    "description": "K1137 regime-conditional robust vol models — Codex primary-path review (Gemini-only at run time)",
+    "completed_at": "2026-05-13T05:55",
+    "verdict": "FAIL — regime window off-by-one: VIX[t-253..t-2] used instead of VIX[t-252..t-1] (k1137.py:510-518)"
   },
   {
     "timestamp": "2026-05-13T05:52",
     "task_type": "paper_review",
     "task_id": "task-k1138-codex-review-primary",
-    "status": "running",
-    "description": "K1138 equity compendium robust models — Codex primary-path review (Gemini-only at run time)"
+    "status": "completed",
+    "description": "K1138 equity compendium robust models — Codex primary-path review (Gemini-only at run time)",
+    "completed_at": "2026-05-13T05:54",
+    "verdict": "FAIL — BH-FDR not enforced in asset_null/model_null logic (IWM overclaim)"
   }
 ]

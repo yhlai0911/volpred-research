@@ -7683,7 +7683,7 @@
     "created_at": "2026-05-13T13:38:27.087603",
     "description": "K1137 has 60KB results, verdict=C_HAR_REGIME_INVARIANT. HAR+VIX passes all 3 VIX regimes. Paper 4 Channel 1 regime-invariant claim needs this KB entry. Document in knowledge.json with proper experiment_id, verdict, and all required fields.",
     "source": "nosource_rescan_extension_top5",
-    "blocked_reason": "prereq: task-k1137-codex-review-primary must PASS first"
+    "blocked_reason": "prereq: K1137_revision_window_fix must complete + PASS first"
   },
   {
     "id": "document_K1138_kb_entry",
@@ -7694,7 +7694,7 @@
     "created_at": "2026-05-13T13:38:27.087603",
     "description": "K1138 has 35KB results, verdict=MIXED. Equity portfolio (SPY/QQQ/IWM) has PASS cases. Research honesty requires documenting which (asset, model) combinations pass. Document in knowledge.json.",
     "source": "nosource_rescan_extension_top5",
-    "blocked_reason": "prereq: task-k1138-codex-review-primary must PASS first"
+    "blocked_reason": "prereq: K1138_revision_bh_fix must complete + PASS first"
   },
   {
     "id": "document_K1135_kb_entry",
@@ -7744,7 +7744,7 @@
   {
     "id": "task-k1137-codex-review-primary",
     "title": "K1137 Codex primary-path review (Gemini-only at run time)",
-    "status": "running",
+    "status": "succeeded",
     "priority": 2,
     "task_type": "paper_review",
     "created_at": "2026-05-13T05:51:16",
@@ -7755,12 +7755,15 @@
       "paper4",
       "har-regime"
     ],
-    "claimed_at": "2026-05-13T05:51"
+    "claimed_at": "2026-05-13T05:51",
+    "completed_at": "2026-05-13T05:55",
+    "codex_verdict": "FAIL",
+    "codex_issue": "build_rolling_vix_regimes() off-by-one: vix_lag1.shift(1) + past=v[i-w:i] → VIX[t-253..t-2] not VIX[t-252..t-1] (k1137.py:510-518)"
   },
   {
     "id": "task-k1138-codex-review-primary",
     "title": "K1138 Codex primary-path review (Gemini-only at run time)",
-    "status": "running",
+    "status": "succeeded",
     "priority": 2,
     "task_type": "paper_review",
     "created_at": "2026-05-13T05:51:16",
@@ -7771,7 +7774,10 @@
       "paper4",
       "equity-compendium"
     ],
-    "claimed_at": "2026-05-13T05:51"
+    "claimed_at": "2026-05-13T05:51",
+    "completed_at": "2026-05-13T05:54",
+    "codex_verdict": "FAIL",
+    "codex_issue": "BH-FDR not enforced in asset/model conclusion logic (lines 840, 848); IWM misclassified PASS"
   },
   {
     "id": "task-k1135-codex-review-primary",
@@ -8990,5 +8996,37 @@
     "created_at": "2026-05-13T05:53:00.504725+00:00",
     "generated_at": "2026-05-13T05:53:00.504730+00:00",
     "k_id": "K820"
+  },
+  {
+    "id": "K1138_revision_bh_fix",
+    "title": "K1138 revision: fix BH-FDR enforcement in asset/model conclusion logic",
+    "status": "pending",
+    "priority": 2,
+    "task_type": "experiment",
+    "created_at": "2026-05-13T05:54",
+    "description": "Codex FAIL found: asset_null/model_null logic at k1138.py lines 840/848 uses max_t > 2.0 only, ignoring BH-adjusted p-value gate. Fix: change to require both max_t > 2.0 AND corresponding DM_HLN_p_BH < 0.05. IWM DM_t=2.064, p_BH=0.071 → correctly NULL after fix. Re-run summary computation only (DM test results in results.json are correct). Update README and results JSON verdict accordingly.",
+    "tags": [
+      "K1138",
+      "bh-fdr",
+      "codex-fail-fix",
+      "paper4",
+      "equity-compendium"
+    ]
+  },
+  {
+    "id": "K1137_revision_window_fix",
+    "title": "K1137 revision: fix regime rolling window off-by-one (VIX lag indexing)",
+    "status": "pending",
+    "priority": 2,
+    "task_type": "experiment",
+    "created_at": "2026-05-13T05:55",
+    "description": "Codex FAIL: build_rolling_vix_regimes() k1137.py:510-518 applies .shift(1) then v[i-window:i], giving VIX[t-253..t-2] instead of spec VIX[t-252..t-1]. Fix: use vix_series[i-window:i] directly (unshifted) for the quantile window, keeping .shift(1) only for the day-of-t predictor. Requires full experiment re-run since regime labels change. DM-HLN HAC is already correct (k1137.py:460-486); BH-FDR already correct (k1137.py:825-853).",
+    "tags": [
+      "K1137",
+      "regime-window",
+      "codex-fail-fix",
+      "paper4",
+      "har-regime"
+    ]
   }
 ]
