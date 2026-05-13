@@ -835,3 +835,84 @@ yfinance API 對 1m / 5m interval 設 30/60 天 lookback 上限（2020/2023/2024
 - GDELT 2.0 raw parquet 已存（experiments/k1268/gdelt_5min_bars.parquet 864 bars），K1268b 可直接 re-use
 - TODO platform_ops: write `external-data-sources` skill 記錄 yfinance / Polygon / Databento /
   GDELT 2.0 各自 limits + use case，避免下次設計犯同樣錯誤
+
+---
+
+## 2026-05-12: leverage-direction `reproduce.py` print-only → `reproduce_report.json` 3 週靜默 stale
+
+**Incident**: hourly dispatch 派 paper_review agent 跑 leverage-direction v3 review cycle。Pre-flight
+讀 `reproduce_report.json` 看到 `alert_level=amber`、`timestamp=2026-04-19T11:35:00Z`（3 週前）。
+Body_v3.tex mtime = 今天，commits `07967bf7` + `be3b1601` 已修 7 HIGH，但 reproduce_report 完全沒更新。
+
+**Root cause**: `paper/leverage-direction/reproduce.py` 從頭到尾只 `print()` 不寫 JSON。`reproduce_report.json`
+的 `audit_method` 欄位寫 "Manual update 2026-04-19 post session reproduce.py edits" — 確認當初是
+**人工手寫**，沒有 script-emit linkage。3 週內 body_v3 多次修訂、reproduce.py 也加新 checks，但
+JSON 因為沒人手動同步而 silently stale。Review cycle 用 stale gate 判定會做出 false-negative
+（明明 HIGH 1 修了卻看到老的 "HM gamma contradiction" 推薦）。
+
+**Secondary incident**: hour 初派的 paper_review agent (`a0c2291b96a5deb91`) spawn 兩個 Codex
+background reviewers 後設 polling loop 等 v3/ 出檔，自己 exit。但 Codex job 沒實際啟動（ps 無
+`codex exec`），結果 polling loop 變孤兒 process（PID 26141）永遠等不到的檔，agent 回報
+"Both jobs still running"。手動 `pkill -f "academic_review_report.md.*ready"` 清除。
+
+**Lessons**:
+1. **Reproduce.py 必須 emit JSON 不只 print** — 任何 `paper/<id>/reproduce.py` 都得在 script 結束時
+   寫 `reproduce_report.json`，否則 gate 永遠靠人工同步、必 stale。
+2. **Schema split**: mechanical fields (`status_breakdown` / `match_rate_pct` / `mismatches` / `timestamp`)
+   每次 re-run 自動覆蓋；narrative fields (`divergences` / `recommendations` / `suggested_next_action`)
+   從 prior JSON preserve（避免每次跑失去手寫脈絡）。
+3. **Gate logic 統一**: `mismatches=0` AND `traceable_match_rate_pct≥95` → green；`mismatches=0` only
+   → amber；有 mismatch → red。pass_with_untraceable 只在 amber 出現。
+4. **Agent dispatch 防禦**: paper_review agent 若 spawn background reviewer 必 wait until completion
+   再 exit（或主線程直接 foreground 跑 reviewer，不開 background）。Polling loop pattern 不可靠
+   — 沒人保證 spawned job 真的有跑。
+
+**Fix path**:
+- `paper/leverage-direction/reproduce.py` L765+ 加 JSON emission block（dataclass `Check` 已存在，
+  從 `checks` list + `status_counts` 重算 mechanical fields；prior JSON 的 narrative fields preserve）。
+  Re-run 後 timestamp `2026-04-19T11:35:00Z` → `2026-05-12T10:14:33Z`，match_rate 35.0% → 57.6%,
+  traceable 79.5% → 80.9%，mismatches=0 確認。Still amber（19 UNTRACEABLE rows 阻擋 ≥95% gate）。
+- TODO: 同期 audit 所有 10 papers 的 reproduce.py emit JSON 狀況。**已確認 2 篇有同樣 print-only 問題**：
+  `paper/taiwan-vt/reproduce.py` 和 `paper/vt-trend-following/reproduce.py` 兩者 reproduce_report.json
+  timestamp 都凍在 `2026-04-19T07:00:55Z` (alert=yellow，3 週前)，待用同樣 JSON-emit block patch 修。
+  其他 8 篇 (crypto-fear-channel, garch-x-vix, prg-periodic-garch, vix-sufficiency, volatility-absorption,
+  vt-crowding-abm, vt-insurance-cost, leverage-direction) 已含 `json.dump` linkage。
+- TODO: review_history/v3/ 在 reproduce gate 變 green 前不啟動 review cycle（19 UNTRACEABLE 來自
+  Tables 1/2/6/7/8/11/14 缺 dedicated experiments — 多 K 補充工作，不適合單 agent 派出去）。
+
+---
+
+## 2026-05-13: K1303 HAR-CJ 實作三重缺陷 → Codex primary-path FAIL
+
+**Incident**: K1303 worktree agent 完成 HAR-CJ 實驗並自行寫入 `knowledge.json`（closure_status=closed），
+但未經 Codex primary-path review。Codex 事後審查發現 3 個 blocking issues：
+
+1. **DM-HLN 缺 HAC（HIGH）**：forecast error 用 plain sample variance 做 DM test，沒有 Newey-West
+   kernel。專案已有 `src/volpred/stats/model_evaluation.py:83` 的 HAC 實作，agent 完全未引用。
+2. **跳躍分量無正式閾值（HIGH）**：jump = `max(RV_t - BPV_t, 0)` — 純 truncation，沒有 BNS z-test
+   或 Threshold Quadratic Variation (TQ) 統計檢定。導致 explosive beta estimates：j_d=2224, j_w=4203,
+   j_m=-8416，顯示噪音未過濾。
+3. **Extra lag（MEDIUM）**：`X_{t-1}` → `Y_{t+1}` 是 2-step-ahead 預測，不是 HAR 標準 1-step lag。
+
+**Root cause**：
+- Agent 跑完後直接寫 knowledge.json，未等 Codex review（違反 CLAUDE.md 實驗後流程規則）。
+- Brief 未明確指定使用 `src/volpred/stats/model_evaluation.py` 的 HAC DM test。
+- HAR-CJ jump 識別規格未在 brief 中指定 BNS/TQ 方法，agent 預設用最簡單的 truncation。
+
+**Lessons**:
+1. **Brief 必明指統計方法實作路徑**：DM-HLN 相關任務 brief 必含 `src/volpred/stats/model_evaluation.py:83`
+   路徑引用，讓 agent 知道「HAC 版本已存在」。
+2. **HAR-CJ jump 識別 hard rule**：任何 HAR-CJ 實驗必用 BNS (2006) 或 Barndorff-Nielsen & Shephard
+   z-test 識別跳躍；不可只用 `max(RV-BPV, 0)` truncation。Explosive beta 是識別問題的 tell-sign。
+3. **Codex review gate 在 knowledge entry 之前**：agent 不可自行判斷 closure；results.json 可以先寫，
+   knowledge.json 必須等 Codex PASS 後由主線程寫入。
+4. **Knowledge 保留 requires_revision 狀態**：不刪 K1303 entry，改 `closure_status=requires_revision`
+   + `codex_review_verdict=FAIL` — 保持研究誠實原則（不能用刪除掩蓋 FAIL）。
+
+**Fix path**:
+- K1303 entry: `closure_status=requires_revision`, `codex_review_verdict=FAIL`（已更新）
+- K1303_revision_har_cj_abd: P3 新實驗任務（已加入 next_tasks.json），修正規格：
+  (1) HAC/Newey-West DM-HLN via `src/volpred/stats/model_evaluation.py:83`
+  (2) BNS z-test 識別跳躍（截斷水準 α=0.001，BPV + signed-rank）
+  (3) Standard 1-step lag（X_{t-1} → Y_t）
+- experiments/k1303/k1303_codex_review.md 已存檔（完整 Codex review 報告）

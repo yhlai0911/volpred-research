@@ -7294,7 +7294,7 @@
     "title": "K1303 Codex primary-path review + knowledge.json closure_status fix",
     "priority": 3,
     "description": "K1303 HAR-CJ NULL (DM-HLN t=-0.91 on TX1)。Agent 在 Codex blocked + 無 Task tool 情況下仍寫 knowledge.json，誤讀 K1259 規則為「NULL 不算 too-good 所以可寫」。實際 K1259 教訓：任何 fallback PASS 都不算 final closure。修正動作：(a) Codex 恢復後 (2026-05-13 02:46 UTC) 對 experiments/k1303/k1303.py + results.json 做 primary review；(b) 若 PASS 則更新 knowledge.json K1303 entry 加 reviewer_source 欄位；若 FAIL 則 revert entry 或補 closure_status=requires_revision。Commit cdef3718。",
-    "status": "running",
+    "status": "succeeded",
     "task_type": "paper_review",
     "blocked_reason": "codex_quota_reset_pending",
     "blocked_until": "2026-05-13T02:46:00Z",
@@ -7305,7 +7305,9 @@
       "k1259-violation-cleanup"
     ],
     "created_at": "2026-05-12T03:00:49Z",
-    "started_at": "2026-05-13T13:36:24.035491"
+    "started_at": "2026-05-13T13:36:24.035491",
+    "completed_at": "2026-05-13T13:41:06.316016",
+    "result": "Codex FAIL (3 issues: HAC missing, no BNS jump threshold, extra lag); knowledge.json requires_revision"
   },
   {
     "id": "task-k1306-codex-review-primary",
@@ -7721,5 +7723,16 @@
     "created_at": "2026-05-13T13:38:27.087603",
     "description": "K901 has 29KB results, 13-market international VT: MDD improvement 13/13, Sharpe 0/13, GJR gamma>0 13/13. Is parent experiment for K1178 (Paper 3 Table 5). Document in knowledge.json.",
     "source": "nosource_rescan_extension_top5"
+  },
+  {
+    "id": "K1303_revision_har_cj_abd",
+    "title": "K1303 HAR-CJ revision: ABD jump threshold + HAC DM + standard 1-step lag",
+    "status": "pending",
+    "priority": 3,
+    "task_type": "experiment",
+    "created_at": "2026-05-13T13:41:06.316016",
+    "description": "Codex FAIL found 3 issues in K1303 HAR-CJ: (1) DM-HLN missing HAC/Newey-West correction (use src/volpred/stats/model_evaluation.py:83 HAC version); (2) jump identification uses naive max(RV-BPV,0) with no BNS/TQ z-test threshold (beta magnitudes j_d=2224, j_w=4203, j_m=-8416 confirm noisy regressors); (3) feature X_t-1 vs target Y_t+1 = 2-step-ahead, not standard HAR-CJ 1-step. Fix: implement ABD/BNS z-test thresholded jump identification + correct HAC DM + standard 1-step. NULL verdict pending re-evaluation after fix.",
+    "source": "K1303_codex_review_fail",
+    "prerequisite": "task-k1303-codex-review-primary"
   }
 ]
