@@ -5804,10 +5804,12 @@
     "task_id": "K1306_article_general",
     "task_type": "daily_article",
     "started_at": "2026-05-13T13:28:49.222042",
-    "status": "running",
+    "status": "succeeded",
     "agent": "k1306-article-agent",
     "worktree": "agent-k1306-article",
-    "description": "K1306 SEC EDGAR NULL result article - VIX sufficiency extends to firm-level 10-K text"
+    "description": "K1306 SEC EDGAR NULL result article - VIX sufficiency extends to firm-level 10-K text",
+    "completed_at": "2026-05-13T13:33:56.220380",
+    "result": "article mile_6acbf075 published as draft in feed.json"
   },
   {
     "task_id": "Other_papers_nosource_rescan_extension",
@@ -5822,9 +5824,11 @@
     "task_id": "multi_source_task_generator_v2",
     "task_type": "governance",
     "started_at": "2026-05-13T13:28:49.222042",
-    "status": "running",
+    "status": "succeeded",
     "agent": "task-gen-v2-agent",
     "worktree": "agent-task-gen-v2",
-    "description": "Implement 5-source task generator v2 (experiment/paper_decision/paper_body/event_article/daily_article)"
+    "description": "Implement 5-source task generator v2 (experiment/paper_decision/paper_body/event_article/daily_article)",
+    "completed_at": "2026-05-13T13:33:56.220380",
+    "result": "scripts/task_generator_v2.py created; 139 tasks in dry-run (not yet committed to next_tasks)"
   }
 ]

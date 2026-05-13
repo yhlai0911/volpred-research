@@ -6200,7 +6200,7 @@
     "title": "完整 multi-source task generator (8 types stub → live)",
     "description": "V2 task: expand multi-source generator to remaining 5 types — experiment (research_program backlog), paper_decision (paper status FSM), paper_body (paper.tex section anchors), event_article (BLS/FOMC/earnings calendar), member_qa (questions queue), strategy_lifecycle (STRATEGY_REGISTRY drift). Each: signal source + idempotent quota + dry-run. paper_review/platform_ops/governance already shipped 2026-05-06.",
     "priority": 3,
-    "status": "running",
+    "status": "succeeded",
     "task_type": "governance",
     "source": "audit_2026_05_07",
     "tags": [
@@ -6209,7 +6209,8 @@
     ],
     "created_at": "2026-05-07T00:21:00+00:00",
     "progress_2026_05_07": "paper_review (concrete) + platform_ops (cron staleness signal) + governance (skill audit + error_log threshold) shipped + wired into continue_task_dispatch._maybe_refill. Remaining 5 types: experiment, paper_decision, paper_body, event_article, member_qa, strategy_lifecycle.",
-    "started_at": "2026-05-13T13:28:53.553771"
+    "started_at": "2026-05-13T13:28:53.553771",
+    "completed_at": "2026-05-13T13:34:01.189250"
   },
   {
     "id": "paper2-table2-footnote-tier-decision",
@@ -7654,7 +7655,7 @@
     "title": "K1306: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1306 has verdict signal (score=0, reasons=None) but no general article. Verdict preview: ",
     "priority": 4,
-    "status": "running",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1306",
@@ -7663,6 +7664,7 @@
       "audience-general"
     ],
     "created_at": "2026-05-13T00:07:17+00:00",
-    "started_at": "2026-05-13T13:28:53.553780"
+    "started_at": "2026-05-13T13:28:53.553780",
+    "completed_at": "2026-05-13T13:34:01.189269"
   }
 ]
