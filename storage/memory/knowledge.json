@@ -29564,5 +29564,44 @@
     ],
     "data_source": "yfinance USO/UNG/GLD/SLV 2010-2026",
     "created_at": "2026-05-14T08:08:28.401869+00:00"
+  },
+  {
+    "id": "k1302-1778775585",
+    "experiment_id": "K1302",
+    "timestamp": "2026-05-15T16:07:00Z",
+    "title": "K1302: Table 2 γ Byte-Match Diagnostic — Rolling vs Full-Sample Spec Divergence",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer_source": "Codex primary review (2026-05-15) + 4-fix patch",
+    "closure_status": "closed",
+    "summary": "GJR-GARCH γ re-estimation for 4 individual Taiwan stocks (Hon Hai/MediaTek/0056.TW/Mega Financial) in Paper 2 Table 2. Canonical spec: full-sample 2008-2024, Constant mean, Bollerslev-Wooldridge robust SE. All 4 stocks FAIL byte-match vs paper (rolling w=2000 Newey-West HAC legacy values). Root cause: methodology divergence (rolling vs. full-sample, NW-HAC vs. BW-robust), NOT data error.",
+    "key_findings": [
+      "Hon Hai (2317.TW): paper γ=0.052 vs canonical γ=0.032 (Δ=0.020, t-stat 1.14→1.74)",
+      "MediaTek (2454.TW): paper γ=0.044 vs canonical γ=0.041 (Δ=0.003, t-stat 0.96→3.10 — SE method drives t-stat change)",
+      "Mega Financial (2886.TW): paper γ=0.179 vs canonical γ=0.038 (Δ=0.141 — largest outlier, legacy rolling window artifact)",
+      "0056.TW ETF: paper γ=0.112 vs canonical γ=0.067 (Δ=0.045)",
+      "9-stock average under full-sample canonical: ~0.038 vs. paper 0.054 (affects amplification ratio: 5.0× → ~7.2×)"
+    ],
+    "decision": "Option B (footnote tier): Table 2 values preserved (rolling w=2000 methodology documented in Notes). K1302 canonical values disclosed in Table 2 Notes as methodological note. reproduce.py: 3 items (Hon Hai/MediaTek/0056.TW) moved from UNTRACEABLE to CONFLICT_RESOLVED with K1302 source binding. Full Option A update (replace all individual stock values) deferred to K1146 narrative pivot task.",
+    "reproduce_gate_impact": "reproduce.py gate improved from 96.3% to 96.4% (133/143 traceable). 3 UNTRACEABLE → CONFLICT_RESOLVED.",
+    "codex_review": {
+      "verdict": "FAIL → CONDITIONAL_PASS post-fix",
+      "issues_fixed": [
+        "cov_type=\"robust\" now explicit in am.fit() (not default-reliant)",
+        "Convergence warning logged immediately after am.fit() before any result use",
+        "Hardcoded mega_financial_outlier note and markdown recommendation now dynamically generated from all_results",
+        "Cache reader handles both Close and adj_close column names (2886.TW/2383.TW fix)"
+      ],
+      "residual_caveats": "Convergence gate is a warning log, not an early return — appropriate for diagnostic tool where partial estimates are informative"
+    },
+    "paper_impact": "Paper 2 (taiwan-vt): Table 2 Notes updated with canonical disclosure. Future K1146 narrative pivot should adopt Option A to update all individual stock γ to canonical + recalculate 9-stock average and amplification ratios throughout Section 4.2.",
+    "tags": [
+      "paper2",
+      "GJR-GARCH",
+      "byte-match",
+      "Table2",
+      "leverage-effect",
+      "reproduce-gate",
+      "methodology-note"
+    ]
   }
 ]

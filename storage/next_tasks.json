@@ -6218,7 +6218,7 @@
     "title": "Paper 2 Table 2 footnote tier decision (post K1302 Codex review)",
     "priority": 1,
     "description": "K1302 byte-match FAIL — 4 stocks 不同 footnote tier (per K1256 precedent): (1) 2454.TW SE-method footnote (Δγ ≤ 0.001, NW-HAC vs Hessian), (2) 2317.TW/0056.TW data-revision drift footnote (Δγ ≤ 0.05), (3) 2886.TW methodology mismatch (Δγ=0.135, sign same)。**主線程 narrative decision** per CLAUDE.md L177-185 paper narrative state machine — 不丟 worktree agent。決策路徑：Option A 全換 K1302 canonical γ + 3-spec footnote / Option B 個案 footnote tier / Option C erratum + reproduce.py NOTE classification。Codex primary review PASS 後再決定；blocker for Paper 2 READY_FOR_SUBMISSION。",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_body",
     "main_thread_only": true,
     "blocked_reason": "k1302_codex_review_pending",
@@ -6230,7 +6230,8 @@
       "table2",
       "main-thread"
     ],
-    "created_at": "2026-05-12T03:57:38Z"
+    "created_at": "2026-05-12T03:57:38Z",
+    "completed_at": "2026-05-15T00:22:40.813308+08:00"
   },
   {
     "id": "paper2_body_update_table3_canonical",
@@ -6255,7 +6256,7 @@
     "title": "Paper 2 reproduce.py gate fix — 108 checks 中多項 UNTRACEABLE source binding",
     "description": "Paper 2 reproduce.py gate FAIL (alert=yellow). Stats: 79/108 VERIFIED (73.1%), 75 VERIFIED + 2 CLOSE + 2 CONFLICT_RESOLVED + 6 MISMATCH + 23 UNTRACEABLE. traceable_match=92.9% (need ≥95% gate). 7 dominant gaps: (1) Table 1 TWII summary stats (mean/std/skew/kurt) no JSON; (2) Table 4 VT strategy Sharpe BH/EWMA/GARCH/GJR no JSON; (3) Table 5 common-period values no dedicated JSON; (4) Table 2 individual gamma Hon Hai/MediaTek/0056.TW (N121 averages only); (5) Sec 6 macro corr + Sec 4.5 TSMC VT Sharpe no JSON; (6) Appendix TZ c2c Sharpe TW+JP blend no JSON; (7) Sec 3 TWD/USD test p=0.08 no JSON. Suggested action per reproduce_report: (1) unify gamma estimation across Table 2 + Sec 4.5 (pick window, note explicitly), (2) backfill JSONs for Tables 1/4/5, (3) re-run reproduce.py target ≥95%. Each gap needs: identify source experiment(s), find/compute JSON, write inline % source: in body.tex, validate. Estimated 4-6 hours dedicated session. paper-workflow.md rule: body.tex edits stay main-thread, but JSON backfill + source identification can be agent-prep. Body.tex was promoted from body_v3.tex on 2026-05-10 with K1175 canonical Sharpe 0.799/MDD -33.8% — that work resolved Table 3 audit but not 7 other gap categories.",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_body",
     "source": "paper2_v3_promote_K1175_2026_05_10",
     "tags": [
@@ -6265,7 +6266,8 @@
       "main-thread"
     ],
     "created_at": "2026-05-10T16:50:00+00:00",
-    "last_note": "[2026-05-11] Updated description with 7-category gap breakdown after reproduce_report.json inspection. 23 UNTRACEABLE clustered: Tables 1/4/5 entire missing JSON; Table 2 gamma sub-panel; Appendix TZ/Sec 6/Sec 4.5/Sec 3 misc. Suggested split into 2-3 sub-tasks (Tables backfill + Sections backfill + gamma unification) for tractable session work."
+    "last_note": "[2026-05-11] Updated description with 7-category gap breakdown after reproduce_report.json inspection. 23 UNTRACEABLE clustered: Tables 1/4/5 entire missing JSON; Table 2 gamma sub-panel; Appendix TZ/Sec 6/Sec 4.5/Sec 3 misc. Suggested split into 2-3 sub-tasks (Tables backfill + Sections backfill + gamma unification) for tractable session work.",
+    "completed_at": "2026-05-15T00:22:40.813308+08:00"
   },
   {
     "id": "paper2_table3_canonical_K1175_completed",
@@ -7277,7 +7279,7 @@
     "title": "K1302 Codex primary-path review (post quota reset)",
     "priority": 2,
     "description": "K1302 provenance audit FAIL byte-match for all 4 Paper 2 Table 2 stocks. Codex CLI quota reset 2026-05-13 02:46 UTC 後 `codex exec --skip-git-repo-check` 對 experiments/k1302/k1302.py + results.json 做 primary review。Focus: (a) MLE multistart convergence quality (best LL distribution per stock), (b) GJR-Normal vs Paper canonical spec equivalence verification, (c) 2886.TW Mega Financial 大 drift (Δγ=0.135) — methodology mismatch or data issue? (d) 2383.TW NOT_IN_TABLE_2 — README 寫了 2383 但 script 用 2886；README 改正。PASS 才能 trigger Paper 2 Table 2 footnote tier 主線程決策。",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "blocked_reason": "codex_quota_reset_pending",
     "blocked_until": "2026-05-13T02:46:00Z",
@@ -7287,7 +7289,8 @@
       "primary-path-verify",
       "paper2-blocker"
     ],
-    "created_at": "2026-05-12T03:57:38Z"
+    "created_at": "2026-05-12T03:57:38Z",
+    "completed_at": "2026-05-15T00:22:40.813308+08:00"
   },
   {
     "id": "task-k1303-codex-review-primary",

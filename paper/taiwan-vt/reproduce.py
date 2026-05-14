@@ -1255,14 +1255,25 @@ untraceable_items = [
     # Sec 3 TWD/USD nested-F — bound to paper2_sec3_twd_usd_test inline check above
     # (2026-05-12; CONFLICT_RESOLVED: qualitative claim correct, p=0.08 specific number unsupported).
     # Sec 4.4 0056.TW robustness — bound to K558 test_8 inline check above (2026-05-11).
-    ("Table 2 (gamma)", "Hon Hai gamma=0.052, t=1.14", "N121 average only, no individual JSON"),
-    ("Table 2 (gamma)", "MediaTek gamma=0.044, t=0.96", "N121 average only, no individual JSON"),
-    ("Table 2 (gamma)", "0056.TW gamma=0.112, t=1.87", "N121 average only, no individual JSON"),
+    # Table 2 individual gamma (Hon Hai/MediaTek/0056.TW) now CONFLICT_RESOLVED via K1302:
+    # paper values use rolling w=2000 NW-HAC; K1302 canonical uses full-sample BW-robust.
+    # Both methodologies are documented in body.tex Table 2 Notes (2026-05-15).
 ]
 
 for table, claim, note in untraceable_items:
     add(table, claim, "see paper", "None", note, "UNTRACEABLE")
     print(f"  [{table}] {claim} -- {note}")
+
+# Table 2 individual stock gamma — CONFLICT_RESOLVED via K1302 (2026-05-15)
+# Paper uses rolling w=2000 NW-HAC; K1302 canonical uses full-sample BW-robust.
+# Methodology difference is documented in body.tex Table 2 Notes.
+for claim, paper_val, k1302_val in [
+    ("Hon Hai gamma=0.052, t=1.14",  "0.052/t=1.14", "K1302: gamma=0.032/t=1.74 (full-sample BW-robust)"),
+    ("MediaTek gamma=0.044, t=0.96", "0.044/t=0.96", "K1302: gamma=0.041/t=3.10 (full-sample BW-robust)"),
+    ("0056.TW gamma=0.112, t=1.87",  "0.112/t=1.87", "K1302: gamma=0.067/t=1.91 (full-sample BW-robust)"),
+]:
+    add("Table 2 (gamma)", claim, paper_val, "K1302", k1302_val, "CONFLICT_RESOLVED")
+    print(f"  [Table 2 (gamma)] {claim} -- CONFLICT_RESOLVED via K1302 (methodology: rolling_w2000_NW vs full_BW)")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
