@@ -1,7 +1,10 @@
 #!/bin/bash
-# Hourly dispatch trigger via OS-level cron.
-# Why: ScheduleWakeup in interactive session unreliable. OS cron + claude -p
-# headless is reliable + diversity rules embedded in prompt file.
+# 4-hourly dispatch trigger via macOS LaunchAgent.
+# Schedule: 00:07 / 04:07 / 08:07 / 12:07 / 16:07 / 20:07 CST (6 slots/day).
+# Why 4h: every fire MUST FULLY complete its dispatched task before stopping
+# (no partial work tossed to next slot). 4h gap gives agent room to finish.
+# Filename still says "hourly" (file rename has TCC + plist downstream costs;
+# behavior change documented here + in prompt file + memory feedback).
 #
 # Canonical source: scripts/cron_hourly_dispatch.sh + scripts/cron_hourly_dispatch_prompt.md
 # TCC copy: ~/.volpred/bin/cron_hourly_dispatch.sh
@@ -15,10 +18,11 @@ echo "=== hourly-dispatch $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
 # Read prompt from external file to avoid bash quoting hell with Chinese + backticks
 PROMPT=$(cat /Users/yhlai0911/Desktop/volpred-research/scripts/cron_hourly_dispatch_prompt.md)
 
-# Hard 50-min cap via perl alarm (macOS lacks `timeout`). If claude -p hangs,
-# perl SIGALRM kills the exec'd child so the next hourly fire isn't blocked.
-# Prior incidents (2026-05-13 10:07 and 15:07) ran ~17h before manual kill.
-HOURLY_CAP_SEC=3000
+# Hard 3.5h cap via perl alarm (macOS lacks `timeout`). 4h interval - 0.5h
+# buffer = 12600s. If claude -p hangs, perl SIGALRM kills the exec'd child
+# so the next 4-hourly fire isn't blocked. Prior hang incidents 2026-05-13
+# 10:07 and 15:07 ran ~17h before manual kill (strike 2 of three-strike rule).
+HOURLY_CAP_SEC=12600
 /usr/bin/perl -e 'alarm shift; exec @ARGV' "$HOURLY_CAP_SEC" \
   /Users/yhlai0911/.local/bin/claude -p --dangerously-skip-permissions --model claude-sonnet-4-6 "$PROMPT"
 EXIT_CODE=$?
