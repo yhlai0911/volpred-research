@@ -29544,5 +29544,25 @@
     "created_at": "2026-05-14T04:18:20.547260+00:00",
     "importance": 2,
     "paper_relevance": "Not paper-relevant (NULL). Feeds into K1121/K846 moat — 50/50 SPY/GLD remains hard to beat with NFCI/EPU regime overlays even with bond leg."
+  },
+  {
+    "id": "k1135-1778800000",
+    "experiment_id": "K1135",
+    "title": "K1135: Skew-t GAS commodity Scenario B — QLIKE NULL, VaR/ES rescued (H1:0/4, H2:2-3/4, H3:4/4)",
+    "content": "[提出: Claude followup K1129, 執行: compute-queue + Claude] 4 commodity × 3 models OOS (2010-2020 IS, 2020-2026 test, n=1576, seed=42). Treatment: USO(skew=-0.578), GLD(-0.310), SLV(-1.064); Control: UNG(+0.103). **Scenario B 確認**: H1(QLIKE DM BH-FDR) 0/4 NULL — USO raw DM_p=0.046 但 BH_p=0.185，其餘更遠；H2(VaR Trinity @1%) 2/4 PASS (GLD/UNG M2 PASS, USO/SLV FAIL DQ clustering)；H2(@5%) 3/4 (GLD M2 FAIL CC+DQ)；H3(ES Z1+Z2 @1%) 4/4 PASS；H3(@5%) 4/4 PASS. 估計 lambda_M2 = -0.050(USO)/-0.049(GLD)/-0.054(SLV) — 偏度幅度小。**K1129 vs K1135 比較**: K1129 symmetric-t GAS 在 commodity 全 NULL；K1135 skew-t GAS 在 QLIKE 仍 NULL 但 tail risk (VaR/ES) 顯著改善，skewness improves tail quantile accuracy but NOT volatility level forecast。**Paper 4 Channel 3 implication**: 加 commodity subsection — GAS skew-t improves tail risk only; lambda recovers VaR/ES but not QLIKE in commodities. M0 fails ES at both alphas; M1/M2 pass ES 4/4. Codex CONDITIONAL PASS (BH-FDR + docstring fix applied). Compute job exit=0, charts: commodity_skew_vs_gauss.png, var_es_backtest.png.",
+    "tags": [
+      "Paper_4",
+      "Channel_3_GAS_family",
+      "skew-t-GAS",
+      "Scenario_B",
+      "commodity-tail-risk",
+      "QLIKE-NULL",
+      "VaR-ES-rescued",
+      "K1129-companion",
+      "BH-FDR",
+      "Hansen-1994"
+    ],
+    "data_source": "yfinance USO/UNG/GLD/SLV 2010-2026",
+    "created_at": "2026-05-14T08:08:28.401869+00:00"
   }
 ]
