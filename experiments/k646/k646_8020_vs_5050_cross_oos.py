@@ -119,8 +119,12 @@ print(f"  Return series: {len(ret)} days")
 # ==================================================================
 
 def apply_12vix(risky_ret, vix_series, rf_daily=RF_DAILY):
-    """Apply 12/VIX allocation: equity_weight = min(12/VIX, 1.0), rest in cash."""
-    equity_weight = np.minimum(VIX_TARGET / vix_series, 1.0)
+    """Apply 12/VIX allocation with proper lag — signal from t-1, return at t.
+
+    2026-05-06 K547-family lookahead patch. Same fix as K645 sibling.
+    """
+    equity_weight_raw = np.minimum(VIX_TARGET / vix_series, 1.0)
+    equity_weight = equity_weight_raw.shift(1).fillna(equity_weight_raw.iloc[0])
     portfolio_ret = equity_weight * risky_ret + (1 - equity_weight) * rf_daily
     return portfolio_ret, equity_weight
 
