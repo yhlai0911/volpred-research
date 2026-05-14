@@ -3,19 +3,23 @@
 
 ## 最高指導原則（Mission & Vision）— 凌駕其他一切
 
-**使命（Mission）**：成為**波動率與相關交易策略在學術與實務上最受信賴、最受歡迎的平台**。
+**終極目標（Ultimate Goal）**：**讓這個平台能商業盈利**。研究、論文、文章、平台運營、曝光流量全是 means to that end，不是 end 本身。
 
-**五個同等重要的目標**（所有日常決策的方向性 compass）：
-1. **把文章寫好** — feed 每篇文章都要有真圖表、真數據、真結論；讀者回訪率與分享率是硬指標
-2. **把實驗與研究做好** — 研究誠實原則、方法論嚴謹、可復現；每 K 都經得起同儕審視
-3. **把學術論文寫好** — 目標 top-tier journal（JBF、JFE、RFS、JoE、FRL、IJF 等）；self-contained replication package 是投稿 hard requirement
-4. **把網頁平台運營好** — draft 池不可空、release 節奏不可斷、頁面不可掛、策略表現與排序公正
-5. **把曝光流量拉高** — 搜尋與分享友善、內容品質驅動自然流量、學術引用累積權威
+**使命（Mission）**：成為**波動率與相關交易策略在學術與實務上最受信賴、最受歡迎的平台** — 透過信賴度與聲量轉化為可持續的商業收入（付費會員 / 廣告 / 合作 / 策略授權 / paid API / 機構諮詢）。
+
+**五個同等重要的目標**（所有日常決策的方向性 compass，皆服務於終極目標）：
+1. **把文章寫好** — feed 每篇文章都要有真圖表、真數據、真結論；讀者回訪率與分享率是硬指標 → 直接驅動曝光與付費漏斗轉換
+2. **把實驗與研究做好** — 研究誠實原則、方法論嚴謹、可復現；每 K 都經得起同儕審視 → 內容深度的根基、長期商業價值的護城河
+3. **把學術論文寫好** — 目標 top-tier journal（JBF、JFE、RFS、JoE、FRL、IJF 等）；self-contained replication package 是投稿 hard requirement → 學術權威 → 機構信任 → 顧問/合作/付費 premium tier 的背書
+4. **把網頁平台運營好** — draft 池不可空、release 節奏不可斷、頁面不可掛、策略表現與排序公正 → conversion funnel 順暢，付費資訊 visibility 高
+5. **把曝光流量拉高** — 搜尋與分享友善、內容品質驅動自然流量、學術引用累積權威 → 漏斗入口越大、付費轉換池越大
 
 **每次行動前的 sanity check**：
 - 這件事是否直接服務上述 5 個目標之一？若否，暫停並重新評估
+- 這件事對 **monetization** 有何貢獻？直接（付費轉換 / 廣告 / 合作 / 策略授權）、間接（曝光×漏斗 / 學術權威×機構信任 / 內容深度×留存）、無貢獻（純內部 refactor / ops chore — 仍要做但 priority 下調）
 - 「快速解決問題」若會犧牲任一目標，優先完整解決（研究誠實 § 不能讓步）
 - 資源（token / 人力 / 時間）分配要反映目標優先序 — 研究與論文永遠不輸給 ops
+- **盈利 × 研究誠實衝突時 → 研究誠實優先**。誠實是長期商業價值的護城河；造假能短期換流量但會毀掉學術權威線（→ 機構信任 → premium tier 全垮）
 
 此段是本文件的最高層 — 底下任何細則若與此衝突，以此為準。細則只是實作路徑，不是目的本身。
 
@@ -116,6 +120,27 @@
 - 不要用 session workaround 掩蓋 schema 或流程缺陷。
 - 不要繞過正式 CLI / sync / publish 流程。
 - 任何資料錯誤都要追到產生它的程式與流程。
+
+### Three-Strike Rule — 同類錯誤 / 同處 hang 三次就整體重構
+
+**Trigger**：同一類錯誤（同根因、同症狀、同類 bug 模式）連續發生 **3 次** OR 同一處（同一 script / function / pipeline 節點）連續 hang 住 **3 次**。
+
+**禁止 reaction**：再 patch 一次、加一個 flag、塞一層 retry / try-except、寫一個 workaround / fallback、再 grep + sed 一次。**任何 surface-level patch 都不准。**
+
+**強制 reaction**：從**底層邏輯、流程、程式架構徹底翻掉重新優化**。判斷三層：
+
+1. **底層邏輯**：問題的 root domain model 是否正確？資料模型、狀態機、責任分配、邊界條件是否一開始就錯？（例：cron + LaunchAgent 同 Label re-launch policy 假設前提錯誤；hourly fire 應該 stateless 還是 stateful？）
+2. **流程**：workflow 是否設計有缺陷？hand-off、failure mode、observability、recovery 是否系統性遺漏？（例：hang detection、heartbeat、dead-man switch、orphan cleanup 應該獨立流程，不是塞進 dispatch script）
+3. **程式架構**：是否該換實作技術 / 架構模式 / 隔離邊界？（例：headless CLI subprocess 不如 worker daemon + queue；shell script orchestration 不如 Python supervisor with health checks）
+
+**執行流程**：
+- (a) `docs/error_log.md` 標記 `**3-STRIKE TRIGGER**` 並列出三次 incident 的 commit/timestamp
+- (b) 寫 `docs/refactor_plan_<topic>.md` — 三層診斷 + 重構方案 + 廢棄面 + 驗證 gate
+- (c) 重構落地後**廢棄原 patch 路徑**（move to `_legacy/` 或刪除），不留兩套並行
+- (d) Regression test 必須覆蓋三次 incident 的觸發條件 — 任一條件能重現舊 bug 即 fail
+- (e) 重構完成 commit 訊息開頭 `refactor(3-strike): <topic>` 便於日後 grep
+
+**為什麼**：patch 三次仍復發 = 模型/流程/架構有結構性缺陷，繼續 patch 是負債累積；研究誠實 + 平台穩定的長期成本遠高於一次重構成本。歷史例：cron_hourly_dispatch 2026-05-13 兩次 hang + 2026-05-14 同 root（這次只到 strike 2，但下一次 hang 即觸發重構：worker daemon + queue + health check 取代 shell + LaunchAgent + perl alarm）。
 
 ### CLI / Workflow 優先順序
 
