@@ -13,7 +13,28 @@
 exec >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/hourly_dispatch.log 2>&1
 cd /Users/yhlai0911/Desktop/volpred-research || exit 1
 
+# Enable job control so background subshells get their own process group;
+# `kill -- -PGID` then propagates to all descendants (claude + its forks).
+set -m
+
 echo "=== hourly-dispatch $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
+
+# Cleanup trap: if launchd / external kill / shell error terminates parent
+# mid-flight, ensure claude + watchdog don't orphan. Codex review 2026-05-14
+# CRITICAL #2.
+cleanup() {
+  local exit_status=$?
+  if [ -n "${CLAUDE_PID:-}" ] && kill -0 "$CLAUDE_PID" 2>/dev/null; then
+    echo "[CLEANUP] parent exiting (status=$exit_status); killing claude PGID $CLAUDE_PID"
+    kill -TERM -- "-$CLAUDE_PID" 2>/dev/null || kill -TERM "$CLAUDE_PID" 2>/dev/null
+    sleep 2
+    kill -KILL -- "-$CLAUDE_PID" 2>/dev/null || kill -KILL "$CLAUDE_PID" 2>/dev/null
+  fi
+  if [ -n "${WATCHDOG_PID:-}" ] && kill -0 "$WATCHDOG_PID" 2>/dev/null; then
+    kill -KILL "$WATCHDOG_PID" 2>/dev/null
+  fi
+}
+trap cleanup EXIT TERM INT HUP
 
 # Read prompt from external file to avoid bash quoting hell with Chinese + backticks
 PROMPT=$(cat /Users/yhlai0911/Desktop/volpred-research/scripts/cron_hourly_dispatch_prompt.md)
@@ -31,26 +52,36 @@ HOURLY_CAP_SEC=12600
 /usr/bin/perl -e 'alarm shift; exec @ARGV' "$HOURLY_CAP_SEC" \
   /Users/yhlai0911/.local/bin/claude -p --dangerously-skip-permissions --model claude-sonnet-4-6 "$PROMPT" &
 CLAUDE_PID=$!
+# Capture claude binary path for PID-reuse race protection (Codex CRITICAL #3).
+# Before signaling watchdog target, verify command name still matches.
+CLAUDE_CMD_PATTERN="claude"
 
 # Parent watchdog — fires only if perl alarm fails to deliver / claude ignored SIGALRM.
-# Adds 60s grace beyond alarm cap, then SIGTERM, then SIGKILL after 10s.
+# Adds 60s grace beyond alarm cap, then SIGTERM (full PGID), then SIGKILL after 10s.
+# PID reuse mitigation: verify `ps -p <PID> -o comm=` still matches CLAUDE_CMD_PATTERN.
 (
   sleep $((HOURLY_CAP_SEC + 60))
-  if kill -0 $CLAUDE_PID 2>/dev/null; then
-    echo "[WATCHDOG] claude -p PID $CLAUDE_PID still alive past cap+60s; sending SIGTERM"
-    kill -TERM $CLAUDE_PID 2>/dev/null
+  ACTUAL_CMD=$(ps -p "$CLAUDE_PID" -o comm= 2>/dev/null | tr -d '[:space:]')
+  if kill -0 "$CLAUDE_PID" 2>/dev/null && [[ "$ACTUAL_CMD" == *"$CLAUDE_CMD_PATTERN"* ]]; then
+    echo "[WATCHDOG] claude PID $CLAUDE_PID (cmd=$ACTUAL_CMD) alive past cap+60s; SIGTERM to PGID"
+    kill -TERM -- "-$CLAUDE_PID" 2>/dev/null || kill -TERM "$CLAUDE_PID" 2>/dev/null
     sleep 10
-    if kill -0 $CLAUDE_PID 2>/dev/null; then
-      echo "[WATCHDOG] SIGTERM ignored; sending SIGKILL"
-      kill -KILL $CLAUDE_PID 2>/dev/null
+    ACTUAL_CMD2=$(ps -p "$CLAUDE_PID" -o comm= 2>/dev/null | tr -d '[:space:]')
+    if kill -0 "$CLAUDE_PID" 2>/dev/null && [[ "$ACTUAL_CMD2" == *"$CLAUDE_CMD_PATTERN"* ]]; then
+      echo "[WATCHDOG] SIGTERM ignored; SIGKILL to PGID"
+      kill -KILL -- "-$CLAUDE_PID" 2>/dev/null || kill -KILL "$CLAUDE_PID" 2>/dev/null
     fi
+  elif [ -n "$ACTUAL_CMD" ] && [[ "$ACTUAL_CMD" != *"$CLAUDE_CMD_PATTERN"* ]]; then
+    echo "[WATCHDOG] aborted — PID $CLAUDE_PID now belongs to '$ACTUAL_CMD' (PID reuse)"
   fi
 ) &
 WATCHDOG_PID=$!
 
 wait $CLAUDE_PID
 EXIT_CODE=$?
-kill $WATCHDOG_PID 2>/dev/null  # Cleanup watchdog if claude finished normally.
+# Watchdog cleanup is also handled by trap cleanup() as belt-and-suspenders.
+kill $WATCHDOG_PID 2>/dev/null
+WATCHDOG_PID=""  # mark consumed so trap doesn't double-kill a reused PID
 
 if [ $EXIT_CODE -eq 142 ]; then
   echo "[HANG-KILLED] claude -p exceeded ${HOURLY_CAP_SEC}s cap (SIGALRM via perl alarm)"
