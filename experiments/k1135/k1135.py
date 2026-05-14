@@ -977,7 +977,8 @@ sys.stdout.flush()
 
 
 # ============================================================
-# BH FDR adjustment across 3 hypotheses × 4 commodities
+# BH FDR adjustment for H1 × 4 commodities
+# (H2/H3 use binary test criteria without continuous p-values)
 # ============================================================
 print('\n' + '=' * 72)
 print('BH FDR ADJUSTMENT — across {H1 QLIKE DM M2 vs M0} × 4 tickers')

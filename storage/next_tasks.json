@@ -7794,7 +7794,7 @@
   {
     "id": "task-k1135-codex-review-primary",
     "title": "K1135 Codex primary-path review (Gemini-only at run time)",
-    "status": "pending",
+    "status": "succeeded",
     "priority": 3,
     "task_type": "paper_review",
     "created_at": "2026-05-13T05:51:16",
@@ -7804,12 +7804,15 @@
       "K1135",
       "skew-t-gas",
       "commodities"
-    ]
+    ],
+    "verdict": "CONDITIONAL_PASS",
+    "completed_at": "2026-05-13T07:20:00",
+    "reviewer": "code-reviewer subagent fallback (Codex-exec stdin-block)"
   },
   {
     "id": "task-k1123-codex-review-primary",
     "title": "K1123 Codex primary-path review (Gemini-only at run time)",
-    "status": "pending",
+    "status": "succeeded",
     "priority": 3,
     "task_type": "paper_review",
     "created_at": "2026-05-13T05:51:16",
@@ -7819,7 +7822,10 @@
       "K1123",
       "alt-data",
       "allocation"
-    ]
+    ],
+    "verdict": "CONDITIONAL_PASS",
+    "completed_at": "2026-05-13T07:20:00",
+    "reviewer": "code-reviewer subagent fallback (Codex-exec stdin-block)"
   },
   {
     "id": "task-k901-codex-review-primary",
@@ -9099,5 +9105,37 @@
     "created_at": "2026-05-13T06:11:32.457685Z",
     "notes": [],
     "completed_at": "2026-05-13T06:20:35.580175+00:00"
+  },
+  {
+    "id": "task-k1123-bh-fix-rerun",
+    "title": "K1123 BH-FDR fix + re-run (CONDITIONAL PASS → closure)",
+    "status": "succeeded",
+    "priority": 3,
+    "task_type": "experiment",
+    "created_at": "2026-05-13T07:20:00",
+    "description": "K1123 code-reviewer: BH-FDR missing for 12 simultaneous hypothesis tests (4 strategies x 3 baselines). Fix: multipletests(raw_ps, method='fdr_bh') on 12 bootstrap p-values; re-run; update k1123_results.json. Minor: relabel 'DM-HLN' to 'stationary bootstrap' in docstring; fix H4 Sharpe SE formula. After fix+rerun trigger document_K1123_kb_entry.",
+    "tags": [
+      "K1123",
+      "bh-fdr",
+      "fix",
+      "alt-data",
+      "allocation"
+    ]
+  },
+  {
+    "id": "task-k1135-bh-fix-rerun",
+    "title": "K1135 BH-FDR docstring fix + full re-run (CONDITIONAL PASS → closure)",
+    "status": "compute_queued",
+    "priority": 3,
+    "task_type": "experiment",
+    "created_at": "2026-05-13T07:20:00",
+    "description": "K1135 code-reviewer: (1) BH-FDR docstring says 3H x 4C=12 but only H1 x 4 adjusted — fix docstring OR apply H2+H3 BH correction. (2) k1135_results.json reconstructed from run.log (SIGPIPE) — full re-run with seed=42 needed for canonical complete JSON with all LR stat fields. Minor: DM arg naming comment, H2 threshold note. After fix+rerun trigger document_K1135_kb_entry.",
+    "tags": [
+      "K1135",
+      "bh-fdr",
+      "rerun",
+      "skew-t-gas",
+      "commodities"
+    ]
   }
 ]

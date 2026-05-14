@@ -5978,5 +5978,30 @@
       "experiments/k1138/k1138_v2_review.md",
       "storage/memory/knowledge.json (K1138 appended)"
     ]
+  },
+  {
+    "task_id": "task-k1123-codex-review-primary",
+    "task_type": "paper_review",
+    "title": "K1123 primary code review (code-reviewer fallback)",
+    "status": "completed",
+    "verdict": "CONDITIONAL_PASS",
+    "dispatched_at": "2026-05-13T07:20:00",
+    "note": "Codex-exec stdin-block, used code-reviewer subagent. Critical: BH-FDR missing for 12 tests. Fix task: task-k1123-bh-fix-rerun"
+  },
+  {
+    "task_id": "task-k1135-codex-review-primary",
+    "task_type": "paper_review",
+    "title": "K1135 primary code review (code-reviewer fallback)",
+    "status": "completed",
+    "verdict": "CONDITIONAL_PASS",
+    "dispatched_at": "2026-05-13T07:20:00",
+    "note": "Codex-exec stdin-block, used code-reviewer subagent. BH-FDR docstring mismatch + SIGPIPE provenance → re-run needed. Fix task: task-k1135-bh-fix-rerun"
+  },
+  {
+    "task_type": "experiment",
+    "title": "K1123 BH-FDR fix + re-run (CONDITIONAL PASS → closure)",
+    "status": "completed",
+    "completed_at": "2026-05-14T04:18:26.492889+00:00",
+    "details": "Applied BH-FDR correction across 12 simultaneous tests (4 strategies × 3 baselines). Fixed H4 Sharpe SE to Jobson-Korkie approximation. Fixed numpy bool serialization. Re-ran: FAIL confirmed (0/4 hypotheses). Knowledge entry written. K1135 docstring fixed + enqueued to compute queue."
   }
 ]

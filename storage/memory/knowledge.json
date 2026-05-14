@@ -29521,5 +29521,28 @@
       "Small-cap (IWM) vs large-cap (SPY/QQQ) structural difference in vol predictability",
       "Test HAR-RV-X vs HAR-RV (not RW) as baseline"
     ]
+  },
+  {
+    "id": "K1123",
+    "title": "K1123: ★★ Cross-asset alt-data allocation (SPY+GLD+TLT) — NULL, alt-data regime signals do not beat risk-parity",
+    "content": "[提出: Claude, 執行: Claude, 審查: code-reviewer subagent CONDITIONAL PASS → BH-FDR fix → closure] K1121 延伸：加入 TLT 債券腳成三資產組合。4 strategies (NFCI regime / EPU regime / combined / smooth-tilt) vs 3 baselines (50/50 SPY/GLD, 40/30/30, rolling risk-parity). 1819 days 2019-2026, TX 5bps. BH-FDR applied across 12 simultaneous tests (4S×3B). 結果: H1 BH-adj p 全部 0.784-0.896 >> 0.05; H2 3-asset edge (-0.147) < K1121 edge (+0.003); H3 S4 smooth (Sharpe 1.082) < max step (S1 1.161); H4 0 stress-period passes. Verdict: FAIL (0/4). Best alt S1 Sharpe 1.161 still < B0 50/50 Sharpe 1.310. Key: 加 TLT 反而拖累 (TLT CAGR -0.14%/yr, negative drag). Lesson: cross-asset extension from 2-asset to 3-asset 不會自動改善 alt-data edge—需要 uncorrelated profitable 第三腳，TLT 2019-2026 是負貢獻。",
+    "tags": [
+      "alt-data",
+      "allocation",
+      "SPY-GLD-TLT",
+      "regime",
+      "null-result",
+      "BH-FDR",
+      "stationary-bootstrap"
+    ],
+    "data_source": "yfinance (SPY, GLD, TLT) + FRED (USEPUINDXD, NFCI), 2019-2026",
+    "experiment_id": "K1123",
+    "period": "2019-01-14 to 2026-04-13",
+    "n_days": 1819,
+    "verdict": "FAIL",
+    "n_hypotheses_passed": 0,
+    "created_at": "2026-05-14T04:18:20.547260+00:00",
+    "importance": 2,
+    "paper_relevance": "Not paper-relevant (NULL). Feeds into K1121/K846 moat — 50/50 SPY/GLD remains hard to beat with NFCI/EPU regime overlays even with bond leg."
   }
 ]

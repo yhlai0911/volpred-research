@@ -51,8 +51,8 @@ DESIGN:
 
 Evaluation:
   - Sharpe, Sortino, MDD, Calmar, CAGR (full, IS 2018-2022, OOS 2023+)
-  - DM-HLN via stationary bootstrap (Politis-Romano 1994, 1000 reps, block=20)
-    on Sharpe difference vs B0, B1, B2
+  - Stationary bootstrap (Politis-Romano 1994, 1000 reps, block=20)
+    on Sharpe difference vs B0, B1, B2 + BH-FDR across 4 strategies × 3 baselines
   - Regime-conditional Sharpe: stress days vs calm days
   - Harvey t>3.0 threshold for cross-test (Sharpe ratio SE ~ 1/sqrt(N))
 
@@ -73,6 +73,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from statsmodels.stats.multitest import multipletests
 
 warnings.filterwarnings("ignore")
 
@@ -685,6 +686,21 @@ def main():
             boot_oos[s][f"vs_{b}_OOS"] = res
             log(f"    OOS {s} vs {b}: diff={res['obs_diff']:.3f} p={res['p_value']:.3f} t={res['t_stat']:.2f}")
 
+    # 8b. BH-FDR correction across 4 strategies × 3 baselines = 12 simultaneous tests
+    log("--- BH-FDR correction (12 tests: 4 strategies × 3 baselines) ---")
+    _pvals_flat, _keys_flat = [], []
+    for s in alt_strategies:
+        for b in ["B0", "B1", "B2"]:
+            _pvals_flat.append(boot_results[s][f"vs_{b}"]["p_value"])
+            _keys_flat.append((s, f"vs_{b}"))
+    _, _pvals_bh, _, _ = multipletests(_pvals_flat, alpha=0.05, method='fdr_bh')
+    for (s, k), p_bh in zip(_keys_flat, _pvals_bh):
+        boot_results[s][k]["bh_p"] = float(p_bh)
+    for s in alt_strategies:
+        row = " ".join(f"vs_{b}:p={boot_results[s][f'vs_{b}']['p_value']:.3f}/bh={boot_results[s][f'vs_{b}']['bh_p']:.3f}"
+                       for b in ["B0", "B1", "B2"])
+        log(f"  {s}: {row}")
+
     # 9. Regime-conditional Sharpe
     log("--- Regime-conditional analysis ---")
     regime_cond = regime_conditional(bt, df, strategies)
@@ -698,10 +714,11 @@ def main():
     best_alt_strat = max(alt_strategies, key=lambda s: full_metrics[s]["sharpe"])
     best_alt_sr = full_metrics[best_alt_strat]["sharpe"]
 
-    # H1: Alt-data beats all three baselines with p<0.05 vs ALL three
+    # H1: Alt-data beats all three baselines with BH-adj p<0.05 vs ALL three
+    # (BH-FDR correction applied across 12 simultaneous tests: 4 strategies × 3 baselines)
     h1_pass_candidates = []
     for s in alt_strategies:
-        passes = all(boot_results[s][f"vs_{b}"]["p_value"] < 0.05
+        passes = all(boot_results[s][f"vs_{b}"]["bh_p"] < 0.05
                      and boot_results[s][f"vs_{b}"]["obs_diff"] > 0
                      for b in ["B0", "B1", "B2"])
         if passes:
@@ -725,20 +742,21 @@ def main():
         total_t = boot_results[s]["vs_B2"]["t_stat"]
         stress_sr = regime_cond[s]["stress_sharpe"]
         b2_stress_sr = regime_cond["B2"]["stress_sharpe"]
-        # Rough stress-improvement t-stat: use stress Sharpe diff / Sharpe SE
-        # Sharpe SE ~ sqrt(1/N_stress)
+        # Stress-period t-stat: Jobson-Korkie (1981) SE for Sharpe ratio difference
+        # SE(SR_diff) ≈ sqrt((1 + 0.5*(SR_s² + SR_b²)) / N) [annualized daily SR]
         n_stress = regime_cond[s]["stress_n"]
         if n_stress > 0 and stress_sr is not None and b2_stress_sr is not None:
             stress_diff = stress_sr - b2_stress_sr
-            stress_t = stress_diff / np.sqrt(1 / n_stress)  # approximate
+            se_approx = np.sqrt((1 + 0.5 * (stress_sr**2 + b2_stress_sr**2)) / n_stress)
+            stress_t = stress_diff / se_approx if se_approx > 0 else None
         else:
             stress_t = None
         h4_candidates[s] = {
-            "total_t_vs_B2": total_t,
-            "stress_t_vs_B2": stress_t,
+            "total_t_vs_B2": float(total_t) if total_t is not None else None,
+            "stress_t_vs_B2": float(stress_t) if stress_t is not None else None,
             "n_stress": n_stress,
-            "total_pass": abs(total_t) > 2.0 if total_t is not None else False,
-            "stress_pass": abs(stress_t) > 2.0 if stress_t is not None else False,
+            "total_pass": bool(abs(total_t) > 2.0) if total_t is not None else False,
+            "stress_pass": bool(abs(stress_t) > 2.0) if stress_t is not None else False,
         }
     h4_pass_candidates = [s for s in alt_strategies
                           if h4_candidates[s]["total_pass"] and h4_candidates[s]["stress_pass"]
