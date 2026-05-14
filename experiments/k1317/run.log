@@ -1,0 +1,82 @@
+========================================================================
+K1317: Forgetting-factor BMA Volatility Forecast
+Delta grid: [0.9, 0.95, 0.99, 1.0]
+========================================================================
+
+[Asset: SPY] N=4096, span=2010-01-05 -> 2026-04-17
+  Running delta=0.9...
+    done in 122s, QLIKE=-8.204780, mean_entropy=1.6602, collapsed_frac=0.000
+  Running delta=0.95...
+    done in 123s, QLIKE=-8.207355, mean_entropy=1.5360, collapsed_frac=0.000
+  Running delta=0.99...
+    done in 123s, QLIKE=-8.215358, mean_entropy=0.8307, collapsed_frac=0.009
+  Running delta=1.0...
+    done in 123s, QLIKE=-8.227436, mean_entropy=0.1576, collapsed_frac=0.681
+  Best delta (selected on first 790 OOS days): 0.99
+
+[SPY] Summary:
+  Best delta: 0.99
+  delta=0.9: QLIKE=-8.204780, entropy=1.6602, collapsed=0.000
+  delta=0.95: QLIKE=-8.207355, entropy=1.5360, collapsed=0.000
+  delta=0.99: QLIKE=-8.215358, entropy=0.8307, collapsed=0.009
+  delta=1.0: QLIKE=-8.227436, entropy=0.1576, collapsed=0.681
+  DM best_delta vs standard: t=+1.69, p=0.0911, harvey_pass=False
+  DM best_delta vs GJR-t: t=-3.83, p=0.0001, harvey_pass=True
+  H1 PASS this asset: False
+  H2 PASS this asset: True (HAC t=+20.96, p=0.0000)
+
+[Asset: GLD] N=4096, span=2010-01-05 -> 2026-04-17
+  Running delta=0.9...
+    done in 109s, QLIKE=-8.150770, mean_entropy=1.6828, collapsed_frac=0.000
+  Running delta=0.95...
+    done in 109s, QLIKE=-8.152973, mean_entropy=1.5833, collapsed_frac=0.000
+  Running delta=0.99...
+    done in 109s, QLIKE=-8.160436, mean_entropy=1.0242, collapsed_frac=0.000
+  Running delta=1.0...
+    done in 109s, QLIKE=-8.181168, mean_entropy=0.1761, collapsed_frac=0.669
+  Best delta (selected on first 790 OOS days): 0.99
+
+[GLD] Summary:
+  Best delta: 0.99
+  delta=0.9: QLIKE=-8.150770, entropy=1.6828, collapsed=0.000
+  delta=0.95: QLIKE=-8.152973, entropy=1.5833, collapsed=0.000
+  delta=0.99: QLIKE=-8.160436, entropy=1.0242, collapsed=0.000
+  delta=1.0: QLIKE=-8.181168, entropy=0.1761, collapsed=0.669
+  DM best_delta vs standard: t=+1.22, p=0.2229, harvey_pass=False
+  DM best_delta vs GJR-t: t=-1.82, p=0.0687, harvey_pass=False
+  H1 PASS this asset: False
+  H2 PASS this asset: True (HAC t=+24.06, p=0.0000)
+
+[Asset: 0050.TW] N=3979, span=2010-01-05 -> 2026-04-17
+  Running delta=0.9...
+    done in 106s, QLIKE=-7.695028, mean_entropy=1.6089, collapsed_frac=0.014
+  Running delta=0.95...
+    done in 106s, QLIKE=-7.692078, mean_entropy=1.4426, collapsed_frac=0.030
+  Running delta=0.99...
+    done in 106s, QLIKE=-7.690959, mean_entropy=0.5207, collapsed_frac=0.294
+  Running delta=1.0...
+    done in 106s, QLIKE=-7.679046, mean_entropy=0.0152, collapsed_frac=0.991
+  Best delta (selected on first 762 OOS days): 0.9
+
+[0050.TW] Summary:
+  Best delta: 0.9
+  delta=0.9: QLIKE=-7.695028, entropy=1.6089, collapsed=0.014
+  delta=0.95: QLIKE=-7.692078, entropy=1.4426, collapsed=0.030
+  delta=0.99: QLIKE=-7.690959, entropy=0.5207, collapsed=0.294
+  delta=1.0: QLIKE=-7.679046, entropy=0.0152, collapsed=0.991
+  DM best_delta vs standard: t=-0.02, p=0.9835, harvey_pass=False
+  DM best_delta vs GJR-t: t=-0.02, p=0.9835, harvey_pass=False
+  H1 PASS this asset: False
+  H2 PASS this asset: True (HAC t=+46.72, p=0.0000)
+
+=== Hypothesis verdicts ===
+  H1: FAIL
+  H2: PASS
+  H3: FAIL
+  Overall: PASS
+
+Saved: /Users/yhlai0911/Desktop/volpred-research/experiments/k1317/k1317_results.json
+Saved: /Users/yhlai0911/Desktop/volpred-research/experiments/k1317/k1317_entropy_evolution.png
+Saved: /Users/yhlai0911/Desktop/volpred-research/experiments/k1317/k1317_qlike_comparison.png
+
+=== Runtime: 1354.9s ===
