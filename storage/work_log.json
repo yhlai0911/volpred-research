@@ -6051,5 +6051,22 @@
     "status": "completed",
     "description": "K1317 Forgetting-Factor BMA: H1=FAIL, H2=PASS, H3=FAIL, Overall=PASS_NULL. Codex CONDITIONAL PASS.",
     "agent": "main_thread"
+  },
+  {
+    "task_id": "task-k1306-codex-review-primary",
+    "task_type": "paper_review",
+    "status": "completed",
+    "description": "K1306 Codex primary-path review: FAIL. Issues: (1) L167 partial-month target contamination when embargo mid-month; (2) N=3 df=0 / N=4 df=1 verdict threshold |t|>2 statistically invalid. knowledge.json closure_status=requires_revision.",
+    "started_at": "2026-05-15T00:07:00Z",
+    "completed_at": "2026-05-15T00:19:12.854410Z",
+    "outcome": "FAIL - requires_revision"
+  },
+  {
+    "task_id": "task-paper2-taiwanvt-h1h3-decision",
+    "task_type": "paper_decision",
+    "status": "completed",
+    "outcome": "DECISION_MADE — accept K1175 canonical (1.137/-13.7%) for Section 4.3+Table 5 fix",
+    "timestamp": "2026-05-15T00:30:22.029798+00:00",
+    "notes": "H1: Table 3=1.137 correct (K1175 vix_863.sharpe=1.1369), Section 4.3 text=0.690 stale. H3: Table 3 MDD=-13.7% correct, Section 4.3 text=-15.3% stale. Root cause: K1175 updated Table 3 but did not propagate to Section 4.3 or Table 5 reconciliation table. Fix task created: task-paper2-taiwanvt-h1h3-fix (P1 paper_body). H2 (GJR increment) deferred — need Table 3 Buy&Hold to verify +0.114 vs +0.124. K900 common period: GJR=1.0835 (Table 4 1.084 confirmed), 8.63/VIX=1.1324. K1306 FAIL recorded — K1306v2 task created (P2 experiment)."
   }
 ]

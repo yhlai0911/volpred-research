@@ -29153,7 +29153,14 @@
         -4.576,
         2.14
       ]
-    }
+    },
+    "reviewer_source": "Codex primary-path review (gpt-5.4, session 019e28fe)",
+    "closure_status": "requires_revision",
+    "codex_review_date": "2026-05-15",
+    "codex_fail_reasons": [
+      "Line 167: rv_series.index > embargo checks month-end label only; embargo mid-month means first monthly RV includes pre-embargo returns (partial-month event-window contamination)",
+      "Lines 215-222 + 374-379: N=3→df=0, N=4→df=1 with 3-param model; |t_tone|>2 verdict threshold statistically invalid at these df; small-N saturation not guarded at code level"
+    ]
   },
   {
     "id": "K1303",

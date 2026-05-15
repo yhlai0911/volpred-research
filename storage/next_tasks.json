@@ -7317,7 +7317,7 @@
     "title": "K1306 Codex primary-path review + knowledge.json closure_status fix",
     "priority": 3,
     "description": "K1306 SEC EDGAR 10-K pilot 完成 (pipeline PASS, signal NULL, β_tone=+0.168 t=1.28)。Agent 寫 knowledge.json (entry #2102) 雖在 README 註明 CONDITIONAL_PASS 但同樣違 K1259。修正：(a) Codex 恢復後對 k1306.py + k1306_fetch_edgar.py 做 primary review，重點：lookahead 強保護 (strict-before VIX, strict-after target, +1bd embargo)、small-N saturation (MSFT R²=0.984 with N=4 / 3 predictors)、stouffer Z 的 t≢z 警示是否完整；(b) PASS 則補 reviewer_source 欄位，FAIL 則加 closure_status=requires_revision。SEC direction status 改成 feasible 已 OK。Commit 24b0405e。",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "blocked_reason": "codex_quota_reset_pending",
     "blocked_until": "2026-05-13T02:46:00Z",
@@ -7327,7 +7327,9 @@
       "primary-path-verify",
       "k1259-violation-cleanup"
     ],
-    "created_at": "2026-05-12T03:00:49Z"
+    "created_at": "2026-05-12T03:00:49Z",
+    "completed_at": "2026-05-15",
+    "completion_note": "Codex FAIL: (1) Line 167 partial-month contamination (embargo mid-month); (2) N=3/4 with 3-param model verdict threshold invalid. closure_status=requires_revision in knowledge.json"
   },
   {
     "id": "task-k1309-codex-review-primary",
@@ -9141,5 +9143,35 @@
       "skew-t-gas",
       "commodities"
     ]
+  },
+  {
+    "id": "K1306v2",
+    "title": "K1306v2: SEC 10-K LM-tone pilot — fix partial-month contamination + small-N guard",
+    "task_type": "experiment",
+    "status": "pending",
+    "priority": 2,
+    "tags": [
+      "experiment",
+      "sec",
+      "text_analysis",
+      "integrity"
+    ],
+    "created_at": "2026-05-15T00:30:11.170730+00:00",
+    "description": "K1306 revision: fix two Codex FAIL issues. (1) Line 167: replace rv_series.index > embargo month-end label check with explicit date-range fwd = rv_series[(rv_series.index > embargo) & (rv_series.index <= embargo + MonthEnd(12))].iloc[:12] to avoid partial-month contamination for mid-month embargo dates. (2) Lines 215-222: add N>=5 guard before OLS verdict (3-param model needs df>=2; N=3→df=0, N=4→df=1 makes HC1 t-stats invalid). After fix: Codex primary-path review required before knowledge.json write. Worktree agent. experiments/k1306/ only."
+  },
+  {
+    "id": "task-paper2-taiwanvt-h1h3-fix",
+    "title": "Paper 2 (taiwan-vt) H1+H3 canonical value fix — propagate K1175 to Section 4.3 + Table 5",
+    "task_type": "paper_body",
+    "status": "pending",
+    "priority": 1,
+    "tags": [
+      "paper_body",
+      "taiwan-vt",
+      "paper2",
+      "integrity"
+    ],
+    "created_at": "2026-05-15T00:30:11.170730+00:00",
+    "description": "Paper 2 (taiwan-vt) H1+H3 partial-update fix. Root cause: K1175 updated Table 3 to canonical (1.137, -13.7%) but Section 4.3 text and Table 5 were not propagated. Fix: (A) Section 4.3 line ~308: update 0.690->1.137 Sharpe, -15.3%->-13.7% MDD, 7.2%->10.72% return, 12.1%->9.43% vol. (B) Table 5 reconciliation row for 8.63/VIX: 0.690->1.137. (C) Fix Table 3 footnote contradiction (M2): remove conflicting sentence — keep only 8.63/VIX uses monthly rebalancing and GJR-VT uses daily rebalancing. (D) After edits: uv run volpred ops paper-update --paper-id taiwan-vt. K1175 JSON: experiments/k1175/k1175_results.json .vix_863.sharpe=1.1369, .mdd_pct=-13.71. Main thread only."
   }
 ]
