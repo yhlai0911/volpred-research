@@ -7877,7 +7877,7 @@
     "description": "K1100G_D5 has a non-null verdict in experiments/k1100g_d5/ but no published feed article and no existing task. Verdict: {'primary': 'H3_NIGHT_R2_BETTER', 'explanation': 'REF_night_r2 DM t = +2.01 domi. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -7886,7 +7886,8 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.413961+00:00",
     "generated_at": "2026-05-13T05:53:00.413964+00:00",
-    "k_id": "K1100G_D5"
+    "k_id": "K1100G_D5",
+    "completed_at": "2026-05-15T08:36:22.576316+00:00"
   },
   {
     "id": "gen_article_k1100g_d6",
@@ -8064,7 +8065,7 @@
     "description": "K1142 has a non-null verdict in experiments/k1142/ but no published feed article and no existing task. Verdict: PARTIAL_OOS_ONLY. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -8073,7 +8074,8 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.426820+00:00",
     "generated_at": "2026-05-13T05:53:00.426823+00:00",
-    "k_id": "K1142"
+    "k_id": "K1142",
+    "completed_at": "2026-05-15T08:36:22.576316+00:00"
   },
   {
     "id": "gen_article_k1148_d1",
@@ -8251,7 +8253,7 @@
     "description": "K1202 has a non-null verdict in experiments/k1202/ but no published feed article and no existing task. Verdict: {'label': 'FINAL_NULL', 'max_abs_t_hac': 0.25046848869548255, 'max_cell': 'utili. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -8260,7 +8262,8 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.435216+00:00",
     "generated_at": "2026-05-13T05:53:00.435218+00:00",
-    "k_id": "K1202"
+    "k_id": "K1202",
+    "completed_at": "2026-05-15T08:36:22.576316+00:00"
   },
   {
     "id": "gen_article_k1203",
@@ -9155,7 +9158,7 @@
     "id": "K1306v2",
     "title": "K1306v2: SEC 10-K LM-tone pilot — fix partial-month contamination + small-N guard",
     "task_type": "experiment",
-    "status": "pending",
+    "status": "succeeded",
     "priority": 2,
     "tags": [
       "experiment",
@@ -9164,7 +9167,8 @@
       "integrity"
     ],
     "created_at": "2026-05-15T00:30:11.170730+00:00",
-    "description": "K1306 revision: fix two Codex FAIL issues. (1) Line 167: replace rv_series.index > embargo month-end label check with explicit date-range fwd = rv_series[(rv_series.index > embargo) & (rv_series.index <= embargo + MonthEnd(12))].iloc[:12] to avoid partial-month contamination for mid-month embargo dates. (2) Lines 215-222: add N>=5 guard before OLS verdict (3-param model needs df>=2; N=3→df=0, N=4→df=1 makes HC1 t-stats invalid). After fix: Codex primary-path review required before knowledge.json write. Worktree agent. experiments/k1306/ only."
+    "description": "K1306 revision: fix two Codex FAIL issues. (1) Line 167: replace rv_series.index > embargo month-end label check with explicit date-range fwd = rv_series[(rv_series.index > embargo) & (rv_series.index <= embargo + MonthEnd(12))].iloc[:12] to avoid partial-month contamination for mid-month embargo dates. (2) Lines 215-222: add N>=5 guard before OLS verdict (3-param model needs df>=2; N=3→df=0, N=4→df=1 makes HC1 t-stats invalid). After fix: Codex primary-path review required before knowledge.json write. Worktree agent. experiments/k1306/ only.",
+    "completed_at": "2026-05-15T08:36:22.576316+00:00"
   },
   {
     "id": "task-paper2-taiwanvt-h1h3-fix",
