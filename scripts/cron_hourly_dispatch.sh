@@ -1,10 +1,8 @@
 #!/bin/bash
-# 4-hourly dispatch trigger via macOS LaunchAgent.
-# Schedule: 00:07 / 04:07 / 08:07 / 12:07 / 16:07 / 20:07 CST (6 slots/day).
-# Why 4h: every fire MUST FULLY complete its dispatched task before stopping
-# (no partial work tossed to next slot). 4h gap gives agent room to finish.
-# Filename still says "hourly" (file rename has TCC + plist downstream costs;
-# behavior change documented here + in prompt file + memory feedback).
+# Hourly dispatch trigger via macOS LaunchAgent.
+# Schedule: HH:07 every hour (24 slots/day). Reverted from 4-hourly per user
+# directive 2026-05-16. Task scoping must fit ~50min cap (smaller units;
+# heavy work goes to compute_queue.py for async worker pickup).
 #
 # Canonical source: scripts/cron_hourly_dispatch.sh + scripts/cron_hourly_dispatch_prompt.md
 # TCC copy: ~/.volpred/bin/cron_hourly_dispatch.sh
@@ -39,7 +37,7 @@ trap cleanup EXIT TERM INT HUP
 # Read prompt from external file to avoid bash quoting hell with Chinese + backticks
 PROMPT=$(cat /Users/yhlai0911/Desktop/volpred-research/scripts/cron_hourly_dispatch_prompt.md)
 
-# Two-layer hang defense (3.5h hard cap, 4h interval - 30min buffer):
+# Two-layer hang defense (50min hard cap, 60min interval - 10min buffer):
 # Layer 1: perl alarm SIGALRM (verified working across exec on macOS 25.3:
 #   `perl -e 'alarm 2; exec sleep 10'` → exit 142). Cheap, no extra process.
 # Layer 2: background subshell + parent watchdog SIGTERM→SIGKILL. Belt-and-
@@ -47,7 +45,7 @@ PROMPT=$(cat /Users/yhlai0911/Desktop/volpred-research/scripts/cron_hourly_dispa
 #   handler that ignores the signal (Gemini review 2026-05-14 concern).
 # Prior hang incidents 2026-05-13 10:07 + 15:07 = strike 2 of three-strike;
 # next hang triggers worker-daemon refactor per CLAUDE.md three-strike rule.
-HOURLY_CAP_SEC=12600
+HOURLY_CAP_SEC=3000
 
 /usr/bin/perl -e 'alarm shift; exec @ARGV' "$HOURLY_CAP_SEC" \
   /Users/yhlai0911/.local/bin/claude -p --dangerously-skip-permissions --model claude-sonnet-4-6 "$PROMPT" &

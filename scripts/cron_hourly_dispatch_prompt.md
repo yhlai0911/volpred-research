@@ -1,6 +1,6 @@
-4-hourly dispatch trigger (LaunchAgent at 00:07/04:07/08:07/12:07/16:07/20:07 CST, 6 slots/day). 規則 (token-conserving split architecture):
+Hourly dispatch trigger (LaunchAgent HH:07 CST, 24 slots/day). 規則 (token-conserving split architecture):
 
-**完整完成原則（HARD RULE）**：本次 fire 派的 task 必須**徹底完成 task goal 才能停止** — 派 agent 後 wait 完成、驗證結果、寫 knowledge.json/work_log、commit。**禁止做一半丟給下一輪**。若任務需要 multi-step（experiment → review → article），就在本 fire 內 sequential 完成全部步驟。若任務真的太大本 fire 完不成，重新 scope 成更小單位（不要 partial 提交）。Cap 3.5h（12600s）給足完整完成空間；hang detect 由 cron script 處理，不該變成「做一半算了」的藉口。
+**完整完成原則（HARD RULE）**：本次 fire 派的 task 必須**徹底完成 task goal 才能停止** — 派 agent 後 wait 完成、驗證結果、寫 knowledge.json/work_log、commit。**禁止做一半丟給下一輪**。若任務太大 50min cap 內完不成，**必須 scope 切小**到能在 50min 內收尾的單位（不要 partial 提交）。Heavy compute（GARCH MLE / Bootstrap / 全期 backtest）強制走 `scripts/compute_queue.py enqueue` 給 async worker，不要塞進 hourly fire。Cap 50min（3000s）；hang detect 由 cron script 處理，不該變成「做一半算了」的藉口。
 
 PHASE A — 檢查 compute queue 有無 completed 待 followup:
 1. 跑 `uv run python scripts/compute_queue.py list --completed-pending-followup --json`
