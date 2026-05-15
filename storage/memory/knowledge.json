@@ -29700,5 +29700,30 @@
       }
     },
     "codex_review": "CONDITIONAL PASS (2026-05-15, primary-path Codex; MAJOR notation fixed)"
+  },
+  {
+    "id": "K1100g_d9",
+    "title": "K1100g_d9: ★★ Refit-Cadence Artifact Confirmed — skewed-t still no help (CONDITIONAL_PASS)",
+    "content": "[提出: cadence robustness, 執行: Claude worktree agent] K1100g_d8 N225 Student-t DM sign flip (+2.31→-1.92) 確認為 refit-cadence artifact。在 d7 cadence (refit_every=5) 下：N225 d9_st=+2.31 (完全還原 d7), SPY d9_st=+0.66 (還原 d7)。skewed-t gap DM：N225=+0.66, SPY=+2.73，兩市場 Harvey=False。結論：d8「skewed-t does not help on gap models」HOLDS with clean baseline。CONDITIONAL_PASS caveats (Codex gpt-5.4): (1) verdict logic bug — ROBUST_WITH_RECOVERY 用 n225_d9_sk (gap² within skewed-t) 而非 dm_innov_gap (skewed-t vs Student-t)，文字敘述與測量不匹配；(2) SPY 只被當附註不是必要條件，嚴格按 taxonomy 更接近 MIXED；(3) p-value 用 norm.cdf 非 t_{n-1}。Cross-cadence verdict (CADENCE_ARTIFACT_FOR_STUDENT_T_NOT_FOR_SKEWED_T) 內容正確，只是分類標籤的邏輯連接有缺陷。",
+    "tags": [
+      "cadence-robustness",
+      "skewed-t",
+      "student-t",
+      "DM-test",
+      "N225",
+      "SPY",
+      "null-result"
+    ],
+    "verdict": "CONDITIONAL_PASS",
+    "codex_review": "CONDITIONAL_PASS (gpt-5.4, 2026-05-15)",
+    "key_finding": "N225 d8 Student-t sign flip (+2.31→-1.92) = pure cadence artifact. Skewed-t gap DM borderline, Harvey=False both markets. d8 conclusion holds.",
+    "data_source": "yfinance ^N225 + SPY 2010-2026, gap²=overnight² PRG kernel",
+    "experiment_id": "k1100g_d9",
+    "parent_experiments": [
+      "k1100g_d7",
+      "k1100g_d8"
+    ],
+    "created_at": "2026-05-15T02:42:27.123912+00:00",
+    "importance": 2
   }
 ]

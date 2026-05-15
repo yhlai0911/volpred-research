@@ -704,7 +704,7 @@
     "title": "K1100g_d9: rerun K1100g_d8 with d7 cadence (refit_every=5 n_restarts=10) to disambiguate sign flip",
     "priority": 3,
     "description": "K1100g_d8 N225 DM +2.32 → -1.33 sign flip likely refit-cadence artifact (d7 used refit_every=5, d8 used 25). Rerun skewed-t on N225+SPY with d7 cadence. If sign holds under d7 cadence → signal real. If flips back positive → cadence artifact confirmed, Path (b) still candidate.",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-04-18T03:28:41.635550",
     "tags": [
       "K1100g-followup",
@@ -714,7 +714,9 @@
     "blocked_reason": "compute_runtime_incompatible",
     "blocked_at": "2026-05-04T09:40:24+00:00",
     "blocked_note": "Prior background agent (a8dedb02034744cc7) IS-fits subprocess killed when agent timeout exited; cold-start MLE on 4 models × 2 markets exceeds agent runtime. Main thread or dedicated long-runtime worker.",
-    "task_type": "experiment"
+    "task_type": "experiment",
+    "completed_at": "2026-05-15T02:42:35.840517+00:00",
+    "completion_note": "CONDITIONAL_PASS. Cadence artifact confirmed. Skewed-t no-help holds. knowledge.json written. Verdict logic bug noted in caveats."
   },
   {
     "id": "K1100h",

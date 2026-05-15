@@ -6076,5 +6076,13 @@
     "outcome": "Article mile_56cf4d9d published as draft — K644 meta-analysis 24-experiment review",
     "timestamp": "2026-05-15T00:42:39.302488+00:00",
     "notes": "Title: K644：24 個波動率實驗大回顧——39% 零假設背後的 5 個可操作發現. Tags: 研究/GARCH/VIX/波動率預測/策略設計/方法論. 2 charts: results_overview + methodology_insights. Supabase synced. Agent af7fb6b9755a00a34, 79k tokens."
+  },
+  {
+    "task_id": "K1100g_d9_cadence_verify",
+    "task_type": "experiment",
+    "status": "completed",
+    "outcome": "CONDITIONAL_PASS — cadence artifact confirmed, skewed-t no-help holds",
+    "timestamp": "2026-05-15T02:42:35.840517+00:00",
+    "notes": "N225 d9_st=+2.31 (restored from d8=-1.92), SPY d9_st=+0.66. Skewed-t Harvey=False both markets. CONDITIONAL_PASS caveats: verdict logic uses wrong DM var (n225_d9_sk vs dm_innov_gap), SPY not required condition. Codex gpt-5.4 review. knowledge.json written."
   }
 ]
