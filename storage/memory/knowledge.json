@@ -29725,5 +29725,112 @@
     ],
     "created_at": "2026-05-15T02:42:27.123912+00:00",
     "importance": 2
+  },
+  {
+    "item_id": "K1300",
+    "experiment_id": "K1300",
+    "created_at": "2026-05-15",
+    "title": "Forgetting-Factor BMA (Dynamic Model Averaging, λ<1): Confirmed Fail vs Best Individual Model",
+    "verdict": "H_K1300_CONFIRMED_FAIL",
+    "confidence": 0.88,
+    "description": "Tested forgetting-factor BMA (λ∈{0.95, 0.97, 0.99, 1.0}) on SPY/GLD/0050.TW OOS 2020-2026. H: best-λ<1 BMA beats best individual model (K1257 best: λ=1 standard BMA). All three assets fail Harvey gate (|DM-t|<3): SPY best λ=0.99 DM-t=-1.34 (p=0.180), GLD best λ=0.95 DM-t=-1.74 (p=0.082), 0050.TW best λ=0.95 DM-t=+0.14 (p=0.888). Conclusion: Dynamic model averaging via forgetting factor does not improve over standard BMA (λ=1) on these assets. Standard BMA posterior concentration (K1257, K1315: up to 99% weight on HAR-VIX/A4f_IV2) reflects genuine predictive dominance — not a numerical artifact that discounting would fix. λ<1 penalty for past model performance does not recover forecast accuracy. Implication for K1317 (which tests finer λ grid and more SE methods): consistent across BMA variants. Codex review: CONDITIONAL_PASS (no critical issues, minor notation comments only). Lookahead guard: posterior weights updated with log p(y_t|M_i,F_{t-1}) from prior period — strictly causal.",
+    "related_experiments": [
+      "K1257",
+      "K1315",
+      "K1316",
+      "K1317"
+    ],
+    "tags": [
+      "BMA",
+      "dynamic-model-averaging",
+      "forgetting-factor",
+      "QLIKE",
+      "DM-Harvey",
+      "SPY",
+      "GLD",
+      "Taiwan",
+      "null-result"
+    ],
+    "asset": "multi",
+    "method": "Forgetting-Factor BMA (DMA), λ∈{0.95,0.97,0.99,1.0}",
+    "data_period": "2010-2026 (OOS 2020-2026)",
+    "key_stats": {
+      "SPY": {
+        "best_lambda": 0.99,
+        "dm_t": -1.34,
+        "p": 0.18,
+        "harvey_pass": false
+      },
+      "GLD": {
+        "best_lambda": 0.95,
+        "dm_t": -1.74,
+        "p": 0.082,
+        "harvey_pass": false
+      },
+      "0050.TW": {
+        "best_lambda": 0.95,
+        "dm_t": 0.14,
+        "p": 0.888,
+        "harvey_pass": false
+      }
+    },
+    "codex_review": "CONDITIONAL_PASS (2026-05-15, primary-path Codex; no critical issues)"
+  },
+  {
+    "item_id": "K1309",
+    "experiment_id": "K1309",
+    "created_at": "2026-05-15",
+    "title": "HAR-PD (Path-Dependent HAR, arXiv:2503.00851) vs HAR-RV: NULL on TX1; US/GLD Untrustworthy",
+    "verdict": "NULL",
+    "confidence": 0.82,
+    "description": "Tested HAR-PD (path-dependent HAR with R1/R2 exponential kernel features, arXiv:2503.00851) vs standard HAR-RV on TX1 (Taiwan futures, 2017-2026) and SPY/QQQ/GLD. TX1 (TRUSTED, n_train=1513): DM_HLN_t=-0.346 (p=0.7292), block bootstrap 95% CI [-0.183,+0.198] covers 0 — NULL. HAR-PD no better than HAR-RV on Taiwan futures. SPY/QQQ/GLD: all UNTRUSTWORTHY (n_train=25 due to yfinance 60-day intraday cap; below 120-day trust threshold). GLD shows DM_t=3.754 (p=0.0038) but this is unreliable at n=25. Overall verdict: NULL (only trusted result is TX1=NULL). Bootstrap fix applied (i.i.d. → circular block bootstrap, block_len=10) after Codex FAIL on Critical Issue 1 (i.i.d. assumption violated for autocorrelated loss differentials). Codex Issue 2 (log-spec vs level-spec) reclassified MINOR by independent reviewer — both sides use log-RV, apples-to-apples; does not affect NULL conclusion. Implication: path-memory features from arXiv:2503.00851 do not add forecast power on TAIFEX TX1 over the 2017-2026 period; need longer US intraday history for valid US market test.",
+    "related_experiments": [
+      "K1302",
+      "K1304"
+    ],
+    "tags": [
+      "HAR",
+      "path-dependent",
+      "HAR-PD",
+      "RV",
+      "DM-HLN",
+      "block-bootstrap",
+      "TX1",
+      "TAIFEX",
+      "null-result"
+    ],
+    "asset": "TX1",
+    "method": "HAR-PD vs HAR-RV, circular block bootstrap DM-HLN",
+    "data_period": "2017-2026 (OOS split 70/30)",
+    "key_stats": {
+      "TX1": {
+        "dm_hln_t": -0.346,
+        "p_value": 0.7292,
+        "mse_rv": 1.471,
+        "mse_pd": 1.502,
+        "n_train": 1513,
+        "n_test": 649,
+        "trust": "TRUSTED",
+        "bootstrap_ci": [
+          -0.183,
+          0.198
+        ],
+        "verdict": "NULL"
+      },
+      "SPY": {
+        "n_train": 25,
+        "trust": "UNTRUSTWORTHY"
+      },
+      "QQQ": {
+        "n_train": 25,
+        "trust": "UNTRUSTWORTHY"
+      },
+      "GLD": {
+        "n_train": 25,
+        "trust": "UNTRUSTWORTHY",
+        "dm_t_unreliable": 3.754
+      }
+    },
+    "codex_review": "CONDITIONAL_PASS (2026-05-15, primary-path Codex; bootstrap fix applied)"
   }
 ]

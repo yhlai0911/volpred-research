@@ -83,8 +83,9 @@ MLE; no forecast / no signal lag. Seed=42 fixed for multistart reproducibility.
 - **MLE convergence**: 100/100 starts converged; LL std across starts =
   1.1×10⁻¹¹ (well-identified, no basin ambiguity).
 - **SE robustness**: all three SE methods (OPG / Hessian / Sandwich QML)
-  give t(γ) in the range 6.6–14.4; even the most conservative (sandwich)
-  exceeds paper's 3.18 by ~2x.
+  give t(γ) in the range 5.42–14.38 (sandwich QML = 5.42, Hessian = 9.49,
+  OPG = 14.38); even the most conservative (sandwich) exceeds paper's 3.18
+  by ~1.7x.
 - **Sample window**: yfinance ^TWII begins **1997-07-02**; paper text
   claims sample starts "January 1997". The 81-day n_obs gap (paper 7148
   vs our 7067) is consistent with ~4 months of pre-Jul-1997 trading days

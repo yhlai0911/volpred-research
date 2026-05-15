@@ -2,7 +2,7 @@
   "experiment_id": "K1309",
   "title": "HAR-PD (Path-Dependent HAR) vs HAR-RV on TX1 + SPY/QQQ/GLD",
   "arxiv_source": "arXiv:2503.00851v2 \u2014 Liu/Fu/Hong (2025) 'Forecasting realized volatility in the stock market: a path-dependent perspective'",
-  "date_run": "2026-05-12 11:27:22",
+  "date_run": "2026-05-15 12:29:35",
   "seed": 42,
   "methodology": {
     "path_features": {
@@ -100,8 +100,8 @@
         "seed": 42,
         "mse_diff_point_har_minus_pd": -0.031151432119327582,
         "mse_diff_ci95": [
-          -0.1749931072850865,
-          0.17194983474378042
+          -0.1829627836287927,
+          0.19809743383057302
         ],
         "ci_excludes_zero": false
       },
@@ -169,8 +169,8 @@
         "seed": 42,
         "mse_diff_point_har_minus_pd": 0.255636751934083,
         "mse_diff_ci95": [
-          -0.30398973043852084,
-          0.9724839009377931
+          -0.0043142233332746464,
+          0.5156845590494659
         ],
         "ci_excludes_zero": false
       },
@@ -238,16 +238,16 @@
         "seed": 42,
         "mse_diff_point_har_minus_pd": 0.3084927061248497,
         "mse_diff_ci95": [
-          -0.18842989971393043,
-          0.9659398158853181
+          0.0460815105662893,
+          0.5860495030327172
         ],
-        "ci_excludes_zero": false
+        "ci_excludes_zero": true
       },
       "verdict": "UNTRUSTWORTHY",
       "verdict_components": {
         "pass_3sigma": false,
         "pd_lower_mse": true,
-        "bootstrap_ci_excludes_zero": false,
+        "bootstrap_ci_excludes_zero": true,
         "sample_trust_flag": "UNTRUSTWORTHY"
       }
     },
@@ -307,8 +307,8 @@
         "seed": 42,
         "mse_diff_point_har_minus_pd": 3.1248201974785235,
         "mse_diff_ci95": [
-          1.5997896553587923,
-          4.766520604278652
+          2.4894994064060496,
+          3.743045152647527
         ],
         "ci_excludes_zero": true
       },

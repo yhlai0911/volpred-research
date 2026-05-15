@@ -6084,5 +6084,37 @@
     "outcome": "CONDITIONAL_PASS — cadence artifact confirmed, skewed-t no-help holds",
     "timestamp": "2026-05-15T02:42:35.840517+00:00",
     "notes": "N225 d9_st=+2.31 (restored from d8=-1.92), SPY d9_st=+0.66. Skewed-t Harvey=False both markets. CONDITIONAL_PASS caveats: verdict logic uses wrong DM var (n225_d9_sk vs dm_innov_gap), SPY not required condition. Codex gpt-5.4 review. knowledge.json written."
+  },
+  {
+    "task_id": "task-k1300-codex-review-primary",
+    "task_type": "paper_review",
+    "status": "completed",
+    "outcome": "CONDITIONAL_PASS — Forgetting-Factor BMA H_K1300_CONFIRMED_FAIL trustworthy; no critical issues",
+    "timestamp": "2026-05-15T04:34:52.487136+00:00",
+    "notes": "SPY DM-t=-1.34 (λ=0.99), GLD DM-t=-1.74 (λ=0.95), 0050.TW DM-t=+0.14 (λ=0.95). All Harvey FAIL. Codex primary-path CONDITIONAL_PASS. knowledge.json entry K1300 written."
+  },
+  {
+    "task_id": "task-k1309-codex-review-primary",
+    "task_type": "paper_review",
+    "status": "completed",
+    "outcome": "CONDITIONAL_PASS after bootstrap fix — HAR-PD vs HAR-RV TX1 NULL; US assets UNTRUSTWORTHY",
+    "timestamp": "2026-05-15T04:34:52.487136+00:00",
+    "notes": "Critical Fix: i.i.d. → circular block bootstrap (block_len=10). TX1: DM_HLN=-0.346, p=0.7292, CI[-0.183,+0.198]. SPY/QQQ/GLD n_train=25 UNTRUSTWORTHY. k1309.py updated, k1309_results.json rerun. knowledge.json entry K1309 written."
+  },
+  {
+    "task_id": "task-twii-stats-codex-review",
+    "task_type": "paper_review",
+    "status": "completed",
+    "outcome": "CONDITIONAL_PASS after 4 fixes — TWII GJR constraint, docstring, method field, README claim corrected",
+    "timestamp": "2026-05-15T04:34:52.487136+00:00",
+    "notes": "Fix1: gamma<0 constraint in neg_log_lik(). Fix2: docstring I[r→eps]. Fix3: method field OPG→Hessian primary. Fix4: README t range 6.6-14.4→5.42-14.38. No recomputation needed. Codex review disposition: CONFLICT_RESOLVED for 6/7 cells per K892 precedent."
+  },
+  {
+    "task_id": "trending_repost_2026_05_15_a",
+    "task_type": "trending_repost",
+    "status": "completed",
+    "outcome": "Published — trending_repost on VolPred angle (milestone_ed39c127)",
+    "timestamp": "2026-05-15T04:34:52.487136+00:00",
+    "notes": "Daily cap used: 1/2. Published to feed. FB post pending (browser automation unavailable in agent). trending_repost_log.json updated."
   }
 ]

@@ -400,10 +400,14 @@ def dm_hln(loss_a: np.ndarray, loss_b: np.ndarray, h: int = 1) -> Tuple[float, f
 
 
 def bootstrap_mse_diff_ci(loss_a: np.ndarray, loss_b: np.ndarray,
-                          n_boot: int = 500, seed: int = SEED
+                          n_boot: int = 500, seed: int = SEED,
+                          block_len: int = 10
                           ) -> Tuple[float, float, float]:
-    """Bootstrap CI on (MSE_a - MSE_b).  Positive => a worse, b preferred.
+    """Circular block bootstrap CI on (MSE_a - MSE_b).
 
+    Stationary circular block bootstrap (Politis & Romano 1994) with
+    block_len=10 for daily data — preserves serial autocorrelation of
+    forecast loss differentials. Positive => a worse, b preferred.
     Returns (point_diff, lo95, hi95).
     """
     rng = np.random.default_rng(seed)
@@ -411,9 +415,13 @@ def bootstrap_mse_diff_ci(loss_a: np.ndarray, loss_b: np.ndarray,
     b = np.asarray(loss_b, dtype=float)
     T = len(a)
     point = float(a.mean() - b.mean())
+    n_blocks = int(np.ceil(T / block_len))
     diffs = np.empty(n_boot)
     for k in range(n_boot):
-        idx = rng.integers(0, T, T)
+        starts = rng.integers(0, T, n_blocks)
+        idx = np.concatenate([
+            np.arange(s, s + block_len) % T for s in starts
+        ])[:T]
         diffs[k] = a[idx].mean() - b[idx].mean()
     return point, float(np.quantile(diffs, 0.025)), float(np.quantile(diffs, 0.975))
 

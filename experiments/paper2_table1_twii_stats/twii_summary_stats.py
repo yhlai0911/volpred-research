@@ -19,9 +19,9 @@ Method:
   - GJR-N(1,1) gamma estimated via custom MLE (NO arch package — K1213 lesson
     "套件限制 ≠ 模型無效"): full-sample, scipy.optimize.minimize Nelder-Mead,
     100 random starts (seed=42), gradient-free, choose best by log-likelihood.
-    Variance: omega + (alpha + gamma * I[r_{t-1}<0]) * r_{t-1}^2 + beta * sigma_{t-1}^2.
-    Standard errors: inverse OPG (outer-product-of-gradients) numerically; analytic
-    Hessian unstable for boundary alpha+gamma/2+beta near 1.
+    Variance: omega + (alpha + gamma * I[eps_{t-1}<0]) * eps_{t-1}^2 + beta * sigma_{t-1}^2.
+    Standard errors: Hessian numerical 2nd deriv (primary), OPG, Sandwich QML (all 3 reported);
+    analytic Hessian unstable for boundary alpha+gamma/2+beta near 1.
   - gamma t-stat = gamma / SE(gamma).
 
 No forecast lag concern: this is in-sample descriptive + full-sample MLE.
@@ -136,7 +136,7 @@ def gjr_recursion(params: np.ndarray, r: np.ndarray) -> np.ndarray:
     """Return per-t conditional variance sigma^2_t (length T).
 
     Variance recursion (in same units as r):
-        sigma^2_t = omega + (alpha + gamma * I[r_{t-1}<0]) * r_{t-1}^2 + beta * sigma^2_{t-1}
+        sigma^2_t = omega + (alpha + gamma * I[eps_{t-1}<0]) * eps_{t-1}^2 + beta * sigma^2_{t-1}
     Demeaned residuals: we estimate a constant mean mu jointly.
     """
     mu, omega, alpha, gamma, beta = params
@@ -156,7 +156,7 @@ def neg_log_lik(params: np.ndarray, r: np.ndarray) -> float:
     mu, omega, alpha, gamma, beta = params
     # Stationarity (positive-variance) constraint penalties — we keep soft
     # because Nelder-Mead has no bounds; multistart explores feasible regions.
-    if omega <= 0 or alpha < 0 or beta < 0 or (alpha + gamma) < 0:
+    if omega <= 0 or alpha < 0 or beta < 0 or gamma < 0 or (alpha + gamma) < 0:
         return 1e10
     # Loose stationarity (alpha + gamma/2 + beta < 1)
     if alpha + gamma / 2.0 + beta >= 0.999999:
@@ -461,7 +461,8 @@ def main() -> int:
         ),
         "method": (
             "log returns × 100; basic stats via scipy (ddof=1, Fisher excess kurt); "
-            "GJR-N(1,1) custom MLE, 100-start Nelder-Mead seed=42, OPG SE"
+            "GJR-N(1,1) custom MLE, 100-start Nelder-Mead seed=42; "
+            "SE: Hessian numerical (primary), OPG, Sandwich QML (all 3 reported)"
         ),
         "data_sources": {
             "pre_2008_snapshot": str(PRE2008_CSV.relative_to(REPO_ROOT)),

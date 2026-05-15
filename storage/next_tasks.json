@@ -7246,7 +7246,7 @@
     "title": "K1300 Codex primary-path review (post quota reset)",
     "priority": 3,
     "description": "K1300 forgetting-factor BMA 已由 main-thread self-audit 確認 H_CONFIRMED_FAIL（no asset crossed Harvey |t|>3 at any λ∈{0.95,0.97,0.99,1.00}）。但 review_source != Codex primary-path（K1259 教訓：subagent/main-thread PASS ≠ Codex CONDITIONAL PASS）。Codex CLI quota reset 2026-05-13 02:46 UTC 後派 `codex exec --skip-git-repo-check` 對 experiments/k1300/k1300_forgetting_bma.py + k1300_results.json 做 primary-path review。通過 CONDITIONAL_PASS bar 才補寫 storage/memory/knowledge.json entry。Commit 8be65ce7 已收 experiment 三件套。",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "blocked_reason": "codex_quota_reset_pending",
     "blocked_until": "2026-05-13T02:46:00Z",
@@ -7256,7 +7256,8 @@
       "primary-path-verify",
       "post-quota-reset"
     ],
-    "created_at": "2026-05-12T02:55:01Z"
+    "created_at": "2026-05-12T02:55:01Z",
+    "completed_at": "2026-05-15T04:35:07.233837+00:00"
   },
   {
     "id": "task-k1301-codex-review-primary",
@@ -7340,7 +7341,7 @@
     "title": "K1309 Codex primary-path review (post quota reset)",
     "priority": 3,
     "description": "K1309 HAR-PD NULL (TX1 DM-HLN t=-0.346 p=0.73, CI [-0.175,+0.172] includes 0, 4 連 NULL quartet 加入)。Codex CLI quota reset 2026-05-13 02:46 UTC 後 `codex exec --skip-git-repo-check` 對 experiments/k1309/k1309.py + results.json 做 primary review。Focus: (a) compute_path_features 雙重 lag (shift(1)+shift(i)) 正確性, (b) λ fixed=(4.0,1.0,0.25) 選擇合理性 vs arXiv NLLS-fit, (c) bootstrap CI 與 DM 一致, (d) sample_trust_flag guard 邏輯。PASS 則更新 knowledge.json 補 reviewer_source 欄位；FAIL 則加 closure_status=requires_revision。Commit 8ddaddba (cherry-picked from worktree).",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "blocked_reason": "codex_quota_reset_pending",
     "blocked_until": "2026-05-13T02:46:00Z",
@@ -7350,7 +7351,8 @@
       "primary-path-verify",
       "null-quartet"
     ],
-    "created_at": "2026-05-12T03:32:56Z"
+    "created_at": "2026-05-12T03:32:56Z",
+    "completed_at": "2026-05-15T04:35:07.233837+00:00"
   },
   {
     "id": "task-k950-codex-review-postpub",
@@ -7526,7 +7528,7 @@
     "title": "Paper 2 Table 1 TWII stats Codex primary-path review",
     "priority": 3,
     "description": "Paper 2 Table 1 TWII summary stats backfilled (6/7 CONFLICT_RESOLVED due to 1997-07 yfinance coverage gap, MLE 100/100 multistart converged, 3 SE methods consistent t(γ)>6). Codex CLI quota reset 2026-05-13 02:46 UTC 後 `codex exec --skip-git-repo-check` 對 experiments/paper2_table1_twii_stats/twii_summary_stats.py 做 primary review。Focus: (a) log-return *100 scaling, (b) MLE convergence + seed=42 multistart logic, (c) snapshot CSV 不 live-fetch, (d) tolerance choice (mean ±0.005 / std ±0.005 / skew ±0.02 / kurt ±0.02 / γ ±0.005 / t ±0.10), (e) SE method 3-way comparison (OPG/Hessian/Sandwich)。",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "blocked_reason": "codex_quota_reset_pending",
     "blocked_until": "2026-05-13T02:46:00Z",
@@ -7535,7 +7537,8 @@
       "codex-review",
       "paper2-gate-clear"
     ],
-    "created_at": "2026-05-12T05:02:57Z"
+    "created_at": "2026-05-12T05:02:57Z",
+    "completed_at": "2026-05-15T04:35:07.233837+00:00"
   },
   {
     "id": "task-tsmc-vt-codex-review",
@@ -9183,7 +9186,7 @@
     "title": "trending_repost: AI 巨頭 CapEx 軍備競賽 — VolPred vol regime 角度",
     "priority": 3,
     "description": "第 1 篇 trending_repost trial run。Genre reference: havingchien substack AI 6/13（不引用、不抄襲）。Topic: AI four giants ($Meta/$MSFT/$AMZN/$GOOGL) Q1-Q2 2026 CapEx。Angle: vol regime — AI infra spending 是否驅動 mega-cap tech IV term structure / RV regime shift / cross-asset correlation breakdown。Independent primary sources: 各家 10-Q Q1 2026 (SEC EDGAR) + yfinance OHLC + CBOE skew data + 我們 K-experiments vol regime 經驗（K1018 / K1216 / K826 etc.）。Workflow: `.claude/skills/trending-repost/SKILL.md` 7-step SOP。雙發佈: feed-publisher draft + Ivan Lai FB（claude-in-chrome）。Daily cap = 2/day（本日已 1/2）。3-model gate: Gemini pro plagiarism + Codex numerical。",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "trending_repost",
     "source": "user_directive_2026_05_15",
     "tags": [
@@ -9192,6 +9195,7 @@
       "vol-regime",
       "first-trial"
     ],
-    "created_at": "2026-05-15T01:34:36Z"
+    "created_at": "2026-05-15T01:34:36Z",
+    "completed_at": "2026-05-15T04:35:07.233837+00:00"
   }
 ]
