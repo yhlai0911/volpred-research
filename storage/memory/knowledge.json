@@ -23494,7 +23494,17 @@
     ],
     "data_source": "yfinance SPY 2006-2026",
     "created_at": "2026-04-07T14:08:01.988239+00:00",
-    "experiment_date": "2026-04-07"
+    "experiment_date": "2026-04-07",
+    "codex_review": "CONDITIONAL_PASS (2026-05-16, primary-path Codex gpt-5.4, session 019e2d59)",
+    "codex_review_caveats": [
+      "Major: wavelet feature uses t-2 lag (extra shift) — unfairly weakens wavelet model, NULL conclusion needs re-verification after fix",
+      "Major: max(pred,0.0001) floor causes QLIKE 474.48 artifact on WHAR_HAR_db4 — not comparable loss",
+      "Major: IS t-stats wrong (intercept X'X mismatch, k=p+1 inconsistency) — D2/D3/D4/D5/A5 significance may be distorted",
+      "Minor: DM HAR-vs-WHAR t=5.98 not in JSON dm_tests",
+      "Minor: IS R^2=0.126 not persisted to JSON",
+      "Minor: No multiple-testing correction for 7 DM tests",
+      "Minor: n_oos 1824/1823 traceability not in JSON"
+    ]
   },
   {
     "id": "know_20260407145237_k982",

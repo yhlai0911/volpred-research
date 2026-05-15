@@ -6157,5 +6157,27 @@
     "status": "succeeded",
     "summary": "Propagated K1175 canonical vix_863 values (Sharpe 1.137, MDD -13.7%) to body.tex: 7 edits across lines 274/270/309/311/478/567/632. Fixed Table 3 footnote contradiction (All strategies → GJR/GARCH/EWMA daily, 8.63/VIX monthly). Updated common-period gap calculation. Compiled OK (47 pages), paper-update sync to Supabase.",
     "verdict": "PASS"
+  },
+  {
+    "session": "16:07 CST dispatch (context-resumed)",
+    "timestamp": "2026-05-16T04:35:00+08:00",
+    "task_id": "task-k901-codex-review-primary",
+    "task_type": "paper_review",
+    "status": "FAIL",
+    "experiment": "K901",
+    "verdict": "FAIL",
+    "summary": "Codex primary review K901 (international VT 13 markets): FAIL. 2 Major: (1) GJR convergence silently swallowed, (2) Bootstrap no seed. Lookahead CLEAN. Fix task created: task-k901-fix-codex-fail.",
+    "output_file": "experiments/k901/k901_codex_review.md"
+  },
+  {
+    "session": "16:07 CST dispatch (context-resumed)",
+    "timestamp": "2026-05-16T04:35:00+08:00",
+    "task_id": "task-k981-codex-review-primary-reverify",
+    "task_type": "paper_review",
+    "status": "CONDITIONAL_PASS",
+    "experiment": "K981",
+    "verdict": "CONDITIONAL_PASS",
+    "summary": "Codex primary review K981 (HAR+Wavelet): CONDITIONAL_PASS. 3 Major: (1) Wavelet extra lag t-2 (new Codex finding), (2) QLIKE floor artifact, (3) IS t-stats intercept mismatch (new Codex finding). Lookahead CLEAN. knowledge.json updated. Fix task created.",
+    "output_file": "experiments/k981/k981_codex_review_primary.md"
   }
 ]
