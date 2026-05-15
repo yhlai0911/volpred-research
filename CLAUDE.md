@@ -85,6 +85,10 @@
 ## 專案地圖
 
 - 本機雙 agent 研究系統：Claude 偏主研究與整合，Codex 偏審查、第二意見、針對性修正。
+- **雙 AI CLI 可用性**（2026-05-14 確認）：
+  - **Codex CLI** `codex-cli 0.130.0` ✅ — ChatGPT auth（`Logged in using ChatGPT`），預設 `gpt-5.4` medium reasoning；headless 入口 `codex exec`；`--full-auto` 已 deprecated 改 `-s workspace-write`。中文 prompt 必 heredoc + stdin。
+  - **Gemini CLI** `0.42.0` ✅ — oauth-personal active = `ideahub.everything@gmail.com`（**有 Gemini Pro 訂閱**，pro 模型可放心當主力，不會降級）；headless 入口 `gemini -p`，**必加 `-y --skip-trust`**（v0.42 trust gate 否則 silent fail）。
+  - 完整 flags / 子指令對照表：[codex-cli SKILL](file:///Users/yhlai0911/.claude/skills/codex-cli/SKILL.md) + [gemini-cli SKILL](file:///Users/yhlai0911/.claude/skills/gemini-cli/SKILL.md)。
 - active frontend / Zeabur target 由 `config/project_targets.json` 決定；**先改 config，再改程式或文件。**
 - 目前線上站點：`https://volpred.zeabur.app`
 - 研究記憶雙寫：Supabase + Mirror API
@@ -244,7 +248,9 @@ Codex 審代碼 → 通過才寫 `knowledge.json` → 每 5-10 實驗彙整一�
 
 ## 系統任務類型與派工
 
-10 類任務（experiment / paper_decision / paper_body / paper_review / event_article / daily_article / member_qa / strategy_lifecycle / platform_ops / governance）× 對應 skill 映射 + 主 agent 依 `storage/work_log.json` 做多樣化決策的完整表格、schema、decision tree，全在 `.claude/rules/agent-delegation.md`（Claude 碰 `.claude/skills/**` 或 `scripts/agent_prompts/**` 時自動載入）。
+11 類任務（experiment / paper_decision / paper_body / paper_review / event_article / daily_article / member_qa / strategy_lifecycle / platform_ops / governance / **trending_repost**）× 對應 skill 映射 + 主 agent 依 `storage/work_log.json` 做多樣化決策的完整表格、schema、decision tree，全在 `.claude/rules/agent-delegation.md`（Claude 碰 `.claude/skills/**` 或 `scripts/agent_prompts/**` 時自動載入）。
+
+**`trending_repost` 是 11 類中唯一帶 daily cap**（≤2/day）— 熱門主題改寫文章，VolPred 角度 + 無 source citation + 無抄襲；雙發佈（VolPred feed + Ivan Lai FB）；完整 SOP 在 `.claude/skills/trending-repost/SKILL.md`。
 
 **跨類型歧義澄清**：
 - **交易策略研究**：設計階段（backtest/檢定）= 類型 1 experiment；上架階段（registry/metrics）= 類型 8 strategy_lifecycle

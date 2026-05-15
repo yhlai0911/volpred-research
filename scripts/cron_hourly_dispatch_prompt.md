@@ -10,7 +10,15 @@ PHASE A — 檢查 compute queue 有無 completed 待 followup:
 PHASE B — 派新工:
 
 1. 跑 `uv run python scripts/continue_task_dispatch.py --report` 看 dispatch state + agentable candidates。
-2. 多樣性檢查: `jq '[.[-5:] | .[] | .task_type]' storage/work_log.json` — 從 10 type 池選不在 last-3 的 type（experiment / paper_decision / paper_body / paper_review / event_article / daily_article / member_qa / strategy_lifecycle / platform_ops / governance）。
+2. 多樣性檢查: `jq '[.[-5:] | .[] | .task_type]' storage/work_log.json` — 從 11 type 池選不在 last-3 的 type（experiment / paper_decision / paper_body / paper_review / event_article / daily_article / member_qa / strategy_lifecycle / platform_ops / governance / **trending_repost**）。
+
+   **trending_repost daily cap = 2/day**（per `.claude/skills/trending-repost/SKILL.md`）：
+   ```bash
+   jq --arg today "$(date '+%Y-%m-%d')" \
+      '[.[] | select(.task_type == "trending_repost" and (.timestamp // "")[0:10] == $today)] | length' \
+      storage/work_log.json
+   ```
+   結果 ≥ 2 → 禁挑 trending_repost，rotate 其他 type。
 3. 優先序（CLAUDE.md 關 2 diversity 為硬規）:
    a. 若 last-3 work_log 已有 ≥2 paper_review/paper_body/paper_decision → 禁挑 paper_*，必 rotate 到其他 type。違反 = 整盤 diversity 崩。
    b. 否則考量 paper R1 backlog (Paper 2 還剩 3 SEVERE) + M3 monetization weight。
