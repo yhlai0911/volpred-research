@@ -1,26 +1,26 @@
 {
-  "timestamp": "2026-05-08T12:07:40Z",
+  "timestamp": "2026-05-15T00:07:20Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "Total drafts: 6 (<12 threshold, ALERT). By audience: general=2 (<8 threshold, ALERT), research=4 (>=4 threshold, ok)."
+      "detail": "Total drafts=6 (<12 threshold, ALERT). By audience: general=2 (<8 threshold, ALERT), research=4 (>=4 threshold, ok)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json is 131 hours old (>26h threshold). Metrics severely stale."
+      "detail": "storage/strategy_metrics.json is 114.07 hours old (>26h threshold). Metrics severely stale."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated today (2026-05-08) or yesterday (2026-05-07) in last 30 lines. Most recent incidents from 2026-04-26: lancedb list_tables() API shape fix; Member Q&A 5-day silent gap fix (q 29cbeb5c); Codex CLI gpt-5.5 400 error fix."
+      "detail": "No entries dated today (2026-05-15) or yesterday (2026-05-14) in last 30 lines. Most recent incidents from 2026-04-26: lancedb list_tables() API shape fix; Member Q&A 5-day silent gap fix (q 29cbeb5c); Codex CLI gpt-5.5 400 error fix."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "14 strategies checked (excl. _market_daily). No strategy has >2 portfolio_return=null in last 3 entries."
+      "detail": "15 strategies checked. No strategy has >2 portfolio_return=null in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
@@ -36,6 +36,6 @@
   "alerts": [
     "article pool low (<12): 6 total drafts",
     "general audience pool low (<8): 2 general drafts",
-    "metrics stale: strategy_metrics.json is 131 hours old (>26h threshold)"
+    "metrics stale: strategy_metrics.json is 114.07 hours old (>26h threshold)"
   ]
 }
