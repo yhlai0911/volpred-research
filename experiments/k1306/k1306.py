@@ -33,6 +33,8 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
 
+from pandas.tseries.offsets import MonthEnd
+
 import numpy as np
 import pandas as pd
 
@@ -161,10 +163,22 @@ def build_panel(tone: pd.DataFrame, monthly_rv: pd.DataFrame, daily_vix: pd.Seri
         vix_mean_lag = float(vix_window.mean())
 
         # Target: monthly RV after embargo, take next 12 month-ends
+        # Fix (K1306v2 revised): push lower bound to the month-end of the embargo month
+        # using MonthEnd(0), then require index > that month-end so we start strictly from
+        # the NEXT complete calendar month. Without this, if embargo is mid-month (e.g.
+        # 2023-11-03), the monthly RV at 2023-11-30 satisfies (index > embargo) even though
+        # that RV bucket covers the full month of November (including pre-embargo days).
+        # MonthEnd(0) snaps embargo to its own month-end; the strict > condition then
+        # excludes that partial month and starts from 2023-12-31 onwards.
+        # Upper bound: embargo_month_end + 12 months caps the window to 12 forward months.
         rv_series = monthly_rv_for_ticker(monthly_rv, ticker)
         if rv_series is None or rv_series.empty:
             continue
-        fwd = rv_series[rv_series.index > embargo].iloc[:12]
+        embargo_month_end = embargo + MonthEnd(0)
+        fwd = rv_series[
+            (rv_series.index > embargo_month_end) &
+            (rv_series.index <= embargo_month_end + MonthEnd(12))
+        ].iloc[:12]
         if len(fwd) < 6:  # need at least 6 months forward
             continue
         rv_fwd_12m = float(fwd.mean())
@@ -212,8 +226,11 @@ def per_firm_ols(panel: pd.DataFrame) -> dict:
     pooled_rows = []
     for ticker, g in panel.groupby("ticker"):
         g = g.dropna(subset=["tone_delta_neg", "vix_mean_lag", "rv_fwd_12m"])
-        if len(g) < 3:
-            out_per_firm[ticker] = {"n_obs": int(len(g)), "skipped": "n<3"}
+        n_obs = len(g)
+        # Fix (K1306v2): M2 has 3 params (const, vix, tone); HC1 needs df>=2 → N>=5.
+        # N=3 or N=4 gives df=0 or df=1, making HC1 t-stats numerically invalid.
+        if n_obs < 5:
+            out_per_firm[ticker] = {"n_obs": int(n_obs), "skipped": "n<5 insufficient df for HC1"}
             continue
         y = g["rv_fwd_12m"].values
         X1 = sm.add_constant(g[["vix_mean_lag"]].values)
@@ -224,7 +241,7 @@ def per_firm_ols(panel: pd.DataFrame) -> dict:
         # LOO out-of-sample QLIKE
         qlike1, qlike2 = loo_qlike(y, X1), loo_qlike(y, X2)
         out_per_firm[ticker] = {
-            "n_obs": int(len(g)),
+            "n_obs": int(n_obs),
             "m1_r2": float(m1.rsquared),
             "m2_r2": float(m2.rsquared),
             "m1_adj_r2": float(m1.rsquared_adj),
@@ -251,17 +268,28 @@ def per_firm_ols(panel: pd.DataFrame) -> dict:
         dummies = pd.get_dummies(pooled["ticker"], drop_first=True).astype(float)
         Xp1 = sm.add_constant(pd.concat([pooled[["vix_mean_lag"]], dummies], axis=1).values)
         Xp2 = sm.add_constant(pd.concat([pooled[["vix_mean_lag", "tone_delta_neg"]], dummies], axis=1).values)
-        m1p = sm.OLS(y, Xp1).fit(cov_type="HC1")
-        m2p = sm.OLS(y, Xp2).fit(cov_type="HC1")
-        # tone_delta_neg coefficient is at index 2 (const=0, vix=1, tone=2, then dummies)
-        pooled_result = {
-            "n_obs": int(len(pooled)),
-            "m1_r2": float(m1p.rsquared),
-            "m2_r2": float(m2p.rsquared),
-            "beta_tone": float(m2p.params[2]),
-            "t_tone": float(m2p.tvalues[2]),
-            "p_tone": float(m2p.pvalues[2]),
-        }
+        # Fix (K1306v2): check df_resid = N - k >= 2 before fitting HC1.
+        # Xp2 has n_firms+2 params (const + vix + tone + (n_firms-1) dummies).
+        # HC1 t-stats are invalid when df_resid < 2.
+        n_pooled = len(y)
+        k_p2 = Xp2.shape[1]
+        if n_pooled - k_p2 < 2:
+            pooled_result = {
+                "n_obs": int(n_pooled),
+                "skipped": f"df_resid={n_pooled - k_p2} < 2; pooled HC1 invalid (n_firms too large relative to N)",
+            }
+        else:
+            m1p = sm.OLS(y, Xp1).fit(cov_type="HC1")
+            m2p = sm.OLS(y, Xp2).fit(cov_type="HC1")
+            # tone_delta_neg coefficient is at index 2 (const=0, vix=1, tone=2, then dummies)
+            pooled_result = {
+                "n_obs": int(n_pooled),
+                "m1_r2": float(m1p.rsquared),
+                "m2_r2": float(m2p.rsquared),
+                "beta_tone": float(m2p.params[2]),
+                "t_tone": float(m2p.tvalues[2]),
+                "p_tone": float(m2p.pvalues[2]),
+            }
 
     # Stouffer combined Z across firms with valid t-stats
     z_scores = []

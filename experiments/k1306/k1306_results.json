@@ -26,72 +26,30 @@
     "per_firm": {
       "AAPL": {
         "n_obs": 4,
-        "m1_r2": 0.17755523415601793,
-        "m2_r2": 0.6021288316168179,
-        "m1_adj_r2": -0.23366714876597316,
-        "m2_adj_r2": -0.19361350514954645,
-        "beta_vix": -0.0002561681963863027,
-        "beta_tone": 0.7338040341291125,
-        "t_tone": 1.2803891629445099,
-        "p_tone": 0.20040830338774362,
-        "qlike_m1": 0.13772359167011095,
-        "qlike_m2": 0.44832251003114376,
-        "qlike_improvement_pct": -225.52339406382157
+        "skipped": "n<5 insufficient df for HC1"
       },
       "GOOGL": {
         "n_obs": 1,
-        "skipped": "n<3"
+        "skipped": "n<5 insufficient df for HC1"
       },
       "MSFT": {
         "n_obs": 4,
-        "m1_r2": 0.8284401239371809,
-        "m2_r2": 0.9840347178302346,
-        "m1_adj_r2": 0.7426601859057713,
-        "m2_adj_r2": 0.9521041534907037,
-        "beta_vix": 0.00029066033896420424,
-        "beta_tone": 0.129915902638346,
-        "t_tone": 3.599095572162428,
-        "p_tone": 0.00031932582630608846,
-        "qlike_m1": 0.053935487276386695,
-        "qlike_m2": 84189.34731748211,
-        "qlike_improvement_pct": -156092579.54892612
+        "skipped": "n<5 insufficient df for HC1"
       },
       "NVDA": {
         "n_obs": 3,
-        "m1_r2": 0.276848487072732,
-        "m2_r2": 1.0,
-        "m1_adj_r2": -0.44630302585453596,
-        "m2_adj_r2": NaN,
-        "beta_vix": 0.0024381496343111103,
-        "beta_tone": -9.93316497256542,
-        "t_tone": -0.0,
-        "p_tone": 1.0,
-        "qlike_m1": 29.56781325725552,
-        "qlike_m2": 29.47194786943086,
-        "qlike_improvement_pct": 0.3242221093273963
+        "skipped": "n<5 insufficient df for HC1"
       }
     },
-    "pooled": {
-      "n_obs": 11,
-      "m1_r2": 0.8536373836434663,
-      "m2_r2": 0.858513154710197,
-      "beta_tone": 0.167607179616429,
-      "t_tone": 1.278380050005599,
-      "p_tone": 0.20111545483108695
-    },
-    "stouffer": {
-      "n_firms": 3,
-      "combined_z": 2.8171718253206603,
-      "p_value_two_sided": 0.004844859865903661,
-      "caveat": "t-stats treated as z; valid only for N>=30 per firm — small-sample pilot"
-    }
+    "pooled": null,
+    "stouffer": null
   },
   "bootstrap_pooled_beta_tone": {
     "n_boot": 500,
-    "mean": 0.060430643085429156,
-    "ci_2_5": -4.575972694239203,
-    "ci_97_5": 2.1402353382119195,
-    "frac_positive": 0.8
+    "mean": 0.21098067012412947,
+    "ci_2_5": -3.7857203722047994,
+    "ci_97_5": 2.6323782666006674,
+    "frac_positive": 0.856
   },
   "panel_summary": {
     "vix_mean_lag": {
@@ -116,19 +74,39 @@
     },
     "rv_fwd_12m": {
       "count": 16.0,
-      "mean": 0.010796724093093716,
-      "std": 0.008776557053212813,
-      "min": 0.003367710756273784,
-      "25%": 0.0053262515794955745,
-      "50%": 0.007259920574185685,
-      "75%": 0.011381303245386028,
-      "max": 0.03333289637291265
+      "mean": 0.0106818044022227,
+      "std": 0.008338955340090519,
+      "min": 0.0032535500997837295,
+      "25%": 0.005223723771443154,
+      "50%": 0.007107130325264888,
+      "75%": 0.012146564936575567,
+      "max": 0.030830947954500282
     }
+  },
+  "version": "K1306v2",
+  "codex_review": {
+    "verdict": "PASS",
+    "date": "2026-05-15",
+    "model": "gpt-5.4",
+    "session": "019e2ac0-7629-7af0-bb65-c786c328ce43",
+    "rounds": 3,
+    "checklist": {
+      "lookahead_bias": "PASS",
+      "partial_month_contamination": "PASS",
+      "small_n_guard": "PASS",
+      "statistical_validity_hc1_df": "PASS",
+      "seed_fixedness": "PASS"
+    },
+    "bugs_fixed": [
+      "Bug1: partial-month lower bound now uses MonthEnd(0) snap + strict > to exclude embargo month",
+      "Bug2: per-firm N<5 guard raised from N<3 (invalid HC1 df) to N<5 (df>=2 for 3-param model)",
+      "Bug3 (Codex-discovered): pooled OLS now checks df_resid=N-k>=2 before reporting HC1 t-stats"
+    ]
   },
   "lookahead_check": {
     "embargo_business_days": 1,
     "vix_mean_window": "21 trading days strictly BEFORE embargo_date",
-    "target_window": "next 12 monthly RV strictly AFTER embargo_date",
+    "target_window": "next 12 monthly RV strictly AFTER embargo_month_end (MonthEnd(0) snap)",
     "baseline_lag_match": true,
     "challenger_lag_match": true
   },
