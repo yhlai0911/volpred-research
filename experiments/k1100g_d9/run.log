@@ -1,5 +1,5 @@
   [sanity] Hansen skewed-t lam=0 matches scaled Student-t OK
-[18:29:15] K1100g_d9 cadence-robustness rerun start
+[08:34:21] K1100g_d9 cadence-robustness rerun start
   REFIT_EVERY=5 (d7=5, d8=25)
   N_RESTARTS_OOS_WARM=4 (d7=4, d8=2)
   N_RESTARTS_OOS_COLD=6 (d7=6, d8=4)
@@ -9,16 +9,177 @@
   Aligned rows (finite overnight): 3970
   Date range: 2010-01-05 .. 2026-03-31
   Train n=2447  Test n=1465
-  [18:29:15] IS fits (4 models) ...
-    IS elapsed: base_st=11.4s  gap_st=7.9s  base_sk=13.9s  gap_sk=13.8s
+  [08:34:22] IS fits (4 models) ...
+    IS elapsed: base_st=11.1s  gap_st=7.8s  base_sk=13.6s  gap_sk=13.5s
     M_base_st  ll= 13582.961 df=5.12  success=True
     M_gap_st   ll= 13614.148 df=6.61 ξ=+0.1403  success=True
     M_base_sk  ll= 13576.723 η=7.60 λ=-0.078  success=True
     M_gap_sk   ll= 13607.646 η=7.10 λ=-0.127 ξ=+0.0914  success=True
-  [18:30:02] OOS 4 models (refit_every=5, n_restarts_warm=4, cold=6) ...
+  [08:35:08] OOS 4 models (refit_every=5, n_restarts_warm=4, cold=6) ...
     [N225_base_st t=2547/3970 elapsed=44s refits=20]
-    [N225_base_st t=2647/3970 elapsed=85s refits=40]
-    [N225_base_st t=2747/3970 elapsed=131s refits=60]
-    [N225_base_st t=2847/3970 elapsed=183s refits=80]
-    [N225_base_st t=2947/3970 elapsed=239s refits=100]
-    [N225_base_st t=3047/3970 elapsed=294s refits=120]
+    [N225_base_st t=2647/3970 elapsed=84s refits=40]
+    [N225_base_st t=2747/3970 elapsed=130s refits=60]
+    [N225_base_st t=2847/3970 elapsed=181s refits=80]
+    [N225_base_st t=2947/3970 elapsed=235s refits=100]
+    [N225_base_st t=3047/3970 elapsed=289s refits=120]
+    [N225_base_st t=3147/3970 elapsed=349s refits=140]
+    [N225_base_st t=3247/3970 elapsed=413s refits=160]
+    [N225_base_st t=3347/3970 elapsed=483s refits=180]
+    [N225_base_st t=3447/3970 elapsed=555s refits=200]
+    [N225_base_st t=3547/3970 elapsed=629s refits=220]
+    [N225_base_st t=3647/3970 elapsed=698s refits=240]
+    [N225_base_st t=3747/3970 elapsed=769s refits=260]
+    [N225_base_st t=3847/3970 elapsed=836s refits=280]
+    [N225_base_st t=3947/3970 elapsed=905s refits=300]
+    base_st: refits=305  elapsed=923.3s
+    [N225_gap_st t=2547/3970 elapsed=50s refits=20]
+    [N225_gap_st t=2647/3970 elapsed=100s refits=40]
+    [N225_gap_st t=2747/3970 elapsed=154s refits=60]
+    [N225_gap_st t=2847/3970 elapsed=208s refits=80]
+    [N225_gap_st t=2947/3970 elapsed=266s refits=100]
+    [N225_gap_st t=3047/3970 elapsed=325s refits=120]
+    [N225_gap_st t=3147/3970 elapsed=385s refits=140]
+    [N225_gap_st t=3247/3970 elapsed=444s refits=160]
+    [N225_gap_st t=3347/3970 elapsed=504s refits=180]
+    [N225_gap_st t=3447/3970 elapsed=565s refits=200]
+    [N225_gap_st t=3547/3970 elapsed=628s refits=220]
+    [N225_gap_st t=3647/3970 elapsed=693s refits=240]
+    [N225_gap_st t=3747/3970 elapsed=756s refits=260]
+    [N225_gap_st t=3847/3970 elapsed=820s refits=280]
+    [N225_gap_st t=3947/3970 elapsed=886s refits=300]
+    gap_st:  refits=305  elapsed=902.3s
+    [N225_base_sk t=2547/3970 elapsed=43s refits=20]
+    [N225_base_sk t=2647/3970 elapsed=82s refits=40]
+    [N225_base_sk t=2747/3970 elapsed=128s refits=60]
+    [N225_base_sk t=2847/3970 elapsed=178s refits=80]
+    [N225_base_sk t=2947/3970 elapsed=230s refits=100]
+    [N225_base_sk t=3047/3970 elapsed=283s refits=120]
+    [N225_base_sk t=3147/3970 elapsed=338s refits=140]
+    [N225_base_sk t=3247/3970 elapsed=395s refits=160]
+    [N225_base_sk t=3347/3970 elapsed=454s refits=180]
+    [N225_base_sk t=3447/3970 elapsed=513s refits=200]
+    [N225_base_sk t=3547/3970 elapsed=576s refits=220]
+    [N225_base_sk t=3647/3970 elapsed=639s refits=240]
+    [N225_base_sk t=3747/3970 elapsed=703s refits=260]
+    [N225_base_sk t=3847/3970 elapsed=763s refits=280]
+    [N225_base_sk t=3947/3970 elapsed=827s refits=300]
+    base_sk: refits=305  λ-boundary hits=0  elapsed=843.2s
+    [N225_gap_sk t=2547/3970 elapsed=59s refits=20]
+    [N225_gap_sk t=2647/3970 elapsed=140s refits=40]
+    [N225_gap_sk t=2747/3970 elapsed=300s refits=60]
+    [N225_gap_sk t=2847/3970 elapsed=407s refits=80]
+    [N225_gap_sk t=2947/3970 elapsed=513s refits=100]
+    [N225_gap_sk t=3047/3970 elapsed=667s refits=120]
+    [N225_gap_sk t=3147/3970 elapsed=780s refits=140]
+    [N225_gap_sk t=3247/3970 elapsed=842s refits=160]
+    [N225_gap_sk t=3347/3970 elapsed=906s refits=180]
+    [N225_gap_sk t=3447/3970 elapsed=968s refits=200]
+    [N225_gap_sk t=3547/3970 elapsed=1052s refits=220]
+    [N225_gap_sk t=3647/3970 elapsed=1167s refits=240]
+    [N225_gap_sk t=3747/3970 elapsed=1324s refits=260]
+    [N225_gap_sk t=3847/3970 elapsed=1439s refits=280]
+    [N225_gap_sk t=3947/3970 elapsed=1558s refits=300]
+    gap_sk:  refits=305  λ-boundary hits=0  elapsed=1590.3s
+  [OOS] n_valid across all 4 models = 1465
+  [OOS] DM(gap_st): t=+2.315  QLIKE imp=+2.33%
+  [OOS] DM(gap_sk): t=+0.658  QLIKE imp=+0.57%  Harvey |t|>3: False  <-- KEY
+  [OOS] DM(innov_base): t=+1.282  QLIKE imp=+0.64%
+  [OOS] DM(innov_gap): t=-1.814  QLIKE imp=-1.15%
+
+=== [SPY] (SPY) ===
+  [cache] SPY -> spy_daily_2010-2026.parquet n=4085
+  Aligned rows (finite overnight): 4084
+  Date range: 2010-01-05 .. 2026-03-31
+  Train n=2515  Test n=1508
+  [09:46:07] IS fits (4 models) ...
+    IS elapsed: base_st=11.3s  gap_st=10.7s  base_sk=14.2s  gap_sk=6.8s
+    M_base_st  ll= 14612.380 df=9.05  success=True
+    M_gap_st   ll= 14669.223 df=6.50 ξ=+0.0601  success=True
+    M_base_sk  ll= 14684.452 η=9.60 λ=-0.113  success=True
+    M_gap_sk   ll= 14719.739 η=7.59 λ=-0.137 ξ=+0.0651  success=True
+  [09:46:50] OOS 4 models (refit_every=5, n_restarts_warm=4, cold=6) ...
+    [SPY_base_st t=2615/4084 elapsed=46s refits=20]
+    [SPY_base_st t=2715/4084 elapsed=93s refits=40]
+    [SPY_base_st t=2815/4084 elapsed=142s refits=60]
+    [SPY_base_st t=2915/4084 elapsed=191s refits=80]
+    [SPY_base_st t=3015/4084 elapsed=241s refits=100]
+    [SPY_base_st t=3115/4084 elapsed=293s refits=120]
+    [SPY_base_st t=3215/4084 elapsed=349s refits=140]
+    [SPY_base_st t=3315/4084 elapsed=404s refits=160]
+    [SPY_base_st t=3415/4084 elapsed=459s refits=180]
+    [SPY_base_st t=3515/4084 elapsed=547s refits=200]
+    [SPY_base_st t=3615/4084 elapsed=651s refits=220]
+    [SPY_base_st t=3715/4084 elapsed=709s refits=240]
+    [SPY_base_st t=3815/4084 elapsed=767s refits=260]
+    [SPY_base_st t=3915/4084 elapsed=828s refits=280]
+    [SPY_base_st t=4015/4084 elapsed=892s refits=300]
+    base_st: refits=314  elapsed=937.4s
+    [SPY_gap_st t=2615/4084 elapsed=45s refits=20]
+    [SPY_gap_st t=2715/4084 elapsed=81s refits=40]
+    [SPY_gap_st t=2815/4084 elapsed=118s refits=60]
+    [SPY_gap_st t=2915/4084 elapsed=155s refits=80]
+    [SPY_gap_st t=3015/4084 elapsed=194s refits=100]
+    [SPY_gap_st t=3115/4084 elapsed=233s refits=120]
+    [SPY_gap_st t=3215/4084 elapsed=271s refits=140]
+    [SPY_gap_st t=3315/4084 elapsed=311s refits=160]
+    [SPY_gap_st t=3415/4084 elapsed=354s refits=180]
+    [SPY_gap_st t=3515/4084 elapsed=399s refits=200]
+    [SPY_gap_st t=3615/4084 elapsed=447s refits=220]
+    [SPY_gap_st t=3715/4084 elapsed=496s refits=240]
+    [SPY_gap_st t=3815/4084 elapsed=546s refits=260]
+    [SPY_gap_st t=3915/4084 elapsed=593s refits=280]
+    [SPY_gap_st t=4015/4084 elapsed=645s refits=300]
+    gap_st:  refits=314  elapsed=683.5s
+    [SPY_base_sk t=2615/4084 elapsed=46s refits=20]
+    [SPY_base_sk t=2715/4084 elapsed=94s refits=40]
+    [SPY_base_sk t=2815/4084 elapsed=139s refits=60]
+    [SPY_base_sk t=2915/4084 elapsed=187s refits=80]
+    [SPY_base_sk t=3015/4084 elapsed=234s refits=100]
+    [SPY_base_sk t=3115/4084 elapsed=286s refits=120]
+    [SPY_base_sk t=3215/4084 elapsed=341s refits=140]
+    [SPY_base_sk t=3315/4084 elapsed=391s refits=160]
+    [SPY_base_sk t=3415/4084 elapsed=443s refits=180]
+    [SPY_base_sk t=3515/4084 elapsed=516s refits=200]
+    [SPY_base_sk t=3615/4084 elapsed=571s refits=220]
+    [SPY_base_sk t=3715/4084 elapsed=626s refits=240]
+    [SPY_base_sk t=3815/4084 elapsed=682s refits=260]
+    [SPY_base_sk t=3915/4084 elapsed=741s refits=280]
+    [SPY_base_sk t=4015/4084 elapsed=803s refits=300]
+    base_sk: refits=314  λ-boundary hits=0  elapsed=848.4s
+    [SPY_gap_sk t=2615/4084 elapsed=23s refits=20]
+    [SPY_gap_sk t=2715/4084 elapsed=31s refits=40]
+    [SPY_gap_sk t=2815/4084 elapsed=39s refits=60]
+    [SPY_gap_sk t=2915/4084 elapsed=48s refits=80]
+    [SPY_gap_sk t=3015/4084 elapsed=57s refits=100]
+    [SPY_gap_sk t=3115/4084 elapsed=66s refits=120]
+    [SPY_gap_sk t=3215/4084 elapsed=74s refits=140]
+    [SPY_gap_sk t=3315/4084 elapsed=82s refits=160]
+    [SPY_gap_sk t=3415/4084 elapsed=91s refits=180]
+    [SPY_gap_sk t=3515/4084 elapsed=100s refits=200]
+    [SPY_gap_sk t=3615/4084 elapsed=109s refits=220]
+    [SPY_gap_sk t=3715/4084 elapsed=119s refits=240]
+    [SPY_gap_sk t=3815/4084 elapsed=129s refits=260]
+    [SPY_gap_sk t=3915/4084 elapsed=138s refits=280]
+    [SPY_gap_sk t=4015/4084 elapsed=149s refits=300]
+    gap_sk:  refits=314  λ-boundary hits=0  elapsed=157.2s
+  [OOS] n_valid across all 4 models = 1508
+  [OOS] DM(gap_st): t=+0.660  QLIKE imp=+1.38%
+  [OOS] DM(gap_sk): t=+2.729  QLIKE imp=+2.09%  Harvey |t|>3: False  <-- KEY
+  [OOS] DM(innov_base): t=-1.051  QLIKE imp=-0.83%
+  [OOS] DM(innov_gap): t=-0.064  QLIKE imp=-0.10%
+
+[10:30:37] Loading d7 + d8 anchors ...
+  N225  d7 Student-t DM=2.3146126850632074
+  N225  d8 Student-t DM=-1.9190324007546329  Skewed-t DM=-1.3326567546444958
+  SPY  d7 Student-t DM=0.6603955857641025
+  SPY  d8 Student-t DM=-2.0983399223185133  Skewed-t DM=-1.7423633845821638
+
+[10:30:37] === Verdict: ROBUST_WITH_RECOVERY ===
+  cadence_sensitivity: CADENCE_ARTIFACT_FOR_STUDENT_T_NOT_FOR_SKEWED_T
+  N225 Student-t DM restored (+2.31 under d9 cadence vs +2.31 d7; d8 was -1.92), confirming the refit-cadence artifact. Skewed-t gap DM still borderline (+0.66, |t|<1.96); d8 'skewed-t does not help' conclusion HOLDS with a proper baseline. SPY Student-t DM sign recovered: d9=+0.66, d7=+0.66.
+
+[OK] results -> k1100g_d9_results.json
+  [plot] k1100g_d9_cadence_sensitivity.png
+  [plot] k1100g_d9_skewt_param_stability.png
+
+[DONE] total elapsed: 6975.5s
