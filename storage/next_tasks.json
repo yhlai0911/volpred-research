@@ -9174,7 +9174,7 @@
     "id": "task-paper2-taiwanvt-h1h3-fix",
     "title": "Paper 2 (taiwan-vt) H1+H3 canonical value fix — propagate K1175 to Section 4.3 + Table 5",
     "task_type": "paper_body",
-    "status": "pending",
+    "status": "succeeded",
     "priority": 1,
     "tags": [
       "paper_body",
@@ -9183,7 +9183,8 @@
       "integrity"
     ],
     "created_at": "2026-05-15T00:30:11.170730+00:00",
-    "description": "Paper 2 (taiwan-vt) H1+H3 partial-update fix. Root cause: K1175 updated Table 3 to canonical (1.137, -13.7%) but Section 4.3 text and Table 5 were not propagated. Fix: (A) Section 4.3 line ~308: update 0.690->1.137 Sharpe, -15.3%->-13.7% MDD, 7.2%->10.72% return, 12.1%->9.43% vol. (B) Table 5 reconciliation row for 8.63/VIX: 0.690->1.137. (C) Fix Table 3 footnote contradiction (M2): remove conflicting sentence — keep only 8.63/VIX uses monthly rebalancing and GJR-VT uses daily rebalancing. (D) After edits: uv run volpred ops paper-update --paper-id taiwan-vt. K1175 JSON: experiments/k1175/k1175_results.json .vix_863.sharpe=1.1369, .mdd_pct=-13.71. Main thread only."
+    "description": "Paper 2 (taiwan-vt) H1+H3 partial-update fix. Root cause: K1175 updated Table 3 to canonical (1.137, -13.7%) but Section 4.3 text and Table 5 were not propagated. Fix: (A) Section 4.3 line ~308: update 0.690->1.137 Sharpe, -15.3%->-13.7% MDD, 7.2%->10.72% return, 12.1%->9.43% vol. (B) Table 5 reconciliation row for 8.63/VIX: 0.690->1.137. (C) Fix Table 3 footnote contradiction (M2): remove conflicting sentence — keep only 8.63/VIX uses monthly rebalancing and GJR-VT uses daily rebalancing. (D) After edits: uv run volpred ops paper-update --paper-id taiwan-vt. K1175 JSON: experiments/k1175/k1175_results.json .vix_863.sharpe=1.1369, .mdd_pct=-13.71. Main thread only.",
+    "completed_at": "2026-05-16T08:15:00+08:00"
   },
   {
     "id": "trending_repost_2026_05_15_a",
