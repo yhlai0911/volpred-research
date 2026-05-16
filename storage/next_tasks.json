@@ -927,8 +927,9 @@
     "title": "K1169: Paper 2 §5 narrative rewrite (main thread, K1166 correction)",
     "priority": 1,
     "description": "K1164 REJECTED 已被 K1166 翻轉為 within-market CONFIRMED + cross-market open。Paper 2 §5 必須改寫: K1164 從 main result 降為 'shared-pooled-coef σ² tautology demonstration', K1166 升為 main mechanism test。主線程改 paper/2/body.tex。",
-    "status": "pending",
-    "task_type": "paper_body"
+    "status": "blocked",
+    "task_type": "paper_body",
+    "blocked_reason": "paper/eav-universal-magnitude/ directory not yet created; paper kickoff (paper-dir init + outline) is a separate prerequisite task"
   },
   {
     "id": "K1175_gdelt_fullscan",
@@ -962,14 +963,15 @@
     "title": "K1211 Paper 2 §5 draft: revise §5.5 AU from below-ladder to above-ladder (K1213 result)",
     "priority": 3,
     "description": "K1213 overturns K1171 below-ladder framing. K1211 §5.5 must be revised: AU θ_rel ∈ [1.07, 1.48] ABOVE ladder. K1210 H2 ±1-day precision partially superseded by numerical entrapment. Primary Spearman unchanged (ρ=+0.418). Update trajectory table + narrative commitment.",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-04-18T02:50:33.770865",
     "tags": [
       "K1211-revision",
       "Paper2",
       "AU-overturned"
     ],
-    "task_type": "paper_body"
+    "task_type": "paper_body",
+    "completed_at": "2026-05-16"
   },
   {
     "id": "K1216c_developed_multistart",
@@ -7405,7 +7407,7 @@
     "title": "K981 mile_ec876702 Codex primary-path re-verify (post-quota-reset)",
     "description": "Codex CLI 0.121.0 quota resets 2026-05-12 19:46 PT. Re-run primary-path Codex review of mile_ec876702 against k981_wavelet_har_results.json + k981_wavelet_har.py to upgrade Gemini fallback CONDITIONAL PASS to full PASS. Verify Gemini's 2 Major / 4 Minor findings + scan for residual non-coverage outside Gemini scan. Per K1259 lesson.",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "scheduled_after": "2026-05-13T00:00:00Z",
     "blocked_by": [
       "codex_quota_reset_2026_05_12_19_46_PT"
