@@ -92,12 +92,14 @@
       },
       {
         "id": "check_alerts",
-        "label": "ops alert checks (release_pool / draft / cron)",
+        "label": "ops alert checks (release_pool / draft / cron) — LaunchAgent canonical",
         "cron": "0 * * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_check_alerts.sh",
         "log_path": "storage/logs/cron/check_alerts.log",
         "command_deprecated": "scripts/check_alerts.py",
-        "description": "每小時檢查 release_pool_gap / draft_pool_low / host_cron_fail 並寄送 deduped email alert。",
+        "host_crontab_managed": false,
+        "launchagent_label": "com.volpred.check-alerts",
+        "description": "每小時檢查 release_pool_gap / draft_pool_low / host_cron_fail 並寄送 deduped email alert。**Trigger source: LaunchAgent only (com.volpred.check-alerts, StartCalendarInterval array of 24 Hour entries).** 2026-05-16 dual-cron refactor: host crontab `0 * * * *` entry REMOVED — dual-source previously caused 4 simultaneous fires per hour (sh→uv→python chain × 2 sources), token waste + log pipe contention + slow execution (11:00 fire delayed to 11:10 log). LaunchAgent is macOS-native, single-Label semantics, more reliable.",
         "matchers": [
           "scripts/check_alerts.py",
           "ops check-alerts",
