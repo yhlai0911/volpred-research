@@ -1,31 +1,31 @@
 {
-  "timestamp": "2026-05-16T00:05:39Z",
+  "timestamp": "2026-05-16T06:10:29Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "Total draft articles: 6 (threshold: 12). Breakdown — research: 4, general: 2. General audience critically low (<8)."
+      "detail": "Total draft articles: 6 (threshold: 12). Breakdown — research: 4 (threshold: 4, borderline OK), general: 2 (threshold: 8, CRITICAL LOW). Pool has been persistently low since 2026-04-20."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json is 138 hours old (threshold: 26h). Last modified ~2026-05-10."
+      "detail": "storage/strategy_metrics.json last modified epoch=1778392997. Age: ~144 hours (~6 days). Threshold: 26h. File has been stale since approximately 2026-05-10."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Last 30 lines of docs/error_log.md contain entries from 2026-04-26 only. No entries dated today (2026-05-16) or yesterday (2026-05-15). Most recent issues: lancedb list_tables API shape change (fixed), member Q&A 5-day pending gap (fixed), Codex CLI 400 error on gpt-5.5 (workaround applied)."
+      "detail": "Last 30 lines of docs/error_log.md: no entries dated 2026-05-15 (yesterday) or 2026-05-16 (today). Most recent entries are from 2026-04-26: lancedb list_tables API shape change (fixed), member Q&A 5-day gap (fixed), Codex CLI gpt-5.5 400 error (workaround applied)."
     },
     {
       "name": "PAPER_TRADING_GAPS",
-      "status": "alert",
-      "detail": "Strategy '_market_daily' has 3 null portfolio_return values in last 3 entries (2026-04-23, 2026-04-24, 2026-04-25). All other strategies have non-null recent entries."
+      "status": "ok",
+      "detail": "14 active strategies checked (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, adaptive_tier). All have exactly 1 null in last 3 entries (today's entry pending). No strategy exceeds threshold of >2 nulls. Note: _market_daily is market calendar data (no portfolio_return), not a strategy — previous alert was false positive."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files. Working tree clean."
+      "detail": "0 uncommitted files (threshold: 50). Working tree clean."
     },
     {
       "name": "KNOWLEDGE_SIZE",
@@ -35,8 +35,7 @@
   ],
   "alerts": [
     "article pool low (<12): total 6 drafts (research=4, general=2)",
-    "general audience article pool critically low (<8): only 2 draft articles",
-    "metrics stale: storage/strategy_metrics.json is 138 hours old (threshold: 26h)",
-    "paper trading gap: strategy '_market_daily' has 3/3 null portfolio_return in last entries (2026-04-23 to 2026-04-25)"
+    "general audience article pool critically low (<8): only 2 general-audience drafts",
+    "metrics stale: storage/strategy_metrics.json is ~144 hours old (threshold: 26h)"
   ]
 }
