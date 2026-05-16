@@ -184,6 +184,14 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 
 **Pending**：B=1000 CI 完成 → Codex re-review → user decision (A/B/C) → body.tex §3.2 重寫 → reproduce.py binding 補 K1370。Narrative state = `decision_pending` (NOT yet `decision_made_awaiting_body_rewrite`)。
 
+**RESOLVED 2026-05-16 23:25 CST (commit b4148e48)** — K1370 v2 B=1000 完成 + Codex CONDITIONAL PASS + Supabase synced:
+- 90% CI [2.31, 6.61], median 3.78, 1000/1000 valid（41.8 min runtime）
+- body_v3.tex §3.2 採方向 (A)：headline 改 4.3× canonical 匹配 spec（原 228eedb2 parallel agent 已 pivot；本次只用 v2 deterministic CI 數字取代 v1 hash-buggy）
+- reproduce.py 加 K1370 v2 CI + median bindings；gate 96.6% → 96.7% green
+- knowledge.json K1370 entry rewrite（supersedes 228eedb2 v1）
+- 留 caveat：MD5 seed 近乎可重現但非 bitwise (scipy.optimize ~2e-5 漂移)
+- Narrative state = `decision_made` (auto, per honest correction obligation + Codex PASS); body_v3.tex already adopted Option A
+
 **第三篇：Is Volatility Targeting Just Trend Following?**
 - `paper/vt-trend-following/main.tex`（29 頁）
 - 目標：Journal of Portfolio Management 或 Financial Analysts Journal
