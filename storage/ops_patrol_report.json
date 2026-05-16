@@ -1,31 +1,31 @@
 {
-  "timestamp": "2026-05-15T18:10:53Z",
+  "timestamp": "2026-05-16T00:05:39Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "Total drafts=6 (<12 threshold, ALERT). By audience: general=2 (<8 threshold, ALERT), research=4 (>=4 threshold, ok)."
+      "detail": "Total draft articles: 6 (threshold: 12). Breakdown — research: 4, general: 2. General audience critically low (<8)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json is 132.11 hours old (>26h threshold, ALERT). Metrics severely stale."
+      "detail": "storage/strategy_metrics.json is 138 hours old (threshold: 26h). Last modified ~2026-05-10."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated today (2026-05-15) or yesterday (2026-05-14) in last 30 lines. Most recent incidents from 2026-04-26: lancedb list_tables() API shape fix; Member Q&A 5-day silent gap fix (q 29cbeb5c); Codex CLI gpt-5.5 400 error fix."
+      "detail": "Last 30 lines of docs/error_log.md contain entries from 2026-04-26 only. No entries dated today (2026-05-16) or yesterday (2026-05-15). Most recent issues: lancedb list_tables API shape change (fixed), member Q&A 5-day pending gap (fixed), Codex CLI 400 error on gpt-5.5 (workaround applied)."
     },
     {
       "name": "PAPER_TRADING_GAPS",
-      "status": "ok",
-      "detail": "14 trackable strategies checked (entries field is array). Each has at most 1 null portfolio_return in last 3 entries (threshold >2 → no alert). Strategy '_market_daily' has non-array entries field, skipped."
+      "status": "alert",
+      "detail": "Strategy '_market_daily' has 3 null portfolio_return values in last 3 entries (2026-04-23, 2026-04-24, 2026-04-25). All other strategies have non-null recent entries."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold: >50). Working tree is clean."
+      "detail": "0 uncommitted files. Working tree clean."
     },
     {
       "name": "KNOWLEDGE_SIZE",
@@ -34,8 +34,9 @@
     }
   ],
   "alerts": [
-    "article pool low (<12): 6 total drafts",
-    "general audience pool low (<8): 2 general drafts",
-    "metrics stale: strategy_metrics.json is 132.11h old (>26h threshold)"
+    "article pool low (<12): total 6 drafts (research=4, general=2)",
+    "general audience article pool critically low (<8): only 2 draft articles",
+    "metrics stale: storage/strategy_metrics.json is 138 hours old (threshold: 26h)",
+    "paper trading gap: strategy '_market_daily' has 3/3 null portfolio_return in last entries (2026-04-23 to 2026-04-25)"
   ]
 }

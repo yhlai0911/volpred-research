@@ -1,0 +1,30 @@
+{
+  "timestamp": "2026-05-16T00:05:49Z",
+  "patrol_run": "2026-05-16T00:05:49Z",
+  "alerts": [
+    {
+      "id": "article_pool_low",
+      "severity": "high",
+      "message": "article pool low (<12): total 6 drafts (research=4, general=2)",
+      "detail": "Draft article count is 6, below the threshold of 12. This risks breaking the release cadence. Action: run feed-publisher or publication-candidates to generate new drafts immediately."
+    },
+    {
+      "id": "general_audience_low",
+      "severity": "critical",
+      "message": "general audience article pool critically low (<8): only 2 draft articles",
+      "detail": "General audience drafts: 2 (threshold: 8). Platform growth and reader retention at risk. Action: prioritize generating general-audience content via feed-publisher."
+    },
+    {
+      "id": "metrics_stale",
+      "severity": "high",
+      "message": "metrics stale: storage/strategy_metrics.json is 138 hours old (threshold: 26h)",
+      "detail": "strategy_metrics.json last modified ~138 hours ago. Strategy leaderboard and performance tables may show outdated data. Action: run 'uv run volpred ops update-metrics' or trigger daily_update job."
+    },
+    {
+      "id": "paper_trading_gap_market_daily",
+      "severity": "medium",
+      "message": "paper trading gap: strategy '_market_daily' has 3/3 null portfolio_return in last entries (2026-04-23 to 2026-04-25)",
+      "detail": "Strategy '_market_daily' last 3 paper trading entries all have portfolio_return=null. Data collection may have stopped ~3 weeks ago. Action: investigate paper trading collection job for this strategy."
+    }
+  ]
+}
