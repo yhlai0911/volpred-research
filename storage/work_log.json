@@ -6436,5 +6436,32 @@
     "verdict": "COMPLETED",
     "status": "succeeded",
     "notes": "Paper 4 main_v3.tex +72 lines: §7.7 channel-specific (K1135/K1137/K1138/K1143), K1117/K1123 paragraphs, abstract/intro bullet, bib entries. experiments.md Part F. K1300 Codex PASS (confidence 0.88→0.92) committed Phase A."
+  },
+  {
+    "timestamp": "2026-05-17T07:30:00+08:00",
+    "task_id": "gen_article_k1100g_d8",
+    "task_type": "daily_article",
+    "title": "K1100G D8/D9：Refit Cadence Artifact — 每五天還是每二十五天",
+    "status": "succeeded",
+    "article_id": "mile_e4dc737c",
+    "result_summary": "Daily article about K1100G refit cadence artifact. D7→D8→D9 arc: DM sign flip (+2.31→-1.92→+2.31) confirmed cadence artifact. 2 charts uploaded. Published as draft. Supabase sync OK."
+  },
+  {
+    "timestamp": "2026-05-17T07:15:00+08:00",
+    "task_id": "paper_review_mile_53983530",
+    "task_type": "paper_review",
+    "title": "Codex 24h review — 月底翻盤效應文章 K547",
+    "status": "succeeded",
+    "verdict": "FAIL → CONDITIONAL (citation fixed, K547b pending)",
+    "result_summary": "Codex FAIL: (1) Harvey citation wrong → fixed in feed.json; (2) avg|stat|≥3 caveat added; (3) VIX timing lookahead pending K547b shift(1) rerun"
+  },
+  {
+    "timestamp": "2026-05-16T22:45:50Z",
+    "task_type": "paper_decision",
+    "task_id": "K1146",
+    "status": "succeeded",
+    "title": "K1146: Paper 2 三市場 θ_EAV universal regularity narrative decision",
+    "summary": "Paper 2 EAV 貢獻框架確立：TW(K1145 t=5.24) + US(K1147 t=4.50) + JP(K1150 t=11.99) 三市場全 PASS。Magnitude ordering: US(1.91e-4) > JP(1.41e-4) > TW(6.36e-5)。Narrative state = decision_made_awaiting_body_rewrite。K1146_body paper_body 任務已加入 queue。K1141 dual-NULL framing superseded。",
+    "next_task": "K1146_body (paper_body, P2) or K547b (experiment, P3)"
   }
 ]

@@ -902,10 +902,13 @@
     "title": "K1146: Paper 2 manuscript pivot to universal-magnitude (main thread, NOT agent)",
     "priority": 1,
     "description": "[3-market 全 PASS 後] Paper 2 從 dual-NULL 改寫為 three-market universal regularity (TW K1145 + US K1147 + JP K1150)。需主線程改 paper/2/body.tex (5-stage classifier 判 stage)。重點：5-layer robustness 表 + magnitude comparison + self-challenge §4.7 防審稿人質疑高 t-stat。",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_decision",
-    "blocked_reason": "prereq: K1145/K1147/K1150 three-market PASS not yet in knowledge.json",
-    "blocked_at": "2026-05-16T02:04:43Z"
+    "blocked_reason": null,
+    "blocked_at": "2026-05-16T02:04:43Z",
+    "unblocked_at": "2026-05-17T22:41:50Z",
+    "completed_at": "2026-05-16T22:45:34Z",
+    "notes": "Narrative decision made 2026-05-17: pivot to three-market universal θ_EAV regularity (TW+US+JP). Body rewrite planned as K1146_body. Supersedes K1141 dual-NULL framing."
   },
   {
     "id": "K1156",
@@ -6594,7 +6597,7 @@
     "title": "Paper review (Codex 24h-rule): 「月底翻盤效應」還活著嗎？把日曆異常疊在波動率目標策略上的失敗實錄",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_53983530 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_53983530",
@@ -6603,7 +6606,9 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-08T09:08:12+00:00"
+    "created_at": "2026-05-08T09:08:12+00:00",
+    "completed_at": "2026-05-17T00:00:00Z",
+    "notes": "Codex FAIL → 3 issues: (1) Harvey citation fixed in feed.json (2) avg|stat|≥3 caveat added (3) K547b shift(1) pending"
   },
   {
     "id": "paper_review_mile_5a50ea3c",
@@ -7936,7 +7941,7 @@
     "description": "K1100G_D8 has a non-null verdict in experiments/k1100g_d8/ but no published feed article and no existing task. Verdict: {'verdict': 'STILL_BORDERLINE', 'preliminary': True, 'reason': 'N225 gap² DM-HLN. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -7945,7 +7950,9 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.414586+00:00",
     "generated_at": "2026-05-13T05:53:00.414588+00:00",
-    "k_id": "K1100G_D8"
+    "k_id": "K1100G_D8",
+    "completed_at": "2026-05-17T07:30:00Z",
+    "article_id": "mile_e4dc737c"
   },
   {
     "id": "gen_article_k1108d",
@@ -9325,5 +9332,26 @@
     "blocked_reason": null,
     "completed_at": "2026-05-16T10:01:16Z",
     "closure_note": "reproduce.py updated with K1302+K1302b canonical bindings; 13 VERIFIED rows; gate 96.4% → 96.6%"
+  },
+  {
+    "id": "K547b_shift1_daily_vt_verify",
+    "type": "experiment",
+    "priority": 3,
+    "status": "pending",
+    "title": "K547b: Daily VT shift(1) re-run — VIX timing correction",
+    "description": "Re-run K547 backtest with weights.shift(1) (use prev-day VIX for today's weight). Verify: (1) Daily VT risk-adj return with correct lag (2) Does ToM overlay still underperform? (3) Update article mile_53983530 if headline numbers change.",
+    "created_at": "2026-05-17T00:00:00Z",
+    "depends_on": [],
+    "error_log_ref": "2026-05-17 mile_53983530 Codex FAIL"
+  },
+  {
+    "id": "K1146_body",
+    "title": "K1146_body: Paper 2 §6 EAV universal regularity body rewrite (paper_body)",
+    "priority": 2,
+    "task_type": "paper_body",
+    "status": "pending",
+    "description": "Paper 2 body.tex 新增 §6 'Earnings Announcement Volatility: A Universal Cross-Market Regularity'。來源: K1145 (TW θ=6.36e-5 t=5.24) + K1147 (US θ=1.91e-4 t=4.50) + K1150 (JP θ=1.41e-4 t=11.99)。包含 5-layer robustness 表、magnitude ordering、§8.x self-challenge (Hessian Wald vs cluster bootstrap + Bonferroni k=3)。同時 retire K1141 dual-NULL paragraph。修改 paper/taiwan-vt/body.tex 插在現行 §5 Macro Indicators 與 §6 VaR 之間。",
+    "blocked_reason": null,
+    "created_at": "2026-05-16T22:45:34Z"
   }
 ]

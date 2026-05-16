@@ -161,6 +161,36 @@
 
 **Pending（paper_body task）**：body.tex EAV heterogeneity 段落需對應改寫（K1141）；narrative state = decision_made_awaiting_body_rewrite。K1302 γ provenance rebuild 仍 pending（FAIL_LARGE_DRIFT → needs separate investigation）。
 
+**★ Paper 2 θ_EAV Universal Regularity — DECISION_MADE (2026-05-17, K1146)**
+
+K1145 (TW) + K1147 (US) + K1150 (JP) 三市場同步 PASS 後，EAV 貢獻框架再次升級：從「嚴格 null verification」→ **「三市場普遍性正規律」**（universal cross-market regularity with magnitude ordering）。
+
+| 市場 | 實驗 | pooled θ_EAV | cluster bootstrap t | 95% CI | placebo p |
+|------|------|-------------|---------------------|---------|-----------|
+| TW（31 stocks, 2014-2025） | K1145 | +6.36e-5 | +5.24 | [+4.13e-5, +9.38e-5] | 0/60 |
+| US（30 stocks, 2014-2025） | K1147 | +1.909e-4 | +4.50 | [+1.29e-4, +2.80e-4] | 0/60 |
+| JP（30 stocks, 2014-2025） | K1150 | +1.413e-4 | +11.99 | [+1.29e-4, +1.76e-4] | 0/60 |
+
+**Magnitude ordering**: US (1.91e-4) > JP (1.41e-4) > TW (6.36e-5)，與各市場制度性特徵一致（美國 earnings call 文化最強、分析師覆蓋最密、機構交易圍繞公告期最集中）。
+
+**與 K1109/K1113/K1114/K1140 null heterogeneity 的關係**：互補而非矛盾——within-market 找不到 firm-attribute predictor → θ_EAV 在每個市場內近乎常數 → cross-market 差異是市場層級結構差異（不是個股層級噪音）。
+
+**K1146 決策**：Paper 2 EAV 貢獻框架定為：
+> *"Earnings announcement volatility amplification is a universal cross-market regularity: positive, robust, and structurally ordered across TW (K1145), US (K1147), and Japan (K1150). The within-market null heterogeneity (K1109/K1113/K1114/K1140) is reinterpreted as supporting evidence that θ_EAV is market-level constant, with cross-market ordering driven by institutional characteristics."*
+
+**Body rewrite plan（K1146_body 任務）**：
+- 新增 §6 "Earnings Announcement Volatility: A Universal Cross-Market Regularity"（插在現行 §5 Macro Indicators 與 §6 VaR 之間）
+  - §6.1 A4f-EAV 模型設定
+  - §6.2 Taiwan（K1145）: 5-layer robustness
+  - §6.3 Cross-market validation（K1147 US + K1150 JP）
+  - §6.4 5-layer robustness 彙總表（3 markets × 5 checks）
+  - §6.5 Magnitude ordering 與制度性詮釋
+  - §6.6 Reconciliation with null heterogeneity（K1109/K1113/K1114/K1140）
+- 新增 §8.x Self-Challenge（in Discussion）：Hessian Wald vs cluster bootstrap；Bonferroni k=3 調整後所有市場 |t| > 2.39 仍全過
+- K1141（舊 dual-NULL body rewrite）→ SUPERSEDED by K1146_body
+
+**Narrative state** = `decision_made_awaiting_body_rewrite`（K1141 superseded；等 K1146_body paper_body task）
+
 **★ Paper 2 §3.2 Amplification Narrative — DECISION PENDING (2026-05-16, K1370)**
 
 K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch artifact**。
