@@ -6392,5 +6392,14 @@
     "outcome": "K827v2 ABM simulation code verified. Codex CONDITIONAL PASS. Lookahead: PASS (line 141 vix[t-1], lines 198-203 VIX[:-1]→returns[1:]). Seeds: PASS (per-sim RNG isolation, deterministic seeds). Bootstrap: PASS w/note (N_BOOTSTRAP=2000). Aggregate: PASS. Issues fixed: ddof=0→ddof=1 (line 255), df=2n-2→Welch-Satterthwaite (line 462). n=500 makes both fixes negligible impact (< 0.2%). Key result: VT Sharpe at 30%=0.4308 [0.4050, 0.4552], 50%=0.1801 [0.1602, 0.2020]. Critical threshold: 50%. threshold_stable=false (threshold region varies across param combos). Most influential param: kyle_lambda.",
     "reviewer": "Codex gpt-5.4 + Claude main-thread",
     "verdict": "CONDITIONAL_PASS → FIXED → EFFECTIVE_PASS"
+  },
+  {
+    "task_type": "paper_review",
+    "timestamp": "2026-05-16T19:12:09.604527+00:00",
+    "title": "K1312: GARCH-to-Neural AAAI 2024 — Interpretation + knowledge.json + research_program.md update",
+    "task_id": "main-thread-k1312-interpretation-20260517",
+    "status": "succeeded",
+    "verdict": "NULL — ML ceiling 8th confirmation",
+    "notes": "Compute queue followup dispatched in main thread. CONDITIONAL PASS code review (manual). knowledge.json entry #2124 written. research_program.md ML-GARCH section updated."
   }
 ]

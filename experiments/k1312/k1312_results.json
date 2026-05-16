@@ -1,0 +1,151 @@
+{
+  "experiment_id": "K1312",
+  "title": "GARCH-to-Neural (AAAI 2024): GARCH-LSTM Volatility Forecasting",
+  "reference": "Zhao, Zhu, Ng, Lee (2024) arXiv:2402.06642, AAAI 2024",
+  "date_computed": "2026-05-16T17:34:41Z",
+  "elapsed_seconds": 253.4,
+  "config": {
+    "assets": [
+      "SPY",
+      "QQQ"
+    ],
+    "oos_start": "2021-01-04",
+    "sub_period_split": "2024-01-01",
+    "refit_interval": 63,
+    "window": 1500,
+    "lstm_seq_len": 20,
+    "lstm_hidden": 32,
+    "lstm_layers": 2,
+    "lstm_dropout": 0.1,
+    "lstm_epochs": 100,
+    "lstm_patience": 10,
+    "lstm_lr": 0.001,
+    "seed": 42,
+    "device": "cpu",
+    "lookahead_protection": "All features shifted by 1 day before walk-forward. GJR forecast at t uses only r[:t] and var[:t]. LSTM window: feats[t-seq_len:t] (shifted, so max info=t-1).",
+    "features": [
+      "ret",
+      "r2",
+      "neg_r2",
+      "gjr_var",
+      "rv22",
+      "vix"
+    ],
+    "garch_nn_init": "Input layer initialized with GJR alpha/gamma/beta priors per Zhao et al. (2024) GARCH-NN equivalence."
+  },
+  "per_asset": {
+    "SPY": {
+      "asset": "SPY",
+      "n_oos": 1348,
+      "oos_start": "2021-01-04",
+      "oos_end": "2026-05-15",
+      "qlike": {
+        "gjr_baseline": 1.7304176689075068,
+        "garch_lstm": 3.4509726440932456
+      },
+      "mse": {
+        "gjr_baseline": 14.911493169016284,
+        "garch_lstm": 12.716525326621927
+      },
+      "relative_improvement_qlike": -0.9943003970087784,
+      "relative_improvement_mse": 0.1471997349638433,
+      "dm_test_qlike": {
+        "t_stat": 8.711353223678245,
+        "p_value": 0.0,
+        "interpretation": "negative t_stat => GARCH-LSTM better (QLIKE)",
+        "harvey_significant_3sd": true
+      },
+      "dm_test_mse": {
+        "t_stat": -1.5368944294558633,
+        "p_value": 0.1245540142198609,
+        "interpretation": "negative t_stat => GARCH-LSTM better (MSE)",
+        "harvey_significant_3sd": false
+      },
+      "sub_period": {
+        "early_2021_2023": {
+          "n": 753,
+          "qlike_gjr": 1.6040001570151075,
+          "qlike_lstm": 3.0839424212574404,
+          "lstm_better": false,
+          "rel_improvement": -0.9226571816528781
+        },
+        "late_2024_2026": {
+          "n": 595,
+          "qlike_gjr": 1.8904048730335177,
+          "qlike_lstm": 3.9154663546736836,
+          "lstm_better": false,
+          "rel_improvement": -1.071231623726491
+        }
+      },
+      "gates": {
+        "dm_t_gt_3_and_negative": false,
+        "rel_improvement_qlike_5pct": false,
+        "sub_period_stable": false,
+        "passed_count": 0
+      },
+      "verdict": "NULL -- ML ceiling 8th confirmation"
+    },
+    "QQQ": {
+      "asset": "QQQ",
+      "n_oos": 1348,
+      "oos_start": "2021-01-04",
+      "oos_end": "2026-05-15",
+      "qlike": {
+        "gjr_baseline": 1.7460806585471644,
+        "garch_lstm": 3.2915603468056167
+      },
+      "mse": {
+        "gjr_baseline": 27.591778387280854,
+        "garch_lstm": 25.949143376786793
+      },
+      "relative_improvement_qlike": -0.8851135717546844,
+      "relative_improvement_mse": 0.059533495356402115,
+      "dm_test_qlike": {
+        "t_stat": 9.316481952697115,
+        "p_value": 0.0,
+        "interpretation": "negative t_stat => GARCH-LSTM better (QLIKE)",
+        "harvey_significant_3sd": true
+      },
+      "dm_test_mse": {
+        "t_stat": -0.8459291895892169,
+        "p_value": 0.39774249294415487,
+        "interpretation": "negative t_stat => GARCH-LSTM better (MSE)",
+        "harvey_significant_3sd": false
+      },
+      "sub_period": {
+        "early_2021_2023": {
+          "n": 753,
+          "qlike_gjr": 1.6525776510164791,
+          "qlike_lstm": 3.007113822594755,
+          "lstm_better": false,
+          "rel_improvement": -0.8196505445569339
+        },
+        "late_2024_2026": {
+          "n": 595,
+          "qlike_gjr": 1.864413036144821,
+          "qlike_lstm": 3.6515405698825565,
+          "lstm_better": false,
+          "rel_improvement": -0.9585470059966464
+        }
+      },
+      "gates": {
+        "dm_t_gt_3_and_negative": false,
+        "rel_improvement_qlike_5pct": false,
+        "sub_period_stable": false,
+        "passed_count": 0
+      },
+      "verdict": "NULL -- ML ceiling 8th confirmation"
+    }
+  },
+  "overall_verdict": "NULL -- ML ceiling 8th confirmation (GARCH-LSTM fails all gates)",
+  "three_gate_framework": {
+    "gate_a": "DM-HLN |t|>3.0 AND t<0 (challenger better)",
+    "gate_b": "QLIKE relative improvement >= 5% vs GJR",
+    "gate_c": "Sub-period stable (both 2021-23 and 2024+ better)",
+    "reference": "Harvey, Liu, Zhu (2016) RFS; Diebold & Mariano (1995)"
+  },
+  "plot_files": [
+    "/Users/yhlai0911/Desktop/volpred-research/experiments/k1312/k1312_qlike_comparison.png"
+  ],
+  "ml_ceiling_context": "7 prior NULL results: K785 MF2-GARCH, K816v2 GINN, K784 GARCH-GRU, K1263 KAN-GARCH-MIDAS, and others. All DM-HLN |t|<3 vs GJR-GARCH."
+}

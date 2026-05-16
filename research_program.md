@@ -346,7 +346,7 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 - [ ] Sentiment-Augmented GARCH-LSTM — Computational Economics 2025
 - [ ] KAN for VIX Forecasting — Expert Systems with Applications 2025
 - [ ] CNN-Transformer Hybrid — European J. Finance 2025
-- [ ] GARCH-to-Neural — AAAI 2024
+- [x] ~~GARCH-to-Neural~~ → **K1312 完成 NULL (2026-05-17)**: SPY QLIKE LSTM=3.451 vs GJR=1.730 (差 99.4%，DM t=+8.71)，QQQ QLIKE LSTM=3.292 vs GJR=1.746 (差 88.5%，DM t=+9.32)，0/3 gates × 2 assets。**ML ceiling 第 8 次確認**。結構化 GJR inductive bias 仍無法突破 QLIKE ceiling；MSE 小幅改善(15%/6%)但均不顯著。
 - [ ] ML Risk-Based Allocation — Scientific Reports 2025（LSTM + regime switching，Sharpe 1.38）
 
 ### Rough Volatility & Hurst

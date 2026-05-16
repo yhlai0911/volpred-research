@@ -30082,5 +30082,52 @@
     "created_at": "2026-05-16T17:33:51.074188+00:00",
     "updated_at": "2026-05-16T17:33:51.074446+00:00",
     "session_id": "230840ab-60b8-456f-96b1-18321be3372d"
+  },
+  {
+    "id": "K1312",
+    "title": "K1312: GARCH-to-Neural (AAAI 2024) — GARCH-LSTM with GJR Inductive Bias",
+    "summary": "Implementation of Zhao, Zhu, Ng, Lee (AAAI 2024 / arXiv:2402.06642) GARCH-LSTM: maps GJR variance update equation directly to LSTM input structure as structured prior. SPY OOS n=1348 (2021-2026): QLIKE GJR=1.730 vs LSTM=3.451 (rel=-99.4%, WORSE); MSE LSTM 14.7% better but DM p=0.12 (NS). QQQ: QLIKE GJR=1.746 vs LSTM=3.292 (rel=-88.5%, WORSE); MSE LSTM 6% better (NS). DM-HLN QLIKE t=+8.71 (SPY) / +9.32 (QQQ) — GJR significantly better at Harvey 3σ. Sub-period stable (both 2021-23 and 2024+): LSTM worse in both sub-periods. All 3 gates failed × 2 assets. ML ceiling 8th confirmation. Counter-intuitive: GJR-consistent inductive bias actually HARMS QLIKE vs plain GJR. Possible explanation: LSTM overfits to GJR residuals during training, distorting dynamics.",
+    "experiment_id": "K1312",
+    "asset": "SPY, QQQ",
+    "tags": [
+      "GARCH-LSTM",
+      "ML ceiling",
+      "AAAI 2024",
+      "GARCH-to-Neural",
+      "DM-HLN",
+      "QLIKE",
+      "NULL result"
+    ],
+    "verdict": "NULL — ML ceiling 8th confirmation",
+    "key_metrics": {
+      "spy_qlike_gjr": 1.73,
+      "spy_qlike_lstm": 3.451,
+      "spy_rel_qlike": -0.994,
+      "spy_dm_t_qlike": 8.711,
+      "spy_mse_rel_improvement": 0.147,
+      "spy_dm_p_mse": 0.1246,
+      "qqq_qlike_gjr": 1.746,
+      "qqq_qlike_lstm": 3.292,
+      "qqq_rel_qlike": -0.885,
+      "qqq_dm_t_qlike": 9.316,
+      "qqq_mse_rel_improvement": 0.06,
+      "n_oos": 1348,
+      "oos_period": "2021-01-04 to 2026-05-15",
+      "gates_passed": 0,
+      "ml_ceiling_count": 8,
+      "seed": 42,
+      "lstm_hidden": 32,
+      "lstm_layers": 2,
+      "lstm_seq_len": 20,
+      "refit_interval_days": 63
+    },
+    "insight": "8th consecutive NULL for ML vs GJR-GARCH. Even structured priors (GARCH-NN equivalence) fail to overcome GJR's efficiency for daily vol forecasting. MSE improvement (15%/6%) without QLIKE improvement suggests LSTM learns conditional mean of r² better but not the distributional shape (kurtosis, tail). harvey_significant_3sd in output JSON is directionless (|t|>3) — always read with dm_t_gt_3_and_negative gate for correct directional inference.",
+    "codex_review": "Main-thread manual review (Codex CLI doesn't support focus text in review mode). CONDITIONAL PASS: lookahead shift(1) at L591 ✓; QLIKE Patton formula ✓; DM-HLN sign convention ✓; gate_dm requires t<0 AND |t|>3 ✓; seeds fixed ✓. Minor: harvey_significant_3sd is |t|>3 regardless of direction (documentation ambiguity, not error).",
+    "spec": "Features: ret, r², neg_r², gjr_var, rv22, VIX — all shifted 1 day. Walk-forward refit every 63 days. Window=1500 days. LSTM init from GJR α/γ/β priors.",
+    "reference": "Zhao, Zhu, Ng, Lee (2024) arXiv:2402.06642, AAAI 2024",
+    "prior_ml_ceiling": "K785 K816v2 K784 K1263 (7 prior NULLs)",
+    "created_at": "2026-05-16T19:11:40.859990+00:00",
+    "updated_at": "2026-05-16T19:11:40.861589+00:00",
+    "session_id": "hourly-dispatch-2026-05-17"
   }
 ]
