@@ -28,7 +28,19 @@ PHASE B — 派新工:
 5. 分流決策（token 節省）:
    - heavy compute (GARCH MLE / Bootstrap / data fetch / 全期 backtest / pooled-MLE multistart) → 改 `uv run python scripts/compute_queue.py enqueue --script <path> --title <T> --result-artifact <path> --followup-brief 'brief' --followup-task-type paper_review --timeout 3600`。Compute worker cron */15 min 接手；下次 hourly 自動派 interpretation agent（省 60-70% tokens）。注意: 腳本必須完整已寫才能 enqueue。
    - decision / writing / narrative → 派 Claude agent 正常流程（worktree for experiments；main repo for articles/paper body）。
-6. Brief 含 task title/description + skill 規範 + lookahead + Codex 審核要求 + Mission sanity check。**寫文章類任務（feed-publisher / trending-repost / daily_article / event_article / member_qa 答覆 / FB hook）brief 必含 `.claude/skills/anti-ai-style/` 路徑 + 「寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist」明文要求**（per memory feedback_use_anti_ai_style）。
+6. Brief 含 task title/description + skill 規範 + lookahead + Codex 審核要求 + Mission sanity check。
+
+   **Reader-facing 寫文章類任務硬規則**（feed-publisher / trending-repost / daily_article / event_article / member_qa 答覆 / FB hook，per memory `feedback_reader_facing_3canon` + `feedback_use_anti_ai_style`）：
+
+   (a) Brief **必含 3 canonical paths**，agent 開工前先讀完：
+       - `.claude/skills/trending-repost/SKILL.md`（即便非 trending_repost type，dual-publish + style 規範通用）
+       - `.claude/skills/anti-ai-style/SKILL.md`
+       - `.claude/rules/publishing.md`
+   (b) **Evidence package 先於 prose** — 任何句子之前先組好：≥3 個可驗證數字（primary source）+ ≥1 表 + ≥1 圖 + ≥1 層量化分析（descriptive stats / before-after / cross-section / rolling / event-window / vol change）+ 最好有統計檢定或比較框架。不滿足 → 換題目或換 task type，禁強推。
+   (c) **trending_repost 特別**：正式 task type 非摘要 / 翻譯；風格可參 havingchien Substack/commentary tone 但不引用不貼近改寫；先選題掃描 + 30 日查重 + VolPred angle 確認；雙發佈 feed + Ivan Lai FB。
+   (d) **寫前**讀 anti-ai-style/references/prompt-templates.md，5 原則套 prompt header（年齡降級 / 長文裁切 / 資訊密度 / 負向約束 / 蘇格拉底對槓）。
+   (e) **寫後**跑 anti-ai-style/references/editor-sop.md 3 階段 9-checklist；任一 fail 不 publish。
+   (f) **3-model gate** 之 Gemini 一審 prompt 加問「是否仍有 AI 味？指出最像 AI 的 3 句並建議改寫」。
 7. 派完 end summary 格式（per memory feedback_task_end_summary_format）: 結束時間 / 總時間 / 本次 token / 完成項目 / 本週 Max 20x quota % (`uv run python scripts/weekly_quota_estimate.py`) / 下次任務時間。
 8. 若 last-3 涵蓋所有 candidates 的 type → 派沒做過的 type，必要時主動生 brief / 文章 / compute job。沒事做永不可接受。
 9. 嚴禁: force push, --no-verify, 寫 knowledge.json from agent (K1259), 假數字。研究誠實 > 一切。
