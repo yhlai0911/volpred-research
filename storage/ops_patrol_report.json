@@ -1,31 +1,31 @@
 {
-  "timestamp": "2026-05-16T06:10:29Z",
+  "timestamp": "2026-05-16T12:04:15Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "Total draft articles: 6 (threshold: 12). Breakdown — research: 4 (threshold: 4, borderline OK), general: 2 (threshold: 8, CRITICAL LOW). Pool has been persistently low since 2026-04-20."
+      "detail": "Total drafts: 6 (<12). Research audience: 4 (OK, threshold <4). General audience: 2 (<8, alert). Article pool is critically low."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json last modified epoch=1778392997. Age: ~144 hours (~6 days). Threshold: 26h. File has been stale since approximately 2026-05-10."
+      "detail": "strategy_metrics.json last modified ~150 hours ago (threshold: 26h). File mtime=2026-05-10 06:03 UTC, current time=2026-05-16. Metrics are stale."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Last 30 lines of docs/error_log.md: no entries dated 2026-05-15 (yesterday) or 2026-05-16 (today). Most recent entries are from 2026-04-26: lancedb list_tables API shape change (fixed), member Q&A 5-day gap (fixed), Codex CLI gpt-5.5 400 error (workaround applied)."
+      "detail": "No entries dated 2026-05-15 or 2026-05-16 found in last 30 lines of docs/error_log.md. Most recent entry is 2026-04-26."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "14 active strategies checked (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, adaptive_tier). All have exactly 1 null in last 3 entries (today's entry pending). No strategy exceeds threshold of >2 nulls. Note: _market_daily is market calendar data (no portfolio_return), not a strategy — previous alert was false positive."
+      "detail": "No strategy has >2 null portfolio_return in last 3 entries. All strategies have sufficient recent data."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold: 50). Working tree clean."
+      "detail": "0 uncommitted files. Working tree is clean."
     },
     {
       "name": "KNOWLEDGE_SIZE",
@@ -34,8 +34,8 @@
     }
   ],
   "alerts": [
-    "article pool low (<12): total 6 drafts (research=4, general=2)",
-    "general audience article pool critically low (<8): only 2 general-audience drafts",
-    "metrics stale: storage/strategy_metrics.json is ~144 hours old (threshold: 26h)"
+    "article pool low (<12): total drafts=6, general=2, research=4",
+    "general audience pool low (<8): only 2 general-audience draft articles",
+    "metrics stale: strategy_metrics.json is ~150 hours old (threshold 26h)"
   ]
 }
