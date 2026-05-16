@@ -6373,5 +6373,24 @@
     "output": "mile_207d3750",
     "status": "succeeded",
     "notes": "3-model review: Gemini PASS + Codex CONDITIONAL_PASS (4 issues fixed). FB: pending (retry next cycle)."
+  },
+  {
+    "task_id": "K1312",
+    "task_type": "experiment",
+    "title": "K1312: GARCH-to-Neural AAAI 2024 — GARCH-LSTM implementation + compute enqueued",
+    "verdict": "COMPUTE_QUEUED",
+    "timestamp": "2026-05-16T17:24:49.540883+00:00",
+    "notes": "Worktree agent implemented GARCH-LSTM (Zhao et al. arXiv:2402.06642). GARCH-NN equivalence maps GJR update to LSTM input structure. 6 features all shift(1), seed=42. Compute job compute-k1312-garch-to-neural-aaai-2024-full-run-* enqueued. Commit 21e1682b. Knowledge entry pending compute results."
+  },
+  {
+    "task_id": "Paper8_K827v2_audit_design_validation",
+    "task_type": "paper_body",
+    "title": "K827v2 ABM Sensitivity — Design Validation Audit (Codex CONDITIONAL PASS)",
+    "status": "succeeded",
+    "timestamp": "2026-05-16T17:33:27.381505+00:00",
+    "duration_min": 35,
+    "outcome": "K827v2 ABM simulation code verified. Codex CONDITIONAL PASS. Lookahead: PASS (line 141 vix[t-1], lines 198-203 VIX[:-1]→returns[1:]). Seeds: PASS (per-sim RNG isolation, deterministic seeds). Bootstrap: PASS w/note (N_BOOTSTRAP=2000). Aggregate: PASS. Issues fixed: ddof=0→ddof=1 (line 255), df=2n-2→Welch-Satterthwaite (line 462). n=500 makes both fixes negligible impact (< 0.2%). Key result: VT Sharpe at 30%=0.4308 [0.4050, 0.4552], 50%=0.1801 [0.1602, 0.2020]. Critical threshold: 50%. threshold_stable=false (threshold region varies across param combos). Most influential param: kyle_lambda.",
+    "reviewer": "Codex gpt-5.4 + Claude main-thread",
+    "verdict": "CONDITIONAL_PASS → FIXED → EFFECTIVE_PASS"
   }
 ]

@@ -5335,7 +5335,7 @@
   {
     "id": "Paper8_K827v2_audit_design_validation",
     "title": "Paper 8: K827v2 design-validation (Sharpe 0.43/0.18) 單獨 audit",
-    "status": "pending",
+    "status": "succeeded",
     "priority": 2,
     "created_at": "2026-04-17T17:20:14+08:00",
     "description": "Paper 8 Section 4.6 的 K827v2 design-validation (30% 下 Sharpe 0.43, 50% 下 0.18) 未正式 audit. 建議單獨 audit 補 verification.",
@@ -5344,7 +5344,9 @@
       "k827v2",
       "audit-followup"
     ],
-    "task_type": "paper_body"
+    "task_type": "paper_body",
+    "completed_at": "2026-05-16T17:34:02.043542+00:00",
+    "notes": "Codex CONDITIONAL PASS → fixed (ddof=1, Welch-Satterthwaite df). Knowledge.json written. Key: VT Sharpe 30%=0.4308, 50%=0.1801, threshold_stable=false, most_influential=kyle_lambda."
   },
   {
     "id": "Paper8_K827v3_code_cutoff_fix",
@@ -7523,14 +7525,15 @@
     "title": "K1312: GARCH-to-Neural — AAAI 2024",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 302). Original: GARCH-to-Neural — AAAI 2024\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1312.py with signal.shift(1) + seed=42, (c) K1312_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "tags": [
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-05-12T04:39:44Z"
+    "created_at": "2026-05-12T04:39:44Z",
+    "notes": "compute_queued: compute-k1312-garch-to-neural-aaai-2024-full-run-*; awaiting compute worker; will dispatch interpretation agent when results ready"
   },
   {
     "id": "task-twii-stats-codex-review",

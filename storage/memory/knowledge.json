@@ -30046,5 +30046,41 @@
     "created_at": "2026-05-16T15:18:00+00:00",
     "updated_at": "2026-05-16T15:24:57.963037+00:00",
     "session_id": "post-compact-resume"
+  },
+  {
+    "id": "K827v2",
+    "title": "K827v2 ABM VT Crowding — Sensitivity Analysis + 500 Simulations (SIMULATION)",
+    "summary": "K827v2 enhances original K827 ABM with 500 sims (vs 100) and ±50% sensitivity analysis on 3 parameters (kyle_lambda, vix_vol_sensitivity, vix_mr_speed). VT Sharpe at 10%=0.5013 [0.4731, 0.5288], 20%=0.4732, 30%=0.4308 [0.4050, 0.4552], 50%=0.1801 [0.1602, 0.2020], 70%=-0.1449, 100%=-0.4063. Critical threshold detected at 50% crowding. threshold_stable=false: threshold region varies across parameter combinations (<=30%, 30-50%, >50% all occur). Most influential parameter: kyle_lambda (Brunnermeier & Pedersen market liquidity channel). Significance: 10% vs 30%: |t|=3.64 ***, 10% vs 50%: |t|=17.82 ***. TYPE: SIMULATION ONLY — results are model-dependent design validation, not empirical claims.",
+    "experiment_id": "K827v2",
+    "asset": "SIMULATION",
+    "tags": [
+      "ABM",
+      "VT crowding",
+      "kyle_lambda",
+      "sensitivity_analysis",
+      "simulation"
+    ],
+    "verdict": "CONDITIONAL_PASS (SIMULATION) → fixed → EFFECTIVE_PASS",
+    "key_metrics": {
+      "vt_sharpe_10pct": 0.5013,
+      "vt_sharpe_30pct": 0.4308,
+      "vt_sharpe_50pct": 0.1801,
+      "vt_sharpe_70pct": -0.1449,
+      "vt_sharpe_100pct": -0.4063,
+      "critical_threshold": "50%",
+      "threshold_stable": false,
+      "most_influential_param": "kyle_lambda",
+      "t_stat_10vs30": 3.64,
+      "t_stat_10vs50": 17.82,
+      "n_sims_part1": 500,
+      "n_bootstrap": 2000
+    },
+    "paper_update": "Paper 5 / Paper 8 — H1 (VT crowding degrades at 30-50% threshold) and H5 (threshold not stable under parameter perturbation) design validation",
+    "codex_review": "Codex gpt-5.4 CONDITIONAL PASS. Lookahead PASS. Seeds PASS. Issues: df=2n-2 (fixed to Welch-Satterthwaite) and ddof=0 (fixed to ddof=1) — negligible impact at n=500.",
+    "spec": "ABM N_AGENTS=1000, N_DAYS=2520, N_SIMS=500, baseline params: kyle_lambda=0.005, vix_vol_sensitivity=200, vix_mr_speed=0.03",
+    "supersedes": "K827",
+    "created_at": "2026-05-16T17:33:51.074188+00:00",
+    "updated_at": "2026-05-16T17:33:51.074446+00:00",
+    "session_id": "230840ab-60b8-456f-96b1-18321be3372d"
   }
 ]
