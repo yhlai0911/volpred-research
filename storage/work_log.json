@@ -6199,5 +6199,17 @@
     "codex_review": "PASS (2026-05-16)",
     "commit": "9da47136",
     "tokens_used": "N/A (main thread code edit + Codex CLI review)"
+  },
+  {
+    "timestamp": "2026-05-16T01:15:18.619234+00:00",
+    "task_id": "K1302_paper2_table2_erratum_decision",
+    "task_type": "paper_decision",
+    "title": "Paper 2 Table 2 γ erratum: Option A decision (canonical full-sample for all stocks)",
+    "status": "succeeded",
+    "summary": "Formal decision: adopt Option A for Paper 2 Table 2 γ erratum. Root cause: 4 individual stock rows (Hon Hai/MediaTek/Mega Financial/0056) used legacy rolling-w2000 NW-HAC estimates inconsistent with canonical spec used for TAIEX/0050/TSMC/SPY. K1302 provides canonical BW-robust values for these 4 stocks. Created K1302b task for 5 remaining unlisted stocks. Full Table 2 update + §5 amplification revision scheduled post-K1302b.",
+    "artifacts": [
+      "paper/taiwan-vt/body.tex (Table 2 footnote updated with decision + K1302 values)",
+      "storage/next_tasks.json (K1302_erratum_decision -> succeeded; K1302b added P2)"
+    ]
   }
 ]

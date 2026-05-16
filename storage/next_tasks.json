@@ -9079,7 +9079,7 @@
   {
     "id": "K1302_paper2_table2_erratum_decision",
     "title": "K1302 result: Paper 2 Table 2 γ erratum/update decision (4 stocks large drift)",
-    "status": "pending",
+    "status": "succeeded",
     "priority": 2,
     "task_type": "paper_decision",
     "created_at": "2026-05-13T05:58",
@@ -9090,7 +9090,10 @@
       "erratum",
       "table2",
       "gamma-estimation"
-    ]
+    ],
+    "completed_at": "2026-05-16T01:14:44Z",
+    "verdict": "DECISION_MADE",
+    "verdict_notes": "Option A adopted (2026-05-16): Update Table 2 all individual stock rows to K1302 canonical (full-sample GJR-GARCH BW-robust) for internal consistency with TAIEX/0050/TSMC/SPY. Root cause: 4 rows used legacy rolling-w2000 NW-HAC spec. K1302 covers 2317/2454/2886/0056. Pending K1302b for 5 remaining unlisted stocks (2882/2891/2412/2885/2881) to compute canonical 9-stock average. Full Table 2 + §5 amplification update deferred to post-K1302b."
   },
   {
     "task_id": "task-k1303-v2-codex-review",
@@ -9239,5 +9242,23 @@
       "is_tstats"
     ],
     "task_type": "experiment"
+  },
+  {
+    "id": "K1302b",
+    "title": "K1302b: Canonical γ estimation for 5 remaining individual stocks (2882/2891/2412/2885/2881)",
+    "priority": 2,
+    "status": "pending",
+    "task_type": "experiment",
+    "created_at": "2026-05-16T01:14:44Z",
+    "description": "Paper 2 Table 2 canonical update: run full-sample GJR-GARCH(1,1) BW-robust SE estimation for 5 unlisted individual Taiwan stocks: 2882 Cathay Financial, 2891 CTBC Financial, 2412 Chunghwa Telecom, 2885 Yuanta Financial, 2881 Fubon Financial. K1302 covers 2317/2454/2886/0056/2383. K1302b covers remaining 5. After K1302b PASS + Codex review: main thread updates Table 2 (all rows + canonical averages) and §5 amplification ratio (using new 9-stock avg). Same setup as K1302: arch package, sample 2008-2024, robust SE (Bollerslev-Wooldridge), 100+ multistart. Produces: experiments/k1302b/{k1302b.py, k1302b_results.json, README.md}. Worktree agent task. NO knowledge.json write (main thread after Codex review). Mission M3 (paper2 submission gate).",
+    "tags": [
+      "paper2",
+      "provenance",
+      "table2",
+      "canonical-gamma",
+      "mission-3",
+      "gjr-garch"
+    ],
+    "source": "K1302_erratum_decision_followup"
   }
 ]

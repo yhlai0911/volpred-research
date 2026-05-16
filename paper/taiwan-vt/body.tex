@@ -162,7 +162,14 @@ Mega Financial (2886) & 0.179 & 2.42 & 0.015 & 0.901 & 0.977 \\
 \bottomrule
 \end{tabular}
 \begin{flushleft}
-\small \textit{Notes:} GJR-GARCH(1,1) with rolling window $w = 2000$. $t$-statistics use Newey-West HAC standard errors. Persistence $= \alpha + \beta + \gamma/2$. Individual stocks use the full available sample (2008--2026). 0056.TW is itself a diversified ETF (30+ constituents); it is reported separately and excluded from the primary 9-stock individual-stock average used for the amplification ratio. \textit{Methodological note}: Canonical full-sample estimates (GJR-GARCH(1,1), Bollerslev-Wooldridge robust SE, 2008--2024) from experiment K1302 differ from rolling-window values for Hon Hai ($\gamma = 0.032$, $t = 1.74$), MediaTek ($\gamma = 0.041$, $t = 3.10$), Mega Financial ($\gamma = 0.038$, $t = 1.55$), and 0056.TW ($\gamma = 0.067$, $t = 1.91$). The differences reflect the rolling-window versus full-sample specification and Newey-West versus Bollerslev-Wooldridge standard errors; the 9-stock average decreases from 0.054 to approximately 0.038 under the canonical full-sample specification. % source: K1302 (CONFLICT_RESOLVED: rolling_w2000_NW-HAC vs canonical_full_BW-robust; 2026-05-15)
+% DRAFT NOTE (2026-05-16): Table rows for Hon Hai/MediaTek/Mega/0056 currently show legacy rolling-w2000
+% NW-HAC estimates (inconsistent with TAIEX/0050/TSMC/SPY which use canonical full-sample BW-robust spec).
+% Decision: Option A adopted — update ALL individual stock rows to canonical full-sample GJR-GARCH(1,1)
+% BW-robust SE (experiment K1302). K1302 canonical values: Hon Hai γ=0.032 t=1.74; MediaTek γ=0.041
+% t=3.10; Mega Financial γ=0.038 t=1.55; 0056.TW γ=0.067 t=1.91.
+% Pending K1302b (5 unlisted stocks: 2882/2891/2412/2885/2881) to recompute 9-stock average.
+% Full Table 2 update + §5 amplification ratio revision scheduled after K1302b PASS + Codex review.
+\small \textit{Notes:} TAIEX, 0050.TW, SPY, and TSMC use full-sample GJR-GARCH(1,1) with Bollerslev-Wooldridge robust standard errors (2008--2024). The four individual stocks and 0056.TW shown above currently use rolling-window estimates ($w = 2000$, Newey-West HAC) from the original draft and will be updated to the canonical specification upon completion of K1302b. Persistence $= \alpha + \beta + \gamma/2$. 0056.TW is itself a diversified ETF (30+ constituents); it is reported separately and excluded from the primary 9-stock individual-stock average used for the amplification ratio. \textit{Provisional canonical estimates from K1302} (full-sample BW-robust, 2008--2024): Hon Hai ($\gamma = 0.032$, $t = 1.74$), MediaTek ($\gamma = 0.041$, $t = 3.10$), Mega Financial ($\gamma = 0.038$, $t = 1.55$), 0056.TW ($\gamma = 0.067$, $t = 1.91$); the 9-stock average is expected to decrease from 0.054 to approximately 0.038 under the canonical specification. % source: K1302 (OPTION_A_DECIDED 2026-05-16; pending K1302b for 5 remaining stocks)
 \end{flushleft}
 \end{table}
 
