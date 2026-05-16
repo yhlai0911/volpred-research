@@ -51,11 +51,11 @@
       {
         "id": "release_pool",
         "label": "文章池定時釋出",
-        "cron": "7 */6 * * *",
+        "cron": "7 */3 * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_release_pool.sh",
         "log_path": "storage/logs/cron/release_pool.log",
         "command_deprecated": "release-pool-by-settings",
-        "description": "每 6 小時依節奏設定釋出文章池內容（2026-04-27 用戶指定 12h→6h，配合 draft pool 補充節奏）。對應 .release_settings.json interval_minutes=360。",
+        "description": "每 3 小時依節奏設定釋出文章池內容（2026-05-16 用戶指定 6h→3h，搭配 draft pool 152 篇消化加速）。對應 .release_settings.json interval_minutes=180。實際 fire 走 piggy-back via check_alerts hourly tick（host cron 只可靠執行 0 * * * *）。",
         "matchers": [
           "release-pool-by-settings",
           "cron_release_pool.sh"
