@@ -6290,5 +6290,15 @@
       "compute queue: compute-k981-v2-wavelet-lag-fix-qlike-floor-fix-is-t-stats-fix-1778915759"
     ],
     "notes": "MAJOR-1: wavelet window t-2->t-1 lag fix. MAJOR-2: QLIKE floor 0.0001->data quantile. MAJOR-3: IS t-stats XtX with intercept. 4 Minors: DM to JSON, IS R2 to JSON, n_oos note, multiple-testing note. Re-run enqueued. Awaiting compute results to verify NULL conclusion persists and WHAR_HAR_db4 QLIKE artifact resolved."
+  },
+  {
+    "task_id": "gen_article_k1100g_d3",
+    "task_type": "daily_article",
+    "description": "K1100G_D3 Student-t PRG innovation article — research audience, published directly",
+    "timestamp": "2026-05-16T08:27:22.846582+00:00",
+    "status": "succeeded",
+    "experiment_id": "k1100g_d3",
+    "article_id": "mile_61ffe64a",
+    "notes": "3-model review: Claude + Gemini CONDITIONAL_PASS + Codex CONDITIONAL_PASS; all fixes applied; pseudo-LRT labeling + Harvey-style framing corrected"
   }
 ]
