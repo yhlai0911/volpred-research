@@ -1364,17 +1364,51 @@ try:
                 add("Table 2 (gamma)", "10-security avg (incl. 0056) = 0.031", "0.031", "K1302+K1302b",
                     actual_str, "CONFLICT")
 
-        # Amplification ratio TAIEX-to-individual
-        amp_9 = 0.272 / avg_9
-        paper_amp = 10
-        amp_str = f"{amp_9:.2f} (TAIEX 0.272 / avg 9 individual {avg_9:.4f})"
+        # Amplification ratio TAIEX-to-individual — canonical full-sample BW-robust
+        # K1370-v2 (2026-05-16) supersedes old 10× headline:
+        #   matched-sample 2008-2024 (apples-to-apples): TAIEX γ=0.1139 / 9-indiv γ=0.027 ≈ 4.3×
+        #   old 10× = Table 1 (rolling NW-HAC γ=0.272) ÷ Table 2 (canonical BW-robust γ=0.027) = spec-mismatch artifact
+        taiex_canonical = 0.1139  # K1370 v2 matched-sample full-sample BW-robust
+        amp_9 = taiex_canonical / avg_9
+        paper_amp = 4.3
+        amp_str = f"{amp_9:.2f} (TAIEX canonical γ {taiex_canonical} / avg 9 individual {avg_9:.4f})"
         if abs(amp_9 - paper_amp) <= 0.5:
-            add("Sec 3.2 amplification", "TAIEX-to-individual ratio = ~10x", "10x", "K1302+K1302b",
+            add("Sec 3.2 amplification", "TAIEX-to-individual matched-sample ratio ≈ 4.3×", "4.3x", "K1302+K1302b+K1370",
                 amp_str, "VERIFIED")
             print(f"  [Sec 3.2] amplification ratio canonical -- VERIFIED ({amp_9:.2f}x)")
         else:
-            add("Sec 3.2 amplification", "TAIEX-to-individual ratio = ~10x", "10x", "K1302+K1302b",
+            add("Sec 3.2 amplification", "TAIEX-to-individual matched-sample ratio ≈ 4.3×", "4.3x", "K1302+K1302b+K1370",
                 amp_str + " (delta > 0.5)", "CONFLICT")
+
+        # K1370 v2 90% bootstrap CI check
+        try:
+            k1370_path = REPO_EXP_DIR / "k1370" / "k1370_results.json"
+            k1370 = json.loads(k1370_path.read_text())
+            amp = k1370["amplification_ratio"]
+            ci_low, ci_high = amp["ci_low_90"], amp["ci_high_90"]
+            expected_low, expected_high = 2.31, 6.61
+            tol = 0.05
+            if abs(ci_low - expected_low) <= tol and abs(ci_high - expected_high) <= tol:
+                add("Sec 3.2 CI (90%)", f"K1370 v2 block-bootstrap 90% CI = [{expected_low}, {expected_high}]",
+                    f"[{expected_low}, {expected_high}]", "K1370",
+                    f"[{ci_low:.3f}, {ci_high:.3f}]", "VERIFIED")
+                print(f"  [Sec 3.2] K1370 v2 90% CI -- VERIFIED [{ci_low:.3f}, {ci_high:.3f}]")
+            else:
+                add("Sec 3.2 CI (90%)", f"K1370 v2 block-bootstrap 90% CI = [{expected_low}, {expected_high}]",
+                    f"[{expected_low}, {expected_high}]", "K1370",
+                    f"[{ci_low:.3f}, {ci_high:.3f}]", "CONFLICT")
+            # Median check
+            med = amp["median"]
+            if abs(med - 3.78) <= 0.05:
+                add("Sec 3.2 CI median", "K1370 v2 bootstrap median = 3.78", "3.78", "K1370",
+                    f"{med:.3f}", "VERIFIED")
+                print(f"  [Sec 3.2] K1370 v2 median -- VERIFIED ({med:.3f})")
+            else:
+                add("Sec 3.2 CI median", "K1370 v2 bootstrap median = 3.78", "3.78", "K1370",
+                    f"{med:.3f}", "CONFLICT")
+        except Exception as e:
+            add("Sec 3.2 CI (90%)", "K1370 v2 90% CI", "see paper", "K1370",
+                f"load failed: {e}", "UNTRACEABLE")
 except Exception as e:
     print(f"  [Table 2 (gamma)] ERROR loading K1302/K1302b results: {e}")
     add("Table 2 (gamma)", "K1302+K1302b canonical integration",

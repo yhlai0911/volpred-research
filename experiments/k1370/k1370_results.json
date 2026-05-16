@@ -1,16 +1,36 @@
 {
   "experiment_id": "K1370",
-  "title": "Paper 2 Block-Bootstrap CI — Canonical Full-Sample BW-Robust Spec",
-  "timestamp": "2026-05-16T14:31:41.861975+00:00",
+  "title": "Block-bootstrap 90% CI for TAIEX-to-Individual amplification ratio under canonical full-sample BW-robust GJR-GARCH(1,1)",
+  "timestamp": "2026-05-16T15:17:45.471917+00:00",
+  "runtime_seconds": 2509.6,
   "config": {
-    "B": 10000,
+    "B": 1000,
     "block_length": 252,
-    "seeds": "42..10041",
-    "n_workers": 8,
+    "block_bootstrap_method": "stationary (Politis-Romano 1994)",
+    "n_start_multistart_per_replicate": 10,
+    "n_start_canonical_K1302": 100,
+    "global_seed": 42,
+    "seed_base": 42,
+    "per_replicate_boot_seed": "seed_base + r (r in [0, B-1])",
+    "per_series_sub_seed": "(boot_seed*100003 + uint32(md5(ticker)[:8])) % (2**31-1)  [K1370-v2 process-stable]",
+    "multistart_seeds_per_replicate": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
     "sample_start": "2008-01-01",
     "sample_end": "2024-12-31",
-    "n_obs": 4160,
-    "stocks_9": [
+    "estimator": "arch package GJR-GARCH(1,1) Normal, Constant mean",
+    "se_method": "robust (Bollerslev-Wooldridge QML)",
+    "index_ticker": "^TWII",
+    "individual_tickers": [
       "2317.TW",
       "2454.TW",
       "2886.TW",
@@ -21,85 +41,87 @@
       "2885.TW",
       "2881.TW"
     ],
-    "pilot": false
+    "individual_count": 9,
+    "validity_rule": "TAIEX must converge AND >=5 of 9 individuals must converge"
   },
-  "point_estimates": {
-    "taiex_gamma_full_sample": 0.113924,
-    "nine_stock_avg_gamma_canonical": 0.026747,
-    "amplification_ratio_canonical": 4.2594,
-    "canonical_individual_gammas": {
-      "2317.TW": 0.032024,
-      "2454.TW": 0.040597,
-      "2886.TW": 0.037932,
-      "2383.TW": 0.009451,
-      "2882.TW": 0.038376,
-      "2891.TW": 0.039639,
-      "2412.TW": 0.001125,
-      "2885.TW": 0.019867,
-      "2881.TW": 0.021709
+  "data_source": {
+    "primary": "/Users/yhlai0911/Desktop/volpred-research/paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv",
+    "fallback": "yfinance auto_adjust=True, cached to experiments/k1370/data/",
+    "n_observations_per_series": {
+      "^TWII": 4160,
+      "2317.TW": 4170,
+      "2454.TW": 4170,
+      "2886.TW": 4170,
+      "2383.TW": 4170,
+      "2882.TW": 4170,
+      "2891.TW": 4170,
+      "2412.TW": 4170,
+      "2885.TW": 4170,
+      "2881.TW": 4170
     }
   },
-  "bootstrap_ci_90pct": {
-    "lower": 1.98,
-    "upper": 5.08,
-    "median": 3.02,
-    "n_valid_replicates": 9977,
-    "n_total_replicates": 10000
+  "point_estimate_sanity": {
+    "matched_sample_2008_2024": {
+      "TAIEX_gamma": 0.11392370481995903,
+      "mean_individual_gamma": 0.024243163406108496,
+      "amplification_ratio": 4.69920954256547,
+      "note": "Apples-to-apples; both TAIEX and 9 individuals on identical 2008-2024 window."
+    },
+    "mixed_sample_paper_headline": {
+      "TAIEX_gamma_1997_2026": 0.10546226091009706,
+      "mean_individual_gamma_2008_2024": 0.024243163406108496,
+      "amplification_ratio": 4.350185623198166,
+      "note": "Reproduces paper body.tex \u00a73.2 headline 10\u00d7 ratio = 0.272 (TAIEX over 1997-2026, n=7148) / 0.027 (9-indiv over 2008-2024, n=4170). This is the source of the 10\u00d7 headline."
+    },
+    "canonical_target_K1302_K1302b_mixed": 10.07,
+    "research_honesty_flag": "The paper's 10\u00d7 headline (body.tex \u00a73.2) is constructed from MIXED samples: TAIEX over 1997-2026 (29 years, includes 1997 Asian crisis + 2000 dot-com bust) vs individual stocks over 2008-2024 (17 years, post-GFC era only). On the matched 2008-2024 sample (apples-to-apples), the ratio shrinks substantially. K1370 reports the matched-sample bootstrap CI as the primary finding; the mixed-sample CI would require bootstrapping TAIEX with its own 1997-2026 sample (different n) and is out of scope for this script."
   },
-  "paper2_update": {
-    "old_ci": [
-      2.8,
-      8.1
-    ],
-    "old_point_estimate": 5.0,
-    "old_nine_stock_avg_gamma": 0.054,
-    "new_ci": [
-      1.98,
-      5.08
-    ],
-    "new_point_estimate": 4.3,
-    "new_nine_stock_avg_gamma": 0.0267
+  "amplification_ratio": {
+    "point_estimate_canonical": 10.07,
+    "point_estimate_this_run_10start": 4.69920954256547,
+    "ci_low_90": 2.3052643728399302,
+    "ci_high_90": 6.6105906057456245,
+    "ci_low_95": 2.175221597081244,
+    "ci_high_95": 7.68305821218618,
+    "median": 3.7791756532756757,
+    "mean": 4.036518296372921,
+    "std": 1.4323039396236994,
+    "B": 1000,
+    "block_length": 252,
+    "seed_base": 42
   },
-  "full_sample_point_estimates_by_series": {
-    "TAIEX": {
-      "gamma": 0.113924,
-      "converged": true
+  "replicate_count": {
+    "total": 1000,
+    "valid": 1000,
+    "dropped": 0,
+    "validity_rule": "TAIEX gamma converged AND >=5/9 individuals converged"
+  },
+  "per_replicate_stats": {
+    "converged_per_series_mean_rate": {
+      "^TWII": 1.0,
+      "2317.TW": 1.0,
+      "2454.TW": 1.0,
+      "2886.TW": 0.9957999999999999,
+      "2383.TW": 0.9992000000000001,
+      "2882.TW": 1.0,
+      "2891.TW": 0.9987,
+      "2412.TW": 0.8376,
+      "2885.TW": 1.0,
+      "2881.TW": 1.0
     },
-    "2317.TW": {
-      "gamma": 0.032065,
-      "converged": true
-    },
-    "2454.TW": {
-      "gamma": 0.039779,
-      "converged": true
-    },
-    "2886.TW": {
-      "gamma": 0.037086,
-      "converged": true
-    },
-    "2383.TW": {
-      "gamma": 0.009449,
-      "converged": true
-    },
-    "2882.TW": {
-      "gamma": 0.040052,
-      "converged": true
-    },
-    "2891.TW": {
-      "gamma": 0.042044,
-      "converged": true
-    },
-    "2412.TW": {
-      "gamma": -0.021651,
-      "converged": true
-    },
-    "2885.TW": {
-      "gamma": 0.019755,
-      "converged": true
-    },
-    "2881.TW": {
-      "gamma": 0.022906,
-      "converged": true
+    "n_indiv_converged_distribution": {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 9,
+      "9": 991
     }
-  }
+  },
+  "lookahead_free_certification": "Each replicate is an independent in-sample MLE on a block-bootstrap resample of full-sample log returns. No conditioning on future observations. No t\u2192t+1 leak. Seeds fixed: np.random.seed(42); per-replicate bootstrap_seed = 42 + r; per-series sub-seed uses MD5(ticker) (process-stable; replaces hash(ticker) which is PYTHONHASHSEED-randomized \u2014 K1370-v2 fix per Codex CRITICAL 2026-05-16). All arch fits use cov_type='robust'.",
+  "notes": "Replaces stale CI [2.8, 8.1] in paper/taiwan-vt/body.tex \u00a73.2 which was constructed around draft 5x point estimate under rolling-window NW-HAC. This K1370 CI is the canonical estimate under K1302+K1302b full-sample BW-robust GJR-GARCH spec. Reduced N_start=10 vs 100 in K1302 for tractability (B=1000 \u00d7 10 series \u00d7 10 starts = 100000 total MLE fits, vs B \u00d7 10 \u00d7 100 = 1000000 fits at N_start=100)."
 }

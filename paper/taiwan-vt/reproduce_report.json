@@ -2,26 +2,26 @@
   "paper_id": "taiwan-vt",
   "paper_title": "Volatility Targeting in Taiwan Equity Markets",
   "target_journal": "Pacific-Basin Finance Journal",
-  "timestamp": "2026-05-16T10:01:03Z",
+  "timestamp": "2026-05-16T15:25:22Z",
   "script": "paper/taiwan-vt/reproduce.py",
   "exit_code": 0,
   "runtime_seconds": 1,
   "alert_level": "green",
   "gate_status": "pass_with_untraceable",
   "gate_rule": ">=95% traceable match rate + 0 MISMATCH (green); 0 MISMATCH only (amber); else red/fail",
-  "total_checks": 153,
-  "matched": 143,
+  "total_checks": 155,
+  "matched": 145,
   "mismatches": 0,
   "untraceable": 5,
   "status_breakdown": {
-    "VERIFIED": 132,
+    "VERIFIED": 134,
     "CLOSE": 2,
     "CONFLICT_RESOLVED": 9,
     "MISMATCH": 0,
     "UNTRACEABLE": 5
   },
   "match_rate_pct": 93.5,
-  "traceable_match_rate_pct": 96.6,
+  "traceable_match_rate_pct": 96.7,
   "divergences": [
     {
       "table": "Table 2 (gamma)",
@@ -101,5 +101,5 @@
     ]
   },
   "suggested_next_action": "Run K1302 individual \u03b3 rebuild for 4 stocks \u00d7 3 specs. Add K1176 binding for Appendix TZ c2c Sharpe. Run macro experiment for Sec 6 BCI/import claims.",
-  "audit_method": "Auto-emitted by reproduce.py at 2026-05-16T10:01:03Z (mechanical fields recomputed; narrative fields preserved from prior JSON)."
+  "audit_method": "Auto-emitted by reproduce.py at 2026-05-16T15:25:22Z (mechanical fields recomputed; narrative fields preserved from prior JSON)."
 }

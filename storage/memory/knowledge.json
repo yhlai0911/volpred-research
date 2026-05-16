@@ -30004,8 +30004,8 @@
   },
   {
     "id": "K1370",
-    "title": "Paper 2 Block-Bootstrap CI — TAIEX Amplification Ratio (Canonical Full-Sample BW-Robust)",
-    "summary": "Block-bootstrap (B=10000, block_length=252) CI for TAIEX-to-individual-stock amplification ratio using canonical full-sample Bollerslev-Wooldridge robust GJR-GARCH(1,1) spec. Canonical: TAIEX gamma=0.1139, nine-stock avg gamma=0.0267, ratio=4.26x. 90% CI [1.98, 5.08], median=3.0 (9977/10000 valid replicates). Replaces stale rolling-window CI [2.8, 8.1] median=4.9 (old rolling: 0.272/0.054=5.0x). U.S. benchmark 2.8x is now within CI — cannot reject null at 90% level. Paper 2 body_v3.tex §3.2 updated with canonical values.",
+    "title": "Paper 2 Block-Bootstrap CI — TAIEX Amplification Ratio (K1370-v2 canonical, deterministic seed)",
+    "summary": "Block-bootstrap CI (Politis-Romano stationary, B=1000, block_length=252) for TAIEX-to-individual amplification ratio under K1302+K1302b canonical full-sample BW-robust GJR-GARCH(1,1) spec, 2008-2024. K1370-v2 deterministic re-run (MD5-based per-series seeds) after Codex v1 FAIL on PYTHONHASHSEED non-reproducibility. 90% CI [2.305, 6.611], 95% CI [2.175, 7.683], median=3.779, mean=4.037, 1000/1000 valid. Matched-sample 2008-2024 point: TAIEX γ=0.1139 / 9-indiv γ=0.0242 → 4.70×. Mixed-sample 1997-2026 TAIEX BW-robust / 2008-2024 indiv: ratio=4.35× (TAIEX γ=0.1055). KEY FINDING: paper §3.2 old 10× headline = spec-mismatch artifact (Table 1 rolling NW-HAC γ_TAIEX=0.272 ÷ Table 2 canonical BW-robust γ_indiv=0.027). Same-spec ratio is 4.35-4.70×, NOT 10×. Body_v3.tex updated to 4.3× canonical with [2.31,6.61] CI; U.S. 2.8× falls within CI so cannot reject null. Reproducibility caveat (Codex re-review): MD5 seeds make replicate paths reproducible but scipy.optimize solver introduces ~2e-5 numerical drift per replicate; treat as 'near-deterministic' not bitwise.",
     "experiment_id": "K1370",
     "asset": "TAIEX_taiwan-vt",
     "tags": [
@@ -30015,24 +30015,36 @@
       "paper2",
       "taiwan-vt",
       "gjr-garch",
-      "canonical-spec"
+      "canonical-spec",
+      "research-honesty-correction",
+      "spec-mismatch-artifact",
+      "k1370-v2-supersedes-v1"
     ],
-    "verdict": "PASS",
+    "verdict": "CONDITIONAL_PASS",
     "key_metrics": {
-      "taiex_gamma_canonical": 0.1139,
-      "nine_stock_avg_gamma_canonical": 0.0267,
-      "amplification_ratio_canonical": 4.26,
-      "ci_90pct_lower": 1.98,
-      "ci_90pct_upper": 5.08,
-      "ci_median": 3.02,
-      "n_valid_replicates": 9977,
-      "n_total_replicates": 10000,
-      "old_ratio": 5.0,
-      "old_ci_lower": 2.8,
-      "old_ci_upper": 8.1
+      "taiex_gamma_matched_2008_2024": 0.11392370481995903,
+      "nine_stock_avg_gamma_matched_2008_2024": 0.024243163406108496,
+      "matched_sample_amplification_ratio": 4.69920954256547,
+      "mixed_sample_amplification_ratio_1997_2026": 4.350185623198166,
+      "ci_90pct_lower": 2.3052643728399302,
+      "ci_90pct_upper": 6.6105906057456245,
+      "ci_95pct_lower": 2.175221597081244,
+      "ci_95pct_upper": 7.68305821218618,
+      "ci_median": 3.7791756532756757,
+      "ci_mean": 4.036518296372921,
+      "ci_std": 1.4323039396236994,
+      "n_valid_replicates": 1000,
+      "n_total_replicates": 1000,
+      "block_length": 252,
+      "us_benchmark_amplification": 2.8,
+      "us_benchmark_within_ci": true
     },
-    "paper_update": "body_v3.tex §3.2 updated: all [2.8,8.1] -> [1.98,5.08], 5.0x -> 4.3x, median 4.9 -> 3.0. Canonical spec footnote added.",
-    "created_at": "2026-05-16T15:14:07.640526+00:00",
-    "spec": "GJR-GARCH(1,1) full-sample BW-robust, 2008-2024, n=4160, B=10000, block_len=252"
+    "paper_update": "body_v3.tex §3.2 superseded prior 228eedb2 commit (B=10000 hash-buggy v1) with v2 deterministic CI [2.31, 6.61], median 3.78, B=1000. Headline 4.3× retained (K1302 canonical 9-avg=0.027); narrative pivot from old 10× already in body_v3.tex.",
+    "codex_review": "v1 (B=10000, non-deterministic hash): FAIL. v2 (B=1000, MD5 seed + cache guard + per-series n): CONDITIONAL PASS for knowledge.json + body update; PASS for narrative pivot 10× → 4.7× matched-sample / 4.3× canonical.",
+    "spec": "GJR-GARCH(1,1) full-sample BW-robust 2008-2024 (TWII n=4160, 9 indiv n=4170 each), arch package, cov_type='robust', 10-multistart per series per replicate (vs K1302 100-multistart canonical)",
+    "supersedes": "K1370-v1 (228eedb2 commit) with PYTHONHASHSEED-randomized per-series seeds (Codex FAIL CRITICAL)",
+    "created_at": "2026-05-16T15:18:00+00:00",
+    "updated_at": "2026-05-16T15:24:57.963037+00:00",
+    "session_id": "post-compact-resume"
   }
 ]
