@@ -6463,5 +6463,19 @@
     "title": "K1146: Paper 2 三市場 θ_EAV universal regularity narrative decision",
     "summary": "Paper 2 EAV 貢獻框架確立：TW(K1145 t=5.24) + US(K1147 t=4.50) + JP(K1150 t=11.99) 三市場全 PASS。Magnitude ordering: US(1.91e-4) > JP(1.41e-4) > TW(6.36e-5)。Narrative state = decision_made_awaiting_body_rewrite。K1146_body paper_body 任務已加入 queue。K1141 dual-NULL framing superseded。",
     "next_task": "K1146_body (paper_body, P2) or K547b (experiment, P3)"
+  },
+  {
+    "timestamp": "2026-05-16T23:35:56.766448+00:00",
+    "session_id": "hourly-dispatch-2026-05-17",
+    "task_type": "experiment",
+    "task_id": "K547b_shift1_daily_vt_verify",
+    "status": "completed",
+    "summary": "K547b: VIX timing lookahead correction for K547 Turn-of-Month VT. Daily VT Sharpe 1.666→0.689 (-58.7%); Monthly VT≈Daily VT (0.692 vs 0.689). ToM overlay still underperforms Daily VT (bootstrap 95% CI [-2.96,-0.73] bps, entirely negative). Collateral: 4 Codex P1/P2 bug fixes (publications.py draft exposure, DM formula regression, cron PID lock, publish_draft.py shared lock). Article mile_53983530 updated with errata. Commit 0b72a699.",
+    "artifacts": [
+      "experiments/k547b/k547b.py",
+      "experiments/k547b/k547b_results.json",
+      "experiments/k547b/k547b_sharpe_comparison.png",
+      "storage/reports/mile_53983530.json"
+    ]
   }
 ]

@@ -9337,12 +9337,14 @@
     "id": "K547b_shift1_daily_vt_verify",
     "type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "title": "K547b: Daily VT shift(1) re-run — VIX timing correction",
     "description": "Re-run K547 backtest with weights.shift(1) (use prev-day VIX for today's weight). Verify: (1) Daily VT risk-adj return with correct lag (2) Does ToM overlay still underperform? (3) Update article mile_53983530 if headline numbers change.",
     "created_at": "2026-05-17T00:00:00Z",
     "depends_on": [],
-    "error_log_ref": "2026-05-17 mile_53983530 Codex FAIL"
+    "error_log_ref": "2026-05-17 mile_53983530 Codex FAIL",
+    "completed_at": "2026-05-16T23:35:44.862054+00:00",
+    "result_summary": "Daily VT Sharpe 1.666→0.689 (-58.7%). Monthly VT≈Daily VT (0.692 vs 0.689). ToM overlay still underperforms (bootstrap CI [-2.96,-0.73] bps, entirely negative). Article mile_53983530 updated. K547b knowledge entry written."
   },
   {
     "id": "K1146_body",
