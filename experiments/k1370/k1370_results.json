@@ -1,12 +1,12 @@
 {
   "experiment_id": "K1370",
   "title": "Paper 2 Block-Bootstrap CI — Canonical Full-Sample BW-Robust Spec",
-  "timestamp": "2026-05-16T13:29:22.008202+00:00",
+  "timestamp": "2026-05-16T14:31:41.861975+00:00",
   "config": {
-    "B": 10,
+    "B": 10000,
     "block_length": 252,
-    "seeds": "42..51",
-    "n_workers": 1,
+    "seeds": "42..10041",
+    "n_workers": 8,
     "sample_start": "2008-01-01",
     "sample_end": "2024-12-31",
     "n_obs": 4160,
@@ -40,11 +40,11 @@
     }
   },
   "bootstrap_ci_90pct": {
-    "lower": 2.47,
-    "upper": 5.18,
-    "median": 3.37,
-    "n_valid_replicates": 10,
-    "n_total_replicates": 10
+    "lower": 1.98,
+    "upper": 5.08,
+    "median": 3.02,
+    "n_valid_replicates": 9977,
+    "n_total_replicates": 10000
   },
   "paper2_update": {
     "old_ci": [
@@ -54,8 +54,8 @@
     "old_point_estimate": 5.0,
     "old_nine_stock_avg_gamma": 0.054,
     "new_ci": [
-      2.47,
-      5.18
+      1.98,
+      5.08
     ],
     "new_point_estimate": 4.3,
     "new_nine_stock_avg_gamma": 0.0267
