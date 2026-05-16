@@ -6731,7 +6731,7 @@
     "title": "Paper review (Codex 24h-rule): K973 Time-Varying Hurst NULL @ daily SPY (mile_927eeb01)",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_927eeb01 (audience=general) needs Codex source-code-level review within 24h. Pipe article + experiments/k973/k973_hurst_vol.py through codex exec --skip-git-repo-check; check (a) shift(1) lookahead correctness, (b) DM/QLIKE math, (c) NULL claim defensibility, (d) 5,094 obs / OOS=1822 numbers vs results JSON, (e) Hurst R/S vs Variogram method distinction not over-claimed.",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "K973_post_publish_codex_review",
     "article_id": "mile_927eeb01",
@@ -6741,7 +6741,8 @@
       "K973",
       "main-thread-only"
     ],
-    "created_at": "2026-05-09T10:13:13.117813+00:00"
+    "created_at": "2026-05-09T10:13:13.117813+00:00",
+    "completed_at": "2026-05-16T19:22:57+08:00"
   },
   {
     "id": "paper_review_mile_9a629641",

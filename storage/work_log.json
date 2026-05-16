@@ -6315,5 +6315,16 @@
       "storage/memory/knowledge.json (entry: K1302)"
     ],
     "notes": "Codex v1 FAIL: no multistart, stale targets, wrong in_table2 flag. Codex v2 CONDITIONAL_PASS: cache provenance comment + exception logging fixed in main thread. 100-multistart confirmed identical to single-start → global optimum validated. Paper 2 Table 2 body.tex already consistent; JSON provenance now backing 5 rows."
+  },
+  {
+    "id": "paper_review_mile_927eeb01",
+    "task_type": "paper_review",
+    "timestamp": "2026-05-16T19:22:57+08:00",
+    "experiment_id": "K973",
+    "article_id": "mile_927eeb01",
+    "title": "K973 post-publish Codex primary-path review",
+    "verdict": "CONDITIONAL_PASS",
+    "status": "succeeded",
+    "notes": "All 5 checklist items passed. MINOR: HAR_H_vario_ewma IS coefficients missing from results.json (t=0.62 documented in README.md). NULL result defensible. Lookahead correct. DM test correct for h=1."
   }
 ]
