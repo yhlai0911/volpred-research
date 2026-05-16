@@ -1,9 +1,9 @@
 # K901: International VT Evidence — 13 Markets for Paper 3 Table 5
 
 - Experiment ID: `k901`
-- Status: pending_rerun_v3 (Codex v2 CONDITIONAL PASS 2026-05-16; alignment fix applied; v3 re-run enqueued)
+- Status: **COMPLETED v3** (code-reviewer CONDITIONAL PASS 2026-05-16; knowledge.json written)
 - Created At: 2026-04-16T09:41:26.980187+00:00
-- Run At: 2026-04-05 (original); v2 run 2026-05-16T08:16 (GJR+seed fix); v3 compute_queue enqueued 2026-05-16 (alignment fix)
+- Run At: 2026-04-05 (original); v2 run 2026-05-16T08:16 (GJR+seed fix); v3 compute_queue 2026-05-16T03:45 (alignment fix)
 
 ## 問題描述
 
@@ -50,15 +50,25 @@ Paper 3 R2 HIGH A.2: "Table 5 (13 International Markets) untraceable. K567 only 
 - 加入 DM 符號說明：「正值 = BH 較好；負值 = VT 較好；0/13 |t|>3.0 = 雙向均無顯著差異」
 - v3 re-run 已排入 compute_queue：`compute-k901-v3-alignment-fix`
 
-## 待辦
+## code-reviewer Review v3 — CONDITIONAL PASS（2026-05-16）
 
-- [ ] compute_queue v3 re-run 完成後確認結果不變
-- [ ] Codex re-review v3（CONDITIONAL_PASS+ 才寫 knowledge.json）
-- [ ] 通過後寫 knowledge.json + 規劃 K901 文章
+v2 的 2 個 MAJOR issues 均已修正確認。Non-critical 問題：
 
-## 預期結果（從原始跑結果推估）
+1. **Minor（conf 85）**：DM sign note 文字可更清晰（「Negative t → VT (strategy 1) better than BH (strategy 2)」）。不影響計算結果。
 
-MDD 改善 13/13 市場；Sharpe 改善部分市場；GJR gamma > 0 全部市場。
+2. **Important for paper（conf 82）**：結論自動生成「VT is universal for MDD reduction」— 論文中必須加 qualifier：「13 USD-denominated ETFs sharing US VIX signal」，非「13 fully independent markets with local vol signals」。代碼邏輯正確，是論文敘述問題。
+
+**Verdict：CONDITIONAL PASS → knowledge.json 已寫入（2026-05-16）**
+
+## v3 最終結果
+
+- MDD 改善：13/13 USD-denominated ETFs
+- Sharpe 改善：0/13
+- DM |t|>3.0（Harvey threshold）：0/13
+- GJR gamma > 0：13/13（12/13 達 t>1.96）
+- Mean gamma：0.1029，Median：0.0948
+- Spearman(gamma, ΔMDD)：rho=0.346，p=0.247（non-significant）
+- 結論：VT 跨市場 MDD 保護一致，但 return 優勢無統計支撐
 
 ## 參考文獻
 

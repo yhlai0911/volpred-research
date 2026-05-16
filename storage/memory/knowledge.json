@@ -29848,7 +29848,7 @@
     "title": "12/VIX VT: Universal MDD Reduction Across 13 International Markets (Paper 3 Table 5)",
     "verdict": "CONFIRMED",
     "confidence": 0.9,
-    "description": "12/VIX VT (w_t = min(12/VIX_{t-1}, 1.0)) tested across 13 international ETF markets (6 DM: SPY, EWJ, EWG, EWU, EWA, EWC; 7 EM: EWZ, EEM, FXI, EWH, EWT, EWY + EFA). Period: 2005-2026. MDD improved in 13/13 markets (UNIVERSAL). Sharpe improved in 0/13 markets — VT is drawdown insurance, not return enhancer. GJR gamma > 0 in 13/13 markets, significant (t>1.96) in 12/13 (mean gamma=0.103, median=0.095). DM test significant (Harvey |t|>3): 0/13. Cross-sectional Spearman(gamma, ΔMDD): rho=0.346 (p=0.247, n.s.). Spearman(gamma, ΔSharpe): rho=0.148 (p=0.629, n.s.). Resolves Paper 3 R2 HIGH A.2: Table 5 now fully traceable (K567 only had 6 markets). Bootstrap Sharpe CI: seed=42, np.random.default_rng (reproducible). GJR: 15/15 windows converged for all 13 markets (convergence_flag==0 gate). Codex review: PASS (2026-05-16, re-review after FAIL fix; all 6 items passed).",
+    "description": "12/VIX VT (w_t = min(12/VIX_{t-1}, 1.0)) tested across 13 international USD-denominated ETF markets (7 DM: SPY, EWJ, EWG, EWU, EWA, EWC, EFA; 6 EM: EWZ, EEM, FXI, EWH, EWT, EWY). Period: 2005-2026. v3 (alignment fix): BH aligned to VT dates via bh_ret_aligned=mkt_ret.loc[vt_idx].values; DM sign convention documented. MDD improved 13/13 markets. Sharpe improved 0/13. GJR gamma > 0 in 13/13 (significant t>1.96 in 12/13; mean=0.103, median=0.095). DM |t|>3.0 (Harvey): 0/13 — no statistically significant difference in either direction. Bootstrap Sharpe CI: seed=42, reproducible. GJR: convergence_flag==0 gate, 0 failed windows. Resolves Paper 3 R2 HIGH A.2. Paper note: 'universal MDD reduction' qualifier = 13 USD-denominated ETFs sharing US VIX signal, not 13 independent markets with local vol signals.",
     "related_experiments": [
       "K567",
       "K1178"
@@ -29885,7 +29885,9 @@
       },
       "gjr_convergence": "15/15 per market, 0 failed"
     },
-    "codex_review": "PASS (2026-05-16, primary-path Codex gpt-5.4; re-review after FAIL fix)"
+    "codex_review": "CONDITIONAL PASS (code-reviewer subagent v3, 2026-05-16; all 5 checklist items pass; 2 non-critical paper-writing notes)",
+    "updated_at": "2026-05-16",
+    "reviewer_source": "code-reviewer subagent (Codex fallback path; primary-path Codex exec timed out)"
   },
   {
     "item_id": "K1302b",
