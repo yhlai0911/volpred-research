@@ -1,0 +1,61 @@
+=== K1302b GJR-GARCH(1,1) — 5 Taiwan individual stocks ===
+Date: 2026-05-16T01:40:34.572049+00:00
+Sample: 2008-01-01 to 2024-12-31
+Global seed: 42; multistart seeds: 42..141 (100 starts)
+
+[1/3] Loading data...
+  [2882.TW] fetching from yfinance (live; will cache locally)...
+  2882.TW: 4170 log-return obs, 2008-01-03 → 2024-12-31, mean=0.0002, std=0.0176
+  [2891.TW] fetching from yfinance (live; will cache locally)...
+  2891.TW: 4170 log-return obs, 2008-01-03 → 2024-12-31, mean=0.0004, std=0.0180
+  [2412.TW] fetching from yfinance (live; will cache locally)...
+  2412.TW: 4170 log-return obs, 2008-01-03 → 2024-12-31, mean=0.0003, std=0.0104
+  [2885.TW] fetching from yfinance (live; will cache locally)...
+  2885.TW: 4170 log-return obs, 2008-01-03 → 2024-12-31, mean=0.0003, std=0.0185
+  [2881.TW] fetching from yfinance (live; will cache locally)...
+  2881.TW: 4170 log-return obs, 2008-01-03 → 2024-12-31, mean=0.0005, std=0.0172
+
+[2/3] Running GJR-GARCH(1,1) multistart MLE × 5 stocks...
+
+  2882.TW (Cathay Financial)
+  [2882.TW] running 100 multistart fits, n=4170...
+    converged: 100/100
+    BEST: seed=124  LL=-7625.36  γ=+0.0384  t=+2.128  α=0.059  β=0.898  persist=0.976
+
+  2891.TW (CTBC)
+  [2891.TW] running 100 multistart fits, n=4170...
+    converged: 100/100
+    BEST: seed=78  LL=-7381.21  γ=+0.0396  t=+1.911  α=0.070  β=0.896  persist=0.986
+
+  2412.TW (Chunghwa Telecom)
+  [2412.TW] running 100 multistart fits, n=4170...
+    converged: 26/100
+    BEST: seed=87  LL=-5224.61  γ=+0.0011  t=+0.193  α=0.000  β=0.997  persist=0.997
+
+  2885.TW (Yuanta)
+  [2885.TW] running 100 multistart fits, n=4170...
+    converged: 100/100
+    BEST: seed=89  LL=-7692.78  γ=+0.0199  t=+1.531  α=0.044  β=0.935  persist=0.989
+
+  2881.TW (Fubon)
+  [2881.TW] running 100 multistart fits, n=4170...
+    converged: 100/100
+    BEST: seed=54  LL=-7494.39  γ=+0.0217  t=+1.460  α=0.065  β=0.909  persist=0.985
+
+[3/3] Summary...
+
+Per-stock summary:
+  Ticker        gamma   t-stat    alpha     beta  persist
+  2882.TW     +0.0384   +2.128   0.0594   0.8976   0.9762
+  2891.TW     +0.0396   +1.911   0.0698   0.8963   0.9859
+  2412.TW     +0.0011   +0.193   0.0000   0.9966   0.9972
+  2885.TW     +0.0199   +1.531   0.0445   0.9348   0.9892
+  2881.TW     +0.0217   +1.460   0.0650   0.9093   0.9852
+
+  N converged: 5/5
+  avg γ across 5 stocks: +0.0241
+  avg persistence:       0.9867
+  gamma>0 count:         5/5
+  persistence<1 count:   5/5
+
+Results saved to /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a04db13c6b6a1f376/experiments/k1302b/k1302b_results.json
