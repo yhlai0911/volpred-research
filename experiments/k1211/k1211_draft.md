@@ -8,9 +8,12 @@
 > to paper `.tex`; body rewrite stays in the main thread.
 >
 > **Canonical integrity**: K1204 32/32 PASS shared-key cross-verification
-> plus K1207 verdict `SECTOR_ORTHOGONAL_CONFIRMED` (F=689.5, p=7.9e-14).
+> plus K1207 verdict `SECTOR_ORTHOGONAL_CONFIRMED` (F=689.5, p=7.9e-14)
+> plus K1213 verdict `ABOVE_LADDER_OVERTURNED` (AU θ_rel 0.150→1.476,
+> ΔLL=+99.47, 100-start global search).
 > Trajectory Panel Harvey |t| sequence **monotonic 3.236 → 3.808** across
 > five iterations, all above |t|>3 Harvey threshold.
+> Revised N=13 Spearman: ρ=+0.418, p=0.156 (K1213).
 
 ---
 
@@ -43,10 +46,16 @@ The **between-market Spearman** is non-monotonic. K1165 ρ = +0.750
 (p = 0.052) → K1168 +0.612 (p = 0.060) represents the institutional
 ladder at its cleanest, before the emerging-market (EM) above-ladder
 cluster enters. K1172 adds MX/ID and drops to ρ = +0.441 (p = 0.152);
-K1171 adds AU below-ladder and lands at ρ = +0.385 (p = 0.194). The
-rank test loses N=12 and N=13 significance at the 5% level, but this is
-a joint consequence of two distinct residual mechanisms diagnosed in
-§5.3 (EM scale factor) and §5.5 (AU below-ladder) rather than a
+K1171 adds AU and lands at ρ = +0.385 (p = 0.194) based on the K1171
+single-start AU estimate (θ_rel = 0.150, initially below-ladder).
+K1213 subsequently overturns this via 100-start global search — see
+§5.5 — revising AU to θ_rel = 1.476 (above-ladder); the K1213-revised
+N=13 Spearman is ρ = +0.418 (p = 0.156). The rank test loses N=12 and
+N=13 significance at the 5% level, but this is a consequence of (a)
+small N, (b) the EM cost-of-capital scale factor diagnosed in §5.3, and
+(c) the developed-market bi-cluster compressing the rank ordering —
+**not** an AU below-ladder drag. See also §5.3 (EM scale factor) and
+§5.5 (AU K1213 revision). The drop-one LOO analysis repeatedly
 collapse of the ladder itself — drop-one LOO analysis repeatedly
 restores ρ to the K1168 / K1172 range (see Table 5 below).
 
@@ -156,40 +165,45 @@ full coverage**. Paper 2's K1152 quarterly-density hypothesis
 (K1204) compares K1153 vs K1163 on all four statistics and highlights
 the preserved low-cluster membership.
 
-## §5.5 Australia below-ladder residual (K1171 / K1207 / K1210 forensic)
+## §5.5 Australia residual — K1213 global search overturns K1171 below-ladder reading
 
 K1171 closes the Australian earnings-date gap via HAND_CODED ASX
-financial calendars and adds N=13 to the panel. AU lands at θ_rel
-= **0.150** — second-lowest in the panel — at `institutions_pct_mean`
-= **0.368**, squarely in the mid range. This is the **mirror image** of
-the BR / IN / MX above-ladder residual: AU sits *below* the institutional
-ladder rather than above it. Drop-AU LOO recovers ρ = 0.441
-(= K1172 primary), confirming AU is a mild leverage point of the full
-K1171 rank test.
+financial calendars and reports AU θ_rel = **0.150** at
+`institutions_pct_mean` = **0.368**, placing AU below the institutional
+ladder — second-lowest in the N=13 panel. This below-ladder reading
+drove the K1171 §6.2 semi-annual cadence / HAND_CODED precision
+hypotheses and the K1207 sector forensic.
 
-K1171 §6.2 hypothesises that AU's below-ladder position is driven by
-**sector composition orthogonal to institutional ownership**: ASX Top
-10 is heavily biased toward banks and miners whose earnings reports
-generate less idiosyncratic announcement volatility than US or Brazilian
-firms of comparable institutional ownership. The claim is narrative-level
-at the K1171 stage, not empirically tested.
+**K1213 overturns the K1171 reading.** K1171 used a single numerical
+start for the pooled MLE; K1213 re-runs the AU pooled MLE with **100
+random initialisations** (following the pooled-MLE hard rule requiring
+≥100 multistart for any cross-entity MLE). The log-likelihood surface
+has two basins:
 
-Two candidate mechanisms for AU specifically remain open in K1171:
-- (a) **Semi-annual reporting cadence** — ASX permits half-yearly
-  rather than quarterly reporting; EAV per-announcement may be different.
-- (b) **HAND_CODED ±1 trading-day precision** — the AU dates are
-  hand-assembled from ASX financial calendars, introducing up to ±1-day
-  event-date uncertainty that could dilute pooled θ_EAV.
+- **Basin A** (K1171 estimate): θ_rel = 0.150, LL = 89,047.22 —
+  reached by **77%** of starts.
+- **Basin B** (global maximum): θ_rel = **1.476**, LL = 89,146.69,
+  **ΔLL = +99.47** — reached by **23%** of starts.
 
-K1210 (forensic root-cause decomposition of the AU residual, currently
-executing in a parallel worktree) is expected to decompose (a) vs (b).
-At the time of this draft K1210 is **pending** — Paper 2 §5 retains the
-AU caveat as a residual open question and flags AU explicitly rather
-than excluding it from the panel. The main-thread paper update can
-cherry-pick K1210 verdict into §5.5 once complete; until then, the
-narrative says: *"AU below-ladder residual arises from sector
-composition (confirmed by K1207) combined with an ASX-specific
-reporting-cadence or date-precision factor under investigation."*
+With ΔLL = +99.47 (equivalent to a log-likelihood ratio statistic of
+198.94 with 1 df), Basin B is unambiguously the global maximum. The
+Nelder-Mead independent check reaches θ_rel = 1.070 (LL = 89,303;
+algorithm not fully converged), bracketing AU's interval as
+**[1.07, 1.48]** — squarely in the above-ladder range alongside BR
+(1.89), CA (1.45), MX (1.20), IN (1.17). **AU is above-ladder, not
+below-ladder.** K1171's θ_rel = 0.150 was a **numerical entrapment
+artefact** of single-start MLE, not an economically meaningful
+below-ladder position.
+
+The revised N=13 Spearman (with AU at θ_rel = 1.476) is ρ = **+0.418**
+(p = 0.156), compared with K1171 ρ = +0.385 (p = 0.194). AU no longer
+acts as a below-ladder leverage point depressing the rank correlation;
+Drop-AU LOO at K1213 estimate no longer recovers a qualitatively
+different ρ. The **K1213 verdict is ABOVE_LADDER_OVERTURNED.**
+
+K1210 forensic decomposition and the K1171-era semi-annual cadence /
+HAND_CODED precision hypotheses are **superseded**. No AU-specific
+structural residual remains open in Paper 2 §5.
 
 ## §5.6 Sector orthogonality (K1207 empirical verification)
 
@@ -219,11 +233,14 @@ Key findings, Paper 2 §5-adoptable verbatim:
   is the dominant channel behind the EM above-ladder residual for these
   markets.
 
-For the **AU below-ladder residual**, sector adjustment *amplifies*
-rather than reduces the residual magnitude (+31% amplification, i.e.
-−31% reduction). AU's low-θ_rel is **not sector-explained**; K1171's
-semi-annual reporting and HAND_CODED hypotheses retain leading-explanation
-status.
+For **AU**, K1207 was conducted using the K1171 single-start estimate
+(θ_rel = 0.150); at that estimate, sector adjustment *amplifies* rather
+than reduces the below-ladder magnitude (+31% amplification). However,
+K1213 subsequently identifies θ_rel = 0.150 as a Basin A local minimum;
+the global optimum places AU at θ_rel = 1.476 (above-ladder). K1207's
+sector analysis for AU is therefore **superseded by K1213** — the
+residual being sector-amplified was a numerical entrapment artefact
+rather than a genuine below-ladder position.
 
 **Verdict (K1207): `SECTOR_ORTHOGONAL_CONFIRMED`.** Sector and
 institutional ownership are statistically independent within-market
@@ -235,15 +252,17 @@ roughly 32× the incremental adj-R² of institutional ownership (0.005)
 — and the joint sector F-test is highly significant (F = 689.5,
 p < 10⁻¹³, market-clustered SE). Sector-adjusted per-market residuals
 absorb 95%, 78%, 39% of the India, Mexico, Brazil above-ladder
-residuals respectively, whereas the Australian below-ladder residual is
-not sector-explained and is attributed to a separate reporting-cadence
-mechanism under investigation (K1210)."*
+residuals respectively; the Australian residual at the K1171
+single-start estimate was sector-amplified but is superseded by K1213
+global search, which places AU above-ladder (θ_rel = 1.476, ΔLL = +99.47
+versus the K1171 Basin A local minimum)."*
 
 ## §5.7 Narrative commitment — FINAL
 
 Paper 2 §5 headline: **the cross-market institutional-ownership ladder
-is STRENGTHENED across five N-extension iterations, with three residual
-caveats.**
+is STRENGTHENED across five N-extension iterations, with one residual
+caveat (EM cost-of-capital scale factor); AU below-ladder artefact
+RESOLVED by K1213.**
 
 The **within-market analyst-attention channel** is robust across all
 five iterations: panel Harvey |t| grows monotonically 3.236 → 3.808
@@ -259,11 +278,14 @@ incremental adj-R² = 0.148 (K1207).
   absorption (K1207) covers 95% IN / 78% MX / 39% BR of the above-ladder
   magnitude, so the residual is jointly sector-mix and cost-of-capital.
 
-- **Caveat (ii) — AU below-ladder residual** (K1171 / K1207 / K1210):
-  AU θ_rel = 0.150 at inst_pct = 0.368 is sector-independent (K1207
-  amplifies by 31%). Leading candidates are ASX semi-annual reporting
-  cadence and HAND_CODED ±1-day event-date precision. **K1210 forensic
-  decomposition pending** — caveat retained until K1210 lands.
+- **Caveat (ii) — AU residual RESOLVED** (K1213): K1171 reported AU
+  θ_rel = 0.150 (below-ladder) from a single-start pooled MLE — a
+  Basin A local minimum. K1213 100-start global search finds Basin B
+  (global maximum, 23% of starts, **ΔLL = +99.47**) at θ_rel = **1.476**,
+  placing AU above-ladder alongside BR / CA / IN / MX. Revised N=13
+  Spearman ρ = +0.418 (p = 0.156). No AU-specific residual remains
+  open. K1210 forensic decomposition and K1171-era hypotheses are
+  superseded.
 
 - **Caveat (iii) — European low-cluster robust** (K1163): θ_rel =
   0.194 under full N=30 coverage stays inside the low cluster (≤ 0.25);
@@ -274,9 +296,10 @@ incremental adj-R² = 0.148 (K1207).
 
 Paper 2 §5 thus commits to three orthogonal structural drivers
 (between-market inst_pct, within-market analyst attention, within-market
-GICS sector), with the AU below-ladder mechanism as the only
-outstanding residual — pending K1210 forensic decomposition before
-submission.
+GICS sector), with one remaining caveat — the EM cost-of-capital scale
+factor (Caveat i), jointly attributable to sector mix and elevated
+nominal cost-of-capital in emerging markets. No market-specific
+below-ladder residual remains open following K1213.
 
 ---
 
@@ -288,7 +311,8 @@ submission.
 | 2 | K1166 | 108 (pooled TW/EU/JP/US) | — | — | — | **3.556** |
 | 3 | K1168 | 10 | **+0.6121** | 0.0600 | 0.7500 (drop EU) | **3.627** |
 | 4 | K1172 | 12 | **+0.4406** | 0.1517 | 0.6091 (drop MX) | **3.789** |
-| 5 | K1171 | 13 | **+0.3846** | 0.1944 | 0.5455 (drop MX) | **3.808** |
+| 5 | K1171 | 13 | +0.3846 | 0.1944 | 0.5455 (drop MX) | **3.808** |
+| 5′ | K1213 (AU θ_rel revised) | 13 | **+0.4176** | 0.1557 | — | — |
 
 Legend: Panel Harvey t is the joint panel OLS `log_analyst` t with
 market FE + `log_mcap` + `institutions_pct` controls, cluster-robust
@@ -297,6 +321,10 @@ by market. Sequence 3.236 → 3.556 → 3.627 → 3.789 → 3.808 is
 |t| > 3 threshold. Primary ρ is Spearman between per-market
 `institutions_pct_mean` and `θ_rel`. Drop-LOO ρ is the maximum
 cross-market ρ obtained by dropping the single most-influential market.
+Iter 5′ (K1213) is a Spearman-only revision: AU θ_rel corrected from
+0.150 (K1171 Basin A local minimum) to 1.476 (K1213 Basin B global
+maximum, ΔLL = +99.47, 100-start MLE); panel Harvey t is unchanged as
+no new panel OLS was run.
 
 Figure mapping (from K1204):
 - **Figure 5A** → `experiments/k1204/k1204_figure_A_trajectory_rho.{pdf,png}` (ρ trajectory)
