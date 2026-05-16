@@ -37,10 +37,11 @@ PHASE B — 派新工:
        - `.claude/skills/anti-ai-style/SKILL.md`
        - `.claude/rules/publishing.md`
    (b) **Evidence package 先於 prose** — 任何句子之前先組好：≥3 個可驗證數字（primary source）+ ≥1 表 + ≥1 圖 + ≥1 層量化分析（descriptive stats / before-after / cross-section / rolling / event-window / vol change）+ 最好有統計檢定或比較框架。不滿足 → 換題目或換 task type，禁強推。
-   (c) **trending_repost 特別**：正式 task type 非摘要 / 翻譯；風格可參 havingchien Substack/commentary tone 但不引用不貼近改寫；先選題掃描 + 30 日查重 + VolPred angle 確認；雙發佈 feed + Ivan Lai FB。
+   (c) **trending_repost 特別**：正式 task type 非摘要 / 翻譯；風格可參 havingchien Substack/commentary tone 但不引用不貼近改寫；先選題掃描 + 30 日查重 + VolPred angle 確認；**VolPred 直接 published 不進 draft pool**；daily cap = 2/day；雙發佈 feed + Ivan Lai FB。
    (d) **寫前**讀 anti-ai-style/references/prompt-templates.md，5 原則套 prompt header（年齡降級 / 長文裁切 / 資訊密度 / 負向約束 / 蘇格拉底對槓）。
-   (e) **寫後**跑 anti-ai-style/references/editor-sop.md 3 階段 9-checklist；任一 fail 不 publish。
+   (e) **寫後**跑 anti-ai-style/references/editor-sop.md 3 階段 9-checklist；任一 fail 不 publish。**只要還有 AI 味、翻譯腔、模板腔、空泛評論 → 不得發布**（無 partial pass；3 輪改寫仍 fail → 該主題 abandon）。
    (f) **3-model gate** 之 Gemini 一審 prompt 加問「是否仍有 AI 味？指出最像 AI 的 3 句並建議改寫」。
+   (g) **FB 貼文規則**（trending_repost / 同步發 Ivan Lai FB，完整 SOP `.claude/skills/trending-repost/references/fb-ivanlai-tone.md`）：FB 文案是改寫版（不貼 VolPred 內文，重組 200-400 字）；主貼文**不放連結**；VolPred 連結放**第一則留言**；Ivan Lai 口吻（先個人觀察 → 短句短段 → 留白 → 不講滿）；額外禁「綜上所述/值得關注/在 AI 時代/根據資料顯示」；claude-in-chrome 輸入中文**整段貼上**不要逐字 type，貼後 screenshot 檢查再送出；失敗 retry max 3。
 7. 派完 end summary 格式（per memory feedback_task_end_summary_format）: 結束時間 / 總時間 / 本次 token / 完成項目 / 本週 Max 20x quota % (`uv run python scripts/weekly_quota_estimate.py`) / 下次任務時間。
 8. 若 last-3 涵蓋所有 candidates 的 type → 派沒做過的 type，必要時主動生 brief / 文章 / compute job。沒事做永不可接受。
 9. 嚴禁: force push, --no-verify, 寫 knowledge.json from agent (K1259), 假數字。研究誠實 > 一切。
