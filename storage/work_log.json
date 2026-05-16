@@ -6219,5 +6219,17 @@
     "status": "completed",
     "description": "Revised experiments/k1211/k1211_draft.md: §5.5 AU below-ladder→above-ladder per K1213 100-start global search (θ_rel 0.150→1.476, ΔLL=+99.47); §5.6 AU bullet superseded; §5.7 headline→1 residual caveat, Caveat(ii) RESOLVED; Table 5 Iter 5' added (ρ=+0.418, p=0.156); header canonical integrity updated with K1213 verdict.",
     "commit": "e722f956"
+  },
+  {
+    "timestamp": "2026-05-16T11:31:56.856013",
+    "task_type": "experiment",
+    "task_id": "k901-alignment-fix-codex-review-v2",
+    "description": "Phase A followup: K901 compute_queue v2 re-run complete. Codex review v2 → CONDITIONAL PASS. Fixed 2 new MAJOR issues (DM sign + BH/VT 1-day alignment). Enqueued K901 v3 re-run. Trending_repost daily cap already 2/2 (not 1/2 as previously estimated), preventing trending dispatch.",
+    "k_ids": [
+      "k901"
+    ],
+    "verdict": "CONDITIONAL_PASS",
+    "followup": "compute-k901-v3-alignment-fix in queue; Codex review v3 needed before knowledge.json write",
+    "notes": "DM sign: positive stat = BH better (VT defensive), not VT better. Confirmed findings direction correct (13/13 MDD improved, 0/13 Sharpe improved, 0/13 Harvey |t|>3.0). trending_repost log showed 2 entries for 2026-05-16 before this session started (AI data-center power + Moody downgrade), blocking second repost."
   }
 ]

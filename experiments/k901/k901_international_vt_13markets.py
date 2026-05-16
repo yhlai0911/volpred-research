@@ -396,19 +396,32 @@ for ticker, info in MARKETS.items():
 
     print(f"  MDD improvement: {mdd_improvement:.1%} ({mdd_improvement_pp:+.1f}pp)")
 
-    # --- Sharpe Improvement ---
+    # --- Sharpe Improvement (descriptive; each uses its own full-period sample) ---
+    # BH and VT differ by 1 day (VT drops day 1 due to signal shift(1)).
+    # For descriptive Sharpe comparison this 1-day diff is negligible (~0.02%).
+    # DM test and bootstrap use aligned samples (see below).
     sharpe_diff = vt_metrics['sharpe'] - bh_metrics['sharpe']
     print(f"  Sharpe diff: {sharpe_diff:+.4f}")
 
+    # --- Align BH returns to VT dates (VT drops day 1 due to shift(1)) ---
+    # vt_idx = common_idx from run_vt; bh starts from day 1 of valid_idx.
+    # We MUST align bh to vt_idx before DM test / bootstrap / Sharpe comparison
+    # to avoid a 1-day offset (vt_ret[i] vs bh_ret[i+1] mismatch).
+    bh_ret_aligned = mkt_ret.loc[vt_idx].values
+
     # --- DM Test ---
+    # SIGN NOTE: strategy_dm_test(series1, series2) with loss_fn="negative_return"
+    # computes d = (-series1) - (-series2) = series2 - series1 = BH - VT.
+    # Positive t-stat ⟹ BH returns > VT returns (BH is better in return terms).
+    # Negative t-stat ⟹ VT returns > BH returns (VT is better in return terms).
+    # 0/13 markets reach Harvey |t|>3.0, confirming no statistically significant
+    # difference in EITHER direction.
     dm_stat, dm_pval = np.nan, np.nan
     if HAS_DM:
         try:
-            # Align returns for DM test
-            n_dm = min(len(vt_ret), len(bh_ret))
             dm_stat, dm_pval = strategy_dm_test(
-                vt_ret[:n_dm],
-                bh_ret[:n_dm],
+                vt_ret,
+                bh_ret_aligned,
                 h=1,
                 loss_fn="negative_return"
             )
@@ -417,7 +430,7 @@ for ticker, info in MARKETS.items():
             print(f"  DM test failed: {e}")
 
     # --- Bootstrap Sharpe Diff ---
-    boot = bootstrap_sharpe_diff(vt_ret, bh_ret)
+    boot = bootstrap_sharpe_diff(vt_ret, bh_ret_aligned)
     print(f"  Bootstrap Sharpe diff: {boot['mean_diff']:+.4f} [{boot['ci_lo']:.4f}, {boot['ci_hi']:.4f}]")
 
     # --- GJR Gamma Estimation ---

@@ -1,9 +1,9 @@
 # K901: International VT Evidence — 13 Markets for Paper 3 Table 5
 
 - Experiment ID: `k901`
-- Status: pending_rerun (Codex FAIL fixed 2026-05-16; awaiting re-run via compute_queue)
+- Status: pending_rerun_v3 (Codex v2 CONDITIONAL PASS 2026-05-16; alignment fix applied; v3 re-run enqueued)
 - Created At: 2026-04-16T09:41:26.980187+00:00
-- Run At: 2026-04-05 (original); compute_queue enqueued 2026-05-16 (post-fix)
+- Run At: 2026-04-05 (original); v2 run 2026-05-16T08:16 (GJR+seed fix); v3 compute_queue enqueued 2026-05-16 (alignment fix)
 
 ## 問題描述
 
@@ -37,11 +37,24 @@ Paper 3 R2 HIGH A.2: "Table 5 (13 International Markets) untraceable. K567 only 
 - Sharpe>2x/MDD>80%/DM>3 等 sanity check 改為結構化 `review_flags` 欄位
 - Spearman 加入常數輸入檢查
 
+## Codex Review v2 — CONDITIONAL PASS（2026-05-16）
+
+前版 2 個 FAIL 項目已解除。但發現 2 個新 MAJOR issues：
+
+1. **DM stat 符號解讀反向**：`strategy_dm_test(vt_ret, bh_ret, loss_fn="negative_return")` 計算 `d = BH - VT`，所以**正值代表 BH 較好（VT defensive），負值代表 VT 較好（return dominant）**。0/13 達 Harvey |t|>3.0 不受影響（絕對值），但方向標籤需修正。
+
+2. **BH/VT 樣本錯開 1 天**：VT 因 `signal.shift(1).dropna()` 少掉第一天，導致 `vt_ret` 對應 d2..dN，而 `bh_ret[:n_dm]` 對應 d1..dN-1，DM test 和 bootstrap 在不同日期上比較。
+
+**修正（2026-05-16）**：
+- 加入 `bh_ret_aligned = mkt_ret.loc[vt_idx].values`，DM test 和 bootstrap 改用 aligned 序列
+- 加入 DM 符號說明：「正值 = BH 較好；負值 = VT 較好；0/13 |t|>3.0 = 雙向均無顯著差異」
+- v3 re-run 已排入 compute_queue：`compute-k901-v3-alignment-fix`
+
 ## 待辦
 
-- [ ] compute_queue re-run（13 markets，2006-2026）
-- [ ] Codex re-review（CONDITIONAL_PASS+ 才寫 knowledge.json）
-- [ ] 通過後寫 knowledge.json + document_K901_kb_entry
+- [ ] compute_queue v3 re-run 完成後確認結果不變
+- [ ] Codex re-review v3（CONDITIONAL_PASS+ 才寫 knowledge.json）
+- [ ] 通過後寫 knowledge.json + 規劃 K901 文章
 
 ## 預期結果（從原始跑結果推估）
 
