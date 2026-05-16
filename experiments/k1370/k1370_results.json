@@ -1,0 +1,105 @@
+{
+  "experiment_id": "K1370",
+  "title": "Paper 2 Block-Bootstrap CI — Canonical Full-Sample BW-Robust Spec",
+  "timestamp": "2026-05-16T13:29:22.008202+00:00",
+  "config": {
+    "B": 10,
+    "block_length": 252,
+    "seeds": "42..51",
+    "n_workers": 1,
+    "sample_start": "2008-01-01",
+    "sample_end": "2024-12-31",
+    "n_obs": 4160,
+    "stocks_9": [
+      "2317.TW",
+      "2454.TW",
+      "2886.TW",
+      "2383.TW",
+      "2882.TW",
+      "2891.TW",
+      "2412.TW",
+      "2885.TW",
+      "2881.TW"
+    ],
+    "pilot": false
+  },
+  "point_estimates": {
+    "taiex_gamma_full_sample": 0.113924,
+    "nine_stock_avg_gamma_canonical": 0.026747,
+    "amplification_ratio_canonical": 4.2594,
+    "canonical_individual_gammas": {
+      "2317.TW": 0.032024,
+      "2454.TW": 0.040597,
+      "2886.TW": 0.037932,
+      "2383.TW": 0.009451,
+      "2882.TW": 0.038376,
+      "2891.TW": 0.039639,
+      "2412.TW": 0.001125,
+      "2885.TW": 0.019867,
+      "2881.TW": 0.021709
+    }
+  },
+  "bootstrap_ci_90pct": {
+    "lower": 2.47,
+    "upper": 5.18,
+    "median": 3.37,
+    "n_valid_replicates": 10,
+    "n_total_replicates": 10
+  },
+  "paper2_update": {
+    "old_ci": [
+      2.8,
+      8.1
+    ],
+    "old_point_estimate": 5.0,
+    "old_nine_stock_avg_gamma": 0.054,
+    "new_ci": [
+      2.47,
+      5.18
+    ],
+    "new_point_estimate": 4.3,
+    "new_nine_stock_avg_gamma": 0.0267
+  },
+  "full_sample_point_estimates_by_series": {
+    "TAIEX": {
+      "gamma": 0.113924,
+      "converged": true
+    },
+    "2317.TW": {
+      "gamma": 0.032065,
+      "converged": true
+    },
+    "2454.TW": {
+      "gamma": 0.039779,
+      "converged": true
+    },
+    "2886.TW": {
+      "gamma": 0.037086,
+      "converged": true
+    },
+    "2383.TW": {
+      "gamma": 0.009449,
+      "converged": true
+    },
+    "2882.TW": {
+      "gamma": 0.040052,
+      "converged": true
+    },
+    "2891.TW": {
+      "gamma": 0.042044,
+      "converged": true
+    },
+    "2412.TW": {
+      "gamma": -0.021651,
+      "converged": true
+    },
+    "2885.TW": {
+      "gamma": 0.019755,
+      "converged": true
+    },
+    "2881.TW": {
+      "gamma": 0.022906,
+      "converged": true
+    }
+  }
+}
