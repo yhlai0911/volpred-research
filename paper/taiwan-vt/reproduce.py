@@ -1264,16 +1264,121 @@ for table, claim, note in untraceable_items:
     add(table, claim, "see paper", "None", note, "UNTRACEABLE")
     print(f"  [{table}] {claim} -- {note}")
 
-# Table 2 individual stock gamma — CONFLICT_RESOLVED via K1302 (2026-05-15)
-# Paper uses rolling w=2000 NW-HAC; K1302 canonical uses full-sample BW-robust.
-# Methodology difference is documented in body.tex Table 2 Notes.
-for claim, paper_val, k1302_val in [
-    ("Hon Hai gamma=0.052, t=1.14",  "0.052/t=1.14", "K1302: gamma=0.032/t=1.74 (full-sample BW-robust)"),
-    ("MediaTek gamma=0.044, t=0.96", "0.044/t=0.96", "K1302: gamma=0.041/t=3.10 (full-sample BW-robust)"),
-    ("0056.TW gamma=0.112, t=1.87",  "0.112/t=1.87", "K1302: gamma=0.067/t=1.91 (full-sample BW-robust)"),
-]:
-    add("Table 2 (gamma)", claim, paper_val, "K1302", k1302_val, "CONFLICT_RESOLVED")
-    print(f"  [Table 2 (gamma)] {claim} -- CONFLICT_RESOLVED via K1302 (methodology: rolling_w2000_NW vs full_BW)")
+# Table 2 individual stock gamma — VERIFIED via K1302+K1302b canonical (2026-05-16)
+# Paper body.tex commit ae93e44e adopts K1302+K1302b full-sample BW-robust as canonical.
+# Each row binds to per_stock entry in respective results.json.
+try:
+    # load_json searches EXP_DIR/REPO_EXP_DIR (= experiments/); subdir relative.
+    k1302_path = REPO_EXP_DIR / "k1302" / "k1302_results.json"
+    k1302b_path = REPO_EXP_DIR / "k1302b" / "k1302b_results.json"
+    with open(k1302_path) as f:
+        k1302_results = json.load(f)
+    with open(k1302b_path) as f:
+        k1302b_results = json.load(f)
+    k1302_per = k1302_results.get("results", {}).get("per_stock") or k1302_results.get("results", {})
+    k1302b_per = k1302b_results.get("per_stock", {})
+
+    # K1302: 4 individual + 1 ETF (TWA spec canonical)
+    k1302_canonical = {
+        "2317.TW": ("Hon Hai", "0.032/t=1.74"),
+        "2454.TW": ("MediaTek", "0.041/t=3.10"),
+        "2886.TW": ("Mega Financial", "0.038/t=1.55"),
+        "2383.TW": ("ELITE Material", "0.009/t=1.15"),
+        "0056.TW": ("0056 ETF", "0.067/t=1.91"),
+    }
+    for tk, (name, paper_str) in k1302_canonical.items():
+        stock_entry = k1302_per.get(tk, {})
+        twa = stock_entry.get("TWA") or stock_entry
+        g = twa.get("gamma") if twa else None
+        t = twa.get("gamma_t_robust") if twa else None
+        if g is not None and t is not None:
+            actual_str = f"gamma={g:.3f}/t={t:.2f}"
+            paper_g, paper_t = float(paper_str.split("/")[0]), float(paper_str.split("=")[1])
+            if abs(g - paper_g) <= 0.001 and abs(t - paper_t) <= 0.05:
+                add("Table 2 (gamma)", f"{name} canonical {paper_str}", paper_str, "K1302",
+                    f"K1302 per_stock.{tk}.TWA: {actual_str}", "VERIFIED")
+                print(f"  [Table 2 (gamma)] {name} canonical -- VERIFIED via K1302")
+            else:
+                add("Table 2 (gamma)", f"{name} canonical {paper_str}", paper_str, "K1302",
+                    f"K1302 per_stock.{tk}.TWA: {actual_str} (delta exceeds ±0.001/±0.05)", "CONFLICT")
+                print(f"  [Table 2 (gamma)] {name} -- CONFLICT body vs K1302")
+
+    # K1302b: 5 individual (BW-robust canonical)
+    k1302b_canonical = {
+        "2882.TW": ("Cathay Financial", "0.038/t=2.13"),
+        "2891.TW": ("CTBC", "0.040/t=1.91"),
+        "2412.TW": ("Chunghwa Telecom", "0.001/t=0.19"),
+        "2885.TW": ("Yuanta", "0.020/t=1.53"),
+        "2881.TW": ("Fubon", "0.022/t=1.46"),
+    }
+    for tk, (name, paper_str) in k1302b_canonical.items():
+        s = k1302b_per.get(tk, {})
+        g = s.get("gamma")
+        t = s.get("t_stat_gamma") or s.get("t_stat")
+        if g is not None and t is not None:
+            actual_str = f"gamma={g:.3f}/t={t:.2f}"
+            paper_g, paper_t = float(paper_str.split("/")[0]), float(paper_str.split("=")[1])
+            if abs(g - paper_g) <= 0.001 and abs(t - paper_t) <= 0.05:
+                add("Table 2 (gamma)", f"{name} canonical {paper_str}", paper_str, "K1302b",
+                    f"K1302b per_stock.{tk}: {actual_str}", "VERIFIED")
+                print(f"  [Table 2 (gamma)] {name} canonical -- VERIFIED via K1302b")
+            else:
+                add("Table 2 (gamma)", f"{name} canonical {paper_str}", paper_str, "K1302b",
+                    f"K1302b per_stock.{tk}: {actual_str} (delta exceeds ±0.001/±0.05)", "CONFLICT")
+                print(f"  [Table 2 (gamma)] {name} -- CONFLICT body vs K1302b")
+
+    # 9-stock individual avg (computed from K1302+K1302b)
+    individual_gammas = []
+    for tk in ["2317.TW", "2454.TW", "2886.TW", "2383.TW"]:
+        twa = (k1302_per.get(tk, {}).get("TWA") or k1302_per.get(tk, {}))
+        if twa.get("gamma") is not None:
+            individual_gammas.append(twa["gamma"])
+    for tk in ["2882.TW", "2891.TW", "2412.TW", "2885.TW", "2881.TW"]:
+        s = k1302b_per.get(tk, {})
+        if s.get("gamma") is not None:
+            individual_gammas.append(s["gamma"])
+
+    if len(individual_gammas) == 9:
+        avg_9 = sum(individual_gammas) / 9
+        paper_avg_9 = 0.027
+        actual_str = f"{avg_9:.4f} (from K1302+K1302b 9 individuals)"
+        if abs(avg_9 - paper_avg_9) <= 0.001:
+            add("Table 2 (gamma)", "9-stock individual avg = 0.027", "0.027", "K1302+K1302b",
+                actual_str, "VERIFIED")
+            print(f"  [Table 2 (gamma)] 9-stock avg canonical -- VERIFIED ({avg_9:.4f})")
+        else:
+            add("Table 2 (gamma)", "9-stock individual avg = 0.027", "0.027", "K1302+K1302b",
+                actual_str, "CONFLICT")
+
+        # 10-security avg (with 0056)
+        zero56_twa = (k1302_per.get("0056.TW", {}).get("TWA") or k1302_per.get("0056.TW", {}))
+        if zero56_twa.get("gamma") is not None:
+            avg_10 = (sum(individual_gammas) + zero56_twa["gamma"]) / 10
+            paper_avg_10 = 0.031
+            actual_str = f"{avg_10:.4f} (9 individuals + 0056)"
+            if abs(avg_10 - paper_avg_10) <= 0.001:
+                add("Table 2 (gamma)", "10-security avg (incl. 0056) = 0.031", "0.031", "K1302+K1302b",
+                    actual_str, "VERIFIED")
+                print(f"  [Table 2 (gamma)] 10-security avg -- VERIFIED ({avg_10:.4f})")
+            else:
+                add("Table 2 (gamma)", "10-security avg (incl. 0056) = 0.031", "0.031", "K1302+K1302b",
+                    actual_str, "CONFLICT")
+
+        # Amplification ratio TAIEX-to-individual
+        amp_9 = 0.272 / avg_9
+        paper_amp = 10
+        amp_str = f"{amp_9:.2f} (TAIEX 0.272 / avg 9 individual {avg_9:.4f})"
+        if abs(amp_9 - paper_amp) <= 0.5:
+            add("Sec 3.2 amplification", "TAIEX-to-individual ratio = ~10x", "10x", "K1302+K1302b",
+                amp_str, "VERIFIED")
+            print(f"  [Sec 3.2] amplification ratio canonical -- VERIFIED ({amp_9:.2f}x)")
+        else:
+            add("Sec 3.2 amplification", "TAIEX-to-individual ratio = ~10x", "10x", "K1302+K1302b",
+                amp_str + " (delta > 0.5)", "CONFLICT")
+except Exception as e:
+    print(f"  [Table 2 (gamma)] ERROR loading K1302/K1302b results: {e}")
+    add("Table 2 (gamma)", "K1302+K1302b canonical integration",
+        "see paper", "K1302+K1302b", f"load failed: {e}", "UNTRACEABLE")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

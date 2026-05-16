@@ -9301,7 +9301,7 @@
     "title": "K1371: Paper 2 reproduce.py byte-match update to new Table 2 canonical numbers",
     "priority": 2,
     "description": "Paper 2 reproduce.py currently expects rolling-window numbers (0.054 9-stock avg, etc.). After K1302+K1302b canonical integration (commit ae93e44e), reproduce.py must read K1302+K1302b results.json directly and verify Table 2 byte-match ±0.001 γ / ±0.05 t-stat. Update paper/taiwan-vt/reproduce.py + regenerate reproduce_report.json. Confirm match_rate ≥ 95% gate. Main thread task (touches paper/ + storage/).",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "paper2_canonical_pivot_followup_2026_05_16",
     "tags": [
@@ -9310,6 +9310,8 @@
       "main_thread"
     ],
     "created_at": "2026-05-16T02:04:43Z",
-    "blocked_reason": null
+    "blocked_reason": null,
+    "completed_at": "2026-05-16T10:01:16Z",
+    "closure_note": "reproduce.py updated with K1302+K1302b canonical bindings; 13 VERIFIED rows; gate 96.4% → 96.6%"
   }
 ]
