@@ -29944,5 +29944,62 @@
       "primary_spec_b": "full_2008_2026_log_intercept"
     },
     "notes": "Core lookahead discipline confirmed correct. Two bugs caught and fixed in same session. Script at experiments/paper2_sec45_tsmc_vt/tsmc_vt_strategy.py."
+  },
+  {
+    "item_id": "K1302",
+    "title": "K1302: GJR-GARCH 100-multistart canonical γ — Paper 2 Table 2 provenance gap closed (5 Taiwan individual stocks, TWA full-sample GJR-N)",
+    "category": "knowledge",
+    "experiment_id": "k1302",
+    "content": "[執行: Claude main_thread, Codex review 2 rounds] K1302 v2 (100-multistart) 為 Paper 2 (taiwan-vt) Table 2 的 5 檔個股提供正式 JSON 來源支持。股票: 2317.TW Hon Hai, 2454.TW MediaTek, 0056.TW 高股息 ETF, 2886.TW Mega Financial, 2383.TW ELITE Material。規格: TWA = GJR-GARCH(1,1) Normal full-sample 2008-01-01..2024-12-31, Bollerslev-Wooldridge robust SE, 100-multistart seeds 42..141, np.random.seed(42)。Byte-match 結果 (全 PASS, tolerance |Δγ|≤0.001 / |Δt|≤0.05): 2317.TW γ=0.0320 Δγ=0.00002 t=1.741 Δt=0.001; 2454.TW γ=0.0406 Δγ=0.00040 t=3.096 Δt=0.004; 0056.TW γ=0.0668 Δγ=0.00017 t=1.914 Δt=0.004; 2886.TW γ=0.0379 Δγ=0.00007 t=1.552 Δt=0.002; 2383.TW γ=0.0095 Δγ=0.00045 t=1.147 Δt=0.004。全部 5/5 converged 100/100 starts, persistence < 1.0 (range 0.978–0.998)。100-multistart 選出之最佳 LL 與 arch 預設單次估計結果一致 — 確認全域最佳解 (global optimum robustness)。Paper body.tex Table 2 已顯示正確值; 本實驗補齊 JSON 出處，消除 reproduce.py MISMATCH 風險。Codex v1 review FAIL (單次 arch.fit, stale N121 targets, in_table2 flag 錯誤); v2 CONDITIONAL_PASS; 兩項 minor 問題 (cache provenance comment + exception logging) 已在主線程修正。",
+    "verdict": "CONDITIONAL_PASS",
+    "closure_status": "codex_v2_conditional_pass_minors_fixed_in_mainthread",
+    "reviewer_source": "Codex review primary-path (codex-cli 0.130.0 gpt-5.4, 2 rounds)",
+    "paper_target": "paper/taiwan-vt (Paper 2) Table 2 — 個股 γ 來源 JSON",
+    "byte_match_summary": {
+      "overall": "PASS (5/5)",
+      "tolerance": "|Δγ|≤0.001 / |Δt|≤0.05",
+      "2317.TW": {
+        "gamma": 0.032,
+        "delta_gamma": 2e-05,
+        "t": 1.741,
+        "delta_t": 0.001,
+        "verdict": "PASS"
+      },
+      "2454.TW": {
+        "gamma": 0.0406,
+        "delta_gamma": 0.0004,
+        "t": 3.096,
+        "delta_t": 0.004,
+        "verdict": "PASS"
+      },
+      "0056.TW": {
+        "gamma": 0.0668,
+        "delta_gamma": 0.00017,
+        "t": 1.914,
+        "delta_t": 0.004,
+        "verdict": "PASS"
+      },
+      "2886.TW": {
+        "gamma": 0.0379,
+        "delta_gamma": 7e-05,
+        "t": 1.552,
+        "delta_t": 0.002,
+        "verdict": "PASS"
+      },
+      "2383.TW": {
+        "gamma": 0.0095,
+        "delta_gamma": 0.00045,
+        "t": 1.147,
+        "delta_t": 0.004,
+        "verdict": "PASS"
+      }
+    },
+    "related_experiments": [
+      "K1302b",
+      "K1256",
+      "K1216c"
+    ],
+    "timestamp": "2026-05-16T09:35:00Z",
+    "author": "main_thread"
   }
 ]

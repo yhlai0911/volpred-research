@@ -6300,5 +6300,20 @@
     "experiment_id": "k1100g_d3",
     "article_id": "mile_61ffe64a",
     "notes": "3-model review: Claude + Gemini CONDITIONAL_PASS + Codex CONDITIONAL_PASS; all fixes applied; pseudo-LRT labeling + Harvey-style framing corrected"
+  },
+  {
+    "task_id": "task-k1302-paper2-provenance-paper-decision",
+    "task_type": "paper_decision",
+    "description": "K1302 v2: Paper 2 Table 2 individual γ provenance — 100-multistart GJR-GARCH (5 stocks), byte-match PASS, Codex CONDITIONAL_PASS + minors fixed",
+    "timestamp": "2026-05-16T09:25:40.186737+00:00",
+    "status": "succeeded",
+    "experiment_id": "k1302",
+    "artifacts": [
+      "experiments/k1302/k1302.py (v2: 100-multistart, 3-spec TWA/TWB/TWC, correct PAPER_TABLE2_TARGETS, in_table2 fix, exception logging)",
+      "experiments/k1302/k1302_results.json (all 5 stocks PASS, overall_pass=True)",
+      "experiments/k1302/k1302_byte_match_diagnostic.md (v2 PASS diagnostic)",
+      "storage/memory/knowledge.json (entry: K1302)"
+    ],
+    "notes": "Codex v1 FAIL: no multistart, stale targets, wrong in_table2 flag. Codex v2 CONDITIONAL_PASS: cache provenance comment + exception logging fixed in main thread. 100-multistart confirmed identical to single-start → global optimum validated. Paper 2 Table 2 body.tex already consistent; JSON provenance now backing 5 rows."
   }
 ]

@@ -1,7 +1,7 @@
-# K1302 Byte-Match Diagnostic — Paper 2 Table 2 γ
+# K1302 Byte-Match Diagnostic — Paper 2 Table 2 γ (v2 — 100 multistart)
 
-Generated: 2026-05-14T16:14:32.413727+00:00
-Overall verdict: **FAIL** (4 stocks failed)
+Generated: 2026-05-16T09:21:07.233755+00:00
+Overall verdict: **PASS** (0 stocks failed)
 
 Tolerance: |Δγ| ≤ 0.001, |Δt| ≤ 0.05
 
@@ -9,14 +9,13 @@ Tolerance: |Δγ| ≤ 0.001, |Δt| ≤ 0.05
 
 | Ticker | Name | γ_paper | γ_est | Δγ | t_paper | t_est | Δt | Verdict |
 |--------|------|--------:|------:|---:|--------:|------:|---:|---------|
-| 2317.TW | Hon Hai Precision | +0.0520 | +0.0320 | 0.0200 | +1.140 | +1.741 | 0.601 | FAIL_LARGE_DRIFT |
-| 2454.TW | MediaTek | +0.0440 | +0.0406 | 0.0034 | +0.960 | +3.096 | 2.136 | FAIL_LARGE_DRIFT |
-| 0056.TW | Yuanta High Dividend ETF | +0.1120 | +0.0668 | 0.0452 | +1.870 | +1.914 | 0.044 | FAIL_LARGE_DRIFT |
-| 2886.TW | Mega Financial | +0.1790 | +0.0379 | 0.1411 | +2.420 | +1.552 | 0.868 | FAIL_LARGE_DRIFT |
+| 2317.TW | Hon Hai Precision | +0.0320 | +0.0320 | 0.0000 | +1.740 | +1.741 | 0.001 | PASS |
+| 2454.TW | MediaTek | +0.0410 | +0.0406 | 0.0004 | +3.100 | +3.096 | 0.004 | PASS |
+| 0056.TW | Yuanta High Dividend ETF | +0.0670 | +0.0668 | 0.0002 | +1.910 | +1.914 | 0.004 | PASS |
+| 2886.TW | Mega Financial | +0.0380 | +0.0379 | 0.0001 | +1.550 | +1.552 | 0.002 | PASS |
+| 2383.TW | ELITE Material | +0.0090 | +0.0095 | 0.0005 | +1.150 | +1.147 | 0.003 | PASS |
 
 
-## Recommendation
+## Summary
 
-The individual stocks (Hon Hai/MediaTek/0056/Mega) in Table 2 are confirmed legacy numbers from N121 knowledge summary. They differ significantly in t-stats from the new canonical Full-Sample Robust SE specification. Mega Financial (2886.TW) additionally shows a large γ drift (0.179 → 0.0379).
-
-Main thread should adopt Option A: Update Paper 2 Table 2 to K1302 canonical values for internal consistency with 0050.TW/TSMC.
+K1302 v2 (100-multistart BW-robust) confirms canonical gamma values in Paper 2 Table 2. PASS indicates internal consistency between experiment JSON and paper body.tex.

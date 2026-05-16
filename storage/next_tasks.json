@@ -1050,7 +1050,7 @@
     "title": "K1302: Paper 2 individual γ JSON rebuild (4 stocks × 3 specs, Table 2 provenance)",
     "priority": 2,
     "description": "Paper 2 reproduce gate gap #4: Hon Hai/MediaTek/ELITE Material/0056.TW individual γ no JSON backing. Run scipy.optimize.minimize 100+ multistart per (stock, spec) for 3-spec disambiguation (TWA/TWB/TWC). Byte-match to Paper 2 Table 2 ±0.001 γ / ±0.05 t-stat. README at experiments/k1302/README.md (commit cdabb25b/5970a3f3). Worktree agent — produces experiments/k1302/{k1302.py, k1302_results.json, README.md} only. No knowledge.json write (主線程 + Codex review 後)。Mission M3 (paper2 submission unblock) + M2 (research integrity, eliminate soft Table 2 rows). Codex review primary path required pre-knowledge entry。",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "manual_addition_after_autogen_collision_fix",
     "tags": [
@@ -1059,7 +1059,9 @@
       "provenance",
       "mission-3"
     ],
-    "created_at": "2026-05-12T03:09:33Z"
+    "created_at": "2026-05-12T03:09:33Z",
+    "completed_at": "2026-05-16T09:25:45.265802+00:00",
+    "completion_note": "K1302 v2 100-multistart GJR-GARCH PASS. All 5 Table 2 stocks byte-match PASS. knowledge.json written. Codex CONDITIONAL_PASS + minors fixed."
   },
   {
     "id": "K1302_paper2_individual_gamma_json",
