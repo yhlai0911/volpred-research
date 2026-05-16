@@ -901,7 +901,9 @@
     "priority": 1,
     "description": "[3-market 全 PASS 後] Paper 2 從 dual-NULL 改寫為 three-market universal regularity (TW K1145 + US K1147 + JP K1150)。需主線程改 paper/2/body.tex (5-stage classifier 判 stage)。重點：5-layer robustness 表 + magnitude comparison + self-challenge §4.7 防審稿人質疑高 t-stat。",
     "status": "pending",
-    "task_type": "paper_decision"
+    "task_type": "paper_decision",
+    "blocked_reason": "prereq: K1145/K1147/K1150 three-market PASS not yet in knowledge.json",
+    "blocked_at": "2026-05-16T02:04:43Z"
   },
   {
     "id": "K1156",
@@ -9262,5 +9264,39 @@
     "source": "K1302_erratum_decision_followup",
     "completed_at": "2026-05-16T01:44:18Z",
     "closure_note": "5/5 converged Codex CONDITIONAL_PASS knowledge K1302b written"
+  },
+  {
+    "id": "K1370",
+    "title": "K1370: Paper 2 block-bootstrap CI re-computation under canonical full-sample BW-robust spec",
+    "priority": 2,
+    "description": "Paper 2 §3.2 amplification ratio CI [2.8, 8.1] was computed under draft rolling-window spec (5.0× point estimate). New canonical 10× point estimate (K1302+K1302b avg γ=0.027) needs matching CI recompute. Block bootstrap B=10000, block length 252, seeds 42..10041. Per-stock GJR-GARCH(1,1) BW-robust re-estimated on each bootstrap replicate; amplification ratio = TAIEX γ / mean(individual γ); 90% CI from quantiles. Paper 2 currently flags CI as `(stale)` with K1370 forward-ref. Worktree agent suitable — produces experiments/k1370/{k1370.py, k1370_results.json, README.md}. No knowledge.json write (主線程 + Codex review 後).",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "paper2_canonical_pivot_followup_2026_05_16",
+    "tags": [
+      "experiment",
+      "paper2",
+      "bootstrap",
+      "CI",
+      "k1370"
+    ],
+    "created_at": "2026-05-16T02:04:43Z",
+    "blocked_reason": null
+  },
+  {
+    "id": "K1371_paper2_reproduce_update",
+    "title": "K1371: Paper 2 reproduce.py byte-match update to new Table 2 canonical numbers",
+    "priority": 2,
+    "description": "Paper 2 reproduce.py currently expects rolling-window numbers (0.054 9-stock avg, etc.). After K1302+K1302b canonical integration (commit ae93e44e), reproduce.py must read K1302+K1302b results.json directly and verify Table 2 byte-match ±0.001 γ / ±0.05 t-stat. Update paper/taiwan-vt/reproduce.py + regenerate reproduce_report.json. Confirm match_rate ≥ 95% gate. Main thread task (touches paper/ + storage/).",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "paper2_canonical_pivot_followup_2026_05_16",
+    "tags": [
+      "paper2",
+      "reproduce_gate",
+      "main_thread"
+    ],
+    "created_at": "2026-05-16T02:04:43Z",
+    "blocked_reason": null
   }
 ]
