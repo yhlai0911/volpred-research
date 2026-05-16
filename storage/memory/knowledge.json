@@ -30132,5 +30132,49 @@
     "created_at": "2026-05-16T19:11:40.859990+00:00",
     "updated_at": "2026-05-16T19:11:40.861589+00:00",
     "session_id": "hourly-dispatch-2026-05-17"
+  },
+  {
+    "id": "K547b",
+    "title": "K547b: VIX Timing Lookahead Correction — Daily VT shift(1) Re-run",
+    "summary": "CORRECTION STUDY for K547 (Turn-of-Month VT). K547 used same-day VIX for weight calculation (weight[t]=12/VIX[t] with return[t]), creating lookahead bias since VIX and SPY are strongly negatively correlated at daily frequency. K547b applies shift(1): weight[t]=12/VIX[t-1]. Full-sample SPY 2005-01-05 to 2026-03-26, N=5339. Daily VT Sharpe: 1.666 (K547) → 0.689 (K547b, -58.7%). Monthly VT: 0.743 → 0.692 (-6.9%). ToM Enhanced: 1.655 → 0.675 (-59.2%). Core conclusion unchanged: ToM overlay still underperforms VT benchmarks. Block bootstrap 95% CI: [-2.96, -0.73] bps annualised (entirely negative). Key new insight: Monthly VT (0.692) ≈ Daily VT (0.689) — the supposed superiority of daily rebalancing was largely a lookahead artifact. Article mile_53983530 updated with correction notice.",
+    "experiment_id": "K547b",
+    "asset": "SPY",
+    "tags": [
+      "VT",
+      "volatility-targeting",
+      "lookahead-correction",
+      "shift(1)",
+      "VIX-timing",
+      "Turn-of-Month",
+      "correction",
+      "SPY",
+      "block-bootstrap"
+    ],
+    "verdict": "CORRECTION — K547 lookahead confirmed; core conclusions unchanged",
+    "key_metrics": {
+      "sample_period": "2005-01-05 to 2026-03-26",
+      "n_obs": 5339,
+      "daily_vt_sharpe_k547b": 0.6888,
+      "monthly_vt_sharpe_k547b": 0.6919,
+      "tom_enhanced_sharpe_k547b": 0.6751,
+      "daily_vt_sharpe_k547": 1.666,
+      "daily_vt_sharpe_delta_pct": -58.66,
+      "bootstrap_mean_diff_bps": -1.87,
+      "bootstrap_ci_lower_bps": -2.96,
+      "bootstrap_ci_upper_bps": -0.73,
+      "ci_entirely_negative": true,
+      "oos_tom_enhanced_wins": "2/5",
+      "seed": 42,
+      "block_size": 20,
+      "B": 10000
+    },
+    "insight": "VIX same-day timing inflates Daily VT Sharpe by ~0.98 (1.666 → 0.689, -58.7%). Mechanism: VIX high ↔ SPY down same day → using same-day VIX is equivalent to \"knowing\" today was bad and retroactively reducing position. After correction, Monthly VT and Daily VT are statistically indistinguishable (0.692 vs 0.689). ToM overlay conclusion is robust to the timing fix.",
+    "codex_review": "feature-dev:code-reviewer subagent review (primary-path Codex CLI not available for focus-file mode). CONDITIONAL PASS after P1 fix: initial version had asymmetric NaN handling — monthly_vt held 0.0 weight for entire first month (~21 days) while daily_vt only lost 1 day (shift artefact). Fix: spy_ret and vix_lagged both cropped to vix_lagged.first_valid_index() before strategy loop. Post-fix re-run confirms results stable. All 7 review criteria passed: shift(1) ✓, no return lookahead ✓, seed=42 ✓, bootstrap structure correct ✓, block size appropriate ✓, NaN handled ✓, baseline comparison correct ✓.",
+    "spec": "weight[t] = 12/VIX[t-1] (shift(1) applied once at data prep stage, all strategies receive pre-shifted vix_lagged). First valid row = 2005-01-05.",
+    "correction_of": "K547",
+    "article_updated": "mile_53983530",
+    "created_at": "2026-05-16T23:33:34.229427+00:00",
+    "updated_at": "2026-05-16T23:33:34.229427+00:00",
+    "session_id": "hourly-dispatch-2026-05-17"
   }
 ]

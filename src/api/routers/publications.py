@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
-from .common import get_storage_dir
+from .common import get_storage_dir, require_research_mirror_token
 
 router = APIRouter()
 
@@ -27,11 +27,16 @@ def get_publication(pub_id: str):
     from fastapi import HTTPException
 
     publisher = _get_publisher()
-    feed = publisher.get_feed(limit=1000)
-    for item in feed:
-        if item.get("id") == pub_id:
-            return item
-    raise HTTPException(status_code=404, detail="Publication not found")
+    # 2026-05-16: prefer get_report() which streams the feed and exits on first
+    # match. Previous code did `get_feed(limit=1000)` which loaded the entire
+    # feed into memory on every single-article request (violates CLAUDE.md
+    # token discipline for storage/reports/feed.json).
+    report = publisher.get_report(pub_id)
+    if report is None:
+        raise HTTPException(status_code=404, detail="Publication not found")
+    if report.get("status") != "published":
+        raise HTTPException(status_code=404, detail="Publication not found")
+    return report
 
 
 @router.get("/notifications")
@@ -53,9 +58,14 @@ class PublishRequest(BaseModel):
     metrics: dict = {}
 
 
-@router.post("/publish")
+@router.post("/publish", dependencies=[Depends(require_research_mirror_token)])
 def publish_item(req: PublishRequest):
-    """Publish a new item to the feed (can be called from local to Zeabur)."""
+    """Publish a new item to the feed (can be called from local to Zeabur).
+
+    2026-05-16: gated behind RESEARCH_MIRROR_TOKEN. Previously unauthenticated
+    — any caller could publish arbitrary content to the canonical feed and
+    trigger Supabase push. See docs/code_review_2026-05-16.md C5.
+    """
     publisher = _get_publisher()
     pub_id = publisher.publish_milestone(
         title=req.title,

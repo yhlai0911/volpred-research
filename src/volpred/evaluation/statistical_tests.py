@@ -20,7 +20,9 @@ def diebold_mariano_test(loss1: np.ndarray, loss2: np.ndarray, h: int = 1) -> di
     T = len(d)
     d_bar = np.mean(d)
 
-    # HAC variance estimator (Newey-West style)
+    # HAC variance estimator (Newey-West style, standard DM formula).
+    # For an h-step forecast, lags 1..h-1 are included. For h=1 (most common)
+    # range(1, h) = range(1, 1) is intentionally empty: V = gamma_0 only.
     gamma_0 = np.var(d, ddof=1)
     V = gamma_0
     for k in range(1, h):
@@ -82,17 +84,21 @@ def kupiec_test(violations: np.ndarray, alpha: float = 0.05) -> dict:
     }
 
 
-def christoffersen_test(violations: np.ndarray) -> dict:
+def christoffersen_test(violations: np.ndarray, alpha: float | None = None) -> dict:
     """Christoffersen's test for conditional coverage (independence of violations).
 
-    Tests whether violations are independent (no clustering).
-    Combines unconditional coverage + independence.
+    Tests whether violations are independent (no clustering). When ``alpha`` is
+    given, also reports the joint conditional-coverage LR statistic
+    (= Kupiec LR + independence LR, chi-squared df=2).
 
     Args:
-        violations: Binary series (1 = VaR violation, 0 = no violation)
+        violations: Binary series (1 = VaR violation, 0 = no violation).
+        alpha: Target VaR confidence level used to construct violations. If
+            None, joint CC test is skipped (independence-only mode).
 
     Returns:
-        dict with 'independence_stat', 'independence_pval', 'cc_stat', 'cc_pval', 'conclusion'
+        dict with 'independence_stat', 'independence_pval'. When alpha is
+        provided, also 'cc_stat', 'cc_pval', and 'cc_conclusion'.
     """
     T = len(violations)
 
@@ -121,12 +127,7 @@ def christoffersen_test(violations: np.ndarray) -> dict:
 
     p_ind = 1 - stats.chi2.cdf(max(lr_ind, 0), 1)
 
-    # Conditional coverage = unconditional + independence
-    n_viol = int(np.sum(violations))
-    p_hat = n_viol / T
-    alpha = p_hat  # use observed rate
-
-    return {
+    out: dict = {
         'independence_stat': float(lr_ind),
         'independence_pval': float(p_ind),
         'n00': n00, 'n01': n01, 'n10': n10, 'n11': n11,
@@ -134,6 +135,27 @@ def christoffersen_test(violations: np.ndarray) -> dict:
         'pi11': float(pi11),
         'conclusion': 'independent' if p_ind >= 0.05 else 'clustered',
     }
+
+    # Joint conditional-coverage LR (Christoffersen 1998): kupiec_lr + ind_lr.
+    # NOTE (2026-05-16 fix): previous version reassigned `alpha = p_hat` (the
+    # observed rate) and then returned without computing the joint stat — so
+    # cc_stat / cc_pval were never reported and the CC test was effectively
+    # disabled. We now accept the target alpha as an optional parameter.
+    if alpha is not None:
+        n_viol = int(np.sum(violations))
+        p_hat = n_viol / T if T > 0 else 0.0
+        if 0 < p_hat < 1 and 0 < alpha < 1:
+            lr_uc = -2 * (
+                (T - n_viol) * np.log(1 - alpha) + n_viol * np.log(alpha)
+                - (T - n_viol) * np.log(1 - p_hat) - n_viol * np.log(p_hat)
+            )
+            cc_stat = max(lr_uc, 0) + max(lr_ind, 0)
+            cc_pval = 1 - stats.chi2.cdf(cc_stat, 2)
+            out['cc_stat'] = float(cc_stat)
+            out['cc_pval'] = float(cc_pval)
+            out['cc_conclusion'] = 'pass' if cc_pval >= 0.05 else 'reject'
+
+    return out
 
 
 def compute_var_violations(returns: np.ndarray, var_forecasts: np.ndarray, alpha: float = 0.05) -> np.ndarray:
