@@ -145,6 +145,22 @@
 - [ ] `/latex-academic-reviewer` 全面審查
 - [ ] 修正 Gemini 指出的 3 弱點
 
+**★ Paper 2 θ_EAV Heterogeneity Narrative — DECISION_MADE (2026-05-16, K1144)**
+
+四個互補實驗（≥3 OOS-verified + Codex reviewed）確認 cross-sectional + temporal 雙 NULL：
+
+| 實驗 | 類型 | 結果 | 說明 |
+|------|------|------|------|
+| K1109 (Sector ANOVA) | Cross-sectional | **FAIL** p=0.297 | N=31 pre-registered random sample；ANOVA joint test NULL；fabless β 衰減 46% |
+| K1113 (Firm covariates) | Cross-sectional | **FAIL** 0/5 significant | log_mktcap / beta_rolling / ROA / leverage / turnover 全 null after BH |
+| K1114 (Rolling HAC) | Temporal | FAIL | Initial 3/9 BH-pass — 但全是 96% overlap artifact（↓ block-boot） |
+| K1140 (HAC + Block-boot) | Temporal | **0/9 BH-FDR PASS** | Newey-West L=24 + stationary block-bootstrap seed=42；MediaTek t 從 4.33→1.75 collapse |
+
+**貢獻框架轉向（Decision）**：Paper 2 EAV 貢獻從「找 firm-attribute predictor」改為「嚴格 null verification」：
+> *"After N=31 sector ANOVA + 5 firm covariates + rolling HAC + block-bootstrap, no systematic source of θ_EAV heterogeneity survives multiple-testing correction. Earnings-announcement variance effects appear universal in magnitude (or too noisy at stock level to detect cross-sectionally / temporally)."*
+
+**Pending（paper_body task）**：body.tex EAV heterogeneity 段落需對應改寫（K1141）；narrative state = decision_made_awaiting_body_rewrite。K1302 γ provenance rebuild 仍 pending（FAIL_LARGE_DRIFT → needs separate investigation）。
+
 **第三篇：Is Volatility Targeting Just Trend Following?**
 - `paper/vt-trend-following/main.tex`（29 頁）
 - 目標：Journal of Portfolio Management 或 Financial Analysts Journal

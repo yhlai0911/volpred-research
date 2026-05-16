@@ -892,8 +892,10 @@
     "title": "K1144: Paper 2 narrative pivot to dual-NULL (after K1140 confirmation)",
     "priority": 2,
     "description": "K1140 確認 cross + temporal θ_EAV heterogeneity dual NULL。Paper 2 contribution 從「找 firm-attribute predictor」改為「rigorous null verification: after N=31 sector ANOVA + 5 covariates + rolling HAC + block-boot, no systematic source of θ heterogeneity survives MTCorrection」。需主線程更新 paper/2/body.tex (5-stage classifier 判 stage)。",
-    "status": "pending",
-    "task_type": "paper_decision"
+    "status": "succeeded",
+    "task_type": "paper_decision",
+    "completed_at": "2026-05-16",
+    "completion_artifact": "research_program.md dual-NULL narrative decision documented"
   },
   {
     "id": "K1146",
@@ -7549,7 +7551,7 @@
     "title": "Paper 2 Sec 4.5 TSMC VT — Codex primary-path review",
     "priority": 3,
     "description": "Sec 4.5 TSMC VT Sharpe + variance share 雙 PASS。Codex CLI quota reset 2026-05-13 02:46 UTC 後 `codex exec --skip-git-repo-check` 對 experiments/paper2_sec45_tsmc_vt/tsmc_vt_strategy.py 做 primary review。Focus: (a) shift(1) lag + train_data exclusivity, (b) sqrt(252) annualization, (c) snapshot read-only no live fetch, (d) OLS R² + intercept handling, (e) K1175 spec alignment (simple returns + clean_tw50_data)。Two bugs caught + fixed during dev (split artifact + return type)。",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "blocked_reason": "codex_quota_reset_pending",
     "blocked_until": "2026-05-13T02:46:00Z",
@@ -7558,7 +7560,9 @@
       "codex-review",
       "paper2-gate"
     ],
-    "created_at": "2026-05-12T05:17:03Z"
+    "created_at": "2026-05-12T05:17:03Z",
+    "completed_at": "2026-05-16",
+    "completion_artifact": "knowledge.json entry paper2_sec45_tsmc_vt; 2 bugs fixed (P2 bootstrap Sharpe + P3 metadata); Codex CONDITIONAL_PASS_FIXED"
   },
   {
     "id": "tsmc_0050_concentration_2020_acceleration_article_general",

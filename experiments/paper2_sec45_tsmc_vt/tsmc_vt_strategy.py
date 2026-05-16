@@ -254,9 +254,12 @@ def block_bootstrap_sharpe(
         starts = rng.integers(0, n, size=n_blocks)
         idx = np.concatenate([np.arange(s, s + block) % n for s in starts])[:n]
         sample = r[idx]
-        mu = sample.mean()
-        sigma = sample.std()
-        sharpes[b] = (mu / sigma) * np.sqrt(252) if sigma > 0 else 0.0
+        # Use geometric annualized return to match backtest_strategy() headline Sharpe
+        n_s = len(sample)
+        n_years_b = n_s / 252
+        ann_ret_b = (1 + sample).prod() ** (1 / n_years_b) - 1
+        ann_vol_b = sample.std() * np.sqrt(252)
+        sharpes[b] = float(ann_ret_b / ann_vol_b) if ann_vol_b > 0 else 0.0
     return {
         "boot_B": B,
         "boot_block": block,
@@ -546,7 +549,7 @@ def main() -> int:
             "live_fetch": False,
             "tsmc_ticker": "2330.TW",
             "etf_ticker": "0050.TW",
-            "returns": "close-to-close log returns (np.log(p_t / p_{t-1}))",
+            "returns": "Number A (VT Sharpe): simple pct_change() returns; Number B (variance share OLS): log returns (np.log(p_t / p_{t-1}))",
         },
         "spec_alignment": {
             "K1175_canonical": "target_vol=10%, GARCH(1,1) mean='Zero' dist='normal', "

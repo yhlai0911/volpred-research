@@ -29905,5 +29905,44 @@
     ],
     "timestamp": "2026-05-16T01:44:18Z",
     "author": "main_thread"
+  },
+  {
+    "id": "paper2_sec45_tsmc_vt",
+    "type": "paper_reproduction",
+    "paper_id": "taiwan-vt",
+    "section": "Sec 4.5",
+    "title": "TSMC VT Sharpe + 0050 variance share — Codex primary-path review CONDITIONAL PASS (bugs fixed)",
+    "date": "2026-05-16",
+    "codex_verdict": "CONDITIONAL_PASS_FIXED",
+    "codex_session": "019e2f76-de37-7f53-9533-3553dd906727",
+    "reviewer_source": "Codex review (primary-path, 0.130.0 gpt-5.4)",
+    "review_summary": {
+      "a_lookahead": "PASS — shift(1) explicit, garch_oos_forecast train_end=date_loc exclusive, compute_ewma_vol uses r[i-1]",
+      "b_annualization": "PASS — sqrt(252) applied correctly in both backtest_strategy and block_bootstrap_sharpe (after fix)",
+      "c_snapshot_readonly": "PASS — load_snapshot() reads local CSV only, no live yfinance/requests",
+      "d_ols_intercept": "PASS — ols_r_squared(intercept=True) for primary; no-intercept reported separately for sensitivity",
+      "e_k1175_alignment": "PASS — target_vol=10%, GARCH(1,1) Zero/normal, window=2000 refit=21, OOS=2020-01-01, tx_cost=5bps; simple returns for VT, log returns for OLS (after metadata fix)"
+    },
+    "bugs_found_and_fixed": [
+      {
+        "severity": "P2",
+        "location": "block_bootstrap_sharpe() lines 256-259",
+        "issue": "Bootstrap Sharpe used arithmetic mean/std*sqrt(252) while headline backtest_strategy() uses geometric annualized return/ann_vol — diverge for volatile returns",
+        "fix": "Changed to geometric: ann_ret_b=(1+sample).prod()^(1/n_years_b)-1; ann_vol_b=std*sqrt(252)"
+      },
+      {
+        "severity": "P3",
+        "location": "data_source.returns metadata line 549",
+        "issue": "Metadata said log returns for whole experiment but Number A uses simple pct_change() returns",
+        "fix": "Clarified: Number A uses simple returns, Number B uses log returns"
+      }
+    ],
+    "paper_numbers": {
+      "tsmc_vt_sharpe_target": 1.121,
+      "variance_share_target": 0.525,
+      "primary_spec_a": "garch_vt_10_oos2020",
+      "primary_spec_b": "full_2008_2026_log_intercept"
+    },
+    "notes": "Core lookahead discipline confirmed correct. Two bugs caught and fixed in same session. Script at experiments/paper2_sec45_tsmc_vt/tsmc_vt_strategy.py."
   }
 ]
