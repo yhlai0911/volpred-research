@@ -57,9 +57,21 @@ PENDING_SESSIONS_PATH = PROJECT_ROOT / "storage" / "ops" / "pending_sessions.jso
 SKIP_JOB_IDS = {
     "check_alerts",           # we ARE check_alerts — would recurse
     "shared_scheduler_tick",  # advisory-only in v12, host_crontab_managed=false
+    # 2026-05-17: daily_update hangs (likely Supabase sync stall) — exceeded
+    # 240s subprocess cap repeatedly → killed check_alerts wrapper at 300s for
+    # 5 consecutive hours. Disabled from piggy-back; daily_update has its own
+    # host cron entry `3 8 * * 1-6`. Re-enable only after daily_update hang
+    # root-cause is fixed (see docs/error_log.md 2026-05-17 entry).
+    "daily_update",
 }
 
-DEFAULT_SUBPROCESS_TIMEOUT_SEC = 600  # 10 min per job
+DEFAULT_SUBPROCESS_TIMEOUT_SEC = 240  # 4 min per job (under check_alerts 300s wrapper cap)
+# 2026-05-17 fix: was 600s but check_alerts.sh wrapper SIGALRM cap is 300s.
+# Any single hanging job took full 600s while wrapper killed parent at 300s →
+# 5 hours of consecutive HANG-KILLED. Keep 240 < 300 with 60s headroom for
+# the rest of check_alerts (alert eval ~0.7s + report formatting).
+# Long jobs (daily_update can take 5-10min) should run via direct host cron
+# (configured separately), NOT via this piggy-back fan-out.
 
 
 def _utc_now() -> datetime:
