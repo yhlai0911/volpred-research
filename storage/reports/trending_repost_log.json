@@ -82,5 +82,23 @@
     "status": "published",
     "fb_post_draft": "看到一個數字停了一下。\n\nNikkei 過去一年漲 68%，但美元計價的 EWJ 只漲 32%。\n\n中間 36 個百分點，主要被日圓貶值吃掉。\n\n這個本來不奇怪。Abenomics 之後，弱日圓推日股，已經習慣了。\n\n但有件事在悄悄變。\n\n過去三個月，Nikkei 跟 USDJPY 的 60 日相關係數從 +0.31 翻到 −0.47。換句話說，「弱日圓利多日股」這個關係，現在反向。\n\nFisher z 檢定 p < 0.0001。不是噪音。\n\n為什麼重要？因為對美元投資人，過去十年的對沖紅利是建立在「日股漲、日圓弱、兩邊抵銷」的同步上。\n\n當這個同步斷掉，下一段如果日圓反彈、日股下殺，就是雙殺。EWJ 過去 30 天的波動 19%，會嚴重低估真實尾巴。\n\n我在追的不是日股創高，是 USDJPY 會不會跌破 155。那才是 carry trade 平倉真正開始的訊號。",
     "fb_comment_draft": "完整版分析 + 圖表在這裡 → https://volpred.zeabur.app/article/mile_dda1e670"
+  },
+  {
+    "date": "2026-05-16",
+    "trending_topic": "VIXTWN near 40 vs US VIX 17 divergence — cross-market vol regime split",
+    "source_surface": "VIXTWN CSV (VolPred primary), yfinance ^VIX, SPY",
+    "primary_sources_used": [
+      "data/vixtwn/vixtwn_daily.csv (VIXTWN Dec avg=20.35, Jan=22.12, Apr=31.74, 5/14=39.33, YTD low=16.50, YTD high=41.63)",
+      "yfinance ^VIX (Dec avg=15.55, Jan=16.05, Apr=19.81, May avg=17.58, 5/14=17.26, peak 31.05 on 3/27)",
+      "yfinance SPY (low 631.97 on 3/30, 5/14=748.17, +18.4% rally)"
+    ],
+    "volpred_angle": "cross-market vol regime divergence — VIXTWN/VIX ratio expanded from 1.31x (Dec) to 2.24x (May); VT strategy 12/VIX blindspot when using US VIX for 0050 allocation",
+    "mile_id": "mile_609d9ff3",
+    "fb_post_status": "pending",
+    "fb_post_url": null,
+    "word_count": 1715,
+    "gemini_verdict": "CONDITIONAL_PASS (1 critical fix: VIX peak 25.60→31.05 corrected; minor AI phrases improved)",
+    "codex_verdict": "MANUAL_PASS (all 8 key numbers verified: ratios 1.31/1.38/1.60/2.24, VIXTWN gain 138%, SPY rally 18.4%, VIX drop 44.4%, spread 22pt; no overclaim; no lookahead bias; Codex CLI scanned repo not article — manual cross-check applied)",
+    "status": "published"
   }
 ]
