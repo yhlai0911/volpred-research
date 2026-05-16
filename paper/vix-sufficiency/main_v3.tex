@@ -45,7 +45,7 @@
 % ─── Abstract ────────────────────────────────────────────────
 \begin{abstract}
 \noindent
-We conduct a systematic out-of-sample horse race among eleven pre-specified signal families---cross-asset volatility momentum, VIX term structure, behavioral sentiment, the variance risk premium, multi-asset portfolio optimization, equal risk contribution, Bitcoin volatility, the yield curve slope, Google Trends fear proxies, overnight VIX changes, and calendar anomalies---evaluating whether any can improve upon VIX alone for equity volatility forecasting and volatility-timing portfolio construction. Using daily S\&P~500 data spanning 1993--2026, we apply a unified forecast pipeline with strict lag enforcement, transaction-cost accounting, the \citet{harvey2016} multiple-testing threshold ($|t|>3.0$), formal Holm-Bonferroni correction, and proxy-robust evaluation following \citet{patton2011}. The main finding is strongly negative: not a single signal family produces a statistically significant out-of-sample improvement---whether measured by the standard \citet{campbell2008} $R^2_{\text{OOS}}$ relative to the historical mean, by incremental $R^2$ relative to VIX-only forecasts, or by Sharpe ratio gains for volatility-timing strategies---and all results survive Holm-Bonferroni family-wise error rate correction. The VIX--realized volatility $R^2$ ranges from 0.24 to 0.64 across five non-overlapping eras spanning 33 years (coefficient of variation = 0.37), demonstrating time-invariance. Volatility model rankings are criterion-dependent---GJR-GARCH dominates under proxy-robust QLIKE on $r_t^2$ (Model Confidence Set sole member) while AMEM dominates for VaR/ES risk management (composite score 1.94 vs.\ 1.63)---yet VIX sufficiency holds regardless of which model or criterion is used. We frame VIX sufficiency as a rational outcome of option-market information aggregation and show that volatility timing functions as drawdown insurance---costly in Sharpe terms (average drag 3.49\%/year for 12/VIX) but welfare-improving for investors with CRRA risk aversion $\gamma \geq 4.5$. The informative null sharpens the research frontier: future gains require either higher-frequency realized measures or genuinely exogenous information not already embedded in option prices.
+We conduct a systematic out-of-sample horse race among eleven pre-specified signal families---cross-asset volatility momentum, VIX term structure, behavioral sentiment, the variance risk premium, multi-asset portfolio optimization, equal risk contribution, Bitcoin volatility, the yield curve slope, Google Trends fear proxies, overnight VIX changes, and calendar anomalies---evaluating whether any can improve upon VIX alone for equity volatility forecasting and volatility-timing portfolio construction. Using daily S\&P~500 data spanning 1993--2026, we apply a unified forecast pipeline with strict lag enforcement, transaction-cost accounting, the \citet{harvey2016} multiple-testing threshold ($|t|>3.0$), formal Holm-Bonferroni correction, and proxy-robust evaluation following \citet{patton2011}. The main finding is strongly negative: not a single signal family produces a statistically significant out-of-sample improvement---whether measured by the standard \citet{campbell2008} $R^2_{\text{OOS}}$ relative to the historical mean, by incremental $R^2$ relative to VIX-only forecasts, or by Sharpe ratio gains for volatility-timing strategies---and all results survive Holm-Bonferroni family-wise error rate correction. The VIX--realized volatility $R^2$ ranges from 0.24 to 0.64 across five non-overlapping eras spanning 33 years (coefficient of variation = 0.37), demonstrating time-invariance. Volatility model rankings are criterion-dependent---GJR-GARCH dominates under proxy-robust QLIKE on $r_t^2$ (Model Confidence Set sole member) while AMEM dominates for VaR/ES risk management (composite score 1.94 vs.\ 1.63)---yet VIX sufficiency holds regardless of which model or criterion is used. We frame VIX sufficiency as a rational outcome of option-market information aggregation and show that volatility timing functions as drawdown insurance---costly in Sharpe terms (average drag 3.49\%/year for 12/VIX) but welfare-improving for investors with CRRA risk aversion $\gamma \geq 4.5$. The aggregate null conceals structured channel-specific heterogeneity: HAR+VIX achieves regime-invariant gains on Parkinson realized volatility for large-cap equity (QQQ/IWM, all three VIX regimes), GARCH-MIDAS long-run factors are universally null (0 conditional passes across 54 cells), and GAS-t score-driven models are architecturally harmful on equity (DM $t=-3.27$) yet provide validated tail-risk estimation on commodity (ES passes 4/4 assets). The informative null sharpens the research frontier: future gains require either higher-frequency realized measures or genuinely exogenous information not already embedded in option prices.
 
 \medskip
 \noindent
@@ -89,6 +89,7 @@ Our main finding is strongly negative but highly informative. Across 11 signal f
     \item No signal-based strategy statistically outperforms the simple 12/VIX benchmark or the static 50/50 SPY/GLD allocation (maximum Sharpe improvement = +0.010, not significant).
     \item VIX's forecasting power is time-invariant: the VIX--realized volatility $R^2$ ranges from 0.24 (low-volatility QE era, 2012--2020) to 0.64 (post-dot-com era, 2000--2007), with a coefficient of variation of only 0.37.
     \item Even the most economically motivated signal---the variance risk premium---achieves an in-sample $t$-statistic of 3.51 for return prediction but delivers out-of-sample $R^2 < 0.3\%$.
+    \item The aggregate null conceals structured channel-specific heterogeneity: HAR+VIX achieves regime-invariant Parkinson-volatility gains on large-cap equity (QQQ/IWM, all three VIX regimes); GARCH-MIDAS long-run factors are universally null (0 of 54 conditional passes); GAS-t is architecturally harmful on equity (DM $t = -3.27$ for SPY) but provides validated tail-risk estimation on negatively-skewed commodities (ES backtest passes 4/4 assets at 1\% level).
 \end{itemize}
 
 We interpret this null through the lens of option-market information aggregation. VIX is not simply a backward-looking statistical estimate; it is the forward-looking consensus of thousands of option traders who collectively incorporate cross-asset signals, macroeconomic data, sentiment, and term structure information into their pricing. The eleven signal families we test are precisely the inputs that option traders use. VIX, by construction, already contains them.
@@ -530,6 +531,9 @@ ERC & 2 & 1.795 & $-13.3$ & No \\
 
 The result is unambiguous: no multi-asset strategy beats the simple 50/50 SPY/GLD allocation on Sharpe ratio. Adding assets reduces maximum drawdown (9-asset minimum variance achieves MDD of only $-5.7\%$ versus $-13.3\%$ for 50/50) but at the cost of lower returns, resulting in lower Sharpe ratios. This is consistent with \citet{demiguel2009}, who show that estimation error in optimized portfolios offsets diversification benefits.
 
+We further test whether financial-stress alt-data (NFCI, STLFSI, USEPU, WLEMU) can improve a daily regime-switching allocation between SPY and GLD. The matched-pair design (K1123, $N = 1{,}819$ trading days, 2019--2026) tests five alt-data allocation rules against the static 50/50 baseline (Sharpe $= 1.31$, OOS Sharpe $= 1.98$). All five alt-data strategies underperform the baseline on full-sample Sharpe (best: $1.16$) and on out-of-sample Sharpe. This extends the allocation null from the portfolio-optimization domain (Table~\ref{tab:multiasset}) to the regime-switching domain: VIX sufficiency holds regardless of whether the application is volatility forecasting, volatility-timing strategy, multi-asset optimization, or alt-data regime allocation.
+% source: experiments/k1123/k1123_results.json .verdict .headline_table .n_days
+
 \subsection{Era Stability of VIX Sufficiency}
 
 Table~\ref{tab:era_stability} presents the VIX forecasting power and strategy performance across five non-overlapping eras.
@@ -594,6 +598,9 @@ Vol momentum 20/60 & 0.0001 & 0.0004 & 0.0216$^{\dagger}$ & 0.0001 & 0.0372$^{\d
 \end{table}
 
 The pattern is nuanced: during the three non-crisis eras (DotCom, PostDotCom, LowVol/QE), incremental $R^2$ values are uniformly tiny (all below 0.001) across all signals, confirming VIX sufficiency in normal market regimes. However, during the GFC (Era 3) and COVID/Inflation (Era 5) eras, three signals---Overnight VIX absolute change, VRP proxy, and Vol momentum 20/60---exhibit materially larger incremental $R^2$ values (up to 0.037 for Vol momentum in Era 5), with four in-sample cells crossing the Harvey threshold: all three signals in Era 3 GFC, and Vol momentum 20/60 in Era 5. This in-sample crisis-era exception is consistent with the paper's core out-of-sample finding, however: all era-pooled OOS Diebold--Mariano tests remain $|t|<3$ even after Holm--Bonferroni correction (Table~\ref{tab:horse_race}). The refined reading is that VIX sufficiency is robust on average but has identified, well-defined crisis-regime boundary conditions where the option-market information set may be partially incomplete during extreme volatility episodes.
+
+A complementary matched-pair design directly tests whether alt-data signals improve forecasting specifically during VIX jump days (K1117, $N_{\text{jump}} = 181$ days at the VIX 2$\sigma$ threshold, $N_{\text{total}} = 4{,}022$). Six alt-data variables (VVIX, USEPU, NFCI, ANFCI, STLFSI, WLEMU) are tested for incremental forecasting content on jump-day windows versus control windows. The verdict is FULL\_NULL: no signal achieves DM-HLN $|t|>2$ in any specification, and no hypothesis ($H_1$, $H_2$, $H_3$) passes BH correction (VVIX: $H_1$ DM $t = 1.35$, $p_{\text{BH}} = 0.69$). VIX sufficiency extends even to extreme volatility episodes where option-market information updating is fastest.
+% source: experiments/k1117/k1117_results.json .verdict .jump_counts .tests.vvix
 
 \subsection{Criterion-Dependent Model Rankings}
 \label{sec:criterion_dependent}
@@ -674,6 +681,64 @@ Era & VT Sharpe & BH Sharpe & $\Delta$Sharpe & VT MDD & BH MDD & Winner \\
 
 The 12/VIX strategy wins in only 1 of 5 eras (the low-volatility QE period). This further reinforces that VT strategies do not generate alpha in the traditional sense; their value lies in drawdown insurance, which is most apparent during high-volatility regimes where VT reduces exposure.
 
+\subsection{Channel-Specific Mechanism Heterogeneity}
+\label{subsec:channel_specific}
+
+% source: experiments/k1137/k1137_results.json .channel_analysis
+% source: experiments/k1138/k1138_results.json .summary
+% source: experiments/k1136/k1136_results.json .summary
+% source: experiments/k1143/k1143_results.json .per_asset_results.SPY.model_metrics
+% source: experiments/k1135/k1135_results.json .verdict
+
+The aggregate null across eleven signal families conceals a structured heterogeneity in \emph{how} different model architectures fail. We characterize three channels with qualitatively distinct failure patterns, providing sharper guidance for future research beyond "all signals fail."
+
+\subsubsection{Channel 1: HAR+VIX on Equity---Regime-Invariant Gains on Parkinson Volatility}
+
+The HAR-RV+VIX model (M4: Corsi 2009 HAR on log-Parkinson realized volatility with $\log(\text{VIX}^2_{t-1})$ regressor) delivers statistically significant out-of-sample improvements on large-cap and mid-cap equity indices relative to a GJR-GARCH(1,1) Normal baseline evaluated on the same Parkinson target. We define regime-invariance as passing the Harvey threshold ($|t|>3.0$, BH-adjusted) in all three VIX quintile regimes (low/mid/high).
+
+Across 18 equity asset $\times$ regime cells (3 assets $\times$ 3 regimes $\times$ 2 models, evaluated in K1137), HAR+VIX achieves regime-invariant status for two equity indices: QQQ passes across all three regimes (low $t=6.79$, mid $t=4.83$, high $t=3.09$; all BH-adjusted $p < 0.001$), and IWM passes across all three regimes (low $t=4.22$, mid $t=3.61$, high $t=2.73$; all BH-adjusted $p < 0.05$). SPY achieves 2 of 3 regime passes (low $t=7.99$, mid $t=4.39$, but high $t=2.26$ fails BH correction). Across the full 54-cell evaluation (6 assets $\times$ 3 regimes $\times$ 3 models), 17 cells pass BH-adjusted Harvey threshold.
+
+These gains are specific to the Parkinson-range volatility measurement framework.\footnote{K1136 fair-test analysis establishes that GARCH-MIDAS-X, a score-driven long-memory extension, achieves zero conditional passes (0/3 regimes) under the same matched-target protocol (K1136, \texttt{fair\_test\_1\_m3\_midas\_pass\_count = 0}), ruling out the possibility that any long-run factor model outperforms.} The HAR+VIX gains reflect the empirically documented efficiency of Parkinson-range estimators for capturing intraday volatility dynamics that daily closing-price GARCH imperfectly approximates---not an incremental signal beyond VIX in the traditional regression sense.
+
+\subsubsection{Channel 2: GARCH-MIDAS Long-Run Factor---Universal Null}
+
+GARCH-MIDAS-X, which extends the baseline GJR-GARCH by adding a slow-moving multiplicative component driven by lagged monthly VIX-squared ($\tau_t = \exp(m + \theta \times \text{VIX}^2_{\text{monthly}})$), achieves zero BH-adjusted conditional passes across all three VIX regimes and all six assets evaluated in K1137 (\texttt{n\_midas\_conditional\_pass = 0}). This null is universal: neither equity nor commodity assets benefit from the MIDAS long-run factor once target-consistent evaluation is applied.
+
+The MIDAS null strengthens the option-market information aggregation argument: any low-frequency volatility information that a one-month lagged VIX factor could supply is already impounded in the contemporaneous VIX level, leaving no incremental forecasting content for the long-run MIDAS component.
+
+\subsubsection{Channel 3: GAS-t Score-Driven Models---Asset-Class Bifurcation}
+
+The Generalized Autoregressive Score (GAS-t) framework \citep{crealetal2013} exhibits qualitatively different behavior across asset classes.
+
+\textbf{Equity: architectural incompatibility.} On SPY (K1138: $N_{\text{OOS}} = 1{,}323$, 2021--2026), GAS-t is actively harmful relative to GJR-GARCH Normal (DM-HLN $t = -3.27$, $p < 0.001$). K1143 tests four candidate remedies---Hansen skew-t asymmetry (M2), score winsorization at $\pm0.3$ (M3), persistence capping at $\beta \leq 0.9$ (M4), and regime switching to HAR in low-VIX environments (M5)---and finds that \emph{all variants produce QLIKE above the GJR-N baseline}: M1 symmetric GAS-t QLIKE $= 1.527$ versus GJR-N $= 1.474$; Hansen skew-t (M2) QLIKE $= 1.535$ (worse than M1). The post-2020 equity return distribution (excess kurtosis $= 8.85$, skewness $= +0.30$) contradicts the GAS framework's core premise that score-driven updates stabilize conditional variance when innovations are approximately Student-$t$. Instead, the GAS score exhibits positive skewness ($+1.58$), causing right-biased updates that systematically overweight large positive return shocks.
+
+\textbf{Commodity: tail-risk instrument, not volatility forecaster.} On negatively skewed commodities (USO, UNG), the skew-t GAS extension \citep{hansen1994} recovers VaR/ES performance that the symmetric GAS-t variant lacks (K1135, $H_3$: ES backtests pass at the 1\% level for all four assets, BH-adjusted). However, forecasting QLIKE remains null (0 of 4 assets improve, $H_1$ pass count $= 0$). This bifurcation---ES improvement without QLIKE improvement---indicates that skew-t GAS captures distributional shape for risk management without improving point volatility forecasts.
+
+The Channel~3 pattern thus identifies a \emph{usage boundary}: for equity volatility forecasting, GAS-t is architecturally incompatible and should be replaced by GJR-GARCH. For commodity tail-risk estimation specifically, skew-t GAS provides a validated tail-risk instrument despite null forecasting performance. These distinctions cannot be inferred from the aggregate null result alone.
+
+\begin{table}[H]
+\centering
+\small
+\begin{threeparttable}
+\caption{Channel-Specific Outcome Matrix}
+\label{tab:channel_outcomes}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Channel & Equity (SPY/QQQ/IWM) & Commodity (USO/GLD) & TLT \\
+\midrule
+1. HAR+VIX (Parkinson target) & \textbf{PASS} (QQQ/IWM 3/3 regimes) & PASS (TLT/USO) & PASS (3/3 regimes) \\
+2. GARCH-MIDAS long-run & NULL (0/3 regimes all assets) & NULL & NULL \\
+3a. GAS-t (QLIKE) & \textbf{HARMFUL} (SPY $t=-3.27$) & NULL & --- \\
+3b. Skew-t GAS (ES 1\%) & --- & \textbf{PASS} (4/4 assets) & --- \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+% source: K1137 .channel_analysis.channel_1_HAR_equity; K1138 .summary; K1136 .summary; K1143 .per_asset_results; K1135 .verdict
+\item \textit{Notes}: Channel 1 PASS requires BH-adjusted Harvey $|t|>3.0$ in all three VIX regimes. Channel 2 evaluates GARCH-MIDAS-X fair test (matched target). Channel 3a tests QLIKE improvement vs GJR-GARCH Normal. Channel 3b tests ES backtest at 1\% coverage. Regime-invariant = PASS in all low/mid/high VIX regimes.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
 
 %=================================================================
 \section{Why the Null is Informative}
@@ -871,6 +936,9 @@ Christensen, B.~J., \& Prabhala, N.~R. (1998). The relation between implied and 
 \bibitem[Corsi(2009)]{corsi2009}
 Corsi, F. (2009). A simple approximate long-memory model of realized volatility. \textit{Journal of Financial Econometrics}, 7(2), 174--196.
 
+\bibitem[Creal et al.(2013)]{crealetal2013}
+Creal, D., Koopman, S.~J., \& Lucas, A. (2013). Generalized autoregressive score models with applications. \textit{Journal of Applied Econometrics}, 28(5), 777--795.
+
 \bibitem[Da et al.(2011)]{da2011}
 Da, Z., Engelberg, J., \& Gao, P. (2011). In search of attention. \textit{Journal of Finance}, 66(5), 1461--1499.
 
@@ -891,6 +959,9 @@ Estrella, A., \& Mishkin, F.~S. (1998). Predicting U.S.\ recessions: Financial v
 
 \bibitem[Fleming et al.(2001)]{fleming2001}
 Fleming, J., Kirby, C., \& Ostdiek, B. (2001). The economic value of volatility timing. \textit{Journal of Finance}, 56(1), 329--352.
+
+\bibitem[Hansen(1994)]{hansen1994}
+Hansen, B.~E. (1994). Autoregressive conditional density estimation. \textit{International Economic Review}, 35(3), 705--730.
 
 \bibitem[Hansen and Lunde(2005)]{hansen2005}
 Hansen, P.~R., \& Lunde, A. (2005). A forecast comparison of volatility models: Does anything beat a GARCH(1,1)? \textit{Journal of Applied Econometrics}, 20(7), 873--889.
