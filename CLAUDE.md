@@ -129,7 +129,9 @@
 
 **Trigger**：同一類錯誤（同根因、同症狀、同類 bug 模式）連續發生 **3 次** OR 同一處（同一 script / function / pipeline 節點）連續 hang 住 **3 次**。
 
-**禁止 reaction**：再 patch 一次、加一個 flag、塞一層 retry / try-except、寫一個 workaround / fallback、再 grep + sed 一次。**任何 surface-level patch 都不准。**
+**但 strike 3 是 LATEST 觸發點不是 ONLY 觸發點**（2026-05-16 用戶補強）：**一旦看見結構性 root cause（dual source、race condition、無 single-source-of-truth、無 lock、無 hang detect、wrong domain model 等），就立刻三層重構，不等次數累積到 3。** 「先 patch 再 observe 看會不會 strike 3」是被禁止的偷懶 reaction。
+
+**禁止 reaction**：再 patch 一次、加一個 flag、塞一層 retry / try-except、寫一個 workaround / fallback、再 grep + sed 一次、「先記下來等下次再修」、「strike 1 不修等 strike 3」。**任何 surface-level patch 或拖延都不准。**
 
 **強制 reaction**：從**底層邏輯、流程、程式架構徹底翻掉重新優化**。判斷三層：
 
