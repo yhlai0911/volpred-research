@@ -9240,7 +9240,7 @@
   {
     "id": "task-k981-fix-conditional-pass",
     "title": "K981 fix: wavelet extra lag + IS t-stats + QLIKE floor (Codex CONDITIONAL_PASS)",
-    "status": "pending",
+    "status": "in_progress",
     "priority": 3,
     "created_at": "2026-05-16T04:31:00+08:00",
     "description": "Codex primary review (2026-05-16) CONDITIONAL_PASS with 3 Major unfixed issues:\n(1) Wavelet feature uses t-2 lag (L95,L184): compute_wavelet_features uses values[t-window:t] then shift(1), giving t-2. Fix: change to values[t-window+1:t+1] or remove extra shift from wavelet features. After fix, re-run and re-verify NULL conclusion.\n(2) QLIKE floor artifact (L171,L222): max(pred,0.0001) causes WHAR_HAR_db4=474.48 artifact. Fix: use data-scale-compatible lower bound (0.5-1% quantile of train targets).\n(3) IS t-stats wrong (L460,L474): intercept model but using X'X without constant column; k=p+1 inconsistent. Fix: use design matrix with intercept column or statsmodels.OLS.\n4 Minor issues also noted — see experiments/k981/k981_codex_review_primary.md.",
@@ -9251,7 +9251,10 @@
       "wavelet_lag",
       "is_tstats"
     ],
-    "task_type": "experiment"
+    "task_type": "experiment",
+    "compute_job_id": "compute-k981-v2-wavelet-lag-fix-qlike-floor-fix-is-t-stats-fix-1778915759",
+    "updated_at": "2026-05-16T08:00:00+00:00",
+    "note": "3 Major + 4 Minor fixes applied to k981_wavelet_har.py. Re-run enqueued to compute queue. Awaiting results for verdict verification."
   },
   {
     "id": "K1302b",

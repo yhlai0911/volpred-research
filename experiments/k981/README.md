@@ -93,3 +93,19 @@ IS R² = 0.126（低於 HAR 的預期水準）
 - `k981_wavelet_har_results.json` — 完整結果
 - `k981_wavelet_decomposition.png` — 小波分解視覺化
 - `k981_forecast_comparison.png` — 模型比較圖
+
+## v2 修正（2026-05-16 Codex CONDITIONAL_PASS 修正）
+
+**問題（Codex primary-path 2026-05-16）**：
+1. **MAJOR**: Wavelet window t-2 lag — `values[t-window:t]` 後又 `.shift(1)` 導致 wavelet 比 HAR 多一日 lag（t-2 vs t-1），對 wavelet 不公平。
+2. **MAJOR**: QLIKE floor 0.0001 太小（r² scale ~1-10），造成 WHAR_HAR_db4=474.48 artifact。
+3. **MAJOR**: IS t-stats 設計矩陣不含截距項，標準誤偏誤。
+4. **MINOR**: HAR vs WHAR DM t=5.98 未寫入 JSON；IS R²=0.126 未存入 JSON；n_oos 無法區分 total vs evaluated；7 DM tests 無 multiple-testing note。
+
+**修正（v2）**：
+- `values[t-window+1:t+1]` 使 wavelet lag 與 HAR 對稱（t-1）
+- QLIKE floor 改為 `np.percentile(y_train, 0.5)` 資料自適應下限
+- XtX 加截距列，IS t-stats 現在正確
+- HAR_vs_WHAR_db4 DM、wavelet_is_r2、dm_multiple_testing_note 均已加入 JSON
+
+**狀態**：v2 已 enqueue compute queue (compute-k981-v2-wavelet-lag-fix-qlike-floor-fix-is-t-stats-fix-1778915759)，等待重跑驗證 NULL 結論是否持續（expected: HAR 仍優於 wavelet，但 WHAR_HAR_db4 QLIKE 應大幅改善）。
