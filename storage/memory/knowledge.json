@@ -29840,5 +29840,51 @@
       }
     },
     "codex_review": "CONDITIONAL_PASS (2026-05-15, primary-path Codex; bootstrap fix applied)"
+  },
+  {
+    "item_id": "K901",
+    "experiment_id": "K901",
+    "created_at": "2026-05-16",
+    "title": "12/VIX VT: Universal MDD Reduction Across 13 International Markets (Paper 3 Table 5)",
+    "verdict": "CONFIRMED",
+    "confidence": 0.9,
+    "description": "12/VIX VT (w_t = min(12/VIX_{t-1}, 1.0)) tested across 13 international ETF markets (6 DM: SPY, EWJ, EWG, EWU, EWA, EWC; 7 EM: EWZ, EEM, FXI, EWH, EWT, EWY + EFA). Period: 2005-2026. MDD improved in 13/13 markets (UNIVERSAL). Sharpe improved in 0/13 markets — VT is drawdown insurance, not return enhancer. GJR gamma > 0 in 13/13 markets, significant (t>1.96) in 12/13 (mean gamma=0.103, median=0.095). DM test significant (Harvey |t|>3): 0/13. Cross-sectional Spearman(gamma, ΔMDD): rho=0.346 (p=0.247, n.s.). Spearman(gamma, ΔSharpe): rho=0.148 (p=0.629, n.s.). Resolves Paper 3 R2 HIGH A.2: Table 5 now fully traceable (K567 only had 6 markets). Bootstrap Sharpe CI: seed=42, np.random.default_rng (reproducible). GJR: 15/15 windows converged for all 13 markets (convergence_flag==0 gate). Codex review: PASS (2026-05-16, re-review after FAIL fix; all 6 items passed).",
+    "related_experiments": [
+      "K567",
+      "K1178"
+    ],
+    "tags": [
+      "VT",
+      "international",
+      "MDD",
+      "GJR-GARCH",
+      "Paper3",
+      "Table5",
+      "13-markets",
+      "bootstrap"
+    ],
+    "asset": "SPY/EWJ/EWG/EWU/EWA/EWC/EWZ/EEM/EFA/FXI/EWH/EWT/EWY",
+    "method": "12/VIX VT vs B&H; GJR-GARCH rolling (window=2000); Bootstrap Sharpe CI (n=5000, seed=42); DM test",
+    "data_period": "2005-2026 (yfinance)",
+    "key_stats": {
+      "n_markets": 13,
+      "n_mdd_improved": 13,
+      "n_sharpe_improved": 0,
+      "n_gamma_positive": 13,
+      "n_gamma_significant": 12,
+      "mean_gamma": 0.1029,
+      "median_gamma": 0.0948,
+      "n_dm_significant_harvey": 0,
+      "spearman_gamma_mdd": {
+        "rho": 0.346,
+        "p": 0.247
+      },
+      "spearman_gamma_sharpe": {
+        "rho": 0.148,
+        "p": 0.629
+      },
+      "gjr_convergence": "15/15 per market, 0 failed"
+    },
+    "codex_review": "PASS (2026-05-16, primary-path Codex gpt-5.4; re-review after FAIL fix)"
   }
 ]

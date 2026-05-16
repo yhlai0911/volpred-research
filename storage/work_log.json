@@ -6179,5 +6179,25 @@
     "verdict": "CONDITIONAL_PASS",
     "summary": "Codex primary review K981 (HAR+Wavelet): CONDITIONAL_PASS. 3 Major: (1) Wavelet extra lag t-2 (new Codex finding), (2) QLIKE floor artifact, (3) IS t-stats intercept mismatch (new Codex finding). Lookahead CLEAN. knowledge.json updated. Fix task created.",
     "output_file": "experiments/k981/k981_codex_review_primary.md"
+  },
+  {
+    "timestamp": "2026-05-16T16:30:00+08:00",
+    "task_type": "trending_repost",
+    "task_id": "task-trending-bond-vol-vix-divergence-20260516",
+    "title": "債市已在喊，股市還沒聽見：30 年公債殖利率破 5% 與 VIX 背離的意義",
+    "status": "succeeded",
+    "mile_id": "mile_50f44a46",
+    "verdict": "CONDITIONAL_PASS",
+    "summary": "Trending repost: Moody’s US sovereign downgrade (Aaa->Aa1) + 30Y Treasury yield 5.08% + VIX-MOVE cross-asset vol divergence. VolPred angle: VT strategy blind spot when relying on VIX alone during cross-asset vol divergence; HAR-RV K1137 context. Gemini 9/10 PASS, manual Codex CONDITIONAL_PASS. 2 charts generated + uploaded to Supabase. Published status=published. FB post pending."
+  },
+  {
+    "task_type": "experiment",
+    "timestamp": "2026-05-16T08:45:00+08:00",
+    "title": "K901 fix + Codex re-review PASS + knowledge.json entry",
+    "description": "Fixed Codex FAIL issues in k901_international_vt_13markets.py (GJR silent convergence + bootstrap seed). Compute_queue re-run 62s (13 markets, 100% convergence). Codex re-review: PASS. knowledge.json K901 entry written.",
+    "experiment_id": "K901",
+    "codex_review": "PASS (2026-05-16)",
+    "commit": "9da47136",
+    "tokens_used": "N/A (main thread code edit + Codex CLI review)"
   }
 ]

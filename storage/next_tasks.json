@@ -7735,13 +7735,14 @@
   {
     "id": "document_K901_kb_entry",
     "title": "K901 13-market international VT KB entry — Paper3 parent",
-    "status": "pending",
+    "status": "succeeded",
     "priority": 3,
     "task_type": "experiment",
     "created_at": "2026-05-13T13:38:27.087603",
     "description": "K901 has 29KB results, 13-market international VT: MDD improvement 13/13, Sharpe 0/13, GJR gamma>0 13/13. Is parent experiment for K1178 (Paper 3 Table 5). Document in knowledge.json.",
     "source": "nosource_rescan_extension_top5",
-    "blocked_reason": "prereq: task-k901-codex-review-primary must PASS first"
+    "completed_at": "2026-05-16T08:45:00+08:00",
+    "result_summary": "knowledge.json entry K901 written: 13-market VT, MDD 13/13, gamma>0 13/13, Codex PASS. Paper 3 Table 5 provenance resolved."
   },
   {
     "id": "K1303_revision_har_cj_abd",
@@ -7842,7 +7843,7 @@
   {
     "id": "task-k901-codex-review-primary",
     "title": "K901 Codex primary-path review (no code review recorded)",
-    "status": "pending",
+    "status": "succeeded",
     "priority": 3,
     "task_type": "paper_review",
     "created_at": "2026-05-13T05:51:16",
@@ -7852,7 +7853,9 @@
       "K901",
       "international",
       "paper3"
-    ]
+    ],
+    "completed_at": "2026-05-16T08:45:00+08:00",
+    "result_summary": "Codex PASS (2026-05-16 re-review after fix). All 6 items verified: GJR convergence gate, bootstrap SEED=42, signal.shift(1), dropna, review_flags, no global suppress."
   },
   {
     "id": "gen_article_k1100g_d3",
@@ -9206,7 +9209,7 @@
   {
     "id": "task-k901-fix-codex-fail",
     "title": "K901 fix: GJR silent fail + Bootstrap seed — Codex FAIL → re-review",
-    "status": "pending",
+    "status": "succeeded",
     "priority": 3,
     "created_at": "2026-05-16T04:31:00+08:00",
     "description": "Codex primary review (2026-05-16) FAIL. 2 Major issues:\n(1) GJR-GARCH convergence failure silently swallowed (L48,L224,L243-245,L249-265,L421-424): global warnings.filterwarnings ignore + bare except:pass + convergence_flag not checked. Fix: remove global ignore; log arch warnings; only include converged==True estimates in summary; add n_attempted/n_failed/n_converged to results JSON.\n(2) Bootstrap Sharpe CI no fixed seed (L270-289): uses np.random.choice, violates project seed rule. Fix: BOOTSTRAP_SEED=42, rng=np.random.default_rng(BOOTSTRAP_SEED), seed in results.\n3 Minor issues also noted — see experiments/k901/k901_codex_review.md.\nAfter fix: re-run experiment, submit to Codex review again. CONDITIONAL_PASS+ required before knowledge.json entry.",
@@ -9217,7 +9220,9 @@
       "bootstrap_seed",
       "gjr_convergence"
     ],
-    "task_type": "experiment"
+    "task_type": "experiment",
+    "completed_at": "2026-05-16T08:07:00+08:00",
+    "result_summary": "Code fixed: GJR global suppress removed + convergence gate added; bootstrap seed BOOTSTRAP_SEED=42 via default_rng; re-run enqueued compute_queue. Commit 9da47136."
   },
   {
     "id": "task-k981-fix-conditional-pass",
