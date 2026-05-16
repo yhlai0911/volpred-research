@@ -29886,5 +29886,22 @@
       "gjr_convergence": "15/15 per market, 0 failed"
     },
     "codex_review": "PASS (2026-05-16, primary-path Codex gpt-5.4; re-review after FAIL fix)"
+  },
+  {
+    "item_id": "K1302b",
+    "title": "K1302b: GJR-GARCH canonical γ for 5 unlisted TW individual stocks — completes Paper 2 Table 2 reproduce gate",
+    "category": "knowledge",
+    "experiment_id": "k1302b",
+    "content": "[提出: Claude, 執行: Claude background agent (worktree-violated→cherry-picked)] K1302b 補完 K1302 未涵蓋的 5 檔個股 (2882 Cathay/2891 CTBC/2412 Chunghwa/2885 Yuanta/2881 Fubon)。Full-sample 2008-01-01 to 2024-12-31 (n=4170 each), GJR-GARCH(1,1) Normal, Bollerslev-Wooldridge robust SE, 100-multistart seeds 42..141, np.random.seed(42). 結果: 全 5/5 converged on ≥1 start, γ>0 全 5/5, persistence<1 全 5/5. avg γ=+0.0241, avg persistence=0.9867. Per-stock: 2882 γ=+0.0384 t=+2.128 (conv 100/100); 2891 γ=+0.0396 t=+1.911 (conv 100/100); 2412 γ=+0.0011 t=+0.193 (conv 26/100, low-vol defensive telecom, flat LL near γ≈0, honestly reported); 2885 γ=+0.0199 t=+1.531 (conv 100/100); 2881 γ=+0.0217 t=+1.460 (conv 100/100). Codex primary review CONDITIONAL_PASS (0 CRITICAL, 1 MINOR README wording fixed in 2026-05-16 follow-up commit). 主線程 next: combine K1302+K1302b into 9-stock canonical avg → update Paper 2 Table 2 + §3.2 amplification ratio + reproduce.py byte-match.",
+    "verdict": "PASS",
+    "closure_status": "codex_conditional_pass_minor_addressed",
+    "paper_target": "paper/taiwan-vt (Paper 2 Table 2 reproduce gate completion)",
+    "related_experiments": [
+      "K1302",
+      "K1166",
+      "K1146"
+    ],
+    "timestamp": "2026-05-16T01:44:18Z",
+    "author": "main_thread"
   }
 ]
