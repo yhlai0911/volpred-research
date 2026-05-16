@@ -16,7 +16,14 @@ ALERT_RECIPIENT = "yihao.lai@gmail.com"
 ALERT_LEVELS = ("info", "warn", "critical")
 ALERT_DEDUP_WINDOW = timedelta(hours=24)
 SCHEDULER_STALE_WINDOW = timedelta(minutes=30)
-RELEASE_POOL_GAP_BUFFER = timedelta(minutes=30)  # grace on top of configured interval
+RELEASE_POOL_GAP_BUFFER = timedelta(minutes=60)  # grace on top of configured interval
+# 2026-05-17 bump 30→60min: piggy-back release fires only on check_alerts
+# hourly cron tick (`0 * * * *`). With 180min interval + 30min buffer = 210min
+# threshold, normal cycle could routinely hit 210-240min (release at HH:XX,
+# age reaches interval-5 at HH+2:55, next hourly tick at HH'+:00 → gap up to
+# interval+59min). Three consecutive same-pattern alerts (23:55/03:59/07:58
+# CST 2026-05-16/17) triggered warn just BEFORE next auto-piggy fire.
+# Buffer must be ≥ check_alerts cadence (60min) to absorb the fence-post.
 
 _TAIPEI_TZ = ZoneInfo("Asia/Taipei")
 _RELEASE_POOL_FIRE_RE = re.compile(r"^=== \[release-pool\] fire at (.+) ===$")
