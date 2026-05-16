@@ -161,6 +161,29 @@
 
 **Pending（paper_body task）**：body.tex EAV heterogeneity 段落需對應改寫（K1141）；narrative state = decision_made_awaiting_body_rewrite。K1302 γ provenance rebuild 仍 pending（FAIL_LARGE_DRIFT → needs separate investigation）。
 
+**★ Paper 2 §3.2 Amplification Narrative — DECISION PENDING (2026-05-16, K1370)**
+
+K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch artifact**。
+
+| Spec / period | TAIEX γ | 9-indiv mean γ | Ratio | Source |
+|---|---|---|---|---|
+| Table 1 (rolling w=2000 NW-HAC, 1997-2026 +81 Asian-crisis days) | 0.272 | — | — | `paper2_table1_twii_stats` |
+| Table 2 / K1302+K1302b (full-sample BW-robust, 2008-2024) | — | 0.027 | — | K1302/K1302b |
+| Body.tex §3.2 headline = Table 1 ÷ Table 2 | 0.272 | 0.027 | **10×** | spec-mismatch artifact |
+| K1370 matched-sample (2008-2024 both) BW-robust | 0.114 | 0.024 | **4.70×** | K1370 sanity (B=10 quick + B=1000 in progress) |
+| K1370 mixed-sample (TAIEX 1997-2026 BW-robust / indiv 2008-2024) | 0.106 | 0.024 | **4.35×** | K1370 sanity |
+
+**Same-spec same-period 比率落在 4.35-4.70×，不是 10×**。Codex v1 review FAIL → v2 (hash-stable + cache guard + per-series n) CONDITIONAL PASS → B=1000 重跑 ETA ~44 min（22:36 CST 啟動）。
+
+**Decision needed (user)**：
+1. (A) headline 改為 **4.7×** matched-sample + 完整披露 spec/period 一致性，撤回 10× 與 8.8× / 9.1× 衍生敘述
+2. (B) headline 保留 10× 但補強質性免責：標明 「spec asymmetric, not same-methodology comparison」
+3. (C) 雙報導：matched-spec 4.7× 為 primary，extended-TAIEX rolling 10× 為 supplementary 並標明 spec mismatch
+
+**Recommendation**：選項 A — 研究誠實 § 第 6 條「結論強度不超過證據；推翻舊結論必回溯更正」。10× headline 不能用 same-spec 復現，等同無法 reproduce。
+
+**Pending**：B=1000 CI 完成 → Codex re-review → user decision (A/B/C) → body.tex §3.2 重寫 → reproduce.py binding 補 K1370。Narrative state = `decision_pending` (NOT yet `decision_made_awaiting_body_rewrite`)。
+
 **第三篇：Is Volatility Targeting Just Trend Following?**
 - `paper/vt-trend-following/main.tex`（29 頁）
 - 目標：Journal of Portfolio Management 或 Financial Analysts Journal
