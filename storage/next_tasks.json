@@ -7587,7 +7587,7 @@
     "title": "TSMC concentration article (mile_a8ac2ae4) — 24h three-model review",
     "priority": 3,
     "description": "mile_a8ac2ae4 (TSMC concentration, audience=general, 6731 chars) 24h 內走 Claude→Gemini→Codex 三模 review。Gemini pro (with today=2026-05-12 calibration) 審 framing/tone/honest-uncertainty；Codex 對 source numbers (R² 0.521 / 0.836, β 0.588 / 0.680) verify against experiments/paper2_sec45_tsmc_vt/tsmc_vt_strategy_results.json。Codex blocked until 2026-05-13 02:46 UTC。",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "blocked_reason": "codex_quota_reset_pending",
     "blocked_until": "2026-05-13T02:46:00Z",
@@ -7596,7 +7596,9 @@
       "3model-review",
       "article-verify"
     ],
-    "created_at": "2026-05-12T06:21:43Z"
+    "created_at": "2026-05-12T06:21:43Z",
+    "completed_at": "2026-05-16T05:21:26.339322+00:00",
+    "result_summary": "三模 review PASS: Claude PASS + Gemini PASS (TL;DR fix applied) + Codex PASS 7/7. TL;DR 比較基準修正 34%→84%, feed.json+Supabase synced."
   },
   {
     "id": "K1316_article_general",

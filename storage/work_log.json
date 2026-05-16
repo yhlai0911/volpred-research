@@ -6239,5 +6239,14 @@
     "title": "K901 v3 alignment fix: code-reviewer CONDITIONAL PASS + knowledge.json updated",
     "status": "succeeded",
     "notes": "Compute job compute-k901-v3-alignment-fix completed (2026-05-16T03:45). Results: 13/13 MDD improvement, 0/13 Sharpe, 0/13 DM |t|>3.0. code-reviewer subagent CONDITIONAL PASS. Updated knowledge.json K901 entry with v3 notes."
+  },
+  {
+    "task_id": "task-mile-a8ac2ae4-3model-review",
+    "task_type": "paper_review",
+    "title": "TSMC concentration article (mile_a8ac2ae4) — 24h three-model review",
+    "status": "succeeded",
+    "timestamp": "2026-05-16T05:21:34.469920+00:00",
+    "summary": "三模 review 完成：Claude PASS / Gemini PASS (Q2 TL;DR fix) / Codex PASS 7/7。TL;DR 比較基準從「歷史 52%→84%」修正為「Pre-2020 34%→2020-2026 84%」，feed.json+Supabase synced。所有數字（R²、β、Sharpe、MDD）完全吻合實驗 JSON，VT shift(1) 確認無 lookahead。",
+    "agent": "main_thread"
   }
 ]
