@@ -6336,5 +6336,24 @@
     "mile_id": "mile_609d9ff3",
     "verdict": "CONDITIONAL_PASS",
     "summary": "Trending repost #2 (2026-05-16): VIXTWN vs US VIX cross-market vol divergence. VIXTWN 39.33 vs VIX 17.26 — ratio expanded from 1.31x (Dec) to 2.24x (May, 5y high range). SPY rally 18.4%, VIX compressed 44% from peak; VIXTWN stayed elevated. VolPred angle: VT 12/VIX blindspot for Taiwan allocation, cross-asset hedge cost asymmetry. Gemini CONDITIONAL_PASS (1 number fix applied), Codex CLI scanned repo (manual audit: all 8 numbers PASS), Anti-AI gate PASS. Published status=published. FB post pending."
+  },
+  {
+    "timestamp": "2026-05-16T13:31:22.769134+00:00",
+    "task_id": "K1370",
+    "task_type": "experiment",
+    "status": "compute_enqueued",
+    "summary": "K1370 block-bootstrap CI script written, piloted (50/50 valid), fixed sv persistence constraint, B=10000 enqueued to compute_queue. Pilot 90% CI [2.1, 5.5], point estimate 4.3× (full-sample 2008-2024, vs old 5.0× rolling-spec). Worker cron picks up next run.",
+    "commit": "4d170074"
+  },
+  {
+    "task_id": "gen_article_k1100g_d6",
+    "task_type": "daily_article",
+    "status": "succeeded",
+    "artifact_id": "mile_ab7c3253",
+    "title": "拿到三倍資料，預測力卻沒有變強——台指期夜盤訊號的邊界條件",
+    "experiment_ref": "K1100g_d6",
+    "started_at": "2026-05-16T14:00:00+00:00",
+    "completed_at": "2026-05-16T14:31:09.130197+00:00",
+    "notes": "K1016 hallucination pattern detected + worktree shared-JSON violation aborted merge. Article was recovered from stash-popped feed.json. Numbers verified against k1100g_d6_results.json: DM t=1.40/1.99, scaling_ratio=0.54/0.57, Harvey FAIL."
   }
 ]

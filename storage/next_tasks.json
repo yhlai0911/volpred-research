@@ -7911,7 +7911,7 @@
     "description": "K1100G_D6 has a non-null verdict in experiments/k1100g_d6/ but no published feed article and no existing task. Verdict: {'primary': 'FAIL', 'explanation': 'DM t weakens or stays weak at extended N: |M. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -7920,7 +7920,9 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.414297+00:00",
     "generated_at": "2026-05-13T05:53:00.414301+00:00",
-    "k_id": "K1100G_D6"
+    "k_id": "K1100G_D6",
+    "completed_at": "2026-05-16T14:30:59.997650+00:00",
+    "artifact_id": "mile_ab7c3253"
   },
   {
     "id": "gen_article_k1100g_d8",
@@ -9284,7 +9286,7 @@
     "title": "K1370: Paper 2 block-bootstrap CI re-computation under canonical full-sample BW-robust spec",
     "priority": 2,
     "description": "Paper 2 §3.2 amplification ratio CI [2.8, 8.1] was computed under draft rolling-window spec (5.0× point estimate). New canonical 10× point estimate (K1302+K1302b avg γ=0.027) needs matching CI recompute. Block bootstrap B=10000, block length 252, seeds 42..10041. Per-stock GJR-GARCH(1,1) BW-robust re-estimated on each bootstrap replicate; amplification ratio = TAIEX γ / mean(individual γ); 90% CI from quantiles. Paper 2 currently flags CI as `(stale)` with K1370 forward-ref. Worktree agent suitable — produces experiments/k1370/{k1370.py, k1370_results.json, README.md}. No knowledge.json write (主線程 + Codex review 後).",
-    "status": "pending",
+    "status": "compute_enqueued",
     "task_type": "experiment",
     "source": "paper2_canonical_pivot_followup_2026_05_16",
     "tags": [
@@ -9295,7 +9297,9 @@
       "k1370"
     ],
     "created_at": "2026-05-16T02:04:43Z",
-    "blocked_reason": null
+    "blocked_reason": null,
+    "compute_queue_id": "k1370-bootstrap-b10000",
+    "updated_at": "2026-05-16T13:31:16.067967+00:00"
   },
   {
     "id": "K1371_paper2_reproduce_update",

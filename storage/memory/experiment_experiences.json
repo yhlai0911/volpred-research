@@ -1099,5 +1099,19 @@
     "recommendation": "(1) Codex 是 primary review path，subagent 是 unavailable-only fallback，不是平行替代品。(2) 任何 audit 必 re-walk full population — 子集 audit 必含「blind-spot analysis」field 說明子集外可能漏掉什麼。(3) Codex 從不可用恢復後，必須補 re-review 期間 fallback gate 過的 closures — 不是補審查所有 K，是補審查那些 subagent 過了 gate 寫了 knowledge entry 的。(4) Closure 標 ✅ 前必 audit 盲區清楚：「已掃 X 範圍 / X 排除原因 / 驗證 evidence」三件齊。",
     "source_task_id": "K1259_v2_review_2026_04_29",
     "created_at": "2026-04-29T03:00:00+00:00"
+  },
+  {
+    "id": "dedup_layer2_audience_pivot_save_2026_05_09",
+    "title": "Dedup Layer-2 (jq title-test + LanceDB dist) + audience-pivot save 是 2026-05-09 第一個系統性 hard-dup 救援 pattern",
+    "category": "publication-process",
+    "lesson": "K-id-only auto-discovery (build_publication_candidates) 僅看「該 K 是否被任何 article 引用」，無法偵測「topic family 已被別 K 在同 audience 覆蓋」。K979 SKEW general → K447 mile_1b2ad1f8 4 天前 SKEW general 4-dim 重疊（audience+conclusion+SEO+tags），auto-discovery 沒抓到 — 派出 agent 後才被 dedup Layer-2 (LanceDB dist 0.401 + jq title-test) HARD STOP. **正確救援 pattern**：不直接 close, 改 audience pivot — research version 用 methodology differentiation (Harvey 3.0 + DM + 8 model + Q1-Q5 mechanical artifact 揭示) 重新 dispatch，dist 0.561-0.677 全 PASS。Lesson: dedup 不是禁令而是換角度提示。",
+    "recommendation": "(1) build_publication_candidates 加 topic-family clustering (≥2 domain tag overlap per audience) 主動 demote false-positive missing_audience candidates — 已實作於 scripts/build_publication_candidates.py 2026-05-09; (2) Agent dedup Layer-2 不是 HARD STOP 而是「stop + suggest audience pivot」; (3) audience pivot 必有 4 維度差異化（method/data scope/conclusion strength/audience need）才合理 — K979 research vs general 在 method (8 model + Harvey 3.0 vs Ridge AUC) + audience need (research density vs general narrative) 兩維有別; (4) 跨語言 tag normalization (vix-sufficiency vs VIX 充分性 / tail-risk vs 尾端風險) 仍是 TODO — 已 queue P5 fix.",
+    "source_task_id": "K979_general_dedup_dup_pivot_2026_05_09",
+    "examples": [
+      "K979 general → K447 mile_1b2ad1f8 4-dim dup → research pivot mile_f46b6320 PASS",
+      "K973 general → 0 collision (clean dispatch first time)",
+      "K982 general → LanceDB top dist 0.521 (just barely PASS, no pivot needed)"
+    ],
+    "created_at": "2026-05-09T14:42:00+00:00"
   }
 ]
