@@ -6537,5 +6537,24 @@
       "paper/garch-x-vix/README.md"
     ],
     "mission_alignment": "paper (P2 priority) — strengthens R1 revision, closes proxy sensitivity concern"
+  },
+  {
+    "timestamp": "2026-05-17T06:18:21.647831+00:00",
+    "task_type": "paper_review",
+    "task_id": "document_K1135_kb_entry",
+    "title": "K1135 code review + KB entry (Skew-t GAS commodities Scenario B)",
+    "status": "succeeded",
+    "details": {
+      "codex_review": "CONDITIONAL_PASS via code-reviewer subagent fallback (Codex ENOBUFS/large working tree)",
+      "verdict": "Scenario B — VaR/ES improved, QLIKE NULL",
+      "knowledge_entry": "K1135 written to storage/memory/knowledge.json",
+      "issues_found": [
+        "Dead XtX_inv variable in dq_test (no numerical impact)",
+        "Latent unreachable continue bug in refit block (unreachable given oos_start_idx>=WINDOW guard)"
+      ],
+      "all_lookahead_clear": true,
+      "paper4_implication": "GAS-skewt for tail risk only (commodity subsection)"
+    },
+    "duration_note": "~35min (code review + KB entry)"
   }
 ]

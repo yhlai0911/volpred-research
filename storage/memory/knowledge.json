@@ -29967,7 +29967,7 @@
       "tolerance": "|Δγ|≤0.001 / |Δt|≤0.05",
       "2317.TW": {
         "gamma": 0.032,
-        "delta_gamma": 0.00002,
+        "delta_gamma": 2e-05,
         "t": 1.741,
         "delta_t": 0.001,
         "verdict": "PASS"
@@ -29988,7 +29988,7 @@
       },
       "2886.TW": {
         "gamma": 0.0379,
-        "delta_gamma": 0.00007,
+        "delta_gamma": 7e-05,
         "t": 1.552,
         "delta_t": 0.002,
         "verdict": "PASS"
@@ -30312,7 +30312,7 @@
       "N_start_alternative": 100,
       "max_abs_delta": 0.092,
       "mean_abs_delta": 0.005,
-      "median_abs_delta": 0.000019,
+      "median_abs_delta": 1.9e-05,
       "n_delta_gt_0_1": 0,
       "n_delta_gt_0_5": 0,
       "v2_median_amp": 3.839,
@@ -30368,5 +30368,54 @@
     "follow_up": "Consider ALFRED-fallback: use non-vintage FRED for STLFSI4 to fill 9 NO_DATA cells (robustness check, not required for NULL result). Vintage availability for STLFSI4 starts ~late 2022 only.",
     "created_at": "2026-05-17T03:44:03Z",
     "session_id": "248663ab-44ac-4c3e-b401-d2b7ad60abc3"
+  },
+  {
+    "id": "K1135",
+    "experiment_id": "K1135",
+    "experiment_path": "experiments/k1135/k1135.py",
+    "title": "K1135: Skew-t GAS on negatively skewed commodities — Scenario B (VaR/ES only, QLIKE NULL)",
+    "summary": "Tested Hansen (1994) skew-t GAS (M2) vs symmetric GAS-t (M1) vs GARCH-N (M0) on negatively skewed commodities USO/UNG/GLD/SLV. IS=2010-2019, OOS=2020-01-01~2026-04-10, window=1500, refit_every=63. H1 (QLIKE DM-HLN M2>M0, t>+2 & BH_p<0.05): 0/4 pass — NULL. H2 (VaR Trinity Kupiec+CC+DQ): @1%: 2/4 pass, @5%: 3/4 pass. H3 (ES Acerbi-Szekely Z1+Z2): @1%: 4/4 pass, @5%: 4/4 pass. Verdict = Scenario B: skew-t improves tail risk (VaR/ES) but NOT vol-forecast QLIKE. Treatment USO (skew=-0.60), UNG borderline (skew=-0.27); control GLD/SLV. Supports Paper 4 Channel 3 commodity subsection: 'GAS-skewt for tail risk only'.",
+    "asset": "USO/UNG/GLD/SLV (commodities ETF)",
+    "tags": [
+      "gas-skewt",
+      "hansen-1994",
+      "commodities",
+      "var-es",
+      "paper-4",
+      "scenario-b",
+      "qlike-null",
+      "tail-risk",
+      "kupiec",
+      "acerbi-szekely",
+      "dm-test"
+    ],
+    "verdict": "CONDITIONAL_PASS",
+    "key_metrics": {
+      "H1_QLIKE_DM_pass": "0/4 (NULL)",
+      "H2_VaR_trinity_1pct": "2/4",
+      "H2_VaR_trinity_5pct": "3/4",
+      "H3_ES_Z1Z2_1pct": "4/4",
+      "H3_ES_Z1Z2_5pct": "4/4",
+      "scenario": "B",
+      "oos_period": "2020-01-01 ~ 2026-04-10",
+      "window": 1500,
+      "refit_every": 63,
+      "seed": 42,
+      "models": [
+        "M0=GARCH-N (baseline)",
+        "M1=GAS-t (symmetric)",
+        "M2=GAS-skewt (Hansen 1994)"
+      ],
+      "multiple_testing": "BH FDR across 4 commodities for H1"
+    },
+    "codex_review": "CONDITIONAL_PASS — code-reviewer subagent fallback (primary-path Codex ENOBUFS due to large working tree). Lookahead: CLEAR (last_r=returns[t_abs-1] correct). IS/OOS: CLEAR. Hansen skew-t (Eq.6-8): CLEAR. GAS score derivation: CLEAR. Fisher scaling: symmetric-t approx for skew-t, acceptable given |lambda_hat|<=0.05 (Gonzalez-Rivera et al. 2014). VaR/ES tests: CLEAR (dead XtX_inv in dq_test, no numerical impact). BH FDR: CLEAR. Seed: CLEAR. QLIKE proxy: CLEAR (Patton 2011 proxy-robust).",
+    "paper_relevance": "Paper 4 Channel 3 (GAS family): closes commodity sub-narrative. K1129 (sym-t NULL) + K1138 (equity HARMFUL) + K1143 (skew-t no rescue equity) + K1135 (commodity Scenario B) = complete GAS family assessment for Paper 4.",
+    "prior_experiments": {
+      "K1129": "commodity symmetric GAS-t NULL on all 4 assets",
+      "K1138": "equity GAS-t HARMFUL (SPY DM t=-3.27)",
+      "K1143": "equity static skew-t did not rescue equity harm"
+    },
+    "follow_up": "Consider M3: Gonzalez-Rivera (2014) time-varying skew GAS for robustness. USO-only subtest (highest neg skew -0.60) could show stronger tail effect.",
+    "created_at": "2026-05-17T06:17:29.814626+00:00"
   }
 ]
