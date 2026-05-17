@@ -23556,7 +23556,7 @@
     ],
     "data_source": "yfinance SPY + 0050.TW 2010-2026",
     "created_at": "2026-04-07T17:15:55.034798+00:00",
-    "experiment_date": "2026-04-08"
+    "experiment_date": "2026-04-07"
   },
   {
     "id": "know_20260407171555_k987",
@@ -23572,7 +23572,7 @@
     ],
     "data_source": "yfinance SPY + ^VIX 2006-2026",
     "created_at": "2026-04-07T17:15:55.034798+00:00",
-    "experiment_date": "2026-04-08"
+    "experiment_date": "2026-04-07"
   },
   {
     "id": "know_20260407184943_k986",
@@ -23589,7 +23589,7 @@
     ],
     "data_source": "yfinance SPY + ^VIX 2006-2026",
     "created_at": "2026-04-07T18:49:43.602298+00:00",
-    "experiment_date": "2026-04-08"
+    "experiment_date": "2026-04-07"
   },
   {
     "id": "know_20260407205036_k989",
@@ -23605,7 +23605,7 @@
     ],
     "data_source": "yfinance SPY + ^VIX 2006-2026",
     "created_at": "2026-04-07T20:50:36.160146+00:00",
-    "experiment_date": "2026-04-08"
+    "experiment_date": "2026-04-07"
   },
   {
     "id": "know_20260407205036_k990",
@@ -23622,7 +23622,7 @@
     ],
     "data_source": "yfinance SPY + 0050.TW 2006-2026",
     "created_at": "2026-04-07T20:50:36.160146+00:00",
-    "experiment_date": "2026-04-08"
+    "experiment_date": "2026-04-07"
   },
   {
     "id": "know_20260407224624_k991",
@@ -23639,7 +23639,7 @@
     ],
     "data_source": "yfinance 0050.TW + ^VIX 2006-2026",
     "created_at": "2026-04-07T22:46:24.161976+00:00",
-    "experiment_date": "2026-04-08"
+    "experiment_date": "2026-04-07"
   },
   {
     "id": "know_20260407224624_k993",
@@ -23655,7 +23655,7 @@
     ],
     "data_source": "yfinance SPY + ^VIX + ^VIX3M 2010-2026",
     "created_at": "2026-04-07T22:46:24.161976+00:00",
-    "experiment_date": "2026-04-08"
+    "experiment_date": "2026-04-07"
   },
   {
     "id": "know_20260408003813_k988",
@@ -29907,7 +29907,11 @@
       "K1146"
     ],
     "timestamp": "2026-05-16T01:44:18Z",
-    "author": "main_thread"
+    "author": "main_thread",
+    "codex_review": "CONDITIONAL_PASS",
+    "codex_review_notes": "Codex primary review: 0 CRITICAL, 1 MINOR (README wording, fixed in 2026-05-16 follow-up commit). Source: content text + experiments/k1302b/README.md reviewer checklist.",
+    "reviewer_source": "Codex primary review (main thread)",
+    "review_path": "primary"
   },
   {
     "id": "paper2_sec45_tsmc_vt",
@@ -29963,7 +29967,7 @@
       "tolerance": "|Δγ|≤0.001 / |Δt|≤0.05",
       "2317.TW": {
         "gamma": 0.032,
-        "delta_gamma": 2e-05,
+        "delta_gamma": 0.00002,
         "t": 1.741,
         "delta_t": 0.001,
         "verdict": "PASS"
@@ -29984,7 +29988,7 @@
       },
       "2886.TW": {
         "gamma": 0.0379,
-        "delta_gamma": 7e-05,
+        "delta_gamma": 0.00007,
         "t": 1.552,
         "delta_t": 0.002,
         "verdict": "PASS"
@@ -30308,7 +30312,7 @@
       "N_start_alternative": 100,
       "max_abs_delta": 0.092,
       "mean_abs_delta": 0.005,
-      "median_abs_delta": 1.9e-05,
+      "median_abs_delta": 0.000019,
       "n_delta_gt_0_1": 0,
       "n_delta_gt_0_5": 0,
       "v2_median_amp": 3.839,
