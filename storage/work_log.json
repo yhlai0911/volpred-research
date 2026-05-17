@@ -6689,5 +6689,22 @@
       "MEDIUM: Citation 'Leybourne & Newbold (2016)' was incorrect for Harvey t>3 threshold → fixed",
       "LOW: '統計強度' terminology non-standard (DM t-statistic) → noted, acceptable for general readers"
     ]
+  },
+  {
+    "session_id": "bea70bd0-e330-4413-9ae0-2a10a7a15230",
+    "task_type": "paper_review",
+    "task_id": "paper_review_mile_0bdb89aa",
+    "article_id": "mile_0bdb89aa",
+    "experiment_id": "K561",
+    "timestamp": "2026-05-17T17:27:46.531125+00:00",
+    "verdict": "CONDITIONAL_PASS",
+    "issues_found": [
+      "MEDIUM: Statistical test description said '日報酬序列' but actual test was paired-t on 5 OOS Sharpe ratios (n=5) - fixed",
+      "MINOR: Duplicate '統計強度 統計強度' typo - fixed",
+      "DISCLOSED: Lookahead (same-day VIX signal → same-day return) - article explicitly flags, NEGATIVE conclusion direction robust"
+    ],
+    "numbers_verified": true,
+    "lookahead_check": "DISCLOSED - article flags and recommends lagged rerun before publication",
+    "notes": "K561 bond-equity safe-side switching: all quantitative numbers match JSON. Statistical test corrected (paired-t on OOS Sharpe, n=5, |t|>3.0). NEGATIVE result: no dynamic switching beats static GLD."
   }
 ]
