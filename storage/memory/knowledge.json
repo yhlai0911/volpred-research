@@ -30048,7 +30048,8 @@
     "supersedes": "K1370-v1 (228eedb2 commit) with PYTHONHASHSEED-randomized per-series seeds (Codex FAIL CRITICAL)",
     "created_at": "2026-05-16T15:18:00+00:00",
     "updated_at": "2026-05-16T15:24:57.963037+00:00",
-    "session_id": "post-compact-resume"
+    "session_id": "post-compact-resume",
+    "sensitivity_validation": "K1370c (2026-05-17) PASS — N_start=10 vs N_start=100 max_abs_delta=0.092, mean=0.005, identical median amp 3.839. Codex residual concern closed."
   },
   {
     "id": "K827v2",
@@ -30282,6 +30283,47 @@
     "spec": "TSMC+UMC quarterly R&D + utilization 2022Q1-2024Q3, hand-verified via stockanalysis.com (SEC 6-K proxy) cross-checked against K1202 LLM_EXTRACTED values",
     "merge_commit": "bfd5db3e (main) / 10bd2460 (worktree branch)",
     "created_at": "2026-05-17T02:06:02.678087+00:00",
+    "session_id": "continuous-research-6h-2026-05-17"
+  },
+  {
+    "id": "K1370c",
+    "experiment_id": "K1370c",
+    "title": "K1370c N_start=10 vs N_start=100 sensitivity micro-test (PASS — closes Codex residual concern)",
+    "summary": "20 evenly-spaced replicates from K1370 v2 (B=1000, N_start=10) re-run with N_start=100 while holding all other variables identical (boot_seed via explicit assert, block_length, seed_base, returns_by_ticker). Verdict PASS: max_abs_delta=0.092 (<0.1 threshold), mean_abs_delta=0.005 (<0.05 threshold). 19/20 reps showed delta~0 (median 1.9e-5); only 1 rep (v2_idx=550) had non-trivial +0.092 delta, likely from 2412.TW flat-surface basin selection. N_start=10 sufficient for K1370 v2 CI [2.31, 6.61] — Codex residual concern (K1370 v2 CONDITIONAL PASS) is closed. Runtime 490s for 20 reps × 10 series × 100 starts = 20,000 arch fits.",
+    "asset": "TAIEX_taiwan-vt (sensitivity follow-up to K1370)",
+    "tags": [
+      "k1370-follow-up",
+      "n_start-sensitivity",
+      "multistart-mle",
+      "gjr-garch",
+      "codex-residual-closure",
+      "paper-2",
+      "bootstrap-validation"
+    ],
+    "verdict": "PASS",
+    "key_metrics": {
+      "n_replicates_tested": 20,
+      "selection": "evenly-spaced step=50 from K1370 v2 B=1000",
+      "N_start_baseline": 10,
+      "N_start_alternative": 100,
+      "max_abs_delta": 0.092,
+      "mean_abs_delta": 0.005,
+      "median_abs_delta": 1.9e-05,
+      "n_delta_gt_0_1": 0,
+      "n_delta_gt_0_5": 0,
+      "v2_median_amp": 3.839,
+      "n100_median_amp": 3.839,
+      "v2_mean_amp": 4.118,
+      "n100_mean_amp": 4.123,
+      "runtime_seconds": 490,
+      "pass_threshold": "max<0.1 AND mean<0.05"
+    },
+    "codex_review": "FAILED 2× (hang 32min + 10min, 0-byte output). Fallback per .claude/rules/experiments.md L36-46: code-reviewer subagent CONDITIONAL PASS with 1 fix applied (boot_seed hold-constant assert added). Trivial 90-LoC wrapper around k1370.run_replicate.",
+    "closes": "K1370 v2 Codex residual concern (CONDITIONAL_PASS → de facto PASS for paper citation purposes)",
+    "follow_up_for_k1370_entry": "Remove follow_up_suggested[1] (N_start sensitivity) — now resolved by K1370c PASS",
+    "supersedes": null,
+    "spec": "Direct call to k1370.run_replicate(rep_idx=v2_idx, multistart_seeds=list(range(100)), seed_base=42); hold-constant guarded by explicit boot_seed assert",
+    "created_at": "2026-05-17T03:01:26.547418+00:00",
     "session_id": "continuous-research-6h-2026-05-17"
   }
 ]
