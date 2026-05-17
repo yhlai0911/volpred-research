@@ -155,5 +155,22 @@
     "fb_post_url": null,
     "word_count": 1100,
     "fb_draft": "storage/reports/fb_draft_oil_vix.txt"
+  },
+  {
+    "date": "2026-05-18",
+    "trending_topic": "Goldman Sachs up-crash: Nasdaq-100 call-index positive correlation, 4th time in decade",
+    "source_surface": "CNBC 2026-05-14, independently reconstructed via yfinance",
+    "primary_sources_used": [
+      "yfinance SPY 2014-01-01 to 2026-05-15 (monthly returns, 149 months)",
+      "yfinance QQQ 2014-01-01 to 2026-05-15 (monthly returns)",
+      "yfinance ^VIX 2014-01-01 to 2026-05-15 (monthly avg + change)",
+      "VolPred compute_upcrash.py (realized vol 20d forward window, 3,111 trading days)"
+    ],
+    "volpred_angle": "realized vol patterns after strong-return + low-VIX episodes (up-crash classification); GJR-GARCH leverage-effect interpretation",
+    "mile_id": "mile_57894028",
+    "fb_post_status": "pending_manual",
+    "fb_post_url": null,
+    "word_count": 1832,
+    "status": "published"
   }
 ]
