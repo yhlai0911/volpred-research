@@ -30325,5 +30325,44 @@
     "spec": "Direct call to k1370.run_replicate(rep_idx=v2_idx, multistart_seeds=list(range(100)), seed_base=42); hold-constant guarded by explicit boot_seed assert",
     "created_at": "2026-05-17T03:01:26.547418+00:00",
     "session_id": "continuous-research-6h-2026-05-17"
+  },
+  {
+    "id": "K1305",
+    "experiment_id": "K1305",
+    "title": "K1305: True ALFRED PIT Vintage × GLD/TLT/BTC — Universal-NULL UPHELD (0/12 valid OOS cells pass Harvey |t|>3)",
+    "summary": "Tested whether NFCI, ANFCI, STLFSI4, USEPU, WLEMU alt-data (via true ALFRED point-in-time vintage; conservative F-1 week lag) improve OLS QLIKE loss over native IV (AR+native IV = M2 baseline) for GLD (^GVZ), TLT (^MOVE/TYVIX), BTC (Deribit DVOL) across M1-M5 models. OLS IS/OOS split at 2023-01-01 (IS≈156wk, OOS≈156wk). DM test HLN-corrected, PASS threshold |t|>3. Result: 0/12 valid OOS cells pass Harvey threshold (9/21 cells were NO_DATA due to STLFSI4 HTTP 400 for pre-2022 ALFRED vintage queries — known data limitation). Alt-data adds NO forecasting value over native IV under true vintage PIT discipline. Universal-NULL claim for Paper 4 upheld across all 3 cross-asset markets.",
+    "asset": "GLD/TLT/BTC (cross-asset)",
+    "tags": [
+      "alfred-pit-vintage",
+      "cross-asset",
+      "gld",
+      "tlt",
+      "btc",
+      "dm-test",
+      "hln-correction",
+      "universal-null",
+      "alt-data",
+      "paper-4",
+      "ols",
+      "null-result"
+    ],
+    "verdict": "UPHELD (Universal-NULL)",
+    "key_metrics": {
+      "n_cells_tested": 21,
+      "n_cells_oos_valid": 12,
+      "n_cells_harvey_pass": 0,
+      "pass_rate": "0/12 (0.0%)",
+      "no_data_cells": 9,
+      "stlfsi_limitation": "STLFSI4 HTTP 400 for pre-2022 ALFRED realtime vintage queries; affects M4/M5 for pre-2022 OOS windows",
+      "alt_data_lag": "ALFRED PIT F-1 week (conservative: extra shift(1) on top of ALFRED realtime_end=friday)",
+      "dm_baseline": "M2=AR(1)+native_IV",
+      "is_period": "2020-01-03 to 2022-12-31 (~156 weeks)",
+      "oos_period": "2023-01-01 to 2026 (~156 weeks)"
+    },
+    "codex_review": "CONDITIONAL PASS (Codex built-in P1: API key in logs → redacted; NaN→null JSON fix; summary clarified to 0/12 valid cells). code-reviewer subagent CONDITIONAL PASS: all lookahead, DM HLN implementation, IS/OOS split checks PASS. Conservative F-1 lag documented. STLFSI4 vintage limitation documented.",
+    "paper_relevance": "Paper 4 (EAV Universal-Magnitude): closes cross-asset boundary — GLD/TLT/BTC join TWN/US/EM universe. Universal-NULL claim holds under strictest PIT vintage discipline.",
+    "follow_up": "Consider ALFRED-fallback: use non-vintage FRED for STLFSI4 to fill 9 NO_DATA cells (robustness check, not required for NULL result). Vintage availability for STLFSI4 starts ~late 2022 only.",
+    "created_at": "2026-05-17T03:44:03Z",
+    "session_id": "248663ab-44ac-4c3e-b401-d2b7ad60abc3"
   }
 ]
