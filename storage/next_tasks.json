@@ -6804,7 +6804,7 @@
     "title": "Paper review (Codex 24h-rule): 財報季要降槓桿嗎？21 年 SPY 數據說：別自作聰明",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_9fb5d7f7 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_9fb5d7f7",
@@ -6813,7 +6813,9 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-10T09:08:09+00:00"
+    "created_at": "2026-05-10T09:08:09+00:00",
+    "completed_at": "2026-05-17T22:15:53.658583+00:00",
+    "completion_note": "Codex review 2026-05-18: CONDITIONAL_PASS. HIGH lookahead (vix.shift issue), MEDIUM-HIGH DM test naming, MEDIUM OOS overlap. Disclaimer added to article. K570b correction experiment needed."
   },
   {
     "id": "paper_review_mile_a0ac369d",
@@ -9458,5 +9460,93 @@
     "blocks": [],
     "completed_at": "2026-05-17T15:28:23.793658+00:00",
     "verdict": "EXPLORATORY_NULL"
+  },
+  {
+    "id": "K1307",
+    "title": "K1307: 修正 review_v2 的 5 HIGH",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 249). Original: 修正 review_v2 的 5 HIGH\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1307.py with signal.shift(1) + seed=42, (c) K1307_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-05-17T20:00:49Z"
+  },
+  {
+    "id": "K1308",
+    "title": "K1308: Codex adversarial review",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 293). Original: Codex adversarial review\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1308.py with signal.shift(1) + seed=42, (c) K1308_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-05-17T20:00:49Z"
+  },
+  {
+    "id": "K1310",
+    "title": "K1310: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 340). Original: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1310.py with signal.shift(1) + seed=42, (c) K1310_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-05-17T20:00:49Z"
+  },
+  {
+    "id": "K1311",
+    "title": "K1311: HAR-GNN（Graph Neural Network）— ScienceDirect 2024",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 376). Original: HAR-GNN（Graph Neural Network）— ScienceDirect 2024\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1311.py with signal.shift(1) + seed=42, (c) K1311_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-05-17T20:00:49Z"
+  },
+  {
+    "id": "K1313",
+    "title": "K1313: Probabilistic RV Quantile Forecasting** — arXiv:2508.15922（從 HAR/GARCH 點預測到條件分位數）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 392). Original: Probabilistic RV Quantile Forecasting** — arXiv:2508.15922（從 HAR/GARCH 點預測到條件分位數）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1313.py with signal.shift(1) + seed=42, (c) K1313_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-05-17T20:00:49Z"
+  },
+  {
+    "id": "K570b_lookahead_fix",
+    "task_type": "experiment",
+    "priority": 3,
+    "status": "pending",
+    "title": "K570b: 修正 lookahead bias — vix.shift(1) + block bootstrap + corrected OOS labels",
+    "description": "K570 post-publish Codex review (2026-05-18) found HIGH lookahead: weights use VIX_t for ret_t. K570b must: (1) use vix.shift(1) throughout run_vt_strategy(), (2) replace i.i.d. bootstrap with block/stationary bootstrap, (3) rename OOS to overlapping subperiod checks, (4) rename dm_test_sharpe to hac_return_diff_test. If null result confirmed after fix, update article mile_9fb5d7f7 with corrected numbers and remove disclaimer. Review doc: experiments/k570/k570_post_publish_codex_review.md",
+    "created_at": "2026-05-17T22:15:53.658583+00:00",
+    "blocked_reason": null,
+    "tags": [
+      "K570",
+      "lookahead-fix",
+      "VT",
+      "earnings-season"
+    ],
+    "completed_at": null,
+    "completion_note": null
   }
 ]

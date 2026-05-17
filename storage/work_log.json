@@ -6794,5 +6794,22 @@
     "description": "K1370 compute queue followup: update Paper 2 §3.2 amplification CI [2.31,6.61]→[2.28,6.58], write knowledge.json entry.",
     "status": "succeeded",
     "result": "CI updated in 7 locations in body_v3.tex; knowledge PASS entry written; compute queue marked; paper-update synced; committed bdaf96dc."
+  },
+  {
+    "timestamp": "2026-05-17T22:17:22.652455+00:00",
+    "task_type": "paper_review",
+    "task_id": "paper_review_mile_9fb5d7f7",
+    "title": "Codex 24h-rule 審查：財報季要降槓桿嗎？(K570)",
+    "status": "succeeded",
+    "summary": "Codex (gpt-5.4) 代碼審查 K570 實驗。發現 HIGH lookahead bias (VIX_t 用於 weight_t 計算)、MEDIUM-HIGH DM 檢定術語不精確、MEDIUM OOS 視窗重疊聲稱不實。主要結論方向 (null result) 可能仍成立但需 K570b 修正版確認。已在文章加方法論免責聲明，建立 K570b 修正任務。",
+    "artifacts": [
+      "experiments/k570/k570_post_publish_codex_review.md",
+      "storage/reports/feed.json (mile_9fb5d7f7 disclaimer added)"
+    ],
+    "related_tasks": [
+      "K570b_lookahead_fix"
+    ],
+    "codex_verdict": "CONDITIONAL_PASS",
+    "reviewer": "Codex gpt-5.4 (session 019e37fd)"
   }
 ]
