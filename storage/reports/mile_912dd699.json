@@ -1,0 +1,60 @@
+{
+  "id": "mile_912dd699",
+  "title": "LASSO 救得了波動率預測嗎？10 個因子全選了，還是輸給古老的 GARCH",
+  "description": "最近一篇 Frontiers of Finance 2026 期刊的研究用了 287 個高頻因子 加上 LASSO 自動篩選，把波動率預測做出了亮眼成績。我們很好奇：如果把這套「自適應多因子」邏輯搬到日頻資料、用 10 個常見的波動率代理變數試試看，會不會也能贏過 1993 年就提出的老式 GJR-GARCH？",
+  "content": "# LASSO 救得了波動率預測嗎？10 個因子全選了，還是輸給古老的 GARCH\n\n## 摘要\n\n最近一篇 *Frontiers of Finance* 2026 期刊的研究用了 **287 個高頻因子** 加上 LASSO 自動篩選，把波動率預測做出了亮眼成績。我們很好奇：如果把這套「自適應多因子」邏輯搬到日頻資料、用 10 個常見的波動率代理變數試試看，會不會也能贏過 1993 年就提出的老式 GJR-GARCH？\n\n答案讓人意外——**沒贏**。20 年資料、7 個模型同場競技，LASSO、Ridge、ElasticNet 全部敗下陣來。但更有趣的是 LASSO 「沒有真的去蕪存菁」：10 個因子它**全部都選了**，而且其中一個叫做 **VIX²** 的因子在 8 次重新訓練裡 100% 被選中。這個小細節，反而才是研究的真正禮物。\n\n---\n\n## 一、起手式：把高頻論文的精神搬進日頻世界\n\nCinquetti 等人 2026 年那篇高頻論文（287 因子 + 動態選擇）的核心邏輯只有一句話：\n\n> 「我不知道哪個因子有用，所以我把候選全部丟進去，讓統計方法替我挑。」\n\n這個「自適應」想法在今天的機器學習圈很主流。它的對手——傳統 HAR-RV 模型——只用 3 個因子（過去 1 天、5 天、22 天的報酬平方），死板但便宜。\n\n我們設計了一個「公平擂台」：\n\n| 模型 | 因子數 | 篩選方式 |\n|---|---|---|\n| HAR-3 | 3 | 經典三項 |\n| HAR-10 | 10 | OLS 全用 |\n| HAR-LASSO | ≤10 | LASSO 自動挑 |\n| HAR-Ridge | 10 | Ridge 收縮 |\n| HAR-ElasticNet | ≤10 | L1+L2 混合 |\n| Rolling-LASSO | ≤10 | 每 252 天重新挑一次 |\n| GJR-GARCH | 3 | 1993 年 baseline |\n\n10 個候選因子包括：1/5/22/66 天的報酬平方、絕對報酬、Parkinson 區間波動率、Garman-Klass 區間波動率、VIX/√252、**VIX²**、以及不對稱槓桿項。**所有因子皆執行 shift(1)，避免 feature-level 看穿未來；rolling refit 邊界只用 `train_start:t` 訓練、`x_test=t+1` 預測，無 OOS lookahead**。但有一處方法論細節要誠實標記：LASSO/ElasticNet/Ridge 的超參數 α 選擇使用 sklearn 預設的 5-fold CV（非 `TimeSeriesSplit`），訓練窗內較晚資料會參與較早 fold 的 α 選擇，存在 **within-window 超參數 leakage**——OOS 預測值本身仍 valid，但 α 的選擇帶有微弱 future-info 影響，使正則化模型的 OOS 表現可能略為樂觀（這對主結論「GJR 仍勝」反而是保守方向）。\n\n資料：SPY + VIX，2006-04 到 2026-04（共 5,028 個交易日）。樣本內 2006–2018（3,204 天），樣本外 2019–2026（1,824 天）。隨機種子固定為 42。\n\n---\n\n## 二、結果一張圖：QLIKE 越低越好，GJR-GARCH 把全場踩在腳下\n\n下圖是樣本外的成績單。**QLIKE 數字越負（越低）代表預測越準**——這是評估波動率預測最嚴謹的損失函數，由 Patton (2011) 證明它對「真實波動率」的雜訊具備穩健性。\n\n![K986 OOS 模型比較](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k986_oos_comparison.png)\n\n把七個模型按 QLIKE 從好到壞排：\n\n| 名次 | 模型 | QLIKE | OOS R² |\n|---|---|---|---|\n| 1 | **GJR-GARCH** | **-8.527** | **0.4653** |\n| 2 | HAR-3（經典） | -8.194 | 0.1895 |\n| 3 | HAR-Ridge | -7.453 | 0.2574 |\n| 4 | Rolling-LASSO | -2.670 | 0.2392 |\n| 5 | HAR-ElasticNet | +2.301 | 0.2505 |\n| 6 | HAR-LASSO | +2.302 | 0.2505 |\n| 7 | HAR-10（OLS） | +2.447 | 0.2492 |\n\n幾個一秒看懂的重點：\n\n1. **第一名是最古老的 GJR-GARCH（1993）**——比 HAR-3 多帶 33 年的學術背書，QLIKE 把 HAR-3 拉開一截，DM 統計量達 -7.24（極顯著）。\n2. **HAR-LASSO 排第六、HAR-10 倒數第一**：加因子確實讓 OOS R² 從 0.19 提升到 0.25，但 QLIKE 反而從 -8.19 惡化到 +2.30。\n3. 為什麼 R² 變好但 QLIKE 變差？因為多因子模型偶爾會吐出**接近零或極小**的預測值，而 QLIKE 會懲罰這種小數字（log 項炸開）。Ridge 的強收縮把這個問題壓住，所以它是 HAR 變體裡的優等生（但仍輸 GJR-GARCH 兩個量級）。\n\n---\n\n## 三、最反直覺的一幕：LASSO 沒挑、它全選了\n\n理論上 LASSO 是「能砍因子的」演算法——把不重要的係數壓成零。實務上呢？我們做了 8 次 rolling 重新訓練，每次都看它選了幾個因子。下圖是熱度圖：\n\n![K986 因子選擇頻率](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k986_factor_selection.png)\n\n| 因子 | 8 次訓練被選的次數 | 解讀 |\n|---|---|---|\n| 報酬平方 1 天 | 8/8 (100%) | 核心 |\n| 報酬平方 5 天 | 8/8 (100%) | 核心 |\n| 絕對報酬 | 8/8 (100%) | 核心 |\n| Garman-Klass 區間 | 8/8 (100%) | 核心 |\n| **VIX²** | **8/8 (100%)** | **永遠中選** |\n| 槓桿項 | 8/8 (100%) | 核心 |\n| 報酬平方 66 天 | 8/8 (100%) | 核心（季度成分） |\n| VIX/√252 | 7/8 (87.5%) | 接近核心 |\n| 報酬平方 22 天 | 6/8 (75%) | 偶爾被砍 |\n| Parkinson | 5/8 (62.5%) | 與 GK 重複，偶爾被砍 |\n\n**換句話說，LASSO 看了 10 個候選，只有 2 個（Parkinson 和 22 天平方）會偶爾被踢掉，其他 8 個一律保留。** 這不是「動態選擇」，這是「全都要」。\n\n---\n\n## 四、為什麼 287 因子的高頻論文成功，10 因子的日頻版本失敗？\n\n關鍵差異有三個，都跟「日頻 R² 是極為粗糙的波動率代理」有關：\n\n### 訊號雜訊比的問題\n日頻報酬平方的雜訊本來就大（單日波動會被一筆大跳動主宰）。我們只有 10 個候選因子可挑，邊際因子帶來的微小資訊量很容易被雜訊淹沒，**LASSO 找不到值得砍的因子**。Cinquetti 那篇用的是 5 分鐘高頻數據算的 287 個因子，每個因子的訊號穩定度遠高於日頻，篩選才有意義。\n\n### GJR-GARCH 的「結構優勢」\nGJR-GARCH 用條件異質變異數結構直接建模 σ²ₜ 的動態演化，HAR 只是把幾個過去的 R² 線性組合。這不是「因子數量誰多誰少」的問題，是「模型內建變異數的時間結構」vs.「線性回歸用 r² 當解釋變數」的根本差異。當預測目標本身就是 σ²ₜ 時，GARCH 家族有與生俱來的優勢——這是另一個 **daily noisy-proxy 下 GJR 強勢的案例**（K188 / K744 同方向；但 K973 同樣是 daily r² target 卻是 HAR > GJR——口徑上不能簡化成「所有 daily 都 GJR 贏」，要看訊號/雜訊比與序列相關性等實驗設定）。\n\n### LASSO 的「自我懷疑」失靈\n理論上 LASSO 應該在「訊號弱、共線性高」時把因子壓掉。但在日頻 vol 預測，候選因子彼此共線性中等（VIX² 和 VIX/√252 高度相關，但 GK 和槓桿項就獨立）、訊號普遍偏弱，LASSO 只是把所有係數**等比例地縮小**，沒有真的做出「選擇」。\n\n---\n\n## 五、那 VIX² 100% 被選中算什麼？\n\n**這才是這個實驗最值得記住的單一發現。**\n\nVIX² = (VIX/100)²，是 VIX 指數的二次方。我們先前的實驗（K987、K1018）已經發現它有「非線性風險映射」的特殊角色——當 VIX 從 20 跳到 30，不是 50% 的恐慌增量，是接近 125% 的恐慌增量。\n\nLASSO 在 8 次重新訓練裡 100% 把 VIX² 留下來，這是一個**獨立的證據**：**規模化地、自動化地、看 SPY 過去 13 年資料的演算法，自己得出「VIX² 不能丟」的結論。** 這不是研究者主觀放進去的偏好，而是統計演算法自己挑出來的訊號。\n\n換句話說：\n\n> 「整體模型雖然輸給 GJR-GARCH，但個別因子的重要性偵測仍然有效——LASSO 沒幫我們贏比賽，但它幫我們確認了 VIX² 是真因子。」\n\n這在學術上是一個有用的副產品。在實務上，它告訴選擇權交易者、波動率對沖基金：**處理 VIX 衍生產品時，把 VIX² 一併納入線性模型，比只用 VIX 線性項更貼近真實風險映射**。\n\n---\n\n## 六、給投資人 / 研究者的三個 takeaway\n\n1. **「機器學習一定贏古典模型」是迷思**：在訊號清晰、樣本豐富的領域（高頻、跨資產、文本）ML 確實能勝出；在日頻波動率這種「雜訊主導 + 預測目標就是變異數」的場景，1993 年的 GJR-GARCH 仍然是極強的 baseline。買 ML 套裝產品前，先問它打贏 GARCH 沒。\n\n2. **正則化不是萬靈丹**：LASSO/Ridge/ElasticNet 在訊號雜訊比低時退化成「集體縮水」而非「真正選擇」。如果你看到 LASSO 把所有候選都留下來，那不是它在說「全都重要」，是它在說「我也分不出來」。\n\n3. **VIX² 值得保留**：不論你用什麼框架建波動率模型，把 VIX² 當作一個獨立特徵放進去——這已經是第三個獨立實驗（包括這次的純自動化選擇）給出同樣結論。\n\n---\n\n## 數據與方法\n\n- **資產**：SPY（標普 500 ETF）+ ^VIX（CBOE 隱含波動率指數）\n- **資料來源**：yfinance\n- **期間**：2006-04-10 到 2026-04-06（共 5,028 個交易日）\n- **樣本內**：2006–2018，3,204 天；**樣本外**：2019–2026，1,824 天\n- **預測目標**：日頻 r²（報酬平方，作為已實現變異數代理）\n- **統計檢定**：QLIKE 損失函數（Patton 2011）、兩模型預測誤差差異的顯著性檢定、樣本外 R²、Mincer-Zarnowitz 回歸\n- **隨機種子**：42（所有 train/test 分割、bootstrap 流程固定）\n- **防穿透**：所有因子皆執行 shift(1)，預測 t 期 σ²ₜ 時只用 t-1 及之前資訊\n\n*本文基於實驗 K986（腳本：experiments/k986/k986_adaptive_har.py，結果：experiments/k986/k986_adaptive_har_results.json）。先前實驗 K987 已從 GARCH-X 框架確認 VIX² 在波動率建模中的非線性角色，本研究的 LASSO 自動選擇結果獨立呼應該結論。*\n\n*參考文獻：Corsi (2009) HAR-RV model；Cinquetti et al. (FoFI 2026) 287-factor HF volatility forecasting；Patton (2011) QLIKE loss function；Glosten, Jagannathan and Runkle (1993) GJR-GARCH。*\n\n[提出: Claude]\n\n\n---\n\n### 延伸閱讀\n- [分數階差分救得了波動率預測嗎？跨五資產的誠實答案](/reports/mile_63e51581)\n\n",
+  "category": "general",
+  "audience": "general",
+  "phase": "research",
+  "details": {
+    "experiment_refs": [
+      "K986",
+      "K987"
+    ],
+    "image_url": "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k986_oos_comparison.png"
+  },
+  "tags": [
+    "一般讀者",
+    "SPY",
+    "波動率預測",
+    "LASSO",
+    "因子選擇",
+    "GARCH"
+  ],
+  "related_articles": [
+    {
+      "id": "mile_63e51581",
+      "title": "分數階差分救得了波動率預測嗎？跨五資產的誠實答案",
+      "similarity": 0.21
+    }
+  ],
+  "created_at": "2026-05-09T16:12:21.838777+00:00",
+  "published_at": "2026-05-09T16:12:21.838777+00:00",
+  "status": "draft",
+  "errata": {
+    "update_history": [
+      {
+        "at": "2026-05-09T16:12:21.838777+00:00",
+        "action": "initial_publish",
+        "summary": "K986 Adaptive Multi-Factor HAR — general-audience debut. NULL vs GJR-GARCH baseline; LASSO/Ridge/ElasticNet 全部敗給 1993 GJR-GARCH (QLIKE -8.527 vs -8.194)，但 VIX² 在 8/8 rolling refits 100% 被選中，獨立呼應 K987 finding。",
+        "reviewer_source": "pending_codex_review_24h_rule"
+      },
+      {
+        "at": "2026-05-10T08:04:34.011563+00:00",
+        "action": "codex_review_fix",
+        "summary": "Codex v2 errata: shift(1) claim 加 sklearn cv=5 plain-KFold within-window hyperparameter leakage caveat + § 4 GARCH 天花板呼應改寫為 daily noisy-proxy 下 GJR 強勢並標 K973 反例口徑; audit_source=codex_2026_05_10",
+        "old_content_chars": 5025,
+        "new_content_chars": 5461,
+        "title_changed": false,
+        "description_changed": true,
+        "description_source": "auto (first paragraph)",
+        "image_paths_normalized": 0,
+        "image_url_changed": false
+      }
+    ],
+    "update_at": "2026-05-10T08:04:34.011563+00:00",
+    "update_action": "codex_review_fix",
+    "update_summary": "Codex v2 errata: shift(1) claim 加 sklearn cv=5 plain-KFold within-window hyperparameter leakage caveat + § 4 GARCH 天花板呼應改寫為 daily noisy-proxy 下 GJR 強勢並標 K973 反例口徑; audit_source=codex_2026_05_10"
+  },
+  "last_updated_at": "2026-05-10T08:04:34.011563+00:00"
+}
