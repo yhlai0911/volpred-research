@@ -6669,5 +6669,25 @@
     "mile_id": "mile_dab6cc06",
     "audience": "general",
     "notes": "VIX normalization vs oil $103 divergence; cross-asset March shock data (Oil+37.5%, VIX+26.8%, Gold-6%); SPY-Oil corr=-0.855; VIXTWN 39.33 (99.1th pctile). Gemini review: PASS. FB pending browser session."
+  },
+  {
+    "timestamp": "2026-05-17T17:19:34.657679+00:00",
+    "task_type": "paper_review",
+    "task_id": "paper_review_mile_86e39d05",
+    "title": "Paper review (Codex 24h-rule): 小型股波動率也吃 VIX 嗎？（K1080 / mile_86e39d05）",
+    "status": "succeeded",
+    "verdict": "CONDITIONAL_PASS",
+    "actions": [
+      "Manual number verification: all article claims match k1080_results.json",
+      "Lookahead check: PASS (vix[abs_idx-1], oos_v[:-1])",
+      "DM-HAC implementation: PASS",
+      "Harvey threshold |t|>3.0: PASS",
+      "Citation fix: replaced garbled 'Leybourne & Newbold (2016)' with 'Harvey, Liu, and Zhu (2016)' in 2 locations",
+      "feed-sync --apply dispatched to Supabase"
+    ],
+    "issues_found": [
+      "MEDIUM: Citation 'Leybourne & Newbold (2016)' was incorrect for Harvey t>3 threshold → fixed",
+      "LOW: '統計強度' terminology non-standard (DM t-statistic) → noted, acceptable for general readers"
+    ]
   }
 ]

@@ -6691,7 +6691,7 @@
     "title": "Paper review (Codex 24h-rule): 小型股波動率也吃 VIX 嗎？把美股大中小三檔 ETF 一起放上同一張尺",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_86e39d05 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_86e39d05",
@@ -6700,7 +6700,9 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-09T07:46:03+00:00"
+    "created_at": "2026-05-09T07:46:03+00:00",
+    "completed_at": "2026-05-17T17:19:25.485144+00:00",
+    "notes": "Manual + Codex review: CONDITIONAL_PASS. Fixed garbled citation (嚴格統計/Leybourne→Harvey,Liu,Zhu 2016). Lookahead correct, DM-HAC correct, Harvey threshold correct, all numbers verified against k1080_results.json."
   },
   {
     "id": "paper_review_mile_8d1c7528",
