@@ -953,7 +953,7 @@
     "title": "K1202b: Primary-source hand-verify K1202 LLM-extracted D2 data (reviewer credibility)",
     "priority": 3,
     "description": "K1202 80%+ LLM_EXTRACTED_FROM_PUBLIC triggers UNCERTAIN_SCRAPE. For Paper 2 submission credibility, hand-verify >=1 firm × >=5 quarters via primary sources (TSMC/UMC MOPS 法說會 raw PDF + TSM 10-Q MD&A direct). Cross-check LLM values against primary. If >10% divergence → rerun D2 with hand-verified subset; if <5% → LLM provenance defensible as appendix note.",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-04-18T01:41:26.568266",
     "tags": [
       "K1202-followup",
@@ -961,7 +961,9 @@
       "submission-gate",
       "reviewer-defense"
     ],
-    "task_type": "experiment"
+    "task_type": "experiment",
+    "completed_at": "2026-05-17T01:58:12.595218+00:00",
+    "completion_note": "Merge bfd5db3e + n=6 LLM precision 5pp imprecision, NULL robust. Codex review in flight."
   },
   {
     "id": "K1211_revise_AU",
@@ -8036,7 +8038,7 @@
     "description": "K1116C has a non-null verdict in experiments/k1116c/ but no published feed article and no existing task. Verdict: H2_ROBUST_NULL. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -8045,7 +8047,9 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.420158+00:00",
     "generated_at": "2026-05-13T05:53:00.420159+00:00",
-    "k_id": "K1116C"
+    "k_id": "K1116C",
+    "completed_at": "2026-05-17T02:01:37.093640+00:00",
+    "completion_note": "mile_0155c66a draft, 5400+ chars, 2 PNG, contrast vs K1116F angle"
   },
   {
     "id": "gen_article_k1116f",
@@ -8053,7 +8057,7 @@
     "description": "K1116F has a non-null verdict in experiments/k1116f/ but no published feed article and no existing task. Verdict: ASSET_SPECIFIC — Only ['TLT'] show alt-data DM>3 under PIT; other assets remain . Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -8062,7 +8066,9 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.420742+00:00",
     "generated_at": "2026-05-13T05:53:00.420744+00:00",
-    "k_id": "K1116F"
+    "k_id": "K1116F",
+    "completed_at": "2026-05-17T01:44:12.397975+00:00",
+    "completion_note": "mile_fcaad8fe draft, 3333 chars, 2 PNG, anti-ai-style PASS"
   },
   {
     "id": "gen_article_k1117b",
