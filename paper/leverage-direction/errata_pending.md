@@ -1,6 +1,6 @@
 # Paper 1 (leverage-direction) Errata Pending
 
-**Last updated**: 2026-05-17 (batch-2 added: K1186/K1206 Table 6 errata applied to tables.tex)
+**Last updated**: 2026-05-17 (batch-3 added: K1198 errata applied — Table 10 t-stat, Table 11 footnote, body_v3.tex t=-4.71→-3.79 ×3)
 **Status**: pre-resubmission errata items, no public erratum filed yet
 
 ---
@@ -12,12 +12,14 @@ Reference article: `mile_1fde450d` (general audience disclosure)
 
 ### 4 items requiring update (3/6 DIVERGED in K1198 check)
 
-| # | Location | Original value | Recomputed value | Recommended action |
-|---|---|---|---|---|
-| 1 | Table 10 SPY constituent avg γ | 0.076 | 0.0939 | Footnote: "N=20 公開 API 可得；原 paper N=50" |
-| 2 | Table 10 t-stat (ETF vs avg stock γ) | -16.92 | -10.53 | Update table number; amplification direction + significance preserved |
-| 3 | Appendix C3 gold bull vs bear t-stat | -4.71 | -3.79 | Update text; same direction, p<0.001 still strong significance |
-| 4 | Table 11 VT ES / kurtosis | -1.35% / 0.46 | -2.74% / 3.76 | Footnote: VT spec = Hybrid VT (12/VIX), not pure GARCH VT |
+**Applied 2026-05-17 (batch-3 hourly dispatch)**
+
+| # | Location | Original value | Recomputed value | Recommended action | Status |
+|---|---|---|---|---|---|
+| 1 | Table 10 SPY constituent avg γ | 0.076 | 0.0939 | Footnote: "N=20 公開 API 可得；原 paper N=50" | ✅ APPLIED — footnote `†` added to tables.tex |
+| 2 | Table 10 t-stat (ETF vs avg stock γ) | -16.92 | -10.53 | Update table number; amplification direction + significance preserved | ✅ APPLIED — tables.tex updated |
+| 3 | Appendix C3 gold bull vs bear t-stat | -4.71 | -3.79 | Update text; same direction, p<0.001 still strong significance | ✅ APPLIED — body_v3.tex ×3 (L12, L168, L208) |
+| 4 | Table 11 VT ES / kurtosis | -1.35% / 0.46 | -2.74% / 3.76 | Footnote: VT spec = Hybrid VT (12/VIX), not pure GARCH VT | ✅ APPLIED — Notes section added to tables.tex |
 
 ### 3 items MATCHED (no action needed)
 
@@ -43,11 +45,12 @@ Threshold: errata-level (footnote / table value update), NOT retraction.
 
 ### Resubmission integration plan
 
-When next opening Paper 1 main_v?.tex for revision:
-1. Apply 4 footnote/value updates above
-2. Add reproducibility note section citing K1198 commit (current main HEAD when applied)
-3. Run reproduce.py post-update to confirm new gate
-4. Sync via `uv run volpred ops paper-update --paper-id leverage-direction`
+**Status (2026-05-17)**: Steps 1 applied (batch-3). Steps 3-4 pending.
+
+1. ~~Apply 4 footnote/value updates above~~ ✅ DONE (batch-3)
+2. ~~Add reproducibility note~~ — done via errata footnotes in tables.tex
+3. ~~Run reproduce.py post-update~~ ✅ DONE — gate_status=pass_with_untraceable, MISMATCH=0 (amber pre-existing)
+4. **PENDING**: Sync via `uv run volpred ops paper-update --paper-id leverage-direction`
 
 ---
 

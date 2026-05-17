@@ -186,12 +186,17 @@ Buy \& Hold & 0.75 & $-$33.7\% & $-$0.24 \\
 \toprule
 Index & ETF $\gamma$ & Avg Stock $\gamma$ & Ratio & $t$-stat \\
 \midrule
-SPY (50 stocks) & 0.211 & 0.076 & 2.8$\times$ & $-$16.92*** \\
+SPY (50 stocks) & 0.211 & 0.076$^{\dagger}$ & 2.8$\times$ & $-$10.53*** \\
 EEM (3 stocks) & 0.138 & 0.041 & 3.3$\times$ & --- \\
 EWJ (10 stocks) & 0.087 & 0.127 & 0.7$\times$ & 2.09 \\
 EWG (3 stocks) & 0.114 & 0.131 & 0.9$\times$ & --- \\
 \bottomrule
 \end{tabular}
+
+\vspace{4pt}
+\raggedright\footnotesize
+\textit{Notes:} $t$-stat tests $H_0{:}\,\hat{\gamma}_{\text{ETF}}=\bar{\hat{\gamma}}_{\text{stock}}$ (Welch). ***$p<0.001$.
+\textit{Errata (K1198):} $^{\dagger}$Constituent $\bar{\hat{\gamma}}$ for SPY was originally estimated from N=50 FTSE index members (not individually verifiable via public API). K1198 public replication uses N=20 yfinance-available S\&P~500 constituents and obtains avg $\hat{\gamma}=0.094$; the updated $t$-statistic ($-10.53$) is reported. Amplification direction ($\hat{\gamma}_{\text{ETF}}>\hat{\gamma}_{\text{stock}}$, $p<0.001$) is preserved under both N=50 and N=20.
 \end{table}
 
 
@@ -212,6 +217,10 @@ Skewness & $-$0.583 & $-$0.143 & $-$75\% \\
 Days $|r|>2\%$ & 5.64\% & 0.00\% & $-$100\% \\
 \bottomrule
 \end{tabular}
+
+\vspace{4pt}
+\raggedright\footnotesize
+\textit{Notes:} Hybrid VT targets $\sigma^{*}=12\%$ annualised with VIX scaling ($w_t = \sigma^{*}/\hat{\sigma}_t \times f(\text{VIX}_t)$). ES and kurtosis metrics reflect this specification. Pure GARCH-VT (constant target, no VIX scaling) gives ES(1\%)$\,{=}\,-2.74\%$ and excess kurtosis$\,{=}\,3.76$ (K1198 reconciliation). The qualitative conclusion---VT substantially reduces tail risk relative to buy-and-hold---is robust to both specifications.
 \end{table}
 
 

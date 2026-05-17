@@ -2,31 +2,30 @@
   "paper_id": "leverage-direction",
   "paper_title": "Leverage Direction Matters: GJR-GARCH Gamma Taxonomy",
   "target_journal": "JBF",
-  "timestamp": "2026-04-19T11:35:00Z",
+  "timestamp": "2026-05-17T14:15:20Z",
   "script": "paper/leverage-direction/reproduce.py",
   "exit_code": 0,
   "runtime_seconds": 1,
   "alert_level": "amber",
   "gate_status": "pass_with_untraceable",
-  "gate_rule": ">=95% match rate + green alert (or 0 MISMATCH + UNTRACEABLE-only gap)",
-  "total_checks": 58,
-  "matched": 31,
+  "gate_rule": ">=95% traceable match rate + 0 MISMATCH (green); else amber if 0 MISMATCH only",
+  "total_checks": 66,
+  "matched": 38,
   "mismatches": 0,
   "untraceable": 19,
   "status_breakdown": {
-    "MATCH": 20,
-    "ROUNDING": 1,
+    "MATCH": 28,
+    "NOTE": 9,
+    "UNTRACEABLE": 19,
     "VERIFIED_KB_ONLY": 9,
-    "NOTE": 1,
-    "MISMATCH": 8,
-    "UNTRACEABLE": 19
+    "ROUNDING": 1
   },
-  "match_rate_pct": 35.0,
-  "traceable_match_rate_pct": 79.5,
+  "match_rate_pct": 57.6,
+  "traceable_match_rate_pct": 80.9,
   "divergences": [
     "All 7 pre-session MISMATCHes reclassified to NOTE tier: K799 vs K802 DM p (canonical K802), K799 vs K802 GJR+Normal violations (canonical K799), K824v2 vs K802 FHS HistSim violations (different residual treatment), Table 1 vs Table 11 kurtosis (different windows by design), in-text DM p echo. See reproduce.py stdout for full NOTE list.",
-    "2 pre-session MISMATCHes fixed: Kupiec p 0.60→0.67 (Student-t) and 0.40→0.64 (GARCH+Normal) via standard rounding (main.tex tables.tex L93/L95).",
-    "3 specs of HM gamma (K1256 DIVERGENT_SAME_SIGN: pure_vt_full / pure_vt_high_vix / hybrid_vt_full) — NOTE tier pending L11 errata path (c)."
+    "2 pre-session MISMATCHes fixed: Kupiec p 0.60\u21920.67 (Student-t) and 0.40\u21920.64 (GARCH+Normal) via standard rounding (main.tex tables.tex L93/L95).",
+    "3 specs of HM gamma (K1256 DIVERGENT_SAME_SIGN: pure_vt_full / pure_vt_high_vix / hybrid_vt_full) \u2014 NOTE tier pending L11 errata path (c)."
   ],
   "untraceable_summary": {
     "count": 19,
@@ -54,7 +53,7 @@
     ]
   },
   "suggested_next_action": "Revise v3: (1) resolve Sec 5.4 vs Sec 4.7 HM gamma contradiction, (2) unify DM p-value source, (3) correct Kupiec rounding. Then re-run reproduce.py to recompute traceable match rate.",
-  "audit_method": "Manual update 2026-04-19 post session reproduce.py edits (K1256 NOTE tier + Kupiec rounding fix + 5 cross-source NOTE reclass). See storage/work_log.json entries.",
-  "matches": 21,
-  "total": 60
+  "audit_method": "Auto-emitted by reproduce.py at 2026-05-17T14:15:20Z (mechanical fields recomputed; narrative fields preserved from prior JSON).",
+  "matches": 38,
+  "total": 66
 }

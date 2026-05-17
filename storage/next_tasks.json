@@ -4919,7 +4919,7 @@
   {
     "id": "Paper1_stubs_activate_GJR_EWMA_JBF_Leverage",
     "title": "Paper 1: 3 個 planning stubs 需協調執行 (gjr_vs_ewma_crisis / jbf_robustness_suite / structural_leverage_panel)",
-    "status": "pending",
+    "status": "succeeded",
     "priority": 3,
     "created_at": "2026-04-17T18:15:35+08:00",
     "description": "Non-K sweep 發現 Paper 1 的 3 個 non-K folders 是 planning stubs (metrics={}) 設計為填 Tables 3/7/12 缺口但從未執行. 主線程協調: 當 K1185/K1186/K1187 跑完, 看 Paper 1 各 Table 剩餘 no-source 缺口, 若尚有 stubs 覆蓋的 numbers → agent execute 這些 stubs 而非建新 K. 或最終併成 K1196+ 統一 new experiment. 決策待 K1185-K1188 完成.",
@@ -4928,7 +4928,9 @@
       "stubs-activation",
       "coordination"
     ],
-    "task_type": "paper_body"
+    "task_type": "paper_body",
+    "completed_at": "2026-05-17T14:16:00+08:00",
+    "completion_note": "Decision: 4 stubs (gjr_vs_ewma_crisis / jbf_robustness_suite / structural_leverage_index / structural_leverage_panel) are empty shells (metrics={}, README blank). K1185-K1188 already cover T4/T6/T7/T8. Table 12 Spearman ρ MATCHED in K1198. GJR vs EWMA crisis content already in body_v3.tex L316-318. No execution needed; stubs marked superseded."
   },
   {
     "id": "Paper2_D3D4D5_gamma_VaR_days",
