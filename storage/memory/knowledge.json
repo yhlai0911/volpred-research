@@ -30543,5 +30543,49 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-05-18T05:13:25.005636"
+  },
+  {
+    "item_id": "K570b",
+    "experiment_id": "K570b",
+    "experiment_path": "experiments/k570b/",
+    "parent_experiment": "K570",
+    "created_at": "2026-05-17",
+    "title": "K570b: Earnings Season VT Strategy — NULL Confirmed (post-lookahead fix; Sharpe 1.43→0.38 after vix.shift(1))",
+    "verdict": "PASS",
+    "confidence": 0.9,
+    "reviewer": "Codex gpt-5.4 (post-publish primary path, 2026-05-18) + Claude main thread verification",
+    "reviewer_source": "Codex_post_publish_review + main_thread_k570b_verify",
+    "proposer": "Codex post-publish review",
+    "executor": "Claude worktree agent + main thread",
+    "asset": "SPY",
+    "method": "VT strategy (12/VIX) with earnings-season overlay; vix.shift(1) lookahead fix; circular block bootstrap; HAC return-differential test",
+    "data_period": "2005-01-01 to 2026-03-27 (5341 days)",
+    "key_stats": {
+      "k570_baseline_sharpe_with_lookahead": 1.4251,
+      "k570b_baseline_sharpe_corrected": 0.3801,
+      "sharpe_change_pct": -73.3,
+      "null_result_maintained": true,
+      "max_hac_t_vs_baseline": 1.49,
+      "harvey_threshold": 3.0,
+      "n_oos_periods": 3,
+      "block_bootstrap_block_size": 21
+    },
+    "description": "K570 post-publish Codex review (2026-05-18) found HIGH lookahead bias: weights used vix[t] for ret[t]. K570b fixes: (1) vix.shift(1).bfill() throughout run_vt_strategy(); (2) circular block bootstrap (block_size=21) replacing i.i.d.; (3) renamed dm_test_sharpe → hac_return_diff_test with disclaimer; (4) OOS periods relabeled as overlapping subperiod robustness checks. MAIN FINDING: Baseline 12/VIX Sharpe drops from 1.43 to 0.38 (-73.3%) — lookahead was inflating VT performance. NULL result for earnings-season adjustment confirmed. Consistent with K498/K412/K80/N153. Feed article mile_9fb5d7f7 corrected 2026-05-18.",
+    "tags": [
+      "VT-strategy",
+      "earnings-season",
+      "lookahead-fix",
+      "SPY",
+      "null-result",
+      "K570-correction"
+    ],
+    "related_experiments": [
+      "K570",
+      "K498",
+      "K412",
+      "K80",
+      "N153"
+    ],
+    "lesson": "Lookahead bias inflated VT baseline Sharpe by 3.7x (1.43→0.38). Always use vix.shift(1) for VT strategy backtests. VT strategy's true value post-correction is in drawdown control (-29.5% vs B&H -55.2%), not return enhancement or Sharpe superiority."
   }
 ]

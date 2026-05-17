@@ -9535,7 +9535,7 @@
     "id": "K570b_lookahead_fix",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "title": "K570b: 修正 lookahead bias — vix.shift(1) + block bootstrap + corrected OOS labels",
     "description": "K570 post-publish Codex review (2026-05-18) found HIGH lookahead: weights use VIX_t for ret_t. K570b must: (1) use vix.shift(1) throughout run_vt_strategy(), (2) replace i.i.d. bootstrap with block/stationary bootstrap, (3) rename OOS to overlapping subperiod checks, (4) rename dm_test_sharpe to hac_return_diff_test. If null result confirmed after fix, update article mile_9fb5d7f7 with corrected numbers and remove disclaimer. Review doc: experiments/k570/k570_post_publish_codex_review.md",
     "created_at": "2026-05-17T22:15:53.658583+00:00",
@@ -9546,7 +9546,7 @@
       "VT",
       "earnings-season"
     ],
-    "completed_at": null,
-    "completion_note": null
+    "completed_at": "2026-05-17T23:23:18.123968+00:00",
+    "completion_note": "K570b completed: vix.shift(1) + block bootstrap + HAC rename + OOS label fix. NULL confirmed. Sharpe 1.43→0.38 (-73.3%). Article mile_9fb5d7f7 corrected. Knowledge entry added."
   }
 ]
