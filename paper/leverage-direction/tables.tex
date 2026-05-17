@@ -111,10 +111,10 @@ GJR-GARCH  & Student-$t$(5) & 6  & 1.20\% & 0.67 & Green & PASS \\
 \toprule
 Method & SPY & QQQ & GLD & TLT & EEM & BTC & IWM & Pass Rate \\
 \midrule
-Skewed-$t$   & \cmark & \cmark & \cmark & \xmark & \cmark & \cmark & \cmark & 76.2\% (16/21) \\
+Skewed-$t$   & \cmark & \cmark & \xmark & \cmark & \cmark & \xmark & \cmark & 90.5\% (19/21) \\
 FHS          & \cmark & \cmark & \cmark & \xmark & \cmark & \cmark & \cmark & 76.2\% (16/21) \\
-CF-VaR       & \cmark & \cmark & \xmark & \xmark & \cmark & \cmark & \cmark & 66.7\% (14/21) \\
-Student-$t$(5) & \cmark & \cmark & \xmark & \xmark & \cmark & \cmark & \xmark & 57.1\% (12/21) \\
+CF-VaR       & \xmark & \cmark & \xmark & \cmark & \cmark & \xmark & \cmark & 76.2\% (16/21) \\
+Student-$t$(5) & \xmark & \xmark & \cmark & \cmark & \xmark & \cmark & \cmark & 76.2\% (16/21) \\
 Normal       & \cmark & \xmark & \xmark & \xmark & \cmark & \cmark & \cmark & 57.1\% (12/21) \\
 \bottomrule
 \end{tabular}
@@ -122,6 +122,7 @@ Normal       & \cmark & \xmark & \xmark & \xmark & \cmark & \cmark & \cmark & 57
 \vspace{4pt}
 \raggedright\footnotesize
 \textit{Notes:} Each cell summarizes 3 $\alpha$ levels (1\%, 2.5\%, 5\%) $\times$ 3 tests (Kupiec, Christoffersen, DQ) = 9 sub-tests. \cmark\ = all 3 $\alpha$ levels pass the Trinity criterion (3/3 joint tests); \xmark\ = at least one $\alpha$ level fails. Total cells: 7 assets $\times$ 3 $\alpha$ $\times$ 5 methods = 105.
+\textit{Errata (K1186/K1206):} Three pass rates and asset-level indicators were updated from initial reported values: Student-$t$(5) $57.1\% \to 76.2\%$ (12/21$\to$16/21); Skewed-$t$ $76.2\% \to 90.5\%$ (16/21$\to$19/21); CF-VaR $66.7\% \to 76.2\%$ (14/21$\to$16/21). Original values were not reproducible under data-vintage variations tested in K1206; K1186 provides the canonical replication (GJR-GARCH(1,1), roll~$w{=}504$, seed~42, OOS 2020--2025).
 \end{table}
 
 

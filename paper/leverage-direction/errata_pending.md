@@ -1,6 +1,6 @@
 # Paper 1 (leverage-direction) Errata Pending
 
-**Last updated**: 2026-05-17 (created from K1198 MODIFY_PAPER verdict)
+**Last updated**: 2026-05-17 (batch-2 added: K1186/K1206 Table 6 errata applied to tables.tex)
 **Status**: pre-resubmission errata items, no public erratum filed yet
 
 ---
@@ -51,6 +51,27 @@ When next opening Paper 1 main_v?.tex for revision:
 
 ---
 
-## Prior items (none yet)
+## Source: K1186/K1206 canonical replication (errata-batch-2, Table 6)
 
-This is the first errata batch for Paper 1 — file created 2026-05-17.
+Applied: 2026-05-17 (main thread hourly dispatch)
+Task: `Paper1_Table6_errata` (next_tasks.json → succeeded)
+
+### 3 rows updated in `tables.tex` Table 6 (var_panel)
+
+| Method | Location | Original | K1186 canonical | Action |
+|---|---|---|---|---|
+| Student-$t$(5) | Row + pass rate | 57.1% (12/21), checkmarks: SPY✓ QQQ✓ GLD✗ TLT✗ EEM✓ BTC✓ IWM✗ | 76.2% (16/21), checkmarks: SPY✗ QQQ✗ GLD✓ TLT✓ EEM✗ BTC✓ IWM✓ | Updated row + errata footnote |
+| Skewed-t | Row + pass rate | 76.2% (16/21), checkmarks: SPY✓ QQQ✓ GLD✓ TLT✗ EEM✓ BTC✓ IWM✓ | 90.5% (19/21), checkmarks: SPY✓ QQQ✓ GLD✗ TLT✓ EEM✓ BTC✗ IWM✓ | Updated row + errata footnote |
+| CF-VaR | Row + pass rate | 66.7% (14/21), checkmarks: SPY✓ QQQ✓ GLD✗ TLT✗ EEM✓ BTC✓ IWM✓ | 76.2% (16/21), checkmarks: SPY✗ QQQ✓ GLD✗ TLT✓ EEM✓ BTC✗ IWM✓ | Updated row + errata footnote |
+
+### Forensic basis
+
+- **K1206**: tested 3 reconstruction hypotheses (data-vintage truncation, bisection-based skewed-t, CF-VaR spec variants). All 3 divergent methods returned `verdict=neither_reconstructs` / `no_variant_reconstructs`. Original values unrecoverable.
+- **K1186**: canonical replication (GJR-GARCH(1,1), roll w=504, seed=42, OOS 2020–2025, yfinance 2000–2026). n_targets_matched=2 (Normal + FHS correct; 3 others updated).
+- Main conclusions unchanged: distribution-family hierarchy (Skewed-t best) and VaR pass-rate ordering preserved.
+
+### Errata footnote added to Table 6 in tables.tex
+
+Inline footnote appended to `\textit{Notes:}` block in tables.tex.
+
+---
