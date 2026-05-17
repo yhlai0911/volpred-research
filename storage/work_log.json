@@ -6523,5 +6523,19 @@
     "status": "succeeded",
     "artifact": "mile_34be417d",
     "notes": "Sector-FE F=689.5 p=7.9e-14; adj-R2 incremental 0.148=32x inst 0.0046; IT/Financials 11x; Spearman rho=-0.006 p=0.987; draft status; 3 charts uploaded to Supabase"
+  },
+  {
+    "timestamp": "2026-05-17T05:30:00+00:00",
+    "task_type": "paper_body",
+    "task_id": "Paper9_dual_target_integration",
+    "title": "Paper 9: K1066 Dual-Target Robustness Integration",
+    "status": "succeeded",
+    "summary": "Prepared R1 robustness subsection for Paper 9 (garch-x-vix). K1066 finding: A4f_oc vs GJR_oc on r²_oc DM t=+4.04 (Harvey PASS); A4f_oc vs GJR_close on r²_oc DM t=+7.05 (Harvey PASS, largest DM in analysis); 5/5 sub-periods (binomial p=0.031). LaTeX: paper/garch-x-vix/r1_prep/robustness_oc_proxy.tex. experiments.md updated with K1066. README R1 prep note added. Addresses Limitations proxy sensitivity future work.",
+    "artifacts": [
+      "paper/garch-x-vix/r1_prep/robustness_oc_proxy.tex",
+      "paper/garch-x-vix/experiments.md",
+      "paper/garch-x-vix/README.md"
+    ],
+    "mission_alignment": "paper (P2 priority) — strengthens R1 revision, closes proxy sensitivity concern"
   }
 ]
