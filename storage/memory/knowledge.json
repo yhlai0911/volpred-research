@@ -30498,5 +30498,24 @@
     "experiment_path": "experiments/k980v2/",
     "reviewer_source": "Codex primary-path (gpt-5.4, session 019e368a-fcfa-7233-ba51-5872fc38dca0, 2026-05-17, CONDITIONAL_PASS)",
     "title": "K980v2: Threshold GJR-GARCH Joint MLE — EXPLORATORY_NULL (K980 methodology fix)"
+  },
+  {
+    "item_id": "7963675d",
+    "category": "event_study_taiwan",
+    "title": "K1373: 台股除息日波動率事件研究 — CONDITIONAL_PASS",
+    "content": "台股 5 檔標的（0050/0056/2330/2317/2882，2015-2025）除息日絕對對數報酬 |r| 池化後相對控制日邊際顯著偏高（Welch t=1.967, p=0.0521, Cohen d=0.188, MW p=0.0060）。個股層面只有 2882.TW（國泰金）達邊際顯著（MW p=0.019, d=0.517），其餘 4 檔均不顯著。除息前 10 日（pre-window）池化有預期累積跡象（t=2.918, p=0.0036）；除息後 10 日（post-window）無顯著差異（p=0.323）。效應量小（d=0.188），n=92 個事件，謹慎詮釋。方法：event_window=±10 交易日；控制組=距任何除息日 >10 日之交易日；yfinance .dividends 作為除息日曆（無 lookahead）；重疊窗格排除所有分組；np.random.seed(42)。",
+    "evidence": [
+      "experiments/k1373/k1373_results.json",
+      "experiments/k1373/k1373.py",
+      "experiments/k1373/README.md"
+    ],
+    "confidence": 0.65,
+    "created_at": "2026-05-18T03:24:13.329139",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "K1373",
+    "experiment_path": "experiments/k1373/",
+    "reviewer_source": "feature-dev:code-reviewer subagent fallback (Codex unavailable, 2026-05-18)",
+    "caution": "效應量小；樣本數有限（最少 11 事件/標的）；結論邊際，不宜過度宣稱",
+    "research_direction": "支持除息季（六月）波動率研究方向；後續可探索除息前 buildup 可交易性"
   }
 ]

@@ -106,6 +106,9 @@ def classify_days(absr: pd.Series, ex_dates: list[date], window: int):
     min_dist = {d: float("inf") for d in trading_days}
     event_day_map = {d: None for d in trading_days}  # nearest ex-date
 
+    # Count how many ex-dates each day falls within window of (for overlap detection)
+    in_window_count = {d: 0 for d in trading_days}
+
     for ex_td in ex_trading:
         if ex_td not in td_idx:
             continue
@@ -114,9 +117,17 @@ def classify_days(absr: pd.Series, ex_dates: list[date], window: int):
             j = i_ex + offset
             if 0 <= j < n:
                 d = trading_days[j]
+                in_window_count[d] += 1
                 if abs(offset) < abs(min_dist.get(d, float("inf"))):
                     min_dist[d] = offset
                     event_day_map[d] = ex_td
+                # Tied-distance: day is equidistant from two ex-dates.
+                # Leave min_dist[d] as-is (first-processed wins); overlap_days
+                # below will exclude it from all groups.
+
+    # Days within the event window of MORE than one ex-date are ambiguous:
+    # exclude them from all groups to avoid classification errors.
+    overlap_days = {d for d, c in in_window_count.items() if c > 1}
 
     pre_vals, ex_vals, post_vals, control_vals = [], [], [], []
     pre_dates, ex_dates_found, post_dates, control_dates = [], [], [], []
@@ -124,6 +135,8 @@ def classify_days(absr: pd.Series, ex_dates: list[date], window: int):
     for d in trading_days:
         if d not in absr.index.date:
             continue
+        if d in overlap_days:
+            continue  # ambiguous — within window of multiple ex-dates
         val = absr.loc[pd.Timestamp(d)]
         dist = min_dist[d]
         if dist == 0:
@@ -208,7 +221,7 @@ def analyze_asset(ticker: str) -> dict:
     post_vs_ctrl = run_tests(post, ctrl)
     cd = cohens_d(ex, ctrl)
 
-    return {
+    stats = {
         "ticker": ticker,
         "n_ex_dates": classified["n_ex_dates"],
         "n_ex_obs": int(len(ex)),
@@ -239,6 +252,7 @@ def analyze_asset(ticker: str) -> dict:
             "p_value": post_vs_ctrl["p_value"],
         },
     }
+    return stats, classified
 
 
 # ---------------------------------------------------------------------------
@@ -351,14 +365,8 @@ def main():
 
     for ticker in ASSETS:
         try:
-            result = analyze_asset(ticker)
+            result, classified = analyze_asset(ticker)
             per_asset_results[ticker] = result
-
-            # Also get raw classified arrays for pooled analysis
-            prices = download_prices(ticker, START, END)
-            absr = compute_absr(prices)
-            ex_dates = get_ex_dates(ticker, START, END)
-            classified = classify_days(absr, ex_dates, EVENT_WINDOW)
             per_asset_classified.append(classified)
 
         except Exception as e:
