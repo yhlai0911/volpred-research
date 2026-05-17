@@ -1,0 +1,309 @@
+Using CPython 3.12.10
+Creating virtual environment at: .venv
+   Building volpred @ file:///Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/k1305-run
+      Built volpred @ file:///Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/k1305-run
+Installed 115 packages in 1.48s
+[03:13:20] ======================================================================
+[03:13:20] K1305: True ALFRED vintage × GLD/TLT/BTC boundary closure
+[03:13:20] Sample: 2020-01-01 to 2026-04-30
+[03:13:20] IS: to 2022-12-31 | OOS: from 2023-01-01
+[03:13:20] ======================================================================
+[03:13:20] FRED API key: FOUND (len=32)
+[03:13:20] Fetching ALFRED true PIT vintage for all 5 series...
+[03:13:20]   Fetching ALFRED PIT vintage for NFCI (NFCI)...
+[03:14:08]     ALFRED error for NFCI on 2021-08-27: HTTPSConnectionPool(host='api.stlouisfed.org', port=443): Max retries exceeded with url: /fred/series/observations?series_id=NFCI&realtime_start=2021-08-27&realtime_end=2021-08-27&observation_start=2021-05-29&observation_end=2021-08-27&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json (Caused by SSLError(InterruptedError(4, 'Interrupted system call')))
+[03:16:32]   NFCI: 329 valid rows out of 330
+[03:16:32]   NFCI: OK (329 valid)
+[03:16:32]   Fetching ALFRED PIT vintage for ANFCI (ANFCI)...
+[03:20:24]   ANFCI: 330 valid rows out of 330
+[03:20:24]   ANFCI: OK (330 valid)
+[03:20:24]   Fetching ALFRED PIT vintage for STLFSI4 (STLFSI)...
+[03:20:24]     ALFRED error for STLFSI4 on 2020-01-03: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-01-03&realtime_end=2020-01-03&observation_start=2019-10-05&observation_end=2020-01-03&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:25]     ALFRED error for STLFSI4 on 2020-01-10: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-01-10&realtime_end=2020-01-10&observation_start=2019-10-12&observation_end=2020-01-10&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:25]     ALFRED error for STLFSI4 on 2020-01-17: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-01-17&realtime_end=2020-01-17&observation_start=2019-10-19&observation_end=2020-01-17&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:26]     ALFRED error for STLFSI4 on 2020-01-24: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-01-24&realtime_end=2020-01-24&observation_start=2019-10-26&observation_end=2020-01-24&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:26]     ALFRED error for STLFSI4 on 2020-01-31: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-01-31&realtime_end=2020-01-31&observation_start=2019-11-02&observation_end=2020-01-31&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:27]     ALFRED error for STLFSI4 on 2020-02-07: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-02-07&realtime_end=2020-02-07&observation_start=2019-11-09&observation_end=2020-02-07&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:27]     ALFRED error for STLFSI4 on 2020-02-14: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-02-14&realtime_end=2020-02-14&observation_start=2019-11-16&observation_end=2020-02-14&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:28]     ALFRED error for STLFSI4 on 2020-02-21: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-02-21&realtime_end=2020-02-21&observation_start=2019-11-23&observation_end=2020-02-21&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:29]     ALFRED error for STLFSI4 on 2020-02-28: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-02-28&realtime_end=2020-02-28&observation_start=2019-11-30&observation_end=2020-02-28&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:29]     ALFRED error for STLFSI4 on 2020-03-06: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-03-06&realtime_end=2020-03-06&observation_start=2019-12-07&observation_end=2020-03-06&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:30]     ALFRED error for STLFSI4 on 2020-03-13: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-03-13&realtime_end=2020-03-13&observation_start=2019-12-14&observation_end=2020-03-13&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:30]     ALFRED error for STLFSI4 on 2020-03-20: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-03-20&realtime_end=2020-03-20&observation_start=2019-12-21&observation_end=2020-03-20&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:31]     ALFRED error for STLFSI4 on 2020-03-27: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-03-27&realtime_end=2020-03-27&observation_start=2019-12-28&observation_end=2020-03-27&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:31]     ALFRED error for STLFSI4 on 2020-04-03: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-04-03&realtime_end=2020-04-03&observation_start=2020-01-04&observation_end=2020-04-03&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:32]     ALFRED error for STLFSI4 on 2020-04-10: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-04-10&realtime_end=2020-04-10&observation_start=2020-01-11&observation_end=2020-04-10&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:32]     ALFRED error for STLFSI4 on 2020-04-17: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-04-17&realtime_end=2020-04-17&observation_start=2020-01-18&observation_end=2020-04-17&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:33]     ALFRED error for STLFSI4 on 2020-04-24: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-04-24&realtime_end=2020-04-24&observation_start=2020-01-25&observation_end=2020-04-24&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:33]     ALFRED error for STLFSI4 on 2020-05-01: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-05-01&realtime_end=2020-05-01&observation_start=2020-02-01&observation_end=2020-05-01&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:34]     ALFRED error for STLFSI4 on 2020-05-08: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-05-08&realtime_end=2020-05-08&observation_start=2020-02-08&observation_end=2020-05-08&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:34]     ALFRED error for STLFSI4 on 2020-05-15: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-05-15&realtime_end=2020-05-15&observation_start=2020-02-15&observation_end=2020-05-15&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:35]     ALFRED error for STLFSI4 on 2020-05-22: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-05-22&realtime_end=2020-05-22&observation_start=2020-02-22&observation_end=2020-05-22&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:35]     ALFRED error for STLFSI4 on 2020-05-29: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-05-29&realtime_end=2020-05-29&observation_start=2020-02-29&observation_end=2020-05-29&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:36]     ALFRED error for STLFSI4 on 2020-06-05: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-06-05&realtime_end=2020-06-05&observation_start=2020-03-07&observation_end=2020-06-05&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:36]     ALFRED error for STLFSI4 on 2020-06-12: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-06-12&realtime_end=2020-06-12&observation_start=2020-03-14&observation_end=2020-06-12&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:37]     ALFRED error for STLFSI4 on 2020-06-19: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-06-19&realtime_end=2020-06-19&observation_start=2020-03-21&observation_end=2020-06-19&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:37]     ALFRED error for STLFSI4 on 2020-06-26: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-06-26&realtime_end=2020-06-26&observation_start=2020-03-28&observation_end=2020-06-26&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:38]     ALFRED error for STLFSI4 on 2020-07-03: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-07-03&realtime_end=2020-07-03&observation_start=2020-04-04&observation_end=2020-07-03&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:38]     ALFRED error for STLFSI4 on 2020-07-10: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-07-10&realtime_end=2020-07-10&observation_start=2020-04-11&observation_end=2020-07-10&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:39]     ALFRED error for STLFSI4 on 2020-07-17: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-07-17&realtime_end=2020-07-17&observation_start=2020-04-18&observation_end=2020-07-17&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:39]     ALFRED error for STLFSI4 on 2020-07-24: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-07-24&realtime_end=2020-07-24&observation_start=2020-04-25&observation_end=2020-07-24&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:40]     ALFRED error for STLFSI4 on 2020-07-31: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-07-31&realtime_end=2020-07-31&observation_start=2020-05-02&observation_end=2020-07-31&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:40]     ALFRED error for STLFSI4 on 2020-08-07: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-08-07&realtime_end=2020-08-07&observation_start=2020-05-09&observation_end=2020-08-07&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:41]     ALFRED error for STLFSI4 on 2020-08-14: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-08-14&realtime_end=2020-08-14&observation_start=2020-05-16&observation_end=2020-08-14&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:42]     ALFRED error for STLFSI4 on 2020-08-21: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-08-21&realtime_end=2020-08-21&observation_start=2020-05-23&observation_end=2020-08-21&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:42]     ALFRED error for STLFSI4 on 2020-08-28: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-08-28&realtime_end=2020-08-28&observation_start=2020-05-30&observation_end=2020-08-28&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:43]     ALFRED error for STLFSI4 on 2020-09-04: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-09-04&realtime_end=2020-09-04&observation_start=2020-06-06&observation_end=2020-09-04&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:43]     ALFRED error for STLFSI4 on 2020-09-11: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-09-11&realtime_end=2020-09-11&observation_start=2020-06-13&observation_end=2020-09-11&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:44]     ALFRED error for STLFSI4 on 2020-09-18: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-09-18&realtime_end=2020-09-18&observation_start=2020-06-20&observation_end=2020-09-18&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:45]     ALFRED error for STLFSI4 on 2020-09-25: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-09-25&realtime_end=2020-09-25&observation_start=2020-06-27&observation_end=2020-09-25&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:45]     ALFRED error for STLFSI4 on 2020-10-02: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-10-02&realtime_end=2020-10-02&observation_start=2020-07-04&observation_end=2020-10-02&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:46]     ALFRED error for STLFSI4 on 2020-10-09: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-10-09&realtime_end=2020-10-09&observation_start=2020-07-11&observation_end=2020-10-09&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:46]     ALFRED error for STLFSI4 on 2020-10-16: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-10-16&realtime_end=2020-10-16&observation_start=2020-07-18&observation_end=2020-10-16&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:47]     ALFRED error for STLFSI4 on 2020-10-23: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-10-23&realtime_end=2020-10-23&observation_start=2020-07-25&observation_end=2020-10-23&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:47]     ALFRED error for STLFSI4 on 2020-10-30: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-10-30&realtime_end=2020-10-30&observation_start=2020-08-01&observation_end=2020-10-30&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:48]     ALFRED error for STLFSI4 on 2020-11-06: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-11-06&realtime_end=2020-11-06&observation_start=2020-08-08&observation_end=2020-11-06&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:48]     ALFRED error for STLFSI4 on 2020-11-13: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-11-13&realtime_end=2020-11-13&observation_start=2020-08-15&observation_end=2020-11-13&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:49]     ALFRED error for STLFSI4 on 2020-11-20: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-11-20&realtime_end=2020-11-20&observation_start=2020-08-22&observation_end=2020-11-20&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:50]     ALFRED error for STLFSI4 on 2020-11-27: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-11-27&realtime_end=2020-11-27&observation_start=2020-08-29&observation_end=2020-11-27&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:50]     ALFRED error for STLFSI4 on 2020-12-04: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-12-04&realtime_end=2020-12-04&observation_start=2020-09-05&observation_end=2020-12-04&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:51]     ALFRED error for STLFSI4 on 2020-12-11: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-12-11&realtime_end=2020-12-11&observation_start=2020-09-12&observation_end=2020-12-11&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:51]     ALFRED error for STLFSI4 on 2020-12-18: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-12-18&realtime_end=2020-12-18&observation_start=2020-09-19&observation_end=2020-12-18&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:52]     ALFRED error for STLFSI4 on 2020-12-25: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2020-12-25&realtime_end=2020-12-25&observation_start=2020-09-26&observation_end=2020-12-25&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:53]     ALFRED error for STLFSI4 on 2021-01-01: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-01-01&realtime_end=2021-01-01&observation_start=2020-10-03&observation_end=2021-01-01&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:53]     ALFRED error for STLFSI4 on 2021-01-08: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-01-08&realtime_end=2021-01-08&observation_start=2020-10-10&observation_end=2021-01-08&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:54]     ALFRED error for STLFSI4 on 2021-01-15: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-01-15&realtime_end=2021-01-15&observation_start=2020-10-17&observation_end=2021-01-15&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:54]     ALFRED error for STLFSI4 on 2021-01-22: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-01-22&realtime_end=2021-01-22&observation_start=2020-10-24&observation_end=2021-01-22&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:55]     ALFRED error for STLFSI4 on 2021-01-29: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-01-29&realtime_end=2021-01-29&observation_start=2020-10-31&observation_end=2021-01-29&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:55]     ALFRED error for STLFSI4 on 2021-02-05: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-02-05&realtime_end=2021-02-05&observation_start=2020-11-07&observation_end=2021-02-05&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:56]     ALFRED error for STLFSI4 on 2021-02-12: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-02-12&realtime_end=2021-02-12&observation_start=2020-11-14&observation_end=2021-02-12&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:56]     ALFRED error for STLFSI4 on 2021-02-19: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-02-19&realtime_end=2021-02-19&observation_start=2020-11-21&observation_end=2021-02-19&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:57]     ALFRED error for STLFSI4 on 2021-02-26: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-02-26&realtime_end=2021-02-26&observation_start=2020-11-28&observation_end=2021-02-26&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:57]     ALFRED error for STLFSI4 on 2021-03-05: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-03-05&realtime_end=2021-03-05&observation_start=2020-12-05&observation_end=2021-03-05&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:58]     ALFRED error for STLFSI4 on 2021-03-12: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-03-12&realtime_end=2021-03-12&observation_start=2020-12-12&observation_end=2021-03-12&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:58]     ALFRED error for STLFSI4 on 2021-03-19: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-03-19&realtime_end=2021-03-19&observation_start=2020-12-19&observation_end=2021-03-19&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:59]     ALFRED error for STLFSI4 on 2021-03-26: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-03-26&realtime_end=2021-03-26&observation_start=2020-12-26&observation_end=2021-03-26&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:20:59]     ALFRED error for STLFSI4 on 2021-04-02: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-04-02&realtime_end=2021-04-02&observation_start=2021-01-02&observation_end=2021-04-02&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:01]     ALFRED error for STLFSI4 on 2021-04-09: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-04-09&realtime_end=2021-04-09&observation_start=2021-01-09&observation_end=2021-04-09&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:01]     ALFRED error for STLFSI4 on 2021-04-16: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-04-16&realtime_end=2021-04-16&observation_start=2021-01-16&observation_end=2021-04-16&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:02]     ALFRED error for STLFSI4 on 2021-04-23: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-04-23&realtime_end=2021-04-23&observation_start=2021-01-23&observation_end=2021-04-23&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:03]     ALFRED error for STLFSI4 on 2021-04-30: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-04-30&realtime_end=2021-04-30&observation_start=2021-01-30&observation_end=2021-04-30&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:04]     ALFRED error for STLFSI4 on 2021-05-07: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-05-07&realtime_end=2021-05-07&observation_start=2021-02-06&observation_end=2021-05-07&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:05]     ALFRED error for STLFSI4 on 2021-05-14: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-05-14&realtime_end=2021-05-14&observation_start=2021-02-13&observation_end=2021-05-14&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:05]     ALFRED error for STLFSI4 on 2021-05-21: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-05-21&realtime_end=2021-05-21&observation_start=2021-02-20&observation_end=2021-05-21&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:06]     ALFRED error for STLFSI4 on 2021-05-28: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-05-28&realtime_end=2021-05-28&observation_start=2021-02-27&observation_end=2021-05-28&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:06]     ALFRED error for STLFSI4 on 2021-06-04: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-06-04&realtime_end=2021-06-04&observation_start=2021-03-06&observation_end=2021-06-04&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:07]     ALFRED error for STLFSI4 on 2021-06-11: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-06-11&realtime_end=2021-06-11&observation_start=2021-03-13&observation_end=2021-06-11&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:07]     ALFRED error for STLFSI4 on 2021-06-18: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-06-18&realtime_end=2021-06-18&observation_start=2021-03-20&observation_end=2021-06-18&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:08]     ALFRED error for STLFSI4 on 2021-06-25: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-06-25&realtime_end=2021-06-25&observation_start=2021-03-27&observation_end=2021-06-25&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:08]     ALFRED error for STLFSI4 on 2021-07-02: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-07-02&realtime_end=2021-07-02&observation_start=2021-04-03&observation_end=2021-07-02&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:09]     ALFRED error for STLFSI4 on 2021-07-09: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-07-09&realtime_end=2021-07-09&observation_start=2021-04-10&observation_end=2021-07-09&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:09]     ALFRED error for STLFSI4 on 2021-07-16: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-07-16&realtime_end=2021-07-16&observation_start=2021-04-17&observation_end=2021-07-16&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:10]     ALFRED error for STLFSI4 on 2021-07-23: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-07-23&realtime_end=2021-07-23&observation_start=2021-04-24&observation_end=2021-07-23&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:10]     ALFRED error for STLFSI4 on 2021-07-30: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-07-30&realtime_end=2021-07-30&observation_start=2021-05-01&observation_end=2021-07-30&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:11]     ALFRED error for STLFSI4 on 2021-08-06: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-08-06&realtime_end=2021-08-06&observation_start=2021-05-08&observation_end=2021-08-06&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:12]     ALFRED error for STLFSI4 on 2021-08-13: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-08-13&realtime_end=2021-08-13&observation_start=2021-05-15&observation_end=2021-08-13&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:12]     ALFRED error for STLFSI4 on 2021-08-20: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-08-20&realtime_end=2021-08-20&observation_start=2021-05-22&observation_end=2021-08-20&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:13]     ALFRED error for STLFSI4 on 2021-08-27: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-08-27&realtime_end=2021-08-27&observation_start=2021-05-29&observation_end=2021-08-27&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:13]     ALFRED error for STLFSI4 on 2021-09-03: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-09-03&realtime_end=2021-09-03&observation_start=2021-06-05&observation_end=2021-09-03&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:14]     ALFRED error for STLFSI4 on 2021-09-10: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-09-10&realtime_end=2021-09-10&observation_start=2021-06-12&observation_end=2021-09-10&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:14]     ALFRED error for STLFSI4 on 2021-09-17: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-09-17&realtime_end=2021-09-17&observation_start=2021-06-19&observation_end=2021-09-17&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:15]     ALFRED error for STLFSI4 on 2021-09-24: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-09-24&realtime_end=2021-09-24&observation_start=2021-06-26&observation_end=2021-09-24&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:15]     ALFRED error for STLFSI4 on 2021-10-01: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-10-01&realtime_end=2021-10-01&observation_start=2021-07-03&observation_end=2021-10-01&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:16]     ALFRED error for STLFSI4 on 2021-10-08: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-10-08&realtime_end=2021-10-08&observation_start=2021-07-10&observation_end=2021-10-08&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:16]     ALFRED error for STLFSI4 on 2021-10-15: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-10-15&realtime_end=2021-10-15&observation_start=2021-07-17&observation_end=2021-10-15&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:17]     ALFRED error for STLFSI4 on 2021-10-22: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-10-22&realtime_end=2021-10-22&observation_start=2021-07-24&observation_end=2021-10-22&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:18]     ALFRED error for STLFSI4 on 2021-10-29: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-10-29&realtime_end=2021-10-29&observation_start=2021-07-31&observation_end=2021-10-29&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:18]     ALFRED error for STLFSI4 on 2021-11-05: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-11-05&realtime_end=2021-11-05&observation_start=2021-08-07&observation_end=2021-11-05&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:19]     ALFRED error for STLFSI4 on 2021-11-12: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-11-12&realtime_end=2021-11-12&observation_start=2021-08-14&observation_end=2021-11-12&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:19]     ALFRED error for STLFSI4 on 2021-11-19: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-11-19&realtime_end=2021-11-19&observation_start=2021-08-21&observation_end=2021-11-19&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:20]     ALFRED error for STLFSI4 on 2021-11-26: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-11-26&realtime_end=2021-11-26&observation_start=2021-08-28&observation_end=2021-11-26&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:20]     ALFRED error for STLFSI4 on 2021-12-03: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-12-03&realtime_end=2021-12-03&observation_start=2021-09-04&observation_end=2021-12-03&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:21]     ALFRED error for STLFSI4 on 2021-12-10: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-12-10&realtime_end=2021-12-10&observation_start=2021-09-11&observation_end=2021-12-10&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:21]     ALFRED error for STLFSI4 on 2021-12-17: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-12-17&realtime_end=2021-12-17&observation_start=2021-09-18&observation_end=2021-12-17&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:22]     ALFRED error for STLFSI4 on 2021-12-24: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-12-24&realtime_end=2021-12-24&observation_start=2021-09-25&observation_end=2021-12-24&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:22]     ALFRED error for STLFSI4 on 2021-12-31: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2021-12-31&realtime_end=2021-12-31&observation_start=2021-10-02&observation_end=2021-12-31&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:23]     ALFRED error for STLFSI4 on 2022-01-07: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-01-07&realtime_end=2022-01-07&observation_start=2021-10-09&observation_end=2022-01-07&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:24]     ALFRED error for STLFSI4 on 2022-01-14: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-01-14&realtime_end=2022-01-14&observation_start=2021-10-16&observation_end=2022-01-14&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:24]     ALFRED error for STLFSI4 on 2022-01-21: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-01-21&realtime_end=2022-01-21&observation_start=2021-10-23&observation_end=2022-01-21&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:25]     ALFRED error for STLFSI4 on 2022-01-28: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-01-28&realtime_end=2022-01-28&observation_start=2021-10-30&observation_end=2022-01-28&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:25]     ALFRED error for STLFSI4 on 2022-02-04: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-02-04&realtime_end=2022-02-04&observation_start=2021-11-06&observation_end=2022-02-04&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:26]     ALFRED error for STLFSI4 on 2022-02-11: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-02-11&realtime_end=2022-02-11&observation_start=2021-11-13&observation_end=2022-02-11&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:26]     ALFRED error for STLFSI4 on 2022-02-18: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-02-18&realtime_end=2022-02-18&observation_start=2021-11-20&observation_end=2022-02-18&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:27]     ALFRED error for STLFSI4 on 2022-02-25: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-02-25&realtime_end=2022-02-25&observation_start=2021-11-27&observation_end=2022-02-25&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:27]     ALFRED error for STLFSI4 on 2022-03-04: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-03-04&realtime_end=2022-03-04&observation_start=2021-12-04&observation_end=2022-03-04&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:28]     ALFRED error for STLFSI4 on 2022-03-11: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-03-11&realtime_end=2022-03-11&observation_start=2021-12-11&observation_end=2022-03-11&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:28]     ALFRED error for STLFSI4 on 2022-03-18: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-03-18&realtime_end=2022-03-18&observation_start=2021-12-18&observation_end=2022-03-18&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:29]     ALFRED error for STLFSI4 on 2022-03-25: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-03-25&realtime_end=2022-03-25&observation_start=2021-12-25&observation_end=2022-03-25&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:29]     ALFRED error for STLFSI4 on 2022-04-01: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-04-01&realtime_end=2022-04-01&observation_start=2022-01-01&observation_end=2022-04-01&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:30]     ALFRED error for STLFSI4 on 2022-04-08: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-04-08&realtime_end=2022-04-08&observation_start=2022-01-08&observation_end=2022-04-08&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:30]     ALFRED error for STLFSI4 on 2022-04-15: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-04-15&realtime_end=2022-04-15&observation_start=2022-01-15&observation_end=2022-04-15&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:32]     ALFRED error for STLFSI4 on 2022-04-22: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-04-22&realtime_end=2022-04-22&observation_start=2022-01-22&observation_end=2022-04-22&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:33]     ALFRED error for STLFSI4 on 2022-04-29: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-04-29&realtime_end=2022-04-29&observation_start=2022-01-29&observation_end=2022-04-29&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:36]     ALFRED error for STLFSI4 on 2022-05-06: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-05-06&realtime_end=2022-05-06&observation_start=2022-02-05&observation_end=2022-05-06&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:37]     ALFRED error for STLFSI4 on 2022-05-13: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-05-13&realtime_end=2022-05-13&observation_start=2022-02-12&observation_end=2022-05-13&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:37]     ALFRED error for STLFSI4 on 2022-05-20: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-05-20&realtime_end=2022-05-20&observation_start=2022-02-19&observation_end=2022-05-20&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:38]     ALFRED error for STLFSI4 on 2022-05-27: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-05-27&realtime_end=2022-05-27&observation_start=2022-02-26&observation_end=2022-05-27&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:38]     ALFRED error for STLFSI4 on 2022-06-03: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-06-03&realtime_end=2022-06-03&observation_start=2022-03-05&observation_end=2022-06-03&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:39]     ALFRED error for STLFSI4 on 2022-06-10: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-06-10&realtime_end=2022-06-10&observation_start=2022-03-12&observation_end=2022-06-10&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:39]     ALFRED error for STLFSI4 on 2022-06-17: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-06-17&realtime_end=2022-06-17&observation_start=2022-03-19&observation_end=2022-06-17&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:40]     ALFRED error for STLFSI4 on 2022-06-24: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-06-24&realtime_end=2022-06-24&observation_start=2022-03-26&observation_end=2022-06-24&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:40]     ALFRED error for STLFSI4 on 2022-07-01: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-07-01&realtime_end=2022-07-01&observation_start=2022-04-02&observation_end=2022-07-01&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:41]     ALFRED error for STLFSI4 on 2022-07-08: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-07-08&realtime_end=2022-07-08&observation_start=2022-04-09&observation_end=2022-07-08&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:41]     ALFRED error for STLFSI4 on 2022-07-15: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-07-15&realtime_end=2022-07-15&observation_start=2022-04-16&observation_end=2022-07-15&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:42]     ALFRED error for STLFSI4 on 2022-07-22: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-07-22&realtime_end=2022-07-22&observation_start=2022-04-23&observation_end=2022-07-22&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:43]     ALFRED error for STLFSI4 on 2022-07-29: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-07-29&realtime_end=2022-07-29&observation_start=2022-04-30&observation_end=2022-07-29&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:43]     ALFRED error for STLFSI4 on 2022-08-05: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-08-05&realtime_end=2022-08-05&observation_start=2022-05-07&observation_end=2022-08-05&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:44]     ALFRED error for STLFSI4 on 2022-08-12: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-08-12&realtime_end=2022-08-12&observation_start=2022-05-14&observation_end=2022-08-12&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:44]     ALFRED error for STLFSI4 on 2022-08-19: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-08-19&realtime_end=2022-08-19&observation_start=2022-05-21&observation_end=2022-08-19&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:45]     ALFRED error for STLFSI4 on 2022-08-26: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-08-26&realtime_end=2022-08-26&observation_start=2022-05-28&observation_end=2022-08-26&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:46]     ALFRED error for STLFSI4 on 2022-09-02: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-09-02&realtime_end=2022-09-02&observation_start=2022-06-04&observation_end=2022-09-02&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:47]     ALFRED error for STLFSI4 on 2022-09-09: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-09-09&realtime_end=2022-09-09&observation_start=2022-06-11&observation_end=2022-09-09&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:51]     ALFRED error for STLFSI4 on 2022-09-16: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-09-16&realtime_end=2022-09-16&observation_start=2022-06-18&observation_end=2022-09-16&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:52]     ALFRED error for STLFSI4 on 2022-09-23: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-09-23&realtime_end=2022-09-23&observation_start=2022-06-25&observation_end=2022-09-23&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:52]     ALFRED error for STLFSI4 on 2022-09-30: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-09-30&realtime_end=2022-09-30&observation_start=2022-07-02&observation_end=2022-09-30&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:53]     ALFRED error for STLFSI4 on 2022-10-07: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-10-07&realtime_end=2022-10-07&observation_start=2022-07-09&observation_end=2022-10-07&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:54]     ALFRED error for STLFSI4 on 2022-10-14: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-10-14&realtime_end=2022-10-14&observation_start=2022-07-16&observation_end=2022-10-14&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:55]     ALFRED error for STLFSI4 on 2022-10-21: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-10-21&realtime_end=2022-10-21&observation_start=2022-07-23&observation_end=2022-10-21&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:56]     ALFRED error for STLFSI4 on 2022-10-28: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-10-28&realtime_end=2022-10-28&observation_start=2022-07-30&observation_end=2022-10-28&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:21:56]     ALFRED error for STLFSI4 on 2022-11-04: 400 Client Error: Bad Request for url: https://api.stlouisfed.org/fred/series/observations?series_id=STLFSI4&realtime_start=2022-11-04&realtime_end=2022-11-04&observation_start=2022-08-06&observation_end=2022-11-04&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json
+[03:23:51]   STLFSI: 181 valid rows out of 330
+[03:23:51]   STLFSI: OK (181 valid)
+[03:23:51]   Fetching ALFRED PIT vintage for USEPUINDXD (USEPU)...
+[03:26:26] ======================================================================
+[03:26:26] K1305: True ALFRED vintage × GLD/TLT/BTC boundary closure
+[03:26:26] Sample: 2020-01-01 to 2026-04-30
+[03:26:26] IS: to 2022-12-31 | OOS: from 2023-01-01
+[03:26:26] ======================================================================
+[03:26:26] FRED API key: FOUND (len=32)
+[03:26:26] Fetching ALFRED true PIT vintage for all 5 series...
+[03:26:26]   Loading NFCI from cache NFCI_alfred_pit_weekly.csv
+[03:26:26]   NFCI: OK (329 valid)
+[03:26:26]   Loading ANFCI from cache ANFCI_alfred_pit_weekly.csv
+[03:26:26]   ANFCI: OK (330 valid)
+[03:26:26]   Loading STLFSI from cache STLFSI_alfred_pit_weekly.csv
+[03:26:26]   STLFSI: OK (181 valid)
+[03:26:26]   Fetching ALFRED PIT vintage for USEPUINDXD (USEPU)...
+[03:29:47]   USEPU: 330 valid rows out of 330
+[03:29:47]   USEPU: OK (330 valid)
+[03:29:47]   Fetching ALFRED PIT vintage for WLEMUINDXD (WLEMU)...
+[03:31:57]     ALFRED error for WLEMUINDXD on 2023-12-01: HTTPSConnectionPool(host='api.stlouisfed.org', port=443): Max retries exceeded with url: /fred/series/observations?series_id=WLEMUINDXD&realtime_start=2023-12-01&realtime_end=2023-12-01&observation_start=2023-09-02&observation_end=2023-12-01&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json (Caused by SSLError(InterruptedError(4, 'Interrupted system call')))
+[03:31:58]     ALFRED error for WLEMUINDXD on 2023-12-08: HTTPSConnectionPool(host='api.stlouisfed.org', port=443): Max retries exceeded with url: /fred/series/observations?series_id=WLEMUINDXD&realtime_start=2023-12-08&realtime_end=2023-12-08&observation_start=2023-09-09&observation_end=2023-12-08&sort_order=desc&limit=5&api_key=[REDACTED]&file_type=json (Caused by SSLError(InterruptedError(4, 'Interrupted system call')))
+[03:33:30]   WLEMU: 328 valid rows out of 330
+[03:33:30]   WLEMU: OK (328 valid)
+[03:33:30] ALFRED vintage: ['NFCI', 'ANFCI', 'STLFSI', 'USEPU', 'WLEMU'] loaded
+[03:33:30] 
+Alt-data loaded: ['NFCI', 'ANFCI', 'STLFSI', 'USEPU', 'WLEMU'] (source: ALFRED_PIT_vintage)
+[03:33:30] 
+============================================================
+[03:33:30] Asset: GLD | ticker=GLD | IV=^GVZ
+[03:33:30] ============================================================
+[03:33:36] Fetching GLD (IV=^GVZ)...
+[03:33:38]   GLD: 329 weeks, 2020-01-10 to 2026-04-24
+[03:33:38]   iv_mean missing: 0 / 329
+[03:33:38]   Panel shape: (329, 9), 2020-01-10 to 2026-04-24
+[03:33:38]   IS n=156, OOS n=173
+[03:34:19]   M1: n_oos=172 oos_qlike=-2.824916
+[03:34:19]   M2: n_oos=172 oos_qlike=-2.835672
+[03:34:19]   M3_NFCI: n_oos=172 oos_qlike=-2.836610
+[03:34:19]   M3_ANFCI: n_oos=172 oos_qlike=-2.837644
+[03:34:19]   M3_STLFSI: n_oos=0 oos_qlike=nan
+[03:34:19]   M3_USEPU: n_oos=172 oos_qlike=-2.835537
+[03:34:19]   M3_WLEMU: n_oos=170 oos_qlike=-2.830019
+[03:34:19]   M4: n_oos=0 oos_qlike=nan
+[03:34:19]   M5: n_oos=0 oos_qlike=nan
+[03:34:19]   M2 baseline OOS n=172
+[03:34:19]     DM M1                   t=-1.587 p=0.1145 n=172 QLIKE%=-0.38% -> NULL
+[03:34:19]     DM M3_NFCI              t=+0.724 p=0.4700 n=172 QLIKE%=+0.03% -> NULL
+[03:34:19]     DM M3_ANFCI             t=+2.205 p=0.0288 n=172 QLIKE%=+0.07% -> NULL
+[03:34:19]     DM M3_USEPU             t=-0.043 p=0.9660 n=172 QLIKE%=-0.00% -> NULL
+[03:34:19]     DM M3_WLEMU             t=-1.889 p=0.0606 n=170 QLIKE%=-0.34% -> NULL
+[03:34:19] 
+============================================================
+[03:34:19] Asset: TLT | ticker=TLT | IV=^MOVE
+[03:34:19] ============================================================
+[03:34:19] Fetching TLT (IV=^MOVE)...
+[03:34:19]   TLT: 329 weeks, 2020-01-10 to 2026-04-24
+[03:34:19]   iv_mean missing: 0 / 329
+[03:34:19]   Panel shape: (329, 9), 2020-01-10 to 2026-04-24
+[03:34:19]   IS n=156, OOS n=173
+[03:34:19]   M1: n_oos=172 oos_qlike=-2.996846
+[03:34:19]   M2: n_oos=172 oos_qlike=-2.983027
+[03:34:19]   M3_NFCI: n_oos=172 oos_qlike=-2.964141
+[03:34:19]   M3_ANFCI: n_oos=172 oos_qlike=-2.971122
+[03:34:19]   M3_STLFSI: n_oos=0 oos_qlike=nan
+[03:34:19]   M3_USEPU: n_oos=172 oos_qlike=-2.976894
+[03:34:19]   M3_WLEMU: n_oos=170 oos_qlike=-2.965918
+[03:34:19]   M4: n_oos=0 oos_qlike=nan
+[03:34:19]   M5: n_oos=0 oos_qlike=nan
+[03:34:19]   M2 baseline OOS n=172
+[03:34:19]     DM M1                   t=+3.057 p=0.0026 n=172 QLIKE%=+0.46% -> PASS
+[03:34:19]     DM M3_NFCI              t=-7.729 p=0.0000 n=172 QLIKE%=-0.63% -> NULL_IV_WINS
+[03:34:19]     DM M3_ANFCI             t=-9.034 p=0.0000 n=172 QLIKE%=-0.40% -> NULL_IV_WINS
+[03:34:19]     DM M3_USEPU             t=-4.597 p=0.0000 n=172 QLIKE%=-0.21% -> NULL_IV_WINS
+[03:34:19]     DM M3_WLEMU             t=-3.372 p=0.0009 n=170 QLIKE%=-0.77% -> NULL_IV_WINS
+[03:34:19] 
+============================================================
+[03:34:19] Asset: BTC | ticker=BTC-USD | IV=None
+[03:34:19] ============================================================
+[03:34:19] Fetching BTC-USD (IV=None)...
+[03:34:20]   DVOL loaded: 1847 rows, 2021-03-24 to 2026-04-13
+[03:34:20]   BTC: 330 weeks, 2020-01-10 to 2026-05-01
+[03:34:20]   iv_mean missing: 65 / 330
+[03:34:20]   Panel shape: (329, 9), 2020-01-10 to 2026-04-24
+[03:34:20]   IS n=156, OOS n=173
+[03:34:20]   M1: n_oos=172 oos_qlike=-1.789689
+[03:34:20]   M2: n_oos=172 oos_qlike=-1.815621
+[03:34:20]   M3_NFCI: n_oos=172 oos_qlike=-1.766730
+[03:34:20]   M3_ANFCI: n_oos=172 oos_qlike=-1.791419
+[03:34:20]   M3_STLFSI: n_oos=0 oos_qlike=nan
+[03:34:20]   M3_USEPU: n_oos=172 oos_qlike=-1.815604
+[03:34:20]   M3_WLEMU: n_oos=170 oos_qlike=-1.795687
+[03:34:20]   M4: n_oos=0 oos_qlike=nan
+[03:34:20]   M5: n_oos=0 oos_qlike=nan
+[03:34:20]   M2 baseline OOS n=172
+[03:34:20]     DM M1                   t=-7.308 p=0.0000 n=172 QLIKE%=-1.43% -> NULL_IV_WINS
+[03:34:20]     DM M3_NFCI              t=-7.895 p=0.0000 n=172 QLIKE%=-2.69% -> NULL_IV_WINS
+[03:34:20]     DM M3_ANFCI             t=-6.749 p=0.0000 n=172 QLIKE%=-1.33% -> NULL_IV_WINS
+[03:34:20]     DM M3_USEPU             t=-0.006 p=0.9954 n=172 QLIKE%=-0.00% -> NULL
+[03:34:20]     DM M3_WLEMU             t=-1.091 p=0.2766 n=170 QLIKE%=-1.25% -> NULL
+[03:34:20] 
+======================================================================
+[03:34:20] VERDICT: UPHELD
+[03:34:20] Summary: Universal-NULL UPHELD: 0/21 cells pass Harvey |t|>3 threshold. Alt-data adds no OOS value over native IV across GLD/TLT/BTC under true ALFRED vintage. Valid cells: 12/21 (57%). Alt-data source: ALFRED_PIT_vintage.
+[03:34:20] ======================================================================
+[03:34:20] 
+Results saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/k1305-run/experiments/k1305/k1305_results.json
+
+================================================================================
+K1305 SUMMARY — DM-Harvey t-stats (vs M2 native IV baseline)
+Asset   Spec                    t-stat    QLIKE%   n_oos  Verdict     
+--------------------------------------------------------------------------------
+GLD     M1                      -1.587     -0.38     172  NULL
+GLD     M3_NFCI                 +0.724     +0.03     172  NULL
+GLD     M3_ANFCI                +2.205     +0.07     172  NULL
+GLD     M3_STLFSI                 +nan      n/a        0  NO_DATA
+GLD     M3_USEPU                -0.043     -0.00     172  NULL
+GLD     M3_WLEMU                -1.889     -0.34     170  NULL
+GLD     M4                        +nan      n/a        0  NO_DATA
+GLD     M5                        +nan      n/a        0  NO_DATA
+TLT     M1                      +3.057     +0.46     172  PASS
+TLT     M3_NFCI                 -7.729     -0.63     172  NULL_IV_WINS
+TLT     M3_ANFCI                -9.034     -0.40     172  NULL_IV_WINS
+TLT     M3_STLFSI                 +nan      n/a        0  NO_DATA
+TLT     M3_USEPU                -4.597     -0.21     172  NULL_IV_WINS
+TLT     M3_WLEMU                -3.372     -0.77     170  NULL_IV_WINS
+TLT     M4                        +nan      n/a        0  NO_DATA
+TLT     M5                        +nan      n/a        0  NO_DATA
+BTC     M1                      -7.308     -1.43     172  NULL_IV_WINS
+BTC     M3_NFCI                 -7.895     -2.69     172  NULL_IV_WINS
+BTC     M3_ANFCI                -6.749     -1.33     172  NULL_IV_WINS
+BTC     M3_STLFSI                 +nan      n/a        0  NO_DATA
+BTC     M3_USEPU                -0.006     -0.00     172  NULL
+BTC     M3_WLEMU                -1.091     -1.25     170  NULL
+BTC     M4                        +nan      n/a        0  NO_DATA
+BTC     M5                        +nan      n/a        0  NO_DATA
+
+VERDICT: UPHELD
+Summary: Universal-NULL UPHELD: 0/21 cells pass Harvey |t|>3 threshold. Alt-data adds no OOS value over native IV across GLD/TLT/BTC under true ALFRED vintage. Valid cells: 12/21 (57%). Alt-data source: ALFRED_PIT_vintage.
+Runtime: 473.6s

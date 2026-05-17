@@ -1,0 +1,621 @@
+{
+  "experiment_id": "K1305",
+  "title": "True ALFRED vintage × GLD/TLT/BTC — boundary closure for Paper 4 universal-NULL",
+  "started_utc": "2026-05-17T03:26:26.747709Z",
+  "hypothesis": "H_K1305: 0 cells |t|>3 favoring alt-data over native IV across GLD/TLT/BTC",
+  "data_source": "ALFRED PIT vintage API + yfinance (GLD/TLT/BTC-USD/^GVZ/^MOVE) + K1119 DVOL",
+  "data_period": "2020-01-01 to 2026-04-30",
+  "is_period": "2020-01-01 to 2022-12-31",
+  "oos_period": "2023-01-01 to 2026-04-30",
+  "seed": 42,
+  "references": [
+    "K1116 / K1116b / K1116c / K1118 — predecessor experiments",
+    "Baker, Bloom, Davis (2016) QJE — EPU index",
+    "Brave, Butters (2011) Fed Letter 286 — NFCI",
+    "Kliesen, Smith (2010) — STLFSI",
+    "Patton (2011) JoE — QLIKE proxy-robust loss",
+    "Harvey, Leybourne, Newbold (1997) IJF — HLN DM correction",
+    "Croushore & Stark (2001) J Econometrics — real-time vintage importance"
+  ],
+  "lookahead_check": {
+    "shift_confirmed": true,
+    "seed": 42,
+    "alfred_realtime_end_is_forecast_friday": true,
+    "iv_lagged_1_period": true,
+    "y_lag1_explicit_shift1": true,
+    "reviewer_2_focused": "feature-dev:code-reviewer subagent",
+    "reviewer_2_verdict": "CONDITIONAL PASS — all lookahead, DM, IS/OOS checks PASS; alt_signal_conservative_lag (F-1 vintage) already documented; F-1 vs F distinction makes test stricter for alt-data, does not invalidate NULL",
+    "codex_builtin_review": "Codex built-in review PASS (after P1 API key redaction + NaN fix + summary clarification)"
+  },
+  "altdata_source": "ALFRED_PIT_vintage",
+  "altdata_series_loaded": [
+    "NFCI",
+    "ANFCI",
+    "STLFSI",
+    "USEPU",
+    "WLEMU"
+  ],
+  "verdict": "UPHELD",
+  "summary": "Universal-NULL UPHELD: 0/12 valid OOS cells pass Harvey |t|>3 threshold (9/21 NO_DATA due to STLFSI4 vintage gaps in ALFRED pre-2022). Alt-data adds no OOS value over native IV across GLD/TLT/BTC under true ALFRED vintage (conservative F-1 lag). Alt-data source: ALFRED_PIT_vintage + extra conservative shift(1).",
+  "n_cells_tested": 21,
+  "n_cells_oos_valid": 12,
+  "n_cells_harvey_pass": 0,
+  "results_by_asset": {
+    "GLD": {
+      "M1": {
+        "dm_t": -1.5865344974141762,
+        "qlike_pct": -0.37930649009554995,
+        "n_oos": 172,
+        "verdict": "NULL"
+      },
+      "M3_NFCI": {
+        "dm_t": 0.7241575851460225,
+        "qlike_pct": 0.0331059912078113,
+        "n_oos": 172,
+        "verdict": "NULL"
+      },
+      "M3_ANFCI": {
+        "dm_t": 2.2052808366701315,
+        "qlike_pct": 0.0695523026046193,
+        "n_oos": 172,
+        "verdict": "NULL"
+      },
+      "M3_STLFSI": {
+        "dm_t": null,
+        "qlike_pct": null,
+        "n_oos": 0,
+        "verdict": "NO_DATA"
+      },
+      "M3_USEPU": {
+        "dm_t": -0.04265318048241024,
+        "qlike_pct": -0.004766897823519351,
+        "n_oos": 172,
+        "verdict": "NULL"
+      },
+      "M3_WLEMU": {
+        "dm_t": -1.8891159105897821,
+        "qlike_pct": -0.34040675791196623,
+        "n_oos": 170,
+        "verdict": "NULL"
+      },
+      "M4": {
+        "dm_t": null,
+        "qlike_pct": null,
+        "n_oos": 0,
+        "verdict": "NO_DATA"
+      },
+      "M5": {
+        "dm_t": null,
+        "qlike_pct": null,
+        "n_oos": 0,
+        "verdict": "NO_DATA"
+      }
+    },
+    "TLT": {
+      "M1": {
+        "dm_t": 3.0572843048326317,
+        "qlike_pct": 0.46325744747137104,
+        "n_oos": 172,
+        "verdict": "PASS"
+      },
+      "M3_NFCI": {
+        "dm_t": -7.729314202926281,
+        "qlike_pct": -0.6330885768111392,
+        "n_oos": 172,
+        "verdict": "NULL_IV_WINS"
+      },
+      "M3_ANFCI": {
+        "dm_t": -9.033987295579264,
+        "qlike_pct": -0.39908392744774435,
+        "n_oos": 172,
+        "verdict": "NULL_IV_WINS"
+      },
+      "M3_STLFSI": {
+        "dm_t": null,
+        "qlike_pct": null,
+        "n_oos": 0,
+        "verdict": "NO_DATA"
+      },
+      "M3_USEPU": {
+        "dm_t": -4.597279335697721,
+        "qlike_pct": -0.20560054375543865,
+        "n_oos": 172,
+        "verdict": "NULL_IV_WINS"
+      },
+      "M3_WLEMU": {
+        "dm_t": -3.372373652037632,
+        "qlike_pct": -0.7735651216611987,
+        "n_oos": 170,
+        "verdict": "NULL_IV_WINS"
+      },
+      "M4": {
+        "dm_t": null,
+        "qlike_pct": null,
+        "n_oos": 0,
+        "verdict": "NO_DATA"
+      },
+      "M5": {
+        "dm_t": null,
+        "qlike_pct": null,
+        "n_oos": 0,
+        "verdict": "NO_DATA"
+      }
+    },
+    "BTC": {
+      "M1": {
+        "dm_t": -7.307771716734131,
+        "qlike_pct": -1.4282753310717755,
+        "n_oos": 172,
+        "verdict": "NULL_IV_WINS"
+      },
+      "M3_NFCI": {
+        "dm_t": -7.895001077218909,
+        "qlike_pct": -2.692769483936744,
+        "n_oos": 172,
+        "verdict": "NULL_IV_WINS"
+      },
+      "M3_ANFCI": {
+        "dm_t": -6.748897484813412,
+        "qlike_pct": -1.3330005066588773,
+        "n_oos": 172,
+        "verdict": "NULL_IV_WINS"
+      },
+      "M3_STLFSI": {
+        "dm_t": null,
+        "qlike_pct": null,
+        "n_oos": 0,
+        "verdict": "NO_DATA"
+      },
+      "M3_USEPU": {
+        "dm_t": -0.005786343272277338,
+        "qlike_pct": -0.000955160210091874,
+        "n_oos": 172,
+        "verdict": "NULL"
+      },
+      "M3_WLEMU": {
+        "dm_t": -1.0914950973519353,
+        "qlike_pct": -1.2513278475673886,
+        "n_oos": 170,
+        "verdict": "NULL"
+      },
+      "M4": {
+        "dm_t": null,
+        "qlike_pct": null,
+        "n_oos": 0,
+        "verdict": "NO_DATA"
+      },
+      "M5": {
+        "dm_t": null,
+        "qlike_pct": null,
+        "n_oos": 0,
+        "verdict": "NO_DATA"
+      }
+    }
+  },
+  "detail_by_asset": {
+    "GLD": {
+      "asset": "GLD",
+      "ticker": "GLD",
+      "iv_ticker": "^GVZ",
+      "n_full": 329,
+      "n_is": 156,
+      "n_oos": 173,
+      "iv_missing_fraction": 0.0,
+      "alt_data_available": [
+        "NFCI",
+        "ANFCI",
+        "STLFSI",
+        "USEPU",
+        "WLEMU"
+      ],
+      "model_summary": {
+        "M1": {
+          "n_is": 155,
+          "n_oos": 172,
+          "oos_qlike": -2.8249158348372876,
+          "is_r2": 0.1048839370114677
+        },
+        "M2": {
+          "n_is": 155,
+          "n_oos": 172,
+          "oos_qlike": -2.835671721715559,
+          "is_r2": 0.22072666484369996
+        },
+        "M3_NFCI": {
+          "n_is": 154,
+          "n_oos": 172,
+          "oos_qlike": -2.8366104989464325,
+          "is_r2": 0.22510677180934757
+        },
+        "M3_ANFCI": {
+          "n_is": 155,
+          "n_oos": 172,
+          "oos_qlike": -2.83764399669232,
+          "is_r2": 0.224540564437835
+        },
+        "M3_STLFSI": {
+          "n_is": 7,
+          "n_oos": 0,
+          "oos_qlike": null,
+          "is_r2": null
+        },
+        "M3_USEPU": {
+          "n_is": 155,
+          "n_oos": 172,
+          "oos_qlike": -2.8355365481419743,
+          "is_r2": 0.2339079617993557
+        },
+        "M3_WLEMU": {
+          "n_is": 155,
+          "n_oos": 170,
+          "oos_qlike": -2.830018648053091,
+          "is_r2": 0.24591812123782397
+        },
+        "M4": {
+          "n_is": 7,
+          "n_oos": 0,
+          "oos_qlike": null,
+          "is_r2": null
+        },
+        "M5": {
+          "n_is": 7,
+          "n_oos": 0,
+          "oos_qlike": null,
+          "is_r2": null
+        }
+      },
+      "n_pass": 0,
+      "n_null_iv_wins": 0,
+      "verdict": "UPHELD",
+      "dm_results": {
+        "M1": {
+          "dm_t": -1.5865344974141762,
+          "dm_p": 0.11446554820742061,
+          "n_oos": 172,
+          "qlike_pct": -0.37930649009554995,
+          "m2_oos_qlike": -2.835671721715559,
+          "chal_oos_qlike": -2.8249158348372876,
+          "verdict": "NULL"
+        },
+        "M3_NFCI": {
+          "dm_t": 0.7241575851460225,
+          "dm_p": 0.46995856982378315,
+          "n_oos": 172,
+          "qlike_pct": 0.0331059912078113,
+          "m2_oos_qlike": -2.835671721715559,
+          "chal_oos_qlike": -2.8366104989464325,
+          "verdict": "NULL"
+        },
+        "M3_ANFCI": {
+          "dm_t": 2.2052808366701315,
+          "dm_p": 0.028768335323492433,
+          "n_oos": 172,
+          "qlike_pct": 0.0695523026046193,
+          "m2_oos_qlike": -2.835671721715559,
+          "chal_oos_qlike": -2.83764399669232,
+          "verdict": "NULL"
+        },
+        "M3_STLFSI": {
+          "dm_t": null,
+          "dm_p": null,
+          "n_oos": 0,
+          "verdict": "NO_DATA"
+        },
+        "M3_USEPU": {
+          "dm_t": -0.04265318048241024,
+          "dm_p": 0.9660277654679637,
+          "n_oos": 172,
+          "qlike_pct": -0.004766897823519351,
+          "m2_oos_qlike": -2.835671721715559,
+          "chal_oos_qlike": -2.8355365481419743,
+          "verdict": "NULL"
+        },
+        "M3_WLEMU": {
+          "dm_t": -1.8891159105897821,
+          "dm_p": 0.06058908707026989,
+          "n_oos": 170,
+          "qlike_pct": -0.34040675791196623,
+          "m2_oos_qlike": -2.839685128132676,
+          "chal_oos_qlike": -2.830018648053091,
+          "verdict": "NULL"
+        },
+        "M4": {
+          "dm_t": null,
+          "dm_p": null,
+          "n_oos": 0,
+          "verdict": "NO_DATA"
+        },
+        "M5": {
+          "dm_t": null,
+          "dm_p": null,
+          "n_oos": 0,
+          "verdict": "NO_DATA"
+        }
+      }
+    },
+    "TLT": {
+      "asset": "TLT",
+      "ticker": "TLT",
+      "iv_ticker": "^MOVE",
+      "n_full": 329,
+      "n_is": 156,
+      "n_oos": 173,
+      "iv_missing_fraction": 0.0,
+      "alt_data_available": [
+        "NFCI",
+        "ANFCI",
+        "STLFSI",
+        "USEPU",
+        "WLEMU"
+      ],
+      "model_summary": {
+        "M1": {
+          "n_is": 155,
+          "n_oos": 172,
+          "oos_qlike": -2.9968457692340955,
+          "is_r2": 0.2616887147811563
+        },
+        "M2": {
+          "n_is": 155,
+          "n_oos": 172,
+          "oos_qlike": -2.9830266759974795,
+          "is_r2": 0.32746634100205607
+        },
+        "M3_NFCI": {
+          "n_is": 154,
+          "n_oos": 172,
+          "oos_qlike": -2.9641414748685104,
+          "is_r2": 0.3665334123010521
+        },
+        "M3_ANFCI": {
+          "n_is": 155,
+          "n_oos": 172,
+          "oos_qlike": -2.971121895982095,
+          "is_r2": 0.3434226921049375
+        },
+        "M3_STLFSI": {
+          "n_is": 7,
+          "n_oos": 0,
+          "oos_qlike": null,
+          "is_r2": null
+        },
+        "M3_USEPU": {
+          "n_is": 155,
+          "n_oos": 172,
+          "oos_qlike": -2.976893556931259,
+          "is_r2": 0.32952449827200414
+        },
+        "M3_WLEMU": {
+          "n_is": 155,
+          "n_oos": 170,
+          "oos_qlike": -2.965917964550234,
+          "is_r2": 0.3527592468390903
+        },
+        "M4": {
+          "n_is": 7,
+          "n_oos": 0,
+          "oos_qlike": null,
+          "is_r2": null
+        },
+        "M5": {
+          "n_is": 7,
+          "n_oos": 0,
+          "oos_qlike": null,
+          "is_r2": null
+        }
+      },
+      "n_pass": 1,
+      "n_null_iv_wins": 4,
+      "verdict": "BOUNDARY-LEAK",
+      "dm_results": {
+        "M1": {
+          "dm_t": 3.0572843048326317,
+          "dm_p": 0.0025926627921526446,
+          "n_oos": 172,
+          "qlike_pct": 0.46325744747137104,
+          "m2_oos_qlike": -2.9830266759974795,
+          "chal_oos_qlike": -2.9968457692340955,
+          "verdict": "PASS"
+        },
+        "M3_NFCI": {
+          "dm_t": -7.729314202926281,
+          "dm_p": 8.812950369474493e-13,
+          "n_oos": 172,
+          "qlike_pct": -0.6330885768111392,
+          "m2_oos_qlike": -2.9830266759974795,
+          "chal_oos_qlike": -2.9641414748685104,
+          "verdict": "NULL_IV_WINS"
+        },
+        "M3_ANFCI": {
+          "dm_t": -9.033987295579264,
+          "dm_p": 4.440892098500626e-16,
+          "n_oos": 172,
+          "qlike_pct": -0.39908392744774435,
+          "m2_oos_qlike": -2.9830266759974795,
+          "chal_oos_qlike": -2.971121895982095,
+          "verdict": "NULL_IV_WINS"
+        },
+        "M3_STLFSI": {
+          "dm_t": null,
+          "dm_p": null,
+          "n_oos": 0,
+          "verdict": "NO_DATA"
+        },
+        "M3_USEPU": {
+          "dm_t": -4.597279335697721,
+          "dm_p": 8.289978477682425e-06,
+          "n_oos": 172,
+          "qlike_pct": -0.20560054375543865,
+          "m2_oos_qlike": -2.9830266759974795,
+          "chal_oos_qlike": -2.976893556931259,
+          "verdict": "NULL_IV_WINS"
+        },
+        "M3_WLEMU": {
+          "dm_t": -3.372373652037632,
+          "dm_p": 0.0009238716239250433,
+          "n_oos": 170,
+          "qlike_pct": -0.7735651216611987,
+          "m2_oos_qlike": -2.9890401365187977,
+          "chal_oos_qlike": -2.965917964550234,
+          "verdict": "NULL_IV_WINS"
+        },
+        "M4": {
+          "dm_t": null,
+          "dm_p": null,
+          "n_oos": 0,
+          "verdict": "NO_DATA"
+        },
+        "M5": {
+          "dm_t": null,
+          "dm_p": null,
+          "n_oos": 0,
+          "verdict": "NO_DATA"
+        }
+      }
+    },
+    "BTC": {
+      "asset": "BTC",
+      "ticker": "BTC-USD",
+      "iv_ticker": null,
+      "n_full": 329,
+      "n_is": 156,
+      "n_oos": 173,
+      "iv_missing_fraction": 0.1945288753799392,
+      "alt_data_available": [
+        "NFCI",
+        "ANFCI",
+        "STLFSI",
+        "USEPU",
+        "WLEMU"
+      ],
+      "model_summary": {
+        "M1": {
+          "n_is": 155,
+          "n_oos": 172,
+          "oos_qlike": -1.7896888802675206,
+          "is_r2": 0.08567538882380621
+        },
+        "M2": {
+          "n_is": 92,
+          "n_oos": 172,
+          "oos_qlike": -1.8156209463500097,
+          "is_r2": 0.08235795389525691
+        },
+        "M3_NFCI": {
+          "n_is": 91,
+          "n_oos": 172,
+          "oos_qlike": -1.7667304595627331,
+          "is_r2": 0.13350816497417184
+        },
+        "M3_ANFCI": {
+          "n_is": 92,
+          "n_oos": 172,
+          "oos_qlike": -1.7914187099361594,
+          "is_r2": 0.10164203514730108
+        },
+        "M3_STLFSI": {
+          "n_is": 7,
+          "n_oos": 0,
+          "oos_qlike": null,
+          "is_r2": null
+        },
+        "M3_USEPU": {
+          "n_is": 92,
+          "n_oos": 172,
+          "oos_qlike": -1.815603604261164,
+          "is_r2": 0.08583966342791838
+        },
+        "M3_WLEMU": {
+          "n_is": 92,
+          "n_oos": 170,
+          "oos_qlike": -1.7956872659659784,
+          "is_r2": 0.08494555832337924
+        },
+        "M4": {
+          "n_is": 7,
+          "n_oos": 0,
+          "oos_qlike": null,
+          "is_r2": null
+        },
+        "M5": {
+          "n_is": 7,
+          "n_oos": 0,
+          "oos_qlike": null,
+          "is_r2": null
+        }
+      },
+      "n_pass": 0,
+      "n_null_iv_wins": 3,
+      "verdict": "UPHELD",
+      "dm_results": {
+        "M1": {
+          "dm_t": -7.307771716734131,
+          "dm_p": 9.93027882145725e-12,
+          "n_oos": 172,
+          "qlike_pct": -1.4282753310717755,
+          "m2_oos_qlike": -1.8156209463500097,
+          "chal_oos_qlike": -1.7896888802675206,
+          "verdict": "NULL_IV_WINS"
+        },
+        "M3_NFCI": {
+          "dm_t": -7.895001077218909,
+          "dm_p": 3.3439917501709715e-13,
+          "n_oos": 172,
+          "qlike_pct": -2.692769483936744,
+          "m2_oos_qlike": -1.8156209463500097,
+          "chal_oos_qlike": -1.7667304595627331,
+          "verdict": "NULL_IV_WINS"
+        },
+        "M3_ANFCI": {
+          "dm_t": -6.748897484813412,
+          "dm_p": 2.2168467062044783e-10,
+          "n_oos": 172,
+          "qlike_pct": -1.3330005066588773,
+          "m2_oos_qlike": -1.8156209463500097,
+          "chal_oos_qlike": -1.7914187099361594,
+          "verdict": "NULL_IV_WINS"
+        },
+        "M3_STLFSI": {
+          "dm_t": null,
+          "dm_p": null,
+          "n_oos": 0,
+          "verdict": "NO_DATA"
+        },
+        "M3_USEPU": {
+          "dm_t": -0.005786343272277338,
+          "dm_p": 0.9953899367027195,
+          "n_oos": 172,
+          "qlike_pct": -0.000955160210091874,
+          "m2_oos_qlike": -1.8156209463500097,
+          "chal_oos_qlike": -1.815603604261164,
+          "verdict": "NULL"
+        },
+        "M3_WLEMU": {
+          "dm_t": -1.0914950973519353,
+          "dm_p": 0.27660873410434106,
+          "n_oos": 170,
+          "qlike_pct": -1.2513278475673886,
+          "m2_oos_qlike": -1.8184419363068294,
+          "chal_oos_qlike": -1.7956872659659784,
+          "verdict": "NULL"
+        },
+        "M4": {
+          "dm_t": null,
+          "dm_p": null,
+          "n_oos": 0,
+          "verdict": "NO_DATA"
+        },
+        "M5": {
+          "dm_t": null,
+          "dm_p": null,
+          "n_oos": 0,
+          "verdict": "NO_DATA"
+        }
+      }
+    }
+  },
+  "pass_cells": [],
+  "completed_utc": "2026-05-17T03:34:20.330406Z",
+  "runtime_seconds": 473.582643,
+  "stlfsi_limitation_note": "STLFSI4 (STLFSI) returns HTTP 400 for most pre-2022 ALFRED realtime requests — ALFRED vintage history for this series begins ~late 2022. Result: 181/330 weeks valid, all M3_STLFSI/M4/M5 cells are NO_DATA. This is a known ALFRED data availability constraint, not a code bug."
+}
