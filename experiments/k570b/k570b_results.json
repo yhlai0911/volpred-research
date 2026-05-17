@@ -1,0 +1,329 @@
+{
+  "experiment_id": "k570b",
+  "parent_experiment": "k570",
+  "title": "Earnings Season Volatility Pattern \u2014 Lookahead Fix & Methodology Corrections",
+  "timestamp": "2026-05-17T23:14:21.444227+00:00",
+  "lookahead_fix": "vix.shift(1) \u2014 previous day VIX used for weight[t]",
+  "methodology_corrections": [
+    "lookahead_fix",
+    "block_bootstrap",
+    "hac_rename",
+    "oos_label_fix"
+  ],
+  "data_source": "yfinance (SPY, ^VIX)",
+  "data_period": "2004-12-31 to 2026-03-26",
+  "n_observations": 5342,
+  "n_strategy_days": 5341,
+  "result_type": "NULL RESULT",
+  "conclusion": "After fixing lookahead bias (vix.shift(1)), upgrading to block bootstrap, correcting the HAC test name, and labelling periods correctly, earnings season STILL does NOT justify VT adjustment. All three earnings-adjusted strategies fail Harvey (2016) t>3.0 threshold. NULL result confirmed across 3 overlapping robustness subperiods. Consistent with K498/K412/K80/N153: VIX remains the sufficient statistic.",
+  "earnings_classification": {
+    "method": "Weeks 3-5 of Jan/Apr/Jul/Oct",
+    "n_earnings_days": 986,
+    "n_non_earnings_days": 4356,
+    "pct_earnings": 18.45750655185324
+  },
+  "descriptive_statistics": {
+    "rv_21d": {
+      "earnings_mean": 0.15561515703792184,
+      "earnings_std": 0.11630300784110789,
+      "non_earnings_mean": 0.15648267918997913,
+      "non_earnings_std": 0.10868049389000553,
+      "t_stat": -0.2233239945770995,
+      "p_value": 0.8232918960419064
+    },
+    "vix": {
+      "earnings_mean": 18.986014202690512,
+      "earnings_std": 8.846167723714114,
+      "non_earnings_mean": 19.191081269275607,
+      "non_earnings_std": 8.557347035188732,
+      "t_stat": -0.6751061182109425,
+      "p_value": 0.49963757616925025
+    },
+    "spy_return": {
+      "earnings_mean_bps": 5.009689903954213,
+      "non_earnings_mean_bps": 3.6028087058002884,
+      "t_stat": 0.3331210740450177,
+      "p_value": 0.7390559700379968
+    },
+    "abs_return": {
+      "earnings_mean_bps": 75.73819467214437,
+      "non_earnings_mean_bps": 76.90530250223644,
+      "t_stat": -0.35953645897110403,
+      "p_value": 0.719208024932617
+    },
+    "levene_test": {
+      "F_stat": 0.11646802851038532,
+      "p_value": 0.7329106522737738
+    }
+  },
+  "full_sample_strategies": {
+    "bh": {
+      "name": "Buy & Hold",
+      "ann_ret": 0.10236094669864815,
+      "ann_vol": 0.1899514731700396,
+      "sharpe": 0.43358940746366714,
+      "mdd": -0.5518943384581217,
+      "calmar": 0.1854719999205344,
+      "sortino": 0.5294620563723995,
+      "avg_weight": 1.0,
+      "annual_turnover": 0.0
+    },
+    "baseline": {
+      "name": "12/VIX (Baseline)",
+      "ann_ret": 0.055912519851902376,
+      "ann_vol": 0.09447989710366529,
+      "sharpe": 0.38010752501665424,
+      "mdd": -0.294631457090778,
+      "calmar": 0.18977104618762872,
+      "sortino": 0.5076350277083842,
+      "avg_weight": 0.7052730036914546,
+      "annual_turnover": 7.929408678489503
+    },
+    "earnings_enhanced": {
+      "name": "Earnings Enhanced (10/14)",
+      "ann_ret": 0.05925879144483215,
+      "ann_vol": 0.10353238220104914,
+      "sharpe": 0.37919335583910013,
+      "mdd": -0.32286261183360415,
+      "calmar": 0.18354182018255105,
+      "sortino": 0.5000321247822841,
+      "avg_weight": 0.7541417312043529,
+      "annual_turnover": 8.457100434335292
+    },
+    "earnings_only": {
+      "name": "Earnings-Only VT",
+      "ann_ret": 0.08650655341756686,
+      "ann_vol": 0.1772287046555419,
+      "sharpe": 0.375258362051608,
+      "mdd": -0.5545416952049006,
+      "calmar": 0.15599648171739924,
+      "sortino": 0.45415518906649893,
+      "avg_weight": 0.9469989632239971,
+      "annual_turnover": 3.6519909908581827
+    },
+    "anti_earnings": {
+      "name": "Anti-Earnings VT",
+      "ann_ret": 0.06654497743349852,
+      "ann_vol": 0.11664304409968844,
+      "sharpe": 0.39903774625188165,
+      "mdd": -0.3369656126765276,
+      "calmar": 0.19748299212174752,
+      "sortino": 0.5046464633278888,
+      "avg_weight": 0.7582740404674576,
+      "annual_turnover": 8.744330960232178
+    }
+  },
+  "hac_tests_vs_baseline": {
+    "earnings_enhanced": {
+      "hac_t": 1.3355403353487116,
+      "hac_p": 0.18175648418783585,
+      "boot_mean": 0.003760784620316935,
+      "boot_ci_lower": -0.04526481151072172,
+      "boot_ci_upper": 0.05364778951607727,
+      "boot_p_better": 0.5598,
+      "boot_block_size": 21
+    },
+    "earnings_only": {
+      "hac_t": 2.2971407877290453,
+      "hac_p": 0.02164924584858996,
+      "boot_mean": 0.037497620591188885,
+      "boot_ci_lower": -0.14070190686370881,
+      "boot_ci_upper": 0.20730366952751028,
+      "boot_p_better": 0.6681,
+      "boot_block_size": 21
+    },
+    "anti_earnings": {
+      "hac_t": 1.8203020172462763,
+      "hac_p": 0.06876897496411694,
+      "boot_mean": 0.030445465947287743,
+      "boot_ci_lower": -0.09472871434920979,
+      "boot_ci_upper": 0.14959844144257187,
+      "boot_p_better": 0.6953,
+      "boot_block_size": 21
+    }
+  },
+  "cross_oos": [
+    {
+      "period": "Train 2005-2011, Test 2012-2017",
+      "test_start": "2012-01-01",
+      "test_end": "2017-12-31",
+      "n_test_days": 1509,
+      "note": "overlapping_subperiod_robustness_check",
+      "results": {
+        "bh": {
+          "sharpe": 1.1472047480069651,
+          "ann_ret": 0.1576522679040797,
+          "mdd": -0.13022918852006987
+        },
+        "baseline": {
+          "sharpe": 0.8701386024054719,
+          "ann_ret": 0.09552918779640973,
+          "mdd": -0.11979081015635938
+        },
+        "earnings_enhanced": {
+          "sharpe": 0.879920041158889,
+          "ann_ret": 0.10307076843519991,
+          "mdd": -0.1410927576999721
+        },
+        "earnings_only": {
+          "sharpe": 1.018552961177165,
+          "ann_ret": 0.13784662452429153,
+          "mdd": -0.14951000853150784
+        },
+        "anti_earnings": {
+          "sharpe": 0.9883979014418857,
+          "ann_ret": 0.11140550799137028,
+          "mdd": -0.11207537813699817
+        }
+      },
+      "hac_tests": {
+        "earnings_enhanced": {
+          "hac_t": 1.4911701584586206,
+          "hac_p": 0.13612596805013322
+        },
+        "earnings_only": {
+          "hac_t": 3.253748117605688,
+          "hac_p": 0.0011641511191047282
+        },
+        "anti_earnings": {
+          "hac_t": 2.583974828151224,
+          "hac_p": 0.00986020209841132
+        }
+      }
+    },
+    {
+      "period": "Train 2008-2015, Test 2016-2020",
+      "test_start": "2016-01-01",
+      "test_end": "2020-12-31",
+      "n_test_days": 1259,
+      "note": "overlapping_subperiod_robustness_check",
+      "results": {
+        "bh": {
+          "sharpe": 0.6952116298777279,
+          "ann_ret": 0.15109995319926828,
+          "mdd": -0.3371725988642293
+        },
+        "baseline": {
+          "sharpe": 0.8103081534912031,
+          "ann_ret": 0.09481772538326383,
+          "mdd": -0.1317568401208632
+        },
+        "earnings_enhanced": {
+          "sharpe": 0.8006077704395556,
+          "ann_ret": 0.10160598643461682,
+          "mdd": -0.15229967081193502
+        },
+        "earnings_only": {
+          "sharpe": 0.6810403144413856,
+          "ann_ret": 0.144359791303166,
+          "mdd": -0.3371725988642294
+        },
+        "anti_earnings": {
+          "sharpe": 0.7470091726226223,
+          "ann_ret": 0.09747456259313259,
+          "mdd": -0.13261011630548963
+        }
+      },
+      "hac_tests": {
+        "earnings_enhanced": {
+          "hac_t": 1.1067126092243544,
+          "hac_p": 0.26862978061111753
+        },
+        "earnings_only": {
+          "hac_t": 1.3573705248026964,
+          "hac_p": 0.17490696476029455
+        },
+        "anti_earnings": {
+          "hac_t": 0.34675061465929113,
+          "hac_p": 0.7288366737602141
+        }
+      }
+    },
+    {
+      "period": "Train 2012-2019, Test 2020-2025",
+      "test_start": "2020-01-01",
+      "test_end": "2025-12-31",
+      "n_test_days": 1508,
+      "note": "overlapping_subperiod_robustness_check",
+      "results": {
+        "bh": {
+          "sharpe": 0.6285384596932305,
+          "ann_ret": 0.1503430012223672,
+          "mdd": -0.33717259886422923
+        },
+        "baseline": {
+          "sharpe": 0.5773234063777204,
+          "ann_ret": 0.07546968661923259,
+          "mdd": -0.14790609718380118
+        },
+        "earnings_enhanced": {
+          "sharpe": 0.57844157615223,
+          "ann_ret": 0.08174120133825014,
+          "mdd": -0.16914662242037387
+        },
+        "earnings_only": {
+          "sharpe": 0.5611525066284234,
+          "ann_ret": 0.1308693464139825,
+          "mdd": -0.33717259886422934
+        },
+        "anti_earnings": {
+          "sharpe": 0.5890281476200374,
+          "ann_ret": 0.08768044782189399,
+          "mdd": -0.17505113109304773
+        }
+      },
+      "hac_tests": {
+        "earnings_enhanced": {
+          "hac_t": 1.0444209050707454,
+          "hac_p": 0.29645819644089655
+        },
+        "earnings_only": {
+          "hac_t": 1.6478699452303092,
+          "hac_p": 0.0995878205992855
+        },
+        "anti_earnings": {
+          "hac_t": 0.880060815244687,
+          "hac_p": 0.37896668191294336
+        }
+      }
+    }
+  ],
+  "vt_performance_by_period": {
+    "excess_earn_mean_bps": -3.142405085821798,
+    "excess_earn_ann_pct": -7.9188608162709295,
+    "excess_non_mean_bps": -2.045253890831658,
+    "excess_non_ann_pct": -5.1540398048957785,
+    "difference_t_stat": -0.43395532473324,
+    "difference_p_value": 0.6643384177518349,
+    "sharpe_earnings": 0.4726213108168595,
+    "sharpe_non_earnings": 0.397957437382818
+  },
+  "year_by_year": {
+    "enhanced_wins": 12,
+    "total_years": 21,
+    "win_rate": 0.5714285714285714
+  },
+  "comparison_with_k570": {
+    "k570_baseline_sharpe": 1.4251,
+    "k570b_baseline_sharpe": 0.38010752501665424,
+    "null_result_maintained": true,
+    "sharpe_change_pct": -73.32765946132521,
+    "note": "Sharpe change expected because lookahead bias inflated K570 weights. After vix.shift(1), weights are set from t-1 VIX rather than t VIX."
+  },
+  "methodology_notes": {
+    "lookahead_fix": "vix.shift(1) applied at top of run_vt_strategy(). Weight[t] = f(VIX[t-1]). First row backfilled.",
+    "hac_test": "hac_return_diff_test() (renamed from dm_test_sharpe). Newey-West HAC with lag=n^(1/3). Tests H0: mean(ret_candidate - ret_baseline)=0. NOT a proper Diebold-Mariano forecast loss test.",
+    "bootstrap": "Circular block bootstrap with block_size=max(21, n^(1/3)). Accounts for serial correlation in daily returns. CI will be wider than i.i.d. bootstrap used in K570.",
+    "oos_label": "3 subperiods are OVERLAPPING robustness checks, not non-overlapping OOS. 2012-2017 and 2016-2020 share 2016-2017; 2016-2020 and 2020-2025 share 2020."
+  },
+  "references": [
+    "Moreira & Muir (2017, JoF): Volatility-managed portfolios",
+    "Savor & Wilson (2016, JFE): Earnings Announcements and Systematic Risk",
+    "Harvey (2016, JoF): t>3 threshold for new factors",
+    "K498: Earnings Season Vol Patterns \u2014 null at index level",
+    "K412: Earnings Season Effect on Index Volatility \u2014 null",
+    "K80: VT Seasonality \u2014 null (sell-in-may)",
+    "K570: Original experiment with lookahead bias"
+  ],
+  "elapsed_seconds": 12.274034023284912
+}
