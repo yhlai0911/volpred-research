@@ -6610,5 +6610,19 @@
     "dispatched_at": "2026-05-17T11:00:00Z",
     "completed_at": "2026-05-17T11:25:15.911046Z",
     "notes": "IGARCH persistence=1.0, gamma p=0.300 (not sig), Wilcoxon aggregate p=0.25 (N=3 power issue). CONDITIONAL_PASS code review; MEDIUM fix applied (added gamma_tstat/pvalue to results JSON)."
+  },
+  {
+    "timestamp": "2026-05-17T12:19:09Z",
+    "task_type": "daily_article",
+    "task_id": "gen_article_k1203",
+    "title": "七個資產全部測完了，替代數據連時序作弊問題解決後還是輸",
+    "article_id": "mile_c1dfdf53",
+    "status": "completed",
+    "experiment_refs": [
+      "K1201",
+      "K1203"
+    ],
+    "dispatch_fix": "fixed continue_task_dispatch.py priority sort P4/int mixed type",
+    "notes": "7-asset PIT panorama NULL result article; editor SOP 9-checklist all PASS"
   }
 ]

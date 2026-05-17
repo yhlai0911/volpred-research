@@ -214,9 +214,13 @@ def categorize(tasks: list[dict]) -> dict:
         else:
             agentable.append(t)
 
-    agentable.sort(key=lambda t: (t.get("priority", 999), t.get("id", "")))
-    main_thread.sort(key=lambda t: (t.get("priority", 999), t.get("id", "")))
-    blocked.sort(key=lambda b: (b["task"].get("priority", 999), b["task"].get("id", "")))
+    def _prio_key(v):
+        s = str(v)
+        return int(s[1:]) if s.startswith("P") and s[1:].isdigit() else (int(s) if str(s).isdigit() else 999)
+
+    agentable.sort(key=lambda t: (_prio_key(t.get("priority", 999)), str(t.get("id", ""))))
+    main_thread.sort(key=lambda t: (_prio_key(t.get("priority", 999)), str(t.get("id", ""))))
+    blocked.sort(key=lambda b: (_prio_key(b["task"].get("priority", 999)), str(b["task"].get("id", ""))))
     return {"agentable": agentable, "main_thread": main_thread, "blocked": blocked}
 
 
