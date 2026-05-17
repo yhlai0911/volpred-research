@@ -1,0 +1,116 @@
+{
+  "_meta": {
+    "purpose": "Primary-source quarterly financial reference for TSMC (2330.TW) and UMC (2303.TW), used to cross-check K1202 LLM_EXTRACTED non-capex variables (R&D delta, wafer ASP delta, utilisation delta).",
+    "accessed_date": "2026-05-16",
+    "sources": [
+      {
+        "name": "stockanalysis.com TSMC quarterly income statement",
+        "url": "https://www.stockanalysis.com/stocks/tsm/financials/?p=quarterly",
+        "data_source_upstream": "TSMC SEC 6-K filings + IR press releases (consolidated TWD financials)",
+        "extraction_method": "WebFetch 2026-05-16",
+        "covered": "2023Q1-2024Q4 quarterly revenue, R&D, gross margin, operating margin"
+      },
+      {
+        "name": "stockanalysis.com TSMC annual",
+        "url": "https://www.stockanalysis.com/stocks/tsm/financials/",
+        "data_source_upstream": "TSMC annual reports / 20-F",
+        "extraction_method": "WebFetch 2026-05-16",
+        "covered": "2022, 2023, 2024 annual"
+      },
+      {
+        "name": "stockanalysis.com UMC quarterly income statement",
+        "url": "https://www.stockanalysis.com/stocks/umc/financials/?p=quarterly",
+        "data_source_upstream": "UMC SEC 6-K filings + IR press releases",
+        "extraction_method": "WebFetch 2026-05-16",
+        "covered": "2023Q1-2024Q4 quarterly revenue, R&D, gross margin"
+      },
+      {
+        "name": "stockanalysis.com UMC annual",
+        "url": "https://www.stockanalysis.com/stocks/umc/financials/",
+        "data_source_upstream": "UMC annual reports / 20-F",
+        "extraction_method": "WebFetch 2026-05-16",
+        "covered": "2022, 2023, 2024 annual"
+      },
+      {
+        "name": "TSMC IR (direct)",
+        "url": "https://investor.tsmc.com/english/quarterly-results",
+        "status": "BLOCKED_403_via_WebFetch_2026-05-16",
+        "blockage_note": "Direct TSMC IR pages reject WebFetch with 403. stockanalysis.com is upstream-consistent re-distributor of the same SEC-filed numbers; use as authoritative for revenue / R&D / margin per K1202b note."
+      },
+      {
+        "name": "UMC IR (direct)",
+        "url": "https://www.umc.com/en/News/Investor",
+        "status": "BLOCKED_403_via_WebFetch_2026-05-16",
+        "blockage_note": "Same blockage pattern as TSMC. Utilization rate (UMC-only disclosure) not available through fallback sources via WebFetch — marked UNVERIFIED_via_webfetch in cross-check; reviewer should be referred to UMC investor conference PDF appendix."
+      }
+    ],
+    "trace_chain": "TSMC/UMC SEC 6-K consolidated income statement -> stockanalysis.com aggregator -> WebFetch 2026-05-16 -> primary_source_reference.json. Independent reproducible step."
+  },
+
+  "tsmc_quarterly_TWD_millions": {
+    "_units": "millions TWD",
+    "2022Q1": {"announce_date": "2022-04-14", "revenue": 491076, "rd_expense": 36049, "gross_margin_pct": 55.63},
+    "2022Q2": {"announce_date": "2022-07-14", "revenue": 534141, "rd_expense": 39649, "gross_margin_pct": 59.06},
+    "2022Q3": {"announce_date": "2022-10-13", "revenue": 613143, "rd_expense": 42978, "gross_margin_pct": 60.43},
+    "2022Q4": {"announce_date": "2023-01-12", "revenue": 625532, "rd_expense": 44587, "gross_margin_pct": 62.22},
+    "2023Q1": {"announce_date": "2023-04-20", "revenue": 508633, "rd_expense": 39157, "gross_margin_pct": 56.33, "operating_margin_pct": 45.46},
+    "2023Q2": {"announce_date": "2023-07-20", "revenue": 480841, "rd_expense": 41665, "gross_margin_pct": 54.11, "operating_margin_pct": 42.00},
+    "2023Q3": {"announce_date": "2023-10-19", "revenue": 546733, "rd_expense": 51138, "gross_margin_pct": 54.26, "operating_margin_pct": 41.71},
+    "2023Q4": {"announce_date": "2024-01-18", "revenue": 625529, "rd_expense": 50410, "gross_margin_pct": 53.04, "operating_margin_pct": 41.60},
+    "2024Q1": {"announce_date": "2024-04-18", "revenue": 592644, "rd_expense": 46109, "gross_margin_pct": 53.07, "operating_margin_pct": 42.02},
+    "2024Q2": {"announce_date": "2024-07-18", "revenue": 673510, "rd_expense": 48058, "gross_margin_pct": 53.17, "operating_margin_pct": 42.55},
+    "2024Q3": {"announce_date": "2024-10-17", "revenue": 759692, "rd_expense": 52784, "gross_margin_pct": 57.83, "operating_margin_pct": 47.49},
+    "2024Q4": {"announce_date": "2025-01-16", "revenue": 868461, "rd_expense": 57231, "gross_margin_pct": 59.00, "operating_margin_pct": 49.02}
+  },
+
+  "tsmc_annual_TWD_millions": {
+    "2022": {"revenue": 2263890, "rd_expense": 163262, "gross_margin_pct": 59.56, "operating_margin_pct": 49.53},
+    "2023": {"revenue": 2161740, "rd_expense": 182370, "gross_margin_pct": 54.36, "operating_margin_pct": 42.63},
+    "2024": {"revenue": 2894310, "rd_expense": 204182, "gross_margin_pct": 56.12, "operating_margin_pct": 45.68}
+  },
+
+  "umc_quarterly_TWD_millions": {
+    "_units": "millions TWD",
+    "2022Q1": {"announce_date": "2022-04-27", "revenue": 63423, "rd_expense": 3033, "gross_margin_pct": 43.37},
+    "2022Q2": {"announce_date": "2022-07-27", "revenue": 72055, "rd_expense": 3209, "gross_margin_pct": 46.45},
+    "2022Q3": {"announce_date": "2022-10-26", "revenue": 75392, "rd_expense": 3304, "gross_margin_pct": 47.30},
+    "2022Q4": {"announce_date": "2023-02-08", "revenue": 67836, "rd_expense": 3407, "gross_margin_pct": 42.93},
+    "2023Q1": {"announce_date": "2023-04-26", "revenue": 54209, "rd_expense": 2767, "gross_margin_pct": 35.46},
+    "2023Q2": {"announce_date": "2023-07-26", "revenue": 56296, "rd_expense": 3317, "gross_margin_pct": 35.97},
+    "2023Q3": {"announce_date": "2023-10-25", "revenue": 57069, "rd_expense": 3255, "gross_margin_pct": 35.85},
+    "2023Q4": {"announce_date": "2024-01-31", "revenue": 54958, "rd_expense": 3945, "gross_margin_pct": 32.40},
+    "2024Q1": {"announce_date": "2024-04-24", "revenue": 54632, "rd_expense": 3407, "gross_margin_pct": 30.93},
+    "2024Q2": {"announce_date": "2024-07-31", "revenue": 56799, "rd_expense": 3853, "gross_margin_pct": 35.18},
+    "2024Q3": {"announce_date": "2024-10-30", "revenue": 60485, "rd_expense": 4022, "gross_margin_pct": 33.77},
+    "2024Q4": {"announce_date": "2025-02-05", "revenue": 60386, "rd_expense": 4334, "gross_margin_pct": 30.38}
+  },
+
+  "umc_annual_TWD_millions": {
+    "2022": {"revenue": 278705, "rd_expense": 12954, "gross_margin_pct": 45.12},
+    "2023": {"revenue": 222533, "rd_expense": 13284, "gross_margin_pct": 34.94},
+    "2024": {"revenue": 232303, "rd_expense": 15616, "gross_margin_pct": 32.57}
+  },
+
+  "_quarterly_announce_date_to_k1202_row_mapping_TSMC": {
+    "comment": "K1202 row announce_date is the conference-call date (post earnings). TSMC convention: results for prior quarter announced ~1 month into current quarter. Mapping for TSMC K1202 rows 2023-03-01 .. 2024-11-15 to TSMC quarterly results:",
+    "2023-03-01_TSMC_row": {"k1202_row_date": "2023-03-01", "covers_results_of": "2022Q4", "tsmc_quarter_ref": "covers FY2022Q4 actuals; guidance for 2023Q1"},
+    "2023-05-15_TSMC_row": {"k1202_row_date": "2023-05-15", "covers_results_of": "2023Q1", "tsmc_quarter_ref": "2023Q1"},
+    "2023-08-15_TSMC_row": {"k1202_row_date": "2023-08-15", "covers_results_of": "2023Q2", "tsmc_quarter_ref": "2023Q2"},
+    "2023-11-15_TSMC_row": {"k1202_row_date": "2023-11-15", "covers_results_of": "2023Q3", "tsmc_quarter_ref": "2023Q3"},
+    "2024-03-01_TSMC_row": {"k1202_row_date": "2024-03-01", "covers_results_of": "2023Q4", "tsmc_quarter_ref": "2023Q4"},
+    "2024-05-16_TSMC_row": {"k1202_row_date": "2024-05-16", "covers_results_of": "2024Q1", "tsmc_quarter_ref": "2024Q1"},
+    "2024-08-15_TSMC_row": {"k1202_row_date": "2024-08-15", "covers_results_of": "2024Q2", "tsmc_quarter_ref": "2024Q2"},
+    "2024-11-15_TSMC_row": {"k1202_row_date": "2024-11-15", "covers_results_of": "2024Q3", "tsmc_quarter_ref": "2024Q3"}
+  },
+
+  "_quarterly_announce_date_to_k1202_row_mapping_UMC": {
+    "comment": "K1202 row announce_date for UMC matches UMC earnings release dates. Mapping:",
+    "2023-04-27_UMC_row": {"k1202_row_date": "2023-04-27", "covers_results_of": "2023Q1"},
+    "2023-07-27_UMC_row": {"k1202_row_date": "2023-07-27", "covers_results_of": "2023Q2"},
+    "2023-10-26_UMC_row": {"k1202_row_date": "2023-10-26", "covers_results_of": "2023Q3"},
+    "2024-02-29_UMC_row": {"k1202_row_date": "2024-02-29", "covers_results_of": "2023Q4"},
+    "2024-04-25_UMC_row": {"k1202_row_date": "2024-04-25", "covers_results_of": "2024Q1"},
+    "2024-08-01_UMC_row": {"k1202_row_date": "2024-08-01", "covers_results_of": "2024Q2"},
+    "2024-11-01_UMC_row": {"k1202_row_date": "2024-11-01", "covers_results_of": "2024Q3"}
+  }
+}

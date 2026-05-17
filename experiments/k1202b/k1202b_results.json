@@ -1,0 +1,680 @@
+{
+  "experiment_id": "K1202b",
+  "parent": "K1202",
+  "purpose": "Paper 2 D2 LLM_EXTRACTED primary-source hand-verify (reviewer credibility gate)",
+  "seed": 42,
+  "accessed_date": "2026-05-16",
+  "method_summary": "Cross-check K1202 LLM_EXTRACTED non-capex variables vs TSMC/UMC quarterly income statements (stockanalysis.com -> SEC 6-K). 15 rows total (8 TSMC + 7 UMC), spanning 2023Q1-2024Q3 quarterly earnings calls.",
+  "primary_source_blockage": {
+    "tsmc_ir_direct_403": "https://investor.tsmc.com/english/quarterly-results (WebFetch 403)",
+    "umc_ir_direct_403": "https://www.umc.com/en/News/Investor (WebFetch 403)",
+    "fallback_used": "stockanalysis.com (upstream-traceable to SEC 6-K)"
+  },
+  "rows_verified": 15,
+  "rd_yoy_derived_TSMC": {
+    "2023Q1": 8.622,
+    "2023Q2": 5.085,
+    "2023Q3": 18.986,
+    "2023Q4": 13.06,
+    "2024Q1": 17.754,
+    "2024Q2": 15.344,
+    "2024Q3": 3.219,
+    "2024Q4": 13.531
+  },
+  "rd_yoy_derived_UMC": {
+    "2023Q1": -8.77,
+    "2023Q2": 3.366,
+    "2023Q3": -1.483,
+    "2023Q4": 15.791,
+    "2024Q1": 23.13,
+    "2024Q2": 16.159,
+    "2024Q3": 23.564,
+    "2024Q4": 9.861
+  },
+  "cross_check_table": [
+    {
+      "stock": "2330.TW",
+      "k1202_announce_date": "2023-03-01",
+      "k1202_quarter_ref": "2022Q4",
+      "checks": [
+        {
+          "variable": "rd_delta_pct",
+          "k1202_quarter_ref": "2022Q4",
+          "status": "no_prior_year_reference",
+          "label": "UNVERIFIED"
+        },
+        {
+          "variable": "wafer_asp_delta_pct",
+          "k1202_quarter_ref": "2022Q4",
+          "status": "no_prior_year_reference",
+          "label": "UNVERIFIED"
+        },
+        {
+          "variable": "utilisation_delta_pp",
+          "k1202_quarter_ref": "2022Q4",
+          "llm_value": -8.0,
+          "label": "UNVERIFIED_via_webfetch",
+          "llm_source_tag": "HAND_CODED",
+          "blockage_reason": "TSMC does not publicly disclose utilization rate since 2019; UMC quarterly utilization is in IR PDF appendix which returned WebFetch 403 (2026-05-16). Reviewer should be referred to UMC quarterly investor conference presentation pp.4-5 for primary source."
+        }
+      ]
+    },
+    {
+      "stock": "2330.TW",
+      "k1202_announce_date": "2023-05-15",
+      "k1202_quarter_ref": "2023Q1",
+      "checks": [
+        {
+          "variable": "rd_delta_pct",
+          "k1202_quarter_ref": "2023Q1",
+          "llm_value": 8.0,
+          "primary_value": 8.622,
+          "abs_diff_pp": 0.622,
+          "label": "MATCH",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "primary_source_method": "derived from quarterly R&D YoY (stockanalysis.com -> SEC 6-K)"
+        },
+        {
+          "variable": "wafer_asp_delta_pct",
+          "k1202_quarter_ref": "2023Q1",
+          "llm_value": 0.0,
+          "primary_proxy_gm_delta_pp": 0.7,
+          "directional_check": "NEUTRAL",
+          "label": "PROXY_DIRECTIONAL_NEUTRAL",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "primary_source_method": "proxy: GM YoY Δ (ASP changes transmit to GM at ~ fixed cost)",
+          "note": "ASP not separately disclosed by TSMC/UMC; this is a proxy directional check, not a magnitude check"
+        },
+        {
+          "variable": "utilisation_delta_pp",
+          "k1202_quarter_ref": "2023Q1",
+          "llm_value": -5.0,
+          "label": "UNVERIFIED_via_webfetch",
+          "llm_source_tag": "HAND_CODED",
+          "blockage_reason": "TSMC does not publicly disclose utilization rate since 2019; UMC quarterly utilization is in IR PDF appendix which returned WebFetch 403 (2026-05-16). Reviewer should be referred to UMC quarterly investor conference presentation pp.4-5 for primary source."
+        }
+      ]
+    },
+    {
+      "stock": "2330.TW",
+      "k1202_announce_date": "2023-08-15",
+      "k1202_quarter_ref": "2023Q2",
+      "checks": [
+        {
+          "variable": "rd_delta_pct",
+          "k1202_quarter_ref": "2023Q2",
+          "llm_value": 9.0,
+          "primary_value": 5.085,
+          "abs_diff_pp": 3.915,
+          "label": "CLOSE",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "primary_source_method": "derived from quarterly R&D YoY (stockanalysis.com -> SEC 6-K)"
+        },
+        {
+          "variable": "wafer_asp_delta_pct",
+          "k1202_quarter_ref": "2023Q2",
+          "llm_value": 0.0,
+          "primary_proxy_gm_delta_pp": -4.95,
+          "directional_check": "NEUTRAL",
+          "label": "PROXY_DIRECTIONAL_NEUTRAL",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "primary_source_method": "proxy: GM YoY Δ (ASP changes transmit to GM at ~ fixed cost)",
+          "note": "ASP not separately disclosed by TSMC/UMC; this is a proxy directional check, not a magnitude check"
+        },
+        {
+          "variable": "utilisation_delta_pp",
+          "k1202_quarter_ref": "2023Q2",
+          "llm_value": 2.0,
+          "label": "UNVERIFIED_via_webfetch",
+          "llm_source_tag": "HAND_CODED",
+          "blockage_reason": "TSMC does not publicly disclose utilization rate since 2019; UMC quarterly utilization is in IR PDF appendix which returned WebFetch 403 (2026-05-16). Reviewer should be referred to UMC quarterly investor conference presentation pp.4-5 for primary source."
+        }
+      ]
+    },
+    {
+      "stock": "2330.TW",
+      "k1202_announce_date": "2023-11-15",
+      "k1202_quarter_ref": "2023Q3",
+      "checks": [
+        {
+          "variable": "rd_delta_pct",
+          "k1202_quarter_ref": "2023Q3",
+          "llm_value": 10.0,
+          "primary_value": 18.986,
+          "abs_diff_pp": 8.986,
+          "label": "DIVERGE",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "primary_source_method": "derived from quarterly R&D YoY (stockanalysis.com -> SEC 6-K)"
+        },
+        {
+          "variable": "wafer_asp_delta_pct",
+          "k1202_quarter_ref": "2023Q3",
+          "llm_value": 1.0,
+          "primary_proxy_gm_delta_pp": -6.17,
+          "directional_check": "SIGN_DISAGREE",
+          "label": "PROXY_DIRECTIONAL_SIGN_DISAGREE",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "primary_source_method": "proxy: GM YoY Δ (ASP changes transmit to GM at ~ fixed cost)",
+          "note": "ASP not separately disclosed by TSMC/UMC; this is a proxy directional check, not a magnitude check"
+        },
+        {
+          "variable": "utilisation_delta_pp",
+          "k1202_quarter_ref": "2023Q3",
+          "llm_value": 4.0,
+          "label": "UNVERIFIED_via_webfetch",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "blockage_reason": "TSMC does not publicly disclose utilization rate since 2019; UMC quarterly utilization is in IR PDF appendix which returned WebFetch 403 (2026-05-16). Reviewer should be referred to UMC quarterly investor conference presentation pp.4-5 for primary source."
+        }
+      ]
+    },
+    {
+      "stock": "2330.TW",
+      "k1202_announce_date": "2024-03-01",
+      "k1202_quarter_ref": "2023Q4",
+      "checks": [
+        {
+          "variable": "rd_delta_pct",
+          "k1202_quarter_ref": "2023Q4",
+          "llm_value": 11.703872666177473,
+          "primary_value": 13.06,
+          "abs_diff_pp": 1.356,
+          "label": "MATCH",
+          "llm_source_tag": "PROXY_ANNUAL",
+          "primary_source_method": "derived from quarterly R&D YoY (stockanalysis.com -> SEC 6-K)"
+        },
+        {
+          "variable": "wafer_asp_delta_pct",
+          "k1202_quarter_ref": "2023Q4",
+          "llm_value": 1.5,
+          "primary_proxy_gm_delta_pp": -9.18,
+          "directional_check": "SIGN_DISAGREE",
+          "label": "PROXY_DIRECTIONAL_SIGN_DISAGREE",
+          "llm_source_tag": "HAND_CODED",
+          "primary_source_method": "proxy: GM YoY Δ (ASP changes transmit to GM at ~ fixed cost)",
+          "note": "ASP not separately disclosed by TSMC/UMC; this is a proxy directional check, not a magnitude check"
+        },
+        {
+          "variable": "utilisation_delta_pp",
+          "k1202_quarter_ref": "2023Q4",
+          "llm_value": 5.0,
+          "label": "UNVERIFIED_via_webfetch",
+          "llm_source_tag": "HAND_CODED",
+          "blockage_reason": "TSMC does not publicly disclose utilization rate since 2019; UMC quarterly utilization is in IR PDF appendix which returned WebFetch 403 (2026-05-16). Reviewer should be referred to UMC quarterly investor conference presentation pp.4-5 for primary source."
+        }
+      ]
+    },
+    {
+      "stock": "2330.TW",
+      "k1202_announce_date": "2024-05-16",
+      "k1202_quarter_ref": "2024Q1",
+      "checks": [
+        {
+          "variable": "rd_delta_pct",
+          "k1202_quarter_ref": "2024Q1",
+          "llm_value": 11.703872666177473,
+          "primary_value": 17.754,
+          "abs_diff_pp": 6.05,
+          "label": "DIVERGE",
+          "llm_source_tag": "PROXY_ANNUAL",
+          "primary_source_method": "derived from quarterly R&D YoY (stockanalysis.com -> SEC 6-K)"
+        },
+        {
+          "variable": "wafer_asp_delta_pct",
+          "k1202_quarter_ref": "2024Q1",
+          "llm_value": 2.0,
+          "primary_proxy_gm_delta_pp": -3.26,
+          "directional_check": "SIGN_DISAGREE",
+          "label": "PROXY_DIRECTIONAL_SIGN_DISAGREE",
+          "llm_source_tag": "HAND_CODED",
+          "primary_source_method": "proxy: GM YoY Δ (ASP changes transmit to GM at ~ fixed cost)",
+          "note": "ASP not separately disclosed by TSMC/UMC; this is a proxy directional check, not a magnitude check"
+        },
+        {
+          "variable": "utilisation_delta_pp",
+          "k1202_quarter_ref": "2024Q1",
+          "llm_value": 3.0,
+          "label": "UNVERIFIED_via_webfetch",
+          "llm_source_tag": "HAND_CODED",
+          "blockage_reason": "TSMC does not publicly disclose utilization rate since 2019; UMC quarterly utilization is in IR PDF appendix which returned WebFetch 403 (2026-05-16). Reviewer should be referred to UMC quarterly investor conference presentation pp.4-5 for primary source."
+        }
+      ]
+    },
+    {
+      "stock": "2330.TW",
+      "k1202_announce_date": "2024-08-15",
+      "k1202_quarter_ref": "2024Q2",
+      "checks": [
+        {
+          "variable": "rd_delta_pct",
+          "k1202_quarter_ref": "2024Q2",
+          "llm_value": 11.703872666177473,
+          "primary_value": 15.344,
+          "abs_diff_pp": 3.64,
+          "label": "CLOSE",
+          "llm_source_tag": "PROXY_ANNUAL",
+          "primary_source_method": "derived from quarterly R&D YoY (stockanalysis.com -> SEC 6-K)"
+        },
+        {
+          "variable": "wafer_asp_delta_pct",
+          "k1202_quarter_ref": "2024Q2",
+          "llm_value": 2.0,
+          "primary_proxy_gm_delta_pp": -0.94,
+          "directional_check": "SIGN_DISAGREE",
+          "label": "PROXY_DIRECTIONAL_SIGN_DISAGREE",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "primary_source_method": "proxy: GM YoY Δ (ASP changes transmit to GM at ~ fixed cost)",
+          "note": "ASP not separately disclosed by TSMC/UMC; this is a proxy directional check, not a magnitude check"
+        },
+        {
+          "variable": "utilisation_delta_pp",
+          "k1202_quarter_ref": "2024Q2",
+          "llm_value": 6.0,
+          "label": "UNVERIFIED_via_webfetch",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "blockage_reason": "TSMC does not publicly disclose utilization rate since 2019; UMC quarterly utilization is in IR PDF appendix which returned WebFetch 403 (2026-05-16). Reviewer should be referred to UMC quarterly investor conference presentation pp.4-5 for primary source."
+        }
+      ]
+    },
+    {
+      "stock": "2330.TW",
+      "k1202_announce_date": "2024-11-15",
+      "k1202_quarter_ref": "2024Q3",
+      "checks": [
+        {
+          "variable": "rd_delta_pct",
+          "k1202_quarter_ref": "2024Q3",
+          "llm_value": 11.703872666177473,
+          "primary_value": 3.219,
+          "abs_diff_pp": 8.485,
+          "label": "DIVERGE",
+          "llm_source_tag": "PROXY_ANNUAL",
+          "primary_source_method": "derived from quarterly R&D YoY (stockanalysis.com -> SEC 6-K)"
+        },
+        {
+          "variable": "wafer_asp_delta_pct",
+          "k1202_quarter_ref": "2024Q3",
+          "llm_value": 2.5,
+          "primary_proxy_gm_delta_pp": 3.57,
+          "directional_check": "SIGN_AGREE",
+          "label": "PROXY_DIRECTIONAL_SIGN_AGREE",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "primary_source_method": "proxy: GM YoY Δ (ASP changes transmit to GM at ~ fixed cost)",
+          "note": "ASP not separately disclosed by TSMC/UMC; this is a proxy directional check, not a magnitude check"
+        },
+        {
+          "variable": "utilisation_delta_pp",
+          "k1202_quarter_ref": "2024Q3",
+          "llm_value": 5.0,
+          "label": "UNVERIFIED_via_webfetch",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "blockage_reason": "TSMC does not publicly disclose utilization rate since 2019; UMC quarterly utilization is in IR PDF appendix which returned WebFetch 403 (2026-05-16). Reviewer should be referred to UMC quarterly investor conference presentation pp.4-5 for primary source."
+        }
+      ]
+    },
+    {
+      "stock": "2303.TW",
+      "k1202_announce_date": "2023-04-27",
+      "k1202_quarter_ref": "2023Q1",
+      "checks": [
+        {
+          "variable": "rd_delta_pct",
+          "k1202_quarter_ref": "2023Q1",
+          "llm_value": 2.0,
+          "primary_value": -8.77,
+          "abs_diff_pp": 10.77,
+          "label": "MAJOR_DIVERGE",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "primary_source_method": "derived from quarterly R&D YoY (stockanalysis.com -> SEC 6-K)"
+        },
+        {
+          "variable": "wafer_asp_delta_pct",
+          "k1202_quarter_ref": "2023Q1",
+          "llm_value": -3.0,
+          "primary_proxy_gm_delta_pp": -7.91,
+          "directional_check": "SIGN_AGREE",
+          "label": "PROXY_DIRECTIONAL_SIGN_AGREE",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "primary_source_method": "proxy: GM YoY Δ (ASP changes transmit to GM at ~ fixed cost)",
+          "note": "ASP not separately disclosed by TSMC/UMC; this is a proxy directional check, not a magnitude check"
+        },
+        {
+          "variable": "utilisation_delta_pp",
+          "k1202_quarter_ref": "2023Q1",
+          "llm_value": -3.0,
+          "label": "UNVERIFIED_via_webfetch",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "blockage_reason": "TSMC does not publicly disclose utilization rate since 2019; UMC quarterly utilization is in IR PDF appendix which returned WebFetch 403 (2026-05-16). Reviewer should be referred to UMC quarterly investor conference presentation pp.4-5 for primary source."
+        }
+      ]
+    },
+    {
+      "stock": "2303.TW",
+      "k1202_announce_date": "2023-07-27",
+      "k1202_quarter_ref": "2023Q2",
+      "checks": [
+        {
+          "variable": "rd_delta_pct",
+          "k1202_quarter_ref": "2023Q2",
+          "llm_value": 2.0,
+          "primary_value": 3.366,
+          "abs_diff_pp": 1.366,
+          "label": "MATCH",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "primary_source_method": "derived from quarterly R&D YoY (stockanalysis.com -> SEC 6-K)"
+        },
+        {
+          "variable": "wafer_asp_delta_pct",
+          "k1202_quarter_ref": "2023Q2",
+          "llm_value": -2.0,
+          "primary_proxy_gm_delta_pp": -10.48,
+          "directional_check": "SIGN_AGREE",
+          "label": "PROXY_DIRECTIONAL_SIGN_AGREE",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "primary_source_method": "proxy: GM YoY Δ (ASP changes transmit to GM at ~ fixed cost)",
+          "note": "ASP not separately disclosed by TSMC/UMC; this is a proxy directional check, not a magnitude check"
+        },
+        {
+          "variable": "utilisation_delta_pp",
+          "k1202_quarter_ref": "2023Q2",
+          "llm_value": -3.0,
+          "label": "UNVERIFIED_via_webfetch",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "blockage_reason": "TSMC does not publicly disclose utilization rate since 2019; UMC quarterly utilization is in IR PDF appendix which returned WebFetch 403 (2026-05-16). Reviewer should be referred to UMC quarterly investor conference presentation pp.4-5 for primary source."
+        }
+      ]
+    },
+    {
+      "stock": "2303.TW",
+      "k1202_announce_date": "2023-10-26",
+      "k1202_quarter_ref": "2023Q3",
+      "checks": [
+        {
+          "variable": "rd_delta_pct",
+          "k1202_quarter_ref": "2023Q3",
+          "llm_value": 3.0,
+          "primary_value": -1.483,
+          "abs_diff_pp": 4.483,
+          "label": "CLOSE",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "primary_source_method": "derived from quarterly R&D YoY (stockanalysis.com -> SEC 6-K)"
+        },
+        {
+          "variable": "wafer_asp_delta_pct",
+          "k1202_quarter_ref": "2023Q3",
+          "llm_value": -1.0,
+          "primary_proxy_gm_delta_pp": -11.45,
+          "directional_check": "SIGN_AGREE",
+          "label": "PROXY_DIRECTIONAL_SIGN_AGREE",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "primary_source_method": "proxy: GM YoY Δ (ASP changes transmit to GM at ~ fixed cost)",
+          "note": "ASP not separately disclosed by TSMC/UMC; this is a proxy directional check, not a magnitude check"
+        },
+        {
+          "variable": "utilisation_delta_pp",
+          "k1202_quarter_ref": "2023Q3",
+          "llm_value": 1.0,
+          "label": "UNVERIFIED_via_webfetch",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "blockage_reason": "TSMC does not publicly disclose utilization rate since 2019; UMC quarterly utilization is in IR PDF appendix which returned WebFetch 403 (2026-05-16). Reviewer should be referred to UMC quarterly investor conference presentation pp.4-5 for primary source."
+        }
+      ]
+    },
+    {
+      "stock": "2303.TW",
+      "k1202_announce_date": "2024-02-29",
+      "k1202_quarter_ref": "2023Q4",
+      "checks": [
+        {
+          "variable": "rd_delta_pct",
+          "k1202_quarter_ref": "2023Q4",
+          "llm_value": 2.5498524186527094,
+          "primary_value": 15.791,
+          "abs_diff_pp": 13.241,
+          "label": "MAJOR_DIVERGE",
+          "llm_source_tag": "PROXY_ANNUAL",
+          "primary_source_method": "derived from quarterly R&D YoY (stockanalysis.com -> SEC 6-K)"
+        },
+        {
+          "variable": "wafer_asp_delta_pct",
+          "k1202_quarter_ref": "2023Q4",
+          "llm_value": -1.0,
+          "primary_proxy_gm_delta_pp": -10.53,
+          "directional_check": "SIGN_AGREE",
+          "label": "PROXY_DIRECTIONAL_SIGN_AGREE",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "primary_source_method": "proxy: GM YoY Δ (ASP changes transmit to GM at ~ fixed cost)",
+          "note": "ASP not separately disclosed by TSMC/UMC; this is a proxy directional check, not a magnitude check"
+        },
+        {
+          "variable": "utilisation_delta_pp",
+          "k1202_quarter_ref": "2023Q4",
+          "llm_value": 1.0,
+          "label": "UNVERIFIED_via_webfetch",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "blockage_reason": "TSMC does not publicly disclose utilization rate since 2019; UMC quarterly utilization is in IR PDF appendix which returned WebFetch 403 (2026-05-16). Reviewer should be referred to UMC quarterly investor conference presentation pp.4-5 for primary source."
+        }
+      ]
+    },
+    {
+      "stock": "2303.TW",
+      "k1202_announce_date": "2024-04-25",
+      "k1202_quarter_ref": "2024Q1",
+      "checks": [
+        {
+          "variable": "rd_delta_pct",
+          "k1202_quarter_ref": "2024Q1",
+          "llm_value": 2.5498524186527094,
+          "primary_value": 23.13,
+          "abs_diff_pp": 20.58,
+          "label": "MAJOR_DIVERGE",
+          "llm_source_tag": "PROXY_ANNUAL",
+          "primary_source_method": "derived from quarterly R&D YoY (stockanalysis.com -> SEC 6-K)"
+        },
+        {
+          "variable": "wafer_asp_delta_pct",
+          "k1202_quarter_ref": "2024Q1",
+          "llm_value": 0.0,
+          "primary_proxy_gm_delta_pp": -4.53,
+          "directional_check": "NEUTRAL",
+          "label": "PROXY_DIRECTIONAL_NEUTRAL",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "primary_source_method": "proxy: GM YoY Δ (ASP changes transmit to GM at ~ fixed cost)",
+          "note": "ASP not separately disclosed by TSMC/UMC; this is a proxy directional check, not a magnitude check"
+        },
+        {
+          "variable": "utilisation_delta_pp",
+          "k1202_quarter_ref": "2024Q1",
+          "llm_value": 2.0,
+          "label": "UNVERIFIED_via_webfetch",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "blockage_reason": "TSMC does not publicly disclose utilization rate since 2019; UMC quarterly utilization is in IR PDF appendix which returned WebFetch 403 (2026-05-16). Reviewer should be referred to UMC quarterly investor conference presentation pp.4-5 for primary source."
+        }
+      ]
+    },
+    {
+      "stock": "2303.TW",
+      "k1202_announce_date": "2024-08-01",
+      "k1202_quarter_ref": "2024Q2",
+      "checks": [
+        {
+          "variable": "rd_delta_pct",
+          "k1202_quarter_ref": "2024Q2",
+          "llm_value": 2.5498524186527094,
+          "primary_value": 16.159,
+          "abs_diff_pp": 13.609,
+          "label": "MAJOR_DIVERGE",
+          "llm_source_tag": "PROXY_ANNUAL",
+          "primary_source_method": "derived from quarterly R&D YoY (stockanalysis.com -> SEC 6-K)"
+        },
+        {
+          "variable": "wafer_asp_delta_pct",
+          "k1202_quarter_ref": "2024Q2",
+          "llm_value": 0.5,
+          "primary_proxy_gm_delta_pp": -0.79,
+          "directional_check": "SIGN_DISAGREE",
+          "label": "PROXY_DIRECTIONAL_SIGN_DISAGREE",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "primary_source_method": "proxy: GM YoY Δ (ASP changes transmit to GM at ~ fixed cost)",
+          "note": "ASP not separately disclosed by TSMC/UMC; this is a proxy directional check, not a magnitude check"
+        },
+        {
+          "variable": "utilisation_delta_pp",
+          "k1202_quarter_ref": "2024Q2",
+          "llm_value": 2.0,
+          "label": "UNVERIFIED_via_webfetch",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "blockage_reason": "TSMC does not publicly disclose utilization rate since 2019; UMC quarterly utilization is in IR PDF appendix which returned WebFetch 403 (2026-05-16). Reviewer should be referred to UMC quarterly investor conference presentation pp.4-5 for primary source."
+        }
+      ]
+    },
+    {
+      "stock": "2303.TW",
+      "k1202_announce_date": "2024-11-01",
+      "k1202_quarter_ref": "2024Q3",
+      "checks": [
+        {
+          "variable": "rd_delta_pct",
+          "k1202_quarter_ref": "2024Q3",
+          "llm_value": 2.5498524186527094,
+          "primary_value": 23.564,
+          "abs_diff_pp": 21.014,
+          "label": "MAJOR_DIVERGE",
+          "llm_source_tag": "PROXY_ANNUAL",
+          "primary_source_method": "derived from quarterly R&D YoY (stockanalysis.com -> SEC 6-K)"
+        },
+        {
+          "variable": "wafer_asp_delta_pct",
+          "k1202_quarter_ref": "2024Q3",
+          "llm_value": 1.0,
+          "primary_proxy_gm_delta_pp": -2.08,
+          "directional_check": "SIGN_DISAGREE",
+          "label": "PROXY_DIRECTIONAL_SIGN_DISAGREE",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "primary_source_method": "proxy: GM YoY Δ (ASP changes transmit to GM at ~ fixed cost)",
+          "note": "ASP not separately disclosed by TSMC/UMC; this is a proxy directional check, not a magnitude check"
+        },
+        {
+          "variable": "utilisation_delta_pp",
+          "k1202_quarter_ref": "2024Q3",
+          "llm_value": 3.0,
+          "label": "UNVERIFIED_via_webfetch",
+          "llm_source_tag": "LLM_EXTRACTED_FROM_PUBLIC",
+          "blockage_reason": "TSMC does not publicly disclose utilization rate since 2019; UMC quarterly utilization is in IR PDF appendix which returned WebFetch 403 (2026-05-16). Reviewer should be referred to UMC quarterly investor conference presentation pp.4-5 for primary source."
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "rd_delta_pct": {
+      "n_total_rows_in_sample": 15,
+      "n_NA_in_k1202": 0,
+      "n_unverifiable": 1,
+      "n_verifiable_magnitude": 14,
+      "n_directional_only": 0,
+      "magnitude_counts": {
+        "MATCH": 3,
+        "CLOSE": 3,
+        "DIVERGE": 3,
+        "MAJOR_DIVERGE": 5
+      },
+      "directional_counts": {
+        "SIGN_AGREE": 0,
+        "SIGN_DISAGREE": 0,
+        "NEUTRAL": 0
+      },
+      "match_rate_pct": 21.43,
+      "abs_diff_stats_pp": {
+        "n": 14,
+        "mean": 8.437,
+        "median": 7.268,
+        "max": 21.014,
+        "min": 0.622
+      }
+    },
+    "wafer_asp_delta_pct": {
+      "n_total_rows_in_sample": 15,
+      "n_NA_in_k1202": 0,
+      "n_unverifiable": 1,
+      "n_verifiable_magnitude": 0,
+      "n_directional_only": 14,
+      "magnitude_counts": {
+        "MATCH": 0,
+        "CLOSE": 0,
+        "DIVERGE": 0,
+        "MAJOR_DIVERGE": 0
+      },
+      "directional_counts": {
+        "SIGN_AGREE": 5,
+        "SIGN_DISAGREE": 6,
+        "NEUTRAL": 3
+      },
+      "match_rate_pct": null,
+      "abs_diff_stats_pp": null
+    },
+    "utilisation_delta_pp": {
+      "n_total_rows_in_sample": 15,
+      "n_NA_in_k1202": 0,
+      "n_unverifiable": 15,
+      "n_verifiable_magnitude": 0,
+      "n_directional_only": 0,
+      "magnitude_counts": {
+        "MATCH": 0,
+        "CLOSE": 0,
+        "DIVERGE": 0,
+        "MAJOR_DIVERGE": 0
+      },
+      "directional_counts": {
+        "SIGN_AGREE": 0,
+        "SIGN_DISAGREE": 0,
+        "NEUTRAL": 0
+      },
+      "match_rate_pct": null,
+      "abs_diff_stats_pp": null
+    },
+    "_per_source_tag": {
+      "LLM_EXTRACTED_FROM_PUBLIC": {
+        "rd_delta_pct_label_counts": {
+          "MATCH": 2,
+          "CLOSE": 2,
+          "DIVERGE": 1,
+          "MAJOR_DIVERGE": 1,
+          "UNVERIFIED": 0,
+          "NA": 0
+        },
+        "rd_quantifiable_n": 6,
+        "rd_match_rate_pct": 33.33,
+        "rd_major_diverge_rate_pct": 16.67,
+        "rd_abs_diff_pp_stats": {
+          "n": 6,
+          "mean": 5.024,
+          "median": 4.199,
+          "max": 10.77
+        }
+      },
+      "PROXY_ANNUAL": {
+        "rd_delta_pct_label_counts": {
+          "MATCH": 1,
+          "CLOSE": 1,
+          "DIVERGE": 2,
+          "MAJOR_DIVERGE": 4,
+          "UNVERIFIED": 0,
+          "NA": 0
+        },
+        "rd_quantifiable_n": 8,
+        "rd_match_rate_pct": 12.5,
+        "rd_major_diverge_rate_pct": 50.0,
+        "rd_abs_diff_pp_stats": {
+          "n": 8,
+          "mean": 10.997,
+          "median": 10.863,
+          "max": 21.014
+        }
+      }
+    },
+    "_verdict": "RECOMMEND_K1202_RERUN",
+    "_recommendation": "LLM_EXTRACTED-subset R&D MAJOR_DIVERGE rate 16.7% > 10% gate. K1202 D2 should be rerun with hand-verified R&D YoY (SEC 6-K derived) replacing LLM-extracted subset for TSMC + UMC quarterly rows.",
+    "_asp_directional_disagree_rate": 0.545,
+    "_asp_directional_note": "ASP magnitude is not separately disclosed (TSMC/UMC). Proxy = quarterly GM YoY Δ. Sign-disagree rate 55% reflects that GM is driven by node-mix and yield in addition to ASP; sign-agree treated as positive sanity, sign-disagree NOT treated as LLM error.",
+    "_util_note": "utilisation_delta_pp UNVERIFIABLE via WebFetch (TSMC undisclosed since 2019; UMC IR PDF 403). Paper 2 appendix should: (a) acknowledge utilisation primary-source verification not feasible programmatically, (b) note that K1202 utilisation channel univariate t=+0.25 (NULL) means precision of this variable is moot for NULL conclusion."
+  }
+}
