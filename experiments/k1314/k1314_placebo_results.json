@@ -1,0 +1,73 @@
+{
+  "experiment_id": "k1314_placebo",
+  "purpose": "random-graph placebo for K1314 SPY DM=5.4 sanity check",
+  "run_at_utc": "2026-05-17T01:32:14.623125+00:00",
+  "per_asset": {
+    "SPY": {
+      "n_oos": 1257,
+      "qlike_baseline": 5.696548553976135,
+      "qlike_placebo": 5.314522640510568,
+      "improvement_pct": 6.706269767487832,
+      "dm_hln": {
+        "t_stat": 2.687293707659566,
+        "p_value": 0.007298481793377665,
+        "n": 1257,
+        "mean_d": 0.3820259134655662,
+        "hac_se": 0.14210353068206452
+      }
+    },
+    "QQQ": {
+      "n_oos": 1257,
+      "qlike_baseline": 5.432409354682426,
+      "qlike_placebo": 5.724388367898037,
+      "improvement_pct": -5.374760886970735,
+      "dm_hln": {
+        "t_stat": -2.5303531220219417,
+        "p_value": 0.011516127850972113,
+        "n": 1257,
+        "mean_d": -0.29197901321561043,
+        "hac_se": 0.11534471072552245
+      }
+    },
+    "GLD": {
+      "n_oos": 1257,
+      "qlike_baseline": 3.803095533024133,
+      "qlike_placebo": 3.7824394563335653,
+      "improvement_pct": 0.5431385173262443,
+      "dm_hln": {
+        "t_stat": 0.6399376180968058,
+        "p_value": 0.522329867168011,
+        "n": 1257,
+        "mean_d": 0.020656076690568025,
+        "hac_se": 0.032265424086899475
+      }
+    },
+    "TLT": {
+      "n_oos": 1257,
+      "qlike_baseline": 3.8089370564372502,
+      "qlike_placebo": 3.7899252054222323,
+      "improvement_pct": 0.4991379677143034,
+      "dm_hln": {
+        "t_stat": 0.7436204840824255,
+        "p_value": 0.4572451857930253,
+        "n": 1257,
+        "mean_d": 0.019011851015017196,
+        "hac_se": 0.025556433054418546
+      }
+    },
+    "IWM": {
+      "n_oos": 1257,
+      "qlike_baseline": 4.334255917314767,
+      "qlike_placebo": 4.268049156041712,
+      "improvement_pct": 1.527523121294419,
+      "dm_hln": {
+        "t_stat": 4.297383107278932,
+        "p_value": 1.861724616780691e-05,
+        "n": 1257,
+        "mean_d": 0.06620676127305382,
+        "hac_se": 0.015400167765801855
+      }
+    }
+  },
+  "interpretation": "If SPY DM t-stat under random graph also >3, the K1314 main gain is from extra regressors / overfit, not from correlation-graph info."
+}

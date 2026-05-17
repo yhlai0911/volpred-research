@@ -1,0 +1,172 @@
+{
+  "experiment_id": "k1314",
+  "title": "Graph Signal Processing HAR (GSP-HAR) honest replication test",
+  "run_at_utc": "2026-05-17T01:33:32.789485+00:00",
+  "config": {
+    "tickers": [
+      "SPY",
+      "QQQ",
+      "GLD",
+      "TLT",
+      "IWM"
+    ],
+    "period": {
+      "start": "2005-01-01",
+      "end": "2024-12-31",
+      "oos_start": "2020-01-01"
+    },
+    "rv_proxy": "daily squared log return",
+    "graph": {
+      "k_nn": 2,
+      "tau_heat_kernel": 1.0,
+      "refit_every_days": 21
+    },
+    "seed": 42
+  },
+  "per_asset": {
+    "SPY": {
+      "n_oos": 1257,
+      "qlike_baseline": 5.696548553976135,
+      "qlike_gsp": 4.895326946436582,
+      "qlike_improvement_pct": 14.065036046788506,
+      "dm_hln": {
+        "t_stat": 5.408509459553106,
+        "p_value": 7.601448670513378e-08,
+        "n": 1257,
+        "mean_d": 0.8012216075395526,
+        "hac_se": 0.14808198935710373
+      },
+      "rv_mean": 0.00017779816333755906,
+      "rv_std": 0.0006656541831710138
+    },
+    "QQQ": {
+      "n_oos": 1257,
+      "qlike_baseline": 5.432409354682426,
+      "qlike_gsp": 5.3778196244747845,
+      "qlike_improvement_pct": 1.0048898498525094,
+      "dm_hln": {
+        "t_stat": 0.8833627581700888,
+        "p_value": 0.37720935158089475,
+        "n": 1257,
+        "mean_d": 0.054589730207642004,
+        "hac_se": 0.0617730497358085
+      },
+      "rv_mean": 0.0002630505095006233,
+      "rv_std": 0.0007408502747044249
+    },
+    "GLD": {
+      "n_oos": 1257,
+      "qlike_baseline": 3.803095533024133,
+      "qlike_gsp": 3.8928534482315644,
+      "qlike_improvement_pct": -2.3601278071512932,
+      "dm_hln": {
+        "t_stat": -1.0093799991315284,
+        "p_value": 0.3129868382207768,
+        "n": 1257,
+        "mean_d": -0.08975791520743111,
+        "hac_se": 0.08888843146576655
+      },
+      "rv_mean": 9.598599521463917e-05,
+      "rv_std": 0.00020489321343719486
+    },
+    "TLT": {
+      "n_oos": 1257,
+      "qlike_baseline": 3.8089370564372502,
+      "qlike_gsp": 3.768880132700146,
+      "qlike_improvement_pct": 1.0516562270149954,
+      "dm_hln": {
+        "t_stat": 1.4735505730145513,
+        "p_value": 0.1408532044987838,
+        "n": 1257,
+        "mean_d": 0.040056923737104684,
+        "hac_se": 0.027173133897471224
+      },
+      "rv_mean": 0.0001277611851502998,
+      "rv_std": 0.0003133740131057762
+    },
+    "IWM": {
+      "n_oos": 1257,
+      "qlike_baseline": 4.334255917314767,
+      "qlike_gsp": 4.233004556631979,
+      "qlike_improvement_pct": 2.3360725027403793,
+      "dm_hln": {
+        "t_stat": 1.4920463534932435,
+        "p_value": 0.13593811347483942,
+        "n": 1257,
+        "mean_d": 0.10125136068278817,
+        "hac_se": 0.06783373547895966
+      },
+      "rv_mean": 0.00030102286001446396,
+      "rv_std": 0.0009300207561248519
+    }
+  },
+  "cross_asset": {
+    "qlike_baseline_avg": 4.615049283086942,
+    "qlike_gsp_avg": 4.433576941695011,
+    "qlike_improvement_pct_avg": 3.932186424465368,
+    "pooled_dm_hln": {
+      "t_stat": 3.7333303837649465,
+      "p_value": 0.00019063466701418896,
+      "n": 6285,
+      "mean_d": 0.1814723413919313,
+      "hac_se": 0.04860483408226636
+    }
+  },
+  "verdict_raw": "MARGINAL",
+  "verdict": "MARGINAL",
+  "verdict_definition": {
+    "PASS_HARVEY": ">=3/5 assets DM-HLN t > 3.0 in favour of GSP",
+    "MARGINAL": ">=1/5 asset t>3 OR pooled t>1.96",
+    "NULL": "neither",
+    "MARGINAL_PLACEBO_INCONCLUSIVE": "MARGINAL by raw DM but random-graph placebo achieves comparable improvement \u2014 gain likely from extra regressors, not graph info."
+  },
+  "placebo": {
+    "ran_at": "2026-05-17T01:32:14.623125+00:00",
+    "note": "Random-graph placebo regression. If placebo also shows t>3 in same asset, that asset's GSP-HAR gain is likely from extra-regressor noise, not graph-signal info.",
+    "per_asset": {
+      "SPY": {
+        "dm_t_stat": 2.687293707659566,
+        "improvement_pct": 6.706269767487832
+      },
+      "QQQ": {
+        "dm_t_stat": -2.5303531220219417,
+        "improvement_pct": -5.374760886970735
+      },
+      "GLD": {
+        "dm_t_stat": 0.6399376180968058,
+        "improvement_pct": 0.5431385173262443
+      },
+      "TLT": {
+        "dm_t_stat": 0.7436204840824255,
+        "improvement_pct": 0.4991379677143034
+      },
+      "IWM": {
+        "dm_t_stat": 4.297383107278932,
+        "improvement_pct": 1.527523121294419
+      }
+    }
+  },
+  "placebo_warning": "Survives placebo in: ['SPY']. Real signal candidate.",
+  "lookahead_free_certification": {
+    "har_features_use_shift_1": true,
+    "graph_correlation_strictly_past": true,
+    "walk_forward_expanding_window": true,
+    "oos_refit_per_day": true,
+    "seed_fixed": 42,
+    "notes": "All HAR regressors built from rv.shift(1) and earlier rolling means. Graph filter at date t built from rv.iloc[:i] where i is positional index of t, which excludes row t (strictly past). Walk-forward OLS uses train = full.loc[full.index < dt]."
+  },
+  "deviations_from_paper": {
+    "graph_adjacency": "Pearson top-2 k-NN (paper uses DY framework + abs Pearson)",
+    "filter": "heat kernel exp(-tau*L) fixed tau=1.0 (paper uses magnetic Laplacian + learned convex weights)",
+    "domain": "spatial only (paper does real+imag GFT with NN fusion)",
+    "universe": "5 US ETFs (paper uses 24 global indices)",
+    "rv_proxy": "daily squared log return (paper uses 5-min realized variance)",
+    "rationale": "tests core GSP idea without architectural confounds; simpler bar = harder to over-claim"
+  },
+  "references": [
+    "Yan H. et al. (2024) arXiv:2410.22706 GSP-HAR",
+    "Corsi F. (2009) JFE HAR-RV",
+    "Patton A. (2011) JoE robust loss functions",
+    "Harvey D., Leybourne S., Newbold P. (1997) IJoF DM small-sample"
+  ]
+}
