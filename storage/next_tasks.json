@@ -7767,13 +7767,15 @@
   {
     "id": "document_K1123_kb_entry",
     "title": "K1123 cross-asset alt-data allocation FAIL KB entry",
-    "status": "pending",
+    "status": "succeeded",
     "priority": 3,
     "task_type": "experiment",
     "created_at": "2026-05-13T13:38:27.087603",
     "description": "K1123 has 21KB results, verdict=FAIL. Cross-asset alt-data allocation failed. Null results must be documented per research honesty principle. Document in knowledge.json.",
     "source": "nosource_rescan_extension_top5",
-    "blocked_reason": "prereq: task-k1123-codex-review-primary must PASS first"
+    "blocked_reason": "prereq: task-k1123-codex-review-primary must PASS first",
+    "completed_at": "2026-05-17T07:15:10.372639+00:00",
+    "result_summary": "K1123 null result already in knowledge.json (item_id K1123, created 2026-05-14). Gemini code review PASS. FAIL verdict not gated by provenance validator."
   },
   {
     "id": "document_K901_kb_entry",

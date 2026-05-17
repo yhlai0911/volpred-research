@@ -1,0 +1,106 @@
+{
+  "experiment_id": "K1371",
+  "title": "HAR-RV-X: Financial Sector Lead as TSMC Volatility Predictor",
+  "timestamp": "2026-05-17T07:23:46.642374+00:00",
+  "config": {
+    "tickers": {
+      "tsmc": "2330.TW",
+      "fubon": "2881.TW",
+      "cathay": "2882.TW"
+    },
+    "period": "2015-01-01 to 2025-12-31",
+    "oos_period": "2022-01-01 to 2025-12-31",
+    "har_lags": {
+      "daily": 1,
+      "weekly": 5,
+      "monthly": 22
+    },
+    "rv_proxy": "squared_log_returns_annualized",
+    "estimation": "OLS_NW_HAC",
+    "nw_lags": 22,
+    "refit_frequency": "monthly",
+    "seed": 42
+  },
+  "oos_n": 968,
+  "losses": {
+    "M0_HAR": {
+      "qlike": 3.871033895538144,
+      "mse": 0.048804718755602036,
+      "n_oos": 968
+    },
+    "M1_HAR_X_d": {
+      "qlike": 3.9232476633704496,
+      "mse": 0.048121609660219264,
+      "n_oos": 968
+    },
+    "M2_HAR_X_wm": {
+      "qlike": 3.891862361313019,
+      "mse": 0.04860820635944394,
+      "n_oos": 968
+    },
+    "M3_HAR_X_full": {
+      "qlike": 3.902677960591957,
+      "mse": 0.048115160302689294,
+      "n_oos": 968
+    },
+    "M4_HAR_X_cat": {
+      "qlike": 3.866307530527101,
+      "mse": 0.04827537643482687,
+      "n_oos": 968
+    },
+    "M5_HAR_X_fin": {
+      "qlike": 3.971779751526297,
+      "mse": 0.048348480831797595,
+      "n_oos": 968
+    }
+  },
+  "dm_tests_vs_M0_HAR": {
+    "M1_HAR_X_d": {
+      "dm_stat": -3.838798839451255,
+      "p_value": 0.00012363767052287378,
+      "d_bar": -0.052213767832305864,
+      "n": 968
+    },
+    "M2_HAR_X_wm": {
+      "dm_stat": -1.8194437021740841,
+      "p_value": 0.06884376446332408,
+      "d_bar": -0.020828465774875307,
+      "n": 968
+    },
+    "M3_HAR_X_full": {
+      "dm_stat": -2.488207218960738,
+      "p_value": 0.012838890145649274,
+      "d_bar": -0.03164406505381321,
+      "n": 968
+    },
+    "M4_HAR_X_cat": {
+      "dm_stat": 0.350308961256475,
+      "p_value": 0.7261068407306404,
+      "d_bar": 0.004726365011042514,
+      "n": 968
+    },
+    "M5_HAR_X_fin": {
+      "dm_stat": -2.763282375531458,
+      "p_value": 0.005722323752551861,
+      "d_bar": -0.10074585598815311,
+      "n": 968
+    }
+  },
+  "fubon_vs_cathay_dm": {
+    "dm_stat": 4.606270024545603,
+    "p_value": 4.099559812444436e-06,
+    "d_bar": 0.05694013284334837,
+    "n": 968
+  },
+  "hypotheses": {
+    "H1_HAR_X_d_improves_QLIKE": false,
+    "H2_any_HAR_X_improves_QLIKE": false,
+    "H3_fubon_better_than_cathay": false,
+    "H4_harvey_t_gt2_for_best": false
+  },
+  "n_hypotheses_passed": 0,
+  "verdict": "FAIL",
+  "key_finding": "HAR base QLIKE=3.871034. Best extension M4_HAR_X_cat: QLIKE=3.866308 (+0.12%), DM t=0.350 p=0.7261.",
+  "motivating_prior": "K757: Fubon->TSMC Granger F=6.11 p<0.001 (2010-2026)",
+  "data_source": "yfinance daily adjusted close (2330.TW, 2881.TW, 2882.TW)"
+}

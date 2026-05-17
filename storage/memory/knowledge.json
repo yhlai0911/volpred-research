@@ -30417,5 +30417,38 @@
     },
     "follow_up": "Consider M3: Gonzalez-Rivera (2014) time-varying skew GAS for robustness. USO-only subtest (highest neg skew -0.60) could show stronger tail effect.",
     "created_at": "2026-05-17T06:17:29.814626+00:00"
+  },
+  {
+    "id": "K1371",
+    "title": "K1371: HAR-RV-X Financial Sector Lead → TSMC Vol — NULL, Fubon Granger does not translate to OOS forecasting improvement",
+    "content": "[提出: Claude (autonomous, research_program.md L341 + K757 Granger finding), 執行: Claude, 審查: Codex CONDITIONAL_PASS 2026-05-17] K757 發現 Fubon Financial (2881.TW) → TSMC (2330.TW) Granger causality F=6.11 p<0.001 (returns, VAR framework). K1371 測試此 Granger lead 是否能改善 HAR-RV OOS QLIKE 預測。6 models: M0 HAR (base), M1 HAR+Fubon-daily, M2 HAR+Fubon-weekly/monthly, M3 HAR+Fubon-all, M4 HAR+Cathay-daily, M5 HAR+Fubon+Cathay. OOS 2022-2025 (N=968), expanding window, monthly refit. RESULT: 0/4 hypotheses pass. VERDICT: FAIL. KEY: M1 (Fubon daily) 顯著傷害預測 QLIKE=3.923 > baseline 3.871 (DM-t=-3.84, p<0.001) — 加入 Fubon 反而讓結果更差. M4 (Cathay) 微幅改善 +0.12% 但 p=0.73 完全不顯著. LESSON: Granger causality in mean returns ≠ useful volatility forecasting improvement. Cross-asset Granger → cross-asset vol predictability 的 channel 不通 (at least with daily squared-return RV proxy). 原因: (1) 日頻 squared return RV proxy 非常 noisy，加多一個 noisy series 放大 estimation error; (2) K757 Granger 在 mean level，不在 variance level; (3) HAR-X 多參數在 noisy RV proxy 下 OOS 容易 overfit.",
+    "tags": [
+      "HAR-RV",
+      "cross-asset",
+      "Granger",
+      "TSMC",
+      "financial-sector",
+      "null-result",
+      "Taiwan",
+      "QLIKE"
+    ],
+    "data_source": "yfinance daily (2330.TW, 2881.TW, 2882.TW), 2015-2025",
+    "experiment_id": "K1371",
+    "period": "2015-01-06 to 2025-12-30 (OOS: 2022-2025, N=968)",
+    "verdict": "FAIL",
+    "n_hypotheses_passed": 0,
+    "created_at": "2026-05-17T07:25:02.811066+00:00",
+    "importance": 2,
+    "codex_review": "CONDITIONAL_PASS 2026-05-17 (directional fix applied)",
+    "paper_relevance": "Not paper-relevant. Closes research_program.md L341 direction — financial sector lead has no HAR-RV forecasting utility for TSMC.",
+    "key_numbers": {
+      "har_baseline_qlike": 3.871,
+      "fubon_daily_qlike": 3.9232,
+      "fubon_daily_dm_t": -3.839,
+      "fubon_daily_p": 0.0001,
+      "cathay_daily_qlike": 3.8663,
+      "cathay_daily_dm_t": 0.35,
+      "cathay_daily_p": 0.726
+    }
   }
 ]
