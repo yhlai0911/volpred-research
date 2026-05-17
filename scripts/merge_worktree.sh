@@ -300,9 +300,20 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>") || {
 
         # 檢查 agent 是否修改了共享 JSON（違反規則的早期警告）
         # K1262-v4 (2026-04-27): git diff 用 -C "$MAIN_DIR" 強制 ref 解析在主 repo
+        # 2026-05-18 K-worktree-stash-pop fix: 加 runtime/operational state 檔
+        # （worktree 不該帶這些；它們是 main 上 cron/runtime 寫的 live state）
         local shared_json_modified=false
         local shared_files=""
-        for shared_f in "storage/reports/feed.json" "storage/memory/knowledge.json" "storage/memory/thinking_journal.json" "storage/memory/experiment_experiences.json"; do
+        for shared_f in \
+            "storage/reports/feed.json" \
+            "storage/memory/knowledge.json" \
+            "storage/memory/thinking_journal.json" \
+            "storage/memory/experiment_experiences.json" \
+            "storage/.release_settings.json" \
+            "storage/paper_trading.json" \
+            "storage/session_state.json" \
+            "storage/market_status.json" \
+            "storage/ops/cron_last_run.json"; do
             if git -C "$MAIN_DIR" diff --name-only "$main_branch..$branch" -- "$shared_f" 2>/dev/null | grep -q .; then
                 shared_json_modified=true
                 shared_files="$shared_files $shared_f"
@@ -380,8 +391,36 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>" 2>/dev/nul
             echo "  [PREP] 還原 main 的 stash..."
             if ! git stash pop 2>&1 | tee /tmp/merge_worktree_stash_pop.log; then
                 echo ""
+                echo "  ⚠️  STASH POP 衝突 — 自動 surgical restore runtime 檔（2026-05-18 K-worktree-stash-pop fix）"
+                # 自動救回 runtime/operational state 檔案（worktree merge 不應該覆蓋這些）
+                # 這些檔案的 worktree 版本是 stale（從 checkout 時凍結），main 版本才是 live
+                local runtime_files=(
+                    "storage/.release_settings.json"
+                    "storage/logs/cron/release_pool.log"
+                    "storage/logs/cron/check_alerts.log"
+                    "storage/logs/cron/collect_us.log"
+                    "storage/logs/cron/collect_tw.log"
+                    "storage/logs/cron/daily_update.log"
+                    "storage/logs/cron/continue_task_stub.log"
+                    "storage/market_status.json"
+                    "storage/session_state.json"
+                    "storage/ops/cron_last_run.json"
+                    "storage/ops/pending_sessions.json"
+                )
+                local restored=0
+                for rf in "${runtime_files[@]}"; do
+                    # 只還原 stash@{0} 內確實有的 runtime 檔（避免 noisy error）
+                    if git stash show stash@{0} --name-only 2>/dev/null | grep -qx "$rf"; then
+                        if git checkout stash@{0} -- "$rf" 2>/dev/null; then
+                            echo "    [✓ RESTORED] $rf"
+                            restored=$((restored + 1))
+                        fi
+                    fi
+                done
+                echo "  [OK] 自動還原 $restored 個 runtime 檔"
+                echo ""
                 echo "  🚨 ============================================="
-                echo "  🚨 STASH POP 衝突！你的主線程修改還在 stash@{0}"
+                echo "  🚨 但 stash@{0} 內可能還有其他主線程未提交變更需手動處理"
                 echo "  🚨 不要關掉這個 session 以免遺忘。"
                 echo "  🚨 救回方法："
                 echo "  🚨   git stash show stash@{0} --name-only   # 看有哪些檔"
