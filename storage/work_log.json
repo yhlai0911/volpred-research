@@ -6647,5 +6647,16 @@
       "paper/leverage-direction/errata_pending.md",
       "storage/next_tasks.json"
     ]
+  },
+  {
+    "timestamp": "2026-05-17T15:28:14.219115+00:00",
+    "task_id": "K980v2_proper_threshold_GARCH",
+    "task_type": "experiment",
+    "title": "K980v2: Proper joint threshold-GJR-GARCH with continuous h_t (fix estimation-evaluation mismatch)",
+    "verdict": "EXPLORATORY_NULL",
+    "status": "succeeded",
+    "experiment_id": "k980v2",
+    "reviewer": "Codex primary-path CONDITIONAL_PASS",
+    "notes": "Joint-MLE TGJR QLIKE 1.4750 vs GJR 1.4956 (-1.38%), DM p=0.269. NULL confirmed, effect direction reversed vs K980 misspecification."
   }
 ]

@@ -30481,5 +30481,22 @@
     "reviewer_source": "feature-dev:code-reviewer subagent (CONDITIONAL_PASS; MEDIUM fix applied post-review)",
     "caveats": "N=3 halvings; H3 pre-window COVID contamination; IGARCH not novel; vol drop may reflect market maturation not halving mechanism",
     "created_at": "2026-05-17T19:25:07.965652"
+  },
+  {
+    "item_id": "7dd81633",
+    "category": "threshold_garch",
+    "content": "K980v2 (methodology fix for K980 FAIL): Correct joint-MLE Threshold GJR-GARCH. K980 error was fitting separate GJR on regime subsets then evaluating with continuous h_t. K980v2 joint MLE result: EXPLORATORY_NULL. TGJR OOS QLIKE 1.4750 vs GJR 1.4956 (-1.38%), DM stat 1.105, p=0.269 (not sig). Best c=14, low-VIX pers=0.538, high-VIX pers=0.970. TGJR wins in both regimes but effect too small to reject equal accuracy. Key lesson: subset-estimation misspecification reversed direction (K980 showed TGJR worse; correct joint MLE shows TGJR marginally better but still null). Implication: VIX regime info provides marginal but insignificant improvement — EXPLORATORY territory.",
+    "evidence": [
+      "experiments/k980v2/k980v2_results.json",
+      "experiments/k980v2/k980v2.py",
+      "experiments/k980v2/README.md"
+    ],
+    "confidence": 0.72,
+    "created_at": "2026-05-17T23:27:41.628954",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "k980v2",
+    "experiment_path": "experiments/k980v2/",
+    "reviewer_source": "Codex primary-path (gpt-5.4, session 019e368a-fcfa-7233-ba51-5872fc38dca0, 2026-05-17, CONDITIONAL_PASS)",
+    "title": "K980v2: Threshold GJR-GARCH Joint MLE — EXPLORATORY_NULL (K980 methodology fix)"
   }
 ]

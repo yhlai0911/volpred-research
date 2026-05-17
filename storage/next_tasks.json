@@ -9434,7 +9434,7 @@
     "title": "K980-v2: Proper joint threshold-GJR-GARCH with continuous h_t (fix estimation-evaluation mismatch)",
     "description": "K980 Codex FAIL (2026-05-17): TGJR was estimated by fitting separate GJR on regime-conditional subsets (non-contiguous observations), but IS/OOS recursion assumes full continuous h_t state. K980-v2 should implement proper threshold-GARCH via joint MLE on full time series, with regime indicator in loss function at each t based on VIX_{t-1}. This gives each step access to the true h_{t-1} regardless of regime transitions. Expected result: NULL likely holds (GJR already captures regime dynamics), but parameter estimates and economic interpretation will be valid. References: Chen Liu Gerlach (2011), Glosten Jagannathan Runkle (1993).",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "K980_codex_fail_followup",
     "tags": [
@@ -9445,6 +9445,8 @@
     ],
     "created_at": "2026-05-17T13:16:16.224462Z",
     "blocked_by": [],
-    "blocks": []
+    "blocks": [],
+    "completed_at": "2026-05-17T15:28:23.793658+00:00",
+    "verdict": "EXPLORATORY_NULL"
   }
 ]
