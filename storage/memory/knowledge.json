@@ -30517,5 +30517,31 @@
     "reviewer_source": "feature-dev:code-reviewer subagent fallback (Codex unavailable, 2026-05-18)",
     "caution": "效應量小；樣本數有限（最少 11 事件/標的）；結論邊際，不宜過度宣稱",
     "research_direction": "支持除息季（六月）波動率研究方向；後續可探索除息前 buildup 可交易性"
+  },
+  {
+    "item_id": "7a754f62",
+    "category": "bootstrap_ci",
+    "content": "K1370 v2 stationary block bootstrap (Politis-Romano 1994, B=1000, L=252) on canonical full-sample BW-robust GJR-GARCH(1,1) for TAIEX (^TWII) vs 9 individual Taiwanese stocks (2008-2024, n=4160). 90% CI for TAIEX-to-individual amplification ratio: [2.28, 6.58], median=3.78 (1000/1000 replicates valid). Point estimate ratio 4.3x from canonical K1302+K1302b 100-start fits (TAIEX gamma=0.114, indiv mean gamma=0.027). Confirms amplification > 1 (lower bound 2.28 >> 1.0). US benchmark 2.8x within CI; cannot reject Taiwan=US at 90% CL. Paper 2 body_v3.tex §3.2 updated: [2.31, 6.61] -> [2.28, 6.58] (7 occurrences). NOTE: K1302+K1302b 100-start canonical individual gamma=0.027 is correct; K1370 10-start point estimate 0.024 is less precise (10 vs 100 starts).",
+    "verdict": "PASS",
+    "experiment_id": "K1370",
+    "experiment_path": "experiments/k1370",
+    "related_experiments": [
+      "K1302",
+      "K1302b"
+    ],
+    "reviewer_source": "Codex CRITICAL review 2026-05-16 (K1370-v2 MD5-seed fix; hash process-stable)",
+    "tags": [
+      "bootstrap",
+      "amplification-ratio",
+      "leverage-effect",
+      "TAIEX",
+      "Paper2",
+      "CI-update"
+    ],
+    "evidence": [
+      "experiments/k1370/k1370_results.json"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-05-18T05:13:25.005636"
   }
 ]

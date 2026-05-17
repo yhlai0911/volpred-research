@@ -10,11 +10,11 @@
     "8"
   ],
   "env": {},
-  "status": "queued",
+  "status": "completed",
   "queued_at": "2026-05-16T13:30:42.286283+00:00",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-05-17T19:30:11Z",
+  "completed_at": "2026-05-17T20:12:30Z",
+  "exit_code": 0,
   "stdout_file": "storage/logs/compute/k1370-bootstrap-b10000.stdout",
   "stderr_file": "storage/logs/compute/k1370-bootstrap-b10000.stderr",
   "result_artifact": "experiments/k1370/k1370_results.json",
@@ -23,6 +23,8 @@
     "task_type": "paper_decision",
     "priority": 2
   },
-  "followup_dispatched": false,
-  "timeout_seconds": 7200
+  "followup_dispatched": true,
+  "timeout_seconds": 7200,
+  "followup_dispatched_at": "2026-05-17T21:13:30Z",
+  "followup_next_task_id": "main-thread-paper-update-K1370"
 }
