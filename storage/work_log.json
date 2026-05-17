@@ -6706,5 +6706,20 @@
     "numbers_verified": true,
     "lookahead_check": "DISCLOSED - article flags and recommends lagged rerun before publication",
     "notes": "K561 bond-equity safe-side switching: all quantitative numbers match JSON. Statistical test corrected (paired-t on OOS Sharpe, n=5, |t|>3.0). NEGATIVE result: no dynamic switching beats static GLD."
+  },
+  {
+    "session_id": "bea70bd0-e330-4413-9ae0-2a10a7a15230",
+    "task_type": "paper_review",
+    "task_id": "paper_review_mile_2eab57ad",
+    "article_id": "mile_2eab57ad",
+    "experiment_id": "K1086",
+    "timestamp": "2026-05-17T17:29:31.375034+00:00",
+    "verdict": "CONDITIONAL_PASS",
+    "issues_found": [
+      "MINOR: A4f-COMBO DM t=1.44 in article → should be 1.43 (JSON: 1.4346) - fixed"
+    ],
+    "numbers_verified": true,
+    "lookahead_check": "PASS - vix_lag = vix[abs_idx-1], move_lag = move[abs_idx-1] confirmed",
+    "notes": "K1086 TLT bond vol forecasting MOVE vs VIX: all numbers verified. FAIL result (no A4f beats GJR at Harvey t>3.0). Minor COMBO DM t rounding fixed."
   }
 ]
