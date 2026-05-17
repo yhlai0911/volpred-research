@@ -4507,7 +4507,7 @@
     "title": "K980 mile_3655a10a Codex primary-path re-verification (post quota reset)",
     "priority": 4,
     "description": "Per K1259 教訓 (2026-04-29) closure bar: main-thread/subagent fallback PASS != primary-path Codex PASS. K980 mile_3655a10a got CONDITIONAL PASS from 2026-05-11 main-thread fallback review (Codex CLI quota-blocked). Re-run Codex primary path after quota resets 2026-05-12 19:46 PT to upgrade to full PASS. Use prompt at /tmp/k980_codex_review_prompt.txt or rebuild equivalent. Compare verdict with main-thread fallback findings. Update knowledge entry K980_review review_path field upon completion.",
-    "status": "pending",
+    "status": "completed",
     "task_type": "paper_review",
     "source": "K980_post_publish_review_followup",
     "earliest_start": "2026-05-13T03:50:00Z",
@@ -4516,7 +4516,9 @@
     "blocked_by": [],
     "blocked_reason": "codex_quota_reset_pending",
     "blocked_until": "2026-05-13T02:46:00Z",
-    "blocked_note": "Codex CLI 0.121.0 ChatGPT-account daily quota exhausted 2026-05-11 by 7 paper_reviews. Quota resets 2026-05-12 19:46 PT. Per K1259 lesson, primary-path re-verify needed to upgrade fallback CONDITIONAL/PASS → canonical PASS."
+    "blocked_note": "Codex CLI 0.121.0 ChatGPT-account daily quota exhausted 2026-05-11 by 7 paper_reviews. Quota resets 2026-05-12 19:46 PT. Per K1259 lesson, primary-path re-verify needed to upgrade fallback CONDITIONAL/PASS → canonical PASS.",
+    "completed_at": "2026-05-17T13:16:16.224216Z",
+    "completion_note": "Codex primary-path review complete: FAIL — TGJR estimation-evaluation mismatch (MAJOR). NULL result conclusion directionally intact. Article kept draft. K980-v2 added for proper joint threshold-GARCH estimation."
   },
   {
     "id": "K980_post_publish_codex_review",
@@ -9424,5 +9426,23 @@
     "experiment_ref": "K1372",
     "results_path": "experiments/k1372/k1372_results.json",
     "created_at": "2026-05-17T12:00:00Z"
+  },
+  {
+    "id": "K980v2_proper_threshold_GARCH",
+    "title": "K980-v2: Proper joint threshold-GJR-GARCH with continuous h_t (fix estimation-evaluation mismatch)",
+    "description": "K980 Codex FAIL (2026-05-17): TGJR was estimated by fitting separate GJR on regime-conditional subsets (non-contiguous observations), but IS/OOS recursion assumes full continuous h_t state. K980-v2 should implement proper threshold-GARCH via joint MLE on full time series, with regime indicator in loss function at each t based on VIX_{t-1}. This gives each step access to the true h_{t-1} regardless of regime transitions. Expected result: NULL likely holds (GJR already captures regime dynamics), but parameter estimates and economic interpretation will be valid. References: Chen Liu Gerlach (2011), Glosten Jagannathan Runkle (1993).",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "K980_codex_fail_followup",
+    "tags": [
+      "K980-followup",
+      "threshold-GARCH",
+      "methodology-fix",
+      "joint-MLE"
+    ],
+    "created_at": "2026-05-17T13:16:16.224462Z",
+    "blocked_by": [],
+    "blocks": []
   }
 ]

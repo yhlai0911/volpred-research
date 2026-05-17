@@ -577,7 +577,7 @@ for param_name in ['omega', 'alpha', 'gamma', 'beta', 'persistence']:
 # ============================================================
 # 10. Plots
 # ============================================================
-BASE = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a95fb3ea/experiments/k980'
+BASE = str(__import__('pathlib').Path(__file__).parent)
 
 # Plot 1: Regime Parameters Comparison
 fig, axes = plt.subplots(1, 5, figsize=(16, 4))
@@ -650,7 +650,7 @@ results = {
         'threshold_variable': 'VIX_{t-1} (lagged, no lookahead)',
         'threshold_grid': thresholds,
         'best_threshold': int(best_c),
-        'regime_constraint': 'Each regime >= 20% of IS observations',
+        'regime_constraint': 'Each regime >= 15% of IS observations',
         'models': ['GJR (baseline)', 'Threshold GJR (TGJR)', 'GJR + VIX Dummy']
     },
     'parameters': {

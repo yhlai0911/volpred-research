@@ -114,4 +114,57 @@ Per `.claude/rules/experiments.md` 2026-04-29 K1259 教訓: subagent fallback PA
 1. Codex CLI hit quota limit (resets 2026-05-12 19:46 PT)
 2. feature-dev:code-reviewer subagent dispatch tool not loaded in this session's tool surface
 
-**Closure standard**: This review establishes a clean CONDITIONAL PASS for byte-accuracy + lookahead + methodology. The 24h-rule clock is technically met by this review. A **primary-path Codex re-verification** should be scheduled when quota resets (post 2026-05-12 19:46) to convert this to full PASS per K1259 教訓 closure bar. Next_tasks entry should be appended for that re-verification step.
+---
+
+## PRIMARY-PATH CODEX RE-VERIFICATION (2026-05-17)
+
+**Codex CLI version**: 0.130.0 (ChatGPT auth, gpt-5.4 model)
+**Review date**: 2026-05-17
+**Reviewer source**: Codex primary-path (session 019e3610-17ad-7532-afa6-20f217887832)
+**Tokens used**: 55,549
+
+### Final Verdict: FAIL
+
+**Root cause**: TGJR estimation–evaluation mismatch. `fit_gjr()` is run on non-contiguous regime-subsets (`returns_low = returns_is[low_mask]`, `returns_high = returns_is[high_mask]`), so its internal likelihood recursion treats "the previous observation **in the subset**" as t-1. But IS recursion (lines 268-283) and OOS recursion (lines 309-323) then assume `h_t` is continuous across the full time series. The model being estimated ≠ the model being forecast/evaluated.
+
+---
+
+### Codex Findings
+
+| # | Severity | Type | Finding |
+|---|----------|------|---------|
+| 1 | **MAJOR** | New | TGJR estimation–evaluation mismatch (root cause of FAIL) |
+| 2 | **MAJOR** | New | `BASE` path hardcoded to worktree (`/.claude/worktrees/agent-a95fb3ea/experiments/k980`) — reproducibility broken for re-runs outside original worktree |
+| 3 | MINOR | New | `gjr_forecast_oos()` bug at t=0 (r2_prev=0, indicator=0, first OOS h underestimates α+γ contribution) — function is **never called**, so no impact on existing results |
+| 4 | MINOR | New | VaR overlay uses fixed t(5) quantile on Gaussian-MLE variance — `df=5` is not estimated from residuals; `sqrt(3/5)` scale is mathematically correct but the overlay is not model-consistent |
+| 5 | MINOR | New | 15% regime constraint in code (line 248-250) vs "≥20%" in results.json metadata (line 653) |
+| 6 | INFO | Confirmed | Lookahead: CLEAN — `VIX_lag = VIX.shift(1)` correctly propagated throughout |
+| 7 | INFO | Confirmed | OOS recursion: CLEAN — both GJR and TGJR use `r_prev = all_returns[idx-1]` and `vix_lag_oos[t]` (already t-1) |
+| 8 | INFO | Confirmed | IS threshold selection: CLEAN — `best_c` grid search is IS-only, no OOS contamination |
+| 9 | INFO | Confirmed | DM test (h=1): CORRECT — `range(1,1)` empty → `var_d = gamma0/T`, valid 1-step-ahead DM |
+
+### Codex assessment of TGJR estimation methodology
+
+> 不是單純「方法論選擇」，而是根本性缺陷。合法的 threshold-GJR 應該在完整時間序列上聯合估計，讓 `h_t` 在 regime 切換時仍保持真實的 `t-1 → t` 連續遞迴；目前做法把 low/high 子樣本拆開估，等於估了另一個模型。
+
+---
+
+### Impact on published article (mile_3655a10a)
+
+**Article status**: `draft` (not publicly visible as of 2026-05-17)
+
+**NULL result integrity**: The null conclusion ("TGJR doesn't beat GJR") is directionally **conservative and robust**. The misspecified TGJR is at a disadvantage vs. a properly estimated one; if anything, proper joint estimation might produce a slightly better TGJR. The fact that even the misspecified version fails to beat GJR strengthens the null.
+
+**Article narrative accuracy**: The article's "拆兩半" framing **accurately describes what was done** — the code does literally split the IS data and estimate separately. The article's explanations for failure (sample halving, state discontinuity, VIX information redundancy) are all empirically correct for this implementation.
+
+**Required correction**: Article currently refers to "門檻型 GJR-GARCH" and the literature on threshold models. This should be clarified: the implementation is **two separate GJR models with regime switching** (not joint threshold-GARCH estimation as in Chen et al. 2011). The parameter estimates and economic ratios should be interpreted with this caveat. Draft should remain unpublished until K980-v2 with proper joint threshold-GARCH estimation is completed, OR until a methodology clarification footnote is added.
+
+---
+
+### Action items
+
+1. ✅ Primary-path Codex re-verification complete (FAIL)
+2. 🔴 Fix BASE path hardcoding (line 580) → use relative path or `pathlib`
+3. 🔴 Fix results.json metadata `regime_constraint` (15% → matches code)
+4. 📝 Add K980-v2 to next_tasks: proper joint threshold-GARCH (full sequence MLE with regime indicator in loss function)
+5. 📝 Article draft: add methodology caveat OR keep draft until K980-v2 completes

@@ -23467,7 +23467,7 @@
     "id": "know_20260407135653_k980",
     "experiment_id": "K980",
     "title": "K980: Threshold GJR-GARCH — NULL OOS, regime params differ but discrete switching hurts",
-    "content": "[提出: Chen Liu Gerlach 2011, 執行: Claude] SPY 2006-2026, IS 3268, OOS 1824。VIX regime switching GJR（c=14 by grid search）。參數確實在 regime 間顯著不同：low-VIX persistence=0.42 gamma=0.20 vs high-VIX persistence=0.97 gamma=0.05。但 OOS TGJR QLIKE=1.503 vs GJR 1.499（無改善，DM p=0.748）。Regime-conditional：TGJR 在 calm market 幫助 (1.57 vs 1.65) 但在 stressed market 更差 (1.49 vs 1.47)。85% OOS 在 high-VIX regime → 淨效果負。GJR+Dummy 同樣無效 (1.505)。結論：VIX 信息通過 MF2 連續乘法方式（K970）比離散 regime switching 更有效。分開估計 regime 損失 h_t 的時間連續性。",
+    "content": "[提出: Chen Liu Gerlach 2011, 執行: Claude] SPY 2006-2026, IS 3268, OOS 1824。VIX regime switching GJR（c=14 by grid search）。參數確實在 regime 間顯著不同：low-VIX persistence=0.42 gamma=0.20 vs high-VIX persistence=0.97 gamma=0.05。但 OOS TGJR QLIKE=1.503 vs GJR 1.499（無改善，DM p=0.748）。Regime-conditional：TGJR 在 calm market 幫助 (1.57 vs 1.65) 但在 stressed market 更差 (1.49 vs 1.47)。85% OOS 在 high-VIX regime → 淨效果負。GJR+Dummy 同樣無效 (1.505)。結論：VIX 信息通過 MF2 連續乘法方式（K970）比離散 regime switching 更有效。分開估計 regime 損失 h_t 的時間連續性。\n\n[2026-05-17 Codex Primary-Path Review — FAIL]\nMAJOR: TGJR 估計失配 — fit_gjr() 在 low_mask / high_mask 子集上獨立估計，subset 內的 t-1 不等於日曆 t-1，估計的模型 ≠ IS/OOS 遞迴使用的模型。threshold ranking (best_c=14) 與 regime 參數比率的統計/經濟解釋不可靠。NULL 結論（TGJR 不贏 GJR）方向保守正確。文章 mile_3655a10a 保持 draft 待 K980-v2（正確 joint MLE）完成後確認。\n",
     "tags": [
       "threshold-GARCH",
       "regime-switching",
@@ -23477,7 +23477,16 @@
     ],
     "data_source": "yfinance SPY + ^VIX 2006-2026",
     "created_at": "2026-04-07T13:56:53.370595+00:00",
-    "experiment_date": "2026-04-07"
+    "experiment_date": "2026-04-07",
+    "codex_primary_review": {
+      "verdict": "FAIL",
+      "date": "2026-05-17",
+      "reviewer": "Codex CLI 0.130.0 gpt-5.4",
+      "session": "019e3610-17ad-7532-afa6-20f217887832",
+      "major_finding": "TGJR estimation-evaluation mismatch: fit_gjr() on non-contiguous regime subsets, but IS/OOS recursion assumes full continuous h_t state",
+      "null_result_intact": true,
+      "article_status": "draft — held pending K980-v2 methodology fix"
+    }
   },
   {
     "id": "know_20260407140801_k981",
