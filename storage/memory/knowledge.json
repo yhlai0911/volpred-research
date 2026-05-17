@@ -30176,5 +30176,63 @@
     "created_at": "2026-05-16T23:33:34.229427+00:00",
     "updated_at": "2026-05-16T23:33:34.229427+00:00",
     "session_id": "hourly-dispatch-2026-05-17"
+  },
+  {
+    "id": "K1314",
+    "experiment_id": "K1314",
+    "title": "K1314 GSP-HAR honest replication stress test (CONDITIONAL PASS — placebo-flagged marginal)",
+    "summary": "Simplified GSP-HAR stress test on 5 US ETFs (SPY/QQQ/GLD/TLT/IWM, daily squared-return RV proxy, 2005-2024 in-sample / 2020-2024 OOS) found no robust broad-based evidence that graph augmentation improves HAR baseline. Only SPY shows strong positive DM-HLN (t=+5.41); 4/5 assets null or worse (QQQ t=+0.88, GLD t=-1.01, TLT t=+1.47, IWM t=+1.49). Single random-graph placebo draw even exceeds main performance in IWM (placebo t=+4.30 > main t=+1.49), so gains may reflect extra-regressor fitting rather than genuine graph information. Pooled DM t=+3.73 not decision-grade (raw stack across assets, not Stouffer or inverse-variance meta; SPY scale-dominates). Treat as null-to-marginal negative reference, NOT as confirmation that GSP-HAR works. Daily squared RV proxy + log-target switch (Corsi 2009 form for positivity) deviate from paper spec — honest stress test, not paper-level replication of arXiv:2410.22706 which uses 5-min RV + 24-index DY framework + learned magnetic Laplacian.",
+    "asset": "SPY+QQQ+GLD+TLT+IWM (5 US ETFs)",
+    "tags": [
+      "har",
+      "gsp-har",
+      "graph-signal-processing",
+      "volatility-forecast",
+      "qlike",
+      "dm-hln",
+      "honest-replication-stress-test",
+      "placebo-flagged",
+      "marginal-null-leaning",
+      "us-equity",
+      "arxiv-2410.22706"
+    ],
+    "verdict": "CONDITIONAL_PASS",
+    "key_metrics": {
+      "per_asset_dm_hln_t": {
+        "SPY": 5.41,
+        "QQQ": 0.88,
+        "GLD": -1.01,
+        "TLT": 1.47,
+        "IWM": 1.49
+      },
+      "placebo_t_random_graph": {
+        "SPY": 2.69,
+        "QQQ": -2.53,
+        "GLD": 0.64,
+        "TLT": 0.74,
+        "IWM": 4.3
+      },
+      "robust_count": "1/5 (SPY survives single-placebo-draw, IWM placebo-reversed)",
+      "pooled_dm_t_raw_stack": 3.73,
+      "pooled_dm_t_caveat": "raw stack across assets; SPY-dominated; not Stouffer or IVW meta; not decision-grade",
+      "in_sample_period": "2005-2024",
+      "oos_period": "2020-2024",
+      "rv_proxy": "daily squared log return (NOT 5-min RV from paper)",
+      "spec_deviation_from_paper": "5-min RV → daily squared, 24 global indices → 5 US ETFs, learned magnetic Laplacian → fixed Pearson 2-NN heat-kernel tau=1.0, log-target switch (Corsi 2009) added for positivity"
+    },
+    "codex_review": "CONDITIONAL PASS — lookahead protection PASS (signal.shift(1) + expanding-window graph + walk-forward refit verified), log-target switch symmetric (PASS), DM-HLN HAC PASS. FAIL points: pooled t not decision-grade (raw stack); placebo is single seeded draw not formal null distribution; README 'SPY result is real' too strong. Wording must use 'placebo-relative survivor under single seeded draw' not 'robust'.",
+    "wording_constraint_for_future_citation": "Do NOT cite as: (a) 'GSP-HAR works', (b) 'SPY confirmed', (c) 'GSP-HAR doesn't work'. ONLY cite as: 'simplified setting did not reproduce broad improvement; single placebo draw flagged noise-fitting risk; paper-spec replication still pending'.",
+    "supersedes": null,
+    "follow_up_suggested": [
+      "K1314b: re-run with 5-min RV from CBOE / TAQ / paid feed if available",
+      "K1314c: 100+ random-graph placebo draws for formal noise distribution",
+      "K1314d: proper Stouffer or inverse-variance meta aggregation across 5 assets",
+      "K1314e: extend to 24-index cross-section to match paper graph dimensionality"
+    ],
+    "spec": "HAR(1,5,22) log-target Corsi 2009 + GSP-augmented (Pearson 2-NN k-NN graph + heat-kernel exp(-1.0·L)); walk-forward OLS daily refit; seed=42",
+    "data_source": "yfinance auto_adjust 2005-01-01..2024-12-31, 5 US ETFs",
+    "merge_commit": "f23e7e31 (main) / 99afcdf3 (worktree branch)",
+    "created_at": "2026-05-17T01:37:11.744273+00:00",
+    "session_id": "continuous-research-6h-2026-05-17"
   }
 ]
