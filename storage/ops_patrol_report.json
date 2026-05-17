@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-17T00:06:48Z",
+  "timestamp": "2026-05-17T06:10:23Z",
   "all_ok": false,
   "checks": [
     {
@@ -9,8 +9,8 @@
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
-      "status": "alert",
-      "detail": "storage/strategy_metrics.json last modified 2026-05-10T06:03:17Z, age=162.0 hours (threshold 26h). Metrics are stale."
+      "status": "ok",
+      "detail": "storage/strategy_metrics.json mtime ~17s ago (refreshed since last patrol at 00:06:48Z). Well within 26-hour threshold."
     },
     {
       "name": "ERROR_LOG",
@@ -35,7 +35,6 @@
   ],
   "alerts": [
     "article pool low (<12): total drafts=6, general=2, research=4",
-    "general audience articles low (<8): general=2 (threshold 8)",
-    "metrics stale: strategy_metrics.json age=162.0h (last updated 2026-05-10T06:03:17Z, threshold 26h)"
+    "general audience articles low (<8): general=2 (threshold 8)"
   ]
 }
