@@ -952,3 +952,26 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
   (2) BNS z-test 識別跳躍（截斷水準 α=0.001，BPV + signed-rank）
   (3) Standard 1-step lag（X_{t-1} → Y_t）
 - experiments/k1303/k1303_codex_review.md 已存檔（完整 Codex review 報告）
+
+---
+
+## 2026-05-17 | mile_53983530（K547 月底翻盤效應）Codex 24h review FAIL
+
+**問題**：文章已發佈 2026-05-08，9 天後才執行 Codex review，且三關全失。
+
+**三個問題**：
+1. **引用錯誤（已修正）**：`嚴格統計, C. R. (2016)` 應為 `Harvey, Campbell R.; Liu, Yan; Zhu, Heqing (2016). "… and the Cross-Section of Expected Returns." RFS, 29(1), 5–68` — 已直接在 feed.json 修正。
+2. **avg |stat|≥3 門檻誤用（已加說明）**：原文把 Harvey et al. (2016) 的因子發現門檻套用在跨期間策略 t-stat 平均，這是啟發式應用，非正式 Harvey 檢定。已在 feed.json 加備注。
+3. **Lookahead bias 待驗（PENDING K547b）**：Daily VT weight 由當日 VIX close（16:15 ET）計算，乘當日 SPY close（16:00 ET）報酬 — VIX close 比 SPY close 晚 15 分鐘，若以交易執行點計算，需加 `shift(1)`。Daily VT 1.666 數字需要 K547b 重算驗證；核心結論（ToM overlay 輸）預期不變，但 Daily VT headline 數字可能改變。
+
+**Lessons**：
+1. **24h review 必在發佈後 24 小時內執行**，不可積壓 9 天 — 此次是 9 天，paper_review backlog 問題。
+2. **Harvey et al. (2016) threshold 只適用於因子 t-stat 門檻**，不能直接用在策略跨期間平均比較。
+3. **VIX timing vs SPY timing**：VT 策略若以 VIX close 定權重，必確認 VIX 公布時間 vs 目標 close 時間；CBOE VIX settle 16:15 ET，NYSE/SPY 16:00 ET — 必須用前日 VIX 或加 shift(1)。
+
+**Fix path**:
+- feed.json 引用 + 門檻說明：已修正（2026-05-17）
+- K547b（shift(1) Daily VT 驗證）：加入 next_tasks.json，P3 pending
+- 若 K547b 結論不變：文章標為 VERIFIED_CORRECTED；若結論改變，文章需重算後 update
+
+| 2026-05-17 | `release_pool_gap` alert false-positive 第 3 strike — 短暫 critical (1 min) auto-clear pattern 重複出現 (19:17 / 23:19 同 session) | 觸發瞬間 last_released_at 距 now 實際 < threshold（e.g. 23:19 fire 但 last release = 15:00 = 3.3h，warn_thresh=4h，critical_thresh=6h，數學上不該 critical）。Monitor state-change 似乎讀到 stale .release_settings.json 或 log mid-write race，緊接著下一輪 read 又 OK 就 clear | 3-strike 觀察 — 標 候補 structural refactor。當前不改 threshold（rule 本身正確）。下次再 fire 時收集更細 diag（fire 瞬間 jq snapshot of .release_settings.json + heartbeat poll log diff）。若第 4 strike 確認是 alert state-change monitor 自己的 race condition → 改成 monitor 內加 50ms 重 read 驗證、或改用 file content hash 不只 mtime | 不是真的 release pool 斷掉；release_pool.log 顯示 cron 正常每 3h fire。是 alert 偵測層 false-positive |
