@@ -6736,5 +6736,16 @@
     "numbers_verified": true,
     "lookahead_check": "N/A - meta-synthesis article, no primary code",
     "notes": "K957 40-experiment meta-synthesis (K526-K566). All numbers verified against k957_results.json. 4 Harvey-pass (K548/551/553/558), K560/566/563 daily artifact numbers correct. VIX 37 cumulative confirmations correct."
+  },
+  {
+    "entry_id": 776,
+    "timestamp": "2026-05-18T01:35:13.519586",
+    "task_type": "paper_review",
+    "experiment_id": "K592",
+    "article_id": "mile_9a629641",
+    "verdict": "CONDITIONAL_PASS",
+    "summary": "K592 MF2-GARCH vs GJR vs HAR-ABS (SPY OOS 2023-2024). All numbers verified: QLIKE GJR=1.566/MF2=1.670/HAR=1.835, DM t=2.53/−3.00/4.47, correlations 0.909/0.760/0.854, delta=0.9218. Lookahead PASS: τ_t uses rv22[valid] / returns[valid+1] indexing correctly. DM HAC T^(1/3) Bartlett PASS. Harvey PASS only HAR vs GJR (4.47>3.0). No article fixes needed. Codex review skipped (background hung) → CONDITIONAL_PASS.",
+    "fixes_applied": [],
+    "notes": "JSON field mf2_beats_gjr_significant:true is misleadingly named (GJR actually wins) but article text is correct. No fix needed."
   }
 ]
