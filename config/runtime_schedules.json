@@ -183,6 +183,21 @@
           "cron_research_backlog.sh",
           "research_backlog"
         ]
+      },
+      {
+        "id": "work_summary_6h",
+        "label": "6h 工作摘要 email (HTML, 用戶 2026-05-17 要求)",
+        "cron": "5 */6 * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_work_summary.sh",
+        "log_path": "storage/logs/cron/work_summary.log",
+        "description": "每 6h 寄送 HTML 工作摘要 email 給 yihao.lai@gmail.com（涵蓋 git commits + work_log + 文章 + worktree agents + notifications，窗口 SINCE=NOW-6h）。LaunchAgent canonical (host_crontab_managed=false 同 check_alerts pattern)。Fire times: 00:05/06:05/12:05/18:05 UTC。",
+        "host_crontab_managed": false,
+        "launchagent_label": "com.volpred.work-summary",
+        "matchers": [
+          "work_summary_6h.py",
+          "cron_work_summary.sh",
+          "com.volpred.work-summary"
+        ]
       }
     ]
   },
