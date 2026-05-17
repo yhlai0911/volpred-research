@@ -30450,5 +30450,27 @@
       "cathay_daily_dm_t": 0.35,
       "cathay_daily_p": 0.726
     }
+  },
+  {
+    "id": "K1372",
+    "item_id": "K1372",
+    "category": "volatility_modeling",
+    "title": "K1372: BTC 半減期前後波動率事件研究 — 個別 MW 顯著但集合 Null (N=3 power 問題)",
+    "content": "[提出: autonomous-research (mock_user_questions.json uq_mock1), 執行: Claude worktree, 審查: feature-dev:code-reviewer subagent CONDITIONAL_PASS 2026-05-17] GJR-GARCH(1,1)-t 全樣本估計（BTC-USD 2013-2025，N=4122）顯示 persistence=1.0000（IGARCH，BTC 加密貨幣市場已知特性）。三次半減期個別 Mann-Whitney U 檢定：H2(2016) p=0.0068、H3(2020) p=0.000（COVID 前窗污染）、H4(2024) p=0.000，均顯示半減期後90日波動率低於前90日。集合 Wilcoxon signed-rank（N=3）p=0.25，統計力嚴重不足。槓桿效應 gamma=-0.0198（t=-1.036，p=0.300），不顯著。VERDICT: EXPLORATORY_NULL（N=3 halvings 統計力不足，無法集合推論）。需 H5+ 事件才能做 confirmatory analysis。",
+    "evidence": [
+      "H2_2016 pre_vol=0.4064, post_vol=0.2962, MW_p=0.0068",
+      "H3_2020 pre_vol=0.8329 (COVID 污染), post_vol=0.4094, MW_p=0.0000",
+      "H4_2024 pre_vol=0.4753, post_vol=0.3787, MW_p=0.0000",
+      "aggregate Wilcoxon p=0.25 (N=3)",
+      "GJR-GARCH gamma=-0.0198 t=-1.036 p=0.300 (not significant)",
+      "GARCH persistence=1.0000 (IGARCH)"
+    ],
+    "confidence": 0.7,
+    "verdict": "EXPLORATORY_NULL",
+    "experiment_id": "K1372",
+    "experiment_path": "experiments/k1372/",
+    "reviewer_source": "feature-dev:code-reviewer subagent (CONDITIONAL_PASS; MEDIUM fix applied post-review)",
+    "caveats": "N=3 halvings; H3 pre-window COVID contamination; IGARCH not novel; vol drop may reflect market maturation not halving mechanism",
+    "created_at": "2026-05-17T19:25:07.965652"
   }
 ]

@@ -6599,5 +6599,16 @@
       "K1206"
     ],
     "agent": "main_thread"
+  },
+  {
+    "task_type": "experiment",
+    "task_id": "K1372",
+    "title": "BTC 半減期前後波動率事件研究 (GJR-GARCH)",
+    "status": "completed",
+    "verdict": "EXPLORATORY_NULL",
+    "confidence": 0.7,
+    "dispatched_at": "2026-05-17T11:00:00Z",
+    "completed_at": "2026-05-17T11:25:15.911046Z",
+    "notes": "IGARCH persistence=1.0, gamma p=0.300 (not sig), Wilcoxon aggregate p=0.25 (N=3 power issue). CONDITIONAL_PASS code review; MEDIUM fix applied (added gamma_tstat/pvalue to results JSON)."
   }
 ]
