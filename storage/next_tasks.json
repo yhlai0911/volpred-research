@@ -5128,7 +5128,7 @@
     "title": "Paper 3 K1128 narrative pivot decision: abandon VIX-regime → adopt pooled microstructure signal (K1142 anchor)",
     "priority": 4,
     "description": "4 complementary K1128 NULL/PARTIAL experiments done (K1128/K1131/K1142/K1199) satisfying >=3 gate. Main thread decide: (a) Full reframe to K1142 vol-norm pooled signal anchor; (b) Hybrid K1128 null + K1142 positive subframe; (c) Abandon Paper 3 leverage-only direction entirely. | K1205 synthesis completed (commit e7088770): integrity 7/7 PASS, recommends path (b) hybrid null+positive negative-result methodology paper. Figures ready at experiments/k1205/.",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-04-18T00:54:17.549854",
     "tags": [
       "Paper3",
@@ -5137,15 +5137,17 @@
       "K1128"
     ],
     "synthesis_ready": true,
-    "task_type": "paper_decision"
+    "task_type": "paper_decision",
+    "completion_note": "Decision already made 2026-05-13 per research_program.md: Option A = asset-class-specific copula study (Joe copula), status=decision_made_awaiting_body_rewrite"
   },
   {
     "id": "Paper3_decision",
     "title": "Paper 3 方向重大決策：reframe / abandon / negative-result paper",
     "priority": 4,
     "description": "[priority 4 — wait for new evidence] K1100g_d2 推翻 Paper 3 reframe anchor。3 連 Paper 3 找 anchor 都失敗。需用戶決策：(a) 繼續挖 K1100g_d3/4/5 (b) reframe 為 negative-result paper (c) abandon Paper 3 資源轉其他 paper。",
-    "status": "pending",
-    "task_type": "paper_decision"
+    "status": "succeeded",
+    "task_type": "paper_decision",
+    "completion_note": "Decision already made 2026-05-13 per research_program.md: Option A = asset-class-specific copula study (Joe copula), status=decision_made_awaiting_body_rewrite"
   },
   {
     "id": "Paper3_experiments_md_add_K697_paper3_fixes",
@@ -5165,8 +5167,9 @@
     "title": "Paper 3 完整重構為 Taiwan microstructural study (PRIORITY 1)",
     "priority": 4,
     "description": "[priority 4 — wait for new evidence per user 2026-04-13] K1100/K1100b/K1100f 連 5 null 證明 Lai 2024 不可推廣為通用方法。改寫 Paper 3 outline 為 TAIFEX 微結構 empirical study，或完全 pivot 到不同 paper。Main thread 主導。",
-    "status": "pending",
-    "task_type": "paper_decision"
+    "status": "succeeded",
+    "task_type": "paper_decision",
+    "completion_note": "Decision already made 2026-05-13 per research_program.md: Option A = asset-class-specific copula study (Joe copula), status=decision_made_awaiting_body_rewrite"
   },
   {
     "id": "Paper3_split_sample_K1193_STRENGTHENING_update",
@@ -7699,7 +7702,7 @@
     "title": "Paper review (Codex 24h-rule): 80 場實驗、4 次 Codex 把關之後：我們對波動率投資的三件確定事與三個慘痛錯誤",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_80aeb8a1 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_80aeb8a1",
@@ -7708,7 +7711,9 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-12T23:07:17+00:00"
+    "created_at": "2026-05-12T23:07:17+00:00",
+    "completed_at": "2026-05-18T11:24:15.991066+00:00",
+    "completion_note": "Codex 24h-rule review complete. 4 fixes applied: (1) citation Harvey,Liu,Zhu RFS; (2) AUC vs accuracy metric disambiguation; (3) K621-K699=79 not 80; (4) significance wording p=0.096 clarified. VIX magnitude corr 0.57 verified independently (VIX(t-1) vs |ret(t)| = 0.5691). feed-sync done."
   },
   {
     "id": "paper_review_mile_aeca4e68",

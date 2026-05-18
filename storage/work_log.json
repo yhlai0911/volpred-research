@@ -1,5 +1,29 @@
 [
   {
+    "session_id": "hourly_dispatch_2026-05-18",
+    "timestamp": "2026-05-18T11:24:26.570230+00:00",
+    "task_id": "paper_review_mile_80aeb8a1",
+    "task_type": "paper_review",
+    "article_id": "mile_80aeb8a1",
+    "article_title": "80 場實驗、4 次 Codex 把關之後：我們對波動率投資的三件確定事與三個慘痛錯誤",
+    "reviewer": "Codex CLI (gpt-5.4) + main thread verification",
+    "verdict": "PASS_WITH_CORRECTIONS",
+    "issues_found": [
+      "CONFIRMED ERROR A: AUC(0.6134) vs accuracy(0.5637) 不同指標同欄比較 — 已修正",
+      "CONFIRMED ERROR B: 引用缺 Harvey（第一作者），期刊應為 Review of Financial Studies — 已修正",
+      "CONFIRMED ERROR D1: K621–K699=79場非80場 — 已修正",
+      "CONFIRMED ERROR D2: 顯著性表述矛盾 — 已修正為 bootstrap p=0.096",
+      "UNCLEAR C: VIX magnitude correlation 0.57 — 主線程獨立驗證 VIX(t-1) vs |ret(t)|=0.5691 ✓"
+    ],
+    "fixes_applied": 4,
+    "stale_tasks_cleaned": [
+      "Paper3_K1128_pivot_decision",
+      "Paper3_decision",
+      "Paper3_reframe"
+    ],
+    "feed_sync_done": true
+  },
+  {
     "entry_id": "init0001",
     "timestamp": "2026-04-18T09:12:00+08:00",
     "task_type": "governance",
