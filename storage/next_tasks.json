@@ -5,11 +5,13 @@
     "priority": 2,
     "title": "K681b: Lookahead fix — US/EFA weights shift(1) correction + rerun backtest",
     "description": "K681 review found: w_pct_us = 1 - pct[i] uses vix[i] (same-day). Must correct to w_pct_us = (1 - pct).shift(1) for proper signal timing. Rerun backtest for US (50/50 SPY/GLD) and EFA. Compare corrected Sharpe vs original (1.676, 1.843). If corrected EFA Sharpe still >1.2, article claims hold with errata. If <0.8, need major article correction.",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-05-18T02:18:30.167712+00:00",
     "source": "paper_review_mile_073884fd lookahead audit 2026-05-18",
     "parent_experiment": "k681",
-    "blocking_article": "mile_073884fd"
+    "blocking_article": "mile_073884fd",
+    "completed_at": "2026-05-18T04:10:00.000000+00:00",
+    "notes": "Completed: lookahead fix + results + knowledge.json + article correction all done. EFA/US claims retracted."
   },
   {
     "id": "All_papers_reproducibility_audit",
@@ -1087,7 +1089,7 @@
     "title": "K1302: Paper 2 Table 2 individual γ JSON rebuild (4 stocks × 3 specs)",
     "description": "Rebuild Paper 2 Table 2 individual-stock γ for 2317.TW / 2454.TW / 2383.TW / 0056.TW under 3-spec disambiguation (TWA/TWB/TWC). Currently 4 rows lack canonical results.json backing — P2 cannot move to ready_for_submission without provenance closure. Brief: experiments/k1302/README.md. Mission: 3 (paper) primary.",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "autonomous_backlog_gen",
     "tags": [
@@ -1096,7 +1098,9 @@
       "individual-stocks",
       "3-spec-pattern"
     ],
-    "created_at": "2026-05-12T02:50:12+00:00"
+    "created_at": "2026-05-12T02:50:12+00:00",
+    "completed_at": "2026-05-18T04:20:00.000000+00:00",
+    "notes": "K1302 v2: 5 stocks × 3 specs × byte-match all PASS. Knowledge entries written. Codex review done (2026-05-16)."
   },
   {
     "id": "K1303_har_cj_jump_component",
@@ -8510,7 +8514,7 @@
     "description": "K1300 has a non-null verdict in experiments/k1300/ but no published feed article and no existing task. Verdict: H_K1300_CONFIRMED_FAIL. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -8519,7 +8523,9 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.446198+00:00",
     "generated_at": "2026-05-13T05:53:00.446200+00:00",
-    "k_id": "K1300"
+    "k_id": "K1300",
+    "completed_at": "2026-05-18T04:40:00.000000+00:00",
+    "notes": "Article mile_60176965 written and committed (5e37a6ae). Draft status."
   },
   {
     "id": "gen_article_k151",
@@ -9388,7 +9394,7 @@
     "title": "K1370: Paper 2 block-bootstrap CI re-computation under canonical full-sample BW-robust spec",
     "priority": 2,
     "description": "Paper 2 §3.2 amplification ratio CI [2.8, 8.1] was computed under draft rolling-window spec (5.0× point estimate). New canonical 10× point estimate (K1302+K1302b avg γ=0.027) needs matching CI recompute. Block bootstrap B=10000, block length 252, seeds 42..10041. Per-stock GJR-GARCH(1,1) BW-robust re-estimated on each bootstrap replicate; amplification ratio = TAIEX γ / mean(individual γ); 90% CI from quantiles. Paper 2 currently flags CI as `(stale)` with K1370 forward-ref. Worktree agent suitable — produces experiments/k1370/{k1370.py, k1370_results.json, README.md}. No knowledge.json write (主線程 + Codex review 後).",
-    "status": "compute_enqueued",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "paper2_canonical_pivot_followup_2026_05_16",
     "tags": [
@@ -9401,7 +9407,9 @@
     "created_at": "2026-05-16T02:04:43Z",
     "blocked_reason": null,
     "compute_queue_id": "k1370-bootstrap-b10000",
-    "updated_at": "2026-05-16T13:31:16.067967+00:00"
+    "updated_at": "2026-05-16T13:31:16.067967+00:00",
+    "completed_at": "2026-05-18T04:15:00.000000+00:00",
+    "notes": "K1370-v2 CONDITIONAL_PASS: CI [2.31, 6.61], median 3.78, 1000/1000 valid. Knowledge.json written. K1370c sensitivity also done."
   },
   {
     "id": "K1371_paper2_reproduce_update",
