@@ -79,7 +79,7 @@ def compute_wavelet_features(series, wavelet='db4', max_level=5):
     Returns DataFrame with detail coefficients D1-D5 and approximation A5.
     """
     n = len(series)
-    values = series.values
+    values = series.values.copy()  # pywt.wavedec requires writeable buffer (yfinance returns read-only)
 
     # We need enough data for the decomposition
     # Use rolling window of 64 (2^6) for 5-level decomposition
@@ -149,8 +149,6 @@ def rolling_oos_forecast(df, feature_cols, target_col, is_end, min_train=500):
     valid_cols = feature_cols + [target_col]
 
     for i, date in enumerate(oos_indices):
-        # Training data: everything up to this point
-        train_mask = (df.index <= date) & (~oos_mask | (df.index < date))
         train = df.loc[df.index < date, valid_cols].dropna()
 
         if len(train) < min_train:

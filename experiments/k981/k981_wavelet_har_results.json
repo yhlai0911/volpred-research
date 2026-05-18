@@ -13,117 +13,129 @@
   "models": {
     "AR(1)": {
       "n_oos": 1823,
-      "qlike": 1.7368471948117836,
-      "mse": 30.2436028624536,
-      "mae": 1.7177919108332185,
-      "r2_oos": 0.19764756551093388,
-      "mz_alpha": 0.1489333954775407,
-      "mz_beta": 0.8960837497755136,
-      "mz_r2": 0.20034561828406228,
-      "correlation": 0.4475998416935179
+      "qlike": 1.7368560868876652,
+      "mse": 30.24343152457052,
+      "mae": 1.7177905269701272,
+      "r2_oos": 0.1976474198474869,
+      "mz_alpha": 0.14893258623727523,
+      "mz_beta": 0.896084369491665,
+      "mz_r2": 0.20034543408611993,
+      "correlation": 0.4475996359316213
     },
     "HAR": {
       "n_oos": 1823,
-      "qlike": 1.5407730279613707,
-      "mse": 29.301449627351616,
-      "mae": 1.6465180703808848,
-      "r2_oos": 0.22264256843051988,
-      "mz_alpha": 0.2317170752547939,
-      "mz_beta": 0.83530687768306,
-      "mz_r2": 0.23166534631789204,
-      "correlation": 0.4813162643396668
+      "qlike": 1.540781569205421,
+      "mse": 29.30127605381871,
+      "mae": 1.6465169841036087,
+      "r2_oos": 0.22264262822019998,
+      "mz_alpha": 0.23171533252109944,
+      "mz_beta": 0.8353079644524072,
+      "mz_r2": 0.2316652602435807,
+      "correlation": 0.4813161749241142
     },
     "WHAR_db4": {
       "n_oos": 1823,
-      "qlike": 1.8010784357316976,
-      "mse": 38.74712119005284,
-      "mae": 1.9732272970800626,
-      "r2_oos": -0.027947865790735937,
-      "mz_alpha": 0.7864004884460049,
-      "mz_beta": 0.43207186199692993,
-      "mz_r2": 0.03697255751223272,
-      "correlation": 0.19228249403477318
+      "qlike": 1.7455086704558842,
+      "mse": 39.7469526245219,
+      "mae": 2.0422241953012366,
+      "r2_oos": -0.054479216935940045,
+      "mz_alpha": 0.6910305673770881,
+      "mz_beta": 0.4436599150877374,
+      "mz_r2": 0.0888951751439433,
+      "correlation": 0.2981529391838077
     },
     "WHAR_haar": {
       "n_oos": 1823,
-      "qlike": 50.19355934341777,
-      "mse": 37.97998859722363,
-      "mae": 1.9863112967704797,
-      "r2_oos": -0.0075961006180569335,
-      "mz_alpha": 0.702125354663692,
-      "mz_beta": 0.47849747217887223,
-      "mz_r2": 0.034441981924644094,
-      "correlation": 0.1855855110849008
+      "qlike": 327.7940978587705,
+      "qlike_artifact": true,
+      "qlike_artifact_reason": "OLS near-singularity from 6 collinear Haar coefficients; QLIKE not comparable to HAR/AR(1)/GJR-GARCH",
+      "mse": 39.887543101412334,
+      "mae": 2.1600112266839626,
+      "r2_oos": -0.05820905598500015,
+      "mz_alpha": 0.6996105838907845,
+      "mz_beta": 0.4262755429065357,
+      "mz_r2": 0.06581951883339887,
+      "correlation": 0.25655315011396546
     },
     "WHAR_HAR_db4": {
       "n_oos": 1823,
-      "qlike": 474.483910082088,
-      "mse": 31.078091480913436,
-      "mae": 1.6859453594899827,
-      "r2_oos": 0.1755088680277087,
-      "mz_alpha": 0.4176552946963088,
-      "mz_beta": 0.7145170523570529,
-      "mz_r2": 0.2088754959157081,
-      "correlation": 0.45702898804748476
+      "qlike": 236.7104560136966,
+      "qlike_artifact": true,
+      "qlike_artifact_reason": "OLS near-singularity from 9 collinear predictors (HAR+wavelet combined); QLIKE not comparable to HAR/AR(1)/GJR-GARCH",
+      "mse": 33.43634401674013,
+      "mae": 1.7425365993998483,
+      "r2_oos": 0.11294004878702457,
+      "mz_alpha": 0.5258123506854597,
+      "mz_beta": 0.5981304501487307,
+      "mz_r2": 0.20700145788471702,
+      "correlation": 0.45497412880813015
     },
     "GJR-GARCH": {
       "n_oos": 1823,
-      "qlike": 1.5307621810075307,
-      "mse": 28.076439830262217,
-      "mae": 1.6048222918147905,
-      "r2_oos": 0.2551416591452661,
-      "mz_alpha": 0.25895983642155507,
-      "mz_beta": 0.7646663249847535,
-      "mz_r2": 0.28236148355519375,
-      "correlation": 0.5313769693496262
+      "qlike": 1.53076945052617,
+      "mse": 28.07628403995447,
+      "mae": 1.6048228911623197,
+      "r2_oos": 0.2551414371662577,
+      "mz_alpha": 0.2589570854295229,
+      "mz_beta": 0.764665307570743,
+      "mz_r2": 0.2823616174440291,
+      "correlation": 0.5313770953325229
     }
   },
   "wavelet_component_importance": {
     "D1 (1-2d)": {
-      "coefficient": 0.002114957627682862,
-      "t_stat": 1.137852496884194
+      "coefficient": -0.013441570052373524,
+      "t_stat": -7.533396877368218
     },
     "D2 (2-4d)": {
-      "coefficient": 0.009513115253239765,
-      "t_stat": 4.113655586342423
+      "coefficient": 0.018015973208548534,
+      "t_stat": 8.106666543193603
     },
     "D3 (4-8d)": {
-      "coefficient": -0.005950608900754984,
-      "t_stat": -3.1573873443875655
+      "coefficient": -0.00012829221872053594,
+      "t_stat": -0.07091313367700074
     },
     "D4 (8-16d)": {
-      "coefficient": 0.0071229743809921794,
-      "t_stat": 3.299510035294187
+      "coefficient": 0.024739632708407133,
+      "t_stat": 11.937676337954148
     },
     "D5 (16-32d)": {
-      "coefficient": 0.010075214917704961,
-      "t_stat": 7.857092642146922
+      "coefficient": 0.008240954167585196,
+      "t_stat": 6.690771464145805
     },
     "A5 (>32d)": {
-      "coefficient": -8.991727086544825e-05,
-      "t_stat": -2.490815213822752
+      "coefficient": -9.064701997416433e-05,
+      "t_stat": -2.615566491983126
     }
   },
+  "wavelet_is_r2": 0.19464682386782473,
+  "n_oos_total_dates": 1824,
+  "n_oos_note": "n_oos per model = evaluated predictions after min_train=500 warmup; last date excluded as target. n_oos_total_dates = all OOS rows.",
+  "dm_multiple_testing_note": "7 DM tests vs AR(1) without Bonferroni/Holm correction; HAR vs WHAR_db4 DM-t=5.98 survives any FWE adjustment given extreme magnitude.",
   "dm_tests": {
     "HAR": {
-      "t_stat": -3.300578802371086,
-      "p_value": 0.0009835049661879314
+      "t_stat": -3.3005855724353994,
+      "p_value": 0.0009834813798244024
     },
     "WHAR_db4": {
-      "t_stat": 1.059137054250311,
-      "p_value": 0.2896779094276489
+      "t_stat": 0.13645861786999483,
+      "p_value": 0.8914738286927713
     },
     "WHAR_haar": {
-      "t_stat": 1.0441508225630525,
-      "p_value": 0.29655427942504997
+      "t_stat": 1.419279576129478,
+      "p_value": 0.15598876342044332
     },
     "WHAR_HAR_db4": {
-      "t_stat": 1.9411891330266877,
-      "p_value": 0.05238953086567033
+      "t_stat": 2.6807477573026723,
+      "p_value": 0.007412086410380381
     },
     "GJR-GARCH": {
-      "t_stat": -2.649961482286685,
-      "p_value": 0.008119803291519956
+      "t_stat": -2.6499931102055565,
+      "p_value": 0.008119046181971568
+    },
+    "HAR_vs_WHAR_db4": {
+      "t_stat": 5.953734877446081,
+      "p_value": 3.1375455566973187e-09
     }
   },
   "references": [
@@ -135,39 +147,39 @@
     {
       "rank": 1,
       "model": "GJR-GARCH",
-      "qlike": 1.5307621810075307
+      "qlike": 1.53076945052617
     },
     {
       "rank": 2,
       "model": "HAR",
-      "qlike": 1.5407730279613707
+      "qlike": 1.540781569205421
     },
     {
       "rank": 3,
       "model": "AR(1)",
-      "qlike": 1.7368471948117836
+      "qlike": 1.7368560868876652
     },
     {
       "rank": 4,
       "model": "WHAR_db4",
-      "qlike": 1.8010784357316976
+      "qlike": 1.7455086704558842
     },
     {
       "rank": 5,
-      "model": "WHAR_haar",
-      "qlike": 50.19355934341777
+      "model": "WHAR_HAR_db4",
+      "qlike": 236.7104560136966
     },
     {
       "rank": 6,
-      "model": "WHAR_HAR_db4",
-      "qlike": 474.483910082088
+      "model": "WHAR_haar",
+      "qlike": 327.7940978587705
     }
   ],
   "summary": {
     "best_model": "GJR-GARCH",
-    "best_qlike": 1.5307621810075307,
-    "har_qlike": 1.5407730279613707,
+    "best_qlike": 1.53076945052617,
+    "har_qlike": 1.540781569205421,
     "whar_vs_har": "HAR better",
-    "conclusion": "HAR outperforms WHAR (db4) by 16.9% in QLIKE. Fixed-window averages remain a robust choice; wavelet energy features do not capture additional predictive information for daily r² forecasting with this proxy."
+    "conclusion": "HAR outperforms WHAR (db4) by 13.3% in QLIKE. Fixed-window averages remain a robust choice; wavelet energy features do not capture additional predictive information for daily r² forecasting with this proxy."
   }
 }

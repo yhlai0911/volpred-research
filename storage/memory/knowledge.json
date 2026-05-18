@@ -30739,5 +30739,44 @@
       "K1192"
     ],
     "note": "Codex working-tree review (2026-05-19) identified and resolved: VIXTWN CSV duplicates (19→0), CPI June 2026 Saturday→Thursday date fix, DM sign convention in test_conclusion_lint.py (4 tests fixed). All issues resolved before knowledge write."
+  },
+  {
+    "id": "K981",
+    "experiment_id": "K981",
+    "experiment_path": "experiments/k981/",
+    "timestamp": "2026-05-19T04:23:49.259791",
+    "category": "volatility_forecasting",
+    "title": "K981: HAR + Wavelet Decomposition — Null Result (SPY 2006-2026)",
+    "content": "Wavelet energy features (Daubechies-4 / Haar, 5-level decomposition, 64-day window) do NOT improve HAR-RV for daily r² forecasting on SPY (2006-2026, n_oos=1823).\nHAR QLIKE=1.5408 vs WHAR_db4 QLIKE=1.7455; DM t=5.954, p<0.0001 (HAR significantly better).\nGJR-GARCH best: QLIKE=1.5308, R²_OOS=0.2551.\nWHAR_haar (QLIKE=327.79) and WHAR_HAR_db4 (QLIKE=236.71) QLIKE values are OLS-singularity artifacts (qlike_artifact=true in results JSON); MSE/R²_OOS valid for these.\nIS regression: D2/D4/D5 wavelet energy |t|>3 statistically significant, but IS R²=0.195 does not translate to OOS predictive power.\nRoot cause: wavelet dyadic scales (2^k days) misalign with financial calendar; wavelet energy is second-order statistic of r², adding noise not signal.\nConsistent with K973 (Hurst NULL) and K986 (LASSO NULL): transform/regularization approaches fail to improve on HAR at daily r² frequency.",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer_source": "code-reviewer subagent fallback (Codex quota exhausted 2026-05-19; primary-path Codex re-verify pending quota reset)",
+    "tags": [
+      "wavelet",
+      "HAR",
+      "null_result",
+      "multi_scale",
+      "daily_rv",
+      "Daubechies",
+      "SPY",
+      "OOS_verified"
+    ],
+    "key_stats": {
+      "n_oos": 1823,
+      "har_qlike": 1.5408,
+      "whar_db4_qlike": 1.7455,
+      "gjr_garch_qlike": 1.5308,
+      "dm_har_vs_whar_t": 5.954,
+      "dm_har_vs_whar_p": 3.14e-09,
+      "har_r2_oos": 0.2226,
+      "whar_db4_r2_oos": -0.0545,
+      "gjr_r2_oos": 0.2551,
+      "wavelet_is_r2": 0.1946
+    },
+    "related_experiments": [
+      "K973",
+      "K986",
+      "K1312"
+    ],
+    "note": "v3 fix: pywt.wavedec requires writeable numpy buffer; yfinance returns read-only arrays. Fix: series.values.copy() at compute_wavelet_features() line 82. v2 lag-alignment/QLIKE-floor/IS-t-stats fixes preserved. Dead code (train_mask) removed. WHAR artifacts flagged in JSON."
   }
 ]

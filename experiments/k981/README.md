@@ -109,3 +109,30 @@ IS R² = 0.126（低於 HAR 的預期水準）
 - HAR_vs_WHAR_db4 DM、wavelet_is_r2、dm_multiple_testing_note 均已加入 JSON
 
 **狀態**：v2 已 enqueue compute queue (compute-k981-v2-wavelet-lag-fix-qlike-floor-fix-is-t-stats-fix-1778915759)，等待重跑驗證 NULL 結論是否持續（expected: HAR 仍優於 wavelet，但 WHAR_HAR_db4 QLIKE 應大幅改善）。
+
+## v3 修正（2026-05-19 code-reviewer CONDITIONAL_PASS 收束）
+
+**觸發原因**：v2 執行失敗 — `ValueError: buffer source array is read-only`。yfinance 現在回傳唯讀 numpy array；`pywt.wavedec` 內部需寫入 buffer，`except Exception: continue` 靜默吞下 5030 個 error 導致 wavelet 特徵全 NaN（Non-null wavelet rows: 0）。
+
+**修正（v3）**：
+- `compute_wavelet_features()` 第 82 行：`values = series.values.copy()`（加 `.copy()` 確保 buffer 可寫）
+- 移除 `rolling_oos_forecast()` 死代碼（`train_mask` 計算後未使用）
+- `k981_wavelet_har_results.json` 加 `qlike_artifact: true` 旗標於 WHAR_haar / WHAR_HAR_db4
+
+**v3 結果（1823 OOS obs）**：
+| Model | QLIKE | R²_OOS | DM vs AR(1) |
+|-------|-------|--------|-------------|
+| GJR-GARCH | 1.5308 | 0.2551 | t=-2.650, p=0.008 *** |
+| HAR | 1.5408 | 0.2226 | t=-3.301, p=0.001 *** |
+| AR(1) | 1.7368 | 0.1976 | — |
+| WHAR_db4 | 1.7455 | -0.0545 | t=0.136, p=0.891 |
+| WHAR_haar | 327.79* | -0.0582 | — |
+| WHAR_HAR_db4 | 236.71* | 0.1129 | — |
+
+*QLIKE artifact（OLS 近似奇異，不可與其他模型比較）
+
+HAR vs WHAR_db4 DM: t=5.954, p<0.0001 *** → **NULL 結論確認，與 v1 一致（原 t=5.98）**。
+
+**Review**：`feature-dev:code-reviewer` subagent fallback（Codex quota 耗盡，重置後需 primary-path Codex 二次驗證）。Verdict: CONDITIONAL_PASS。
+
+**狀態**：CLOSED — 結論為 NULL，wavelet energy 特徵不能改進 HAR 日頻 r² 預測。

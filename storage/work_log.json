@@ -7095,5 +7095,22 @@
     "article_id": "mile_70bd1eeb",
     "evidence": "K1374 PASS (226 events, d=0.305, p<0.0001)",
     "status": "published"
+  },
+  {
+    "id": "task-k981-v3-closure-2000d52a",
+    "task_type": "experiment",
+    "experiment_id": "K981",
+    "status": "succeeded",
+    "started_at": "2026-05-19T00:00:00+00:00",
+    "completed_at": "2026-05-18T20:24:04.108580+00:00",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "code-reviewer subagent fallback (Codex quota exhausted)",
+    "summary": "K981 HAR+Wavelet v3 closure. Fix: series.values.copy() for pywt read-only buffer (yfinance API change). 1823 OOS predictions now valid. NULL: HAR QLIKE=1.5408 >> WHAR_db4 1.7455, DM t=5.954 p<0.0001. I1 (QLIKE artifact flags) + I2 (dead code train_mask) fixed. knowledge.json written. Codex primary-path re-verify pending quota reset.",
+    "files_changed": [
+      "experiments/k981/k981_wavelet_har.py",
+      "experiments/k981/k981_wavelet_har_results.json",
+      "experiments/k981/README.md",
+      "storage/memory/knowledge.json"
+    ]
   }
 ]
