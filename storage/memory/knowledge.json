@@ -30666,5 +30666,39 @@
     ],
     "confidence": 0.8,
     "date": "2026-05-18"
+  },
+  {
+    "id": "K1375",
+    "experiment_id": "K1375",
+    "experiment_path": "experiments/k1375/",
+    "timestamp": "2026-05-18T17:17:42.590995",
+    "category": "volatility_event_study",
+    "title": "K1375: 高股息 ETF（0056/00878/00919）除息日波動率 — NULL（ETF 分散效應消除個股 ex-div vol spike）",
+    "content": "K1374 個股峰季 d=0.305 在高股息 ETF 層級降至 d=0.055（全 NULL）。\n0056(年配, n=21, d=-0.015, p=0.927)、00878(季配, n=22, d=+0.343, p=0.179)、00919(月配, n=12, d=-0.147, p=0.285)。\nPooled n=55, d=+0.055, p=0.617。ETF 多成份股分散弱化個股除息日特有風險。\n投資人執行高股息 ETF 除息日附近操作無需擔心特別 vol spike。\n00878 邊際方向性正確但樣本不足（需 ≈68 事件達 80% power，目前僅 22）。\n研究設計：純事件研究，ex-dates 外部日曆，非 return series 推算，無前視偏誤。",
+    "verdict": "CONDITIONAL_PASS",
+    "tags": [
+      "taiwan_etf",
+      "ex_dividend",
+      "event_study",
+      "null_result",
+      "etf_diversification"
+    ],
+    "key_stats": {
+      "0056_d": -0.015,
+      "0056_p": 0.927,
+      "00878_d": 0.343,
+      "00878_p": 0.179,
+      "00919_d": -0.147,
+      "00919_p": 0.285,
+      "pooled_d": 0.055,
+      "pooled_p": 0.617,
+      "k1374_benchmark_d": 0.305,
+      "n_events_total": 55
+    },
+    "related_experiments": [
+      "K1373",
+      "K1374"
+    ],
+    "note": "Manual code review CONDITIONAL_PASS: lookahead clean, control design OK, stats correct, seeds fixed. Codex working-tree review did not flag K1375."
   }
 ]
