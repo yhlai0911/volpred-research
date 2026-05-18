@@ -214,20 +214,20 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 
 **Pending**：B=1000 CI 完成 → Codex re-review → user decision (A/B/C) → body.tex §3.2 重寫 → reproduce.py binding 補 K1370。Narrative state = `decision_pending` (NOT yet `decision_made_awaiting_body_rewrite`)。
 
-**⚠ Paper 2 EAV (eav-universal-magnitude) 新 paper scaffold NEEDS_REWRITE (2026-05-17 03:30 UTC)**
+**RESOLVED 2026-05-18 (scaffold rewrite v2 complete)** — EAV Paper scaffold 已按 review_v1.md Option A 全面重寫：
 
-Commit dc99894f 由 background agent 自寫 `paper/eav-universal-magnitude/` scaffold (README + abstract + lit_review)，未經主線程審查 → review_v1.md 找出 **5 P0 framing errors**：
-1. **Stale 2 weeks** — 缺 K1146 DECISION_MADE 三市場 universal (TW K1145 + US K1147 + JP K1150) magnitude ordering 升級
-2. **"universal firm-event constant" over-claim** — 2 markets (TW+US) ≠ universal；US θ 是 TW 的 2.78× 距 constant 遠
-3. **K1148_d2 misuse** — scaffold 引為 cross-market magnitude evidence，實際是 spec consistency (TW-fitted → US OOS panel DM)
-4. **Skipped null heterogeneity evidence chain** — K1109/K1113/K1114/K1140 (Paper 2 narrative ★ 主轉折支撐) 完全略過，違反研究誠實 L6
-5. **Placebo 13.6σ unverified** — 實算 13.27σ + σ definition 缺失；K1145/K1148_d2 主 fits `converged=false` flag 未說明
+- **Decision**: Option A（按 14-item 清單逐項修正，核心研究問題 valid）
+- **Implemented**: 2026-05-17 main-thread rewrite（README.md v2 + abstract_working.md v2 + lit_review.md v2）
+- **5 P0 issues**: ALL RESOLVED（JP 市場補入 K1147/K1150；"universal constant" → "robust cross-market positive amplification with market-specific magnitude ordering US>JP>TW"；null heterogeneity chain K1109/K1113/K1114/K1140 已完整列入；IS t vs OOS DM t 語意拆開；placebo 13.6σ → 13.27σ + σ 定義補齊）
+- **Cross-paper conflict resolved**: K1141 明確歸屬 Paper 4（vix-sufficiency），README v2 已標注
+- **Narrative state**: `decision_made_awaiting_body_rewrite`
 
-**Verdict**: NEEDS_REWRITE (非 SCOPE_REJECT — 核心研究問題 valid)。Body.tex 不可在現 scaffold 開始。Pending user decision: (A) revise scaffold per review_v1.md 14-item list / (B) retract dc99894f / (C) 重新規劃 Paper 2 EAV vs taiwan-vt scope。Narrative state = `scaffold_needs_rewrite_blocking_body`.
+**Remaining P1 tasks（不 blocking body start）**:
+- lit_review.md: 核實 Patell & Wolfson (1979) JFE vs JFQA；補 binary-vs-continuous spec 文獻
+- Engle-Ghysels-Sohn 2013 journal name 待 citation-verifier pass（ReStat vs JBES）
+- reproduce.py + data snapshot pinning（body kickoff 時必須先做）
 
-Cross-paper conflict: K1141 README 自稱「Paper 4 §4 Channel-Specific」但 scaffold 引為 Paper 2 — paper 歸屬待澄清。
-
-Review: `paper/eav-universal-magnitude/review_v1.md` (5 P0 + 4 P1 + 5 P2/P3 = 14 rewrite items).
+**Body.tex 狀態**: P0 scaffold resolved → body 可開始草稿；但須先完成 reproduce.py + data snapshot（paper-workflow.md hard rule 2）。Details in `paper/eav-universal-magnitude/README.md` (v2)。
 
 ---
 
