@@ -1,26 +1,26 @@
 {
-  "timestamp": "2026-05-18T06:09:08Z",
+  "timestamp": "2026-05-18T12:04:49.868144+00:00",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "Total drafts=6 (<12 threshold). research=4 (ok, >=4), general=2 (alert, <8)"
+      "detail": "total_drafts=6, research=4, general=2; ALERTS: article pool low (<12): total=6; general pool low (<8): general=2"
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
-      "status": "ok",
-      "detail": "strategy_metrics.json age=23.99h (<26h threshold)"
+      "status": "alert",
+      "detail": "age=29.9h (threshold=26h); ALERT: metrics stale"
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated 2026-05-17 or 2026-05-18 found in last 30 lines of docs/error_log.md"
+      "detail": "no entries dated 2026-05-17 or 2026-05-18 in last 30 lines"
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All strategies (14 with entries) have <=1 null in last 3 entries. _market_daily has 0 entries (empty)."
+      "detail": "all 14 strategies have <=1 null in last 3 entries (last_date=2026-04-25)"
     },
     {
       "name": "GIT_STATUS",
@@ -34,7 +34,8 @@
     }
   ],
   "alerts": [
-    "article pool low: total=6 (<12 required)",
-    "article pool targeted: general audience=2 (<8 required)"
+    "article pool low (<12): total=6",
+    "general pool low (<8): general=2",
+    "metrics stale (age=29.9h)"
   ]
 }
