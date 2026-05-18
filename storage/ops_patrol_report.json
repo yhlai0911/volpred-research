@@ -1,31 +1,31 @@
 {
-  "timestamp": "2026-05-17T18:06:08Z",
+  "timestamp": "2026-05-18T00:02:46Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "Total drafts=6 (<12 threshold). Breakdown: general=2 (<8 threshold, targeted alert), research=4 (>=4, ok). Pool critically low."
+      "detail": "Total drafts: 6 (<12 threshold). Breakdown — research: 4 (threshold >=4: OK), general: 2 (threshold >=8: ALERT)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json age ~11.9 hours (mtime epoch 1778998145, checked 18:06Z). Well within 26-hour threshold."
+      "detail": "storage/strategy_metrics.json is ~17.9 hours old (mtime 2026-05-17T06:09:05Z). Under 26-hour threshold."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated 2026-05-17 (today) or 2026-05-16 (yesterday) in docs/error_log.md. Most recent entries are from 2026-04-26."
+      "detail": "No entries dated 2026-05-18 (today) or 2026-05-17 (yesterday). Most recent entries are from 2026-04-26."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 14 strategies have null_count<=1 in last 3 entries (alert threshold >2). Strategies: slow_vt(1), risk_parity(1), simple_12vix(1), recommended_5050(1), taiwan_8.63vix(1), taiwan_spy_momentum(1), tz_tw_jp_5050(1), global_vt_tz(1), vix_leading_guard(1), vix_cond_leverage(1), taiwan_hybrid_leverage(1), piecewise_conservative(1), fear_dca(1), adaptive_tier(1), _market_daily(0)."
+      "detail": "Checked 10 strategies (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage). No strategy has >2 nulls in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold >50). Working tree is clean."
+      "detail": "0 uncommitted files. Working tree clean."
     },
     {
       "name": "KNOWLEDGE_SIZE",
@@ -34,7 +34,7 @@
     }
   ],
   "alerts": [
-    "article pool low (<12): total drafts=6, general=2, research=4",
-    "general audience articles low (<8): general=2 (threshold 8)"
+    "article pool low (<12): total drafts = 6",
+    "general audience draft pool low (<8): general drafts = 2"
   ]
 }
