@@ -6842,5 +6842,20 @@
     "files_changed": [
       "research_program.md"
     ]
+  },
+  {
+    "timestamp": "2026-05-18T02:18:38.976813+00:00",
+    "task_type": "paper_review",
+    "task_id": "paper_review_mile_073884fd",
+    "title": "Codex 24h-rule 審查：VIX 百分位策略走出美國 (K681)",
+    "verdict": "CONDITIONAL_PASS",
+    "finding": "1日 lookahead in US/EFA (w_pct_us uses vix[i] not vix[i-1]). Article claims 前一日 VIX 但代碼用當日. EFA Sharpe=1.843/US Sharpe=1.676 可能膨脹. Taiwan results valid. K681b P2 correction experiment added.",
+    "review_doc": "experiments/k681/k681_review_lookahead_2026_05_18.md",
+    "actions": [
+      "errata added to feed.json mile_073884fd",
+      "K681b added to next_tasks P2",
+      "paper_review_mile_0c6b4e0c closed as no-action (meta-synthesis)"
+    ],
+    "reviewer": "Claude main-thread (manual code audit)"
   }
 ]
