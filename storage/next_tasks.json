@@ -6900,7 +6900,7 @@
     "title": "Paper review (Codex 24h-rule): 5/12 美國 CPI 倒數 24 小時：三情境劇本 + 部位調整建議（VIX 18 適中，但 hot surprise 是唯一真風險）",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_ae145f60 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_ae145f60",
@@ -6909,7 +6909,10 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-12T03:38:37+00:00"
+    "created_at": "2026-05-12T03:38:37+00:00",
+    "completed_at": "2026-05-18T21:31:34.810573",
+    "review_notes": "3-model review completed 2026-05-18. Verdict: NEEDS_FIX (moderate) — Bauer & Swanson 2023 wrong citation (FOMC paper used for CPI); 'statistical strength 0.55' should be 't-stat=0.55'. Article time-sensitive (CPI already published). Fix added as separate task.",
+    "review_report": "storage/ops/codex_24h_review_20260518.json"
   },
   {
     "id": "paper_review_mile_c0d97d70",
@@ -7720,7 +7723,7 @@
     "title": "Paper review (Codex 24h-rule): 把實作 bug 修掉之後，MF2-GARCH 真的贏了 GJR——但 25% 收斂率讓這場勝利打了折",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_aeca4e68 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_aeca4e68",
@@ -7729,14 +7732,17 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-12T23:07:17+00:00"
+    "created_at": "2026-05-12T23:07:17+00:00",
+    "completed_at": "2026-05-18T21:31:34.810573",
+    "review_notes": "3-model review completed 2026-05-18. Verdict: NEEDS_FIX (minor) — emoji table AI-style, IGARCH overstatement, g_mean annotation needed. Core numbers verified correct. Fix added as separate task.",
+    "review_report": "storage/ops/codex_24h_review_20260518.json"
   },
   {
     "id": "paper_review_mile_a8ac2ae4",
     "title": "Paper review (Codex 24h-rule): 台股大盤集中度自 2020 起顯著加速 — 為什麼 0050 越來越像 TSMC ETF",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_a8ac2ae4 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_a8ac2ae4",
@@ -7745,7 +7751,10 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-12T23:07:17+00:00"
+    "created_at": "2026-05-12T23:07:17+00:00",
+    "completed_at": "2026-05-18T21:31:34.810573",
+    "review_notes": "3-model review completed 2026-05-18. Verdict: NEEDS_FIX (moderate) — sample period mislabeled 2008-2026, actual data from 2009-01-02. Core R² findings verified. Fix added as separate task.",
+    "review_report": "storage/ops/codex_24h_review_20260518.json"
   },
   {
     "id": "experiment_scaffold_k1268b",
@@ -9796,5 +9805,27 @@
     "blocked_by": [],
     "paper_id": "eav-universal-magnitude",
     "notes": "2026-05-18 partial: references.bib built (10 entries), citation keys fixed (engel_rangel typo, k1213_convergence inline, garch_x_vix removed, diebold1995+benjamini_hochberg1995 added), Table 2 US/JP min values corrected (US theta 1.94->1.82e-4, US t 20.67->20.27, JP t 18.24->18.22), pdflatex clean compile verified (0 undefined citations). Remaining: §1.3 CITATION NEEDED (NotebookLM pass), summary stats table, Appendix A, jfe.bst install."
+  },
+  {
+    "id": "fix_mile_a8ac2ae4_sample_period",
+    "title": "Fix mile_a8ac2ae4: 修正樣本期間標示（2008-2026 → 2009-2026）",
+    "type": "platform_ops",
+    "priority": "P2",
+    "status": "pending",
+    "created_at": "2026-05-18T21:31:34.810573",
+    "description": "mile_a8ac2ae4 (台股大盤集中度) 文章中寫「完整樣本 2008-2026 n=4,227」，但 CSV 核查確認 0050/TSMC 共同有效資料從 2009-01-02 起，2008 全年無共同樣本。應修正為「2009-2026，共 4,227 個報酬觀察值」。Source: codex_24h_review_20260518.json",
+    "related_article": "mile_a8ac2ae4",
+    "review_source": "storage/ops/codex_24h_review_20260518.json"
+  },
+  {
+    "id": "fix_mile_ae145f60_citation",
+    "title": "Fix mile_ae145f60: 替換 Bauer & Swanson 2023 錯引（CPI 非線性反應需正確文獻）",
+    "type": "platform_ops",
+    "priority": "P2",
+    "status": "pending",
+    "created_at": "2026-05-18T21:31:34.810573",
+    "description": "mile_ae145f60 (CPI 倒數文) 引用 Bauer & Swanson (2023) 支持「CPI surprise 非線性反應」，但該文討論 FOMC 貨幣政策高頻識別，不是 CPI surprise 股票反應。應替換為研究 inflation surprise 與 equity 非線性反應的文獻（如 Bernanke & Kuttner 2005 JF，或 Cieslak & Schrimpf 2019）。注意：本文時效已過（2026-05-12 CPI 已公佈），修正優先級 P2。Source: codex_24h_review_20260518.json",
+    "related_article": "mile_ae145f60",
+    "review_source": "storage/ops/codex_24h_review_20260518.json"
   }
 ]
