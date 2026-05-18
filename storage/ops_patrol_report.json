@@ -1,40 +1,40 @@
 {
-  "timestamp": "2026-05-18T00:02:46Z",
+  "timestamp": "2026-05-18T06:09:08Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "Total drafts: 6 (<12 threshold). Breakdown — research: 4 (threshold >=4: OK), general: 2 (threshold >=8: ALERT)."
+      "detail": "Total drafts=6 (<12 threshold). research=4 (ok, >=4), general=2 (alert, <8)"
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json is ~17.9 hours old (mtime 2026-05-17T06:09:05Z). Under 26-hour threshold."
+      "detail": "strategy_metrics.json age=23.99h (<26h threshold)"
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated 2026-05-18 (today) or 2026-05-17 (yesterday). Most recent entries are from 2026-04-26."
+      "detail": "No entries dated 2026-05-17 or 2026-05-18 found in last 30 lines of docs/error_log.md"
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "Checked 10 strategies (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage). No strategy has >2 nulls in last 3 entries."
+      "detail": "All strategies (14 with entries) have <=1 null in last 3 entries. _market_daily has 0 entries (empty)."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files. Working tree clean."
+      "detail": "0 uncommitted files"
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json contains 2044 entries."
+      "detail": "knowledge.json entries=2044"
     }
   ],
   "alerts": [
-    "article pool low (<12): total drafts = 6",
-    "general audience draft pool low (<8): general drafts = 2"
+    "article pool low: total=6 (<12 required)",
+    "article pool targeted: general audience=2 (<8 required)"
   ]
 }

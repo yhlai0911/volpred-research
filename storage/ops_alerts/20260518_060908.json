@@ -1,0 +1,19 @@
+{
+  "timestamp": "2026-05-18T06:09:08Z",
+  "alerts": [
+    "article pool low: total=6 (<12 required)",
+    "article pool targeted: general audience=2 (<8 required)"
+  ],
+  "detail": {
+    "article_pool": {
+      "total": 6,
+      "research": 4,
+      "general": 2
+    },
+    "thresholds": {
+      "total_min": 12,
+      "research_min": 4,
+      "general_min": 8
+    }
+  }
+}
