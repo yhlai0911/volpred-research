@@ -30700,5 +30700,44 @@
       "K1374"
     ],
     "note": "Manual code review CONDITIONAL_PASS: lookahead clean, control design OK, stats correct, seeds fixed. Codex working-tree review did not flag K1375."
+  },
+  {
+    "id": "K1376",
+    "experiment_id": "K1376",
+    "experiment_path": "experiments/k1376/",
+    "timestamp": "2026-05-19T01:26:40.602216",
+    "category": "hedging_mdd_protection",
+    "title": "K1376: Paper 3 review_v2 B.3 — MDD Retention Bootstrap CI (全 22 資產)",
+    "content": "Block-bootstrap (B=10000, block=252, seed=42) 90% CI for MDD retention (Def-A) across 22 asset classes + 50/50 composite.\n22/23 assets have CI lo > 0。例外：SLV CI lo = −2.5%（邊際，銀本身回撤路徑特殊）。\nSPY: point 103.7%, CI [93.0, 182.2]。QQQ: 109.0%, [89.0, 221.5]。IWM: 102.2%, [86.7, 179.5]。\nGLD: 123.2%, [56.9, 208.9]。TLT: 102.9%, [65.8, 181.8]。LQD: 83.8%, [76.2, 184.6]（lowest CI lo but positive）。\nVT rule: w = min(12/VIX_month_end, 1), monthly lag shift(1)。TSMOM hedge: OLS beta [0,0.5], 1-day lag shift(1)。\nExtends K1192 from 5 to 22 assets。Paper 3 B.3 universal MDD protection hypothesis 獲支持。",
+    "verdict": "PASS",
+    "reviewer": "Codex built-in reviewer 2026-05-19 (working-tree review)",
+    "tags": [
+      "paper3",
+      "mdd",
+      "bootstrap",
+      "vt",
+      "hedging",
+      "drawdown",
+      "cross_asset"
+    ],
+    "key_stats": {
+      "assets_analyzed": 23,
+      "ci_lo_positive_count": 22,
+      "ci_lo_negative_count": 1,
+      "slv_ci_lo": -2.5,
+      "spy_point": 103.7,
+      "spy_ci_lo": 93.0,
+      "spy_ci_hi": 182.2,
+      "qqq_point": 109.0,
+      "qqq_ci_lo": 89.0,
+      "lqd_ci_lo": 76.2,
+      "bootstrap_reps": 10000,
+      "block_size": 252,
+      "ci_pct": 90
+    },
+    "related_experiments": [
+      "K1192"
+    ],
+    "note": "Codex working-tree review (2026-05-19) identified and resolved: VIXTWN CSV duplicates (19→0), CPI June 2026 Saturday→Thursday date fix, DM sign convention in test_conclusion_lint.py (4 tests fixed). All issues resolved before knowledge write."
   }
 ]

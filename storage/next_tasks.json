@@ -9815,21 +9815,27 @@
     "title": "K1371: AQR BAB factor re-run — Paper 3 Table 4 M5 full sample (B.2 fix)",
     "priority": 2,
     "description": "Paper 3 (vt-trend-following) review_v2 B.2 fix: Replace SPLV-SPHB proxy with real AQR BAB factor for full sample Jan 2005-Mar 2026 (N~5049 vs 3740 with SPHB). Re-run Table 4 M5 regression. AQR BAB available at https://www.aqr.com/Insights/Datasets/Betting-Against-Beta-Equity-Factors-Monthly. Script: experiments/k1371/k1371.py. Result must update paper/vt-trend-following/results/table4_m5_bab_full.json.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "blocked_reason": "AQR BAB data download + script design required first",
     "created_at": "2026-05-18T15:24:07Z",
-    "notes": "Queued from paper3_vt_fix_review_v2_5HIGH dispatch. Fixes HIGH issue B.2 in review_v2.tex. SPLV-SPHB truncated to 2009 (SHY launched Oct 2007, SPHB Oct 2011); AQR BAB goes back to 1926 monthly. Monthly freq acceptable for factor model regression."
+    "notes": "Queued from paper3_vt_fix_review_v2_5HIGH dispatch. Fixes HIGH issue B.2 in review_v2.tex. SPLV-SPHB truncated to 2009 (SHY launched Oct 2007, SPHB Oct 2011); AQR BAB goes back to 1926 monthly. Monthly freq acceptable for factor model regression.",
+    "completed_at": "2026-05-17",
+    "synced_from_experiments_at": "2026-05-18T17:29:27.154324+00:00",
+    "result_summary": "**Status**: Complete | **Date**: 2026-05-17 | **Proposed by**: Claude (autonomous, from research_program.md line 341 + K757 finding)"
   },
   {
     "id": "K1372",
     "title": "K1372: MDD retention analysis — all 22 assets (Paper 3 B.3 fix)",
     "priority": 2,
     "description": "Paper 3 (vt-trend-following) review_v2 B.3 fix: Expand K1192 block-bootstrap MDD retention analysis from 5 US equity assets to all 22 primary sample assets. Include commodities (GLD, SLV, USO), bonds (TLT, LQD, HYG), real estate (VNQ), international ETFs (EEM, EFA, FXI, EWZ, EWJ, EWG, EWU, EWA, INDA). Script: experiments/k1372/k1372.py. Results: k1372_results.json + updated Table 5 (tab:mdd_bootstrap) with 22-asset MDD retention CI.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "blocked_reason": null,
     "created_at": "2026-05-18T15:24:07Z",
-    "notes": "Queued from paper3_vt_fix_review_v2_5HIGH dispatch. Fixes HIGH issue B.3 in review_v2.tex. K1192 canonical bootstrap: 5000 reps, block size via Politis-Romano, 2005-2026. Extend same methodology to all 22 assets. GJR-GARCH per-asset fit required. Hypothesis: commodities and bonds may show weaker MDD retention (near-zero leverage effect gamma)."
+    "notes": "Queued from paper3_vt_fix_review_v2_5HIGH dispatch. Fixes HIGH issue B.3 in review_v2.tex. K1192 canonical bootstrap: 5000 reps, block size via Politis-Romano, 2005-2026. Extend same methodology to all 22 assets. GJR-GARCH per-asset fit required. Hypothesis: commodities and bonds may show weaker MDD retention (near-zero leverage effect gamma). | 2026-05-19: Completed as K1376 (K1372 ID was taken by BTC halving study). K1376 PASS — 22/23 assets CI lo > 0. Paper 3 body_v3.tex tab:mdd_bootstrap updated. Resolved review_v2 HIGH B.3.",
+    "completed_at": "2026-05-17",
+    "synced_from_experiments_at": "2026-05-18T17:29:27.154324+00:00",
+    "result_summary": "**Experiment ID**: K1372\n**Status**: completed\n**Created At**: 2026-05-17T11:15:33Z\n**Member Question Source**: uq_mock1 (score 82/100)"
   }
 ]

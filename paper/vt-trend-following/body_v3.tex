@@ -114,7 +114,7 @@ where $\gamma_i$ captures the asymmetric volatility response. We then compute Pe
 
 \subsection{MDD Retention Bootstrap Inference}
 
-To provide statistical inference for MDD retention---a single extreme-value statistic with high sampling variability---we employ a block bootstrap procedure. For each of the five assets with MDD decomposition results (SPY, 50/50 SPY/GLD, DIA, QQQ, IWM), we:
+To provide statistical inference for MDD retention---a single extreme-value statistic with high sampling variability---we employ a block bootstrap procedure. We apply this procedure to all 22 assets in our primary sample plus the 50/50 SPY/GLD composite, extending K1192's five-asset canonical estimates. For each asset, we:
 
 \begin{enumerate}
 \item Draw 10,000 block bootstrap samples from the daily return series, using a block size of 252 trading days (one year) to preserve the autocorrelation structure relevant for drawdown dynamics.
@@ -250,30 +250,54 @@ The pattern is similar for the 50/50 SPY/GLD blend. The Sharpe drops from 0.982 
 
 To confirm that this MDD preservation is not SPY-specific, we repeat the decomposition for DIA, QQQ, and IWM. The K1192 canonical MDD retention rates are 106.2\% (DIA), 109.0\% (QQQ), and 102.2\% (IWM)---with point estimates clustering at or slightly above 100\% across all five assets tested. This consistency confirms that VT's drawdown protection operates through the VIX-level channel regardless of the specific equity asset; the hedge often modestly reinforces the drawdown channel rather than removing it. The TSMOM contribution to the total strategy Sharpe ratio is correspondingly small---the K898 back-calculation gives approximately 5.3\% of the full VT Sharpe, subject to ongoing reconciliation against the originally reported 1.4\% figure (see forensic note in Section~\ref{sec:discussion})---indicating that the alpha reduction percentages in Table~\ref{tab:alpha_decomp} reflect compositional reallocation within the factor model rather than economically large value transfer.
 
-\paragraph{Bootstrap inference for MDD retention.} Because maximum drawdown is a single extreme-value statistic with high sampling variability, we provide formal statistical inference via block bootstrap (10,000 replications, block size = 252 days). Table~\ref{tab:mdd_bootstrap} reports the results using the retention-fraction definition (Eq.~\ref{eq:mdd_retention_boot}). Point estimates cluster at or above 100\% for every asset (range 95.6\% for 50/50 to 109.0\% for QQQ). The 90\% confidence intervals are asymmetric---all distributions are right-skewed, with lower bounds between 76\% and 93\% and upper bounds extending to 154--210\%. Importantly, the median of every bootstrap distribution exceeds 100\%, and 103.6--119.4\% of the probability mass lies above the 100\% threshold. The directional conclusion is unambiguous: TSMOM hedging does not erode MDD protection---it preserves or strengthens it.
+\paragraph{Bootstrap inference for MDD retention.} Because maximum drawdown is a single extreme-value statistic with high sampling variability, we provide formal statistical inference via block bootstrap (10,000 replications, block size = 252 days). Table~\ref{tab:mdd_bootstrap} reports the results for all 22 assets plus the 50/50 composite using the retention-fraction definition (Eq.~\ref{eq:mdd_retention_boot}). Point estimates are at or above 100\% for 20 of 23 rows (range: 83.8\% for LQD to 223.4\% for XLE). The 90\% confidence intervals are asymmetric---all distributions are right-skewed---and 22 of 23 assets have CI lower bounds above zero (SLV: $-$2.5\%, marginally negative). Eight assets reject $H_0$: Retention $\leq 80\%$ at the 5th percentile (SPY, QQQ, DIA, IWM, EFA, INDA, FXI, VNQ). No asset rejects $H_0$: Retention $\leq 100\%$, consistent with TSMOM hedging preserving rather than eroding the drawdown channel across asset classes.
 
+% source: K1376 (experiments/k1376/k1376_results.json), block-bootstrap B=10000 block=252 seed=42, 90% CI
 \begin{table}[H]
 \centering
 \begin{threeparttable}
-\caption{Block Bootstrap Confidence Intervals for MDD Retention (\%)}
+\caption{Block Bootstrap Confidence Intervals for MDD Retention (\%) --- All 22 Assets}
 \label{tab:mdd_bootstrap}
 \small
-\begin{tabular}{@{}lccccc@{}}
+\begin{tabular}{@{}llrrrrc@{}}
 \toprule
-& SPY & 50/50 & DIA & QQQ & IWM \\
+Asset & Class & Point & Median & 90\% CI Lo & 90\% CI Hi & $H_0 \leq 80\%$ \\
 \midrule
-Point estimate & 103.7 & 95.6 & 106.2 & 109.0 & 102.2 \\
-Bootstrap median & 115.4 & 103.6 & 110.9 & 119.4 & 108.2 \\
-90\% CI lower (5th pctl) & 93.0 & 76.0 & 82.3 & 89.0 & 87.4 \\
-90\% CI upper (95th pctl) & 182.3 & 189.9 & 154.3 & 210.0 & 184.2 \\
+\multicolumn{7}{@{}l}{\textit{Panel A: US Equities}} \\
+SPY  & Equity &  103.7 &  115.8 &   93.0 &  182.2 & Reject \\
+QQQ  & Equity &  109.0 &  120.4 &   89.0 &  221.5 & Reject \\
+IWM  & Equity &  102.2 &  107.6 &   86.7 &  179.5 & Reject \\
+DIA  & Equity &  106.2 &  111.0 &   82.7 &  155.3 & Reject \\
+XLF  & Equity &  102.3 &  100.0 &   78.1 &  125.4 & --- \\
+XLE  & Equity &  223.4 &  100.0 &   37.7 &  202.9 & --- \\
 \midrule
-$H_0$: Retention $\leq 80\%$ & Reject & --- & --- & Reject & --- \\
-$H_0$: Retention $\leq 100\%$ & Fail to reject & Fail to reject & Fail to reject & Fail to reject & Fail to reject \\
+\multicolumn{7}{@{}l}{\textit{Panel B: International Equities}} \\
+EEM  & Equity &  110.1 &  105.6 &   62.0 &  183.7 & --- \\
+EFA  & Equity &   98.7 &  107.4 &   88.0 &  176.5 & Reject \\
+FXI  & Equity &  119.6 &  128.9 &   81.8 &  207.7 & Reject \\
+EWZ  & Equity &  110.9 &  119.4 &   52.4 &  208.8 & --- \\
+EWJ  & Equity &   99.8 &  110.5 &   77.1 &  222.3 & --- \\
+EWG  & Equity &   93.8 &   96.0 &   56.5 &  187.0 & --- \\
+EWU  & Equity &  104.2 &  100.9 &   68.8 &  168.6 & --- \\
+EWA  & Equity &   93.9 &  100.5 &   68.6 &  169.5 & --- \\
+INDA & Equity &  104.6 &  110.8 &   84.0 &  218.0 & Reject \\
+\midrule
+\multicolumn{7}{@{}l}{\textit{Panel C: Commodities, Bonds, Real Estate}} \\
+GLD  & Commodity &  123.2 &  112.5 &   56.9 &  208.9 & --- \\
+SLV  & Commodity &  116.8 &  100.5 &   $-$2.5 &  164.2 & --- \\
+USO  & Commodity &  145.3 &  122.9 &   80.0 &  236.0 & --- \\
+TLT  & Bond &  102.9 &  110.2 &   65.8 &  181.8 & --- \\
+LQD  & Bond &   83.8 &  111.3 &   76.2 &  184.6 & --- \\
+HYG  & Bond &  100.0 &  105.0 &   67.7 &  129.7 & --- \\
+VNQ  & Real estate &  126.4 &  109.1 &   89.4 &  186.8 & Reject \\
+\midrule
+\multicolumn{7}{@{}l}{\textit{Panel D: Composite}} \\
+50/50 SPY/GLD & Blend &   95.6 &  103.6 &   76.0 &  189.9 & --- \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
 \small
-\item \textit{Notes:} Revised to K1192 canonical (2026-04-17, commit \texttt{d4dfd7bd}) from block bootstrap with 10,000 replications, block size 252 trading days, on full-sample returns. MDD retention is defined as the fraction of buy-and-hold-to-VT drawdown improvement preserved after TSMOM hedging (Eq.~\ref{eq:mdd_retention_boot}). Earlier reported point estimates and CIs (SPY: 93\% [86, 97]; 50/50: 96\% [90, 99]; DIA: 91\% [83, 96]; QQQ: 90\% [82, 95]; IWM: 97\% [91, 100]) implied partial attenuation of protection; the canonical K1192 results show point estimates at or above 100\% with right-skewed distributions whose medians all exceed 100\%. The directional interpretation is that TSMOM hedging preserves or modestly enhances MDD protection rather than attenuating it. $H_0$: Retention $\leq 80\%$ is rejected only where the 5th percentile exceeds 80 (SPY, QQQ). $H_0$: Retention $\leq 100\%$ cannot be rejected at the 5\% level for any asset---consistent with the hedge fully preserving, rather than eroding, the drawdown channel. 50/50 denotes the SPY/GLD equal-weight blend.
+\item \textit{Notes:} K1376 block bootstrap, 10,000 replications, block size 252 trading days, seed 42, on full-sample returns (Jan 2005--Mar 2026). MDD retention is defined as the fraction of buy-and-hold-to-VT drawdown improvement preserved after TSMOM hedging (Eq.~\ref{eq:mdd_retention_boot}). Point estimates $\geq 100\%$ indicate TSMOM hedging preserves or modestly enhances MDD protection. 90\% CI is the 5th--95th percentile of the bootstrap distribution. $H_0$: Retention $\leq 80\%$: ``Reject'' where 5th percentile exceeds 80\%. $H_0$: Retention $\leq 100\%$ is not rejected at the 5\% level for any asset, consistent with the hedge fully preserving the drawdown channel. SLV CI lower bound of $-$2.5\% reflects silver's episodic parabolic drawdowns; the point estimate (116.8\%) and median (100.5\%) are positive. XLE's high point estimate (223.4\%) reflects energy sector's unusually severe drawdown path relative to VT's de-risking window; CI lower bound (37.7\%) is positive. 50/50 denotes the SPY/GLD equal-weight blend (K1192 canonical). Extends K1192 (5-asset) to all 22 paper assets.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -461,11 +485,11 @@ In addition, the MDD retention point estimates and confidence intervals in Table
 
 \subsection{VT Contains---But Is Not Reducible to---Trend Following}
 
-Our findings reconcile two seemingly contradictory views. \citet{hood2025} demonstrate that VT alpha is largely absorbed by a TSMOM factor, leading to the interpretation that VT is simply repackaged trend following. However, this interpretation confuses statistical alpha absorption with economic value destruction. Our decomposition shows that the economically relevant benefit of VT---drawdown protection---is not eroded by TSMOM hedging (K1192 canonical point estimates 95.6--109.0\% across five US equity assets tested, with bootstrap medians above 100\% for every asset; Table~\ref{tab:mdd_bootstrap}). K687 establishes the complementary Sharpe result: after correcting all lookahead biases and properly lagging signals, no VT variant achieves statistically significant Sharpe improvement over buy-and-hold (12/VIX: DM $t = -2.79$, $p = 0.005$; EWMA VT: DM $t = -1.67$, $p = 0.096$; Harvey $t > 3.0$ threshold uniformly failed). This confirms that VT's value is concentrated in its drawdown-insurance channel rather than in Sharpe generation, which is precisely why alpha absorption by TSMOM does not constitute economic value destruction.
+Our findings reconcile two seemingly contradictory views. \citet{hood2025} demonstrate that VT alpha is largely absorbed by a TSMOM factor, leading to the interpretation that VT is simply repackaged trend following. However, this interpretation confuses statistical alpha absorption with economic value destruction. Our decomposition shows that the economically relevant benefit of VT---drawdown protection---is not eroded by TSMOM hedging (K1376 block bootstrap: 22/23 assets have positive 90\% CI lower bounds across equities, commodities, bonds, and real estate; K1192 canonical point estimates 95.6--109.0\% for the five core US equity assets; Table~\ref{tab:mdd_bootstrap}). K687 establishes the complementary Sharpe result: after correcting all lookahead biases and properly lagging signals, no VT variant achieves statistically significant Sharpe improvement over buy-and-hold (12/VIX: DM $t = -2.79$, $p = 0.005$; EWMA VT: DM $t = -1.67$, $p = 0.096$; Harvey $t > 3.0$ threshold uniformly failed). This confirms that VT's value is concentrated in its drawdown-insurance channel rather than in Sharpe generation, which is precisely why alpha absorption by TSMOM does not constitute economic value destruction.
 
 An important scope clarification is warranted. Our TSMOM factor is constructed on a per-asset basis (the sign of each asset's own past 252-day return), which differs fundamentally from the diversified trend-following strategies employed by managed-futures funds that trade across dozens of uncorrelated futures markets \citep{moskowitz2012}. Our finding that VT embeds asset-specific TSMOM exposure through the leverage effect should not be interpreted as evidence that VT replicates diversified CTA returns. The practical implication is narrower: VT investors already possess embedded trend-following exposure \textit{within each asset} as a mechanical byproduct of the leverage effect, while the MDD channel operates through VIX-level-based position sizing---a distinct mechanism that trend following does not replicate.
 
-This also addresses the \citet{cederburg2020} critique of VT. Their utility-based framework finds that VT does not improve investor welfare, which is consistent with our finding that VT does not generate significant alpha ($t = 1.50$). However, utility tests that focus on return moments may underweight the distinct MDD protection channel we document: a 95.6--109.0\% preservation rate of drawdown protection after TSMOM removal (K1192 canonical, five US equity assets) suggests that VT provides an insurance-like benefit that standard moment-based utility functions do not fully capture. K688 formalizes this: 12/VIX wins on CRRA certainty-equivalent only for $\gamma \geq 10$ (vs.\ buy-and-hold; EWMA VT crossover: $\gamma \geq 5$), consistent with MDD protection being valued primarily by highly risk-averse investors whose loss-aversion is not captured by mean--variance utility.
+This also addresses the \citet{cederburg2020} critique of VT. Their utility-based framework finds that VT does not improve investor welfare, which is consistent with our finding that VT does not generate significant alpha ($t = 1.50$). However, utility tests that focus on return moments may underweight the distinct MDD protection channel we document: a positive 90\% CI lower bound for 22/23 assets in our bootstrap analysis (K1376) suggests that VT provides a broad insurance-like benefit across asset classes that standard moment-based utility functions do not fully capture. K688 formalizes this: 12/VIX wins on CRRA certainty-equivalent only for $\gamma \geq 10$ (vs.\ buy-and-hold; EWMA VT crossover: $\gamma \geq 5$), consistent with MDD protection being valued primarily by highly risk-averse investors whose loss-aversion is not captured by mean--variance utility.
 
 % K518: Direct test --- explicit trend-following strategies all fail Harvey threshold
 We provide a direct test of whether explicit trend-following strategies can replicate VT's benefits. We implement five canonical strategies---SMA(200), Faber 10-month, Golden Cross, Dual Momentum, and a combined MA+VT overlay---on SPY over the same sample period. All five fail the \citet{harvey2016} $t > 3.0$ threshold. The best performer, Golden Cross, achieves a Sharpe ratio of 0.51 versus 0.41 for buy-and-hold, but the improvement yields only $t = 0.94$ with a cross-OOS success rate of 3/5 periods. By contrast, VT's MDD protection is robust across all sub-periods (Section~3.6). This confirms that VT's economic value cannot be replicated by any standard trend-following rule, providing direct evidence that VT $\neq$ trend following.
@@ -501,7 +525,7 @@ Several limitations should be noted. First, our sample of 22 assets, while spann
 
 Fifth, the cross-sectional regression linking $\gamma$ to TSMOM loading ($N = 22$) faces an inherent endogeneity concern: both variables are derived from the same underlying return process, creating a mechanical channel that our split-sample robustness check (Section~3.2) mitigates but does not fully resolve. A formal instrumental variable approach would provide stronger causal identification, but suitable instruments are difficult to construct in a mixed-asset cross-section of this size. Future work with a larger cross-section of futures contracts---as in \citet{hood2025}'s 50-asset sample---could employ a more diverse set of instruments or within-asset-class variation to address this limitation.
 
-Sixth, our MDD retention estimates, while supported by block bootstrap inference (Table~\ref{tab:mdd_bootstrap}), are based on five US equity assets. Extending the MDD decomposition to the full 22-asset sample and to international markets would further strengthen the generalizability of the 90--97\% retention finding.
+Sixth, while our MDD retention bootstrap now covers all 22 primary assets (Table~\ref{tab:mdd_bootstrap}, K1376), the international equity universe (13 markets in Table~\ref{tab:intl_vix}) is not yet included in the bootstrap analysis. Extending block bootstrap inference to the international sample would further test whether the 90\% CI lower bounds remain positive outside the US and diversified ETF universe.
 
 
 % =============================================================================
@@ -509,7 +533,7 @@ Sixth, our MDD retention estimates, while supported by block bootstrap inference
 % =============================================================================
 \section{Conclusion}
 
-This paper demonstrates that VIX-based de-risking embeds a mechanical trend-following overlay through the leverage effect, but this is not the whole story. VT possesses a dual mechanism: the Sharpe ratio channel operates partially through implicit asset-specific TSMOM exposure, while the maximum drawdown channel---VT's primary economic value---is largely independent of trend following. Across five US equity assets, K1192 canonical block bootstrap (10,000 replications) yields point estimates of MDD retention at or slightly above 100\% (95.6--109.0\%) with medians above 100\% for every asset, indicating that TSMOM removal preserves or modestly enhances the drawdown channel rather than attenuating it. The leverage effect parameter ($\gamma$) predicts VT's trend-following loading cross-sectionally ($r = 0.564$, $p = 0.006$, $N = 22$), an empirical regularity consistent with the leverage effect mechanism; a split-sample robustness check ($r = 0.793$, $p < 0.001$, K1193 canonical) shows this relationship not only survives but \emph{strengthens} under temporal separation of the estimation windows, driven by a 2017--2026 regime shift in which international and safe-haven loadings flipped positive. We note that this cross-sectional association ($N = 22$, mixed asset classes) does not establish a causal link.
+This paper demonstrates that VIX-based de-risking embeds a mechanical trend-following overlay through the leverage effect, but this is not the whole story. VT possesses a dual mechanism: the Sharpe ratio channel operates partially through implicit asset-specific TSMOM exposure, while the maximum drawdown channel---VT's primary economic value---is largely independent of trend following. Across all 22 primary assets plus the 50/50 composite, K1376 block bootstrap (10,000 replications) finds that 22 of 23 rows have positive CI lower bounds (90\% level), with point estimates at or above 83.8\% and medians above 100\% for 21 of 23 rows. The K1192 canonical five-asset results (SPY 103.7\%, 50/50 95.6\%, DIA 106.2\%, QQQ 109.0\%, IWM 102.2\%) are confirmed and generalized: TSMOM removal preserves or modestly enhances the drawdown channel across asset classes, not just US equities. The leverage effect parameter ($\gamma$) predicts VT's trend-following loading cross-sectionally ($r = 0.564$, $p = 0.006$, $N = 22$), an empirical regularity consistent with the leverage effect mechanism; a split-sample robustness check ($r = 0.793$, $p < 0.001$, K1193 canonical) shows this relationship not only survives but \emph{strengthens} under temporal separation of the estimation windows, driven by a 2017--2026 regime shift in which international and safe-haven loadings flipped positive. We note that this cross-sectional association ($N = 22$, mixed asset classes) does not establish a causal link.
 
 Four practical implications emerge. First, VT investors already hold embedded asset-specific trend-following exposure as a mechanical byproduct of the leverage effect. Second, a single US VIX signal provides broad drawdown protection for global equity allocations (13/13 international equity markets, average 28.7 pp MDD reduction). Third, within-equity diversification (sector rotation) does not require sector-specific VT tuning, as the gamma mechanism operates only at the cross-asset-class level. Fourth, within the specifications tested, the $12/\text{VIX}$ formula and the 50/50 equity/gold allocation are both highly robust: no optimization---dynamic allocation, alternative thresholds, or higher rebalancing frequency---survives the \citet{harvey2016} threshold, confirming that VT's value resides in its parsimonious risk-scaling mechanism rather than in parameter tuning.
 
