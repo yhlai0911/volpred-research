@@ -6963,5 +6963,17 @@
     "status": "completed",
     "verdict": "NULL",
     "summary": "0056/00878/00919 除息日 pooled d=0.055 p=0.617，全 NULL。K1374 個股 d=0.305 在 ETF 層被分散效應消除。CONDITIONAL_PASS 寫入 knowledge.json。"
+  },
+  {
+    "timestamp": "2026-05-18T10:14:46.978710+00:00",
+    "task_id": "eav_paper_revision_v1",
+    "task_type": "paper_body",
+    "status": "completed_partial",
+    "title": "eav-universal-magnitude Paper Revision v1 — MAJOR/SEVERE citation & table fixes",
+    "summary": "Built references.bib (10 entries). Fixed 3 citation key errors: engel_rangel2008 typo→engle_rangel2008, k1213_convergence_lesson→inline text, garch_x_vix_paper→removed. Added missing citations: diebold1995 (DM test first use) + benjamini_hochberg1995 (BH-FDR). Fixed Table 2 US/JP min values (US theta 1.94e-4→1.82e-4, US Hess-t 20.67→20.27, JP Hess-t 18.24→18.22) from JSON ground truth. Removed [NOTE: verify JFE vs JFQA] comment. Verified xelatex+bibtex clean compile: 0 undefined citations. Remaining: §1.3 CITATION NEEDED (NotebookLM), summary stats table, Appendix A, jfe.bst install.",
+    "files_modified": [
+      "paper/eav-universal-magnitude/body.tex",
+      "paper/eav-universal-magnitude/references.bib"
+    ]
   }
 ]

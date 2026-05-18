@@ -112,7 +112,7 @@ United States, and Japan---and systematically ordered in magnitude, with a
 market ranking (US $>$ JP $>$ TW) that closely tracks institutional features
 such as analyst coverage density and earnings-disclosure culture. The key
 analytical vehicle is a multiplicative GARCH framework adapted from
-\citet{engel_rangel2008} and \citet{engle2013}, in which conditional variance
+\citet{engle_rangel2008} and \citet{engle2013}, in which conditional variance
 decomposes into a firm-specific short-run component $g_{i,t}$ and a pooled
 market-level long-run component $\tau_t$ driven by observable covariates
 including a binary earnings indicator.
@@ -185,7 +185,7 @@ ball_kothari1991}. Our contribution is to show this effect survives in a
 multiplicative GARCH framework estimated across three distinct markets, with
 magnitude ordering rather than a single stylized fact.
 
-Second, our multiplicative specification follows \citet{engel_rangel2008} and
+Second, our multiplicative specification follows \citet{engle_rangel2008} and
 \citet{engle2013}, who separate conditional variance into short-run and long-run
 (or permanent and transitory) components. We adapt this framework by replacing
 the macroeconomic long-run driver with an event-date covariate, preserving the
@@ -256,8 +256,8 @@ where $\mathrm{EAV}_{i,t} = 1$ if firm $i$ announces earnings on day $t$
 $\mathrm{VIX}_{t-1}^2$ enters as a global stress control, following the
 specification hierarchy in \citet{engle2013}.\footnote{%
   The VIX squared rather than VIX level follows the variance--standard-deviation
-  scale matching in \citet{engel_rangel2008} and is standard in the GARCH-X
-  literature \citep{garch_x_vix_paper}.}
+  scale matching in \citet{engle_rangel2008}, which is standard in the GARCH-X
+  literature.}
 
 The parameter of primary interest is $\theta_{\mathrm{EAV}}$: the pooled
 earnings-announcement effect on the market-level variance factor, shared
@@ -319,8 +319,8 @@ log-likelihood improvement $|\Delta\mathcal{L}| < 10^{-7}$.\footnote{%
   The inner L-BFGS-B optimizer reports \texttt{converged = False} for the
   Taiwan and U.S. fits, reflecting the extremely small magnitude of
   $\hat{\theta}_{\mathrm{EAV}} \sim 10^{-4}$--$10^{-5}$ relative to the
-  BFGS gradient tolerance. Per \citet{k1213_convergence_lesson}, library-level
-  convergence flags are sensitive to scale; our outer-loop criterion is satisfied
+  BFGS gradient tolerance. Library-level convergence flags are sensitive to
+  parameter scale in low-magnitude estimation problems; our outer-loop criterion is satisfied
   and the log-likelihood plateau is monotone. Japan reports \texttt{converged = True}.
   The replication package documents this explicitly, and Appendix~\ref{app:gradient}
   provides an analytic-gradient verification.}
@@ -511,7 +511,7 @@ $\hat{\theta}_{\mathrm{EAV}}$ in the range $[6.21, 7.96] \times 10^{-5}$
 with Hessian $t \in [12.17, 14.12]$.
 % source: experiments/k1145/k1145_results.json: robustness_dropout[0..4].theta_eav
 
-\textbf{BH-FDR multiplicity.} Applying Benjamini-Hochberg correction to
+\textbf{BH-FDR multiplicity.} Applying \citet{benjamini_hochberg1995} correction to
 the two primary tests (pooled Hessian Wald + cluster bootstrap), both
 remain at BH-adjusted $p = 0.0$, as the raw $p$-values from either
 inferential channel are numerically indistinguishable from zero.
@@ -725,7 +725,7 @@ survives PCA factor controls in both markets:
 US IS $t = 23.81$, TW IS $t = 10.62$.
 % source: experiments/k1149/k1149_results.json: h1_absorption.us.t_is = 23.812069612851634
 % source: experiments/k1149/k1149_results.json: h1_absorption.tw.t_is = 10.618801224466884
-OOS DM tests also confirm: US OOS DM $= -3.31$ (pass); TW OOS DM $= -2.48$ (pass).
+OOS \citet{diebold1995} DM tests also confirm: US OOS DM $= -3.31$ (pass); TW OOS DM $= -2.48$ (pass).
 % source: experiments/k1149/k1149_results.json: h1_absorption.us.oos_t = -3.311
 % source: experiments/k1149/k1149_results.json: h1_absorption.tw.oos_t = -2.482
 Factor absorption is confirmed in both markets.
@@ -796,8 +796,8 @@ Layer & Test & Taiwan (K1145) & US (K1147) & Japan (K1150) \\
   & Window-5 $\hat{\theta}$ & $1.73\times10^{-5}$ & $8.29\times10^{-5}$ & $8.12\times10^{-5}$ \\
 \midrule
 \multirow{2}{*}{(2) Drop-stock}
-  & Min $\hat{\theta}$ (5 seeds) & $6.21\times10^{-5}$ & $1.94\times10^{-4}$ & $1.34\times10^{-4}$ \\
-  & Min Hess $t$ (5 seeds) & 12.17 & 20.67 & 18.24 \\
+  & Min $\hat{\theta}$ (5 seeds) & $6.21\times10^{-5}$ & $1.82\times10^{-4}$ & $1.34\times10^{-4}$ \\
+  & Min Hess $t$ (5 seeds) & 12.17 & 20.27 & 18.22 \\
 \midrule
 (3) BH-FDR multiplicity
   & min BH-adj $p$ (primary tests) & 0.000 & 0.000 & 0.000 \\
@@ -916,6 +916,8 @@ to verify magnitude-order agreement.]
 %==============================================================
 
 \bibliographystyle{jfe}
+% NOTE: jfe.bst required — obtain from JFE editorial site before submission.
+% For compilation/review: replace with \bibliographystyle{plainnat} temporarily.
 \bibliography{references}
 
 % ─── Inline citation fallbacks (to be moved to .bib) ─────────
@@ -930,7 +932,7 @@ to verify magnitude-order agreement.]
 %   price behavior: Empirical test. Journal of Accounting Research, 14(2),
 %   246--276.
 %
-% \bibitem{engel_rangel2008}
+% \bibitem{engle_rangel2008}
 %   Engle, R. F., & Rangel, J. G. (2008). The Spline-GARCH model for
 %   low-frequency volatility and its global macroeconomic causes. Review of
 %   Financial Studies, 21(3), 1187--1222.
@@ -952,7 +954,7 @@ to verify magnitude-order agreement.]
 % \bibitem{patell_wolfson1979}
 %   Patell, J. M., & Wolfson, M. A. (1979). Anticipated information releases
 %   reflected in call option prices. Journal of Financial Economics, 7(2),
-%   117--140. [NOTE: verify JFE vs JFQA -- see lit_review.md F.]
+%   117--140.
 %
 % \bibitem{ball_kothari1991}
 %   Ball, R., & Kothari, S. P. (1991). Security returns around earnings
