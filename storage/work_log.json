@@ -6857,5 +6857,18 @@
       "paper_review_mile_0c6b4e0c closed as no-action (meta-synthesis)"
     ],
     "reviewer": "Claude main-thread (manual code audit)"
+  },
+  {
+    "timestamp": "2026-05-18T10:07:00.000000+00:00",
+    "task_type": "paper_review",
+    "task_id": "k681b-correction-followup",
+    "title": "K681b Lookahead Correction Followup — US/EFA 結果撤回",
+    "status": "succeeded",
+    "summary": "compute_queue K681b 結果讀取。US Pct Sharpe 1.712→0.341, EFA Pct Sharpe 1.871→-0.054。兩市場 Harvey FAIL。更正文章 mile_073884fd，加更正通知，撤回 US/EFA 顯著性宣稱。knowledge.json k681b 寫入 PASS。",
+    "outputs": {
+      "article_corrected": "mile_073884fd",
+      "k681b_readme": "experiments/k681b/README.md",
+      "knowledge_entry": "k681b"
+    }
   }
 ]

@@ -1,0 +1,18 @@
+Traceback (most recent call last):
+  File "/Users/yhlai0911/Desktop/volpred-research/experiments/k981/k981_wavelet_har.py", line 463, in <module>
+    reg.fit(X_wavelet, y_target)
+  File "/Users/yhlai0911/Desktop/volpred-research/.venv/lib/python3.12/site-packages/sklearn/base.py", line 1336, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yhlai0911/Desktop/volpred-research/.venv/lib/python3.12/site-packages/sklearn/linear_model/_base.py", line 630, in fit
+    X, y = validate_data(
+           ^^^^^^^^^^^^^^
+  File "/Users/yhlai0911/Desktop/volpred-research/.venv/lib/python3.12/site-packages/sklearn/utils/validation.py", line 2919, in validate_data
+    X, y = check_X_y(X, y, **check_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yhlai0911/Desktop/volpred-research/.venv/lib/python3.12/site-packages/sklearn/utils/validation.py", line 1314, in check_X_y
+    X = check_array(
+        ^^^^^^^^^^^^
+  File "/Users/yhlai0911/Desktop/volpred-research/.venv/lib/python3.12/site-packages/sklearn/utils/validation.py", line 1097, in check_array
+    raise ValueError(
+ValueError: Found array with 0 sample(s) (shape=(0, 6)) while a minimum of 1 is required by LinearRegression.

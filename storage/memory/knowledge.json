@@ -30587,5 +30587,40 @@
       "N153"
     ],
     "lesson": "Lookahead bias inflated VT baseline Sharpe by 3.7x (1.43→0.38). Always use vix.shift(1) for VT strategy backtests. VT strategy's true value post-correction is in drawdown control (-29.5% vs B&H -55.2%), not return enhancement or Sharpe superiority."
+  },
+  {
+    "id": "k681b",
+    "experiment_id": "k681b",
+    "title": "K681b: US/EFA VIX 百分位策略 Lookahead 修正 — 結果崩塌",
+    "verdict": "PASS",
+    "reviewer": "主線程 (K681 lookahead audit 2026-05-18) + compute_queue correction run",
+    "date": "2026-05-18",
+    "parent_experiment": "k681",
+    "tags": [
+      "lookahead-bias",
+      "VIX",
+      "correction",
+      "US",
+      "EFA",
+      "vix-percentile"
+    ],
+    "summary": "K681b 用 .shift(1) 修正 US/EFA VIX 百分位信號後，結果完全崩塌：US Pct Sharpe 1.712→0.341，EFA Pct Sharpe 1.871→-0.054；兩市場 DM Harvey 均失敗（t<0）。K681 原文 US/EFA 達顯著水準的宣稱已撤回。台灣結果本即使用 vix_lag1，不受影響。",
+    "key_findings": {
+      "us_pct_sharpe_original": 1.712,
+      "us_pct_sharpe_fixed": 0.341,
+      "us_dm_t_original": 3.109,
+      "us_dm_t_fixed": -1.07,
+      "us_harvey_pass_after_fix": false,
+      "efa_pct_sharpe_original": 1.871,
+      "efa_pct_sharpe_fixed": -0.054,
+      "efa_dm_t_original": 5.368,
+      "efa_dm_t_fixed": -0.062,
+      "efa_harvey_pass_after_fix": false,
+      "taiwan_unaffected": true
+    },
+    "correction_type": "lookahead_bias",
+    "fix_applied": "w_pct_us_fixed = (1 - pct).shift(1); w_12vix_fixed = clip(12/VIX, max=1).shift(1)",
+    "article_correction": "mile_073884fd — 更正通知已加，US/EFA 顯著性宣稱已撤回",
+    "lesson": "策略代碼必須對每個市場分別確認 shift — K681 台灣有 shift 但 US/EFA 沒有，閱讀文章時易因台灣正確而忽略 US/EFA 缺漏。Lookahead audit 必須逐市場、逐信號逐行驗證，不能只看部分路徑。"
   }
 ]
