@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-04T11:35:13.206929+00:00",
+  "generated_at": "2026-05-18T21:09:45.484798+00:00",
   "slot_cap": 4,
   "slot_state": {
     "worktrees": [],
@@ -7,83 +7,99 @@
     "occupied": 0
   },
   "free_slots": 4,
-  "pending_total": 40,
-  "pending_agentable": 6,
-  "pending_main_thread": 29,
-  "pending_blocked": 5,
+  "pending_total": 67,
+  "pending_agentable": 51,
+  "pending_main_thread": 7,
+  "pending_blocked": 9,
   "dispatch_candidates": [
     {
-      "id": "K1032_article_general",
+      "id": "K1310",
       "priority": 3,
-      "title": "K1032: write general-audience article (auto-discovered uncovered K)"
+      "title": "K1310: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）"
     },
     {
-      "id": "K1067_article_general",
+      "id": "K1310",
       "priority": 3,
-      "title": "K1067: write general-audience article (auto-discovered uncovered K)"
+      "title": "K1310: Sentiment-Augmented GARCH-LSTM — Computational Economics 2025"
     },
     {
-      "id": "K1080_article_general",
+      "id": "K1310",
       "priority": 3,
-      "title": "K1080: write general-audience article (auto-discovered uncovered K)"
+      "title": "K1310: ★ **Multivariate Rough Volatility Model** — arXiv:2412.14353 (Feb 2026)。多變量 fractional OU + GMM 估計。跨資產 rough vol "
     },
     {
-      "id": "K561_article_general",
+      "id": "K1311",
       "priority": 3,
-      "title": "K561: write general-audience article (auto-discovered uncovered K)"
+      "title": "K1311: HAR-GNN（Graph Neural Network）— ScienceDirect 2024"
     }
   ],
   "main_thread_queue_top5": [
     {
-      "id": "K1146",
-      "priority": 1,
-      "title": "K1146: Paper 2 manuscript pivot to universal-magnitude (main thread, NOT agent)"
+      "id": "BTC_GAS_negative_paper",
+      "priority": 4,
+      "title": "Negative-result methodology paper: \"Why GAS-t fails on BTC — Student-t innovation is the culprit, MS cannot rescue it\""
     },
     {
-      "id": "K1169",
-      "priority": 1,
-      "title": "K1169: Paper 2 §5 narrative rewrite (main thread, K1166 correction)"
+      "id": "Paper1_new_experiments_Tables_4_6_7_8",
+      "priority": 4,
+      "title": "Paper 1 BLOCKER: 4 new K experiments 補 Tables 4/6/7/8 的 15 no-source"
     },
     {
-      "id": "vix_sufficiency_expansion",
-      "priority": 1,
-      "title": "Paper vix-sufficiency 擴充：integrate K1116/K1118/K1116b/K1121 + K504/K1098"
+      "id": "Paper2_section5_major_revision",
+      "priority": 4,
+      "title": "Paper 2 §5 MAJOR trajectory revision (K1215 supersede): integrate K1216 WIDESPREAD_FRAGILITY"
     },
     {
-      "id": "K1144",
-      "priority": 2,
-      "title": "K1144: Paper 2 narrative pivot to dual-NULL (after K1140 confirmation)"
+      "id": "Paper2_section5_rewrite",
+      "priority": 4,
+      "title": "Paper 2 §5 cross-market rewrite: apply K1204 synthesis (STRENGTHENED + 3 caveats) + Figures A-E"
     },
     {
-      "id": "K547_lookahead_audit_fix",
-      "priority": 2,
-      "title": "K547: lookahead bug fix — port_ret = weights * spy_ret needs .shift(1) on weights"
+      "id": "Paper4_body_rewrite",
+      "priority": 4,
+      "title": "Paper 4 body_v4.tex rewrite: incorporate K1203 + UNIVERSAL_NULL_7_OF_7 FINAL claim"
     }
   ],
   "refill": null,
   "blocked_tasks": [
     {
-      "id": "K1175_gdelt_fullscan",
-      "priority": 2,
-      "reason": "awaiting_external_data",
-      "title": "K1175: Full 96-files-per-day GDELT scan OR GCP-authed BigQuery rerun",
-      "blocked_at": "2026-05-04T09:40:24+00:00",
-      "blocked_until": "2026-06-01"
-    },
-    {
-      "id": "K1100g_d9_cadence_verify",
+      "id": "K1268b_gdelt_with_paid_intraday",
       "priority": 3,
-      "reason": "compute_runtime_incompatible",
-      "title": "K1100g_d9: rerun K1100g_d8 with d7 cadence (refit_every=5 n_restarts=10) to disambiguate sign flip",
-      "blocked_at": "2026-05-04T09:40:24+00:00",
+      "reason": "paid_data_source_decision_pending",
+      "title": "K1268b: GDELT 5-min vs SPY 5-min RV — re-run with backtest-grade intraday data",
+      "blocked_at": null,
       "blocked_until": null
     },
     {
-      "id": "K1100h",
+      "id": "K1307",
       "priority": 3,
-      "reason": "awaiting_external_data",
-      "title": "K1100h: Tick-level PRG on TAIFEX TX (Dropbox 2017-2021)",
-      "blocked_at": "2026-05-04T09:40:24+00:00",
+      "reason": "data_eta_q2_pending",
+      "title": "K1307: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）",
+      "blocked_at": null,
+      "blocked_until": null
+    },
+    {
+      "id": "K1308",
+      "priority": 3,
+      "reason": "diversity_rule_post_null_quartet",
+      "title": "K1308: PatchTST-lite vs HAR-RV — MDPI 2025",
+      "blocked_at": null,
+      "blocked_until": null
+    },
+    {
+      "id": "K1310",
+      "priority": 3,
+      "reason": "paid_data_source_decision_pending",
+      "title": "K1310: I4: VIX futures roll yield 策略 — contango 環境下的 roll yield 收割 vs 尾部風險保護 ⚠️ **BLOCKED: 需要 VIX futures 歷史數據（yfinance ",
+      "blocked_at": null,
+      "blocked_until": null
+    },
+    {
+      "id": "K1311",
+      "priority": 3,
+      "reason": "data_accumulation_pending",
+      "title": "K1311: VIXTWN 數據累積到 252 天後驗證 ratio 穩定性（Q6）",
+      "blocked_at": null,
       "blocked_until": null
     },
     {
@@ -95,12 +111,28 @@
       "blocked_until": null
     },
     {
-      "id": "K1116d",
+      "id": "K267_article_general",
       "priority": 4,
-      "reason": "awaiting_external_data",
-      "title": "K1116d: True ALFRED vintage when FRED_API_KEY obtained",
-      "blocked_at": "2026-05-04T09:57:06+00:00",
-      "blocked_until": "2026-06-15"
+      "reason": "self_tagged_optional",
+      "title": "K267: write general-audience article (auto-discovered uncovered K)",
+      "blocked_at": "2026-05-06T01:25:20+00:00",
+      "blocked_until": null
+    },
+    {
+      "id": "K691_article_general",
+      "priority": 4,
+      "reason": "self_tagged_optional",
+      "title": "K691: write general-audience article (auto-discovered uncovered K)",
+      "blocked_at": "2026-05-05T07:25:26+00:00",
+      "blocked_until": null
+    },
+    {
+      "id": "K705_article_general",
+      "priority": 4,
+      "reason": "self_tagged_optional",
+      "title": "K705: write general-audience article (auto-discovered uncovered K)",
+      "blocked_at": "2026-05-05T03:24:34+00:00",
+      "blocked_until": null
     }
   ]
 }
