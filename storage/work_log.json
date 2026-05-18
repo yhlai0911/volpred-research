@@ -7016,5 +7016,29 @@
     "title": "mile_8d1c7528 語氣修正 — p=0.72 誤標顯著 + 偽裝/絕對過強語氣",
     "status": "succeeded",
     "summary": "修正 3 處研究誠實問題：(1) p=0.72 卡方兩處誤標「達顯著水準」→「未達顯著水準」；(2) 節標題「偽裝」→ 描述性措辭；(3) 「絕對沒有變好」→「沒有顯著變好」。加 errata record。已 Supabase sync。"
+  },
+  {
+    "timestamp": "2026-05-18T14:20:50Z",
+    "task_id": "correct_mile_5061e209",
+    "task_type": "daily_article",
+    "title": "修正 K863 AUC 分析文章 (mile_5061e209) — bootstrap n/CI 方向/章節標題",
+    "status": "succeeded",
+    "summary": "3 項修正：章節標題樣本數 5,346→4,687；bootstrap n=1,000→2,000(AUC CI)/5,000(significance)；CI=[-0.072,-0.010] 完全為負→複合模型統計顯著更差(非「未優於」)"
+  },
+  {
+    "timestamp": "2026-05-18T14:20:50Z",
+    "task_id": "correct_mile_27038b04",
+    "task_type": "daily_article",
+    "title": "修正 K669 多市場 VIX 傳遞文章 (mile_27038b04) — EEM 顯著性 + Bonferroni",
+    "status": "succeeded",
+    "summary": "2 項修正：EEM p≈0.023 在個別 α=0.05 顯著但 Bonferroni 校正後 α=0.0125 不顯著 (4 市場)，補充正確詮釋；「12 個參數」未在文章中出現，屬任務描述誤判"
+  },
+  {
+    "timestamp": "2026-05-18T14:20:50Z",
+    "task_id": "correct_mile_50a70b23",
+    "task_type": "daily_article",
+    "title": "修正 K776 DMEM 文章 (mile_50a70b23) — 目標變數/α_g 角點解",
+    "status": "succeeded",
+    "summary": "2 項修正：目標變數澄清 E[|r_{t+1}|] (Approach A) 非 RV_22d；α_g=0.0 重寫為最佳化碰到下界角點解，非統計推論「不顯著」"
   }
 ]

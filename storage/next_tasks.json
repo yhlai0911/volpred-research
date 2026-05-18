@@ -9746,7 +9746,7 @@
     "id": "correct_mile_5061e209",
     "title": "mile_5061e209 數字修正 — 樣本數 5346→4687 + bootstrap 描述 + CI 方向",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "description": "CONDITIONAL_PASS 文章留 published. 需修正: (1) 文中「5,346 個交易日」改為「4,687 個交易日」（核實正確數字）; (2) bootstrap 描述寫 1,000 次但實際 code 跑 2,000 或 5,000 次，對齊實際數字; (3) 信賴區間方向解讀 bug — 核實並改正方向描述。加 errata 記錄。",
     "added": "2026-05-18",
@@ -9755,13 +9755,14 @@
       "data-accuracy"
     ],
     "estimated_min": 20,
-    "requires_codex_review": false
+    "requires_codex_review": false,
+    "completed_at": "2026-05-18T14:20:38Z"
   },
   {
     "id": "correct_mile_27038b04",
     "title": "mile_27038b04 修正 — EEM 顯著語氣 + multiple comparison + 12 參數描述",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "description": "CONDITIONAL_PASS 文章留 published. 需修正: (1) EEM 結果的顯著性語氣需對齊實際 p-value，加適當不確定性描述; (2) 多市場比較需加 multiple comparison 說明（Bonferroni 或 note）; (3) 「12 個參數」描述與實際 model spec 不符，核實後修正。加 errata 記錄。",
     "added": "2026-05-18",
@@ -9771,13 +9772,14 @@
       "multiple-comparison"
     ],
     "estimated_min": 20,
-    "requires_codex_review": false
+    "requires_codex_review": false,
+    "completed_at": "2026-05-18T14:20:38Z"
   },
   {
     "id": "correct_mile_50a70b23",
     "title": "mile_50a70b23 修正 — 22-day RV vs absolute return 混用 + α_g=0 推論",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "description": "CONDITIONAL_PASS 文章留 published. 需修正: (1) 目標變數描述：若實際為 22-day realized variance 但文中說「絕對報酬」則改正，或反之; (2) α_g=0 的推論邏輯需加強（零係數 ≠ 結論，需說明 non-rejection 含義）。加 errata 記錄。",
     "added": "2026-05-18",
@@ -9786,7 +9788,8 @@
       "model-description"
     ],
     "estimated_min": 20,
-    "requires_codex_review": false
+    "requires_codex_review": false,
+    "completed_at": "2026-05-18T14:20:38Z"
   },
   {
     "id": "eav_paper_revision_v1",
