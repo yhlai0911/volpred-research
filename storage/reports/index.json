@@ -1,24 +1,25 @@
 {
-  "generated_at": "2026-05-16T16:01:09.195703+00:00",
+  "generated_at": "2026-05-18T00:05:31.864097+00:00",
   "source": "storage/reports/feed.json",
   "summary": {
-    "total": 1233,
-    "last_30_days": 322,
+    "total": 1260,
+    "last_30_days": 337,
     "status": {
-      "published": 1076,
-      "draft": 150,
-      "unpublished": 7
+      "published": 1089,
+      "draft": 162,
+      "unpublished": 7,
+      "retracted": 2
     },
     "audience": {
-      "research": 592,
-      "general": 474,
+      "research": 598,
+      "general": 495,
       "daily": 81,
       "unknown": 77,
       "member_qa": 9
     },
     "category": {
-      "milestone": 656,
-      "general": 471,
+      "milestone": 664,
+      "general": 490,
       "unknown": 73,
       "member_qa": 9,
       "daily_article": 8,
@@ -29,9 +30,714 @@
       "diary": 1
     },
     "with_thumbnail": 44,
-    "total_chars": 3609018
+    "total_chars": 3726031
   },
   "articles": [
+    {
+      "id": "mile_3ef6edd5",
+      "title": "你買的不是台股，你買的是台積電的七折波動",
+      "description": "# 你買的不是台股，你買的是台積電的七折波動\n\n你打開帳戶，看到 0050，心想：五十家公司，分散穩健，長期存股。\n\n然後台積電那週跌了 8%，你的 0050 跌了 5.6%。\n\n「嗯，有分散效果嘛，只跌七成。」\n\n好，這句話有問題。\n\n---\n\n## 相關係數 0.93，不是分散，是稀釋\n\n2012 年，台積電與 0050 的 252 日滾動相關係數是 **0.67**。一般人對這個數字的直覺是",
+      "category": "milestone",
+      "tags": [
+        "一般讀者",
+        "台股",
+        "0050",
+        "台積電",
+        "波動率",
+        "ETF",
+        "集中風險",
+        "相關係數"
+      ],
+      "status": "published",
+      "published_at": "2026-05-18T00:18:39.035992+00:00",
+      "created_at": "2026-05-18T00:18:39.035992+00:00",
+      "proposer": "Claude",
+      "audience": "general"
+    },
+    {
+      "id": "mile_096db2f2",
+      "title": "高 Gamma 資產真的更適合波動率目標策略嗎？13 個跨類別資產的因果重檢",
+      "date": "2026-05-18T00:00:22.347707+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "波動率目標",
+        "跨資產驗證",
+        "槓桿效應",
+        "樣本外檢驗",
+        "機制分解",
+        "因果分析"
+      ],
+      "length_chars": 5344,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_57894028",
+      "title": "股市急漲時，選擇權市場在怕什麼",
+      "date": "2026-05-17T20:19:32.328749+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "波動率",
+        "選擇權",
+        "VIX",
+        "QQQ",
+        "美股",
+        "市場結構",
+        "realized-vol"
+      ],
+      "length_chars": 3725,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_8e2bae2e",
+      "title": "把六個總體變數一次丟進貝氏選模型，結果它什麼都沒選：聯合估計再次確認 GARCH 自己就夠了",
+      "date": "2026-05-17T20:00:17.719671+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "波動率預測",
+        "貝氏選模型",
+        "恐慌指數",
+        "風險模型",
+        "方法論"
+      ],
+      "length_chars": 5691,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_696c6063",
+      "title": "澳洲股市的謎——我們以為找到了答案，結果發現問題出在資料本身",
+      "date": "2026-05-17T18:13:22.837156+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "draft",
+      "tags": [
+        "研究",
+        "跨市場分析",
+        "財報事件",
+        "法醫檢定",
+        "波動率梯形",
+        "資料品質"
+      ],
+      "length_chars": 5366,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_dab6cc06",
+      "title": "油價還在 100 美元，VIX 卻說沒事了——誰說錯了？",
+      "date": "2026-05-17T16:27:48.046826+00:00",
+      "audience": "general",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "油價",
+        "VIX",
+        "波動率",
+        "跨市場",
+        "地緣政治",
+        "風險評估"
+      ],
+      "length_chars": 2889,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_284f64eb",
+      "title": "VIX 期限結構斜率能預測波動，卻換不到交易 alpha：一個誠實的失敗紀錄",
+      "date": "2026-05-17T15:00:16.458961+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "VIX",
+        "波動率",
+        "擇時策略",
+        "研究誠實",
+        "期限結構",
+        "失敗紀錄"
+      ],
+      "length_chars": 5846,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_c1dfdf53",
+      "title": "七個資產全部測完了，替代數據連時序作弊問題解決後還是輸",
+      "date": "2026-05-17T12:15:34.091719+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "替代數據",
+        "波動率預測",
+        "跨資產",
+        "SPY",
+        "TLT",
+        "另類數據"
+      ],
+      "length_chars": 2756,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_6fba99d4",
+      "title": "美國國會議員的股票交易，能預測美股波動率嗎？一份誠實的「沒有」",
+      "date": "2026-05-17T12:00:14.170238+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "美股",
+        "國會交易",
+        "波動率預測",
+        "VIX",
+        "資訊不對稱",
+        "實證研究"
+      ],
+      "length_chars": 5887,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_b274dbfa",
+      "title": "不假設分配的風險值估計：Conformal VaR 在 SPY 13 年外樣本表現",
+      "date": "2026-05-17T09:00:21.588818+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "風險管理",
+        "VaR",
+        "SPY",
+        "GARCH",
+        "美股",
+        "方法論"
+      ],
+      "length_chars": 6638,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_d3d2e5d0",
+      "title": "我們把恐慌指數直接塞進比特幣的波動率方程式：11 年 4,120 筆得出一個接近零的數字",
+      "date": "2026-05-17T08:12:45.076178+00:00",
+      "audience": "general",
+      "category": "milestone",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "比特幣",
+        "BTC",
+        "VIX",
+        "GARCH-X",
+        "波動率預測",
+        "恐慌指數",
+        "加密貨幣"
+      ],
+      "length_chars": 2204,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_490999f6",
+      "title": "1399 筆研究紀錄盤點：被引用 260 次以上的 16 個結論",
+      "date": "2026-05-17T06:00:38.652406+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "retracted",
+      "tags": [
+        "研究",
+        "meta-review",
+        "knowledge-base",
+        "VIX",
+        "leverage",
+        "QLIKE",
+        "VT-strategy",
+        "methodology"
+      ],
+      "length_chars": 3611,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_de900ba0",
+      "title": "美國 VIX 預測台灣 0050 的波動率？跨市場時差讓訊號被稀釋的真實案例",
+      "date": "2026-05-17T06:00:11.661384+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "台股",
+        "0050",
+        "VIX",
+        "波動率",
+        "跨市場",
+        "模型比較"
+      ],
+      "length_chars": 5460,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_5b6f9e1b",
+      "title": "換掉 yfinance 也救不回來：新興市場法人持股階梯為何是結構問題",
+      "date": "2026-05-17T04:15:28.297642+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "draft",
+      "tags": [
+        "研究",
+        "新興市場",
+        "法人持股",
+        "跨市場研究",
+        "法說會",
+        "資本成本",
+        "paper-2"
+      ],
+      "length_chars": 6885,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_34be417d",
+      "title": "K1207：GICS 行業別是法說會超額波動的獨立驅動因素——跨 12 市場 182 股驗證",
+      "date": "2026-05-17T04:13:41.977240+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "draft",
+      "tags": [
+        "研究",
+        "法說會波動",
+        "GICS行業",
+        "法人持股",
+        "panel regression",
+        "跨市場"
+      ],
+      "length_chars": 5652,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_b5a91c4d",
+      "title": "用「動態切點」救一個失敗故事：K1199 為何仍救不回 VIX 三段論",
+      "date": "2026-05-17T03:43:59.043135+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "retracted",
+      "tags": [
+        "一般讀者",
+        "訂單流",
+        "OFI",
+        "VIX",
+        "跳動預測",
+        "台指期",
+        "方法論",
+        "null-result"
+      ],
+      "length_chars": 5699,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_30c68d4e",
+      "title": "重寫一次發現數字微微跑掉：研究結論可信度其實是漸層、不是黑白",
+      "date": "2026-05-17T03:38:03.041761+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "研究方法",
+        "可復現性",
+        "波動率模型",
+        "SPY",
+        "論文驗證"
+      ],
+      "length_chars": 3819,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_1fde450d",
+      "title": "論文發出去之後，6 個數字裡有 3 個對不上：一場我們自己抓自己的核對",
+      "date": "2026-05-17T03:34:39.216453+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "研究誠實",
+        "論文修訂",
+        "可復現性",
+        "GJR-GARCH",
+        "黃金",
+        "槓桿效應"
+      ],
+      "length_chars": 3369,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_fd36c6cd",
+      "title": "我們把自己論文裡的兩個數字重做了一次：5.2 跟 −0.05 真的對嗎",
+      "date": "2026-05-17T03:33:00.532679+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "復現研究",
+        "0050",
+        "波動率",
+        "風險管理",
+        "方法論"
+      ],
+      "length_chars": 4567,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_4dccf655",
+      "title": "一個冷門的對沖實驗：TSMOM 沒讓 VT 賺更多，但把回撤砍掉了三分之一",
+      "date": "2026-05-17T03:29:48.489922+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "VT 波動率目標",
+        "TSMOM 趨勢動能",
+        "MDD 下檔保護",
+        "SPY",
+        "對沖策略",
+        "論文重現"
+      ],
+      "length_chars": 3482,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_1a5263af",
+      "title": "想用偏態 t 打敗波動率？商品市場給了個彆扭答案 — 波動預測沒救，但能救你的『最壞情境』",
+      "date": "2026-05-17T03:22:05.833408+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "paper-4",
+        "GAS",
+        "skew-t",
+        "商品",
+        "風險管理"
+      ],
+      "length_chars": 5650,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_a404c9a2",
+      "title": "「設計被否決」比「結果是 null」更冷峻 — 一個 paper subsection 連 hypothesis 都不成立的故事",
+      "date": "2026-05-17T03:21:42.754986+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "研究方法",
+        "台股",
+        "多重檢定",
+        "樣本量",
+        "反面教材",
+        "K1148_D3"
+      ],
+      "length_chars": 5060,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_3b7bdc47",
+      "title": "美股版本爆過、台股版本擦邊掉 — 同一條檢定線兩種命運的真實故事",
+      "date": "2026-05-17T03:21:28.856580+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "財報事件",
+        "波動率預測",
+        "跨市場驗證",
+        "Harvey 門檻",
+        "GJR-GARCH",
+        "K1148_d2",
+        "K1148_d1"
+      ],
+      "length_chars": 4355,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_70f2fbf5",
+      "title": "VIX 進入波動率方程式：六分之一的 OOS 改進，但摸到 GARCH 的天花板",
+      "date": "2026-05-17T03:00:23.219835+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "波動率預測",
+        "GARCH",
+        "VIX",
+        "樣本外",
+        "模型比較"
+      ],
+      "length_chars": 8499,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_52f14aa1",
+      "title": "我們把指標換成月頻再測一次：另類數據還是輸給 VIX，連『升頻稀釋』這個藉口都不能用了",
+      "date": "2026-05-17T02:40:09.464583+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "波動率預測",
+        "另類數據",
+        "VIX",
+        "月頻",
+        "Paper4"
+      ],
+      "length_chars": 4384,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_17f67ce8",
+      "title": "卡在門檻邊緣的研究結果，比『完全沒效』還危險 — 為什麼財金研究要堅持 t≥3？",
+      "date": "2026-05-17T02:05:25.013695+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "波動率預測",
+        "統計顯著性",
+        "研究方法",
+        "財報事件",
+        "p-hacking",
+        "K1148_D1"
+      ],
+      "length_chars": 4424,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_0155c66a",
+      "title": "我們把同一份資料的時序對齊改了 6 次：EPU、NFCI 還是贏不了 VIX",
+      "date": "2026-05-17T02:00:50.528036+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "alt-data",
+        "EPU",
+        "NFCI",
+        "VIX",
+        "robustness",
+        "Paper4"
+      ],
+      "length_chars": 5432,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_fcaad8fe",
+      "title": "為什麼只有公債吃這套？我們把另類數據丟到三個資產，結果只有 TLT 點頭",
+      "date": "2026-05-17T01:43:28.163854+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "TLT",
+        "公債",
+        "另類數據",
+        "金融壓力指數",
+        "資產異質性",
+        "風險預測"
+      ],
+      "length_chars": 3333,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_8d0e6f48",
+      "title": "把樣本拆成「景氣循環的上升期 vs 下降期」再測一次，晶圓代工財報日的謎還是沒解開",
+      "date": "2026-05-17T01:40:07.074930+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "TSMC",
+        "半導體",
+        "財報日",
+        "景氣循環",
+        "波動率"
+      ],
+      "length_chars": 3067,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_d3897886",
+      "title": "晶圓代工財報日為什麼比較劇烈？我們連四層猜想全部失敗了，這篇講為什麼這對你是好消息",
+      "date": "2026-05-17T01:29:18.179293+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "台積電",
+        "晶圓代工",
+        "財報",
+        "波動率",
+        "研究誠實",
+        "NULL",
+        "假訊號"
+      ],
+      "length_chars": 4586,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_fe578587",
+      "title": "晶圓代工財報日波動率謎題 — K1108 系列六層機制 NULL 全記錄",
+      "date": "2026-05-17T00:21:00.281210+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "draft",
+      "tags": [
+        "研究",
+        "晶圓代工",
+        "財報日波動率",
+        "A4f-EAV",
+        "GJR-GARCH",
+        "機制檢定",
+        "資本支出"
+      ],
+      "length_chars": 9211,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_7b4c0a26",
+      "title": "短天期恐慌指數已經夠了：把 VIX9D 和 VIX3M 一起放進模型，反而沒有加分",
+      "date": "2026-05-16T23:58:58.262896+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "波動率預測",
+        "恐慌指數",
+        "期限結構",
+        "風險模型",
+        "資料診斷"
+      ],
+      "length_chars": 5263,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_e4dc737c",
+      "title": "每五天還是每二十五天？一個參數差點讓整個實驗結論翻盤",
+      "date": "2026-05-16T22:33:46.001784+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "draft",
+      "tags": [
+        "研究",
+        "波動率預測",
+        "研究誠實",
+        "跳空訊號",
+        "N225",
+        "SPY",
+        "模型設計",
+        "研究方法",
+        "預測模型"
+      ],
+      "length_chars": 3539,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_ba1dc7f8",
+      "title": "五月十五日，六個資產類別同一天全部向下：分散投資的邊界在哪裡",
+      "date": "2026-05-16T20:28:02.156773+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "trending",
+        "跨資產",
+        "分散投資",
+        "波動率",
+        "通脹",
+        "黃金",
+        "VIX"
+      ],
+      "length_chars": 1880,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_d9c62a56",
+      "title": "測了 16 個模型組合，唯一看起來成功的那個，其實是資料時序用錯了",
+      "date": "2026-05-16T20:17:50.687299+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "波動率預測",
+        "資料品質",
+        "FRED",
+        "美國國債",
+        "alt-data",
+        "方法論"
+      ],
+      "length_chars": 2808,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_734bb29d",
+      "title": "股票配黃金的人，到底該看哪個『恐慌指數』？SPY+GLD 配置的恐慌指數搭配實驗",
+      "date": "2026-05-16T19:59:43.216258+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "投資組合",
+        "風險管理",
+        "黃金",
+        "恐慌指數",
+        "資產配置",
+        "風險預測"
+      ],
+      "length_chars": 6661,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_207d3750",
+      "title": "選擇權定價 8%，財報卻連四季靜悄悄：NVDA 波動率的三重謎題",
+      "date": "2026-05-16T16:28:41.484581+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "trending",
+        "nvidia",
+        "earnings",
+        "options",
+        "implied-vol",
+        "volatility-targeting",
+        "財報"
+      ],
+      "length_chars": 3396,
+      "thumbnail_url": null
+    },
     {
       "id": "mile_f84efaf6",
       "title": "每日策略建議：VIX 18.43（正常）— 2026-05-17",
@@ -1418,7 +2124,7 @@
         "風險管理",
         "投資迷思"
       ],
-      "length_chars": 5012,
+      "length_chars": 5668,
       "thumbnail_url": null
     },
     {
@@ -1700,7 +2406,7 @@
         "ETF",
         "風險管理"
       ],
-      "length_chars": 6913,
+      "length_chars": 7033,
       "thumbnail_url": null
     },
     {
@@ -2081,7 +2787,7 @@
         "投資策略",
         "研究誠實"
       ],
-      "length_chars": 6702,
+      "length_chars": 7790,
       "thumbnail_url": null
     },
     {
@@ -4193,100 +4899,6 @@
       "thumbnail_url": null
     },
     {
-      "id": "mile_096db2f2",
-      "title": "高 Gamma 資產真的更適合波動率目標策略嗎？13 個跨類別資產的因果重檢",
-      "date": "2026-05-04T22:27:13.914460+00:00",
-      "audience": "general",
-      "category": "general",
-      "status": "draft",
-      "tags": [
-        "一般讀者",
-        "波動率目標",
-        "跨資產驗證",
-        "槓桿效應",
-        "樣本外檢驗",
-        "機制分解",
-        "因果分析"
-      ],
-      "length_chars": 5344,
-      "thumbnail_url": null
-    },
-    {
-      "id": "mile_8e2bae2e",
-      "title": "把六個總體變數一次丟進貝氏選模型，結果它什麼都沒選：聯合估計再次確認 GARCH 自己就夠了",
-      "date": "2026-05-04T21:28:25.458876+00:00",
-      "audience": "general",
-      "category": "general",
-      "status": "draft",
-      "tags": [
-        "一般讀者",
-        "波動率預測",
-        "貝氏選模型",
-        "恐慌指數",
-        "風險模型",
-        "方法論"
-      ],
-      "length_chars": 5691,
-      "thumbnail_url": null
-    },
-    {
-      "id": "mile_284f64eb",
-      "title": "VIX 期限結構斜率能預測波動，卻換不到交易 alpha：一個誠實的失敗紀錄",
-      "date": "2026-05-04T21:27:44.900919+00:00",
-      "audience": "general",
-      "category": "general",
-      "status": "draft",
-      "tags": [
-        "一般讀者",
-        "VIX",
-        "波動率",
-        "擇時策略",
-        "研究誠實",
-        "期限結構",
-        "失敗紀錄"
-      ],
-      "length_chars": 5846,
-      "thumbnail_url": null
-    },
-    {
-      "id": "mile_6fba99d4",
-      "title": "美國國會議員的股票交易，能預測美股波動率嗎？一份誠實的「沒有」",
-      "date": "2026-05-04T21:27:29.998860+00:00",
-      "audience": "general",
-      "category": "general",
-      "status": "draft",
-      "tags": [
-        "一般讀者",
-        "美股",
-        "國會交易",
-        "波動率預測",
-        "VIX",
-        "資訊不對稱",
-        "實證研究"
-      ],
-      "length_chars": 5887,
-      "thumbnail_url": null
-    },
-    {
-      "id": "mile_b274dbfa",
-      "title": "不假設分配的風險值估計：Conformal VaR 在 SPY 13 年外樣本表現",
-      "date": "2026-05-04T21:26:57.331995+00:00",
-      "audience": "general",
-      "category": "general",
-      "status": "draft",
-      "tags": [
-        "一般讀者",
-        "風險管理",
-        "VaR",
-        "SPY",
-        "GARCH",
-        "美股",
-        "方法論"
-      ],
-      "length_chars": 6638,
-      "thumbnail_url": null
-    },
-    {
       "id": "mile_1e57c478",
       "title": "K1263：把 2024 諾獎熱門架構 KAN 接上宏觀基本面 MIDAS，QLIKE 反而比 30 年前 GJR-GARCH 差 33%",
       "date": "2026-05-04T21:00:06.359769+00:00",
@@ -4304,80 +4916,6 @@
         "QQQ"
       ],
       "length_chars": 9691,
-      "thumbnail_url": null
-    },
-    {
-      "id": "mile_de900ba0",
-      "title": "美國 VIX 預測台灣 0050 的波動率？跨市場時差讓訊號被稀釋的真實案例",
-      "date": "2026-05-04T20:29:36.412483+00:00",
-      "audience": "general",
-      "category": "general",
-      "status": "draft",
-      "tags": [
-        "一般讀者",
-        "台股",
-        "0050",
-        "VIX",
-        "波動率",
-        "跨市場",
-        "模型比較"
-      ],
-      "length_chars": 5460,
-      "thumbnail_url": null
-    },
-    {
-      "id": "mile_70f2fbf5",
-      "title": "VIX 進入波動率方程式：六分之一的 OOS 改進，但摸到 GARCH 的天花板",
-      "date": "2026-05-04T20:29:23.062759+00:00",
-      "audience": "general",
-      "category": "general",
-      "status": "draft",
-      "tags": [
-        "一般讀者",
-        "波動率預測",
-        "GARCH",
-        "VIX",
-        "樣本外",
-        "模型比較"
-      ],
-      "length_chars": 8499,
-      "thumbnail_url": null
-    },
-    {
-      "id": "mile_7b4c0a26",
-      "title": "短天期恐慌指數已經夠了：把 VIX9D 和 VIX3M 一起放進模型，反而沒有加分",
-      "date": "2026-05-04T20:27:53.345631+00:00",
-      "audience": "general",
-      "category": "general",
-      "status": "draft",
-      "tags": [
-        "一般讀者",
-        "波動率預測",
-        "恐慌指數",
-        "期限結構",
-        "風險模型",
-        "資料診斷"
-      ],
-      "length_chars": 5263,
-      "thumbnail_url": null
-    },
-    {
-      "id": "mile_734bb29d",
-      "title": "股票配黃金的人，到底該看哪個『恐慌指數』？SPY+GLD 配置的恐慌指數搭配實驗",
-      "date": "2026-05-04T19:28:56.850263+00:00",
-      "audience": "general",
-      "category": "general",
-      "status": "draft",
-      "tags": [
-        "一般讀者",
-        "投資組合",
-        "風險管理",
-        "黃金",
-        "恐慌指數",
-        "資產配置",
-        "風險預測"
-      ],
-      "length_chars": 6661,
       "thumbnail_url": null
     },
     {
