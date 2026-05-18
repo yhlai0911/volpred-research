@@ -6895,5 +6895,40 @@
     "id": "eav-universal-magnitude",
     "verdict": "DRAFT_COMPLETE",
     "notes": "reproduce.py 20/20 GREEN (match_rate=1.0, alert_level=green). experiments.md, reproduce.py, body.tex Sections 1-9 written. Key numbers: TW theta=6.36e-5 t=5.24; US theta=1.91e-4 t=4.50; JP theta=1.41e-4 t=11.99. All 3 markets placebo 0/60. K1109 F=1.31 p=0.297; K1113 CV R2=-0.661; K1149 A+D. Pending: references.bib, Appendix A analytic gradient, summary stats table fill-in."
+  },
+  {
+    "timestamp": "2026-05-18T10:15:00.000000+08:00",
+    "task_type": "paper_review",
+    "task_id": "paper_review_eav_v1",
+    "title": "eav-universal-magnitude 首次 paper-review-cycle v1 — NEEDS_REVISION",
+    "verdict": "NEEDS_REVISION",
+    "paper": "eav-universal-magnitude",
+    "review_archive": "paper/eav-universal-magnitude/review_history/v1/",
+    "summary": "17 issues found (SEVERE=1, MAJOR=5, MINOR=11) + 11 citation issues. SEVERE: §1.3 [CITATION NEEDED] (3 unsupported claims). MAJOR: Table 2 dropout rows mismatch; references.bib missing; Appendix A analytic gradient absent; invalid citation keys (k1213_convergence_lesson, garch_x_vix_paper, engel_rangel2008→engle_rangel2008, missing DM/HLN). MINOR: notation/formatting. All 10 NEEDS_REWRITE issues from review_v1.md scaffold resolved in body.tex.",
+    "notes": "Commit 9e03fcbc. Next: fill §1.3 citations, fix Table 2, build references.bib, write Appendix A."
+  },
+  {
+    "timestamp": "2026-05-18T10:20:00.000000+08:00",
+    "task_type": "paper_review",
+    "task_id": "codex_24h_batch_5articles",
+    "title": "5篇積壓文章 Codex 24h-rule 批量審查 — 1 FAIL + 4 CONDITIONAL_PASS",
+    "verdict": "MIXED",
+    "articles_reviewed": [
+      "mile_7ba7ee54",
+      "mile_8d1c7528",
+      "mile_5061e209",
+      "mile_27038b04",
+      "mile_50a70b23"
+    ],
+    "fail_count": 1,
+    "conditional_pass_count": 4,
+    "summary": "mile_7ba7ee54 FAIL — 論證混用 Strategy A/C，NW t=3.70 來自 A 但 OOS/bootstrap/cost/月勝率皆施測 C，soft-unpublished。其餘 4 篇 CONDITIONAL_PASS：(1) mile_8d1c7528: p=0.72 誤標「達顯著水準」+ 過強語氣；(2) mile_5061e209: 5346→4687 樣本數 + bootstrap desc + CI 方向；(3) mile_27038b04: EEM significance + multiple comparison + 12參數描述；(4) mile_50a70b23: 22-day RV vs absolute return + α_g=0 推論。",
+    "review_doc": "docs/article_reviews_codex_2026_05_18.md",
+    "actions": [
+      "mile_7ba7ee54 unpublished via uv run volpred ops unpublish",
+      "5 paper_review tasks marked succeeded in next_tasks.json",
+      "error_log.md updated with mile_7ba7ee54 FAIL incident",
+      "correction tasks added to next_tasks.json for all 5 articles"
+    ]
   }
 ]
