@@ -6930,5 +6930,29 @@
       "error_log.md updated with mile_7ba7ee54 FAIL incident",
       "correction tasks added to next_tasks.json for all 5 articles"
     ]
+  },
+  {
+    "timestamp": "2026-05-18T08:30:00.000000+00:00",
+    "task_type": "daily_article",
+    "task_id": "correct_mile_7ba7ee54",
+    "title": "mile_7ba7ee54 修正完成 — 統一使用策略A，全四層分析一致",
+    "verdict": "COMPLETED",
+    "article_id": "mile_7ba7ee54",
+    "status": "published",
+    "key_numbers": {
+      "full_sample_nw_t": 3.7,
+      "oos1_t": 1.8,
+      "oos2_t": 1.65,
+      "oos3_t": 3.27,
+      "bootstrap_ci": [
+        "+0.53%",
+        "+1.55%"
+      ],
+      "zero_in_ci": false,
+      "net_excess_annual": "+0.814%",
+      "monthly_win_rate": 0.5985
+    },
+    "conclusion": "OOS3-concentrated conditional signal (2023-2026 AI/semi bull market); not cross-period robust; not recommended for live trading",
+    "fix_summary": "Codex FAIL (A/C mixing) repaired — supplement script k620_strategy_a_supplement.py computed A-only stats; article rewritten with consistent Strategy A data throughout"
   }
 ]
