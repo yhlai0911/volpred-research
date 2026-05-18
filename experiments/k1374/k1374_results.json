@@ -6,14 +6,14 @@
   "pooled_stats": {
     "n_ex_events": 226,
     "n_control_obs": 40729,
-    "mean_ex_abs_ret": 0.01324026401348422,
-    "mean_ctrl_abs_ret": 0.009862724002973843,
-    "ex_ctrl_ratio": 1.3424550874070864,
-    "t_stat": 4.019063823970694,
-    "p_value": 7.95169830638741e-05,
-    "mw_stat": 5505349.0,
-    "mw_p": 3.4514288994149187e-07,
-    "cohens_d": 0.3050711773533606
+    "mean_ex_abs_ret": 0.01324026938131329,
+    "mean_ctrl_abs_ret": 0.009862722871036077,
+    "ex_ctrl_ratio": 1.3424557857339858,
+    "t_stat": 4.019073538757521,
+    "p_value": 7.951392364171412e-05,
+    "mw_stat": 5509445.0,
+    "mw_p": 3.054038066543039e-07,
+    "cohens_d": 0.3050717811848992
   },
   "per_ticker": {
     "0050.TW": {
@@ -205,9 +205,9 @@
     }
   },
   "sector_cohens_d": {
+    "Industrial": 0.5787,
     "Tech": 0.0904,
     "Financial": 0.5197,
-    "Industrial": 0.5787,
     "ETF": 0.1868
   },
   "seasonal_analysis": {
@@ -215,12 +215,18 @@
     "off_season_months": "Oct-Mar",
     "n_peak_events": 188,
     "n_off_events": 38,
-    "peak_season_d": 0.3455,
-    "off_season_d": 0.1048
+    "n_peak_ctrl": 19345,
+    "n_off_ctrl": 21384,
+    "peak_season_d": 0.3055,
+    "off_season_d": 0.133,
+    "note": "d computed against season-matched controls (Apr-Sep vs Apr-Sep; Oct-Mar vs Oct-Mar)"
   },
   "robustness_check": {
     "description": "Excluding the two highest-d tickers (2412.TW d=1.633, 2886.TW d=1.245) to verify result not driven by outliers",
-    "tickers_excluded": ["2412.TW", "2886.TW"],
+    "tickers_excluded": [
+      "2412.TW",
+      "2886.TW"
+    ],
     "n_ex_events": 204,
     "t_stat": 2.9853,
     "p_value": 0.0032,
@@ -228,7 +234,7 @@
     "cohens_d": 0.2381,
     "verdict_robust": "PASS"
   },
-  "verdict_rationale": "Pooled Welch t-test: p=0.0001 < 0.05 and Cohen's d=0.305 > 0.20. Both criteria met — ex-date volatility elevation confirmed at large sample. Robustness check: excluding the two highest-d tickers (2412.TW, 2886.TW) still gives p=0.003 and d=0.238 (PASS) — result not driven by outlier stocks.",
+  "verdict_rationale": "Pooled Welch t-test: p=0.0001 < 0.05 and Cohen's d=0.305 > 0.20. Both criteria met — ex-date volatility elevation confirmed at large sample. Robustness check: excluding 2412.TW d=1.633, 2886.TW d=1.245 still gives p=0.0032 and d=0.238 (PASS) — result not driven by outlier stocks.",
   "tickers_processed": [
     "0050.TW",
     "0056.TW",

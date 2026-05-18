@@ -387,6 +387,10 @@ def main():
     # For seasonal analysis (Q2+Q3 = Apr-Sep; Q4+Q1 = Oct-Mar)
     peak_ex_r = []
     off_ex_r = []
+    peak_ctrl_r: list[float] = []   # season-matched control days Apr-Sep
+    off_ctrl_r: list[float] = []    # season-matched control days Oct-Mar
+    ticker_ex_arrays: dict = {}     # per-ticker, for robustness check
+    ticker_ctrl_arrays: dict = {}   # per-ticker, for robustness check
 
     for ticker in TICKERS:
         print(f"\nProcessing {ticker}...")
@@ -450,6 +454,18 @@ def main():
                 peak_ex_r.append(r_val)
             else:
                 off_ex_r.append(r_val)
+
+        # Season-matched control days (keeps seasonal d unconfounded by baseline seasonality)
+        for ctrl_dt, ctrl_val in ctrl_r.items():
+            month = ctrl_dt.month
+            if 4 <= month <= 9:
+                peak_ctrl_r.append(ctrl_val)
+            else:
+                off_ctrl_r.append(ctrl_val)
+
+        # Store per-ticker arrays for robustness check
+        ticker_ex_arrays[ticker] = ex_r.values
+        ticker_ctrl_arrays[ticker] = ctrl_r.values
 
         # Event profile
         profile_df = compute_event_profile(abs_ret, snapped_ex, window=EVENT_WINDOW)
@@ -515,27 +531,28 @@ def main():
         print(f"  Sector {sec}: d={d:.4f} (n_ex={n1s}, n_ctrl={n2s})")
 
     # -----------------------------------------------
-    # Seasonal analysis
+    # Seasonal analysis (season-matched controls)
     # -----------------------------------------------
     peak_arr = np.array(peak_ex_r)
     off_arr = np.array(off_ex_r)
-    ctrl_arr = pool_ctrl
+    peak_ctrl_arr = np.array(peak_ctrl_r)
+    off_ctrl_arr = np.array(off_ctrl_r)
 
     peak_d = None
     off_d = None
-    if len(peak_arr) > 0 and len(ctrl_arr) > 0:
-        n_p, n_c = len(peak_arr), len(ctrl_arr)
-        s_p, s_c = peak_arr.std(ddof=1), ctrl_arr.std(ddof=1)
+    if len(peak_arr) > 0 and len(peak_ctrl_arr) > 10:
+        n_p, n_c = len(peak_arr), len(peak_ctrl_arr)
+        s_p, s_c = peak_arr.std(ddof=1), peak_ctrl_arr.std(ddof=1)
         ps_peak = np.sqrt(((n_p - 1) * s_p**2 + (n_c - 1) * s_c**2) / (n_p + n_c - 2))
-        peak_d = float((peak_arr.mean() - ctrl_arr.mean()) / ps_peak) if ps_peak > 0 else 0.0
-    if len(off_arr) > 0 and len(ctrl_arr) > 0:
-        n_o, n_c = len(off_arr), len(ctrl_arr)
-        s_o, s_c = off_arr.std(ddof=1), ctrl_arr.std(ddof=1)
+        peak_d = float((peak_arr.mean() - peak_ctrl_arr.mean()) / ps_peak) if ps_peak > 0 else 0.0
+    if len(off_arr) > 0 and len(off_ctrl_arr) > 10:
+        n_o, n_c = len(off_arr), len(off_ctrl_arr)
+        s_o, s_c = off_arr.std(ddof=1), off_ctrl_arr.std(ddof=1)
         ps_off = np.sqrt(((n_o - 1) * s_o**2 + (n_c - 1) * s_c**2) / (n_o + n_c - 2))
-        off_d = float((off_arr.mean() - ctrl_arr.mean()) / ps_off) if ps_off > 0 else 0.0
+        off_d = float((off_arr.mean() - off_ctrl_arr.mean()) / ps_off) if ps_off > 0 else 0.0
 
-    print(f"  Peak-season (Apr-Sep) Cohen's d: {peak_d}")
-    print(f"  Off-season (Oct-Mar) Cohen's d:  {off_d}")
+    print(f"  Peak-season (Apr-Sep) Cohen's d (season-matched ctrl): {peak_d}")
+    print(f"  Off-season (Oct-Mar) Cohen's d  (season-matched ctrl): {off_d}")
 
     # -----------------------------------------------
     # Verdict
@@ -561,6 +578,57 @@ def main():
 
     print(f"\n  VERDICT: {verdict}")
     print(f"  Rationale: {verdict_rationale}")
+
+    # -----------------------------------------------
+    # Robustness check: exclude top-2 highest-d tickers
+    # -----------------------------------------------
+    sorted_by_d = sorted(ticker_results.items(), key=lambda x: x[1]['cohens_d'], reverse=True)
+    top2_tickers = [t for t, _ in sorted_by_d[:2]]
+    rob_ex: list[float] = []
+    rob_ctrl: list[float] = []
+    for t in ticker_results:
+        if t not in top2_tickers:
+            rob_ex.extend(ticker_ex_arrays[t])
+            rob_ctrl.extend(ticker_ctrl_arrays[t])
+
+    rob_ex_arr = np.array(rob_ex)
+    rob_ctrl_arr = np.array(rob_ctrl)
+    robustness_check = None
+    if len(rob_ex_arr) >= 10:
+        rob_t, rob_p = stats.ttest_ind(rob_ex_arr, rob_ctrl_arr, equal_var=False)
+        rob_mw_stat, rob_mw_p = stats.mannwhitneyu(rob_ex_arr, rob_ctrl_arr, alternative='two-sided')
+        n_r1, n_r2 = len(rob_ex_arr), len(rob_ctrl_arr)
+        s_r1, s_r2 = rob_ex_arr.std(ddof=1), rob_ctrl_arr.std(ddof=1)
+        pooled_r = np.sqrt(((n_r1 - 1) * s_r1**2 + (n_r2 - 1) * s_r2**2) / (n_r1 + n_r2 - 2))
+        rob_d = float((rob_ex_arr.mean() - rob_ctrl_arr.mean()) / pooled_r) if pooled_r > 0 else 0.0
+        rob_verdict = (
+            "PASS" if rob_p < 0.05 and rob_d > 0.20
+            else "CONDITIONAL_PASS" if rob_p < 0.10 and rob_d > 0.15
+            else "NULL"
+        )
+        top2_info = ", ".join(
+            f"{t} d={ticker_results[t]['cohens_d']:.3f}" for t in top2_tickers
+        )
+        robustness_check = {
+            "description": (
+                f"Excluding the two highest-d tickers ({top2_info}) "
+                "to verify result not driven by outliers"
+            ),
+            "tickers_excluded": top2_tickers,
+            "n_ex_events": int(len(rob_ex_arr)),
+            "t_stat": round(float(rob_t), 4),
+            "p_value": round(float(rob_p), 4),
+            "mw_p": round(float(rob_mw_p), 6),
+            "cohens_d": round(rob_d, 4),
+            "verdict_robust": rob_verdict,
+        }
+        if rob_verdict in ("PASS", "CONDITIONAL_PASS"):
+            verdict_rationale += (
+                f" Robustness check: excluding {top2_info} "
+                f"still gives p={rob_p:.4f} and d={rob_d:.3f} ({rob_verdict}) — "
+                "result not driven by outlier stocks."
+            )
+        print(f"  Robustness (excl {top2_tickers}): t={rob_t:.3f}, p={rob_p:.4f}, d={rob_d:.3f} → {rob_verdict}")
 
     # -----------------------------------------------
     # Plots
@@ -643,9 +711,13 @@ def main():
             "off_season_months": "Oct-Mar",
             "n_peak_events": int(len(peak_arr)),
             "n_off_events": int(len(off_arr)),
+            "n_peak_ctrl": int(len(peak_ctrl_arr)),
+            "n_off_ctrl": int(len(off_ctrl_arr)),
             "peak_season_d": round(peak_d, 4) if peak_d is not None else None,
             "off_season_d": round(off_d, 4) if off_d is not None else None,
+            "note": "d computed against season-matched controls (Apr-Sep vs Apr-Sep; Oct-Mar vs Oct-Mar)",
         },
+        "robustness_check": robustness_check,
         "verdict_rationale": verdict_rationale,
         "tickers_processed": list(ticker_results.keys()),
         "tickers_skipped": skipped,
