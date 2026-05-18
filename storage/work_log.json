@@ -7040,5 +7040,52 @@
     "title": "修正 K776 DMEM 文章 (mile_50a70b23) — 目標變數/α_g 角點解",
     "status": "succeeded",
     "summary": "2 項修正：目標變數澄清 E[|r_{t+1}|] (Approach A) 非 RV_22d；α_g=0.0 重寫為最佳化碰到下界角點解，非統計推論「不顯著」"
+  },
+  {
+    "timestamp": "2026-05-18T15:12:32.891965+00:00",
+    "task_type": "platform_ops",
+    "task_id": "fix_mile_a8ac2ae4_sample_period",
+    "title": "Fix mile_a8ac2ae4: 樣本期間 2008→2009",
+    "status": "succeeded",
+    "notes": "Research integrity fix: 2008-2026 共18年 → 2009-2026 共17年 (CSV data starts 2009-01-02). 3 content locations fixed in feed.json."
+  },
+  {
+    "timestamp": "2026-05-18T15:12:32.891965+00:00",
+    "task_type": "platform_ops",
+    "task_id": "fix_mile_ae145f60_citation",
+    "title": "Fix mile_ae145f60: Bauer&Swanson→Bernanke&Kuttner",
+    "status": "succeeded",
+    "notes": "Research integrity fix: replaced wrong citation Bauer&Swanson(2023) FOMC paper with Bernanke&Kuttner(2005) JF for stock market reaction to monetary surprises. 2 locations fixed."
+  },
+  {
+    "timestamp": "2026-05-18T15:12:32.891965+00:00",
+    "task_type": "platform_ops",
+    "task_id": "dedup_next_tasks_k1307_k1308",
+    "title": "next_tasks.json K1307/K1308 重複 ID 清理",
+    "status": "succeeded",
+    "notes": "Auto-generated tasks from research_program.md had ID conflicts. Renamed to paper4_fix_review_v2_5HIGH and paper9_codex_adversarial_review. Removed 2 duplicate K1308 Taiwan HAR-RV entries. 559→557 tasks."
+  },
+  {
+    "timestamp": "2026-05-18T15:24:30Z",
+    "task_id": "paper3_vt_fix_review_v2_5HIGH",
+    "task_type": "paper_review",
+    "paper": "vt-trend-following",
+    "status": "partial_success",
+    "actions": [
+      "B.1 fix: line 50 January 2007->2005 (primary sample data section)",
+      "B.1 fix: Table 2 notes January 2007->2005 (22 assets)",
+      "C.1 fix: Table 2 notes 1.4%->5.3% (K898: 0.043/0.805)",
+      "A.1 fix: K687 DM test citation added (Section 4.1, after K1192)",
+      "A.1 fix: K697 VIX magnitude/direction citation added (Section 4.2)",
+      "A.1 fix: K688 CRRA gamma>=10 breakeven citation + Cederburg 90-97%->95.6-109.0% (K1192 canonical)",
+      "Compile: xelatex main_v3.tex -> 34 pages OK (no errors)",
+      "Sync: uv run volpred ops paper-update --paper-id vt-trend-following -> updated_at 2026-05-18T15:24:14Z",
+      "Queued: K1371 (AQR BAB re-run) + K1372 (MDD 22 assets) as P2 pending experiments"
+    ],
+    "pending": [
+      "B.2: K1371 AQR BAB factor re-run (Table 4 M5, full sample N=5049)",
+      "B.3: K1372 MDD retention analysis all 22 assets (extend K1192 beyond 5 US equity)"
+    ],
+    "notes": "Text-fixable HIGH issues (A.1, B.1, C.1) resolved. Compute-heavy issues (B.2, B.3) queued as K1371/K1372 P2 experiments. All 5 review_v2 HIGH items accounted for."
   }
 ]

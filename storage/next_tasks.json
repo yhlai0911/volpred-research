@@ -9510,26 +9510,28 @@
     "verdict": "EXPLORATORY_NULL"
   },
   {
-    "id": "K1307",
-    "title": "K1307: 修正 review_v2 的 5 HIGH",
+    "id": "paper3_vt_fix_review_v2_5HIGH",
+    "title": "Paper 3 (vt-trend-following): 修正 review_v2 的 5 HIGH issues",
     "priority": 3,
-    "description": "Auto-generated from research_program.md unchecked item (line 249). Original: 修正 review_v2 的 5 HIGH\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1307.py with signal.shift(1) + seed=42, (c) K1307_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
-    "task_type": "experiment",
+    "description": "Paper 4 (leverage-direction) review_v2.tex 有 5 HIGH issues 待修正：\n1. 樣本期間不一致\n2. BAB proxy（SPLV→AQR）\n3. MDD 只有 5 美股\n4. 1.4% 數字不可驗證\n5. 需引用 K687/K697/K688\n\nSource: research_program.md line 249 (was auto-generated as K1307 — ID conflict resolved 2026-05-18)",
+    "status": "partial_success",
+    "task_type": "paper_review",
     "source": "research_backlog_auto",
     "tags": [
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-05-17T20:00:49Z"
+    "created_at": "2026-05-17T20:00:49Z",
+    "completed_at": "2026-05-18T15:24:36Z",
+    "notes": " | 2026-05-18: Text fixes A.1+B.1+C.1 done. B.2+B.3 queued as K1371/K1372."
   },
   {
-    "id": "K1308",
-    "title": "K1308: Codex adversarial review",
+    "id": "paper9_codex_adversarial_review",
+    "title": "Paper 9 (GARCH-X VIX): Codex adversarial review",
     "priority": 3,
-    "description": "Auto-generated from research_program.md unchecked item (line 293). Original: Codex adversarial review\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1308.py with signal.shift(1) + seed=42, (c) K1308_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "description": "Paper 9 (garch-x-vix/main.tex, 31頁) 需要 Codex adversarial review。\n核心：Multiplicative GARCH-X with VIX，目標 Journal of Empirical Finance / JoF。\n已完成：初稿（31頁，24 refs）、latex-academic-reviewer 審查。\n本任務：Codex adversarial review — 挑戰實作方法與設計選擇。\n\nSource: research_program.md line 293 (was auto-generated as K1308 — ID conflict resolved 2026-05-18)",
     "status": "pending",
-    "task_type": "experiment",
+    "task_type": "paper_review",
     "source": "research_backlog_auto",
     "tags": [
       "experiment",
@@ -9598,20 +9600,6 @@
     "completion_note": "K570b completed: vix.shift(1) + block bootstrap + HAC rename + OOS label fix. NULL confirmed. Sharpe 1.43→0.38 (-73.3%). Article mile_9fb5d7f7 corrected. Knowledge entry added."
   },
   {
-    "id": "K1308",
-    "title": "K1308: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）",
-    "priority": 3,
-    "description": "Auto-generated from research_program.md unchecked item (line 340). Original: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1308.py with signal.shift(1) + seed=42, (c) K1308_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
-    "task_type": "experiment",
-    "source": "research_backlog_auto",
-    "tags": [
-      "experiment",
-      "autonomous-research"
-    ],
-    "created_at": "2026-05-18T00:00:08Z"
-  },
-  {
     "id": "K1310",
     "title": "K1310: Sentiment-Augmented GARCH-LSTM — Computational Economics 2025",
     "priority": 3,
@@ -9652,20 +9640,6 @@
       "autonomous-research"
     ],
     "created_at": "2026-05-18T00:00:08Z"
-  },
-  {
-    "id": "K1308",
-    "title": "K1308: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）",
-    "priority": 3,
-    "description": "Auto-generated from research_program.md unchecked item (line 340). Original: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1308.py with signal.shift(1) + seed=42, (c) K1308_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
-    "task_type": "experiment",
-    "source": "research_backlog_auto",
-    "tags": [
-      "experiment",
-      "autonomous-research"
-    ],
-    "created_at": "2026-05-18T00:00:21Z"
   },
   {
     "id": "K1310",
@@ -9815,21 +9789,47 @@
     "title": "Fix mile_a8ac2ae4: 修正樣本期間標示（2008-2026 → 2009-2026）",
     "type": "platform_ops",
     "priority": "P2",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-05-18T21:31:34.810573",
     "description": "mile_a8ac2ae4 (台股大盤集中度) 文章中寫「完整樣本 2008-2026 n=4,227」，但 CSV 核查確認 0050/TSMC 共同有效資料從 2009-01-02 起，2008 全年無共同樣本。應修正為「2009-2026，共 4,227 個報酬觀察值」。Source: codex_24h_review_20260518.json",
     "related_article": "mile_a8ac2ae4",
-    "review_source": "storage/ops/codex_24h_review_20260518.json"
+    "review_source": "storage/ops/codex_24h_review_20260518.json",
+    "completed_at": "2026-05-18T15:12:22.791595+00:00",
+    "completion_note": "Fixed in main thread 2026-05-18: direct feed.json edit"
   },
   {
     "id": "fix_mile_ae145f60_citation",
     "title": "Fix mile_ae145f60: 替換 Bauer & Swanson 2023 錯引（CPI 非線性反應需正確文獻）",
     "type": "platform_ops",
     "priority": "P2",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-05-18T21:31:34.810573",
     "description": "mile_ae145f60 (CPI 倒數文) 引用 Bauer & Swanson (2023) 支持「CPI surprise 非線性反應」，但該文討論 FOMC 貨幣政策高頻識別，不是 CPI surprise 股票反應。應替換為研究 inflation surprise 與 equity 非線性反應的文獻（如 Bernanke & Kuttner 2005 JF，或 Cieslak & Schrimpf 2019）。注意：本文時效已過（2026-05-12 CPI 已公佈），修正優先級 P2。Source: codex_24h_review_20260518.json",
     "related_article": "mile_ae145f60",
-    "review_source": "storage/ops/codex_24h_review_20260518.json"
+    "review_source": "storage/ops/codex_24h_review_20260518.json",
+    "completed_at": "2026-05-18T15:12:22.791595+00:00",
+    "completion_note": "Fixed in main thread 2026-05-18: direct feed.json edit"
+  },
+  {
+    "id": "K1371",
+    "title": "K1371: AQR BAB factor re-run — Paper 3 Table 4 M5 full sample (B.2 fix)",
+    "priority": 2,
+    "description": "Paper 3 (vt-trend-following) review_v2 B.2 fix: Replace SPLV-SPHB proxy with real AQR BAB factor for full sample Jan 2005-Mar 2026 (N~5049 vs 3740 with SPHB). Re-run Table 4 M5 regression. AQR BAB available at https://www.aqr.com/Insights/Datasets/Betting-Against-Beta-Equity-Factors-Monthly. Script: experiments/k1371/k1371.py. Result must update paper/vt-trend-following/results/table4_m5_bab_full.json.",
+    "status": "pending",
+    "task_type": "experiment",
+    "blocked_reason": "AQR BAB data download + script design required first",
+    "created_at": "2026-05-18T15:24:07Z",
+    "notes": "Queued from paper3_vt_fix_review_v2_5HIGH dispatch. Fixes HIGH issue B.2 in review_v2.tex. SPLV-SPHB truncated to 2009 (SHY launched Oct 2007, SPHB Oct 2011); AQR BAB goes back to 1926 monthly. Monthly freq acceptable for factor model regression."
+  },
+  {
+    "id": "K1372",
+    "title": "K1372: MDD retention analysis — all 22 assets (Paper 3 B.3 fix)",
+    "priority": 2,
+    "description": "Paper 3 (vt-trend-following) review_v2 B.3 fix: Expand K1192 block-bootstrap MDD retention analysis from 5 US equity assets to all 22 primary sample assets. Include commodities (GLD, SLV, USO), bonds (TLT, LQD, HYG), real estate (VNQ), international ETFs (EEM, EFA, FXI, EWZ, EWJ, EWG, EWU, EWA, INDA). Script: experiments/k1372/k1372.py. Results: k1372_results.json + updated Table 5 (tab:mdd_bootstrap) with 22-asset MDD retention CI.",
+    "status": "pending",
+    "task_type": "experiment",
+    "blocked_reason": null,
+    "created_at": "2026-05-18T15:24:07Z",
+    "notes": "Queued from paper3_vt_fix_review_v2_5HIGH dispatch. Fixes HIGH issue B.3 in review_v2.tex. K1192 canonical bootstrap: 5000 reps, block size via Politis-Romano, 2005-2026. Extend same methodology to all 22 assets. GJR-GARCH per-asset fit required. Hypothesis: commodities and bonds may show weaker MDD retention (near-zero leverage effect gamma)."
   }
 ]
