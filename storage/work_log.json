@@ -7190,5 +7190,31 @@
     "title": "K1377 HAR Exp-QLIKE 組合文章 — SPY/GLD 達 Harvey |t|>3，首次跨市場確認",
     "result": "success",
     "notes": "slug=mile_2252fc17, status=draft. Anti-AI checklist 9/9 PASS. 2 charts uploaded. SPY DM t=3.723, GLD DM t=6.003 Harvey PASS; 0050.TW t=2.434 Harvey FAIL."
+  },
+  {
+    "timestamp": "2026-05-19T05:25:05Z",
+    "task_type": "experiment",
+    "task_id": "K1378",
+    "action": "compute_queue_enqueue",
+    "description": "K1378 leave-COVID-out DM test (SF1 fix) — script written + enqueued to compute_queue as k1378-covid-dm. W=2000, refit_every=63, OOS_start=2019-01-01. Tests full OOS + non-COVID OOS (2020-03-01 to 2021-06-30 excluded). Harvey threshold |t|>3.0.",
+    "artifacts": [
+      "experiments/k1378/README.md",
+      "experiments/k1378/k1378.py"
+    ],
+    "compute_queue_id": "k1378-covid-dm",
+    "next_task": "k1378_results.json followup after compute completes"
+  },
+  {
+    "timestamp": "2026-05-19T05:25:05Z",
+    "task_type": "experiment",
+    "task_id": "K1379",
+    "action": "compute_queue_enqueue",
+    "description": "K1379 HAR-RV/HAR-RV-VIX horse race benchmarks (C4 HIGH fix) — script written + enqueued as k1379-har-benchmark. 4-model comparison (GJR, A4f, HAR-RV, HAR-RV-VX). 6 DM pairs, same Patton QLIKE proxy. Loss arrays saved as .npy for K_NEW_C White RC/SPA.",
+    "artifacts": [
+      "experiments/k1379/README.md",
+      "experiments/k1379/k1379.py"
+    ],
+    "compute_queue_id": "k1379-har-benchmark",
+    "next_task": "k1379_results.json followup after compute completes"
   }
 ]
