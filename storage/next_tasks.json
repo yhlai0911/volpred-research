@@ -9988,7 +9988,7 @@
   {
     "id": "platform_ops_tw50_staleness_api",
     "task_type": "platform_ops",
-    "status": "pending",
+    "status": "succeeded",
     "priority": "P1",
     "title": "Fix broken tw50-staleness test files: add tw50_date param + build_milestone_description",
     "description": "Two untracked test files reference non-existent API: (1) tests/test_daily_update_tw_staleness.py calls generate_daily_article(..., tw50_date=...) but tw50_date param does not exist in scripts/daily_update.py; (2) tests/test_daily_update_tw_staleness_milestone.py imports build_milestone_description from scripts/daily_update.py — function does not exist. Fix: implement tw50_date optional param and build_milestone_description in scripts/daily_update.py, then verify tests pass.",

@@ -7234,5 +7234,24 @@
     "status": "completed",
     "title": "K1370 Bootstrap CI review + Paper 2 CI update",
     "notes": "Codex CONDITIONAL_PASS (session 019e3f17). Fixes: fit_gjr_one type hint float->tuple[float,float]; sanity-check N_start hardcode range(10)->range(N_START) (2 occurrences). Knowledge.json: item_id=2cc9e0ee, verdict=CONDITIONAL_PASS, experiment_id=K1370. Paper 2 CI updated [2.31,6.61]->[2.28,6.58] (8 occurrences in body.tex). P1 task added: platform_ops_tw50_staleness_api."
+  },
+  {
+    "timestamp": "2026-05-19T08:13:36.363654+00:00",
+    "task_type": "platform_ops",
+    "task_id": "platform_ops_tw50_staleness_api",
+    "title": "Fix tw50-staleness test files: add tw50_date param + build_milestone_description",
+    "outcome": "succeeded",
+    "details": {
+      "changes": [
+        "Added _TW50_STALENESS_WARNING_TEMPLATE constant (single source-of-truth)",
+        "generate_daily_article() now accepts tw50_date param, stamps price with date, adds staleness warning, exposes tw50_date in details",
+        "New build_milestone_description() helper mirrors staleness logic for 持倉比率 milestone path",
+        "main() now uses build_milestone_description() for milestone desc; passes tw50_date to generate_daily_article()"
+      ],
+      "tests_passed": 9,
+      "files_changed": [
+        "scripts/daily_update.py"
+      ]
+    }
   }
 ]
