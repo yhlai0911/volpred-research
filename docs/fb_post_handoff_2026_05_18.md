@@ -1,22 +1,37 @@
-# FB Post Handoff — 4 Trending Reposts Ready for Manual / Sonnet-Sidepanel Push
+# FB Post Handoff — 5 Trending Reposts Pending Manual / Sidepanel Push
 
-**Created**: 2026-05-18 03:25 CST
-**Reason**: Claude Code MCP cannot drive Chrome (extension not connected). Personal FB has no API. Posts must go through manual browser UI — either user click-paste, or claude.ai Sonnet 4.6 in browser side panel.
-**Skipped from queue**: `mile_609d9ff3` (2026-05-16, no fb_post_draft, topic 2 days stale — marked `wont_fix` in trending_repost_log.json)
+**Updated**: 2026-05-19 17:10 CST
+**Pending count**: 5 (was 4 in v1; +2 added 5/18; 2 marked wont_fix)
+**Wont-fix**: `mile_ed85d127` (4d stale, no draft) + `mile_57894028` (1d, no draft, ROI low)
+
+**Why not auto-posted**: Claude Code MCP claude-in-chrome NOT connected → cannot drive Chrome UI. Personal FB has no API. Standby fix: connect MCP browser extension OR pivot to FB Page + Graph API.
 
 ---
 
 ## Workflow per post
 
-1. Open Facebook (already on the screen)
+1. Open Facebook (https://facebook.com)
 2. Click "Ivan Lai，在想些什麼？"
-3. Paste **FB POST** block as main post
+3. Paste FB POST block as main post
 4. Click 發佈
-5. After post appears, click "留言" → paste **FIRST COMMENT** block as first reply
+5. After post appears, click 留言 → paste FIRST COMMENT block as first reply
+
+## After posting all 5, run:
+
+```bash
+jq 'map(if .mile_id == "mile_ba1dc7f8" or .mile_id == "mile_207d3750" or .mile_id == "mile_dda1e670" or .mile_id == "mile_50f44a46" or .mile_id == "mile_dab6cc06" then .fb_post_status = "success" | .fb_posted_at = (now | strftime("%Y-%m-%dT%H:%M:%SZ")) else . end)' storage/reports/trending_repost_log.json > /tmp/trl.json && mv /tmp/trl.json storage/reports/trending_repost_log.json
+```
 
 ---
 
-## Posts (newest first — most timely priority)
+## Posts (newest first)
+
+
+=== mile_dab6cc06 (2026-05-18) ===
+--- FB POST ---
+storage/reports/fb_draft_oil_vix.txt
+--- FIRST COMMENT (after posting) ---
+https://volpred.zeabur.app/article/mile_dab6cc06
 
 
 === mile_ba1dc7f8 (2026-05-17) ===
@@ -117,11 +132,3 @@ Fisher z 檢定 p < 0.0001。不是噪音。
 --- FIRST COMMENT (after posting) ---
 完整版分析 + 圖表在這裡 → https://volpred.zeabur.app/article/mile_50f44a46
 
-
----
-
-## After posting all 4, run this to flip status:
-
-```bash
-jq 'map(if .mile_id == "mile_ba1dc7f8" or .mile_id == "mile_207d3750" or .mile_id == "mile_dda1e670" or .mile_id == "mile_50f44a46" then .fb_post_status = "success" | .fb_posted_at = (now | strftime("%Y-%m-%dT%H:%M:%SZ")) else . end)' storage/reports/trending_repost_log.json > /tmp/trl.json && mv /tmp/trl.json storage/reports/trending_repost_log.json
-```
