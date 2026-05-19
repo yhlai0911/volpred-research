@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/Users/yhlai0911/Desktop/volpred-research/experiments/k1379/k1379.py", line 62, in <module>
+    oos_indices = np.where(oos_mask.values)[0]
+                           ^^^^^^^^^^^^^^^
+AttributeError: 'numpy.ndarray' object has no attribute 'values'

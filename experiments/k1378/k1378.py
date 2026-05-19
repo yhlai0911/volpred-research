@@ -323,7 +323,6 @@ mean_qlike_gjr_nc = float(np.mean(loss_gjr[valid_no_covid]))
 mean_qlike_a4f_nc = float(np.mean(loss_a4f[valid_no_covid]))
 
 # (c) COVID-only OOS
-covid_only = valid & ~no_covid_oos_pos & oos_mask.values[oos_mask.values]
 covid_only_oos = valid & ~no_covid_oos_pos
 d_covid = loss_diff[covid_only_oos]
 dm_t_covid, dm_p_covid = dm_test(d_covid)

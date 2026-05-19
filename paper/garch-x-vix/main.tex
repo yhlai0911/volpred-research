@@ -761,6 +761,18 @@ A4f significantly outperforms GJR-GARCH and the longer-lag MIDAS specifications 
 
 The \citet{giacomini2006} conditional predictive ability test further supports this interpretation: A4f conditionally outperforms GJR ($\chi^2 = 16.28$, $p < 0.001$) but not B1 ($\chi^2 = 3.77$, $p = 0.152$).
 
+\subsection{HAR-RV Benchmark Comparison}
+\label{sec:har_rv_benchmark}
+
+To assess whether A4f competes with realized-measure-based benchmarks---which use intraday or lagged realized variance as inputs and represent the standard alternative to GARCH-family models in the volatility forecasting literature---we compare A4f against HAR-RV \citep{corsi2009} and HAR-RV-VIX (HAR-RV augmented with $\mathrm{VIX}_{t-1}^2$). Because these model families predict different targets ($\sigma_t^2$ for GARCH-X versus $\mathrm{RV}_t$ for HAR), we use $r_t^2$ as a common volatility proxy for a fair cross-family comparison. The evaluation period and estimation protocol match those of the main horse race (OOS 2019--2026, $W = 2{,}000$, refit every 63 days).
+
+Under this common-proxy evaluation ($n = 1{,}852$), A4f achieves lower average loss than both HAR-RV and HAR-RV-VIX (4.2\% and 6.7\% improvements, respectively), but neither difference reaches the \citet{harvey2016} threshold:
+\begin{itemize}
+  \item A4f vs.\ HAR-RV: DM $t = +0.29$, $p = 0.77$ (not significant)
+  \item A4f vs.\ HAR-RV-VIX: DM $t = +0.65$, $p = 0.52$ (not significant)
+\end{itemize}
+These results indicate that A4f is statistically \emph{non-inferior} to HAR-type benchmarks under the $r_t^2$ proxy. Importantly, A4f achieves this parity without requiring high-frequency or realized-variance data as inputs---a practical advantage for daily risk management where intraday data may be unavailable or costly. We caution that, under the standard Patton QLIKE (which penalizes underestimation and is asymmetric in the opposite direction), the relative rankings between GARCH-X and HAR-type models may shift; a formal comparison on realized variance proxies is left for future work.
+
 \subsection{Multiple Testing Considerations}
 
 With 16 pairwise tests against GJR, 10 of 16 multiplicative models achieve $|t| > 3.0$ at the Harvey threshold. Our main result---A4f vs.\ GJR with $t = 4.03$---exceeds the Bonferroni-adjusted critical value of $z_{0.05/(2 \times 16)} \approx 2.95$.

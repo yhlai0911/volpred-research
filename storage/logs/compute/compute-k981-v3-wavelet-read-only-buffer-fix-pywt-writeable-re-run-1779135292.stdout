@@ -1,0 +1,112 @@
+============================================================
+K981: HAR + Wavelet Decomposition
+============================================================
+Total observations: 5094
+Date range: 2006-01-04 to 2026-04-06
+r² mean: 1.4858, std: 5.9924
+
+Computing wavelet features (db4, 5 levels)...
+Wavelet features computed.
+Non-null wavelet rows: 5030
+Computing Haar wavelet features...
+
+Applying shift(1) to all features...
+IS: 2006-01-04 to 2018-12-31 (3270 obs)
+OOS: 2019-01-02 to 2026-04-06 (1824 obs)
+
+--- AR(1) ---
+  OOS predictions: 1823
+  QLIKE: 1.736856
+  MSE: 30.2434
+  R² OOS: 0.1976
+  MZ: α=0.1489, β=0.8961, R²=0.2003
+
+--- HAR ---
+  OOS predictions: 1823
+  QLIKE: 1.540782
+  MSE: 29.3013
+  R² OOS: 0.2226
+  MZ: α=0.2317, β=0.8353, R²=0.2317
+
+--- WHAR_db4 ---
+  OOS predictions: 1823
+  QLIKE: 1.745509
+  MSE: 39.7470
+  R² OOS: -0.0545
+  MZ: α=0.6910, β=0.4437, R²=0.0889
+
+--- WHAR_haar ---
+  OOS predictions: 1823
+  QLIKE: 327.794098
+  MSE: 39.8875
+  R² OOS: -0.0582
+  MZ: α=0.6996, β=0.4263, R²=0.0658
+
+--- WHAR_HAR_db4 ---
+  OOS predictions: 1823
+  QLIKE: 236.710456
+  MSE: 33.4363
+  R² OOS: 0.1129
+  MZ: α=0.5258, β=0.5981, R²=0.2070
+
+--- GJR-GARCH ---
+  OOS predictions: 1823
+  QLIKE: 1.530769
+  MSE: 28.0763
+  R² OOS: 0.2551
+  MZ: α=0.2590, β=0.7647, R²=0.2824
+
+============================================================
+Diebold-Mariano Tests (QLIKE loss, vs AR(1) baseline)
+============================================================
+  HAR vs AR(1): t=-3.301, p=0.0010 *** (better)
+  WHAR_db4 vs AR(1): t=0.136, p=0.8915  (worse)
+  WHAR_haar vs AR(1): t=1.419, p=0.1560  (worse)
+  WHAR_HAR_db4 vs AR(1): t=2.681, p=0.0074 *** (worse)
+  GJR-GARCH vs AR(1): t=-2.650, p=0.0081 *** (better)
+
+--- HAR vs WHAR_db4 ---
+  WHAR_db4 vs HAR: t=5.954, p=0.0000
+  → HAR better ***
+
+============================================================
+Wavelet Component Importance (IS OLS)
+============================================================
+Component        Coefficient     t-stat
+----------------------------------------
+  D1 (1-2d)          -0.013442     -7.533 ***
+  D2 (2-4d)           0.018016      8.107 ***
+  D3 (4-8d)          -0.000128     -0.071 
+  D4 (8-16d)          0.024740     11.938 ***
+  D5 (16-32d)         0.008241      6.691 ***
+  A5 (>32d)          -0.000091     -2.616 **
+  Intercept           0.986405
+  R² (IS): 0.1946
+
+Generating wavelet decomposition plot...
+  Saved k981_wavelet_decomposition.png
+Generating forecast comparison plot...
+  Saved k981_forecast_comparison.png
+
+Saving results...
+
+Results saved to k981_wavelet_har_results.json
+
+============================================================
+SUMMARY
+============================================================
+
+Model                   QLIKE          MSE     R²_OOS      MZ_R²     Corr
+----------------------------------------------------------------------
+  GJR-GARCH          1.530769      28.0763     0.2551     0.2824   0.5314
+  HAR                1.540782      29.3013     0.2226     0.2317   0.4813
+  AR(1)              1.736856      30.2434     0.1976     0.2003   0.4476
+  WHAR_db4           1.745509      39.7470    -0.0545     0.0889   0.2982
+  WHAR_HAR_db4     236.710456      33.4363     0.1129     0.2070   0.4550
+  WHAR_haar        327.794098      39.8875    -0.0582     0.0658   0.2566
+
+Best model: GJR-GARCH (QLIKE=1.530769)
+
+HAR outperforms WHAR (db4) by 13.3% in QLIKE. Fixed-window averages remain a robust choice; wavelet energy features do not capture additional predictive information for daily r² forecasting with this proxy.
+
+Done!

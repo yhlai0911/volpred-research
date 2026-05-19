@@ -7267,5 +7267,20 @@
     ],
     "started_at": "2026-05-19T09:21:22.199960+00:00",
     "notes": "Fixed numpy.values bug in k1378/k1379/k1380; re-enqueued all three Paper 9 robustness jobs. K1380 implements White RC + Hansen SPA test for 17-spec GARCH horse race (C3 CRITICAL fix)."
+  },
+  {
+    "id": "cd7f8b3c",
+    "task_type": "paper_review",
+    "title": "K1379 HAR-RV Followup Interpretation + Paper 9 SF2 Body Update",
+    "description": "PHASE A followup: K1379 HAR-RV/HAR-RV-VIX benchmark horse race results interpreted. A4f non-inferior to HAR-RV (DM t=0.29, Harvey FAIL). Added HAR-RV comparison section to Paper 9 main.tex. Enqueued K1378 (leave-COVID-out, SF1) and K1380 (White RC/SPA, SF3) to compute queue.",
+    "status": "completed",
+    "timestamp": "2026-05-19T19:18:02.397204",
+    "result_summary": "K1379: A4f beats HAR-RV numerically 4.2% QLIKE but DM t=0.29 (Harvey FAIL). Paper 9 HAR-RV section added. K1378+K1380 enqueued.",
+    "knowledge_entries": [
+      "88127805"
+    ],
+    "experiment_ids": [
+      "k1379"
+    ]
   }
 ]

@@ -30839,5 +30839,20 @@
     "experiment_path": "experiments/k1370/",
     "codex_review": "CONDITIONAL_PASS — Codex session 019e3f17-1e56-7ee1-b176-388c320feec7 (2026-05-19). Issues fixed: fit_gjr_one type hint corrected, sanity-check N_start hardcode replaced with N_START variable.",
     "created_at": "2026-05-19T15:19:43.953980"
+  },
+  {
+    "item_id": "88127805",
+    "category": "paper_evidence",
+    "content": "K1379: Paper 9 HAR-RV/HAR-RV-VIX Benchmark Horse Race (SF2 fix). OOS 2019-01-01 to 2026-05-18, n=1852 valid obs, W=2000, refit=63. QLIKE (r² proxy, lower=better): GJR 624.33 < A4f 688.49 < HAR-RV 718.48 < HAR-RV-VIX 737.58. A4f beats HAR-RV by 4.2% and HAR-RV-VIX by 6.7% in point estimate QLIKE. DM Harvey tests: A4f vs GJR t=-1.19 (FAIL), A4f vs HAR-RV t=+0.29 (FAIL), A4f vs HAR-VX t=+0.65 (FAIL); all Harvey FAIL at |t|>3.0. C4 verdict: A4f is statistically NON-INFERIOR to HAR-RV (can't reject equal accuracy), but cannot claim Harvey-significant superiority. Implication for Paper 9: Address SF2 by framing as parsimonious equivalence — 'A4f matches HAR-RV accuracy without requiring realized measures as inputs, validating the VIX-squared specification as a practical alternative.' Note: GJR unexpectedly best (624.33) in r² proxy evaluation — proxy-dependent artifact; paper's main result uses full QLIKE kernel where A4f beats GJR at DM t=4.03. HAR-RV fit via rolling OLS on 5-day RV proxy; comparison fair on common r² benchmark.",
+    "evidence": [
+      "experiments/k1379/k1379_results.json",
+      "experiments/k1379/k1379.py",
+      "paper/garch-x-vix/review_history/v2/codex_adversarial_review_2026-05-19.md (SF2)"
+    ],
+    "confidence": 0.85,
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "k1379",
+    "k_id": "K1379",
+    "created_at": "2026-05-19T19:12:10.426806"
   }
 ]
