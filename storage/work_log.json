@@ -7417,5 +7417,15 @@
     ],
     "codex_session": "019e416e-dc48-7510-8663-8a45f2f89124",
     "reviewer": "Codex CLI 0.130.0 / gpt-5.4 / primary-path"
+  },
+  {
+    "timestamp": "2026-05-19T19:25:43Z",
+    "task_type": "experiment",
+    "task_id": "K1380",
+    "title": "K1380 numba JIT rescue — SPA/RC test for Paper 9 C3 CRITICAL",
+    "status": "compute_queued",
+    "summary": "Added numba @njit(cache=True) to 4 bottleneck functions: _gjr_filter, _garch_x_nll_free, _garch_x_nll_constrained, _midas_filter_ll. Replaced Python for-loops in fit_garch_x and fit_midas with thin wrappers calling JIT functions. Expected speedup ~50x (30-90min → ~2min). Re-enqueued as compute-k1380-v3 with timeout=10800s. Lookahead verified: vix[abs_idx-1] throughout.",
+    "commit": "a7c80e12",
+    "compute_job_id": "compute-k1380-v3-numba-jit-spa-rc-test-17-spec-horse-race-paper-9-c3-1779218697"
   }
 ]

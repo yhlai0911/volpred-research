@@ -9978,7 +9978,7 @@
     "description": "Per Paper 9 v3 review C3 CRITICAL: 17 規格排名需 White (2000) RC 或 Hansen (2005) SPA test 作為 multiple testing correction。建立規格選擇 genealogy 與 Appendix B。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "dispatched",
+    "status": "compute_queued",
     "blocked_reason": null,
     "tags": [
       "paper9",
@@ -9989,7 +9989,11 @@
     ],
     "created_at": "2026-05-19T04:19:29.423720+00:00",
     "dispatched_at": "2026-05-19T09:21:14.026610Z",
-    "compute_queue_id": "k1380-spa-test"
+    "compute_queue_id": "k1380-spa-test",
+    "compute_job_id": "compute-k1380-v3-numba-jit-spa-rc-test-17-spec-horse-race-paper-9-c3-1779218697",
+    "updated_at": "2026-05-19T19:25:27Z",
+    "k_id": "K1380",
+    "notes": "K1380 v3: numba JIT fix enqueued, timeout=10800s (was failing at 3600s)"
   },
   {
     "id": "platform_ops_tw50_staleness_api",
