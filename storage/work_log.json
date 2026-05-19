@@ -7147,5 +7147,24 @@
     "n_ath_vix_18_22": 81,
     "key_finding": "ATH+VIX18-22 → +1.50% mean 30d return, 67.9% win rate (best of 4 bins)",
     "chart": "artifacts/trending_repost/ath_vix_2026_05_19.png"
+  },
+  {
+    "timestamp": "2026-05-19T09:23:00+08:00",
+    "task_type": "paper_body",
+    "task_id": "paper3_vt_fix_review_v4_HIGH",
+    "paper_id": "taiwan-vt",
+    "status": "completed",
+    "description": "Fix Paper 3 body_v3.tex review_v4 HIGH+MEDIUM issues: H1+H3 (Table 3 8.63/VIX Sharpe 1.137→0.690 MDD -13.7→-15.3 K1175 canonical), H2 (GJR+0.114→+0.124 Intro+Conclusion; common period Sharpe refs K900: 1.074→1.084, 1.137→1.132), M1 (Section 5: time-zone arbitrage→risk management), M2 (Table 3 footnote contradiction removed). Compiled 47pp xelatex clean. Synced paper-update. Commit 7ea0593d.",
+    "commit": "7ea0593d"
+  },
+  {
+    "task_id": "K1377",
+    "task_type": "experiment",
+    "title": "K1377: HAR Exp-QLIKE Combination — SPY/GLD PASS",
+    "status": "completed",
+    "timestamp": "2026-05-19T03:49:03.661183+00:00",
+    "result": "PASS: SPY DM t=3.723 Harvey PASS; GLD DM t=6.003 Harvey PASS; 0050.TW DM t=2.434 FAIL. Knowledge: caa7febc",
+    "agent_type": "worktree",
+    "worktree": "agent-a6ec6416edc4603cb"
   }
 ]

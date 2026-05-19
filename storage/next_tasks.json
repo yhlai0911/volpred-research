@@ -1,5 +1,24 @@
 [
   {
+    "id": "K1377",
+    "title": "K1377: HAR 組合預測（Inverse-QLIKE 加權）— SPY / GLD / 0050.TW",
+    "description": "測試以 rolling inverse-QLIKE 加權組合 HAR / HAR-ABS / HAR-VIX 三個模型，是否能以 DM-Harvey |t|>3 顯著勝過最佳單一模型 HAR-VIX（K530 結果）。對應 research_program.md 面向 A「組合預測（反 QLIKE 加權）」方向。",
+    "task_type": "experiment",
+    "priority": "P3",
+    "status": "succeeded",
+    "created_at": "2026-05-19T11:13:23.368781",
+    "tags": [
+      "HAR",
+      "forecast-combination",
+      "inverse-QLIKE",
+      "SPY",
+      "GLD",
+      "0050.TW"
+    ],
+    "completed_at": "2026-05-19T11:49:03.785530",
+    "result": "PASS: SPY/GLD Harvey PASS (t=3.723/6.003), 0050.TW FAIL (t=2.434)"
+  },
+  {
     "id": "K681b",
     "task_type": "experiment",
     "priority": 2,
@@ -9842,5 +9861,75 @@
     "completed_at": "2026-05-17",
     "synced_from_experiments_at": "2026-05-18T17:29:27.154324+00:00",
     "result_summary": "**Experiment ID**: K1372\n**Status**: completed\n**Created At**: 2026-05-17T11:15:33Z\n**Member Question Source**: uq_mock1 (score 82/100)"
+  },
+  {
+    "id": "K1307",
+    "title": "K1307: 修正 review_v2 的 5 HIGH",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 249). Original: 修正 review_v2 的 5 HIGH\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1307.py with signal.shift(1) + seed=42, (c) K1307_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-05-19T00:00:04Z"
+  },
+  {
+    "id": "K1308",
+    "title": "K1308: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 340). Original: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1308.py with signal.shift(1) + seed=42, (c) K1308_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-05-19T00:00:04Z"
+  },
+  {
+    "id": "K1310",
+    "title": "K1310: Risk Parity + Heavy-Tailed + Regime-Switching DCC — Paolella (2025, JTSA)",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 412). Original: Risk Parity + Heavy-Tailed + Regime-Switching DCC — Paolella (2025, JTSA)\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1310.py with signal.shift(1) + seed=42, (c) K1310_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-05-19T00:00:04Z"
+  },
+  {
+    "id": "K1307",
+    "title": "K1307: 修正 review_v2 的 5 HIGH",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 249). Original: 修正 review_v2 的 5 HIGH\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1307.py with signal.shift(1) + seed=42, (c) K1307_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-05-19T00:00:35Z"
+  },
+  {
+    "id": "K1308",
+    "title": "K1308: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 340). Original: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1308.py with signal.shift(1) + seed=42, (c) K1308_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-05-19T00:00:35Z"
   }
 ]
