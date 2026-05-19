@@ -1,5 +1,34 @@
 [
   {
+    "timestamp": "2026-05-19T11:32:06.876380+00:00",
+    "task_type": "paper_body",
+    "task_id": "Paper2_section5_major_revision",
+    "title": "EAV Paper 2 §6.5 Cross-Market Institutional Panel (K1222b integration)",
+    "paper_id": "eav-universal-magnitude",
+    "status": "completed",
+    "deliverable": "New §6.5 subsections in paper/eav-universal-magnitude/body.tex (86 lines added)",
+    "experiments_used": [
+      "K1165",
+      "K1166",
+      "K1168",
+      "K1171",
+      "K1172",
+      "K1207",
+      "K1216",
+      "K1216b",
+      "K1216c",
+      "K1213",
+      "K1222b"
+    ],
+    "key_findings": [
+      "Panel Harvey |t|(log_analyst) = 3.236→3.808 across 5 iterations (all > threshold, invariant to multistart)",
+      "K1207 sector-FE: F=689.5 adjR2=0.148 vs inst=0.0046 (32x ratio; orthogonal cross-sector rho=-0.006)",
+      "K1216c institutional-ownership Spearman: rho=+0.379 p=0.201 N=13 (MODESTLY WEAKER SURVIVING)",
+      "Fisher z test: canonical +0.441 vs refined +0.379 p=0.87 (indistinguishable)"
+    ],
+    "notes": "K1222b FINAL guide applied. xelatex clean (2 passes). task_id Paper2_section5_major_revision marked succeeded."
+  },
+  {
     "session_id": "hourly_dispatch_2026-05-18",
     "timestamp": "2026-05-18T11:24:26.570230+00:00",
     "task_id": "paper_review_mile_80aeb8a1",

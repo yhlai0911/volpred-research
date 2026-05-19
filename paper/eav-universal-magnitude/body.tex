@@ -774,6 +774,117 @@ preferred ($\Delta$DM $t \approx 0.33$). The earlier framing that
 robustly identify the earnings-announcement effect.
 
 %==============================================================
+\subsection{Broader Cross-Market Evidence: 12-Market Institutional Panel}
+\label{sec:cross_market_panel}
+%==============================================================
+
+The three-market comparisons in Sections~\ref{sec:cross} and~\ref{sec:regularity} are
+corroborated by a broader 12-market panel analysis extending to Brazil (BR), Canada (CA),
+China (CH), the EU, Hong Kong (HK), Indonesia (ID), India (IN), Japan (JP), Korea (KR), Mexico
+(MX), Taiwan (TW), and the U.S.\ (K1165 through K1172; $N = 172$ stocks $\times$ mean
+2{,}955 trading days). We summarise the three main findings.
+
+\subsubsection{Within-Market Analyst-Attention Mechanism}
+\label{sec:within_analyst}
+
+Panel OLS with market fixed effects regresses firm-level $\hat{\theta}_{\mathrm{EAV},i}$
+on $\log(\mathrm{analyst})$, $\log(\mathrm{mcap})$, and $\mathrm{institutions\_pct}$
+(cluster-robust SEs, market clusters). The Harvey-Liu-Zhu (2016) $|t| > 3.0$ threshold
+is satisfied for $\log(\mathrm{analyst})$ across every successive N-extension:
+
+\begin{equation}
+|t|(\log\mathrm{analyst}): \quad 3.236 \;\to\; 3.556 \;\to\; 3.627 \;\to\; 3.789 \;\to\; 3.808
+\label{eq:analyst_trajectory}
+\end{equation}
+
+corresponding to N = 7, N = 10, N = 10 (K1166 refit), N = 12, N = 13 markets
+(K1165 $\to$ K1166 $\to$ K1168 $\to$ K1172 $\to$ K1171), all above the Harvey threshold.
+% source: k1172_results.json: panel_ols.joint.coefs.log_analyst.t = 3.7893
+% source: k1222b_revision_guide.md §5.1 sequence table (K1165/K1166/K1168/K1171 values)
+By contrast, $\mathrm{institutions\_pct}$ is insignificant within markets at
+every iteration ($|t| < 1$, $\hat{\beta} \approx -1.27 \times 10^{-3}$, stable).
+This panel Harvey t is independent of the pooled-MLE basin choice (it uses stock-level
+GJR volatility estimates, not the shared-MIDAS $\hat{\theta}_{\mathrm{EAV}}$), and is
+therefore invariant to the K1216c multistart revision discussed in
+Section~\ref{sec:spearman_panel} below.
+
+\subsubsection{Sector-Composition Dominates Institutional Ownership}
+\label{sec:sector_fe}
+
+K1207 augments the 12-market panel (K1171, $N = 182$ firm-market observations) with
+GICS sector fixed effects across 10 sectors. The incremental explanatory power
+reveals a clear hierarchy:
+
+\begin{itemize}
+\item \textbf{Sector FE} (M3 $-$ M1): incremental adj.-$R^2 = 0.148$, sector joint
+  $F = 689.5$, $p = 7.9 \times 10^{-14}$ (market-clustered SE, 9 df).
+  % source: k1207_results.json: analysis2_4model.M3.sector_fe_f = 689.52, sector_fe_p = 7.865e-14
+  % source: k1207_results.json: verdict.inc_R2_sector_M3_minus_M1 = 0.14799
+\item \textbf{Institutional ownership FE} (M2 $-$ M1): incremental adj.-$R^2 = 0.0046$,
+  approximately $32\times$ less explanatory than sector.
+  % source: k1207_results.json: verdict.inc_R2_inst_M2_minus_M1 = 0.004634
+\item \textbf{Sector--ownership orthogonality}: cross-sector Spearman($\hat{\theta}_{\mathrm{EAV}}$
+  sector median, $\mathrm{inst\_pct}$ sector median) $= -0.006$, $p = 0.987$ ($n = 10$
+  sectors).
+  % source: k1207_results.json: analysis4_orthogonality.rho = -0.006, p = 0.987
+\end{itemize}
+
+Sector composition (the GICS mix of each country's large-cap benchmark) is the dominant
+cross-market driver of $\hat{\theta}_{\mathrm{EAV}}$ variation, explaining $\approx 32\times$
+more variation than institutional ownership. Sector and ownership operate through orthogonal
+channels (cross-sector $\rho = -0.006$). The K1207 verdict is
+\texttt{SECTOR\_ORTHOGONAL\_CONFIRMED}.
+
+\subsubsection{Institutional-Ownership Ordering: Modestly Weaker but Surviving}
+\label{sec:spearman_panel}
+
+The K1165$\to$K1172 canonical trajectory reported a positive cross-market Spearman
+correlation between $\mathrm{institutions\_pct}$ and $\hat{\theta}_{\mathrm{rel}} \equiv
+\hat{\theta}_{\mathrm{EAV}} / \overline{\sigma^2}$, peaking at $\rho = +0.441$ ($p = 0.152$,
+$N = 12$) before the K1213/K1216/K1216b/K1216c multistart audits.
+% source: k1172_results.json: cross_market_spearman.institutions_pct_vs_theta_rel.rho = 0.441, p = 0.152
+
+The multistart audits (K1213 AU; K1216 BR/IN/MX; K1216b CH/ID; K1216c US/EU/JP/TW) reveal
+that all 9 audited markets' joint pooled-MLE canonical estimates are trapped in an inferior
+local minimum (Appendix~\ref{app:gradient}). An intermediate correction applying the
+multistart protocol only to the five EM markets while leaving DEV markets at single-init
+canonical values produces an artefactual collapse to $\rho = -0.071$ (K1216b asymmetric
+refinement). Once the identical 100-start protocol is applied uniformly to all 9 fragile
+markets, the rank concordance rebounds:
+
+\begin{table}[htbp]
+\caption{Cross-Market Spearman Trajectory: Institutional Ownership vs.\ $\hat{\theta}_{\mathrm{rel}}$}
+\label{tab:spearman_traj}
+\centering
+\begin{tabular}{lccccl}
+\toprule
+Scenario & $N$ & $\rho$ & $p$ & Harvey $t$ & Status \\
+\midrule
+K1172 baseline (all canonical) & 12 & $+0.441$ & $0.152$ & $+1.55$ & Reference \\
+K1216b: 5-EM refined, DEV canonical & 13 & $-0.071$ & $0.817$ & $-0.24$ & Artefact (asymmetric) \\
+K1216c: 9-market uniform refinement & 13 & $\mathbf{+0.379}$ & $\mathbf{0.201}$ & $\mathbf{+1.36}$ & \textbf{FINAL} \\
+\bottomrule
+\end{tabular}
+\end{table}
+% source: k1216c_results.json: spearman_variants.K1216c_FULL_9market_refined_plus_AU_N13.rho=0.3791, p=0.2014
+% source: k1216c_results.json: harvey_t_per_variant.K1216c_FULL_9market_refined_plus_AU_N13=1.3588
+
+The canonical (+0.441, $N=12$) and uniformly-refined (+0.379, $N=13$) estimates are
+statistically indistinguishable under a Fisher $z$ comparison
+($z$-stat $= 0.16$, two-sided $p \approx 0.87$). Both are moderately positive and
+non-significant at 5\%. We therefore characterise the cross-market institutional-ownership
+ladder as \emph{modestly weaker but surviving}: at the global optimum, the ladder retains
+$\approx 86\%$ of its canonical magnitude and a positive directional prediction consistent
+with the analyst-attention interpretation of Section~\ref{sec:within_analyst}.
+
+\paragraph{Pre-registration disclosure.}
+Canada, Hong Kong, and Korea carry K1172 canonical $\hat{\theta}_{\mathrm{rel}}$ in the
+K1216c rebuild (these three markets were not included in the 9-market multistart audit).
+Given the universal FRAGILE verdict across all 9 audited markets, a future audit on
+CA/HK/KR would likely shift their $\hat{\theta}_{\mathrm{rel}}$ upward; the final
+$\rho$ is expected to fall between $+0.30$ and $+0.50$.
+
+%==============================================================
 \section{Robustness Battery}
 \label{sec:robustness}
 %==============================================================
