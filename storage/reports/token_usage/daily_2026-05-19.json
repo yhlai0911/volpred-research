@@ -1,0 +1,227 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-05-19",
+  "week_range": "2026-05-15 → 2026-05-22",
+  "totals": {
+    "input_tokens": 10,
+    "output_tokens": 637,
+    "cache_read_tokens": 28494,
+    "cache_create_tokens": 85687,
+    "billable_total": 86334,
+    "assistant_messages": 4,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.3395
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 10,
+      "output_tokens": 637,
+      "cache_read_tokens": 28494,
+      "cache_create_tokens": 85687,
+      "messages": 4,
+      "estimated_cost_usd": 0.3395
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 6,
+      "output_tokens": 344,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 56988,
+      "messages": 2,
+      "billable_total": 57338,
+      "estimated_cost_usd": 0.2189,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "token_report": {
+      "input_tokens": 4,
+      "output_tokens": 293,
+      "cache_read_tokens": 28494,
+      "cache_create_tokens": 28699,
+      "messages": 2,
+      "billable_total": 28996,
+      "estimated_cost_usd": 0.1206,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 2,
+      "billable_total": 57338,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 2,
+          "billable_total": 57338
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "non-text assistant message",
+          "messages": 1,
+          "billable_total": 28669
+        },
+        {
+          "name": "other",
+          "messages": 1,
+          "billable_total": 28669
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 1,
+          "billable_total": 28669
+        },
+        {
+          "name": "先確認腳本存在，然後執行日報。",
+          "messages": 1,
+          "billable_total": 28669
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 0,
+      "billable_total": 0,
+      "family_breakdown": [],
+      "prefix_breakdown": [],
+      "top_first_lines": []
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 1,
+      "cache_create_tokens": 85687,
+      "billable_total": 86334,
+      "cache_create_share_pct": 99.3,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "f2aaf800-9032-4548-a7a4-ae1c32ce7045",
+          "messages": 4,
+          "billable_total": 86334,
+          "cache_create_tokens": 85687,
+          "cache_read_tokens": 28494,
+          "duration_minutes": 0.1,
+          "cache_create_share_pct": 99.3,
+          "first_ts": "2026-05-19T14:44:01.246000+00:00",
+          "last_ts": "2026-05-19T14:44:05.250000+00:00"
+        }
+      ]
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "84b4157",
+      "message": "merge: resolve paper8 README status conflict — keep errata-addressed HEAD + red "
+    },
+    {
+      "sha": "cc958c8",
+      "message": "experiment(k1381): Taiwan tech sector vol HAR-X — MIXED verdict"
+    },
+    {
+      "sha": "bb637b9",
+      "message": "experiment(k1381): Taiwan tech sector vol as leading indicator for 0050.TW"
+    },
+    {
+      "sha": "00ec8a2",
+      "message": "interpret(paper9/k1378): SF1 CONFIRMED — leave-COVID-out DM t=-0.362 Harvey FAIL"
+    },
+    {
+      "sha": "b26b2e5",
+      "message": "feat(article): K1376 research article — VT-TSMOM MDD Bootstrap CI 22 assets"
+    },
+    {
+      "sha": "2e1c915",
+      "message": "fix(boss_report): --force flag to bypass dedup for manual re-send"
+    },
+    {
+      "sha": "b5565c7",
+      "message": "ops: boss_report adds 意圖/規劃/推理/blockers sections + cycle intent state"
+    },
+    {
+      "sha": "04666d3",
+      "message": "Ops patrol report 2026-05-19T12:07Z"
+    },
+    {
+      "sha": "34bad15",
+      "message": "ops: boss_report HTML email + 4h cron + revised direction (free-tier-first)"
+    },
+    {
+      "sha": "253eafc",
+      "message": "ops: live-verify gate + ops_team_structure activated + 3 new audit crons"
+    },
+    {
+      "sha": "dfbab41",
+      "message": "ops: add ops_dashboard + 2 audit scripts + trending_repost URL canonical fix"
+    },
+    {
+      "sha": "4fd164e",
+      "message": "feat(paper2-eav): add §6.5 cross-market institutional panel (K1222b integration)"
+    },
+    {
+      "sha": "72e562d",
+      "message": "fb(handoff): final state — 2 posted (ba1dc7f8+207d3750), 2 fb_silent_reject (dda"
+    },
+    {
+      "sha": "1fd8363",
+      "message": "feat(paper9): K1379 HAR-RV followup + SF2 paper body update + K1378 bugfix"
+    },
+    {
+      "sha": "452c400",
+      "message": "feat(paper9): K1380 White RC/SPA test + fix numpy.values bug in K1378/K1379/K138"
+    },
+    {
+      "sha": "bc4e180",
+      "message": "fb(handoff): pending grew 4→5 (2 added 5/18, 2 wont-fix) + cron daily gaps fixed"
+    },
+    {
+      "sha": "044de98",
+      "message": "fix(platform_ops): tw50 staleness disclosure in daily_update article paths"
+    },
+    {
+      "sha": "d5b0bf4",
+      "message": "review(K1370): Codex CONDITIONAL_PASS fixes + Paper 2 CI update + knowledge entr"
+    },
+    {
+      "sha": "7c1edc9",
+      "message": "feat(trending_repost): 穆迪降評美債一週年 — 市場數據覆盤文章"
+    },
+    {
+      "sha": "fd167ba",
+      "message": "Ops patrol report 2026-05-19T06:10Z"
+    },
+    {
+      "sha": "f752198",
+      "message": "feat(paper9): K1378 + K1379 robustness experiment scripts for SF1 & C4 fixes"
+    },
+    {
+      "sha": "904d8bd",
+      "message": "feat(article+tasks): K1377 HAR Exp-QLIKE 文章 draft + K_NEW_A/B/C Paper 9 實驗任務"
+    },
+    {
+      "sha": "1f0dbf6",
+      "message": "review(paper9/v3): LaTeX + citation review cycle — 3 SERIOUS FLAWs confirmed + 1"
+    },
+    {
+      "sha": "b3766cf",
+      "message": "ops(k1377): mark succeeded + update work_log"
+    },
+    {
+      "sha": "09e5a6b",
+      "message": "feat(k1377): HAR Exp-QLIKE combination — SPY/GLD PASS, 0050.TW partial"
+    },
+    {
+      "sha": "7ea0593",
+      "message": "fix(paper3/taiwan-vt): resolve review_v4 HIGH+MEDIUM issues in body_v3.tex"
+    },
+    {
+      "sha": "4046592",
+      "message": "feat(trending_repost): SPY ATH+VIX 18-22 歷史分析——反直覺的最佳勝率組合"
+    },
+    {
+      "sha": "9347a59",
+      "message": "Ops patrol report 2026-05-19T00:06Z"
+    }
+  ]
+}
