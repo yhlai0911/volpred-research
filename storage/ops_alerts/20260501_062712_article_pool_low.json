@@ -1,0 +1,13 @@
+{
+  "timestamp": "2026-05-01T06:27:12Z",
+  "alert_type": "article_pool_low",
+  "severity": "warning",
+  "message": "article pool low (<12): only 6 draft articles in feed (research=4, general=2)",
+  "detail": {
+    "total_drafts": 6,
+    "threshold": 12,
+    "research_count": 4,
+    "general_count": 2
+  },
+  "recommended_action": "Run feed-publisher to add at least 6 more draft articles. Priority: general audience (need +6 to reach threshold of 8)."
+}

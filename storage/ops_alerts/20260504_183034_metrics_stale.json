@@ -1,0 +1,7 @@
+{
+  "timestamp": "2026-05-04T18:30:34Z",
+  "alert_type": "metrics_stale",
+  "severity": "warning",
+  "detail": "storage/strategy_metrics.json last modified ~42.2 hours ago (2026-05-02T20:54:01Z). Threshold: 26 hours. Strategy metrics are stale — live dashboard and rankings may be outdated.",
+  "recommended_action": "Run: uv run volpred ops update-strategy-metrics (or equivalent daily_update job). Verify cron scheduler is firing correctly."
+}

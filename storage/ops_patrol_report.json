@@ -1,47 +1,41 @@
 {
-  "timestamp": "2026-04-26T12:20:59.429622Z",
+  "timestamp": "2026-05-19T12:07:17Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "alert",
-      "detail": "Total drafts: 4 (<12). General: 1/8, Research: 3/4."
+      "detail": "total_drafts=6, research=4, general=2; ALERTS: article pool low (<12): total=6; general pool low (<8): general=2"
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
-      "status": "ok",
-      "detail": "strategy_metrics.json is 18.2h old (<26h threshold)"
+      "status": "alert",
+      "detail": "age=54.0h (threshold=26h); ALERT: metrics stale"
     },
     {
       "name": "ERROR_LOG",
-      "status": "alert",
-      "detail": "3 entries dated today (2026-04-26)",
-      "entries": [
-        "2026-04-26: knowledge-index-summary returns status=broken (lancedb list_tables API shape change; fixed)",
-        "2026-04-26: Member Q&A pending 5-day silent gap for q=29cbeb5c; evaluated and ranked",
-        "2026-04-26: Codex CLI gpt-5.5 model requires upgrade; fallback to main thread audit"
-      ]
+      "status": "ok",
+      "detail": "no entries dated 2026-05-19 (today) or 2026-05-18 (yesterday) in last 30 lines; most recent entry 2026-04-26"
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 15 strategies have <=2 nulls in last 3 entries"
+      "detail": "all 14 strategies have <=1 null in last 3 entries; no strategy exceeds >2 null threshold; _market_daily skipped (empty)"
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files"
+      "detail": "0 uncommitted files (threshold: >50); working tree clean"
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "2044 entries in knowledge.json"
+      "detail": "knowledge.json entries=2044"
     }
   ],
   "alerts": [
-    "article pool low (<12)",
-    "article pool research audience low (3<4)",
-    "article pool general audience low (1<8)",
-    "error_log has 3 entries dated today/yesterday"
+    "article pool low (<12): total=6",
+    "general pool low (<8): general=2",
+    "metrics stale (age=54.0h)"
   ]
 }

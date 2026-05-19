@@ -1,7 +1,7 @@
 # Paper 8: The Volatility Absorption Hypothesis
 
 **Target Journal**: TBD
-**Status**: R1 review — Path B errata revision applied in main_v3.tex (2026-05-13) | Reproduce gate 61.3% amber. **2026-04-19 CRITICAL errata** (see `errata_pending.md`):
+**Status**: R1 review — Path B errata revision applied in main_v3.tex (2026-05-13) | Reproduce gate 61.3% **red** (canonical threshold: <80% match → red; previously mislabelled "amber" prior to alert_level schema fix 2026-05-12). **2026-04-19 CRITICAL errata** (see `errata_pending.md`):
 - ~~**CRITICAL**: controlled regression $t = -3.14 \to -1.17$ crosses Harvey boundary~~ → **ADDRESSED** in main_v3.tex: K903 values applied ($\beta=-0.000216$, $t=-1.26$) with Harvey-boundary footnote
 - ~~**HIGH**: T10 2020-2026 $\beta$ sign flip~~ → **ADDRESSED** in main_v3.tex: table updated to K903 snapshot (2020-2026 $\beta=+0.000141$, $t=+0.47$); "all periods" claim removed; crisis-era caveat added
 - **MEDIUM**: 10+ T9/T10 magnitude drifts within acceptable yfinance drift range

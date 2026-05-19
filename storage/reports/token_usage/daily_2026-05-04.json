@@ -1,0 +1,127 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-05-04",
+  "week_range": "2026-05-01 → 2026-05-08",
+  "totals": {
+    "input_tokens": 9,
+    "output_tokens": 693,
+    "cache_read_tokens": 0,
+    "cache_create_tokens": 68859,
+    "billable_total": 69561,
+    "assistant_messages": 3,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.2686
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 9,
+      "output_tokens": 693,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 68859,
+      "messages": 3,
+      "estimated_cost_usd": 0.2686
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 6,
+      "output_tokens": 462,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 45906,
+      "messages": 2,
+      "billable_total": 46374,
+      "estimated_cost_usd": 0.1791,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "token_report": {
+      "input_tokens": 3,
+      "output_tokens": 231,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 22953,
+      "messages": 1,
+      "billable_total": 23187,
+      "estimated_cost_usd": 0.0895,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 2,
+      "billable_total": 46374,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 2,
+          "billable_total": 46374
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "non-text assistant message",
+          "messages": 1,
+          "billable_total": 23187
+        },
+        {
+          "name": "other",
+          "messages": 1,
+          "billable_total": 23187
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 1,
+          "billable_total": 23187
+        },
+        {
+          "name": "今天是週一，執行日報腳本。",
+          "messages": 1,
+          "billable_total": 23187
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 0,
+      "billable_total": 0,
+      "family_breakdown": [],
+      "prefix_breakdown": [],
+      "top_first_lines": []
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 1,
+      "cache_create_tokens": 68859,
+      "billable_total": 69561,
+      "cache_create_share_pct": 99.0,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "b4700ac9-8815-4ded-bfa2-16c83a169f99",
+          "messages": 3,
+          "billable_total": 69561,
+          "cache_create_tokens": 68859,
+          "cache_read_tokens": 0,
+          "duration_minutes": 0.0,
+          "cache_create_share_pct": 99.0,
+          "first_ts": "2026-05-04T14:49:20.452000+00:00",
+          "last_ts": "2026-05-04T14:49:21.508000+00:00"
+        }
+      ]
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "dbdd48d",
+      "message": "Ops patrol report 2026-05-04T12:16Z"
+    },
+    {
+      "sha": "979bafd",
+      "message": "Ops patrol report 2026-05-04T06:33Z"
+    },
+    {
+      "sha": "72a909b",
+      "message": "Ops patrol report 2026-05-04T00:47Z"
+    }
+  ]
+}

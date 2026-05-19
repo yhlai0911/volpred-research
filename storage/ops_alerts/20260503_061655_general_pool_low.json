@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-05-03T06:16:55Z",
+  "alert_type": "general_pool_low",
+  "severity": "warning",
+  "message": "general audience pool low (<8): only 2 general-audience draft articles",
+  "detail": {
+    "general_drafts": 2,
+    "threshold": 8,
+    "deficit": 6
+  },
+  "recommended_action": "Create 6 more general-audience draft articles. Use feed-publisher skill with audience=general. Draw from recent research experiments or market analysis."
+}

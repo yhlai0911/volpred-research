@@ -1,0 +1,6 @@
+{
+  "timestamp": "2026-05-01T18:27:15Z",
+  "alert": "paper trading null: _market_daily >2 nulls",
+  "detail": "_market_daily strategy has 3/3 nulls for portfolio_return in the last 3 entries. Data pipeline may be broken for this strategy.",
+  "action": "Investigate _market_daily data feed; check daily_update cron and market data collection for gaps."
+}

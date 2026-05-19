@@ -1,0 +1,26 @@
+{
+  "timestamp": "2026-05-17T00:06:48Z",
+  "alerts": [
+    {
+      "id": "article_pool_low",
+      "severity": "high",
+      "message": "article pool low (<12): total drafts=6",
+      "detail": "Total draft articles is 6, below the minimum threshold of 12. Immediate action required to refill article pool.",
+      "action": "Run /publication-candidates or feed-publisher to queue new drafts."
+    },
+    {
+      "id": "general_audience_low",
+      "severity": "high",
+      "message": "general audience articles low (<8): general drafts=2",
+      "detail": "Only 2 general-audience draft articles remain (threshold: 8). General audience pipeline is critically depleted.",
+      "action": "Prioritise general-audience articles in next publication batch."
+    },
+    {
+      "id": "metrics_stale",
+      "severity": "medium",
+      "message": "metrics stale: strategy_metrics.json is 162.0 hours old (threshold 26h)",
+      "detail": "storage/strategy_metrics.json was last updated 2026-05-10T06:03:17Z. Over 6 days without a refresh. Strategy metrics displayed to users are out-of-date.",
+      "action": "Run: uv run volpred ops update-strategy-metrics (or equivalent daily_update job)."
+    }
+  ]
+}

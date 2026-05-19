@@ -1,0 +1,13 @@
+{
+  "timestamp": "2026-05-15T00:07:20Z",
+  "alert": "article pool low (<12)",
+  "detail": {
+    "total_drafts": 6,
+    "threshold": 12,
+    "by_audience": {
+      "general": {"count": 2, "threshold": 8, "status": "ALERT"},
+      "research": {"count": 4, "threshold": 4, "status": "ok"}
+    }
+  },
+  "recommended_action": "Run feed-publisher to draft >=6 new general-audience articles and >=8 overall to restore pool above thresholds."
+}

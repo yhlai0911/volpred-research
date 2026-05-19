@@ -1,0 +1,7 @@
+{
+  "timestamp": "2026-05-15T06:15:23Z",
+  "alert_type": "metrics_stale",
+  "severity": "warning",
+  "detail": "storage/strategy_metrics.json is ~120.2 hours old (threshold: 26h). Metrics severely stale.",
+  "action": "Run strategy metrics refresh: uv run volpred ops update-metrics or equivalent."
+}

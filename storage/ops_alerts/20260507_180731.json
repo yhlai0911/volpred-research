@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-05-07T18:07:31Z",
+  "source": "ops_patrol",
+  "alerts": [
+    {
+      "type": "article_pool_low",
+      "severity": "warning",
+      "message": "Article pool low (<12): total drafts=6. Action: run feed-publisher to queue new articles.",
+      "detail": {
+        "total_drafts": 6,
+        "threshold": 12,
+        "research_audience": 4,
+        "general_audience": 2
+      }
+    },
+    {
+      "type": "general_audience_low",
+      "severity": "warning",
+      "message": "General-audience draft pool critically low (<8): general=2. Prioritize publishing general-audience articles.",
+      "detail": {
+        "general_audience_drafts": 2,
+        "threshold": 8
+      }
+    },
+    {
+      "type": "metrics_stale",
+      "severity": "warning",
+      "message": "strategy_metrics.json is ~114 hours old (>26h threshold). Run: uv run volpred ops strategy-metrics-update",
+      "detail": {
+        "file": "storage/strategy_metrics.json",
+        "age_hours": 114,
+        "threshold_hours": 26
+      }
+    }
+  ]
+}

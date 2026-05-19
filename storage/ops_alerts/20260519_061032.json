@@ -1,0 +1,20 @@
+{
+  "timestamp": "2026-05-19T06:10:32Z",
+  "alerts": [
+    {
+      "name": "article pool low",
+      "severity": "warning",
+      "detail": "Total draft articles=6 (threshold <12). Immediate action: commission new articles via publication-candidates + feed-publisher."
+    },
+    {
+      "name": "general audience pool low",
+      "severity": "warning",
+      "detail": "General audience drafts=2 (threshold <8). Research audience=4 (OK). Priority: write 6+ general-audience articles."
+    },
+    {
+      "name": "strategy metrics stale",
+      "severity": "warning",
+      "detail": "storage/strategy_metrics.json is ~48 hours old (threshold: 26 hours). Run: uv run volpred ops update-metrics or equivalent recalc pipeline."
+    }
+  ]
+}

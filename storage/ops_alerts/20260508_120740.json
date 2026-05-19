@@ -1,0 +1,21 @@
+{
+  "timestamp": "2026-05-08T12:07:40Z",
+  "severity": "warn",
+  "alerts": [
+    {
+      "name": "article_pool_low",
+      "level": "warn",
+      "detail": "Total draft articles: 6, threshold <12. Action: publish-candidates or feed-publisher to generate more drafts."
+    },
+    {
+      "name": "general_audience_draft_low",
+      "level": "warn",
+      "detail": "General-audience drafts: 2, threshold <8. Research drafts: 4 (ok). Action: prioritize general-audience article production."
+    },
+    {
+      "name": "strategy_metrics_stale",
+      "level": "warn",
+      "detail": "storage/strategy_metrics.json is 131 hours old (>26h threshold). Action: run `uv run volpred ops metrics-update` or equivalent to refresh strategy metrics."
+    }
+  ]
+}

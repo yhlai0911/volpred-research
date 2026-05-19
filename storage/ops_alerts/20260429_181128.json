@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-04-29T18:11:28Z",
+  "alert_type": "article_pool_low",
+  "severity": "warning",
+  "summary": "article pool low (<12): total draft=6, general draft=2 (<8 threshold)",
+  "detail": {
+    "total_draft": 6,
+    "threshold_total": 12,
+    "research_draft": 4,
+    "threshold_research": 4,
+    "general_draft": 2,
+    "threshold_general": 8,
+    "research_ok": true,
+    "general_alert": true
+  },
+  "recommended_action": "Publish new general-audience articles. Run /research or feed-publisher to generate and queue more general content. Current general pool (2) is 6 short of threshold (8)."
+}

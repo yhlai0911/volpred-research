@@ -688,10 +688,19 @@ def main():
         print(f"  {idx}. {recommendation}")
 
     # ── Save report ─────────────────────────────────────────────────────────
+    if pct_verified >= 95 and total_mismatch == 0:
+        alert_level = "green"
+    elif pct_verified >= 80:
+        alert_level = "amber"
+    else:
+        alert_level = "red"
+
     report = {
         "paper": "volatility-absorption",
         "paper_version": "v2",
         "generated_at": date.today().isoformat(),
+        "alert_level": alert_level,
+        "match_rate": round(pct_verified / 100, 4),
         "total_checks": len(checks),
         "matches": total_match,
         "mismatches": total_mismatch,
@@ -728,6 +737,7 @@ def main():
     with open(report_path, "w") as f:
         json.dump(report, f, indent=2, default=str)
     print(f"\n  Report saved: {report_path}")
+    print(f"  match_rate={pct_verified:.1f}% alert_level={alert_level}")
 
     return 0
 

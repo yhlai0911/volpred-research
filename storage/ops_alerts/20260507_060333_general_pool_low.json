@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-05-07T06:03:33Z",
+  "alert_type": "general_audience_pool_low",
+  "severity": "critical",
+  "message": "General audience article pool critically low (<8): count = 2",
+  "detail": {
+    "general_audience_drafts": 2,
+    "threshold": 8,
+    "research_audience_drafts": 4
+  },
+  "recommended_action": "Prioritize publishing general-audience articles. Run publication-candidates skill to identify topics."
+}
