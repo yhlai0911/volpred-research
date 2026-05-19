@@ -7253,5 +7253,19 @@
         "scripts/daily_update.py"
       ]
     }
+  },
+  {
+    "task_type": "experiment",
+    "task_id": "K_NEW_C_paper9_spec_genealogy",
+    "k_id": "K1380",
+    "title": "K1380: Paper 9 C3 Fix — White RC / Hansen SPA Test for 17-Spec Horse Race",
+    "status": "dispatched_to_compute_queue",
+    "compute_queue_ids": [
+      "k1380-spa-test",
+      "k1379-har-benchmark-v2",
+      "k1378-covid-dm-v2"
+    ],
+    "started_at": "2026-05-19T09:21:22.199960+00:00",
+    "notes": "Fixed numpy.values bug in k1378/k1379/k1380; re-enqueued all three Paper 9 robustness jobs. K1380 implements White RC + Hansen SPA test for 17-spec GARCH horse race (C3 CRITICAL fix)."
   }
 ]

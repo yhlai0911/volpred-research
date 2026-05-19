@@ -59,7 +59,7 @@ vix = df['VIX'].values
 log_vix = np.log(np.maximum(vix, 1.0))
 r2 = ret ** 2
 
-oos_indices = np.where(oos_mask.values)[0]
+oos_indices = np.where(oos_mask)[0]
 n_oos = len(oos_indices)
 
 print(f"  SPY: {df.index[0].date()} to {df.index[-1].date()}, n={len(df)}")

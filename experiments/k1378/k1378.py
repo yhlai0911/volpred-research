@@ -69,9 +69,9 @@ log_vix = np.log(np.maximum(vix, 1.0))
 r2 = ret ** 2
 
 dates = df.index.to_numpy()
-oos_indices = np.where(oos_mask.values)[0]
+oos_indices = np.where(oos_mask)[0]
 n_oos = len(oos_indices)
-no_covid_oos_pos = no_covid_oos_mask.values[oos_mask.values]  # bool mask within OOS
+no_covid_oos_pos = no_covid_oos_mask[oos_mask]  # bool mask within OOS
 
 print(f"  SPY: {df.index[0].date()} to {df.index[-1].date()}, n={len(df)}")
 print(f"  OOS: {OOS_START} onwards, n_oos={n_oos}")
