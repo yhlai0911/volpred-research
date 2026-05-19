@@ -7489,7 +7489,7 @@
     "id": "task-k950-codex-review-primary-reverify",
     "task_type": "paper_review",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "source": "K950_post_publish_codex_review_followup",
     "created_at": "2026-05-11",
     "not_before": "2026-05-13",
@@ -7503,7 +7503,9 @@
     ],
     "blocked_reason": "codex_quota_reset_pending",
     "blocked_until": "2026-05-13T02:46:00Z",
-    "blocked_note": "Codex CLI 0.121.0 ChatGPT-account daily quota exhausted 2026-05-11 by 7 paper_reviews. Quota resets 2026-05-12 19:46 PT. Per K1259 lesson, primary-path re-verify needed to upgrade fallback CONDITIONAL/PASS → canonical PASS."
+    "blocked_note": "Codex CLI 0.121.0 ChatGPT-account daily quota exhausted 2026-05-11 by 7 paper_reviews. Quota resets 2026-05-12 19:46 PT. Per K1259 lesson, primary-path re-verify needed to upgrade fallback CONDITIONAL/PASS → canonical PASS.",
+    "completed_at": "2026-05-20T10:07:00+08:00",
+    "completion_note": "Primary-path Codex review completed. Session 019e416e. Verdict: CONDITIONAL_PASS. Two code quality fixes applied (BH label + MDD anchoring). Core conclusion 0/5 VT wins unchanged. K1259 closure."
   },
   {
     "id": "task-k981-codex-review-primary-reverify",

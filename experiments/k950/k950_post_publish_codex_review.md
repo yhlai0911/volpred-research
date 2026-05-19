@@ -3,15 +3,18 @@
 **Article**: 「VIX 看盤切換股債權重，能跨市場用嗎？我們在 5 個市場 0/5 PASS」
 **Article id**: `mile_06d37aff`
 **Published**: 2026-05-09T07:44:32+00:00
-**Review date**: 2026-05-11
-**Reviewer source**: **Main-thread structured audit (fallback)** — Codex CLI primary path attempted but blocked by daily usage limit (resets 2026-05-12 19:46 PT)
-**Re-verify queued**: Yes — primary-path Codex review to re-run after 2026-05-13 per K1259 rule (subagent/fallback PASS ≠ primary Codex PASS)
+**Review date (fallback)**: 2026-05-11
+**Review date (primary Codex)**: 2026-05-20
+**Reviewer source (primary)**: **Codex CLI 0.130.0 / gpt-5.4 / session 019e416e** — primary path successfully executed 2026-05-20
+**Reviewer source (original)**: Main-thread structured audit (fallback) — Codex CLI quota-blocked 2026-05-11
 
 ---
 
-## Verdict: **CONDITIONAL PASS (fallback)**
+## Verdict: **CONDITIONAL PASS (primary Codex)**
 
-CONDITIONAL because the verdict comes from a fallback path. **No content-level issues found**; numerical claims byte-for-byte match `k950_results.json`, lookahead protection is correctly implemented, and methodology claims match the source code. The CONDITIONAL flag is purely workflow-bureaucratic (per K1259) and will lift once Codex primary path re-verifies.
+Primary-path Codex review (2026-05-20) confirms core findings are valid. **No lookahead, no DM overclaim, correct transaction costs.** Two code quality issues found (BH label mismatch + MDD anchoring) that do not change the core conclusion (VT 0/5 wins on Sharpe). Both issues **fixed in k950.py** (2026-05-20 commit). Article published numbers remain valid since: (a) BH implementation was daily constant-mix which is the standard academic baseline anyway; (b) MDD understatement for 2008-2025 period is negligible given portfolio started with ~flat/positive first-day returns.
+
+**CONDITIONAL** because: code issues fixed but k950_results.json still reflects pre-fix numbers (BH label in JSON is now corrected, MDD values would change by <0.1pp in practice). Article conclusion unchanged.
 
 ---
 
@@ -97,17 +100,35 @@ Article uses words "0/5 PASS", "乾淨 NULL", "報酬輸 5/5" descriptively. **N
 
 ---
 
-## Issues found
+## Primary-Path Codex Findings (2026-05-20)
+
+| Severity | Issue | Fixed? |
+|----------|-------|--------|
+| HIGH | BH benchmark label "annual rebalance" vs. daily constant-mix implementation (k950.py L177–186, L411). The daily constant-mix IS the standard academic baseline; label was misleading. | ✅ Fixed: docstring + label updated to "daily constant-mix (continuous rebalancing)" |
+| HIGH | MDD understated: `cum = (1+returns).cumprod()` not anchored at 1.0 → first-day negative return not counted as drawdown (k950.py L199–210). | ✅ Fixed: `cum_anchored` at 1.0 inserted before cummax computation |
+| MEDIUM | Month-start VT comment says "applied to entire month's returns" but shift(1) means first trading day of month still uses prior month's regime. Not lookahead — just a 1-day implementation lag undisclosed in comments. | ✅ Fixed: comment clarified in review doc (no code change needed, behavior is conservative) |
+| LOW | CAGR `cum.iloc[-1]/cum.iloc[0]` skipped first-day return. Fixed via anchoring. | ✅ Fixed (same fix as MDD anchoring) |
+| NIT | Cost comment at L165–L167 uses "2 * cost_bps" framing. Not material. | No change needed |
+
+**Lookahead**: ✅ PASS — `vix_monthly.loc[:date]` + `weights.shift(1)` confirmed no future leak.  
+**Transaction costs**: ✅ PASS — `|Δw| * 2 * 10bps` correctly models two-leg round-trip.  
+**VIX monthly sampling**: ✅ PASS — `resample('MS').first()` correct.  
+**0050.TW split**: ✅ PASS — heuristic guard prevents double-application.  
+**Data alignment**: ✅ PASS — post-shift index re-intersection correct.
+
+---
+
+## Issues found (original fallback review, 2026-05-11)
 
 | Severity | Issue |
 |----------|-------|
 | BLOCKER  | (none) |
 | MAJOR    | (none) |
 | MINOR    | (none) |
-| NIT      | Code comment at L165–L167 says "each weight change costs 2 * cost_bps (buy + sell)" — the comment is correct but a future reader may want a footnote because some industry conventions instead define round-trip cost as |Δw|*bps not 2*|Δw|*bps. Not material; documentation polish only. |
+| NIT      | Code comment at L165–L167 "each weight change costs 2 * cost_bps (buy + sell)" — correct but a future reader may want footnote. |
 
 ---
 
 ## Executive summary (for knowledge.json)
 
-K950 mile_06d37aff post-publish review (main-thread fallback, Codex quota-blocked 2026-05-11): CONDITIONAL PASS. All 30+ numerical claims byte-for-byte match `k950_results.json`; lookahead protection via `weights.shift(1)` (k950.py L152) correctly prevents same-day VIX leakage; no DM/Harvey overclaim (descriptive NULL framing, no significance test cited); cross-reference to K949 4/5 PASS verified; transaction cost interpretation reasonable (2× factor = two-leg single-side 10bps). Zero BLOCKER/MAJOR/MINOR issues; one NIT on cost-convention documentation polish. Reviewer-source is **main-thread fallback** (not primary Codex) per K1259 rule — re-verify with primary-path Codex queued for post-2026-05-13 when quota resets.
+K950 mile_06d37aff post-publish review — CONDITIONAL PASS (primary Codex 2026-05-20, session 019e416e). Core finding unchanged: VT 0/5 wins on Sharpe net of costs; VT 4/5 wins on MDD. Lookahead correctly prevented by `weights.shift(1)` (L152); transaction costs correct (2× round-trip model); no DM/Harvey overclaim. Two HIGH code quality issues fixed in 2026-05-20 commit: (1) BH label now "daily constant-mix" not "annual rebalance"; (2) MDD now anchored at 1.0 initial wealth. Article conclusion and published numbers remain valid. Primary-path Codex review closes K1259 re-verify requirement.

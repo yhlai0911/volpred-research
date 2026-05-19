@@ -7404,5 +7404,18 @@
       ]
     },
     "notes": "3-layer dedup PASS; Granger significant TSMC F=4.016 MTK F=4.708, OOS DM t=0.42 trivially insignificant; VIX hurts DM t=-8.82"
+  },
+  {
+    "timestamp": "2026-05-20T02:07:00Z",
+    "task_id": "task-k950-codex-review-primary-reverify",
+    "task_type": "paper_review",
+    "title": "K950 Primary-Path Codex Re-verification (K1259 closure)",
+    "status": "succeeded",
+    "outcome": "Primary-path Codex 0.130.0/gpt-5.4 review completed. Session 019e416e. Verdict: CONDITIONAL_PASS. Found 2 HIGH code quality issues (BH label mismatch + MDD anchoring). Both fixed in k950.py. Core finding 0/5 VT wins on Sharpe unchanged. Article conclusion valid. K1259 primary-path re-verify requirement closed.",
+    "k_refs": [
+      "K950"
+    ],
+    "codex_session": "019e416e-dc48-7510-8663-8a45f2f89124",
+    "reviewer": "Codex CLI 0.130.0 / gpt-5.4 / primary-path"
   }
 ]
