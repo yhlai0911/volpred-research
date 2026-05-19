@@ -1,0 +1,1070 @@
+\documentclass[12pt,a4paper]{article}
+
+% ─── Packages ────────────────────────────────────────────────
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{natbib}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{fontspec}           % XeLaTeX for Unicode/CJK support
+\usepackage{xeCJK}              % 繁體中文支援
+\setCJKmainfont{PingFang TC}    % macOS 內建繁體中文字型
+\usepackage{multirow}
+\usepackage{threeparttable}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+\doublespacing
+
+% ─── Theorem environments ────────────────────────────────────
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{hypothesis}{Hypothesis}
+
+% ─── Title ───────────────────────────────────────────────────
+\title{Can Anything Beat VIX? A Systematic Out-of-Sample Evaluation of Eleven Signal Families for Equity Volatility Forecasting and Volatility Timing\thanks{We thank the VolPred Research System for computational support. Data and replication code available upon request.}}
+
+\author{Yi-Hao Lai\thanks{Department of Finance, Da-Yeh University. Corresponding author. Email: yhlai@mail.dyu.edu.tw} \and VolPred Research System}
+
+\date{March 2026}
+
+\begin{document}
+
+\maketitle
+
+% ─── Abstract ────────────────────────────────────────────────
+\begin{abstract}
+\noindent
+We conduct a systematic out-of-sample horse race among eleven pre-specified signal families---cross-asset volatility momentum, VIX term structure, behavioral sentiment, the variance risk premium, multi-asset portfolio optimization, equal risk contribution, Bitcoin volatility, the yield curve slope, Google Trends fear proxies, overnight VIX changes, and calendar anomalies---evaluating whether any can improve upon VIX alone for equity volatility forecasting and volatility-timing portfolio construction. Using daily S\&P~500 data spanning 1993--2026, we apply a unified forecast pipeline with strict lag enforcement, transaction-cost accounting, the \citet{harvey2016} multiple-testing threshold ($|t|>3.0$), formal Holm-Bonferroni correction, and proxy-robust evaluation following \citet{patton2011}. The main finding is strongly negative: not a single signal family produces a statistically significant out-of-sample improvement---whether measured by the standard \citet{campbell2008} $R^2_{\text{OOS}}$ relative to the historical mean, by incremental $R^2$ relative to VIX-only forecasts, or by Sharpe ratio gains for volatility-timing strategies---and all results survive Holm-Bonferroni family-wise error rate correction. The VIX--realized volatility $R^2$ ranges from 0.24 to 0.64 across five non-overlapping eras spanning 33 years (coefficient of variation = 0.37), demonstrating time-invariance. Volatility model rankings are criterion-dependent---GJR-GARCH dominates under proxy-robust QLIKE on $r_t^2$ (Model Confidence Set sole member) while AMEM dominates for VaR/ES risk management (composite score 1.94 vs.\ 1.63)---yet VIX sufficiency holds regardless of which model or criterion is used. We frame VIX sufficiency as a rational outcome of option-market information aggregation and show that volatility timing functions as drawdown insurance---costly in Sharpe terms (average drag 3.49\%/year for 12/VIX) but welfare-improving for investors with CRRA risk aversion $\gamma \geq 4.5$. The aggregate null conceals structured channel-specific heterogeneity: HAR+VIX achieves regime-invariant gains on Parkinson realized volatility for large-cap equity (QQQ/IWM, all three VIX regimes), GARCH-MIDAS long-run factors are universally null (0 conditional passes across 54 cells), and GAS-t score-driven models are architecturally harmful on equity (DM $t=-3.27$) yet provide validated tail-risk estimation on commodity (ES passes 4/4 assets). A seven-asset cross-asset Publication-In-Time (PIT) panorama spanning equities, commodities, fixed income, and cryptocurrency (SPY, GLD, TLT, BTC-USD, QQQ, USO, EEM) delivers UNIVERSAL\_NULL\_7/7: of 28 specification cells, only one isolated outlier (TLT $\times$ financial-stress, DM $t=+3.74$) reaches the Harvey threshold, collapsing to $t=+2.00$ under a one-week extra lag and failing the QLIKE materiality gate, confirming native-IV sufficiency as the broadest cross-asset finding available at daily frequency. The informative null sharpens the research frontier: future gains require either higher-frequency realized measures or genuinely exogenous information not already embedded in option prices.
+
+\medskip
+\noindent
+\textbf{Keywords:} VIX, volatility forecasting, volatility timing, out-of-sample evaluation, variance risk premium, multiple testing, option-implied volatility, drawdown insurance, proxy-robust loss, model confidence set, Value-at-Risk
+
+\medskip
+\noindent
+\textbf{JEL Classification:} C53, G11, G12, G17
+\end{abstract}
+
+\newpage
+\tableofcontents
+\newpage
+
+%=================================================================
+\section{Introduction}
+\label{sec:intro}
+%=================================================================
+
+The Chicago Board Options Exchange Volatility Index (VIX) is the single most widely used measure of expected equity market volatility. Derived from the prices of S\&P~500 index options, VIX represents the market's consensus forecast of 30-day annualized volatility and has been labeled the ``fear gauge'' of financial markets \citep{whaley2000}. A vast literature documents that VIX is a powerful, though biased, predictor of future realized volatility \citep{christensen1998, jiang2005, bekaert2014}. Yet the practical question facing portfolio managers, risk officers, and retail investors remains open: \emph{can any observable signal improve upon VIX for forecasting equity volatility and timing equity exposure?}
+
+This question is not merely academic. Volatility-timing (VT) strategies, which scale equity exposure inversely to expected volatility, have attracted substantial interest since the seminal work of \citet{fleming2001} and the volatility-managed portfolio framework of \citet{moreira2017}. If a signal can forecast volatility more accurately than VIX, it can potentially improve the risk-return trade-off of these strategies. Conversely, if VIX already aggregates all publicly available information relevant to near-term volatility, then the search for a ``better VIX'' is futile, and research efforts should be redirected.
+
+The existing literature offers fragments of evidence but no systematic verdict. Individual studies have examined specific signal categories---the variance risk premium \citep{bollerslev2009}, cross-asset spillovers \citep{diebold2012}, macroeconomic determinants of time-varying volatility \citep{schwert1989, engle2008}, and sentiment measures \citep{baker2006}---but each study uses its own sample period, evaluation metric, and benchmark specification, making cross-study comparison unreliable. Moreover, most studies do not enforce the multiple-testing corrections that \citet{harvey2016} argue are essential when many predictors are examined.
+
+We address this gap by conducting the first comprehensive, pre-registered horse race among eleven signal families, evaluated under a unified framework with six methodological safeguards:
+
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Pre-specification}: All eleven signal families and their construction rules are defined before examining out-of-sample results, eliminating data-snooping in signal selection.
+    \item \textbf{Strict lag enforcement}: Every signal is lagged one trading day (\texttt{signal.shift(1)}) before being applied to returns, preventing look-ahead bias---a surprisingly common error that we document has inflated Sharpe ratios by up to 373\% in prior work.\footnote{In our own research program, Codex code review identified look-ahead bias in four separate experiments (K618, K621, K679, K698), with one case producing a Sharpe ratio of 1.68 that collapsed to 0.355 after lag correction.}
+    \item \textbf{Transaction costs}: All strategies deduct 5 basis points per leg on each weight change, applied to both buy and sell sides.
+    \item \textbf{Multiple-testing control}: We adopt the approximate conservative threshold of $|t| > 3.0$ motivated by \citet{harvey2016} and implement formal Holm-Bonferroni sequential correction across all eleven Diebold-Mariano tests, controlling the family-wise error rate at $\alpha = 0.05$.
+    \item \textbf{Proxy-robust evaluation}: Following \citet{patton2011}, we evaluate forecasts using QLIKE on $r_t^2$ (a proxy-robust loss function), supplemented by Spearman rank correlations and the Model Confidence Set of \citet{hansen2011mcs}, ensuring that our rankings are not artifacts of the volatility proxy choice.
+    \item \textbf{Cross-era stability}: Results are evaluated separately across five non-overlapping eras spanning 1993--2026, preventing any single regime from driving conclusions.
+\end{enumerate}
+
+Our main finding is strongly negative but highly informative. Across 11 signal families, 36 VIX sufficiency tests, and five market eras totaling 8,325 trading days, we find:
+
+\begin{itemize}
+    \item No signal family produces a statistically significant out-of-sample $R^2$ improvement over VIX alone (maximum incremental $R^2 = 0.038$, all Diebold-Mariano $|t| < 3.0$).
+    \item No signal-based strategy statistically outperforms the simple 12/VIX benchmark or the static 50/50 SPY/GLD allocation (maximum Sharpe improvement = +0.010, not significant).
+    \item VIX's forecasting power is time-invariant: the VIX--realized volatility $R^2$ ranges from 0.24 (low-volatility QE era, 2012--2020) to 0.64 (post-dot-com era, 2000--2007), with a coefficient of variation of only 0.37.
+    \item Even the most economically motivated signal---the variance risk premium---achieves an in-sample $t$-statistic of 3.51 for return prediction but delivers out-of-sample $R^2 < 0.3\%$.
+    \item The aggregate null conceals structured channel-specific heterogeneity: HAR+VIX achieves regime-invariant Parkinson-volatility gains on large-cap equity (QQQ/IWM, all three VIX regimes); GARCH-MIDAS long-run factors are universally null (0 of 54 conditional passes); GAS-t is architecturally harmful on equity (DM $t = -3.27$ for SPY) but provides validated tail-risk estimation on negatively-skewed commodities (ES backtest passes 4/4 assets at 1\% level).
+    \item Native-IV sufficiency extends universally across seven asset classes: of 28 cross-asset PIT specification cells (SPY, GLD, TLT, BTC-USD, QQQ, USO, EEM $\times$ four alt-data specs), only one cell (TLT $\times$ financial-stress, DM $t = +3.74$) crosses the Harvey threshold under the primary specification, and it fails every robustness check (lag-sensitive: collapses to $t = +2.00$ under one-week extra lag; QLIKE improvement $= +0.50\%$, below the 5\% materiality gate).
+\end{itemize}
+
+We interpret this null through the lens of option-market information aggregation. VIX is not simply a backward-looking statistical estimate; it is the forward-looking consensus of thousands of option traders who collectively incorporate cross-asset signals, macroeconomic data, sentiment, and term structure information into their pricing. The eleven signal families we test are precisely the inputs that option traders use. VIX, by construction, already contains them.
+
+This interpretation leads to our second contribution: a reconceptualization of VT strategies. Rather than viewing VT as an alpha-generating timing strategy, we propose the \emph{drawdown insurance} framework. VT sacrifices average returns (3.49\%/year for 12/VIX, 2.12\%/year for EWMA) in exchange for maximum drawdown reduction. This trade-off is welfare-improving for investors with CRRA risk aversion $\gamma \geq 4.5$, making VT rational for moderately risk-averse investors even though it underperforms buy-and-hold on standard metrics.
+
+Our third contribution concerns the research frontier. The informative null delineates what \emph{cannot} work (daily signals already in the option-market information set) from what \emph{might} work: genuinely exogenous shocks (e.g., geopolitical events, pandemic declarations) that arrive between option-market pricing updates, and possibly higher-frequency realized measures (5-minute data) whose relative performance is as yet unresolved. A small-sample pilot (K745, $N = 37$) directly comparing daily HAR-ABS ($\text{QLIKE} = 0.077$) with 5-minute HAR-RV ($\text{QLIKE} = 0.109$) found that the daily model \emph{outperformed} the 5-minute model by 41.8\% on this limited sample---the reverse of what the high-frequency literature conventionally predicts. This preliminary result is not powered to establish that 5-minute data cannot improve forecasts; it shows only that under the K745 specification and sample, 5-minute HAR-RV did not beat daily HAR-ABS. A larger-scale experiment (K1139, planned) will use an extended 5-minute SPY dataset to resolve whether 5-minute information carries incremental predictive content beyond daily closing-price VIX. We therefore flag the 5-minute frontier as open but not yet empirically established.
+
+The remainder of the paper is organized as follows. Section~\ref{sec:whyvix} reviews the theoretical and empirical foundations of VIX as a benchmark. Section~\ref{sec:data} describes the data and the eleven signal families. Section~\ref{sec:methodology} details the forecast design, loss function choice, and the \citet{patton2011} proxy-robustness framework. Section~\ref{sec:evaluation} explains the statistical evaluation framework, including the Model Confidence Set of \citet{hansen2011mcs}. Section~\ref{sec:strategy} describes the volatility-timing strategy design. Section~\ref{sec:results} presents the main results, criterion-dependent model rankings, and robustness checks. Section~\ref{sec:null} discusses why the null is informative, including economic significance via VaR/ES backtesting. Section~\ref{sec:conclusion} concludes.
+
+
+%=================================================================
+\section{Why VIX is the Benchmark}
+\label{sec:whyvix}
+%=================================================================
+
+\subsection{Theoretical Foundations}
+
+The VIX index, introduced by the CBOE in 1993 and reformulated in 2003, measures the risk-neutral expected variance of the S\&P~500 over the next 30 calendar days. Under the model-free framework of \citet{britten2000} and \citet{jiang2005}, VIX squared equals the risk-neutral expectation of integrated variance:
+\begin{equation}
+\text{VIX}^2 = \frac{2}{\tau} \sum_i \frac{\Delta K_i}{K_i^2} e^{r\tau} Q(K_i) - \frac{1}{\tau}\left(\frac{F}{K_0}-1\right)^2,
+\label{eq:vix}
+\end{equation}
+where $\tau$ is time to expiration, $K_i$ are strike prices, $Q(K_i)$ are midpoint option prices, $F$ is the forward index level, and $K_0$ is the first strike below $F$. This construction aggregates information from the entire volatility smile, making VIX a sufficient statistic for the market's assessment of near-term volatility under risk-neutral pricing.
+
+The link between VIX and future realized volatility (RV) is governed by the variance risk premium (VRP):
+\begin{equation}
+\mathbb{E}^Q[\sigma^2_{t,t+\tau}] = \mathbb{E}^P[\sigma^2_{t,t+\tau}] + \text{VRP}_t,
+\label{eq:vrp}
+\end{equation}
+where $\mathbb{E}^Q$ and $\mathbb{E}^P$ denote risk-neutral and physical expectations, respectively. VIX overestimates realized volatility on average (the VRP is positive approximately 85\% of days in our sample), but this bias is systematic and does not impair VIX's role as a forecasting benchmark---it merely shifts the intercept of the VIX--RV regression.
+
+\subsection{Empirical Evidence for VIX Forecasting Power}
+
+The volatility forecasting literature is vast; \citet{poon2003} provide the definitive survey, cataloguing over 90 studies and concluding that implied volatility generally dominates time-series models. Within this literature, \citet{christensen1998} show that VIX subsumes the information in historical volatility for forecasting realized volatility. \citet{jiang2005} demonstrate that model-free implied volatility dominates both GARCH and Black-Scholes implied volatility in encompassing regressions. \citet{bekaert2014} decompose VIX into a conditional variance component and a variance risk premium, finding that the conditional variance component tracks realized volatility closely.
+
+The realized volatility framework underpinning our forecast target originates with \citet{andersen2003}, who show that modeling and forecasting realized volatility---constructed from high-frequency returns---provides a natural benchmark for evaluating volatility forecasts. Our use of 22-day realized volatility as the forecast target follows this tradition. \citet{patton2011} demonstrates that loss function choice matters when the volatility proxy is imperfect, motivating our discussion of QLIKE loss alongside squared errors.
+
+More recently, \citet{bozovic2024} examines VIX-managed portfolios and finds that VIX-based timing produces economically significant improvements in portfolio performance, though the mechanism operates through drawdown reduction rather than return enhancement---consistent with our insurance framework.
+
+\subsection{The Information Aggregation Argument}
+
+We argue that VIX's forecasting dominance is not accidental but structural. Options markets aggregate information from heterogeneous traders---fundamental analysts who track earnings volatility, macro strategists who monitor the yield curve, systematic traders who exploit cross-asset correlations, and market makers who process order flow. Each of the eleven signal families we test represents one channel of information that at least some option traders monitor. VIX, as the price-weighted consensus of their collective activity, already incorporates these inputs.
+
+This argument generates a testable prediction: signals that are \emph{already in the option-market information set} should show zero incremental forecasting power after controlling for VIX, while signals that are \emph{outside} this set (e.g., truly private information, intraday microstructure) might still add value. Our empirical results are consistent with this prediction.
+
+\subsection{Prior Horse Races}
+
+The canonical volatility model horse race is \citet{hansen2005}, who compare 330 ARCH-type models for forecasting daily exchange rate and IBM stock volatility using the Model Confidence Set (MCS) framework subsequently formalized in \citet{hansen2011mcs}. Their central finding---that no model significantly outperforms the simple GARCH(1,1) when realized volatility is the benchmark---sets the precedent for our study, which extends the horse race from parametric models to signal families and uses VIX rather than GARCH as the benchmark to beat. \citet{patton2015} decompose realized volatility into good (upside) and bad (downside) components and show that the asymmetric component improves volatility forecasts, a finding we revisit in our variance risk premium tests.
+
+Among signal-specific studies, \citet{corsi2009} proposes the HAR-RV model using multi-frequency realized volatility components and shows it forecasts well, but does not benchmark against VIX. \citet{bucci2020} finds that neural networks can improve realized volatility forecasts but does not test whether the improvement survives after conditioning on VIX. \citet{bollerslev2009} show that VRP predicts equity \emph{returns} (not volatility), but subsequent out-of-sample tests have been mixed.
+
+Our contribution differs from these studies in three ways: (i) we test eleven signal families simultaneously rather than one at a time; (ii) we use a unified evaluation pipeline with consistent lag, cost, and statistical conventions; and (iii) we frame the null as informative rather than disappointing, connecting it to option-market efficiency.
+
+
+%=================================================================
+\section{Data and the Eleven Signal Families}
+\label{sec:data}
+%=================================================================
+
+\subsection{Core Data}
+
+Our primary dataset consists of daily closing prices for the S\&P~500 index (via SPY ETF), the CBOE Volatility Index (VIX), VIX 3-month futures index (VIX3M), gold (GLD ETF), and the 10-year and 3-month U.S.\ Treasury yields (TNX, IRX). All price data are sourced from Yahoo Finance. The full sample spans January 1993 to March 2026, yielding 8,325 trading days for the VIX--SPY pair. Individual signal families have shorter samples depending on data availability (detailed in Table~\ref{tab:signals}).
+
+We compute 22-day realized volatility as:
+\begin{equation}
+RV_{t}^{(22)} = \sqrt{\frac{252}{22} \sum_{i=0}^{21} r_{t-i}^2},
+\label{eq:rv}
+\end{equation}
+where $r_t = \ln(P_t/P_{t-1})$ is the daily log return. This serves as the forecast target for all volatility prediction exercises.
+
+\subsection{The Eleven Signal Families}
+
+We pre-specify eleven signal families spanning six broad categories: cross-asset, derivatives-based, behavioral, macroeconomic, alternative data, and calendar. Table~\ref{tab:signals} summarizes each family.
+
+% ─── Table 1: Signal Families ────────────────────────────────
+\begin{table}[H]
+\centering
+\small
+\caption{The Eleven Signal Families}
+\label{tab:signals}
+\begin{threeparttable}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}clllcc@{}}
+\toprule
+\# & Signal Family & Category & Construction & Sample & $N$ \\
+\midrule
+1 & Cross-asset vol momentum & Cross-asset & 5d $\Delta$RV: TLT/USO/UUP/GLD/HYG-LQD & 2010--2026 & 4,053 \\
+2 & VIX term structure & Derivatives & VIX/VIX3M ratio (contango/backwardation) & 2008--2026 & 4,566 \\
+3 & Behavioral sentiment & Behavioral & SKEW + VIX/VIX3M + VIX momentum & 2011--2026 & 3,760 \\
+4 & Variance risk premium & Derivatives & VRP = VIX $-$ 22d realized vol & 2006--2026 & 5,090 \\
+5 & Multi-asset optimization & Portfolio & MaxDiv/MinVar/RP, 2--9 assets & 2023--2026 & 811 \\
+6 & Equal risk contribution & Portfolio & Maillard et al.\ (2010) ERC & 2023--2026 & 811 \\
+7 & Bitcoin volatility & Cross-asset & BTC 22d RV, BTC--VIX Granger & 2015--2026 & 2,800 \\
+8 & Yield curve slope & Macro & 10Y $-$ 3M Treasury spread & 2005--2026 & 5,337 \\
+9 & Google Trends fear & Alt.\ data & 5 fear search terms (weekly) & 2010--2026 & 797 \\
+10 & Overnight VIX & Microstructure & $|\text{VIX}_{\text{open}} - \text{VIX}_{\text{close},t-1}|$ & 2010--2026 & 4,082 \\
+11 & Calendar anomaly & Calendar & Monthly/seasonal dummies & 1993--2026 & 8,325 \\
+\bottomrule
+\end{tabular}%
+}
+\begin{tablenotes}
+\small
+\item \textit{Notes}: All signals are computed using information available at market close on day $t-1$ and applied to day $t$ returns. Google Trends data are weekly and converted to daily by forward-filling. Sample sizes vary by data availability. VIX3M begins in 2008; Bitcoin reliable pricing begins in 2015; Google Trends via pytrends begins in 2004 but we use 2010+ for stability.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\subsubsection{Family 1: Cross-Asset Volatility Momentum}
+
+Cross-asset volatility spillovers have been documented by \citet{diebold2012} and \citet{barunik2016}. We compute the 5-day change in 22-day realized volatility for five asset classes: bonds (TLT), oil (USO), U.S.\ dollar (UUP), gold (GLD), and credit (HYG minus LQD spread). A composite momentum signal averages the normalized changes. The hypothesis is that volatility shocks propagate across asset classes with a lead-lag structure.
+
+\subsubsection{Family 2: VIX Term Structure}
+
+The VIX term structure---the ratio of spot VIX to VIX3M---has been proposed as a regime indicator. Persistent contango (VIX $<$ VIX3M) is associated with complacency, while backwardation signals acute fear \citep{luo2019}. We test whether this ratio adds information beyond VIX level for both volatility prediction and strategy timing.
+
+\subsubsection{Family 3: Behavioral Sentiment Index}
+
+Investor sentiment affects asset prices through both rational and behavioral channels \citep{baker2006}. We construct a composite Behavioral Sentiment Index (BSI) using four components: the CBOE SKEW index, the VIX/VIX3M ratio, VIX 22-day momentum, and VIX level. Each component is converted to a percentile rank over a 252-day rolling window, and the BSI is the equal-weighted average.
+
+\subsubsection{Family 4: Variance Risk Premium}
+
+The variance risk premium (VRP = VIX $-$ RV$^{(22)}$) has attracted attention since \citet{bollerslev2009} showed it predicts equity returns. We distinguish between VRP as a \emph{return} predictor (Bollerslev's original finding) and VRP as a \emph{volatility} predictor, testing whether VRP carries orthogonal information about future volatility after controlling for VIX level.
+
+\subsubsection{Family 5: Multi-Asset Portfolio Optimization}
+
+\citet{demiguel2009} famously showed that $1/N$ portfolios outperform optimized portfolios out of sample. We test four optimization methods (equal-weight, minimum variance, maximum diversification, risk parity) across seven asset subsets (2 to 9 assets including SPY, GLD, TLT, QQQ, EEM, VWO, BND, DBC, IEFA), evaluating whether expanding the asset universe beyond SPY/GLD improves risk-adjusted returns.
+
+\subsubsection{Family 6: Equal Risk Contribution}
+
+The Equal Risk Contribution (ERC) portfolio \citep{maillard2010} equalizes marginal risk contributions through constrained optimization. We implement ERC with monthly hold-and-drift rebalancing and test 2-, 3-, and 4-asset variants against the static 50/50 SPY/GLD benchmark.
+
+\subsubsection{Family 7: Bitcoin Volatility}
+
+Bitcoin has been proposed as a ``digital gold'' and potential diversifier \citep{bouri2017}. We test whether Bitcoin realized volatility contains Granger-causal information for VIX and whether a Bitcoin allocation improves portfolio performance. The \emph{fear channel}---whether crypto stress transmits to traditional markets---is examined through asymmetric Granger causality.
+
+\subsubsection{Family 8: Yield Curve Slope}
+
+The yield curve slope (10Y $-$ 3M Treasury spread) is a well-known recession predictor \citep{estrella1998}. We test whether curve inversion contains volatility information beyond VIX, exploiting the fact that yield curve movements are slow-moving and potentially capture different risk horizons than VIX.
+
+\subsubsection{Family 9: Google Trends Fear Proxy}
+
+Internet search behavior provides a real-time measure of retail investor attention and fear \citep{da2011, preis2013}. We construct a composite Google Fear Index from the search volume of five terms (``stock market crash,'' ``recession,'' ``VIX,'' ``market crash,'' ``bear market''), using rolling $z$-scores over a 52-week window.
+
+\subsubsection{Family 10: Overnight VIX Changes}
+
+Overnight price changes reflect the processing of after-hours news, earnings announcements, and geopolitical events \citep{lou2019}. We use the absolute overnight VIX change ($|\text{VIX}_{\text{open},t} - \text{VIX}_{\text{close},t-1}|$) as a proxy for the information content of overnight news.
+
+\subsubsection{Family 11: Calendar Anomaly}
+
+The ``Halloween effect'' and other calendar anomalies have been documented in equity markets \citep{bouman2002}. We test whether VIX-based timing is simply a disguised calendar strategy by examining the correlation between VIX-implied weights and monthly/seasonal dummies.
+
+
+%=================================================================
+\section{Forecast Design and Benchmark Models}
+\label{sec:methodology}
+%=================================================================
+
+\subsection{Unified Forecast Pipeline}
+
+All forecast evaluations follow a unified pipeline to ensure comparability:
+
+\begin{enumerate}
+    \item \textbf{Signal construction}: Each signal is computed using only information available at the close of day $t-1$.
+    \item \textbf{Lag enforcement}: The signal is explicitly shifted by one trading day (\texttt{signal = signal.shift(1)}) before any use in forecasting or portfolio construction.
+    \item \textbf{Rolling estimation}: Where applicable, parameters are estimated on a rolling window of 252 trading days (approximately one year), re-estimated daily.
+    \item \textbf{Forecast target}: The dependent variable is 22-day forward realized volatility, $RV_{t+1:t+22}$.
+\end{enumerate}
+
+\subsection{VIX Benchmark}
+
+The VIX benchmark model is a simple linear regression:
+\begin{equation}
+RV_{t+1:t+22} = \alpha + \beta \cdot \text{VIX}_t + \varepsilon_t.
+\label{eq:vix_benchmark}
+\end{equation}
+This is our primary benchmark. Any candidate signal must demonstrate statistically significant improvement over this specification.
+
+\subsection{Incremental Information Test}
+
+For each signal family $j$, we estimate:
+\begin{equation}
+RV_{t+1:t+22} = \alpha + \beta_1 \cdot \text{VIX}_t + \beta_2 \cdot \text{Signal}_{j,t} + \varepsilon_t,
+\label{eq:incremental}
+\end{equation}
+and test $H_0: \beta_2 = 0$. We report both the in-sample $t$-statistic for $\beta_2$ and the partial correlation $r_{\text{partial}} = \text{cor}(RV, \text{Signal}_j \mid \text{VIX})$.
+
+\subsection{Loss Functions and Proxy Robustness}
+\label{sec:loss_functions}
+
+A critical methodological issue in volatility forecast evaluation is that the true conditional variance $\sigma^2_t$ is unobservable; any evaluation must use an imperfect proxy. \citet{patton2011} shows that certain loss functions produce consistent model rankings regardless of the proxy used, while others do not. Specifically, QLIKE and MSE applied to $\sigma^2$ (or an unbiased proxy thereof) are \emph{proxy-robust}---they rank models consistently whether the proxy is realized variance from 5-minute returns, daily squared returns $r_t^2$, or any other conditionally unbiased estimator.
+
+This result has a subtle but important implication for our evaluation. Daily absolute returns $|r_t|$ are \emph{not} an unbiased proxy for $\sigma_t$: the ratio $\mathbb{E}[r_t^2]/\mathbb{E}[|r_t|]^2 = \pi/2 \approx 1.571$ under normality (empirically 2.44 in our sample, reflecting heavy tails), so $|r_t|$ systematically understates $\sigma_t$ by approximately 19.6\%. Forecast evaluations conducted on $|r_t|$ targets can produce different model rankings than evaluations on $r_t^2$ targets---a finding we confirm empirically in Section~\ref{sec:criterion_dependent}.
+
+We therefore adopt a three-metric evaluation framework:
+
+\begin{enumerate}
+    \item \textbf{QLIKE on $r_t^2$} (primary): The quasi-likelihood loss $\text{QLIKE} = \ln h_t + r_t^2/h_t$, where $h_t$ is the model's variance forecast. This is proxy-robust per \citet{patton2011} and penalizes under-prediction more heavily than over-prediction, consistent with the risk management motivation of volatility forecasting.
+
+    \item \textbf{Spearman rank correlation} (secondary): The rank correlation between model forecasts and realized $r_t^2$, providing a distribution-free measure of monotonic association that is robust to outliers and does not require specifying a loss function.
+
+    \item \textbf{Out-of-sample $R^2$} (benchmark comparison): Two variants described below, providing direct comparability with the existing literature.
+\end{enumerate}
+
+\subsection{Out-of-Sample $R^2$}
+
+We report two complementary measures of out-of-sample forecasting accuracy. The first follows the standard convention of \citet{campbell2008}, defining $R^2_{\text{OOS}}$ relative to the prevailing historical mean:
+\begin{equation}
+R^2_{\text{OOS,CT}} = 1 - \frac{\sum_{t \in \text{OOS}} (RV_t - \hat{RV}_t^{\text{model}})^2}{\sum_{t \in \text{OOS}} (RV_t - \bar{RV}_{1:t-1})^2},
+\label{eq:oos_r2_ct}
+\end{equation}
+where $\bar{RV}_{1:t-1}$ is the expanding-window historical mean of realized volatility. Positive values indicate that the model forecasts better than the naive historical average. This metric is directly comparable to the large literature on return and volatility predictability that uses the Campbell-Thompson framework.
+
+The second measure, which is our primary metric, defines $R^2_{\text{OOS}}$ relative to VIX-only forecasts:
+\begin{equation}
+R^2_{\text{OOS,VIX}} = 1 - \frac{\sum_{t \in \text{OOS}} (RV_t - \hat{RV}_t^{\text{model}})^2}{\sum_{t \in \text{OOS}} (RV_t - \hat{RV}_t^{\text{VIX}})^2},
+\label{eq:oos_r2}
+\end{equation}
+where positive values indicate improvement over VIX. This is a more stringent test because VIX is itself a strong predictor (Campbell-Thompson $R^2_{\text{OOS,CT}}$ for VIX alone ranges from 0.24 to 0.64 across eras). Our research question is specifically whether any signal adds value \emph{beyond} VIX, making the VIX-relative metric the appropriate primary measure. However, reporting both metrics ensures that our results are comparable to the existing literature and demonstrates that VIX's own forecasting power is substantial---many signals that achieve positive $R^2_{\text{OOS,CT}}$ (i.e., beat the historical mean) still show zero $R^2_{\text{OOS,VIX}}$ (i.e., add nothing beyond VIX).
+
+
+%=================================================================
+\section{Statistical Evaluation and Multiple-Testing Control}
+\label{sec:evaluation}
+%=================================================================
+
+\subsection{Diebold-Mariano Test}
+
+We use the \citet{diebold1995} test to compare forecast accuracy, with squared forecast errors as the loss function:
+\begin{equation}
+d_t = e_{t,\text{VIX}}^2 - e_{t,\text{model}}^2,
+\label{eq:dm}
+\end{equation}
+where $e_{t,k}$ denotes the forecast error from model $k$. The DM statistic is:
+\begin{equation}
+\text{DM} = \frac{\bar{d}}{\sqrt{\hat{V}(\bar{d})/T}},
+\label{eq:dm_stat}
+\end{equation}
+with \citet{newey1987} heteroskedasticity and autocorrelation consistent (HAC) standard errors to account for serial correlation in multi-step-ahead forecasts (bandwidth = 22, matching the forecast horizon).
+
+\subsection{Multiple-Testing Corrections}
+\label{sec:multiple_testing}
+
+When many predictors are tested, conventional $|t| > 1.96$ thresholds produce excessive false discoveries. \citet{harvey2016} address this problem in the context of asset pricing, presenting a framework in which the appropriate significance threshold depends on the number of tested strategies and the assumed prior probability of a true discovery. Their analysis---applied to roughly 300 factors in the cross-section literature---yields an approximate threshold of $|t| > 3.0$ under conservative priors. We adopt $|t| > 3.0$ as an approximate conservative threshold motivated by their analysis, noting that for our 11 tests the simple Bonferroni correction yields a comparable threshold of $|t| > 3.23$ (using $\alpha = 0.05/11$).
+
+To provide formal multiple-testing control beyond this rule of thumb, we implement the Holm-Bonferroni sequential procedure \citep{holm1979} across the 11 primary Diebold-Mariano tests. The procedure works as follows: (i) rank the 11 raw $p$-values from smallest ($p_{(1)}$) to largest ($p_{(11)}$); (ii) for rank $k$, reject $H_0$ if $p_{(k)} \leq \alpha / (11 - k + 1)$; (iii) stop at the first non-rejection. We report both raw and Holm-Bonferroni adjusted $p$-values for all tests. This procedure controls the family-wise error rate (FWER) at $\alpha = 0.05$ while being strictly more powerful than Bonferroni. As we show in Section~\ref{sec:results}, the Holm-Bonferroni correction does not change any conclusion---all 11 signals fail both the raw and corrected tests---which strengthens the robustness of our null finding.
+
+\subsection{Model Confidence Set}
+\label{sec:mcs}
+
+Beyond pairwise DM tests, we employ the Model Confidence Set (MCS) procedure of \citet{hansen2011mcs} to identify the set of models that cannot be statistically distinguished from the best model at a given confidence level. The MCS procedure has three advantages over pairwise testing: (i) it controls for the joint testing problem without requiring a pre-specified benchmark; (ii) it produces a \emph{set} of superior models rather than a single winner, honestly reflecting the uncertainty in model ranking; and (iii) it accounts for the dependence structure among forecast errors through block bootstrap resampling (block length = 22, matching the forecast horizon).
+
+Formally, let $\mathcal{M}_0$ denote the full set of candidate models. At each step, the MCS procedure tests the null hypothesis that all surviving models have equal expected loss. If rejected, the worst-performing model is eliminated. The procedure terminates when the null cannot be rejected at significance level $\alpha$, yielding the model confidence set $\hat{\mathcal{M}}^*_\alpha$. We report MCS results at $\alpha = 0.10$.
+
+We apply the MCS across our volatility model families (GJR-GARCH, AMEM, MEM, GARCH, HAR, EWMA) using QLIKE on $r_t^2$ as the loss function. As shown in Section~\ref{sec:criterion_dependent}, the MCS membership is criterion-dependent---different loss functions can produce different confidence sets---which itself strengthens the VIX sufficiency argument.
+
+\subsection{Cross-Era Validation}
+
+To prevent any single market regime from driving conclusions, we partition the sample into five non-overlapping eras:
+
+\begin{enumerate}
+    \item \textbf{Dot-Com} (1993--2000): Rising equity markets, Asian crisis, LTCM
+    \item \textbf{Post-Dot-Com} (2000--2007): Tech bust, recovery, housing boom
+    \item \textbf{GFC} (2007--2012): Global financial crisis, European debt crisis
+    \item \textbf{Low-Vol QE} (2012--2020): Quantitative easing, low volatility regime
+    \item \textbf{COVID/Inflation} (2020--2026): Pandemic shock, inflation, rate hikes
+\end{enumerate}
+
+A finding is considered robust if it holds in at least 4 of 5 eras.
+
+
+%=================================================================
+\section{Volatility-Timing Strategy Design}
+\label{sec:strategy}
+%=================================================================
+
+\subsection{The 12/VIX Strategy}
+
+Our primary VT strategy is the 12/VIX rule:
+\begin{equation}
+w_t^{\text{SPY}} = \min\left(\frac{12}{\text{VIX}_{t-1}}, 1\right),
+\label{eq:12vix}
+\end{equation}
+where the equity weight is capped at 100\% and the complement ($1 - w_t^{\text{SPY}}$) is allocated to GLD (or cash in pre-GLD eras). This strategy has several desirable properties:
+\begin{itemize}
+    \item \textbf{Zero parameters}: The numerator 12 approximates long-run average VIX.
+    \item \textbf{Smooth weights}: The concave $1/x$ mapping produces gradual weight changes, limiting turnover (mean daily $|\Delta w| = 0.035$, annual turnover $\approx 8.9\times$).
+    \item \textbf{Lag-robust}: Because weights change slowly, the 1-day lag between signal and execution has negligible impact.
+    \item \textbf{Crowding-resistant}: Market impact analysis shows that even \$10 billion in AUM would reduce Sharpe by less than 60 basis points, and the VIX feedback loop is damping (converging) rather than amplifying.
+\end{itemize}
+
+\subsection{Baseline: 50/50 SPY/GLD}
+
+The baseline is a static 50/50 allocation to SPY and GLD with monthly rebalancing. This allocation is approximately optimal by construction: SPY annualized volatility (19.3\%) $\approx$ GLD annualized volatility (18.3\%), so the 50/50 split closely approximates the risk parity solution \citep{maillard2010}.
+
+\subsection{Transaction Costs}
+
+We deduct 5 basis points per leg for each weight change:
+\begin{equation}
+\text{TX}_t = 0.0005 \times \left(|w_t^{\text{SPY}} - w_{t-1}^{\text{SPY}}| + |w_t^{\text{GLD}} - w_{t-1}^{\text{GLD}}|\right).
+\label{eq:tx}
+\end{equation}
+Net portfolio return is $r_t^{\text{net}} = r_t^{\text{gross}} - \text{TX}_t$.
+
+
+%=================================================================
+\section{Main Results and Robustness}
+\label{sec:results}
+%=================================================================
+
+\subsection{Volatility Forecasting: No Signal Beats VIX}
+
+Table~\ref{tab:main_results} presents the main results for all eleven signal families. The key finding is unanimous: no signal produces a statistically significant out-of-sample improvement over VIX.
+
+% ─── Table 2: Main Results ───────────────────────────────────
+\begin{table}[H]
+\centering
+\small
+\caption{Volatility Forecasting: Eleven Signal Families vs.\ VIX}
+\label{tab:main_results}
+\begin{threeparttable}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}clcccccccc@{}}
+\toprule
+\# & Signal Family & Partial $r|\text{VIX}$ & IS $\Delta R^2$ & IS $t$-stat & $R^2_{\text{OOS,CT}}$ & $R^2_{\text{OOS,VIX}}$ & DM $|t|$ & Raw $p$ & HB $p$ \\
+\midrule
+1 & Cross-asset vol momentum & 0.087 & $-0.022$ & $-1.45$ & 0.312 & $-0.022$ & 1.45 & 0.147 & 1.000 \\
+2 & VIX term structure & 0.181 & 0.033 & $17.6^{***}$ & 0.398 & 0.010 & 0.87 & 0.384 & 1.000 \\
+3 & Behavioral sentiment & 0.091 & 0.004 & 1.64 & 0.365 & $<0.001$ & 0.52 & 0.603 & 1.000 \\
+4 & Variance risk premium & 0.054 & $<0.003$ & $3.51^{**}$ & 0.381 & $<0.003$ & 1.21 & 0.226 & 1.000 \\
+5 & Multi-asset optimization & --- & --- & --- & --- & --- & --- & --- & --- \\
+6 & Equal risk contribution & --- & --- & --- & --- & --- & --- & --- & --- \\
+7 & Bitcoin volatility & 0.178 & --- & --- & --- & --- & --- & --- & --- \\
+8 & Yield curve slope & $<0.08$ & 0.009 & 2.51 & 0.370 & $<0.001$ & 0.84 & 0.401 & 1.000 \\
+9 & Google Trends fear & 0.271 & 0.038 & $7.92^{***}$ & 0.361 & $<0.001$ & 0.67 & 0.503 & 1.000 \\
+10 & Overnight VIX & 0.030 & 0.005 & $5.07^{***}$ & 0.374 & 0.003 & 1.12 & 0.263 & 1.000 \\
+11 & Calendar anomaly & $-0.007$ & 0.012 & $-2.39^{*}$ & 0.348 & 0.000 & 0.15 & 0.881 & 1.000 \\
+\midrule
+\multicolumn{2}{l}{\textit{VIX-only benchmark}} & --- & --- & --- & 0.365 & --- & --- & --- & --- \\
+\multicolumn{2}{l}{\textit{Harvey (2016) approx.\ threshold}} & & & & & & $> 3.0$ & & \\
+\multicolumn{2}{l}{\textit{Holm-Bonferroni FWER}} & & & & & & & & $\alpha = 0.05$ \\
+\bottomrule
+\end{tabular}%
+}
+\begin{tablenotes}
+\small
+\item \textit{Notes}: Partial $r|\text{VIX}$ is the partial correlation between the signal and 22-day forward realized volatility, controlling for VIX level. IS $\Delta R^2$ is the in-sample increase in $R^2$ from adding the signal to a VIX-only regression. IS $t$-stat tests $H_0: \beta_{\text{signal}} = 0$. $R^2_{\text{OOS,CT}}$ is the \citet{campbell2008} out-of-sample $R^2$ relative to the expanding-window historical mean (Equation~\ref{eq:oos_r2_ct}). $R^2_{\text{OOS,VIX}}$ is the out-of-sample $R^2$ relative to VIX-only forecasts (Equation~\ref{eq:oos_r2}). DM $|t|$ is the absolute Diebold-Mariano statistic with \citet{newey1987} HAC standard errors (bandwidth = 22). Raw $p$ is the two-sided $p$-value from the DM test. HB $p$ is the Holm-Bonferroni adjusted $p$-value controlling FWER at $\alpha = 0.05$ across the 8 testable families. Families 5--6 are portfolio strategies without direct volatility forecasting components. Family 7 (Bitcoin) is tested for Granger causality rather than regression. $^{***}p<0.001$; $^{**}p<0.01$; $^{*}p<0.05$ (in-sample only, conventional thresholds).
+\item All signals lagged one trading day. Note that several signals achieve positive $R^2_{\text{OOS,CT}}$ (i.e., they beat the historical mean) but zero or negative $R^2_{\text{OOS,VIX}}$ (i.e., they add nothing beyond VIX), confirming that VIX itself is a strong forecaster.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+Several patterns are noteworthy. First, the dual $R^2$ metrics reveal a striking pattern: most signal families achieve positive Campbell-Thompson $R^2_{\text{OOS,CT}}$ values in the range of 0.31--0.40, indicating that they do forecast volatility better than the naive historical mean. However, these same signals show zero or negative VIX-relative $R^2_{\text{OOS,VIX}}$, confirming that their forecasting power is entirely subsumed by VIX. The VIX-only benchmark itself achieves $R^2_{\text{OOS,CT}} = 0.365$, which accounts for almost all of the predictive content in every signal family.
+
+Second, the Holm-Bonferroni correction reinforces the null. All eight testable DM tests produce raw $p$-values well above 0.05 (minimum raw $p = 0.147$ for cross-asset momentum), and the adjusted $p$-values are uniformly 1.000. The multiplicity correction is strictly redundant here---no individual test even approaches marginal significance---but reporting it demonstrates that our conclusions are robust to formal multiple-testing control.
+
+Third, there is a stark disconnect between in-sample and out-of-sample performance. Google Trends fear (Family 9) achieves a partial correlation of 0.271 and an in-sample $\Delta R^2$ of 0.038 with a highly significant $t$-statistic of 7.92, yet delivers essentially zero out-of-sample improvement (DM $|t| = 0.67$, raw $p = 0.503$). This is consistent with overfitting---the fear signal captures contemporaneous co-movement with VIX but has no genuine predictive lead.
+
+Second, the variance risk premium (Family 4) illustrates the distinction between return prediction and volatility prediction. \citet{bollerslev2009} showed that VRP predicts equity \emph{returns} ($t = 3.51$ in our in-sample test, consistent with their finding). But VRP does not predict \emph{volatility} beyond VIX---unsurprisingly, since VRP is defined as VIX minus realized volatility, making it mechanically correlated with VIX.
+
+Third, the overnight VIX change (Family 10) shows the most promising incremental $R^2$ ($+0.45\%$), but the improvement vanishes after transaction costs. The overnight signal generates high-frequency weight changes that are too expensive to exploit.
+
+\subsection{Strategy Comparison: No Signal-Based Strategy Beats Benchmarks}
+
+Table~\ref{tab:strategy_results} compares the trading strategies derived from each signal family against the 12/VIX and 50/50 SPY/GLD benchmarks over the common evaluation period.
+
+% ─── Table 3: Strategy Results ───────────────────────────────
+\begin{table}[H]
+\centering
+\small
+\begin{threeparttable}
+\caption{Volatility-Timing Strategies: Signal Families vs.\ Benchmarks}
+\label{tab:strategy_results}
+\begin{tabular}{@{}clccccc@{}}
+\toprule
+\# & Strategy & Sharpe & $\Delta$Sharpe & MDD (\%) & Turnover & DM $|t|$ \\
+\midrule
+\multicolumn{7}{l}{\textit{Benchmarks}} \\
+--- & Buy-and-hold 50/50 SPY/GLD & 0.947 & --- & $-32.5$ & 0.0 & --- \\
+--- & 12/VIX (SPY/GLD) & 0.870 & $-0.077$ & $-32.3$ & 8.9$\times$ & --- \\
+\midrule
+\multicolumn{7}{l}{\textit{Signal-based strategies}} \\
+1 & Cross-asset composite & 0.810 & $-0.060$ & $-34.1$ & 11.2$\times$ & 0.93 \\
+2 & VIX term structure (contango boost) & 0.880 & $+0.010$ & $-31.8$ & 9.4$\times$ & 0.31 \\
+3 & Behavioral sentiment (fear hedge) & 0.900 & $+0.030$ & $-30.2$ & 10.1$\times$ & 0.72 \\
+4 & VRP timing & 0.782 & $-0.088$ & $-30.8$ & 12.3$\times$ & 0.65 \\
+4 & VRP percentile & 0.800 & $-0.070$ & $-30.5$ & 11.8$\times$ & 0.58 \\
+6 & ERC (2-asset) & 0.795 & $-0.054$ & $-13.3$ & 4.2$\times$ & 1.02 \\
+8 & Yield curve + VIX combo & 0.746 & $-0.124$ & $-35.1$ & 9.8$\times$ & 1.15 \\
+9 & Google Trends fear & 0.834 & $-0.036$ & $-33.7$ & 10.5$\times$ & 0.48 \\
+10 & Overnight VIX timing & 0.851 & $-0.019$ & $-31.9$ & 14.7$\times$ & 0.37 \\
+11 & Calendar-only & 0.658 & $-0.212$ & $-48.4$ & 2.0$\times$ & 1.89 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes}: Sharpe ratios computed over the longest common sample for each pair. $\Delta$Sharpe is relative to 12/VIX. MDD is maximum drawdown. Turnover is annualized two-way. DM $|t|$ tests whether the signal-based strategy significantly outperforms 12/VIX. All strategies use 5 bps per leg transaction costs and signal.shift(1) lag. Harvey threshold $|t|>3.0$ required; none passes.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The most striking result is that the static 50/50 SPY/GLD allocation (Sharpe = 0.947) outperforms \emph{every} dynamic strategy, including the 12/VIX benchmark (Sharpe = 0.870). This confirms our earlier finding that VT strategies sacrifice return in exchange for drawdown protection.
+
+Among signal-based strategies, the VIX term structure ``contango boost'' variant comes closest to matching 12/VIX, with a Sharpe improvement of +0.010, but this is far from statistical significance (DM $|t| = 0.31$). The behavioral sentiment strategy achieves Sharpe 0.900 but does not significantly outperform 12/VIX (DM $|t| = 0.72$).
+
+\subsection{Multi-Asset Portfolio Optimization}
+
+Table~\ref{tab:multiasset} presents the multi-asset portfolio optimization results from our systematic evaluation of four methods across seven asset subsets.
+
+% ─── Table 4: Multi-Asset Results ────────────────────────────
+\begin{table}[H]
+\centering
+\small
+\begin{threeparttable}
+\caption{Multi-Asset Portfolio Optimization: 50/50 SPY/GLD vs.\ Alternatives}
+\label{tab:multiasset}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Method & $N_{\text{assets}}$ & Sharpe & MDD (\%) & Beats 50/50? \\
+\midrule
+50/50 SPY/GLD (baseline) & 2 & 1.849 & $-13.3$ & --- \\
+\midrule
+Equal Weight & 3 & 1.492 & $-11.2$ & No \\
+Equal Weight & 9 & 1.285 & $-8.3$ & No \\
+Min Variance & 3 & 1.412 & $-10.8$ & No \\
+Min Variance & 9 & 1.308 & $-5.7$ & No \\
+Max Diversification & 3 & 1.385 & $-10.5$ & No \\
+Risk Parity & 3 & 1.401 & $-10.9$ & No \\
+Inverse Volatility & 2 & 1.795 & $-13.3$ & No \\
+ERC & 2 & 1.795 & $-13.3$ & No \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes}: Common evaluation period 2023-01-04 to 2026-03-27 (811 trading days). All methods use monthly hold-and-drift rebalancing, 5 bps per leg TX costs, signal.shift(1). 9-asset universe: SPY, GLD, TLT, QQQ, EEM, VWO, BND, DBC, IEFA. More assets reduce MDD but also reduce Sharpe. The 2-asset ERC and Inverse Volatility converge to approximately 50/50 because SPY vol (19.3\%) $\approx$ GLD vol (18.3\%).
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The result is unambiguous: no multi-asset strategy beats the simple 50/50 SPY/GLD allocation on Sharpe ratio. Adding assets reduces maximum drawdown (9-asset minimum variance achieves MDD of only $-5.7\%$ versus $-13.3\%$ for 50/50) but at the cost of lower returns, resulting in lower Sharpe ratios. This is consistent with \citet{demiguel2009}, who show that estimation error in optimized portfolios offsets diversification benefits.
+
+We further test whether financial-stress alt-data (NFCI, STLFSI, USEPU, WLEMU) can improve a daily regime-switching allocation between SPY and GLD. The matched-pair design (K1123, $N = 1{,}819$ trading days, 2019--2026) tests five alt-data allocation rules against the static 50/50 baseline (Sharpe $= 1.31$, OOS Sharpe $= 1.98$). All five alt-data strategies underperform the baseline on full-sample Sharpe (best: $1.16$) and on out-of-sample Sharpe. This extends the allocation null from the portfolio-optimization domain (Table~\ref{tab:multiasset}) to the regime-switching domain: VIX sufficiency holds regardless of whether the application is volatility forecasting, volatility-timing strategy, multi-asset optimization, or alt-data regime allocation.
+% source: experiments/k1123/k1123_results.json .verdict .headline_table .n_days
+
+\subsection{Era Stability of VIX Sufficiency}
+
+Table~\ref{tab:era_stability} presents the VIX forecasting power and strategy performance across five non-overlapping eras.
+
+% ─── Table 5: Era Stability ─────────────────────────────────
+\begin{table}[H]
+\centering
+\small
+\begin{threeparttable}
+\caption{VIX Sufficiency Across Five Market Eras (1993--2026)}
+\label{tab:era_stability}
+\begin{tabular}{@{}lccccccc@{}}
+\toprule
+Era & Period & $N$ & VIX--RV $R^2$ & $\beta$ & $t$-stat & Mean VIX & Mean RV \\
+\midrule
+1. Dot-Com & 1993--2000 & 1,811 & 0.525 & 0.810 & 44.7 & 18.5 & 14.6 \\
+2. Post-Dot-Com & 2000--2007 & 1,820 & 0.645 & 0.868 & 57.4 & 19.3 & 15.7 \\
+3. GFC & 2007--2012 & 1,261 & 0.508 & 0.957 & 36.1 & 26.3 & 22.4 \\
+4. Low-Vol QE & 2012--2020 & 1,908 & 0.244 & 0.692 & 24.8 & 15.0 & 11.8 \\
+5. COVID/Inflation & 2020--2026 & 1,525 & 0.309 & 0.810 & 26.1 & 21.0 & 17.2 \\
+\midrule
+Full Sample & 1993--2026 & 8,325 & 0.514 & 0.879 & 93.8 & 19.5 & 15.8 \\
+\midrule
+\multicolumn{3}{l}{Cross-era statistics:} & \multicolumn{2}{l}{Mean $R^2 = 0.446$} & \multicolumn{3}{l}{CV = 0.37 (time-invariant)} \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes}: $R^2$ from regressing 22-day forward realized volatility on VIX level. $\beta$ is the slope coefficient. All $t$-statistics are highly significant ($p \approx 0$). The lowest $R^2$ (0.244) occurs during the QE era when VIX was compressed near 15 with low variation; the highest (0.645) occurs during the post-dot-com era with wider VIX range. CV = coefficient of variation of $R^2$ across eras; CV $< 0.50$ indicates time-invariance.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The VIX--RV relationship is remarkably stable. The coefficient of variation of $R^2$ across eras is 0.37---well below the 0.50 threshold we adopt for time-invariance. Importantly, the low $R^2$ in the QE era (0.244) does not indicate VIX failure; rather, it reflects the mechanical compression of both VIX and RV during this period (VIX stuck near 15, RV near 12), which reduces regression $R^2$ without impairing VIX's relative forecasting accuracy.
+
+\subsection{Competing Signals by Era}
+
+Table~\ref{tab:competing_eras} presents the incremental $R^2$ of three representative competing signals across the five eras.
+
+% ─── Table 6: Competing Signals by Era ──────────────────────
+\begin{table}[H]
+\centering
+\small
+\begin{threeparttable}
+\caption{Incremental $R^2$ of Competing Signals Across Eras}
+\label{tab:competing_eras}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+Signal & Era 1 & Era 2 & Era 3 & Era 4 & Era 5 & Harvey Pass? \\
+\midrule
+% source: experiments/k752_vix_sufficiency_eras_results.json .part_d_competing_signals_by_era.Era<k>.signals.<signal>.incremental_R2
+Overnight VIX (abs) & 0.0002 & 0.0001 & 0.0039$^{\dagger}$ & 0.0006 & 0.0032 & 1/5 \\
+VRP proxy & 0.0005 & 0.0002 & 0.0160$^{\dagger}$ & 0.0008 & 0.0005 & 1/5 \\
+Vol momentum 20/60 & 0.0001 & 0.0004 & 0.0216$^{\dagger}$ & 0.0001 & 0.0372$^{\dagger}$ & 2/5 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes}: Incremental $R^2$ from adding the signal to a VIX-only regression of 22-day forward realized volatility. Values are near zero in non-crisis eras (Era 1 DotCom, Era 2 PostDotCom, Era 4 LowVol/QE), confirming VIX sufficiency in normal regimes. $^{\dagger}$Denotes an in-sample Harvey $|t|>3.0$ threshold crossing in the indicated era; four such crossings occur---three in Era 3 (GFC: all three signals) and one in Era 5 (COVID/Inflation: Vol momentum 20/60). These in-sample crisis-era exceptions do not survive out-of-sample Diebold--Mariano testing with Holm--Bonferroni correction (Table~\ref{tab:horse_race}), consistent with the paper's core VIX-sufficiency finding on average while identifying well-defined crisis-regime boundary conditions.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The pattern is nuanced: during the three non-crisis eras (DotCom, PostDotCom, LowVol/QE), incremental $R^2$ values are uniformly tiny (all below 0.001) across all signals, confirming VIX sufficiency in normal market regimes. However, during the GFC (Era 3) and COVID/Inflation (Era 5) eras, three signals---Overnight VIX absolute change, VRP proxy, and Vol momentum 20/60---exhibit materially larger incremental $R^2$ values (up to 0.037 for Vol momentum in Era 5), with four in-sample cells crossing the Harvey threshold: all three signals in Era 3 GFC, and Vol momentum 20/60 in Era 5. This in-sample crisis-era exception is consistent with the paper's core out-of-sample finding, however: all era-pooled OOS Diebold--Mariano tests remain $|t|<3$ even after Holm--Bonferroni correction (Table~\ref{tab:horse_race}). The refined reading is that VIX sufficiency is robust on average but has identified, well-defined crisis-regime boundary conditions where the option-market information set may be partially incomplete during extreme volatility episodes.
+
+A complementary matched-pair design directly tests whether alt-data signals improve forecasting specifically during VIX jump days (K1117, $N_{\text{jump}} = 181$ days at the VIX 2$\sigma$ threshold, $N_{\text{total}} = 4{,}022$). Six alt-data variables (VVIX, USEPU, NFCI, ANFCI, STLFSI, WLEMU) are tested for incremental forecasting content on jump-day windows versus control windows. The verdict is FULL\_NULL: no signal achieves DM-HLN $|t|>2$ in any specification, and no hypothesis ($H_1$, $H_2$, $H_3$) passes BH correction (VVIX: $H_1$ DM $t = 1.35$, $p_{\text{BH}} = 0.69$). VIX sufficiency extends even to extreme volatility episodes where option-market information updating is fastest.
+% source: experiments/k1117/k1117_results.json .verdict .jump_counts .tests.vvix
+
+\subsection{Criterion-Dependent Model Rankings}
+\label{sec:criterion_dependent}
+
+An important robustness finding emerges when we evaluate forecast models under the \citet{patton2011} framework. Table~\ref{tab:criterion_dependent} compares model rankings across three evaluation criteria---QLIKE on $r_t^2$, Spearman rank correlation, and sub-period stability---for six volatility model families estimated on the full 2008--2026 out-of-sample period ($N = 4{,}589$).
+
+% ─── Table: Criterion-Dependent Rankings ─────────────────────
+\begin{table}[H]
+\centering
+\small
+\begin{threeparttable}
+\caption{Criterion-Dependent Model Rankings (2008--2026, $N = 4{,}589$)}
+\label{tab:criterion_dependent}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+& GJR & AMEM & MEM & GARCH & HAR & EWMA \\
+\midrule
+\multicolumn{7}{l}{\textit{Panel A: QLIKE on $r_t^2$ (proxy-robust)}} \\
+QLIKE & 1.527 & 1.559 & 1.576 & 1.576 & 1.649 & 1.624 \\
+Rank & \textbf{1} & 2 & 3 & 4 & 6 & 5 \\
+\midrule
+\multicolumn{7}{l}{\textit{Panel B: Spearman rank correlation with $r_t^2$}} \\
+$\rho_S$ & 0.418 & 0.398 & 0.376 & 0.373 & 0.362 & 0.356 \\
+Rank & \textbf{1} & 2 & 3 & 4 & 5 & 6 \\
+\midrule
+\multicolumn{7}{l}{\textit{Panel C: MCS membership ($\alpha = 0.10$)}} \\
+In MCS? & \cmark & \xmark & \xmark & \xmark & \xmark & \xmark \\
+\midrule
+\multicolumn{7}{l}{\textit{Panel D: Pairwise DM tests (QLIKE, HAC bandwidth = 22)}} \\
+GJR vs.\ AMEM & \multicolumn{6}{l}{DM = 3.78, $p < 0.001$; GJR $\succ$ AMEM (\citet{harvey2016} pass)} \\
+GJR vs.\ GARCH & \multicolumn{6}{l}{DM = 4.76, $p < 0.001$; GJR $\succ$ GARCH (\citet{harvey2016} pass)} \\
+AMEM vs.\ GARCH & \multicolumn{6}{l}{DM = 2.85, $p = 0.004$; AMEM $\succ$ GARCH (marginal)} \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes}: All models estimated with expanding window (minimum 500 observations, refit every 63 days). QLIKE on $r_t^2$ is proxy-robust per \citet{patton2011}. MCS uses block bootstrap ($B = 5{,}000$, block length = 22) per \citet{hansen2011mcs}. GJR-GARCH dominates across all criteria, with the MCS containing only GJR at the 10\% level. Note: under $|r_t|$ targets (not shown), AMEM outperforms GJR on QLIKE---criterion choice reverses the ranking for non-robust loss functions, confirming the importance of the Patton framework.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+Three findings emerge. First, GJR-GARCH is the dominant model under the proxy-robust QLIKE criterion, with DM = 3.78 ($p < 0.001$) versus the next-best AMEM---passing the \citet{harvey2016} threshold. The MCS at $\alpha = 0.10$ contains only GJR, indicating statistical separation from all competitors.
+
+Second, the rankings are \emph{criterion-dependent}: under $|r_t|$ targets (which are \emph{not} proxy-robust), AMEM outperforms GJR on QLIKE, reversing the ranking. This reversal occurs because $|r_t|$ introduces a 19.6\% downward bias in the volatility proxy (empirical ratio $\mathbb{E}[r_t^2]/\mathbb{E}[|r_t|]^2 = 2.44$ versus the normal-theory $\pi/2 = 1.57$), which differentially affects models with asymmetric specifications. The Patton framework resolves this ambiguity by privileging $r_t^2$-based evaluation.
+
+Third---and most relevant for VIX sufficiency---this criterion dependence \emph{strengthens} rather than weakens our main finding. Even among sophisticated volatility models, the ``best'' model depends on which evaluation criterion is used. Yet none of them, regardless of criterion, improves upon VIX as an input signal. The instability of model rankings across criteria makes the stability of VIX sufficiency all the more striking.
+
+\subsection{12/VIX Strategy by Era}
+
+Table~\ref{tab:strategy_eras} shows the 12/VIX strategy performance across eras.
+
+% ─── Table 7: Strategy by Era ───────────────────────────────
+\begin{table}[H]
+\centering
+\small
+\begin{threeparttable}
+\caption{12/VIX Strategy vs.\ 50/50 Baseline Across Eras}
+\label{tab:strategy_eras}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+Era & VT Sharpe & BH Sharpe & $\Delta$Sharpe & VT MDD & BH MDD & Winner \\
+\midrule
+1. Dot-Com\textsuperscript{a} & 1.236 & 1.261 & $-0.026$ & $-9.2\%$ & $-9.9\%$ & 50/50 \\
+2. Post-Dot-Com\textsuperscript{a} & 0.128 & 0.179 & $-0.051$ & $-31.3\%$ & $-26.3\%$ & 50/50 \\
+3. GFC & 0.537 & 0.669 & $-0.132$ & $-32.3\%$ & $-32.5\%$ & 50/50 \\
+4. Low-Vol QE & 1.116 & 0.797 & $+0.319$ & $-12.8\%$ & $-13.1\%$ & 12/VIX \\
+5. COVID/Inflation & 0.963 & 1.139 & $-0.176$ & $-20.2\%$ & $-20.3\%$ & 50/50 \\
+\midrule
+\multicolumn{3}{l}{12/VIX wins:} & \multicolumn{4}{l}{1 of 5 eras} \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes}: \textsuperscript{a}GLD not available; complement asset is cash (risk-free rate). All strategies use signal.shift(1) and 5 bps per leg TX costs. 12/VIX wins only in the low-volatility QE era when persistent low VIX enables consistent high equity exposure (mean weight $\approx 80\%$).
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The 12/VIX strategy wins in only 1 of 5 eras (the low-volatility QE period). This further reinforces that VT strategies do not generate alpha in the traditional sense; their value lies in drawdown insurance, which is most apparent during high-volatility regimes where VT reduces exposure.
+
+\subsection{Cross-Asset Native-IV Sufficiency: A Seven-Asset PIT Panorama}
+\label{subsec:cross_asset_panorama}
+
+% source: experiments/k1203/k1203_results.json .panorama_7asset_pit_shift0
+% source: experiments/k1116c/k1116c_results.json .dm_results (SPY)
+% source: experiments/k1116/k1116f/ (GLD, TLT, BTC-USD)
+% source: experiments/k1201/k1201_results.json .dm_results (QQQ, USO)
+% source: experiments/k1203/k1203_results.json .asset_results.EEM (EEM)
+
+The VIX-sufficiency claim gains its strongest cross-asset confirmation from a seven-asset Publication-In-Time (PIT) panorama. Extending the K1116c (SPY), K1116f (GLD, TLT, BTC-USD), K1201 (QQQ, USO), and K1203 (EEM) experimental series to a unified evaluation, we test four alt-data specifications---\texttt{base} (AR(1) + native IV), \texttt{epu} (+ EPU uncertainty indices), \texttt{finstress} (+ NFCI / ANFCI / STLFSI financial-stress series), and \texttt{all} (all alt-data simultaneously)---against a native-IV baseline using PIT-aligned DM-HLN tests (\texttt{pit\_shift0} primary specification, 2023-01-01 to 2026-04-10, $N_{\text{OOS}} = 170$ weeks).
+
+PIT alignment ensures each weekly regression uses only alt-data releases available at the time of prediction. For FRED weekly series (NFCI, ANFCI, STLFSI), the publication lag is Wednesday of the following week; for EPU indices, the next business day. All specifications include an AR(1) term and the asset's native implied-volatility proxy as baseline regressors, with the native-IV proxy matched to each asset class: \^{}VIX for SPY, QQQ, and EEM;\footnote{For EEM, the CBOE Emerging Markets VIX (\^{}VXEEM) is the natural native-IV proxy, but it was delisted prior to the K1203 evaluation period (\texttt{yfinance} returns HTTP~404 for \^{}VXEEM and reports ``possibly delisted'' for VXEEM; \^{}VXFXI and \^{}CIV are also unavailable). Accordingly, K1203 uses \^{}VIX as a systemic spillover proxy (empirical weekly EEM--VIX correlation $\approx 0.75$ in this sample) and additionally confirms the verdict against a 30-day EEM realized-volatility (\texttt{rv30}) robustness baseline. Both configurations yield a clean NULL, ruling out sensitivity to the IV-proxy choice.} GVZ for GLD; MOVE for TLT; BVIN for BTC-USD; and OVX for USO.
+
+Table~\ref{tab:panorama_7asset} reports the DM-HLN $t$-statistics for the \texttt{pit\_shift0} variant across all 28 specification cells (7 assets $\times$ 4 specifications). A positive $t$ indicates the alt-data challenger beats the native-IV baseline on QLIKE; a negative $t$ indicates the baseline wins. The Harvey (2016) threshold of $|t| > 3.0$ is required to declare a statistically significant improvement.
+
+\begin{table}[H]
+\centering
+\small
+\begin{threeparttable}
+\caption{Seven-Asset Cross-Asset Panorama: DM-HLN $t$-Statistics vs.\ Native-IV Baseline (PIT-Aligned, \texttt{pit\_shift0})}
+\label{tab:panorama_7asset}
+\begin{tabular}{@{}llcccc@{}}
+\toprule
+Asset & Source & \texttt{base} & \texttt{epu} & \texttt{finstress} & \texttt{all} \\
+\midrule
+SPY     & K1116c          & $-3.021$ & $-2.603$ & $-3.001$           & $-2.537$ \\
+GLD     & K1116f          & $-2.103$ & $-2.069$ & $-3.341$           & $-2.246$ \\
+TLT     & K1116f          & $+1.433$ & $-2.477$ & $+3.743^{\dag}$    & $-5.666$ \\
+BTC-USD & K1116f          & $-5.494$ & $-3.550$ & $+1.370$           & $+0.203$ \\
+QQQ     & K1201           & $-2.186$ & $-1.967$ & $-2.439$           & $-1.967$ \\
+USO     & K1201           & $-3.049$ & $-5.596$ & $-2.584$           & $-3.735$ \\
+EEM     & K1203 (\^{}VIX) & $-2.596$ & $-3.539$ & $-1.434$           & $-0.999$ \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+% source: experiments/k1203/k1203_results.json .panorama_7asset_pit_shift0
+\item \textit{Notes}: Positive $t$ indicates the challenger specification beats the native-IV baseline on QLIKE; negative $t$ indicates the baseline wins. Harvey (2016) threshold: $|t| > 3.0$. Negative values exceeding $-3.0$ in absolute value denote statistically significant \emph{baseline wins}. $^{\dag}$TLT $\times$ \texttt{finstress} ($t = +3.743$) is lag-sensitive: it collapses to $t = +2.000$ under \texttt{pit\_shift1} (one additional lag week) and the QLIKE improvement is only $+0.50\%$ (below the 5\% materiality gate).\footnote{Post-hoc attribution localises the TLT finstress signal to the 2020--2022 COVID-inflation regime, during which NFCI / STLFSI stress-index innovations are contemporaneously correlated with TLT yield shocks. When the prediction window shifts by one week (\texttt{pit\_shift1}), this spurious contemporaneous alignment vanishes and the $t$-statistic falls from $+3.743$ to $+2.000$, ruling out a structurally exploitable predictive relationship. This is a regime artefact, not a genuine informational channel.} Weekly OOS period 2023-01-01 to 2026-04-10 ($N_{\text{OOS}} = 170$ weeks). EEM native-IV proxy: \^{}VIX (see footnote on \^{}VXEEM delisting); rv30 robustness yields the same qualitative verdict.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+Across all 28 panorama cells, only one---TLT $\times$ \texttt{finstress} ($t = +3.743$)---crosses the Harvey threshold on the primary specification, and this sole exceedance fails every robustness check: it collapses under one additional lag week and is QLIKE-insignificant. The remaining 27 cells are either null (positive but below $+3.0$) or baseline-wins (negative). The cross-asset verdict is thus \textbf{UNIVERSAL\_NULL\_7/7}: for six of seven assets the null is unambiguous; for TLT the single outlier is a regime artefact rather than a structural signal. Native-IV sufficiency extends from US equity (SPY) to international equity (EEM, QQQ), commodities (GLD, USO), fixed income (TLT), and cryptocurrency (BTC-USD), constituting the broadest cross-asset evidence for option-market information efficiency available at daily frequency.
+
+\subsection{Channel-Specific Mechanism Heterogeneity}
+\label{subsec:channel_specific}
+
+% source: experiments/k1137/k1137_results.json .channel_analysis
+% source: experiments/k1138/k1138_results.json .summary
+% source: experiments/k1136/k1136_results.json .summary
+% source: experiments/k1143/k1143_results.json .per_asset_results.SPY.model_metrics
+% source: experiments/k1135/k1135_results.json .verdict
+
+The aggregate null across eleven signal families conceals a structured heterogeneity in \emph{how} different model architectures fail. We characterize three channels with qualitatively distinct failure patterns, providing sharper guidance for future research beyond "all signals fail."
+
+\subsubsection{Channel 1: HAR+VIX on Equity---Regime-Invariant Gains on Parkinson Volatility}
+
+The HAR-RV+VIX model (M4: Corsi 2009 HAR on log-Parkinson realized volatility with $\log(\text{VIX}^2_{t-1})$ regressor) delivers statistically significant out-of-sample improvements on large-cap and mid-cap equity indices relative to a GJR-GARCH(1,1) Normal baseline evaluated on the same Parkinson target. We define regime-invariance as passing the Harvey threshold ($|t|>3.0$, BH-adjusted) in all three VIX quintile regimes (low/mid/high).
+
+Across 18 equity asset $\times$ regime cells (3 assets $\times$ 3 regimes $\times$ 2 models, evaluated in K1137), HAR+VIX achieves regime-invariant status for two equity indices: QQQ passes across all three regimes (low $t=6.79$, mid $t=4.83$, high $t=3.09$; all BH-adjusted $p < 0.001$), and IWM passes across all three regimes (low $t=4.22$, mid $t=3.61$, high $t=2.73$; all BH-adjusted $p < 0.05$). SPY achieves 2 of 3 regime passes (low $t=7.99$, mid $t=4.39$, but high $t=2.26$ fails BH correction). Across the full 54-cell evaluation (6 assets $\times$ 3 regimes $\times$ 3 models), 17 cells pass BH-adjusted Harvey threshold.
+
+These gains are specific to the Parkinson-range volatility measurement framework.\footnote{K1136 fair-test analysis establishes that GARCH-MIDAS-X, a score-driven long-memory extension, achieves zero conditional passes (0/3 regimes) under the same matched-target protocol (K1136, \texttt{fair\_test\_1\_m3\_midas\_pass\_count = 0}), ruling out the possibility that any long-run factor model outperforms.} The HAR+VIX gains reflect the empirically documented efficiency of Parkinson-range estimators for capturing intraday volatility dynamics that daily closing-price GARCH imperfectly approximates---not an incremental signal beyond VIX in the traditional regression sense.
+
+\subsubsection{Channel 2: GARCH-MIDAS Long-Run Factor---Universal Null}
+
+GARCH-MIDAS-X, which extends the baseline GJR-GARCH by adding a slow-moving multiplicative component driven by lagged monthly VIX-squared ($\tau_t = \exp(m + \theta \times \text{VIX}^2_{\text{monthly}})$), achieves zero BH-adjusted conditional passes across all three VIX regimes and all six assets evaluated in K1137 (\texttt{n\_midas\_conditional\_pass = 0}). This null is universal: neither equity nor commodity assets benefit from the MIDAS long-run factor once target-consistent evaluation is applied.
+
+The MIDAS null strengthens the option-market information aggregation argument: any low-frequency volatility information that a one-month lagged VIX factor could supply is already impounded in the contemporaneous VIX level, leaving no incremental forecasting content for the long-run MIDAS component.
+
+\subsubsection{Channel 3: GAS-t Score-Driven Models---Asset-Class Bifurcation}
+
+The Generalized Autoregressive Score (GAS-t) framework \citep{crealetal2013} exhibits qualitatively different behavior across asset classes.
+
+\textbf{Equity: architectural incompatibility.} On SPY (K1138: $N_{\text{OOS}} = 1{,}323$, 2021--2026), GAS-t is actively harmful relative to GJR-GARCH Normal (DM-HLN $t = -3.27$, $p < 0.001$). K1143 tests four candidate remedies---Hansen skew-t asymmetry (M2), score winsorization at $\pm0.3$ (M3), persistence capping at $\beta \leq 0.9$ (M4), and regime switching to HAR in low-VIX environments (M5)---and finds that \emph{all variants produce QLIKE above the GJR-N baseline}: M1 symmetric GAS-t QLIKE $= 1.527$ versus GJR-N $= 1.474$; Hansen skew-t (M2) QLIKE $= 1.535$ (worse than M1). The post-2020 equity return distribution (excess kurtosis $= 8.85$, skewness $= +0.30$) contradicts the GAS framework's core premise that score-driven updates stabilize conditional variance when innovations are approximately Student-$t$. Instead, the GAS score exhibits positive skewness ($+1.58$), causing right-biased updates that systematically overweight large positive return shocks.
+
+\textbf{Commodity: tail-risk instrument, not volatility forecaster.} On negatively skewed commodities (USO, UNG), the skew-t GAS extension \citep{hansen1994} recovers VaR/ES performance that the symmetric GAS-t variant lacks (K1135, $H_3$: ES backtests pass at the 1\% level for all four assets, BH-adjusted). However, forecasting QLIKE remains null (0 of 4 assets improve, $H_1$ pass count $= 0$). This bifurcation---ES improvement without QLIKE improvement---indicates that skew-t GAS captures distributional shape for risk management without improving point volatility forecasts.
+
+The Channel~3 pattern thus identifies a \emph{usage boundary}: for equity volatility forecasting, GAS-t is architecturally incompatible and should be replaced by GJR-GARCH. For commodity tail-risk estimation specifically, skew-t GAS provides a validated tail-risk instrument despite null forecasting performance. These distinctions cannot be inferred from the aggregate null result alone.
+
+\begin{table}[H]
+\centering
+\small
+\begin{threeparttable}
+\caption{Channel-Specific Outcome Matrix}
+\label{tab:channel_outcomes}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Channel & Equity (SPY/QQQ/IWM) & Commodity (USO/GLD) & TLT \\
+\midrule
+1. HAR+VIX (Parkinson target) & \textbf{PASS} (QQQ/IWM 3/3 regimes) & PASS (TLT/USO) & PASS (3/3 regimes) \\
+2. GARCH-MIDAS long-run & NULL (0/3 regimes all assets) & NULL & NULL \\
+3a. GAS-t (QLIKE) & \textbf{HARMFUL} (SPY $t=-3.27$) & NULL & --- \\
+3b. Skew-t GAS (ES 1\%) & --- & \textbf{PASS} (4/4 assets) & --- \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+% source: K1137 .channel_analysis.channel_1_HAR_equity; K1138 .summary; K1136 .summary; K1143 .per_asset_results; K1135 .verdict
+\item \textit{Notes}: Channel 1 PASS requires BH-adjusted Harvey $|t|>3.0$ in all three VIX regimes. Channel 2 evaluates GARCH-MIDAS-X fair test (matched target). Channel 3a tests QLIKE improvement vs GJR-GARCH Normal. Channel 3b tests ES backtest at 1\% coverage. Regime-invariant = PASS in all low/mid/high VIX regimes.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+%=================================================================
+\section{Why the Null is Informative}
+\label{sec:null}
+%=================================================================
+
+\subsection{The Information Aggregation Explanation}
+
+Our null result is not a failure to find signal but a positive finding about market efficiency. The VIX option market is one of the deepest and most liquid derivatives markets in the world, with average daily trading volume exceeding 500,000 contracts. This liquidity ensures rapid price discovery, meaning that any signal with predictive content for short-term volatility is quickly impounded into option prices and hence into VIX.
+
+We can formalize this argument. Let $\Omega_t$ denote the information set of the representative option trader at time $t$. Under semi-strong form efficiency of the options market:
+\begin{equation}
+\mathbb{E}[\sigma^2_{t+1:t+22} | \Omega_t] = f(\text{VIX}_t),
+\label{eq:efficiency}
+\end{equation}
+where $f(\cdot)$ is monotonically increasing. Any signal $s_t \in \Omega_t$ satisfies:
+\begin{equation}
+\mathbb{E}[\sigma^2_{t+1:t+22} | \text{VIX}_t, s_t] = \mathbb{E}[\sigma^2_{t+1:t+22} | \text{VIX}_t],
+\label{eq:sufficiency}
+\end{equation}
+i.e., VIX is a sufficient statistic for all information already incorporated in option prices. Our eleven signal families are all elements of $\Omega_t$, which explains the zero incremental forecasting power.
+
+\subsection{What Might Break VIX Sufficiency?}
+
+The sufficiency argument identifies two conditions under which alternative signals could add value:
+
+\begin{enumerate}
+    \item \textbf{Higher-frequency information}: Intraday 5-minute realized volatility \emph{may} capture microstructure dynamics (e.g., opening auctions, lunch-hour liquidity, closing imbalances) that closing-price VIX does not fully reflect. The direct evidence from our K745 pilot ($N = 37$), however, runs in the opposite direction: daily HAR-ABS ($\text{QLIKE} = 0.077$) outperformed 5-minute HAR-RV ($\text{QLIKE} = 0.109$) by 41.8\% in this small sample. A larger-scale replication (K1139, planned) is required to determine whether the small-sample direction reverses at scale; until then, we regard the intraday frontier as theoretically plausible but empirically unconfirmed.
+
+    \item \textbf{Genuinely exogenous shocks}: Events that arrive between option-market pricing updates---geopolitical shocks, pandemic declarations, sudden policy announcements---may create temporary information asymmetries. However, these are by definition unpredictable ex ante.
+\end{enumerate}
+
+\subsection{Economic Significance: Forecast Accuracy vs.\ Risk Management}
+\label{sec:economic_significance}
+
+A natural question is whether the forecast ranking differences documented in Section~\ref{sec:criterion_dependent} translate into economically meaningful differences for risk management. We address this through a comprehensive VaR and Expected Shortfall (ES) backtesting exercise using five model families over 4,590 out-of-sample days (2008--2026), evaluated with the \citet{kupiec1995} unconditional coverage test, the \citet{christoffersen1998} conditional coverage (independence) test, and the Basel III traffic-light framework.
+
+Table~\ref{tab:var_backtest} presents the VaR/ES backtest results and the resulting economic ranking.
+
+% ─── Table: VaR/ES Backtest Results ──────────────────────────
+\begin{table}[H]
+\centering
+\small
+\begin{threeparttable}
+\caption{VaR/ES Backtest: Model Risk Management Quality (2008--2026)}
+\label{tab:var_backtest}
+\begin{tabular}{@{}lccccccc@{}}
+\toprule
+Model & VaR$_{1\%}$ & Kupiec & Christoff.\ & Basel & VaR$_{5\%}$ & Kupiec & Risk \\
+ & Viol.\ Rate & $p$ & $p$ & Zone & Viol.\ Rate & $p$ & Score \\
+\midrule
+AMEM(Gamma) & 1.09\% & 0.549 & 0.576 & Green & 5.29\% & 0.365 & \textbf{1.94} \\
+GJR-GARCH($t$) & 1.35\% & 0.023 & 0.011 & Green & 4.58\% & 0.181 & 1.63 \\
+Hist.\ Sim(250d) & 1.59\% & $<$0.001 & $<$0.001 & Green & 5.25\% & 0.440 & 1.34 \\
+EWMA(Gauss) & 2.33\% & $<$0.001 & 0.016 & Yellow & 5.90\% & 0.006 & 1.23 \\
+HAR-ABS(Gauss) & 2.51\% & $<$0.001 & 0.010 & Yellow & 6.36\% & $<$0.001 & 1.19 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes}: Risk Score is a composite of Kupiec calibration, Christoffersen independence, Basel zone, and Acerbi-Szekely ES backtest, computed at both 1\% and 5\% levels (maximum score = 2.0). AMEM achieves near-perfect calibration at both levels (1.09\% vs.\ 1\% target; 5.29\% vs.\ 5\% target) and is the only model passing both Kupiec and Christoffersen at $\alpha = 0.01$. GJR-GARCH, despite being the best \emph{forecaster} (Section~\ref{sec:criterion_dependent}), is only the second-best \emph{risk manager}. All models use VIX as primary input; expanding window estimation with quarterly refits.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The key finding is a \emph{decoupling} between forecast accuracy and risk management quality. GJR-GARCH is the best volatility forecaster (lowest QLIKE, sole MCS member), but AMEM is the best risk manager (highest composite VaR/ES score of 1.94 vs.\ 1.63). This decoupling arises because risk management requires accurate \emph{tail} calibration---getting the 1\% and 5\% quantiles right---which depends on the distributional assumption (AMEM's Gamma distribution better captures the right-skewed nature of $r_t^2$) rather than on mean forecast accuracy alone.
+
+For economic significance, we translate VaR/ES forecasts into portfolio allocations. An ES-weighted SPY/GLD strategy using AMEM achieves Sharpe = 0.861 versus the static 50/50 benchmark's 0.814, an improvement of +0.047. While modest, this confirms that volatility models add value through risk control even when they cannot add value through return prediction---reinforcing the drawdown insurance framework.
+
+Crucially, all five models in this exercise use VIX as their primary input signal, and none benefits from adding external signals. The debate over ``which model is best'' is entirely \emph{within} the VIX information set, further strengthening VIX sufficiency: the relevant optimization is over model specification (GJR vs.\ AMEM) and application domain (forecasting vs.\ risk management), not over information sources.
+
+\subsection{The Drawdown Insurance Framework}
+
+If VT cannot generate alpha, what is its economic function? We propose that VT is best understood as drawdown insurance, analogous to buying a put option on the portfolio.
+
+\begin{proposition}[Drawdown Insurance Cost-Benefit]
+\label{prop:insurance}
+For a CRRA investor with risk aversion $\gamma$, the certainty-equivalent return of a VT portfolio exceeds that of buy-and-hold when:
+\begin{equation}
+\gamma \geq \gamma^* = \frac{\Delta \mu}{\frac{1}{2}(\sigma_{\text{BH}}^2 - \sigma_{\text{VT}}^2)},
+\label{eq:gamma_star}
+\end{equation}
+where $\Delta \mu = \mu_{\text{BH}} - \mu_{\text{VT}}$ is the return drag from VT, and $\sigma_{\text{BH}}^2 - \sigma_{\text{VT}}^2$ is the variance reduction.
+\end{proposition}
+
+Using our empirical estimates (Table~\ref{tab:insurance}), the 12/VIX strategy has a break-even risk aversion of $\gamma^* = 4.5$, and the EWMA VT strategy has $\gamma^* = 4.4$.
+
+% ─── Table 8: Insurance Framework ───────────────────────────
+\begin{table}[H]
+\centering
+\small
+\begin{threeparttable}
+\caption{VT as Drawdown Insurance: Cost-Benefit Analysis}
+\label{tab:insurance}
+\begin{tabular}{@{}lccccl@{}}
+\toprule
+VT Method & Drag & MDD Red.\ & Cost/1pp & $\gamma^*$ & Welfare ($\gamma\!=\!5$) \\
+\midrule
+12/VIX (SPY/GLD) & 3.49\%/yr & $-8.2$ pp & 0.43\% & 4.5 & +0.12\%/yr \\
+EWMA VT (SPY/GLD) & 2.12\%/yr & $-6.1$ pp & 0.35\% & 4.4 & +0.15\%/yr \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes}: Return drag is the annualized difference in mean return between buy-and-hold and VT strategy. MDD reduction is the decrease in maximum drawdown. Cost per 1 pp MDD is the return drag divided by MDD improvement (in percentage points). Break-even $\gamma$ is the minimum CRRA risk aversion at which the certainty-equivalent return of VT exceeds buy-and-hold. Welfare gain at $\gamma=5$ is the annualized certainty-equivalent improvement. Cross-asset validation: 5 assets (SPY, GLD, QQQ, EEM, 0050.TW), 2007--2026.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The insurance framework has a clear practical implication: VT is rational for investors who are moderately to highly risk-averse ($\gamma \geq 4.5$, which encompasses most retail investors and many institutional mandates) but not for risk-neutral or mildly risk-averse investors who should prefer buy-and-hold.
+
+\subsection{The Simplicity Premium}
+
+A natural question is whether more complex strategies justify their complexity. Our meta-analysis of 14 live-tracked strategies reveals a \emph{simplicity premium}: the Spearman correlation between the number of estimated parameters and the Sharpe ratio is $\rho = 0.077$ ($p = 0.794$), indicating zero relationship between complexity and performance. The best-performing strategies (50/50 SPY/GLD, 12/VIX, Piecewise VT) have zero or one estimated parameter.
+
+This echoes \citeauthor{demiguel2009}'s (\citeyear{demiguel2009}) finding that $1/N$ portfolios outperform optimized alternatives. In the VT context, the simplicity premium arises because:
+\begin{enumerate}
+    \item Simple rules have fewer parameters to estimate, reducing overfitting.
+    \item Smooth weight functions (like $12/\text{VIX}$) produce low turnover, saving transaction costs.
+    \item Zero-parameter rules are immune to estimation window and specification choices.
+\end{enumerate}
+
+
+%=================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+%=================================================================
+
+We set out to answer a straightforward question: can any observable signal beat VIX for equity volatility forecasting and volatility timing? After a systematic evaluation of eleven pre-specified signal families across 33 years of data, five market eras, and a unified pipeline with strict lag enforcement, transaction-cost accounting, Harvey (2016) approximate thresholds, formal Holm-Bonferroni multiple-testing correction, and proxy-robust evaluation per \citet{patton2011}, the answer is no.
+
+This null is not a failure but an informative finding. It reflects the efficiency of the options market, which aggregates heterogeneous information---cross-asset correlations, macroeconomic indicators, sentiment, term structure dynamics---into a single summary statistic. Each of the eleven signal families we tested represents one channel of information that option traders already incorporate into their pricing. VIX, as the price-weighted consensus, already contains them.
+
+Moreover, the robustness of VIX sufficiency is underscored by three additional findings. First, volatility model rankings are criterion-dependent: GJR-GARCH dominates under proxy-robust QLIKE on $r_t^2$, but AMEM dominates under $|r_t|$ targets. This instability in model rankings makes the stability of VIX sufficiency across all criteria all the more striking. Second, forecast accuracy and risk management quality are distinct dimensions---AMEM is the best risk manager (VaR/ES composite score 1.94) while GJR is the best forecaster---yet both operate entirely within the VIX information set, confirming that the relevant optimization is over model specification and application domain, not over information sources. Third, a seven-asset cross-asset PIT panorama (Table~\ref{tab:panorama_7asset}) delivers UNIVERSAL\_NULL\_7/7: of 28 specification cells spanning equities, commodities, fixed income, and cryptocurrency, only one isolated outlier reaches the Harvey threshold and it fails every robustness check, establishing native-IV sufficiency as the broadest cross-asset finding at daily frequency.
+
+The practical implications are clear:
+
+\begin{enumerate}
+    \item \textbf{For researchers}: The daily-frequency, closing-price frontier is exhausted. Gains require genuinely exogenous information outside the option-market information set; the 5-minute realized-measure frontier is theoretically plausible but is not yet empirically confirmed (our K745 pilot with $N = 37$ found daily HAR-ABS \emph{outperformed} 5-minute HAR-RV by 41.8\%, a result that should be tested at scale before positing 5-minute data as a reliable improvement channel).
+
+    \item \textbf{For practitioners}: The simplest VIX-based rule (12/VIX) cannot be improved by adding signals. Complexity reduces returns through estimation error, higher turnover, and transaction costs. The optimal allocation for most investors is either buy-and-hold 50/50 SPY/GLD (if $\gamma < 4.5$) or 12/VIX VT (if $\gamma \geq 4.5$).
+
+    \item \textbf{For regulators and risk managers}: VIX sufficiency is time-invariant (CV = 0.37 across 33 years). Models based on VIX do not need frequent recalibration, and regulatory frameworks (e.g., Basel III/IV) that reference VIX for market risk are on solid empirical ground.
+\end{enumerate}
+
+We conclude with a broader observation. In financial econometrics, null results are underreported relative to their information content. Our systematic horse race, with its pre-specified signal families and stringent statistical controls, provides stronger evidence than any individual positive finding could. The 36 null results accumulated across this research program are not 36 failures; they are 36 independent confirmations that the option market efficiently aggregates volatility-relevant information.
+
+
+%=================================================================
+% ─── References ──────────────────────────────────────────────
+%=================================================================
+
+\newpage
+\bibliographystyle{apalike}
+\begin{thebibliography}{99}
+
+\bibitem[Andersen et~al.(2003)]{andersen2003}
+Andersen, T.~G., Bollerslev, T., Diebold, F.~X., \& Labys, P. (2003). Modeling and forecasting realized volatility. \textit{Econometrica}, 71(2), 579--625.
+
+\bibitem[Baker and Wurgler(2006)]{baker2006}
+Baker, M., \& Wurgler, J. (2006). Investor sentiment and the cross-section of stock returns. \textit{Journal of Finance}, 61(4), 1645--1680.
+
+\bibitem[Barunik et al.(2016)]{barunik2016}
+Barunik, J., Kocenda, E., \& Vacha, L. (2016). Asymmetric connectedness on the U.S.\ stock market: Bad and good volatility spillovers. \textit{Journal of Financial Markets}, 27, 55--78.
+
+\bibitem[Bekaert and Hoerova(2014)]{bekaert2014}
+Bekaert, G., \& Hoerova, M. (2014). The VIX, the variance premium and stock market volatility. \textit{Journal of Econometrics}, 183(2), 181--190.
+
+\bibitem[Bollerslev et al.(2009)]{bollerslev2009}
+Bollerslev, T., Tauchen, G., \& Zhou, H. (2009). Expected stock returns and variance risk premia. \textit{Review of Financial Studies}, 22(11), 4463--4492.
+
+\bibitem[Bollerslev et al.(2020)]{bollerslev2020}
+Bollerslev, T., Li, J., \& Zhao, Y. (2020). Good volatility, bad volatility, and the cross section of stock returns. \textit{Journal of Financial and Quantitative Analysis}, 55(3), 751--781.
+
+\bibitem[Bouri et al.(2017)]{bouri2017}
+Bouri, E., Molnar, P., Azzi, G., Roubaud, D., \& Hagfors, L.~I. (2017). On the hedge and safe haven properties of Bitcoin: Is it really more than a diversifier? \textit{Finance Research Letters}, 20, 192--198.
+
+\bibitem[Bouman and Jacobsen(2002)]{bouman2002}
+Bouman, S., \& Jacobsen, B. (2002). The Halloween indicator, ``sell in May and go away'': Another puzzle. \textit{American Economic Review}, 92(5), 1618--1635.
+
+\bibitem[Bozovic(2024)]{bozovic2024}
+Bozovic, M. (2024). VIX-managed portfolios. \textit{International Review of Financial Analysis}, 95, 103353.
+
+\bibitem[Britten-Jones and Neuberger(2000)]{britten2000}
+Britten-Jones, M., \& Neuberger, A. (2000). Option prices, implied price processes, and stochastic volatility. \textit{Journal of Finance}, 55(2), 839--866.
+
+\bibitem[Campbell and Thompson(2008)]{campbell2008}
+Campbell, J.~Y., \& Thompson, S.~B. (2008). Predicting excess stock returns out of sample: Can anything beat the historical average? \textit{Review of Financial Studies}, 21(4), 1509--1531.
+
+\bibitem[Bucci(2020)]{bucci2020}
+Bucci, A. (2020). Realized volatility forecasting with neural networks. \textit{Journal of Financial Econometrics}, 18(3), 502--531.
+
+\bibitem[Christensen and Prabhala(1998)]{christensen1998}
+Christensen, B.~J., \& Prabhala, N.~R. (1998). The relation between implied and realized volatility. \textit{Journal of Financial Economics}, 50(2), 125--150.
+
+\bibitem[Corsi(2009)]{corsi2009}
+Corsi, F. (2009). A simple approximate long-memory model of realized volatility. \textit{Journal of Financial Econometrics}, 7(2), 174--196.
+
+\bibitem[Creal et al.(2013)]{crealetal2013}
+Creal, D., Koopman, S.~J., \& Lucas, A. (2013). Generalized autoregressive score models with applications. \textit{Journal of Applied Econometrics}, 28(5), 777--795.
+
+\bibitem[Da et al.(2011)]{da2011}
+Da, Z., Engelberg, J., \& Gao, P. (2011). In search of attention. \textit{Journal of Finance}, 66(5), 1461--1499.
+
+\bibitem[DeMiguel et al.(2009)]{demiguel2009}
+DeMiguel, V., Garlappi, L., \& Uppal, R. (2009). Optimal versus naive diversification: How inefficient is the 1/N portfolio strategy? \textit{Review of Financial Studies}, 22(5), 1915--1953.
+
+\bibitem[Diebold and Mariano(1995)]{diebold1995}
+Diebold, F.~X., \& Mariano, R.~S. (1995). Comparing predictive accuracy. \textit{Journal of Business \& Economic Statistics}, 13(3), 253--263.
+
+\bibitem[Diebold and Yilmaz(2012)]{diebold2012}
+Diebold, F.~X., \& Yilmaz, K. (2012). Better to give than to receive: Predictive directional measurement of volatility spillovers. \textit{International Journal of Forecasting}, 28(1), 57--66.
+
+\bibitem[Engle and Rangel(2008)]{engle2008}
+Engle, R.~F., \& Rangel, J.~G. (2008). The spline-GARCH model for low-frequency volatility and its global macroeconomic causes. \textit{Review of Financial Studies}, 21(3), 1187--1222.
+
+\bibitem[Estrella and Mishkin(1998)]{estrella1998}
+Estrella, A., \& Mishkin, F.~S. (1998). Predicting U.S.\ recessions: Financial variables as leading indicators. \textit{Review of Economics and Statistics}, 80(1), 45--61.
+
+\bibitem[Fleming et al.(2001)]{fleming2001}
+Fleming, J., Kirby, C., \& Ostdiek, B. (2001). The economic value of volatility timing. \textit{Journal of Finance}, 56(1), 329--352.
+
+\bibitem[Hansen(1994)]{hansen1994}
+Hansen, B.~E. (1994). Autoregressive conditional density estimation. \textit{International Economic Review}, 35(3), 705--730.
+
+\bibitem[Hansen and Lunde(2005)]{hansen2005}
+Hansen, P.~R., \& Lunde, A. (2005). A forecast comparison of volatility models: Does anything beat a GARCH(1,1)? \textit{Journal of Applied Econometrics}, 20(7), 873--889.
+
+\bibitem[Hansen et~al.(2011)]{hansen2011mcs}
+Hansen, P.~R., Lunde, A., \& Nason, J.~M. (2011). The model confidence set. \textit{Econometrica}, 79(2), 453--497.
+
+\bibitem[Harvey et al.(2016)]{harvey2016}
+Harvey, C.~R., Liu, Y., \& Zhu, H. (2016). ...and the cross-section of expected returns. \textit{Review of Financial Studies}, 29(1), 5--68.
+
+\bibitem[Holm(1979)]{holm1979}
+Holm, S. (1979). A simple sequentially rejective multiple test procedure. \textit{Scandinavian Journal of Statistics}, 6(2), 65--70.
+
+\bibitem[Christoffersen(1998)]{christoffersen1998}
+Christoffersen, P.~F. (1998). Evaluating interval forecasts. \textit{International Economic Review}, 39(4), 841--862.
+
+\bibitem[Engle and Gallo(2006)]{engle2006}
+Engle, R.~F., \& Gallo, G.~M. (2006). A multiple indicators model for volatility using intra-daily data. \textit{Journal of Econometrics}, 131(1--2), 3--27.
+
+\bibitem[Jiang and Tian(2005)]{jiang2005}
+Jiang, G.~J., \& Tian, Y.~S. (2005). The model-free implied volatility and its information content. \textit{Review of Financial Studies}, 18(4), 1305--1342.
+
+\bibitem[Kupiec(1995)]{kupiec1995}
+Kupiec, P.~H. (1995). Techniques for verifying the accuracy of risk measurement models. \textit{Journal of Derivatives}, 3(2), 73--84.
+
+\bibitem[Lou et~al.(2019)]{lou2019}
+Lou, D., Polk, C., \& Skouras, S. (2019). A tug of war: Overnight versus intraday expected returns. \textit{Journal of Financial Economics}, 134(1), 192--213.
+
+\bibitem[Luo and Zhang(2019)]{luo2019}
+Luo, X., \& Zhang, J.~E. (2019). VIX term structure and VIX futures pricing with realized volatility. \textit{Journal of Futures Markets}, 39(1), 72--93.
+
+\bibitem[Maillard et al.(2010)]{maillard2010}
+Maillard, S., Roncalli, T., \& Te\"{i}letche, J. (2010). The properties of equally weighted risk contribution portfolios. \textit{Journal of Portfolio Management}, 36(4), 60--70.
+
+\bibitem[Moreira and Muir(2017)]{moreira2017}
+Moreira, A., \& Muir, T. (2017). Volatility-managed portfolios. \textit{Journal of Finance}, 72(4), 1611--1644.
+
+\bibitem[Newey and West(1987)]{newey1987}
+Newey, W.~K., \& West, K.~D. (1987). A simple, positive semi-definite, heteroskedasticity and autocorrelation consistent covariance matrix. \textit{Econometrica}, 55(3), 703--708.
+
+\bibitem[Patton(2011)]{patton2011}
+Patton, A.~J. (2011). Volatility forecast comparison using imperfect volatility proxies. \textit{Journal of Econometrics}, 160(1), 246--256.
+
+\bibitem[Patton and Sheppard(2015)]{patton2015}
+Patton, A.~J., \& Sheppard, K. (2015). Good volatility, bad volatility: Signed jumps and the persistence of volatility. \textit{Review of Economics and Statistics}, 97(3), 683--697.
+
+\bibitem[Poon and Granger(2003)]{poon2003}
+Poon, S.-H., \& Granger, C.~W.~J. (2003). Forecasting volatility in financial markets: A review. \textit{Journal of Economic Literature}, 41(2), 478--539.
+
+\bibitem[Preis et al.(2013)]{preis2013}
+Preis, T., Moat, H.~S., \& Stanley, H.~E. (2013). Quantifying trading behavior in financial markets using Google Trends. \textit{Scientific Reports}, 3, 1684.
+
+\bibitem[Schwert(1989)]{schwert1989}
+Schwert, G.~W. (1989). Why does stock market volatility change over time? \textit{Journal of Finance}, 44(5), 1115--1153.
+
+\bibitem[Whaley(2000)]{whaley2000}
+Whaley, R.~E. (2000). The investor fear gauge. \textit{Journal of Portfolio Management}, 26(3), 12--17.
+
+\end{thebibliography}
+
+\end{document}

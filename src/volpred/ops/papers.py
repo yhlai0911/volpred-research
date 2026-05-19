@@ -233,7 +233,7 @@ def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
     metrics: dict[str, int | None] = {}
 
     # Find the best tex file (v3 > v2 > v1)
-    for name in ["main_v3.tex", "main_v2.tex", "main.tex"]:
+    for name in ["main_v4.tex", "main_v3.tex", "main_v2.tex", "main.tex"]:
         tex = paper_dir / name
         if tex.exists():
             break
@@ -397,7 +397,7 @@ def update_paper_full(
 
     # 2. Find best PDF (v3 > v2 > v1)
     pdf_path = None
-    for name in ["main_v3.pdf", "main_v2.pdf", "main.pdf"]:
+    for name in ["main_v4.pdf", "main_v3.pdf", "main_v2.pdf", "main.pdf"]:
         candidate = paper_dir / name
         if candidate.exists():
             pdf_path = candidate

@@ -7427,5 +7427,14 @@
     "summary": "Added numba @njit(cache=True) to 4 bottleneck functions: _gjr_filter, _garch_x_nll_free, _garch_x_nll_constrained, _midas_filter_ll. Replaced Python for-loops in fit_garch_x and fit_midas with thin wrappers calling JIT functions. Expected speedup ~50x (30-90min → ~2min). Re-enqueued as compute-k1380-v3 with timeout=10800s. Lookahead verified: vix[abs_idx-1] throughout.",
     "commit": "a7c80e12",
     "compute_job_id": "compute-k1380-v3-numba-jit-spa-rc-test-17-spec-horse-race-paper-9-c3-1779218697"
+  },
+  {
+    "timestamp": "2026-05-19T20:17:52Z",
+    "task_type": "paper_body",
+    "task_id": "Paper4_body_rewrite",
+    "title": "Paper 4 body_v4.tex: 7-asset cross-asset PIT panorama + UNIVERSAL_NULL_7_OF_7 final claim",
+    "status": "completed",
+    "summary": "Created main_v4.tex with 4 additions: (1) abstract update mentioning 7-asset UNIVERSAL_NULL_7_OF_7, (2) new intro bullet for cross-asset null, (3) new subsection Cross-Asset Native-IV Sufficiency (subsec:cross_asset_panorama) with panorama Table + VXEEM delisting footnote + TLT finstress regime-artefact footnote, (4) conclusion update. Compiled to 46-page PDF (v3=39p → v4=46p). Updated papers.py lookup to include main_v4. paper-update CLI synced to Supabase.",
+    "commit": null
   }
 ]
