@@ -1,0 +1,134 @@
+{
+  "experiment_id": "k1381",
+  "title": "Taiwan Tech Sector Vol as Leading Indicator for 0050.TW",
+  "metadata": {
+    "data_source": "paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv",
+    "n_total": 3935,
+    "n_train": 2754,
+    "n_test": 1181,
+    "date_range": "2009-02-18 to 2026-04-17",
+    "rv_proxy": "squared log return (Patton 2011)",
+    "outlier_filter": "|log-return| > 0.5 masked as NaN",
+    "forecast_clamp": "predictions clamped to [1e-10, inf)",
+    "harvey_threshold": 3.0,
+    "seed": 42
+  },
+  "full_sample_qlike": {
+    "HAR": 9.125813,
+    "HAR_X_TSMC": 9.162923,
+    "HAR_X_MTK": 9.208464,
+    "HAR_X_TECH": 9.220968,
+    "HAR_X_VIX": 9.419056,
+    "HAR_X_ALL": 9.503441
+  },
+  "oos_qlike": {
+    "HAR": 9.334553,
+    "HAR_X_TSMC": 9.329219,
+    "HAR_X_MTK": 9.358599,
+    "HAR_X_TECH": 9.351835,
+    "HAR_X_VIX": 9.691537,
+    "HAR_X_ALL": 9.694772
+  },
+  "dm_tests": {
+    "HAR_X_TSMC vs HAR": {
+      "dm_t": 0.4217,
+      "dm_p": 0.6733,
+      "harvey_pass": false,
+      "direction": "model2_wins"
+    },
+    "HAR_X_MTK vs HAR": {
+      "dm_t": -1.223,
+      "dm_p": 0.2216,
+      "harvey_pass": false,
+      "direction": "model1_wins"
+    },
+    "HAR_X_TECH vs HAR": {
+      "dm_t": -0.8074,
+      "dm_p": 0.4196,
+      "harvey_pass": false,
+      "direction": "model1_wins"
+    },
+    "HAR_X_VIX vs HAR": {
+      "dm_t": -8.8218,
+      "dm_p": 0.0,
+      "harvey_pass": true,
+      "direction": "model1_wins"
+    },
+    "HAR_X_ALL vs HAR": {
+      "dm_t": -8.4721,
+      "dm_p": 0.0,
+      "harvey_pass": true,
+      "direction": "model1_wins"
+    }
+  },
+  "granger_tests": {
+    "TSMC_to_0050": {
+      "f_stat": 4.0163,
+      "p_value": 0.0012,
+      "lags": 5,
+      "significant_05": true
+    },
+    "MTK_to_0050": {
+      "f_stat": 4.7084,
+      "p_value": 0.0003,
+      "lags": 5,
+      "significant_05": true
+    }
+  },
+  "model_coefficients": {
+    "HAR": [
+      4.766e-05,
+      -0.00493915,
+      0.54799282,
+      0.08958001
+    ],
+    "HAR_X_TSMC": [
+      4.176e-05,
+      -0.02155526,
+      0.54983036,
+      0.09396392,
+      0.02875699
+    ],
+    "HAR_X_MTK": [
+      3.489e-05,
+      -0.02090633,
+      0.54646205,
+      0.09655807,
+      0.02830328
+    ],
+    "HAR_X_TECH": [
+      3.275e-05,
+      -0.02821303,
+      0.54748305,
+      0.09830719,
+      0.01443071,
+      0.02647481
+    ],
+    "HAR_X_VIX": [
+      -6.78e-06,
+      -0.01441095,
+      0.5280086,
+      0.01655705,
+      0.42306573
+    ],
+    "HAR_X_ALL": [
+      -1.305e-05,
+      -0.02610721,
+      0.52818962,
+      0.02527273,
+      0.00285577,
+      0.01865414,
+      0.40173824
+    ]
+  },
+  "verdict": "MIXED — partial evidence — HAR_X_TSMC shows improvement but not all Harvey-pass or Granger significant",
+  "key_findings": [
+    "Best OOS model: HAR_X_TSMC (QLIKE=9.329219, +0.06% vs HAR=9.334553)",
+    "Harvey (|t|>3.0) significant HAR-X wins: 0/5",
+    "Granger causality p<0.05: 2/2 tech stocks",
+    "TSMC Granger to 0050: F=4.0163, p=0.0012",
+    "MTK Granger to 0050: F=4.7084, p=0.0003",
+    "DM t-stats: HAR_X_TSMC=0.4217, HAR_X_MTK=-1.223, HAR_X_TECH=-0.8074, HAR_X_VIX=-8.8218, HAR_X_ALL=-8.4721",
+    "Data cleaning: log-return outliers (|r|>0.5) masked as NaN to remove corporate action artifacts"
+  ]
+}
