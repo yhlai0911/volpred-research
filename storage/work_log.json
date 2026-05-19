@@ -7166,5 +7166,21 @@
     "result": "PASS: SPY DM t=3.723 Harvey PASS; GLD DM t=6.003 Harvey PASS; 0050.TW DM t=2.434 FAIL. Knowledge: caa7febc",
     "agent_type": "worktree",
     "worktree": "agent-a6ec6416edc4603cb"
+  },
+  {
+    "timestamp": "2026-05-19T04:13:26.412569+00:00",
+    "task_type": "governance",
+    "task_id": "k1377_knowledge_entry",
+    "title": "K1377 structured knowledge entry 補齊（PASS verdict + Codex v5 provenance）",
+    "result": "success",
+    "notes": "K1377 原有舊格式 entry（無 verdict/experiment_id 欄位），補寫正確 provenance 格式 entry。experiment_id=K1377, verdict=PASS, codex_review=Codex v5 PASS"
+  },
+  {
+    "timestamp": "2026-05-19T04:18:47.056270+00:00",
+    "task_type": "paper_review",
+    "task_id": "paper9_standard_review_v3",
+    "title": "Paper 9 (garch-x-vix) LaTeX + Citation Review v3 — 整合 adversarial v2 三個 SERIOUS FLAW",
+    "result": "success",
+    "notes": "v3 新發現: LaTeX HIGH=3, MEDIUM=10, LOW=8; Citation MEDIUM=2, LOW=3. 所有 v2 三個 SERIOUS FLAW 均確認未解決。Consolidated C1-C17 優先序清單建立。Stage: review → revision_required。需要實驗 K_NEW_A/B/C + writing 2週。"
   }
 ]

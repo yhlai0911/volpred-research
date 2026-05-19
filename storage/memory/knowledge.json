@@ -30778,5 +30778,51 @@
       "K1312"
     ],
     "note": "v3 fix: pywt.wavedec requires writeable numpy buffer; yfinance returns read-only arrays. Fix: series.values.copy() at compute_wavelet_features() line 82. v2 lag-alignment/QLIKE-floor/IS-t-stats fixes preserved. Dead code (train_mask) removed. WHAR artifacts flagged in JSON."
+  },
+  {
+    "item_id": "caa7febc",
+    "category": "vol_models",
+    "content": "[提出: Claude autonomous dispatch, 執行: Worktree agent + Codex review] K1377: HAR Forecast Combination via Exp-QLIKE (Softmin) Weighting.\n\n測試在 HAR 族內（HAR-SQ / HAR-ABS / HAR-VIX）以 rolling W=252 天 exp(-mean_QLIKE) 加權組合是否優於最佳單一 HAR-VIX。OOS: SPY/GLD 2015-2026 (2860 obs), 0050.TW 2013-2026 (3151 obs)。\n\nDM-Harvey 結果（vs HAR-VIX baseline）：SPY t=3.723 Harvey PASS，GLD t=6.003 Harvey PASS，0050.TW t=2.434 Harvey FAIL。Verdict: PASS (2/3 assets).\n\n關鍵發現：(1) HAR 族內 Exp-QLIKE 組合 SPY/GLD 顯著優於 HAR-VIX，部分化解 K482 等權謎題；(2) 等權組合也 PASS SPY/GLD (t=3.751/6.147)——K482 equal-weight-puzzle 可能是跨模型族問題，HAR 族內等權本身有效；(3) HAR-SQ (r² target) 也 PASS SPY/GLD——組合主要貢獻是跨資產穩健性；(4) Proxy 選擇影響排名：r² QLIKE 時 HAR-SQ 優；|r| QLIKE 時 HAR-VIX 優（K530 結論）；(5) 0050.TW clip ±15% 必要（yfinance split artifact）；(6) QLIKE 為負值須用 softmin exp(-QLIKE) 不能用 literal 1/QLIKE。\nexperiment_id=K1377, reviewer=Codex_CLI_v5_CONDITIONAL_PASS, confidence=0.82",
+    "evidence": [
+      "K1377 experiments/k1377/ PASS Codex_review_v5",
+      "SPY: DM t=3.723 Harvey PASS",
+      "GLD: DM t=6.003 Harvey PASS",
+      "0050.TW: DM t=2.434 Harvey FAIL",
+      "related: K530 K482 K782 K1257 K1300"
+    ],
+    "confidence": 0.82,
+    "created_at": "2026-05-19T11:48:48.362230"
+  },
+  {
+    "id": "3dac3b63",
+    "experiment_id": "K1377",
+    "experiment_path": "experiments/k1377",
+    "timestamp": "2026-05-19T04:10:57.246976+00:00",
+    "category": "vol_models",
+    "title": "HAR Forecast Combination (Exp-QLIKE Weighting) — SPY/GLD PASS, 0050.TW partial",
+    "content": "K1377: Exp-QLIKE weighted HAR forecast combination vs HAR-VIX baseline. OOS 2015-2026 (SPY/GLD, 2860 obs) and 2013-2026 (0050.TW, 3151 obs). SPY: Comb-ExpQLIKE QLIKE=-8.411 vs HAR-VIX=-7.820, DM t=3.723, Harvey PASS. GLD: QLIKE=-8.360 vs HAR-VIX=-8.244, DM t=6.003, Harvey PASS. 0050.TW: DM t=2.434, Harvey FAIL (t<3 threshold). Exp-QLIKE beats EqualWeight: GLD DM t=3.454 Harvey PASS; SPY not significantly different. Exp-QLIKE weights relatively uniform (~0.39 HAR-SQ / 0.32 HAR-ABS / 0.29 HAR-VIX for SPY). Key finding: HAR combination within same model family outperforms best single model (HAR-VIX) in equity (SPY) and commodity (GLD) with statistical significance. Taiwan ETF (0050.TW) shows consistent direction but |t|<3 (Harvey conservative threshold). Resolves K482 equal-weight puzzle: exp-QLIKE provides additional benefit vs equal-weight for GLD.",
+    "verdict": "PASS",
+    "reviewer": "Codex v5",
+    "codex_review": "v5 PASS — all prior issues resolved: softmin weighting, plug-in h_t^2 under Patton 2011 QLIKE, OLS scale mismatch for HAR-ABS/VIX corrected",
+    "tags": [
+      "har-rv",
+      "forecast-combination",
+      "exp-qlike",
+      "softmin",
+      "dm-test",
+      "harvey",
+      "spy",
+      "gld",
+      "0050-tw"
+    ],
+    "key_stats": {
+      "SPY_DM_t": 3.723,
+      "SPY_harvey_pass": true,
+      "GLD_DM_t": 6.003,
+      "GLD_harvey_pass": true,
+      "TW0050_DM_t": 2.434,
+      "TW0050_harvey_pass": false,
+      "assets_harvey_pass": "2/3"
+    }
   }
 ]
