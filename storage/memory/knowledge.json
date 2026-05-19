@@ -30824,5 +30824,20 @@
       "TW0050_harvey_pass": false,
       "assets_harvey_pass": "2/3"
     }
+  },
+  {
+    "item_id": "2cc9e0ee",
+    "category": "bootstrap_ci",
+    "content": "K1370: Block-bootstrap 90% CI for TAIEX-to-individual amplification ratio under canonical full-sample BW-robust GJR-GARCH(1,1). Matched-sample (2008-2024): point estimate ~4.7×, 90% CI [2.28, 6.58], median 3.78 (B=1000, L=252, N_start=10). Replaces stale CI [2.8,8.1]. IMPORTANT: N_start=10 vs K1302's 100 — CI valid for 10-start estimator only. Mixed-sample (TAIEX 1997-2026 / individuals 2008-2024) gives ~10× (K1302 canonical) — paper now reports matched-sample 4.3×. All 1000 replicates valid. research_honesty_flag documented in results JSON.",
+    "evidence": [
+      "experiments/k1370/k1370_results.json",
+      "experiments/k1370/k1370.py"
+    ],
+    "confidence": 0.85,
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "K1370",
+    "experiment_path": "experiments/k1370/",
+    "codex_review": "CONDITIONAL_PASS — Codex session 019e3f17-1e56-7ee1-b176-388c320feec7 (2026-05-19). Issues fixed: fit_gjr_one type hint corrected, sanity-check N_start hardcode replaced with N_START variable.",
+    "created_at": "2026-05-19T15:19:43.953980"
   }
 ]

@@ -215,8 +215,8 @@ def stationary_block_indices(n: int, block_length: int, rng: np.random.Generator
 # ============================================================================
 # GJR-GARCH(1,1) MLE: best-LL of N_start multistart
 # ============================================================================
-def fit_gjr_one(ret_pct_arr: np.ndarray, seed: int) -> float | None:
-    """Single fit; returns gamma if converged & stationary, else None."""
+def fit_gjr_one(ret_pct_arr: np.ndarray, seed: int) -> tuple[float, float] | None:
+    """Single fit; returns (gamma, loglikelihood) if converged & stationary, else None."""
     rng = np.random.RandomState(seed)
     sv = np.array([
         rng.uniform(-0.05, 0.15),    # mu
@@ -372,8 +372,8 @@ def main():
     point_gammas = {}
     for tk, arr in returns_by_ticker.items():
         ret_pct = arr * 100.0
-        # Use 10-start multistart matching replicate config; deterministic seeds
-        result = fit_gjr_best(ret_pct, list(range(10)))
+        # Use N_START multistart matching replicate config; deterministic seeds
+        result = fit_gjr_best(ret_pct, list(range(N_START)))
         if result[0] is None:
             log(f"  {tk}: POINT-ESTIMATE FIT FAILED (all 10 starts diverged)")
             point_gammas[tk] = np.nan
@@ -403,7 +403,7 @@ def main():
             twii_full = pd.concat([pre2008, from2008_full]).sort_index()
             twii_full = twii_full[~twii_full.index.duplicated(keep="last")]
             r_full = compute_log_returns(twii_full).values * 100.0
-            res_full = fit_gjr_best(r_full, list(range(10)))
+            res_full = fit_gjr_best(r_full, list(range(N_START)))
             if res_full[0] is not None:
                 g_taiex_1997 = float(res_full[0])
                 mixed_sample_ratio_pe = g_taiex_1997 / mean_indiv_pe if mean_indiv_pe else None
