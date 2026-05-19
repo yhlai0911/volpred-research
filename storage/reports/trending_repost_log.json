@@ -186,5 +186,25 @@
     "status": "published",
     "fb_wont_fix_reason": "No fb_post_draft prepared, ROI too low to backfill now",
     "fb_wont_fix_at": "2026-05-19T09:10:00Z"
+  },
+  {
+    "date": "2026-05-20",
+    "trending_topic": "VIX dispersion: Mag6 avg RV 33.1% vs SPY RV 10.9% — index calm but individual stocks wild",
+    "source_surface": "Market observation (VIX 18 + NVDA/GOOGL 44%+ RV), independently computed via yfinance",
+    "primary_sources_used": [
+      "yfinance: NVDA/GOOGL/META/MSFT/AMZN/AAPL/SPY/^VIX 2020-2026 closing prices",
+      "Self-computed 20d realized volatility (annualized): Mag6 avg 33.1%, SPY 10.9%",
+      "Historical comparison: COVID 2020-03, tariff tantrum 2025-04 (same basket, same method)",
+      "Monthly Mag6-SPY RV spread table 2025-01 to 2026-05"
+    ],
+    "volpred_angle": "VIX as index-only risk signal; low-correlation environment creates gap between index vol and portfolio vol; VT strategy blind spot",
+    "mile_id": "mile_32eb397f",
+    "fb_post_status": "pending",
+    "fb_post_url": null,
+    "fb_draft": "VIX 今天收 18。\n\n從數字表面看，美股平靜。\n\n但我同時打開 NVDA 的 20 日波動率：44.8%。GOOGL：42.7%。\n\n如果你同時持有這兩支，你帳戶裡的那個市場，跟 VIX 說的根本是兩回事。\n\n---\n\n這不是矛盾，是設計問題。\n\nS&P500 是加權平均。當 NVDA 某天大漲、GOOGL 同天大跌，指數的震動就被抵消了。相關係數低，指數就靜。\n\n現在大型科技股就是這個狀態：每支有自己的故事，NVDA 跑 AI capex 議題，GOOGL 跑廣告市佔，各走各的方向。\n\n六支 Mag6 的平均已實現波動率：33.1%。\nSPY 指數同期：10.9%。\n差距：22.2 個百分點。\n\n五月是 2025 年以來這個差距最大的月份。\n\n---\n\n很多系統化策略（波動率目標，VT）以 VIX 作為加減倉依據：VIX 低就多買。\n\nVIX 18 的環境，這類規則會叫你拿高部位。看起來合理。\n\n但你的組合裡如果有 NVDA 和 GOOGL，你承受的波動率接近 40%，不是 18%。\n\n---\n\nVIX 回答的是：指數下個月會有多亂？\n\n它沒辦法回答：你的持倉今天有多亂？\n\n低相關環境下，這兩個問題的答案差很遠。\n\n（連結在留言）",
+    "fb_comment_link": "https://volpred.zeabur.app/v3/reports/mile_32eb397f",
+    "word_count": 1800,
+    "retry_count": 0,
+    "timestamp": "2026-05-19T16:25:56+08:00"
   }
 ]
