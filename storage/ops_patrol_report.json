@@ -1,41 +1,40 @@
 {
-  "timestamp": "2026-05-19T12:07:17Z",
+  "timestamp": "2026-05-19T18:09:23Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
-      "status": "alert",
-      "detail": "total_drafts=6, research=4, general=2; ALERTS: article pool low (<12): total=6; general pool low (<8): general=2"
+      "status": "ok",
+      "detail": "total_drafts=160 (≥12 OK); research=16 (≥4 OK); general=144 (≥8 OK). All thresholds met."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "age=54.0h (threshold=26h); ALERT: metrics stale"
+      "detail": "storage/strategy_metrics.json last modified 2026-05-17T06:09:05Z, age=60.0h (threshold=26h). STALE."
     },
     {
       "name": "ERROR_LOG",
-      "status": "ok",
-      "detail": "no entries dated 2026-05-19 (today) or 2026-05-18 (yesterday) in last 30 lines; most recent entry 2026-04-26"
+      "status": "alert",
+      "detail": "Entry dated 2026-05-18 (yesterday): release_pool_gap 4-strike confirmed REAL outage — merge_worktree.sh stash-pop conflict overwrote live storage/.release_settings.json with stale worktree version (2026-05-16T00:32), check_alerts computed gap=42.74h → critical. Fix applied same day (git checkout stash rescue + merge_worktree whitelist fix pending). Note: 2026-05-17 entry also present (K547 Codex 24h review FAIL — citation + Harvey threshold misuse + lookahead bias K547b pending), but is 2 days old."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "all 14 strategies have <=1 null in last 3 entries; no strategy exceeds >2 null threshold; _market_daily skipped (empty)"
+      "detail": "15 strategy keys found. 0 strategies have >2 portfolio_return=null in last 3 entries. No alerts."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold: >50); working tree clean"
+      "detail": "0 uncommitted files (threshold: 50). Working tree clean."
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "knowledge.json entries=2044"
+      "detail": "2147 entries in storage/memory/knowledge.json."
     }
   ],
   "alerts": [
-    "article pool low (<12): total=6",
-    "general pool low (<8): general=2",
-    "metrics stale (age=54.0h)"
+    "metrics_stale: strategy_metrics.json is 60.0h old (>26h threshold). Last modified 2026-05-17T06:09:05Z.",
+    "error_log_yesterday: 2026-05-18 entry — release_pool_gap 4-strike confirmed REAL outage (merge_worktree.sh stash-pop conflict overwrote live .release_settings.json with stale worktree version)."
   ]
 }
