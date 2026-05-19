@@ -152,20 +152,28 @@ def main():
         stale=stale
     ))
 
-    # L4 alerts active
-    dedup = jl(REPO / "storage" / "ops" / "alert_dedup.json", {})
-    active_alerts = 0
-    if isinstance(dedup, dict) and "alerts" in dedup:
-        for k, v in dedup["alerts"].items():
-            if isinstance(v, dict):
-                ts = v.get("sent_at", v.get("timestamp", ""))
-                if ts and ts > time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(now - 86400)):
-                    active_alerts += 1
+    # L4 alerts — INGEST recent warn/critical from notification_log + surface as actionable
+    nlog = jl(REPO / "storage" / "notifications" / "notification_log.json", [])
+    cutoff_6h = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(now - 6 * 3600))
+    recent_breach = []
+    if isinstance(nlog, list):
+        for n in nlog:
+            if not isinstance(n, dict): continue
+            ts = n.get("timestamp", "")
+            if ts < cutoff_6h: continue
+            level = n.get("level", "info")
+            if level in ("warn", "critical"):
+                recent_breach.append({
+                    "ts": ts[11:16],
+                    "level": level,
+                    "subject": (n.get("subject") or n.get("title") or "")[:80],
+                })
     out.append(section(
-        "health_alerts",
-        "ok" if active_alerts == 0 else "warn" if active_alerts <= 2 else "critical",
-        f"{active_alerts} alerts fired last 24h",
-        "check storage/notifications/" if active_alerts > 0 else None
+        "health_alerts_unhandled",
+        "ok" if not recent_breach else "warn" if len(recent_breach) <= 2 else "critical",
+        f"{len(recent_breach)} warn/critical alerts last 6h (read + act per .claude/rules/alert.md)",
+        "ingest alerts → run remediation per alert.md auto-action table" if recent_breach else None,
+        breaches=recent_breach[:8],
     ))
 
     # Summary header
