@@ -20,7 +20,8 @@
 
 3. **VolPred 連結放在第一則留言**
    - 主貼文發出後，**自己**立刻在貼文下方 reply 1 則留言
-   - 留言內容：「完整版分析 + 圖表在這裡 → https://volpred.zeabur.app/article/<mile_id>」
+   - 留言內容：「完整版分析 + 圖表在這裡 → https://volpred.zeabur.app/v3/reports/<mile_id>」
+   - **URL hard rule**：只能用 `/v3/reports/<mile_id>`，**絕對不可**用 `/article/<mile_id>`（404）。發文前 `curl -I` 驗 HTTP 200。
    - 留言可以簡單，但連結要完整正確
 
 ---

@@ -79,6 +79,7 @@ paths:
      - 可保留少量畫面感，但不可做作
    - Facebook 主貼文**不要直接放連結**
    - VolPred 原文連結改為 **發文後留言區第一則留言**
+   - **FB / 外部留言 URL 唯一格式**：`https://volpred.zeabur.app/v3/reports/<mile_id>` — **絕對不可**用 `/article/<mile_id>`（404，2026-05-19 incident，2 entries 已 backfill）。發文前必 `curl -I` 驗 HTTP 200，並通過 `tests/test_trending_repost_fb_url.py::assert_fb_comment_url` 檢核。
    - 每日上限 **2 篇**，不可超發
    - 若 FB 失敗，可不阻塞 feed publish，但必須留下 retry log，不可直接略過
 

@@ -267,6 +267,7 @@ Log to `storage/reports/trending_repost_log.json`:
   - still same core thesis, but adapted for FB reading behavior
 - **Do not place the VolPred link inside the main FB post body**
 - After the FB post is published, add the **VolPred original article link in the first comment**
+  - **URL hard rule**：FB 第一則留言連結**只能**用 `https://volpred.zeabur.app/v3/reports/<mile_id>`。**禁止**用 `/article/<mile_id>`（404，2026-05-19 incident）。發文前必 `curl -I` 驗 HTTP 200，並寫入 `fb_comment_link` 欄位（log schema）。
 - Before posting, rewrite against the **Ivan Lai FB style spec** below, not just
   against generic "social media best practices"
 - Recommended structure:
