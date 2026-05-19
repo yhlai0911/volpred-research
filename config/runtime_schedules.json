@@ -225,6 +225,15 @@
         "description": "Hourly: write dashboard snapshot to storage/ops/dashboard_latest.json",
         "host_crontab_managed": false,
         "piggy_back_enabled": true
+      },
+      {
+        "id": "boss_report_4h",
+        "cron": "10 */4 * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_boss_report.sh",
+        "log_path": "storage/logs/cron/boss_report.log",
+        "description": "Every 4h: send boss HTML email report (state + decisions + recommendations)",
+        "host_crontab_managed": false,
+        "piggy_back_enabled": true
       }
     ]
   },
