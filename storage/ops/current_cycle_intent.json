@@ -1,0 +1,26 @@
+{
+  "cycle_start": "2026-05-19T11:55:00Z",
+  "intent": "從反應式 firefighting 轉成主動 ops 結構。建 dashboard + audit + boss report 三件套，然後 cycle 化主線程運營。",
+  "weekly_goal": [
+    "Mission 4: 0 stale cron 持續一週、live URL 100% 自動驗證",
+    "Mission 1: 維持 ≥6 articles/day 同時把 narrative-arc dedup Layer 4 落地（已 ✅）",
+    "Mission 3: Paper 4 body_v4 完成 rewrite gate",
+    "Mission 5: FB MCP ext popup gate 找根因 + 解（不再說『修不到』）"
+  ],
+  "plan": [
+    "Cycle 1: 建 dashboard + 2 audit + boss report email infra（✅ 本 cycle 完成）",
+    "Cycle 2-3: Paper 4 body_v4 rewrite main thread + 派 review agent 並行",
+    "Cycle 4: free_tier_growth_plan.md spec + 識別 P1 analytics 工具選型",
+    "Cycle 5+: MCP ext 根因 deep-dive；若不解，準備 Anthropic issue text"
+  ],
+  "success_criteria": [
+    "每 cycle 開頭 dashboard read 不再有 surprise critical（即 standing audit catch 問題早於我）",
+    "每 4h boss email 自動寄出無 fail",
+    "次次 cycle 至少 1 個結構性改善（不只 patch）+ 2 個 article 產出"
+  ],
+  "risks": [
+    "main thread context 易爆（已多次 compact），需要更積極派 agent 卸載",
+    "FB MCP root cause 可能要花 ≥2 cycles 才找到",
+    "Paper 4 rewrite 過長吃掉太多 main thread bandwidth"
+  ]
+}

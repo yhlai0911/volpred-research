@@ -99,7 +99,7 @@ def _pending_tasks():
 
 
 def _autonomous_decisions():
-    """Read from a log of autonomous decisions I keep. Falls back to git log greps."""
+    """Read from a log of autonomous decisions I keep. Each entry includes intent + reasoning + outcome + next."""
     decisions_log = PROJECT_ROOT / "storage" / "ops" / "autonomous_decisions.jsonl"
     out = []
     if decisions_log.exists():
@@ -112,6 +112,41 @@ def _autonomous_decisions():
                         out.append(d)
                 except: pass
         except: pass
+    return out
+
+
+def _cycle_intent():
+    """Read my current cycle's intent + goal + plan from a small state file."""
+    f = PROJECT_ROOT / "storage" / "ops" / "current_cycle_intent.json"
+    if not f.exists(): return {}
+    try: return json.loads(f.read_text())
+    except: return {}
+
+
+def _blockers():
+    """Read boss_blockers.md and return a list of items."""
+    f = PROJECT_ROOT / "docs" / "boss_blockers.md"
+    if not f.exists(): return []
+    txt = f.read_text()
+    out = []
+    current_priority = None
+    current_item = None
+    for line in txt.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("## 🔴"):
+            current_priority = "P1"
+        elif stripped.startswith("## 🟡"):
+            current_priority = "P2"
+        elif stripped.startswith("## 🟢"):
+            current_priority = "P3"
+        elif stripped.startswith("## 過去已解"):
+            current_priority = None
+        elif stripped.startswith("### ") and current_priority:
+            if current_item: out.append(current_item)
+            current_item = {"priority": current_priority, "title": stripped[4:], "lines": []}
+        elif current_item and stripped.startswith("- "):
+            current_item["lines"].append(stripped[2:])
+    if current_item: out.append(current_item)
     return out
 
 
@@ -144,6 +179,8 @@ def build_html():
     pending = _pending_tasks()
     decisions = _autonomous_decisions()
     next_actions = _next_actions()
+    intent = _cycle_intent()
+    blockers = _blockers()
 
     title = f"[VolPred Boss Report] {NOW.strftime('%Y-%m-%d %H:%MZ')} 平台運營報告"
     overall_color = {"ok": "#0a8a3a", "warn": "#d97706", "critical": "#b91c1c", "error": "#6b7280"}.get(dash.get("overall_status", "ok"), "#444")
@@ -168,6 +205,20 @@ def build_html():
 
     parts = [f"<!DOCTYPE html><html><head><meta charset='utf-8'>{css}</head><body>"]
     parts.append(f"<h1 style='background:{overall_color}'>VolPred Boss Report · {_esc(NOW.strftime('%Y-%m-%d %H:%M UTC'))} · Overall <strong>{_esc(dash.get('overall_status', '?').upper())}</strong></h1>")
+
+    # 0. Current cycle intent / goal / plan
+    if intent:
+        parts.append("<h2>⓪ 本 cycle 意圖 / 目標 / 規劃</h2>")
+        parts.append("<table>")
+        for k_zh, k_en in [("意圖 Intent", "intent"), ("本週目標 Weekly Goal", "weekly_goal"),
+                            ("本 cycle 計劃 Plan", "plan"), ("成功標準 Success Criteria", "success_criteria"),
+                            ("已知風險 Known Risks", "risks")]:
+            v = intent.get(k_en)
+            if v:
+                if isinstance(v, list): v = "<br>".join("• " + _esc(x) for x in v)
+                else: v = _esc(v)
+                parts.append(f"<tr><td><strong>{_esc(k_zh)}</strong></td><td>{v}</td></tr>")
+        parts.append("</table>")
 
     # 1. State
     parts.append("<h2>① 平台狀態</h2>")
@@ -199,12 +250,21 @@ def build_html():
         parts.append(f"<tr><td><code>{_esc(p['name'])}</code></td><td class='small'>{_esc(p['status'])}</td></tr>")
     parts.append("</table>")
 
-    # 4. Autonomous decisions
+    # 4. Autonomous decisions (with intent / reasoning / outcome / next)
     if decisions:
-        parts.append("<h2>④ 自主決策</h2><ul>")
+        parts.append("<h2>④ 自主決策 + 推理</h2>")
         for d in decisions:
-            parts.append(f"<li>{_esc(d.get('summary', ''))} <span class='small'>({_esc(d.get('timestamp', '')[:16])})</span></li>")
-        parts.append("</ul>")
+            cat = d.get("category", "")
+            pill_color = {"structural": "#1d4ed8", "delegation": "#7c3aed", "monetization": "#059669",
+                          "infra": "#0891b2", "fb_incident": "#b91c1c", "paper": "#ca8a04",
+                          "research": "#0a8a3a"}.get(cat, "#6b7280")
+            parts.append(f"<div style='border-left:3px solid {pill_color};padding:6px 12px;margin:8px 0;background:#fafbfc'>")
+            parts.append(f"<div><span class='pill' style='background:{pill_color};color:white'>{_esc(cat)}</span> <strong>{_esc(d.get('summary', ''))}</strong> <span class='small'>{_esc(d.get('timestamp', '')[:16])}</span></div>")
+            for label, key in [("意圖", "intent"), ("推理", "reasoning"), ("執行成果", "outcome"), ("下一步", "next")]:
+                v = d.get(key)
+                if v:
+                    parts.append(f"<div class='small' style='margin-top:4px'><strong>{label}</strong>：{_esc(v)}</div>")
+            parts.append("</div>")
 
     # 5. Next actions
     if next_actions:
@@ -218,9 +278,20 @@ def build_html():
     if rec_file.exists():
         rec_txt = rec_file.read_text()[:3000]
         parts.append("<h2>⑥ 方向建議（你的決策可能改變）</h2>")
-        # Crude markdown → HTML: just escape + preserve newlines + bold
         rendered = _esc(rec_txt).replace("\n", "<br>")
         parts.append(f"<div class='small' style='background:#fafbfc;padding:10px;border-radius:6px'>{rendered}</div>")
+
+    # 7. BLOCKERS — needs boss help (RED FRAME)
+    if blockers:
+        parts.append("<h2 style='color:#b91c1c;border-bottom-color:#fecaca'>🚨 ⑦ 需要老闆協助 / 資源</h2>")
+        parts.append("<p class='small'>下列項目我無法自主解決，需要你的協助或決策。</p>")
+        for b in blockers:
+            color = {"P1": "#b91c1c", "P2": "#d97706", "P3": "#0a8a3a"}.get(b["priority"], "#6b7280")
+            parts.append(f"<div style='border-left:4px solid {color};padding:8px 12px;margin:8px 0;background:#fef2f2'>")
+            parts.append(f"<div><span class='pill' style='background:{color};color:white'>{b['priority']}</span> <strong>{_esc(b['title'])}</strong></div>")
+            for ln in b["lines"][:6]:
+                parts.append(f"<div class='small' style='margin-top:2px'>• {_esc(ln)}</div>")
+            parts.append("</div>")
 
     parts.append(f"<p class='small'>Report generated {_esc(NOW.isoformat())} · Window {int(WINDOW.total_seconds()/3600)}h · Source: <code>scripts/boss_report.py</code></p>")
     parts.append("</body></html>")
