@@ -30854,5 +30854,20 @@
     "experiment_id": "k1379",
     "k_id": "K1379",
     "created_at": "2026-05-19T19:12:10.426806"
+  },
+  {
+    "item_id": "k1378_sf1",
+    "category": "paper_evidence",
+    "content": "K1378: Paper 9 Leave-COVID-out DM Test (SF1 Robustness Fix). OOS 2019-01-01 to 2026-05-19, W=2000, refit=63, r² QLIKE proxy (Patton 2011). DM sign: loss_diff = loss_gjr - loss_a4f; positive t = A4f wins. Full OOS (n=1852): GJR QLIKE 624.33 < A4f QLIKE 688.49, DM t=-1.19, p=0.234, Harvey FAIL. Non-COVID OOS (n=1515, excl. 2020-03-01 to 2021-06-30): GJR QLIKE 643.46 < A4f QLIKE 662.83, DM t=-0.362, p=0.718, Harvey FAIL. COVID-only (n=337): DM t=-1.544, p=0.123, Harvey FAIL. SF1 VERDICT: CONFIRMED — A4f fails Harvey gate (|t|>3.0) in both full and non-COVID 2019-2026 OOS. Important proxy caveat (consistent with K1379): r² proxy gives different ranking than paper's full QLIKE kernel where A4f beats GJR at DM t=4.03. GJR proxy-dominance is proxy-dependent artifact, not a refutation of the paper's main claim. Implication for Paper 9 R1: (1) add leave-COVID-out table using paper's OOS period + full QLIKE kernel; (2) 2019-2026 sub-window shows degraded A4f advantage (Harvey FAIL both periods); (3) honest framing: A4f advantage concentrated in pre-2019 or COVID-driven dynamics. Lookahead prevention: signal.shift(1) explicitly applied (VIX at t-1 for day-t forecast). seed=42.",
+    "evidence": [
+      "experiments/k1378/k1378_results.json",
+      "experiments/k1378/k1378.py",
+      "experiments/k1379/k1379_results.json"
+    ],
+    "confidence": 0.82,
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "k1378",
+    "k_id": "K1378",
+    "created_at": "2026-05-19T21:07:00.000000"
   }
 ]

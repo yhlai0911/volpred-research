@@ -45,8 +45,26 @@ Yahoo Finance retroactively adjusts historical price series (dividend reconcilia
   > "Paper's reported DM t-statistics correspond to yfinance data frozen at K997/K1085 drafting time (pre-2026-04-19). Subsequent yfinance retroactive price adjustments shift these values by 0-11% relative; the Harvey |t| > 3 conclusion is invariant. Pinned snapshot CSVs are bundled in the replication package for reviewer rerun."
 - **No paper body edit required pre-reviewer-response**; this document is a shelf-ready errata for when needed.
 
+## SF1: Leave-COVID-out Analysis (K1378, identified 2026-05-19)
+
+**Finding**: K1378 compute job (completed 2026-05-19T12:31) ran leave-COVID-out DM test for OOS 2019-2026 using r² QLIKE proxy (Patton 2011). Results show SF1 CONFIRMED under this test window:
+
+| Period | n | GJR QLIKE | A4f QLIKE | DM t | Harvey pass |
+|--------|---|-----------|-----------|------|-------------|
+| Full OOS 2019-2026 | 1852 | **624.33** | 688.49 | −1.191 | ✗ |
+| Non-COVID OOS | 1515 | **643.46** | 662.83 | −0.362 | ✗ |
+| COVID-only | 337 | — | — | −1.544 | ✗ |
+
+**Critical caveat**: The r² proxy gives reversed QLIKE ranking vs paper's full QLIKE kernel (same artifact observed in K1379). The paper's A4f DM t=4.03 used full QLIKE kernel and a longer OOS period. K1378's findings apply to the 2019-2026 sub-window only.
+
+**Interpretation**: A4f's advantage in the paper is not statistically present in the 2019-2026 OOS using r² proxy. The paper's core claim (DM t=4.03 with full QLIKE) may rely on pre-2019 dynamics or COVID amplification, warranting careful framing in R1 response.
+
+**Action for R1 response**: Add leave-COVID-out analysis using the paper's own OOS period and full QLIKE kernel. Frame as honest robustness check rather than hiding it. Knowledge entry: `k1378_sf1`.
+
 ## Cross-reference
 
 - `paper/garch-x-vix/reproduce_report.json` — current snapshot-first match_rate
 - `docs/error_log.md` (2026-04-19 entries) — session-level session context
 - `.claude/rules/paper-workflow.md` — "Data snapshot pinning — yfinance drift 對策" rule
+- `experiments/k1378/k1378_results.json` — SF1 leave-COVID-out DM test results
+- `experiments/k1379/k1379_results.json` — SF2 HAR-RV benchmark horse race
