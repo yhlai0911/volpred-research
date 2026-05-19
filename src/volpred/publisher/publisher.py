@@ -511,6 +511,32 @@ class Publisher:
             except Exception:
                 pass
 
+            # 2026-05-19 post-publish live verify gate (Three-Strike fix):
+            # 5 articles got published+synced this session but no code verified
+            # the public URL resolved → FB pipeline used wrong URL template
+            # downstream. We now block "publish success" on actual HTTP 200.
+            try:
+                from volpred.publisher.live_verify import (
+                    verify_article_live,
+                    stamp_verified,
+                    emit_verify_alert,
+                )
+
+                live_ok = verify_article_live(pub_id)
+                stamp_verified(item, verified=live_ok)
+                # Persist the stamp/flag back to feed.json (the entry was
+                # already written by _append_to_feed; rewrite to include the
+                # new verify keys).
+                self._rewrite_feed_entry(pub_id, item)
+                if not live_ok:
+                    emit_verify_alert(
+                        pub_id,
+                        item.get("title"),
+                        storage_dir=str(self.reports_dir.parent),
+                    )
+            except Exception as exc:
+                print(f"  [live_verify] exception for {pub_id}: {exc}")
+
         return pub_id
 
     def get_feed(self, limit: int = 50, category: str | None = None, include_non_published: bool = False) -> list[dict]:
@@ -662,6 +688,34 @@ class Publisher:
                 result=result_label,
                 storage_dir=storage_dir,
             )
+
+    def _rewrite_feed_entry(self, pub_id: str, updated_item: dict) -> bool:
+        """Replace a single feed entry by id, preserving lock + read-back.
+
+        Used by post-publish gates (live_verify) that mutate an already-appended
+        item AFTER _append_to_feed has run. Returns True on success.
+        """
+        from volpred.ops.shared_lock import shared_state_lock
+
+        storage_dir = str(self.reports_dir.parent)
+        with shared_state_lock("publisher_feed", storage_dir=storage_dir):
+            feed = self._load_feed()
+            found = False
+            for idx, entry in enumerate(feed):
+                if entry.get("id") == pub_id:
+                    feed[idx] = updated_item
+                    found = True
+                    break
+            if not found:
+                return False
+            tmp_file = self._feed_file.with_name(f".{self._feed_file.name}.tmp")
+            with open(tmp_file, 'w') as f:
+                json.dump(feed, f, indent=2, default=str, ensure_ascii=False)
+            with open(tmp_file) as f:
+                json.load(f)
+            tmp_file.replace(self._feed_file)
+            self._sync_feed_to_remote()
+            return True
 
     def get_report(self, pub_id: str) -> dict | None:
         # Contentlayer pattern: feed.json is canonical. Read from it only.

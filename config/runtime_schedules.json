@@ -198,6 +198,33 @@
           "cron_work_summary.sh",
           "com.volpred.work-summary"
         ]
+      },
+      {
+        "id": "audit_publish_sync",
+        "cron": "15 * * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_audit_publish_sync.sh",
+        "log_path": "storage/logs/cron/audit_publish_sync.log",
+        "description": "Hourly: local published vs supabase vs live URL parity audit",
+        "host_crontab_managed": false,
+        "piggy_back_enabled": true
+      },
+      {
+        "id": "audit_fb_pipeline",
+        "cron": "20 */6 * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_audit_fb_pipeline.sh",
+        "log_path": "storage/logs/cron/audit_fb_pipeline.log",
+        "description": "6h: FB stale pending audit",
+        "host_crontab_managed": false,
+        "piggy_back_enabled": true
+      },
+      {
+        "id": "ops_dashboard",
+        "cron": "30 * * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_ops_dashboard.sh",
+        "log_path": "storage/logs/cron/ops_dashboard.log",
+        "description": "Hourly: write dashboard snapshot to storage/ops/dashboard_latest.json",
+        "host_crontab_managed": false,
+        "piggy_back_enabled": true
       }
     ]
   },

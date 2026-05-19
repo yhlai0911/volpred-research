@@ -374,6 +374,44 @@ def release_pool_articles(
         with shared_state_lock("publisher_feed", storage_dir=storage_dir):
             dump_json(_feed_path(storage_dir), feed)
         publisher._sync_feed_to_remote()
+
+        # 2026-05-19 post-publish live verify gate (Three-Strike fix):
+        # release_pool was flipping status='published' without verifying the
+        # public URL actually resolved. Verify each released item, stamp
+        # verified_live_at on PASS, mark live_verify_failed + alert on FAIL.
+        try:
+            from volpred.publisher.live_verify import (
+                verify_article_live,
+                stamp_verified,
+                emit_verify_alert,
+            )
+
+            for released_entry in released:
+                article_id = released_entry.get("id")
+                if not article_id:
+                    continue
+                live_ok = verify_article_live(article_id)
+                target = next(
+                    (i for i in feed if i.get("id") == article_id),
+                    None,
+                )
+                if target is not None:
+                    stamp_verified(target, verified=live_ok)
+                released_entry["verified_live"] = bool(live_ok)
+                if not live_ok:
+                    emit_verify_alert(
+                        article_id,
+                        (target or {}).get("title") if target else None,
+                        storage_dir=storage_dir,
+                    )
+
+            # Re-persist feed with verify stamps under the same lock namespace.
+            with shared_state_lock("publisher_feed", storage_dir=storage_dir):
+                dump_json(_feed_path(storage_dir), feed)
+            publisher._sync_feed_to_remote()
+        except Exception as exc:
+            print(f"  [release_pool] live_verify exception: {exc}")
+
         if update_last_released:
             _update_content_release_settings(
                 {"last_released_at": released_at},
