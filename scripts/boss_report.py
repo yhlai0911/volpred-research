@@ -324,6 +324,8 @@ def main():
         notifier = EmailNotifier()
         # Use notify() with html_body for multipart/alternative
         from volpred.ops.alerts import ALERT_RECIPIENT
+        # CLI flag --force bypasses dedup for manual / immediate re-send
+        force = "--force" in sys.argv
         result = notifier.notify(
             subject=title,
             body=plain,
@@ -331,6 +333,7 @@ def main():
             recipients=[ALERT_RECIPIENT],
             dedupe_type="boss_report",
             dedupe_key=NOW.strftime("%Y-%m-%d-%H"),
+            force_send=force,
         )
         print(f"[boss_report] sent notification_id={result.get('notification_id') if isinstance(result, dict) else result} subject={title}")
     except Exception as e:
