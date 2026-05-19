@@ -31,34 +31,34 @@
   },
   "dm_tests": {
     "HAR_X_TSMC vs HAR": {
-      "dm_t": 0.4217,
-      "dm_p": 0.6733,
+      "dm_t": 0.4215,
+      "dm_p": 0.6735,
+      "harvey_pass": false,
+      "direction": "model1_wins"
+    },
+    "HAR_X_MTK vs HAR": {
+      "dm_t": -1.2225,
+      "dm_p": 0.2218,
       "harvey_pass": false,
       "direction": "model2_wins"
     },
-    "HAR_X_MTK vs HAR": {
-      "dm_t": -1.223,
-      "dm_p": 0.2216,
-      "harvey_pass": false,
-      "direction": "model1_wins"
-    },
     "HAR_X_TECH vs HAR": {
-      "dm_t": -0.8074,
-      "dm_p": 0.4196,
+      "dm_t": -0.807,
+      "dm_p": 0.4198,
       "harvey_pass": false,
-      "direction": "model1_wins"
+      "direction": "model2_wins"
     },
     "HAR_X_VIX vs HAR": {
-      "dm_t": -8.8218,
+      "dm_t": -8.8181,
       "dm_p": 0.0,
       "harvey_pass": true,
-      "direction": "model1_wins"
+      "direction": "model2_wins"
     },
     "HAR_X_ALL vs HAR": {
-      "dm_t": -8.4721,
+      "dm_t": -8.4686,
       "dm_p": 0.0,
       "harvey_pass": true,
-      "direction": "model1_wins"
+      "direction": "model2_wins"
     }
   },
   "granger_tests": {
@@ -128,7 +128,7 @@
     "Granger causality p<0.05: 2/2 tech stocks",
     "TSMC Granger to 0050: F=4.0163, p=0.0012",
     "MTK Granger to 0050: F=4.7084, p=0.0003",
-    "DM t-stats: HAR_X_TSMC=0.4217, HAR_X_MTK=-1.223, HAR_X_TECH=-0.8074, HAR_X_VIX=-8.8218, HAR_X_ALL=-8.4721",
+    "DM t-stats: HAR_X_TSMC=0.4215, HAR_X_MTK=-1.2225, HAR_X_TECH=-0.807, HAR_X_VIX=-8.8181, HAR_X_ALL=-8.4686",
     "Data cleaning: log-return outliers (|r|>0.5) masked as NaN to remove corporate action artifacts"
   ]
 }

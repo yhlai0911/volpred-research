@@ -7341,5 +7341,20 @@
       "k1378_sf1"
     ],
     "source": "compute_queue_followup"
+  },
+  {
+    "id": "d34af23e",
+    "task_type": "experiment",
+    "title": "K1381: Taiwan Tech Sector Vol (TSMC/MTK) as HAR Leading Indicator for 0050.TW",
+    "description": "Ran HAR-X experiments adding TSMC/MTK realized vol as predictors for 0050.TW. Granger causality significant (TSMC F=4.02 p=0.0012; MTK F=4.71 p=0.0003) but OOS QLIKE improvement trivial (+0.06%, DM HLN t=+0.42, Harvey FAIL). VIX significantly hurts OOS (DM HLN t=-8.82, Harvey PASS). VERDICT: MIXED. Codex review: PASS after HLN correction + direction-label fix. knowledge entry: 1fd7e749.",
+    "status": "completed",
+    "timestamp": "2026-05-19T22:35:05.279348",
+    "result_summary": "MIXED — Granger significant but OOS gains sub-threshold; VIX hurts",
+    "knowledge_entries": [
+      "1fd7e749"
+    ],
+    "experiment_ids": [
+      "k1381"
+    ]
   }
 ]

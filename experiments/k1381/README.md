@@ -51,8 +51,8 @@ All models estimated via OLS (numpy lstsq). **All features lagged by 1 day** to 
 | HAR_X_TSMC vs HAR | +0.422 | 0.673 | FAIL | HAR_X_TSMC marginally better |
 | HAR_X_MTK vs HAR | -1.223 | 0.222 | FAIL | HAR better |
 | HAR_X_TECH vs HAR | -0.807 | 0.420 | FAIL | HAR better |
-| **HAR_X_VIX vs HAR** | **-8.822** | **<0.001** | **PASS** | **HAR significantly better** |
-| **HAR_X_ALL vs HAR** | **-8.472** | **<0.001** | **PASS** | **HAR significantly better** |
+| **HAR_X_VIX vs HAR** | **-8.818** | **<0.001** | **PASS** | **HAR significantly better** |
+| **HAR_X_ALL vs HAR** | **-8.469** | **<0.001** | **PASS** | **HAR significantly better** |
 
 ### Granger Causality F-test (lag=5, n=3,913)
 
@@ -88,7 +88,8 @@ All models estimated via OLS (numpy lstsq). **All features lagged by 1 day** to 
 - **Lookahead prevention**: All features constructed with `.shift(1)`. Verified manually: rv_d at date t equals rv_0050 at t-1 for all observations.
 - **Forecast positivity**: OLS predictions clamped at 1e-10 to ensure valid QLIKE computation.
 - **Granger test design**: Restricted model = HAR(target). Unrestricted = HAR(target) + predictor lags 1..5. F-stat computed as ((RSS_r - RSS_u)/5) / (RSS_u/(n-k_u)).
-- **DM sign convention**: d = loss_HAR - loss_X; positive t-stat means HAR-X beats HAR.
+- **DM sign convention**: d = loss_HAR - loss_X; positive t-stat means HAR-X beats HAR (model1 in "X vs HAR" label). Harvey PASS threshold |t|>3.0 is a conservative gate per Patton (2011) convention.
+- **HLN correction**: DM statistic uses Harvey/Leybourne/Newbold (1997) small-sample correction MDM = sqrt((n+1−2h+h(h−1)/n)/n) × DM_basic; for h=1, n=1181 this factor ≈ 0.9996.
 - **seed**: 42 (no stochastic elements in this experiment beyond numpy.random seed set at top).
 
 ## Files

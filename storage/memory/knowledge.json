@@ -30869,5 +30869,31 @@
     "experiment_id": "k1378",
     "k_id": "K1378",
     "created_at": "2026-05-19T21:07:00.000000"
+  },
+  {
+    "item_id": "1fd7e749",
+    "created_at": "2026-05-19T22:34:36.647023",
+    "category": "volatility_forecasting",
+    "title": "Taiwan Tech Sector Vol (TSMC/MTK) as HAR Leading Indicator for 0050.TW",
+    "content": "HAR-X models adding TSMC (2330.TW) and MediaTek (2454.TW) realized vol do NOT significantly improve OOS vol forecasts for 0050.TW beyond plain HAR. n=3935, OOS n=1181 (2021-01-14 to 2026-04-17). HAR_X_TSMC OOS QLIKE improvement = +0.06% only (DM HLN t=+0.42, Harvey FAIL). VIX as regressor significantly HURTS: DM HLN t=-8.82, Harvey PASS — US implied vol is noise for Taiwan market. Granger causality statistically significant (TSMC F=4.02 p=0.0012; MTK F=4.71 p=0.0003) but economically trivial in OOS. HAR own-lags subsume tech sector signal. VERDICT: MIXED.",
+    "evidence": [
+      "experiments/k1381/k1381_results.json",
+      "experiments/k1381/k1381.py"
+    ],
+    "confidence": 0.75,
+    "verdict": "MIXED",
+    "experiment_id": "k1381",
+    "reviewer": "Codex gpt-5.4 PASS (session 019e40a6) — HLN correction + direction-label fix verified",
+    "tags": [
+      "HAR",
+      "HAR-X",
+      "Taiwan",
+      "0050.TW",
+      "TSMC",
+      "tech-sector",
+      "Granger",
+      "QLIKE",
+      "VIX"
+    ]
   }
 ]

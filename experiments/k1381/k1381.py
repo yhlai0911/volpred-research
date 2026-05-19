@@ -249,15 +249,23 @@ dm_model_list = [
     ("HAR_X_ALL",  "HAR_X_ALL vs HAR"),
 ]
 
-print("\n[K1381] === DM Tests ===")
+print("\n[K1381] === DM Tests (Harvey/Leybourne/Newbold 1997 correction, h=1) ===")
 for model_name, label in dm_model_list:
     model_loss = oos_loss_series[model_name]
-    d = har_loss - model_loss  # positive => HAR-X has lower loss => wins
+    d = har_loss - model_loss  # positive => HAR-X (model1 in label) has lower loss => wins
     n_d = len(d)
-    dm_stat = float(np.mean(d) / (np.std(d, ddof=1) / np.sqrt(n_d)))
+    # Basic DM statistic
+    dm_stat_raw = float(np.mean(d) / (np.std(d, ddof=1) / np.sqrt(n_d)))
+    # HLN (1997) small-sample correction for h=1-step-ahead forecasts:
+    # MDM = sqrt((n+1-2h+h*(h-1)/n)/n) * DM_raw  =>  for h=1: sqrt((n-1)/n) * DM_raw
+    h = 1
+    hln_factor = np.sqrt((n_d + 1 - 2 * h + h * (h - 1) / n_d) / n_d)
+    dm_stat = float(dm_stat_raw * hln_factor)
     dm_p    = float(2.0 * (1.0 - stats.t.cdf(abs(dm_stat), df=n_d - 1)))
     harvey_pass = abs(dm_stat) > 3.0
-    direction = "model2_wins" if dm_stat > 0 else ("model1_wins" if dm_stat < 0 else "tie")
+    # Naming convention: label is "HAR_X_? vs HAR" so model1=HAR_X, model2=HAR
+    # dm_stat > 0 (d>0) => model1 (HAR_X) wins; dm_stat < 0 => model2 (HAR) wins
+    direction = "model1_wins" if dm_stat > 0 else ("model2_wins" if dm_stat < 0 else "tie")
     dm_tests[label] = {
         "dm_t":        round(dm_stat, 4),
         "dm_p":        round(dm_p, 4),
@@ -342,7 +350,7 @@ granger_tests = {
 # -----------------------------------------------------------------------
 n_harvey_wins = sum(
     1 for v in dm_tests.values()
-    if v["harvey_pass"] and v["direction"] == "model2_wins"
+    if v["harvey_pass"] and v["direction"] == "model1_wins"
 )
 n_granger_sig = sum(1 for v in granger_tests.values() if v["significant_05"])
 
