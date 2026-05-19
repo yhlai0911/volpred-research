@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-19T06:10:32Z",
+  "timestamp": "2026-05-19T12:07:17Z",
   "all_ok": false,
   "checks": [
     {
@@ -10,7 +10,7 @@
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "age=48.0h (threshold=26h); ALERT: metrics stale"
+      "detail": "age=54.0h (threshold=26h); ALERT: metrics stale"
     },
     {
       "name": "ERROR_LOG",
@@ -20,7 +20,7 @@
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "all 14 strategies have <=1 null in last 3 entries; no strategy exceeds >2 null threshold; _market_daily skipped"
+      "detail": "all 14 strategies have <=1 null in last 3 entries; no strategy exceeds >2 null threshold; _market_daily skipped (empty)"
     },
     {
       "name": "GIT_STATUS",
@@ -36,6 +36,6 @@
   "alerts": [
     "article pool low (<12): total=6",
     "general pool low (<8): general=2",
-    "metrics stale (age=48.0h)"
+    "metrics stale (age=54.0h)"
   ]
 }
