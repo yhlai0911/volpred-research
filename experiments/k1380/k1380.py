@@ -25,6 +25,7 @@ import numpy as np
 import pandas as pd
 from datetime import datetime, timezone
 from scipy import optimize, stats
+from numba import njit
 
 warnings.filterwarnings('ignore')
 np.random.seed(42)
@@ -93,14 +94,21 @@ vix_monthly = vix_series.resample('ME').mean()
 # 2. MODEL FITTING FUNCTIONS
 # ═══════════════════════════════════════════════════════════════════════════
 
+@njit(cache=True)
 def _gjr_filter(omega, alpha, gamma, beta, returns):
-    """Pure-Python GJR variance filter (avoids numba cold-start overhead)."""
+    """GJR variance filter (numba JIT, ~50x faster than pure Python)."""
     n = len(returns)
     h = np.empty(n)
-    h[0] = max(np.var(returns[:min(250, n)]), 1e-8)
+    n_init = min(250, n)
+    v = 0.0
+    for i in range(n_init):
+        v += returns[i] * returns[i]
+    h0 = v / n_init
+    h[0] = h0 if h0 > 1e-8 else 1e-8
     for t in range(1, n):
-        asym = gamma * returns[t-1]**2 if returns[t-1] < 0 else 0.0
-        h[t] = max(omega + alpha * returns[t-1]**2 + asym + beta * h[t-1], 1e-10)
+        asym = gamma * returns[t-1] * returns[t-1] if returns[t-1] < 0.0 else 0.0
+        h_new = omega + alpha * returns[t-1] * returns[t-1] + asym + beta * h[t-1]
+        h[t] = h_new if h_new > 1e-10 else 1e-10
     return h
 
 
@@ -131,6 +139,50 @@ def fit_gjr(returns):
     return best_p
 
 
+@njit(cache=True)
+def _garch_x_nll_free(omg, a, g, b, returns, tau_vals, tau_denom):
+    """GARCH-X neg log-likelihood, free ω mode (numba JIT)."""
+    if omg <= 0.0 or a < 0.0 or g < 0.0 or b < 0.0 or a + g / 2.0 + b >= 1.0:
+        return 1e10
+    n = len(returns)
+    persist = a + g / 2.0 + b
+    gv = omg / (1.0 - persist) if (1.0 - persist) > 1e-8 else omg / 1e-8
+    ll = 0.0
+    LOG2PI_HALF = 0.9189385332046728
+    for t in range(1, n):
+        td = tau_denom[t] if tau_denom[t] > 1e-16 else 1e-16
+        u = returns[t - 1] / (td ** 0.5)
+        asym = g * u * u if u < 0.0 else 0.0
+        gv_new = omg + a * u * u + asym + b * gv
+        gv = gv_new if gv_new > 1e-10 else 1e-10
+        sigma2 = tau_vals[t] * gv
+        sigma2 = sigma2 if sigma2 > 1e-16 else 1e-16
+        ll += -(LOG2PI_HALF + 0.5 * (np.log(sigma2) + returns[t] * returns[t] / sigma2))
+    return -ll
+
+
+@njit(cache=True)
+def _garch_x_nll_constrained(a, g, b, returns, tau_vals, tau_denom):
+    """GARCH-X neg log-likelihood, constrained ω mode (numba JIT)."""
+    if a < 0.0 or g < 0.0 or b < 0.0 or a + g / 2.0 + b >= 1.0:
+        return 1e10
+    omg = 1.0 - a - g / 2.0 - b
+    n = len(returns)
+    gv = 1.0
+    ll = 0.0
+    LOG2PI_HALF = 0.9189385332046728
+    for t in range(1, n):
+        td = tau_denom[t] if tau_denom[t] > 1e-16 else 1e-16
+        u = returns[t - 1] / (td ** 0.5)
+        asym = g * u * u if u < 0.0 else 0.0
+        gv_new = omg + a * u * u + asym + b * gv
+        gv = gv_new if gv_new > 1e-10 else 1e-10
+        sigma2 = tau_vals[t] * gv
+        sigma2 = sigma2 if sigma2 > 1e-16 else 1e-16
+        ll += -(LOG2PI_HALF + 0.5 * (np.log(sigma2) + returns[t] * returns[t] / sigma2))
+    return -ll
+
+
 def fit_garch_x(returns, tau_vals, omega_mode='constrained', denom='tau_t'):
     """
     Fit multiplicative GARCH-X given τ_t series.
@@ -148,39 +200,12 @@ def fit_garch_x(returns, tau_vals, omega_mode='constrained', denom='tau_t'):
 
     if omega_mode == 'free':
         def neg_ll(p):
-            omg, a, g, b = p
-            if omg <= 0 or a < 0 or g < 0 or b < 0 or a + g/2 + b >= 1:
-                return 1e10
-            persist = a + g/2 + b
-            eg = omg / max(1 - persist, 1e-8)
-            gv = eg
-            ll = 0.0
-            for t in range(1, n):
-                td = max(tau_denom[t], 1e-16)
-                u = returns[t-1] / np.sqrt(td)
-                asym = g * u**2 if u < 0 else 0.0
-                gv = max(omg + a * u**2 + asym + b * gv, 1e-10)
-                sigma2 = max(tau_vals[t] * gv, 1e-16)
-                ll += -0.5 * (np.log(2*np.pi) + np.log(sigma2) + returns[t]**2/sigma2)
-            return -ll
+            return _garch_x_nll_free(p[0], p[1], p[2], p[3], returns, tau_vals, tau_denom)
         starts = [[0.05, 0.05, 0.05, 0.90], [0.02, 0.03, 0.08, 0.88]]
         bounds = [(1e-6, 1.0), (1e-4, 0.3), (1e-4, 0.3), (0.5, 0.999)]
     else:
         def neg_ll(p):
-            a, g, b = p
-            if a < 0 or g < 0 or b < 0 or a + g/2 + b >= 1:
-                return 1e10
-            omg = 1 - a - g/2 - b
-            gv = 1.0
-            ll = 0.0
-            for t in range(1, n):
-                td = max(tau_denom[t], 1e-16)
-                u = returns[t-1] / np.sqrt(td)
-                asym = g * u**2 if u < 0 else 0.0
-                gv = max(omg + a * u**2 + asym + b * gv, 1e-10)
-                sigma2 = max(tau_vals[t] * gv, 1e-16)
-                ll += -0.5 * (np.log(2*np.pi) + np.log(sigma2) + returns[t]**2/sigma2)
-            return -ll
+            return _garch_x_nll_constrained(p[0], p[1], p[2], returns, tau_vals, tau_denom)
         starts = [[0.05, 0.05, 0.90], [0.03, 0.08, 0.88]]
         bounds = [(1e-4, 0.3), (1e-4, 0.3), (0.5, 0.999)]
 
@@ -282,6 +307,26 @@ def beta_poly_weights(K, omega2):
     return phi
 
 
+@njit(cache=True)
+def _midas_filter_ll(returns, tau, a, g, b):
+    """GARCH-MIDAS log-likelihood loop (numba JIT); tau pre-computed."""
+    omg = 1.0 - a - g / 2.0 - b
+    n = len(returns)
+    gv = 1.0
+    ll = 0.0
+    LOG2PI_HALF = 0.9189385332046728
+    for t in range(1, n):
+        td = tau[t - 1] if tau[t - 1] > 1e-16 else 1e-16
+        u = returns[t - 1] / (td ** 0.5)
+        asym = g * u * u if u < 0.0 else 0.0
+        gv_new = omg + a * u * u + asym + b * gv
+        gv = gv_new if gv_new > 1e-10 else 1e-10
+        sigma2 = tau[t] * gv
+        sigma2 = sigma2 if sigma2 > 1e-16 else 1e-16
+        ll += -(LOG2PI_HALF + 0.5 * (np.log(sigma2) + returns[t] * returns[t] / sigma2))
+    return -ll
+
+
 def fit_midas(returns, vix_lags_matrix, Km_mode=False):
     """
     Fit GARCH-MIDAS: log τ_t = m + θ Σ_k φ_k(1,ω₂) log VIX_{t-k}
@@ -298,16 +343,7 @@ def fit_midas(returns, vix_lags_matrix, Km_mode=False):
         phi = beta_poly_weights(K, omega2)
         log_tau = m + theta * (vix_lags_matrix @ phi)
         tau = np.exp(np.clip(log_tau, -20, 20))
-        omg = 1 - a - g/2 - b
-        gv = 1.0
-        ll = 0.0
-        for t in range(1, n):
-            u = returns[t-1] / np.sqrt(max(tau[t-1], 1e-16))
-            asym = g * u**2 if u < 0 else 0.0
-            gv = max(omg + a * u**2 + asym + b * gv, 1e-10)
-            sigma2 = max(tau[t] * gv, 1e-16)
-            ll += -0.5 * (np.log(2*np.pi) + np.log(sigma2) + returns[t]**2/sigma2)
-        return -ll
+        return _midas_filter_ll(returns, tau, a, g, b)
 
     starts = [
         [-8.0, 0.5, 2.0, 0.05, 0.05, 0.90],
