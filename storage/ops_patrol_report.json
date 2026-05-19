@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-18T18:02:51Z",
+  "timestamp": "2026-05-19T00:06:00Z",
   "all_ok": false,
   "checks": [
     {
@@ -10,22 +10,22 @@
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "age=35.9h (threshold=26h); ALERT: metrics stale"
+      "detail": "age=41.9h (threshold=26h); ALERT: metrics stale"
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "no entries dated 2026-05-17 or 2026-05-18 in last 30 lines; most recent entry 2026-04-26"
+      "detail": "no entries dated 2026-05-19 (today) or 2026-05-18 (yesterday) in last 30 lines; most recent entry 2026-04-26"
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "all 14 strategies have <=1 null in last 3 entries; no strategy exceeds >2 null threshold"
+      "detail": "all 14 strategies have <=1 null in last 3 entries; no strategy exceeds >2 null threshold; _market_daily has no entries (skipped)"
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files"
+      "detail": "0 uncommitted files (threshold: >50); working tree clean"
     },
     {
       "name": "KNOWLEDGE_SIZE",
@@ -36,6 +36,6 @@
   "alerts": [
     "article pool low (<12): total=6",
     "general pool low (<8): general=2",
-    "metrics stale (age=35.9h)"
+    "metrics stale (age=41.9h)"
   ]
 }
