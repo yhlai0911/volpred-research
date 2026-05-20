@@ -205,7 +205,7 @@
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_audit_publish_sync.sh",
         "log_path": "storage/logs/cron/audit_publish_sync.log",
         "description": "Hourly: local published vs supabase vs live URL parity audit",
-        "host_crontab_managed": false,
+        "host_crontab_managed": true,
         "piggy_back_enabled": true
       },
       {
@@ -214,7 +214,7 @@
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_audit_fb_pipeline.sh",
         "log_path": "storage/logs/cron/audit_fb_pipeline.log",
         "description": "6h: FB stale pending audit",
-        "host_crontab_managed": false,
+        "host_crontab_managed": true,
         "piggy_back_enabled": true
       },
       {
@@ -223,7 +223,7 @@
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_ops_dashboard.sh",
         "log_path": "storage/logs/cron/ops_dashboard.log",
         "description": "Hourly: write dashboard snapshot to storage/ops/dashboard_latest.json",
-        "host_crontab_managed": false,
+        "host_crontab_managed": true,
         "piggy_back_enabled": true
       },
       {
@@ -232,7 +232,7 @@
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_boss_report.sh",
         "log_path": "storage/logs/cron/boss_report.log",
         "description": "Every 4h: send boss HTML email report (state + decisions + recommendations)",
-        "host_crontab_managed": false,
+        "host_crontab_managed": true,
         "piggy_back_enabled": true
       }
     ]
@@ -335,191 +335,6 @@
     "source_label": "Canonical one-shot and event-relative task spec",
     "note": "Materialize due event windows into control-plane tasks with dedupe ledger protection.",
     "items": [
-      {
-        "id": "fomc-2026-04-29-t2",
-        "event_key": "FOMC_2026_04_29",
-        "trigger_mode": "one_shot",
-        "dedupe_key": "fomc-2026-04-29-t2:one_shot",
-        "not_before": "2026-04-26T00:00:00+08:00",
-        "deadline": "2026-04-27T00:00:00+08:00",
-        "preferred_agent": "claude",
-        "public_effect": "published",
-        "task_template": {
-          "title": "Event article: FOMC 04/28-29 T-2 (scenario number grid + position sizing)",
-          "description": "Dispatch per brief storage/next_draft_candidate_fomc_t2.md. Differentiation axis: scenario-conditional SPY/VIX 1-day move grid (94.8% hold vs 4.2% surprise cut vs hawkish hold) + T-2 to T+0 position sizing rules citing mile_fa23c3b2. status=published immediate (event-driven), 2 real matplotlib charts, general audience 1500+ CJK, 3-layer dedup pre-run required (grep feed for 'T-2 FOMC', publication_candidates, theme matrix). Event cap: 3/3-4 used (T-12/T-11/T-7), this is slot 4/4. Skip if T+0 slot must be reserved.",
-          "task_family": "content",
-          "priority": 20,
-          "preferred_agent": "claude",
-          "fallback_allowed": false,
-          "approval_mode": "auto",
-          "risk_level": "safe",
-          "public_effect": "published",
-          "preconditions": [],
-          "payload_patch": {
-            "memo_path": "storage/next_draft_candidate_fomc_t2.md",
-            "audience": "general",
-            "event_series_slot": "T-2",
-            "event_date": "2026-04-29",
-            "prior_articles": [
-              "mile_78d649c4",
-              "mile_f7bc6e6a",
-              "mile_a0dccb21"
-            ]
-          }
-        }
-      },
-      {
-        "id": "nfp-2026-05-01-t2",
-        "event_key": "NFP_2026_05_01",
-        "trigger_mode": "one_shot",
-        "dedupe_key": "nfp-2026-05-01-t2:one_shot",
-        "not_before": "2026-04-29T00:00:00+08:00",
-        "deadline": "2026-04-30T23:59:59+08:00",
-        "preferred_agent": "claude",
-        "public_effect": "published",
-        "task_template": {
-          "title": "Event article: NFP 05/01 T-2 (consensus expectations + SPY/VIX historical reaction grid)",
-          "description": "Dispatch per brief storage/next_draft_candidate_nfp_t2.md. Differentiation axis: consensus headline NFP / unemployment / wage growth expectations + historical SPY/VIX 1-day reaction conditional on surprise size (small/medium/large beat-or-miss buckets). status=published immediate (event-driven), 2 real matplotlib charts, general audience 1500+ CJK. 3-layer dedup pre-run required. Event cap: T-2 + T+0 (+ optional T+1) ≤ 3 entries (T-7 missed in calendar populate gap).",
-          "task_family": "content",
-          "priority": 20,
-          "preferred_agent": "claude",
-          "fallback_allowed": false,
-          "approval_mode": "auto",
-          "risk_level": "safe",
-          "public_effect": "published",
-          "preconditions": [],
-          "payload_patch": {
-            "memo_path": "storage/next_draft_candidate_nfp_t2.md",
-            "audience": "general",
-            "event_series_slot": "T-2",
-            "event_date": "2026-05-01",
-            "prior_articles": []
-          }
-        }
-      },
-      {
-        "id": "nfp-2026-05-01-t0",
-        "event_key": "NFP_2026_05_01",
-        "trigger_mode": "one_shot",
-        "dedupe_key": "nfp-2026-05-01-t0:one_shot",
-        "not_before": "2026-05-01T21:00:00+08:00",
-        "deadline": "2026-05-02T23:59:59+08:00",
-        "preferred_agent": "claude",
-        "public_effect": "published",
-        "task_template": {
-          "title": "Event article: NFP 05/01 T+0 immediate reaction (actual vs expected + market path)",
-          "description": "Dispatch within 24h of NFP release (08:30 ET = 20:30 CST). Content: actual headline NFP / unemployment / AHE YoY vs consensus, post-release SPY/VIX intraday path vs historical conditional, Fed-path implied prob shift via FedWatch (May/June FOMC). status=published immediate, 2 real matplotlib charts (intraday vs conditional / FFR curve pre-vs-post). general audience 1500+ CJK. 3-layer dedup vs T-2. Differentiation: ex-post reality check.",
-          "task_family": "content",
-          "priority": 15,
-          "preferred_agent": "claude",
-          "fallback_allowed": false,
-          "approval_mode": "auto",
-          "risk_level": "safe",
-          "public_effect": "published",
-          "preconditions": [],
-          "payload_patch": {
-            "memo_path": "storage/next_draft_candidate_nfp_t0.md",
-            "audience": "general",
-            "event_series_slot": "T+0",
-            "event_date": "2026-05-01",
-            "prior_articles": []
-          }
-        }
-      },
-      {
-        "id": "fomc-2026-04-29-t0",
-        "event_key": "FOMC_2026_04_29",
-        "trigger_mode": "one_shot",
-        "dedupe_key": "fomc-2026-04-29-t0:one_shot",
-        "not_before": "2026-04-29T21:00:00+08:00",
-        "deadline": "2026-04-30T23:59:59+08:00",
-        "preferred_agent": "claude",
-        "public_effect": "published",
-        "task_template": {
-          "title": "Event article: FOMC 04/28-29 T+0 immediate reaction",
-          "description": "Dispatch within 24h of FOMC decision announcement (29 Apr 14:00 ET = 30 Apr 02:00 UTC). Content: actual decision vs expected (94.8% hold prior), dot-plot update surprise/alignment, post-announce SPY/VIX intraday path vs historical conditional, next-FOMC implied prob shift. status=published immediate (event-driven), 2 real matplotlib charts (intraday vs conditional expectation / FFR curve pre-vs-post), general audience 1500+ CJK. 3-layer dedup against the T-12/T-11/T-7/T-2 series. Differentiation: ex-post reality check vs prior scenario forecasts. Event cap: 4/4 final slot of this FOMC cycle.",
-          "task_family": "content",
-          "priority": 15,
-          "preferred_agent": "claude",
-          "fallback_allowed": false,
-          "approval_mode": "auto",
-          "risk_level": "safe",
-          "public_effect": "published",
-          "preconditions": [],
-          "payload_patch": {
-            "audience": "general",
-            "event_series_slot": "T+0",
-            "event_date": "2026-04-29",
-            "prior_articles": [
-              "mile_78d649c4",
-              "mile_f7bc6e6a",
-              "mile_a0dccb21",
-              "pending_t2_mile"
-            ],
-            "requires_websearch": [
-              "Actual FOMC decision 2026-04-29",
-              "Updated FedFunds futures probabilities post-announce",
-              "Dot plot median path"
-            ]
-          }
-        }
-      },
-      {
-        "id": "cpi-us-2026-05-13-t2",
-        "event_key": "CPI_US_2026_05_13",
-        "trigger_mode": "one_shot",
-        "dedupe_key": "cpi-us-2026-05-13-t2:one_shot",
-        "not_before": "2026-05-11T08:00:00+08:00",
-        "deadline": "2026-05-12T20:00:00+08:00",
-        "preferred_agent": "claude",
-        "public_effect": "published",
-        "task_template": {
-          "title": "Event article: US CPI 05/13 T-2 (scenario grid + breakeven inflation reaction)",
-          "description": "US April CPI released Wed 05/13 08:30 ET. T-2 angle: BLS headline/core YoY/MoM scenario grid (consensus vs hot vs cool) + breakeven inflation / TIPS / VIX 1-day move expectations. status=published immediate. 3-layer dedup pre-run (grep feed for CPI, publication_candidates, theme matrix). audience=general 1500+ CJK 2 charts.",
-          "task_family": "content",
-          "priority": 20,
-          "preferred_agent": "claude",
-          "fallback_allowed": false,
-          "approval_mode": "auto",
-          "risk_level": "safe",
-          "public_effect": "published",
-          "preconditions": [],
-          "payload_patch": {
-            "audience": "general",
-            "event_series_slot": "T-2",
-            "event_date": "2026-05-13",
-            "event_type": "CPI_US"
-          }
-        }
-      },
-      {
-        "id": "cpi-us-2026-05-13-t0",
-        "event_key": "CPI_US_2026_05_13",
-        "trigger_mode": "one_shot",
-        "dedupe_key": "cpi-us-2026-05-13-t0:one_shot",
-        "not_before": "2026-05-13T21:30:00+08:00",
-        "deadline": "2026-05-14T20:00:00+08:00",
-        "preferred_agent": "claude",
-        "public_effect": "published",
-        "task_template": {
-          "title": "Event article: US CPI 05/13 T+0 (actual vs expected + market reconcile)",
-          "description": "US April CPI released 05/13 08:30 ET = CST 21:30. T+0 angle: actual headline/core CPI YoY/MoM vs consensus, surprise size, intraday SPY/VIX/breakeven/USD reaction, sector winners/losers. status=published immediate, write after announce + 1h. 3-layer dedup pre-run. audience=general.",
-          "task_family": "content",
-          "priority": 15,
-          "preferred_agent": "claude",
-          "fallback_allowed": false,
-          "approval_mode": "auto",
-          "risk_level": "safe",
-          "public_effect": "published",
-          "preconditions": [],
-          "payload_patch": {
-            "audience": "general",
-            "event_series_slot": "T+0",
-            "event_date": "2026-05-13",
-            "event_type": "CPI_US"
-          }
-        }
-      },
       {
         "id": "nfp-2026-06-05-t7",
         "event_key": "NFP_2026_06_05",
