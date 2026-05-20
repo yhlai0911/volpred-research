@@ -30895,5 +30895,35 @@
       "QLIKE",
       "VIX"
     ]
+  },
+  {
+    "item_id": "6acdf75c",
+    "category": "risk_management",
+    "content": "K1382（Multi-Horizon VaR: GARCH-Sim vs Square-Root-T vs HistSim, SPY 2015-2025）主要發現：\n\n1. HistSim 在 h=21（月度）水平完全失效：全樣本 violation rate=15.06%（target 5%），ratio=5.03；在所有子區間均嚴重超標（COVID 期間 ratio 達 13.78）。Kupiec LR test p<0.001，強烈拒絕 UC。\n\n2. GARCH-Sim 與 SRT 在 h=21 統計上無法區分：全樣本 VaR ratio 分別為 1.60 vs 1.29（α=5%），1.45 vs 1.17（α=1%），二者方向一致且 Kupiec 結果相近（均未嚴重失效）。2022-2025 子期間 h=21 α=1% 時二者結果完全相同（ratio=0.2991, n=3）——非代碼 bug，係低 exception 環境（後 COVID 正常化）下兩種參數法同時只捕捉到相同尾部事件。\n\n3. 短期水平（h=1, h=5）三種方法表現相近，差異不顯著。\n\n4. 重要方法論警告：h=21 時使用每日觀測做 Kupiec 測試存在嚴重的重疊窗口問題。n_obs=2766 個觀測但有效獨立觀測約 132 個，p 值反保守（過度拒絕）約 21 倍。主要結論方向仍有效（HistSim 明顯失效），但 p 值不應按字面解讀。\n\n實務建議：月度 VaR 計算應避免 HistSim；GARCH-Sim 與 SRT 在短中期水平提供相近保護，GARCH-Sim 在理論上更正確（完整分佈傳播 vs 方差線性縮放假設）。",
+    "evidence": [
+      "experiments/k1382/k1382_results.json",
+      "experiments/k1382/k1382.py",
+      "experiments/k1382/README.md",
+      "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv (SPY 2015-2025, n=2766)"
+    ],
+    "confidence": 0.75,
+    "created_at": "2026-05-20T17:35:52.291951",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "K1382",
+    "experiment_path": "experiments/k1382/",
+    "reviewer": "main-thread code review fallback (Codex CLI custom-focus not supported; codex-companion.mjs v1.0.1; experiments.md fallback rule)",
+    "caveats": [
+      "Kupiec test 使用重疊窗口（h=21），有效 n≈132 而非 2766，p 值反保守",
+      "未跑獨立樣本驗證（其他資產/市場）",
+      "GARCH-Sim 與 SRT 差異在此樣本內統計上無法區分"
+    ],
+    "tags": [
+      "VaR",
+      "GARCH",
+      "HistSim",
+      "multi-horizon",
+      "backtesting",
+      "risk-management"
+    ]
   }
 ]

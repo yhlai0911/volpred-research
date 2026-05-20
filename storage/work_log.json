@@ -7461,5 +7461,14 @@
       "paper/taiwan-vt/body.tex",
       "research_program.md"
     ]
+  },
+  {
+    "task_type": "experiment",
+    "experiment_id": "K1382",
+    "title": "Multi-Horizon VaR: GARCH-Sim vs SRT vs HistSim (SPY 2015-2025)",
+    "status": "succeeded",
+    "verdict": "CONDITIONAL_PASS",
+    "timestamp": "2026-05-20T17:36:00.829419",
+    "notes": "HistSim 月度失效(ratio=5.03)。GARCH-Sim≈SRT 無法區分。重疊窗口 Kupiec 警告。"
   }
 ]
