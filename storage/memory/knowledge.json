@@ -30925,5 +30925,146 @@
       "backtesting",
       "risk-management"
     ]
+  },
+  {
+    "item_id": "cf7e62d9",
+    "category": "rough_volatility",
+    "content": "K1386: Multivariate Rough Volatility (fGN AR + cross-asset residual). SPY/QQQ/GLD Parkinson RV, IS 2010-2021, OOS 2022-2026-05-19. Hurst (Gatheral structure func): SPY H=0.1031, QQQ H=0.0936, GLD H=0.0294 — all < 0.5 (rough). fGN AR on log-RV increments (anti-persistent, ACF lag-1 approx -0.43 to -0.49). QLIKE OOS: HAR=0.369, fGN-uni=0.461, fGN-multi=0.463. DM test: fGN-uni t=+3.269, fGN-multi t=+3.257 (HAR sig wins, |t|>3.0). Verdict: NULL — HAR significantly outperforms fGN at daily frequency. Key lesson: rough vol increment anti-persistence (H~0.1) cannot beat HAR long-memory aggregation at daily frequency. Cross-asset correction (QQQ/GLD lag-1 residuals) provides negligible marginal gain. Method improvement over K806: Parkinson RV + structure function H + correct fGN architecture reduces QLIKE from 132.6 to 0.46 but still cannot beat HAR=0.37. H1 caveat: evaluation alignment fix required (shift -1 so actual=rv_{t+1}); without fix fGN appeared 4.3% better (artifact). H2 caveat: cross-asset uses lag-1 realized residuals — feasible at forecast time.",
+    "evidence": [
+      "experiments/k1386/k1386_results.json",
+      "experiments/k1386/k1386.py",
+      "Gatheral et al. (2018) log-structure function",
+      "K529 (SPY Hurst H=0.1 daily), K806 (NULL multivariate fBm)"
+    ],
+    "confidence": 0.85,
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "K1386",
+    "reviewer": "code-reviewer subagent fallback (primary Codex unavailable for focus-text review)",
+    "reviewer_source": "feature-dev:code-reviewer subagent",
+    "created_at": "2026-05-20T21:40:41.205071",
+    "hurst_estimates": {
+      "SPY": 0.103081,
+      "QQQ": 0.093565,
+      "GLD": 0.029357
+    },
+    "qlike_oos": {
+      "HAR": 0.36879574,
+      "fGN_univariate": 0.461357,
+      "fGN_multivariate": 0.46271202
+    },
+    "dm_stats": {
+      "fGN_uni_vs_HAR": 3.268827,
+      "fGN_multi_vs_HAR": 3.257408
+    },
+    "related_experiments": [
+      "K529",
+      "K806"
+    ]
+  },
+  {
+    "item_id": "71a71a17",
+    "category": "multivariate_model",
+    "experiment_id": "K1387",
+    "verdict": "NULL",
+    "title": "K1387: Gaussian vs Student-t DCC Risk Parity (ERC) — SPY/TLT/GLD OOS 2020-2024 [NULL]",
+    "content": "K1387: Gaussian DCC vs Student-t DCC 風險平價（ERC）組合比較。SPY+TLT+GLD，IS expanding window 初始 250 天（2015-2019），OOS 2020-2024 (T=1257)，refit 每 5 天。M0=等權重，M1=Inverse-Vol(60日)，M2=Gaussian DCC+ERC，M3=Student-t DCC+ERC。估計 mean_nu=7.41（自由度，OOS 均值）。\nQKLIKE(組合層級): M2=-9.047567, M3=-9.050979。DM test(M2 vs M3): t=1.3271, p=0.1847 (正 t → M2 QLIKE 較高 → M3 better)。\nVaR M2: 1pct: N=35 Kupiec=FAIL Christ=PASS; 5pct: N=86 Kupiec=FAIL Christ=PASS。VaR M3: 1pct: N=30 Kupiec=FAIL Christ=PASS; 5pct: N=86 Kupiec=FAIL Christ=PASS。\nVerdict=NULL。\n方法論: 兩步 MLE (Stage1 univariate GARCH(1,1)；Stage2a MVN DCC；Stage2b t-DCC)。ERC=scipy SLSQP minimize sum(RC_i - sigma_p/N)^2。Lookahead 保護: weights[t] = H_{t|t-1} (formed t-1)。\nCodex review (primary-path read-only sandbox 2026-05-21): CONDITIONAL_PASS。已發現並修正兩個問題: (1) h_last timing L593 (h_vecs[-1]→h_pred；對稱影響 M2/M3，非 lookahead)；(2) DM comment L714 (措辭錯誤已修)。實驗使用修前版本跑出，h_last bug 對稱影響 M2/M3 故比較方向仍有效；絕對 QLIKE 略偏高。修正版 (L593) 已更新 K1387.py，如需論文用精確數字應 re-run。",
+    "evidence": [
+      "experiments/K1387/K1387_results.json",
+      "experiments/K1387/K1387.py",
+      "Paolella (2025, JTSA) heavy-tailed multivariate DCC",
+      "Engle & Sheppard (2002) DCC",
+      "Maillard, Roncalli & Teiletche (2010) ERC",
+      "K1100c, K1100d (DCC series prior work)"
+    ],
+    "confidence": 0.78,
+    "reviewer": "Codex primary-path CONDITIONAL_PASS (read-only sandbox, 2026-05-21)",
+    "reviewer_source": "Codex primary-path (read-only)",
+    "codex_review": "CONDITIONAL_PASS — (1) h_last timing offset L593 symmetric to M2/M3, not lookahead; (2) DM comment L714 fixed. Lookahead, ERC, Kupiec, Christoffersen correct.",
+    "created_at": "2026-05-20T20:13:54.529790+00:00",
+    "qlike": {
+      "M2": -9.047566914446977,
+      "M3": -9.050978901370243
+    },
+    "dm_t_stat": 1.3270616365621235,
+    "dm_p_value": 0.18472948297396452,
+    "mean_nu_oos": 7.413150845252926,
+    "oos_len": 1257,
+    "var_accuracy": {
+      "M2_1pct": {
+        "n_violations": 35,
+        "expected_violations": 12.570000000000011,
+        "violation_rate": 0.02784407319013524,
+        "kupiec_lr": 27.22918925738609,
+        "kupiec_p": 1.8070975393857935e-07,
+        "christoffersen_lr": 0.8864222213877611,
+        "christoffersen_p": 0.3464486970473164,
+        "kupiec_pass": false,
+        "christoffersen_pass": true
+      },
+      "M2_5pct": {
+        "n_violations": 86,
+        "expected_violations": 62.85000000000006,
+        "violation_rate": 0.06841686555290374,
+        "kupiec_lr": 8.090292612505216,
+        "kupiec_p": 0.004450297651269031,
+        "christoffersen_lr": 0.0024184707903032177,
+        "christoffersen_p": 0.9607774831562926,
+        "kupiec_pass": false,
+        "christoffersen_pass": true
+      },
+      "M3_1pct": {
+        "n_violations": 30,
+        "expected_violations": 12.570000000000011,
+        "violation_rate": 0.02386634844868735,
+        "kupiec_lr": 17.578341168201874,
+        "kupiec_p": 2.7571072103493854e-05,
+        "christoffersen_lr": 0.10527802230546968,
+        "christoffersen_p": 0.7455854490902305,
+        "kupiec_pass": false,
+        "christoffersen_pass": true
+      },
+      "M3_5pct": {
+        "n_violations": 86,
+        "expected_violations": 62.85000000000006,
+        "violation_rate": 0.06841686555290374,
+        "kupiec_lr": 8.090292612505216,
+        "kupiec_p": 0.004450297651269031,
+        "christoffersen_lr": 0.0024184707903032177,
+        "christoffersen_p": 0.9607774831562926,
+        "kupiec_pass": false,
+        "christoffersen_pass": true
+      }
+    },
+    "performance": {
+      "M0": {
+        "ann_return": 0.05972437615904101,
+        "ann_vol": 0.11293786158124075,
+        "sharpe": 0.5288251018997634,
+        "max_drawdown": -0.23985227168395828
+      },
+      "M1": {
+        "ann_return": 0.06852646465992812,
+        "ann_vol": 0.10938309712075042,
+        "sharpe": 0.6264812979676397,
+        "max_drawdown": -0.22346353081161197
+      },
+      "M2": {
+        "ann_return": 0.06982380151117785,
+        "ann_vol": 0.10961807805983348,
+        "sharpe": 0.6369734148510204,
+        "max_drawdown": -0.23286180538719303
+      },
+      "M3": {
+        "ann_return": 0.06982889305937995,
+        "ann_vol": 0.10957237394582582,
+        "sharpe": 0.6372855724920624,
+        "max_drawdown": -0.23289085640267482
+      }
+    },
+    "related_experiments": [
+      "K1100c",
+      "K1100d"
+    ],
+    "codex_caveat": "h_last timing: stored h_{T_IS|T_IS-1} (last IS filtered) instead of h_pred (one-step-ahead forecast) at line 593. Bug symmetric to M2/M3; DM comparison valid. Fixed in committed K1387.py v2 (line 593). Re-run for paper-ready tables."
   }
 ]

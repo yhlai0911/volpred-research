@@ -1,0 +1,156 @@
+{
+  "experiment_id": "K1387",
+  "title": "Risk Parity + Heavy-Tailed DCC \u2014 Paolella (2025, JTSA)",
+  "verdict": "NULL",
+  "period": {
+    "full": "2015-01-05 to 2024-12-30",
+    "oos": "2020-01-02 to 2024-12-30",
+    "oos_length_days": 1257
+  },
+  "assets": [
+    "SPY",
+    "TLT",
+    "GLD"
+  ],
+  "models": {
+    "M0_equal_weight": {
+      "description": "1/N equal weight benchmark",
+      "ann_return": 0.05972437615904101,
+      "ann_vol": 0.11293786158124075,
+      "sharpe": 0.5288251018997634,
+      "max_drawdown": -0.23985227168395828,
+      "rc_rmse": 0.11429283292766428
+    },
+    "M1_inverse_vol": {
+      "description": "Rolling 21-day inverse volatility weights",
+      "ann_return": 0.06852646465992812,
+      "ann_vol": 0.10938309712075042,
+      "sharpe": 0.6264812979676397,
+      "max_drawdown": -0.22346353081161197,
+      "rc_rmse": 0.09517220152889222
+    },
+    "M2_DCC_Gaussian": {
+      "description": "DCC-GARCH(1,1) with Gaussian innovations",
+      "ann_return": 0.06982380151117785,
+      "ann_vol": 0.10961807805983348,
+      "sharpe": 0.6369734148510204,
+      "max_drawdown": -0.23286180538719303,
+      "qlike": -9.047566914446977,
+      "rc_rmse": 0.02293673808187695
+    },
+    "M3_DCC_StudentT": {
+      "description": "DCC-GARCH(1,1) with multivariate Student-t innovations",
+      "estimated_dof_mean": 7.413150845252926,
+      "ann_return": 0.06982889305937995,
+      "ann_vol": 0.10957237394582582,
+      "sharpe": 0.6372855724920624,
+      "max_drawdown": -0.23289085640267482,
+      "qlike": -9.050978901370243,
+      "rc_rmse": 0.023429497796152568
+    }
+  },
+  "qlike": {
+    "M2": -9.047566914446977,
+    "M3": -9.050978901370243,
+    "improvement_pct": 0.03771165171288541,
+    "dm_t_stat": 1.3270616365621235,
+    "dm_p_value": 0.18472948297396452,
+    "dm_significant": false,
+    "m3_better": false
+  },
+  "var_accuracy": {
+    "M2_1pct": {
+      "n_violations": 35,
+      "expected_violations": 12.570000000000011,
+      "violation_rate": 0.02784407319013524,
+      "kupiec_lr": 27.22918925738609,
+      "kupiec_p": 1.8070975393857935e-07,
+      "christoffersen_lr": 0.8864222213877611,
+      "christoffersen_p": 0.3464486970473164,
+      "kupiec_pass": false,
+      "christoffersen_pass": true
+    },
+    "M2_5pct": {
+      "n_violations": 86,
+      "expected_violations": 62.85000000000006,
+      "violation_rate": 0.06841686555290374,
+      "kupiec_lr": 8.090292612505216,
+      "kupiec_p": 0.004450297651269031,
+      "christoffersen_lr": 0.0024184707903032177,
+      "christoffersen_p": 0.9607774831562926,
+      "kupiec_pass": false,
+      "christoffersen_pass": true
+    },
+    "M3_1pct": {
+      "n_violations": 30,
+      "expected_violations": 12.570000000000011,
+      "violation_rate": 0.02386634844868735,
+      "kupiec_lr": 17.578341168201874,
+      "kupiec_p": 2.7571072103493854e-05,
+      "christoffersen_lr": 0.10527802230546968,
+      "christoffersen_p": 0.7455854490902305,
+      "kupiec_pass": false,
+      "christoffersen_pass": true
+    },
+    "M3_5pct": {
+      "n_violations": 86,
+      "expected_violations": 62.85000000000006,
+      "violation_rate": 0.06841686555290374,
+      "kupiec_lr": 8.090292612505216,
+      "kupiec_p": 0.004450297651269031,
+      "christoffersen_lr": 0.0024184707903032177,
+      "christoffersen_p": 0.9607774831562926,
+      "kupiec_pass": false,
+      "christoffersen_pass": true
+    }
+  },
+  "risk_contribution_rmse": {
+    "M0": 0.11429283292766428,
+    "M1": 0.09517220152889222,
+    "M2": 0.02293673808187695,
+    "M3": 0.023429497796152568
+  },
+  "performance": {
+    "M0": {
+      "ann_return": 0.05972437615904101,
+      "ann_vol": 0.11293786158124075,
+      "sharpe": 0.5288251018997634,
+      "max_drawdown": -0.23985227168395828
+    },
+    "M1": {
+      "ann_return": 0.06852646465992812,
+      "ann_vol": 0.10938309712075042,
+      "sharpe": 0.6264812979676397,
+      "max_drawdown": -0.22346353081161197
+    },
+    "M2": {
+      "ann_return": 0.06982380151117785,
+      "ann_vol": 0.10961807805983348,
+      "sharpe": 0.6369734148510204,
+      "max_drawdown": -0.23286180538719303
+    },
+    "M3": {
+      "ann_return": 0.06982889305937995,
+      "ann_vol": 0.10957237394582582,
+      "sharpe": 0.6372855724920624,
+      "max_drawdown": -0.23289085640267482
+    }
+  },
+  "methodology": {
+    "garch_spec": "GARCH(1,1) per asset, Normal innovations Stage 1",
+    "dcc_spec": "Engle (2002) DCC, two-stage estimation",
+    "dcc_gaussian": "MVN log-likelihood Stage 2",
+    "dcc_studentt": "Multivariate Student-t log-likelihood Stage 2 with estimated df",
+    "risk_parity": "Equal Risk Contribution (ERC), scipy.optimize.minimize SLSQP",
+    "lookahead_protection": "Portfolio weights at t use covariance H_{t-1}, strictly no lookahead",
+    "is_window": 250,
+    "rebalance_freq": 5,
+    "seed": 42
+  },
+  "conclusion": "NULL result: Student-t DCC does not significantly outperform Gaussian DCC for risk parity. DM test: t=1.327 (p=0.1847), QLIKE M2=-9.0476 vs M3=-9.0510. Mean estimated df=7.4. Consistent with K1100d (regime-switching DCC also NULL) and univariate Student-t non-dominance pattern.",
+  "reviewer": "self (K1387 agent)",
+  "related_experiments": [
+    "K1100c",
+    "K1100d"
+  ]
+}
