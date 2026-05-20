@@ -256,6 +256,28 @@ Log to `storage/reports/trending_repost_log.json`:
 
 ### Step 7 — Facebook post (Ivan Lai)
 
+> **⚠️ FB 發文實戰教訓（2026-05-20 多次踩雷後寫入，違反任一條就重蹈覆轍）**
+>
+> 1. **發文前必先 `get_page_text` 查 Ivan Lai 牆**確認該篇沒發過。pfbid scan
+>    在 FB profile cache lag 下會 false-negative（dda1e670/50f44a46/74a28bcf
+>    三次誤判「沒發成功」其實都發了）。只信 get_page_text 看到的牆。沒查就開
+>    composer = 重複發文風險。
+> 2. **留言 URL 要打進「留言框」不是「貼文本體」**。2026-05-20 把 URL 誤打進
+>    composer 本體兩次。每次 type 前先 `find` 確認 ref 是留言 textbox
+>    （aria-label 含「以 Ivan Lai 的身分留言」），不是 composer 本體。
+> 3. **FB profile inline composer 有草稿復原機制** — 關掉 composer dialog 後
+>    文字回到 profile 頂端 inline composer 框；再點它會重開 dialog 帶舊草稿。
+>    這不是 dup，是同一篇未發佈草稿。別誤判、別關掉真草稿。
+> 4. **主貼文本體絕不放 URL**。若不慎打入 → `cmd+a` → `Delete` → 重打乾淨版
+>    → 移除 FB 自動生成的連結預覽卡（卡片右上 X）。
+> 5. **留言用獨立 send 鍵**（留言框右下藍色紙飛機 icon），不靠 Return。
+> 6. **每個關鍵步驟後 screenshot 確認**（composer 開了沒 / 發佈成功沒 /
+>    留言送出沒），不靠 find 描述猜狀態。
+> 7. **single-shot，禁 retry-loop**。發佈鍵點一次後等 6-8s + screenshot 驗，
+>    沒成功查原因，不連點 — retry-loop 2026-05-19 造成 3 篇 Nikkei dup。
+> 8. 發佈流程：composer → 確認本體乾淨 → `繼續` → `貼文設定`頁點藍色`發佈`
+>    （不是`排程選項` row）→ 等 → screenshot 驗 composer 關閉 + 牆上「剛剛」。
+
 **Primary path**: claude-in-chrome browser automation.
 - Open https://facebook.com (assumes Ivan Lai logged in on the user's Chrome profile)
 - **Do not paste the VolPred article verbatim into Facebook.**
