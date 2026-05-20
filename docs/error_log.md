@@ -1002,3 +1002,22 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 1. 帶 `existing_*` 參數的函式若 caller 不傳 → silent collision；設計這類參數時應讓「不傳」即 fail 或至少 log warn。
 2. 任何 dedup 邏輯用「英文 token overlap」對中文內容必失效 — 中文專案的 identity key 應用穩定 ID（行號 / hash），不用詞頻。
 3. 時間戳跨檔流動必標 timezone 並一致解析；UTC 字串配 `mktime` 是經典 +N 小時 bug。
+
+---
+
+## 2026-05-20 | hourly-dispatch 8/12 run 失敗 — fd limit + org 訂閱兩根因
+
+**問題**：`storage/logs/cron/hourly_dispatch.log` 顯示 2026-05-20 12 個 hourly run 中只 3 個 exit=0（15:26/17:39/19:39），8 個 exit=1，1 個 exit=142（18:57 cap hang）。自主 dispatch 主幹大半天空轉。
+
+**根因 A — 檔案描述符上限（07/08/09/10/11/16:07，exit=1 秒級失敗）**：claude -p 啟動即報 `error: An unknown error occurred, possibly due to low max file descriptors. Current limit: 256`。LaunchAgent (`com.volpred.hourly-dispatch`) 程序繼承 launchd 預設 `maxfiles` soft 256 / hard unlimited，且**不 source login profile** → 拿不到 profile 設的 1048576。互動 session 正常因為 profile 有設。
+
+**根因 B — 組織訂閱被停用（13/14:07，exit=1）**：claude -p 回 `Your organization has disabled Claude subscription access for Claude Code · Use an Anthropic API key instead, or ask your admin to enable access`。帳號/組織層設定，間歇出現。**非 wrapper 可修** — 需用戶在 Anthropic org 設定啟用 Claude Code 訂閱存取，或為 headless run 配置 `ANTHROPIC_API_KEY`。
+
+**Fix（根因 A）**：`scripts/cron_hourly_dispatch.sh` 在 `cd` 後加 `ulimit -Sn 65536`（soft-only；hard=unlimited 故 soft raise 必成功）。TCC copy `~/.volpred/bin/` 同步。模擬 launchd 環境（soft 256）驗證 raise 至 65536 生效。
+
+**Lessons**：
+1. LaunchAgent / cron headless 程序**不 source login profile** — profile 設的 `ulimit`、`PATH`、env 全拿不到。任何 headless wrapper 需顯式設定所需 resource limit。
+2. `ulimit -n N`（無 -S/-H）會同時設 soft+hard；要「raise soft 到 hard 上限」必用 `-Sn`，否則一旦 hard 被夾住就再也升不回去。
+3. 自主主幹（hourly-dispatch）必須有失敗 visibility — 8/12 run silent 失敗一整天才被發現。候補：fire 後若 exit≠0 連續 N 次應主動 ping 用戶（hang detection alert 已規劃，failure detection 一併納入）。
+
+**Pending（根因 B 屬用戶決策）**：org 訂閱存取需用戶處理；headless dispatch 在訂閱間歇停用下不穩 — 建議配置 API key fallback。

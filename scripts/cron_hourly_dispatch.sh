@@ -11,6 +11,14 @@
 exec >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/hourly_dispatch.log 2>&1
 cd /Users/yhlai0911/Desktop/volpred-research || exit 1
 
+# Raise file-descriptor SOFT limit. LaunchAgent-spawned processes inherit
+# launchd's default (soft 256 / hard unlimited — `launchctl limit maxfiles`)
+# and DO NOT source the login profile, so claude -p crashes instantly with
+# "low max file descriptors" (2026-05-20: 6/12 hourly runs failed this way).
+# Interactive shells get 1048576 from the profile; headless runs must set it.
+# Use -Sn (soft only) — hard is unlimited so the soft raise always succeeds.
+ulimit -Sn 65536 2>/dev/null || true
+
 # Enable job control so background subshells get their own process group;
 # `kill -- -PGID` then propagates to all descendants (claude + its forks).
 set -m
