@@ -84,12 +84,14 @@
 
 ## 專案地圖
 
-- 本機雙 agent 研究系統：Claude 偏主研究與整合，Codex 偏審查、第二意見、針對性修正。
+- 本機多 agent 研究系統：Claude 偏主研究與整合，Codex 與 Antigravity (agy) 偏審查、第二意見、針對性修正與分擔工作。
 - **AI CLI 可用性**（2026-05-20 更新）：
   - **Codex CLI** `codex-cli 0.132.0` ✅ — ChatGPT auth（`Logged in using ChatGPT`），預設 `gpt-5.4` medium reasoning；headless 入口 `codex exec`；`-s workspace-write`。中文 prompt 必 heredoc + stdin。reinstall 要 `npm install -g @openai/codex@latest --include=optional`（缺 darwin-arm64 binary 會 crash）。
-  - **Gemini headless** → `scripts/gemini_ask.py` ✅ — 直打 Gemini API（`GOOGLE_CLOUD_API_KEY`），預設 `gemini-3.1-pro-preview`，真 stdout pipe。用法 `uv run python scripts/gemini_ask.py "prompt"` / stdin `... | gemini_ask.py -` / `--model` override。
-  - **已放棄**：`gemini-cli`（2026-06-18 Google 停服）+ `antigravity-cli`（`agy chat` 開 GUI 無 stdout pipe，headless 不可用）。所有 Gemini second-opinion / fact-check 一律走 `gemini_ask.py`。
-  - 完整對照：[codex-cli SKILL](file:///Users/yhlai0911/.claude/skills/codex-cli/SKILL.md) + memory `reference_dual_cli_availability`。
+  - **Antigravity CLI** `agy 1.0.0` ✅ — Google OAuth，預設 `gemini-3.5-flash`（`ANTIGRAVITY_MODEL` env 換模型）；headless 入口 `agy -p "<prompt>"`（真 stdout pipe，2026-05-20 實測單行/多行中文 prompt 皆通過）；agentic 工作加 `--dangerously-skip-permissions`。**第三個 agentic CLI，與 Codex 並列分擔審查 / 第二意見 / 針對性修正**。`-p` 吃參數不吃 stdin — 中文多行 prompt 用 heredoc 存變數再 `agy -p "$VAR"`。
+  - **Gemini 輕量 Q&A** → `scripts/gemini_ask.py` ✅ — 直打 Gemini API（`GOOGLE_CLOUD_API_KEY`），預設 `gemini-3.1-pro-preview`，真 stdout pipe。用於 fact-check / 大檔摘要 / 一次性問答（非 agentic）；用法 `uv run python scripts/gemini_ask.py "prompt"` / stdin `... | gemini_ask.py -` / `--model` override。
+  - **分工**：agentic 多步工作（code review、針對性修正、獨立子任務）→ Codex CLI 或 `agy`；一次性問答 / fact-check → `gemini_ask.py`。
+  - **已放棄**：`gemini-cli`（2026-06-18 Google 停服，由 `agy` 繼承）。
+  - 完整對照：[codex-cli SKILL](file:///Users/yhlai0911/.claude/skills/codex-cli/SKILL.md) + memory `reference_dual_cli_availability` + `reference_antigravity_cli`。
 - active frontend / Zeabur target 由 `config/project_targets.json` 決定；**先改 config，再改程式或文件。**
 - 目前線上站點：`https://volpred.zeabur.app`
 - 研究記憶雙寫：Supabase + Mirror API
