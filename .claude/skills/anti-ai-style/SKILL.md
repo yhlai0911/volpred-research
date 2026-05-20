@@ -5,7 +5,7 @@ description: |
   articles, trending_repost, daily_article, member_qa answers, paper
   abstracts, social-media hooks) to eliminate generic "AI 味" — the
   hollow, formulaic, translation-stilted phrasing that makes readers
-  bounce. Enforces an 8-landmine avoidance catalog, a 5-rule prompt
+  bounce. Enforces an 9-landmine avoidance catalog, a 5-rule prompt
   protocol, and a 3-stage editor SOP grounded in 5 expert sources
   (Wu Dan-Ru 50-year writer's framework + 4 prompt-engineering guides).
   Trigger phrases: '避免 AI 味', '人味', '人話', 'avoid AI style',
@@ -44,18 +44,26 @@ paths:
 
 ## 三層防線速查（先讀這段，細節在 references/）
 
-### Layer 1 — 8 大地雷 catalog（寫前先記、寫後必檢）
+### Layer 1 — 9 大地雷 catalog（寫前先記、寫後必檢）
 
-| # | 地雷 | 一句症狀 |
-|---|---|---|
-| 1 | **「不是…而是…」假哲理** | 強行對立不對等概念 |
-| 2 | **無效換句話說** | 6 句講完 2 句的事 |
-| 3 | **標籤式情緒** | 直接寫「讓人感到心酸」 |
-| 4 | **爆米花式昇華** | 小事擴張成宇宙大道理 |
-| 5 | **生硬戲劇轉折** | 「然而，真正的考驗才正要開始」 |
-| 6 | **稻草人「有人說」** | 捏造假想敵且無查證 |
-| 7 | **翻譯腔「這」** | 「這讓人不禁感到…」 |
-| 8 | **吊書袋空詞** | 「結構性梳理」等 |
+| # | 地雷 | 一句症狀 | 硬上限 |
+|---|---|---|---|
+| 1 | **「不是…而是…」假哲理** | 強行對立不對等概念（含變體：不該是X而是Y / 並非 / 與其說…不如說）— **標題 + H1 也要查** | 0 |
+| 2 | **無效換句話說** | 6 句講完 2 句的事 | — |
+| 3 | **標籤式情緒** | 直接寫「讓人感到心酸」 | 0 |
+| 4 | **爆米花式昇華** | 小事擴張成宇宙大道理 | 0 |
+| 5 | **生硬戲劇轉折** | 「然而，真正的考驗才正要開始」 | 0 |
+| 6 | **稻草人「有人說」** | 捏造假想敵且無查證 | 0 |
+| 7 | **翻譯腔「這」** | 「這讓人不禁感到…」 | 0 |
+| 8 | **吊書袋空詞** | 「結構性梳理」等 | 0 |
+| 9 | **破折號上癮（最隱性 AI tell）** | 「——」當補充說明 / 戲劇停頓濫用 | **≤ 1 個 / 1000 字** |
+
+**地雷 9 — 破折號（2026-05-20 boss 抓出，原 8 catalog 漏列）**：
+- AI 最愛用「——」接補充子句（「VIX 體制——美股恐慌指數——反映…」）。中文自然書寫極少這樣。
+- 症狀：全文「——」或「—」密度高（>1/1000 字即偏高，>3/1000 字 = 嚴重 AI 味）。
+- 修正：每個「——」三選一改寫 — (a) 斷成兩個句子用句號 (b) 改逗號併入主句 (c) 補充內容若不重要直接刪。
+- havingchien 等真人 Substack 專欄幾乎不用破折號，靠短句句號 + 列點 + 口語連接詞。
+- **檢測**：`grep -o "——\|—" content | wc -l`，除以字數×1000，>1 即 fail。
 
 完整症狀／根因／修正 → [references/8-landmines.md](references/8-landmines.md)
 
@@ -88,7 +96,7 @@ paths:
    ↓
 2. 跑 AI 生成 → 拿到 first draft
    ↓
-3. 開 references/bad-vs-good.md 對照 8 地雷自查
+3. 開 references/bad-vs-good.md 對照 9 地雷自查
    ↓
 4. 跑 references/editor-sop.md 三階段（每段勾完才 publish）
    ↓
@@ -110,7 +118,7 @@ paths:
 
 ## 硬規則（不可違反）
 
-1. **8 地雷任一未消除 → 不 publish**（即使其他品質維度全 PASS）
+1. **9 地雷任一未消除 → 不 publish**（即使其他品質維度全 PASS）
 2. **情緒命名禁直白**：禁「讓人感到」「心酸」「孤獨」「拋棄」「不禁」直接出現
    — 改畫面 / 動作 / 意象
 3. **轉折詞配額**：每篇 ≤2 個「然而」/「真正的」/「但其實」/「事實上」
