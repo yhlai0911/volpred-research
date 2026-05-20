@@ -1,5 +1,19 @@
 [
   {
+    "id": "f76982be",
+    "timestamp": "2026-05-20T14:23Z",
+    "task_type": "paper_review",
+    "paper_id": "taiwan-vt",
+    "description": "Fix 3 remaining issues in body.tex: (1) Intro common-period attribution — removed wrong 2020-2026 frame for 1.074/1.137 figures; GJR VT 1.108 now correctly stated as common-period leader. (2) Intro +0.114→+0.124 (GJR vs GARCH Sharpe increment, consistent with Section 4.2 explicit calc 1.074-0.950=0.124). (3) Conclusion +0.114→+0.124. Compiled 53pp, synced Supabase.",
+    "status": "completed",
+    "issues_fixed": [
+      "H2_intro_common_period_attribution",
+      "H2_intro_sharpe_increment_0114_to_0124",
+      "H2_conclusion_sharpe_increment_0114_to_0124"
+    ],
+    "remaining_severe": "K1386 NULL result: Codex review pending before knowledge.json write"
+  },
+  {
     "timestamp": "2026-05-19T11:32:06.876380+00:00",
     "task_type": "paper_body",
     "task_id": "Paper2_section5_major_revision",
