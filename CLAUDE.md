@@ -88,8 +88,8 @@
 - **AI CLI 可用性**（2026-05-20 更新）：
   - **Codex CLI** `codex-cli 0.132.0` ✅ — ChatGPT auth（`Logged in using ChatGPT`），預設 `gpt-5.4` medium reasoning；headless 入口 `codex exec`；`-s workspace-write`。中文 prompt 必 heredoc + stdin。reinstall 要 `npm install -g @openai/codex@latest --include=optional`（缺 darwin-arm64 binary 會 crash）。
   - **Antigravity CLI** `agy 1.0.0` ✅ — Google OAuth，預設 `gemini-3.5-flash`（`ANTIGRAVITY_MODEL` env 換模型）；headless 入口 `agy -p "<prompt>"`（真 stdout pipe，2026-05-20 實測單行/多行中文 prompt 皆通過）；agentic 工作加 `--dangerously-skip-permissions`。**第三個 agentic CLI，與 Codex 並列分擔審查 / 第二意見 / 針對性修正**。`-p` 吃參數不吃 stdin — 中文多行 prompt 用 heredoc 存變數再 `agy -p "$VAR"`。
-  - **Gemini 輕量 Q&A** → `scripts/gemini_ask.py` ✅ — 直打 Gemini API（`GOOGLE_CLOUD_API_KEY`），預設 `gemini-3.1-pro-preview`，真 stdout pipe。用於 fact-check / 大檔摘要 / 一次性問答（非 agentic）；用法 `uv run python scripts/gemini_ask.py "prompt"` / stdin `... | gemini_ask.py -` / `--model` override。
-  - **分工**：agentic 多步工作（code review、針對性修正、獨立子任務）→ Codex CLI 或 `agy`；一次性問答 / fact-check → `gemini_ask.py`。
+  - **Gemini 輕量 Q&A（fallback）** → `scripts/gemini_ask.py` ✅ — 直打 Gemini API（`GOOGLE_CLOUD_API_KEY`），預設 `gemini-3.1-pro-preview`，真 stdout pipe；獨立於 gemini-cli（6/18 停服不影響）。**定位是 `agy` 的 fallback**：只在 agy 不可用、或需純 pipe 一次性呼叫時用。⚠️ **每次成功呼叫會打 PAID API → 自動 email 通知 admin + 記 `storage/logs/gemini_ask_usage.jsonl`**（用戶 2026-05-20 硬性要求）。用法 `uv run python scripts/gemini_ask.py "prompt"` / stdin `... | gemini_ask.py -` / `--model` override。
+  - **分工**：agentic 多步工作（code review、針對性修正、獨立子任務）→ Codex CLI 或 `agy`；一次性問答 / fact-check → 優先 `agy -p`，`gemini_ask.py` 僅 fallback。
   - **已放棄**：`gemini-cli`（2026-06-18 Google 停服，由 `agy` 繼承）。
   - 完整對照：[codex-cli SKILL](file:///Users/yhlai0911/.claude/skills/codex-cli/SKILL.md) + memory `reference_dual_cli_availability` + `reference_antigravity_cli`。
 - active frontend / Zeabur target 由 `config/project_targets.json` 決定；**先改 config，再改程式或文件。**
