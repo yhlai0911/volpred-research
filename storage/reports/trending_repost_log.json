@@ -201,15 +201,14 @@
     ],
     "volpred_angle": "VIX as index-only risk signal; low-correlation environment creates gap between index vol and portfolio vol; VT strategy blind spot",
     "mile_id": "mile_32eb397f",
-    "fb_post_status": "failed_cron_no_browser",
+    "fb_post_status": "success",
     "fb_post_url": null,
     "fb_draft": "VIX 今天收 18。\n\n從數字表面看，美股平靜。\n\n但我同時打開 NVDA 的 20 日波動率：44.8%。GOOGL：42.7%。\n\n如果你同時持有這兩支，你帳戶裡的那個市場，跟 VIX 說的根本是兩回事。\n\n---\n\n這不是矛盾，是設計問題。\n\nS&P500 是加權平均。當 NVDA 某天大漲、GOOGL 同天大跌，指數的震動就被抵消了。相關係數低，指數就靜。\n\n現在大型科技股就是這個狀態：每支有自己的故事，NVDA 跑 AI capex 議題，GOOGL 跑廣告市佔，各走各的方向。\n\n六支 Mag6 的平均已實現波動率：33.1%。\nSPY 指數同期：10.9%。\n差距：22.2 個百分點。\n\n五月是 2025 年以來這個差距最大的月份。\n\n---\n\n很多系統化策略（波動率目標，VT）以 VIX 作為加減倉依據：VIX 低就多買。\n\nVIX 18 的環境，這類規則會叫你拿高部位。看起來合理。\n\n但你的組合裡如果有 NVDA 和 GOOGL，你承受的波動率接近 40%，不是 18%。\n\n---\n\nVIX 回答的是：指數下個月會有多亂？\n\n它沒辦法回答：你的持倉今天有多亂？\n\n低相關環境下，這兩個問題的答案差很遠。\n\n（連結在留言）",
     "fb_comment_link": "https://volpred.zeabur.app/v3/reports/mile_32eb397f",
     "word_count": 1800,
     "retry_count": 1,
     "timestamp": "2026-05-19T16:25:56+08:00",
-    "fb_failed_at": "2026-05-20T05:30:00+08:00",
-    "fb_fail_reason": "cron session has no browser access for Chrome automation"
+    "fb_posted_at": "2026-05-20T18:26:59.835430+08:00"
   },
   {
     "date": "2026-05-20",
@@ -224,14 +223,15 @@
     ],
     "volpred_angle": "OVX/VIX ratio divergence as cross-asset decoupling signal; inflation-regime transmission channel; VT strategy blind spot when OVX/VIX decouples; portfolio risk measurement with energy exposure",
     "mile_id": "mile_8d61b9b3",
-    "fb_post_status": "pending",
+    "fb_post_status": "success",
     "fb_post_url": null,
     "fb_draft": "OVX 昨天最高衝到 120.9。\n\n這個數字代表什麼？原油選擇權市場預期接下來一個月，WTI 的年化波動率接近 121%。\n\n同一天，VIX 收在 23。\n\n---\n\n兩個指數通常走一起。地緣政治衝擊同時打油市和股市，兩個都漲。\n\n但伊朗戰爭開打後，這個關係斷掉了。\n\n2022 俄烏戰爭：OVX 峰值 78.9，VIX 峰值 36.5，OVX/VIX 比值 2.2。\n2026 伊朗戰爭：OVX 峰值 120.9，VIX 峰值 31.0，OVX/VIX 比值 3.9。\n\n每一單位的股市恐慌，對應的油市恐慌翻了接近兩倍。\n\n---\n\n為什麼這次傳導鏈斷了？三個原因：\n\n一、通膨起點不同。2022 年 CPI 已超過 7%，油價再衝等於往過熱的爐子加薪火，聯準會升息預期直接壓縮科技股本益比。2026 年 CPI 約 2.5%，TIPS breakeven 只上漲 24bp，遠比 2022 年的 40bp 溫和。\n\n二、美國不再依賴中東石油。頁岩油讓霍爾木茲封鎖對美國能源的直接衝擊遠小於以前，打擊最重的是亞洲進口國。\n\n三、市場學了。2022 年的完整循環之後，投資人更相信「地緣政治油價衝擊終究會解決」。\n\n---\n\n這個分裂對投組有一個隱藏的問題。\n\n波動率目標化策略用 VIX 決定倉位。VIX 17-21，系統說「維持標準部位」。\n\n但如果你持有能源股，OVX/VIX 比值 3.9 意味著能源曝險的隱含波動率幾乎是大盤四倍。VIX 沒說謊，只是它回答的問題，不是你真正需要問的那個。\n\n（詳細資料與圖表在留言）",
     "fb_comment_link": "https://volpred.zeabur.app/v3/reports/mile_8d61b9b3",
     "word_count": 2200,
     "retry_count": 0,
     "timestamp": "2026-05-20T05:30:00+08:00",
-    "status": "published"
+    "status": "published",
+    "fb_posted_at": "2026-05-20T18:26:59.835430+08:00"
   },
   {
     "date": "2026-05-20",

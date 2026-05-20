@@ -1217,22 +1217,6 @@
     "blocked_note": "0050.TW 5-min data accumulation ETA 2026 Q2"
   },
   {
-    "id": "K1308",
-    "title": "K1308: PatchTST-lite vs HAR-RV — MDPI 2025",
-    "priority": 3,
-    "description": "Auto-generated from research_program.md unchecked item (line 284). Original: PatchTST-lite vs HAR-RV — MDPI 2025\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1308.py with signal.shift(1) + seed=42, (c) K1308_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
-    "task_type": "experiment",
-    "source": "research_backlog_auto",
-    "tags": [
-      "experiment",
-      "autonomous-research"
-    ],
-    "created_at": "2026-05-12T04:08:13Z",
-    "blocked_reason": "diversity_rule_post_null_quartet",
-    "blocked_note": "4 NULLs (K868/K1301/K1303/K1309) — pause novel-method experiments until quartet article gets Codex+reader signal"
-  },
-  {
     "id": "K1309",
     "title": "K1309: HAR-PD (Path-Dependent) — arXiv:2503.00851",
     "priority": 3,
@@ -2970,24 +2954,6 @@
     "completed_at": "2026-05-04"
   },
   {
-    "id": "K691_article_general",
-    "title": "K691: write general-audience article (auto-discovered uncovered K)",
-    "description": "K K691 has verdict signal (score=1, reasons=None) but no general article. Verdict preview: ",
-    "priority": 4,
-    "status": "pending",
-    "task_type": "daily_article",
-    "source": "auto_discovered",
-    "k_id": "K691",
-    "tags": [
-      "auto-discovered",
-      "audience-general"
-    ],
-    "created_at": "2026-05-05T07:25:11+00:00",
-    "blocked_reason": "self_tagged_optional",
-    "blocked_at": "2026-05-05T07:25:26+00:00",
-    "blocked_note": "K691 is session synthesis retrospective, not a publishable research finding"
-  },
-  {
     "id": "K694_article_general",
     "title": "K694: write general-audience article (auto-discovered uncovered K)",
     "description": "K K694 has verdict signal (score=0, reasons=[]) but no general article. Verdict preview: [提出: K693 驗證, 執行: Claude] K693 修正後重新 live audit。Avg Sharpe inflation +0.74。最膨脹：Adaptive +2.04(121%), Piecewise +2.01(103%), Taiwan Hybrid +1.74(86%)。最不受影響：Fear DCA -0.003, 12/VIX -0.16。排名變化：Risk Parity #9→#5(+4), Taiwan VT #8→#4(+4), Piecewise #4→#7(-3), Adaptive #6→#10(-4)。修正後 7",
@@ -3121,24 +3087,6 @@
     "completed_at": "2026-05-08T09:02:00+00:00",
     "mile_id": "mile_6c2bd99e",
     "findings": "mile_6c2bd99e published draft. K703 ten-numbers cheatsheet across 7 source K (K697/K687/K702/K696/K688/K626/K700). 3 PNGs. Honest 37.5% false-positive + 10% self-overturn rate. K707 FAQ complement. 2 publish_draft edge cases discovered (description sync + frontmatter experiment_refs)."
-  },
-  {
-    "id": "K705_article_general",
-    "title": "K705: write general-audience article (auto-discovered uncovered K)",
-    "description": "K K705 has verdict signal (score=2, reasons=None) but no general article. Verdict preview: ",
-    "priority": 4,
-    "status": "pending",
-    "task_type": "daily_article",
-    "source": "auto_discovered",
-    "k_id": "K705",
-    "tags": [
-      "auto-discovered",
-      "audience-general"
-    ],
-    "created_at": "2026-05-05T03:24:21+00:00",
-    "blocked_reason": "self_tagged_optional",
-    "blocked_at": "2026-05-05T03:24:34+00:00",
-    "blocked_note": "K705 is website messaging audit / UX review, not a general-audience research article"
   },
   {
     "id": "K707_article_general",
@@ -8697,23 +8645,6 @@
     "k_id": "K426"
   },
   {
-    "id": "gen_article_k462",
-    "title": "K462: write general-audience article (auto-discovered, verdict=NULL)",
-    "description": "K462 has a non-null verdict in experiments/k462/ but no published feed article and no existing task. Verdict: NULL. Write a general-audience article summarising key findings.",
-    "task_type": "daily_article",
-    "priority": 4,
-    "status": "pending",
-    "tags": [
-      "auto-generated",
-      "audience-general",
-      "uncovered-k"
-    ],
-    "source": "task_generator_v2_daily_article",
-    "created_at": "2026-05-13T05:53:00.458370+00:00",
-    "generated_at": "2026-05-13T05:53:00.458372+00:00",
-    "k_id": "K462"
-  },
-  {
     "id": "gen_article_k463",
     "title": "K463: write general-audience article (auto-discovered, verdict=TVP_PARTIAL)",
     "description": "K463 has a non-null verdict in experiments/k463/ but no published feed article and no existing task. Verdict: TVP_PARTIAL. Write a general-audience article summarising key findings.",
@@ -8882,23 +8813,6 @@
     "created_at": "2026-05-13T05:53:00.471906+00:00",
     "generated_at": "2026-05-13T05:53:00.471907+00:00",
     "k_id": "K551"
-  },
-  {
-    "id": "gen_article_k554",
-    "title": "K554: write general-audience article (auto-discovered, verdict=NULL)",
-    "description": "K554 has a non-null verdict in experiments/k554/ but no published feed article and no existing task. Verdict: NULL. Write a general-audience article summarising key findings.",
-    "task_type": "daily_article",
-    "priority": 4,
-    "status": "pending",
-    "tags": [
-      "auto-generated",
-      "audience-general",
-      "uncovered-k"
-    ],
-    "source": "task_generator_v2_daily_article",
-    "created_at": "2026-05-13T05:53:00.472442+00:00",
-    "generated_at": "2026-05-13T05:53:00.472448+00:00",
-    "k_id": "K554"
   },
   {
     "id": "gen_article_k559",
@@ -9570,10 +9484,10 @@
     "notes": "Codex adversarial review complete 2026-05-19. 3 SERIOUS FLAWs (COVID subperiod, MCS claim, spec search), 4 SIGNIFICANT CONCERNS. Review saved: paper/garch-x-vix/review_history/v2/"
   },
   {
-    "id": "K1310",
-    "title": "K1310: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）",
+    "id": "K1388",
+    "title": "K1388: HAR-GNN（Graph Neural Network）— ScienceDirect 2024",
     "priority": 3,
-    "description": "Auto-generated from research_program.md unchecked item (line 340). Original: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1310.py with signal.shift(1) + seed=42, (c) K1310_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "description": "Auto-generated from research_program.md unchecked item (line 376). Original: HAR-GNN（Graph Neural Network）— ScienceDirect 2024\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1388.py with signal.shift(1) + seed=42, (c) K1388_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
     "status": "pending",
     "task_type": "experiment",
     "source": "research_backlog_auto",
@@ -9581,21 +9495,12 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-05-17T20:00:49Z"
-  },
-  {
-    "id": "K1311",
-    "title": "K1311: HAR-GNN（Graph Neural Network）— ScienceDirect 2024",
-    "priority": 3,
-    "description": "Auto-generated from research_program.md unchecked item (line 376). Original: HAR-GNN（Graph Neural Network）— ScienceDirect 2024\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1311.py with signal.shift(1) + seed=42, (c) K1311_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
-    "task_type": "experiment",
-    "source": "research_backlog_auto",
-    "tags": [
-      "experiment",
-      "autonomous-research"
-    ],
-    "created_at": "2026-05-17T20:00:49Z"
+    "created_at": "2026-05-17T20:00:49Z",
+    "kid_reassigned": {
+      "from": "K1311",
+      "at": "2026-05-20",
+      "reason": "kid_collision — generate_research_backlog id-assignment bug (fixed)"
+    }
   },
   {
     "id": "K1313",
@@ -9630,10 +9535,10 @@
     "completion_note": "K570b completed: vix.shift(1) + block bootstrap + HAC rename + OOS label fix. NULL confirmed. Sharpe 1.43→0.38 (-73.3%). Article mile_9fb5d7f7 corrected. Knowledge entry added."
   },
   {
-    "id": "K1310",
-    "title": "K1310: Sentiment-Augmented GARCH-LSTM — Computational Economics 2025",
+    "id": "K1385",
+    "title": "K1385: Sentiment-Augmented GARCH-LSTM — Computational Economics 2025",
     "priority": 3,
-    "description": "Auto-generated from research_program.md unchecked item (line 393). Original: Sentiment-Augmented GARCH-LSTM — Computational Economics 2025\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1310.py with signal.shift(1) + seed=42, (c) K1310_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "description": "Auto-generated from research_program.md unchecked item (line 393). Original: Sentiment-Augmented GARCH-LSTM — Computational Economics 2025\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1385.py with signal.shift(1) + seed=42, (c) K1385_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
     "status": "pending",
     "task_type": "experiment",
     "source": "research_backlog_auto",
@@ -9641,13 +9546,18 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-05-18T00:00:08Z"
+    "created_at": "2026-05-18T00:00:08Z",
+    "kid_reassigned": {
+      "from": "K1310",
+      "at": "2026-05-20",
+      "reason": "kid_collision — generate_research_backlog id-assignment bug (fixed)"
+    }
   },
   {
-    "id": "K1311",
-    "title": "K1311: KAN for VIX Forecasting — Expert Systems with Applications 2025",
+    "id": "K1389",
+    "title": "K1389: KAN for VIX Forecasting — Expert Systems with Applications 2025",
     "priority": 3,
-    "description": "Auto-generated from research_program.md unchecked item (line 394). Original: KAN for VIX Forecasting — Expert Systems with Applications 2025\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1311.py with signal.shift(1) + seed=42, (c) K1311_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "description": "Auto-generated from research_program.md unchecked item (line 394). Original: KAN for VIX Forecasting — Expert Systems with Applications 2025\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1389.py with signal.shift(1) + seed=42, (c) K1389_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
     "status": "pending",
     "task_type": "experiment",
     "source": "research_backlog_auto",
@@ -9655,13 +9565,18 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-05-18T00:00:08Z"
+    "created_at": "2026-05-18T00:00:08Z",
+    "kid_reassigned": {
+      "from": "K1311",
+      "at": "2026-05-20",
+      "reason": "kid_collision — generate_research_backlog id-assignment bug (fixed)"
+    }
   },
   {
-    "id": "K1313",
-    "title": "K1313: ML Risk-Based Allocation — Scientific Reports 2025（LSTM + regime switching，Sharpe 1.38）",
+    "id": "K1391",
+    "title": "K1391: ML Risk-Based Allocation — Scientific Reports 2025（LSTM + regime switching，Sharpe 1.38）",
     "priority": 3,
-    "description": "Auto-generated from research_program.md unchecked item (line 397). Original: ML Risk-Based Allocation — Scientific Reports 2025（LSTM + regime switching，Sharpe 1.38）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1313.py with signal.shift(1) + seed=42, (c) K1313_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "description": "Auto-generated from research_program.md unchecked item (line 397). Original: ML Risk-Based Allocation — Scientific Reports 2025（LSTM + regime switching，Sharpe 1.38）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1391.py with signal.shift(1) + seed=42, (c) K1391_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
     "status": "pending",
     "task_type": "experiment",
     "source": "research_backlog_auto",
@@ -9669,13 +9584,18 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-05-18T00:00:08Z"
+    "created_at": "2026-05-18T00:00:08Z",
+    "kid_reassigned": {
+      "from": "K1313",
+      "at": "2026-05-20",
+      "reason": "kid_collision — generate_research_backlog id-assignment bug (fixed)"
+    }
   },
   {
-    "id": "K1310",
-    "title": "K1310: ★ **Multivariate Rough Volatility Model** — arXiv:2412.14353 (Feb 2026)。多變量 fractional OU + GMM 估計。跨資產 rough vol 的正式框架。",
+    "id": "K1386",
+    "title": "K1386: ★ **Multivariate Rough Volatility Model** — arXiv:2412.14353 (Feb 2026)。多變量 fractional OU + GMM 估計。跨資產 rough vol 的正式框架。",
     "priority": 3,
-    "description": "Auto-generated from research_program.md unchecked item (line 401). Original: ★ **Multivariate Rough Volatility Model** — arXiv:2412.14353 (Feb 2026)。多變量 fractional OU + GMM 估計。跨資產 rough vol 的正式框架。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1310.py with signal.shift(1) + seed=42, (c) K1310_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "description": "Auto-generated from research_program.md unchecked item (line 401). Original: ★ **Multivariate Rough Volatility Model** — arXiv:2412.14353 (Feb 2026)。多變量 fractional OU + GMM 估計。跨資產 rough vol 的正式框架。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1386.py with signal.shift(1) + seed=42, (c) K1386_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
     "status": "pending",
     "task_type": "experiment",
     "source": "research_backlog_auto",
@@ -9683,13 +9603,18 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-05-18T00:00:21Z"
+    "created_at": "2026-05-18T00:00:21Z",
+    "kid_reassigned": {
+      "from": "K1310",
+      "at": "2026-05-20",
+      "reason": "kid_collision — generate_research_backlog id-assignment bug (fixed)"
+    }
   },
   {
-    "id": "K1311",
-    "title": "K1311: Regime-Weighted Conformal VaR (RWC) — arXiv:2602.03903 (2026)。控制非定態 portfolio VaR 超限率。regime-structured vol clustering。",
+    "id": "K1390",
+    "title": "K1390: Regime-Weighted Conformal VaR (RWC) — arXiv:2602.03903 (2026)。控制非定態 portfolio VaR 超限率。regime-structured vol clustering。",
     "priority": 3,
-    "description": "Auto-generated from research_program.md unchecked item (line 407). Original: Regime-Weighted Conformal VaR (RWC) — arXiv:2602.03903 (2026)。控制非定態 portfolio VaR 超限率。regime-structured vol clustering。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1311.py with signal.shift(1) + seed=42, (c) K1311_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "description": "Auto-generated from research_program.md unchecked item (line 407). Original: Regime-Weighted Conformal VaR (RWC) — arXiv:2602.03903 (2026)。控制非定態 portfolio VaR 超限率。regime-structured vol clustering。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1390.py with signal.shift(1) + seed=42, (c) K1390_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
     "status": "pending",
     "task_type": "experiment",
     "source": "research_backlog_auto",
@@ -9697,13 +9622,18 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-05-18T00:00:21Z"
+    "created_at": "2026-05-18T00:00:21Z",
+    "kid_reassigned": {
+      "from": "K1311",
+      "at": "2026-05-20",
+      "reason": "kid_collision — generate_research_backlog id-assignment bug (fixed)"
+    }
   },
   {
-    "id": "K1313",
-    "title": "K1313: Conformal Predictive Portfolio Selection (CPPS) — arXiv:2410.16333。預測區間 → 選最佳投資組合。",
+    "id": "K1392",
+    "title": "K1392: Conformal Predictive Portfolio Selection (CPPS) — arXiv:2410.16333。預測區間 → 選最佳投資組合。",
     "priority": 3,
-    "description": "Auto-generated from research_program.md unchecked item (line 408). Original: Conformal Predictive Portfolio Selection (CPPS) — arXiv:2410.16333。預測區間 → 選最佳投資組合。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1313.py with signal.shift(1) + seed=42, (c) K1313_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "description": "Auto-generated from research_program.md unchecked item (line 408). Original: Conformal Predictive Portfolio Selection (CPPS) — arXiv:2410.16333。預測區間 → 選最佳投資組合。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1392.py with signal.shift(1) + seed=42, (c) K1392_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
     "status": "pending",
     "task_type": "experiment",
     "source": "research_backlog_auto",
@@ -9711,7 +9641,12 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-05-18T00:00:21Z"
+    "created_at": "2026-05-18T00:00:21Z",
+    "kid_reassigned": {
+      "from": "K1313",
+      "at": "2026-05-20",
+      "reason": "kid_collision — generate_research_backlog id-assignment bug (fixed)"
+    }
   },
   {
     "id": "correct_mile_7ba7ee54",
@@ -9869,10 +9804,10 @@
     "result_summary": "**Experiment ID**: K1372\n**Status**: completed\n**Created At**: 2026-05-17T11:15:33Z\n**Member Question Source**: uq_mock1 (score 82/100)"
   },
   {
-    "id": "K1308",
-    "title": "K1308: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）",
+    "id": "K1387",
+    "title": "K1387: Risk Parity + Heavy-Tailed + Regime-Switching DCC — Paolella (2025, JTSA)",
     "priority": 3,
-    "description": "Auto-generated from research_program.md unchecked item (line 340). Original: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1308.py with signal.shift(1) + seed=42, (c) K1308_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "description": "Auto-generated from research_program.md unchecked item (line 412). Original: Risk Parity + Heavy-Tailed + Regime-Switching DCC — Paolella (2025, JTSA)\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1387.py with signal.shift(1) + seed=42, (c) K1387_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
     "status": "pending",
     "task_type": "experiment",
     "source": "research_backlog_auto",
@@ -9880,35 +9815,12 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-05-19T00:00:04Z"
-  },
-  {
-    "id": "K1310",
-    "title": "K1310: Risk Parity + Heavy-Tailed + Regime-Switching DCC — Paolella (2025, JTSA)",
-    "priority": 3,
-    "description": "Auto-generated from research_program.md unchecked item (line 412). Original: Risk Parity + Heavy-Tailed + Regime-Switching DCC — Paolella (2025, JTSA)\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1310.py with signal.shift(1) + seed=42, (c) K1310_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
-    "task_type": "experiment",
-    "source": "research_backlog_auto",
-    "tags": [
-      "experiment",
-      "autonomous-research"
-    ],
-    "created_at": "2026-05-19T00:00:04Z"
-  },
-  {
-    "id": "K1308",
-    "title": "K1308: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）",
-    "priority": 3,
-    "description": "Auto-generated from research_program.md unchecked item (line 340). Original: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1308.py with signal.shift(1) + seed=42, (c) K1308_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
-    "task_type": "experiment",
-    "source": "research_backlog_auto",
-    "tags": [
-      "experiment",
-      "autonomous-research"
-    ],
-    "created_at": "2026-05-19T00:00:35Z"
+    "created_at": "2026-05-19T00:00:04Z",
+    "kid_reassigned": {
+      "from": "K1310",
+      "at": "2026-05-20",
+      "reason": "kid_collision — generate_research_backlog id-assignment bug (fixed)"
+    }
   },
   {
     "id": "K_NEW_A_paper9_covid_subperiod",
@@ -9981,10 +9893,10 @@
     "notes": "Discovered during K1370 paper_review hourly dispatch 2026-05-19"
   },
   {
-    "id": "K1308",
-    "title": "K1308: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）",
+    "id": "K1383",
+    "title": "K1383: PatchTST-lite vs HAR-RV — MDPI 2025",
     "priority": 3,
-    "description": "Auto-generated from research_program.md unchecked item (line 340). Original: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1308.py with signal.shift(1) + seed=42, (c) K1308_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "description": "Auto-generated from research_program.md unchecked item (line 284). Original: PatchTST-lite vs HAR-RV — MDPI 2025\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1383.py with signal.shift(1) + seed=42, (c) K1383_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
     "status": "pending",
     "task_type": "experiment",
     "source": "research_backlog_auto",
@@ -9992,20 +9904,13 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-05-20T00:00:04Z"
-  },
-  {
-    "id": "K1308",
-    "title": "K1308: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）",
-    "priority": 3,
-    "description": "Auto-generated from research_program.md unchecked item (line 340). Original: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1308.py with signal.shift(1) + seed=42, (c) K1308_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
-    "task_type": "experiment",
-    "source": "research_backlog_auto",
-    "tags": [
-      "experiment",
-      "autonomous-research"
-    ],
-    "created_at": "2026-05-20T00:00:31Z"
+    "created_at": "2026-05-12T04:08:13Z",
+    "blocked_reason": "diversity_rule_post_null_quartet",
+    "blocked_note": "4 NULLs (K868/K1301/K1303/K1309) — pause novel-method experiments until quartet article gets Codex+reader signal",
+    "kid_reassigned": {
+      "from": "K1308",
+      "at": "2026-05-20",
+      "reason": "kid_collision resolved — K1308 retained by 台灣 5-min HAR-RV task"
+    }
   }
 ]

@@ -12,7 +12,7 @@ Layers reported:
 Each section emits {ok|warn|critical} + 1-line tldr + actionable next.
 """
 from __future__ import annotations
-import calendar, json, os, sys, time
+import json, os, sys, time, calendar
 from pathlib import Path
 from urllib import request, error
 from urllib.parse import quote
@@ -127,54 +127,23 @@ def main():
     ))
 
     # L4 cron health
-    # max-age 從 runtime_schedules.json 的 cron cadence 推導 + grace，不再硬編碼。
-    # 2026-05-20 fix: collect_us/tw 是每日 job，舊版硬編 12h max-age → 跑完半天就
-    # 假性 critical。改成：解析 cron 算出真實 cadence，max-age = cadence × 1.5 + 1h grace。
     cron = jl(REPO / "storage" / "ops" / "cron_last_run.json", {})
-    sched = jl(REPO / "config" / "runtime_schedules.json", {})
     stale = []
-
-    def _cadence_hours(cron_expr):
-        """Rough cadence in hours from a 5-field cron expr. Returns None if unknown."""
-        if not cron_expr or len(cron_expr.split()) != 5:
-            return None
-        minute, hour, dom, month, dow = cron_expr.split()
-        # hourly-ish: hour has */N
-        if hour.startswith("*/"):
-            try: return int(hour[2:])
-            except: return None
-        # every hour
-        if hour == "*":
-            if minute.startswith("*/"):
-                try: return int(minute[2:]) / 60.0
-                except: return None
-            return 1.0
-        # fixed hour(s) → daily (or weekday-restricted daily ≈ still ~24h cadence,
-        # but Mon-only etc would be weekly — approximate by counting hour values)
-        n_hours = len(hour.split(",")) if "," in hour else 1
-        if n_hours >= 1:
-            return 24.0 / n_hours
-        return None
-
-    sched_items = {it.get("id"): it.get("cron", "") for it in sched.get("system_crontab", {}).get("items", []) if isinstance(it, dict)}
-    # jobs we actively monitor (others ignored — no noise)
-    monitored = ["collect_us_data", "collect_tw_data", "release_pool", "check_alerts",
-                 "paper_sync_all", "memory_health_daily", "market_calendar_sync",
-                 "refresh_paper_snapshots", "audit_publish_sync", "boss_report_4h"]
-    for job in monitored:
+    expected_max_age_hours = {
+        "collect_us_data": 12, "collect_tw_data": 12, "release_pool": 4,
+        "check_alerts": 2, "paper_sync_all": 8, "memory_health_daily": 30,
+        "market_calendar_sync": 30, "refresh_paper_snapshots": 30,
+    }
+    for job, max_h in expected_max_age_hours.items():
         last = cron.get(job, "")
-        if not last:
-            continue
-        cadence = _cadence_hours(sched_items.get(job, ""))
-        # default: if cron unknown, fall back to 24h cadence assumption
-        cadence = cadence if cadence else 24.0
-        max_h = round(cadence * 1.5 + 1, 1)  # 1.5x cadence + 1h grace
+        if not last: continue
         try:
-            last_ts = calendar.timegm(time.strptime(last[:19], "%Y-%m-%dT%H:%M:%S"))  # UTC-correct
+            # cron_last_run.json stores UTC ISO timestamps; parse as UTC
+            # (time.mktime would mis-read them as local time → spurious +8h age)
+            last_ts = calendar.timegm(time.strptime(last[:19], "%Y-%m-%dT%H:%M:%S"))
             age_h = (now - last_ts) / 3600.0
             if age_h > max_h:
-                stale.append({"job": job, "age_h": round(age_h, 1), "max_h": max_h,
-                              "cadence_h": round(cadence, 1)})
+                stale.append({"job": job, "age_h": round(age_h, 1), "max_h": max_h})
         except Exception:
             pass
     out.append(section(

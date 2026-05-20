@@ -979,3 +979,26 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 | 2026-05-17 | `release_pool_gap` alert false-positive 第 3 strike — 短暫 critical (1 min) auto-clear pattern 重複出現 (19:17 / 23:19 同 session) | 觸發瞬間 last_released_at 距 now 實際 < threshold（e.g. 23:19 fire 但 last release = 15:00 = 3.3h，warn_thresh=4h，critical_thresh=6h，數學上不該 critical）。Monitor state-change 似乎讀到 stale .release_settings.json 或 log mid-write race，緊接著下一輪 read 又 OK 就 clear | 3-strike 觀察 — 標 候補 structural refactor。當前不改 threshold（rule 本身正確）。下次再 fire 時收集更細 diag（fire 瞬間 jq snapshot of .release_settings.json + heartbeat poll log diff）。若第 4 strike 確認是 alert state-change monitor 自己的 race condition → 改成 monitor 內加 50ms 重 read 驗證、或改用 file content hash 不只 mtime | 不是真的 release pool 斷掉；release_pool.log 顯示 cron 正常每 3h fire。是 alert 偵測層 false-positive |
 
 | 2026-05-18 | `release_pool_gap` 4-strike confirmed as REAL outage caused by `merge_worktree.sh` stash-pop conflict — main 的 live `storage/.release_settings.json` (`last_released_at=2026-05-17T16:27:48`) 被 stash 但 pop 失敗時只 print warning，working tree 留下 worktree 帶來的 stale 2026-05-16T00:32 版本 → check_alerts 計算 gap=42.74h → critical | (1) merge_worktree 在 03:11-03:15 merge agent-a67750cb6d749990a 時，worktree branch 含 `.release_settings.json` （stale from worktree's old checkout time）與 main 衝突。`git merge -X ours` 應該保 main 但 main 版本已被 stash 走 (line 297-299)。pop 後 stash pop conflict (line 381)，script 只印 warning 不 auto-restore → working tree 保 worktree 版本 (=stale)。(2) Earlier 3 false-positive alerts (yesterday 19:17/23:19 + today 03:16) **不是 false-positive**, 都是同一次 worktree merge 造成的真 outage 持續中，monitor 正確報告。我把它誤標 false-positive 是因為當下 cat 看到的 settings 還是 live 值 — 但那是 alerts.py 還沒 reload；當 cron 下次 fire check_alerts 時讀到 stale 檔 → fire critical. | (a) **立即**: `git checkout stash@{0} -- storage/.release_settings.json storage/logs/cron/release_pool.log` 救回 live state，alert 即 clear 確認 (03:19). (b) **流程修**: `scripts/merge_worktree.sh` stash pop 衝突分支加 auto-restore whitelist (`storage/.release_settings.json` + cron logs + `paper_trading.json` etc.)，從 stash@{0} surgical `git checkout` 取回 main 版本而非保留 worktree stale 版本. (c) **預警**: pre-merge `shared_json_modified` guard 加 `storage/.release_settings.json` 等 runtime files 到清單，worktree 若帶這些就 ABORT (不再 silent overwrite). (d) 3-strike 升級為實質 fix，不只 observe — 之前誤判 false-positive 教訓: alert 連 fire 3 次不能假設是 monitor 錯，要驗證底層數據是不是真的有問題. | K1032 / K1114 / K1262 worktree-shared-state-contamination 家族第 4 次再現，每次都加防禦層仍漏網。Standby true structural refactor: 把 runtime state (`storage/.release_settings.json` / logs / `paper_trading.json`) 改成 SQLite 或 jsonl append-only，git 不追蹤 → 從根本上不會被 worktree branch 帶 stale 版本進來 |
+
+---
+
+## 2026-05-20 | dispatcher 無限推薦同一任務 + ops_dashboard 虛報 cron stale
+
+**問題 A — K-id collision 無限迴圈**：`continue_task_dispatch.py --dry-run` 候選永遠是 `K1308 x3`（同一任務重複）。深查 next_tasks.json 發現 K1308 被 5 個 task 共用、K1310 x5、K1311 x4、K1313 x3，且其中「台灣 5-min HAR-RV」項在 K1308/K1310/K1384 重複 materialize 多次。
+
+**根因**：`scripts/generate_research_backlog.py` 兩個 bug：
+1. `find_next_k_id()` 設計有 `existing_task_ids` 參數但 `generate()` line 148 從未傳入 → 只檢查 `experiments/` 目錄、無視在途 next_tasks 條目 → 每日 cron run 重配相同 K-id。
+2. `already_in_next_tasks()` 用 keyword overlap（`\w{4,}` 抓 top-5 詞）做 dedup — 中文 brief 的中文字元很少形成 4+ 連續 token → keyword 抓不到 → hits<3 → 同一 research_program.md 行每天重新 materialize。
+
+**問題 B — ops_dashboard 虛報 cron stale**：`scripts/ops_dashboard.py` 用 `time.mktime(time.strptime(...))` 解析 `cron_last_run.json` 的時間戳。該檔存 UTC ISO 字串，但 `mktime` 把 struct 當 local time → 每個 cron age 虛增 +8h（Asia/Taipei offset）。release_pool（max 4h）實際 age 0.1h 被算成 8.1h → false-positive warn。handoff 長期記載的「daily cron 偶爾 stale」有部分即此 bug,非真 cron 失敗。
+
+**Fix**：
+- `ops_dashboard.py`：`import calendar` + `calendar.timegm()` 取代 `time.mktime()`（UTC 正解）。
+- `generate_research_backlog.py`：(a) `find_next_k_id` 每次 assign 後傳入更新的 `in_flight_ids`；(b) `already_in_next_tasks` 改以 research_program.md `source_line` 精確比對為主（穩定 identity，免疫 CJK），keyword overlap 降為 Latin-only 次要 fallback；(c) brief 新增 `source_line` 欄位。
+- 資料清理：next_tasks.json 569→560，刪 K1308 3 dup、9 個 collision K-id 重配 K1384-K1392、刪 6 個標題重複任務（含 4 個 `write general-audience article` 通用 dup）。
+- 殘留：`refill_task_pool.py` 也會產生 `write general-audience article` 通用 dup（本次清掉但根因未修）— 標候補，下次碰 article refill 時修其 dedup。
+
+**Lessons**：
+1. 帶 `existing_*` 參數的函式若 caller 不傳 → silent collision；設計這類參數時應讓「不傳」即 fail 或至少 log warn。
+2. 任何 dedup 邏輯用「英文 token overlap」對中文內容必失效 — 中文專案的 identity key 應用穩定 ID（行號 / hash），不用詞頻。
+3. 時間戳跨檔流動必標 timezone 並一致解析；UTC 字串配 `mktime` 是經典 +N 小時 bug。

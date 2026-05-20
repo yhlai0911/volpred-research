@@ -94,18 +94,37 @@ def extract_unchecked_items(text: str, *, limit: int = 20) -> list[dict]:
     return items
 
 
-def already_in_next_tasks(brief_text: str, existing_tasks: list) -> bool:
-    """Dedup: skip if a similar brief already exists in next_tasks.json."""
-    brief_lower = brief_text.lower()
-    keywords = [w for w in re.findall(r"\w{4,}", brief_lower) if len(w) > 3][:5]
+def already_in_next_tasks(item: dict, existing_tasks: list) -> bool:
+    """Dedup: skip if this research_program.md item already has a task.
+
+    Primary check is exact source-line match — research_program.md line
+    number is a stable identity that survives CJK-heavy text where keyword
+    overlap is unreliable (Chinese chars rarely yield \\w{4,} tokens, so the
+    old keyword heuristic let the same line re-materialize every daily run).
+    Keyword overlap is kept only as a secondary fallback for Latin briefs.
+    """
+    brief_text = item["text"]
+    src_line = item.get("source_line")
     for t in existing_tasks:
-        title = (t.get("title") or "").lower()
-        desc = (t.get("description") or "").lower()
-        combined = title + " " + desc
-        # If 3+ of top 5 keywords appear, treat as duplicate
-        hits = sum(1 for k in keywords if k in combined)
-        if hits >= 3:
+        if t.get("source") != "research_backlog_auto":
+            continue
+        # Exact source-line match (preferred — stable across runs)
+        if src_line is not None and t.get("source_line") == src_line:
             return True
+        # Legacy tasks predate the source_line field — fall back to parsing
+        # it out of the auto-generated description.
+        if src_line is not None:
+            m = re.search(r"unchecked item \(line (\d+)\)", t.get("description") or "")
+            if m and int(m.group(1)) == src_line:
+                return True
+    # Secondary keyword fallback (Latin-heavy briefs only)
+    brief_lower = brief_text.lower()
+    keywords = [w for w in re.findall(r"[a-z]{4,}", brief_lower)][:5]
+    if len(keywords) >= 3:
+        for t in existing_tasks:
+            combined = ((t.get("title") or "") + " " + (t.get("description") or "")).lower()
+            if sum(1 for k in keywords if k in combined) >= 3:
+                return True
     return False
 
 
@@ -128,6 +147,7 @@ def build_experiment_brief(item: dict, k_id: int) -> dict:
         "status": "pending",
         "task_type": "experiment",
         "source": "research_backlog_auto",
+        "source_line": item["source_line"],
         "tags": ["experiment", "autonomous-research"],
         "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
@@ -144,18 +164,21 @@ def generate(*, dry_run: bool = False, max_new: int = 5) -> dict:
     with NEXT_TASKS.open("r", encoding="utf-8") as f:
         tasks = json.load(f)
 
+    # K-id assignment must avoid collisions with in-flight next_tasks.json
+    # entries, not just experiments/ dirs — otherwise every run re-assigns the
+    # same id to the same recurring item (K1308 collided 5x before this fix).
+    in_flight_ids = {t.get("id") or t.get("k_id") for t in tasks}
     new_briefs = []
-    next_k = find_next_k_id(start=1302)
+    next_k = find_next_k_id(start=1302, existing_task_ids=in_flight_ids)
     for item in items:
         if len(new_briefs) >= max_new:
             break
-        if already_in_next_tasks(item["text"], tasks):
+        if already_in_next_tasks(item, tasks):
             continue
         brief = build_experiment_brief(item, next_k)
         new_briefs.append(brief)
-        next_k += 1
-        while f"k{next_k}" in {p.name.lower() for p in EXPERIMENTS_DIR.iterdir() if p.is_dir()}:
-            next_k += 1
+        in_flight_ids.add(brief["id"])
+        next_k = find_next_k_id(start=next_k + 1, existing_task_ids=in_flight_ids)
 
     if not new_briefs:
         return {"ok": True, "added": 0, "reason": "all_already_covered_or_in_progress"}
