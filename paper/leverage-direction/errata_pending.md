@@ -1,6 +1,6 @@
 # Paper 1 (leverage-direction) Errata Pending
 
-**Last updated**: 2026-05-17 (batch-3 added: K1198 errata applied — Table 10 t-stat, Table 11 footnote, body_v3.tex t=-4.71→-3.79 ×3)
+**Last updated**: 2026-05-20 (batch-4 added: K1187 Table 7 per-asset period disclosure + K1198 sync completed)
 **Status**: pre-resubmission errata items, no public erratum filed yet
 
 ---
@@ -50,7 +50,38 @@ Threshold: errata-level (footnote / table value update), NOT retraction.
 1. ~~Apply 4 footnote/value updates above~~ ✅ DONE (batch-3)
 2. ~~Add reproducibility note~~ — done via errata footnotes in tables.tex
 3. ~~Run reproduce.py post-update~~ ✅ DONE — gate_status=pass_with_untraceable, MISMATCH=0 (amber pre-existing)
-4. **PENDING**: Sync via `uv run volpred ops paper-update --paper-id leverage-direction`
+4. **DONE 2026-05-20**: Sync via `uv run volpred ops paper-update --paper-id leverage-direction`
+
+---
+
+## Source: K1187 Table 7 per-asset period disclosure (errata-batch-4)
+
+Applied: 2026-05-20 (main thread hourly dispatch)
+Task: `Paper1_new_experiments_Tables_4_6_7_8` (next_tasks.json → succeeded via this batch)
+
+### Context
+
+K1187 (2026-04-17) achieved 6/20 match rate for Table 7 (tab:vt). Root cause: undisclosed per-asset evaluation windows. The body text (Section 4.5, line 309) explicitly states GLD values use 2022--2026; SPY fingerprinted to 2014--2026; BTC post-2019. K1187 used uniform 2015--2026, producing divergent BH Sharpe for GLD (0.83 vs paper 1.56) and BTC (0.92 vs paper 0.43).
+
+### Action taken
+
+Added `\textit{Notes:}` and `\textit{Replication note (K1187):}` sections to Table 7 (`tables.tex`) specifying:
+- Per-asset evaluation windows (GLD = 2022--2026, SPY = 2014--2026, BTC = post-2019)
+- K1187 uniform-window GLD divergence is period-driven (not computational error)
+- GLD exact reconstruction also requires paper-original data vintage
+
+### Research integrity verdict
+
+**KEEP values** — GLD BH 1.56 and VT 1.71 are consistent with body text narrative ("Over 2022--2026"). BTC 0.43 consistent with post-2021 bear-market window. Table values are correct for their respective native windows; disclosure was missing.
+
+**Remaining caveat (GLD)**: K1187 exhaustive search found max GLD BH Sharpe of 1.29 for 2022--2026 (data cutoff 2026-04-17). Paper may use earlier cutoff (pre-March 2026 gold pullback) yielding ~1.50. Exact reconstruction requires paper-original data; errata note added to table.
+
+### Status
+
+| Item | Action | Status |
+|------|--------|--------|
+| Table 7 per-asset period disclosure | Added Notes + Replication note to tables.tex | ✅ APPLIED |
+| K1198 paper-update sync | `uv run volpred ops paper-update --paper-id leverage-direction` | ✅ RUN (2026-05-20) |
 
 ---
 

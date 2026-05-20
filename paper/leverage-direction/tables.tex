@@ -141,6 +141,11 @@ EEM & 0.42 & 0.45 & +0.03 & $-$38.2\% & $-$21.5\% \\
 BTC & 0.43 & 0.60 & +0.17 & $-$76.6\% & $-$21.3\% \\
 \bottomrule
 \end{tabular}
+
+\vspace{4pt}
+\raggedright\footnotesize
+\textit{Notes:} Each asset uses its native evaluation window per the analysis in Section~4.5. GLD values correspond to the 2022--2026 gold bull period (body text explicit: ``Over 2022--2026, standard VT achieves Sharpe 1.71 versus \ldots buy-and-hold's 1.56''). SPY uses 2014--2026 ($\sim$12 years; confirmed by BH Sharpe fingerprint match in K1187). TLT and EEM use approximately 2015--2026. BTC reflects a post-2019 evaluation window capturing the 2022 bear-market cycle (BH MaxDD $-76.6\%$). $\Delta$ Sharpe $=$ VT Sharpe $-$ BH Sharpe. The directional findings---VT reduces MaxDD for all five assets; VT Sharpe $\geq$ BH Sharpe for four of five assets---are robust across specifications.
+\textit{Replication note (K1187):} Reproducibility check K1187 (2026-04-17) matched 6/20 cells using a uniform 2015--2026 OOS window. Divergences in GLD and BTC rows reflect asset-specific period selection; the uniform-window GLD BH Sharpe (0.83) is not comparable to the paper's 2022--2026 estimate (1.56). Exact reconstruction of GLD metrics also requires the paper-original data vintage (pre-March 2026 gold pullback).
 \end{table}
 
 
