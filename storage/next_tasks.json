@@ -9508,14 +9508,16 @@
     "title": "K1313: Probabilistic RV Quantile Forecasting** — arXiv:2508.15922（從 HAR/GARCH 點預測到條件分位數）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 392). Original: Probabilistic RV Quantile Forecasting** — arXiv:2508.15922（從 HAR/GARCH 點預測到條件分位數）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1313.py with signal.shift(1) + seed=42, (c) K1313_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "tags": [
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-05-17T20:00:49Z"
+    "created_at": "2026-05-17T20:00:49Z",
+    "completed_at": "2026-05-20T20:28:41.741334+00:00",
+    "result_summary": "CONDITIONAL_PASS: HAR-QR UC@5% p=0.333 PASS, DM t=-2.95 p=0.003 (HAR-QR better than GARCH-Normal); caveats: GARCH stale sigma + cc_test naming"
   },
   {
     "id": "K570b_lookahead_fix",

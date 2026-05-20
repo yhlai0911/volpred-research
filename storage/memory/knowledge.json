@@ -31066,5 +31066,34 @@
       "K1100d"
     ],
     "codex_caveat": "h_last timing: stored h_{T_IS|T_IS-1} (last IS filtered) instead of h_pred (one-step-ahead forecast) at line 593. Bug symmetric to M2/M3; DM comparison valid. Fixed in committed K1387.py v2 (line 593). Re-run for paper-ready tables."
+  },
+  {
+    "item_id": "cec0749f",
+    "experiment_id": "K1313",
+    "category": "var_forecasting",
+    "content": "HAR-QR (quantile regression on HAR-RV predictors) achieves well-calibrated VaR for SPY 2018-2024 OOS (n=1760). UC@5% Kupiec p=0.333 (PASS), UC@1% p=0.741 (PASS). GARCH-Normal fails: UC@5% p=0.034, UC@1% p≈0 with 3.3% coverage vs 1% target. DM test tau=0.05: t=-2.954, p=0.003 (HAR-QR better); tau=0.01: t=-3.103, p=0.002. Mean pinball loss=0.001134. Directly forecasting quantiles via QR avoids distributional assumptions and better captures fat tails.",
+    "evidence": [
+      "M2 HAR-QR: kupiec_5pct p=0.3325, kupiec_1pct p=0.7405 — both PASS",
+      "M3 GARCH-Normal: kupiec_5pct p=0.034 (FAIL), kupiec_1pct p≈0 with coverage=3.3% (FAIL)",
+      "DM tau=0.05: t=-2.954, p=0.003; DM tau=0.01: t=-3.103, p=0.002 — HAR-QR better at both tails",
+      "Caveat: GARCH stale batch sigma may inflate DM magnitude; direction (HAR-QR better) remains valid"
+    ],
+    "confidence": 0.72,
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer_source": "feature-dev:code-reviewer subagent fallback",
+    "created_at": "2026-05-21T04:27:38.345736",
+    "tags": [
+      "VaR",
+      "quantile-regression",
+      "HAR-RV",
+      "GARCH",
+      "Kupiec",
+      "DM-test",
+      "SPY",
+      "tail-risk"
+    ],
+    "asset": "SPY",
+    "oos_period": "2018-01-01/2024-12-31",
+    "n_oos": 1760
   }
 ]
