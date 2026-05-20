@@ -7536,5 +7536,27 @@
     ],
     "commit": "16e034d0",
     "duration_min": 50
+  },
+  {
+    "timestamp": "2026-05-20T15:26:18.864868+00:00",
+    "task_type": "paper_review",
+    "title": "taiwan-vt: resolve all 5 MEDIUM issues (review_r4)",
+    "paper_id": "taiwan-vt",
+    "details": {
+      "issues_resolved": [
+        "sub-M8a: separate GJR+Normal (excess 1.71%) from GJR+CF (over-conservative 0.51%) in body_v3 L405",
+        "M3-persist: add christoffersen1998 bibitem + VaR trinity definition with Kupiec+Christoffersen+Basel citation",
+        "N4: add footnote at L387 comparing 2020-2026 (8 violations, 0.5%) to K896 full OOS (18/1756=1.025%)",
+        "M5: add period clarification for Normal 2.0% (2020-2026) vs K896 full OOS 1.71%",
+        "SSVS PIP: add note that PIP=1.000 is rounded from K461 computed value 0.9994"
+      ],
+      "bonus_fixes": [
+        "sec:cf label added to Cornish-Fisher Divergence subsection",
+        "politis1994 bibitem added (was cited but missing)"
+      ],
+      "compile": "xelatex x3, clean output, 47 pages",
+      "review_status_before": "0 SEVERE / 0 HIGH / 5 MEDIUM / 6 MINOR (review_r4)",
+      "review_status_after": "0 SEVERE / 0 HIGH / 0 MEDIUM / 6 MINOR"
+    }
   }
 ]

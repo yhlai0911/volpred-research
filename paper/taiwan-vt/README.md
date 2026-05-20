@@ -1,7 +1,7 @@
 # Paper 2: Volatility Targeting in Taiwan — Leverage Amplification and Timezone Transmission
 
 **Target Journal**: Pacific-Basin Finance Journal
-**Status**: R1 review — 3 SEVERE remaining (H1/H2/H3 resolved in body.tex 2026-05-20), needs revision | **Reproduce gate 0 MISMATCH** (2026-04-19 post-session: 4 γ disambiguation mismatches 全 reclass NOTE via body_v2.tex 3-spec footnotes on TWII/TSMC/0050.TW + SSVS PIP UNTRACEABLE + GJR+Normal viol NOTE). 75 VERIFIED / 2 CONFLICT_RESOLVED / 0 MISMATCH / 24 UNTRACEABLE (structural data-limit — Table 4/5 VT performance + Sec 6 macro signals 需 new experiments).
+**Status**: Minor Revision — 0 SEVERE / 0 HIGH / 0 MEDIUM remaining (all 5 MEDIUM resolved 2026-05-20: sub-M8a, M3-persist/Christoffersen, N4 footnote, M5 period note, SSVS PIP note); 6 MINOR outstanding. Next step: run paper-review-cycle for final pass before submission. | **Reproduce gate 0 MISMATCH** (2026-04-19 post-session: 4 γ disambiguation mismatches 全 reclass NOTE via body_v2.tex 3-spec footnotes on TWII/TSMC/0050.TW + SSVS PIP UNTRACEABLE + GJR+Normal viol NOTE). 75 VERIFIED / 2 CONFLICT_RESOLVED / 0 MISMATCH / 24 UNTRACEABLE (structural data-limit — Table 4/5 VT performance + Sec 6 macro signals 需 new experiments).
 **Pages**: 60 | **Citations**: 34
 
 ## Data Sources
