@@ -191,7 +191,7 @@ K1145 (TW) + K1147 (US) + K1150 (JP) 三市場同步 PASS 後，EAV 貢獻框架
 
 **Narrative state** = `decision_made_awaiting_body_rewrite`（K1141 superseded；等 K1146_body paper_body task）
 
-**★ Paper 2 §3.2 Amplification Narrative — DECISION PENDING (2026-05-16, K1370)**
+**★ Paper 2 §3.2 Amplification Narrative — RESOLVED 2026-05-20 (Option A implemented)**
 
 K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch artifact**。
 
@@ -203,16 +203,11 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 | K1370 matched-sample (2008-2024 both) BW-robust | 0.114 | 0.024 | **4.70×** | K1370 sanity (B=10 quick + B=1000 in progress) |
 | K1370 mixed-sample (TAIEX 1997-2026 BW-robust / indiv 2008-2024) | 0.106 | 0.024 | **4.35×** | K1370 sanity |
 
-**Same-spec same-period 比率落在 4.35-4.70×，不是 10×**。Codex v1 review FAIL → v2 (hash-stable + cache guard + per-series n) CONDITIONAL PASS → B=1000 重跑 ETA ~44 min（22:36 CST 啟動）。
+**Same-spec same-period 比率落在 4.35-4.70×，不是 10×**。Codex v1 review FAIL → v2 (hash-stable + cache guard + per-series n) CONDITIONAL PASS → B=1000 完成（90% CI [2.28, 6.58], median=3.78, n_valid=1000/1000）。
 
-**Decision needed (user)**：
-1. (A) headline 改為 **4.7×** matched-sample + 完整披露 spec/period 一致性，撤回 10× 與 8.8× / 9.1× 衍生敘述
-2. (B) headline 保留 10× 但補強質性免責：標明 「spec asymmetric, not same-methodology comparison」
-3. (C) 雙報導：matched-spec 4.7× 為 primary，extended-TAIEX rolling 10× 為 supplementary 並標明 spec mismatch
+**Decision: Option A**（研究誠實 § 第 6 條）— headline 4.3× canonical (TAIEX γ=0.114 ÷ 9-indiv mean γ=0.027，全樣本 BW-robust)，90% CI [2.28, 6.58]；body.tex §3.2 已補「Specification revision」段落說明 10× 為 spec-mismatch；10× 已撤回。
 
-**Recommendation**：選項 A — 研究誠實 § 第 6 條「結論強度不超過證據；推翻舊結論必回溯更正」。10× headline 不能用 same-spec 復現，等同無法 reproduce。
-
-**Pending**：B=1000 CI 完成 → Codex re-review → user decision (A/B/C) → body.tex §3.2 重寫 → reproduce.py binding 補 K1370。Narrative state = `decision_pending` (NOT yet `decision_made_awaiting_body_rewrite`)。
+**Implementation**: commits 4b9374d7 + d5b0bf45；body.tex Introduction (line 10,14) + §3.2 (line 179) 均使用 4.3× + CI；research_program 本條 2026-05-20 標 RESOLVED。Narrative state: `decision_made`（§3.2 body 完成，無需進一步 rewrite）。
 
 **RESOLVED 2026-05-18 (scaffold rewrite v2 complete)** — EAV Paper scaffold 已按 review_v1.md Option A 全面重寫：
 

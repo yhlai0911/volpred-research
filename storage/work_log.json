@@ -7445,5 +7445,21 @@
     "status": "completed",
     "summary": "Published trending_repost on OVX/VIX divergence during 2026 Iran War. OVX peaked 120.9 (all-time high) vs VIX max 31.0; OVX/VIX ratio 2.2→3.9. 3-mechanism analysis: inflation regime, US energy independence, market learning. Gemini CONDITIONAL_PASS (3 AI-style fixes applied), Codex CONDITIONAL_PASS (4 fixes: 印證→方向一致, MOVE range added, 能源波動率具體化, 去相關性降強度). Published mile_8d61b9b3 (general, 2 charts uploaded to Supabase). FB draft prepared, pending browser session. mile_32eb397f FB retry marked failed_cron_no_browser.",
     "commit": null
+  },
+  {
+    "timestamp": "2026-05-20T07:25:14.164813+00:00",
+    "task_type": "paper_review",
+    "paper_id": "taiwan-vt",
+    "description": "Fix 3 numerical inconsistencies in body.tex (review_v4 HIGH issues): (1) 8.63/VIX Sharpe in Introduction common-period context 1.137→1.132 (K900); (2) GJR increment Introduction +0.114→+0.124 (K1175 canonical); (3) GJR increment Conclusion +0.114→+0.124. Compiled xelatex OK (47pp). research_program.md K1370 DECISION PENDING→RESOLVED (Option A: 4.3× implemented).",
+    "status": "completed",
+    "source_experiments": [
+      "K1175",
+      "K900",
+      "K1370"
+    ],
+    "files_changed": [
+      "paper/taiwan-vt/body.tex",
+      "research_program.md"
+    ]
   }
 ]
