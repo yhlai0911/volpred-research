@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-19T18:09:23Z",
+  "timestamp": "2026-05-20T00:04:19Z",
   "all_ok": false,
   "checks": [
     {
@@ -10,17 +10,17 @@
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json last modified 2026-05-17T06:09:05Z, age=60.0h (threshold=26h). STALE."
+      "detail": "storage/strategy_metrics.json last modified 2026-05-17T06:09:05Z, age=65.9h (threshold=26h). STALE."
     },
     {
       "name": "ERROR_LOG",
-      "status": "alert",
-      "detail": "Entry dated 2026-05-18 (yesterday): release_pool_gap 4-strike confirmed REAL outage — merge_worktree.sh stash-pop conflict overwrote live storage/.release_settings.json with stale worktree version (2026-05-16T00:32), check_alerts computed gap=42.74h → critical. Fix applied same day (git checkout stash rescue + merge_worktree whitelist fix pending). Note: 2026-05-17 entry also present (K547 Codex 24h review FAIL — citation + Harvey threshold misuse + lookahead bias K547b pending), but is 2 days old."
+      "status": "ok",
+      "detail": "No entries dated today (2026-05-20) or yesterday (2026-05-19). Most recent: 2026-05-18 (release_pool_gap 4-strike REAL outage, stash-pop conflict fix applied same day) and 2026-05-17 (K547 Codex review FAIL: citation + Harvey threshold + lookahead K547b pending). Both predate yesterday cutoff."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "15 strategy keys found. 0 strategies have >2 portfolio_return=null in last 3 entries. No alerts."
+      "detail": "14 strategies checked. Max nulls in last 3 entries: 1 per strategy (last entry date 2026-04-24, consistent across all). Threshold >2 not exceeded."
     },
     {
       "name": "GIT_STATUS",
@@ -34,7 +34,6 @@
     }
   ],
   "alerts": [
-    "metrics_stale: strategy_metrics.json is 60.0h old (>26h threshold). Last modified 2026-05-17T06:09:05Z.",
-    "error_log_yesterday: 2026-05-18 entry — release_pool_gap 4-strike confirmed REAL outage (merge_worktree.sh stash-pop conflict overwrote live .release_settings.json with stale worktree version)."
+    "metrics_stale: strategy_metrics.json is 65.9h old (>26h threshold). Last modified 2026-05-17T06:09:05Z. Action: recalculate strategy metrics."
   ]
 }
