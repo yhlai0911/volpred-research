@@ -1,39 +1,43 @@
 {
-  "timestamp": "2026-05-20T00:04:19Z",
+  "timestamp": "2026-05-20T12:08:45Z",
   "all_ok": false,
   "checks": [
     {
-      "name": "ARTICLE_POOL",
+      "name": "article_pool",
       "status": "ok",
-      "detail": "total_drafts=160 (≥12 OK); research=16 (≥4 OK); general=144 (≥8 OK). All thresholds met."
+      "detail": "total=160, research=16, general=144"
     },
     {
-      "name": "STRATEGY_METRICS_FRESHNESS",
+      "name": "strategy_metrics_freshness",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json last modified 2026-05-17T06:09:05Z, age=65.9h (threshold=26h). STALE."
+      "detail": "78.0h old"
     },
     {
-      "name": "ERROR_LOG",
-      "status": "ok",
-      "detail": "No entries dated today (2026-05-20) or yesterday (2026-05-19). Most recent: 2026-05-18 (release_pool_gap 4-strike REAL outage, stash-pop conflict fix applied same day) and 2026-05-17 (K547 Codex review FAIL: citation + Harvey threshold + lookahead K547b pending). Both predate yesterday cutoff."
+      "name": "error_log_recent",
+      "status": "alert",
+      "detail": "Found 1 entry/entries dated today (2026-05-20) or yesterday (2026-05-19)",
+      "entries": [
+        "2026-05-19: 3-STRIKE TRIGGER — publish pipeline 缺 post-publish live verify gate，5 篇文章 silently un-verified，下游 FB push 用錯誤 URL template /article/{id} 404"
+      ]
     },
     {
-      "name": "PAPER_TRADING_GAPS",
+      "name": "paper_trading_gaps",
       "status": "ok",
-      "detail": "14 strategies checked. Max nulls in last 3 entries: 1 per strategy (last entry date 2026-04-24, consistent across all). Threshold >2 not exceeded."
+      "detail": "No strategies with >2 portfolio_return=null in last 3 entries"
     },
     {
-      "name": "GIT_STATUS",
+      "name": "git_uncommitted_files",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold: 50). Working tree clean."
+      "detail": "0 uncommitted files"
     },
     {
-      "name": "KNOWLEDGE_SIZE",
+      "name": "knowledge_size",
       "status": "ok",
-      "detail": "2147 entries in storage/memory/knowledge.json."
+      "detail": "2147 entries in knowledge.json"
     }
   ],
   "alerts": [
-    "metrics_stale: strategy_metrics.json is 65.9h old (>26h threshold). Last modified 2026-05-17T06:09:05Z. Action: recalculate strategy metrics."
+    "metrics stale (78.0h old)",
+    "error log has recent entries (2026-05-19): 3-STRIKE publish pipeline live verify"
   ]
 }
