@@ -1,31 +1,33 @@
-# Handoff — 2026-05-20 18:18 台灣時間
+# Handoff — 2026-05-20 20:17 台灣時間
 
-**寫入時機**：用戶主動要求（即將 compact / 可能重啟 session）
+**寫入時機**：運營 cycle 收尾（CLAUDE.md Compact 規則）
 **角色**：VolPred 平台 autonomous 運營經理（用戶 = 老闆，report-only，full autonomy 已授權，不問選擇題）
 
 ---
 
-## 重啟後一切生效 — 已驗證保證
+## 本 cycle 完成（最新在上）— commit `e1733d8c`
 
-- **定時任務**：全走 OS 層，與 Claude Code session 無關。`com.volpred.check-alerts` LaunchAgent 每小時 fire → `run_due_jobs.py` piggy-back dispatch 全部 18 條 system_crontab job。另有 11 條 host crontab + 10 個 LaunchAgent。**session 關了照跑，不會漏。**
-- **compact 門檻**：`.claude/settings.local.json` 的 `env.CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=62` 是有效設定（claude-code-guide 已查證為真實 env var）。**新 session 啟動時讀取 → 62% 立刻生效。**舊 session 沒生效是因為啟動早於設定 — 重開即修正。
-- **session_crons**（CronCreate 型 prompt workflow）：離線時記入 `storage/ops/pending_sessions.json`，新 session 啟動 replay。
+- **Paper 1 Table 7 errata + paper-update sync**（paper_body，`Paper1_new_experiments_Tables_4_6_7_8` → succeeded）：
+  - K1187 reproducibility issues 處理：加入 Notes + Replication note 到 Table 7（tab:vt）— GLD = 2022-2026、SPY = 2014-2026、BTC = post-2019 期間揭露
+  - errata_pending.md batch-4 section 新增；K1198 Step 4 DONE
+  - main_v3.tex 編譯乾淨（66 頁）；paper-update sync 成功（updated_at: 2026-05-20T12:13:39Z）
+  - Paper 1 三批 errata 全數落地（batch-1 K1185/K1188 + batch-2 K1186/K1206 + batch-3 K1198 + batch-4 K1187）
+- **Daily data refresh**：leverage-direction 3 CSVs +22 rows（2026-05-14~20 新交易日）
 
-## 本 session 最近完成（最新在上）
+## 本 cycle 完成（前期）— commit `8fdcc6ab`
 
-- **排程孤兒修復**（commit `17679646`）：boss_report_4h / ops_dashboard / audit_publish_sync / audit_fb_pipeline 4 條因 `host_crontab_managed:false` 被 piggy-back 排除、從沒跑過。已改 true，驗證 fired exit 0。**boss_report 4h email 現在才真正自動化。**也 GC 6 個過期 event_jobs（15→9）。
-- **email 時間台灣化**（commit `cdb3e790`）：boss_report + work_summary_6h 所有顯示時間改 UTC+8。
-- **compact handoff 規則**（commit `e7efcf0e`）：CLAUDE.md 加「compact 前必寫 handoff + 接續提示詞」。
-- **FB 發文教訓**（commit `2b2b9ebb`）：trending-repost SKILL Step 7 加 8 條實戰教訓。
-- **2 篇原創專欄已發 feed + FB**：`mile_74a28bcf`（波動率體制）+ `mile_94c1a524`（理財教育）。
-- **CLI 治理**：gemini-cli/antigravity-cli 棄用，headless Gemini 改 `scripts/gemini_ask.py`（Gemini 3.1 Pro）。
+- **K-id collision 無限迴圈修復（3-strike 級結構修）**：dispatcher 永遠推薦 K1308 x3。根因 `generate_research_backlog.py` find_next_k_id 無視在途 next_tasks ids + dedup keyword 對中文失效。已修產生器（傳 in-flight ids + source_line 精確 dedup）+ 清 next_tasks.json 569→560（K1308 dup×3 / 9 collision 重配 K1384-1392 / 標題重複×6）。
+- **ops_dashboard 虛報 cron stale 修復**：UTC 時間戳被 mktime 當 local → 虛增 +8h。改 calendar.timegm。handoff 長期「daily cron 偶爾 stale」部分即此 bug。
+- **2 篇 pending FB 補發**：mile_8d61b9b3（OVX/VIX 伊朗戰爭）+ mile_32eb397f（VIX dispersion/Mag6）發 Ivan Lai FB + 留言連結，trending_repost_log 標 success。
+- **2 條 stale cron 補跑**：release_pool + paper_sync_all（exit 0）。
+- dashboard 現 7/7 區段全綠。
 
-## 未完成 / 待驗證
+## 待驗證 / 候補
 
 - **無進行中背景 agent**。
-- **FB pipeline**：全 success + 4 wont_fix，無 pending。
-- **daily cron 偶爾 stale**（memory_health / refresh_paper_snapshots / market_calendar）— piggy-back 對 daily job 不穩，standing 問題，候補結構修（worker daemon 取代 shell piggy-back）。
-- 未 commit：storage/ 運營狀態檔自然 drift（feed.json / cron logs / notification_log），非 session 產出。
+- **novel-method 實驗 soft pause**：next_tasks 內 PatchTST(K1383) 帶 `diversity_rule_post_null_quartet` block（4 連 NULL K868/K1301/K1303/K1309 後暫停 novel-method 直到 quartet 文章獲 Codex+讀者訊號）。dispatcher 目前頂層候選 K1313/K1385/K1386 皆 novel-method，性質同屬暫停範圍但未標 block — 下次 session 若要派實驗需先確認 quartet 文章訊號狀態，或改派非 novel-method / daily_article。
+- **refill_task_pool.py dedup bug 候補**：會產生 `write general-audience article` 通用標題 dup（本 cycle 清 4 個但根因未修）。下次碰 article refill 時修。
+- 未 commit：storage/ 運營狀態檔自然 drift。
 
 ## 未回應用戶的問題
 
@@ -33,12 +35,11 @@
 
 ## 關鍵檔案
 
-- ops 巡檢：`uv run python scripts/ops_dashboard.py`（7 區段）
+- ops 巡檢：`uv run python scripts/ops_dashboard.py`
+- dispatcher：`uv run python scripts/continue_task_dispatch.py --dry-run`
 - 決策日誌：`storage/ops/autonomous_decisions.jsonl`
-- boss 報告：`scripts/boss_report.py`（4h cron，現已生效）/ `docs/boss_blockers.md` / `docs/boss_direction_recommendations.md`
-- 團隊結構：`docs/ops_team_structure.md`
+- 教訓：`docs/error_log.md`（2026-05-20 entry）
 - FB 發文教訓：`.claude/skills/trending-repost/SKILL.md` Step 7
-- 排程唯一來源：`config/runtime_schedules.json`
 
 ---
 
@@ -49,10 +50,10 @@
 > 接續步驟：
 > 1. 跑 `uv run python scripts/ops_dashboard.py` 取得平台 7 區段健康狀態
 > 2. 有 critical/warn 先處理（daily cron stale 就 `bash ~/.volpred/bin/cron_<id>.sh` 補 + 更新 `storage/ops/cron_last_run.json`）
-> 3. production OK 就從 `storage/next_tasks.json` pending 池派工（先 `jq '[.[-5:]|.[].task_type]' storage/work_log.json` 查多樣化，≥3 同 type 必換）
-> 4. FB 發文嚴守 `.claude/skills/trending-repost/SKILL.md` Step 7 的 8 條（發文前 get_page_text 查牆 / 留言 URL 進留言框 / single-shot 禁 retry-loop / 每步 screenshot）
-> 5. 寫文章嚴守 `anti-ai-style` 9 地雷（含 #9 破折號 ≤1/1000 字、標題不用「不是X而是Y」）+ 內容要厚（具體案例走教學）+ Layer 4 narrative-arc dedup
-> 6. 重大決策寫入 `storage/ops/autonomous_decisions.jsonl`（含 intent/reasoning/outcome/next）
-> 7. compact 前必更新本 handoff 檔（CLAUDE.md Compact Instructions 規則）
+> 3. production OK 就從 `storage/next_tasks.json` pending 池派工（先 `jq '[.[-5:]|.[].task_type]' storage/work_log.json` 查多樣化，≥3 同 type 必換）。注意：dispatcher 頂層候選 K1313/K1385/K1386 是 novel-method 實驗，受 `diversity_rule_post_null_quartet` soft pause 影響 — 派實驗前先確認 quartet 文章訊號，否則改派非 novel-method 或 daily_article。
+> 4. FB 發文嚴守 `.claude/skills/trending-repost/SKILL.md` Step 7 的 8 條
+> 5. 寫文章嚴守 `anti-ai-style` 9 地雷 + 內容要厚 + Layer 4 narrative-arc dedup
+> 6. 重大決策寫入 `storage/ops/autonomous_decisions.jsonl`
+> 7. compact 前必更新本 handoff 檔
 >
-> 無未回應的用戶問題、無進行中背景 agent。直接從 dashboard 巡檢開始下一個 cycle。boss_report 每 4h 自動寄（已驗證生效）。
+> 無未回應的用戶問題、無進行中背景 agent。直接從 dashboard 巡檢開始下一個 cycle。
