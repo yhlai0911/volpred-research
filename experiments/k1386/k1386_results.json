@@ -12,7 +12,8 @@
     "is_period": "2010-01-01 ~ 2021-12-31",
     "oos_period": "2022-01-01 ~ 2026-05-19",
     "n_is": 3021,
-    "n_oos": 1128
+    "n_oos": 1128,
+    "n_eval": 1127
   },
   "hurst_estimates": {
     "SPY": 0.103081,
@@ -33,25 +34,26 @@
   },
   "model_ar_lag_p": 20,
   "qlike_oos": {
-    "HAR": 0.15645374,
-    "fGN_univariate": 0.16253467,
-    "fGN_multivariate": 0.14979025
+    "HAR": 0.36879574,
+    "fGN_univariate": 0.461357,
+    "fGN_multivariate": 0.46271202
   },
   "dm_test": {
     "fGN_uni_vs_HAR": {
-      "t_stat": 0.513161,
+      "t_stat": 3.268827,
       "sign_convention": "d = loss_fGN_uni - loss_HAR; t>0 => fGN-uni WORSE; t<0 => fGN-uni BETTER",
-      "verdict": "H0 not rejected"
+      "verdict": "H0 rejected (|t|>2.0)"
     },
     "fGN_multi_vs_HAR": {
-      "t_stat": -0.620333,
+      "t_stat": 3.257408,
       "sign_convention": "d = loss_fGN_multi - loss_HAR; t>0 => fGN-multi WORSE; t<0 => fGN-multi BETTER",
-      "verdict": "H0 not rejected"
+      "verdict": "H0 rejected (|t|>2.0)"
     }
   },
   "verdict": "NULL",
   "caveats": [
-    "None"
+    "Evaluation alignment fix (H1): predictions at index t represent forecast for t+1; actual_rv uses shift(-1) to compare against rv[t+1]. n_eval = n_oos - 1.",
+    "H2: fGN-multi cross-asset correction uses realized (not predicted) lag-1 residuals of other assets; feasible since these are one-period lagged values known at forecast time."
   ],
   "lookahead_prevention": "HAR: features at t (rv_d/rv_w/rv_m ending at t), target rv_{t+1}. fGN-uni: AR on increments d_t..d_{t-p+1} to predict d_{t+1}, anchor at log_rv_t. fGN-multi: cross-asset uses lag-1 residuals (t-1), no contemporaneous cross info.",
   "seed": 42

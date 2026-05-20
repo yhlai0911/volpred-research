@@ -101,15 +101,19 @@ AR 係數在 IS 上估計，OOS 不再 refit（固定係數，expanding window �
 
 符號約定：`d = loss_fGN - loss_HAR`；t > 0 = fGN **worse**；t < 0 = fGN **better**。
 
-| Comparison          | DM t-stat | |t| > 2.0? | |t| > 3.0? |
+| Comparison          | DM t-stat | \|t\| > 2.0? | \|t\| > 3.0? |
 |---------------------|-----------|-----------|-----------|
-| fGN-uni vs HAR      | +0.513    | 否        | 否        |
-| fGN-multi vs HAR    | −0.620    | 否        | 否        |
+| fGN-uni vs HAR      | +3.269    | 是（WORSE）| 是        |
+| fGN-multi vs HAR    | +3.257    | 是（WORSE）| 是        |
+
+（符號：t>0 = fGN 較差；t<0 = fGN 較好）
 
 ### Verdict: **NULL**
 
-fGN-multi 的 QLIKE 略低於 HAR（4.3% 改善）但未達統計顯著（|t|=0.62 << 2.0）。
-fGN-uni 比 HAR 略差（QLIKE 高 3.9%，t=+0.51）。
+fGN-multi 的 QLIKE（0.463）顯著**差**於 HAR（0.369），DM |t|=3.26 > 3.0，HAR 在統計上明確勝出。
+fGN-uni 情形相同（QLIKE=0.461，DM t=+3.27）。
+
+**方法論修正（相比原始提交）**：原版代碼評估時使用 `actual_rv[t] = rv_t`（當日），但三個模型都是預測 `rv_{t+1}`（隔日）。已修正為 `actual_rv[t] = rv_{t+1}`（shift -1）。此修正讓 QLIKE 從錯誤的 ~0.15 校正為正確的 ~0.37-0.46，DM 結論從「不顯著」改為「HAR 顯著優於 fGN」。NULL 結論不變但方向反轉：fGN 不是略優，而是顯著劣。
 
 ---
 

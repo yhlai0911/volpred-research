@@ -484,11 +484,15 @@ def main():
     # ── OOS Evaluation ──
     print("\n--- OOS Evaluation (QLIKE on Parkinson RV) ---")
     oos_idx = df[test_mask].index
-    actual_rv = spy_rv_pk.loc[oos_idx].values
+    # Fix H1: models predict RV_{t+1} (indexed at t); actual must be rv[t+1]
+    # Use shift(-1) so that actual_rv[t] = rv[t+1], then drop last (no t+1 available)
+    rv_shifted = spy_rv_pk.shift(-1)
+    eval_idx = oos_idx[:-1]  # drop last OOS date (rv[T+1] unknown)
+    actual_rv = rv_shifted.loc[eval_idx].values
 
-    har_f = har_preds.reindex(oos_idx).ffill().values
-    uni_f = fgn_uni_preds.reindex(oos_idx).ffill().values
-    multi_f = fgn_multi_preds.reindex(oos_idx).ffill().values
+    har_f = har_preds.reindex(eval_idx).ffill().values
+    uni_f = fgn_uni_preds.reindex(eval_idx).ffill().values
+    multi_f = fgn_multi_preds.reindex(eval_idx).ffill().values
 
     ql_har = qlike_loss(actual_rv, har_f)
     ql_uni = qlike_loss(actual_rv, uni_f)
@@ -528,12 +532,21 @@ def main():
         caveats.append("ANOMALY: fGN-multi beats HAR by >20% — verify no lookahead")
     if abs(dm_multi) > 10.0:
         caveats.append("ANOMALY: |DM| > 10 — likely numerical issue")
-    if not caveats:
-        caveats.append("None")
+    caveats.append(
+        "Evaluation alignment fix (H1): predictions at index t represent forecast for t+1; "
+        "actual_rv uses shift(-1) to compare against rv[t+1]. n_eval = n_oos - 1."
+    )
+    caveats.append(
+        "H2: fGN-multi cross-asset correction uses realized (not predicted) lag-1 residuals of other assets; "
+        "feasible since these are one-period lagged values known at forecast time."
+    )
+    if not any(c.startswith("None") for c in caveats):
+        pass
 
     # ── Plot ──
     print("\n--- Generating Plot ---")
-    oos_dates = df["date"][test_mask].values
+    # Use eval_idx dates (trimmed by 1 for alignment fix)
+    oos_dates = df.loc[df.index.isin(eval_idx), "date"].values
 
     fig, axes = plt.subplots(2, 1, figsize=(14, 9))
 
@@ -594,6 +607,7 @@ def main():
             "oos_period": "2022-01-01 ~ 2026-05-19",
             "n_is": n_is,
             "n_oos": n_oos,
+            "n_eval": n_oos - 1,
         },
         "hurst_estimates": {
             "SPY": round(hurst_estimates["SPY"], 6),
