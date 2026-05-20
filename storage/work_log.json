@@ -7558,5 +7558,30 @@
       "review_status_before": "0 SEVERE / 0 HIGH / 5 MEDIUM / 6 MINOR (review_r4)",
       "review_status_after": "0 SEVERE / 0 HIGH / 0 MEDIUM / 6 MINOR"
     }
+  },
+  {
+    "timestamp": "2026-05-20T16:30:09.908176+00:00",
+    "task_type": "trending_repost",
+    "title": "Fed 加息機率一週飆 34%，VIX 還在 18：市場在看什麼？",
+    "pub_id": "mile_883a7429",
+    "status": "published",
+    "audience": "general",
+    "tags": [
+      "Fed",
+      "VIX",
+      "升息",
+      "FOMC",
+      "波動率",
+      "宏觀",
+      "美債殖利率"
+    ],
+    "topic": "Fed升息機率一週14%→48%，VIX落後未反應；歷史比較2022升息循環VIX均值25.6 vs 現在19；三假說：市場質疑鷹派真實性/短期RV低/等待6月FOMC",
+    "review": "Gemini A- (anti-ai-style 9 landmines cleared, em-dash 3/7)",
+    "charts": [
+      "chart1_vix_vs_30y.png (Supabase uploaded)",
+      "chart2_scatter_2022_vs_2026.png (Supabase uploaded)"
+    ],
+    "dedup": "LanceDB all dist>0.65, grep no match on 美債/殖利率/rate-hike",
+    "notes": "3-model gate: Gemini done (A-); Codex pending (non-blocking)"
   }
 ]
