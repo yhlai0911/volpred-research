@@ -30,6 +30,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 STORAGE = PROJECT_ROOT / "storage"
+TW = timezone(timedelta(hours=8))  # email 時間以台灣時間為準（用戶 2026-05-20）
 NOW = datetime.now(timezone.utc)
 WINDOW = timedelta(hours=6)
 SINCE = NOW - WINDOW
@@ -119,7 +120,7 @@ def _new_notifications() -> list[dict]:
         except Exception:
             title = f.name
             level = ""
-        out.append({"time": mtime.strftime("%H:%M"), "title": title, "level": level})
+        out.append({"time": mtime.astimezone(TW).strftime("%H:%M"), "title": title, "level": level})
     return out
 
 
@@ -153,9 +154,9 @@ def _articles_in_window() -> dict[str, list[dict]]:
         except Exception:
             create_dt = None
         if pub_dt and pub_dt >= SINCE and art.get("status") == "published":
-            pub.append({"id": art.get("id"), "title": art.get("title", "")[:100], "ts": pub_dt.strftime("%H:%M"), "audience": art.get("audience", "")})
+            pub.append({"id": art.get("id"), "title": art.get("title", "")[:100], "ts": pub_dt.astimezone(TW).strftime("%H:%M"), "audience": art.get("audience", "")})
         elif create_dt and create_dt >= SINCE and art.get("status") == "draft":
-            drafts.append({"id": art.get("id"), "title": art.get("title", "")[:100], "ts": create_dt.strftime("%H:%M"), "audience": art.get("audience", "")})
+            drafts.append({"id": art.get("id"), "title": art.get("title", "")[:100], "ts": create_dt.astimezone(TW).strftime("%H:%M"), "audience": art.get("audience", "")})
     return {"published": pub, "drafts": drafts}
 
 
@@ -195,7 +196,7 @@ def _platform_health() -> dict:
                     last_dt = last_dt.replace(tzinfo=timezone.utc)
                 gap_min = (NOW - last_dt).total_seconds() / 60
                 health["last_release_gap_min"] = round(gap_min, 1)
-                health["last_release_at"] = last_dt.strftime("%H:%M UTC")
+                health["last_release_at"] = last_dt.astimezone(TW).strftime("%H:%M") + " 台灣時間"
         except Exception:
             health["release_interval_min"] = None
     # Knowledge.json size + freshness
@@ -204,7 +205,7 @@ def _platform_health() -> dict:
         try:
             stat = kj.stat()
             health["knowledge_size_mb"] = round(stat.st_size / (1024 * 1024), 2)
-            health["knowledge_mtime"] = datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+            health["knowledge_mtime"] = datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc).astimezone(TW).strftime("%Y-%m-%d %H:%M") + " 台灣時間"
         except Exception:
             pass
     # Active alerts (current)
@@ -401,7 +402,7 @@ def build_html() -> tuple[str, str, str]:
     recs = _recommendations(commits, articles, health, work)
     exec_summary = _executive_summary(commits, articles, work, health, mission, events, cats)
 
-    title = f"6h 平台運營彙報 {SINCE.strftime('%Y-%m-%d %H:%MZ')} → {NOW.strftime('%H:%MZ')}"
+    title = f"6h 平台運營彙報 {SINCE.astimezone(TW).strftime('%Y-%m-%d %H:%M')} → {NOW.astimezone(TW).strftime('%H:%M')} 台灣時間"
 
     # ── HTML ───────────────────────────────────────────────────
     css = """

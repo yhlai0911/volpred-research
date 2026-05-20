@@ -22,7 +22,10 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
-NOW = datetime.now(timezone.utc)
+# 所有 email 顯示時間以台灣時間 (UTC+8) 為準（用戶 2026-05-20 要求）
+TW = timezone(timedelta(hours=8))
+NOW = datetime.now(timezone.utc)        # 內部比較仍用 UTC（git log / ISO 比對）
+NOW_TW = NOW.astimezone(TW)             # 顯示用台灣時間
 WINDOW = timedelta(hours=4)
 SINCE = NOW - WINDOW
 
@@ -172,6 +175,20 @@ def _esc(s):
     return html.escape(str(s) if s is not None else "")
 
 
+def _iso_to_tw(iso_str):
+    """UTC ISO 字串 → 台灣時間顯示 'MM-DD HH:MM'。失敗回原字串。"""
+    if not iso_str:
+        return ""
+    try:
+        s = iso_str.replace("Z", "+00:00")
+        dt = datetime.fromisoformat(s)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(TW).strftime("%m-%d %H:%M")
+    except Exception:
+        return iso_str[:16]
+
+
 def build_html():
     dash = _dashboard()
     commits = _commits_in_window()
@@ -182,7 +199,7 @@ def build_html():
     intent = _cycle_intent()
     blockers = _blockers()
 
-    title = f"[VolPred Boss Report] {NOW.strftime('%Y-%m-%d %H:%MZ')} 平台運營報告"
+    title = f"[VolPred Boss Report] {NOW_TW.strftime('%Y-%m-%d %H:%M')} 台灣時間 平台運營報告"
     overall_color = {"ok": "#0a8a3a", "warn": "#d97706", "critical": "#b91c1c", "error": "#6b7280"}.get(dash.get("overall_status", "ok"), "#444")
 
     css = """<style>
@@ -204,7 +221,7 @@ def build_html():
     </style>"""
 
     parts = [f"<!DOCTYPE html><html><head><meta charset='utf-8'>{css}</head><body>"]
-    parts.append(f"<h1 style='background:{overall_color}'>VolPred Boss Report · {_esc(NOW.strftime('%Y-%m-%d %H:%M UTC'))} · Overall <strong>{_esc(dash.get('overall_status', '?').upper())}</strong></h1>")
+    parts.append(f"<h1 style='background:{overall_color}'>VolPred Boss Report · {_esc(NOW_TW.strftime('%Y-%m-%d %H:%M'))} 台灣時間 · Overall <strong>{_esc(dash.get('overall_status', '?').upper())}</strong></h1>")
 
     # 0. Current cycle intent / goal / plan
     if intent:
@@ -259,7 +276,7 @@ def build_html():
                           "infra": "#0891b2", "fb_incident": "#b91c1c", "paper": "#ca8a04",
                           "research": "#0a8a3a"}.get(cat, "#6b7280")
             parts.append(f"<div style='border-left:3px solid {pill_color};padding:6px 12px;margin:8px 0;background:#fafbfc'>")
-            parts.append(f"<div><span class='pill' style='background:{pill_color};color:white'>{_esc(cat)}</span> <strong>{_esc(d.get('summary', ''))}</strong> <span class='small'>{_esc(d.get('timestamp', '')[:16])}</span></div>")
+            parts.append(f"<div><span class='pill' style='background:{pill_color};color:white'>{_esc(cat)}</span> <strong>{_esc(d.get('summary', ''))}</strong> <span class='small'>{_esc(_iso_to_tw(d.get('timestamp', '')))} 台灣時間</span></div>")
             for label, key in [("意圖", "intent"), ("推理", "reasoning"), ("執行成果", "outcome"), ("下一步", "next")]:
                 v = d.get(key)
                 if v:
@@ -293,12 +310,12 @@ def build_html():
                 parts.append(f"<div class='small' style='margin-top:2px'>• {_esc(ln)}</div>")
             parts.append("</div>")
 
-    parts.append(f"<p class='small'>Report generated {_esc(NOW.isoformat())} · Window {int(WINDOW.total_seconds()/3600)}h · Source: <code>scripts/boss_report.py</code></p>")
+    parts.append(f"<p class='small'>Report generated {_esc(NOW_TW.strftime('%Y-%m-%d %H:%M:%S'))} 台灣時間 · Window {int(WINDOW.total_seconds()/3600)}h · Source: <code>scripts/boss_report.py</code></p>")
     parts.append("</body></html>")
 
     # Plain-text fallback
     plain_lines = [
-        f"VolPred Boss Report — {NOW.strftime('%Y-%m-%d %H:%M UTC')}",
+        f"VolPred Boss Report — {NOW_TW.strftime('%Y-%m-%d %H:%M')} 台灣時間",
         f"Overall: {dash.get('overall_status', '?').upper()}",
         "",
         "== State ==",
