@@ -9597,7 +9597,7 @@
     "title": "K1386: ★ **Multivariate Rough Volatility Model** — arXiv:2412.14353 (Feb 2026)。多變量 fractional OU + GMM 估計。跨資產 rough vol 的正式框架。",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 401). Original: ★ **Multivariate Rough Volatility Model** — arXiv:2412.14353 (Feb 2026)。多變量 fractional OU + GMM 估計。跨資產 rough vol 的正式框架。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1386.py with signal.shift(1) + seed=42, (c) K1386_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "tags": [
@@ -9609,7 +9609,12 @@
       "from": "K1310",
       "at": "2026-05-20",
       "reason": "kid_collision — generate_research_backlog id-assignment bug (fixed)"
-    }
+    },
+    "completed_at": "2026-05-20T21:40:50.721085",
+    "verdict": "NULL",
+    "qlike_har": 0.36879574,
+    "qlike_fgn_multi": 0.46271202,
+    "dm_fgn_multi_vs_har": 3.257408
   },
   {
     "id": "K1390",

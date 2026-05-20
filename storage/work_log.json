@@ -7506,5 +7506,21 @@
     "verdict": "SUCCEEDED",
     "research_integrity": "KEEP values — per-asset periods confirmed by body text. GLD data-vintage caveat noted.",
     "paper_id": "leverage-direction"
+  },
+  {
+    "timestamp": "2026-05-20T21:41:02.232707",
+    "task_type": "experiment",
+    "task_id": "K1386",
+    "title": "K1386: Multivariate Rough Volatility Model (fGN + cross-asset residual)",
+    "verdict": "NULL",
+    "summary": "H estimates: SPY=0.1031, QQQ=0.0936, GLD=0.0294 (all rough, H<0.5). QLIKE: HAR=0.369, fGN-multi=0.463. DM t=+3.26 (HAR sig wins). Key finding: fGN increment AR cannot beat HAR long-memory aggregation at daily frequency. H1 alignment bug fixed (shift -1): original apparent 4.3% fGN advantage was artifact. Method improvement vs K806: QLIKE 132.6→0.46 (still loses to HAR 0.37). Code review: feature-dev:code-reviewer subagent (Codex focus-text unavailable).",
+    "files": [
+      "experiments/k1386/k1386.py",
+      "experiments/k1386/k1386_results.json",
+      "experiments/k1386/README.md",
+      "experiments/k1386/k1386_forecast_comparison.png"
+    ],
+    "commit": "16e034d0",
+    "duration_min": 50
   }
 ]
