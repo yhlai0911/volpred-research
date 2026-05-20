@@ -295,6 +295,23 @@ Codex 審代碼 → 通過才寫 `knowledge.json` → 每 5-10 實驗彙整一�
 
 ## Compact Instructions
 
+### Handoff 強制規則（2026-05-20 用戶硬性要求）
+
+**Compact 觸發前必做**（不論 auto-compact 或手動 /compact）：
+
+1. **寫 handoff 文件** `storage/ops/handoff_latest.md`，內容：
+   - 當前任務狀態（在做什麼、做到哪、下一步）
+   - 未完成 agent 的 ID + task_type + 預期產出
+   - 未回應用戶的問題
+   - 最近未 commit 的工作 / 待驗證項
+   - 關鍵檔案路徑與 line 定位
+2. **寫接續提示詞** 到同檔末段「## 接續提示詞」區，一段可直接貼回的指令，明確寫「讀 storage/ops/handoff_latest.md 後從 X 繼續」。
+3. **Compact 後第一個動作**：讀 `storage/ops/handoff_latest.md` → 直接依接續提示詞繼續任務，不重新摸索、不問用戶「我們在做什麼」。
+
+**為什麼**：compact 會丟失執行脈絡；沒有 handoff 文件，compact 後會忘記未竟任務、重複問用戶、或漏掉未驗證的工作。handoff 文件是 compact 的 single source of truth。
+
+---
+
 Context compaction 時，**優先保留**：
 - 用戶明確的規則陳述 / feedback（「不要做 X」「應該做 Y」）— 任何優先，否則下次還會犯
 - 最近一次未回應用戶的問題（避免 compact 後忘記答）
