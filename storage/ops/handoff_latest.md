@@ -22,6 +22,18 @@
 - **2 條 stale cron 補跑**：release_pool + paper_sync_all（exit 0）。
 - dashboard 現 7/7 區段全綠。
 
+## 排程失敗徹查（2026-05-20 用戶要求，commit `e4154466` + `f1bdea2d`）
+
+全面 audit `storage/logs/cron/*.log` → 5 結構性根因全修：
+1. hourly-dispatch fd limit 256（LaunchAgent 不 source profile）→ wrapper 加 `ulimit -Sn 65536`
+2. `host_cron_fail` alert 完全失效 — `_CRON_EXIT_RE` 對所有實際 log 格式皆不匹配 → 修 regex
+3. exit banner 由 piggy-back 發非 wrapper 自發 → daily_update banner 凍結 2026-04-25 → wrapper 自發 canonical banner
+4. daily_update 讀 feed.json 並發 crash（JSONDecodeError）→ `_load_json_retry`
+5. market_daily sync 400 ×161（白名單含 Supabase 不存在的 nk225_*）→ 移除 + `_post` 印 error body
+- org 訂閱問題：用戶確認信用卡換卡所致，已解決。
+- 剩餘 log（collect_tw DNS / paper_sync_all urlopen timeout / compute_worker EINTR）= 暫時性，自然重試，非結構問題。
+- **驗收點**：20:07 hourly-dispatch 自動 fire → 應 exit 0 + 寫出 `=== [hourly_dispatch] exit N ===` canonical banner。
+
 ## 待驗證 / 候補
 
 - **無進行中背景 agent**。
