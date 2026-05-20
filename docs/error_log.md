@@ -1048,3 +1048,17 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 5. headless wrapper 不 source profile — ulimit/PATH/env 全要顯式設（見上條根因 1）。
 
 **Pending 候補（未在本次做，量大）**：其餘 `exec`-form wrapper（collect_tw/us、market_cal、refresh_paper_snapshots、paper_sync_all 等）目前靠 piggy-back 發 banner，若改走自己 LaunchAgent 也會 silent。理想結構是所有 wrapper 自發 banner（shared `cron_lib.sh` 提供 `emit_exit`）。下次碰 cron wrapper 維運時落地。
+
+---
+
+## 2026-05-21 | hourly-dispatch 02:07 + 03:07 CST 兩次 SIGALRM (exit=142)
+
+**現象**：`storage/logs/cron/hourly_dispatch.log` 顯示 2026-05-21 02:07 和 03:07 兩次 `[HANG-KILLED] claude -p exceeded 3000s cap (SIGALRM via perl alarm)`。04:07 正常 exit=0，05:07（本 session）執行中。
+
+**根因分析**：非真 hang — cap 機制正常運作（`/usr/bin/perl alarm 3000s` 正確 SIGALRM）。兩次被殺 session 均在執行複雜 platform_ops 任務（K1313 worktree 清理 + feed.json 四輪 term-fix + release-pool-by-settings 診斷），任務積壓導致單次 session 工作量超過 50min 時限。
+
+**此次 root cause**：article `mile_4ec7b75e` description 欄位含多個 `\bHarvey\b` / `\|t\|` / `\bt-stat\b` / `\bDiebold-Mariano\b` 違規詞，前兩輪只修 `content` 欄位（誤診），直到 05:07 session 才追蹤到 `_audit_general_content` 讀 `description or content` 優先序，正確修 `description`，release-pool 通過。
+
+**教訓**：(L1) `release_pool_articles` body_text 讀取順序：`description` > `content` > `summary`，文章若有 `description` 欄位，`content` 的修改不會被 audit 看到；(L2) 術語替換時須先確認哪個欄位是 audit 的實際掃描對象，不可假設 `content` 是唯一儲存。
+
+**已修**：feed.json `mile_4ec7b75e` description 欄位所有違規詞替換完成（2026-05-21 05:xx CST），`release-pool-by-settings` 驗證通過（released=1, supabase_synced=true, verified_live=true）。
