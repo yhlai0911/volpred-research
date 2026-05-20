@@ -1,0 +1,58 @@
+{
+  "experiment_id": "K1386",
+  "data": {
+    "assets": [
+      "SPY",
+      "QQQ",
+      "GLD"
+    ],
+    "primary_asset": "SPY",
+    "rv_proxy": "Parkinson range: (log(H/L))^2 / (4*log(2))",
+    "log_rv_target_for_fgn": "log(RV_pk)",
+    "is_period": "2010-01-01 ~ 2021-12-31",
+    "oos_period": "2022-01-01 ~ 2026-05-19",
+    "n_is": 3021,
+    "n_oos": 1128
+  },
+  "hurst_estimates": {
+    "SPY": 0.103081,
+    "QQQ": 0.093565,
+    "GLD": 0.029357,
+    "method": "Log-structure function: slope of log E[|\u0394_h log_RV|^2] vs log(h), lags 1-20, IS only",
+    "reference": "Gatheral et al. (2018), arXiv:2412.14353"
+  },
+  "log_rv_correlation_matrix_is": {
+    "SPY_QQQ": 0.877238,
+    "SPY_GLD": 0.394856,
+    "QQQ_GLD": 0.32502
+  },
+  "increment_acf_lag1_is": {
+    "SPY": -0.429661,
+    "QQQ": -0.440014,
+    "GLD": -0.491289
+  },
+  "model_ar_lag_p": 20,
+  "qlike_oos": {
+    "HAR": 0.15645374,
+    "fGN_univariate": 0.16253467,
+    "fGN_multivariate": 0.14979025
+  },
+  "dm_test": {
+    "fGN_uni_vs_HAR": {
+      "t_stat": 0.513161,
+      "sign_convention": "d = loss_fGN_uni - loss_HAR; t>0 => fGN-uni WORSE; t<0 => fGN-uni BETTER",
+      "verdict": "H0 not rejected"
+    },
+    "fGN_multi_vs_HAR": {
+      "t_stat": -0.620333,
+      "sign_convention": "d = loss_fGN_multi - loss_HAR; t>0 => fGN-multi WORSE; t<0 => fGN-multi BETTER",
+      "verdict": "H0 not rejected"
+    }
+  },
+  "verdict": "NULL",
+  "caveats": [
+    "None"
+  ],
+  "lookahead_prevention": "HAR: features at t (rv_d/rv_w/rv_m ending at t), target rv_{t+1}. fGN-uni: AR on increments d_t..d_{t-p+1} to predict d_{t+1}, anchor at log_rv_t. fGN-multi: cross-asset uses lag-1 residuals (t-1), no contemporaneous cross info.",
+  "seed": 42
+}
