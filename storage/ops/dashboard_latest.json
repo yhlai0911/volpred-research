@@ -1,13 +1,13 @@
 {
-  "dashboard_generated_at": "2026-05-20T12:00:20Z",
-  "overall_status": "ok",
-  "section_breaches": 0,
-  "section_critical": 0,
+  "dashboard_generated_at": "2026-05-20T17:00:44Z",
+  "overall_status": "critical",
+  "section_breaches": 1,
+  "section_critical": 1,
   "sections": [
     {
       "section": "production_pending",
       "status": "ok",
-      "tldr": "58 pending tasks (top types: [('daily_article', 40), ('experiment', 15), ('?', 2)])",
+      "tldr": "56 pending tasks (top types: [('daily_article', 40), ('experiment', 14), ('?', 2)])",
       "next": "dispatch top P1-P3 if slots free"
     },
     {
@@ -29,9 +29,9 @@
       "tldr": "3/3 sample live URLs return 200",
       "next": null,
       "sample": [
-        "mile_94c1a524",
-        "mile_6cc748ba",
-        "mile_74a28bcf"
+        "mile_883a7429",
+        "mile_7e3767a1",
+        "mile_94c1a524"
       ],
       "dead": []
     },
@@ -50,10 +50,26 @@
     },
     {
       "section": "health_alerts_unhandled",
-      "status": "ok",
-      "tldr": "0 warn/critical alerts last 6h (read + act per .claude/rules/alert.md)",
-      "next": null,
-      "breaches": []
+      "status": "critical",
+      "tldr": "3 warn/critical alerts last 6h (read + act per .claude/rules/alert.md)",
+      "next": "ingest alerts → run remediation per alert.md auto-action table",
+      "breaches": [
+        {
+          "ts": "14:09",
+          "level": "warn",
+          "subject": "[VolPred Alert][WARN] ⚠️ gemini_ask.py 已呼叫 — 產生 Gemini API 費用"
+        },
+        {
+          "ts": "16:00",
+          "level": "warn",
+          "subject": "[VolPred Alert][WARN] Release pool cron gap > 4.0h (interval=180min)"
+        },
+        {
+          "ts": "16:00",
+          "level": "critical",
+          "subject": "[VolPred Alert][CRITICAL] Host cron failure detected"
+        }
+      ]
     }
   ]
 }

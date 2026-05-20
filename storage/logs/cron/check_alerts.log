@@ -3455,3 +3455,133 @@ breaches=0 sent=0 skipped=0
 - [ok] supabase_sync_fail level=info title=Supabase sync queue clean
 JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-20T12:00:23.625667+00:00"}
 === [check_alerts] exit 0 at 2026-05-20 20:00:24 CST (duration=19s) ===
+=== [check_alerts] 2026-05-20 21:00:03 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=3 skipped=11 ids=['audit_publish_sync', 'ops_dashboard', 'boss_report_4h']
+  piggy-back-drift: none
+  release-pool-auto: ok age=224min reason=done
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-20T13:00:40.786352+00:00"}
+=== [check_alerts] exit 0 at 2026-05-20 21:00:42 CST (duration=41s) ===
+=== [check_alerts] 2026-05-20 22:00:04 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=3 skipped=11 ids=['release_pool', 'audit_publish_sync', 'ops_dashboard']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=161min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-20T14:00:34.410991+00:00"}
+=== [check_alerts] exit 0 at 2026-05-20 22:00:36 CST (duration=34s) ===
+=== [check_alerts] 2026-05-20 23:00:02 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=2 skipped=12 ids=['audit_publish_sync', 'ops_dashboard']
+  piggy-back-drift: none
+  release-pool-auto: ok age=221min reason=done
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-20T15:00:36.985759+00:00"}
+=== [check_alerts] exit 0 at 2026-05-20 23:00:43 CST (duration=41s) ===
+=== [check_alerts] 2026-05-21 00:00:08 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=3 skipped=11 ids=['paper_sync_all', 'audit_publish_sync', 'ops_dashboard']
+  piggy-back-drift: none
+  release-pool-auto: ok age=281min reason=done
+breaches=2 sent=2 skipped=0
+- [BREACH] release_pool_gap level=warn title=Release pool cron gap > 4.0h (interval=180min)
+    ## 觸發條件
+    release_pool host cron fire gap 已超過 4.0 小時門檻 (interval=180min + 30min grace)。
+    - last_fire_at: 2026-05-20T11:19:15.979858+00:00
+    - gap_hours: 4.69
+    - configured_interval_minutes: 180
+    - log_path: storage/logs/cron/release_pool.log
+    
+    ## 影響
+    文章釋出中斷 = 讀者端看到平台停滯、搜尋索引停滯；Mission 第 1 條（文章品質）
+    與第 5 條（曝光流量）直接受損。若持續 >6.0h 會累積多篇 draft 排隊延遲。
+    
+    ## 建議行動
+    1. 立即手動釋出（最快復原）：
+       VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings
+    2. 診斷 host cron 是否仍在跑：
+       tail -20 storage/logs/cron/release_pool.log
+       crontab -l | grep release_pool
+    3. 若 cron daemon 卡住：重新 install crontab 或 launchd job
+    4. 若 draft 池也空（配合 draft_pool_low alert）：先補池，見 publish-checklist
+       與 .claude/skills/publication-candidates/SKILL.md 的 5-step 選題流程。
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [BREACH] host_cron_fail level=critical title=Host cron failure detected
+    ## 觸發條件
+    偵測到 host cron 失敗（最新 exit code != 0）。
+    - scheduler_last_tick_at: 2026-04-19T04:45:13.375232+00:00（僅供參考，v12 後不作為 breach 判準）
+    - scheduler_last_status: ok
+    - scheduler_age_minutes: 45315.4
+    - failing_logs:
+      - storage/logs/cron/paper_sync_all.log exit=1 at 2026-05-20T16:00:22.132151+00:00
+    
+    ## 影響
+    資料收集 / daily_update / release_pool 等 host cron 斷鏈 → 下游 metrics、前端顯示、
+    Supabase mirror sync 可能顯示過期資料；若失敗的是 release_pool，會同步觸發
+    release_pool_gap alert，發文節奏中斷。
+    
+    ## 建議行動
+    1. 查失敗 log： tail -20 <failing_log 路徑>
+    2. 權限問題（exit=126）： chmod +x scripts/<script>.sh
+    3. macOS Sequoia+ FDA（exit=1 + Operation not permitted）：
+       System Settings > Privacy & Security > Full Disk Access 加 script 路徑
+    4. 手動跑 failed command 驗證修復： uv run <command>
+    5. 比對 canonical schedule： crontab -l  vs config/runtime_schedules.json
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+dispatched:
+  - sent: level=warn title=Release pool cron gap > 4.0h (interval=180min) notif_id=e4f6c847 reason=ok
+  - sent: level=critical title=Host cron failure detected notif_id=a2e95cbf reason=ok
+JSON: {"breach_count": 2, "sent_count": 2, "skipped_count": 0, "generated_at": "2026-05-20T16:00:36.370258+00:00"}
+=== [check_alerts] exit 0 at 2026-05-21 00:00:45 CST (duration=40s) ===
+=== [check_alerts] 2026-05-21 01:00:01 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=7 skipped=7 ids=['release_pool', 'release_settings_audit', 'paper_sync_all', 'audit_publish_sync', 'audit_fb_pipeline', 'ops_dashboard', 'boss_report_4h']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=39min
+breaches=1 sent=0 skipped=1
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [BREACH] host_cron_fail level=critical title=Host cron failure detected
+    ## 觸發條件
+    偵測到 host cron 失敗（最新 exit code != 0）。
+    - scheduler_last_tick_at: 2026-04-19T04:45:13.375232+00:00（僅供參考，v12 後不作為 breach 判準）
+    - scheduler_last_status: ok
+    - scheduler_age_minutes: 45375.9
+    - failing_logs:
+      - storage/logs/cron/ops_dashboard.log exit=1 at 2026-05-20T17:00:48.351196+00:00
+    
+    ## 影響
+    資料收集 / daily_update / release_pool 等 host cron 斷鏈 → 下游 metrics、前端顯示、
+    Supabase mirror sync 可能顯示過期資料；若失敗的是 release_pool，會同步觸發
+    release_pool_gap alert，發文節奏中斷。
+    
+    ## 建議行動
+    1. 查失敗 log： tail -20 <failing_log 路徑>
+    2. 權限問題（exit=126）： chmod +x scripts/<script>.sh
+    3. macOS Sequoia+ FDA（exit=1 + Operation not permitted）：
+       System Settings > Privacy & Security > Full Disk Access 加 script 路徑
+    4. 手動跑 failed command 驗證修復： uv run <command>
+    5. 比對 canonical schedule： crontab -l  vs config/runtime_schedules.json
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+dispatched:
+  - skipped: level=critical title=Host cron failure detected notif_id=a2e95cbf reason=dedup_24h
+JSON: {"breach_count": 1, "sent_count": 0, "skipped_count": 1, "generated_at": "2026-05-20T17:01:06.644900+00:00"}
+=== [check_alerts] exit 0 at 2026-05-21 01:01:09 CST (duration=69s) ===

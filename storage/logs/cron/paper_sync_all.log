@@ -1704,3 +1704,85 @@ JSON: {"action": "paper_sync_all", "summary": {"skip": 11}, "results":
 {"paper_id": "vt-insurance-cost", "action": "skip", "reason": "supabase_newer"},
 {"paper_id": "vt-trend-following", "action": "skip", "reason": 
 "supabase_newer"}]}
+=== paper-sync-all 2026-05-21 00:00:01 ===
+  crypto-fear-channel       skip             supabase_newer
+  eav-universal-magnitude   skip             supabase_newer
+  garch-x-vix               skip             supabase_newer
+  leverage-direction        skip             supabase_newer
+  prg-periodic-garch        skip             supabase_newer
+  taiwan-vt                 skip             supabase_newer
+  vix-sufficiency           skip             supabase_newer
+  volatility-absorption     skip             supabase_newer
+  vt-crowding-abm           skip             supabase_newer
+  vt-insurance-cost         skip             supabase_newer
+  vt-trend-following        skip             supabase_newer
+Sync complete {'skip': 11}
+JSON: {"action": "paper_sync_all", "summary": {"skip": 11}, "results": 
+[{"paper_id": "crypto-fear-channel", "action": "skip", "reason": 
+"supabase_newer"}, {"paper_id": "eav-universal-magnitude", "action": "skip", 
+"reason": "supabase_newer"}, {"paper_id": "garch-x-vix", "action": "skip", 
+"reason": "supabase_newer"}, {"paper_id": "leverage-direction", "action": 
+"skip", "reason": "supabase_newer"}, {"paper_id": "prg-periodic-garch", 
+"action": "skip", "reason": "supabase_newer"}, {"paper_id": "taiwan-vt", 
+"action": "skip", "reason": "supabase_newer"}, {"paper_id": "vix-sufficiency", 
+"action": "skip", "reason": "supabase_newer"}, {"paper_id": 
+"volatility-absorption", "action": "skip", "reason": "supabase_newer"}, 
+{"paper_id": "vt-crowding-abm", "action": "skip", "reason": "supabase_newer"}, 
+{"paper_id": "vt-insurance-cost", "action": "skip", "reason": "supabase_newer"},
+{"paper_id": "vt-trend-following", "action": "skip", "reason": 
+"supabase_newer"}]}
+=== [paper_sync_all] piggy-back fire at 2026-05-20T16:00:16.191901+00:00 ===
+=== paper-sync-all 2026-05-21 00:00:16 ===
+Traceback (most recent call last):
+  File "/Users/yhlai0911/Desktop/volpred-research/.venv/bin/volpred", line 4, in <module>
+    from volpred.cli import cli
+  File "/Users/yhlai0911/Desktop/volpred-research/src/volpred/cli.py", line 9, in <module>
+    from pydantic import ValidationError
+  File "/Users/yhlai0911/Desktop/volpred-research/.venv/lib/python3.12/site-packages/pydantic/__init__.py", line 5, in <module>
+    from ._migration import getattr_migration
+  File "/Users/yhlai0911/Desktop/volpred-research/.venv/lib/python3.12/site-packages/pydantic/_migration.py", line 4, in <module>
+    from pydantic.warnings import PydanticDeprecatedSince20
+  File "/Users/yhlai0911/Desktop/volpred-research/.venv/lib/python3.12/site-packages/pydantic/warnings.py", line 5, in <module>
+    from .version import version_short
+  File "/Users/yhlai0911/Desktop/volpred-research/.venv/lib/python3.12/site-packages/pydantic/version.py", line 7, in <module>
+    from pydantic_core import __version__ as __pydantic_core_version__
+  File "/Users/yhlai0911/Desktop/volpred-research/.venv/lib/python3.12/site-packages/pydantic_core/__init__.py", line 8, in <module>
+    from ._pydantic_core import (
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1322, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1262, in _find_spec
+  File "<frozen importlib._bootstrap_external>", line 1532, in find_spec
+  File "<frozen importlib._bootstrap_external>", line 1506, in _get_spec
+  File "<frozen importlib._bootstrap_external>", line 1609, in find_spec
+  File "<frozen importlib._bootstrap_external>", line 1652, in _fill_cache
+InterruptedError: [Errno 4] Interrupted system call: '/Users/yhlai0911/Desktop/volpred-research/.venv/lib/python3.12/site-packages/pydantic_core'
+=== [paper_sync_all] exit 1 at 2026-05-20T16:00:22.132151+00:00 (duration=5.9s) ===
+=== [paper_sync_all] piggy-back fire at 2026-05-20T17:00:21.323644+00:00 ===
+=== paper-sync-all 2026-05-21 01:00:21 ===
+  crypto-fear-channel       skip             supabase_newer
+  eav-universal-magnitude   skip             supabase_newer
+  garch-x-vix               skip             supabase_newer
+  leverage-direction        skip             supabase_newer
+  prg-periodic-garch        skip             supabase_newer
+  taiwan-vt                 skip             supabase_newer
+  vix-sufficiency           skip             supabase_newer
+  volatility-absorption     skip             supabase_newer
+  vt-crowding-abm           skip             supabase_newer
+  vt-insurance-cost         skip             supabase_newer
+  vt-trend-following        skip             supabase_newer
+Sync complete {'skip': 11}
+JSON: {"action": "paper_sync_all", "summary": {"skip": 11}, "results": 
+[{"paper_id": "crypto-fear-channel", "action": "skip", "reason": 
+"supabase_newer"}, {"paper_id": "eav-universal-magnitude", "action": "skip", 
+"reason": "supabase_newer"}, {"paper_id": "garch-x-vix", "action": "skip", 
+"reason": "supabase_newer"}, {"paper_id": "leverage-direction", "action": 
+"skip", "reason": "supabase_newer"}, {"paper_id": "prg-periodic-garch", 
+"action": "skip", "reason": "supabase_newer"}, {"paper_id": "taiwan-vt", 
+"action": "skip", "reason": "supabase_newer"}, {"paper_id": "vix-sufficiency", 
+"action": "skip", "reason": "supabase_newer"}, {"paper_id": 
+"volatility-absorption", "action": "skip", "reason": "supabase_newer"}, 
+{"paper_id": "vt-crowding-abm", "action": "skip", "reason": "supabase_newer"}, 
+{"paper_id": "vt-insurance-cost", "action": "skip", "reason": "supabase_newer"},
+{"paper_id": "vt-trend-following", "action": "skip", "reason": 
+"supabase_newer"}]}
+=== [paper_sync_all] exit 0 at 2026-05-20T17:00:28.152333+00:00 (duration=6.8s) ===

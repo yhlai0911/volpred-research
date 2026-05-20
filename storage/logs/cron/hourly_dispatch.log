@@ -3054,3 +3054,71 @@ else
         echo "[WATCHDOG] aborted — PID $CLAUDE_PID now belongs to '$ACTUAL_CMD' (PID reuse)";
     fi;
 fi )
+=== hourly-dispatch 2026-05-20 21:07:03 CST ===
+=== hourly-dispatch 2026-05-20 22:07:00 CST ===
+---
+
+**任務結束摘要**
+
+- **完成時間**: 2026-05-20 ~21:35 CST（約 25 分鐘）
+- **完成項目**: paper_review — taiwan-vt body.tex 三項修復
+  1. Introduction 錯誤 common-period 屬性修復：移除以 "2020--2026" 框架包裝 1.074/1.137 的錯誤導語；VIX-proxy 1.137/GJR VT 1.074 作為 Table 3 主評估期結果陳述，common period (2020-2026) GJR VT 1.108 最高 Sharpe 另行說明
+  2. Introduction +0.114 → +0.124（與 Section 4.2 明確計算 1.074-0.950=0.124 一致）
+  3. Conclusion +0.114 → +0.124（同）
+  - 編譯 53 頁無錯誤，Supabase 同步完成，README 更新（3 SEVERE 剩餘）
+- **下次任務**: K1386 NULL result Codex review — 通過後寫 knowledge.json（fGN vs HAR, HAR 顯著勝出）
+=== hourly-dispatch end 2026-05-20 22:24:11 CST (exit=0) ===
+[2]+  Terminated: 15          ( sleep $((HOURLY_CAP_SEC + 60)); ACTUAL_CMD=$(ps -p "$CLAUDE_PID" -o comm= 2>/dev/null | tr -d '[:space:]'); if kill -0 "$CLAUDE_PID" 2> /dev/null && [[ "$ACTUAL_CMD" == *"$CLAUDE_CMD_PATTERN"* ]]; then
+    echo "[WATCHDOG] claude PID $CLAUDE_PID (cmd=$ACTUAL_CMD) alive past cap+60s; SIGTERM to PGID"; kill -TERM -- "-$CLAUDE_PID" 2> /dev/null || kill -TERM "$CLAUDE_PID" 2> /dev/null; sleep 10; ACTUAL_CMD2=$(ps -p "$CLAUDE_PID" -o comm= 2>/dev/null | tr -d '[:space:]'); if kill -0 "$CLAUDE_PID" 2> /dev/null && [[ "$ACTUAL_CMD2" == *"$CLAUDE_CMD_PATTERN"* ]]; then
+        echo "[WATCHDOG] SIGTERM ignored; SIGKILL to PGID"; kill -KILL -- "-$CLAUDE_PID" 2> /dev/null || kill -KILL "$CLAUDE_PID" 2> /dev/null;
+    fi;
+else
+    if [ -n "$ACTUAL_CMD" ] && [[ "$ACTUAL_CMD" != *"$CLAUDE_CMD_PATTERN"* ]]; then
+        echo "[WATCHDOG] aborted — PID $CLAUDE_PID now belongs to '$ACTUAL_CMD' (PID reuse)";
+    fi;
+fi )
+=== [hourly_dispatch] exit 0 at 2026-05-20 22:24:11 CST ===
+=== hourly-dispatch 2026-05-20 23:07:05 CST ===
+同步完成（updated_at: 2026-05-20T15:26:38）。
+
+**台灣 VT 論文 paper_review 任務完成摘要：**
+
+| Issue | 修正內容 | 位置 |
+|-------|----------|------|
+| sub-M8a | GJR+CF 從「comparable」→「over-conservative (0.51% < 1%)」 | body_v3 L405 |
+| M3-persist | 新增 Christoffersen (1998) bibitem + VaR trinity 三準則定義 | main_v3 + body_v3 L385 |
+| N4 | 腳注對比 K896 全 OOS（18/1,756=1.025%）與 2020-2026（8 violations） | body_v3 L387 |
+| M5 | Normal 2.0% 加入期間標注（K896 full OOS = 1.71%） | body_v3 L387 |
+| SSVS PIP | Table 腳注說明 PIP=1.000 係 K461 值 0.9994 四捨五入 | body_v3 L219 |
+| 額外修正 | `\label{sec:cf}` + `politis1994` bibitem（原缺失）| both files |
+
+論文狀態：**0 SEVERE / 0 HIGH / 0 MEDIUM / 6 MINOR**，達 Minor Revision 完整修訂水準。下一步：啟動 paper-review-cycle 做最終 pass 再評估投稿時機。
+=== hourly-dispatch end 2026-05-20 23:26:48 CST (exit=0) ===
+[2]+  Terminated: 15          ( sleep $((HOURLY_CAP_SEC + 60)); ACTUAL_CMD=$(ps -p "$CLAUDE_PID" -o comm= 2>/dev/null | tr -d '[:space:]'); if kill -0 "$CLAUDE_PID" 2> /dev/null && [[ "$ACTUAL_CMD" == *"$CLAUDE_CMD_PATTERN"* ]]; then
+    echo "[WATCHDOG] claude PID $CLAUDE_PID (cmd=$ACTUAL_CMD) alive past cap+60s; SIGTERM to PGID"; kill -TERM -- "-$CLAUDE_PID" 2> /dev/null || kill -TERM "$CLAUDE_PID" 2> /dev/null; sleep 10; ACTUAL_CMD2=$(ps -p "$CLAUDE_PID" -o comm= 2>/dev/null | tr -d '[:space:]'); if kill -0 "$CLAUDE_PID" 2> /dev/null && [[ "$ACTUAL_CMD2" == *"$CLAUDE_CMD_PATTERN"* ]]; then
+        echo "[WATCHDOG] SIGTERM ignored; SIGKILL to PGID"; kill -KILL -- "-$CLAUDE_PID" 2> /dev/null || kill -KILL "$CLAUDE_PID" 2> /dev/null;
+    fi;
+else
+    if [ -n "$ACTUAL_CMD" ] && [[ "$ACTUAL_CMD" != *"$CLAUDE_CMD_PATTERN"* ]]; then
+        echo "[WATCHDOG] aborted — PID $CLAUDE_PID now belongs to '$ACTUAL_CMD' (PID reuse)";
+    fi;
+fi )
+=== [hourly_dispatch] exit 0 at 2026-05-20 23:26:48 CST ===
+=== hourly-dispatch 2026-05-21 00:07:00 CST ===
+全部 4 個 feed-sync 任務均已完成（exit code 0）。本次 hourly dispatch 完整結束。
+
+**結束時間**：2026-05-21 00:30 CST  
+**完成項目**：trending_repost `mile_883a7429` 發佈 + Supabase 同步 + commit `35193363`  
+**下次任務時間**：HH:07（下一個整點）
+=== hourly-dispatch end 2026-05-21 00:53:57 CST (exit=0) ===
+[2]+  Terminated: 15          ( sleep $((HOURLY_CAP_SEC + 60)); ACTUAL_CMD=$(ps -p "$CLAUDE_PID" -o comm= 2>/dev/null | tr -d '[:space:]'); if kill -0 "$CLAUDE_PID" 2> /dev/null && [[ "$ACTUAL_CMD" == *"$CLAUDE_CMD_PATTERN"* ]]; then
+    echo "[WATCHDOG] claude PID $CLAUDE_PID (cmd=$ACTUAL_CMD) alive past cap+60s; SIGTERM to PGID"; kill -TERM -- "-$CLAUDE_PID" 2> /dev/null || kill -TERM "$CLAUDE_PID" 2> /dev/null; sleep 10; ACTUAL_CMD2=$(ps -p "$CLAUDE_PID" -o comm= 2>/dev/null | tr -d '[:space:]'); if kill -0 "$CLAUDE_PID" 2> /dev/null && [[ "$ACTUAL_CMD2" == *"$CLAUDE_CMD_PATTERN"* ]]; then
+        echo "[WATCHDOG] SIGTERM ignored; SIGKILL to PGID"; kill -KILL -- "-$CLAUDE_PID" 2> /dev/null || kill -KILL "$CLAUDE_PID" 2> /dev/null;
+    fi;
+else
+    if [ -n "$ACTUAL_CMD" ] && [[ "$ACTUAL_CMD" != *"$CLAUDE_CMD_PATTERN"* ]]; then
+        echo "[WATCHDOG] aborted — PID $CLAUDE_PID now belongs to '$ACTUAL_CMD' (PID reuse)";
+    fi;
+fi )
+=== [hourly_dispatch] exit 0 at 2026-05-21 00:53:57 CST ===
+=== hourly-dispatch 2026-05-21 01:07:00 CST ===

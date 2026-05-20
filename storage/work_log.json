@@ -7583,5 +7583,19 @@
     ],
     "dedup": "LanceDB all dist>0.65, grep no match on 美債/殖利率/rate-hike",
     "notes": "3-model gate: Gemini done (A-); Codex pending (non-blocking)"
+  },
+  {
+    "timestamp": "2026-05-20T17:25:05.735894+00:00",
+    "task_type": "daily_article",
+    "title": "K567: VIX-Conditional Leverage 在跨國市場不通用 — 6 市場 NULL result",
+    "status": "succeeded",
+    "article_id": "mile_357f5f44",
+    "article_title": "VIX 是全球恐慌指數？六個市場真錢實測的答案讓人意外",
+    "article_status": "draft",
+    "audience": "research",
+    "experiment_refs": [
+      "K567"
+    ],
+    "notes": "K567 null result article: 6/6 markets fail Harvey threshold, 18 OOS cells 0 wins. Images reused from experiments/k567/. Anti-AI style: all 9 checks PASS. Numbers byte-matched from results.json."
   }
 ]
