@@ -164,7 +164,7 @@ LLM 對「fluent-sounding citation」hallucinate 率最高 — 編造名人語�
 
 得到答覆後跑跨模型驗證：
 $ echo "驗證：AI 聲稱 X 在 Y 年說過 Z。請查證真實性，附 URL。" \
-    | gemini -m gemini-2.5-pro -p - -y --skip-trust
+    | uv run python scripts/gemini_ask.py -
 
 不通過驗證 → 整段刪 / 重寫，禁止保留含「假 citation」的句子。
 ```

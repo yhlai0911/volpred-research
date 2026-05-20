@@ -85,10 +85,11 @@
 ## 專案地圖
 
 - 本機雙 agent 研究系統：Claude 偏主研究與整合，Codex 偏審查、第二意見、針對性修正。
-- **雙 AI CLI 可用性**（2026-05-14 確認）：
-  - **Codex CLI** `codex-cli 0.130.0` ✅ — ChatGPT auth（`Logged in using ChatGPT`），預設 `gpt-5.4` medium reasoning；headless 入口 `codex exec`；`--full-auto` 已 deprecated 改 `-s workspace-write`。中文 prompt 必 heredoc + stdin。
-  - **Gemini CLI** `0.42.0` ✅ — oauth-personal active = `ideahub.everything@gmail.com`（**有 Gemini Pro 訂閱**，pro 模型可放心當主力，不會降級）；headless 入口 `gemini -p`，**必加 `-y --skip-trust`**（v0.42 trust gate 否則 silent fail）。
-  - 完整 flags / 子指令對照表：[codex-cli SKILL](file:///Users/yhlai0911/.claude/skills/codex-cli/SKILL.md) + [gemini-cli SKILL](file:///Users/yhlai0911/.claude/skills/gemini-cli/SKILL.md)。
+- **AI CLI 可用性**（2026-05-20 更新）：
+  - **Codex CLI** `codex-cli 0.132.0` ✅ — ChatGPT auth（`Logged in using ChatGPT`），預設 `gpt-5.4` medium reasoning；headless 入口 `codex exec`；`-s workspace-write`。中文 prompt 必 heredoc + stdin。reinstall 要 `npm install -g @openai/codex@latest --include=optional`（缺 darwin-arm64 binary 會 crash）。
+  - **Gemini headless** → `scripts/gemini_ask.py` ✅ — 直打 Gemini API（`GOOGLE_CLOUD_API_KEY`），預設 `gemini-3.1-pro-preview`，真 stdout pipe。用法 `uv run python scripts/gemini_ask.py "prompt"` / stdin `... | gemini_ask.py -` / `--model` override。
+  - **已放棄**：`gemini-cli`（2026-06-18 Google 停服）+ `antigravity-cli`（`agy chat` 開 GUI 無 stdout pipe，headless 不可用）。所有 Gemini second-opinion / fact-check 一律走 `gemini_ask.py`。
+  - 完整對照：[codex-cli SKILL](file:///Users/yhlai0911/.claude/skills/codex-cli/SKILL.md) + memory `reference_dual_cli_availability`。
 - active frontend / Zeabur target 由 `config/project_targets.json` 決定；**先改 config，再改程式或文件。**
 - 目前線上站點：`https://volpred.zeabur.app`
 - 研究記憶雙寫：Supabase + Mirror API

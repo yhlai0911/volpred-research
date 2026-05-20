@@ -107,7 +107,7 @@ grep -nE "結構性|本質上是|深層次|多維度|生態化|賦能|閉環" $D
 grep -nE "[0-9]+%|根據|研究|論文|報告|引用|曾說" $DRAFT > /tmp/claims.txt
 
 # 跨模型驗證
-cat /tmp/claims.txt | gemini -m gemini-2.5-pro -p - -y --skip-trust <<'EOF'
+cat /tmp/claims.txt | uv run python scripts/gemini_ask.py - <<'EOF'
 請逐項驗證下列 claims：
 (1) 數字 / 統計是否真實？給 primary source URL
 (2) 名人語錄是否確有其事？給原始出處
