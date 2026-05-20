@@ -74,7 +74,9 @@ def extract_unchecked_items(text: str, *, limit: int = 20) -> list[dict]:
         if any(p in body_lower for p in [
             "latex-academic-reviewer", "citation-verifier", "cover letter",
             "highlights", "graphical abstract", "投稿準備", "全面審查",
-            "校稿", "highlights", "/paper-update", "submit",
+            "校稿", "/paper-update", "submit",
+            # Paper-fix / review-correction items (not new research experiments)
+            "修正 review", "review_v", "gemini 審查",
         ]):
             continue
         # Require some signal of a real research question (model/test/data/hypothesis)
