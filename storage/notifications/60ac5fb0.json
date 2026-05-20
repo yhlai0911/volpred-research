@@ -1,0 +1,20 @@
+{
+  "id": "60ac5fb0",
+  "subject": "[VolPred Alert][WARN] FB Pending Backlog: 5 trending reposts ready, need manual push",
+  "body": "Alert level: warn\nTitle: FB Pending Backlog: 5 trending reposts ready, need manual push\n\n## 觸發條件\ntrending_repost_log.json 累積 5 篇 fb_post_status=pending 帶 fb_post_draft，最早 mile_50f44a46 (2026-05-16) 已 pending 3 天。\n\n## 影響\nMission 5 (曝光流量) 直接受損 — VolPred feed 文章 OK 上線但 FB 同步發佈承諾沒落地。讀者轉換漏斗少了 Ivan Lai FB 流量入口。Three-Strike 候補 standby（5 月 17 fb_pending_audit + 5 月 18 handoff + 5 月 19 重新累積 = 第 3 次）。\n\n## 建議行動\n1. 立即 copy-paste：docs/fb_post_handoff_2026_05_18.md（5 posts 主貼文 + 留言連結都備好，最新到最舊排序）\n2. 全部發完跑文末 jq one-liner flip status\n3. 結構性決策：要嘛 (a) 連 MCP claude-in-chrome 到 Claude Code 給我 drive Chrome，要嘛 (b) 改 FB Page + Graph API 路徑",
+  "text_body": "Alert level: warn\nTitle: FB Pending Backlog: 5 trending reposts ready, need manual push\n\n## 觸發條件\ntrending_repost_log.json 累積 5 篇 fb_post_status=pending 帶 fb_post_draft，最早 mile_50f44a46 (2026-05-16) 已 pending 3 天。\n\n## 影響\nMission 5 (曝光流量) 直接受損 — VolPred feed 文章 OK 上線但 FB 同步發佈承諾沒落地。讀者轉換漏斗少了 Ivan Lai FB 流量入口。Three-Strike 候補 standby（5 月 17 fb_pending_audit + 5 月 18 handoff + 5 月 19 重新累積 = 第 3 次）。\n\n## 建議行動\n1. 立即 copy-paste：docs/fb_post_handoff_2026_05_18.md（5 posts 主貼文 + 留言連結都備好，最新到最舊排序）\n2. 全部發完跑文末 jq one-liner flip status\n3. 結構性決策：要嘛 (a) 連 MCP claude-in-chrome 到 Claude Code 給我 drive Chrome，要嘛 (b) 改 FB Page + Graph API 路徑",
+  "html_body": null,
+  "level": "warn",
+  "metadata": {
+    "notification_type": "ops_alert",
+    "alert_level": "warn",
+    "alert_title": "FB Pending Backlog: 5 trending reposts ready, need manual push",
+    "recipient": "yihao.lai@gmail.com"
+  },
+  "timestamp": "2026-05-19T09:06:12.775166+00:00",
+  "recipients": [
+    "yihao.lai@gmail.com"
+  ],
+  "sent": true,
+  "configured": true
+}

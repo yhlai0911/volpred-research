@@ -1,8 +1,8 @@
 {
   "experiment_id": "K1370",
   "title": "Block-bootstrap 90% CI for TAIEX-to-Individual amplification ratio under canonical full-sample BW-robust GJR-GARCH(1,1)",
-  "timestamp": "2026-05-16T15:17:45.471917+00:00",
-  "runtime_seconds": 2509.6,
+  "timestamp": "2026-05-17T20:12:18.562693+00:00",
+  "runtime_seconds": 2518.0,
   "config": {
     "B": 1000,
     "block_length": 252,
@@ -63,14 +63,14 @@
   "point_estimate_sanity": {
     "matched_sample_2008_2024": {
       "TAIEX_gamma": 0.11392370481995903,
-      "mean_individual_gamma": 0.024243163406108496,
-      "amplification_ratio": 4.69920954256547,
+      "mean_individual_gamma": 0.024243970932199727,
+      "amplification_ratio": 4.69905301976133,
       "note": "Apples-to-apples; both TAIEX and 9 individuals on identical 2008-2024 window."
     },
     "mixed_sample_paper_headline": {
-      "TAIEX_gamma_1997_2026": 0.10546226091009706,
-      "mean_individual_gamma_2008_2024": 0.024243163406108496,
-      "amplification_ratio": 4.350185623198166,
+      "TAIEX_gamma_1997_2026": 0.10781016076945997,
+      "mean_individual_gamma_2008_2024": 0.024243970932199727,
+      "amplification_ratio": 4.446885416211726,
       "note": "Reproduces paper body.tex \u00a73.2 headline 10\u00d7 ratio = 0.272 (TAIEX over 1997-2026, n=7148) / 0.027 (9-indiv over 2008-2024, n=4170). This is the source of the 10\u00d7 headline."
     },
     "canonical_target_K1302_K1302b_mixed": 10.07,
@@ -78,14 +78,14 @@
   },
   "amplification_ratio": {
     "point_estimate_canonical": 10.07,
-    "point_estimate_this_run_10start": 4.69920954256547,
-    "ci_low_90": 2.3052643728399302,
-    "ci_high_90": 6.6105906057456245,
-    "ci_low_95": 2.175221597081244,
-    "ci_high_95": 7.68305821218618,
-    "median": 3.7791756532756757,
-    "mean": 4.036518296372921,
-    "std": 1.4323039396236994,
+    "point_estimate_this_run_10start": 4.69905301976133,
+    "ci_low_90": 2.284235584911323,
+    "ci_high_90": 6.580706477190761,
+    "ci_low_95": 2.1616036472805504,
+    "ci_high_95": 7.6766039509703745,
+    "median": 3.780938870469008,
+    "mean": 4.031478178538553,
+    "std": 1.4169595050330315,
     "B": 1000,
     "block_length": 252,
     "seed_base": 42
@@ -104,8 +104,8 @@
       "2886.TW": 0.9957999999999999,
       "2383.TW": 0.9992000000000001,
       "2882.TW": 1.0,
-      "2891.TW": 0.9987,
-      "2412.TW": 0.8376,
+      "2891.TW": 0.9983,
+      "2412.TW": 0.8352999999999999,
       "2885.TW": 1.0,
       "2881.TW": 1.0
     },
@@ -118,8 +118,8 @@
       "5": 0,
       "6": 0,
       "7": 0,
-      "8": 9,
-      "9": 991
+      "8": 3,
+      "9": 997
     }
   },
   "lookahead_free_certification": "Each replicate is an independent in-sample MLE on a block-bootstrap resample of full-sample log returns. No conditioning on future observations. No t\u2192t+1 leak. Seeds fixed: np.random.seed(42); per-replicate bootstrap_seed = 42 + r; per-series sub-seed uses MD5(ticker) (process-stable; replaces hash(ticker) which is PYTHONHASHSEED-randomized \u2014 K1370-v2 fix per Codex CRITICAL 2026-05-16). All arch fits use cov_type='robust'.",

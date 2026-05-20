@@ -1,36 +1,33 @@
 {
-  "generated_at": "2026-05-18T21:09:45.484798+00:00",
+  "generated_at": "2026-05-20T12:07:34.001014+00:00",
   "slot_cap": 4,
   "slot_state": {
-    "worktrees": [],
+    "worktrees": [
+      "agent-a74cc77955ff0c969"
+    ],
     "active_agents": [],
-    "occupied": 0
+    "occupied": 1
   },
-  "free_slots": 4,
-  "pending_total": 67,
-  "pending_agentable": 51,
-  "pending_main_thread": 7,
-  "pending_blocked": 9,
+  "free_slots": 3,
+  "pending_total": 58,
+  "pending_agentable": 48,
+  "pending_main_thread": 3,
+  "pending_blocked": 7,
   "dispatch_candidates": [
     {
-      "id": "K1310",
+      "id": "K1313",
       "priority": 3,
-      "title": "K1310: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）"
+      "title": "K1313: Probabilistic RV Quantile Forecasting** — arXiv:2508.15922（從 HAR/GARCH 點預測到條件分位數）"
     },
     {
-      "id": "K1310",
+      "id": "K1385",
       "priority": 3,
-      "title": "K1310: Sentiment-Augmented GARCH-LSTM — Computational Economics 2025"
+      "title": "K1385: Sentiment-Augmented GARCH-LSTM — Computational Economics 2025"
     },
     {
-      "id": "K1310",
+      "id": "K1386",
       "priority": 3,
-      "title": "K1310: ★ **Multivariate Rough Volatility Model** — arXiv:2412.14353 (Feb 2026)。多變量 fractional OU + GMM 估計。跨資產 rough vol "
-    },
-    {
-      "id": "K1311",
-      "priority": 3,
-      "title": "K1311: HAR-GNN（Graph Neural Network）— ScienceDirect 2024"
+      "title": "K1386: ★ **Multivariate Rough Volatility Model** — arXiv:2412.14353 (Feb 2026)。多變量 fractional OU + GMM 估計。跨資產 rough vol "
     }
   ],
   "main_thread_queue_top5": [
@@ -45,19 +42,9 @@
       "title": "Paper 1 BLOCKER: 4 new K experiments 補 Tables 4/6/7/8 的 15 no-source"
     },
     {
-      "id": "Paper2_section5_major_revision",
+      "id": "experiment_scaffold_k1268b",
       "priority": 4,
-      "title": "Paper 2 §5 MAJOR trajectory revision (K1215 supersede): integrate K1216 WIDESPREAD_FRAGILITY"
-    },
-    {
-      "id": "Paper2_section5_rewrite",
-      "priority": 4,
-      "title": "Paper 2 §5 cross-market rewrite: apply K1204 synthesis (STRENGTHENED + 3 caveats) + Figures A-E"
-    },
-    {
-      "id": "Paper4_body_rewrite",
-      "priority": 4,
-      "title": "Paper 4 body_v4.tex rewrite: incorporate K1203 + UNIVERSAL_NULL_7_OF_7 FINAL claim"
+      "title": "Experiment scaffold: K1268B (research_program backlog)"
     }
   ],
   "refill": null,
@@ -79,14 +66,6 @@
       "blocked_until": null
     },
     {
-      "id": "K1308",
-      "priority": 3,
-      "reason": "diversity_rule_post_null_quartet",
-      "title": "K1308: PatchTST-lite vs HAR-RV — MDPI 2025",
-      "blocked_at": null,
-      "blocked_until": null
-    },
-    {
       "id": "K1310",
       "priority": 3,
       "reason": "paid_data_source_decision_pending",
@@ -99,6 +78,14 @@
       "priority": 3,
       "reason": "data_accumulation_pending",
       "title": "K1311: VIXTWN 數據累積到 252 天後驗證 ratio 穩定性（Q6）",
+      "blocked_at": null,
+      "blocked_until": null
+    },
+    {
+      "id": "K1383",
+      "priority": 3,
+      "reason": "diversity_rule_post_null_quartet",
+      "title": "K1383: PatchTST-lite vs HAR-RV — MDPI 2025",
       "blocked_at": null,
       "blocked_until": null
     },
@@ -116,22 +103,6 @@
       "reason": "self_tagged_optional",
       "title": "K267: write general-audience article (auto-discovered uncovered K)",
       "blocked_at": "2026-05-06T01:25:20+00:00",
-      "blocked_until": null
-    },
-    {
-      "id": "K691_article_general",
-      "priority": 4,
-      "reason": "self_tagged_optional",
-      "title": "K691: write general-audience article (auto-discovered uncovered K)",
-      "blocked_at": "2026-05-05T07:25:26+00:00",
-      "blocked_until": null
-    },
-    {
-      "id": "K705_article_general",
-      "priority": 4,
-      "reason": "self_tagged_optional",
-      "title": "K705: write general-audience article (auto-discovered uncovered K)",
-      "blocked_at": "2026-05-05T03:24:34+00:00",
       "blocked_until": null
     }
   ]

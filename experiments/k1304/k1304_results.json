@@ -1,0 +1,549 @@
+{
+  "experiment_id": "K1304",
+  "title": "K1304: K1257 BMA 0050.TW H1 FAIL \u2014 Hypothesis Decomposition (H_sample / H_pool / H_micro)",
+  "proposer": "Claude",
+  "executor": "Claude worktree agent",
+  "parent_experiment": "K1257",
+  "data_period": "2010-01-01 to 2026-04-18",
+  "oos_start_canonical": "2020-01-01",
+  "rolling_window": 1250,
+  "refit_freq": 63,
+  "seed": 42,
+  "models": [
+    "GARCH_N",
+    "GJR_N",
+    "GJR_t",
+    "EGARCH_N",
+    "HAR_ABS",
+    "A4f_IV2"
+  ],
+  "assets": [
+    "SPY",
+    "GLD",
+    "0050.TW"
+  ],
+  "lookahead_discipline": {
+    "forecast_lag": "h_t uses returns[t-1] \u2014 explicit r_prev = returns[t-1]",
+    "weight_update": "posterior w_{t+1} updated with y_t AFTER BMA forecast at t",
+    "ll_per_day": "IS window [s..t-1] only, no OOS information",
+    "hhi_hitting_time": "computed forward only"
+  },
+  "baseline": {
+    "SPY": {
+      "n_oos": 1581,
+      "oos_start": "2020-01-01",
+      "bma_qlike": -8.227435934021337,
+      "equal_weight_qlike": -8.204426515519783,
+      "gjr_t_qlike": -8.174852779117515,
+      "per_model_qlike": {
+        "GARCH_N": -8.154045379478035,
+        "GJR_N": -8.146190701632813,
+        "GJR_t": -8.174852779117515,
+        "EGARCH_N": -8.144335135176284,
+        "HAR_ABS": -8.099141887473873,
+        "A4f_IV2": -8.241646799418408
+      },
+      "dm_bma_vs_gjr": {
+        "t_stat": -3.3974966985713597,
+        "p_value": 0.000696941134322504,
+        "harvey_pass": true
+      },
+      "final_weights": {
+        "GARCH_N": 8.425100611178495e-31,
+        "GJR_N": 1.69428829463743e-33,
+        "GJR_t": 1.8033486675362302e-09,
+        "EGARCH_N": 3.907987660172589e-34,
+        "HAR_ABS": 1.1930781674838524e-49,
+        "A4f_IV2": 0.9999999981966514
+      },
+      "hhi_hitting_time_days": 46,
+      "ll_per_day": {
+        "GARCH_N": 4.413223973679675,
+        "GJR_N": 4.41333513171759,
+        "GJR_t": 3.5437270310775384,
+        "EGARCH_N": 4.454284328571828,
+        "HAR_ABS": -1.8851652150202702,
+        "A4f_IV2": 4.481702898213791
+      },
+      "gjr_t_ll_advantage_vs_garch_n": -0.8694969426021366,
+      "candidate_pool": [
+        "GARCH_N",
+        "GJR_N",
+        "GJR_t",
+        "EGARCH_N",
+        "HAR_ABS",
+        "A4f_IV2"
+      ],
+      "h1_verdict": "PASS"
+    },
+    "GLD": {
+      "n_oos": 1581,
+      "oos_start": "2020-01-01",
+      "bma_qlike": -8.181168443888822,
+      "equal_weight_qlike": -8.137113249478231,
+      "gjr_t_qlike": -8.09042062066809,
+      "per_model_qlike": {
+        "GARCH_N": -8.116791287137037,
+        "GJR_N": -8.095806033905006,
+        "GJR_t": -8.09042062066809,
+        "EGARCH_N": -8.089845927350694,
+        "HAR_ABS": -8.067091230865335,
+        "A4f_IV2": -8.188748199815198
+      },
+      "dm_bma_vs_gjr": {
+        "t_stat": -3.379418886794974,
+        "p_value": 0.0007440728883547632,
+        "harvey_pass": true
+      },
+      "final_weights": {
+        "GARCH_N": 1.9791903456139303e-25,
+        "GJR_N": 1.2360747267708316e-32,
+        "GJR_t": 8.044263861987218e-09,
+        "EGARCH_N": 1.111429217645314e-34,
+        "HAR_ABS": 1.7138459571683856e-42,
+        "A4f_IV2": 0.9999999919557361
+      },
+      "hhi_hitting_time_days": 57,
+      "ll_per_day": {
+        "GARCH_N": 4.363384984436583,
+        "GJR_N": 4.360022370642911,
+        "GJR_t": 3.4759448910132056,
+        "EGARCH_N": 4.3766136000611695,
+        "HAR_ABS": -1.8851652150202702,
+        "A4f_IV2": 4.392928174285083
+      },
+      "gjr_t_ll_advantage_vs_garch_n": -0.8874400934233773,
+      "candidate_pool": [
+        "GARCH_N",
+        "GJR_N",
+        "GJR_t",
+        "EGARCH_N",
+        "HAR_ABS",
+        "A4f_IV2"
+      ],
+      "h1_verdict": "PASS"
+    },
+    "0050.TW": {
+      "n_oos": 1524,
+      "oos_start": "2020-01-01",
+      "bma_qlike": -7.679046170988067,
+      "equal_weight_qlike": -7.69397775929242,
+      "gjr_t_qlike": -7.682462845493507,
+      "per_model_qlike": {
+        "GARCH_N": -7.66806331024713,
+        "GJR_N": -7.675993232483801,
+        "GJR_t": -7.682462845493507,
+        "EGARCH_N": -7.667318887560695,
+        "HAR_ABS": -7.5779968884754725,
+        "A4f_IV2": -7.6774473829611445
+      },
+      "dm_bma_vs_gjr": {
+        "t_stat": 0.9798308714158286,
+        "p_value": 0.3273252272783327,
+        "harvey_pass": false
+      },
+      "final_weights": {
+        "GARCH_N": 4.2354457268351926e-35,
+        "GJR_N": 1.7830654326880769e-32,
+        "GJR_t": 1.0,
+        "EGARCH_N": 2.4018481028296523e-35,
+        "HAR_ABS": 6.622202183509736e-65,
+        "A4f_IV2": 5.399987830894686e-32
+      },
+      "hhi_hitting_time_days": 14,
+      "ll_per_day": {
+        "GARCH_N": 4.213934570809726,
+        "GJR_N": 4.2294062971599,
+        "GJR_t": 3.3417172442940224,
+        "EGARCH_N": 4.2349445470582685,
+        "HAR_ABS": -1.8851652150202702,
+        "A4f_IV2": 4.253571885722954
+      },
+      "gjr_t_ll_advantage_vs_garch_n": -0.8722173265157034,
+      "candidate_pool": [
+        "GARCH_N",
+        "GJR_N",
+        "GJR_t",
+        "EGARCH_N",
+        "HAR_ABS",
+        "A4f_IV2"
+      ],
+      "h1_verdict": "FAIL"
+    }
+  },
+  "h_sample": {
+    "verdict": "REJECT",
+    "note": "Even with SPY-matched OOS window, 0050.TW H1 remains FAIL \u2014 window asymmetry not the driver",
+    "details": {
+      "spy_oos_start": "2020-01-01",
+      "spy_n_oos": 1581,
+      "tw_oos_start_original": "2020-01-01",
+      "tw_oos_start_matched": "2020-01-02",
+      "tw_n_oos_original": 1524,
+      "tw_n_oos_matched": 1524,
+      "h1_verdict_matched": "FAIL",
+      "dm_t_stat_matched": 0.9798308714158286,
+      "hhi_hitting_time_matched": 14
+    },
+    "matched_bma_result": {
+      "n_oos": 1524,
+      "oos_start": "2020-01-02",
+      "bma_qlike": -7.679046170988067,
+      "equal_weight_qlike": -7.69397775929242,
+      "gjr_t_qlike": -7.682462845493507,
+      "per_model_qlike": {
+        "GARCH_N": -7.66806331024713,
+        "GJR_N": -7.675993232483801,
+        "GJR_t": -7.682462845493507,
+        "EGARCH_N": -7.667318887560695,
+        "HAR_ABS": -7.5779968884754725,
+        "A4f_IV2": -7.6774473829611445
+      },
+      "dm_bma_vs_gjr": {
+        "t_stat": 0.9798308714158286,
+        "p_value": 0.3273252272783327,
+        "harvey_pass": false
+      },
+      "final_weights": {
+        "GARCH_N": 4.2354457268351926e-35,
+        "GJR_N": 1.7830654326880769e-32,
+        "GJR_t": 1.0,
+        "EGARCH_N": 2.4018481028296523e-35,
+        "HAR_ABS": 6.622202183509736e-65,
+        "A4f_IV2": 5.399987830894686e-32
+      },
+      "hhi_hitting_time_days": 14,
+      "ll_per_day": {
+        "GARCH_N": 4.213934570809726,
+        "GJR_N": 4.2294062971599,
+        "GJR_t": 3.3417172442940224,
+        "EGARCH_N": 4.2349445470582685,
+        "HAR_ABS": -1.8851652150202702,
+        "A4f_IV2": 4.253571885722954
+      },
+      "gjr_t_ll_advantage_vs_garch_n": -0.8722173265157034,
+      "candidate_pool": [
+        "GARCH_N",
+        "GJR_N",
+        "GJR_t",
+        "EGARCH_N",
+        "HAR_ABS",
+        "A4f_IV2"
+      ],
+      "h1_verdict": "FAIL"
+    }
+  },
+  "h_pool": {
+    "verdict": "REJECT",
+    "h1_flips_to_pass_when_drop": [],
+    "note": "No single drop rescues H1 \u2014 pool misfit not the driver",
+    "loo_results": {
+      "GARCH_N": {
+        "n_oos": 1524,
+        "oos_start": "2020-01-01",
+        "bma_qlike": -7.67856384554798,
+        "equal_weight_qlike": -7.695427859750404,
+        "gjr_t_qlike": -7.682462845493507,
+        "per_model_qlike": {
+          "GJR_N": -7.675993232483801,
+          "GJR_t": -7.682462845493507,
+          "EGARCH_N": -7.667318887560695,
+          "HAR_ABS": -7.5779968884754725,
+          "A4f_IV2": -7.6774473829611445
+        },
+        "dm_bma_vs_gjr": {
+          "t_stat": 0.9784558990708666,
+          "p_value": 0.3280042867242543,
+          "harvey_pass": false
+        },
+        "final_weights": {
+          "GJR_N": 1.7830654326880769e-32,
+          "GJR_t": 1.0,
+          "EGARCH_N": 2.4018481028296523e-35,
+          "HAR_ABS": 6.622202183509736e-65,
+          "A4f_IV2": 5.399987830894686e-32
+        },
+        "hhi_hitting_time_days": 14,
+        "ll_per_day": {
+          "GJR_N": 4.2294062971599,
+          "GJR_t": 3.3417172442940224,
+          "EGARCH_N": 4.2349445470582685,
+          "HAR_ABS": -1.8851652150202702,
+          "A4f_IV2": 4.253571885722954
+        },
+        "gjr_t_ll_advantage_vs_garch_n": null,
+        "candidate_pool": [
+          "GJR_N",
+          "GJR_t",
+          "EGARCH_N",
+          "HAR_ABS",
+          "A4f_IV2"
+        ],
+        "h1_verdict": "FAIL"
+      },
+      "GJR_N": {
+        "n_oos": 1524,
+        "oos_start": "2020-01-01",
+        "bma_qlike": -7.678677110368387,
+        "equal_weight_qlike": -7.695664523012881,
+        "gjr_t_qlike": -7.682462845493507,
+        "per_model_qlike": {
+          "GARCH_N": -7.66806331024713,
+          "GJR_t": -7.682462845493507,
+          "EGARCH_N": -7.667318887560695,
+          "HAR_ABS": -7.5779968884754725,
+          "A4f_IV2": -7.6774473829611445
+        },
+        "dm_bma_vs_gjr": {
+          "t_stat": 0.9791526955219735,
+          "p_value": 0.3276600446624942,
+          "harvey_pass": false
+        },
+        "final_weights": {
+          "GARCH_N": 4.2354457268350723e-35,
+          "GJR_t": 1.0,
+          "EGARCH_N": 2.4018481028295842e-35,
+          "HAR_ABS": 6.622202183509359e-65,
+          "A4f_IV2": 5.399987830894379e-32
+        },
+        "hhi_hitting_time_days": 14,
+        "ll_per_day": {
+          "GARCH_N": 4.213934570809726,
+          "GJR_t": 3.3417172442940224,
+          "EGARCH_N": 4.2349445470582685,
+          "HAR_ABS": -1.8851652150202702,
+          "A4f_IV2": 4.253571885722954
+        },
+        "gjr_t_ll_advantage_vs_garch_n": -0.8722173265157034,
+        "candidate_pool": [
+          "GARCH_N",
+          "GJR_t",
+          "EGARCH_N",
+          "HAR_ABS",
+          "A4f_IV2"
+        ],
+        "h1_verdict": "FAIL"
+      },
+      "GJR_t": {
+        "n_oos": 1524,
+        "oos_start": "2020-01-01",
+        "bma_qlike": -7.668700810226501,
+        "equal_weight_qlike": -7.693592430649453,
+        "gjr_t_qlike": null,
+        "per_model_qlike": {
+          "GARCH_N": -7.66806331024713,
+          "GJR_N": -7.675993232483801,
+          "EGARCH_N": -7.667318887560695,
+          "HAR_ABS": -7.5779968884754725,
+          "A4f_IV2": -7.6774473829611445
+        },
+        "dm_bma_vs_gjr": {
+          "t_stat": 0.0,
+          "p_value": 1.0,
+          "harvey_pass": false
+        },
+        "final_weights": {
+          "GARCH_N": 0.0005890998636192921,
+          "GJR_N": 0.2480030842008996,
+          "EGARCH_N": 0.000334068355744948,
+          "HAR_ABS": 9.210691518127775e-34,
+          "A4f_IV2": 0.7510737475797361
+        },
+        "hhi_hitting_time_days": 95,
+        "ll_per_day": {
+          "GARCH_N": 4.213934570809726,
+          "GJR_N": 4.2294062971599,
+          "EGARCH_N": 4.2349445470582685,
+          "HAR_ABS": -1.8851652150202702,
+          "A4f_IV2": 4.253571885722954
+        },
+        "gjr_t_ll_advantage_vs_garch_n": null,
+        "candidate_pool": [
+          "GARCH_N",
+          "GJR_N",
+          "EGARCH_N",
+          "HAR_ABS",
+          "A4f_IV2"
+        ],
+        "h1_verdict": "FAIL"
+      },
+      "EGARCH_N": {
+        "n_oos": 1524,
+        "oos_start": "2020-01-01",
+        "bma_qlike": -7.6784685423292345,
+        "equal_weight_qlike": -7.693142698382354,
+        "gjr_t_qlike": -7.682462845493507,
+        "per_model_qlike": {
+          "GARCH_N": -7.66806331024713,
+          "GJR_N": -7.675993232483801,
+          "GJR_t": -7.682462845493507,
+          "HAR_ABS": -7.5779968884754725,
+          "A4f_IV2": -7.6774473829611445
+        },
+        "dm_bma_vs_gjr": {
+          "t_stat": 0.9834581099978269,
+          "p_value": 0.3255382254377124,
+          "harvey_pass": false
+        },
+        "final_weights": {
+          "GARCH_N": 4.2354457268351926e-35,
+          "GJR_N": 1.7830654326880769e-32,
+          "GJR_t": 1.0,
+          "HAR_ABS": 6.622202183509736e-65,
+          "A4f_IV2": 5.399987830894686e-32
+        },
+        "hhi_hitting_time_days": 14,
+        "ll_per_day": {
+          "GARCH_N": 4.213934570809726,
+          "GJR_N": 4.2294062971599,
+          "GJR_t": 3.3417172442940224,
+          "HAR_ABS": -1.8851652150202702,
+          "A4f_IV2": 4.253571885722954
+        },
+        "gjr_t_ll_advantage_vs_garch_n": -0.8722173265157034,
+        "candidate_pool": [
+          "GARCH_N",
+          "GJR_N",
+          "GJR_t",
+          "HAR_ABS",
+          "A4f_IV2"
+        ],
+        "h1_verdict": "FAIL"
+      },
+      "HAR_ABS": {
+        "n_oos": 1524,
+        "oos_start": "2020-01-01",
+        "bma_qlike": -7.67973954454977,
+        "equal_weight_qlike": -7.700677217712351,
+        "gjr_t_qlike": -7.682462845493507,
+        "per_model_qlike": {
+          "GARCH_N": -7.66806331024713,
+          "GJR_N": -7.675993232483801,
+          "GJR_t": -7.682462845493507,
+          "EGARCH_N": -7.667318887560695,
+          "A4f_IV2": -7.6774473829611445
+        },
+        "dm_bma_vs_gjr": {
+          "t_stat": 0.971660995588735,
+          "p_value": 0.3313735160956566,
+          "harvey_pass": false
+        },
+        "final_weights": {
+          "GARCH_N": 4.235445726835313e-35,
+          "GJR_N": 1.7830654326880769e-32,
+          "GJR_t": 1.0,
+          "EGARCH_N": 2.4018481028296523e-35,
+          "A4f_IV2": 5.399987830894686e-32
+        },
+        "hhi_hitting_time_days": 14,
+        "ll_per_day": {
+          "GARCH_N": 4.213934570809726,
+          "GJR_N": 4.2294062971599,
+          "GJR_t": 3.3417172442940224,
+          "EGARCH_N": 4.2349445470582685,
+          "A4f_IV2": 4.253571885722954
+        },
+        "gjr_t_ll_advantage_vs_garch_n": -0.8722173265157034,
+        "candidate_pool": [
+          "GARCH_N",
+          "GJR_N",
+          "GJR_t",
+          "EGARCH_N",
+          "A4f_IV2"
+        ],
+        "h1_verdict": "FAIL"
+      },
+      "A4f_IV2": {
+        "n_oos": 1524,
+        "oos_start": "2020-01-01",
+        "bma_qlike": -7.6803802437239925,
+        "equal_weight_qlike": -7.675001495220012,
+        "gjr_t_qlike": -7.682462845493507,
+        "per_model_qlike": {
+          "GARCH_N": -7.66806331024713,
+          "GJR_N": -7.675993232483801,
+          "GJR_t": -7.682462845493507,
+          "EGARCH_N": -7.667318887560695,
+          "HAR_ABS": -7.5779968884754725
+        },
+        "dm_bma_vs_gjr": {
+          "t_stat": 0.9858438276700661,
+          "p_value": 0.32436634255839647,
+          "harvey_pass": false
+        },
+        "final_weights": {
+          "GARCH_N": 4.235445726834952e-35,
+          "GJR_N": 1.7830654326880769e-32,
+          "GJR_t": 1.0,
+          "EGARCH_N": 2.4018481028297208e-35,
+          "HAR_ABS": 6.622202183509359e-65
+        },
+        "hhi_hitting_time_days": 14,
+        "ll_per_day": {
+          "GARCH_N": 4.213934570809726,
+          "GJR_N": 4.2294062971599,
+          "GJR_t": 3.3417172442940224,
+          "EGARCH_N": 4.2349445470582685,
+          "HAR_ABS": -1.8851652150202702
+        },
+        "gjr_t_ll_advantage_vs_garch_n": -0.8722173265157034,
+        "candidate_pool": [
+          "GARCH_N",
+          "GJR_N",
+          "GJR_t",
+          "EGARCH_N",
+          "HAR_ABS"
+        ],
+        "h1_verdict": "FAIL"
+      }
+    }
+  },
+  "h_micro": {
+    "verdict": "REJECT",
+    "gjr_t_advantage_vs_garch_n": {
+      "SPY": -0.8694969426021366,
+      "GLD": -0.8874400934233773,
+      "0050.TW": -0.8722173265157034
+    },
+    "ratio_0050tw_vs_spy": null,
+    "ratio_0050tw_vs_gld": null,
+    "ratio_0050tw_vs_max_dev_mkt": null,
+    "threshold": 2.0,
+    "note": "0050.TW GJR-t LL advantage ratio vs max(SPY,GLD) = N/A (threshold \u2265 2.0\u00d7)",
+    "ll_per_day_by_asset": {
+      "SPY": {
+        "GARCH_N": 4.413223973679675,
+        "GJR_N": 4.41333513171759,
+        "GJR_t": 3.5437270310775384,
+        "EGARCH_N": 4.454284328571828,
+        "HAR_ABS": -1.8851652150202702,
+        "A4f_IV2": 4.481702898213791
+      },
+      "GLD": {
+        "GARCH_N": 4.363384984436583,
+        "GJR_N": 4.360022370642911,
+        "GJR_t": 3.4759448910132056,
+        "EGARCH_N": 4.3766136000611695,
+        "HAR_ABS": -1.8851652150202702,
+        "A4f_IV2": 4.392928174285083
+      },
+      "0050.TW": {
+        "GARCH_N": 4.213934570809726,
+        "GJR_N": 4.2294062971599,
+        "GJR_t": 3.3417172442940224,
+        "EGARCH_N": 4.2349445470582685,
+        "HAR_ABS": -1.8851652150202702,
+        "A4f_IV2": 4.253571885722954
+      }
+    }
+  },
+  "hypothesis_verdicts": {
+    "H_sample": "REJECT",
+    "H_pool": "REJECT",
+    "H_micro": "REJECT",
+    "H_K1304_decomposition": "REJECT",
+    "dominating_hypotheses": []
+  },
+  "conclusions": "K1304 decomposes the K1257 0050.TW H1 FAIL (DM-Harvey t=+0.98, not significant). Baseline verified: SPY DM t=-3.397, GLD DM t=-3.379, 0050.TW DM t=+0.980. H_sample: REJECT \u2014 Even with SPY-matched OOS window, 0050.TW H1 remains FAIL \u2014 window asymmetry not the driver. H_pool: REJECT \u2014 No single drop rescues H1 \u2014 pool misfit not the driver. H_micro: REJECT \u2014 0050.TW GJR-t LL advantage ratio vs max(SPY,GLD) = N/A (threshold \u2265 2.0\u00d7). Dominating hypothesis(es): None decisive. H_K1304 overall verdict: REJECT.",
+  "runtime_seconds": 1033.4
+}

@@ -1,0 +1,23 @@
+{
+  "id": "compute-k981-v2-wavelet-lag-fix-qlike-floor-fix-is-t-stats-fix-1778915759",
+  "title": "K981 v2: wavelet lag fix + QLIKE floor fix + IS t-stats fix",
+  "script_path": "experiments/k981/k981_wavelet_har.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "failed",
+  "queued_at": "2026-05-16T07:15:59Z",
+  "started_at": "2026-05-16T07:30:06Z",
+  "completed_at": "2026-05-16T07:31:44Z",
+  "exit_code": 1,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k981-v2-wavelet-lag-fix-qlike-floor-fix-is-t-stats-fix-1778915759.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k981-v2-wavelet-lag-fix-qlike-floor-fix-is-t-stats-fix-1778915759.stderr",
+  "result_artifact": "experiments/k981/k981_wavelet_har_results.json",
+  "claude_followup": {
+    "brief": "K981 v2 re-run complete. Compare old vs new QLIKE for wavelet models: old WHAR_db4=1.8011, WHAR_HAR_db4=474.48. Verify NULL conclusion (HAR > wavelet) still holds after fixing t-2 lag to t-1. Check DM HAR-vs-WHAR_db4 t-stat (was 5.98, should remain large). If WHAR_HAR_db4 QLIKE drastically changed from 474.48, confirm floor artifact was real. Update README and knowledge.json with v2 verdict.",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 3600
+}

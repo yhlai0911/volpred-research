@@ -1,0 +1,382 @@
+{
+  "experiment_id": "K556",
+  "title": "Momentum Crash Filter for VT",
+  "subtitle": "Can price momentum protect against VT's worst periods?",
+  "verdict": "NULL: Momentum crash filter does NOT improve 12/VIX",
+  "data_source": "yfinance (SPY, ^VIX, GLD)",
+  "period": "2005-04-07 to 2026-05-05",
+  "n_observations": 5303,
+  "elapsed_seconds": 6.8,
+  "timestamp": "2026-05-06T15:39:13.117401",
+  "literature": [
+    "Moreira & Muir (2017): Volatility-Managed Portfolios, JF",
+    "Jegadeesh & Titman (1993): Returns to Buying Winners and Selling Losers, JF",
+    "Daniel & Moskowitz (2016): Momentum Crashes, JFE",
+    "Barroso & Santa-Clara (2015): Momentum has its moments, JFE",
+    "Harvey, Liu & Zhu (2016): ...and the Cross-Section of Expected Returns, RFS"
+  ],
+  "prior_knowledge": [
+    "K247: Dual Momentum degraded 53%",
+    "K204: GLD Momentum VT = NULL",
+    "K537: Cross-Asset Vol Momentum = NULL",
+    "K541: VT weekly win rate <44%, edge is purely compounding",
+    "K524: 384 rules, 0 survive BH correction"
+  ],
+  "full_sample_metrics": {
+    "BuyHold": {
+      "label": "BuyHold",
+      "ann_return": 0.122543,
+      "ann_vol": 0.190655,
+      "sharpe": 0.6427,
+      "mdd": -0.5519,
+      "calmar": 0.222,
+      "sortino": 0.7846,
+      "n_days": 5303
+    },
+    "Benchmark_12VIX": {
+      "label": "Benchmark_12VIX",
+      "ann_return": 0.062734,
+      "ann_vol": 0.094421,
+      "sharpe": 0.6644,
+      "mdd": -0.2946,
+      "calmar": 0.2129,
+      "sortino": 0.8855,
+      "n_days": 5303
+    },
+    "A_MomFilter": {
+      "label": "A_MomFilter",
+      "ann_return": 0.071269,
+      "ann_vol": 0.112365,
+      "sharpe": 0.6343,
+      "mdd": -0.3247,
+      "calmar": 0.2195,
+      "sortino": 0.8148,
+      "n_days": 5303
+    },
+    "B_TrendScaled": {
+      "label": "B_TrendScaled",
+      "ann_return": 0.061501,
+      "ann_vol": 0.097184,
+      "sharpe": 0.6328,
+      "mdd": -0.3298,
+      "calmar": 0.1865,
+      "sortino": 0.7908,
+      "n_days": 5303
+    },
+    "C_CrashDetector": {
+      "label": "C_CrashDetector",
+      "ann_return": 0.06262,
+      "ann_vol": 0.093982,
+      "sharpe": 0.6663,
+      "mdd": -0.2971,
+      "calmar": 0.2108,
+      "sortino": 0.8885,
+      "n_days": 5303
+    },
+    "D_DualMomentum": {
+      "label": "D_DualMomentum",
+      "ann_return": 0.075496,
+      "ann_vol": 0.122323,
+      "sharpe": 0.6172,
+      "mdd": -0.4341,
+      "calmar": 0.1739,
+      "sortino": 0.7611,
+      "n_days": 5303
+    }
+  },
+  "dm_tests": {
+    "A_MomFilter": {
+      "t_stat": 1.2764,
+      "p_value": 0.201831,
+      "significant_harvey": "False",
+      "direction": "Strat better",
+      "mean_diff_bps": 0.34
+    },
+    "B_TrendScaled": {
+      "t_stat": -0.1771,
+      "p_value": 0.859391,
+      "significant_harvey": "False",
+      "direction": "12/VIX better",
+      "mean_diff_bps": -0.05
+    },
+    "C_CrashDetector": {
+      "t_stat": -0.2302,
+      "p_value": 0.817926,
+      "significant_harvey": "False",
+      "direction": "12/VIX better",
+      "mean_diff_bps": -0.0
+    },
+    "D_DualMomentum": {
+      "t_stat": 1.3284,
+      "p_value": 0.184031,
+      "significant_harvey": "False",
+      "direction": "Strat better",
+      "mean_diff_bps": 0.51
+    }
+  },
+  "bootstrap_results": {
+    "A_MomFilter": {
+      "mean_sharpe_diff": -0.0306,
+      "ci_95_lo": -0.152,
+      "ci_95_hi": 0.0901,
+      "pct_strat_better": 0.3117
+    },
+    "B_TrendScaled": {
+      "mean_sharpe_diff": -0.0318,
+      "ci_95_lo": -0.1974,
+      "ci_95_hi": 0.1332,
+      "pct_strat_better": 0.3512
+    },
+    "C_CrashDetector": {
+      "mean_sharpe_diff": 0.002,
+      "ci_95_lo": -0.0115,
+      "ci_95_hi": 0.0157,
+      "pct_strat_better": 0.6088
+    },
+    "D_DualMomentum": {
+      "mean_sharpe_diff": -0.0464,
+      "ci_95_lo": -0.1926,
+      "ci_95_hi": 0.0936,
+      "pct_strat_better": 0.2643
+    }
+  },
+  "oos_consistency": {
+    "A_MomFilter": {
+      "oos_wins": 0,
+      "oos_total": 5,
+      "win_rate": 0.0,
+      "avg_sharpe_diff": -0.0853
+    },
+    "B_TrendScaled": {
+      "oos_wins": 3,
+      "oos_total": 5,
+      "win_rate": 0.6,
+      "avg_sharpe_diff": 0.0104
+    },
+    "C_CrashDetector": {
+      "oos_wins": 1,
+      "oos_total": 5,
+      "win_rate": 0.2,
+      "avg_sharpe_diff": 0.0059
+    },
+    "D_DualMomentum": {
+      "oos_wins": 2,
+      "oos_total": 5,
+      "win_rate": 0.4,
+      "avg_sharpe_diff": -0.0831
+    }
+  },
+  "oos_period_results": {
+    "P1: Pre-GFC + GFC": {
+      "BuyHold": {
+        "sharpe": -0.2941,
+        "ann_return": -0.072288,
+        "mdd": -0.5136
+      },
+      "Benchmark_12VIX": {
+        "sharpe": -0.2294,
+        "ann_return": -0.023524,
+        "mdd": -0.2798
+      },
+      "A_MomFilter": {
+        "sharpe": -0.3126,
+        "ann_return": -0.033297,
+        "mdd": -0.3106
+      },
+      "B_TrendScaled": {
+        "sharpe": -0.2673,
+        "ann_return": -0.032745,
+        "mdd": -0.3074
+      },
+      "C_CrashDetector": {
+        "sharpe": -0.2386,
+        "ann_return": -0.024312,
+        "mdd": -0.2819
+      },
+      "D_DualMomentum": {
+        "sharpe": -0.5724,
+        "ann_return": -0.071677,
+        "mdd": -0.4222
+      }
+    },
+    "P2: Recovery": {
+      "BuyHold": {
+        "sharpe": 1.2419,
+        "ann_return": 0.227892,
+        "mdd": -0.1861
+      },
+      "Benchmark_12VIX": {
+        "sharpe": 1.1334,
+        "ann_return": 0.102641,
+        "mdd": -0.1149
+      },
+      "A_MomFilter": {
+        "sharpe": 0.9997,
+        "ann_return": 0.124046,
+        "mdd": -0.1685
+      },
+      "B_TrendScaled": {
+        "sharpe": 1.2035,
+        "ann_return": 0.102657,
+        "mdd": -0.1204
+      },
+      "C_CrashDetector": {
+        "sharpe": 1.133,
+        "ann_return": 0.102443,
+        "mdd": -0.117
+      },
+      "D_DualMomentum": {
+        "sharpe": 1.1831,
+        "ann_return": 0.157192,
+        "mdd": -0.1584
+      }
+    },
+    "P3: Bull Market": {
+      "BuyHold": {
+        "sharpe": 0.6761,
+        "ann_return": 0.089161,
+        "mdd": -0.1935
+      },
+      "Benchmark_12VIX": {
+        "sharpe": 0.5726,
+        "ann_return": 0.052189,
+        "mdd": -0.1284
+      },
+      "A_MomFilter": {
+        "sharpe": 0.498,
+        "ann_return": 0.047624,
+        "mdd": -0.1471
+      },
+      "B_TrendScaled": {
+        "sharpe": 0.6143,
+        "ann_return": 0.053756,
+        "mdd": -0.146
+      },
+      "C_CrashDetector": {
+        "sharpe": 0.5672,
+        "ann_return": 0.051665,
+        "mdd": -0.1284
+      },
+      "D_DualMomentum": {
+        "sharpe": 0.4742,
+        "ann_return": 0.051126,
+        "mdd": -0.1614
+      }
+    },
+    "P4: COVID Era": {
+      "BuyHold": {
+        "sharpe": 1.1633,
+        "ann_return": 0.254816,
+        "mdd": -0.3372
+      },
+      "Benchmark_12VIX": {
+        "sharpe": 1.4156,
+        "ann_return": 0.12777,
+        "mdd": -0.1318
+      },
+      "A_MomFilter": {
+        "sharpe": 1.331,
+        "ann_return": 0.167251,
+        "mdd": -0.1433
+      },
+      "B_TrendScaled": {
+        "sharpe": 1.3607,
+        "ann_return": 0.123834,
+        "mdd": -0.1431
+      },
+      "C_CrashDetector": {
+        "sharpe": 1.4644,
+        "ann_return": 0.130119,
+        "mdd": -0.1262
+      },
+      "D_DualMomentum": {
+        "sharpe": 1.6078,
+        "ann_return": 0.210858,
+        "mdd": -0.1326
+      }
+    },
+    "P5: Post-COVID": {
+      "BuyHold": {
+        "sharpe": 0.7153,
+        "ann_return": 0.126746,
+        "mdd": -0.245
+      },
+      "Benchmark_12VIX": {
+        "sharpe": 0.6775,
+        "ann_return": 0.065847,
+        "mdd": -0.1485
+      },
+      "A_MomFilter": {
+        "sharpe": 0.627,
+        "ann_return": 0.069842,
+        "mdd": -0.1708
+      },
+      "B_TrendScaled": {
+        "sharpe": 0.7103,
+        "ann_return": 0.069793,
+        "mdd": -0.1323
+      },
+      "C_CrashDetector": {
+        "sharpe": 0.6732,
+        "ann_return": 0.0652,
+        "mdd": -0.1467
+      },
+      "D_DualMomentum": {
+        "sharpe": 0.4616,
+        "ann_return": 0.053521,
+        "mdd": -0.2437
+      }
+    }
+  },
+  "regime_performance": {
+    "Crash(<-10%)": {
+      "Benchmark_12VIX": -2.743,
+      "A_MomFilter": -2.743,
+      "B_TrendScaled": -2.016,
+      "C_CrashDetector": -2.827,
+      "D_DualMomentum": -3.029
+    },
+    "Negative(-10~0%)": {
+      "Benchmark_12VIX": -1.139,
+      "A_MomFilter": -1.141,
+      "B_TrendScaled": -0.364,
+      "C_CrashDetector": -1.145,
+      "D_DualMomentum": -1.49
+    },
+    "Weak(0~5%)": {
+      "Benchmark_12VIX": 0.445,
+      "A_MomFilter": -0.231,
+      "B_TrendScaled": 1.081,
+      "C_CrashDetector": 0.442,
+      "D_DualMomentum": 0.366
+    },
+    "Moderate(5~15%)": {
+      "Benchmark_12VIX": 3.019,
+      "A_MomFilter": 2.693,
+      "B_TrendScaled": 3.679,
+      "C_CrashDetector": 3.017,
+      "D_DualMomentum": 2.904
+    },
+    "Strong(>15%)": {
+      "Benchmark_12VIX": 3.626,
+      "A_MomFilter": 3.282,
+      "B_TrendScaled": 5.966,
+      "C_CrashDetector": 3.722,
+      "D_DualMomentum": 3.122
+    }
+  },
+  "mom_break_events": 39,
+  "strategy_descriptions": {
+    "Benchmark_12VIX": "Standard 12/VIX volatility targeting",
+    "A_MomFilter": "Full equity when MOM_60>5% (strong trend), 12/VIX when MOM_60<0 or break",
+    "B_TrendScaled": "weight = 12/VIX * (1 - MOM_60/20%), stronger trend \u2192 less VT",
+    "C_CrashDetector": "Normal 12/VIX + extra 20% weight cut when MOM_60 drops >10% in 5d",
+    "D_DualMomentum": "Full equity when SPY MOM > GLD MOM, 12/VIX when SPY MOM < GLD MOM"
+  },
+  "key_findings": [
+    "A_MomFilter: t=1.276 (p=0.2018), mean diff=+0.3bps/day, boot 95%CI=[-0.1520,+0.0901], OOS wins=0/5",
+    "B_TrendScaled: t=-0.177 (p=0.8594), mean diff=-0.1bps/day, boot 95%CI=[-0.1974,+0.1332], OOS wins=3/5",
+    "C_CrashDetector: t=-0.230 (p=0.8179), mean diff=-0.0bps/day, boot 95%CI=[-0.0115,+0.0157], OOS wins=1/5",
+    "D_DualMomentum: t=1.328 (p=0.1840), mean diff=+0.5bps/day, boot 95%CI=[-0.1926,+0.0936], OOS wins=2/5"
+  ]
+}

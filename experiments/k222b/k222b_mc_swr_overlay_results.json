@@ -1,0 +1,102 @@
+{
+  "experiment": "K222b",
+  "title": "Monte Carlo SWR Overlay (10k paths, block-bootstrap, patched 12/VIX)",
+  "started_at": "2026-05-08 01:44:58.220413",
+  "finished_at": "2026-05-08 01:45:15.441535",
+  "config": {
+    "n_paths": 10000,
+    "n_years": 30,
+    "trading_days_per_year": 252,
+    "trading_days_per_month": 21,
+    "block_size": 21,
+    "seed": 42,
+    "initial_capital": 1000000,
+    "wr_sweep": [
+      0.04,
+      0.05,
+      0.06,
+      0.07,
+      0.08
+    ],
+    "strategies": [
+      "spy_bh",
+      "5050_bh",
+      "5050_vt"
+    ],
+    "vt_floor_threshold_for_signal": 12.0,
+    "data_start": "2004-06-01",
+    "data_end": "2025-01-01",
+    "sample_start": "2005-01-01",
+    "sample_end": "2024-12-31",
+    "cash_sleeve_return": 0.0,
+    "withdrawal_type": "nominal_fixed",
+    "path_length_days": 7560
+  },
+  "data_window": {
+    "first_date": "2005-01-03",
+    "last_date": "2024-12-31",
+    "rows": 5033
+  },
+  "wr_sweep": {
+    "0.04": {
+      "spy_bh": 0.9868,
+      "5050_bh": 0.9997,
+      "5050_vt": 0.9993
+    },
+    "0.05": {
+      "spy_bh": 0.9612,
+      "5050_bh": 0.9945,
+      "5050_vt": 0.9851
+    },
+    "0.06": {
+      "spy_bh": 0.9117,
+      "5050_bh": 0.9771,
+      "5050_vt": 0.9028
+    },
+    "0.07": {
+      "spy_bh": 0.8412,
+      "5050_bh": 0.9328,
+      "5050_vt": 0.6839
+    },
+    "0.08": {
+      "spy_bh": 0.7527,
+      "5050_bh": 0.8509,
+      "5050_vt": 0.4012
+    }
+  },
+  "diagnostics_4pct_wr": {
+    "spy_bh": {
+      "mean_terminal_wealth_4pct_wr": 20019970.629597154,
+      "median_terminal_wealth_4pct_wr": 12534056.083407732,
+      "p10_terminal_wealth_4pct_wr": 2431421.4549987805,
+      "p90_terminal_wealth_4pct_wr": 44993469.996859044,
+      "ruin_count_4pct_wr": 132
+    },
+    "5050_bh": {
+      "mean_terminal_wealth_4pct_wr": 17206181.339779437,
+      "median_terminal_wealth_4pct_wr": 13263480.560016315,
+      "p10_terminal_wealth_4pct_wr": 4526507.417609199,
+      "p90_terminal_wealth_4pct_wr": 34347655.7614908,
+      "ruin_count_4pct_wr": 3
+    },
+    "5050_vt": {
+      "mean_terminal_wealth_4pct_wr": 3929708.184850432,
+      "median_terminal_wealth_4pct_wr": 3487759.425782718,
+      "p10_terminal_wealth_4pct_wr": 1539619.0877068862,
+      "p90_terminal_wealth_4pct_wr": 6853033.290723251,
+      "ruin_count_4pct_wr": 7
+    }
+  },
+  "summary": {
+    "vt_doubles_swr_claim": "rejected",
+    "vt_8pct_survival": 0.4012,
+    "5050_bh_4pct_survival": 0.9997
+  },
+  "compared_to_k87_prediction": "K87 prediction: 5050_vt 8% WR survival 25-28%; observed 40.1% -- consistency N",
+  "reproducibility": {
+    "seed": 42,
+    "rng": "numpy.random.default_rng",
+    "block_bootstrap": "fixed-block, block_size=21",
+    "note": "2nd run with same seed/data should produce byte-identical wr_sweep"
+  }
+}

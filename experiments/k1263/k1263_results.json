@@ -1,0 +1,117 @@
+{
+  "experiment_id": "K1263",
+  "title": "KAN-GARCH-MIDAS: Can structured Kolmogorov-Arnold Networks break the ML ceiling?",
+  "date": "2026-05-02",
+  "data_source": "yfinance",
+  "assets": [
+    "SPY",
+    "QQQ"
+  ],
+  "oos_period": "2021-01-04 to 2026-04-10",
+  "config": {
+    "refit_interval": 63,
+    "window": 1500,
+    "seed": 42,
+    "macro_features": [
+      "vix(t-1)",
+      "term_spread(t-1)",
+      "credit_proxy(t-1)",
+      "rv22(t-1)"
+    ],
+    "lookahead_protection": "all macro X shifted by 1 day before walk-forward"
+  },
+  "models": {
+    "baseline": "GJR-GARCH-Normal (expanding window, scipy MLE)",
+    "challenger": "KAN-GARCH-MIDAS (pykan width=[d,3,1] grid=5 k=3, log-var target, EWMA-22 smoothed)"
+  },
+  "references": [
+    "Liu Z. et al. (2024), 'KAN: Kolmogorov-Arnold Networks', arXiv:2404.19756",
+    "Engle, Ghysels, Sohn (2013), Stock Market Volatility and Macroeconomic Fundamentals, RES",
+    "Patton (2011), Volatility forecast comparison using imperfect proxies, J. Econometrics",
+    "Harvey, Liu, Zhu (2016), ...and the cross-section of expected returns, RFS",
+    "Diebold & Mariano (1995); Harvey-Leybourne-Newbold (1997)"
+  ],
+  "per_asset": {
+    "SPY": {
+      "asset": "SPY",
+      "n_oos": 1322,
+      "oos_start": "2021-01-04",
+      "oos_end": "2026-04-09",
+      "qlike": {
+        "gjr_baseline": 1.4856928896035348,
+        "kan_garch_midas": 1.8382657514545735
+      },
+      "relative_improvement": -0.23731207460050818,
+      "dm_test_kan_vs_gjr": {
+        "t_stat": 4.888271726568693,
+        "p_value": 1.1419057621697704e-06,
+        "interpretation": "negative t favors KAN",
+        "harvey_significant": true
+      },
+      "sub_period": {
+        "early_2021_2023": {
+          "n": 753,
+          "qlike_gjr": 1.4040459883343361,
+          "qlike_kan": 1.6751363670983361,
+          "kan_better": false,
+          "rel_improvement": -0.19307799104615014
+        },
+        "late_2024_2026": {
+          "n": 569,
+          "qlike_gjr": 1.5937423037611913,
+          "qlike_kan": 2.0541469929664307,
+          "kan_better": false,
+          "rel_improvement": -0.2888827686374993
+        }
+      },
+      "gates": {
+        "dm_t_gt_3": false,
+        "rel_improvement_5pct": false,
+        "sub_period_stable": false,
+        "passed_count": 0
+      },
+      "verdict": "NULL \u2014 ML ceiling reaffirmed"
+    },
+    "QQQ": {
+      "asset": "QQQ",
+      "n_oos": 1322,
+      "oos_start": "2021-01-04",
+      "oos_end": "2026-04-09",
+      "qlike": {
+        "gjr_baseline": 1.4611069100306968,
+        "kan_garch_midas": 1.940091632117486
+      },
+      "relative_improvement": -0.3278231858315734,
+      "dm_test_kan_vs_gjr": {
+        "t_stat": 6.345365581014212,
+        "p_value": 3.042295304567233e-10,
+        "interpretation": "negative t favors KAN",
+        "harvey_significant": true
+      },
+      "sub_period": {
+        "early_2021_2023": {
+          "n": 753,
+          "qlike_gjr": 1.3804149150322536,
+          "qlike_kan": 1.8541199796186416,
+          "kan_better": false,
+          "rel_improvement": -0.3431613636073469
+        },
+        "late_2024_2026": {
+          "n": 569,
+          "qlike_gjr": 1.5678926257316244,
+          "qlike_kan": 2.0538643110834425,
+          "kan_better": false,
+          "rel_improvement": -0.30995214683470407
+        }
+      },
+      "gates": {
+        "dm_t_gt_3": false,
+        "rel_improvement_5pct": false,
+        "sub_period_stable": false,
+        "passed_count": 0
+      },
+      "verdict": "NULL \u2014 ML ceiling reaffirmed"
+    }
+  },
+  "overall_verdict": "NULL \u2014 ML ceiling reaffirmed (7th time)"
+}

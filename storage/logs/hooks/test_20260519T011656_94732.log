@@ -1,0 +1,17 @@
+.......F
+=================================== FAILURES ===================================
+_________________________ test_r2_claim_contradicts_dm _________________________
+
+    def test_r2_claim_contradicts_dm():
+        text = "GARCH dominates GJR."
+        dm = {"GARCH_vs_GJR": {"t_stat": -2.5, "p_value": 0.01}}
+        warnings = lint_conclusion(text, dm_tests=dm)
+>       assert any(w.startswith("[R2]") for w in warnings)
+E       assert False
+E        +  where False = any(<generator object test_r2_claim_contradicts_dm.<locals>.<genexpr> at 0x1161ee810>)
+
+tests/test_conclusion_lint.py:84: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_conclusion_lint.py::test_r2_claim_contradicts_dm - assert F...
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 7 passed in 3.21s

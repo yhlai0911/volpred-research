@@ -1,0 +1,123 @@
+{
+  "experiment_id": "k681b",
+  "date": "2026-05-18T02:30:30.750394+00:00",
+  "fix_applied": "shift(1) on pct and 12/VIX for US/EFA",
+  "eval_period": "2010-01-04 to 2026-03-27",
+  "us": {
+    "pct_original": {
+      "strategy": "Percentile-ORIG",
+      "sharpe": 1.712,
+      "cagr_pct": 15.21,
+      "mdd_pct": -4.98,
+      "ann_ret_pct": 14.34,
+      "ann_vol_pct": 6.04,
+      "n_days": 4082,
+      "n_years": 16.2
+    },
+    "vix12_original": {
+      "strategy": "12VIX-ORIG",
+      "sharpe": 1.117,
+      "cagr_pct": 12.63,
+      "mdd_pct": -7.93,
+      "ann_ret_pct": 12.16,
+      "ann_vol_pct": 7.31,
+      "n_days": 4082,
+      "n_years": 16.2
+    },
+    "pct_fixed": {
+      "strategy": "Percentile-FIXED",
+      "sharpe": 0.341,
+      "cagr_pct": 6.13,
+      "mdd_pct": -11.83,
+      "ann_ret_pct": 6.14,
+      "ann_vol_pct": 6.28,
+      "n_days": 4081,
+      "n_years": 16.2
+    },
+    "vix12_fixed": {
+      "strategy": "12VIX-FIXED",
+      "sharpe": 0.483,
+      "cagr_pct": 7.6,
+      "mdd_pct": -12.23,
+      "ann_ret_pct": 7.61,
+      "ann_vol_pct": 7.48,
+      "n_days": 4082,
+      "n_years": 16.2
+    },
+    "dm_original": {
+      "t_stat": 3.109,
+      "p_value": 0.0019,
+      "harvey_pass": true,
+      "n_obs": 4082
+    },
+    "dm_fixed": {
+      "t_stat": -1.07,
+      "p_value": 0.2846,
+      "harvey_pass": false,
+      "n_obs": 4081
+    }
+  },
+  "efa": {
+    "pct_original": {
+      "strategy": "Percentile-ORIG",
+      "sharpe": 1.871,
+      "cagr_pct": 20.77,
+      "mdd_pct": -8.47,
+      "ann_ret_pct": 19.21,
+      "n_days": 4082
+    },
+    "vix12_original": {
+      "strategy": "12VIX-ORIG",
+      "sharpe": 0.851,
+      "cagr_pct": 12.95,
+      "mdd_pct": -10.18,
+      "ann_ret_pct": 12.7,
+      "n_days": 4082
+    },
+    "pct_fixed": {
+      "strategy": "Percentile-FIXED",
+      "sharpe": -0.054,
+      "cagr_pct": 3.24,
+      "mdd_pct": -18.8,
+      "ann_ret_pct": 3.54,
+      "n_days": 4081
+    },
+    "vix12_fixed": {
+      "strategy": "12VIX-FIXED",
+      "sharpe": 0.019,
+      "cagr_pct": 3.71,
+      "mdd_pct": -21.65,
+      "ann_ret_pct": 4.2,
+      "n_days": 4082
+    },
+    "dm_original": {
+      "t_stat": 5.368,
+      "p_value": 0.0,
+      "harvey_pass": true,
+      "n_obs": 4082
+    },
+    "dm_fixed": {
+      "t_stat": -0.062,
+      "p_value": 0.9502,
+      "harvey_pass": false,
+      "n_obs": 4081
+    }
+  },
+  "summary_comparison": {
+    "us_pct_sharpe_original": 1.712,
+    "us_pct_sharpe_fixed": 0.341,
+    "us_sharpe_delta": -1.371,
+    "efa_pct_sharpe_original": 1.871,
+    "efa_pct_sharpe_fixed": -0.054,
+    "efa_sharpe_delta": -1.925,
+    "us_dm_t_original": 3.109,
+    "us_dm_t_fixed": -1.07,
+    "efa_dm_t_original": 5.368,
+    "efa_dm_t_fixed": -0.062
+  },
+  "interpretation": [
+    "EFA result collapsed — major article correction or retraction needed"
+  ],
+  "parent_experiment": "k681",
+  "lookahead_fix": "w_pct_us = (1-pct).shift(1); w_12vix_us = min(12/VIX, 1).shift(1)"
+}

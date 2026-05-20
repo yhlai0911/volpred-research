@@ -1,0 +1,25 @@
+{
+  "id": "compute-k981-v3-wavelet-read-only-buffer-fix-pywt-writeable-re-run-1779135292",
+  "title": "K981 v3: wavelet read-only buffer fix (pywt writeable) + re-run",
+  "script_path": "experiments/k981/k981_wavelet_har.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-05-18T20:14:52Z",
+  "started_at": "2026-05-18T20:15:14Z",
+  "completed_at": "2026-05-18T20:16:58Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k981-v3-wavelet-read-only-buffer-fix-pywt-writeable-re-run-1779135292.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k981-v3-wavelet-read-only-buffer-fix-pywt-writeable-re-run-1779135292.stderr",
+  "result_artifact": "experiments/k981/k981_wavelet_har_results.json",
+  "claude_followup": {
+    "brief": "K981 v3 re-run. Compare new wavelet QLIKE vs HAR: check if NULL conclusion (HAR > wavelet) holds after fixing t-2 lag alignment + QLIKE floor + IS t-stats. Key: WHAR_db4 QLIKE was 1.8011 in v1 (unmodified). DM HAR-vs-WHAR_db4 t=5.98 in v1. Verify these hold. Write knowledge.json entry and update README v3.",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "timeout_seconds": 1200,
+  "followup_dispatched_at": "2026-05-18T21:09:04Z",
+  "followup_next_task_id": "hourly-dispatch-2026-05-19-k981-v3-interpretation"
+}

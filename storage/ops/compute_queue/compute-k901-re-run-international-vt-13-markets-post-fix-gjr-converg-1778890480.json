@@ -1,0 +1,25 @@
+{
+  "id": "compute-k901-re-run-international-vt-13-markets-post-fix-gjr-converg-1778890480",
+  "title": "K901 re-run: international VT 13 markets (post-fix: GJR convergence + bootstrap seed)",
+  "script_path": "experiments/k901/k901_international_vt_13markets.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-05-16T00:14:40Z",
+  "started_at": "2026-05-16T00:15:04Z",
+  "completed_at": "2026-05-16T00:16:06Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k901-re-run-international-vt-13-markets-post-fix-gjr-converg-1778890480.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k901-re-run-international-vt-13-markets-post-fix-gjr-converg-1778890480.stderr",
+  "result_artifact": "experiments/k901/k901_international_vt_13markets_results.json",
+  "claude_followup": {
+    "brief": "K901 post-fix re-run complete. Verify: (1) results JSON has gjr_convergence.n_converged/n_failed per market, (2) bootstrap_seed=42 in config, (3) no review_flags about GJR_HIGH_FAIL_RATE for major markets. Then run Codex primary review of experiments/k901/k901_international_vt_13markets.py. CONDITIONAL_PASS+ required before writing knowledge.json entry (task: document_K901_kb_entry). Brief: K901 is 13-market international VT study for Paper 3 Table 5. Original results: MDD improved 13/13 markets, GJR gamma>0 13/13. Fixed issues: GJR silent fail (non-converged estimates excluded) + bootstrap seed. After Codex review passes, write knowledge.json with K number K901, convergence stats, and Paper 3 Table 5 relevance.",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "timeout_seconds": 3600,
+  "followup_dispatched_at": "2026-05-16T03:31:16Z",
+  "followup_next_task_id": "compute-k901-v3-alignment-fix"
+}

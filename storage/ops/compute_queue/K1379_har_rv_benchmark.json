@@ -1,0 +1,25 @@
+{
+  "id": "K1379_har_rv_benchmark",
+  "title": "K1379: Paper 9 C4 Fix — HAR-RV / HAR-RV-VIX Benchmarks",
+  "script_path": "experiments/k1379/k1379.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-05-19T09:13:05Z",
+  "started_at": "2026-05-19T09:30:10Z",
+  "completed_at": "2026-05-19T09:32:10Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/K1379_har_rv_benchmark.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/K1379_har_rv_benchmark.stderr",
+  "result_artifact": "experiments/k1379/k1379_results.json",
+  "claude_followup": {
+    "brief": "K1379 HAR-RV benchmark horse race for Paper 9 C4 fix. Check: (1) A4f vs HAR-RV DM t-stat; (2) A4f vs HAR-RV-VIX DM t-stat. If A4f beats both at Harvey |t|>3.0 → strong contribution claim. If HAR-RV-VIX is competitive → honest limitation. Update Table 2 in paper body, knowledge.json with verdict.",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "timeout_seconds": 2400,
+  "followup_dispatched_at": "2026-05-19T11:09:29Z",
+  "followup_next_task_id": "k1379_interpretation_main"
+}

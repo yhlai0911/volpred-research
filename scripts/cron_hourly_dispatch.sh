@@ -96,6 +96,10 @@ elif [ $EXIT_CODE -eq 143 ] || [ $EXIT_CODE -eq 137 ]; then
 fi
 
 echo "=== hourly-dispatch end $(date '+%Y-%m-%d %H:%M:%S %Z') (exit=$EXIT_CODE) ==="
+# Canonical exit banner — host_cron_fail alert (src/volpred/ops/alerts.py
+# _CRON_EXIT_RE) only recognises the `=== [<job>] exit <N> at <ts> ===` form.
+# Without this line a failed hourly-dispatch run never alerts.
+echo "=== [hourly_dispatch] exit $EXIT_CODE at $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
 
 # macOS notification (heredoc avoids nested-quote issues)
 LATEST_COMMIT=$(/usr/bin/git -C /Users/yhlai0911/Desktop/volpred-research log -1 --pretty=format:'%h %s' 2>&1 | head -c 100 | tr -d '"\\')

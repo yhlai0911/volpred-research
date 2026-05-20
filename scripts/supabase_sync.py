@@ -71,12 +71,16 @@ CONFLICT_KEYS = {
 # Any other keys (e.g. overnight_gap, gap_alert_level) must be stripped
 # before POST or PostgREST returns 400 "column X does not exist".
 # Root cause of 2026-04-12..17 silent sync failure.
+# MUST mirror the live Supabase `market_daily` table schema exactly. A key
+# here that the table lacks → every row carrying it 400s with PGRST204
+# ("could not find column ... in schema cache"). nk225_* were listed but the
+# table never had them → 14/30 rows 400'd for ~5 weeks unnoticed (collection
+# also stopped 2026-04-10). If you add a key here, ALTER the table first.
 _MARKET_DAILY_COLUMNS = {
     "trade_date",
     "spy_close", "spy_open",
     "gld_close", "gld_open",
     "tw50_close", "tw50_open",
-    "nk225_close", "nk225_open",
     "vix_level",
     "sigma_spy_ann", "sigma_gld_ann",
 }
@@ -103,11 +107,17 @@ def _post(table: str, data: list | dict) -> bool:
         return True
     except HTTPError as e:
         code = e.code
-        e.read()  # consume error body
+        try:
+            body = e.read().decode("utf-8", "replace")[:400]
+        except Exception:
+            body = "<unreadable>"
         if code == 409 and conflict:
             # Fallback: PATCH (update) existing rows
             return _patch(table, conflict, data)
-        print(f"  Supabase {table} error: {code}")
+        # Print the PostgREST error body — without it a 400 is opaque and
+        # every diagnosis is blind (2026-05-20: market_daily 14/30 rows 400'd
+        # for weeks with no visible reason).
+        print(f"  Supabase {table} error: {code} — {body}")
         return False
     except Exception as e:
         print(f"  Supabase {table} error: {e}")

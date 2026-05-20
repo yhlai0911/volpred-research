@@ -21,6 +21,29 @@ from volpred.config.runtime import get_default_mirror_url, get_local_data_sync_d
 from volpred.data.manager import DataManager
 from volpred.publisher.publisher import Publisher
 
+def _load_json_retry(path: Path, default, retries: int = 4, delay: float = 0.25):
+    """Load JSON, tolerating a concurrent writer mid-truncate.
+
+    feed.json is written by several processes (feed-publisher, supabase_sync,
+    this script). A plain json.loads() of a file caught mid-write raises
+    JSONDecodeError and crashed the whole daily_update run (2026-05-19). A
+    short retry rides out the millisecond-scale write window; only a
+    persistently bad file falls through to `default`.
+    """
+    import time
+    for attempt in range(retries):
+        try:
+            txt = path.read_text()
+            if txt.strip():
+                return json.loads(txt)
+        except (json.JSONDecodeError, OSError):
+            pass
+        if attempt < retries - 1:
+            time.sleep(delay)
+    print(f"  ⚠️ {path} unreadable after {retries} tries — using default")
+    return default
+
+
 # ──────────────────────────────────────────────────────────────────────
 # Single source of truth for strategy metadata.
 # All downstream consumers (feed article, Supabase signals, paper trading)
@@ -862,7 +885,7 @@ def main():
     feed_path = Path("storage/reports/feed.json")
     last_spy_date = None
     if feed_path.exists():
-        feed = json.loads(feed_path.read_text())
+        feed = _load_json_retry(feed_path, [])
         for p in feed:
             if p.get("phase") == "daily_update" and p.get("details", {}).get("spy_date"):
                 last_spy_date = p["details"]["spy_date"]
@@ -939,7 +962,7 @@ def main():
     # --- Sync static data ---
     storage = Path("storage")
     feed_source = storage / "reports" / "feed.json"
-    feed = json.loads(feed_source.read_text()) if feed_source.exists() else []
+    feed = _load_json_retry(feed_source, []) if feed_source.exists() else []
     feed.sort(key=lambda x: x.get("published_at") or "", reverse=True)
     sorted_feed = json.dumps(feed, indent=2, ensure_ascii=False, default=str)
 

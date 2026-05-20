@@ -1,0 +1,20 @@
+{
+  "task_id": "task-k1135-codex-review-primary",
+  "status": "completed",
+  "completed_at": "2026-05-13T07:25:44.689918",
+  "reviewer": "feature-dev:code-reviewer subagent (Codex-exec stdin-block fallback)",
+  "verdict": "CONDITIONAL_PASS",
+  "critical_issues": [
+    "None"
+  ],
+  "important_issues": [
+    "BH-FDR scope mismatch: docstring says 3H x 4C = 12 p-values but only H1 x 4 are BH-adjusted; H2/H3 receive no correction",
+    "Provenance: k1135_results.json reconstructed from run.log (SIGPIPE). All p-values verified but 3 LR stat fields null. Full re-run recommended."
+  ],
+  "minor_issues": [
+    "DM test argument order (internally coherent but non-standard convention)",
+    "Scenario B H2 threshold ambiguous across 1% vs 5% VaR"
+  ],
+  "action_required": "Fix BH-FDR docstring OR apply H2/H3 BH correction; re-run to get complete JSON (seed=42 reproducible)",
+  "prereq_for": "document_K1135_kb_entry"
+}

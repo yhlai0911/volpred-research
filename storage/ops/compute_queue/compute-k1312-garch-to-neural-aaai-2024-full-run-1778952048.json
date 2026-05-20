@@ -1,0 +1,25 @@
+{
+  "id": "compute-k1312-garch-to-neural-aaai-2024-full-run-1778952048",
+  "title": "K1312: GARCH-to-Neural AAAI 2024 full run",
+  "script_path": "experiments/k1312/k1312.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-05-16T17:20:48Z",
+  "started_at": "2026-05-16T17:30:10Z",
+  "completed_at": "2026-05-16T17:34:42Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1312-garch-to-neural-aaai-2024-full-run-1778952048.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1312-garch-to-neural-aaai-2024-full-run-1778952048.stderr",
+  "result_artifact": "experiments/k1312/k1312_results.json",
+  "claude_followup": {
+    "brief": "K1312 GARCH-to-Neural AAAI 2024 完成。讀 experiments/k1312/k1312_results.json 並：(1) DM-HLN vs GJR-GARCH baseline (QLIKE, MSE) Harvey criterion，(2) 寫 knowledge.json entry，(3) 更新 research_program.md ML ceiling section。",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "timeout_seconds": 3600,
+  "followup_dispatched_at": "2026-05-16T19:12:01Z",
+  "followup_next_task_id": "main-thread-k1312-interpretation-20260517"
+}

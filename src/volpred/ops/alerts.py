@@ -27,7 +27,15 @@ RELEASE_POOL_GAP_BUFFER = timedelta(minutes=60)  # grace on top of configured in
 
 _TAIPEI_TZ = ZoneInfo("Asia/Taipei")
 _RELEASE_POOL_FIRE_RE = re.compile(r"^=== \[release-pool\] fire at (.+) ===$")
-_CRON_EXIT_RE = re.compile(r"^=== exit (\d+) at (.+) ===$")
+# Matches the canonical cron-wrapper end banner:
+#   === [<job>] exit <N> at <timestamp> (duration=<X>s) ===
+# The old pattern `^=== exit (\d+) at (.+) ===$` matched NOTHING — every
+# wrapper emits the `[<job>]`-prefixed form — so host_cron_fail was silently
+# dead and 2026-05-20's 8/12 hourly-dispatch failures never alerted. The
+# `(duration=...)` suffix is optional. group(1)=exit code, group(2)=timestamp.
+_CRON_EXIT_RE = re.compile(
+    r"^=== \[[^\]]+\] exit (\d+) at (.+?)(?: \(duration=[^)]*\))? ===$"
+)
 
 
 def _utc_now() -> datetime:

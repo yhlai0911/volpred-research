@@ -1,0 +1,25 @@
+{
+  "id": "k1379-har-benchmark-v2",
+  "title": "K1379 v2: Paper 9 C4 Fix — HAR-RV / HAR-RV-VIX Benchmarks (fix numpy.values bug)",
+  "script_path": "experiments/k1379/k1379.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-05-19T09:21:02Z",
+  "started_at": "2026-05-19T10:00:03Z",
+  "completed_at": "2026-05-19T10:01:43Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k1379-har-benchmark-v2.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k1379-har-benchmark-v2.stderr",
+  "result_artifact": "experiments/k1379/k1379_results.json",
+  "claude_followup": {
+    "brief": "K1379 HAR-RV benchmark for Paper 9 C4 fix. Check DM tests: A4f vs GJR, A4f vs HAR-RV, A4f vs HAR-RV-VIX. QLIKE comparison. If A4f significantly beats HAR-RV-VIX → C4 resolved; add Table to paper. Update knowledge.json with verdict.",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "timeout_seconds": 2400,
+  "followup_dispatched_at": "2026-05-19T11:09:43Z",
+  "followup_next_task_id": "k1379_interpretation_main"
+}

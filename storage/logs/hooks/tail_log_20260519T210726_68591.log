@@ -1,0 +1,48 @@
+======================================================================
+K1378: Leave-COVID-out DM Test (A4f vs GJR-GARCH)
+======================================================================
+
+[1] Loading snapshot CSV...
+  SPY: 2000-01-04 to 2026-05-18, n=6642
+  OOS: 2019-01-01 onwards, n_oos=1864
+  COVID period: 2020-03-01 to 2021-06-30
+  Non-COVID OOS: 1527 days
+
+[2] Rolling window OOS forecasting (A4f + GJR)...
+  OOS step 0/1864 (0.1s)
+  OOS step 500/1864 (21.6s)
+  OOS step 1000/1864 (44.3s)
+  OOS step 1500/1864 (66.8s)
+  Done in 83.8s
+
+[3] Computing QLIKE losses...
+
+[4] Diebold-Mariano tests...
+
+--- Full OOS (n=1852) ---
+  GJR QLIKE: 624.326672
+  A4f QLIKE: 688.487540
+  DM t-stat: -1.191
+  Harvey pass (|t|>3): False
+
+--- Non-COVID OOS (n=1515) ---
+  GJR QLIKE: 643.457643
+  A4f QLIKE: 662.833095
+  DM t-stat: -0.362
+  Harvey pass (|t|>3): False
+
+--- COVID-only OOS (n=337) ---
+  DM t-stat: -1.544
+  Harvey pass (|t|>3): False
+
+  Saved loss arrays for K_NEW_C (White RC / SPA)
+
+[5] Results saved to /Users/yhlai0911/Desktop/volpred-research/experiments/k1378/k1378_results.json
+
+Total elapsed: 83.8s
+
+==================================================
+SF1 VERDICT: CONFIRMED
+  A4f DM t=-0.362 outside COVID → Harvey FAIL → SF1 confirmed
+  Paper needs major revision: COVID-driven result.
+==================================================

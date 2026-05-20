@@ -1,0 +1,26 @@
+[
+  {
+    "id": "K500",
+    "title": "K500: first occurrence",
+    "category": "model_behavior",
+    "content": "[提出: Claude, 執行: Claude] First entry with id K500.",
+    "tags": ["test"],
+    "legacy": false
+  },
+  {
+    "id": "K500",
+    "title": "K500: duplicate entry (should be flagged)",
+    "category": "model_behavior",
+    "content": "[提出: Claude, 執行: Claude] Duplicate entry with same id — dedup did not collapse.",
+    "tags": ["test", "duplicate"],
+    "legacy": false
+  },
+  {
+    "id": "K501",
+    "title": "K501: unique entry",
+    "category": "experiment",
+    "content": "[提出: Claude, 執行: Claude] Unique singleton.",
+    "tags": ["test"],
+    "legacy": false
+  }
+]

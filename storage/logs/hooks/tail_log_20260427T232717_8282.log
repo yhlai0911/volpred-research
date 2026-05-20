@@ -1,0 +1,16 @@
+Skipped release run
+JSON: {"action": "release_article_pool_by_settings", "mode": "auto", 
+"released_count": 0, "released": [], "skipped": true, "reason": 
+"interval_not_due", "next_release_at": "2026-04-28T02:00:00+00:00", "settings": 
+{"mode": "auto", "interval_minutes": 720, "max_articles_per_run": 1, "due_only":
+true, "include_drafts": true, "preferred_audiences": [], "last_released_at": 
+"2026-04-27T14:00:07.261799+00:00", "updated_at": 
+"2026-04-27T14:00:28.574132+00:00"}}
+---wc:---
+     202 storage/logs/cron/release_pool.log
+---
+-rw-r--r--@ 1 yhlai0911  staff  12975 Apr 27 23:26 storage/logs/cron/release_pool.log
+---test FDA write to check_alerts.log success was at 15:00:---
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-04-27T15:00:05.611260+00:00"}

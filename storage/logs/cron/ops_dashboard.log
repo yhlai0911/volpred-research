@@ -1,0 +1,200 @@
+=== [ops_dashboard] piggy-back fire at 2026-05-20T10:16:08.257321+00:00 ===
+=== [ops_dashboard] start at 2026-05-20T10:16:08Z ===
+{
+  "dashboard_generated_at": "2026-05-20T10:16:09Z",
+  "overall_status": "warn",
+  "section_breaches": 2,
+  "section_critical": 0,
+  "sections": [
+    {
+      "section": "production_pending",
+      "status": "ok",
+      "tldr": "67 pending tasks (top types: [('daily_article', 44), ('experiment', 20), ('?', 2)])",
+      "next": "dispatch top P1-P3 if slots free"
+    },
+    {
+      "section": "production_throughput",
+      "status": "ok",
+      "tldr": "8 articles published last 24h (target 6/day)",
+      "next": null
+    },
+    {
+      "section": "distribution_supabase",
+      "status": "ok",
+      "tldr": "8/8 last-24h articles synced",
+      "next": null,
+      "missing": []
+    },
+    {
+      "section": "verification_live_url",
+      "status": "ok",
+      "tldr": "3/3 sample live URLs return 200",
+      "next": null,
+      "sample": [
+        "mile_94c1a524",
+        "mile_6cc748ba",
+        "mile_74a28bcf"
+      ],
+      "dead": []
+    },
+    {
+      "section": "verification_fb_pipeline",
+      "status": "warn",
+      "tldr": "2 FB posts pending sync",
+      "next": "handoff doc + manual paste or retry MCP"
+    },
+    {
+      "section": "health_cron",
+      "status": "warn",
+      "tldr": "2 cron jobs stale (over max-age)",
+      "next": "manual fire ~/.volpred/bin/cron_<id>.sh",
+      "stale": [
+        {
+          "job": "release_pool",
+          "age_h": 8.3,
+          "max_h": 4
+        },
+        {
+          "job": "paper_sync_all",
+          "age_h": 8.3,
+          "max_h": 8
+        }
+      ]
+    },
+    {
+      "section": "health_alerts_unhandled",
+      "status": "ok",
+      "tldr": "0 warn/critical alerts last 6h (read + act per .claude/rules/alert.md)",
+      "next": null,
+      "breaches": []
+    }
+  ]
+}
+=== [ops_dashboard] exit 0 at 2026-05-20T10:16:10Z ===
+=== [ops_dashboard] exit 0 at 2026-05-20T10:16:10.534453+00:00 (duration=2.3s) ===
+=== [ops_dashboard] piggy-back fire at 2026-05-20T11:00:05.917086+00:00 ===
+=== [ops_dashboard] start at 2026-05-20T11:00:06Z ===
+{
+  "dashboard_generated_at": "2026-05-20T11:00:06Z",
+  "overall_status": "ok",
+  "section_breaches": 0,
+  "section_critical": 0,
+  "sections": [
+    {
+      "section": "production_pending",
+      "status": "ok",
+      "tldr": "58 pending tasks (top types: [('daily_article', 40), ('experiment', 15), ('?', 2)])",
+      "next": "dispatch top P1-P3 if slots free"
+    },
+    {
+      "section": "production_throughput",
+      "status": "ok",
+      "tldr": "8 articles published last 24h (target 6/day)",
+      "next": null
+    },
+    {
+      "section": "distribution_supabase",
+      "status": "ok",
+      "tldr": "8/8 last-24h articles synced",
+      "next": null,
+      "missing": []
+    },
+    {
+      "section": "verification_live_url",
+      "status": "ok",
+      "tldr": "3/3 sample live URLs return 200",
+      "next": null,
+      "sample": [
+        "mile_94c1a524",
+        "mile_6cc748ba",
+        "mile_74a28bcf"
+      ],
+      "dead": []
+    },
+    {
+      "section": "verification_fb_pipeline",
+      "status": "ok",
+      "tldr": "0 FB posts pending sync",
+      "next": null
+    },
+    {
+      "section": "health_cron",
+      "status": "ok",
+      "tldr": "0 cron jobs stale (over max-age)",
+      "next": null,
+      "stale": []
+    },
+    {
+      "section": "health_alerts_unhandled",
+      "status": "ok",
+      "tldr": "0 warn/critical alerts last 6h (read + act per .claude/rules/alert.md)",
+      "next": null,
+      "breaches": []
+    }
+  ]
+}
+=== [ops_dashboard] exit 0 at 2026-05-20T11:00:10Z ===
+=== [ops_dashboard] exit 0 at 2026-05-20T11:00:10.499709+00:00 (duration=4.6s) ===
+=== [ops_dashboard] piggy-back fire at 2026-05-20T12:00:19.176110+00:00 ===
+=== [ops_dashboard] start at 2026-05-20T12:00:19Z ===
+{
+  "dashboard_generated_at": "2026-05-20T12:00:19Z",
+  "overall_status": "ok",
+  "section_breaches": 0,
+  "section_critical": 0,
+  "sections": [
+    {
+      "section": "production_pending",
+      "status": "ok",
+      "tldr": "58 pending tasks (top types: [('daily_article', 40), ('experiment', 15), ('?', 2)])",
+      "next": "dispatch top P1-P3 if slots free"
+    },
+    {
+      "section": "production_throughput",
+      "status": "ok",
+      "tldr": "9 articles published last 24h (target 6/day)",
+      "next": null
+    },
+    {
+      "section": "distribution_supabase",
+      "status": "ok",
+      "tldr": "9/9 last-24h articles synced",
+      "next": null,
+      "missing": []
+    },
+    {
+      "section": "verification_live_url",
+      "status": "ok",
+      "tldr": "3/3 sample live URLs return 200",
+      "next": null,
+      "sample": [
+        "mile_94c1a524",
+        "mile_6cc748ba",
+        "mile_74a28bcf"
+      ],
+      "dead": []
+    },
+    {
+      "section": "verification_fb_pipeline",
+      "status": "ok",
+      "tldr": "0 FB posts pending sync",
+      "next": null
+    },
+    {
+      "section": "health_cron",
+      "status": "ok",
+      "tldr": "0 cron jobs stale (over max-age)",
+      "next": null,
+      "stale": []
+    },
+    {
+      "section": "health_alerts_unhandled",
+      "status": "ok",
+      "tldr": "0 warn/critical alerts last 6h (read + act per .claude/rules/alert.md)",
+      "next": null,
+      "breaches": []
+    }
+  ]
+}
+=== [ops_dashboard] exit 0 at 2026-05-20T12:00:23Z ===
+=== [ops_dashboard] exit 0 at 2026-05-20T12:00:23.559118+00:00 (duration=4.4s) ===

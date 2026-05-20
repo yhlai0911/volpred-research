@@ -1,0 +1,20 @@
+{
+  "id": "ff395c27",
+  "subject": "[VolPred Alert][WARN] host cron 21h drift 根因 = TCC FDA 阻擋；需用戶決定修復路徑",
+  "body": "Alert level: warn\nTitle: host cron 21h drift 根因 = TCC FDA 阻擋；需用戶決定修復路徑\n\n2026-04-27 release_pool 21h drift 根因定位完成。\n\n## 診斷\n- macOS `com.vix.cron` daemon 不在 launchctl active list (`launchctl list | grep -i cron` 完全 empty)。\n- 該 daemon 是執行 crontab entries 的關鍵 service，被 macOS 系統管理載入/卸載 — 不可預測；2026-04-26T16:00 後到 04-27T14:00 連續 21 小時 silent unloaded → 21 個 hourly check_alerts fire 全 miss → release_pool / collect_tw / market_calendar / memory_health 全凍結。\n- 嘗試遷移到 user-level launchd LaunchAgents 取代 cron — 但 launchd-spawned bash 撞到 macOS TCC (Transparency, Consent, Control)：「Operation not permitted」當 LaunchAgent 嘗試寫 `~/Desktop/volpred-research/storage/logs/`. com.vix.cron daemon 有 FDA 權限 (系統 daemon 內建)，user-level LaunchAgent 沒有。\n\n## 修法（需用戶操作）\n\n### Option A：grant Full Disk Access to /bin/bash（推薦）\n1. 開 System Settings → Privacy & Security → Full Disk Access\n2. 點 + → 在 Finder 用 ⇧⌘G 輸入 `/bin/bash` → Add\n3. 重啟 Terminal session\n4. 重跑 `bash /Users/yhlai0911/.volpred/bin/install_launchd_jobs.sh` 安裝 LaunchAgents\n5. 移除 crontab：`crontab -r`\n\n優點：launchd 是 macOS 一等公民 service manager，daemon-by-design 持續 active，不會像 com.vix.cron 偶被 idle-killed。\n\n### Option B：sudo 強制 load com.vix.cron 持續載入\n```\nsudo launchctl load -w /System/Library/LaunchDaemons/com.vix.cron.plist\n```\n保持現有 crontab 不動，但需確認 daemon 重啟後不再 unload（macOS 仍有可能 silent kill，未必永久 fix）。\n\n### Option C：移專案出 ~/Desktop（refactor，工程量大）\n不建議，影響範圍太廣。\n\n## 當前狀態\n- 已 revert 試做的 LaunchAgents（無雙 fire 風險）\n- crontab entries 全部保留\n- 等 `com.vix.cron` 再次被 macOS 載入後 cron entries 會繼續 fire（時間不確定）\n- 已寫 `~/.volpred/bin/install_launchd_jobs.sh` 含完整 plist 配置，如選 Option A 直接跑即可\n\n## docs/error_log.md 已記錄\n2026-04-27 entry 含 21h gap timeline + 根因 + 兩個修法路徑。下次同問題重現時可直接照表 fix。\n\n## 建議\n選 Option A — long-term 穩定。需要約 2 分鐘的系統設定 + 1 個指令重跑。",
+  "text_body": "Alert level: warn\nTitle: host cron 21h drift 根因 = TCC FDA 阻擋；需用戶決定修復路徑\n\n2026-04-27 release_pool 21h drift 根因定位完成。\n\n## 診斷\n- macOS `com.vix.cron` daemon 不在 launchctl active list (`launchctl list | grep -i cron` 完全 empty)。\n- 該 daemon 是執行 crontab entries 的關鍵 service，被 macOS 系統管理載入/卸載 — 不可預測；2026-04-26T16:00 後到 04-27T14:00 連續 21 小時 silent unloaded → 21 個 hourly check_alerts fire 全 miss → release_pool / collect_tw / market_calendar / memory_health 全凍結。\n- 嘗試遷移到 user-level launchd LaunchAgents 取代 cron — 但 launchd-spawned bash 撞到 macOS TCC (Transparency, Consent, Control)：「Operation not permitted」當 LaunchAgent 嘗試寫 `~/Desktop/volpred-research/storage/logs/`. com.vix.cron daemon 有 FDA 權限 (系統 daemon 內建)，user-level LaunchAgent 沒有。\n\n## 修法（需用戶操作）\n\n### Option A：grant Full Disk Access to /bin/bash（推薦）\n1. 開 System Settings → Privacy & Security → Full Disk Access\n2. 點 + → 在 Finder 用 ⇧⌘G 輸入 `/bin/bash` → Add\n3. 重啟 Terminal session\n4. 重跑 `bash /Users/yhlai0911/.volpred/bin/install_launchd_jobs.sh` 安裝 LaunchAgents\n5. 移除 crontab：`crontab -r`\n\n優點：launchd 是 macOS 一等公民 service manager，daemon-by-design 持續 active，不會像 com.vix.cron 偶被 idle-killed。\n\n### Option B：sudo 強制 load com.vix.cron 持續載入\n```\nsudo launchctl load -w /System/Library/LaunchDaemons/com.vix.cron.plist\n```\n保持現有 crontab 不動，但需確認 daemon 重啟後不再 unload（macOS 仍有可能 silent kill，未必永久 fix）。\n\n### Option C：移專案出 ~/Desktop（refactor，工程量大）\n不建議，影響範圍太廣。\n\n## 當前狀態\n- 已 revert 試做的 LaunchAgents（無雙 fire 風險）\n- crontab entries 全部保留\n- 等 `com.vix.cron` 再次被 macOS 載入後 cron entries 會繼續 fire（時間不確定）\n- 已寫 `~/.volpred/bin/install_launchd_jobs.sh` 含完整 plist 配置，如選 Option A 直接跑即可\n\n## docs/error_log.md 已記錄\n2026-04-27 entry 含 21h gap timeline + 根因 + 兩個修法路徑。下次同問題重現時可直接照表 fix。\n\n## 建議\n選 Option A — long-term 穩定。需要約 2 分鐘的系統設定 + 1 個指令重跑。",
+  "html_body": null,
+  "level": "warn",
+  "metadata": {
+    "notification_type": "ops_alert",
+    "alert_level": "warn",
+    "alert_title": "host cron 21h drift 根因 = TCC FDA 阻擋；需用戶決定修復路徑",
+    "recipient": "yihao.lai@gmail.com"
+  },
+  "timestamp": "2026-04-27T14:51:07.413495+00:00",
+  "recipients": [
+    "yihao.lai@gmail.com"
+  ],
+  "sent": true,
+  "configured": true
+}

@@ -1,0 +1,45 @@
+======================================================================
+K1380: White RC / Hansen SPA Test — 17-Spec Horse Race
+======================================================================
+
+[1] Loading snapshot CSV...
+  SPY: 2000-01-04 to 2026-05-18, n=6642
+  OOS: 2019-01-01 onwards, n_oos=1864
+
+[2] Rolling window OOS forecasting (17 specs, ~ 29 refits)...
+    This may take 30-90 min in compute_queue.
+  OOS step 0/1864 (0.0%, 0s)
+  OOS step 200/1864 (10.7%, 125s)
+  OOS step 400/1864 (21.5%, 227s)
+  OOS step 600/1864 (32.2%, 327s)
+  OOS step 800/1864 (42.9%, 434s)
+  OOS step 1000/1864 (53.6%, 558s)
+  OOS step 1200/1864 (64.4%, 683s)
+  OOS step 1400/1864 (75.1%, 756s)
+  OOS step 1600/1864 (85.8%, 837s)
+  OOS step 1800/1864 (96.6%, 925s)
+
+  Rolling forecasts complete (957s)
+
+[3] Computing QLIKE losses...
+  n_valid (all 17 models): 0
+  Mean QLIKE per spec (lower = better):
+     1. A1  : nan
+     2. A2  : nan
+     3. A3  : nan
+     4. A4  : nan
+     5. A5  : nan
+     6. A2f : nan
+     7. A4f : nan
+     8. A3f : nan
+     9. A2n : nan
+    10. A4n : nan
+    11. B1  : nan
+    12. B2  : nan
+    13. B3  : nan
+    14. C1  : nan
+    15. C2  : nan
+    16. C3  : nan
+    17. B0  : nan
+
+[4] Hansen SPA + White RC tests (B=499 stationary bootstrap)...

@@ -1,0 +1,242 @@
+{
+  "experiment_id": "k1266",
+  "title": "Multivariate Rough Volatility (rough Bergomi) on SPY/QQQ/IWM",
+  "literature": [
+    "arXiv:2412.14353 (2024-12) Multivariate rough volatility",
+    "Bayer-Friz-Gatheral (2016) Pricing under rough volatility",
+    "Engle (2002) Dynamic Conditional Correlation"
+  ],
+  "differentiation_from_K806": "K806 used multivariate fBm + cross-asset H regressors on r^2 target; K1266 uses rough Bergomi spec + DCC-GARCH baseline + joint Sigma evaluation on 3 US ETFs (different assets, different spec, different evaluation target).",
+  "assets": [
+    "SPY",
+    "QQQ",
+    "IWM"
+  ],
+  "period": {
+    "start": "2010-01-05",
+    "end": "2026-04-29",
+    "is_end": "2018-12-31",
+    "oos_start": "2019-01-01",
+    "n_is": 2263,
+    "n_oos": 1841
+  },
+  "seed": 42,
+  "hursts": {
+    "SPY": 0.015296692787318001,
+    "QQQ": 0.015331029774685721,
+    "IWM": 0.1
+  },
+  "dcc_params": {
+    "a": 0.2366206650122729,
+    "b": 0.7188141244488687
+  },
+  "verdict": "NULL",
+  "headline": {
+    "mv_qlike_dcc": -26.035375543280036,
+    "mv_qlike_uni_rough": -22.31451671798566,
+    "mv_qlike_mv_rough": -23.542257701363006,
+    "rel_improve_mv_vs_dcc_pct": -9.575885847210397,
+    "dm_t_mv_vs_dcc": 13.904038282804489,
+    "dm_p_mv_vs_dcc": 0.0,
+    "subperiod_wins_mv_vs_dcc": 0
+  },
+  "per_asset_qlike": {
+    "SPY": {
+      "dcc": 1.5519965358017982,
+      "uni_rough": 2.0475854416736987,
+      "mv_rough": 2.0475854416736987
+    },
+    "QQQ": {
+      "dcc": 1.5125081919693846,
+      "uni_rough": 1.8137832245086136,
+      "mv_rough": 1.8137832245086136
+    },
+    "IWM": {
+      "dcc": 1.393092825987078,
+      "uni_rough": 1.685946769738498,
+      "mv_rough": 1.685946769738498
+    }
+  },
+  "dm_table": {
+    "mv_rough vs dcc": {
+      "mv_QLIKE": {
+        "t": 13.904038282804489,
+        "p": 0.0
+      },
+      "Frobenius": {
+        "t": 15.204805956044947,
+        "p": 0.0
+      },
+      "QLIKE_SPY": {
+        "t": 11.71999435463077,
+        "p": 0.0
+      },
+      "QLIKE_QQQ": {
+        "t": 9.62800525917275,
+        "p": 0.0
+      },
+      "QLIKE_IWM": {
+        "t": 6.508197391300683,
+        "p": 9.779221876726751e-11
+      }
+    },
+    "uni_rough vs dcc": {
+      "mv_QLIKE": {
+        "t": 20.326689969444757,
+        "p": 0.0
+      },
+      "Frobenius": {
+        "t": 16.7188628082192,
+        "p": 0.0
+      },
+      "QLIKE_SPY": {
+        "t": 11.71999435463077,
+        "p": 0.0
+      },
+      "QLIKE_QQQ": {
+        "t": 9.62800525917275,
+        "p": 0.0
+      },
+      "QLIKE_IWM": {
+        "t": 6.508197391300683,
+        "p": 9.779221876726751e-11
+      }
+    },
+    "mv_rough vs uni_rough": {
+      "mv_QLIKE": {
+        "t": -31.54240202310949,
+        "p": 0.0
+      },
+      "Frobenius": {
+        "t": 1.7815175362473623,
+        "p": 0.07499284122946714
+      },
+      "QLIKE_SPY": {
+        "t": NaN,
+        "p": NaN
+      },
+      "QLIKE_QQQ": {
+        "t": NaN,
+        "p": NaN
+      },
+      "QLIKE_IWM": {
+        "t": NaN,
+        "p": NaN
+      }
+    }
+  },
+  "subperiod_qlike_mv": {
+    "2020": {
+      "dcc": -23.916204167163706,
+      "uni_rough": -19.771143298092298,
+      "mv_rough": -21.197909283001916
+    },
+    "2022": {
+      "dcc": -25.305726814673534,
+      "uni_rough": -20.0046945639183,
+      "mv_rough": -21.326087252681752
+    },
+    "others": {
+      "dcc": -26.573365213465266,
+      "uni_rough": -23.229429833844996,
+      "mv_rough": -24.40192780791824
+    },
+    "all": {
+      "dcc": -26.035375543280036,
+      "uni_rough": -22.31451671798566,
+      "mv_rough": -23.542257701363006
+    }
+  },
+  "subperiod_frobenius": {
+    "2020": {
+      "dcc": 0.0015519393425492084,
+      "uni_rough": 0.0027951025423907623,
+      "mv_rough": 0.0028775057575674786
+    },
+    "2022": {
+      "dcc": 0.0009160434037404337,
+      "uni_rough": 0.0017242275836045922,
+      "mv_rough": 0.0017128040137963881
+    },
+    "others": {
+      "dcc": 0.0004187829220395845,
+      "uni_rough": 0.0005950833578352035,
+      "mv_rough": 0.0006017045120591509
+    },
+    "all": {
+      "dcc": 0.0006423032671215224,
+      "uni_rough": 0.0010513680152826085,
+      "mv_rough": 0.0010659433442425587
+    }
+  },
+  "subperiod_per_asset_qlike": {
+    "SPY": {
+      "2020": {
+        "dcc": 1.462923627018385,
+        "uni_rough": 2.0004965509770605,
+        "mv_rough": 2.0004965509770605
+      },
+      "2022": {
+        "dcc": 1.4066028882848725,
+        "uni_rough": 1.9555266698449818,
+        "mv_rough": 1.9555266698449818
+      },
+      "others": {
+        "dcc": 1.5961470604457413,
+        "uni_rough": 2.0737785913186184,
+        "mv_rough": 2.0737785913186184
+      },
+      "all": {
+        "dcc": 1.5519965358017982,
+        "uni_rough": 2.0475854416736987,
+        "mv_rough": 2.0475854416736987
+      }
+    },
+    "QQQ": {
+      "2020": {
+        "dcc": 1.635194220658829,
+        "uni_rough": 1.941457458228448,
+        "mv_rough": 1.941457458228448
+      },
+      "2022": {
+        "dcc": 1.4116660243506745,
+        "uni_rough": 1.6635134756002756,
+        "mv_rough": 1.6635134756002756
+      },
+      "others": {
+        "dcc": 1.5082238380530544,
+        "uni_rough": 1.8178341787680563,
+        "mv_rough": 1.8178341787680563
+      },
+      "all": {
+        "dcc": 1.5125081919693846,
+        "uni_rough": 1.8137832245086136,
+        "mv_rough": 1.8137832245086136
+      }
+    },
+    "IWM": {
+      "2020": {
+        "dcc": 1.5325000334024101,
+        "uni_rough": 2.1631661084443716,
+        "mv_rough": 2.1631661084443716
+      },
+      "2022": {
+        "dcc": 1.2546569586781426,
+        "uni_rough": 1.4488198809728376,
+        "mv_rough": 1.4488198809728376
+      },
+      "others": {
+        "dcc": 1.392701935350177,
+        "uni_rough": 1.6401594521525553,
+        "mv_rough": 1.6401594521525553
+      },
+      "all": {
+        "dcc": 1.393092825987078,
+        "uni_rough": 1.685946769738498,
+        "mv_rough": 1.685946769738498
+      }
+    }
+  },
+  "completed_at": "2026-05-03T12:38:51.991389",
+  "runtime_seconds": 30.054958
+}

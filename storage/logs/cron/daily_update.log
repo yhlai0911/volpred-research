@@ -681,3 +681,568 @@ Saved to storage/risk_forecast.json
 
 ✓ Done!
 === [daily_update] exit 0 at 2026-04-25T01:05:47.195880+00:00 (duration=346.6s) ===
+=== Daily Update: 2026-05-18 ===
+  TLT 66d momentum: -5.7% (negative, SPY-only recommended)
+  GLD regime: BULL (inverted leverage → GARCH) (252d ret=+40.1%)
+  VIX/GARCH ratio: 1.4 (normal)
+  VIX term structure: contango (0.863)
+  SPY: $739.17 (-1.21%), σ=13.2%
+  GLD: $417.29, σ=21.0%
+  🔄 Hybrid VT active (VIX-based weight, ratio=1.4)
+  Slow VT: 65% SPY, 35% cash
+  Risk Parity: 64% SPY, 40% GLD, 0% cash
+  12/VIX Simple: 65% SPY, 35% cash (SHY)
+  ★ 50/50 SPY/GLD: 33% SPY, 33% GLD, 34% SHY
+  台灣 8.63/VIX: 47% 0050.TW, 53% 短債 (NT$95.4)
+  ⚠️ 10d SPY Momentum [BIASED c2c, o2o FAIL]: SPY 10d avg=+0.257% → HOLD 0050
+  ⚠️ TW+JP 50/50 TZ [BIASED]: TW ON, JP ON (^N225 ¥61409.29)
+  ⚠️ Global VT+TZ [50% BIASED]: SPY 17%, GLD 17%, 0050 50%
+  VIX+景氣領先: 33% 0050.TW (↓保守k=6, MoM=+0.0)
+  VIX條件槓桿: SPY 33%, GLD 33%, cash 34% (1.0x 標準, VIX=18.4)
+  台股混合槓桿: 47% 0050.TW, 53% cash (1.0x 標準, RV22=26.3%, VIX pctl=0.66)
+  保守型VT(Piecewise): SPY 10%, GLD 10%, cash 80% (VIX=18.4, 漸退)
+  恐慌加碼DCA: 正常投入 1.0x (VIX=18.4, 本月建議投入 100% 正常金額)
+  自適應三階VT: SPY 33%, GLD 33%, cash 34% (標準 12/VIX (15≤VIX=18.4≤20))
+  ⚠️ 數據未更新（spy_date=2026-05-15 與上次相同），跳過發布
+  跳過發布（數據與上次相同）
+  Published locally. Feed: 1260 items (no configured local data mirrors)
+  Mirror API: RESEARCH_MIRROR_TOKEN not set, skipping
+  Supabase: article synced
+  Supabase: risk_forecast synced
+  Supabase: 14 strategy signals synced
+  Supabase: 420 paper trades synced (last 30d × 14 strategies)
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-03-24 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-03-28 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-03-30 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-03-31 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-01 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-02 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-03 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-06 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-07 stripped 3 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap', 'vix'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-08 stripped 3 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap', 'vix'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-09 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-10 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-11 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-14 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-15 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-16 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-17 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-18 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-20 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-21 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-22 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-23 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-24 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-25 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-05-18 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  ⚠️ Supabase: market_daily synced 16/30 (FAILED 14)
+
+--- Generating risk forecast ---
+=== Risk Forecast: 2026-05-18 ===
+  SPY: σ_ann=13.2% | regime=正常 | VaR(skewt) 1d=2.38% | VaR(CF) 1d=2.76% | VaR(t) 1d=2.17% | Basel GREEN (1/93)
+  QQQ: σ_ann=17.4% | regime=正常 | VaR(skewt) 1d=3.09% | VaR(CF) 1d=3.30% | VaR(t) 1d=2.86% | Basel GREEN (0/93)
+  GLD: σ_ann=20.0% | regime=高波動 | VaR(skewt) 1d=3.47% | VaR(CF) 1d=3.69% | VaR(t) 1d=3.29% | Basel GREEN (2/93)
+  TLT: σ_ann=11.6% | regime=低波動 | VaR(skewt) 1d=1.81% | VaR(CF) 1d=1.81% | VaR(t) 1d=1.91% | Basel GREEN (1/93)
+  0050.TW: σ_ann=19.4% | regime=正常 | VaR(skewt) 1d=3.32% | VaR(CF) 1d=4.09% | VaR(t) 1d=3.19% | Basel GREEN (1/85)=== Daily Update: 2026-05-18 ===
+  TLT 66d momentum: -5.7% (negative, SPY-only recommended)
+  GLD regime: BULL (inverted leverage → GARCH) (252d ret=+40.1%)
+  VIX/GARCH ratio: 1.4 (normal)
+  VIX term structure: contango (0.863)
+  SPY: $739.17 (-1.21%), σ=13.2%
+  GLD: $417.29, σ=21.0%
+  🔄 Hybrid VT active (VIX-based weight, ratio=1.4)
+  Slow VT: 65% SPY, 35% cash
+  Risk Parity: 64% SPY, 40% GLD, 0% cash
+  12/VIX Simple: 65% SPY, 35% cash (SHY)
+  ★ 50/50 SPY/GLD: 33% SPY, 33% GLD, 34% SHY
+  台灣 8.63/VIX: 47% 0050.TW, 53% 短債 (NT$95.4)
+  ⚠️ 10d SPY Momentum [BIASED c2c, o2o FAIL]: SPY 10d avg=+0.257% → HOLD 0050
+  ⚠️ TW+JP 50/50 TZ [BIASED]: TW ON, JP ON (^N225 ¥61409.29)
+  ⚠️ Global VT+TZ [50% BIASED]: SPY 17%, GLD 17%, 0050 50%
+  VIX+景氣領先: 33% 0050.TW (↓保守k=6, MoM=+0.0)
+  VIX條件槓桿: SPY 33%, GLD 33%, cash 34% (1.0x 標準, VIX=18.4)
+  台股混合槓桿: 47% 0050.TW, 53% cash (1.0x 標準, RV22=26.3%, VIX pctl=0.66)
+  保守型VT(Piecewise): SPY 10%, GLD 10%, cash 80% (VIX=18.4, 漸退)
+  恐慌加碼DCA: 正常投入 1.0x (VIX=18.4, 本月建議投入 100% 正常金額)
+  自適應三階VT: SPY 33%, GLD 33%, cash 34% (標準 12/VIX (15≤VIX=18.4≤20))
+  ⚠️ 數據未更新（spy_date=2026-05-15 與上次相同），跳過發布
+  跳過發布（數據與上次相同）
+  Published locally. Feed: 1260 items (no configured local data mirrors)
+  Mirror API: RESEARCH_MIRROR_TOKEN not set, skipping
+  Supabase: article synced
+  Supabase: risk_forecast synced
+  Supabase: 14 strategy signals synced
+  Supabase: 420 paper trades synced (last 30d × 14 strategies)
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-03-24 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-03-28 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-03-30 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-03-31 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-01 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-02 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-03 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-06 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-07 stripped 3 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap', 'vix'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-08 stripped 3 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap', 'vix'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-09 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-10 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-11 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-14 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-15 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-16 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-17 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-18 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-20 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-21 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-22 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-23 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-24 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-25 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-05-18 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  ⚠️ Supabase: market_daily synced 16/30 (FAILED 14)
+
+--- Generating risk forecast ---
+=== Risk Forecast: 2026-05-18 ===
+  SPY: σ_ann=13.2% | regime=正常 | VaR(skewt) 1d=2.38% | VaR(CF) 1d=2.76% | VaR(t) 1d=2.17% | Basel GREEN (1/93)
+  QQQ: σ_ann=17.4% | regime=正常 | VaR(skewt) 1d=3.09% | VaR(CF) 1d=3.30% | VaR(t) 1d=2.86% | Basel GREEN (0/93)
+  GLD: σ_ann=20.0% | regime=高波動 | VaR(skewt) 1d=3.47% | VaR(CF) 1d=3.69% | VaR(t) 1d=3.29% | Basel GREEN (2/93)
+  TLT: σ_ann=11.6% | regime=低波動 | VaR(skewt) 1d=1.81% | VaR(CF) 1d=1.81% | VaR(t) 1d=1.91% | Basel GREEN (1/93)
+  0050.TW: σ_ann=19.4% | regime=正常 | VaR(skewt) 1d=3.32% | VaR(CF) 1d=4.09% | VaR(t) 1d=3.19% | Basel GREEN (1/85)
+  EEM: σ_ann=32.1% | regime=極端 | VaR(skewt) 1d=5.41% | VaR(CF) 1d=5.63% | VaR(t) 1d=5.28% | Basel GREEN (1/93)
+
+Saved to storage/risk_forecast.json
+  ✓ risk_forecast.json updated
+
+--- Recalculating strategy metrics ---
+  slow_vt                   Sharpe=1.31 Ret=48.8% MDD=-10.7% sparkline=90pt
+  risk_parity               Sharpe=2.10 Ret=144.0% MDD=-11.5% sparkline=90pt
+  simple_12vix              Sharpe=1.30 Ret=46.4% MDD=-11.0% sparkline=90pt
+  recommended_5050          Sharpe=1.90 Ret=68.8% MDD=-7.7% sparkline=90pt
+  taiwan_8.63vix            Sharpe=2.17 Ret=100.7% MDD=-11.2% sparkline=90pt
+  taiwan_spy_momentum       Sharpe=3.27 Ret=320.2% MDD=-8.1% sparkline=90pt
+  tz_tw_jp_5050             Sharpe=3.51 Ret=268.0% MDD=-6.7% sparkline=90pt
+  global_vt_tz              Sharpe=3.04 Ret=138.0% MDD=-5.5% sparkline=90pt
+  vix_leading_guard         Sharpe=1.60 Ret=80.0% MDD=-16.0% sparkline=90pt
+  vix_cond_leverage         Sharpe=2.66 Ret=135.0% MDD=-6.5% sparkline=90pt
+  taiwan_hybrid_leverage    Sharpe=2.60 Ret=154.3% MDD=-10.3% sparkline=90pt
+  piecewise_conservative    Sharpe=3.10 Ret=70.0% MDD=-2.5% sparkline=90pt
+  fear_dca                  Sharpe=1.42 Ret=98.3% MDD=-18.8% sparkline=90pt
+  adaptive_tier             Sharpe=2.96 Ret=141.3% MDD=-5.1% sparkline=90pt
+
+✓ 14 strategies updated → strategy_metrics.json
+  → frontend metrics synced: frontend-v2-fix/data/strategy_metrics.json
+  → Supabase strategy_metrics_cache: 14/14 synced (metrics only; sparkline owned by frontend buildSparkline)
+
+--- Updating market status ---
+  Trading calendar synced: 30 days (2026-05-18 ~ 2026-06-16)
+  Today: 美股正常開盤、台股正常開盤
+
+--- Rebuilding feed index ---
+[feed-index] wrote INDEX.md + index.json (1260 articles, last30=337)
+
+--- Rebuilding experiments index ---
+[index] wrote experiments/INDEX.md (1051 K rows; uncovered=781, PASS=224 FAIL=68 NULL=94)
+
+--- Sync health check ---
+  paper_trades: OK (trade_date=2026-05-18)
+  market_daily: OK (trade_date=2026-05-18)
+  strategy_signals: OK (updated_at=2026-05-18T00:03:56.935652+00:00)
+
+--- Ops alert checks ---
+  breaches=0 sent=0 skipped=0
+  - [ok] release_pool_gap | Release pool cron gap > 4.0h (interval=180min)
+  - [ok] draft_pool_low | Draft pool below threshold (<4)
+  - [ok] host_cron_fail | Host cron failure detected
+  - [ok] member_qa_stale | Member Q&A pending stale
+  - [ok] supabase_sync_fail | Supabase sync queue clean
+
+✓ Done!
+
+  EEM: σ_ann=32.1% | regime=極端 | VaR(skewt) 1d=5.41% | VaR(CF) 1d=5.63% | VaR(t) 1d=5.28% | Basel GREEN (1/93)
+
+Saved to storage/risk_forecast.json
+  ✓ risk_forecast.json updated
+
+--- Recalculating strategy metrics ---
+  slow_vt                   Sharpe=1.31 Ret=48.8% MDD=-10.7% sparkline=90pt
+  risk_parity               Sharpe=2.10 Ret=144.0% MDD=-11.5% sparkline=90pt
+  simple_12vix              Sharpe=1.30 Ret=46.4% MDD=-11.0% sparkline=90pt
+  recommended_5050          Sharpe=1.90 Ret=68.8% MDD=-7.7% sparkline=90pt
+  taiwan_8.63vix            Sharpe=2.17 Ret=100.7% MDD=-11.2% sparkline=90pt
+  taiwan_spy_momentum       Sharpe=3.27 Ret=320.2% MDD=-8.1% sparkline=90pt
+  tz_tw_jp_5050             Sharpe=3.51 Ret=268.0% MDD=-6.7% sparkline=90pt
+  global_vt_tz              Sharpe=3.04 Ret=138.0% MDD=-5.5% sparkline=90pt
+  vix_leading_guard         Sharpe=1.60 Ret=80.0% MDD=-16.0% sparkline=90pt
+  vix_cond_leverage         Sharpe=2.66 Ret=135.0% MDD=-6.5% sparkline=90pt
+  taiwan_hybrid_leverage    Sharpe=2.60 Ret=154.3% MDD=-10.3% sparkline=90pt
+  piecewise_conservative    Sharpe=3.10 Ret=70.0% MDD=-2.5% sparkline=90pt
+  fear_dca                  Sharpe=1.42 Ret=98.3% MDD=-18.8% sparkline=90pt
+  adaptive_tier             Sharpe=2.96 Ret=141.3% MDD=-5.1% sparkline=90pt
+
+✓ 14 strategies updated → strategy_metrics.json
+  → frontend metrics synced: frontend-v2-fix/data/strategy_metrics.json
+  → Supabase strategy_metrics_cache: 14/14 synced (metrics only; sparkline owned by frontend buildSparkline)
+
+--- Updating market status ---
+  Trading calendar synced: 30 days (2026-05-18 ~ 2026-06-16)
+  Today: 美股正常開盤、台股正常開盤
+
+--- Rebuilding feed index ---
+[feed-index] wrote INDEX.md + index.json (1260 articles, last30=337)
+
+--- Rebuilding experiments index ---
+[index] wrote experiments/INDEX.md (1051 K rows; uncovered=781, PASS=224 FAIL=68 NULL=94)
+
+--- Sync health check ---
+  paper_trades: OK (trade_date=2026-05-18)
+  market_daily: OK (trade_date=2026-05-18)
+  strategy_signals: OK (updated_at=2026-05-18T00:03:56.935652+00:00)
+
+--- Ops alert checks ---
+  breaches=0 sent=0 skipped=0
+  - [ok] release_pool_gap | Release pool cron gap > 4.0h (interval=180min)
+  - [ok] draft_pool_low | Draft pool below threshold (<4)
+  - [ok] host_cron_fail | Host cron failure detected
+  - [ok] member_qa_stale | Member Q&A pending stale
+  - [ok] supabase_sync_fail | Supabase sync queue clean
+
+✓ Done!
+=== Daily Update: 2026-05-19 ===
+  TLT 66d momentum: -5.2% (negative, SPY-only recommended)
+  GLD regime: BULL (inverted leverage → GARCH) (252d ret=+42.2%)
+  VIX/GARCH ratio: 1.41 (normal)
+  VIX term structure: contango (0.852)
+  SPY: $738.65 (-0.07%), σ=12.6%
+  GLD: $418.43, σ=19.8%
+  🔄 Hybrid VT active (VIX-based weight, ratio=1.41)
+  Slow VT: 67% SPY, 33% cash
+  Risk Parity: 68% SPY, 43% GLD, 0% cash
+  12/VIX Simple: 67% SPY, 33% cash (SHY)
+  ★ 50/50 SPY/GLD: 34% SPY, 34% GLD, 32% SHY
+  台灣 8.63/VIX: 48% 0050.TW, 52% 短債 (NT$94.9)
+  ⚠️ 10d SPY Momentum [BIASED c2c, o2o FAIL]: SPY 10d avg=+0.286% → HOLD 0050
+  ⚠️ TW+JP 50/50 TZ [BIASED]: TW ON, JP ON (^N225 ¥61409.29)
+  ⚠️ Global VT+TZ [50% BIASED]: SPY 17%, GLD 17%, 0050 50%
+  VIX+景氣領先: 34% 0050.TW (↓保守k=6, MoM=+0.0)
+  VIX條件槓桿: SPY 34%, GLD 34%, cash 32% (1.0x 標準, VIX=17.8)
+  台股混合槓桿: 48% 0050.TW, 52% cash (1.0x 標準, RV22=26.5%, VIX pctl=0.58)
+  保守型VT(Piecewise): SPY 14%, GLD 14%, cash 72% (VIX=17.8, 漸退)
+  恐慌加碼DCA: 正常投入 1.0x (VIX=17.8, 本月建議投入 100% 正常金額)
+  自適應三階VT: SPY 34%, GLD 34%, cash 32% (標準 12/VIX (15≤VIX=17.8≤20))
+Traceback (most recent call last):
+  File "/Users/yhlai0911/Desktop/volpred-research/scripts/daily_update.py", line 1185, in <module>
+    main()
+  File "/Users/yhlai0911/Desktop/volpred-research/scripts/daily_update.py", line 800, in main
+    feed = json.loads(feed_path.read_text())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yhlai0911/.local/share/uv/python/cpython-3.12.10-macos-aarch64-none/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yhlai0911/.local/share/uv/python/cpython-3.12.10-macos-aarch64-none/lib/python3.12/json/decoder.py", line 338, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yhlai0911/.local/share/uv/python/cpython-3.12.10-macos-aarch64-none/lib/python3.12/json/decoder.py", line 356, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+=== Daily Update: 2026-05-20 ===
+  TLT 66d momentum: -7.2% (negative, SPY-only recommended)
+  GLD regime: BULL (inverted leverage → GARCH) (252d ret=+38.1%)
+  VIX/GARCH ratio: 1.39 (normal)
+  VIX term structure: contango (0.855)
+  SPY: $733.73 (-0.67%), σ=13.0%
+  GLD: $411.5, σ=20.5%
+  🔄 Hybrid VT active (VIX-based weight, ratio=1.39)
+  Slow VT: 66% SPY, 34% cash
+  Risk Parity: 65% SPY, 41% GLD, 0% cash
+  12/VIX Simple: 66% SPY, 34% cash (SHY)
+  ★ 50/50 SPY/GLD: 33% SPY, 33% GLD, 34% SHY
+  台灣 8.63/VIX: 48% 0050.TW, 52% 短債 (NT$94.9)
+  ⚠️ 10d SPY Momentum [BIASED c2c, o2o FAIL]: SPY 10d avg=+0.139% → HOLD 0050
+  ⚠️ TW+JP 50/50 TZ [BIASED]: TW ON, JP ON (^N225 ¥60815.95)
+  ⚠️ Global VT+TZ [50% BIASED]: SPY 17%, GLD 17%, 0050 50%
+  VIX+景氣領先: 33% 0050.TW (↓保守k=6, MoM=+0.0)
+  VIX條件槓桿: SPY 33%, GLD 33%, cash 34% (1.0x 標準, VIX=18.1)
+  台股混合槓桿: 48% 0050.TW, 52% cash (1.0x 標準, RV22=26.5%, VIX pctl=0.63)
+  保守型VT(Piecewise): SPY 12%, GLD 12%, cash 76% (VIX=18.1, 漸退)
+  恐慌加碼DCA: 正常投入 1.0x (VIX=18.1, 本月建議投入 100% 正常金額)
+  自適應三階VT: SPY 33%, GLD 33%, cash 34% (標準 12/VIX (15≤VIX=18.1≤20))
+  🚫 HIGH similarity articles found (12) — likely duplicate topic:
+    [61%] mile_c2114a5a: 2026-05-19 本日持倉比率建議（依據 2026-05-18 收盤數據）
+    [61%] mile_7c45f1b9: 2026-05-17 本日持倉比率建議（依據 2026-05-15 收盤數據）
+    [61%] mile_1a462a41: 2026-05-16 本日持倉比率建議（依據 2026-05-15 收盤數據）
+  → Consider skipping or differentiating this article significantly.
+  Daily article chart uploaded: https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/p...
+  ⚠️ Duplicate title within 24h: '每日策略建議：VIX 18.06（正常）— 2026-05-20' (existing: mile_f33d2435). Skipping.
+  Daily recommendation article created: mile_f33d2435 (status=published)
+  Published locally. Feed: 1277 items (no configured local data mirrors)
+  Mirror API: 4/4 synced
+  Supabase: article synced
+  Supabase: risk_forecast synced
+  Supabase: 14 strategy signals synced
+  Supabase: 420 paper trades synced (last 30d × 14 strategies)
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-03-24 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-03-28 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-03-30 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-03-31 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-01 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-02 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-03 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-06 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-07 stripped 3 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap', 'vix'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-08 stripped 3 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap', 'vix'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-09 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-10 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-11 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-14 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-15 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-16 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-17 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-18 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-20 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-21 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-22 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-23 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-24 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-25 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-05-18 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-05-19 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync=== Daily Update: 2026-05-20 ===
+  TLT 66d momentum: -7.2% (negative, SPY-only recommended)
+  GLD regime: BULL (inverted leverage → GARCH) (252d ret=+38.1%)
+  VIX/GARCH ratio: 1.39 (normal)
+  VIX term structure: contango (0.855)
+  SPY: $733.73 (-0.67%), σ=13.0%
+  GLD: $411.5, σ=20.5%
+  🔄 Hybrid VT active (VIX-based weight, ratio=1.39)
+  Slow VT: 66% SPY, 34% cash
+  Risk Parity: 65% SPY, 41% GLD, 0% cash
+  12/VIX Simple: 66% SPY, 34% cash (SHY)
+  ★ 50/50 SPY/GLD: 33% SPY, 33% GLD, 34% SHY
+  台灣 8.63/VIX: 48% 0050.TW, 52% 短債 (NT$94.9)
+  ⚠️ 10d SPY Momentum [BIASED c2c, o2o FAIL]: SPY 10d avg=+0.139% → HOLD 0050
+  ⚠️ TW+JP 50/50 TZ [BIASED]: TW ON, JP ON (^N225 ¥60815.95)
+  ⚠️ Global VT+TZ [50% BIASED]: SPY 17%, GLD 17%, 0050 50%
+  VIX+景氣領先: 33% 0050.TW (↓保守k=6, MoM=+0.0)
+  VIX條件槓桿: SPY 33%, GLD 33%, cash 34% (1.0x 標準, VIX=18.1)
+  台股混合槓桿: 48% 0050.TW, 52% cash (1.0x 標準, RV22=26.5%, VIX pctl=0.63)
+  保守型VT(Piecewise): SPY 12%, GLD 12%, cash 76% (VIX=18.1, 漸退)
+  恐慌加碼DCA: 正常投入 1.0x (VIX=18.1, 本月建議投入 100% 正常金額)
+  自適應三階VT: SPY 33%, GLD 33%, cash 34% (標準 12/VIX (15≤VIX=18.1≤20))
+  🚫 HIGH similarity articles found (12) — likely duplicate topic:
+    [61%] mile_c2114a5a: 2026-05-19 本日持倉比率建議（依據 2026-05-18 收盤數據）
+    [61%] mile_7c45f1b9: 2026-05-17 本日持倉比率建議（依據 2026-05-15 收盤數據）
+    [61%] mile_1a462a41: 2026-05-16 本日持倉比率建議（依據 2026-05-15 收盤數據）
+  → Consider skipping or differentiating this article significantly.
+  Daily article chart uploaded: https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/p...
+  🚫 HIGH similarity articles found (10) — likely duplicate topic:
+    [70%] mile_348183e2: 每日策略建議：VIX 17.82（正常）— 2026-05-19
+    [70%] mile_f84efaf6: 每日策略建議：VIX 18.43（正常）— 2026-05-17
+    [70%] mile_3bacffce: 每日策略建議：VIX 18.43（正常）— 2026-05-16
+  → Consider skipping or differentiating this article significantly.
+  Daily recommendation article created: mile_f33d2435 (status=published)
+  Published locally. Feed: 1277 items (no configured local data mirrors)
+  Mirror API: 4/4 synced
+  Supabase: article synced
+  Supabase: risk_forecast synced
+  Supabase: 14 strategy signals synced
+  Supabase: 420 paper trades synced (last 30d × 14 strategies)
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-03-24 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-03-28 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-03-30 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-03-31 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-01 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-02 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-03 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-06 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-07 stripped 3 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap', 'vix'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-08 stripped 3 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap', 'vix'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-09 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-10 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  Supabase market_daily error: 400
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-11 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-14 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-15 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-16 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-17 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-18 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-20 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-21 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-22 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-23 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-24 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-04-25 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-05-18 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-05-20 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  ⚠️ Supabase: market_daily synced 16/30 (FAILED 14)
+
+--- Generating risk forecast ---
+=== Risk Forecast: 2026-05-20 ===
+  SPY: σ_ann=13.0% | regime=正常 | VaR(skewt) 1d=2.35% | VaR(CF) 1d=2.72% | VaR(t) 1d=2.14% | Basel GREEN (1/95)
+  QQQ: σ_ann=16.8% | regime=正常 | VaR(skewt) 1d=2.99% | VaR(CF) 1d=3.19% | VaR(t) 1d=2.77% | Basel GREEN (0/95)
+  GLD: σ_ann=19.1% | regime=正常 | VaR(skewt) 1d=3.31% | VaR(CF) 1d=3.51% | VaR(t) 1d=3.13% | Basel GREEN (2/95)
+  TLT: σ_ann=11.2% | regime=低波動 | VaR(skewt) 1d=1.75% | VaR(CF) 1d=1.74% | VaR(t) 1d=1.84% | Basel GREEN (1/95)
+  0050.TW: σ_ann=18.7% | regime=正常 | VaR(skewt) 1d=3.21% | VaR(CF) 1d=3.95% | VaR(t) 1d=3.08% | Basel GREEN (1/86)
+  EEM: σ_ann=28.9% | regime=高波動 | VaR(skewt) 1d=4.86% | VaR(CF) 1d=5.06% | VaR(t) 1d=4.74% | Basel GREEN (1/95)
+
+Saved to storage/risk_forecast.json
+  ✓ risk_forecast.json updated
+
+--- Recalculating strategy metrics ---
+  slow_vt                   Sharpe=1.29 Ret=48.1% MDD=-10.7% sparkline=90pt
+  risk_parity               Sharpe=2.07 Ret=141.3% MDD=-11.5% sparkline=90pt
+  simple_12vix              Sharpe=1.28 Ret=45.7% MDD=-11.0% sparkline=90pt
+  recommended_5050          Sharpe=1.87 Ret=67.6% MDD=-7.7% sparkline=90pt
+  taiwan_8.63vix            Sharpe=2.15 Ret=99.7% MDD=-11.2% sparkline=90pt
+  taiwan_spy_momentum       Sharpe=3.24 Ret=315.8% MDD=-8.1% sparkline=90pt
+  tz_tw_jp_5050             Sharpe=3.44 Ret=260.6% MDD=-6.7% sparkline=90pt
+  global_vt_tz              Sharpe=3.00 Ret=135.9% MDD=-5.5% sparkline=90pt
+  vix_leading_guard         Sharpe=1.59 Ret=79.4% MDD=-16.0% sparkline=90pt
+  vix_cond_leverage         Sharpe=2.63 Ret=133.3% MDD=-6.5% sparkline=90pt
+  taiwan_hybrid_leverage    Sharpe=2.58 Ret=153.0% MDD=-10.3% sparkline=90pt
+  piecewise_conservative    Sharpe=3.08 Ret=69.5% MDD=-2.5% sparkline=90pt
+  fear_dca                  Sharpe=1.41 Ret=96.9% MDD=-18.8% sparkline=90pt
+  adaptive_tier             Sharpe=2.92 Ret=139.5% MDD=-5.1% sparkline=90pt
+
+✓ 14 strategies updated → strategy_metrics.json
+  → frontend metrics synced: frontend-v2-fix/data/strategy_metrics.json
+  → Supabase strategy_metrics_cache: 14/14 synced (metrics only; sparkline owned by frontend buildSparkline)
+
+--- Updating market status ---
+  Trading calendar synced: 30 days (2026-05-20 ~ 2026-06-18)
+  Today: 美股正常開盤、台股正常開盤
+
+--- Rebuilding feed index ---
+[feed-index] wrote INDEX.md + index.json (1277 articles, last30=338)
+
+--- Rebuilding experiments index ---
+[index] wrote experiments/INDEX.md (1060 K rows; uncovered=790, PASS=227 FAIL=70 NULL=94)
+
+--- Sync health check ---
+  paper_trades: OK (trade_date=2026-05-20)
+  market_daily: OK (trade_date=2026-05-20)
+  strategy_signals: OK (updated_at=2026-05-20T00:05:17.886676+00:00)
+
+--- Ops alert checks ---
+  breaches=0 sent=0 skipped=0
+  - [ok] release_pool_gap | Release pool cron gap > 4.0h (interval=180min)
+  - [ok] draft_pool_low | Draft pool below threshold (<4)
+  - [ok] host_cron_fail | Host cron failure detected
+  - [ok] member_qa_stale | Member Q&A pending stale
+  - [ok] supabase_sync_fail | Supabase sync queue clean
+
+✓ Done!
+
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-05-19 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  [sync_market_daily] schema-mismatch warning: trade_date=2026-05-20 stripped 2 unknown keys (not in _MARKET_DAILY_COLUMNS): ['gap_alert_level', 'overnight_gap'] — update _MARKET_DAILY_COLUMNS if these should sync
+  ⚠️ Supabase: market_daily synced 16/30 (FAILED 14)
+
+--- Generating risk forecast ---
+=== Risk Forecast: 2026-05-20 ===
+  SPY: σ_ann=13.0% | regime=正常 | VaR(skewt) 1d=2.35% | VaR(CF) 1d=2.72% | VaR(t) 1d=2.14% | Basel GREEN (1/95)
+  QQQ: σ_ann=16.8% | regime=正常 | VaR(skewt) 1d=2.99% | VaR(CF) 1d=3.19% | VaR(t) 1d=2.77% | Basel GREEN (0/95)
+  GLD: σ_ann=19.1% | regime=正常 | VaR(skewt) 1d=3.31% | VaR(CF) 1d=3.51% | VaR(t) 1d=3.13% | Basel GREEN (2/95)
+  TLT: σ_ann=11.2% | regime=低波動 | VaR(skewt) 1d=1.75% | VaR(CF) 1d=1.74% | VaR(t) 1d=1.84% | Basel GREEN (1/95)
+  0050.TW: σ_ann=18.7% | regime=正常 | VaR(skewt) 1d=3.21% | VaR(CF) 1d=3.95% | VaR(t) 1d=3.08% | Basel GREEN (1/86)
+  EEM: σ_ann=28.9% | regime=高波動 | VaR(skewt) 1d=4.86% | VaR(CF) 1d=5.06% | VaR(t) 1d=4.74% | Basel GREEN (1/95)
+
+Saved to storage/risk_forecast.json
+  ✓ risk_forecast.json updated
+
+--- Recalculating strategy metrics ---
+  slow_vt                   Sharpe=1.29 Ret=48.1% MDD=-10.7% sparkline=90pt
+  risk_parity               Sharpe=2.07 Ret=141.3% MDD=-11.5% sparkline=90pt
+  simple_12vix              Sharpe=1.28 Ret=45.7% MDD=-11.0% sparkline=90pt
+  recommended_5050          Sharpe=1.87 Ret=67.6% MDD=-7.7% sparkline=90pt
+  taiwan_8.63vix            Sharpe=2.15 Ret=99.7% MDD=-11.2% sparkline=90pt
+  taiwan_spy_momentum       Sharpe=3.24 Ret=315.8% MDD=-8.1% sparkline=90pt
+  tz_tw_jp_5050             Sharpe=3.44 Ret=260.6% MDD=-6.7% sparkline=90pt
+  global_vt_tz              Sharpe=3.00 Ret=135.9% MDD=-5.5% sparkline=90pt
+  vix_leading_guard         Sharpe=1.59 Ret=79.4% MDD=-16.0% sparkline=90pt
+  vix_cond_leverage         Sharpe=2.63 Ret=133.3% MDD=-6.5% sparkline=90pt
+  taiwan_hybrid_leverage    Sharpe=2.58 Ret=153.0% MDD=-10.3% sparkline=90pt
+  piecewise_conservative    Sharpe=3.08 Ret=69.5% MDD=-2.5% sparkline=90pt
+  fear_dca                  Sharpe=1.41 Ret=96.9% MDD=-18.8% sparkline=90pt
+  adaptive_tier             Sharpe=2.92 Ret=139.5% MDD=-5.1% sparkline=90pt
+
+✓ 14 strategies updated → strategy_metrics.json
+  → frontend metrics synced: frontend-v2-fix/data/strategy_metrics.json
+  → Supabase strategy_metrics_cache: 14/14 synced (metrics only; sparkline owned by frontend buildSparkline)
+
+--- Updating market status ---
+  Trading calendar synced: 30 days (2026-05-20 ~ 2026-06-18)
+  Today: 美股正常開盤、台股正常開盤
+
+--- Rebuilding feed index ---
+[feed-index] wrote INDEX.md + index.json (1277 articles, last30=338)
+
+--- Rebuilding experiments index ---
+[index] wrote experiments/INDEX.md (1060 K rows; uncovered=790, PASS=227 FAIL=70 NULL=94)
+
+--- Sync health check ---
+  paper_trades: OK (trade_date=2026-05-20)
+  market_daily: OK (trade_date=2026-05-20)
+  strategy_signals: OK (updated_at=2026-05-20T00:05:17.886676+00:00)
+
+--- Ops alert checks ---
+  breaches=0 sent=0 skipped=0
+  - [ok] release_pool_gap | Release pool cron gap > 4.0h (interval=180min)
+  - [ok] draft_pool_low | Draft pool below threshold (<4)
+  - [ok] host_cron_fail | Host cron failure detected
+  - [ok] member_qa_stale | Member Q&A pending stale
+  - [ok] supabase_sync_fail | Supabase sync queue clean
+
+✓ Done!

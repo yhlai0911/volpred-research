@@ -1,0 +1,1656 @@
+ M .claude/rules/agent-delegation.md
+ M .claude/rules/publishing.md
+ M .claude/settings.json
+ M .claude/skills/autonomous-research/SKILL.md
+ M .claude/skills/autonomous-research/references/agent-brief-template.md
+ M .claude/skills/feed-publisher/SKILL.md
+ M .claude/skills/memory-health/SKILL.md
+ M data/vixtwn/vixtwn_daily.csv
+ M experiments/INDEX.md
+ M experiments/index.json
+ M experiments/k1018/k1018.py
+ M experiments/k1018/k1018_results.json
+ M experiments/k1096/README.md
+ D experiments/k1100g_d9.py
+ M experiments/k1123/data/backtest.parquet
+ M experiments/k1123/data/panel.parquet
+ M experiments/k1123/data/weights.parquet
+ M experiments/k1135/k1135_results.json
+ M experiments/k1176/k1176.py
+ M experiments/k1176/k1176_results.json
+ M experiments/k1176/run.log
+ M experiments/k1302/k1302_run.log
+ M experiments/k1304/README.md
+ M experiments/k1305/k1305.py
+ M experiments/k157/k157_correlation_forecasting.py
+ M experiments/k157/k157_correlation_forecasting_results.json
+ M experiments/k219/k219_risk_parity_vs_equal.py
+ M experiments/k222/k222_retirement_swr.py
+ M experiments/k237/k237_international_vt.py
+ M experiments/k237/k237_international_vt_results.json
+ M experiments/k556/k556_momentum_crash_filter.py
+ D experiments/k556/k556_momentum_crash_filter_results.json
+ M experiments/k560/k560_sector_rotation_vt.py
+ M experiments/k560/k560_sector_rotation_vt_results.json
+ M experiments/k562/k562_k560_sector_validation.py
+ M experiments/k562/k562_k560_sector_validation_results.json
+ M experiments/k583/k583_iv_surface.py
+ M experiments/k583/k583_iv_surface_results.json
+ M experiments/k645/k645_gld_role_analysis.py
+ M experiments/k818/k818_ssvs_return_prediction.py
+ M experiments/k843/k843_intraday_futures.py
+ M experiments/k843/k843_intraday_futures_results.json
+ M experiments/k901/k901_international_vt_13markets_results.json
+ M experiments/k947/k947_results.json
+ M experiments/order_flow_vol/order_flow_vol.py
+ M experiments/tail_risk_parity/tail_risk_parity.py
+ M experiments/tail_risk_parity/tail_risk_parity_results.json
+ M experiments/var_position_sizing/var_position_sizing.py
+ M experiments/var_position_sizing/var_position_sizing_results.json
+ M paper/crypto-fear-channel/data/spy_btc_usd_vix_2015-2026.csv
+ M paper/crypto-fear-channel/reproduce_report.json
+ M paper/garch-x-vix/data/gld_vix_gvz_2000-2026.csv
+ M paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv
+ M paper/garch-x-vix/data/uso_vix_ovx_2005-2026.csv
+ M paper/leverage-direction/data/spy_qqq_gld_tlt_eem_iwm_slv_btc_usd_vix_2010-2026.csv
+ M paper/leverage-direction/data/spy_vix_2004-2026.csv
+ M paper/leverage-direction/data/vix_daily.csv
+ M paper/leverage-direction/reproduce.py
+ M paper/leverage-direction/reproduce_report.json
+ M paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv
+ M paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv
+ M paper/volatility-absorption/reproduce_report.json
+ M paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity.py
+ M paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity_results.json
+ M scripts/daily_update.py
+ M scripts/generate_research_backlog.py
+ M scripts/merge_worktree.sh
+ M scripts/publish_draft.py
+ M src/volpred/memory/system.py
+ M src/volpred/publisher/publisher.py
+ M storage/.release_settings.json
+ M storage/.supabase_sync_state.json
+ M storage/drafts/k237_general_draft.md
+ M storage/drafts/k562_general_draft.md
+ M storage/logs/cron/check_alerts.log
+ M storage/logs/cron/collect_tw.log
+ M storage/logs/cron/collect_us.log
+ M storage/logs/cron/continue_task_stub.log
+ M storage/logs/cron/daily_update.log
+ M storage/logs/cron/market_cal.log
+ M storage/logs/cron/release_pool.log
+ M storage/market_status.json
+ M storage/memory/experiment_experiences.json
+ M storage/memory/thinking_journal.json
+ M storage/next_tasks.json
+ M storage/notifications/notification_log.json
+ M storage/ops/agents/claude-supervisor.json
+ M storage/ops/agents/claude-worker.json
+ M storage/ops/alert_dedup.json
+ M storage/ops/cron_last_run.json
+ M storage/ops/dispatch_report_latest.json
+ D storage/ops/event_ledger/116f715395fd16df830d5fbfc34d8f4bb8ccb676da5d3636d95c1babd4c7d4c9.json
+ M storage/ops/pending_continue.json
+ M storage/ops/pending_sessions.json
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T033827Z_39406/config.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T033827Z_39406/git_status.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T033827Z_39406/manifest.json
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T033827Z_39406/storage.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T033827Z_39406/tracked.patch
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T033827Z_39406/tracked_files.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T033827Z_39406/untracked.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T033827Z_39406/untracked.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T034315Z_42350/config.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T034315Z_42350/git_status.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T034315Z_42350/manifest.json
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T034315Z_42350/storage.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T034315Z_42350/tracked.patch
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T034315Z_42350/tracked_files.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T034315Z_42350/untracked.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T034315Z_42350/untracked.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T034401Z_42774/config.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T034401Z_42774/git_status.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T034401Z_42774/manifest.json
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T034401Z_42774/storage.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T034401Z_42774/tracked.patch
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T034401Z_42774/tracked_files.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T034401Z_42774/untracked.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T034401Z_42774/untracked.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T035344Z_47891/config.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T035344Z_47891/git_status.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T035344Z_47891/manifest.json
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T035344Z_47891/storage.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T035344Z_47891/tracked.patch
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T035344Z_47891/tracked_files.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T035344Z_47891/untracked.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T035344Z_47891/untracked.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T041353Z_57572/config.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T041353Z_57572/git_status.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T041353Z_57572/manifest.json
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T041353Z_57572/storage.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T041353Z_57572/tracked.patch
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T041353Z_57572/tracked_files.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T041353Z_57572/untracked.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T041353Z_57572/untracked.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T041518Z_59592/config.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T041518Z_59592/git_status.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T041518Z_59592/manifest.json
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T041518Z_59592/storage.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T041518Z_59592/tracked.patch
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T041518Z_59592/tracked_files.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T041518Z_59592/untracked.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T041518Z_59592/untracked.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T042325Z_64068/config.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T042325Z_64068/git_status.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T042325Z_64068/manifest.json
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T042325Z_64068/storage.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T042325Z_64068/tracked.patch
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T042325Z_64068/tracked_files.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T042325Z_64068/untracked.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T042325Z_64068/untracked.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T043014Z_68414/config.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T043014Z_68414/git_status.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T043014Z_68414/manifest.json
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T043014Z_68414/storage.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T043014Z_68414/tracked.patch
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T043014Z_68414/tracked_files.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T043014Z_68414/untracked.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T043014Z_68414/untracked.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T044211Z_77607/config.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T044211Z_77607/git_status.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T044211Z_77607/manifest.json
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T044211Z_77607/storage.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T044211Z_77607/tracked.patch
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T044211Z_77607/tracked_files.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T044211Z_77607/untracked.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T044211Z_77607/untracked.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T044812Z_84102/config.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T044812Z_84102/git_status.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T044812Z_84102/manifest.json
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T044812Z_84102/storage.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T044812Z_84102/tracked.patch
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T044812Z_84102/tracked_files.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T044812Z_84102/untracked.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T044812Z_84102/untracked.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055055Z_19707/config.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055055Z_19707/git_status.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055055Z_19707/manifest.json
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055055Z_19707/storage.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055055Z_19707/tracked.patch
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055055Z_19707/tracked_files.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055055Z_19707/untracked.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055055Z_19707/untracked.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055527Z_24490/config.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055527Z_24490/git_status.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055527Z_24490/manifest.json
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055527Z_24490/storage.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055527Z_24490/tracked.patch
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055527Z_24490/tracked_files.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055527Z_24490/untracked.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055527Z_24490/untracked.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055600Z_24983/config.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055600Z_24983/git_status.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055600Z_24983/manifest.json
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055600Z_24983/storage.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055600Z_24983/tracked.patch
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055600Z_24983/tracked_files.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055600Z_24983/untracked.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055600Z_24983/untracked.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055704Z_25697/config.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055704Z_25697/git_status.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055704Z_25697/manifest.json
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055704Z_25697/storage.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055704Z_25697/tracked.patch
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055704Z_25697/tracked_files.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055704Z_25697/untracked.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T055704Z_25697/untracked.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T060125Z_28575/config.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T060125Z_28575/git_status.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T060125Z_28575/manifest.json
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T060125Z_28575/storage.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T060125Z_28575/tracked.patch
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T060125Z_28575/tracked_files.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T060125Z_28575/untracked.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T060125Z_28575/untracked.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T060539Z_32470/config.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T060539Z_32470/git_status.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T060539Z_32470/manifest.json
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T060539Z_32470/storage.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T060539Z_32470/tracked.patch
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T060539Z_32470/tracked_files.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T060539Z_32470/untracked.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T060539Z_32470/untracked.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T061644Z_40863/config.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T061644Z_40863/git_status.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T061644Z_40863/manifest.json
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T061644Z_40863/storage.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T061644Z_40863/tracked.patch
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T061644Z_40863/tracked_files.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T061644Z_40863/untracked.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T061644Z_40863/untracked.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T062300Z_46234/config.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T062300Z_46234/git_status.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T062300Z_46234/manifest.json
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T062300Z_46234/storage.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T062300Z_46234/tracked.patch
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T062300Z_46234/tracked_files.txt
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T062300Z_46234/untracked.tar.gz
+ D storage/ops/rollback_points/claude-supervisor_session_20260418T062300Z_46234/untracked.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T033847Z_39644/config.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T033847Z_39644/git_status.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T033847Z_39644/manifest.json
+ D storage/ops/rollback_points/claude-worker_session_20260418T033847Z_39644/storage.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T033847Z_39644/tracked.patch
+ D storage/ops/rollback_points/claude-worker_session_20260418T033847Z_39644/tracked_files.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T033847Z_39644/untracked.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T033847Z_39644/untracked.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T033915Z_39917/config.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T033915Z_39917/git_status.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T033915Z_39917/manifest.json
+ D storage/ops/rollback_points/claude-worker_session_20260418T033915Z_39917/storage.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T033915Z_39917/tracked.patch
+ D storage/ops/rollback_points/claude-worker_session_20260418T033915Z_39917/tracked_files.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T033915Z_39917/untracked.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T033915Z_39917/untracked.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T034411Z_42917/config.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T034411Z_42917/git_status.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T034411Z_42917/manifest.json
+ D storage/ops/rollback_points/claude-worker_session_20260418T034411Z_42917/storage.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T034411Z_42917/tracked.patch
+ D storage/ops/rollback_points/claude-worker_session_20260418T034411Z_42917/tracked_files.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T034411Z_42917/untracked.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T034411Z_42917/untracked.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T035345Z_48210/config.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T035345Z_48210/git_status.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T035345Z_48210/manifest.json
+ D storage/ops/rollback_points/claude-worker_session_20260418T035345Z_48210/storage.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T035345Z_48210/tracked.patch
+ D storage/ops/rollback_points/claude-worker_session_20260418T035345Z_48210/tracked_files.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T035345Z_48210/untracked.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T035345Z_48210/untracked.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T041354Z_57871/config.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T041354Z_57871/git_status.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T041354Z_57871/manifest.json
+ D storage/ops/rollback_points/claude-worker_session_20260418T041354Z_57871/storage.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T041354Z_57871/tracked.patch
+ D storage/ops/rollback_points/claude-worker_session_20260418T041354Z_57871/tracked_files.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T041354Z_57871/untracked.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T041354Z_57871/untracked.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T041518Z_59590/config.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T041518Z_59590/git_status.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T041518Z_59590/manifest.json
+ D storage/ops/rollback_points/claude-worker_session_20260418T041518Z_59590/storage.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T041518Z_59590/tracked.patch
+ D storage/ops/rollback_points/claude-worker_session_20260418T041518Z_59590/tracked_files.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T041518Z_59590/untracked.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T041518Z_59590/untracked.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T042326Z_64425/config.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T042326Z_64425/git_status.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T042326Z_64425/manifest.json
+ D storage/ops/rollback_points/claude-worker_session_20260418T042326Z_64425/storage.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T042326Z_64425/tracked.patch
+ D storage/ops/rollback_points/claude-worker_session_20260418T042326Z_64425/tracked_files.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T042326Z_64425/untracked.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T042326Z_64425/untracked.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T043014Z_68415/config.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T043014Z_68415/git_status.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T043014Z_68415/manifest.json
+ D storage/ops/rollback_points/claude-worker_session_20260418T043014Z_68415/storage.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T043014Z_68415/tracked.patch
+ D storage/ops/rollback_points/claude-worker_session_20260418T043014Z_68415/tracked_files.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T043014Z_68415/untracked.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T043014Z_68415/untracked.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T044211Z_77609/config.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T044211Z_77609/git_status.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T044211Z_77609/manifest.json
+ D storage/ops/rollback_points/claude-worker_session_20260418T044211Z_77609/storage.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T044211Z_77609/tracked.patch
+ D storage/ops/rollback_points/claude-worker_session_20260418T044211Z_77609/tracked_files.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T044211Z_77609/untracked.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T044211Z_77609/untracked.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T044812Z_84103/config.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T044812Z_84103/git_status.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T044812Z_84103/manifest.json
+ D storage/ops/rollback_points/claude-worker_session_20260418T044812Z_84103/storage.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T044812Z_84103/tracked.patch
+ D storage/ops/rollback_points/claude-worker_session_20260418T044812Z_84103/tracked_files.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T044812Z_84103/untracked.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T044812Z_84103/untracked.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T055055Z_19705/config.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T055055Z_19705/git_status.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T055055Z_19705/manifest.json
+ D storage/ops/rollback_points/claude-worker_session_20260418T055055Z_19705/storage.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T055055Z_19705/tracked.patch
+ D storage/ops/rollback_points/claude-worker_session_20260418T055055Z_19705/tracked_files.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T055055Z_19705/untracked.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T055055Z_19705/untracked.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T055711Z_25802/config.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T055711Z_25802/git_status.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T055711Z_25802/manifest.json
+ D storage/ops/rollback_points/claude-worker_session_20260418T055711Z_25802/storage.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T055711Z_25802/tracked.patch
+ D storage/ops/rollback_points/claude-worker_session_20260418T055711Z_25802/tracked_files.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T055711Z_25802/untracked.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T055711Z_25802/untracked.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T060125Z_28577/config.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T060125Z_28577/git_status.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T060125Z_28577/manifest.json
+ D storage/ops/rollback_points/claude-worker_session_20260418T060125Z_28577/storage.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T060125Z_28577/tracked.patch
+ D storage/ops/rollback_points/claude-worker_session_20260418T060125Z_28577/tracked_files.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T060125Z_28577/untracked.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T060125Z_28577/untracked.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T060539Z_32468/config.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T060539Z_32468/git_status.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T060539Z_32468/manifest.json
+ D storage/ops/rollback_points/claude-worker_session_20260418T060539Z_32468/storage.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T060539Z_32468/tracked.patch
+ D storage/ops/rollback_points/claude-worker_session_20260418T060539Z_32468/tracked_files.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T060539Z_32468/untracked.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T060539Z_32468/untracked.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T061644Z_40862/config.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T061644Z_40862/git_status.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T061644Z_40862/manifest.json
+ D storage/ops/rollback_points/claude-worker_session_20260418T061644Z_40862/storage.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T061644Z_40862/tracked.patch
+ D storage/ops/rollback_points/claude-worker_session_20260418T061644Z_40862/tracked_files.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T061644Z_40862/untracked.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T061644Z_40862/untracked.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T062301Z_46630/config.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T062301Z_46630/git_status.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T062301Z_46630/manifest.json
+ D storage/ops/rollback_points/claude-worker_session_20260418T062301Z_46630/storage.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T062301Z_46630/tracked.patch
+ D storage/ops/rollback_points/claude-worker_session_20260418T062301Z_46630/tracked_files.txt
+ D storage/ops/rollback_points/claude-worker_session_20260418T062301Z_46630/untracked.tar.gz
+ D storage/ops/rollback_points/claude-worker_session_20260418T062301Z_46630/untracked.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T034015Z_40408/config.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T034015Z_40408/git_status.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T034015Z_40408/manifest.json
+ D storage/ops/rollback_points/codex-worker_session_20260418T034015Z_40408/storage.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T034015Z_40408/tracked.patch
+ D storage/ops/rollback_points/codex-worker_session_20260418T034015Z_40408/tracked_files.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T034015Z_40408/untracked.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T034015Z_40408/untracked.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T034045Z_40683/config.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T034045Z_40683/git_status.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T034045Z_40683/manifest.json
+ D storage/ops/rollback_points/codex-worker_session_20260418T034045Z_40683/storage.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T034045Z_40683/tracked.patch
+ D storage/ops/rollback_points/codex-worker_session_20260418T034045Z_40683/tracked_files.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T034045Z_40683/untracked.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T034045Z_40683/untracked.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T034422Z_43065/config.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T034422Z_43065/git_status.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T034422Z_43065/manifest.json
+ D storage/ops/rollback_points/codex-worker_session_20260418T034422Z_43065/storage.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T034422Z_43065/tracked.patch
+ D storage/ops/rollback_points/codex-worker_session_20260418T034422Z_43065/tracked_files.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T034422Z_43065/untracked.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T034422Z_43065/untracked.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T034642Z_44366/config.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T034642Z_44366/git_status.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T034642Z_44366/manifest.json
+ D storage/ops/rollback_points/codex-worker_session_20260418T034642Z_44366/storage.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T034642Z_44366/tracked.patch
+ D storage/ops/rollback_points/codex-worker_session_20260418T034642Z_44366/tracked_files.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T034642Z_44366/untracked.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T034642Z_44366/untracked.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T035346Z_48537/config.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T035346Z_48537/git_status.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T035346Z_48537/manifest.json
+ D storage/ops/rollback_points/codex-worker_session_20260418T035346Z_48537/storage.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T035346Z_48537/tracked.patch
+ D storage/ops/rollback_points/codex-worker_session_20260418T035346Z_48537/tracked_files.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T035346Z_48537/untracked.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T035346Z_48537/untracked.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T041355Z_58201/config.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T041355Z_58201/git_status.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T041355Z_58201/manifest.json
+ D storage/ops/rollback_points/codex-worker_session_20260418T041355Z_58201/storage.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T041355Z_58201/tracked.patch
+ D storage/ops/rollback_points/codex-worker_session_20260418T041355Z_58201/tracked_files.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T041355Z_58201/untracked.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T041355Z_58201/untracked.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T041518Z_59591/config.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T041518Z_59591/git_status.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T041518Z_59591/manifest.json
+ D storage/ops/rollback_points/codex-worker_session_20260418T041518Z_59591/storage.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T041518Z_59591/tracked.patch
+ D storage/ops/rollback_points/codex-worker_session_20260418T041518Z_59591/tracked_files.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T041518Z_59591/untracked.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T041518Z_59591/untracked.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T042327Z_64760/config.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T042327Z_64760/git_status.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T042327Z_64760/manifest.json
+ D storage/ops/rollback_points/codex-worker_session_20260418T042327Z_64760/storage.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T042327Z_64760/tracked.patch
+ D storage/ops/rollback_points/codex-worker_session_20260418T042327Z_64760/tracked_files.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T042327Z_64760/untracked.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T042327Z_64760/untracked.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T043014Z_68416/config.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T043014Z_68416/git_status.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T043014Z_68416/manifest.json
+ D storage/ops/rollback_points/codex-worker_session_20260418T043014Z_68416/storage.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T043014Z_68416/tracked.patch
+ D storage/ops/rollback_points/codex-worker_session_20260418T043014Z_68416/tracked_files.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T043014Z_68416/untracked.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T043014Z_68416/untracked.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T044211Z_77608/config.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T044211Z_77608/git_status.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T044211Z_77608/manifest.json
+ D storage/ops/rollback_points/codex-worker_session_20260418T044211Z_77608/storage.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T044211Z_77608/tracked.patch
+ D storage/ops/rollback_points/codex-worker_session_20260418T044211Z_77608/tracked_files.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T044211Z_77608/untracked.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T044211Z_77608/untracked.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T044812Z_84101/config.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T044812Z_84101/git_status.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T044812Z_84101/manifest.json
+ D storage/ops/rollback_points/codex-worker_session_20260418T044812Z_84101/storage.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T044812Z_84101/tracked.patch
+ D storage/ops/rollback_points/codex-worker_session_20260418T044812Z_84101/tracked_files.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T044812Z_84101/untracked.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T044812Z_84101/untracked.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T055055Z_19706/config.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T055055Z_19706/git_status.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T055055Z_19706/manifest.json
+ D storage/ops/rollback_points/codex-worker_session_20260418T055055Z_19706/storage.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T055055Z_19706/tracked.patch
+ D storage/ops/rollback_points/codex-worker_session_20260418T055055Z_19706/tracked_files.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T055055Z_19706/untracked.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T055055Z_19706/untracked.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T055718Z_25884/config.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T055718Z_25884/git_status.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T055718Z_25884/manifest.json
+ D storage/ops/rollback_points/codex-worker_session_20260418T055718Z_25884/storage.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T055718Z_25884/tracked.patch
+ D storage/ops/rollback_points/codex-worker_session_20260418T055718Z_25884/tracked_files.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T055718Z_25884/untracked.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T055718Z_25884/untracked.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T060125Z_28576/config.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T060125Z_28576/git_status.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T060125Z_28576/manifest.json
+ D storage/ops/rollback_points/codex-worker_session_20260418T060125Z_28576/storage.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T060125Z_28576/tracked.patch
+ D storage/ops/rollback_points/codex-worker_session_20260418T060125Z_28576/tracked_files.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T060125Z_28576/untracked.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T060125Z_28576/untracked.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T060539Z_32469/config.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T060539Z_32469/git_status.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T060539Z_32469/manifest.json
+ D storage/ops/rollback_points/codex-worker_session_20260418T060539Z_32469/storage.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T060539Z_32469/tracked.patch
+ D storage/ops/rollback_points/codex-worker_session_20260418T060539Z_32469/tracked_files.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T060539Z_32469/untracked.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T060539Z_32469/untracked.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T061644Z_40864/config.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T061644Z_40864/git_status.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T061644Z_40864/manifest.json
+ D storage/ops/rollback_points/codex-worker_session_20260418T061644Z_40864/storage.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T061644Z_40864/tracked.patch
+ D storage/ops/rollback_points/codex-worker_session_20260418T061644Z_40864/tracked_files.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T061644Z_40864/untracked.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T061644Z_40864/untracked.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T062302Z_46965/config.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T062302Z_46965/git_status.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T062302Z_46965/manifest.json
+ D storage/ops/rollback_points/codex-worker_session_20260418T062302Z_46965/storage.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T062302Z_46965/tracked.patch
+ D storage/ops/rollback_points/codex-worker_session_20260418T062302Z_46965/tracked_files.txt
+ D storage/ops/rollback_points/codex-worker_session_20260418T062302Z_46965/untracked.tar.gz
+ D storage/ops/rollback_points/codex-worker_session_20260418T062302Z_46965/untracked.txt
+ D storage/ops/rollback_points/i9b_k142_k145_safe_migration_20260416T083547Z/config.tar.gz
+ D storage/ops/rollback_points/i9b_k142_k145_safe_migration_20260416T083547Z/git_status.txt
+ D storage/ops/rollback_points/i9b_k142_k145_safe_migration_20260416T083547Z/manifest.json
+ D storage/ops/rollback_points/i9b_k142_k145_safe_migration_20260416T083547Z/storage.tar.gz
+ D storage/ops/rollback_points/i9b_k142_k145_safe_migration_20260416T083547Z/tracked.patch
+ D storage/ops/rollback_points/i9b_k142_k145_safe_migration_20260416T083547Z/tracked_files.txt
+ D storage/ops/rollback_points/i9b_k142_k145_safe_migration_20260416T083547Z/untracked.tar.gz
+ D storage/ops/rollback_points/i9b_k142_k145_safe_migration_20260416T083547Z/untracked.txt
+ D storage/ops/rollback_points/k147_k148_k149_safe_migration_20260416T084616Z/config.tar.gz
+ D storage/ops/rollback_points/k147_k148_k149_safe_migration_20260416T084616Z/git_status.txt
+ D storage/ops/rollback_points/k147_k148_k149_safe_migration_20260416T084616Z/manifest.json
+ D storage/ops/rollback_points/k147_k148_k149_safe_migration_20260416T084616Z/storage.tar.gz
+ D storage/ops/rollback_points/k147_k148_k149_safe_migration_20260416T084616Z/tracked.patch
+ D storage/ops/rollback_points/k147_k148_k149_safe_migration_20260416T084616Z/tracked_files.txt
+ D storage/ops/rollback_points/k147_k148_k149_safe_migration_20260416T084616Z/untracked.tar.gz
+ D storage/ops/rollback_points/k147_k148_k149_safe_migration_20260416T084616Z/untracked.txt
+ D storage/ops/rollback_points/k151_k152_k157_safe_migration_20260416T085053Z/config.tar.gz
+ D storage/ops/rollback_points/k151_k152_k157_safe_migration_20260416T085053Z/git_status.txt
+ D storage/ops/rollback_points/k151_k152_k157_safe_migration_20260416T085053Z/manifest.json
+ D storage/ops/rollback_points/k151_k152_k157_safe_migration_20260416T085053Z/storage.tar.gz
+ D storage/ops/rollback_points/k151_k152_k157_safe_migration_20260416T085053Z/tracked.patch
+ D storage/ops/rollback_points/k151_k152_k157_safe_migration_20260416T085053Z/tracked_files.txt
+ D storage/ops/rollback_points/k151_k152_k157_safe_migration_20260416T085053Z/untracked.tar.gz
+ D storage/ops/rollback_points/k151_k152_k157_safe_migration_20260416T085053Z/untracked.txt
+ D storage/ops/rollback_points/k159_k180_k181_safe_migration_20260416T090226Z/config.tar.gz
+ D storage/ops/rollback_points/k159_k180_k181_safe_migration_20260416T090226Z/git_status.txt
+ D storage/ops/rollback_points/k159_k180_k181_safe_migration_20260416T090226Z/manifest.json
+ D storage/ops/rollback_points/k159_k180_k181_safe_migration_20260416T090226Z/storage.tar.gz
+ D storage/ops/rollback_points/k159_k180_k181_safe_migration_20260416T090226Z/tracked.patch
+ D storage/ops/rollback_points/k159_k180_k181_safe_migration_20260416T090226Z/tracked_files.txt
+ D storage/ops/rollback_points/k159_k180_k181_safe_migration_20260416T090226Z/untracked.tar.gz
+ D storage/ops/rollback_points/k159_k180_k181_safe_migration_20260416T090226Z/untracked.txt
+ D storage/ops/rollback_points/k182_k186_k188_safe_migration_20260416T090621Z/config.tar.gz
+ D storage/ops/rollback_points/k182_k186_k188_safe_migration_20260416T090621Z/git_status.txt
+ D storage/ops/rollback_points/k182_k186_k188_safe_migration_20260416T090621Z/manifest.json
+ D storage/ops/rollback_points/k182_k186_k188_safe_migration_20260416T090621Z/storage.tar.gz
+ D storage/ops/rollback_points/k182_k186_k188_safe_migration_20260416T090621Z/tracked.patch
+ D storage/ops/rollback_points/k182_k186_k188_safe_migration_20260416T090621Z/tracked_files.txt
+ D storage/ops/rollback_points/k182_k186_k188_safe_migration_20260416T090621Z/untracked.tar.gz
+ D storage/ops/rollback_points/k182_k186_k188_safe_migration_20260416T090621Z/untracked.txt
+ D storage/ops/rollback_points/k189_k190_k191_k193_k194_safe_migration_20260416T091126Z/config.tar.gz
+ D storage/ops/rollback_points/k189_k190_k191_k193_k194_safe_migration_20260416T091126Z/git_status.txt
+ D storage/ops/rollback_points/k189_k190_k191_k193_k194_safe_migration_20260416T091126Z/manifest.json
+ D storage/ops/rollback_points/k189_k190_k191_k193_k194_safe_migration_20260416T091126Z/storage.tar.gz
+ D storage/ops/rollback_points/k189_k190_k191_k193_k194_safe_migration_20260416T091126Z/tracked.patch
+ D storage/ops/rollback_points/k189_k190_k191_k193_k194_safe_migration_20260416T091126Z/tracked_files.txt
+ D storage/ops/rollback_points/k189_k190_k191_k193_k194_safe_migration_20260416T091126Z/untracked.tar.gz
+ D storage/ops/rollback_points/k189_k190_k191_k193_k194_safe_migration_20260416T091126Z/untracked.txt
+ D storage/ops/rollback_points/k195_k197_k199_k200_k202_safe_migration_20260416T092119Z/config.tar.gz
+ D storage/ops/rollback_points/k195_k197_k199_k200_k202_safe_migration_20260416T092119Z/git_status.txt
+ D storage/ops/rollback_points/k195_k197_k199_k200_k202_safe_migration_20260416T092119Z/manifest.json
+ D storage/ops/rollback_points/k195_k197_k199_k200_k202_safe_migration_20260416T092119Z/storage.tar.gz
+ D storage/ops/rollback_points/k195_k197_k199_k200_k202_safe_migration_20260416T092119Z/tracked.patch
+ D storage/ops/rollback_points/k195_k197_k199_k200_k202_safe_migration_20260416T092119Z/tracked_files.txt
+ D storage/ops/rollback_points/k195_k197_k199_k200_k202_safe_migration_20260416T092119Z/untracked.tar.gz
+ D storage/ops/rollback_points/k195_k197_k199_k200_k202_safe_migration_20260416T092119Z/untracked.txt
+ D storage/ops/rollback_points/k203_k204_k205_k206_k207_safe_migration_20260416T092527Z/config.tar.gz
+ D storage/ops/rollback_points/k203_k204_k205_k206_k207_safe_migration_20260416T092527Z/git_status.txt
+ D storage/ops/rollback_points/k203_k204_k205_k206_k207_safe_migration_20260416T092527Z/manifest.json
+ D storage/ops/rollback_points/k203_k204_k205_k206_k207_safe_migration_20260416T092527Z/storage.tar.gz
+ D storage/ops/rollback_points/k203_k204_k205_k206_k207_safe_migration_20260416T092527Z/tracked.patch
+ D storage/ops/rollback_points/k203_k204_k205_k206_k207_safe_migration_20260416T092527Z/tracked_files.txt
+ D storage/ops/rollback_points/k203_k204_k205_k206_k207_safe_migration_20260416T092527Z/untracked.tar.gz
+ D storage/ops/rollback_points/k203_k204_k205_k206_k207_safe_migration_20260416T092527Z/untracked.txt
+ D storage/ops/rollback_points/k208_k237_k263_k267_k274_safe_migration_20260416T092823Z/config.tar.gz
+ D storage/ops/rollback_points/k208_k237_k263_k267_k274_safe_migration_20260416T092823Z/git_status.txt
+ D storage/ops/rollback_points/k208_k237_k263_k267_k274_safe_migration_20260416T092823Z/manifest.json
+ D storage/ops/rollback_points/k208_k237_k263_k267_k274_safe_migration_20260416T092823Z/storage.tar.gz
+ D storage/ops/rollback_points/k208_k237_k263_k267_k274_safe_migration_20260416T092823Z/tracked.patch
+ D storage/ops/rollback_points/k208_k237_k263_k267_k274_safe_migration_20260416T092823Z/tracked_files.txt
+ D storage/ops/rollback_points/k208_k237_k263_k267_k274_safe_migration_20260416T092823Z/untracked.tar.gz
+ D storage/ops/rollback_points/k208_k237_k263_k267_k274_safe_migration_20260416T092823Z/untracked.txt
+ D storage/ops/rollback_points/k275_k277_k280_k285_k286_safe_migration_20260416T093123Z/config.tar.gz
+ D storage/ops/rollback_points/k275_k277_k280_k285_k286_safe_migration_20260416T093123Z/git_status.txt
+ D storage/ops/rollback_points/k275_k277_k280_k285_k286_safe_migration_20260416T093123Z/manifest.json
+ D storage/ops/rollback_points/k275_k277_k280_k285_k286_safe_migration_20260416T093123Z/storage.tar.gz
+ D storage/ops/rollback_points/k275_k277_k280_k285_k286_safe_migration_20260416T093123Z/tracked.patch
+ D storage/ops/rollback_points/k275_k277_k280_k285_k286_safe_migration_20260416T093123Z/tracked_files.txt
+ D storage/ops/rollback_points/k275_k277_k280_k285_k286_safe_migration_20260416T093123Z/untracked.tar.gz
+ D storage/ops/rollback_points/k275_k277_k280_k285_k286_safe_migration_20260416T093123Z/untracked.txt
+ D storage/ops/rollback_points/k851_I1_k745_safe_migration_20260416T090500Z/config.tar.gz
+ D storage/ops/rollback_points/k851_I1_k745_safe_migration_20260416T090500Z/git_status.txt
+ D storage/ops/rollback_points/k851_I1_k745_safe_migration_20260416T090500Z/manifest.json
+ D storage/ops/rollback_points/k851_I1_k745_safe_migration_20260416T090500Z/storage.tar.gz
+ D storage/ops/rollback_points/k851_I1_k745_safe_migration_20260416T090500Z/tracked.patch
+ D storage/ops/rollback_points/k851_I1_k745_safe_migration_20260416T090500Z/tracked_files.txt
+ D storage/ops/rollback_points/k851_I1_k745_safe_migration_20260416T090500Z/untracked.tar.gz
+ D storage/ops/rollback_points/k851_I1_k745_safe_migration_20260416T090500Z/untracked.txt
+ D storage/ops/rollback_points/pre_impl_20260415T080047Z/config.tar.gz
+ D storage/ops/rollback_points/pre_impl_20260415T080047Z/git_status.txt
+ D storage/ops/rollback_points/pre_impl_20260415T080047Z/manifest.json
+ D storage/ops/rollback_points/pre_impl_20260415T080047Z/storage.tar.gz
+ D storage/ops/rollback_points/pre_impl_20260415T080047Z/tracked.patch
+ D storage/ops/rollback_points/pre_impl_20260415T080047Z/untracked.tar.gz
+ D storage/ops/rollback_points/pre_impl_20260415T080047Z/untracked.txt
+ D storage/ops/rollback_points/rollback_20260417T071006Z/config.tar.gz
+ D storage/ops/rollback_points/rollback_20260417T071006Z/git_status.txt
+ D storage/ops/rollback_points/rollback_20260417T071006Z/manifest.json
+ D storage/ops/rollback_points/rollback_20260417T071006Z/storage.tar.gz
+ D storage/ops/rollback_points/rollback_20260417T071006Z/tracked.patch
+ D storage/ops/rollback_points/rollback_20260417T071006Z/tracked_files.txt
+ D storage/ops/rollback_points/rollback_20260417T071006Z/untracked.tar.gz
+ D storage/ops/rollback_points/rollback_20260417T071006Z/untracked.txt
+ D storage/ops/rollback_points/root_clutter_archive_20260415T082500Z/config.tar.gz
+ D storage/ops/rollback_points/root_clutter_archive_20260415T082500Z/git_status.txt
+ D storage/ops/rollback_points/root_clutter_archive_20260415T082500Z/manifest.json
+ D storage/ops/rollback_points/root_clutter_archive_20260415T082500Z/storage.tar.gz
+ D storage/ops/rollback_points/root_clutter_archive_20260415T082500Z/tracked.patch
+ D storage/ops/rollback_points/root_clutter_archive_20260415T082500Z/tracked_files.txt
+ D storage/ops/rollback_points/root_clutter_archive_20260415T082500Z/untracked.tar.gz
+ D storage/ops/rollback_points/root_clutter_archive_20260415T082500Z/untracked.txt
+ D storage/ops/rollback_points/v11_session1_baseline_20260417T094021Z/config.tar.gz
+ D storage/ops/rollback_points/v11_session1_baseline_20260417T094021Z/git_status.txt
+ D storage/ops/rollback_points/v11_session1_baseline_20260417T094021Z/manifest.json
+ D storage/ops/rollback_points/v11_session1_baseline_20260417T094021Z/storage.tar.gz
+ D storage/ops/rollback_points/v11_session1_baseline_20260417T094021Z/tracked.patch
+ D storage/ops/rollback_points/v11_session1_baseline_20260417T094021Z/tracked_files.txt
+ D storage/ops/rollback_points/v11_session1_baseline_20260417T094021Z/untracked.txt
+ M storage/ops/writer_log.jsonl
+ M storage/paper_trading.json
+ M storage/publication_candidates.json
+ M storage/reports/INDEX.md
+ M storage/reports/feed.json
+ M storage/reports/index.json
+ M storage/reports/trending_repost_log.json
+ M storage/risk_forecast.json
+ M storage/session_state.json
+ M storage/strategy_metrics.json
+ M storage/work_log.json
+?? artifacts/cost_2026-04-15_2026-05-15.pdf
+?? docs/claude-code-skill-handoff.md
+?? experiments/audit_cumsum_metric_2026_05_02.md
+?? experiments/k1018/k1018_dm_harvey_threshold.png
+?? experiments/k1018/k1018_metric_fix_2026_05_02.md
+?? experiments/k1018/k1018_sharpe_bootstrap_ci.png
+?? experiments/k1121/k1121_article_sharpe_diff_ci.png
+?? experiments/k1121/k1121_article_stress_sharpe.png
+?? experiments/k1263/README.md
+?? experiments/k1263/data/HYG.csv
+?? experiments/k1263/data/IEF.csv
+?? experiments/k1263/data/IRX.csv
+?? experiments/k1263/data/QQQ.csv
+?? experiments/k1263/data/SPY.csv
+?? experiments/k1263/data/TNX.csv
+?? experiments/k1263/data/VIX.csv
+?? experiments/k1263/k1263.py
+?? experiments/k1263/k1263_dm_heatmap.png
+?? experiments/k1263/k1263_qlike_comparison.png
+?? experiments/k1263/k1263_results.json
+?? experiments/k1266/README.md
+?? experiments/k1266/data/etf_returns.csv
+?? experiments/k1266/k1266.py
+?? experiments/k1266/k1266_dm_heatmap.png
+?? experiments/k1266/k1266_qlike_comparison.png
+?? experiments/k1266/k1266_results.json
+?? experiments/k1267/data/earnings_dates_from_k1174.csv
+?? experiments/k1267/data/per_day_ticker_counts_k1174_120000.csv
+?? experiments/k1267/data/stock_company_map.csv
+?? experiments/k1267/k1267_fetch_full_coverage.py
+?? experiments/k1268/fetch_summary.json
+?? experiments/k1304/k1304_hhi_and_loo.png
+?? experiments/k1304/k1304_results.json
+?? experiments/k1304/k1304_weight_evolution.png
+?? experiments/k1305/data/ANFCI_alfred_pit_weekly.csv
+?? experiments/k1305/data/NFCI_alfred_pit_weekly.csv
+?? experiments/k1305/data/STLFSI_alfred_pit_weekly.csv
+?? experiments/k191/k191_correlations.png
+?? experiments/k191/k191_dm_tests.png
+?? experiments/k194/k194_best_models.png
+?? experiments/k194/k194_ffd_weights.png
+?? experiments/k194/k194_spy_models.png
+?? experiments/k197/k197_adaptive_vs_fixed.png
+?? experiments/k197/k197_cusum_stats.png
+?? experiments/k199/k199_is_oos_r2.png
+?? experiments/k199/k199_partial_correlations.png
+?? experiments/k205/k205_strategy_comparison.png
+?? experiments/k205/k205_weekend_yearly.png
+?? experiments/k206/k206_dm_tests.png
+?? experiments/k206/k206_strategy_comparison.png
+?? experiments/k207/k207_panel_r2.png
+?? experiments/k207/k207_per_asset_r2.png
+?? experiments/k222/figures/fig_swr_refutation.png
+?? experiments/k222/figures/fig_vt_role_reframe.png
+?? experiments/k222/figures/generate_figs.py
+?? experiments/k222/k222_retirement_swr_results.json
+?? experiments/k222b/fig_strategy_survival_curves.png
+?? experiments/k222b/fig_wr_sweep_heatmap.png
+?? experiments/k222b/generate_swr_figs.py
+?? experiments/k222b/k222b_mc_swr_overlay.py
+?? experiments/k222b/k222b_mc_swr_overlay_results.json
+?? experiments/k237/figures/fig1_mdd_comparison.png
+?? experiments/k237/figures/fig2_sharpe_comparison.png
+?? experiments/k237/figures/fig3_taiwan_caveat.png
+?? experiments/k237/generate_rewrite_figures.py
+?? experiments/k237/k237_drawdown_comparison.png
+?? experiments/k237/k237_vix_correlations.png
+?? experiments/k274/figures/k274_novelty_distribution.png
+?? experiments/k274/figures/k274_paper_4_viability.png
+?? experiments/k274/figures/k274_paper_readiness.png
+?? experiments/k274/make_figures.py
+?? experiments/k280/figures/k280_cost_benefit.png
+?? experiments/k280/figures/k280_crisis_protection.png
+?? experiments/k280/figures/k280_evidence_balance.png
+?? experiments/k280/figures/k280_vix_lookup.png
+?? experiments/k280/make_figures.py
+?? experiments/k288/figures/k288_f3_5050_vs_spy.png
+?? experiments/k288/figures/k288_f4_mdd_reduction.png
+?? experiments/k288/figures/k288_stability_scores.png
+?? experiments/k288/figures/make_figs.py
+?? experiments/k301/k301_claim_outcomes.png
+?? experiments/k301/k301_confidence_levels.png
+?? experiments/k301/k301_stability_distribution.png
+?? experiments/k302/figures/_make_figs.py
+?? experiments/k302/figures/fig1_category_breakdown.png
+?? experiments/k302/figures/fig2_priority_difficulty.png
+?? experiments/k302/figures/fig3_under_explored.png
+?? experiments/k319/figures/fig1_sharpe_mdd_by_decade.png
+?? experiments/k319/figures/fig2_cagr_heatmap.png
+?? experiments/k319/figures/fig3_worst_month_by_decade.png
+?? experiments/k319/figures/make_figures.py
+?? experiments/k320/figures/k320_content_health.png
+?? experiments/k320/figures/k320_issue_breakdown.png
+?? experiments/k320/figures/k320_severity_breakdown.png
+?? experiments/k320/make_figures.py
+?? experiments/k432/k432_dm_tests.png
+?? experiments/k432/k432_qlike_comparison.png
+?? experiments/k435/figures/k435_fig1_breaks_timeline.png
+?? experiments/k435/figures/k435_fig2_per_regime_params.png
+?? experiments/k435/figures/k435_fig3_rolling_persistence.png
+?? experiments/k435/figures/k435_fig4_oos_qlike.png
+?? experiments/k435/figures/plot_k435.py
+?? experiments/k438/_make_k438_charts.py
+?? experiments/k438/delta_coefficients.png
+?? experiments/k438/oos_qlike_comparison.png
+?? experiments/k438/param_stability.png
+?? experiments/k439/k439_corr_vix_rv.png
+?? experiments/k439/k439_mse_improvement.png
+?? experiments/k439/k439_pvalues_3tests.png
+?? experiments/k441/k441_efficiency.png
+?? experiments/k441/k441_gjr_proxies.png
+?? experiments/k441/k441_qlike_matrix.png
+?? experiments/k447/k447_skew_terciles.png
+?? experiments/k447/k447_tail_prediction.png
+?? experiments/k451/k451_forecast_models.png
+?? experiments/k451/k451_variance_decomposition.png
+?? experiments/k455/figures/fig1_network.png
+?? experiments/k455/figures/fig2_heatmap.png
+?? experiments/k455/figures/fig3_rolling.png
+?? experiments/k455/figures/fig4_ranking.png
+?? experiments/k455/k455_figures.py
+?? experiments/k458/figures/category_results.png
+?? experiments/k458/figures/complexity_scatter.png
+?? experiments/k458/figures/fdr_pvalues.png
+?? experiments/k458/figures/forest_plot.png
+?? experiments/k458/figures/make_figures.py
+?? experiments/k471/figures/k471_corr_with_fwd_rv.png
+?? experiments/k471/figures/k471_delta_r2.png
+?? experiments/k471/figures/k471_regime_corr.png
+?? experiments/k471/figures/k471_skew_distribution.png
+?? experiments/k471/make_figures.py
+?? experiments/k478/k478_dm_pvalues.png
+?? experiments/k478/k478_granger_summary.png
+?? experiments/k478/k478_qlike_comparison.png
+?? experiments/k478/make_figs.py
+?? experiments/k479/k479_dm_pvalues.png
+?? experiments/k479/k479_qlike_compare.png
+?? experiments/k479/k479_r2_compare.png
+?? experiments/k479/make_article_figures.py
+?? experiments/k485/fig1_qlike_by_period.png
+?? experiments/k485/fig2_dm_pvalue_by_period.png
+?? experiments/k485/fig3_avg_qlike_ranking.png
+?? experiments/k485/make_figures.py
+?? experiments/k489/fig1_matched_tenor_r2.png
+?? experiments/k489/fig2_cross_tenor_heatmap.png
+?? experiments/k489/fig3_slope_regime_rv.png
+?? experiments/k489/make_plots.py
+?? experiments/k497/k497_mcs_intersection.png
+?? experiments/k497/k497_ranking_heatmap.png
+?? experiments/k497/k497_spearman_matrix.png
+?? experiments/k497/make_charts.py
+?? experiments/k503/k503_strategy_comparison.png
+?? experiments/k503/k503_t_stats.png
+?? experiments/k511/k511_cointegration_pct.png
+?? experiments/k511/k511_cross_oos_sharpe.png
+?? experiments/k511/k511_plots.py
+?? experiments/k511/k511_strategy_sharpe_bars.png
+?? experiments/k517/k517_fig1_sharpe_comparison.png
+?? experiments/k517/k517_fig2_cross_oos_heatmap.png
+?? experiments/k517/k517_fig3_cumulative.png
+?? experiments/k520/k520_tx_cost_sensitivity.png
+?? experiments/k520/k520_vix_threshold_sensitivity.png
+?? experiments/k544/fig1_mdd_vs_cost.png
+?? experiments/k544/fig2_oos_heatmap.png
+?? experiments/k544/fig3_net_pnl_by_oos.png
+?? experiments/k545/k545_bootstrap_ci.png
+?? experiments/k545/k545_cross_oos.png
+?? experiments/k545/k545_strategy_comparison.png
+?? experiments/k547/k547_tom_anomaly_dead.png
+?? experiments/k549/charts/k549_general_2022_stress.png
+?? experiments/k549/charts/k549_general_sharpe_ci.png
+?? experiments/k550/k550_crossoos_heatmap.png
+?? experiments/k550/k550_sharpe_decomp.png
+?? experiments/k550/k550_sharpe_vs_return.png
+?? experiments/k556/k556_results.json
+?? experiments/k557/k557_cross_oos_diff.png
+?? experiments/k557/k557_dm_stats.png
+?? experiments/k557/k557_strategy_comparison.png
+?? experiments/k560/figures/k560_lookahead_illustration.png
+?? experiments/k560/figures/k560_post_patch_oos_sharpe.png
+?? experiments/k560/figures/k560_pre_post_sharpe.png
+?? experiments/k560/figures/make_rewrite_figs.py
+?? experiments/k571/_make_charts.py
+?? experiments/k571/k571_cross_oos_consistency.png
+?? experiments/k571/k571_half_life_overview.png
+?? experiments/k571/k571_sharpe_vs_harvey.png
+?? experiments/k576/k576_fig1_sharpe_compare.png
+?? experiments/k576/k576_fig2_cross_oos.png
+?? experiments/k576/k576_fig3_return_risk_decomp.png
+?? experiments/k594/fig1_sharpe_by_period.png
+?? experiments/k594/fig2_mean_sharpe_and_pvalues.png
+?? experiments/k594/fig3_cum_return_by_period.png
+?? experiments/k603/_make_figs.py
+?? experiments/k603/k603_fig1_sharpe_by_variant.png
+?? experiments/k603/k603_fig2_dm_vs_harvey.png
+?? experiments/k603/k603_fig3_cross_oos.png
+?? experiments/k619/figures/fig1_bug_fix_before_after.png
+?? experiments/k619/figures/fig2_model_qlike_comparison.png
+?? experiments/k619/figures/fig3_complexity_vs_qlike.png
+?? experiments/k619/figures/make_figs.py
+?? experiments/k631/_make_article_figs.py
+?? experiments/k631/fig1_dow_3market.png
+?? experiments/k631/fig2_calendar_dm.png
+?? experiments/k631/fig3_opex_effect.png
+?? experiments/k635/k635_qlike_comparison.png
+?? experiments/k635/k635_sharpe_comparison.png
+?? experiments/k635/make_extra_figs.py
+?? experiments/k644/k644_methodology_insights.png
+?? experiments/k644/k644_results_overview.png
+?? experiments/k645_results.json
+?? experiments/k647/k647v2_net_sharpe_after_tx_1920f9.png
+?? experiments/k647/k647v2_profile_match_matrix_1920f9.png
+?? experiments/k647/k647v2_sharpe_vs_mdd_pareto_1920f9.png
+?? experiments/k647/make_charts.py
+?? experiments/k647/net_sharpe_after_tx.png
+?? experiments/k647/profile_match_matrix.png
+?? experiments/k647/sharpe_vs_mdd_pareto.png
+?? experiments/k649/k649_auc_comparison.png
+?? experiments/k649/k649_strategy_harm.png
+?? experiments/k655/k655_horizon_sharpe_minimax.png
+?? experiments/k663/k663_correlation_regime.png
+?? experiments/k663/k663_episodes_compare.png
+?? experiments/k663/k663_sharpe_heatmap.png
+?? experiments/k666/k666_entry_month_vix_regime.png
+?? experiments/k666/k666_monthly_return_rv.png
+?? experiments/k666/k666_sell_in_may.png
+?? experiments/k671/k671_cross_oos.png
+?? experiments/k671/k671_strategy_summary.png
+?? experiments/k672/charts/k672_general_evidence_map.png
+?? experiments/k672/charts/k672_general_topic_landscape.png
+?? experiments/k674/k674_avg_vs_worst.png
+?? experiments/k674/k674_dd_heatmap.png
+?? experiments/k674/k674_dollar_impact.png
+?? experiments/k676/k676_fig1_aftertax_sharpe.png
+?? experiments/k676/k676_fig2_tax_savings.png
+?? experiments/k676/k676_fig3_turnover_wealth.png
+?? experiments/k677/k677_fig1_vix_before_recessions.png
+?? experiments/k677/k677_fig2_precision_comparison.png
+?? experiments/k677/k677_fig3_recession_vs_expansion.png
+?? experiments/k678/k678_corr_heatmap.png
+?? experiments/k678/k678_market_avg.png
+?? experiments/k678/k678_top_bottom_pairs.png
+?? experiments/k678/make_plots.py
+?? experiments/k681/_make_k681_charts.py
+?? experiments/k681/cross_market_equity.png
+?? experiments/k681/efa_drawdown.png
+?? experiments/k683/k683_composite_metrics.png
+?? experiments/k683/k683_dm_tstat_harvey.png
+?? experiments/k694/k694_beat_spy.png
+?? experiments/k694/k694_corrected_vs_original.png
+?? experiments/k694/k694_inflation_chart.py
+?? experiments/k694/k694_inflation_rank.png
+?? experiments/k695/k695_lambda_sharpe.png
+?? experiments/k695/k695_lambda_turnover.png
+?? experiments/k696/k696_crisis_dd.png
+?? experiments/k696/k696_floor_sharpe.png
+?? experiments/k696/k696_floor_sharpe.py
+?? experiments/k696/k696_sharpe_gap.png
+?? experiments/k701/k701_corr_by_freq.png
+?? experiments/k701/k701_cost_mdd.png
+?? experiments/k701/k701_sharpe_alpha.png
+?? experiments/k701/make_charts.py
+?? experiments/k703/k703_persona_action_map.png
+?? experiments/k703/k703_source_K_network.png
+?? experiments/k703/k703_ten_numbers_dashboard.png
+?? experiments/k703/make_figures.py
+?? experiments/k707/k707_category_distribution.png
+?? experiments/k707/k707_persona_action_map.png
+?? experiments/k707/k707_top10_answers.png
+?? experiments/k707/make_figures.py
+?? experiments/k712/k712_combo_comparison.png
+?? experiments/k712/k712_etf_correlations.png
+?? experiments/k717/k717_dim_contribution.png
+?? experiments/k717/k717_radar_top5.png
+?? experiments/k717/k717_ranking_comparison.png
+?? experiments/k774/k774_metrics_compare.png
+?? experiments/k774/k774_weight_behavior.png
+?? experiments/k818_ssvs_return_prediction_results.json
+?? experiments/k859/k859_rebalance_frequency.png
+?? experiments/k859/k859_sharpe_turnover.png
+?? experiments/k867/k867_spygld_quantiles.png
+?? experiments/k867/k867_tail_dependence.png
+?? experiments/k873/vix_dow_pattern.png
+?? experiments/k873/vt_strategy_equity.png
+?? experiments/k873/weekend_ratio_by_market.png
+?? experiments/k875/oos_qlike_comparison.png
+?? experiments/k875/quarterly_vol_comparison.png
+?? experiments/k875/vol_distribution_earnings_vs_non.png
+?? experiments/k876/k876_is_vs_oos_auc.png
+?? experiments/k876/k876_strategy_comparison.png
+?? experiments/k876/k876_vix_quintile_crash_prob.png
+?? experiments/k877/k877_is_vs_oos_strength.png
+?? experiments/k877/k877_oos_r2_comparison.png
+?? experiments/k881/k881_dm_vs_gjr.png
+?? experiments/k881/k881_harvey_count.png
+?? experiments/k881/k881_qlike_per_asset.png
+?? experiments/k945/k945_he_heatmap.png
+?? experiments/k945/k945_mu_var_ratio.png
+?? experiments/k953/k953_qlike_preliminary.png
+?? experiments/mag7_q1_2026_followup/README.md
+?? experiments/mag7_q1_2026_followup/generate_charts.py
+?? experiments/mag7_q1_2026_followup/mag7_q1_2026_ai_growth.png
+?? experiments/mag7_q1_2026_followup/mag7_q1_2026_capex_guide.png
+?? experiments/mag7_q1_2026_followup/mag7_q1_2026_ni_vs_capex.png
+?? experiments/strategy_lifecycle_audit_2026_05_12/audit_report.md
+?? experiments/strategy_lifecycle_audit_2026_05_12/computed_metrics.json
+?? experiments/strategy_lifecycle_audit_2026_05_12/full_period_metrics.json
+?? paper/taiwan-vt/body_v_pre_canonical_backup.tex
+?? paper/taiwan-vt/reviews/review_r4.md
+?? paper/vix-sufficiency/review_history/v1/latex_review_report.md
+?? paper/volatility-absorption/main_v3.toc
+?? scripts/_make_k715_charts.py
+?? scripts/_rewrite_mile_d716099a.py
+?? scripts/compare_data.py
+?? scripts/generate_diverse_tasks.py
+?? scripts/lookahead_audit.py
+?? scripts/publish_k1018_general.py
+?? scripts/publish_k1021_article.py
+?? scripts/publish_k1121_article.py
+?? scripts/publish_k1263_article.py
+?? scripts/publish_k672_general.py
+?? scripts/publish_k774_article.py
+?? scripts/render_cost_csv_to_pdf.py
+?? scripts/test_0056.py
+?? scripts/test_hac_lags.py
+?? scripts/test_hon_hai_garch.py
+?? scripts/test_hon_hai_hac_full.py
+?? scripts/test_hon_hai_long.py
+?? scripts/test_hon_hai_rolling.py
+?? scripts/test_hon_hai_specs.py
+?? scripts/test_mega_expanding.py
+?? scripts/test_mega_rolling_short.py
+?? scripts/test_mega_specs.py
+?? scripts/tests/test_merge_worktree_dedup.py
+?? src/volpred/research/__init__.py
+?? src/volpred/research/conclusion_lint.py
+?? storage/charts/k715_long_term_vs_recent_bh.png
+?? storage/charts/k715_strategy_ranking_2023_2026.png
+?? storage/charts/k715_vix_regime_overlay.png
+?? storage/charts/trending/chart1_vix_move_divergence.png
+?? storage/charts/trending/chart2_three_downgrades.png
+?? storage/drafts/ai_capex_725b_skeptical.md
+?? storage/drafts/k1020_general_draft.md
+?? storage/drafts/k1024_general_draft.md
+?? storage/drafts/k1029_general_draft.md
+?? storage/drafts/k1035_general_draft.md
+?? storage/drafts/k1040_general_draft.md
+?? storage/drafts/k1048_general_draft.md
+?? storage/drafts/k1066_general_draft.md
+?? storage/drafts/k1071_general_draft.md
+?? storage/drafts/k1072_general_draft.md
+?? storage/drafts/k1073_general_draft.md
+?? storage/drafts/k1076_general_draft.md
+?? storage/drafts/k1096_general_draft.md
+?? storage/drafts/k1103_general_draft.md
+?? storage/drafts/k1106b_general_draft.md
+?? storage/drafts/k1115_general_draft.md
+?? storage/drafts/k1137_article.md
+?? storage/drafts/k1140_general_draft.md
+?? storage/drafts/k1142_draft.md
+?? storage/drafts/k191_general_draft.md
+?? storage/drafts/k194_general_draft.md
+?? storage/drafts/k197_general_draft.md
+?? storage/drafts/k199_general_draft.md
+?? storage/drafts/k205_general_draft.md
+?? storage/drafts/k206_general_draft.md
+?? storage/drafts/k207_general_draft.md
+?? storage/drafts/k237_international_vt_rewrite_draft.md
+?? storage/drafts/k274_general_draft.md
+?? storage/drafts/k280_portfolio_guide_draft.md
+?? storage/drafts/k288_cross_period_stability_draft.md
+?? storage/drafts/k301_general_draft.md
+?? storage/drafts/k302_open_questions_draft.md
+?? storage/drafts/k319_decade_draft.md
+?? storage/drafts/k320_content_audit_draft.md
+?? storage/drafts/k432_general_draft.md
+?? storage/drafts/k435_structural_break_draft.md
+?? storage/drafts/k439_general_draft.md
+?? storage/drafts/k441_general_draft.md
+?? storage/drafts/k447_general_draft.md
+?? storage/drafts/k451_general_draft.md
+?? storage/drafts/k455_vol_spillover_draft.md
+?? storage/drafts/k458_meta_analysis_draft.md
+?? storage/drafts/k471_higher_moments_draft.md
+?? storage/drafts/k478_general_draft.md
+?? storage/drafts/k479_general_draft.md
+?? storage/drafts/k485_general_draft.md
+?? storage/drafts/k489_vix_term_structure_article.md
+?? storage/drafts/k497_general_draft.md
+?? storage/drafts/k503_general_draft.md
+?? storage/drafts/k511_general_draft.md
+?? storage/drafts/k517_general_draft.md
+?? storage/drafts/k520_general_draft.md
+?? storage/drafts/k544_general_draft.md
+?? storage/drafts/k545_general_draft.md
+?? storage/drafts/k550_general_draft.md
+?? storage/drafts/k557_general_draft.md
+?? storage/drafts/k560_sector_rotation_rewrite_draft.md
+?? storage/drafts/k571_general_draft.md
+?? storage/drafts/k576_general_draft.md
+?? storage/drafts/k594_general_draft.md
+?? storage/drafts/k603_general_draft.md
+?? storage/drafts/k619_kan_corrected_draft.md
+?? storage/drafts/k631_general_draft.md
+?? storage/drafts/k635_general_draft.md
+?? storage/drafts/k644_meta_analysis_draft.md
+?? storage/drafts/k646_general_draft.md
+?? storage/drafts/k647_general_v2_algorithm.md
+?? storage/drafts/k649_general_draft.md
+?? storage/drafts/k663_general_draft.md
+?? storage/drafts/k666_general_draft.md
+?? storage/drafts/k671_general_draft.md
+?? storage/drafts/k674_general_draft.md
+?? storage/drafts/k676_general_draft.md
+?? storage/drafts/k677_general_draft.md
+?? storage/drafts/k678_general_draft.md
+?? storage/drafts/k694_general_draft.md
+?? storage/drafts/k695_general_draft.md
+?? storage/drafts/k696_general_draft.md
+?? storage/drafts/k701_general_draft.md
+?? storage/drafts/k703_general_draft.md
+?? storage/drafts/k707_general_draft.md
+?? storage/drafts/k709_general_draft.md
+?? storage/drafts/k712_general_draft.md
+?? storage/drafts/k715_general_draft.md
+?? storage/drafts/k717_general_draft.md
+?? storage/drafts/k719_self_correction_draft.md
+?? storage/drafts/k722_general_draft.md
+?? storage/drafts/k726_general_draft.md
+?? storage/drafts/k753_general_draft.md
+?? storage/drafts/k859_general_draft.md
+?? storage/drafts/k865_tariff_spillover.md
+?? storage/drafts/k867_general_draft.md
+?? storage/drafts/k868_k1301_k1303_k1309_dm_chart.png
+?? storage/drafts/k868_k1301_k1303_k1309_har_null_synthesis_draft.md
+?? storage/drafts/k868_k1301_k1303_k1309_mse_chart.png
+?? storage/drafts/k873_general_draft.md
+?? storage/drafts/k875_general_draft.md
+?? storage/drafts/k876_general_draft.md
+?? storage/drafts/k877_general_draft.md
+?? storage/drafts/k881_general_draft.md
+?? storage/drafts/k890_general_draft.md
+?? storage/drafts/k911_general_draft.md
+?? storage/drafts/k928_general_draft.md
+?? storage/drafts/k929_general_draft.md
+?? storage/drafts/k936_general_draft.md
+?? storage/drafts/k945_general_draft.md
+?? storage/drafts/k947_general_draft.md
+?? storage/drafts/k950_general_draft.md
+?? storage/drafts/k953_general_draft.md
+?? storage/drafts/k966_general_draft.md
+?? storage/drafts/k971_caviar_vt_general.md
+?? storage/drafts/k973_general_draft.md
+?? storage/drafts/k980_general_draft.md
+?? storage/drafts/k984_general_draft.md
+?? storage/drafts/k986_adaptive_har_general.md
+?? storage/drafts/k989_general_draft.md
+?? storage/drafts/k990_general_draft.md
+?? storage/drafts/mag7_q1_2026_earnings_outlook.md
+?? storage/drafts/mile_5302df53_rewrite_draft.md
+?? storage/drafts/mile_ac32c38e_rewrite.md
+?? storage/drafts/mile_c4c73ed9_rewrite.md
+?? storage/drafts/mile_d716099a_rewrite_draft.md
+?? storage/drafts/mile_e8aefbf1_rewrite_draft.md
+?? storage/drafts/mile_f46b6320_codex_fix_v2.md
+?? storage/drafts/msft_ai_123pct_deep_dive.md
+?? storage/drafts/null_quartet_har_tx1.md
+?? storage/drafts/trending_bond_vol_vix_divergence.md
+?? storage/drafts/trending_pjm_ai_power_assets/pjm_q1_metrics.png
+?? storage/drafts/trending_pjm_ai_power_assets/pjm_summer_peak_forecast.png
+?? storage/drafts/trending_pjm_ai_power_fb.txt
+?? storage/drafts/trending_pjm_ai_power_fb_comment.txt
+?? storage/drafts/trending_pjm_ai_power_pjm_ai_power.md
+?? storage/drafts/trending_repost_ed39c127_facebook.md
+?? storage/drafts/trending_repost_ed39c127_rewrite.md
+?? storage/figures/mile_ed9e4626_anthropic_mtm_q1_2026.png
+?? storage/figures/mile_ed9e4626_capex_2026_period_explicit.png
+?? storage/figures/null_quartet_har_tx1_dm.png
+?? storage/figures/tsmc_concentration_rolling_beta.png
+?? storage/figures/tsmc_concentration_rolling_r2.png
+?? storage/logs/compute/compute-k1135-skew-t-gas-commodities-full-re-run-seed-42-canonical-j-1778732222.stderr
+?? storage/logs/compute/compute-k1135-skew-t-gas-commodities-full-re-run-seed-42-canonical-j-1778732222.stdout
+?? storage/logs/compute/compute-k1304-bma-0050-tw-h1-fail-decomposition-h-sample-h-pool-h-mi-1778629580.stderr
+?? storage/logs/compute/compute-k1304-bma-0050-tw-h1-fail-decomposition-h-sample-h-pool-h-mi-1778629580.stdout
+?? storage/logs/compute/compute-k1304-k1257-bma-0050-tw-h1-fail-h-sample-h-pool-h-micro-1778631266.stderr
+?? storage/logs/compute/compute-k1304-k1257-bma-0050-tw-h1-fail-h-sample-h-pool-h-micro-1778631266.stdout
+?? storage/logs/compute/compute-k901-re-run-international-vt-13-markets-post-fix-gjr-converg-1778890480.stderr
+?? storage/logs/compute/compute-k901-re-run-international-vt-13-markets-post-fix-gjr-converg-1778890480.stdout
+?? storage/logs/cron/compute_worker.log
+?? storage/logs/cron/compute_worker_launchd.err
+?? storage/logs/cron/compute_worker_launchd.log
+?? storage/logs/cron/hourly_dispatch.log
+?? storage/logs/cron/hourly_dispatch_launchd.err
+?? storage/logs/cron/hourly_dispatch_launchd.log
+?? storage/logs/cron/memory_health.log
+?? storage/logs/cron/paper_sync_all.log
+?? storage/logs/cron/populate_events.log
+?? storage/logs/cron/refresh_paper_snapshots.log
+?? storage/logs/cron/release_settings_audit.log
+?? storage/logs/cron/research_backlog.log
+?? storage/logs/hooks/git_status_20260425T011955_59698.log
+?? storage/logs/hooks/git_status_20260425T012312_63589.log
+?? storage/logs/hooks/git_status_20260425T012759_66844.log
+?? storage/logs/hooks/git_status_20260426T193903_59949.log
+?? storage/logs/hooks/git_status_20260427T004740_63395.log
+?? storage/logs/hooks/git_status_20260427T004924_65084.log
+?? storage/logs/hooks/git_status_20260427T031702_83230.log
+?? storage/logs/hooks/git_status_20260427T083942_79313.log
+?? storage/logs/hooks/git_status_20260427T101207_17729.log
+?? storage/logs/hooks/git_status_20260427T111342_38445.log
+?? storage/logs/hooks/git_status_20260427T111401_38891.log
+?? storage/logs/hooks/git_status_20260427T111425_39317.log
+?? storage/logs/hooks/git_status_20260427T172410_59928.log
+?? storage/logs/hooks/git_status_20260427T173250_64088.log
+?? storage/logs/hooks/git_status_20260427T184333_94046.log
+?? storage/logs/hooks/git_status_20260427T185231_20493.log
+?? storage/logs/hooks/git_status_20260427T195336_43850.log
+?? storage/logs/hooks/git_status_20260427T195342_43915.log
+?? storage/logs/hooks/git_status_20260427T210515_6990.log
+?? storage/logs/hooks/git_status_20260427T212242_19115.log
+?? storage/logs/hooks/git_status_20260427T212643_22063.log
+?? storage/logs/hooks/git_status_20260427T225937_89377.log
+?? storage/logs/hooks/git_status_20260427T225944_89544.log
+?? storage/logs/hooks/git_status_20260427T225957_89810.log
+?? storage/logs/hooks/git_status_20260428T002227_48404.log
+?? storage/logs/hooks/git_status_20260429T101040_84269.log
+?? storage/logs/hooks/git_status_20260429T103829_10482.log
+?? storage/logs/hooks/git_status_20260430T103307_73931.log
+?? storage/logs/hooks/git_status_20260502T205629_23229.log
+?? storage/logs/hooks/git_status_20260503T203924_26325.log
+?? storage/logs/hooks/git_status_20260504T164912_7836.log
+?? storage/logs/hooks/git_status_20260504T181039_90499.log
+?? storage/logs/hooks/git_status_20260506T193838_90794.log
+?? storage/logs/hooks/git_status_20260506T193847_90926.log
+?? storage/logs/hooks/git_status_20260507T120819_17594.log
+?? storage/logs/hooks/git_status_20260508T143826_16519.log
+?? storage/logs/hooks/git_status_20260508T214156_58249.log
+?? storage/logs/hooks/git_status_20260511T002254_38198.log
+?? storage/logs/hooks/git_status_20260511T002304_38357.log
+?? storage/logs/hooks/git_status_20260511T004422_56096.log
+?? storage/logs/hooks/git_status_20260511T005458_64918.log
+?? storage/logs/hooks/git_status_20260511T011153_79928.log
+?? storage/logs/hooks/git_status_20260511T011159_80036.log
+?? storage/logs/hooks/git_status_20260511T014101_1941.log
+?? storage/logs/hooks/git_status_20260511T015403_11102.log
+?? storage/logs/hooks/git_status_20260511T045200_85887.log
+?? storage/logs/hooks/git_status_20260511T045233_86315.log
+?? storage/logs/hooks/git_status_20260511T045238_86390.log
+?? storage/logs/hooks/git_status_20260511T045242_86489.log
+?? storage/logs/hooks/git_status_20260511T045307_86968.log
+?? storage/logs/hooks/git_status_20260511T045332_87407.log
+?? storage/logs/hooks/git_status_20260511T061130_22456.log
+?? storage/logs/hooks/git_status_20260511T061242_23802.log
+?? storage/logs/hooks/git_status_20260511T061303_24181.log
+?? storage/logs/hooks/git_status_20260511T061313_24396.log
+?? storage/logs/hooks/git_status_20260511T061315_24482.log
+?? storage/logs/hooks/git_status_20260511T061318_24601.log
+?? storage/logs/hooks/git_status_20260511T061332_24825.log
+?? storage/logs/hooks/git_status_20260511T061451_25714.log
+?? storage/logs/hooks/git_status_20260511T074126_57024.log
+?? storage/logs/hooks/git_status_20260511T081255_72096.log
+?? storage/logs/hooks/git_status_20260511T081300_72162.log
+?? storage/logs/hooks/git_status_20260511T081338_72733.log
+?? storage/logs/hooks/git_status_20260512T105026_39665.log
+?? storage/logs/hooks/git_status_20260512T105034_39826.log
+?? storage/logs/hooks/git_status_20260512T105059_40333.log
+?? storage/logs/hooks/git_status_20260512T105116_40706.log
+?? storage/logs/hooks/git_status_20260512T105719_47852.log
+?? storage/logs/hooks/git_status_20260512T105948_49578.log
+?? storage/logs/hooks/git_status_20260512T112443_63964.log
+?? storage/logs/hooks/git_status_20260512T112519_64696.log
+?? storage/logs/hooks/git_status_20260512T113200_68699.log
+?? storage/logs/hooks/git_status_20260512T113239_69353.log
+?? storage/logs/hooks/git_status_20260512T130223_5728.log
+?? storage/logs/hooks/git_status_20260512T131639_12747.log
+?? storage/logs/hooks/git_status_20260512T171406_5699.log
+?? storage/logs/hooks/git_status_20260513T001757_63070.log
+?? storage/logs/hooks/git_status_20260513T005129_88678.log
+?? storage/logs/hooks/git_status_20260513T021528_21350.log
+?? storage/logs/hooks/git_status_20260513T032031_44526.log
+?? storage/logs/hooks/git_status_20260513T061849_8025.log
+?? storage/logs/hooks/git_status_20260513T071946_29848.log
+?? storage/logs/hooks/git_status_20260513T074547_39339.log
+?? storage/logs/hooks/git_status_20260513T075616_44471.log
+?? storage/logs/hooks/git_status_20260513T081819_55196.log
+?? storage/logs/hooks/git_status_20260513T101220_97529.log
+?? storage/logs/hooks/git_status_20260513T133629_80272.log
+?? storage/logs/hooks/git_status_20260513T133727_81871.log
+?? storage/logs/hooks/git_status_20260513T134403_84819.log
+?? storage/logs/hooks/git_status_20260513T140255_94349.log
+?? storage/logs/hooks/git_status_20260513T140300_94411.log
+?? storage/logs/hooks/git_status_20260513T140411_95004.log
+?? storage/logs/hooks/git_status_20260514T121842_46327.log
+?? storage/logs/hooks/git_status_20260515T002323_10703.log
+?? storage/logs/hooks/git_status_20260515T082535_58746.log
+?? storage/logs/hooks/git_status_20260515T103540_18554.log
+?? storage/logs/hooks/git_status_20260515T103648_19828.log
+?? storage/logs/hooks/git_status_20260515T123516_99039.log
+?? storage/logs/hooks/git_status_20260515T163647_66283.log
+?? storage/logs/hooks/git_status_20260515T163711_66516.log
+?? storage/logs/hooks/git_status_20260515T163907_68445.log
+?? storage/logs/hooks/git_status_20260516T083604_6372.log
+?? storage/logs/hooks/tail_log_20260424T140824_12513.log
+?? storage/logs/hooks/tail_log_20260425T122504_75560.log
+?? storage/logs/hooks/tail_log_20260426T131809_7238.log
+?? storage/logs/hooks/tail_log_20260426T134442_24837.log
+?? storage/logs/hooks/tail_log_20260426T134443_24919.log
+?? storage/logs/hooks/tail_log_20260426T134443_24996.log
+?? storage/logs/hooks/tail_log_20260426T134444_25072.log
+?? storage/logs/hooks/tail_log_20260427T224652_78880.log
+?? storage/logs/hooks/tail_log_20260427T232717_8282.log
+?? storage/logs/hooks/tail_log_20260429T172911_35260.log
+?? storage/logs/hooks/tail_log_20260430T102815_69426.log
+?? storage/logs/hooks/tail_log_20260430T145511_68400.log
+?? storage/logs/hooks/tail_log_20260430T162808_2213.log
+?? storage/logs/hooks/tail_log_20260430T162820_2447.log
+?? storage/logs/hooks/tail_log_20260502T205228_20037.log
+?? storage/logs/hooks/tail_log_20260502T205739_24444.log
+?? storage/logs/hooks/tail_log_20260502T205802_24824.log
+?? storage/logs/hooks/tail_log_20260502T220024_86188.log
+?? storage/logs/hooks/tail_log_20260502T221050_96532.log
+?? storage/logs/hooks/tail_log_20260502T223931_16756.log
+?? storage/logs/hooks/tail_log_20260502T223940_16925.log
+?? storage/logs/hooks/tail_log_20260503T011127_23683.log
+?? storage/logs/hooks/tail_log_20260503T015012_57097.log
+?? storage/logs/hooks/tail_log_20260504T114145_78676.log
+?? storage/logs/hooks/tail_log_20260504T115003_87725.log
+?? storage/logs/hooks/tail_log_20260504T171016_29124.log
+?? storage/logs/hooks/tail_log_20260504T172542_47981.log
+?? storage/logs/hooks/tail_log_20260507T211319_12847.log
+?? storage/logs/hooks/tail_log_20260508T074134_51531.log
+?? storage/logs/hooks/tail_log_20260508T090316_87193.log
+?? storage/logs/hooks/tail_log_20260508T090328_87324.log
+?? storage/logs/hooks/tail_log_20260508T090422_87711.log
+?? storage/logs/hooks/tail_log_20260508T130826_81536.log
+?? storage/logs/hooks/tail_log_20260508T170806_72933.log
+?? storage/logs/hooks/tail_log_20260508T170821_73263.log
+?? storage/logs/hooks/tail_log_20260508T170853_73795.log
+?? storage/logs/hooks/tail_log_20260508T171108_74888.log
+?? storage/logs/hooks/tail_log_20260508T171226_75578.log
+?? storage/logs/hooks/tail_log_20260508T184222_26510.log
+?? storage/logs/hooks/tail_log_20260508T184350_27535.log
+?? storage/logs/hooks/tail_log_20260508T184359_27804.log
+?? storage/logs/hooks/tail_log_20260508T184412_28006.log
+?? storage/logs/hooks/tail_log_20260508T184425_28261.log
+?? storage/logs/hooks/tail_log_20260508T184436_28475.log
+?? storage/logs/hooks/tail_log_20260508T184559_31113.log
+?? storage/logs/hooks/tail_log_20260508T193542_66135.log
+?? storage/logs/hooks/tail_log_20260508T194121_72243.log
+?? storage/logs/hooks/tail_log_20260508T213513_53073.log
+?? storage/logs/hooks/tail_log_20260508T214054_57389.log
+?? storage/logs/hooks/tail_log_20260508T214218_58600.log
+?? storage/logs/hooks/tail_log_20260508T214312_59364.log
+?? storage/logs/hooks/tail_log_20260508T223535_95345.log
+?? storage/logs/hooks/tail_log_20260509T014325_25966.log
+?? storage/logs/hooks/tail_log_20260509T014438_27699.log
+?? storage/logs/hooks/tail_log_20260509T040750_26659.log
+?? storage/logs/hooks/tail_log_20260511T002011_36096.log
+?? storage/logs/hooks/tail_log_20260511T011238_80628.log
+?? storage/logs/hooks/tail_log_20260511T011319_81238.log
+?? storage/logs/hooks/tail_log_20260511T014816_8329.log
+?? storage/logs/hooks/tail_log_20260511T014820_8426.log
+?? storage/logs/hooks/tail_log_20260511T045302_86874.log
+?? storage/logs/hooks/tail_log_20260512T141741_35337.log
+?? storage/logs/hooks/tail_log_20260512T151643_57391.log
+?? storage/logs/hooks/tail_log_20260512T151747_58235.log
+?? storage/logs/hooks/tail_log_20260512T151758_58486.log
+?? storage/logs/hooks/tail_log_20260512T151819_59189.log
+?? storage/logs/hooks/tail_log_20260512T151913_59958.log
+?? storage/logs/hooks/tail_log_20260512T163819_90005.log
+?? storage/logs/hooks/tail_log_20260512T163850_90705.log
+?? storage/logs/hooks/tail_log_20260512T163915_91396.log
+?? storage/logs/hooks/tail_log_20260512T173747_13856.log
+?? storage/logs/hooks/tail_log_20260512T190819_45955.log
+?? storage/logs/hooks/tail_log_20260512T200819_66366.log
+?? storage/logs/hooks/tail_log_20260512T205049_81614.log
+?? storage/logs/hooks/tail_log_20260512T210810_88162.log
+?? storage/logs/hooks/tail_log_20260512T210830_88484.log
+?? storage/logs/hooks/tail_log_20260512T210843_89088.log
+?? storage/logs/hooks/tail_log_20260512T211048_91084.log
+?? storage/logs/hooks/tail_log_20260512T211112_91615.log
+?? storage/logs/hooks/tail_log_20260512T213810_3525.log
+?? storage/logs/hooks/tail_log_20260512T223811_24308.log
+?? storage/logs/hooks/tail_log_20260512T233810_45420.log
+?? storage/logs/hooks/tail_log_20260513T000819_56036.log
+?? storage/logs/hooks/tail_log_20260513T003811_76863.log
+?? storage/logs/hooks/tail_log_20260513T003930_78811.log
+?? storage/logs/hooks/tail_log_20260513T010819_97390.log
+?? storage/logs/hooks/tail_log_20260513T013811_8342.log
+?? storage/logs/hooks/tail_log_20260513T020818_18724.log
+?? storage/logs/hooks/tail_log_20260513T030814_39014.log
+?? storage/logs/hooks/tail_log_20260513T033818_51267.log
+?? storage/logs/hooks/tail_log_20260513T040810_61394.log
+?? storage/logs/hooks/tail_log_20260513T043817_71698.log
+?? storage/logs/hooks/tail_log_20260513T050810_82109.log
+?? storage/logs/hooks/tail_log_20260513T053818_93164.log
+?? storage/logs/hooks/tail_log_20260513T060810_3756.log
+?? storage/logs/hooks/tail_log_20260513T070809_25023.log
+?? storage/logs/hooks/tail_log_20260513T073810_36171.log
+?? storage/logs/hooks/tail_log_20260513T090811_74024.log
+?? storage/logs/hooks/tail_log_20260513T100819_95258.log
+?? storage/logs/hooks/tail_log_20260513T103809_7285.log
+?? storage/logs/hooks/tail_log_20260513T110820_17230.log
+?? storage/logs/hooks/tail_log_20260513T113820_30172.log
+?? storage/logs/hooks/tail_log_20260513T120811_41078.log
+?? storage/logs/hooks/tail_log_20260513T123818_53915.log
+?? storage/logs/hooks/tail_log_20260513T130814_64208.log
+?? storage/logs/hooks/tail_log_20260513T133820_82406.log
+?? storage/logs/hooks/tail_log_20260513T144001_8133.log
+?? storage/logs/hooks/tail_log_20260513T153316_27697.log
+?? storage/logs/hooks/tail_log_20260514T160720_35305.log
+?? storage/logs/hooks/tail_log_20260515T043917_88982.log
+?? storage/logs/hooks/test_20260423T114344_39831.log
+?? storage/logs/hooks/test_20260423T114355_40004.log
+?? storage/logs/hooks/test_20260425T002506_41140.log
+?? storage/logs/hooks/test_20260425T002542_41867.log
+?? storage/logs/hooks/test_20260425T161626_62626.log
+?? storage/logs/hooks/test_20260426T120353_51721.log
+?? storage/logs/hooks/test_20260426T122303_64616.log
+?? storage/logs/hooks/test_20260426T175943_86747.log
+?? storage/logs/hooks/test_20260426T182836_7477.log
+?? storage/logs/hooks/test_20260426T183817_15735.log
+?? storage/logs/hooks/test_20260426T190251_33118.log
+?? storage/logs/hooks/test_20260426T190334_33944.log
+?? storage/logs/hooks/test_20260426T190937_39094.log
+?? storage/logs/hooks/test_20260429T172905_35151.log
+?? storage/logs/hooks/test_20260504T165627_16492.log
+?? storage/logs/hooks/test_20260504T165739_18063.log
+?? storage/logs/hooks/test_20260504T165756_18353.log
+?? storage/logs/hooks/test_20260504T171720_36899.log
+?? storage/logs/hooks/test_20260504T171725_37013.log
+?? storage/logs/hooks/test_20260504T172035_41509.log
+?? storage/logs/hooks/test_20260504T172217_43653.log
+?? storage/logs/hooks/test_20260504T172321_45015.log
+?? storage/logs/hooks/test_20260504T172348_45480.log
+?? storage/logs/hooks/test_20260504T172352_45596.log
+?? storage/logs/hooks/test_20260504T174219_63510.log
+?? storage/logs/hooks/test_20260508T074126_51450.log
+?? storage/logs/hooks/test_20260508T074144_51618.log
+?? storage/logs/hooks/test_20260508T074159_51759.log
+?? storage/logs/hooks/test_20260508T074250_52106.log
+?? storage/logs/hooks/test_20260508T090308_87080.log
+?? storage/logs/hooks/test_20260508T090322_87256.log
+?? storage/logs/hooks/test_20260508T090415_87644.log
+?? storage/logs/hooks/test_20260508T120900_59675.log
+?? storage/logs/hooks/test_20260508T120907_59857.log
+?? storage/logs/hooks/test_20260508T120922_60152.log
+?? storage/logs/hooks/test_20260508T121034_60724.log
+?? storage/logs/hooks/test_20260508T170600_72126.log
+?? storage/logs/hooks/test_20260508T170802_72875.log
+?? storage/logs/hooks/test_20260508T170812_73056.log
+?? storage/logs/hooks/test_20260508T170825_73314.log
+?? storage/logs/hooks/test_20260508T170849_73665.log
+?? storage/logs/hooks/test_20260508T171103_74827.log
+?? storage/logs/hooks/test_20260508T171217_75469.log
+?? storage/logs/hooks/test_20260508T171221_75518.log
+?? storage/logs/hooks/test_20260508T171312_75889.log
+?? storage/logs/hooks/test_20260508T171322_75984.log
+?? storage/logs/hooks/test_20260508T171332_76083.log
+?? storage/logs/hooks/test_20260508T171341_76173.log
+?? storage/logs/hooks/test_20260508T171450_76767.log
+?? storage/logs/hooks/test_20260508T171516_77069.log
+?? storage/logs/hooks/test_20260508T171703_77778.log
+?? storage/logs/hooks/test_20260508T183939_24326.log
+?? storage/logs/hooks/test_20260508T184218_26430.log
+?? storage/logs/hooks/test_20260508T184346_27466.log
+?? storage/logs/hooks/test_20260508T184355_27722.log
+?? storage/logs/hooks/test_20260508T184403_27881.log
+?? storage/logs/hooks/test_20260508T184421_28183.log
+?? storage/logs/hooks/test_20260508T184430_28344.log
+?? storage/logs/hooks/test_20260508T184554_30849.log
+?? storage/logs/hooks/test_20260508T194110_72034.log
+?? storage/logs/hooks/test_20260508T213508_52985.log
+?? storage/logs/hooks/test_20260508T213518_53158.log
+?? storage/logs/hooks/test_20260508T213909_56197.log
+?? storage/logs/hooks/test_20260508T214049_57295.log
+?? storage/logs/hooks/test_20260508T214127_57784.log
+?? storage/logs/hooks/test_20260508T214137_57946.log
+?? storage/logs/hooks/test_20260508T214214_58519.log
+?? storage/logs/hooks/test_20260508T214306_59226.log
+?? storage/logs/hooks/test_20260508T223525_95154.log
+?? storage/logs/hooks/test_20260509T014320_25885.log
+?? storage/logs/hooks/test_20260509T014329_26037.log
+?? storage/logs/hooks/test_20260509T014433_27576.log
+?? storage/logs/hooks/test_20260509T014533_28385.log
+?? storage/logs/hooks/test_20260509T040746_26575.log
+?? storage/logs/hooks/test_20260509T040815_27052.log
+?? storage/logs/hooks/test_20260509T040854_27715.log
+?? storage/memory/knowledge.json.backup_2026_05_08_pre_k936_fix
+?? storage/memory/knowledge.json.backup_2026_05_09_pre_26pair_audit
+?? storage/next_draft_candidate_k1067f.md
+?? storage/notifications/01632b85.json
+?? storage/notifications/01952ed6.json
+?? storage/notifications/02a40406.json
+?? storage/notifications/077f7111.json
+?? storage/notifications/0c1c8ef9.json
+?? storage/notifications/0c6e02eb.json
+?? storage/notifications/0f664d92.json
+?? storage/notifications/1312a7ef.json
+?? storage/notifications/142affbd.json
+?? storage/notifications/19abb477.json
+?? storage/notifications/1cb45667.json
+?? storage/notifications/1d1e687f.json
+?? storage/notifications/1e10dcad.json
+?? storage/notifications/1e2b8053.json
+?? storage/notifications/209df2fd.json
+?? storage/notifications/20c65a1b.json
+?? storage/notifications/22190dc3.json
+?? storage/notifications/22c565ba.json
+?? storage/notifications/24120a56.json
+?? storage/notifications/287ee4e0.json
+?? storage/notifications/2b181fe5.json
+?? storage/notifications/2bd0b50b.json
+?? storage/notifications/2cb4d040.json
+?? storage/notifications/2fd22c1e.json
+?? storage/notifications/303cba87.json
+?? storage/notifications/30aef164.json
+?? storage/notifications/32d36df2.json
+?? storage/notifications/33029be9.json
+?? storage/notifications/33b4d339.json
+?? storage/notifications/34dcdee1.json
+?? storage/notifications/358f94fd.json
+?? storage/notifications/360dbe60.json
+?? storage/notifications/370c9705.json
+?? storage/notifications/37f40c0d.json
+?? storage/notifications/388e88ad.json
+?? storage/notifications/3aacc4cf.json
+?? storage/notifications/3b07587a.json
+?? storage/notifications/3c8e2a0b.json
+?? storage/notifications/3d075cec.json
+?? storage/notifications/3f370ea6.json
+?? storage/notifications/42444b81.json
+?? storage/notifications/434af719.json
+?? storage/notifications/4525fb7b.json
+?? storage/notifications/465136b1.json
+?? storage/notifications/4b54ffb6.json
+?? storage/notifications/4e51b6d8.json
+?? storage/notifications/514cea7c.json
+?? storage/notifications/51efa4f6.json
+?? storage/notifications/51f77dcd.json
+?? storage/notifications/53b7caf3.json
+?? storage/notifications/54f09f08.json
+?? storage/notifications/5668f70c.json
+?? storage/notifications/56aa2cf9.json
+?? storage/notifications/57703e28.json
+?? storage/notifications/58ae423e.json
+?? storage/notifications/5a71dc0f.json
+?? storage/notifications/5cff6584.json
+?? storage/notifications/5ebac122.json
+?? storage/notifications/61e037b7.json
+?? storage/notifications/6279a881.json
+?? storage/notifications/640dd383.json
+?? storage/notifications/6627abe2.json
+?? storage/notifications/673ceb65.json
+?? storage/notifications/68b5890b.json
+?? storage/notifications/698c481a.json
+?? storage/notifications/69c62eb3.json
+?? storage/notifications/6bb1ef1a.json
+?? storage/notifications/6ee6e1b5.json
+?? storage/notifications/7021f63a.json
+?? storage/notifications/71e08a31.json
+?? storage/notifications/71e74767.json
+?? storage/notifications/725361f8.json
+?? storage/notifications/740963e4.json
+?? storage/notifications/7515ccb1.json
+?? storage/notifications/75443ace.json
+?? storage/notifications/77908afe.json
+?? storage/notifications/77c8bf1c.json
+?? storage/notifications/7910ba93.json
+?? storage/notifications/7a1cbc97.json
+?? storage/notifications/7b2b2c37.json
+?? storage/notifications/7b3e0950.json
+?? storage/notifications/7ba555b8.json
+?? storage/notifications/7dcce96a.json
+?? storage/notifications/7ebae4b2.json
+?? storage/notifications/7f9cf2b3.json
+?? storage/notifications/806209db.json
+?? storage/notifications/81a1b09d.json
+?? storage/notifications/82c19043.json
+?? storage/notifications/844270d2.json
+?? storage/notifications/84c2beb1.json
+?? storage/notifications/856afb50.json
+?? storage/notifications/85ea8c90.json
+?? storage/notifications/87dc3d0f.json
+?? storage/notifications/89d7ca70.json
+?? storage/notifications/8a128535.json
+?? storage/notifications/8c4c90e2.json
+?? storage/notifications/9276ae70.json
+?? storage/notifications/9319d262.json
+?? storage/notifications/93d4d453.json
+?? storage/notifications/97e139a3.json
+?? storage/notifications/9d51b3f2.json
+?? storage/notifications/9d7beb65.json
+?? storage/notifications/9fef5db3.json
+?? storage/notifications/a0f1d590.json
+?? storage/notifications/a0f484a7.json
+?? storage/notifications/a78295d4.json
+?? storage/notifications/a78f10cc.json
+?? storage/notifications/aa17df3c.json
+?? storage/notifications/aae43892.json
+?? storage/notifications/ac5770b1.json
+?? storage/notifications/ad3991b6.json
+?? storage/notifications/aed72806.json
+?? storage/notifications/b5efe783.json
+?? storage/notifications/b7001901.json
+?? storage/notifications/b719197f.json
+?? storage/notifications/b845ef4d.json
+?? storage/notifications/b900c358.json
+?? storage/notifications/bc0621dc.json
+?? storage/notifications/bce777c0.json
+?? storage/notifications/bd67adf8.json
+?? storage/notifications/bd9f39fd.json
+?? storage/notifications/be6666c5.json
+?? storage/notifications/c0e32349.json
+?? storage/notifications/c0fd5b52.json
+?? storage/notifications/c40bf33a.json
+?? storage/notifications/c50e49a9.json
+?? storage/notifications/c5368777.json
+?? storage/notifications/c5e3000f.json
+?? storage/notifications/c7ad325a.json
+?? storage/notifications/c8a2bcd2.json
+?? storage/notifications/cc446550.json
+?? storage/notifications/cd7fed5a.json
+?? storage/notifications/cdfe8258.json
+?? storage/notifications/cfc25026.json
+?? storage/notifications/d03798ac.json
+?? storage/notifications/d0493d2c.json
+?? storage/notifications/d1684207.json
+?? storage/notifications/d2df8143.json
+?? storage/notifications/d331ef43.json
+?? storage/notifications/d54c570a.json
+?? storage/notifications/d6a7a74b.json
+?? storage/notifications/d6f67262.json
+?? storage/notifications/d857eccd.json
+?? storage/notifications/d8657fe9.json
+?? storage/notifications/da2a2df0.json
+?? storage/notifications/da43da43.json
+?? storage/notifications/da76c4c7.json
+?? storage/notifications/daba8f98.json
+?? storage/notifications/db5d8c01.json
+?? storage/notifications/dc293b99.json
+?? storage/notifications/df2e9fa5.json
+?? storage/notifications/df4557b1.json
+?? storage/notifications/df5535a7.json
+?? storage/notifications/df592119.json
+?? storage/notifications/e333d438.json
+?? storage/notifications/e47241d1.json
+?? storage/notifications/e6494306.json
+?? storage/notifications/e7da389f.json
+?? storage/notifications/e95c60ac.json
+?? storage/notifications/ea7b2d5b.json
+?? storage/notifications/eaaa5157.json
+?? storage/notifications/ec2ab3bb.json
+?? storage/notifications/ed996968.json
+?? storage/notifications/efd3f4b7.json
+?? storage/notifications/efeafbbb.json
+?? storage/notifications/f0d2f2fe.json
+?? storage/notifications/f133fc14.json
+?? storage/notifications/f2c4d0c2.json
+?? storage/notifications/f72bbf4a.json
+?? storage/notifications/f8efff69.json
+?? storage/notifications/f925797e.json
+?? storage/notifications/fa799c5b.json
+?? storage/notifications/fedfd188.json
+?? storage/notifications/ff395c27.json
+?? storage/notifications/skip_35e2463e.json
+?? storage/notifications/skip_3fa1ab21.json
+?? storage/notifications/skip_42daf895.json
+?? storage/notifications/skip_4571bf4a.json
+?? storage/notifications/skip_466118e2.json
+?? storage/notifications/skip_a095685f.json
+?? storage/notifications/skip_fe8ec457.json
+?? storage/ops/compute_queue/compute-k1135-skew-t-gas-commodities-full-re-run-seed-42-canonical-j-1778732222.json
+?? storage/ops/compute_queue/compute-k1304-bma-0050-tw-h1-fail-decomposition-h-sample-h-pool-h-mi-1778629580.json
+?? storage/ops/compute_queue/compute-k1304-k1257-bma-0050-tw-h1-fail-h-sample-h-pool-h-micro-1778631266.json
+?? storage/ops/compute_queue/compute-k901-re-run-international-vt-13-markets-post-fix-gjr-converg-1778890480.json
+?? storage/ops/event_ledger/300687050a6c59fce59a71b201170f6609c9dce0d9f2c15796b77244f2fc1720.json
+?? storage/ops/event_ledger/e22a91060f618a1dd13b8e4178f589afb68c47799ff3a3046fdf6de3f99783a1.json
+?? storage/ops/loop_cadence_override.json
+?? storage/ops/review_k1123_codex_receipt.json
+?? storage/ops/review_k1135_codex_receipt.json
+?? storage/reports/feed.json.bak.mile_c496072f_audit
+?? storage/reports/feed.json.bak_d716099a_pre_rewrite
+?? storage/reports/feed.json.bak_swrcorr_2026-05-07T071240
+?? storage/reports/mile_0c1f9687.json
+?? storage/reports/mile_4c1045ea.json
+?? storage/reports/mile_5302df53.json
+?? storage/reports/mile_6c2bd99e.json
+?? storage/reports/mile_912dd699.json
+?? storage/reports/mile_9e6e75d8.json
+?? storage/reports/mile_9ed87beb.json
+?? storage/reports/mile_a0ac369d.json
+?? storage/reports/mile_ac32c38e.json
+?? storage/reports/mile_c0d97d70.json
+?? storage/reports/mile_c496072f.json
+?? storage/reports/mile_c4c73ed9.json
+?? storage/reports/mile_d716099a.json
+?? storage/reports/mile_e6e05369.json
+?? storage/reports/mile_e8aefbf1.json
+?? storage/reports/mile_ecb736a6.json
+?? storage/reports/mile_ed39c127.json
+?? storage/reports/mile_ed9e4626.json
+?? storage/reports/mile_f46b6320.json
+?? storage/reports/token_usage/daily_2026-04-27.json
+?? storage/reports/token_usage/daily_2026-04-27.md
+?? storage/reports/token_usage/daily_2026-05-12.json
+?? storage/reports/token_usage/daily_2026-05-12.md
+?? storage/reports/token_usage/weekly_2026-05-08.json
+?? storage/reports/token_usage/weekly_2026-05-08.md
+?? tests/fixtures/knowledge_clean.json
+?? tests/fixtures/knowledge_corrupt_content_id_mismatch.json
+?? tests/fixtures/knowledge_corrupt_duplicate_ids.json
+?? tests/fixtures/knowledge_corrupt_experiment_id_mismatch.json
+?? tests/fixtures/knowledge_corrupt_id_title_misaligned.json
+?? tests/test_conclusion_lint.py
+?? tests/test_daily_update_tw_staleness.py
+?? tests/test_daily_update_tw_staleness_milestone.py
+?? tests/test_merge_worktree_dedup_regression.py
+?? tests/test_publish_draft_citation_sanitizer.py
+?? tests/test_publish_draft_cli_ux.py
+?? tests/test_publish_draft_description_sync.py
+?? tests/test_publish_draft_experiment_refs.py
+?? tests/test_publish_draft_image_validation.py
+?? tests/test_publish_draft_tag_cap.py
+ 631 files changed, 41596 insertions(+), 3056754 deletions(-)

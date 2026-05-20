@@ -1021,3 +1021,30 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 3. 自主主幹（hourly-dispatch）必須有失敗 visibility — 8/12 run silent 失敗一整天才被發現。候補：fire 後若 exit≠0 連續 N 次應主動 ping 用戶（hang detection alert 已規劃，failure detection 一併納入）。
 
 **Pending（根因 B 屬用戶決策）**：org 訂閱存取需用戶處理；headless dispatch 在訂閱間歇停用下不穩 — 建議配置 API key fallback。
+
+---
+
+## 2026-05-20 | 徹查排程失敗（用戶要求從底層杜絕）— 5 根因
+
+承上條（hourly-dispatch fd limit）。用戶要求徹查所有排程失敗並結構性杜絕。全面 audit `storage/logs/cron/*.log` 後找到 5 個獨立根因：
+
+**根因 1 — hourly-dispatch fd limit 256**（已修，見上條）。
+
+**根因 2 — org 訂閱間歇停用**：用戶確認為信用卡換卡未扣款，已解決、不會再犯。
+
+**根因 3 — `host_cron_fail` alert 完全失效（最嚴重）**：`src/volpred/ops/alerts.py` 的 `_CRON_EXIT_RE = ^=== exit (\d+) at (.+) ===$` 對**任何**實際 cron log 格式都不匹配 — 所有 wrapper 實際發的是 `=== [<job>] exit N at <ts> (duration=Xs) ===`（帶 `[job]` 前綴）。⇒ `_latest_cron_exit` 永遠回 None ⇒ `failing_logs` 永遠空 ⇒ host_cron_fail 從來無法 breach。今天 8/12 hourly 失敗 silent 一整天就是因為這個 monitoring 本身是死的。**Fix**：regex 改 `^=== \[[^\]]+\] exit (\d+) at (.+?)(?: \(duration=[^)]*\))? ===$`。
+
+**根因 4 — banner 由 piggy-back dispatcher 發、非 wrapper 自發**：canonical exit banner 由 `run_due_jobs.py`（piggy-back）在跑 job 時寫。走自己 LaunchAgent 而非 piggy-back 的 job 拿不到 banner。`daily_update` 在 `SKIP_JOB_IDS` + 自己 wrapper `exec` python ⇒ banner 凍結在 2026-04-25 ⇒ 即使 host_cron_fail regex 修好也讀到 stale exit 0。`hourly_dispatch` 同理無 banner。**Fix**：`cron_daily_update.sh` 改非 `exec`、捕捉 exit、自發 `=== [daily_update] exit N at ... ===`；`cron_hourly_dispatch.sh` 結束加同格式 canonical 行。
+
+**根因 5 — daily_update 讀 feed.json 無並發保護**：`json.loads(feed_path.read_text())` 撞上其他程序 mid-write ⇒ `JSONDecodeError` ⇒ 整個 daily_update run crash（2026-05-19）。**Fix**：`scripts/daily_update.py` 加 `_load_json_retry()`（4 retry × 0.25s，騎過毫秒級寫入窗口）。
+
+**附帶修復 — market_daily 400（非 cron run 失敗，但 daily_update 內 161 次 sync 400）**：`_MARKET_DAILY_COLUMNS` 白名單含 `nk225_close/nk225_open`，但 Supabase `market_daily` 表從無此欄（PGRST204），且 nk225 採集 2026-04-10 已停 ⇒ 帶 nk225 的舊 row 永遠 400（14/30 fail）。**Fix**：白名單移除 nk225_*；`_post` 改印出 PostgREST error body（原本 `e.read()` 丟棄 ⇒ 每個 400 都是盲修）。修後 30/30 sync OK。
+
+**Lessons**：
+1. **Monitoring 自己要被 monitor**：host_cron_fail 死了數月無人知，因為「沒 alert」被誤讀為「沒問題」。Alert regex / parser 對實際資料格式的匹配必須有 test 覆蓋（任一真實 log sample 進 regex 測試）。
+2. **Observability 不能靠單一上游**：banner 由 piggy-back 發是 fragile single-point — 任一繞過 piggy-back 的 job 就 silent。每個 wrapper 應自負其 exit banner。
+3. **錯誤 body 不可丟棄**：`e.read()  # consume` 把 400 變不透明，盲修數週。HTTP error 一律印 body（截斷）。
+4. **共享檔（feed.json）的讀取必須容忍 concurrent write**：retry 或 atomic write，不可裸 `json.loads(read_text())`。
+5. headless wrapper 不 source profile — ulimit/PATH/env 全要顯式設（見上條根因 1）。
+
+**Pending 候補（未在本次做，量大）**：其餘 `exec`-form wrapper（collect_tw/us、market_cal、refresh_paper_snapshots、paper_sync_all 等）目前靠 piggy-back 發 banner，若改走自己 LaunchAgent 也會 silent。理想結構是所有 wrapper 自發 banner（shared `cron_lib.sh` 提供 `emit_exit`）。下次碰 cron wrapper 維運時落地。

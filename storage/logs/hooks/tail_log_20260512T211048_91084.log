@@ -1,0 +1,14 @@
+/Users/yhlai0911/.volpred/bin/cron_hourly_dispatch.sh: line 54: unexpected EOF while looking for matching `"'
+/Users/yhlai0911/.volpred/bin/cron_hourly_dispatch.sh: line 55: syntax error: unexpected end of file
+=== hourly-dispatch 2026-05-12 21:07:05 CST ===
+=== hourly-dispatch 2026-05-12 21:08:31 CST ===
+=== hourly-dispatch 2026-05-12 21:08:44 CST ===
+---
+50: 
+51: # 通知用戶 — 解決「系統有跑但看不到 = 等於沒跑」的信任問題
+52: LATEST_COMMIT=$(/usr/bin/git -C /Users/yhlai0911/Desktop/volpred-research log -1 --pretty=format:'%h %s' 2>&1 | head -c 100)
+53: /usr/bin/osascript -e "display notification \"$LATEST_COMMIT\" with title \"volpred hourly-dispatch $(date '+%H:%M')\" sound name \"Pop\"" 2>/dev/null || true
+--- file end check ---
+      53 scripts/cron_hourly_dispatch.sh
+0000000    /   u   s   r   /   b   i   n   /   o   s   a   s   c   r   i
+0000020    p   t       -   e       "   d   i   s   p   l   a   y       n

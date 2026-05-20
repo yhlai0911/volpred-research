@@ -1,0 +1,25 @@
+{
+  "id": "compute-k1304-k1257-bma-0050-tw-h1-fail-h-sample-h-pool-h-micro-1778631266",
+  "title": "K1304: K1257 BMA 0050.TW H1 FAIL 分解（H_sample / H_pool / H_micro）",
+  "script_path": "experiments/k1304/k1304.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-05-13T00:14:26Z",
+  "started_at": "2026-05-13T00:30:04Z",
+  "completed_at": "2026-05-13T00:47:19Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1304-k1257-bma-0050-tw-h1-fail-h-sample-h-pool-h-micro-1778631266.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1304-k1257-bma-0050-tw-h1-fail-h-sample-h-pool-h-micro-1778631266.stderr",
+  "result_artifact": "experiments/k1304/k1304_results.json",
+  "claude_followup": {
+    "brief": "K1304 BMA 0050.TW decomposition 已完成。讀 experiments/k1304/k1304_results.json 的 hypothesis_verdicts + dominating_hypotheses + conclusions。主要任務: (1) 解讀三假說哪個主導 0050.TW posterior collapse（H_sample=OOS 短 / H_pool=候選池不適 / H_micro=微結構）；(2) 對照 knowledge.json K1257 entry 的 closure_asymmetry 欄位；(3) 評估是否有足夠證據更新 Paper 2 §5 narrative（目前狀態=decision_made_awaiting_body_rewrite）；(4) 若三假說都有統計支持，準備 experiments/k1304/README.md 更新 + knowledge.json suggested entry 草稿（不直接寫 knowledge.json，由主線程 Codex review 後決定）。先查 docs/error_log.md 確認 lookahead 防錯規則 + research_program.md §Paper 2 現況，再解讀結果。",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "timeout_seconds": 3600,
+  "followup_dispatched_at": "2026-05-13T01:10:43Z",
+  "followup_next_task_id": "interpret-k1304-bma-decomposition-followup-1778634643"
+}

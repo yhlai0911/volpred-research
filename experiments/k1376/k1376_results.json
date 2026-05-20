@@ -1,0 +1,1470 @@
+{
+  "experiment_id": "K1376",
+  "title": "Paper 3 review_v2 B.3 Fix \u2014 MDD Retention Bootstrap CI (All 22 Assets)",
+  "paper": "paper/vt-trend-following",
+  "review_item": "review_v2 HIGH issue B.3",
+  "methodology": {
+    "vt_rule": "w = min(12/VIX_month_end, 1), monthly rebalancing, lag 1 month",
+    "tsmom_hedge": "rolling 252-day OLS, beta clipped [0, 0.5]",
+    "bootstrap": "B=10000, block=252 days, seed=42",
+    "ci": "90% (percentile bootstrap)",
+    "primary_metric": "def_a: (MDD_BH - MDD_Hedged) / (MDD_BH - MDD_VT) * 100",
+    "extends": "K1192 (5-asset canonical)"
+  },
+  "assets_analyzed": 23,
+  "k1192_comparison": {
+    "SPY": {
+      "point": 103.7
+    },
+    "50/50": {
+      "point": 95.6
+    },
+    "DIA": {
+      "point": 106.2
+    },
+    "QQQ": {
+      "point": 109.0
+    },
+    "IWM": {
+      "point": 102.2
+    }
+  },
+  "results": {
+    "SPY": {
+      "asset": "SPY",
+      "asset_class": "equity",
+      "period_start": "2005-01-03",
+      "period_end": "2026-03-31",
+      "n_obs": 5344,
+      "bootstrap": {
+        "n_obs": 5344,
+        "n_reps": 10000,
+        "block_size": 252,
+        "ci_pct": 90,
+        "point_estimates": {
+          "bh_mdd_pct": -55.19,
+          "vt_mdd_pct": -26.31,
+          "hedged_mdd_pct": -25.25,
+          "a_retention": 103.7,
+          "b_vt_reduction": 52.3,
+          "c_hedged_abs_mdd": -25.3,
+          "d_hedged_vs_bh": -54.2
+        },
+        "def_a_retention_fraction": {
+          "lo": 93.0,
+          "hi": 182.2,
+          "mean": 129.7,
+          "median": 115.8,
+          "n": 10000
+        },
+        "def_b_vt_mdd_reduction": {
+          "lo": 27.4,
+          "hi": 55.0,
+          "mean": 42.0,
+          "median": 44.3,
+          "n": 10000
+        },
+        "def_c_hedged_abs_mdd": {
+          "lo": -34.0,
+          "hi": -12.4,
+          "mean": -22.6,
+          "median": -24.4,
+          "n": 10000
+        },
+        "def_d_hedged_vs_bh": {
+          "lo": -59.8,
+          "hi": -42.1,
+          "mean": -51.0,
+          "median": -50.5,
+          "n": 10000
+        }
+      }
+    },
+    "QQQ": {
+      "asset": "QQQ",
+      "asset_class": "equity",
+      "period_start": "2005-01-03",
+      "period_end": "2026-03-31",
+      "n_obs": 5344,
+      "bootstrap": {
+        "n_obs": 5344,
+        "n_reps": 10000,
+        "block_size": 252,
+        "ci_pct": 90,
+        "point_estimates": {
+          "bh_mdd_pct": -53.4,
+          "vt_mdd_pct": -28.46,
+          "hedged_mdd_pct": -26.21,
+          "a_retention": 109.0,
+          "b_vt_reduction": 46.7,
+          "c_hedged_abs_mdd": -26.2,
+          "d_hedged_vs_bh": -50.9
+        },
+        "def_a_retention_fraction": {
+          "lo": 89.0,
+          "hi": 221.5,
+          "mean": 133.6,
+          "median": 120.4,
+          "n": 10000
+        },
+        "def_b_vt_mdd_reduction": {
+          "lo": 26.3,
+          "hi": 49.7,
+          "mean": 41.0,
+          "median": 42.6,
+          "n": 10000
+        },
+        "def_c_hedged_abs_mdd": {
+          "lo": -32.8,
+          "hi": -11.3,
+          "mean": -22.7,
+          "median": -26.2,
+          "n": 10000
+        },
+        "def_d_hedged_vs_bh": {
+          "lo": -66.8,
+          "hi": -42.1,
+          "mean": -52.0,
+          "median": -50.1,
+          "n": 10000
+        }
+      }
+    },
+    "IWM": {
+      "asset": "IWM",
+      "asset_class": "equity",
+      "period_start": "2005-01-03",
+      "period_end": "2026-03-31",
+      "n_obs": 5344,
+      "bootstrap": {
+        "n_obs": 5344,
+        "n_reps": 10000,
+        "block_size": 252,
+        "ci_pct": 90,
+        "point_estimates": {
+          "bh_mdd_pct": -58.64,
+          "vt_mdd_pct": -30.97,
+          "hedged_mdd_pct": -30.35,
+          "a_retention": 102.2,
+          "b_vt_reduction": 47.2,
+          "c_hedged_abs_mdd": -30.3,
+          "d_hedged_vs_bh": -48.2
+        },
+        "def_a_retention_fraction": {
+          "lo": 86.7,
+          "hi": 179.5,
+          "mean": 113.4,
+          "median": 107.6,
+          "n": 10000
+        },
+        "def_b_vt_mdd_reduction": {
+          "lo": 18.8,
+          "hi": 51.2,
+          "mean": 35.5,
+          "median": 36.0,
+          "n": 10000
+        },
+        "def_c_hedged_abs_mdd": {
+          "lo": -45.1,
+          "hi": -21.1,
+          "mean": -32.3,
+          "median": -30.6,
+          "n": 10000
+        },
+        "def_d_hedged_vs_bh": {
+          "lo": -54.8,
+          "hi": -25.2,
+          "mean": -40.2,
+          "median": -41.2,
+          "n": 10000
+        }
+      }
+    },
+    "XLF": {
+      "asset": "XLF",
+      "asset_class": "equity",
+      "period_start": "2005-01-03",
+      "period_end": "2026-03-31",
+      "n_obs": 5344,
+      "bootstrap": {
+        "n_obs": 5344,
+        "n_reps": 10000,
+        "block_size": 252,
+        "ci_pct": 90,
+        "point_estimates": {
+          "bh_mdd_pct": -82.69,
+          "vt_mdd_pct": -47.59,
+          "hedged_mdd_pct": -46.78,
+          "a_retention": 102.3,
+          "b_vt_reduction": 42.4,
+          "c_hedged_abs_mdd": -46.8,
+          "d_hedged_vs_bh": -43.4
+        },
+        "def_a_retention_fraction": {
+          "lo": 78.1,
+          "hi": 125.4,
+          "mean": 101.4,
+          "median": 100.0,
+          "n": 10000
+        },
+        "def_b_vt_mdd_reduction": {
+          "lo": 24.5,
+          "hi": 55.1,
+          "mean": 39.9,
+          "median": 40.3,
+          "n": 10000
+        },
+        "def_c_hedged_abs_mdd": {
+          "lo": -61.5,
+          "hi": -26.8,
+          "mean": -41.5,
+          "median": -39.7,
+          "n": 10000
+        },
+        "def_d_hedged_vs_bh": {
+          "lo": -55.1,
+          "hi": -24.3,
+          "mean": -39.9,
+          "median": -39.8,
+          "n": 10000
+        }
+      }
+    },
+    "XLE": {
+      "asset": "XLE",
+      "asset_class": "equity",
+      "period_start": "2005-01-03",
+      "period_end": "2026-03-31",
+      "n_obs": 5344,
+      "bootstrap": {
+        "n_obs": 5344,
+        "n_reps": 10000,
+        "block_size": 252,
+        "ci_pct": 90,
+        "point_estimates": {
+          "bh_mdd_pct": -71.26,
+          "vt_mdd_pct": -63.32,
+          "hedged_mdd_pct": -53.52,
+          "a_retention": 223.4,
+          "b_vt_reduction": 11.1,
+          "c_hedged_abs_mdd": -53.5,
+          "d_hedged_vs_bh": -24.9
+        },
+        "def_a_retention_fraction": {
+          "lo": 37.7,
+          "hi": 202.9,
+          "mean": 115.7,
+          "median": 100.0,
+          "n": 10000
+        },
+        "def_b_vt_mdd_reduction": {
+          "lo": 7.1,
+          "hi": 39.3,
+          "mean": 21.4,
+          "median": 21.1,
+          "n": 10000
+        },
+        "def_c_hedged_abs_mdd": {
+          "lo": -76.6,
+          "hi": -30.6,
+          "mean": -52.6,
+          "median": -51.3,
+          "n": 10000
+        },
+        "def_d_hedged_vs_bh": {
+          "lo": -39.8,
+          "hi": -5.4,
+          "mean": -21.6,
+          "median": -21.3,
+          "n": 10000
+        }
+      }
+    },
+    "DIA": {
+      "asset": "DIA",
+      "asset_class": "equity",
+      "period_start": "2005-01-03",
+      "period_end": "2026-03-31",
+      "n_obs": 5344,
+      "bootstrap": {
+        "n_obs": 5344,
+        "n_reps": 10000,
+        "block_size": 252,
+        "ci_pct": 90,
+        "point_estimates": {
+          "bh_mdd_pct": -51.87,
+          "vt_mdd_pct": -26.78,
+          "hedged_mdd_pct": -25.23,
+          "a_retention": 106.2,
+          "b_vt_reduction": 48.4,
+          "c_hedged_abs_mdd": -25.2,
+          "d_hedged_vs_bh": -51.4
+        },
+        "def_a_retention_fraction": {
+          "lo": 82.7,
+          "hi": 155.3,
+          "mean": 117.3,
+          "median": 111.0,
+          "n": 10000
+        },
+        "def_b_vt_mdd_reduction": {
+          "lo": 25.7,
+          "hi": 56.6,
+          "mean": 39.6,
+          "median": 40.2,
+          "n": 10000
+        },
+        "def_c_hedged_abs_mdd": {
+          "lo": -35.6,
+          "hi": -11.1,
+          "mean": -24.6,
+          "median": -25.2,
+          "n": 10000
+        },
+        "def_d_hedged_vs_bh": {
+          "lo": -58.9,
+          "hi": -32.8,
+          "mean": -43.9,
+          "median": -43.6,
+          "n": 10000
+        }
+      }
+    },
+    "EEM": {
+      "asset": "EEM",
+      "asset_class": "equity",
+      "period_start": "2005-01-03",
+      "period_end": "2026-03-31",
+      "n_obs": 5344,
+      "bootstrap": {
+        "n_obs": 5344,
+        "n_reps": 10000,
+        "block_size": 252,
+        "ci_pct": 90,
+        "point_estimates": {
+          "bh_mdd_pct": -66.43,
+          "vt_mdd_pct": -40.74,
+          "hedged_mdd_pct": -38.14,
+          "a_retention": 110.1,
+          "b_vt_reduction": 38.7,
+          "c_hedged_abs_mdd": -38.1,
+          "d_hedged_vs_bh": -42.6
+        },
+        "def_a_retention_fraction": {
+          "lo": 62.0,
+          "hi": 183.7,
+          "mean": 109.2,
+          "median": 105.6,
+          "n": 9998
+        },
+        "def_b_vt_mdd_reduction": {
+          "lo": 12.8,
+          "hi": 40.0,
+          "mean": 28.8,
+          "median": 29.9,
+          "n": 10000
+        },
+        "def_c_hedged_abs_mdd": {
+          "lo": -63.1,
+          "hi": -25.0,
+          "mean": -42.8,
+          "median": -41.5,
+          "n": 10000
+        },
+        "def_d_hedged_vs_bh": {
+          "lo": -45.6,
+          "hi": -11.7,
+          "mean": -31.3,
+          "median": -33.1,
+          "n": 10000
+        }
+      }
+    },
+    "EFA": {
+      "asset": "EFA",
+      "asset_class": "equity",
+      "period_start": "2005-01-03",
+      "period_end": "2026-03-31",
+      "n_obs": 5344,
+      "bootstrap": {
+        "n_obs": 5344,
+        "n_reps": 10000,
+        "block_size": 252,
+        "ci_pct": 90,
+        "point_estimates": {
+          "bh_mdd_pct": -61.04,
+          "vt_mdd_pct": -33.27,
+          "hedged_mdd_pct": -33.62,
+          "a_retention": 98.7,
+          "b_vt_reduction": 45.5,
+          "c_hedged_abs_mdd": -33.6,
+          "d_hedged_vs_bh": -44.9
+        },
+        "def_a_retention_fraction": {
+          "lo": 88.0,
+          "hi": 176.5,
+          "mean": 117.9,
+          "median": 107.4,
+          "n": 10000
+        },
+        "def_b_vt_mdd_reduction": {
+          "lo": 18.7,
+          "hi": 47.8,
+          "mean": 34.7,
+          "median": 35.7,
+          "n": 10000
+        },
+        "def_c_hedged_abs_mdd": {
+          "lo": -47.6,
+          "hi": -19.7,
+          "mean": -32.8,
+          "median": -33.6,
+          "n": 10000
+        },
+        "def_d_hedged_vs_bh": {
+          "lo": -52.9,
+          "hi": -23.0,
+          "mean": -39.2,
+          "median": -40.2,
+          "n": 10000
+        }
+      }
+    },
+    "FXI": {
+      "asset": "FXI",
+      "asset_class": "equity",
+      "period_start": "2005-10-10",
+      "period_end": "2026-03-31",
+      "n_obs": 5150,
+      "bootstrap": {
+        "n_obs": 5150,
+        "n_reps": 10000,
+        "block_size": 252,
+        "ci_pct": 90,
+        "point_estimates": {
+          "bh_mdd_pct": -72.68,
+          "vt_mdd_pct": -47.6,
+          "hedged_mdd_pct": -42.69,
+          "a_retention": 119.6,
+          "b_vt_reduction": 34.5,
+          "c_hedged_abs_mdd": -42.7,
+          "d_hedged_vs_bh": -41.3
+        },
+        "def_a_retention_fraction": {
+          "lo": 81.8,
+          "hi": 207.7,
+          "mean": 131.5,
+          "median": 128.9,
+          "n": 10000
+        },
+        "def_b_vt_mdd_reduction": {
+          "lo": 13.9,
+          "hi": 38.3,
+          "mean": 26.8,
+          "median": 27.3,
+          "n": 10000
+        },
+        "def_c_hedged_abs_mdd": {
+          "lo": -63.8,
+          "hi": -30.0,
+          "mean": -46.1,
+          "median": -44.2,
+          "n": 10000
+        },
+        "def_d_hedged_vs_bh": {
+          "lo": -47.3,
+          "hi": -20.1,
+          "mean": -34.2,
+          "median": -34.5,
+          "n": 10000
+        }
+      }
+    },
+    "EWZ": {
+      "asset": "EWZ",
+      "asset_class": "equity",
+      "period_start": "2005-01-03",
+      "period_end": "2026-03-31",
+      "n_obs": 5344,
+      "bootstrap": {
+        "n_obs": 5344,
+        "n_reps": 10000,
+        "block_size": 252,
+        "ci_pct": 90,
+        "point_estimates": {
+          "bh_mdd_pct": -77.25,
+          "vt_mdd_pct": -68.89,
+          "hedged_mdd_pct": -67.98,
+          "a_retention": 110.9,
+          "b_vt_reduction": 10.8,
+          "c_hedged_abs_mdd": -68.0,
+          "d_hedged_vs_bh": -12.0
+        },
+        "def_a_retention_fraction": {
+          "lo": 52.4,
+          "hi": 208.8,
+          "mean": 121.8,
+          "median": 119.4,
+          "n": 10000
+        },
+        "def_b_vt_mdd_reduction": {
+          "lo": 6.7,
+          "hi": 33.9,
+          "mean": 19.3,
+          "median": 18.9,
+          "n": 10000
+        },
+        "def_c_hedged_abs_mdd": {
+          "lo": -81.6,
+          "hi": -40.7,
+          "mean": -59.4,
+          "median": -58.5,
+          "n": 10000
+        },
+        "def_d_hedged_vs_bh": {
+          "lo": -42.9,
+          "hi": -5.1,
+          "mean": -23.3,
+          "median": -22.8,
+          "n": 10000
+        }
+      }
+    },
+    "EWJ": {
+      "asset": "EWJ",
+      "asset_class": "equity",
+      "period_start": "2005-01-03",
+      "period_end": "2026-03-31",
+      "n_obs": 5344,
+      "bootstrap": {
+        "n_obs": 5344,
+        "n_reps": 10000,
+        "block_size": 252,
+        "ci_pct": 90,
+        "point_estimates": {
+          "bh_mdd_pct": -54.45,
+          "vt_mdd_pct": -30.46,
+          "hedged_mdd_pct": -30.5,
+          "a_retention": 99.8,
+          "b_vt_reduction": 44.1,
+          "c_hedged_abs_mdd": -30.5,
+          "d_hedged_vs_bh": -44.0
+        },
+        "def_a_retention_fraction": {
+          "lo": 77.1,
+          "hi": 222.3,
+          "mean": 133.9,
+          "median": 110.5,
+          "n": 9996
+        },
+        "def_b_vt_mdd_reduction": {
+          "lo": 17.2,
+          "hi": 48.4,
+          "mean": 34.8,
+          "median": 36.0,
+          "n": 10000
+        },
+        "def_c_hedged_abs_mdd": {
+          "lo": -44.3,
+          "hi": -19.5,
+          "mean": -29.4,
+          "median": -28.2,
+          "n": 10000
+        },
+        "def_d_hedged_vs_bh": {
+          "lo": -54.5,
+          "hi": -25.9,
+          "mean": -40.5,
+          "median": -40.8,
+          "n": 10000
+        }
+      }
+    },
+    "EWG": {
+      "asset": "EWG",
+      "asset_class": "equity",
+      "period_start": "2005-01-03",
+      "period_end": "2026-03-31",
+      "n_obs": 5344,
+      "bootstrap": {
+        "n_obs": 5344,
+        "n_reps": 10000,
+        "block_size": 252,
+        "ci_pct": 90,
+        "point_estimates": {
+          "bh_mdd_pct": -63.1,
+          "vt_mdd_pct": -36.51,
+          "hedged_mdd_pct": -38.17,
+          "a_retention": 93.8,
+          "b_vt_reduction": 42.1,
+          "c_hedged_abs_mdd": -38.2,
+          "d_hedged_vs_bh": -39.5
+        },
+        "def_a_retention_fraction": {
+          "lo": 56.5,
+          "hi": 187.0,
+          "mean": 98.3,
+          "median": 96.0,
+          "n": 10000
+        },
+        "def_b_vt_mdd_reduction": {
+          "lo": 14.2,
+          "hi": 44.1,
+          "mean": 30.1,
+          "median": 30.6,
+          "n": 10000
+        },
+        "def_c_hedged_abs_mdd": {
+          "lo": -65.9,
+          "hi": -27.9,
+          "mean": -43.9,
+          "median": -42.2,
+          "n": 10000
+        },
+        "def_d_hedged_vs_bh": {
+          "lo": -44.4,
+          "hi": -13.8,
+          "mean": -29.7,
+          "median": -30.0,
+          "n": 10000
+        }
+      }
+    },
+    "EWU": {
+      "asset": "EWU",
+      "asset_class": "equity",
+      "period_start": "2005-01-03",
+      "period_end": "2026-03-31",
+      "n_obs": 5344,
+      "bootstrap": {
+        "n_obs": 5344,
+        "n_reps": 10000,
+        "block_size": 252,
+        "ci_pct": 90,
+        "point_estimates": {
+          "bh_mdd_pct": -63.99,
+          "vt_mdd_pct": -35.94,
+          "hedged_mdd_pct": -34.77,
+          "a_retention": 104.2,
+          "b_vt_reduction": 43.8,
+          "c_hedged_abs_mdd": -34.8,
+          "d_hedged_vs_bh": -45.7
+        },
+        "def_a_retention_fraction": {
+          "lo": 68.8,
+          "hi": 168.6,
+          "mean": 108.6,
+          "median": 100.9,
+          "n": 10000
+        },
+        "def_b_vt_mdd_reduction": {
+          "lo": 15.9,
+          "hi": 46.5,
+          "mean": 32.2,
+          "median": 32.7,
+          "n": 10000
+        },
+        "def_c_hedged_abs_mdd": {
+          "lo": -56.0,
+          "hi": -22.1,
+          "mean": -38.0,
+          "median": -36.1,
+          "n": 10000
+        },
+        "def_d_hedged_vs_bh": {
+          "lo": -49.1,
+          "hi": -16.0,
+          "mean": -33.9,
+          "median": -35.0,
+          "n": 10000
+        }
+      }
+    },
+    "EWA": {
+      "asset": "EWA",
+      "asset_class": "equity",
+      "period_start": "2005-01-03",
+      "period_end": "2026-03-31",
+      "n_obs": 5344,
+      "bootstrap": {
+        "n_obs": 5344,
+        "n_reps": 10000,
+        "block_size": 252,
+        "ci_pct": 90,
+        "point_estimates": {
+          "bh_mdd_pct": -66.98,
+          "vt_mdd_pct": -39.57,
+          "hedged_mdd_pct": -41.25,
+          "a_retention": 93.9,
+          "b_vt_reduction": 40.9,
+          "c_hedged_abs_mdd": -41.2,
+          "d_hedged_vs_bh": -38.4
+        },
+        "def_a_retention_fraction": {
+          "lo": 68.6,
+          "hi": 169.5,
+          "mean": 108.0,
+          "median": 100.5,
+          "n": 10000
+        },
+        "def_b_vt_mdd_reduction": {
+          "lo": 16.5,
+          "hi": 43.3,
+          "mean": 31.2,
+          "median": 31.4,
+          "n": 10000
+        },
+        "def_c_hedged_abs_mdd": {
+          "lo": -62.9,
+          "hi": -25.1,
+          "mean": -42.2,
+          "median": -41.2,
+          "n": 10000
+        },
+        "def_d_hedged_vs_bh": {
+          "lo": -44.8,
+          "hi": -17.9,
+          "mean": -32.0,
+          "median": -32.7,
+          "n": 10000
+        }
+      }
+    },
+    "INDA": {
+      "asset": "INDA",
+      "asset_class": "equity",
+      "period_start": "2013-02-07",
+      "period_end": "2026-03-31",
+      "n_obs": 3306,
+      "bootstrap": {
+        "n_obs": 3306,
+        "n_reps": 10000,
+        "block_size": 252,
+        "ci_pct": 90,
+        "point_estimates": {
+          "bh_mdd_pct": -45.07,
+          "vt_mdd_pct": -32.59,
+          "hedged_mdd_pct": -32.02,
+          "a_retention": 104.6,
+          "b_vt_reduction": 27.7,
+          "c_hedged_abs_mdd": -32.0,
+          "d_hedged_vs_bh": -29.0
+        },
+        "def_a_retention_fraction": {
+          "lo": 84.0,
+          "hi": 218.0,
+          "mean": 124.4,
+          "median": 110.8,
+          "n": 10000
+        },
+        "def_b_vt_mdd_reduction": {
+          "lo": 12.7,
+          "hi": 31.1,
+          "mean": 23.8,
+          "median": 25.1,
+          "n": 10000
+        },
+        "def_c_hedged_abs_mdd": {
+          "lo": -44.1,
+          "hi": -18.5,
+          "mean": -31.1,
+          "median": -32.0,
+          "n": 10000
+        },
+        "def_d_hedged_vs_bh": {
+          "lo": -42.6,
+          "hi": -16.3,
+          "mean": -28.5,
+          "median": -27.3,
+          "n": 10000
+        }
+      }
+    },
+    "GLD": {
+      "asset": "GLD",
+      "asset_class": "commodity",
+      "period_start": "2005-11-18",
+      "period_end": "2026-03-31",
+      "n_obs": 5121,
+      "bootstrap": {
+        "n_obs": 5121,
+        "n_reps": 10000,
+        "block_size": 252,
+        "ci_pct": 90,
+        "point_estimates": {
+          "bh_mdd_pct": -45.56,
+          "vt_mdd_pct": -35.01,
+          "hedged_mdd_pct": -32.57,
+          "a_retention": 123.2,
+          "b_vt_reduction": 23.1,
+          "c_hedged_abs_mdd": -32.6,
+          "d_hedged_vs_bh": -28.5
+        },
+        "def_a_retention_fraction": {
+          "lo": 56.9,
+          "hi": 208.9,
+          "mean": 123.4,
+          "median": 112.5,
+          "n": 9949
+        },
+        "def_b_vt_mdd_reduction": {
+          "lo": 9.9,
+          "hi": 40.4,
+          "mean": 22.8,
+          "median": 21.1,
+          "n": 10000
+        },
+        "def_c_hedged_abs_mdd": {
+          "lo": -41.9,
+          "hi": -14.0,
+          "mean": -26.8,
+          "median": -27.4,
+          "n": 10000
+        },
+        "def_d_hedged_vs_bh": {
+          "lo": -54.5,
+          "hi": -6.5,
+          "mean": -27.7,
+          "median": -26.0,
+          "n": 10000
+        }
+      }
+    },
+    "SLV": {
+      "asset": "SLV",
+      "asset_class": "commodity",
+      "period_start": "2007-05-02",
+      "period_end": "2026-03-31",
+      "n_obs": 4759,
+      "bootstrap": {
+        "n_obs": 4759,
+        "n_reps": 10000,
+        "block_size": 252,
+        "ci_pct": 90,
+        "point_estimates": {
+          "bh_mdd_pct": -76.28,
+          "vt_mdd_pct": -63.18,
+          "hedged_mdd_pct": -60.99,
+          "a_retention": 116.8,
+          "b_vt_reduction": 17.2,
+          "c_hedged_abs_mdd": -61.0,
+          "d_hedged_vs_bh": -20.0
+        },
+        "def_a_retention_fraction": {
+          "lo": -2.5,
+          "hi": 164.2,
+          "mean": 95.0,
+          "median": 100.5,
+          "n": 10000
+        },
+        "def_b_vt_mdd_reduction": {
+          "lo": 8.9,
+          "hi": 37.1,
+          "mean": 22.4,
+          "median": 22.0,
+          "n": 10000
+        },
+        "def_c_hedged_abs_mdd": {
+          "lo": -75.2,
+          "hi": -32.6,
+          "mean": -52.5,
+          "median": -51.7,
+          "n": 10000
+        },
+        "def_d_hedged_vs_bh": {
+          "lo": -45.3,
+          "hi": 0.6,
+          "mean": -21.9,
+          "median": -21.6,
+          "n": 10000
+        }
+      }
+    },
+    "USO": {
+      "asset": "USO",
+      "asset_class": "commodity",
+      "period_start": "2007-04-13",
+      "period_end": "2026-03-31",
+      "n_obs": 4772,
+      "bootstrap": {
+        "n_obs": 4772,
+        "n_reps": 10000,
+        "block_size": 252,
+        "ci_pct": 90,
+        "point_estimates": {
+          "bh_mdd_pct": -98.19,
+          "vt_mdd_pct": -90.46,
+          "hedged_mdd_pct": -86.96,
+          "a_retention": 145.3,
+          "b_vt_reduction": 7.9,
+          "c_hedged_abs_mdd": -87.0,
+          "d_hedged_vs_bh": -11.4
+        },
+        "def_a_retention_fraction": {
+          "lo": 80.0,
+          "hi": 236.0,
+          "mean": 135.9,
+          "median": 122.9,
+          "n": 10000
+        },
+        "def_b_vt_mdd_reduction": {
+          "lo": 1.9,
+          "hi": 27.4,
+          "mean": 11.4,
+          "median": 9.3,
+          "n": 10000
+        },
+        "def_c_hedged_abs_mdd": {
+          "lo": -97.0,
+          "hi": -52.5,
+          "mean": -79.5,
+          "median": -82.5,
+          "n": 10000
+        },
+        "def_d_hedged_vs_bh": {
+          "lo": -32.7,
+          "hi": -2.5,
+          "mean": -14.4,
+          "median": -12.4,
+          "n": 10000
+        }
+      }
+    },
+    "TLT": {
+      "asset": "TLT",
+      "asset_class": "bond",
+      "period_start": "2005-01-03",
+      "period_end": "2026-03-31",
+      "n_obs": 5344,
+      "bootstrap": {
+        "n_obs": 5344,
+        "n_reps": 10000,
+        "block_size": 252,
+        "ci_pct": 90,
+        "point_estimates": {
+          "bh_mdd_pct": -48.35,
+          "vt_mdd_pct": -31.52,
+          "hedged_mdd_pct": -31.02,
+          "a_retention": 102.9,
+          "b_vt_reduction": 34.8,
+          "c_hedged_abs_mdd": -31.0,
+          "d_hedged_vs_bh": -35.8
+        },
+        "def_a_retention_fraction": {
+          "lo": 65.8,
+          "hi": 181.8,
+          "mean": 115.9,
+          "median": 110.2,
+          "n": 10000
+        },
+        "def_b_vt_mdd_reduction": {
+          "lo": 15.3,
+          "hi": 48.7,
+          "mean": 33.3,
+          "median": 34.0,
+          "n": 10000
+        },
+        "def_c_hedged_abs_mdd": {
+          "lo": -41.4,
+          "hi": -16.3,
+          "mean": -26.4,
+          "median": -25.0,
+          "n": 10000
+        },
+        "def_d_hedged_vs_bh": {
+          "lo": -55.8,
+          "hi": -16.1,
+          "mean": -37.3,
+          "median": -38.2,
+          "n": 10000
+        }
+      }
+    },
+    "LQD": {
+      "asset": "LQD",
+      "asset_class": "bond",
+      "period_start": "2005-01-03",
+      "period_end": "2026-03-31",
+      "n_obs": 5344,
+      "bootstrap": {
+        "n_obs": 5344,
+        "n_reps": 10000,
+        "block_size": 252,
+        "ci_pct": 90,
+        "point_estimates": {
+          "bh_mdd_pct": -24.95,
+          "vt_mdd_pct": -15.4,
+          "hedged_mdd_pct": -16.94,
+          "a_retention": 83.8,
+          "b_vt_reduction": 38.3,
+          "c_hedged_abs_mdd": -16.9,
+          "d_hedged_vs_bh": -32.1
+        },
+        "def_a_retention_fraction": {
+          "lo": 76.2,
+          "hi": 184.6,
+          "mean": 119.8,
+          "median": 111.3,
+          "n": 10000
+        },
+        "def_b_vt_mdd_reduction": {
+          "lo": 29.5,
+          "hi": 49.0,
+          "mean": 38.2,
+          "median": 37.6,
+          "n": 10000
+        },
+        "def_c_hedged_abs_mdd": {
+          "lo": -23.6,
+          "hi": -8.0,
+          "mean": -14.5,
+          "median": -13.4,
+          "n": 10000
+        },
+        "def_d_hedged_vs_bh": {
+          "lo": -63.0,
+          "hi": -27.8,
+          "mean": -44.0,
+          "median": -44.0,
+          "n": 10000
+        }
+      }
+    },
+    "HYG": {
+      "asset": "HYG",
+      "asset_class": "bond",
+      "period_start": "2008-04-11",
+      "period_end": "2026-03-31",
+      "n_obs": 4521,
+      "bootstrap": {
+        "n_obs": 4521,
+        "n_reps": 10000,
+        "block_size": 252,
+        "ci_pct": 90,
+        "point_estimates": {
+          "bh_mdd_pct": -34.2,
+          "vt_mdd_pct": -17.48,
+          "hedged_mdd_pct": -17.48,
+          "a_retention": 100.0,
+          "b_vt_reduction": 48.9,
+          "c_hedged_abs_mdd": -17.5,
+          "d_hedged_vs_bh": -48.9
+        },
+        "def_a_retention_fraction": {
+          "lo": 67.7,
+          "hi": 129.7,
+          "mean": 104.1,
+          "median": 105.0,
+          "n": 10000
+        },
+        "def_b_vt_mdd_reduction": {
+          "lo": 20.7,
+          "hi": 49.9,
+          "mean": 38.3,
+          "median": 37.0,
+          "n": 10000
+        },
+        "def_c_hedged_abs_mdd": {
+          "lo": -23.1,
+          "hi": -8.0,
+          "mean": -15.3,
+          "median": -15.2,
+          "n": 10000
+        },
+        "def_d_hedged_vs_bh": {
+          "lo": -52.6,
+          "hi": -16.0,
+          "mean": -40.2,
+          "median": -41.1,
+          "n": 10000
+        }
+      }
+    },
+    "VNQ": {
+      "asset": "VNQ",
+      "asset_class": "real_estate",
+      "period_start": "2005-09-29",
+      "period_end": "2026-03-31",
+      "n_obs": 5157,
+      "bootstrap": {
+        "n_obs": 5157,
+        "n_reps": 10000,
+        "block_size": 252,
+        "ci_pct": 90,
+        "point_estimates": {
+          "bh_mdd_pct": -73.07,
+          "vt_mdd_pct": -43.96,
+          "hedged_mdd_pct": -36.28,
+          "a_retention": 126.4,
+          "b_vt_reduction": 39.8,
+          "c_hedged_abs_mdd": -36.3,
+          "d_hedged_vs_bh": -50.3
+        },
+        "def_a_retention_fraction": {
+          "lo": 89.4,
+          "hi": 186.8,
+          "mean": 127.6,
+          "median": 109.1,
+          "n": 10000
+        },
+        "def_b_vt_mdd_reduction": {
+          "lo": 21.6,
+          "hi": 51.7,
+          "mean": 38.2,
+          "median": 39.3,
+          "n": 10000
+        },
+        "def_c_hedged_abs_mdd": {
+          "lo": -50.6,
+          "hi": -18.6,
+          "mean": -34.9,
+          "median": -33.5,
+          "n": 10000
+        },
+        "def_d_hedged_vs_bh": {
+          "lo": -55.5,
+          "hi": -28.6,
+          "mean": -43.5,
+          "median": -45.0,
+          "n": 10000
+        }
+      }
+    },
+    "50/50": {
+      "asset": "50/50",
+      "asset_class": "composite",
+      "period_start": "2005-11-18",
+      "period_end": "2026-03-31",
+      "n_obs": 5121,
+      "bootstrap": {
+        "n_obs": 5121,
+        "n_reps": 10000,
+        "block_size": 252,
+        "ci_pct": 90,
+        "point_estimates": {
+          "bh_mdd_pct": -32.49,
+          "vt_mdd_pct": -16.84,
+          "hedged_mdd_pct": -17.53,
+          "a_retention": 95.6,
+          "b_vt_reduction": 48.2,
+          "c_hedged_abs_mdd": -17.5,
+          "d_hedged_vs_bh": -46.0
+        },
+        "def_a_retention_fraction": {
+          "lo": 76.0,
+          "hi": 189.9,
+          "mean": 112.9,
+          "median": 103.6,
+          "n": 9925
+        },
+        "def_b_vt_mdd_reduction": {
+          "lo": 21.6,
+          "hi": 49.0,
+          "mean": 39.2,
+          "median": 43.0,
+          "n": 10000
+        },
+        "def_c_hedged_abs_mdd": {
+          "lo": -21.5,
+          "hi": -9.1,
+          "mean": -16.3,
+          "median": -17.5,
+          "n": 10000
+        },
+        "def_d_hedged_vs_bh": {
+          "lo": -56.0,
+          "hi": -21.6,
+          "mean": -42.3,
+          "median": -45.7,
+          "n": 10000
+        }
+      }
+    }
+  },
+  "summary": {
+    "rows": [
+      {
+        "asset": "SPY",
+        "asset_class": "equity",
+        "n_obs": 5344,
+        "period": "2005-01-03 \u2014 2026-03-31",
+        "bh_mdd_pct": -55.19,
+        "vt_mdd_pct": -26.31,
+        "hedged_mdd_pct": -25.25,
+        "retention_point": 103.7,
+        "retention_ci_lo": 93.0,
+        "retention_ci_hi": 182.2
+      },
+      {
+        "asset": "QQQ",
+        "asset_class": "equity",
+        "n_obs": 5344,
+        "period": "2005-01-03 \u2014 2026-03-31",
+        "bh_mdd_pct": -53.4,
+        "vt_mdd_pct": -28.46,
+        "hedged_mdd_pct": -26.21,
+        "retention_point": 109.0,
+        "retention_ci_lo": 89.0,
+        "retention_ci_hi": 221.5
+      },
+      {
+        "asset": "IWM",
+        "asset_class": "equity",
+        "n_obs": 5344,
+        "period": "2005-01-03 \u2014 2026-03-31",
+        "bh_mdd_pct": -58.64,
+        "vt_mdd_pct": -30.97,
+        "hedged_mdd_pct": -30.35,
+        "retention_point": 102.2,
+        "retention_ci_lo": 86.7,
+        "retention_ci_hi": 179.5
+      },
+      {
+        "asset": "XLF",
+        "asset_class": "equity",
+        "n_obs": 5344,
+        "period": "2005-01-03 \u2014 2026-03-31",
+        "bh_mdd_pct": -82.69,
+        "vt_mdd_pct": -47.59,
+        "hedged_mdd_pct": -46.78,
+        "retention_point": 102.3,
+        "retention_ci_lo": 78.1,
+        "retention_ci_hi": 125.4
+      },
+      {
+        "asset": "XLE",
+        "asset_class": "equity",
+        "n_obs": 5344,
+        "period": "2005-01-03 \u2014 2026-03-31",
+        "bh_mdd_pct": -71.26,
+        "vt_mdd_pct": -63.32,
+        "hedged_mdd_pct": -53.52,
+        "retention_point": 223.4,
+        "retention_ci_lo": 37.7,
+        "retention_ci_hi": 202.9
+      },
+      {
+        "asset": "DIA",
+        "asset_class": "equity",
+        "n_obs": 5344,
+        "period": "2005-01-03 \u2014 2026-03-31",
+        "bh_mdd_pct": -51.87,
+        "vt_mdd_pct": -26.78,
+        "hedged_mdd_pct": -25.23,
+        "retention_point": 106.2,
+        "retention_ci_lo": 82.7,
+        "retention_ci_hi": 155.3
+      },
+      {
+        "asset": "EEM",
+        "asset_class": "equity",
+        "n_obs": 5344,
+        "period": "2005-01-03 \u2014 2026-03-31",
+        "bh_mdd_pct": -66.43,
+        "vt_mdd_pct": -40.74,
+        "hedged_mdd_pct": -38.14,
+        "retention_point": 110.1,
+        "retention_ci_lo": 62.0,
+        "retention_ci_hi": 183.7
+      },
+      {
+        "asset": "EFA",
+        "asset_class": "equity",
+        "n_obs": 5344,
+        "period": "2005-01-03 \u2014 2026-03-31",
+        "bh_mdd_pct": -61.04,
+        "vt_mdd_pct": -33.27,
+        "hedged_mdd_pct": -33.62,
+        "retention_point": 98.7,
+        "retention_ci_lo": 88.0,
+        "retention_ci_hi": 176.5
+      },
+      {
+        "asset": "FXI",
+        "asset_class": "equity",
+        "n_obs": 5150,
+        "period": "2005-10-10 \u2014 2026-03-31",
+        "bh_mdd_pct": -72.68,
+        "vt_mdd_pct": -47.6,
+        "hedged_mdd_pct": -42.69,
+        "retention_point": 119.6,
+        "retention_ci_lo": 81.8,
+        "retention_ci_hi": 207.7
+      },
+      {
+        "asset": "EWZ",
+        "asset_class": "equity",
+        "n_obs": 5344,
+        "period": "2005-01-03 \u2014 2026-03-31",
+        "bh_mdd_pct": -77.25,
+        "vt_mdd_pct": -68.89,
+        "hedged_mdd_pct": -67.98,
+        "retention_point": 110.9,
+        "retention_ci_lo": 52.4,
+        "retention_ci_hi": 208.8
+      },
+      {
+        "asset": "EWJ",
+        "asset_class": "equity",
+        "n_obs": 5344,
+        "period": "2005-01-03 \u2014 2026-03-31",
+        "bh_mdd_pct": -54.45,
+        "vt_mdd_pct": -30.46,
+        "hedged_mdd_pct": -30.5,
+        "retention_point": 99.8,
+        "retention_ci_lo": 77.1,
+        "retention_ci_hi": 222.3
+      },
+      {
+        "asset": "EWG",
+        "asset_class": "equity",
+        "n_obs": 5344,
+        "period": "2005-01-03 \u2014 2026-03-31",
+        "bh_mdd_pct": -63.1,
+        "vt_mdd_pct": -36.51,
+        "hedged_mdd_pct": -38.17,
+        "retention_point": 93.8,
+        "retention_ci_lo": 56.5,
+        "retention_ci_hi": 187.0
+      },
+      {
+        "asset": "EWU",
+        "asset_class": "equity",
+        "n_obs": 5344,
+        "period": "2005-01-03 \u2014 2026-03-31",
+        "bh_mdd_pct": -63.99,
+        "vt_mdd_pct": -35.94,
+        "hedged_mdd_pct": -34.77,
+        "retention_point": 104.2,
+        "retention_ci_lo": 68.8,
+        "retention_ci_hi": 168.6
+      },
+      {
+        "asset": "EWA",
+        "asset_class": "equity",
+        "n_obs": 5344,
+        "period": "2005-01-03 \u2014 2026-03-31",
+        "bh_mdd_pct": -66.98,
+        "vt_mdd_pct": -39.57,
+        "hedged_mdd_pct": -41.25,
+        "retention_point": 93.9,
+        "retention_ci_lo": 68.6,
+        "retention_ci_hi": 169.5
+      },
+      {
+        "asset": "INDA",
+        "asset_class": "equity",
+        "n_obs": 3306,
+        "period": "2013-02-07 \u2014 2026-03-31",
+        "bh_mdd_pct": -45.07,
+        "vt_mdd_pct": -32.59,
+        "hedged_mdd_pct": -32.02,
+        "retention_point": 104.6,
+        "retention_ci_lo": 84.0,
+        "retention_ci_hi": 218.0
+      },
+      {
+        "asset": "GLD",
+        "asset_class": "commodity",
+        "n_obs": 5121,
+        "period": "2005-11-18 \u2014 2026-03-31",
+        "bh_mdd_pct": -45.56,
+        "vt_mdd_pct": -35.01,
+        "hedged_mdd_pct": -32.57,
+        "retention_point": 123.2,
+        "retention_ci_lo": 56.9,
+        "retention_ci_hi": 208.9
+      },
+      {
+        "asset": "SLV",
+        "asset_class": "commodity",
+        "n_obs": 4759,
+        "period": "2007-05-02 \u2014 2026-03-31",
+        "bh_mdd_pct": -76.28,
+        "vt_mdd_pct": -63.18,
+        "hedged_mdd_pct": -60.99,
+        "retention_point": 116.8,
+        "retention_ci_lo": -2.5,
+        "retention_ci_hi": 164.2
+      },
+      {
+        "asset": "USO",
+        "asset_class": "commodity",
+        "n_obs": 4772,
+        "period": "2007-04-13 \u2014 2026-03-31",
+        "bh_mdd_pct": -98.19,
+        "vt_mdd_pct": -90.46,
+        "hedged_mdd_pct": -86.96,
+        "retention_point": 145.3,
+        "retention_ci_lo": 80.0,
+        "retention_ci_hi": 236.0
+      },
+      {
+        "asset": "TLT",
+        "asset_class": "bond",
+        "n_obs": 5344,
+        "period": "2005-01-03 \u2014 2026-03-31",
+        "bh_mdd_pct": -48.35,
+        "vt_mdd_pct": -31.52,
+        "hedged_mdd_pct": -31.02,
+        "retention_point": 102.9,
+        "retention_ci_lo": 65.8,
+        "retention_ci_hi": 181.8
+      },
+      {
+        "asset": "LQD",
+        "asset_class": "bond",
+        "n_obs": 5344,
+        "period": "2005-01-03 \u2014 2026-03-31",
+        "bh_mdd_pct": -24.95,
+        "vt_mdd_pct": -15.4,
+        "hedged_mdd_pct": -16.94,
+        "retention_point": 83.8,
+        "retention_ci_lo": 76.2,
+        "retention_ci_hi": 184.6
+      },
+      {
+        "asset": "HYG",
+        "asset_class": "bond",
+        "n_obs": 4521,
+        "period": "2008-04-11 \u2014 2026-03-31",
+        "bh_mdd_pct": -34.2,
+        "vt_mdd_pct": -17.48,
+        "hedged_mdd_pct": -17.48,
+        "retention_point": 100.0,
+        "retention_ci_lo": 67.7,
+        "retention_ci_hi": 129.7
+      },
+      {
+        "asset": "VNQ",
+        "asset_class": "real_estate",
+        "n_obs": 5157,
+        "period": "2005-09-29 \u2014 2026-03-31",
+        "bh_mdd_pct": -73.07,
+        "vt_mdd_pct": -43.96,
+        "hedged_mdd_pct": -36.28,
+        "retention_point": 126.4,
+        "retention_ci_lo": 89.4,
+        "retention_ci_hi": 186.8
+      },
+      {
+        "asset": "50/50",
+        "asset_class": "composite",
+        "n_obs": 5121,
+        "period": "2005-11-18 \u2014 2026-03-31",
+        "bh_mdd_pct": -32.49,
+        "vt_mdd_pct": -16.84,
+        "hedged_mdd_pct": -17.53,
+        "retention_point": 95.6,
+        "retention_ci_lo": 76.0,
+        "retention_ci_hi": 189.9
+      }
+    ],
+    "n_positive_ci_lo": 22,
+    "n_total": 23,
+    "all_positive_ci_lo": false
+  },
+  "verdict": "PASS",
+  "timestamp": "2026-05-18T16:13:49.825684Z",
+  "verdict_note": "MDD retention CI lo > 0 for 22/23 assets. Universal MDD protection hypothesis supported."
+}

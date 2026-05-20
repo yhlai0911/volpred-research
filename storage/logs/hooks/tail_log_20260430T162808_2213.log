@@ -1,0 +1,17 @@
+critical=0 warn=1
+  [warn] Draft pool below threshold (<4) :: {'draft_count': 2, 'scheduled_count': 0, 'eligible_count': 2, 'feed_path': 'storage/reports/feed.json'}
+---
+=== [release_pool] piggy-back fire at 2026-04-30T05:00:04.916734+00:00 ===
+Skipped release run
+JSON: {"action": "release_article_pool_by_settings", "mode": "auto", 
+"released_count": 0, "released": [], "skipped": true, "reason": 
+"interval_not_due", "next_release_at": "2026-04-30T08:20:00+00:00", "settings": 
+{"mode": "auto", "interval_minutes": 360, "max_articles_per_run": 1, "due_only":
+true, "include_drafts": true, "preferred_audiences": [], "last_released_at": 
+"2026-04-30T02:20:45.128554+00:00", "updated_at": 
+"2026-04-30T02:21:02.946747+00:00"}}
+=== [release_pool] exit 0 at 2026-04-30T05:00:05.213960+00:00 (duration=0.3s) ===
+---
+draft count: 2
+  mile_a9ce7cd4 :: K1024: A4f Refit Cadence Insensitive — QLIKE Spread 0.021%, 季度 refit 為 compute /
+  mile_b8efe3f8 :: K1073: A4f-GARCH 外生變數選擇敏感度 — VIX9D / VIX / VIX3M / VVIX 在 SPY 的橫向比較

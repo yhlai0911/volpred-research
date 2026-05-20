@@ -1,0 +1,506 @@
+Saved working directory and index state WIP on main: 2c4ae994 publish(K1068+K1084+K1093+K869): 4-parallel batch — all PASS lookahead
+name = 'scripts.supabase_sync'
+
+    def resolve(name: str) -> object:
+        # Simplified from zope.dottedname.
+        parts = name.split(".")
+    
+        used = parts.pop(0)
+>       found: object = __import__(used)
+                        ^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'scripts'
+
+.venv/lib/python3.12/site-packages/_pytest/monkeypatch.py:67: ModuleNotFoundError
+=========================== short test summary info ============================
+FAILED tests/test_publisher_audience_audit.py::test_publish_milestone_strict_blocks_general_with_research_jargon
+============================== 1 failed in 0.03s ===============================
+On branch main
+Your branch is ahead of 'origin/main' by 151 commits.
+  (use "git push" to publish your local commits)
+
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   .claude/rules/agent-delegation.md
+	modified:   .claude/skills/feed-publisher/SKILL.md
+	modified:   data/vixtwn/vixtwn_daily.csv
+	modified:   docs/error_log.md
+	modified:   experiments/INDEX.md
+	modified:   experiments/index.json
+	modified:   experiments/k1018/k1018.py
+	modified:   experiments/k1018/k1018_results.json
+	deleted:    experiments/k1100g_d9.py
+	modified:   experiments/k1100g_d9/run.log
+	modified:   experiments/k1176/k1176.py
+	modified:   experiments/k1176/k1176_results.json
+	modified:   experiments/k1176/run.log
+	modified:   experiments/k157/k157_correlation_forecasting.py
+	modified:   experiments/k157/k157_correlation_forecasting_results.json
+	modified:   experiments/k219/k219_risk_parity_vs_equal.py
+	modified:   experiments/k222/k222_retirement_swr.py
+	modified:   experiments/k237/k237_international_vt.py
+	modified:   experiments/k237/k237_international_vt_results.json
+	modified:   experiments/k556/k556_momentum_crash_filter.py
+	deleted:    experiments/k556/k556_momentum_crash_filter_results.json
+	modified:   experiments/k560/k560_sector_rotation_vt.py
+	modified:   experiments/k560/k560_sector_rotation_vt_results.json
+	modified:   experiments/k562/k562_k560_sector_validation.py
+	modified:   experiments/k562/k562_k560_sector_validation_results.json
+	modified:   experiments/k583/k583_iv_surface.py
+	modified:   experiments/k583/k583_iv_surface_results.json
+	modified:   experiments/k645/k645_gld_role_analysis.py
+	modified:   experiments/k646/k646_8020_vs_5050_cross_oos.py
+	modified:   experiments/k646/k646_results.json
+	modified:   experiments/k818/k818_ssvs_return_prediction.py
+	modified:   experiments/k843/k843_intraday_futures.py
+	modified:   experiments/k843/k843_intraday_futures_results.json
+	modified:   experiments/order_flow_vol/order_flow_vol.py
+	modified:   experiments/tail_risk_parity/tail_risk_parity.py
+	modified:   experiments/tail_risk_parity/tail_risk_parity_results.json
+	modified:   experiments/var_position_sizing/var_position_sizing.py
+	modified:   experiments/var_position_sizing/var_position_sizing_results.json
+	modified:   paper/volatility-absorption/README.md
+	modified:   paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity.py
+	modified:   paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity_results.json
+	modified:   research_program.md
+	modified:   scripts/continue_task_dispatch.py
+	modified:   scripts/daily_update.py
+	modified:   scripts/publish_draft.py
+	modified:   scripts/refill_task_pool.py
+	modified:   src/volpred/publisher/publisher.py
+	modified:   storage/.release_settings.json
+	modified:   storage/.supabase_sync_state.json
+	modified:   storage/drafts/k237_general_draft.md
+	modified:   storage/drafts/k562_general_draft.md
+	modified:   storage/logs/cron/check_alerts.log
+	modified:   storage/logs/cron/collect_tw.log
+	modified:   storage/logs/cron/collect_us.log
+	modified:   storage/logs/cron/continue_task_stub.log
+	modified:   storage/logs/cron/daily_update.log
+	modified:   storage/logs/cron/market_cal.log
+	modified:   storage/logs/cron/release_pool.log
+	modified:   storage/market_status.json
+	modified:   storage/memory/knowledge.json
+	modified:   storage/memory/thinking_journal.json
+	modified:   storage/next_tasks.json
+	modified:   storage/notifications/notification_log.json
+	modified:   storage/ops/agents/claude-supervisor.json
+	modified:   storage/ops/agents/claude-worker.json
+	modified:   storage/ops/alert_dedup.json
+	modified:   storage/ops/cron_last_run.json
+	modified:   storage/ops/dispatch_report_latest.json
+	deleted:    storage/ops/event_ledger/116f715395fd16df830d5fbfc34d8f4bb8ccb676da5d3636d95c1babd4c7d4c9.json
+	modified:   storage/ops/pending_continue.json
+	modified:   storage/ops/pending_sessions.json
+	modified:   storage/ops/writer_log.jsonl
+	modified:   storage/paper_trading.json
+	modified:   storage/publication_candidates.json
+	modified:   storage/reports/INDEX.md
+	modified:   storage/reports/feed.json
+	modified:   storage/reports/index.json
+	modified:   storage/risk_forecast.json
+	modified:   storage/session_state.json
+	modified:   storage/strategy_metrics.json
+	modified:   storage/work_log.json
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	experiments/audit_cumsum_metric_2026_05_02.md
+	experiments/k1018/k1018_dm_harvey_threshold.png
+	experiments/k1018/k1018_metric_fix_2026_05_02.md
+	experiments/k1018/k1018_sharpe_bootstrap_ci.png
+	experiments/k1121/k1121_article_sharpe_diff_ci.png
+	experiments/k1121/k1121_article_stress_sharpe.png
+	experiments/k1263/
+	experiments/k1266/
+	experiments/k191/k191_correlations.png
+	experiments/k191/k191_dm_tests.png
+	experiments/k194/k194_best_models.png
+	experiments/k194/k194_ffd_weights.png
+	experiments/k194/k194_spy_models.png
+	experiments/k197/k197_adaptive_vs_fixed.png
+	experiments/k197/k197_cusum_stats.png
+	experiments/k199/k199_is_oos_r2.png
+	experiments/k199/k199_partial_correlations.png
+	experiments/k205/k205_strategy_comparison.png
+	experiments/k205/k205_weekend_yearly.png
+	experiments/k206/k206_dm_tests.png
+	experiments/k206/k206_strategy_comparison.png
+	experiments/k207/k207_panel_r2.png
+	experiments/k207/k207_per_asset_r2.png
+	experiments/k222/figures/
+	experiments/k222/k222_retirement_swr_results.json
+	experiments/k222b/
+	experiments/k237/figures/
+	experiments/k237/generate_rewrite_figures.py
+	experiments/k237/k237_drawdown_comparison.png
+	experiments/k237/k237_vix_correlations.png
+	experiments/k274/figures/
+	experiments/k274/make_figures.py
+	experiments/k280/figures/
+	experiments/k280/make_figures.py
+	experiments/k288/figures/
+	experiments/k301/k301_claim_outcomes.png
+	experiments/k301/k301_confidence_levels.png
+	experiments/k301/k301_stability_distribution.png
+	experiments/k302/figures/
+	experiments/k319/figures/
+	experiments/k320/figures/
+	experiments/k320/make_figures.py
+	experiments/k432/k432_dm_tests.png
+	experiments/k432/k432_qlike_comparison.png
+	experiments/k435/figures/
+	experiments/k439/k439_corr_vix_rv.png
+	experiments/k439/k439_mse_improvement.png
+	experiments/k439/k439_pvalues_3tests.png
+	experiments/k441/k441_efficiency.png
+	experiments/k441/k441_gjr_proxies.png
+	experiments/k441/k441_qlike_matrix.png
+	experiments/k447/k447_skew_terciles.png
+	experiments/k447/k447_tail_prediction.png
+	experiments/k451/k451_forecast_models.png
+	experiments/k451/k451_variance_decomposition.png
+	experiments/k455/figures/
+	experiments/k455/k455_figures.py
+	experiments/k458/figures/
+	experiments/k471/figures/
+	experiments/k471/make_figures.py
+	experiments/k478/k478_dm_pvalues.png
+	experiments/k478/k478_granger_summary.png
+	experiments/k478/k478_qlike_comparison.png
+	experiments/k478/make_figs.py
+	experiments/k479/k479_dm_pvalues.png
+	experiments/k479/k479_qlike_compare.png
+	experiments/k479/k479_r2_compare.png
+	experiments/k479/make_article_figures.py
+	experiments/k485/fig1_qlike_by_period.png
+	experiments/k485/fig2_dm_pvalue_by_period.png
+	experiments/k485/fig3_avg_qlike_ranking.png
+	experiments/k485/make_figures.py
+	experiments/k489/fig1_matched_tenor_r2.png
+	experiments/k489/fig2_cross_tenor_heatmap.png
+	experiments/k489/fig3_slope_regime_rv.png
+	experiments/k489/make_plots.py
+	experiments/k497/k497_mcs_intersection.png
+	experiments/k497/k497_ranking_heatmap.png
+	experiments/k497/k497_spearman_matrix.png
+	experiments/k497/make_charts.py
+	experiments/k503/k503_strategy_comparison.png
+	experiments/k503/k503_t_stats.png
+	experiments/k511/k511_cointegration_pct.png
+	experiments/k511/k511_cross_oos_sharpe.png
+	experiments/k511/k511_plots.py
+	experiments/k511/k511_strategy_sharpe_bars.png
+	experiments/k517/k517_fig1_sharpe_comparison.png
+	experiments/k517/k517_fig2_cross_oos_heatmap.png
+	experiments/k517/k517_fig3_cumulative.png
+	experiments/k520/k520_tx_cost_sensitivity.png
+	experiments/k520/k520_vix_threshold_sensitivity.png
+	experiments/k544/fig1_mdd_vs_cost.png
+	experiments/k544/fig2_oos_heatmap.png
+	experiments/k544/fig3_net_pnl_by_oos.png
+	experiments/k545/k545_bootstrap_ci.png
+	experiments/k545/k545_cross_oos.png
+	experiments/k545/k545_strategy_comparison.png
+	experiments/k547/k547_tom_anomaly_dead.png
+	experiments/k549/charts/
+	experiments/k550/k550_crossoos_heatmap.png
+	experiments/k550/k550_sharpe_decomp.png
+	experiments/k550/k550_sharpe_vs_return.png
+	experiments/k556/k556_results.json
+	experiments/k557/k557_cross_oos_diff.png
+	experiments/k557/k557_dm_stats.png
+	experiments/k557/k557_strategy_comparison.png
+	experiments/k560/figures/
+	experiments/k571/_make_charts.py
+	experiments/k571/k571_cross_oos_consistency.png
+	experiments/k571/k571_half_life_overview.png
+	experiments/k571/k571_sharpe_vs_harvey.png
+	experiments/k576/k576_fig1_sharpe_compare.png
+	experiments/k576/k576_fig2_cross_oos.png
+	experiments/k576/k576_fig3_return_risk_decomp.png
+	experiments/k594/fig1_sharpe_by_period.png
+	experiments/k594/fig2_mean_sharpe_and_pvalues.png
+	experiments/k594/fig3_cum_return_by_period.png
+	experiments/k603/_make_figs.py
+	experiments/k603/k603_fig1_sharpe_by_variant.png
+	experiments/k603/k603_fig2_dm_vs_harvey.png
+	experiments/k603/k603_fig3_cross_oos.png
+	experiments/k619/figures/
+	experiments/k631/_make_article_figs.py
+	experiments/k631/fig1_dow_3market.png
+	experiments/k631/fig2_calendar_dm.png
+	experiments/k631/fig3_opex_effect.png
+	experiments/k635/k635_qlike_comparison.png
+	experiments/k635/k635_sharpe_comparison.png
+	experiments/k635/make_extra_figs.py
+	experiments/k645_results.json
+	experiments/k647/k647v2_net_sharpe_after_tx_1920f9.png
+	experiments/k647/k647v2_profile_match_matrix_1920f9.png
+	experiments/k647/k647v2_sharpe_vs_mdd_pareto_1920f9.png
+	experiments/k647/make_charts.py
+	experiments/k647/net_sharpe_after_tx.png
+	experiments/k647/profile_match_matrix.png
+	experiments/k647/sharpe_vs_mdd_pareto.png
+	experiments/k649/k649_auc_comparison.png
+	experiments/k649/k649_strategy_harm.png
+	experiments/k655/k655_horizon_sharpe_minimax.png
+	experiments/k663/k663_correlation_regime.png
+	experiments/k663/k663_episodes_compare.png
+	experiments/k663/k663_sharpe_heatmap.png
+	experiments/k666/k666_entry_month_vix_regime.png
+	experiments/k666/k666_monthly_return_rv.png
+	experiments/k666/k666_sell_in_may.png
+	experiments/k671/k671_cross_oos.png
+	experiments/k671/k671_strategy_summary.png
+	experiments/k672/charts/k672_general_evidence_map.png
+	experiments/k672/charts/k672_general_topic_landscape.png
+	experiments/k674/k674_avg_vs_worst.png
+	experiments/k674/k674_dd_heatmap.png
+	experiments/k674/k674_dollar_impact.png
+	experiments/k683/k683_composite_metrics.png
+	experiments/k683/k683_dm_tstat_harvey.png
+	experiments/k695/k695_lambda_sharpe.png
+	experiments/k695/k695_lambda_turnover.png
+	experiments/k712/k712_combo_comparison.png
+	experiments/k712/k712_etf_correlations.png
+	experiments/k774/k774_metrics_compare.png
+	experiments/k774/k774_weight_behavior.png
+	experiments/k818_ssvs_return_prediction_results.json
+	experiments/k859/k859_rebalance_frequency.png
+	experiments/k859/k859_sharpe_turnover.png
+	experiments/k867/k867_spygld_quantiles.png
+	experiments/k867/k867_tail_dependence.png
+	experiments/k873/vix_dow_pattern.png
+	experiments/k873/vt_strategy_equity.png
+	experiments/k873/weekend_ratio_by_market.png
+	experiments/k875/oos_qlike_comparison.png
+	experiments/k875/quarterly_vol_comparison.png
+	experiments/k875/vol_distribution_earnings_vs_non.png
+	experiments/k876/k876_is_vs_oos_auc.png
+	experiments/k876/k876_strategy_comparison.png
+	experiments/k876/k876_vix_quintile_crash_prob.png
+	experiments/k877/k877_is_vs_oos_strength.png
+	experiments/k877/k877_oos_r2_comparison.png
+	experiments/k881/k881_dm_vs_gjr.png
+	experiments/k881/k881_harvey_count.png
+	experiments/k881/k881_qlike_per_asset.png
+	experiments/mag7_q1_2026_followup/
+	scripts/_rewrite_mile_d716099a.py
+	scripts/generate_diverse_tasks.py
+	scripts/lookahead_audit.py
+	scripts/publish_k1018_general.py
+	scripts/publish_k1021_article.py
+	scripts/publish_k1121_article.py
+	scripts/publish_k1263_article.py
+	scripts/publish_k672_general.py
+	scripts/publish_k774_article.py
+	storage/drafts/ai_capex_725b_skeptical.md
+	storage/drafts/k1024_general_draft.md
+	storage/drafts/k1029_general_draft.md
+	storage/drafts/k1048_general_draft.md
+	storage/drafts/k1066_general_draft.md
+	storage/drafts/k1071_general_draft.md
+	storage/drafts/k1072_general_draft.md
+	storage/drafts/k1073_general_draft.md
+	storage/drafts/k1076_general_draft.md
+	storage/drafts/k1103_general_draft.md
+	storage/drafts/k1106b_general_draft.md
+	storage/drafts/k1115_general_draft.md
+	storage/drafts/k1140_general_draft.md
+	storage/drafts/k191_general_draft.md
+	storage/drafts/k194_general_draft.md
+	storage/drafts/k197_general_draft.md
+	storage/drafts/k199_general_draft.md
+	storage/drafts/k205_general_draft.md
+	storage/drafts/k206_general_draft.md
+	storage/drafts/k207_general_draft.md
+	storage/drafts/k237_international_vt_rewrite_draft.md
+	storage/drafts/k274_general_draft.md
+	storage/drafts/k280_portfolio_guide_draft.md
+	storage/drafts/k288_cross_period_stability_draft.md
+	storage/drafts/k301_general_draft.md
+	storage/drafts/k302_open_questions_draft.md
+	storage/drafts/k319_decade_draft.md
+	storage/drafts/k320_content_audit_draft.md
+	storage/drafts/k432_general_draft.md
+	storage/drafts/k435_structural_break_draft.md
+	storage/drafts/k439_general_draft.md
+	storage/drafts/k441_general_draft.md
+	storage/drafts/k447_general_draft.md
+	storage/drafts/k451_general_draft.md
+	storage/drafts/k455_vol_spillover_draft.md
+	storage/drafts/k458_meta_analysis_draft.md
+	storage/drafts/k471_higher_moments_draft.md
+	storage/drafts/k478_general_draft.md
+	storage/drafts/k479_general_draft.md
+	storage/drafts/k485_general_draft.md
+	storage/drafts/k489_vix_term_structure_article.md
+	storage/drafts/k497_general_draft.md
+	storage/drafts/k503_general_draft.md
+	storage/drafts/k511_general_draft.md
+	storage/drafts/k517_general_draft.md
+	storage/drafts/k520_general_draft.md
+	storage/drafts/k544_general_draft.md
+	storage/drafts/k545_general_draft.md
+	storage/drafts/k550_general_draft.md
+	storage/drafts/k557_general_draft.md
+	storage/drafts/k560_sector_rotation_rewrite_draft.md
+	storage/drafts/k571_general_draft.md
+	storage/drafts/k576_general_draft.md
+	storage/drafts/k594_general_draft.md
+	storage/drafts/k603_general_draft.md
+	storage/drafts/k619_kan_corrected_draft.md
+	storage/drafts/k631_general_draft.md
+	storage/drafts/k635_general_draft.md
+	storage/drafts/k647_general_v2_algorithm.md
+	storage/drafts/k649_general_draft.md
+	storage/drafts/k663_general_draft.md
+	storage/drafts/k666_general_draft.md
+	storage/drafts/k671_general_draft.md
+	storage/drafts/k674_general_draft.md
+	storage/drafts/k695_general_draft.md
+	storage/drafts/k712_general_draft.md
+	storage/drafts/k859_general_draft.md
+	storage/drafts/k867_general_draft.md
+	storage/drafts/k873_general_draft.md
+	storage/drafts/k875_general_draft.md
+	storage/drafts/k876_general_draft.md
+	storage/drafts/k877_general_draft.md
+	storage/drafts/k881_general_draft.md
+	storage/drafts/k929_general_draft.md
+	storage/drafts/k966_general_draft.md
+	storage/drafts/mag7_q1_2026_earnings_outlook.md
+	storage/drafts/mile_5302df53_rewrite_draft.md
+	storage/drafts/mile_d716099a_rewrite_draft.md
+	storage/drafts/mile_e8aefbf1_rewrite_draft.md
+	storage/drafts/msft_ai_123pct_deep_dive.md
+	storage/figures/mile_ed9e4626_anthropic_mtm_q1_2026.png
+	storage/figures/mile_ed9e4626_capex_2026_period_explicit.png
+	storage/logs/cron/memory_health.log
+	storage/logs/cron/refresh_paper_snapshots.log
+	storage/logs/cron/release_settings_audit.log
+	storage/logs/hooks/
+	storage/next_draft_candidate_k1067f.md
+	storage/notifications/01632b85.json
+	storage/notifications/01952ed6.json
+	storage/notifications/02a40406.json
+	storage/notifications/0c6e02eb.json
+	storage/notifications/19abb477.json
+	storage/notifications/1e10dcad.json
+	storage/notifications/24120a56.json
+	storage/notifications/2b181fe5.json
+	storage/notifications/30aef164.json
+	storage/notifications/32d36df2.json
+	storage/notifications/33b4d339.json
+	storage/notifications/360dbe60.json
+	storage/notifications/388e88ad.json
+	storage/notifications/3aacc4cf.json
+	storage/notifications/3c8e2a0b.json
+	storage/notifications/3d075cec.json
+	storage/notifications/42444b81.json
+	storage/notifications/4525fb7b.json
+	storage/notifications/465136b1.json
+	storage/notifications/4e51b6d8.json
+	storage/notifications/514cea7c.json
+	storage/notifications/51efa4f6.json
+	storage/notifications/53b7caf3.json
+	storage/notifications/54f09f08.json
+	storage/notifications/5668f70c.json
+	storage/notifications/58ae423e.json
+	storage/notifications/5a71dc0f.json
+	storage/notifications/5cff6584.json
+	storage/notifications/5ebac122.json
+	storage/notifications/61e037b7.json
+	storage/notifications/6279a881.json
+	storage/notifications/68b5890b.json
+	storage/notifications/698c481a.json
+	storage/notifications/69c62eb3.json
+	storage/notifications/6bb1ef1a.json
+	storage/notifications/71e74767.json
+	storage/notifications/725361f8.json
+	storage/notifications/740963e4.json
+	storage/notifications/7515ccb1.json
+	storage/notifications/77908afe.json
+	storage/notifications/77c8bf1c.json
+	storage/notifications/7a1cbc97.json
+	storage/notifications/7b2b2c37.json
+	storage/notifications/7b3e0950.json
+	storage/notifications/7ba555b8.json
+	storage/notifications/7ebae4b2.json
+	storage/notifications/844270d2.json
+	storage/notifications/84c2beb1.json
+	storage/notifications/856afb50.json
+	storage/notifications/87dc3d0f.json
+	storage/notifications/89d7ca70.json
+	storage/notifications/8a128535.json
+	storage/notifications/9319d262.json
+	storage/notifications/9d7beb65.json
+	storage/notifications/9fef5db3.json
+	storage/notifications/a0f484a7.json
+	storage/notifications/a78295d4.json
+	storage/notifications/a78f10cc.json
+	storage/notifications/aa17df3c.json
+	storage/notifications/ad3991b6.json
+	storage/notifications/aed72806.json
+	storage/notifications/b5efe783.json
+	storage/notifications/bce777c0.json
+	storage/notifications/bd9f39fd.json
+	storage/notifications/c0fd5b52.json
+	storage/notifications/c50e49a9.json
+	storage/notifications/c5368777.json
+	storage/notifications/c5e3000f.json
+	storage/notifications/c7ad325a.json
+	storage/notifications/c8a2bcd2.json
+	storage/notifications/cc446550.json
+	storage/notifications/cdfe8258.json
+	storage/notifications/cfc25026.json
+	storage/notifications/d54c570a.json
+	storage/notifications/d6a7a74b.json
+	storage/notifications/d6f67262.json
+	storage/notifications/d857eccd.json
+	storage/notifications/da2a2df0.json
+	storage/notifications/da43da43.json
+	storage/notifications/da76c4c7.json
+	storage/notifications/daba8f98.json
+	storage/notifications/df4557b1.json
+	storage/notifications/df592119.json
+	storage/notifications/e333d438.json
+	storage/notifications/e47241d1.json
+	storage/notifications/e6494306.json
+	storage/notifications/ea7b2d5b.json
+	storage/notifications/eaaa5157.json
+	storage/notifications/ec2ab3bb.json
+	storage/notifications/ed996968.json
+	storage/notifications/efd3f4b7.json
+	storage/notifications/f0d2f2fe.json
+	storage/notifications/f133fc14.json
+	storage/notifications/f2c4d0c2.json
+	storage/notifications/fa799c5b.json
+	storage/notifications/ff395c27.json
+	storage/notifications/skip_35e2463e.json
+	storage/notifications/skip_42daf895.json
+	storage/notifications/skip_4571bf4a.json
+	storage/notifications/skip_a095685f.json
+	storage/notifications/skip_fe8ec457.json
+	storage/ops/event_ledger/a29a6f724af2f8760dc33987170ad9a608a88d3fed4e6c762b8c36abab059397.json
+	storage/ops/loop_cadence_override.json
+	storage/reports/feed.json.bak.mile_c496072f_audit
+	storage/reports/feed.json.bak_d716099a_pre_rewrite
+	storage/reports/feed.json.bak_swrcorr_2026-05-07T071240
+	storage/reports/mile_0c1f9687.json
+	storage/reports/mile_4c1045ea.json
+	storage/reports/mile_5302df53.json
+	storage/reports/mile_9e6e75d8.json
+	storage/reports/mile_c496072f.json
+	storage/reports/mile_d716099a.json
+	storage/reports/mile_e8aefbf1.json
+	storage/reports/mile_ed9e4626.json
+	storage/reports/token_usage/daily_2026-04-27.json
+	storage/reports/token_usage/daily_2026-04-27.md
+	tests/test_daily_update_tw_staleness.py
+	tests/test_daily_update_tw_staleness_milestone.py
+	tests/test_publish_draft_citation_sanitizer.py
+
+no changes added to commit (use "git add" and/or "git commit -a")
+Dropped refs/stash@{0} (2f4608bd60a9e4c2dae4c43d97ab6ee79d64b428)
