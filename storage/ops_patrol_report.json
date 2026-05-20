@@ -1,34 +1,36 @@
 {
-  "timestamp": "2026-05-20T12:08:45Z",
+  "timestamp": "2026-05-20T18:05:10Z",
   "all_ok": false,
   "checks": [
     {
       "name": "article_pool",
       "status": "ok",
-      "detail": "total=160, research=16, general=144"
+      "detail": "total=160, research=16, general=144 — all thresholds met (total>=12, research>=4, general>=8)"
     },
     {
       "name": "strategy_metrics_freshness",
       "status": "alert",
-      "detail": "78.0h old"
+      "detail": "storage/strategy_metrics.json is ~83.9h old (mtime 2026-05-17T06:09Z); threshold: 26h"
     },
     {
       "name": "error_log_recent",
       "status": "alert",
-      "detail": "Found 1 entry/entries dated today (2026-05-20) or yesterday (2026-05-19)",
+      "detail": "Entries from yesterday (2026-05-19) and 2 days ago (2026-05-18) found",
       "entries": [
-        "2026-05-19: 3-STRIKE TRIGGER — publish pipeline 缺 post-publish live verify gate，5 篇文章 silently un-verified，下游 FB push 用錯誤 URL template /article/{id} 404"
+        "2026-05-19: 3-STRIKE TRIGGER — publish pipeline missing post-publish live verify gate; 5 articles published without HTTP check; FB push used wrong URL /article/{id}",
+        "2026-05-18: merge_worktree stash-pop conflict caused release_pool_gap outage (4th strike, real outage confirmed); merge_worktree.sh fix applied",
+        "2026-05-18: mile_7ba7ee54 FAIL — article mixed Strategy A/C argument; unpublished + rewrite task added"
       ]
     },
     {
       "name": "paper_trading_gaps",
       "status": "ok",
-      "detail": "No strategies with >2 portfolio_return=null in last 3 entries"
+      "detail": "15 keys checked; _market_daily excluded (market OHLC, no portfolio_return by design); all 14 strategy entries have <=2 nulls in last 3 records"
     },
     {
       "name": "git_uncommitted_files",
       "status": "ok",
-      "detail": "0 uncommitted files"
+      "detail": "0 uncommitted files — working tree clean"
     },
     {
       "name": "knowledge_size",
@@ -37,7 +39,7 @@
     }
   ],
   "alerts": [
-    "metrics stale (78.0h old)",
-    "error log has recent entries (2026-05-19): 3-STRIKE publish pipeline live verify"
+    "metrics stale: strategy_metrics.json is ~83.9h old (threshold 26h)",
+    "error_log_recent: entries from 2026-05-19 (yesterday) — 3-STRIKE publish pipeline live verify gate; 2026-05-18 worktree stash-pop outage + mile_7ba7ee54 FAIL"
   ]
 }
