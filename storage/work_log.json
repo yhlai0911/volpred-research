@@ -1,5 +1,21 @@
 [
   {
+    "id": "a3f91c04",
+    "timestamp": "2026-05-21T05:30Z",
+    "task_type": "paper_review",
+    "paper_id": "leverage-direction",
+    "description": "Post-compaction: completed v3.1 mechanical fixes and wrote v3 review reports. (1) Synced crypto-fear-channel Supabase status to ready_for_submission. (2) Ran v3 post-revision review (academic + citation) for leverage-direction: HOLD verdict, 2 CRITICAL + 2 SEVERE + 2 MAJOR. (3) Ported body_v3.tex edits to body.tex: t=-4.71→-3.79 (K1198 source), gold γ +0.20 vs +0.048 disambiguation footnote. (4) Abstract: added in-sample qualifier to 9/9 DM claim. (5) §4.9: forward reference to §5.4.5 γ_HM disambiguation. (6) k1092 bibitem removed from bibliography; converted to inline footnote. Paper compiles clean (xelatex x3). Commit 17d37281.",
+    "status": "completed",
+    "issues_fixed": [
+      "CRITICAL_body_tex_not_synced_with_body_v3",
+      "CRITICAL_t_stat_4.71_vs_3.79_reconciled_via_K1198",
+      "SEVERE_abstract_missing_inSample_qualifier",
+      "SEVERE_section_4.9_missing_forward_ref_to_disambiguation",
+      "MAJOR_k1092_bibitem_converted_to_footnote"
+    ],
+    "remaining": "HIGH-2 PARTIAL (§4.8 HM footnote placement), HIGH-5 PARTIAL (ES scope is DCC not primary panel). Ready for v4 review."
+  },
+  {
     "id": "f76982be",
     "timestamp": "2026-05-20T14:23Z",
     "task_type": "paper_review",
