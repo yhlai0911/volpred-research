@@ -1,0 +1,217 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-05-21",
+  "week_range": "2026-05-15 → 2026-05-22",
+  "totals": {
+    "input_tokens": 11,
+    "output_tokens": 676,
+    "cache_read_tokens": 59616,
+    "cache_create_tokens": 89750,
+    "billable_total": 90437,
+    "assistant_messages": 5,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.3646
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 11,
+      "output_tokens": 676,
+      "cache_read_tokens": 59616,
+      "cache_create_tokens": 89750,
+      "messages": 5,
+      "estimated_cost_usd": 0.3646
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 7,
+      "output_tokens": 405,
+      "cache_read_tokens": 29808,
+      "cache_create_tokens": 59779,
+      "messages": 3,
+      "billable_total": 60191,
+      "estimated_cost_usd": 0.2392,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "bash_other": {
+      "input_tokens": 3,
+      "output_tokens": 134,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 29808,
+      "messages": 1,
+      "billable_total": 29945,
+      "estimated_cost_usd": 0.1138,
+      "emoji": "💭",
+      "description": "其他 Bash 操作"
+    },
+    "token_report": {
+      "input_tokens": 1,
+      "output_tokens": 137,
+      "cache_read_tokens": 29808,
+      "cache_create_tokens": 163,
+      "messages": 1,
+      "billable_total": 301,
+      "estimated_cost_usd": 0.0116,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 3,
+      "billable_total": 60191,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 3,
+          "billable_total": 60191
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "other",
+          "messages": 2,
+          "billable_total": 30246
+        },
+        {
+          "name": "non-text assistant message",
+          "messages": 1,
+          "billable_total": 29945
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 1,
+          "billable_total": 29945
+        },
+        {
+          "name": "⏱ 開始 2026-05-21 00:00:00",
+          "messages": 1,
+          "billable_total": 29945
+        },
+        {
+          "name": "今天是週四，只需執行 daily report。",
+          "messages": 1,
+          "billable_total": 301
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 1,
+      "billable_total": 29945,
+      "family_breakdown": [
+        {
+          "name": "other bash",
+          "messages": 1,
+          "billable_total": 29945
+        }
+      ],
+      "prefix_breakdown": [
+        {
+          "name": "date",
+          "messages": 1,
+          "billable_total": 29945
+        }
+      ],
+      "top_first_lines": [
+        {
+          "name": "date",
+          "messages": 1,
+          "billable_total": 29945
+        }
+      ]
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 1,
+      "cache_create_tokens": 89750,
+      "billable_total": 90437,
+      "cache_create_share_pct": 99.2,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "8067647f-7e18-4529-8f29-4f57aa229ad2",
+          "messages": 5,
+          "billable_total": 90437,
+          "cache_create_tokens": 89750,
+          "cache_read_tokens": 59616,
+          "duration_minutes": 0.1,
+          "cache_create_share_pct": 99.2,
+          "first_ts": "2026-05-21T14:44:46.243000+00:00",
+          "last_ts": "2026-05-21T14:44:51.491000+00:00"
+        }
+      ]
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "4542689",
+      "message": "Ops patrol report 2026-05-21T12:05Z"
+    },
+    {
+      "sha": "8013752",
+      "message": "feat(article): K877 黃金白銀比率波動率預測因子 — VIX 充分性確認"
+    },
+    {
+      "sha": "e47f0cd",
+      "message": "ops: handoff — hourly-dispatch incident 標記 RESOLVED"
+    },
+    {
+      "sha": "fd52703",
+      "message": "fix(hourly-dispatch): launchd exit-78 — log 路徑移出 TCC 保護的 Desktop"
+    },
+    {
+      "sha": "d3e01af",
+      "message": "ops: hourly-dispatch launchd incident 診斷紀錄（probe 還原）"
+    },
+    {
+      "sha": "d3022f3",
+      "message": "rule(CLAUDE.md): 回應用戶後必須流回 ops loop，不停在等下一句（用戶糾正）"
+    },
+    {
+      "sha": "0480f7a",
+      "message": "rule(CLAUDE.md): 每個工作段落附開始/停止時間戳（用戶要求）"
+    },
+    {
+      "sha": "bc2e9a1",
+      "message": "fix(paper-portfolio): 3 篇 ready 論文獨立審查全 REJECT → 降回 working"
+    },
+    {
+      "sha": "c2b1646",
+      "message": "Merge: keep patrol report 2026-05-21T06:10Z (report is disposable)"
+    },
+    {
+      "sha": "e20f2b8",
+      "message": "Ops patrol report 2026-05-21T06:10Z"
+    },
+    {
+      "sha": "35e830b",
+      "message": "Merge branch 'main' of https://github.com/yhlai0911/volpred-research"
+    },
+    {
+      "sha": "28e0b2b",
+      "message": "fix(leverage-direction): v3.3 M-1 citations + cosmetics — 7 plain-text → LaTeX c"
+    },
+    {
+      "sha": "5a3d7fc",
+      "message": "fix(paper-portfolio): vt-insurance-cost 過度宣稱更正 + 獨立 review driver"
+    },
+    {
+      "sha": "80cb668",
+      "message": "fix(paper-update): 同步 \\title{} — 前端論文顯示 paper-id 而非真標題"
+    },
+    {
+      "sha": "d4a28b4",
+      "message": "ops: update work_log for 2026-05-21 HH:08 dispatch (paper_review leverage-direct"
+    },
+    {
+      "sha": "5c8863a",
+      "message": "fix(leverage-direction): v3.2 targeted fixes from v4 review — all SEVERE resolve"
+    },
+    {
+      "sha": "2cc8d9f",
+      "message": "Ops patrol report 2026-05-21T00:09Z"
+    }
+  ]
+}
