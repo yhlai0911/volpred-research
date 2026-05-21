@@ -1086,3 +1086,26 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 2. **方法段必對 code 逐行核**。crypto-fear 的 BLOCKING 全是「論文宣稱的方法 ≠ 實際跑的 code」— reproduce gate 驗數字 byte-match，但沒驗「方法描述」與 code 一致。reproduce.py 應加 method-description assertion 或 review 必開 code 對照。
 3. **Harvey |t|>3 誤用第二次再現** — 2026-05-17 K547 已記，仍出現在 3 篇 paper。需做成 grep-able lint：body.tex 出現 `Harvey` + `DM` / `Diebold-Mariano` 近距離 → flag。
 4. 「reproduce GREEN + latex ★ + citation」的 6/6 gate **不含對抗性方法論審查** — gate 漏了「identification / 自審盲點」這一維。
+
+---
+
+## 2026-05-21 | hourly-dispatch launchd exit-78 — plist StandardOutPath 在 TCC 保護的 Desktop
+
+**問題**：`com.volpred.hourly-dispatch` LaunchAgent 自 09:07 起每班 exit 78 (EX_CONFIG)、零輸出、script body 完全沒執行（probe 寫 /tmp 第一行都沒跑）。06/07/08:07 還正常。
+
+**根因**：plist 的 `StandardOutPath` / `StandardErrorPath` 指向 `~/Desktop/volpred-research/storage/logs/cron/hourly_dispatch_launchd.{log,err}`。**macOS TCC 保護 ~/Desktop** — launchd spawn job 時需先 open StandardOutPath 給 child 當 stdout，open 不了 Desktop 內的檔 → spawn 失敗 EX_CONFIG/78 → script 從沒執行。對照正常的 `com.volpred.release-pool` plist：std 路徑在 `~/.volpred/logs/`（TCC-safe）。09:00 前後 TCC 對該 Desktop 路徑的授權被收回（macOS TCC reset / 權限 re-prompt 被拒）→ 由可用變不可用。
+
+**Fix**：
+- plist `StandardOutPath`/`StandardErrorPath` → `~/.volpred/logs/hourly_dispatch_launchd.{log,err}`（移出 Desktop）。
+- wrapper `cron_hourly_dispatch.sh` 的 `exec >> ...hourly_dispatch.log` 也移到 `~/.volpred/logs/hourly_dispatch.log`（script 跑起來後自己的 redirect 同樣會撞 TCC）。
+- `storage/logs/cron/hourly_dispatch.log` 改為 symlink 指向 `~/.volpred/logs/hourly_dispatch.log`（dashboard / alerts.py 等 reader 仍能讀，reader 是有 Desktop 權限的主程序）。
+- `launchctl bootout` + `bootstrap` reload plist。
+- 驗證：kickstart → start banner 寫入、claude -p 啟動、launchd 不再 78。
+
+**Lessons**：
+1. **LaunchAgent 的 `StandardOutPath`/`StandardErrorPath` 絕不可放 ~/Desktop**（或任何 TCC 保護目錄）— launchd 在 spawn 階段就要 open，open 失敗 = job 永遠起不來、exit 78、零 log（連自己壞掉都沒地方寫）。一律放 `~/.volpred/logs/`。
+2. 此前只把 wrapper **執行檔**移出 Desktop（2026-04-19 教訓），但 plist 的 **std 路徑**漏了 — TCC 防護要 wrapper + log + plist-std-path 三者都在 TCC-safe 區。
+3. 「exit 78 + 零 log」是 launchd spawn 階段失敗的指紋（script body 沒跑）；對照「有 log 但中途死」是 script 邏輯問題 — 兩者診斷路徑不同。
+4. **`cp` 覆蓋正在被執行的 .sh 會 torn-write**（16:39 run 撞 line 99 syntax error fragment）→ 改 wrapper TCC copy 前應先確認沒有 running instance，或寫到 temp 再 `mv`（atomic rename）。
+
+**Pending 候補**：LaunchAgent plist 無 repo 原始檔（直接編 `~/Library/LaunchAgents/`）— 應比照 wrapper 在 repo 建 `config/launchagents/` 源 + install script，否則重灌不可復現。

@@ -8,7 +8,11 @@
 # TCC copy: ~/.volpred/bin/cron_hourly_dispatch.sh
 # After editing: cp scripts/cron_hourly_dispatch.sh ~/.volpred/bin/ && chmod +x ~/.volpred/bin/cron_hourly_dispatch.sh
 
-exec >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/hourly_dispatch.log 2>&1
+# Log target lives OUTSIDE Desktop/ — macOS TCC protects ~/Desktop and blocks
+# launchd-spawned processes from opening files there (2026-05-21 incident:
+# plist StandardOutPath under Desktop → spawn failed EX_CONFIG/78, script body
+# never ran). storage/logs/cron/hourly_dispatch.log is a symlink to this.
+exec >> /Users/yhlai0911/.volpred/logs/hourly_dispatch.log 2>&1
 cd /Users/yhlai0911/Desktop/volpred-research || exit 1
 
 # Raise file-descriptor SOFT limit. LaunchAgent-spawned processes inherit
