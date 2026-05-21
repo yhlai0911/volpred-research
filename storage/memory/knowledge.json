@@ -31119,5 +31119,46 @@
     "reference": "Hsu, Tseng & Wang (2008, JFM): Dynamic hedging with futures: A copula-based GARCH model",
     "data_period": "IS 2005-2018 (N=3522), OOS 2019-2024 (N=1509)",
     "reviewer_source": "manual code review (Codex pending)"
+  },
+  {
+    "item_id": "7cae6282",
+    "category": "volatility_forecasting",
+    "experiment_id": "K1318",
+    "experiment_path": "experiments/k1318/",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer_source": "code-reviewer subagent fallback (Codex companion CLI failure 2026-05-21)",
+    "reviewer": "feature-dev:code-reviewer subagent",
+    "content": "K1318: HAR-RV 5-min Pilot — SPY & 0050.TW Actual Realized Variance. First experiment using actual 5-minute RV (SPY n=88 obs, 0050.TW n=61 obs) as both features and target. SPY OOS (n=36): HAR-RV-5min QLIKE=0.487 vs EWMA=0.502 (3% better in point terms), DM-HLN t=-0.240 → NULL. TW50 OOS (n=9): HAR-RV-5min QLIKE=0.463 vs EWMA=0.443 (slightly worse), DM-HLN t=0.761 → NULL. Overall verdict CONDITIONAL_PASS: methodology is sound (no lookahead, correct DM-HLN, correct QLIKE), but sample size too small for powered inference (need 252+ trading days = full calendar year of intraday collection). NULL verdict = inconclusive, NOT evidence against 5-min RV superiority over proxies. Rerun recommended in Q3-Q4 2026 when SPY reaches ~252 RV obs.",
+    "evidence": [
+      "experiments/k1318/k1318_results.json",
+      "data/intraday/SPY_daily_rv.csv (88 obs 2026-01-14~2026-05-20)",
+      "data/intraday/0050_TW_daily_rv.csv (61 non-null obs 2026-02-09~2026-05-20)",
+      "code-reviewer subagent CONDITIONAL_PASS: lookahead-free, expanding OLS correct, DM/HLN correct, QLIKE formula correct (Patton 2011)"
+    ],
+    "confidence": 0.55,
+    "prior_context": {
+      "K530": "HAR-ABS QLIKE=-3.892 on daily abs(r) target; different scale (negative QLIKE)",
+      "K782": "HAR loses to GJR on r^2 target; proxy quality noted as key factor"
+    },
+    "qlike_results": {
+      "SPY": {
+        "HAR_RV_5min": 0.4868,
+        "HAR_ABS": 0.5135,
+        "HAR_SQ": 0.4394,
+        "EWMA_094": 0.5019
+      },
+      "TW50": {
+        "HAR_RV_5min": 0.4627,
+        "HAR_ABS": 0.4521,
+        "HAR_SQ": 0.4885,
+        "EWMA_094": 0.4427
+      }
+    },
+    "dm_tests": {
+      "SPY_HAR_RV_vs_EWMA": "t=-0.240, p=0.812, NULL, n_oos=36",
+      "TW50_HAR_RV_vs_EWMA": "t=0.761, p=0.463, NULL, n_oos=9"
+    },
+    "sample_limitation": "Intraday RV collection started 2026; ~252 trading days needed for ~200 OOS window. Rerun in Q3-Q4 2026.",
+    "created_at": "2026-05-21T23:30:06.929788"
   }
 ]
