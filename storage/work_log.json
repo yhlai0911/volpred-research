@@ -7767,5 +7767,25 @@
     "reviewer": "code-reviewer subagent fallback",
     "completed_at": "2026-05-21T23:30:15.074020",
     "notes": "Methodology sound. Small-sample NULL (n=36/9 OOS). Rerun Q3-Q4 2026 at 252+ obs."
+  },
+  {
+    "task_id": "paper_body_leverage_v5_fixes_20260522",
+    "task_type": "paper_body",
+    "timestamp": "2026-05-22T00:15:17+08:00",
+    "title": "leverage-direction v5 post-review fixes: H-2 circularity + M-1 \\ref{} + M-3 MCS citation + min-1 comment",
+    "status": "succeeded",
+    "details": "H-2: added temporal-separation sentence to rho=1.000 paragraph (gamma IS 2010-17, beta_trend OOS 2018-26). M-1: 5 hardcoded Table/Section refs replaced with \\ref{}. M-3: MCS citation hansen2005→hansen2011 + new bibitem. min-1: removed H6 review comment from body.tex.",
+    "paper": "leverage-direction",
+    "commit": "44e5343b"
+  },
+  {
+    "id": "v7-leverage-fixes",
+    "timestamp": "2026-05-22T01:31:00+08:00",
+    "task_type": "paper_review",
+    "status": "completed",
+    "paper": "leverage-direction",
+    "version": "v7",
+    "summary": "v6 review cycle complete + v7 fixes applied",
+    "details": "P1: 6 section labels added (sec:data, sec:vt_methodology, sec:leverage_direction, sec:garch_comparison, sec:var_compliance, sec:vt_results) + 16 hardcoded Section/Table refs replaced with \\ref{}. P2: engle1982 bibitem added to main.tex + \\citep{engle1982} in body.tex line 66; hood2025 subtitle updated (How trend following explains alpha in volatility-managed strategies). P3: cederburg2020 reframed at line 45 to include negative headline conclusion (VT does not systematically improve Sharpe across 103 strategies). PDF recompiled: 66 pages, all labels resolved. v6 review_history: academic_review_report.md (4.2★ NEAR_READY → predicted 4.5★ after fixes) + citation_check_report.md (0 MAJOR/2 MED/4 MINOR) + README.md archived."
   }
 ]
