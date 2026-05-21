@@ -1,71 +1,65 @@
-# Handoff — 2026-05-20 20:17 台灣時間
+# Handoff — 2026-05-21 13:48 CST
 
-**寫入時機**：運營 cycle 收尾（CLAUDE.md Compact 規則）
-**角色**：VolPred 平台 autonomous 運營經理（用戶 = 老闆，report-only，full autonomy 已授權，不問選擇題）
+**角色**：VolPred 自主運營經理（用戶=老闆，report-only，full autonomy）
 
 ---
 
-## 本 cycle 完成（最新在上）— commit `e1733d8c`
+## 立即next task（最高優先）
 
-- **Paper 1 Table 7 errata + paper-update sync**（paper_body，`Paper1_new_experiments_Tables_4_6_7_8` → succeeded）：
-  - K1187 reproducibility issues 處理：加入 Notes + Replication note 到 Table 7（tab:vt）— GLD = 2022-2026、SPY = 2014-2026、BTC = post-2019 期間揭露
-  - errata_pending.md batch-4 section 新增；K1198 Step 4 DONE
-  - main_v3.tex 編譯乾淨（66 頁）；paper-update sync 成功（updated_at: 2026-05-20T12:13:39Z）
-  - Paper 1 三批 errata 全數落地（batch-1 K1185/K1188 + batch-2 K1186/K1206 + batch-3 K1198 + batch-4 K1187）
-- **Daily data refresh**：leverage-direction 3 CSVs +22 rows（2026-05-14~20 新交易日）
+**crypto-fear-channel 3 個 BLOCKING 修訂** — 論文方法段與 `experiments/k1025/k1025.py` 實際 code 不符：
+1. §4.3 QR：文稿寫 lagged BTC_RV_{t-1}+1000 bootstrap，code 實為同日 VIX_t~BTC_RV_t 無 bootstrap
+2. §5.3 subperiod Granger：文稿寫 AIC lag，code 實為 lag 1-3 挑最小 p-value（lag mining，無多重檢定校正）
+3. §4.5/§7 OOS：文稿寫 AIC AR(p) rolling，code 為固定 lag expanding-window，且 2019-01-01 同時落 IS+OOS
+詳見 `paper/crypto-fear-channel/review_history/v5_independent/codex_review.md`。修法：逐項決定「改論文敘述對齊 code」或「改 code 對齊論文」（研究誠實三選一），不可造假。修完重跑 reproduce + 獨立審查。
 
-## 本 cycle 完成（前期）— commit `8fdcc6ab`
+之後 prg-periodic-garch（資訊集不對等）+ vt-crowding-abm（threshold 內生校準）同樣待修。
 
-- **K-id collision 無限迴圈修復（3-strike 級結構修）**：dispatcher 永遠推薦 K1308 x3。根因 `generate_research_backlog.py` find_next_k_id 無視在途 next_tasks ids + dedup keyword 對中文失效。已修產生器（傳 in-flight ids + source_line 精確 dedup）+ 清 next_tasks.json 569→560（K1308 dup×3 / 9 collision 重配 K1384-1392 / 標題重複×6）。
-- **ops_dashboard 虛報 cron stale 修復**：UTC 時間戳被 mktime 當 local → 虛增 +8h。改 calendar.timegm。handoff 長期「daily cron 偶爾 stale」部分即此 bug。
-- **2 篇 pending FB 補發**：mile_8d61b9b3（OVX/VIX 伊朗戰爭）+ mile_32eb397f（VIX dispersion/Mag6）發 Ivan Lai FB + 留言連結，trending_repost_log 標 success。
-- **2 條 stale cron 補跑**：release_pool + paper_sync_all（exit 0）。
-- dashboard 現 7/7 區段全綠。
+## 本 session 已完成
 
-## 排程失敗徹查（2026-05-20 用戶要求，commit `e4154466` + `f1bdea2d`）
-
-全面 audit `storage/logs/cron/*.log` → 5 結構性根因全修：
-1. hourly-dispatch fd limit 256（LaunchAgent 不 source profile）→ wrapper 加 `ulimit -Sn 65536`
-2. `host_cron_fail` alert 完全失效 — `_CRON_EXIT_RE` 對所有實際 log 格式皆不匹配 → 修 regex
-3. exit banner 由 piggy-back 發非 wrapper 自發 → daily_update banner 凍結 2026-04-25 → wrapper 自發 canonical banner
-4. daily_update 讀 feed.json 並發 crash（JSONDecodeError）→ `_load_json_retry`
-5. market_daily sync 400 ×161（白名單含 Supabase 不存在的 nk225_*）→ 移除 + `_post` 印 error body
-- org 訂閱問題：用戶確認信用卡換卡所致，已解決。
-- 剩餘 log（collect_tw DNS / paper_sync_all urlopen timeout / compute_worker EINTR）= 暫時性，自然重試，非結構問題。
-- **驗收點**：20:07 hourly-dispatch 自動 fire → 應 exit 0 + 寫出 `=== [hourly_dispatch] exit N ===` canonical banner。
+- **排程失敗徹查**（5 根因修復）：hourly-dispatch fd limit / host_cron_fail regex 死 / banner 由 piggy-back 發 / feed.json 並發 crash / market_daily nk225 400。commit `e4154466` `f1bdea2d`。
+- **CLI 文件**：agy headless 可用，第三 agentic CLI；gemini_ask.py 計費通知。`91400ffc` `aa423657`。
+- **論文 portfolio 審計**：3 篇「ready」獨立 Codex/agy 審查全 REJECT → 降回 `working`；vt-insurance-cost 過度宣稱更正；paper-update 同步 title bug 修；paper-upsert --status downgrade bug 修。`80cb6687` `5a3d7fce` `a3eff249`。
+- **規則**：時間戳規則 `1e8834e2`；回應後流回 ops loop 規則 `ff3c0420`。
+- 巡檢：dashboard 7/7 OK；hourly-dispatch 09:07 異常（exit 78 無 banner，10-13:07 疑似 Mac 睡眠未 fire）→ 已 `launchctl kickstart` 重啟恢復；agy 2 個孤兒進程已 kill；K1387 = NULL 已入 knowledge.json。
 
 ## 待驗證 / 候補
 
-- **無進行中背景 agent**。
-- **novel-method 實驗 soft pause**：next_tasks 內 PatchTST(K1383) 帶 `diversity_rule_post_null_quartet` block（4 連 NULL K868/K1301/K1303/K1309 後暫停 novel-method 直到 quartet 文章獲 Codex+讀者訊號）。dispatcher 目前頂層候選 K1313/K1385/K1386 皆 novel-method，性質同屬暫停範圍但未標 block — 下次 session 若要派實驗需先確認 quartet 文章訊號狀態，或改派非 novel-method / daily_article。
-- **refill_task_pool.py dedup bug 候補**：會產生 `write general-audience article` 通用標題 dup（本 cycle 清 4 個但根因未修）。下次碰 article refill 時修。
-- 未 commit：storage/ 運營狀態檔自然 drift。
-
-## 未回應用戶的問題
-
-無。
-
-## 關鍵檔案
-
-- ops 巡檢：`uv run python scripts/ops_dashboard.py`
-- dispatcher：`uv run python scripts/continue_task_dispatch.py --dry-run`
-- 決策日誌：`storage/ops/autonomous_decisions.jsonl`
-- 教訓：`docs/error_log.md`（2026-05-20 entry）
-- FB 發文教訓：`.claude/skills/trending-repost/SKILL.md` Step 7
-
----
+- hourly-dispatch 已 kickstart，驗下一班 14:07 是否 exit 0 + 寫 canonical banner。
+- agy headless **會 hang**（crypto-fear 重審跑 1h37m 未完被 kill；`--print-timeout` 不可靠）→ 用 agy 必須包外部 timeout（perl alarm）。候補：寫進 reference_antigravity_cli memory。
+- 無進行中背景 agent（hourly-dispatch 是 OS 層 worker，獨立）。
 
 ## 接續提示詞
 
-> 讀 `storage/ops/handoff_latest.md` 了解上一段脈絡。你是 VolPred 平台自主運營經理（用戶 = 老闆，report-only，full autonomy 已授權，不問選擇題；決策直接做、做錯事後修）。
->
-> 接續步驟：
-> 1. 跑 `uv run python scripts/ops_dashboard.py` 取得平台 7 區段健康狀態
-> 2. 有 critical/warn 先處理（daily cron stale 就 `bash ~/.volpred/bin/cron_<id>.sh` 補 + 更新 `storage/ops/cron_last_run.json`）
-> 3. production OK 就從 `storage/next_tasks.json` pending 池派工（先 `jq '[.[-5:]|.[].task_type]' storage/work_log.json` 查多樣化，≥3 同 type 必換）。注意：dispatcher 頂層候選 K1313/K1385/K1386 是 novel-method 實驗，受 `diversity_rule_post_null_quartet` soft pause 影響 — 派實驗前先確認 quartet 文章訊號，否則改派非 novel-method 或 daily_article。
-> 4. FB 發文嚴守 `.claude/skills/trending-repost/SKILL.md` Step 7 的 8 條
-> 5. 寫文章嚴守 `anti-ai-style` 9 地雷 + 內容要厚 + Layer 4 narrative-arc dedup
-> 6. 重大決策寫入 `storage/ops/autonomous_decisions.jsonl`
-> 7. compact 前必更新本 handoff 檔
->
-> 無未回應的用戶問題、無進行中背景 agent。直接從 dashboard 巡檢開始下一個 cycle。
+讀 `storage/ops/handoff_latest.md` 後：先跑 `uv run python scripts/ops_dashboard.py` 巡檢；無 critical 就**直接開始 crypto-fear-channel 3 BLOCKING 修訂**（見上方 next task），這是研究誠實最高優先。修訂走主線程，逐項對 `experiments/k1025/k1025.py` 核對。完成後接 ops loop 派工，不停在等用戶。
+
+---
+
+## 🔴 OPEN INCIDENT — hourly-dispatch launchd 環境失敗（2026-05-21 16:35）
+
+**症狀**：`com.volpred.hourly-dispatch` LaunchAgent 自 09:07 起每班 exit 78 (EX_CONFIG)、零 log 輸出。`launchctl print` runs 計數持續增加（已 27）證明有 fire，但每次秒級死。
+
+**已確認**：
+- 手動 `bash ~/.volpred/bin/cron_hourly_dispatch.sh` → 完全正常（寫 banner + claude 啟動）。
+- launchd 跑同一檔 → exit 78、連 start banner 都沒寫。
+- `bash -n` 語法 OK；launchd .err 空；prompt 檔存在。
+- **不是** 單純 TCC 擋 Desktop log — 其他 LaunchAgent（collect-tw/release-pool）寫同目錄 log 正常。
+- 06/07/08:07 今天還正常（exit 0），09:07 起壞 → 09:00 前後有東西變了。
+
+**未釘死的根因方向**：hourly-dispatch 是唯一跑 `claude -p` 的 LaunchAgent — 需 `~/.claude/` config + keychain。launchd 環境可能拿不到（HOME / keychain / TCC for ~/.claude）。
+
+**下一步（fresh context 查）**：
+1. 讓 launchd 跑一個 probe script（`env > /tmp/probe.txt; whoami; ls ~/.claude`）比對 launchd env vs 手動 env 差異。
+2. 查 09:00 前後系統有無變動（macOS update / TCC reset / keychain lock）。
+3. 確認 claude -p 在 launchd 最小 env 下能否 auth。
+4. 修法可能：plist 加 `EnvironmentVariables`（HOME 等）/ wrapper 開頭顯式 source 設定 / 或改回 host crontab piggy-back。
+
+**暫時 mitigation**：手動 `bash ~/.volpred/bin/cron_hourly_dispatch.sh &` 可跑一班。本 incident 期間 16:33 已手動觸發一班（PID 5848）。
+
+### incident 更新 16:38 — probe 結果
+
+- 在 wrapper 第一行插 `echo >> /tmp/hourly_probe.txt` 探針 + kickstart → **`/tmp` 探針檔完全沒被建立**。
+- 結論精煉：**launchd fire 後根本沒執行 script body**（連寫 /tmp 的第一行都沒跑）= exec-level 失敗，不是 script 邏輯問題。
+- 排除：檔案權限（`-rwxr-xr-x` 與正常的 release_pool wrapper 相同）、quarantine xattr（兩者皆無）、語法（`bash -n` OK）。
+- 仍未知：為何 launchd 能 exec `com.volpred.release-pool` 的 wrapper 卻不能 exec `com.volpred.hourly-dispatch` 的。兩者都 `~/.volpred/bin/*.sh`、同權限。
+- probe 已還原（`git checkout` + 重新 cp TCC copy），wrapper 現為乾淨 committed 版。
+- **下一步建議**：`launchctl print gui/$UID/com.volpred.hourly-dispatch` 完整輸出比對 release-pool 的；查 plist 差異（ProgramArguments / WorkingDirectory / 有無 `Program` vs `ProgramArguments` 寫法差）；考慮 `bootout` + 重新 `bootstrap` plist；或直接重建 plist。
