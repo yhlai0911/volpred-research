@@ -7703,5 +7703,15 @@
     "experiment_id": "K1320",
     "verdict": "CONDITIONAL_PASS",
     "notes": "GJR-GARCH + 5 copula families + DCC. SPY-QQQ IS 2005-2018, OOS 2019-2024. Best IS copula: Gumbel (AIC=-6939.99). OOS HE: Gumbel=0.8880, DCC=0.8862, Δ=+0.0019 (DM t=0.50 p=0.617, NS). Null result: all copula≈DCC for high-correlation equity pair. Clayton fails (HE=0.7133). Code review MINOR: Gumbel LL coefficient bug (1/θ-2 vs 2/θ-2), negligible impact. knowledge.json item_id=f37c47e7. Codex review pending (PID 87869)."
+  },
+  {
+    "task_id": "paper_body_leverage_v33_20260521",
+    "task_type": "paper_body",
+    "timestamp": "2026-05-21T11:19:43.219233+00:00",
+    "description": "leverage-direction v3.3: M-1 systematic plain-text → \\citet{}/\\citep{} conversion (27 replacements), resolve v4 MEDIUM M-1",
+    "result": "COMPLETED",
+    "paper_id": "leverage-direction",
+    "version": "v3.3",
+    "fixes": "M-1 citation conversion (27 instances across body.tex), version updated to May 2026 (v3.3)"
   }
 ]
