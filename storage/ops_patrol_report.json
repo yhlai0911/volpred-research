@@ -1,31 +1,31 @@
 {
-  "timestamp": "2026-05-21T06:10:31Z",
+  "timestamp": "2026-05-21T12:05:39Z",
   "all_ok": true,
   "checks": [
     {
       "name": "article_pool",
       "status": "ok",
-      "detail": "161 total drafts (research: 18, general: 143). All thresholds met (total>=12, research>=4, general>=8)."
+      "detail": "158 total drafts (research: 18, general: 140). All thresholds met (total>=12, research>=4, general>=8)."
     },
     {
       "name": "strategy_metrics_freshness",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json is ~21 seconds old (mtime=1779343773). Well within 26-hour threshold."
+      "detail": "storage/strategy_metrics.json is ~11 seconds old (mtime=1779365129). Well within 26-hour threshold."
     },
     {
       "name": "error_log",
       "status": "ok",
-      "detail": "Today 2026-05-21: hourly-dispatch 02:07+03:07 CST two SIGALRM exits (exit=142, HANG-KILLED after 3000s). Root cause: complex platform_ops tasks exceeded 50min cap — resolved. feed.json article mile_4ec7b75e description field term fix confirmed, release-pool-by-settings passed. 04:07 exit=0. No unresolved incidents."
+      "detail": "Entry dated 2026-05-21: LaunchAgent exit-78 due to TCC-protected ~/Desktop StandardOutPath. Root cause fixed (paths moved to ~/.volpred/logs/). Lesson: LaunchAgent std paths must not be in TCC-protected dirs. No unresolved incidents."
     },
     {
       "name": "paper_trading_gaps",
       "status": "ok",
-      "detail": "15 strategies checked: slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, _market_daily, adaptive_tier. No strategy has >2 consecutive null portfolio_return in last 3 entries."
+      "detail": "15 strategies checked (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, _market_daily, adaptive_tier). All strategies have <=1 null portfolio_return in last 3 entries. No alert triggered."
     },
     {
       "name": "git_status",
       "status": "ok",
-      "detail": "0 uncommitted files."
+      "detail": "0 uncommitted files. Repository is clean."
     },
     {
       "name": "knowledge_size",
