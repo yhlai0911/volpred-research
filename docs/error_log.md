@@ -1062,3 +1062,27 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 **教訓**：(L1) `release_pool_articles` body_text 讀取順序：`description` > `content` > `summary`，文章若有 `description` 欄位，`content` 的修改不會被 audit 看到；(L2) 術語替換時須先確認哪個欄位是 audit 的實際掃描對象，不可假設 `content` 是唯一儲存。
 
 **已修**：feed.json `mile_4ec7b75e` description 欄位所有違規詞替換完成（2026-05-21 05:xx CST），`release-pool-by-settings` 驗證通過（released=1, supabase_synced=true, verified_live=true）。
+
+---
+
+## 2026-05-21 | 3 篇「ready_for_submission」論文獨立審查全 REJECT — Claude 自審盲點
+
+**問題**：用戶質疑「ready_for_submission 的論文有經過多輪審查嗎？Codex/antigravity 重新審查嗎？」。查證後跑首次獨立跨模型審查（Codex GPT-5.4 + agy Gemini），結果 3 篇標記 `ready_for_submission` 的論文（crypto-fear-channel / prg-periodic-garch / vt-crowding-abm）**Codex 全部 REJECT**，agy 對 vt-crowding 也 REJECT、對 prg MAJOR_REVISION→傾向 REJECT。
+
+**根因**：所有 paper review_history v1-v4「4 輪 paper-review-cycle」**全部是 Claude general-purpose subagent 當 latex-academic-reviewer / citation-verifier 的 proxy** — 即 Claude 審 Claude 寫的論文。同模型自審有系統性盲點，4 輪也補不上。各篇 BLOCKING：
+- **crypto-fear-channel**：論文方法段與 `experiments/k1025/k1025.py` 實際 code 不符 — QR 文稿寫 lagged+bootstrap 實為同日無 bootstrap；Granger 文稿寫 AIC 實為 p-value mining；OOS 有 2019-01-01 IS/OOS 重疊 leak。
+- **prg-periodic-garch**：PRG vs baseline 資訊集不對等（PRG 用當日 overnight，baseline 沒有）；「fair-information GJR-X」實際仍不公平。
+- **vt-crowding-abm**：threshold detector 內生校準（calibrated 重現既有 headline = 套套邏輯）；跨 table threshold 自相矛盾。
+- 共同 MAJOR：Harvey et al. (2016) `|t|>3` 門檻誤用於 DM test（**與 2026-05-17 K547 entry 同錯，再現**）。
+
+**處置**：
+- 3 篇 supabase status 全 `ready_for_submission` → `working`。
+- `research_program.md` P5/P6/P10 加 INDEPENDENT-REVIEW OVERRIDE，舊「✅ READY」記錄 strikethrough 保留作 audit trail。
+- 6 份獨立報告歸檔 `paper/<id>/review_history/v5_independent/{codex,agy}_review.md`。
+- 修 `paper-upsert` CLI bug：`--status` 預設 `working` + `if status != "working"` gate → 永遠無法把論文降回 `working`。改 `default=None` + `if status is not None`。
+
+**Lessons**：
+1. **同模型自審 ≠ 審查**。4 輪 Claude-proxy review 全 PASS 的論文，獨立模型 5 分鐘抓出 BLOCKING。投稿前必過**獨立模型**（Codex / agy）審查 gate — 新增為 paper stage gate，未過不得標 ready_for_submission。
+2. **方法段必對 code 逐行核**。crypto-fear 的 BLOCKING 全是「論文宣稱的方法 ≠ 實際跑的 code」— reproduce gate 驗數字 byte-match，但沒驗「方法描述」與 code 一致。reproduce.py 應加 method-description assertion 或 review 必開 code 對照。
+3. **Harvey |t|>3 誤用第二次再現** — 2026-05-17 K547 已記，仍出現在 3 篇 paper。需做成 grep-able lint：body.tex 出現 `Harvey` + `DM` / `Diebold-Mariano` 近距離 → flag。
+4. 「reproduce GREEN + latex ★ + citation」的 6/6 gate **不含對抗性方法論審查** — gate 漏了「identification / 自審盲點」這一維。

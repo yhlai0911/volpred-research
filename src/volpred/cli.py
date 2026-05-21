@@ -2390,7 +2390,7 @@ def ops_paper_list() -> None:
 @click.option("--title", default=None, help="Paper title (omit to keep existing)")
 @click.option("--authors", default=None, help="Authors string (omit to keep existing)")
 @click.option("--abstract", default=None, help="Abstract")
-@click.option("--status", default="working", show_default=True, help="Paper status")
+@click.option("--status", default=None, help="Paper status (omit to keep existing)")
 @click.option("--target-journal", default=None, help="Target journal")
 @click.option("--pdf-url", default=None, help="PDF URL")
 @click.option("--pages", default=None, help="Pages")
@@ -2427,7 +2427,7 @@ def ops_paper_upsert(
         kwargs["authors"] = authors
     if abstract is not None:
         kwargs["abstract"] = abstract
-    if status != "working":  # only override if explicitly changed
+    if status is not None:  # explicit --status (incl. downgrade to "working")
         kwargs["status"] = status
     if target_journal is not None:
         kwargs["target_journal"] = target_journal
