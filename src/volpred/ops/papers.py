@@ -233,7 +233,8 @@ def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
     metrics: dict[str, int | None] = {}
 
     # Find the best tex file (v3 > v2 > v1)
-    for name in ["main_v4.tex", "main_v3.tex", "main_v2.tex", "main.tex"]:
+    for name in ["main_v4.tex", "main_v3.tex", "main_v2.tex", "main.tex",
+                 "body.tex", "body_v5.tex", "body_v4.tex", "body_v3.tex"]:
         tex = paper_dir / name
         if tex.exists():
             break
@@ -241,6 +242,32 @@ def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
         return metrics
 
     content = tex.read_text(errors="ignore")
+
+    # Extract \title{...} — paper-update previously never synced the title,
+    # so papers whose title was never explicitly upserted displayed their
+    # paper-id on the frontend (crypto-fear-channel, eav-universal-magnitude).
+    # Brace-match to span the closing }, then strip LaTeX line breaks/markup.
+    tm = re.search(r"\\title\s*\{", content)
+    if tm:
+        i, depth, buf = tm.end(), 1, []
+        while i < len(content) and depth:
+            ch = content[i]
+            if ch == "{":
+                depth += 1
+            elif ch == "}":
+                depth -= 1
+                if depth == 0:
+                    break
+            buf.append(ch)
+            i += 1
+        title = "".join(buf)
+        title = re.sub(r"%.*", "", title)            # strip LaTeX line comments
+        title = title.split(r"\thanks")[0]           # drop \thanks{...} onward
+        title = re.sub(r"\\\\(\[[^\]]*\])?", " ", title)  # \\ and \\[0.5em]
+        title = re.sub(r"\\[a-zA-Z]+", " ", title)   # other \commands (\large …)
+        title = re.sub(r"\s+", " ", title).strip(" {}")
+        if title:
+            metrics["title"] = title
 
     # Count \bibitem entries (citations)
     citations = len(re.findall(r"\\bibitem", content))
@@ -411,6 +438,8 @@ def update_paper_full(
 
     # 4. Update metadata with auto-detected metrics
     kwargs: dict[str, Any] = {"paper_id": paper_id}
+    if "title" in metrics:
+        kwargs["title"] = metrics["title"]
     if "pages" in metrics:
         kwargs["pages"] = metrics["pages"]
     if "citations" in metrics:
