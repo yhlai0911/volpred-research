@@ -36,6 +36,8 @@
 
 除此之外：**遇任何問題自行由底層邏輯與流程去修整優化**，不用每一步都請示。規則不清楚就依「研究誠實原則」+「永遠修流程，不修資料」+「先改 skill/rules」推導；依然不清楚就先做再記教訓到 `docs/error_log.md`。
 
+**回應用戶後不可停在「等下一句」（2026-05-21 用戶硬性糾正）**：處理完用戶的問題 / 指令後，**必須自己流回日常 ops loop**（dashboard 巡檢 → triage critical/warn → 從 next_tasks 派工 → 收背景 agent → 繼續），不把「回答完用戶」當成回合結束。互動 session 與運營經理 session 是同一個角色 — 用戶插話只是 user-assigned 優先任務插隊，做完就接回自主主線，不是切換成「reactive 待命模式」。停下來的唯一正當理由是 ops loop 自然到達暫停點（無 critical、池有工已派、背景 agent 已收），不是「用戶沒再說話」。
+
 ## Bootstrap 原則
 
 這份 `CLAUDE.md` 只保留每次 session 都必須先知道的核心規則。它刻意維持精簡；較長的細節拆到：
