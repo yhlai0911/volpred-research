@@ -34,7 +34,13 @@
 
 ---
 
-## 🔴 OPEN INCIDENT — hourly-dispatch launchd 環境失敗（2026-05-21 16:35）
+## ✅ RESOLVED — hourly-dispatch launchd exit-78（2026-05-21 16:41 修復，commit 90d493e2）
+
+根因：plist StandardOutPath/StandardErrorPath 在 TCC 保護的 ~/Desktop → launchd spawn 階段 open 失敗 → EX_CONFIG/78、script body 從沒跑。Fix：plist std 路徑 + wrapper exec-log 全移 ~/.volpred/logs/；storage/logs/cron/hourly_dispatch.log 改 symlink；bootout+bootstrap reload；kickstart 驗證 16:41 班正常啟動 claude。詳見 docs/error_log.md。候補：LaunchAgent plist 無 repo 源，應建 config/launchagents/ + install script。
+
+---
+
+## （存查，已解決）原 incident 診斷紀錄
 
 **症狀**：`com.volpred.hourly-dispatch` LaunchAgent 自 09:07 起每班 exit 78 (EX_CONFIG)、零 log 輸出。`launchctl print` runs 計數持續增加（已 27）證明有 fire，但每次秒級死。
 
