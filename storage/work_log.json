@@ -7651,5 +7651,16 @@
     "status": "completed",
     "timestamp": "2026-05-21T00:23:21.824509+00:00",
     "notes": "v4 review confirmed v3.1 fixes clean. 2 SEVERE fixed (erroneous twelve in MDD claim + rho=1.000 underexplained). 4 MED/Minor addressed. Pending: M-1 ~8 plain text citations + MIN-3 hood2025 DOI. Gate for ready_for_submission: M-1+MED-1 verification."
+  },
+  {
+    "timestamp": "2026-05-21T09:17:00+08:00",
+    "type": "paper_body",
+    "task": "leverage-direction v3.3: M-1 citation fixes + cosmetics",
+    "description": "7 plain-text citations → LaTeX \\citet{}/\\citep{}/\\citealt{}; strip 15 internal review comments (v2-H*, Codex-R6-fix); remove empty appendix section; restore hidden We test: from LaTeX comment. Compiled clean (xelatex, 66pp, 0 errors). Supabase synced.",
+    "status": "completed",
+    "paper_id": "leverage-direction",
+    "files_changed": [
+      "paper/leverage-direction/body.tex"
+    ]
   }
 ]
