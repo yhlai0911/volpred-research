@@ -1,41 +1,39 @@
 {
-  "timestamp": "2026-05-19T12:07:17Z",
+  "timestamp": "2026-05-21T00:09:11Z",
   "all_ok": false,
   "checks": [
     {
-      "name": "ARTICLE_POOL",
+      "name": "article_pool",
+      "status": "ok",
+      "detail": "total=160 drafts. research=16 (threshold>=4: OK), general=144 (threshold>=8: OK), total>=12: OK."
+    },
+    {
+      "name": "strategy_metrics_freshness",
       "status": "alert",
-      "detail": "total_drafts=6, research=4, general=2; ALERTS: article pool low (<12): total=6; general pool low (<8): general=2"
+      "detail": "storage/strategy_metrics.json is ~89 hours old (mtime ~2026-05-17T06:29Z). Threshold: 26h. Needs refresh."
     },
     {
-      "name": "STRATEGY_METRICS_FRESHNESS",
-      "status": "alert",
-      "detail": "age=54.0h (threshold=26h); ALERT: metrics stale"
-    },
-    {
-      "name": "ERROR_LOG",
+      "name": "error_log_recent",
       "status": "ok",
-      "detail": "no entries dated 2026-05-19 (today) or 2026-05-18 (yesterday) in last 30 lines; most recent entry 2026-04-26"
+      "detail": "No entries dated 2026-05-21 (today) or 2026-05-20 (yesterday) in docs/error_log.md. Most recent: 2026-05-18 (merge_worktree stash-pop outage fix; mile_7ba7ee54 FAIL)."
     },
     {
-      "name": "PAPER_TRADING_GAPS",
+      "name": "paper_trading_gaps",
       "status": "ok",
-      "detail": "all 14 strategies have <=1 null in last 3 entries; no strategy exceeds >2 null threshold; _market_daily skipped (empty)"
+      "detail": "14 strategies checked (excl. _market_daily). All have null_count<=1 in last 3 entries (last entry 2026-04-24 has null, prior 2 are non-null). Threshold >2: not triggered."
     },
     {
-      "name": "GIT_STATUS",
+      "name": "git_uncommitted_files",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold: >50); working tree clean"
+      "detail": "0 uncommitted files. Working tree is clean."
     },
     {
-      "name": "KNOWLEDGE_SIZE",
+      "name": "knowledge_size",
       "status": "ok",
-      "detail": "knowledge.json entries=2044"
+      "detail": "storage/memory/knowledge.json contains 2147 entries."
     }
   ],
   "alerts": [
-    "article pool low (<12): total=6",
-    "general pool low (<8): general=2",
-    "metrics stale (age=54.0h)"
+    "metrics stale: storage/strategy_metrics.json is ~89h old (threshold 26h). Run metrics refresh pipeline."
   ]
 }

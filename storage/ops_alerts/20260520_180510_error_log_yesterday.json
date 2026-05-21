@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-05-20T18:05:10Z",
+  "alert_type": "error_log_recent",
+  "severity": "info",
+  "detail": "error_log.md has entries from 2026-05-19 and 2026-05-18.",
+  "entries": [
+    "2026-05-19: 3-STRIKE TRIGGER — publish pipeline missing post-publish live verify gate (live_verify.py deployed as fix, backfill confirmed 5/5 PASS)",
+    "2026-05-18: merge_worktree stash-pop conflict -> release_pool_gap 4th-strike outage (fixed: auto-restore whitelist added to merge_worktree.sh)",
+    "2026-05-18: mile_7ba7ee54 FAIL — mixed Strategy A/C argument (unpublished, rewrite task P2 added)"
+  ],
+  "action_required": "Verify live_verify gate is active in publish pipeline; confirm merge_worktree.sh fix committed; track mile_7ba7ee54 rewrite in next_tasks."
+}
