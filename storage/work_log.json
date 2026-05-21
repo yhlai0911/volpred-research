@@ -7845,5 +7845,14 @@
       "k1222b"
     ],
     "next_step": "paper-review-cycle to trigger review_history/v2 after body updates stabilize"
+  },
+  {
+    "task_type": "experiment",
+    "task_id": "K1319",
+    "timestamp": "2026-05-22T07:22:33+08:00",
+    "title": "K1319: HAR + Wavelet Decomposition (Daily RV Preliminary)",
+    "verdict": "NULL",
+    "summary": "HAR-W with wavelet energy features significantly worse than HAR on daily r^2 data. QLIKE: HAR=-8.175 vs HAR-W=-7.974 (worse). MSE: HAR=3.18e-7 vs HAR-W=7.03e-7 (2x worse). DM t=+6.29 p<0.001. Root cause: daily r^2 noise amplified by wavelet energy; HAR rolling averages are better low-pass filters. 5-min RV version deferred to Q2 2026.",
+    "next_tasks_id": "K1319"
   }
 ]

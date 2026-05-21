@@ -1,0 +1,60 @@
+{
+  "experiment_id": "K1319",
+  "date": "2026-05-22",
+  "verdict": "NULL",
+  "data": {
+    "asset": "SPY",
+    "rv_proxy": "squared log return (r^2_t)",
+    "period": "2010-01-01 to 2026-05-20",
+    "n_total": 4129,
+    "n_is": 2494,
+    "n_oos": 1613,
+    "oos_start": "2020-01-01"
+  },
+  "models": {
+    "wavelet": "db4",
+    "dwt_levels": 4,
+    "window": 64,
+    "har_lags": [
+      1,
+      5,
+      22
+    ],
+    "forecast_origin": "end-of-day t; HAR uses rv[t] (no extra shift); target = rv[t+1]"
+  },
+  "qlike": {
+    "ewma_0.94": -8.117991,
+    "har": -8.17492,
+    "har_w": -7.97419,
+    "harw_vs_har_improvement_pct": -2.455
+  },
+  "mse": {
+    "ewma_0.94": 3.542e-07,
+    "har": 3.177e-07,
+    "har_w": 7.034e-07,
+    "harw_vs_har_improvement_pct": -121.439
+  },
+  "dm_test": {
+    "harw_vs_har_t_stat": 6.2929,
+    "harw_vs_har_pvalue": 0.0,
+    "har_vs_ewma_t_stat": -3.0226,
+    "har_vs_ewma_pvalue": 0.0025,
+    "correction": "Harvey-Leybourne-Newbold (1997), h=1: factor=sqrt((T-1)/T)",
+    "alpha": 0.05,
+    "sign_convention": "negative t_stat => HAR-W better (lower loss)"
+  },
+  "interpretation": {
+    "harw_better_qlike": false,
+    "harw_better_mse": false,
+    "dm_significant": false,
+    "note": "Preliminary with daily r^2 RV proxy. 5-min RV version deferred to Q2 2026. Wavelet features: mean(coeff^2) energy per level — non-negative by design."
+  },
+  "lookahead_audit": {
+    "forecast_origin": "end-of-day t",
+    "har_features": "rv_d=rv[t], rv_w=rolling(5) ending t, rv_m=rolling(22) ending t — all <= t",
+    "harw_features": "DWT on rv[t-63 .. t] (64 days ending inclusive at t) — all <= t",
+    "target": "rv_target = rv.shift(-1) = rv[t+1] at row t",
+    "status": "CLEAN — both HAR and HAR-W use identical information set {rv_1..rv_t}"
+  },
+  "seed": 42
+}
