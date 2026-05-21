@@ -7694,5 +7694,14 @@
       "word_count": 5046,
       "anti_ai_style_pass": true
     }
+  },
+  {
+    "task_type": "experiment",
+    "title": "K1320: Copula-GARCH 最小變異數避險比率 — Hsu et al. (2008, JFM) [CONDITIONAL_PASS]",
+    "status": "completed",
+    "timestamp": "2026-05-21T10:38:11.213430+00:00",
+    "experiment_id": "K1320",
+    "verdict": "CONDITIONAL_PASS",
+    "notes": "GJR-GARCH + 5 copula families + DCC. SPY-QQQ IS 2005-2018, OOS 2019-2024. Best IS copula: Gumbel (AIC=-6939.99). OOS HE: Gumbel=0.8880, DCC=0.8862, Δ=+0.0019 (DM t=0.50 p=0.617, NS). Null result: all copula≈DCC for high-correlation equity pair. Clayton fails (HE=0.7133). Code review MINOR: Gumbel LL coefficient bug (1/θ-2 vs 2/θ-2), negligible impact. knowledge.json item_id=f37c47e7. Codex review pending (PID 87869)."
   }
 ]

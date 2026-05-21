@@ -31095,5 +31095,29 @@
     "asset": "SPY",
     "oos_period": "2018-01-01/2024-12-31",
     "n_oos": 1760
+  },
+  {
+    "item_id": "f37c47e7",
+    "k_id": "K1320",
+    "experiment_id": "K1320",
+    "category": "hedging",
+    "title": "K1320: Copula-GARCH 最小變異數避險比率 — SPY-QQQ OOS 2019-2024 [CONDITIONAL_PASS]",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1320: Hsu, Tseng & Wang (2008, JFM) copula-GARCH 最小變異數避險方法論驗證。SPY（現貨）vs QQQ（避險工具），IS 2005-2018（N=3522），OOS 2019-2024（N=1509）。GJR-GARCH(1,1) marginals + 經驗 PIT → 5 copula families（Normal/Student-t/Clayton/Gumbel/Frank）MLE。\n\n【IS copula 選取（AIC）】Gumbel θ=3.3703 AIC=-6939.99（最佳）→ Student-t -5546 → Normal -5397 → Frank -4918 → Clayton -2987。Gumbel 大幅領先 ΔAIC=1394，反映 SPY-QQQ 上尾相依（科技牛市共漲）。\n\n【OOS Hedge Effectiveness（HE = 1 - Var_hedged/Var_unhedged）】Copula_Gumbel_static=0.8880, DCC_Gaussian=0.8862, Rolling_OLS=0.8701, OLS=0.8584。Clayton 嚴重失敗 HE=0.7133（rho_equiv=0.50，下尾單側結構無法捕捉正相關 pair）。\n\n【DM 檢定（HLN-HAC，|t|>1.96@5%）vs DCC_Gaussian】Gumbel t=0.5002 p=0.617（不顯著），所有 copula（除 Clayton）HE 優於 DCC 但差距 +0.0019 無統計顯著。Clayton t=-1.74 p=0.082（不顯著，接近邊界）。OLS t=-0.84, Rolling_OLS t=-0.77（均不顯著）。\n\n【方法論 gates】Lookahead-free: np.roll(1) → h_{t-1} 作用於 t 期報酬。seed=42。GARCH persistence: SPY=0.953, QQQ=0.966（<1 收斂）。\n\n【Code review 自審 CONDITIONAL_PASS】Normal/Student-t/Clayton/Frank copula LL 公式正確。Gumbel MINOR BUG：(1/θ-2)*log_s 應為 (2/θ-2)*log_s，MLE 補償後 θ bias≈0.02（3.37 vs 理論 3.39），rho_equiv 誤差<0.001，結論不受影響。\n\n【主要結論】高相關股票 pair（r≈0.93）中 copula 選擇幾乎無差異：HE 收斂在 0.8862-0.8880 窄域（ΔHIE=0.0018）。主宰避險效果的是相關性水平（rho_equiv≈0.88），不是 copula 尾部結構。Clayton 是唯一例外（rho_equiv 嚴重低估），再次確認 K1100b 教訓。Static > Dynamic Gumbel（HE 0.8880 vs 0.8876）：IS 估計參數已足夠穩定。",
+    "evidence": [
+      "Gumbel best IS AIC=-6939.99 (ΔAIC vs Student-t=1394)",
+      "OOS HE: Gumbel=0.8880, DCC=0.8862, ΔHIE=0.0019",
+      "DM test Gumbel vs DCC: t=0.5002 p=0.617 (not significant)",
+      "Clayton HE=0.7133 (rho_equiv=0.50 underestimates dependence)",
+      "Lookahead: hr_lagged via np.roll(1), h_{t-1} applied at t",
+      "GARCH persistence SPY=0.953 QQQ=0.966 (<1 converged)",
+      "Gumbel MINOR: (1/θ-2)*log_s bug, θ bias≈0.02, rho_equiv error<0.001",
+      "source: experiments/k1320/k1320_results.json + manual code review"
+    ],
+    "confidence": 0.82,
+    "created_at": "2026-05-21T18:37:43.358928",
+    "reference": "Hsu, Tseng & Wang (2008, JFM): Dynamic hedging with futures: A copula-based GARCH model",
+    "data_period": "IS 2005-2018 (N=3522), OOS 2019-2024 (N=1509)",
+    "reviewer_source": "manual code review (Codex pending)"
   }
 ]
