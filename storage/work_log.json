@@ -7798,5 +7798,16 @@
     "source_experiment": "K1316",
     "summary": "Anti-AI 9-checklist review + minor final-sentence edit + published to feed + Supabase synced",
     "details": "K1316 VIX cross-market TAIFEX TX1 study (N=626, DM not Harvey-significant). Draft mile_b46e313f reviewed with editor-sop.md 9-checklist. 1 edit: final sentence over-generalization removed. Published: 2026-05-21T18:19:45Z. verified_live=true, 2068 chars, 2 real Supabase charts."
+  },
+  {
+    "timestamp": "2026-05-22T03:15:42+08:00",
+    "task_type": "experiment",
+    "task_id": "K1308",
+    "title": "K1308: VIXTWN/VIX Ratio 穩定性驗證（Q6 中期更新）",
+    "status": "succeeded",
+    "verdict": "CONDITIONAL_PASS",
+    "findings": "UNSTABLE — ratio 從 K1181 基準 1.39 漂移至 1.57（全期），近 30 日 rolling mean=2.06；OLS R²=0.62，前後半 mean 1.38 vs 1.76（Welch t=-7.93, p≈0）。台灣特有恐慌溢酬顯著超越 US VIX。Paper 2 Sec 2.5 需加樣本期說明。",
+    "experiment_path": "experiments/k1308/",
+    "knowledge_id": "know_20260522031502_k1308"
   }
 ]

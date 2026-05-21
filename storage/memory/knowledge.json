@@ -31160,5 +31160,24 @@
     },
     "sample_limitation": "Intraday RV collection started 2026; ~252 trading days needed for ~200 OOS window. Rerun in Q3-Q4 2026.",
     "created_at": "2026-05-21T23:30:06.929788"
+  },
+  {
+    "id": "know_20260522031502_k1308",
+    "title": "K1308: VIXTWN/VIX Ratio 時變性確認 — Q6 中期更新（119天）",
+    "body": "K1181 基準（Dec2025–Apr2026, N=76）ratio=1.3906, CV=0.098。K1308 以 119 天資料（Dec2025–May2026）更新：mean=1.5737, CV=0.204，顯著高於基準（t=6.22, p≈0）。OLS trend β=0.0073/day (R²=0.620, p≈0)，前半（N=59）mean=1.3838 vs 後半（N=60）mean=1.7605（Welch t=-7.93, p≈0）。最近 30 日 rolling mean=2.0643。May 2026 VIXTWN 飆升至 37-40，VIX 僅 17-18，ratio 達 2.1-2.3，顯示台灣特有恐慌溢酬大幅超越美股 VIX。VIXTWN/VIX ratio 非穩定結構常數——Paper 2 Sec 2.5 數字（1.393, CV=10%）需加明確樣本期說明。進度：119/252 天（47.2%），預計 2026-12 達 252 天。代碼 Codex CONDITIONAL_PASS（命名修正已完成，4 項限制已文件化）。",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "K1308",
+    "experiment_path": "experiments/k1308/",
+    "reviewer": "Codex CLI",
+    "tags": [
+      "vixtwn",
+      "vix",
+      "ratio",
+      "taiwan",
+      "stability",
+      "paper2",
+      "time-varying"
+    ],
+    "created_at": "2026-05-22T03:15:02+08:00"
   }
 ]

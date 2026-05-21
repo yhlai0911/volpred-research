@@ -1,0 +1,84 @@
+{
+  "experiment_id": "K1308",
+  "title": "VIXTWN/VIX Ratio 穩定性驗證（Q6）",
+  "run_date": "2026-05-22",
+  "codex_review": "CONDITIONAL_PASS",
+  "data_sources": {
+    "vixtwn": "/Users/yhlai0911/Desktop/volpred-research/data/vixtwn/vixtwn_daily.csv",
+    "vix": "/Users/yhlai0911/Desktop/volpred-research/paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv"
+  },
+  "known_limitations": [
+    "baseline comparison uses K1181 fixed constant 1.3906, not a two-sample test",
+    "inner merge on calendar date only; TZ/session mismatch not corrected",
+    "midpoint break test is Welch t-test, not formal Chow/CUSUM",
+    "dedup keeps first row of duplicates without value validation"
+  ],
+  "overall_stats": {
+    "mean": 1.5737,
+    "median": 1.4639,
+    "std": 0.3211,
+    "cv": 0.204,
+    "min": 1.0911,
+    "max": 2.2787,
+    "n": 119,
+    "period": "2025-12-01–2026-05-20",
+    "ci_95": [
+      1.5154,
+      1.632
+    ]
+  },
+  "comparison_to_k1181": {
+    "k1181_baseline_mean": 1.3906,
+    "k1181_baseline_cv": 0.098,
+    "k1181_n": 76,
+    "current_n": 119,
+    "additional_days": 43,
+    "mean_diff": 0.1831,
+    "t_stat_vs_baseline": 6.2219,
+    "p_vs_baseline": 0.0,
+    "baseline_still_valid": false
+  },
+  "rolling_summary": {
+    "window": 30,
+    "final_30d_mean": 2.0643,
+    "final_30d_cv": 0.0824,
+    "rolling_mean_range": [
+      1.3074,
+      2.0643
+    ]
+  },
+  "ols_trend": {
+    "beta": 0.00733,
+    "intercept": 1.1413,
+    "r_squared": 0.6202,
+    "p_value": 0.0,
+    "trend_significant": true
+  },
+  "midpoint_mean_shift_test": {
+    "test_type": "welch_ttest_at_midpoint",
+    "group1_mean": 1.3838,
+    "group2_mean": 1.7605,
+    "t_stat": -7.9339,
+    "p_value": 0.0,
+    "mean_shift_detected": true,
+    "split_at_n": 59,
+    "limitation": "midpoint-only Welch t-test, not a formal Chow/CUSUM break test"
+  },
+  "progress_to_252d": {
+    "current_n": 119,
+    "target_n": 252,
+    "pct_complete": 47.2,
+    "remaining_trading_days": 133,
+    "estimated_completion": "~2026-12 (approx 7 months)"
+  },
+  "stability_verdict": {
+    "mean_in_range": false,
+    "cv_ok": false,
+    "no_trend": false,
+    "no_midpoint_mean_shift": false,
+    "consistent_with_k1181": false,
+    "overall_stable": false,
+    "calendar_merge_limitation": "inner join on date label only; no TZ-correction"
+  },
+  "conclusion": "UNSTABLE — ratio 顯著漂移，需進一步審查"
+}
