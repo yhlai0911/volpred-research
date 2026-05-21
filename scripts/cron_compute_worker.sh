@@ -10,7 +10,7 @@
 # TCC copy:  ~/.volpred/bin/cron_compute_worker.sh
 # After edit: cp scripts/cron_compute_worker.sh ~/.volpred/bin/ && chmod +x ~/.volpred/bin/cron_compute_worker.sh
 
-exec >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/compute_worker.log 2>&1
+exec >> /Users/yhlai0911/.volpred/logs/compute_worker.log 2>&1
 cd /Users/yhlai0911/Desktop/volpred-research || exit 1
 
 echo "=== compute-worker $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
