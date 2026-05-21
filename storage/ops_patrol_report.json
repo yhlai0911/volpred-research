@@ -1,45 +1,39 @@
 {
-  "timestamp": "2026-05-20T18:05:10Z",
+  "timestamp": "2026-05-21T00:09:11Z",
   "all_ok": false,
   "checks": [
     {
       "name": "article_pool",
       "status": "ok",
-      "detail": "total=160, research=16, general=144 — all thresholds met (total>=12, research>=4, general>=8)"
+      "detail": "total=160 drafts. research=16 (threshold>=4: OK), general=144 (threshold>=8: OK), total>=12: OK."
     },
     {
       "name": "strategy_metrics_freshness",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json is ~83.9h old (mtime 2026-05-17T06:09Z); threshold: 26h"
+      "detail": "storage/strategy_metrics.json is ~89 hours old (mtime ~2026-05-17T06:29Z). Threshold: 26h. Needs refresh."
     },
     {
       "name": "error_log_recent",
-      "status": "alert",
-      "detail": "Entries from yesterday (2026-05-19) and 2 days ago (2026-05-18) found",
-      "entries": [
-        "2026-05-19: 3-STRIKE TRIGGER — publish pipeline missing post-publish live verify gate; 5 articles published without HTTP check; FB push used wrong URL /article/{id}",
-        "2026-05-18: merge_worktree stash-pop conflict caused release_pool_gap outage (4th strike, real outage confirmed); merge_worktree.sh fix applied",
-        "2026-05-18: mile_7ba7ee54 FAIL — article mixed Strategy A/C argument; unpublished + rewrite task added"
-      ]
+      "status": "ok",
+      "detail": "No entries dated 2026-05-21 (today) or 2026-05-20 (yesterday) in docs/error_log.md. Most recent: 2026-05-18 (merge_worktree stash-pop outage fix; mile_7ba7ee54 FAIL)."
     },
     {
       "name": "paper_trading_gaps",
       "status": "ok",
-      "detail": "15 keys checked; _market_daily excluded (market OHLC, no portfolio_return by design); all 14 strategy entries have <=2 nulls in last 3 records"
+      "detail": "14 strategies checked (excl. _market_daily). All have null_count<=1 in last 3 entries (last entry 2026-04-24 has null, prior 2 are non-null). Threshold >2: not triggered."
     },
     {
       "name": "git_uncommitted_files",
       "status": "ok",
-      "detail": "0 uncommitted files — working tree clean"
+      "detail": "0 uncommitted files. Working tree is clean."
     },
     {
       "name": "knowledge_size",
       "status": "ok",
-      "detail": "2147 entries in knowledge.json"
+      "detail": "storage/memory/knowledge.json contains 2147 entries."
     }
   ],
   "alerts": [
-    "metrics stale: strategy_metrics.json is ~83.9h old (threshold 26h)",
-    "error_log_recent: entries from 2026-05-19 (yesterday) — 3-STRIKE publish pipeline live verify gate; 2026-05-18 worktree stash-pop outage + mile_7ba7ee54 FAIL"
+    "metrics stale: storage/strategy_metrics.json is ~89h old (threshold 26h). Run metrics refresh pipeline."
   ]
 }
