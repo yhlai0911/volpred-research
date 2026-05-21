@@ -1,6 +1,6 @@
 # Paper 1 (leverage-direction) Errata Pending
 
-**Last updated**: 2026-05-20 (batch-4 added: K1187 Table 7 per-asset period disclosure + K1198 sync completed)
+**Last updated**: 2026-05-21 (v3.3: M-1 plain-text citation → \\citet{}/\\citep{} conversion, 27 replacements)
 **Status**: pre-resubmission errata items, no public erratum filed yet
 
 ---
