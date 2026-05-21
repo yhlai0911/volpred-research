@@ -1,0 +1,153 @@
+{
+  "experiment_id": "K1318",
+  "lookahead_free_certification": "All features computed from past data only (lag >= 1); rv_1d[t]=RV[t-1], rv_5d[t]=mean(RV[t-5..t-1]), rv_22d[t]=mean(RV[t-22..t-1]); daily proxy: abs_1d[t]=|r[t-1]|, sq_1d[t]=r[t-1]^2; EWMA[t] uses r[t-1]^2; expanding OLS fit on [0..t-1] predicts t; code lines verified: shift(1) throughout",
+  "data_source": {
+    "spy_rv": "data/intraday/SPY_daily_rv.csv",
+    "tw_rv": "data/intraday/0050_TW_daily_rv.csv",
+    "daily_prices": "yfinance SPY & 0050.TW 2025-01-01~2026-05-21"
+  },
+  "sample_sizes": {
+    "spy_rv_total": 88,
+    "tw_rv_total": 61,
+    "spy_oos": 36,
+    "tw_oos": 9
+  },
+  "models": [
+    "HAR_RV_5min",
+    "HAR_RV_5min_LOG",
+    "HAR_ABS",
+    "HAR_SQ",
+    "EWMA_094"
+  ],
+  "results": {
+    "SPY": {
+      "n_rv_obs_total": 88,
+      "n_common_dates": 66,
+      "n_oos": 36,
+      "QLIKE": {
+        "HAR_RV_5min": 0.486774,
+        "HAR_RV_5min_LOG": 8.974994,
+        "HAR_ABS": 0.513458,
+        "HAR_SQ": 0.439365,
+        "EWMA_094": 0.501937
+      },
+      "MSE": {
+        "HAR_RV_5min": 1.861489e-08,
+        "HAR_RV_5min_LOG": 0.9998476,
+        "HAR_ABS": 1.58495e-08,
+        "HAR_SQ": 1.56207e-08,
+        "EWMA_094": 1.447294e-08
+      },
+      "DM_vs_EWMA": {
+        "HAR_RV_5min": {
+          "dm_stat": -0.24371209632283464,
+          "hln_stat": -0.2403033676587247,
+          "p_value": 0.8114970571635488,
+          "n_obs": 36,
+          "verdict": "NULL",
+          "d_bar": -0.015162701376404976,
+          "note": "negative d_bar = model1 better; HLN 1997 small-sample correction applied"
+        },
+        "HAR_RV_5min_LOG": {
+          "dm_stat": 44.6020999963458,
+          "hln_stat": 43.97826367869481,
+          "p_value": 3.1771591398538165e-32,
+          "n_obs": 36,
+          "verdict": "FAIL",
+          "d_bar": 8.473057103555936,
+          "note": "negative d_bar = model1 better; HLN 1997 small-sample correction applied"
+        },
+        "HAR_ABS": {
+          "dm_stat": 0.1758500348282206,
+          "hln_stat": 0.17339047265076654,
+          "p_value": 0.8633434366753551,
+          "n_obs": 36,
+          "verdict": "NULL",
+          "d_bar": 0.011521298301772651,
+          "note": "negative d_bar = model1 better; HLN 1997 small-sample correction applied"
+        },
+        "HAR_SQ": {
+          "dm_stat": -0.9445331086314057,
+          "hln_stat": -0.9313222047404155,
+          "p_value": 0.35806688995941843,
+          "n_obs": 36,
+          "verdict": "NULL",
+          "d_bar": -0.06257226030062833,
+          "note": "negative d_bar = model1 better; HLN 1997 small-sample correction applied"
+        }
+      }
+    },
+    "TW50": {
+      "n_rv_obs_total": 61,
+      "n_common_dates": 39,
+      "n_oos": 9,
+      "QLIKE": {
+        "HAR_RV_5min": 0.462705,
+        "HAR_RV_5min_LOG": 7.653438,
+        "HAR_ABS": 0.45209,
+        "HAR_SQ": 0.488544,
+        "EWMA_094": 0.442653
+      },
+      "MSE": {
+        "HAR_RV_5min": 6.851224e-08,
+        "HAR_RV_5min_LOG": 0.9995194,
+        "HAR_ABS": 6.763279e-08,
+        "HAR_SQ": 8.114499e-08,
+        "EWMA_094": 6.428011e-08
+      },
+      "DM_vs_EWMA": {
+        "HAR_RV_5min": {
+          "dm_stat": 0.8071976531887486,
+          "hln_stat": 0.7610332457701748,
+          "p_value": 0.46847350514838937,
+          "n_obs": 9,
+          "verdict": "NULL",
+          "d_bar": 0.020051782302470622,
+          "note": "negative d_bar = model1 better; HLN 1997 small-sample correction applied"
+        },
+        "HAR_RV_5min_LOG": {
+          "dm_stat": 45.42246285752974,
+          "hln_stat": 42.82470867300448,
+          "p_value": 9.746691349290408e-11,
+          "n_obs": 9,
+          "verdict": "FAIL",
+          "d_bar": 7.210784821769337,
+          "note": "negative d_bar = model1 better; HLN 1997 small-sample correction applied"
+        },
+        "HAR_ABS": {
+          "dm_stat": 0.42198849257542675,
+          "hln_stat": 0.39785456624369775,
+          "p_value": 0.7011430320495015,
+          "n_obs": 9,
+          "verdict": "NULL",
+          "d_bar": 0.009437166758392223,
+          "note": "negative d_bar = model1 better; HLN 1997 small-sample correction applied"
+        },
+        "HAR_SQ": {
+          "dm_stat": 0.9340978107660171,
+          "hln_stat": 0.8806758617122121,
+          "p_value": 0.40417337141642884,
+          "n_obs": 9,
+          "verdict": "NULL",
+          "d_bar": 0.04589089595358911,
+          "note": "negative d_bar = model1 better; HLN 1997 small-sample correction applied"
+        }
+      }
+    }
+  },
+  "verdict": "NULL",
+  "verdict_rationale": "SPY: HAR-RV-5min DM t=-0.240 (NULL), QLIKE=0.486774 vs EWMA=0.501937 (better). TW50: HAR-RV-5min DM t=0.761 (NULL), QLIKE=0.462705 vs EWMA=0.442653 (worse). Small-sample power issue (SPY n\u224836, TW50 n\u22489): NULL = inconclusive.",
+  "methodology": {
+    "oos_type": "expanding_window",
+    "min_train_days": 30,
+    "dm_correction": "HLN_1997_small_sample",
+    "significance_level": 0.01,
+    "harvey_threshold": 3.0,
+    "loss_function": "QLIKE",
+    "random_seed": 42
+  },
+  "prior_context": {
+    "K530": "HAR-ABS QLIKE=-3.892 (daily |r| target); HAR expected stronger with true 5-min RV",
+    "K782": "HAR loses to GJR on r^2 target; proxy quality matters more than model"
+  }
+}
