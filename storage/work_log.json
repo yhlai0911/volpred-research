@@ -7829,5 +7829,21 @@
     "review_version": "v7",
     "status": "completed",
     "commit": "b739e02b"
+  },
+  {
+    "timestamp": "2026-05-22T06:17:40+08:00",
+    "task_type": "paper_body",
+    "task_id": "paper_body_eav_k1222b_cherry_pick",
+    "title": "Paper 2 §5.5 K1222b cherry-pick: Section synthesis → K1222b FINAL + §5.5.4 multistart methodology",
+    "status": "completed",
+    "summary": "Applied K1222b FINAL to paper/eav-universal-magnitude/body.tex: (1) Section synthesis updated ρ+0.385→+0.379 p=0.201, removed AU below-ladder caveat(ii), replaced with CA/HK/KR disclosure caveat, added three-drivers commitment; (2) New §5.5.4 subsubsection with 10-step multistart protocol + 10-market LR record table; (3) Figure 5A caption annotated K1216c FINAL. Compiled clean (2 XeLaTeX passes).",
+    "papers": [
+      "eav-universal-magnitude"
+    ],
+    "experiments_referenced": [
+      "k1216c",
+      "k1222b"
+    ],
+    "next_step": "paper-review-cycle to trigger review_history/v2 after body updates stabilize"
   }
 ]

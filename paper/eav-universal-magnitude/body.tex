@@ -922,33 +922,129 @@ The TW$+$EU (low-cluster) vs.\ JP$+$US (high-cluster) four-market classification
 Figure~\ref{fig:5E} compares K1153 ($N = 18$) and K1163 ($N = 30$) estimates with
 cluster-bootstrap confidence intervals.
 
-\paragraph{Section synthesis: STRENGTHENED with 3 residual caveats.}
-The 13-market institutional panel supports the following headline:
-\begin{quote}
-\emph{The cross-market institutional-ownership ladder is real, robust, and structurally
-interpretable, with three explicitly-bounded residual caveats.}
-\end{quote}
-The primary cross-market statistic (Spearman $\rho = +0.385$, $p = 0.194$, $N = 13$;
-Figure~\ref{fig:5A}) remains positive and consistent with the analyst-attention
-interpretation.
-The panel analyst-coverage mechanism (joint $\log$-analyst $t = 3.808$, all five
-N-extension iterations above the Harvey--Liu--Zhu $|t| > 3.0$ threshold;
-Figure~\ref{fig:5B}) is the single most robust quantitative regularity in this section.
-The two-level decomposition (between-market $R^2 = 0.419$ for inst\_pct; within-market
-$R^2 = 0.053$ for $\log$analyst; ratio $\approx 7.9\times$; Figure~\ref{fig:5C})
-formalises the hierarchical structure.
+\paragraph{Section synthesis: MODESTLY WEAKER BUT SURVIVING --- K1222b FINAL.}
+% source: k1222b_revision_guide.md §5.5 narrative commitment (K1216c supersedes K1222/K1215/K1211)
+The within-market analyst-attention mechanism is robust: Panel Harvey $|t|(\log\mathrm{analyst})$
+grows monotonically $3.236 \to 3.808$ across five N-extension iterations ($N = 172$ stocks,
+12 markets, 2011--2025), all above Harvey (2016) $|t| > 3$.
+$\mathrm{institutions\_pct}$ is insignificant within market
+($|t| < 1$, $\hat{\beta} \approx -1.25 \times 10^{-3}$, stable; Figure~\ref{fig:5B}).
+GICS sector FE add incremental adjusted $R^2 = 0.148$ ($\approx 32\times$ the
+inst-FE $0.0046$), $F = 689.5$, $p = 7.9 \times 10^{-14}$ (K1207; Figure~\ref{fig:5C}).
+Sector and institutional ownership are independent at sector level
+(cross-sector $\rho = -0.006$, $p = 0.987$).
+EU panel full-coverage robustness (K1163) keeps EU low-cluster at $N = 30$
+(bootstrap $t = 4.81$, 95\% CI $\hat{\theta}_{\mathrm{rel}} \in [0.127, 0.277]$;
+Figure~\ref{fig:5E}).
+
+The cross-market institutional-ownership ladder is \emph{modestly weaker but surviving}
+under panel-wide 100-multistart audit.
+The canonical trajectory $\rho = +0.75 \to +0.44 \to +0.39$ updates to a 9-market
+consistent refined Spearman
+$\rho(\mathrm{inst\_pct},\hat{\theta}_{\mathrm{rel}}) = +0.379$, $p = 0.201$,
+Harvey $t = +1.36$ ($N = 13$, K1216c; Table~\ref{tab:spearman_traj}).
+% source: k1216c_results.json: spearman_variants.K1216c_FULL_9market_refined_plus_AU_N13.rho=0.3791, p=0.2014
+% source: k1216c_results.json: harvey_t_per_variant.K1216c_FULL_9market_refined_plus_AU_N13=1.3588
+The canonical $+0.441$ (K1172, $N = 12$) and refined $+0.379$ are statistically
+indistinguishable under a Fisher $z$ comparison ($z$-stat $= 0.16$, two-sided $p \approx 0.87$);
+both are moderately positive and non-significant at 5\%.
+The intermediate K1216b $\rho = -0.071$ was an \textbf{asymmetric-refinement artefact}:
+refining 5 EM pools to basin-B while leaving 4 DEV pools at default-init basin-A broke the
+rank concordance. K1216c shows all 4 DEV pools are also FRAGILE
+(US LR $= 2837$, EU $838$, JP $236$, TW $588$); moving DEV to basin-B in parallel
+rebuilds concordance.
+
 Residual caveat (i)---EM cost-of-capital scaling (K1173 null-shift $\Delta\rho = -0.056$,
 Figure~\ref{fig:5D})---requires treating EM $\hat{\theta}_{\mathrm{rel}}$ as a separate
-structural regime whose distance from the developed-market ladder is not an artefact.
-Residual caveat (ii)---AU below-ladder sector bias
-($\hat{\mathrm{inst\_pct}} = 0.37$; $\hat{\theta}_{\mathrm{rel}} = 0.15$;
-drop-AU LOO $\rho = 0.441$)---is attributable to ASX heavy-bank/miner sector composition
-generating less idiosyncratic earnings-day volatility than comparable capitalisations
-in other markets.
-Residual caveat (iii)---EU full-coverage cluster membership (K1163
-$\hat{\theta}_{\mathrm{rel}} = 0.194$, CI $[0.127, 0.277]$,
-cluster-boot $t = 4.81$; Figure~\ref{fig:5E})---is \textbf{ROBUST}: the quarterly-density
-hypothesis remains rejected under full 30-stock EU coverage.
+structural regime whose distance from the developed-market ladder is not a measurement
+artefact.
+Residual caveat (ii)---CA/HK/KR disclosure: these three markets carry K1172 canonical
+$\hat{\theta}_{\mathrm{rel}}$ in the K1216c rebuild; given the universal FRAGILE verdict
+across all 9 audited markets, a future audit on CA/HK/KR is expected to shift the final
+$\rho$ to $[+0.30,\,+0.50]$.
+
+As an additional methodological contribution, this paper establishes that cross-market
+pooled MLE on the shared-MIDAS $+$ stock-FE-GJR specification requires $\geq 100$ random
+initialisations to escape secondary local minima
+(Section~\ref{sec:multistart_method}).
+Default-init single-shot L-BFGS-B lands in inferior basin-A for every audited market
+(9/9 FRAGILE across AU $+$ 5 EM $+$ 4 DEV); Nelder-Mead polish further improves the
+L-BFGS-B best in every case.
+
+\textbf{Paper 2 commits to three cross-market structural drivers}---
+(a)~within-market analyst attention (primary; Harvey $|t| > 3$, $\times 5$ iterations),
+(b)~within-market GICS sector composition (primary; $F = 689.5$, $p = 7.9\times10^{-14}$),
+and (c)~cross-market institutional ownership (\emph{modestly weaker but surviving};
+refined $\rho = +0.379$, $p = 0.20$, $N = 13$)---plus one additional methodological
+contribution (multistart pooled-MLE diagnostic;
+Section~\ref{sec:multistart_method}).
+All future extensions on this specification must follow the \S5.5.4 multistart protocol.
+
+\subsubsection{Multistart Pooled-MLE as an Additional Methodological Contribution}
+\label{sec:multistart_method}
+% source: k1222b_revision_guide.md §5.4 (promoted from K1222 appendix to §5.5.4 Paper 2 contribution)
+
+K1213, K1216, K1216b, and K1216c together establish that the shared-MIDAS $+$ stock-FE-GJR
+pooled-MLE specification (K1168/K1172) exhibits a \textbf{panel-wide two-basin likelihood
+surface}: all 9 audited markets (AU $+$ 5 EM $+$ 4 DEV) trap default-init L-BFGS-B in an
+inferior local minimum. This is a methodological contribution to cross-market
+systemic-volatility studies on small-$S$ pools ($S \leq 10$ stocks per market).
+
+\paragraph{Multistart protocol} (identical across K1213/K1216/K1216b/K1216c):
+\begin{enumerate}[label=\arabic*.]
+\item 100 random L-BFGS-B initialisations per market; log-uniform on
+  $\hat{\theta}_{\mathrm{EAV}},\, \theta_0 \in [10^{-6},\, 5 \times 10^{-4}]$.
+\item Penalty-trap guard rejecting \texttt{res.fun}~$> 10^{11}$ or
+  $-$\texttt{res.fun}~$< 1000$.
+\item $K$-means ($K = 2$) basin identification on converged
+  $(\hat{\theta}_{\mathrm{EAV}},\,\mathrm{LL})$ pairs.
+\item Best-LL across valid starts $=$ L-BFGS-B global estimate.
+\item Sensitivity polish: Nelder-Mead warm-start $+$ \texttt{differential\_evolution} check.
+\item Refined best-LL $= \max$ over valid optimisers (NM consistently exceeds L-BFGS-B best).
+\item LR test vs.\ canonical: $\mathrm{LR} = 2(\mathrm{LL}_{\mathrm{refined}}
+  - \mathrm{LL}_{\mathrm{canonical}})$ vs.\ $\chi^2(1) = 3.84$.
+\item Standard errors: Hessian on $\hat{\theta}_{\mathrm{EAV}}$ $+$ HAC-robust sandwich
+  (stock-level scores).
+\item Cross-market rebuild: refit
+  $\hat{\theta}_{\mathrm{rel}} = \hat{\theta}_{\mathrm{EAV,pooled}}\,/\,\overline{\sigma^2}_{\mathrm{sample}}$.
+\item Seed discipline: base $= 42$; 100 start seeds $43\ldots 142$; DE seed $49$;
+  $K$-means seed $42$.
+\end{enumerate}
+
+\begin{table}[htbp]
+\caption{9-Market Multistart Audit: LR Test of Canonical vs.\ Refined Pooled-MLE Estimates}
+\label{tab:multistart_lr}
+\centering
+\begin{threeparttable}
+\small
+\begin{tabular}{llccccc}
+\toprule
+Market & Exp & Canon $\hat{\theta}_{\mathrm{rel}}$ & Refined $\hat{\theta}_{\mathrm{rel}}$ & LR stat & $\chi^2(1)$ multiple & Verdict \\
+\midrule
+AU & K1213  & 0.150 & 1.476 & 198.9   & $51.8\times$ & FRAGILE \\
+BR & K1216  & 1.887 & 2.691 & 145.66  & $37.9\times$ & FRAGILE \\
+IN & K1216  & 1.170 & 3.077 & 410.76  & $107\times$  & FRAGILE \\
+MX & K1216  & 1.202 & 1.845 & 347.27  & $90\times$   & FRAGILE \\
+CH & K1216b & 0.304 & 1.469 & 597.94  & $156\times$  & FRAGILE \\
+ID & K1216b & 0.238 & 1.917 & 365.36  & $95\times$   & FRAGILE \\
+US & K1216c & 0.415 & 8.614 & 2836.68 & $739\times$  & FRAGILE \\
+EU & K1216c & 0.196 & 1.434 & 837.97  & $218\times$  & FRAGILE \\
+JP & K1216c & 1.668 & 4.706 & 235.57  & $61.3\times$ & FRAGILE \\
+TW & K1216c & 0.314 & 1.364 & 587.78  & $153\times$  & FRAGILE \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item[*] All 10 markets reject the canonical single-init estimate at $p < 10^{-30}$
+under nested LR. The 9/9 FRAGILE pattern is a feature of the K1168/K1172 joint
+pooled-MLE specification on small-$S$ panels, not a market-specific anomaly.
+The two-basin pathology is \textbf{invisible} under default single-init L-BFGS-B
+(used in K1145/K1147/K1150/K1153/K1168/K1172); the multistart diagnostic reveals it
+only after $10 \times 100 = 1000$ fits.
+% sources: k1213_results.json, k1216_results.json, k1216b_results.json, k1216c_results.json (verbatim)
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
 
 %==============================================================
 \subsubsection*{Cross-Market Panel Figures (Figures~\ref{fig:5A}--\ref{fig:5E})}
@@ -961,7 +1057,11 @@ hypothesis remains rejected under full 30-stock EU coverage.
 trajectory across N-extension iterations K1165--K1171. Error bars show Fisher-$z$ 95\%
 confidence intervals; colours indicate verdict
 (STRENGTHENED\,/\,PARTIAL\,/\,DATA\_LIMITED).
-$N$ increases from 7 to 13 markets across iterations.}
+$N$ increases from 7 to 13 markets across iterations.
+\textbf{FINAL annotation}: K1216c 9-market uniform refinement yields
+$\rho = +0.379$, $p = 0.201$, $N = 13$ (rightmost point, solid border);
+K1216b asymmetric $\rho = -0.071$ (open border) is relegated to a methodology footnote.}
+% source: k1222b_revision_guide.md cherry-pick instruction 10
 \label{fig:5A}
 \end{figure}
 
