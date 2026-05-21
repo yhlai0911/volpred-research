@@ -1,65 +1,82 @@
 # Review Round v5 — leverage-direction
 
 **Date**: 2026-05-21
-**Triggered by**: v4 MEDIUM M-1 citation fix — systematic plain-text → \citet{}/\citep{} conversion
-**Status**: Pre-review (v3.3 fixes applied; v5 academic review not yet run)
+**Triggered by**: v4 MEDIUM M-1 citation fix — systematic plain-text → `\citet{}/\citep{}` conversion
+**Status**: COMPLETE — v5 academic + citation review run; fixes applied
 
 ---
 
-## v3.3 Fixes Applied (2026-05-21 hourly dispatch)
+## v3.3 Fixes Applied (Earlier This Session)
 
-All M-1 plain-text citations converted to \citet{}/\citep{} commands throughout body.tex:
-
-| Citation | Old (plain text) | New (LaTeX command) |
-|---------|-----------------|---------------------|
-| bollerslev1986 | "(Bollerslev, 1986)" | `\citep{bollerslev1986}` |
-| glosten1993 | "Glosten, Jagannathan, and Runkle (1993)" | `\citet{glosten1993}` |
-| black1976 | "Black (1976)" | `\citet{black1976}` |
-| christie1982 | "Christie (1982)" | `\citet{christie1982}` |
-| hood2025 | "Hood and Raughtigan (2025)" | `\citet{hood2025}` (×3 occurrences) |
-| bollerslev1986 | "Bollerslev's (1986)" | `\citeauthor{bollerslev1986}'s (\citeyear{bollerslev1986})` |
-| engle2018 | "Engle and Siriwardane (2018)" | `\citet{engle2018}` |
-| kupiec1995 | "Kupiec (1995)" | `\citet{kupiec1995}` |
-| christoffersen1998 | "Christoffersen (1998)" | `\citet{christoffersen1998}` |
-| mcneil2015 | "McNeil, Frey, and Embrechts (2015)" | `\citet{mcneil2015}` |
-| bollerslev1987 | "Bollerslev (1987)" | `\citet{bollerslev1987}` |
-| kuester2006 | "Kuester, Mittnik, and Paolella (2006)" | `\citet{kuester2006}` |
-| moreira2017 | "Moreira and Muir (2017)" | `\citet{moreira2017}` (×2 occurrences) |
-| harvey2018 | "Harvey, Hoyle, ... (2018)" | `\citet{harvey2018}` |
-| fleming2001,fleming2003 | "Fleming, Kirby, and Ostdiek (2001, 2003)" | `\citet{fleming2001,fleming2003}` |
-| bollerslev1986 | "Bollerslev (1986)" (methodology §) | `\citet{bollerslev1986}` |
-| glosten1993 | "Glosten et al.\ (1993)" (methodology §) | `\citet{glosten1993}` |
-| sheppard2023 | "(Sheppard, 2023)" | `\citep{sheppard2023}` (×2 occurrences) |
-| hwang2006 | "Hwang & Valls Pereira, 2006" | `\citealt{hwang2006}` |
-| kupiec1995 | "Kupiec's (1995)" | `\citeauthor{kupiec1995}'s (\citeyear{kupiec1995})` |
-| christoffersen1998 | "Christoffersen's (1998)" | `\citeauthor{christoffersen1998}'s (\citeyear{christoffersen1998})` |
-| chevallier2017 | "Chevallier and Ielpo (2017)" | `\citet{chevallier2017}` (×2 occurrences) |
-| baur2010safe | "Baur and McDermott (2010)" | `\citet{baur2010safe}` |
-| baur2010hedge | "Baur and Lucey (2010)" | `\citet{baur2010hedge}` |
-| chang2021 | "Chang et al.\ (2021)" | `\citet{chang2021}` |
-| patton2011 | "Patton's (2011)" | `\citeauthor{patton2011}'s (\citeyear{patton2011})` |
-| nelson2025 | "Nelson's (2025)" | `\citeauthor{nelson2025}'s (\citeyear{nelson2025})` |
-
-**Also updated**: main.tex `\date{}` → "May 2026 (v3.3)"
+All M-1 plain-text citations converted to `\citet{}/\citep{}` commands throughout body.tex (27 entries). Main.tex `\date{}` updated to "May 2026 (v3.3)".
 
 ---
 
-## Pending (for next round)
+## v5 Fixes Applied (This Round, 2026-05-21)
 
-### MEDIUM (2 remaining)
-- **M-3 PENDING**: campbell2017 bibitem format — LOW priority (comma separator vs standard natbib)
-- **MED-1 PENDING**: Verify Cederburg et al. (2020) 4.9% figure against original Tables 2–3; update footnote with specific table reference (requires external journal access)
+| Fix | Files | Details |
+|-----|-------|---------|
+| H-1: 3 residual plain-text citations missed in v3.3 | body.tex | L112: `\citep{diebold1995}`; L585: `\citet{patton2011}`; L609: `\citet{hood2025}` |
+| M-2: K-codes removed from table notes | tables.tex | K1186, K1206, K1187, K1198 removed from rendered text; substantive content preserved |
 
-### Minor
-- **MIN-3 PENDING**: Update hood2025 bibitem with final JPM 51(9) vol/issue/pages + DOI (requires verification at doi.org/10.3905/jpm.2025.1.764 before changing)
+---
+
+## Review Results
+
+### Citation Check — CONDITIONAL_PASS
+
+| Issue | Severity | Status |
+|-------|----------|--------|
+| H-1: 3 residual plain-text citations | MAJOR | RESOLVED in v5 |
+| M-2: K-codes in table notes | MAJOR | RESOLVED in v5 |
+| campbell2017 DOI (possible digit error `44`→`43`?) | FLAGGED | Needs manual doi.org verification |
+| MED-1: Cederburg et al. 4.9% attribution | MEDIUM | OPEN — requires journal access |
+| MIN-3: hood2025 "early access" | MINOR | OPEN — update to Vol 52(1), p.100 |
+
+### Academic Review — 4.0/5★, Minor Revision
+
+| Issue | Severity | Status |
+|-------|----------|--------|
+| H-2: ρ=1.000 circularity defense (missing OOS sentence) | HIGH | OPEN |
+| M-1: Hardcoded Table/Section numbers (5 locations) | MEDIUM | OPEN |
+| M-3: MCS citation year (hansen2005 vs. hansen2011?) | MEDIUM | OPEN |
+| min-1: Internal `% H6 response:` comment at body.tex:68 | MINOR | OPEN |
+| min-2: Engle (1982) ARCH citation missing | MINOR | OPEN |
+| min-3: VT weight σ_hat_t annualization not stated | MINOR | OPEN |
 
 ---
 
 ## Gate for ready_for_submission
 
-After v5 academic + citation review confirms ≥4★ and 0 MEDIUM:
-- Academic ≥ 4★ (expected with M-1 complete)
-- Citation 0 MAJOR (currently 0 MAJOR ✅)
-- ≤ 1 MED (M-3 bibitem format is cosmetic; MED-1 needs external verification)
+| Condition | Status |
+|-----------|--------|
+| Academic ≥ 4★ | ✅ PASS — 4.0/5★ |
+| Citation 0 MAJOR | ⚠️ CONDITIONAL — campbell2017 DOI manual check needed |
+| ≤ 1 MED remaining | ❌ FAIL — 3 open (H-2 ρ defense, M-1 refs, M-3 MCS) |
 
-**Prediction**: v5 review should upgrade to ≥4★ once M-1 is confirmed clean → stage upgrade to `ready_for_submission` pending MED-1 verification.
+**NOT READY for submission.**
+
+### v6 Required Fixes (P1 — blocking)
+
+1. body.tex ~462: Add temporal-separation sentence to ρ=1.000 paragraph  
+2. body.tex ~165/175/215/287: Replace hardcoded `Table N` → `\ref{}`  
+3. body.tex ~146: Replace `Section 5.1` → `\ref{}`  
+4. Verify MCS citation: `hansen2005` → confirm is `hansen2011`?  
+5. Verify campbell2017 DOI: `104.00000044` vs `104.00000043` at doi.org  
+
+### v6 Required Fixes (P2 — pre-submission)
+
+- Update hood2025 bibitem: Vol 52(1), p.100, full title  
+- Resolve MED-1 Cederburg 4.9% (journal access required)
+
+---
+
+## Files in This Round
+
+- `citation_check_report.md`
+- `academic_review_report.md`
+- `README.md` (this file)
+
+## Next Round Trigger
+
+After main thread v6 P1 fixes → new cycle → `review_history/v6/`

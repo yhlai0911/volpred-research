@@ -7713,5 +7713,29 @@
     "paper_id": "leverage-direction",
     "version": "v3.3",
     "fixes": "M-1 citation conversion (27 instances across body.tex), version updated to May 2026 (v3.3)"
+  },
+  {
+    "task_id": "paper_review_leverage_v5",
+    "task_type": "paper_review",
+    "title": "leverage-direction paper v5 academic + citation review",
+    "timestamp": "2026-05-21T12:26:24+00:00",
+    "status": "completed",
+    "paper_id": "leverage-direction",
+    "review_round": "v5",
+    "academic_score": "4.0/5",
+    "citation_verdict": "CONDITIONAL_PASS",
+    "fixes_applied": [
+      "H-1 plain-text citations x3 (body.tex:112,585,609)",
+      "M-2 K-codes in tables.tex x5"
+    ],
+    "open_issues": [
+      "H-2 rho=1.000 circularity sentence",
+      "M-1 hardcoded refs x5",
+      "M-3 MCS citation year",
+      "campbell2017 DOI verify",
+      "MIN-3 hood2025 metadata",
+      "MED-1 Cederburg 4.9%"
+    ],
+    "next_action": "v6 fixes: H-2 + M-1 + M-3 + DOI verify → ready_for_submission"
   }
 ]
