@@ -51,6 +51,19 @@ def _commits_in_window():
     return out
 
 
+def _cron_review():
+    """Per-scheduler run outcomes — did each cron job complete / succeed?
+    Added 2026-05-21: the boss email must let the boss GRASP whether the
+    autonomous schedulers actually ran, not just that they exist."""
+    try:
+        return subprocess.run(
+            ["uv", "run", "python", "scripts/cron_review.py"],
+            cwd=str(PROJECT_ROOT), capture_output=True, text=True, timeout=90,
+        ).stdout.strip()
+    except Exception as e:
+        return f"cron_review 取得失敗：{str(e)[:200]}"
+
+
 def _dashboard():
     try:
         out = subprocess.check_output(
@@ -244,6 +257,16 @@ def build_html():
         st = s.get("status", "?")
         parts.append(f"<tr><td>{_esc(s.get('section'))}</td><td class='{st}'>{_esc(st)}</td><td>{_esc(s.get('tldr'))}</td><td class='small'>{_esc(s.get('next') or '—')}</td></tr>")
     parts.append("</table>")
+
+    # 1b. Cron run outcomes — did the autonomous schedulers actually run?
+    cron_txt = _cron_review()
+    parts.append("<h2>①-b 排程器成果掌握（cron 跑完沒 / 成功沒）</h2>")
+    cron_cls = "critical" if "🔴" in cron_txt else ("warn" if "⚠️" in cron_txt else "ok")
+    parts.append(f"<p class='small'>每個定時排程器的 runs / exit / 完成狀態。"
+                 f"<span class='{cron_cls}'>"
+                 f"{'有需要掌握的項目 ↓' if cron_cls != 'ok' else '全部正常'}</span></p>")
+    parts.append(f"<pre style='font-size:11px;background:#f9fafb;padding:8px;"
+                 f"border-radius:4px;overflow-x:auto'>{_esc(cron_txt)}</pre>")
 
     # 2. Cycle activity
     parts.append(f"<h2>② 本 cycle 活動（過去 {int(WINDOW.total_seconds()/3600)}h）</h2>")
