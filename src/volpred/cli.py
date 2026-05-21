@@ -1534,6 +1534,8 @@ def ops_queue_summary(storage_dir: str) -> None:
 def ops_continue_task_maintain(storage_dir: str, stub_if_no_work: bool) -> None:
     """Run the canonical continuation gate before opening queue/alert detail."""
     from volpred.ops import build_continue_task_maintenance
+    from volpred.ops.pending_replay import mark_self_replayed
+    mark_self_replayed("continue_task")
 
     result = build_continue_task_maintenance(storage_dir=storage_dir)
     if stub_if_no_work and result.get("skip"):
@@ -1567,6 +1569,8 @@ def ops_continue_task_maintain(storage_dir: str, stub_if_no_work: bool) -> None:
 def ops_daily_planning_maintain(storage_dir: str, source: str, limit: int, stub_if_no_work: bool) -> None:
     """Run the canonical daily-planning gate before opening queue/scheduler/platform detail."""
     from volpred.ops import build_daily_planning_maintenance
+    from volpred.ops.pending_replay import mark_self_replayed
+    mark_self_replayed("daily_planning")
 
     result = build_daily_planning_maintenance(storage_dir=storage_dir, source=source, limit=limit)
     if stub_if_no_work and result.get("skip"):
@@ -1624,6 +1628,8 @@ def ops_token_summary(storage_dir: str, days: int) -> None:
 def ops_token_usage_maintain(storage_dir: str, days: int, tail_lines: int, check_only: bool, stub_if_no_work: bool) -> None:
     """Run the canonical token-usage daily/weekly report maintenance loop with optional no-work stub output."""
     from volpred.ops import run_token_usage_maintenance
+    from volpred.ops.pending_replay import mark_self_replayed
+    mark_self_replayed("token_usage_daily")
 
     result = run_token_usage_maintenance(
         storage_dir=storage_dir,
@@ -1680,6 +1686,8 @@ def ops_token_policy_summary(policy_path: str) -> None:
 def ops_git_sync_maintain(stub_if_no_work: bool) -> None:
     """Run the canonical git-sync preflight gate before opening full status/diff output."""
     from volpred.ops import build_git_sync_maintenance
+    from volpred.ops.pending_replay import mark_self_replayed
+    mark_self_replayed("git_sync")
 
     result = build_git_sync_maintenance()
     if stub_if_no_work and result.get("skip"):
@@ -1712,6 +1720,8 @@ def ops_git_sync_maintain(stub_if_no_work: bool) -> None:
 def ops_ndc_indicator_maintain(storage_dir: str, stub_if_no_work: bool) -> None:
     """Run the canonical NDC business-cycle freshness gate before manual update work."""
     from volpred.ops import build_ndc_indicator_maintenance
+    from volpred.ops.pending_replay import mark_self_replayed
+    mark_self_replayed("ndc_indicator_refresh")
 
     result = build_ndc_indicator_maintenance(storage_dir=storage_dir)
     if stub_if_no_work and result.get("skip"):
@@ -1776,6 +1786,8 @@ def ops_knowledge_index_summary(storage_dir: str) -> None:
 def ops_knowledge_index_maintain(storage_dir: str, tail_lines: int, check_only: bool, stub_if_no_work: bool) -> None:
     """Run the canonical knowledge-index maintenance decision loop with optional no-work stub output."""
     from volpred.ops import run_knowledge_index_maintenance
+    from volpred.ops.pending_replay import mark_self_replayed
+    mark_self_replayed("knowledge_index_check")
 
     result = run_knowledge_index_maintenance(
         storage_dir=storage_dir,
@@ -1845,6 +1857,8 @@ def ops_platform_patrol_summary(storage_dir: str, source: str, limit: int) -> No
 def ops_platform_patrol_maintain(storage_dir: str, source: str, limit: int, stub_if_no_work: bool) -> None:
     """Run the canonical platform patrol gate with optional no-work stub output."""
     from volpred.ops import build_platform_patrol_maintenance
+    from volpred.ops.pending_replay import mark_self_replayed
+    mark_self_replayed("platform_patrol")
 
     result = build_platform_patrol_maintenance(storage_dir=storage_dir, source=source, limit=limit)
     if stub_if_no_work and result.get("skip"):
@@ -1896,6 +1910,8 @@ def ops_question_ops_summary(source: str, limit: int) -> None:
 def ops_question_ops_maintain(source: str, limit: int, stub_if_no_work: bool) -> None:
     """Run the canonical member-question gate with optional no-work stub output."""
     from volpred.ops import build_question_ops_maintenance
+    from volpred.ops.pending_replay import mark_self_replayed
+    mark_self_replayed("question_research")
 
     result = build_question_ops_maintenance(source=source, limit=limit)
     if stub_if_no_work and result.get("skip"):
@@ -2459,6 +2475,28 @@ def ops_paper_update(paper_id: str, paper_dir: str | None) -> None:
     console.print(f"[green]Paper fully updated[/green] {paper_id}")
     console.print(f"  pages={paper.get('pages')} citations={paper.get('citations')} pdf_url={'✅' if paper.get('pdf_url') else '❌'}")
     _print_json({"action": "paper_update", "item": paper})
+
+
+@ops.command("paper-sync-all")
+@click.option("--dry-run", is_flag=True, help="Show what would be synced without invoking Supabase")
+@click.option("--force", is_flag=True, help="Sync every paper even if Supabase updated_at is already newer than local files")
+def ops_paper_sync_all(dry_run: bool, force: bool) -> None:
+    """Auto-sync every paper/ directory to Supabase when local .tex/.pdf is newer.
+
+    Fixes the recurring drift where main-thread edits update local .tex but the
+    website still shows old dates because paper-update CLI is per-paper and
+    manual. Designed for cron schedule (idempotent: skips papers where Supabase
+    updated_at is newer than local files).
+    """
+    from volpred.ops.papers import sync_all_papers
+
+    results = sync_all_papers(only_stale=not force, dry_run=dry_run)
+    actions: dict[str, int] = {}
+    for r in results:
+        actions[r["action"]] = actions.get(r["action"], 0) + 1
+        console.print(f"  {r['paper_id']:<25} {r['action']:<16} {r.get('reason') or r.get('updated_at', '')}")
+    console.print(f"[green]Sync complete[/green] {actions}")
+    _print_json({"action": "paper_sync_all", "summary": actions, "results": results})
 
 
 @ops.command("paper-migrate-storage")

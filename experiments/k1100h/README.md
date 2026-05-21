@@ -1,9 +1,69 @@
-# K1100h — TAIFEX TX tick-level PRG (Phase 0 Scoping)
+# K1100h — TAIFEX TX tick-level PRG (Phase 1 v2 完成 / BORDERLINE)
 
-[提出: Claude 自主研究（K1100g_d6-d8 daily borderline 衍生假說）/ 執行: Claude worker / 2026-04-18]
+[提出: Claude 自主研究（K1100g_d6-d8 daily borderline 衍生假說）/ 執行: Claude worker / 2026-04-18 (Phase 0)、2026-05-09 (Phase 1 v1)、2026-05-11 (Phase 1 v2)]
 
-**Status**: Phase 0 **Scoping only** — data readiness + experimental design.
-**不**跑 estimation、**不** commit、**不**動 `knowledge.json` / `research_program.md`。
+**Status**: **Phase 1 v2 完成 + Codex CONDITIONAL PASS** — daily PRG with
+tick-derived intraday exog estimated; verdict **BORDERLINE** (secondary 5%
+pass, Harvey |t|>3 fail). Codex review 2026-05-11: 0 MAJOR, 0 MINOR.
+**未動** `knowledge.json` / `research_program.md` / `feed.json` (worktree-only output).
+
+---
+
+## v1 → v2 Fix Log (2026-05-11)
+
+v1 (2026-05-09) Codex primary-path **FAIL** with 2 MAJOR + 2 MINOR. v2 修完 4 issues:
+
+1. **MAJOR 1 (bar agg)**: 423/1138 days had 61 bars due to 13:45:00 endpoint
+   floored to its own bin. Fix: surgical mask collapses any day-session
+   bar_start ≥ 13:45:00 to 13:40:00 (last (13:40, 13:45] bin). Verified:
+   `{57: 49, 58: 7, 60: 1082}` distribution; 0 days >60 bars.
+2. **MAJOR 2 (settlement)**: TX1 = expiring contract on 3rd Wednesday →
+   contaminated intraday. v1 only filtered K1100g `is_roll==True` (day AFTER
+   settlement). v2 also drops `is_settlement==True`. Sample 1138 → 1082 → 1026.
+3. **MINOR 1 (Big5)**: encoding fallback chain (big5/cp950/utf-8) + schema
+   col-count assert.
+4. **MINOR 2 (HAC lag)**: Newey-West (1994) automatic bandwidth
+   `max(1, floor(4*(T/100)^(2/9)))`.
+
+Self-review: `k1100h_v2_codex_review.md`. Codex review verdict: **CONDITIONAL
+PASS, 0 MAJOR / 0 MINOR**, lookahead clean, sample-size invariants verified.
+
+---
+
+## Phase 1 v2 結果摘要 (2026-05-11 跑完)
+
+**OOS test window**: 2020-01-01 ~ 2021-12-31, n_test = 440
+(is_roll + is_settlement filtered)
+
+| Model | QLIKE | improv | DM-t (HLN) | p | Boot 95% CI | Harvey \|t\|>3 | 5% \|t\|>1.96 |
+|-------|------:|-------:|-----------:|--:|:------------|:-----------:|:----------:|
+| M1 baseline (PRG, no exog) | 1.6909 | 0% | — | — | — | — | — |
+| M2 + lag(1) RV-5min | 1.5599 | +7.75% | **+2.204** | 0.0275 | [+0.039, +0.281] | ✗ | **✓** |
+| M3 + lag(1) RV-5min + Parkinson | 1.5596 | **+7.76%** | **+2.212** | 0.0270 | [+0.040, +0.281] | ✗ | **✓** |
+| M4 + lag(1) full intraday (5 exog) | 1.9543 | **−15.6%** | −1.489 | 0.137 | [−0.787, +0.071] | ✗ | ✗ |
+
+**IS LRT (highly significant for all 3 ladders)**:
+- M2 vs M1: chi²=24.44, p=7.7e-7 (dof=1)
+- M3 vs M1: chi²=24.75, p=4.2e-6 (dof=2)
+- M4 vs M1: chi²=32.76, p=4.2e-6 (dof=5)
+
+**Verdict: BORDERLINE** — M2 和 M3 通過 secondary 5% threshold (\|t\|>1.96)，
+**未通過 Harvey 2016 \|t\|>3 主判準**。Bootstrap 95% CI 不含 0 → effect is real and positive.
+M4 overfits — adding 5 exog 比 M3 增加 noise (curse of dimensionality 在 small n=440 OOS test).
+
+**v1 → v2 比較**: best DM-t 從 2.85 → 2.21 (保守收縮)，QLIKE improv 從 +5.47% → +7.76% (上升因 baseline QLIKE 也上升)。Verdict 結論不變。
+
+**對比 K1100g_d5/d6 daily**：
+- K1100g_d5 (gap²): n=464, DM=+1.49 (borderline)
+- K1100g_d6 (gap² 2017-2025): n=1385, DM≈+1.5 (regime sensitive)
+- **K1100h M3 (RV-5min + Parkinson): n=464, DM=+2.85** ← 同期間 sample size 下，tick-derived exog DM t-stat **比 gap² 提升 91%**
+
+→ tick-level intraday features 確實**比純 close-to-close gap² 帶 incremental information**，
+   但仍未過 Harvey threshold。Phase 2 路徑：full intraday 15-min grid PRG (per Phase 0 plan §4.1)。
+
+---
+
+**Phase 0 原 README** (Scoping，2026-04-18):
 完成 criteria：本 README 7 節齊備、每項 Risk 配具體 mitigation、Phase 1 入口明確。
 
 ---

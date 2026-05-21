@@ -1,0 +1,90 @@
+========================================================================
+K1304: BMA 0050.TW H1 FAIL — Hypothesis Decomposition
+========================================================================
+Hypotheses: H_sample (window), H_pool (LOO×6), H_micro (LL advantage)
+Seed: 42, K1257 canonical OOS: 2020-01-01-2026-04-18
+
+[Step 0] Loading data...
+  SPY: N=4096, span=2010-01-05 to 2026-04-17
+  GLD: N=4096, span=2010-01-05 to 2026-04-17
+  0050.TW: N=3979, span=2010-01-05 to 2026-04-17
+
+[Step 1] BASELINE: K1257 canonical BMA for all 3 assets...
+  [BASELINE_SPY] asset=SPY, oos_start=2020-01-01, n_oos=1581, candidates=['GARCH_N', 'GJR_N', 'GJR_t', 'EGARCH_N', 'HAR_ABS', 'A4f_IV2']
+    refit t=2515 (0%) elapsed=3s
+
+  [SPY] H1=PASS, DM t=-3.397, HHI hit day=46, n_oos=1581
+  [BASELINE_GLD] asset=GLD, oos_start=2020-01-01, n_oos=1581, candidates=['GARCH_N', 'GJR_N', 'GJR_t', 'EGARCH_N', 'HAR_ABS', 'A4f_IV2']
+    refit t=2515 (0%) elapsed=131s
+
+  [GLD] H1=PASS, DM t=-3.379, HHI hit day=57, n_oos=1581
+  [BASELINE_0050.TW] asset=0050.TW, oos_start=2020-01-01, n_oos=1524, candidates=['GARCH_N', 'GJR_N', 'GJR_t', 'EGARCH_N', 'HAR_ABS', 'A4f_IV2']
+    refit t=2455 (0%) elapsed=247s
+
+  [0050.TW] H1=FAIL, DM t=+0.980, HHI hit day=14, n_oos=1524
+
+[Step 2] H_sample: SPY-matched OOS window for 0050.TW...
+
+=== H_sample: 0050.TW with SPY-matched OOS start ===
+  SPY OOS start: 2020-01-01, n_oos=1581
+  0050.TW matched OOS start: 2020-01-02, n_oos=1524
+  0050.TW original OOS start: 2020-01-01 (K1257 canonical)
+  Window difference: 57 days
+  [H_sample_matched] asset=0050.TW, oos_start=2020-01-02, n_oos=1524, candidates=['GARCH_N', 'GJR_N', 'GJR_t', 'EGARCH_N', 'HAR_ABS', 'A4f_IV2']
+    refit t=2455 (0%) elapsed=359s
+  H_sample result: H1_matched=FAIL, DM t=0.9798308714158286
+
+[Step 3] H_pool: Leave-one-out × 6 for 0050.TW...
+
+=== H_pool: Leave-one-out × 6 for 0050.TW ===
+
+  --- Drop: GARCH_N (remaining: ['GJR_N', 'GJR_t', 'EGARCH_N', 'HAR_ABS', 'A4f_IV2']) ---
+  [H_pool_drop_GARCH_N] asset=0050.TW, oos_start=2020-01-01, n_oos=1524, candidates=['GJR_N', 'GJR_t', 'EGARCH_N', 'HAR_ABS', 'A4f_IV2']
+    refit t=2455 (0%) elapsed=471s
+  Drop GARCH_N: H1=FAIL, DM t=+0.978, HHI hit=14
+
+  --- Drop: GJR_N (remaining: ['GARCH_N', 'GJR_t', 'EGARCH_N', 'HAR_ABS', 'A4f_IV2']) ---
+  [H_pool_drop_GJR_N] asset=0050.TW, oos_start=2020-01-01, n_oos=1524, candidates=['GARCH_N', 'GJR_t', 'EGARCH_N', 'HAR_ABS', 'A4f_IV2']
+    refit t=2455 (0%) elapsed=583s
+  Drop GJR_N: H1=FAIL, DM t=+0.979, HHI hit=14
+
+  --- Drop: GJR_t (remaining: ['GARCH_N', 'GJR_N', 'EGARCH_N', 'HAR_ABS', 'A4f_IV2']) ---
+  [H_pool_drop_GJR_t] asset=0050.TW, oos_start=2020-01-01, n_oos=1524, candidates=['GARCH_N', 'GJR_N', 'EGARCH_N', 'HAR_ABS', 'A4f_IV2']
+    refit t=2455 (0%) elapsed=693s
+  Drop GJR_t: H1=FAIL, DM t=+0.000, HHI hit=95
+
+  --- Drop: EGARCH_N (remaining: ['GARCH_N', 'GJR_N', 'GJR_t', 'HAR_ABS', 'A4f_IV2']) ---
+  [H_pool_drop_EGARCH_N] asset=0050.TW, oos_start=2020-01-01, n_oos=1524, candidates=['GARCH_N', 'GJR_N', 'GJR_t', 'HAR_ABS', 'A4f_IV2']
+    refit t=2455 (0%) elapsed=797s
+  Drop EGARCH_N: H1=FAIL, DM t=+0.983, HHI hit=14
+
+  --- Drop: HAR_ABS (remaining: ['GARCH_N', 'GJR_N', 'GJR_t', 'EGARCH_N', 'A4f_IV2']) ---
+  [H_pool_drop_HAR_ABS] asset=0050.TW, oos_start=2020-01-01, n_oos=1524, candidates=['GARCH_N', 'GJR_N', 'GJR_t', 'EGARCH_N', 'A4f_IV2']
+    refit t=2455 (0%) elapsed=898s
+  Drop HAR_ABS: H1=FAIL, DM t=+0.972, HHI hit=14
+
+  --- Drop: A4f_IV2 (remaining: ['GARCH_N', 'GJR_N', 'GJR_t', 'EGARCH_N', 'HAR_ABS']) ---
+  [H_pool_drop_A4f_IV2] asset=0050.TW, oos_start=2020-01-01, n_oos=1524, candidates=['GARCH_N', 'GJR_N', 'GJR_t', 'EGARCH_N', 'HAR_ABS']
+    refit t=2455 (0%) elapsed=1010s
+  Drop A4f_IV2: H1=FAIL, DM t=+0.986, HHI hit=14
+  H_pool verdict: REJECT, H1 flips when drop: []
+
+[Step 4] H_micro: LL-per-day diagnostic across assets...
+
+=== H_micro: Per-candidate LL-per-day diagnostic ===
+  SPY: GJR-t LL advantage vs GARCH-N = -0.8694969426021366
+  GLD: GJR-t LL advantage vs GARCH-N = -0.8874400934233773
+  0050.TW: GJR-t LL advantage vs GARCH-N = -0.8722173265157034
+  Advantages not all positive (GJR-t not IS-dominant) — H_micro REJECT
+  (Negative advantage = GARCH-N fits IS window better than GJR-t)
+  H_micro verdict: REJECT, ratio vs max dev mkt: None
+
+[Step 5] Generating charts...
+Saved: /Users/yhlai0911/Desktop/volpred-research/experiments/k1304/k1304_weight_evolution.png
+Saved: /Users/yhlai0911/Desktop/volpred-research/experiments/k1304/k1304_hhi_and_loo.png
+
+=== Summary Verdicts ===
+K1304 decomposes the K1257 0050.TW H1 FAIL (DM-Harvey t=+0.98, not significant). Baseline verified: SPY DM t=-3.397, GLD DM t=-3.379, 0050.TW DM t=+0.980. H_sample: REJECT — Even with SPY-matched OOS window, 0050.TW H1 remains FAIL — window asymmetry not the driver. H_pool: REJECT — No single drop rescues H1 — pool misfit not the driver. H_micro: REJECT — 0050.TW GJR-t LL advantage ratio vs max(SPY,GLD) = N/A (threshold ≥ 2.0×). Dominating hypothesis(es): None decisive. H_K1304 overall verdict: REJECT.
+
+Saved: /Users/yhlai0911/Desktop/volpred-research/experiments/k1304/k1304_results.json
+Runtime: 1033.4s

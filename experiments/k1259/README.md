@@ -15,8 +15,28 @@
 |---|---|
 | `README.md` | 本檔，解釋資料抽取邏輯、覆蓋範圍、限制 |
 | `build_dm_ledger.py` | Phase 1 產生器；idempotent，重跑會覆寫兩個 output |
-| `dm_ledger.json` | 結構化 DM ledger（rows array，strict schema） |
+| `apply_phase15_backfill.py` | Phase 1.5 applier；replay 2026-04-20 main-thread asset-tag backfill |
+| `phase15_asset_map.json` | Phase 1.5 pinned asset map（K_id → ticker / pipe-union），105 K |
+| `dm_ledger.json` | 結構化 DM ledger（Phase 1.5 已 applied；rows array，strict schema + `asset_source`） |
 | `dm_ledger_summary.md` | 人類可讀摘要（coverage、distribution、gaps） |
+| `generic_key_audit.md` | Codex MAJOR-2 audit — 11 false-positive rows (ttest/mcnemar) 已從 ledger 移除；Phase 2 MCS 結果差異僅 `middle` 一 model（cosmetic） |
+
+### 完整重現指令（Phase 1 + 1.5）
+
+```bash
+# Step 1: 重建 Phase 1 ledger（empty asset 為 null）
+python experiments/k1259/build_dm_ledger.py
+
+# Step 2: replay Phase 1.5 asset backfill（從 phase15_asset_map.json）
+python experiments/k1259/apply_phase15_backfill.py \
+    --in experiments/k1259/dm_ledger.json \
+    --out experiments/k1259/dm_ledger.json
+```
+
+**重要**：`build_dm_ledger.py` 重跑會覆寫 Phase 1.5 backfill；必跑 Step 2 才回到
+canonical state。Phase 2 (`k1259_mcs.py`) 直接讀 Phase 1.5 ledger（`asset` 欄位已填）。
+新增 K-experiment 後若需擴 backfill map，編輯 `phase15_asset_map.json` 加 entry，
+不可再對既有 K 做隱性 re-derivation（會破壞已 published Phase 2 結果重現性）。
 
 ## Row schema（strict）
 

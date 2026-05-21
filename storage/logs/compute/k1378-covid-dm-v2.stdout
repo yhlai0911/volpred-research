@@ -1,0 +1,20 @@
+======================================================================
+K1378: Leave-COVID-out DM Test (A4f vs GJR-GARCH)
+======================================================================
+
+[1] Loading snapshot CSV...
+  SPY: 2000-01-04 to 2026-05-18, n=6642
+  OOS: 2019-01-01 onwards, n_oos=1864
+  COVID period: 2020-03-01 to 2021-06-30
+  Non-COVID OOS: 1527 days
+
+[2] Rolling window OOS forecasting (A4f + GJR)...
+  OOS step 0/1864 (0.0s)
+  OOS step 500/1864 (23.6s)
+  OOS step 1000/1864 (47.0s)
+  OOS step 1500/1864 (69.8s)
+  Done in 88.1s
+
+[3] Computing QLIKE losses...
+
+[4] Diebold-Mariano tests...

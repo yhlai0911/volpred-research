@@ -1,0 +1,23 @@
+{
+  "id": "k1378-covid-dm",
+  "title": "K1378: Paper 9 Leave-COVID-out DM Test (SF1 Fix)",
+  "script_path": "experiments/k1378/k1378.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "failed",
+  "queued_at": "2026-05-19T05:24:36Z",
+  "started_at": "2026-05-19T05:30:05Z",
+  "completed_at": "2026-05-19T05:30:22Z",
+  "exit_code": 1,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k1378-covid-dm.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k1378-covid-dm.stderr",
+  "result_artifact": "experiments/k1378/k1378_results.json",
+  "claude_followup": {
+    "brief": "Read k1378_results.json sf1_verdict. If REFUTED (|t_no_covid|>3.0): add non-COVID DM t-stat to Table 2 caption or footnote in paper body draft. If CONFIRMED: flag paper needs major revision section on COVID dominance of results. Also compare full_oos vs no_covid_oos DM t-stats to quantify COVID contribution. K_NEW_A task in next_tasks.json.",
+    "task_type": "paper_review",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 1800
+}

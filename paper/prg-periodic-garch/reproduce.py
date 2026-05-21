@@ -78,6 +78,17 @@ PAPER_CLAIMS = {
     "TAIFEX PRG_Extended QLIKE":  {"paper": 0.198, "tol": 0.05},
     "TAIFEX DM_t (PRG vs GJR)":   {"paper": 5.10,  "tol": 0.10},
     "TAIFEX DM_t (GJR vs HAR)":   {"paper": 0.57,  "tol": 0.15},
+    # K1260 — Table 5 (§4.5 Fair-information GJR-X benchmark, SPY OOS)
+    # Added 2026-04-27 v4 review trail: §4.5 K1260 subsection introduces three OOS
+    # QLIKE values + two K1260-unique DM contrasts (PRG-vs-GJR row removed in v4.1).
+    # IS LR diagnostic (delta_hat, LR_stat) included for full Table 5 binding.
+    "K1260 GJR QLIKE":            {"paper": 0.8544, "tol": 0.05},
+    "K1260 GJR-X QLIKE":          {"paper": 0.8607, "tol": 0.05},
+    "K1260 PRG_Extended QLIKE":   {"paper": 0.7559, "tol": 0.05},
+    "K1260 DM_t (GJR-X vs GJR)":  {"paper": -0.53, "tol": 0.30},
+    "K1260 DM_t (PRG vs GJR-X)":  {"paper": 7.72,  "tol": 0.15},
+    "K1260 IS LR delta_hat":      {"paper": 0.13,  "tol": 0.10},
+    "K1260 IS LR_stat":           {"paper": 49.37, "tol": 0.10},
 }
 
 
@@ -257,6 +268,38 @@ if d_taifex:
                         dm.get("GJR-GARCH vs HAR(RV_total)", {}).get("t_stat")))
 
 # ============================================================
+# Table 5 — K1260: Fair-information GJR-X benchmark (§4.5, stored-only)
+# ============================================================
+# K1260 was a one-shot SPY-only fair-information experiment (commit a49d4b9a
+# cherry-picked into main). reproduce.py uses stored JSON only (no live re-run)
+# because the GJR-X estimation pipeline is bundled in the experiment script and
+# the relevant deliverable is byte-match verification of paper Table 5 numbers.
+k1260_path = find_result_file("k1260_results.json", kid_hint="k1260")
+d_k1260 = None
+if k1260_path:
+    print(f"\n[LOAD] K1260 stored: {k1260_path.relative_to(PROJECT)}")
+    with open(k1260_path) as f:
+        d_k1260 = json.load(f)
+else:
+    print("\n[WARN] K1260 result JSON not found in paper/ nor experiments/")
+
+if d_k1260:
+    qlike = d_k1260.get("qlike", {})
+    dm = d_k1260.get("dm_tests", {})
+    is_lr = d_k1260.get("is_lr_diagnostic", {})
+    checks.append(check("K1260 GJR QLIKE",          qlike.get("GJR")))
+    checks.append(check("K1260 GJR-X QLIKE",        qlike.get("GJR_X")))
+    checks.append(check("K1260 PRG_Extended QLIKE", qlike.get("PRG_Extended")))
+    checks.append(check("K1260 DM_t (GJR-X vs GJR)",
+                        dm.get("GJR_X_vs_GJR", {}).get("t_stat")))
+    checks.append(check("K1260 DM_t (PRG vs GJR-X)",
+                        dm.get("PRG_vs_GJR_X", {}).get("t_stat")))
+    # IS LR diagnostic: delta_hat from gjrx_params.delta; LR_stat from is_lr.LR_stat
+    delta_hat = is_lr.get("gjrx_params", {}).get("delta")
+    checks.append(check("K1260 IS LR delta_hat", delta_hat))
+    checks.append(check("K1260 IS LR_stat", is_lr.get("LR_stat")))
+
+# ============================================================
 # Table 3 — K880v2: Ablation check (lookahead-fix / session-update removed)
 # ============================================================
 d_v2 = None
@@ -323,13 +366,13 @@ report = {
     "paper_title": "Periodic Realized GARCH: Session-Boundary Information Transfers and Volatility Forecasting",
     "target_journal": "Finance Research Letters",
     "audit_date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
-    "auditor": "reproduce.py (claude / Paper 6 Sub1 fix)",
+    "auditor": "reproduce.py (claude / Paper 6 v4.1 ready_for_submission)",
     "mode": {
         "quick": quick_mode,
         "skip_live": skip_live,
     },
     "match_summary": {
-        "tables_verified": 2,
+        "tables_verified": 3,
         "checks_total": total,
         "checks_matched": matched,
         "overall_match_rate_pct": round(match_rate, 2),
@@ -341,9 +384,13 @@ report = {
             "K881 (QQQ/GLD/EEM)",
             "K886 (0050.TW)",
         ],
-        "checks": checks,
+        "checks": [c for c in checks if not c["metric"].startswith("K1260")],
     },
     "table3_ablation_check": ablation_check,
+    "table5_gjrx_check": {
+        "source_experiments": ["K1260 (SPY fair-info GJR-X, stored)"],
+        "checks": [c for c in checks if c["metric"].startswith("K1260")],
+    },
     "alert_level": (
         "green" if match_rate >= 95.0 else ("yellow" if match_rate >= 80.0 else "red")
     ),
@@ -351,7 +398,8 @@ report = {
         f"{'GREEN' if match_rate >= 95.0 else ('YELLOW' if match_rate >= 80.0 else 'RED')}: "
         f"{matched}/{total} = {match_rate:.1f}% match vs paper claims. "
         "Table 2: K880 (SPY), K881 (QQQ/GLD/EEM), K886 (0050.TW), K874d (TAIFEX stored). "
-        "Table 3 ablation via K880v2."
+        "Table 3 ablation via K880v2. "
+        "Table 5 (§4.5 fair-info GJR-X): K1260 (SPY OOS, stored)."
     ),
 }
 out_path = PAPER_DIR / "reproduce_report.json"

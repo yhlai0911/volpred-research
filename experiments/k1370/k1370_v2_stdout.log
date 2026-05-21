@@ -1,0 +1,98 @@
+22:35:55 === K1370 Block-bootstrap CI for TAIEX-to-Individual amplification ===
+22:35:55 Date: 2026-05-16T14:35:55.918855+00:00
+22:35:55 Config: B=1000, block_length=252, N_start=10, seed_base=42, sample=2008-01-01..2024-12-31
+22:35:55 Index: ^TWII | Individuals: 9 stocks
+22:35:55 
+22:35:55 [1/3] Loading data...
+22:35:55   Paper CSV: 4773 rows, 2008-01-02 → 2026-05-08
+22:35:55   [^TWII] loaded from paper CSV (twii_adj_close): 4489 rows
+22:35:55   [2317.TW] loaded from paper CSV (2317_tw_adj_close): 4479 rows
+22:35:55   [2454.TW] loaded from paper CSV (2454_tw_adj_close): 4479 rows
+22:35:55   [2886.TW] loaded from local cache: 6554 rows
+22:35:55   [2383.TW] loaded from local cache: 6554 rows
+22:35:55   [2882.TW] loaded from local cache: 6554 rows
+22:35:55   [2891.TW] fetching from yfinance...
+22:35:56   [2412.TW] fetching from yfinance...
+22:35:57   [2885.TW] fetching from yfinance...
+22:35:57   [2881.TW] fetching from yfinance...
+22:35:57   ^TWII: n=4160  mean=0.00024  std=0.01149  [2008-01-03 → 2024-12-31]
+22:35:57   2317.TW: n=4170  mean=0.00028  std=0.01885  [2008-01-03 → 2024-12-31]
+22:35:57   2454.TW: n=4170  mean=0.00050  std=0.02360  [2008-01-03 → 2024-12-31]
+22:35:57   2886.TW: n=4170  mean=0.00038  std=0.01537  [2008-01-03 → 2024-12-31]
+22:35:57   2383.TW: n=4170  mean=0.00115  std=0.02585  [2008-01-03 → 2024-12-31]
+22:35:57   2882.TW: n=4170  mean=0.00021  std=0.01762  [2008-01-03 → 2024-12-31]
+22:35:57   2891.TW: n=4170  mean=0.00042  std=0.01804  [2008-01-03 → 2024-12-31]
+22:35:57   2412.TW: n=4170  mean=0.00031  std=0.01039  [2008-01-03 → 2024-12-31]
+22:35:57   2885.TW: n=4170  mean=0.00032  std=0.01846  [2008-01-03 → 2024-12-31]
+22:35:57   2881.TW: n=4170  mean=0.00053  std=0.01723  [2008-01-03 → 2024-12-31]
+22:35:57 
+22:35:57 [2/3] Point-estimate sanity check (full-sample, single-start)...
+22:35:58   ^TWII: γ=+0.1139  (converged 10/10)
+22:35:58   2317.TW: γ=+0.0320  (converged 10/10)
+22:35:58   2454.TW: γ=+0.0406  (converged 10/10)
+22:35:58   2886.TW: γ=+0.0379  (converged 10/10)
+22:35:59   2383.TW: γ=+0.0095  (converged 10/10)
+22:35:59   2882.TW: γ=+0.0384  (converged 10/10)
+22:35:59   2891.TW: γ=+0.0396  (converged 10/10)
+22:36:00   2412.TW: γ=-0.0214  (converged 8/10)
+22:36:00   2885.TW: γ=+0.0199  (converged 10/10)
+22:36:00   2881.TW: γ=+0.0217  (converged 10/10)
+22:36:00   MATCHED-SAMPLE (2008-2024): TAIEX γ = 0.1139, mean 9-indiv γ = 0.0242, ratio = 4.70
+22:36:01   MIXED-SAMPLE (TAIEX 1997-2026 / indiv 2008-2024): TAIEX γ = 0.1055, ratio = 4.35 ← reproduces paper headline ~10×
+22:36:01   (paper headline target ≈ 10.07 = mixed-sample)
+22:36:01 
+22:36:01 [3/3] Running 1000 bootstrap replicates (block_length=252, N_start=10; ~100000 total MLE fits)...
+22:36:03   r=   1/1000  valid=1/1  recent50_median=3.84  elapsed=3s  ETA=2660s
+22:37:05   r=  25/1000  valid=25/25  recent50_median=3.84  elapsed=64s  ETA=2502s
+22:38:09   r=  50/1000  valid=50/50  recent50_median=3.87  elapsed=128s  ETA=2437s
+22:39:11   r=  75/1000  valid=75/75  recent50_median=3.75  elapsed=191s  ETA=2354s
+22:40:14   r= 100/1000  valid=100/100  recent50_median=3.69  elapsed=253s  ETA=2281s
+22:41:16   r= 125/1000  valid=125/125  recent50_median=3.92  elapsed=316s  ETA=2211s
+22:42:19   r= 150/1000  valid=150/150  recent50_median=3.39  elapsed=378s  ETA=2143s
+22:43:22   r= 175/1000  valid=175/175  recent50_median=3.31  elapsed=441s  ETA=2079s
+22:44:24   r= 200/1000  valid=200/200  recent50_median=3.52  elapsed=503s  ETA=2013s
+22:45:27   r= 225/1000  valid=225/225  recent50_median=3.64  elapsed=566s  ETA=1950s
+22:46:29   r= 250/1000  valid=250/250  recent50_median=3.60  elapsed=629s  ETA=1886s
+22:47:31   r= 275/1000  valid=275/275  recent50_median=3.67  elapsed=691s  ETA=1821s
+22:48:34   r= 300/1000  valid=300/300  recent50_median=4.09  elapsed=753s  ETA=1758s
+22:49:36   r= 325/1000  valid=325/325  recent50_median=4.09  elapsed=815s  ETA=1693s
+22:50:38   r= 350/1000  valid=350/350  recent50_median=3.82  elapsed=878s  ETA=1630s
+22:51:40   r= 375/1000  valid=375/375  recent50_median=3.70  elapsed=940s  ETA=1566s
+22:52:43   r= 400/1000  valid=400/400  recent50_median=3.72  elapsed=1002s  ETA=1503s
+22:53:45   r= 425/1000  valid=425/425  recent50_median=3.69  elapsed=1065s  ETA=1440s
+22:54:47   r= 450/1000  valid=450/450  recent50_median=3.53  elapsed=1127s  ETA=1377s
+22:55:49   r= 475/1000  valid=475/475  recent50_median=3.72  elapsed=1188s  ETA=1314s
+22:56:51   r= 500/1000  valid=500/500  recent50_median=3.66  elapsed=1251s  ETA=1251s
+22:57:54   r= 525/1000  valid=525/525  recent50_median=3.70  elapsed=1313s  ETA=1188s
+22:58:57   r= 550/1000  valid=550/550  recent50_median=3.67  elapsed=1377s  ETA=1126s
+23:00:00   r= 575/1000  valid=575/575  recent50_median=3.96  elapsed=1439s  ETA=1064s
+23:01:03   r= 600/1000  valid=600/600  recent50_median=3.80  elapsed=1502s  ETA=1002s
+23:02:06   r= 625/1000  valid=625/625  recent50_median=3.67  elapsed=1565s  ETA=939s
+23:03:08   r= 650/1000  valid=650/650  recent50_median=3.69  elapsed=1628s  ETA=876s
+23:04:10   r= 675/1000  valid=675/675  recent50_median=3.76  elapsed=1690s  ETA=814s
+23:05:13   r= 700/1000  valid=700/700  recent50_median=3.76  elapsed=1752s  ETA=751s
+23:06:15   r= 725/1000  valid=725/725  recent50_median=3.93  elapsed=1815s  ETA=688s
+23:07:18   r= 750/1000  valid=750/750  recent50_median=4.30  elapsed=1878s  ETA=626s
+23:08:21   r= 775/1000  valid=775/775  recent50_median=4.35  elapsed=1940s  ETA=563s
+23:09:23   r= 800/1000  valid=800/800  recent50_median=3.89  elapsed=2003s  ETA=501s
+23:10:25   r= 825/1000  valid=825/825  recent50_median=3.76  elapsed=2064s  ETA=438s
+23:11:28   r= 850/1000  valid=850/850  recent50_median=3.60  elapsed=2127s  ETA=375s
+23:12:31   r= 875/1000  valid=875/875  recent50_median=3.65  elapsed=2190s  ETA=313s
+23:13:35   r= 900/1000  valid=900/900  recent50_median=3.82  elapsed=2255s  ETA=251s
+23:14:38   r= 925/1000  valid=925/925  recent50_median=3.64  elapsed=2317s  ETA=188s
+23:15:41   r= 950/1000  valid=950/950  recent50_median=3.69  elapsed=2380s  ETA=125s
+23:16:43   r= 975/1000  valid=975/975  recent50_median=3.89  elapsed=2442s  ETA=63s
+23:17:45   r=1000/1000  valid=1000/1000  recent50_median=4.04  elapsed=2504s  ETA=0s
+23:17:45 
+Bootstrap done in 2504s
+23:17:45 
+23:17:45 Valid replicates: 1000/1000  (dropped 0)
+23:17:45 90% CI = [2.305, 6.611]  median=3.779  mean=4.037  std=1.432
+23:17:45 95% CI = [2.175, 7.683]
+23:17:45 
+Results saved to /Users/yhlai0911/Desktop/volpred-research/experiments/k1370/k1370_results.json
+23:17:45 Replicate-level data saved to /Users/yhlai0911/Desktop/volpred-research/experiments/k1370/k1370_replicates.json
+23:17:45 Histogram saved to /Users/yhlai0911/Desktop/volpred-research/experiments/k1370/amplification_distribution.png
+23:17:45 
+=== K1370 done in 41.8 min ===
+23:17:45 FINAL: 90% CI = [2.305, 6.611]  median = 3.779  point estimate (canonical) = 10.07

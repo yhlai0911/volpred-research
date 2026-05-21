@@ -1,0 +1,217 @@
+{
+  "experiment_id": "K1302b",
+  "title": "GJR-GARCH(1,1) full-sample \u03b3 for 5 unlisted Taiwan individual stocks",
+  "timestamp": "2026-05-16T01:40:53.577261+00:00",
+  "config": {
+    "stocks": [
+      {
+        "ticker": "2882.TW",
+        "name": "Cathay Financial"
+      },
+      {
+        "ticker": "2891.TW",
+        "name": "CTBC"
+      },
+      {
+        "ticker": "2412.TW",
+        "name": "Chunghwa Telecom"
+      },
+      {
+        "ticker": "2885.TW",
+        "name": "Yuanta"
+      },
+      {
+        "ticker": "2881.TW",
+        "name": "Fubon"
+      }
+    ],
+    "sample_start": "2008-01-01",
+    "sample_end": "2024-12-31",
+    "estimator": "arch package GJR-GARCH(1,1), Constant mean, Normal distribution",
+    "se_method": "robust (Bollerslev-Wooldridge)",
+    "n_multistart": 100,
+    "multistart_seed_range": [
+      42,
+      141
+    ],
+    "global_seed": 42,
+    "stationarity_filter": "persistence (alpha + 0.5*gamma + beta) < 1",
+    "best_selection": "highest log-likelihood across converged starts"
+  },
+  "data_source": {
+    "primary": "yfinance (auto_adjust=True) 2000-01-01..present, filtered to sample window 2008-01-01..2024-12-31",
+    "cache": "/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a04db13c6b6a1f376/experiments/k1302b/data",
+    "filter": "drop NaN returns (zero-volume rows not available in close-only path)"
+  },
+  "per_stock": {
+    "2882.TW": {
+      "ticker": "2882.TW",
+      "n_obs": 4170,
+      "n_attempted": 100,
+      "n_converged": 100,
+      "converged": true,
+      "best_seed": 124,
+      "omega": 0.06350378577891155,
+      "alpha": 0.05942128509914209,
+      "gamma": 0.038375858817315055,
+      "beta": 0.8976110052551228,
+      "persistence": 0.9762202197629224,
+      "gamma_se_robust": 0.018029882084758066,
+      "t_stat_gamma": 2.1284586686097566,
+      "gamma_p_robust": 0.033299073302109745,
+      "log_likelihood": -7625.359034148822,
+      "aic": 15260.718068297643,
+      "bic": 15292.396424871607,
+      "convergence_flag": 0,
+      "ll_distribution": {
+        "min": -7625.359034599033,
+        "p25": -7625.3590343368,
+        "median": -7625.359034216266,
+        "p75": -7625.359034167885,
+        "max": -7625.359034148822,
+        "n": 100
+      },
+      "estimator_note": "arch package GJR-GARCH(1,1) Constant mean Normal dist, Bollerslev-Wooldridge robust SE, 100 multistart (seeds 42..141), best by log-likelihood; stationarity filter persistence<1.",
+      "name": "Cathay Financial"
+    },
+    "2891.TW": {
+      "ticker": "2891.TW",
+      "n_obs": 4170,
+      "n_attempted": 100,
+      "n_converged": 100,
+      "converged": true,
+      "best_seed": 78,
+      "omega": 0.038999709031392285,
+      "alpha": 0.06979607544390273,
+      "gamma": 0.039639049060818735,
+      "beta": 0.8962520980232409,
+      "persistence": 0.985867697997553,
+      "gamma_se_robust": 0.020744970306903986,
+      "t_stat_gamma": 1.9107787803208733,
+      "gamma_p_robust": 0.056033015752441885,
+      "log_likelihood": -7381.2123359684065,
+      "aic": 14772.424671936813,
+      "bic": 14804.103028510777,
+      "convergence_flag": 0,
+      "ll_distribution": {
+        "min": -7381.2123364553345,
+        "p25": -7381.212336155582,
+        "median": -7381.212336012394,
+        "p75": -7381.212335983133,
+        "max": -7381.2123359684065,
+        "n": 100
+      },
+      "estimator_note": "arch package GJR-GARCH(1,1) Constant mean Normal dist, Bollerslev-Wooldridge robust SE, 100 multistart (seeds 42..141), best by log-likelihood; stationarity filter persistence<1.",
+      "name": "CTBC"
+    },
+    "2412.TW": {
+      "ticker": "2412.TW",
+      "n_obs": 4170,
+      "n_attempted": 100,
+      "n_converged": 26,
+      "converged": true,
+      "best_seed": 87,
+      "omega": 0.0011518207593451113,
+      "alpha": 3.1914304351071614e-05,
+      "gamma": 0.001125246949708074,
+      "beta": 0.9966099604979566,
+      "persistence": 0.9972044982771617,
+      "gamma_se_robust": 0.005828754989574024,
+      "t_stat_gamma": 0.1930509948901299,
+      "gamma_p_robust": 0.8469190310311767,
+      "log_likelihood": -5224.6126923612155,
+      "aic": 10459.225384722431,
+      "bic": 10490.903741296395,
+      "convergence_flag": 0,
+      "ll_distribution": {
+        "min": -5342.768814613681,
+        "p25": -5308.676788123352,
+        "median": -5296.492820494434,
+        "p75": -5296.4928199079295,
+        "max": -5224.6126923612155,
+        "n": 26
+      },
+      "estimator_note": "arch package GJR-GARCH(1,1) Constant mean Normal dist, Bollerslev-Wooldridge robust SE, 100 multistart (seeds 42..141), best by log-likelihood; stationarity filter persistence<1.",
+      "name": "Chunghwa Telecom"
+    },
+    "2885.TW": {
+      "ticker": "2885.TW",
+      "n_obs": 4170,
+      "n_attempted": 100,
+      "n_converged": 100,
+      "converged": true,
+      "best_seed": 89,
+      "omega": 0.027274430380838682,
+      "alpha": 0.04448924131947952,
+      "gamma": 0.019866628411300262,
+      "beta": 0.9348145284205545,
+      "persistence": 0.9892370839456841,
+      "gamma_se_robust": 0.012980439217565616,
+      "t_stat_gamma": 1.5305050991199125,
+      "gamma_p_robust": 0.12589175227844213,
+      "log_likelihood": -7692.779481571477,
+      "aic": 15395.558963142954,
+      "bic": 15427.237319716918,
+      "convergence_flag": 0,
+      "ll_distribution": {
+        "min": -7692.779482185789,
+        "p25": -7692.7794817730055,
+        "median": -7692.779481626315,
+        "p75": -7692.779481591386,
+        "max": -7692.779481571477,
+        "n": 100
+      },
+      "estimator_note": "arch package GJR-GARCH(1,1) Constant mean Normal dist, Bollerslev-Wooldridge robust SE, 100 multistart (seeds 42..141), best by log-likelihood; stationarity filter persistence<1.",
+      "name": "Yuanta"
+    },
+    "2881.TW": {
+      "ticker": "2881.TW",
+      "n_obs": 4170,
+      "n_attempted": 100,
+      "n_converged": 100,
+      "converged": true,
+      "best_seed": 54,
+      "omega": 0.03868787812227048,
+      "alpha": 0.06498513225350686,
+      "gamma": 0.021709211060071655,
+      "beta": 0.9093235504866284,
+      "persistence": 0.9851632882701711,
+      "gamma_se_robust": 0.01486521149784343,
+      "t_stat_gamma": 1.4604037798736411,
+      "gamma_p_robust": 0.14417913457268902,
+      "log_likelihood": -7494.390253509523,
+      "aic": 14998.780507019046,
+      "bic": 15030.45886359301,
+      "convergence_flag": 0,
+      "ll_distribution": {
+        "min": -7494.390253981196,
+        "p25": -7494.390253681688,
+        "median": -7494.390253585369,
+        "p75": -7494.390253519782,
+        "max": -7494.390253509523,
+        "n": 100
+      },
+      "estimator_note": "arch package GJR-GARCH(1,1) Constant mean Normal dist, Bollerslev-Wooldridge robust SE, 100 multistart (seeds 42..141), best by log-likelihood; stationarity filter persistence<1.",
+      "name": "Fubon"
+    }
+  },
+  "summary": {
+    "n_stocks": 5,
+    "n_converged": 5,
+    "avg_gamma_5stocks": 0.02414319885984275,
+    "avg_persistence": 0.9867385576506985,
+    "gamma_positive_count": 5,
+    "persistence_lt_1_count": 5
+  },
+  "success_criteria": {
+    "all_5_converged": true,
+    "all_gamma_positive": true,
+    "all_persistence_lt_1": true
+  },
+  "lookahead_free_certification": "\u03b3 is in-sample MLE on full window 2008-01-01..2024-12-31; no forecast / OOS split; no signal generation; signal.shift not applicable. All randomness seeded: np.random.seed(42) global; multistart seeds 42..141 explicit.",
+  "mirror_of": "K1302 (extends 4 Table-2 stocks + TSMC to 5 additional unlisted stocks)",
+  "notes": {
+    "purpose": "Closes Paper 2 (taiwan-vt) Table 2 amplification-ratio re-computation: K1302 produced canonical full-sample BW-robust \u03b3 for Hon Hai/MediaTek/Mega/0056; K1302b adds Cathay/CTBC/Chunghwa Telecom/Yuanta/Fubon to complete the 9-stock average under uniform canonical specification.",
+    "methodology_consistency": "Byte-similar to K1302: same arch package, GJR(1,1), Constant mean, Normal, robust SE \u2014 only difference is multistart (K1302 single-start default; K1302b explicit 100 multistart per .claude/rules/experiments.md \u00a7Pooled-MLE rule for parameter stability)."
+  }
+}

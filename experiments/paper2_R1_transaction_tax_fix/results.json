@@ -1,0 +1,777 @@
+{
+  "experiment_id": "paper2_R1_transaction_tax_fix",
+  "title": "Paper 2 R1 SEVERE 1 — Transaction Tax Sensitivity for VT on 0050.TW",
+  "purpose": "Address Gemini R1 SEVERE 1: 'Taiwan 0.1-0.3% TX tax not accounted — VT turnover may erode gains'. Paper canonical TX is 0.186% (ETF tax 0.10% + commission 0.04275%×2). This experiment runs sensitivity at 0.10%/0.15%/0.186%/0.30% to show the VT-vs-BH claim survives the full reviewer-cited 0.10-0.30% range.",
+  "data_source": "yfinance 0050.TW + ^VIX, clean_tw50_data split correction",
+  "data_period": "2009-01-02 to 2026-04-17",
+  "configuration": {
+    "ewma_lambda": 0.94,
+    "target_vol": 0.1,
+    "garch_window": 2000,
+    "tx_grid": [
+      {
+        "key": "etf_floor",
+        "rate": 0.001,
+        "desc": "0.10% — ETF tax floor (no commission, theoretical lower bound)"
+      },
+      {
+        "key": "brief_mid",
+        "rate": 0.0015,
+        "desc": "0.15% — Brief midpoint of reviewer-cited 0.10%-0.30% range"
+      },
+      {
+        "key": "paper_canonical",
+        "rate": 0.00186,
+        "desc": "0.186% — Paper canonical: ETF tax 0.10% + commission 0.04275%×2"
+      },
+      {
+        "key": "stock_high",
+        "rate": 0.003,
+        "desc": "0.30% — Common-stock TX rate (hypothetical: 0050.TW as common stock)"
+      }
+    ],
+    "seed": 42,
+    "lookahead_guard": "signal.shift(1) on all VT weights; VIX uses previous US close strictly before TW date",
+    "rebalancing": "Monthly for VIX strategies, daily for GARCH/GJR/EWMA",
+    "methodology_source": "Re-uses experiments/k1175/k1175.py; only TX_COST varied"
+  },
+  "tx_sensitivity_sweep": {
+    "buy_hold": {
+      "etf_floor": {
+        "name": "Buy & Hold (2010-2026)",
+        "n_days": 3980,
+        "n_years": 15.79,
+        "period": "2010-01-04 to 2026-04-17",
+        "tx_cost": 0.001,
+        "ann_return_pct": 11.9693,
+        "ann_vol_pct": 18.2521,
+        "sharpe": 0.6558,
+        "mdd_pct": -36.3816,
+        "ann_turnover_pct": 0.0,
+        "ann_tx_drag_bps": 0.0,
+        "rebal_events": 0,
+        "rebal_events_per_year": 0.0,
+        "avg_abs_dw": 0.0,
+        "max_abs_dw": 0.0,
+        "tx_label": "0.10% — ETF tax floor (no commission, theoretical lower bound)"
+      },
+      "brief_mid": {
+        "name": "Buy & Hold (2010-2026)",
+        "n_days": 3980,
+        "n_years": 15.79,
+        "period": "2010-01-04 to 2026-04-17",
+        "tx_cost": 0.0015,
+        "ann_return_pct": 11.9693,
+        "ann_vol_pct": 18.2521,
+        "sharpe": 0.6558,
+        "mdd_pct": -36.3816,
+        "ann_turnover_pct": 0.0,
+        "ann_tx_drag_bps": 0.0,
+        "rebal_events": 0,
+        "rebal_events_per_year": 0.0,
+        "avg_abs_dw": 0.0,
+        "max_abs_dw": 0.0,
+        "tx_label": "0.15% — Brief midpoint of reviewer-cited 0.10%-0.30% range"
+      },
+      "paper_canonical": {
+        "name": "Buy & Hold (2010-2026)",
+        "n_days": 3980,
+        "n_years": 15.79,
+        "period": "2010-01-04 to 2026-04-17",
+        "tx_cost": 0.00186,
+        "ann_return_pct": 11.9693,
+        "ann_vol_pct": 18.2521,
+        "sharpe": 0.6558,
+        "mdd_pct": -36.3816,
+        "ann_turnover_pct": 0.0,
+        "ann_tx_drag_bps": 0.0,
+        "rebal_events": 0,
+        "rebal_events_per_year": 0.0,
+        "avg_abs_dw": 0.0,
+        "max_abs_dw": 0.0,
+        "tx_label": "0.186% — Paper canonical: ETF tax 0.10% + commission 0.04275%×2"
+      },
+      "stock_high": {
+        "name": "Buy & Hold (2010-2026)",
+        "n_days": 3980,
+        "n_years": 15.79,
+        "period": "2010-01-04 to 2026-04-17",
+        "tx_cost": 0.003,
+        "ann_return_pct": 11.9693,
+        "ann_vol_pct": 18.2521,
+        "sharpe": 0.6558,
+        "mdd_pct": -36.3816,
+        "ann_turnover_pct": 0.0,
+        "ann_tx_drag_bps": 0.0,
+        "rebal_events": 0,
+        "rebal_events_per_year": 0.0,
+        "avg_abs_dw": 0.0,
+        "max_abs_dw": 0.0,
+        "tx_label": "0.30% — Common-stock TX rate (hypothetical: 0050.TW as common stock)"
+      }
+    },
+    "ewma_vt": {
+      "etf_floor": {
+        "name": "EWMA VT 10% (2010-2026)",
+        "n_days": 3980,
+        "n_years": 15.79,
+        "period": "2010-01-04 to 2026-04-17",
+        "tx_cost": 0.001,
+        "ann_return_pct": 5.9682,
+        "ann_vol_pct": 10.5756,
+        "sharpe": 0.5643,
+        "mdd_pct": -22.3489,
+        "ann_turnover_pct": 489.0,
+        "ann_tx_drag_bps": 48.9,
+        "rebal_events": 3748,
+        "rebal_events_per_year": 237.31,
+        "avg_abs_dw": 0.0206,
+        "max_abs_dw": 0.4718,
+        "tx_label": "0.10% — ETF tax floor (no commission, theoretical lower bound)"
+      },
+      "brief_mid": {
+        "name": "EWMA VT 10% (2010-2026)",
+        "n_days": 3980,
+        "n_years": 15.79,
+        "period": "2010-01-04 to 2026-04-17",
+        "tx_cost": 0.0015,
+        "ann_return_pct": 5.7095,
+        "ann_vol_pct": 10.5759,
+        "sharpe": 0.5399,
+        "mdd_pct": -22.4707,
+        "ann_turnover_pct": 489.0,
+        "ann_tx_drag_bps": 73.35,
+        "rebal_events": 3748,
+        "rebal_events_per_year": 237.31,
+        "avg_abs_dw": 0.0206,
+        "max_abs_dw": 0.4718,
+        "tx_label": "0.15% — Brief midpoint of reviewer-cited 0.10%-0.30% range"
+      },
+      "paper_canonical": {
+        "name": "EWMA VT 10% (2010-2026)",
+        "n_days": 3980,
+        "n_years": 15.79,
+        "period": "2010-01-04 to 2026-04-17",
+        "tx_cost": 0.00186,
+        "ann_return_pct": 5.5235,
+        "ann_vol_pct": 10.5762,
+        "sharpe": 0.5223,
+        "mdd_pct": -22.5582,
+        "ann_turnover_pct": 489.0,
+        "ann_tx_drag_bps": 90.95,
+        "rebal_events": 3748,
+        "rebal_events_per_year": 237.31,
+        "avg_abs_dw": 0.0206,
+        "max_abs_dw": 0.4718,
+        "tx_label": "0.186% — Paper canonical: ETF tax 0.10% + commission 0.04275%×2"
+      },
+      "stock_high": {
+        "name": "EWMA VT 10% (2010-2026)",
+        "n_days": 3980,
+        "n_years": 15.79,
+        "period": "2010-01-04 to 2026-04-17",
+        "tx_cost": 0.003,
+        "ann_return_pct": 4.9369,
+        "ann_vol_pct": 10.5771,
+        "sharpe": 0.4668,
+        "mdd_pct": -22.8348,
+        "ann_turnover_pct": 489.0,
+        "ann_tx_drag_bps": 146.7,
+        "rebal_events": 3748,
+        "rebal_events_per_year": 237.31,
+        "avg_abs_dw": 0.0206,
+        "max_abs_dw": 0.4718,
+        "tx_label": "0.30% — Common-stock TX rate (hypothetical: 0050.TW as common stock)"
+      }
+    },
+    "garch_vt": {
+      "etf_floor": {
+        "name": "GARCH VT 10% (2020-2026)",
+        "n_days": 1523,
+        "n_years": 6.04,
+        "period": "2020-01-03 to 2026-04-17",
+        "tx_cost": 0.001,
+        "ann_return_pct": 9.4798,
+        "ann_vol_pct": 11.1807,
+        "sharpe": 0.8479,
+        "mdd_pct": -23.2652,
+        "ann_turnover_pct": 634.46,
+        "ann_tx_drag_bps": 63.45,
+        "rebal_events": 1522,
+        "rebal_events_per_year": 251.83,
+        "avg_abs_dw": 0.0252,
+        "max_abs_dw": 0.3124,
+        "tx_label": "0.10% — ETF tax floor (no commission, theoretical lower bound)"
+      },
+      "brief_mid": {
+        "name": "GARCH VT 10% (2020-2026)",
+        "n_days": 1523,
+        "n_years": 6.04,
+        "period": "2020-01-03 to 2026-04-17",
+        "tx_cost": 0.0015,
+        "ann_return_pct": 9.1332,
+        "ann_vol_pct": 11.1802,
+        "sharpe": 0.8169,
+        "mdd_pct": -23.4664,
+        "ann_turnover_pct": 634.46,
+        "ann_tx_drag_bps": 95.17,
+        "rebal_events": 1522,
+        "rebal_events_per_year": 251.83,
+        "avg_abs_dw": 0.0252,
+        "max_abs_dw": 0.3124,
+        "tx_label": "0.15% — Brief midpoint of reviewer-cited 0.10%-0.30% range"
+      },
+      "paper_canonical": {
+        "name": "GARCH VT 10% (2020-2026)",
+        "n_days": 1523,
+        "n_years": 6.04,
+        "period": "2020-01-03 to 2026-04-17",
+        "tx_cost": 0.00186,
+        "ann_return_pct": 8.8844,
+        "ann_vol_pct": 11.1799,
+        "sharpe": 0.7947,
+        "mdd_pct": -23.6109,
+        "ann_turnover_pct": 634.46,
+        "ann_tx_drag_bps": 118.01,
+        "rebal_events": 1522,
+        "rebal_events_per_year": 251.83,
+        "avg_abs_dw": 0.0252,
+        "max_abs_dw": 0.3124,
+        "tx_label": "0.186% — Paper canonical: ETF tax 0.10% + commission 0.04275%×2"
+      },
+      "stock_high": {
+        "name": "GARCH VT 10% (2020-2026)",
+        "n_days": 1523,
+        "n_years": 6.04,
+        "period": "2020-01-03 to 2026-04-17",
+        "tx_cost": 0.003,
+        "ann_return_pct": 8.1,
+        "ann_vol_pct": 11.179,
+        "sharpe": 0.7246,
+        "mdd_pct": -24.0667,
+        "ann_turnover_pct": 634.46,
+        "ann_tx_drag_bps": 190.34,
+        "rebal_events": 1522,
+        "rebal_events_per_year": 251.83,
+        "avg_abs_dw": 0.0252,
+        "max_abs_dw": 0.3124,
+        "tx_label": "0.30% — Common-stock TX rate (hypothetical: 0050.TW as common stock)"
+      }
+    },
+    "gjr_vt": {
+      "etf_floor": {
+        "name": "GJR VT 10% (2020-2026)",
+        "n_days": 1523,
+        "n_years": 6.04,
+        "period": "2020-01-03 to 2026-04-17",
+        "tx_cost": 0.001,
+        "ann_return_pct": 10.9817,
+        "ann_vol_pct": 11.505,
+        "sharpe": 0.9545,
+        "mdd_pct": -23.569,
+        "ann_turnover_pct": 661.73,
+        "ann_tx_drag_bps": 66.17,
+        "rebal_events": 1522,
+        "rebal_events_per_year": 251.83,
+        "avg_abs_dw": 0.0263,
+        "max_abs_dw": 0.4889,
+        "tx_label": "0.10% — ETF tax floor (no commission, theoretical lower bound)"
+      },
+      "brief_mid": {
+        "name": "GJR VT 10% (2020-2026)",
+        "n_days": 1523,
+        "n_years": 6.04,
+        "period": "2020-01-03 to 2026-04-17",
+        "tx_cost": 0.0015,
+        "ann_return_pct": 10.6152,
+        "ann_vol_pct": 11.5051,
+        "sharpe": 0.9227,
+        "mdd_pct": -23.7905,
+        "ann_turnover_pct": 661.73,
+        "ann_tx_drag_bps": 99.26,
+        "rebal_events": 1522,
+        "rebal_events_per_year": 251.83,
+        "avg_abs_dw": 0.0263,
+        "max_abs_dw": 0.4889,
+        "tx_label": "0.15% — Brief midpoint of reviewer-cited 0.10%-0.30% range"
+      },
+      "paper_canonical": {
+        "name": "GJR VT 10% (2020-2026)",
+        "n_days": 1523,
+        "n_years": 6.04,
+        "period": "2020-01-03 to 2026-04-17",
+        "tx_cost": 0.00186,
+        "ann_return_pct": 10.3521,
+        "ann_vol_pct": 11.5052,
+        "sharpe": 0.8998,
+        "mdd_pct": -23.9496,
+        "ann_turnover_pct": 661.73,
+        "ann_tx_drag_bps": 123.08,
+        "rebal_events": 1522,
+        "rebal_events_per_year": 251.83,
+        "avg_abs_dw": 0.0263,
+        "max_abs_dw": 0.4889,
+        "tx_label": "0.186% — Paper canonical: ETF tax 0.10% + commission 0.04275%×2"
+      },
+      "stock_high": {
+        "name": "GJR VT 10% (2020-2026)",
+        "n_days": 1523,
+        "n_years": 6.04,
+        "period": "2020-01-03 to 2026-04-17",
+        "tx_cost": 0.003,
+        "ann_return_pct": 9.523,
+        "ann_vol_pct": 11.5058,
+        "sharpe": 0.8277,
+        "mdd_pct": -24.8709,
+        "ann_turnover_pct": 661.73,
+        "ann_tx_drag_bps": 198.52,
+        "rebal_events": 1522,
+        "rebal_events_per_year": 251.83,
+        "avg_abs_dw": 0.0263,
+        "max_abs_dw": 0.4889,
+        "tx_label": "0.30% — Common-stock TX rate (hypothetical: 0050.TW as common stock)"
+      }
+    },
+    "vix_863": {
+      "etf_floor": {
+        "name": "8.63/VIX monthly (2016-2026)",
+        "n_days": 2497,
+        "n_years": 9.91,
+        "period": "2016-01-04 to 2026-04-17",
+        "tx_cost": 0.001,
+        "ann_return_pct": 9.2147,
+        "ann_vol_pct": 9.5337,
+        "sharpe": 0.9665,
+        "mdd_pct": -15.0549,
+        "ann_turnover_pct": 103.66,
+        "ann_tx_drag_bps": 10.37,
+        "rebal_events": 123,
+        "rebal_events_per_year": 12.41,
+        "avg_abs_dw": 0.0835,
+        "max_abs_dw": 0.3258,
+        "tx_label": "0.10% — ETF tax floor (no commission, theoretical lower bound)"
+      },
+      "brief_mid": {
+        "name": "8.63/VIX monthly (2016-2026)",
+        "n_days": 2497,
+        "n_years": 9.91,
+        "period": "2016-01-04 to 2026-04-17",
+        "tx_cost": 0.0015,
+        "ann_return_pct": 9.1581,
+        "ann_vol_pct": 9.5333,
+        "sharpe": 0.9606,
+        "mdd_pct": -15.0903,
+        "ann_turnover_pct": 103.66,
+        "ann_tx_drag_bps": 15.55,
+        "rebal_events": 123,
+        "rebal_events_per_year": 12.41,
+        "avg_abs_dw": 0.0835,
+        "max_abs_dw": 0.3258,
+        "tx_label": "0.15% — Brief midpoint of reviewer-cited 0.10%-0.30% range"
+      },
+      "paper_canonical": {
+        "name": "8.63/VIX monthly (2016-2026)",
+        "n_days": 2497,
+        "n_years": 9.91,
+        "period": "2016-01-04 to 2026-04-17",
+        "tx_cost": 0.00186,
+        "ann_return_pct": 9.1174,
+        "ann_vol_pct": 9.5331,
+        "sharpe": 0.9564,
+        "mdd_pct": -15.1158,
+        "ann_turnover_pct": 103.66,
+        "ann_tx_drag_bps": 19.28,
+        "rebal_events": 123,
+        "rebal_events_per_year": 12.41,
+        "avg_abs_dw": 0.0835,
+        "max_abs_dw": 0.3258,
+        "tx_label": "0.186% — Paper canonical: ETF tax 0.10% + commission 0.04275%×2"
+      },
+      "stock_high": {
+        "name": "8.63/VIX monthly (2016-2026)",
+        "n_days": 2497,
+        "n_years": 9.91,
+        "period": "2016-01-04 to 2026-04-17",
+        "tx_cost": 0.003,
+        "ann_return_pct": 8.9887,
+        "ann_vol_pct": 9.5325,
+        "sharpe": 0.943,
+        "mdd_pct": -15.1966,
+        "ann_turnover_pct": 103.66,
+        "ann_tx_drag_bps": 31.1,
+        "rebal_events": 123,
+        "rebal_events_per_year": 12.41,
+        "avg_abs_dw": 0.0835,
+        "max_abs_dw": 0.3258,
+        "tx_label": "0.30% — Common-stock TX rate (hypothetical: 0050.TW as common stock)"
+      }
+    }
+  },
+  "drift_vs_k1175_stored": {
+    "buy_hold": {
+      "sharpe": {
+        "ours_snapshot": 0.6558,
+        "k1175_live_yfin_2026_04_17": 0.7989,
+        "abs_diff": 0.1431,
+        "status": "MODEST_DRIFT",
+        "interpretation": "yfinance vendor drift (K1175 unpinned)"
+      },
+      "ann_return_pct": {
+        "ours_snapshot": 11.9693,
+        "k1175_live_yfin_2026_04_17": 14.48,
+        "abs_diff": 2.5107,
+        "status": "MATERIAL_DRIFT",
+        "interpretation": "yfinance vendor drift (K1175 unpinned)"
+      },
+      "ann_vol_pct": {
+        "ours_snapshot": 18.2521,
+        "k1175_live_yfin_2026_04_17": 18.13,
+        "abs_diff": 0.1221,
+        "status": "MODEST_DRIFT",
+        "interpretation": "yfinance vendor drift (K1175 unpinned)"
+      },
+      "mdd_pct": {
+        "ours_snapshot": -36.3816,
+        "k1175_live_yfin_2026_04_17": -33.83,
+        "abs_diff": 2.5516,
+        "status": "MATERIAL_DRIFT",
+        "interpretation": "yfinance vendor drift (K1175 unpinned)"
+      },
+      "ann_turnover_pct": {
+        "ours_snapshot": 0.0,
+        "k1175_live_yfin_2026_04_17": 0.0,
+        "abs_diff": 0.0,
+        "status": "MATCH",
+        "interpretation": "yfinance vendor drift (K1175 unpinned)"
+      }
+    },
+    "ewma_vt": {
+      "sharpe": {
+        "ours_snapshot": 0.5223,
+        "k1175_live_yfin_2026_04_17": 0.7012,
+        "abs_diff": 0.1789,
+        "status": "MODEST_DRIFT",
+        "interpretation": "yfinance vendor drift (K1175 unpinned)"
+      },
+      "ann_return_pct": {
+        "ours_snapshot": 5.5235,
+        "k1175_live_yfin_2026_04_17": 7.42,
+        "abs_diff": 1.8965,
+        "status": "MATERIAL_DRIFT",
+        "interpretation": "yfinance vendor drift (K1175 unpinned)"
+      },
+      "ann_vol_pct": {
+        "ours_snapshot": 10.5762,
+        "k1175_live_yfin_2026_04_17": 10.58,
+        "abs_diff": 0.0038,
+        "status": "MATCH",
+        "interpretation": "yfinance vendor drift (K1175 unpinned)"
+      },
+      "mdd_pct": {
+        "ours_snapshot": -22.5582,
+        "k1175_live_yfin_2026_04_17": -21.17,
+        "abs_diff": 1.3882,
+        "status": "MATERIAL_DRIFT",
+        "interpretation": "yfinance vendor drift (K1175 unpinned)"
+      },
+      "ann_turnover_pct": {
+        "ours_snapshot": 489.0,
+        "k1175_live_yfin_2026_04_17": 479.9,
+        "abs_diff": 9.1,
+        "status": "MODEST_DRIFT",
+        "interpretation": "yfinance vendor drift (K1175 unpinned)"
+      }
+    },
+    "garch_vt": {
+      "sharpe": {
+        "ours_snapshot": 0.7947,
+        "k1175_live_yfin_2026_04_17": 0.9497,
+        "abs_diff": 0.155,
+        "status": "MODEST_DRIFT",
+        "interpretation": "yfinance vendor drift (K1175 unpinned)"
+      },
+      "ann_return_pct": {
+        "ours_snapshot": 8.8844,
+        "k1175_live_yfin_2026_04_17": 10.5,
+        "abs_diff": 1.6156,
+        "status": "MATERIAL_DRIFT",
+        "interpretation": "yfinance vendor drift (K1175 unpinned)"
+      },
+      "ann_vol_pct": {
+        "ours_snapshot": 11.1799,
+        "k1175_live_yfin_2026_04_17": 11.06,
+        "abs_diff": 0.1199,
+        "status": "MODEST_DRIFT",
+        "interpretation": "yfinance vendor drift (K1175 unpinned)"
+      },
+      "mdd_pct": {
+        "ours_snapshot": -23.6109,
+        "k1175_live_yfin_2026_04_17": -22.18,
+        "abs_diff": 1.4309,
+        "status": "MATERIAL_DRIFT",
+        "interpretation": "yfinance vendor drift (K1175 unpinned)"
+      },
+      "ann_turnover_pct": {
+        "ours_snapshot": 634.46,
+        "k1175_live_yfin_2026_04_17": 677.8,
+        "abs_diff": 43.34,
+        "status": "MATERIAL_DRIFT",
+        "interpretation": "yfinance vendor drift (K1175 unpinned)"
+      }
+    },
+    "gjr_vt": {
+      "sharpe": {
+        "ours_snapshot": 0.8998,
+        "k1175_live_yfin_2026_04_17": 1.0742,
+        "abs_diff": 0.1744,
+        "status": "MODEST_DRIFT",
+        "interpretation": "yfinance vendor drift (K1175 unpinned)"
+      },
+      "ann_return_pct": {
+        "ours_snapshot": 10.3521,
+        "k1175_live_yfin_2026_04_17": 12.19,
+        "abs_diff": 1.8379,
+        "status": "MATERIAL_DRIFT",
+        "interpretation": "yfinance vendor drift (K1175 unpinned)"
+      },
+      "ann_vol_pct": {
+        "ours_snapshot": 11.5052,
+        "k1175_live_yfin_2026_04_17": 11.35,
+        "abs_diff": 0.1552,
+        "status": "MODEST_DRIFT",
+        "interpretation": "yfinance vendor drift (K1175 unpinned)"
+      },
+      "mdd_pct": {
+        "ours_snapshot": -23.9496,
+        "k1175_live_yfin_2026_04_17": -22.25,
+        "abs_diff": 1.6996,
+        "status": "MATERIAL_DRIFT",
+        "interpretation": "yfinance vendor drift (K1175 unpinned)"
+      },
+      "ann_turnover_pct": {
+        "ours_snapshot": 661.73,
+        "k1175_live_yfin_2026_04_17": 694.3,
+        "abs_diff": 32.57,
+        "status": "MODEST_DRIFT",
+        "interpretation": "yfinance vendor drift (K1175 unpinned)"
+      }
+    },
+    "vix_863": {
+      "sharpe": {
+        "ours_snapshot": 0.9564,
+        "k1175_live_yfin_2026_04_17": 1.1369,
+        "abs_diff": 0.1805,
+        "status": "MODEST_DRIFT",
+        "interpretation": "yfinance vendor drift (K1175 unpinned)"
+      },
+      "ann_return_pct": {
+        "ours_snapshot": 9.1174,
+        "k1175_live_yfin_2026_04_17": 10.72,
+        "abs_diff": 1.6026,
+        "status": "MATERIAL_DRIFT",
+        "interpretation": "yfinance vendor drift (K1175 unpinned)"
+      },
+      "ann_vol_pct": {
+        "ours_snapshot": 9.5331,
+        "k1175_live_yfin_2026_04_17": 9.43,
+        "abs_diff": 0.1031,
+        "status": "MODEST_DRIFT",
+        "interpretation": "yfinance vendor drift (K1175 unpinned)"
+      },
+      "mdd_pct": {
+        "ours_snapshot": -15.1158,
+        "k1175_live_yfin_2026_04_17": -13.71,
+        "abs_diff": 1.4058,
+        "status": "MATERIAL_DRIFT",
+        "interpretation": "yfinance vendor drift (K1175 unpinned)"
+      },
+      "ann_turnover_pct": {
+        "ours_snapshot": 103.66,
+        "k1175_live_yfin_2026_04_17": 102.1,
+        "abs_diff": 1.56,
+        "status": "MODEST_DRIFT",
+        "interpretation": "yfinance vendor drift (K1175 unpinned)"
+      }
+    }
+  },
+  "vt_vs_bh_survival": {
+    "ewma_vt": {
+      "etf_floor": {
+        "vt_sharpe_net": 0.5643,
+        "bh_sharpe_same_window": 0.6558,
+        "sharpe_diff_vs_bh": -0.0915,
+        "vt_mdd_net": -22.3489,
+        "bh_mdd_same_window": -36.3816,
+        "mdd_improvement_pp": 14.03
+      },
+      "brief_mid": {
+        "vt_sharpe_net": 0.5399,
+        "bh_sharpe_same_window": 0.6558,
+        "sharpe_diff_vs_bh": -0.1159,
+        "vt_mdd_net": -22.4707,
+        "bh_mdd_same_window": -36.3816,
+        "mdd_improvement_pp": 13.91
+      },
+      "paper_canonical": {
+        "vt_sharpe_net": 0.5223,
+        "bh_sharpe_same_window": 0.6558,
+        "sharpe_diff_vs_bh": -0.1335,
+        "vt_mdd_net": -22.5582,
+        "bh_mdd_same_window": -36.3816,
+        "mdd_improvement_pp": 13.82
+      },
+      "stock_high": {
+        "vt_sharpe_net": 0.4668,
+        "bh_sharpe_same_window": 0.6558,
+        "sharpe_diff_vs_bh": -0.189,
+        "vt_mdd_net": -22.8348,
+        "bh_mdd_same_window": -36.3816,
+        "mdd_improvement_pp": 13.55
+      }
+    },
+    "garch_vt": {
+      "etf_floor": {
+        "vt_sharpe_net": 0.8479,
+        "bh_sharpe_same_window": 1.0309,
+        "sharpe_diff_vs_bh": -0.183,
+        "vt_mdd_net": -23.2652,
+        "bh_mdd_same_window": -36.3816,
+        "mdd_improvement_pp": 13.12
+      },
+      "brief_mid": {
+        "vt_sharpe_net": 0.8169,
+        "bh_sharpe_same_window": 1.0309,
+        "sharpe_diff_vs_bh": -0.214,
+        "vt_mdd_net": -23.4664,
+        "bh_mdd_same_window": -36.3816,
+        "mdd_improvement_pp": 12.92
+      },
+      "paper_canonical": {
+        "vt_sharpe_net": 0.7947,
+        "bh_sharpe_same_window": 1.0309,
+        "sharpe_diff_vs_bh": -0.2362,
+        "vt_mdd_net": -23.6109,
+        "bh_mdd_same_window": -36.3816,
+        "mdd_improvement_pp": 12.77
+      },
+      "stock_high": {
+        "vt_sharpe_net": 0.7246,
+        "bh_sharpe_same_window": 1.0309,
+        "sharpe_diff_vs_bh": -0.3063,
+        "vt_mdd_net": -24.0667,
+        "bh_mdd_same_window": -36.3816,
+        "mdd_improvement_pp": 12.31
+      }
+    },
+    "gjr_vt": {
+      "etf_floor": {
+        "vt_sharpe_net": 0.9545,
+        "bh_sharpe_same_window": 1.0309,
+        "sharpe_diff_vs_bh": -0.0764,
+        "vt_mdd_net": -23.569,
+        "bh_mdd_same_window": -36.3816,
+        "mdd_improvement_pp": 12.81
+      },
+      "brief_mid": {
+        "vt_sharpe_net": 0.9227,
+        "bh_sharpe_same_window": 1.0309,
+        "sharpe_diff_vs_bh": -0.1082,
+        "vt_mdd_net": -23.7905,
+        "bh_mdd_same_window": -36.3816,
+        "mdd_improvement_pp": 12.59
+      },
+      "paper_canonical": {
+        "vt_sharpe_net": 0.8998,
+        "bh_sharpe_same_window": 1.0309,
+        "sharpe_diff_vs_bh": -0.1311,
+        "vt_mdd_net": -23.9496,
+        "bh_mdd_same_window": -36.3816,
+        "mdd_improvement_pp": 12.43
+      },
+      "stock_high": {
+        "vt_sharpe_net": 0.8277,
+        "bh_sharpe_same_window": 1.0309,
+        "sharpe_diff_vs_bh": -0.2032,
+        "vt_mdd_net": -24.8709,
+        "bh_mdd_same_window": -36.3816,
+        "mdd_improvement_pp": 11.51
+      }
+    },
+    "vix_863": {
+      "etf_floor": {
+        "vt_sharpe_net": 0.9665,
+        "bh_sharpe_same_window": 0.9728,
+        "sharpe_diff_vs_bh": -0.0063,
+        "vt_mdd_net": -15.0549,
+        "bh_mdd_same_window": -36.3816,
+        "mdd_improvement_pp": 21.33
+      },
+      "brief_mid": {
+        "vt_sharpe_net": 0.9606,
+        "bh_sharpe_same_window": 0.9728,
+        "sharpe_diff_vs_bh": -0.0122,
+        "vt_mdd_net": -15.0903,
+        "bh_mdd_same_window": -36.3816,
+        "mdd_improvement_pp": 21.29
+      },
+      "paper_canonical": {
+        "vt_sharpe_net": 0.9564,
+        "bh_sharpe_same_window": 0.9728,
+        "sharpe_diff_vs_bh": -0.0164,
+        "vt_mdd_net": -15.1158,
+        "bh_mdd_same_window": -36.3816,
+        "mdd_improvement_pp": 21.27
+      },
+      "stock_high": {
+        "vt_sharpe_net": 0.943,
+        "bh_sharpe_same_window": 0.9728,
+        "sharpe_diff_vs_bh": -0.0298,
+        "vt_mdd_net": -15.1966,
+        "bh_mdd_same_window": -36.3816,
+        "mdd_improvement_pp": 21.18
+      }
+    }
+  },
+  "claim_summary_net_sharpe_by_tx": {
+    "buy_hold": {
+      "tx_etf_floor_0.10pct": 0.6558,
+      "tx_brief_mid_0.15pct": 0.6558,
+      "tx_paper_canonical_0.186pct": 0.6558,
+      "tx_stock_high_0.30pct": 0.6558,
+      "sharpe_range": 0.0
+    },
+    "ewma_vt": {
+      "tx_etf_floor_0.10pct": 0.5643,
+      "tx_brief_mid_0.15pct": 0.5399,
+      "tx_paper_canonical_0.186pct": 0.5223,
+      "tx_stock_high_0.30pct": 0.4668,
+      "sharpe_range": 0.0975
+    },
+    "garch_vt": {
+      "tx_etf_floor_0.10pct": 0.8479,
+      "tx_brief_mid_0.15pct": 0.8169,
+      "tx_paper_canonical_0.186pct": 0.7947,
+      "tx_stock_high_0.30pct": 0.7246,
+      "sharpe_range": 0.1233
+    },
+    "gjr_vt": {
+      "tx_etf_floor_0.10pct": 0.9545,
+      "tx_brief_mid_0.15pct": 0.9227,
+      "tx_paper_canonical_0.186pct": 0.8998,
+      "tx_stock_high_0.30pct": 0.8277,
+      "sharpe_range": 0.1268
+    },
+    "vix_863": {
+      "tx_etf_floor_0.10pct": 0.9665,
+      "tx_brief_mid_0.15pct": 0.9606,
+      "tx_paper_canonical_0.186pct": 0.9564,
+      "tx_stock_high_0.30pct": 0.943,
+      "sharpe_range": 0.0235
+    }
+  },
+  "ROBUSTNESS_VERDICT": "ewma_vt: Sharpe range across TX 0.10%-0.30% = 0.0975 | garch_vt: Sharpe range across TX 0.10%-0.30% = 0.1233 | gjr_vt: Sharpe range across TX 0.10%-0.30% = 0.1268 | vix_863: Sharpe range across TX 0.10%-0.30% = 0.0235 | At TX=0.30% (worst case, hypothetical common-stock rate): 0/4 VT strategies retain higher net Sharpe than BH in own window | At TX=0.30%: 4/4 VT strategies retain MDD improvement (less negative drawdown) vs BH",
+  "timestamp": "2026-05-12T16:45:46.871010",
+  "proposer": "Main thread (Paper 2 R1 SEVERE 1 fix)",
+  "executor": "Claude main thread",
+  "reviewer_to_run_codex": "Codex CLI quota reset 2026-05-13 02:46 UTC. Review focus: (a) signal.shift(1) preserved on all VT weights; (b) tx_cost applied to |Δw| (round-trip notional change), not single-leg; (c) ann_vol uses √252; (d) Sharpe = ann_ret / ann_vol (consistent with K1175); (e) seed=42 set globally."
+}

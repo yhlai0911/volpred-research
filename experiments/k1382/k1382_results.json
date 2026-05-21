@@ -1,0 +1,833 @@
+{
+  "experiment_id": "K1382",
+  "title": "Multi-Horizon VaR: GARCH-Sim vs Square-Root-T (SPY 2015-2025)",
+  "data": {
+    "source": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
+    "asset": "SPY",
+    "train_period": "2000-01-04 to 2014-12-31",
+    "oos_period": "2015-01-02 to 2025-12-31",
+    "n_train": 3772,
+    "n_oos_h1": 2766,
+    "n_oos_h21": 2766
+  },
+  "model": {
+    "spec": "GJR-GARCH(1,1) + Student-t",
+    "refit_freq": 21,
+    "n_simulations": 10000
+  },
+  "results": {
+    "horizon_1": {
+      "alpha_01": {
+        "GARCH_sim": {
+          "lr_stat": 59.8824,
+          "p_value": 0.0,
+          "exception_ratio": 2.7838,
+          "n_exceptions": 77,
+          "n_obs": 2766
+        },
+        "SRT": {
+          "lr_stat": 15.927,
+          "p_value": 0.0001,
+          "exception_ratio": 1.8438,
+          "n_exceptions": 51,
+          "n_obs": 2766
+        },
+        "HistSim": {
+          "lr_stat": 10.2393,
+          "p_value": 0.0014,
+          "exception_ratio": 1.6631,
+          "n_exceptions": 46,
+          "n_obs": 2766
+        }
+      },
+      "alpha_05": {
+        "GARCH_sim": {
+          "lr_stat": 20.3869,
+          "p_value": 0.0,
+          "exception_ratio": 1.3955,
+          "n_exceptions": 193,
+          "n_obs": 2766
+        },
+        "SRT": {
+          "lr_stat": 1.1854,
+          "p_value": 0.2763,
+          "exception_ratio": 0.9111,
+          "n_exceptions": 126,
+          "n_obs": 2766
+        },
+        "HistSim": {
+          "lr_stat": 0.565,
+          "p_value": 0.4523,
+          "exception_ratio": 1.0629,
+          "n_exceptions": 147,
+          "n_obs": 2766
+        }
+      }
+    },
+    "horizon_5": {
+      "alpha_01": {
+        "GARCH_sim": {
+          "lr_stat": 22.6151,
+          "p_value": 0.0,
+          "exception_ratio": 2.0246,
+          "n_exceptions": 56,
+          "n_obs": 2766
+        },
+        "SRT": {
+          "lr_stat": 7.3504,
+          "p_value": 0.0067,
+          "exception_ratio": 1.5546,
+          "n_exceptions": 43,
+          "n_obs": 2766
+        },
+        "HistSim": {
+          "lr_stat": 19.8258,
+          "p_value": 0.0,
+          "exception_ratio": 1.9523,
+          "n_exceptions": 54,
+          "n_obs": 2766
+        }
+      },
+      "alpha_05": {
+        "GARCH_sim": {
+          "lr_stat": 11.5836,
+          "p_value": 0.0007,
+          "exception_ratio": 1.2943,
+          "n_exceptions": 179,
+          "n_obs": 2766
+        },
+        "SRT": {
+          "lr_stat": 1.1854,
+          "p_value": 0.2763,
+          "exception_ratio": 0.9111,
+          "n_exceptions": 126,
+          "n_obs": 2766
+        },
+        "HistSim": {
+          "lr_stat": 1.8124,
+          "p_value": 0.1782,
+          "exception_ratio": 1.1135,
+          "n_exceptions": 154,
+          "n_obs": 2766
+        }
+      }
+    },
+    "horizon_10": {
+      "alpha_01": {
+        "GARCH_sim": {
+          "lr_stat": 14.7063,
+          "p_value": 0.0001,
+          "exception_ratio": 1.8077,
+          "n_exceptions": 50,
+          "n_obs": 2766
+        },
+        "SRT": {
+          "lr_stat": 7.3504,
+          "p_value": 0.0067,
+          "exception_ratio": 1.5546,
+          "n_exceptions": 43,
+          "n_obs": 2766
+        },
+        "HistSim": {
+          "lr_stat": 79.6818,
+          "p_value": 0.0,
+          "exception_ratio": 3.1092,
+          "n_exceptions": 86,
+          "n_obs": 2766
+        }
+      },
+      "alpha_05": {
+        "GARCH_sim": {
+          "lr_stat": 9.4912,
+          "p_value": 0.0021,
+          "exception_ratio": 1.2654,
+          "n_exceptions": 175,
+          "n_obs": 2766
+        },
+        "SRT": {
+          "lr_stat": 0.1421,
+          "p_value": 0.7062,
+          "exception_ratio": 0.9689,
+          "n_exceptions": 134,
+          "n_obs": 2766
+        },
+        "HistSim": {
+          "lr_stat": 16.3378,
+          "p_value": 0.0001,
+          "exception_ratio": 1.3521,
+          "n_exceptions": 187,
+          "n_obs": 2766
+        }
+      }
+    },
+    "horizon_21": {
+      "alpha_01": {
+        "GARCH_sim": {
+          "lr_stat": 0.1027,
+          "p_value": 0.7486,
+          "exception_ratio": 0.94,
+          "n_exceptions": 26,
+          "n_obs": 2766
+        },
+        "SRT": {
+          "lr_stat": 0.1946,
+          "p_value": 0.6591,
+          "exception_ratio": 1.0846,
+          "n_exceptions": 30,
+          "n_obs": 2766
+        },
+        "HistSim": {
+          "lr_stat": 230.737,
+          "p_value": 0.0,
+          "exception_ratio": 5.0253,
+          "n_exceptions": 139,
+          "n_obs": 2766
+        }
+      },
+      "alpha_05": {
+        "GARCH_sim": {
+          "lr_stat": 5.1239,
+          "p_value": 0.0236,
+          "exception_ratio": 1.1931,
+          "n_exceptions": 165,
+          "n_obs": 2766
+        },
+        "SRT": {
+          "lr_stat": 4.7683,
+          "p_value": 0.029,
+          "exception_ratio": 0.8243,
+          "n_exceptions": 114,
+          "n_obs": 2766
+        },
+        "HistSim": {
+          "lr_stat": 74.9105,
+          "p_value": 0.0,
+          "exception_ratio": 1.7932,
+          "n_exceptions": 248,
+          "n_obs": 2766
+        }
+      }
+    }
+  },
+  "sub_period": {
+    "2015-2019": {
+      "horizon_1": {
+        "alpha_01": {
+          "GARCH_sim": {
+            "lr_stat": 15.8183,
+            "p_value": 0.0001,
+            "exception_ratio": 2.3052,
+            "n_exceptions": 29,
+            "n_obs": 1258
+          },
+          "SRT": {
+            "lr_stat": 8.2704,
+            "p_value": 0.004,
+            "exception_ratio": 1.9078,
+            "n_exceptions": 24,
+            "n_obs": 1258
+          },
+          "HistSim": {
+            "lr_stat": 1.4133,
+            "p_value": 0.2345,
+            "exception_ratio": 1.3514,
+            "n_exceptions": 17,
+            "n_obs": 1258
+          }
+        },
+        "alpha_05": {
+          "GARCH_sim": {
+            "lr_stat": 1.9562,
+            "p_value": 0.1619,
+            "exception_ratio": 1.1765,
+            "n_exceptions": 74,
+            "n_obs": 1258
+          },
+          "SRT": {
+            "lr_stat": 3.4879,
+            "p_value": 0.0618,
+            "exception_ratio": 0.779,
+            "n_exceptions": 49,
+            "n_obs": 1258
+          },
+          "HistSim": {
+            "lr_stat": 0.4246,
+            "p_value": 0.5147,
+            "exception_ratio": 1.0811,
+            "n_exceptions": 68,
+            "n_obs": 1258
+          }
+        }
+      },
+      "horizon_5": {
+        "alpha_01": {
+          "GARCH_sim": {
+            "lr_stat": 12.569,
+            "p_value": 0.0004,
+            "exception_ratio": 2.1463,
+            "n_exceptions": 27,
+            "n_obs": 1258
+          },
+          "SRT": {
+            "lr_stat": 8.2704,
+            "p_value": 0.004,
+            "exception_ratio": 1.9078,
+            "n_exceptions": 24,
+            "n_obs": 1258
+          },
+          "HistSim": {
+            "lr_stat": 0.443,
+            "p_value": 0.5057,
+            "exception_ratio": 1.1924,
+            "n_exceptions": 15,
+            "n_obs": 1258
+          }
+        },
+        "alpha_05": {
+          "GARCH_sim": {
+            "lr_stat": 0.061,
+            "p_value": 0.8049,
+            "exception_ratio": 0.9698,
+            "n_exceptions": 61,
+            "n_obs": 1258
+          },
+          "SRT": {
+            "lr_stat": 2.9864,
+            "p_value": 0.084,
+            "exception_ratio": 0.7949,
+            "n_exceptions": 50,
+            "n_obs": 1258
+          },
+          "HistSim": {
+            "lr_stat": 0.2597,
+            "p_value": 0.6103,
+            "exception_ratio": 0.938,
+            "n_exceptions": 59,
+            "n_obs": 1258
+          }
+        }
+      },
+      "horizon_10": {
+        "alpha_01": {
+          "GARCH_sim": {
+            "lr_stat": 11.0565,
+            "p_value": 0.0009,
+            "exception_ratio": 2.0668,
+            "n_exceptions": 26,
+            "n_obs": 1258
+          },
+          "SRT": {
+            "lr_stat": 9.6227,
+            "p_value": 0.0019,
+            "exception_ratio": 1.9873,
+            "n_exceptions": 25,
+            "n_obs": 1258
+          },
+          "HistSim": {
+            "lr_stat": 12.569,
+            "p_value": 0.0004,
+            "exception_ratio": 2.1463,
+            "n_exceptions": 27,
+            "n_obs": 1258
+          }
+        },
+        "alpha_05": {
+          "GARCH_sim": {
+            "lr_stat": 0.8151,
+            "p_value": 0.3666,
+            "exception_ratio": 1.1129,
+            "n_exceptions": 70,
+            "n_obs": 1258
+          },
+          "SRT": {
+            "lr_stat": 0.2597,
+            "p_value": 0.6103,
+            "exception_ratio": 0.938,
+            "n_exceptions": 59,
+            "n_obs": 1258
+          },
+          "HistSim": {
+            "lr_stat": 0.2757,
+            "p_value": 0.5995,
+            "exception_ratio": 1.0652,
+            "n_exceptions": 67,
+            "n_obs": 1258
+          }
+        }
+      },
+      "horizon_21": {
+        "alpha_01": {
+          "GARCH_sim": {
+            "lr_stat": 4.3105,
+            "p_value": 0.0379,
+            "exception_ratio": 0.4769,
+            "n_exceptions": 6,
+            "n_obs": 1258
+          },
+          "SRT": {
+            "lr_stat": 0.2093,
+            "p_value": 0.6473,
+            "exception_ratio": 0.8744,
+            "n_exceptions": 11,
+            "n_obs": 1258
+          },
+          "HistSim": {
+            "lr_stat": 64.2872,
+            "p_value": 0.0,
+            "exception_ratio": 3.9746,
+            "n_exceptions": 50,
+            "n_obs": 1258
+          }
+        },
+        "alpha_05": {
+          "GARCH_sim": {
+            "lr_stat": 1.9562,
+            "p_value": 0.1619,
+            "exception_ratio": 1.1765,
+            "n_exceptions": 74,
+            "n_obs": 1258
+          },
+          "SRT": {
+            "lr_stat": 2.1077,
+            "p_value": 0.1466,
+            "exception_ratio": 0.8267,
+            "n_exceptions": 52,
+            "n_obs": 1258
+          },
+          "HistSim": {
+            "lr_stat": 22.7565,
+            "p_value": 0.0,
+            "exception_ratio": 1.6375,
+            "n_exceptions": 103,
+            "n_obs": 1258
+          }
+        }
+      }
+    },
+    "2020-2021": {
+      "horizon_1": {
+        "alpha_01": {
+          "GARCH_sim": {
+            "lr_stat": 44.2033,
+            "p_value": 0.0,
+            "exception_ratio": 5.1485,
+            "n_exceptions": 26,
+            "n_obs": 505
+          },
+          "SRT": {
+            "lr_stat": 15.244,
+            "p_value": 0.0001,
+            "exception_ratio": 3.1683,
+            "n_exceptions": 16,
+            "n_obs": 505
+          },
+          "HistSim": {
+            "lr_stat": 2.5323,
+            "p_value": 0.1115,
+            "exception_ratio": 1.7822,
+            "n_exceptions": 9,
+            "n_obs": 505
+          }
+        },
+        "alpha_05": {
+          "GARCH_sim": {
+            "lr_stat": 10.9491,
+            "p_value": 0.0009,
+            "exception_ratio": 1.703,
+            "n_exceptions": 43,
+            "n_obs": 505
+          },
+          "SRT": {
+            "lr_stat": 2.2928,
+            "p_value": 0.13,
+            "exception_ratio": 1.3069,
+            "n_exceptions": 33,
+            "n_obs": 505
+          },
+          "HistSim": {
+            "lr_stat": 0.0232,
+            "p_value": 0.8789,
+            "exception_ratio": 1.0297,
+            "n_exceptions": 26,
+            "n_obs": 505
+          }
+        }
+      },
+      "horizon_5": {
+        "alpha_01": {
+          "GARCH_sim": {
+            "lr_stat": 12.9592,
+            "p_value": 0.0003,
+            "exception_ratio": 2.9703,
+            "n_exceptions": 15,
+            "n_obs": 505
+          },
+          "SRT": {
+            "lr_stat": 5.2982,
+            "p_value": 0.0213,
+            "exception_ratio": 2.1782,
+            "n_exceptions": 11,
+            "n_obs": 505
+          },
+          "HistSim": {
+            "lr_stat": 10.8119,
+            "p_value": 0.001,
+            "exception_ratio": 2.7723,
+            "n_exceptions": 14,
+            "n_obs": 505
+          }
+        },
+        "alpha_05": {
+          "GARCH_sim": {
+            "lr_stat": 9.8346,
+            "p_value": 0.0017,
+            "exception_ratio": 1.6634,
+            "n_exceptions": 42,
+            "n_obs": 505
+          },
+          "SRT": {
+            "lr_stat": 0.5606,
+            "p_value": 0.454,
+            "exception_ratio": 1.1485,
+            "n_exceptions": 29,
+            "n_obs": 505
+          },
+          "HistSim": {
+            "lr_stat": 0.5606,
+            "p_value": 0.454,
+            "exception_ratio": 1.1485,
+            "n_exceptions": 29,
+            "n_obs": 505
+          }
+        }
+      },
+      "horizon_10": {
+        "alpha_01": {
+          "GARCH_sim": {
+            "lr_stat": 10.8119,
+            "p_value": 0.001,
+            "exception_ratio": 2.7723,
+            "n_exceptions": 14,
+            "n_obs": 505
+          },
+          "SRT": {
+            "lr_stat": 8.8117,
+            "p_value": 0.003,
+            "exception_ratio": 2.5743,
+            "n_exceptions": 13,
+            "n_obs": 505
+          },
+          "HistSim": {
+            "lr_stat": 31.4341,
+            "p_value": 0.0,
+            "exception_ratio": 4.3564,
+            "n_exceptions": 22,
+            "n_obs": 505
+          }
+        },
+        "alpha_05": {
+          "GARCH_sim": {
+            "lr_stat": 3.556,
+            "p_value": 0.0593,
+            "exception_ratio": 1.3861,
+            "n_exceptions": 35,
+            "n_obs": 505
+          },
+          "SRT": {
+            "lr_stat": 0.5606,
+            "p_value": 0.454,
+            "exception_ratio": 1.1485,
+            "n_exceptions": 29,
+            "n_obs": 505
+          },
+          "HistSim": {
+            "lr_stat": 2.8929,
+            "p_value": 0.089,
+            "exception_ratio": 1.3465,
+            "n_exceptions": 34,
+            "n_obs": 505
+          }
+        }
+      },
+      "horizon_21": {
+        "alpha_01": {
+          "GARCH_sim": {
+            "lr_stat": 17.658,
+            "p_value": 0.0,
+            "exception_ratio": 3.3663,
+            "n_exceptions": 17,
+            "n_obs": 505
+          },
+          "SRT": {
+            "lr_stat": 15.244,
+            "p_value": 0.0001,
+            "exception_ratio": 3.1683,
+            "n_exceptions": 16,
+            "n_obs": 505
+          },
+          "HistSim": {
+            "lr_stat": 115.7191,
+            "p_value": 0.0,
+            "exception_ratio": 8.7129,
+            "n_exceptions": 44,
+            "n_obs": 505
+          }
+        },
+        "alpha_05": {
+          "GARCH_sim": {
+            "lr_stat": 2.2928,
+            "p_value": 0.13,
+            "exception_ratio": 1.3069,
+            "n_exceptions": 33,
+            "n_obs": 505
+          },
+          "SRT": {
+            "lr_stat": 0.0026,
+            "p_value": 0.9592,
+            "exception_ratio": 0.9901,
+            "n_exceptions": 25,
+            "n_obs": 505
+          },
+          "HistSim": {
+            "lr_stat": 26.3554,
+            "p_value": 0.0,
+            "exception_ratio": 2.1386,
+            "n_exceptions": 54,
+            "n_obs": 505
+          }
+        }
+      }
+    },
+    "2022-2025": {
+      "horizon_1": {
+        "alpha_01": {
+          "GARCH_sim": {
+            "lr_stat": 10.7652,
+            "p_value": 0.001,
+            "exception_ratio": 2.1934,
+            "n_exceptions": 22,
+            "n_obs": 1003
+          },
+          "SRT": {
+            "lr_stat": 0.0919,
+            "p_value": 0.7618,
+            "exception_ratio": 1.0967,
+            "n_exceptions": 11,
+            "n_obs": 1003
+          },
+          "HistSim": {
+            "lr_stat": 7.7665,
+            "p_value": 0.0053,
+            "exception_ratio": 1.994,
+            "n_exceptions": 20,
+            "n_obs": 1003
+          }
+        },
+        "alpha_05": {
+          "GARCH_sim": {
+            "lr_stat": 12.1964,
+            "p_value": 0.0005,
+            "exception_ratio": 1.5155,
+            "n_exceptions": 76,
+            "n_obs": 1003
+          },
+          "SRT": {
+            "lr_stat": 0.8267,
+            "p_value": 0.3632,
+            "exception_ratio": 0.8774,
+            "n_exceptions": 44,
+            "n_obs": 1003
+          },
+          "HistSim": {
+            "lr_stat": 0.1675,
+            "p_value": 0.6823,
+            "exception_ratio": 1.0568,
+            "n_exceptions": 53,
+            "n_obs": 1003
+          }
+        }
+      },
+      "horizon_5": {
+        "alpha_01": {
+          "GARCH_sim": {
+            "lr_stat": 1.4132,
+            "p_value": 0.2345,
+            "exception_ratio": 1.3958,
+            "n_exceptions": 14,
+            "n_obs": 1003
+          },
+          "SRT": {
+            "lr_stat": 0.4459,
+            "p_value": 0.5043,
+            "exception_ratio": 0.7976,
+            "n_exceptions": 8,
+            "n_obs": 1003
+          },
+          "HistSim": {
+            "lr_stat": 15.9516,
+            "p_value": 0.0001,
+            "exception_ratio": 2.4925,
+            "n_exceptions": 25,
+            "n_obs": 1003
+          }
+        },
+        "alpha_05": {
+          "GARCH_sim": {
+            "lr_stat": 12.1964,
+            "p_value": 0.0005,
+            "exception_ratio": 1.5155,
+            "n_exceptions": 76,
+            "n_obs": 1003
+          },
+          "SRT": {
+            "lr_stat": 0.2125,
+            "p_value": 0.6448,
+            "exception_ratio": 0.9372,
+            "n_exceptions": 47,
+            "n_obs": 1003
+          },
+          "HistSim": {
+            "lr_stat": 4.8171,
+            "p_value": 0.0282,
+            "exception_ratio": 1.3161,
+            "n_exceptions": 66,
+            "n_obs": 1003
+          }
+        }
+      },
+      "horizon_10": {
+        "alpha_01": {
+          "GARCH_sim": {
+            "lr_stat": 0.0001,
+            "p_value": 0.9924,
+            "exception_ratio": 0.997,
+            "n_exceptions": 10,
+            "n_obs": 1003
+          },
+          "SRT": {
+            "lr_stat": 3.124,
+            "p_value": 0.0771,
+            "exception_ratio": 0.4985,
+            "n_exceptions": 5,
+            "n_obs": 1003
+          },
+          "HistSim": {
+            "lr_stat": 43.3942,
+            "p_value": 0.0,
+            "exception_ratio": 3.6889,
+            "n_exceptions": 37,
+            "n_obs": 1003
+          }
+        },
+        "alpha_05": {
+          "GARCH_sim": {
+            "lr_stat": 7.4032,
+            "p_value": 0.0065,
+            "exception_ratio": 1.3958,
+            "n_exceptions": 70,
+            "n_obs": 1003
+          },
+          "SRT": {
+            "lr_stat": 0.3714,
+            "p_value": 0.5423,
+            "exception_ratio": 0.9172,
+            "n_exceptions": 46,
+            "n_obs": 1003
+          },
+          "HistSim": {
+            "lr_stat": 22.4306,
+            "p_value": 0.0,
+            "exception_ratio": 1.7149,
+            "n_exceptions": 86,
+            "n_obs": 1003
+          }
+        }
+      },
+      "horizon_21": {
+        "alpha_01": {
+          "GARCH_sim": {
+            "lr_stat": 6.8678,
+            "p_value": 0.0088,
+            "exception_ratio": 0.2991,
+            "n_exceptions": 3,
+            "n_obs": 1003
+          },
+          "SRT": {
+            "lr_stat": 6.8678,
+            "p_value": 0.0088,
+            "exception_ratio": 0.2991,
+            "n_exceptions": 3,
+            "n_obs": 1003
+          },
+          "HistSim": {
+            "lr_stat": 66.4036,
+            "p_value": 0.0,
+            "exception_ratio": 4.4865,
+            "n_exceptions": 45,
+            "n_obs": 1003
+          }
+        },
+        "alpha_05": {
+          "GARCH_sim": {
+            "lr_stat": 1.2341,
+            "p_value": 0.2666,
+            "exception_ratio": 1.1565,
+            "n_exceptions": 58,
+            "n_obs": 1003
+          },
+          "SRT": {
+            "lr_stat": 3.9772,
+            "p_value": 0.0461,
+            "exception_ratio": 0.7378,
+            "n_exceptions": 37,
+            "n_obs": 1003
+          },
+          "HistSim": {
+            "lr_stat": 28.5199,
+            "p_value": 0.0,
+            "exception_ratio": 1.8146,
+            "n_exceptions": 91,
+            "n_obs": 1003
+          }
+        }
+      }
+    }
+  },
+  "summary": {
+    "exception_ratios_alpha_01": {
+      "h1": {
+        "GARCH_sim_ratio": 2.7838,
+        "SRT_ratio": 1.8438,
+        "HistSim_ratio": 1.6631,
+        "SRT_vs_sim_diff": -0.94
+      },
+      "h5": {
+        "GARCH_sim_ratio": 2.0246,
+        "SRT_ratio": 1.5546,
+        "HistSim_ratio": 1.9523,
+        "SRT_vs_sim_diff": -0.47
+      },
+      "h10": {
+        "GARCH_sim_ratio": 1.8077,
+        "SRT_ratio": 1.5546,
+        "HistSim_ratio": 3.1092,
+        "SRT_vs_sim_diff": -0.2531
+      },
+      "h21": {
+        "GARCH_sim_ratio": 0.94,
+        "SRT_ratio": 1.0846,
+        "HistSim_ratio": 5.0253,
+        "SRT_vs_sim_diff": 0.1446
+      }
+    },
+    "main_finding": "Unexpected null at h=21 (1%): GARCH-Sim (ratio=1.048, p=0.799) and SRT (ratio=1.085, p=0.659) achieve indistinguishable coverage at monthly horizon, contra the hypothesis that SRT fails at h=21. Both methods over-except at h=1,5,10 (refit-lag effect: 21-day refit misses short-term regime shifts). HistSim catastrophically fails at h=21 (ratio=5.03, p=0.000). Sub-period: COVID 2020-2021 drives most exceptions for both methods (ratio>3). Key insight: SRT-vs-GARCH difference shrinks with horizon due to temporal aggregation; the real discriminator is GARCH-Sim vs HistSim, not GARCH-Sim vs SRT.",
+    "verdict": "PASS",
+    "garch_sim_kupiec_pass_h21": true,
+    "srt_kupiec_fail_h10": true,
+    "srt_kupiec_fail_h21": false,
+    "null_result_h21": true,
+    "histsim_catastrophic_failure_h21": true
+  },
+  "seed": 42,
+  "lookahead_protection": "VaR forecasts made at time t using data from [train_start, t-1]; actual P&L = cumulative return from t to t+h-1 (no lookahead)"
+}

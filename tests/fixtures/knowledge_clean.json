@@ -1,0 +1,36 @@
+[
+  {
+    "id": "K588",
+    "title": "K588: DCC-GARCH SPY-GLD risk parity",
+    "category": "multivariate_model",
+    "experiment_id": "K588",
+    "content": "[提出: User, 執行: Claude] DCC-GARCH(1,1) SPY-GLD time-varying correlation does not improve 2-asset risk parity Sharpe. K588 final result: rho mean +0.03 std 0.20.",
+    "tags": ["DCC-GARCH", "risk_parity"],
+    "legacy": false
+  },
+  {
+    "id": "K700",
+    "title": "K700: HAR-RV baseline for SPY",
+    "category": "model_behavior",
+    "experiment_id": "K700",
+    "content": "[提出: User, 執行: Claude] K700: HAR-RV with daily/weekly/monthly RV components on SPY 2018-2024. Reference K588 for multivariate context.",
+    "tags": ["HAR-RV"],
+    "legacy": false
+  },
+  {
+    "id": "know_20260406085851_k936",
+    "title": "K936: time-varying Hurst exponent (rough volatility)",
+    "category": "experiment",
+    "content": "[提出: Claude, 執行: Claude] K936 rolling Hurst on SPY HF data shows H ≈ 0.13 — confirms rough vol regime.",
+    "tags": ["Hurst", "rough_vol"],
+    "legacy": false
+  },
+  {
+    "id": "ce3b9f8b",
+    "category": "model_behavior",
+    "content": "GJR-GARCH outperforms symmetric GARCH for SPY OOS 2023-2024 in QLIKE.",
+    "evidence": ["fdbde66e"],
+    "confidence": 0.85,
+    "legacy": true
+  }
+]

@@ -1,0 +1,22 @@
+=== Run release pool manually ===
+「嚴格統計檢驗」)', 'Diebold-Mariano (use 「兩模型比較顯著」)', '|t| stat (use 
+白話)', 't-stat (use 白話)']"]}], "due_only": true, "include_drafts": true, 
+"preferred_audiences": [], "limit": 1, "mode": "auto", "force": false, 
+"skipped": false, "settings": {"mode": "auto", "interval_minutes": 180, 
+"max_articles_per_run": 1, "due_only": true, "include_drafts": true, 
+"preferred_audiences": [], "last_released_at": 
+"2026-05-19T09:08:22.320952+00:00", "updated_at": 
+"2026-05-19T10:00:09.674893+00:00"}}
+
+=== Verify cron last_run ===
+"2026-05-19T14:00:16+00:00"
+
+=== Check why cron didn't fire (last log lines) ===
+"skipped": false, "settings": {"mode": "auto", "interval_minutes": 180, 
+"max_articles_per_run": 1, "due_only": true, "include_drafts": true, 
+"preferred_audiences": [], "last_released_at": 
+"2026-05-19T09:08:22.320952+00:00", "updated_at": 
+"2026-05-19T10:00:09.674893+00:00"}}
+=== [release_pool] exit 0 at 2026-05-19T14:00:13.620412+00:00 (duration=4.0s) ===
+=== [release_pool] check_alerts fallback fire at 2026-05-19T14:00:13+00:00 ===
+=== [release_pool] exit 0 at 2026-05-19T14:00:16+00:00 (fallback) ===

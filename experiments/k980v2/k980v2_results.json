@@ -1,0 +1,254 @@
+{
+  "experiment_id": "k980v2",
+  "title": "Threshold GJR-GARCH \u2014 Correct Joint MLE (K980 Methodology Fix)",
+  "date": "2026-05-17",
+  "data_source": "yfinance (SPY, ^VIX)",
+  "data_period": "2006-01-05 to 2026-04-06",
+  "total_obs": 5093,
+  "is_obs": 3269,
+  "oos_obs": 1824,
+  "is_period": "2006-01-05 to 2018-12-31",
+  "oos_period": "2019-01-02 to 2026-04-06",
+  "seed": 42,
+  "methodology": {
+    "description": "Threshold GJR-GARCH(1,1) with JOINT MLE over full time series. h_t is continuous across regime switches \u2014 h_{t-1} is always the variance from the previous step regardless of active regime. Fixes K980 estimation-evaluation mismatch where fit_gjr() was run on non-contiguous subsets but h_t was evaluated on continuous sequence.",
+    "k980_fix": "Joint MLE on full time series (vs K980 subset-wise MLE)",
+    "threshold_variable": "VIX_{t-1} (shifted: vix_lag = vix.shift(1) applied first)",
+    "threshold_grid": [
+      14,
+      16,
+      18,
+      20,
+      22,
+      24
+    ],
+    "best_threshold": 14,
+    "regime_constraint": "Each regime >= 15% of IS observations",
+    "multistart": 20,
+    "optimizer": "scipy.optimize.minimize L-BFGS-B",
+    "likelihood": "Gaussian log-likelihood summed over full IS time series",
+    "models": [
+      "GJR baseline (20 multistart)",
+      "TGJR joint MLE (20 multistart)"
+    ]
+  },
+  "parameters": {
+    "gjr_baseline": {
+      "omega": 2.7247795820307058e-06,
+      "alpha": 1e-06,
+      "gamma": 0.23117860784203445,
+      "beta": 0.8630480858387909,
+      "persistence": 0.9786383897598081,
+      "loglik": 13831.832252436128,
+      "converged": true,
+      "nobs": 3269
+    },
+    "tgjr_joint_mle": {
+      "best_threshold": 14,
+      "low_regime": {
+        "omega": 1.6980908591186944e-05,
+        "alpha": 1e-06,
+        "gamma": 0.49082981064738196,
+        "beta": 0.29248297516306915,
+        "persistence": 0.5378988804867602
+      },
+      "high_regime": {
+        "omega": 4.415274749111837e-06,
+        "alpha": 1e-06,
+        "gamma": 0.16980626648784364,
+        "beta": 0.8849869227132605,
+        "persistence": 0.9698910559571824
+      },
+      "loglik": 13878.986586501826,
+      "converged": true,
+      "loglik_distribution": {
+        "n_converged": 20,
+        "min": 13154.050542485675,
+        "max": 13878.986586501826,
+        "std": 147.89046449327185
+      }
+    }
+  },
+  "threshold_grid_results": {
+    "14": {
+      "qlike_is": 1.6009550301985338,
+      "pct_low": 0.33802386050780053,
+      "pct_high": 0.6619761394921995,
+      "n_low": 1105,
+      "n_high": 2164,
+      "loglik": 13878.986586501826,
+      "converged": true,
+      "persistence_low": 0.5378988804867602,
+      "persistence_high": 0.9698910559571824
+    },
+    "16": {
+      "qlike_is": 1.6013209582002257,
+      "pct_low": 0.4796573875802998,
+      "pct_high": 0.5203426124197003,
+      "n_low": 1568,
+      "n_high": 1701,
+      "loglik": 13879.030100667638,
+      "converged": true,
+      "persistence_low": 0.8548785070737014,
+      "persistence_high": 0.9686929235149884
+    },
+    "18": {
+      "qlike_is": 1.6042848094481519,
+      "pct_low": 0.5937595594983175,
+      "pct_high": 0.40624044050168245,
+      "n_low": 1941,
+      "n_high": 1328,
+      "loglik": 13873.62850739373,
+      "converged": true,
+      "persistence_low": 0.8326582312674405,
+      "persistence_high": 0.9640095882381757
+    },
+    "20": {
+      "qlike_is": 1.6180112512436475,
+      "pct_low": 0.6788008565310493,
+      "pct_high": 0.32119914346895073,
+      "n_low": 2219,
+      "n_high": 1050,
+      "loglik": 13852.559896039518,
+      "converged": true,
+      "persistence_low": 0.9256870526771191,
+      "persistence_high": 0.9418081711359176
+    },
+    "22": {
+      "qlike_is": 1.619696605906295,
+      "pct_low": 0.7491587641480575,
+      "pct_high": 0.2508412358519425,
+      "n_low": 2449,
+      "n_high": 820,
+      "loglik": 13849.121228020762,
+      "converged": true,
+      "persistence_low": 0.9468072860386108,
+      "persistence_high": 0.9607225362102825
+    },
+    "24": {
+      "qlike_is": 1.6237426987218566,
+      "pct_low": 0.808810033649434,
+      "pct_high": 0.19118996635056593,
+      "n_low": 2644,
+      "n_high": 625,
+      "loglik": 13843.338838775335,
+      "converged": true,
+      "persistence_low": 0.95809626343686,
+      "persistence_high": 0.9946448122798105
+    }
+  },
+  "oos_evaluation": {
+    "GJR": {
+      "QLIKE": 1.4956089795879477,
+      "MSE": 2.7172850673477487e-07
+    },
+    "TGJR": {
+      "QLIKE": 1.4749662140439859,
+      "MSE": 2.7267181111154754e-07
+    }
+  },
+  "regime_conditional_evaluation": {
+    "Low_VIX": {
+      "GJR": {
+        "QLIKE": 1.6148938415871656,
+        "MSE": 2.438740766040952e-09
+      },
+      "TGJR": {
+        "QLIKE": 1.5742598406990258,
+        "MSE": 2.288143903863927e-09
+      }
+    },
+    "High_VIX": {
+      "GJR": {
+        "QLIKE": 1.4739770097953435,
+        "MSE": 3.2056343838713597e-07
+      },
+      "TGJR": {
+        "QLIKE": 1.4569595978112064,
+        "MSE": 3.2170511863625696e-07
+      }
+    }
+  },
+  "dm_test": {
+    "comparison": "GJR vs TGJR",
+    "loss_function": "QLIKE",
+    "dm_stat": 1.1047365245861063,
+    "p_value": 0.26927377205374103,
+    "max_lag": 24,
+    "hac": "Newey-West Bartlett kernel",
+    "h": 1,
+    "significant_at_5pct": false,
+    "winner": "TGJR"
+  },
+  "var_backtesting": {
+    "VaR_0.01": {
+      "GJR": {
+        "violations": 37,
+        "violation_rate": 0.020285087719298246,
+        "expected_rate": 0.01,
+        "kupiec_LR": 15.015844345159849,
+        "kupiec_p": 0.00010661230755726336,
+        "kupiec_status": "FAIL"
+      },
+      "TGJR": {
+        "violations": 35,
+        "violation_rate": 0.01918859649122807,
+        "expected_rate": 0.01,
+        "kupiec_LR": 12.257215327609288,
+        "kupiec_p": 0.00046346260883722845,
+        "kupiec_status": "FAIL"
+      }
+    },
+    "VaR_0.05": {
+      "GJR": {
+        "violations": 107,
+        "violation_rate": 0.05866228070175439,
+        "expected_rate": 0.05,
+        "kupiec_LR": 2.736129890340294,
+        "kupiec_p": 0.09810209447572904,
+        "kupiec_status": "PASS"
+      },
+      "TGJR": {
+        "violations": 93,
+        "violation_rate": 0.05098684210526316,
+        "expected_rate": 0.05,
+        "kupiec_LR": 0.03716532344287771,
+        "kupiec_p": 0.847128839868194,
+        "kupiec_status": "PASS"
+      }
+    }
+  },
+  "k980_comparison": {
+    "k980_gjr_qlike": 1.4988919784179369,
+    "k980v2_gjr_qlike": 1.4956089795879477,
+    "pct_diff_gjr": -0.21902838078127132,
+    "k980v2_tgjr_qlike": 1.4749662140439859,
+    "pct_diff_tgjr_vs_gjr": -1.3802247663456177
+  },
+  "stationarity_check": {
+    "tgjr_low_persistence": 0.5378988804867602,
+    "tgjr_high_persistence": 0.9698910559571824,
+    "low_stationary": true,
+    "high_stationary": true
+  },
+  "oos_regime_obs": {
+    "low_vix_obs": 280,
+    "high_vix_obs": 1544,
+    "pct_low": 0.15350877192982457,
+    "pct_high": 0.8464912280701754
+  },
+  "references": [
+    "Glosten, Jagannathan & Runkle (1993, JoF): On the relation between expected value and volatility of nominal excess return on stocks",
+    "Zakoian (1994): Threshold heteroskedastic models",
+    "Chen, Liu & Gerlach (2011, Comp. Stats): Bayesian subset selection for threshold ARMA",
+    "Patton (2011, J Econometrics): Volatility forecast comparison using imperfect proxies",
+    "Diebold & Mariano (1995, JBES): Comparing predictive accuracy",
+    "Hansen & Lunde (2005, J Econometrics): Forecast comparison of volatility models"
+  ],
+  "conclusions": {
+    "verdict": "EXPLORATORY_NULL",
+    "key_finding": "K980v2 (joint MLE) TGJR improves OOS QLIKE by 1.38% vs baseline GJR. DM test: stat=1.105, p=0.2693 (not statistically significant). Optimal threshold c=14. Low-regime persistence=0.5379, high-regime persistence=0.9699.",
+    "methodology_fix": "K980 FAIL was due to estimating two separate GJR models on non-contiguous subsets but evaluating with a continuous h_t recursion (estimation-evaluation mismatch). K980v2 uses joint MLE where h_t is continuous across regime switches.",
+    "null_result_integrity": "NULL result from K980 is directionally conserved. Joint MLE TGJR still improves vs GJR by 1.38% (DM p=0.2693)."
+  }
+}

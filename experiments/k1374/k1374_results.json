@@ -1,0 +1,265 @@
+{
+  "experiment_id": "K1374",
+  "title": "台股除息日波動率 — 擴展樣本分析",
+  "verdict": "PASS",
+  "summary": "Pooled 226 ex-date events across 17 TWSE tickers. Mean ex |r|=0.01324 vs ctrl=0.00986 (ratio=1.342). Welch t=4.019, p=0.0001; MW p=0.0000; Cohen's d=0.305. Verdict: PASS.",
+  "pooled_stats": {
+    "n_ex_events": 226,
+    "n_control_obs": 40729,
+    "mean_ex_abs_ret": 0.01324026938131329,
+    "mean_ctrl_abs_ret": 0.009862722871036077,
+    "ex_ctrl_ratio": 1.3424557857339858,
+    "t_stat": 4.019073538757521,
+    "p_value": 7.951392364171412e-05,
+    "mw_stat": 5509445.0,
+    "mw_p": 3.054038066543039e-07,
+    "cohens_d": 0.3050717811848992
+  },
+  "per_ticker": {
+    "0050.TW": {
+      "n_events": 21,
+      "n_ex_obs": 21,
+      "mean_ex": 0.0097,
+      "mean_ctrl": 0.008113,
+      "cohens_d": 0.184,
+      "p_value": 0.4979,
+      "p_value_bh": 0.7019,
+      "reject_bh": false,
+      "sector": "ETF"
+    },
+    "0056.TW": {
+      "n_events": 18,
+      "n_ex_obs": 18,
+      "mean_ex": 0.006648,
+      "mean_ctrl": 0.005646,
+      "cohens_d": 0.1587,
+      "p_value": 0.4915,
+      "p_value_bh": 0.7019,
+      "reject_bh": false,
+      "sector": "ETF"
+    },
+    "2330.TW": {
+      "n_events": 31,
+      "n_ex_obs": 31,
+      "mean_ex": 0.013459,
+      "mean_ctrl": 0.012259,
+      "cohens_d": 0.101,
+      "p_value": 0.5367,
+      "p_value_bh": 0.7019,
+      "reject_bh": false,
+      "sector": "Tech"
+    },
+    "2317.TW": {
+      "n_events": 11,
+      "n_ex_obs": 11,
+      "mean_ex": 0.013181,
+      "mean_ctrl": 0.011699,
+      "cohens_d": 0.1166,
+      "p_value": 0.5334,
+      "p_value_bh": 0.7019,
+      "reject_bh": false,
+      "sector": "Tech"
+    },
+    "2454.TW": {
+      "n_events": 13,
+      "n_ex_obs": 13,
+      "mean_ex": 0.016116,
+      "mean_ctrl": 0.016907,
+      "cohens_d": -0.0487,
+      "p_value": 0.8722,
+      "p_value_bh": 0.9506,
+      "reject_bh": false,
+      "sector": "Tech"
+    },
+    "2412.TW": {
+      "n_events": 11,
+      "n_ex_obs": 11,
+      "mean_ex": 0.012321,
+      "mean_ctrl": 0.004741,
+      "cohens_d": 1.6333,
+      "p_value": 0.0113,
+      "p_value_bh": 0.0963,
+      "reject_bh": false,
+      "sector": "Industrial"
+    },
+    "2882.TW": {
+      "n_events": 11,
+      "n_ex_obs": 11,
+      "mean_ex": 0.015079,
+      "mean_ctrl": 0.009695,
+      "cohens_d": 0.5166,
+      "p_value": 0.0793,
+      "p_value_bh": 0.2871,
+      "reject_bh": false,
+      "sector": "Financial"
+    },
+    "2881.TW": {
+      "n_events": 11,
+      "n_ex_obs": 11,
+      "mean_ex": 0.012391,
+      "mean_ctrl": 0.0097,
+      "cohens_d": 0.2667,
+      "p_value": 0.5068,
+      "p_value_bh": 0.7019,
+      "reject_bh": false,
+      "sector": "Financial"
+    },
+    "2886.TW": {
+      "n_events": 11,
+      "n_ex_obs": 11,
+      "mean_ex": 0.016353,
+      "mean_ctrl": 0.007248,
+      "cohens_d": 1.2447,
+      "p_value": 0.0011,
+      "p_value_bh": 0.0195,
+      "reject_bh": true,
+      "sector": "Financial"
+    },
+    "2880.TW": {
+      "n_events": 11,
+      "n_ex_obs": 11,
+      "mean_ex": 0.013104,
+      "mean_ctrl": 0.006596,
+      "cohens_d": 0.9075,
+      "p_value": 0.0844,
+      "p_value_bh": 0.2871,
+      "reject_bh": false,
+      "sector": "Financial"
+    },
+    "2891.TW": {
+      "n_events": 11,
+      "n_ex_obs": 11,
+      "mean_ex": 0.008701,
+      "mean_ctrl": 0.008846,
+      "cohens_d": -0.0155,
+      "p_value": 0.9506,
+      "p_value_bh": 0.9506,
+      "reject_bh": false,
+      "sector": "Financial"
+    },
+    "2303.TW": {
+      "n_events": 11,
+      "n_ex_obs": 11,
+      "mean_ex": 0.021041,
+      "mean_ctrl": 0.01342,
+      "cohens_d": 0.5475,
+      "p_value": 0.1821,
+      "p_value_bh": 0.4421,
+      "reject_bh": false,
+      "sector": "Tech"
+    },
+    "2308.TW": {
+      "n_events": 11,
+      "n_ex_obs": 11,
+      "mean_ex": 0.013335,
+      "mean_ctrl": 0.013911,
+      "cohens_d": -0.0427,
+      "p_value": 0.8964,
+      "p_value_bh": 0.9506,
+      "reject_bh": false,
+      "sector": "Tech"
+    },
+    "1301.TW": {
+      "n_events": 11,
+      "n_ex_obs": 11,
+      "mean_ex": 0.019589,
+      "mean_ctrl": 0.010277,
+      "cohens_d": 0.8367,
+      "p_value": 0.1278,
+      "p_value_bh": 0.3621,
+      "reject_bh": false,
+      "sector": "Industrial"
+    },
+    "1303.TW": {
+      "n_events": 11,
+      "n_ex_obs": 11,
+      "mean_ex": 0.019051,
+      "mean_ctrl": 0.010732,
+      "cohens_d": 0.708,
+      "p_value": 0.3114,
+      "p_value_bh": 0.6617,
+      "reject_bh": false,
+      "sector": "Industrial"
+    },
+    "1216.TW": {
+      "n_events": 11,
+      "n_ex_obs": 11,
+      "mean_ex": 0.013031,
+      "mean_ctrl": 0.008797,
+      "cohens_d": 0.5138,
+      "p_value": 0.044,
+      "p_value_bh": 0.2495,
+      "reject_bh": false,
+      "sector": "Industrial"
+    },
+    "2002.TW": {
+      "n_events": 11,
+      "n_ex_obs": 11,
+      "mean_ex": 0.00848,
+      "mean_ctrl": 0.009226,
+      "cohens_d": -0.0687,
+      "p_value": 0.811,
+      "p_value_bh": 0.9506,
+      "reject_bh": false,
+      "sector": "Industrial"
+    }
+  },
+  "sector_cohens_d": {
+    "Industrial": 0.5787,
+    "Tech": 0.0904,
+    "Financial": 0.5197,
+    "ETF": 0.1868
+  },
+  "seasonal_analysis": {
+    "peak_season_months": "Apr-Sep",
+    "off_season_months": "Oct-Mar",
+    "n_peak_events": 188,
+    "n_off_events": 38,
+    "n_peak_ctrl": 19345,
+    "n_off_ctrl": 21384,
+    "peak_season_d": 0.3055,
+    "off_season_d": 0.133,
+    "note": "d computed against season-matched controls (Apr-Sep vs Apr-Sep; Oct-Mar vs Oct-Mar)"
+  },
+  "robustness_check": {
+    "description": "Excluding the two highest-d tickers (2412.TW d=1.633, 2886.TW d=1.245) to verify result not driven by outliers",
+    "tickers_excluded": [
+      "2412.TW",
+      "2886.TW"
+    ],
+    "n_ex_events": 204,
+    "t_stat": 2.9853,
+    "p_value": 0.0032,
+    "mw_p": 0.000414,
+    "cohens_d": 0.2381,
+    "verdict_robust": "PASS"
+  },
+  "verdict_rationale": "Pooled Welch t-test: p=0.0001 < 0.05 and Cohen's d=0.305 > 0.20. Both criteria met — ex-date volatility elevation confirmed at large sample. Robustness check: excluding 2412.TW d=1.633, 2886.TW d=1.245 still gives p=0.0032 and d=0.238 (PASS) — result not driven by outlier stocks.",
+  "tickers_processed": [
+    "0050.TW",
+    "0056.TW",
+    "2330.TW",
+    "2317.TW",
+    "2454.TW",
+    "2412.TW",
+    "2882.TW",
+    "2881.TW",
+    "2886.TW",
+    "2880.TW",
+    "2891.TW",
+    "2303.TW",
+    "2308.TW",
+    "1301.TW",
+    "1303.TW",
+    "1216.TW",
+    "2002.TW"
+  ],
+  "tickers_skipped": [],
+  "data_source": "yfinance adjusted close + .dividends",
+  "period": "2015-01-01 to 2025-12-31",
+  "seed": 42,
+  "related_experiments": [
+    "K1373"
+  ],
+  "date": "2026-05-18"
+}

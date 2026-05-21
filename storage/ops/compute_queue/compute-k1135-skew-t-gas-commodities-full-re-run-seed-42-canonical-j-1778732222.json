@@ -1,0 +1,25 @@
+{
+  "id": "compute-k1135-skew-t-gas-commodities-full-re-run-seed-42-canonical-j-1778732222",
+  "title": "K1135: Skew-t GAS commodities full re-run (seed=42, canonical JSON after SIGPIPE fix)",
+  "script_path": "experiments/k1135/k1135.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-05-14T04:17:02Z",
+  "started_at": "2026-05-14T04:30:06Z",
+  "completed_at": "2026-05-14T04:53:34Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1135-skew-t-gas-commodities-full-re-run-seed-42-canonical-j-1778732222.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1135-skew-t-gas-commodities-full-re-run-seed-42-canonical-j-1778732222.stderr",
+  "result_artifact": "experiments/k1135/k1135_results.json",
+  "claude_followup": {
+    "brief": "K1135 skew-t GAS full re-run completed. Read experiments/k1135/k1135_results.json and: (1) verify scenario is still Scenario B (only VaR/ES improved, QLIKE NULL), (2) confirm H1/H2/H3 counts match reconstructed log (H1:0/4, H2:2-3/4, H3:4/4), (3) write knowledge.json entry for K1135 with Paper 4 Channel 3 implications. Codex reviewer approved methodology CONDITIONAL PASS — BH docstring fix applied.",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "timeout_seconds": 3600,
+  "followup_dispatched_at": "2026-05-14T08:08:30Z",
+  "followup_next_task_id": "k1135-interpretation-main"
+}

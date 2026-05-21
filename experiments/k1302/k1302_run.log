@@ -1,0 +1,101 @@
+=== K1302 Individual γ JSON Rebuild (v2 — 100 multistart) ===
+Date: 2026-05-16T09:20:19.437515+00:00
+Global seed: 42; multistart seeds: 42..141 (100 starts)
+
+[1/3] Loading data...
+  Paper CSV: 4773 rows, 2008-01-02 → 2026-05-08
+  [2317.TW] loaded from paper CSV (2317_tw_adj_close): 4479 rows
+  2317.TW: 4170 log-return obs, 2008-01-03 → 2024-12-31, mean=0.0003, std=0.0188
+  [2454.TW] loaded from paper CSV (2454_tw_adj_close): 4479 rows
+  2454.TW: 4170 log-return obs, 2008-01-03 → 2024-12-31, mean=0.0005, std=0.0236
+  [0056.TW] loaded from paper CSV (0056_tw_adj_close): 4483 rows
+  0056.TW: 4173 log-return obs, 2008-01-03 → 2024-12-31, mean=0.0003, std=0.0104
+  [2886.TW] loading from local cache...
+  2886.TW: 4170 log-return obs, 2008-01-03 → 2024-12-31, mean=0.0004, std=0.0154
+  [2383.TW] loading from local cache...
+  2383.TW: 4170 log-return obs, 2008-01-03 → 2024-12-31, mean=0.0012, std=0.0258
+
+[2/3] Running GJR-GARCH MLE (3 specs × 5 stocks, 100 multistart each)...
+
+  2317.TW (Hon Hai Precision)
+    TWA (GJR-Normal Full-Sample (Canonical)): n=4170, dist=normal
+      Running 100 multistart fits (seeds 42..141)...
+      converged: 100/100
+      BEST: seed=49  LL=-8060.16  γ=+0.0320  t=+1.741  α=0.059  β=0.902  persist=0.978
+    TWB (GJR-StudentT Full-Sample (Heavy-tail)): n=4170, dist=t
+      Running 100 multistart fits (seeds 42..141)...
+      converged: 100/100
+      BEST: seed=139  LL=-7856.88  γ=+0.0298  t=+2.052  α=0.042  β=0.940  persist=0.997
+    TWC (GJR-Normal Last 1250 Days (Robustness)): n=1250, dist=normal
+      Running 100 multistart fits (seeds 42..141)...
+      converged: 100/100
+      BEST: seed=89  LL=-2340.88  γ=-0.0045  t=-0.109  α=0.103  β=0.870  persist=0.971
+
+  2454.TW (MediaTek)
+    TWA (GJR-Normal Full-Sample (Canonical)): n=4170, dist=normal
+      Running 100 multistart fits (seeds 42..141)...
+      converged: 100/100
+      BEST: seed=119  LL=-9297.20  γ=+0.0406  t=+3.096  α=0.016  β=0.946  persist=0.983
+    TWB (GJR-StudentT Full-Sample (Heavy-tail)): n=4170, dist=t
+      Running 100 multistart fits (seeds 42..141)...
+      converged: 100/100
+      BEST: seed=67  LL=-9165.79  γ=+0.0403  t=+3.007  α=0.019  β=0.953  persist=0.992
+    TWC (GJR-Normal Last 1250 Days (Robustness)): n=1250, dist=normal
+      Running 100 multistart fits (seeds 42..141)...
+      converged: 100/100
+      BEST: seed=112  LL=-2855.09  γ=+0.0260  t=+0.820  α=0.051  β=0.882  persist=0.946
+
+  0056.TW (Yuanta High Dividend ETF)
+    TWA (GJR-Normal Full-Sample (Canonical)): n=4173, dist=normal
+      Running 100 multistart fits (seeds 42..141)...
+      converged: 100/100
+      BEST: seed=105  LL=-5333.45  γ=+0.0668  t=+1.914  α=0.088  β=0.861  persist=0.983
+    TWB (GJR-StudentT Full-Sample (Heavy-tail)): n=4173, dist=t
+      Running 100 multistart fits (seeds 42..141)...
+      converged: 100/100
+      BEST: seed=76  LL=-5055.49  γ=+0.0652  t=+2.158  α=0.074  β=0.867  persist=0.974
+    TWC (GJR-Normal Last 1250 Days (Robustness)): n=1250, dist=normal
+      Running 100 multistart fits (seeds 42..141)...
+      converged: 100/100
+      BEST: seed=94  LL=-1551.08  γ=+0.2084  t=+2.946  α=0.043  β=0.673  persist=0.820
+
+  2886.TW (Mega Financial)
+    TWA (GJR-Normal Full-Sample (Canonical)): n=4170, dist=normal
+      Running 100 multistart fits (seeds 42..141)...
+      converged: 100/100
+      BEST: seed=104  LL=-6787.37  γ=+0.0379  t=+1.552  α=0.057  β=0.914  persist=0.990
+    TWB (GJR-StudentT Full-Sample (Heavy-tail)): n=4170, dist=t
+      Running 100 multistart fits (seeds 42..141)...
+      converged: 100/100
+      BEST: seed=100  LL=-6664.62  γ=+0.0458  t=+2.370  α=0.055  β=0.918  persist=0.996
+    TWC (GJR-Normal Last 1250 Days (Robustness)): n=1250, dist=normal
+      Running 100 multistart fits (seeds 42..141)...
+      converged: 100/100
+      BEST: seed=55  LL=-1755.52  γ=+0.0683  t=+1.277  α=0.058  β=0.829  persist=0.922
+
+  2383.TW (ELITE Material)
+    TWA (GJR-Normal Full-Sample (Canonical)): n=4170, dist=normal
+      Running 100 multistart fits (seeds 42..141)...
+      converged: 100/100
+      BEST: seed=55  LL=-9541.33  γ=+0.0095  t=+1.147  α=0.037  β=0.956  persist=0.998
+    TWB (GJR-StudentT Full-Sample (Heavy-tail)): n=4170, dist=t
+      Running 100 multistart fits (seeds 42..141)...
+      converged: 31/100
+      BEST: seed=48  LL=-9389.62  γ=+0.0091  t=+0.953  α=0.045  β=0.951  persist=1.000
+    TWC (GJR-Normal Last 1250 Days (Robustness)): n=1250, dist=normal
+      Running 100 multistart fits (seeds 42..141)...
+      converged: 100/100
+      BEST: seed=56  LL=-3009.75  γ=+0.0416  t=+1.034  α=0.084  β=0.801  persist=0.906
+
+[3/3] Byte-match vs Paper 2 Table 2 (TWA spec only)...
+  Tolerance: |Δγ| ≤ 0.001, |Δt| ≤ 0.05
+
+  2317.TW  | γ: +0.032 vs +0.032 (Δ=0.000) | t: +1.74 vs +1.74 (Δ=0.00) | PASS
+  2454.TW  | γ: +0.041 vs +0.041 (Δ=0.000) | t: +3.10 vs +3.10 (Δ=0.00) | PASS
+  0056.TW  | γ: +0.067 vs +0.067 (Δ=0.000) | t: +1.91 vs +1.91 (Δ=0.00) | PASS
+  2886.TW  | γ: +0.038 vs +0.038 (Δ=0.000) | t: +1.55 vs +1.55 (Δ=0.00) | PASS
+  2383.TW  | γ: +0.009 vs +0.009 (Δ=0.000) | t: +1.15 vs +1.15 (Δ=0.00) | PASS
+
+Overall Result: PASS
+
+Results saved to /Users/yhlai0911/Desktop/volpred-research/experiments/k1302/k1302_results.json

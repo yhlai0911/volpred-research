@@ -1,0 +1,23 @@
+{
+  "id": "k1380-spa-test",
+  "title": "K1380: Paper 9 C3 Fix — White RC / Hansen SPA Test for 17-Spec Horse Race",
+  "script_path": "experiments/k1380/k1380.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "failed",
+  "queued_at": "2026-05-19T09:21:07Z",
+  "started_at": "2026-05-19T10:15:10Z",
+  "completed_at": "2026-05-19T12:15:11Z",
+  "exit_code": -1,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k1380-spa-test.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k1380-spa-test.stderr",
+  "result_artifact": "experiments/k1380/k1380_results.json",
+  "claude_followup": {
+    "brief": "K1380 White RC / Hansen SPA test for Paper 9 C3 fix. Check SPA p-value for A4f < 0.10 → A4f survives data snooping; list which models in Superior Set. Add 'Multiple Testing' subsection to paper 9 body with SPA results Table. Update knowledge.json with verdict.",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 7200
+}

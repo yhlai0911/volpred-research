@@ -176,13 +176,16 @@ def run_monthly_regime_vt(equity_ret, safe_ret, vix_monthly, cost_bps=COST_BPS):
 
 def run_bh_5050(equity_ret, safe_ret):
     """
-    Buy-and-hold 50/50 with annual rebalance.
+    Buy-and-hold 50/50: daily constant-mix (continuous rebalancing).
+    Note: labeled as "annual rebalance" in original docstring, but implementation
+    is daily constant-mix (0.5*eq + 0.5*safe every day). Daily constant-mix is the
+    standard academic baseline for comparison.
     """
     common_idx = equity_ret.dropna().index.intersection(safe_ret.dropna().index)
     equity_ret = equity_ret.loc[common_idx]
     safe_ret = safe_ret.loc[common_idx]
 
-    # Simple 50/50 daily
+    # Daily constant-mix 50/50 (continuously rebalanced)
     port_ret = 0.5 * equity_ret + 0.5 * safe_ret
 
     return port_ret
@@ -196,19 +199,20 @@ def compute_metrics(returns, label=''):
 
     n_years = len(returns) / 252
 
-    # Cumulative
+    # Cumulative — anchor at 1.0 so first-day negative return registers as drawdown
     cum = (1 + returns).cumprod()
+    cum_anchored = pd.concat([pd.Series([1.0], index=[returns.index[0] - pd.Timedelta(days=1)]), cum])
 
     # CAGR
-    total_return = cum.iloc[-1] / cum.iloc[0]
+    total_return = cum.iloc[-1]  # starting from 1.0 anchor
     cagr = total_return ** (1 / n_years) - 1
 
     # Sharpe
     sharpe = returns.mean() / returns.std() * np.sqrt(252) if returns.std() > 0 else 0
 
-    # MDD
-    peak = cum.cummax()
-    dd = (cum - peak) / peak
+    # MDD — computed from 1.0-anchored wealth path
+    peak = cum_anchored.cummax()
+    dd = (cum_anchored - peak) / peak
     mdd = dd.min()
 
     # Annualized vol
@@ -408,7 +412,7 @@ def main():
         'period': f'{START} to {END}',
         'methodology': {
             'strategy': 'Monthly Regime VT: VIX<15→80% eq, VIX≥25→30% eq, else 50%',
-            'baseline': 'BH 50/50 (annual rebalance)',
+            'baseline': 'BH 50/50 (daily constant-mix, continuously rebalanced)',
             'cost': f'{COST_BPS}bps single-side per weight change',
             'vix_signal': 'Month-start ^VIX, shift(1) for daily lag',
         },

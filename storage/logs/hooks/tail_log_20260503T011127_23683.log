@@ -1,0 +1,37 @@
+  Robust VT (SPY/GLD): Sharpe=1.4057, MDD=-11.69%
+
+[8] LISTING CRITERIA SUMMARY
+  #1 Same-period comparison: see [6] evaluate_vs_existing output
+  #2 Cross-OOS (2y): 3/5 PASS
+  #3 Codex review: (to be done after script execution)
+  #4 Sensitivity: PASS
+  #5 MDD < -20%: MDD=-31.18% FAIL
+
+✅ Results saved to /Users/yhlai0911/Desktop/volpred-research/experiments/k1018/k1018_results.json
+---DM diff---
+PRE:
+{
+  "robust_vs_baseline": {
+    "t_stat": 0.4151,
+    "p_value": 0.6781,
+    "harvey_significant": false
+  },
+  "robust_vs_bh5050": {
+    "t_stat": -0.2151,
+    "p_value": 0.8297,
+    "harvey_significant": false
+  }
+}
+POST:
+{
+  "robust_vs_baseline": {
+    "t_stat": 0.4156,
+    "p_value": 0.6778,
+    "harvey_significant": false
+  },
+  "robust_vs_bh5050": {
+    "t_stat": -0.2352,
+    "p_value": 0.8141,
+    "harvey_significant": false
+  }
+}

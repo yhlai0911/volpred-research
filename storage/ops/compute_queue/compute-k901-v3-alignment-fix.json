@@ -1,0 +1,25 @@
+{
+  "id": "compute-k901-v3-alignment-fix",
+  "title": "K901 v3: BH/VT alignment fix + DM sign verification (1-day shift correction)",
+  "script_path": "experiments/k901/k901_international_vt_13markets.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-05-16T03:31:01Z",
+  "started_at": "2026-05-16T03:45:11Z",
+  "completed_at": "2026-05-16T03:45:53Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k901-v3-alignment-fix.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k901-v3-alignment-fix.stderr",
+  "result_artifact": "experiments/k901/k901_international_vt_13markets_results.json",
+  "claude_followup": {
+    "brief": "K901 alignment fix re-run complete. Run Codex review v3 on experiments/k901/k901_international_vt_13markets.py. Verify: (1) DM stats still show 0/13 |t|>3.0, (2) 13/13 MDD improvement unchanged, (3) alignment fix confirmed in results. If Codex PASS, write knowledge.json entry and plan K901 article.",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "timeout_seconds": 1800,
+  "followup_dispatched_at": "2026-05-16T04:07:52Z",
+  "followup_next_task_id": "k901-v3-codex-review-202605161207"
+}

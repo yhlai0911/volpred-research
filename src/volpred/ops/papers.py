@@ -233,7 +233,8 @@ def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
     metrics: dict[str, int | None] = {}
 
     # Find the best tex file (v3 > v2 > v1)
-    for name in ["main_v3.tex", "main_v2.tex", "main.tex"]:
+    for name in ["main_v4.tex", "main_v3.tex", "main_v2.tex", "main.tex",
+                 "body.tex", "body_v5.tex", "body_v4.tex", "body_v3.tex"]:
         tex = paper_dir / name
         if tex.exists():
             break
@@ -241,6 +242,32 @@ def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
         return metrics
 
     content = tex.read_text(errors="ignore")
+
+    # Extract \title{...} — paper-update previously never synced the title,
+    # so papers whose title was never explicitly upserted displayed their
+    # paper-id on the frontend (crypto-fear-channel, eav-universal-magnitude).
+    # Brace-match to span the closing }, then strip LaTeX line breaks/markup.
+    tm = re.search(r"\\title\s*\{", content)
+    if tm:
+        i, depth, buf = tm.end(), 1, []
+        while i < len(content) and depth:
+            ch = content[i]
+            if ch == "{":
+                depth += 1
+            elif ch == "}":
+                depth -= 1
+                if depth == 0:
+                    break
+            buf.append(ch)
+            i += 1
+        title = "".join(buf)
+        title = re.sub(r"%.*", "", title)            # strip LaTeX line comments
+        title = title.split(r"\thanks")[0]           # drop \thanks{...} onward
+        title = re.sub(r"\\\\(\[[^\]]*\])?", " ", title)  # \\ and \\[0.5em]
+        title = re.sub(r"\\[a-zA-Z]+", " ", title)   # other \commands (\large …)
+        title = re.sub(r"\s+", " ", title).strip(" {}")
+        if title:
+            metrics["title"] = title
 
     # Count \bibitem entries (citations)
     citations = len(re.findall(r"\\bibitem", content))
@@ -268,7 +295,106 @@ def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
         except Exception:
             pass
 
+    # Extract abstract from \begin{abstract} … \end{abstract} (2026-05-11:
+    # taiwan-vt incident — body.tex promoted to K1175 canonical but Supabase
+    # still pushed pre-K1175 abstract because CLI didn't extract from .tex).
+    abstract_match = re.search(
+        r"\\begin\{abstract\}\s*(?:\\noindent\s*)?(.*?)\\end\{abstract\}",
+        content,
+        re.DOTALL,
+    )
+    if abstract_match:
+        raw = abstract_match.group(1).strip()
+        # Collapse internal whitespace runs to single space for tidy display.
+        cleaned = re.sub(r"\s+", " ", raw)
+        if cleaned:
+            metrics["abstract"] = cleaned
+
     return metrics
+
+
+def sync_all_papers(
+    *,
+    only_stale: bool = True,
+    dry_run: bool = False,
+) -> list[dict[str, Any]]:
+    """Auto-sync every paper in paper/<id>/ whose .tex or .pdf is newer than its
+    Supabase updated_at timestamp.
+
+    2026-05-11 user-driven fix: main-thread edits to body.tex / main_v3.tex
+    abstract / etc. were not being pushed to Supabase because paper-update CLI
+    requires manual invocation per paper. Result: 6/9 papers showed April
+    updated_at on the website despite recent edits. Sync-all closes that loop.
+
+    Args:
+        only_stale: if True (default), skip papers where Supabase updated_at
+            is newer than all local .tex/.pdf mtime.
+        dry_run: if True, return planned actions without invoking Supabase.
+
+    Returns: list of dicts with {paper_id, action, reason, ...}.
+    """
+    PROJECT = Path(__file__).resolve().parent.parent.parent.parent
+    paper_root = PROJECT / "paper"
+    if not paper_root.is_dir():
+        return []
+
+    # Existing papers in Supabase (id → updated_at)
+    existing_papers = {p["id"]: p for p in list_papers()}
+
+    results: list[dict[str, Any]] = []
+    for paper_dir in sorted(paper_root.iterdir()):
+        if not paper_dir.is_dir():
+            continue
+        paper_id = paper_dir.name
+        if paper_id.startswith(".") or paper_id.startswith("_"):
+            continue
+
+        # Newest .tex / .pdf mtime in this paper dir
+        candidates = list(paper_dir.glob("*.tex")) + list(paper_dir.glob("*.pdf"))
+        if not candidates:
+            results.append({"paper_id": paper_id, "action": "skip", "reason": "no_tex_or_pdf"})
+            continue
+        latest_local_mtime = max(c.stat().st_mtime for c in candidates)
+
+        existing = existing_papers.get(paper_id)
+        if existing is not None and only_stale:
+            db_updated_str = existing.get("updated_at") or ""
+            try:
+                db_updated = datetime.fromisoformat(db_updated_str.replace("Z", "+00:00"))
+                if db_updated.tzinfo is None:
+                    db_updated = db_updated.replace(tzinfo=timezone.utc)
+                if db_updated.timestamp() >= latest_local_mtime:
+                    results.append({"paper_id": paper_id, "action": "skip", "reason": "supabase_newer"})
+                    continue
+            except (ValueError, AttributeError):
+                pass
+
+        if dry_run:
+            results.append({"paper_id": paper_id, "action": "would_update", "in_db": existing is not None})
+            continue
+
+        # If paper doesn't exist in Supabase yet, create minimal record first
+        # so update_paper_full's get_paper() lookup succeeds.
+        if existing is None:
+            try:
+                upsert_paper_metadata(paper_id=paper_id)
+            except Exception as exc:
+                results.append({"paper_id": paper_id, "action": "create_failed", "error": str(exc)})
+                continue
+
+        try:
+            paper = update_paper_full(paper_id=paper_id, paper_dir=paper_dir)
+            results.append({
+                "paper_id": paper_id,
+                "action": "updated",
+                "pages": paper.get("pages"),
+                "citations": paper.get("citations"),
+                "updated_at": paper.get("updated_at"),
+            })
+        except Exception as exc:
+            results.append({"paper_id": paper_id, "action": "update_failed", "error": str(exc)})
+
+    return results
 
 
 def update_paper_full(
@@ -298,7 +424,7 @@ def update_paper_full(
 
     # 2. Find best PDF (v3 > v2 > v1)
     pdf_path = None
-    for name in ["main_v3.pdf", "main_v2.pdf", "main.pdf"]:
+    for name in ["main_v4.pdf", "main_v3.pdf", "main_v2.pdf", "main.pdf"]:
         candidate = paper_dir / name
         if candidate.exists():
             pdf_path = candidate
@@ -312,10 +438,14 @@ def update_paper_full(
 
     # 4. Update metadata with auto-detected metrics
     kwargs: dict[str, Any] = {"paper_id": paper_id}
+    if "title" in metrics:
+        kwargs["title"] = metrics["title"]
     if "pages" in metrics:
         kwargs["pages"] = metrics["pages"]
     if "citations" in metrics:
         kwargs["citations"] = metrics["citations"]
+    if "abstract" in metrics:
+        kwargs["abstract"] = metrics["abstract"]
 
     if len(kwargs) > 1:  # has something beyond paper_id
         paper = upsert_paper_metadata(**kwargs)

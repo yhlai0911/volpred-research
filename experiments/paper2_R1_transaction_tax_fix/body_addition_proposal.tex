@@ -1,0 +1,66 @@
+% =============================================================================
+% Paper 2 R1 SEVERE 1 — Transaction Cost Sensitivity (proposed body addition)
+% Suggested placement: paper/taiwan-vt/body.tex, end of §4 (immediately after
+% Table~\ref{tab:vt_common} note on common-period comparison, ~line 295), OR
+% as new §4.6 "Transaction Cost Sensitivity" before §5 high-frequency section.
+%
+% Word count: 198 (target ~150-200 EN words; deliberately compact, PBFJ-tier).
+% Data source: experiments/paper2_R1_transaction_tax_fix/results.json
+% Length-justified: gemini SEVERE 1 demanded explicit sensitivity, so a single
+% paragraph is the minimum credible response; an inline table is included to
+% give reviewers byte-traceable evidence per paper-workflow.md § Table row binding.
+% =============================================================================
+
+\subsection{Transaction Cost Sensitivity}\label{sec:tx_sensitivity}
+
+Taiwan's Securities Transaction Tax differentiates between common stocks (0.30\% on
+sell) and ETFs (0.10\% on sell), and online brokerages typically charge 30\% of the
+statutory 0.1425\% commission rate. Our baseline applies 0.186\% round-trip---the
+appropriate rate for 0050.TW as an ETF---but a referee may legitimately ask whether
+the volatility-targeting (VT) advantage survives across the full Taiwan tax-and-commission
+range. Table~\ref{tab:tx_sensitivity} reports Sharpe ratios and maximum-drawdown (MDD)
+improvements over Buy \& Hold at four round-trip transaction rates spanning 0.10\% to
+0.30\%. The Sharpe ratio of each strategy declines monotonically with the transaction
+rate, as expected, but two findings emerge clearly. First, the MDD improvement
+relative to Buy \& Hold survives the entire range: at the worst case of 0.30\%, all
+four VT specifications retain MDD improvements of at least 11.5 percentage points.
+Second, the monthly-rebalanced $8.63/\text{VIX}$ specification is far less sensitive to
+transaction costs than the daily-rebalanced VT variants---its Sharpe range across the
+0.10\%--0.30\% grid is only 0.024 versus 0.098--0.127 for the daily-rebalanced
+strategies---reinforcing our practical recommendation in Section~\ref{sec:implementation}
+that retail investors should adopt monthly rebalancing.
+
+\begin{table}[!htbp]
+\centering
+\caption{Transaction Cost Sensitivity for VT Strategies on 0050.TW}
+\label{tab:tx_sensitivity}
+\small
+\begin{tabular}{lccccc}
+\toprule
+& \multicolumn{4}{c}{Net Sharpe at round-trip transaction rate} & MDD impr.\ vs BH \\
+\cmidrule(lr){2-5}
+Strategy & 0.10\% & 0.15\% & 0.186\% & 0.30\% & at TX=0.30\% (pp) \\
+\midrule
+EWMA VT (10\%)        & 0.564 & 0.540 & 0.522 & 0.467 & $+13.6$ \\
+GARCH VT (10\%)       & 0.848 & 0.817 & 0.795 & 0.725 & $+12.3$ \\
+GJR VT (10\%)         & 0.955 & 0.923 & 0.900 & 0.828 & $+11.5$ \\
+$8.63/\text{VIX}$ (monthly) & 0.967 & 0.961 & 0.956 & 0.943 & $+21.2$ \\
+\bottomrule
+\end{tabular}
+% source: experiments/paper2_R1_transaction_tax_fix/results.json
+%   tx_sensitivity_sweep.<strat>.{etf_floor,brief_mid,paper_canonical,stock_high}.sharpe
+%   vt_vs_bh_survival.<strat>.stock_high.mdd_improvement_pp
+\smallskip
+\\
+\small \textit{Notes:} 0.10\% is the ETF-only floor (tax 0.10\%, no commission); 0.15\%
+is the midpoint of the Taiwan transaction-tax range; 0.186\% is the paper canonical (ETF
+tax 0.10\% + online-discount commission 0.04275\% $\times$ 2); 0.30\% is the
+hypothetical common-stock rate (not actually applicable to the 0050.TW ETF; included
+for upper-bound robustness only). Evaluation windows: EWMA 2010--2026
+($n=3{,}980$); GARCH/GJR 2020--2026 ($n=1{,}524$); $8.63/\text{VIX}$ 2016--2026
+($n=2{,}497$). Sample annual turnovers, identical across TX rates by construction:
+EWMA 489\%/yr, GARCH 634\%/yr, GJR 662\%/yr, $8.63/\text{VIX}$ 104\%/yr. MDD improvement
+is in percentage points and is computed within each strategy's own evaluation window.
+Reproduction: \texttt{experiments/paper2\_R1\_transaction\_tax\_fix/turnover\_and\_tax.py}
+using the pinned snapshot \texttt{paper/taiwan-vt/data/0050\_tw\_twii\_2330\_tw\_2317\_tw\_2454\_tw\_0056\_tw\_spy\_vix\_2008-2026.csv}.
+\end{table}

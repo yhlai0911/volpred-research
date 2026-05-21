@@ -1,0 +1,23 @@
+{
+  "id": "k1378-covid-dm-v2",
+  "title": "K1378 v2: Paper 9 SF1 Fix — Leave-COVID-out DM Test (fix numpy.values bug)",
+  "script_path": "experiments/k1378/k1378.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "failed",
+  "queued_at": "2026-05-19T09:20:56Z",
+  "started_at": "2026-05-19T09:45:08Z",
+  "completed_at": "2026-05-19T09:46:41Z",
+  "exit_code": 1,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k1378-covid-dm-v2.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k1378-covid-dm-v2.stderr",
+  "result_artifact": "experiments/k1378/k1378_results.json",
+  "claude_followup": {
+    "brief": "K1378 leave-COVID-out DM test for Paper 9 SF1 fix. Check if |DM_t_no_covid| > 3.0: YES → SF1 REFUTED (A4f robust outside COVID); NO → SF1 CONFIRMED → major revision needed. Update knowledge.json with verdict + paper 9 narrative decision.",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 1800
+}

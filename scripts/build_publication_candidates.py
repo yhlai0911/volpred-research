@@ -75,15 +75,49 @@ def score_priority(entry: dict) -> tuple[int, list[str]]:
     return max(0, min(10, score)), reasons
 
 
+def _k_id_family(kid: str) -> str:
+    """Strip trailing letter suffix to get K-family base (K1106b → K1106, K852b → K852).
+
+    K-experiment sub-variants (K1106 vs K1106b vs K1106c) cover the same
+    underlying study. For dedup purposes, treat them as the same family.
+    """
+    # Strip trailing letters case-insensitively, then uppercase for comparison.
+    return re.sub(r"[a-zA-Z]+$", "", kid, count=1).upper() if re.match(r"^[Kk]\d", kid) else kid.upper()
+
+
 def k_covered_by_article(k_id: str, article: dict) -> bool:
-    """Check whether article covers this K via tags/title/content."""
+    """Check whether article covers this K via tags/title/content/experiment_refs.
+
+    Matches K-family (K1106 ↔ K1106b ↔ K1106c) via _k_id_family().
+    """
     k_lower = k_id.lower()
+    k_family = _k_id_family(k_id)
+    # 1. tags — exact + family match
     tags = [str(t).lower() for t in article.get("tags", [])]
     if k_lower in tags:
         return True
+    for t in tags:
+        if t.upper().startswith(k_family) and _k_id_family(t) == k_family:
+            return True
+    # 2. details.experiment_refs (canonical structured field per feed-publisher
+    # SKILL.md K-id stripping; titles get K-id stripped to experiment_refs).
+    # 2026-05-11 K869 incident: mile_4ec7b75e covered K869 but build script
+    # only checked tags/title/content, missed structured refs → K869 stayed
+    # falsely uncovered for 6 days.
+    # 2026-05-11 K1106 follow-up: family-match needed since refs may use
+    # K1106b sub-variant while candidate is K1106 base.
+    details = article.get("details") or {}
+    if isinstance(details, dict):
+        refs = details.get("experiment_refs") or []
+        if isinstance(refs, list):
+            for r in refs:
+                if _k_id_family(str(r)) == k_family:
+                    return True
+    # 3. title
     title = str(article.get("title", "")).lower()
     if k_lower in title:
         return True
+    # 4. description + content body
     content = str(article.get("description", "") + article.get("content", "")).lower()
     # Match K1145 or k1145 but not K114 inside K1145
     pattern = rf"\b{re.escape(k_lower)}\b"
@@ -114,8 +148,20 @@ def main():
             by_k[k_id] = entry
 
     # For each K, check feed coverage
+    incomplete_research_count = 0
     candidates = []
     for k_id, entry in by_k.items():
+        # 2026-05-09 K728/K924 incidents: K experiments without *_results.json are
+        # incomplete research and must not enter article candidate pool.
+        k_lower = k_id.lower()
+        exp_dir = ROOT / "experiments" / k_lower
+        has_results = bool(
+            (exp_dir / f"{k_lower}_results.json").exists()
+            or (exp_dir.exists() and any(exp_dir.glob("*_results.json")))
+        )
+        if not has_results:
+            incomplete_research_count += 1
+            continue
         covering_articles = []
         for article in feed:
             if k_covered_by_article(k_id, article):
@@ -134,7 +180,15 @@ def main():
             "verdict_preview": entry.get("content", "")[:300],
             "covered_by": covering_articles,
             "uncovered": len(covering_articles) == 0,
-            "audiences_covered": sorted({a["audience"] for a in covering_articles if a.get("audience")}),
+            # Treat audience=None/empty as 'general' (pre-2026-04-14 articles
+            # had no audience metadata; platform default-tone was general).
+            # 2026-05-11 K665/K630/K622 incidents: dropping audience=null from
+            # this set caused refill_task_pool to mistakenly queue articles
+            # for K-experiments that already had audience=null legacy coverage.
+            "audiences_covered": sorted({
+                (a.get("audience") or "general")
+                for a in covering_articles
+            }),
             "updated_at": entry.get("updated_at", ""),
             "tags": entry.get("tags", []),
         })
@@ -153,19 +207,97 @@ def main():
     total = len(candidates)
     uncovered = sum(1 for c in candidates if c["uncovered"])
     high_uncovered = [c for c in candidates if c["uncovered"] and c["score"] >= 5]
+
+    # 2026-05-09 K979 incident: missing_audience 須 cluster by topic family，非僅 K-id
+    # K979 was tagged missing_general because no article mentioned "K979", but K447's
+    # mile_1b2ad1f8 (general SKEW article from 2026-05-05) covered the same topic family.
+    # Fix: compute tag-overlap between candidate K and existing articles in target audience;
+    # if ≥2 domain tags overlap, mark as topic_family_collision and exclude from missing list.
+    GENERIC_TAGS = {
+        "一般讀者", "研究", "general", "research", "深度研究",
+        "波動率預測", "vol-prediction", "volatility", "金融研究",
+    }
+
+    # 2026-05-09 K979 incident fix: cross-language synonyms were missed by pure
+    # lowercase+hyphen normalisation (tail-risk ↔ 尾端風險, vix-sufficiency ↔ VIX充分性).
+    CROSS_LANG_SYNONYMS: dict[str, str] = {
+        "尾端風險": "tail-risk", "尾部風險": "tail-risk",
+        "tail-risk": "tail-risk", "tailrisk": "tail-risk",
+        "vix充分性": "vix-sufficiency", "vix-充分性": "vix-sufficiency",
+        "vix-sufficiency": "vix-sufficiency",
+        "波動率模型": "garch", "garch模型": "garch", "波動率預測模型": "garch",
+        "動能": "momentum", "動量": "momentum",
+        "類股輪動": "sector-rotation", "板塊輪動": "sector-rotation",
+        "sector-rotation": "sector-rotation",
+        "風險平價": "risk-parity", "risk-parity": "risk-parity",
+        "機制轉換": "regime-switching", "體制轉換": "regime-switching",
+        "regime-switching": "regime-switching",
+        "跨資產": "cross-asset", "cross-asset": "cross-asset",
+        "避險": "hedging", "對沖": "hedging",
+        "槓桿": "leverage",
+        "最大回撤": "max-drawdown", "最大跌幅": "max-drawdown", "mdd": "max-drawdown",
+        "期權": "options", "選擇權": "options",
+        "隱含波動率": "implied-volatility", "implied-volatility": "implied-volatility",
+        "加密貨幣": "crypto", "比特幣": "bitcoin",
+        "台股": "taiwan", "台灣市場": "taiwan",
+        "國際市場": "international", "跨國": "international",
+    }
+
+    def _norm_tag(t: str) -> str:
+        normed = t.strip().lower().replace("_", "-").replace(" ", "-")
+        return CROSS_LANG_SYNONYMS.get(normed, normed)
+
+    def _domain_tags(tags: list) -> set[str]:
+        return {_norm_tag(t) for t in (tags or []) if t and t not in GENERIC_TAGS}
+
+    def _topic_family_collision(cand_tags: set[str], audience: str) -> list[dict]:
+        """Find feed articles in target audience sharing ≥2 domain tags with candidate K."""
+        if not cand_tags:
+            return []
+        hits = []
+        for art in feed:
+            if not isinstance(art, dict):
+                continue
+            if (art.get("audience") or (art.get("details") or {}).get("audience")) != audience:
+                continue
+            art_tags = _domain_tags(art.get("tags") or [])
+            overlap = cand_tags & art_tags
+            if len(overlap) >= 2:
+                hits.append({
+                    "id": art.get("id"),
+                    "title": art.get("title", "")[:80],
+                    "shared_tags": sorted(overlap),
+                })
+        return hits
+
+    # Annotate each candidate with topic_family_collision per audience
+    for c in candidates:
+        cand_tags = _domain_tags(c.get("tags") or [])
+        c["topic_family_collisions"] = {
+            "general": _topic_family_collision(cand_tags, "general"),
+            "research": _topic_family_collision(cand_tags, "research"),
+        }
+
     missing_general = [
         c for c in candidates
-        if c["covered_by"] and "general" not in c["audiences_covered"] and c["score"] >= 4
+        if c["covered_by"]
+        and "general" not in c["audiences_covered"]
+        and c["score"] >= 4
+        and not c["topic_family_collisions"]["general"]  # exclude topic-family clashes
     ]
     missing_research = [
         c for c in candidates
-        if c["covered_by"] and "research" not in c["audiences_covered"] and c["score"] >= 4
+        if c["covered_by"]
+        and "research" not in c["audiences_covered"]
+        and c["score"] >= 4
+        and not c["topic_family_collisions"]["research"]
     ]
 
     output = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "summary": {
             "total_k": total,
+            "incomplete_research_filtered": incomplete_research_count,
             "uncovered": uncovered,
             "high_priority_uncovered": len(high_uncovered),
             "missing_general_audience": len(missing_general),
@@ -191,7 +323,7 @@ def main():
     OUTPUT_PATH.write_text(json.dumps(output, ensure_ascii=False, indent=2))
 
     # Print concise summary
-    print(f"Scanned {total} K experiments.")
+    print(f"Scanned {total} K experiments ({incomplete_research_count} filtered: no results JSON).")
     print(f"  Uncovered: {uncovered}")
     print(f"  High-priority uncovered (score≥5): {len(high_uncovered)}")
     print(f"  Covered but missing general audience: {len(missing_general)}")

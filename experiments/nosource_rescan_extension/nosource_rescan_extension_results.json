@@ -1,0 +1,201 @@
+{
+  "experiment_id": "nosource_rescan_extension",
+  "date": "2026-05-13",
+  "auditor": "agent (Claude Sonnet 4.6, task: Other_papers_nosource_rescan_extension)",
+  "papers_scanned": ["Paper1", "Paper2", "Paper3", "Paper4"],
+  "paper_directory_mapping": {
+    "Paper1": "paper/leverage-direction",
+    "Paper2": "paper/taiwan-vt",
+    "Paper3": "paper/vt-trend-following",
+    "Paper4": "paper/vix-sufficiency"
+  },
+  "method": "Scan all .tex body/main files + reproducibility_audit/*.md per paper for K-id references; cross-check against experiments/ directory existence and knowledge.json (case-insensitive experiment_id search); classify as: (1) fully_documented = dir + KB entry, (2) documentation_gap = dir exists but no KB entry, (3) missing_both = no dir + no KB, (4) in_kb_no_dir = KB only (unusual)",
+  "knowledge_json_size_bytes": 1976113,
+  "per_paper": {
+    "Paper1": {
+      "paper_name": "leverage-direction",
+      "tex_files_scanned": ["main.tex", "body_v3.tex", "body_v2.tex", "body.tex", "reproducibility_audit/*.md"],
+      "k_referenced": ["K1001", "K1003", "K1023", "K1045", "K1092", "K1198", "K228", "K783", "K799", "K802", "K824", "K885", "K899", "K902", "K903", "K904", "K920", "K921", "K922", "K923"],
+      "k_total_referenced": 20,
+      "k_fully_documented": ["K1001", "K1003", "K1023", "K1045", "K1092", "K802", "K824", "K902", "K904", "K920", "K921", "K922"],
+      "k_with_experiments_no_knowledge": ["K1198", "K228", "K783", "K799", "K885", "K899", "K903", "K923"],
+      "k_missing_both": [],
+      "k_in_kb_no_dir": [],
+      "documentation_gap_count": 8,
+      "documentation_gap_pct": 40.0,
+      "gap_notes": {
+        "K228": "Has dir (k228_leverage_dynamics.py + README + data) but NO results.json — incomplete experiment",
+        "K783": "Has results.json (17KB) + README + .py — complete experiment, missing KB entry",
+        "K799": "Has results.json (8KB) + README + .py — grand evaluation, missing KB entry",
+        "K885": "Has results.json (56KB, EVT-VaR) + README + .py — large complete experiment, missing KB entry",
+        "K899": "Has results.json (20KB, unified VaR) + README + .py — complete experiment, missing KB entry",
+        "K903": "Has results.json (5KB) + README + .py — complete experiment, missing KB entry",
+        "K923": "Has results.json (22KB, copula hedge ratio) + README + .py — complete experiment, missing KB entry",
+        "K1198": "Has results.json (10KB) + README + .py — complete with verdict field, missing KB entry"
+      },
+      "prior_nosource_report": "paper/leverage-direction/reproducibility_audit/nosource_rescan_report.md (2026-04-17)",
+      "prior_report_finding": "Paper 1 had ZERO UNDOCUMENTED_K per prior report — these 8 gaps differ: prior report focused on numerical values with no matching K experiment; this scan finds K experiments that DO exist but lack KB entries"
+    },
+    "Paper2": {
+      "paper_name": "taiwan-vt",
+      "tex_files_scanned": ["main.tex", "body_v3.tex", "body_v2.tex", "body.tex", "reproducibility_audit/*.md"],
+      "k_referenced": ["K1045", "K1098", "K1175", "K1176", "K1181", "K461", "K472", "K512", "K515", "K516", "K553", "K558", "K835", "K844", "K847", "K848", "K849", "K850", "K851", "K852", "K853", "K854", "K886", "K892", "K896", "K900"],
+      "k_total_referenced": 26,
+      "k_fully_documented": ["K1045", "K1098", "K461", "K472", "K512", "K515", "K516", "K553", "K558", "K850", "K851", "K852", "K853", "K854", "K886", "K892", "K896", "K900"],
+      "k_with_experiments_no_knowledge": ["K1175", "K1176", "K1181", "K835", "K844", "K847", "K848", "K849"],
+      "k_missing_both": [],
+      "k_in_kb_no_dir": [],
+      "documentation_gap_count": 8,
+      "documentation_gap_pct": 30.8,
+      "gap_notes": {
+        "K1175": "Has results.json (8KB) — Table 3 canonical DIVERGENT audit. UNDOCUMENTED per prior nosource report. Missing KB entry.",
+        "K1176": "Has results.json (12KB) — Table 4 time-zone momentum. UNDOCUMENTED per prior nosource report. Missing KB entry.",
+        "K1181": "Has results.json (4KB) — shared K1181 between Paper2 and Paper3. Missing KB entry.",
+        "K835": "Has results.json (5KB, taiwan VIX blend) + README + .py — complete experiment, missing KB entry",
+        "K844": "Has results.json (9KB, futures vs stock VT) + README + .py — complete with conclusion field, missing KB entry",
+        "K847": "Has results.json (9KB, overnight gap decomposition) + README + .py — complete experiment, missing KB entry",
+        "K848": "Has results.json (9KB, TAIFEX 5min RV) + README + .py — complete experiment, missing KB entry",
+        "K849": "Has results.json (15KB, HAR-RV TAIFEX) + README + .py — complete with summary field, missing KB entry"
+      },
+      "prior_nosource_report": "paper/taiwan-vt/reproducibility_audit/nosource_rescan_report.md (2026-04-17)",
+      "prior_report_finding": "Prior report found 15 UNDOCUMENTED_K + 16 STILL_NO_SOURCE out of 42 no-source numbers. K1175 and K1176 were in UNDOCUMENTED_K category. This scan confirms 8 K experiments with dirs but no KB entries."
+    },
+    "Paper3": {
+      "paper_name": "vt-trend-following",
+      "tex_files_scanned": ["main.tex", "main_v3.tex", "main_v2.tex", "body_v3.tex", "body_v2.tex", "reproducibility_audit/*.md"],
+      "k_referenced": ["K1045", "K1178", "K1179", "K1180", "K1181", "K1182", "K1192", "K1193", "K488", "K499", "K503", "K507", "K518", "K533", "K54", "K55", "K568", "K687", "K688", "K697", "K76", "K77", "K898", "K901"],
+      "k_total_referenced": 24,
+      "k_fully_documented": ["K1045", "K488", "K499", "K503", "K507", "K518", "K533", "K568", "K687", "K688", "K697", "K898"],
+      "k_with_experiments_no_knowledge": ["K1178", "K1179", "K1180", "K1181", "K1182", "K1192", "K1193", "K901"],
+      "k_missing_both": ["K54", "K55", "K76", "K77"],
+      "k_in_kb_no_dir": [],
+      "documentation_gap_count": 8,
+      "documentation_gap_pct": 33.3,
+      "truly_missing_count": 4,
+      "gap_notes": {
+        "K1178": "Has results.json (34KB) — Paper 3 Table 5 canonical 13-market replication. CRITICAL experiment, missing KB entry.",
+        "K1179": "Has results.json (3KB) + README + .py — complete experiment, missing KB entry",
+        "K1180": "Has results.json (4KB, has summary field) + README + .py — complete with verdict, missing KB entry",
+        "K1181": "Has results.json (4KB) + README + .py — shared with Paper2, missing KB entry",
+        "K1182": "Has results.json (11KB, has conclusion field) + README + .py — complete with verdict, missing KB entry",
+        "K1192": "Has results.json (16KB, has summary field) + README + .py — complete with verdict, missing KB entry",
+        "K1193": "Has results.json (6KB) + README + .py — complete experiment, missing KB entry",
+        "K901": "Has results.json (29KB, 13-market international) + README + .py — complete with conclusion, missing KB entry",
+        "K54": "TRULY MISSING — no experiments/k54 directory found; referenced in body_v3.tex but no experiment dir or KB entry",
+        "K55": "TRULY MISSING — no experiments/k55 directory found; referenced in body_v3.tex but no experiment dir or KB entry",
+        "K76": "TRULY MISSING — no experiments/k76 directory found; referenced in body_v3.tex but no experiment dir or KB entry",
+        "K77": "TRULY MISSING — no experiments/k77 directory found; referenced in body_v3.tex but no experiment dir or KB entry"
+      },
+      "prior_nosource_report": "paper/vt-trend-following/reproducibility_audit/nosource_rescan_report.md (2026-04-17)",
+      "prior_report_finding": "Prior report found 3 UNDOCUMENTED_K (K697, K1178, paper3_fixes) + 5 STILL_NO_SOURCE out of 13. K54/55/76/77 are very early K IDs — likely pre-K-numbering era experiments with no formal experiment directory."
+    },
+    "Paper4": {
+      "paper_name": "vix-sufficiency",
+      "tex_files_scanned": ["main.tex", "main_v3.tex", "main_v2.tex", "reproducibility_audit/*.md"],
+      "k_referenced": ["K1045", "K1053", "K1098", "K1116", "K1117", "K1118", "K1121", "K1123", "K1129", "K1135", "K1136", "K1137", "K1138", "K1139", "K1141", "K1143", "K507", "K618", "K621", "K679", "K698", "K731", "K738", "K745", "K752", "K780", "K786"],
+      "k_total_referenced": 27,
+      "k_fully_documented": ["K1045", "K1098", "K1116", "K1118", "K1121", "K1129", "K1136", "K507", "K618", "K621", "K679", "K698", "K731", "K745"],
+      "k_with_experiments_no_knowledge": ["K1053", "K1117", "K1123", "K1135", "K1137", "K1138", "K1139", "K1141", "K1143", "K738", "K752", "K780", "K786"],
+      "k_missing_both": [],
+      "k_in_kb_no_dir": [],
+      "documentation_gap_count": 13,
+      "documentation_gap_pct": 48.1,
+      "gap_notes": {
+        "K1053": "Has results.json (4KB, has conclusion field) + README + .py — complete with verdict, missing KB entry",
+        "K1117": "Has results.json (7KB, verdict=FULL_NULL) + README + .py — complete with verdict, missing KB entry",
+        "K1123": "Has results.json (21KB, verdict=FAIL) + README + .py — complete with clear FAIL verdict, missing KB entry",
+        "K1135": "Has results.json (23KB, Skew-t GAS, Scenario B verdict) + README + .py — complete with rich verdict dict, missing KB entry",
+        "K1137": "Has results.json (60KB, verdict=C_HAR_REGIME_INVARIANT) + README + .py — LARGEST, complete with regime-invariant finding, missing KB entry",
+        "K1138": "Has results.json (35KB, verdict=MIXED) + README + .py — equity compendium finding, missing KB entry",
+        "K1139": "Has results.json (19KB) + README + .py — complete experiment, missing KB entry",
+        "K1141": "Has dir (README + tables + figures) but NO results.json — incomplete experiment",
+        "K1143": "Has results.json (13KB) + README + .py — complete experiment, missing KB entry",
+        "K738": "Has results.json (40KB, VT insurance cost-benefit) + README + .py — complete experiment, missing KB entry",
+        "K752": "Has results.json (13KB, has conclusion field) + README + .py — era-specific VIX sufficiency, missing KB entry",
+        "K780": "Has results.json (14KB, tail-first ES) + README + .py — complete experiment, missing KB entry",
+        "K786": "Has results.json (8KB, VT insurance premium, has verdict field) + README + .py — complete with verdict, missing KB entry"
+      },
+      "prior_nosource_report": "NOT FOUND — Paper 4 has no nosource_rescan_report.md in reproducibility_audit/. This extension scan is the FIRST rescan for Paper 4.",
+      "prior_report_finding": "Paper 4 diff_report.md (2026-04-17) found 8 DIVERGENT items and 3 UNTRACED items (DIV-6/7/8). The 13 documentation gaps identified here are distinct: these are K experiments with full dirs but no KB entries."
+    }
+  },
+  "summary": {
+    "total_documentation_gaps": 37,
+    "total_truly_missing": 4,
+    "per_paper_gaps": {
+      "Paper1": 8,
+      "Paper2": 8,
+      "Paper3": 8,
+      "Paper4": 13
+    },
+    "per_paper_gap_pct": {
+      "Paper1": 40.0,
+      "Paper2": 30.8,
+      "Paper3": 33.3,
+      "Paper4": 48.1
+    },
+    "incomplete_experiments": ["K228 (Paper1, no results.json)", "K1141 (Paper4, no results.json)"],
+    "total_k_referenced_across_papers": 97,
+    "total_unique_k_referenced": 77
+  },
+  "top5_priority_to_document": [
+    {
+      "rank": 1,
+      "kid": "K1137",
+      "paper": "Paper4",
+      "paper_name": "vix-sufficiency",
+      "reason": "Largest results.json (60KB), verdict=C_HAR_REGIME_INVARIANT — HAR+VIX passes across all 3 VIX regimes for equity assets. Regime-invariant robustness is a key Paper 4 narrative claim. Highest information density.",
+      "results_size_bytes": 60863,
+      "verdict_summary": "C_HAR_REGIME_INVARIANT: HAR+VIX PASSES across all 3 regimes for ≥2 equity assets AND ≥8 total PASS cells",
+      "priority_score": 12
+    },
+    {
+      "rank": 2,
+      "kid": "K1138",
+      "paper": "Paper4",
+      "paper_name": "vix-sufficiency",
+      "reason": "35KB results, verdict=MIXED — equity compendium (SPY/QQQ/IWM) showing specific passing combos. Paper 4 needs to report specific passing combos rather than claiming universal null. Research-honest documentation critical.",
+      "results_size_bytes": 35585,
+      "verdict_summary": "MIXED: some (asset, model) combos PASS. Max DM t: SPY=4.18, QQQ=4.22, IWM=2.06",
+      "priority_score": 12
+    },
+    {
+      "rank": 3,
+      "kid": "K1135",
+      "paper": "Paper4",
+      "paper_name": "vix-sufficiency",
+      "reason": "23KB results, Skew-t GAS on negatively skewed commodities. Scenario B verdict (VaR/ES improved, QLIKE NULL) — informs Paper 4 commodity-specific subsection. H2/H3 pass counts documented.",
+      "results_size_bytes": 23744,
+      "verdict_summary": "Scenario B: Only VaR/ES improved, QLIKE NULL. H1_pass=0, H2_pass_1pct=2, H3_pass_1pct=4",
+      "priority_score": 12
+    },
+    {
+      "rank": 4,
+      "kid": "K1123",
+      "paper": "Paper4",
+      "paper_name": "vix-sufficiency",
+      "reason": "21KB results, clear FAIL verdict. Cross-asset alt-data allocation (SPY+GLD+TLT) extension of K1121. Null result must be documented per research honesty principle.",
+      "results_size_bytes": 21883,
+      "verdict_summary": "FAIL — alt-data allocation fails to improve on baseline across asset combination",
+      "priority_score": 12
+    },
+    {
+      "rank": 5,
+      "kid": "K901",
+      "paper": "Paper3",
+      "paper_name": "vt-trend-following",
+      "reason": "29KB results, 13-market international VT experiment. conclusion field present (MDD improvement 13/13 markets, Sharpe improvement 0/13, Spearman correlation computed). Parent experiment for K1178 — critical supporting evidence for Paper 3 Table 5.",
+      "results_size_bytes": 29890,
+      "verdict_summary": "12/VIX VT across 13 international markets: MDD improvement 13/13, Sharpe 0/13. GJR gamma > 0 in 13/13.",
+      "priority_score": 11
+    }
+  ],
+  "methodology_notes": {
+    "k_source_collection": "Scanned main.tex + all body_vN.tex + reproducibility_audit/*.md for each paper to maximize K-reference coverage. Latest body_v3 used as canonical but all versions checked to capture historical K references.",
+    "kb_search_method": "grep for both 'K123' and 'k123' (case-insensitive) experiment_id in knowledge.json — file is ~2MB so grep is safe and avoids full-file read",
+    "experiment_dir_matching": "Fuzzy match: exact lowercase match OR prefix match (e.g., k799_ variants). Covers k824v2, k783b etc.",
+    "gap_definition": "Documentation gap = experiment directory exists in experiments/ AND no knowledge.json entry with matching experiment_id. This is distinct from 'no-source' in prior reports (which means no matching experiment exists at all).",
+    "truly_missing_definition": "K referenced in paper tex but no experiments/ dir AND no KB entry. K54/55/76/77 are very low-numbered — pre-K-numbering era, likely predating the K-ID experiment system.",
+    "known_limitation": "K1181 appears in both Paper2 and Paper3 — counted once in gap list but in both papers' reference sets. K1045 (shared methodology experiment) is documented in KB but referenced by all 4 papers."
+  }
+}

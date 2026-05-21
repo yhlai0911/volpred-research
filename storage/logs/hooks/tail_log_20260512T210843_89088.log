@@ -1,0 +1,11 @@
+=== line 50-60 with numbers ===
+50: 
+51: # 通知用戶 — 解決「系統有跑但看不到 = 等於沒跑」的信任問題
+52: LATEST_COMMIT=$(/usr/bin/git -C /Users/yhlai0911/Desktop/volpred-research log -1 --pretty=format:'%h %s' 2>&1 | head -c 100)
+53: /usr/bin/osascript -e "display notification \"$LATEST_COMMIT\" with title \"volpred hourly-dispatch $(date '+%H:%M')\" sound name \"Pop\"" 2>/dev/null || true
+=== try /bin/bash strict ===
+=== explicit run with /bin/bash ===
+bash: line 9: kill: (89158) - No such process
+--- log after manual ---
+- **下次任務時間**：22:07 CST（下次 hourly cron）；建議繼續 SEVERE 4（S2/S3/S4 gamma parameter conflicts 整合 K892 到 body.tex Table 2）
+=== hourly-dispatch end 2026-05-12 21:21:35 CST ===

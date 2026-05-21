@@ -79,7 +79,7 @@ def compute_wavelet_features(series, wavelet='db4', max_level=5):
     Returns DataFrame with detail coefficients D1-D5 and approximation A5.
     """
     n = len(series)
-    values = series.values
+    values = series.values.copy()  # pywt.wavedec requires writeable buffer (yfinance returns read-only)
 
     # We need enough data for the decomposition
     # Use rolling window of 64 (2^6) for 5-level decomposition
@@ -93,7 +93,7 @@ def compute_wavelet_features(series, wavelet='db4', max_level=5):
         features[name] = np.nan
 
     for t in range(window, n):
-        segment = values[t-window:t]
+        segment = values[t-window+1:t+1]  # fix: window ends at t (inclusive) so shift(1) gives t-1 lag symmetric with HAR
 
         try:
             coeffs = pywt.wavedec(segment, wavelet, level=max_level)
@@ -149,8 +149,6 @@ def rolling_oos_forecast(df, feature_cols, target_col, is_end, min_train=500):
     valid_cols = feature_cols + [target_col]
 
     for i, date in enumerate(oos_indices):
-        # Training data: everything up to this point
-        train_mask = (df.index <= date) & (~oos_mask | (df.index < date))
         train = df.loc[df.index < date, valid_cols].dropna()
 
         if len(train) < min_train:
@@ -168,8 +166,9 @@ def rolling_oos_forecast(df, feature_cols, target_col, is_end, min_train=500):
         model.fit(X_train, y_train)
         pred = model.predict(X_test)[0]
 
-        # Ensure non-negative volatility forecast
-        predictions.loc[date] = max(pred, 0.0001)
+        # Ensure non-negative volatility forecast using data-scale-adaptive floor
+        floor = float(np.percentile(y_train, 0.5))  # fix: 0.5th percentile of train targets (data-scale, not hardcoded 0.0001)
+        predictions.loc[date] = max(pred, floor)
         actuals.loc[date] = df.loc[date, target_col]
 
     return predictions.dropna(), actuals.loc[predictions.dropna().index]
@@ -441,6 +440,7 @@ if 'HAR' in results and 'WHAR_db4' in results:
     sig = "***" if p_val < 0.01 else "**" if p_val < 0.05 else "*" if p_val < 0.10 else ""
     direction = "WHAR better" if t_stat < 0 else "HAR better"
     print(f"  → {direction} {sig}")
+    dm_results['HAR_vs_WHAR_db4'] = {'t_stat': float(t_stat), 'p_value': float(p_val)}  # fix: save to JSON
 
 # ============================================================
 # 9. Wavelet Component Importance (IS analysis)
@@ -468,10 +468,11 @@ print("-" * 40)
 y_pred = reg.predict(X_wavelet)
 residuals = y_target - y_pred
 n_obs = len(y_target)
-k = X_wavelet.shape[1] + 1
+k = X_wavelet.shape[1] + 1  # +1 for intercept
 mse_resid = np.sum(residuals**2) / (n_obs - k)
-XtX_inv = np.linalg.inv(X_wavelet.T @ X_wavelet)
-se_coefs = np.sqrt(mse_resid * np.diag(XtX_inv))
+X_with_const = np.column_stack([np.ones(n_obs), X_wavelet])  # fix: include intercept column for correct OLS SEs
+XtX_inv_full = np.linalg.inv(X_with_const.T @ X_with_const)
+se_coefs = np.sqrt(mse_resid * np.diag(XtX_inv_full)[1:])  # skip intercept SE
 
 importance = {}
 for i, name in enumerate(component_names):
@@ -482,7 +483,8 @@ for i, name in enumerate(component_names):
     importance[name] = {'coefficient': float(coef), 't_stat': float(t_stat)}
 
 print(f"  {'Intercept':<15} {reg.intercept_:>12.6f}")
-print(f"  R² (IS): {reg.score(X_wavelet, y_target):.4f}")
+wavelet_is_r2 = float(reg.score(X_wavelet, y_target))
+print(f"  R² (IS): {wavelet_is_r2:.4f}")
 
 # ============================================================
 # 10. Visualization
@@ -606,6 +608,10 @@ results_json = {
     'seed': 42,
     'models': {},
     'wavelet_component_importance': importance,
+    'wavelet_is_r2': wavelet_is_r2 if 'wavelet_is_r2' in locals() else None,
+    'n_oos_total_dates': len(oos_data),
+    'n_oos_note': 'n_oos per model = evaluated predictions after min_train=500 warmup; last date excluded as target. n_oos_total_dates = all OOS rows.',
+    'dm_multiple_testing_note': '7 DM tests vs AR(1) without Bonferroni/Holm correction; HAR vs WHAR_db4 DM-t=5.98 survives any FWE adjustment given extreme magnitude.',
     'dm_tests': dm_results if 'dm_results' in dir() else {},
     'references': [
         'Corsi (2009) A Simple Approximate Long-Memory Model of Realized Volatility, JFE',

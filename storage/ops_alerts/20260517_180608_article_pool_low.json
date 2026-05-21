@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-05-17T18:06:08Z",
+  "alert_type": "article_pool_low",
+  "severity": "critical",
+  "message": "article pool low (<12): total drafts=6. general=2 (<8 threshold), research=4 (>=4, ok).",
+  "detail": {
+    "total_drafts": 6,
+    "threshold_total": 12,
+    "general_drafts": 2,
+    "threshold_general": 8,
+    "research_drafts": 4,
+    "threshold_research": 4
+  },
+  "recommended_action": "Dispatch feed-publisher agent to write 6+ general audience articles to restore pool above thresholds."
+}

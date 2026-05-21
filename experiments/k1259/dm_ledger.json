@@ -16,9 +16,9 @@
     "source_file",
     "source_field_path"
   ],
-  "n_rows": 2741,
-  "n_files_scanned": 710,
-  "n_files_without_dm": 472,
+  "n_rows": 2718,
+  "n_files_scanned": 711,
+  "n_files_without_dm": 481,
   "rows": [
     {
       "k_id": "K1000",
@@ -877,51 +877,6 @@
       "harvey_adjusted": null,
       "source_file": "experiments/k1004/k1004_results.json",
       "source_field_path": "assets.QQQ.dm_tests.A4f-VIX-t_vs_GJR-t"
-    },
-    {
-      "k_id": "K1006",
-      "model_a": "overnight_gap",
-      "model_b": "zero",
-      "loss_fn": "QLIKE",
-      "asset": "VIX",
-      "sample_n": null,
-      "period": "2012-01-04 to 2026-04-08",
-      "dm_stat": 2.7474,
-      "p_value": 0.006039,
-      "harvey_adjusted": false,
-      "source_file": "experiments/k1006/k1006_results.json",
-      "source_field_path": "statistical_tests.overnight_gap_vs_zero",
-      "asset_source": "phase1.5_backfill_singleton"
-    },
-    {
-      "k_id": "K1006",
-      "model_a": "overnight_return",
-      "model_b": "zero",
-      "loss_fn": "QLIKE",
-      "asset": "VIX",
-      "sample_n": null,
-      "period": "2012-01-04 to 2026-04-08",
-      "dm_stat": 3.1691,
-      "p_value": 0.001543,
-      "harvey_adjusted": true,
-      "source_file": "experiments/k1006/k1006_results.json",
-      "source_field_path": "statistical_tests.overnight_return_vs_zero",
-      "asset_source": "phase1.5_backfill_singleton"
-    },
-    {
-      "k_id": "K1006",
-      "model_a": "naive_net",
-      "model_b": "zero",
-      "loss_fn": "QLIKE",
-      "asset": "VIX",
-      "sample_n": null,
-      "period": "2012-01-04 to 2026-04-08",
-      "dm_stat": 1.1796,
-      "p_value": 0.238256,
-      "harvey_adjusted": false,
-      "source_file": "experiments/k1006/k1006_results.json",
-      "source_field_path": "statistical_tests.naive_net_vs_zero",
-      "asset_source": "phase1.5_backfill_singleton"
     },
     {
       "k_id": "K1010",
@@ -2723,36 +2678,6 @@
       "harvey_adjusted": null,
       "source_file": "experiments/k1059/k1059_results.json",
       "source_field_path": "part_a_event_study.pre_vs_post",
-      "asset_source": "phase1.5_backfill_multi"
-    },
-    {
-      "k_id": "K1059",
-      "model_a": "ttest_dense",
-      "model_b": "none",
-      "loss_fn": "QLIKE",
-      "asset": "0050.TW|SPY|VIX",
-      "sample_n": null,
-      "period": "",
-      "dm_stat": -1.390609,
-      "p_value": 0.16464742,
-      "harvey_adjusted": null,
-      "source_file": "experiments/k1059/k1059_results.json",
-      "source_field_path": "part_b_clustering.ttest_dense_vs_none",
-      "asset_source": "phase1.5_backfill_multi"
-    },
-    {
-      "k_id": "K1059",
-      "model_a": "ttest_any",
-      "model_b": "none",
-      "loss_fn": "QLIKE",
-      "asset": "0050.TW|SPY|VIX",
-      "sample_n": null,
-      "period": "",
-      "dm_stat": -1.374358,
-      "p_value": 0.16947852,
-      "harvey_adjusted": null,
-      "source_file": "experiments/k1059/k1059_results.json",
-      "source_field_path": "part_b_clustering.ttest_any_vs_none",
       "asset_source": "phase1.5_backfill_multi"
     },
     {
@@ -22734,34 +22659,6 @@
       "source_field_path": "dm_tests.MIDAS_RV_vs_MIDAS_VIX"
     },
     {
-      "k_id": "K528",
-      "model_a": "A_nfp",
-      "model_b": "all",
-      "loss_fn": "QLIKE",
-      "asset": "",
-      "sample_n": null,
-      "period": "",
-      "dm_stat": 1.524954,
-      "p_value": 0.1283682,
-      "harvey_adjusted": null,
-      "source_file": "experiments/k528/k528_nfp_event_study_results.json",
-      "source_field_path": "statistical_tests.A_nfp_vs_all"
-    },
-    {
-      "k_id": "K528",
-      "model_a": "B_nfp",
-      "model_b": "friday",
-      "loss_fn": "QLIKE",
-      "asset": "",
-      "sample_n": null,
-      "period": "",
-      "dm_stat": 2.132732,
-      "p_value": 0.03354367,
-      "harvey_adjusted": null,
-      "source_file": "experiments/k528/k528_nfp_event_study_results.json",
-      "source_field_path": "statistical_tests.B_nfp_vs_friday"
-    },
-    {
       "k_id": "K530",
       "model_a": "HAR-VIX",
       "model_b": "HAR-ABS",
@@ -24398,62 +24295,6 @@
       "source_field_path": "all_pairwise_pooled_dm.1000_vs_2000"
     },
     {
-      "k_id": "K594",
-      "model_a": "adaptive",
-      "model_b": "fixed_2000",
-      "loss_fn": "QLIKE",
-      "asset": "SPY",
-      "sample_n": null,
-      "period": "",
-      "dm_stat": 0.3376,
-      "p_value": 0.7357,
-      "harvey_adjusted": null,
-      "source_file": "experiments/k594/k594_adaptive_window_vt_results.json",
-      "source_field_path": "statistical_tests_pooled.adaptive_vs_fixed_2000"
-    },
-    {
-      "k_id": "K594",
-      "model_a": "adaptive",
-      "model_b": "fixed_504",
-      "loss_fn": "QLIKE",
-      "asset": "SPY",
-      "sample_n": null,
-      "period": "",
-      "dm_stat": 0.1031,
-      "p_value": 0.9179,
-      "harvey_adjusted": null,
-      "source_file": "experiments/k594/k594_adaptive_window_vt_results.json",
-      "source_field_path": "statistical_tests_pooled.adaptive_vs_fixed_504"
-    },
-    {
-      "k_id": "K594",
-      "model_a": "adaptive",
-      "model_b": "12_vix",
-      "loss_fn": "QLIKE",
-      "asset": "SPY",
-      "sample_n": null,
-      "period": "",
-      "dm_stat": -0.3566,
-      "p_value": 0.7214,
-      "harvey_adjusted": null,
-      "source_file": "experiments/k594/k594_adaptive_window_vt_results.json",
-      "source_field_path": "statistical_tests_pooled.adaptive_vs_12_vix"
-    },
-    {
-      "k_id": "K594",
-      "model_a": "adaptive",
-      "model_b": "buy_hold",
-      "loss_fn": "QLIKE",
-      "asset": "SPY",
-      "sample_n": null,
-      "period": "",
-      "dm_stat": -0.2587,
-      "p_value": 0.7959,
-      "harvey_adjusted": null,
-      "source_file": "experiments/k594/k594_adaptive_window_vt_results.json",
-      "source_field_path": "statistical_tests_pooled.adaptive_vs_buy_hold"
-    },
-    {
       "k_id": "K618",
       "model_a": "KAN",
       "model_b": "GJR-GARCH",
@@ -25226,62 +25067,6 @@
       "asset_source": "phase1.5_backfill_multi"
     },
     {
-      "k_id": "K649",
-      "model_a": "ttest",
-      "model_b": "unconditional",
-      "loss_fn": "QLIKE",
-      "asset": "",
-      "sample_n": null,
-      "period": "2007-01-01 to 2026-03-27",
-      "dm_stat": -1.46,
-      "p_value": 0.1476,
-      "harvey_adjusted": null,
-      "source_file": "experiments/k649/k649_results.json",
-      "source_field_path": "calm_before_storm.up_calm_to_storm.ttest_vs_unconditional"
-    },
-    {
-      "k_id": "K649",
-      "model_a": "ttest_before",
-      "model_b": "after",
-      "loss_fn": "QLIKE",
-      "asset": "",
-      "sample_n": null,
-      "period": "2007-01-01 to 2026-03-27",
-      "dm_stat": -3.81,
-      "p_value": 0.0002,
-      "harvey_adjusted": null,
-      "source_file": "experiments/k649/k649_results.json",
-      "source_field_path": "calm_before_storm.up_calm_to_storm.ttest_before_vs_after"
-    },
-    {
-      "k_id": "K649",
-      "model_a": "ttest",
-      "model_b": "unconditional",
-      "loss_fn": "QLIKE",
-      "asset": "",
-      "sample_n": null,
-      "period": "2007-01-01 to 2026-03-27",
-      "dm_stat": 0.35,
-      "p_value": 0.7246,
-      "harvey_adjusted": null,
-      "source_file": "experiments/k649/k649_results.json",
-      "source_field_path": "calm_before_storm.down_storm_to_calm.ttest_vs_unconditional"
-    },
-    {
-      "k_id": "K649",
-      "model_a": "ttest_before",
-      "model_b": "after",
-      "loss_fn": "QLIKE",
-      "asset": "",
-      "sample_n": null,
-      "period": "2007-01-01 to 2026-03-27",
-      "dm_stat": -1.03,
-      "p_value": 0.307,
-      "harvey_adjusted": null,
-      "source_file": "experiments/k649/k649_results.json",
-      "source_field_path": "calm_before_storm.down_storm_to_calm.ttest_before_vs_after"
-    },
-    {
       "k_id": "K651",
       "model_a": "garch",
       "model_b": "har_macro",
@@ -25378,20 +25163,6 @@
       "harvey_adjusted": null,
       "source_file": "experiments/k651/k651_results.json",
       "source_field_path": "dm_tests.garch_vs_har_vix"
-    },
-    {
-      "k_id": "K658",
-      "model_a": "stat_test_30",
-      "model_b": "w20",
-      "loss_fn": "QLIKE",
-      "asset": "",
-      "sample_n": null,
-      "period": "2006-01-01 to 2026-03-27",
-      "dm_stat": 2.904676,
-      "p_value": 0.00553028,
-      "harvey_adjusted": null,
-      "source_file": "experiments/k658/k658_results.json",
-      "source_field_path": "reentry_strategies.stat_test_30_vs_w20"
     },
     {
       "k_id": "K679",
@@ -26033,34 +25804,6 @@
       "asset_source": "phase1.5_backfill_multi"
     },
     {
-      "k_id": "K706",
-      "model_a": "ttest_fixed",
-      "model_b": "minvar",
-      "loss_fn": "QLIKE",
-      "asset": "",
-      "sample_n": null,
-      "period": "2006-01-04 to 2026-03-27",
-      "dm_stat": 0.405,
-      "p_value": 0.6854,
-      "harvey_adjusted": null,
-      "source_file": "experiments/k706/k706_results.json",
-      "source_field_path": "fixed_vs_dynamic_oos.ttest_fixed_vs_minvar"
-    },
-    {
-      "k_id": "K706",
-      "model_a": "ttest_fixed",
-      "model_b": "maxsharpe",
-      "loss_fn": "QLIKE",
-      "asset": "",
-      "sample_n": null,
-      "period": "2006-01-04 to 2026-03-27",
-      "dm_stat": -1.152,
-      "p_value": 0.2493,
-      "harvey_adjusted": null,
-      "source_file": "experiments/k706/k706_results.json",
-      "source_field_path": "fixed_vs_dynamic_oos.ttest_fixed_vs_maxsharpe"
-    },
-    {
       "k_id": "K730",
       "model_a": "dm",
       "model_b": "5050",
@@ -26283,34 +26026,6 @@
       "harvey_adjusted": null,
       "source_file": "experiments/k736/k736_calendar_anomaly_vt_results.json",
       "source_field_path": "part_d.dm_tests.VT-exCal vs 12/VIX"
-    },
-    {
-      "k_id": "K744",
-      "model_a": "ttest_first",
-      "model_b": "middle",
-      "loss_fn": "QLIKE",
-      "asset": "SPY",
-      "sample_n": null,
-      "period": "ttest_first_vs_middle",
-      "dm_stat": 13.139312,
-      "p_value": 0.0,
-      "harvey_adjusted": null,
-      "source_file": "experiments/k744/k744_rv_5min_validation_results.json",
-      "source_field_path": "part_c_intraday_patterns.ttest_first_vs_middle"
-    },
-    {
-      "k_id": "K744",
-      "model_a": "ttest_last",
-      "model_b": "middle",
-      "loss_fn": "QLIKE",
-      "asset": "SPY",
-      "sample_n": null,
-      "period": "ttest_last_vs_middle",
-      "dm_stat": -1.841104,
-      "p_value": 0.06569537,
-      "harvey_adjusted": null,
-      "source_file": "experiments/k744/k744_rv_5min_validation_results.json",
-      "source_field_path": "part_c_intraday_patterns.ttest_last_vs_middle"
     },
     {
       "k_id": "K745",
@@ -28817,20 +28532,6 @@
       "harvey_adjusted": null,
       "source_file": "experiments/k786/k786_vt_insurance_premium_results.json",
       "source_field_path": "dm_tests.Smooth VoV VT vs 12/VIX"
-    },
-    {
-      "k_id": "K789",
-      "model_a": "mcnemar_fear",
-      "model_b": "vix",
-      "loss_fn": "QLIKE",
-      "asset": "",
-      "sample_n": null,
-      "period": "",
-      "dm_stat": 0.0,
-      "p_value": 1.0,
-      "harvey_adjusted": null,
-      "source_file": "experiments/k789/k789_google_trends_results.json",
-      "source_field_path": "part_b_return_prediction.mcnemar_fear_vs_vix"
     },
     {
       "k_id": "K789",
@@ -38580,21 +38281,6 @@
     },
     {
       "k_id": "K975",
-      "model_a": "welch_test_bw",
-      "model_b": "contango",
-      "loss_fn": "QLIKE",
-      "asset": "SPY|VIX",
-      "sample_n": null,
-      "period": "2010-01-05 to 2026-04-06",
-      "dm_stat": 0.593776,
-      "p_value": 0.55307351,
-      "harvey_adjusted": null,
-      "source_file": "experiments/k975/k975_vix_slope_results.json",
-      "source_field_path": "welch_test_bw_vs_contango",
-      "asset_source": "phase1.5_backfill_multi"
-    },
-    {
-      "k_id": "K975",
       "model_a": "dm_test_slope",
       "model_b": "12vix",
       "loss_fn": "QLIKE",
@@ -39299,21 +38985,6 @@
       "asset_source": "phase1.5_backfill_multi"
     },
     {
-      "k_id": "K990",
-      "model_a": "vt_spy",
-      "model_b": "vt_only",
-      "loss_fn": "QLIKE",
-      "asset": "0050.TW|SPY|VIX",
-      "sample_n": null,
-      "period": "2009-02-28 to 2026-04-30",
-      "dm_stat": 0.90631,
-      "p_value": 0.36583583,
-      "harvey_adjusted": null,
-      "source_file": "experiments/k990/k990_monthly_leadlag_results.json",
-      "source_field_path": "statistical_tests.vt_spy_vs_vt_only",
-      "asset_source": "phase1.5_backfill_multi"
-    },
-    {
       "k_id": "K994",
       "model_a": "A4",
       "model_b": "GJR",
@@ -39485,12 +39156,6 @@
       "source_field_path": "assets.0050.TW.dm_tests.A4f_vs_A4"
     }
   ],
-  "phase1_5_stats": {
-    "missing_ks_scanned": 181,
-    "singleton_ks": 15,
-    "multi_asset_ks": 90,
-    "no_ticker_ks": 76,
-    "rows_backfilled_singleton": 67,
-    "rows_tagged_multi": 1023
-  }
+  "phase15_applied_at": "2026-04-20T00:00:00+00:00",
+  "phase15_n_kids_in_map": 105
 }

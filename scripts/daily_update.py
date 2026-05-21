@@ -21,6 +21,29 @@ from volpred.config.runtime import get_default_mirror_url, get_local_data_sync_d
 from volpred.data.manager import DataManager
 from volpred.publisher.publisher import Publisher
 
+def _load_json_retry(path: Path, default, retries: int = 4, delay: float = 0.25):
+    """Load JSON, tolerating a concurrent writer mid-truncate.
+
+    feed.json is written by several processes (feed-publisher, supabase_sync,
+    this script). A plain json.loads() of a file caught mid-write raises
+    JSONDecodeError and crashed the whole daily_update run (2026-05-19). A
+    short retry rides out the millisecond-scale write window; only a
+    persistently bad file falls through to `default`.
+    """
+    import time
+    for attempt in range(retries):
+        try:
+            txt = path.read_text()
+            if txt.strip():
+                return json.loads(txt)
+        except (json.JSONDecodeError, OSError):
+            pass
+        if attempt < retries - 1:
+            time.sleep(delay)
+    print(f"  ⚠️ {path} unreadable after {retries} tries — using default")
+    return default
+
+
 # ──────────────────────────────────────────────────────────────────────
 # Single source of truth for strategy metadata.
 # All downstream consumers (feed article, Supabase signals, paper trading)
@@ -46,6 +69,18 @@ STRATEGY_REGISTRY = {
     # K595: Adaptive Tier — VIX regime switching (leverage / standard / piecewise exit)
     "adaptive_tier":          ("自適應三階 VT",               True, 13),
 }
+
+
+# Single source-of-truth for the 0050.TW staleness disclosure text.
+# Used in both generate_daily_article() and build_milestone_description() so
+# both article variants emit identical warning copy (reader consistency).
+_TW50_STALENESS_WARNING_TEMPLATE = (
+    "> ⚠️ **0050.TW 資料延遲提醒**：本文所引用的 0050.TW 收盤為 "
+    "{tw50_date}，較美股 {spy_date} 收盤晚一個交易日以上。"
+    "原因：daily_update cron 於台北時間 08:03 執行，早於台股當日開盤"
+    "（09:00），TW 資料天然落後一個交易日；偶有 yfinance 同步延遲。"
+    "今日台股實際收盤後請以官方 TWSE 數據為準。"
+)
 
 
 def fit_garch(returns_pct, vol_type="GARCH", p=1, o=0, q=1):
@@ -89,7 +124,7 @@ def _vix_regime(vix_level):
 def generate_daily_article(pub, strat_list, vix_level, sigma_gjr_ann, spy_close,
                            gld_close, spy_date, today, gap_alert_level=None,
                            gap_alert_text=None, overnight_gap=None,
-                           tw50_close=None, spy_ret=None, gld_ret=None):
+                           tw50_close=None, tw50_date=None, spy_ret=None, gld_ret=None):
     """Generate a rich 每日建議 article with chart, VIX interpretation, and advice.
 
     This runs as part of daily_update.py (system crontab) and requires zero
@@ -156,8 +191,18 @@ def generate_daily_article(pub, strat_list, vix_level, sigma_gjr_ann, spy_close,
     spy_chg = f" ({spy_ret*100:+.2f}%)" if spy_ret is not None else ""
     gld_chg = f" ({gld_ret*100:+.2f}%)" if gld_ret is not None else ""
     tw_line = ""
+    tw_staleness_section = ""
     if tw50_close is not None:
-        tw_line = f"\n- **0050.TW**: NT${tw50_close}"
+        if tw50_date:
+            tw_line = f"\n- **0050.TW**: NT${tw50_close}（{tw50_date} 收盤）"
+        else:
+            tw_line = f"\n- **0050.TW**: NT${tw50_close}"
+        if tw50_date and spy_date and tw50_date < spy_date:
+            tw_staleness_section = (
+                "\n" + _TW50_STALENESS_WARNING_TEMPLATE.format(
+                    tw50_date=tw50_date, spy_date=spy_date
+                ) + "\n"
+            )
 
     # --- Gap alert section ---
     gap_section = ""
@@ -183,8 +228,7 @@ def generate_daily_article(pub, strat_list, vix_level, sigma_gjr_ann, spy_close,
 - **SPY**: ${spy_close}{spy_chg}
 - **GLD**: ${gld_close}{gld_chg}{tw_line}
 - **VIX**: {vix_display} {regime_emoji}（{regime_name}）
-- **GARCH 年化波動率**: {sigma_gjr_ann}%
-
+- **GARCH 年化波動率**: {sigma_gjr_ann}%{tw_staleness_section}
 """
 
     # Insert chart if available
@@ -259,6 +303,7 @@ def generate_daily_article(pub, strat_list, vix_level, sigma_gjr_ann, spy_close,
             "spy_close": spy_close,
             "gld_close": gld_close,
             "tw50_close": tw50_close,
+            "tw50_date": tw50_date,
             "sigma_annual": sigma_gjr_ann,
             "vix_level": round(vix_level, 2) if vix_level is not None else None,
             "vix_regime": regime_name,
@@ -272,6 +317,49 @@ def generate_daily_article(pub, strat_list, vix_level, sigma_gjr_ann, spy_close,
 
     print(f"  Daily recommendation article created: {pub_id} (status=published)")
     return pub_id
+
+
+def build_milestone_description(strat_list, sigma_gjr_ann, vix_level, spy_date,
+                                tw50_close=None, tw50_date=None):
+    """Build the 持倉比率 milestone description with optional TW50 staleness disclosure.
+
+    Extracted so both the daily-update milestone publish path and tests can produce
+    identical output without duplicating the staleness warning template.
+    """
+    strat_rows = []
+    for sid, w_info in strat_list:
+        display_name, is_active, _ = STRATEGY_REGISTRY.get(sid, (sid, True, 99))
+        if not is_active:
+            continue
+        assets_str = " + ".join(f"**{a} {w*100:.0f}%**" for a, w in w_info.items() if w > 0)
+        cash = max(0, 1 - sum(w_info.values()))
+        if not assets_str:
+            assets_str = "**CASH 100%**"
+        strat_rows.append(f"| {display_name} | {assets_str} | {cash*100:.0f}% |")
+    strat_table = "\n".join(strat_rows)
+
+    vix_display = round(vix_level, 2) if vix_level is not None else "N/A"
+
+    desc = (
+        f"## 策略建議（{spy_date} 數據 → 預測下一交易日）\n\n"
+        f"σ = {sigma_gjr_ann}% · VIX = {vix_display}\n\n"
+        f"| 策略 | 配置 | 現金 |\n"
+        f"|------|------|------|\n"
+        f"{strat_table}\n"
+    )
+
+    if tw50_close is not None:
+        if tw50_date:
+            desc += f"\n- **0050.TW**: NT${tw50_close}（{tw50_date} 收盤）"
+        else:
+            desc += f"\n- **0050.TW**: NT${tw50_close}"
+        if tw50_date and spy_date and tw50_date < spy_date:
+            staleness = _TW50_STALENESS_WARNING_TEMPLATE.format(
+                tw50_date=tw50_date, spy_date=spy_date
+            )
+            desc += f"\n{staleness}\n"
+
+    return desc
 
 
 def main():
@@ -797,7 +885,7 @@ def main():
     feed_path = Path("storage/reports/feed.json")
     last_spy_date = None
     if feed_path.exists():
-        feed = json.loads(feed_path.read_text())
+        feed = _load_json_retry(feed_path, [])
         for p in feed:
             if p.get("phase") == "daily_update" and p.get("details", {}).get("spy_date"):
                 last_spy_date = p["details"]["spy_date"]
@@ -819,32 +907,18 @@ def main():
     if skip_publish:
         print(f"  跳過發布（數據與上次相同）")
     else:
-        # Build strategy table (only active strategies, using display names from STRATEGY_REGISTRY)
-        strat_rows = []
-        for sid, w_info in strat_list:
-            display_name, is_active, _ = STRATEGY_REGISTRY.get(sid, (sid, True, 99))
-            if not is_active:
-                continue
-            assets_str = " + ".join(f"**{a} {w*100:.0f}%**" for a, w in w_info.items() if w > 0)
-            cash = max(0, 1 - sum(w_info.values()))
-            if not assets_str:
-                assets_str = "**CASH 100%**"
-            strat_rows.append(f"| {display_name} | {assets_str} | {cash*100:.0f}% |")
-        strat_table = "\n".join(strat_rows)
-
         gap_section = ""
         if gap_alert_level:
             gap_section = f"\n---\n\n### Overnight Gap 警報 (I4)\n{gap_alert_text}\n"
 
-        desc = f"""## 策略建議（{spy_date} 數據 → 預測下一交易日）
-
-σ = {sigma_gjr_ann}% · VIX = {round(vix_level, 2) if vix_level else 'N/A'}
-
-| 策略 | 配置 | 現金 |
-|------|------|------|
-{strat_table}
-{gap_section}
-"""
+        desc = build_milestone_description(
+            strat_list=strat_list,
+            sigma_gjr_ann=sigma_gjr_ann,
+            vix_level=vix_level,
+            spy_date=spy_date,
+            tw50_close=tw50_close if locals().get('tw50_close') is not None else None,
+            tw50_date=tw50_date,
+        ) + gap_section
         pub.publish_milestone(
             title=f"{today} 本日持倉比率建議（依據 {spy_date} 收盤數據）",
             tags=["持倉建議", "daily-update", "12/VIX", "SPY", "GLD", "0050.TW", "VT策略"],
@@ -878,6 +952,7 @@ def main():
                 gap_alert_text=gap_alert_text if gap_alert_level else None,
                 overnight_gap=overnight_gap,
                 tw50_close=tw50_close if locals().get('tw50_close') is not None else None,
+                tw50_date=tw50_date,
                 spy_ret=spy_ret,
                 gld_ret=gld_ret,
             )
@@ -887,7 +962,7 @@ def main():
     # --- Sync static data ---
     storage = Path("storage")
     feed_source = storage / "reports" / "feed.json"
-    feed = json.loads(feed_source.read_text()) if feed_source.exists() else []
+    feed = _load_json_retry(feed_source, []) if feed_source.exists() else []
     feed.sort(key=lambda x: x.get("published_at") or "", reverse=True)
     sorted_feed = json.dumps(feed, indent=2, ensure_ascii=False, default=str)
 

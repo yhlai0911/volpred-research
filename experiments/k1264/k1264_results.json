@@ -1,0 +1,195 @@
+{
+  "experiment_id": "K1264",
+  "title": "TX Futures Overnight Gap Strategy",
+  "attribution": "[提出: 用戶, 執行: Claude]",
+  "timestamp_utc": "2026-05-02T18:07:43.160557+00:00",
+  "data_source": "TAIFEX TX tick CSVs (~/Dropbox/TAIFEXDATA/TAIFEXDATA/python/Daily_*TX.csv)",
+  "data_period": {
+    "start": "2017-05-16",
+    "end": "2026-04-28",
+    "n_trading_days": 2179
+  },
+  "tx_cost_round_trip_bps": 5.0,
+  "methodology": {
+    "signal_lag": "SPY_overnight(t-1) → TX position closed-to-open from t to t+1",
+    "session": "Day session ONLY (08:45-13:45) — no night session",
+    "expiry_filter": "max-volume expiry on day session per file",
+    "random_seed": 42
+  },
+  "holiday_gap_diagnostics": {
+    "normal_1day_n": 1697,
+    "normal_1day_mean_bps": 7.72,
+    "fri_to_mon_n": 397,
+    "fri_to_mon_mean_bps": 1.01,
+    "holiday_n": 62,
+    "holiday_mean_bps": -9.33
+  },
+  "gap_diagnostics": {
+    "mean_bps": 6.18,
+    "std_bps": 93.96,
+    "median_bps": 11.25,
+    "skew": -0.414,
+    "kurtosis": 16.084,
+    "pct_positive": 57.4,
+    "sharpe_no_cost": 1.045
+  },
+  "strategy_S1_unconditional": {
+    "n_days": 2179,
+    "n_trades": 2179,
+    "exposure_pct": 100.0,
+    "mean_gross_bps": 6.18,
+    "mean_net_bps": 1.18,
+    "ann_return_gross_pct": 15.585,
+    "ann_vol_gross_pct": 14.916,
+    "sharpe_gross": 1.045,
+    "t_stat_gross": 3.072,
+    "p_val_gross": 0.0021,
+    "ann_return_net_pct": 2.985,
+    "ann_vol_net_pct": 14.916,
+    "sharpe_net": 0.2,
+    "t_stat_net": 0.588,
+    "p_val_net": 0.5563,
+    "mdd_gross_pct": -24.34,
+    "mdd_net_pct": -39.71,
+    "win_rate_gross_pct": 57.4,
+    "win_rate_net_pct": 54.2
+  },
+  "strategy_S2_spy_conditioned": {
+    "n_days": 2179,
+    "n_trades": 1249,
+    "exposure_pct": 57.3,
+    "mean_gross_bps": 5.82,
+    "mean_net_bps": 0.82,
+    "ann_return_gross_pct": 8.407,
+    "ann_vol_gross_pct": 10.582,
+    "sharpe_gross": 0.795,
+    "t_stat_gross": 2.338,
+    "p_val_gross": 0.0195,
+    "ann_return_net_pct": 1.185,
+    "ann_vol_net_pct": 10.572,
+    "sharpe_net": 0.112,
+    "t_stat_net": 0.33,
+    "p_val_net": 0.7418,
+    "mdd_gross_pct": -16.96,
+    "mdd_net_pct": -27.36,
+    "win_rate_gross_pct": 56.4,
+    "win_rate_net_pct": 53.6
+  },
+  "h2_conditional_uplift": {
+    "unconditional_mean_bps": 6.18,
+    "conditional_mean_bps": 5.82,
+    "ratio": 0.941,
+    "passes_1_5x": false
+  },
+  "cross_oos": {
+    "unconditional": [
+      {
+        "year": 2018,
+        "n_days": 247,
+        "sharpe_net": -1.622,
+        "ann_return_net_pct": -19.268,
+        "t_stat_net": -1.605
+      },
+      {
+        "year": 2020,
+        "n_days": 245,
+        "sharpe_net": 0.408,
+        "ann_return_net_pct": 6.708,
+        "t_stat_net": 0.402
+      },
+      {
+        "year": 2022,
+        "n_days": 246,
+        "sharpe_net": -1.224,
+        "ann_return_net_pct": -18.946,
+        "t_stat_net": -1.209
+      },
+      {
+        "year": 2023,
+        "n_days": 239,
+        "sharpe_net": 0.691,
+        "ann_return_net_pct": 6.695,
+        "t_stat_net": 0.673
+      },
+      {
+        "year": 2024,
+        "n_days": 242,
+        "sharpe_net": 0.468,
+        "ann_return_net_pct": 7.746,
+        "t_stat_net": 0.459
+      }
+    ],
+    "spy_conditioned": [
+      {
+        "year": 2018,
+        "n_days": 247,
+        "sharpe_net": 0.012,
+        "ann_return_net_pct": 0.079,
+        "t_stat_net": 0.012
+      },
+      {
+        "year": 2020,
+        "n_days": 245,
+        "sharpe_net": 0.1,
+        "ann_return_net_pct": 1.126,
+        "t_stat_net": 0.098
+      },
+      {
+        "year": 2022,
+        "n_days": 246,
+        "sharpe_net": -1.292,
+        "ann_return_net_pct": -14.059,
+        "t_stat_net": -1.278
+      },
+      {
+        "year": 2023,
+        "n_days": 239,
+        "sharpe_net": 0.266,
+        "ann_return_net_pct": 1.82,
+        "t_stat_net": 0.258
+      },
+      {
+        "year": 2024,
+        "n_days": 242,
+        "sharpe_net": -0.667,
+        "ann_return_net_pct": -8.822,
+        "t_stat_net": -0.653
+      }
+    ],
+    "n_pos_uncond": 3,
+    "n_pos_cond": 3,
+    "n_total": 5
+  },
+  "gates_unconditional": {
+    "gate1": false,
+    "gate2": false,
+    "gate3": false,
+    "passes": 0,
+    "verdict": "REJECT"
+  },
+  "gates_spy_conditioned": {
+    "gate1": false,
+    "gate2": false,
+    "gate3": false,
+    "passes": 0,
+    "verdict": "REJECT"
+  },
+  "verdict": {
+    "unconditional": "REJECT",
+    "spy_conditioned": "REJECT",
+    "listing_recommendation": "NO"
+  },
+  "references": [
+    "K515: SPY ETF overnight gap alpha 10.73bp/day t=4.06 (源頭 finding)",
+    "K625: SPY ETF cost-killing 18.55bp round-trip",
+    "K843: TAIFEX tick parsing pattern (max-volume expiry, Big5 encoding)",
+    "Lou, Polk, Skouras (2019) JFE: Overnight vs Intraday Returns"
+  ],
+  "limitations": [
+    "TX cost 5bp round-trip 是 typical retail 假設 — 實際視 broker 而定",
+    "仍未考慮 slippage（fill at exact open/close 假設）",
+    "Day-session-only 排除夜盤 information 但避開 night noise",
+    "OOS years (2018/2020/2022/2023/2024) 涵蓋多種 regime 但不含 2017 部分樣本"
+  ],
+  "elapsed_seconds": 26.3
+}

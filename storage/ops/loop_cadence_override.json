@@ -1,0 +1,8 @@
+{
+  "purpose": "User 2026-05-02 14:35 CST 指定 24h cadence override：alert monitor /loop 由 30min 改為 15min，到期 revert 30min。",
+  "set_at": "2026-05-02T06:35:37Z",
+  "revert_at": "2026-05-03T06:35:37Z",
+  "current_cadence_seconds": 900,
+  "default_cadence_seconds": 1800,
+  "instructions_for_loop": "Each /loop iteration: read this file. If now < revert_at -> ScheduleWakeup delaySeconds=current_cadence_seconds. Else -> delete this file and use default_cadence_seconds=1800 (revert)."
+}

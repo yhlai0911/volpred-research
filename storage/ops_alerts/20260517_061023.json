@@ -1,0 +1,20 @@
+{
+  "timestamp": "2026-05-17T06:10:23Z",
+  "severity": "warning",
+  "alerts": [
+    {
+      "type": "article_pool_low",
+      "severity": "warning",
+      "message": "article pool low (<12): total drafts=6, general=2, research=4",
+      "detail": "Total draft count 6 is below threshold of 12. General-audience pool (2) is critically below threshold of 8. Research pool (4) meets minimum.",
+      "recommended_action": "Dispatch feed-publisher agent for at least 6 new general-audience articles (market analysis, methodology, or research-recap topics) to restore pool to healthy levels."
+    },
+    {
+      "type": "article_pool_general_low",
+      "severity": "warning",
+      "message": "general audience articles low (<8): only 2 drafts in general audience pool",
+      "detail": "General-audience draft count of 2 is far below the threshold of 8. Release cadence is at risk.",
+      "recommended_action": "Prioritize general-audience article drafts. Use publication-candidates skill to select non-research topics, dispatch feed-publisher with audience=general."
+    }
+  ]
+}

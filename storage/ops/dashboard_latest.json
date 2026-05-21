@@ -1,0 +1,75 @@
+{
+  "dashboard_generated_at": "2026-05-20T17:00:44Z",
+  "overall_status": "critical",
+  "section_breaches": 1,
+  "section_critical": 1,
+  "sections": [
+    {
+      "section": "production_pending",
+      "status": "ok",
+      "tldr": "56 pending tasks (top types: [('daily_article', 40), ('experiment', 14), ('?', 2)])",
+      "next": "dispatch top P1-P3 if slots free"
+    },
+    {
+      "section": "production_throughput",
+      "status": "ok",
+      "tldr": "9 articles published last 24h (target 6/day)",
+      "next": null
+    },
+    {
+      "section": "distribution_supabase",
+      "status": "ok",
+      "tldr": "9/9 last-24h articles synced",
+      "next": null,
+      "missing": []
+    },
+    {
+      "section": "verification_live_url",
+      "status": "ok",
+      "tldr": "3/3 sample live URLs return 200",
+      "next": null,
+      "sample": [
+        "mile_883a7429",
+        "mile_7e3767a1",
+        "mile_94c1a524"
+      ],
+      "dead": []
+    },
+    {
+      "section": "verification_fb_pipeline",
+      "status": "ok",
+      "tldr": "0 FB posts pending sync",
+      "next": null
+    },
+    {
+      "section": "health_cron",
+      "status": "ok",
+      "tldr": "0 cron jobs stale (over max-age)",
+      "next": null,
+      "stale": []
+    },
+    {
+      "section": "health_alerts_unhandled",
+      "status": "critical",
+      "tldr": "3 warn/critical alerts last 6h (read + act per .claude/rules/alert.md)",
+      "next": "ingest alerts → run remediation per alert.md auto-action table",
+      "breaches": [
+        {
+          "ts": "14:09",
+          "level": "warn",
+          "subject": "[VolPred Alert][WARN] ⚠️ gemini_ask.py 已呼叫 — 產生 Gemini API 費用"
+        },
+        {
+          "ts": "16:00",
+          "level": "warn",
+          "subject": "[VolPred Alert][WARN] Release pool cron gap > 4.0h (interval=180min)"
+        },
+        {
+          "ts": "16:00",
+          "level": "critical",
+          "subject": "[VolPred Alert][CRITICAL] Host cron failure detected"
+        }
+      ]
+    }
+  ]
+}

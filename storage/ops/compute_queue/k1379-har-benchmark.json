@@ -1,0 +1,23 @@
+{
+  "id": "k1379-har-benchmark",
+  "title": "K1379: Paper 9 HAR-RV/HAR-RV-VIX Horse Race Benchmarks (C4 Fix)",
+  "script_path": "experiments/k1379/k1379.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "failed",
+  "queued_at": "2026-05-19T05:24:44Z",
+  "started_at": "2026-05-19T05:45:06Z",
+  "completed_at": "2026-05-19T05:45:10Z",
+  "exit_code": 1,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k1379-har-benchmark.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k1379-har-benchmark.stderr",
+  "result_artifact": "experiments/k1379/k1379_results.json",
+  "claude_followup": {
+    "brief": "Read k1379_results.json. Check paper9_c4_assessment.verdict (ADDRESSED or LIMITATION). If ADDRESSED: add HAR-RV and HAR-RV-VIX rows to Table 2 with DM t-stats (a4f_vs_har, a4f_vs_har_vx). If LIMITATION: draft honest limitation paragraph for paper body: A4f does not Harvey-beat HAR-RV, note both pass vs GJR. Also check if k1378_losses.npy and k1379_losses.npy are both ready for K_NEW_C White RC/SPA test. C4 task K_NEW_B in next_tasks.json.",
+    "task_type": "paper_review",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 2400
+}

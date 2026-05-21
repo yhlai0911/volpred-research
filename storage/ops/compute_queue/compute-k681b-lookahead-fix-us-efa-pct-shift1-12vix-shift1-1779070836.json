@@ -1,0 +1,25 @@
+{
+  "id": "compute-k681b-lookahead-fix-us-efa-pct-shift1-12vix-shift1-1779070836",
+  "title": "K681b: Lookahead fix US/EFA (pct.shift1 + 12vix.shift1)",
+  "script_path": "experiments/k681b/k681b_lookahead_fix.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-05-18T02:20:36Z",
+  "started_at": "2026-05-18T02:30:08Z",
+  "completed_at": "2026-05-18T02:30:30Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k681b-lookahead-fix-us-efa-pct-shift1-12vix-shift1-1779070836.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k681b-lookahead-fix-us-efa-pct-shift1-12vix-shift1-1779070836.stderr",
+  "result_artifact": "experiments/k681b/k681b_results.json",
+  "claude_followup": {
+    "brief": "K681b lookahead fix 結果出來。比較 EFA/US corrected Sharpe vs original. 若 EFA Fixed Sharpe ≥1.2 → errata only; 若 <0.8 → article correction needed. 更新 experiments/k681b/README.md 結論, 寫 knowledge.json CONDITIONAL_PASS entry (k681b, reviewer=主線程+Codex), 更新 feed.json mile_073884fd errata 加上具體數字, work_log 記錄結果.",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "timeout_seconds": 1800,
+  "followup_dispatched_at": "2026-05-18T03:13:50Z",
+  "followup_next_task_id": "k681b-correction-followup"
+}

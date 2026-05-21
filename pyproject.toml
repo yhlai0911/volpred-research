@@ -56,3 +56,8 @@ packages = ["src/volpred"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[dependency-groups]
+dev = [
+    "playwright>=1.60.0",
+]

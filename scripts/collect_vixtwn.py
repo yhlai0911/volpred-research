@@ -11,8 +11,15 @@ Free data: rolling last 3-4 months only
 
 Run: uv run python scripts/collect_vixtwn.py
 Output: data/vixtwn/vixtwn_daily.csv
+
+Exit codes (2026-05-04 silent-fail fix):
+  0 = success (any month with records, including same-day pickup)
+  1 = total fetch failure (all attempted months failed → cron exit code
+      surfaces in storage/logs/cron/collect_tw.log; check_alerts'
+      host_cron_fail then triggers per .claude/rules/alert.md)
 """
 import csv
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -116,11 +123,18 @@ def main():
         months_to_fetch.append(f"{y}{m:02d}")
 
     all_records = []
+    fetch_failures: list[str] = []
     for ym in sorted(months_to_fetch):
         records = fetch_month(ym)
-        all_records.extend(records)
         if records:
+            all_records.extend(records)
             print(f"  {ym}: {len(records)} days ({records[0]['date']} to {records[-1]['date']})")
+        else:
+            # fetch_month already prints "fetch failed" on exception; an
+            # empty return on success is rare but possible if TAIFEX returns
+            # an empty file. Track so we can distinguish total-failure from
+            # same-day-not-yet-published.
+            fetch_failures.append(ym)
 
     # Save
     n_new = save_records(all_records, existing)
@@ -134,6 +148,28 @@ def main():
         latest = sorted(all_records, key=lambda x: x["date"])[-1]
         print(f"  Latest VIXTWN: {latest['vixtwn_close']} ({latest['date']})")
 
+    # 2026-05-04 silent-fail fix: previously fetch_month exception caught,
+    # main() unconditional return None → cron exit 0 even when 6/6 months
+    # failed (e.g. transient DNS). check_alerts host_cron_fail therefore
+    # never triggered. Now: total failure → non-zero exit so cron log
+    # records `=== exit 1 ===` and alert system catches it.
+    if fetch_failures and not all_records:
+        print(
+            f"\n  [collect_vixtwn] FAIL: all {len(fetch_failures)} months "
+            f"returned no records ({fetch_failures}). Likely transient DNS "
+            f"or TAIFEX outage; check_alerts will surface as host_cron_fail.",
+            file=sys.stderr,
+        )
+        return 1
+    if fetch_failures:
+        # Partial: some months OK, others empty. Warn but don't fail —
+        # same-day publish lag is normal for the current month early in
+        # the trading day, and a stale month edge is harmless if the
+        # daily total is current.
+        print(f"  [collect_vixtwn] WARN: {len(fetch_failures)} month(s) "
+              f"empty: {fetch_failures} (may be transient or pre-publish)")
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main() or 0)

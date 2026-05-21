@@ -1,0 +1,365 @@
+{
+  "experiment_id": "K1300",
+  "title": "K1300: Forgetting-Factor BMA \u2014 K1257 H3 follow-up. Tests whether \u03bb<1 posterior discounting recovers Harvey-significant performance vs equal-weight.",
+  "proposer": "Claude",
+  "executor": "Claude main thread",
+  "predecessor": "K1257 (standard BMA, H2/H3 FAIL)",
+  "data_period": "2018-01-01 to 2026-04-18",
+  "oos_start": "2020-01-01",
+  "rolling_window": 1250,
+  "refit_freq": 63,
+  "lambda_grid": [
+    0.95,
+    0.97,
+    0.99,
+    1.0
+  ],
+  "models": [
+    "GARCH_N",
+    "GJR_N",
+    "GJR_t",
+    "EGARCH_N",
+    "HAR_ABS",
+    "A4f_IV2"
+  ],
+  "assets": [
+    "SPY",
+    "GLD",
+    "0050.TW"
+  ],
+  "seed": 42,
+  "bootstrap_B": 1000,
+  "bootstrap_block_len": 22,
+  "harvey_threshold": 3.0,
+  "per_asset": {
+    "SPY": {
+      "oos_start_date": "2020-01-02",
+      "n_oos": 1581,
+      "lambda_results": {
+        "0.95": {
+          "lambda": 0.95,
+          "bma_qlike": -8.19948461781885,
+          "equal_weight_qlike": -8.181248992293114,
+          "qlike_diff_mean": -0.018235625525734277,
+          "qlike_diff_ci95": [
+            -0.05932708038792543,
+            0.02023706745600025
+          ],
+          "dm_harvey_t": -1.0779522268638229,
+          "dm_harvey_p": 0.2812196201770376,
+          "harvey_pass": false,
+          "n_oos_eff": 1581,
+          "final_weights": {
+            "GARCH_N": 0.07192550658189834,
+            "GJR_N": 0.11813771713801052,
+            "GJR_t": 0.10290336464084211,
+            "EGARCH_N": 0.25241664476744896,
+            "HAR_ABS": 0.09156662798863581,
+            "A4f_IV2": 0.36305013888316434
+          },
+          "weight_entropy_final": 1.6098967319904487
+        },
+        "0.97": {
+          "lambda": 0.97,
+          "bma_qlike": -8.20088673104723,
+          "equal_weight_qlike": -8.181248992293114,
+          "qlike_diff_mean": -0.019637738754115012,
+          "qlike_diff_ci95": [
+            -0.060438168271198044,
+            0.02078405434694322
+          ],
+          "dm_harvey_t": -1.1489488915415649,
+          "dm_harvey_p": 0.2507509563353405,
+          "harvey_pass": false,
+          "n_oos_eff": 1581,
+          "final_weights": {
+            "GARCH_N": 0.05081953541373174,
+            "GJR_N": 0.09650833451334283,
+            "GJR_t": 0.09600195240783509,
+            "EGARCH_N": 0.254953327013126,
+            "HAR_ABS": 0.06007439736674066,
+            "A4f_IV2": 0.44164245328522345
+          },
+          "weight_entropy_final": 1.4803459899262676
+        },
+        "0.99": {
+          "lambda": 0.99,
+          "bma_qlike": -8.20513731899905,
+          "equal_weight_qlike": -8.181248992293114,
+          "qlike_diff_mean": -0.02388832670593647,
+          "qlike_diff_ci95": [
+            -0.06519447357943813,
+            0.016578129998808155
+          ],
+          "dm_harvey_t": -1.3410390059266422,
+          "dm_harvey_p": 0.18010053548108562,
+          "harvey_pass": false,
+          "n_oos_eff": 1581,
+          "final_weights": {
+            "GARCH_N": 0.0018203646163096956,
+            "GJR_N": 0.007387769030809569,
+            "GJR_t": 0.10087901819194976,
+            "EGARCH_N": 0.05002930341409524,
+            "HAR_ABS": 0.0014206549957190818,
+            "A4f_IV2": 0.8384628897511169
+          },
+          "weight_entropy_final": 0.5860268246373044
+        },
+        "1.00": {
+          "lambda": 1.0,
+          "bma_qlike": -8.176429679286132,
+          "equal_weight_qlike": -8.181248992293114,
+          "qlike_diff_mean": 0.004819313006981969,
+          "qlike_diff_ci95": [
+            -0.03893634723166571,
+            0.04279994877284759
+          ],
+          "dm_harvey_t": 0.26861884066413644,
+          "dm_harvey_p": 0.7882580803985149,
+          "harvey_pass": false,
+          "n_oos_eff": 1581,
+          "final_weights": {
+            "GARCH_N": 3.0409920845309214e-18,
+            "GJR_N": 4.984176683545304e-10,
+            "GJR_t": 0.9999999995015822,
+            "EGARCH_N": 1.0622125640970435e-32,
+            "HAR_ABS": 1.00424367960555e-34,
+            "A4f_IV2": 1.4096450286539067e-30
+          },
+          "weight_entropy_final": 1.117431633997749e-08
+        }
+      },
+      "per_model_qlike": {
+        "GARCH_N": -8.155545134447964,
+        "GJR_N": -8.179472731119924,
+        "GJR_t": -8.162658343874789,
+        "EGARCH_N": -8.113435050892768,
+        "HAR_ABS": -8.107538416430142,
+        "A4f_IV2": -8.11961867397771
+      },
+      "best_lambda": null,
+      "best_lambda_harvey_pass": false
+    },
+    "GLD": {
+      "oos_start_date": "2020-01-02",
+      "n_oos": 1581,
+      "lambda_results": {
+        "0.95": {
+          "lambda": 0.95,
+          "bma_qlike": -8.153541913226137,
+          "equal_weight_qlike": -8.133904051906592,
+          "qlike_diff_mean": -0.019637861319544446,
+          "qlike_diff_ci95": [
+            -0.043415481448406894,
+            0.001486143932873423
+          ],
+          "dm_harvey_t": -1.7431595522559304,
+          "dm_harvey_p": 0.08150027134451188,
+          "harvey_pass": false,
+          "n_oos_eff": 1581,
+          "final_weights": {
+            "GARCH_N": 0.09451496314591634,
+            "GJR_N": 0.0926971583178797,
+            "GJR_t": 0.3330203637562757,
+            "EGARCH_N": 0.009358267400202696,
+            "HAR_ABS": 0.0729647218346042,
+            "A4f_IV2": 0.3974445255451215
+          },
+          "weight_entropy_final": 1.4110508141107785
+        },
+        "0.97": {
+          "lambda": 0.97,
+          "bma_qlike": -8.153120804407152,
+          "equal_weight_qlike": -8.133904051906592,
+          "qlike_diff_mean": -0.019216752500558956,
+          "qlike_diff_ci95": [
+            -0.04632079422300831,
+            0.004203010590446794
+          ],
+          "dm_harvey_t": -1.5460798015304695,
+          "dm_harvey_p": 0.12228555573948796,
+          "harvey_pass": false,
+          "n_oos_eff": 1581,
+          "final_weights": {
+            "GARCH_N": 0.009657403932150432,
+            "GJR_N": 0.008908882295558437,
+            "GJR_t": 0.354286803278903,
+            "EGARCH_N": 0.00047445334033067337,
+            "HAR_ABS": 0.00374415870003894,
+            "A4f_IV2": 0.6229282984530183
+          },
+          "weight_entropy_final": 0.7738907282955791
+        },
+        "0.99": {
+          "lambda": 0.99,
+          "bma_qlike": -8.155756781445593,
+          "equal_weight_qlike": -8.133904051906592,
+          "qlike_diff_mean": -0.021852729539000144,
+          "qlike_diff_ci95": [
+            -0.056463264344436666,
+            0.00816092766206721
+          ],
+          "dm_harvey_t": -1.458120706623863,
+          "dm_harvey_p": 0.14500601289621518,
+          "harvey_pass": false,
+          "n_oos_eff": 1581,
+          "final_weights": {
+            "GARCH_N": 1.0491352796158959e-06,
+            "GJR_N": 3.765075490578072e-07,
+            "GJR_t": 0.07777892541001961,
+            "EGARCH_N": 7.164940215483263e-08,
+            "HAR_ABS": 2.847125057620407e-08,
+            "A4f_IV2": 0.922219548826499
+          },
+          "weight_entropy_final": 0.27333402528809875
+        },
+        "1.00": {
+          "lambda": 1.0,
+          "bma_qlike": -8.164176525415483,
+          "equal_weight_qlike": -8.133904051906592,
+          "qlike_diff_mean": -0.030272473508892,
+          "qlike_diff_ci95": [
+            -0.06732204994913285,
+            0.00437388149011168
+          ],
+          "dm_harvey_t": -1.7723417477460959,
+          "dm_harvey_p": 0.07653051270963318,
+          "harvey_pass": false,
+          "n_oos_eff": 1581,
+          "final_weights": {
+            "GARCH_N": 2.3256580745027353e-26,
+            "GJR_N": 7.5955014414685275e-34,
+            "GJR_t": 5.011310303940799e-07,
+            "EGARCH_N": 1.8329438307306389e-40,
+            "HAR_ABS": 4.73732529418086e-46,
+            "A4f_IV2": 0.9999994988689694
+          },
+          "weight_entropy_final": 7.770737198476526e-06
+        }
+      },
+      "per_model_qlike": {
+        "GARCH_N": -8.110892756438796,
+        "GJR_N": -8.089087408394146,
+        "GJR_t": -8.09628662405721,
+        "EGARCH_N": -8.069812084688422,
+        "HAR_ABS": -8.053536358957256,
+        "A4f_IV2": -8.185558422314731
+      },
+      "best_lambda": null,
+      "best_lambda_harvey_pass": false
+    },
+    "0050.TW": {
+      "oos_start_date": "2020-01-02",
+      "n_oos": 1524,
+      "lambda_results": {
+        "0.95": {
+          "lambda": 0.95,
+          "bma_qlike": -7.700976540152295,
+          "equal_weight_qlike": -7.701718683608705,
+          "qlike_diff_mean": 0.0007421434564104527,
+          "qlike_diff_ci95": [
+            -0.00742835922005859,
+            0.010053665729547853
+          ],
+          "dm_harvey_t": 0.14113644285945848,
+          "dm_harvey_p": 0.8877808193579542,
+          "harvey_pass": false,
+          "n_oos_eff": 1524,
+          "final_weights": {
+            "GARCH_N": 0.0954886765184527,
+            "GJR_N": 0.09184115745985232,
+            "GJR_t": 0.037047074090734274,
+            "EGARCH_N": 0.20902475240779658,
+            "HAR_ABS": 0.11620719856569452,
+            "A4f_IV2": 0.45039114095746946
+          },
+          "weight_entropy_final": 1.5022171004984588
+        },
+        "0.97": {
+          "lambda": 0.97,
+          "bma_qlike": -7.6983462442861175,
+          "equal_weight_qlike": -7.701718683608705,
+          "qlike_diff_mean": 0.003372439322588818,
+          "qlike_diff_ci95": [
+            -0.00914728328714799,
+            0.01959769665760239
+          ],
+          "dm_harvey_t": 0.4525485144673228,
+          "dm_harvey_p": 0.6509383329717946,
+          "harvey_pass": false,
+          "n_oos_eff": 1524,
+          "final_weights": {
+            "GARCH_N": 0.07898828885458331,
+            "GJR_N": 0.060499610312653634,
+            "GJR_t": 0.015109139315756944,
+            "EGARCH_N": 0.18399642196137792,
+            "HAR_ABS": 0.08668472971648603,
+            "A4f_IV2": 0.5747218098391423
+          },
+          "weight_entropy_final": 1.275343792453762
+        },
+        "0.99": {
+          "lambda": 0.99,
+          "bma_qlike": -7.694406664957703,
+          "equal_weight_qlike": -7.701718683608705,
+          "qlike_diff_mean": 0.007312018651003405,
+          "qlike_diff_ci95": [
+            -0.013495739450873645,
+            0.034139653492202396
+          ],
+          "dm_harvey_t": 0.6184987805671668,
+          "dm_harvey_p": 0.5363390881705139,
+          "harvey_pass": false,
+          "n_oos_eff": 1524,
+          "final_weights": {
+            "GARCH_N": 0.038153334524609415,
+            "GJR_N": 0.028080127056647104,
+            "GJR_t": 0.01173288471590438,
+            "EGARCH_N": 0.19510732005295767,
+            "HAR_ABS": 0.025522949657464357,
+            "A4f_IV2": 0.7014033839924171
+          },
+          "weight_entropy_final": 0.938329168260746
+        },
+        "1.00": {
+          "lambda": 1.0,
+          "bma_qlike": -7.680802596632918,
+          "equal_weight_qlike": -7.701718683608705,
+          "qlike_diff_mean": 0.020916086975788777,
+          "qlike_diff_ci95": [
+            -0.0014023966584841981,
+            0.04910141703602581
+          ],
+          "dm_harvey_t": 1.7149133380741284,
+          "dm_harvey_p": 0.0865645400671311,
+          "harvey_pass": false,
+          "n_oos_eff": 1524,
+          "final_weights": {
+            "GARCH_N": 6.652887365615395e-32,
+            "GJR_N": 1.866110650253237e-24,
+            "GJR_t": 1.0,
+            "EGARCH_N": 9.123654851827139e-48,
+            "HAR_ABS": 4.0272963087232635e-65,
+            "A4f_IV2": 1.0004935446785869e-31
+          },
+          "weight_entropy_final": 1.0196091241108647e-22
+        }
+      },
+      "per_model_qlike": {
+        "GARCH_N": -7.676260302034287,
+        "GJR_N": -7.69876618942532,
+        "GJR_t": -7.684977906312616,
+        "EGARCH_N": -7.628326519929887,
+        "HAR_ABS": -7.5758833154727645,
+        "A4f_IV2": -7.676795771279915
+      },
+      "best_lambda": null,
+      "best_lambda_harvey_pass": false
+    }
+  },
+  "verdict": "H_K1300_CONFIRMED_FAIL",
+  "verdict_detail": "SPY: best \u03bb<1 DM-t=-1.34 (\u03bb=0.99, p=0.180); GLD: best \u03bb<1 DM-t=-1.74 (\u03bb=0.95, p=0.082); 0050.TW: best \u03bb<1 DM-t=+0.14 (\u03bb=0.95, p=0.888)",
+  "conclusions": "K1300 forgetting-factor BMA tested \u03bb\u2208[0.95, 0.97, 0.99, 1.0] on SPY, GLD, 0050.TW over 2020-01-01\u21922026-04-18 OOS. Verdict: H_K1300_CONFIRMED_FAIL. Detail: SPY: best \u03bb<1 DM-t=-1.34 (\u03bb=0.99, p=0.180); GLD: best \u03bb<1 DM-t=-1.74 (\u03bb=0.95, p=0.082); 0050.TW: best \u03bb<1 DM-t=+0.14 (\u03bb=0.95, p=0.888). K1257 baseline (\u03bb=1) reported here for direct comparison. Lookahead discipline: posterior used for forecast at t is \u03bb-discounted log-likelihood through t-1; weight update at t uses log p(y_t | M_i, F_{t-1}) computed AFTER forecast locked.",
+  "runtime_seconds": 259.7,
+  "quick_mode": false
+}

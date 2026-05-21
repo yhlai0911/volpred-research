@@ -1,0 +1,17 @@
+{
+  "task_id": "task-k1123-codex-review-primary",
+  "status": "completed",
+  "completed_at": "2026-05-13T07:25:41.537621",
+  "reviewer": "feature-dev:code-reviewer subagent (Codex-exec stdin-block fallback)",
+  "verdict": "CONDITIONAL_PASS",
+  "critical_issues": [
+    "BH-FDR missing: 12 simultaneous hypothesis tests (4 strategies x 3 baselines) use raw p-values at 0.05 without BH adjustment"
+  ],
+  "minor_issues": [
+    "rolling_z self-inclusion (negligible effect, technically impure)",
+    "DM-HLN labeling mismatch: stationary bootstrap on Sharpe diff, not HLN variance correction",
+    "H4 stress t-stat approximation: overstates t when SR is large"
+  ],
+  "action_required": "Fix BH-FDR for 12 comparisons, re-run, then document KB entry",
+  "prereq_for": "document_K1123_kb_entry"
+}

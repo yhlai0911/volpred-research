@@ -1,0 +1,23 @@
+{
+  "id": "compute-k1380-v3-numba-jit-spa-rc-test-17-spec-horse-race-paper-9-c3-1779218697",
+  "title": "K1380 v3: numba JIT SPA/RC test (17-spec horse race, Paper 9 C3)",
+  "script_path": "experiments/k1380/k1380.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "failed",
+  "queued_at": "2026-05-19T19:24:57Z",
+  "started_at": "2026-05-19T19:30:10Z",
+  "completed_at": "2026-05-19T19:46:36Z",
+  "exit_code": 1,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1380-v3-numba-jit-spa-rc-test-17-spec-horse-race-paper-9-c3-1779218697.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1380-v3-numba-jit-spa-rc-test-17-spec-horse-race-paper-9-c3-1779218697.stderr",
+  "result_artifact": "experiments/k1380/k1380_results.json",
+  "claude_followup": {
+    "brief": "K1380 SPA/RC test 完成：確認 spa_pval + rc_pval。若 best_spec 顯著優於 GJR benchmark (p<0.10)，寫入 Paper 9 §5 Table 1 + C3 CRITICAL resolved。走 Codex code review 後寫 knowledge.json。",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 10800
+}

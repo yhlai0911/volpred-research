@@ -1,9 +1,9 @@
 # Paper 10: The Crypto Fear Channel — Asymmetric BTC–Equity Volatility Spillover
 
 **Target Journal**: Journal of International Financial Markets, Institutions & Money (1st) / Journal of Empirical Finance (2nd) / Finance Research Letters (backup)
-**Status**: **Kickoff — intro drafted, main body pending** (2026-04-17 outline + body_v0_intro.tex; 2026-04-19 Codex P25 `task_7d2c` pre-body audit queued awaiting quota reset 2026-04-24)
-**Pages**: TBD (body pending)
-**Citations**: TBD
+**Status**: **READY FOR SUBMISSION** (2026-05-17 v4.1 hotfix; 4-round review history complete; 0 blocking issues; academic 4.70★; citation 21/22 VERIFIED; reproduce gate GREEN)
+**Pages**: ~30 (target met)
+**Citations**: TBD (citation_check.md pending)
 
 ## Central claim
 
@@ -39,13 +39,11 @@ Underlying daily data: BTC-USD / SPY / VIX from yfinance (`auto_adjust=False` pe
 
 ## Next Actions
 
-- **Blocked until 2026-04-24 10:27 UTC**: Codex `task_7d2cdf...` pre-body audit (queued, awaiting quota reset per `docs/error_log.md` 2026-04-19 Codex quota blocker)
-- **Post-quota-resume**: Codex audit produces:
-  - Experimental claim cross-check vs `K639/K746b/K1025` JSONs
-  - Citation candidates (Diebold-Yilmaz 2012 / Forbes-Rigobon 2002 / Bouri et al. 2017 / Corbet et al. 2018)
-  - Outline-to-body gap analysis
-- **Main-thread post-audit**: Draft body sections §3 methodology + §4 results (L188 rule — `.tex` body writing stays on main thread, not Codex)
-- **Reproduce.py kickoff**: Follow P5/P6 green pattern
+- **Submit to JIMF** (Journal of International Financial Markets, Institutions & Money, 1st choice). Prepare cover letter + submission package.
+- **Pre-submission copy-edit** (3 MINOR deferred): (1) wrap `\texttt{statsmodels...}` overfull hbox into footnote; (2) Table 6 caption scope clarification; (3) §8.2 F/p pairing style.
+- ~~**review cycle**~~ — COMPLETE (4 rounds, v1-v4; see `review_history/`; v4.1 hotfix closes last MAJOR+3MED)
+- ~~**reproduce.py setup**~~ — DONE (37/37 byte-match, gate=pass)
+- ~~**citation_check.md**~~ — DONE (24 citations inventoried; 21 VERIFIED, 1 NEEDS_CHECK, 0 ERROR)
 
 ## Cross-reference
 

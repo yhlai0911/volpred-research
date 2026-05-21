@@ -1,0 +1,16 @@
+[main fd2adca0] fix(scheduling): remove timeout (macOS no native), rely on --dangerously-skip-permissions
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+=== claude -p progress after 60s ===
+  PID ELAPSED      TIME STAT
+90773   01:25   0:04.28 S   
+=== log tail ===
+Not logged in · Please run /login
+SessionEnd hook [node "${CLAUDE_PLUGIN_ROOT}/scripts/session-lifecycle-hook.mjs" SessionEnd] failed: /bin/sh: node: command not found
+
+=== hourly-dispatch end 2026-05-12 15:07:08 CST ===
+=== hourly-dispatch 2026-05-12 15:17:48 CST ===
+=== hourly-dispatch end 2026-05-12 15:26:15 CST ===
+=== hourly-dispatch 2026-05-12 16:07:04 CST ===
+/Users/yhlai0911/.volpred/bin/cron_hourly_dispatch.sh: line 24: timeout: command not found
+=== hourly-dispatch end 2026-05-12 16:07:04 CST ===
+=== hourly-dispatch 2026-05-12 16:38:51 CST ===

@@ -1,0 +1,23 @@
+-rw-r--r--@ 1 yhlai0911  staff  84656 May 19 06:00 storage/logs/cron/memory_health.log
+---tail memory_health.log---
+memory-health-summary"}, "suggestions": ["記憶檔狀態健康；維持每週一次 compact 
+檢查即可。"], "highlights": {"knowledge": {"label": "knowledge", "path": 
+"storage/memory/knowledge.json", "status": "ok", "size_bytes": 2061795, 
+"size_mb": 1.966, "entry_count": 2141, "warn_mb": 5.0, "danger_mb": 10.0}, 
+"thinking_journal": {"label": "thinking_journal", "path": 
+"storage/memory/thinking_journal.json", "status": "ok", "size_bytes": 982859, 
+"size_mb": 0.937, "entry_count": 824, "warn_mb": 3.0, "danger_mb": 5.0}}}
+=== [memory_health_daily] exit 0 at 2026-05-18T22:00:18.467665+00:00 (duration=10.2s) ===
+---paper_sync_all.log---
+-rw-r--r--@ 1 yhlai0911  staff  84117 May 19 12:00 storage/logs/cron/paper_sync_all.log
+{"paper_id": "vt-crowding-abm", "action": "skip", "reason": "supabase_newer"}, 
+{"paper_id": "vt-insurance-cost", "action": "skip", "reason": "supabase_newer"},
+{"paper_id": "vt-trend-following", "action": "skip", "reason": 
+"supabase_newer"}]}
+=== [paper_sync_all] exit 0 at 2026-05-19T04:00:05.543957+00:00 (duration=0.5s) ===
+---refresh_paper_snapshots.log---
+  SKIP   paper/vt-insurance-cost/data/spy_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_gld_2006-2024_rebal_snapshot.csv: frozen_by_token
+  SKIP   paper/vt-insurance-cost/data/spy_gld_vix_vvix_2012-2024_snapshot.csv: frozen_by_token
+  SKIP   paper/vt-insurance-cost/data/vix_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/vvix_2012_2024.csv: unknown_schema

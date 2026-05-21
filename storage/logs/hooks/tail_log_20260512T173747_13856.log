@@ -1,0 +1,18 @@
+17:37:49
+===
+=== 17:07 fire? ===
+2. 派工方向：last-3 = [platform_ops, event_article, experiment] → 缺 paper_* → 鎖定 paper R1 修正（M3 monetization）
+3. 順手收益：rerun `paper/volatility-absorption/reproduce.py` → 確認 R1 fixes #4–#8 已落地，gate 從 50.7% → 61.3%；剩 12 mismatch 全是 K903 yfinance snapshot drift（narrative-level，主線程下輪處理）
+4. 主要派工：agent `a8c21ece3c580bed5` 修 leverage-direction R1 HIGH #1（body_v3.tex 第 208 行 gold γ +0.20 vs +0.048 標籤歧義）→ 加 footnote 區分 2013-2015 sub-window vs 全期 bull/bear binary partition，引 K274 + K1198
+5. xelatex 兩次通過、無 undefined refs，commit `be3b1601`，main_v3.pdf 重生 65 pages
+
+**待主線程下輪處理**：
+- leverage-direction：v3 已修 7/7 HIGH，可考慮 promote review → ready_for_submission（需先 rerun reproduce.py on v3）
+- volatility-absorption：T9/T10/Text 12 mismatch 是 K903 snapshot drift，需 narrative decision（path b/c）+ errata section
+- paper-update CLI 同步（this commit 尚未走 `volpred ops paper-update`）
+=== hourly-dispatch end 2026-05-12 17:15:08 CST ===
+===
+=== launchd state ===
+-	0	com.volpred.hourly-dispatch
+=== launchd stderr ===
+=== launchd stdout ===

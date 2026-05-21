@@ -1,0 +1,5 @@
+?? experiments/k1265/
+---results.json verdict---
+jq: error: syntax error, unexpected //, expecting '}' (Unix shell quoting issues?) at <top-level>, line 1:
+.verdict // .summary // {strategies: (.strategies // [] | length), gates: .gates_passed // "n/a"}                                                                                        
+jq: 1 compile error

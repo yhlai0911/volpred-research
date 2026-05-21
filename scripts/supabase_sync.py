@@ -71,12 +71,16 @@ CONFLICT_KEYS = {
 # Any other keys (e.g. overnight_gap, gap_alert_level) must be stripped
 # before POST or PostgREST returns 400 "column X does not exist".
 # Root cause of 2026-04-12..17 silent sync failure.
+# MUST mirror the live Supabase `market_daily` table schema exactly. A key
+# here that the table lacks → every row carrying it 400s with PGRST204
+# ("could not find column ... in schema cache"). nk225_* were listed but the
+# table never had them → 14/30 rows 400'd for ~5 weeks unnoticed (collection
+# also stopped 2026-04-10). If you add a key here, ALTER the table first.
 _MARKET_DAILY_COLUMNS = {
     "trade_date",
     "spy_close", "spy_open",
     "gld_close", "gld_open",
     "tw50_close", "tw50_open",
-    "nk225_close", "nk225_open",
     "vix_level",
     "sigma_spy_ann", "sigma_gld_ann",
 }
@@ -103,11 +107,17 @@ def _post(table: str, data: list | dict) -> bool:
         return True
     except HTTPError as e:
         code = e.code
-        e.read()  # consume error body
+        try:
+            body = e.read().decode("utf-8", "replace")[:400]
+        except Exception:
+            body = "<unreadable>"
         if code == 409 and conflict:
             # Fallback: PATCH (update) existing rows
             return _patch(table, conflict, data)
-        print(f"  Supabase {table} error: {code}")
+        # Print the PostgREST error body — without it a 400 is opaque and
+        # every diagnosis is blind (2026-05-20: market_daily 14/30 rows 400'd
+        # for weeks with no visible reason).
+        print(f"  Supabase {table} error: {code} — {body}")
         return False
     except Exception as e:
         print(f"  Supabase {table} error: {e}")
@@ -360,8 +370,35 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
     Contentlayer pattern (2026-04-18): feed.json is canonical and now
     holds the complete content directly (post reconcile_content_from_singles).
     We no longer read mile_*.json singles as a content fallback.
+
+    Defensive markdown-table sanitization (2026-04-29): even though
+    publisher._append_to_feed is the primary sanitizer, this is the
+    secondary belt-and-suspenders catch for content that bypassed the
+    publisher path (legacy entries, manual edits, hot-fix scripts).
+    Auto-escapes unescaped statistical-notation pipes like `|t|` inside
+    markdown table cells before Supabase write.
     """
     content = item.get("content") or item.get("description") or ""
+    if content:
+        try:
+            from volpred.publisher.markdown_table_sanitizer import (
+                sanitize_markdown_tables,
+            )
+            sanitized, report = sanitize_markdown_tables(content)
+            if report.changed:
+                content = sanitized
+                print(
+                    f"  [supabase_sync] markdown_table_sanitizer auto-fixed "
+                    f"{len(report.fixed_lines)} row(s) for "
+                    f"{item.get('id', 'unknown')}: {report.summary()}"
+                )
+            if report.has_unfixed:
+                print(
+                    f"  [supabase_sync] WARN unfixable table rows for "
+                    f"{item.get('id', 'unknown')}: lines={report.unfixed_lines}"
+                )
+        except Exception as exc:
+            print(f"  [supabase_sync] markdown_table_sanitizer error: {exc}")
     row = {
         "slug": item.get("id", ""),
         "title": item.get("title", ""),
@@ -377,6 +414,55 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
         "published_at": item.get("published_at"),
     }
     ok = _post("articles", row)
+    # Single retry on _post failure (transient HTTP error / network blip)
+    # before falling through to read-back verification. release_pool used to
+    # silently lose K1021 here because _post returned False and nobody
+    # checked the value.
+    if not ok and row["slug"]:
+        print(f"  [supabase_sync] _post failed for {row['slug']}, retrying once")
+        ok = _post("articles", row)
+        if not ok:
+            print(f"  [supabase_sync] _post retry FAILED for {row['slug']} -- caller must handle")
+    # Read-back verification (2026-04-30 architectural fix): _post returns
+    # True on HTTP 2xx but PostgREST upsert with `Prefer: return=minimal` does
+    # not echo body, so we cannot confirm row state from POST alone. K1021
+    # incident (release_pool's second sync_article call left Supabase status
+    # at 'draft' while local feed was 'published') showed _post can succeed
+    # at the HTTP layer while the row state diverges. Read the row back and
+    # if `status` / `published_at` mismatch the row we sent, force an
+    # explicit PATCH via _patch_where as recovery.
+    if ok and row["slug"]:
+        try:
+            actual = _select_rows(
+                "articles",
+                select="slug,status,published_at",
+                slug=row["slug"],
+            )
+            if actual:
+                got = actual[0]
+                want_status = row["status"]
+                want_pub = row.get("published_at")
+                status_diverged = got.get("status") != want_status
+                pub_diverged = (
+                    want_pub is not None and got.get("published_at") != want_pub
+                )
+                if status_diverged or pub_diverged:
+                    print(
+                        f"  [supabase_sync] read-back diverged for {row['slug']}: "
+                        f"got status={got.get('status')!r} published_at={got.get('published_at')!r} "
+                        f"want status={want_status!r} published_at={want_pub!r} -- patching"
+                    )
+                    fix = {"status": want_status}
+                    if want_pub is not None:
+                        fix["published_at"] = want_pub
+                    patched = _patch_where("articles", {"slug": row["slug"]}, fix)
+                    if not patched:
+                        print(
+                            f"  [supabase_sync] read-back PATCH fallback FAILED for {row['slug']}"
+                        )
+                        ok = False
+        except Exception as exc:
+            print(f"  [supabase_sync] read-back verification error for {row['slug']}: {exc}")
     if ok:
         # Sync tags
         tags = item.get("tags") or []
@@ -587,6 +673,16 @@ def sync_market_daily(trade_date: str, market: dict) -> bool:
     if not SUPABASE_KEY or not trade_date or not isinstance(market, dict):
         return False
     row = {k: v for k, v in market.items() if k in _MARKET_DAILY_COLUMNS}
+    # 2026-05-04 finding #4 修整：whitelist 早已 enforce (上面 row=)，但 stripped 欄位
+    # 不可見導致 audit agent 誤判「未 enforce」+ caller 不知 schema mismatch。
+    # 補 print warning 提升可觀察性 — caller 可看到 daily_update 在塞 unknown keys。
+    stripped = {k for k in market.keys() if k not in _MARKET_DAILY_COLUMNS and k != "trade_date"}
+    if stripped:
+        print(
+            f"  [sync_market_daily] schema-mismatch warning: trade_date={trade_date} "
+            f"stripped {len(stripped)} unknown keys (not in _MARKET_DAILY_COLUMNS): "
+            f"{sorted(stripped)} — update _MARKET_DAILY_COLUMNS if these should sync"
+        )
     row["trade_date"] = trade_date
     return _post("market_daily", row)
 

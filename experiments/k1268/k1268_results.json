@@ -1,0 +1,71 @@
+{
+  "experiment_id": "K1268",
+  "title": "GDELT 2.0 high-frequency (5-min) public-bulk scan vs SPY 5-min RV",
+  "date_run": "2026-05-10T17:53:14.683816+00:00",
+  "seed": 42,
+  "methodology": {
+    "endpoint": "http://data.gdeltproject.org/gdeltv2/{ts}.export.CSV.zip",
+    "lags_tested": [
+      -6,
+      -3,
+      -1,
+      0,
+      1,
+      2,
+      3,
+      6
+    ],
+    "lookahead_rule": "lag >= 1 = causal (signal_{t-lag} -> rv_t); lag <= 0 reported for completeness only",
+    "rth_filter_utc": {
+      "start": [
+        13,
+        30
+      ],
+      "end": [
+        20,
+        0
+      ]
+    },
+    "hac_lags": 6,
+    "bootstrap_n": 1000,
+    "block_size_bars": 12
+  },
+  "verdict": "FAIL_NO_DATA",
+  "verdict_breakdown": {
+    "headline": "FAIL_NO_DATA",
+    "uncorrected": {
+      "label": "FAIL_NO_DATA",
+      "alpha": 0.05,
+      "days_with_signal": 0,
+      "eligible_days": 0
+    },
+    "bonferroni": {
+      "label": "FAIL_NO_DATA",
+      "alpha": 0.004166666666666667,
+      "n_tests_per_day": 12,
+      "days_with_signal": 0,
+      "eligible_days": 0
+    }
+  },
+  "per_day": [
+    {
+      "date": "2020-03-12",
+      "skip": "no_data",
+      "n": 0,
+      "rv_proxy": "empty"
+    },
+    {
+      "date": "2023-03-13",
+      "skip": "no_data",
+      "n": 0,
+      "rv_proxy": "empty"
+    },
+    {
+      "date": "2024-08-05",
+      "skip": "no_data",
+      "n": 0,
+      "rv_proxy": "empty"
+    }
+  ],
+  "verdict_criteria": "Headline = Bonferroni-corrected (alpha=0.05/12). PASS = \u22652/3 days |corr|>0.20 at lag>=+1 AND boot CI excludes 0 AND Granger p<alpha. Uncorrected version reported alongside."
+}

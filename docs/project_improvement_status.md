@@ -1,6 +1,104 @@
 # Project Improvement Status
 
-Last updated: **2026-04-23 (token optimization planning)**
+Last updated: **2026-05-04 (system audit + 4-phase improvement plan)**
+
+## 2026-05-04 系統性 audit + 4-phase 優化計劃
+
+### 觸發背景
+
+用戶 2026-05-04 觀察「slot 池無工作但 backlog 有 37 個 pending」→ 質問為何沒 auto-fill → 主線程深度 audit 揭露**完整 dispatch 機制存在但 0 次落地執行**。
+
+### Audit 範圍
+
+兩階段並行：
+- **Schedule 7-layer 盤點**（主線程）：launchd / crontab / runtime_schedules.json / session_crons / event_jobs / Anthropic CronCreate / piggy-back
+- **Codebase 深度審視**（Explore subagent）：storage source-of-truth / publisher / paper workflow / frontend / test coverage / skills / error_log
+
+### Findings — 18 個系統性問題
+
+#### CRITICAL（Mission impact，立即修）
+
+1. **`session_crons` 9 spec / 0 實際 fire** — piggy-back 累積 1313 條 missed (continue_task=219, daily_planning=161, …)，**replayed_count=null × 8**。`session_startup.md §2.0` SOP 從未真實執行。
+2. **`continue_task` dispatch 邏輯缺工具** — 只有 `stub.py` 設旗標，**無腳本判 slot < 4 + 派下個 task**。已修：`scripts/continue_task_dispatch.py` 補上（dry-run 列出 4 個 agentable candidates）。
+3. **`.claude/skills/admin-ops/SKILL.md` + 11 skills 引用不存在的 `references/*.md`** — Agent dispatch 時 skill 加載不全 → context 壞 → 影響 admin-ops / autonomous-research / feed-publisher / paper-review-cycle。
+4. **`scripts/supabase_sync.py:74-82` `_MARKET_DAILY_COLUMNS` 白名單未 upstream enforce** — 各 caller 仍可發送未列欄位 → PostgREST 400 silent fail（2026-04-17 incident pattern）。
+5. **`scheduler_state.json` vs `cron_last_run.json` 雙寫 race** — `control-plane.md` 規則文字說「不雙寫」但 code 路徑兩個都寫，無 atomic merge / lock。
+6. **`continue_task_dispatch.py` 已寫但無 cron 排程** — 只在當前 session in-process CronCreate (id 3e643940 hourly :17) 補上；session 結束就死。需 host 層 install。
+7. **`shared_scheduler_tick */10` spec 寫但 launchd / crontab 都沒掛** — log size=0 自 2026-04-19，已 14 天死亡。功能被 piggy-back 接管但 spec 沒同步刪。
+
+#### HIGH（Debt accumulating）
+
+8. **`publisher.py:629-650` 寫 feed.json 無 read-back 驗證** — write 失敗（disk full / permission）仍回 success（2026-04-30 K1021 incident pattern）。
+9. **`content.py::release_pool_articles:318` `sync_article()` 回傳被忽略** — Supabase sync 失敗無人知道，不寫 alert / pending_syncs。
+10. **`tests/` coverage 缺口**：`volpred.publisher.email_notifier` (518 行) **無任何 test**；`volpred.ops.alerts` / `volpred.ops.event_jobs` test 不足。
+11. **`storage/.release_settings.json` 與 Supabase out-of-sync 風險** — 2026-04-20 PATCH 400 incident 起點，無定期 audit。
+12. **`frontend-v2-fix/scripts/deploy-zeabur-safe.sh` hardcode env** — 改 `config/project_targets.json` 不會 reflect 到 deploy。
+13. **`next_tasks.json` 完成的 task 沒同步 status** — K1125 已 FAIL 2026-04-13 仍 pending（會被 dispatch 誤再派）。
+14. **`event_jobs` 4 個過期未 GC**（FOMC 4-29 / NFP 5-1 已過 deadline）— ledger 累積。
+
+#### MEDIUM（Cleanup nice-to-have）
+
+15. **8 個 error_log entries 同 pattern「sync 失敗被吞」** — 缺架構性 retry + read-back + alert 三層防護。
+16. **缺 skill audit script** — 2026-04-27 `member-questions/SKILL.md` 遺失 incident 顯示需 weekly audit。
+17. **`control_plane.lock` 不統一** — multi writer 寫 shared state 沒共用 lock 機制。
+18. **piggy-back timing drift assertion 缺** — 2026-04-19 1.5s drift 致 3h 週期 regression incident，未加 defensive assertion。
+
+### 4-Phase 優化計劃
+
+對應 Mission 5 條目標 priority：(1)文章 + (4)網頁 ← sync robustness；(2)實驗 ← skill references；(3)論文 ← paper workflow 整潔；(5)流量 ← 由 1+4 derived。
+
+#### Phase 1（commit-safe，已完成）
+
+- [x] B1.1: `scripts/continue_task_dispatch.py` slot-aware report + candidate list — commit `00bbce4e`
+- [x] B1.2: `scripts/cron_continue_task_stub.sh` 補 call dispatch.py — commit `00bbce4e`
+- [x] B1.3: in-process CronCreate replace stale `/loop` heartbeat（id 3e643940 hourly :17）— session-only
+- [x] B1.4: `docs/error_log.md` 「2026-05-04 工作池 auto-fill 全鏈路斷裂」entry — commit `00bbce4e`
+- [x] B1.5: commit Phase 1 — `00bbce4e`
+
+#### Phase 2（中度修整，commit batch）
+
+- [x] B2.1: `scripts/sync_next_tasks_status.py` — 從 experiments/<id>/README.md 反查，把 next_tasks 已完成 K 標 succeeded（解 #13）— commit `51c8f4a2`，K1125 已標 succeeded_null_result
+- [x] B2.2: `scripts/check_skills_complete.sh` — audit skill SKILL.md + reference paths（解 #16）— commit `9f6e5045`，4 dead refs 修（paper-review-cycle .agents→.claude × 3, external-data-sources 移除 missing taiwan-macro-data 提及）
+- [x] B2.3: `publisher.py::_append_to_feed` 加 post-write read-back（解 #8）— commit `bb0e3705`
+- [x] B2.4: `content.py::release_pool_articles` sync_article 失敗寫 `.failed_supabase_syncs.json` 觸 alert（解 #9）— commit `bb0e3705`
+- [x] B2.5: `gc_event_ledger` verified no-op — 機制 work，gc_after=deadline+7d 是設計（4 個 expired event_jobs 5-7/5-9 才該清，今 5-4 不該動，is finding #14 over-warning）
+- [x] B2.6: `tests/test_email_notifier.py` 7 cases + `tests/test_event_jobs.py` 擴 3 cases（gc preserve unexpired / past_deadline skip / payload_patch overlay）（解 #10）
+
+#### Phase 3（架構級，需 review，分批 commit）
+
+- [x] B3.1: 已於 B2.2 commit 修完所有可解 ref；2026-05-04 重跑 `check_skills_complete.sh` 報 `all references/*.md mentions in SKILL.md exist`；原 audit「11 個」是 over-counting includes legacy `.agents/` paths and same-skill self-refs（解 #3）
+- [x] B3.2: 確認 `scheduler_state.json` vs `cron_last_run.json` 為不同 domain（K cluster 訓練 state vs piggy-back run state），#5 為 audit over-warning，無需拆
+- [x] B3.3: `supabase_sync.py::sync_market_daily` 加 stripped-keys warning（解 #4）— commit `9f6e5045`
+- [x] B3.4: `content.py` L362+L693 兩個 unlocked feed.json write 統一加 `shared_state_lock("publisher_feed")`（解 #17）— commit `450d26a7`
+- [x] B3.5: `scripts/audit_release_settings.py` + 6h piggy-back schedule + `auto`→`scheduled` 線上 mapping 修 silent PATCH 400 history（解 #11）— commit `db2f6ece`
+- [x] B3.6: `frontend-v2-fix/scripts/deploy-zeabur-safe.sh` 從 `config/project_targets.json` 讀 PROJECT_ID/SERVICE_ID（解 #12）— frontend-v2-fix commit `4740e34`
+- [ ] B3.7: piggy-back drift assertion 加進 `check_alerts.py`（解 #18）
+- [x] B3.8: CLAUDE.md L107 + control-plane.md 統一 task source-of-truth（已於 B2 commit 寫入；session_startup.md 已是 read-only doc，無需動）
+
+#### Phase 4（host install，需用戶授權）
+
+- [ ] B4.1: 寫 launchd plist `~/Library/LaunchAgents/com.volpred.continue-task.plist` cron `*/30 * * * *`
+- [ ] B4.2: 跑 `bash scripts/install_host_crontab.sh` rebuild canonical crontab + 補 continue_task entry（解 #1, #6）
+- [ ] B4.3: 移除 `runtime_schedules.json system_crontab.shared_scheduler_tick`（已死，piggy-back 接管）（解 #7）
+- [ ] B4.4: `session_startup.md §2.0` replay 改為 enforced script `scripts/replay_pending_sessions.py`（解 #1, #2）
+
+### Effort × Risk × Mission Impact
+
+| Phase | Effort | Risk | Mission Impact |
+|---|---|---|---|
+| 1 | 0.5 day | Low | 立即恢復 dispatch + 留 audit trail |
+| 2 | 1-2 days | Low-Med | 修 8 個 sync 漏洞、補 status sync、補 test |
+| 3 | 3-5 days | Med | 解所有 architectural debt（skills + control plane） |
+| 4 | 0.5 day + user auth | Med-High | host 級 install — 需用戶 review crontab/launchd diff |
+
+### 執行原則
+
+- 不誤殺 active agent / 不 break feed
+- 每個 commit 標明對應 finding 編號
+- Phase 3 之前先確認 Phase 1+2 commit 通過 + tests pass
+- Phase 4 之前產出 diff preview 給用戶 review
+
+---
 
 ## 2026-04-23 Token Optimization Planning
 
@@ -44,7 +142,10 @@ Last updated: **2026-04-23 (token optimization planning)**
 ### Research
 - ✅ **K1259 MCS/SPA meta-analysis 3-phase 完整落地**：Phase 1 ledger 2741 DM rows/236 K/16 assets (commit def4695b) → Phase 1.5 main-thread asset backfill 38%→78% (efd370f4) → Phase 2 HLN-2011 Variant A 18/20 per-asset MCS runs (5314dbd3) + CF-Rolling absence 分析 appendix (5bbeb48e)。**Key finding**: SPY QLIKE α=0.10 88/100 survive, A4f family dominant; GLD MSE 窄 set; α=0.10=0.20 identical; CF-Rolling 真正 absent（Trinity-only evaluation，never DM-compared pairwise）。
 - ✅ **K1258 forgetting-factor BMA completed** (commit b6c6225f, agent a09ba983 5.83 min)：H1 FAIL (no Harvey pass), H2 PASS (regime switching restored 10-80x), H3 PASS (optimal λ asset-specific), H4 λ=1.0 default。Structural insight: forgetting 修好 K1257 H3 concentration 但 switching 不 translate 為 predictive gain → BMA family 對 vol forecasting 結構性不足，regime gains 需 switching-model / mixture-of-experts。
-- ⏸️ **K1258/K1259 knowledge.json + feed pending Codex 04-24 review**（依 CLAUDE.md L1 實驗後先 review 再 finalize）。
+- ✅ **K1258 knowledge.json done** (entry 727e23ee, 2026-04-24 main-thread fallback `codex_review.md` PASS-with-caveats)。
+- ✅ **K1259 knowledge.json done** (entry c4db347a, 2026-04-28 subagent fallback `codex_review.md` PASS-with-caveats; agent a9496102fadd8a804, commit 7c0013b6)。
+- ✅ **K1259 review-cycle TRULY closed 2026-04-29**（Codex primary-path 二次驗證後）：(1) `d4c2faf1` MAJOR-3 docstring；(2) `53c1d559` MAJOR-1 v1 Phase 1.5 backfill scripted；(3) `aff7b4a5` MAJOR-2 v1 NON_DM_PATH_TOKENS 5 tokens；(4) `b1f85845` knowledge entry refresh；(5) `9b9951fd` research_program；(6) `90b650e7` project_improvement_status；(7) `218f350c` retraction of premature closure after Codex v2 FAIL；(8) **此 commit** v2 fix — extended NON_DM_PATH_TOKENS 至 9 tokens (加 `welch`/`stat_test`/`statistical_test`/`vs_zero`)，ledger 2730 → 2718 (12 false-positives 移除)；MCS 18/20 cells superior_sets 100% identical pre-v2 vs post-v2 (n_pairs=418 不變；12 removed rows 因 MIN_PAIRS_PER_MODEL=2 filter 早就 0 MCS signal)。**Codex review v2 doc**：`experiments/k1259/codex_review_v2.md`（FAIL → fix → close 完整 trail）。Option B (positive DM gate `dm`/`harvey`/`hln`) 拒絕 — 會誤刪 K1085/K1088 等 191 legit DM rows。Knowledge `c4db347a` confidence 0.88→0.75 retracted→0.90 (true closure)。**MED finding** (phase15_asset_map K1128/K1130/K1131 TAIFEX target-asset semantic) 留 separate slot — orthogonal to extraction correctness。**Lesson 系統化**: subagent fallback ≠ primary-path Codex；Codex 可用時應 primary，subagent 是 secondary opinion。
+- ⏸️ **K1258/K1259 feed publication** 推延至 Phase 3 article 階段（meta-analysis 完整 narrative 需 Phase 1+2 結果整合，非單獨 K-finding 文章）。Phase 3 K1259 article 已 dedup-clean (3-layer 2026-04-28T19:40 CST)，可隨時排入後續 slot。
 
 ### Platform / Infrastructure
 - ✅ **event_jobs full pipeline wired**（round 6 發現 empty → round 13 populate FOMC T-2/T+0 commit aebaeab4 → round 14 root-fix run_due_jobs piggy-back expand_due_event_jobs commit cac18c1a → round 15 standard pattern doc commit 4d7d787c）。完整鏈：host cron `0 * * * *` → check_alerts → run_due_jobs → expand_due_event_jobs → materialize task → 下輪 claim-next。scheduler_tick.log 自 2026-04-19 size=0 的 dead scheduler 被 piggy-back 接管。

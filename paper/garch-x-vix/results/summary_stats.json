@@ -1,0 +1,119 @@
+{
+  "data_source": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
+  "data_provenance": "yfinance auto_adjust=False snapshot, pinned per .claude/rules/paper-workflow.md",
+  "full_sample_start": "2005-01-01",
+  "oos_start": "2019-01-02",
+  "trading_days_per_year": 252,
+  "full_sample": {
+    "spy_logret": {
+      "mean": 0.09971665561048802,
+      "std": 0.19015246618283227,
+      "skewness": -0.30109619004047566,
+      "excess_kurtosis": 14.692754226602075,
+      "min": -0.11588669166535226,
+      "max": 0.13557727884725868,
+      "n": 5351
+    },
+    "vix_level": {
+      "mean": 19.16432442822828,
+      "std": 8.609643238281873,
+      "skewness": 2.5431485697875194,
+      "excess_kurtosis": 9.68512996295393,
+      "min": 9.140000343322754,
+      "max": 82.69000244140625,
+      "n": 5351
+    },
+    "date_range": [
+      "2005-01-03",
+      "2026-04-10"
+    ]
+  },
+  "oos_sample": {
+    "spy_logret": {
+      "mean": 0.1528798729499367,
+      "std": 0.1964893282664133,
+      "skewness": -0.5747314094325121,
+      "excess_kurtosis": 14.18480718337484,
+      "min": -0.11588669166535226,
+      "max": 0.09986273356161934,
+      "n": 1828
+    },
+    "vix_level": {
+      "mean": 20.21988514059221,
+      "std": 7.5420694117497575,
+      "skewness": 2.728651488153505,
+      "excess_kurtosis": 13.093233693194485,
+      "min": 11.539999961853027,
+      "max": 82.69000244140625,
+      "n": 1828
+    },
+    "date_range": [
+      "2019-01-02",
+      "2026-04-10"
+    ]
+  },
+  "table1_cells": {
+    "vix_mean_ann_full": 19.16,
+    "vix_mean_ann_oos": 20.22,
+    "spy_std_ann_full": 0.19,
+    "spy_std_ann_oos": 0.196,
+    "spy_skewness_full": -0.3,
+    "spy_skewness_oos": -0.57,
+    "vix_skewness_full": 2.54,
+    "vix_skewness_oos": 2.73,
+    "spy_kurtosis_full": 14.69,
+    "spy_kurtosis_oos": 14.18,
+    "vix_kurtosis_full": 9.69,
+    "vix_kurtosis_oos": 13.09,
+    "spy_min_full": -0.116,
+    "spy_max_full": 0.136,
+    "spy_min_oos": -0.116,
+    "spy_max_oos": 0.1,
+    "vix_min_full": 9.14,
+    "vix_max_full": 82.69,
+    "vix_min_oos": 11.54,
+    "vix_max_oos": 82.69,
+    "n_full": 5351,
+    "n_oos": 1828
+  },
+  "paper_table1_claimed": {
+    "vix_mean_ann_full": 18.97,
+    "vix_mean_ann_oos": 22.14,
+    "spy_std_ann_full": 0.188,
+    "spy_std_ann_oos": 0.213,
+    "n_full": 5347,
+    "n_oos": 1825
+  },
+  "discrepancies_vs_paper": [
+    {
+      "field": "vix_mean_ann_full",
+      "paper_claim": 18.97,
+      "snapshot_computed": 19.16,
+      "delta_abs": 0.19
+    },
+    {
+      "field": "vix_mean_ann_oos",
+      "paper_claim": 22.14,
+      "snapshot_computed": 20.22,
+      "delta_abs": 1.92
+    },
+    {
+      "field": "spy_std_ann_oos",
+      "paper_claim": 0.213,
+      "snapshot_computed": 0.196,
+      "delta_abs": 0.017
+    },
+    {
+      "field": "n_full",
+      "paper_claim": 5347,
+      "snapshot_computed": 5351,
+      "delta": 4
+    },
+    {
+      "field": "n_oos",
+      "paper_claim": 1825,
+      "snapshot_computed": 1828,
+      "delta": 3
+    }
+  ]
+}

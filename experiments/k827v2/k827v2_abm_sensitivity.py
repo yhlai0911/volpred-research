@@ -252,7 +252,7 @@ def aggregate_metrics(sim_results):
             ci_lo, ci_hi = bootstrap_ci(values)
             agg[key] = {
                 'mean': float(np.mean(values)),
-                'std': float(np.std(values)),
+                'std': float(np.std(values, ddof=1)),
                 'median': float(np.median(values)),
                 'q5': float(np.percentile(values, 5)),
                 'q95': float(np.percentile(values, 95)),
@@ -456,10 +456,12 @@ def analyze_results(part1_results, sensitivity_results):
             if part1_results[label].get('vt_sharpe') is not None:
                 other = part1_results[label]['vt_sharpe']
                 n = N_SIMS_MAIN
+                s1, s2 = base['std'], other['std']
                 t_stat = (base['mean'] - other['mean']) / np.sqrt(
-                    base['std']**2 / n + other['std']**2 / n
+                    s1**2 / n + s2**2 / n
                 )
-                df_approx = 2 * n - 2
+                # Welch-Satterthwaite df
+                df_approx = (s1**2/n + s2**2/n)**2 / ((s1**2/n)**2/(n-1) + (s2**2/n)**2/(n-1))
                 p_value = 2 * (1 - sp_stats.t.cdf(abs(t_stat), df=df_approx))
                 sig = "***" if abs(t_stat) > 3.0 else ("**" if abs(t_stat) > 2.0 else ("*" if abs(t_stat) > 1.65 else "ns"))
                 sig_tests[label] = {

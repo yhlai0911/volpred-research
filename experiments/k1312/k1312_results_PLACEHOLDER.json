@@ -1,0 +1,18 @@
+{
+  "experiment_id": "K1312",
+  "title": "GARCH-to-Neural (AAAI 2024): GARCH-LSTM Volatility Forecasting",
+  "status": "compute_queued",
+  "compute_queued": true,
+  "note": "This is a placeholder. Actual results will be written to k1312_results.json after compute_queue worker runs k1312.py.",
+  "queued_at": "2026-05-17",
+  "script": "experiments/k1312/k1312.py",
+  "expected_output": "experiments/k1312/k1312_results.json",
+  "assets": ["SPY", "QQQ"],
+  "oos_start": "2021-01-04",
+  "three_gates": {
+    "gate_a": "DM-HLN |t|>3.0 AND t<0 (challenger better)",
+    "gate_b": "QLIKE relative improvement >= 5% vs GJR-GARCH baseline",
+    "gate_c": "Sub-period stable (both 2021-23 and 2024+ better)"
+  },
+  "reference": "Zhao, Zhu, Ng, Lee (2024) arXiv:2402.06642, AAAI 2024"
+}

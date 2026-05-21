@@ -1,0 +1,26 @@
+[
+  {
+    "id": "K936",
+    "title": "K112: EMD-GARCH IMF boundary 與 IGARCH 假象（legacy 內容被錯掛到 K936 id slot）",
+    "category": "model_behavior",
+    "content": "[提出: User, 執行: Claude] EMD 分解後第一個 IMF 容易呈現 IGARCH-like 高 persistence，實際是 IMF boundary artifact，不是真 unit-root 行為。",
+    "tags": ["EMD", "GARCH", "legacy"],
+    "legacy": true
+  },
+  {
+    "id": "K937",
+    "title": "K140: VT crowding tipping point at 25% AUM share",
+    "category": "strategy",
+    "content": "[提出: Claude, 執行: Claude] VT crowding 模擬顯示 AUM share 25% 為 tipping point，超過後 fragility 上升。",
+    "tags": ["VT", "crowding"],
+    "legacy": true
+  },
+  {
+    "id": "K588",
+    "title": "K588: DCC-GARCH SPY-GLD risk parity",
+    "category": "multivariate_model",
+    "content": "[提出: User, 執行: Claude] DCC-GARCH(1,1) SPY-GLD time-varying correlation does not improve 2-asset risk parity Sharpe.",
+    "tags": ["DCC-GARCH", "risk_parity"],
+    "legacy": false
+  }
+]

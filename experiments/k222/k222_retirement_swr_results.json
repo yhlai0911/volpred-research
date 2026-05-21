@@ -1,0 +1,303 @@
+{
+  "experiment": "K222",
+  "title": "Retirement SWR: 50/50+VT vs B&H",
+  "date": "2026-05-07 15:40:11.259632",
+  "data_period": "2005-01-01 to 2024-12-31",
+  "initial_capital": 1000000,
+  "full_period_results": {
+    "spy_bh": {
+      "3%": {
+        "terminal_wealth": 4635647.85,
+        "min_wealth": 538331.79,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 599917.86,
+        "wealth_path_len": 5033
+      },
+      "4%": {
+        "terminal_wealth": 3825866.78,
+        "min_wealth": 514730.76,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 799890.49,
+        "wealth_path_len": 5033
+      },
+      "5%": {
+        "terminal_wealth": 3016085.7,
+        "min_wealth": 491129.73,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 999863.11,
+        "wealth_path_len": 5033
+      },
+      "6%": {
+        "terminal_wealth": 2206304.63,
+        "min_wealth": 467528.7,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 1199835.73,
+        "wealth_path_len": 5033
+      },
+      "7%": {
+        "terminal_wealth": 1396523.56,
+        "min_wealth": 443927.67,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 1399808.35,
+        "wealth_path_len": 5033
+      }
+    },
+    "5050_bh": {
+      "3%": {
+        "terminal_wealth": 5406662.81,
+        "min_wealth": 950742.09,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 599917.86,
+        "wealth_path_len": 5033
+      },
+      "4%": {
+        "terminal_wealth": 4769117.95,
+        "min_wealth": 947467.88,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 799890.49,
+        "wealth_path_len": 5033
+      },
+      "5%": {
+        "terminal_wealth": 4131573.08,
+        "min_wealth": 943454.93,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 999863.11,
+        "wealth_path_len": 5033
+      },
+      "6%": {
+        "terminal_wealth": 3494028.21,
+        "min_wealth": 909860.43,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 1199835.73,
+        "wealth_path_len": 5033
+      },
+      "7%": {
+        "terminal_wealth": 2856483.34,
+        "min_wealth": 876265.92,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 1399808.35,
+        "wealth_path_len": 5033
+      }
+    },
+    "5050_vt": {
+      "3%": {
+        "terminal_wealth": 2411523.07,
+        "min_wealth": 956744.65,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 599917.86,
+        "wealth_path_len": 5033
+      },
+      "4%": {
+        "terminal_wealth": 2019005.01,
+        "min_wealth": 953471.74,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 799890.49,
+        "wealth_path_len": 5033
+      },
+      "5%": {
+        "terminal_wealth": 1626486.95,
+        "min_wealth": 950198.84,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 999863.11,
+        "wealth_path_len": 5033
+      },
+      "6%": {
+        "terminal_wealth": 1233968.89,
+        "min_wealth": 946925.94,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 1199835.73,
+        "wealth_path_len": 5033
+      },
+      "7%": {
+        "terminal_wealth": 841450.83,
+        "min_wealth": 710679.54,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 1399808.35,
+        "wealth_path_len": 5033
+      }
+    }
+  },
+  "fine_swr": {
+    "spy_bh": {
+      "full_period": 0.085,
+      "all_windows": 0.1
+    },
+    "5050_bh": {
+      "full_period": 0.1,
+      "all_windows": 0.1
+    },
+    "5050_vt": {
+      "full_period": 0.09,
+      "all_windows": 0.1
+    }
+  },
+  "rolling_swr": {
+    "spy_bh": 0.07,
+    "5050_bh": 0.07,
+    "5050_vt": 0.07
+  },
+  "gfc_stress_test": {
+    "spy_bh": {
+      "3%": {
+        "terminal_wealth": 1413334.45,
+        "min_wealth": 465256.68,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 299958.93,
+        "wealth_path_len": 2518
+      },
+      "4%": {
+        "terminal_wealth": 1236602.94,
+        "min_wealth": 453142.44,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 399945.24,
+        "wealth_path_len": 2518
+      },
+      "5%": {
+        "terminal_wealth": 1059871.43,
+        "min_wealth": 441028.19,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 499931.55,
+        "wealth_path_len": 2518
+      },
+      "6%": {
+        "terminal_wealth": 883139.92,
+        "min_wealth": 428913.95,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 599917.86,
+        "wealth_path_len": 2518
+      },
+      "7%": {
+        "terminal_wealth": 706408.41,
+        "min_wealth": 416799.7,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 699904.18,
+        "wealth_path_len": 2518
+      }
+    },
+    "5050_bh": {
+      "3%": {
+        "terminal_wealth": 1618874.37,
+        "min_wealth": 789110.19,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 299958.93,
+        "wealth_path_len": 2518
+      },
+      "4%": {
+        "terminal_wealth": 1482780.01,
+        "min_wealth": 775311.18,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 399945.24,
+        "wealth_path_len": 2518
+      },
+      "5%": {
+        "terminal_wealth": 1346685.65,
+        "min_wealth": 761512.17,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 499931.55,
+        "wealth_path_len": 2518
+      },
+      "6%": {
+        "terminal_wealth": 1210591.29,
+        "min_wealth": 747713.16,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 599917.86,
+        "wealth_path_len": 2518
+      },
+      "7%": {
+        "terminal_wealth": 1074496.93,
+        "min_wealth": 733914.15,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 699904.18,
+        "wealth_path_len": 2518
+      }
+    },
+    "5050_vt": {
+      "3%": {
+        "terminal_wealth": 1009895.81,
+        "min_wealth": 924137.32,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 299958.93,
+        "wealth_path_len": 2518
+      },
+      "4%": {
+        "terminal_wealth": 901284.05,
+        "min_wealth": 882465.51,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 399945.24,
+        "wealth_path_len": 2518
+      },
+      "5%": {
+        "terminal_wealth": 792672.29,
+        "min_wealth": 787916.07,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 499931.55,
+        "wealth_path_len": 2518
+      },
+      "6%": {
+        "terminal_wealth": 684060.53,
+        "min_wealth": 679956.0,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 599917.86,
+        "wealth_path_len": 2518
+      },
+      "7%": {
+        "terminal_wealth": 575448.77,
+        "min_wealth": 571995.94,
+        "ruined": false,
+        "ruin_day": null,
+        "total_withdrawn": 699904.18,
+        "wealth_path_len": 2518
+      }
+    }
+  },
+  "vt_diagnostics": {
+    "mean_vt_weight": 0.7081,
+    "median_vt_weight": 0.7203,
+    "pct_fully_invested": 0.1109,
+    "gfc_mean_vt_weight": 0.2644,
+    "avg_cash_drag_pct": 29.19
+  },
+  "return_comparison": {
+    "spy_bh_ann": 0.10274,
+    "5050_bh_ann": 0.10469,
+    "5050_vt_ann": 0.11513,
+    "vt_drag_ann": 0.01044
+  },
+  "risk_comparison": {
+    "spy_bh_vol": 0.19033,
+    "5050_bh_vol": 0.13305,
+    "5050_vt_vol": 0.07587,
+    "spy_bh_mdd": -0.55189,
+    "5050_bh_mdd": -0.3249,
+    "5050_vt_mdd": -0.09924
+  }
+}

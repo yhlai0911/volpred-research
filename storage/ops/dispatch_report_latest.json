@@ -1,0 +1,107 @@
+{
+  "generated_at": "2026-05-20T17:07:31.363788+00:00",
+  "slot_cap": 4,
+  "slot_state": {
+    "worktrees": [],
+    "active_agents": [],
+    "occupied": 0
+  },
+  "free_slots": 4,
+  "pending_total": 56,
+  "pending_agentable": 47,
+  "pending_main_thread": 2,
+  "pending_blocked": 7,
+  "dispatch_candidates": [
+    {
+      "id": "K1313",
+      "priority": 3,
+      "title": "K1313: Probabilistic RV Quantile Forecasting** — arXiv:2508.15922（從 HAR/GARCH 點預測到條件分位數）"
+    },
+    {
+      "id": "K1385",
+      "priority": 3,
+      "title": "K1385: Sentiment-Augmented GARCH-LSTM — Computational Economics 2025"
+    },
+    {
+      "id": "K1387",
+      "priority": 3,
+      "title": "K1387: Risk Parity + Heavy-Tailed + Regime-Switching DCC — Paolella (2025, JTSA)"
+    },
+    {
+      "id": "K1388",
+      "priority": 3,
+      "title": "K1388: HAR-GNN（Graph Neural Network）— ScienceDirect 2024"
+    }
+  ],
+  "main_thread_queue_top5": [
+    {
+      "id": "BTC_GAS_negative_paper",
+      "priority": 4,
+      "title": "Negative-result methodology paper: \"Why GAS-t fails on BTC — Student-t innovation is the culprit, MS cannot rescue it\""
+    },
+    {
+      "id": "experiment_scaffold_k1268b",
+      "priority": 4,
+      "title": "Experiment scaffold: K1268B (research_program backlog)"
+    }
+  ],
+  "refill": null,
+  "blocked_tasks": [
+    {
+      "id": "K1268b_gdelt_with_paid_intraday",
+      "priority": 3,
+      "reason": "paid_data_source_decision_pending",
+      "title": "K1268b: GDELT 5-min vs SPY 5-min RV — re-run with backtest-grade intraday data",
+      "blocked_at": null,
+      "blocked_until": null
+    },
+    {
+      "id": "K1307",
+      "priority": 3,
+      "reason": "data_eta_q2_pending",
+      "title": "K1307: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）",
+      "blocked_at": null,
+      "blocked_until": null
+    },
+    {
+      "id": "K1310",
+      "priority": 3,
+      "reason": "paid_data_source_decision_pending",
+      "title": "K1310: I4: VIX futures roll yield 策略 — contango 環境下的 roll yield 收割 vs 尾部風險保護 ⚠️ **BLOCKED: 需要 VIX futures 歷史數據（yfinance ",
+      "blocked_at": null,
+      "blocked_until": null
+    },
+    {
+      "id": "K1311",
+      "priority": 3,
+      "reason": "data_accumulation_pending",
+      "title": "K1311: VIXTWN 數據累積到 252 天後驗證 ratio 穩定性（Q6）",
+      "blocked_at": null,
+      "blocked_until": null
+    },
+    {
+      "id": "K1383",
+      "priority": 3,
+      "reason": "diversity_rule_post_null_quartet",
+      "title": "K1383: PatchTST-lite vs HAR-RV — MDPI 2025",
+      "blocked_at": null,
+      "blocked_until": null
+    },
+    {
+      "id": "TSMC_0417_optional",
+      "priority": 3,
+      "reason": "self_tagged_optional",
+      "title": "TSMC 法說 04/17 深度追蹤（optional）",
+      "blocked_at": "2026-05-04T09:40:24+00:00",
+      "blocked_until": null
+    },
+    {
+      "id": "K267_article_general",
+      "priority": 4,
+      "reason": "self_tagged_optional",
+      "title": "K267: write general-audience article (auto-discovered uncovered K)",
+      "blocked_at": "2026-05-06T01:25:20+00:00",
+      "blocked_until": null
+    }
+  ]
+}

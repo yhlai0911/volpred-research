@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.volpred.hourly-dispatch</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/yhlai0911/.volpred/bin/cron_hourly_dispatch.sh</string>
+    </array>
+
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Minute</key>
+        <integer>7</integer>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/hourly_dispatch_launchd.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/hourly_dispatch_launchd.err</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/Users/yhlai0911/.nvm/versions/node/v22.20.0/bin:/Users/yhlai0911/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>HOME</key>
+        <string>/Users/yhlai0911</string>
+    </dict>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/yhlai0911/Desktop/volpred-research</string>
+
+    <key>ProcessType</key>
+    <string>Interactive</string>
+</dict>
+</plist>

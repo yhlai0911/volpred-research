@@ -8,7 +8,7 @@
 |---|---|---|---|
 | **Claude**（主研究員）| 實驗執行、分析、記憶管理、論文寫作 | 直接執行 | 深度分析、code、持續研究 |
 | **Codex (GPT)**| 針對性審查、第二意見、新方向 | `/codex:rescue`、`/codex:review`、`codex exec` | 找漏洞、結構性問題、editorial advice |
-| **Gemini** | 方法論建議、文獻連結、robustness 建議 | `/gemini-cli` | 學術框架、cross-reference、新測試建議 |
+| **Gemini** | 方法論建議、文獻連結、robustness 建議 | `scripts/gemini_ask.py` | 學術框架、cross-reference、新測試建議 |
 
 ## Codex Plugin 命令
 

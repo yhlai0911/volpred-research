@@ -1,0 +1,153 @@
+{
+  "experiment_id": "paper2_R1_linear_scaling_fix",
+  "title": "Paper 2 R1 SEVERE 2 \u2014 VIXTWN/VIX 1.39 linearity / regime conditioning",
+  "purpose": "Address Gemini R1 SEVERE 2: '1.39 amplification assumed static/linear \u2014 breaks in tail events'. The VIXTWN-to-VIX ratio of 1.39 is the basis for K = 12/1.39 = 8.63 in the 8.63/VIX strategy and is also invoked qualitatively elsewhere in the paper. This experiment tests whether the ratio is regime-stable by partitioning days into expanding-window VIX quantile buckets and a tail-shock bucket, then applies stationary block bootstrap (B=500, seed=42) to obtain regime-conditional 95% CIs.",
+  "data_sources": {
+    "vixtwn": {
+      "path": "experiments/k1098/k1098_vixtwn_daily.csv",
+      "n_raw": 3701,
+      "source": "TAIFEX official Dropbox (K1098 canonical parse)"
+    },
+    "vix": {
+      "path": "paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv",
+      "column": "vix_close",
+      "source": "paper canonical snapshot (yfinance ^VIX)"
+    }
+  },
+  "configuration": {
+    "seed": 42,
+    "bootstrap_B": 500,
+    "block_mean_length_days": 21,
+    "warmup_obs": 252,
+    "tolerance_pct_of_1_39": 0.1,
+    "lookahead_guard": "Expanding-window quantile and mean/std thresholds use x[:t] strictly (day t excluded from its own threshold). First 252 obs dropped.",
+    "buckets": {
+      "Q1": "VIX_t <= expanding 25th pct",
+      "Q2": "25th < VIX_t <= 50th",
+      "Q3": "50th < VIX_t <= 75th",
+      "Q4": "VIX_t > 75th",
+      "Tail": "|\u0394log(VIX_t)| > 2 * expanding std (overlaps with Q3/Q4)"
+    }
+  },
+  "paired_data_summary": {
+    "n_paired": 3327,
+    "n_eval_after_warmup": 3075,
+    "date_start": "2008-01-02",
+    "date_end": "2021-12-30",
+    "overall_ratio_mean": 0.981072239254628,
+    "overall_ratio_median": 0.9769230928489994,
+    "overall_ratio_std": 0.16713817793138266,
+    "vixtwn_mean": 18.198956097560977,
+    "vix_mean": 19.04473495669481
+  },
+  "paper_canonical_ratio": 1.39,
+  "paper_canonical_ratio_precise": 1.393,
+  "amplification_per_quantile": {
+    "Q1": {
+      "criterion": "VIX_t in expanding-window Q1 of [Q1<=25th, Q2<=50th, Q3<=75th, Q4>75th]",
+      "n": 1533,
+      "mean_ratio": 1.0176180719315033,
+      "median_ratio": 1.0177619686547756,
+      "std_ratio": 0.14069546572345232,
+      "vix_mean": 14.344840183494453,
+      "vixtwn_mean": 14.517971298108282,
+      "deviation_from_1_39_pct": -26.79006676751774
+    },
+    "Q2": {
+      "criterion": "VIX_t in expanding-window Q2 of [Q1<=25th, Q2<=50th, Q3<=75th, Q4>75th]",
+      "n": 634,
+      "mean_ratio": 1.006496218161798,
+      "median_ratio": 0.9896075803513347,
+      "std_ratio": 0.18032860303564952,
+      "vix_mean": 18.444731868779996,
+      "vixtwn_mean": 18.629258675078866,
+      "deviation_from_1_39_pct": -27.590200132244746
+    },
+    "Q3": {
+      "criterion": "VIX_t in expanding-window Q3 of [Q1<=25th, Q2<=50th, Q3<=75th, Q4>75th]",
+      "n": 574,
+      "mean_ratio": 0.9466030342153116,
+      "median_ratio": 0.9188750748565959,
+      "std_ratio": 0.17569223225237984,
+      "vix_mean": 23.77393725524796,
+      "vixtwn_mean": 22.322369337979094,
+      "deviation_from_1_39_pct": -31.899062286668233
+    },
+    "Q4": {
+      "criterion": "VIX_t in expanding-window Q4 of [Q1<=25th, Q2<=50th, Q3<=75th, Q4>75th]",
+      "n": 334,
+      "mean_ratio": 0.8243110403677176,
+      "median_ratio": 0.824133821377129,
+      "std_ratio": 0.13342416367956197,
+      "vix_mean": 33.62790419527157,
+      "vixtwn_mean": 27.190868263473053,
+      "deviation_from_1_39_pct": -40.697047455559876
+    },
+    "Tail": {
+      "criterion": "|\u0394log(VIX_t)| > 2 * expanding_std (US-vol shock days)",
+      "n": 183,
+      "mean_ratio": 0.877279033373267,
+      "median_ratio": 0.8764510474483006,
+      "std_ratio": 0.20164878041685702,
+      "vix_mean": 23.953606542993764,
+      "vixtwn_mean": 19.979016393442624,
+      "deviation_from_1_39_pct": -36.886400476743376
+    }
+  },
+  "bootstrap_ci": {
+    "overall": {
+      "mean": 0.9819827559369583,
+      "se": 0.014159333362629716,
+      "ci_low": 0.952607267540319,
+      "ci_high": 1.008983558663984,
+      "contains_1_39": false
+    },
+    "per_bucket": {
+      "Q1": {
+        "bs_mean": 1.0178711890905774,
+        "bs_se": 0.015481056935358638,
+        "ci_low": 0.9870428734747395,
+        "ci_high": 1.0458722932239364,
+        "contains_1_39": false
+      },
+      "Q2": {
+        "bs_mean": 1.0055546547237701,
+        "bs_se": 0.02541635965196374,
+        "ci_low": 0.9553628794384016,
+        "ci_high": 1.054074491236388,
+        "contains_1_39": false
+      },
+      "Q3": {
+        "bs_mean": 0.9441108167103623,
+        "bs_se": 0.02530023059757588,
+        "ci_low": 0.8972386611003138,
+        "ci_high": 0.9946134943479603,
+        "contains_1_39": false
+      },
+      "Q4": {
+        "bs_mean": 0.8247870530649127,
+        "bs_se": 0.020129401906857566,
+        "ci_low": 0.7844611696355257,
+        "ci_high": 0.8619913109915546,
+        "contains_1_39": false
+      },
+      "Tail": {
+        "bs_mean": 0.8773563919557396,
+        "bs_se": 0.023072070495237552,
+        "ci_low": 0.8323401504955612,
+        "ci_high": 0.9188153714185707,
+        "contains_1_39": false
+      }
+    }
+  },
+  "ks_test_tail_vs_nontail": {
+    "D": 0.2734734598553386,
+    "p_approx": 7.960751113610365e-12,
+    "n_a": 183,
+    "n_b": 2892
+  },
+  "verdict": "linearity_BREAKS",
+  "rationale": "At least one volatility-regime bucket exceeds the +/-10% tolerance around 1.39, OR its 95% bootstrap CI does not cover 1.39. The static ratio understates regime dependence; recommend replacing the single 1.39 figure in the main narrative with a regime-conditional table and noting that K = 8.63 represents the long-run mean while VT exposure in tail-vol periods is under- or over-stated.",
+  "body_addition_target": "paper/taiwan-vt/body.tex (proposed \u00a74 or end of \u00a73 robustness)",
+  "timestamp_utc": "2026-05-12T12:11:26.371394+00:00"
+}

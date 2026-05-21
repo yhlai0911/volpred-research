@@ -1,0 +1,12 @@
+=== bash -n syntax ===
+OK
+=== verify prompt readable ===
+      24 scripts/cron_hourly_dispatch_prompt.md
+=== check 00:07 fire status ===
+77470 /Users/yhlai0911/.local/bin/claude -p --dangerously-skip-permissions --model claude-sonnet-4-6 Hourly dispatch trigger (OS cron). 規則 (token-conserving split architecture)：
+
+6. 派完 end summary 格式（per memory feedback_task_end_summary_format）：結束時間 / 總時間 / 本次 token / 完成項目 / 本週 Max 20x quota % (`uv run python scripts/weekly_quota_estimate.py`) / 下次任務時間。
+7. 若 last-3 涵蓋所有 candidates 的 type → 派沒做過的 type，必要時主動生 brief / 文章 / compute job。「沒事做」**永不可接受**。
+8. 嚴禁: force push, --no-verify, 寫 knowledge.json from agent (K1259), 假數字。研究誠實 > 一切。'
+ 2 files changed, 33 insertions(+), 40 deletions(-)
+ create mode 100644 scripts/cron_hourly_dispatch_prompt.md

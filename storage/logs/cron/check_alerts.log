@@ -2512,3 +2512,1076 @@ breaches=0 sent=0 skipped=0
 - [ok] host_cron_fail level=info title=Host cron failure detected
 - [ok] member_qa_stale level=info title=Member Q&A pending stale
 JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-04-26T16:00:00.981565+00:00"}
+=== [check_alerts] 2026-05-18 04:00:05 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=5 skipped=5 ids=['release_pool', 'memory_health_daily', 'release_settings_audit', 'paper_sync_all', 'research_backlog_daily']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=1min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-17T20:00:49.736009+00:00"}
+=== [check_alerts] exit 0 at 2026-05-18 04:00:50 CST (duration=45s) ===
+=== [check_alerts] 2026-05-18 05:00:03 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=10 ids=[]
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=60min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-17T21:00:11.808609+00:00"}
+=== [check_alerts] exit 0 at 2026-05-18 05:00:15 CST (duration=14s) ===
+=== [check_alerts] 2026-05-18 06:00:08 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=3 skipped=7 ids=['memory_health_daily', 'refresh_paper_snapshots', 'paper_sync_all']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=120min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-17T22:00:38.776347+00:00"}
+=== [check_alerts] exit 0 at 2026-05-18 06:00:43 CST (duration=37s) ===
+=== [check_alerts] 2026-05-18 07:00:04 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=3 skipped=7 ids=['release_pool', 'release_settings_audit', 'populate_events_weekly']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=161min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-17T23:00:22.603183+00:00"}
+=== [check_alerts] exit 0 at 2026-05-18 07:00:26 CST (duration=24s) ===
+=== [check_alerts] 2026-05-18 08:00:10 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=2 skipped=8 ids=['market_calendar_sync', 'research_backlog_daily']
+  piggy-back-drift: none
+  release-pool-auto: ok age=221min reason=done
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-18T00:00:49.399785+00:00"}
+=== [check_alerts] exit 0 at 2026-05-18 08:00:51 CST (duration=46s) ===
+=== [check_alerts] 2026-05-18 09:00:04 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=10 ids=[]
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=60min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-18T01:00:11.949062+00:00"}
+=== [check_alerts] exit 0 at 2026-05-18 09:00:12 CST (duration=11s) ===
+=== [check_alerts] 2026-05-18 10:00:01 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=1 skipped=9 ids=['release_pool']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=101min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-18T02:00:02.907692+00:00"}
+=== [check_alerts] exit 0 at 2026-05-18 10:00:03 CST (duration=2s) ===
+=== [check_alerts] 2026-05-18 11:00:11 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=10 ids=[]
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=162min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-18T03:00:14.722350+00:00"}
+=== [check_alerts] exit 0 at 2026-05-18 11:00:15 CST (duration=10s) ===
+=== [check_alerts] 2026-05-18 12:00:05 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=1 skipped=9 ids=['paper_sync_all']
+  piggy-back-drift: none
+  release-pool-auto: ok age=222min reason=done
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-18T04:01:05.553347+00:00"}
+=== [check_alerts] exit 0 at 2026-05-18 12:01:07 CST (duration=65s) ===
+=== [check_alerts] 2026-05-18 13:00:03 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=2 skipped=8 ids=['release_pool', 'release_settings_audit']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=60min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-18T05:00:18.192843+00:00"}
+=== [check_alerts] exit 0 at 2026-05-18 13:00:18 CST (duration=18s) ===
+=== [check_alerts] 2026-05-18 14:00:08 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=10 ids=[]
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=120min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-18T06:00:17.917927+00:00"}
+=== [check_alerts] exit 0 at 2026-05-18 14:00:24 CST (duration=19s) ===
+=== [check_alerts] 2026-05-18 15:00:10 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=1 skipped=9 ids=['collect_tw_data']
+  piggy-back-drift: none
+  release-pool-auto: ok age=180min reason=done
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-18T07:00:42.584700+00:00"}
+=== [check_alerts] exit 0 at 2026-05-18 15:00:44 CST (duration=38s) ===
+=== [check_alerts] 2026-05-18 16:00:07 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=1 skipped=9 ids=['release_pool']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=60min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-18T08:00:08.773260+00:00"}
+=== [check_alerts] exit 0 at 2026-05-18 16:00:09 CST (duration=4s) ===
+=== [check_alerts] 2026-05-18 17:00:05 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=10 ids=[]
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=120min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-18T09:00:11.239687+00:00"}
+=== [check_alerts] exit 0 at 2026-05-18 17:00:14 CST (duration=11s) ===
+=== [check_alerts] 2026-05-18 18:00:07 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=1 skipped=9 ids=['paper_sync_all']
+  piggy-back-drift: none
+  release-pool-auto: ok age=180min reason=done
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-18T10:00:39.287078+00:00"}
+=== [check_alerts] exit 0 at 2026-05-18 18:00:39 CST (duration=34s) ===
+=== [check_alerts] 2026-05-18 19:00:08 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=2 skipped=8 ids=['release_pool', 'release_settings_audit']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=151min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-18T11:00:33.222145+00:00"}
+=== [check_alerts] exit 0 at 2026-05-18 19:00:33 CST (duration=27s) ===
+=== [check_alerts] 2026-05-18 20:00:09 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=10 ids=[]
+  piggy-back-drift: none
+  release-pool-auto: ok age=210min reason=done
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-18T12:00:41.297348+00:00"}
+=== [check_alerts] exit 0 at 2026-05-18 20:00:43 CST (duration=37s) ===
+=== [check_alerts] 2026-05-18 21:00:09 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=10 ids=[]
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=60min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-18T13:00:25.399169+00:00"}
+=== [check_alerts] exit 0 at 2026-05-18 21:00:25 CST (duration=20s) ===
+=== [check_alerts] 2026-05-18 22:00:08 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=1 skipped=9 ids=['release_pool']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=120min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-18T14:00:20.655179+00:00"}
+=== [check_alerts] exit 0 at 2026-05-18 22:00:21 CST (duration=18s) ===
+=== [check_alerts] 2026-05-18 23:00:05 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=10 ids=[]
+  piggy-back-drift: none
+  release-pool-auto: ok age=180min reason=done
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-18T15:00:33.975155+00:00"}
+=== [check_alerts] exit 0 at 2026-05-18 23:00:38 CST (duration=35s) ===
+=== [check_alerts] 2026-05-19 00:00:04 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=1 skipped=9 ids=['paper_sync_all']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=60min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-18T16:00:17.209930+00:00"}
+=== [check_alerts] exit 0 at 2026-05-19 00:00:19 CST (duration=16s) ===
+=== [check_alerts] 2026-05-19 01:00:07 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=2 skipped=8 ids=['release_pool', 'release_settings_audit']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=120min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-18T17:00:31.254545+00:00"}
+=== [check_alerts] exit 0 at 2026-05-19 01:00:31 CST (duration=26s) ===
+=== [check_alerts] 2026-05-19 02:00:11 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=10 ids=[]
+  piggy-back-drift: none
+  release-pool-auto: ok age=180min reason=done
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-18T18:00:40.624038+00:00"}
+=== [check_alerts] exit 0 at 2026-05-19 02:00:42 CST (duration=36s) ===
+=== [check_alerts] 2026-05-19 03:00:10 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=10 ids=[]
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=60min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-18T19:00:22.489205+00:00"}
+=== [check_alerts] exit 0 at 2026-05-19 03:00:23 CST (duration=17s) ===
+=== [check_alerts] 2026-05-19 04:00:10 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=1 skipped=9 ids=['release_pool']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=103min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-18T20:00:11.115996+00:00"}
+=== [check_alerts] exit 0 at 2026-05-19 04:00:11 CST (duration=5s) ===
+=== [check_alerts] 2026-05-19 05:00:10 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=10 ids=[]
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=163min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-18T21:00:20.546371+00:00"}
+=== [check_alerts] exit 0 at 2026-05-19 05:00:21 CST (duration=16s) ===
+=== [check_alerts] 2026-05-19 06:00:03 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=2 skipped=8 ids=['memory_health_daily', 'paper_sync_all']
+  piggy-back-drift: none
+  release-pool-auto: ok age=223min reason=done
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-18T22:00:58.005543+00:00"}
+=== [check_alerts] exit 0 at 2026-05-19 06:00:59 CST (duration=58s) ===
+=== [check_alerts] 2026-05-19 07:00:08 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=2 skipped=8 ids=['release_pool', 'release_settings_audit']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=60min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-18T23:00:37.463860+00:00"}
+=== [check_alerts] exit 0 at 2026-05-19 07:00:38 CST (duration=32s) ===
+=== [check_alerts] 2026-05-19 08:00:04 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=2 skipped=8 ids=['collect_us_data', 'research_backlog_daily']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=120min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-19T00:00:35.716585+00:00"}
+=== [check_alerts] exit 0 at 2026-05-19 08:00:36 CST (duration=34s) ===
+=== [check_alerts] 2026-05-19 09:00:08 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=10 ids=[]
+  piggy-back-drift: none
+  release-pool-auto: ok age=180min reason=done
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-19T01:00:42.755392+00:00"}
+=== [check_alerts] exit 0 at 2026-05-19 09:00:43 CST (duration=37s) ===
+=== [check_alerts] 2026-05-19 10:00:05 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=1 skipped=9 ids=['release_pool']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=104min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-19T02:00:14.384988+00:00"}
+=== [check_alerts] exit 0 at 2026-05-19 10:00:14 CST (duration=12s) ===
+=== [check_alerts] 2026-05-19 11:00:01 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=10 ids=[]
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=164min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-19T03:00:07.314037+00:00"}
+=== [check_alerts] exit 0 at 2026-05-19 11:00:11 CST (duration=11s) ===
+=== [check_alerts] 2026-05-19 12:00:04 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=1 skipped=9 ids=['paper_sync_all']
+  piggy-back-drift: none
+  release-pool-auto: ok age=224min reason=done
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-19T04:00:31.976557+00:00"}
+=== [check_alerts] exit 0 at 2026-05-19 12:00:33 CST (duration=29s) ===
+=== [check_alerts] 2026-05-19 13:00:03 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=2 skipped=8 ids=['release_pool', 'release_settings_audit']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=60min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-19T05:00:24.214971+00:00"}
+=== [check_alerts] exit 0 at 2026-05-19 13:00:24 CST (duration=24s) ===
+=== [check_alerts] 2026-05-19 14:00:06 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=10 ids=[]
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=120min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-19T06:00:19.914791+00:00"}
+=== [check_alerts] exit 0 at 2026-05-19 14:00:23 CST (duration=20s) ===
+=== [check_alerts] 2026-05-19 15:00:02 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=1 skipped=9 ids=['collect_tw_data']
+  piggy-back-drift: none
+  release-pool-auto: ok age=181min reason=done
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-19T07:00:46.589151+00:00"}
+=== [check_alerts] exit 0 at 2026-05-19 15:00:47 CST (duration=47s) ===
+=== [check_alerts] 2026-05-19 16:00:08 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=1 skipped=9 ids=['release_pool']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=100min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-19T08:00:26.385486+00:00"}
+=== [check_alerts] exit 0 at 2026-05-19 16:00:26 CST (duration=22s) ===
+=== [check_alerts] 2026-05-19 17:00:07 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=10 ids=[]
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=160min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-19T09:00:21.654843+00:00"}
+=== [check_alerts] exit 0 at 2026-05-19 17:00:25 CST (duration=22s) ===
+=== [check_alerts] 2026-05-19 18:00:02 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=1 skipped=9 ids=['paper_sync_all']
+  piggy-back-drift: none
+  release-pool-auto: ok age=220min reason=done
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-19T10:00:09.905692+00:00"}
+=== [check_alerts] exit 0 at 2026-05-19 18:00:10 CST (duration=10s) ===
+=== [check_alerts] 2026-05-19 19:00:26 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=3 skipped=7 ids=['release_pool', 'release_settings_audit', 'paper_sync_all']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=112min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-19T11:00:31.814851+00:00"}
+=== [check_alerts] exit 0 at 2026-05-19 19:00:33 CST (duration=28s) ===
+=== [check_alerts] 2026-05-19 20:00:06 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=10 ids=[]
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=172min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-19T12:00:06.801005+00:00"}
+=== [check_alerts] exit 0 at 2026-05-19 20:00:07 CST (duration=2s) ===
+=== [check_alerts] 2026-05-19 21:00:08 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=10 ids=[]
+  piggy-back-drift: none
+  release-pool-auto: ok age=232min reason=done
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-19T13:00:24.120913+00:00"}
+=== [check_alerts] exit 0 at 2026-05-19 21:00:29 CST (duration=24s) ===
+=== [check_alerts] 2026-05-19 22:00:05 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=1 skipped=9 ids=['release_pool']
+  piggy-back-drift: none
+  release-pool-auto: ok age=292min reason=done
+breaches=1 sent=1 skipped=0
+- [BREACH] release_pool_gap level=warn title=Release pool cron gap > 4.0h (interval=180min)
+    ## 觸發條件
+    release_pool host cron fire gap 已超過 4.0 小時門檻 (interval=180min + 30min grace)。
+    - last_fire_at: 2026-05-19T09:08:22.320952+00:00
+    - gap_hours: 4.87
+    - configured_interval_minutes: 180
+    - log_path: storage/logs/cron/release_pool.log
+    
+    ## 影響
+    文章釋出中斷 = 讀者端看到平台停滯、搜尋索引停滯；Mission 第 1 條（文章品質）
+    與第 5 條（曝光流量）直接受損。若持續 >6.0h 會累積多篇 draft 排隊延遲。
+    
+    ## 建議行動
+    1. 立即手動釋出（最快復原）：
+       VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings
+    2. 診斷 host cron 是否仍在跑：
+       tail -20 storage/logs/cron/release_pool.log
+       crontab -l | grep release_pool
+    3. 若 cron daemon 卡住：重新 install crontab 或 launchd job
+    4. 若 draft 池也空（配合 draft_pool_low alert）：先補池，見 publish-checklist
+       與 .claude/skills/publication-candidates/SKILL.md 的 5-step 選題流程。
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+dispatched:
+  - sent: level=warn title=Release pool cron gap > 4.0h (interval=180min) notif_id=df9b47b4 reason=ok
+JSON: {"breach_count": 1, "sent_count": 1, "skipped_count": 0, "generated_at": "2026-05-19T14:00:16.403315+00:00"}
+=== [check_alerts] exit 0 at 2026-05-19 22:00:21 CST (duration=17s) ===
+=== [check_alerts] 2026-05-19 23:00:05 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=10 ids=[]
+  piggy-back-drift: none
+  release-pool-auto: ok age=352min reason=done
+breaches=1 sent=0 skipped=1
+- [BREACH] release_pool_gap level=warn title=Release pool cron gap > 4.0h (interval=180min)
+    ## 觸發條件
+    release_pool host cron fire gap 已超過 4.0 小時門檻 (interval=180min + 30min grace)。
+    - last_fire_at: 2026-05-19T09:08:22.320952+00:00
+    - gap_hours: 5.87
+    - configured_interval_minutes: 180
+    - log_path: storage/logs/cron/release_pool.log
+    
+    ## 影響
+    文章釋出中斷 = 讀者端看到平台停滯、搜尋索引停滯；Mission 第 1 條（文章品質）
+    與第 5 條（曝光流量）直接受損。若持續 >6.0h 會累積多篇 draft 排隊延遲。
+    
+    ## 建議行動
+    1. 立即手動釋出（最快復原）：
+       VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings
+    2. 診斷 host cron 是否仍在跑：
+       tail -20 storage/logs/cron/release_pool.log
+       crontab -l | grep release_pool
+    3. 若 cron daemon 卡住：重新 install crontab 或 launchd job
+    4. 若 draft 池也空（配合 draft_pool_low alert）：先補池，見 publish-checklist
+       與 .claude/skills/publication-candidates/SKILL.md 的 5-step 選題流程。
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+dispatched:
+  - skipped: level=warn title=Release pool cron gap > 4.0h (interval=180min) notif_id=df9b47b4 reason=dedup_24h
+JSON: {"breach_count": 1, "sent_count": 0, "skipped_count": 1, "generated_at": "2026-05-19T15:00:23.413137+00:00"}
+=== [check_alerts] exit 0 at 2026-05-19 23:00:28 CST (duration=25s) ===
+=== [check_alerts] 2026-05-20 00:00:05 CST skip — prior run still holds lock ===
+=== [check_alerts] 2026-05-20 01:00:03 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=3 skipped=7 ids=['release_pool', 'release_settings_audit', 'paper_sync_all']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=37min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-19T17:00:06.519474+00:00"}
+=== [check_alerts] exit 0 at 2026-05-20 01:00:07 CST (duration=4s) ===
+=== [check_alerts] 2026-05-20 02:00:00 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=10 ids=[]
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=97min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-19T18:00:01.070290+00:00"}
+=== [check_alerts] exit 0 at 2026-05-20 02:00:02 CST (duration=2s) ===
+=== [check_alerts] 2026-05-20 03:00:02 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=10 ids=[]
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=157min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-19T19:00:03.086959+00:00"}
+=== [check_alerts] exit 0 at 2026-05-20 03:00:04 CST (duration=2s) ===
+=== [check_alerts] 2026-05-20 04:00:07 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=1 skipped=9 ids=['release_pool']
+  piggy-back-drift: none
+  release-pool-auto: ok age=217min reason=done
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-19T20:00:18.550922+00:00"}
+=== [check_alerts] exit 0 at 2026-05-20 04:00:20 CST (duration=16s) ===
+=== [check_alerts] 2026-05-20 05:00:04 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=10 ids=[]
+  piggy-back-drift: none
+  release-pool-auto: ok age=277min reason=done
+breaches=1 sent=0 skipped=1
+- [BREACH] release_pool_gap level=warn title=Release pool cron gap > 4.0h (interval=180min)
+    ## 觸發條件
+    release_pool host cron fire gap 已超過 4.0 小時門檻 (interval=180min + 30min grace)。
+    - last_fire_at: 2026-05-19T16:23:27.175051+00:00
+    - gap_hours: 4.61
+    - configured_interval_minutes: 180
+    - log_path: storage/logs/cron/release_pool.log
+    
+    ## 影響
+    文章釋出中斷 = 讀者端看到平台停滯、搜尋索引停滯；Mission 第 1 條（文章品質）
+    與第 5 條（曝光流量）直接受損。若持續 >6.0h 會累積多篇 draft 排隊延遲。
+    
+    ## 建議行動
+    1. 立即手動釋出（最快復原）：
+       VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings
+    2. 診斷 host cron 是否仍在跑：
+       tail -20 storage/logs/cron/release_pool.log
+       crontab -l | grep release_pool
+    3. 若 cron daemon 卡住：重新 install crontab 或 launchd job
+    4. 若 draft 池也空（配合 draft_pool_low alert）：先補池，見 publish-checklist
+       與 .claude/skills/publication-candidates/SKILL.md 的 5-step 選題流程。
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+dispatched:
+  - skipped: level=warn title=Release pool cron gap > 4.0h (interval=180min) notif_id=df9b47b4 reason=dedup_24h
+JSON: {"breach_count": 1, "sent_count": 0, "skipped_count": 1, "generated_at": "2026-05-19T21:00:17.593173+00:00"}
+=== [check_alerts] exit 0 at 2026-05-20 05:00:19 CST (duration=18s) ===
+=== [check_alerts] 2026-05-20 06:00:08 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=2 skipped=8 ids=['memory_health_daily', 'paper_sync_all']
+  piggy-back-drift: none
+  release-pool-auto: ok age=337min reason=done
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-19T22:00:19.328936+00:00"}
+=== [check_alerts] exit 0 at 2026-05-20 06:00:19 CST (duration=13s) ===
+=== [check_alerts] 2026-05-20 07:00:03 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=2 skipped=8 ids=['release_pool', 'release_settings_audit']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=90min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-19T23:00:13.714113+00:00"}
+=== [check_alerts] exit 0 at 2026-05-20 07:00:16 CST (duration=14s) ===
+=== [check_alerts] 2026-05-20 08:00:09 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=2 skipped=8 ids=['collect_us_data', 'research_backlog_daily']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=150min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-20T00:00:31.262136+00:00"}
+=== [check_alerts] exit 0 at 2026-05-20 08:00:33 CST (duration=27s) ===
+=== [check_alerts] 2026-05-20 09:00:01 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=10 ids=[]
+  piggy-back-drift: none
+  release-pool-auto: ok age=210min reason=done
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-20T01:00:15.700302+00:00"}
+=== [check_alerts] exit 0 at 2026-05-20 09:00:20 CST (duration=20s) ===
+=== [check_alerts] 2026-05-20 10:00:07 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=1 skipped=9 ids=['release_pool']
+  piggy-back-drift: none
+  release-pool-auto: ok age=270min reason=done
+breaches=1 sent=0 skipped=1
+- [BREACH] release_pool_gap level=warn title=Release pool cron gap > 4.0h (interval=180min)
+    ## 觸發條件
+    release_pool host cron fire gap 已超過 4.0 小時門檻 (interval=180min + 30min grace)。
+    - last_fire_at: 2026-05-19T21:30:04.067267+00:00
+    - gap_hours: 4.51
+    - configured_interval_minutes: 180
+    - log_path: storage/logs/cron/release_pool.log
+    
+    ## 影響
+    文章釋出中斷 = 讀者端看到平台停滯、搜尋索引停滯；Mission 第 1 條（文章品質）
+    與第 5 條（曝光流量）直接受損。若持續 >6.0h 會累積多篇 draft 排隊延遲。
+    
+    ## 建議行動
+    1. 立即手動釋出（最快復原）：
+       VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings
+    2. 診斷 host cron 是否仍在跑：
+       tail -20 storage/logs/cron/release_pool.log
+       crontab -l | grep release_pool
+    3. 若 cron daemon 卡住：重新 install crontab 或 launchd job
+    4. 若 draft 池也空（配合 draft_pool_low alert）：先補池，見 publish-checklist
+       與 .claude/skills/publication-candidates/SKILL.md 的 5-step 選題流程。
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+dispatched:
+  - skipped: level=warn title=Release pool cron gap > 4.0h (interval=180min) notif_id=df9b47b4 reason=dedup_24h
+JSON: {"breach_count": 1, "sent_count": 0, "skipped_count": 1, "generated_at": "2026-05-20T02:00:24.866741+00:00"}
+=== [check_alerts] exit 0 at 2026-05-20 10:00:26 CST (duration=21s) ===
+=== [check_alerts] 2026-05-20 11:00:02 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=10 ids=[]
+  piggy-back-drift: none
+  release-pool-auto: ok age=330min reason=done
+breaches=1 sent=0 skipped=1
+- [BREACH] release_pool_gap level=warn title=Release pool cron gap > 4.0h (interval=180min)
+    ## 觸發條件
+    release_pool host cron fire gap 已超過 4.0 小時門檻 (interval=180min + 30min grace)。
+    - last_fire_at: 2026-05-19T21:30:04.067267+00:00
+    - gap_hours: 5.5
+    - configured_interval_minutes: 180
+    - log_path: storage/logs/cron/release_pool.log
+    
+    ## 影響
+    文章釋出中斷 = 讀者端看到平台停滯、搜尋索引停滯；Mission 第 1 條（文章品質）
+    與第 5 條（曝光流量）直接受損。若持續 >6.0h 會累積多篇 draft 排隊延遲。
+    
+    ## 建議行動
+    1. 立即手動釋出（最快復原）：
+       VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings
+    2. 診斷 host cron 是否仍在跑：
+       tail -20 storage/logs/cron/release_pool.log
+       crontab -l | grep release_pool
+    3. 若 cron daemon 卡住：重新 install crontab 或 launchd job
+    4. 若 draft 池也空（配合 draft_pool_low alert）：先補池，見 publish-checklist
+       與 .claude/skills/publication-candidates/SKILL.md 的 5-step 選題流程。
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+dispatched:
+  - skipped: level=warn title=Release pool cron gap > 4.0h (interval=180min) notif_id=df9b47b4 reason=dedup_24h
+JSON: {"breach_count": 1, "sent_count": 0, "skipped_count": 1, "generated_at": "2026-05-20T03:00:19.773267+00:00"}
+=== [check_alerts] exit 0 at 2026-05-20 11:00:24 CST (duration=24s) ===
+=== [check_alerts] 2026-05-20 12:00:07 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=1 skipped=9 ids=['paper_sync_all']
+  piggy-back-drift: none
+  release-pool-auto: ok age=390min reason=done
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-20T04:00:20.940158+00:00"}
+=== [check_alerts] exit 0 at 2026-05-20 12:00:22 CST (duration=18s) ===
+=== [check_alerts] 2026-05-20 13:00:35 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=2 skipped=8 ids=['release_pool', 'release_settings_audit']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=81min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-20T05:00:44.652526+00:00"}
+=== [check_alerts] exit 0 at 2026-05-20 13:00:47 CST (duration=43s) ===
+=== [check_alerts] 2026-05-20 14:00:04 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=10 ids=[]
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=141min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-20T06:00:15.545272+00:00"}
+=== [check_alerts] exit 0 at 2026-05-20 14:00:21 CST (duration=21s) ===
+=== [check_alerts] 2026-05-20 15:00:10 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=1 skipped=9 ids=['collect_tw_data']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=92min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-20T07:00:21.609884+00:00"}
+=== [check_alerts] exit 0 at 2026-05-20 15:00:23 CST (duration=19s) ===
+=== [check_alerts] 2026-05-20 16:00:02 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=1 skipped=9 ids=['release_pool']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=152min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-20T08:00:03.458917+00:00"}
+=== [check_alerts] exit 0 at 2026-05-20 16:00:07 CST (duration=7s) ===
+=== [check_alerts] 2026-05-20 17:00:08 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=0 skipped=10 ids=[]
+  piggy-back-drift: none
+  release-pool-auto: ok age=212min reason=done
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-20T09:00:09.148057+00:00"}
+=== [check_alerts] exit 0 at 2026-05-20 17:00:10 CST (duration=4s) ===
+=== [check_alerts] 2026-05-20 18:00:05 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=1 skipped=9 ids=['paper_sync_all']
+  piggy-back-drift: none
+  release-pool-auto: ok age=272min reason=done
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-20T10:00:10.859835+00:00"}
+=== [check_alerts] exit 0 at 2026-05-20 18:00:11 CST (duration=7s) ===
+=== [check_alerts] 2026-05-20 19:00:01 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=3 skipped=11 ids=['release_settings_audit', 'audit_fb_pipeline', 'ops_dashboard']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=103min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-20T11:00:10.543575+00:00"}
+=== [check_alerts] exit 0 at 2026-05-20 19:00:11 CST (duration=11s) ===
+=== [check_alerts] 2026-05-20 20:00:06 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=2 skipped=12 ids=['audit_publish_sync', 'ops_dashboard']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=163min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-20T12:00:23.625667+00:00"}
+=== [check_alerts] exit 0 at 2026-05-20 20:00:24 CST (duration=19s) ===
+=== [check_alerts] 2026-05-20 21:00:03 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=3 skipped=11 ids=['audit_publish_sync', 'ops_dashboard', 'boss_report_4h']
+  piggy-back-drift: none
+  release-pool-auto: ok age=224min reason=done
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-20T13:00:40.786352+00:00"}
+=== [check_alerts] exit 0 at 2026-05-20 21:00:42 CST (duration=41s) ===
+=== [check_alerts] 2026-05-20 22:00:04 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=3 skipped=11 ids=['release_pool', 'audit_publish_sync', 'ops_dashboard']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=161min
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-20T14:00:34.410991+00:00"}
+=== [check_alerts] exit 0 at 2026-05-20 22:00:36 CST (duration=34s) ===
+=== [check_alerts] 2026-05-20 23:00:02 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=2 skipped=12 ids=['audit_publish_sync', 'ops_dashboard']
+  piggy-back-drift: none
+  release-pool-auto: ok age=221min reason=done
+breaches=0 sent=0 skipped=0
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [ok] host_cron_fail level=info title=Host cron failure detected
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+JSON: {"breach_count": 0, "sent_count": 0, "skipped_count": 0, "generated_at": "2026-05-20T15:00:36.985759+00:00"}
+=== [check_alerts] exit 0 at 2026-05-20 23:00:43 CST (duration=41s) ===
+=== [check_alerts] 2026-05-21 00:00:08 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=3 skipped=11 ids=['paper_sync_all', 'audit_publish_sync', 'ops_dashboard']
+  piggy-back-drift: none
+  release-pool-auto: ok age=281min reason=done
+breaches=2 sent=2 skipped=0
+- [BREACH] release_pool_gap level=warn title=Release pool cron gap > 4.0h (interval=180min)
+    ## 觸發條件
+    release_pool host cron fire gap 已超過 4.0 小時門檻 (interval=180min + 30min grace)。
+    - last_fire_at: 2026-05-20T11:19:15.979858+00:00
+    - gap_hours: 4.69
+    - configured_interval_minutes: 180
+    - log_path: storage/logs/cron/release_pool.log
+    
+    ## 影響
+    文章釋出中斷 = 讀者端看到平台停滯、搜尋索引停滯；Mission 第 1 條（文章品質）
+    與第 5 條（曝光流量）直接受損。若持續 >6.0h 會累積多篇 draft 排隊延遲。
+    
+    ## 建議行動
+    1. 立即手動釋出（最快復原）：
+       VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings
+    2. 診斷 host cron 是否仍在跑：
+       tail -20 storage/logs/cron/release_pool.log
+       crontab -l | grep release_pool
+    3. 若 cron daemon 卡住：重新 install crontab 或 launchd job
+    4. 若 draft 池也空（配合 draft_pool_low alert）：先補池，見 publish-checklist
+       與 .claude/skills/publication-candidates/SKILL.md 的 5-step 選題流程。
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [BREACH] host_cron_fail level=critical title=Host cron failure detected
+    ## 觸發條件
+    偵測到 host cron 失敗（最新 exit code != 0）。
+    - scheduler_last_tick_at: 2026-04-19T04:45:13.375232+00:00（僅供參考，v12 後不作為 breach 判準）
+    - scheduler_last_status: ok
+    - scheduler_age_minutes: 45315.4
+    - failing_logs:
+      - storage/logs/cron/paper_sync_all.log exit=1 at 2026-05-20T16:00:22.132151+00:00
+    
+    ## 影響
+    資料收集 / daily_update / release_pool 等 host cron 斷鏈 → 下游 metrics、前端顯示、
+    Supabase mirror sync 可能顯示過期資料；若失敗的是 release_pool，會同步觸發
+    release_pool_gap alert，發文節奏中斷。
+    
+    ## 建議行動
+    1. 查失敗 log： tail -20 <failing_log 路徑>
+    2. 權限問題（exit=126）： chmod +x scripts/<script>.sh
+    3. macOS Sequoia+ FDA（exit=1 + Operation not permitted）：
+       System Settings > Privacy & Security > Full Disk Access 加 script 路徑
+    4. 手動跑 failed command 驗證修復： uv run <command>
+    5. 比對 canonical schedule： crontab -l  vs config/runtime_schedules.json
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+dispatched:
+  - sent: level=warn title=Release pool cron gap > 4.0h (interval=180min) notif_id=e4f6c847 reason=ok
+  - sent: level=critical title=Host cron failure detected notif_id=a2e95cbf reason=ok
+JSON: {"breach_count": 2, "sent_count": 2, "skipped_count": 0, "generated_at": "2026-05-20T16:00:36.370258+00:00"}
+=== [check_alerts] exit 0 at 2026-05-21 00:00:45 CST (duration=40s) ===
+=== [check_alerts] 2026-05-21 01:00:01 CST start ===
+=== ops check-alerts ===
+  run-due-jobs: fired=7 skipped=7 ids=['release_pool', 'release_settings_audit', 'paper_sync_all', 'audit_publish_sync', 'audit_fb_pipeline', 'ops_dashboard', 'boss_report_4h']
+  piggy-back-drift: none
+  release-pool-auto: skip reason=interval_not_due_age=39min
+breaches=1 sent=0 skipped=1
+- [ok] release_pool_gap level=info title=Release pool cron gap > 4.0h (interval=180min)
+- [ok] draft_pool_low level=info title=Draft pool below threshold (<4)
+- [BREACH] host_cron_fail level=critical title=Host cron failure detected
+    ## 觸發條件
+    偵測到 host cron 失敗（最新 exit code != 0）。
+    - scheduler_last_tick_at: 2026-04-19T04:45:13.375232+00:00（僅供參考，v12 後不作為 breach 判準）
+    - scheduler_last_status: ok
+    - scheduler_age_minutes: 45375.9
+    - failing_logs:
+      - storage/logs/cron/ops_dashboard.log exit=1 at 2026-05-20T17:00:48.351196+00:00
+    
+    ## 影響
+    資料收集 / daily_update / release_pool 等 host cron 斷鏈 → 下游 metrics、前端顯示、
+    Supabase mirror sync 可能顯示過期資料；若失敗的是 release_pool，會同步觸發
+    release_pool_gap alert，發文節奏中斷。
+    
+    ## 建議行動
+    1. 查失敗 log： tail -20 <failing_log 路徑>
+    2. 權限問題（exit=126）： chmod +x scripts/<script>.sh
+    3. macOS Sequoia+ FDA（exit=1 + Operation not permitted）：
+       System Settings > Privacy & Security > Full Disk Access 加 script 路徑
+    4. 手動跑 failed command 驗證修復： uv run <command>
+    5. 比對 canonical schedule： crontab -l  vs config/runtime_schedules.json
+- [ok] member_qa_stale level=info title=Member Q&A pending stale
+- [ok] supabase_sync_fail level=info title=Supabase sync queue clean
+dispatched:
+  - skipped: level=critical title=Host cron failure detected notif_id=a2e95cbf reason=dedup_24h
+JSON: {"breach_count": 1, "sent_count": 0, "skipped_count": 1, "generated_at": "2026-05-20T17:01:06.644900+00:00"}
+=== [check_alerts] exit 0 at 2026-05-21 01:01:09 CST (duration=69s) ===

@@ -1,0 +1,68 @@
+{
+  "validation_date": "2026-05-11",
+  "fix_applied": "K1116d-v2: 6-month obs chunks + 14-day realtime_end overlap",
+  "before_fix": {
+    "method": "yearly obs/realtime chunks (rt_end=obs_end)",
+    "USEPU": {"total_obs": 3046, "missing_boundary_dates_dec": 8, "note": "12-01..12-08 boundary dates dropped across 7 years"},
+    "WLEMU": {"total_obs": 3046, "missing_boundary_dates_dec": 8, "note": "same pattern as USEPU"},
+    "NFCI": {"total_obs": 436, "missing_boundary_dates_dec": 0, "note": "weekly, not yearly-chunked, not affected"},
+    "ANFCI": {"total_obs": 436, "missing_boundary_dates_dec": 0, "note": "weekly, not yearly-chunked, not affected"},
+    "STLFSI": {"total_obs": 432, "missing_boundary_dates_dec": 0, "note": "weekly chained, not yearly-chunked"}
+  },
+  "after_fix": {
+    "USEPU": {
+      "total_obs": 3056,
+      "date_range": "2017-12-01..2026-04-13",
+      "gap_count_>5bd": 0,
+      "max_gap_bd": 1,
+      "max_gap_days": 1,
+      "year_boundary_dec_check": "all 9 years (2017-2025) have full 12-01..12-10 weekday coverage"
+    },
+    "WLEMU": {
+      "total_obs": 3056,
+      "date_range": "2017-12-01..2026-04-13",
+      "gap_count_>5bd": 0,
+      "max_gap_bd": 1,
+      "max_gap_days": 1,
+      "year_boundary_dec_check": "all 9 years (2017-2025) have full 12-01..12-10 weekday coverage"
+    },
+    "NFCI": {
+      "total_obs": 436,
+      "date_range": "2017-12-01..2026-04-03",
+      "gap_count_>5bd": 0,
+      "max_gap_bd": 5,
+      "max_gap_days": 7,
+      "note": "weekly Friday cadence; 5bd / 7d gaps are normal week-week intervals"
+    },
+    "ANFCI": {
+      "total_obs": 436,
+      "date_range": "2017-12-01..2026-04-03",
+      "gap_count_>5bd": 0,
+      "max_gap_bd": 5,
+      "max_gap_days": 7,
+      "note": "weekly Friday cadence; same as NFCI"
+    },
+    "STLFSI": {
+      "total_obs": 432,
+      "date_range": "2017-12-01..2026-04-03",
+      "gap_count_>5bd": 3,
+      "max_gap_bd": 15,
+      "max_gap_days": 21,
+      "note": "3 chain-transition gaps (STLFSI->STLFSI2 21d on 2020-03/04; STLFSI2->STLFSI3 14d on 2022-01; STLFSI3->STLFSI4 14d on 2022-10/11). Intrinsic to FRED publication breaks at series rotation; not a fetch bug."
+    }
+  },
+  "delta_summary": {
+    "USEPU": "+10 rows (3046 -> 3056)",
+    "WLEMU": "+10 rows (3046 -> 3056)",
+    "NFCI": "0 rows (unchanged)",
+    "ANFCI": "0 rows (unchanged)",
+    "STLFSI": "0 rows (unchanged)"
+  },
+  "audit_methodology": {
+    "scan_scope": "full population per series (all rows in vintage_with_release_date.csv)",
+    "gap_metric": "(a) calendar-day gap, (b) business-day gap (pd.bdate_range)",
+    "spot_check": "explicit 12-01..12-10 weekday presence per year (the original Codex MAJOR pattern)",
+    "blind_spots_addressed": "v1 audit only checked DATE.diff() calendar gaps; missed boundary dates dropped between consecutive obs whose calendar diff was <=3d (because the missing date was a single day surrounded by present neighbors). v2 now does explicit weekday presence per year-month window."
+  },
+  "verdict": "PASS — chunk-boundary fix verified. All daily series gap-free at >5bd threshold. Weekly STLFSI chain gaps documented as intrinsic publication breaks."
+}

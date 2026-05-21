@@ -1,0 +1,191 @@
+=== [refresh_paper_snapshots] piggy-back fire at 2026-05-04T11:00:01.467532+00:00 ===
+=== [refresh_paper_snapshots] piggy-back fire at 2026-05-04T11:00:06.009434+00:00 ===
+[refresh] checked=18 skipped=9 errors=0 would_update=0 written=0
+  fresh  paper/crypto-fear-channel/data/spy_btc_usd_vix_2015-2026.csv: 2026-05-01 (no new data)
+  SKIP   paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv: frozen_sample_end_2022
+  fresh  paper/garch-x-vix/data/gld_vix_gvz_2000-2026.csv: 2026-05-01 (no new data)
+  fresh  paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv: 2026-05-01 (no new data)
+  fresh  paper/garch-x-vix/data/uso_vix_ovx_2005-2026.csv: 2026-05-01 (no new data)
+  fresh  paper/leverage-direction/data/spy_qqq_gld_tlt_eem_iwm_slv_btc_usd_vix_2010-2026.csv: 2026-05-01 (no new data)
+  fresh  paper/leverage-direction/data/spy_vix_2004-2026.csv: 2026-05-01 (no new data)
+  fresh  paper/leverage-direction/data/vix_daily.csv: 2026-05-01 (no new data)
+  fresh  paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv: 2026-05-01 (no new data)
+  fresh  paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv: 2026-05-01 (no new data)
+  SKIP   paper/vt-insurance-cost/data/gld_2006_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/gld_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_2006_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_gld_2006-2024_rebal_snapshot.csv: frozen_by_token
+  SKIP   paper/vt-insurance-cost/data/spy_gld_vix_vvix_2012-2024_snapshot.csv: frozen_by_token
+  SKIP   paper/vt-insurance-cost/data/vix_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/vvix_2012_2024.csv: unknown_schema
+=== [refresh_paper_snapshots] exit 0 at 2026-05-04T11:00:16.671664+00:00 (duration=10.7s) ===
+[refresh] checked=18 skipped=9 errors=0 would_update=0 written=0
+  fresh  paper/crypto-fear-channel/data/spy_btc_usd_vix_2015-2026.csv: 2026-05-01 (no new data)
+  SKIP   paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv: frozen_sample_end_2022
+  fresh  paper/garch-x-vix/data/gld_vix_gvz_2000-2026.csv: 2026-05-01 (no new data)
+  fresh  paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv: 2026-05-01 (no new data)
+  fresh  paper/garch-x-vix/data/uso_vix_ovx_2005-2026.csv: 2026-05-01 (no new data)
+  fresh  paper/leverage-direction/data/spy_qqq_gld_tlt_eem_iwm_slv_btc_usd_vix_2010-2026.csv: 2026-05-01 (no new data)
+  fresh  paper/leverage-direction/data/spy_vix_2004-2026.csv: 2026-05-01 (no new data)
+  fresh  paper/leverage-direction/data/vix_daily.csv: 2026-05-01 (no new data)
+  fresh  paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv: 2026-05-01 (no new data)
+  fresh  paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv: 2026-05-01 (no new data)
+  SKIP   paper/vt-insurance-cost/data/gld_2006_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/gld_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_2006_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_gld_2006-2024_rebal_snapshot.csv: frozen_by_token
+  SKIP   paper/vt-insurance-cost/data/spy_gld_vix_vvix_2012-2024_snapshot.csv: frozen_by_token
+  SKIP   paper/vt-insurance-cost/data/vix_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/vvix_2012_2024.csv: unknown_schema
+=== [refresh_paper_snapshots] exit 0 at 2026-05-04T11:00:16.901501+00:00 (duration=15.4s) ===
+=== [refresh_paper_snapshots] piggy-back fire at 2026-05-10T22:00:01.895363+00:00 ===
+=== [refresh_paper_snapshots] piggy-back fire at 2026-05-10T22:00:05.677398+00:00 ===
+[refresh] checked=18 skipped=9 errors=0 would_update=0 written=9
+  WROTE paper/crypto-fear-channel/data/spy_btc_usd_vix_2015-2026.csv: 2026-05-01 → 2026-05-08 (+5 rows)
+  SKIP   paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv: frozen_sample_end_2022
+  WROTE paper/garch-x-vix/data/gld_vix_gvz_2000-2026.csv: 2026-05-01 → 2026-05-08 (+5 rows)
+  WROTE paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv: 2026-05-01 → 2026-05-08 (+5 rows)
+  WROTE paper/garch-x-vix/data/uso_vix_ovx_2005-2026.csv: 2026-05-01 → 2026-05-08 (+5 rows)
+  WROTE paper/leverage-direction/data/spy_qqq_gld_tlt_eem_iwm_slv_btc_usd_vix_2010-2026.csv: 2026-05-01 → 2026-05-08 (+5 rows)
+  WROTE paper/leverage-direction/data/spy_vix_2004-2026.csv: 2026-05-01 → 2026-05-08 (+5 rows)
+  WROTE paper/leverage-direction/data/vix_daily.csv: 2026-05-01 → 2026-05-08 (+5 rows)
+  WROTE paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv: 2026-05-01 → 2026-05-08 (+5 rows)
+  WROTE paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv: 2026-05-01 → 2026-05-08 (+5 rows)
+  SKIP   paper/vt-insurance-cost/data/gld_2006_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/gld_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_2006_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_gld_2006-2024_rebal_snapshot.csv: frozen_by_token
+  SKIP   paper/vt-insurance-cost/data/spy_gld_vix_vvix_2012-2024_snapshot.csv: frozen_by_token
+  SKIP   paper/vt-insurance-cost/data/vix_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/vvix_2012_2024.csv: unknown_schema
+[refresh] checked=18 skipped=9 errors=0 would_update=0 written=2
+  fresh  paper/crypto-fear-channel/data/spy_btc_usd_vix_2015-2026.csv: 2026-05-08 (no new data)
+  SKIP   paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv: frozen_sample_end_2022
+  fresh  paper/garch-x-vix/data/gld_vix_gvz_2000-2026.csv: 2026-05-08 (no new data)
+  fresh  paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv: 2026-05-08 (no new data)
+  fresh  paper/garch-x-vix/data/uso_vix_ovx_2005-2026.csv: 2026-05-08 (no new data)
+  fresh  paper/leverage-direction/data/spy_qqq_gld_tlt_eem_iwm_slv_btc_usd_vix_2010-2026.csv: 2026-05-08 (no new data)
+  fresh  paper/leverage-direction/data/spy_vix_2004-2026.csv: 2026-05-08 (no new data)
+  fresh  paper/leverage-direction/data/vix_daily.csv: 2026-05-08 (no new data)
+  WROTE paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv: 2026-05-01 → 2026-05-08 (+5 rows)
+  WROTE paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv: 2026-05-01 → 2026-05-08 (+5 rows)
+  SKIP   paper/vt-insurance-cost/data/gld_2006_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/gld_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_2006_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_gld_2006-2024_rebal_snapshot.csv: frozen_by_token
+  SKIP   paper/vt-insurance-cost/data/spy_gld_vix_vvix_2012-2024_snapshot.csv: frozen_by_token
+  SKIP   paper/vt-insurance-cost/data/vix_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/vvix_2012_2024.csv: unknown_schema
+=== [refresh_paper_snapshots] exit 0 at 2026-05-10T22:00:16.668914+00:00 (duration=14.8s) ===
+=== [refresh_paper_snapshots] exit 0 at 2026-05-10T22:00:16.755099+00:00 (duration=11.1s) ===
+=== [refresh_paper_snapshots] piggy-back fire at 2026-05-17T22:00:09.648926+00:00 ===
+[refresh] checked=20 skipped=11 errors=0 would_update=0 written=9
+  WROTE paper/crypto-fear-channel/data/spy_btc_usd_vix_2015-2026.csv: 2026-05-01 → 2026-05-15 (+10 rows)
+  SKIP   paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv: frozen_sample_end_2022
+  WROTE paper/garch-x-vix/data/gld_vix_gvz_2000-2026.csv: 2026-05-01 → 2026-05-15 (+10 rows)
+  WROTE paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv: 2026-05-01 → 2026-05-15 (+10 rows)
+  WROTE paper/garch-x-vix/data/uso_vix_ovx_2005-2026.csv: 2026-05-01 → 2026-05-15 (+10 rows)
+  WROTE paper/leverage-direction/data/spy_qqq_gld_tlt_eem_iwm_slv_btc_usd_vix_2010-2026.csv: 2026-05-01 → 2026-05-15 (+10 rows)
+  WROTE paper/leverage-direction/data/spy_vix_2004-2026.csv: 2026-05-01 → 2026-05-15 (+10 rows)
+  WROTE paper/leverage-direction/data/vix_daily.csv: 2026-05-01 → 2026-05-15 (+10 rows)
+  WROTE paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv: 2026-05-01 → 2026-05-15 (+10 rows)
+  SKIP   paper/taiwan-vt/data/_twii_1997_2007_snapshot.csv: frozen_by_token
+  SKIP   paper/taiwan-vt/data/_usdtwd_snapshot.csv: unknown_schema
+  WROTE paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv: 2026-05-01 → 2026-05-15 (+10 rows)
+  SKIP   paper/vt-insurance-cost/data/gld_2006_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/gld_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_2006_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_gld_2006-2024_rebal_snapshot.csv: frozen_by_token
+  SKIP   paper/vt-insurance-cost/data/spy_gld_vix_vvix_2012-2024_snapshot.csv: frozen_by_token
+  SKIP   paper/vt-insurance-cost/data/vix_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/vvix_2012_2024.csv: unknown_schema
+[refresh] checked=20 skipped=11 errors=0 would_update=0 written=9
+  WROTE paper/crypto-fear-channel/data/spy_btc_usd_vix_2015-2026.csv: 2026-05-01 → 2026-05-15 (+10 rows)
+  SKIP   paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv: frozen_sample_end_2022
+  WROTE paper/garch-x-vix/data/gld_vix_gvz_2000-2026.csv: 2026-05-01 → 2026-05-15 (+10 rows)
+  WROTE paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv: 2026-05-01 → 2026-05-15 (+10 rows)
+  WROTE paper/garch-x-vix/data/uso_vix_ovx_2005-2026.csv: 2026-05-01 → 2026-05-15 (+10 rows)
+  WROTE paper/leverage-direction/data/spy_qqq_gld_tlt_eem_iwm_slv_btc_usd_vix_2010-2026.csv: 2026-05-01 → 2026-05-15 (+10 rows)
+  WROTE paper/leverage-direction/data/spy_vix_2004-2026.csv: 2026-05-01 → 2026-05-15 (+10 rows)
+  WROTE paper/leverage-direction/data/vix_daily.csv: 2026-05-01 → 2026-05-15 (+10 rows)
+  WROTE paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv: 2026-05-01 → 2026-05-15 (+10 rows)
+  SKIP   paper/taiwan-vt/data/_twii_1997_2007_snapshot.csv: frozen_by_token
+  SKIP   paper/taiwan-vt/data/_usdtwd_snapshot.csv: unknown_schema
+  WROTE paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv: 2026-05-01 → 2026-05-15 (+10 rows)
+  SKIP   paper/vt-insurance-cost/data/gld_2006_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/gld_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_2006_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_gld_2006-2024_rebal_snapshot.csv: frozen_by_token
+  SKIP   paper/vt-insurance-cost/data/spy_gld_vix_vvix_2012-2024_snapshot.csv: frozen_by_token
+  SKIP   paper/vt-insurance-cost/data/vix_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/vvix_2012_2024.csv: unknown_schema
+=== [refresh_paper_snapshots] exit 0 at 2026-05-17T22:00:30.635579+00:00 (duration=21.0s) ===
+[refresh] checked=20 skipped=11 errors=0 would_update=0 written=9
+  WROTE paper/crypto-fear-channel/data/spy_btc_usd_vix_2015-2026.csv: 2026-05-15 → 2026-05-18 (+1 rows)
+  SKIP   paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv: frozen_sample_end_2022
+  WROTE paper/garch-x-vix/data/gld_vix_gvz_2000-2026.csv: 2026-05-15 → 2026-05-18 (+1 rows)
+  WROTE paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv: 2026-05-15 → 2026-05-18 (+1 rows)
+  WROTE paper/garch-x-vix/data/uso_vix_ovx_2005-2026.csv: 2026-05-15 → 2026-05-18 (+1 rows)
+  WROTE paper/leverage-direction/data/spy_qqq_gld_tlt_eem_iwm_slv_btc_usd_vix_2010-2026.csv: 2026-05-15 → 2026-05-18 (+1 rows)
+  WROTE paper/leverage-direction/data/spy_vix_2004-2026.csv: 2026-05-15 → 2026-05-18 (+1 rows)
+  WROTE paper/leverage-direction/data/vix_daily.csv: 2026-05-15 → 2026-05-18 (+1 rows)
+  WROTE paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv: 2026-05-15 → 2026-05-18 (+1 rows)
+  SKIP   paper/taiwan-vt/data/_twii_1997_2007_snapshot.csv: frozen_by_token
+  SKIP   paper/taiwan-vt/data/_usdtwd_snapshot.csv: unknown_schema
+  WROTE paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv: 2026-05-15 → 2026-05-18 (+1 rows)
+  SKIP   paper/vt-insurance-cost/data/gld_2006_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/gld_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_2006_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_gld_2006-2024_rebal_snapshot.csv: frozen_by_token
+  SKIP   paper/vt-insurance-cost/data/spy_gld_vix_vvix_2012-2024_snapshot.csv: frozen_by_token
+  SKIP   paper/vt-insurance-cost/data/vix_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/vvix_2012_2024.csv: unknown_schema
+[refresh] checked=20 skipped=11 errors=0 would_update=0 written=0
+  fresh  paper/crypto-fear-channel/data/spy_btc_usd_vix_2015-2026.csv: 2026-05-18 (no new data)
+  SKIP   paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv: frozen_sample_end_2022
+  fresh  paper/garch-x-vix/data/gld_vix_gvz_2000-2026.csv: 2026-05-18 (no new data)
+  fresh  paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv: 2026-05-18 (no new data)
+  fresh  paper/garch-x-vix/data/uso_vix_ovx_2005-2026.csv: 2026-05-18 (no new data)
+  fresh  paper/leverage-direction/data/spy_qqq_gld_tlt_eem_iwm_slv_btc_usd_vix_2010-2026.csv: 2026-05-18 (no new data)
+  fresh  paper/leverage-direction/data/spy_vix_2004-2026.csv: 2026-05-18 (no new data)
+  fresh  paper/leverage-direction/data/vix_daily.csv: 2026-05-18 (no new data)
+  fresh  paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv: 2026-05-18 (no new data)
+  SKIP   paper/taiwan-vt/data/_twii_1997_2007_snapshot.csv: frozen_by_token
+  SKIP   paper/taiwan-vt/data/_usdtwd_snapshot.csv: unknown_schema
+  fresh  paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv: 2026-05-18 (no new data)
+  SKIP   paper/vt-insurance-cost/data/gld_2006_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/gld_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_2006_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_gld_2006-2024_rebal_snapshot.csv: frozen_by_token
+  SKIP   paper/vt-insurance-cost/data/spy_gld_vix_vvix_2012-2024_snapshot.csv: frozen_by_token
+  SKIP   paper/vt-insurance-cost/data/vix_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/vvix_2012_2024.csv: unknown_schema
+[refresh] checked=20 skipped=11 errors=0 would_update=0 written=9
+  WROTE paper/crypto-fear-channel/data/spy_btc_usd_vix_2015-2026.csv: 2026-05-18 → 2026-05-19 (+1 rows)
+  SKIP   paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv: frozen_sample_end_2022
+  WROTE paper/garch-x-vix/data/gld_vix_gvz_2000-2026.csv: 2026-05-18 → 2026-05-19 (+1 rows)
+  WROTE paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv: 2026-05-18 → 2026-05-19 (+1 rows)
+  WROTE paper/garch-x-vix/data/uso_vix_ovx_2005-2026.csv: 2026-05-18 → 2026-05-19 (+1 rows)
+  WROTE paper/leverage-direction/data/spy_qqq_gld_tlt_eem_iwm_slv_btc_usd_vix_2010-2026.csv: 2026-05-18 → 2026-05-19 (+1 rows)
+  WROTE paper/leverage-direction/data/spy_vix_2004-2026.csv: 2026-05-18 → 2026-05-19 (+1 rows)
+  WROTE paper/leverage-direction/data/vix_daily.csv: 2026-05-18 → 2026-05-19 (+1 rows)
+  WROTE paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv: 2026-05-18 → 2026-05-19 (+1 rows)
+  SKIP   paper/taiwan-vt/data/_twii_1997_2007_snapshot.csv: frozen_by_token
+  SKIP   paper/taiwan-vt/data/_usdtwd_snapshot.csv: unknown_schema
+  WROTE paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv: 2026-05-18 → 2026-05-19 (+1 rows)
+  SKIP   paper/vt-insurance-cost/data/gld_2006_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/gld_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_2006_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/spy_gld_2006-2024_rebal_snapshot.csv: frozen_by_token
+  SKIP   paper/vt-insurance-cost/data/spy_gld_vix_vvix_2012-2024_snapshot.csv: frozen_by_token
+  SKIP   paper/vt-insurance-cost/data/vix_2012_2024.csv: non_date_indexed_schema (header[0]=Price)
+  SKIP   paper/vt-insurance-cost/data/vvix_2012_2024.csv: unknown_schema

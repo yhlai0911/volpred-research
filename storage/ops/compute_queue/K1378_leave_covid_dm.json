@@ -1,0 +1,23 @@
+{
+  "id": "K1378_leave_covid_dm",
+  "title": "K1378: Paper 9 SF1 Fix — Leave-COVID-out DM Test",
+  "script_path": "experiments/k1378/k1378.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "failed",
+  "queued_at": "2026-05-19T09:13:00Z",
+  "started_at": "2026-05-19T09:15:08Z",
+  "completed_at": "2026-05-19T09:15:11Z",
+  "exit_code": 1,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/K1378_leave_covid_dm.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/K1378_leave_covid_dm.stderr",
+  "result_artifact": "experiments/k1378/k1378_results.json",
+  "claude_followup": {
+    "brief": "K1378 leave-COVID-out DM test for Paper 9 SF1 fix. Check if |DM_t_no_covid| > 3.0: if YES → SF1 REFUTED (A4f robust outside COVID) → add Table to paper body; if NO → SF1 CONFIRMED → major revision needed. Update knowledge.json with verdict + paper 9 narrative decision.",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 1800
+}

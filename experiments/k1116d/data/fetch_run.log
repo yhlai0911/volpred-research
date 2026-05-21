@@ -1,0 +1,50 @@
+/Users/yhlai0911/opt/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/masked.py:61: UserWarning: Pandas requires version '1.3.6' or newer of 'bottleneck' (version '1.3.4' currently installed).
+  from pandas.core import (
+======================================================================
+K1116d: TRUE ALFRED first-release vintage fetch (FRED API output_type=4)
+======================================================================
+
+[STLFSI] cadence=weekly_fri  chain=['STLFSI', 'STLFSI2', 'STLFSI3', 'STLFSI4']
+    STLFSI  obs 2017-12-01..2020-04-30
+    STLFSI2  obs 2020-04-01..2022-01-31
+    STLFSI3  obs 2022-01-15..2022-11-30
+    STLFSI4  obs 2022-11-01..2026-04-13
+  fetched 432 first-release rows  DATE 2017-12-01..2026-04-03  REL  2017-12-07..2026-04-08
+  weekly PIT: 437 rows
+
+[NFCI] cadence=weekly_fri  chain=['NFCI']
+    NFCI  obs 2017-12-01..2026-04-13
+  fetched 436 first-release rows  DATE 2017-12-01..2026-04-03  REL  2017-12-06..2026-04-08
+  weekly PIT: 437 rows
+
+[ANFCI] cadence=weekly_fri  chain=['ANFCI']
+    ANFCI  obs 2017-12-01..2026-04-13
+  fetched 436 first-release rows  DATE 2017-12-01..2026-04-03  REL  2017-12-06..2026-04-08
+  weekly PIT: 437 rows
+
+[USEPU] cadence=daily  chain=['USEPUINDXD']
+    USEPUINDXD  obs 2017-12-01..2018-12-01
+    USEPUINDXD  obs 2018-12-02..2019-12-02
+    USEPUINDXD  obs 2019-12-03..2020-12-03
+    USEPUINDXD  obs 2020-12-04..2021-12-04
+    USEPUINDXD  obs 2021-12-05..2022-12-05
+    USEPUINDXD  obs 2022-12-06..2023-12-06
+    USEPUINDXD  obs 2023-12-07..2024-12-07
+    USEPUINDXD  obs 2024-12-08..2025-12-08
+    USEPUINDXD  obs 2025-12-09..2026-04-13
+  fetched 3046 first-release rows  DATE 2017-12-01..2026-04-12  REL  2017-12-01..2026-04-13
+  weekly PIT: 439 rows
+
+[WLEMU] cadence=daily  chain=['WLEMUINDXD']
+    WLEMUINDXD  obs 2017-12-01..2018-12-01
+  FAILED: FRED API failed for WLEMUINDXD 2017-12-01..2018-12-01: HTTPSConnectionPool(host='api.stlouisfed.org', port=443): Max retries exceeded with url: /fred/series/observations?series_id=WLEMUINDXD&api_key=77bce720a411739e3bb68d05e050ac60&file_type=json&output_type=4&observation_start=2017-12-01&observation_end=2018-12-01&realtime_start=2017-12-01&realtime_end=2018-12-01&limit=100000 (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7fafa8794ac0>: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known'))
+
+Fetch log saved: /Users/yhlai0911/Desktop/volpred-research/experiments/k1116d/data/fetch_log.json
+
+Fetching revision-corrected (fredgraph) for comparison snapshots...
+  STLFSI revised snapshot fetch failed: HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Max retries exceeded with url: /graph/fredgraph.csv?id=STLFSI4 (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7fafa8794f10>: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known'))
+  NFCI revised snapshot fetch failed: HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Max retries exceeded with url: /graph/fredgraph.csv?id=NFCI (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7fafa8794cd0>: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known'))
+  ANFCI revised snapshot fetch failed: HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Max retries exceeded with url: /graph/fredgraph.csv?id=ANFCI (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7fafa8794f40>: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known'))
+  USEPU revised snapshot fetch failed: HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Max retries exceeded with url: /graph/fredgraph.csv?id=USEPUINDXD (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7fafa8794e50>: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known'))
+  WLEMU revised snapshot fetch failed: HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Max retries exceeded with url: /graph/fredgraph.csv?id=WLEMUINDXD (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7fafa8794100>: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known'))
+======================================================================

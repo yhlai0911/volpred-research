@@ -1,0 +1,186 @@
+{
+  "experiment_id": "K1373",
+  "title": "台股除權息日波動率事件研究",
+  "description": "Event study of absolute log returns around Taiwan stock/ETF dividend ex-dates. Tests whether ex-date volatility is systematically elevated vs non-event control days, and whether pre-window (buildup) and post-window (reversion) patterns exist.",
+  "date": "2026-05-18",
+  "assets": [
+    "0050.TW",
+    "0056.TW",
+    "2330.TW",
+    "2317.TW",
+    "2882.TW"
+  ],
+  "period": {
+    "start": "2015-01-01",
+    "end": "2025-12-31"
+  },
+  "event_window": 10,
+  "measure": "absolute log return |log(P_t / P_{t-1})|",
+  "per_asset": {
+    "0050.TW": {
+      "n_ex_dates": 21,
+      "mean_absr_pre": 0.00801821510385043,
+      "mean_absr_exdate": 0.009699603968501162,
+      "mean_absr_post": 0.008433580473391308,
+      "mean_absr_control": 0.008113267691004665,
+      "ttest_exdate_vs_control": {
+        "t_stat": 0.69016019828058,
+        "p_value": 0.4979271377276009,
+        "n_ex": 21,
+        "n_control": 2244
+      },
+      "mannwhitney_exdate_vs_control": {
+        "statistic": 24978.0,
+        "p_value": 0.6351221046936972
+      },
+      "cohens_d": 0.1840222345361706,
+      "ttest_pre_vs_control": {
+        "t_stat": -0.15875728427936833,
+        "p_value": 0.8739929825130404
+      },
+      "ttest_post_vs_control": {
+        "t_stat": 0.5146612774263671,
+        "p_value": 0.6072682027872535
+      }
+    },
+    "0056.TW": {
+      "n_ex_dates": 18,
+      "mean_absr_pre": 0.0070829906114643765,
+      "mean_absr_exdate": 0.006647932496461792,
+      "mean_absr_post": 0.006482770848106405,
+      "mean_absr_control": 0.0056458239228961375,
+      "ttest_exdate_vs_control": {
+        "t_stat": 0.702880673987723,
+        "p_value": 0.49148461039890184,
+        "n_ex": 18,
+        "n_control": 2302
+      },
+      "mannwhitney_exdate_vs_control": {
+        "statistic": 22817.5,
+        "p_value": 0.4584129943913855
+      },
+      "cohens_d": 0.15872885804782738,
+      "ttest_pre_vs_control": {
+        "t_stat": 1.867946724119881,
+        "p_value": 0.06330965125604536
+      },
+      "ttest_post_vs_control": {
+        "t_stat": 1.842452120411426,
+        "p_value": 0.06679782089000384
+      }
+    },
+    "2330.TW": {
+      "n_ex_dates": 31,
+      "mean_absr_pre": 0.012837436782390434,
+      "mean_absr_exdate": 0.01345852182461417,
+      "mean_absr_post": 0.011894455105218516,
+      "mean_absr_control": 0.012259254672047267,
+      "ttest_exdate_vs_control": {
+        "t_stat": 0.6246419416972274,
+        "p_value": 0.536751922030028,
+        "n_ex": 31,
+        "n_control": 2023
+      },
+      "mannwhitney_exdate_vs_control": {
+        "statistic": 34685.0,
+        "p_value": 0.30970231006392435
+      },
+      "cohens_d": 0.10100427639272133,
+      "ttest_pre_vs_control": {
+        "t_stat": 0.9256566014002189,
+        "p_value": 0.35511484020425144
+      },
+      "ttest_post_vs_control": {
+        "t_stat": -0.5415662393695482,
+        "p_value": 0.5883980928034518
+      }
+    },
+    "2317.TW": {
+      "n_ex_dates": 11,
+      "mean_absr_pre": 0.013630137385644657,
+      "mean_absr_exdate": 0.013180886211390047,
+      "mean_absr_post": 0.011016198795793417,
+      "mean_absr_control": 0.011698504273121142,
+      "ttest_exdate_vs_control": {
+        "t_stat": 0.6444322335194846,
+        "p_value": 0.5334435391608416,
+        "n_ex": 11,
+        "n_control": 2443
+      },
+      "mannwhitney_exdate_vs_control": {
+        "statistic": 16807.0,
+        "p_value": 0.15042694762738412
+      },
+      "cohens_d": 0.11660584203438265,
+      "ttest_pre_vs_control": {
+        "t_stat": 1.7131193787414152,
+        "p_value": 0.08924506793886584
+      },
+      "ttest_post_vs_control": {
+        "t_stat": -0.6364016377752822,
+        "p_value": 0.5256997169435038
+      }
+    },
+    "2882.TW": {
+      "n_ex_dates": 11,
+      "mean_absr_pre": 0.010665875738994574,
+      "mean_absr_exdate": 0.015078576651056856,
+      "mean_absr_post": 0.010457991876412743,
+      "mean_absr_control": 0.009694762783953828,
+      "ttest_exdate_vs_control": {
+        "t_stat": 1.9509700882459617,
+        "p_value": 0.07928283764368935,
+        "n_ex": 11,
+        "n_control": 2443
+      },
+      "mannwhitney_exdate_vs_control": {
+        "statistic": 18939.0,
+        "p_value": 0.01892239859734775
+      },
+      "cohens_d": 0.5165642472896108,
+      "ttest_pre_vs_control": {
+        "t_stat": 1.0027202304602887,
+        "p_value": 0.3180115841430257
+      },
+      "ttest_post_vs_control": {
+        "t_stat": 0.7620642481966681,
+        "p_value": 0.44752508082496645
+      }
+    }
+  },
+  "pooled": {
+    "n_events_total": 92,
+    "n_ex_obs": 92,
+    "mean_absr_pre": 0.010473349645148377,
+    "mean_absr_exdate": 0.011428508003530347,
+    "mean_absr_post": 0.009783579015272343,
+    "mean_absr_control": 0.009451513137591195,
+    "ttest_exdate_vs_control": {
+      "t_stat": 1.967189378442133,
+      "p_value": 0.05214880134149938,
+      "n_ex": 92,
+      "n_control": 11455
+    },
+    "mannwhitney_exdate_vs_control": {
+      "statistic": 614435.0,
+      "p_value": 0.005992493979816884
+    },
+    "cohens_d": 0.18782806226309565,
+    "ttest_pre_vs_control": {
+      "t_stat": 2.9181719804427795,
+      "p_value": 0.003594486083422091
+    },
+    "ttest_post_vs_control": {
+      "t_stat": 0.9883388393743006,
+      "p_value": 0.3232067035219271
+    }
+  },
+  "verdict": "CONDITIONAL_PASS",
+  "summary": "Ex-date |r| is marginally elevated vs control days (pooled t-stat=1.967, p=0.0521, Cohen's d=0.188). Result is marginal (0.05 ≤ p < 0.10); treat with caution.",
+  "methodology_notes": {
+    "lookahead": "CLEAN — ex-dates from external dividend calendar (yfinance .dividends index); no future return data used to classify days",
+    "seed": "np.random.seed(42)",
+    "control_definition": "all trading days with min distance > EVENT_WINDOW from any ex-date for the same asset",
+    "ex_date_alignment": "if ex-date falls on non-trading day, use next available trading day"
+  }
+}

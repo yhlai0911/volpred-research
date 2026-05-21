@@ -1,0 +1,189 @@
+{
+  "paper": "eav-universal-magnitude",
+  "match_rate": 1.0,
+  "n_pass": 20,
+  "n_total": 20,
+  "alert_level": "green",
+  "cells": [
+    {
+      "label": "theta_eav_TW",
+      "status": "MATCH",
+      "expected": 6.362165248598386e-05,
+      "actual": 6.362165248598386e-05,
+      "rtol": 0.0001,
+      "paper_loc": "Table 1, TW row, \u03b8\u0302_EAV",
+      "source": "experiments/k1145/k1145_results.json"
+    },
+    {
+      "label": "cluster_t_TW",
+      "status": "MATCH",
+      "expected": 5.24205446767625,
+      "actual": 5.24205446767625,
+      "rtol": 0.0001,
+      "paper_loc": "Table 1, TW row, cluster-boot t",
+      "source": "experiments/k1145/k1145_results.json"
+    },
+    {
+      "label": "ci_lo_TW",
+      "status": "MATCH",
+      "expected": 4.1306308727984814e-05,
+      "actual": 4.1306308727984814e-05,
+      "rtol": 0.001,
+      "paper_loc": "Table 1, TW row, 95% CI lower",
+      "source": "experiments/k1145/k1145_results.json"
+    },
+    {
+      "label": "ci_hi_TW",
+      "status": "MATCH",
+      "expected": 9.380079088948486e-05,
+      "actual": 9.380079088948486e-05,
+      "rtol": 0.001,
+      "paper_loc": "Table 1, TW row, 95% CI upper",
+      "source": "experiments/k1145/k1145_results.json"
+    },
+    {
+      "label": "theta_eav_US",
+      "status": "MATCH",
+      "expected": 0.00019089860360002893,
+      "actual": 0.00019089860360002893,
+      "rtol": 0.0001,
+      "paper_loc": "Table 1, US row, \u03b8\u0302_EAV",
+      "source": "experiments/k1147/k1147_results.json"
+    },
+    {
+      "label": "cluster_t_US",
+      "status": "MATCH",
+      "expected": 4.495682046447166,
+      "actual": 4.495682046447166,
+      "rtol": 0.0001,
+      "paper_loc": "Table 1, US row, cluster-boot t",
+      "source": "experiments/k1147/k1147_results.json"
+    },
+    {
+      "label": "ci_lo_US",
+      "status": "MATCH",
+      "expected": 0.00012854708414741794,
+      "actual": 0.00012854708414741794,
+      "rtol": 0.001,
+      "paper_loc": "Table 1, US row, 95% CI lower",
+      "source": "experiments/k1147/k1147_results.json"
+    },
+    {
+      "label": "ci_hi_US",
+      "status": "MATCH",
+      "expected": 0.00027972115868475005,
+      "actual": 0.00027972115868475005,
+      "rtol": 0.001,
+      "paper_loc": "Table 1, US row, 95% CI upper",
+      "source": "experiments/k1147/k1147_results.json"
+    },
+    {
+      "label": "theta_eav_JP",
+      "status": "MATCH",
+      "expected": 0.00014127865441754286,
+      "actual": 0.00014127865441754286,
+      "rtol": 0.0001,
+      "paper_loc": "Table 1, JP row, \u03b8\u0302_EAV",
+      "source": "experiments/k1150/k1150_results.json"
+    },
+    {
+      "label": "cluster_t_JP",
+      "status": "MATCH",
+      "expected": 11.988711745888638,
+      "actual": 11.988711745888638,
+      "rtol": 0.0001,
+      "paper_loc": "Table 1, JP row, cluster-boot t",
+      "source": "experiments/k1150/k1150_results.json"
+    },
+    {
+      "label": "ci_lo_JP",
+      "status": "MATCH",
+      "expected": 0.00012905130436150728,
+      "actual": 0.00012905130436150728,
+      "rtol": 0.001,
+      "paper_loc": "Table 1, JP row, 95% CI lower",
+      "source": "experiments/k1150/k1150_results.json"
+    },
+    {
+      "label": "ci_hi_JP",
+      "status": "MATCH",
+      "expected": 0.00017575756620675766,
+      "actual": 0.00017575756620675766,
+      "rtol": 0.001,
+      "paper_loc": "Table 1, JP row, 95% CI upper",
+      "source": "experiments/k1150/k1150_results.json"
+    },
+    {
+      "label": "placebo_n_TW",
+      "status": "MATCH",
+      "expected": 60,
+      "actual": 60,
+      "rtol": 0,
+      "paper_loc": "Table 2, TW row, n_placebo",
+      "source": "experiments/k1145/k1145_placebo_results.json"
+    },
+    {
+      "label": "placebo_rejection_TW",
+      "status": "MATCH",
+      "expected": 0.0,
+      "actual": 0.0,
+      "rtol": 0,
+      "paper_loc": "Table 2, TW row, rejection rate",
+      "source": "experiments/k1145/k1145_placebo_results.json"
+    },
+    {
+      "label": "placebo_z_US",
+      "status": "MATCH",
+      "expected": 70.74197260419099,
+      "actual": 70.74197260419099,
+      "rtol": 0.001,
+      "paper_loc": "Table 2, US row, placebo z",
+      "source": "experiments/k1147/k1147_placebo_results.json"
+    },
+    {
+      "label": "placebo_z_JP",
+      "status": "MATCH",
+      "expected": 38.64792142936809,
+      "actual": 38.64792142936809,
+      "rtol": 0.001,
+      "paper_loc": "Table 2, JP row, placebo z",
+      "source": "experiments/k1150/k1150_placebo_results.json"
+    },
+    {
+      "label": "h1_absorption_US_is_t",
+      "status": "MATCH",
+      "expected": 23.812069612851634,
+      "actual": 23.812069612851634,
+      "rtol": 0.0001,
+      "paper_loc": "Table 3, US row, IS t (factor absorption)",
+      "source": "experiments/k1149/k1149_results.json"
+    },
+    {
+      "label": "h1_absorption_TW_is_t",
+      "status": "MATCH",
+      "expected": 10.618801224466884,
+      "actual": 10.618801224466884,
+      "rtol": 0.0001,
+      "paper_loc": "Table 3, TW row, IS t (factor absorption)",
+      "source": "experiments/k1149/k1149_results.json"
+    },
+    {
+      "label": "h3_interaction_US_t",
+      "status": "MATCH",
+      "expected": 5.038263489525833,
+      "actual": 5.038263489525833,
+      "rtol": 0.0001,
+      "paper_loc": "Table 3, US row, stress-interaction t",
+      "source": "experiments/k1149/k1149_results.json"
+    },
+    {
+      "label": "h3_interaction_TW_t",
+      "status": "MATCH",
+      "expected": -0.38525445175650225,
+      "actual": -0.38525445175650225,
+      "rtol": 0.0001,
+      "paper_loc": "Table 3, TW row, stress-interaction t",
+      "source": "experiments/k1149/k1149_results.json"
+    }
+  ]
+}

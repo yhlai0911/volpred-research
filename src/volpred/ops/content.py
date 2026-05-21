@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
 
@@ -174,6 +175,14 @@ def _update_content_release_settings(fields: dict, *, storage_dir: str = "storag
     local_payload = {**current, **fields, "updated_at": now_iso}
     dump_json(local, local_payload)
     remote_payload = {**fields, "updated_at": now_iso}
+    # 2026-05-04 finding #B3.5: Supabase content_release_settings.mode CHECK
+    # constraint predates the client-side 'auto' mode and only accepts
+    # ('manual','scheduled'). 'auto' is semantically a scheduled fire that
+    # bypasses force checks (see release_pool_by_settings L404), so map
+    # 'auto'→'scheduled' on the wire. Local payload keeps 'auto' as-is so
+    # release_pool_articles still bypasses the force check.
+    if remote_payload.get("mode") == "auto":
+        remote_payload["mode"] = "scheduled"
     try:
         return _patch_where("content_release_settings", {"id": "default"}, remote_payload)
     except Exception:
@@ -309,13 +318,42 @@ def release_pool_articles(
         # mile_*.json singles to read back / rewrite. feed entry already
         # holds the full content since reconcile_content_from_singles().
         article_slug = str(item.get("id", ""))
+        # K1021 incident (2026-04-30): sync_article return value used to be
+        # ignored → release_pool flipped local status to 'published' while
+        # Supabase silently kept 'draft'. Capture the result so we can
+        # surface failures via the released dict + heartbeat alerts can
+        # detect divergence (status_synced=False).
+        sync_ok = False
+        try:
+            sync_ok = bool(sync_article(item, storage_dir=publisher.reports_dir.parent))
+        except Exception as exc:
+            print(f"  [release_pool] sync_article exception for {article_slug}: {exc}")
         released.append({
             "id": article_slug,
             "title": item.get("title"),
             "status": item.get("status"),
             "published_at": item.get("published_at"),
+            "supabase_synced": bool(sync_ok),
         })
-        sync_article(item, storage_dir=publisher.reports_dir.parent)
+        if not sync_ok:
+            # 2026-05-04 finding #9 修整：sync_article 失敗必寫
+            # `.failed_supabase_syncs.json`，否則 alerts.py 的
+            # `_parse_supabase_sync_state` 抓不到 → silent gap K1021 pattern。
+            # 與 publisher.publish_milestone path 同一機制（
+            # src/volpred/publisher/publisher.py:484-501）。
+            failed_path = publisher.reports_dir.parent / ".failed_supabase_syncs.json"
+            try:
+                failed = json.loads(failed_path.read_text()) if failed_path.exists() else []
+            except Exception:
+                failed = []
+            if article_slug not in failed:
+                failed.append(article_slug)
+                failed_path.write_text(json.dumps(failed))
+            print(
+                f"  [release_pool] WARN Supabase sync failed for {article_slug} -- "
+                f"recorded to .failed_supabase_syncs.json. "
+                f"Run scripts/supabase_sync.py sync-article {article_slug} to retry."
+            )
         # Auto-mark linked questions as answered now that article is published
         _mark_questions_answered_on_publish(article_slug)
         try:
@@ -329,8 +367,51 @@ def release_pool_articles(
             pass
 
     if released:
-        dump_json(_feed_path(storage_dir), feed)
+        # 2026-05-04 finding #17 修整：feed.json 寫入須與 publisher._append_to_feed
+        # 同一 lock namespace 防 race（之前直接 dump_json 沒 lock，並發時可能與
+        # publisher 的 lock-protected write 互相覆蓋）
+        from volpred.ops.shared_lock import shared_state_lock
+        with shared_state_lock("publisher_feed", storage_dir=storage_dir):
+            dump_json(_feed_path(storage_dir), feed)
         publisher._sync_feed_to_remote()
+
+        # 2026-05-19 post-publish live verify gate (Three-Strike fix):
+        # release_pool was flipping status='published' without verifying the
+        # public URL actually resolved. Verify each released item, stamp
+        # verified_live_at on PASS, mark live_verify_failed + alert on FAIL.
+        try:
+            from volpred.publisher.live_verify import (
+                verify_article_live,
+                stamp_verified,
+                emit_verify_alert,
+            )
+
+            for released_entry in released:
+                article_id = released_entry.get("id")
+                if not article_id:
+                    continue
+                live_ok = verify_article_live(article_id)
+                target = next(
+                    (i for i in feed if i.get("id") == article_id),
+                    None,
+                )
+                if target is not None:
+                    stamp_verified(target, verified=live_ok)
+                released_entry["verified_live"] = bool(live_ok)
+                if not live_ok:
+                    emit_verify_alert(
+                        article_id,
+                        (target or {}).get("title") if target else None,
+                        storage_dir=storage_dir,
+                    )
+
+            # Re-persist feed with verify stamps under the same lock namespace.
+            with shared_state_lock("publisher_feed", storage_dir=storage_dir):
+                dump_json(_feed_path(storage_dir), feed)
+            publisher._sync_feed_to_remote()
+        except Exception as exc:
+            print(f"  [release_pool] live_verify exception: {exc}")
+
         if update_last_released:
             _update_content_release_settings(
                 {"last_released_at": released_at},
@@ -654,7 +735,11 @@ def cleanup_test_post(pub_id: str, *, hard_delete: bool = False, storage_dir: st
 
     trimmed_feed = [item for item in feed if item.get("id") != pub_id]
     if len(trimmed_feed) != len(feed):
-        dump_json(_feed_path(storage_dir), trimmed_feed)
+        # 2026-05-04 finding #17 修整：feed.json 寫入須與 publisher._append_to_feed
+        # 同一 lock namespace 防 race
+        from volpred.ops.shared_lock import shared_state_lock
+        with shared_state_lock("publisher_feed", storage_dir=storage_dir):
+            dump_json(_feed_path(storage_dir), trimmed_feed)
         result["local_feed_removed"] = True
         publisher._sync_feed_to_remote()  # internal use: keep remote feed in sync
 

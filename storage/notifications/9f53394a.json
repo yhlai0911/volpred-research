@@ -1,0 +1,20 @@
+{
+  "id": "9f53394a",
+  "subject": "[VolPred Alert][WARN] ⚠️ gemini_ask.py 已呼叫 — 產生 Gemini API 費用",
+  "body": "Alert level: warn\nTitle: ⚠️ gemini_ask.py 已呼叫 — 產生 Gemini API 費用\n\n## 觸發條件\nscripts/gemini_ask.py 於 2026-05-20T14:09:28.521720+00:00 被呼叫並成功打 Gemini API。\n- caller: uv (ppid=44146)\n- model: gemini-3.1-pro-preview\n- prompt 7 字 / 回應 1 字\n## 影響\n此呼叫直接打 PAID Gemini API → 產生實際 API 費用。gemini_ask.py 是 agy 的 fallback，正常情況不應頻繁觸發；短時間多次出現代表 agy 或主路徑可能異常。\n## 建議行動\n查 storage/logs/gemini_ask_usage.jsonl 看呼叫頻率與 caller。若非預期：查為何沒走 agy；若為單次 fallback：忽略即可。",
+  "text_body": "Alert level: warn\nTitle: ⚠️ gemini_ask.py 已呼叫 — 產生 Gemini API 費用\n\n## 觸發條件\nscripts/gemini_ask.py 於 2026-05-20T14:09:28.521720+00:00 被呼叫並成功打 Gemini API。\n- caller: uv (ppid=44146)\n- model: gemini-3.1-pro-preview\n- prompt 7 字 / 回應 1 字\n## 影響\n此呼叫直接打 PAID Gemini API → 產生實際 API 費用。gemini_ask.py 是 agy 的 fallback，正常情況不應頻繁觸發；短時間多次出現代表 agy 或主路徑可能異常。\n## 建議行動\n查 storage/logs/gemini_ask_usage.jsonl 看呼叫頻率與 caller。若非預期：查為何沒走 agy；若為單次 fallback：忽略即可。",
+  "html_body": null,
+  "level": "warn",
+  "metadata": {
+    "notification_type": "ops_alert",
+    "alert_level": "warn",
+    "alert_title": "⚠️ gemini_ask.py 已呼叫 — 產生 Gemini API 費用",
+    "recipient": "yihao.lai@gmail.com"
+  },
+  "timestamp": "2026-05-20T14:09:29.107983+00:00",
+  "recipients": [
+    "yihao.lai@gmail.com"
+  ],
+  "sent": true,
+  "configured": true
+}

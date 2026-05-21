@@ -13,6 +13,12 @@ paths:
 - 修訂保留 review / diff / 版本化檔案，不只覆蓋舊版
 - 期刊 metadata / PDF slug / 同步細節 → `docs/paper-guide.md`
 - 實驗數據或引用檢查 → 明確調用 `latex-academic-reviewer` / `citation-verifier` / `paper-update`
+- **Supabase 自動同步 safety net**（2026-05-11 用戶反饋 + 6 papers updated_at 停在 April incident）：
+  - `paper-sync-all` cron 每 6 小時自動掃 paper/<id>/ — local .tex/.pdf mtime > Supabase updated_at 就 push（idempotent，fresh paper 跳過）
+  - 主動改完 paper 後仍**建議**手動 `uv run volpred ops paper-update --paper-id <id>` 立即同步（不要等 6h cron）
+  - 手動忘記時 cron 兜底；網頁日期不會再 silently lag local edits
+  - `paper-update` CLI 自動 extract abstract from main_v3.tex (2026-05-11 fix e707c232，止 abstract drift)
+  - `paper-sync-all` 對新 paper 自動 create Supabase record (crypto-fear-channel 2026-05-11 案例)
 
 ## Self-contained paper folder（投稿 hard requirement）
 

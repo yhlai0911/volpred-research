@@ -130,6 +130,33 @@ def build_continue_task_maintenance(storage_dir: str = "storage") -> dict[str, A
             }
         )
 
+    # 2026-04-29 architectural fix: integrate alert breach state into
+    # heartbeat output. Previously `queued_count==0` returned skip=no_work
+    # even when CRITICAL alerts (e.g. draft_pool=0, release_pool gap, member_qa
+    # stale, host_cron_fail) were unaddressed → LLM main thread saw "no work"
+    # and silent-skipped 7 consecutive slots while draft_pool=0 burned for ~10h.
+    # Mission-critical alerts must surface as actionable, not be elided by
+    # queue-only skip logic. See `docs/error_log.md` 2026-04-29 alert-action gap.
+    alert_report = build_alert_condition_report(storage_dir=storage_dir)
+    breached_alerts = [
+        {
+            "id": cond.get("id"),
+            "level": cond.get("level"),
+            "title": cond.get("title"),
+            "body": cond.get("body", ""),
+            "details": cond.get("details", {}),
+        }
+        for cond in alert_report.get("conditions", [])
+        if cond.get("breached")
+    ]
+    critical_alert_count = sum(
+        1 for a in breached_alerts if str(a.get("level") or "").lower() == "critical"
+    )
+    warn_alert_count = sum(
+        1 for a in breached_alerts if str(a.get("level") or "").lower() == "warn"
+    )
+    has_actionable_alert = bool(breached_alerts)
+
     skip = False
     action = "review_next_task"
     reason = "dispatch_candidate"
@@ -137,6 +164,15 @@ def build_continue_task_maintenance(storage_dir: str = "storage") -> dict[str, A
         skip = True
         action = "skip"
         reason = "slot_full"
+    elif has_actionable_alert and next_decision is None and queued_count == 0:
+        # ALERT path: even with no formal queue work, breached alerts are
+        # actionable (e.g. draft pool empty, release pool stalled). Do not
+        # skip; LLM must inspect alerts and act.
+        skip = False
+        action = "address_alert"
+        reason = (
+            f"alert_breach_critical={critical_alert_count}_warn={warn_alert_count}"
+        )
     elif queued_count == 0 and next_decision is None:
         skip = True
         action = "skip"
@@ -146,8 +182,9 @@ def build_continue_task_maintenance(storage_dir: str = "storage") -> dict[str, A
         reason = "blocked_queue"
 
     followup_commands = _compact_command_list(
+        "uv run volpred ops check-alerts" if has_actionable_alert else None,
         "uv run volpred ops queue-summary",
-        "uv run volpred ops check-alerts" if not skip else None,
+        "uv run volpred ops check-alerts" if (not skip and not has_actionable_alert) else None,
         "uv run volpred ops scheduler-summary" if not skip else None,
     )
 
@@ -167,6 +204,12 @@ def build_continue_task_maintenance(storage_dir: str = "storage") -> dict[str, A
         "discovery_allowed": bool(snapshot.get("discovery_allowed")),
         "next_decision": next_decision,
         "queue_head": queue_head,
+        "alerts": {
+            "breach_count": len(breached_alerts),
+            "critical_count": critical_alert_count,
+            "warn_count": warn_alert_count,
+            "items": breached_alerts,
+        },
         "followup_commands": followup_commands,
         "detail_hints": {
             "maintain": "uv run volpred ops continue-task-maintain --stub-if-no-work",

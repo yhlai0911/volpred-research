@@ -161,11 +161,16 @@ def normalize_model_name(s: str) -> str | None:
 def load_ledger(path: Path) -> tuple[list[dict], dict]:
     """Load Phase-1 ledger; return (filtered_rows, drop_stats).
 
-    Filter rules:
+    Filter rules (enforced here):
       - asset tag required (non-empty, singleton ticker — no pipe union)
       - model_a AND model_b must normalize to canonical
       - dm_stat must be finite
-      - loss_fn must be recognized
+
+    Note: loss_fn is NOT filtered here. All recognized and unrecognized
+    loss_fn rows pass through; downstream `build_t_matrix` iterates only
+    LOSS_FNS = ["QLIKE", "MSE"] cells, so non-target loss rows are
+    naturally excluded at matrix construction. Phase 3 readers iterating
+    `kept` directly should not assume Parkinson/ES/FZ rows are absent.
     """
     with path.open() as fh:
         obj = json.load(fh)

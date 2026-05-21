@@ -48,6 +48,12 @@
 |---|-------|-------------|------|
 | K1001 | Conrad-Loch Macro GARCH-X vs VIX GARCH-X | **Section 5.3 source**: VIX dominates macroeconomic specifications. SPY OOS 2019-01-01, n=1,779. GJR-N vs A4f-VIX DM t=4.77 (Harvey PASS); all macro models (Macro_TermSpread/Unemployment/Combined, VIX_Macro) fail to beat GJR (best macro t=1.48). FRED sources: GS10, TB3MS, UNRATE. **Scope note**: tests 2 macro variables; paper narrative says "six" — K1001 covers the key conceptual result, broader macro comparison was planned but not fully run. | `experiments/k1001/` |
 
+## R1 Robustness — Proxy Sensitivity (r1_prep/)
+
+| K | Title | Contribution | Path |
+|---|-------|-------------|------|
+| K1066 | A4f_oc vs A4f_close — Full Rolling OOS Test (Dual-Target) | **R1 proxy robustness source**: A4f_oc vs GJR_oc on r²_oc DM t=+4.04 (Harvey PASS); A4f_oc vs GJR_close on r²_oc DM t=+7.05 (Harvey PASS, largest DM in analysis). H1 PASS, H2 FAIL (4.04<4.48 baseline), H3 PASS (5/5 sub-periods, binomial p=0.031). SPY OHLC + VIX, OOS 2019-01-01 (n=1828), window 2000d, refit 63d, seed 42. Shelf-ready LaTeX: `paper/garch-x-vix/r1_prep/robustness_oc_proxy.tex`. Addresses Limitations "future work" on proxy sensitivity at daily frequency. | `experiments/k1066/` |
+
 ## Summary Statistics / Diagnostics (Section 2 / Table 1)
 
 | K | Title | Contribution | Path |

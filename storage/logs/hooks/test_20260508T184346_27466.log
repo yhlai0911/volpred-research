@@ -1,0 +1,25 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.10, pytest-9.0.3, pluggy-1.6.0 -- /Users/yhlai0911/Desktop/volpred-research/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /Users/yhlai0911/Desktop/volpred-research
+configfile: pyproject.toml
+plugins: anyio-4.12.1
+collecting ... collected 15 items
+
+tests/test_publish_draft_image_validation.py::test_normalize_passthrough_https_only PASSED [  6%]
+tests/test_publish_draft_image_validation.py::test_normalize_passthrough_http_too PASSED [ 13%]
+tests/test_publish_draft_image_validation.py::test_normalize_mixed_only_relative_uploaded PASSED [ 20%]
+tests/test_publish_draft_image_validation.py::test_normalize_all_relative_uploaded PASSED [ 26%]
+tests/test_publish_draft_image_validation.py::test_normalize_missing_file_raises_with_actionable_message PASSED [ 33%]
+tests/test_publish_draft_image_validation.py::test_normalize_image_url_field_passthrough_https PASSED [ 40%]
+tests/test_publish_draft_image_validation.py::test_normalize_image_url_field_local_uploaded PASSED [ 46%]
+tests/test_publish_draft_image_validation.py::test_normalize_image_url_field_missing_raises PASSED [ 53%]
+tests/test_publish_draft_image_validation.py::test_normalize_image_url_field_empty_passthrough PASSED [ 60%]
+tests/test_publish_draft_image_validation.py::test_apply_update_uploads_local_image_paths PASSED [ 66%]
+tests/test_publish_draft_image_validation.py::test_apply_update_missing_image_fails_with_code PASSED [ 73%]
+tests/test_publish_draft_image_validation.py::test_apply_update_image_url_frontmatter_field PASSED [ 80%]
+tests/test_publish_draft_image_validation.py::test_normalize_caches_repeated_path PASSED [ 86%]
+tests/test_publish_draft_image_validation.py::test_normalize_image_url_field_shares_cache_with_body PASSED [ 93%]
+tests/test_publish_draft_image_validation.py::test_apply_update_no_image_gate_bypasses_upload PASSED [100%]
+
+============================== 15 passed in 0.04s ==============================

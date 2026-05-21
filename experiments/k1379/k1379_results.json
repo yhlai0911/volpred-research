@@ -1,0 +1,64 @@
+{
+  "experiment_id": "k1379",
+  "title": "Paper 9 HAR-RV / HAR-RV-VIX Benchmarks vs A4f",
+  "metadata": {
+    "data_source": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
+    "oos_start": "2019-01-01",
+    "window": 2000,
+    "refit_every": 63,
+    "n_valid_oos": 1852,
+    "harvey_threshold": 3.0,
+    "qlike_proxy": "r_squared (daily squared log return)",
+    "elapsed_seconds": 92.0,
+    "timestamp": "2026-05-19T10:01:43.264403+00:00",
+    "note": "HAR-RV fit via rolling OLS; A4f and GJR via MLE. Fair comparison: same QLIKE proxy."
+  },
+  "qlike_means": {
+    "GJR": 624.3266721124259,
+    "A4f": 688.4875400369174,
+    "HAR_RV": 718.4775617814432,
+    "HAR_RV_VIX": 737.5772977540925
+  },
+  "dm_tests": {
+    "A4f vs GJR": {
+      "dm_t": -1.1911404177557512,
+      "dm_p": 0.23375118115546245,
+      "harvey_pass": false,
+      "direction": "model2_wins"
+    },
+    "A4f vs HAR-RV": {
+      "dm_t": 0.28938230745479476,
+      "dm_p": 0.7723212409721572,
+      "harvey_pass": false,
+      "direction": "model1_wins"
+    },
+    "A4f vs HAR-VX": {
+      "dm_t": 0.647990787962718,
+      "dm_p": 0.5170712754124622,
+      "harvey_pass": false,
+      "direction": "model1_wins"
+    },
+    "HAR-RV vs GJR": {
+      "dm_t": -1.0732345892758746,
+      "dm_p": 0.28330576873297386,
+      "harvey_pass": false,
+      "direction": "model2_wins"
+    },
+    "HAR-VX vs GJR": {
+      "dm_t": -1.1177784293372566,
+      "dm_p": 0.2638066902618643,
+      "harvey_pass": false,
+      "direction": "model2_wins"
+    },
+    "HAR-VX vs HAR-RV": {
+      "dm_t": -0.20728915864877875,
+      "dm_p": 0.8358068417816478,
+      "harvey_pass": false,
+      "direction": "model2_wins"
+    }
+  },
+  "paper9_c4_assessment": {
+    "a4f_vs_har_rv_harvey_pass": false,
+    "verdict": "C4 LIMITATION \u2014 A4f does NOT significantly beat HAR-RV (honest result, add as limitation)"
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "experiment_id": "K1372",
+  "title": "BTC Halving Volatility Event Study",
+  "research_question": "BTC 半減期前後的波動率是否有可預測的 pattern？GARCH 能否捕捉？",
+  "data": {
+    "asset": "BTC-USD",
+    "source": "yfinance",
+    "start": "2013-01-01",
+    "end": "2025-12-30",
+    "n_obs": 4122
+  },
+  "halvings": {
+    "H2_2016": {
+      "date": "2016-07-09",
+      "pre_vol_mean": 0.4064,
+      "post_vol_mean": 0.2962,
+      "pre_garch_mean": 0.4756,
+      "post_garch_mean": 0.3727,
+      "mw_u": 4997.0,
+      "mw_p": 0.0068,
+      "pre_n": 90,
+      "post_n": 90
+    },
+    "H3_2020": {
+      "date": "2020-05-11",
+      "pre_vol_mean": 0.8329,
+      "post_vol_mean": 0.4094,
+      "pre_garch_mean": 0.8685,
+      "post_garch_mean": 0.4666,
+      "mw_u": 6042.0,
+      "mw_p": 0.0,
+      "pre_n": 90,
+      "post_n": 90
+    },
+    "H4_2024": {
+      "date": "2024-04-19",
+      "pre_vol_mean": 0.4753,
+      "post_vol_mean": 0.3787,
+      "pre_garch_mean": 0.5246,
+      "post_garch_mean": 0.4336,
+      "mw_u": 5649.0,
+      "mw_p": 0.0,
+      "pre_n": 90,
+      "post_n": 90
+    }
+  },
+  "aggregate": {
+    "post_minus_pre_differences": [
+      -0.1102,
+      -0.4234,
+      -0.0966
+    ],
+    "post_minus_pre_mean": -0.2101,
+    "n_post_increase": 0,
+    "wilcoxon_stat": 0.0,
+    "wilcoxon_p": 0.25,
+    "n_halvings": 3
+  },
+  "garch": {
+    "spec": "GJR-GARCH(1,1)-t",
+    "omega": 0.16931071450289253,
+    "alpha": 0.11365427046817882,
+    "gamma": -0.019770480570889832,
+    "gamma_tstat": -1.0362829079790414,
+    "gamma_pvalue": 0.30007017764354216,
+    "beta": 0.8962309698172978,
+    "nu": 3.2053957304345255,
+    "persistence": 1.0000,
+    "log_likelihood": -10159.789053060598
+  },
+  "verdict": "EXPLORATORY_NULL (insufficient power)",
+  "power_caveat": "N=3 halvings, very low statistical power. Results exploratory only.",
+  "generated_at": "2026-05-17T11:15:33Z"
+}

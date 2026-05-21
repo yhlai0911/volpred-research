@@ -230,6 +230,37 @@ class MemorySystem:
         evidence: list[str] | None = None,
         confidence: float = 0.5,
     ) -> str:
+        # 2026-05-09 K947 incident — lint conclusion-style content before
+        # entering knowledge.json. Default: WARN to stderr (don't block
+        # legacy / in-progress writes). Strict mode: raise. Toggle via
+        # env var VOLPRED_LINT_STRICT=1.
+        try:
+            from volpred.research.conclusion_lint import lint_conclusion
+
+            warnings = lint_conclusion(content)
+            if warnings:
+                strict = os.environ.get("VOLPRED_LINT_STRICT", "").strip() in (
+                    "1",
+                    "true",
+                    "True",
+                    "yes",
+                )
+                header = (
+                    f"[conclusion_lint] add_knowledge category={category} "
+                    f"flagged {len(warnings)} warning(s):"
+                )
+                print(header, file=sys.stderr)
+                for w in warnings:
+                    print(f"  - {w}", file=sys.stderr)
+                if strict:
+                    raise ValueError(
+                        f"conclusion_lint strict mode blocked add_knowledge: "
+                        f"{len(warnings)} warning(s)"
+                    )
+        except ImportError:
+            # linter optional — if module missing, skip silently
+            pass
+
         item = {
             "item_id": uuid.uuid4().hex[:8],
             "category": category,
@@ -272,6 +303,16 @@ class MemorySystem:
         # parallelism across different memory indexes.
         from volpred.ops.shared_lock import shared_state_lock
         from volpred.ops.writer_log import append_writer_log
+
+        # 2026-05-17 K1259 audit follow-up T3: knowledge.json provenance gate.
+        # PASS / CONDITIONAL_PASS verdicts must carry experiment_id (or
+        # equivalent). PASS additionally requires reviewer attribution.
+        # Only NEW entries are validated; existing 2129-entry corpus is being
+        # cleaned in separate B1-B8 data fixes. See .claude/rules/experiments.md.
+        if filename == "knowledge.json":
+            from volpred.memory.provenance import validate_provenance
+
+            validate_provenance(record)
 
         filepath = self.memory_dir / filename
         # Derive a friendly subsystem key without the .json suffix

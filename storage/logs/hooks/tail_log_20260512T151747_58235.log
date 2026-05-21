@@ -1,0 +1,21 @@
+-	0	com.volpred.collect-tw-data
+-	0	com.volpred.release-pool
+-	0	com.volpred.market-calendar-sync
+-	0	com.volpred.hourly-dispatch
+-	0	com.volpred.collect-us-data
+-	0	com.volpred.check-alerts
+-	0	com.volpred.compute-worker
+-	0	com.volpred.daily-update
+-	0	com.volpred.memory-health-daily
+===
+=== test manual fire hourly-dispatch ===
+=== launchd stdout ===
+=== launchd stderr ===
+=== old log (cron wrapper inner output) ===
+=== hourly-dispatch 2026-05-12 14:17:43 CST ===
+=== hourly-dispatch 2026-05-12 15:07:00 CST ===
+Not logged in · Please run /login
+SessionEnd hook [node "${CLAUDE_PLUGIN_ROOT}/scripts/session-lifecycle-hook.mjs" SessionEnd] failed: /bin/sh: node: command not found
+
+=== hourly-dispatch end 2026-05-12 15:07:08 CST ===
+=== hourly-dispatch 2026-05-12 15:17:48 CST ===

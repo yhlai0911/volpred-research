@@ -1,0 +1,114 @@
+{
+  "experiment_id": "K1313",
+  "timestamp": "2026-05-20T20:18:59.362116Z",
+  "data": {
+    "asset": "SPY",
+    "period": "2010-01-01/2024-12-31",
+    "oos_period": "2018-01-01/2024-12-31",
+    "n_oos": 1760,
+    "n_refits": 84
+  },
+  "models": {
+    "M1_HAR_OLS": {
+      "kupiec_5pct": {
+        "stat": 390.2768172335668,
+        "p_value": 0.0,
+        "coverage": 0.1806818181818182,
+        "n_violations": 318,
+        "T": 1760
+      },
+      "kupiec_1pct": {
+        "stat": 752.2753153321447,
+        "p_value": 0.0,
+        "coverage": 0.12727272727272726,
+        "n_violations": 224,
+        "T": 1760
+      },
+      "cc_test": {
+        "stat": 7.69876262698952,
+        "p_value": 0.005525869442705833,
+        "coverage": 0.1806818181818182
+      }
+    },
+    "M2_HAR_QR": {
+      "kupiec_5pct": {
+        "stat": 0.939119954465923,
+        "p_value": 0.3325042696517825,
+        "coverage": 0.055113636363636365,
+        "n_violations": 97,
+        "T": 1760
+      },
+      "kupiec_1pct": {
+        "stat": 0.10964811726358903,
+        "p_value": 0.7405451053983014,
+        "coverage": 0.010795454545454546,
+        "n_violations": 19,
+        "T": 1760
+      },
+      "cc_test": {
+        "stat": 0.5255754034619855,
+        "p_value": 0.4684730150417191,
+        "coverage": 0.055113636363636365
+      },
+      "pinball_loss_by_tau": {
+        "0.01": 0.00038145213663646495,
+        "0.05": 0.001328404738198753,
+        "0.1": 0.0021269764872769758,
+        "0.9": 0.0017179847114319128,
+        "0.95": 0.0009933423075556634,
+        "0.99": 0.00025734385588682554
+      },
+      "pinball_mean": 0.0011342507061644325
+    },
+    "M3_GARCH_Normal": {
+      "kupiec_5pct": {
+        "stat": 4.475787212996124,
+        "p_value": 0.03437836199419908,
+        "coverage": 0.06136363636363636,
+        "n_violations": 108,
+        "T": 1760
+      },
+      "kupiec_1pct": {
+        "stat": 58.47917245980645,
+        "p_value": 2.0539125955565396e-14,
+        "coverage": 0.03295454545454545,
+        "n_violations": 58,
+        "T": 1760
+      },
+      "cc_test": {
+        "stat": 4.212178311555228,
+        "p_value": 0.04013476597259957,
+        "coverage": 0.06136363636363636
+      }
+    }
+  },
+  "dm_test": {
+    "M2_vs_M3_tau05": {
+      "t_stat": -2.9537151261859917,
+      "p_value": 0.003139736888859934,
+      "better": "M2"
+    },
+    "M2_vs_M3_tau01": {
+      "t_stat": -3.103236437374183,
+      "p_value": 0.0019141664756221477,
+      "better": "M2"
+    }
+  },
+  "verdict": "CONDITIONAL_PASS",
+  "conclusion": "HAR-QR achieves 0.0551 5%-VaR coverage (target 0.05, Kupiec p=0.3325) vs GARCH-Normal 0.0614 (Kupiec p=0.0344). DM test at tau=0.05: t=-2.9537, p=0.0031 (better=M2). Mean pinball loss=0.001134.",
+  "caveats": [
+    "M3 GARCH uses single batch-level sigma (stale up to 21 days) while M1/M2 use daily-updating predictors — asymmetry slightly disadvantages GARCH in DM comparison; direction of result (HAR-QR better calibrated) remains valid but DM magnitude may be inflated.",
+    "cc_test stores Christoffersen independence component (LR_ind ~chi2(1)) only, NOT full CC joint test (LR_cc = LR_uc + LR_ind ~chi2(2)); interpret as violation autocorrelation test only."
+  ],
+  "codex_review": {
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer_source": "feature-dev:code-reviewer subagent fallback",
+    "date": "2026-05-21",
+    "issues": [
+      "GARCH stale sigma batch-level forecast vs daily HAR-QR predictors — asymmetric comparison bias for M3",
+      "cc_test key stores independence component only, not full CC joint test — misleading nomenclature"
+    ]
+  },
+  "lookahead_verified": true,
+  "seed": 42
+}

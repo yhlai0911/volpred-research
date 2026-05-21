@@ -14,11 +14,47 @@ paths:
 - 優先順序固定：`user-assigned > scheduled > agent-discovered`
 - 正式 runtime：**單一主線程 Claude Code** + **按需啟動的 Codex rescue / subagent**；不把 `claude-worker` / `codex-worker` 視為 standing worker runtime
 - 排程唯一來源 `config/runtime_schedules.json`；不讓舊 guide / 歷史報告成為另類 source of truth
-- `storage/ops/` 內 task / approval / execution / rollback 檔案是控制面資料，**不手動亂改收尾**
-- `storage/next_tasks.json` = legacy planning / working list，**不是 canonical queue**，不可覆蓋 `storage/ops/` 狀態
+- `storage/ops/` 內 task / approval / execution / rollback 檔案是控制面資料，**不手動亂改收尾**；`storage/ops/tasks/` 內 TaskRecord 是 **execution receipts / audit trail**（已完成 history），**不是 pending queue**
+- `storage/next_tasks.json` = de-facto **pending queue**（2026-05-04 audit 後確認的實際分工：唯一有 pending P1-P4 的池，dispatcher `scripts/continue_task_dispatch.py` 從這挑工）— 完成的 task 同步靠 `scripts/sync_next_tasks_status.py` 反查 experiments + knowledge.json 標 succeeded；原 v12 設計把它標 legacy 但 `storage/ops/tasks/` 從未被任何 caller 用作 pending queue（全是 receipts）→ 2026-05-04 改規則承認此分工
 - `uv run volpred ops scheduler-tick` executor lane **目前只做 advisory snapshot**；正式 task claim/finish 必須來自主線程 direct dispatch 或明確 bootstrapped session
 - Session cron 與 system crontab **需與 canonical runtime schedule 一致**
 - Admin UI 目前是 **observer**；UI 與 canonical spec 不一致時以 canonical spec / local state 為準
+
+## Task pool 三軌：agentable / main_thread / blocked（2026-05-04 修流程）
+
+**問題**：dispatcher 原本只分 `agentable / main_thread`，stale candidates（auth-blocked / prior-failure / self-optional）反覆被推薦、main thread 反覆 silent skip → slot 永遠空、pool 看似有工實際無工可派。
+
+**修整**：
+
+1. **`blocked` bucket** — `scripts/continue_task_dispatch.py::categorize` 新增第三類，filter 掉再列 candidates
+2. **Hard block schema** — 任務帶 `blocked_reason` (controlled vocab) + `blocked_at` + `blocked_until` (auto-recheck) + `blocked_note`
+3. **Soft block 自動偵測** — title/description 含 `(optional)` / `否則跳過` / `only if truly new` → 自動歸類 `self_tagged_optional`
+4. **Hard-block CLI** — `scripts/mark_task_blocked.py --id <id> --reason <vocab> --note "..." [--until YYYY-MM-DD]`；`--unblock` 反向
+
+**Controlled vocabulary**（`BLOCKED_REASONS`）：
+- `awaiting_external_data` — 缺 auth / credentials / 原始資料（GCP, Dropbox 等）
+- `compute_runtime_incompatible` — experiment runtime > background agent timeout（K1100g_d9 IS-fits hang 案例）
+- `self_tagged_optional` — task 自標 optional / skippable
+- `kid_collision` — K-id 重用，需改名才能派
+- `prior_attempts_failed` — 反覆失敗，需主線程 debug
+- `deprecated` — 被其他 task 取代 / 失去 relevance
+
+**Skip-dispatch 必須 mark blocked**（硬規則，不可 silent skip）— 否則 candidate 永遠回到下一輪 dispatch，無限迴圈。
+
+## Pool 永遠有工：自動 refill 機制（2026-05-04 用戶硬規則）
+
+**用戶要求**：「任務池永遠要有待辦任務；定時繼續任務時 取出任務執行 並補進新任務」。流程責任，不靠主線程紀律。
+
+**機制**（`continue_task_dispatch.py::_maybe_refill`）：
+- 當 `agentable < REFILL_FLOOR (=4)` 時，dispatcher 自動 invoke `scripts/refill_task_pool.py` 補 `(floor - agentable)` 個新 pending tasks
+- Refill source: `storage/publication_candidates.json` 的 `top_10_uncovered` + `missing_research_top5` + `missing_general_top5`（已 184+ uncovered K's，永不缺源）
+- 新 task `task_type='daily_article'`、`source='auto_discovered'`、priority 由 candidate score 推導（5+→P1 / 4+→P2 / 3+→P3）
+- Idempotent：dup-skip by K-id；重跑安全
+- Quiet on no-add：steady-state 不 print noise
+
+**Manual override**：`uv run python scripts/refill_task_pool.py --apply --target N` 強制補 N 個；`--dry-run` 預覽。
+
+**對 Mission 的服務**：池永遠滿 = 連續性研究產出 = Mission #2 (research) + #1 (articles) 不間斷。Pool 空 = 系統空轉 = 違反運營承諾。
 
 ### release-task：claimed → queued 退回（2026-04-26 新增）
 

@@ -473,19 +473,32 @@ class Publisher:
         self._append_to_feed(item)
         self._sync_to_remote(title, description, phase, details)
 
-        # Sync to Supabase DB (so website shows article immediately)
+        # Sync to Supabase DB (so website shows article immediately).
+        # K1021 incident (2026-04-30): the previous implementation swallowed
+        # the sync_article return value AND swallowed exceptions silently,
+        # so a row written as draft to Supabase would never get its
+        # status='published' updated when release_pool flipped it. We now
+        # capture the boolean return AND treat False as a recordable failure
+        # (joins the same .failed_supabase_syncs.json + alerts pipeline as
+        # raised exceptions did).
+        sync_ok = False
         try:
             import sys
             sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent / "scripts"))
             from supabase_sync import sync_article
-            sync_article(item, storage_dir=self.reports_dir.parent)
+            sync_ok = bool(sync_article(item, storage_dir=self.reports_dir.parent))
         except Exception as e:
-            # Record failed sync with error for later diagnosis
+            print(f"  Supabase sync exception for {pub_id}: {e}")
+        if not sync_ok:
             failed_path = self.reports_dir.parent / ".failed_supabase_syncs.json"
-            failed = json.loads(failed_path.read_text()) if failed_path.exists() else []
-            failed.append(pub_id)
-            failed_path.write_text(json.dumps(failed))
-            print(f"  Supabase sync failed for {pub_id}: {e}")
+            try:
+                failed = json.loads(failed_path.read_text()) if failed_path.exists() else []
+            except Exception:
+                failed = []
+            if pub_id not in failed:
+                failed.append(pub_id)
+                failed_path.write_text(json.dumps(failed))
+            print(f"  Supabase sync FAILED for {pub_id} -- recorded to .failed_supabase_syncs.json")
 
         if normalized_status == 'published':
             try:
@@ -497,6 +510,32 @@ class Publisher:
                 )
             except Exception:
                 pass
+
+            # 2026-05-19 post-publish live verify gate (Three-Strike fix):
+            # 5 articles got published+synced this session but no code verified
+            # the public URL resolved → FB pipeline used wrong URL template
+            # downstream. We now block "publish success" on actual HTTP 200.
+            try:
+                from volpred.publisher.live_verify import (
+                    verify_article_live,
+                    stamp_verified,
+                    emit_verify_alert,
+                )
+
+                live_ok = verify_article_live(pub_id)
+                stamp_verified(item, verified=live_ok)
+                # Persist the stamp/flag back to feed.json (the entry was
+                # already written by _append_to_feed; rewrite to include the
+                # new verify keys).
+                self._rewrite_feed_entry(pub_id, item)
+                if not live_ok:
+                    emit_verify_alert(
+                        pub_id,
+                        item.get("title"),
+                        storage_dir=str(self.reports_dir.parent),
+                    )
+            except Exception as exc:
+                print(f"  [live_verify] exception for {pub_id}: {exc}")
 
         return pub_id
 
@@ -577,6 +616,34 @@ class Publisher:
         # Ensure content is not empty (use description as fallback)
         if not item.get('content') and item.get('description'):
             item['content'] = item['description']
+        # Auto-escape unescaped statistical-notation pipes inside markdown
+        # tables. Architectural fix 2026-04-29: K549 mile_5c662be0 broke
+        # frontend table rendering because agent didn't escape `|t|>3.0`
+        # (Harvey threshold) inside table cells; pipe count > header count
+        # → renderer split row into wrong number of cells. K1018 same-day
+        # parallel agent escaped some rows but missed line 28. Behavioral
+        # inconsistency proves manual escape unenforceable; sanitize at
+        # the canonical write site so feed.json is always clean.
+        if item.get('content'):
+            from volpred.publisher.markdown_table_sanitizer import (
+                sanitize_markdown_tables,
+            )
+            sanitized, report = sanitize_markdown_tables(item['content'])
+            if report.changed:
+                item['content'] = sanitized
+                print(
+                    f"  [feed_publisher] markdown_table_sanitizer auto-fixed "
+                    f"{len(report.fixed_lines)} table row(s) for "
+                    f"{item.get('id', 'unknown')}: {report.summary()}"
+                )
+            if report.has_unfixed:
+                # Surface but do not block — caller can decide. The unfixed
+                # rows still pass through; renderer may degrade but content
+                # is preserved.
+                print(
+                    f"  [feed_publisher] WARN unfixable table rows for "
+                    f"{item.get('id', 'unknown')}: lines={report.unfixed_lines}"
+                )
         # Serialize concurrent writers (Claude Code, Codex, cron workers)
         # against feed.json. Lock name follows docs/agent-collab-invariants.md.
         from volpred.ops.shared_lock import shared_state_lock
@@ -597,6 +664,18 @@ class Publisher:
                 with open(tmp_file) as f:
                     json.load(f)
                 tmp_file.replace(self._feed_file)
+                # Read-back verification: confirm record_id 真的在 persisted feed 裡
+                # （2026-05-04 finding #8 修整：tmp_file.replace 雖是 atomic rename，
+                # 但 disk fault / partial write / TOCTOU 仍可能讓 item 沒寫進去。
+                # K1021 同 pattern — write 回 success ≠ row 真寫入）
+                _record_id = item.get('id')
+                if _record_id:
+                    verify_feed = self._load_feed()
+                    if not any(rec.get("id") == _record_id for rec in verify_feed):
+                        raise RuntimeError(
+                            f"_append_to_feed read-back failed: id={_record_id} "
+                            f"not present in persisted feed (entries={len(verify_feed)})"
+                        )
                 self._sync_feed_to_remote()
         except Exception as exc:
             result_label = f"error: {type(exc).__name__}: {exc}"[:200]
@@ -609,6 +688,34 @@ class Publisher:
                 result=result_label,
                 storage_dir=storage_dir,
             )
+
+    def _rewrite_feed_entry(self, pub_id: str, updated_item: dict) -> bool:
+        """Replace a single feed entry by id, preserving lock + read-back.
+
+        Used by post-publish gates (live_verify) that mutate an already-appended
+        item AFTER _append_to_feed has run. Returns True on success.
+        """
+        from volpred.ops.shared_lock import shared_state_lock
+
+        storage_dir = str(self.reports_dir.parent)
+        with shared_state_lock("publisher_feed", storage_dir=storage_dir):
+            feed = self._load_feed()
+            found = False
+            for idx, entry in enumerate(feed):
+                if entry.get("id") == pub_id:
+                    feed[idx] = updated_item
+                    found = True
+                    break
+            if not found:
+                return False
+            tmp_file = self._feed_file.with_name(f".{self._feed_file.name}.tmp")
+            with open(tmp_file, 'w') as f:
+                json.dump(feed, f, indent=2, default=str, ensure_ascii=False)
+            with open(tmp_file) as f:
+                json.load(f)
+            tmp_file.replace(self._feed_file)
+            self._sync_feed_to_remote()
+            return True
 
     def get_report(self, pub_id: str) -> dict | None:
         # Contentlayer pattern: feed.json is canonical. Read from it only.

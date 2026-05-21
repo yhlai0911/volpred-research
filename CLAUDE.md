@@ -3,19 +3,23 @@
 
 ## 最高指導原則（Mission & Vision）— 凌駕其他一切
 
-**使命（Mission）**：成為**波動率與相關交易策略在學術與實務上最受信賴、最受歡迎的平台**。
+**終極目標（Ultimate Goal）**：**讓這個平台能商業盈利**。研究、論文、文章、平台運營、曝光流量全是 means to that end，不是 end 本身。
 
-**五個同等重要的目標**（所有日常決策的方向性 compass）：
-1. **把文章寫好** — feed 每篇文章都要有真圖表、真數據、真結論；讀者回訪率與分享率是硬指標
-2. **把實驗與研究做好** — 研究誠實原則、方法論嚴謹、可復現；每 K 都經得起同儕審視
-3. **把學術論文寫好** — 目標 top-tier journal（JBF、JFE、RFS、JoE、FRL、IJF 等）；self-contained replication package 是投稿 hard requirement
-4. **把網頁平台運營好** — draft 池不可空、release 節奏不可斷、頁面不可掛、策略表現與排序公正
-5. **把曝光流量拉高** — 搜尋與分享友善、內容品質驅動自然流量、學術引用累積權威
+**使命（Mission）**：成為**波動率與相關交易策略在學術與實務上最受信賴、最受歡迎的平台** — 透過信賴度與聲量轉化為可持續的商業收入（付費會員 / 廣告 / 合作 / 策略授權 / paid API / 機構諮詢）。
+
+**五個同等重要的目標**（所有日常決策的方向性 compass，皆服務於終極目標）：
+1. **把文章寫好** — feed 每篇文章都要有真圖表、真數據、真結論；讀者回訪率與分享率是硬指標 → 直接驅動曝光與付費漏斗轉換
+2. **把實驗與研究做好** — 研究誠實原則、方法論嚴謹、可復現；每 K 都經得起同儕審視 → 內容深度的根基、長期商業價值的護城河
+3. **把學術論文寫好** — 目標 top-tier journal（JBF、JFE、RFS、JoE、FRL、IJF 等）；self-contained replication package 是投稿 hard requirement → 學術權威 → 機構信任 → 顧問/合作/付費 premium tier 的背書
+4. **把網頁平台運營好** — draft 池不可空、release 節奏不可斷、頁面不可掛、策略表現與排序公正 → conversion funnel 順暢，付費資訊 visibility 高
+5. **把曝光流量拉高** — 搜尋與分享友善、內容品質驅動自然流量、學術引用累積權威 → 漏斗入口越大、付費轉換池越大
 
 **每次行動前的 sanity check**：
 - 這件事是否直接服務上述 5 個目標之一？若否，暫停並重新評估
+- 這件事對 **monetization** 有何貢獻？直接（付費轉換 / 廣告 / 合作 / 策略授權）、間接（曝光×漏斗 / 學術權威×機構信任 / 內容深度×留存）、無貢獻（純內部 refactor / ops chore — 仍要做但 priority 下調）
 - 「快速解決問題」若會犧牲任一目標，優先完整解決（研究誠實 § 不能讓步）
 - 資源（token / 人力 / 時間）分配要反映目標優先序 — 研究與論文永遠不輸給 ops
+- **盈利 × 研究誠實衝突時 → 研究誠實優先**。誠實是長期商業價值的護城河；造假能短期換流量但會毀掉學術權威線（→ 機構信任 → premium tier 全垮）
 
 此段是本文件的最高層 — 底下任何細則若與此衝突，以此為準。細則只是實作路徑，不是目的本身。
 
@@ -80,7 +84,14 @@
 
 ## 專案地圖
 
-- 本機雙 agent 研究系統：Claude 偏主研究與整合，Codex 偏審查、第二意見、針對性修正。
+- 本機多 agent 研究系統：Claude 偏主研究與整合，Codex 與 Antigravity (agy) 偏審查、第二意見、針對性修正與分擔工作。
+- **AI CLI 可用性**（2026-05-20 更新）：
+  - **Codex CLI** `codex-cli 0.132.0` ✅ — ChatGPT auth（`Logged in using ChatGPT`），預設 `gpt-5.4` medium reasoning；headless 入口 `codex exec`；`-s workspace-write`。中文 prompt 必 heredoc + stdin。reinstall 要 `npm install -g @openai/codex@latest --include=optional`（缺 darwin-arm64 binary 會 crash）。
+  - **Antigravity CLI** `agy 1.0.0` ✅ — Google OAuth，預設 `gemini-3.5-flash`（`ANTIGRAVITY_MODEL` env 換模型）；headless 入口 `agy -p "<prompt>"`（真 stdout pipe，2026-05-20 實測單行/多行中文 prompt 皆通過）；agentic 工作加 `--dangerously-skip-permissions`。**第三個 agentic CLI，與 Codex 並列分擔審查 / 第二意見 / 針對性修正**。`-p` 吃參數不吃 stdin — 中文多行 prompt 用 heredoc 存變數再 `agy -p "$VAR"`。
+  - **Gemini 輕量 Q&A（fallback）** → `scripts/gemini_ask.py` ✅ — 直打 Gemini API（`GOOGLE_CLOUD_API_KEY`），預設 `gemini-3.1-pro-preview`，真 stdout pipe；獨立於 gemini-cli（6/18 停服不影響）。**定位是 `agy` 的 fallback**：只在 agy 不可用、或需純 pipe 一次性呼叫時用。⚠️ **每次成功呼叫會打 PAID API → 自動 email 通知 admin + 記 `storage/logs/gemini_ask_usage.jsonl`**（用戶 2026-05-20 硬性要求）。用法 `uv run python scripts/gemini_ask.py "prompt"` / stdin `... | gemini_ask.py -` / `--model` override。
+  - **分工**：agentic 多步工作（code review、針對性修正、獨立子任務）→ Codex CLI 或 `agy`；一次性問答 / fact-check → 優先 `agy -p`，`gemini_ask.py` 僅 fallback。
+  - **已放棄**：`gemini-cli`（2026-06-18 Google 停服，由 `agy` 繼承）。
+  - 完整對照：[codex-cli SKILL](file:///Users/yhlai0911/.claude/skills/codex-cli/SKILL.md) + memory `reference_dual_cli_availability` + `reference_antigravity_cli`。
 - active frontend / Zeabur target 由 `config/project_targets.json` 決定；**先改 config，再改程式或文件。**
 - 目前線上站點：`https://volpred.zeabur.app`
 - 研究記憶雙寫：Supabase + Mirror API
@@ -103,8 +114,12 @@
 
 - `storage/` 是本地唯一源頭 — 不手改歷史 JSON 修結果；paper_trading 不手補，讓 forward tracking / recalc 自然修正
 - Frontend target / Zeabur service / paper public dir / Mirror 預設 URL → `config/project_targets.json`；排程 → `config/runtime_schedules.json`（不反推 cron）
-- v12 canonical task/schedule source：`storage/ops/`（TaskRecord / AgentSession / ExecutionReceipt）+ `config/runtime_schedules.json` + `event_jobs` + `storage/ops/event_ledger/`
-- `storage/next_tasks.json` = legacy planning list（v11→v12 遺留），**不是** shared scheduler queue / canonical schema；不可覆蓋 `storage/ops/` 或 `event_jobs`
+- v12 task/schedule sources（雙軌實際分工，2026-05-04 audit 後明確）：
+  - **`storage/next_tasks.json`** = de-facto **pending queue**（priority sorted；37+ pending P1-P4），dispatcher 從這挑下個任務派工 — 由 `scripts/continue_task_dispatch.py` 讀
+  - **`storage/ops/`**（TaskRecord / AgentSession / ExecutionReceipt）= **execution receipts / audit trail**（已 claim/run/finish 的歷史，56 succeeded + 7 failed + 1 awaiting_approval），dispatch 完成後寫入
+  - 完成的 task 同步：`scripts/sync_next_tasks_status.py` 反查 experiments/<id>/results.json + knowledge.json，把 next_tasks 已實際完成的 K 標 succeeded（避免 stale pending 被 dispatcher 誤再派）
+  - `config/runtime_schedules.json` + `event_jobs` + `storage/ops/event_ledger/` = canonical schedule spec
+  - **歷史背景**：原 v12 設計把 `next_tasks.json` 標 legacy，但 `storage/ops/tasks/` 從未被任何 caller 用作 pending queue（全是 receipts），導致 next_tasks 是唯一有 pending 的池。2026-05-04 audit 確認此實際分工 + `continue_task_dispatch.py` 落地 + 規則改成符合現實。原 「不可覆蓋 storage/ops/」改為「dispatch 完成後寫入 storage/ops/ 作 receipt」
 
 ### 永遠修流程，不修資料
 
@@ -112,6 +127,29 @@
 - 不要用 session workaround 掩蓋 schema 或流程缺陷。
 - 不要繞過正式 CLI / sync / publish 流程。
 - 任何資料錯誤都要追到產生它的程式與流程。
+
+### Three-Strike Rule — 同類錯誤 / 同處 hang 三次就整體重構
+
+**Trigger**：同一類錯誤（同根因、同症狀、同類 bug 模式）連續發生 **3 次** OR 同一處（同一 script / function / pipeline 節點）連續 hang 住 **3 次**。
+
+**但 strike 3 是 LATEST 觸發點不是 ONLY 觸發點**（2026-05-16 用戶補強）：**一旦看見結構性 root cause（dual source、race condition、無 single-source-of-truth、無 lock、無 hang detect、wrong domain model 等），就立刻三層重構，不等次數累積到 3。** 「先 patch 再 observe 看會不會 strike 3」是被禁止的偷懶 reaction。
+
+**禁止 reaction**：再 patch 一次、加一個 flag、塞一層 retry / try-except、寫一個 workaround / fallback、再 grep + sed 一次、「先記下來等下次再修」、「strike 1 不修等 strike 3」。**任何 surface-level patch 或拖延都不准。**
+
+**強制 reaction**：從**底層邏輯、流程、程式架構徹底翻掉重新優化**。判斷三層：
+
+1. **底層邏輯**：問題的 root domain model 是否正確？資料模型、狀態機、責任分配、邊界條件是否一開始就錯？（例：cron + LaunchAgent 同 Label re-launch policy 假設前提錯誤；hourly fire 應該 stateless 還是 stateful？）
+2. **流程**：workflow 是否設計有缺陷？hand-off、failure mode、observability、recovery 是否系統性遺漏？（例：hang detection、heartbeat、dead-man switch、orphan cleanup 應該獨立流程，不是塞進 dispatch script）
+3. **程式架構**：是否該換實作技術 / 架構模式 / 隔離邊界？（例：headless CLI subprocess 不如 worker daemon + queue；shell script orchestration 不如 Python supervisor with health checks）
+
+**執行流程**：
+- (a) `docs/error_log.md` 標記 `**3-STRIKE TRIGGER**` 並列出三次 incident 的 commit/timestamp
+- (b) 寫 `docs/refactor_plan_<topic>.md` — 三層診斷 + 重構方案 + 廢棄面 + 驗證 gate
+- (c) 重構落地後**廢棄原 patch 路徑**（move to `_legacy/` 或刪除），不留兩套並行
+- (d) Regression test 必須覆蓋三次 incident 的觸發條件 — 任一條件能重現舊 bug 即 fail
+- (e) 重構完成 commit 訊息開頭 `refactor(3-strike): <topic>` 便於日後 grep
+
+**為什麼**：patch 三次仍復發 = 模型/流程/架構有結構性缺陷，繼續 patch 是負債累積；研究誠實 + 平台穩定的長期成本遠高於一次重構成本。歷史例：cron_hourly_dispatch 2026-05-13 兩次 hang + 2026-05-14 同 root（這次只到 strike 2，但下一次 hang 即觸發重構：worker daemon + queue + health check 取代 shell + LaunchAgent + perl alarm）。
 
 ### CLI / Workflow 優先順序
 
@@ -136,6 +174,7 @@
 - 先看 [`docs/workflow-index.md`](/Users/yhlai0911/Desktop/volpred-research/docs/workflow-index.md) 判斷 workflow / 執行模式，再按需讀對應 skill 全文；不要一開始就把多份長 SOP 全載入。
 - **若新任務與當前上下文、已載入 skills、或目前正在處理的專案文件無直接關聯，必須另開一個乾淨的 sub-agent 處理。**
 - 用 sub-agent 的目的是隔離大搜尋、大量 logs、文件探索與無關 side task，減少 context 汙染與 token 損耗。
+- **外部論文 / 文件 / 法規 / 大型網頁 RAG → `/notebooklm`**（不要拉整篇 PDF/HTML 進 context）。觸發時機：cross-paper meta-eval、prior-art audit、reviewer R1 drafting、開新方向深挖文獻、paper intro 寫作、法規/公告查詢。**主線程已被授權自主**判斷需要哪些文獻、自主下載 PDF 上傳建主題式 notebook、自主 query 作 RAG（不必逐次徵詢）— 只有大量 quota 消耗（≥10 notebook 或 ≥50 sources）/ audio·video 生成 / 投稿決策仍需確認。完整 SOP 見 `~/.claude/skills/notebooklm/SKILL.md`；專案觸發時機 + 授權範圍細節見 user memory `reference_notebooklm_rag_workflow`。對比：自家 `knowledge.json` / experiments 用 LanceDB（`scripts/build_knowledge_index.py update`），不混用。
 - `context_window.used_percentage` 行為邊界：
   - `<55%`：正常工作
   - `55-62%`：避免開新 noisy side task；優先 fork subagent 或先收斂
@@ -214,7 +253,9 @@ Codex 審代碼 → 通過才寫 `knowledge.json` → 每 5-10 實驗彙整一�
 
 ## 系統任務類型與派工
 
-10 類任務（experiment / paper_decision / paper_body / paper_review / event_article / daily_article / member_qa / strategy_lifecycle / platform_ops / governance）× 對應 skill 映射 + 主 agent 依 `storage/work_log.json` 做多樣化決策的完整表格、schema、decision tree，全在 `.claude/rules/agent-delegation.md`（Claude 碰 `.claude/skills/**` 或 `scripts/agent_prompts/**` 時自動載入）。
+11 類任務（experiment / paper_decision / paper_body / paper_review / event_article / daily_article / member_qa / strategy_lifecycle / platform_ops / governance / **trending_repost**）× 對應 skill 映射 + 主 agent 依 `storage/work_log.json` 做多樣化決策的完整表格、schema、decision tree，全在 `.claude/rules/agent-delegation.md`（Claude 碰 `.claude/skills/**` 或 `scripts/agent_prompts/**` 時自動載入）。
+
+**`trending_repost` 是 11 類中唯一帶 daily cap**（≤2/day）— 熱門主題改寫文章，VolPred 角度 + 無 source citation + 無抄襲；雙發佈（VolPred feed + Ivan Lai FB）；完整 SOP 在 `.claude/skills/trending-repost/SKILL.md`。
 
 **跨類型歧義澄清**：
 - **交易策略研究**：設計階段（backtest/檢定）= 類型 1 experiment；上架階段（registry/metrics）= 類型 8 strategy_lifecycle
@@ -255,6 +296,23 @@ Codex 審代碼 → 通過才寫 `knowledge.json` → 每 5-10 實驗彙整一�
 可以直接新增補充內容；但**刪除或改寫既有治理規範前，先取得使用者同意。**
 
 ## Compact Instructions
+
+### Handoff 強制規則（2026-05-20 用戶硬性要求）
+
+**Compact 觸發前必做**（不論 auto-compact 或手動 /compact）：
+
+1. **寫 handoff 文件** `storage/ops/handoff_latest.md`，內容：
+   - 當前任務狀態（在做什麼、做到哪、下一步）
+   - 未完成 agent 的 ID + task_type + 預期產出
+   - 未回應用戶的問題
+   - 最近未 commit 的工作 / 待驗證項
+   - 關鍵檔案路徑與 line 定位
+2. **寫接續提示詞** 到同檔末段「## 接續提示詞」區，一段可直接貼回的指令，明確寫「讀 storage/ops/handoff_latest.md 後從 X 繼續」。
+3. **Compact 後第一個動作**：讀 `storage/ops/handoff_latest.md` → 直接依接續提示詞繼續任務，不重新摸索、不問用戶「我們在做什麼」。
+
+**為什麼**：compact 會丟失執行脈絡；沒有 handoff 文件，compact 後會忘記未竟任務、重複問用戶、或漏掉未驗證的工作。handoff 文件是 compact 的 single source of truth。
+
+---
 
 Context compaction 時，**優先保留**：
 - 用戶明確的規則陳述 / feedback（「不要做 X」「應該做 Y」）— 任何優先，否則下次還會犯

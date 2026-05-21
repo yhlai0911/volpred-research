@@ -1,0 +1,6 @@
+{
+  "alert": "error_log_yesterday",
+  "timestamp": "2026-05-19T18:09:23Z",
+  "detail": "2026-05-18 error log entry: release_pool_gap 4-strike confirmed REAL outage caused by merge_worktree.sh stash-pop conflict. live storage/.release_settings.json was overwritten with stale worktree version (2026-05-16T00:32), causing check_alerts to compute gap=42.74h and fire critical alert. Rescue applied same day via git checkout stash. Structural fix (merge_worktree.sh stash-pop whitelist + pre-merge guard for runtime files) is pending.",
+  "action_required": "Confirm merge_worktree.sh stash-pop whitelist fix has been applied. Consider moving runtime state files out of git tracking (SQLite or jsonl append-only) to prevent recurrence."
+}

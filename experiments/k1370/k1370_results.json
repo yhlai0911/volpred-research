@@ -1,0 +1,127 @@
+{
+  "experiment_id": "K1370",
+  "title": "Block-bootstrap 90% CI for TAIEX-to-Individual amplification ratio under canonical full-sample BW-robust GJR-GARCH(1,1)",
+  "timestamp": "2026-05-17T20:12:18.562693+00:00",
+  "runtime_seconds": 2518.0,
+  "config": {
+    "B": 1000,
+    "block_length": 252,
+    "block_bootstrap_method": "stationary (Politis-Romano 1994)",
+    "n_start_multistart_per_replicate": 10,
+    "n_start_canonical_K1302": 100,
+    "global_seed": 42,
+    "seed_base": 42,
+    "per_replicate_boot_seed": "seed_base + r (r in [0, B-1])",
+    "per_series_sub_seed": "(boot_seed*100003 + uint32(md5(ticker)[:8])) % (2**31-1)  [K1370-v2 process-stable]",
+    "multistart_seeds_per_replicate": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "sample_start": "2008-01-01",
+    "sample_end": "2024-12-31",
+    "estimator": "arch package GJR-GARCH(1,1) Normal, Constant mean",
+    "se_method": "robust (Bollerslev-Wooldridge QML)",
+    "index_ticker": "^TWII",
+    "individual_tickers": [
+      "2317.TW",
+      "2454.TW",
+      "2886.TW",
+      "2383.TW",
+      "2882.TW",
+      "2891.TW",
+      "2412.TW",
+      "2885.TW",
+      "2881.TW"
+    ],
+    "individual_count": 9,
+    "validity_rule": "TAIEX must converge AND >=5 of 9 individuals must converge"
+  },
+  "data_source": {
+    "primary": "/Users/yhlai0911/Desktop/volpred-research/paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv",
+    "fallback": "yfinance auto_adjust=True, cached to experiments/k1370/data/",
+    "n_observations_per_series": {
+      "^TWII": 4160,
+      "2317.TW": 4170,
+      "2454.TW": 4170,
+      "2886.TW": 4170,
+      "2383.TW": 4170,
+      "2882.TW": 4170,
+      "2891.TW": 4170,
+      "2412.TW": 4170,
+      "2885.TW": 4170,
+      "2881.TW": 4170
+    }
+  },
+  "point_estimate_sanity": {
+    "matched_sample_2008_2024": {
+      "TAIEX_gamma": 0.11392370481995903,
+      "mean_individual_gamma": 0.024243970932199727,
+      "amplification_ratio": 4.69905301976133,
+      "note": "Apples-to-apples; both TAIEX and 9 individuals on identical 2008-2024 window."
+    },
+    "mixed_sample_paper_headline": {
+      "TAIEX_gamma_1997_2026": 0.10781016076945997,
+      "mean_individual_gamma_2008_2024": 0.024243970932199727,
+      "amplification_ratio": 4.446885416211726,
+      "note": "Reproduces paper body.tex \u00a73.2 headline 10\u00d7 ratio = 0.272 (TAIEX over 1997-2026, n=7148) / 0.027 (9-indiv over 2008-2024, n=4170). This is the source of the 10\u00d7 headline."
+    },
+    "canonical_target_K1302_K1302b_mixed": 10.07,
+    "research_honesty_flag": "The paper's 10\u00d7 headline (body.tex \u00a73.2) is constructed from MIXED samples: TAIEX over 1997-2026 (29 years, includes 1997 Asian crisis + 2000 dot-com bust) vs individual stocks over 2008-2024 (17 years, post-GFC era only). On the matched 2008-2024 sample (apples-to-apples), the ratio shrinks substantially. K1370 reports the matched-sample bootstrap CI as the primary finding; the mixed-sample CI would require bootstrapping TAIEX with its own 1997-2026 sample (different n) and is out of scope for this script."
+  },
+  "amplification_ratio": {
+    "point_estimate_canonical": 10.07,
+    "point_estimate_this_run_10start": 4.69905301976133,
+    "ci_low_90": 2.284235584911323,
+    "ci_high_90": 6.580706477190761,
+    "ci_low_95": 2.1616036472805504,
+    "ci_high_95": 7.6766039509703745,
+    "median": 3.780938870469008,
+    "mean": 4.031478178538553,
+    "std": 1.4169595050330315,
+    "B": 1000,
+    "block_length": 252,
+    "seed_base": 42
+  },
+  "replicate_count": {
+    "total": 1000,
+    "valid": 1000,
+    "dropped": 0,
+    "validity_rule": "TAIEX gamma converged AND >=5/9 individuals converged"
+  },
+  "per_replicate_stats": {
+    "converged_per_series_mean_rate": {
+      "^TWII": 1.0,
+      "2317.TW": 1.0,
+      "2454.TW": 1.0,
+      "2886.TW": 0.9957999999999999,
+      "2383.TW": 0.9992000000000001,
+      "2882.TW": 1.0,
+      "2891.TW": 0.9983,
+      "2412.TW": 0.8352999999999999,
+      "2885.TW": 1.0,
+      "2881.TW": 1.0
+    },
+    "n_indiv_converged_distribution": {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 3,
+      "9": 997
+    }
+  },
+  "lookahead_free_certification": "Each replicate is an independent in-sample MLE on a block-bootstrap resample of full-sample log returns. No conditioning on future observations. No t\u2192t+1 leak. Seeds fixed: np.random.seed(42); per-replicate bootstrap_seed = 42 + r; per-series sub-seed uses MD5(ticker) (process-stable; replaces hash(ticker) which is PYTHONHASHSEED-randomized \u2014 K1370-v2 fix per Codex CRITICAL 2026-05-16). All arch fits use cov_type='robust'.",
+  "notes": "Replaces stale CI [2.8, 8.1] in paper/taiwan-vt/body.tex \u00a73.2 which was constructed around draft 5x point estimate under rolling-window NW-HAC. This K1370 CI is the canonical estimate under K1302+K1302b full-sample BW-robust GJR-GARCH spec. Reduced N_start=10 vs 100 in K1302 for tractability (B=1000 \u00d7 10 series \u00d7 10 starts = 100000 total MLE fits, vs B \u00d7 10 \u00d7 100 = 1000000 fits at N_start=100)."
+}

@@ -1,0 +1,165 @@
+{
+  "experiment_id": "paper2_table1_twii_stats",
+  "title": "Paper 2 Table 1 TWII summary statistics reproduction",
+  "paper_id": "taiwan-vt",
+  "paper_claim_loc": "body.tex L34 (sample window) + L51 (Table 1 row)",
+  "paper_claim_text": "TWII (1997-2026) mean=0.019 std=1.45 skew=-0.31 kurt=5.82 gamma_GJR=0.272 t(gamma)=3.18 n=7148 trading days",
+  "method": "log returns \u00d7 100; basic stats via scipy (ddof=1, Fisher excess kurt); GJR-N(1,1) custom MLE, 100-start Nelder-Mead seed=42, OPG SE",
+  "data_sources": {
+    "pre_2008_snapshot": "paper/taiwan-vt/data/_twii_1997_2007_snapshot.csv",
+    "from_2008_snapshot": "paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv",
+    "live_fetch": false,
+    "sample_start": "1997-07-02",
+    "sample_end": "2026-05-08",
+    "yfinance_pre1997_07_unavailable": true,
+    "note": "yfinance ^TWII history begins 1997-07-02; paper text says 'January 1997' as nominal sample window. Effective coverage starts 1997-07-02. This explains n_obs gap vs paper's 7148."
+  },
+  "seed": 42,
+  "n_multistart": 100,
+  "basic_stats": {
+    "n_obs": 7067,
+    "mean_pct": 0.021668810981307032,
+    "std_pct": 1.358439986155694,
+    "skew": -0.28124703457130595,
+    "kurt_excess": 4.305502284130735
+  },
+  "gjr_n": {
+    "params": {
+      "mu": 0.03658487081114161,
+      "omega": 0.027604426949862614,
+      "alpha": 0.03996161964000486,
+      "gamma": 0.10546243646775941,
+      "beta": 0.8919639444721746
+    },
+    "se": {
+      "mu": 0.012069281871301648,
+      "omega": 0.003959576458208952,
+      "alpha": 0.0060834211685502505,
+      "gamma": 0.011118567156953222,
+      "beta": 0.008120838208474139
+    },
+    "t_stats": {
+      "gamma": 9.485254257946927
+    },
+    "log_lik": -11084.728550594915,
+    "multistart_diagnostics": {
+      "n_starts": 100,
+      "n_converged": 100,
+      "n_failed": 0,
+      "ll_max": -11084.728550594915,
+      "ll_min": -11084.728550594984,
+      "ll_mean": -11084.728550594933,
+      "ll_std": 1.0921589417392102e-11,
+      "ll_top5": [
+        -11084.728550594915,
+        -11084.728550594915,
+        -11084.728550594917,
+        -11084.728550594917,
+        -11084.728550594918
+      ],
+      "ll_basin_spread": 6.912159733474255e-11,
+      "seed": 42
+    },
+    "se_primary_method": "Hessian (numerical, central diff h=1e-4)",
+    "se_opg": {
+      "mu": 0.012537935195619607,
+      "omega": 0.002369862655300239,
+      "alpha": 0.0053012456627086,
+      "gamma": 0.007335073543100556,
+      "beta": 0.0049073040642812265
+    },
+    "se_hessian": {
+      "mu": 0.012069281871301648,
+      "omega": 0.003959576458208952,
+      "alpha": 0.0060834211685502505,
+      "gamma": 0.011118567156953222,
+      "beta": 0.008120838208474139
+    },
+    "se_sandwich_qml": {
+      "mu": 0.011897555165688432,
+      "omega": 0.007151823497325053,
+      "alpha": 0.007389886711628722,
+      "gamma": 0.01944316799168396,
+      "beta": 0.014865315994380648
+    },
+    "t_gamma_alt": {
+      "opg": 14.377829458432416,
+      "hessian": 9.485254257946927,
+      "sandwich_qml": 5.424138520680722
+    }
+  },
+  "paper_canonical": {
+    "mean_pct": 0.019,
+    "std_pct": 1.45,
+    "skew": -0.31,
+    "kurt_excess": 5.82,
+    "gamma_gjr": 0.272,
+    "t_gamma": 3.18,
+    "n_obs": 7148
+  },
+  "tolerance": {
+    "mean_pct": 0.005,
+    "std_pct": 0.005,
+    "skew": 0.02,
+    "kurt_excess": 0.02,
+    "gamma_gjr": 0.005,
+    "t_gamma": 0.1,
+    "n_obs": 0
+  },
+  "cell_results": {
+    "n_obs": {
+      "computed": 7067,
+      "paper_canonical": 7148,
+      "delta": -81.0,
+      "tolerance": 0.0,
+      "verdict": "DRIFT_LARGE"
+    },
+    "mean_pct": {
+      "computed": 0.021668810981307032,
+      "paper_canonical": 0.019,
+      "delta": 0.002668810981307033,
+      "tolerance": 0.005,
+      "verdict": "BYTE_MATCH"
+    },
+    "std_pct": {
+      "computed": 1.358439986155694,
+      "paper_canonical": 1.45,
+      "delta": -0.09156001384430601,
+      "tolerance": 0.005,
+      "verdict": "DRIFT_LARGE"
+    },
+    "skew": {
+      "computed": -0.28124703457130595,
+      "paper_canonical": -0.31,
+      "delta": 0.028752965428694044,
+      "tolerance": 0.02,
+      "verdict": "DRIFT_SMALL"
+    },
+    "kurt_excess": {
+      "computed": 4.305502284130735,
+      "paper_canonical": 5.82,
+      "delta": -1.5144977158692656,
+      "tolerance": 0.02,
+      "verdict": "DRIFT_LARGE"
+    },
+    "gamma_gjr": {
+      "computed": 0.10546243646775941,
+      "paper_canonical": 0.272,
+      "delta": -0.1665375635322406,
+      "tolerance": 0.005,
+      "verdict": "DRIFT_LARGE"
+    },
+    "t_gamma": {
+      "computed": 9.485254257946927,
+      "paper_canonical": 3.18,
+      "delta": 6.3052542579469275,
+      "tolerance": 0.1,
+      "verdict": "DRIFT_LARGE"
+    }
+  },
+  "overall_verdict": "DRIFT_LARGE",
+  "byte_match_count": 1,
+  "lookahead_guard": "N/A \u2014 Table 1 reports in-sample descriptive moments + full-sample MLE; no forecast / no signal lag. Seed=42 fixed for multistart reproducibility.",
+  "produced_at_utc": "2026-05-12T04:58:42.280986+00:00",
+  "runtime_seconds": 414.3
+}

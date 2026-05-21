@@ -1,0 +1,263 @@
+2026-05-19 00:13:05,296 INFO ======================================================================
+2026-05-19 00:13:05,296 INFO K1376: Paper 3 review_v2 B.3 — MDD Retention Bootstrap CI (22 assets)
+2026-05-19 00:13:05,296 INFO ======================================================================
+2026-05-19 00:13:05,296 INFO Bootstrap: B=10000, block=252, CI=90%
+2026-05-19 00:13:05,296 INFO Extending K1192 from 5 equity assets to all 22 primary assets
+2026-05-19 00:13:05,296 INFO Downloading 24 tickers from 2003-01-01 to 2026-04-01
+2026-05-19 00:13:07,879 INFO Downloaded: 24 columns, 5848 rows (2003-01-02 to 2026-03-31)
+2026-05-19 00:13:07,907 INFO 
+============================================================
+2026-05-19 00:13:07,912 INFO Analyzing: SPY (class=equity)
+2026-05-19 00:13:07,924 INFO   Period: 2005-01-03 to 2026-03-31, n=5344
+2026-05-19 00:13:07,924 INFO   BH MDD=-55.2%  VT MDD=-26.3%  Hedged MDD=-25.3%
+2026-05-19 00:13:07,926 INFO   BH Sharpe=0.610  VT Sharpe=0.686  Hedged Sharpe=0.655
+2026-05-19 00:13:07,928 INFO   Bootstrap: n=5344, reps=10000, block=252
+2026-05-19 00:13:07,929 INFO   Point: retention=103.7%, vt_red=52.3%, hedged_abs=-25.3%, hedged_vs_bh=-54.2%
+2026-05-19 00:13:09,831 INFO   → MDD retention 90% CI: [93.0, 182.2]  (point=103.7%)
+2026-05-19 00:13:09,832 INFO 
+============================================================
+2026-05-19 00:13:09,832 INFO Analyzing: QQQ (class=equity)
+2026-05-19 00:13:09,838 INFO   Period: 2005-01-03 to 2026-03-31, n=5344
+2026-05-19 00:13:09,841 INFO   BH MDD=-53.4%  VT MDD=-28.5%  Hedged MDD=-26.2%
+2026-05-19 00:13:09,845 INFO   BH Sharpe=0.726  VT Sharpe=0.759  Hedged Sharpe=0.743
+2026-05-19 00:13:09,846 INFO   Bootstrap: n=5344, reps=10000, block=252
+2026-05-19 00:13:09,846 INFO   Point: retention=109.0%, vt_red=46.7%, hedged_abs=-26.2%, hedged_vs_bh=-50.9%
+2026-05-19 00:13:11,745 INFO   → MDD retention 90% CI: [89.0, 221.5]  (point=109.0%)
+2026-05-19 00:13:11,745 INFO 
+============================================================
+2026-05-19 00:13:11,746 INFO Analyzing: IWM (class=equity)
+2026-05-19 00:13:11,751 INFO   Period: 2005-01-03 to 2026-03-31, n=5344
+2026-05-19 00:13:11,754 INFO   BH MDD=-58.6%  VT MDD=-31.0%  Hedged MDD=-30.3%
+2026-05-19 00:13:11,755 INFO   BH Sharpe=0.439  VT Sharpe=0.441  Hedged Sharpe=0.492
+2026-05-19 00:13:11,758 INFO   Bootstrap: n=5344, reps=10000, block=252
+2026-05-19 00:13:11,759 INFO   Point: retention=102.2%, vt_red=47.2%, hedged_abs=-30.3%, hedged_vs_bh=-48.2%
+2026-05-19 00:13:13,631 INFO   → MDD retention 90% CI: [86.7, 179.5]  (point=102.2%)
+2026-05-19 00:13:13,631 INFO 
+============================================================
+2026-05-19 00:13:13,632 INFO Analyzing: XLF (class=equity)
+2026-05-19 00:13:13,637 INFO   Period: 2005-01-03 to 2026-03-31, n=5344
+2026-05-19 00:13:13,639 INFO   BH MDD=-82.7%  VT MDD=-47.6%  Hedged MDD=-46.8%
+2026-05-19 00:13:13,639 INFO   BH Sharpe=0.326  VT Sharpe=0.428  Hedged Sharpe=0.362
+2026-05-19 00:13:13,640 INFO   Bootstrap: n=5344, reps=10000, block=252
+2026-05-19 00:13:13,641 INFO   Point: retention=102.3%, vt_red=42.4%, hedged_abs=-46.8%, hedged_vs_bh=-43.4%
+2026-05-19 00:13:15,517 INFO   → MDD retention 90% CI: [78.1, 125.4]  (point=102.3%)
+2026-05-19 00:13:15,518 INFO 
+============================================================
+2026-05-19 00:13:15,518 INFO Analyzing: XLE (class=equity)
+2026-05-19 00:13:15,525 INFO   Period: 2005-01-03 to 2026-03-31, n=5344
+2026-05-19 00:13:15,526 INFO   BH MDD=-71.3%  VT MDD=-63.3%  Hedged MDD=-53.5%
+2026-05-19 00:13:15,526 INFO   BH Sharpe=0.438  VT Sharpe=0.405  Hedged Sharpe=0.322
+2026-05-19 00:13:15,527 INFO   Bootstrap: n=5344, reps=10000, block=252
+2026-05-19 00:13:15,528 INFO   Point: retention=223.4%, vt_red=11.1%, hedged_abs=-53.5%, hedged_vs_bh=-24.9%
+2026-05-19 00:13:17,403 INFO   → MDD retention 90% CI: [37.7, 202.9]  (point=223.4%)
+2026-05-19 00:13:17,406 INFO 
+============================================================
+2026-05-19 00:13:17,407 INFO Analyzing: DIA (class=equity)
+2026-05-19 00:13:17,414 INFO   Period: 2005-01-03 to 2026-03-31, n=5344
+2026-05-19 00:13:17,415 INFO   BH MDD=-51.9%  VT MDD=-26.8%  Hedged MDD=-25.2%
+2026-05-19 00:13:17,416 INFO   BH Sharpe=0.594  VT Sharpe=0.669  Hedged Sharpe=0.520
+2026-05-19 00:13:17,416 INFO   Bootstrap: n=5344, reps=10000, block=252
+2026-05-19 00:13:17,417 INFO   Point: retention=106.2%, vt_red=48.4%, hedged_abs=-25.2%, hedged_vs_bh=-51.4%
+2026-05-19 00:13:19,294 INFO   → MDD retention 90% CI: [82.7, 155.3]  (point=106.2%)
+2026-05-19 00:13:19,294 INFO 
+============================================================
+2026-05-19 00:13:19,295 INFO Analyzing: EEM (class=equity)
+2026-05-19 00:13:19,300 INFO   Period: 2005-01-03 to 2026-03-31, n=5344
+2026-05-19 00:13:19,301 INFO   BH MDD=-66.4%  VT MDD=-40.7%  Hedged MDD=-38.1%
+2026-05-19 00:13:19,301 INFO   BH Sharpe=0.368  VT Sharpe=0.379  Hedged Sharpe=0.316
+2026-05-19 00:13:19,302 INFO   Bootstrap: n=5344, reps=10000, block=252
+2026-05-19 00:13:19,304 INFO   Point: retention=110.1%, vt_red=38.7%, hedged_abs=-38.1%, hedged_vs_bh=-42.6%
+2026-05-19 00:13:21,183 INFO   → MDD retention 90% CI: [62.0, 183.7]  (point=110.1%)
+2026-05-19 00:13:21,183 INFO 
+============================================================
+2026-05-19 00:13:21,184 INFO Analyzing: EFA (class=equity)
+2026-05-19 00:13:21,189 INFO   Period: 2005-01-03 to 2026-03-31, n=5344
+2026-05-19 00:13:21,189 INFO   BH MDD=-61.0%  VT MDD=-33.3%  Hedged MDD=-33.6%
+2026-05-19 00:13:21,190 INFO   BH Sharpe=0.375  VT Sharpe=0.418  Hedged Sharpe=0.437
+2026-05-19 00:13:21,191 INFO   Bootstrap: n=5344, reps=10000, block=252
+2026-05-19 00:13:21,192 INFO   Point: retention=98.7%, vt_red=45.5%, hedged_abs=-33.6%, hedged_vs_bh=-44.9%
+2026-05-19 00:13:23,102 INFO   → MDD retention 90% CI: [88.0, 176.5]  (point=98.7%)
+2026-05-19 00:13:23,106 INFO 
+============================================================
+2026-05-19 00:13:23,108 INFO Analyzing: FXI (class=equity)
+2026-05-19 00:13:23,115 INFO   Period: 2005-10-10 to 2026-03-31, n=5150
+2026-05-19 00:13:23,116 INFO   BH MDD=-72.7%  VT MDD=-47.6%  Hedged MDD=-42.7%
+2026-05-19 00:13:23,119 INFO   BH Sharpe=0.316  VT Sharpe=0.356  Hedged Sharpe=0.338
+2026-05-19 00:13:23,120 INFO   Bootstrap: n=5150, reps=10000, block=252
+2026-05-19 00:13:23,120 INFO   Point: retention=119.6%, vt_red=34.5%, hedged_abs=-42.7%, hedged_vs_bh=-41.3%
+2026-05-19 00:13:24,923 INFO   → MDD retention 90% CI: [81.8, 207.7]  (point=119.6%)
+2026-05-19 00:13:24,925 INFO 
+============================================================
+2026-05-19 00:13:24,925 INFO Analyzing: EWZ (class=equity)
+2026-05-19 00:13:24,930 INFO   Period: 2005-01-03 to 2026-03-31, n=5344
+2026-05-19 00:13:24,931 INFO   BH MDD=-77.2%  VT MDD=-68.9%  Hedged MDD=-68.0%
+2026-05-19 00:13:24,931 INFO   BH Sharpe=0.363  VT Sharpe=0.346  Hedged Sharpe=0.350
+2026-05-19 00:13:24,933 INFO   Bootstrap: n=5344, reps=10000, block=252
+2026-05-19 00:13:24,933 INFO   Point: retention=110.9%, vt_red=10.8%, hedged_abs=-68.0%, hedged_vs_bh=-12.0%
+2026-05-19 00:13:26,818 INFO   → MDD retention 90% CI: [52.4, 208.8]  (point=110.9%)
+2026-05-19 00:13:26,818 INFO 
+============================================================
+2026-05-19 00:13:26,819 INFO Analyzing: EWJ (class=equity)
+2026-05-19 00:13:26,824 INFO   Period: 2005-01-03 to 2026-03-31, n=5344
+2026-05-19 00:13:26,824 INFO   BH MDD=-54.5%  VT MDD=-30.5%  Hedged MDD=-30.5%
+2026-05-19 00:13:26,824 INFO   BH Sharpe=0.334  VT Sharpe=0.387  Hedged Sharpe=0.461
+2026-05-19 00:13:26,825 INFO   Bootstrap: n=5344, reps=10000, block=252
+2026-05-19 00:13:26,825 INFO   Point: retention=99.8%, vt_red=44.1%, hedged_abs=-30.5%, hedged_vs_bh=-44.0%
+2026-05-19 00:13:28,699 INFO   → MDD retention 90% CI: [77.1, 222.3]  (point=99.8%)
+2026-05-19 00:13:28,699 INFO 
+============================================================
+2026-05-19 00:13:28,700 INFO Analyzing: EWG (class=equity)
+2026-05-19 00:13:28,706 INFO   Period: 2005-01-03 to 2026-03-31, n=5344
+2026-05-19 00:13:28,706 INFO   BH MDD=-63.1%  VT MDD=-36.5%  Hedged MDD=-38.2%
+2026-05-19 00:13:28,706 INFO   BH Sharpe=0.359  VT Sharpe=0.366  Hedged Sharpe=0.262
+2026-05-19 00:13:28,710 INFO   Bootstrap: n=5344, reps=10000, block=252
+2026-05-19 00:13:28,710 INFO   Point: retention=93.8%, vt_red=42.1%, hedged_abs=-38.2%, hedged_vs_bh=-39.5%
+2026-05-19 00:13:30,590 INFO   → MDD retention 90% CI: [56.5, 187.0]  (point=93.8%)
+2026-05-19 00:13:30,590 INFO 
+============================================================
+2026-05-19 00:13:30,590 INFO Analyzing: EWU (class=equity)
+2026-05-19 00:13:30,597 INFO   Period: 2005-01-03 to 2026-03-31, n=5344
+2026-05-19 00:13:30,597 INFO   BH MDD=-64.0%  VT MDD=-35.9%  Hedged MDD=-34.8%
+2026-05-19 00:13:30,597 INFO   BH Sharpe=0.330  VT Sharpe=0.356  Hedged Sharpe=0.315
+2026-05-19 00:13:30,598 INFO   Bootstrap: n=5344, reps=10000, block=252
+2026-05-19 00:13:30,599 INFO   Point: retention=104.2%, vt_red=43.8%, hedged_abs=-34.8%, hedged_vs_bh=-45.7%
+2026-05-19 00:13:32,478 INFO   → MDD retention 90% CI: [68.8, 168.6]  (point=104.2%)
+2026-05-19 00:13:32,478 INFO 
+============================================================
+2026-05-19 00:13:32,479 INFO Analyzing: EWA (class=equity)
+2026-05-19 00:13:32,485 INFO   Period: 2005-01-03 to 2026-03-31, n=5344
+2026-05-19 00:13:32,485 INFO   BH MDD=-67.0%  VT MDD=-39.6%  Hedged MDD=-41.2%
+2026-05-19 00:13:32,487 INFO   BH Sharpe=0.385  VT Sharpe=0.381  Hedged Sharpe=0.402
+2026-05-19 00:13:32,489 INFO   Bootstrap: n=5344, reps=10000, block=252
+2026-05-19 00:13:32,489 INFO   Point: retention=93.9%, vt_red=40.9%, hedged_abs=-41.2%, hedged_vs_bh=-38.4%
+2026-05-19 00:13:34,374 INFO   → MDD retention 90% CI: [68.6, 169.5]  (point=93.9%)
+2026-05-19 00:13:34,375 INFO 
+============================================================
+2026-05-19 00:13:34,375 INFO Analyzing: INDA (class=equity)
+2026-05-19 00:13:34,384 INFO   Period: 2013-02-07 to 2026-03-31, n=3306
+2026-05-19 00:13:34,385 INFO   BH MDD=-45.1%  VT MDD=-32.6%  Hedged MDD=-32.0%
+2026-05-19 00:13:34,387 INFO   BH Sharpe=0.352  VT Sharpe=0.326  Hedged Sharpe=0.351
+2026-05-19 00:13:34,388 INFO   Bootstrap: n=3306, reps=10000, block=252
+2026-05-19 00:13:34,388 INFO   Point: retention=104.6%, vt_red=27.7%, hedged_abs=-32.0%, hedged_vs_bh=-29.0%
+2026-05-19 00:13:35,547 INFO   → MDD retention 90% CI: [84.0, 218.0]  (point=104.6%)
+2026-05-19 00:13:35,547 INFO 
+============================================================
+2026-05-19 00:13:35,548 INFO Analyzing: GLD (class=commodity)
+2026-05-19 00:13:35,555 INFO   Period: 2005-11-18 to 2026-03-31, n=5121
+2026-05-19 00:13:35,555 INFO   BH MDD=-45.6%  VT MDD=-35.0%  Hedged MDD=-32.6%
+2026-05-19 00:13:35,555 INFO   BH Sharpe=0.678  VT Sharpe=0.700  Hedged Sharpe=0.600
+2026-05-19 00:13:35,556 INFO   Bootstrap: n=5121, reps=10000, block=252
+2026-05-19 00:13:35,557 INFO   Point: retention=123.2%, vt_red=23.1%, hedged_abs=-32.6%, hedged_vs_bh=-28.5%
+2026-05-19 00:13:37,364 INFO   → MDD retention 90% CI: [56.9, 208.9]  (point=123.2%)
+2026-05-19 00:13:37,365 INFO 
+============================================================
+2026-05-19 00:13:37,365 INFO Analyzing: SLV (class=commodity)
+2026-05-19 00:13:37,373 INFO   Period: 2007-05-02 to 2026-03-31, n=4759
+2026-05-19 00:13:37,374 INFO   BH MDD=-76.3%  VT MDD=-63.2%  Hedged MDD=-61.0%
+2026-05-19 00:13:37,375 INFO   BH Sharpe=0.432  VT Sharpe=0.348  Hedged Sharpe=0.116
+2026-05-19 00:13:37,376 INFO   Bootstrap: n=4759, reps=10000, block=252
+2026-05-19 00:13:37,376 INFO   Point: retention=116.8%, vt_red=17.2%, hedged_abs=-61.0%, hedged_vs_bh=-20.0%
+2026-05-19 00:13:39,032 INFO   → MDD retention 90% CI: [-2.5, 164.2]  (point=116.8%)
+2026-05-19 00:13:39,034 INFO 
+============================================================
+2026-05-19 00:13:39,034 INFO Analyzing: USO (class=commodity)
+2026-05-19 00:13:39,040 INFO   Period: 2007-04-13 to 2026-03-31, n=4772
+2026-05-19 00:13:39,041 INFO   BH MDD=-98.2%  VT MDD=-90.5%  Hedged MDD=-87.0%
+2026-05-19 00:13:39,041 INFO   BH Sharpe=0.020  VT Sharpe=-0.040  Hedged Sharpe=0.013
+2026-05-19 00:13:39,042 INFO   Bootstrap: n=4772, reps=10000, block=252
+2026-05-19 00:13:39,042 INFO   Point: retention=145.3%, vt_red=7.9%, hedged_abs=-87.0%, hedged_vs_bh=-11.4%
+2026-05-19 00:13:40,690 INFO   → MDD retention 90% CI: [80.0, 236.0]  (point=145.3%)
+2026-05-19 00:13:40,691 INFO 
+============================================================
+2026-05-19 00:13:40,691 INFO Analyzing: TLT (class=bond)
+2026-05-19 00:13:40,696 INFO   Period: 2005-01-03 to 2026-03-31, n=5344
+2026-05-19 00:13:40,697 INFO   BH MDD=-48.4%  VT MDD=-31.5%  Hedged MDD=-31.0%
+2026-05-19 00:13:40,698 INFO   BH Sharpe=0.287  VT Sharpe=0.393  Hedged Sharpe=0.363
+2026-05-19 00:13:40,699 INFO   Bootstrap: n=5344, reps=10000, block=252
+2026-05-19 00:13:40,699 INFO   Point: retention=102.9%, vt_red=34.8%, hedged_abs=-31.0%, hedged_vs_bh=-35.8%
+2026-05-19 00:13:42,683 INFO   → MDD retention 90% CI: [65.8, 181.8]  (point=102.9%)
+2026-05-19 00:13:42,683 INFO 
+============================================================
+2026-05-19 00:13:42,684 INFO Analyzing: LQD (class=bond)
+2026-05-19 00:13:42,689 INFO   Period: 2005-01-03 to 2026-03-31, n=5344
+2026-05-19 00:13:42,689 INFO   BH MDD=-25.0%  VT MDD=-15.4%  Hedged MDD=-16.9%
+2026-05-19 00:13:42,689 INFO   BH Sharpe=0.502  VT Sharpe=0.549  Hedged Sharpe=0.550
+2026-05-19 00:13:42,690 INFO   Bootstrap: n=5344, reps=10000, block=252
+2026-05-19 00:13:42,690 INFO   Point: retention=83.8%, vt_red=38.3%, hedged_abs=-16.9%, hedged_vs_bh=-32.1%
+2026-05-19 00:13:44,599 INFO   → MDD retention 90% CI: [76.2, 184.6]  (point=83.8%)
+2026-05-19 00:13:44,599 INFO 
+============================================================
+2026-05-19 00:13:44,599 INFO Analyzing: HYG (class=bond)
+2026-05-19 00:13:44,605 INFO   Period: 2008-04-11 to 2026-03-31, n=4521
+2026-05-19 00:13:44,605 INFO   BH MDD=-34.2%  VT MDD=-17.5%  Hedged MDD=-17.5%
+2026-05-19 00:13:44,605 INFO   BH Sharpe=0.511  VT Sharpe=0.540  Hedged Sharpe=0.336
+2026-05-19 00:13:44,606 INFO   Bootstrap: n=4521, reps=10000, block=252
+2026-05-19 00:13:44,606 INFO   Point: retention=100.0%, vt_red=48.9%, hedged_abs=-17.5%, hedged_vs_bh=-48.9%
+2026-05-19 00:13:46,199 INFO   → MDD retention 90% CI: [67.7, 129.7]  (point=100.0%)
+2026-05-19 00:13:46,199 INFO 
+============================================================
+2026-05-19 00:13:46,199 INFO Analyzing: VNQ (class=real_estate)
+2026-05-19 00:13:46,205 INFO   Period: 2005-09-29 to 2026-03-31, n=5157
+2026-05-19 00:13:46,205 INFO   BH MDD=-73.1%  VT MDD=-44.0%  Hedged MDD=-36.3%
+2026-05-19 00:13:46,206 INFO   BH Sharpe=0.363  VT Sharpe=0.435  Hedged Sharpe=0.529
+2026-05-19 00:13:46,206 INFO   Bootstrap: n=5157, reps=10000, block=252
+2026-05-19 00:13:46,206 INFO   Point: retention=126.4%, vt_red=39.8%, hedged_abs=-36.3%, hedged_vs_bh=-50.3%
+2026-05-19 00:13:48,010 INFO   → MDD retention 90% CI: [89.4, 186.8]  (point=126.4%)
+2026-05-19 00:13:48,010 INFO 
+============================================================
+2026-05-19 00:13:48,011 INFO Analyzing: 50/50 (class=composite)
+2026-05-19 00:13:48,016 INFO   Period: 2005-11-18 to 2026-03-31, n=5121
+2026-05-19 00:13:48,017 INFO   BH MDD=-32.5%  VT MDD=-16.8%  Hedged MDD=-17.5%
+2026-05-19 00:13:48,024 INFO   BH Sharpe=0.887  VT Sharpe=0.968  Hedged Sharpe=0.811
+2026-05-19 00:13:48,025 INFO   Bootstrap: n=5121, reps=10000, block=252
+2026-05-19 00:13:48,025 INFO   Point: retention=95.6%, vt_red=48.2%, hedged_abs=-17.5%, hedged_vs_bh=-46.0%
+2026-05-19 00:13:49,824 INFO   → MDD retention 90% CI: [76.0, 189.9]  (point=95.6%)
+2026-05-19 00:13:49,824 INFO 
+================================================================================
+2026-05-19 00:13:49,824 INFO SUMMARY: MDD Retention 90% CI by Asset (def_a)
+2026-05-19 00:13:49,824 INFO ================================================================================
+2026-05-19 00:13:49,824 INFO 
+--- EQUITY ---
+2026-05-19 00:13:49,824 INFO      Asset      n    BH MDD    VT MDD   Retention    CI_lo    CI_hi
+2026-05-19 00:13:49,824 INFO        SPY   5344     -55.2     -26.3       103.7     93.0    182.2
+2026-05-19 00:13:49,824 INFO        QQQ   5344     -53.4     -28.5       109.0     89.0    221.5
+2026-05-19 00:13:49,824 INFO        IWM   5344     -58.6     -31.0       102.2     86.7    179.5
+2026-05-19 00:13:49,825 INFO        XLF   5344     -82.7     -47.6       102.3     78.1    125.4
+2026-05-19 00:13:49,825 INFO        XLE   5344     -71.3     -63.3       223.4     37.7    202.9
+2026-05-19 00:13:49,825 INFO        DIA   5344     -51.9     -26.8       106.2     82.7    155.3
+2026-05-19 00:13:49,825 INFO        EEM   5344     -66.4     -40.7       110.1     62.0    183.7
+2026-05-19 00:13:49,825 INFO        EFA   5344     -61.0     -33.3        98.7     88.0    176.5
+2026-05-19 00:13:49,825 INFO        FXI   5150     -72.7     -47.6       119.6     81.8    207.7
+2026-05-19 00:13:49,825 INFO        EWZ   5344     -77.2     -68.9       110.9     52.4    208.8
+2026-05-19 00:13:49,825 INFO        EWJ   5344     -54.5     -30.5        99.8     77.1    222.3
+2026-05-19 00:13:49,825 INFO        EWG   5344     -63.1     -36.5        93.8     56.5    187.0
+2026-05-19 00:13:49,825 INFO        EWU   5344     -64.0     -35.9       104.2     68.8    168.6
+2026-05-19 00:13:49,825 INFO        EWA   5344     -67.0     -39.6        93.9     68.6    169.5
+2026-05-19 00:13:49,825 INFO       INDA   3306     -45.1     -32.6       104.6     84.0    218.0
+2026-05-19 00:13:49,825 INFO 
+--- COMMODITY ---
+2026-05-19 00:13:49,825 INFO      Asset      n    BH MDD    VT MDD   Retention    CI_lo    CI_hi
+2026-05-19 00:13:49,825 INFO        GLD   5121     -45.6     -35.0       123.2     56.9    208.9
+2026-05-19 00:13:49,825 INFO        SLV   4759     -76.3     -63.2       116.8     -2.5    164.2
+2026-05-19 00:13:49,825 INFO        USO   4772     -98.2     -90.5       145.3     80.0    236.0
+2026-05-19 00:13:49,825 INFO 
+--- BOND ---
+2026-05-19 00:13:49,825 INFO      Asset      n    BH MDD    VT MDD   Retention    CI_lo    CI_hi
+2026-05-19 00:13:49,825 INFO        TLT   5344     -48.4     -31.5       102.9     65.8    181.8
+2026-05-19 00:13:49,825 INFO        LQD   5344     -24.9     -15.4        83.8     76.2    184.6
+2026-05-19 00:13:49,825 INFO        HYG   4521     -34.2     -17.5       100.0     67.7    129.7
+2026-05-19 00:13:49,825 INFO 
+--- REAL_ESTATE ---
+2026-05-19 00:13:49,825 INFO      Asset      n    BH MDD    VT MDD   Retention    CI_lo    CI_hi
+2026-05-19 00:13:49,825 INFO        VNQ   5157     -73.1     -44.0       126.4     89.4    186.8
+2026-05-19 00:13:49,825 INFO 
+--- COMPOSITE ---
+2026-05-19 00:13:49,825 INFO      Asset      n    BH MDD    VT MDD   Retention    CI_lo    CI_hi
+2026-05-19 00:13:49,825 INFO      50/50   5121     -32.5     -16.8        95.6     76.0    189.9
+2026-05-19 00:13:49,825 INFO 
+Assets with CI lower bound > 0%: 22/23
+2026-05-19 00:13:49,825 INFO All 22+ assets retain MDD protection: False
+2026-05-19 00:13:49,825 INFO 
+Verdict: PASS — MDD retention CI lo > 0 for 22/23 assets. Universal MDD protection hypothesis supported.
+2026-05-19 00:13:49,829 INFO 
+Results saved to /Users/yhlai0911/Desktop/volpred-research/experiments/k1376/k1376_results.json

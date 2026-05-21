@@ -1,0 +1,121 @@
+{
+  "generated_at": "2026-05-18T14:30:00",
+  "reviewer": "paper_review_agent (claude-sonnet-4-6)",
+  "review_method": "editor-sop-9checklist + gemini-2.5-flash + codex-gpt5.4",
+  "articles": [
+    {
+      "id": "mile_aeca4e68",
+      "title": "把實作 bug 修掉之後，MF2-GARCH 真的贏了 GJR——但 25% 收斂率讓這場勝利打了折",
+      "published_at": "2026-05-04",
+      "editor_sop_pass": true,
+      "editor_sop_notes": {
+        "check_1_1": "PASS — 無「不是...而是」結構",
+        "check_1_2": "PASS — 結論確實限縮在證據範圍內（有貢獻的 null-leaning result 表述誠實）",
+        "check_1_3": "PASS — 所有主張附有 K623 實驗、Conrad & Engle 2025 JAE 參考",
+        "check_2_1": "PASS — 資訊密度高，每段有新事實",
+        "check_2_2": "PASS — 戲劇詞配額在限額內",
+        "check_2_3": "WARNING — emoji+checkmark 表格（✅/❌/⚠️）是 AI 模板腔，Gemini 指出。另有「null-leaning result」英文直譯語感",
+        "check_3_1": "PASS (with minor note) — Conrad & Engle 2025 JAE 40(4) 438-454 經 Codex 網路核查確認存在；Patton 2011 為 JoE（Journal of Econometrics），文章標記為「那條經典守則」未寫期刊名，不算錯引但應補全",
+        "check_3_2": "PASS — 無情緒命名語句",
+        "check_3_3": "PASS — 有個人觀點（誠實報告研究過程三階段；批判性呈現收斂率問題）"
+      },
+      "gemini_issues": [
+        "「方法論複製忠實：✅；QLIKE 樣本外勝出：✅...」這種 emoji+checkmark 標籤表格是典型 AI 指令遵循輸出格式",
+        "「有貢獻的 null-leaning result」是英文直譯，語感生硬；建議改寫",
+        "25% 收斂率在 Gemini 看來可能被過輕描述：75% 失敗在金融實務中通常被視為『模型不穩定』而非『打了折的勝利』，這個定性判斷應更明確",
+        "DM test 顯著性僅稱「達統計顯著水準」而未提具體 p-value，說服力稍薄"
+      ],
+      "codex_issues": [
+        "g_mean_across_refits = 1.3666，而文章聲稱 g_t 是「單位均值」短期成分——數字與理論不一致，需補充說明（樣本內平均偏離理論均值 1 的原因）",
+        "IGARCH 邊界敘述過度宣稱：「persistence≈1 代表高波動無限延續」不準確；正確說法是極慢均值回歸，只有精確=1 才是嚴格 IGARCH 無均值回歸",
+        "Patton 2011 是 JoE（Journal of Econometrics），文章未明確標出期刊名（但 Conrad & Engle 2025 JAE 引用格式已 Codex 核查確認正確）",
+        "QLIKE 穩健性描述略強於 Patton 原文；建議改寫為「QLIKE 在不完美代理下具穩健排序性，是文獻中常用比較準則」"
+      ],
+      "verdict": "NEEDS_FIX",
+      "fix_severity": "MINOR",
+      "fix_notes": "3 個 minor 修正：(1) emoji/checkmark 表格改為文字表格或加說明；(2) IGARCH 邊界敘述修正為「極慢均值回歸」；(3) 補 g_mean=1.37 注解。核心結論、數字、邏輯均正確，不影響研究誠信。文章可保持已發布狀態，下次 update 時順帶修正。"
+    },
+    {
+      "id": "mile_a8ac2ae4",
+      "title": "台股大盤集中度自 2020 起顯著加速 — 為什麼 0050 越來越像 TSMC ETF",
+      "published_at": "2026-05-12",
+      "editor_sop_pass": true,
+      "editor_sop_notes": {
+        "check_1_1": "PASS — 無「不是...而是」結構",
+        "check_1_2": "PASS — 結論範圍謹慎，明確標注相關≠因果，假說未做正式因果檢定",
+        "check_1_3": "PASS — Ben-David et al. (2018)、Greenwood & Thesmar (2011)、Moreira & Muir (2017) 均有 DOI",
+        "check_2_1": "PASS — 結構完整，每節有新數據",
+        "check_2_2": "PASS",
+        "check_2_3": "WARNING — 「台積電單獨解釋 0050.TW 報酬變異」是英文直譯（'explains variance'）；「差距無統計顯著性」為統計軟體輸出語法",
+        "check_3_1": "NEEDS_FIX — 樣本期間標示有誤：文章寫「完整樣本 2008-2026 n=4,227」，但 Codex 直接讀本地 CSV 確認 0050 與 TSMC 共同有效資料從 2009-01-02 起，n=4,228 level rows，2008 全年共同樣本為 0 筆",
+        "check_3_2": "PASS",
+        "check_3_3": "PASS — 有作者觀點與批判性討論（4 條假說皆誠實標注描述性 hypothesis）"
+      },
+      "gemini_issues": [
+        "「台積電單獨解釋 0050.TW 報酬變異」英文直譯腔，建議改為「單靠台積電的表現即可解釋 0050 近八成的報酬波動」",
+        "「H3 ETF 規模膨脹 + Passive flow 自我強化」術語堆砌感強，可展開描述",
+        "VT 策略 Sharpe CI=[0.193, 1.946] 的詮釋需注意：CI 過寬表示差距無統計意義，文章雖有說明但強調不夠"
+      ],
+      "codex_issues": [
+        "CRITICAL: 樣本期間標示錯誤——文章寫「完整樣本 2008-2026 n=4,227」，但本地 CSV 核查確認 0050/TSMC 共同樣本從 2009-01-02 起（2008 全年無共同有效資料）。正確描述應為「2009-2026，n=4,227 報酬觀察值」",
+        "Sharpe CI=[0.193, 1.946]：若此為差值（1.087-0.879=0.208）的 CI，則下界 0.193 幾乎貼著點估，CI 含義需說明清楚",
+        "三篇學術引用（Ben-David et al. 2018、Greenwood & Thesmar 2011、Moreira & Muir 2017）經 Codex 核查，DOI 與卷期均正確",
+        "OLS 應補 HAC/Newey-West 標準誤說明，且 2020 前後結構轉折應更明確標為 regime evidence 而非單一 β 解讀"
+      ],
+      "verdict": "NEEDS_FIX",
+      "fix_severity": "MODERATE",
+      "fix_notes": "主要問題：樣本期間標示錯誤（寫 2008-2026，實際從 2009-01-02 起）。此為事實錯誤，需在文章中修正為「2009-2026，共 4,227 個報酬觀察值」。次要改善：Sharpe CI 解釋補充說明、翻譯腔潤飾。核心研究結論（R² 0.34→0.84 的結構轉折、beta 上升）不受影響。"
+    },
+    {
+      "id": "mile_ae145f60",
+      "title": "5/12 美國 CPI 倒數 24 小時：三情境劇本 + 部位調整建議（VIX 18 適中，但 hot surprise 是唯一真風險）",
+      "published_at": "2026-05-12",
+      "editor_sop_pass": true,
+      "editor_sop_notes": {
+        "check_1_1": "PASS — 無「不是...而是」結構",
+        "check_1_2": "WARNING — 文章一方面說CPI日波動不顯著(p=0.59)，同時給出精確三情境點位區間，有潛在邏輯矛盾感（但Codex解釋兩者並不互斥）",
+        "check_1_3": "PASS — 所有數字來源明確（K925、BLS、yfinance）",
+        "check_2_1": "PASS",
+        "check_2_2": "PASS",
+        "check_2_3": "WARNING — 「Cool：Core <2.6% 或 MoM <0.2% → SPY +1.0~+1.8%」是純公式輸出格式；「Hot surprise 是唯一真風險」像 prompt 摘要句",
+        "check_3_1": "NEEDS_FIX — Bauer & Swanson (2023) 被用來支持「CPI surprise 非線性反應」，但 Codex 查核指出該文討論 FOMC/貨幣政策高頻識別，不是 CPI surprise 股票反應，屬過度延伸/錯引",
+        "check_3_2": "PASS",
+        "check_3_3": "PASS — 有逆市場直覺的分析（CPI日不比普通日波動大）"
+      },
+      "gemini_issues": [
+        "「Hot surprise 是唯一真風險」句式過於 AI 摘要腔",
+        "「VIX：CPI 日 18.18，非 CPI 日 18.39，差異 p 值 0.72」純數據堆疊沒有解釋，可改為敘述句",
+        "三情境表格公式化痕跡強（Cool/In-line/Hot → 箭頭 → 數字）",
+        "p值解釋邏輯：文章提供了無統計顯著差異的p值，卻同時給精確情境預測，Gemini認為此處需更明確的橋接解釋（Codex確認兩者並不互斥，是條件 vs 無條件效應的差別）"
+      ],
+      "codex_issues": [
+        "CITATION ERROR: Bauer & Swanson (2023) NBER Macro Annual 的研究主題是 FOMC 貨幣政策 surprise 與高頻識別，不是 CPI surprise 的非線性股票反應。文章用該引用支持『hot surprise 非線性反應』屬錯引或過度延伸",
+        "「統計強度 0.55」術語不精確：原始結果檔中對應欄位是 absret_t_stat=0.545（Welch t-statistic），應直接寫「t 統計量 = 0.55」",
+        "Lucca & Moench (2015) 核心是 pre-FOMC drift，不是 CPI；但文章用它支持「公佈後 5 分鐘 overreaction」也不完全對題，需注意",
+        "Savor & Wilson (2013) 確認涵蓋 inflation announcement days，引用有效",
+        "三情境數字（Cool/In-line/Hot 的 SPY/VIX 預期範圍）與 K925 結果檔中的 hot_vs_cool 比較對照：hot_absret_t=-0.60、p=0.55，情境差異無統計顯著性。文章給出精確區間估計但未交代情境切分規則與各情境樣本數"
+      ],
+      "verdict": "NEEDS_FIX",
+      "fix_severity": "MODERATE",
+      "fix_notes": "主要問題：(1) Bauer & Swanson (2023) 引用不當——應替換為直接討論 CPI surprise 非對稱股票反應的文獻；(2) 「統計強度 0.55」應改為「t 統計量 = 0.55」。文章屬事件驅動時效文（2026-05-12 發布），CPI 已公佈，修正引用即可。文章核心統計（n=2827、135次、p=0.59、CI=[0.86,1.28]）均與 K925 結果檔一致，無造假問題。注意：本文時效已過（CPI 已發布），修正優先級可降低。"
+    }
+  ],
+  "summary": {
+    "total_articles": 3,
+    "pass": 0,
+    "needs_fix": 3,
+    "fix_breakdown": {
+      "minor": ["mile_aeca4e68"],
+      "moderate": ["mile_a8ac2ae4", "mile_ae145f60"]
+    },
+    "critical_findings": [
+      "mile_a8ac2ae4: 樣本期間標示錯誤（2008-2026 應為 2009-2026，2008年無共同有效資料）",
+      "mile_ae145f60: Bauer & Swanson (2023) 錯引（FOMC 文獻被用來支持 CPI 非線性反應）"
+    ],
+    "non_critical_findings": [
+      "mile_aeca4e68: emoji checkmark 表格 AI 腔；IGARCH 邊界敘述過強；g_mean=1.37 需注解",
+      "mile_a8ac2ae4: 翻譯腔潤飾；Sharpe CI 說明補充",
+      "mile_ae145f60: 「統計強度 0.55」術語需改為 t-stat；三情境缺情境切分說明"
+    ]
+  }
+}

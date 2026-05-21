@@ -1,0 +1,35 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.10, pytest-9.0.3, pluggy-1.6.0 -- /Users/yhlai0911/Desktop/volpred-research/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /Users/yhlai0911/Desktop/volpred-research
+configfile: pyproject.toml
+plugins: anyio-4.12.1
+collecting ... collected 25 items
+
+tests/test_publish_draft_citation_sanitizer.py::test_citation_three_authors_with_and_preserved PASSED [  4%]
+tests/test_publish_draft_citation_sanitizer.py::test_citation_three_authors_with_oxford_comma_preserved PASSED [  8%]
+tests/test_publish_draft_citation_sanitizer.py::test_citation_et_al_preserved PASSED [ 12%]
+tests/test_publish_draft_citation_sanitizer.py::test_citation_ampersand_two_authors_preserved PASSED [ 16%]
+tests/test_publish_draft_citation_sanitizer.py::test_citation_and_two_authors_preserved PASSED [ 20%]
+tests/test_publish_draft_citation_sanitizer.py::test_citation_single_author_preserved PASSED [ 24%]
+tests/test_publish_draft_citation_sanitizer.py::test_citation_bollerslev_preserved PASSED [ 28%]
+tests/test_publish_draft_citation_sanitizer.py::test_citation_fullwidth_paren_preserved PASSED [ 32%]
+tests/test_publish_draft_citation_sanitizer.py::test_citation_comma_year_preserved PASSED [ 36%]
+tests/test_publish_draft_citation_sanitizer.py::test_citation_year_letter_suffix_preserved PASSED [ 40%]
+tests/test_publish_draft_citation_sanitizer.py::test_harvey_threshold_jargon_still_sanitized PASSED [ 44%]
+tests/test_publish_draft_citation_sanitizer.py::test_bare_harvey_jargon_still_sanitized PASSED [ 48%]
+tests/test_publish_draft_citation_sanitizer.py::test_dm_test_jargon_still_sanitized PASSED [ 52%]
+tests/test_publish_draft_citation_sanitizer.py::test_diebold_mariano_jargon_still_sanitized PASSED [ 56%]
+tests/test_publish_draft_citation_sanitizer.py::test_t_stat_jargon_still_sanitized PASSED [ 60%]
+tests/test_publish_draft_citation_sanitizer.py::test_p_value_jargon_still_sanitized PASSED [ 64%]
+tests/test_publish_draft_citation_sanitizer.py::test_mixed_citation_and_jargon PASSED [ 68%]
+tests/test_publish_draft_citation_sanitizer.py::test_k531_repro_no_duplication PASSED [ 72%]
+tests/test_publish_draft_citation_sanitizer.py::test_k663_repro_erb_harvey_2013 PASSED [ 76%]
+tests/test_publish_draft_citation_sanitizer.py::test_references_section_full_block PASSED [ 80%]
+tests/test_publish_draft_citation_sanitizer.py::test_stash_restore_round_trip PASSED [ 84%]
+tests/test_publish_draft_citation_sanitizer.py::test_stash_skips_text_without_citations PASSED [ 88%]
+tests/test_publish_draft_citation_sanitizer.py::test_audit_exempts_citation_with_harvey PASSED [ 92%]
+tests/test_publish_draft_citation_sanitizer.py::test_audit_still_blocks_bare_jargon PASSED [ 96%]
+tests/test_publish_draft_citation_sanitizer.py::test_audit_mixed_citation_and_jargon PASSED [100%]
+
+============================== 25 passed in 0.03s ==============================

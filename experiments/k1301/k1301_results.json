@@ -1,0 +1,159 @@
+{
+  "experiment_id": "K1301",
+  "title": "HAR-RS (Realized Semivariance) vs HAR-RV on TAIFEX TX1 + SPY",
+  "date_run": "2026-05-12 10:53:23",
+  "seed": 42,
+  "methodology": {
+    "decomposition": "Barndorff-Nielsen, Kinnebrock, Shephard (2008) RV = RS+ + RS- by sign of 5-min log returns",
+    "target": "log(RV_{t+1})",
+    "har_rv_features": [
+      "log RV_{t-1}",
+      "log mean RV_{[t-5,t-1]}",
+      "log mean RV_{[t-22,t-1]}"
+    ],
+    "har_rs_features": [
+      "log RS+_{t-1}",
+      "log mean RS+_{[t-5,t-1]}",
+      "log mean RS+_{[t-22,t-1]}",
+      "log RS-_{t-1}",
+      "log mean RS-_{[t-5,t-1]}",
+      "log mean RS-_{[t-22,t-1]}"
+    ],
+    "split": "70/30 chronological",
+    "test": "DM-HLN h=1 on squared errors (Harvey 1997 small-sample correction)",
+    "pass_rule": "|DM_HLN_t| > 3 AND HAR-RS lower MSE",
+    "lookahead_guard": "all features built from .shift(1) lag + rolling on lagged series; target shift(-1) only on RV column"
+  },
+  "data_sources": {
+    "TX1": "TAIFEX tick CSV 2017-05-16..2026-05-08, day session 08:45-13:45, 5-min bars",
+    "SPY": "yfinance 5m, last 30 trading days, regular session 09:30-16:00 ET"
+  },
+  "results": {
+    "TX1": {
+      "asset": "TX1",
+      "n_daily_rows": 2186,
+      "n_har_rows": 2163,
+      "n_train": 1514,
+      "n_test": 649,
+      "n_clip_target_at_eps": 0,
+      "n_clip_feat_at_eps": 0,
+      "sample_trust_flag": "OK",
+      "date_range": [
+        "2017-06-16 00:00:00",
+        "2026-05-07 00:00:00"
+      ],
+      "har_rv": {
+        "beta": {
+          "intercept": -1.7501000927267794,
+          "rv_d": 0.23930636193361468,
+          "rv_w": 0.42293660885715134,
+          "rv_m": 0.1737725881848046
+        },
+        "mse_oos": 1.4709108750371849,
+        "mae_oos": 0.4891716636907093,
+        "r2_is": 0.517619146974871,
+        "r2_oos": 0.04323277200503739,
+        "mse_oos_ci95": [
+          0.3347633455823805,
+          3.0871288242442074
+        ]
+      },
+      "har_rs": {
+        "beta": {
+          "intercept": -1.2000030473738308,
+          "rsp_d": 0.09041056882349213,
+          "rsp_w": 0.1248249305208905,
+          "rsp_m": 0.11999993883152318,
+          "rsn_d": 0.12571453948374106,
+          "rsn_w": 0.3020540325726678,
+          "rsn_m": 0.06950177807871956
+        },
+        "mse_oos": 1.4502827438722714,
+        "mae_oos": 0.4913126382257612,
+        "r2_is": 0.5170071603486848,
+        "r2_oos": 0.05665052573051177,
+        "mse_oos_ci95": [
+          0.3310074654510365,
+          3.053741061993778
+        ]
+      },
+      "dm_hln": {
+        "loss": "squared_error",
+        "h": 1,
+        "t_stat": 1.290298271972442,
+        "p_value": 0.1974073438775883,
+        "interpretation_sign": "positive => HAR-RV loss > HAR-RS loss => HAR-RS preferred",
+        "harvey_threshold": 3.0,
+        "pass_3sigma": false,
+        "har_rs_lower_mse": true
+      }
+    },
+    "SPY": {
+      "asset": "SPY",
+      "n_daily_rows": 30,
+      "n_har_rows": 7,
+      "n_train": 4,
+      "n_test": 3,
+      "n_clip_target_at_eps": 0,
+      "n_clip_feat_at_eps": 0,
+      "sample_trust_flag": "UNTRUSTWORTHY_SMALL_SAMPLE",
+      "date_range": [
+        "2026-04-30 00:00:00",
+        "2026-05-08 00:00:00"
+      ],
+      "har_rv": {
+        "beta": {
+          "intercept": 46.879361754318005,
+          "rv_d": 1.5490479371831993,
+          "rv_w": -2.5230463500890883,
+          "rv_m": 6.695379016880401
+        },
+        "mse_oos": 8.575662190490709,
+        "mae_oos": 2.81793393218649,
+        "r2_is": 1.0,
+        "r2_oos": -39.65836332497162,
+        "mse_oos_ci95": [
+          3.963030567427019,
+          15.165063502021638
+        ]
+      },
+      "har_rs": {
+        "beta": {
+          "intercept": 1.062136058443565,
+          "rsp_d": 3.0800316255209865,
+          "rsp_w": -0.574013049949438,
+          "rsp_m": 1.5684511243519474,
+          "rsn_d": -3.337892974661628,
+          "rsn_w": 3.4355779782405675,
+          "rsn_m": -3.177137377856198
+        },
+        "mse_oos": 4.079106027910282,
+        "mae_oos": 1.3883732124782135,
+        "r2_is": 1.0,
+        "r2_oos": -18.33958815539211,
+        "mse_oos_ci95": [
+          0.09270110781255282,
+          11.985726870109806
+        ]
+      },
+      "dm_hln": {
+        "loss": "squared_error",
+        "h": 1,
+        "t_stat": 0.7600412870105555,
+        "p_value": 0.5266044880725747,
+        "interpretation_sign": "positive => HAR-RV loss > HAR-RS loss => HAR-RS preferred",
+        "harvey_threshold": 3.0,
+        "pass_3sigma": false,
+        "har_rs_lower_mse": true
+      }
+    }
+  },
+  "verdict_lines": [
+    "TX1: DM_HLN_t=1.290  p=0.1974  MSE_RV=1.4709  MSE_RS=1.4503  pass_3sigma=False  rs_lower_mse=True",
+    "SPY: DM_HLN_t=0.760  p=0.5266  MSE_RV=8.5757  MSE_RS=4.0791  pass_3sigma=False  rs_lower_mse=True"
+  ],
+  "trustworthy_assets": [
+    "TX1"
+  ],
+  "overall_verdict": "NULL"
+}

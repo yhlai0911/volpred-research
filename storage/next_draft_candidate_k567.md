@@ -1,3 +1,5 @@
+> 🔒 CONSUMED 2026-05-21T13:07Z — published as mile_357f5f44 "VIX 是全球恐慌指數？六個市場真錢實測的答案讓人意外" (status=draft, audience=research)
+
 # Next Draft Candidate: K567 VIX-Conditional Leverage 在跨國市場不通用
 
 **Prepared 2026-04-27 by main thread** as second preemptive brief in the 2026-04-26/27 cron heartbeat refill cycle (after K908 brief consumed → mile_3eb8657c). 補 K-research general-audience pool。

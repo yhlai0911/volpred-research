@@ -1,0 +1,9 @@
+........................................................................ [ 77%]
+.....................                                                    [100%]
+=============================== warnings summary ===============================
+tests/test_evaluation_metrics.py::test_dm_test_equal_losses_returns_zero_stat
+  /Users/yhlai0911/Desktop/volpred-research/src/volpred/evaluation/statistical_tests.py:33: RuntimeWarning: invalid value encountered in scalar divide
+    dm_stat = d_bar / np.sqrt(V / T)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+93 passed, 1 warning in 53.99s

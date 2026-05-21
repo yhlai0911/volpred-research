@@ -1,0 +1,20 @@
+.venv/lib/python3.12/site-packages/_pytest/monkeypatch.py:104: in derive_importpath
+    target = resolve(module)
+             ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'scripts.supabase_sync'
+
+    def resolve(name: str) -> object:
+        # Simplified from zope.dottedname.
+        parts = name.split(".")
+    
+        used = parts.pop(0)
+>       found: object = __import__(used)
+                        ^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'scripts'
+
+.venv/lib/python3.12/site-packages/_pytest/monkeypatch.py:67: ModuleNotFoundError
+=========================== short test summary info ============================
+FAILED tests/test_publisher_audience_audit.py::test_publish_milestone_strict_blocks_general_with_research_jargon
+1 failed, 36 passed in 3.73s

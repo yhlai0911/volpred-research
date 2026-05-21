@@ -1,0 +1,38 @@
+{
+  "experiment_id": "k1378",
+  "title": "Paper 9 Leave-COVID-out DM Test (SF1 Robustness Fix)",
+  "metadata": {
+    "data_source": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
+    "oos_start": "2019-01-01",
+    "covid_exclusion": "2020-03-01 to 2021-06-30",
+    "window": 2000,
+    "refit_every": 63,
+    "harvey_threshold": 3.0,
+    "qlike_proxy": "r_squared (squared log return)",
+    "elapsed_seconds": 83.8,
+    "timestamp": "2026-05-19T12:31:46.807027+00:00"
+  },
+  "full_oos": {
+    "n": 1852,
+    "gjr_qlike_mean": 624.3266721124259,
+    "a4f_qlike_mean": 688.4875400369174,
+    "dm_t_stat": -1.1911402440214907,
+    "dm_p_value": 0.2337512493307039,
+    "harvey_pass": false
+  },
+  "no_covid_oos": {
+    "n": 1515,
+    "gjr_qlike_mean": 643.4576432338923,
+    "a4f_qlike_mean": 662.8330951136666,
+    "dm_t_stat": -0.36166793813847603,
+    "dm_p_value": 0.7176506560801825,
+    "harvey_pass": false,
+    "sf1_verdict": "CONFIRMED"
+  },
+  "covid_only_oos": {
+    "n": 337,
+    "dm_t_stat": -1.5443226250387558,
+    "dm_p_value": 0.12345148303782394,
+    "harvey_pass": false
+  }
+}

@@ -1,0 +1,360 @@
+{
+  "experiment_id": "k1265",
+  "title": "VIX-Managed Portfolio (Moreira-Muir 2017 replication + VIX extension)",
+  "executed_at": "2026-05-03T12:36:58.057300+00:00",
+  "seed": 42,
+  "data": {
+    "spy_source": "yfinance SPY auto_adjust=True",
+    "vix_source": "yfinance ^VIX Close",
+    "in_sample": [
+      "1993-01-29",
+      "2003-12-31"
+    ],
+    "oos": [
+      "2004-01-01",
+      "2026-04-30"
+    ],
+    "n_obs_oos": 5617
+  },
+  "calibration": {
+    "c_rv": 0.015155223723593736,
+    "c_vix": 0.031187017854931512,
+    "in_sample_avg_weight_target": 1.0,
+    "weight_cap": 5.0,
+    "target_vol_static": 0.15,
+    "rv_window": 22
+  },
+  "metrics_oos": {
+    "buy_hold": {
+      "n": 5617,
+      "annual_return": 0.11959543365189979,
+      "annual_vol": 0.18704922984487124,
+      "sharpe": 0.6393794497367667,
+      "max_drawdown": -0.5518942934531563,
+      "calmar": 0.21669989175572224,
+      "total_return": 8.729097734381835,
+      "turnover_annual": 0.0
+    },
+    "vol_target_static": {
+      "n": 5617,
+      "annual_return": 0.10619195552176815,
+      "annual_vol": 0.1382263825717313,
+      "sharpe": 0.7682466512256502,
+      "max_drawdown": -0.33829558231290147,
+      "calmar": 0.3139028739179558,
+      "total_return": 7.611925708550604,
+      "turnover_annual": 0.9354067000074533
+    },
+    "mm_rv_managed": {
+      "n": 5617,
+      "annual_return": 0.1342204383799021,
+      "annual_vol": 0.20047350594211855,
+      "sharpe": 0.669517090296484,
+      "max_drawdown": -0.4671373145549096,
+      "calmar": 0.28732544842363517,
+      "total_return": 11.659774717727368,
+      "turnover_annual": 9.272518103832551
+    },
+    "mm_vix_managed": {
+      "n": 5617,
+      "annual_return": 0.12105599860274541,
+      "annual_vol": 0.16283278371690896,
+      "sharpe": 0.7434375058846007,
+      "max_drawdown": -0.27631248049136714,
+      "calmar": 0.4381126700736472,
+      "total_return": 10.030744160888403,
+      "turnover_annual": 4.015792919655531
+    }
+  },
+  "dm_hln_vs_buy_hold": {
+    "vol_target_static": {
+      "t": -0.9913004480126908,
+      "p_value": 0.321581601929259,
+      "n": 5617,
+      "max_lag": 9
+    },
+    "mm_rv_managed": {
+      "t": 0.4684257169272039,
+      "p_value": 0.6394983606843361,
+      "n": 5617,
+      "max_lag": 9
+    },
+    "mm_vix_managed": {
+      "t": 0.06552641489382498,
+      "p_value": 0.9477572078016099,
+      "n": 5617,
+      "max_lag": 9
+    }
+  },
+  "bootstrap_sharpe_ci": {
+    "buy_hold": {
+      "sharpe_lo": 0.2701448351960766,
+      "sharpe_hi": 1.0535659098854184,
+      "n_boot": 10000
+    },
+    "vol_target_static": {
+      "sharpe_lo": 0.3922992959181527,
+      "sharpe_hi": 1.1645438917325233,
+      "n_boot": 10000
+    },
+    "mm_rv_managed": {
+      "sharpe_lo": 0.282811866518638,
+      "sharpe_hi": 1.0718113199269792,
+      "n_boot": 10000
+    },
+    "mm_vix_managed": {
+      "sharpe_lo": 0.3671367282841764,
+      "sharpe_hi": 1.1247742699983978,
+      "n_boot": 10000
+    }
+  },
+  "bootstrap_sharpe_diff_vs_buy_hold": {
+    "vol_target_static": {
+      "diff_lo": -0.023620410865076352,
+      "diff_hi": 0.28855509102728333,
+      "n_boot": 10000
+    },
+    "mm_rv_managed": {
+      "diff_lo": -0.3476077039869627,
+      "diff_hi": 0.3942935539102738,
+      "n_boot": 10000
+    },
+    "mm_vix_managed": {
+      "diff_lo": -0.17883614103936446,
+      "diff_hi": 0.37316200205080186,
+      "n_boot": 10000
+    }
+  },
+  "subperiod": {
+    "2004-2009": {
+      "start": "2004-01-01",
+      "end": "2009-12-31",
+      "metrics": {
+        "buy_hold": {
+          "n": 1511,
+          "annual_return": 0.04517849925409267,
+          "annual_vol": 0.2238060007822632,
+          "sharpe": 0.20186455723341398,
+          "max_drawdown": -0.5518942934531563,
+          "calmar": 0.08186078346890413,
+          "total_return": 0.12881462893924023
+        },
+        "vol_target_static": {
+          "n": 1511,
+          "annual_return": 0.053353504922169386,
+          "annual_vol": 0.13621381490802634,
+          "sharpe": 0.3916893815667265,
+          "max_drawdown": -0.33829558231290147,
+          "calmar": 0.15771268592216156,
+          "total_return": 0.30237802575969286
+        },
+        "mm_rv_managed": {
+          "n": 1511,
+          "annual_return": 0.09599420192622656,
+          "annual_vol": 0.16017325148291273,
+          "sharpe": 0.5993148109156491,
+          "max_drawdown": -0.20889101073057148,
+          "calmar": 0.459542043434508,
+          "total_return": 0.6458275836597276
+        },
+        "mm_vix_managed": {
+          "n": 1511,
+          "annual_return": 0.07858798612104247,
+          "annual_vol": 0.1695204066987964,
+          "sharpe": 0.4635901225784426,
+          "max_drawdown": -0.27631248049136714,
+          "calmar": 0.28441707005521166,
+          "total_return": 0.468760100134785
+        }
+      },
+      "dm_vs_buy_hold": {
+        "vol_target_static": {
+          "t": 0.20309883292263853,
+          "p_value": 0.839085147372868,
+          "n": 1511,
+          "max_lag": 7
+        },
+        "mm_rv_managed": {
+          "t": 0.7978130999630434,
+          "p_value": 0.4251044009675815,
+          "n": 1511,
+          "max_lag": 7
+        },
+        "mm_vix_managed": {
+          "t": 0.5862150436529568,
+          "p_value": 0.5578186278166992,
+          "n": 1511,
+          "max_lag": 7
+        }
+      }
+    },
+    "2010-2019": {
+      "start": "2010-01-01",
+      "end": "2019-12-31",
+      "metrics": {
+        "buy_hold": {
+          "n": 2516,
+          "annual_return": 0.13711706008828406,
+          "annual_vol": 0.14698651771188687,
+          "sharpe": 0.9328546741752991,
+          "max_drawdown": -0.1934892374755942,
+          "calmar": 0.7086547131882689,
+          "total_return": 2.5275790926881774
+        },
+        "vol_target_static": {
+          "n": 2516,
+          "annual_return": 0.12503035659062217,
+          "annual_vol": 0.12954417109616365,
+          "sharpe": 0.9651561743971424,
+          "max_drawdown": -0.17306131893059062,
+          "calmar": 0.7224627511406397,
+          "total_return": 2.202924625514503
+        },
+        "mm_rv_managed": {
+          "n": 2516,
+          "annual_return": 0.17340437901029684,
+          "annual_vol": 0.23840256075599117,
+          "sharpe": 0.7273595487415044,
+          "max_drawdown": -0.4671373145549096,
+          "calmar": 0.37120643889370575,
+          "total_return": 3.234873176316258
+        },
+        "mm_vix_managed": {
+          "n": 2516,
+          "annual_return": 0.15269558357564356,
+          "annual_vol": 0.170845516625153,
+          "sharpe": 0.8937640658763575,
+          "max_drawdown": -0.2620496245868069,
+          "calmar": 0.5826972040750297,
+          "total_return": 2.9655139180938055
+        }
+      },
+      "dm_vs_buy_hold": {
+        "vol_target_static": {
+          "t": -1.2285678794906518,
+          "p_value": 0.219348813229286,
+          "n": 2516,
+          "max_lag": 8
+        },
+        "mm_rv_managed": {
+          "t": 0.733268467242869,
+          "p_value": 0.46346304437809716,
+          "n": 2516,
+          "max_lag": 8
+        },
+        "mm_vix_managed": {
+          "t": 0.6197018508389536,
+          "p_value": 0.5355102339337807,
+          "n": 2516,
+          "max_lag": 8
+        }
+      }
+    },
+    "2020-2026": {
+      "start": "2020-01-01",
+      "end": "2026-04-30",
+      "metrics": {
+        "buy_hold": {
+          "n": 1590,
+          "annual_return": 0.1625888775268329,
+          "annual_vol": 0.2045273283728347,
+          "sharpe": 0.794949402704993,
+          "max_drawdown": -0.3371728284043478,
+          "calmar": 0.48221227759151286,
+          "total_return": 1.4432796464520004
+        },
+        "vol_target_static": {
+          "n": 1590,
+          "annual_return": 0.1265954031738165,
+          "annual_vol": 0.15271112978079482,
+          "sharpe": 0.8289860952213146,
+          "max_drawdown": -0.26067572018210394,
+          "calmar": 0.4856432470403418,
+          "total_return": 1.0645076484119427
+        },
+        "mm_rv_managed": {
+          "n": 1590,
+          "annual_return": 0.10854311049023586,
+          "annual_vol": 0.16639467621584747,
+          "sharpe": 0.6523232170567377,
+          "max_drawdown": -0.2580499799962217,
+          "calmar": 0.4206282460933542,
+          "total_return": 0.8163570832112463
+        },
+        "mm_vix_managed": {
+          "n": 1590,
+          "annual_return": 0.11134780430591606,
+          "annual_vol": 0.14209325151630803,
+          "sharpe": 0.7836248598557595,
+          "max_drawdown": -0.19924878204424434,
+          "calmar": 0.5588380674828448,
+          "total_return": 0.8938887635517603
+        }
+      },
+      "dm_vs_buy_hold": {
+        "vol_target_static": {
+          "t": -1.435092580189388,
+          "p_value": 0.15145751079750402,
+          "n": 1590,
+          "max_lag": 7
+        },
+        "mm_rv_managed": {
+          "t": -1.0547083144933715,
+          "p_value": 0.29171908704955984,
+          "n": 1590,
+          "max_lag": 7
+        },
+        "mm_vix_managed": {
+          "t": -1.2027797476125581,
+          "p_value": 0.22924074966056907,
+          "n": 1590,
+          "max_lag": 7
+        }
+      }
+    }
+  },
+  "gates": {
+    "vol_target_static": {
+      "delta_sharpe": 0.12886720148888342,
+      "delta_sharpe_gt_0_15": false,
+      "dm_p_value": 0.321581601929259,
+      "dm_p_lt_0_10": false,
+      "subperiod_positive": 3,
+      "subperiod_positive_ge_2": true,
+      "mdd_ratio": 0.6129716982507907,
+      "mdd_ratio_lt_1_2": true,
+      "all_pass": false
+    },
+    "mm_rv_managed": {
+      "delta_sharpe": 0.030137640559717238,
+      "delta_sharpe_gt_0_15": false,
+      "dm_p_value": 0.6394983606843361,
+      "dm_p_lt_0_10": false,
+      "subperiod_positive": 1,
+      "subperiod_positive_ge_2": false,
+      "mdd_ratio": 0.8464253392294937,
+      "mdd_ratio_lt_1_2": true,
+      "all_pass": false
+    },
+    "mm_vix_managed": {
+      "delta_sharpe": 0.10405805614783392,
+      "delta_sharpe_gt_0_15": false,
+      "dm_p_value": 0.9477572078016099,
+      "dm_p_lt_0_10": false,
+      "subperiod_positive": 1,
+      "subperiod_positive_ge_2": false,
+      "mdd_ratio": 0.5006619632946431,
+      "mdd_ratio_lt_1_2": true,
+      "all_pass": false
+    }
+  },
+  "verdict": "NULL",
+  "notes": [
+    "Lookahead-controlled: weight at t uses signal at t-1 (.shift(1)).",
+    "c_rv and c_vix calibrated using IN-SAMPLE 1993-2003 only; reported metrics are OOS 2004-2026.",
+    "Monthly rebalance applied to lagged signal (no end-of-month look-ahead).",
+    "Weight cap 5x to prevent runaway leverage in low-vol windows; consistent with Moreira-Muir Sec V.",
+    "Long-only (negative weights clipped to 0).",
+    "Stationary bootstrap n=10000, mean block=22, seed=42."
+  ]
+}

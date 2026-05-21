@@ -45,7 +45,6 @@ Data source: yfinance (real data only), 2005-2026 or available
 import sys
 import os
 import warnings
-warnings.filterwarnings("ignore")
 
 import numpy as np
 import pandas as pd
@@ -90,6 +89,7 @@ RF_DAILY = RF_ANNUAL / 252
 
 GJR_WINDOW = 2000       # rolling window for GJR estimation
 N_BOOTSTRAP = 5000      # for Sharpe CI
+BOOTSTRAP_SEED = 42     # fixed seed — reproducibility rule
 
 DATA_START = "2004-01-01"  # early start for warmup
 DATA_END = "2026-12-31"
@@ -181,8 +181,8 @@ def run_vt(mkt_ret_series, shy_ret_series, vix_series, name):
     # LAG the signal by 1 day — this is the critical anti-lookahead step
     signal = raw_signal.shift(1)  # signal.shift(1) — NO LOOKAHEAD
 
-    # Fill first day with 1.0 (fully invested)
-    signal = signal.fillna(1.0)
+    # Drop the lagged NaN (first day); portfolio starts from day 2 for semantic correctness
+    signal = signal.dropna()
 
     # Align
     common_idx = mkt_ret_series.index.intersection(shy_ret_series.index).intersection(signal.index)
@@ -199,29 +199,43 @@ def run_vt(mkt_ret_series, shy_ret_series, vix_series, name):
 def estimate_gjr_gamma(returns, window=GJR_WINDOW):
     """
     Estimate GJR-GARCH(1,1) gamma using arch library.
-    Returns list of (date_index, gamma, tstat) for rolling windows.
+    Returns dict with 'results' (converged only) + convergence stats.
+    Non-converged windows are excluded from results and counted in n_failed.
     """
     try:
         from arch import arch_model
     except ImportError:
         print("  WARNING: arch library not available")
-        return []
+        return {'results': [], 'n_attempted': 0, 'n_converged': 0, 'n_failed': 0}
 
     n = len(returns)
     if n < window + 100:
-        return []
+        return {'results': [], 'n_attempted': 0, 'n_converged': 0, 'n_failed': 0}
 
     results = []
+    n_attempted = 0
+    n_converged = 0
+    n_failed = 0
+
     # Rolling: estimate every 252 days (annual) to reduce computation
     step = 252
     for end_idx in range(window, n, step):
         r_window = returns[end_idx - window:end_idx]
         r_scaled = r_window * 100  # scale for numerical stability
+        n_attempted += 1
 
         try:
             model = arch_model(r_scaled, vol='GARCH', p=1, o=1, q=1,
                              mean='Constant', dist='normal')
             res = model.fit(disp='off', show_warning=False)
+
+            if res.convergence_flag != 0:
+                n_failed += 1
+                warnings.warn(
+                    f"GJR rolling window end={end_idx}: convergence_flag={res.convergence_flag} — excluded",
+                    RuntimeWarning, stacklevel=2
+                )
+                continue
 
             # GJR gamma is the 'o' parameter (asymmetry)
             gamma = res.params.get('gamma[1]', np.nan)
@@ -233,49 +247,76 @@ def estimate_gjr_gamma(returns, window=GJR_WINDOW):
                 pval = np.nan
                 tstat = np.nan
 
+            if not (np.isfinite(gamma) and np.isfinite(tstat)):
+                n_failed += 1
+                continue
+
+            n_converged += 1
             results.append({
                 'end_idx': end_idx,
                 'gamma': float(gamma),
                 'tstat': float(tstat),
                 'pval': float(pval),
-                'converged': res.convergence_flag == 0,
+                'converged': True,
             })
         except Exception as e:
-            pass  # Skip failed estimations
+            n_failed += 1
+            warnings.warn(f"GJR rolling window end={end_idx}: {e}", RuntimeWarning, stacklevel=2)
 
     # Also estimate on full sample
     r_full = returns * 100
+    n_attempted += 1
     try:
         model = arch_model(r_full, vol='GARCH', p=1, o=1, q=1,
                          mean='Constant', dist='normal')
         res = model.fit(disp='off', show_warning=False)
-        gamma_full = res.params.get('gamma[1]', np.nan)
-        se_full = res.std_err.get('gamma[1]', np.nan)
-        tstat_full = gamma_full / se_full if se_full > 0 else np.nan
-        pval_full = res.pvalues.get('gamma[1]', np.nan)
-        results.append({
-            'end_idx': n,
-            'gamma': float(gamma_full),
-            'tstat': float(tstat_full),
-            'pval': float(pval_full),
-            'converged': res.convergence_flag == 0,
-            'full_sample': True,
-        })
-    except Exception:
-        pass
 
-    return results
+        if res.convergence_flag != 0:
+            n_failed += 1
+            warnings.warn(
+                f"GJR full sample: convergence_flag={res.convergence_flag} — excluded",
+                RuntimeWarning, stacklevel=2
+            )
+        else:
+            gamma_full = res.params.get('gamma[1]', np.nan)
+            se_full = res.std_err.get('gamma[1]', np.nan)
+            tstat_full = gamma_full / se_full if se_full > 0 else np.nan
+            pval_full = res.pvalues.get('gamma[1]', np.nan)
+
+            if np.isfinite(gamma_full) and np.isfinite(tstat_full):
+                n_converged += 1
+                results.append({
+                    'end_idx': n,
+                    'gamma': float(gamma_full),
+                    'tstat': float(tstat_full),
+                    'pval': float(pval_full),
+                    'converged': True,
+                    'full_sample': True,
+                })
+            else:
+                n_failed += 1
+    except Exception as e:
+        n_failed += 1
+        warnings.warn(f"GJR full sample: {e}", RuntimeWarning, stacklevel=2)
+
+    return {
+        'results': results,
+        'n_attempted': n_attempted,
+        'n_converged': n_converged,
+        'n_failed': n_failed,
+    }
 
 
-def bootstrap_sharpe_diff(ret1, ret2, n_boot=N_BOOTSTRAP):
-    """Bootstrap confidence interval for Sharpe difference."""
+def bootstrap_sharpe_diff(ret1, ret2, n_boot=N_BOOTSTRAP, seed=BOOTSTRAP_SEED):
+    """Bootstrap confidence interval for Sharpe difference. seed=BOOTSTRAP_SEED for reproducibility."""
     n = min(len(ret1), len(ret2))
     ret1 = ret1[:n]
     ret2 = ret2[:n]
 
+    rng = np.random.default_rng(seed)
     diffs = []
     for _ in range(n_boot):
-        idx = np.random.choice(n, size=n, replace=True)
+        idx = rng.choice(n, size=n, replace=True)
         s1 = (np.mean(ret1[idx]) - RF_DAILY) / np.std(ret1[idx], ddof=1) * np.sqrt(252)
         s2 = (np.mean(ret2[idx]) - RF_DAILY) / np.std(ret2[idx], ddof=1) * np.sqrt(252)
         diffs.append(s1 - s2)
@@ -287,6 +328,7 @@ def bootstrap_sharpe_diff(ret1, ret2, n_boot=N_BOOTSTRAP):
         'ci_lo': float(np.percentile(diffs, 2.5)),
         'ci_hi': float(np.percentile(diffs, 97.5)),
         'pct_positive': float(np.mean(diffs > 0)),
+        'seed': seed,
     }
 
 
@@ -354,19 +396,32 @@ for ticker, info in MARKETS.items():
 
     print(f"  MDD improvement: {mdd_improvement:.1%} ({mdd_improvement_pp:+.1f}pp)")
 
-    # --- Sharpe Improvement ---
+    # --- Sharpe Improvement (descriptive; each uses its own full-period sample) ---
+    # BH and VT differ by 1 day (VT drops day 1 due to signal shift(1)).
+    # For descriptive Sharpe comparison this 1-day diff is negligible (~0.02%).
+    # DM test and bootstrap use aligned samples (see below).
     sharpe_diff = vt_metrics['sharpe'] - bh_metrics['sharpe']
     print(f"  Sharpe diff: {sharpe_diff:+.4f}")
 
+    # --- Align BH returns to VT dates (VT drops day 1 due to shift(1)) ---
+    # vt_idx = common_idx from run_vt; bh starts from day 1 of valid_idx.
+    # We MUST align bh to vt_idx before DM test / bootstrap / Sharpe comparison
+    # to avoid a 1-day offset (vt_ret[i] vs bh_ret[i+1] mismatch).
+    bh_ret_aligned = mkt_ret.loc[vt_idx].values
+
     # --- DM Test ---
+    # SIGN NOTE: strategy_dm_test(series1, series2) with loss_fn="negative_return"
+    # computes d = (-series1) - (-series2) = series2 - series1 = BH - VT.
+    # Positive t-stat ⟹ BH returns > VT returns (BH is better in return terms).
+    # Negative t-stat ⟹ VT returns > BH returns (VT is better in return terms).
+    # 0/13 markets reach Harvey |t|>3.0, confirming no statistically significant
+    # difference in EITHER direction.
     dm_stat, dm_pval = np.nan, np.nan
     if HAS_DM:
         try:
-            # Align returns for DM test
-            n_dm = min(len(vt_ret), len(bh_ret))
             dm_stat, dm_pval = strategy_dm_test(
-                vt_ret[:n_dm],
-                bh_ret[:n_dm],
+                vt_ret,
+                bh_ret_aligned,
                 h=1,
                 loss_fn="negative_return"
             )
@@ -375,15 +430,22 @@ for ticker, info in MARKETS.items():
             print(f"  DM test failed: {e}")
 
     # --- Bootstrap Sharpe Diff ---
-    boot = bootstrap_sharpe_diff(vt_ret, bh_ret)
+    boot = bootstrap_sharpe_diff(vt_ret, bh_ret_aligned)
     print(f"  Bootstrap Sharpe diff: {boot['mean_diff']:+.4f} [{boot['ci_lo']:.4f}, {boot['ci_hi']:.4f}]")
 
     # --- GJR Gamma Estimation ---
     print(f"  Estimating GJR gamma (window={GJR_WINDOW})...")
-    gjr_results = estimate_gjr_gamma(mkt_ret.values, window=GJR_WINDOW)
+    gjr_output = estimate_gjr_gamma(mkt_ret.values, window=GJR_WINDOW)
+    gjr_results = gjr_output['results']  # converged-only estimates
+    gjr_conv_stats = {
+        'n_attempted': gjr_output['n_attempted'],
+        'n_converged': gjr_output['n_converged'],
+        'n_failed': gjr_output['n_failed'],
+    }
+    print(f"  GJR convergence: {gjr_conv_stats['n_converged']}/{gjr_conv_stats['n_attempted']} windows converged")
 
     if gjr_results:
-        # Full sample estimate
+        # Full sample estimate (converged-only; non-converged already excluded)
         full_sample = [r for r in gjr_results if r.get('full_sample', False)]
         rolling = [r for r in gjr_results if not r.get('full_sample', False)]
 
@@ -391,16 +453,28 @@ for ticker, info in MARKETS.items():
             fs = full_sample[0]
             print(f"  GJR gamma (full): {fs['gamma']:.4f} (t={fs['tstat']:.2f}, p={fs['pval']:.4f})")
         if rolling:
-            gammas = [r['gamma'] for r in rolling if not np.isnan(r['gamma'])]
-            tstats = [r['tstat'] for r in rolling if not np.isnan(r['tstat'])]
-            print(f"  GJR gamma (rolling mean): {np.mean(gammas):.4f} ({len(gammas)} windows)")
+            # All results in rolling are already converged+finite (non-converged excluded above)
+            gammas = [r['gamma'] for r in rolling]
+            tstats = [r['tstat'] for r in rolling]
+            print(f"  GJR gamma (rolling mean, converged only): {np.mean(gammas):.4f} ({len(gammas)} windows)")
             if tstats:
                 print(f"  GJR tstat (rolling mean): {np.mean(tstats):.2f}")
     else:
         full_sample = []
         rolling = []
 
-    # Store results
+    # Structured review flags (sanity checks)
+    review_flags = []
+    if bh_metrics['sharpe'] > 0 and vt_metrics['sharpe'] > 2 * bh_metrics['sharpe']:
+        review_flags.append("VT_SHARPE_OVER_2X_BASELINE")
+    if abs(mdd_improvement) > 0.8:
+        review_flags.append("MDD_IMPROVEMENT_OVER_80PCT")
+    if dm_stat is not None and not np.isnan(dm_stat) and abs(dm_stat) > 3.0:
+        review_flags.append(f"DM_STAT_OVER_3: {dm_stat:.2f}")
+    if gjr_conv_stats['n_failed'] > gjr_conv_stats['n_converged']:
+        review_flags.append(f"GJR_HIGH_FAIL_RATE: {gjr_conv_stats['n_failed']}/{gjr_conv_stats['n_attempted']}")
+
+    # Store results (converged-only GJR estimates)
     all_results[ticker] = {
         "name": info['name'],
         "region": info['region'],
@@ -419,10 +493,12 @@ for ticker, info in MARKETS.items():
         "gjr_gamma_full": full_sample[0] if full_sample else None,
         "gjr_gamma_rolling": {
             "mean_gamma": float(np.mean([r['gamma'] for r in rolling])) if rolling else None,
-            "mean_tstat": float(np.mean([r['tstat'] for r in rolling if not np.isnan(r['tstat'])])) if rolling else None,
+            "mean_tstat": float(np.mean([r['tstat'] for r in rolling])) if rolling else None,
             "n_windows": len(rolling),
             "pct_significant": float(np.mean([r['pval'] < 0.05 for r in rolling])) if rolling else None,
         },
+        "gjr_convergence": gjr_conv_stats,
+        "review_flags": review_flags,
     }
 
 
@@ -487,20 +563,22 @@ n_valid = int(np.sum(valid_mask))
 print(f"\nValid markets for cross-sectional: {n_valid} / {len(table5_data)}")
 
 # Spearman: gamma vs Sharpe improvement
-if n_valid >= 5:
+if n_valid >= 5 and np.std(gammas_valid) > 0 and np.std(sharpe_diffs_valid) > 0:
     rho_sharpe, p_sharpe = stats.spearmanr(gammas_valid, sharpe_diffs_valid)
     print(f"\nSpearman(gamma, ΔSharpe): rho={rho_sharpe:.4f}, p={p_sharpe:.4f}")
 else:
     rho_sharpe, p_sharpe = np.nan, np.nan
-    print(f"\nSpearman(gamma, ΔSharpe): N<5, not computed")
+    reason = "N<5" if n_valid < 5 else "constant input"
+    print(f"\nSpearman(gamma, ΔSharpe): {reason}, not computed")
 
 # Spearman: gamma vs MDD improvement
-if n_valid >= 5:
+if n_valid >= 5 and np.std(gammas_valid) > 0 and np.std(mdd_improvements_valid) > 0:
     rho_mdd, p_mdd = stats.spearmanr(gammas_valid, mdd_improvements_valid)
     print(f"Spearman(gamma, ΔMDD): rho={rho_mdd:.4f}, p={p_mdd:.4f}")
 else:
     rho_mdd, p_mdd = np.nan, np.nan
-    print(f"Spearman(gamma, ΔMDD): N<5, not computed")
+    reason = "N<5" if n_valid < 5 else "constant input"
+    print(f"Spearman(gamma, ΔMDD): {reason}, not computed")
 
 # How many markets show MDD improvement?
 n_mdd_improved = int(np.sum(mdd_improvements > 0))
@@ -570,7 +648,9 @@ output = {
         "rf_annual": RF_ANNUAL,
         "gjr_window": GJR_WINDOW,
         "n_bootstrap": N_BOOTSTRAP,
+        "bootstrap_seed": BOOTSTRAP_SEED,
         "lag": "signal.shift(1) — VIX from t-1 determines weight on t",
+        "gjr_note": "only converged windows (convergence_flag==0, finite gamma+tstat) included in summaries",
         "markets": {k: v for k, v in MARKETS.items()},
     },
     "references": [

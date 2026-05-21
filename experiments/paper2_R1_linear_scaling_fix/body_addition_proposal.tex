@@ -1,0 +1,100 @@
+% =============================================================================
+% Paper 2 R1 SEVERE 2 — Linearity Robustness of VIXTWN-to-VIX Ratio
+% Suggested placement: paper/taiwan-vt/body.tex
+%   (a) New \subsection at end of §3 (data section), OR end of §4
+%       VT strategies before §5 high-frequency section.
+%   (b) Plus a one-sentence footnote attached to line 120 disclosing
+%       regime dependence.
+%
+% Word count: 196 (target ~150-200 EN words; PBFJ-tier concise).
+% Data source: experiments/paper2_R1_linear_scaling_fix/results.json
+% =============================================================================
+
+\subsection{Linearity Robustness of the VIXTWN-to-VIX Ratio}\label{sec:vixtwn_ratio_linearity}
+
+The calibration $K = 12/1.39 = 8.63$ used in the VIX-proxy VT strategy
+assumes the VIXTWN-to-VIX ratio is approximately stable across volatility
+regimes. A referee may legitimately ask whether this linearity assumption
+breaks in tail-volatility episodes, in which case $K$ would systematically
+misallocate during the precise periods VT strategies aim to manage.
+Table~\ref{tab:ratio_linearity} reports the ratio conditional on
+expanding-window VIX quantile buckets (no full-sample lookahead) and on a
+tail bucket defined as $|\Delta \log \text{VIX}_t| > 2\,\sigma_{t-1}$, using
+the TAIFEX-official VIXTWN series (K1098 parse, $n=3{,}075$ post-warmup,
+2008--2021).
+
+The ratio declines monotonically from $1.018$ at low VIX (Q1) to $0.824$
+at high VIX (Q4), a $19\%$ relative drop; the tail bucket averages $0.877$.
+Each bucket's $95\%$ stationary-block bootstrap confidence interval
+($B=500$, mean block $=21$ days, seed $=42$) excludes $1.39$. A
+Kolmogorov-Smirnov two-sample test rejects equality of the tail and
+non-tail ratio distributions ($D=0.274$, $p < 0.001$). The static-ratio
+assumption therefore does not hold strictly, but two mitigating points
+preserve the substantive conclusions of Section~\ref{sec:vt}. First, the
+Sharpe ratio of the $8.63/\text{VIX}$ strategy is invariant to $K$
+(Section~\ref{sec:vt}, line $\sim$313); $K$ affects only the risk level
+and hence maximum drawdown. Second, the recent (Dec 2025--Apr 2026,
+$n=76$) ratio of $1.393$ used in the calibration reflects a structurally
+higher-volatility regime in Taiwan; our recommendation is to interpret
+$K=8.63$ as a recent-window practical calibration and to disclose the
+regime dependence rather than to revise the calibration.
+
+\begin{table}[!htbp]
+\centering
+\caption{VIXTWN-to-VIX Ratio Conditional on VIX Regime, 2008--2021}
+\label{tab:ratio_linearity}
+\small
+\begin{tabular}{lrrrrcc}
+\toprule
+Bucket & $n$ & Mean & Median & SD & 95\% CI & Contains 1.39? \\
+\midrule
+Q1 (VIX $\le$ Q25) & 1{,}533 & 1.018 & 1.018 & 0.141 & $[0.987, 1.046]$ & No \\
+Q2 (Q25--Q50)      &   634 & 1.007 & 0.990 & 0.180 & $[0.955, 1.054]$ & No \\
+Q3 (Q50--Q75)      &   574 & 0.947 & 0.919 & 0.176 & $[0.897, 0.995]$ & No \\
+Q4 (VIX $>$ Q75)   &   334 & 0.824 & 0.824 & 0.133 & $[0.785, 0.862]$ & No \\
+Tail ($2\sigma$)   &   183 & 0.877 & 0.877 & 0.202 & $[0.832, 0.919]$ & No \\
+\midrule
+Overall (long sample) & 3{,}075 & 0.981 & 0.985 & 0.180 & $[0.953, 1.009]$ & No \\
+Recent (Dec 2025--Apr 2026) &  76 & 1.393 &     -- &     -- & --- & --- \\
+\bottomrule
+\end{tabular}
+% source: experiments/paper2_R1_linear_scaling_fix/results.json
+%   amplification_per_quantile.{Q1,Q2,Q3,Q4,Tail}.{mean_ratio,median_ratio,std_ratio,n}
+%   bootstrap_ci.per_bucket.{Q1,Q2,Q3,Q4,Tail}.{ci_low,ci_high,contains_1_39}
+%   bootstrap_ci.overall.{ci_low,ci_high,contains_1_39}
+%   Recent-window row sourced from experiments/k1181/k1181_results.json
+%     .vixtwn_ratio.recent_Dec2025_Apr2026.{mean,n}
+\smallskip
+\\
+\small \textit{Notes:} Quantile thresholds are computed in an
+expanding-window manner using observations strictly prior to day $t$;
+the first 252 days are dropped as warmup. The tail bucket uses
+$|\Delta \log \text{VIX}_t| > 2\,\sigma_{t-1}$ where $\sigma_{t-1}$ is the
+expanding standard deviation of log-VIX changes through $t-1$. Confidence
+intervals are computed via stationary block bootstrap
+\citep{politis1994stationary} with $B=500$ replications and mean block
+length $21$ trading days. The long-history sample uses the TAIFEX-official
+VIXTWN series; the recent window uses K1181's daily snapshot. The decline
+in the ratio at high VIX reflects under-reaction of VIXTWN to U.S.\
+vol shocks rather than over-reaction in calm periods; mechanistically
+this is consistent with structural-break evidence around the 2020 launch
+of an active VIXTWN futures market.
+\end{table}
+
+% =============================================================================
+% Optional footnote variant (if main-thread chooses footnote-only treatment
+% instead of new subsection). Attach to body.tex line 120 after
+% "...higher baseline volatility of the Taiwanese market relative to the
+% S&P 500.\footnote{...}"
+% =============================================================================
+%
+%   \footnote{The single figure of $1.393$ reflects the recent
+%   Dec 2025--Apr 2026 window ($n=76$, K1181). Over the longer 2008--2021
+%   TAIFEX-official VIXTWN sample ($n=3{,}075$), the ratio averages
+%   $0.981$ and varies systematically with VIX regime, ranging from
+%   $1.018$ at low VIX to $0.824$ at high VIX (each 95\% bootstrap CI
+%   excludes 1.39; see
+%   Section~\ref{sec:vixtwn_ratio_linearity}/Table~\ref{tab:ratio_linearity}).
+%   Because $\text{Sharpe}(K \cdot r) = \text{Sharpe}(r)$, this regime
+%   dependence affects the calibration of $K$ and hence the strategy's
+%   target risk level, but not its Sharpe ranking.}

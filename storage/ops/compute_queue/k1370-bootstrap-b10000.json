@@ -1,0 +1,30 @@
+{
+  "id": "k1370-bootstrap-b10000",
+  "title": "K1370: Paper 2 Block-Bootstrap CI B=10000 (canonical full-sample BW-robust)",
+  "script_path": "experiments/k1370/k1370.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--b",
+    "10000",
+    "--workers",
+    "8"
+  ],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-05-16T13:30:42.286283+00:00",
+  "started_at": "2026-05-17T19:30:11Z",
+  "completed_at": "2026-05-17T20:12:30Z",
+  "exit_code": 0,
+  "stdout_file": "storage/logs/compute/k1370-bootstrap-b10000.stdout",
+  "stderr_file": "storage/logs/compute/k1370-bootstrap-b10000.stderr",
+  "result_artifact": "experiments/k1370/k1370_results.json",
+  "claude_followup": {
+    "brief": "K1370 bootstrap complete: read experiments/k1370/k1370_results.json, verify CI plausibility, write knowledge.json entry for Paper 2 §3.2 amplification ratio update. TAIEX full-sample 2008-2024 γ≈0.114 (vs rolling 0.272 in paper body — different spec, expected). New canonical 90% CI replaces stale [2.8,8.1]. Update paper/taiwan-vt/body_v3.tex §3.2 to replace stale CI + ratio with new canonical values.",
+    "task_type": "paper_decision",
+    "priority": 2
+  },
+  "followup_dispatched": true,
+  "timeout_seconds": 7200,
+  "followup_dispatched_at": "2026-05-17T21:13:30Z",
+  "followup_next_task_id": "main-thread-paper-update-K1370"
+}

@@ -1,0 +1,319 @@
+{
+  "experiment_id": "K1377",
+  "title": "HAR Forecast Combination (Exp-QLIKE Weighting) — SPY / GLD / 0050.TW",
+  "date": "2026-05-19",
+  "timestamp": "2026-05-19T11:41:57.175821",
+  "elapsed_seconds": 7.988209,
+  "hypothesis": {
+    "H1": "Exp-QLIKE combo (W=252) beats HAR-VIX DM Harvey |t|>3 on SPY OOS 2015-2026",
+    "H2": "Same conclusion holds across GLD and 0050.TW",
+    "H3": "Exp-QLIKE combo beats equal-weight combo (K482 equal-weight puzzle)"
+  },
+  "method": {
+    "models": [
+      "HAR-SQ",
+      "HAR-ABS",
+      "HAR-VIX"
+    ],
+    "model_estimation_targets": {
+      "HAR-SQ": "r²_t (squared return) — direct variance model",
+      "HAR-ABS": "|r|_t (absolute return) — plug-in: h_t = max(ŷ_t, 1e-6)²",
+      "HAR-VIX": "|r|_t (absolute return) — plug-in: h_t = max(ŷ_t, 1e-6)²"
+    },
+    "model_features": {
+      "HAR-SQ": "rv1_sq, rv5_sq, rv22_sq (r² lags)",
+      "HAR-ABS": "rv1_abs, rv5_abs, rv22_abs (|r| lags)",
+      "HAR-VIX": "rv1_abs, rv5_abs, rv22_abs, log(VIX_{t-1})"
+    },
+    "variance_conversion": "HAR-ABS/VIX: h_t = max(ŷ_{|r|,t}, 1e-6)² — standard plug-in estimator (Andersen & Bollerslev 1998; Patton 2011 RFS). This is a point forecast, not an expectation equality claim. Patton (2011) QLIKE is valid for any positive measurable h_t.",
+    "combinations": [
+      "Comb-ExpQLIKE",
+      "Comb-EqualWeight"
+    ],
+    "weight_scheme": "Exp-QLIKE softmin: w_i = exp(-mean_QLIKE_i) / sum_j exp(-mean_QLIKE_j)",
+    "calib_window": 252,
+    "ols_type": "expanding (no fixed window)",
+    "qlike_proxy": "r²_t (squared return, Patton 2011)",
+    "dm_threshold": "Harvey et al. (1997) |t|>3",
+    "related_experiments": [
+      "K530",
+      "K482",
+      "K1257",
+      "K1300"
+    ],
+    "data_quality_note": "0050.TW returns clipped at +-15% to remove 2014-01-02 yfinance split-adjustment artifact (-138.9% spurious return)"
+  },
+  "data_period": {
+    "SPY": "2000-01-01 to 2026-05-19",
+    "GLD": "2004-01-01 to 2026-05-19",
+    "0050.TW": "2003-01-01 to 2026-05-19"
+  },
+  "oos_period": {
+    "SPY": "2015-01-01 to 2026-05-19",
+    "GLD": "2015-01-01 to 2026-05-19",
+    "0050.TW": "2013-01-01 to 2026-05-19"
+  },
+  "models": [
+    "HAR-SQ",
+    "HAR-ABS",
+    "HAR-VIX",
+    "Comb-ExpQLIKE",
+    "Comb-EqualWeight"
+  ],
+  "results": {
+    "SPY": {
+      "data_period": "2000-02-04 to 2026-05-18",
+      "n_total": 6610,
+      "oos_period": "2015-01-02 to 2026-05-18",
+      "n_oos": 2860,
+      "n_oos_calibrated": 2608,
+      "data_quality": {
+        "clipped_returns": [],
+        "ret_clip_threshold": 0.15
+      },
+      "QLIKE": {
+        "HAR-SQ": -8.384972107113393,
+        "HAR-ABS": -8.169696264898942,
+        "HAR-VIX": -7.819525983884009,
+        "Comb-ExpQLIKE": -8.41077818223,
+        "Comb-EqualWeight": -8.415610869578572
+      },
+      "MSE": {
+        "HAR-SQ": 2.0412848921764825e-07,
+        "HAR-ABS": 2.068095773092349e-07,
+        "HAR-VIX": 2.0857568795898972e-07,
+        "Comb-ExpQLIKE": 2.015516734640872e-07,
+        "Comb-EqualWeight": 2.01790000044041e-07
+      },
+      "MAE": {
+        "HAR-SQ": 0.00013741694278346465,
+        "HAR-ABS": 0.00011538464896252371,
+        "HAR-VIX": 0.00011181223584024351,
+        "Comb-ExpQLIKE": 0.00012119253000400356,
+        "Comb-EqualWeight": 0.00011969623153386843
+      },
+      "DM_vs_HARVIX": {
+        "HAR-SQ": {
+          "t_stat": 3.547865217412133,
+          "p_value": 0.0003883669051178984,
+          "harvey_pass": true,
+          "direction": "alt_better",
+          "n_obs": 2860
+        },
+        "HAR-ABS": {
+          "t_stat": 2.177736923348846,
+          "p_value": 0.029425628307071294,
+          "harvey_pass": false,
+          "direction": "alt_better",
+          "n_obs": 2860
+        },
+        "Comb-ExpQLIKE": {
+          "t_stat": 3.7230323471844176,
+          "p_value": 0.000196844291115994,
+          "harvey_pass": true,
+          "direction": "alt_better",
+          "n_obs": 2860
+        },
+        "Comb-EqualWeight": {
+          "t_stat": 3.751240029046946,
+          "p_value": 0.00017596214286319523,
+          "harvey_pass": true,
+          "direction": "alt_better",
+          "n_obs": 2860
+        }
+      },
+      "DM_ExpQLIKE_vs_EqualWeight": {
+        "t_stat": -0.9376536626173723,
+        "p_value": 0.3484224241529008,
+        "harvey_pass": false,
+        "direction": "ref_better"
+      },
+      "avg_expqlike_weights": {
+        "HAR-SQ": 0.3912279748754782,
+        "HAR-ABS": 0.31880695048769764,
+        "HAR-VIX": 0.28996507463682336
+      }
+    },
+    "GLD": {
+      "data_period": "2004-12-22 to 2026-05-18",
+      "n_total": 5384,
+      "oos_period": "2015-01-02 to 2026-05-18",
+      "n_oos": 2860,
+      "n_oos_calibrated": 2608,
+      "data_quality": {
+        "clipped_returns": [],
+        "ret_clip_threshold": 0.15
+      },
+      "QLIKE": {
+        "HAR-SQ": -8.364736177450384,
+        "HAR-ABS": -8.207671809489373,
+        "HAR-VIX": -8.244346575731804,
+        "Comb-ExpQLIKE": -8.360207379961441,
+        "Comb-EqualWeight": -8.353743657816388
+      },
+      "MSE": {
+        "HAR-SQ": 9.378206791100514e-08,
+        "HAR-ABS": 9.616500113325569e-08,
+        "HAR-VIX": 9.610538448798426e-08,
+        "Comb-ExpQLIKE": 9.409535996659472e-08,
+        "Comb-EqualWeight": 9.437258172894312e-08
+      },
+      "MAE": {
+        "HAR-SQ": 0.00011499160440454755,
+        "HAR-ABS": 9.433780449112209e-05,
+        "HAR-VIX": 9.449470347087805e-05,
+        "Comb-ExpQLIKE": 0.00010009369970894288,
+        "Comb-EqualWeight": 9.953310983112642e-05
+      },
+      "DM_vs_HARVIX": {
+        "HAR-SQ": {
+          "t_stat": 3.6011451863510615,
+          "p_value": 0.0003168185821049718,
+          "harvey_pass": true,
+          "direction": "alt_better",
+          "n_obs": 2860
+        },
+        "HAR-ABS": {
+          "t_stat": -2.9641302250547885,
+          "p_value": 0.0030353980316377704,
+          "harvey_pass": false,
+          "direction": "ref_better",
+          "n_obs": 2860
+        },
+        "Comb-ExpQLIKE": {
+          "t_stat": 6.002812947216137,
+          "p_value": 1.939279847817943e-09,
+          "harvey_pass": true,
+          "direction": "alt_better",
+          "n_obs": 2860
+        },
+        "Comb-EqualWeight": {
+          "t_stat": 6.14675219078708,
+          "p_value": 7.908553811830643e-10,
+          "harvey_pass": true,
+          "direction": "alt_better",
+          "n_obs": 2860
+        }
+      },
+      "DM_ExpQLIKE_vs_EqualWeight": {
+        "t_stat": 3.4538811577067565,
+        "p_value": 0.0005525808248374453,
+        "harvey_pass": true,
+        "direction": "alt_better"
+      },
+      "avg_expqlike_weights": {
+        "HAR-SQ": 0.3607619986613484,
+        "HAR-ABS": 0.31240719397521594,
+        "HAR-VIX": 0.3268308073634367
+      }
+    },
+    "0050.TW": {
+      "data_period": "2009-02-17 to 2026-05-18",
+      "n_total": 4088,
+      "oos_period": "2013-01-02 to 2026-05-18",
+      "n_oos": 3151,
+      "n_oos_calibrated": 2899,
+      "data_quality": {
+        "clipped_returns": [
+          {
+            "date": "2009-02-19",
+            "raw": 0.15311020890379,
+            "clipped": 0.15
+          },
+          {
+            "date": "2014-01-02",
+            "raw": -1.388852937219767,
+            "clipped": -0.15
+          }
+        ],
+        "ret_clip_threshold": 0.15
+      },
+      "QLIKE": {
+        "HAR-SQ": -7.973551286948459,
+        "HAR-ABS": -7.534264294110106,
+        "HAR-VIX": -7.305443410809858,
+        "Comb-ExpQLIKE": -7.841172729645945,
+        "Comb-EqualWeight": -7.819963810582992
+      },
+      "MSE": {
+        "HAR-SQ": 3.5348954807307356e-07,
+        "HAR-ABS": 3.479057135852575e-07,
+        "HAR-VIX": 3.460896203320079e-07,
+        "Comb-ExpQLIKE": 3.4323204756197407e-07,
+        "Comb-EqualWeight": 3.439892860452722e-07
+      },
+      "MAE": {
+        "HAR-SQ": 0.0001649424193305504,
+        "HAR-ABS": 0.00013652665596124305,
+        "HAR-VIX": 0.00013415060876714749,
+        "Comb-ExpQLIKE": 0.0001459669924738079,
+        "Comb-EqualWeight": 0.00014244893492415116
+      },
+      "DM_vs_HARVIX": {
+        "HAR-SQ": {
+          "t_stat": 2.1759090841746462,
+          "p_value": 0.029562059409349084,
+          "harvey_pass": false,
+          "direction": "alt_better",
+          "n_obs": 3151
+        },
+        "HAR-ABS": {
+          "t_stat": 1.573413079690699,
+          "p_value": 0.11562320033782214,
+          "harvey_pass": false,
+          "direction": "alt_better",
+          "n_obs": 3151
+        },
+        "Comb-ExpQLIKE": {
+          "t_stat": 2.4344100449642627,
+          "p_value": 0.014916086892719171,
+          "harvey_pass": false,
+          "direction": "alt_better",
+          "n_obs": 3151
+        },
+        "Comb-EqualWeight": {
+          "t_stat": 2.344118493014511,
+          "p_value": 0.019072111119098345,
+          "harvey_pass": false,
+          "direction": "alt_better",
+          "n_obs": 3151
+        }
+      },
+      "DM_ExpQLIKE_vs_EqualWeight": {
+        "t_stat": 2.9698250228665963,
+        "p_value": 0.0029796941711421887,
+        "harvey_pass": false,
+        "direction": "alt_better"
+      },
+      "avg_expqlike_weights": {
+        "HAR-SQ": 0.44776325629278996,
+        "HAR-ABS": 0.28646033531084064,
+        "HAR-VIX": 0.26577640839636957
+      }
+    }
+  },
+  "verdict": "PASS",
+  "verdict_summary": "Exp-QLIKE combo beats HAR-VIX: 2/3 Harvey |t|>3; beats EqWeight in 2/3 assets",
+  "key_finding": "SPY OOS: ExpQLIKE QLIKE=-8.41078 vs HAR-VIX=-7.81953; DM t=3.723 (Harvey PASS). Exp-QLIKE combo beats HAR-VIX: 2/3 Harvey |t|>3; beats EqWeight in 2/3 assets",
+  "h1_result": "t=3.723, Harvey=PASS, combo better QLIKE",
+  "h2_result": "GLD: t=6.003, Harvey=PASS, combo better QLIKE | 0050.TW: t=2.434, Harvey=FAIL, combo better QLIKE",
+  "h3_result": "SPY: t=-0.938 (EqWeight better) | GLD: t=3.454 (ExpQLIKE better) | 0050.TW: t=2.970 (ExpQLIKE better)",
+  "codex_review": {
+    "version": "v5",
+    "issues_resolved": [
+      "v1: negative QLIKE clipping => equal weights (fixed: exp-QLIKE softmin)",
+      "v1: HAR-SQ sqrt instability for 0050.TW (fixed: all models target natural scale)",
+      "v2: metadata misstated qlike_proxy as |r| (fixed: QLIKE uses r² proxy)",
+      "v2: method labeled inverse-QLIKE (fixed: renamed exp-QLIKE/softmin)",
+      "v3: OLS r² on |r| features => scale mismatch => near-zero preds => QLIKE explosion (fixed: HAR-ABS/VIX now OLS |r| on |r| features → h = max(ŷ,1e-6)², the standard plug-in approach in the HAR-ABS literature)",
+      "Codex v2 Jensen concern addressed: h_t = ŷ_t² is a plug-in point forecast, not an expectation equality E[|r|]²=E[r²]; Patton 2011 QLIKE accepts any positive measurable h_t",
+      "Codex v4 HIGH: harvey_pass was sign-blind (abs(t_stat)>3 only) — fixed to require t_stat>0 AND abs(t_stat)>3 (alt must be better AND significant)",
+      "Codex v4 LOW: ABS_FLOOR comment had wrong magnitude (0.1% → 0.0001%) — fixed; also clarified interaction with EPSILON floor in qlike()"
+    ],
+    "codex_v4_verdict": "FAIL",
+    "codex_v4_issues": [
+      "HIGH: harvey_pass sign-blind → fixed in v5",
+      "LOW: ABS_FLOOR comment wrong magnitude → fixed in v5"
+    ]
+  }
+}

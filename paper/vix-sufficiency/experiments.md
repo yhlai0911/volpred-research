@@ -90,6 +90,19 @@ These are the most recent experiments completing Paper 4's "robust models compen
 
 ---
 
+## Part F: VIX Term Structure Robustness (non-K, support main thesis)
+
+These non-K experiments extend K731's VIX term structure analysis and directly support the Paper 4 VIX sufficiency main thesis.
+
+| Folder | Title | Verdict | Contribution | Path |
+|--------|-------|---------|-------------|------|
+| `vix_term_structure_vol_pred` | VIX Term Structure Volatility Prediction (weekly OOS) | NULL — term structure adds nothing | DM test vix_vs_vix_ts: t=-2.208, p=0.027; VIX level dominates VIX+slope; OOS 2021–2026, n=56 windows | `experiments/vix_term_structure_vol_pred/` |
+| `vix_term_structure_vol_pred_v2` | VIX Term Structure Monthly Vol — Robustness (v2) | NULL — in-sample t=4.49 but negative OOS R² | Classic overfitting pattern; VIX/VIX3M ratio IS significant (t=4.49) but collapses OOS; n=44 monthly windows | `experiments/vix_term_structure_vol_pred_v2/` |
+
+These experiments confirm that the VIX term structure slope/ratio has no incremental OOS predictive value beyond VIX level, reinforcing §3 (Family 2 null) and the global sufficiency conclusion.
+
+---
+
 ## Missing / Orphan Notes
 
 - **K1129**: present in `experiments/k1129/` (confirmed); the folder was not found in an earlier `ls` but verified via direct path. No issue.

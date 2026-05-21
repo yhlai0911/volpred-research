@@ -833,21 +833,26 @@ for tk in equity_tickers:
     print()
 print(f"\n  PASS cells / 9: {pass_count}")
 
-# Per-asset NULL check (cross-model): for each ticker, max t across 3 robust
-# models. If max t ≤ 2 → NULL.
+# Per-asset NULL check (cross-model): for each ticker, any cell with BOTH
+# DM_HLN_t > 2.0 AND DM_HLN_p_BH < 0.05 → PASS. Must satisfy both criteria
+# to be consistent with the 9-cell PASS logic at line 828.
 print("\nPer-asset NULL (cross-model):")
 asset_null = {}
 for tk in equity_tickers:
-    max_t = max(cell_results[(tk, lbl)]['DM_HLN_t'] for lbl in robust_labels)
-    asset_null[tk] = 'NULL' if max_t <= 2.0 else 'PASS'
+    asset_cells = [cell_results[(tk, lbl)] for lbl in robust_labels]
+    asset_pass = any(c['DM_HLN_t'] > 2.0 and c['DM_HLN_p_BH'] < 0.05 for c in asset_cells)
+    asset_null[tk] = 'PASS' if asset_pass else 'NULL'
+    max_t = max(c['DM_HLN_t'] for c in asset_cells)
     print(f"  {tk}: max DM_t={max_t:+.2f} → {asset_null[tk]}")
 
-# Per-model NULL check (cross-asset)
+# Per-model NULL check (cross-asset): same dual-criterion as 9-cell PASS logic.
 print("\nPer-model NULL (cross-asset):")
 model_null = {}
 for lbl in robust_labels:
-    max_t = max(cell_results[(tk, lbl)]['DM_HLN_t'] for tk in equity_tickers)
-    model_null[lbl] = 'NULL' if max_t <= 2.0 else 'PASS'
+    model_cells = [cell_results[(tk, lbl)] for tk in equity_tickers]
+    model_pass = any(c['DM_HLN_t'] > 2.0 and c['DM_HLN_p_BH'] < 0.05 for c in model_cells)
+    model_null[lbl] = 'PASS' if model_pass else 'NULL'
+    max_t = max(c['DM_HLN_t'] for c in model_cells)
     print(f"  {lbl}: max DM_t={max_t:+.2f} → {model_null[lbl]}")
 
 # Harvey joint threshold: |t|>3 AND BH p<0.05 for robust claim

@@ -83,16 +83,22 @@ def main():
     now = datetime.now()
     print(f"=== 台股數據收集: {now.strftime('%Y-%m-%d %H:%M')} ===")
 
+    # 2026-05-04 silent-fail fix: track per-section ok/fail so cron exit
+    # surfaces total failure to check_alerts host_cron_fail.
+    section_ok: dict[str, bool] = {}
+
     # 1. VIXTWN（TAIFEX 來源）
     print("\n--- VIXTWN ---")
     try:
-        subprocess.run(
+        result = subprocess.run(
             [str(VENV_PYTHON), str(PROJECT / "scripts" / "collect_vixtwn.py")],
             cwd=str(PROJECT),
             timeout=60,
         )
+        section_ok["vixtwn"] = result.returncode == 0
     except Exception as e:
         print(f"  VIXTWN error: {e}")
+        section_ok["vixtwn"] = False
 
     # 2. 0050.TW 日線快取更新（force_refresh 確保拿最新）
     print("\n--- 0050.TW 日線 ---")
@@ -102,18 +108,27 @@ def main():
         dm = DataManager()
         tw50 = dm.get_model_data("0050.TW", "2020-01-01", "2026-12-31", force_refresh=True)
         print(f"  0050.TW: {tw50.index[-1].date()} close={float(tw50.iloc[-1]['close']):.2f} ({len(tw50)} rows)")
+        section_ok["tw50_daily"] = True
     except Exception as e:
         print(f"  0050.TW 日線 error: {e}")
+        section_ok["tw50_daily"] = False
 
     # 3. 0050.TW 5-min data
     print("\n--- 0050.TW 5-min ---")
     try:
         collect_5min("0050.TW", PROJECT / "data" / "intraday")
+        section_ok["tw50_5min"] = True
     except Exception as e:
         print(f"  0050.TW 5-min error: {e}")
+        section_ok["tw50_5min"] = False
 
     print("\n✓ 台股數據收集完成")
+    if section_ok and not any(section_ok.values()):
+        print(f"\n  [collect_tw_data] FAIL: all sections failed: {section_ok}",
+              file=sys.stderr)
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main() or 0)

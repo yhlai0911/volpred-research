@@ -943,7 +943,7 @@
     "asset_null_map": {
       "SPY": "PASS",
       "QQQ": "PASS",
-      "IWM": "PASS"
+      "IWM": "NULL"
     },
     "model_null_map": {
       "HAR-RV-X": "PASS",
@@ -976,7 +976,7 @@
   },
   "summary": {
     "verdict": "MIXED",
-    "paper4_implication": "Mixed results: some (asset, model) combos PASS, others NULL. Paper 4 should report the specific passing combos explicitly rather than claiming universal null.",
+    "paper4_implication": "Mixed results: SPY and QQQ PASS via HAR-RV-X (DM t>4, BH-adjusted p<0.001); IWM NULL (t=2.064, BH-adjusted p=0.071 does not survive FDR correction). 2/9 cells pass dual criterion (t>2.0 AND BH p<0.05). Paper 4 should report HAR-RV-X as the only model surviving FDR correction for large-cap equities; small-cap IWM null is consistent with Paper 4 universal-null claim.",
     "max_dm_t_equity": {
       "SPY": 4.184825696254127,
       "QQQ": 4.21881416284582,
@@ -985,7 +985,14 @@
     "best_equity_model_combo": [
       "QQQ",
       "HAR-RV-X"
-    ]
+    ],
+    "v2_correction": {
+      "correction_date": "2026-05-13",
+      "defect": "asset_null/model_null summary flags used max_t > 2.0 only, ignoring BH-adjusted p-value",
+      "fix": "corrected to require BOTH DM_HLN_t > 2.0 AND DM_HLN_p_BH < 0.05, consistent with 9-cell PASS logic",
+      "impact": "IWM reclassified PASS -> NULL (t=2.064 > 2.0 but p_BH=0.071 > 0.05); SPY/QQQ unaffected (p_BH<0.001)",
+      "per_cell_dm_statistics": "unchanged (already correct)"
+    }
   },
   "data_source": "yfinance (SPY/QQQ/IWM OHLC + ^VIX)",
   "timestamp": "2026-04-17T05:18:16.434159+00:00",

@@ -1,0 +1,28 @@
+=== yfinance data dir contents ===
+
+=== fred data freshness ===
+
+=== TAIFEX dir ===
+total 6120
+drwxr-xr-x@   8 yhlai0911  staff      256 Apr 18 14:35 .
+drwxr-xr-x@  55 yhlai0911  staff     1760 May 18 09:16 ..
+-rw-r--r--@   1 yhlai0911  staff     6148 Apr 18 14:35 .DS_Store
+drwxr-xr-x@   3 yhlai0911  staff       96 May 19 15:00 cache
+-rw-r--r--    1 yhlai0911  staff  3122350 Apr 18 14:35 congressional_trades_house.csv
+drwxr-xr-x    4 yhlai0911  staff      128 Apr 18 14:35 dgbas
+drwxr-xr-x@ 162 yhlai0911  staff     5184 May 19 15:00 intraday
+drwxr-xr-x@   3 yhlai0911  staff       96 May 17 23:19 vixtwn
+
+=== daily_update status (2026-04-25 dead) ===
+-rw-r--r--  1 yhlai0911  staff  60792 May 19 11:44 storage/logs/cron/daily_update.log
+  File "/Users/yhlai0911/.local/share/uv/python/cpython-3.12.10-macos-aarch64-none/lib/python3.12/json/decoder.py", line 356, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+=== paper_trading freshness ===
+"_market_daily"
+"adaptive_tier"
+"fear_dca"
+"global_vt_tz"
+"piecewise_conservative"
+null

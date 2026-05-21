@@ -19,7 +19,7 @@ Use this skill to decide **去哪裡拿資料、怎麼拿、有哪些陷阱**。
 Do **not** use this skill for：
 
 - 研究結論判斷與模型設計 → `autonomous-research`
-- 純 DGBAS / NDC 專屬流程細節 → `taiwan-macro-data`
+- 純 DGBAS / NDC 細節：見本 skill §5「DGBAS 台灣主計總處」+ §6「NDC 國發會」段落（自包含）
 
 ## 總覽
 
@@ -275,10 +275,8 @@ vix = web.DataReader('VIXCLS', 'fred', '1990-01-01', '2026-04-01')
 
 ## 5. DGBAS 台灣主計總處
 
-詳見 `taiwan-macro-data` skill（`.claude/skills/taiwan-macro-data/SKILL.md`）。
-
 ### 快速用法
-需透過 Chrome 自動化下載 CSV（無 REST API key）。
+需透過 Chrome 自動化下載 CSV（無 REST API key）。本 skill 內建涵蓋；下方為主要 dataset / funid 對照表。
 
 ### 常用資料集
 | funid | 名稱 | 頻率 |

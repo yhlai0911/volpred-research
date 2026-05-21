@@ -1,0 +1,55 @@
+{
+  "generated_at": "2026-05-18T08:18:15.600007Z",
+  "purpose": "Strategy A specific stats to fix A/C mixing in article mile_7ba7ee54",
+  "seed": 42,
+  "strategy": "A: Post-Revenue Boost (×1.20 for 5 days after monthly revenue)",
+  "oos_per_period": {
+    "OOS1: 2015-2018": {
+      "n_days": 976,
+      "sharpe_base": 0.7815453976241358,
+      "sharpe_a": 0.8278925344790877,
+      "ann_excess": 0.007295864189127397,
+      "a_vs_base_t": 1.7953817355991513,
+      "a_vs_base_p": 0.07290248555814563
+    },
+    "OOS2: 2019-2022": {
+      "n_days": 975,
+      "sharpe_base": 1.301383060231283,
+      "sharpe_a": 1.310823645280131,
+      "ann_excess": 0.006638948889627589,
+      "a_vs_base_t": 1.6517778832851997,
+      "a_vs_base_p": 0.09890216431964015
+    },
+    "OOS3: 2023-2026": {
+      "n_days": 810,
+      "sharpe_base": 2.39979201135526,
+      "sharpe_a": 2.4569895522091008,
+      "ann_excess": 0.018334207524382768,
+      "a_vs_base_t": 3.2688376918513677,
+      "a_vs_base_p": 0.001125508538250639
+    }
+  },
+  "bootstrap_a": {
+    "mean_excess_annual": 0.01030222626248652,
+    "ci_95_lower": 0.005284048537942689,
+    "ci_95_upper": 0.015498705127159248,
+    "zero_in_ci": false,
+    "n_bootstrap": 10000
+  },
+  "transaction_costs_a": {
+    "methodology": "weight-delta (consistent with K620 original)",
+    "tx_cost_bps": 10,
+    "annual_extra_tx": 0.0021655642562697884,
+    "gross_excess_annual": 0.01030222626248652,
+    "net_excess_annual": 0.008136662006216731
+  },
+  "monthly_alpha_a": {
+    "total_months": 137,
+    "positive_months": 82,
+    "negative_months": 55,
+    "win_rate": 0.5985401459854015,
+    "mean_monthly_excess": 0.0008239035659461615,
+    "median_monthly_excess": 0.0008597783620276551,
+    "binomial_p": 0.012983418661332157
+  }
+}

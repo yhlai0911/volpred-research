@@ -26,7 +26,7 @@
 
 \author{Yi-Hao Lai\thanks{Department of Finance, Da-Yeh University. Corresponding author. Email: yhlai@mail.dyu.edu.tw}}
 
-\date{April 2026 (v3 errata)}
+\date{May 2026 (v3.2)}
 
 \begin{document}
 
@@ -36,7 +36,7 @@
 \begin{abstract}
 \noindent
 % v2: Abstract revised for H1 (two contributions, TZ removed), H7 (twelve->nine), H3 (OOS caveat)
-The direction of the asymmetric volatility response---measured by the GJR-GARCH $\gamma$ parameter---varies systematically across asset classes in ways that have direct implications for model selection, risk management, and portfolio construction. Using daily data for seven primary assets (equities, gold, bonds, emerging markets, cryptocurrency) over 2017--2025, extended to 26 assets in validation analyses, we make two contributions. First, we propose a leverage direction taxonomy: equities exhibit standard leverage ($\gamma > 0$), gold displays regime-dependent leverage (inverted during fear-driven rallies, standard during liquidation-driven declines), and bonds show near-zero asymmetry. This taxonomy determines optimal GARCH specification: GJR-GARCH significantly outperforms symmetric GARCH only when $|\gamma| > 0.10$, correctly classifying all nine Diebold-Mariano comparisons in the primary sample, with 6/6 correct out-of-sample predictions. Second, we link leverage direction to the economic channel of volatility targeting (VT) alpha: $\gamma$ predicts whether VT acts as trend-following or contrarian within homogeneous equity markets (Spearman $\rho = 0.886$, $p = 0.019$ for six equity-type assets), but this relationship does not extend to diverse asset classes ($\rho = -0.448$, $p = 0.14$ for twelve assets). Meanwhile, VT's primary benefit---maximum drawdown reduction---is universal across all tested assets and driven by base volatility level ($\rho = 0.944$ for primary assets, $\rho = 0.83$ for the extended $N = 14$ sample), independent of $\gamma$. These findings delineate a complexity ceiling: increasing model sophistication (DCC-GARCH, copula, GARCH-MIDAS, Markov-switching) improves statistical measurement but not investable allocation decisions.
+The direction of the asymmetric volatility response---measured by the GJR-GARCH $\gamma$ parameter---varies systematically across asset classes in ways that have direct implications for model selection, risk management, and portfolio construction. Using daily data for seven primary assets (equities, gold, bonds, emerging markets, cryptocurrency) over 2017--2025, extended to 26 assets in validation analyses, we make two contributions. First, we propose a leverage direction taxonomy: equities exhibit standard leverage ($\gamma > 0$), gold displays regime-dependent leverage (inverted during fear-driven rallies, standard during liquidation-driven declines), and bonds show near-zero asymmetry. This taxonomy determines optimal GARCH specification: GJR-GARCH significantly outperforms symmetric GARCH only when $|\gamma| > 0.10$, correctly classifying all nine Diebold-Mariano comparisons in the primary sample (in-sample threshold calibration), with 6/6 correct out-of-sample predictions. Second, we link leverage direction to the economic channel of volatility targeting (VT) alpha: $\gamma$ predicts whether VT acts as trend-following or contrarian within homogeneous equity markets (Spearman $\rho = 0.886$, $p = 0.019$ for six equity-type assets), but this relationship does not extend to diverse asset classes ($\rho = -0.448$, $p = 0.14$ for twelve assets). Meanwhile, VT's primary benefit---maximum drawdown reduction---is universal across all tested assets and driven by base volatility level ($\rho = 0.944$ for primary assets, $\rho = 0.83$ for the extended $N = 14$ sample), independent of $\gamma$. These findings delineate a complexity ceiling: increasing model sophistication (DCC-GARCH, copula, GARCH-MIDAS, Markov-switching) improves statistical measurement but not investable allocation decisions.
 
 \medskip
 \noindent
@@ -126,9 +126,6 @@ Fissler, T., \& Ziegel, J.~F. (2016). Higher order elicitability and Osband's pr
 \bibitem[Patton and Sheppard(2015)]{pattonSheppard2015}
 Patton, A.~J., \& Sheppard, K. (2015). Good volatility, bad volatility: Signed jumps and the persistence of volatility. \textit{Review of Economics and Statistics}, 97(3), 683--697. https://doi.org/10.1162/REST\_a\_00503
 
-\bibitem[VolPred Research(K1092, 2026)]{k1092}
-VolPred Research Program (2026). K1092: Asset-matched DCC-A4f Fissler--Ziegel evaluation. Internal experiment record, available in the paper's replication package.
-
 \bibitem[Christoffersen(1998)]{christoffersen1998}
 Christoffersen, P.~F. (1998). Evaluating interval forecasts. \textit{International Economic Review}, 39(4), 841--862. https://doi.org/10.2307/2527341
 
@@ -183,9 +180,6 @@ Hood, B., \& Raughtigan, C. (2025). Volatility targeting is trendy. \textit{Jour
 \bibitem[Henriksson and Merton(1981)]{henriksson1981}
 Henriksson, R.~D., \& Merton, R.~C. (1981). On market timing and investment performance. II. Statistical procedures for evaluating forecasting skills. \textit{Journal of Business}, 54(4), 513--533. https://doi.org/10.1086/296144
 
-\bibitem[Hou et al.(2020)]{hou2020}
-Hou, K., Xue, C., \& Zhang, L. (2020). Replicating anomalies. \textit{Review of Financial Studies}, 33(5), 2019--2133. https://doi.org/10.1093/rfs/hhy131
-
 \bibitem[Hwang and Valls Pereira(2006)]{hwang2006}
 Hwang, S., \& Valls Pereira, P.~L. (2006). Small sample properties of GARCH estimates and persistence. \textit{European Journal of Finance}, 12(6--7), 473--494. https://doi.org/10.1080/13518470500039436
 
@@ -231,8 +225,8 @@ Treynor, J.~L., \& Mazuy, K.~K. (1966). Can mutual funds outguess the market? \t
 \bibitem[Xu(2024)]{xu2024}
 Xu, X. (2024). Improving volatility-managed portfolios in real time. \textit{Critical Finance Review}, forthcoming.
 
-\bibitem[Campbell et~al., 2017]{campbell2017}
-Campbell, J.Y., Sunderam, A., and Viceira, L.M. (2017). Inflation bets or deflation hedges? The changing risks of nominal bonds. \textit{Critical Finance Review}, 6(2), 263--301.
+\bibitem[Campbell et~al.(2017)]{campbell2017}
+Campbell, J.~Y., Sunderam, A., \& Viceira, L.~M. (2017). Inflation bets or deflation hedges? The changing risks of nominal bonds. \textit{Critical Finance Review}, 6(2), 263--301. https://doi.org/10.1561/104.00000044
 
 \end{thebibliography}
 

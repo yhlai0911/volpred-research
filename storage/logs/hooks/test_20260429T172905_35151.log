@@ -1,0 +1,19 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.10, pytest-9.0.3, pluggy-1.6.0 -- /Users/yhlai0911/Desktop/volpred-research/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /Users/yhlai0911/Desktop/volpred-research
+configfile: pyproject.toml
+plugins: anyio-4.12.1
+collecting ... collected 9 items
+
+tests/test_markdown_table_sanitizer.py::test_no_op_on_clean_table PASSED [ 11%]
+tests/test_markdown_table_sanitizer.py::test_k549_harvey_t_inside_2cell_row PASSED [ 22%]
+tests/test_markdown_table_sanitizer.py::test_k549_pass_t3_inside_header PASSED [ 33%]
+tests/test_markdown_table_sanitizer.py::test_already_escaped_no_change PASSED [ 44%]
+tests/test_markdown_table_sanitizer.py::test_multiple_tables_only_broken_ones_fixed PASSED [ 55%]
+tests/test_markdown_table_sanitizer.py::test_unfixable_row_preserved_with_warning PASSED [ 66%]
+tests/test_markdown_table_sanitizer.py::test_separator_with_alignment_colons PASSED [ 77%]
+tests/test_markdown_table_sanitizer.py::test_non_table_pipes_untouched PASSED [ 88%]
+tests/test_markdown_table_sanitizer.py::test_real_k549_problematic_rows PASSED [100%]
+
+============================== 9 passed in 0.02s ===============================

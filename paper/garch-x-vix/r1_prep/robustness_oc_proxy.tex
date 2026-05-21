@@ -1,0 +1,109 @@
+% Paper 9 (garch-x-vix) — R1 Revision: Dual-Target Robustness Subsection
+% Source: K1066 (experiments/k1066/)
+% Prepared: 2026-05-17
+% Placement: Insert after \subsection{VIX vs.\ Macroeconomic Variables} in \section{Robustness}
+% Integration notes:
+%   - Add \label{sec:proxy_oc} cross-ref to Limitations (replace "future work" sentence)
+%   - Limitations revision draft at bottom of this file
+%   - No new figure required; Table alone is sufficient
+%   - K1066 data: SPY OHLC + VIX, yfinance, 2005-01-04–2026-04-10, OOS 2019-01-01 (n=1828)
+
+%=================================================================
+\subsection{Alternative Volatility Proxy: Open-to-Close Returns}
+\label{sec:proxy_oc}
+%=================================================================
+
+Our primary evaluation uses $r_t^2$ (close-to-close return squared) as the volatility proxy.
+A potential concern is that models fitted on close-to-close returns ($r_{\mathrm{close}}$)
+may align with the $r_{\mathrm{close}}^2$ proxy by construction, inflating the apparent advantage
+of A4f when both the model and the evaluation criterion use the same return definition.
+
+To test for proxy sensitivity, we estimate two additional models---GJR-GARCH and A4f
+using open-to-close returns $r_{\mathrm{oc},t} = \log(\text{close}_t) - \log(\text{open}_t)$
+as the return input---and evaluate all four models against $r_{\mathrm{oc}}^2$ as the
+volatility target.\footnote{Open-to-close returns capture intraday variance only;
+overnight returns are excluded. The $r_{\mathrm{oc}}^2$ proxy is noisier than
+five-minute realized variance, which \citet{patton2011} shows preserves QLIKE rankings
+regardless of proxy noise. A five-minute RV robustness check remains future work, but
+the daily open-to-close test provides a meaningful first cross-check on proxy invariance.}
+The rolling OOS design mirrors the main analysis: 2000-day estimation window,
+63-day refit frequency, OOS 2019--2026 ($n = 1{,}828$).
+
+Table~\ref{tab:dual_target_dm} reports the Diebold-Mariano statistics
+across model--proxy combinations.
+
+\begin{table}[H]
+\centering
+\caption{DM tests across return definitions and volatility proxies}
+\label{tab:dual_target_dm}
+\begin{threeparttable}
+\small
+\begin{tabular}{@{}llcccc@{}}
+\toprule
+Model A & Model B & Proxy & QLIKE (A) & DM $t$ & Harvey sig. \\
+\midrule
+\multicolumn{6}{l}{\textit{Baseline (main results, close-to-close target)}} \\[2pt]
+A4f$_\mathrm{close}$ & GJR$_\mathrm{close}$ & $r^2_\mathrm{close}$ & $-8.360$ & $+4.03$ & Yes \\[4pt]
+\multicolumn{6}{l}{\textit{Alternative proxy (open-to-close target)}} \\[2pt]
+A4f$_\mathrm{oc}$ & GJR$_\mathrm{oc}$    & $r^2_\mathrm{oc}$ & $-8.816$ & $+4.04$ & Yes \\
+A4f$_\mathrm{oc}$ & GJR$_\mathrm{close}$ & $r^2_\mathrm{oc}$ & $-8.816$ & $+7.05$ & Yes \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\footnotesize
+\item Positive DM $t$: Model A achieves lower QLIKE (better forecast).
+\item Harvey~(2016) threshold: $|t| > 3.0$. SPY, OOS 2019--2026;
+      baseline row ($t=4.03$) from Table~\ref{tab:pairwise_dm}; open-to-close rows
+      from K1066 (same OOS window, $n=1{,}828$, seed 42).
+\item Subscripts: \textit{close} = model estimated on $r_\mathrm{close}$;
+      \textit{oc} = model estimated on $r_\mathrm{oc}$.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+Three findings emerge from Table~\ref{tab:dual_target_dm}.
+First, A4f$_\mathrm{oc}$ significantly outperforms GJR$_\mathrm{oc}$ on the open-to-close
+target ($t = 4.04$, Harvey pass), confirming that the multiplicative VIX$^2$ structure
+delivers statistically meaningful gains even when both the model and the benchmark
+use open-to-close returns.
+Second, the matched-model DM statistics are nearly identical across proxy definitions:
+$t = 4.03$ for the close-to-close pair and $t = 4.04$ for the open-to-close pair.
+This parallel strengthens the interpretation that the VIX$^2$ component adds genuine
+forecast information rather than exploiting a mechanical alignment between the return
+definition and the proxy.
+Third, the cross-definition test---A4f$_\mathrm{oc}$ versus GJR$_\mathrm{close}$ evaluated
+on $r^2_\mathrm{oc}$---yields $t = +7.05$, the largest DM statistic in our analysis.
+This comparison isolates the combined gain from both switching to an open-to-close
+model and incorporating VIX$^2$: relative to the plain close-to-close GJR baseline,
+the open-to-close A4f achieves a seven-standard-deviation improvement in forecast
+accuracy on the intraday variance target.
+
+Sub-period stability further supports proxy invariance. A4f$_\mathrm{oc}$ achieves
+lower QLIKE than GJR$_\mathrm{oc}$ in all five non-overlapping sub-periods spanning
+2019--2026 (5/5; binomial $p = 0.031$), with QLIKE improvements ranging from
+0.3\%~to~2.8\%. The result confirms directional consistency across market regimes
+(Pre-COVID, COVID crash, Post-COVID, rate hike cycle, 2024--2026 expansion).
+
+In summary, the advantage of the multiplicative VIX$^2$ framework documented in
+Section~\ref{sec:results} is robust to the choice of volatility proxy:
+the model delivers Harvey-significant gains whether the evaluation target is
+close-to-close or intraday open-to-close variance, and the gains are quantitatively
+similar in both settings.
+
+
+% ---------------------------------------------------------------
+% LIMITATIONS REVISION (replace existing "future work" sentence)
+% ---------------------------------------------------------------
+% Current text (line ~864 in main.tex):
+%   "Since VIX and intraday realized variance have a non-trivial relationship,
+%    the relative advantage of VIX-based models could change with proxy choice;
+%    we leave this robustness check for future work with high-frequency data."
+%
+% Replacement:
+%   "Since VIX and intraday realized variance have a non-trivial relationship,
+%    the relative advantage of VIX-based models could change with proxy choice.
+%    Section~\ref{sec:proxy_oc} provides a daily-frequency cross-check using
+%    open-to-close returns as an alternative proxy, finding consistent Harvey-significant
+%    gains ($t = 4.04$, 5/5 sub-periods); a five-minute realized variance check remains
+%    for future work."
+% ---------------------------------------------------------------

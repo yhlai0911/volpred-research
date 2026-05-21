@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-26T16:33:31.171273+00:00",
+  "updated_at": "2026-05-20T17:01:09.574377+00:00",
   "alerts": {
     "1b5c055fcb8a884411fcb173a434ddafd0796e494429fcfa85559f77fe3f418f": {
       "level": "info",
@@ -28,11 +28,11 @@
       "title": "Host cron failure detected",
       "recipient": "yihao.lai@gmail.com",
       "first_sent_at": "2026-04-19T05:41:24.589787+00:00",
-      "last_sent_at": "2026-04-19T05:41:24.589787+00:00",
-      "last_notification_id": "b3059757",
-      "send_count": 1,
-      "last_skipped_at": "2026-04-19T05:41:36.140702+00:00",
-      "skip_count": 1
+      "last_sent_at": "2026-05-20T16:00:42.383469+00:00",
+      "last_notification_id": "a2e95cbf",
+      "send_count": 2,
+      "last_skipped_at": "2026-05-20T17:01:09.573582+00:00",
+      "skip_count": 2
     },
     "bc51c55960eda4bdd7906bff858f95e5dfcb246a720886389dc708a4808759ca": {
       "level": "info",
@@ -151,6 +151,50 @@
       "first_sent_at": "2026-04-26T16:33:27.100608+00:00",
       "last_sent_at": "2026-04-26T16:33:27.100608+00:00",
       "last_notification_id": "4d05236b",
+      "send_count": 1,
+      "last_skipped_at": null,
+      "skip_count": 0
+    },
+    "8cbedaf131bfe85b4b959bc5741e272a7c9a3d72e4ca5b583831315902ad3b5b": {
+      "level": "critical",
+      "title": "Release pool cron gap > 4.0h (interval=180min)",
+      "recipient": "yihao.lai@gmail.com",
+      "first_sent_at": "2026-05-17T19:17:07.144490+00:00",
+      "last_sent_at": "2026-05-17T19:17:07.144490+00:00",
+      "last_notification_id": "49289d10",
+      "send_count": 1,
+      "last_skipped_at": null,
+      "skip_count": 0
+    },
+    "bab8248281e5f87983422a30fa83d4164445a671dde59a7c81be2f37625f4299": {
+      "level": "warn",
+      "title": "FB Pending Backlog: 5 trending reposts ready, need manual push",
+      "recipient": "yihao.lai@gmail.com",
+      "first_sent_at": "2026-05-19T09:06:12.772402+00:00",
+      "last_sent_at": "2026-05-19T09:06:12.772402+00:00",
+      "last_notification_id": "60ac5fb0",
+      "send_count": 1,
+      "last_skipped_at": null,
+      "skip_count": 0
+    },
+    "cd4dd618dee24ce35cc7f7c4b5e75216ca90a74078f7b03b5181e7ad46b2faf8": {
+      "level": "warn",
+      "title": "Release pool cron gap > 4.0h (interval=180min)",
+      "recipient": "yihao.lai@gmail.com",
+      "first_sent_at": "2026-05-19T14:00:18.009827+00:00",
+      "last_sent_at": "2026-05-20T16:00:38.237504+00:00",
+      "last_notification_id": "e4f6c847",
+      "send_count": 2,
+      "last_skipped_at": "2026-05-20T03:00:23.856294+00:00",
+      "skip_count": 4
+    },
+    "e28b5068534016a73f5e633df4e2a2574895a79edbd52fecc014e99de9505ecc": {
+      "level": "warn",
+      "title": "⚠️ gemini_ask.py 已呼叫 — 產生 Gemini API 費用",
+      "recipient": "yihao.lai@gmail.com",
+      "first_sent_at": "2026-05-20T14:09:29.104141+00:00",
+      "last_sent_at": "2026-05-20T14:09:29.104141+00:00",
+      "last_notification_id": "9f53394a",
       "send_count": 1,
       "last_skipped_at": null,
       "skip_count": 0

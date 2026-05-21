@@ -2,6 +2,33 @@
 
 [提出: Claude (user direction), 執行: Claude] · 2026-04-17
 
+---
+
+## v2 修正（2026-05-13）— Codex primary-path review BLOCKING defect fix
+
+**缺陷**：`asset_null` / `model_null` summary flags 只用 `max_t > 2.0` 判定，未同時要求 `DM_HLN_p_BH < 0.05`。此邏輯與 9-cell PASS logic（line 828，正確使用雙條件）不一致，違反 BH-FDR enforcement 原則。
+
+**影響**：
+- **IWM** asset-level 判決 **PASS → NULL**（t=+2.064 > 2.0，但 p_BH=0.071 > 0.05，BH 校正後不顯著）
+- SPY、QQQ 不受影響（p_BH=0.000137 << 0.05）
+- model_null_map：HAR-RV-X 仍 PASS（SPY/QQQ 通過雙條件）；GARCH-MIDAS-X / GAS-t 仍 NULL
+- 總體 verdict 維持 **MIXED**（2/9 cells pass 雙條件；pass_count 維持）
+- 所有 per-cell DM 統計量（DM_HLN_t, DM_HLN_p_BH）**不變**（原本即正確）
+
+**修正點**（`k1138.py` lines 840/848）：
+```python
+# BEFORE (incorrect):
+asset_null[tk] = 'NULL' if max_t <= 2.0 else 'PASS'
+
+# AFTER (correct):
+asset_pass = any(c['DM_HLN_t'] > 2.0 and c['DM_HLN_p_BH'] < 0.05 for c in asset_cells)
+asset_null[tk] = 'PASS' if asset_pass else 'NULL'
+```
+
+**主要結論調整**：IWM 由「邊界 PASS」改為「NULL（BH 校正後不顯著）」，與其 p_BH=0.071 的表格數字一致。Paper 4 implication 不變：HAR-RV-X 對 large-cap equity（SPY/QQQ）有顯著 VIX marginal value；small-cap IWM NULL 與 Paper 4 universal-null claim 相容。
+
+---
+
 ## 問題與動機
 
 K1136 已建立 commodity compendium（USO/GLD/UNG/BTC-USD）下的 "universal robust-method NULL"：GARCH-MIDAS-X + HAR-RV-X + GAS-t（K1129/K1134）全部無法顯著優於 GJR-GARCH baseline。
@@ -88,11 +115,13 @@ IWM HAR-RV-X near miss（t=+2.06 剛過 2 但 BH 校正後 p=0.071）
 
 ### Asset-level NULL check（cross-model）
 
-| Asset | max DM_t | 判決 | 詳情 |
-|-------|----------|------|------|
-| SPY | +4.19 | **PASS** | HAR-RV-X |
-| QQQ | +4.22 | **PASS** | HAR-RV-X |
-| IWM | +2.06 | **PASS**（剛過）| HAR-RV-X |
+| Asset | max DM_t | best p_BH | 判決 | 詳情 |
+|-------|----------|-----------|------|------|
+| SPY | +4.19 | 0.000137 | **PASS** | HAR-RV-X（BH adj p<0.05） |
+| QQQ | +4.22 | 0.000137 | **PASS** | HAR-RV-X（BH adj p<0.05） |
+| IWM | +2.06 | 0.071 | **NULL** | t>2 但 BH 校正後 p=0.071>0.05，不顯著 |
+
+（v2 修正：IWM 由 PASS 改為 NULL；dual criterion t>2.0 AND p_BH<0.05 須同時滿足）
 
 ### Model-level NULL check（cross-asset）
 
@@ -112,11 +141,11 @@ IWM HAR-RV-X near miss（t=+2.06 剛過 2 但 BH 校正後 p=0.071）
 | UNG   | +0.74 | NULL |
 | BTC-USD | +0.52 | NULL |
 | **K1138 Equity** | | |
-| SPY   | **+4.19** | **PASS** |
-| QQQ   | **+4.22** | **PASS** |
-| IWM   | **+2.06** | PASS (marginal) |
+| SPY   | **+4.19** | **PASS** (p_BH=0.000) |
+| QQQ   | **+4.22** | **PASS** (p_BH=0.000) |
+| IWM   | **+2.06** | NULL (p_BH=0.071，BH 校正後不顯著) |
 
-**完全的 asset-class heterogeneity**：equity max DM-t 是 commodity 的 2.5x 以上。
+**Asset-class heterogeneity**：large-cap equity（SPY/QQQ）max DM-t 是 commodity 的 2.5x 以上；small-cap IWM 邊界 NULL。
 
 ### Full QLIKE matrix
 
@@ -148,15 +177,17 @@ IWM HAR-RV-X near miss（t=+2.06 剛過 2 但 BH 校正後 p=0.071）
 
 **Cells passing Harvey joint (t>+2 & BH adj p<0.05): 2/9**
 
-**Asset NULL (cross-model)**: SPY→PASS (+4.19) / QQQ→PASS (+4.22) / IWM→PASS (+2.06)
+**Asset NULL (cross-model)**: SPY→PASS (t=+4.19, p_BH=0.000) / QQQ→PASS (t=+4.22, p_BH=0.000) / IWM→**NULL** (t=+2.06 but p_BH=0.071>0.05)
 **Model NULL (cross-asset)**: HAR-RV-X→PASS / GARCH-MIDAS-X→NULL / GAS-t→NULL
+
+（v2 修正：IWM 由 PASS 改為 NULL）
 
 ### Paper 4 implication
 
 **結論：MIXED — Universal-null claim 必須限定在特定 model family，不是所有 robust extensions。**
 
-1. **HAR-RV-X（VIX regressor for HAR-RV family）對 equity 有顯著 marginal value**（SPY t=+4.19, QQQ t=+4.22, IWM 邊界 t=+2.06）。這 **推翻** K1136 的 "universal" 推論。
-   - 為什麼 equity 有效、commodity 無效？VIX 本身就是 SPY option implied vol 的加權平均。VIX 對 S&P 500（及延伸至 QQQ/IWM）是 *內生*（endogenous）implied vol measure；對 commodity 是 *外生* cross-market spillover measure。HAR 能 exploit 前者但無法 exploit 後者。
+1. **HAR-RV-X（VIX regressor for HAR-RV family）對 large-cap equity 有顯著 marginal value**（SPY t=+4.19 p_BH=0.000, QQQ t=+4.22 p_BH=0.000；IWM t=+2.06 但 p_BH=0.071 BH 校正後 NULL）。SPY/QQQ 的結果 **推翻** K1136 的 "universal" 推論；IWM NULL 在邊界且不通過 FDR。
+   - 為什麼 large-cap equity 有效、commodity 無效？VIX 本身就是 SPY option implied vol 的加權平均。VIX 對 S&P 500（及延伸至 QQQ）是 *內生*（endogenous）implied vol measure；對 commodity 和 small-cap（IWM）是 *外生* cross-market spillover measure。HAR 能 exploit 前者但無法 exploit 後者。
 
 2. **GARCH-MIDAS-X 對 equity 和 commodity 都 NULL**（equity max t=+1.36）。MIDAS 的 long-run driver formulation 對 daily vol 沒有增益——這個 "universal null" 是穩健的。
 
@@ -231,7 +262,7 @@ K1136 + K1138 結果顯示三個 channel 的 universality 各不相同：
 
 | Channel | Commodity | Equity | Conclusion |
 |---------|-----------|--------|-----------|
-| **HAR+VIX regressor** | NULL | **PASS** (SPY/QQQ strong, IWM edge) | Asset-class HETEROGENEOUS |
+| **HAR+VIX regressor** | NULL | **PASS** (SPY/QQQ strong, BH p<0.001; IWM NULL p_BH=0.071) | Large-cap equity HETEROGENEOUS; small-cap boundary |
 | **MIDAS long-run** | NULL | NULL | Universal NULL (sustained) |
 | **GAS-t score** | NULL | **NEGATIVE** | Universally unhelpful; equity actively harmful |
 

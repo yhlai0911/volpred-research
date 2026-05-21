@@ -1,95 +1,489 @@
 {
   "paper_id": "vt-crowding-abm",
-  "title": "When Volatility Targeting Crowds — Quantifying the Tipping Point via ABM",
+  "paper_title": "When Positive-Feedback Strategies Crowd: A Family-Level Threshold Framework via Agent-Based Simulation",
   "target_journal": "Finance Research Letters (FRL)",
-  "audit_date": "2026-04-18",
-  "auditor": "Claude (task_e318c42ebf73 pre-submission audit)",
-  "alert_level": "green",
-  "summary": "Paper is submission-ready. Reproduce.py runs clean in ~210s; 33/33 headline numbers match main.tex within <1% tolerance (100% match_rate). Seed robustness across 3 offsets (42, 13, 7) is high: VT Sharpe relative range <=19% at every adoption level, kurtosis spike at 70% (1.5-1.6) and 100% (62) directionally identical, AnnVol identical to 3 decimals. The '50-70% tipping point' range claim survives seed perturbation.",
-  "reproduce_cmd": "uv run python paper/vt-crowding-abm/reproduce.py",
-  "reproduce_runtime_sec": 210,
-  "reproduce_exit_code": 0,
-  "reproduce_builtin_checks": {
-    "t_stat_30_vs_10": {"paper": 0.05, "computed": 0.0505, "match": true},
-    "t_stat_50_vs_10": {"paper": 7.12, "computed": 7.125, "match": true}
+  "audit_date": "2026-04-27",
+  "auditor": "reproduce.py (Paper 5 v3 \u2014 K1261/K1262/K1262b expansion)",
+  "mode": {
+    "skip_live": false
   },
-  "match_rate": {
-    "total_claims_checked": 33,
-    "matched": 33,
-    "rate_percent": 100.0,
-    "tolerance": "max(0.03, 5% of paper value)",
-    "categories": {
-      "Sharpe_by_adoption": "6/6",
-      "VT_return_by_adoption": "6/6",
-      "Kurtosis": "3/3",
-      "Flash_crash_freq": "3/3",
-      "Annualized_volatility": "7/7",
-      "Skewness": "2/2",
-      "VIX_mean": "2/2",
-      "Max_drawdown": "2/2",
-      "t_statistics": "3/3"
+  "match_summary": {
+    "tables_verified": 4,
+    "checks_total": 47,
+    "checks_matched": 47,
+    "overall_match_rate_pct": 100.0
+  },
+  "alert_level": "green",
+  "tables": {
+    "table1_main": {
+      "source": "paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity_results.json",
+      "section": "main.tex Table tab:main + Table tab:market + \u00a74.3 t-tests"
     },
-    "key_validated_values": {
-      "Sharpe_10pct": {"paper": 0.47, "computed": 0.4675},
-      "Sharpe_20pct": {"paper": 0.50, "computed": 0.4956},
-      "Sharpe_30pct": {"paper": 0.47, "computed": 0.4664},
-      "Sharpe_50pct": {"paper": 0.34, "computed": 0.3357},
-      "Sharpe_70pct": {"paper": 0.08, "computed": 0.0844},
-      "Sharpe_100pct": {"paper": -0.27, "computed": -0.2670},
-      "AnnVol_100pct": {"paper": 0.351, "computed": 0.3508},
-      "Kurt_100pct": {"paper": 61.4, "computed": 61.353},
-      "Skew_100pct": {"paper": -4.73, "computed": -4.734},
-      "VIXspike_100pct": {"paper": 90.0, "note": "matched via ann_vol +119.1% proxy"}
+    "table2_cross_strategy": {
+      "source": [
+        "experiments/k1261/k1261_results.json (Strict detector cell1)",
+        "experiments/k1262/k1262_softer_detector_table.md (cross-detector recompute)"
+      ],
+      "section": "main.tex Table tab:cross_strategy_threshold (\u00a74.4)"
+    },
+    "table3_scaling_window": {
+      "source": "experiments/k1262/k1262_results.json (Phase 2 16,800-sim sweep)",
+      "section": "main.tex Table tab:scaling_window_matrix (\u00a74.4)"
+    },
+    "table4_oat_robustness": {
+      "source": "experiments/k1262b/k1262b_results.json (5-cell OAT)",
+      "section": "main.tex Table tab:oat_robustness (\u00a74.5) + \u00a75.4 knife-edge rebuttal"
     }
   },
-  "seed_robustness": {
-    "method": "Re-run k827v3 core simulation with 3 seed offsets (42=paper default, 13, 7), N_SIMS=120 per cell (reduced from 500 for runtime; still produces stable means)",
-    "script": "paper/vt-crowding-abm/reproducibility_audit/seed_robustness.py",
-    "results_json": "paper/vt-crowding-abm/reproducibility_audit/seed_robustness_results.json",
-    "runtime_sec": 26,
-    "sharpe_by_seed": {
-      "10pct": {"42": 0.488, "13": 0.486, "7": 0.493, "rel_range_percent": 1.3},
-      "30pct": {"42": 0.456, "13": 0.461, "7": 0.474, "rel_range_percent": 4.1},
-      "50pct": {"42": 0.309, "13": 0.339, "7": 0.347, "rel_range_percent": 11.6},
-      "70pct": {"42": 0.084, "13": 0.101, "7": 0.088, "rel_range_percent": 18.7},
-      "100pct": {"42": -0.275, "13": -0.272, "7": -0.276, "rel_range_percent": 1.6}
+  "checks": [
+    {
+      "metric": "Sharpe @ phi=10% (K827v3)",
+      "paper_value": 0.47,
+      "reproduced_value": 0.4675,
+      "abs_diff": 0.0025,
+      "tol": 0.05,
+      "match": true,
+      "source_paper_loc": "Table tab:main row phi=10%",
+      "source_json_field": "part1_results.10%.vt_sharpe.mean"
     },
-    "kurtosis_by_seed": {
-      "50pct": {"42": 0.073, "13": 0.070, "7": 0.069},
-      "70pct": {"42": 1.613, "13": 1.575, "7": 1.577},
-      "100pct": {"42": 62.218, "13": 62.314, "7": 62.377}
+    {
+      "metric": "Sharpe @ phi=20% (K827v3)",
+      "paper_value": 0.5,
+      "reproduced_value": 0.4956,
+      "abs_diff": 0.0044,
+      "tol": 0.05,
+      "match": true,
+      "source_paper_loc": "Table tab:main row phi=20%",
+      "source_json_field": "part1_results.20%.vt_sharpe.mean"
     },
-    "critical_threshold_per_seed": {
-      "42": "50%",
-      "13": "50%",
-      "7": "70%"
+    {
+      "metric": "Sharpe @ phi=30% (K827v3)",
+      "paper_value": 0.47,
+      "reproduced_value": 0.4664,
+      "abs_diff": 0.0036,
+      "tol": 0.05,
+      "match": true,
+      "source_paper_loc": "Table tab:main row phi=30%",
+      "source_json_field": "part1_results.30%.vt_sharpe.mean"
     },
-    "tipping_stable_in_paper_range": true,
-    "stability_verdict": "All 3 seeds show identical qualitative pattern: flat Sharpe at 10-30%, ~30% decline at 50%, >80% collapse at 70%, negative at 100%. The paper's claim 'tipping point at 50-70%' is the RANGE spanning two adoption levels — so even though the knife-edge >30% rule flips '50%' vs '70%' across seeds, both values are INSIDE the paper's stated tipping range. No seed contradicts the paper narrative. Sharpe relative range <=19% << 30% stress threshold."
-  },
-  "frl_hard_requirements_compliance": {
-    "README.md": {"exists": true, "path": "paper/vt-crowding-abm/README.md"},
-    "data_sources.md": {"exists": true, "path": "paper/vt-crowding-abm/data_sources.md", "note": "Pure simulation - no external data dependencies"},
-    "experiments.md": {"exists": true, "path": "paper/vt-crowding-abm/experiments.md", "note": "K827/K827v2/K827v3/K864 indexed"},
-    "scripts_README": {"exists": true, "path": "paper/vt-crowding-abm/scripts/README.md"},
-    "results_directory": {"exists": true, "path": "paper/vt-crowding-abm/results/README.md"},
-    "figures_directory": {"exists": true, "path": "paper/vt-crowding-abm/figures/", "note": "No includegraphics in main.tex - intentional (tabular paper)"},
-    "reproduce_py": {"exists": true, "runs_clean": true},
-    "experiment_scripts_self_contained": {
-      "exists": true,
-      "path": "paper/vt-crowding-abm/experiments/",
-      "files": ["k827_abm_vt_crowding.py", "k827v2_abm_sensitivity.py", "k827v3_abm_fixed_liquidity.py", "k864_heterogeneous_abm.py"]
+    {
+      "metric": "Sharpe @ phi=50% (K827v3)",
+      "paper_value": 0.34,
+      "reproduced_value": 0.3357,
+      "abs_diff": 0.0043,
+      "tol": 0.05,
+      "match": true,
+      "source_paper_loc": "Table tab:main row phi=50%",
+      "source_json_field": "part1_results.50%.vt_sharpe.mean"
     },
-    "all_5_hard_requirements_met": true
-  },
-  "minor_observations": [
-    "results/README.md line 42 says 'Sharpe ~0.20 at 50%' but actual is 0.34. Cosmetic mismatch in secondary index file; main.tex and reproduce.py are correct. Not a blocking issue.",
-    "reproduce.py only verifies 2 t-stat claims; could be extended to check the full 33-cell matrix used in this audit. Not required for submission.",
-    "Seed 7 produces deg@50%=29.6% (below 30% threshold) vs seed 42/13 at ~37%. Paper's '50-70% range' wording already handles this correctly - no revision needed."
+    {
+      "metric": "Sharpe @ phi=70% (K827v3)",
+      "paper_value": 0.08,
+      "reproduced_value": 0.0844,
+      "abs_diff": 0.0044,
+      "tol": 0.05,
+      "match": true,
+      "source_paper_loc": "Table tab:main row phi=70% (headline)",
+      "source_json_field": "part1_results.70%.vt_sharpe.mean"
+    },
+    {
+      "metric": "Sharpe @ phi=100% (K827v3)",
+      "paper_value": -0.27,
+      "reproduced_value": -0.267,
+      "abs_diff": 0.003,
+      "tol": 0.05,
+      "match": true,
+      "source_paper_loc": "Table tab:main row phi=100%",
+      "source_json_field": "part1_results.100%.vt_sharpe.mean"
+    },
+    {
+      "metric": "Kurtosis @ phi=70% (K827v3)",
+      "paper_value": 1.41,
+      "reproduced_value": 1.4121,
+      "abs_diff": 0.0021,
+      "tol": 0.5,
+      "match": true,
+      "source_paper_loc": "Table tab:main kurt col, phi=70%",
+      "source_json_field": "part1_results.70%.kurtosis.mean"
+    },
+    {
+      "metric": "Kurtosis @ phi=100% (K827v3)",
+      "paper_value": 61.4,
+      "reproduced_value": 61.3526,
+      "abs_diff": 0.0474,
+      "tol": 5.0,
+      "match": true,
+      "source_paper_loc": "Table tab:main kurt col, phi=100%; abstract '~61'",
+      "source_json_field": "part1_results.100%.kurtosis.mean"
+    },
+    {
+      "metric": "AnnVol @ phi=100% (K827v3)",
+      "paper_value": 0.351,
+      "reproduced_value": 0.3508,
+      "abs_diff": 0.0002,
+      "tol": 0.05,
+      "match": true,
+      "source_paper_loc": "Table tab:market AnnVol col, phi=100%",
+      "source_json_field": "part1_results.100%.ann_vol.mean"
+    },
+    {
+      "metric": "Skewness @ phi=100% (K827v3)",
+      "paper_value": -4.73,
+      "reproduced_value": -4.7344,
+      "abs_diff": 0.0044,
+      "tol": 0.5,
+      "match": true,
+      "source_paper_loc": "Table tab:market skew col, phi=100%",
+      "source_json_field": "part1_results.100%.skewness.mean"
+    },
+    {
+      "metric": "VIX_spike_pct @ phi=70% (K827v3)",
+      "paper_value": 16.2,
+      "reproduced_value": 16.1581,
+      "abs_diff": 0.0419,
+      "tol": 1.0,
+      "match": true,
+      "source_paper_loc": "Table tab:market VIX-spike col phi=70%",
+      "source_json_field": "part1_results.70%.vix_spike_pct.mean"
+    },
+    {
+      "metric": "VIX_spike_pct @ phi=100% (K827v3)",
+      "paper_value": 90.0,
+      "reproduced_value": 90.0245,
+      "abs_diff": 0.0245,
+      "tol": 2.0,
+      "match": true,
+      "source_paper_loc": "Table tab:market VIX-spike col phi=100%",
+      "source_json_field": "part1_results.100%.vix_spike_pct.mean"
+    },
+    {
+      "metric": "MaxDD @ phi=70% (K827v3)",
+      "paper_value": -0.601,
+      "reproduced_value": -0.6009,
+      "abs_diff": 0.0001,
+      "tol": 0.05,
+      "match": true,
+      "source_paper_loc": "Table tab:market MDD col, phi=70%",
+      "source_json_field": "part1_results.70%.max_dd.mean"
+    },
+    {
+      "metric": "MaxDD @ phi=100% (K827v3)",
+      "paper_value": -0.913,
+      "reproduced_value": -0.9131,
+      "abs_diff": 0.0001,
+      "tol": 0.05,
+      "match": true,
+      "source_paper_loc": "Table tab:market MDD col, phi=100%",
+      "source_json_field": "part1_results.100%.max_dd.mean"
+    },
+    {
+      "metric": "|t| 30% vs 10% (K827v3 Welch)",
+      "paper_value": 0.05,
+      "reproduced_value": 0.0505,
+      "abs_diff": 0.0005,
+      "tol": 0.15,
+      "match": true,
+      "source_paper_loc": "main.tex \u00a74.3 'yields t = 0.05'",
+      "source_json_field": "computed: Welch t from part1_results vt_sharpe mean/std/n"
+    },
+    {
+      "metric": "|t| 50% vs 10% (K827v3 Welch)",
+      "paper_value": 7.12,
+      "reproduced_value": 7.125,
+      "abs_diff": 0.005,
+      "tol": 0.15,
+      "match": true,
+      "source_paper_loc": "main.tex \u00a74.3 'yields t = 7.12'",
+      "source_json_field": "computed: Welch t from part1_results vt_sharpe mean/std/n"
+    },
+    {
+      "metric": "|t| 70% vs 50% (K827v3 Welch)",
+      "paper_value": 16.94,
+      "reproduced_value": 16.9438,
+      "abs_diff": 0.0038,
+      "tol": 0.15,
+      "match": true,
+      "source_paper_loc": "main.tex \u00a74.3 'yields t = 16.94'",
+      "source_json_field": "computed: Welch t from part1_results vt_sharpe mean/std/n"
+    },
+    {
+      "metric": "K1261 VT_baseline strict threshold",
+      "paper_value": "100%",
+      "reproduced_value": "100%",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:cross_strategy_threshold VT Strict col",
+      "source_json_field": "threshold_detection.VT_baseline_K827v3_stored.critical_adoption"
+    },
+    {
+      "metric": "K1261 TF strict threshold",
+      "paper_value": "20%",
+      "reproduced_value": "20%",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:cross_strategy_threshold TF Strict col",
+      "source_json_field": "threshold_detection.TF.critical_adoption"
+    },
+    {
+      "metric": "K1261 MR strict threshold",
+      "paper_value": "50%",
+      "reproduced_value": "50%",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:cross_strategy_threshold MR Strict col",
+      "source_json_field": "threshold_detection.MR.critical_adoption"
+    },
+    {
+      "metric": "K1261 NoiseControl strict threshold (null)",
+      "paper_value": null,
+      "reproduced_value": null,
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:cross_strategy_threshold NC Strict col",
+      "source_json_field": "threshold_detection.NoiseControl.critical_adoption"
+    },
+    {
+      "metric": "K1261 NoiseControl Sharpe @ phi=100% (anchor)",
+      "paper_value": 0.5,
+      "reproduced_value": 0.4986,
+      "abs_diff": 0.0014,
+      "tol": 0.05,
+      "match": true,
+      "source_paper_loc": "main.tex \u00a74.4 'NoiseControl produces no detectable threshold' (Sharpe anchor)",
+      "source_json_field": "threshold_detection.NoiseControl.justification.per_adoption.100%.sharpe"
+    },
+    {
+      "metric": "K1262 scaling=10 window=22 TF (softer)",
+      "paper_value": "20%",
+      "reproduced_value": "20%",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:scaling_window_matrix s=10 W=22 (TF cell)",
+      "source_json_field": "threshold_per_cell.TF.10.22.softer_kurt_weak.critical_adoption"
+    },
+    {
+      "metric": "K1262 scaling=10 window=22 MR (softer)",
+      "paper_value": "50%",
+      "reproduced_value": "50%",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:scaling_window_matrix s=10 W=22 (MR cell)",
+      "source_json_field": "threshold_per_cell.MR.10.22.softer_kurt_weak.critical_adoption"
+    },
+    {
+      "metric": "K1262 scaling=1 window=22 TF (softer)",
+      "paper_value": "70%",
+      "reproduced_value": "70%",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:scaling_window_matrix s=1 W=22 (TF cell)",
+      "source_json_field": "threshold_per_cell.TF.1.22.softer_kurt_weak.critical_adoption"
+    },
+    {
+      "metric": "K1262 scaling=1 window=22 MR (softer)",
+      "paper_value": "70%",
+      "reproduced_value": "70%",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:scaling_window_matrix s=1 W=22 (MR cell)",
+      "source_json_field": "threshold_per_cell.MR.1.22.softer_kurt_weak.critical_adoption"
+    },
+    {
+      "metric": "K1262 TF<=VT in 12/12 cells (softer)",
+      "paper_value": 12,
+      "reproduced_value": 12,
+      "tol": 0,
+      "match": true,
+      "source_paper_loc": "main.tex \u00a74.4 'TF threshold < VT in 12/12 cells'",
+      "source_json_field": "computed: count of TF cells with critical < VT(100%) under softer"
+    },
+    {
+      "metric": "K1262 MR<=VT in 12/12 cells (softer)",
+      "paper_value": 12,
+      "reproduced_value": 12,
+      "tol": 0,
+      "match": true,
+      "source_paper_loc": "main.tex \u00a74.4 'MR threshold <= VT in 12/12 cells'",
+      "source_json_field": "computed: count of MR cells with critical <= VT(100%) under softer"
+    },
+    {
+      "metric": "K1262 VT_baseline softer threshold",
+      "paper_value": "100%",
+      "reproduced_value": "100%",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:cross_strategy_threshold VT Softer col",
+      "source_json_field": "k1262_softer_detector_table.md (cross-detector recompute)"
+    },
+    {
+      "metric": "K1262 VT_baseline Sharpe-only threshold (anchor)",
+      "paper_value": "70%",
+      "reproduced_value": "70%",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:cross_strategy_threshold VT Sharpe-only col (calibration anchor)",
+      "source_json_field": "k1262_softer_detector_table.md P5-style col"
+    },
+    {
+      "metric": "K1262 TF Sharpe-only threshold",
+      "paper_value": "20%",
+      "reproduced_value": "20%",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:cross_strategy_threshold TF Sharpe-only col",
+      "source_json_field": "k1262_softer_detector_table.md P5-style col"
+    },
+    {
+      "metric": "K1262 MR Sharpe-only threshold",
+      "paper_value": "20%",
+      "reproduced_value": "20%",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:cross_strategy_threshold MR Sharpe-only col",
+      "source_json_field": "k1262_softer_detector_table.md P5-style col"
+    },
+    {
+      "metric": "K1262b cell1 baseline VT threshold",
+      "paper_value": "70%",
+      "reproduced_value": "70%",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:oat_robustness cell1 VT col (calibration anchor)",
+      "source_json_field": "threshold_per_cell.cell1_baseline.VT_baseline.critical_adoption"
+    },
+    {
+      "metric": "K1262b cell2 lambda_low VT threshold",
+      "paper_value": "100%",
+      "reproduced_value": "100%",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:oat_robustness cell2 VT col",
+      "source_json_field": "threshold_per_cell.cell2_lambda_low.VT_baseline.critical_adoption"
+    },
+    {
+      "metric": "K1262b cell3 lambda_high VT threshold",
+      "paper_value": "70%",
+      "reproduced_value": "70%",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:oat_robustness cell3 VT col",
+      "source_json_field": "threshold_per_cell.cell3_lambda_high.VT_baseline.critical_adoption"
+    },
+    {
+      "metric": "K1262b cell4 gamma_low VT threshold",
+      "paper_value": "70%",
+      "reproduced_value": "70%",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:oat_robustness cell4 VT col",
+      "source_json_field": "threshold_per_cell.cell4_gamma_low.VT_baseline.critical_adoption"
+    },
+    {
+      "metric": "K1262b cell5 gamma_high VT threshold",
+      "paper_value": "70%",
+      "reproduced_value": "70%",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:oat_robustness cell5 VT col",
+      "source_json_field": "threshold_per_cell.cell5_gamma_high.VT_baseline.critical_adoption"
+    },
+    {
+      "metric": "K1262b cell1 MR threshold",
+      "paper_value": "70%",
+      "reproduced_value": "70%",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:oat_robustness cell1 MR col",
+      "source_json_field": "threshold_per_cell.cell1_baseline.MR.critical_adoption"
+    },
+    {
+      "metric": "K1262b cell2 MR threshold",
+      "paper_value": "30%",
+      "reproduced_value": "30%",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:oat_robustness cell2 MR col",
+      "source_json_field": "threshold_per_cell.cell2_lambda_low.MR.critical_adoption"
+    },
+    {
+      "metric": "K1262b cell3 MR threshold (null)",
+      "paper_value": null,
+      "reproduced_value": null,
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:oat_robustness cell3 MR col (null - high-lambda saturation)",
+      "source_json_field": "threshold_per_cell.cell3_lambda_high.MR.critical_adoption"
+    },
+    {
+      "metric": "K1262b cell4 MR threshold",
+      "paper_value": "70%",
+      "reproduced_value": "70%",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:oat_robustness cell4 MR col",
+      "source_json_field": "threshold_per_cell.cell4_gamma_low.MR.critical_adoption"
+    },
+    {
+      "metric": "K1262b cell5 MR threshold",
+      "paper_value": "70%",
+      "reproduced_value": "70%",
+      "tol": 0.0,
+      "match": true,
+      "source_paper_loc": "Table tab:oat_robustness cell5 MR col",
+      "source_json_field": "threshold_per_cell.cell5_gamma_high.MR.critical_adoption"
+    },
+    {
+      "metric": "K1262b TF=30% in all 5 cells",
+      "paper_value": 5,
+      "reproduced_value": 5,
+      "tol": 0,
+      "match": true,
+      "source_paper_loc": "Table tab:oat_robustness TF col (5 cells all == 30%)",
+      "source_json_field": "computed: count of cells with TF.critical_adoption == 30%"
+    },
+    {
+      "metric": "K1262b NoiseControl null in all 5 cells",
+      "paper_value": 5,
+      "reproduced_value": 5,
+      "tol": 0,
+      "match": true,
+      "source_paper_loc": "Table tab:oat_robustness NC col (5/5 null)",
+      "source_json_field": "computed: count of cells with NoiseControl.critical_adoption is None"
+    },
+    {
+      "metric": "K1262b TF<=VT in 5/5 cells",
+      "paper_value": 5,
+      "reproduced_value": 5,
+      "tol": 0,
+      "match": true,
+      "source_paper_loc": "main.tex \u00a75.4 'TF threshold below VT in 5/5 cells'",
+      "source_json_field": "computed: rank-compare TF vs VT per cell"
+    },
+    {
+      "metric": "K1262b MR<=VT in 5/5 cells (incl. null saturation)",
+      "paper_value": 5,
+      "reproduced_value": 5,
+      "tol": 0,
+      "match": true,
+      "source_paper_loc": "main.tex \u00a75.4 'MR threshold <= VT in 5/5 cells (high-lambda null = saturation)'",
+      "source_json_field": "computed: rank-compare MR vs VT per cell with null-as-saturation rule"
+    },
+    {
+      "metric": "Joint 17/17 robustness checks",
+      "paper_value": 17,
+      "reproduced_value": 17,
+      "tol": 0,
+      "match": true,
+      "source_paper_loc": "main.tex \u00a75.4 'yields 17/17 robustness checks'",
+      "source_json_field": "computed: 12 (K1262 strategy-spec) + 5 (K1262b microstructure)"
+    }
   ],
-  "recommendation": "APPROVE FOR SUBMISSION. alert_level=green. All 33 headline numbers match, 5 FRL hard requirements met, seed robustness confirms tipping-point claim within paper-stated range (50-70%). No (a)(b)(c) divergence action needed.",
-  "next_steps_if_any": [
-    "Optional polish: correct results/README.md Sharpe claim to 0.34 (not 0.20). Non-blocking.",
-    "Optional: extend reproduce.py assertions to cover all 33 cells. Not required for FRL submission."
-  ]
+  "joint_robustness": {
+    "strategy_spec_count": 12,
+    "microstructure_count": 5,
+    "total_count_paper_claim": 17,
+    "ordering_preserved": "TF/MR <= VT in 12/12 strategy-spec + 5/5 microstructure cells",
+    "noise_control_falsifiability": "5/5 OAT + 12/12 strategy-spec cells: NoiseControl never crosses"
+  },
+  "actor_message_to_user": "GREEN: 47/47 = 100.0% match vs paper claims. Tables 1+2+3+4 verified across K827v3 + K1261 + K1262 + K1262b. v3 expansion adds cross-strategy + lambda/gamma OAT verification (\u00a74.4 + \u00a74.5 + \u00a75.4)."
 }

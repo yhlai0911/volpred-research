@@ -1,0 +1,25 @@
+{
+  "id": "compute-k1304-bma-0050-tw-h1-fail-decomposition-h-sample-h-pool-h-mi-1778629580",
+  "title": "K1304: BMA 0050.TW H1 FAIL decomposition (H_sample/H_pool/H_micro)",
+  "script_path": "experiments/k1304/k1304.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-05-12T23:46:20Z",
+  "started_at": "2026-05-13T00:00:05Z",
+  "completed_at": "2026-05-13T00:17:31Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1304-bma-0050-tw-h1-fail-decomposition-h-sample-h-pool-h-mi-1778629580.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1304-bma-0050-tw-h1-fail-decomposition-h-sample-h-pool-h-mi-1778629580.stderr",
+  "result_artifact": "experiments/k1304/k1304_results.json",
+  "claude_followup": {
+    "brief": "K1304 BMA decomposition completed. Read experiments/k1304/k1304_results.json and interpret: (1) which hypothesis (H_sample/H_pool/H_micro) dominates the 0050.TW H1 FAIL, (2) update research_program.md Paper 2 §5 implications, (3) check if H_pool verdict suggests BMA candidate pool needs revision for Taiwan markets. Do NOT write knowledge.json — only report interpretation.",
+    "task_type": "paper_decision",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "timeout_seconds": 3600,
+  "followup_dispatched_at": "2026-05-13T01:10:39Z",
+  "followup_next_task_id": "interpret-k1304-bma-decomposition-1778634639"
+}

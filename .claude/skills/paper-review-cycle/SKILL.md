@@ -42,19 +42,19 @@ Do **not** use this skill for：
 
 ### Step 1: 並行啟動兩個 review agents
 
-**⚠️ 關鍵：審查 agent 通常派 Codex-based subagent（`codex:review` / `codex:codex-rescue`）。Codex 讀不到 `.claude/skills/`，prompt 必須引用 `.agents/skills/<name>/SKILL.md` 路徑（skill 同源 canonical 在 `agent-specs/skills/`）。** 忘了指 path → agent 瞎做不符合規範 → 主線程要重派燒 token。
+**⚠️ 關鍵：審查 agent 通常派 Codex-based subagent（`codex:review` / `codex:codex-rescue`）。透過 codex-companion runtime，Codex 可讀 project root 任何檔（含 `.claude/skills/`）。prompt 必須明寫 skill path 否則 agent 瞎做不符合規範 → 主線程要重派燒 token。**
 
 ```bash
 # Agent 1 (citation-verifier, Codex-based)
-prompt: "先讀 .agents/skills/citation-verifier/SKILL.md 掌握規範。
+prompt: "先讀 .claude/skills/citation-verifier/SKILL.md 掌握規範。
         接著對 paper/<id>/main_v<n>.tex 跑完整 citation verification：
         APA format / DOI / author / quoted-content accuracy / cited-fact verification via web search。
         輸出報告到 paper/<id>/review_history/v<n>/citation_check_report.md
         Format: Markdown，含 severity (MAJOR/MED/MINOR) + suggested fix。"
 
 # Agent 2 (latex-academic-reviewer, Codex-based)
-prompt: "先讀 .agents/skills/latex-academic-reviewer/SKILL.md 和
-        .agents/skills/latex-academic-reviewer/references/review-criteria.md。
+prompt: "先讀 .claude/skills/latex-academic-reviewer/SKILL.md 和
+        .claude/skills/latex-academic-reviewer/references/review-criteria.md。
         對 paper/<id>/main_v<n>.tex + body_v<n>.tex 做完整學術審查：
         logic / argument / model / equation / symbol / citation / 結構。
         輸出報告到 paper/<id>/review_history/v<n>/academic_review_report.md

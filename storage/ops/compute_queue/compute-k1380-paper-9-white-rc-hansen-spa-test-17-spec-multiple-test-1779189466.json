@@ -1,0 +1,23 @@
+{
+  "id": "compute-k1380-paper-9-white-rc-hansen-spa-test-17-spec-multiple-test-1779189466",
+  "title": "K1380: Paper 9 White RC / Hansen SPA Test (17-Spec Multiple Testing Fix)",
+  "script_path": "experiments/k1380/k1380.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "failed",
+  "queued_at": "2026-05-19T11:17:46Z",
+  "started_at": "2026-05-19T12:45:10Z",
+  "completed_at": "2026-05-19T14:45:11Z",
+  "exit_code": -1,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1380-paper-9-white-rc-hansen-spa-test-17-spec-multiple-test-1779189466.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1380-paper-9-white-rc-hansen-spa-test-17-spec-multiple-test-1779189466.stderr",
+  "result_artifact": "experiments/k1380/k1380_results.json",
+  "claude_followup": {
+    "brief": "K1380 White RC / Hansen SPA test for Paper 9 SF3 fix. Check: (1) Does any model in the 17-spec set significantly beat GJR? (2) Does A4f survive White Reality Check after data snooping correction? If A4f's RC p-value < 0.10 → main claim survives multiple testing correction. Update Paper 9 multiple testing section. Write knowledge.json entry.",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 7200
+}

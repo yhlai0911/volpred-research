@@ -1,0 +1,136 @@
+{
+  "experiment_id": "K1306",
+  "title": "SEC EDGAR 10-K LM-sentiment pilot",
+  "verdict": "NULL",
+  "verdict_rule": "PASS if >=3 firms have |t_tone|>2 AND OOS QLIKE improvement >5%",
+  "seed": 42,
+  "n_boot": 500,
+  "n_filings": 16,
+  "n_firms": 4,
+  "n_aligned_obs": 16,
+  "pass_firms": [],
+  "tickers": [
+    "AAPL",
+    "GOOGL",
+    "MSFT",
+    "NVDA"
+  ],
+  "filing_years": [
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "ols": {
+    "per_firm": {
+      "AAPL": {
+        "n_obs": 4,
+        "skipped": "n<5 insufficient df for HC1"
+      },
+      "GOOGL": {
+        "n_obs": 1,
+        "skipped": "n<5 insufficient df for HC1"
+      },
+      "MSFT": {
+        "n_obs": 4,
+        "skipped": "n<5 insufficient df for HC1"
+      },
+      "NVDA": {
+        "n_obs": 3,
+        "skipped": "n<5 insufficient df for HC1"
+      }
+    },
+    "pooled": null,
+    "stouffer": null
+  },
+  "bootstrap_pooled_beta_tone": {
+    "n_boot": 500,
+    "mean": 0.21098067012412947,
+    "ci_2_5": -3.7857203722047994,
+    "ci_97_5": 2.6323782666006674,
+    "frac_positive": 0.856
+  },
+  "panel_summary": {
+    "vix_mean_lag": {
+      "count": 16.0,
+      "mean": 20.9552083554722,
+      "std": 6.012130170215196,
+      "min": 13.395238149733771,
+      "25%": 16.71142872174581,
+      "50%": 19.76642858414423,
+      "75%": 25.770952406383696,
+      "max": 30.27904782976423
+    },
+    "tone_delta_neg": {
+      "count": 12.0,
+      "mean": -0.0009112358533662099,
+      "std": 0.00523814337496279,
+      "min": -0.01628807163448004,
+      "25%": -0.0012484692278110733,
+      "50%": -0.00043496774831083135,
+      "75%": 0.0014797693610501556,
+      "max": 0.004609252598795736
+    },
+    "rv_fwd_12m": {
+      "count": 16.0,
+      "mean": 0.0106818044022227,
+      "std": 0.008338955340090519,
+      "min": 0.0032535500997837295,
+      "25%": 0.005223723771443154,
+      "50%": 0.007107130325264888,
+      "75%": 0.012146564936575567,
+      "max": 0.030830947954500282
+    }
+  },
+  "version": "K1306v2",
+  "codex_review": {
+    "verdict": "PASS",
+    "date": "2026-05-15",
+    "model": "gpt-5.4",
+    "session": "019e2ac0-7629-7af0-bb65-c786c328ce43",
+    "rounds": 3,
+    "checklist": {
+      "lookahead_bias": "PASS",
+      "partial_month_contamination": "PASS",
+      "small_n_guard": "PASS",
+      "statistical_validity_hc1_df": "PASS",
+      "seed_fixedness": "PASS"
+    },
+    "bugs_fixed": [
+      "Bug1: partial-month lower bound now uses MonthEnd(0) snap + strict > to exclude embargo month",
+      "Bug2: per-firm N<5 guard raised from N<3 (invalid HC1 df) to N<5 (df>=2 for 3-param model)",
+      "Bug3 (Codex-discovered): pooled OLS now checks df_resid=N-k>=2 before reporting HC1 t-stats"
+    ]
+  },
+  "lookahead_check": {
+    "embargo_business_days": 1,
+    "vix_mean_window": "21 trading days strictly BEFORE embargo_date",
+    "target_window": "next 12 monthly RV strictly AFTER embargo_month_end (MonthEnd(0) snap)",
+    "baseline_lag_match": true,
+    "challenger_lag_match": true
+  },
+  "limitations": [
+    "Pilot sample only: 5 firms x 5 years, recent EDGAR-API window",
+    "META filings missing (CIK submissions API recent-window cutoff)",
+    "GOOGL 2020-2022 missing (Alphabet CIK reorg / API window)",
+    "MSFT 2023/2024 risk_factors extraction returned <50 chars (heuristic miss; MD&A still extracted)",
+    "Per-firm N <=5: t-stats unreliable as z-stats; Stouffer caveated",
+    "12-month forward RV window overlaps for adjacent filings — autocorrelation in residuals not corrected"
+  ],
+  "next_steps_if_PASS": [
+    "K1307: full S&P-500 panel with proper FE + Driscoll-Kraay SE",
+    "Replace heuristic section extraction with structured XBRL filings tags",
+    "Add 8-K event windows for higher-frequency tone updates"
+  ],
+  "data_files": {
+    "filings_index": "experiments/k1306/data/filings_index.json",
+    "lm_dictionary": "experiments/k1306/data/dict/LM_MasterDictionary.csv",
+    "raw_sections": "experiments/k1306/data/raw/"
+  },
+  "git_metadata": {
+    "code": "experiments/k1306/k1306.py",
+    "fetcher": "experiments/k1306/k1306_fetch_edgar.py",
+    "readme": "experiments/k1306/README.md"
+  }
+}

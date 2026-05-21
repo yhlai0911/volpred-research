@@ -1,0 +1,19 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.10, pytest-9.0.3, pluggy-1.6.0 -- /Users/yhlai0911/Desktop/volpred-research/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /Users/yhlai0911/Desktop/volpred-research
+configfile: pyproject.toml
+plugins: anyio-4.12.1
+collecting ... collected 9 items
+
+tests/test_daily_update_tw_staleness.py::test_tw50_no_data_omits_tw_line PASSED [ 11%]
+tests/test_daily_update_tw_staleness.py::test_tw50_fresh_no_staleness_warning PASSED [ 22%]
+tests/test_daily_update_tw_staleness.py::test_tw50_stale_renders_warning PASSED [ 33%]
+tests/test_daily_update_tw_staleness.py::test_tw50_date_persisted_in_details PASSED [ 44%]
+tests/test_daily_update_tw_staleness_milestone.py::test_milestone_tw50_no_data_omits_tw_line PASSED [ 55%]
+tests/test_daily_update_tw_staleness_milestone.py::test_milestone_tw50_fresh_no_staleness_warning PASSED [ 66%]
+tests/test_daily_update_tw_staleness_milestone.py::test_milestone_tw50_stale_renders_warning PASSED [ 77%]
+tests/test_daily_update_tw_staleness_milestone.py::test_milestone_tw50_close_without_date_graceful PASSED [ 88%]
+tests/test_daily_update_tw_staleness_milestone.py::test_milestone_warning_format_matches_rich_article PASSED [100%]
+
+============================== 9 passed in 3.14s ===============================

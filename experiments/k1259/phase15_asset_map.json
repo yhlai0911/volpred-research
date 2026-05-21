@@ -1,0 +1,430 @@
+{
+  "schema_version": 1,
+  "description": "Phase 1.5 asset backfill map: maps K_id -> inferred asset (singleton ticker or pipe-delimited multi-asset union). Generated 2026-04-20 by main-thread reading each K folder README.md + *_results.json. Pinned here so apply_phase15_backfill.py can deterministically reproduce dm_ledger.json from a fresh build_dm_ledger.py run.",
+  "generated_at": "2026-04-20T00:00:00+00:00",
+  "n_kids": 105,
+  "n_singleton": 15,
+  "n_multi": 90,
+  "map": {
+    "K1000": {
+      "asset": "SPY",
+      "source": "phase1.5_backfill_singleton"
+    },
+    "K1001": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1002": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1006": {
+      "asset": "VIX",
+      "source": "phase1.5_backfill_singleton"
+    },
+    "K1010": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1013": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1014": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1015": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1016": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1018": {
+      "asset": "GLD|SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1019": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1020": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1022": {
+      "asset": "0050.TW|EEM|GLD|QQQ|SPY|TLT|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1024": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1028": {
+      "asset": "QQQ|SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1030": {
+      "asset": "0050.TW|EEM|GLD|QQQ|SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1031": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1054": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1057": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1059": {
+      "asset": "0050.TW|SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1063": {
+      "asset": "0050.TW|SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1065": {
+      "asset": "0050.TW|SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1066": {
+      "asset": "0050.TW|SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1072": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1073": {
+      "asset": "0050.TW|GLD|QQQ|SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1079": {
+      "asset": "0050.TW|QQQ|SPY|TLT|VIX|XLE|XLF",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1084": {
+      "asset": "0050.TW|SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1085": {
+      "asset": "0050.TW|EEM|EWT|EWZ|GLD|IWM|QQQ|SPY|TLT|USO|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1086": {
+      "asset": "EEM|GLD|HYG|IEF|LQD|SPY|TLT|USO|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1087": {
+      "asset": "GLD|SPY|TLT|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1088": {
+      "asset": "EEM|GLD|IWM|QQQ|SPY|TLT|USO|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1089": {
+      "asset": "BTC|BTC-USD|EEM|ETH|ETH-USD|GLD|IWM|QQQ|SPY|TLT|USO|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1092": {
+      "asset": "GLD|SPY|TLT|USO|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1093": {
+      "asset": "GLD|SPY|USO|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1095": {
+      "asset": "0050.TW|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1096": {
+      "asset": "BTC|BTC-USD|ETH-USD|SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1097": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1098": {
+      "asset": "0050.TW|2317.TW|2330.TW|GLD|USO|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1100": {
+      "asset": "GLD|QQQ|SPY|TLT|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1103": {
+      "asset": "2330.TW|2454.TW|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1108": {
+      "asset": "0050.TW|2330.TW|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1115": {
+      "asset": "EEM|GLD|QQQ|SPY",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1116": {
+      "asset": "GLD|SPY|TLT|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1118": {
+      "asset": "0050.TW|BTC|BTC-USD|GLD|SPY|TLT|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1119": {
+      "asset": "BTC|BTC-USD|ETH-USD|GLD|SPY|TLT|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1120": {
+      "asset": "BTC-USD|GLD|SPY|TLT|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1125": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1128": {
+      "asset": "VIX",
+      "source": "phase1.5_backfill_singleton"
+    },
+    "K1130": {
+      "asset": "VIX",
+      "source": "phase1.5_backfill_singleton"
+    },
+    "K1131": {
+      "asset": "VIX",
+      "source": "phase1.5_backfill_singleton"
+    },
+    "K1133": {
+      "asset": "BTC|BTC-USD|GLD|SPY|USO",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1134": {
+      "asset": "BTC-USD|GLD|QQQ|SPY|USO|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1135": {
+      "asset": "0050.TW|BTC-USD|GLD|QQQ|SLV|SPY|USO",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1136": {
+      "asset": "0050.TW|BTC|BTC-USD|GLD|QQQ|SPY|USO|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1142": {
+      "asset": "VIX",
+      "source": "phase1.5_backfill_singleton"
+    },
+    "K1199": {
+      "asset": "BTC-USD|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1203": {
+      "asset": "BTC|BTC-USD|EEM|GLD|QQQ|SPX|SPY|TLT|USO|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K1205": {
+      "asset": "VIX",
+      "source": "phase1.5_backfill_singleton"
+    },
+    "K1241": {
+      "asset": "BTC|BTC-USD|SPY|V|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K442": {
+      "asset": "SPY",
+      "source": "phase1.5_backfill_singleton"
+    },
+    "K444": {
+      "asset": "GLD|SPY",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K458": {
+      "asset": "0050.TW|BTC-USD|GLD|SPY|TLT",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K461": {
+      "asset": "0050.TW",
+      "source": "phase1.5_backfill_singleton"
+    },
+    "K464": {
+      "asset": "EWH|EWJ|EWT|EWY|SPY",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K468": {
+      "asset": "EEM|QQQ|SPY",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K495": {
+      "asset": "BTC-USD|EEM|EWJ|EWT|GLD|HYG|IWM|QQQ|SPY|TLT|USO|XLE|XLF",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K512": {
+      "asset": "0050.TW",
+      "source": "phase1.5_backfill_singleton"
+    },
+    "K567": {
+      "asset": "EFA|EWJ|EWU|EWZ|SPY",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K592": {
+      "asset": "SPY",
+      "source": "phase1.5_backfill_singleton"
+    },
+    "K639": {
+      "asset": "BTC-USD|SPY",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K702": {
+      "asset": "EFA|GLD|SPY|TLT",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K704": {
+      "asset": "GLD|SPY",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K794": {
+      "asset": "EEM|GLD|SPY",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K797": {
+      "asset": "SPY",
+      "source": "phase1.5_backfill_singleton"
+    },
+    "K806": {
+      "asset": "0050.TW|BTC-USD|GLD|QQQ|SPY",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K835": {
+      "asset": "0050.TW",
+      "source": "phase1.5_backfill_singleton"
+    },
+    "K881": {
+      "asset": "EEM|GLD|QQQ",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K891": {
+      "asset": "GLD|SPY",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K894": {
+      "asset": "SPY",
+      "source": "phase1.5_backfill_singleton"
+    },
+    "K910": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K923": {
+      "asset": "GLD|SPY",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K926": {
+      "asset": "0050.TW|2330.TW|SPY",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K933": {
+      "asset": "SPX|SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K934": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K935": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K937": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K939": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K942": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K943": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K944": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K945": {
+      "asset": "GLD|IWM|QQQ|SLV|SPY",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K947": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K967": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K969": {
+      "asset": "SPY",
+      "source": "phase1.5_backfill_singleton"
+    },
+    "K970": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K971": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K975": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K976": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K980": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K982": {
+      "asset": "SPY|VIX|XLB|XLE|XLF|XLI|XLK|XLP|XLRE|XLU|XLV|XLY",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K987": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K988": {
+      "asset": "0050.TW|EEM|GLD|QQQ|SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K989": {
+      "asset": "SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K990": {
+      "asset": "0050.TW|SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    },
+    "K994": {
+      "asset": "0050.TW|EEM|GLD|QQQ|SPY|VIX",
+      "source": "phase1.5_backfill_multi"
+    }
+  }
+}

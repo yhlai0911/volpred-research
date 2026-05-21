@@ -1,0 +1,100 @@
+/Users/yhlai0911/opt/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/masked.py:61: UserWarning: Pandas requires version '1.3.6' or newer of 'bottleneck' (version '1.3.4' currently installed).
+  from pandas.core import (
+18:03:45 === K1370 Block-bootstrap CI for TAIEX-to-Individual amplification ===
+18:03:45 Date: 2026-05-16T10:03:45.753266+00:00
+18:03:45 Config: B=1000, block_length=252, N_start=10, seed_base=42, sample=2008-01-01..2024-12-31
+18:03:45 Index: ^TWII | Individuals: 9 stocks
+18:03:45 
+18:03:45 [1/3] Loading data...
+18:03:46   Paper CSV: 4753 rows, 2008-01-02 → 2026-04-17
+18:03:46   [^TWII] loaded from paper CSV (twii_adj_close): 4470 rows
+18:03:46   [2317.TW] loaded from paper CSV (2317_tw_adj_close): 4479 rows
+18:03:46   [2454.TW] loaded from paper CSV (2454_tw_adj_close): 4479 rows
+18:03:46   [2886.TW] loaded from local cache: 6554 rows
+18:03:46   [2383.TW] loaded from local cache: 6554 rows
+18:03:46   [2882.TW] loaded from local cache: 6554 rows
+18:03:46   [2891.TW] loaded from local cache: 5936 rows
+18:03:46   [2412.TW] loaded from local cache: 6328 rows
+18:03:46   [2885.TW] loaded from local cache: 6554 rows
+18:03:46   [2881.TW] loaded from local cache: 6042 rows
+18:03:46   ^TWII: n=4160  mean=0.00024  std=0.01149  [2008-01-03 → 2024-12-31]
+18:03:46   2317.TW: n=4170  mean=0.00028  std=0.01885  [2008-01-03 → 2024-12-31]
+18:03:46   2454.TW: n=4170  mean=0.00050  std=0.02360  [2008-01-03 → 2024-12-31]
+18:03:46   2886.TW: n=4170  mean=0.00038  std=0.01537  [2008-01-03 → 2024-12-31]
+18:03:46   2383.TW: n=4170  mean=0.00115  std=0.02585  [2008-01-03 → 2024-12-31]
+18:03:46   2882.TW: n=4170  mean=0.00021  std=0.01762  [2008-01-03 → 2024-12-31]
+18:03:46   2891.TW: n=4170  mean=0.00042  std=0.01804  [2008-01-03 → 2024-12-31]
+18:03:46   2412.TW: n=4170  mean=0.00031  std=0.01039  [2008-01-03 → 2024-12-31]
+18:03:46   2885.TW: n=4170  mean=0.00032  std=0.01846  [2008-01-03 → 2024-12-31]
+18:03:46   2881.TW: n=4170  mean=0.00053  std=0.01723  [2008-01-03 → 2024-12-31]
+18:03:46 
+18:03:46 [2/3] Point-estimate sanity check (full-sample, single-start)...
+18:03:46   ^TWII: γ=+0.1139  (converged 10/10)
+18:03:47   2317.TW: γ=+0.0320  (converged 10/10)
+18:03:47   2454.TW: γ=+0.0406  (converged 10/10)
+18:03:48   2886.TW: γ=+0.0379  (converged 10/10)
+18:03:48   2383.TW: γ=+0.0095  (converged 10/10)
+18:03:49   2882.TW: γ=+0.0384  (converged 10/10)
+18:03:49   2891.TW: γ=+0.0396  (converged 10/10)
+18:03:50   2412.TW: γ=-0.0214  (converged 3/10)
+18:03:50   2885.TW: γ=+0.0199  (converged 10/10)
+18:03:51   2881.TW: γ=+0.0217  (converged 10/10)
+18:03:51   MATCHED-SAMPLE (2008-2024): TAIEX γ = 0.1139, mean 9-indiv γ = 0.0242, ratio = 4.70
+18:03:51   Mixed-sample sanity skipped (FileNotFoundError: [Errno 2] No such file or directory: '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-abcd4bab64c82347f/paper/taiwan-vt/data/_twii_1997_2007_snapshot.csv')
+18:03:51   (paper headline target ≈ 10.07 = mixed-sample)
+18:03:51 
+18:03:51 [3/3] Running 1000 bootstrap replicates (block_length=252, N_start=10; ~100000 total MLE fits)...
+18:03:55   r=   1/1000  valid=1/1  recent50_median=4.03  elapsed=4s  ETA=4019s
+18:05:35   r=  25/1000  valid=25/25  recent50_median=3.66  elapsed=104s  ETA=4058s
+18:07:17   r=  50/1000  valid=50/50  recent50_median=3.86  elapsed=206s  ETA=3920s
+18:09:02   r=  75/1000  valid=75/75  recent50_median=3.85  elapsed=312s  ETA=3845s
+18:10:40   r= 100/1000  valid=100/100  recent50_median=3.63  elapsed=410s  ETA=3687s
+18:12:19   r= 125/1000  valid=125/125  recent50_median=3.40  elapsed=509s  ETA=3560s
+18:13:58   r= 150/1000  valid=150/150  recent50_median=3.69  elapsed=607s  ETA=3441s
+18:15:37   r= 175/1000  valid=175/175  recent50_median=3.78  elapsed=707s  ETA=3332s
+18:17:15   r= 200/1000  valid=200/200  recent50_median=4.26  elapsed=804s  ETA=3216s
+18:18:52   r= 225/1000  valid=225/225  recent50_median=4.17  elapsed=901s  ETA=3104s
+18:20:19   r= 250/1000  valid=250/250  recent50_median=4.04  elapsed=988s  ETA=2964s
+18:21:46   r= 275/1000  valid=275/275  recent50_median=3.77  elapsed=1076s  ETA=2836s
+18:23:18   r= 300/1000  valid=300/300  recent50_median=3.63  elapsed=1168s  ETA=2724s
+18:24:58   r= 325/1000  valid=325/325  recent50_median=3.43  elapsed=1268s  ETA=2633s
+18:26:34   r= 350/1000  valid=350/350  recent50_median=3.55  elapsed=1363s  ETA=2531s
+18:28:07   r= 375/1000  valid=375/375  recent50_median=4.51  elapsed=1457s  ETA=2428s
+18:29:40   r= 400/1000  valid=400/400  recent50_median=4.15  elapsed=1549s  ETA=2324s
+18:31:14   r= 425/1000  valid=425/425  recent50_median=3.67  elapsed=1643s  ETA=2223s
+18:32:47   r= 450/1000  valid=450/450  recent50_median=4.00  elapsed=1736s  ETA=2122s
+18:34:15   r= 475/1000  valid=475/475  recent50_median=4.08  elapsed=1825s  ETA=2017s
+18:35:45   r= 500/1000  valid=500/500  recent50_median=3.71  elapsed=1914s  ETA=1914s
+18:37:13   r= 525/1000  valid=525/525  recent50_median=3.62  elapsed=2003s  ETA=1812s
+18:38:46   r= 550/1000  valid=550/550  recent50_median=4.14  elapsed=2095s  ETA=1714s
+18:40:18   r= 575/1000  valid=575/575  recent50_median=4.00  elapsed=2187s  ETA=1617s
+18:41:48   r= 600/1000  valid=600/600  recent50_median=3.54  elapsed=2277s  ETA=1518s
+18:43:17   r= 625/1000  valid=625/625  recent50_median=3.50  elapsed=2367s  ETA=1420s
+18:44:53   r= 650/1000  valid=650/650  recent50_median=3.96  elapsed=2462s  ETA=1326s
+18:46:27   r= 675/1000  valid=675/675  recent50_median=4.11  elapsed=2557s  ETA=1231s
+18:47:58   r= 700/1000  valid=700/700  recent50_median=4.26  elapsed=2647s  ETA=1135s
+18:49:32   r= 725/1000  valid=725/725  recent50_median=4.17  elapsed=2742s  ETA=1040s
+18:51:04   r= 750/1000  valid=750/750  recent50_median=3.77  elapsed=2834s  ETA=945s
+18:52:43   r= 775/1000  valid=775/775  recent50_median=3.62  elapsed=2933s  ETA=851s
+18:54:16   r= 800/1000  valid=800/800  recent50_median=3.64  elapsed=3026s  ETA=756s
+18:55:48   r= 825/1000  valid=825/825  recent50_median=3.71  elapsed=3118s  ETA=661s
+18:57:20   r= 850/1000  valid=850/850  recent50_median=3.69  elapsed=3209s  ETA=566s
+18:58:50   r= 875/1000  valid=875/875  recent50_median=3.86  elapsed=3299s  ETA=471s
+19:00:18   r= 900/1000  valid=900/900  recent50_median=3.91  elapsed=3388s  ETA=376s
+19:01:48   r= 925/1000  valid=925/925  recent50_median=3.58  elapsed=3477s  ETA=282s
+19:03:18   r= 950/1000  valid=950/950  recent50_median=3.45  elapsed=3567s  ETA=188s
+19:04:47   r= 975/1000  valid=975/975  recent50_median=3.64  elapsed=3656s  ETA=94s
+19:06:15   r=1000/1000  valid=1000/1000  recent50_median=3.88  elapsed=3745s  ETA=0s
+19:06:15 
+Bootstrap done in 3745s
+19:06:15 
+19:06:15 Valid replicates: 1000/1000  (dropped 0)
+19:06:15 90% CI = [2.323, 6.860]  median=3.807  mean=4.133  std=1.789
+19:06:15 95% CI = [2.092, 8.130]
+19:06:15 
+Results saved to /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-abcd4bab64c82347f/experiments/k1370/k1370_results.json
+19:06:15 Replicate-level data saved to /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-abcd4bab64c82347f/experiments/k1370/k1370_replicates.json
+19:06:16 Histogram saved to /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-abcd4bab64c82347f/experiments/k1370/amplification_distribution.png
+19:06:16 
+=== K1370 done in 62.5 min ===
+19:06:16 FINAL: 90% CI = [2.323, 6.860]  median = 3.807  point estimate (canonical) = 10.07
