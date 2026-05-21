@@ -1,37 +1,39 @@
 {
-  "timestamp": "2026-05-21T12:05:39Z",
-  "all_ok": true,
+  "timestamp": "2026-05-21T18:05:11Z",
+  "all_ok": false,
   "checks": [
     {
-      "name": "article_pool",
+      "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "158 total drafts (research: 18, general: 140). All thresholds met (total>=12, research>=4, general>=8)."
+      "detail": "Total drafts: 158 (threshold: 12). Research audience: 18 (threshold: 4). General audience: 140 (threshold: 8). All OK."
     },
     {
-      "name": "strategy_metrics_freshness",
+      "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json is ~11 seconds old (mtime=1779365129). Well within 26-hour threshold."
+      "detail": "storage/strategy_metrics.json last modified 27 seconds ago (threshold: 26 hours). Fresh."
     },
     {
-      "name": "error_log",
-      "status": "ok",
-      "detail": "Entry dated 2026-05-21: LaunchAgent exit-78 due to TCC-protected ~/Desktop StandardOutPath. Root cause fixed (paths moved to ~/.volpred/logs/). Lesson: LaunchAgent std paths must not be in TCC-protected dirs. No unresolved incidents."
+      "name": "ERROR_LOG",
+      "status": "alert",
+      "detail": "5 entries dated today or yesterday. Today (2026-05-21): (1) hourly-dispatch 02:07+03:07 CST SIGALRM exit=142; (2) 3 ready_for_submission papers failed independent review — Claude self-review blind spot (3 BLOCKING issues per paper); (3) hourly-dispatch launchd exit-78 plist StandardOutPath in TCC-protected Desktop. Yesterday (2026-05-20): (4) hourly-dispatch 8/12 runs failed — fd limit + org subscription; (5) scheduling failure root-cause audit — 5 root causes identified."
     },
     {
-      "name": "paper_trading_gaps",
+      "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "15 strategies checked (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, _market_daily, adaptive_tier). All strategies have <=1 null portfolio_return in last 3 entries. No alert triggered."
+      "detail": "All 15 strategies checked. No strategy has >2 portfolio_return=null in last 3 date-keyed entries."
     },
     {
-      "name": "git_status",
+      "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files. Repository is clean."
+      "detail": "0 uncommitted files (threshold: 50). Clean working tree."
     },
     {
-      "name": "knowledge_size",
+      "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "2151 entries in storage/memory/knowledge.json."
+      "detail": "storage/memory/knowledge.json contains 2151 entries."
     }
   ],
-  "alerts": []
+  "alerts": [
+    "ERROR_LOG: 5 active error entries dated 2026-05-21 or 2026-05-20 — hourly-dispatch instability (SIGALRM + launchd exit-78 + 8/12 run failures), 3 papers failed independent review with BLOCKING methodology issues."
+  ]
 }
