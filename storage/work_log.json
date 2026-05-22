@@ -8056,5 +8056,38 @@
     "title": "20 年來有幾次差點打垮它？我們拿真實危機數據算了",
     "status": "succeeded",
     "notes": "K289 stress test article published to feed as draft (mile_017ffbd7). Image: k289_crisis_comparison.png uploaded to Supabase. anti-ai-style SOP 9 checks all PASS."
+  },
+  {
+    "timestamp": "2026-05-22T21:18:12+08:00",
+    "task_type": "paper_review",
+    "task_id": "garch_x_vix_v5_c5_fix",
+    "title": "garch-x-vix Paper v5: C5 Proposition 2 coherence fix + C4 HAR-RV experiment queued",
+    "status": "succeeded",
+    "summary": "Fixed C5: (1) Proposition 2 now scoped to constrained model with clarification for A4f two-channel VRP correction, (2) Table tab:vrp_corr adds A4f row ρ=-0.017 p=0.479 from k998_results.json with explanatory note, (3) Discussion point (ii) no longer falsely references E[g_t]=1 constraint as A4f feature. LaTeX compiles clean. C4: wrote K1396 HAR-RV vs A4f script (Corsi 2009, same OOS protocol), enqueued to compute queue.",
+    "paper_id": "garch-x-vix",
+    "items_completed": [
+      "C5: Proposition 2 scope clarification (constrained model explicit)",
+      "C5: Table 3 A4f row added (ρ=-0.017, p=0.479, k998_results source)",
+      "C5: Discussion point (ii) structural scale-separation rewrite",
+      "C4: K1396 HAR-RV script written (experiments/k1396/k1396.py)",
+      "C4: Enqueued compute-k1396-har-rv-vs-a4f-paper-9-c4-har-benchmark-1779455820",
+      "review_history/v5/README.md created",
+      "paper-update sync to Supabase",
+      "git commit 1f4e682f"
+    ],
+    "remaining_issues": [
+      "C4: HAR-RV result pending compute queue (K1396)",
+      "C6-C17: Medium/low priority issues still open"
+    ]
+  },
+  {
+    "timestamp": "2026-05-22T14:16:03.929668+00:00",
+    "task_type": "paper_review",
+    "task_id": "k1396-paper9-c4-har-followup",
+    "description": "K1396 compute queue followup: Paper 9 C4 HAR-RV benchmark ACKNOWLEDGED. Added Patton QLIKE results (DM t=+0.87, p=0.39, not Harvey-sig) to Section 7.4. Codex PASS. knowledge.json written.",
+    "status": "succeeded",
+    "paper_id": "garch-x-vix",
+    "experiment_id": "K1396",
+    "commit": "2a0bdd7e"
   }
 ]

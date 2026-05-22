@@ -1,0 +1,25 @@
+{
+  "id": "compute-k1396-har-rv-vs-a4f-paper-9-c4-har-benchmark-1779455820",
+  "title": "K1396: HAR-RV vs A4f — Paper 9 C4 HAR Benchmark",
+  "script_path": "experiments/k1396/k1396.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-05-22T13:17:00Z",
+  "started_at": "2026-05-22T13:30:03Z",
+  "completed_at": "2026-05-22T13:31:28Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1396-har-rv-vs-a4f-paper-9-c4-har-benchmark-1779455820.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1396-har-rv-vs-a4f-paper-9-c4-har-benchmark-1779455820.stderr",
+  "result_artifact": "experiments/k1396/k1396_results.json",
+  "claude_followup": {
+    "brief": "K1396 完成後：讀 experiments/k1396/k1396_results.json，查 DM(HAR_vs_A4f) 和 DM(HAR_VIX_vs_A4f) t stat 與 Harvey-sig。若 A4f Harvey-sig 優於 HAR → 在 paper/garch-x-vix/main.tex Table 2 加 HAR 和 HAR-VIX 行 + C4 RESOLVED。若 A4f 不 Harvey-sig 優於 HAR → 加 honest limitation 段落到 Limitations section。更新 review_history/v5/README.md C4 狀態。",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "timeout_seconds": 7200,
+  "followup_dispatched_at": "2026-05-22T14:11:18Z",
+  "followup_next_task_id": "k1396-paper9-c4-acknowledged-1779459077"
+}

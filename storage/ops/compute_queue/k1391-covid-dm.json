@@ -5,11 +5,11 @@
   "interpreter": "uv run python",
   "args": [],
   "env": {},
-  "status": "queued",
+  "status": "completed",
   "queued_at": "2026-05-22T03:33:59Z",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-05-22T03:45:08Z",
+  "completed_at": "2026-05-22T03:45:56Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k1391-covid-dm.stdout",
   "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k1391-covid-dm.stderr",
   "result_artifact": "experiments/k1391/k1391_results.json",
@@ -18,6 +18,8 @@
     "task_type": "experiment",
     "priority": 1
   },
-  "followup_dispatched": false,
-  "timeout_seconds": 7200
+  "followup_dispatched": true,
+  "timeout_seconds": 7200,
+  "followup_dispatched_at": "2026-05-22T04:18:37Z",
+  "followup_next_task_id": "k1392-covid-dm-truncated"
 }

@@ -1,0 +1,23 @@
+{
+  "id": "compute-k1380-v4-spa-rc-test-3-strike-refactor-per-model-masks-no-np-1779430534",
+  "title": "K1380_v4: SPA/RC test 3-strike refactor (per-model masks, no np.roll)",
+  "script_path": "experiments/K1380_v4/k1380_v4.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "failed",
+  "queued_at": "2026-05-22T06:15:34Z",
+  "started_at": "2026-05-22T06:30:04Z",
+  "completed_at": "2026-05-22T06:46:05Z",
+  "exit_code": 1,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1380-v4-spa-rc-test-3-strike-refactor-per-model-masks-no-np-1779430534.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1380-v4-spa-rc-test-3-strike-refactor-per-model-masks-no-np-1779430534.stderr",
+  "result_artifact": "experiments/K1380_v4/k1380_v4_results.json",
+  "claude_followup": {
+    "brief": "K1380_v4 完成。讀 experiments/K1380_v4/k1380_v4_results.json，分析: (1) n_valid_spa 是否 >1500，(2) ≥12/17 模型 coverage≥95% 是否達標，(3) SPA p-value 與 RC p-value 解讀，(4) C3 verdict 確認，(5) 若 PASS 寫 knowledge.json entry (experiment_id=K1380_v4, reviewer=pending_codex)，(6) 更新 research_program.md Paper 9 C3 狀態。",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 7200
+}

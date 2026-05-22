@@ -1,0 +1,25 @@
+{
+  "id": "compute-k1392-leave-covid-out-dm-test-paper-oos-truncated-to-2026-04-1779423747",
+  "title": "K1392: Leave-COVID-out DM Test (Paper OOS Truncated to 2026-04-07)",
+  "script_path": "experiments/k1392/k1392.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-05-22T04:22:27Z",
+  "started_at": "2026-05-22T04:30:08Z",
+  "completed_at": "2026-05-22T04:30:59Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1392-leave-covid-out-dm-test-paper-oos-truncated-to-2026-04-1779423747.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1392-leave-covid-out-dm-test-paper-oos-truncated-to-2026-04-1779423747.stderr",
+  "result_artifact": "experiments/k1392/k1392_results.json",
+  "claude_followup": {
+    "brief": "K1392 是 K1391 的修正版：把 OOS 截斷到論文所述期間 2026-04-07 (n≈1825)。解讀要點：(1) 核查 full_oos DM t 是否 ≈ +4.0，與論文 K988 pinned snapshot t=4.148 吻合 → 驗證 OOS 匹配；(2) 若非 COVID subperiod DM t > 3.0 (Harvey-sig) → 論文 C1 通過，加 robustness table；(3) 若 non-COVID t < 3.0 → 必須降格主張，改寫 Paper 9 C1 段落。C1 處理優先級：CRITICAL。",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "timeout_seconds": 3600,
+  "followup_dispatched_at": "2026-05-22T05:12:13Z",
+  "followup_next_task_id": "K1393-fix-a4f-spec"
+}
