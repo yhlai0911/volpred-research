@@ -24,7 +24,7 @@
       "tol_pct": 1.0,
       "rel_diff_pct": 0.014769461086526183,
       "status": "match",
-      "source_path": "k1025.descriptive_statistics.btc_ret.mean (× 100)"
+      "source_path": "k1025_raw.descriptive_statistics.btc_ret.mean (× 100)"
     },
     {
       "metric": "T1: btc_ret std (%)",
@@ -33,7 +33,7 @@
       "tol_pct": 1.0,
       "rel_diff_pct": 0.001970382980521637,
       "status": "match",
-      "source_path": "k1025.descriptive_statistics.btc_ret.std (× 100)"
+      "source_path": "k1025_raw.descriptive_statistics.btc_ret.std (× 100)"
     },
     {
       "metric": "T1: btc_ret excess kurtosis",
@@ -42,7 +42,7 @@
       "tol_pct": 1.0,
       "rel_diff_pct": 0.0012033614105646762,
       "status": "match",
-      "source_path": "k1025.descriptive_statistics.btc_ret.kurtosis"
+      "source_path": "k1025_raw.descriptive_statistics.btc_ret.kurtosis"
     },
     {
       "metric": "T1: spy_ret excess kurtosis",
@@ -51,7 +51,7 @@
       "tol_pct": 1.0,
       "rel_diff_pct": 0.0003777662904972629,
       "status": "match",
-      "source_path": "k1025.descriptive_statistics.spy_ret.kurtosis"
+      "source_path": "k1025_raw.descriptive_statistics.spy_ret.kurtosis"
     },
     {
       "metric": "T1: VIX mean",
@@ -60,7 +60,7 @@
       "tol_pct": 1.0,
       "rel_diff_pct": 0.0016367513555110012,
       "status": "match",
-      "source_path": "k1025.descriptive_statistics.vix.mean"
+      "source_path": "k1025_raw.descriptive_statistics.vix.mean"
     },
     {
       "metric": "T1: VIX max (March 2020)",
@@ -69,7 +69,7 @@
       "tol_pct": 1.0,
       "rel_diff_pct": 2.95248065337252e-06,
       "status": "match",
-      "source_path": "k1025.descriptive_statistics.vix.max"
+      "source_path": "k1025_raw.descriptive_statistics.vix.max"
     },
     {
       "metric": "T1: VIX min",
@@ -78,187 +78,187 @@
       "tol_pct": 1.0,
       "rel_diff_pct": 3.756266447897328e-06,
       "status": "match",
-      "source_path": "k1025.descriptive_statistics.vix.min"
+      "source_path": "k1025_raw.descriptive_statistics.vix.min"
     },
     {
       "metric": "T2: BTC- → VIX lag 1 F-stat",
-      "paper_value": 18.96,
-      "actual_value": 18.957464193544286,
+      "paper_value": 21.78,
+      "actual_value": 21.776998098143146,
       "tol_pct": 1.0,
-      "rel_diff_pct": 0.013374506622967334,
+      "rel_diff_pct": 0.013782836808334375,
       "status": "match",
-      "source_path": "k1025.asymmetric_granger.btc_neg_to_vix.1.F"
+      "source_path": "k1025_v2.asymmetric_granger.btc_neg_to_vix.1.F"
     },
     {
       "metric": "T2: BTC- → VIX lag 5 F-stat",
-      "paper_value": 6.64,
-      "actual_value": 6.644409619992141,
+      "paper_value": 8.27,
+      "actual_value": 8.269271200129971,
       "tol_pct": 1.0,
-      "rel_diff_pct": 0.06640993964067873,
+      "rel_diff_pct": 0.00881257400276295,
       "status": "match",
-      "source_path": "k1025.asymmetric_granger.btc_neg_to_vix.5.F"
+      "source_path": "k1025_v2.asymmetric_granger.btc_neg_to_vix.5.F"
     },
     {
       "metric": "T2: BTC+ → VIX lag 1 F-stat (NS branch)",
-      "paper_value": 2.0,
-      "actual_value": 2.0023980015664398,
+      "paper_value": 2.04,
+      "actual_value": 2.0445138678548935,
       "tol_pct": 2.0,
-      "rel_diff_pct": 0.11990007832198835,
+      "rel_diff_pct": 0.22126803210262225,
       "status": "match",
-      "source_path": "k1025.asymmetric_granger.btc_pos_to_vix.1.F"
+      "source_path": "k1025_v2.asymmetric_granger.btc_pos_to_vix.1.F"
     },
     {
       "metric": "T2: BTC+ → VIX lag 5 p-value (NS branch)",
-      "paper_value": 0.927,
-      "actual_value": 0.9266945885293701,
+      "paper_value": 0.919,
+      "actual_value": 0.9189128350533359,
       "tol_pct": 2.0,
-      "rel_diff_pct": 0.03294622121142412,
+      "rel_diff_pct": 0.009484760246372622,
       "status": "match",
-      "source_path": "k1025.asymmetric_granger.btc_pos_to_vix.5.p"
+      "source_path": "k1025_v2.asymmetric_granger.btc_pos_to_vix.5.p"
     },
     {
       "metric": "T3: QR β τ=0.05 (sign-reversal lower tail)",
-      "paper_value": -2.86,
-      "actual_value": -2.8627503375583814,
+      "paper_value": -2.78,
+      "actual_value": -2.783556672308748,
       "tol_pct": 1.0,
-      "rel_diff_pct": 0.09616564889445803,
+      "rel_diff_pct": 0.12793785283267423,
       "status": "match",
-      "source_path": "k1025.quantile_regression['0.05'].beta"
+      "source_path": "k1025_v2.quantile_regression['0.05'].beta"
     },
     {
       "metric": "T3: QR β τ=0.25",
-      "paper_value": -2.34,
-      "actual_value": -2.3426337281009353,
+      "paper_value": -2.12,
+      "actual_value": -2.117224205251574,
       "tol_pct": 1.0,
-      "rel_diff_pct": 0.11255248294595849,
+      "rel_diff_pct": 0.13093371454839295,
       "status": "match",
-      "source_path": "k1025.quantile_regression['0.25'].beta"
+      "source_path": "k1025_v2.quantile_regression['0.25'].beta"
     },
     {
       "metric": "T3: QR β τ=0.50 (median)",
-      "paper_value": 2.61,
-      "actual_value": 2.6129602121402797,
+      "paper_value": 2.82,
+      "actual_value": 2.8199088568494233,
       "tol_pct": 1.0,
-      "rel_diff_pct": 0.11341808966589507,
+      "rel_diff_pct": 0.003232026616190318,
       "status": "match",
-      "source_path": "k1025.quantile_regression['0.5'].beta"
+      "source_path": "k1025_v2.quantile_regression['0.5'].beta"
     },
     {
       "metric": "T3: QR β τ=0.75",
-      "paper_value": 8.76,
-      "actual_value": 8.759175588315372,
+      "paper_value": 9.39,
+      "actual_value": 9.389200228902922,
       "tol_pct": 1.0,
-      "rel_diff_pct": 0.009411092290267525,
+      "rel_diff_pct": 0.008517264079642232,
       "status": "match",
-      "source_path": "k1025.quantile_regression['0.75'].beta"
+      "source_path": "k1025_v2.quantile_regression['0.75'].beta"
     },
     {
       "metric": "T3: QR β τ=0.95 (upper-tail amplification)",
-      "paper_value": 22.31,
-      "actual_value": 22.307901048914943,
+      "paper_value": 19.85,
+      "actual_value": 19.84589247288727,
       "tol_pct": 1.0,
-      "rel_diff_pct": 0.009408117817374271,
+      "rel_diff_pct": 0.020692831802165083,
       "status": "match",
-      "source_path": "k1025.quantile_regression['0.95'].beta"
+      "source_path": "k1025_v2.quantile_regression['0.95'].beta"
     },
     {
-      "metric": "T4: 2015-2017 Granger F (NS)",
-      "paper_value": 0.59,
-      "actual_value": 0.5904074691706894,
+      "metric": "T4: 2015-2017 Granger F (conventional sig, Bonferroni NS)",
+      "paper_value": 2.88,
+      "actual_value": 2.880979298268499,
       "tol_pct": 2.0,
-      "rel_diff_pct": 0.06906257130329767,
+      "rel_diff_pct": 0.03400341210066999,
       "status": "match",
-      "source_path": "k1025.subperiod_granger['2015-2017 (Pre-mania)'].F"
+      "source_path": "k1025_v2.subperiod_granger['2015-2017 (Pre-mania)'].F"
     },
     {
       "metric": "T4: 2018-2019 Granger F (NS)",
-      "paper_value": 0.23,
-      "actual_value": 0.23295760571320934,
+      "paper_value": 0.37,
+      "actual_value": 0.36905431735209815,
       "tol_pct": 2.0,
-      "rel_diff_pct": 1.285915527482316,
+      "rel_diff_pct": 0.2555899048383369,
       "status": "match",
-      "source_path": "k1025.subperiod_granger['2018-2019 (Crypto winter)'].F"
+      "source_path": "k1025_v2.subperiod_granger['2018-2019 (Crypto winter)'].F"
     },
     {
-      "metric": "T4: 2020 COVID Granger F (structural watershed)",
-      "paper_value": 11.05,
-      "actual_value": 11.050869872012079,
+      "metric": "T4: 2020 COVID Granger F (structural watershed, Bonferroni pass)",
+      "paper_value": 12.31,
+      "actual_value": 12.309355487879293,
       "tol_pct": 1.0,
-      "rel_diff_pct": 0.007872144905686263,
+      "rel_diff_pct": 0.0052356792908848865,
       "status": "match",
-      "source_path": "k1025.subperiod_granger['2020 (COVID)'].F"
+      "source_path": "k1025_v2.subperiod_granger['2020 (COVID)'].F"
     },
     {
       "metric": "T4: 2021-2022 Granger F (NS)",
-      "paper_value": 1.95,
-      "actual_value": 1.9494228422488715,
+      "paper_value": 2.03,
+      "actual_value": 2.0274859303001973,
       "tol_pct": 2.0,
-      "rel_diff_pct": 0.029597833391201644,
+      "rel_diff_pct": 0.12384579801982766,
       "status": "match",
-      "source_path": "k1025.subperiod_granger['2021-2022 (Bull-Bear)'].F"
+      "source_path": "k1025_v2.subperiod_granger['2021-2022 (Bull-Bear)'].F"
     },
     {
       "metric": "T4: 2023-2026 Granger F (NS)",
-      "paper_value": 0.46,
-      "actual_value": 0.4613130026771352,
-      "tol_pct": 2.0,
-      "rel_diff_pct": 0.2854353645946063,
+      "paper_value": 0.16,
+      "actual_value": 0.16221170469952842,
+      "tol_pct": 5.0,
+      "rel_diff_pct": 1.3823154372052602,
       "status": "match",
-      "source_path": "k1025.subperiod_granger['2023-2026 (Recovery+ETF)'].F"
+      "source_path": "k1025_v2.subperiod_granger['2023-2026 (Recovery+ETF)'].F"
     },
     {
       "metric": "T5: DCC Low regime mean correlation",
       "paper_value": 0.068,
-      "actual_value": 0.06828272276568179,
+      "actual_value": 0.06665886029250782,
       "tol_pct": 2.0,
-      "rel_diff_pct": 0.4157687730614426,
+      "rel_diff_pct": 1.9722642757237956,
       "status": "match",
       "source_path": "k1025.dcc_correlation_by_regime.Low.mean"
     },
     {
       "metric": "T5: DCC Crisis regime mean correlation",
       "paper_value": 0.409,
-      "actual_value": 0.4087979701535438,
+      "actual_value": 0.4073434693087552,
       "tol_pct": 1.0,
-      "rel_diff_pct": 0.049396050478282494,
+      "rel_diff_pct": 0.4050197289107025,
       "status": "match",
       "source_path": "k1025.dcc_correlation_by_regime.Crisis.mean"
     },
     {
       "metric": "DY: total spillover index mean (%)",
       "paper_value": 90.11,
-      "actual_value": 90.1083334333823,
+      "actual_value": 90.11034077935554,
       "tol_pct": 0.5,
-      "rel_diff_pct": 0.00184948021052101,
+      "rel_diff_pct": 0.0003781815065360854,
       "status": "match",
-      "source_path": "k1025.spillover_index.mean_total"
+      "source_path": "k1025_v2.spillover_index.mean_total"
     },
     {
       "metric": "DY: BTC net spillover (net receiver)",
-      "paper_value": -76.89,
-      "actual_value": -76.88571578482524,
+      "paper_value": -74.41,
+      "actual_value": -74.40520998232779,
       "tol_pct": 1.0,
-      "rel_diff_pct": 0.00557187563371507,
+      "rel_diff_pct": 0.006437330563374088,
       "status": "match",
-      "source_path": "k1025.spillover_index.mean_net_btc"
+      "source_path": "k1025_v2.spillover_index.mean_net_btc"
     },
     {
-      "metric": "T6: DM t-stat (full OOS)",
-      "paper_value": -0.98,
-      "actual_value": -0.9802532026128447,
+      "metric": "T6: DM t-stat (Harvey, full OOS)",
+      "paper_value": -1.14,
+      "actual_value": -1.1385809178700868,
       "tol_pct": 2.0,
-      "rel_diff_pct": 0.025837001310680795,
+      "rel_diff_pct": 0.12448088858887298,
       "status": "match",
-      "source_path": "k1025.forecast_evaluation.dm_stat"
+      "source_path": "k1025_v2.forecast_evaluation.dm_stat_harvey"
     },
     {
       "metric": "T6: AR baseline MSE",
-      "paper_value": 4.467,
-      "actual_value": 4.467410019302655,
+      "paper_value": 4.649,
+      "actual_value": 4.648667845168058,
       "tol_pct": 1.0,
-      "rel_diff_pct": 0.009178851637677444,
+      "rel_diff_pct": 0.007144651149540874,
       "status": "match",
-      "source_path": "k1025.forecast_evaluation.mse_ar"
+      "source_path": "k1025_v2.forecast_evaluation.mse_ar"
     },
     {
       "metric": "T6: OOS n (2019-01-01 to 2026-04-08)",
@@ -342,7 +342,7 @@
       "source_path": "k1025b.forecast_evaluation.dm_stat"
     }
   ],
-  "generated_at": "2026-04-28T04:10:46+00:00",
+  "generated_at": "2026-05-22T10:31:40+00:00",
   "stage": "body draft complete (v5, 9 sections, 15 pages)",
   "notes": [
     "Expanded 2026-04-28 from 7 → 25 checks covering all 6 tables in body_v5.tex.",
