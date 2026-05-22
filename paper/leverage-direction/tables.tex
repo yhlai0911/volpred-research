@@ -3,7 +3,7 @@
 
 \begin{table}[H]
 \centering
-\caption{Descriptive Statistics of Daily Returns (2017--2025)}
+\caption{Descriptive Statistics of Daily Returns (In-Sample Period: 2017--2025)}
 \label{tab:desc}
 \begin{tabular}{lrrrrrrr}
 \toprule
@@ -109,7 +109,7 @@ GJR-GARCH  & Student-$t$(5) & 6  & 1.20\% & 0.67 & Green & PASS \\
 \small
 \begin{tabular}{lccccccc|r}
 \toprule
-Method & SPY & QQQ & GLD & TLT & EEM & BTC & IWM & Pass Rate \\
+Method & SPY & QQQ & GLD & TLT & EEM & BTC & IWM & Pass Rate$^{\dagger}$ \\
 \midrule
 Skewed-$t$   & \cmark & \cmark & \xmark & \cmark & \cmark & \xmark & \cmark & 90.5\% (19/21) \\
 FHS          & \cmark & \cmark & \cmark & \xmark & \cmark & \cmark & \cmark & 76.2\% (16/21) \\
@@ -122,7 +122,7 @@ Normal       & \cmark & \xmark & \xmark & \xmark & \cmark & \cmark & \cmark & 57
 \vspace{4pt}
 \raggedright\footnotesize
 \textit{Notes:} Each cell summarizes 3 $\alpha$ levels (1\%, 2.5\%, 5\%) $\times$ 3 tests (Kupiec, Christoffersen, DQ) = 9 sub-tests. \cmark\ = all 3 $\alpha$ levels pass the Trinity criterion (3/3 joint tests); \xmark\ = at least one $\alpha$ level fails. Total cells: 7 assets $\times$ 3 $\alpha$ $\times$ 5 methods = 105.
-\textit{Errata:} Three pass rates and asset-level indicators were updated from initial reported values: Student-$t$(5) $57.1\% \to 76.2\%$ (12/21$\to$16/21); Skewed-$t$ $76.2\% \to 90.5\%$ (16/21$\to$19/21); CF-VaR $66.7\% \to 76.2\%$ (14/21$\to$16/21). Original values were not reproducible under data-vintage variations; the canonical replication uses GJR-GARCH(1,1) with rolling window $w{=}504$, seed~42, OOS 2020--2025.
+$^{\dagger}$Three pass rates and asset-level indicators were updated from initial reported values: Student-$t$(5) $57.1\% \to 76.2\%$ (12/21$\to$16/21); Skewed-$t$ $76.2\% \to 90.5\%$ (16/21$\to$19/21); CF-VaR $66.7\% \to 76.2\%$ (14/21$\to$16/21). Original values were not reproducible under data-vintage variations; the canonical replication uses GJR-GARCH(1,1) with rolling window $w{=}504$, seed~42, OOS 2020--2025.
 \end{table}
 
 
@@ -201,7 +201,7 @@ EWG (3 stocks) & 0.114 & 0.131 & 0.9$\times$ & --- \\
 \vspace{4pt}
 \raggedright\footnotesize
 \textit{Notes:} $t$-stat tests $H_0{:}\,\hat{\gamma}_{\text{ETF}}=\bar{\hat{\gamma}}_{\text{stock}}$ (Welch). ***$p<0.001$.
-\textit{Errata:} $^{\dagger}$Constituent $\bar{\hat{\gamma}}$ for SPY was originally estimated from N=50 index members (not individually verifiable via public API). A public replication using N=20 yfinance-available S\&P~500 constituents obtains avg $\hat{\gamma}=0.094$; the updated $t$-statistic ($-10.53$) is reported. Amplification direction ($\hat{\gamma}_{\text{ETF}}>\hat{\gamma}_{\text{stock}}$, $p<0.001$) is preserved under both N=50 and N=20.
+$^{\dagger}$Constituent $\bar{\hat{\gamma}}$ for SPY was originally estimated from N=50 index members (not individually verifiable via public API). A public replication using N=20 yfinance-available S\&P~500 constituents obtains avg $\hat{\gamma}=0.094$; the updated $t$-statistic ($-10.53$) is reported. Amplification direction ($\hat{\gamma}_{\text{ETF}}>\hat{\gamma}_{\text{stock}}$, $p<0.001$) is preserved under both N=50 and N=20.
 \end{table}
 
 
