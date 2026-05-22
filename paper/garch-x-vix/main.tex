@@ -477,12 +477,14 @@ Measure & Spearman $\rho$ & $p$-value \\
 $g_t$ (A3f: $\tau_{t-1}$, free $\omega$) & 0.819 & $< 0.001$ \\
 $g_t$ (A2n: log-exp, normalized) & 0.801 & $< 0.001$ \\
 $g_t$ (A4n: VIX$^2$, normalized) & 0.778 & $< 0.001$ \\
+$g_t$ (A4f: VIX$^2$, free $\omega$, \textit{recommended}) & $-0.017$ & 0.479 \\
 Raw $r_t^2 / \mathrm{VIX}_{t-1}^2$ & 0.151 & $< 0.001$ \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
 \footnotesize
 \item VRP proxy: $\mathrm{VIX}_{t-1}^2/252 - r_t^2$. OOS period: 2019--2026, $n = 1{,}824$. Spearman $\rho$ used for robustness to outliers.
+\item A4f's near-zero $\rho = -0.017$ ($p = 0.479$) reflects that free $\omega_g$ absorbs the average VRP level (so $\E[g_t] = 0.48$ rather than 1), leaving $g_t$ to capture residual GARCH dynamics approximately orthogonal to VRP. The high correlations for A3f/A2n/A4n arise because their $\tau_t$ specifications absorb less VRP signal, leaving a larger systematic component in $g_t$.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -870,7 +872,7 @@ Under the constrained model ($\omega_g = 1 - \alpha - \gamma/2 - \beta$), $\E[g_
 This identity is exact, not an approximation. The simpler $\E[\sigma_t^2] \approx \E[\tau_t]$ holds only when $\mathrm{Cov}(\tau_t, g_t) \approx 0$. Empirically, $\mathrm{Corr}(\tau_t, g_t) \approx 0.49$, reflecting the crisis channel: high VIX $\to$ high $\tau_t$ $\to$ large standardized shocks $\to$ higher $g_t$.
 
 \begin{proposition}[VRP Auto-Correction]
-When $\tau_t = \theta_0 + \theta_1 \mathrm{VIX}_{t-1}^2$, the MLE of $\theta_1$ endogenously corrects for the variance risk premium. Specifically, the ratio $\theta_1 / [1/(252 \times 10{,}000)]$ measures the discount on implied variance relative to the ``no-VRP'' benchmark.
+Under the constrained model ($\E[g_t]=1$, with $\omega_g = 1-\alpha-\gamma/2-\beta$), when $\tau_t = \theta_0 + \theta_1 \mathrm{VIX}_{t-1}^2$, the MLE of $\theta_1$ endogenously corrects for the variance risk premium. Specifically, the ratio $\theta_1 / [1/(252 \times 10{,}000)]$ measures the discount on implied variance relative to the ``no-VRP'' benchmark. In the free-omega model (A4f), VRP correction is distributed across two channels---$\theta_1$ scaling and $\E[g_t]$ level---so $\theta_1$ alone no longer identifies the full VRP discount; see the empirical discussion below.
 \end{proposition}
 
 Empirically, the constrained model yields $\theta_1$-ratio $= 0.78$, implying a 21.9\% discount---directly measuring the average VRP fraction. In the free-omega model, VRP correction splits between two channels: $\theta_1$-ratio $= 1.96$ (overshoot) and $\E[g_t] = 0.48$ (level correction), with effective ratio $= 0.94$. This demonstrates that VRP correction is a real economic phenomenon captured by the multiplicative structure.
@@ -881,7 +883,7 @@ The dynamic factor $g_t$ reflects time-varying departures of realized variance f
 
 By construction, $g_t$ from the model recursion is approximately orthogonal to VRP ($\rho \approx 0.06$), because $\tau_t$ already absorbs the VRP signal. The high correlation reported in Section~\ref{sec:vrp} ($\rho \approx 0.80$) uses the g-proxy method of comparing model variance to raw implied variance without VRP correction, where the GARCH dynamics amplify the systematic VRP component relative to the raw ratio ($\rho = 0.15$).
 
-These results distinguish source decomposition from mere relabeling: (i)~$\theta_1$ provides parametric identification of VRP magnitude, (ii)~the $\E[g_t]=1$ constraint pins the scale, making $\tau_t$ the sole determinant of unconditional variance, and (iii)~the forecasting gain (DM $t = 4.03$ vs.\ GJR) demonstrates that the decomposition captures information not available to standard models.
+These results distinguish source decomposition from mere relabeling: (i)~$\theta_1$ provides parametric identification of VRP magnitude (in the constrained model) or distributes VRP correction across two channels (in A4f); (ii)~the multiplicative structure provides structural scale separation---$\tau_t$ captures exogenous option-market fear while $g_t$ captures endogenous GARCH dynamics, with this decomposition interpretable whether $\E[g_t]=1$ (constrained) or $\E[g_t]=0.48$ (A4f); and (iii)~the forecasting gain (DM $t = 4.03$ vs.\ GJR) demonstrates that the decomposition captures information not available to standard models.
 
 
 %=================================================================
