@@ -223,7 +223,7 @@ GJR $\gamma$ vs.\ $\Delta\alpha$ & 0.291 & 0.189 & --- & --- \\
 \multicolumn{5}{@{}l}{\textit{Panel B: Split-Sample Estimation (addresses endogeneity)}} \\
 \multicolumn{5}{@{}l}{$\gamma$ from 2007--2016; $\beta_{\text{TSMOM}}^{\perp}$ from 2017--2026} \\
 GJR $\gamma$ vs.\ $\beta_{\text{TSMOM}}^{\perp}$ & 0.793 & $< 0.001$ & 0.749 & $< 0.001$ \\
-\multicolumn{5}{@{}l}{Bootstrap 95\% CI for Pearson $r$: $[0.114, 0.737]$} \\
+\multicolumn{5}{@{}l}{Bootstrap 90\% CI for Pearson $r$: $[0.589, 0.919]$} \\
 \midrule
 \multicolumn{5}{@{}l}{\textit{Cross-sectional regression (full sample): $\beta_{\text{TSMOM},i}^{\perp} = \gamma_0 + \gamma_1 \cdot \text{GJR}_{\gamma,i} + \varepsilon_i$}} \\
 \multicolumn{5}{@{}l}{$\hat{\gamma}_0 = 0.001$ ($t = 0.03$), $\hat{\gamma}_1 = 0.568$ ($t = 3.06$), $R^2 = 0.319$} \\
@@ -317,15 +317,15 @@ The standalone TSMOM strategy provides further insight. Pure TSMOM achieves a Sh
 Strategy & Sharpe & MDD (\%) & Calmar & Sharpe & MDD (\%) & Calmar \\
 \midrule
 Buy \& Hold         & 0.611 & $-$55.2 & 0.214 & 0.865 & $-$32.5 & 0.364 \\
-12/VIX VT           & 0.797 & $-$24.7 & 0.301 & 0.982 & $-$12.4 & 0.624 \\
-TSMOM-Hedged VT     & 0.737 & $-$26.9 & 0.264 & 0.937 & $-$13.1 & 0.501 \\
+12/VIX VT           & 0.797 & $-$26.3 & 0.283 & 0.982 & $-$12.4 & 0.624 \\
+TSMOM-Hedged VT     & 0.737 & $-$25.3 & 0.281 & 0.937 & $-$13.1 & 0.501 \\
 Pure TSMOM          & 0.172 & $-$27.5 & 0.092 & 0.232 & $-$31.8 & 0.075 \\
 \midrule
 \multicolumn{7}{@{}l}{\textit{Decomposition}} \\
 $\Delta$Sharpe (VT $-$ B\&H) & \multicolumn{3}{c}{+0.186} & \multicolumn{3}{c}{+0.117} \\
 $\Delta$Sharpe lost to TSMOM & \multicolumn{3}{c}{$-$0.060 (32\%)} & \multicolumn{3}{c}{$-$0.046 (39\%)} \\
-MDD protection (VT) & \multicolumn{3}{c}{30.5 pp} & \multicolumn{3}{c}{20.1 pp} \\
-MDD protection retained & \multicolumn{3}{c}{28.3 pp (93\%)} & \multicolumn{3}{c}{19.4 pp (96\%)} \\
+MDD protection (VT) & \multicolumn{3}{c}{28.9 pp} & \multicolumn{3}{c}{20.1 pp} \\
+MDD protection retained & \multicolumn{3}{c}{29.9 pp (103.7\%)} & \multicolumn{3}{c}{19.4 pp (96\%)} \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
@@ -439,12 +439,12 @@ INDA (India)  & $-$0.466 & 0.157 & $-$45.1 & 0.098 & $-$26.4 & $-$0.059 & 18.7 \
 EWT (Taiwan)  & $-$0.569 & 0.311 & $-$62.9 & 0.262 & $-$32.9 & $-$0.049 & 30.1 \\
 MCHI (China Broad) & $-$0.468 & 0.077 & $-$62.8 & 0.083 & $-$39.9 & 0.006 & 23.0 \\
 \midrule
-\multicolumn{2}{@{}l}{Average} & 0.148 & $-$63.1 & 0.100 & $-$34.4 & $-$0.048 & 28.7 \\
-\multicolumn{2}{@{}l}{$t$-statistic} & --- & --- & --- & --- & $-$5.91 & 15.70 \\
+\multicolumn{2}{@{}l}{Average} & 0.148 & $-$63.1 & 0.100 & $-$34.4 & $-$0.048 & 24.9 \\
+\multicolumn{2}{@{}l}{$t$-statistic} & --- & --- & --- & --- & $-$5.91 & 10.25 \\
 \multicolumn{2}{@{}l}{$p$ (one-sided)} & --- & --- & --- & --- & 0.000 & 0.000 \\
 \midrule
 \multicolumn{8}{@{}l}{\textit{Cross-sectional predictors of $\Delta$MDD}} \\
-\multicolumn{3}{@{}l}{VIX Sensitivity vs.\ $\Delta$MDD:} & \multicolumn{5}{l}{$r = -0.770$ ($p = 0.002$), $\rho = -0.720$ ($p = 0.006$)} \\
+\multicolumn{3}{@{}l}{VIX Sensitivity vs.\ $\Delta$MDD:} & \multicolumn{5}{l}{$r = -0.806$ ($p < 0.001$), $\rho = -0.835$ ($p < 0.001$)} \\
 \multicolumn{3}{@{}l}{GJR $\gamma$ vs.\ $\Delta$Sharpe:} & \multicolumn{5}{l}{\emph{Removed in v3:} K1178 replication did not reproduce the originally reported Spearman $\rho = 0.830$ (K1178 canonical: $\rho = 0.187$, NS); see forensic note in Section~\ref{sec:discussion}.} \\
 \bottomrule
 \end{tabular}
@@ -455,12 +455,12 @@ MCHI (China Broad) & $-$0.468 & 0.077 & $-$62.8 & 0.083 & $-$39.9 & 0.006 & 23.0
 \end{threeparttable}
 \end{table}
 
-Figure~\ref{fig:cross_asset} presents the cross-sectional relationship between Sharpe ratio change and MDD improvement. Nearly all 13 markets fall in the ``insurance quadrant'' (negative $\Delta$Sharpe, positive $\Delta$MDD), confirming that VT functions as drawdown insurance rather than alpha generation. The developed markets (blue circles) cluster at higher MDD improvement values (average 32.0~pp) than emerging markets (red squares, average 24.7~pp), reflecting tighter synchronization with US equity conditions. Brazil (EWZ) is a notable outlier with the smallest MDD improvement (13.2~pp), consistent with its idiosyncratic risk sources that are less responsive to the US VIX signal. The cross-sectional correlation between VIX sensitivity and MDD protection ($r = -0.770$, $p = 0.002$) provides a pricing mechanism for VT insurance.
+Figure~\ref{fig:cross_asset} presents the cross-sectional relationship between Sharpe ratio change and MDD improvement. Nearly all 13 markets fall in the ``insurance quadrant'' (negative $\Delta$Sharpe, positive $\Delta$MDD), confirming that VT functions as drawdown insurance rather than alpha generation. The developed markets (blue circles) cluster at higher MDD improvement values (average 32.0~pp) than emerging markets (red squares, average 24.7~pp), reflecting tighter synchronization with US equity conditions. Brazil (EWZ) is a notable outlier with the smallest MDD improvement (13.2~pp), consistent with its idiosyncratic risk sources that are less responsive to the US VIX signal. The cross-sectional correlation between VIX sensitivity and MDD protection ($r = -0.806$, $p < 0.001$) provides a pricing mechanism for VT insurance.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.85\textwidth]{figures/fig2_cross_asset_scatter.pdf}
-\caption{Cross-Asset VT: Sharpe Ratio Change vs.\ MDD Improvement for 13 International Markets. Each point represents a country ETF. The $x$-axis shows the change in Sharpe ratio from applying 12/VIX VT relative to buy-and-hold; the $y$-axis shows the improvement in maximum drawdown (percentage points). Blue circles denote developed markets ($N = 7$); red squares denote emerging markets ($N = 6$). Dotted lines indicate cross-sectional averages ($\Delta$Sharpe $= -0.048$; $\Delta$MDD $= 28.7$~pp). All 13 markets achieve MDD improvement ($t = 15.70$), while only 2 of 13 show Sharpe improvement, consistent with the insurance pricing interpretation. Data from Table~\ref{tab:international}.}
+\caption{Cross-Asset VT: Sharpe Ratio Change vs.\ MDD Improvement for 13 International Markets. Each point represents a country ETF. The $x$-axis shows the change in Sharpe ratio from applying 12/VIX VT relative to buy-and-hold; the $y$-axis shows the improvement in maximum drawdown (percentage points). Blue circles denote developed markets ($N = 7$); red squares denote emerging markets ($N = 6$). Dotted lines indicate cross-sectional averages ($\Delta$Sharpe $= -0.048$; $\Delta$MDD $= 24.9$~pp). All 13 markets achieve MDD improvement ($t = 10.25$), while only 2 of 13 show Sharpe improvement, consistent with the insurance pricing interpretation. Data from Table~\ref{tab:international}.}
 \label{fig:cross_asset}
 \end{figure}
 
@@ -514,7 +514,7 @@ A comprehensive search over 427 VT configurations---spanning GARCH, GJR-GARCH, E
 
 Our international results strengthen the ``insurance pricing'' interpretation of VT \citep{lai2026a}. Across 13 markets, VT extracts a consistent ${\sim}4\%$/year Sharpe drag (the ``premium'') in exchange for broad MDD protection (the ``payout''). This is analogous to buying portfolio insurance: the premium is paid continuously through reduced expected returns, while the payout materializes during crisis episodes. The breadth of this finding---13 of 13 markets across both developed and emerging economies---is consistent with the global financial cycle framework of \citet{miranda2020}, in which US monetary conditions and risk appetite propagate internationally through capital flows.
 
-The cross-sectional correlation between VIX sensitivity and MDD protection ($r = -0.770$) provides a pricing mechanism. Markets more sensitive to US-driven risk-off episodes (higher $|\rho(\text{VIX})|$) receive more protection, just as higher-beta assets benefit more from portfolio insurance. The insurance analogy can be made precise: the breakeven VIX level---above which VT's cash drag is more than offset by crisis-period savings---is approximately 26.6 for SPY. Below this threshold, VT underperforms buy-and-hold (the ``premium'' regime); above it, VT outperforms (the ``payout'' regime). In the low-VIX regime (VIX $< 15$), VT costs roughly 4.0\%/year in foregone Sharpe, while in the crisis regime (VIX $> 30$), it delivers approximately 12\%/year of excess protection.
+The cross-sectional correlation between VIX sensitivity and MDD protection ($r = -0.806$) provides a pricing mechanism. Markets more sensitive to US-driven risk-off episodes (higher $|\rho(\text{VIX})|$) receive more protection, just as higher-beta assets benefit more from portfolio insurance. The insurance analogy can be made precise: the breakeven VIX level---above which VT's cash drag is more than offset by crisis-period savings---is approximately 26.6 for SPY. Below this threshold, VT underperforms buy-and-hold (the ``premium'' regime); above it, VT outperforms (the ``payout'' regime). In the low-VIX regime (VIX $< 15$), VT costs roughly 4.0\%/year in foregone Sharpe, while in the crisis regime (VIX $> 30$), it delivers approximately 12\%/year of excess protection.
 
 % K507: 50/50 allocation also irreducible --- dynamic allocation fails Harvey
 The two-asset 50/50 SPY/GLD allocation also resists optimization. We test dynamic allocation schemes---regime-switching, DCC-based, and VIX-conditional tilting---against the static 50/50 benchmark. All dynamic alternatives fail the Harvey threshold ($t < 3.0$), consistent with the DCC analysis of \citet{lai2026a} showing that the two-asset blend is already near-optimal. This parsimony is a feature: within the specifications tested, VT's economic value derives from two robust components---the $12/\text{VIX}$ scaling rule and the 50/50 equity/gold allocation---neither of which benefits from the added complexity we examined.
@@ -525,7 +525,7 @@ Several limitations should be noted. First, our sample of 22 assets, while spann
 
 Fifth, the cross-sectional regression linking $\gamma$ to TSMOM loading ($N = 22$) faces an inherent endogeneity concern: both variables are derived from the same underlying return process, creating a mechanical channel that our split-sample robustness check (Section~3.2) mitigates but does not fully resolve. A formal instrumental variable approach would provide stronger causal identification, but suitable instruments are difficult to construct in a mixed-asset cross-section of this size. Future work with a larger cross-section of futures contracts---as in \citet{hood2025}'s 50-asset sample---could employ a more diverse set of instruments or within-asset-class variation to address this limitation.
 
-Sixth, while our MDD retention bootstrap now covers all 22 primary assets (Table~\ref{tab:mdd_bootstrap}, K1376), the international equity universe (13 markets in Table~\ref{tab:intl_vix}) is not yet included in the bootstrap analysis. Extending block bootstrap inference to the international sample would further test whether the 90\% CI lower bounds remain positive outside the US and diversified ETF universe.
+Sixth, while our MDD retention bootstrap now covers all 22 primary assets (Table~\ref{tab:mdd_bootstrap}, K1376), the international equity universe (13 markets in Table~\ref{tab:international}) is not yet included in the bootstrap analysis. Extending block bootstrap inference to the international sample would further test whether the 90\% CI lower bounds remain positive outside the US and diversified ETF universe.
 
 
 % =============================================================================
@@ -535,7 +535,7 @@ Sixth, while our MDD retention bootstrap now covers all 22 primary assets (Table
 
 This paper demonstrates that VIX-based de-risking embeds a mechanical trend-following overlay through the leverage effect, but this is not the whole story. VT possesses a dual mechanism: the Sharpe ratio channel operates partially through implicit asset-specific TSMOM exposure, while the maximum drawdown channel---VT's primary economic value---is largely independent of trend following. Across all 22 primary assets plus the 50/50 composite, K1376 block bootstrap (10,000 replications) finds that 22 of 23 rows have positive CI lower bounds (90\% level), with point estimates at or above 83.8\% and medians above 100\% for 21 of 23 rows. The K1192 canonical five-asset results (SPY 103.7\%, 50/50 95.6\%, DIA 106.2\%, QQQ 109.0\%, IWM 102.2\%) are confirmed and generalized: TSMOM removal preserves or modestly enhances the drawdown channel across asset classes, not just US equities. The leverage effect parameter ($\gamma$) predicts VT's trend-following loading cross-sectionally ($r = 0.564$, $p = 0.006$, $N = 22$), an empirical regularity consistent with the leverage effect mechanism; a split-sample robustness check ($r = 0.793$, $p < 0.001$, K1193 canonical) shows this relationship not only survives but \emph{strengthens} under temporal separation of the estimation windows, driven by a 2017--2026 regime shift in which international and safe-haven loadings flipped positive. We note that this cross-sectional association ($N = 22$, mixed asset classes) does not establish a causal link.
 
-Four practical implications emerge. First, VT investors already hold embedded asset-specific trend-following exposure as a mechanical byproduct of the leverage effect. Second, a single US VIX signal provides broad drawdown protection for global equity allocations (13/13 international equity markets, average 28.7 pp MDD reduction). Third, within-equity diversification (sector rotation) does not require sector-specific VT tuning, as the gamma mechanism operates only at the cross-asset-class level. Fourth, within the specifications tested, the $12/\text{VIX}$ formula and the 50/50 equity/gold allocation are both highly robust: no optimization---dynamic allocation, alternative thresholds, or higher rebalancing frequency---survives the \citet{harvey2016} threshold, confirming that VT's value resides in its parsimonious risk-scaling mechanism rather than in parameter tuning.
+Four practical implications emerge. First, VT investors already hold embedded asset-specific trend-following exposure as a mechanical byproduct of the leverage effect. Second, a single US VIX signal provides broad drawdown protection for global equity allocations (13/13 international equity markets, average 24.9 pp MDD reduction). Third, within-equity diversification (sector rotation) does not require sector-specific VT tuning, as the gamma mechanism operates only at the cross-asset-class level. Fourth, within the specifications tested, the $12/\text{VIX}$ formula and the 50/50 equity/gold allocation are both highly robust: no optimization---dynamic allocation, alternative thresholds, or higher rebalancing frequency---survives the \citet{harvey2016} threshold, confirming that VT's value resides in its parsimonious risk-scaling mechanism rather than in parameter tuning.
 
 Our findings reframe the ``Is VT just trend following?'' debate. VT \textit{contains} trend following, but VT is not \textit{reducible to} trend following. A direct test shows that five canonical trend-following strategies all fail to replicate VT's benefits. Its economic value resides in a VIX-level channel that provides drawdown insurance---a benefit that pure momentum strategies do not replicate.
 

@@ -1,5 +1,15 @@
 [
   {
+    "task_type": "paper_body",
+    "paper_id": "leverage-direction",
+    "version": "v9",
+    "started_at": "2026-05-23T06:07:00",
+    "completed_at": "2026-05-23T06:33:55",
+    "status": "completed",
+    "summary": "leverage-direction v9: fixed 9 orphan labels, CRRA expansion, abstract IS/OOS date, abstract significance criterion. Compiled clean (66 pages, 0 errors). Paper-update synced. Committed e7d76dbb.",
+    "commit": "e7d76dbb"
+  },
+  {
     "id": "a3f91c04",
     "timestamp": "2026-05-21T05:30Z",
     "task_type": "paper_review",
@@ -8178,5 +8188,19 @@
     "word_count_zh": 2846,
     "charts": 2,
     "notes": "EVT-GPD vs Normal vs Student-t VaR comparison; 12/12 Kupiec pass; DQ tied 3/12 with Student-t; 6 assets OOS 2023-2024"
+  },
+  {
+    "timestamp": "2026-05-23T07:37:41+08:00",
+    "task_type": "paper_review",
+    "task_id": "paper_review_vt_trend_v3_h1h4",
+    "paper_id": "vt-trend-following",
+    "title": "Paper 3 body_v3 HIGH fixes H1-H4 (Table 3 MDD / Table 2B CI / Table 5 intl / broken ref)",
+    "result": "COMPLETED",
+    "summary": "Ran citation-verifier + latex-academic-reviewer on body_v3.tex (first v3 review; R1-R4 all on body_v2). Found 3 HIGH table/text contradictions from partial-update error + 1 broken ref. Fixed H4 (ref tab:intl_vix→tab:international), H2 (split-sample CI 95%[0.114,0.737]→90%[0.589,0.919] K1193), H3 (Table 5 avg 28.7→24.9 pp, t=15.70→10.25, r=-0.770→-0.806, ρ=-0.720→-0.835 K1178; Figure 2 caption + Discussion + Conclusion), H1 (Table 3 SPY VT MDD -24.7→-26.3, Hedged -26.9→-25.3, 30.5→28.9 pp, 28.3(93%)→29.9(103.7%) K1192). XeLaTeX 0 errors 2 passes. HIGH=0 restored.",
+    "source_jsons": [
+      "K1178",
+      "K1192",
+      "K1193"
+    ]
   }
 ]
