@@ -9842,7 +9842,7 @@
     "description": "Per Paper 9 v3 review C1 CRITICAL: 跑 A4f vs benchmark leave-COVID-out DM test，排除 2020-03 to 2021-06。若仍 PASS = 主張得到支持，否則 SERIOUS FLAW confirmed。Output: table for paper body.",
     "task_type": "experiment",
     "priority": 3,
-    "status": "dispatched",
+    "status": "pending_main_thread",
     "blocked_reason": null,
     "tags": [
       "paper9",
@@ -9852,7 +9852,9 @@
     ],
     "created_at": "2026-05-19T04:19:29.423384+00:00",
     "dispatched_at": "2026-05-19T05:24:52.722691Z",
-    "compute_queue_id": "k1378-covid-dm"
+    "compute_queue_id": "k1378-covid-dm",
+    "compute_done": true,
+    "compute_done_note": "K1392 (leave-COVID-out) + K1396 (HAR benchmark) complete 2026-05-23"
   },
   {
     "id": "K_NEW_B_paper9_har_benchmark",
@@ -9860,7 +9862,7 @@
     "description": "Per Paper 9 v3 review C4 HIGH: Table 2 無任何 HAR 基準，需加 HAR-RV, HAR-RV-J, HAR-RV-VIX + DM test vs A4f。使用 realized variance 代理。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "dispatched",
+    "status": "pending_main_thread",
     "blocked_reason": null,
     "tags": [
       "paper9",
@@ -9870,7 +9872,9 @@
     ],
     "created_at": "2026-05-19T04:19:29.423717+00:00",
     "dispatched_at": "2026-05-19T05:24:52.722691Z",
-    "compute_queue_id": "k1379-har-benchmark"
+    "compute_queue_id": "k1379-har-benchmark",
+    "compute_done": true,
+    "compute_done_note": "K1392 (leave-COVID-out) + K1396 (HAR benchmark) complete 2026-05-23"
   },
   {
     "id": "K_NEW_C_paper9_spec_genealogy",
