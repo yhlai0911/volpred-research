@@ -716,6 +716,33 @@ The sub-period results show that A4f improves QLIKE in all three sub-periods, bu
 
 To address the concern that A4f's advantage may be driven by a single extreme episode (e.g., the COVID-19 crash), we conduct an extended sub-period analysis using seven non-overlapping two-year windows spanning 2013--2026. A4f achieves lower QLIKE than GJR-GARCH in all seven periods (7/7), with improvements ranging from 4.81\% to 8.09\% (mean 6.52\%). The COVID period (2019--2020) shows the largest improvement (8.09\%), but removing it leaves the remaining six periods with improvements of 4.8--6.8\%---confirming that the model's advantage is not COVID-dependent. Of the seven individual periods, three pass the Harvey $|t| > 3.0$ threshold and five pass $|t| > 2.0$; the pooled full-period DM statistic is $t = 6.535$, far exceeding conventional thresholds. These results demonstrate that A4f's superiority is robust across low-volatility environments (2017--2018), crisis periods (2019--2020, 2025--2026), and recovery phases (2021--2022, 2023--2024).
 
+A complementary leave-COVID-out test provides a more stringent robustness check. Rather than splitting the OOS window into two-year periods, we remove the 104 trading days spanning 2020-02-01 to 2020-06-30 from the full OOS window and re-estimate the DM test on the remaining $n = 1{,}721$ observations. Table~\ref{tab:covid_robust} reports the results. The non-COVID DM statistic ($t = 4.26$) \emph{exceeds} the primary full-OOS result (Table~\ref{tab:main_results}: $t = 4.03$), comfortably surpassing the Harvey $|t| > 3.0$ threshold---the opposite of what would be expected if the COVID-era volatility spike were the primary driver. Post-COVID observations (2021--2026, $n=1{,}448$) independently confirm Harvey significance ($t = 3.76$). Within the COVID window itself ($n = 104$), the DM statistic drops to $t = 1.48$, not because A4f underperforms---the mean QLIKE improvement during this window is approximately $2.5\times$ larger than outside it---but because 104 observations are insufficient for the HAC-corrected DM test to reach conventional significance. These results confirm that A4f's advantage is a persistent normal-market phenomenon, not an artifact of a single extreme episode.
+
+\begin{table}[H]
+\centering
+\caption{Leave-COVID-out robustness: DM tests for A4f vs.\ GJR-GARCH by OOS sub-sample}
+\label{tab:covid_robust}
+\begin{threeparttable}
+\small
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Sub-sample (OOS: 2019-01-01--2026-04-07) & $n$ & DM $t$ & Harvey sig.\ ($|t|>3.0$) & Interpretation \\
+\midrule
+\textbf{Non-COVID} (excl.\ 2020-02-01--2020-06-30) & \textbf{1,721} & \textbf{4.26} & \textbf{Yes} & Advantage strengthens \\
+Pre-COVID (2019) & 273 & 2.52 & No$^{a}$ & Short-sample \\
+COVID window (2020-02--06) & 104 & 1.48 & No$^{a}$ & Extreme short-sample \\
+Post-COVID (2021--2026-04) & 1,448 & 3.76 & Yes & Confirmed \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\footnotesize
+\item A4f specification: $\tau_t = \theta_0 + \theta_1 \mathrm{VIX}_{t-1}^2$, free $\omega_g$, Student-$t$ innovations; OOS window $W=2{,}000$, refit every 63 days. DM test uses HAC-robust standard errors (Newey--West, lag~$=12$). For the primary full-OOS DM result ($t = 4.03$, $n = 1{,}825$), see Table~\ref{tab:main_results}.
+\item $^{a}$~Insufficient power at $n < 300$; mean QLIKE improvement is directionally consistent across all sub-samples.
+\item Source: \texttt{experiments/K1393/k1393\_results.json}.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
 Among VIX variants, the 9-day VIX (VIX9D) achieves the strongest result (DM $t = 5.15$), consistent with short-term implied volatility being more responsive to recent market conditions. The 3-month VIX (VIX3M) does not reach significance ($t = 2.59$), suggesting that longer-term implied volatility changes too slowly to provide daily forecasting value.
 
 \subsection{Estimation/Forecasting Consistency}
@@ -880,6 +907,53 @@ Several limitations should be noted. First, our QLIKE evaluation uses $r_t^2$ as
 
 Future research directions include incorporating realized variance measures from high-frequency data as the target variable, extending the multiplicative framework to multivariate settings for portfolio risk management (preliminary DCC-A4f results suggest significant gains over DCC-GJR for SPY/GLD portfolios), multi-horizon VaR calibration at $h = 5$ and $10$ day horizons (where initial tests suggest $\sqrt{h}$ scaling provides adequate approximation to proper $h$-step GARCH formulas), and investigating whether the source decomposition can be exploited in longer-horizon VRP prediction with monthly or quarterly aggregation.
 
+
+%=================================================================
+\appendix
+\section{Specification Genealogy and Multiple-Testing Disclosure}
+\label{app:spec_genealogy}
+%=================================================================
+
+To address potential concerns about data mining and post-hoc specification selection, Table~\ref{tab:spec_genealogy} documents the ex-ante design rationale for all 17 specifications in the horse race. All specifications were defined prior to examining any OOS QLIKE rankings; the selection exercise is purely an ex-post ranking of pre-registered designs.
+
+\begin{table}[H]
+\centering
+\caption{Specification genealogy: ex-ante design rationale for all 17 models}
+\label{tab:spec_genealogy}
+\begin{threeparttable}
+\small
+\begin{tabular}{@{}llp{7.5cm}@{}}
+\toprule
+Spec & Category & Ex-ante design rationale \\
+\midrule
+A1 & GARCH-X & Inherited from pilot K889; included \emph{only} to document the cost of estimation/forecasting inconsistency ($\tau_t$ in estimation, $\tau_{t-1}$ in OOS) \\
+A2 & GARCH-X & Log-exponential: convention from the GARCH-MIDAS literature \citep{engle2013} \\
+A3 & GARCH-X & Log-exponential with lagged denominator ($\tau_{t-1}$): conservative timing variant \\
+A4 & GARCH-X & VIX-squared: dimensional consistency ($\mathrm{VIX}^2$ has variance units matching $\sigma_t^2$) \\
+A5 & GARCH-X & VIX-level $\exp(\theta_1\,\mathrm{VIX})$: alternative scaling, included for completeness \\
+A2f & GARCH-X & Log-exponential with free $\omega_g$: accommodates the VRP systematic wedge \\
+A4f & GARCH-X & VIX-squared with free $\omega_g$: combines A4 dimensional consistency with VRP accommodation \\
+A3f & GARCH-X & Log-exponential, lagged denominator, free $\omega_g$: conservative timing + VRP flexibility \\
+A2n & GARCH-X & Log-exponential with sample-mean normalization: alternative $\E[g_t]=1$ enforcement method \\
+A4n & GARCH-X & VIX-squared with sample-mean normalization: dimensional consistency + alternative normalization \\
+\midrule
+B1 & MIDAS-RW & Rolling MIDAS, $K=22$ daily lags ($\approx\!1$ month): shortest conventional lag \citep{engle2013} \\
+B2 & MIDAS-RW & Rolling MIDAS, $K=65$ daily lags ($\approx\!1$ quarter): medium lag \\
+B3 & MIDAS-RW & Rolling MIDAS, $K=125$ daily lags ($\approx\!6$ months): long lag \\
+C1 & MIDAS-FS & Fixed-span MIDAS, $K_m=6$ monthly lags: semi-annual window \\
+C2 & MIDAS-FS & Fixed-span MIDAS, $K_m=12$ monthly lags: annual window \\
+C3 & MIDAS-FS & Fixed-span MIDAS, $K_m=24$ monthly lags: 2-year window \\
+\midrule
+B0 & Benchmark & Standard GJR-GARCH(1,1): well-established daily volatility benchmark \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\footnotesize
+\item All 17 specifications were defined prior to any OOS evaluation. The only ex-post element is A4f emerging as the point-estimate QLIKE winner; the economic arguments for A4f (dimensional consistency + VRP flexibility) were documented before OOS results were examined.
+\item \textbf{Multiple-testing disclosure}: The 16-comparison horse race uses the \citet{harvey2016} $|t| > 3.0$ threshold, which is approximately equal to the Bonferroni-adjusted critical value $z_{0.05/(2 \times 16)} \approx 2.95$. The primary A4f vs.\ GJR-GARCH comparison ($t = 4.03$) substantially exceeds this threshold. The Model Confidence Set \citep{hansen2011} provides a complementary multiple-testing-adjusted evaluation (Section~\ref{sec:robustness}).
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
 
 %=================================================================
 % Bibliography
