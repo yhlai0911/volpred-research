@@ -1,0 +1,152 @@
+{
+  "report_type": "weekly",
+  "source": "claude_code_jsonl",
+  "week_range": "2026-05-22 → 2026-05-29",
+  "totals": {
+    "input_tokens": 9,
+    "output_tokens": 1173,
+    "cache_read_tokens": 89343,
+    "cache_create_tokens": 60282,
+    "billable_total": 61464,
+    "assistant_messages": 5,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.2705
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 9,
+      "output_tokens": 1173,
+      "cache_read_tokens": 89343,
+      "cache_create_tokens": 60282,
+      "messages": 5,
+      "estimated_cost_usd": 0.2705
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 4,
+      "output_tokens": 461,
+      "cache_read_tokens": 29781,
+      "cache_create_tokens": 30021,
+      "messages": 2,
+      "billable_total": 30486,
+      "estimated_cost_usd": 0.1284,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "bash_other": {
+      "input_tokens": 3,
+      "output_tokens": 210,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 29781,
+      "messages": 1,
+      "billable_total": 29994,
+      "estimated_cost_usd": 0.1148,
+      "emoji": "💭",
+      "description": "其他 Bash 操作"
+    },
+    "token_report": {
+      "input_tokens": 2,
+      "output_tokens": 502,
+      "cache_read_tokens": 59562,
+      "cache_create_tokens": 480,
+      "messages": 2,
+      "billable_total": 984,
+      "estimated_cost_usd": 0.0272,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    }
+  },
+  "daily_breakdown": {
+    "2026-05-22": {
+      "input_tokens": 9,
+      "output_tokens": 1173,
+      "cache_read_tokens": 89343,
+      "cache_create_tokens": 60282,
+      "messages": 5,
+      "billable_total": 61464,
+      "estimated_cost_usd": 0.2705
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 2,
+      "billable_total": 30486,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 2,
+          "billable_total": 30486
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "non-text assistant message",
+          "messages": 1,
+          "billable_total": 29994
+        },
+        {
+          "name": "other",
+          "messages": 1,
+          "billable_total": 492
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 1,
+          "billable_total": 29994
+        },
+        {
+          "name": "今天是週五，需執行日報與週報。先跑兩個報告。",
+          "messages": 1,
+          "billable_total": 492
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 1,
+      "billable_total": 29994,
+      "family_breakdown": [
+        {
+          "name": "other bash",
+          "messages": 1,
+          "billable_total": 29994
+        }
+      ],
+      "prefix_breakdown": [
+        {
+          "name": "date",
+          "messages": 1,
+          "billable_total": 29994
+        }
+      ],
+      "top_first_lines": [
+        {
+          "name": "date",
+          "messages": 1,
+          "billable_total": 29994
+        }
+      ]
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 1,
+      "cache_create_tokens": 60282,
+      "billable_total": 61464,
+      "cache_create_share_pct": 98.1,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "e7fcf07a-ab98-4641-9d32-84d3929f9fcf",
+          "messages": 5,
+          "billable_total": 61464,
+          "cache_create_tokens": 60282,
+          "cache_read_tokens": 89343,
+          "duration_minutes": 0.1,
+          "cache_create_share_pct": 98.1,
+          "first_ts": "2026-05-22T14:44:14.475000+00:00",
+          "last_ts": "2026-05-22T14:44:19.461000+00:00"
+        }
+      ]
+    }
+  }
+}
