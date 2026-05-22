@@ -1,0 +1,23 @@
+{
+  "id": "k1391-covid-dm",
+  "title": "K1391: Leave-COVID-out DM Test (A4f vs GJR, Paper 9 C1 CRITICAL)",
+  "script_path": "experiments/k1391/k1391.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-05-22T03:33:59Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k1391-covid-dm.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k1391-covid-dm.stderr",
+  "result_artifact": "experiments/k1391/k1391_results.json",
+  "claude_followup": {
+    "brief": "K1391 完成後：讀 experiments/k1391/k1391_results.json，檢查 full_oos DM t 與 K988 +4.03 的一致性，再看 non_covid/pre_covid/post_covid 的 DM t 是否仍 Harvey-significant (|t|>3.0)。結果決定 Paper 9 (garch-x-vix) C1 CRITICAL 如何修訂：若 non-COVID 仍 sig → 加 Table of subperiod DM results + 一段 robustness discussion；若不 sig → 需降低 main claims。更新 experiments/k1391/k1391_results.json + knowledge.json + paper/garch-x-vix/consolidated_issues_v3.md C1 狀態。",
+    "task_type": "experiment",
+    "priority": 1
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 7200
+}

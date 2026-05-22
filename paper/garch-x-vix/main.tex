@@ -10,9 +10,9 @@
 \usepackage{hyperref}
 \usepackage{xcolor}
 \usepackage{float}
-\usepackage{fontspec}
-\usepackage{xeCJK}
-\setCJKmainfont{PingFang TC}
+% \usepackage{fontspec}  % removed for cross-platform compilation compatibility
+% \usepackage{xeCJK}     % removed: no CJK content in submission draft
+% \setCJKmainfont{PingFang TC}
 \usepackage{multirow}
 \usepackage{threeparttable}
 \usepackage{tabularx}
@@ -28,6 +28,7 @@
 \newtheorem{proposition}{Proposition}
 \newtheorem{corollary}{Corollary}
 \newtheorem{hypothesis}{Hypothesis}
+\newtheorem{remark}{Remark}
 
 % ─── Custom commands ─────────────────────────────────────────
 \newcommand{\E}{\mathbb{E}}
@@ -48,7 +49,7 @@
 % ─── Abstract ────────────────────────────────────────────────
 \begin{abstract}
 \noindent
-We propose a daily multiplicative GARCH-X model, $\sigma_t^2 = \tau_t \times g_t$, where $\tau_t$ is a simple function of lagged VIX and $g_t$ follows a GJR-GARCH process on standardized returns. In a systematic horse race among 17 specifications---including ten daily GARCH-X variants, six GARCH-MIDAS alternatives with Beta-polynomial weighting, and a GJR-GARCH benchmark---the simplest daily model with $\tau_t = \theta_0 + \theta_1 \mathrm{VIX}_{t-1}^2$ and freely estimated intercept (A4f) achieves the lowest QLIKE loss function, significantly outperforming GJR-GARCH (Diebold-Mariano $t = 4.03$, surpassing the \citet{harvey2016} threshold of $|t| > 3.0$) and outperforming all GARCH-MIDAS specifications in point estimates. The result extends to QQQ ($t = 3.71$), European equities (EURO STOXX 50: $t = 3.64$; FEZ: $t = 3.45$), and, when asset-specific fear indices are used, to GLD with GVZ ($t = 3.17$). We show that the $g_t$ component \emph{contemporaneously} tracks the variance risk premium (Spearman $\rho \approx 0.80$), providing a structural interpretation: $\tau_t$ reflects the option-market fear level while $g_t$ captures deviations of realized variance from implied variance. Importantly, $g_t$ has no out-of-sample \emph{predictive} power for future VRP---it is a decomposition tool, not a forecasting signal. Residual diagnostics reveal that VIX absorption reduces excess kurtosis by 60\% and shifts optimal Student-$t$ degrees of freedom from 5.3 to 8.0, directly explaining the improved tail risk calibration. For risk management, A4f with Student-$t$ innovations passes VaR backtesting at two of three confidence levels (scorecard 3/4), whereas GJR-GARCH passes none (scorecard 1/4). These findings demonstrate that GARCH-MIDAS complexity is unnecessary when the external variable updates daily, and that a parsimonious multiplicative structure with VIX delivers both superior point forecasts and improved tail risk measurement.
+We propose a daily multiplicative GARCH-X model, $\sigma_t^2 = \tau_t \times g_t$, where $\tau_t$ is a simple function of lagged VIX and $g_t$ follows a GJR-GARCH process on standardized returns. In a systematic horse race among 17 specifications---including ten daily GARCH-X variants, six GARCH-MIDAS alternatives with Beta-polynomial weighting, and a GJR-GARCH benchmark---the simplest daily model with $\tau_t = \theta_0 + \theta_1 \mathrm{VIX}_{t-1}^2$ and freely estimated intercept (A4f) achieves the lowest QLIKE loss function, significantly outperforming GJR-GARCH (Diebold-Mariano $t = 4.03$, surpassing the \citet{harvey2016} threshold of $|t| > 3.0$) and outperforming all GARCH-MIDAS specifications in point estimates. The result extends to QQQ ($t = 3.71$), European equities (EURO STOXX 50: $t = 3.64$; FEZ: $t = 3.45$), and, when asset-specific fear indices are used, to GLD with GVZ ($t = 3.17$). We show that the $g_t$ component \emph{contemporaneously} tracks the variance risk premium (Spearman $\rho \approx 0.80$), providing a structural interpretation: $\tau_t$ reflects the option-market fear level while $g_t$ captures deviations of realized variance from implied variance. Importantly, $g_t$ has no out-of-sample \emph{predictive} power for future VRP---it is a decomposition tool, not a forecasting signal. Residual diagnostics reveal that VIX absorption reduces excess kurtosis by 60\% and shifts optimal Student-$t$ degrees of freedom from 5.3 to 8.0, directly explaining the improved tail risk calibration. For risk management, A4f with Student-$t$ innovations passes VaR backtesting at two of three confidence levels (scorecard 3/4), whereas GJR-GARCH passes none (scorecard 1/4). These findings demonstrate that a parsimonious multiplicative GARCH-X specification with daily VIX is statistically indistinguishable from the best GARCH-MIDAS alternative (B1, $K=22$; DM $t = -0.90$) while significantly dominating longer-lag MIDAS specifications ($|t| > 3.0$), delivering both superior point forecasts and improved tail risk measurement.
 
 \medskip
 \noindent
@@ -76,13 +77,13 @@ However, when the external variable of interest is VIX, which updates at daily f
 
 We address this question through three contributions.
 
-\textbf{First}, we conduct the most comprehensive specification comparison to date of 17 multiplicative volatility models, encompassing ten daily GARCH-X variants that differ in the functional form of $\tau_t$ (log-exponential, VIX-squared, VIX-level), the choice of normalization denominator ($\tau_t$ versus $\tau_{t-1}$), and the treatment of the $g_t$ intercept (constrained to enforce $\E[g_t]=1$ versus freely estimated), alongside six GARCH-MIDAS specifications with rolling-window and fixed-span Beta-polynomial filters at various lag lengths, and a standard GJR-GARCH(1,1) benchmark. Using S\&P~500 daily returns from 2005 to 2026 with an out-of-sample (OOS) period spanning 2019--2026 (1,825 observations), we evaluate all models under the proxy-robust QLIKE loss function of \citet{patton2011} and the stringent Diebold-Mariano testing framework with the \citet{harvey2016} multiple-testing threshold of $|t| > 3.0$. The simplest daily model---$\tau_t = \theta_0 + \theta_1 \mathrm{VIX}_{t-1}^2$ with freely estimated $g_t$ intercept (denoted A4f)---achieves the lowest QLIKE and a DM test statistic of $t = 4.03$ against GJR-GARCH. While the Model Confidence Set cannot distinguish A4f from other well-specified VIX models (all survive at $\alpha = 0.10$), the primary finding is that \emph{any} VIX-augmented multiplicative model significantly outperforms plain GJR-GARCH, with A4f being the point-estimate best among functionally equivalent alternatives. Notably, GARCH-MIDAS specifications with longer lag structures ($K = 65$--$125$) are significantly inferior to A4f ($|t| > 3.0$), confirming that mixed-frequency complexity is unnecessary when VIX updates daily.
+\textbf{First}, we conduct the most comprehensive specification comparison to date of 17 multiplicative volatility models, encompassing ten daily GARCH-X variants that differ in the functional form of $\tau_t$ (log-exponential, VIX-squared, VIX-level), the choice of normalization denominator ($\tau_t$ versus $\tau_{t-1}$), and the treatment of the $g_t$ intercept (constrained to enforce $\E[g_t]=1$ versus freely estimated), alongside six GARCH-MIDAS specifications with rolling-window and fixed-span Beta-polynomial filters at various lag lengths, and a standard GJR-GARCH(1,1) benchmark. Using S\&P~500 daily returns from 2005 to 2026 with an out-of-sample (OOS) period spanning 2019--2026 (1,825 observations), we evaluate all models under the proxy-robust QLIKE loss function of \citet{patton2011} and the stringent Diebold-Mariano testing framework with the \citet{harvey2016} multiple-testing threshold of $|t| > 3.0$. The simplest daily model---$\tau_t = \theta_0 + \theta_1 \mathrm{VIX}_{t-1}^2$ with freely estimated $g_t$ intercept (denoted A4f)---achieves the lowest QLIKE and a DM test statistic of $t = 4.03$ against GJR-GARCH. While the Model Confidence Set cannot distinguish A4f from other well-specified VIX models (all survive at $\alpha = 0.10$), the primary finding is that \emph{any} VIX-augmented multiplicative model significantly outperforms plain GJR-GARCH, with A4f being the point-estimate best among functionally equivalent alternatives. Notably, GARCH-MIDAS specifications with longer lag structures ($K = 65$--$125$) are significantly inferior to A4f ($|t| > 3.0$), while the shortest-lag MIDAS (B1, $K=22$) is statistically indistinguishable (DM $t = -0.90$)---demonstrating that parsimony, not statistical dominance over all MIDAS variants, characterizes the advantage of daily GARCH-X when VIX updates daily.
 
 \textbf{Second}, we propose a \emph{source decomposition} interpretation that differs from the standard long-run/short-run narrative. In our framework, $\tau_t$ captures the \emph{exogenous} volatility level implied by the options market (the ``fear level''), while $g_t$ captures \emph{endogenous} GARCH dynamics conditional on this external environment. We demonstrate that $g_t$ tracks the variance risk premium (VRP) with Spearman rank correlation $\rho \approx 0.80$---far exceeding the raw $r_t^2 / \mathrm{VIX}_{t-1}^2$ ratio ($\rho = 0.15$)---indicating that the GARCH autoregressive structure substantially enhances VRP measurement. However, we also report the honest null result that $g_t$ possesses no exploitable out-of-sample predictive power for future VRP, consistent with the high noise level and low autocorrelation of daily VRP.
 
 \textbf{Third}, we validate the model's practical value through VaR and Expected Shortfall (ES) backtesting. A4f with Student-$t$ innovations achieves a scorecard of 3/4 (passing VaR at 1\% and 5\% levels plus ES at 2.5\%), while GJR-GARCH achieves only 1/4 regardless of distributional assumption. Cross-asset validation shows that the model generalizes to assets with high VIX correlation (QQQ: DM $t = 3.71$) and, when asset-specific implied volatility indices are employed, to gold (GLD with GVZ: DM $t = 3.39$). For assets with weak VIX linkage---emerging markets (EEM) and Taiwan (0050.TW)---the model improves directionally but does not reach statistical significance, consistent with the interpretation that the multiplicative structure requires a relevant fear index as input.
 
-Our findings contribute to the literature on component volatility models \citep{engle2008, engle2013, conrad2015, conrad2020}, the role of VIX in volatility forecasting \citep{bekaert2014}, and the practical evaluation of volatility models for risk management \citep{patton2011, hansen2011}. The key message is one of parsimony: when the external variable is already daily, GARCH-MIDAS complexity is not only unnecessary but actively detrimental, and a simple multiplicative structure delivers both forecasting and risk management gains.
+Our findings contribute to the literature on component volatility models \citep{engle2008, engle2013, conrad2015, conrad2020}, the role of VIX in volatility forecasting \citep{bekaert2014}, and the practical evaluation of volatility models for risk management \citep{patton2011, hansen2011}. The key message is one of parsimony: when the external variable is already daily, GARCH-MIDAS specifications with long lag structures ($K = 65$--$125$) are significantly dominated by a simple daily multiplicative model ($|t| > 3.0$), while the shortest-lag alternative (B1, $K=22$) is statistically indistinguishable---parsimony rather than statistical dominance is the practical argument for the daily specification. A simple multiplicative structure with daily VIX delivers both superior forecasting and improved risk management without the added complexity of mixed-frequency aggregation.
 
 The remainder of this paper is organized as follows. Section~\ref{sec:literature} reviews the related literature. Section~\ref{sec:methodology} presents the model specifications and evaluation framework. Section~\ref{sec:data} describes the data. Section~\ref{sec:results} reports the empirical results. Section~\ref{sec:robustness} presents robustness analyses. Section~\ref{sec:conclusion} concludes.
 
@@ -98,7 +99,7 @@ The idea of decomposing conditional variance into multiple components has a rich
 
 Subsequent work has expanded the framework in several directions. \citet{conrad2015} incorporated forward-looking variables, showing that consumer confidence and financial conditions indices improve long-horizon volatility forecasts. \citet{conrad2020} demonstrated that combining realized volatility with macroeconomic variables in a two-component MIDAS filter outperforms single-variable specifications. \citet{wang2015} compared GARCH-MIDAS with alternative component models and found that the choice of explanatory variable matters more than the component structure itself.
 
-However, a limitation of existing GARCH-MIDAS studies is that they focus on mixed-frequency settings where the MIDAS aggregation is economically motivated (e.g., monthly macro data driving daily volatility). When the external variable is itself daily---as is the case with VIX---the MIDAS filter imposes unnecessary complexity. Our paper fills this gap by showing that a simple daily multiplicative model dominates the MIDAS alternatives in this setting.
+However, a limitation of existing GARCH-MIDAS studies is that they focus on mixed-frequency settings where the MIDAS aggregation is economically motivated (e.g., monthly macro data driving daily volatility). When the external variable is itself daily---as is the case with VIX---the longer-lag MIDAS filter adds parameters without measurable forecasting benefit. Our paper fills this gap by showing that a simple daily multiplicative model significantly outperforms longer-lag MIDAS alternatives ($K \geq 65$) while achieving statistically indistinguishable performance relative to the shortest-lag MIDAS (B1, $K=22$).
 
 \subsection{VIX and Volatility Forecasting}
 
@@ -180,7 +181,7 @@ where the standardized return $u_{t-1}$ is defined under one of two normalizatio
 u_{t-1}^{(a)} &= \frac{r_{t-1}}{\sqrt{\tau_t}} \qquad (\text{contemporaneous normalization}), \label{eq:u_contemp} \\
 u_{t-1}^{(b)} &= \frac{r_{t-1}}{\sqrt{\tau_{t-1}}} \qquad (\text{lagged normalization}). \label{eq:u_lagged}
 \end{align}
-Contemporaneous normalization follows the recursive structure of \citet[Eq.~4]{engle2013}, where the current volatility environment determines how past shocks are interpreted. Lagged normalization avoids a simultaneity issue in which $\tau_t$ and $u_{t-1}$ both depend on $\mathrm{VIX}_{t-1}$. Our baseline specifications use contemporaneous normalization; lagged normalization is included for comparison (see Section~\ref{sec:taxonomy}).
+Contemporaneous normalization follows the recursive structure of \citet[Eq.~4]{engle2013}, where the current volatility environment determines how past shocks are interpreted. Lagged normalization reflects a conservative timing choice in which the normalization denominator $\tau_{t-1}$ is fully predetermined before the shock $r_{t-1}$ is observed, since both $\tau_t$ and $u_{t-1}$ use $\mathrm{VIX}_{t-1}$ information. Our baseline specifications use contemporaneous normalization; lagged normalization is included for comparison (see Section~\ref{sec:taxonomy}).
 
 Two intercept treatments are considered:
 \begin{enumerate}[label=(\roman*)]
@@ -238,7 +239,7 @@ The key design dimensions are:
 \begin{enumerate}
 \item \textbf{$\tau_t$ functional form}: VIX-squared ($\tau \propto \mathrm{VIX}^2$) provides dimensional consistency---since VIX is quoted in volatility units, VIX$^2$ has variance units matching $\sigma_t^2$. Log-exponential ($\tau = \exp(\theta_0 + \theta_1 \log \mathrm{VIX})$) is the specification used in the original GARCH-MIDAS literature. VIX-level ($\tau = \exp(\theta_0 + \theta_1 \mathrm{VIX})$) is included for completeness.
 
-\item \textbf{Normalization denominator}: Using $\tau_t$ (contemporaneous) follows the recursive structure of \citet[Eq.~4]{engle2013}, where the current environment determines the normalization. Using $\tau_{t-1}$ (lagged) avoids a simultaneity issue in which $\tau_t$ depends on $\mathrm{VIX}_{t-1}$ and $g_t$ depends on $r_{t-1}/\sqrt{\tau_t}$.
+\item \textbf{Normalization denominator}: Using $\tau_t$ (contemporaneous) follows the recursive structure of \citet[Eq.~4]{engle2013}, where the current environment determines the normalization. Using $\tau_{t-1}$ (lagged) reflects a conservative timing convention in which the normalization denominator is predetermined before the shock $r_{t-1}$ is observed.
 
 \item \textbf{Intercept treatment}: The constrained case ($\E[g_t]=1$) is the standard assumption in component models, ensuring that $\tau_t$ alone determines the unconditional variance. The free case provides flexibility to accommodate a systematic wedge between implied and realized variance (the VRP).
 \end{enumerate}
@@ -317,7 +318,7 @@ Backtesting employs four tests:
 \item \textbf{Kupiec (1995) unconditional coverage} (UC): tests whether the violation rate equals the nominal level.
 \item \textbf{Christoffersen (1998) conditional coverage} (CC): additionally tests independence of violations.
 \item \textbf{Engle \& Manganelli (2004) dynamic quantile} (DQ): tests whether violations are predictable.
-\item \textbf{Acerbi \& Szekely (2014)} Z1/Z2 tests for ES adequacy.
+\item \textbf{Acerbi \& Szekely (2019)} Z1/Z2 tests for ES adequacy.
 \end{enumerate}
 
 A model ``passes'' at level $\alpha$ if all three VaR tests (UC, CC, DQ) have $p > 0.05$.
@@ -635,7 +636,7 @@ A4f-$t$ & 2.058 & 0.510 & 2.275 & 0.526 & Pass \\
 \end{tabular}
 \begin{tablenotes}
 \footnotesize
-\item ES tests following \citet{acerbi2014}. Z1 tests ES level adequacy; Z2 tests ES conditional calibration. All models pass both tests.
+\item ES tests following \citet{acerbi2019}. Z1 tests ES level adequacy; Z2 tests ES conditional calibration. All models pass both tests.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -827,7 +828,7 @@ A natural question is whether macroeconomic variables can substitute for or comp
 \label{sec:discussion}
 %=================================================================
 
-A natural concern is whether the ``source decomposition'' label is merely a relabeling of the standard long-run/short-run narrative in GARCH-MIDAS models. We address this by deriving three propositions that establish the economic content of the decomposition.
+A natural concern is whether the ``source decomposition'' label is merely a relabeling of the standard long-run/short-run narrative in GARCH-MIDAS models. We address this by deriving two propositions and one empirical remark that establish the economic content of the decomposition.
 
 \begin{proposition}[Unconditional Variance Identity]
 Under the constrained model ($\omega_g = 1 - \alpha - \gamma/2 - \beta$), $\E[g_t] = 1$ in the stationary distribution, and the unconditional variance satisfies:
@@ -837,6 +838,8 @@ Under the constrained model ($\omega_g = 1 - \alpha - \gamma/2 - \beta$), $\E[g_
 \end{equation}
 \end{proposition}
 
+\noindent\textit{Note}: This is an algebraic identity that follows directly from the multiplicative structure; it holds for any stationary $\tau_t$ and $g_t$ and does not require estimation.
+
 This identity is exact, not an approximation. The simpler $\E[\sigma_t^2] \approx \E[\tau_t]$ holds only when $\mathrm{Cov}(\tau_t, g_t) \approx 0$. Empirically, $\mathrm{Corr}(\tau_t, g_t) \approx 0.49$, reflecting the crisis channel: high VIX $\to$ high $\tau_t$ $\to$ large standardized shocks $\to$ higher $g_t$.
 
 \begin{proposition}[VRP Auto-Correction]
@@ -845,13 +848,13 @@ When $\tau_t = \theta_0 + \theta_1 \mathrm{VIX}_{t-1}^2$, the MLE of $\theta_1$ 
 
 Empirically, the constrained model yields $\theta_1$-ratio $= 0.78$, implying a 21.9\% discount---directly measuring the average VRP fraction. In the free-omega model, VRP correction splits between two channels: $\theta_1$-ratio $= 1.96$ (overshoot) and $\E[g_t] = 0.48$ (level correction), with effective ratio $= 0.94$. This demonstrates that VRP correction is a real economic phenomenon captured by the multiplicative structure.
 
-\begin{proposition}[g Tracks VRP Dynamics]
-The dynamic factor $g_t$ reflects time-varying departures of realized variance from the VRP-corrected implied level. The GARCH autoregressive structure smooths the noisy daily ratio $r_t^2/\tau_t$, extracting its persistent VRP component.
-\end{proposition}
+\begin{remark}[g Tracks VRP Dynamics]
+The dynamic factor $g_t$ reflects time-varying departures of realized variance from the VRP-corrected implied level. The GARCH autoregressive structure smooths the noisy daily ratio $r_t^2/\tau_t$, extracting its persistent VRP component. Unlike Propositions~1 and~2, this characterization is empirical rather than derived analytically; it summarizes the decomposition behavior observed across the full sample.
+\end{remark}
 
 By construction, $g_t$ from the model recursion is approximately orthogonal to VRP ($\rho \approx 0.06$), because $\tau_t$ already absorbs the VRP signal. The high correlation reported in Section~\ref{sec:vrp} ($\rho \approx 0.80$) uses the g-proxy method of comparing model variance to raw implied variance without VRP correction, where the GARCH dynamics amplify the systematic VRP component relative to the raw ratio ($\rho = 0.15$).
 
-These propositions distinguish source decomposition from mere relabeling: (i)~$\theta_1$ provides parametric identification of VRP magnitude, (ii)~the $\E[g_t]=1$ constraint pins the scale, making $\tau_t$ the sole determinant of unconditional variance, and (iii)~the forecasting gain (DM $t = 4.03$ vs.\ GJR) demonstrates that the decomposition captures information not available to standard models.
+These results distinguish source decomposition from mere relabeling: (i)~$\theta_1$ provides parametric identification of VRP magnitude, (ii)~the $\E[g_t]=1$ constraint pins the scale, making $\tau_t$ the sole determinant of unconditional variance, and (iii)~the forecasting gain (DM $t = 4.03$ vs.\ GJR) demonstrates that the decomposition captures information not available to standard models.
 
 
 %=================================================================
@@ -861,7 +864,7 @@ These propositions distinguish source decomposition from mere relabeling: (i)~$\
 
 This paper provides a systematic evaluation of multiplicative volatility models that incorporate VIX as an external scale factor. Our main findings are as follows.
 
-First, all VIX-augmented multiplicative models---whether daily GARCH-X or GARCH-MIDAS---significantly outperform plain GJR-GARCH (A4f: DM $t = 4.03$). The Model Confidence Set eliminates only GJR at $\alpha = 0.25$, confirming that the VIX component is the primary driver of improvement. Among VIX-augmented models, A4f ($\tau_t = \theta_0 + \theta_1 \mathrm{VIX}_{t-1}^2$, free $\omega_g$) achieves the lowest QLIKE, and significantly outperforms longer-lag MIDAS specifications (B2: $t = 3.04$; B3: $t = 3.73$), but is statistically indistinguishable from the shortest-lag MIDAS (B1, $K=22$). The practical implication is that GARCH-MIDAS complexity is unnecessary when the external variable updates daily---a simple daily specification achieves equivalent or superior performance with fewer parameters.
+First, all VIX-augmented multiplicative models---whether daily GARCH-X or GARCH-MIDAS---significantly outperform plain GJR-GARCH (A4f: DM $t = 4.03$). The Model Confidence Set eliminates only GJR at $\alpha = 0.25$, confirming that the VIX component is the primary driver of improvement. Among VIX-augmented models, A4f ($\tau_t = \theta_0 + \theta_1 \mathrm{VIX}_{t-1}^2$, free $\omega_g$) achieves the lowest QLIKE, and significantly outperforms longer-lag MIDAS specifications (B2: $t = 3.04$; B3: $t = 3.73$), but is statistically indistinguishable from the shortest-lag MIDAS (B1, $K=22$). The practical implication is that longer-lag GARCH-MIDAS specifications ($K \geq 65$) are significantly dominated by A4f ($|t| > 3.0$), while the shortest-lag MIDAS (B1, $K=22$) achieves statistically indistinguishable performance (DM $t = -0.90$)---parsimony rather than statistical dominance is the practical argument for the daily specification.
 
 Second, the VIX-squared functional form for $\tau_t$ dominates alternatives due to dimensional consistency: VIX$^2$ has variance units matching $\sigma_t^2$. The free-omega treatment accommodates the systematic wedge between implied and realized variance (the VRP), and the contemporaneous normalization ($u_{t-1} = r_{t-1}/\sqrt{\tau_t}$) outperforms the lagged alternative.
 
@@ -885,11 +888,11 @@ Future research directions include incorporating realized variance measures from
 
 \begin{thebibliography}{99}
 
-\bibitem[Acerbi and Szekely, 2014]{acerbi2014}
-Acerbi, C. and Szekely, B. (2014).
-\newblock Back-testing Expected Shortfall.
-\newblock {\em Risk}, 27(11):76--81.
-\newblock \url{https://www.risk.net/risk-management/2381658/back-testing-expected-shortfall}
+\bibitem[Acerbi and Szekely, 2019]{acerbi2019}
+Acerbi, C. and Szekely, B. (2019).
+\newblock Backtesting expected shortfall: Accounting for tail risk.
+\newblock {\em Management Science}, 65(12):5542--5567.
+\newblock \url{https://doi.org/10.1287/mnsc.2018.3159}
 
 
 \bibitem[Bekaert and Hoerova, 2014]{bekaert2014}
