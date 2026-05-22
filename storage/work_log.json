@@ -8119,5 +8119,23 @@
     "audience": "academic",
     "status": "succeeded",
     "notes": "Hourly dispatch 01:07 fire. ML override (K1385-K1390 blocked). Dispatched paper_body for P9 garch-x-vix. Fixed: C12 (GLD DM t 3.39→3.17 in intro), C6 (added white2000 citation + bibitem), C8 (Bonferroni footnote to Table 4), C10 (added no-simultaneity clarification), corsi2009 missing bibitem added. C13/C15/C16 confirmed already resolved. XeLaTeX 3-pass CLEAN, 43 pages. Supabase synced."
+  },
+  {
+    "timestamp": "2026-05-23T02:30:00+08:00",
+    "task_type": "paper_review",
+    "description": "taiwan-vt formal review cycle v1 — citation-verifier + latex-academic-reviewer parallel agents. NEW findings: H1 three-way gamma inconsistency (0.087/0.097/0.124) + H2 ELITE Material 2383.TW undisclosed. Status downgraded from Minor to Major Revision. Quick citation fixes applied (politis key, Christoffersen cite, Engle page, et~al.). review_history/v1/ archived.",
+    "paper_id": "taiwan-vt",
+    "round": "v1",
+    "verdict": "Major Revision Required (3.5/5 academic, CONDITIONAL_PASS citation)",
+    "high_issues": [
+      "H1: gamma inconsistency 0050.TW",
+      "H2: 2383.TW undisclosed data source"
+    ],
+    "fixes_applied": [
+      "politis1994stationary -> politis1994 (body.tex:449)",
+      "christoffersen1998 cite added (body.tex:593)",
+      "Engle page 1007->1008 (main_v3.tex:93)",
+      "et~al. standardized (4 bibitems)"
+    ]
   }
 ]

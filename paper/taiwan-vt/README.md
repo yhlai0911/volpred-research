@@ -1,7 +1,19 @@
 # Paper 2: Volatility Targeting in Taiwan — Leverage Amplification and Timezone Transmission
 
 **Target Journal**: Pacific-Basin Finance Journal
-**Status**: Minor Revision — 0 SEVERE / 0 HIGH / 0 MEDIUM remaining (all 5 MEDIUM resolved 2026-05-20: sub-M8a, M3-persist/Christoffersen, N4 footnote, M5 period note, SSVS PIP note); 6 MINOR outstanding. Next step: run paper-review-cycle for final pass before submission. | **Reproduce gate 0 MISMATCH** (2026-04-19 post-session: 4 γ disambiguation mismatches 全 reclass NOTE via body_v2.tex 3-spec footnotes on TWII/TSMC/0050.TW + SSVS PIP UNTRACEABLE + GJR+Normal viol NOTE). 75 VERIFIED / 2 CONFLICT_RESOLVED / 0 MISMATCH / 24 UNTRACEABLE (structural data-limit — Table 4/5 VT performance + Sec 6 macro signals 需 new experiments).
+**Status**: **Major Revision Required** — 2 HIGH blocking submission (found 2026-05-23 formal review cycle v1; new, not in R1-R4). 6 MEDIUM, 7 MINOR outstanding. See `review_history/v1/` for full reports.
+
+**HIGH issues (blocking)**:
+- H1: Three-way γ inconsistency for 0050.TW (body.tex lines 52/137/148/683): 0.087 (Table 1-2 rolling), 0.097 (Section 3.1 K892 canonical), 0.124 (Section 8.4 K900 rolling-252d). Source file `data/0050_canonical.json` cited in line 148 **does not exist**. Fix: Update Table 2 to K892 canonical γ=0.097.
+- H2: ELITE Material (2383.TW) appears in Table 2 (line 156, sourced from K1302) but is absent from Section 2.1 data description. Undisclosed data source.
+
+**Quick fixes applied 2026-05-23** (citation fixes):
+- body.tex:449 — `\citep{politis1994stationary}` → `\citep{politis1994}` (MAJOR citation fix)
+- body.tex:593 — Added `\citet{christoffersen1998}` for VaR Trinity independence test (M3)
+- main_v3.tex:93 — Engle (1982) page `987--1007` → `987--1008`
+- main_v3.tex:104,110,116,146 — `et al.` → `et~al.` in 4 bibitems
+
+**Previous status (pre-v1 review)**: Minor Revision — 0 SEVERE / 0 HIGH / 0 MEDIUM remaining (all 5 MEDIUM resolved 2026-05-20: sub-M8a, M3-persist/Christoffersen, N4 footnote, M5 period note, SSVS PIP note); 6 MINOR outstanding. | **Reproduce gate 0 MISMATCH** (2026-04-19 post-session: 4 γ disambiguation mismatches 全 reclass NOTE via body_v2.tex 3-spec footnotes on TWII/TSMC/0050.TW + SSVS PIP UNTRACEABLE + GJR+Normal viol NOTE). 75 VERIFIED / 2 CONFLICT_RESOLVED / 0 MISMATCH / 24 UNTRACEABLE (structural data-limit — Table 4/5 VT performance + Sec 6 macro signals 需 new experiments).
 **Pages**: 60 | **Citations**: 34
 
 ## Data Sources

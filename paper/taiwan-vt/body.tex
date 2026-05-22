@@ -446,7 +446,7 @@ the first 252 days are dropped as warmup. The tail bucket uses
 $|\Delta \log \text{VIX}_t| > 2\,\sigma_{t-1}$ where $\sigma_{t-1}$ is the
 expanding standard deviation of log-VIX changes through $t-1$. Confidence
 intervals are computed via stationary block bootstrap
-\citep{politis1994stationary} with $B=500$ replications and mean block
+\citep{politis1994} with $B=500$ replications and mean block
 length $21$ trading days. The long-history sample uses the TAIFEX-official
 VIXTWN series; the recent window uses K1181's daily snapshot. The decline
 in the ratio at high VIX reflects under-reaction of VIXTWN to U.S.\
@@ -590,7 +590,7 @@ We also evaluate the skewed Student-$t$ distribution, which simultaneously estim
 
 \subsection{Backtest Results}
 
-Over the out-of-sample period 2020--2026 (1,501 trading days), the GJR-GARCH + Student-$t$(5) VaR produces 8 violations (0.5\%), within the Basel III Green Zone threshold of 1.0\% (noting that the traffic-light framework is defined for 250-day windows; we apply the 1\% threshold as a benchmark across our full sample). The \citet{kupiec1995} likelihood ratio test does not reject correct unconditional coverage ($p = 0.12$). For comparison, the Normal distribution produces 30 violations (2.0\%), a borderline result that would trigger the Yellow Zone under Basel III.
+Over the out-of-sample period 2020--2026 (1,501 trading days), the GJR-GARCH + Student-$t$(5) VaR produces 8 violations (0.5\%), within the Basel III Green Zone threshold of 1.0\% (noting that the traffic-light framework is defined for 250-day windows; we apply the 1\% threshold as a benchmark across our full sample). The \citet{kupiec1995} likelihood ratio test does not reject correct unconditional coverage ($p = 0.12$), and the \citet{christoffersen1998} conditional coverage test does not reject serial independence of violations. For comparison, the Normal distribution produces 30 violations (2.0\%), a borderline result that would trigger the Yellow Zone under Basel III.
 
 The EWMA + Student-$t$(5) combination performs comparably, with 8 violations (0.5\%), demonstrating that the simpler EWMA model is sufficient for regulatory VaR compliance in the Taiwanese market. This is a practical finding: Taiwan investors can implement a fully compliant VaR framework using only EWMA (no GARCH optimization required) plus the Student-$t$ critical value.
 
