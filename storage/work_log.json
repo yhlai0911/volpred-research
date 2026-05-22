@@ -8033,5 +8033,20 @@
       "main.tex numbers update needed after compute_queue finishes",
       "Worktree agent-aa76d7fbb2f0382dc needs manual unlock+remove"
     ]
+  },
+  {
+    "timestamp": "2026-05-22T19:24:30.226291+08:00",
+    "task_type": "experiment",
+    "task_id": "k1395-review-knowledge-2026-05-22",
+    "title": "K1395: 台股 TISA DCA 複利幻覺 — code review + knowledge.json",
+    "status": "succeeded",
+    "summary": "Main-thread code review of K1395.py (PASS): (1) No lookahead — simulate_dca() 用 prices[i] 購入、prices[-1] 估值; (2) 0050 splice factor=0.249361 正確移除 2014-01-02 假斷點，保留各段內部日報酬; (3) DCA 數學正確 — 累積股數 × 末日價; IRR 雙切分法 200 次迭代收斂; (4) 波動拖累 = 完整日曆年報酬算術平均 − 幾何平均; (5) TWII 代理充分揭露。Results: 0050 17.3yr MWRR=19.79%, 倍數=7.01x; TWII 132-window best/worst=3.41x, 波動拖累 323bp。已寫 K1395_results.json verdict=PASS 及 knowledge.json entry。",
+    "items_completed": [
+      "K1395.py main-thread code review (PASS)",
+      "K1395_results.json updated: verdict=PASS + reviewer fields",
+      "knowledge.json entry written: k1395_tisa_dca_tw_volatility_drag",
+      "git commit e6af1361"
+    ],
+    "remaining_issues": []
   }
 ]
