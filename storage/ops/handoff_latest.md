@@ -69,3 +69,28 @@
 - 仍未知：為何 launchd 能 exec `com.volpred.release-pool` 的 wrapper 卻不能 exec `com.volpred.hourly-dispatch` 的。兩者都 `~/.volpred/bin/*.sh`、同權限。
 - probe 已還原（`git checkout` + 重新 cp TCC copy），wrapper 現為乾淨 committed 版。
 - **下一步建議**：`launchctl print gui/$UID/com.volpred.hourly-dispatch` 完整輸出比對 release-pool 的；查 plist 差異（ProgramArguments / WorkingDirectory / 有無 `Program` vs `ProgramArguments` 寫法差）；考慮 `bootout` + 重新 `bootstrap` plist；或直接重建 plist。
+
+---
+
+## 🟡 待辦 — 3 篇 FB 發文（drafts 全備好，待乾淨 session 發）
+
+boss_report 13:00 報 FB pipeline critical（3 pending）。3 篇 FB-native 草稿
+已全部寫好存入 `storage/reports/trending_repost_log.json`，volpred URL 已驗 200，
+Ivan Lai 牆已 get_page_text 確認 3 篇都沒發過：
+
+| mile_id | 主題 | fb_draft |
+|---|---|---|
+| mile_bb62fc66 | VIX 31 vs S&P +8.5% | ✅ 已存 |
+| mile_02518109 | 特習會跨資產（KOSPI -9.68%） | ✅ 已存（本 session 補寫） |
+| mile_b14391d9 | Sell in May 的 VIX 面向 | ✅ 已存（本 session 補寫） |
+
+**發文 SOP**：`.claude/skills/trending-repost/SKILL.md` Step 7 八條。逐篇：
+開 composer → 貼 fb_draft → 繼續 → 發佈 → 驗牆 → 留言貼 volpred URL →
+**發完一篇立刻** 把該 mile 的 `fb_post_status` 改 `success`（防 compaction 重發）。
+
+**注意**：FB profile 視窗太寬會變兩欄、composer 被切邊點不開 — 發文前先
+`resize_window` 到 ~860 寬（單欄模式，composer 置中可點）。
+
+**根因待修**：mile_02518109 / mile_b14391d9 原本 `fb_post_status=pending` 但
+**無 fb_draft** — trending_repost pipeline 發了 feed 卻沒生成 FB 草稿。需查
+trending-repost workflow 為何漏生 FB 草稿步驟。
