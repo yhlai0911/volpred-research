@@ -1149,3 +1149,25 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 4. JS DataTransfer + 同源分頁 base64 — `javascript_tool` 回傳大字串被截斷。
 
 **結論**：trending_repost 發 FB 目前只能「文字 + 留言連結」，**附圖需 file_upload 的 files-content API 被正確支援，或另闢工具**。這是工具層限制，非流程可繞。下次 trending_repost 設計 FB 步驟時，圖表改放「留言區」或「VolPred 原文」即可（FB 貼文連結卡已自動帶預覽圖）。
+
+---
+
+## 2026-05-21/22 | P10 crypto-fear-channel — 3 BLOCKING code-method 不符，v1-v3 Claude 自審全漏，獨立 Codex 才抓到
+
+**問題**：Paper P10（crypto-fear-channel）在 4 輪 paper-review-cycle 後標記 `ready_for_submission`，2026-05-21 獨立 Codex GPT-5.4 開啟 `experiments/k1025/k1025.py` 原始碼對照論文方法段，發現 3 個 BLOCKING：
+1. **QR lag 缺失**：論文寫「以 BTC_RV_{t-1} 作為 predictor」，實際 code `btc_rv20.loc[common_idx2]`（同日 t，無 shift）；論文寫「bootstrap SE」，實際無 bootstrap。
+2. **Granger lag mining**：論文寫「VAR-AIC 選 lag」，實際 `min(gc.keys(), key=lambda k: gc[k][0]['ssr_ftest'][1])`（選最小 p-value，=lag mining，over-rejection）。
+3. **OOS IS/OOS 重疊 + 錯誤 spec**：IS 資料 `is_data = forecast_data.loc[:oos_start]`（包含 oos_start 日，= double-counted）；OOS 用固定 lags `{1,2,3,5}` 而非 AIC AR(p)；expanding window 而非 rolling 756-day。
+
+**為何 v1-v3 全漏**：所有 review 輪次（`review_history/v1-v4/`）均為 Claude general-purpose subagent 作 `latex-academic-reviewer` / `citation-verifier` proxy，**讀的是 .tex 文本而非打開 .py 源碼對照**。同模型自審不做方法-代碼逐行核對，系統性盲點。
+
+**處置**：
+- `k1025_v2.py` 建立（commit `b3a9067d`，2026-05-22），修正全部 3 BLOCKING + MAJOR 3（log returns + auto_adjust=True）。
+- `compute_queue` 排入 full re-run（ID `compute-k1025-v2-crypto-fear-channel-corrected-methods-3-blocking-fi-1779441704`，timeout 7200s）。
+- `research_program.md` P10 狀態更新為 `code_fix_queued`；等新結果後更新 main.tex 數字。
+
+**Lessons**：
+1. **論文投稿前必須有獨立模型開 .py 源碼對照方法段**（不只 latex/citation review）— 加為 paper stage gate。獨立模型（Codex / agy）讀實際 code 才算審查，同模型讀 markdown 不算。
+2. **method-code 對照 checklist**：(a) 每個 predictor 是否明確有 `.shift(1)` 或等效 lag；(b) model-selection 是否用 AIC/BIC 而非 p-value mining；(c) IS/OOS split 左閉右開語義（`loc[:oos_start]` vs `loc[:'2018-12-31']`）；(d) 預告的 SE 方法（bootstrap / HAC）是否真的實作。
+3. **reproduce.py 只驗數字 byte-match，不驗方法描述**。reproduce gate 應加方法-代碼一致性審查（獨立模型 review 必須開 .py 源碼核查）。
+4. **code-method 不符是系統性盲點，不是 one-off**（P5/P6/P10 三篇皆有不同形式），現有 review pipeline 缺少 method-vs-code cross-check 維度。

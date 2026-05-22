@@ -8009,5 +8009,29 @@
       "C4: HAR-RV benchmark missing",
       "C5: A4f free-omega vs Proposition 2 contradiction"
     ]
+  },
+  {
+    "timestamp": "2026-05-22T17:25:00+08:00",
+    "task_type": "paper_body",
+    "task_id": "k1025-v2-blocking-fix-2026-05-22",
+    "title": "P10 crypto-fear-channel: k1025_v2.py — 3 BLOCKING code-method mismatch fixes",
+    "status": "succeeded",
+    "summary": "Created k1025_v2.py fixing 3 BLOCKING issues found by independent Codex GPT-5.4 review: (1) QR BTC_RV_lag1 + 1000-iter bootstrap SE, (2) Granger VAR-AIC lag + Bonferroni correction, (3) OOS strict IS/OOS split + AIC AR(p) rolling 756-day window. Compute queue job enqueued (timeout 7200s). Paper status -> code_fix_queued.",
+    "paper_id": "crypto-fear-channel",
+    "items_completed": [
+      "k1025_v2.py created (commit b3a9067d)",
+      "BLOCKING 1: QR lag btc_rv20.shift(1) + 1000-iter bootstrap SE (seed=42)",
+      "BLOCKING 2: Granger VAR select_order AIC + Bonferroni correction",
+      "BLOCKING 3: OOS strict split 2018-12-31 / 2019-01-01 + AIC AR(p) IS + rolling 756-day window",
+      "MAJOR 3: log returns + auto_adjust=True",
+      "research_program.md P10 status -> code_fix_queued",
+      "error_log.md: code-method mismatch lesson documented",
+      "compute_queue enqueued: compute-k1025-v2-crypto-fear-channel-corrected-methods-3-blocking-fi-1779441704"
+    ],
+    "remaining_issues": [
+      "MAJOR 1-5 from v5_independent review still unaddressed (pending new results)",
+      "main.tex numbers update needed after compute_queue finishes",
+      "Worktree agent-aa76d7fbb2f0382dc needs manual unlock+remove"
+    ]
   }
 ]
