@@ -130,7 +130,10 @@ def main():
     cron = jl(REPO / "storage" / "ops" / "cron_last_run.json", {})
     stale = []
     expected_max_age_hours = {
-        "collect_us_data": 12, "collect_tw_data": 12, "release_pool": 4,
+        # collect_* run once daily (collect_tw 15:00 Mon-Fri, collect_us 07:03
+        # Tue-Sat) — a 12h max-age chronically false-flags them every day in
+        # the ~22h gap between daily runs. 26h covers normal daily cadence.
+        "collect_us_data": 26, "collect_tw_data": 26, "release_pool": 4,
         "check_alerts": 2, "paper_sync_all": 8, "memory_health_daily": 30,
         "market_calendar_sync": 30, "refresh_paper_snapshots": 30,
     }
