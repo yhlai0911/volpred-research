@@ -1089,6 +1089,30 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 
 ---
 
+## 2026-05-22 | **3-STRIKE TRIGGER** K1380 SPA/RC Test — valid_all joint-mask n_valid=0 結構性缺陷
+
+**3 次 incident**：
+1. `k1380-spa-test` (failed) — 初版
+2. `compute-k1380-...` (failed) — 修版
+3. `compute-k1380-v3-numba-jit-...` (failed 2026-05-22) — numba v3
+
+**共同症狀**：OOS 完成 1864 步（925s），但 `n_valid (all 17 models): 0`，所有模型 QLIKE mean = nan，bootstrap 階段 `ValueError: high <= 0`。
+
+**Root cause（三層）**：
+1. **底層邏輯**：`valid_all = np.all(~np.isnan(qlike_matrix), axis=0)` 需全 17 模型同步非 NaN。只要任 1 模型（通常是 MIDAS B/C 系列）收斂失敗讓 losses 某行全 NaN，joint mask 立刻全空 → n_valid=0
+2. **流程**：MIDAS B-series 用 `np.roll` 建 lag matrix 有循環包裹問題，fit_midas 收斂困難；C-series `fit_midas` 在某些 window 失敗並被 `try...except` 靜默吞掉 → losses[10:15,:] 部分或全 NaN
+3. **架構**：同時要求 17 個模型在每一個 OOS 步都有 valid 預測，是比 K988 / K1391 的 pairwise DM 更嚴苛的條件，在高維 horse race 中幾乎不可能達到；應改用 model-specific valid masks 進行 pairwise 比較
+
+**Fix（K1380-v4）**：
+- 用 per-model valid masks `valid_i = (~np.isnan(losses[i])) & (r2_oos > 1e-16)` 取代 joint `valid_all`
+- SPA test：只包含 coverage ≥ 95% OOS 步的模型（排除長期收斂失敗的 spec）
+- 加診斷列印：OOS 後立即列各模型 non-NaN count，方便未來除錯
+- MIDAS B-series lag matrix 改用正確 `np.array([tr_lv[max(0,i-k-1)] for i in range(ntr)])` 逐欄構建，不用 np.roll（避免循環包裹）
+
+**Action**：K1380-v4 已加入 next_tasks（P3），待下次 dispatch 建立並入計算佇列。
+
+---
+
 ## 2026-05-21 | hourly-dispatch launchd exit-78 — plist StandardOutPath 在 TCC 保護的 Desktop
 
 **問題**：`com.volpred.hourly-dispatch` LaunchAgent 自 09:07 起每班 exit 78 (EX_CONFIG)、零輸出、script body 完全沒執行（probe 寫 /tmp 第一行都沒跑）。06/07/08:07 還正常。

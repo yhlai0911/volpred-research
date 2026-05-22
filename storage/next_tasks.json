@@ -9994,5 +9994,28 @@
     "completed_at": "2026-05-21T10:38:26.031572+00:00",
     "verdict": "CONDITIONAL_PASS",
     "knowledge_item_id": "f37c47e7"
+  },
+  {
+    "id": "K1380_v4_spa_rc_test_3strike_refactor",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "title": "K1380-v4: Paper 9 C3 SPA/RC Test — Three-Strike Refactor (per-model valid masks)",
+    "description": "3-STRIKE 重構：K1380 連 3 次因 valid_all joint mask → n_valid=0 失敗。根因：任一 MIDAS 模型收斂失敗就讓 joint mask 全空。Fix：(1) 改用 per-model valid_i masks；(2) SPA test 只含 coverage≥95% 的 spec；(3) 加 non-NaN 診斷列印；(4) MIDAS lag matrix 改用正確逐欄構建（不用 np.roll）。成功標準：n_valid > 1500，至少 12/17 模型有 coverage。",
+    "paper": "garch-x-vix",
+    "paper_issue": "C3",
+    "related": [
+      "K1380",
+      "K988"
+    ],
+    "tags": [
+      "spa-test",
+      "white-rc",
+      "horse-race",
+      "paper-9",
+      "three-strike",
+      "midas"
+    ],
+    "source": "3-strike trigger 2026-05-22"
   }
 ]
