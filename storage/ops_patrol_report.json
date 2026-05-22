@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-05-22T06:02:45Z",
-  "all_ok": true,
+  "timestamp": "2026-05-22T12:14:53Z",
+  "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
@@ -10,12 +10,12 @@
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json age: ~0 hours (last modified 2026-05-22T06:02:36Z, threshold 26h). File is fresh."
+      "detail": "storage/strategy_metrics.json age: ~12 seconds at check time. Well within 26-hour threshold."
     },
     {
       "name": "ERROR_LOG",
-      "status": "ok",
-      "detail": "No entries from today (2026-05-22). 3 entries from yesterday (2026-05-21) for informational record: (1) hourly-dispatch 02:07+03:07 CST SIGALRM exit=142; (2) 3 ready_for_submission papers REJECT — Claude self-review blind spot, independent model gate added; (3) hourly-dispatch launchd exit-78 — plist StandardOutPath on TCC-protected ~/Desktop, fix: moved to ~/.volpred/logs/."
+      "status": "alert",
+      "detail": "Yesterday (2026-05-21) entries in docs/error_log.md: (1) hourly-dispatch 02:07+03:07 CST SIGALRM exit=142 — HANG-KILLED after 3000s; (2) feed.json mile_4ec7b75e description violation words fixed ~05:xx CST; (3) 3 papers ready_for_submission all REJECTED by independent model review — Claude self-review blind spot, new gate required; (4) hourly-dispatch launchd exit-78 — plist StandardOutPath on TCC-protected ~/Desktop, fixed by moving to ~/.volpred/logs/."
     },
     {
       "name": "PAPER_TRADING_GAPS",
@@ -33,5 +33,7 @@
       "detail": "storage/memory/knowledge.json contains 2151 entries."
     }
   ],
-  "alerts": []
+  "alerts": [
+    "error_log_yesterday: 4 entries dated 2026-05-21 — hourly-dispatch SIGALRM x2, feed.json violation fix, 3 papers REJECTED by independent review, launchd exit-78 TCC issue"
+  ]
 }

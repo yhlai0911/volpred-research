@@ -1,0 +1,7 @@
+{
+  "timestamp": "2026-05-22T12:14:53Z",
+  "alert_type": "error_log_yesterday",
+  "severity": "warn",
+  "detail": "docs/error_log.md contains 4 entries dated 2026-05-21 (yesterday): (1) hourly-dispatch 02:07+03:07 CST SIGALRM exit=142 — HANG-KILLED after 3000s, root cause TCC plist path issue; (2) feed.json mile_4ec7b75e description violation words replaced ~05:xx CST; (3) 3 papers marked ready_for_submission all REJECTED by independent model review — Claude self-review blind spot confirmed, new gate required; (4) hourly-dispatch launchd exit-78 — plist StandardOutPath pointed at TCC-protected ~/Desktop, fixed by moving logs to ~/.volpred/logs/.",
+  "action_required": "Verify hourly-dispatch is healthy post-fix. Verify independent-model review gate is now enforced for paper submissions."
+}
