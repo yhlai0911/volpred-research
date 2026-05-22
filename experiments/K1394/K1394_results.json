@@ -1,0 +1,86 @@
+{
+  "experiment_id": "K1394",
+  "title": "兒少投資帳戶的複利幻覺：波動拖累與報酬順序風險",
+  "seed": 42,
+  "data_source": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
+  "data_diagnostics": {
+    "raw_daily_rows": 6644,
+    "date_min": "2000-01-03",
+    "date_max": "2026-05-19",
+    "missing_spy_adj_close": 0,
+    "monthly_rows": 317
+  },
+  "market_level": {
+    "definition": "算術/幾何年報酬以日曆年聚合的完整年份報酬序列計算",
+    "n_full_calendar_years": 25,
+    "full_year_range": "2001-2025",
+    "sample_monthly_returns": 316,
+    "arithmetic_annual_return": 0.1035538776698213,
+    "geometric_annual_return": 0.08762681006676676,
+    "volatility_drag_annual": 0.01592706760305454,
+    "volatility_drag_bp": 159.2706760305454,
+    "annual_return_volatility": 0.17812396279240955,
+    "monthly_return_volatility_annualized": 0.15172750161155424
+  },
+  "rolling_dca": {
+    "n_windows": 102,
+    "monthly_contribution": 5000.0,
+    "total_invested": 1080000.0,
+    "hold_years": 18,
+    "textbook_smooth_6pct_final_nominal": 1936765.9720357026,
+    "final_nominal": {
+      "min": 2416422.249959678,
+      "p10": 2692521.5757039273,
+      "median": 3319432.821838903,
+      "p90": 4197082.211421265,
+      "max": 4661261.314675764
+    },
+    "final_real_2pct_inflation": {
+      "min": 1691880.6921847926,
+      "p10": 1885194.223526316,
+      "median": 2324132.0097791003,
+      "p90": 2938626.457828048,
+      "max": 3263625.8086348213
+    },
+    "money_weighted_annual_return": {
+      "min": 0.08365058877904885,
+      "p10": 0.09419521638323813,
+      "median": 0.11428932208930154,
+      "p90": 0.13642349876496226,
+      "max": 0.14621267305792007
+    },
+    "worst_window": {
+      "start_ym": "2002-04",
+      "end_ym": "2020-03",
+      "final_nominal": 2416422.249959678,
+      "final_real": 1691880.6921847926,
+      "invested": 1080000.0,
+      "money_weighted_annual_return": 0.08365058877904885,
+      "multiple_nominal": 2.237428009221924
+    },
+    "best_window": {
+      "start_ym": "2008-06",
+      "end_ym": "2026-05",
+      "final_nominal": 4661261.314675764,
+      "final_real": 3263625.8086348213,
+      "invested": 1080000.0,
+      "money_weighted_annual_return": 0.14621267305792007,
+      "multiple_nominal": 4.315982698773856
+    },
+    "median_window": {
+      "start_ym": "2004-06",
+      "end_ym": "2022-05",
+      "final_nominal": 3336803.0793173946,
+      "final_real": 2336293.958398233,
+      "invested": 1080000.0,
+      "money_weighted_annual_return": 0.11478724873488999,
+      "multiple_nominal": 3.0896324808494393
+    }
+  },
+  "caveats": [
+    "SPY adjusted close 含股息再投資，未扣交易成本與管理費。",
+    "歷史回測，過去報酬不保證未來；US 大盤是 survivorship-favourable 市場。",
+    "實質終值以期末 18 年通膨一次折現，為保守購買力視角；若以投入時點分別折現，實質值會略高。",
+    "rolling 視窗高度重疊（相鄰起點僅差一個月），分布的極端值由少數獨立 18 年段落驅動，非獨立樣本。"
+  ]
+}
