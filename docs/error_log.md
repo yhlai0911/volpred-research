@@ -1133,3 +1133,19 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 4. **`cp` 覆蓋正在被執行的 .sh 會 torn-write**（16:39 run 撞 line 99 syntax error fragment）→ 改 wrapper TCC copy 前應先確認沒有 running instance，或寫到 temp 再 `mv`（atomic rename）。
 
 **Pending 候補**：LaunchAgent plist 無 repo 原始檔（直接編 `~/Library/LaunchAgents/`）— 應比照 wrapper 在 repo 建 `config/launchagents/` 源 + install script，否則重灌不可復現。
+
+---
+
+## FB trending_repost 發文 — 工具現況（2026-05-22 釐清）
+
+**可做（本 session 已完成 3 篇）**：
+- 發文：JS `javascript_tool` 對 composer DOM `.click()` 繞過 viewport 限制（繼續/發佈鈕）。
+- 留言：點 post 留言 icon → 跳 permalink dialog → computer type URL → 點藍色 send。
+
+**做不到 — 附圖（4 法實測全撞工具牆，需工具層修）**：
+1. `file_upload` paths — API 改版，不再收 host 路徑，要 `files` 內容參數（schema 未更新）。
+2. `upload_image` — 只收 screenshot 的 imageId；screenshot 必帶 viewport 白邊 + "Claude is active" toast，品質不可用。
+3. JS DataTransfer + `fetch(圖URL)` — FB CSP `connect-src` 擋跨域 fetch。
+4. JS DataTransfer + 同源分頁 base64 — `javascript_tool` 回傳大字串被截斷。
+
+**結論**：trending_repost 發 FB 目前只能「文字 + 留言連結」，**附圖需 file_upload 的 files-content API 被正確支援，或另闢工具**。這是工具層限制，非流程可繞。下次 trending_repost 設計 FB 步驟時，圖表改放「留言區」或「VolPred 原文」即可（FB 貼文連結卡已自動帶預覽圖）。
