@@ -10,7 +10,7 @@
 
 | # | Issue | Source | Severity | Linked to v2 Adversarial? |
 |---|-------|--------|----------|--------------------------|
-| C1 | COVID subperiod analysis missing | v2-Ch4 + LaTeX-HIGH2 | **CRITICAL** | v2 SERIOUS FLAW #1 |
+| C1 | COVID subperiod analysis missing | v2-Ch4 + LaTeX-HIGH2 | **CRITICAL → PASS (K1393)** | v2 SERIOUS FLAW #1 |
 | C2 | Main claim overstatement: "unnecessary" vs "indistinguishable" | v2-Ch3 | **CRITICAL** | v2 SERIOUS FLAW #2 |
 | C3 | Spec genealogy / multiple testing (White RC or SPA) | v2-Ch7 | **CRITICAL** | v2 SERIOUS FLAW #3 |
 | C4 | HAR-RV benchmark missing | v2-Ch6 | **HIGH** | v2 SIGNIFICANT |
@@ -32,14 +32,28 @@
 
 ## TOP-5 MOST URGENT FIXES (pre-submission critical path)
 
-### RANK 1 — COVID Subperiod Analysis (C1)
+### RANK 1 — COVID Subperiod Analysis (C1) — **RESOLVED 2026-05-22 (K1393)**
+
+**Status**: ✅ PASS — K1393 leave-COVID-out DM test confirms A4f advantage is NOT COVID-driven.
+
+**K1393 results** (K988-faithful spec, OOS 2019-01-01 to 2026-04-07):
+
+| Subperiod | n | DM t | Harvey-sig |
+|-----------|---|------|------------|
+| Full OOS | 1825 | +3.60 | ✓ |
+| Non-COVID (excl 2020-02-01–06-30) | 1721 | **+4.26** | **✓ C1 PASS** |
+| Pre-COVID (2019) | 273 | +2.52 | ✗ |
+| COVID window (2020-02–06) | 104 | +1.48 | ✗ |
+| Post-COVID (2021–2026-04) | 1448 | +3.76 | ✓ |
+
+**Key finding**: Non-COVID DM t=+4.26 is Harvey-significant (|t|>3.0). COVID window t=+1.48 not sig — advantage comes from **normal market conditions**, not crisis volatility spikes.
+
+**Paper action required**:
+1. Add robustness table (Table A1 or Table 5 expansion) showing subperiod DM results
+2. Narrative: "The VIX-augmented model advantage is not an artifact of the COVID-19 crisis episode. Excluding the 2020-02 to 2020-06 window (n=104), the non-COVID DM t-statistic is +4.26, remaining Harvey-significant at |t|>3.0."
+3. ~~Compute K_NEW_A~~ → completed as K1393
 
 **Why top priority**: The entire 2019-2026 OOS period is heavily influenced by the COVID-19 shock (VIX peak = 82.69). Without leave-COVID-out analysis, any VIX-driven model trivially wins on crisis episodes. The paper acknowledges the 7-period 2-year window analysis in prose (lines 714-716) but provides no table. This is the most likely reason a referee at JEF/JoF will reject in R1.
-
-**Required actions**:
-1. Run leave-COVID-out DM test (exclude 2020-02-01 to 2020-06-30) and report DM t for A4f vs GJR
-2. Add Table A1 (Appendix) or restructure Table 5 to show: pre-COVID (2019), COVID (2020), post-COVID (2021-2022), recent (2023-2026) separately
-3. Compute key experiments: K_NEW_A (leave-COVID-out DM, suggested in v2 review)
 
 **Connection to v2**: v2 SERIOUS FLAW #1; also corroborated by LaTeX-HIGH2 (missing table for the existing 7-period claim)
 
@@ -133,7 +147,7 @@ Change "contemporaneous normalization avoids a simultaneity issue" → "contempo
 
 | ID | Description | Urgency | Estimated K |
 |----|-------------|---------|-------------|
-| K_NEW_A | Leave-COVID-out DM test (2019+2021-2026) | CRITICAL | K_next_available |
+| K_NEW_A | Leave-COVID-out DM test (2019+2021-2026) | ~~CRITICAL~~ **DONE** | K1393 (2026-05-22) |
 | K_NEW_B | HAR-RV + HAR-RV-VIX horse race | HIGH | K_next+1 |
 | K_NEW_C | White's Reality Check / SPA on 17-spec horse race | HIGH | K_next+2 |
 | K_NEW_D | COVID-period refit sensitivity interaction (refit freq × crisis dates) | MEDIUM | K_next+3 |

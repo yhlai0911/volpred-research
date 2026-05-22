@@ -77,7 +77,16 @@ Key results:
 
 **Paper 9 implication**: K1391 does NOT directly address C1 for the paper's stated OOS. Need **K1392** with OOS truncated to 2026-04-07. K1391 results are a monitoring finding (A4f advantage not robust to most recent data) but not immediately relevant to the paper's C1 fix.
 
-**Action**: K1392 enqueued — same protocol but OOS end = 2026-04-07.
+**Action**: ~~K1392 enqueued~~ → K1392 completed (with bugs) → **K1393 completed 2026-05-22: C1 PASS**.
+
+## SF1 RESOLUTION — K1393 (2026-05-22)
+
+**K1393** (K988-faithful A4f spec) provides the definitive C1 answer:
+- Non-COVID DM t=+4.26 (Harvey-sig, n=1721) — A4f advantage NOT COVID-driven
+- COVID window DM t=+1.48 (not sig, n=104) — advantage from normal markets
+- Full OOS DM t=+3.60 (Harvey-sig, n=1825)
+
+**C1 status: RESOLVED.** Paper action: add subperiod robustness table, narrative "advantage not COVID artifact."
 
 ## Cross-reference
 
@@ -87,4 +96,5 @@ Key results:
 - `experiments/k1378/k1378_results.json` — SF1 leave-COVID-out DM test results (r² proxy)
 - `experiments/k1379/k1379_results.json` — SF2 HAR-RV benchmark horse race
 - `experiments/k1391/k1391_results.json` — SF1 leave-COVID-out DM test (full QLIKE, extended OOS to May 2026)
-- `experiments/k1392/` (pending) — SF1 fix: truncated OOS to paper's stated 2026-04-07
+- `experiments/k1392/k1392_results.json` — K1392 (INVALID: 3 A4f spec bugs; for diagnostic reference only)
+- `experiments/k1393/k1393_results.json` — **K1393 VALID: K988-faithful, C1 PASS, non-COVID DM t=+4.26**
