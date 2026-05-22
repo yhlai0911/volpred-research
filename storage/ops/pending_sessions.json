@@ -6,59 +6,59 @@
       "cron": "3 9 * * *",
       "prompt": "每日任務審視：執行 daily-planning-maintain --stub-if-no-work；若有 planning gap 再建立正式 task",
       "description": "每日一次的 queue-first 任務審視。",
-      "recorded_at": "2026-05-20T17:00:07+00:00",
+      "recorded_at": "2026-05-22T20:00:08+00:00",
       "replayed_at": "2026-04-27T07:33:38+00:00",
-      "recorded_count": 74
+      "recorded_count": 126
     },
     "continue_task": {
       "cron": "*/30 * * * *",
       "prompt": "繼續任務（slot-aware）：執行 continue-task-maintain --stub-if-no-work。**先看 heartbeat 回傳的 alerts.items**：若 critical_count > 0（draft_pool=0 / release_pool gap / member_qa stale / host_cron_fail 等），**alert auto-remediation 優先於 dispatch candidate**——照 .claude/rules/alert.md 對應 action 立即執行，不可 skip。alerts 處理完才看 dispatch candidate **並 fill 至 slot=4 上限（slot<4 時派 (4-current) 個 parallel）**；不一次一個。",
       "description": "Slot-aware continuation heartbeat。cron `*/30` 嚴格每 30 分鐘等距 fire（每小時 :00 / :30），永遠落在 Claude Code Max $200 plan 1-hour prompt cache window 中央，cache 命中率最佳。2026-04-26 用戶指定 4h→30min；先嘗試 50min 但發現 `*/50` 標準 cron 解析為 :00 / :50（50/10 不等距），改用 `*/30` 才是真正等距。Cache TTL 已於 Anthropic support article 'Using Claude Code with your Pro or Max plan' 確認 Max plan = 1h；Pro / API key = 5min。**單一 cron 行表達等距 cadence 的限制**：只能用 60 的因數（1/2/3/4/5/6/10/12/15/20/30/60）；45 無法用單一 `*/45` 等距表達（會解析為 :00 / :45 = 45/15 gap）；要真等距 45min 需 3 條 entries cycle 過 3-hour period。歷史 2026-05-10 用戶問 45min，回答 vanilla cron 限制，最終保持 `*/30`（或可選 hourly `0 * * * *` 真減頻）。注意：2026-03 初 default TTL 曾悄悄從 1h 降到 5min（GH issue #46829），Max 訂閱保持 1h 但需監控未來變動，若降級則本 cadence 失效。Slot fill rule (per feedback_pool_fill_to_threshold): cron fire 時 slot < 4 派 (4-current) 個 agent 並行補滿，不一次一個。",
-      "recorded_at": "2026-05-20T17:00:07+00:00",
+      "recorded_at": "2026-05-22T20:00:08+00:00",
       "replayed_at": "2026-04-27T07:33:38+00:00",
-      "recorded_count": 122
+      "recorded_count": 174
     },
     "question_research": {
       "cron": "17 */6 * * *",
       "prompt": "會員問題研究：執行 question-ops-maintain --stub-if-no-work。若 pending>0 且 ranked=0：(a) 跑 question-ranking-workflow --source user --output-json /tmp/q_workflow.json；(b) 主線程逐題 4 維度評分（研究可行性/讀者價值/研究相關性/預期影響力 各 1-10）寫 evaluation JSON 到 /tmp/q_evals.json；(c) 跑 question-rerank --evaluations-json /tmp/q_evals.json。若 ranked>0 且 researching=0：dispatch claude general-purpose subagent 走 question-claim → research → answer → question-finish 路徑。**不可僅 review report 就停**（5 天 silent gap 教訓 2026-04-26）。",
       "description": "每 6 小時執行會員問題評分與研究 pipeline。actionable not review-only — pending 必走 evaluate→rerank→claim→research，避免 5 天 silent gap (lesson 2026-04-26 question 29cbeb5c)。",
-      "recorded_at": "2026-05-20T17:00:07+00:00",
+      "recorded_at": "2026-05-22T20:00:08+00:00",
       "replayed_at": "2026-04-27T07:33:38+00:00",
-      "recorded_count": 81
+      "recorded_count": 133
     },
     "platform_patrol": {
       "cron": "37 */6 * * *",
       "prompt": "平台巡檢：執行 platform-patrol-maintain --stub-if-no-work；若有訊號再看 detail CLI 並建立後續任務",
       "description": "每 6 小時執行平台低噪音巡檢 gate；只有有訊號才展開 detail CLI。",
-      "recorded_at": "2026-05-20T17:00:07+00:00",
+      "recorded_at": "2026-05-22T20:00:08+00:00",
       "replayed_at": "2026-04-27T07:33:38+00:00",
-      "recorded_count": 82
+      "recorded_count": 134
     },
     "git_sync": {
       "cron": "47 */4 * * *",
       "prompt": "Git sync：執行 git-sync-maintain --stub-if-no-work；若需同步再依 wrapper 建議處理 commit / pull / push",
       "description": "每 4 小時的 git sync，避免本地與雲端狀態分叉。",
-      "recorded_at": "2026-05-20T17:00:07+00:00",
+      "recorded_at": "2026-05-22T20:00:08+00:00",
       "replayed_at": "2026-04-27T07:33:38+00:00",
-      "recorded_count": 87
+      "recorded_count": 139
     },
     "knowledge_index_check": {
       "cron": "7 */6 * * *",
       "prompt": "知識索引維護：執行 knowledge-index-maintain --stub-if-no-work；若有動作再回報 after summary",
       "description": "每 6 小時執行知識索引低噪音維護與 after-check。",
-      "recorded_at": "2026-05-20T17:00:07+00:00",
+      "recorded_at": "2026-05-22T20:00:08+00:00",
       "replayed_at": "2026-04-27T07:33:38+00:00",
-      "recorded_count": 81
+      "recorded_count": 133
     },
     "token_usage_daily": {
       "cron": "23 22 * * *",
       "prompt": "Token 用量日報：執行 token-usage-maintain --stub-if-no-work；只有缺日報或週報時才生成並回報 after summary",
       "description": "每日 token 使用量摘要。",
-      "recorded_at": "2026-05-20T17:00:07+00:00",
+      "recorded_at": "2026-05-22T20:00:08+00:00",
       "replayed_at": "2026-04-27T07:33:38+00:00",
-      "recorded_count": 73
+      "recorded_count": 125
     }
   },
-  "last_scanned_at": "2026-05-20T17:00:07+00:00",
+  "last_scanned_at": "2026-05-22T20:00:08+00:00",
   "last_replay_at": "2026-04-27T07:33:38+00:00"
 }

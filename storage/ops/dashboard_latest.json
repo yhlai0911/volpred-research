@@ -1,25 +1,25 @@
 {
-  "dashboard_generated_at": "2026-05-22T00:00:58Z",
-  "overall_status": "warn",
-  "section_breaches": 2,
+  "dashboard_generated_at": "2026-05-22T20:00:36Z",
+  "overall_status": "ok",
+  "section_breaches": 0,
   "section_critical": 0,
   "sections": [
     {
       "section": "production_pending",
       "status": "ok",
-      "tldr": "54 pending tasks (top types: [('daily_article', 40), ('experiment', 12), ('?', 2)])",
+      "tldr": "51 pending tasks (top types: [('daily_article', 37), ('experiment', 12), ('?', 2)])",
       "next": "dispatch top P1-P3 if slots free"
     },
     {
       "section": "production_throughput",
       "status": "ok",
-      "tldr": "14 articles published last 24h (target 6/day)",
+      "tldr": "12 articles published last 24h (target 6/day)",
       "next": null
     },
     {
       "section": "distribution_supabase",
       "status": "ok",
-      "tldr": "14/14 last-24h articles synced",
+      "tldr": "12/12 last-24h articles synced",
       "next": null,
       "missing": []
     },
@@ -29,30 +29,24 @@
       "tldr": "3/3 sample live URLs return 200",
       "next": null,
       "sample": [
-        "mile_b14391d9",
-        "mile_85a41f69",
-        "mile_b46e313f"
+        "mile_ce3238d1",
+        "mile_345c1579",
+        "mile_490d38ec"
       ],
       "dead": []
     },
     {
       "section": "verification_fb_pipeline",
-      "status": "warn",
-      "tldr": "2 FB posts pending sync",
-      "next": "handoff doc + manual paste or retry MCP"
+      "status": "ok",
+      "tldr": "0 FB posts pending sync",
+      "next": null
     },
     {
       "section": "health_cron",
-      "status": "warn",
-      "tldr": "1 cron jobs stale (over max-age)",
-      "next": "manual fire ~/.volpred/bin/cron_<id>.sh",
-      "stale": [
-        {
-          "job": "collect_tw_data",
-          "age_h": 17.0,
-          "max_h": 12
-        }
-      ]
+      "status": "ok",
+      "tldr": "0 cron jobs stale (over max-age)",
+      "next": null,
+      "stale": []
     },
     {
       "section": "health_alerts_unhandled",
