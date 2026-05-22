@@ -31179,5 +31179,33 @@
       "time-varying"
     ],
     "created_at": "2026-05-22T03:15:02+08:00"
+  },
+  {
+    "id": "k1391_leave_covid_out_dm_oos_mismatch",
+    "title": "K1391: Leave-COVID-out DM Test (A4f vs GJR) — 結果 CONDITIONAL PASS，OOS 期間與論文不符",
+    "body": "K1391 對 Paper 9 (garch-x-vix) 的 A4f vs GJR 執行 leave-COVID-out DM 檢定，使用 full QLIKE kernel（log(h) + r²/h），Codex v2 獨立審查 PASS。\n\n**結果（n=1866，OOS 2019-01-01 至 2026-05-20）**：\n- Full OOS: DM t = −2.030（Harvey ✗），GJR 贏 A4f\n- Non-COVID: DM t = −2.554（Harvey ✗），GJR 贏\n- COVID window: DM t = +1.084（Harvey ✗），A4f 贏但不顯著\n- Post-COVID: DM t = −2.460（Harvey ✗），GJR 贏\n\n所有子期間無一達 Harvey |t| > 3.0 門檻。\n\n**關鍵發現：OOS 期間不符論文**\nK1391 使用的 pinned CSV 含 2026-05-20 資料（n=1866），比論文所述 OOS 終點 2026-04-07（n=1825）多 41 個交易日。這 41 天（2026 年 4 月–5 月）造成 DM 符號翻轉：VIX 持續偏高但 SPY 波動率低於預期，A4f 透過 VIX² 過度預測波動 → QLIKE 更差。\n\n**意涵**：\n1. K1391 不直接回答 Paper 9 C1（論文 OOS 期間的 leave-COVID-out 分析）\n2. K1392（OOS_END='2026-04-07'）已建立並入計算佇列以回答 C1\n3. A4f 優勢在 2026 年 4–5 月已消失 → 監控發現，非當前論文 C1 主軸\n\n**方法論確認（Codex v2 PASS）**：\n- VIX lag 正確：vix_lag[t] = vix_vals[t-1]，OOS 使用 vix[oos_idx-1]\n- GJR 加 SLSQP 平穩性約束（alpha + gamma/2 + beta < 0.999）\n- DM 符號慣例：正 t = A4f 較好（較低 QLIKE 損失）",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "K1391",
+    "experiment_path": "experiments/k1391/",
+    "reviewer": "Codex v2 (2026-05-22)",
+    "tags": [
+      "garch-x",
+      "dm-test",
+      "leave-covid-out",
+      "paper-9",
+      "qlike",
+      "oos-mismatch",
+      "gjr",
+      "a4f",
+      "harvey"
+    ],
+    "created_at": "2026-05-22T04:23:03.853677Z",
+    "related_experiments": [
+      "K988",
+      "K1378",
+      "K1392"
+    ],
+    "paper": "garch-x-vix",
+    "paper_issue": "C1_CRITICAL"
   }
 ]

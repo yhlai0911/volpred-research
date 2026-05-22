@@ -61,10 +61,30 @@ Yahoo Finance retroactively adjusts historical price series (dividend reconcilia
 
 **Action for R1 response**: Add leave-COVID-out analysis using the paper's own OOS period and full QLIKE kernel. Frame as honest robustness check rather than hiding it. Knowledge entry: `k1378_sf1`.
 
+## SF1-K1391: Extended OOS Leave-COVID-out Analysis (2026-05-22)
+
+**K1391** ran leave-COVID-out DM test (A4f vs GJR) using **full QLIKE kernel** (Codex v2 reviewed, PASS). However OOS period extends to 2026-05-20 (n=1866), which is **41 days beyond the paper's stated OOS** (2026-04-07, n=1825).
+
+Key results:
+
+| Period | n | DM t | Harvey sig |
+|--------|---|------|------------|
+| Full OOS (to May 2026) | 1866 | **−2.030** | ✗ |
+| Non-COVID | 1762 | −2.554 | ✗ |
+| COVID window | 104 | +1.084 | ✗ |
+
+**Critical finding**: GJR beats A4f across all subperiods when OOS extends to May 2026. This reversal (from +4.148 with n=1825 to −2.03 with n=1866) is attributed to April–May 2026 data where elevated VIX caused A4f to over-predict volatility (large τ_t) but actual SPY returns were lower-than-expected.
+
+**Paper 9 implication**: K1391 does NOT directly address C1 for the paper's stated OOS. Need **K1392** with OOS truncated to 2026-04-07. K1391 results are a monitoring finding (A4f advantage not robust to most recent data) but not immediately relevant to the paper's C1 fix.
+
+**Action**: K1392 enqueued — same protocol but OOS end = 2026-04-07.
+
 ## Cross-reference
 
 - `paper/garch-x-vix/reproduce_report.json` — current snapshot-first match_rate
 - `docs/error_log.md` (2026-04-19 entries) — session-level session context
 - `.claude/rules/paper-workflow.md` — "Data snapshot pinning — yfinance drift 對策" rule
-- `experiments/k1378/k1378_results.json` — SF1 leave-COVID-out DM test results
+- `experiments/k1378/k1378_results.json` — SF1 leave-COVID-out DM test results (r² proxy)
 - `experiments/k1379/k1379_results.json` — SF2 HAR-RV benchmark horse race
+- `experiments/k1391/k1391_results.json` — SF1 leave-COVID-out DM test (full QLIKE, extended OOS to May 2026)
+- `experiments/k1392/` (pending) — SF1 fix: truncated OOS to paper's stated 2026-04-07

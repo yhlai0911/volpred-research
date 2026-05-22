@@ -7901,5 +7901,22 @@
       "body.tex L249: FHS first use expanded"
     ],
     "next_step": "uv run volpred ops paper-update --paper-id leverage-direction then git commit"
+  },
+  {
+    "timestamp": "2026-05-22T04:23:26.641327+00:00",
+    "task_type": "paper_review",
+    "task_id": "k1391-followup-2026-05-22",
+    "title": "K1391 Leave-COVID-out DM Test Followup — OOS Mismatch Diagnosis + K1392 Creation",
+    "status": "completed",
+    "verdict": "CONDITIONAL_PASS",
+    "summary": "PHASE A followup: Interpreted K1391 (leave-COVID-out DM test, A4f vs GJR, full QLIKE kernel). Codex v2 reviewed PASS. Key finding: K1391 OOS extends to 2026-05-20 (n=1866) vs paper stated 2026-04-07 (n=1825) — 41 extra days caused DM sign reversal (GJR beats A4f in K1391 but A4f wins in K988/paper). Created K1392 with OOS_END=2026-04-07 to match paper OOS. Updated K1391 README, errata_pending.md, created K1392 py+README. Enqueued K1392 to compute queue. Wrote K1391 knowledge entry (CONDITIONAL_PASS).",
+    "papers": [
+      "garch-x-vix"
+    ],
+    "experiments": [
+      "K1391",
+      "K1392"
+    ],
+    "next_step": "K1392 compute results → interpret for Paper 9 C1 resolution (Harvey-sig test determines whether to add robustness table or downgrade main claims)"
   }
 ]
