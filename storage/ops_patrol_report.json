@@ -1,39 +1,39 @@
 {
-  "timestamp": "2026-05-22T12:14:53Z",
+  "timestamp": "2026-05-22T18:02:26Z",
   "all_ok": false,
   "checks": [
     {
-      "name": "ARTICLE_POOL",
+      "name": "ARTICLE POOL",
       "status": "ok",
-      "detail": "Total drafts: 158 (threshold ≥12). Research audience: 18 (threshold ≥4). General audience: 140 (threshold ≥8). All above thresholds."
+      "detail": "Total drafts: 158 (>=12 OK). Research: 18 (>=4 OK). General: 140 (>=8 OK)."
     },
     {
-      "name": "STRATEGY_METRICS_FRESHNESS",
+      "name": "STRATEGY METRICS FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json age: ~12 seconds at check time. Well within 26-hour threshold."
+      "detail": "strategy_metrics.json age: ~0 hours (updated moments ago). Well within 26h threshold."
     },
     {
-      "name": "ERROR_LOG",
+      "name": "ERROR LOG",
       "status": "alert",
-      "detail": "Yesterday (2026-05-21) entries in docs/error_log.md: (1) hourly-dispatch 02:07+03:07 CST SIGALRM exit=142 — HANG-KILLED after 3000s; (2) feed.json mile_4ec7b75e description violation words fixed ~05:xx CST; (3) 3 papers ready_for_submission all REJECTED by independent model review — Claude self-review blind spot, new gate required; (4) hourly-dispatch launchd exit-78 — plist StandardOutPath on TCC-protected ~/Desktop, fixed by moving to ~/.volpred/logs/."
+      "detail": "3 entries dated 2026-05-21 (yesterday): (1) hourly-dispatch 02:07+03:07 CST SIGALRM exit=142; (2) 3 ready_for_submission papers independently rejected — Claude self-review blind spot; (3) hourly-dispatch launchd exit-78 plist StandardOutPath in TCC-protected Desktop."
     },
     {
-      "name": "PAPER_TRADING_GAPS",
+      "name": "PAPER TRADING GAPS",
       "status": "ok",
-      "detail": "All 15 strategies checked. No strategy has >2 nulls in last 3 portfolio_return entries. Strategies: slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, _market_daily, adaptive_tier."
+      "detail": "15 strategies checked. No strategy has >2 null portfolio_return in last 3 entries."
     },
     {
-      "name": "GIT_STATUS",
+      "name": "GIT STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold >50). Working tree clean."
+      "detail": "0 uncommitted files. Clean working tree."
     },
     {
-      "name": "KNOWLEDGE_SIZE",
+      "name": "KNOWLEDGE SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json contains 2151 entries."
+      "detail": "knowledge.json contains 2151 entries."
     }
   ],
   "alerts": [
-    "error_log_yesterday: 4 entries dated 2026-05-21 — hourly-dispatch SIGALRM x2, feed.json violation fix, 3 papers REJECTED by independent review, launchd exit-78 TCC issue"
+    "error_log: 3 entries from yesterday (2026-05-21) — hourly-dispatch SIGALRM, paper submission review failures, launchd exit-78 TCC issue"
   ]
 }
