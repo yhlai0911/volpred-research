@@ -31300,5 +31300,17 @@
       "K988"
     ],
     "item_id": "9741caaf"
+  },
+  {
+    "item_id": "7c681d91",
+    "category": "experiment",
+    "content": "K1395 兒少 TISA 複利幻覺台股版 — 0050.TW + TWII 回測（K1394 美股版的台股對照）。0050 真實窗口 2009-2026（17.3年）：投入 104.5 萬→名目 732.4 萬、金額加權 19.79%（註：起點近 GFC 谷底，運氣偏好）。波動拖累：TWII 323 bp（算術 7.85% vs 幾何 4.62%，std 25.70%）、0050 174 bp、對照 SPY 159 bp。TWII 18年 rolling 132 起點：名目終值 min 128.1/median 177.6/max 436.8 萬，最佳最差 3.41x。反向發現：坊間平滑 6%（193.7萬）高於 TWII 真實中位 177.6萬 — 台股 6% 試算偏樂觀，與美股（6% 偏保守）方向相反。資料修補：yfinance 0050.TW Adj Close 在 2014-01-02 有幻影 4:1 分割（37.41→9.33，單日 4.01x），splice 修補（斷點前×0.249361，保留各段內部日報酬、無 lookahead）；主線程已從原始 snapshot CSV 直接驗證為 yfinance 假象（0050 該日無真實公司行動），splice 數學正確無偏誤。verdict=CONDITIONAL_PASS。reviewer：Codex 審查啟動但 node runtime 忽略 SIGALRM 掛起，改由主線程從原始資料獨立驗證 splice（最關鍵爭點）+ 數字 byte-core 對 results.json。experiment_id=K1395。已整合改寫 mile_490d38ec 為美股+台股雙視角單篇。",
+    "evidence": [
+      "experiments/K1395/K1395_results.json",
+      "experiments/K1395/README.md",
+      "experiments/K1395/K1395.py"
+    ],
+    "confidence": 0.7,
+    "created_at": "2026-05-22T22:27:58.003970"
   }
 ]
