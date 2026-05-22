@@ -1,0 +1,110 @@
+{
+  "experiment_id": "K1398",
+  "title": "MEM/AMEM vs GJR/HAR: Daily Volatility Forecasting",
+  "description": "Compare rolling 1-step-ahead daily volatility forecasts from MEM(1,1) and AMEM(1,1) against GJR-GARCH(1,1) and HAR baselines on SPY, QQQ, and GLD using realized variance from squared log returns.",
+  "date": "2026-05-23",
+  "assets": [
+    "SPY",
+    "QQQ",
+    "GLD"
+  ],
+  "window": 2000,
+  "models": [
+    "MEM",
+    "AMEM",
+    "GJR",
+    "HAR"
+  ],
+  "results": {
+    "SPY": {
+      "qlike": {
+        "MEM": -8.262207186837971,
+        "AMEM": -8.283918138398368,
+        "HAR": -8.272867550957333,
+        "GJR": -8.36207089083458
+      },
+      "mse": {
+        "MEM": 3.210292557324578e-07,
+        "AMEM": 3.2559886255378416e-07,
+        "HAR": 3.24417004647087e-07,
+        "GJR": 2.911494157936769e-07
+      },
+      "dm_vs_gjr": {
+        "MEM": {
+          "t_stat": 6.423992880690923,
+          "p_value": 1.4605627818298217e-10,
+          "significant": true
+        },
+        "AMEM": {
+          "t_stat": 5.6553234076800205,
+          "p_value": 1.6487942566811853e-08,
+          "significant": true
+        }
+      },
+      "oos_n": 4643
+    },
+    "QQQ": {
+      "qlike": {
+        "MEM": -7.852198511058109,
+        "AMEM": -7.50573251588378,
+        "HAR": -7.850606563344581,
+        "GJR": -7.9167121840834
+      },
+      "mse": {
+        "MEM": 3.1450191175054394e-07,
+        "AMEM": 4.4339920518277196e-07,
+        "HAR": 3.1457586226330985e-07,
+        "GJR": 2.9973865665340064e-07
+      },
+      "dm_vs_gjr": {
+        "MEM": {
+          "t_stat": 6.231025214579085,
+          "p_value": 5.044300532830448e-10,
+          "significant": true
+        },
+        "AMEM": {
+          "t_stat": 22.292835680995132,
+          "p_value": 0.0,
+          "significant": true
+        }
+      },
+      "oos_n": 4643
+    },
+    "GLD": {
+      "qlike": {
+        "MEM": -7.461049926193897,
+        "AMEM": -8.026755210760026,
+        "HAR": -8.296594299095092,
+        "GJR": -8.323253882311139
+      },
+      "mse": {
+        "MEM": 2.981872163976542e-06,
+        "AMEM": 1.7082124567318164e-07,
+        "HAR": 1.102829732040281e-07,
+        "GJR": 1.088817143676321e-07
+      },
+      "dm_vs_gjr": {
+        "MEM": {
+          "t_stat": 25.607982201216856,
+          "p_value": 0.0,
+          "significant": true
+        },
+        "AMEM": {
+          "t_stat": 11.234918503659392,
+          "p_value": 0.0,
+          "significant": true
+        }
+      },
+      "oos_n": 3417
+    }
+  },
+  "gates": {
+    "MEM_PASS_count": 0,
+    "AMEM_PASS_count": 0,
+    "total_assets": 3
+  },
+  "verdict": "NULL",
+  "key_finding": "MEM beats GJR on 0/3 assets by QLIKE; MEM pass count=0, AMEM pass count=0.",
+  "reviewer": null,
+  "experiment_path": "experiments/k1398/"
+}
