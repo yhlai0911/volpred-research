@@ -22,6 +22,16 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
+# Absolute uv path — host-cron processes get a minimal PATH (/usr/bin:/bin)
+# without Homebrew, so bare "uv" subprocess calls fail with FileNotFoundError
+# (2026-05-22: 16:10 boss_report Overall ERROR — dashboard + cron_review both
+# "[Errno 2] No such file or directory: 'uv'"). Resolve once, absolutely.
+import shutil as _shutil
+UV = next((p for p in ("/opt/homebrew/bin/uv",
+                       str(Path.home() / ".local/bin/uv"),
+                       "/usr/local/bin/uv") if Path(p).exists()),
+          _shutil.which("uv") or "uv")
+
 # 所有 email 顯示時間以台灣時間 (UTC+8) 為準（用戶 2026-05-20 要求）
 TW = timezone(timedelta(hours=8))
 NOW = datetime.now(timezone.utc)        # 內部比較仍用 UTC（git log / ISO 比對）
@@ -57,7 +67,7 @@ def _cron_review():
     autonomous schedulers actually ran, not just that they exist."""
     try:
         return subprocess.run(
-            ["uv", "run", "python", "scripts/cron_review.py"],
+            [UV, "run", "python", "scripts/cron_review.py"],
             cwd=str(PROJECT_ROOT), capture_output=True, text=True, timeout=90,
         ).stdout.strip()
     except Exception as e:
@@ -67,7 +77,7 @@ def _cron_review():
 def _dashboard():
     try:
         out = subprocess.check_output(
-            ["uv", "run", "python", "scripts/ops_dashboard.py"],
+            [UV, "run", "python", "scripts/ops_dashboard.py"],
             cwd=str(PROJECT_ROOT), stderr=subprocess.STDOUT, text=True, timeout=120,
         )
         return json.loads(out)
