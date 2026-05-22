@@ -31275,5 +31275,30 @@
       "K1394"
     ],
     "item_id": "79f56f38"
+  },
+  {
+    "id": "k1396_har_rv_vs_a4f_paper9_c4",
+    "title": "K1396: HAR-RV vs A4f — Paper 9 C4 Non-inferiority (PASS)",
+    "body": "K1396 (PASS, Codex 0.132.0 review, 2026-05-22): HAR-RV benchmarks vs A4f under Patton QLIKE (OOS 2019-2026, n=1866, W=2000, refit q63, seed=42).\n\nMean QLIKE: HAR=1.5612, HAR_VIX=1.5229, A4f=1.5390.\nDM(A4f vs HAR): t=+0.87, p=0.39 — NOT Harvey-sig (|t|<3.0).\nDM(A4f vs HAR_VIX): t=-0.88, p=0.38 — NOT Harvey-sig.\nDM(HAR_VIX vs HAR): t=-2.60, p=0.009 — conventional sig only, NOT Harvey-sig.\n\nConclusion: A4f statistically non-inferior to HAR-type benchmarks under both r2-proxy (t=+0.29, p=0.77) and Patton QLIKE. A4f has 1.4% lower QLIKE than HAR (1.539 vs 1.561) but cannot claim Harvey-sig superiority.\n\nPaper 9 action: C4 honest limitation paragraph added to Section 7.4 (HAR-RV Benchmark Comparison). C4 status: ACKNOWLEDGED. HAR_VIX adding VIX² predictor to HAR achieves lowest QLIKE (1.523) but still not Harvey-sig vs A4f — all three are statistically indistinguishable at the Harvey threshold.",
+    "verdict": "PASS",
+    "experiment_id": "K1396",
+    "experiment_path": "experiments/k1396/",
+    "reviewer": "Codex 0.132.0",
+    "reviewer_source": "Codex-0.132.0-ChatGPT-auth-2026-05-22",
+    "tags": [
+      "HAR-RV",
+      "paper9",
+      "garch-x-vix",
+      "DM-test",
+      "benchmark",
+      "C4",
+      "SPY",
+      "OOS"
+    ],
+    "created_at": "2026-05-22T14:15:09.949317+00:00",
+    "related_experiments": [
+      "K988"
+    ],
+    "item_id": "9741caaf"
   }
 ]

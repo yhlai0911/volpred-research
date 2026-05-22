@@ -1,6 +1,6 @@
 # K1396: HAR-RV vs A4f — Paper 9 C4 Benchmark
 
-**Status**: Queued (compute_queue)
+**Status**: ✅ COMPLETE — 2026-05-22 (compute_queue; 40s runtime)
 **Paper**: Paper 9 (garch-x-vix)
 **Resolves**: C4 (HAR-RV benchmark missing from main horse race)
 
@@ -26,11 +26,22 @@ The v3 review of Paper 9 (garch-x-vix) flagged the absence of HAR-RV as a HIGH-p
 - **DM threshold**: Harvey et al. (2016) |t| > 3.0
 - **Seed**: 42
 
-## Expected Results
+## Results (K1396_results.json)
 
-Per the consolidated_issues_v3.md C4 note:
-- If A4f significantly outperforms HAR-RV (likely for daily data): adds contribution
-- If A4f does NOT outperform HAR-RV: report as honest limitation
+**Protocol**: Patton QLIKE, OOS 2019–2026, n_OOS=1866, W=2000, refit q63, seed=42
+
+| Model | Mean QLIKE | DM vs A4f | p-value | Harvey-sig |
+|-------|-----------|-----------|---------|------------|
+| HAR-RV | 1.5612 | t=+0.87 | 0.387 | No |
+| HAR-RV-VIX | 1.5229 | t=−0.88 | 0.381 | No |
+| A4f | 1.5390 | — | — | — |
+
+**Verdict (C4)**: ACKNOWLEDGED (non-inferiority confirmed; superiority not established)
+- A4f is 1.4% numerically better than HAR-RV but NOT Harvey-sig (t=+0.87, p=0.39)
+- HAR-RV-VIX has lowest QLIKE but NOT Harvey-sig vs A4f (t=−0.88, p=0.38)
+- HAR-RV-VIX vs HAR-RV: t=−2.60, p=0.009 (conventional sig, not Harvey sig)
+- Honest limitation paragraph added to Paper 9 Section 7.4 (HAR-RV Benchmark Comparison)
+- Result consistent with r² proxy comparison (t=+0.29, p=0.77)
 
 ## References
 

@@ -35,13 +35,22 @@
 
 ---
 
-## C4 Status — HAR-RV Benchmark (IN PROGRESS)
+## C4 Status — HAR-RV Benchmark (ACKNOWLEDGED)
 
-**Status**: ⏳ Compute queued — K1396 (compute-k1396-har-rv-vs-a4f-paper-9-c4-har-benchmark-1779455820)
+**Status**: ✅ ACKNOWLEDGED — K1396 complete (2026-05-22); honest limitation added to Section 7.4
 
-**Plan**: K1396 runs HAR, HAR-VIX vs A4f DM test (same OOS protocol).
-- If A4f Harvey-sig > HAR: add HAR/HAR-VIX rows to Table 2 → C4 RESOLVED
-- If A4f not Harvey-sig > HAR: add honest limitation paragraph → C4 ACKNOWLEDGED
+**K1396 Results** (Patton QLIKE, OOS 2019–2026, n=1866, W=2000, refit q63):
+- Mean QLIKE: HAR=1.5612, HAR_VIX=1.5229, A4f=1.5390
+- DM(A4f vs HAR): t=+0.87, p=0.39 — NOT Harvey-sig
+- DM(A4f vs HAR-VIX): t=−0.88, p=0.38 — NOT Harvey-sig
+
+**Resolution**: A4f is statistically NON-INFERIOR to HAR (neither test is significant); cannot claim superiority. Honest limitation paragraph added to Section 7.4 (HAR-RV Benchmark Comparison), noting:
+- A4f achieves 1.4% lower QLIKE than HAR numerically (1.539 vs 1.561)
+- Difference falls short of Harvey threshold and is consistent with zero
+- Conclusion consistent across r² proxy and QLIKE proxy
+- A4f practical advantage (no intraday data) acknowledged
+
+**Result is consistent with r² proxy results** (DM t=+0.29, p=0.77 under r²), reinforcing non-inferiority claim.
 
 ---
 

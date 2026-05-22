@@ -801,7 +801,14 @@ Under this common-proxy evaluation ($n = 1{,}852$), A4f achieves lower average l
   \item A4f vs.\ HAR-RV: DM $t = +0.29$, $p = 0.77$ (not significant)
   \item A4f vs.\ HAR-RV-VIX: DM $t = +0.65$, $p = 0.52$ (not significant)
 \end{itemize}
-These results indicate that A4f is statistically \emph{non-inferior} to HAR-type benchmarks under the $r_t^2$ proxy. Importantly, A4f achieves this parity without requiring high-frequency or realized-variance data as inputs---a practical advantage for daily risk management where intraday data may be unavailable or costly. We caution that, under the standard Patton QLIKE (which penalizes underestimation and is asymmetric in the opposite direction), the relative rankings between GARCH-X and HAR-type models may shift; a formal comparison on realized variance proxies is left for future work.
+These results indicate that A4f is statistically \emph{non-inferior} to HAR-type benchmarks under the $r_t^2$ proxy. Importantly, A4f achieves this parity without requiring high-frequency or realized-variance data as inputs---a practical advantage for daily risk management where intraday data may be unavailable or costly.
+
+We additionally evaluate this comparison under the proxy-robust Patton QLIKE loss used in the main horse race, employing an identical OOS period (2019--2026), rolling window ($W = 2{,}000$), and quarterly refit schedule ($n_{\mathrm{OOS}} = 1{,}866$, 30 refits; Experiment K1396). A4f uses its steady-state long-run variance at each refit boundary, a standard approximation for daily GARCH-X evaluated against HAR-family models on the same daily grid. Under QLIKE, A4f achieves a 1.4\% lower loss than HAR-RV (QLIKE 1.539 vs.\ 1.561), while HAR-RV-VIX attains the lowest loss of the three (QLIKE 1.523); none of the pairwise differences reach the \citet{harvey2016} threshold:
+\begin{itemize}
+  \item A4f vs.\ HAR-RV (QLIKE): DM $t = +0.87$, $p = 0.39$ (not significant)
+  \item A4f vs.\ HAR-RV-VIX (QLIKE): DM $t = -0.88$, $p = 0.38$ (not significant)
+\end{itemize}
+The conclusion is consistent across both proxies: A4f is statistically non-inferior to HAR-type benchmarks in both evaluations, achieved without intraday data inputs. We cannot claim that A4f statistically dominates HAR-RV; the 1.4\% QLIKE advantage falls short of the stringent Harvey threshold and is consistent with zero. Practitioners should weigh A4f's practical advantage (no intraday data required) against HAR's interpretability and established use in the literature.
 
 \subsection{Multiple Testing Considerations}
 
