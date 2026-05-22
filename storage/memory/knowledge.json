@@ -31324,5 +31324,31 @@
     ],
     "confidence": 0.75,
     "created_at": "2026-05-22T23:26:29.146109"
+  },
+  {
+    "item_id": "0c4aa148",
+    "category": "model_comparison",
+    "content": "MEM (Multiplicative Error Model) and AMEM (Asymmetric MEM) do not improve on GJR-GARCH for one-step-ahead daily variance forecasting on SPY, QQQ, or GLD (2000–2026, r²-proxy RV). QLIKE: SPY GJR=-8.3621 vs MEM=-8.2622/AMEM=-8.2839; QQQ GJR=-7.9167 vs MEM=-7.8522/AMEM=-7.5057; GLD GJR=-8.3233 vs MEM=-7.4610/AMEM=-8.0268. DM MEM vs GJR: SPY t=6.42, QQQ t=6.23, GLD t=25.61 (all p<0.001, positive=MEM worse). DM AMEM vs GJR: SPY t=5.66, QQQ t=22.29, GLD t=11.23. MEM beats GJR on 0/3 assets; AMEM on 0/3. GARCH-family ceiling 9th confirmation (first from pure MEM/AMEM angle). HAR also beats MEM on SPY/QQQ. Null result: Gamma conditional mean recursion offers no benefit over GJR variance targeting with r² proxy RV.",
+    "evidence": [
+      "experiments/k1398/k1398_results.json"
+    ],
+    "confidence": 0.92,
+    "created_at": "2026-05-23T03:33:27.831680",
+    "verdict": "NULL",
+    "experiment_path": "experiments/k1398/",
+    "experiment_id": "K1398",
+    "reviewer_source": "feature-dev:code-reviewer subagent fallback (Codex exit code 2)",
+    "codex_review": "PASS — no lookahead, correct MEM Gamma log-likelihood, GJR /10000 rescaling correct, DM sign convention correct, seed present",
+    "assets_tested": [
+      "SPY",
+      "QQQ",
+      "GLD"
+    ],
+    "models_compared": [
+      "MEM",
+      "AMEM",
+      "GJR",
+      "HAR"
+    ]
   }
 ]
