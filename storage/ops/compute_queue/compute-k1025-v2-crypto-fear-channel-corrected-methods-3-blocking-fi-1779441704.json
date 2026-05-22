@@ -1,0 +1,23 @@
+{
+  "id": "compute-k1025-v2-crypto-fear-channel-corrected-methods-3-blocking-fi-1779441704",
+  "title": "K1025-v2: crypto-fear-channel corrected methods (3 BLOCKING fixes)",
+  "script_path": "experiments/k1025/k1025_v2.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-05-22T09:21:44Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1025-v2-crypto-fear-channel-corrected-methods-3-blocking-fi-1779441704.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1025-v2-crypto-fear-channel-corrected-methods-3-blocking-fi-1779441704.stderr",
+  "result_artifact": "experiments/k1025/k1025_v2_results.json",
+  "claude_followup": {
+    "brief": "K1025-v2 results are in. This is the corrected crypto-fear-channel analysis fixing 3 BLOCKING code-method mismatches: (1) QR now uses lagged BTC_RV_{t-1} + 1000 bootstrap SEs, (2) Granger now uses VAR-AIC lag selection + Bonferroni correction, (3) OOS now has strict IS/OOS split + AIC AR(p) + rolling window. Compare new results vs k1025_results.json. Update paper/crypto-fear-channel/main.tex numbers if results change significantly. Update research_program.md P10 status. Task type: paper_body.",
+    "task_type": "paper_body",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 7200
+}
