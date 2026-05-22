@@ -46,7 +46,9 @@
         "matchers": [
           "daily_update.py",
           "cron_daily_update.sh"
-        ]
+        ],
+        "host_crontab_managed": false,
+        "host_crontab_managed_note": "2026-05-22: LaunchAgent com.volpred.daily-update 為 canonical;移除 host crontab 重複源（雙 fire 致 08:03 文章重複發兩篇）"
       },
       {
         "id": "release_pool",
