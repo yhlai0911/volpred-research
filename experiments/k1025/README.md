@@ -87,3 +87,12 @@ Paper 6 核心實證素材。K639 確認 BTC→SPY Granger causality，K746b 確
 - `k1025.py` — 完整實驗腳本
 - `k1025_results.json` — 結構化結果
 - `k1025_results.png` — 六張圖表
+
+## v2 Methodology Corrections (2026-05-22)
+
+Independent Codex/GPT-5.4 review (reference: review_history/v5_independent/) found 3 BLOCKING issues where the paper's methodology description did not match the code. k1025_v2.py corrects all of them:
+
+1. **BLOCKING 1 — QR predictor lag**: BTC_RV predictor changed from BTC_RV_t (same-day) to BTC_RV_{t-1} (lagged). Asymptotic SEs replaced with 1000-iteration percentile bootstrap (seed=42).
+2. **BLOCKING 2 — Granger lag selection**: Changed from min-p-value selection to VAR-AIC selection (maxlags=5). Bonferroni correction (α/n_periods) applied across subperiods.
+3. **BLOCKING 3 — OOS split and specification**: IS/OOS overlap fixed (strict '2018-12-31' / '2019-01-01' cut). AR order selected by AIC on IS data. Window changed from expanding to rolling (756 trading days). BTC_RV lags reduced to 1 per paper spec.
+4. **MAJOR 3 — Log returns**: BTC returns changed from simple to log returns. yf.download() updated to auto_adjust=True.
