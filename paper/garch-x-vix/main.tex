@@ -81,7 +81,7 @@ We address this question through three contributions.
 
 \textbf{Second}, we propose a \emph{source decomposition} interpretation that differs from the standard long-run/short-run narrative. In our framework, $\tau_t$ captures the \emph{exogenous} volatility level implied by the options market (the ``fear level''), while $g_t$ captures \emph{endogenous} GARCH dynamics conditional on this external environment. We demonstrate that $g_t$ tracks the variance risk premium (VRP) with Spearman rank correlation $\rho \approx 0.80$---far exceeding the raw $r_t^2 / \mathrm{VIX}_{t-1}^2$ ratio ($\rho = 0.15$)---indicating that the GARCH autoregressive structure substantially enhances VRP measurement. However, we also report the honest null result that $g_t$ possesses no exploitable out-of-sample predictive power for future VRP, consistent with the high noise level and low autocorrelation of daily VRP.
 
-\textbf{Third}, we validate the model's practical value through VaR and Expected Shortfall (ES) backtesting. A4f with Student-$t$ innovations achieves a scorecard of 3/4 (passing VaR at 1\% and 5\% levels plus ES at 2.5\%), while GJR-GARCH achieves only 1/4 regardless of distributional assumption. Cross-asset validation shows that the model generalizes to assets with high VIX correlation (QQQ: DM $t = 3.71$) and, when asset-specific implied volatility indices are employed, to gold (GLD with GVZ: DM $t = 3.39$). For assets with weak VIX linkage---emerging markets (EEM) and Taiwan (0050.TW)---the model improves directionally but does not reach statistical significance, consistent with the interpretation that the multiplicative structure requires a relevant fear index as input.
+\textbf{Third}, we validate the model's practical value through VaR and Expected Shortfall (ES) backtesting. A4f with Student-$t$ innovations achieves a scorecard of 3/4 (passing VaR at 1\% and 5\% levels plus ES at 2.5\%), while GJR-GARCH achieves only 1/4 regardless of distributional assumption. Cross-asset validation shows that the model generalizes to assets with high VIX correlation (QQQ: DM $t = 3.71$) and, when asset-specific implied volatility indices are employed, to gold (GLD with GVZ: DM $t = 3.17$). For assets with weak VIX linkage---emerging markets (EEM) and Taiwan (0050.TW)---the model improves directionally but does not reach statistical significance, consistent with the interpretation that the multiplicative structure requires a relevant fear index as input.
 
 Our findings contribute to the literature on component volatility models \citep{engle2008, engle2013, conrad2015, conrad2020}, the role of VIX in volatility forecasting \citep{bekaert2014}, and the practical evaluation of volatility models for risk management \citep{patton2011, hansen2011}. The key message is one of parsimony: when the external variable is already daily, GARCH-MIDAS specifications with long lag structures ($K = 65$--$125$) are significantly dominated by a simple daily multiplicative model ($|t| > 3.0$), while the shortest-lag alternative (B1, $K=22$) is statistically indistinguishable---parsimony rather than statistical dominance is the practical argument for the daily specification. A simple multiplicative structure with daily VIX delivers both superior forecasting and improved risk management without the added complexity of mixed-frequency aggregation.
 
@@ -181,7 +181,7 @@ where the standardized return $u_{t-1}$ is defined under one of two normalizatio
 u_{t-1}^{(a)} &= \frac{r_{t-1}}{\sqrt{\tau_t}} \qquad (\text{contemporaneous normalization}), \label{eq:u_contemp} \\
 u_{t-1}^{(b)} &= \frac{r_{t-1}}{\sqrt{\tau_{t-1}}} \qquad (\text{lagged normalization}). \label{eq:u_lagged}
 \end{align}
-Contemporaneous normalization follows the recursive structure of \citet[Eq.~4]{engle2013}, where the current volatility environment determines how past shocks are interpreted. Lagged normalization reflects a conservative timing choice in which the normalization denominator $\tau_{t-1}$ is fully predetermined before the shock $r_{t-1}$ is observed, since both $\tau_t$ and $u_{t-1}$ use $\mathrm{VIX}_{t-1}$ information. Our baseline specifications use contemporaneous normalization; lagged normalization is included for comparison (see Section~\ref{sec:taxonomy}).
+Contemporaneous normalization follows the recursive structure of \citet[Eq.~4]{engle2013}, where the current volatility environment determines how past shocks are interpreted. Despite the shared time subscript, there is no simultaneity: $\tau_t$ is a deterministic function of $\mathrm{VIX}_{t-1}$, which is observed before $r_t$. Lagged normalization reflects a conservative timing choice in which the normalization denominator $\tau_{t-1}$ is fully predetermined before the shock $r_{t-1}$ is observed, since both $\tau_t$ and $u_{t-1}$ use $\mathrm{VIX}_{t-1}$ information. Our baseline specifications use contemporaneous normalization; lagged normalization is included for comparison (see Section~\ref{sec:taxonomy}).
 
 Two intercept treatments are considered:
 \begin{enumerate}[label=(\roman*)]
@@ -295,7 +295,7 @@ L_{\text{QLIKE}}(\hat{\sigma}_t^2, r_t^2) = \frac{r_t^2}{\hat{\sigma}_t^2} - \lo
 \end{equation}
 evaluated on the squared return $r_t^2$ as the volatility proxy. In practice, we report the average of $\log(\hat{\sigma}_t^2) + r_t^2/\hat{\sigma}_t^2$ (the QLIKE kernel without the constant), which can take negative values; lower values indicate better forecasts. We denote this as ``QLIKE'' throughout for brevity.\footnote{Some tables report QLIKE values around $-8.3$ (SPY main sample) while others report values around $1.4$--$1.6$ (cross-asset and sensitivity samples). The difference arises from the variance scaling: the main sample uses decimal daily returns (magnitude $\sim 10^{-4}$), while the cross-asset computations use a different normalization. Rankings within each table are internally consistent.} \citet{patton2011} shows that QLIKE is robust to noise in the volatility proxy in the sense that using $r_t^2$ instead of realized variance preserves the ranking of correctly specified models.
 
-Pairwise model comparisons use the \citet{diebold2002} test (hereafter DM test). For the full 16-comparison horse race, we adopt the conservative threshold $|t| > 3.0$, which is close to the Bonferroni-adjusted critical value of $z_{0.05/(2 \times 16)} \approx 2.95$ and consistent with the multiple-testing concerns raised by \citet{harvey2016}. For the primary A4f vs.\ GJR comparison, the standard $|t| > 1.96$ threshold applies and is comfortably exceeded.
+Pairwise model comparisons use the \citet{diebold2002} test (hereafter DM test). For the full 16-comparison horse race, we adopt the conservative threshold $|t| > 3.0$, which is close to the Bonferroni-adjusted critical value of $z_{0.05/(2 \times 16)} \approx 2.95$ and consistent with the multiple-testing concerns raised by \citet{white2000} and \citet{harvey2016}. For the primary A4f vs.\ GJR comparison, the standard $|t| > 1.96$ threshold applies and is comfortably exceeded.
 
 \subsubsection{VaR and ES Backtesting}
 
@@ -535,6 +535,7 @@ EEM & 0.50 & 1.338 & 1.307 & 2.47 & No \\
 \footnotesize
 \item DM $t$: positive values indicate A4f has lower (better) QLIKE than GJR. Harvey significance: $|t| > 3.0$. OOS: 2019--2026. For GLD, A4f uses GVZ: $\tau_t = \theta_0 + \theta_1 \mathrm{GVZ}_{t-1}^2$. STOXX50E and FEZ use US VIX (not VSTOXX), which suffices due to global fear synchronization.
 \item $^a$ GVZ-$r^2$ correlation for GLD.
+\item \textbf{Multiple-testing note}: With 6 cross-validation assets beyond the primary SPY result, a conservative Bonferroni-adjusted threshold of $|t| > 3.22$ leaves SPY ($t=4.03$), QQQ ($t=3.71$), STOXX50E ($t=3.64$), and FEZ ($t=3.45$) Harvey-significant; GLD with GVZ ($t=3.17$) falls marginally below this stricter criterion and should be interpreted with caution.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -1037,6 +1038,11 @@ Conrad, C. and Loch, K. (2015).
 \newblock {\em Journal of Applied Econometrics}, 30(7):1090--1114.
 \newblock \url{https://doi.org/10.1002/jae.2404}
 
+\bibitem[Corsi, 2009]{corsi2009}
+Corsi, F. (2009).
+\newblock A simple approximate long-memory model of realized volatility.
+\newblock {\em Journal of Financial Econometrics}, 7(2):174--196.
+\newblock \url{https://doi.org/10.1093/jjfinec/nbp001}
 
 \bibitem[Francq and Thieu, 2019]{francq2019}
 Francq, C. and Thieu, L.Q. (2019).
@@ -1111,6 +1117,12 @@ Patton, A.J. (2011).
 Wang, F. and Ghysels, E. (2015).
 \newblock Econometric analysis of volatility component models.
 \newblock {\em Econometric Theory}, 31(2):362--393.
+
+\bibitem[White, 2000]{white2000}
+White, H. (2000).
+\newblock A reality check for data snooping.
+\newblock {\em Econometrica}, 68(5):1097--1126.
+\newblock \url{https://doi.org/10.1111/1468-0262.00152}
 
 \bibitem[Lai, 2026]{lai2026vt}
 Lai, Y.-H. (2026).
