@@ -31237,5 +31237,17 @@
     "category": "garch_x_vix_robustness",
     "content": "K1393: non-COVID DM t=4.26 Harvey-sig; A4f advantage not COVID-driven; Paper 9 C1 CRITICAL PASS",
     "confidence": 0.95
+  },
+  {
+    "item_id": "5d2c652b",
+    "category": "experiment",
+    "content": "K1394 兒少投資帳戶複利幻覺 — SPY 2000-2026 真實回測。每月定額 5000 元、持有 18 年、102 個 rolling 歷史起點。三發現：(1) 波動拖累 159 bp/年 — 算術年報酬 10.36% vs 幾何（可複利）8.76%；年報酬標準差 17.81%。(2) 18 年實質終值（扣 2% 通膨）分布 169.2/232.4/326.4 萬（min/median/max），最佳/最差起點終值比 1.93x = 報酬順序風險。(3) 坊間平滑 6% 試算 193.7 萬落分布最左 — 平滑試算問題不在高低估，在只給一個點不給分布。理財教育三層認知：路徑波動 / 結果是分布 / 故越早+夠久+不恐慌才有用。verdict=CONDITIONAL_PASS；reviewer=Codex（CONDITIONAL PASS，時序口徑+IRR 定義二修後）。experiment_id=K1394。已發佈 feed+FB mile_490d38ec。",
+    "evidence": [
+      "experiments/K1394/K1394_results.json",
+      "experiments/K1394/README.md",
+      "experiments/K1394/K1394.py"
+    ],
+    "confidence": 0.75,
+    "created_at": "2026-05-22T18:22:46.893596"
   }
 ]
