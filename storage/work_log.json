@@ -7878,5 +7878,28 @@
     "timestamp": "2026-05-22T01:20:19.017412+00:00",
     "result_summary": "Published research article mile_45a2b74a: K193 動態 Copula 尾部相依度預測 SPY 波動率 (draft). SPY-GLD DM p=0.008, Granger F=32.60, p=1.2e-8.",
     "article_id": "mile_45a2b74a"
+  },
+  {
+    "timestamp": "2026-05-22T11:08:15+08:00",
+    "task_type": "paper_review",
+    "task_id": "paper_review_leverage_direction_v8",
+    "title": "leverage-direction v8 review cycle: 6 fixes applied → READY for submission",
+    "status": "completed",
+    "verdict": "NEAR_READY → READY",
+    "summary": "v8 review cycle for leverage-direction. Citation: 1 MAJOR (GJR 1993 data frequency). Academic: 3.8★ NEAR_READY. Applied 6 fixes: (1) body.tex L76 GJR 1993 monthly/CRSP correction; (2) main.tex L184 hood2025 52(1); (3) tables.tex L234 Proposition→Empirical Regularity~1; (4-5) body.tex 5 top-level section labels + roadmap \ref{} conversion; (6) body.tex L249 FHS expansion. XeLaTeX 2-pass CLEAN, 66 pages. Deferred: engle1982 DOI, 2017-25 IS/OOS period clarification, Errata→dagger, γ_HM inline.",
+    "papers": [
+      "leverage-direction"
+    ],
+    "review_round": "v8",
+    "review_history_path": "paper/leverage-direction/review_history/v8/",
+    "fixes_applied": [
+      "body.tex L76: GJR 1993 monthly (not daily) CRSP 1926-1987",
+      "main.tex L184: hood2025 JPM 52(1)",
+      "tables.tex L234: Empirical Regularity~1 (not Proposition 1)",
+      "body.tex: 5 top-level section labels (sec:literature/data_methodology/empirical_results/implications/conclusion)",
+      "body.tex L17: roadmap converted to \ref{}",
+      "body.tex L249: FHS first use expanded"
+    ],
+    "next_step": "uv run volpred ops paper-update --paper-id leverage-direction then git commit"
   }
 ]

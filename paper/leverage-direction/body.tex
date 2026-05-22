@@ -14,11 +14,11 @@ This paper makes two contributions to the volatility forecasting and financial r
 
 Supporting findings reinforce a broader pattern: increasing model sophistication improves statistical measurement but not investable allocation decisions. Supplementary evidence of cross-market information transmission is presented in Appendix~\ref{sec:tz_arbitrage}.
 
-The remainder of the paper is organized as follows. Section 2 reviews the literature. Section 3 describes data and methodology. Section 4 presents empirical results. Section 5 discusses implications and limitations. Section 6 concludes.
+The remainder of the paper is organized as follows. Section~\ref{sec:literature} reviews the literature. Section~\ref{sec:data_methodology} describes data and methodology. Section~\ref{sec:empirical_results} presents empirical results. Section~\ref{sec:implications} discusses implications and limitations. Section~\ref{sec:conclusion} concludes.
 
 
 
-\section{Literature Review}
+\section{Literature Review}\label{sec:literature}
 
 \subsection{GARCH Models and the Leverage Effect}
 
@@ -50,7 +50,7 @@ Recent work has explored neural network approaches to volatility forecasting. Hy
 
 
 
-\section{Data and Methodology}
+\section{Data and Methodology}\label{sec:data_methodology}
 
 \subsection{Data}
 \label{sec:data}
@@ -73,7 +73,7 @@ First, the rolling estimation window ($w = 504$) is re-estimated at every foreca
 
 Second, our out-of-sample evaluation periods satisfy the minimum length recommendation of \citet{hansen2005}, who argue that at least 252 trading days are necessary for reliable forecast comparison. Our primary OOS (2023--2024) contains approximately 504 days, and the validation OOS (2025--March 2026) adds a further $\sim$300 days. Critically, these periods cover distinct market regimes: the post-COVID normalization and low-volatility environment of 2023, the rate-cut cycle and renewed equity momentum of 2024, and the geopolitical shock of the 2025--2026 Iran/Hormuz crisis---providing meaningful regime diversity for evaluating model robustness.
 
-Third, the central research question concerns the \textit{sign} of the leverage parameter $\gamma$---a structural characteristic of each asset's volatility dynamics---rather than short-horizon return prediction. Structural features such as the leverage effect are detectable in relatively short samples: \citet{glosten1993} established the leverage effect in U.S.\ equities using fewer than 3,000 daily observations, and \citet{engle2004} documented asymmetric variance dynamics for individual stocks with as few as 500 observations per estimation window. The gamma taxonomy documented in this paper---positive for equities, negative for gold, near-zero for bonds---is invariant across all window sizes tested ($w \in \{252, 504, 756, 1000, 2000, 3000, 5000\}$; Table~\ref{tab:window}), confirming that this structural classification does not require longer samples.
+Third, the central research question concerns the \textit{sign} of the leverage parameter $\gamma$---a structural characteristic of each asset's volatility dynamics---rather than short-horizon return prediction. Structural features such as the leverage effect are detectable in relatively short samples: \citet{glosten1993} established the leverage effect in U.S.\ equities using approximately 735 monthly observations (CRSP 1926--1987), and \citet{engle2004} documented asymmetric variance dynamics for individual stocks with as few as 500 observations per estimation window. The gamma taxonomy documented in this paper---positive for equities, negative for gold, near-zero for bonds---is invariant across all window sizes tested ($w \in \{252, 504, 756, 1000, 2000, 3000, 5000\}$; Table~\ref{tab:window}), confirming that this structural classification does not require longer samples.
 
 Fourth, we verify that the key results---the gamma taxonomy, the complexity ceiling, and the VaR orthogonality finding---hold in the high-volatility sub-period of 2020--2022 (COVID crash through rate-hiking cycle), which represents the most stressed market conditions in our sample. Results are qualitatively unchanged (details available upon request), further supporting the robustness of our conclusions across market regimes.
 
@@ -149,7 +149,7 @@ We set $\sigma_{\text{target}} = 10\%$ annualized for the GARCH-based analysis, 
 
 
 
-\section{Empirical Results}
+\section{Empirical Results}\label{sec:empirical_results}
 
 \subsection{Data Characteristics}
 
@@ -246,7 +246,7 @@ Both rules replace the skewness-based heuristic, which would incorrectly prescri
 
 Using optimal GARCH specifications (Section~\ref{sec:garch_comparison}) with Normal distribution VaR, we find widespread Basel III compliance failure: SPY achieves Green Zone in only 1 of 6 annual periods (2020--2025), with violation rate 2.2\% versus the 1.0\% target. A sequential attribution analysis reveals that the \textbf{first and simplest adjustment---switching from Normal to Student-$t$(df=5)---accounts for the majority of improvement}: violations drop from 33 to 18 ($-45.5\%$) for SPY, converting the record to 6/6 Green Zone years. More complex adjustments (adaptive thresholds, jump augmentation) add only marginal improvement (Table~\ref{tab:var}). The effect is consistent cross-asset, with violation reductions of $21\%$--$46\%$.
 
-VaR method ranking is \textbf{criterion-dependent}. Under Kupiec unconditional coverage, skewed-$t$ performs best (7/7 assets pass); under the stricter Trinity criterion (Kupiec + Christoffersen + DQ), FHS leads by asset count (6/7 all-$\alpha$ pass); under Fissler-Ziegel joint loss, Normal is most capital-efficient. Table~\ref{tab:var_panel} presents the comprehensive panel (7 assets $\times$ 5 methods $\times$ 3 $\alpha$ levels = 105 cells): skewed-$t$ achieves the highest Trinity pass rate at 90.5\% (19/21); FHS, CF-VaR, and Student-$t$(5) follow at 76.2\% (16/21). TLT fails all five methods---its near-zero asymmetry and regime-dependent volatility produce systematic under-violation. VaR method suitability is driven by volatility regime stability rather than skewness: an initial cross-sectional association ($\rho = -0.636$, $N = 12$) did not survive expansion to $N = 21$ ($\rho = -0.086$, $p = 0.71$). This reinforces the complexity ceiling: the most impactful improvement is the simplest.
+VaR method ranking is \textbf{criterion-dependent}. Under Kupiec unconditional coverage, skewed-$t$ performs best (7/7 assets pass); under the stricter Trinity criterion (Kupiec + Christoffersen + DQ), Filtered Historical Simulation (FHS) leads by asset count (6/7 all-$\alpha$ pass); under Fissler-Ziegel joint loss, Normal is most capital-efficient. Table~\ref{tab:var_panel} presents the comprehensive panel (7 assets $\times$ 5 methods $\times$ 3 $\alpha$ levels = 105 cells): skewed-$t$ achieves the highest Trinity pass rate at 90.5\% (19/21); FHS, CF-VaR, and Student-$t$(5) follow at 76.2\% (16/21). TLT fails all five methods---its near-zero asymmetry and regime-dependent volatility produce systematic under-violation. VaR method suitability is driven by volatility regime stability rather than skewness: an initial cross-sectional association ($\rho = -0.636$, $N = 12$) did not survive expansion to $N = 21$ ($\rho = -0.086$, $p = 0.71$). This reinforces the complexity ceiling: the most impactful improvement is the simplest.
 
 A sharper demonstration of domain orthogonality emerges when we cross the GARCH equation choice with the distributional assumption. Table~\ref{tab:var_ortho} reports VaR 1\% backtesting results for SPY over 2023--2024 (502 trading days) under three configurations. GARCH(1,1) with Normal innovations produces 7 violations (1.39\%, Kupiec $p = 0.64$, Basel Green Zone)---a comfortable pass. Switching to GJR-GARCH---which dominates on QLIKE ($-3.8\%$, DM $p = 0.001$)---raises violations to 10 (1.99\%, Kupiec $p = 0.049$), a borderline failure. The mechanism is straightforward: GJR's asymmetric response to negative returns generates higher conditional variance during stress periods; under Normal quantiles, the fatter conditional tails produce excess VaR exceedances that the thin-tailed Normal $z$-score cannot accommodate.
 
@@ -401,7 +401,7 @@ Hybrid VT provides protection across all ten identifiable crisis episodes (2008-
 
 
 
-\section{Discussion}
+\section{Discussion}\label{sec:implications}
 
 \subsection{The Economics of Inverted Leverage}
 
@@ -606,7 +606,7 @@ Yet HAR-ABS produces the \textit{lowest} VT Sharpe (1.12 vs.\ 1.75 for 12/VIX) w
 
 
 
-\section{Conclusion}
+\section{Conclusion}\label{sec:conclusion}
 
 This paper establishes that the direction of the asymmetric volatility response---measured by the GJR-GARCH $\gamma$ parameter---varies systematically across asset classes and has direct implications for model selection and volatility targeting. Two contributions emerge from our analysis of seven primary assets, extended to 26 assets in validation and confirmed out-of-sample through the 2026 Iran/Hormuz crisis.
 
