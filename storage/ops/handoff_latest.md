@@ -27,3 +27,11 @@
 ## 接續提示詞
 
 讀 `storage/ops/handoff_latest.md`。跑 `uv run python scripts/ops_dashboard.py` 巡檢；無 critical 就從 next_tasks 派工（先查 work_log 多樣化）。完成後接 ops loop，不停在等用戶。
+
+
+## 候補 — 雙 session K-id 撞題（2026-05-22 發現）
+
+互動 session 與 hourly-dispatch 自主 claude -p session 同時碰 K1395 → 各自發了一篇
+同題文章（mile_490d38ec 改寫 / mile_beb61a8a draft）。後者已 retract。
+根因：兩個 session 無共享 K-id 鎖。候補：當 session 開始處理某 K，寫入一個
+cross-session claim 檔（如 storage/ops/active_k_claims.json），另一 session 啟動前檢查。
