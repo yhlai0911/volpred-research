@@ -31312,5 +31312,17 @@
     ],
     "confidence": 0.7,
     "created_at": "2026-05-22T22:27:58.003970"
+  },
+  {
+    "item_id": "7f215af3",
+    "category": "experiment",
+    "content": "K1397 VIX Memorial Day Seasonality — 35年曆法異常分析（calendar anomaly）。節前5日平均 -4.24%，36年中27年下跌（75%一致性），統計顯著（偶然機率<1%；二項式檢定偶然機率0.4%）。節後5日 +0.12%（偶然機率>90%），無顯著效應。年代分析：1990s -5.89%、2000s -3.18%、2010s -6.48%、2020s +0.48%（制度轉變）。2025年異常：節前+22.88%（關稅衝擊背景）。機制：節前交易員減少避險選擇權時間價值消耗，壓低隱含波動率；Memorial Day 在5月財報季尾聲，歷史上干擾最小，效應最乾淨。2020年代後宏觀不確定性升高使效應可靠性下降。數據：CBOE VIX 1990-01-02至2026-04-17，9173個交易日，N=36年事件窗口。verdict=CONDITIONAL_PASS。experiment_id=K1397。reviewer=main-thread-code-review（統計管線：t-test / binomial test / decade aggregation，無 lookahead 風險，無隨機程序）。已發佈文章：mile_ce3238d1（一般讀者，已上線）。",
+    "evidence": [
+      "experiments/k1397/README.md",
+      "experiments/k1397/k1397.py",
+      "experiments/k1397/k1397_results.json"
+    ],
+    "confidence": 0.75,
+    "created_at": "2026-05-22T23:26:29.146109"
   }
 ]
