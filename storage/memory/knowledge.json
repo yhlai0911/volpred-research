@@ -31249,5 +31249,31 @@
     ],
     "confidence": 0.75,
     "created_at": "2026-05-22T18:22:46.893596"
+  },
+  {
+    "id": "k1395_tisa_dca_tw_volatility_drag",
+    "title": "K1395: 台股 TISA DCA 18年複利幻覺 — 波動拖累323bp、最佳/最差終值差3.41x",
+    "body": "K1395（PASS, main_thread_code_review, 2026-05-22）: 用 0050.TW（Adj Close 含息，2009-2026）+ TWII（1997-2026）做台股版兒少 TISA DCA 研究，對應 K1394 美股 SPY 版。\n\n核心發現：\n(1) 0050 真實 17.3 年窗口（2009-01 至 2026-05）：每月 5000 元，總投入 104.5 萬，期末名目 732.4 萬，MWRR=19.79%/yr，倍數=7.01x；算術年報酬 15.05%，幾何年報酬 13.31%，波動拖累 174bp。\n(2) TWII rolling 18 年分布（132 個窗口，每月 5000 元，總投入 108 萬）：最差終值 128.1 萬（MWRR=1.87%），中位終值 177.6 萬（MWRR=5.29%），最佳終值 436.8 萬（MWRR=14.0%）；最佳/最差倍數=3.41x；教科書 6% smooth DCA=193.7 萬，實際中位數略低於教科書。\n(3) TWII 波動拖累 323bp（算術 7.85% vs 幾何 4.62%），遠高於 0050 174bp，反映加權指數不含息 + 高集中度放大波動拖累。\n(4) 0050 yfinance 2014-01-02 假 4:1 split bug 以 splice factor=0.249361 修補，保留各段內部日報酬不變。\n\n方法論：DCA simulate_dca() 以當月月底價購入（無 lookahead），最終估值用 prices[-1]；IRR 雙切分法 200 次迭代；波動拖累 = 完整日曆年報酬的算術平均 − 幾何平均；TWII 為 0050 長史料代理（高度連動，口徑差異：0050 含息 vs TWII 不含息）。",
+    "verdict": "PASS",
+    "experiment_id": "K1395",
+    "experiment_path": "experiments/k1395/",
+    "reviewer": "main_thread",
+    "reviewer_source": "main_thread_code_review_2026-05-22",
+    "tags": [
+      "DCA",
+      "TISA",
+      "兒少",
+      "0050.TW",
+      "TWII",
+      "波動拖累",
+      "報酬順序風險",
+      "台灣",
+      "複利幻覺"
+    ],
+    "created_at": "2026-05-22T19:23:46.905455",
+    "related_experiments": [
+      "K1394"
+    ],
+    "item_id": "79f56f38"
   }
 ]

@@ -134,5 +134,10 @@
     "歷史回測，過去報酬不保證未來。",
     "實質終值以期末通膨一次折現，為保守購買力視角；若以投入時點分別折現，實質值會略高。",
     "rolling 視窗高度重疊（相鄰起點僅差一個月），分布極端值由少數獨立18 年段落驅動，非獨立樣本 — 視為情境涵蓋而非統計推論。"
-  ]
+  ],
+  "verdict": "PASS",
+  "codex_review": "main_thread_code_review",
+  "reviewer": "main_thread",
+  "reviewer_source": "main_thread_code_review_2026-05-22",
+  "review_notes": "PASS: (1) No lookahead — simulate_dca() uses prices[i] for purchase at each month-end, final valuation at prices[-1]; (2) 0050 splice correct — factor=cur/prev applied to all prior prices, preserving internal daily returns; (3) DCA math correct — accumulated shares × final price; IRR bisection 200 iterations converges; (4) Volatility drag = arithmetic − geometric mean of full calendar year returns, correct formula; (5) TWII proxy fully disclosed with rationale. This is a descriptive simulation (not a forecasting model), all key methodology checks passed."
 }
