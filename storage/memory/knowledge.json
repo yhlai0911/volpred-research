@@ -31207,5 +31207,35 @@
     ],
     "paper": "garch-x-vix",
     "paper_issue": "C1_CRITICAL"
+  },
+  {
+    "id": "k1393_leave_covid_out_dm_k988_faithful",
+    "title": "K1393: Leave-COVID-out DM Test — A4f vs GJR (K988 spec faithful, Paper 9 C1 PASS)",
+    "body": "Paper 9 (garch-x-vix) C1 CRITICAL resolved. K1393 confirms A4f QLIKE advantage over GJR is NOT COVID-driven. Full OOS DM t=+3.60 (Harvey-sig, n=1825). Non-COVID (excl 2020-02-01 to 2020-06-30) DM t=+4.26 (Harvey-sig, n=1721) — C1 PASS. COVID window DM t=+1.48 (not sig, n=104), advantage comes from normal market conditions not crisis. K1392 three spec bugs vs K988: (1) theta0 bounds [0,var0*2] vs [-1e-2,1e-2], (2) theta1 bounds [1e-10,1.0] vs [1e-8,1e-3], (3) g init 1.0 vs omega/(1-persist) — degraded A4f QLIKE from -8.361 to -8.194 (K1392 DM t=-1.606). K1393 K988-faithful spec: A4f QLIKE=-8.360, GJR=-8.267, full OOS DM t=+3.60. Pre-COVID t=+2.52 (not sig, n=273), post-COVID t=+3.76 (Harvey-sig, n=1448). Paper action: add robustness table with non-COVID DM t=+4.26; narrative VIX-augmented advantage not COVID artifact.",
+    "verdict": "PASS",
+    "experiment_id": "K1393",
+    "experiment_path": "experiments/k1393/",
+    "reviewer": "feature-dev:code-reviewer subagent (Codex overloaded fallback)",
+    "tags": [
+      "garch-x-vix",
+      "covid-robustness",
+      "dm-test",
+      "a4f-mfgjr",
+      "gjr",
+      "paper9",
+      "C1-CRITICAL"
+    ],
+    "created_at": "2026-05-22T13:31:31.459709",
+    "related_experiments": [
+      "K988",
+      "K1391",
+      "K1392"
+    ],
+    "paper": "garch-x-vix",
+    "paper_issue": "C1_CRITICAL",
+    "item_id": "62485cdc",
+    "category": "garch_x_vix_robustness",
+    "content": "K1393: non-COVID DM t=4.26 Harvey-sig; A4f advantage not COVID-driven; Paper 9 C1 CRITICAL PASS",
+    "confidence": 0.95
   }
 ]

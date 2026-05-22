@@ -1,0 +1,97 @@
+{
+  "experiment_id": "K1393",
+  "run_at": "2026-05-22T05:27:26.064419+00:00",
+  "elapsed_seconds": 121.0,
+  "configuration": {
+    "oos_start": "2019-01-01",
+    "oos_end": "2026-04-07",
+    "window": 2000,
+    "refit_every": 63,
+    "covid_start": "2020-02-01",
+    "covid_end": "2020-06-30",
+    "data_source": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
+    "seed": 42,
+    "a4f_spec": "vix_squared, tau_t denom, free_omega=True, L-BFGS-B",
+    "theta0_bounds": "[-1e-2, 1e-2] (K988-faithful)",
+    "theta1_bounds": "[1e-8, 1e-3] (K988-faithful)",
+    "g_init": "omega/(1-persist) unconditional mean (K988-faithful)",
+    "note": "K1393 = K1392 bug-fix: correct bounds, g init, optimizer to match K988"
+  },
+  "sample_sizes": {
+    "n_full_oos": 1825,
+    "n_covid": 104,
+    "n_non_covid": 1721,
+    "n_pre_covid": 273,
+    "n_post_covid": 1448
+  },
+  "dm_tests": {
+    "full_oos": {
+      "t_stat": 3.6029009651588626,
+      "p_value": 0.00032311957703937854,
+      "mean_diff": 0.09270156323244305,
+      "n": 1825,
+      "harvey_significant": true,
+      "mean_qlike_gjr": -8.267001519557294,
+      "mean_qlike_a4f": -8.359703082789737
+    },
+    "non_covid": {
+      "t_stat": 4.262844850909517,
+      "p_value": 2.1278759226524286e-05,
+      "mean_diff": 0.06738265019155434,
+      "n": 1721,
+      "harvey_significant": true,
+      "mean_qlike_gjr": -8.404861469621673,
+      "mean_qlike_a4f": -8.472244119813228
+    },
+    "pre_covid": {
+      "t_stat": 2.5191958795420866,
+      "p_value": 0.012335880728658832,
+      "mean_diff": 0.058329076641654605,
+      "n": 273,
+      "harvey_significant": false,
+      "mean_qlike_gjr": -8.88096832335598,
+      "mean_qlike_a4f": -8.939297399997635
+    },
+    "covid_window": {
+      "t_stat": 1.482090400867141,
+      "p_value": 0.1413693086183182,
+      "mean_diff": 0.5116808838417646,
+      "n": 104,
+      "harvey_significant": false,
+      "mean_qlike_gjr": -5.985684461280386,
+      "mean_qlike_a4f": -6.49736534512215
+    },
+    "post_covid": {
+      "t_stat": 3.7571522603953356,
+      "p_value": 0.0001786840280792015,
+      "mean_diff": 0.06908957393404236,
+      "n": 1448,
+      "harvey_significant": true,
+      "mean_qlike_gjr": -8.315098229932817,
+      "mean_qlike_a4f": -8.38418780386686
+    }
+  },
+  "k988_reference": {
+    "A4f_qlike": -8.360769450776205,
+    "B0_GJR_qlike": -8.277222480688362,
+    "dm_t": 4.482553559343101,
+    "n": 1825
+  },
+  "metadata": {
+    "paper": "garch-x-vix",
+    "issue_addressed": "C1 CRITICAL \u2014 COVID subperiod analysis (K1392 bug-fix)",
+    "review_round": "v3",
+    "predecessor_experiments": [
+      "K988",
+      "K1391",
+      "K1392"
+    ],
+    "k1392_bugs_fixed": [
+      "theta0 bounds: [0, var0*2] \u2192 [-1e-2, 1e-2]",
+      "theta1 bounds: [1e-10, 1.0] \u2192 [1e-8, 1e-3]",
+      "g_init: 1.0 \u2192 omega/(1-persist)",
+      "optimizer: SLSQP \u2192 L-BFGS-B",
+      "rolling: recompute-each-step \u2192 state-based recursive"
+    ]
+  }
+}

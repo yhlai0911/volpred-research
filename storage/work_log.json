@@ -7918,5 +7918,55 @@
       "K1392"
     ],
     "next_step": "K1392 compute results → interpret for Paper 9 C1 resolution (Harvey-sig test determines whether to add robustness table or downgrade main claims)"
+  },
+  {
+    "timestamp": "2026-05-22T13:31:41.885062",
+    "task_type": "experiment",
+    "task_id": "K1393",
+    "title": "K1393: Leave-COVID-out DM Test — A4f vs GJR (K988 faithful)",
+    "status": "completed",
+    "paper": "garch-x-vix",
+    "paper_issue": "C1_CRITICAL",
+    "finding": "Non-COVID DM t=+4.26 Harvey-sig; A4f advantage NOT COVID-driven; C1 PASS",
+    "subperiods": {
+      "full_oos": {
+        "dm_t": 3.6,
+        "harvey_sig": true,
+        "n": 1825
+      },
+      "non_covid": {
+        "dm_t": 4.26,
+        "harvey_sig": true,
+        "n": 1721
+      },
+      "pre_covid": {
+        "dm_t": 2.52,
+        "harvey_sig": false,
+        "n": 273
+      },
+      "covid_window": {
+        "dm_t": 1.48,
+        "harvey_sig": false,
+        "n": 104
+      },
+      "post_covid": {
+        "dm_t": 3.76,
+        "harvey_sig": true,
+        "n": 1448
+      }
+    },
+    "predecessors": [
+      "K988",
+      "K1391",
+      "K1392"
+    ],
+    "bugs_fixed_in_k1392": [
+      "theta0_bounds",
+      "theta1_bounds",
+      "g_init"
+    ],
+    "knowledge_entry": "k1393_leave_covid_out_dm_k988_faithful",
+    "reviewer": "feature-dev:code-reviewer subagent (Codex overloaded fallback)",
+    "dispatch_session": "2026-05-22-1307"
   }
 ]
