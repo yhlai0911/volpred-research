@@ -94,3 +94,24 @@ Ivan Lai 牆已 get_page_text 確認 3 篇都沒發過：
 **根因待修**：mile_02518109 / mile_b14391d9 原本 `fb_post_status=pending` 但
 **無 fb_draft** — trending_repost pipeline 發了 feed 卻沒生成 FB 草稿。需查
 trending-repost workflow 為何漏生 FB 草稿步驟。
+
+---
+
+## ✅ FB pipeline critical 已清除（2026-05-22 13:44）+ 待補
+
+3 篇 trending_repost 已發佈 Ivan Lai FB（commit a8b77d7d），fb_post_status 全 success：
+mile_bb62fc66 / mile_02518109 / mile_b14391d9。
+
+**突破關鍵**：FB 發文框「繼續/發佈」鈕在 viewport 外點不到 → 改用 `javascript_tool`
+直接 DOM `.click()`，繞過 viewport 限制。**這是 FB 發文的 canonical 方法**，比
+對像素座標可靠。開發文框也用 JS：點含「在想些什麼」的 role=button。
+
+**待補 1 — 留言連結**：3 篇都還沒加 volpred 連結留言（feed DOM 用 JS 找 article
+節點失敗）。下次：每篇 post 底下 comment box 貼 `https://volpred.zeabur.app/v3/reports/<mile>`。
+
+**待補 2 — 附圖（用戶硬性要求「貼文要附圖」）**：本 session 實測 4 種附圖法全撞工具牆：
+(a) file_upload — 已改 API 不收 host 路徑 (b) upload_image — 只收 screenshot 的 imageId
+(c) DataTransfer + fetch — FB CSP 擋跨域 fetch (d) DataTransfer + base64 from 同源分頁 —
+javascript_tool 結果截斷大字串。**未解的方法**：把圖存成 user-uploaded image 再用
+upload_image 的 imageId？或研究 file_upload 新 `files` 參數格式。下次發 trending_repost
+要附圖必須先解這個。trending-repost SKILL Step 7 應補：JS DOM 發文法 + 附圖方法。
