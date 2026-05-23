@@ -126,29 +126,77 @@ def main():
         "handoff doc + manual paste or retry MCP" if fb_pending else None
     ))
 
-    # L4 cron health
+    # L4 cron health — schedule-aware: read cron string from runtime_schedules.json,
+    # compute expected_next_fire via croniter, flag stale only when
+    # now > next_expected_fire + grace AND last_run < prev_expected_fire.
+    # Hardcoded max_h was a false-positive trap for weekday-only / weekly cron.
     cron = jl(REPO / "storage" / "ops" / "cron_last_run.json", {})
-    stale = []
-    expected_max_age_hours = {
-        # collect_* run once daily (collect_tw 15:00 Mon-Fri, collect_us 07:03
-        # Tue-Sat) — a 12h max-age chronically false-flags them every day in
-        # the ~22h gap between daily runs. 26h covers normal daily cadence.
-        "collect_us_data": 26, "collect_tw_data": 26, "release_pool": 4,
-        "check_alerts": 2, "paper_sync_all": 8, "memory_health_daily": 30,
-        "market_calendar_sync": 30, "refresh_paper_snapshots": 30,
+    schedules = jl(REPO / "config" / "runtime_schedules.json", {})
+    # Build {job_id: cron_string} from system_crontab + cron_jobs sections
+    job_cron_map = {}
+    for item in (schedules.get("system_crontab", {}) or {}).get("items", []):
+        if isinstance(item, dict) and item.get("id") and item.get("cron"):
+            job_cron_map[item["id"]] = item["cron"]
+    for item in (schedules.get("cron_jobs", []) or []):
+        if isinstance(item, dict) and item.get("id") and item.get("cron"):
+            # cron_jobs use 'volpred-XXX' ids; map to underscore form for cron_last_run.json
+            job_cron_map[item["id"].replace("volpred-", "").replace("-", "_")] = item["cron"]
+    # Jobs we monitor + grace_min (allow up to grace_min late before flagging)
+    monitored = {
+        "collect_us_data": 60, "collect_tw_data": 60, "release_pool": 30,
+        "check_alerts": 30, "paper_sync_all": 60, "memory_health_daily": 60,
+        "market_calendar_sync": 120, "refresh_paper_snapshots": 120,
     }
-    for job, max_h in expected_max_age_hours.items():
-        last = cron.get(job, "")
-        if not last: continue
+    stale = []
+    try:
+        from croniter import croniter
+        from datetime import datetime
         try:
-            # cron_last_run.json stores UTC ISO timestamps; parse as UTC
-            # (time.mktime would mis-read them as local time → spurious +8h age)
-            last_ts = calendar.timegm(time.strptime(last[:19], "%Y-%m-%dT%H:%M:%S"))
-            age_h = (now - last_ts) / 3600.0
-            if age_h > max_h:
-                stale.append({"job": job, "age_h": round(age_h, 1), "max_h": max_h})
+            from zoneinfo import ZoneInfo
+            local_tz = ZoneInfo("Asia/Taipei")  # host crontab runs in local (Taipei)
         except Exception:
-            pass
+            local_tz = None
+    except Exception:
+        croniter = None
+        local_tz = None
+    for job, grace_min in monitored.items():
+        last = cron.get(job, "")
+        if not last:
+            continue
+        try:
+            last_ts = calendar.timegm(time.strptime(last[:19], "%Y-%m-%dT%H:%M:%S"))
+        except Exception:
+            continue
+        cron_str = job_cron_map.get(job)
+        if cron_str and croniter:
+            # Compute prev expected fire (before now) using local TZ (host crontab runs local).
+            try:
+                now_dt = datetime.now(local_tz) if local_tz else datetime.now()
+                itr = croniter(cron_str, now_dt)
+                prev_fire = itr.get_prev()  # epoch seconds (tz-aware → correct UTC epoch)
+                next_fire = itr.get_next()
+                # stale only if last_run was BEFORE prev_expected_fire
+                # AND we are past prev_fire + grace
+                grace_s = grace_min * 60
+                if last_ts < prev_fire - 60 and time.time() > prev_fire + grace_s:
+                    age_h = (time.time() - last_ts) / 3600.0
+                    stale.append({
+                        "job": job,
+                        "age_h": round(age_h, 1),
+                        "missed_expected_fire_at": time.strftime("%Y-%m-%d %H:%M", time.localtime(prev_fire)),
+                    })
+                continue
+            except Exception:
+                pass
+        # Fallback: simple max-age (legacy behavior)
+        legacy_max_h = {
+            "collect_us_data": 50, "collect_tw_data": 80, "release_pool": 4,
+            "check_alerts": 2, "paper_sync_all": 8, "memory_health_daily": 30,
+            "market_calendar_sync": 192, "refresh_paper_snapshots": 192,
+        }.get(job, 26)
+        age_h = (now - last_ts) / 3600.0
+        if age_h > legacy_max_h:
+            stale.append({"job": job, "age_h": round(age_h, 1), "max_h": legacy_max_h})
     out.append(section(
         "health_cron",
         "ok" if not stale else "warn" if len(stale) <= 2 else "critical",
