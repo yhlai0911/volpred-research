@@ -31378,5 +31378,56 @@
       "K1316"
     ],
     "created_at": "2026-05-23T08:38:00"
+  },
+  {
+    "item_id": "63df63d2",
+    "experiment_id": "K1400",
+    "k_id": "K1400",
+    "experiment_path": "experiments/K1400/",
+    "title": "K1400: 退休族房貸決策 — 一次還清 / 繼續繳 / 還一半 的 30 年提領模擬",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "code-reviewer subagent (a5f9f9008d41fed3a)",
+    "reviewer_source": "feature-dev:code-reviewer fallback (Codex CLI unavailable)",
+    "created_at": "2026-05-23T17:54:31+08:00",
+    "summary": "Block bootstrap 10,000 paths × 360 月 over TWII 1997-2026 monthly returns. Three strategies (A 一次還清 700 萬本金，無房貸 / B 繼續繳 1000 萬 + 月供 1.96 萬 / C 還半 850 萬 + 月供 0.98 萬), 起始淨值相等 700 萬. Findings: (1) B 繼續繳 bust rate 始終最低 (含息 30.5% vs A 32.7% vs C 31.5%), 反直覺. (2) 房貸利率 1.5%-3.0% 對 bust rate 只造成 1-2pp 差異, 利率不是主角. (3) Sequence-of-returns risk + 起始本金規模 主導結果. (4) Median 終值: B (2414 萬) > C (1992) > A (1617). 含息+3.5%/年 sensitivity 三策略順序不變.",
+    "key_numbers": {
+      "data_period": "1997-08..2026-05 (346 months)",
+      "n_paths": 10000,
+      "horizon_months": 360,
+      "bust_rate_with_dividend_2_2pct": {
+        "A": 0.327,
+        "B": 0.305,
+        "C": 0.315
+      },
+      "bust_rate_price_only_2_2pct": {
+        "A": 0.583,
+        "B": 0.545,
+        "C": 0.562
+      },
+      "median_final_with_div_2_2pct_wan": {
+        "A": 1617,
+        "B": 2414,
+        "C": 1992
+      }
+    },
+    "caveats": [
+      "TWII unadjusted (price-only); +3.5%/yr dividend yield added as TR sensitivity (assumption, not data series)",
+      "Inflation 2%/yr is conservative for Taiwan (historical ~1-1.5%)",
+      "100% TWII allocation; real retirees diversify",
+      "Bust = liquid portfolio ≤ 0, no house equity / liquidation",
+      "Block bootstrap implies future ≈ 1997-2026 distribution",
+      "No transaction costs / fees / taxes",
+      "Mortgage fixed nominal rate; floating-rate stress not modeled"
+    ],
+    "article_published": "mile_e058d38f",
+    "tags": [
+      "retirement",
+      "mortgage",
+      "decumulation",
+      "sequence-risk",
+      "bootstrap",
+      "taiwan",
+      "trending_repost"
+    ]
   }
 ]
