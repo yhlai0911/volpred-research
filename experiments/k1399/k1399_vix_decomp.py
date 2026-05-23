@@ -120,12 +120,16 @@ premium_raw = vix_close / (abs_r * np.sqrt(252))  # premium at t using t-day dat
 premium_raw = premium_raw.replace([np.inf, -np.inf], np.nan)
 # Winsorize at 99th percentile to prevent extreme leverage values from dominating OLS
 # (e.g. VIX=15, abs_r=0.0001 gives premium~9450 — will destroy OOS forecasts)
-# Use IS-sample 99th percentile as cap (computed before shift to avoid lookahead)
-p99_is = premium_raw.loc[:'2018-12-31'].quantile(0.99)
-p01_is = premium_raw.loc[:'2018-12-31'].quantile(0.01)
+# Use IS-sample 99th percentile as cap.
+# Use IS_END exclusive of the final date: the last IS predictor row is premium_raw[IS_END-1day]
+# (since premium = premium_raw.shift(1)), so we align the percentile range accordingly.
+is_end_exclusive = pd.Timestamp(IS_END) - pd.tseries.offsets.BDay(1)
+p99_is = premium_raw.loc[:is_end_exclusive].quantile(0.99)
+p01_is = premium_raw.loc[:is_end_exclusive].quantile(0.01)
+print(f"  IS percentile bound range: {IS_START} to {is_end_exclusive.date()} (aligned IS features)")
 print(f"  premium_raw IS 1st-99th pct: [{p01_is:.2f}, {p99_is:.2f}]")
-print(f"  premium_raw IS mean: {premium_raw.loc[:'2018-12-31'].mean():.2f}, "
-      f"median: {premium_raw.loc[:'2018-12-31'].median():.2f}")
+print(f"  premium_raw IS mean: {premium_raw.loc[:is_end_exclusive].mean():.2f}, "
+      f"median: {premium_raw.loc[:is_end_exclusive].median():.2f}")
 premium_raw_winsor = premium_raw.clip(lower=p01_is, upper=p99_is)
 # shift(1): predictor at time t uses winsorized premium_raw from t-1 — lookahead-safe
 premium = premium_raw_winsor.shift(1)
