@@ -1,36 +1,36 @@
 {
-  "timestamp": "2026-05-23T06:05:56Z",
+  "timestamp": "2026-05-23T12:06:43Z",
   "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "Total drafts: 158 (threshold 12). Research audience: 18 (threshold 4). General audience: 140 (threshold 8). All thresholds met."
+      "detail": "158 draft articles total (research: 18, general: 140). All thresholds met (total>=12, research>=4, general>=8)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json mtime: 2026-05-23T06:05 UTC. Age: ~0 hours (threshold 26h). Fresh."
+      "detail": "storage/strategy_metrics.json is 0 hours old (mtime: 2026-05-23). Well within 26h threshold."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated 2026-05-22 or 2026-05-23 in docs/error_log.md. Last entry was 2026-05-21 (hourly-dispatch launchd exit-78 fix)."
+      "detail": "Most recent entry in last 30 lines is dated 2026-05-21 (not today 2026-05-23 or yesterday 2026-05-22). Entry: hourly-dispatch launchd exit-78 — plist StandardOutPath in TCC-protected Desktop. RESOLVED."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "Checked 15 strategies (adaptive_tier, fear_dca, global_vt_tz, piecewise_conservative, recommended_5050, risk_parity, simple_12vix, slow_vt, taiwan_8.63vix, taiwan_hybrid_leverage, taiwan_spy_momentum, tz_tw_jp_5050, vix_cond_leverage, vix_leading_guard, _market_daily). No strategy has >2 nulls in last 3 entries."
+      "detail": "No strategies found with >2 null portfolio_return in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold 50). Working tree clean."
+      "detail": "0 uncommitted files. Working tree clean."
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json: 2151 entries."
+      "detail": "storage/memory/knowledge.json contains 2151 entries."
     }
   ],
   "alerts": []
