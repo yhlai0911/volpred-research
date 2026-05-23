@@ -1,36 +1,36 @@
 {
-  "timestamp": "2026-05-23T12:06:43Z",
+  "timestamp": "2026-05-23T18:06:22Z",
   "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "158 draft articles total (research: 18, general: 140). All thresholds met (total>=12, research>=4, general>=8)."
+      "detail": "Total drafts: 158 (≥12 OK). Research: 18 (≥4 OK). General: 140 (≥8 OK)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json is 0 hours old (mtime: 2026-05-23). Well within 26h threshold."
+      "detail": "storage/strategy_metrics.json age: ~11 seconds (well under 26h threshold)."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Most recent entry in last 30 lines is dated 2026-05-21 (not today 2026-05-23 or yesterday 2026-05-22). Entry: hourly-dispatch launchd exit-78 — plist StandardOutPath in TCC-protected Desktop. RESOLVED."
+      "detail": "No entries dated 2026-05-22 or 2026-05-23 found. Most recent entry: 2026-05-21 (LaunchAgent exit-78 TCC path fix — RESOLVED)."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "No strategies found with >2 null portfolio_return in last 3 entries."
+      "detail": "No strategy has >2 portfolio_return=null in last 3 entries across all 15 strategies."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files. Working tree clean."
+      "detail": "0 uncommitted files (clean working tree)."
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json contains 2151 entries."
+      "detail": "knowledge.json contains 2151 entries."
     }
   ],
   "alerts": []
