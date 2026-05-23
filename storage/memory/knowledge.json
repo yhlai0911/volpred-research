@@ -31350,5 +31350,33 @@
       "GJR",
       "HAR"
     ]
+  },
+  {
+    "id": "K1399",
+    "experiment_id": "K1399",
+    "title": "K1399: VIX Feature Decomposition in HAR — Level is Sufficient Statistic (H1_PASS|H2_PARTIAL|H3_PARTIAL|H4_FAIL|H5_PASS)",
+    "verdict": "CONDITIONAL_PASS",
+    "confidence": 0.88,
+    "content": "[Claude main thread + primary-path Codex CLI, 2026-05-23] K1399 decomposes VIX into 4 components to identify which drives HAR-X advantage over HAR-ABS baseline: (L) level, (dV) 1-day change, (P) vol premium VIX/(|r|*sqrt(252)), (T) MA5 trend. SPY daily |r_t| target, IS 2005-2018 (n=3522), OOS 2019-05-19 (n=1865), static OLS HC3. Key results: H1=PASS: HAR-VIX-L DM t=-4.40 vs HAR-ABS (Harvey |t|>3), replicates K1315 (K1315: t=4.58 OOS to 2024; K1399 OOS extended to May 2026). H2=PARTIAL: HAR-VIX-dV not significant vs baseline (t=1.01) but significantly WORSE than HAR-VIX-L (t=4.15); DVIX adds noise not signal. H3=PARTIAL: HAR-VIX-P not significant vs baseline (t=0.82) but significantly WORSE than HAR-VIX-L (t=4.42); vol premium provides no extra value. H4=FAIL: HAR-VIX-T IS Harvey-significant vs baseline (t=-3.53, BETTER), but redundant when level included (All vs L: t=-0.40); MA5 proxies level, not trend. H5=PASS: HAR-VIX-All not Harvey-better than HAR-VIX-L (t=-0.40, p=0.69); parsimony confirmed. OOS QLIKE ranking: HAR-VIX-All=-3.9423, HAR-VIX-L=-3.9411, HAR-VIX-T=-3.9312, HAR-ABS=-3.9163, HAR-VIX-P=-3.9161, HAR-VIX-dV=-3.9121. VIF: vix_L=60.3, ma5_vix=68.3 in HAR-VIX-All — severe multicollinearity explains why All≈L. Codex MEDIUM fix: IS percentile boundary for premium aligned to last IS feature date (commit 1ed8ba69). Conclusion: VIX level is sufficient statistic for HAR-X; DVIX, vol premium, and trend add no incremental OOS value over level alone. Implication: For Paper 9 HAR-X models on US equity, use VIX level as single exogenous predictor. Extends K1315: confirms VIX level=sufficient statistic for SPY HAR both from combination perspective (K1315) and decomposition perspective (K1399).",
+    "data_source": "paper/leverage-direction/data/spy_vix_2004-2026.csv (local snapshot, auto_adjust=False for SPY)",
+    "period": "IS 2005-01-04 to 2018-12-31, OOS 2019-01-02 to 2026-05-19",
+    "tags": [
+      "VIX",
+      "HAR",
+      "HAR-X",
+      "feature-decomposition",
+      "sufficient-statistic",
+      "QLIKE",
+      "DM-HLN",
+      "SPY",
+      "VIF",
+      "parsimony"
+    ],
+    "codex_review": "CONDITIONAL_PASS (primary-path Codex CLI 0.132.0) — 1 MEDIUM: IS percentile boundary off by 1 BDay (fixed commit 1ed8ba69, no numerical impact). All 6 other checks PASS. Main-thread independent review: PASS.",
+    "related_experiments": [
+      "K1315",
+      "K1316"
+    ],
+    "created_at": "2026-05-23T08:38:00"
   }
 ]
