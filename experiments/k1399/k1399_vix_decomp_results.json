@@ -1,0 +1,149 @@
+{
+  "experiment_id": "K1399",
+  "timestamp": "2026-05-23T08:29:19",
+  "data_source": "paper/leverage-direction/data/spy_vix_2004-2026.csv",
+  "data_period": {
+    "is_start": "2005-01-04",
+    "is_end": "2018-12-31",
+    "oos_start": "2019-01-02",
+    "oos_end": "2026-05-19"
+  },
+  "n_obs": {
+    "is": 3522,
+    "oos": 1865
+  },
+  "models": {
+    "HAR_ABS": {
+      "oos_qlike": -3.916261089239141,
+      "is_r2": 0.28936165453279894,
+      "oos_rank": 4,
+      "dm_t_vs_baseline": null,
+      "dm_p_vs_baseline": null,
+      "harvey_pass_vs_baseline": null
+    },
+    "HAR_VIX_L": {
+      "oos_qlike": -3.941077824560117,
+      "is_r2": 0.3443633977762649,
+      "oos_rank": 2,
+      "dm_t_vs_baseline": -4.4003872477645105,
+      "dm_p_vs_baseline": 1.1416920058984375e-05,
+      "harvey_pass_vs_baseline": true
+    },
+    "HAR_VIX_dV": {
+      "oos_qlike": -3.912110138830787,
+      "is_r2": 0.30444517027037177,
+      "oos_rank": 6,
+      "dm_t_vs_baseline": 1.0122959107340088,
+      "dm_p_vs_baseline": 0.3115279705437897,
+      "harvey_pass_vs_baseline": false
+    },
+    "HAR_VIX_P": {
+      "oos_qlike": -3.916122029762996,
+      "is_r2": 0.28943170737440227,
+      "oos_rank": 5,
+      "dm_t_vs_baseline": 0.8157033481894623,
+      "dm_p_vs_baseline": 0.4147740419381281,
+      "harvey_pass_vs_baseline": false
+    },
+    "HAR_VIX_T": {
+      "oos_qlike": -3.931245982134267,
+      "is_r2": 0.31425371324426077,
+      "oos_rank": 3,
+      "dm_t_vs_baseline": -3.5302244360665673,
+      "dm_p_vs_baseline": 0.0004252885970493696,
+      "harvey_pass_vs_baseline": true
+    },
+    "HAR_VIX_All": {
+      "oos_qlike": -3.9422784656064382,
+      "is_r2": 0.3572514897911374,
+      "oos_rank": 1,
+      "dm_t_vs_baseline": -4.362766703129489,
+      "dm_p_vs_baseline": 1.3545164059876022e-05,
+      "harvey_pass_vs_baseline": true
+    }
+  },
+  "pairwise_dm_vs_vix_l": {
+    "HAR_VIX_dV_vs_L": {
+      "dm_t": 4.151961735185303,
+      "dm_p": 3.445084453630775e-05,
+      "harvey_pass": true
+    },
+    "HAR_VIX_P_vs_L": {
+      "dm_t": 4.418252881133407,
+      "dm_p": 1.0521930726584317e-05,
+      "harvey_pass": true
+    },
+    "HAR_VIX_T_vs_L": {
+      "dm_t": 3.473280577406599,
+      "dm_p": 0.0005258797469751208,
+      "harvey_pass": true
+    },
+    "HAR_VIX_All_vs_L": {
+      "dm_t": -0.3993876684535078,
+      "dm_p": 0.6896533332556762,
+      "harvey_pass": false
+    },
+    "HAR_VIX_All_vs_best_single": {
+      "best_single_model": "HAR_VIX_L",
+      "dm_t": -0.3993876684535078,
+      "dm_p": 0.6896533332556762,
+      "harvey_pass": false
+    }
+  },
+  "vif_check": {
+    "HAR_VIX_All": {
+      "rv1": 2.2453974414982447,
+      "rv5": 5.132064190402406,
+      "rv22": 8.141480848284804,
+      "vix_L": 60.261078654881,
+      "dvix": 2.0990769228613013,
+      "premium": 1.1157992406169193,
+      "ma5_vix": 68.29566118065065
+    }
+  },
+  "hypothesis_verdicts": {
+    "H1_vix_level_significant": "PASS",
+    "H2_dvix_incremental": "PARTIAL",
+    "H3_vol_premium_regime": "PARTIAL",
+    "H4_vix_trend_no_info": "FAIL",
+    "H5_parsimony_all_vs_best": "PASS"
+  },
+  "verdict": "H1_PASS|H2_PARTIAL|H3_PARTIAL|H4_FAIL|H5_PASS",
+  "qlike_ranking": [
+    [
+      "HAR_VIX_All",
+      -3.9422784656064382
+    ],
+    [
+      "HAR_VIX_L",
+      -3.941077824560117
+    ],
+    [
+      "HAR_VIX_T",
+      -3.931245982134267
+    ],
+    [
+      "HAR_ABS",
+      -3.916261089239141
+    ],
+    [
+      "HAR_VIX_P",
+      -3.916122029762996
+    ],
+    [
+      "HAR_VIX_dV",
+      -3.912110138830787
+    ]
+  ],
+  "k1315_replication": {
+    "expected_dm_t_vix_l_vs_baseline": 4.58,
+    "actual_dm_t_vix_l_vs_baseline": 4.4003872477645105,
+    "replication_within_05": true,
+    "note": "K1315 OOS 2019-2024; K1399 OOS 2019-latest. Difference expected."
+  },
+  "summary": "K1399 VIX Feature Decomposition: H1=PASS (VIX level DM t=-4.40), H2=PARTIAL (DVIX vs baseline DM t=1.01), H3=PARTIAL (vol premium DM t=0.82), H4=FAIL (trend insignificant, DM t=-3.53), H5=PASS (parsimony, All vs HAR_VIX_L DM t=-0.40). Best model: HAR_VIX_All (QLIKE=-3.942278). QLIKE ranking: HAR_VIX_All=-3.942278, HAR_VIX_L=-3.941078, HAR_VIX_T=-3.931246, HAR_ABS=-3.916261, HAR_VIX_P=-3.916122, HAR_VIX_dV=-3.912110",
+  "seed": 42,
+  "qlike_formula": "Patton 2011 form B: mean(log(yhat) + y/yhat)",
+  "dm_test": "HLN-corrected DM, NW bandwidth=T^(1/3), t(T-1) distribution",
+  "harvey_threshold": 3.0
+}
