@@ -70,3 +70,31 @@ All 4 HIGH issues fixed in body_v3.tex (commit: see git log):
 Compiled: XeLaTeX 0 errors (2 passes, 2026-05-23 07:xx Taiwan time).
 
 **Post-fix status: HIGH=0, 13 MEDIUM, 7 LOW. Returns to R4's HIGH=0. Paper ready for R5 review.**
+
+## MEDIUM Fixes Applied (2026-05-23, main thread paper_body session)
+
+7 MEDIUM/LOW issues addressed in body_v3.tex (2nd pass):
+
+| Issue | Fix | Status |
+|-------|-----|--------|
+| M2 | Added Calmar ratio interpretation para after Table 3 (SPY 0.283 vs 0.214 B&H; hedged 0.281 preserved) | ✅ Fixed |
+| M3 | Expanded Table 4 M5 footnote: BAB SPLV-SPHB proxy inception May 2011 → N=3,740; K898 AQR full-sample available on request | ✅ Fixed |
+| M4 | Added block size limitation note to Table 6 footnote (b=252, cites Politis & Romano 1994; sensitivity b∈{63,126} deferred) | ✅ Fixed |
+| M8 | Added explicit no-lookahead confirmation in Section 2.4 (rolling 252-day uses only [t-252, t-1]) | ✅ Fixed |
+| M9a | Added Hurst et al. (2017) JPM citation in introduction TSMOM paragraph + bibliography entry | ✅ Fixed |
+| M9b | Fixed NW lag formula citation: newey1987→newey1994 (HAC estimator keeps 1987; bandwidth selection rule cites 1994) | ✅ Fixed |
+| M10 | Hood & Raughtigan (2025): added "Retrieved May 2025" to working paper entry | ✅ Fixed |
+
+New bibliography entries added: hurst2017, newey1994, politis1994.
+
+**Post-MEDIUM-batch status: HIGH=0, MEDIUM=6, LOW=6 (7 of 13 MEDIUM resolved)**
+
+Remaining MEDIUM (require new experiments or deeper investigation):
+- M1: K901/K1178 row-level reconciliation for Table 5 (needs traceability audit)
+- M5: Sector r=0.163 missing source K-number (may need new experiment or removal)
+- M6: K687/K697/K688 inline result citations (bounded but time-intensive)
+- M7: Data appendix table (asset-level start/end dates)
+- M9c: Liu et al. (2019) on VT — exact citation unverified, deferred to next session
+- M11: Placebo test for international VIX channel (new regression needed)
+
+Compiled: XeLaTeX 0 errors, 0 undefined citations (2 passes, 2026-05-23).

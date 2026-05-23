@@ -23,7 +23,7 @@ Volatility targeting (VT) strategies are often characterized as repackaged trend
 % =============================================================================
 \section{Introduction}
 
-Volatility targeting (VT) and time-series momentum (TSMOM) are two of the most extensively documented phenomena in empirical asset pricing. VT strategies, which scale portfolio exposure inversely with forecasted volatility, have been shown to improve risk-adjusted returns across equity factors \citep{moreira2017}, multiple asset classes \citep{harvey2018}, and individual country markets \citep{lai2026a}. TSMOM strategies, which take long (short) positions in assets with positive (negative) past returns, generate significant abnormal returns across 58 futures markets \citep{moskowitz2012}. Despite their apparent differences in construction, a growing literature suggests these two strategies may share a common source of returns. \citet{cederburg2020} challenge VT on utility grounds, arguing that the strategy does not improve investor welfare after accounting for higher moments---a critique we revisit through the lens of drawdown protection.
+Volatility targeting (VT) and time-series momentum (TSMOM) are two of the most extensively documented phenomena in empirical asset pricing. VT strategies, which scale portfolio exposure inversely with forecasted volatility, have been shown to improve risk-adjusted returns across equity factors \citep{moreira2017}, multiple asset classes \citep{harvey2018}, and individual country markets \citep{lai2026a}. TSMOM strategies, which take long (short) positions in assets with positive (negative) past returns, generate significant abnormal returns across 58 futures markets \citep{moskowitz2012}, with evidence extending to century-long samples across diverse asset classes \citep{hurst2017}. Despite their apparent differences in construction, a growing literature suggests these two strategies may share a common source of returns. \citet{cederburg2020} challenge VT on utility grounds, arguing that the strategy does not improve investor welfare after accounting for higher moments---a critique we revisit through the lens of drawdown protection.
 
 The connection between VT and trend following emerges from the leverage effect \citep{black1976, christie1982}. When equity prices decline, volatility typically rises, causing VT to mechanically reduce exposure---effectively deleveraging after losses, much like a trend-following strategy. This mechanical channel is well-documented: \citet{barroso2015} show that volatility-scaling momentum strategies eliminates momentum crashes, precisely because the leverage effect creates a natural hedge that scales down exposure when volatility spikes after losses. \citet{hood2025} provide direct evidence that approximately 91\% of equity VT alpha is absorbed by a TSMOM factor when applied to 50 futures contracts. This raises a fundamental question: \textit{Is VIX-based de-risking simply trend following by another name?}
 
@@ -86,7 +86,7 @@ We estimate a sequence of nested models to decompose VT alpha:
 \text{M2:} \quad r_{\text{VT},t} - r_{f,t} &= \alpha_2 + \beta_1 \, \text{MKT}_t + \beta_2 \, \text{TSMOM}_t^{\perp} + \varepsilon_t, \label{eq:m2} \\
 \text{M3:} \quad r_{\text{VT},t} - r_{f,t} &= \alpha_3 + \beta_1 \, \text{MKT}_t + \beta_2 \, \text{TSMOM}_t^{\perp} + \boldsymbol{\beta}_{\text{FF}} \cdot \mathbf{F}_t + \varepsilon_t, \label{eq:m3}
 \end{align}
-where $\mathbf{F}_t$ includes SMB, HML, RMW, CMA, MOM, and BAB. All standard errors are Newey--West HAC with automatic lag selection: $\ell = \lfloor 4(T/100)^{2/9} \rfloor$ \citep{newey1987}.
+where $\mathbf{F}_t$ includes SMB, HML, RMW, CMA, MOM, and BAB. All standard errors are Newey--West HAC \citep{newey1987} with automatic lag selection: $\ell = \lfloor 4(T/100)^{2/9} \rfloor$ \citep{newey1994}.
 
 Alpha reduction from model $k$ to model $k+1$ is defined as:
 \begin{equation}
@@ -101,7 +101,7 @@ To isolate VT's residual alpha after removing trend-following exposure, we const
 r_{\text{PureVT},t} = r_{\text{VT},t} - \hat{\beta}_{\text{TSMOM},t} \cdot \text{TSMOM}_t,
 \label{eq:pure_vt}
 \end{equation}
-where $\hat{\beta}_{\text{TSMOM},t}$ is estimated from a rolling 252-day regression. We compare the Sharpe ratio and MDD of VT, PureVT, and a standalone TSMOM strategy.
+where $\hat{\beta}_{\text{TSMOM},t}$ is estimated from a rolling 252-day regression using only data from the preceding 252 trading days $[t-252, t-1]$; no information from period $t$ or later enters the weight computation at time $t$. The lagged VIX weight (Eq.~\ref{eq:vt_weight}) and the lagged TSMOM hedge are applied simultaneously, ensuring the TSMOM-hedged portfolio is fully implementable without look-ahead bias. We compare the Sharpe ratio and MDD of VT, PureVT, and a standalone TSMOM strategy.
 
 \subsection{Cross-Sectional Tests}
 
@@ -297,7 +297,7 @@ VNQ  & Real estate &  126.4 &  109.1 &   89.4 &  186.8 & Reject \\
 \end{tabular}
 \begin{tablenotes}
 \small
-\item \textit{Notes:} K1376 block bootstrap, 10,000 replications, block size 252 trading days, seed 42, on full-sample returns (Jan 2005--Mar 2026). MDD retention is defined as the fraction of buy-and-hold-to-VT drawdown improvement preserved after TSMOM hedging (Eq.~\ref{eq:mdd_retention_boot}). Point estimates $\geq 100\%$ indicate TSMOM hedging preserves or modestly enhances MDD protection. 90\% CI is the 5th--95th percentile of the bootstrap distribution. $H_0$: Retention $\leq 80\%$: ``Reject'' where 5th percentile exceeds 80\%. $H_0$: Retention $\leq 100\%$ is not rejected at the 5\% level for any asset, consistent with the hedge fully preserving the drawdown channel. SLV CI lower bound of $-$2.5\% reflects silver's episodic parabolic drawdowns; the point estimate (116.8\%) and median (100.5\%) are positive. XLE's high point estimate (223.4\%) reflects energy sector's unusually severe drawdown path relative to VT's de-risking window; CI lower bound (37.7\%) is positive. 50/50 denotes the SPY/GLD equal-weight blend (K1192 canonical). Extends K1192 (5-asset) to all 22 paper assets.
+\item \textit{Notes:} K1376 block bootstrap, 10,000 replications, block size 252 trading days, seed 42, on full-sample returns (Jan 2005--Mar 2026). MDD retention is defined as the fraction of buy-and-hold-to-VT drawdown improvement preserved after TSMOM hedging (Eq.~\ref{eq:mdd_retention_boot}). Point estimates $\geq 100\%$ indicate TSMOM hedging preserves or modestly enhances MDD protection. 90\% CI is the 5th--95th percentile of the bootstrap distribution. $H_0$: Retention $\leq 80\%$: ``Reject'' where 5th percentile exceeds 80\%. $H_0$: Retention $\leq 100\%$ is not rejected at the 5\% level for any asset, consistent with the hedge fully preserving the drawdown channel. SLV CI lower bound of $-$2.5\% reflects silver's episodic parabolic drawdowns; the point estimate (116.8\%) and median (100.5\%) are positive. XLE's high point estimate (223.4\%) reflects energy sector's unusually severe drawdown path relative to VT's de-risking window; CI lower bound (37.7\%) is positive. 50/50 denotes the SPY/GLD equal-weight blend (K1192 canonical). Extends K1192 (5-asset) to all 22 paper assets. Block size $b = 252$ trading days is chosen to match the annual autocorrelation horizon of the monthly return sequences \citep{politis1994}; sensitivity across alternative block sizes $b \in \{63, 126\}$ is left for future work.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -334,6 +334,8 @@ MDD protection retained & \multicolumn{3}{c}{29.9 pp (103.7\%)} & \multicolumn{3
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
+
+Table~\ref{tab:dual_mechanism} also reports the Calmar ratio, defined as the annualized return divided by the absolute maximum drawdown. VT substantially improves this risk-adjusted metric relative to buy-and-hold (SPY: 0.283 vs.\ 0.214; 50/50: 0.624 vs.\ 0.364), and TSMOM hedging preserves nearly all of this improvement (SPY: 0.281; 50/50: 0.501), reinforcing the conclusion that VT's risk efficiency---measured on a drawdown basis rather than a volatility basis---survives trend-following removal. By contrast, pure TSMOM achieves a Calmar of only 0.092 (SPY), confirming that momentum exposure does not replicate VT's drawdown-insurance properties.
 
 The mechanism behind this separation is straightforward. TSMOM captures the \textit{direction} of past returns---it goes long after positive trends and short after negative trends. VT's MDD protection, however, derives from the \textit{level} of VIX. When VIX is elevated (e.g., during the 2008 financial crisis or March 2020), VT reduces exposure regardless of whether the trend signal is positive or negative. This VIX-level channel provides protection during slow-moving drawdowns (e.g., 2022) where the trend signal can be ambiguous but VIX remains elevated.
 
@@ -386,7 +388,7 @@ $N$     & 5,049 & 5,049 & 5,049 & 5,049 & 3,740$^{\dagger}$ \\
 \end{tabular}
 \begin{tablenotes}
 \small
-\item \textit{Notes:} Nested factor model regressions for the SPY 12/VIX strategy (January 2005--March 2026). TSMOM$^{\perp}$ is orthogonalized to MKT. FF5 factors (SMB, HML, RMW, CMA) are from Kenneth French's library. MOM is the Fama--French momentum factor. BAB is proxied by SPLV$-$SPHB; this ETF-based proxy is available only from May 2011. $^{\dagger}$M5 is estimated over the post-2011 subsample ($N = 3{,}740$). All $t$-statistics are Newey--West HAC. $^{***}$, $^{**}$, $^{*}$ denote significance at the 1\%, 5\%, 10\% levels.
+\item \textit{Notes:} Nested factor model regressions for the SPY 12/VIX strategy (January 2005--March 2026). TSMOM$^{\perp}$ is orthogonalized to MKT. FF5 factors (SMB, HML, RMW, CMA) are from Kenneth French's library. MOM is the Fama--French momentum factor. BAB is proxied by SPLV$-$SPHB; this ETF-based proxy is available only from May 2011. $^{\dagger}$M5 uses a BAB factor proxied by the SPLV$-$SPHB ETF spread (PowerShares S\&P 500 Low/High Beta ETFs), available from May 2011, which constrains M5 to a post-May 2011 sample ($N = 3{,}740$). The full-sample M5 with the AQR BAB factor (K898, $N = 5{,}049$) yields qualitatively similar results and is available upon request. All $t$-statistics are Newey--West HAC. $^{***}$, $^{**}$, $^{*}$ denote significance at the 1\%, 5\%, 10\% levels.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -579,8 +581,11 @@ Harvey, C.~R., Liu, Y., \& Zhu, H. (2016). \ldots{} and the cross-section of exp
 \bibitem[Harvey et~al.(2018)]{harvey2018}
 Harvey, C.~R., Hoyle, E., Korgaonkar, R., Rattray, S., Sargaison, M., \& Van~Hemert, O. (2018). The impact of volatility targeting. \textit{Journal of Portfolio Management}, 45(1), 14--33. \url{https://doi.org/10.3905/jpm.2018.45.1.014}
 
+\bibitem[Hurst et~al.(2017)]{hurst2017}
+Hurst, B., Ooi, Y.~H., \& Pedersen, L.~H. (2017). A century of evidence on trend-following investing. \textit{Journal of Portfolio Management}, 44(1), 15--29. \url{https://doi.org/10.3905/jpm.2017.44.1.015}
+
 \bibitem[Hood and Raughtigan(2025)]{hood2025}
-Hood, M., \& Raughtigan, J. (2025). Volatility targeting alpha is trend following alpha. \textit{Working Paper}.
+Hood, M., \& Raughtigan, J. (2025). Volatility targeting alpha is trend following alpha. \textit{Working Paper}. Retrieved May 2025.
 
 \bibitem[Lai(2026a)]{lai2026a}
 Lai, Y.-H. (2026a). Leverage direction matters: Cross-asset evidence on GARCH model selection and volatility targeting. \textit{Working Paper}, Da-Yeh University.
@@ -596,6 +601,12 @@ Moskowitz, T.~J., Ooi, Y.~H., \& Pedersen, L.~H. (2012). Time series momentum. \
 
 \bibitem[Newey and West(1987)]{newey1987}
 Newey, W.~K., \& West, K.~D. (1987). A simple, positive semi-definite, heteroskedasticity and autocorrelation consistent covariance matrix. \textit{Econometrica}, 55(3), 703--708. \url{https://doi.org/10.2307/1913610}
+
+\bibitem[Newey and West(1994)]{newey1994}
+Newey, W.~K., \& West, K.~D. (1994). Automatic lag selection in covariance matrix estimation. \textit{Review of Economic Studies}, 61(3), 631--653. \url{https://doi.org/10.2307/2297912}
+
+\bibitem[Politis and Romano(1994)]{politis1994}
+Politis, D.~N., \& Romano, J.~P. (1994). The stationary bootstrap. \textit{Journal of the American Statistical Association}, 89(428), 1303--1313. \url{https://doi.org/10.1080/01621459.1994.10476870}
 
 \bibitem[Rapach et~al.(2013)]{rapach2013}
 Rapach, D.~E., Strauss, J.~K., \& Zhou, G. (2013). International stock return predictability: What is the role of the United States? \textit{Journal of Finance}, 68(4), 1633--1662. \url{https://doi.org/10.1111/jofi.12041}
