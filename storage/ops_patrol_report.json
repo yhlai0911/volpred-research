@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-24T12:11:51Z",
+  "timestamp": "2026-05-24T18:04:04Z",
   "all_ok": true,
   "checks": [
     {
@@ -10,7 +10,7 @@
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "strategy_metrics.json age: 0.00 hours (threshold: 26h). OK."
+      "detail": "strategy_metrics.json age: ~5.9 hours (threshold: 26h). OK."
     },
     {
       "name": "ERROR_LOG",
@@ -20,12 +20,12 @@
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "No strategies with >2 null portfolio_return in last 3 entries. (paper_trading.json returned empty strategy list.)"
+      "detail": "All 15 strategies checked (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, _market_daily, adaptive_tier). None have >2 nulls in last 3 portfolio_return entries."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files."
+      "detail": "0 uncommitted files (threshold: >50). Clean working tree."
     },
     {
       "name": "KNOWLEDGE_SIZE",
