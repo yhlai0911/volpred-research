@@ -1,31 +1,31 @@
 {
-  "timestamp": "2026-05-24T00:09:01Z",
+  "timestamp": "2026-05-24T12:11:51Z",
   "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "Total drafts: 158 (general: 140, research: 18). All thresholds met (total>=12, research>=4, general>=8)."
+      "detail": "Total drafts: 158 (general: 140, research: 18). Thresholds: total>=12, general>=8, research>=4. All OK."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json age: ~0.00 hours (essentially just updated). Well within 26-hour threshold."
+      "detail": "strategy_metrics.json age: 0.00 hours (threshold: 26h). OK."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated 2026-05-24 or 2026-05-23. Last entry: 2026-05-21 (hourly-dispatch launchd exit-78 TCC fix)."
+      "detail": "No entries dated today (2026-05-24) or yesterday (2026-05-23). Most recent entry: 2026-05-21."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "15 strategies checked. No strategy has >2 consecutive portfolio_return=null in last 3 entries."
+      "detail": "No strategies with >2 null portfolio_return in last 3 entries. (paper_trading.json returned empty strategy list.)"
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files. Clean working tree."
+      "detail": "0 uncommitted files."
     },
     {
       "name": "KNOWLEDGE_SIZE",
