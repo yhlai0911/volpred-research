@@ -1,0 +1,116 @@
+{
+  "experiment_id": "k1401",
+  "title": "GDP Q1 Second Estimate Event Study — VIX/SPY Response to BEA Releases",
+  "data_sources": {
+    "market": "yfinance (SPY, ^VIX), 2000-01-01 to 2026-05-25",
+    "events": "BEA Q1 GDP Second Estimate release dates 2001-2025 (hard-coded from BEA calendar)"
+  },
+  "sample": {
+    "n_events": 25,
+    "years": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005,
+      2006,
+      2007,
+      2008,
+      2009,
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "event_window_days": 5
+  },
+  "vix_mean_profile": {
+    "-5": 1.0342305024461111,
+    "-4": 1.0299381168354003,
+    "-3": 1.0290219618653627,
+    "-2": 1.0194060449440958,
+    "-1": 1.0326250232286376,
+    "0": 1.0,
+    "1": 1.0034917935883163,
+    "2": 1.038646676452135,
+    "3": 1.0147008240186874,
+    "4": 0.9989634533101795,
+    "5": 0.9970195630382956
+  },
+  "spy_mean_return_pct": {
+    "-5": -0.10252892011960979,
+    "-4": 0.051752253211695624,
+    "-3": -0.09370225364912477,
+    "-2": 0.32307933471572214,
+    "-1": -0.13422801779642368,
+    "0": 0.466388257291972,
+    "1": 0.0828928151602435,
+    "2": -0.12356229795039031,
+    "3": 0.3173756615972674,
+    "4": 0.3172657794106124,
+    "5": 0.005377485005948923
+  },
+  "statistical_tests": {
+    "h1": {
+      "hypothesis": "H1: VIX(T-5) < VIX(T-1) — pre-event vol elevation",
+      "test": "paired t-test (two-sample, one-sided: T-5 < T-1)",
+      "n": 25,
+      "mean_vix_t5": 19.023600006103514,
+      "mean_vix_t1": 18.92880012512207,
+      "mean_diff_t1_minus_t5": -0.09479988098144532,
+      "t_stat": 0.15950445608046862,
+      "p_value": 0.5626968937459885,
+      "alpha_bonferroni": 0.0167,
+      "significant": false
+    },
+    "h2": {
+      "hypothesis": "H2: VIX(T0) > VIX(T+1) — post-announcement vol drop",
+      "test": "paired t-test (one-sided: T0 > T+1)",
+      "n": 25,
+      "mean_vix_t0": 18.314399948120116,
+      "mean_vix_tp1": 18.312799835205077,
+      "mean_diff_t0_minus_tp1": 0.0016001129150390624,
+      "t_stat": 0.006130300923245923,
+      "p_value": 0.49757971543385526,
+      "alpha_bonferroni": 0.0167,
+      "significant": false
+    },
+    "h3": {
+      "hypothesis": "H3: Asymmetric VIX response to upward vs downward GDP revision",
+      "test": "Welch independent t-test (two-sided, equal_var=False)",
+      "n_up": 9,
+      "n_down": 10,
+      "mean_vix_change_up": -0.04295872976562906,
+      "mean_vix_change_down": -0.02229893070195963,
+      "t_stat": -0.8557565383744733,
+      "p_value": 0.4055225831208267,
+      "alpha_bonferroni": 0.0167,
+      "significant": false
+    }
+  },
+  "revision_breakdown": {
+    "n_up": 9,
+    "n_down": 10,
+    "n_flat": 6
+  },
+  "methodology": {
+    "event_window": "[-5, +5] trading days around BEA release",
+    "vix_normalization": "VIX(t) / VIX(T0) for profile plot",
+    "multiple_testing_correction": "Bonferroni k=3, alpha_adj=0.0167",
+    "seed": 42,
+    "lookahead": "None — pure historical event study, no forward-looking data"
+  },
+  "chart": "k1401_event_study.png"
+}
