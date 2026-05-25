@@ -1,5 +1,29 @@
 [
   {
+    "id": "K1401_gdp_q1_second_estimate_event_study",
+    "title": "K1401: GDP Q1 Second Estimate Event Study — VIX/SPY vol reaction to BEA revision history",
+    "description": "Run event study on 25 years of Q1 GDP second estimate releases (late May each year). Analyze VIX level and SPY returns [-5,+5] days around release. Test whether upward vs downward GDP revisions produce asymmetric vol response. Supports 05/29 Q1 2026 GDP second estimate event article.",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "succeeded",
+    "created_at": "2026-05-25T02:07:00.000000+00:00",
+    "source": "hourly_dispatch",
+    "tags": [
+      "GDP",
+      "event-study",
+      "VIX",
+      "SPY",
+      "macro",
+      "event-driven"
+    ],
+    "claimed_by": "hourly-10",
+    "claimed_at": "2026-05-25T02:12:49.269345+00:00",
+    "claim_session_id": "b1c9331ff23f",
+    "started_at": "2026-05-25T02:12:53.357471+00:00",
+    "completed_at": "2026-05-25T02:27:26.359447+00:00",
+    "result": "K1401 GDP Q1 second estimate event study complete. N=25 events 2001-2025. All 3 hypotheses null (p>0.40). CONDITIONAL_PASS Codex review. Merged to main commit 5a5abf1a. knowledge.json entry k1401_gdp_event_study_null written."
+  },
+  {
     "id": "K1377",
     "title": "K1377: HAR 組合預測（Inverse-QLIKE 加權）— SPY / GLD / 0050.TW",
     "description": "測試以 rolling inverse-QLIKE 加權組合 HAR / HAR-ABS / HAR-VIX 三個模型，是否能以 DM-Harvey |t|>3 顯著勝過最佳單一模型 HAR-VIX（K530 結果）。對應 research_program.md 面向 A「組合預測（反 QLIKE 加權）」方向。",
@@ -62,6 +86,15 @@
       "GAS",
       "negative-result",
       "methodology"
+    ],
+    "task_type": "paper_body",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_body",
+        "rationale": "matched: neg-result methodology paper",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -78,7 +111,16 @@
     ],
     "completed_at": "2026-05-04",
     "completion_artifact": "paper/garch-x-vix/scripts/summary_stats.py + paper/garch-x-vix/results/summary_stats.json",
-    "completion_note": "5 discrepancies vs paper Table 1 surfaced (VIX OOS mean +1.92, SPY std OOS +0.017, etc); paper edit / errata cycle needed"
+    "completion_note": "5 discrepancies vs paper Table 1 surfaced (VIX OOS mean +1.92, SPY std OOS +0.017, etc); paper edit / errata cycle needed",
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
+    ]
   },
   {
     "id": "K1015_article_general",
@@ -824,7 +866,16 @@
     "status": "succeeded_null_result",
     "completed_at": "2026-04-18",
     "synced_from_experiments_at": "2026-05-04T09:26:47.263681+00:00",
-    "result_summary": "| 欄位 | 內容 |\n|------|------|\n| 實驗編號 | K1108d |\n| 提出者 | 賴奕豪 |\n| 執行者 | Claude (worktree agent-ae315a15) |\n| 日期 | 2026-04-17 |\n| Parent chain | K1108 → K1108b → K1108c → K1108e → K1108f |\n| Paper mapping "
+    "result_summary": "| 欄位 | 內容 |\n|------|------|\n| 實驗編號 | K1108d |\n| 提出者 | 賴奕豪 |\n| 執行者 | Claude (worktree agent-ae315a15) |\n| 日期 | 2026-04-17 |\n| Parent chain | K1108 → K1108b → K1108c → K1108e → K1108f |\n| Paper mapping ",
+    "task_type": "experiment",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "experiment",
+        "rationale": "matched: K-experiment id",
+        "at": "2026-05-25"
+      }
+    ]
   },
   {
     "id": "K1115_article_general",
@@ -878,7 +929,16 @@
     "last_note": "[session-restart-2026-04-18] cleared stale in_progress: no agent claim",
     "completed_at": "2026-04-13",
     "synced_from_experiments_at": "2026-05-04T08:51:03.283897+00:00",
-    "result_summary": "**Status**: FAIL (triple threshold) but meaningful partial result\n**Date**: 2026-04-13\n**Author**: Claude (worktree agent-k1125)\n**Data**: TAIFEX TX futures 5-min bars 2017-2021 (via K1124 cached 73,2"
+    "result_summary": "**Status**: FAIL (triple threshold) but meaningful partial result\n**Date**: 2026-04-13\n**Author**: Claude (worktree agent-k1125)\n**Data**: TAIFEX TX futures 5-min bars 2017-2021 (via K1124 cached 73,2",
+    "task_type": "experiment",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "experiment",
+        "rationale": "matched: K-experiment id",
+        "at": "2026-05-25"
+      }
+    ]
   },
   {
     "id": "K1128_article_general",
@@ -903,7 +963,16 @@
     "description": "Hansen-Lunde 高頻標準。K1136 改用 5-min 彙總 RV 當 target，檢驗 daily proxy 是否仍為 NULL。資料需 yfinance/polygon 5-min 回抓。",
     "status": "succeeded",
     "completed_at": "2026-05-04",
-    "completion_note": "experiment dir has results.json + README verdict (Scenario B_AGGREGATOR); article task will surface via auto-refill if needed"
+    "completion_note": "experiment dir has results.json + README verdict (Scenario B_AGGREGATOR); article task will surface via auto-refill if needed",
+    "task_type": "experiment",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "experiment",
+        "rationale": "matched: K-experiment id",
+        "at": "2026-05-25"
+      }
+    ]
   },
   {
     "id": "K1140_article_general",
@@ -960,7 +1029,16 @@
     "title": "K1161b: IV crush retry with paid options data (ThetaData / OptionMetrics)",
     "priority": 4,
     "status": "blocked_on_user",
-    "description": "K1161 DATA_INFEASIBLE due to yfinance free options chain history limit (~90d per contract). Requires paid data source: ThetaData Standard (~$50/mo), OptionMetrics IvyDB (academic), HistoricalOptionData.com, or Bloomberg OVDV. 需用戶決定是否訂閱，否則此路線 blocked."
+    "description": "K1161 DATA_INFEASIBLE due to yfinance free options chain history limit (~90d per contract). Requires paid data source: ThetaData Standard (~$50/mo), OptionMetrics IvyDB (academic), HistoricalOptionData.com, or Bloomberg OVDV. 需用戶決定是否訂閱，否則此路線 blocked.",
+    "task_type": "experiment",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "experiment",
+        "rationale": "matched: K-experiment id",
+        "at": "2026-05-25"
+      }
+    ]
   },
   {
     "id": "K1169",
@@ -2201,11 +2279,19 @@
     "priority": 3,
     "status": "succeeded",
     "completed_at": "2026-05-06T20:11:00+00:00",
-    "task_type": "experiment_review",
+    "task_type": "paper_review",
     "tags": [
       "k560",
       "lookahead-patched",
       "audit-phase-2"
+    ],
+    "backfill_log": [
+      {
+        "old": "experiment_review",
+        "new": "paper_review",
+        "rationale": "normalize experiment_review→paper_review",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -3232,7 +3318,16 @@
     ],
     "completed_at": "2026-05-06",
     "completion_artifact": "paper/volatility-absorption/README.md (errata block 4-23) + docs/error_log.md (2026-05-06 K716 entry)",
-    "completion_note": "Option (c) errata disclosure added to paper README acknowledging K716 (a) rebuild BLOCKED by yfinance drift (N=893→767, slope 3.57%, t-stat 48%). Paralysis claim + SAR Table 3 (≤0.82% drift) retained valid; Table 9-10 K716 cells frozen as paper-time values. paper body.tex untouched per paper-workflow rule L188."
+    "completion_note": "Option (c) errata disclosure added to paper README acknowledging K716 (a) rebuild BLOCKED by yfinance drift (N=893→767, slope 3.57%, t-stat 48%). Paralysis claim + SAR Table 3 (≤0.82% drift) retained valid; Table 9-10 K716 cells frozen as paper-time values. paper body.tex untouched per paper-workflow rule L188.",
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
+    ]
   },
   {
     "id": "K717_article_general",
@@ -4781,6 +4876,15 @@
       "paper-1",
       "precision-fix",
       "main-thread-only"
+    ],
+    "task_type": "paper_body",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_body",
+        "rationale": "paper + body-rewrite verbs",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -4795,6 +4899,15 @@
       "leverage-direction",
       "submission-blocker",
       "main-thread-only"
+    ],
+    "task_type": "paper_body",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_body",
+        "rationale": "paper + body-rewrite verbs",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -4810,6 +4923,15 @@
       "forensic",
       "main-thread",
       "possible-major-errata"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -4824,6 +4946,15 @@
       "leverage-direction",
       "kb-footnote",
       "main-thread"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -4839,12 +4970,21 @@
       "research-integrity",
       "internal-inconsistency",
       "main-thread"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
     "id": "Paper1_Table4_footnote_and_methodology_clarify",
     "title": "Paper 1: Table 4 footnote (data vintage ±3) + base model clarify (GARCH not GJR)",
-    "status": "pending_main_thread",
+    "status": "pending",
     "priority": 2,
     "created_at": "2026-04-17T18:01:06+08:00",
     "description": "K1185 (818fff7c) 發現: Paper 1 Table 4 base model 是 GARCH(1,1) 非 GJR (若 GJR Normal=34 不匹配 33). Adaptive = 20-day rolling max sigma. Student-t scale correction sqrt((df-2)/df). 主線程: (1) Table 4 footnote 加 'Violation counts computed 2025-Q4; minor yfinance data revisions may produce ±3 count differences upon replication.'; (2) Methodology section 明載 Table 4 base = GARCH(1,1), Adaptive = 20-day rolling max sigma, Student-t scale correction; (3) experiments.md 加 K1185 為 Table 4 source.",
@@ -4853,6 +4993,22 @@
       "footnote",
       "methodology-clarify",
       "main-thread"
+    ],
+    "started_at": null,
+    "last_released_at": "2026-05-25T00:29:42.782687+00:00",
+    "claimed_by": null,
+    "claimed_at": null,
+    "claim_session_id": "a72ff637a73b",
+    "completed_at": null,
+    "result": null,
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -4882,6 +5038,15 @@
       "paper-1",
       "quick-win",
       "main-thread"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -4928,6 +5093,15 @@
       "taiwan-vt",
       "errata",
       "main-thread"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -4942,6 +5116,15 @@
       "section-6",
       "blocker",
       "new-experiment-required"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -4956,6 +5139,15 @@
       "g20-section6",
       "main-thread",
       "errata"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -4970,6 +5162,15 @@
       "taiwan-vt",
       "documentation-errata",
       "main-thread"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -4985,6 +5186,15 @@
       "errata",
       "research-integrity",
       "main-thread-only"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -4998,6 +5208,15 @@
       "paper-2",
       "quick-win",
       "main-thread"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -5015,7 +5234,16 @@
     "title": "Paper 2 section 5 narrative decision (main thread + 用戶決策)",
     "priority": 1,
     "status": "decision_made_awaiting_body_rewrite",
-    "description": "**DECISION (2026-04-17): Option 4 CONFIRMED by user**. Execute Paper 2 §5 rewrite: (a) keep universal-magnitude claim as IS-identified panel regularity across TW+US; (b) US cross-market OOS validation as main confirmatory evidence (K1148_d2 t=-5.58 p<0.0001, 19/30 stock PASS); (c) TW OOS heterogeneity as subsection (K1148_d1 t=-1.46, 9/29 stock PASS, framed as market-microstructure anomaly); (d) firm-level attribution REJECTED (K1148_d3 no robust differentiator under BH correction, report as exploratory footnote). 主線程執行 body_v2.tex rewrite，須 read 現有 paper/<paper2-dir>/body.tex 和 §5 相關 data tables。 | K1149 (2026-04-17) MAJOR UPGRADE: PCA factor absorption test both markets PASS Harvey joint (US OOS DM t=-3.31, TW t=-2.48). TW OOS heterogeneity reframe: K1148_d1 FAIL was baseline choice artifact. New Opt 4+: claim universal-magnitude is TRUE firm-event effect orthogonal to market factor, surviving both IS and OOS in US+TW. Optional interaction subsection with US-vs-TW sign opposition caveat. | 2026-04-17 REALITY CHECK: 目前 paper/ 沒有 Paper 2 目錄 (EAV universal-magnitude) - 這其實是「start a new paper」不是「rewrite section 5」. 主線程需要先建立 paper/eav-universal-magnitude/ + outline + literature review 才有 body 可寫. Decision 已 confirmed Opt4, 但 paper kick-off is separate P1."
+    "description": "**DECISION (2026-04-17): Option 4 CONFIRMED by user**. Execute Paper 2 §5 rewrite: (a) keep universal-magnitude claim as IS-identified panel regularity across TW+US; (b) US cross-market OOS validation as main confirmatory evidence (K1148_d2 t=-5.58 p<0.0001, 19/30 stock PASS); (c) TW OOS heterogeneity as subsection (K1148_d1 t=-1.46, 9/29 stock PASS, framed as market-microstructure anomaly); (d) firm-level attribution REJECTED (K1148_d3 no robust differentiator under BH correction, report as exploratory footnote). 主線程執行 body_v2.tex rewrite，須 read 現有 paper/<paper2-dir>/body.tex 和 §5 相關 data tables。 | K1149 (2026-04-17) MAJOR UPGRADE: PCA factor absorption test both markets PASS Harvey joint (US OOS DM t=-3.31, TW t=-2.48). TW OOS heterogeneity reframe: K1148_d1 FAIL was baseline choice artifact. New Opt 4+: claim universal-magnitude is TRUE firm-event effect orthogonal to market factor, surviving both IS and OOS in US+TW. Optional interaction subsection with US-vs-TW sign opposition caveat. | 2026-04-17 REALITY CHECK: 目前 paper/ 沒有 Paper 2 目錄 (EAV universal-magnitude) - 這其實是「start a new paper」不是「rewrite section 5」. 主線程需要先建立 paper/eav-universal-magnitude/ + outline + literature review 才有 body 可寫. Decision 已 confirmed Opt4, 但 paper kick-off is separate P1.",
+    "task_type": "paper_decision",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_decision",
+        "rationale": "paper + narrative/decision verbs",
+        "at": "2026-05-25"
+      }
+    ]
   },
   {
     "id": "Paper2_section5_major_revision",
@@ -5062,6 +5290,15 @@
       "errata",
       "main-thread",
       "direction-reversal"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -5077,6 +5314,15 @@
       "errata",
       "research-integrity",
       "main-thread"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -5091,6 +5337,15 @@
       "vt-trend-following",
       "blocker",
       "main-thread"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -5130,6 +5385,15 @@
       "paper-3",
       "quick-win",
       "main-thread"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -5152,6 +5416,15 @@
       "paper-3",
       "good-news-errata",
       "main-thread"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -5159,7 +5432,16 @@
     "title": "Paper 3 Strategic Decision (PRIORITY 1) — A/B/C 三選一",
     "priority": 4,
     "description": "[priority 4 — wait for new evidence] K1100/K1100b/K1100f/K1100g/K1100g_d1/K1100g_d2/K1115 共 7 實驗證明 E055 三條件全 REJECTED。Lai 2024 PRS edge = TAIFEX market microstructure 特有，非通用方法論。需 user 決策：(A) 寫 negative result paper (B) Pivot to TAIFEX microstructure (C) Abandon Paper 3 資源轉其他 papers。 | 2026-04-17 narrative state machine 觸發: K1100b NULL + K1100d NULL + K1100c MIXED (2/5 PASS flight-to-safety). 3/3 互補實驗完成. **新 Paper 3 可發表主張浮現**: asset-class-specific copula advantage — Joe upper-tail significantly beats DCC on equity-bond & equity-gold (λ_L<0.05), NULL on equity-equity (λ_L>0.4, mixing-averaging 主導). 用戶選項: (A) Paper 3 reframe 為 asset-class-specific copula (需 K1172 衍生 N=10-15 pairs 擴驗 λ_L threshold) (B) 保留原 periodic/spot-futures 方向（PRS 延伸） (C) 結合 A+B 雙 subsection. 等用戶 confirm 再進 body rewrite.",
-    "status": "decision_ready_user_input_needed"
+    "status": "decision_ready_user_input_needed",
+    "task_type": "paper_decision",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_decision",
+        "rationale": "paper + narrative/decision verbs",
+        "at": "2026-05-25"
+      }
+    ]
   },
   {
     "id": "Paper4_DIV1_41pct_direction_CRITICAL",
@@ -5174,6 +5456,15 @@
       "research-integrity",
       "critical",
       "main-thread"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -5188,6 +5479,15 @@
       "vix-sufficiency",
       "typo-fix",
       "main-thread"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -5202,6 +5502,15 @@
       "vix-sufficiency",
       "ranking-flip-risk",
       "main-thread"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -5216,6 +5525,15 @@
       "vix-sufficiency",
       "era-specific",
       "main-thread"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -5230,6 +5548,15 @@
       "vix-sufficiency",
       "body-rewrite",
       "main-thread"
+    ],
+    "task_type": "paper_decision",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_decision",
+        "rationale": "paper + narrative/decision verbs",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -5253,7 +5580,16 @@
     "title": "Paper 4 narrative pivot: universal null -> channel-specific claims (主線程 + 用戶決策)",
     "priority": 1,
     "status": "decision_made_awaiting_body_rewrite",
-    "description": "**DECISION (2026-04-17): Channel-specific reframe CONFIRMED by user**. Original \"universal robust null\" claim refuted by K1138 MIXED. New narrative: 3 channels each with distinct universal behavior: (1) HAR+VIX regressor = asset-class HETEROGENEOUS (equity PASS SPY/QQQ t=+4.22, commodity NULL K1136); (2) MIDAS long-run driver = universal NULL (7 assets); (3) GAS-t score-driven = universally unhelpful (equity actively harmful t=-3.27). Supporting evidence: K1117 event-conditional null, K1130 regime fix invalidated. 主線程執行 Paper 4 body rewrite 等 K1139 (VIX component diagnostic) + K1141 write-up prep 完成後再動手。 | K1139 (2026-04-17) 補充: HAR+VIX equity channel 的 mechanism = VIX 是 forward-looking IV components (VRP + TermPrem + SKEW + VVIX) 的 efficient aggregator, 不是 realized-vol proxy. M7 encompass approx M1 表示 decomposition 沒超越 composite VIX. Paper 4 section 5 equity channel 段可加 mechanism subsection but 不可 overclaim \"we found better signal than VIX\". | K1143 (2026-04-17) mechanism diagnostic: GAS-t architectural incompatibility on equity with 3 evidence-backed rationale (score skew / near-Gaussian innovations / long-memory). Paper 4 Channel 3 narrative upgraded from \"unhelpful\" to \"mechanistically incompatible\" with concrete diagnostic numbers. | 2026-04-17 REALITY CHECK: 目前 paper/ 沒有 Paper 4 目錄 (robust null compendium) - 這也是 start-from-scratch. 素材 K1117/K1123/K1130/K1131/K1136/K1138/K1139/K1143/K1137 (running) 齊全. 主線程需建立 paper/robust-null-compendium/ + outline. | K1137 (2026-04-17) regime-conditional PASS 17/54: HAR-RV-X 15/18 cells PASS regime-invariantly (QQQ 3/3, IWM 3/3). Rolling ex-ante 252d quantile fixes K1128 degeneracy. NEW direction: TLT/GLD/USO HAR-structure effect 30-52% might warrant independent subsection. | K1135 (2026-04-17) commodity skew-t diagnostic: QLIKE 0/4 but ES 4/4 PASS. Channel 3 narrative complete: \"asset-class-specific usage pattern — equity harmful, commodity skew-t is concrete tail-risk tool not vol forecasting tool\"."
+    "description": "**DECISION (2026-04-17): Channel-specific reframe CONFIRMED by user**. Original \"universal robust null\" claim refuted by K1138 MIXED. New narrative: 3 channels each with distinct universal behavior: (1) HAR+VIX regressor = asset-class HETEROGENEOUS (equity PASS SPY/QQQ t=+4.22, commodity NULL K1136); (2) MIDAS long-run driver = universal NULL (7 assets); (3) GAS-t score-driven = universally unhelpful (equity actively harmful t=-3.27). Supporting evidence: K1117 event-conditional null, K1130 regime fix invalidated. 主線程執行 Paper 4 body rewrite 等 K1139 (VIX component diagnostic) + K1141 write-up prep 完成後再動手。 | K1139 (2026-04-17) 補充: HAR+VIX equity channel 的 mechanism = VIX 是 forward-looking IV components (VRP + TermPrem + SKEW + VVIX) 的 efficient aggregator, 不是 realized-vol proxy. M7 encompass approx M1 表示 decomposition 沒超越 composite VIX. Paper 4 section 5 equity channel 段可加 mechanism subsection but 不可 overclaim \"we found better signal than VIX\". | K1143 (2026-04-17) mechanism diagnostic: GAS-t architectural incompatibility on equity with 3 evidence-backed rationale (score skew / near-Gaussian innovations / long-memory). Paper 4 Channel 3 narrative upgraded from \"unhelpful\" to \"mechanistically incompatible\" with concrete diagnostic numbers. | 2026-04-17 REALITY CHECK: 目前 paper/ 沒有 Paper 4 目錄 (robust null compendium) - 這也是 start-from-scratch. 素材 K1117/K1123/K1130/K1131/K1136/K1138/K1139/K1143/K1137 (running) 齊全. 主線程需建立 paper/robust-null-compendium/ + outline. | K1137 (2026-04-17) regime-conditional PASS 17/54: HAR-RV-X 15/18 cells PASS regime-invariantly (QQQ 3/3, IWM 3/3). Rolling ex-ante 252d quantile fixes K1128 degeneracy. NEW direction: TLT/GLD/USO HAR-structure effect 30-52% might warrant independent subsection. | K1135 (2026-04-17) commodity skew-t diagnostic: QLIKE 0/4 but ES 4/4 PASS. Channel 3 narrative complete: \"asset-class-specific usage pattern — equity harmful, commodity skew-t is concrete tail-risk tool not vol forecasting tool\".",
+    "task_type": "paper_decision",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_decision",
+        "rationale": "paper + narrative/decision verbs",
+        "at": "2026-05-25"
+      }
+    ]
   },
   {
     "id": "Paper4_experiments_md_add_vix_term_structure",
@@ -5266,6 +5602,15 @@
       "paper-4",
       "quick-win",
       "main-thread"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -5289,6 +5634,15 @@
       "paper-6",
       "date-errata",
       "main-thread"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -5302,6 +5656,15 @@
       "paper-6",
       "var-errata",
       "main-thread"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -5315,6 +5678,15 @@
       "paper-6",
       "quick-win",
       "main-thread"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -5331,12 +5703,21 @@
       "research-integrity",
       "main-thread",
       "critical"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
     "id": "Paper7_minor_errata_97_80bps",
     "title": "Paper 7 MINOR errata: '97%' → 98.0%, '80 bps' → 81 bps (main-thread 2 處)",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 2,
     "created_at": "2026-04-17T17:16:50+08:00",
     "description": "Paper 7 audit (cb1dd9b4, 96% matched best score) 發現 2 minor: (1) Sec 2.3 '1 bps opp share 97%' → 98.0% (K811v2 4.195/4.281); (2) Sec 3.3 '54-80 bps' upper → 81 bps (K846 theoretical 81.46). 2 unverifiable footnote (2012-2024 sub-period ρ=0.04, 48 bps rebalancing) — 需補 sub-period 分析或刪腳註. Main-thread 5-min edit. Paper 7 基本 ready for submission, 此為最後清理.",
@@ -5344,6 +5725,21 @@
       "paper-7",
       "minor-errata",
       "main-thread"
+    ],
+    "claimed_by": "hourly-09",
+    "claimed_at": "2026-05-25T01:10:25.622614+00:00",
+    "claim_session_id": "44fc117ae3a6",
+    "started_at": "2026-05-25T01:10:36.479043+00:00",
+    "completed_at": "2026-05-25T01:13:16.238511+00:00",
+    "result": "97%→98.0% (K811v2), 54-80→54-81 bps (K846), removed unverifiable sub-period footnote. Compiled OK (14p). Synced Supabase. Committed 0da5fcca.",
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -5376,7 +5772,16 @@
     ],
     "completed_at": "2026-05-06",
     "completion_artifact": "paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity.py:605-607",
-    "completion_note": "Changed threshold_region cutoff 30→50 (line 605: deg_30 > 50, line 607: deg_50 > 50). Paper footnote [c] uses 50% threshold; code metadata now matches. Paper 8 table itself was already correct, this was code-side label-only fix. No rerun needed (analysis cosmetic)."
+    "completion_note": "Changed threshold_region cutoff 30→50 (line 605: deg_30 > 50, line 607: deg_50 > 50). Paper footnote [c] uses 50% threshold; code metadata now matches. Paper 8 table itself was already correct, this was code-side label-only fix. No rerun needed (analysis cosmetic).",
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
+    ]
   },
   {
     "id": "Paper9_D5_0050TW_t144_source",
@@ -5388,6 +5793,15 @@
     "tags": [
       "paper-9",
       "data-forensics"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -5401,6 +5815,15 @@
       "paper-9",
       "ticker-forensic",
       "main-thread"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -5414,6 +5837,15 @@
       "paper-9",
       "footnote-errata",
       "main-thread"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -5438,6 +5870,15 @@
       "experiments-md",
       "quick-fix",
       "main-thread"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -5451,6 +5892,15 @@
       "paper-9",
       "quick-win",
       "main-thread"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -5464,6 +5914,15 @@
       "paper-9",
       "subperiod-update",
       "main-thread"
+    ],
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -5478,7 +5937,16 @@
       "infrastructure",
       "compliance"
     ],
-    "completed_at": "2026-04-17T15:47:34+08:00"
+    "completed_at": "2026-04-17T15:47:34+08:00",
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
+    ]
   },
   {
     "id": "TSMC_0417_optional",
@@ -5488,7 +5956,16 @@
     "status": "pending",
     "blocked_reason": "self_tagged_optional",
     "blocked_at": "2026-05-04T09:40:24+00:00",
-    "blocked_note": "Task description self-flags '只有真新發現才寫，否則跳過避免重複。'"
+    "blocked_note": "Task description self-flags '只有真新發現才寫，否則跳過避免重複。'",
+    "task_type": "platform_ops",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "platform_ops",
+        "rationale": "default fallback",
+        "at": "2026-05-25"
+      }
+    ]
   },
   {
     "id": "VolAbsorption_errata_decision",
@@ -5502,6 +5979,15 @@
       "submission-critical",
       "reproducibility",
       "main-thread-decision"
+    ],
+    "task_type": "paper_body",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_body",
+        "rationale": "paper + body-rewrite verbs",
+        "at": "2026-05-25"
+      }
     ]
   },
   {
@@ -5516,7 +6002,16 @@
       "submission-critical",
       "volatility-absorption"
     ],
-    "completed_at": "2026-04-17T16:18:08+08:00"
+    "completed_at": "2026-04-17T16:18:08+08:00",
+    "task_type": "paper_body",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_body",
+        "rationale": "paper + body-rewrite verbs",
+        "at": "2026-05-25"
+      }
+    ]
   },
   {
     "id": "add_conclusion_field_linter_at_experiment_completion",
@@ -6047,7 +6542,7 @@
     "description": "experiments/k222/k222_retirement_swr.py line 528 writes results to experiments/k222_retirement_swr_results.json (root experiments/) instead of experiments/k222/k222_retirement_swr_results.json. Pattern matches K562 path bug fixed earlier. Quick edit + smoke verify.",
     "priority": 5,
     "status": "succeeded",
-    "task_type": "experiment_review",
+    "task_type": "paper_review",
     "source": "k222_rerun_followup",
     "tags": [
       "k222",
@@ -6055,7 +6550,15 @@
     ],
     "created_at": "2026-05-07T07:42:00+00:00",
     "completed_at": "2026-05-07T10:09:00+00:00",
-    "action_taken": "Line 528 patched: out_path = experiments/k222/k222_retirement_swr_results.json (was experiments/k222_..., wrote to root experiments/)."
+    "action_taken": "Line 528 patched: out_path = experiments/k222/k222_retirement_swr_results.json (was experiments/k222_..., wrote to root experiments/).",
+    "backfill_log": [
+      {
+        "old": "experiment_review",
+        "new": "paper_review",
+        "rationale": "normalize experiment_review→paper_review",
+        "at": "2026-05-25"
+      }
+    ]
   },
   {
     "id": "k222_rerun_post_lookahead_patch",
@@ -6114,7 +6617,7 @@
     "description": "2026-05-06 Codex review of mile_d70be85c uncovered 2 K237 source issues: (a) experiments/k237/k237_international_vt.py L93-97 uses yf.download auto_adjust=False - returns are raw Close not total-return, dividends missing - article numbers reflect price-only not actual market performance. (b) L424-429 bootstrap unseeded - exact pass/fail p-values not reproducible. Fix: rerun K237 with auto_adjust=True, seed bootstrap, regenerate results.json, update any article citing K237.",
     "priority": 2,
     "status": "succeeded",
-    "task_type": "experiment_review",
+    "task_type": "paper_review",
     "source": "codex_review_fallout",
     "tags": [
       "k237",
@@ -6123,7 +6626,15 @@
     ],
     "created_at": "2026-05-06T20:08:30+00:00",
     "completed_at": "2026-05-06T23:00:00+00:00",
-    "action_taken": "auto_adjust=False -> True (line 93); bootstrap unseeded -> rng.default_rng with per-market seed (line 430-435). Rerun queued as separate task."
+    "action_taken": "auto_adjust=False -> True (line 93); bootstrap unseeded -> rng.default_rng with per-market seed (line 430-435). Rerun queued as separate task.",
+    "backfill_log": [
+      {
+        "old": "experiment_review",
+        "new": "paper_review",
+        "rationale": "normalize experiment_review→paper_review",
+        "at": "2026-05-25"
+      }
+    ]
   },
   {
     "id": "k645_k646_rerun_post_patch_complete",
@@ -6164,7 +6675,7 @@
     "description": "2026-05-06 lookahead_audit.py 擴 detector 後新增 4 個 unverified files: (1) K560 line 179/192 vt_weight x sector_ret/equity_ret, K562 fix 只 patch validation script 沒 patch K560 main (2) K645 line 511 equity_weight x risky_ret (3) K646 line 124 同 K645 pattern (4) taiwan_paper_fixes line 220 port_ret = new_weight x tw_ret. 每個需 (a) 確認是否真 lookahead, (b) patch + rerun, (c) 檢查現有 results.json 數字是否需 errata, (d) feed.json 引用該 K 的文章是否需 unpublish/re-edit.",
     "priority": 2,
     "status": "succeeded",
-    "task_type": "experiment_review",
+    "task_type": "paper_review",
     "source": "main_thread_audit",
     "tags": [
       "lookahead",
@@ -6173,7 +6684,15 @@
     ],
     "created_at": "2026-05-06T19:09:00+00:00",
     "completed_at": "2026-05-06T21:09:00+00:00",
-    "resolution": "K222 patched (earlier today), K645/K646 patched (apply_12vix shift), K560 main patched (sig_idx i-1 lag), taiwan_paper_fixes verified false-positive (uses index < date strict filter, LAG_MARKERS extended). Audit: 53/54 lag-verified, 0 UNVERIFIED."
+    "resolution": "K222 patched (earlier today), K645/K646 patched (apply_12vix shift), K560 main patched (sig_idx i-1 lag), taiwan_paper_fixes verified false-positive (uses index < date strict filter, LAG_MARKERS extended). Audit: 53/54 lag-verified, 0 UNVERIFIED.",
+    "backfill_log": [
+      {
+        "old": "experiment_review",
+        "new": "paper_review",
+        "rationale": "normalize experiment_review→paper_review",
+        "at": "2026-05-25"
+      }
+    ]
   },
   {
     "id": "memory_health_audit_26_legacy_stub_duplicates",
@@ -6321,7 +6840,16 @@
     "status": "pending_main_thread",
     "description": "paper/leverage-direction/ 缺 scripts/ results/ data_sources.md experiments.md — 補齊 CLAUDE.md self-contained 5 項必備內容（投稿 hard requirement）。",
     "created_at": "2026-04-18T20:51:21.640064",
-    "note": "2026-04-18 audit: Paper folder missing CLAUDE.md self-contained requirements"
+    "note": "2026-04-18 audit: Paper folder missing CLAUDE.md self-contained requirements",
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
+    ]
   },
   {
     "id": "paper_review_mile_0347be08",
@@ -7100,7 +7628,16 @@
     "status": "pending_main_thread",
     "description": "paper/taiwan-vt/ 缺 scripts/ results/ data_sources.md experiments.md — 補齊 self-contained 5 項必備。",
     "created_at": "2026-04-18T20:51:21.640071",
-    "note": "2026-04-18 audit: Paper folder missing CLAUDE.md self-contained requirements"
+    "note": "2026-04-18 audit: Paper folder missing CLAUDE.md self-contained requirements",
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
+    ]
   },
   {
     "id": "paper_vt_trend_following_self_contained",
@@ -7108,7 +7645,16 @@
     "status": "pending_main_thread",
     "description": "paper/vt-trend-following/ 缺 scripts/ results/ data_sources.md experiments.md — 補齊 self-contained 5 項必備。",
     "created_at": "2026-04-18T20:51:21.640074",
-    "note": "2026-04-18 audit: Paper folder missing CLAUDE.md self-contained requirements"
+    "note": "2026-04-18 audit: Paper folder missing CLAUDE.md self-contained requirements",
+    "task_type": "paper_review",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "paper_review",
+        "rationale": "paper + default (errata/footnote/clarif)",
+        "at": "2026-05-25"
+      }
+    ]
   },
   {
     "id": "rewrite_mile_0c1f9687_citation_fix",
@@ -7736,7 +8282,7 @@
     "title": "Experiment scaffold: K1268B (research_program backlog)",
     "description": "K1268B mentioned in research_program.md but no experiments/k1268b/ directory yet. Create three-part scaffold per CLAUDE.md `.claude/rules/experiments.md`: (a) README.md (motivation + method + expected output + lookahead policy), (b) k1268b.py initial implementation (with signal.shift(1) + seed), (c) plan placeholder k1268b_results.json schema. Do NOT run the experiment — just scaffold + stage for main thread to review.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "diverse_gen",
     "tags": [
@@ -7744,7 +8290,13 @@
       "scaffold",
       "research-program-backlog"
     ],
-    "created_at": "2026-05-12T23:07:17+00:00"
+    "created_at": "2026-05-12T23:07:17+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-05-25T01:05:05.449592+00:00",
+    "claim_session_id": "73197fc86aab",
+    "started_at": "2026-05-25T01:05:11.962533+00:00",
+    "completed_at": "2026-05-25T01:06:48.197207+00:00",
+    "result": "Created experiments/k1268b scaffold (README, k1268b.py, k1268b_results.json). Added paid-data gate, explicit signal.shift(1), and seed=42; no experiment execution."
   },
   {
     "id": "K1306_article_general",
@@ -8496,7 +9048,7 @@
     "description": "K1268 has a non-null verdict in experiments/k1268/ but no published feed article and no existing task. Verdict: FAIL_NO_DATA. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -8505,7 +9057,13 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.446071+00:00",
     "generated_at": "2026-05-13T05:53:00.446072+00:00",
-    "k_id": "K1268"
+    "k_id": "K1268",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-05-25T02:08:20.647686+00:00",
+    "claim_session_id": "b26e8c2b2025",
+    "started_at": "2026-05-25T02:08:30.685302+00:00",
+    "completed_at": "2026-05-25T02:11:32.195402+00:00",
+    "result": "Drafted storage/drafts/k1268_general_draft.md for K1268 FAIL_NO_DATA. Included honest data-pipeline framing, source notes, and anti-AI cleanup; kept as draft pending chart/publish review."
   },
   {
     "id": "gen_article_k1300",
@@ -9411,7 +9969,16 @@
     "depends_on": [],
     "error_log_ref": "2026-05-17 mile_53983530 Codex FAIL",
     "completed_at": "2026-05-16T23:35:44.862054+00:00",
-    "result_summary": "Daily VT Sharpe 1.666→0.689 (-58.7%). Monthly VT≈Daily VT (0.692 vs 0.689). ToM overlay still underperforms (bootstrap CI [-2.96,-0.73] bps, entirely negative). Article mile_53983530 updated. K547b knowledge entry written."
+    "result_summary": "Daily VT Sharpe 1.666→0.689 (-58.7%). Monthly VT≈Daily VT (0.692 vs 0.689). ToM overlay still underperforms (bootstrap CI [-2.96,-0.73] bps, entirely negative). Article mile_53983530 updated. K547b knowledge entry written.",
+    "task_type": "experiment",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "experiment",
+        "rationale": "matched: K-experiment id",
+        "at": "2026-05-25"
+      }
+    ]
   },
   {
     "id": "K1146_body",
@@ -9774,7 +10341,16 @@
     "related_article": "mile_a8ac2ae4",
     "review_source": "storage/ops/codex_24h_review_20260518.json",
     "completed_at": "2026-05-18T15:12:22.791595+00:00",
-    "completion_note": "Fixed in main thread 2026-05-18: direct feed.json edit"
+    "completion_note": "Fixed in main thread 2026-05-18: direct feed.json edit",
+    "task_type": "platform_ops",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "platform_ops",
+        "rationale": "default fallback",
+        "at": "2026-05-25"
+      }
+    ]
   },
   {
     "id": "fix_mile_ae145f60_citation",
@@ -9787,7 +10363,16 @@
     "related_article": "mile_ae145f60",
     "review_source": "storage/ops/codex_24h_review_20260518.json",
     "completed_at": "2026-05-18T15:12:22.791595+00:00",
-    "completion_note": "Fixed in main thread 2026-05-18: direct feed.json edit"
+    "completion_note": "Fixed in main thread 2026-05-18: direct feed.json edit",
+    "task_type": "platform_ops",
+    "backfill_log": [
+      {
+        "old": null,
+        "new": "platform_ops",
+        "rationale": "default fallback",
+        "at": "2026-05-25"
+      }
+    ]
   },
   {
     "id": "K1371",
@@ -10004,7 +10589,7 @@
   {
     "id": "K1380_v4_spa_rc_test_3strike_refactor",
     "priority": 3,
-    "status": "in_progress",
+    "status": "failed",
     "task_type": "experiment",
     "title": "K1380-v4: Paper 9 C3 SPA/RC Test — Three-Strike Refactor (per-model valid masks)",
     "description": "3-STRIKE 重構：K1380 連 3 次因 valid_all joint mask → n_valid=0 失敗。根因：任一 MIDAS 模型收斂失敗就讓 joint mask 全空。Fix：(1) 改用 per-model valid_i masks；(2) SPA test 只含 coverage≥95% 的 spec；(3) 加 non-NaN 診斷列印；(4) MIDAS lag matrix 改用正確逐欄構建（不用 np.roll）。成功標準：n_valid > 1500，至少 12/17 模型有 coverage。",
@@ -10024,6 +10609,50 @@
     ],
     "source": "3-strike trigger 2026-05-22",
     "compute_queue_id": "compute-k1380-v4-spa-rc-test-3-strike-refactor-per-model-masks-no-np-1779430534",
-    "updated_at": "2026-05-22T14:16:06.415534"
+    "updated_at": "2026-05-22T14:16:06.415534",
+    "completed_at": "2026-05-25T01:10:12.621755+00:00",
+    "result": "stale in_progress reset — no active agent found, claimed_at=null"
+  },
+  {
+    "id": "email-11725-c77e84",
+    "title": "[email_reply] Re: [VolPred Boss Report] 2026-05-25 08:10 台灣時間 平台運營報告",
+    "description": "Gmail UID: 11725\nMessage-ID: <59DDEF6B-28FC-4EA0-9C7D-646165A2C8EF@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Mon, 25 May 2026 09:23:21 +0800\nSubject: Re: [VolPred Boss Report] 2026-05-25 08:10 台灣時間 平台運營報告\n\n--- 用戶回信內容 ---\n未完成的工作都完成了？\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年5月25日 08:10 寫道：\r\n> \r\n> ﻿\r\n> VolPred Boss Report · 2026-05-25 08:10 台灣時間 · Overall OK\r\n> \r\n> ⓪ 本 cycle 意圖 / 目標 / 規劃\r\n> \r\n> 意圖 Intent\t從反應式 firefighting 轉成主動 ops 結構。建 dashboard + audit + boss report 三件套，然後 cycle 化主線程運營。\r\n> 本週目標 Weekly Goal\t• Mission 4: 0 stale cron 持續一週、live URL 100% 自動驗證\r\n> • Mission 1: 維持 ≥6 articles/day 同時把 narrative-arc dedup Layer 4 落地（已 ✅）\r\n> • Mission 3: Paper 4 body_v4 完成 rewrite gate\r\n> • Mission 5: FB MCP ext popup gate 找根因 + 解（不再說『修不到』）\r\n> 本 cycle 計劃 Plan\t• Cycle 1: 建 dashboard + 2 audit + boss report email infra（✅ 本 cycle 完成）\r\n> • Cycle 2-3: Paper 4 body_v4 rewrite main thread + 派 review agent 並行\r\n> • Cycle 4: free_tier_growth_plan.md spec + 識別 P1 analytics 工具選型\r\n> • Cycle 5+: MCP ext 根因 deep-dive；若不解，準備 Anthropic issue text\r\n> 成功標準 Success Criteria\t• 每 cycle 開頭 dashboard read 不再有 surprise critical（即 standing audit catch 問題早於我）\r\n> • 每 4h boss email 自動寄出無 fail\r\n> • 次次 cycle 至少 1 個結構性改善（不只 patch）+ 2 個 article 產出\r\n> 已知風險 Known Risks\t• main thread context 易爆（已多次 compact），需要更積極派 agent 卸載\r\n> • FB MCP root cause 可能要花 ≥2 cycles 才找到\r\n> • Paper 4 rewrite 過長吃掉太多 main thread bandwidth\r\n> ① 平台狀態\r\n> \r\n> 區段\t狀態\t說明\t建議行動\r\n> production_pending\tok\t50 pending tasks (top types: [('daily_article', 36), ('experiment', 12), ('?', 2)])\tdispatch top P1-P3 if slots free\r\n> production_throughput\tok\t8 articles published last 24h (target 6/day)\t—\r\n> distribution_supabase\tok\t8/8 last-24h articles synced\t—\r\n> verification_live_url\tok\t3/3 sample live URLs return 200\t—\r\n> verification_fb_pipeline\tok\t0 FB posts pending sync\t—\r\n> health_cron\tok\t0 cron jobs stale (over max-age)\t—\r\n> health_alerts_unhandled\tok\t0 warn/critical alerts last 6h (read + act per .claude/rules/alert.md)\t—\r\n> ①-b 排程器成果掌握（cron 跑完沒 / 成功沒）\r\n> \r\n> 每個定時排程器的 runs / exit / 完成狀態。有需要掌握的項目 ↓\r\n> \r\n> === cron 成果掌握 review — 2026-05-25 08:10:10（台灣時間）===\r\n> \r\n>   hourly_dispatch   runs=43 exit=0 running | last: 2026-05-23 10:08:31  ⚠️ 上次完成 46.0h 前（>2h）\r\n>   compute_worker    runs=338 exit=0 idle | last: 2026-05-25 08:00:07\r\n>   check_alerts      runs=113 exit=0 idle | last: 2026-05-25 08:00:40\r\n>   collect_tw        runs=2 exit=0 idle | last: 2026-05-22 15:00:16  ⚠️ 上次完成 65.2h 前（>30h）\r\n>   collect_us        runs=3 exit=0 idle | last: 2026-05-23 08:00:28  ⚠️ 上次完成 48.2h 前（>30h）\r\n>   daily_update      runs=4 exit=0 running | last: 2026-05-23 08:18:21  ⚠️ 上次完成 47.9h 前（>30h）\r\n>   release_pool      runs=19 exit=0 idle | last: 2026-05-25 07:00:25\r\n>   market_cal        runs=1 exit=0 idle | last: 2026-05-25 08:00:14\r\n>   memory_health     runs=5 exit=0 idle | last: 2026-05-25 06:00:10\r\n>   work_summary      runs=19 exit=0 idle | last: 2026-05-25 06:05:19\r\n> \r\n> 近 75 分鐘 git commits（hourly_dispatch 產出代理）：0 筆\r\n> \r\n> 🔴 需要掌握/處理：\r\n>   - hourly_dispatch: ⚠️ 上次完成 46.0h 前（>2h）\r\n>   - collect_tw: ⚠️ 上次完成 65.2h 前（>30h）\r\n>   - collect_us: ⚠️ 上次完成 48.2h 前（>30h）\r\n>   - daily_update: ⚠️ 上次完成 47.9h 前（>30h）\r\n> ② 本 cycle 活動（過去 4h）\r\n> \r\n> 0 commits\r\n> \r\n> ③ Pending 池與論文組合\r\n> \r\n> Pending tasks: 50\r\n> \r\n> By type: daily_article · 36experiment · 12? · 2\r\n> \r\n> 論文組合\r\n> \r\n> Paper\tStatus\r\n> crypto-fear-channel\t**READY FOR SUBMISSION** (2026-05-17 v4.\r\n> eav-universal-magnitude\tscaffold v2 (paper_decision confirmed 20\r\n> garch-x-vix\tsubmitted (under review) | Reproduce gat\r\n> leverage-direction\tR1 review — 2 CRITICAL (C3/C4/C5 subsets\r\n> prg-periodic-garch\t✅ **Submission-ready (all clear)** (2026\r\n> taiwan-vt\t**Major Revision Required** — 2 HIGH blo\r\n> vix-sufficiency\tReproduce gate GREEN (98.0% match, alert\r\n> volatility-absorption\tR1 review — Path B errata revision appli\r\n> vt-crowding-abm\t✅ Submission-ready (R3 SEVERE=0; v2 revi\r\n> vt-insurance-cost\t✅ **Submission-ready — GREEN 100% (9/9)*\r\n> vt-trend-following\tbody_v3 HIGH = 0 (after v3 H1–H4 fixes,\r\n> ⑤ 下個 cycle 行動（無需你決策）\r\n> \r\n> 1. [pending] Wire audit + dashboard into runtime_schedules.json cron\r\n> 2. [pending] Add `live_verify_failed` alerting on draft → published transition (done by agent a67763789e702d1da, commit n\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-05-25T01:32:07.463229+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11725,
+    "email_message_id": "<59DDEF6B-28FC-4EA0-9C7D-646165A2C8EF@gmail.com>",
+    "email_subject": "Re: [VolPred Boss Report] 2026-05-25 08:10 台灣時間 平台運營報告",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-05-25T01:33:13.145636+00:00",
+    "claim_session_id": "749bf27b9ebb",
+    "started_at": "2026-05-25T01:33:13.388510+00:00",
+    "completed_at": "2026-05-25T01:34:35.139434+00:00",
+    "result": "回信寄出說明：boss report cycle 行動 1/2 完成；50 pending 未消化因 session 投在新基礎建設；本 task 為 end-to-end Gmail loop 真實測試成功案例"
+  },
+  {
+    "id": "K1401_gdp_05_29_event_article_preview",
+    "title": "K1401 GDP 05/29 Event Article — Q1 2026 GDP 第二估預覽稿 (05/27前發)",
+    "description": "Write event-driven article based on K1401 null result: GDP second estimates are efficiently priced by market. Angle: null result + current tariff/stagflation context = what VIX is actually watching. Must publish by 05/27 (before 05/29 BEA release). Source: experiments/k1401/k1401_results.json",
+    "task_type": "event_article",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-05-25T02:28:18.155782Z",
+    "source": "hourly_dispatch",
+    "deadline": "2026-05-27T00:00:00Z",
+    "tags": [
+      "GDP",
+      "event-article",
+      "BEA",
+      "VIX",
+      "deadline-05-27"
+    ]
   }
 ]

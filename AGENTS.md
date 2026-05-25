@@ -268,6 +268,8 @@ uv run python scripts/task_pool_claim.py release --id <task_id>
 
 ### Codex 適合做的 task_type
 
+> Canonical 對照表：`.claude/rules/task-routing.md` — 12 types × claim/concurrency/skill 完整列表。本節是摘要。
+
 | ✅ 適合 | ❌ 留給 Claude |
 |---|---|
 | `platform_ops` bug fix / refactor | `paper_body` 寫 .tex |

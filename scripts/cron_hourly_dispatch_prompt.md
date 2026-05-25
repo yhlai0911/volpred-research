@@ -2,6 +2,8 @@ Hourly dispatch trigger (LaunchAgent HH:07 CST, 24 slots/day). 規則 (token-con
 
 **完整完成原則（HARD RULE）**：本次 fire 派的 task 必須**徹底完成 task goal 才能停止** — 派 agent 後 wait 完成、驗證結果、寫 knowledge.json/work_log、commit。**禁止做一半丟給下一輪**。若任務太大 50min cap 內完不成，**必須 scope 切小**到能在 50min 內收尾的單位（不要 partial 提交）。Heavy compute（GARCH MLE / Bootstrap / 全期 backtest）強制走 `scripts/compute_queue.py enqueue` 給 async worker，不要塞進 hourly fire。Cap 50min（3000s）；hang detect 由 cron script 處理，不該變成「做一半算了」的藉口。
 
+**Routing canonical**：`.claude/rules/task-routing.md` — 12 task types × Claude/Codex/並行/skill 對照表 + email_reply 特殊兩段流程。派工前 grep `task_type` 對應行。
+
 **統一任務池 + claim 流程（HARD RULE，2026-05-25 用戶要求）**：
 1. **第一動作必讀 `storage/ops/handoff_latest.md`**（由 com.volpred.handoff-regen LaunchAgent 每小時 :50 自動生成）— 取得任務池快照 / claim 狀態 / email_reply 待處理 / dashboard 訊號。
 2. **派工前先 claim**：`uv run python scripts/task_pool_claim.py claim --id <id> --owner hourly-$(date +%H)` — 拒絕 `wrong_status` / `already_claimed` 時換另一 task，禁強推。
