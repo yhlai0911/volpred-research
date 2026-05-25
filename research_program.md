@@ -59,6 +59,7 @@
 - **★★ EVT-GPD VaR (K1035)**：GJR-EVT rescues GJR（0/4→4/4 Trinity PASS），但 A4f 本身已 4/4 不需 EVT。EVT 是 weak model 的補救工具，非 strong model 的加分項
 - **VaR 方法排名（K1034+K1035 綜合）**：CF-Rolling ≥ EVT > Student-t >> Normal
 - **★★ Multi-Horizon VaR (K1039)**：A4f+CF-Rolling h=1,5 均 100% Trinity PASS。h=10 降為 75%（小樣本）。**√h scaling = proper h-step**（pass rate 相同）→ 實務不需 h-step 公式。Normal 隨 horizon 增加改善（CLT）
+- **★★ Close-Regime Weighted Conformal VaR (K1390)**：VIX_{t-1} > 20 切高/低 vol regime（high N=859, low N=2005, OOS 2015-2026）。5% Conformal Rolling VaR 高 vol=2.997%、低 vol=1.224%（2.45× ratio）；1% 高 vol=5.40%、低 vol=1.95%（2.77×）。Verdict=REGIME_EFFECT — VIX threshold conditioning 對 conformal predictive interval 有顯著 regime-dependent 寬度差異，high-vol regime 必須拉大尾部 quantile，避免 backtest 低估
 - **Copula-based VaR**（多資產聯合尾部風險）
 - Monte Carlo VaR（GARCH 路徑模擬）
 - [x] **★★ A4f + CF-Rolling 結合 (K1036)**：2×3 factorial 完成。CF-Rolling 是 VaR 王者——GJR+CF = A4f+CF = 6/6 Trinity PASS。A4f 對 Student-t 有巨大改善（1/6→5/6），但 CF-Rolling 使模型選擇對 VaR 無關。A4f 的真正價值在 QLIKE 預測精度
@@ -104,6 +105,7 @@
 - Paper trading 績效追蹤
 - **FOMC / 重大事件 ex-ante prior + ex-post 對帳**（2026-04-29 FOMC: HOLD 3.50-3.75% 兌現 12 天前 94.8% prior 中央 scenario; 但 8-4 dissent (1992-10 以來首次 4-dissent) 是 prior 沒涵蓋的 narrative shock，把 June implied prob 從 78% → 95.5% (+17.5pp); SPY 04/29 收盤 -0.04% 落在 hold-conditional 中位附近. mile_fef2e0b2 published）— **methodology lesson**: T+0 ex-post 對帳框架 (actual vs prior conditional distribution) 行得通；dissent structure / vote-split 是 ex-ante prior 應 cover 但常忽略的維度，未來事件 prior 模板需加 vote-split scenario branch
 - **Event date 必驗證外部官方 calendar**（2026-05-02 NFP 假日期 incident: scheduler 把 first-Friday-of-month heuristic 算成 NFP 日期，實際 BLS 是 first Friday _after_ 12th of month. event_expander 必須抓 BLS / FOMC 官方 schedule URL 對齊，否則 silent date drift 會堆積到 publish 階段才被研究誠實 net 抓到. docs/error_log.md 2026-05-02 entry）
+- **GDP revision event study NULL (K1401)**：BEA GDP 二次/三次估計修正 N=25 events 圍繞 VIX。H1 (T-5 < T-1 pre-event 升)：t=0.160 p=0.563 NS；H2 (T0 > T+1 post drop)：t=0.006 p=0.498 NS。Bonferroni α=0.0167。Verdict=NULL — GDP 修正不是 VIX vol mover（一致於文獻：GDP 修正 informational content 低於 NFP / CPI / FOMC，市場 prior 已 absorb）。mile_daaff779 published（事件驅動文章；FB retroactive catch-up pending）
 
 ### 面向 F: 網站與系統
 - 前端功能（12/VIX 計算器, Feed 品質, Paper 下載）
@@ -120,7 +122,7 @@
 - **NLP 情緒分析**：用 FinBERT/LLM 分析財經新聞情緒，預測次日波動率或報酬
 - **替代數據**：Google Trends 搜尋量（已測 null for VT overlay，但可用於報酬預測）、衛星停車場數據、航運追蹤
 - **市場微結構**：order flow imbalance → 短期波動率預測、bid-ask spread dynamics
-- **網絡/傳染模型**：用圖模型分析波動率在資產間的傳播路徑（beyond linear Granger）
+- **網絡/傳染模型**：用圖模型分析波動率在資產間的傳播路徑（beyond linear Granger）— **K628b Diebold-Yilmaz 跨資產 vol spillover** (N=4211 obs 2010-2026Q1)：SPY 是 dominant **NET TRANSMITTER** (net=+43.7%, to_others=48.3%)、TLT 是 **NET RECEIVER** (net=-24.9%)、0050.TW receiver (net=-1.7%)、GLD balanced。**FR-adjusted Granger 結論：SPY→0050.TW = INTERDEPENDENCE (no contagion)**（持續性連動非危機驅動跳變）。reader-facing 文章 mile_55758994 draft
 - **因果推論**：用 DiD / RDD 分析政策事件（例如 Fed 升息）對波動率的因果影響
 - **Agent-Based Simulation**：模擬不同比例投資人使用 VT 對市場穩定性的影響（如果所有人都用 12/VIX 會怎樣？）
 - **加密 DeFi**：AMM 池的 impermanent loss 與波動率的關係、DeFi yield 策略的風險管理

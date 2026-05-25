@@ -8360,5 +8360,16 @@
     "evidence_source": "experiments/k628b/k628b_results.json",
     "anti_ai_gate": "PASS (FB-tone WARNs不適用 web feed long-form)",
     "verification": "agent 編造的 paired t-test p=0.669 已移除（研究誠實原則）"
+  },
+  {
+    "timestamp": "2026-05-25T20:16:43+08:00",
+    "task_type": "governance",
+    "task_id": "research_program_xref_K1390_K1401_K628b_h20",
+    "actor": "hourly-20",
+    "title": "research_program.md cross-reference K1390 / K1401 / K628b 結論到對應面向（B/E/G）",
+    "status": "completed",
+    "summary": "3 個 K cross-references 寫入：面向 B 補 K1390 close-regime weighted conformal VaR（VIX>20 切 regime，5% high-vol 2.997% vs low 1.224%, 2.45× ratio, verdict=REGIME_EFFECT）；面向 E 補 K1401 GDP revision event NULL（N=25, H1 t=0.16/H2 t=0.006 both NS, Bonferroni α=0.0167, 一致 GDP revision informational content < FOMC/NFP/CPI）；面向 G 強化網絡/傳染模型 entry 加 K628b Diebold-Yilmaz N=4211 obs SPY net=+43.7% transmitter, TLT -24.9% receiver, SPY→0050.TW INTERDEPENDENCE (no contagion)。research_program.md +3 / -1 行。",
+    "evidence_source": "experiments/k1390/k1390_results.json, experiments/k1401/k1401_results.json, experiments/k628b/k628b_results.json",
+    "verification": "K1259 provenance gate PASS (0/2166 violations baseline=284)"
   }
 ]
