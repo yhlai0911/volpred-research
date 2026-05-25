@@ -221,6 +221,98 @@ def _detect_priority(text: str) -> int:
     return 3
 
 
+def _next_dispatch_eta() -> tuple[str, int]:
+    """Return (台灣時間 HH:07 string, minutes_from_now). Dispatch fires at HH:07."""
+    from datetime import datetime, timedelta
+    from zoneinfo import ZoneInfo
+    tw = datetime.now(ZoneInfo("Asia/Taipei"))
+    target = tw.replace(minute=7, second=0, microsecond=0)
+    if tw.minute >= 7:
+        target = target + timedelta(hours=1)
+    delta_min = int((target - tw).total_seconds() / 60)
+    return target.strftime("%H:%M"), delta_min
+
+
+def _send_ack_email(task: dict[str, Any], dry_run: bool) -> dict[str, Any]:
+    """Immediately send acknowledgment email after queueing the email_reply task.
+
+    Per user 2026-05-25 directive: 收到 email 後立即回覆「已收到任務 + 決策（馬上做 / 推入任務池）
+    + 類型 + 執行時間 + 完成後 email 回報」— 不等 dispatch tick。
+    """
+    if dry_run:
+        return {"ok": True, "dry_run": True}
+    try:
+        # Lazy import to keep poll script lean
+        import subprocess
+        from pathlib import Path as _P
+
+        eta_hhmm, eta_min = _next_dispatch_eta()
+        priority = task.get("priority", 3)
+        priority_label = {1: "P1 最高優先", 2: "P2 中高優先", 3: "P3 普通優先"}.get(priority, f"P{priority}")
+        priority_note = ""
+        if priority == 1:
+            priority_note = "（**含緊急關鍵字，將排所有 task 之前**）"
+
+        # ACK 邏輯：所有 email_reply 都走 dispatch（gmail-poll 無法 immediately
+        # spawn Claude session）。但如果用戶問題能 0-cost 答（例如「現在狀態」
+        # 類），dispatch 一輪內收尾；複雜任務可能跨多輪 tick。Ack 老實說
+        # 「推入任務池」並標 ETA。
+        body_md = f"""# 已收到你的回信
+
+| 欄位 | 值 |
+|---|---|
+| Task ID | `{task.get('id')}` |
+| 類型 | `email_reply` |
+| Priority | **{priority_label}** {priority_note} |
+| 主旨 | {task.get('email_subject', '')[:80]} |
+| 收信時間 | {task.get('created_at', '')[:19].replace('T', ' ')} UTC |
+
+## 決策
+
+**已推入統一任務池** — `storage/next_tasks.json` 中 `task_type=email_reply`
+
+## 執行時間
+
+- **下次 Claude `hourly-dispatch` fire**：今天 {eta_hhmm}（台灣時間，約 {eta_min} 分鐘後）
+- Claude 主線程會於該 tick 自動 claim + 分析 + 執行
+- 若任務跨多 tick → 中間不會 spam；最後一次 tick 收尾發 close email
+
+## 完成後通知
+
+✅ 全部處理完成時會寄 **close email** 給你（同 thread 回覆）— 含完成項目 / commit hash / 對應 sub-task id
+
+---
+
+*Auto-sent by `gmail_inbox_poll.py` on queue insertion ({_P(__file__).name})*
+"""
+        # Use subprocess to invoke CLI (avoids needing volpred module on path here)
+        cmd = [
+            "/Users/yhlai0911/.local/bin/uv", "run", "volpred", "ops", "send-alert",
+            "--level", "info",
+            "--title", f"Re: {task.get('email_subject', '(no subject)')[:120]}",
+            "--force",  # bypass dedup — ack must always go out
+        ]
+        # Write body to temp file and pass via --body-md (avoids shell quoting issues)
+        import tempfile
+        with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False, encoding="utf-8") as tf:
+            tf.write(body_md)
+            tmppath = tf.name
+        cmd.extend(["--body-md", tmppath])
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=30, cwd=str(ROOT))
+        try:
+            _P(tmppath).unlink()
+        except Exception:
+            pass
+        if proc.returncode != 0:
+            _log(f"  ack send FAILED for {task.get('id')}: {proc.stderr[-200:]}")
+            return {"ok": False, "stderr": proc.stderr[-200:]}
+        _log(f"  ack email sent for {task.get('id')} (ETA next dispatch {eta_hhmm} ~{eta_min}min)")
+        return {"ok": True, "eta": eta_hhmm, "eta_minutes": eta_min}
+    except Exception as exc:
+        _log(f"  ack send EXCEPTION for {task.get('id')}: {exc!r}")
+        return {"ok": False, "error": str(exc)}
+
+
 def _append_task(task: dict[str, Any], dry_run: bool) -> str:
     """Atomically append task to next_tasks.json (file lock + read-modify-write)."""
     if dry_run:
@@ -416,6 +508,12 @@ def poll(max_messages: int = 20, dry_run: bool = False, since_days: int = 2) -> 
             task_id = _append_task(task, dry_run=dry_run)
             queued.append({"task_id": task_id, "uid": uid, "subject": subject})
             _log(f"  queued uid={uid} task_id={task_id} subj={subject[:50]!r}")
+
+            # IMMEDIATELY send ack email — per user 2026-05-25 directive.
+            # Don't wait for hourly-dispatch to acknowledge receipt.
+            ack_result = _send_ack_email(task, dry_run=dry_run)
+            if not ack_result.get("ok"):
+                _log(f"  WARNING: ack failed but task still queued (will be processed at next dispatch)")
 
             # Update in-memory dedup sets so subsequent iterations within this
             # poll don't re-queue (e.g. user sent two replies on same thread)
