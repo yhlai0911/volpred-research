@@ -275,7 +275,49 @@ def _build_task(uid: int, msg: Message, reply: str, quoted: str) -> dict[str, An
     }
 
 
-def poll(max_messages: int = 20, dry_run: bool = False) -> dict[str, Any]:
+def _normalize_subject(subject: str) -> str:
+    """Strip leading Re:/Fwd: chains + collapse whitespace for thread matching."""
+    s = (subject or "").strip()
+    for _ in range(10):
+        low = s.lower()
+        if low.startswith("re:") or low.startswith("re："):
+            s = s[3:].strip()
+        elif low.startswith("fwd:") or low.startswith("fw:"):
+            s = s.split(":", 1)[1].strip()
+        else:
+            break
+    return " ".join(s.split())
+
+
+def _existing_task_keys() -> tuple[set[str], set[str]]:
+    """Read next_tasks.json and return (message_ids, normalized_subjects)
+    already queued as email_reply tasks (any status)."""
+    path = ROOT / "storage" / "next_tasks.json"
+    if not path.exists():
+        return set(), set()
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return set(), set()
+    if not isinstance(data, list):
+        return set(), set()
+    mids: set[str] = set()
+    subs: set[str] = set()
+    for t in data:
+        if not isinstance(t, dict):
+            continue
+        if t.get("task_type") != "email_reply":
+            continue
+        mid = (t.get("email_message_id") or "").strip()
+        if mid:
+            mids.add(mid)
+        subj_norm = _normalize_subject(t.get("email_subject") or t.get("title") or "")
+        if subj_norm:
+            subs.add(subj_norm)
+    return mids, subs
+
+
+def poll(max_messages: int = 20, dry_run: bool = False, since_days: int = 2) -> dict[str, Any]:
     _load_env()
     user = os.environ.get("SMTP_USERNAME")
     pwd = os.environ.get("SMTP_PASSWORD")
@@ -290,6 +332,10 @@ def poll(max_messages: int = 20, dry_run: bool = False) -> dict[str, Any]:
     state = _load_state()
     processed_ids = set(state.get("processed_message_ids", []))
 
+    # Subject + Message-ID dedup against next_tasks.json (canonical "已接單" check).
+    # Means: same thread won't be queued twice even if user re-reads / Gmail un-Seens it.
+    existing_mids, existing_subs = _existing_task_keys()
+
     queued: list[dict[str, Any]] = []
     skipped = 0
 
@@ -298,15 +344,21 @@ def poll(max_messages: int = 20, dry_run: bool = False) -> dict[str, Any]:
         M.login(user, pwd)
         M.select(mailbox)
 
-        # Search unseen mails. Optionally restrict to From == owner for replies.
-        typ, data = M.search(None, "UNSEEN")
+        # Search by date window (last N days) instead of UNSEEN — Gmail's auto-
+        # mark-read on preview makes UNSEEN unreliable. Dedup against existing
+        # next_tasks (by Message-ID + normalized subject) makes re-scan safe.
+        from datetime import datetime, timedelta
+        since_date = (datetime.now() - timedelta(days=since_days)).strftime("%d-%b-%Y")
+        typ, data = M.search(None, f'(SINCE "{since_date}")')
         if typ != "OK":
             _log(f"ERROR: IMAP search failed: {typ}")
             M.logout()
             return {"ok": False, "reason": "search_failed"}
 
         uids = data[0].split() if data and data[0] else []
-        _log(f"UNSEEN count: {len(uids)} (cap={max_messages})")
+        # Process newest-first so latest reply gets priority if duplicates
+        uids = list(reversed(uids))
+        _log(f"SINCE {since_date} count: {len(uids)} (cap={max_messages}, existing_email_tasks: mids={len(existing_mids)} subs={len(existing_subs)})")
 
         for raw_uid in uids[:max_messages]:
             uid = int(raw_uid)
@@ -323,16 +375,26 @@ def poll(max_messages: int = 20, dry_run: bool = False) -> dict[str, Any]:
             in_reply_to = (msg.get("In-Reply-To") or "").strip()
             references = (msg.get("References") or "").strip()
 
-            # Dedup by Message-ID across polls
-            if message_id and message_id in processed_ids:
+            # Filter: only actionable if BOTH from owner AND looks like a reply
+            decision, reason = _should_process(subject, sender, in_reply_to, references, user)
+            if not decision:
                 skipped += 1
                 continue
 
-            # Filter: only actionable if BOTH from owner AND looks like a reply
-            # (changed from OR to AND on 2026-05-25 for security: prevents
-            # external spam with "Re:" prefix from being queued as task.)
-            decision, reason = _should_process(subject, sender, in_reply_to, references, user)
-            if not decision:
+            # 「是否已接單」dedup — 三層防護：
+            # (1) next_tasks.json 已有同 Message-ID 的 email_reply task
+            # (2) next_tasks.json 已有同 normalized subject 的 email_reply task（thread match）
+            # (3) state file processed_message_ids（legacy fallback）
+            if message_id and message_id in existing_mids:
+                _log(f"  skip uid={uid} reason=already_queued_by_msgid subj={subject[:50]!r}")
+                skipped += 1
+                continue
+            norm_subj = _normalize_subject(subject)
+            if norm_subj and norm_subj in existing_subs:
+                _log(f"  skip uid={uid} reason=already_queued_by_subject subj={subject[:50]!r}")
+                skipped += 1
+                continue
+            if message_id and message_id in processed_ids:
                 skipped += 1
                 continue
 
@@ -346,13 +408,18 @@ def poll(max_messages: int = 20, dry_run: bool = False) -> dict[str, Any]:
             task = _build_task(uid, msg, reply, quoted)
             task_id = _append_task(task, dry_run=dry_run)
             queued.append({"task_id": task_id, "uid": uid, "subject": subject})
+            _log(f"  queued uid={uid} task_id={task_id} subj={subject[:50]!r}")
 
+            # Update in-memory dedup sets so subsequent iterations within this
+            # poll don't re-queue (e.g. user sent two replies on same thread)
             if message_id:
                 processed_ids.add(message_id)
+                existing_mids.add(message_id)
+            if norm_subj:
+                existing_subs.add(norm_subj)
 
-            # Mark as Seen (skip in dry-run)
-            if not dry_run:
-                M.store(raw_uid, "+FLAGS", "\\Seen")
+            # Do NOT set \Seen — user may want to read in Gmail too; we now
+            # rely on next_tasks.json dedup, not IMAP flag.
 
         M.close()
         M.logout()
