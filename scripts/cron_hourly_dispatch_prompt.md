@@ -102,6 +102,10 @@ PHASE B — 派新工:
        - `.claude/rules/publishing.md`
    (b) **Evidence package 先於 prose** — 任何句子之前先組好：≥3 個可驗證數字（primary source）+ ≥1 表 + ≥1 圖 + ≥1 層量化分析（descriptive stats / before-after / cross-section / rolling / event-window / vol change）+ 最好有統計檢定或比較框架。不滿足 → 換題目或換 task type，禁強推。
    (c) **trending_repost 特別**：正式 task type 非摘要 / 翻譯；風格可參 havingchien Substack/commentary tone 但不引用不貼近改寫；先選題掃描 + 30 日查重 + VolPred angle 確認；**VolPred 直接 published 不進 draft pool**；daily cap = 2/day；雙發佈 feed + Ivan Lai FB。
+
+   (c2) **event_article 特別（2026-05-25 新增 FB 強制）**：CPI/NFP/FOMC/財報/地緣政治 → **VolPred 直接 published 不進 draft pool** + **FB 雙發佈強制**（與 trending_repost 共用 `.claude/skills/trending-repost/references/fb-ivanlai-tone.md` SOP；但**不算入** trending daily cap=2/day）。語氣可更貼「即時市場觀察」非「專欄式 commentary」。FB 失敗不阻塞 feed publish 但**必留 retry log + work_log entry `fb_post_failed`**。
+
+   ⚠️ **K1401 retroactive**：2026-05-25 11:16 publish 的 K1401 GDP event article (`mile_daaff779`) 因規則 2026-05-25 11:23 才更新，**未跑 FB 步驟**。下次有 idle slot 時補 FB 發佈一次（manual catch-up；之後新 event_article 自動走新規則）。
    (d) **寫前**讀 anti-ai-style/references/prompt-templates.md，5 原則套 prompt header（年齡降級 / 長文裁切 / 資訊密度 / 負向約束 / 蘇格拉底對槓）。
    (e) **寫後**跑 anti-ai-style/references/editor-sop.md 3 階段 9-checklist；任一 fail 不 publish。**只要還有 AI 味、翻譯腔、模板腔、空泛評論 → 不得發布**（無 partial pass；3 輪改寫仍 fail → 該主題 abandon）。
    (f) **3-model gate** 之 Gemini 一審 prompt 加問「是否仍有 AI 味？指出最像 AI 的 3 句並建議改寫」。

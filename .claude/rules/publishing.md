@@ -46,8 +46,22 @@ paths:
 2. **thinking ≠ content**。`m.think()` 內部決策邏輯不是 Markdown 文章內容。文章必須是讀者能直接讀的 Markdown（標題 + 段落 + 表格 + 圖 + 結論）。
 3. **Status 分流**：
    - **非時效性**（研究發現、回顧、方法論）→ `status=draft` 進池，由 release_pool cron 節奏釋出
-   - **事件驅動**（CPI/NFP/FOMC/財報當天/地緣政治）→ `status=published` 立即發，不等節奏
+   - **事件驅動**（CPI/NFP/FOMC/財報當天/地緣政治）→ `status=published` 立即發，不等節奏 + **FB 同步發佈強制**（2026-05-25 用戶硬性要求；共用 trending_repost SOP）
    - **trending_repost**（熱門改寫 / havingchien-style 專欄文）→ feed 端預設 **`status=published`**，且 **FB / Ivan Lai 同步發佈是任務定義的一部分**
+
+   **「立即發 + FB 雙發佈」適用 task type**（共用 `.claude/skills/trending-repost/references/fb-ivanlai-tone.md` SOP）：
+
+   | task_type | feed status | FB dual-publish | daily cap |
+   |---|---|---|---|
+   | `trending_repost` | published 立即 | ✅ 強制 | 2/day |
+   | `event_article` | published 立即 | ✅ 強制（**2026-05-25 新增**）| 無 cap（每事件 3-4 篇上限） |
+   | `daily_article` | draft 進池 | ❌ | — |
+   | 其他類型 | varies | ❌ | — |
+
+   **event_article + FB 規則**（與 trending_repost 共用 SOP，但有差異）：
+   - **共用**：FB 文案是改寫版 200-400 字、不直接貼 feed 內文、Ivan Lai 口吻、主貼文不放連結、連結放第一則留言、URL 必 `https://volpred.zeabur.app/v3/reports/<mile_id>`（pre-publish `curl -I` 驗 200）
+   - **差異**：event_article **不算入 trending_repost daily cap**（不同 type）；event_article FB 文案語氣可更貼近「即時市場觀察」而非「專欄式 commentary」（事件驅動的時效感）
+   - **失敗策略**：FB 失敗**不阻塞** feed publish（同 trending_repost），但必須留 retry log + work_log entry `fb_post_failed`
 4. **每篇必備**：
    - 至少 2 張**真實圖表**（matplotlib PNG + Supabase upload；禁 ASCII / 文字框冒充）
    - 標明**數據來源**（yfinance / FRED / TAIFEX / K 編號）
