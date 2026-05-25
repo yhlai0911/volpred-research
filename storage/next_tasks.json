@@ -9061,7 +9061,7 @@
     "description": "K1249 has a non-null verdict in experiments/k1249/ but no published feed article and no existing task. Verdict: RESIDUAL_DRIFT. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9070,7 +9070,13 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.437678+00:00",
     "generated_at": "2026-05-13T05:53:00.437680+00:00",
-    "k_id": "K1249"
+    "k_id": "K1249",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-25T18:02:46.480717+00:00",
+    "claim_session_id": "e86546adf9fc",
+    "started_at": "2026-05-25T18:03:57.765864+00:00",
+    "completed_at": "2026-05-25T18:03:57.798748+00:00",
+    "result": "Drafted storage/drafts/k1249_general_draft.md for K1249 RESIDUAL_DRIFT. Article explains why a rebuilt paper result can keep the same direction while precise numbers drift due to yfinance vintage changes, and frames errata disclosure as the honest resolution."
   },
   {
     "id": "gen_article_k1266",
@@ -10250,7 +10256,7 @@
     "title": "K1391: ML Risk-Based Allocation — Scientific Reports 2025（LSTM + regime switching，Sharpe 1.38）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 397). Original: ML Risk-Based Allocation — Scientific Reports 2025（LSTM + regime switching，Sharpe 1.38）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1391.py with signal.shift(1) + seed=42, (c) K1391_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "tags": [
@@ -10264,7 +10270,10 @@
       "reason": "kid_collision — generate_research_backlog id-assignment bug (fixed)"
     },
     "started_at": "2026-05-25T06:20:37.686909+00:00",
-    "last_released_at": "2026-05-25T06:21:07.675647+00:00"
+    "last_released_at": "2026-05-25T06:21:07.675647+00:00",
+    "completed_at": "2026-05-22",
+    "synced_from_experiments_at": "2026-05-25T18:12:07.811308+00:00",
+    "result_summary": "**Paper**: Paper 9 (garch-x-vix)  \n**Issue addressed**: C1 CRITICAL — v3 review: OOS period 2019-2026 contains COVID-19 crash (VIX peak 82.69); without subperiod analysis, VIX-based model advantage co"
   },
   {
     "id": "K1386",
@@ -10320,7 +10329,7 @@
     "title": "K1392: Conformal Predictive Portfolio Selection (CPPS) — arXiv:2410.16333。預測區間 → 選最佳投資組合。",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 408). Original: Conformal Predictive Portfolio Selection (CPPS) — arXiv:2410.16333。預測區間 → 選最佳投資組合。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1392.py with signal.shift(1) + seed=42, (c) K1392_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "failed",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "tags": [
@@ -10332,7 +10341,10 @@
       "from": "K1313",
       "at": "2026-05-20",
       "reason": "kid_collision — generate_research_backlog id-assignment bug (fixed)"
-    }
+    },
+    "synced_from_experiments_at": "2026-05-25T18:12:07.811308+00:00",
+    "failure_reason": "INVALID: 3 A4f spec bugs in implementation; superseded by K1393 (K988-faithful, C1 PASS, non-COVID DM t=+4.26). See paper/garch-x-vix/errata_pending.md SF1 RESOLUTION.",
+    "failed_at": "2026-05-25T18:13:05Z"
   },
   {
     "id": "correct_mile_7ba7ee54",
