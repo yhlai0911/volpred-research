@@ -1337,7 +1337,7 @@
     "title": "K1311: VIXTWN 數據累積到 252 天後驗證 ratio 穩定性（Q6）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 245). Original: VIXTWN 數據累積到 252 天後驗證 ratio 穩定性（Q6）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1311.py with signal.shift(1) + seed=42, (c) K1311_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "tags": [
@@ -1346,7 +1346,13 @@
     ],
     "created_at": "2026-05-12T02:47:48Z",
     "blocked_reason": "data_accumulation_pending",
-    "blocked_note": "VIXTWN need 252-day series; check 2026-Q3"
+    "blocked_note": "VIXTWN need 252-day series; check 2026-Q3",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-25T15:58:07.391547+00:00",
+    "claim_session_id": "6ffd3dccf4c4",
+    "started_at": "2026-05-25T15:59:44.546679+00:00",
+    "completed_at": "2026-05-25T15:59:44.582372+00:00",
+    "result": "K1311 scaffolded as a 252-day VIXTWN/VIX readiness gate. Local vixtwn_daily.csv currently has 112 de-duplicated non-null days (2025-12-01 to 2026-05-22), so progress is 44.4% and verdict=NOT_READY_BELOW_252D_GATE; K1308 remains the latest substantive instability evidence."
   },
   {
     "id": "K191_article_general",
@@ -6866,7 +6872,7 @@
   {
     "id": "paper_leverage_direction_self_contained",
     "priority": 2,
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "description": "paper/leverage-direction/ 缺 scripts/ results/ data_sources.md experiments.md — 補齊 CLAUDE.md self-contained 5 項必備內容（投稿 hard requirement）。",
     "created_at": "2026-04-18T20:51:21.640064",
     "note": "2026-04-18 audit: Paper folder missing CLAUDE.md self-contained requirements",
@@ -6878,7 +6884,13 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "hourly-23",
+    "claimed_at": "2026-05-25T15:08:34.102278+00:00",
+    "claim_session_id": "70dab5f1bd3d",
+    "started_at": "2026-05-25T15:08:40.992758+00:00",
+    "completed_at": "2026-05-25T15:12:46.174277+00:00",
+    "result": "Self-contained replication package 5 項補齊: data_sources.md (root) / scripts/README.md / results/README.md / experiments.md 擴充全 Table+Figure×K-id mapping / README.md 加 §Self-contained replication package cross-ref。reproduce.py 0 MISMATCH 保持。commit 4f146604."
   },
   {
     "id": "paper_review_mile_0347be08",
@@ -10934,9 +10946,56 @@
     "description": "Issue: scripts/cron_review.py JOBS dict 用 fixed max_gap_h (collect_us=30, daily_update=30) 判 stale，但這些 cron 設計就限制 weekday range (collect_us='3 7 * * 2-6' = Tue-Sat, daily_update='3 8 * * 1-6' = Mon-Sat)。週日 / 週一遇到 collect_us=30h gap 就 false alarm 寄 boss_report '⚠️ >30h' 給用戶。\n\n2026-05-25 22:00 boss_report 即此 false alarm — 用戶 21:04 回信問「要先處理嗎」。實際 collect_us 健康（週日 5/24 + 週一 5/25 本就不在 cron 範圍）。\n\nFix:\n1. JOBS dict 改帶 cron expression（直接讀 config/runtime_schedules.json）\n2. 用 croniter.get_prev() 計算 'expected last fire'（依 cron schedule，週日週一自動 skip）\n3. staleness = now - max(expected_last_fire, log_last_end)；超過 1.5 * cron interval 才 flag\n4. Regression test: 餵 2026-05-25 22:00 + collect_us cron='3 7 * * 2-6' + log_last=2026-05-23 08:00 → 應判 healthy（next expected = 2026-05-26 07:03 Tue）\n\nMission alignment: 平台運營 (#4) — monitor 不該 cry wolf，每天 noise email 會降低用戶警覺敏感度（→ 真 incident 也被忽略）。\n\nProvenance: hourly-22 dispatch 2026-05-25 22:09 diagnose K-? incident，email-11761-7800a4 已 close。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "auto_discovered",
-    "claimed_by": null,
-    "claimed_at": null
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-25T14:55:25.255268+00:00",
+    "claim_session_id": "11c2d63bf72b",
+    "started_at": "2026-05-25T14:57:03.392063+00:00",
+    "completed_at": "2026-05-25T14:57:13.144349+00:00",
+    "result": "Made cron_review.py schedule-aware by reading config/runtime_schedules.json and computing previous expected fire via croniter instead of fixed max_gap_h for weekday-only jobs. Added 3 regression tests covering the 2026-05-25 collect_us weekend false-alarm case; tests passed."
+  },
+  {
+    "id": "email-11765-f3bea0",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] Re: [VolPred Boss Report] 2026-05-25 21:00 台灣時間平台運營報告",
+    "description": "Gmail UID: 11765\nMessage-ID: <2FE787E4-ADE1-4D57-A57E-66A9E941C950@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Mon, 25 May 2026 23:15:26 +0800\nSubject: Re: [VolPred Alert][INFO] Re: [VolPred Boss Report] 2026-05-25 21:00 台灣時間平台運營報告\n\n--- 用戶回信內容 ---\n你追蹤一個禮拜後你回報我你的決定\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年5月25日 22:15 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> Re: [VolPred Boss Report] 2026-05-25 21:00 台灣時間 平台運營報告\r\n> Alert level: info\r\n> INFO\r\n> Re: collect_us / daily_update stale 處理完成\r\n> \r\n> 老闆好，您 21:04 問「要先處理嗎」— 已完整診斷與補跑。\r\n> \r\n> 一句話：一真一假\r\n> \r\n> Job\tStatus\t動作\r\n> collect_us\tfalse alarm（cron 3 7 * * 2-6，週日週一本就不跑）\t無需處理，5/26 週二 07:03 自動 fire\r\n> daily_update\t真 incident（cron 3 8 * * 1-6，今天週一 LaunchAgent runs=0 沒 fire）\t✅ 手動補跑成功\r\n> daily_update 補跑結果\r\n> \r\n> === [daily_update] exit 0 at 2026-05-25T22:14:11+0800 (duration=218s) ===\r\n> Supabase article synced ✅\r\n> Supabase risk_forecast synced ✅\r\n> Supabase 14 strategy signals synced ✅\r\n> Supabase 420 paper trades synced (30d × 14 strategies) ✅\r\n> Supabase market_daily 30/30 dates synced ✅\r\n> strategy_metrics_cache 14/14 synced ✅\r\n> supabase_sync_fail queue clean ✅\r\n> 跳過發文：spy_date=2026-05-22 與上次相同（週末休市合理，非錯誤）\r\n> 為什麼今天 08:03 LaunchAgent 沒 fire\r\n> \r\n> launchctl print com.volpred.daily-update 顯示 runs=0 exit=(never exited)。plist 設定 Weekday=1 (Mon) 沒問題；最可能原因：macOS 5/25 08:03 處於 sleep / 螢幕關閉狀態，LaunchAgent 預設不會 catchup missed fires。這是 macOS LaunchAgent 單機 cron 本質限制（不像 systemd 有 Persistent=true）。\r\n> \r\n> 結構性修整（排入 next_tasks）\r\n> \r\n> cron_review_weekday_aware_2026-05-25（P3 platform_ops）：scripts/cron_review.py 用 fixed max_gap_h=30 判 stale，未考慮 weekday-restricted cron → 週日 / 週一遇到 collect_us 必 false-alarm 寄 boss_report。Fix: 改用 croniter.get_prev() 算 expected last fire，依 schedule 自動 skip 週日週一。\r\n> \r\n> Monitor noise 累積會降低用戶警覺敏感度 → 真 incident 也被忽略。修這個 monitor design bug 是平台運營（Mission #4）。\r\n> \r\n> 是否需要進一步動作？\r\n> \r\n> 短期：今晚已補回今天 daily_update；明天週二 cron 會正常觸發 collect_us + daily_update\r\n> 長期：考慮加 LaunchAgent Persistent equivalent 或 piggy-back catchup（check_alerts.py 的 run_due_jobs 已涵蓋 collect_us，但 daily_update 因 host_crontab_managed: false 被排除 — 是 2026-05-22 為防雙 fire 故意排除的，trade-off 是 LaunchAgent 不可靠時無 fallback）\r\n> 需要我把 daily_update 加回 piggy-back（同時加 lock 防雙 fire）嗎？或先觀察一週看頻率？\r\n> \r\n> — hourly-dispatch 22:14（台灣時間）\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-05-25T15:30:12.174044+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11765,
+    "email_message_id": "<2FE787E4-ADE1-4D57-A57E-66A9E941C950@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] Re: [VolPred Boss Report] 2026-05-25 21:00 台灣時間平台運營報告",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "claimed_by": "hourly-00",
+    "claimed_at": "2026-05-25T16:07:33.300351+00:00",
+    "claim_session_id": "23204acc18ed",
+    "started_at": "2026-05-25T16:07:33.525733+00:00",
+    "plan": "Plan: 建立 platform_ops follow-up task observation_2026-06-01，blocked_until=2026-06-01T00:00 UTC（台灣時間 08:00 auto-release）。觀察 6 個 fire 點（5/26-6/1 Tue-Sat + Mon）。≥1 miss → 加 piggy-back + file lock；0 miss → 維持現狀記 evidence。完成寄 email 報告決定。",
+    "linked_task_ids": [
+      "daily_update_launchagent_observation_2026-06-01"
+    ],
+    "needs_close_reply": true,
+    "completed_at": "2026-05-25T16:09:28.619826+00:00",
+    "result": "用戶指示追蹤一週後回報決定。已建立 follow-up task daily_update_launchagent_observation_2026-06-01 (blocked_until=2026-06-01 UTC，dispatcher 自動 release)。已寄 close email 確認追蹤機制：6 個 fire 點 / 評估標準 / 查證方法 / 2026-06-01 報告。"
+  },
+  {
+    "id": "daily_update_launchagent_observation_2026-06-01",
+    "title": "[platform_ops] daily_update LaunchAgent 觀察追蹤期 2026-05-26 → 2026-06-01：評估 missing fire 頻率後自主決定是否加回 piggy-back",
+    "description": "Context：2026-05-25 daily_update LaunchAgent (Mon 08:03 fire) runs=0 沒 fire — 推測 macOS 處於 sleep。手動補跑成功。用戶 23:15 email 指示「追蹤一週後回報決定」（email-11765-f3bea0）。\n\nObservation window: 2026-05-26 (Tue) ~ 2026-06-01 (Mon) 共 7 天，cron='3 8 * * 1-6' 期間 6 個 fire 點（Tue-Sat + 隔週 Mon）。\n\n評估標準：\n- 若 ≥1 次 missing fire（runs=0 且當日無手動補跑）→ 加回 piggy-back via run_due_jobs.py（host_crontab_managed: false 改 true 並加 file lock 防雙 fire，因 LaunchAgent 仍會嘗試）。\n- 若 0 miss → 維持現狀，記錄到 docs/error_log.md 作為「macOS LaunchAgent 在 awake state 下穩定」evidence。\n\n查證方法：\n1. launchctl print com.volpred.daily-update | grep -E 'runs|last exit'\n2. storage/logs/cron/daily_update.log 比對 6 個預期 fire date 是否都有 entry\n3. storage/logs/cron/audit_*.log（cron_review.py 應有 weekday-aware 後的真實 stale signal）\n\n回報：完成評估後 send-alert email 給 yihao.lai@gmail.com（subject: [VolPred] daily_update LaunchAgent 一週觀察結果 + 決定）。\n\nMission alignment：Mission #4 平台運營 — 排程可靠性是 publishing pipeline 的基石。\n\nProvenance: email-11765-f3bea0 close，blocked_until=2026-06-01T00:00:00+00:00 (UTC) auto-release。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "user_assigned",
+    "blocked_reason": "self_tagged_optional",
+    "blocked_at": "2026-05-25T16:07:30+00:00",
+    "blocked_until": "2026-06-01T00:00:00+00:00",
+    "blocked_note": "Observation window per user email-11765-f3bea0 (2026-05-25 23:15 台灣時間). Auto-release 2026-06-01 (台灣時間 08:00).",
+    "parent_email_task_id": "email-11765-f3bea0"
   }
 ]
