@@ -108,6 +108,8 @@ PHASE B — 派新工:
    ⚠️ **K1401 retroactive**：2026-05-25 11:16 publish 的 K1401 GDP event article (`mile_daaff779`) 因規則 2026-05-25 11:23 才更新，**未跑 FB 步驟**。下次有 idle slot 時補 FB 發佈一次（manual catch-up；之後新 event_article 自動走新規則）。
    (d) **寫前**讀 anti-ai-style/references/prompt-templates.md，5 原則套 prompt header（年齡降級 / 長文裁切 / 資訊密度 / 負向約束 / 蘇格拉底對槓）。
    (e) **寫後**跑 anti-ai-style/references/editor-sop.md 3 階段 9-checklist；任一 fail 不 publish。**只要還有 AI 味、翻譯腔、模板腔、空泛評論 → 不得發布**（無 partial pass；3 輪改寫仍 fail → 該主題 abandon）。
+
+   (e2) **PROGRAMMATIC GATE（2026-05-25 強制；HARD RULE）**：FB / feed 任何讀者向文字 publish 前 **必跑** `uv run python scripts/anti_ai_gate.py --file /tmp/<draft>.md`（FB mode default ON），exit code 0 才能 publish。MUST level hit 任一條 = 整篇 reject 改寫到 PASS。WARN ≥3 累計也 reject。Gate fail 不准用 `--force` 等繞過 — 改文字到 PASS 才寄。此 gate 補 9-checklist 自律不足 — 2026-05-25 K1401 FB catch-up 第一版未走 gate 就 publish，用戶兩輪 feedback 才修正（套路 hook + AI bridge phrase + 段落過長）。
    (f) **3-model gate** 之 Gemini 一審 prompt 加問「是否仍有 AI 味？指出最像 AI 的 3 句並建議改寫」。
    (g) **FB 貼文規則**（trending_repost / 同步發 Ivan Lai FB，完整 SOP `.claude/skills/trending-repost/references/fb-ivanlai-tone.md`）：FB 文案是改寫版（不貼 VolPred 內文，重組 200-400 字）；主貼文**不放連結**；VolPred 連結放**第一則留言**；Ivan Lai 口吻（先個人觀察 → 短句短段 → 留白 → 不講滿）；額外禁「綜上所述/值得關注/在 AI 時代/根據資料顯示」；claude-in-chrome 輸入中文**整段貼上**不要逐字 type，貼後 screenshot 檢查再送出；失敗 retry max 3。
 7. 派完 end summary 格式（per memory feedback_task_end_summary_format）: 結束時間 / 總時間 / 本次 token / 完成項目 / 本週 Max 20x quota % (`uv run python scripts/weekly_quota_estimate.py`) / 下次任務時間。
