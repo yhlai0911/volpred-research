@@ -8371,5 +8371,25 @@
     "summary": "3 個 K cross-references 寫入：面向 B 補 K1390 close-regime weighted conformal VaR（VIX>20 切 regime，5% high-vol 2.997% vs low 1.224%, 2.45× ratio, verdict=REGIME_EFFECT）；面向 E 補 K1401 GDP revision event NULL（N=25, H1 t=0.16/H2 t=0.006 both NS, Bonferroni α=0.0167, 一致 GDP revision informational content < FOMC/NFP/CPI）；面向 G 強化網絡/傳染模型 entry 加 K628b Diebold-Yilmaz N=4211 obs SPY net=+43.7% transmitter, TLT -24.9% receiver, SPY→0050.TW INTERDEPENDENCE (no contagion)。research_program.md +3 / -1 行。",
     "evidence_source": "experiments/k1390/k1390_results.json, experiments/k1401/k1401_results.json, experiments/k628b/k628b_results.json",
     "verification": "K1259 provenance gate PASS (0/2166 violations baseline=284)"
+  },
+  {
+    "timestamp": "2026-05-25T21:14:54+08:00",
+    "task_type": "governance",
+    "title": "research_program.md cross-reference K1377 / K1320 / K1374 to 面向 A/I/TW",
+    "details": {
+      "commit": "81dca04b",
+      "k_ids": [
+        "K1377",
+        "K1320",
+        "K1374"
+      ],
+      "rationale": "last-7d high-value experiments xref to canonical narrative"
+    }
+  },
+  {
+    "timestamp": "2026-05-25T22:15",
+    "task_type": "email_reply",
+    "title": "collect_us/daily_update stale 處理 + monitor false-alarm 結構修整 P3 task 排入",
+    "task_id": "email-11761-7800a4"
   }
 ]

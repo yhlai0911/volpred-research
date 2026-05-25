@@ -1283,7 +1283,7 @@
     "title": "K1307: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 246). Original: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1307.py with signal.shift(1) + seed=42, (c) K1307_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "tags": [
@@ -1292,7 +1292,13 @@
     ],
     "created_at": "2026-05-12T04:08:13Z",
     "blocked_reason": "data_eta_q2_pending",
-    "blocked_note": "0050.TW 5-min data accumulation ETA 2026 Q2"
+    "blocked_note": "0050.TW 5-min data accumulation ETA 2026 Q2",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-25T13:51:43.296534+00:00",
+    "claim_session_id": "c71dd4705180",
+    "started_at": "2026-05-25T13:54:21.759706+00:00",
+    "completed_at": "2026-05-25T13:54:36.634867+00:00",
+    "result": "K1307 scaffolded with README/py/results and local readiness diagnostic. 0050.TW 5-min RV now has 63 non-null days (2026-02-09 to 2026-05-22), but HAR-22 + min-train leave only 11 OOS obs, so verdict=NOT_READY_SAMPLE_TOO_SHORT."
   },
   {
     "id": "K1309",
@@ -9282,7 +9288,7 @@
     "description": "K490 has a non-null verdict in experiments/k490/ but no published feed article and no existing task. Verdict: VIX9D BETTER (SIGNIFICANT). Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9291,7 +9297,13 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.462760+00:00",
     "generated_at": "2026-05-13T05:53:00.462764+00:00",
-    "k_id": "K490"
+    "k_id": "K490",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-25T12:48:32.319288+00:00",
+    "claim_session_id": "75957239c376",
+    "started_at": "2026-05-25T12:48:35.752117+00:00",
+    "completed_at": "2026-05-25T12:50:47.023302+00:00",
+    "result": "mile_281d2ea7：K490 一般讀者 draft 已進 feed pool；VIX9D 對短期風險預測顯著優於 VIX，含 2 圖。"
   },
   {
     "id": "gen_article_k495",
@@ -9554,7 +9566,7 @@
     "description": "K736 has a non-null verdict in experiments/k736/ but no published feed article and no existing task. Verdict: VT alpha is NOT a calendar anomaly — less than 10% of weight variation is season. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9563,7 +9575,13 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.492382+00:00",
     "generated_at": "2026-05-13T05:53:00.492383+00:00",
-    "k_id": "K736"
+    "k_id": "K736",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-25T11:45:03.054814+00:00",
+    "claim_session_id": "8eaa6cb91e9c",
+    "started_at": "2026-05-25T11:45:10.664482+00:00",
+    "completed_at": "2026-05-25T11:47:34.096755+00:00",
+    "result": "mile_c64f8bcb：K736 一般讀者 draft 已進 feed pool；VT alpha 主要由 VIX level 驅動，不是 Sell in May，含 2 圖。"
   },
   {
     "id": "gen_article_k737",
@@ -10885,5 +10903,40 @@
     "started_at": "2026-05-25T11:12:42.727759+00:00",
     "completed_at": "2026-05-25T11:20:00.011947+00:00",
     "result": "K628b reader-facing daily_article mile_55758994 published as draft (research audience, 1855 字). Anti-AI gate PASS. Fabricated paired t-test 已移除."
+  },
+  {
+    "id": "email-11761-7800a4",
+    "title": "[email_reply] Re: [VolPred Boss Report] 2026-05-25 21:00 台灣時間 平台運營報告",
+    "description": "Gmail UID: 11761\nMessage-ID: <7B1A8F7D-8866-494D-8335-8E490EE358DA@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Mon, 25 May 2026 21:04:05 +0800\nSubject: Re: [VolPred Boss Report] 2026-05-25 21:00 台灣時間 平台運營報告\n\n--- 用戶回信內容 ---\n🔴 需要掌握/處理：\r\n  - collect_us: ⚠️ 上次完成 61.0h 前（>30h）\r\n  - daily_update: ⚠️ 上次完成 60.7h 前（>30h）\r\n要先處理嗎\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年5月25日 21:00 寫道：\r\n> \r\n> 🔴 需要掌握/處理：\r\n>   - collect_us: ⚠️ 上次完成 61.0h 前（>30h）\r\n>   - daily_update: ⚠️ 上次完成 60.7h 前（>30h）\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-05-25T13:15:01.964196+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11761,
+    "email_message_id": "<7B1A8F7D-8866-494D-8335-8E490EE358DA@gmail.com>",
+    "email_subject": "Re: [VolPred Boss Report] 2026-05-25 21:00 台灣時間 平台運營報告",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "claimed_by": "hourly-22",
+    "claimed_at": "2026-05-25T14:07:39.604159+00:00",
+    "claim_session_id": "1d74d283cfaa",
+    "started_at": "2026-05-25T14:07:39.671175+00:00",
+    "completed_at": "2026-05-25T14:15:22.766036+00:00",
+    "result": "Diagnose 完成：collect_us=false alarm (cron 3 7 * * 2-6 週日週一不在範圍)；daily_update=真 incident 手動補跑 exit 0 (218s) Supabase 全 sync。建 P3 platform_ops 任務 cron_review_weekday_aware_2026-05-25 修 monitor design bug。Close email 已寄 8f8d3f13。"
+  },
+  {
+    "id": "cron_review_weekday_aware_2026-05-25",
+    "title": "[platform_ops] cron_review.py: weekday-restricted cron 用 croniter 算 expected last fire，不用 fixed max_gap_h（false alarm fix）",
+    "description": "Issue: scripts/cron_review.py JOBS dict 用 fixed max_gap_h (collect_us=30, daily_update=30) 判 stale，但這些 cron 設計就限制 weekday range (collect_us='3 7 * * 2-6' = Tue-Sat, daily_update='3 8 * * 1-6' = Mon-Sat)。週日 / 週一遇到 collect_us=30h gap 就 false alarm 寄 boss_report '⚠️ >30h' 給用戶。\n\n2026-05-25 22:00 boss_report 即此 false alarm — 用戶 21:04 回信問「要先處理嗎」。實際 collect_us 健康（週日 5/24 + 週一 5/25 本就不在 cron 範圍）。\n\nFix:\n1. JOBS dict 改帶 cron expression（直接讀 config/runtime_schedules.json）\n2. 用 croniter.get_prev() 計算 'expected last fire'（依 cron schedule，週日週一自動 skip）\n3. staleness = now - max(expected_last_fire, log_last_end)；超過 1.5 * cron interval 才 flag\n4. Regression test: 餵 2026-05-25 22:00 + collect_us cron='3 7 * * 2-6' + log_last=2026-05-23 08:00 → 應判 healthy（next expected = 2026-05-26 07:03 Tue）\n\nMission alignment: 平台運營 (#4) — monitor 不該 cry wolf，每天 noise email 會降低用戶警覺敏感度（→ 真 incident 也被忽略）。\n\nProvenance: hourly-22 dispatch 2026-05-25 22:09 diagnose K-? incident，email-11761-7800a4 已 close。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "auto_discovered",
+    "claimed_by": null,
+    "claimed_at": null
   }
 ]
