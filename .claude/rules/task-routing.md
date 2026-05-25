@@ -10,25 +10,28 @@ paths:
 
 # Task Pool — Routing & Capability Matrix
 
-Canonical mapping of `task_type` → who can claim, concurrency rules, special constraints.
-**Updated 2026-05-25**: backfill applied (0 null types remaining); experiment_review collapsed into paper_review; email_reply added.
+Canonical mapping of `task_type` → who can claim, concurrency rules, **model tier**, special constraints.
+**Updated 2026-05-25**: backfill applied (0 null types remaining); experiment_review collapsed into paper_review; email_reply added; **model column added** (per `scripts/model_router.py`).
 
 ## 12 canonical task types
 
-| task_type | Claude | Codex | 並行 | Skill / Workflow canonical | 特殊規則 |
-|---|---|---|---|---|---|
-| **experiment** | ✅ | ✅ | up to 4 | `autonomous-research` | worktree only; Codex review before knowledge.json write (K1259 gate) |
-| **paper_review** | ✅ | ✅ (small text fix) | serialize per paper | `paper-review-cycle` | latex-academic-reviewer + citation-verifier 並行 |
-| **paper_body** | ✅ only | ❌ | serialize per paper | `paper-update` | **禁止 background agent 寫 .tex** (CLAUDE.md hard rule); main thread only |
-| **paper_decision** | ✅ only | ❌ | one at a time | `paper-stage-classifier` | 需 ≥3 互補實驗 + user confirm 才進 `decision_made_awaiting_body_rewrite` |
-| **daily_article** | ✅ | ✅ | up to 2 | `feed-publisher` + `anti-ai-style` | reader-facing 3-canonical 必讀；publication-candidates 選題；3-layer dedup |
-| **event_article** | ✅ only | ❌ | one at a time | `feed-publisher` + event templates | 即時性需要主線程判斷；直接 `published` 不入 draft pool；**FB 雙發佈強制**（2026-05-25 起；共用 trending-repost FB SOP，不算 trending daily cap） |
-| **member_qa** | ✅ only | ❌ | one at a time | `member-questions` | 4 維度評分 → question-rerank → research → publish；每 6h cron |
-| **trending_repost** | ✅ only | ❌ | **daily cap = 2/day** | `trending-repost` | VolPred angle 改寫 + 無 source citation；雙發佈 feed + Ivan Lai FB（**同 event_article 共用 FB SOP**） |
-| **strategy_lifecycle** | ✅ only | ⚠️ (review 子任務) | one at a time | strategy-registry + `scripts/evaluate_new_strategy.py` | 同期間比較 + cross-OOS + Codex review + sensitivity + MDD gate |
-| **platform_ops** | ✅ | ✅ | up to 4 | (varies — admin-ops / specific script) | bug fix / refactor / cron 維修 / data pipeline 修補 |
-| **governance** | ✅ | ✅ (skill/rule 修整) | serialize | (depends on target — rules/skills/docs) | 改 governance 檔前先 commit snapshot；snapshot: prefix |
-| **email_reply** | ✅ only | ❌ (但**接 linked sub-tasks**) | one at a time | `cron_hourly_dispatch_prompt.md` PHASE 0 | filter: from owner + Re: + 含 `[VolPred`；兩段式 plan email + close email |
+| task_type | Claude | Codex | 並行 | **Model** | Skill / Workflow canonical | 特殊規則 |
+|---|---|---|---|---|---|---|
+| **experiment** | ✅ | ✅ | up to 4 | **opus / high** | `autonomous-research` | worktree only; Codex review before knowledge.json write (K1259 gate) |
+| **paper_review** | ✅ | ✅ (small text fix) | serialize per paper | sonnet / medium | `paper-review-cycle` | latex-academic-reviewer + citation-verifier 並行 |
+| **paper_body** | ✅ only | ❌ | serialize per paper | **opus / medium** | `paper-update` | **禁止 background agent 寫 .tex** (CLAUDE.md hard rule); main thread only |
+| **paper_decision** | ✅ only | ❌ | one at a time | **opus / high** | `paper-stage-classifier` | 需 ≥3 互補實驗 + user confirm 才進 `decision_made_awaiting_body_rewrite` |
+| **daily_article** | ✅ | ✅ | up to 2 | sonnet / medium | `feed-publisher` + `anti-ai-style` | reader-facing 3-canonical 必讀；publication-candidates 選題；3-layer dedup |
+| **event_article** | ✅ only | ❌ | one at a time | sonnet / medium | `feed-publisher` + event templates | 即時性需要主線程判斷；直接 `published` 不入 draft pool；**FB 雙發佈強制**（2026-05-25 起；共用 trending-repost FB SOP，不算 trending daily cap） |
+| **member_qa** | ✅ only | ❌ | one at a time | sonnet / medium | `member-questions` | 4 維度評分 → question-rerank → research → publish；每 6h cron |
+| **trending_repost** | ✅ only | ❌ | **daily cap = 2/day** | sonnet / medium | `trending-repost` | VolPred angle 改寫 + 無 source citation；雙發佈 feed + Ivan Lai FB（**同 event_article 共用 FB SOP**） |
+| **strategy_lifecycle** | ✅ only | ⚠️ (review 子任務) | one at a time | **opus / high** | strategy-registry + `scripts/evaluate_new_strategy.py` | 同期間比較 + cross-OOS + Codex review + sensitivity + MDD gate |
+| **platform_ops** | ✅ | ✅ | up to 4 | sonnet / low | (varies — admin-ops / specific script) | bug fix / refactor / cron 維修 / data pipeline 修補 |
+| **governance** | ✅ | ✅ (skill/rule 修整) | serialize | sonnet / low | (depends on target — rules/skills/docs) | 改 governance 檔前先 commit snapshot；snapshot: prefix |
+| **email_reply** | ✅ only | ❌ (但**接 linked sub-tasks**) | one at a time | sonnet / medium | `cron_hourly_dispatch_prompt.md` PHASE 0 | filter: from owner + Re: + 含 `[VolPred`；兩段式 plan email + close email |
+| **lookup / verify / classification**（任務內 routine 用，非主 task type） | ✅ | ✅ | inline | haiku / low | — | 純查詢 / 簡單 grep / boolean classification |
+
+**Orchestrator (hourly-dispatch)** = `opus / high`（高風險決策：triage / claim / routing / brief 撰寫）。Subagent 派工後由 `scripts/model_router.py --task-type <type>` 查 model 並寫進 brief。
 
 ## Routing decision tree（dispatcher 用）
 

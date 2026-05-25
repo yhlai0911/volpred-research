@@ -59,8 +59,12 @@ PROMPT=$(cat /Users/yhlai0911/Desktop/volpred-research/scripts/cron_hourly_dispa
 # next hang triggers worker-daemon refactor per CLAUDE.md three-strike rule.
 HOURLY_CAP_SEC=3000
 
+# Orchestrator model = opus-4-7 (per CLAUDE.md model selection table; high-risk
+# decision tier for triage / claim / brief 撰寫 / routing). Subagents spawned
+# per-task get task-type-specific model via scripts/model_router.py. Was
+# hardcoded sonnet-4-6 prior to 2026-05-25 — gap caught by user.
 /usr/bin/perl -e 'alarm shift; exec @ARGV' "$HOURLY_CAP_SEC" \
-  /Users/yhlai0911/.local/bin/claude -p --dangerously-skip-permissions --model claude-sonnet-4-6 "$PROMPT" &
+  /Users/yhlai0911/.local/bin/claude -p --dangerously-skip-permissions --model claude-opus-4-7 "$PROMPT" &
 CLAUDE_PID=$!
 # Capture claude binary path for PID-reuse race protection (Codex CRITICAL #3).
 # Before signaling watchdog target, verify command name still matches.

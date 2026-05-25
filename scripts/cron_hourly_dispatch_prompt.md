@@ -89,6 +89,21 @@ PHASE B — 派新工:
    c. 每天至少 1 次 experiment 類（生新 research direction），避免長期 maintenance 化 + 30 天無新發現累積。新 experiment 必 grounded in research_program.md Open Question OR 文獻 last 7 天 + monetization angle。
    d. 從 10 type 池選不在 last-3 的 type — 嚴格 enforce，不再 audit 鎖死 paper R1。
 4. Override: reactive K-experiment autogen brief（K1310-K1330 GARCH-Neural / HAR-GNN / Transformer / KAN / Conformal 等 ML novel-method NULL 4 連後 diversity decline）→ skip 改派非 ML K 或 paper_review。
+4.5. **模型分流（2026-05-25 強制）**：派 subagent 前 query router 取 task-type-specific model：
+   ```bash
+   MODEL_INFO=$(uv run python scripts/model_router.py --task-type <task_type>)
+   MODEL=$(echo "$MODEL_INFO" | jq -r .agent_short)  # opus / sonnet / haiku
+   EFFORT=$(echo "$MODEL_INFO" | jq -r .effort)      # high / medium / low
+   ```
+   分流原則（per `.claude/rules/agent-delegation.md` 模型選擇表）：
+   - **experiment / paper_decision / paper_body / strategy_lifecycle** → `opus`（研究與 narrative 必 opus）
+   - **paper_review / event_article / daily_article / trending_repost / member_qa / email_reply** → `sonnet medium`（程序型）
+   - **platform_ops / governance** → `sonnet low`（短流程 + checklist）
+   - **lookup / verify / classification** → `haiku low`（便宜快速）
+   - 派 Agent tool 時 `model: "<opus|sonnet|haiku>"`；派 `claude -p` 時 `--model <cli_flag>`（cli_flag 從 router output 取）
+   - Brief 必含一行 `**Model**: <picked> (per task_type routing)`，便於 audit
+   - 違反（例：experiment 派 sonnet）= 違反 CLAUDE.md 紀律，下次 boss_report 會抓
+
 5. 分流決策（token 節省）:
    - heavy compute (GARCH MLE / Bootstrap / data fetch / 全期 backtest / pooled-MLE multistart) → 改 `uv run python scripts/compute_queue.py enqueue --script <path> --title <T> --result-artifact <path> --followup-brief 'brief' --followup-task-type paper_review --timeout 3600`。Compute worker cron */15 min 接手；下次 hourly 自動派 interpretation agent（省 60-70% tokens）。注意: 腳本必須完整已寫才能 enqueue。
    - decision / writing / narrative → 派 Claude agent 正常流程（worktree for experiments；main repo for articles/paper body）。
