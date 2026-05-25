@@ -33,6 +33,21 @@
 uv run python paper/taiwan-vt/reproduce.py
 ```
 
+## Replication Package Structure
+
+Four entry points for reviewer reproducibility:
+
+| Entry Point | Path | Contents |
+|-------------|------|---------|
+| Scripts index | [`scripts/INDEX.md`](scripts/INDEX.md) | All experiment `.py` scripts grouped by paper section with relative-path links |
+| Results index | [`results/INDEX.md`](results/INDEX.md) | All `*_results.json` files grouped by section with 1-line verdicts |
+| Data sources | [`data_sources.md`](data_sources.md) | Complete data catalog — API, ticker, period, authorization notes |
+| Experiment table | [`experiments.md`](experiments.md) | All 31 K-experiments: section mapping, title, verdict, status, location |
+
+Scripts and results live in `paper/taiwan-vt/experiments/` (17 local K-experiments)
+and `experiments/<K>/` in the repository root (14 additional K-experiments). No files
+are copied or symlinked — the index files point to canonical locations.
+
 ## Known Issues
 - S1: Missing ES analysis → K896 provides data
 - S2-S4: Gamma conflicts → K892 provides correct values
