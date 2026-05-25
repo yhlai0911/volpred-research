@@ -2,7 +2,27 @@
   "env": {
     "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "62"
   },
+  "permissions": {
+    "allow": [
+      "Bash(agy --version)",
+      "Bash(npm ls *)",
+      "Bash(brew list *)",
+      "Read(//opt/homebrew/Caskroom/antigravity/1.23.2,4781536860569600/**)",
+      "Bash(brew info *)"
+    ]
+  },
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /Users/yhlai0911/Desktop/volpred-research/scripts/auto_start_codex_loop.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [
