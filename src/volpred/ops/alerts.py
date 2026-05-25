@@ -138,9 +138,31 @@ def _dispatch_alert_email(
             body.strip(),
         ]
     ).strip()
+
+    # Build HTML body via markdown→HTML + _email_shell wrapper (per user
+    # 2026-05-25 directive: 所有 Claude 寄出的信都用 HTML 高資訊性編排)
+    try:
+        from volpred.publisher.email_notifier import _email_shell, _try_markdown_to_html
+        inner_html = _try_markdown_to_html(body.strip())
+        level_color = {"info": "#2563eb", "warn": "#d97706", "critical": "#dc2626"}.get(level, "#6b7280")
+        # Level badge + body content
+        body_html = (
+            f'<div style="display:inline-block;padding:4px 12px;border-radius:6px;'
+            f'background:{level_color};color:#fff;font-size:12px;font-weight:600;'
+            f'letter-spacing:1px;margin-bottom:12px;">{level.upper()}</div>'
+            f'<div style="color:#1f2937;font-size:14px;line-height:1.65;">'
+            f'{inner_html}'
+            f'</div>'
+        )
+        subtitle = f"Alert level: {level}"
+        html_body = _email_shell(title, subtitle, body_html)
+    except Exception:
+        html_body = None  # fallback to plain text only
+
     notification_id = notifier.notify(
         subject=subject,
         body=text_body,
+        html_body=html_body,
         level=level,
         metadata={
             "notification_type": "ops_alert",

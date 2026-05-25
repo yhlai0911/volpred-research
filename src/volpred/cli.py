@@ -2325,12 +2325,19 @@ def ops_send_daily_digest(target_date: str | None, force_send: bool, storage_dir
     help="Alert level",
 )
 @click.option("--title", required=True, help="Alert title")
-@click.option("--body", required=True, help="Alert body")
+@click.option("--body", default=None, help="Alert body (markdown — auto-rendered to HTML)")
+@click.option("--body-md", "body_md_file", default=None, type=click.Path(exists=True), help="Read markdown body from file (use for long emails with tables/headings)")
 @click.option("--force", "force_send", is_flag=True, help="Bypass 24h dedup and resend once")
 @click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
-def ops_send_alert(level: str, title: str, body: str, force_send: bool, storage_dir: str) -> None:
-    """Send a general-purpose ops alert email to the fixed admin recipient."""
+def ops_send_alert(level: str, title: str, body: str | None, body_md_file: str | None, force_send: bool, storage_dir: str) -> None:
+    """Send a general-purpose ops alert email (HTML auto-rendered from markdown body)."""
+    from pathlib import Path as _Path
     from volpred.ops import ALERT_RECIPIENT, send_alert
+
+    if body_md_file:
+        body = _Path(body_md_file).read_text(encoding="utf-8")
+    if not body or not body.strip():
+        raise click.UsageError("Must provide --body or --body-md")
 
     result = send_alert(
         level,
