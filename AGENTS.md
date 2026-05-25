@@ -70,15 +70,11 @@
 - Paper trading 歷史資料不可手補；讓 forward tracking / recalc 流程自然修正。
 - 前端 target、Zeabur service、paper public dir、Mirror 預設 URL 全看 `config/project_targets.json`。
 - 排程唯一來源是 `config/runtime_schedules.json`；不要從舊文件反推 cron。
-- v11 orchestration 的正式 task / schedule source of truth 是：
-  - `storage/ops/` 下的 control-plane `TaskRecord` / `AgentSession` / `ExecutionReceipt`
-  - `config/runtime_schedules.json`
-  - `event_jobs` + `storage/ops/event_ledger/`
-- `storage/next_tasks.json` 現在只視為 **legacy planning / working list**：
-  - 可以當補充線索或人工待辦
-  - 不是 shared scheduler 的正式 queue
-  - 不是 canonical control-plane schema
-  - 不可拿它覆蓋 `storage/ops/` 或 `event_jobs` 的狀態
+- **正式 task / schedule source of truth**（2026-05-04 audit 確認的實際分工）：
+  - **`storage/next_tasks.json`** = **canonical pending queue**（priority sorted；dispatcher 從這挑下個任務派工）
+  - **`storage/ops/`** TaskRecord / AgentSession / ExecutionReceipt = **execution receipts / audit trail**（已完成 history，不是 pending queue）
+  - `config/runtime_schedules.json` + `event_jobs` + `storage/ops/event_ledger/` = canonical schedule spec
+- **`storage/ops/handoff_latest.md`** = 每小時 :50 自動產生的**統一任務池快照**（Codex / Claude / 互動 session 共用入口）— 開工前必讀
 
 ### 永遠修流程，不修資料
 
@@ -231,6 +227,72 @@
 - 重複性 SOP：`.agents/skills/`
 
 可以直接新增補充內容；但**刪除或改寫既有治理規範前，先取得使用者同意。**
+
+## Codex 每小時任務池工作流（2026-05-25 新增）
+
+**你（Codex）作為 peer worker 與 Claude Code 並行**，共用同一個任務池 `storage/next_tasks.json`，
+透過 **claim 機制 cross-process atomic**（`fcntl.LOCK_EX`）避免撞題。
+
+### Step 0 — 開工必讀 handoff
+```bash
+cat storage/ops/handoff_latest.md
+```
+看 section 1 任務池快照 / section 3 email_reply 待處理 / section 4 pending top 8。
+
+### Step 1 — claim 一個你能勝任的 pending task
+
+```bash
+# 列 pending top 10
+uv run python scripts/task_pool_claim.py list --status pending --limit 10
+
+# claim（owner 命名建議：codex-vscode / codex-cli / codex-review-<topic>）
+uv run python scripts/task_pool_claim.py claim --id <task_id> --owner codex-vscode
+```
+
+- `{"ok": false, "reason": "already_claimed"}` → Claude 或他人已 claim → **換下一筆**（禁強推、禁 release 別人的 claim）
+- `{"ok": false, "reason": "wrong_status"}` → succeeded/failed/blocked → 換下一筆
+- `{"ok": true}` → 進 Step 2
+
+### Step 2 — start → 執行 → complete
+
+```bash
+uv run python scripts/task_pool_claim.py start --id <task_id>
+# ... 執行任務（完整完成、不留半成品）...
+uv run python scripts/task_pool_claim.py complete --id <task_id> --status succeeded --result "<2-3 行摘要>"
+```
+
+中途要放棄（誤抓 / 不適合做）：
+```bash
+uv run python scripts/task_pool_claim.py release --id <task_id>
+```
+
+### Codex 適合做的 task_type
+
+| ✅ 適合 | ❌ 留給 Claude |
+|---|---|
+| `platform_ops` bug fix / refactor | `paper_body` 寫 .tex |
+| `experiment` 跑既有 README brief | `paper_decision` narrative |
+| `governance` 小型流程修整 | `knowledge.json` 寫入（必走 Python writer + K1259 gate）|
+| `code review` | `event_article` 即時事件 |
+| `daily_article` 寫作（需先讀 `.claude/skills/anti-ai-style/`）| `member_qa`、`trending_repost`（Claude skill canonical）|
+|  | 標 `pending_main_thread` 的 task |
+
+### email_reply 任務（最高優先）
+
+`task_type=email_reply` 是用戶 Gmail 回信自動入池的任務。Description 內有「用戶回信內容」+
+「原始助理寄出內容」— 依用戶指示處理（reply / fix / 派工 / 寄回信用 `uv run volpred ops send-alert`）。
+
+### Stale claim 自動退回
+
+每小時 :50 `cron_handoff_regen.sh` 跑 `cleanup --stale-hours 2` — **claim 超過 2 小時沒
+complete/release 自動退回 pending**。所以 VSCode 關掉或 crash 不會永久卡住任務，但**請優先自己 release**。
+
+### Commit 慣例
+
+- 改動 commit 訊息開頭加 `[codex]` 與 Claude 區分
+- **不要 `git push`** — 由用戶或 Claude 主線程統一推
+
+---
 
 ## 一句話版本
 
