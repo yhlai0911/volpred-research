@@ -236,6 +236,36 @@
         "description": "Every 4h: send boss HTML email report (state + decisions + recommendations)",
         "host_crontab_managed": true,
         "piggy_back_enabled": true
+      },
+      {
+        "id": "gmail_poll",
+        "label": "Gmail inbox poll — fetch user replies, queue as email_reply tasks",
+        "cron": "*/15 * * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_gmail_poll.sh",
+        "log_path": "storage/logs/cron/gmail_poll.log",
+        "description": "Every 15 min: IMAP poll UNSEEN, classify replies to assistant mails, append email_reply tasks to next_tasks.json. LaunchAgent canonical (com.volpred.gmail-poll, host_crontab_managed=false). 2026-05-25 added per user directive '定時收 gmail, 回覆助理寄的信就根據原內容和我的指示去處理'.",
+        "host_crontab_managed": false,
+        "launchagent_label": "com.volpred.gmail-poll",
+        "matchers": [
+          "gmail_inbox_poll.py",
+          "cron_gmail_poll.sh",
+          "com.volpred.gmail-poll"
+        ]
+      },
+      {
+        "id": "handoff_regen",
+        "label": "Hourly handoff_latest.md regeneration + stale-claim cleanup",
+        "cron": "50 * * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_handoff_regen.sh",
+        "log_path": "storage/logs/cron/handoff_regen.log",
+        "description": "Every hour at :50 — regenerate storage/ops/handoff_latest.md (task-pool snapshot + email replies + active agents + 接續提示詞) AND auto-release claims older than 6h. Fires 10 min before hourly-dispatch at :07 so dispatch reads fresh handoff. LaunchAgent canonical (com.volpred.handoff-regen). 2026-05-25 added per user directive '統一任務池並每小時建立 handoff 文件與任務接續提示詞'.",
+        "host_crontab_managed": false,
+        "launchagent_label": "com.volpred.handoff-regen",
+        "matchers": [
+          "generate_handoff.py",
+          "cron_handoff_regen.sh",
+          "com.volpred.handoff-regen"
+        ]
       }
     ]
   },
@@ -585,6 +615,62 @@
             "audience": "general",
             "event_series_slot": "T+0",
             "event_date": "2026-06-11",
+            "event_type": "CPI_US"
+          }
+        }
+      },
+      {
+        "id": "cpi-us-2026-06-13-t2",
+        "event_key": "CPI_US_2026_06_13",
+        "trigger_mode": "one_shot",
+        "dedupe_key": "cpi-us-2026-06-13-t2:one_shot",
+        "not_before": "2026-06-11T08:00:00+08:00",
+        "deadline": "2026-06-12T20:00:00+08:00",
+        "preferred_agent": "claude",
+        "public_effect": "published",
+        "task_template": {
+          "title": "Event article: CPI_US 2026-06-13 T-2",
+          "description": "Auto-populated by populate_upcoming_events.py. CPI_US 2026-06-13 T-2 slot. Run feed-publisher event template; 3-layer dedup; audience=general (T-7 may use research).",
+          "task_family": "content",
+          "priority": 20,
+          "preferred_agent": "claude",
+          "fallback_allowed": false,
+          "approval_mode": "auto",
+          "risk_level": "safe",
+          "public_effect": "published",
+          "preconditions": [],
+          "payload_patch": {
+            "audience": "general",
+            "event_series_slot": "T-2",
+            "event_date": "2026-06-13",
+            "event_type": "CPI_US"
+          }
+        }
+      },
+      {
+        "id": "cpi-us-2026-06-13-t0",
+        "event_key": "CPI_US_2026_06_13",
+        "trigger_mode": "one_shot",
+        "dedupe_key": "cpi-us-2026-06-13-t0:one_shot",
+        "not_before": "2026-06-13T21:30:00+08:00",
+        "deadline": "2026-06-15T09:30:00+08:00",
+        "preferred_agent": "claude",
+        "public_effect": "published",
+        "task_template": {
+          "title": "Event article: CPI_US 2026-06-13 T+0",
+          "description": "Auto-populated by populate_upcoming_events.py. CPI_US 2026-06-13 T+0 slot. Run feed-publisher event template; 3-layer dedup; audience=general (T-7 may use research).",
+          "task_family": "content",
+          "priority": 15,
+          "preferred_agent": "claude",
+          "fallback_allowed": false,
+          "approval_mode": "auto",
+          "risk_level": "safe",
+          "public_effect": "published",
+          "preconditions": [],
+          "payload_patch": {
+            "audience": "general",
+            "event_series_slot": "T+0",
+            "event_date": "2026-06-13",
             "event_type": "CPI_US"
           }
         }
