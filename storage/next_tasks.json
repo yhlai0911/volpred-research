@@ -9226,7 +9226,7 @@
     "description": "K182 has a non-null verdict in experiments/k182/ but no published feed article and no existing task. Verdict: {'fomc_vol_effect': True, 'vix_uncertainty_resolution': True, 'trading_signal': . Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9235,7 +9235,13 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.448568+00:00",
     "generated_at": "2026-05-13T05:53:00.448570+00:00",
-    "k_id": "K182"
+    "k_id": "K182",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-25T21:08:44.345879+00:00",
+    "claim_session_id": "a5c74c5ea3bc",
+    "started_at": "2026-05-25T21:08:57.367756+00:00",
+    "completed_at": "2026-05-25T21:09:51.142785+00:00",
+    "result": "K182 一般讀者 draft 已寫入 draft pool；主軸為 FOMC 事件確實提高波動，但 calendar overlay 的增量交易價值不足。對齊 pre/post vol p=0.0115、strategy Sharpe 0.9899 vs 0.9373 但 p=0.7674、Harvey FAIL。"
   },
   {
     "id": "gen_article_k193",
@@ -10572,7 +10578,7 @@
     "description": "Per Paper 9 v3 review C1 CRITICAL: 跑 A4f vs benchmark leave-COVID-out DM test，排除 2020-03 to 2021-06。若仍 PASS = 主張得到支持，否則 SERIOUS FLAW confirmed。Output: table for paper body.",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "blocked_reason": null,
     "tags": [
       "paper9",
@@ -10584,7 +10590,13 @@
     "dispatched_at": "2026-05-19T05:24:52.722691Z",
     "compute_queue_id": "k1378-covid-dm",
     "compute_done": true,
-    "compute_done_note": "K1392 (leave-COVID-out) + K1396 (HAR benchmark) complete 2026-05-23"
+    "compute_done_note": "K1392 (leave-COVID-out) + K1396 (HAR benchmark) complete 2026-05-23",
+    "claimed_by": "hourly-05",
+    "claimed_at": "2026-05-25T21:10:49.775365+00:00",
+    "claim_session_id": "e37d4a6ba729",
+    "started_at": "2026-05-25T21:10:53.895631+00:00",
+    "completed_at": "2026-05-25T21:16:19.612198+00:00",
+    "result": "K1393 fulfilled (Codex 0.132.0 primary-path re-verify 2026-05-26 closing K1259 gate). Verdict: CONDITIONAL_PASS. Core C1 substantive claim PASSES (non-COVID t=4.26 + post-COVID t=3.76 both Harvey-sig). 4 paper-facing inconsistencies identified -> spawned paper9_c1_tab_covid_robust_footnote_fix follow-up."
   },
   {
     "id": "K_NEW_B_paper9_har_benchmark",
@@ -10592,7 +10604,7 @@
     "description": "Per Paper 9 v3 review C4 HIGH: Table 2 無任何 HAR 基準，需加 HAR-RV, HAR-RV-J, HAR-RV-VIX + DM test vs A4f。使用 realized variance 代理。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "blocked_reason": null,
     "tags": [
       "paper9",
@@ -10604,7 +10616,13 @@
     "dispatched_at": "2026-05-19T05:24:52.722691Z",
     "compute_queue_id": "k1379-har-benchmark",
     "compute_done": true,
-    "compute_done_note": "K1392 (leave-COVID-out) + K1396 (HAR benchmark) complete 2026-05-23"
+    "compute_done_note": "K1392 (leave-COVID-out) + K1396 (HAR benchmark) complete 2026-05-23",
+    "claimed_by": "hourly-05",
+    "claimed_at": "2026-05-25T21:10:49.998721+00:00",
+    "claim_session_id": "2ad39e5cccab",
+    "started_at": "2026-05-25T21:10:54.204965+00:00",
+    "completed_at": "2026-05-25T21:16:19.968471+00:00",
+    "result": "K1396 fulfilled (Codex 0.132.0 PASS 2026-05-22). HAR-RV/HAR-VIX vs A4f all NOT Harvey-sig; A4f non-inferior. Paper 9 C4 acknowledged in Section 7.4 limitation paragraph."
   },
   {
     "id": "K_NEW_C_paper9_spec_genealogy",
@@ -11045,5 +11063,29 @@
     "started_at": "2026-05-25T17:01:58.727007+00:00",
     "completed_at": "2026-05-25T17:02:08.461405+00:00",
     "result": "Added a reusable daily_update LaunchAgent observation script plus tests and wrote the 2026-05-26 baseline snapshot. Current verdict is PENDING_OBSERVATION (window 2026-05-26 to 2026-06-01 not finished); decision is correctly deferred until after the six expected fire dates are observed."
+  },
+  {
+    "id": "paper9_c1_tab_covid_robust_footnote_fix",
+    "title": "Paper 9 C1 follow-up: fix tab:covid_robust footnote + L723 attribution + K1393 README downgrade",
+    "description": "Codex primary-path re-review of K1393 (2026-05-26) identified 4 paper-facing inconsistencies in garch-x-vix main.tex around leave-COVID-out robustness section (tab:covid_robust, lines ~720-760). Core C1 result (non-COVID t=4.26 Harvey-sig) is NOT invalidated — these are descriptive/methodology-text issues only. Fix list: (1) main.tex L743 footnote: 'Newey-West, lag=12' → actual q=floor(n^(1/3)) so subperiod lags vary 11/6/4/11/12; either change footnote to bandwidth formula OR change K1393 code to fixed lag=12 + re-run. (2) Same footnote: drop 'Student-t innovations' claim (K1393 is Gaussian likelihood) OR re-fit with t-distribution. (3) main.tex L723: clarify that non-COVID 4.26 comes from K1393 while primary full-OOS 4.03 comes from canonical mcs_dm_results.json (different loss paths). Add source attribution sentence. (4) experiments/k1393/README.md L45: downgrade 'K1393 uses K988 EXACT' to 'K988 A4f-path faithful'; drop 'Full OOS DM t=+4.48' line (K1393 actual full_oos=3.60). Main-thread paper_body task (not background agent per CLAUDE.md no-bg-paper rule).",
+    "task_type": "paper_body",
+    "priority": 3,
+    "status": "pending_main_thread",
+    "blocked_reason": null,
+    "tags": [
+      "paper9",
+      "garch-x-vix",
+      "C1-followup",
+      "footnote-fix",
+      "K1393",
+      "K1259-closure-output"
+    ],
+    "created_at": "2026-05-25T21:16:10.833064+00:00",
+    "source": "K1393_codex_reverify",
+    "related_experiments": [
+      "K1393",
+      "K1392",
+      "K988"
+    ]
   }
 ]

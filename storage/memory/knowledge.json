@@ -29976,7 +29976,7 @@
       "tolerance": "|Δγ|≤0.001 / |Δt|≤0.05",
       "2317.TW": {
         "gamma": 0.032,
-        "delta_gamma": 0.00002,
+        "delta_gamma": 2e-05,
         "t": 1.741,
         "delta_t": 0.001,
         "verdict": "PASS"
@@ -29997,7 +29997,7 @@
       },
       "2886.TW": {
         "gamma": 0.0379,
-        "delta_gamma": 0.00007,
+        "delta_gamma": 7e-05,
         "t": 1.552,
         "delta_t": 0.002,
         "verdict": "PASS"
@@ -30321,7 +30321,7 @@
       "N_start_alternative": 100,
       "max_abs_delta": 0.092,
       "mean_abs_delta": 0.005,
-      "median_abs_delta": 0.000019,
+      "median_abs_delta": 1.9e-05,
       "n_delta_gt_0_1": 0,
       "n_delta_gt_0_5": 0,
       "v2_median_amp": 3.839,
@@ -30647,7 +30647,7 @@
       "n_events": 226,
       "cohens_d_pooled": 0.305,
       "t_stat": 4.019,
-      "p_value": 0.000079,
+      "p_value": 7.9e-05,
       "ex_ctrl_ratio": 1.342,
       "sector_d": {
         "Tech": 0.09,
@@ -30766,7 +30766,7 @@
       "whar_db4_qlike": 1.7455,
       "gjr_garch_qlike": 1.5308,
       "dm_har_vs_whar_t": 5.954,
-      "dm_har_vs_whar_p": 3.14E-9,
+      "dm_har_vs_whar_p": 3.14e-09,
       "har_r2_oos": 0.2226,
       "whar_db4_r2_oos": -0.0545,
       "gjr_r2_oos": 0.2551,
@@ -30995,7 +30995,7 @@
         "expected_violations": 12.570000000000011,
         "violation_rate": 0.02784407319013524,
         "kupiec_lr": 27.22918925738609,
-        "kupiec_p": 1.8070975393857935E-7,
+        "kupiec_p": 1.8070975393857935e-07,
         "christoffersen_lr": 0.8864222213877611,
         "christoffersen_p": 0.3464486970473164,
         "kupiec_pass": false,
@@ -31017,7 +31017,7 @@
         "expected_violations": 12.570000000000011,
         "violation_rate": 0.02386634844868735,
         "kupiec_lr": 17.578341168201874,
-        "kupiec_p": 0.000027571072103493854,
+        "kupiec_p": 2.7571072103493854e-05,
         "christoffersen_lr": 0.10527802230546968,
         "christoffersen_p": 0.7455854490902305,
         "kupiec_pass": false,
@@ -31211,11 +31211,11 @@
   {
     "id": "k1393_leave_covid_out_dm_k988_faithful",
     "title": "K1393: Leave-COVID-out DM Test — A4f vs GJR (K988 spec faithful, Paper 9 C1 PASS)",
-    "body": "Paper 9 (garch-x-vix) C1 CRITICAL resolved. K1393 confirms A4f QLIKE advantage over GJR is NOT COVID-driven. Full OOS DM t=+3.60 (Harvey-sig, n=1825). Non-COVID (excl 2020-02-01 to 2020-06-30) DM t=+4.26 (Harvey-sig, n=1721) — C1 PASS. COVID window DM t=+1.48 (not sig, n=104), advantage comes from normal market conditions not crisis. K1392 three spec bugs vs K988: (1) theta0 bounds [0,var0*2] vs [-1e-2,1e-2], (2) theta1 bounds [1e-10,1.0] vs [1e-8,1e-3], (3) g init 1.0 vs omega/(1-persist) — degraded A4f QLIKE from -8.361 to -8.194 (K1392 DM t=-1.606). K1393 K988-faithful spec: A4f QLIKE=-8.360, GJR=-8.267, full OOS DM t=+3.60. Pre-COVID t=+2.52 (not sig, n=273), post-COVID t=+3.76 (Harvey-sig, n=1448). Paper action: add robustness table with non-COVID DM t=+4.26; narrative VIX-augmented advantage not COVID artifact.",
-    "verdict": "PASS",
+    "body": "K1393 (CONDITIONAL_PASS, Codex 0.132.0 primary-path re-verification 2026-05-26 closing K1259 process gate):\n\nCore methodology valid:\n- Lookahead-free (ret[abs_idx-1], vix[abs_idx-1]; training [abs_idx-W, abs_idx))\n- Seed fixed (np.random.seed(42); deterministic optimizer path)\n- Sample split correct: full 1825 / COVID 104 / non-COVID 1721 / pre 273 / post 1448\n- DM sign convention correct: d = gjr_loss - a4f_loss; positive t = A4f better\n- K1392 (earlier, wrong-direction) divergence diagnosable: different A4f bounds/optimizer/g-init/rolling path; K1393 fix raised A4f mean QLIKE from -8.194 to -8.360, flipping DM sign.\n\nSubperiod DM results (K988-spec faithful for A4f path):\n- full_oos: t=3.60, p=0.0003, Harvey-SIG (K988 ref +4.48; differs because K1393 GJR bounds not K988-exact)\n- non_covid: t=4.26, p<0.001, Harvey-SIG → A4f advantage NOT COVID-driven (C1 PASS)\n- pre_covid: t=2.52, NOT Harvey-sig (n=273)\n- covid_window: t=1.48, NOT sig (n=104 underpowered; mean_diff +0.51 = A4f much better)\n- post_covid: t=3.76, Harvey-SIG → independent post-COVID confirmation\n\nRESIDUAL CONCERNS (paper-facing inconsistencies; not fatal but need paper_body fix):\n1. K1393 README self-claims 'K988 EXACT' + full_oos t=+4.48; actual results.json full_oos=3.60. GJR fit_gjr bounds differ from K988 + no res.success check. README must be downgraded to 'K988 A4f-path faithful'.\n2. paper/garch-x-vix/main.tex tab:covid_robust footnote claims Newey-West lag=12, but K1393 uses q=floor(n^(1/3)). Subperiod lags actually 11/6/4/11/12 (post/pre/covid/non-covid/full). Either fix footnote to bandwidth formula OR change code to fixed lag=12.\n3. Same footnote claims Student-t innovations; K1393 is Gaussian likelihood path. Drop Student-t claim OR re-fit with t-distribution.\n4. main.tex L723 juxtaposes non-COVID t=4.26 (K1393) with primary full-OOS t=4.03 (canonical mcs_dm_results.json) — different loss paths. Must clarify source attribution to avoid reader confusion.\n\nPaper R1 narrative impact:\n- C1 (COVID robustness) substantive claim PASSES — non-COVID + post-COVID both Harvey-sig.\n- 4 inconsistencies are descriptive/methodology-text issues, NOT result invalidation.\n- Recommended action: paper_body task to fix tab:covid_robust footnote + L723 attribution + downgrade K1393 README claims.\n\nK1259 closure: subagent fallback PASS (2026-05-22) downgraded to CONDITIONAL_PASS after Codex primary-path identifies 4 residual issues — exactly the K1259 pattern (subagent missed paper-facing residuals).",
+    "verdict": "CONDITIONAL_PASS",
     "experiment_id": "K1393",
     "experiment_path": "experiments/k1393/",
-    "reviewer": "feature-dev:code-reviewer subagent (Codex overloaded fallback)",
+    "reviewer": "Codex 0.132.0 (primary path) + feature-dev:code-reviewer subagent (initial)",
     "tags": [
       "garch-x-vix",
       "covid-robustness",
@@ -31223,7 +31223,10 @@
       "a4f-mfgjr",
       "gjr",
       "paper9",
-      "C1-CRITICAL"
+      "C1-CRITICAL",
+      "K1259-closure",
+      "codex-reverify",
+      "RESIDUAL_CONCERN"
     ],
     "created_at": "2026-05-22T13:31:31.459709",
     "related_experiments": [
@@ -31236,7 +31239,9 @@
     "item_id": "62485cdc",
     "category": "garch_x_vix_robustness",
     "content": "K1393: non-COVID DM t=4.26 Harvey-sig; A4f advantage not COVID-driven; Paper 9 C1 CRITICAL PASS",
-    "confidence": 0.95
+    "confidence": 0.95,
+    "reviewer_source": "Codex-0.132.0-K1259-closure-2026-05-26",
+    "updated_at": "2026-05-25T21:15:50.539928+00:00"
   },
   {
     "item_id": "5d2c652b",
@@ -31490,18 +31495,18 @@
         "CR": 0.662
       },
       "cc_p_alpha_005": {
-        "HS-252": 7.0E-7,
-        "CU": 0.0000217,
+        "HS-252": 7e-07,
+        "CU": 2.17e-05,
         "CR": 0.538
       },
       "cc_p_alpha_001": {
-        "HS-252": 2.84E-7,
+        "HS-252": 2.84e-07,
         "CU": 0.0017,
         "CR": 0.123
       },
       "cr_high_var_alpha_005": 0.02997,
       "cr_low_var_alpha_005": 0.01224,
-      "cr_high_var_alpha_001": 0.05400,
+      "cr_high_var_alpha_001": 0.054,
       "cr_low_var_alpha_001": 0.01951
     },
     "implication": "Single-shot conformal VaR can be substantially improved by adding one binary regime variable (VIX threshold) — no rolling re-calibration, no parametric assumption, no GARCH machinery. CR is the only method achieving both correct unconditional coverage (Kupiec) AND no clustering of exceedances (Christoffersen Ind). HS-252 passes Kupiec at 95% but fails Independence catastrophically (p=1e-07) — hits cluster heavily. Practical implication: a 2-bucket conformal VaR is a cheap and statistically valid risk model for SPY at both 95% and 99% tails. Caveats: no cutoff sensitivity, no threshold sweep, no rolling re-calibration tested.",

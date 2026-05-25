@@ -8437,5 +8437,15 @@
     "verdict": "PASS",
     "claimed_by": "hourly-04",
     "model": "main-thread-direct"
+  },
+  {
+    "timestamp": "2026-05-25T21:16:28.468179+00:00",
+    "task_id": "K_NEW_A_paper9_covid_subperiod+K_NEW_B_paper9_har_benchmark",
+    "task_type": "experiment",
+    "session": "hourly-05",
+    "summary": "Codex 0.132.0 primary-path re-verify K1393 (Paper 9 C1 leave-COVID-out), closing K1259 process gate. Verdict CONDITIONAL_PASS (subagent fallback PASS downgraded). 4 paper-facing inconsistencies -> paper_body follow-up task created. K_NEW_A+B status synced succeeded.",
+    "verdict": "CONDITIONAL_PASS",
+    "paper": "garch-x-vix",
+    "follow_up_task": "paper9_c1_tab_covid_robust_footnote_fix"
   }
 ]
