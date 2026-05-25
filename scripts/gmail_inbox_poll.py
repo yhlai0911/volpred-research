@@ -170,6 +170,41 @@ def _split_reply_and_quote(body: str) -> tuple[str, str]:
     return reply, quoted
 
 
+def _should_process(
+    subject: str,
+    sender: str,
+    in_reply_to: str,
+    references: str,
+    owner_email: str,
+) -> tuple[bool, str]:
+    """Decide whether an incoming mail should be queued as email_reply task.
+
+    Returns (decision, reason). Requires BOTH conditions (AND, not OR) for safety:
+      1. from_owner: sender contains owner's email (prevents external spam injection)
+      2. is_reply:   subject starts with Re:/Re：  OR  In-Reply-To/References header present
+                     (ensures it's a real continuation of an assistant-sent thread)
+
+    Edge cases:
+      - Owner sends brand-new mail without Re: → rejected (not a reply)
+      - External party with Re: prefix         → rejected (not from owner)
+      - Owner replies from any client          → accepted
+    """
+    from_owner = bool(owner_email) and owner_email.lower() in (sender or "").lower()
+    is_reply = bool(
+        (in_reply_to or "").strip()
+        or (references or "").strip()
+        or (subject or "").lower().startswith("re:")
+        or (subject or "").lower().startswith("re：")
+    )
+    if from_owner and is_reply:
+        return True, "from_owner_and_is_reply"
+    if not from_owner and not is_reply:
+        return False, "not_from_owner_not_reply"
+    if not from_owner:
+        return False, "not_from_owner"
+    return False, "from_owner_but_not_reply"
+
+
 def _detect_priority(text: str) -> int:
     low = text.lower()
     if any(k in low for k in URGENCY_KEYWORDS_HIGH):
@@ -293,17 +328,11 @@ def poll(max_messages: int = 20, dry_run: bool = False) -> dict[str, Any]:
                 skipped += 1
                 continue
 
-            # Filter: only treat as actionable if it looks like a reply OR is from owner
-            is_reply = bool(
-                in_reply_to
-                or references
-                or subject.lower().startswith("re:")
-                or subject.lower().startswith("re：")
-            )
-            from_owner = user.lower() in sender.lower()
-
-            if not (is_reply or from_owner):
-                # Not a reply and not from owner — leave UNSEEN, skip
+            # Filter: only actionable if BOTH from owner AND looks like a reply
+            # (changed from OR to AND on 2026-05-25 for security: prevents
+            # external spam with "Re:" prefix from being queued as task.)
+            decision, reason = _should_process(subject, sender, in_reply_to, references, user)
+            if not decision:
                 skipped += 1
                 continue
 
