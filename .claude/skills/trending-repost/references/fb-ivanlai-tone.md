@@ -112,9 +112,22 @@ claude-in-chrome 在 FB 貼文輸入中文時：
    ```json
    "fb_post_status": "success",
    "fb_post_url": "https://www.facebook.com/...",
-   "fb_comment_url": "https://www.facebook.com/...",
+   "fb_comment_url": "https://volpred.zeabur.app/v3/reports/<mile_id>",
    "fb_post_timestamp": "2026-05-16T...+08:00"
    ```
+9. **必同步 patch `storage/reports/feed.json` 對應 entry `details`**（2026-05-25 K1401 教訓；HARD RULE）：
+   ```bash
+   jq --arg id "<mile_id>" --arg url "<fb_post_url>" --arg ts "<fb_post_timestamp>" \
+     'map(if .id == $id then .details = ((.details // {}) + {
+        fb_post_status: "success",
+        fb_post_url: $url,
+        fb_comment_url: ("https://volpred.zeabur.app/v3/reports/" + $id),
+        fb_post_timestamp: $ts
+      }) else . end)' \
+     storage/reports/feed.json > /tmp/feed_patched.json && mv /tmp/feed_patched.json storage/reports/feed.json
+   uv run python scripts/supabase_sync.py sync-article --id <mile_id>
+   ```
+   **Why**：只記 trending_repost_log.json 不寫回 feed.json，audit 看不到 FB URL → 反覆掃成「未發」重 post。mile_daaff779 (K1401 GDP) 03:33 catch-up success 但 details 為空，11:44 又 fail entry — 即此 root cause。
 
 ### 失敗 fallback
 

@@ -8284,5 +8284,32 @@
       ],
       "memory_saved": "feedback_fb_opening_no_friend_asked.md (renamed feedback_fb_anti_ai_style_aggressive)"
     }
+  },
+  {
+    "timestamp": "2026-05-25T11:44:22.234492+08:00",
+    "task_type": "fb_post_failed",
+    "task_id": "fb_mile_daaff779_gdp_q1_second_estimate",
+    "article_id": "mile_daaff779",
+    "status": "failed",
+    "reason": "no_posting_mechanism_available",
+    "details": "FB MCP is Ads API only; claude-in-chrome not in session. Draft prepared for manual post.",
+    "article_url": "https://volpred.zeabur.app/v3/reports/mile_daaff779",
+    "fb_draft": "每年五月底，市場就開始問同一個問題：GDP第二估出來，波動率會怎麼走？\n\n我用了25年的數據來測這件事。\n\n2001到2025年，每年一次Q1 GDP第二估，三個關於VIX反應的假說全部null result。不是p=0.08那種「快到了」，是p值0.4到0.6之間，清清楚楚的沒有效果。\n\n市場早就把這個定期修正幅度的分布定價進去了。\n\n但這不是重點。\n\n重點是：2026年五月，VIX真正盯著的不是GDP。是關稅公告的即時性、Fed路徑的模糊度、還有停滯通膨的尾部定價。\n\n這三件事跟GDP第二估根本是不同頻道的資訊。\n\n5月29日數字出來。留意的重點放在別的地方。"
+  },
+  {
+    "timestamp": "2026-05-25T12:13:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "fb_metadata_writeback_fix_K1401",
+    "actor": "hourly-12",
+    "outcome": "success",
+    "summary": "Fix FB success metadata writeback root cause. mile_daaff779 (K1401 GDP) 03:33 catch-up FB-posted success but did NOT write fb_post_url to feed.json details → 11:44 audit/repost flow saw empty details and tried again, logged fb_post_failed (no_posting_mechanism_available). False alarm — actual FB post is live at pfbid0QYF7sFUW5w2J8iuyvnX.",
+    "actions": [
+      "Patched feed.json details.fb_post_url + fb_comment_url + fb_post_timestamp + fb_post_status=success for mile_daaff779",
+      "Added HARD RULE to .claude/rules/publishing.md: FB success must writeback to feed.json details (K1401 lesson)",
+      "Added Step 9 to .claude/skills/trending-repost/references/fb-ivanlai-tone.md: jq patch feed.json + supabase_sync after FB success",
+      "Ran supabase_sync.py full — mile_daaff779 details synced (31 articles in batch)"
+    ],
+    "supersedes": "fb_mile_daaff779_gdp_q1_second_estimate (2026-05-25T11:44 false-alarm fb_post_failed)",
+    "root_cause": "trending_repost / event_article FB-success path only logged to trending_repost_log.json or work_log, never patched feed.json details → downstream audit blind to FB URL → repeated repost attempts"
   }
 ]
