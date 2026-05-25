@@ -277,10 +277,17 @@ uv run python scripts/task_pool_claim.py release --id <task_id>
 | `daily_article` 寫作（需先讀 `.claude/skills/anti-ai-style/`）| `member_qa`、`trending_repost`（Claude skill canonical）|
 |  | 標 `pending_main_thread` 的 task |
 
-### email_reply 任務（最高優先）
+### email_reply 任務（**Codex 跳過**，Claude 主線程專屬）
 
-`task_type=email_reply` 是用戶 Gmail 回信自動入池的任務。Description 內有「用戶回信內容」+
-「原始助理寄出內容」— 依用戶指示處理（reply / fix / 派工 / 寄回信用 `uv run volpred ops send-alert`）。
+`task_type=email_reply` 是用戶 Gmail 回信自動入池的任務（filter: from owner + Re: + 含 `[VolPred`）。
+
+**Codex 不接這類 task**，原因：
+- 需要寄 plan email 與 close email — `send-alert` 行為要一致由主線程掌握
+- 需要跨 tick 追蹤 linked sub-tasks 狀態
+
+**但 Codex 可接 email_reply 衍生的 sub-tasks** — Claude 在 Phase 0.B Step 3 規劃時會建 linked sub-tasks（task description 內含 `parent_email_task_id`，task_type 為一般 platform_ops/experiment/governance 等）。這些 sub-tasks 你**可以正常 claim 處理**，幫忙加速消化。
+
+完成 sub-task 後 claude 主線程下次 tick 會偵測「parent_email_task_id 的所有 linked subs 都 succeeded」→ 自動寄 close email + complete parent。
 
 ### Stale claim 自動退回
 

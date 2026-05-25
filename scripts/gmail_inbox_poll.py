@@ -170,39 +170,46 @@ def _split_reply_and_quote(body: str) -> tuple[str, str]:
     return reply, quoted
 
 
+VOLPRED_SUBJECT_MARKER = os.environ.get("VOLPRED_SUBJECT_MARKER", "[VolPred")
+
+
 def _should_process(
     subject: str,
     sender: str,
     in_reply_to: str,
     references: str,
     owner_email: str,
+    subject_marker: str | None = None,
 ) -> tuple[bool, str]:
     """Decide whether an incoming mail should be queued as email_reply task.
 
-    Returns (decision, reason). Requires BOTH conditions (AND, not OR) for safety:
-      1. from_owner: sender contains owner's email (prevents external spam injection)
-      2. is_reply:   subject starts with Re:/Re：  OR  In-Reply-To/References header present
-                     (ensures it's a real continuation of an assistant-sent thread)
-
-    Edge cases:
-      - Owner sends brand-new mail without Re: → rejected (not a reply)
-      - External party with Re: prefix         → rejected (not from owner)
-      - Owner replies from any client          → accepted
+    Requires THREE conditions (all AND) for actionability:
+      1. from_owner:        sender contains owner's email (anti-spoofing)
+      2. is_reply:          Re:/Re：prefix OR In-Reply-To/References header
+                            (genuine continuation, not new topic)
+      3. is_volpred_thread: subject contains marker (default '[VolPred')
+                            → ensures it's a reply to a system-sent mail,
+                              not e.g. a friend's [Re: lunch?] forwarded chain
     """
+    marker = subject_marker if subject_marker is not None else VOLPRED_SUBJECT_MARKER
     from_owner = bool(owner_email) and owner_email.lower() in (sender or "").lower()
+    subj = subject or ""
+    subj_low = subj.lower()
     is_reply = bool(
         (in_reply_to or "").strip()
         or (references or "").strip()
-        or (subject or "").lower().startswith("re:")
-        or (subject or "").lower().startswith("re：")
+        or subj_low.startswith("re:")
+        or subj_low.startswith("re：")
     )
-    if from_owner and is_reply:
-        return True, "from_owner_and_is_reply"
-    if not from_owner and not is_reply:
-        return False, "not_from_owner_not_reply"
+    is_volpred_thread = bool(marker) and (marker.lower() in subj_low)
+
+    if from_owner and is_reply and is_volpred_thread:
+        return True, "from_owner_and_is_reply_and_volpred_thread"
     if not from_owner:
         return False, "not_from_owner"
-    return False, "from_owner_but_not_reply"
+    if not is_reply:
+        return False, "from_owner_but_not_reply"
+    return False, "from_owner_reply_but_not_volpred_thread"
 
 
 def _detect_priority(text: str) -> int:

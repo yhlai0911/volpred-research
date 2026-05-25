@@ -10,9 +10,67 @@ Hourly dispatch trigger (LaunchAgent HH:07 CST, 24 slots/day). 規則 (token-con
 5. 雙 session 撞題保護：claim 機制已 cross-session atomic（fcntl LOCK_EX on next_tasks.json）— 互動 session 與 hourly session claim 同 id 時後者得 `already_claimed`，自動換工。
 
 PHASE 0 — Email reply 任務（**最高優先**，超越 compute queue followup）:
-1. `uv run python scripts/task_pool_claim.py list --status pending --limit 20 2>/dev/null | jq '[.tasks[] | select(.task_type=="email_reply")] | length'`
-2. 若 ≥1：claim 最舊一條 → 讀 task description 內「用戶回信內容」+「原始助理寄出內容」→ 依用戶指示執行（reply / fix / dispatch sub-task / 寄回信用 `uv run volpred ops send-alert --level info --title "Re: <subj>" --body "<回覆>"`）→ complete task → 本 fire 結束（email reply 完成即算一個完整段落）。
-3. 若 =0：進 PHASE A。
+
+**Filter 已收緊（2026-05-25）**：只處理 from owner + Re: prefix + subject 含 `[VolPred` 三條件齊全的回信。其他不會入池。
+
+**兩段式 reply 工作流**（用戶 2026-05-25 硬性要求）：
+
+### Phase 0.A — 先處理已 in_progress 但未 close 的 email_reply
+```bash
+uv run python scripts/task_pool_claim.py list --status in_progress --limit 50 2>/dev/null \
+  | jq '[.tasks[] | select(.task_type=="email_reply")]'
+```
+對每一條（讀 `result` field 看上輪 plan + linked task ids）：
+- jq query linked_task_ids 的當前 status
+- 若**全部 succeeded** → 寄 **CLOSE email**（`Re: <原 subj>` body=「完成項目摘要 + commit hash + 對應 task id」）→ complete --status succeeded
+- 若有 failed → 寄 **close-with-failure email** 說明哪步失敗+原因 → complete --status failed
+- 若仍 in_progress → 跳過本輪不動，下次 tick 再 check（避免 nagging）
+
+### Phase 0.B — 新 pending email_reply 入單
+```bash
+uv run python scripts/task_pool_claim.py list --status pending --limit 50 2>/dev/null \
+  | jq '[.tasks[] | select(.task_type=="email_reply")][0]'
+```
+若有最舊一條 → 走 5 步：
+
+1. **CLAIM**: `uv run python scripts/task_pool_claim.py claim --id <id> --owner hourly-$(date +%H)` → `start`
+2. **ANALYZE**: 讀 description 內「用戶回信內容」+「原始助理寄出內容」→ 分類 (question / command / dispatch / observation / urgent)
+3. **PLAN**: 寫 1-5 個 bullet 計畫 — 每 bullet 含「動作 / 預期產出 / ETA」。對需要 sub-task 的動作，下 `task_pool_claim.py claim` 建 linked sub-task（task_type 對應；description 含 parent_email_task_id 反向追蹤）
+4. **SEND PLAN EMAIL（強制）**:
+   ```bash
+   uv run volpred ops send-alert --level info \
+     --title "Re: <原 email subject>" \
+     --body "收到回信，已開單為 <task_id>。
+
+## 我理解的需求
+<1-2 句重述用戶意圖以確認>
+
+## 後續計畫與動作
+1. <bullet 1 — 動作 / 產出 / ETA>
+2. <bullet 2 ...>
+...
+
+## 追蹤
+- Parent task: <task_id>
+- Linked sub-tasks: <sub_id_1>, <sub_id_2>, ...
+- 預計 ETA: <下 N 個 hourly tick 內完成>
+- 完成後我會寄 close email 給你
+
+— Claude (auto via hourly-dispatch)"
+   ```
+5. **記 plan 到 task.result** (jq edit next_tasks.json 補欄位)：
+   ```bash
+   jq --arg id <task_id> --arg plan '<plan text>' --argjson subs '["sub_id_1","sub_id_2"]' \
+     '(.[] | select(.id==$id)) |= (.plan = $plan | .linked_task_ids = $subs | .needs_close_reply = true)' \
+     storage/next_tasks.json > /tmp/nt && mv /tmp/nt storage/next_tasks.json
+   ```
+6. **EXECUTE**：當下 tick 能完成的立即做（小型 question 直接答完；指令直接 commit）；大型任務派 agent / 進 compute queue / 留 sub-task 給未來 tick 接。
+7. **本 tick close 判定**：若所有 linked sub-tasks 都已 succeeded（或本就無 sub-task 因為 question 直接回答完）→ 寄 close email + complete --status succeeded。否則**留 in_progress**，下次 tick Phase 0.A 接手。
+
+**重要**：plan email 是「**對用戶承諾**」，寄出後沒做完不算結案。stale cleanup 2h 會把卡住的 email_reply auto-release 給下一輪重做（但 plan email 已寄，用戶會看到 retry log），盡量在 2 tick 內收尾。
+
+### Phase 0.C — 都沒事 → 進 PHASE A
+若 0.A 全 close 完、0.B 無新單 → PHASE A。
 
 PHASE A — 檢查 compute queue 有無 completed 待 followup:
 1. 跑 `uv run python scripts/compute_queue.py list --completed-pending-followup --json`

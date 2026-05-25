@@ -17,111 +17,138 @@ spec.loader.exec_module(mod)
 _should_process = mod._should_process
 
 OWNER = "yihao.lai@gmail.com"
+MARKER = "[VolPred"
 
 
-def _check(subject, sender, in_reply_to="", references="", owner=OWNER):
-    return _should_process(subject, sender, in_reply_to, references, owner)
+def _check(subject, sender, in_reply_to="", references="", owner=OWNER, marker=MARKER):
+    return _should_process(subject, sender, in_reply_to, references, owner, marker)
 
 
-# ─── ACCEPT cases ──────────────────────────────────────────────────────────
+# ─── ACCEPT cases (require ALL 3 conditions) ──────────────────────────────
 
-def test_owner_with_re_prefix_english():
-    ok, reason = _check("Re: my old subject", "yihao.lai@gmail.com")
+def test_owner_re_volpred_boss_report():
+    ok, reason = _check(
+        "Re: [VolPred Boss Report] 2026-05-25 平台運營報告",
+        "yihao.lai@gmail.com",
+    )
     assert ok is True, reason
-    assert reason == "from_owner_and_is_reply"
+    assert reason == "from_owner_and_is_reply_and_volpred_thread"
 
 
-def test_owner_with_re_prefix_chinese_colon():
-    ok, _ = _check("Re：研究進度", "Yi-Hao Lai <yihao.lai@gmail.com>")
+def test_owner_re_volpred_6h_summary_chinese_colon():
+    ok, _ = _check(
+        "Re：[VolPred 6h Summary] 06:05 → 12:05",
+        "Yi-Hao Lai <yihao.lai@gmail.com>",
+    )
     assert ok is True
 
 
-def test_owner_with_in_reply_to_header():
-    ok, _ = _check("回覆", "yihao.lai@gmail.com", in_reply_to="<abc@example.com>")
+def test_owner_volpred_with_in_reply_to_header_no_re_prefix():
+    """Some clients drop Re: prefix; reply header still proves thread continuity."""
+    ok, _ = _check(
+        "[VolPred Alert] continuing thought",
+        "yihao.lai@gmail.com",
+        in_reply_to="<abc@gmail.com>",
+    )
     assert ok is True
 
 
-def test_owner_with_references_header():
-    ok, _ = _check("討論", "yihao.lai@gmail.com", references="<x@y.com> <z@y.com>")
+def test_owner_re_volpred_alert():
+    ok, _ = _check("Re: [VolPred Alert][CRITICAL] draft pool=0", OWNER)
     assert ok is True
 
 
-def test_owner_mixed_case_sender():
-    ok, _ = _check("Re: x", "Yihao.Lai@GMAIL.com")
+def test_marker_match_case_insensitive():
+    ok, _ = _check("re: [volpred work summary] tick", OWNER)
     assert ok is True
 
 
-def test_owner_with_display_name_format():
-    ok, _ = _check("Re: x", '"賴奕豪" <yihao.lai@gmail.com>')
-    assert ok is True
+# ─── REJECT: missing 1+ conditions ─────────────────────────────────────────
+
+def test_owner_re_but_not_volpred_thread():
+    """Owner replies to a non-VolPred thread (e.g. lunch invite) → reject."""
+    ok, reason = _check("Re: 一起吃飯？", "yihao.lai@gmail.com")
+    assert ok is False
+    assert reason == "from_owner_reply_but_not_volpred_thread"
 
 
-# ─── REJECT cases ──────────────────────────────────────────────────────────
-
-def test_owner_brand_new_subject_no_reply_marker():
-    """Owner sends new mail (no Re:, no reply headers) → must reject."""
-    ok, reason = _check("new question", "yihao.lai@gmail.com")
+def test_owner_volpred_subject_but_brand_new_no_re():
+    """Owner sends brand-new mail with [VolPred in subject but no Re:/reply header → reject."""
+    ok, reason = _check("[VolPred] manual instruction", "yihao.lai@gmail.com")
     assert ok is False
     assert reason == "from_owner_but_not_reply"
 
 
-def test_external_spam_with_re_prefix():
-    """External sender with Re: prefix (classic spam pattern) → must reject."""
-    ok, reason = _check("Re: your urgent task", "spam@malicious.com")
-    assert ok is False
-    assert reason == "not_from_owner"
-
-
-def test_external_with_reply_headers():
-    """External sender with real reply chain → still reject (not from owner)."""
+def test_external_re_volpred_spoof():
+    """External sender forwards/spoofs a VolPred subject → reject (not from owner)."""
     ok, reason = _check(
-        "Re: shared thread",
-        "colleague@university.edu",
-        in_reply_to="<existing-thread@gmail.com>",
+        "Re: [VolPred Boss Report] forwarded",
+        "spammer@evil.com",
     )
     assert ok is False
     assert reason == "not_from_owner"
 
 
-def test_neither_owner_nor_reply():
-    ok, reason = _check("hello world", "newsletter@somesite.com")
+def test_owner_re_only_no_volpred_marker():
+    ok, reason = _check("Re: random old thread", "yihao.lai@gmail.com")
     assert ok is False
-    assert reason == "not_from_owner_not_reply"
+    assert reason == "from_owner_reply_but_not_volpred_thread"
+
+
+def test_neither_owner_nor_reply_nor_marker():
+    ok, reason = _check("newsletter", "marketing@somesite.com")
+    assert ok is False
 
 
 def test_empty_owner_config():
-    """If owner_email config missing, must reject everything (fail-safe)."""
-    ok, reason = _check("Re: x", "anyone@example.com", owner="")
+    ok, _ = _check("Re: [VolPred x]", "anyone@example.com", owner="")
+    assert ok is False
+
+
+def test_empty_marker_disables_filter():
+    """If VOLPRED_SUBJECT_MARKER is empty string, marker check is bypassed
+    (back to 2-condition check). Useful for testing or alternate deployments."""
+    ok, _ = _check("Re: anything", "yihao.lai@gmail.com", marker="")
+    # marker empty → is_volpred_thread = False → still rejected because new logic requires marker
     assert ok is False
 
 
 def test_none_subject_defensive():
-    """Defensive: None subject must not crash."""
     ok, _ = _check(None, "yihao.lai@gmail.com")
-    assert ok is False  # no reply marker
+    assert ok is False
 
 
 def test_none_sender_defensive():
-    ok, _ = _check("Re: x", None)
+    ok, _ = _check("Re: [VolPred x]", None)
     assert ok is False
 
 
 # ─── EDGE cases ────────────────────────────────────────────────────────────
 
-def test_owner_partial_match_substring_attack():
-    """Sender contains owner's email as substring but in unusual position.
-    Current implementation accepts this. If you ever want strict equality,
-    refactor _should_process to parse the address with email.utils.parseaddr."""
-    ok, _ = _check("Re: x", "evil-yihao.lai@gmail.com-attacker@evil.com")
-    # current behavior: True (substring match). Document, don't enforce.
-    assert ok is True  # accepted under substring rule (acknowledged tradeoff)
+def test_owner_substring_attack_acknowledged():
+    ok, _ = _check(
+        "Re: [VolPred x]",
+        "evil-yihao.lai@gmail.com-attacker@evil.com",
+    )
+    assert ok is True  # acknowledged substring tradeoff
 
 
-def test_re_re_re_chain():
-    ok, _ = _check("Re: Re: Re: ongoing", "yihao.lai@gmail.com")
+def test_re_re_re_chain_with_volpred():
+    ok, _ = _check("Re: Re: Re: [VolPred Boss Report]", OWNER)
     assert ok is True
 
 
-def test_lowercase_re_prefix():
-    ok, _ = _check("re: lowercase", "yihao.lai@gmail.com")
+def test_marker_appears_in_middle_of_subject():
+    """Marker doesn't need to be at start — Re: prefix often pushes it inward."""
+    ok, _ = _check("Re: Fwd: [VolPred Alert] nested", OWNER)
+    assert ok is True
+
+
+def test_custom_marker_env_override():
+    """Pass marker explicitly to verify it's not hardcoded."""
+    ok, _ = _check(
+        "Re: [CustomTag] x",
+        "yihao.lai@gmail.com",
+        marker="[CustomTag",
+    )
     assert ok is True
