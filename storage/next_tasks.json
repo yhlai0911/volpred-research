@@ -9285,7 +9285,7 @@
     "description": "K426 has a non-null verdict in experiments/k426/ but no published feed article and no existing task. Verdict: QLIKE ceiling confirmed (14th time) — ML overfits or adds noise. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9294,7 +9294,13 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.453427+00:00",
     "generated_at": "2026-05-13T05:53:00.453429+00:00",
-    "k_id": "K426"
+    "k_id": "K426",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-25T22:10:49.942658+00:00",
+    "claim_session_id": "26c38fd1b34e",
+    "started_at": "2026-05-25T22:10:57.252849+00:00",
+    "completed_at": "2026-05-25T22:14:10.047104+00:00",
+    "result": "已完成 K426 general draft 並發布至文章池；新增 2 張圖；draft id mile_0108572f。結論：GINN-MLP QLIKE 比 GJR 差 1230%，支持日頻 ML ceiling 案例。"
   },
   {
     "id": "gen_article_k463",
@@ -9717,7 +9723,7 @@
     "description": "K786 has a non-null verdict in experiments/k786/ but no published feed article and no existing task. Verdict: NULL — VoV timing does NOT significantly improve VT insurance. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9726,7 +9732,13 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.500062+00:00",
     "generated_at": "2026-05-13T05:53:00.500064+00:00",
-    "k_id": "K786"
+    "k_id": "K786",
+    "claimed_by": "hourly-06",
+    "claimed_at": "2026-05-25T22:10:47.373388+00:00",
+    "claim_session_id": "a5dcfe7a05f8",
+    "started_at": "2026-05-25T22:10:47.444569+00:00",
+    "completed_at": "2026-05-25T22:20:30.308387+00:00",
+    "result": "K786 VoV-VT NULL article 已發佈 draft pool (mile_0df2d8ab, audience=research, 5247 字, 2 supabase 圖表)。Harvey t=0.98 不過閾、DM vs Static VT t=-10.27 顯著惡化、Sharpe +0.014。9-checklist 全通過，anti_ai_gate.py PASS。commit=fc5a9b39。"
   },
   {
     "id": "gen_article_k809",
@@ -9802,7 +9814,7 @@
     "description": "K820 has a non-null verdict in experiments/k820/ but no published feed article and no existing task. Verdict: {'any_event_beats_baseline_harvey_t3': False, 'baseline_sig_better_harvey_t3': T. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "failed",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9811,7 +9823,12 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.504725+00:00",
     "generated_at": "2026-05-13T05:53:00.504730+00:00",
-    "k_id": "K820"
+    "k_id": "K820",
+    "claimed_by": "hourly-06",
+    "claimed_at": "2026-05-25T22:09:06.826744+00:00",
+    "claim_session_id": "43d6e05e6dc0",
+    "completed_at": "2026-05-25T22:09:28.415658+00:00",
+    "result": "已 dedup 發現 K820 已有 3 篇 feed 文章（mile_4fa40750 / mile_fa23c3b2 / mile_7012b52a）覆蓋 FOMC 事件減倉主題；不再重複發。建議從 task pool 移除或標 deprecated。"
   },
   {
     "id": "K1138_revision_bh_fix",

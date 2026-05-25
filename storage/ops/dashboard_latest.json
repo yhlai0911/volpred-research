@@ -1,5 +1,5 @@
 {
-  "dashboard_generated_at": "2026-05-22T20:00:36Z",
+  "dashboard_generated_at": "2026-05-25T22:00:33Z",
   "overall_status": "ok",
   "section_breaches": 0,
   "section_critical": 0,
@@ -7,19 +7,19 @@
     {
       "section": "production_pending",
       "status": "ok",
-      "tldr": "51 pending tasks (top types: [('daily_article', 37), ('experiment', 12), ('?', 2)])",
+      "tldr": "30 pending tasks (top types: [('daily_article', 23), ('experiment', 6), ('paper_body', 1)])",
       "next": "dispatch top P1-P3 if slots free"
     },
     {
       "section": "production_throughput",
       "status": "ok",
-      "tldr": "12 articles published last 24h (target 6/day)",
+      "tldr": "8 articles published last 24h (target 6/day)",
       "next": null
     },
     {
       "section": "distribution_supabase",
       "status": "ok",
-      "tldr": "12/12 last-24h articles synced",
+      "tldr": "8/8 last-24h articles synced",
       "next": null,
       "missing": []
     },
@@ -29,9 +29,9 @@
       "tldr": "3/3 sample live URLs return 200",
       "next": null,
       "sample": [
-        "mile_ce3238d1",
-        "mile_345c1579",
-        "mile_490d38ec"
+        "mile_076979d0",
+        "mile_227257a3",
+        "mile_334a3f26"
       ],
       "dead": []
     },

@@ -1,0 +1,72 @@
+{
+  "task_id": "daily_update_launchagent_observation_2026-06-01",
+  "generated_at": "2026-05-26T01:01:43+08:00",
+  "window": {
+    "start": "2026-05-26T00:00:00+08:00",
+    "end": "2026-06-01T23:59:59+08:00",
+    "window_closed": false
+  },
+  "schedule": {
+    "cron": "3 8 * * 1-6",
+    "launchagent_label": "com.volpred.daily-update"
+  },
+  "launchctl_status": {
+    "runs": 0,
+    "last_exit": "(never exited)",
+    "running": false
+  },
+  "log_observation": {
+    "log_path": "storage/logs/cron/daily_update.log",
+    "observed_exit_count": 6,
+    "latest_observed_exit": "2026-05-25T22:14:11+08:00"
+  },
+  "observation_rows": [
+    {
+      "expected_fire_at": "2026-05-26T08:03:00+08:00",
+      "expected_date": "2026-05-26",
+      "status": "future",
+      "observed_exit_at": null
+    },
+    {
+      "expected_fire_at": "2026-05-27T08:03:00+08:00",
+      "expected_date": "2026-05-27",
+      "status": "future",
+      "observed_exit_at": null
+    },
+    {
+      "expected_fire_at": "2026-05-28T08:03:00+08:00",
+      "expected_date": "2026-05-28",
+      "status": "future",
+      "observed_exit_at": null
+    },
+    {
+      "expected_fire_at": "2026-05-29T08:03:00+08:00",
+      "expected_date": "2026-05-29",
+      "status": "future",
+      "observed_exit_at": null
+    },
+    {
+      "expected_fire_at": "2026-05-30T08:03:00+08:00",
+      "expected_date": "2026-05-30",
+      "status": "future",
+      "observed_exit_at": null
+    },
+    {
+      "expected_fire_at": "2026-06-01T08:03:00+08:00",
+      "expected_date": "2026-06-01",
+      "status": "future",
+      "observed_exit_at": null
+    }
+  ],
+  "miss_count_so_far": 0,
+  "decision": {
+    "verdict": "PENDING_OBSERVATION",
+    "recommendation": "DEFER_DECISION_UNTIL_WINDOW_CLOSE",
+    "rule": ">=1 missing fire over the observation window => re-enable piggy-back with lock; otherwise keep LaunchAgent-only."
+  },
+  "notes": [
+    "This observer uses log exit banners as the primary evidence of actual completion.",
+    "launchctl runs=0 / last exit=(never exited) can still be unhelpful for this LaunchAgent, so do not use launchctl alone as a gate.",
+    "Re-run this script after 2026-06-01 local close to finalize the decision."
+  ]
+}
