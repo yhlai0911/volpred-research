@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-05-25T12:12:32Z",
+  "alert_type": "paper_trading_gap",
+  "severity": "warning",
+  "strategy": "_market_daily",
+  "detail": "Strategy '_market_daily' has 3/3 null portfolio_returns in last 3 entries. Dates with nulls: 2026-04-24, 2026-05-18, 2026-05-20. Other strategies (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, piecewise_conservative, fear_dca) have 1/3 nulls, likely weekend/holiday gaps.",
+  "action_required": "Investigate _market_daily data pipeline. Check if data source is missing entries for benchmark market index."
+}
