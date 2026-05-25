@@ -8,68 +8,109 @@
     {
       "method": "HS-252",
       "alpha": 0.05,
-      "n_obs": 2871,
-      "n_exceed": 151,
-      "actual_rate": 0.05259491466388018,
+      "n_obs": 2864,
+      "n_exceed": 150,
+      "actual_rate": 0.052374301675977654,
       "nominal_alpha": 0.05,
-      "kupiec_lr": 0.4004900823722721,
-      "kupiec_p_value": 0.5268362664385677
+      "kupiec_lr": 0.3349210484393019,
+      "kupiec_p_value": 0.5627756640025889,
+      "christoffersen_ind_lr": 28.004500947102315,
+      "christoffersen_ind_p_value": 1.2103360857995682e-07,
+      "christoffersen_cc_lr": 28.339421995541617,
+      "christoffersen_cc_p_value": 7.01734297781087e-07
     },
     {
       "method": "CU",
       "alpha": 0.05,
-      "n_obs": 2871,
-      "n_exceed": 121,
-      "actual_rate": 0.0421455938697318,
+      "n_obs": 2864,
+      "n_exceed": 120,
+      "actual_rate": 0.04189944134078212,
       "nominal_alpha": 0.05,
-      "kupiec_lr": 3.929854744249191,
-      "kupiec_p_value": 0.04743604143398117
+      "kupiec_lr": 4.177141459832299,
+      "kupiec_p_value": 0.04097275260711719,
+      "christoffersen_ind_lr": 17.29998910807069,
+      "christoffersen_ind_p_value": 3.1918868166780356e-05,
+      "christoffersen_cc_lr": 21.47713056790299,
+      "christoffersen_cc_p_value": 2.1692037853293655e-05
     },
     {
       "method": "CR",
       "alpha": 0.05,
-      "n_obs": 2871,
-      "n_exceed": 143,
-      "actual_rate": 0.04980842911877394,
+      "n_obs": 2864,
+      "n_exceed": 142,
+      "actual_rate": 0.04958100558659218,
       "nominal_alpha": 0.05,
-      "kupiec_lr": 0.002220878153974981,
-      "kupiec_p_value": 0.9624126507919716
+      "kupiec_lr": 0.010613251528658108,
+      "kupiec_p_value": 0.9179465925997513,
+      "christoffersen_ind_lr": 1.2309694963844322,
+      "christoffersen_ind_p_value": 0.2672185769398989,
+      "christoffersen_cc_lr": 1.2415827479130903,
+      "christoffersen_cc_p_value": 0.5375188907822352
     },
     {
       "method": "HS-252",
       "alpha": 0.01,
-      "n_obs": 2871,
-      "n_exceed": 48,
-      "actual_rate": 0.01671891327063741,
+      "n_obs": 2864,
+      "n_exceed": 47,
+      "actual_rate": 0.016410614525139665,
       "nominal_alpha": 0.01,
-      "kupiec_lr": 10.890943794934643,
-      "kupiec_p_value": 0.0009663557595877004
+      "kupiec_lr": 9.961411612424243,
+      "kupiec_p_value": 0.0015985544028325194,
+      "christoffersen_ind_lr": 20.18973286809404,
+      "christoffersen_ind_p_value": 7.012832305197669e-06,
+      "christoffersen_cc_lr": 30.151144480518283,
+      "christoffersen_cc_p_value": 2.8363653059582106e-07
     },
     {
       "method": "CU",
       "alpha": 0.01,
-      "n_obs": 2871,
+      "n_obs": 2864,
       "n_exceed": 18,
-      "actual_rate": 0.006269592476489028,
+      "actual_rate": 0.006284916201117319,
       "nominal_alpha": 0.01,
-      "kupiec_lr": 4.652851128994371,
-      "kupiec_p_value": 0.03100201394704527
+      "kupiec_lr": 4.600304887300041,
+      "kupiec_p_value": 0.031966270884305814,
+      "christoffersen_ind_lr": 8.128569935427862,
+      "christoffersen_ind_p_value": 0.004357310196280717,
+      "christoffersen_cc_lr": 12.728874822727903,
+      "christoffersen_cc_p_value": 0.0017217098013524446
     },
     {
       "method": "CR",
       "alpha": 0.01,
-      "n_obs": 2871,
-      "n_exceed": 32,
-      "actual_rate": 0.01114594218042494,
+      "n_obs": 2864,
+      "n_exceed": 31,
+      "actual_rate": 0.010824022346368716,
       "nominal_alpha": 0.01,
-      "kupiec_lr": 0.3671958569820175,
-      "kupiec_p_value": 0.5445367479837908
+      "kupiec_lr": 0.191302349675742,
+      "kupiec_p_value": 0.6618348865205577,
+      "christoffersen_ind_lr": 3.9955323375442617,
+      "christoffersen_ind_p_value": 0.04562103915717808,
+      "christoffersen_cc_lr": 4.186834687220004,
+      "christoffersen_cc_p_value": 0.12326517577610085
     }
   ],
   "regime_obs": {
     "high_vol_count": 859,
-    "low_vol_count": 2012
+    "low_vol_count": 2005
+  },
+  "per_regime_var": {
+    "0.05": {
+      "cu_var": 0.017999192160895076,
+      "cr_high_var": 0.029972841833319875,
+      "cr_low_var": 0.012236594087798416
+    },
+    "0.01": {
+      "cu_var": 0.03789961731815776,
+      "cr_high_var": 0.053995632352121695,
+      "cr_low_var": 0.019512644643060646
+    }
   },
   "verdict": "REGIME_EFFECT",
-  "notes": []
+  "notes": [],
+  "caveats": [
+    "IS/OOS cutoff at 2014-12-31 is canonical; cutoff sensitivity (\u00b11y) not tested.",
+    "VIX>20 regime threshold is fixed ex-ante per literature; threshold sensitivity not swept.",
+    "Conformal calibration is single-shot from full IS sample (no rolling re-calibration)."
+  ]
 }

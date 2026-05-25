@@ -45,6 +45,40 @@ def kupiec_lr(n_exceed, n_obs, alpha):
     return lr, p_value
 
 
+def christoffersen_independence(exceedances: np.ndarray) -> Tuple[float, float]:
+    # LR_ind test for first-order Markov independence of exceedance hits
+    e = exceedances.astype(int)
+    if e.size < 2:
+        return float("nan"), float("nan")
+    n00 = int(((e[:-1] == 0) & (e[1:] == 0)).sum())
+    n01 = int(((e[:-1] == 0) & (e[1:] == 1)).sum())
+    n10 = int(((e[:-1] == 1) & (e[1:] == 0)).sum())
+    n11 = int(((e[:-1] == 1) & (e[1:] == 1)).sum())
+    n0 = n00 + n01
+    n1 = n10 + n11
+    n_total = n0 + n1
+    if n0 == 0 or n1 == 0 or n_total == 0:
+        return float("nan"), float("nan")
+    pi = (n01 + n11) / n_total
+    pi0 = n01 / n0 if n0 > 0 else 0.0
+    pi1 = n11 / n1 if n1 > 0 else 0.0
+    if pi in (0.0, 1.0) or (pi0 in (0.0,) and pi1 in (0.0,)):
+        return float("nan"), float("nan")
+    eps = 1e-300
+    ll_null = (n00 + n10) * np.log(max(1 - pi, eps)) + (n01 + n11) * np.log(max(pi, eps))
+    ll_alt = (
+        n00 * np.log(max(1 - pi0, eps))
+        + n01 * np.log(max(pi0, eps))
+        + n10 * np.log(max(1 - pi1, eps))
+        + n11 * np.log(max(pi1, eps))
+    )
+    lr = -2 * (ll_null - ll_alt)
+    if lr < 0:
+        lr = 0.0
+    p_value = 1 - stats.chi2.cdf(lr, df=1)
+    return float(lr), float(p_value)
+
+
 def _pick_column(names: Tuple[str, ...], candidates: List[str]) -> str:
     lower_map = {name.lower(): name for name in names}
     for candidate in candidates:
@@ -74,6 +108,15 @@ def load_data() -> Dict[str, np.ndarray]:
     dates = dates[valid]
     spy = spy[valid]
     vix = vix[valid]
+
+    # Defensive dedup: upstream CSV may contain duplicate trading days
+    # (observed 10 dups in 2026-05; pipeline fix tracked separately).
+    # Keep first occurrence of each date so results stay reproducible.
+    _, first_idx = np.unique(dates, return_index=True)
+    first_idx.sort()
+    dates = dates[first_idx]
+    spy = spy[first_idx]
+    vix = vix[first_idx]
 
     returns = np.full_like(spy, fill_value=np.nan, dtype=float)
     returns[1:] = np.log(spy[1:] / spy[:-1])
@@ -142,11 +185,17 @@ def evaluate_var_methods(data: Dict[str, np.ndarray]) -> Tuple[Dict[Tuple[str, f
 
     outputs: Dict[Tuple[str, float], Dict[str, np.ndarray]] = {}
     summary_rows = []
+    per_regime_var: Dict[float, Dict[str, float]] = {}
 
     for alpha in ALPHAS:
         cu_var = safe_var_from_returns(is_returns, alpha)
         cr_high_var = safe_var_from_returns(is_high_returns, alpha) if is_high_returns.size else cu_var
         cr_low_var = safe_var_from_returns(is_low_returns, alpha) if is_low_returns.size else cu_var
+        per_regime_var[alpha] = {
+            "cu_var": float(cu_var),
+            "cr_high_var": float(cr_high_var),
+            "cr_low_var": float(cr_low_var),
+        }
 
         hs_vars = np.full(oos_idx.shape[0], np.nan, dtype=float)
         cu_vars = np.full(oos_idx.shape[0], cu_var, dtype=float)
@@ -174,8 +223,16 @@ def evaluate_var_methods(data: Dict[str, np.ndarray]) -> Tuple[Dict[Tuple[str, f
             n_exceed = int(exceedances.sum())
             actual_rate = float(n_exceed / n_obs) if n_obs else float("nan")
             lr, p_value = (float("nan"), float("nan"))
+            ind_lr, ind_p = (float("nan"), float("nan"))
             if n_obs > 0:
                 lr, p_value = kupiec_lr(n_exceed, n_obs, alpha)
+                ind_lr, ind_p = christoffersen_independence(exceedances)
+            cc_lr = lr + ind_lr if np.isfinite(lr) and np.isfinite(ind_lr) else float("nan")
+            cc_p = (
+                float(1 - stats.chi2.cdf(cc_lr, df=2))
+                if np.isfinite(cc_lr)
+                else float("nan")
+            )
 
             outputs[(method, alpha)] = {
                 "dates": oos_dates[eval_mask],
@@ -193,6 +250,10 @@ def evaluate_var_methods(data: Dict[str, np.ndarray]) -> Tuple[Dict[Tuple[str, f
                     "nominal_alpha": alpha,
                     "kupiec_lr": None if not np.isfinite(lr) else float(lr),
                     "kupiec_p_value": None if not np.isfinite(p_value) else float(p_value),
+                    "christoffersen_ind_lr": None if not np.isfinite(ind_lr) else float(ind_lr),
+                    "christoffersen_ind_p_value": None if not np.isfinite(ind_p) else float(ind_p),
+                    "christoffersen_cc_lr": None if not np.isfinite(cc_lr) else float(cc_lr),
+                    "christoffersen_cc_p_value": None if not np.isfinite(cc_p) else float(cc_p),
                 }
             )
 
@@ -202,6 +263,7 @@ def evaluate_var_methods(data: Dict[str, np.ndarray]) -> Tuple[Dict[Tuple[str, f
         "oos_returns": oos_returns,
         "oos_regimes": oos_regimes,
         "notes": regime_notes,
+        "per_regime_var": {f"{a:.2f}": per_regime_var[a] for a in ALPHAS},
     }
     return outputs, summary
 
@@ -256,14 +318,34 @@ def write_results(summary: Dict) -> Dict:
         )
         for row in result_rows
     }
-    verdict = (
-        "REGIME_EFFECT"
-        if any(
-            p_lookup.get(("CR", alpha), -np.inf) > p_lookup.get(("CU", alpha), -np.inf)
-            for alpha in ALPHAS
+    cc_lookup = {
+        (row["method"], row["alpha"]): (
+            -np.inf
+            if row.get("christoffersen_cc_p_value") is None
+            else row["christoffersen_cc_p_value"]
         )
-        else "NO_REGIME_EFFECT"
+        for row in result_rows
+    }
+    # Stricter verdict: REGIME_EFFECT requires CR to beat CU on BOTH alphas
+    # under Kupiec, AND CR's conditional coverage (Christoffersen CC) p-value
+    # is not significantly worse than CU on either alpha.
+    cr_kupiec_wins_all = all(
+        p_lookup.get(("CR", a), -np.inf) > p_lookup.get(("CU", a), -np.inf)
+        for a in ALPHAS
     )
+    cr_cc_not_worse = all(
+        cc_lookup.get(("CR", a), -np.inf) >= cc_lookup.get(("CU", a), -np.inf) - 0.05
+        for a in ALPHAS
+    )
+    if cr_kupiec_wins_all and cr_cc_not_worse:
+        verdict = "REGIME_EFFECT"
+    elif any(
+        p_lookup.get(("CR", a), -np.inf) > p_lookup.get(("CU", a), -np.inf)
+        for a in ALPHAS
+    ):
+        verdict = "PARTIAL_REGIME_EFFECT"
+    else:
+        verdict = "NO_REGIME_EFFECT"
 
     oos_regimes = summary["oos_regimes"]
     notes = list(summary["notes"])
@@ -286,8 +368,14 @@ def write_results(summary: Dict) -> Dict:
             "high_vol_count": int(oos_regimes.sum()),
             "low_vol_count": int((~oos_regimes).sum()),
         },
+        "per_regime_var": summary.get("per_regime_var", {}),
         "verdict": verdict,
         "notes": notes,
+        "caveats": [
+            "IS/OOS cutoff at 2014-12-31 is canonical; cutoff sensitivity (±1y) not tested.",
+            "VIX>20 regime threshold is fixed ex-ante per literature; threshold sensitivity not swept.",
+            "Conformal calibration is single-shot from full IS sample (no rolling re-calibration).",
+        ],
     }
 
     with RESULTS_PATH.open("w", encoding="utf-8") as fh:

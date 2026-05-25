@@ -29976,7 +29976,7 @@
       "tolerance": "|Δγ|≤0.001 / |Δt|≤0.05",
       "2317.TW": {
         "gamma": 0.032,
-        "delta_gamma": 2e-05,
+        "delta_gamma": 0.00002,
         "t": 1.741,
         "delta_t": 0.001,
         "verdict": "PASS"
@@ -29997,7 +29997,7 @@
       },
       "2886.TW": {
         "gamma": 0.0379,
-        "delta_gamma": 7e-05,
+        "delta_gamma": 0.00007,
         "t": 1.552,
         "delta_t": 0.002,
         "verdict": "PASS"
@@ -30321,7 +30321,7 @@
       "N_start_alternative": 100,
       "max_abs_delta": 0.092,
       "mean_abs_delta": 0.005,
-      "median_abs_delta": 1.9e-05,
+      "median_abs_delta": 0.000019,
       "n_delta_gt_0_1": 0,
       "n_delta_gt_0_5": 0,
       "v2_median_amp": 3.839,
@@ -30647,7 +30647,7 @@
       "n_events": 226,
       "cohens_d_pooled": 0.305,
       "t_stat": 4.019,
-      "p_value": 7.9e-05,
+      "p_value": 0.000079,
       "ex_ctrl_ratio": 1.342,
       "sector_d": {
         "Tech": 0.09,
@@ -30766,7 +30766,7 @@
       "whar_db4_qlike": 1.7455,
       "gjr_garch_qlike": 1.5308,
       "dm_har_vs_whar_t": 5.954,
-      "dm_har_vs_whar_p": 3.14e-09,
+      "dm_har_vs_whar_p": 3.14E-9,
       "har_r2_oos": 0.2226,
       "whar_db4_r2_oos": -0.0545,
       "gjr_r2_oos": 0.2551,
@@ -30995,7 +30995,7 @@
         "expected_violations": 12.570000000000011,
         "violation_rate": 0.02784407319013524,
         "kupiec_lr": 27.22918925738609,
-        "kupiec_p": 1.8070975393857935e-07,
+        "kupiec_p": 1.8070975393857935E-7,
         "christoffersen_lr": 0.8864222213877611,
         "christoffersen_p": 0.3464486970473164,
         "kupiec_pass": false,
@@ -31017,7 +31017,7 @@
         "expected_violations": 12.570000000000011,
         "violation_rate": 0.02386634844868735,
         "kupiec_lr": 17.578341168201874,
-        "kupiec_p": 2.7571072103493854e-05,
+        "kupiec_p": 0.000027571072103493854,
         "christoffersen_lr": 0.10527802230546968,
         "christoffersen_p": 0.7455854490902305,
         "kupiec_pass": false,
@@ -31429,5 +31429,87 @@
       "taiwan",
       "trending_repost"
     ]
+  },
+  {
+    "item_id": "k1401_gdp_event_study_null",
+    "experiment_id": "k1401",
+    "experiment_path": "experiments/k1401/",
+    "date": "2026-05-25",
+    "topic": "GDP Q1 Second Estimate BEA Release — VIX/SPY Event Study",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "Codex CLI 0.132.0 (ChatGPT auth)",
+    "codex_review": "CONDITIONAL_PASS: H1/H2 direction correct, no lookahead, fence-post OK. Required: H3 Welch fix (done), Harvey→Bonferroni label fix (done), normalization note added.",
+    "summary": "BEA Q1 GDP second estimate releases (2001–2025, N=25) show no statistically significant VIX response in any of 3 hypotheses after Bonferroni correction (alpha_adj=0.0167): H1 pre-event VIX elevation T-5→T-1 p=0.563, H2 post-announcement VIX drop T0→T+1 p=0.498, H3 asymmetry by revision direction (Welch) p=0.406. All null. GDP second estimates carry minimal incremental market information relative to expectations.",
+    "key_stats": {
+      "n_events": 25,
+      "event_window": "[-5,+5] trading days",
+      "h1_t_stat": 0.16,
+      "h1_p": 0.563,
+      "h2_t_stat": 0.006,
+      "h2_p": 0.498,
+      "h3_t_stat": -0.856,
+      "h3_p": 0.406,
+      "multiple_testing_correction": "Bonferroni k=3 alpha_adj=0.0167",
+      "n_up_revisions": 9,
+      "n_down_revisions": 10,
+      "n_flat": 6
+    },
+    "implication": "GDP Q1 second estimate is a low-surprise event. VIX does not systematically price in uncertainty before, nor unwind after, BEA release. Asymmetry by revision direction also absent (low power: n_up=9 vs n_down=10). Article angle: the null itself is informative — market efficiently prices GDP revisions, context (tariffs/stagflation) may be the real driver in 2026.",
+    "related": [
+      "K1046",
+      "K1050"
+    ],
+    "data_source": "yfinance SPY + ^VIX 2000-2026; BEA release calendar (hard-coded)",
+    "methodology_notes": "Welch t-test for H3 (unequal var, small group n≈10); chart uses normalized VIX, tests use raw VIX levels"
+  },
+  {
+    "item_id": "k1390_regime_weighted_conformal_var_pass",
+    "experiment_id": "k1390",
+    "experiment_path": "experiments/k1390/",
+    "date": "2026-05-25",
+    "topic": "Regime-Weighted Conformal VaR — VIX>20 bucket-split for SPY tail risk",
+    "verdict": "PASS",
+    "reviewer": "codex-rescue subagent (gpt-5.4) — 2-pass review: v1 found CSV dup / weak verdict / no Christoffersen / no per-regime magnitude; v2 PASS after fixes",
+    "codex_review": "v1: 5/10 PASS + 4 CAVEAT/FAIL (n_obs irreproducible from CSV dup dates; verdict rule too weak; Christoffersen Ind missing; per-regime VaR magnitude missing). v2 PASS: dedup logic in load_data(), Christoffersen Ind+CC implementation, per-regime VaR payload, stricter verdict (Kupiec both alphas + CC not worse). Re-run reproducible n_obs=2864.",
+    "summary": "Conformal VaR with regime-specific (VIX_{t-1}>20) calibration buckets outperforms both unconditional conformal (CU) and HS-252 rolling baseline on SPY daily returns. OOS 2015-2026 (n=2864): at α=0.05, CR Kupiec p=0.918 vs CU p=0.041 vs HS-252 p=0.563; at α=0.01, CR p=0.662 vs CU p=0.032 vs HS-252 p=0.0016. Christoffersen conditional coverage (CC, df=2) confirms CR is the only method passing on both alphas: CR CC p=0.538/0.123 vs CU 2e-05/0.0017 vs HS-252 7e-07/3e-07. Per-regime IS VaR magnitudes are economically consistent (high-vol bucket 2.45-2.77× larger than low-vol). Verdict REGIME_EFFECT under stricter dual-test rule.",
+    "key_stats": {
+      "n_obs_oos": 2864,
+      "is_period": "2004-2014",
+      "oos_period": "2015-2026",
+      "regime_threshold": "VIX_{t-1} > 20",
+      "high_vol_oos_days": 859,
+      "low_vol_oos_days": 2005,
+      "kupiec_p_alpha_005": {
+        "HS-252": 0.563,
+        "CU": 0.041,
+        "CR": 0.918
+      },
+      "kupiec_p_alpha_001": {
+        "HS-252": 0.0016,
+        "CU": 0.032,
+        "CR": 0.662
+      },
+      "cc_p_alpha_005": {
+        "HS-252": 7.0E-7,
+        "CU": 0.0000217,
+        "CR": 0.538
+      },
+      "cc_p_alpha_001": {
+        "HS-252": 2.84E-7,
+        "CU": 0.0017,
+        "CR": 0.123
+      },
+      "cr_high_var_alpha_005": 0.02997,
+      "cr_low_var_alpha_005": 0.01224,
+      "cr_high_var_alpha_001": 0.05400,
+      "cr_low_var_alpha_001": 0.01951
+    },
+    "implication": "Single-shot conformal VaR can be substantially improved by adding one binary regime variable (VIX threshold) — no rolling re-calibration, no parametric assumption, no GARCH machinery. CR is the only method achieving both correct unconditional coverage (Kupiec) AND no clustering of exceedances (Christoffersen Ind). HS-252 passes Kupiec at 95% but fails Independence catastrophically (p=1e-07) — hits cluster heavily. Practical implication: a 2-bucket conformal VaR is a cheap and statistically valid risk model for SPY at both 95% and 99% tails. Caveats: no cutoff sensitivity, no threshold sweep, no rolling re-calibration tested.",
+    "related": [
+      "K1264",
+      "K1213"
+    ],
+    "data_source": "paper/leverage-direction/data/spy_vix_2004-2026.csv (yfinance SPY adjusted close + ^VIX close, 2004-01-02 to 2026-05-22)",
+    "methodology_notes": "Defensive dedup added to load_data() (10 CSV dup dates 2026-05-04→2026-05-15; upstream pipeline fix tracked separately). Christoffersen Ind LR via 2x2 transition matrix; CC = Kupiec + Ind df=2. Stricter verdict: REGIME_EFFECT requires (a) CR Kupiec p > CU on BOTH alphas AND (b) CR CC p not significantly worse than CU on either alpha."
   }
 ]

@@ -8311,5 +8311,23 @@
     ],
     "supersedes": "fb_mile_daaff779_gdp_q1_second_estimate (2026-05-25T11:44 false-alarm fb_post_failed)",
     "root_cause": "trending_repost / event_article FB-success path only logged to trending_repost_log.json or work_log, never patched feed.json details → downstream audit blind to FB URL → repeated repost attempts"
+  },
+  {
+    "timestamp": "2026-05-25T13:35:00+08:00",
+    "task_type": "experiment",
+    "task_id": "K1390_close_regime_weighted_conformal_var",
+    "actor": "hourly-13",
+    "outcome": "success",
+    "summary": "K1390 close: merged stale worktree agent-a6bc06264aad31c9a (cherry-pick 7353547e only; skipped polluted Ops patrol commits touching shared JSON), 2-pass Codex review (v1 found 4 issues, v2 PASS after fix), wrote knowledge.json with provenance+reviewer (K1259 gate). Final verdict REGIME_EFFECT: CR (regime-weighted conformal VaR) only method passing both Kupiec (p=0.918/0.662) AND Christoffersen CC (p=0.538/0.123) on both alphas vs CU/HS-252 fail. n_obs=2864 reproducible.",
+    "actions": [
+      "git worktree remove .claude/worktrees/agent-a6bc06264aad31c9a (unlock + non-force after broker dead-pid clear)",
+      "Cherry-picked 7353547e to main (K1390 experiment files only)",
+      "codex-rescue v1 review: 5 PASS + 4 CAVEAT/FAIL (CSV dup dates n=2874 vs results n=2871, weak verdict rule, missing Christoffersen, missing per-regime magnitude)",
+      "Patched k1390.py: dedup logic in load_data (np.unique first-occurrence), christoffersen_independence() function, per_regime_var payload, stricter verdict (Kupiec both alphas + CC not worse)",
+      "Patched README.md with new tables + caveats + reviewer note",
+      "codex-rescue v2 re-review: PASS on all 5 points (dedup reproducible n=2864, Christoffersen formula+edge correct, per-regime ratios 2.45-2.77x economically sound, stricter verdict logic correct, caveats adequate)",
+      "Wrote knowledge.json entry k1390_regime_weighted_conformal_var_pass (verdict=PASS, reviewer field populated, K1259 validator OK: 0/2166 violations)"
+    ],
+    "key_findings": "CR Kupiec p {α=0.05: 0.918, α=0.01: 0.662}; CR CC p {α=0.05: 0.538, α=0.01: 0.123}; CR is only method passing both tests both alphas. HS-252 95% Kupiec OK but Ind p=1e-07 (hits cluster catastrophically). CU under-covers both alphas."
   }
 ]
