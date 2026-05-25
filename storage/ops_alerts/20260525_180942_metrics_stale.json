@@ -1,0 +1,7 @@
+{
+  "timestamp": "2026-05-25T18:09:42Z",
+  "alert": "metrics stale",
+  "detail": "storage/strategy_metrics.json is 29 hours old (mtime ~2026-05-24 13:10 UTC). Threshold: 26 hours. Trigger a metrics refresh run.",
+  "check": "STRATEGY_METRICS_FRESHNESS",
+  "severity": "warn"
+}
