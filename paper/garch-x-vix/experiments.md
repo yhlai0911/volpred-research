@@ -42,6 +42,12 @@
 |---|-------|-------------|------|
 | K1003 | A4f Sensitivity — Refit Frequency × Window × Sub-Period × VIX Variants | **Table 12 source**: 16 sensitivity settings, OOS 2019-01-01 (n_valid=1,823). Refit 21/63/126/252d: DM t=4.29/3.92/3.36/3.32. Window 1000–3000: DM t=3.18/3.49/3.92/5.13/4.94. Sub-period COVID/PostCOVID/Stable: DM t=1.59/2.49/4.52. VIX variant VIX/VIX9D/VIX3M/ratio: DM t=3.92/5.15/2.59/3.53. 13/16 (81.2%) Harvey-significant. QLIKE scale ≈1.498/1.408. **Verified rtol≤0.002 across all 8 key cells**. | `experiments/k1003/` |
 
+## Extended Sub-Period Robustness (Section 6, narrative paragraph following Table 12)
+
+| K | Title | Contribution | Path |
+|---|-------|-------------|------|
+| K1027 | A4f Sub-Period Robustness — 7 Non-Overlapping 2-Year Windows (2013–2026) | **Section 6 extended sub-period source**: 7/7 A4f wins over GJR-GARCH across non-overlapping 2-year windows. Improvements 4.80%–7.00% (mean 6.42%, median 6.83%). COVID (P4, 2019–2020) largest at 7.00%; non-COVID six-period range 4.80%–6.90%. Pooled OOS (n=3,328) DM t=−6.977 (p≈3.6e-12). 3/7 pass Harvey \|t\|>3.0, 6/7 pass \|t\|>2.0. SPY + ^VIX yfinance, window 2000d, refit 63d, Student-t df=8, seed 42. **Replaces stale K889b/K1003 narrative numbers (4.81–8.09%, mean 6.52%, pooled t=6.535) — K1027 is the canonical source.** | `experiments/k1027/` |
+
 ## Robustness / Alternative Drivers (Section 5.3)
 
 | K | Title | Contribution | Path |
