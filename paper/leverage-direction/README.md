@@ -21,6 +21,20 @@
 uv run python paper/leverage-direction/reproduce.py
 ```
 
+## Self-contained replication package
+
+This folder is structured per `.claude/rules/paper-workflow.md` §Self-contained
+paper folder (JBF submission hard requirement). Entry points:
+
+- `data_sources.md` — pinned CSV provenance, license, refresh policy
+- `data/` — snapshot CSVs (yfinance, `auto_adjust=False`, snapshot 2026-04-19)
+- `scripts/README.md` — replication entry points (`reproduce.py` + figure regen)
+- `scripts/figures/` — 7 figure generators (`fig_*.py`); status ledger in `data_source.md`
+- `results/README.md` — canonical result-JSON index (where each table number sources from)
+- `experiments.md` — table/figure → K-experiment K-id mapping (canonical)
+- `experiments/` — paper-folder shim copies of K799/K802/K824v2/K902 + HM stub
+- `reproduce.py` / `reproduce_report.json` — paper-wide claim verifier (0 MISMATCH gate)
+
 ## Known Issues (from R1)
 - ~~C1: HM gamma internal contradiction (Sec 4.7 vs Sec 5.4)~~ **RESOLVED 2026-04-19** via K1256 3-spec disambiguation (`pure_vt_full` §4.7, `pure_vt_high_vix` §4.7 VIX>25 conditional, `hybrid_vt_full` §5.4); body_v3.tex L433 footnote documents the three distinct regressions; `reproduce.py` now scores each spec as DIVERGENT_SAME_SIGN (NOTE tier) pending L11 errata path (c) for the 17-55% magnitude divergence vs paper.
 - ~~C2: Kupiec p-values aggressively rounded (0.67→0.60)~~ **RESOLVED 2026-04-19**: tables.tex tab:var_ortho L93 GARCH-Normal 0.40→0.64 + L95 GJR-Student-t 0.60→0.67 (standard rounding of K802 source); reproduce.py HistSim phantom row reclassified UNTRACEABLE. Reproduce gate 7 MISMATCH → 0 across this session: 5 cross-source/period divergences reclassified to NOTE tier (K799 vs K802 DM p / K799 vs K802 GJR+Normal violations / K824v2 vs K802 FHS implementation / Table 1 vs Table 11 kurtosis periods / DM p in-text location), all legitimate reconciliation.
