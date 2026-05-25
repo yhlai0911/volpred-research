@@ -9521,7 +9521,9 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.488298+00:00",
     "generated_at": "2026-05-13T05:53:00.488300+00:00",
-    "k_id": "K688"
+    "k_id": "K688",
+    "started_at": "2026-05-25T10:40:06.358270+00:00",
+    "last_released_at": "2026-05-25T10:41:28.802953+00:00"
   },
   {
     "id": "gen_article_k731",
@@ -9586,7 +9588,7 @@
     "description": "K747 has a non-null verdict in experiments/k747/ but no published feed article and no existing task. Verdict: {'erc_2a_sharpe': 1.795, 'baseline_sharpe': 1.849, 'sharpe_diff': -0.054, 'erc_p. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9595,7 +9597,13 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.494651+00:00",
     "generated_at": "2026-05-13T05:53:00.494655+00:00",
-    "k_id": "K747"
+    "k_id": "K747",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-25T10:41:46.170235+00:00",
+    "claim_session_id": "600bc2bbb88b",
+    "started_at": "2026-05-25T10:41:49.148249+00:00",
+    "completed_at": "2026-05-25T10:44:16.613291+00:00",
+    "result": "mile_45120cd4：K747 一般讀者 draft 已進 feed pool；靜態 50/50 打敗多數風險平價版本，含 2 圖。Supabase tag sync timeout warning noted."
   },
   {
     "id": "gen_article_k769",
@@ -10843,5 +10851,39 @@
     "started_at": "2026-05-25T10:21:29.794425+00:00",
     "completed_at": "2026-05-25T10:25:32.888263+00:00",
     "result": "根因: Anthropic API 529 Overloaded transient (17:07 + 18:07). Fix: cron_hourly_dispatch.sh 加 retry-with-backoff (≤3 attempts, 90s wait, sonnet fallback). 寄 HTML close email 含詳細失敗鏈條 + 修整方案."
+  },
+  {
+    "id": "K705_article_general",
+    "title": "K705: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K705 has verdict signal (score=2, reasons=None) but no general article. Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K705",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "created_at": "2026-05-25T11:10:08+00:00"
+  },
+  {
+    "id": "K628b_article_general_h19",
+    "task_type": "daily_article",
+    "priority": 3,
+    "status": "succeeded",
+    "source": "hourly-19-dispatch",
+    "k_id": "K628b",
+    "title": "K628b: 美股波動 spillover 傳染台股嗎 (16年 DY + FR 實證)",
+    "description": "Reader-facing 文章解讀 K628b Cross-Asset Vol Spillover Network (5 asset DY directional + FR contagion, 2010-2026). Key numbers: SPY net=+43.68% transmitter, TLT=-24.92% receiver, USO=-12.37%, GLD=-4.65%, 0050.TW=-1.75%; SPY→0050.TW ρ全期=0.107, crisis(FR-adj)=0.063, p=0.221 (no contagion, interdependence). 必走 3-canonical SOP + anti_ai_gate.py + 3-model review.",
+    "created_at": "2026-05-25T19:08:00+08:00",
+    "experiment_path": "experiments/k628b/",
+    "results_json": "experiments/k628b/k628b_results.json",
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-05-25T11:12:42.647679+00:00",
+    "claim_session_id": "d9e2e454e5a3",
+    "started_at": "2026-05-25T11:12:42.727759+00:00",
+    "completed_at": "2026-05-25T11:20:00.011947+00:00",
+    "result": "K628b reader-facing daily_article mile_55758994 published as draft (research audience, 1855 字). Anti-AI gate PASS. Fabricated paired t-test 已移除."
   }
 ]

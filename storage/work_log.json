@@ -8329,5 +8329,36 @@
       "Wrote knowledge.json entry k1390_regime_weighted_conformal_var_pass (verdict=PASS, reviewer field populated, K1259 validator OK: 0/2166 violations)"
     ],
     "key_findings": "CR Kupiec p {α=0.05: 0.918, α=0.01: 0.662}; CR CC p {α=0.05: 0.538, α=0.01: 0.123}; CR is only method passing both tests both alphas. HS-252 95% Kupiec OK but Ind p=1e-07 (hits cluster catastrophically). CU under-covers both alphas."
+  },
+  {
+    "timestamp": "2026-05-25T15:11",
+    "task_type": "paper_review",
+    "task_id": "Paper9_Table12_footnote_errata",
+    "note": "P9 Table 12 K988_sens replication footnote added; xelatex+paper-update OK",
+    "commit": "6bde49f0"
+  },
+  {
+    "timestamp": "2026-05-25T08:11:13+00:00",
+    "task_type": "paper_review",
+    "task_id": "Paper9_subperiod_numbers_update_from_K1027",
+    "summary": "K1027 canonical numbers replace stale K889b range/mean/pooled-t in Section 6",
+    "commit": "eaf4d682"
+  },
+  {
+    "timestamp": "2026-05-25T19:35:00+08:00",
+    "task_type": "daily_article",
+    "task_id": "K628b_article_general_h19",
+    "actor": "hourly-19",
+    "k_id": "K628b",
+    "article_id": "mile_55758994",
+    "title": "美股打噴嚏，台股真的感冒？16 年數據拆解跨市場波動傳染鏈",
+    "status": "completed",
+    "audience": "research",
+    "publish_status": "draft",
+    "url": "https://volpred.zeabur.app/v3/reports/mile_55758994",
+    "summary": "K628b reader-facing 文章 (1855 字, audience=research, draft). DY directional spillover + Forbes-Rigobon contagion + regime Granger 三方法論交叉. SPY net=+43.68% transmitter, TLT=-24.92% receiver, 0050.TW=-1.75%. SPY→0050.TW high-vol Granger p=1.22e-17, FR-adj ρ=0.063 p=0.221 (interdependence no contagion). OOS portfolio null: spillover-informed Sharpe 1.15 vs equal-weight 1.21 (diagnostic 而非 alpha).",
+    "evidence_source": "experiments/k628b/k628b_results.json",
+    "anti_ai_gate": "PASS (FB-tone WARNs不適用 web feed long-form)",
+    "verification": "agent 編造的 paired t-test p=0.669 已移除（研究誠實原則）"
   }
 ]
