@@ -1,0 +1,75 @@
+{
+  "experiment_id": "K1390",
+  "data_source": "paper/leverage-direction/data/spy_vix_2004-2026.csv",
+  "is_period": "2004-01-01 to 2014-12-31",
+  "oos_period": "2015-01-01 to 2026-12-31",
+  "regime_threshold": "VIX_{t-1} > 20",
+  "var_results": [
+    {
+      "method": "HS-252",
+      "alpha": 0.05,
+      "n_obs": 2871,
+      "n_exceed": 151,
+      "actual_rate": 0.05259491466388018,
+      "nominal_alpha": 0.05,
+      "kupiec_lr": 0.4004900823722721,
+      "kupiec_p_value": 0.5268362664385677
+    },
+    {
+      "method": "CU",
+      "alpha": 0.05,
+      "n_obs": 2871,
+      "n_exceed": 121,
+      "actual_rate": 0.0421455938697318,
+      "nominal_alpha": 0.05,
+      "kupiec_lr": 3.929854744249191,
+      "kupiec_p_value": 0.04743604143398117
+    },
+    {
+      "method": "CR",
+      "alpha": 0.05,
+      "n_obs": 2871,
+      "n_exceed": 143,
+      "actual_rate": 0.04980842911877394,
+      "nominal_alpha": 0.05,
+      "kupiec_lr": 0.002220878153974981,
+      "kupiec_p_value": 0.9624126507919716
+    },
+    {
+      "method": "HS-252",
+      "alpha": 0.01,
+      "n_obs": 2871,
+      "n_exceed": 48,
+      "actual_rate": 0.01671891327063741,
+      "nominal_alpha": 0.01,
+      "kupiec_lr": 10.890943794934643,
+      "kupiec_p_value": 0.0009663557595877004
+    },
+    {
+      "method": "CU",
+      "alpha": 0.01,
+      "n_obs": 2871,
+      "n_exceed": 18,
+      "actual_rate": 0.006269592476489028,
+      "nominal_alpha": 0.01,
+      "kupiec_lr": 4.652851128994371,
+      "kupiec_p_value": 0.03100201394704527
+    },
+    {
+      "method": "CR",
+      "alpha": 0.01,
+      "n_obs": 2871,
+      "n_exceed": 32,
+      "actual_rate": 0.01114594218042494,
+      "nominal_alpha": 0.01,
+      "kupiec_lr": 0.3671958569820175,
+      "kupiec_p_value": 0.5445367479837908
+    }
+  ],
+  "regime_obs": {
+    "high_vol_count": 859,
+    "low_vol_count": 2012
+  },
+  "verdict": "REGIME_EFFECT",
+  "notes": []
+}
