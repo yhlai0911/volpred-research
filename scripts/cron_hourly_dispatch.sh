@@ -61,47 +61,94 @@ HOURLY_CAP_SEC=3000
 
 # Orchestrator model = opus-4-7 (per CLAUDE.md model selection table; high-risk
 # decision tier for triage / claim / brief 撰寫 / routing). Subagents spawned
-# per-task get task-type-specific model via scripts/model_router.py. Was
-# hardcoded sonnet-4-6 prior to 2026-05-25 — gap caught by user.
-/usr/bin/perl -e 'alarm shift; exec @ARGV' "$HOURLY_CAP_SEC" \
-  /Users/yhlai0911/.local/bin/claude -p --dangerously-skip-permissions --model claude-opus-4-7 "$PROMPT" &
-CLAUDE_PID=$!
-# Capture claude binary path for PID-reuse race protection (Codex CRITICAL #3).
-# Before signaling watchdog target, verify command name still matches.
+# per-task get task-type-specific model via scripts/model_router.py.
+#
+# Retry-with-backoff + fallback (added 2026-05-25, K1751 alert root cause):
+#  - 17:07 / 18:07 fire 都 hit Anthropic API 529 Overloaded → single-shot
+#    exit 1 → pool 連 2 hour 沒消化 → CRITICAL alert
+#  - Fix: 最多 3 attempts (opus → wait 90s → opus → wait 90s → sonnet fallback)
+#    若 attempt < HOURLY_CAP_SEC 還有時間就再試；確認 API 真死才 exit 1
+#
 CLAUDE_CMD_PATTERN="claude"
 
-# Parent watchdog — fires only if perl alarm fails to deliver / claude ignored SIGALRM.
-# Adds 60s grace beyond alarm cap, then SIGTERM (full PGID), then SIGKILL after 10s.
-# PID reuse mitigation: verify `ps -p <PID> -o comm=` still matches CLAUDE_CMD_PATTERN.
-(
-  sleep $((HOURLY_CAP_SEC + 60))
-  ACTUAL_CMD=$(ps -p "$CLAUDE_PID" -o comm= 2>/dev/null | tr -d '[:space:]')
-  if kill -0 "$CLAUDE_PID" 2>/dev/null && [[ "$ACTUAL_CMD" == *"$CLAUDE_CMD_PATTERN"* ]]; then
-    echo "[WATCHDOG] claude PID $CLAUDE_PID (cmd=$ACTUAL_CMD) alive past cap+60s; SIGTERM to PGID"
-    kill -TERM -- "-$CLAUDE_PID" 2>/dev/null || kill -TERM "$CLAUDE_PID" 2>/dev/null
-    sleep 10
-    ACTUAL_CMD2=$(ps -p "$CLAUDE_PID" -o comm= 2>/dev/null | tr -d '[:space:]')
-    if kill -0 "$CLAUDE_PID" 2>/dev/null && [[ "$ACTUAL_CMD2" == *"$CLAUDE_CMD_PATTERN"* ]]; then
-      echo "[WATCHDOG] SIGTERM ignored; SIGKILL to PGID"
-      kill -KILL -- "-$CLAUDE_PID" 2>/dev/null || kill -KILL "$CLAUDE_PID" 2>/dev/null
+# Single dispatch attempt with full hang-defense (perl alarm + watchdog).
+# Returns claude's exit code via global EXIT_CODE. Sets CLAUDE_PID for trap.
+run_one_attempt() {
+  local model=$1
+
+  /usr/bin/perl -e 'alarm shift; exec @ARGV' "$HOURLY_CAP_SEC" \
+    /Users/yhlai0911/.local/bin/claude -p --dangerously-skip-permissions \
+    --model "$model" "$PROMPT" &
+  CLAUDE_PID=$!
+
+  (
+    sleep $((HOURLY_CAP_SEC + 60))
+    ACTUAL_CMD=$(ps -p "$CLAUDE_PID" -o comm= 2>/dev/null | tr -d '[:space:]')
+    if kill -0 "$CLAUDE_PID" 2>/dev/null && [[ "$ACTUAL_CMD" == *"$CLAUDE_CMD_PATTERN"* ]]; then
+      echo "[WATCHDOG] claude PID $CLAUDE_PID (cmd=$ACTUAL_CMD) alive past cap+60s; SIGTERM to PGID"
+      kill -TERM -- "-$CLAUDE_PID" 2>/dev/null || kill -TERM "$CLAUDE_PID" 2>/dev/null
+      sleep 10
+      ACTUAL_CMD2=$(ps -p "$CLAUDE_PID" -o comm= 2>/dev/null | tr -d '[:space:]')
+      if kill -0 "$CLAUDE_PID" 2>/dev/null && [[ "$ACTUAL_CMD2" == *"$CLAUDE_CMD_PATTERN"* ]]; then
+        echo "[WATCHDOG] SIGTERM ignored; SIGKILL to PGID"
+        kill -KILL -- "-$CLAUDE_PID" 2>/dev/null || kill -KILL "$CLAUDE_PID" 2>/dev/null
+      fi
+    elif [ -n "$ACTUAL_CMD" ] && [[ "$ACTUAL_CMD" != *"$CLAUDE_CMD_PATTERN"* ]]; then
+      echo "[WATCHDOG] aborted — PID $CLAUDE_PID now belongs to '$ACTUAL_CMD' (PID reuse)"
     fi
-  elif [ -n "$ACTUAL_CMD" ] && [[ "$ACTUAL_CMD" != *"$CLAUDE_CMD_PATTERN"* ]]; then
-    echo "[WATCHDOG] aborted — PID $CLAUDE_PID now belongs to '$ACTUAL_CMD' (PID reuse)"
+  ) &
+  WATCHDOG_PID=$!
+
+  wait $CLAUDE_PID
+  EXIT_CODE=$?
+
+  kill $WATCHDOG_PID 2>/dev/null
+  WATCHDOG_PID=""
+
+  if [ $EXIT_CODE -eq 142 ]; then
+    echo "[HANG-KILLED] claude -p exceeded ${HOURLY_CAP_SEC}s cap (SIGALRM via perl alarm)"
+  elif [ $EXIT_CODE -eq 143 ] || [ $EXIT_CODE -eq 137 ]; then
+    echo "[HANG-KILLED] claude -p killed by watchdog (SIGTERM=143 / SIGKILL=137)"
   fi
-) &
-WATCHDOG_PID=$!
+}
 
-wait $CLAUDE_PID
-EXIT_CODE=$?
-# Watchdog cleanup is also handled by trap cleanup() as belt-and-suspenders.
-kill $WATCHDOG_PID 2>/dev/null
-WATCHDOG_PID=""  # mark consumed so trap doesn't double-kill a reused PID
+# Retry loop with model fallback (added 2026-05-25 — 17:07/18:07 fire 都 hit
+# Anthropic API 529 Overloaded → previous single-shot exit 1 → pool 連 2 hour
+# 沒消化 → CRITICAL alert. Fix: ≤3 attempts, exponential-ish wait, sonnet
+# fallback on last try).
+MAX_ATTEMPTS=3
+ATTEMPT=1
+EXIT_CODE=1
 
-if [ $EXIT_CODE -eq 142 ]; then
-  echo "[HANG-KILLED] claude -p exceeded ${HOURLY_CAP_SEC}s cap (SIGALRM via perl alarm)"
-elif [ $EXIT_CODE -eq 143 ] || [ $EXIT_CODE -eq 137 ]; then
-  echo "[HANG-KILLED] claude -p killed by watchdog (SIGTERM=143 / SIGKILL=137)"
-fi
+while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+  if [ $ATTEMPT -eq 3 ]; then
+    DISPATCH_MODEL=claude-sonnet-4-6  # fallback (downgrade)
+  else
+    DISPATCH_MODEL=claude-opus-4-7    # primary
+  fi
+  echo "=== attempt $ATTEMPT/$MAX_ATTEMPTS model=$DISPATCH_MODEL at $(date '+%H:%M:%S') ==="
+
+  run_one_attempt "$DISPATCH_MODEL"
+
+  # Success → done
+  if [ $EXIT_CODE -eq 0 ]; then
+    break
+  fi
+
+  # Hang-killed → NO retry (real timeout, not transient)
+  if [ $EXIT_CODE -eq 142 ] || [ $EXIT_CODE -eq 143 ] || [ $EXIT_CODE -eq 137 ]; then
+    echo "[NO-RETRY] hang detected (exit=$EXIT_CODE), aborting retry loop"
+    break
+  fi
+
+  # Transient (API 529, network, etc) → wait + retry
+  if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
+    WAIT=90  # 90s backoff before next attempt
+    echo "[RETRY] attempt $ATTEMPT failed exit=$EXIT_CODE; sleep ${WAIT}s before next"
+    sleep $WAIT
+  fi
+  ATTEMPT=$((ATTEMPT + 1))
+done
 
 echo "=== hourly-dispatch end $(date '+%Y-%m-%d %H:%M:%S %Z') (exit=$EXIT_CODE) ==="
 # Canonical exit banner — host_cron_fail alert (src/volpred/ops/alerts.py
