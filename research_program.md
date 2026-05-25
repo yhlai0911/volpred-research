@@ -36,6 +36,7 @@
 - 分解式模型（EMD-GARCH: 經驗模態分解 + GARCH）
 - ML/DL — Branco 2024 確認非線性 ML 整體不優於線性模型，降低優先級
 - 組合預測（GJR+HAR, stacking, 反 QLIKE 加權）
+  - **★★ K1377 HAR Exp-QLIKE Combination 完成 2026-05-19 PASS**：指數 QLIKE 加權 combo (1/√QLIKE) vs HAR-VIX baseline — SPY DM t=3.723 (Harvey PASS), GLD t=6.003 (Harvey PASS), 0050.TW t=2.434 (Harvey FAIL but combo better)；vs EqWeight 在 GLD t=3.454 / 0050.TW t=2.970 勝。Combo 在 2/3 assets Harvey-significant 勝 HAR-VIX 單模型。延伸 K530 HAR 王者，加權 ensemble 對 QLIKE 預測精度有真實增量
 - 跨資產模型選擇（gamma rule, significance-based）
 
 **多變量模型：**
@@ -313,6 +314,9 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 
 **已完成實驗**：見 `docs/research_archive/completed_phases_2026-03.md`（I0, I1, I1b, I2, I3, I5, I6, I8, I9, I10, I11, I12, K199, K340, K341, K417）
 
+**近期延伸**：
+- **K1320 Copula-GARCH OHR 2026-05-21 CONDITIONAL_PASS（vs DCC-Gaussian NS）**：SPY-GLD 9 種 OHR 方法 OOS HE 比較 — best Gumbel copula HE=0.8880 vs DCC-Gaussian baseline 0.8862，diff=+0.002。9 個 DM tests 全部 p>0.08（最低 Clayton p=0.082），統計上**無 copula 顯著勝 DCC**。Hsu et al. (2008, JFM) 框架重現：copula 結構 ≠ 自動 hedging 增量；marginal HE 改善需 N>>252 才能 power-up。對應面向 I 「核心問題：期貨避險能否系統性改善...」— 答案在 SPY-GLD 配對上**不能**，至少在 252-day OOS
+
 **研究方向（開放）：**
 - [ ] I4: VIX futures roll yield 策略 — contango 環境下的 roll yield 收割 vs 尾部風險保護 ⚠️ **BLOCKED: 需要 VIX futures 歷史數據（yfinance 無）**
 - [ ] I7: 台灣投資人跨境避險實務 — 用台指期避台股、用 ES mini 避美股，匯率風險、保證金需求、稅務影響
@@ -328,6 +332,7 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 **核心結論：8.63/VIX + 月度再平衡是台灣投資人的最佳 VT 策略**
 
 **已確立的結論：**
+- **K1374 台股除息日波動率擴展 2026-05-18 PASS**：17 家 TWSE 大型股、226 ex-date events 對 40,729 control obs。除息日 |r| 均值=1.32% vs 控制=0.99%（**ratio=1.342**），Welch t=4.019 p=0.0001、Mann-Whitney p<1e-6、Cohen's d=0.305（small-to-medium effect）。Robustness 排除離群 outlier 2412.TW（d=1.633）+ 2886.TW（d=1.245）後 d=0.238 仍 PASS。台股除息日**系統性**波動率抬升存在，但效應 size 小於個股 earnings shock — 對應方向 3「聚集效應」與 K1059-K1064 EAV 路線的姊妹結論。**K1375 高股息 ETF 同設計 NULL** — 個股有效應、ETF 級別 cohort 內被分散稀釋
 - 8.63/VIX = 12/(VIX×1.39)，修正後 Sharpe 0.69，MDD -15.3%（Q1/R15）
 - VIX 優於 VXEEM（R12: Spearman 0.595 vs 0.459，因 0050.TW≈50% TSMC→美國科技情緒）
 - SPY→台股 spillover 真實存在（T5b: r=0.376, Granger F=58.8）
