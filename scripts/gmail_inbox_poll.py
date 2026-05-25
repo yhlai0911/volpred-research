@@ -313,6 +313,56 @@ def _send_ack_email(task: dict[str, Any], dry_run: bool) -> dict[str, Any]:
         return {"ok": False, "error": str(exc)}
 
 
+def _send_fast_path_answer(task: dict[str, Any], answer_md: str, pattern_id: str, dry_run: bool) -> dict[str, Any]:
+    """Send the fast-path answer email immediately (replaces ack + close)."""
+    if dry_run:
+        return {"ok": True, "dry_run": True}
+    try:
+        import subprocess
+        import tempfile
+        from pathlib import Path as _P
+
+        # Append closure footer
+        footer = f"""
+
+---
+
+| 元信息 | 值 |
+|---|---|
+| Task ID | `{task.get('id')}` |
+| Fast-path pattern | `{pattern_id}` |
+| 處理方式 | **inline Python heuristic（無需 hourly-dispatch）** |
+| 從 reply 到回信延遲 | ≤15 min（gmail-poll 週期） + 立即答 |
+
+*若你需要更深入的分析或執行其他動作，這個 fast-path 答完後就 close 案子了。再 reply 就會再開新 task。*
+"""
+        full_body = answer_md.rstrip() + footer
+
+        with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False, encoding="utf-8") as tf:
+            tf.write(full_body)
+            tmppath = tf.name
+
+        cmd = [
+            "/Users/yhlai0911/.local/bin/uv", "run", "volpred", "ops", "send-alert",
+            "--level", "info",
+            "--title", f"Re: {task.get('email_subject', '(no subject)')[:120]}",
+            "--body-md", tmppath, "--force",
+        ]
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=30, cwd=str(ROOT))
+        try:
+            _P(tmppath).unlink()
+        except Exception:
+            pass
+        if proc.returncode != 0:
+            _log(f"  fast_path answer send FAILED: {proc.stderr[-200:]}")
+            return {"ok": False, "stderr": proc.stderr[-200:]}
+        _log(f"  fast_path answer sent for {task.get('id')} pattern={pattern_id}")
+        return {"ok": True}
+    except Exception as exc:
+        _log(f"  fast_path answer EXCEPTION: {exc!r}")
+        return {"ok": False, "error": str(exc)}
+
+
 def _append_task(task: dict[str, Any], dry_run: bool) -> str:
     """Atomically append task to next_tasks.json (file lock + read-modify-write)."""
     if dry_run:
@@ -504,16 +554,41 @@ def poll(max_messages: int = 20, dry_run: bool = False, since_days: int = 2) -> 
                 skipped += 1
                 continue
 
-            task = _build_task(uid, msg, reply, quoted)
-            task_id = _append_task(task, dry_run=dry_run)
-            queued.append({"task_id": task_id, "uid": uid, "subject": subject})
-            _log(f"  queued uid={uid} task_id={task_id} subj={subject[:50]!r}")
+            # FAST PATH: try heuristic Python answer before queuing.
+            # If hit → answer email IS the response (no ack, no dispatch wait).
+            # If miss → fall through to normal queue + ack flow.
+            fp = None
+            try:
+                import importlib.util as _ilu
+                _spec = _ilu.spec_from_file_location("efp", ROOT / "scripts" / "email_fast_path.py")
+                _efp = _ilu.module_from_spec(_spec)
+                _spec.loader.exec_module(_efp)
+                fp = _efp.try_fast_path(reply, subject)
+            except Exception as _e:
+                _log(f"  fast_path import/call error: {_e!r}")
+                fp = None
 
-            # IMMEDIATELY send ack email — per user 2026-05-25 directive.
-            # Don't wait for hourly-dispatch to acknowledge receipt.
-            ack_result = _send_ack_email(task, dry_run=dry_run)
-            if not ack_result.get("ok"):
-                _log(f"  WARNING: ack failed but task still queued (will be processed at next dispatch)")
+            task = _build_task(uid, msg, reply, quoted)
+
+            if fp:
+                # Fast-path hit — mark task already-resolved + send answer.
+                task["status"] = "succeeded"
+                task["fast_path_pattern"] = fp["pattern_id"]
+                task["result"] = f"[fast_path:{fp['pattern_id']}] answered inline at queue time (no dispatch)"
+                task["completed_at"] = _now_iso()
+                task_id = _append_task(task, dry_run=dry_run)
+                queued.append({"task_id": task_id, "uid": uid, "subject": subject, "fast_path": fp["pattern_id"]})
+                _log(f"  fast_path HIT uid={uid} pattern={fp['pattern_id']} task_id={task_id}")
+                # Send answer email (acts as ack + close in one shot)
+                _send_fast_path_answer(task, fp["answer_md"], fp["pattern_id"], dry_run=dry_run)
+            else:
+                task_id = _append_task(task, dry_run=dry_run)
+                queued.append({"task_id": task_id, "uid": uid, "subject": subject})
+                _log(f"  queued uid={uid} task_id={task_id} subj={subject[:50]!r}")
+                # Ack email — only for queued (non-fast-path) tasks
+                ack_result = _send_ack_email(task, dry_run=dry_run)
+                if not ack_result.get("ok"):
+                    _log(f"  WARNING: ack failed but task still queued (will be processed at next dispatch)")
 
             # Update in-memory dedup sets so subsequent iterations within this
             # poll don't re-queue (e.g. user sent two replies on same thread)
