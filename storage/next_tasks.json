@@ -9641,7 +9641,7 @@
     "description": "K769 has a non-null verdict in experiments/k769/ but no published feed article and no existing task. Verdict: NULL — TE scaling does NOT meaningfully improve 12/VIX. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9650,7 +9650,13 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.497945+00:00",
     "generated_at": "2026-05-13T05:53:00.497949+00:00",
-    "k_id": "K769"
+    "k_id": "K769",
+    "claimed_by": "hourly-01",
+    "claimed_at": "2026-05-25T17:10:48.790672+00:00",
+    "claim_session_id": "c6e24f358e31",
+    "started_at": "2026-05-25T17:10:52.262561+00:00",
+    "completed_at": "2026-05-25T17:22:04.611026+00:00",
+    "result": "K769 daily_article published to draft pool. Anti-AI gate: PASS. Article id: mile_a8ad6dad. Commit: 7b415779\n\nK769 daily_article published to draft pool (mile_a8ad6dad). Anti-AI gate PASS + 9-checklist PASS (3 dashes only in image alt). Commit 7b415779. Slug + images metadata patched."
   },
   {
     "id": "gen_article_k771",
@@ -10990,12 +10996,18 @@
     "description": "Context：2026-05-25 daily_update LaunchAgent (Mon 08:03 fire) runs=0 沒 fire — 推測 macOS 處於 sleep。手動補跑成功。用戶 23:15 email 指示「追蹤一週後回報決定」（email-11765-f3bea0）。\n\nObservation window: 2026-05-26 (Tue) ~ 2026-06-01 (Mon) 共 7 天，cron='3 8 * * 1-6' 期間 6 個 fire 點（Tue-Sat + 隔週 Mon）。\n\n評估標準：\n- 若 ≥1 次 missing fire（runs=0 且當日無手動補跑）→ 加回 piggy-back via run_due_jobs.py（host_crontab_managed: false 改 true 並加 file lock 防雙 fire，因 LaunchAgent 仍會嘗試）。\n- 若 0 miss → 維持現狀，記錄到 docs/error_log.md 作為「macOS LaunchAgent 在 awake state 下穩定」evidence。\n\n查證方法：\n1. launchctl print com.volpred.daily-update | grep -E 'runs|last exit'\n2. storage/logs/cron/daily_update.log 比對 6 個預期 fire date 是否都有 entry\n3. storage/logs/cron/audit_*.log（cron_review.py 應有 weekday-aware 後的真實 stale signal）\n\n回報：完成評估後 send-alert email 給 yihao.lai@gmail.com（subject: [VolPred] daily_update LaunchAgent 一週觀察結果 + 決定）。\n\nMission alignment：Mission #4 平台運營 — 排程可靠性是 publishing pipeline 的基石。\n\nProvenance: email-11765-f3bea0 close，blocked_until=2026-06-01T00:00:00+00:00 (UTC) auto-release。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "user_assigned",
     "blocked_reason": "self_tagged_optional",
     "blocked_at": "2026-05-25T16:07:30+00:00",
     "blocked_until": "2026-06-01T00:00:00+00:00",
     "blocked_note": "Observation window per user email-11765-f3bea0 (2026-05-25 23:15 台灣時間). Auto-release 2026-06-01 (台灣時間 08:00).",
-    "parent_email_task_id": "email-11765-f3bea0"
+    "parent_email_task_id": "email-11765-f3bea0",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-25T17:00:16.070194+00:00",
+    "claim_session_id": "ff5a097ecdfe",
+    "started_at": "2026-05-25T17:01:58.727007+00:00",
+    "completed_at": "2026-05-25T17:02:08.461405+00:00",
+    "result": "Added a reusable daily_update LaunchAgent observation script plus tests and wrote the 2026-05-26 baseline snapshot. Current verdict is PENDING_OBSERVATION (window 2026-05-26 to 2026-06-01 not finished); decision is correctly deferred until after the six expected fire dates are observed."
   }
 ]
