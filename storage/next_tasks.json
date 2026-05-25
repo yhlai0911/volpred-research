@@ -4984,7 +4984,7 @@
   {
     "id": "Paper1_Table4_footnote_and_methodology_clarify",
     "title": "Paper 1: Table 4 footnote (data vintage ±3) + base model clarify (GARCH not GJR)",
-    "status": "pending",
+    "status": "succeeded",
     "priority": 2,
     "created_at": "2026-04-17T18:01:06+08:00",
     "description": "K1185 (818fff7c) 發現: Paper 1 Table 4 base model 是 GARCH(1,1) 非 GJR (若 GJR Normal=34 不匹配 33). Adaptive = 20-day rolling max sigma. Student-t scale correction sqrt((df-2)/df). 主線程: (1) Table 4 footnote 加 'Violation counts computed 2025-Q4; minor yfinance data revisions may produce ±3 count differences upon replication.'; (2) Methodology section 明載 Table 4 base = GARCH(1,1), Adaptive = 20-day rolling max sigma, Student-t scale correction; (3) experiments.md 加 K1185 為 Table 4 source.",
@@ -4994,13 +4994,13 @@
       "methodology-clarify",
       "main-thread"
     ],
-    "started_at": null,
+    "started_at": "2026-05-25T03:13:45.668322+00:00",
     "last_released_at": "2026-05-25T00:29:42.782687+00:00",
-    "claimed_by": null,
-    "claimed_at": null,
-    "claim_session_id": "a72ff637a73b",
-    "completed_at": null,
-    "result": null,
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-25T03:12:42.156461+00:00",
+    "claim_session_id": "d21922217f48",
+    "completed_at": "2026-05-25T03:14:08.283187+00:00",
+    "result": "Added Table 4 footnote on ±3 data-vintage drift; clarified Table 4 methodology in body_v3 (base=GARCH(1,1), Student-t scale correction, adaptive=20d rolling max sigma); created paper/leverage-direction/experiments.md mapping K1185 as canonical Table 4 source.",
     "task_type": "paper_review",
     "backfill_log": [
       {
@@ -10643,7 +10643,7 @@
     "description": "Write event-driven article based on K1401 null result: GDP second estimates are efficiently priced by market. Angle: null result + current tariff/stagflation context = what VIX is actually watching. Must publish by 05/27 (before 05/29 BEA release). Source: experiments/k1401/k1401_results.json",
     "task_type": "event_article",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-05-25T02:28:18.155782Z",
     "source": "hourly_dispatch",
     "deadline": "2026-05-27T00:00:00Z",
@@ -10653,6 +10653,36 @@
       "BEA",
       "VIX",
       "deadline-05-27"
-    ]
+    ],
+    "claimed_by": "hourly-11",
+    "claimed_at": "2026-05-25T03:08:25.583740+00:00",
+    "claim_session_id": "bc55d1d6a6c8",
+    "started_at": "2026-05-25T03:08:44.891662+00:00",
+    "completed_at": "2026-05-25T03:15:50.599226+00:00",
+    "result": "Published mile_daaff779: 25年數據GDP第二估null result + 2026關稅/停滯通膨VIX驅動因子。2862字，status=published，chart uploaded to Supabase."
+  },
+  {
+    "id": "email-11729-302985",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] HTML email 編排驗證 — 4 項升級摘要",
+    "description": "Gmail UID: 11729\nMessage-ID: <84050662-4758-41C1-9967-D6D6BDCAA8E9@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Mon, 25 May 2026 10:44:59 +0800\nSubject: Re: [VolPred Alert][INFO] HTML email 編排驗證 — 4 項升級摘要\n\n--- 用戶回信內容 ---\n告訴我接下來一個任務是什麼\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年5月25日 10:35 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> HTML email 編排驗證 — 4 項升級摘要\r\n> Alert level: info\r\n> INFO\r\n> 系統升級摘要\r\n> \r\n> 剛完成 4 項升級。寄此信驗證新 HTML email 編排已 live。\r\n> \r\n> 本次落地項目\r\n> \r\n> #\t改動\t影響\r\n> 1\tGmail filter 加 [VolPred 第三層\t只處理 VolPred thread 回信，杜絕 non-system thread spam\r\n> 2\t兩段式 reply workflow\t收信 → 寄 plan email → 執行 → 寄 close email\r\n> 3\t任務池 backfill 60 null types\t0 null 留下，dispatcher routing 全可解析\r\n> 4\t.claude/rules/task-routing.md canonical\t12 types × Claude/Codex 對照表\r\n> Email HTML 編排規範（從現在起每封都這樣）\r\n> \r\n> 標題層級：# 主題 / ## 段落 / ### 細項\r\n> 表格：用 markdown table 列數據對比\r\n> 重點：bold / code / 顏色 badge（INFO 藍 / WARN 橘 / CRITICAL 紅）\r\n> 連結：[link text](url) 自動 render\r\n> 下一步\r\n> \r\n> 任何 Claude 寄出的信都會自動 markdown→HTML（透過 _dispatch_alert_email）\r\n> 長 email 用 --body-md FILE 從檔讀\r\n> 已 PRE_EXISTING：work_summary_6h.py 等 cron email 早就 HTML（boss_report 你看到的就是）\r\n> 驗證請求\r\n> \r\n> 收到這封信看看排版是否高資訊性 — 表格 / 標題 / badge / 程式碼框是否正常顯示。\r\n> 如果有問題告訴我哪裡顯示異常，我立即修。\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-05-25T03:00:13.684445+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11729,
+    "email_message_id": "<84050662-4758-41C1-9967-D6D6BDCAA8E9@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] HTML email 編排驗證 — 4 項升級摘要",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-05-25T03:04:28.620149+00:00",
+    "claim_session_id": "3986f08c0b5f",
+    "started_at": "2026-05-25T03:04:28.858465+00:00",
+    "completed_at": "2026-05-25T03:05:00.209812+00:00",
+    "result": "Q&A type — 一輪 tick 內 plan+close 同時完成；回信附 11:04 起 1h 時間軸 + K1401 將被 11:07 claim 的說明 + 任務池 snapshot"
   }
 ]

@@ -8238,5 +8238,32 @@
     "verdict": "CONDITIONAL_PASS",
     "reviewer": "code-reviewer subagent (Codex fallback)",
     "notes": "TWII bootstrap 10000 paths × 360m; B 持續繳 bust rate 最低 30.5%; FB pending"
+  },
+  {
+    "timestamp": "2026-05-25T09:13",
+    "task_id": "Paper7_minor_errata_97_80bps",
+    "task_type": "paper_body",
+    "title": "Paper 7 MINOR errata: 97%→98.0%, 80 bps→81 bps + remove unverifiable footnote",
+    "verdict": "COMPLETED",
+    "summary": "Fixed 3 minor errata in vt-insurance-cost/main.tex: (1) opp share at 1bps 97%→98.0% (K811v2), (2) structural range 54-80→54-81 bps (K846), (3) removed unverifiable 2012-2024 sub-period footnote. Compiled+synced+committed 0da5fcca.",
+    "paper": "vt-insurance-cost"
+  },
+  {
+    "timestamp": "2026-05-25T02:27:38.101482Z",
+    "task_id": "K1401_gdp_q1_second_estimate_event_study",
+    "task_type": "experiment",
+    "k_id": "k1401",
+    "summary": "K1401 GDP Q1 second estimate BEA event study — 25 events 2001-2025, all 3 H null (Bonferroni alpha=0.0167), Codex CONDITIONAL_PASS, merged to main.",
+    "verdict": "CONDITIONAL_PASS",
+    "session": "hourly-10"
+  },
+  {
+    "timestamp": "2026-05-25T03:15",
+    "task_type": "event_article",
+    "task_id": "K1401_gdp_05_29_event_article_preview",
+    "result": "mile_daaff779 published",
+    "article_id": "mile_daaff779",
+    "url": "https://volpred.zeabur.app/v3/reports/mile_daaff779",
+    "notes": "K1401 GDP Q1 second estimate null result event article. 2862 chars, status=published. VIX驅動因子: 關稅/Fed路徑/停滯通膨尾部風險。"
   }
 ]
