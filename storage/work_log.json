@@ -8419,5 +8419,23 @@
     "source": "hourly-02",
     "result": "K1391→succeeded (extended OOS monitoring finding); K1392→failed (INVALID, A4f spec bugs, superseded by K1393 C1 PASS). README + next_tasks state corrected. Initial NULL_RESULT mis-tag detected via errata_pending.md cross-ref and reverted within same fire.",
     "status": "succeeded"
+  },
+  {
+    "timestamp": "2026-05-26T03:22:44+08:00",
+    "task_type": "paper_review",
+    "task_id": "paper_taiwan_vt_self_contained",
+    "summary": "Paper 2 (Taiwan VT) self-contained replication package 補齊: scripts/INDEX.md (29 K × 8 sections) + results/INDEX.md (27 verdicts) + data_sources.md (7 categories) + experiments.md (31 K) + README.md +14L. Commit 3ecdf065. Mission #3 投稿 PBFJ 前 hygiene gate 通關。Outstanding: H2 ELITE Material 揭露仍待 body 修。",
+    "verdict": "PASS",
+    "claimed_by": "hourly-03",
+    "model": "sonnet-medium"
+  },
+  {
+    "timestamp": "2026-05-26T04:10:26+08:00",
+    "task_type": "paper_review",
+    "task_id": "paper_vt_trend_following_self_contained",
+    "summary": "Paper 3 (VT-Trend-Following) self-contained 5/5 stale-task verification: scripts/README.md (200+ lines, Table/Figure → K experiments → scripts entry-point mapping), results/README.md (traceability map + Section 5 forensic notes), data_sources.md 123L, experiments.md 112L, README.md 5/5 checklist all checked. Task description outdated — 無檔案 diff，僅 next_tasks 狀態同步。命名 README.md vs taiwan-vt INDEX.md 為 cosmetic，per paper-workflow.md 未強制命名。",
+    "verdict": "PASS",
+    "claimed_by": "hourly-04",
+    "model": "main-thread-direct"
   }
 ]

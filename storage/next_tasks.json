@@ -7666,7 +7666,7 @@
   {
     "id": "paper_taiwan_vt_self_contained",
     "priority": 2,
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "description": "paper/taiwan-vt/ 缺 scripts/ results/ data_sources.md experiments.md — 補齊 self-contained 5 項必備。",
     "created_at": "2026-04-18T20:51:21.640071",
     "note": "2026-04-18 audit: Paper folder missing CLAUDE.md self-contained requirements",
@@ -7678,12 +7678,18 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "hourly-03",
+    "claimed_at": "2026-05-25T19:12:02.410633+00:00",
+    "claim_session_id": "43fcae4b32bf",
+    "started_at": "2026-05-25T19:12:06.736761+00:00",
+    "completed_at": "2026-05-25T19:22:36.640677+00:00",
+    "result": "Self-contained 5 項補齊 commit 3ecdf065: scripts/INDEX.md (111L, 29 K-experiments × 8 sections), results/INDEX.md (110L, 27 verdicts: 5 PASS / 4 CP / 1 NULL / 1 FAIL / 3 PARTIAL / 13 missing), data_sources.md (118L, 7 categories), experiments.md (65L, 31 K table), README.md +14L. Anomaly: H2 ELITE Material (2383.TW) 仍待 body Sec 2.1 補揭露 (HIGH blocking PBFJ submission)."
   },
   {
     "id": "paper_vt_trend_following_self_contained",
     "priority": 2,
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "description": "paper/vt-trend-following/ 缺 scripts/ results/ data_sources.md experiments.md — 補齊 self-contained 5 項必備。",
     "created_at": "2026-04-18T20:51:21.640074",
     "note": "2026-04-18 audit: Paper folder missing CLAUDE.md self-contained requirements",
@@ -7695,7 +7701,13 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-05-25T20:08:32.510056+00:00",
+    "claim_session_id": "fc1875478e90",
+    "started_at": "2026-05-25T20:09:42.575556+00:00",
+    "completed_at": "2026-05-25T20:09:50.149697+00:00",
+    "result": "Self-contained 5/5 已齊全（task description stale）：scripts/README.md 為完整 entry-point mapping（200+ lines, Tables/Figures→K experiments→scripts），results/README.md 為 traceability map（每 Table/Figure 對應 canonical JSON path + Section 5 forensic notes），data_sources.md 123 lines，experiments.md 112 lines，README.md 標 '(5/5)' checklist 已 checked。命名用 README.md（與 taiwan-vt INDEX.md 命名不同但功能等價，per paper-workflow.md rule 未強制命名）。無檔案 diff，僅同步 task pool 狀態。"
   },
   {
     "id": "rewrite_mile_0c1f9687_citation_fix",
@@ -9149,7 +9161,7 @@
     "description": "K151 has a non-null verdict in experiments/k151/ but no published feed article and no existing task. Verdict: NULL — CSVD does not provide incremental value beyond VIX. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9158,7 +9170,13 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.447814+00:00",
     "generated_at": "2026-05-13T05:53:00.447816+00:00",
-    "k_id": "K151"
+    "k_id": "K151",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-25T19:04:35.207382+00:00",
+    "claim_session_id": "e7a1aa2151f7",
+    "started_at": "2026-05-25T19:05:50.193936+00:00",
+    "completed_at": "2026-05-25T19:05:50.223500+00:00",
+    "result": "Drafted storage/drafts/k151_general_draft.md for K151 NULL. Article explains that cross-category speculative-vs-defensive vol dispersion has an intuitive behavioral story, but VIX absorbs the signal: OOS R2 worsens (0.281 vs 0.285), overlay Sharpe falls (0.7458 vs 0.8022), and placebo p=0.607."
   },
   {
     "id": "gen_article_k159",
@@ -9185,7 +9203,7 @@
     "description": "K181 has a non-null verdict in experiments/k181/ but no published feed article and no existing task. Verdict: Mixed results — partial corr sig in 4/4 horizons, GARCH-X no help, VT overlay Ha. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9194,7 +9212,13 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.448515+00:00",
     "generated_at": "2026-05-13T05:53:00.448516+00:00",
-    "k_id": "K181"
+    "k_id": "K181",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-25T20:07:11.878951+00:00",
+    "claim_session_id": "7e42613ca3f2",
+    "started_at": "2026-05-25T20:07:24.810376+00:00",
+    "completed_at": "2026-05-25T20:08:17.866766+00:00",
+    "result": "K181 一般讀者 draft 已寫入 draft pool；主軸為 SKEW 有殘餘訊號但不足以穩定改善 forecasting 或通過 overlay 嚴格檢定。對齊 partial corr 4/4 顯著、GARCH-X DM p=0.2286、best overlay Harvey FAIL。"
   },
   {
     "id": "gen_article_k182",
