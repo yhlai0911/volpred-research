@@ -150,6 +150,61 @@ while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
   ATTEMPT=$((ATTEMPT + 1))
 done
 
+# Proactive failure report (added 2026-05-25 per user directive 「遇到失敗也要回報進度」)
+# If all retries failed, immediately email user with diagnosis — don't wait
+# for check_alerts at next :00 to detect it. Skip if 0 exit (success) or
+# hang-killed (different alert path, less mysterious).
+if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 142 ] && [ $EXIT_CODE -ne 143 ] && [ $EXIT_CODE -ne 137 ]; then
+  echo "[FAIL-REPORT] all $MAX_ATTEMPTS attempts failed, sending proactive alert"
+  FAIL_BODY=$(cat <<FAILEOF
+# Hourly-dispatch 連續 $MAX_ATTEMPTS 次 attempt 全失敗
+
+## 時間
+
+- Fire 開始: $(date '+%Y-%m-%d %H:%M:%S %Z')
+- 最後 exit code: \`$EXIT_CODE\`
+- Models tried: opus → opus → sonnet (fallback)
+
+## 最後 30 行 dispatch log
+
+\`\`\`
+$(tail -30 /Users/yhlai0911/.volpred/logs/hourly_dispatch.log 2>&1 | sed 's/\`/<bt>/g')
+\`\`\`
+
+## 影響範圍
+
+- 本輪 dispatch 沒派工 → pool 沒消化（pending email_reply 持續累積）
+- 下次 fire 在 1 小時後（HH+1:07）
+
+## 可能根因
+
+- Anthropic API 持續過載（連 sonnet fallback 也 fail）
+- 網路斷線
+- claude CLI binary 損壞
+- 系統資源耗盡（ulimit / memory）
+
+## 建議行動
+
+\`\`\`
+tail -100 /Users/yhlai0911/.volpred/logs/hourly_dispatch.log
+curl -s https://status.claude.com/api/v2/status.json | jq .status
+ps -ef | grep claude | head
+\`\`\`
+
+---
+
+*Auto-sent by cron_hourly_dispatch.sh fail-report (proactive, bypasses check_alerts dedup)*
+FAILEOF
+)
+  TMP=$(mktemp -t hourly_fail.XXXXXX).md
+  echo "$FAIL_BODY" > "$TMP"
+  /Users/yhlai0911/.local/bin/uv run volpred ops send-alert \
+    --level critical \
+    --title "hourly-dispatch 全 attempt 失敗 (exit $EXIT_CODE) $(date '+%H:%M')" \
+    --body-md "$TMP" --force 2>&1 | tail -1
+  rm -f "$TMP"
+fi
+
 echo "=== hourly-dispatch end $(date '+%Y-%m-%d %H:%M:%S %Z') (exit=$EXIT_CODE) ==="
 # Canonical exit banner — host_cron_fail alert (src/volpred/ops/alerts.py
 # _CRON_EXIT_RE) only recognises the `=== [<job>] exit <N> at <ts> ===` form.
