@@ -31516,5 +31516,49 @@
     ],
     "data_source": "paper/leverage-direction/data/spy_vix_2004-2026.csv (yfinance SPY adjusted close + ^VIX close, 2004-01-02 to 2026-05-22)",
     "methodology_notes": "Defensive dedup added to load_data() (10 CSV dup dates 2026-05-04→2026-05-15; upstream pipeline fix tracked separately). Christoffersen Ind LR via 2x2 transition matrix; CC = Kupiec + Ind df=2. Stricter verdict: REGIME_EFFECT requires (a) CR Kupiec p > CU on BOTH alphas AND (b) CR CC p not significantly worse than CU on either alpha."
+  },
+  {
+    "item_id": "fa9158b2",
+    "timestamp": "2026-05-26T03:47:16.262969+00:00",
+    "created_at": "2026-05-26T11:47:16.263274",
+    "verdict": "CONDITIONAL_PASS",
+    "k_id": "K1322",
+    "experiment_id": "K1322",
+    "experiment_path": "experiments/K1322",
+    "reviewer": "Codex CLI (gpt-5.4 medium) — primary path",
+    "reviewer_source": "codex_review",
+    "codex_review": "experiments/K1322/codex_review.md",
+    "category": "experiment",
+    "proposer": "Claude",
+    "executor": "worktree agent (af9b396e7976b970b) + Claude main thread (Codex audit fix)",
+    "content": "K1322 cross-market validation of TX1 NULL quartet (K868/K1301/K1303/K1309): tests whether 'standard HAR-RV is near-sufficient statistic for daily RV' generalises from TAIFEX TX1 to 0050.TW (Taiwan ETF). Data: 76 days 5-min bars (2026-01-20 to 2026-05-22, 0050.TW day session 09:00-13:30). After HAR 22d warm-up: T=54, n_train=37, n_test=17 — flagged UNTRUSTWORTHY_SMALL_SAMPLE. Results: DM-HLN t=1.82, p=0.088 (below |t|>2 Harvey threshold); QLIKE HAR=0.170 vs RW=0.443 (HAR appears better but small-sample noise — R2_oos negative for both). Verdict gated to revisit when n_total >= 200 days. Codex round-1 review FAIL: production volpred.stats.model_evaluation.dm_test does NOT apply HLN small-sample correction (Harvey 1997); only inline fallback does. Round-2 fix: forced K1322 to use inline HLN-corrected dm_test (multiplier sqrt((n+1-2h+h(h-1)/n)/n)) by raising ImportError in try-clause. Round-2 verdict CONDITIONAL_PASS. Follow-up: volpred-wide dm_test HLN bug needs system-wide fix; logged for next sweep. Lookahead: rv.shift(1) verified; baseline RW uses same lag convention; seed=42 fixed.",
+    "evidence": [
+      "experiments/K1322/K1322_results.json",
+      "experiments/K1322/codex_review.md",
+      "experiments/K1322/K1322.py"
+    ],
+    "confidence": 0.65,
+    "tags": [
+      "HAR-RV",
+      "0050.TW",
+      "Taiwan",
+      "5-min",
+      "cross-market",
+      "Corsi-2009",
+      "UNTRUSTWORTHY_SMALL_SAMPLE",
+      "revisit-gated",
+      "dm_test-HLN-bug-discovered"
+    ],
+    "metadata": {
+      "n_total_days": 76,
+      "n_train": 37,
+      "n_test": 17,
+      "DM_HLN_t": 1.8165499055895726,
+      "DM_HLN_p": 0.08806704883958782,
+      "HAR_QLIKE_test": 0.16980520908813382,
+      "RW_QLIKE_test": 0.4429127600180403,
+      "revisit_gate_threshold_days": 200,
+      "small_sample_flag": true
+    }
   }
 ]

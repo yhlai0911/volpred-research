@@ -1171,3 +1171,27 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 2. **method-code 對照 checklist**：(a) 每個 predictor 是否明確有 `.shift(1)` 或等效 lag；(b) model-selection 是否用 AIC/BIC 而非 p-value mining；(c) IS/OOS split 左閉右開語義（`loc[:oos_start]` vs `loc[:'2018-12-31']`）；(d) 預告的 SE 方法（bootstrap / HAC）是否真的實作。
 3. **reproduce.py 只驗數字 byte-match，不驗方法描述**。reproduce gate 應加方法-代碼一致性審查（獨立模型 review 必須開 .py 源碼核查）。
 4. **code-method 不符是系統性盲點，不是 one-off**（P5/P6/P10 三篇皆有不同形式），現有 review pipeline 缺少 method-vs-code cross-check 維度。
+
+---
+
+### 2026-05-26 — Member Q&A pipeline 36-day silent gap (root cause: session_cron 不可靠 + 多層 fallback 失效)
+
+**症狀**：會員 `yaoxk1431` 2026-05-25 07:53 UTC 提問「台灣進口車 + 個股推薦」，stuck 在 `status=evaluating` 24h+ 直到 `member_qa_stale` WARN alert 2026-05-26 08:00 觸發。檢視 `storage/work_log.json` 發現 last `member_qa` entry = 2026-04-20 — **整套 member_qa 流程 36 天沒任何活動**。
+
+**Root cause (5 層問題堆疊)**：
+1. `question_research` 註冊在 `config/runtime_schedules.json:session_crons` 而非 `host_crons` — host crontab 完全沒它，daemon 永不 fire
+2. session_cron 在 macOS 不可靠（已有教訓 2026-04-24: 9 條 session cron 常只 1 條存活）
+3. piggy-back `_write_pending_sessions` 機制壞 — `storage/ops/pending_sessions.json` 只有 `{"schema_version": 1}`，沒 `pending` 或 `session_crons` 字段，意味 fallback 寫入 schema 從未真正 populate
+4. `storage/ops/cron_last_run.json` 完全無 `question_research` key — 確認從未 fire 過（任何路徑）
+5. `.claude/rules/alert.md` 明文寫 `member_qa_stale` → 主線程立即跑 `question-ranking-workflow`，但 hourly-dispatch prompt 的 PHASE 0 / PHASE A 流程不檢查 `dashboard.alerts.items` 中的 WARN — 只 react CRITICAL，所以 alert 寄了但無 action
+
+**Immediate fix (hourly-17 by main thread, 2026-05-26 17:07-17:30 CST)**：
+- `question-ranking-workflow` 跑成 → 4 維度評分（研究可行性 7 / 讀者價值 8 / 研究相關性 4 / 預期影響力 5, 平均 6.0）→ `question-rerank` 推到 `ranked rank=1`
+- 建 `member_qa_44b3cfcd_import_cars` P2 task 進 next_tasks pool 供下輪 hourly 接手 research → answer → finish
+
+**待落地修流程**（防再發）：
+1. **把 `question_research` 從 session_crons 搬到 host_crons** — 建 `cron_question_ops_maintain.sh` wrapper (放 `~/.volpred/bin/`) 跑 `question-ops-maintain --auto-create-task --stub-if-no-work`；CLI 需加 `--auto-create-task` flag detect pending>0 就建 next_tasks `member_qa` task
+2. **hourly-dispatch prompt 加 PHASE 0.5 dashboard alert 檢查** — 讀 `storage/ops/dashboard_latest.json` 中 `breaches`，對 WARN level alert 也要 action（不只 CRITICAL）；對應 `.claude/rules/alert.md` auto-remediation 表
+3. **修 `_write_pending_sessions` schema bug** — 確認 `pending_sessions.json` 寫入時真有 populate `pending` / `session_crons` 字段，加 unit test
+
+**為什麼這是 3-strike trigger 邊緣**：silent gap 5 天 (2026-04-26 question 29cbeb5c) → 5 天 → 24h (今天) = 同根因（session_cron 不可靠 + alert auto-remediation 未 enforce）三次累積。下次再復發 → 必走 worker daemon + queue 重構（host cron + next_tasks polling），不再依賴 session_cron。

@@ -1,0 +1,20 @@
+{
+  "id": "829b21b1",
+  "subject": "[VolPred Alert][CRITICAL] Host cron failure detected",
+  "body": "Alert level: critical\nTitle: Host cron failure detected\n\n## 觸發條件\n偵測到 host cron 失敗（最新 exit code != 0）。\n- scheduler_last_tick_at: 2026-04-19T04:45:13.375232+00:00（僅供參考，v12 後不作為 breach 判準）\n- scheduler_last_status: ok\n- scheduler_age_minutes: 46816.0\n- failing_logs:\n  - storage/logs/cron/ops_dashboard.log exit=1 at 2026-05-21T17:00:46.524568+00:00\n\n## 影響\n資料收集 / daily_update / release_pool 等 host cron 斷鏈 → 下游 metrics、前端顯示、\nSupabase mirror sync 可能顯示過期資料；若失敗的是 release_pool，會同步觸發\nrelease_pool_gap alert，發文節奏中斷。\n\n## 建議行動\n1. 查失敗 log： tail -20 <failing_log 路徑>\n2. 權限問題（exit=126）： chmod +x scripts/<script>.sh\n3. macOS Sequoia+ FDA（exit=1 + Operation not permitted）：\n   System Settings > Privacy & Security > Full Disk Access 加 script 路徑\n4. 手動跑 failed command 驗證修復： uv run <command>\n5. 比對 canonical schedule： crontab -l  vs config/runtime_schedules.json",
+  "text_body": "Alert level: critical\nTitle: Host cron failure detected\n\n## 觸發條件\n偵測到 host cron 失敗（最新 exit code != 0）。\n- scheduler_last_tick_at: 2026-04-19T04:45:13.375232+00:00（僅供參考，v12 後不作為 breach 判準）\n- scheduler_last_status: ok\n- scheduler_age_minutes: 46816.0\n- failing_logs:\n  - storage/logs/cron/ops_dashboard.log exit=1 at 2026-05-21T17:00:46.524568+00:00\n\n## 影響\n資料收集 / daily_update / release_pool 等 host cron 斷鏈 → 下游 metrics、前端顯示、\nSupabase mirror sync 可能顯示過期資料；若失敗的是 release_pool，會同步觸發\nrelease_pool_gap alert，發文節奏中斷。\n\n## 建議行動\n1. 查失敗 log： tail -20 <failing_log 路徑>\n2. 權限問題（exit=126）： chmod +x scripts/<script>.sh\n3. macOS Sequoia+ FDA（exit=1 + Operation not permitted）：\n   System Settings > Privacy & Security > Full Disk Access 加 script 路徑\n4. 手動跑 failed command 驗證修復： uv run <command>\n5. 比對 canonical schedule： crontab -l  vs config/runtime_schedules.json",
+  "html_body": null,
+  "level": "critical",
+  "metadata": {
+    "notification_type": "ops_alert",
+    "alert_level": "critical",
+    "alert_title": "Host cron failure detected",
+    "recipient": "yihao.lai@gmail.com"
+  },
+  "timestamp": "2026-05-21T17:01:16.738116+00:00",
+  "recipients": [
+    "yihao.lai@gmail.com"
+  ],
+  "sent": true,
+  "configured": true
+}

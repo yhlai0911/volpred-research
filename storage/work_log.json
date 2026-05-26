@@ -8468,5 +8468,40 @@
     "task_id": "Paper2_D3D4D5_gamma_VaR_days",
     "owner": "hourly-10",
     "summary": "Paper 2 (taiwan-vt) 3 MAJOR errata: D3 Table 1+2 gamma 0.087→0.097 (K892), D4 VaR row label Student-t→Cornish-Fisher (K896 match), D5 trading days 4532→4217 (已先前修). body.tex + body_v3.tex 同步; main_v3.pdf 48p compile OK; paper-update sync 10:14 台灣"
+  },
+  {
+    "timestamp": "2026-05-26T11:47:27+08:00",
+    "task_type": "experiment",
+    "task_id": "K1322",
+    "summary": "K1322 TW 0050 5-min HAR-RV exploratory framework — CONDITIONAL_PASS, UNTRUSTWORTHY_SMALL_SAMPLE n_test=17, DM-HLN t=1.82 p=0.088. Codex audit found volpred.stats.model_evaluation.dm_test missing HLN correction, K1322 forced inline fallback. Revisit gate n_total>=200. knowledge.json fa9158b2. commit=599d16b9",
+    "actor": "hourly-11"
+  },
+  {
+    "timestamp": "2026-05-26T13:14:12+08:00",
+    "task_type": "daily_article",
+    "task_id": "gen_article_k510",
+    "status": "succeeded",
+    "owner": "hourly-13",
+    "summary": "K510 Volume-GARCH 4-spec NULL on SPY+QQQ — feed draft mile_13c369f0 (commit b1b54b56), anti_ai_gate PASS round 1"
+  },
+  {
+    "timestamp": "2026-05-26T14:11:14+08:00",
+    "task_type": "governance",
+    "id": "hourly_14_fix_handoff_dashboard_schema",
+    "result": "succeeded",
+    "description": "generate_handoff.py _dashboard_signals 識別 dashboard overall_status/section_breaches schema；取代原 fallback 訊息「no critical/warn keys recognized」假 warn"
+  },
+  {
+    "timestamp": "2026-05-26T16:13",
+    "task_type": "paper_review",
+    "task_id": "Paper2_G20_T4_IS_Sharpe_errata",
+    "summary": "Paper 2 K1180 errata: BCI momentum IS Sharpe 0.732→0.413 + footnote; main_v3.pdf rebuild + Supabase sync; commit d58913e1",
+    "outcome": "succeeded"
+  },
+  {
+    "timestamp": "2026-05-26T17:13:12+08:00",
+    "task_type": "member_qa",
+    "outcome": "evaluate_rerank_dispatched",
+    "summary": "hourly-17 main thread: question 44b3cfcd-4bfe-4904-80a0-70274ff7ba62 (yaoxk1431 import-cars) evaluated 4-dim (avg 6.0) → ranked #1 → member_qa_44b3cfcd_import_cars P2 task enqueued for next hourly. Root cause of 36-day silent gap (5-layer: session_cron unreliable + alert auto-remediation not enforced) documented docs/error_log.md. Close email sent (notification 842e7038). email-11736-659035 completed."
   }
 ]

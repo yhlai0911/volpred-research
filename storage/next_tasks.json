@@ -5166,7 +5166,7 @@
   {
     "id": "Paper2_G20_T4_IS_Sharpe_errata",
     "title": "Paper 2 G20 T4: IS Sharpe 0.732 vs K1180 0.413 (44% gap) — main-thread errata",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 3,
     "created_at": "2026-04-17T17:54:37+08:00",
     "description": "K1180 (18084478) 確認 Paper 2 Section 6.2/6.3 T4 IS Sharpe=0.732 無法 reproduce (K1180 全期 0.413). 主線程 decision: (a) body.tex 補腳注說明 IS 計算精確期間 + 策略規則 (可能 paper 用 sub-period), (b) errata 改為 K1180 canonical 0.413, (c) pending. Paper 2 G20 partial resolve — T1 BCI null + T5 OOS Sharpe 已 formal verify.",
@@ -5184,7 +5184,13 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "hourly-16",
+    "claimed_at": "2026-05-26T08:08:55.651978+00:00",
+    "claim_session_id": "d0593166a04e",
+    "started_at": "2026-05-26T08:08:59.774659+00:00",
+    "completed_at": "2026-05-26T08:13:15.865023+00:00",
+    "result": "Errata applied to body.tex L486 + body_v3.tex L352: Sharpe 0.732 → 0.413 with K1180 footnote; OOS 1.260 unchanged (verified by K1180); experiments.md + audit CSV updated; both PDFs recompiled and uploaded to Supabase. Commit d58913e1."
   },
   {
     "id": "Paper2_Table4_documentation_errata",
@@ -5236,7 +5242,7 @@
   {
     "id": "Paper2_experiments_md_add_K515_K516_K512",
     "title": "Paper 2 QUICK WIN: experiments.md 加 K515/K516/K512 (解 15 UNDOCUMENTED)",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 3,
     "created_at": "2026-04-17T17:30:16+08:00",
     "description": "Paper 2 rescan (fc7c9a7c) 發現 15 UNDOCUMENTED_K 可由 3 個 K 涵蓋: K515 (overnight gap 87%, t=6.845), K516 (futures Sharpe=0.93), K512 (fill rate 79/90%). Ready-to-apply block 在 paper/taiwan-vt/reproducibility_audit/undocumented_k_additions_for_experiments_md.md. 5 min main-thread edit. 解 Paper 2 audit 15 no-source.",
@@ -5253,7 +5259,13 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "hourly-15",
+    "claimed_at": "2026-05-26T07:08:06.356287+00:00",
+    "claim_session_id": "0ce5b7b0daea",
+    "started_at": "2026-05-26T07:08:09.977915+00:00",
+    "completed_at": "2026-05-26T07:10:39.860095+00:00",
+    "result": "experiments.md +K515 +K516 + K512 reconcile (commit 5613e794). 31→33 entries; CONDITIONAL_PASS 4→7. Paper 2 audit 15 UNDOCUMENTED_K 部分解決（K515/K516/K512 涵蓋；G12/G20 仍需 formal experiment）."
   },
   {
     "id": "Paper2_kickoff",
@@ -9349,7 +9361,7 @@
     "description": "K487 has a non-null verdict in experiments/k487/ but no published feed article and no existing task. Verdict: EQUITY-SPECIFIC. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9358,7 +9370,13 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.462055+00:00",
     "generated_at": "2026-05-13T05:53:00.462062+00:00",
-    "k_id": "K487"
+    "k_id": "K487",
+    "claimed_by": "hourly-12",
+    "claimed_at": "2026-05-26T04:08:48.568530+00:00",
+    "claim_session_id": "086978b7d9ae",
+    "started_at": "2026-05-26T04:08:52.416020+00:00",
+    "completed_at": "2026-05-26T04:18:40.686199+00:00",
+    "result": "K487 draft published mile_3a720ff7 (1291 zh chars, gate PASS 0 MUST/1 WARN, draft pool, commit 2c6ceed4). Hook=0050.TW VIX r²=0.0005 striking. 6-asset evidence intact, no fabrication, no out-of-scope claims."
   },
   {
     "id": "gen_article_k490",
@@ -9429,7 +9447,7 @@
     "description": "K510 has a non-null verdict in experiments/k510/ but no published feed article and no existing task. Verdict: NEGATIVE — Volume-GARCH significantly WORSENS OOS forecasting (DM<-2.0). L&L per. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9438,7 +9456,13 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.465310+00:00",
     "generated_at": "2026-05-13T05:53:00.465312+00:00",
-    "k_id": "K510"
+    "k_id": "K510",
+    "claimed_by": "hourly-13",
+    "claimed_at": "2026-05-26T05:08:51.290763+00:00",
+    "claim_session_id": "464e4fff4213",
+    "started_at": "2026-05-26T05:08:55.149333+00:00",
+    "completed_at": "2026-05-26T05:13:16.021362+00:00",
+    "result": "K510 feed draft published (mile_13c369f0), 8/8 spec harvey_pass=false, commit b1b54b56"
   },
   {
     "id": "gen_article_k521",
@@ -9463,7 +9487,7 @@
     "description": "K524 has a non-null verdict in experiments/k524/ but no published feed article and no existing task. Verdict: {'SPY': 'beats_baseline', 'SPY_GLD': 'loses', 'interpretation': 'Policy learning. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9472,7 +9496,13 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.467473+00:00",
     "generated_at": "2026-05-13T05:53:00.467475+00:00",
-    "k_id": "K524"
+    "k_id": "K524",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-26T04:34:08.112246+00:00",
+    "claim_session_id": "a4c5be5eb9b9",
+    "started_at": "2026-05-26T04:34:39.091702+00:00",
+    "completed_at": "2026-05-26T04:37:06.512241+00:00",
+    "result": "Published K524 general follow-up draft as mile_27022311. Added two charts and a differentiated article showing that policy learning does not beat 12/VIX on single-asset SPY, but does improve the diversified SPY/GLD mix."
   },
   {
     "id": "gen_article_k549",
@@ -9489,7 +9519,9 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.471676+00:00",
     "generated_at": "2026-05-13T05:53:00.471678+00:00",
-    "k_id": "K549"
+    "k_id": "K549",
+    "started_at": "2026-05-26T07:47:02.478656+00:00",
+    "last_released_at": "2026-05-26T07:48:30.226301+00:00"
   },
   {
     "id": "gen_article_k551",
@@ -9497,7 +9529,7 @@
     "description": "K551 has a non-null verdict in experiments/k551/ but no published feed article and no existing task. Verdict: {'checks': {'harvey_dm_t3': True, 'harvey_jkm_t3': True, 'cross_oos_primary_4_of. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9506,7 +9538,13 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.471906+00:00",
     "generated_at": "2026-05-13T05:53:00.471907+00:00",
-    "k_id": "K551"
+    "k_id": "K551",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-26T05:38:36.156698+00:00",
+    "claim_session_id": "90b338d71009",
+    "started_at": "2026-05-26T05:39:13.155068+00:00",
+    "completed_at": "2026-05-26T05:41:13.582379+00:00",
+    "result": "Published K551 general follow-up draft as mile_7b73db1c. Added two charts and a differentiated article focused on why the strategy passes 9/10 validation checks, especially the incremental-turnover transaction-cost fix."
   },
   {
     "id": "gen_article_k559",
@@ -9514,7 +9552,7 @@
     "description": "K559 has a non-null verdict in experiments/k559/ but no published feed article and no existing task. Verdict: NULL RESULT. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9523,7 +9561,13 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.472992+00:00",
     "generated_at": "2026-05-13T05:53:00.472994+00:00",
-    "k_id": "K559"
+    "k_id": "K559",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-26T06:42:16.052580+00:00",
+    "claim_session_id": "c57d20775b5b",
+    "started_at": "2026-05-26T06:42:50.767182+00:00",
+    "completed_at": "2026-05-26T06:44:15.557414+00:00",
+    "result": "Published K559 general draft as mile_0123caf0. Added two charts and a general-audience article explaining why correlation-risk-premium and dispersion variants offer only weak, unstable incremental value beyond 12/VIX."
   },
   {
     "id": "gen_article_k567",
@@ -9541,8 +9585,8 @@
     "created_at": "2026-05-13T05:53:00.474492+00:00",
     "generated_at": "2026-05-13T05:53:00.474494+00:00",
     "k_id": "K567",
-    "started_at": "2026-05-25T09:35:28.605579+00:00",
-    "last_released_at": "2026-05-25T09:36:37.292613+00:00"
+    "started_at": "2026-05-26T07:45:12.578526+00:00",
+    "last_released_at": "2026-05-26T07:46:35.597729+00:00"
   },
   {
     "id": "gen_article_k569",
@@ -9736,7 +9780,7 @@
     "description": "K771 has a non-null verdict in experiments/k771/ but no published feed article and no existing task. Verdict: NULL — dispersion timing adds no value. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9745,7 +9789,13 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.498370+00:00",
     "generated_at": "2026-05-13T05:53:00.498372+00:00",
-    "k_id": "K771"
+    "k_id": "K771",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-26T08:52:24.381387+00:00",
+    "claim_session_id": "9ded0653aef6",
+    "started_at": "2026-05-26T08:52:32.120763+00:00",
+    "completed_at": "2026-05-26T08:55:17.223080+00:00",
+    "result": "Published K771 general draft (mile_e07cfddf) with 2 PNGs. Core message: sector dispersion timing sounds smarter but only beat SPY in 2/7 OOS windows and trailed 12/VIX on Sharpe/MDD."
   },
   {
     "id": "gen_article_k786",
@@ -10994,7 +11044,7 @@
     "title": "K705: write general-audience article (auto-discovered uncovered K)",
     "description": "K K705 has verdict signal (score=2, reasons=None) but no general article. Verdict preview: ",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K705",
@@ -11002,7 +11052,13 @@
       "auto-discovered",
       "audience-general"
     ],
-    "created_at": "2026-05-25T11:10:08+00:00"
+    "created_at": "2026-05-25T11:10:08+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-26T07:48:53.527875+00:00",
+    "claim_session_id": "5b9a4f1a2afb",
+    "started_at": "2026-05-26T07:49:24.483467+00:00",
+    "completed_at": "2026-05-26T07:50:44.427510+00:00",
+    "result": "Published K705 general draft as mile_eeeee765. Added two charts and a general-audience article explaining why the site had to shift from alpha-style messaging to honest risk-management framing after the K687 paradigm change."
   },
   {
     "id": "K628b_article_general_h19",
@@ -11161,7 +11217,7 @@
     "title": "K1322: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 347). Original: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1322.py with signal.shift(1) + seed=42, (c) K1322_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 347,
@@ -11169,6 +11225,72 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-05-26T00:00:04Z"
+    "created_at": "2026-05-26T00:00:04Z",
+    "completed_at": "2026-05-26T03:47:23.689023+00:00",
+    "result": "K1322: 0050.TW 5-min HAR-RV exploratory framework. n_test=17, UNTRUSTWORTHY_SMALL_SAMPLE, DM-HLN t=1.82 p=0.088. Codex round-1 FAIL (volpred dm_test missing HLN correction) → round-2 fix forces inline HLN → CONDITIONAL_PASS. Revisit gate n_total>=200 days. knowledge.json item_id=fa9158b2. commit=599d16b9"
+  },
+  {
+    "id": "email-11737-6fff28",
+    "title": "[email_reply] Re: [VolPred Boss Report] 2026-05-26 16:10 台灣時間 平台運營報告",
+    "description": "Gmail UID: 11737\nMessage-ID: <46E37F8A-E2C9-4D7C-85DE-E5841CD6D3F6@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Tue, 26 May 2026 16:11:48 +0800\nSubject: Re: [VolPred Boss Report] 2026-05-26 16:10 台灣時間 平台運營報告\n\n--- 用戶回信內容 ---\n解決有warn的部分\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年5月26日 16:10 寫道：\r\n> \r\n> ﻿\r\n> VolPred Boss Report · 2026-05-26 16:10 台灣時間 · Overall WARN\r\n> \r\n> ⓪ 本 cycle 意圖 / 目標 / 規劃\r\n> \r\n> 意圖 Intent\t從反應式 firefighting 轉成主動 ops 結構。建 dashboard + audit + boss report 三件套，然後 cycle 化主線程運營。\r\n> 本週目標 Weekly Goal\t• Mission 4: 0 stale cron 持續一週、live URL 100% 自動驗證\r\n> • Mission 1: 維持 ≥6 articles/day 同時把 narrative-arc dedup Layer 4 落地（已 ✅）\r\n> • Mission 3: Paper 4 body_v4 完成 rewrite gate\r\n> • Mission 5: FB MCP ext popup gate 找根因 + 解（不再說『修不到』）\r\n> 本 cycle 計劃 Plan\t• Cycle 1: 建 dashboard + 2 audit + boss report email infra（✅ 本 cycle 完成）\r\n> • Cycle 2-3: Paper 4 body_v4 rewrite main thread + 派 review agent 並行\r\n> • Cycle 4: free_tier_growth_plan.md spec + 識別 P1 analytics 工具選型\r\n> • Cycle 5+: MCP ext 根因 deep-dive；若不解，準備 Anthropic issue text\r\n> 成功標準 Success Criteria\t• 每 cycle 開頭 dashboard read 不再有 surprise critical（即 standing audit catch 問題早於我）\r\n> • 每 4h boss email 自動寄出無 fail\r\n> • 次次 cycle 至少 1 個結構性改善（不只 patch）+ 2 個 article 產出\r\n> 已知風險 Known Risks\t• main thread context 易爆（已多次 compact），需要更積極派 agent 卸載\r\n> • FB MCP root cause 可能要花 ≥2 cycles 才找到\r\n> • Paper 4 rewrite 過長吃掉太多 main thread bandwidth\r\n> ① 平台狀態\r\n> \r\n> 區段\t狀態\t說明\t建議行動\r\n> production_pending\tok\t19 pending tasks (top types: [('daily_article', 12), ('experiment', 6), ('paper_body', 1)])\tdispatch top P1-P3 if slots free\r\n> production_throughput\tok\t7 articles published last 24h (target 6/day)\t—\r\n> distribution_supabase\tok\t7/7 last-24h articles synced\t—\r\n> verification_live_url\tok\t3/3 sample live URLs return 200\t—\r\n> verification_fb_pipeline\tok\t0 FB posts pending sync\t—\r\n> health_cron\tok\t0 cron jobs stale (over max-age)\t—\r\n> health_alerts_unhandled\twarn\t1 warn/critical alerts last 6h (read + act per .claude/rules/alert.md)\tingest alerts → run remediation per alert.md auto-action table\r\n> ①-b 排程器成果掌握（cron 跑完沒 / 成功沒）\r\n> \r\n> 每個定時排程器的 runs / exit / 完成狀態。有需要掌握的項目 ↓\r\n> \r\n> === cron 成果掌握 review — 2026-05-26 16:10:17（台灣時間）===\r\n> \r\n>   hourly_dispatch   runs=32 exit=0 running | last: 2026-05-26 16:07:05 (start)\r\n>   compute_worker    runs=127 exit=0 idle | last: 2026-05-26 16:00:07\r\n>   check_alerts      runs=32 exit=0 idle | last: 2026-05-26 16:00:49\r\n>   collect_tw        runs=2 exit=0 idle | last: 2026-05-26 15:00:46\r\n>   collect_us        runs=1 exit=0 idle | last: 2026-05-26 12:00:52\r\n>   daily_update      runs=1 exit=0 idle | last: 2026-04-25 09:05:47  ⚠️ 上次完成 751.1h 前（>30h）\r\n>   release_pool      runs=5 exit=0 idle | last: 2026-05-26 16:00:16\r\n>   market_cal        runs=0 exit=(never exited) idle | last: 2026-05-18 08:00:21  ⚠️ 上次完成 200.2h 前（>200h）\r\n>   memory_health     runs=1 exit=0 idle | last: 2026-05-20 06:00:18  ⚠️ 上次完成 154.2h 前（>30h）\r\n>   work_summary      runs=5 exit=0 idle | last: 2026-05-26 12:05:18\r\n> \r\n> 近 75 分鐘 git commits（hourly_dispatch 產出代理）：1 筆\r\n>   5613e794 paper(P2): experiments.md +K515 +K516 + K512 verdict reconcile\r\n> \r\n> 🔴 需要掌握/處理：\r\n>   - daily_update: ⚠️ 上次完成 751.1h 前（>30h）\r\n>   - market_cal: ⚠️ 上次完成 200.2h 前（>200h）\r\n>   - memory_health: ⚠️ 上次完成 154.2h 前（>30h）\r\n> ② 本 cycle 活動（過去 4h）\r\n> \r\n> 4 commits\r\n> \r\n> SHA\tSubject\tTime\r\n> 5613e794\tpaper(P2): experiments.md +K515 +K516 + K512 verdict reconcile\t15:10\r\n> 46e94110\tfix(handoff): recognize dashboard overall_status/section_breaches schema\t14:11\r\n> b1b54b56\tpublish(K510): Volume-GARCH 4-spec NULL on SPY+QQQ — MDH refuted on modern ETFs\t13:13\r\n> 2c6ceed4\tpublish(K487): cross-asset GJR-X(VIX) draft — 0050.TW r²≈0 反例 / non-equity 0/2\t12:17\r\n> ③ Pending 池與論文組合\r\n> \r\n> Pending tasks: 19\r\n> \r\n> By type: daily_article · 12experiment · 6paper_body · 1\r\n> \r\n> 論文組合\r\n> \r\n> Paper\tStatus\r\n> crypto-fear-channel\t**READY FOR SUBMISSION** (2026-05-17 v4.\r\n> eav-universal-magnitude\tscaffold v2 (paper_decision confirmed 20\r\n> garch-x-vix\tsubmitted (under review) | Reproduce gat\r\n> leverage-direction\tR1 review — 2 CRITICAL (C3/C4/C5 subsets\r\n> prg-periodic-garch\t✅ **Submission-ready (all clear)** (2026\r\n> taiwan-vt\t**Major Revision Required** — 2 HIGH blo\r\n> vix-sufficiency\tReproduce g\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-05-26T08:15:06.637180+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11737,
+    "email_message_id": "<46E37F8A-E2C9-4D7C-85DE-E5841CD6D3F6@gmail.com>",
+    "email_subject": "Re: [VolPred Boss Report] 2026-05-26 16:10 台灣時間 平台運營報告",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "claimed_by": "hourly-17",
+    "claimed_at": "2026-05-26T09:13:40.482930+00:00",
+    "claim_session_id": "3189398d9ab6",
+    "started_at": "2026-05-26T09:13:40.688414+00:00",
+    "completed_at": "2026-05-26T09:14:12.443175+00:00",
+    "result": "WARN in boss report = same member_qa_stale alert. Root cause + immediate fix completed in parallel email-11736 thread (question 44b3cfcd evaluated → ranked #1, research task enqueued, docs/error_log.md updated). Close email sent ack'ing user's '解決有 warn 的部分' directive."
+  },
+  {
+    "id": "email-11736-659035",
+    "title": "[email_reply] Re: [VolPred Alert][WARN] Member Q&A pending stale (max 24h)",
+    "description": "Gmail UID: 11736\nMessage-ID: <B9D32084-A030-49BD-8E41-63DA576BB369@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Tue, 26 May 2026 16:11:24 +0800\nSubject: Re: [VolPred Alert][WARN] Member Q&A pending stale (max 24h)\n\n--- 用戶回信內容 ---\n確認底層問題為什麼會員問題處理程序沒辦法完成\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年5月26日 16:00 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> Member Q&A pending stale (max 24h)\r\n> Alert level: warn\r\n> WARN\r\n> 觸發條件\r\n> \r\n> 有 1 個 member question pending 超過 24h 未進入 ranked。\r\n> \r\n> max_age_hours: 24.1\r\n> 44b3cfcd-4bfe-4904-80a0-70274ff7ba62 (proposer=yaoxk1431, age=24.1h, status=evaluating)\r\n> 影響\r\n> \r\n> Mission 第 1 條（內容產出）+ 第 4 條（平台運營）受損：member 提問長時間無回應 = 平台失信號。\r\n> Question pipeline 卡在 evaluating → 不進 researching → 不進 answered → user 看不到答覆。\r\n> \r\n> 建議行動\r\n> \r\n> 主線程立即跑 4 維度評分：\r\n> uv run volpred ops question-ranking-workflow --source user --output-json /tmp/q_workflow.json\r\n> 寫 evaluation JSON（每題 4 維度 1-10 score）→ /tmp/q_evals.json\r\n> uv run volpred ops question-rerank --evaluations-json /tmp/q_evals.json\r\n> ranked>0 後 dispatch claude subagent 跑 research stage（claim → answer → finish）\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-05-26T08:15:17.437706+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11736,
+    "email_message_id": "<B9D32084-A030-49BD-8E41-63DA576BB369@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][WARN] Member Q&A pending stale (max 24h)",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "claimed_by": "hourly-17",
+    "claimed_at": "2026-05-26T09:07:42.705687+00:00",
+    "claim_session_id": "9a1da4dfdad3",
+    "started_at": "2026-05-26T09:07:54.683377+00:00",
+    "completed_at": "2026-05-26T09:13:06.515070+00:00",
+    "result": "Root cause diagnosed (5-layer: session_cron unreliable + alert auto-remediation not enforced + 36-day work_log gap). Immediate fix: question 44b3cfcd evaluated (score=6.0) + rerank done (ranked #1) + member_qa research task enqueued. Process fix plan documented in docs/error_log.md and close email. Linked task: member_qa_44b3cfcd_import_cars"
+  },
+  {
+    "id": "member_qa_44b3cfcd_import_cars",
+    "title": "[member_qa] 會員 yaoxk1431 提問：台灣進口車比例與經濟變遷 + 個股推薦 2000 字 + 圖表",
+    "description": "Member question id: 44b3cfcd-4bfe-4904-80a0-70274ff7ba62\nProposer: yaoxk1431\nRanked #1 (score=6.0)\nCreated: 2026-05-25T07:53:08+00:00\n\n原題：「看到台灣路上進口車比例越來越高，這跟台灣經濟變遷有關，請幫我整合此資訊，推薦可以買的股票並說明投資理由 2000 字 並生成圖表」\n\n執行流程（per .claude/skills/member-questions/SKILL.md）：\n1. CLAIM: uv run volpred ops question-claim --question-id 44b3cfcd-4bfe-4904-80a0-70274ff7ba62 --actor claude\n2. RESEARCH:\n   - 抓財政部關稅總局 進口車輛數量月統計 (近 10 年趨勢)\n   - 抓 TWSE 進口車產業鏈個股: 和泰汽車 (2207)、裕日車 (2227)、中華車 (2204)、裕融 (9941, 汽車金融)\n   - 摘要近 3 年營收 / EPS / 本益比 / 殖利率\n   - 連結進口車滲透率上升的經濟學意涵 (中產購買力 / 消費升級 / 匯率影響)\n3. WRITE: 走 feed-publisher，target 2000 字繁體中文，含至少 2 圖 (進口車滲透率趨勢、個股表現比較)，content_type=`general`，proposer=yaoxk1431，**published 立即 publish (member_qa 走 published 非 draft per skill SOP)**，問答頁自動連結。\n4. 加合規 disclaimer: 非投資建議、純研究分析、過去績效不代表未來。\n5. ANSWER: uv run volpred ops question-answer --question-id 44b3cfcd-4bfe-4904-80a0-70274ff7ba62 --article-id <feed_id> --actor claude\n6. FINISH: uv run volpred ops question-finish --question-id 44b3cfcd-4bfe-4904-80a0-70274ff7ba62 --actor claude\n7. 寄 close email 給 yaoxk1431 (透過 platform notification 機制) — 或主線程寄 ops alert 給 admin 告知已 answered。\n\n注意：本題與 VolPred 主軸（波動率預測）偏離（相關性 4/10），定位為「擴展題材」。仍要做但別期待病毒式流量。\n\n背景：本題 silent gap 24h+ 是因為 question_research session_cron 不可靠 (root cause email-11736-659035)；本 task 由 hourly-17 evaluate + rerank 完成後 enqueue，等下輪 hourly 派 subagent 接手 research → answer → finish.",
+    "task_type": "member_qa",
+    "priority": 2,
+    "status": "pending",
+    "tags": [
+      "member_qa",
+      "yaoxk1431",
+      "import_cars",
+      "ranked_top1"
+    ],
+    "created_at": "2026-05-26T09:11:00+00:00",
+    "source": "main_thread_rerank"
   }
 ]
