@@ -289,7 +289,10 @@ def _send_ack_email(task: dict[str, Any], dry_run: bool) -> dict[str, Any]:
         cmd = [
             "/Users/yhlai0911/.local/bin/uv", "run", "volpred", "ops", "send-alert",
             "--level", "info",
-            "--title", f"Re: {task.get('email_subject', '(no subject)')[:120]}",
+            # [ACK] prefix to visually distinguish from close email (2026-05-26
+            # user complaint email-11748: ack & close subjects identical → user
+            # could not tell which was which in inbox)
+            "--title", f"[ACK] Re: {task.get('email_subject', '(no subject)')[:115]}",
             "--force",  # bypass dedup — ack must always go out
         ]
         # Write body to temp file and pass via --body-md (avoids shell quoting issues)
