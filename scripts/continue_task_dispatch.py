@@ -23,11 +23,13 @@ import argparse
 import json
 import re
 import sys
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
+WORK_LOG = ROOT / "storage" / "work_log.json"
 WORKTREES_DIR = ROOT / ".claude" / "worktrees"
 AGENTS_DIR = ROOT / "storage" / "ops" / "agents"
 REPORT_PATH = ROOT / "storage" / "ops" / "dispatch_report_latest.json"
@@ -52,16 +54,10 @@ MAIN_THREAD_MARKERS = re.compile(
 # auto-detected from title/description patterns below; they can be
 # upgraded to hard blocks on first encounter so the dispatcher is
 # self-correcting.
-BLOCKED_REASONS = {
-    "awaiting_external_data",       # auth / data not yet available (Dropbox, GCP)
-    "compute_runtime_incompatible", # background agent timeout < experiment runtime
-    "self_tagged_optional",         # task self-flags itself as optional / skippable
-    "kid_collision",                # K-id reuse — needs rename before dispatch
-    "prior_attempts_failed",        # repeated failures; needs main-thread debug
-    "deprecated",                   # superseded by another task / no longer relevant
-    "codex_quota_reset_pending",    # ChatGPT-account daily quota exhausted — paired with blocked_until
-    "paid_data_source_decision_pending",  # task gated on user/admin paid-API decision
-}
+import sys as _sys
+from pathlib import Path as _Path
+_sys.path.insert(0, str(_Path(__file__).resolve().parents[1] / "src"))
+from volpred.ops.blocked_reasons import BLOCKED_REASONS  # noqa: E402
 
 SELF_OPTIONAL_PATTERN = re.compile(
     r"\(\s*optional\s*\)|（\s*optional\s*）|"
@@ -104,6 +100,34 @@ def load_pending_tasks() -> list[dict]:
     if isinstance(data, dict):
         data = data.get("tasks", [])
     return [t for t in data if (t.get("status") or "").lower() == "pending"]
+
+
+def load_recent_task_type_counts(limit: int = 10) -> Counter:
+    """Count recent dispatched task types from work_log for same-priority rotation.
+
+    Lower counts should be preferred inside the same priority bucket so that
+    one prolific type (for example experiments) does not crowd out newly
+    arrived but equally important types such as event_article or
+    trending_repost.
+    """
+    if not WORK_LOG.exists():
+        return Counter()
+    try:
+        data = json.loads(WORK_LOG.read_text())
+    except json.JSONDecodeError:
+        return Counter()
+    if not isinstance(data, list):
+        return Counter()
+
+    recent = data[-limit:]
+    counts: Counter = Counter()
+    for item in recent:
+        if not isinstance(item, dict):
+            continue
+        task_type = (item.get("task_type") or "").strip().lower()
+        if task_type:
+            counts[task_type] += 1
+    return counts
 
 
 def is_main_thread_only(task: dict) -> bool:
@@ -188,7 +212,8 @@ def is_paper_task(task: dict) -> bool:
     )
 
 
-def categorize(tasks: list[dict]) -> dict:
+def categorize(tasks: list[dict], recent_type_counts: Counter | None = None) -> dict:
+    recent_type_counts = recent_type_counts or Counter()
     agentable = []
     main_thread = []
     blocked = []
@@ -218,7 +243,15 @@ def categorize(tasks: list[dict]) -> dict:
         s = str(v)
         return int(s[1:]) if s.startswith("P") and s[1:].isdigit() else (int(s) if str(s).isdigit() else 999)
 
-    agentable.sort(key=lambda t: (_prio_key(t.get("priority", 999)), str(t.get("id", ""))))
+    def _agentable_sort_key(task: dict) -> tuple[int, int, str]:
+        task_type = str(task.get("task_type") or "").strip().lower()
+        return (
+            _prio_key(task.get("priority", 999)),
+            recent_type_counts.get(task_type, 0),
+            str(task.get("id", "")),
+        )
+
+    agentable.sort(key=_agentable_sort_key)
     main_thread.sort(key=lambda t: (_prio_key(t.get("priority", 999)), str(t.get("id", ""))))
     blocked.sort(key=lambda b: (_prio_key(b["task"].get("priority", 999)), str(b["task"].get("id", ""))))
     return {"agentable": agentable, "main_thread": main_thread, "blocked": blocked}
@@ -295,13 +328,14 @@ def _maybe_refill(agentable_count: int, *, auto_refill: bool) -> dict | None:
 def build_report(*, auto_refill: bool = True) -> dict:
     slots = count_active_slots()
     pending = load_pending_tasks()
-    cats = categorize(pending)
+    recent_type_counts = load_recent_task_type_counts()
+    cats = categorize(pending, recent_type_counts=recent_type_counts)
 
     refill_result = _maybe_refill(len(cats["agentable"]), auto_refill=auto_refill)
     if refill_result and refill_result.get("added"):
         # Reload after refill so the report shows the fresh tasks
         pending = load_pending_tasks()
-        cats = categorize(pending)
+        cats = categorize(pending, recent_type_counts=recent_type_counts)
 
     free_slots = max(0, SLOT_CAP - slots["occupied"])
     candidates_to_dispatch = cats["agentable"][:free_slots]

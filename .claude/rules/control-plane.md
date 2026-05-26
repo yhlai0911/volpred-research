@@ -31,13 +31,19 @@ paths:
 3. **Soft block 自動偵測** — title/description 含 `(optional)` / `否則跳過` / `only if truly new` → 自動歸類 `self_tagged_optional`
 4. **Hard-block CLI** — `scripts/mark_task_blocked.py --id <id> --reason <vocab> --note "..." [--until YYYY-MM-DD]`；`--unblock` 反向
 
-**Controlled vocabulary**（`BLOCKED_REASONS`）：
+**Controlled vocabulary**（`BLOCKED_REASONS` — single source `src/volpred/ops/blocked_reasons.py`，2026-05-27 統一）：
 - `awaiting_external_data` — 缺 auth / credentials / 原始資料（GCP, Dropbox 等）
+- `awaiting_interactive_session` — 需 Chrome MCP / FB auth / 其他 interactive-only session；hourly cron 無法自行完成
 - `compute_runtime_incompatible` — experiment runtime > background agent timeout（K1100g_d9 IS-fits hang 案例）
 - `self_tagged_optional` — task 自標 optional / skippable
 - `kid_collision` — K-id 重用，需改名才能派
 - `prior_attempts_failed` — 反覆失敗，需主線程 debug
 - `deprecated` — 被其他 task 取代 / 失去 relevance
+- `codex_quota_reset_pending` — ChatGPT-account daily quota 用完；搭配 `blocked_until` ISO 日期 auto-recheck
+- `paid_data_source_decision_pending` — task 卡在 user/admin 對 paid API（Polygon/IEX 等）的採購決定
+- `diversity_rule_post_null_quartet` — per CLAUDE.md ML novel-method NULL-quartet 規則暫停 novel-method experiment
+
+**新增 vocab 唯一路徑**：改 `src/volpred/ops/blocked_reasons.py`；`mark_task_blocked.py` 與 `continue_task_dispatch.py` 自動繼承。禁止在兩處各自維護 set（2026-05-27 vocab drift 教訓）。
 
 **Skip-dispatch 必須 mark blocked**（硬規則，不可 silent skip）— 否則 candidate 永遠回到下一輪 dispatch，無限迴圈。
 

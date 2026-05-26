@@ -11707,12 +11707,18 @@
     "priority": "P2",
     "title": "FB Ivan Lai dual-publish: 矽谷大裁員 × Mag7 CapEx (mile_89889d46)",
     "description": "FB Ivan Lai dual-publish: 裁員八千人，同一季燒掉 $680 億 (mile_89889d46). Draft at storage/ops/fb_draft_mile_89889d46.md (272 字, anti_ai_gate PASS warn=0/3). URL in 1st comment: https://volpred.zeabur.app/v3/reports/mile_89889d46. Do NOT put link in main post body. Need /mcp claude-in-chrome auth session.",
-    "status": "pending",
+    "status": "blocked",
     "created_at": "2026-05-26T16:20:26+08:00",
     "blocked_reason": "awaiting_interactive_session",
-    "blocked_at": "2026-05-26T19:38:03+00:00",
+    "blocked_at": "2026-05-26T20:40:00+00:00",
     "blocked_note": "Needs interactive Chrome MCP / logged-in FB session for manual post + comment writeback",
-    "last_released_at": "2026-05-26T18:14:00.178912+00:00"
+    "last_released_at": "2026-05-26T18:14:00.178912+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-26T20:39:29.519220+00:00",
+    "claim_session_id": "ea293b5d31d6",
+    "started_at": "2026-05-26T20:39:37.742262+00:00",
+    "completed_at": "2026-05-26T20:40:49.819655+00:00",
+    "result": "Interactive-only FB post task: queue semantics fixed so blocked tasks now move to status=blocked; this item remains awaiting_interactive_session with feed/log handoff metadata already written."
   },
   {
     "id": "platform_ops_daily_update_root_cause_fix",
@@ -11860,5 +11866,24 @@
       "nfp_us",
       "T-7"
     ]
+  },
+  {
+    "id": "governance_blocked_reasons_single_source",
+    "title": "governance: BLOCKED_REASONS vocab single source + add diversity_rule_post_null_quartet",
+    "description": "Schema bug: mark_task_blocked.py VALID_REASONS (7 entries) drifted from continue_task_dispatch.py BLOCKED_REASONS (9 entries). K1383 uses unregistered reason diversity_rule_post_null_quartet. Refactor: extract to src/volpred/ops/blocked_reasons.py single source, import in both callers, add missing vocab entry. Update .claude/rules/control-plane.md docs. Main-thread only; 50min cap.",
+    "priority": 3,
+    "status": "in_progress",
+    "task_type": "governance",
+    "source": "hourly_dispatch_05_auto_discovered",
+    "tags": [
+      "control-plane",
+      "schema-consistency",
+      "vocab"
+    ],
+    "created_at": "2026-05-27T05:08:00+00:00",
+    "claimed_by": "hourly-05",
+    "claimed_at": "2026-05-26T21:10:45.822349+00:00",
+    "claim_session_id": "f8e1f8a1dfce",
+    "started_at": "2026-05-26T21:10:46.069845+00:00"
   }
 ]
