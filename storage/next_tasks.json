@@ -9662,8 +9662,8 @@
     "created_at": "2026-05-13T05:53:00.488298+00:00",
     "generated_at": "2026-05-13T05:53:00.488300+00:00",
     "k_id": "K688",
-    "started_at": "2026-05-25T10:40:06.358270+00:00",
-    "last_released_at": "2026-05-25T10:41:28.802953+00:00"
+    "started_at": "2026-05-26T09:56:12.373769+00:00",
+    "last_released_at": "2026-05-26T09:56:36.542403+00:00"
   },
   {
     "id": "gen_article_k731",
@@ -9717,7 +9717,7 @@
     "description": "K737 has a non-null verdict in experiments/k737/ but no published feed article and no existing task. Verdict: {'baseline_sharpe': 1.862, 'baseline_mdd': -12.89, 'best_strategy': 'Static_50_5. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9726,7 +9726,13 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.492735+00:00",
     "generated_at": "2026-05-13T05:53:00.492742+00:00",
-    "k_id": "K737"
+    "k_id": "K737",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-26T09:57:01.256799+00:00",
+    "claim_session_id": "f37fdf2c2e26",
+    "started_at": "2026-05-26T09:57:11.768513+00:00",
+    "completed_at": "2026-05-26T09:59:02.243798+00:00",
+    "result": "Published K737 general draft (mile_70c28052) with 2 PNGs. Core message: no optimized multi-asset portfolio beat simple 50/50 SPY/GLD on Sharpe; 9-asset max diversification only won 3/5 OOS windows."
   },
   {
     "id": "gen_article_k747",
@@ -11292,5 +11298,128 @@
     ],
     "created_at": "2026-05-26T09:11:00+00:00",
     "source": "main_thread_rerank"
+  },
+  {
+    "id": "email-11746-2d3656",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] [VolPred Alert][WARN] Member Q&A pending stale — root ",
+    "description": "Gmail UID: 11746\nMessage-ID: <754F31A0-7F73-4A36-9998-B21D06CAAEA6@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Tue, 26 May 2026 17:41:35 +0800\nSubject: Re: [VolPred Alert][INFO] [VolPred Alert][WARN] Member Q&A pending stale — root cause + immediate fix done\n\n--- 用戶回信內容 ---\n所以會員問題已經po文回覆了嗎？ 也就是完成所有會員問題的處理流程了嗎？\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年5月26日 17:12 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> Re: [VolPred Alert][WARN] Member Q&A pending stale — root cause + immediate fix done\r\n> Alert level: info\r\n> INFO\r\n> Member Q&A pipeline 36-day silent gap — root cause + 已 immediate fix + 待落地修整\r\n> \r\n> 回應你的問題「確認底層問題為什麼會員問題處理程序沒辦法完成」。診斷完畢，5 層問題堆疊。\r\n> 問題嚴重程度\r\n> \r\n> 受影響 question：44b3cfcd-4bfe-4904-80a0-70274ff7ba62（會員 yaoxk1431 提問：台灣進口車比例 + 個股推薦 2000 字 + 圖表）\r\n> 卡 status=evaluating 超過 24h（觸發 WARN alert）\r\n> 但更嚴重：檢視 storage/work_log.json 發現 last member_qa entry = 2026-04-20 — 整套 member_qa 流程已 36 天無任何活動\r\n> Root Cause（5 層問題互相疊加）\r\n> \r\n> #\t問題\t證據\r\n> 1\tquestion_research cron 註冊在 runtime_schedules.json:session_crons而非 host_crons\thost crontab 完全找不到此 entry\r\n> 2\tsession_cron 在 macOS 不可靠\t已有教訓 2026-04-24（9 條 session cron 常只 1 條存活）\r\n> 3\tpiggy-back _write_pending_sessionsfallback 機制壞\tstorage/ops/pending_sessions.json 只有 {\"schema_version\": 1}，無 pending / session_crons 字段\r\n> 4\tcron_last_run.json 完全無 question_research key\t確認從未 fire 過（任何路徑）\r\n> 5\t.claude/rules/alert.md 寫了 member_qa_stale auto-remediation 但 hourly-dispatch prompt 沒 enforce\t主線程只 react CRITICAL，WARN 等級 alert 寄出後無 action\r\n> Immediate Fix（本次 hourly-17 已完成）\r\n> \r\n> 17:10  question-ranking-workflow → evaluation payload OK\r\n> 17:15  4 維度評分（研究可行性 7 / 讀者價值 8 / 研究相關性 4 / 預期影響力 5, 平均 6.0）\r\n> 17:18  question-rerank → 推到 ranked rank=1 score=6\r\n> 17:25  建 member_qa_44b3cfcd_import_cars P2 task 進 next_tasks pool\r\n>        → 下輪 hourly 派 subagent 走 research → write → answer → finish\r\n> 本題評分備註：與 VolPred 主軸（波動率預測）偏離（研究相關性僅 4/10），定位「擴展題材」非招牌。仍會做但別期待病毒式流量。\r\n> 待落地修流程（防再發）\r\n> \r\n> question_research cron 從 session_crons 搬到 host_crons — 建 cron_question_ops_maintain.sh wrapper（放 ~/.volpred/bin/），跑 question-ops-maintain --auto-create-task --stub-if-no-work；CLI 加 --auto-create-task flag 檢測 pending>0 就建 next_tasks member_qa task 讓 hourly 接手\r\n> hourly-dispatch prompt 加 PHASE 0.5 dashboard alert 檢查 — 讀 dashboard_latest.json::breaches，對 WARN 也要 action（不只 CRITICAL）\r\n> 修 _write_pending_sessions schema bug — 加 unit test 防 silent regression\r\n> 3-Strike 觀察\r\n> \r\n> silent gap 已累積 3 次（2026-04-26 question 29cbeb5c 5 天 → 2026-04-20 work_log gap 36 天 → 本次 24h），同根因（session_cron + alert 未 enforce）。下次再復發 → 走 worker daemon + queue 重構，host cron polling 取代 session_cron。\r\n> 紀錄位置\r\n> \r\n> 教訓寫 docs/error_log.md 2026-05-26 entry\r\n> email_reply task email-11736-659035 已 in_progress（本封寄出後 complete --status succeeded）\r\n> 後續 member_qa_44b3cfcd_import_cars task 等下輪 hourly 接手\r\n> 下次任務時間：2026-05-26 18:07 台灣時間（hourly-18 fire 接手 research）\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "claimed",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-05-26T09:45:11.903264+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11746,
+    "email_message_id": "<754F31A0-7F73-4A36-9998-B21D06CAAEA6@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] [VolPred Alert][WARN] Member Q&A pending stale — root cause + immediate fix done",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-05-26T09:46:33.283048+00:00",
+    "claim_session_id": "73193b8c2bce"
+  },
+  {
+    "id": "email-11748-7b1f24",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] [VolPred Alert][INFO] [VolPred Alert][WARN] Member Q&A",
+    "description": "Gmail UID: 11748\nMessage-ID: <59871E74-76CF-41DB-B90B-05B21D6D043E@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Tue, 26 May 2026 17:50:16 +0800\nSubject: Re: [VolPred Alert][INFO] [VolPred Alert][INFO] [VolPred Alert][WARN] Member Q&A pending stale — root cause + immediate fix done\n\n--- 用戶回信內容 ---\n我從來沒收到過你完工的信！？\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年5月26日 17:45 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> Re: Re: [VolPred Alert][INFO] [VolPred Alert][WARN] Member Q&A pending stale — root cause + immediate fix done\r\n> Alert level: info\r\n> INFO\r\n> 已收到你的回信\r\n> \r\n> 欄位\t值\r\n> Task ID\temail-11746-2d3656\r\n> 類型\temail_reply\r\n> Priority\tP3 普通優先\r\n> 主旨\tRe: [VolPred Alert][INFO] [VolPred Alert][WARN] Member Q&A pending stale — root\r\n> 收信時間\t2026-05-26 09:45:11 UTC\r\n> 決策\r\n> \r\n> 已推入統一任務池 — storage/next_tasks.json 中 task_type=email_reply\r\n> 執行時間\r\n> \r\n> 下次 Claude hourly-dispatch fire：今天 18:07（台灣時間，約 21 分鐘後）\r\n> Claude 主線程會於該 tick 自動 claim + 分析 + 執行\r\n> 若任務跨多 tick → 中間不會 spam；最後一次 tick 收尾發 close email\r\n> 完成後通知\r\n> \r\n> ✅ 全部處理完成時會寄 close email 給你（同 thread 回覆）— 含完成項目 / commit hash / 對應 sub-task id\r\n> Auto-sent by gmail_inbox_poll.py on queue insertion (gmail_inbox_poll.py)\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "pending",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-05-26T10:00:10.183999+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11748,
+    "email_message_id": "<59871E74-76CF-41DB-B90B-05B21D6D043E@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] [VolPred Alert][INFO] [VolPred Alert][WARN] Member Q&A pending stale — root cause + immediate fix done",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>"
+  },
+  {
+    "id": "trending_repost_2026_05_26_etf_dividend_vol",
+    "title": "[trending_repost] 5 月台股 ETF 配息潮 30 檔 — VolPred VT/risk-parity 角度看配息日 IV skew 與配置策略",
+    "description": "Trending source scan 結果（2026-05-26 偶數日 → Taiwan rotation）：\n- 主題：5 月台股 30 檔 ETF 配息（5/15-5/25 除息），殖利率潮 vs vol 配置\n- 來源 surfaces：口袋學堂 / Yahoo TW / 經濟日報 ETF 專題（過去 7 天高曝光）\n- 已過 30 天 dedup（trending_repost_log 無此主題）\n- VolPred angle：\n  1. 除息日前後 IV skew / theta decay 行為（vol angle）\n  2. ETF 配息率 vs vol-adjusted yield（risk parity 角度）\n  3. VT-sized 配置在配息潮的 rebalance 行為（連到 K557/K736 VT 研究）\n\n執行流程（per .claude/skills/trending-repost/SKILL.md）：\n1. Source scan 確認（已做）\n2. Independent fact gathering: yfinance ETF 配息歷史 + TAIFEX VIXTWN + 個別 ETF 殖利率\n3. Evidence package: 配息 ETF 表 + IV skew 圖 + VT vs 配息策略比較\n4. Draft 1500-2500 字 commentary（havingchien-style Substack tone）\n5. **不引用任何來源文章**（口袋學堂 / 經濟日報 / Yahoo 不 cite）\n6. feed-publisher → published 立即發 + FB 雙發佈（Ivan Lai 口吻 200-400 字）\n7. Anti-collision update: storage/reports/trending_repost_log.json\n8. Anti-AI-style 9-checklist 必跑\n\nConstraint: trending_repost daily cap=2; 今天此為第 1 篇。\nSource date 2026-05-26 由主線程親跑 WebSearch 完成（trending-repost SKILL Step 1）。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "tags": [
+      "trending_repost",
+      "etf",
+      "dividend",
+      "vt",
+      "iv_skew",
+      "main_thread_scan"
+    ],
+    "created_at": "2026-05-26T10:03:20.915355+00:00",
+    "source": "main_thread_trending_scan_2026_05_26"
+  },
+  {
+    "id": "event_article_us_cpi_2026_06_13_preview",
+    "title": "[event_article] US CPI 2026-06-13 預覽（T-7 / T-2 / T+0 三篇之 T-7）— VolPred vol regime + VIX term structure 角度",
+    "description": "Event: US CPI release 2026-06-13 (Friday, 8:30 ET / 20:30 TW)\nCron event_jobs.items: cpi-us-2026-06-13-t2 (lead-2 trigger) + cpi-us-2026-06-13-t0 (release day)\n本 task = T-7 preview article (2026-06-06 前發)\n\nVolPred angle:\n1. 近 12 個月 CPI release day VIX 變化 distribution\n2. VIX term structure（VIX/VIX9D ratio）CPI 前後行為\n3. 對應 K experiment 引用：K490 (VIX9D vs VIX)、K1401 (event article 模板)\n4. 對交易者建議：CPI release day VT-sized 部位調整 vs hold\n\n執行流程（per .claude/skills/feed-publisher/SKILL.md + event-article-templates.md）：\n1. yfinance 抓近 12 個月 CPI release day VIX 數據\n2. 算 release day VIX % change distribution + VIX/VIX9D ratio 路徑\n3. 寫 1500-2000 字繁中 + 至少 2 圖（CPI day VIX dist + VIX term ratio path）\n4. content_type=event_article, status=published 立即發\n5. **FB 雙發佈強制**（per publishing rules 2026-05-25 更新；共用 trending-repost FB SOP）\n6. 此事件配額：T-7 (本篇) + T-2 + T+0 共 3 篇上限，不要超發\n\nConstraint: published 立即發（事件驅動）+ FB 同步發佈。",
+    "task_type": "event_article",
+    "priority": 1,
+    "status": "pending",
+    "tags": [
+      "event_article",
+      "us_cpi",
+      "vix_term",
+      "preview_t_minus_7"
+    ],
+    "created_at": "2026-05-26T10:03:20.915355+00:00",
+    "source": "main_thread_event_calendar_pull_2026_05_26"
+  },
+  {
+    "id": "platform_ops_reader_facing_refill_cron",
+    "title": "[platform_ops] 寫 cron_reader_facing_refill.sh + 加 host crontab，收斂 PHASE 0.5 prompt-level reader-facing pool refill",
+    "description": "Context: 2026-05-26 發現 reader-facing badge pipeline (event/trending/member_qa) 完全無 auto refill — 已加 cron_hourly_dispatch_prompt.md PHASE 0.5 由主線程親跑 source scan，但屬 prompt-level 紀律。\n\nDeliverable:\n1. 寫 scripts/refill_reader_facing_pool.py — 三 source 統一介面 (trending_scan / event_pull / member_qa_eval)，   trending 用 WebSearch (Claude API or external)、event 從 event_jobs.items pull、member_qa 從 community_questions.json pull\n2. 寫 wrapper ~/.volpred/bin/cron_reader_facing_refill.sh\n3. 加 host crontab: `0 6,12,18 * * * cron_reader_facing_refill.sh`（早午晚各 1 次）\n4. 加 storage/logs/cron/reader_facing_refill.log\n5. 寫 docs/error_log.md entry「2026-05-26 reader-facing pool refill gap」\n6. 修完後從 cron_hourly_dispatch_prompt.md 移除 PHASE 0.5 主線程 manual scan 邏輯 (改為 verify-only)\n\n預估 60-90 min。可派 codex:codex-rescue 或 general-purpose subagent。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "tags": [
+      "platform_ops",
+      "cron",
+      "reader_facing",
+      "refill",
+      "followup_from_badge_diversity_fix"
+    ],
+    "created_at": "2026-05-26T10:05:39.942179+00:00",
+    "source": "main_thread_2026_05_26_badge_diversity_fix"
+  },
+  {
+    "id": "platform_ops_dispatcher_type_rotation",
+    "title": "[platform_ops] continue_task_dispatch.py 加 type-rotation sort weight（防 same-priority experiment 搶光 slot）",
+    "description": "Context: 2026-05-26 用戶 feedback「badge 都是一般讀者」根因之一 — dispatcher sort key 純 (priority, id)，P1 experiment 6 個會搶光 4 slot，P1 trending_repost / event_article 後到無法被派。\n\nDeliverable:\n1. 改 categorize() return 後的 sort key 加入 type rotation weight:\n   recent_types = Counter(work_log[-10:].task_type)\n   agentable.sort(key=lambda t: (_prio_key(priority), recent_types.get(task_type, 0), id))\n   → same priority 內，最近少派的 type 優先\n2. 加 unit test (tests/test_dispatch_type_rotation.py)：mock 6×experiment + 1×trending + 1×event 同 P1 → 確認 trending/event 排前面\n3. Test regression: 不能破壞既有 P1 conservative gate (P1 non-experiment → main_thread)\n4. 部署後 monitor 3 fire 確認 badge 多樣性改善\n\n預估 45-60 min。可派 codex:codex-rescue。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "tags": [
+      "platform_ops",
+      "dispatcher",
+      "type_rotation",
+      "followup_from_badge_diversity_fix"
+    ],
+    "created_at": "2026-05-26T10:05:39.942179+00:00",
+    "source": "main_thread_2026_05_26_badge_diversity_fix"
+  },
+  {
+    "id": "platform_ops_question_research_host_cron_migration",
+    "title": "[platform_ops] question_research 從 session_cron 搬到 host_crontab（解 member_qa 36 天 silent gap）",
+    "description": "Context: 已有 root cause email (email-11736-659035) 寫明：question_research cron 註冊 session_crons (macOS 不可靠) + piggy-back fallback (_write_pending_sessions) 壞 → 整套 member_qa 36 天無 fire。\n\nDeliverable:\n1. 建 ~/.volpred/bin/cron_question_ops_maintain.sh wrapper\n2. CLI 加 --auto-create-task flag：偵測 community_questions pending>0 自動建 member_qa next_tasks entry\n3. 加 host crontab: `0 */6 * * * cron_question_ops_maintain.sh` (6h cadence per CLAUDE.md)\n4. 從 runtime_schedules.json session_crons 移除 question_research\n5. 修 _write_pending_sessions schema bug + 加 unit test\n6. 寫 docs/error_log.md entry「2026-05-26 question_research host migration」\n\n預估 60 min。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "tags": [
+      "platform_ops",
+      "cron",
+      "member_qa",
+      "host_migration",
+      "followup_from_yaoxk1431_incident"
+    ],
+    "created_at": "2026-05-26T10:05:39.942179+00:00",
+    "source": "main_thread_2026_05_26_yaoxk_root_cause"
   }
 ]
