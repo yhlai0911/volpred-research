@@ -137,10 +137,15 @@ Web search across high-traffic surfaces. Daily rotation suggestion:
 | Even days | Taiwan: 工商時報、經濟日報、財訊、Inside、財報狗、自由財經、Yahoo TW、SCMP |
 
 Filter criteria:
-- Headline contains 1+ of: AI / capex / vol / 市場 / 風險 / 配置 / 通膨 / Fed / GPU / 半導體 / FOMC / TSMC / 台積電 / Meta / Microsoft / Amazon / Alphabet / Nvidia / ETF / 對沖 / 黃金 / VIX
+- Headline contains 1+ of: AI / AI 發展 / token maxxing / tokenmaxx / inference cost / capex / vol / 市場 / 風險 / 配置 / 通膨 / Fed / GPU / 半導體 / FOMC / TSMC / 台積電 / Meta / Microsoft / Amazon / Alphabet / Nvidia / 矽谷裁員 / layoffs / tech layoffs / labor displacement / agent / agentic AI / Anthropic / OpenAI / Claude / GPT / Gemini / model routing / ETF / 對沖 / 黃金 / VIX
 - Article published in past 7 days
-- Has 1+ quantitative numbers (財報、margin、價格、波動率…)
+- Has 1+ quantitative numbers (財報、margin、價格、波動率、headcount、token cost…)
 - NOT same topic as past 30 days (dedup check)
+- **High-viral keywords priority**（per 用戶 2026-05-26 feedback — share rate / monetization 漏斗入口優先）：
+  - **AI 發展** (model release、capability jump、enterprise adoption)
+  - **token maxxing / inference economics** (Anthropic / OpenAI / Google pricing wars、cost-per-task crossover)
+  - **矽谷裁員 / tech layoffs** (Meta / Microsoft / Google / Amazon 大規模裁員 + AI 替代 narrative)
+  - 這 3 類比 niche topics (specific ETF/macro release) viral 高 2-5x，主線程 source scan 應**優先掃這 3 類**
 
 Pick **1 candidate** per fire (cap = 2/day across fires).
 

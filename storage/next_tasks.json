@@ -11289,7 +11289,7 @@
     "description": "Member question id: 44b3cfcd-4bfe-4904-80a0-70274ff7ba62\nProposer: yaoxk1431\nRanked #1 (score=6.0)\nCreated: 2026-05-25T07:53:08+00:00\n\n原題：「看到台灣路上進口車比例越來越高，這跟台灣經濟變遷有關，請幫我整合此資訊，推薦可以買的股票並說明投資理由 2000 字 並生成圖表」\n\n執行流程（per .claude/skills/member-questions/SKILL.md）：\n1. CLAIM: uv run volpred ops question-claim --question-id 44b3cfcd-4bfe-4904-80a0-70274ff7ba62 --actor claude\n2. RESEARCH:\n   - 抓財政部關稅總局 進口車輛數量月統計 (近 10 年趨勢)\n   - 抓 TWSE 進口車產業鏈個股: 和泰汽車 (2207)、裕日車 (2227)、中華車 (2204)、裕融 (9941, 汽車金融)\n   - 摘要近 3 年營收 / EPS / 本益比 / 殖利率\n   - 連結進口車滲透率上升的經濟學意涵 (中產購買力 / 消費升級 / 匯率影響)\n3. WRITE: 走 feed-publisher，target 2000 字繁體中文，含至少 2 圖 (進口車滲透率趨勢、個股表現比較)，content_type=`general`，proposer=yaoxk1431，**published 立即 publish (member_qa 走 published 非 draft per skill SOP)**，問答頁自動連結。\n4. 加合規 disclaimer: 非投資建議、純研究分析、過去績效不代表未來。\n5. ANSWER: uv run volpred ops question-answer --question-id 44b3cfcd-4bfe-4904-80a0-70274ff7ba62 --article-id <feed_id> --actor claude\n6. FINISH: uv run volpred ops question-finish --question-id 44b3cfcd-4bfe-4904-80a0-70274ff7ba62 --actor claude\n7. 寄 close email 給 yaoxk1431 (透過 platform notification 機制) — 或主線程寄 ops alert 給 admin 告知已 answered。\n\n注意：本題與 VolPred 主軸（波動率預測）偏離（相關性 4/10），定位為「擴展題材」。仍要做但別期待病毒式流量。\n\n背景：本題 silent gap 24h+ 是因為 question_research session_cron 不可靠 (root cause email-11736-659035)；本 task 由 hourly-17 evaluate + rerank 完成後 enqueue，等下輪 hourly 派 subagent 接手 research → answer → finish.",
     "task_type": "member_qa",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "member_qa",
       "yaoxk1431",
@@ -11297,7 +11297,9 @@
       "ranked_top1"
     ],
     "created_at": "2026-05-26T09:11:00+00:00",
-    "source": "main_thread_rerank"
+    "source": "main_thread_rerank",
+    "completed_at": "2026-05-26T10:12:13.894974+00:00",
+    "result": "feed_id=mile_ac709655 published; question answered; alert sent"
   },
   {
     "id": "email-11746-2d3656",
@@ -11305,7 +11307,7 @@
     "description": "Gmail UID: 11746\nMessage-ID: <754F31A0-7F73-4A36-9998-B21D06CAAEA6@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Tue, 26 May 2026 17:41:35 +0800\nSubject: Re: [VolPred Alert][INFO] [VolPred Alert][WARN] Member Q&A pending stale — root cause + immediate fix done\n\n--- 用戶回信內容 ---\n所以會員問題已經po文回覆了嗎？ 也就是完成所有會員問題的處理流程了嗎？\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年5月26日 17:12 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> Re: [VolPred Alert][WARN] Member Q&A pending stale — root cause + immediate fix done\r\n> Alert level: info\r\n> INFO\r\n> Member Q&A pipeline 36-day silent gap — root cause + 已 immediate fix + 待落地修整\r\n> \r\n> 回應你的問題「確認底層問題為什麼會員問題處理程序沒辦法完成」。診斷完畢，5 層問題堆疊。\r\n> 問題嚴重程度\r\n> \r\n> 受影響 question：44b3cfcd-4bfe-4904-80a0-70274ff7ba62（會員 yaoxk1431 提問：台灣進口車比例 + 個股推薦 2000 字 + 圖表）\r\n> 卡 status=evaluating 超過 24h（觸發 WARN alert）\r\n> 但更嚴重：檢視 storage/work_log.json 發現 last member_qa entry = 2026-04-20 — 整套 member_qa 流程已 36 天無任何活動\r\n> Root Cause（5 層問題互相疊加）\r\n> \r\n> #\t問題\t證據\r\n> 1\tquestion_research cron 註冊在 runtime_schedules.json:session_crons而非 host_crons\thost crontab 完全找不到此 entry\r\n> 2\tsession_cron 在 macOS 不可靠\t已有教訓 2026-04-24（9 條 session cron 常只 1 條存活）\r\n> 3\tpiggy-back _write_pending_sessionsfallback 機制壞\tstorage/ops/pending_sessions.json 只有 {\"schema_version\": 1}，無 pending / session_crons 字段\r\n> 4\tcron_last_run.json 完全無 question_research key\t確認從未 fire 過（任何路徑）\r\n> 5\t.claude/rules/alert.md 寫了 member_qa_stale auto-remediation 但 hourly-dispatch prompt 沒 enforce\t主線程只 react CRITICAL，WARN 等級 alert 寄出後無 action\r\n> Immediate Fix（本次 hourly-17 已完成）\r\n> \r\n> 17:10  question-ranking-workflow → evaluation payload OK\r\n> 17:15  4 維度評分（研究可行性 7 / 讀者價值 8 / 研究相關性 4 / 預期影響力 5, 平均 6.0）\r\n> 17:18  question-rerank → 推到 ranked rank=1 score=6\r\n> 17:25  建 member_qa_44b3cfcd_import_cars P2 task 進 next_tasks pool\r\n>        → 下輪 hourly 派 subagent 走 research → write → answer → finish\r\n> 本題評分備註：與 VolPred 主軸（波動率預測）偏離（研究相關性僅 4/10），定位「擴展題材」非招牌。仍會做但別期待病毒式流量。\r\n> 待落地修流程（防再發）\r\n> \r\n> question_research cron 從 session_crons 搬到 host_crons — 建 cron_question_ops_maintain.sh wrapper（放 ~/.volpred/bin/），跑 question-ops-maintain --auto-create-task --stub-if-no-work；CLI 加 --auto-create-task flag 檢測 pending>0 就建 next_tasks member_qa task 讓 hourly 接手\r\n> hourly-dispatch prompt 加 PHASE 0.5 dashboard alert 檢查 — 讀 dashboard_latest.json::breaches，對 WARN 也要 action（不只 CRITICAL）\r\n> 修 _write_pending_sessions schema bug — 加 unit test 防 silent regression\r\n> 3-Strike 觀察\r\n> \r\n> silent gap 已累積 3 次（2026-04-26 question 29cbeb5c 5 天 → 2026-04-20 work_log gap 36 天 → 本次 24h），同根因（session_cron + alert 未 enforce）。下次再復發 → 走 worker daemon + queue 重構，host cron polling 取代 session_cron。\r\n> 紀錄位置\r\n> \r\n> 教訓寫 docs/error_log.md 2026-05-26 entry\r\n> email_reply task email-11736-659035 已 in_progress（本封寄出後 complete --status succeeded）\r\n> 後續 member_qa_44b3cfcd_import_cars task 等下輪 hourly 接手\r\n> 下次任務時間：2026-05-26 18:07 台灣時間（hourly-18 fire 接手 research）\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "claimed",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -11318,7 +11320,9 @@
     "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
     "claimed_by": "interactive-claude",
     "claimed_at": "2026-05-26T09:46:33.283048+00:00",
-    "claim_session_id": "73193b8c2bce"
+    "claim_session_id": "73193b8c2bce",
+    "completed_at": "2026-05-26T10:07:07.027523+00:00",
+    "result": "reply sent (notification fa7d23a4); root cause reader-facing pool refill gap; 5 immediate fixes commit 10fd4579; 3 followup platform_ops queued; member_qa subagent in-flight"
   },
   {
     "id": "email-11748-7b1f24",
@@ -11326,7 +11330,7 @@
     "description": "Gmail UID: 11748\nMessage-ID: <59871E74-76CF-41DB-B90B-05B21D6D043E@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Tue, 26 May 2026 17:50:16 +0800\nSubject: Re: [VolPred Alert][INFO] [VolPred Alert][INFO] [VolPred Alert][WARN] Member Q&A pending stale — root cause + immediate fix done\n\n--- 用戶回信內容 ---\n我從來沒收到過你完工的信！？\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年5月26日 17:45 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> Re: Re: [VolPred Alert][INFO] [VolPred Alert][WARN] Member Q&A pending stale — root cause + immediate fix done\r\n> Alert level: info\r\n> INFO\r\n> 已收到你的回信\r\n> \r\n> 欄位\t值\r\n> Task ID\temail-11746-2d3656\r\n> 類型\temail_reply\r\n> Priority\tP3 普通優先\r\n> 主旨\tRe: [VolPred Alert][INFO] [VolPred Alert][WARN] Member Q&A pending stale — root\r\n> 收信時間\t2026-05-26 09:45:11 UTC\r\n> 決策\r\n> \r\n> 已推入統一任務池 — storage/next_tasks.json 中 task_type=email_reply\r\n> 執行時間\r\n> \r\n> 下次 Claude hourly-dispatch fire：今天 18:07（台灣時間，約 21 分鐘後）\r\n> Claude 主線程會於該 tick 自動 claim + 分析 + 執行\r\n> 若任務跨多 tick → 中間不會 spam；最後一次 tick 收尾發 close email\r\n> 完成後通知\r\n> \r\n> ✅ 全部處理完成時會寄 close email 給你（同 thread 回覆）— 含完成項目 / commit hash / 對應 sub-task id\r\n> Auto-sent by gmail_inbox_poll.py on queue insertion (gmail_inbox_poll.py)\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -11336,7 +11340,13 @@
     "email_uid": 11748,
     "email_message_id": "<59871E74-76CF-41DB-B90B-05B21D6D043E@gmail.com>",
     "email_subject": "Re: [VolPred Alert][INFO] [VolPred Alert][INFO] [VolPred Alert][WARN] Member Q&A pending stale — root cause + immediate fix done",
-    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>"
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "hourly-18",
+    "claimed_at": "2026-05-26T10:08:02.619470+00:00",
+    "claim_session_id": "243eca47e0f8",
+    "started_at": "2026-05-26T10:08:02.984886+00:00",
+    "completed_at": "2026-05-26T10:10:33.710912+00:00",
+    "result": "Root cause: ack & close email subjects identical → user could not distinguish in inbox. Fix: gmail_inbox_poll.py:292 ack title now '[ACK] Re: ...' prefix. Close email 1e429773 sent with timeline (17:14/17:45/18:07 attribution) + commit reference."
   },
   {
     "id": "trending_repost_2026_05_26_etf_dividend_vol",
@@ -11421,5 +11431,75 @@
     ],
     "created_at": "2026-05-26T10:05:39.942179+00:00",
     "source": "main_thread_2026_05_26_yaoxk_root_cause"
+  },
+  {
+    "id": "trending_repost_2026_05_26_silicon_valley_layoffs_capex",
+    "title": "[trending_repost] 8000 人換 GPU：矽谷大裁員 × $725B AI CapEx 經濟學悖論 — VolPred labor-displacement vol 角度",
+    "description": "Trending source scan 結果（2026-05-26 high-viral topic per 用戶 feedback：AI 發展 / 矽谷裁員）：\n- 主題：Meta 5/20 宣佈 8000 人裁員 (10% workforce) + Microsoft 8750 buyout + Google 1500 + Mag7 2026 CapEx $725B (YoY +77%)\n- 來源 surfaces：NPR / CNBC / Fortune / Invezz / 24-7 Wall St (過去 7 天高曝光，5/20-5/22 最 viral)\n- 30 天 dedup 通過：5/15 已 cover AI CapEx 但 arc 不同（5/15 = vol regime；本次 = labor-displacement economics）\n\nVolPred angle:\n1. **Labor-displacement risk pricing**：tech sector implied vol vs realized 對裁員事件的 response asymmetry（過去 12 個月 Meta/Microsoft/Google 裁員公告日 stock + vol 反應 distribution）\n2. **CapEx-to-payroll ratio**：Mag 7 $725B CapEx vs 人事節省（X 萬人 × 平均薪資）→ 真實 productivity 替代率需多高才 justify 估值\n3. **Token-vs-headcount cost crossover**（連到 token maxxing 子主題）：Microsoft 5/22 報告 'AI is more expensive than human employees'；Goldman 預測 2030 token consumption 24x；對 model adoption + Mag 7 ROI 估值的影響\n4. **Vol regime 連結**：裁員集中爆發是否會引發 tech sector vol cluster？實證測試：過去 layoff event ≥5000 人後 30 day SPY/QQQ realized vol vs baseline\n\n執行流程（per .claude/skills/trending-repost/SKILL.md）：\n1. Source scan 確認（已做）+ Step 1 viral validation（CNBC 4/24 + NPR 5/20 + Fortune 5/22 三方 confirm）\n2. Independent fact gathering: SEC 10-Q Meta/MSFT/GOOGL Q1 2026 CapEx、Layoffs.fyi tracker、yfinance 個股 vol、FRED tech sector employment\n3. Evidence package: layoff event-study 表 + Mag 7 capex/headcount ratio 圖 + implied vs realized vol 對 layoff 事件 response\n4. Draft 1800-2500 字 commentary (havingchien-style Substack tone)：**不引用任何 source 文章**\n5. feed-publisher → published 立即發 + FB 雙發佈（Ivan Lai 口吻 200-400 字）\n6. Anti-collision update: trending_repost_log.json\n7. Anti-AI-style 9-checklist + anti_ai_gate.py PASS（programmatic gate）必跑\n\nConstraint: 今日 trending_repost cap 2/day；本為第 2 篇（第 1 篇 = trending_repost_2026_05_26_etf_dividend_vol ETF 配息）。\nViral 預期：高（Meta 5/20 才宣佈，timing T+6 day；AI 替代人類是 2026 May 頂級熱門 narrative）。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "tags": [
+      "trending_repost",
+      "ai_layoffs",
+      "capex",
+      "token_economics",
+      "labor_displacement",
+      "high_viral",
+      "main_thread_scan"
+    ],
+    "created_at": "2026-05-26T10:11:15.082705+00:00",
+    "source": "main_thread_trending_scan_2026_05_26_supplement"
+  },
+  {
+    "id": "email-11750-53fa5c",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] [VolPred Alert][INFO] [VolPred Alert][INFO] [VolPred A",
+    "description": "Gmail UID: 11750\nMessage-ID: <A908022C-2B63-4CD9-8DA0-CF4FEEDCA5F8@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Tue, 26 May 2026 18:01:12 +0800\nSubject: Re: [VolPred Alert][INFO] [VolPred Alert][INFO] [VolPred Alert][INFO] [VolPred Alert][WARN] Member Q&A pending stale — root cause + immediate\n\n--- 用戶回信內容 ---\n你寄過哪個任務的完工通知給我？\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年5月26日 18:00 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> Re: Re: [VolPred Alert][INFO] [VolPred Alert][INFO] [VolPred Alert][WARN] Member Q&A pending stale — root cause + immediate\r\n> Alert level: info\r\n> INFO\r\n> 已收到你的回信\r\n> \r\n> 欄位\t值\r\n> Task ID\temail-11748-7b1f24\r\n> 類型\temail_reply\r\n> Priority\tP3 普通優先\r\n> 主旨\tRe: [VolPred Alert][INFO] [VolPred Alert][INFO] [VolPred Alert][WARN] Member Q&A\r\n> 收信時間\t2026-05-26 10:00:10 UTC\r\n> 決策\r\n> \r\n> 已推入統一任務池 — storage/next_tasks.json 中 task_type=email_reply\r\n> 執行時間\r\n> \r\n> 下次 Claude hourly-dispatch fire：今天 18:07（台灣時間，約 6 分鐘後）\r\n> Claude 主線程會於該 tick 自動 claim + 分析 + 執行\r\n> 若任務跨多 tick → 中間不會 spam；最後一次 tick 收尾發 close email\r\n> 完成後通知\r\n> \r\n> ✅ 全部處理完成時會寄 close email 給你（同 thread 回覆）— 含完成項目 / commit hash / 對應 sub-task id\r\n> Auto-sent by gmail_inbox_poll.py on queue insertion (gmail_inbox_poll.py)\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "pending",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-05-26T10:15:11.500308+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11750,
+    "email_message_id": "<A908022C-2B63-4CD9-8DA0-CF4FEEDCA5F8@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] [VolPred Alert][INFO] [VolPred Alert][INFO] [VolPred Alert][WARN] Member Q&A pending stale — root cause + immediate",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>"
+  },
+  {
+    "id": "platform_ops_audience_misclassification_audit",
+    "title": "[platform_ops] 既有 feed 41+ 篇 audience=general mis-classification audit + batch reclassify",
+    "description": "Context: 用戶 2026-05-26 指 mile_d0d66405 (Range-Based GARCH Proxy) 標 audience=general 但內容是 Parkinson + 5×3 GARCH cross-test → 一般讀者看不懂。\nAudit 顯示 ≥41 篇 audience=general 標題含學術名詞 (GARCH/MLE/QLIKE/HAR/Patton/Hawkes/Diebold/Parkinson 等)，制度性 mis-categorization.\n\nDeliverable:\n1. 寫 scripts/audit_audience_classification.py:\n   - Scan feed.json 所有 audience=general\n   - 三維 score: (a) 標題關鍵詞 (GARCH/HAR/Patton/Parkinson/copula/EGARCH/MLE/QLIKE/Hawkes/spillover/cointegrat/panel/GMM/bootstrap/lookahead)\n                (b) 內文長度 + 學術術語密度（per 100 字 vocab unique ratio）\n                (c) 對應 K experiment 是否存在 (experiments/<k>/README.md)\n   - Output report (JSON + Markdown): 候選 reclassify 名單 + 信心分數\n2. 主線程 review report，三個 tier:\n   - HIGH confidence: agent 自動 batch PATCH audience → research\n   - MEDIUM: 列清單給用戶 review\n   - LOW: 保留 general (可能是 hybrid 寫法 OK)\n3. 已 PATCH 的 entries 加 audit_log entry + supabase sync\n4. 寫 docs/error_log.md 2026-05-26 entry 「audience taxonomy drift」\n\nConstraint: published feed 大批改動是 high-blast-radius，HIGH tier batch apply 前**必先 dry-run** + 用戶 confirm。\n預估 60-90 min。可派 codex:codex-rescue 或 general-purpose subagent。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "tags": [
+      "platform_ops",
+      "audience_audit",
+      "feed_quality",
+      "followup_from_mile_d0d66405"
+    ],
+    "created_at": "2026-05-26T10:51:06.442787+00:00",
+    "source": "main_thread_2026_05_26_audience_misclass"
+  },
+  {
+    "id": "platform_ops_feed_publisher_audience_gate",
+    "title": "[platform_ops] feed-publisher 加 audience classification gate（防新文章再 mis-tag general）",
+    "description": "Context: mile_d0d66405 (5/26 published) 證明 feed-publisher 無 audience 判定 gate，agent 預設亂標 general → 41+ 累積 mis-tag.\n\nDeliverable:\n1. 改 src/volpred/publisher/publisher.py publish_milestone():\n   - 新增 _infer_audience(title, content, tags) helper:\n     a. 標題/內文含 ≥2 學術關鍵詞 (per audit script keyword list) → research\n     b. 標題含 K\\d+ + experiment_id 對得到 → research\n     c. content_type=member_qa → 保留 member_qa (不 override)\n     d. content_type=event_article → 保留 event\n     e. 否則 → general\n   - 若 caller 顯式傳 audience 但 _infer 給不同建議 → log WARN + 用 infer 結果（**enforce mechanism over agent discretion**）\n2. 寫 unit test (tests/test_audience_inference.py) — 至少 mile_d0d66405 case + 10 個 negative case\n3. 更新 .claude/skills/feed-publisher/SKILL.md 加 audience taxonomy 段（general / research / methodology / event / member_qa / daily）+ 何時用哪個\n4. 更新 .claude/rules/publishing.md 加 audience gate 硬規則\n5. Backfill check: 加 CI invariant scripts/validate_feed_audience.py — feed 沒有「audience=general 但標題含 ≥2 academic keyword」entries 才 PASS\n\n預估 45-60 min。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "tags": [
+      "platform_ops",
+      "feed_publisher",
+      "audience_gate",
+      "mechanism_enforcement",
+      "followup_from_mile_d0d66405"
+    ],
+    "created_at": "2026-05-26T10:51:06.442787+00:00",
+    "source": "main_thread_2026_05_26_audience_misclass"
   }
 ]
