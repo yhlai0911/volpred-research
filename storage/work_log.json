@@ -8579,5 +8579,15 @@
     "status_in_pool": "draft",
     "audience": "research",
     "anti_ai_gate": "PASS"
+  },
+  {
+    "timestamp": "2026-05-27T05:13:00+08:00",
+    "task_type": "governance",
+    "task_id": "governance_blocked_reasons_single_source",
+    "title": "BLOCKED_REASONS vocab single source refactor",
+    "summary": "Refactored mark_task_blocked.py + continue_task_dispatch.py to share src/volpred/ops/blocked_reasons.py. 10 canonical entries (was 7+9 drift). Added codex_quota_reset_pending, paid_data_source_decision_pending, diversity_rule_post_null_quartet to canonical vocab. K1383 now correctly filtered.",
+    "owner": "hourly-05",
+    "commit": "bb9a37bf",
+    "verdict": "succeeded"
   }
 ]
