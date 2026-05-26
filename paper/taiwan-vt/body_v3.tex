@@ -49,7 +49,7 @@ Log returns are computed as $r_t = \ln(P_t / P_{t-1}) \times 100$. Table~\ref{ta
 & Mean (\%) & Std (\%) & Skewness & Kurtosis & $\gamma_{\text{GJR}}$ & $t(\gamma)$ \\
 \midrule
 TWII (1997--2026) & 0.019 & 1.45 & $-0.31$ & 5.82 & 0.272 & 3.18 \\
-0050.TW (2008--2026) & 0.034 & 1.38 & $-0.47$ & 4.73 & 0.097 & 3.60 \\
+0050.TW (2009--2026) & 0.034 & 1.38 & $-0.47$ & 4.73 & 0.097 & 3.60 \\% source: experiments/k892/k892_verify_tw_gamma_results.json .summary.assets["0050.TW"].full_sample (gamma=0.0970, gamma_t=3.5965, n_obs=4219; D3 errata fix 2026-05-26 — sample period aligned to yfinance availability 2009-01-02 onward)
 SPY (2008--2026) & 0.042 & 1.18 & $-0.52$ & 12.30 & 0.211 & 5.79 \\
 TSMC (2330.TW) & 0.051 & 1.92 & $-0.18$ & 3.41 & 0.052 & 3.98 \\
 9-stock average (excl.\ 0056) & 0.026 & 1.74 & $-0.21$ & 3.62 & 0.054 & --- \\
@@ -262,11 +262,11 @@ EWMA VT (10\%) & 0.701 & $-21.2$ & 7.42 & 10.58 & 480 & --- \\
 GARCH VT (10\%) & 0.950 & $-22.2$ & 10.50 & 11.06 & 678 & --- \\
 GJR VT (10\%) & 1.074 & $-22.3$ & 12.19 & 11.35 & 694 & --- \\
 8.63/VIX (monthly) & 0.690 & $-15.3$ & 10.72 & 9.43 & 102 & --- \\
-Student-$t$ VaR & --- & --- & --- & --- & --- & 0.5\% \\
+GJR+Cornish-Fisher VaR & --- & --- & --- & --- & --- & 0.5\% \\% source: experiments/k896/k896_taiwan_es_supplement_results.json results."1%"."GJR+Cornish-Fisher".violation_rate=0.005125 (paper rounds to 0.5%; D4 errata fix 2026-05-26 — label corrected from "Student-$t$ VaR" since K896 GJR+Student-t violation rate is 1.03\%, not 0.5\%)
 \bottomrule
 \end{tabular}
 \begin{flushleft}
-\small \textit{Notes:} Revised to K1175 canonical replication (2026-04-17, commit \texttt{4549bc00}) using yfinance 0050.TW data (available from 2009-01-02) and daily rebalancing. Evaluation periods differ across strategies: Buy \& Hold and EWMA VT cover 2010-01-04 to 2026-03-30 ($n = 3{,}968$); GARCH VT and GJR VT cover 2020-01-03 to 2026-03-30 ($n = 1{,}511$) due to 2000-day rolling window burn-in; 8.63/VIX covers 2016-01 to 2026-03; Student-$t$ VaR covers 2020-01 to 2026-03. The sample starts from 2009-01 (earliest yfinance data for 0050.TW) and therefore excludes the 2008 Global Financial Crisis drawdown; earlier versions of this paper that reported MDD $-41.3\%$ used an unavailable pre-2009 vendor snapshot and have been corrected. Because evaluation periods differ, cross-strategy Sharpe ratio comparisons in this table should be interpreted with caution; Table~\ref{tab:vt_common} provides a direct comparison over a common period. The elevated turnover for VT variants (480--694\%/yr) reflects daily signal updates and full 0.186\% round-trip transaction cost (the previously reported 98--116\%/yr assumed monthly rebalancing, an unintended documentation inconsistency); 8.63/VIX uses monthly rebalancing while all other strategies use daily rebalancing. VaR violations are the empirical 1\% VaR exceedance rate using Student-$t$(df$= 5$) distribution. MDD: maximum drawdown.
+\small \textit{Notes:} Revised to K1175 canonical replication (2026-04-17, commit \texttt{4549bc00}) using yfinance 0050.TW data (available from 2009-01-02) and daily rebalancing. Evaluation periods differ across strategies: Buy \& Hold and EWMA VT cover 2010-01-04 to 2026-03-30 ($n = 3{,}968$); GARCH VT and GJR VT cover 2020-01-03 to 2026-03-30 ($n = 1{,}511$) due to 2000-day rolling window burn-in; 8.63/VIX covers 2016-01 to 2026-03; GJR+Cornish-Fisher VaR covers 2020-01 to 2026-03. The sample starts from 2009-01 (earliest yfinance data for 0050.TW) and therefore excludes the 2008 Global Financial Crisis drawdown; earlier versions of this paper that reported MDD $-41.3\%$ used an unavailable pre-2009 vendor snapshot and have been corrected. Because evaluation periods differ, cross-strategy Sharpe ratio comparisons in this table should be interpreted with caution; Table~\ref{tab:vt_common} provides a direct comparison over a common period. The elevated turnover for VT variants (480--694\%/yr) reflects daily signal updates and full 0.186\% round-trip transaction cost (the previously reported 98--116\%/yr assumed monthly rebalancing, an unintended documentation inconsistency); 8.63/VIX uses monthly rebalancing while all other strategies use daily rebalancing. VaR violations are the empirical 1\% VaR exceedance rate; the row shown uses the GJR+Cornish-Fisher specification (which achieves 0.51\%, rounded to 0.5\%). The GJR+Student-$t$(df$= 5$) specification reports a 1.03\% violation rate (K896). MDD: maximum drawdown.
 \end{flushleft}
 \end{table}
 

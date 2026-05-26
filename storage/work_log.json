@@ -8461,5 +8461,12 @@
     "task_id": "hourly_08_cleanup_stale_k1401_todo",
     "claimed_by": "hourly-08",
     "result": "Removed stale K1401 retroactive FB TODO from scripts/cron_hourly_dispatch_prompt.md L123 (K1401 mile_daaff779 FB already posted 2026-05-25T03:33 per writer_log; details.fb_post_url verified). Ran sync_next_tasks_status.py --apply: 10 K-id pending evaluated, 0 stale to mark succeeded — pool clean."
+  },
+  {
+    "timestamp": "2026-05-26T10:15:24+08:00",
+    "task_type": "paper_review",
+    "task_id": "Paper2_D3D4D5_gamma_VaR_days",
+    "owner": "hourly-10",
+    "summary": "Paper 2 (taiwan-vt) 3 MAJOR errata: D3 Table 1+2 gamma 0.087→0.097 (K892), D4 VaR row label Student-t→Cornish-Fisher (K896 match), D5 trading days 4532→4217 (已先前修). body.tex + body_v3.tex 同步; main_v3.pdf 48p compile OK; paper-update sync 10:14 台灣"
   }
 ]

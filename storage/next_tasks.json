@@ -5114,7 +5114,7 @@
   {
     "id": "Paper2_D3D4D5_gamma_VaR_days",
     "title": "Paper 2 MAJOR: 0050.TW gamma + VaR 分布標籤 + sample days 3 處小 errata",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 3,
     "created_at": "2026-04-17T16:29:10+08:00",
     "description": "Paper 2 audit 3 MAJOR: (D3) 0050.TW gamma paper 0.087 vs K892 全樣本 0.097 或 2000-day rolling 0.136; (D4) VaR '0.5% GJR+Student-t' 應為 '0.5% CF' (K896 Student-t 1.03%, CF 0.51%); (D5) 4532 trading days 應為 4217 (差 315 天). 全部主線程 body edit 即可修. 誠實 research errata path.",
@@ -5132,7 +5132,13 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "hourly-10",
+    "claimed_at": "2026-05-26T02:08:21.784778+00:00",
+    "claim_session_id": "6b034201697c",
+    "started_at": "2026-05-26T02:08:27.398093+00:00",
+    "completed_at": "2026-05-26T02:15:20.671018+00:00",
+    "result": "D3+D4 errata 完成於 body.tex + body_v3.tex (canonical via main_v3.pdf). D3: Table 1 + Table 2 line 0050.TW gamma 0.087/2.20 → 0.097/3.60 (K892 full-sample MLE, n=4219). Sample period 2008→2009 對齊 yfinance availability. D4: VaR row label Student-t → GJR+Cornish-Fisher (K896 violation 0.5125% match CF not Student-t 1.03%). 同步修 Notes wording + Intro Sec. D5: 已先前修正 (4,532→4,217 trading days). main_v3.pdf recompiled 48 頁 + paper-update sync OK 10:14 台灣。"
   },
   {
     "id": "Paper2_G12_G20_Section6_formal_experiments",
@@ -9400,7 +9406,7 @@
     "description": "K504 has a non-null verdict in experiments/k504/ but no published feed article and no existing task. Verdict: NULL RESULT — no meaningful difference. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9409,7 +9415,13 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.464978+00:00",
     "generated_at": "2026-05-13T05:53:00.464980+00:00",
-    "k_id": "K504"
+    "k_id": "K504",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-26T01:24:39.408685+00:00",
+    "claim_session_id": "55847bccc22e",
+    "started_at": "2026-05-26T01:24:48.473707+00:00",
+    "completed_at": "2026-05-26T01:27:43.273877+00:00",
+    "result": "Published K504 general draft as mile_2699ab2c. Added two charts and a general-audience article explaining why STLFSI4 slightly smooths 12/VIX but does not create a statistically meaningful upgrade."
   },
   {
     "id": "gen_article_k510",
