@@ -387,5 +387,37 @@
     "anti_ai_gate": "PASS (warn=1/3)",
     "model_review": "3-model: Claude(PASS) → Gemini(PASS after fixes) → Codex(CONDITIONAL_PASS→PASS after 9 fixes)",
     "fb_post_note": "claude-in-chrome not available in this session; pending manual post by user"
+  },
+  {
+    "date": "2026-05-27",
+    "mile_id": "mile_89889d46",
+    "article_id": "mile_89889d46",
+    "article_title": "裁員八千人，同一季燒掉 $680 億 — 矽谷的 CapEx 帳要怎麼算",
+    "article_url": "https://volpred.zeabur.app/v3/reports/mile_89889d46",
+    "timestamp": "2026-05-27T00:18:37+08:00",
+    "trending_topic": "矽谷大裁員 × Mag 7 AI CapEx 經濟學悖論",
+    "source_surface": "VolPred original (trending_repost, primary sources: company Q1 2026 earnings press releases + yfinance)",
+    "primary_sources_used": [
+      "Meta Q1 2026 earnings press release 2026-04-30",
+      "Microsoft Q3 FY2026 earnings press release 2026-04-30",
+      "Alphabet Q1 2026 earnings press release 2026-04-29",
+      "Amazon Q1 2026 earnings press release 2026-05-01",
+      "yfinance: META, QQQ, SPY, VIX (2026-04-01 to 2026-05-26)"
+    ],
+    "volpred_angle": "labor-displacement vol pricing; CapEx ROI correction tail risk; EWMA-VIX K1018 regime context",
+    "experiment": "trending_2026_05_27_silicon_layoffs_capex",
+    "word_count": 1732,
+    "fb_post_status": "pending",
+    "fb_post_text": "Meta 裁員 8,000 人那天，VIX 收跌 3.4%。\n\n市場把裁員定了「好消息」的價格。\n\n同一季，Meta 的 CapEx 是 $17.3B。加上 Microsoft、Alphabet、Amazon，四家合計單季燒了 $80B 的基建支出。年增 36%。",
+    "fb_comment_text": "完整圖表和數字在這裡 → https://volpred.zeabur.app/v3/reports/mile_89889d46",
+    "fb_post_url": null,
+    "fb_draft_path": "/tmp/trending_silicon_layoffs_fb.md",
+    "charts": [
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/mile_silicon_layoffs_a3f2c891.png",
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/mile_silicon_layoffs_b7e19d22.png"
+    ],
+    "anti_ai_gate": "PASS (feed: warn=1/3; fb: warn=0/3)",
+    "model_review": "Anti-AI gate PASS x2; editor SOP 9-checklist all PASS",
+    "fb_post_note": "Facebook MCP requires /mcp auth from user; pending manual post"
   }
 ]
