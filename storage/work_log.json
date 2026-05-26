@@ -8548,5 +8548,15 @@
     "owner": "hourly-22",
     "commit": "d91c0c50",
     "notes": "ETF 配息潮 VolPred angle; 9 ETF + 37 除息事件 evidence; anti-AI gate PASS; 3-model review PASS; FB followup task fb_post_trending_etf_dividend_2026_05_26 enqueued P2"
+  },
+  {
+    "task_type": "platform_ops",
+    "task_id": "fb_pipeline_dashboard_warn_handling",
+    "started_at": "2026-05-27T02:14:56+08:00",
+    "completed_at": "2026-05-27T02:14:56+08:00",
+    "status": "completed",
+    "summary": "Dashboard WARN: 2 FB posts pending sync (mile_5b3569c3 ETF + mile_89889d46 silicon layoffs). Chrome MCP unavailable in hourly cron → mark both fb_post tasks blocked awaiting_external_data + send escalation email to user (notification 5359652f). Drafts ready, anti-AI gate PASS. User to manual publish in interactive session.",
+    "commit": null,
+    "owner": "hourly-02"
   }
 ]

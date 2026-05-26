@@ -11412,7 +11412,7 @@
     "description": "Context: 2026-05-26 發現 reader-facing badge pipeline (event/trending/member_qa) 完全無 auto refill — 已加 cron_hourly_dispatch_prompt.md PHASE 0.5 由主線程親跑 source scan，但屬 prompt-level 紀律。\n\nDeliverable:\n1. 寫 scripts/refill_reader_facing_pool.py — 三 source 統一介面 (trending_scan / event_pull / member_qa_eval)，   trending 用 WebSearch (Claude API or external)、event 從 event_jobs.items pull、member_qa 從 community_questions.json pull\n2. 寫 wrapper ~/.volpred/bin/cron_reader_facing_refill.sh\n3. 加 host crontab: `0 6,12,18 * * * cron_reader_facing_refill.sh`（早午晚各 1 次）\n4. 加 storage/logs/cron/reader_facing_refill.log\n5. 寫 docs/error_log.md entry「2026-05-26 reader-facing pool refill gap」\n6. 修完後從 cron_hourly_dispatch_prompt.md 移除 PHASE 0.5 主線程 manual scan 邏輯 (改為 verify-only)\n\n預估 60-90 min。可派 codex:codex-rescue 或 general-purpose subagent。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "failed",
     "tags": [
       "platform_ops",
       "cron",
@@ -11421,7 +11421,13 @@
       "followup_from_badge_diversity_fix"
     ],
     "created_at": "2026-05-26T10:05:39.942179+00:00",
-    "source": "main_thread_2026_05_26_badge_diversity_fix"
+    "source": "main_thread_2026_05_26_badge_diversity_fix",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-26T17:23:01.536302+00:00",
+    "claim_session_id": "e843049a1982",
+    "started_at": "2026-05-26T17:26:56.275125+00:00",
+    "completed_at": "2026-05-26T17:27:49.932397+00:00",
+    "result": "repo 內已交付 refill_reader_facing_pool.py、wrapper/spec、verify-only prompt 與 error_log，pytest 3/3 PASS；force run 已寫 state 並補 4 個 event_article。未完成項目是 host crontab / ~/.volpred/bin 安裝與 [codex] commit，sandbox 仍擋外部 home 寫入與 .git/index.lock。"
   },
   {
     "id": "platform_ops_dispatcher_type_rotation",
@@ -11611,11 +11617,17 @@
     "description": "Draft 已 prep + gate PASS。等具備 claude-in-chrome MCP 的 session（互動 / 下次 hourly with browser tool）撈出來 paste 到 Ivan Lai FB。\n\nDraft 路徑：storage/event_articles/us_cpi_2026_06_13_t7/fb_draft.md\nFeed URL（留言用）：https://volpred.zeabur.app/v3/reports/mile_ebb5d6f5\n\n步驟：\n1. 讀 fb_draft.md（不用再改寫，gate 已 PASS）\n2. curl -I https://volpred.zeabur.app/v3/reports/mile_ebb5d6f5 驗 HTTP 200\n3. claude-in-chrome 開 Ivan Lai FB → form_input 整段貼 draft → screenshot 檢查 → publish\n4. 主貼文 publish 後 reply 留言：完整版分析+圖表在這裡 → https://volpred.zeabur.app/v3/reports/mile_ebb5d6f5\n5. 成功後 patch feed.json：fb_post_status=success + fb_post_url + fb_comment_url + fb_post_timestamp（per .claude/skills/trending-repost/references/fb-ivanlai-tone.md Step 9）\n6. supabase_sync.py sync-article --id mile_ebb5d6f5\n\n注意：原 fb_post_us_cpi_2026_06_13_t7 task 已標 succeeded（draft prep + fallback log 算完成 hourly scope）；本任務專門收 manual FB post 尾巴。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "failed",
     "source": "hourly-21",
     "created_at": "2026-05-26T21:12:00+08:00",
     "parent_task_id": "fb_post_us_cpi_2026_06_13_t7",
-    "ref_milestone": "mile_ebb5d6f5"
+    "ref_milestone": "mile_ebb5d6f5",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-26T17:28:00.486667+00:00",
+    "claim_session_id": "18b80b0574ce",
+    "started_at": "2026-05-26T17:28:06.847809+00:00",
+    "completed_at": "2026-05-26T17:28:37.882933+00:00",
+    "result": "task 需要操作登入中的 Facebook/Chrome 發文與留言，但本 session 的 Chrome/Computer Use 權限不可用；curl live URL 正常、draft 已存在。待具備 browser/Chrome 控制權的 session 再執行 FB post、feed patch 與 sync。"
   },
   {
     "id": "fb_post_trending_etf_dividend_2026_05_26",
@@ -11624,7 +11636,11 @@
     "title": "FB Ivan Lai dual-publish: ETF 配息潮 vol-adjusted 視角 (mile_5b3569c3)",
     "description": "FB Ivan Lai dual-publish: 配息數字背後的風險帳 (mile_5b3569c3). Draft at storage/ops/fb_draft_mile_5b3569c3.md. URL in 1st comment: https://volpred.zeabur.app/v3/reports/mile_5b3569c3. Anti-AI PASS. Do NOT put link in main post body.",
     "status": "pending",
-    "created_at": "2026-05-26T22:27:17+08:00"
+    "created_at": "2026-05-26T22:27:17+08:00",
+    "blocked_reason": "awaiting_external_data",
+    "blocked_at": "2026-05-26T18:13:24+00:00",
+    "blocked_note": "Need chrome MCP session for FB Ivan Lai publish; only available in interactive Claude session, not hourly cron. Draft + anti-AI gate PASS. Escalated via email to user 2026-05-27.",
+    "last_released_at": "2026-05-26T18:13:59.846839+00:00"
   },
   {
     "id": "email-11742-cac837",
@@ -11656,7 +11672,7 @@
     "description": "Gmail UID: 11733\nMessage-ID: <846E0B05-93C1-461C-973D-1FBC11F1184B@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Wed, 27 May 2026 00:12:23 +0800\nSubject: Re: [VolPred Boss Report] 2026-05-27 00:10 台灣時間 平台運營報告\n\n--- 用戶回信內容 ---\nwarn和該處理的要先處理啊！\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年5月27日 00:10 寫道：\r\n> \r\n> VolPred Boss Report · 2026-05-27 00:10 台灣時間 · Overall WARN\r\n> \r\n> ⓪ 本 cycle 意圖 / 目標 / 規劃\r\n> \r\n> 意圖 Intent\t從反應式 firefighting 轉成主動 ops 結構。建 dashboard + audit + boss report 三件套，然後 cycle 化主線程運營。\r\n> 本週目標 Weekly Goal\t• Mission 4: 0 stale cron 持續一週、live URL 100% 自動驗證\r\n> • Mission 1: 維持 ≥6 articles/day 同時把 narrative-arc dedup Layer 4 落地（已 ✅）\r\n> • Mission 3: Paper 4 body_v4 完成 rewrite gate\r\n> • Mission 5: FB MCP ext popup gate 找根因 + 解（不再說『修不到』）\r\n> 本 cycle 計劃 Plan\t• Cycle 1: 建 dashboard + 2 audit + boss report email infra（✅ 本 cycle 完成）\r\n> • Cycle 2-3: Paper 4 body_v4 rewrite main thread + 派 review agent 並行\r\n> • Cycle 4: free_tier_growth_plan.md spec + 識別 P1 analytics 工具選型\r\n> • Cycle 5+: MCP ext 根因 deep-dive；若不解，準備 Anthropic issue text\r\n> 成功標準 Success Criteria\t• 每 cycle 開頭 dashboard read 不再有 surprise critical（即 standing audit catch 問題早於我）\r\n> • 每 4h boss email 自動寄出無 fail\r\n> • 次次 cycle 至少 1 個結構性改善（不只 patch）+ 2 個 article 產出\r\n> 已知風險 Known Risks\t• main thread context 易爆（已多次 compact），需要更積極派 agent 卸載\r\n> • FB MCP root cause 可能要花 ≥2 cycles 才找到\r\n> • Paper 4 rewrite 過長吃掉太多 main thread bandwidth\r\n> ① 平台狀態\r\n> \r\n> 區段\t狀態\t說明\t建議行動\r\n> production_pending\tok\t19 pending tasks (top types: [('daily_article', 8), ('experiment', 6), ('platform_ops', 4)])\tdispatch top P1-P3 if slots free\r\n> production_throughput\tok\t8 articles published last 24h (target 6/day)\t—\r\n> distribution_supabase\tok\t8/8 last-24h articles synced\t—\r\n> verification_live_url\tok\t3/3 sample live URLs return 200\t—\r\n> verification_fb_pipeline\twarn\t1 FB posts pending sync\thandoff doc + manual paste or retry MCP\r\n> health_cron\tok\t0 cron jobs stale (over max-age)\t—\r\n> health_alerts_unhandled\twarn\t1 warn/critical alerts last 6h (read + act per .claude/rules/alert.md)\tingest alerts → run remediation per alert.md auto-action table\r\n> ①-b 排程器成果掌握（cron 跑完沒 / 成功沒）\r\n> \r\n> 每個定時排程器的 runs / exit / 完成狀態。有需要掌握的項目 ↓\r\n> \r\n> === cron 成果掌握 review — 2026-05-27 00:10:10（台灣時間）===\r\n> \r\n>   hourly_dispatch   runs=40 exit=0 running | last: 2026-05-27 00:07:06 (start)\r\n>   compute_worker    runs=159 exit=0 idle | last: 2026-05-27 00:00:07\r\n>   check_alerts      runs=40 exit=0 idle | last: 2026-05-27 00:00:35\r\n>   collect_tw        runs=2 exit=0 idle | last: 2026-05-26 15:00:46\r\n>   collect_us        runs=1 exit=0 idle | last: 2026-05-26 12:00:52\r\n>   daily_update      runs=1 exit=0 idle | last: 2026-04-25 09:05:47  ⚠️ 上次完成 759.1h 前（>30h）\r\n>   release_pool      runs=7 exit=0 idle | last: 2026-05-27 00:00:33\r\n>   market_cal        runs=0 exit=(never exited) idle | last: 2026-05-18 08:00:21  ⚠️ 上次完成 208.2h 前（>200h）\r\n>   memory_health     runs=1 exit=0 idle | last: 2026-05-20 06:00:18  ⚠️ 上次完成 162.2h 前（>30h）\r\n>   work_summary      runs=7 exit=0 idle | last: 2026-05-27 00:05:16\r\n> \r\n> 近 75 分鐘 git commits（hourly_dispatch 產出代理）：1 筆\r\n>   9ba34f37 fix(skill): agy-first for Gemini lightweight Q&A; gemini_ask.py demoted to fallback\r\n> \r\n> 🔴 需要掌握/處理：\r\n>   - daily_update: ⚠️ 上次完成 759.1h 前（>30h）\r\n>   - market_cal: ⚠️ 上次完成 208.2h 前（>200h）\r\n>   - memory_health: ⚠️ 上次完成 162.2h 前（>30h）\r\n> ② 本 cycle 活動（過去 4h）\r\n> \r\n> 6 commits\r\n> \r\n> SHA\tSubject\tTime\r\n> 9ba34f37\tfix(skill): agy-first for Gemini lightweight Q&A; gemini_ask.py demoted to fallback\t23:11\r\n> 67fcb93e\tops(hourly-22): trending_repost ETF 配息潮 mile_5b3569c3 + FB followup queued\t22:31\r\n> d91c0c50\tfeat(trending): ETF 配息潮 — vol-adjusted yield 視角 (mile_5b3569c3)\t22:30\r\n> ec891c13\tops(hourly-21): fb_post US CPI 2026-06-13 T-7 draft prep + fallback log\t21:12\r\n> b7250dd9\tops(hourly-20): event_article US CPI 2026-06-13 T-7 succeeded + FB followup queued\t20:20\r\n> e1d5c9b4\tfeat(event-article): US CPI 2026-06-13 T-7 preview - VIX term structure + CPI day distribution\t20:18\r\n> ③ Pending 池與論文組合\r\n> \r\n> Pending tasks: 19\r\n> \r\n> By type: daily_article · 8experiment · 6platform_ops · 4paper_body · 1\r\n> \r\n> 論文組合\r\n> \r\n> Paper\tStatus\r\n> crypto-fear-channel\t**READY FOR SUBMISSION** (2026-05-17 v4.\r\n> eav-universal-magnitude\tscaffold v2 (paper_de\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -11670,7 +11686,9 @@
     "claimed_by": "hourly-01",
     "claimed_at": "2026-05-26T17:07:38.203666+00:00",
     "claim_session_id": "914b2aaad293",
-    "started_at": "2026-05-26T17:07:54.012439+00:00"
+    "started_at": "2026-05-26T17:07:54.012439+00:00",
+    "completed_at": "2026-05-26T17:12:55.215405+00:00",
+    "result": "warn triage 完成：1) cron_review.py piggy-back fallback fix → market_cal/memory_health 不再 false alarm；2) daily_update 真實 760h stale (2026-05-17 起 disabled from piggy-back) → 建 platform_ops_daily_update_root_cause_fix P3 followup；3) FB pending / member_qa / 6h warn 確認非 actionable；commit fb63a8b3；close email notification_id=92f365f7"
   },
   {
     "id": "fb_post_trending_silicon_layoffs_2026_05_27",
@@ -11679,7 +11697,11 @@
     "title": "FB Ivan Lai dual-publish: 矽谷大裁員 × Mag7 CapEx (mile_89889d46)",
     "description": "FB Ivan Lai dual-publish: 裁員八千人，同一季燒掉 $680 億 (mile_89889d46). Draft at storage/ops/fb_draft_mile_89889d46.md (272 字, anti_ai_gate PASS warn=0/3). URL in 1st comment: https://volpred.zeabur.app/v3/reports/mile_89889d46. Do NOT put link in main post body. Need /mcp claude-in-chrome auth session.",
     "status": "pending",
-    "created_at": "2026-05-26T16:20:26+08:00"
+    "created_at": "2026-05-26T16:20:26+08:00",
+    "blocked_reason": "awaiting_external_data",
+    "blocked_at": "2026-05-26T18:13:24+00:00",
+    "blocked_note": "Need chrome MCP session for FB Ivan Lai publish; only available in interactive Claude session, not hourly cron. Draft + anti-AI gate PASS warn=0/3. Escalated via email to user 2026-05-27.",
+    "last_released_at": "2026-05-26T18:14:00.178912+00:00"
   },
   {
     "id": "platform_ops_daily_update_root_cause_fix",
@@ -11687,13 +11709,113 @@
     "description": "Root cause: daily_update 2026-05-17 因 hang (likely Supabase sync stall) exceed 240s subprocess cap 從 piggy-back disable (scripts/run_due_jobs.py:65)。設計上靠 host crontab '3 8 * * 1-6' fire，但 macOS host cron daemon 不可靠 (CLAUDE.md '只可靠執行 0 * * * *' 規則) → 2026-04-25 起從未 fire。\n\nFix path:\n1. 診斷 daily_update hang root cause (Supabase sync? Mirror sync? memory check?)\n2. Split into smaller jobs each < 240s → 可重新 enable piggy-back\n3. OR migrate to compute_queue (async worker) 避免 cron timeout 限制\n4. Update scripts/run_due_jobs.py SKIP_JOB_IDS 移除 daily_update\n5. 驗證連續 7 天 fire 成功",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "failed",
     "tags": [
       "platform_ops",
       "cron_health",
       "root_cause_fix"
     ],
     "created_at": "2026-05-26T17:11:00+00:00",
-    "source": "hourly_dispatch_001_email_reply_warn_triage"
+    "source": "hourly_dispatch_001_email_reply_warn_triage",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-26T17:28:48.688957+00:00",
+    "claim_session_id": "7e53b2642d43",
+    "started_at": "2026-05-26T17:28:56.764413+00:00",
+    "completed_at": "2026-05-26T17:29:34.401660+00:00",
+    "result": "task brief 已過時：runtime_schedules 現在以 LaunchAgent 為 daily_update canonical，且 daily_update.log 顯示近期仍有成功完成。repo 內已有 daily_update_launchagent_observation.py，規則是觀察到 2026-06-01 視窗結束後再決定是否重啟 piggy-back；當前不宜提前做架構逆轉。"
+  },
+  {
+    "id": "event_article_nfp_us_2026-06-05_tminus7",
+    "title": "[event_article] Event article: US NFP 06/05 T-7 (historical baseline + regime context)",
+    "description": "Auto-generated by refill_reader_facing_pool.py from event_jobs.\nref_event_job_id: nfp-2026-06-05-t7\nevent_key: NFP_2026_06_05\nevent_type: nfp_us\nevent_date: 2026-06-05\nevent_series_slot: T-7\n\nUS May NFP releases Fri 06/05 08:30 ET. T-7 angle: 12-month payroll trend + unemployment regime classification + wage growth context vs Fed dual mandate. status=published immediate. audience=research/general. 3-layer dedup.",
+    "task_type": "event_article",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-05-26T17:27:02+00:00",
+    "source": "reader_facing_refill",
+    "ref_event_job_id": "nfp-2026-06-05-t7",
+    "event_key": "NFP_2026_06_05",
+    "event_type": "nfp_us",
+    "event_date": "2026-06-05",
+    "event_series_slot": "T-7",
+    "tags": [
+      "event_article",
+      "reader_facing",
+      "nfp_us",
+      "T-7"
+    ]
+  },
+  {
+    "id": "event_article_nfp_us_2026-06-05_tminus2",
+    "title": "[event_article] Event article: US NFP 06/05 T-2 (consensus scenarios + position sizing)",
+    "description": "Auto-generated by refill_reader_facing_pool.py from event_jobs.\nref_event_job_id: nfp-2026-06-05-t2\nevent_key: NFP_2026_06_05\nevent_type: nfp_us\nevent_date: 2026-06-05\nevent_series_slot: T-2\n\nNFP T-2: payroll consensus scenarios (cool / in-line / hot) + SPY/VIX 1-day move grid + position sizing. status=published immediate. audience=general. 3-layer dedup.",
+    "task_type": "event_article",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-05-26T17:27:02+00:00",
+    "source": "reader_facing_refill",
+    "ref_event_job_id": "nfp-2026-06-05-t2",
+    "event_key": "NFP_2026_06_05",
+    "event_type": "nfp_us",
+    "event_date": "2026-06-05",
+    "event_series_slot": "T-2",
+    "tags": [
+      "event_article",
+      "reader_facing",
+      "nfp_us",
+      "T-2"
+    ]
+  },
+  {
+    "id": "event_article_nfp_us_2026-06-05_tplus0",
+    "title": "[event_article] Event article: US NFP 06/05 T+0 (actual vs expected + reaction)",
+    "description": "Auto-generated by refill_reader_facing_pool.py from event_jobs.\nref_event_job_id: nfp-2026-06-05-t0\nevent_key: NFP_2026_06_05\nevent_type: nfp_us\nevent_date: 2026-06-05\nevent_series_slot: T+0\n\nNFP T+0: actual payrolls/unemployment/wages vs consensus, surprise size, intraday reaction. status=published immediate. audience=general. 3-layer dedup.",
+    "task_type": "event_article",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-05-26T17:27:02+00:00",
+    "source": "reader_facing_refill",
+    "ref_event_job_id": "nfp-2026-06-05-t0",
+    "event_key": "NFP_2026_06_05",
+    "event_type": "nfp_us",
+    "event_date": "2026-06-05",
+    "event_series_slot": "T+0",
+    "tags": [
+      "event_article",
+      "reader_facing",
+      "nfp_us",
+      "T+0"
+    ]
+  },
+  {
+    "id": "event_article_tsmc_revenue_2026-06-10_tplus0",
+    "title": "[event_article] Event article: TSMC 5月營收 06/10 T+0 (YoY/MoM + AI demand signal)",
+    "description": "Auto-generated by refill_reader_facing_pool.py from event_jobs.\nref_event_job_id: tsmc-revenue-2026-06-10-t0\nevent_key: TSMC_REVENUE_2026_06_10\nevent_type: tsmc_revenue\nevent_date: 2026-06-10\nevent_series_slot: T+0\n\nTSMC 2330.TW 5月營收 06/10 公佈。YoY/MoM 對比 + AI/3nm 製程量產 signal + 對 0050.TW 影響。status=published immediate. audience=general. 3-layer dedup; 單家公司 ≤ 3 篇 cap.",
+    "task_type": "event_article",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-05-26T17:27:02+00:00",
+    "source": "reader_facing_refill",
+    "ref_event_job_id": "tsmc-revenue-2026-06-10-t0",
+    "event_key": "TSMC_REVENUE_2026_06_10",
+    "event_type": "tsmc_revenue",
+    "event_date": "2026-06-10",
+    "event_series_slot": "T+0",
+    "tags": [
+      "event_article",
+      "reader_facing",
+      "tsmc_revenue",
+      "T+0"
+    ]
+  },
+  {
+    "id": "governance_add_awaiting_interactive_session_vocab",
+    "task_type": "governance",
+    "priority": "P3",
+    "title": "[governance] Add awaiting_interactive_session to BLOCKED_REASONS vocab",
+    "description": "scripts/mark_task_blocked.py::VALID_REASONS 加 awaiting_interactive_session 作 controlled reason，semantic: 任務需要 chrome MCP / FB MCP / 其他 interactive-only auth，hourly cron 無法執行需 user interactive session 接手。同時更新 .claude/rules/control-plane.md 的 Controlled vocabulary 區段。Reason: 2026-05-27 hourly-02 將 2 個 fb_post task mark awaiting_external_data 屬 loose interpretation；future-proof 需正式 vocab。",
+    "status": "pending",
+    "created_at": "2026-05-27T02:15:06+08:00",
+    "source": "auto_discovered"
   }
 ]
