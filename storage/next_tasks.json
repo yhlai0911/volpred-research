@@ -11372,7 +11372,7 @@
     "description": "Event: US CPI release 2026-06-13 (Friday, 8:30 ET / 20:30 TW)\nCron event_jobs.items: cpi-us-2026-06-13-t2 (lead-2 trigger) + cpi-us-2026-06-13-t0 (release day)\n本 task = T-7 preview article (2026-06-06 前發)\n\nVolPred angle:\n1. 近 12 個月 CPI release day VIX 變化 distribution\n2. VIX term structure（VIX/VIX9D ratio）CPI 前後行為\n3. 對應 K experiment 引用：K490 (VIX9D vs VIX)、K1401 (event article 模板)\n4. 對交易者建議：CPI release day VT-sized 部位調整 vs hold\n\n執行流程（per .claude/skills/feed-publisher/SKILL.md + event-article-templates.md）：\n1. yfinance 抓近 12 個月 CPI release day VIX 數據\n2. 算 release day VIX % change distribution + VIX/VIX9D ratio 路徑\n3. 寫 1500-2000 字繁中 + 至少 2 圖（CPI day VIX dist + VIX term ratio path）\n4. content_type=event_article, status=published 立即發\n5. **FB 雙發佈強制**（per publishing rules 2026-05-25 更新；共用 trending-repost FB SOP）\n6. 此事件配額：T-7 (本篇) + T-2 + T+0 共 3 篇上限，不要超發\n\nConstraint: published 立即發（事件驅動）+ FB 同步發佈。",
     "task_type": "event_article",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "tags": [
       "event_article",
       "us_cpi",
@@ -11384,7 +11384,9 @@
     "claimed_by": "hourly-20",
     "claimed_at": "2026-05-26T12:08:18.864477+00:00",
     "claim_session_id": "dd3f7f0f1f02",
-    "started_at": "2026-05-26T12:08:30.062583+00:00"
+    "started_at": "2026-05-26T12:08:30.062583+00:00",
+    "completed_at": "2026-05-26T12:19:56.394817+00:00",
+    "result": "Article published: mile_ebb5d6f5 (status=published, audience=event, category=event_article). 1600 zh-Hant words + 2 figs (CPI day VIX dist + VIX9D/VIX event-window). Evidence: VIX % change mean+2.18%/median-0.67%/std 7.87% (N=13), VIX9D/VIX ratio 0.910 vs 0.9006 baseline (p=0.652 null). Anti-AI gate PASS. Refs: K490, K1401. Commit e1d5c9b4. FB dual-publish followup queued (fb_post_us_cpi_2026_06_13_t7 P2)."
   },
   {
     "id": "platform_ops_reader_facing_refill_cron",
@@ -11543,5 +11545,21 @@
     ],
     "created_at": "2026-05-26T11:20:47+00:00",
     "source": "main_thread_2026_05_26_hourly_19_dispatch"
+  },
+  {
+    "id": "fb_post_us_cpi_2026_06_13_t7",
+    "title": "[platform_ops] FB Ivan Lai dual-publish: US CPI 2026-06-13 T-7 預覽 (mile_ebb5d6f5)",
+    "description": "Feed article 已發布 (mile_ebb5d6f5, status=published 2026-05-26 20:18)。\n需同步發佈到 Ivan Lai FB 個人頁。\n\n來源檔：storage/event_articles/us_cpi_2026_06_13_t7/article.md\nFeed URL: https://volpred.zeabur.app/article/mile_ebb5d6f5\n\n步驟（per .claude/skills/trending-repost/references/fb-ivanlai-tone.md）：\n1. 改寫成 FB 200-400 字版本（不貼 VolPred 內文，Ivan Lai 口吻：先個人觀察 → 短句短段 → 不講滿）\n2. 主貼文**不放連結**\n3. VolPred 連結放第一則留言：https://volpred.zeabur.app/article/mile_ebb5d6f5\n4. 跑 anti_ai_gate.py --file <fb_draft.md>（FB mode default ON）→ exit 0 才送出\n5. 透過 claude-in-chrome 貼 FB（中文整段貼，不要逐字 type；貼後 screenshot 檢查）\n6. 失敗 retry max 3；失敗寫 fb_post_failed 進 work_log + storage/logs/fb_post_failures.jsonl\n\n注意：event_article 不算入 trending daily cap=2/day，但仍需 FB SOP 全套。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "tags": [
+      "platform_ops",
+      "fb_dual_publish",
+      "event_article",
+      "us_cpi"
+    ],
+    "created_at": "2026-05-26T12:19:45.6N+00:00",
+    "source": "hourly-20_event_article_followup"
   }
 ]
