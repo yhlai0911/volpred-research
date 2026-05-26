@@ -9832,7 +9832,7 @@
     "description": "K809 has a non-null verdict in experiments/k809/ but no published feed article and no existing task. Verdict: NULL: dispersion timing with ratio signal adds no value over SPY. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9841,7 +9841,13 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.502319+00:00",
     "generated_at": "2026-05-13T05:53:00.502321+00:00",
-    "k_id": "K809"
+    "k_id": "K809",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-26T13:07:25.617756+00:00",
+    "claim_session_id": "c64a1ca2eb0e",
+    "started_at": "2026-05-26T13:07:49.436293+00:00",
+    "completed_at": "2026-05-26T13:09:08.276116+00:00",
+    "result": "Published K809 article draft (mile_30bb0be5) with 2 PNGs. Core message: even normalized dispersion-ratio timing failed to beat SPY; publisher auto-reclassified audience to research because content remained research-grade."
   },
   {
     "id": "gen_article_k813",
@@ -11552,7 +11558,7 @@
     "description": "Feed article 已發布 (mile_ebb5d6f5, status=published 2026-05-26 20:18)。\n需同步發佈到 Ivan Lai FB 個人頁。\n\n來源檔：storage/event_articles/us_cpi_2026_06_13_t7/article.md\nFeed URL: https://volpred.zeabur.app/article/mile_ebb5d6f5\n\n步驟（per .claude/skills/trending-repost/references/fb-ivanlai-tone.md）：\n1. 改寫成 FB 200-400 字版本（不貼 VolPred 內文，Ivan Lai 口吻：先個人觀察 → 短句短段 → 不講滿）\n2. 主貼文**不放連結**\n3. VolPred 連結放第一則留言：https://volpred.zeabur.app/article/mile_ebb5d6f5\n4. 跑 anti_ai_gate.py --file <fb_draft.md>（FB mode default ON）→ exit 0 才送出\n5. 透過 claude-in-chrome 貼 FB（中文整段貼，不要逐字 type；貼後 screenshot 檢查）\n6. 失敗 retry max 3；失敗寫 fb_post_failed 進 work_log + storage/logs/fb_post_failures.jsonl\n\n注意：event_article 不算入 trending daily cap=2/day，但仍需 FB SOP 全套。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "platform_ops",
       "fb_dual_publish",
@@ -11560,6 +11566,25 @@
       "us_cpi"
     ],
     "created_at": "2026-05-26T12:19:45.6N+00:00",
-    "source": "hourly-20_event_article_followup"
+    "source": "hourly-20_event_article_followup",
+    "last_released_at": "2026-05-26T13:07:17.913152+00:00",
+    "claimed_by": "hourly-21",
+    "claimed_at": "2026-05-26T13:09:55.467429+00:00",
+    "claim_session_id": "83bb9079f513",
+    "started_at": "2026-05-26T13:09:59.812668+00:00",
+    "completed_at": "2026-05-26T13:12:16.619324+00:00",
+    "result": "FB draft 已 prep + anti_ai_gate PASS（280 字, Ivan Lai 口吻, 不放連結）→ saved to storage/event_articles/us_cpi_2026_06_13_t7/fb_draft.md。FB 個人帳號發文需 claude-in-chrome browser automation MCP，本 hourly session 不可用 → 走 fb-ivanlai-tone.md fallback：log fb_post_failed 進 storage/logs/fb_post_failures.jsonl + patch feed.json details 標 fb_post_status=pending_manual。開 followup task fb_post_us_cpi_2026_06_13_t7_manual_retry P2 給後續具備 browser tool 的 session 接手。"
+  },
+  {
+    "id": "fb_post_us_cpi_2026_06_13_t7_manual_retry",
+    "title": "FB Ivan Lai manual retry: US CPI 2026-06-13 T-7 (mile_ebb5d6f5)",
+    "description": "Draft 已 prep + gate PASS。等具備 claude-in-chrome MCP 的 session（互動 / 下次 hourly with browser tool）撈出來 paste 到 Ivan Lai FB。\n\nDraft 路徑：storage/event_articles/us_cpi_2026_06_13_t7/fb_draft.md\nFeed URL（留言用）：https://volpred.zeabur.app/v3/reports/mile_ebb5d6f5\n\n步驟：\n1. 讀 fb_draft.md（不用再改寫，gate 已 PASS）\n2. curl -I https://volpred.zeabur.app/v3/reports/mile_ebb5d6f5 驗 HTTP 200\n3. claude-in-chrome 開 Ivan Lai FB → form_input 整段貼 draft → screenshot 檢查 → publish\n4. 主貼文 publish 後 reply 留言：完整版分析+圖表在這裡 → https://volpred.zeabur.app/v3/reports/mile_ebb5d6f5\n5. 成功後 patch feed.json：fb_post_status=success + fb_post_url + fb_comment_url + fb_post_timestamp（per .claude/skills/trending-repost/references/fb-ivanlai-tone.md Step 9）\n6. supabase_sync.py sync-article --id mile_ebb5d6f5\n\n注意：原 fb_post_us_cpi_2026_06_13_t7 task 已標 succeeded（draft prep + fallback log 算完成 hourly scope）；本任務專門收 manual FB post 尾巴。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "hourly-21",
+    "created_at": "2026-05-26T21:12:00+08:00",
+    "parent_task_id": "fb_post_us_cpi_2026_06_13_t7",
+    "ref_milestone": "mile_ebb5d6f5"
   }
 ]
