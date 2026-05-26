@@ -20,6 +20,7 @@ hit ops_dashboard.py 2026-05-21, and v1 of this script). _parse_ts handles
 both. A monitor that lies is worse than no monitor.
 """
 from __future__ import annotations
+import json
 import os
 import re
 import subprocess
@@ -29,21 +30,45 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 LOGS = REPO / "storage" / "logs" / "cron"
+LAST_RUN_PATH = REPO / "storage" / "ops" / "cron_last_run.json"
 TPE = timezone(timedelta(hours=8))
 
-# job → (launchd label, log file, expected max gap hours before "stale")
+# job → (launchd label, log file, expected max gap hours before "stale",
+#         piggy_back_id in cron_last_run.json — fallback when LaunchAgent runs=0
+#         because piggy-back via check_alerts is the real fire path)
+# 2026-05-27: market_cal / memory_health 的 LaunchAgent 從未可靠 fire（macOS cron
+# 限制），實際靠 piggy-back via check_alerts. cron_review v1 只看 launchctl + log
+# banner → 持續 false-flag stale 數天。Fix: piggy_back_id 從 cron_last_run.json
+# 補 fallback timestamp。
 JOBS = {
-    "hourly_dispatch":  ("com.volpred.hourly-dispatch",      "hourly_dispatch.log", 2),
-    "compute_worker":   ("com.volpred.compute-worker",       "compute_worker.log",  1),
-    "check_alerts":     ("com.volpred.check-alerts",         "check_alerts.log",    2),
-    "collect_tw":       ("com.volpred.collect-tw-data",      "collect_tw.log",      30),
-    "collect_us":       ("com.volpred.collect-us-data",      "collect_us.log",      30),
-    "daily_update":     ("com.volpred.daily-update",         "daily_update.log",    30),
-    "release_pool":     ("com.volpred.release-pool",         "release_pool.log",    8),
-    "market_cal":       ("com.volpred.market-calendar-sync", "market_cal.log",      200),
-    "memory_health":    ("com.volpred.memory-health-daily",  "memory_health.log",   30),
-    "work_summary":     ("com.volpred.work-summary",         "work_summary.log",    12),
+    "hourly_dispatch":  ("com.volpred.hourly-dispatch",      "hourly_dispatch.log", 2,   None),
+    "compute_worker":   ("com.volpred.compute-worker",       "compute_worker.log",  1,   None),
+    "check_alerts":     ("com.volpred.check-alerts",         "check_alerts.log",    2,   None),
+    "collect_tw":       ("com.volpred.collect-tw-data",      "collect_tw.log",      30,  "collect_tw_data"),
+    "collect_us":       ("com.volpred.collect-us-data",      "collect_us.log",      30,  "collect_us_data"),
+    "daily_update":     ("com.volpred.daily-update",         "daily_update.log",    30,  "daily_update"),
+    "release_pool":     ("com.volpred.release-pool",         "release_pool.log",    8,   "release_pool"),
+    "market_cal":       ("com.volpred.market-calendar-sync", "market_cal.log",      200, "market_calendar_sync"),
+    "memory_health":    ("com.volpred.memory-health-daily",  "memory_health.log",   30,  "memory_health_daily"),
+    "work_summary":     ("com.volpred.work-summary",         "work_summary.log",    12,  None),
 }
+
+
+def _piggy_back_end(job_id: str) -> datetime | None:
+    """Read piggy-back last-success timestamp from cron_last_run.json."""
+    if not LAST_RUN_PATH.exists():
+        return None
+    try:
+        state = json.loads(LAST_RUN_PATH.read_text())
+    except (OSError, ValueError):
+        return None
+    raw = state.get(job_id) if isinstance(state, dict) else None
+    if not raw:
+        return None
+    try:
+        return datetime.fromisoformat(raw.replace("Z", "+00:00")).astimezone(TPE)
+    except ValueError:
+        return None
 
 
 def _parse_ts(ln: str) -> datetime | None:
@@ -120,7 +145,7 @@ def main() -> int:
     now = datetime.now(TPE)
     print(f"=== cron 成果掌握 review — {now:%Y-%m-%d %H:%M:%S}（台灣時間）===\n")
     attention = []
-    for job, (label, logname, max_gap_h) in JOBS.items():
+    for job, (label, logname, max_gap_h, piggy_id) in JOBS.items():
         st = launchctl_state(label)
         lg = last_log_run(LOGS / logname)
         flags = []
@@ -128,15 +153,23 @@ def main() -> int:
         if le not in (None, "0", "(never exited)"):
             flags.append(f"🔴 last exit {le}")
         end = lg.get("end")
+        # piggy-back fallback: 若 log banner end 不存在或太舊，查 cron_last_run.json
+        source = "log"
+        if piggy_id:
+            pb_end = _piggy_back_end(piggy_id)
+            if pb_end and (end is None or pb_end > end):
+                end = pb_end
+                source = "piggy-back"
         when = "?"
         if end:
-            when = end.strftime("%Y-%m-%d %H:%M:%S")
+            suffix = "" if source == "log" else " (piggy-back)"
+            when = end.strftime("%Y-%m-%d %H:%M:%S") + suffix
             gap_h = (now - end).total_seconds() / 3600
             if gap_h > max_gap_h:
                 flags.append(f"⚠️ 上次完成 {gap_h:.1f}h 前（>{max_gap_h}h）")
         elif lg.get("start"):
             when = lg["start"].strftime("%Y-%m-%d %H:%M:%S") + " (start)"
-        if lg.get("start") and not lg.get("complete") and not st.get("running"):
+        if lg.get("start") and not lg.get("complete") and not st.get("running") and source == "log":
             flags.append("⚠️ 最後一班有 start 無 end（疑似中斷）")
         status = "running" if st.get("running") else "idle"
         line = f"{job:17} runs={st.get('runs')} exit={le} {status} | last: {when}"
