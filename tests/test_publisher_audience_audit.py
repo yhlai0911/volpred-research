@@ -70,37 +70,46 @@ def test_audit_general_content_research_audience_exempt():
     assert _audit_general_content("research", tags, content) == []
 
 
-def test_publish_milestone_strict_blocks_general_with_research_jargon(
-    tmp_path: Path, monkeypatch
+def test_publish_milestone_research_jargon_overrides_general_audience(
+    tmp_path: Path, monkeypatch, capsys
 ):
-    """Integration: publish_milestone with audit_strict=True (default) raises
-    ValueError on a general-audience article containing forbidden terms."""
+    """Integration: publish_milestone with audience='general' but research-grade
+    content (Harvey, DM test, t-value) → _infer_audience overrides to 'research'
+    instead of raising ValueError. (2026-05-26 behavior change: _infer_audience
+    enforce gate takes priority over _audit_general_content; mile_d0d66405 fix.)
+
+    Prior behavior (pre-2026-05-26): raised ValueError with match='general'.
+    New behavior: audience silently corrected to 'research' + WARN log printed.
+    """
+    import json
+
     monkeypatch.setenv("VOLPRED_ACTOR", "claude")
     monkeypatch.setattr(Publisher, "REMOTE_URL", "", raising=False)
     monkeypatch.setattr(Publisher, "_sync_feed_to_remote", lambda self: None, raising=False)
     monkeypatch.setattr(Publisher, "_sync_report_to_remote", lambda self, *a, **kw: None, raising=False)
-    # Stub out supabase + email side effects
-    import volpred.publisher.publisher as mod
-    monkeypatch.setattr(mod, "__name__", mod.__name__)
 
     pub = Publisher(storage_dir=str(tmp_path))
 
-    # Stub external calls that would fire on publish path
-    def _no_op_sync(item, **kwargs):
-        return True
-    monkeypatch.setattr("scripts.supabase_sync.sync_article", _no_op_sync, raising=False)
-
     polluted_content = "FOMC 會議前 t=4.38, Harvey |t|>3, DM test p=0.04."
 
-    with pytest.raises(ValueError, match="general"):
-        pub.publish_milestone(
-            title="一般讀者測試標題",
-            description=polluted_content,
-            phase="research",
-            audience="general",
-            tags=["一般讀者", "FOMC"],
-            status="draft",
-        )
+    # Should NOT raise ValueError — _infer_audience upgrades to 'research'
+    pub_id = pub.publish_milestone(
+        title="一般讀者測試標題",
+        description=polluted_content,
+        phase="research",
+        audience="general",
+        tags=["一般讀者", "FOMC"],
+        status="draft",
+    )
+
+    assert pub_id.startswith("mile_")
+    feed = json.loads((tmp_path / "reports" / "feed.json").read_text())
+    item = next(i for i in feed if i["id"] == pub_id)
+    # _infer_audience must have overridden 'general' to 'research'
+    assert item["audience"] == "research", f"expected 'research', got '{item['audience']}'"
+    # WARN must be printed to stdout
+    captured = capsys.readouterr()
+    assert "_infer_audience" in captured.out and "WARN" in captured.out
 
 
 def test_publish_milestone_strict_passes_clean_general(

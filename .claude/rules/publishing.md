@@ -42,6 +42,21 @@ paths:
 
 ## 發佈硬規則
 
+### Audience Gate（2026-05-26 新增 — mile_d0d66405 incident）
+
+**`_infer_audience` 是 source of truth，agent 提供的 audience 只是 hint。**
+
+- **不允許 agent override**：`publish_milestone` 呼叫時，即使 agent 顯式傳 `audience='general'`，若 `_infer_audience()` 判斷 content 含 ≥2 學術關鍵詞，publisher 會自動覆寫為 `'research'` 並印 WARN log。
+- **唯一豁免**：`content_type='member_qa'` → 保 `member_qa`；`content_type='event_article'` → 保 `event`。
+- **發佈前 CI 檢查**：`uv run python scripts/validate_feed_audience.py` — 若 feed 中有 audience='general' 但含 ≥2 學術關鍵詞的 entry，exit 1 並列出 id。
+- **Agent brief 寫作原則**：
+  - 若 content 含 K-id、QLIKE、Harvey、DM test、bootstrap、p-value、t-stat 等 → 直接傳 `audience='research'`，不要傳 `'general'`
+  - `audience='general'` 只適用於真正散戶向、無統計 jargon 的文章
+  - publisher 會自動修正，但 agent 若知道是研究文章就應該正確傳 `research`，不要依賴後備修正
+
+**學術關鍵詞完整清單（≥2 命中 → 推斷為 research）**：
+`K\d+`（K-id）、`p-value`、`t-stat`、`QLIKE`、`Sharpe`、`Bonferroni`、`bootstrap`、`MLE`、`cointegration`、`GARCH-X`、`Harvey`、`Diebold-Mariano`、`DM test`、`HAR-RV`、`GJR-GARCH`、`EGARCH`、`GARCH`、`MCS`、`VaR`
+
 1. **一律走 `feed-publisher` SKILL**。不要自己拼 Write feed.json 或繞路 supabase_sync（會漏 LanceDB embed + notification + dedup）。
 2. **thinking ≠ content**。`m.think()` 內部決策邏輯不是 Markdown 文章內容。文章必須是讀者能直接讀的 Markdown（標題 + 段落 + 表格 + 圖 + 結論）。
 3. **Status 分流**：

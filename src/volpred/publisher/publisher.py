@@ -54,6 +54,88 @@ _GENERAL_FORBIDDEN_PATTERNS = [
 ]
 _GENERAL_MAX_TAG_COUNT = 8
 
+# 2026-05-26: Academic keyword list shared between _audit_general_content and
+# _infer_audience. Single source of truth — edit here, both functions benefit.
+# Patterns that indicate research-grade content unsuitable for general audience.
+_ACADEMIC_KEYWORDS: list[tuple[re.Pattern, str]] = [
+    (re.compile(r'K\d+', re.IGNORECASE), 'K-id'),
+    (re.compile(r'\bp[\s-]?value\b', re.IGNORECASE), 'p-value'),
+    (re.compile(r'\bt[-\s]?stat\b', re.IGNORECASE), 't-stat'),
+    (re.compile(r'\bQlike\b', re.IGNORECASE), 'QLIKE'),
+    (re.compile(r'\bSharpe\b', re.IGNORECASE), 'Sharpe'),
+    (re.compile(r'\bBonferroni\b', re.IGNORECASE), 'Bonferroni'),
+    (re.compile(r'\bbootstrap\b', re.IGNORECASE), 'bootstrap'),
+    (re.compile(r'\bMLE\b'), 'MLE'),
+    (re.compile(r'\bcointegration\b', re.IGNORECASE), 'cointegration'),
+    (re.compile(r'\bGARCH[-\s]?X\b', re.IGNORECASE), 'GARCH-X'),
+    (re.compile(r'\bHarvey\b'), 'Harvey'),
+    (re.compile(r'\bDiebold[-\s]?Mariano\b', re.IGNORECASE), 'Diebold-Mariano'),
+    (re.compile(r'\bDM\s+test\b', re.IGNORECASE), 'DM test'),
+    (re.compile(r'\bHAR[-\s]?RV\b', re.IGNORECASE), 'HAR-RV'),
+    (re.compile(r'\bGJR[-\s]?GARCH\b', re.IGNORECASE), 'GJR-GARCH'),
+    (re.compile(r'\bEGARCH\b', re.IGNORECASE), 'EGARCH'),
+    (re.compile(r'\bGARCH\b', re.IGNORECASE), 'GARCH'),
+    (re.compile(r'\bMCS\b'), 'MCS'),
+    (re.compile(r'\bVaR\b'), 'VaR'),
+]
+_ACADEMIC_KEYWORD_THRESHOLD = 2  # ≥2 matches → infer research
+
+
+def _infer_audience(
+    title: str,
+    content: str,
+    tags: list[str],
+    content_type: str | None = None,
+) -> str:
+    """Infer the correct audience from content signals. This is the source of truth.
+
+    Enforce mechanism: caller-supplied audience is only a hint. If _infer_audience
+    disagrees, the inferred value wins and a WARN is emitted (see publish_milestone).
+    This prevents agents from defaulting to 'general' for research-grade content,
+    which caused mile_d0d66405 to be mis-tagged (audience=general despite ≥2 academic
+    keywords in title and content).
+
+    Rules (in priority order):
+    1. content_type == 'member_qa'  → 'member_qa' (always preserve)
+    2. content_type == 'event_article' → 'event' (always preserve)
+    3. Title contains K\\d+ regex match → 'research'
+    4. title + content + tags combined contain ≥2 academic keywords → 'research'
+    5. Default → 'general'
+
+    Academic keyword list: K\\d+, p-value, t-stat, QLIKE, Sharpe, Bonferroni,
+    bootstrap, MLE, cointegration, GARCH-X, Harvey, Diebold-Mariano, DM test,
+    HAR-RV, GJR-GARCH, EGARCH, GARCH, MCS, VaR.
+    """
+    # Rule 1 & 2: content_type overrides
+    if content_type == 'member_qa':
+        return 'member_qa'
+    if content_type == 'event_article':
+        return 'event'
+
+    # Rule 3: K-id in title → research
+    if re.search(r'K\d+', title or ''):
+        return 'research'
+
+    # Rule 4: count academic keywords across title + content + tags
+    combined = ' '.join(filter(None, [title or '', content or '', ' '.join(tags or [])]))
+    hit_count = 0
+    hit_labels: list[str] = []
+    seen: set[str] = set()
+    for pattern, label in _ACADEMIC_KEYWORDS:
+        if label in seen:
+            continue
+        if pattern.search(combined):
+            hit_count += 1
+            hit_labels.append(label)
+            seen.add(label)
+        if hit_count >= _ACADEMIC_KEYWORD_THRESHOLD:
+            break
+
+    if hit_count >= _ACADEMIC_KEYWORD_THRESHOLD:
+        return 'research'
+
+    return 'general'
+
 
 def _extract_experiment_refs(tag_list: list[str]) -> tuple[list[str], list[str]]:
     """Split K-id tags out of user-facing tags into metadata refs.
@@ -383,18 +465,25 @@ class Publisher:
         pub_id = f"mile_{uuid.uuid4().hex[:8]}"
         now = datetime.now(timezone.utc).isoformat()
         normalized_status = status if status in {'published', 'draft', 'scheduled', 'unpublished', 'archived'} else 'published'
-        # Determine audience and category — explicit params take priority
+        # Determine audience and category — _infer_audience is the enforce mechanism.
+        # Caller-supplied audience is only a HINT; inferred value always wins.
         tag_list = tags or []
+        # Detect daily from tags before inference (daily is not covered by academic keywords)
+        if audience is None and ('每日建議' in tag_list or 'daily-update' in tag_list):
+            audience = 'daily'
+        # 2026-05-26: _infer_audience enforce gate — prevents agents from mis-tagging
+        # research-grade content as 'general' (mile_d0d66405 incident).
+        inferred = _infer_audience(title, description or '', tag_list, content_type=category)
         if audience is None:
-            if '一般讀者' in tag_list:
-                audience = 'general'
-            elif '每日建議' in tag_list or 'daily-update' in tag_list:
-                audience = 'daily'
-            else:
-                audience = 'research'
-                # 2026-04-14: warn when auto-classify falls through to research default
-                # Common bug: general-intent article missed explicit audience='general'
-                print(f"  ⚠️ audience auto-defaulted to 'research' for title='{title[:50]}...'. If this is a general-reader article, explicitly pass audience='general'.")
+            audience = inferred
+        elif audience != inferred and inferred != 'general':
+            # Infer override: log WARN and use inferred result (enforce over discretion)
+            print(
+                f"  [_infer_audience] WARN: caller passed audience='{audience}' but "
+                f"content signals infer '{inferred}' — overriding to '{inferred}'. "
+                f"(title='{title[:60]}')"
+            )
+            audience = inferred
         if category is None:
             if audience == 'general':
                 category = 'general'

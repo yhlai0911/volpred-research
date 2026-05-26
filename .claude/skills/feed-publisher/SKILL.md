@@ -267,6 +267,27 @@ pub.publish_milestone(
 
 **一般讀者和研究文章的受眾完全不同，寫作方式必須有本質差異。**
 
+#### Audience 分類總表（六個 audience + 定義 + enforce 機制）
+
+**⚠️ `_infer_audience` 是 source of truth（2026-05-26 mile_d0d66405 incident）**
+
+Agent 提供的 audience 只是 **hint**。Publisher 的 `_infer_audience()` 會根據 title / content / tags 中的學術關鍵詞強制推斷，若與 caller 傳入的不同，以推斷結果為準（並印 WARN log）。
+
+**唯一豁免**：`content_type='member_qa'` → 保 `member_qa`；`content_type='event_article'` → 保 `event`。
+
+| audience | 中文標籤 | 定義 | 典型內容 | 是否推斷（`_infer_audience` 覆寫） |
+|----------|---------|------|---------|----------------------------------|
+| `general` | 一般讀者 | 散戶 / 業餘投資人；無統計背景 | 敘事式故事、白話投資建議、類比解釋 | 是：若含 ≥2 學術關鍵詞 → 自動升為 `research` |
+| `research` | 研究 | 有金融 / 統計背景；同行可復現 | K 編號、t-stat、QLIKE、DM test、Harvey、bootstrap | 是：有 K-id in title 或 ≥2 學術關鍵詞 → 確認為 `research` |
+| `methodology` | 方法論 | 純方法比較；不帶具體 K 結果 | GARCH 家族介紹、HAR-RV 推導、MCS 方法解釋 | 否（依 caller 判斷） |
+| `event` | 事件 | 時效性市場事件（FOMC/CPI/NFP/財報） | 即時觀察、情境劇本、當日建議 | 否（由 content_type=event_article 保留） |
+| `member_qa` | 會員提問 | 會員提問研究；問答頁連結 | 答覆指定會員問題 | 否（由 content_type=member_qa 保留） |
+| `daily` | 每日建議 | 每日市場配置、短版評論 | 每日倉位建議、VIX 看板 | 否（依 tag 推斷：`每日建議` / `daily-update`） |
+
+**學術關鍵詞清單**（`_infer_audience` 推斷用，≥2 命中 → `research`）：
+
+`K\d+`（K-id）、`p-value`、`t-stat`、`QLIKE`、`Sharpe`、`Bonferroni`、`bootstrap`、`MLE`、`cointegration`、`GARCH-X`、`Harvey`、`Diebold-Mariano`、`DM test`、`HAR-RV`、`GJR-GARCH`、`EGARCH`、`GARCH`、`MCS`、`VaR`
+
 #### Audience 分流決策表（寫第一個字之前必看）
 
 | 情境 | audience | 骨架風格 | 表格上限 | 字數 |
