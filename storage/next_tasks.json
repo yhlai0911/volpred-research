@@ -1567,7 +1567,7 @@
     "title": "K267: write general-audience article (auto-discovered uncovered K)",
     "description": "K K267 has verdict signal (score=0, reasons=None) but no general article. Verdict preview: ",
     "priority": 4,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K267",
@@ -1576,9 +1576,15 @@
       "audience-general"
     ],
     "created_at": "2026-05-06T01:25:07+00:00",
-    "blocked_reason": "self_tagged_optional",
-    "blocked_at": "2026-05-06T01:25:20+00:00",
-    "blocked_note": "K267 is internal session summary (K183-K266 retrospective), not a research finding for general audience"
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-05-26T22:49:34+00:00",
+    "blocked_note": "Auto-discovered stale task: experiments/k267 remains planning-shell with noncanonical result filename, and same-family day-of-week article already exists in feed; remove from pending queue as duplicate/noise.",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-26T22:48:53.579078+00:00",
+    "claim_session_id": "0a80a46a81b6",
+    "started_at": "2026-05-26T22:48:59.603450+00:00",
+    "completed_at": "2026-05-26T22:49:12.636765+00:00",
+    "result": "Marked deprecated/blocklisted from pending queue. Evidence: experiments/k267 is still planning-shell with noncanonical result filename only, and feed already contains same-family day-of-week article ('禮拜一是不是最危險？跨三市場 day-of-week 大檢驗：幾乎全軍覆沒'), so this auto-discovered general-article task is duplicate/noise rather than a fresh publication candidate."
   },
   {
     "id": "K274_article_general",
@@ -5425,7 +5431,7 @@
   {
     "id": "Paper3_experiments_md_add_K697_paper3_fixes",
     "title": "Paper 3 QUICK WIN: experiments.md 加 K697 (VIX predictive) + paper3_fixes.json (VIX threshold)",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 3,
     "created_at": "2026-04-17T17:48:11+08:00",
     "description": "Paper 3 rescan (f0cd9229) 發現 2 UNDOCUMENTED: K697 (VIX predictive r=0.570 magnitude, r=0.042 direction) + paper3_fixes.json (VIX threshold t-stats 7.98-10.91). 建議主線程: (1) experiments.md 加 K697; (2) body main.tex §methodology cite K697 核心發現; (3) paper3_fixes.json 正式化成 K 編號 + experiments.md 登錄. 5-10 min.",
@@ -5442,7 +5448,13 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "hourly-06",
+    "claimed_at": "2026-05-26T22:11:01.645443+00:00",
+    "claim_session_id": "b581b8eece4f",
+    "started_at": "2026-05-26T22:11:01.928141+00:00",
+    "completed_at": "2026-05-26T22:14:13.059314+00:00",
+    "result": "K79 cite added to body_v3.tex line 149 + footnote linking experiments.md mapping. K697 already cited at line 504 + experiments.md line 35 (Paper 3 rescan f0cd9229 issue already resolved on 4-18 except K79 cite). xelatex 37 pages compile clean. paper-update synced (commit 415e258d). Outstanding traces: B.1 sample period, B.2 BAB N gap, B.3 non-equity MDD — separate tasks."
   },
   {
     "id": "Paper3_reframe",
@@ -9470,7 +9482,7 @@
     "description": "K521 has a non-null verdict in experiments/k521/ but no published feed article and no existing task. Verdict: {'is_2d_artifact': False, 'is_data_alignment_bug': True, 'bug_type': 'K519/K520 . Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "blocked",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9479,7 +9491,16 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.467174+00:00",
     "generated_at": "2026-05-13T05:53:00.467176+00:00",
-    "k_id": "K521"
+    "k_id": "K521",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-26T22:51:30.146904+00:00",
+    "claim_session_id": "20c7d6ee8fc7",
+    "started_at": "2026-05-26T22:51:36.768625+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-05-26T22:51:37+00:00",
+    "blocked_note": "Auto-discovered stale daily_article: experiments/k521 remains planning-shell, while feed already contains published K521-related reader-facing coverage (mile_6ba3e0bf, mile_bdf55e0d); keep out of pending queue as duplicate/noise.",
+    "completed_at": "2026-05-26T22:51:46.549389+00:00",
+    "result": "Marked deprecated/blocklisted from pending queue. Evidence: experiments/k521 is still a planning-shell README, while feed already contains published K521-related reader-facing coverage ('94 個策略實驗，只有 1 個半成功——投資策略的殘酷現實' and '數據分析最常犯的錯——我們差點把錯誤策略推薦給你'); this auto-discovered general-article task is duplicate/noise rather than a fresh publication candidate."
   },
   {
     "id": "gen_article_k524",
@@ -9575,7 +9596,7 @@
     "description": "K567 has a non-null verdict in experiments/k567/ but no published feed article and no existing task. Verdict: {'leverage_universality': False, 'n_markets_with_benefit': 3, 'n_harvey_pass': 0. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9585,8 +9606,13 @@
     "created_at": "2026-05-13T05:53:00.474492+00:00",
     "generated_at": "2026-05-13T05:53:00.474494+00:00",
     "k_id": "K567",
-    "started_at": "2026-05-26T07:45:12.578526+00:00",
-    "last_released_at": "2026-05-26T07:46:35.597729+00:00"
+    "started_at": "2026-05-26T21:42:34.455079+00:00",
+    "last_released_at": "2026-05-26T07:46:35.597729+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-26T21:42:22.731524+00:00",
+    "claim_session_id": "b3f234b28991",
+    "completed_at": "2026-05-26T21:47:15.955369+00:00",
+    "result": "K567 reader-facing article published as draft (mile_4562140e, ~2450字)。anti_ai_gate PASS；2 張 general charts 自動上傳到 Supabase；experiment_refs=K567，phase=robustness。Publisher 依內容訊號自動把 audience 從 general 升為 research。git add/commit 仍被 .git/index.lock 權限限制擋住。"
   },
   {
     "id": "gen_article_k569",
@@ -11872,7 +11898,7 @@
     "title": "governance: BLOCKED_REASONS vocab single source + add diversity_rule_post_null_quartet",
     "description": "Schema bug: mark_task_blocked.py VALID_REASONS (7 entries) drifted from continue_task_dispatch.py BLOCKED_REASONS (9 entries). K1383 uses unregistered reason diversity_rule_post_null_quartet. Refactor: extract to src/volpred/ops/blocked_reasons.py single source, import in both callers, add missing vocab entry. Update .claude/rules/control-plane.md docs. Main-thread only; 50min cap.",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "governance",
     "source": "hourly_dispatch_05_auto_discovered",
     "tags": [
@@ -11884,6 +11910,27 @@
     "claimed_by": "hourly-05",
     "claimed_at": "2026-05-26T21:10:45.822349+00:00",
     "claim_session_id": "f8e1f8a1dfce",
-    "started_at": "2026-05-26T21:10:46.069845+00:00"
+    "started_at": "2026-05-26T21:10:46.069845+00:00",
+    "completed_at": "2026-05-26T21:12:36.650117+00:00",
+    "result": "Extracted BLOCKED_REASONS to src/volpred/ops/blocked_reasons.py (single source, 10 entries). mark_task_blocked.py + continue_task_dispatch.py now import canonical set. Added 3 previously-orphaned reasons (codex_quota_reset_pending, paid_data_source_decision_pending, diversity_rule_post_null_quartet). K1383 now correctly in blocked bucket (was previously rejected by CLI vocab). Tests pass. Commit bb9a37bf."
+  },
+  {
+    "id": "platform_ops_trending_scan_missing_to_skipped",
+    "title": "[platform_ops] refill_reader_facing_pool: treat missing trending scan cmd as skipped not error",
+    "description": "改 scripts/refill_reader_facing_pool.py::refill_trending_candidates() — env VOLPRED_TRENDING_SCAN_CMD 未設時回 {ok: True, skipped: True, reason: 'no_scan_cmd_configured'}，並從 run_refill 的 errors list 排除 skipped。原因：trending scan = best-effort（trending_repost task 主流由 agent 用 WebSearch 自己找候選），不該每 fire 寫 error。Smoke: uv run python scripts/refill_reader_facing_pool.py --force, 驗證 state errors 不再包含 trending_scan。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "in_progress",
+    "created_at": "2026-05-27T07:08:00+08:00",
+    "source": "hourly_dispatch_07_discovery",
+    "tags": [
+      "platform_ops",
+      "reader_facing_refill",
+      "follow_up"
+    ],
+    "claimed_by": "hourly-07",
+    "claimed_at": "2026-05-26T23:10:09.517925+00:00",
+    "claim_session_id": "eefac472e9dd",
+    "started_at": "2026-05-26T23:10:09.792347+00:00"
   }
 ]

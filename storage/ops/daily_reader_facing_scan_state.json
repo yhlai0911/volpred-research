@@ -1,18 +1,63 @@
 {
-  "date": "2026-05-26",
+  "date": "2026-05-27",
   "scanned": true,
-  "scanned_at": "2026-05-26T10:11:15Z",
-  "scanned_by": "interactive-claude-main-thread",
-  "trending_added": 2,
-  "trending_ids": [
-    "trending_repost_2026_05_26_etf_dividend_vol",
-    "trending_repost_2026_05_26_silicon_valley_layoffs_capex"
-  ],
-  "event_added": 1,
-  "event_ids": [
-    "event_article_us_cpi_2026_06_13_preview"
-  ],
+  "scanned_at": "2026-05-26T23:10:32+00:00",
+  "trending_added": 0,
+  "event_added": 0,
   "member_qa_added": 0,
-  "member_qa_note": "已有 member_qa_44b3cfcd_import_cars pending (subagent 接手中)",
-  "notes": "interactive session 親跑 scan，PHASE 0.5 prompt 已就位; followup platform_ops_reader_facing_refill_cron 待後續實作; 2026-05-26 18:10 用戶補充 AI/layoff/token maxxing 高 viral 主題後新增第 2 篇撐滿 daily cap"
+  "errors": [],
+  "trending_skipped": {
+    "reason": "no_scan_cmd_configured",
+    "hint": "set VOLPRED_TRENDING_SCAN_CMD to enable batch refill"
+  },
+  "event_skipped": [
+    {
+      "id": "event_article_nfp_us_2026-06-05_tminus7",
+      "reason": "already_exists"
+    },
+    {
+      "id": "event_article_nfp_us_2026-06-05_tminus2",
+      "reason": "already_exists"
+    },
+    {
+      "id": "event_article_nfp_us_2026-06-05_tplus0",
+      "reason": "already_exists"
+    },
+    {
+      "id": "fomc-2026-06-17-t7",
+      "reason": "out_of_horizon"
+    },
+    {
+      "id": "fomc-2026-06-17-t2",
+      "reason": "out_of_horizon"
+    },
+    {
+      "id": "fomc-2026-06-17-t0",
+      "reason": "out_of_horizon"
+    },
+    {
+      "id": "event_article_tsmc_revenue_2026-06-10_tplus0",
+      "reason": "already_exists"
+    },
+    {
+      "id": "cpi-us-2026-06-11-t2",
+      "reason": "out_of_horizon"
+    },
+    {
+      "id": "cpi-us-2026-06-11-t0",
+      "reason": "out_of_horizon"
+    },
+    {
+      "id": "cpi-us-2026-06-13-t2",
+      "reason": "out_of_horizon"
+    },
+    {
+      "id": "cpi-us-2026-06-13-t0",
+      "reason": "out_of_horizon"
+    }
+  ],
+  "member_qa_result": {
+    "created": false,
+    "reason": "no_pending_member_qa_work"
+  }
 }
