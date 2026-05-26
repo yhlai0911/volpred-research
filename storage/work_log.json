@@ -8454,5 +8454,12 @@
     "task_id": "gen_article_k786",
     "claimed_by": "hourly-06",
     "result": "K786 NULL VoV-VT article publish draft mile_0df2d8ab; commit fc5a9b39"
+  },
+  {
+    "timestamp": "2026-05-26T08:07",
+    "task_type": "governance",
+    "task_id": "hourly_08_cleanup_stale_k1401_todo",
+    "claimed_by": "hourly-08",
+    "result": "Removed stale K1401 retroactive FB TODO from scripts/cron_hourly_dispatch_prompt.md L123 (K1401 mile_daaff779 FB already posted 2026-05-25T03:33 per writer_log; details.fb_post_url verified). Ran sync_next_tasks_status.py --apply: 10 K-id pending evaluated, 0 stale to mark succeeded — pool clean."
   }
 ]
