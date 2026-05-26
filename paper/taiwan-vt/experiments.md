@@ -38,6 +38,7 @@ Columns: K-ID | Paper Section | Title | Verdict | Status | Location
 | K1150 | Sec 5 EAV / Three-Market Evidence | A4f-EAV Japan (N=30 TOPIX) — primary t PASS, bootstrap PASS | PASS | complete | root |
 | K1175 | Sec 4.2 / Sec 4.3 / Conclusion | Table 3 VT 2010–2026 canonical replication — buy-hold Sharpe diff ~9.6% from paper (period mismatch) | PARTIAL_MATCH | complete | root |
 | K1176 | Appendix Time-Zone | Cross-market VT Sharpe comparison — PARTIAL_MATCH; c2c Sharpe 1.92 vs paper 1.47 (split-correction) | PARTIAL_MATCH | complete | root |
+| K1180 | Sec 6.2 / Sec 6.3 BCI Momentum | Coincident MoM strategy IS Sharpe 0.413 (paper 0.732 unreproducible — errata applied to body.tex line 486); OOS Sharpe 1.2694 (paper 1.260) MATCH; BCI null t=-0.5349 (paper -0.53) MATCH; Leading MoM t=3.74 PARTIAL_MATCH | PARTIAL_MATCH | complete | root |
 | K1181 | Sec 2.4 VIX Proxy / Sec 4.5 | VIXTWN stats + Steiger Z — ρ=0.594 matched (paper 0.595); 64-month window confirmed | PARTIAL_MATCH | complete | root |
 | K1302 | Sec 2 / Sec 3.1 / Sec 8.5 | Table 2 individual γ rebuild — 9+1 stocks, 100 multistart, 0 failures; all targets matched | PASS | complete | root |
 | K1302b | Sec 3.1 Diversification | γ for 5 unlisted Taiwan stocks — all 5 converged, avg γ=0.024, persistence<1 | PASS | complete | root |
@@ -48,13 +49,13 @@ Columns: K-ID | Paper Section | Title | Verdict | Status | Location
 
 ## Experiment Count Summary
 
-- Total experiments: 33
+- Total experiments: 34
 - Local (`paper/taiwan-vt/experiments/`): 17 scripts + 18 result JSONs (k851 has 2 JSONs)
-- Root (`experiments/<K>/`): 16 experiments
+- Root (`experiments/<K>/`): 17 experiments
 - PASS: 8 (K553, K558, K892, K1145, K1147, K1150, K1302, K1302b, K1370c)
 - CONDITIONAL_PASS: 7 (K461, K472, K512, K515, K516, K844, K850, K854)
 - FAIL: 1 (K1098)
-- PARTIAL_MATCH: 3 (K1175, K1176, K1181)
+- PARTIAL_MATCH: 4 (K1175, K1176, K1180, K1181)
 - verdict not recorded: 14 (K636, K844, K847, K848, K849, K851, K852, K852b, K853, K886, K896, K900, K1302b, K1370)
 
 ## Open Issues Affecting Submission
