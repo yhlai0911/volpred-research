@@ -1,4 +1,4 @@
-# Handoff — 2026-05-26 05:50:04 台灣時間
+# Handoff — 2026-05-26 14:11:02 台灣時間
 
 **角色**：VolPred 自主運營經理（用戶 = 老闆 / report-only / full autonomy）
 
@@ -6,18 +6,18 @@
 
 ## 1. 任務池快照（`storage/next_tasks.json`）
 
-- **總數**：580
-  - pending: 30
-  - pending_main_thread: 31
-  - succeeded: 468
-  - failed: 2
+- **總數**：582
+  - pending: 21
+  - pending_main_thread: 28
+  - succeeded: 481
+  - failed: 3
   - blocked: 4
   - blocked_on_user: 1
 
 **type 分佈（top 6）**：
   - daily_article: 280
   - paper_review: 132
-  - experiment: 84
+  - experiment: 86
   - platform_ops: 32
   - paper_body: 24
   - paper_decision: 14
@@ -30,7 +30,7 @@
 
 - (無未處理回信)
 
-_Gmail 最後 poll：2026-05-25T21:45:16.238156+00:00_
+_Gmail 最後 poll：2026-05-26T06:00:28.788809+00:00_
 
 ## 4. Pending 任務 top 8（依 priority asc）
 
@@ -40,33 +40,34 @@ _Gmail 最後 poll：2026-05-25T21:45:16.238156+00:00_
 - `K1385` P3 [experiment] K1385: Sentiment-Augmented GARCH-LSTM — Computational Economics 2025
 - `K1388` P3 [experiment] K1388: HAR-GNN（Graph Neural Network）— ScienceDirect 2024
 - `K1389` P3 [experiment] K1389: KAN for VIX Forecasting — Expert Systems with Applications 2025
-- `Paper1_D3_kupiec_rounding_precision` P3 [paper_body] Paper 1 MEDIUM: Kupiec p 1-decimal rounding — 建議 paper 改 2-decimal
-- `Paper1_KB_only_tables_10_11_12_C3_footnote` P3 [paper_review] Paper 1: Tables 10/11/12/C3 6 KB-only 數字加 'pre-K era, KB source' footnote
+- `Paper2_G20_T4_IS_Sharpe_errata` P3 [paper_review] Paper 2 G20 T4: IS Sharpe 0.732 vs K1180 0.413 (44% gap) — main-thread errata
+- `Paper2_Table4_documentation_errata` P3 [paper_review] Paper 2: Table 4 / Methodology / Data section 補說明 (K1176 發現)
 
 ## 5. 進行中 agent / worktree
 
-- **slot 占用**：0 / 4
-- (slot 全空)
+- **slot 占用**：1 / 4
+- worktrees:
+  - `agent-af9b396e7976b970b`
 
 ## 6. 最近 24h 完成（top 5）
 
-- `K_NEW_B_paper9_har_benchmark` P3 [experiment] K_NEW_B: Paper 9 加入 HAR-RV / HAR-RV-VIX 基準至 Table 2 horse race — claimed_by=hourly-05
-- `K_NEW_A_paper9_covid_subperiod` P3 [experiment] K_NEW_A: Paper 9 leave-COVID-out DM test — 驗證主要結果非 COVID 驅動 — claimed_by=hourly-05
-- `gen_article_k182` P4 [daily_article] K182: write general-audience article (auto-discovered, verdict={'fomc_vol_effect': True, 'vix_uncert — claimed_by=codex-cli
-- `paper_vt_trend_following_self_contained` P2 [paper_review] (no title) — claimed_by=hourly-04
-- `gen_article_k181` P4 [daily_article] K181: write general-audience article (auto-discovered, verdict=Mixed results — partial corr sig in 4 — claimed_by=codex-cli
+- `gen_article_k551` P4 [daily_article] K551: write general-audience article (auto-discovered, verdict={'checks': {'harvey_dm_t3': True, 'ha — claimed_by=codex-cli
+- `gen_article_k510` P4 [daily_article] K510: write general-audience article (auto-discovered, verdict=NEGATIVE — Volume-GARCH significantly — claimed_by=hourly-13
+- `gen_article_k524` P4 [daily_article] K524: write general-audience article (auto-discovered, verdict={'SPY': 'beats_baseline', 'SPY_GLD':  — claimed_by=codex-cli
+- `gen_article_k487` P4 [daily_article] K487: write general-audience article (auto-discovered, verdict=EQUITY-SPECIFIC) — claimed_by=hourly-12
+- `K1322` P3 [experiment] K1322: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）
 
 ## 7. Dashboard 訊號
 
-- (dashboard_latest.json present but no critical/warn keys recognized)
+- overall_status=ok (breaches=0, critical=0, generated=2026-05-26T06:00:44Z)
 
 ## 8. 最近 work_log（5 筆，新→舊）
 
-- `2026-05-25T21:16` [experiment] K_NEW_A_paper9_covid_subperiod+K_NEW_B_paper9_har_benchmark
-- `2026-05-26T04:10` [paper_review] paper_vt_trend_following_self_contained
-- `2026-05-26T03:22` [paper_review] paper_taiwan_vt_self_contained
-- `2026-05-26T02:13` [platform_ops] hourly_02_sync_k1391_k1392_state
-- `2026-05-26T01:22` [daily_article] gen_article_k769
+- `2026-05-26T13:14` [daily_article] gen_article_k510
+- `2026-05-26T11:47` [experiment] K1322
+- `2026-05-26T10:15` [paper_review] Paper2_D3D4D5_gamma_VaR_days
+- `2026-05-26T08:07` [governance] hourly_08_cleanup_stale_k1401_todo
+- `2026-05-26T06:20` [daily_article] gen_article_k786
 
 ## 9. 接續提示詞（hourly dispatch / 互動 session 共用）
 

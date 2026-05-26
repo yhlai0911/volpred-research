@@ -132,7 +132,28 @@ def _dashboard_signals(dashboard: dict[str, Any]) -> list[str]:
     out: list[str] = []
     if not dashboard:
         return ["(no dashboard_latest.json)"]
-    # Try common shapes
+
+    # Current canonical schema (check_alerts dashboard): overall_status + section_breaches +
+    # section_critical + sections[]. 寫在前面確保新 schema 優先識別。
+    overall = dashboard.get("overall_status")
+    if overall is not None:
+        gen_at = dashboard.get("dashboard_generated_at", "?")
+        breaches = dashboard.get("section_breaches", 0)
+        critical = dashboard.get("section_critical", 0)
+        out.append(
+            f"overall_status={overall} (breaches={breaches}, critical={critical}, generated={gen_at})"
+        )
+        # 列出非 ok 的 section（status != "ok"），最多 5 條
+        sections = dashboard.get("sections") or []
+        if isinstance(sections, list):
+            non_ok = [s for s in sections if isinstance(s, dict) and s.get("status") not in (None, "ok")]
+            for s in non_ok[:5]:
+                tag = "CRITICAL" if s.get("status") == "critical" else "WARN"
+                name = s.get("section") or s.get("name") or "?"
+                tldr = s.get("tldr") or s.get("status")
+                out.append(f"{tag}: section={name} :: {tldr if isinstance(tldr, str) else json.dumps(tldr, ensure_ascii=False)[:160]}")
+
+    # Legacy / alternative shapes（向後相容；只在新 schema 無訊息時補上）
     for key in ("critical", "criticals", "alerts_critical"):
         if dashboard.get(key):
             for item in dashboard[key][:5]:
@@ -141,13 +162,13 @@ def _dashboard_signals(dashboard: dict[str, Any]) -> list[str]:
         if dashboard.get(key):
             for item in dashboard[key][:5]:
                 out.append(f"WARN: {item if isinstance(item, str) else json.dumps(item, ensure_ascii=False)[:160]}")
+
     if not out:
-        # Fallback: top-level summary key
         summary = dashboard.get("summary") or dashboard.get("status")
         if summary:
             out.append(f"summary: {summary if isinstance(summary, str) else json.dumps(summary, ensure_ascii=False)[:200]}")
         else:
-            out.append("(dashboard_latest.json present but no critical/warn keys recognized)")
+            out.append("(dashboard_latest.json present but no recognized schema)")
     return out
 
 
