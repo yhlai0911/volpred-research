@@ -1,0 +1,84 @@
+{
+  "experiment_id": "K1322",
+  "title": "HAR-RV vs Random Walk on 0050.TW 5-min RV (Taiwan ETF cross-market validation)",
+  "date_run": "2026-05-26 11:44:08",
+  "seed": 42,
+  "data_source": {
+    "symbol": "0050.TW",
+    "source_dir": "/Users/yhlai0911/Desktop/volpred-research/data/intraday",
+    "interval": "5min",
+    "session": "TW day session, regular trading 09:00-13:30 TW time",
+    "rv_formula": "RV_t = sum_k r_5min,k^2 where r = log(P_t/P_{t-1}); drop first auction bar (volume==0)"
+  },
+  "methodology": {
+    "model_baseline": "Random Walk: log(RV_t) = log(RV_{t-1}) (no params)",
+    "model_alternative": "HAR-RV (Corsi 2009): log(RV_t) = b0 + b_d*log(RV_{t-1}) + b_w*log(RV_w) + b_m*log(RV_m)",
+    "lag_convention": "1-step (Corsi 2009 + K1303 v2 ABD convention): features at t-1 predict log(RV_t)",
+    "split": "70/30 chronological",
+    "loss_function": "QLIKE pointwise (Patton 2011) on RV level",
+    "dm_test": "HAC Newey-West DM with HLN (Harvey 1997) small-sample correction, h=1",
+    "pass_rule": "|DM_HLN_t| > 3 AND HAR-RV lower QLIKE (Harvey 2016 threshold). If n_test < 50 the verdict is reported as UNTRUSTWORTHY_SMALL_SAMPLE.",
+    "seed": 42
+  },
+  "cross_market_motivation": {
+    "tx1_null_quartet": [
+      "K868 (day/night)",
+      "K1301 (HAR-RS semivariance)",
+      "K1303 (HAR-CJ jump)",
+      "K1309 (BMA)"
+    ],
+    "tx1_finding": "Standard HAR-RV is a near-sufficient statistic for TAIFEX TX1 daily RV; semivariance / jump / BMA all NULL once HAR-RV included.",
+    "k1322_question": "Does HAR-RV's predictive power over RW also hold on the 0050.TW spot ETF (different microstructure: lower liquidity, call-auction open, no after-hours)?"
+  },
+  "revisit_gate": {
+    "n_total_days_required": 200,
+    "current_n_total_days": 76,
+    "untrustworthy_small_sample": true,
+    "rationale": "76-day intraday window after warm-up leaves n_test ~ 16. Re-run when n_total >= 200 (~ Aug 2026 if data collection continues)."
+  },
+  "n_total_days": 76,
+  "date_range": [
+    "2026-01-20",
+    "2026-05-22"
+  ],
+  "rv_descriptives": {
+    "RV_mean": 8.593584028999534e-05,
+    "RV_std": 6.194663448623716e-05,
+    "RV_min": 2.476853967480836e-05,
+    "RV_max": 0.00038939984160384723,
+    "RV_median": 6.921032518608689e-05,
+    "n_bars_mean": 52.1578947368421,
+    "n_bars_min": 52
+  },
+  "n_train": 37,
+  "n_test": 17,
+  "HAR_betas": {
+    "intercept": -14.601869195818635,
+    "beta_d": 0.17801404773590243,
+    "beta_w": 0.46018706217359834,
+    "beta_m": -1.1974997105693304
+  },
+  "HAR_std_errors": {
+    "intercept": 5.648683007892372,
+    "beta_d": 0.2052551449126969,
+    "beta_w": 0.35494568676348354,
+    "beta_m": 0.6030573478463732
+  },
+  "RW_QLIKE_test": 0.4429127600180403,
+  "HAR_QLIKE_test": 0.16980520908813382,
+  "RW_MSE_test": 0.6485751687919318,
+  "HAR_MSE_test": 0.3112871714664467,
+  "RW_OOS_R2": -2.0079470199420633,
+  "HAR_OOS_R2": -0.4436804935081877,
+  "DM_HLN_t": 1.8165499055895726,
+  "DM_HLN_p": 0.08806704883958782,
+  "DM_interpretation": "positive t => HAR-RV lower QLIKE => HAR preferred; negative => RW preferred",
+  "untrustworthy_small_sample": true,
+  "verdict": "UNTRUSTWORTHY_SMALL_SAMPLE",
+  "revisit_gate_threshold": 200,
+  "caveats": [
+    "n_test=17 < 50 \u2192 DM-HLN test under-powered; verdict is exploratory only. Revisit when n_total >= 200.",
+    "Negative OOS R^2 (HAR=-0.444, RW=-2.008) indicates test variance below sample-mean baseline \u2014 common with very short windows."
+  ],
+  "elapsed_seconds": 2.06
+}
