@@ -11920,7 +11920,7 @@
     "description": "改 scripts/refill_reader_facing_pool.py::refill_trending_candidates() — env VOLPRED_TRENDING_SCAN_CMD 未設時回 {ok: True, skipped: True, reason: 'no_scan_cmd_configured'}，並從 run_refill 的 errors list 排除 skipped。原因：trending scan = best-effort（trending_repost task 主流由 agent 用 WebSearch 自己找候選），不該每 fire 寫 error。Smoke: uv run python scripts/refill_reader_facing_pool.py --force, 驗證 state errors 不再包含 trending_scan。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-05-27T07:08:00+08:00",
     "source": "hourly_dispatch_07_discovery",
     "tags": [
@@ -11931,6 +11931,8 @@
     "claimed_by": "hourly-07",
     "claimed_at": "2026-05-26T23:10:09.517925+00:00",
     "claim_session_id": "eefac472e9dd",
-    "started_at": "2026-05-26T23:10:09.792347+00:00"
+    "started_at": "2026-05-26T23:10:09.792347+00:00",
+    "completed_at": "2026-05-26T23:11:00.830304+00:00",
+    "result": "refill_trending_candidates 改回 skipped 而非 error；state.errors 已清空；commit 7ed7a775"
   }
 ]

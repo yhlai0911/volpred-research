@@ -8589,5 +8589,23 @@
     "owner": "hourly-05",
     "commit": "bb9a37bf",
     "verdict": "succeeded"
+  },
+  {
+    "timestamp": "2026-05-27T06:14:20+08:00",
+    "task_type": "paper_review",
+    "task_id": "Paper3_experiments_md_add_K697_paper3_fixes",
+    "agent": "main-thread-hourly-06",
+    "summary": "Paper 3 (vt-trend-following) body_v3.tex line 149: add K79 inline cite + footnote for VIX threshold robustness sweep (paper3_fixes.json). K697 already cited; this closes K79 traceability gap. xelatex 37 pages compile clean. commit 415e258d.",
+    "commit": "415e258d",
+    "verdict": "succeeded"
+  },
+  {
+    "timestamp": "2026-05-27T07:11+08:00",
+    "task_type": "platform_ops",
+    "task_id": "platform_ops_trending_scan_missing_to_skipped",
+    "agent": "main_thread_hourly-07",
+    "summary": "refill_reader_facing_pool: trending_scan missing env reclassified from error to skipped (best-effort per design); state.errors cleaned",
+    "commit": "7ed7a775",
+    "mission_impact": "#5 流量 (dashboard noise removed, reader_facing refill cron runs clean)"
   }
 ]
