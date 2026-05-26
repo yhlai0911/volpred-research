@@ -9855,7 +9855,7 @@
     "description": "K813 has a non-null verdict in experiments/k813/ but no published feed article and no existing task. Verdict: NS_IMPROVEMENT. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9864,7 +9864,13 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.503281+00:00",
     "generated_at": "2026-05-13T05:53:00.503291+00:00",
-    "k_id": "K813"
+    "k_id": "K813",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-26T14:10:22.749515+00:00",
+    "claim_session_id": "d808fae7d31a",
+    "started_at": "2026-05-26T14:10:22.794987+00:00",
+    "completed_at": "2026-05-26T14:11:58.440832+00:00",
+    "result": "Published K813 article draft (mile_b5f389c0) with 2 PNGs. Core message: STGARCH improved in-sample fit a lot but only improved OOS QLIKE by 0.19%, so publisher correctly auto-reclassified it to research."
   },
   {
     "id": "gen_article_k816",
@@ -11360,7 +11366,7 @@
     "description": "Trending source scan 結果（2026-05-26 偶數日 → Taiwan rotation）：\n- 主題：5 月台股 30 檔 ETF 配息（5/15-5/25 除息），殖利率潮 vs vol 配置\n- 來源 surfaces：口袋學堂 / Yahoo TW / 經濟日報 ETF 專題（過去 7 天高曝光）\n- 已過 30 天 dedup（trending_repost_log 無此主題）\n- VolPred angle：\n  1. 除息日前後 IV skew / theta decay 行為（vol angle）\n  2. ETF 配息率 vs vol-adjusted yield（risk parity 角度）\n  3. VT-sized 配置在配息潮的 rebalance 行為（連到 K557/K736 VT 研究）\n\n執行流程（per .claude/skills/trending-repost/SKILL.md）：\n1. Source scan 確認（已做）\n2. Independent fact gathering: yfinance ETF 配息歷史 + TAIFEX VIXTWN + 個別 ETF 殖利率\n3. Evidence package: 配息 ETF 表 + IV skew 圖 + VT vs 配息策略比較\n4. Draft 1500-2500 字 commentary（havingchien-style Substack tone）\n5. **不引用任何來源文章**（口袋學堂 / 經濟日報 / Yahoo 不 cite）\n6. feed-publisher → published 立即發 + FB 雙發佈（Ivan Lai 口吻 200-400 字）\n7. Anti-collision update: storage/reports/trending_repost_log.json\n8. Anti-AI-style 9-checklist 必跑\n\nConstraint: trending_repost daily cap=2; 今天此為第 1 篇。\nSource date 2026-05-26 由主線程親跑 WebSearch 完成（trending-repost SKILL Step 1）。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "tags": [
       "trending_repost",
       "etf",
@@ -11370,7 +11376,11 @@
       "main_thread_scan"
     ],
     "created_at": "2026-05-26T10:03:20.915355+00:00",
-    "source": "main_thread_trending_scan_2026_05_26"
+    "source": "main_thread_trending_scan_2026_05_26",
+    "claimed_by": "hourly-22",
+    "claimed_at": "2026-05-26T14:08:29.749739+00:00",
+    "claim_session_id": "f886c0ec8096",
+    "started_at": "2026-05-26T14:08:33.360995+00:00"
   },
   {
     "id": "event_article_us_cpi_2026_06_13_preview",
@@ -11586,5 +11596,14 @@
     "created_at": "2026-05-26T21:12:00+08:00",
     "parent_task_id": "fb_post_us_cpi_2026_06_13_t7",
     "ref_milestone": "mile_ebb5d6f5"
+  },
+  {
+    "id": "fb_post_trending_etf_dividend_2026_05_26",
+    "task_type": "platform_ops",
+    "priority": "P2",
+    "title": "FB Ivan Lai dual-publish: ETF 配息潮 vol-adjusted 視角 (mile_5b3569c3)",
+    "description": "FB Ivan Lai dual-publish: 配息數字背後的風險帳 (mile_5b3569c3). Draft at storage/ops/fb_draft_mile_5b3569c3.md. URL in 1st comment: https://volpred.zeabur.app/v3/reports/mile_5b3569c3. Anti-AI PASS. Do NOT put link in main post body.",
+    "status": "pending",
+    "created_at": "2026-05-26T22:27:17+08:00"
   }
 ]

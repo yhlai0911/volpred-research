@@ -1,0 +1,136 @@
+{
+  "title": "5月台股ETF配息潮 — VolPred VT/risk-parity角度",
+  "date": "2026-05-26",
+  "data_sources": [
+    "yfinance (TW ETF price + dividend history)",
+    "data/vixtwn/vixtwn_daily.csv"
+  ],
+  "etf_table": [
+    {
+      "ticker": "00919",
+      "name": "群益台灣精選高息",
+      "price": 27.47,
+      "yield_pct": 12.01,
+      "ann_vol_pct": 16.9,
+      "vol_adj_yield": 0.711,
+      "pre5_ret": 1.776,
+      "post5_ret": -0.352
+    },
+    {
+      "ticker": "0056",
+      "name": "元大高股息",
+      "price": 48.35,
+      "yield_pct": 11.87,
+      "ann_vol_pct": 23.1,
+      "vol_adj_yield": 0.515,
+      "pre5_ret": 0.829,
+      "post5_ret": 0.527
+    },
+    {
+      "ticker": "00878",
+      "name": "國泰永續高股息",
+      "price": 29.48,
+      "yield_pct": 9.67,
+      "ann_vol_pct": 21.4,
+      "vol_adj_yield": 0.452,
+      "pre5_ret": 1.154,
+      "post5_ret": -0.162
+    },
+    {
+      "ticker": "00922",
+      "name": "國泰台灣綜合股息",
+      "price": 38.49,
+      "yield_pct": 10.08,
+      "ann_vol_pct": 28.5,
+      "vol_adj_yield": 0.354,
+      "pre5_ret": 1.248,
+      "post5_ret": -0.161
+    },
+    {
+      "ticker": "00940",
+      "name": "元大台灣價值高息",
+      "price": 11.73,
+      "yield_pct": 5.54,
+      "ann_vol_pct": 18.1,
+      "vol_adj_yield": 0.306,
+      "pre5_ret": -0.997,
+      "post5_ret": 1.347
+    },
+    {
+      "ticker": "00850",
+      "name": "元大臺灣ESG永續",
+      "price": 86.5,
+      "yield_pct": 4.87,
+      "ann_vol_pct": 26.1,
+      "vol_adj_yield": 0.187,
+      "pre5_ret": null,
+      "post5_ret": null
+    },
+    {
+      "ticker": "00929",
+      "name": "復華台灣科技優息",
+      "price": 28.8,
+      "yield_pct": 4.86,
+      "ann_vol_pct": 33.5,
+      "vol_adj_yield": 0.145,
+      "pre5_ret": 1.126,
+      "post5_ret": 0.448
+    },
+    {
+      "ticker": "0050",
+      "name": "元大台灣50",
+      "price": 100.8,
+      "yield_pct": 2.02,
+      "ann_vol_pct": 28.5,
+      "vol_adj_yield": 0.071,
+      "pre5_ret": 1.163,
+      "post5_ret": 0.208
+    },
+    {
+      "ticker": "006208",
+      "name": "富邦台50",
+      "price": 233.15,
+      "yield_pct": 1.9,
+      "ann_vol_pct": 28.4,
+      "vol_adj_yield": 0.067,
+      "pre5_ret": 0.563,
+      "post5_ret": -1.896
+    }
+  ],
+  "key_findings": {
+    "1_vixtwn_may_2026": {
+      "fact": "VIXTWN 在 2026 年 5 月配息潮期間平均 37.1，高於正常水位（25）",
+      "detail": "Mar avg: 36.1, Apr avg: 31.7, May avg: 37.0",
+      "peak": "Mar 9 峰值 41.63（關稅衝擊）",
+      "may_latest": "May 22 latest: 33.09（自高點回落約 20%）"
+    },
+    "2_highest_vol_adj_yield": {
+      "fact": "00919 以 vol-adjusted yield 0.711 排名最高，代表每承擔 1 單位年化波動率獲得 0.711% 配息",
+      "detail": "00919: yield 12.01%, vol 16.9%, vol-adj 0.711\n次高: 0056 vol-adj 0.515（yield 11.87%, vol 23.1%）"
+    },
+    "3_pre_div_rally": {
+      "fact": "高殖利率 ETF（yield > 9%）平均在除息日前 5 個交易日累積 +1.24%，除息後 5 日累積 +0.04%（接近零）",
+      "calculation": "Pre-5d avg of 0056/00878/00919/00922/00929: +1.23%; Post-5d avg: +0.07%",
+      "interpretation": "配息前存在 'buy-the-rumor' 效應；除息後動能快速消退"
+    },
+    "4_vol_risk_angle": {
+      "fact": "當 VIXTWN > 35 時，高 vol ETF（00929 33.5%）的 vol-adjusted yield 僅 0.145，遠低於低 vol 高配息 ETF（00919 0.711）",
+      "interpretation": "在波動率偏高環境中，單純追殖利率不夠——必須 vol-adjust 才能做風險配置決策"
+    }
+  },
+  "quantitative_analysis": {
+    "method": "event study: 除息前後 [-5, +5] 交易日窗口的 log return 平均，2023-2026",
+    "vol_adj_yield": "annual_yield / annual_vol (20-day realized vol)",
+    "vixtwn_regime": "VIXTWN > 35 = elevated; 25-35 = normal; < 25 = low"
+  },
+  "figures": [
+    "figures/fig1_etf_vol_adjusted_yield.png",
+    "figures/fig2_vixtwn_may_dividend.png",
+    "figures/fig3_ex_div_event_returns.png"
+  ],
+  "related_experiments": [
+    "K557 (VT with gold regime)",
+    "K736 (calendar anomaly VT)"
+  ],
+  "computed_at": "2026-05-26T22:13:15.578588"
+}
