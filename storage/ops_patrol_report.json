@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-26T00:04:58Z",
+  "timestamp": "2026-05-26T06:12:49Z",
   "all_ok": false,
   "checks": [
     {
@@ -10,7 +10,7 @@
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json is ~35.9 hours old (mtime=1779624653, threshold=26h)"
+      "detail": "storage/strategy_metrics.json is 42.03 hours old (mtime=1779624653, threshold=26h)"
     },
     {
       "name": "ERROR_LOG",
@@ -20,12 +20,12 @@
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "15 strategies checked; none have >2 portfolio_return=null in last 3 entries"
+      "detail": "15 strategies checked; none have >2 portfolio_return=null in last 3 entries (max nulls=1)"
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files"
+      "detail": "0 uncommitted files; repository is clean"
     },
     {
       "name": "KNOWLEDGE_SIZE",
@@ -34,6 +34,6 @@
     }
   ],
   "alerts": [
-    "STRATEGY_METRICS_FRESHNESS: storage/strategy_metrics.json is ~35.9 hours old (>26h threshold)"
+    "STRATEGY_METRICS_STALE: storage/strategy_metrics.json is 42.03h old (>26h threshold) — run strategy metrics recalc"
   ]
 }
