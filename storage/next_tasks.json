@@ -9652,7 +9652,7 @@
     "description": "K688 has a non-null verdict in experiments/k688/ but no published feed article and no existing task. Verdict: VT wins on utility only for moderately risk-averse (gamma >= 5). Limited but rea. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9662,8 +9662,13 @@
     "created_at": "2026-05-13T05:53:00.488298+00:00",
     "generated_at": "2026-05-13T05:53:00.488300+00:00",
     "k_id": "K688",
-    "started_at": "2026-05-26T09:56:12.373769+00:00",
-    "last_released_at": "2026-05-26T09:56:36.542403+00:00"
+    "started_at": "2026-05-26T20:09:02.326906+00:00",
+    "last_released_at": "2026-05-26T09:56:36.542403+00:00",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-05-26T20:08:56.164079+00:00",
+    "claim_session_id": "7d1c6342b3f6",
+    "completed_at": "2026-05-26T20:14:07.974341+00:00",
+    "result": "K688 reader-facing article published as draft (mile_78f7402e, ~1800字, audience auto-upgraded to research). anti_ai_gate PASS exit=0. Spot-check verified: CE table numbers byte-match k688_results.json. Status: draft pool. Charts: k688_general_ce_by_gamma.png + k688_general_risk_tradeoff.png."
   },
   {
     "id": "gen_article_k731",
@@ -11635,12 +11640,18 @@
     "priority": "P2",
     "title": "FB Ivan Lai dual-publish: ETF 配息潮 vol-adjusted 視角 (mile_5b3569c3)",
     "description": "FB Ivan Lai dual-publish: 配息數字背後的風險帳 (mile_5b3569c3). Draft at storage/ops/fb_draft_mile_5b3569c3.md. URL in 1st comment: https://volpred.zeabur.app/v3/reports/mile_5b3569c3. Anti-AI PASS. Do NOT put link in main post body.",
-    "status": "pending",
+    "status": "failed",
     "created_at": "2026-05-26T22:27:17+08:00",
-    "blocked_reason": "awaiting_external_data",
-    "blocked_at": "2026-05-26T18:13:24+00:00",
-    "blocked_note": "Need chrome MCP session for FB Ivan Lai publish; only available in interactive Claude session, not hourly cron. Draft + anti-AI gate PASS. Escalated via email to user 2026-05-27.",
-    "last_released_at": "2026-05-26T18:13:59.846839+00:00"
+    "blocked_reason": "awaiting_interactive_session",
+    "blocked_at": "2026-05-26T19:38:03+00:00",
+    "blocked_note": "Needs interactive Chrome MCP / logged-in FB session for manual post + comment writeback",
+    "last_released_at": "2026-05-26T18:13:59.846839+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-26T19:35:21.448444+00:00",
+    "claim_session_id": "565e637f2032",
+    "started_at": "2026-05-26T19:35:24.718491+00:00",
+    "completed_at": "2026-05-26T19:38:22.697289+00:00",
+    "result": "本 session 無 Chrome MCP / 已登入 FB 權限，無法直接完成發文；已新增 mark_fb_post_status.py，將 mile_5b3569c3 與 mile_89889d46 正式標記為 fb_post_status=awaiting_interactive_session，並同步修正 ops_dashboard / audit_fb_pipeline 不再把互動 handoff 視為一般 pending。另修復 mark_task_blocked.py 缺鎖導致的 next_tasks.json 尾端損壞風險，相關測試 5/5 PASS。"
   },
   {
     "id": "email-11742-cac837",
@@ -11698,9 +11709,9 @@
     "description": "FB Ivan Lai dual-publish: 裁員八千人，同一季燒掉 $680 億 (mile_89889d46). Draft at storage/ops/fb_draft_mile_89889d46.md (272 字, anti_ai_gate PASS warn=0/3). URL in 1st comment: https://volpred.zeabur.app/v3/reports/mile_89889d46. Do NOT put link in main post body. Need /mcp claude-in-chrome auth session.",
     "status": "pending",
     "created_at": "2026-05-26T16:20:26+08:00",
-    "blocked_reason": "awaiting_external_data",
-    "blocked_at": "2026-05-26T18:13:24+00:00",
-    "blocked_note": "Need chrome MCP session for FB Ivan Lai publish; only available in interactive Claude session, not hourly cron. Draft + anti-AI gate PASS warn=0/3. Escalated via email to user 2026-05-27.",
+    "blocked_reason": "awaiting_interactive_session",
+    "blocked_at": "2026-05-26T19:38:03+00:00",
+    "blocked_note": "Needs interactive Chrome MCP / logged-in FB session for manual post + comment writeback",
     "last_released_at": "2026-05-26T18:14:00.178912+00:00"
   },
   {

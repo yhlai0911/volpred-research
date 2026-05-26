@@ -1,25 +1,25 @@
 {
-  "dashboard_generated_at": "2026-05-26T12:00:29Z",
+  "dashboard_generated_at": "2026-05-26T20:00:34Z",
   "overall_status": "warn",
-  "section_breaches": 1,
+  "section_breaches": 2,
   "section_critical": 0,
   "sections": [
     {
       "section": "production_pending",
       "status": "ok",
-      "tldr": "24 pending tasks (top types: [('daily_article', 10), ('experiment', 6), ('platform_ops', 4)])",
+      "tldr": "19 pending tasks (top types: [('daily_article', 8), ('experiment', 6), ('event_article', 3)])",
       "next": "dispatch top P1-P3 if slots free"
     },
     {
       "section": "production_throughput",
       "status": "ok",
-      "tldr": "8 articles published last 24h (target 6/day)",
+      "tldr": "9 articles published last 24h (target 6/day)",
       "next": null
     },
     {
       "section": "distribution_supabase",
       "status": "ok",
-      "tldr": "8/8 last-24h articles synced",
+      "tldr": "9/9 last-24h articles synced",
       "next": null,
       "missing": []
     },
@@ -29,40 +29,46 @@
       "tldr": "3/3 sample live URLs return 200",
       "next": null,
       "sample": [
-        "mile_ac709655",
-        "mile_cc3c987a",
-        "mile_69861e0d"
+        "mile_91692461",
+        "mile_89889d46",
+        "mile_5b3569c3"
       ],
       "dead": []
     },
     {
       "section": "verification_fb_pipeline",
       "status": "ok",
-      "tldr": "0 FB posts pending sync",
-      "next": null
+      "tldr": "2 FB posts awaiting interactive session",
+      "next": "interactive session / Chrome MCP available時接手貼文與留言",
+      "actionable_pending": [],
+      "awaiting_interactive": [
+        "mile_5b3569c3",
+        "mile_89889d46"
+      ]
     },
     {
       "section": "health_cron",
-      "status": "ok",
-      "tldr": "0 cron jobs stale (over max-age)",
-      "next": null,
-      "stale": []
+      "status": "warn",
+      "tldr": "1 cron jobs stale (over max-age)",
+      "next": "manual fire ~/.volpred/bin/cron_<id>.sh",
+      "stale": [
+        {
+          "job": "release_pool",
+          "age_h": 3.0,
+          "missed_expected_fire_at": "2026-05-27 03:07"
+        }
+      ]
     },
     {
       "section": "health_alerts_unhandled",
       "status": "warn",
-      "tldr": "2 warn/critical alerts last 6h (read + act per .claude/rules/alert.md)",
+      "tldr": "1 warn/critical alerts last 6h (read + act per .claude/rules/alert.md)",
       "next": "ingest alerts → run remediation per alert.md auto-action table",
       "breaches": [
         {
-          "ts": "08:00",
+          "ts": "14:16",
           "level": "warn",
-          "subject": "[VolPred Alert][WARN] Member Q&A pending stale (max 24h)"
-        },
-        {
-          "ts": "09:00",
-          "level": "warn",
-          "subject": "[VolPred Alert][WARN] Member Q&A pending stale (max 25h)"
+          "subject": "[VolPred Alert][WARN] ⚠️ gemini_ask.py 已呼叫 — 產生 Gemini API 費用"
         }
       ]
     }
