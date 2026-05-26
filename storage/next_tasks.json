@@ -11405,7 +11405,7 @@
     "description": "Context: 2026-05-26 用戶 feedback「badge 都是一般讀者」根因之一 — dispatcher sort key 純 (priority, id)，P1 experiment 6 個會搶光 4 slot，P1 trending_repost / event_article 後到無法被派。\n\nDeliverable:\n1. 改 categorize() return 後的 sort key 加入 type rotation weight:\n   recent_types = Counter(work_log[-10:].task_type)\n   agentable.sort(key=lambda t: (_prio_key(priority), recent_types.get(task_type, 0), id))\n   → same priority 內，最近少派的 type 優先\n2. 加 unit test (tests/test_dispatch_type_rotation.py)：mock 6×experiment + 1×trending + 1×event 同 P1 → 確認 trending/event 排前面\n3. Test regression: 不能破壞既有 P1 conservative gate (P1 non-experiment → main_thread)\n4. 部署後 monitor 3 fire 確認 badge 多樣性改善\n\n預估 45-60 min。可派 codex:codex-rescue。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "platform_ops",
       "dispatcher",
@@ -11413,7 +11413,12 @@
       "followup_from_badge_diversity_fix"
     ],
     "created_at": "2026-05-26T10:05:39.942179+00:00",
-    "source": "main_thread_2026_05_26_badge_diversity_fix"
+    "source": "main_thread_2026_05_26_badge_diversity_fix",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-26T10:59:33.534304+00:00",
+    "claim_session_id": "1a874ef3bfdd",
+    "completed_at": "2026-05-26T11:01:02.390256+00:00",
+    "result": "Added same-priority type-rotation weighting to continue_task_dispatch using recent work_log task-type counts. Added tests covering rotation ordering and preserving the P1 non-experiment main-thread gate; pytest passed."
   },
   {
     "id": "platform_ops_question_research_host_cron_migration",
@@ -11457,7 +11462,7 @@
     "description": "Gmail UID: 11750\nMessage-ID: <A908022C-2B63-4CD9-8DA0-CF4FEEDCA5F8@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Tue, 26 May 2026 18:01:12 +0800\nSubject: Re: [VolPred Alert][INFO] [VolPred Alert][INFO] [VolPred Alert][INFO] [VolPred Alert][WARN] Member Q&A pending stale — root cause + immediate\n\n--- 用戶回信內容 ---\n你寄過哪個任務的完工通知給我？\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年5月26日 18:00 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> Re: Re: [VolPred Alert][INFO] [VolPred Alert][INFO] [VolPred Alert][WARN] Member Q&A pending stale — root cause + immediate\r\n> Alert level: info\r\n> INFO\r\n> 已收到你的回信\r\n> \r\n> 欄位\t值\r\n> Task ID\temail-11748-7b1f24\r\n> 類型\temail_reply\r\n> Priority\tP3 普通優先\r\n> 主旨\tRe: [VolPred Alert][INFO] [VolPred Alert][INFO] [VolPred Alert][WARN] Member Q&A\r\n> 收信時間\t2026-05-26 10:00:10 UTC\r\n> 決策\r\n> \r\n> 已推入統一任務池 — storage/next_tasks.json 中 task_type=email_reply\r\n> 執行時間\r\n> \r\n> 下次 Claude hourly-dispatch fire：今天 18:07（台灣時間，約 6 分鐘後）\r\n> Claude 主線程會於該 tick 自動 claim + 分析 + 執行\r\n> 若任務跨多 tick → 中間不會 spam；最後一次 tick 收尾發 close email\r\n> 完成後通知\r\n> \r\n> ✅ 全部處理完成時會寄 close email 給你（同 thread 回覆）— 含完成項目 / commit hash / 對應 sub-task id\r\n> Auto-sent by gmail_inbox_poll.py on queue insertion (gmail_inbox_poll.py)\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -11467,7 +11472,13 @@
     "email_uid": 11750,
     "email_message_id": "<A908022C-2B63-4CD9-8DA0-CF4FEEDCA5F8@gmail.com>",
     "email_subject": "Re: [VolPred Alert][INFO] [VolPred Alert][INFO] [VolPred Alert][INFO] [VolPred Alert][WARN] Member Q&A pending stale — root cause + immediate",
-    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>"
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-05-26T11:07:48.135147+00:00",
+    "claim_session_id": "f289377e1d20",
+    "started_at": "2026-05-26T11:07:48.566687+00:00",
+    "completed_at": "2026-05-26T11:09:10.368861+00:00",
+    "result": "用戶問『你寄過哪個任務的完工通知給我？』→ 回答最近一次完工通知 = email-11748-7b1f24 (close email 1e429773, commit 8b5222d1, 18:11 寄出)，該任務修正 ack/close email subject 視覺混淆問題 (加 [ACK] prefix)。Close email f683ffef 已寄出。"
   },
   {
     "id": "platform_ops_audience_misclassification_audit",
@@ -11491,7 +11502,7 @@
     "description": "Context: mile_d0d66405 (5/26 published) 證明 feed-publisher 無 audience 判定 gate，agent 預設亂標 general → 41+ 累積 mis-tag.\n\nDeliverable:\n1. 改 src/volpred/publisher/publisher.py publish_milestone():\n   - 新增 _infer_audience(title, content, tags) helper:\n     a. 標題/內文含 ≥2 學術關鍵詞 (per audit script keyword list) → research\n     b. 標題含 K\\d+ + experiment_id 對得到 → research\n     c. content_type=member_qa → 保留 member_qa (不 override)\n     d. content_type=event_article → 保留 event\n     e. 否則 → general\n   - 若 caller 顯式傳 audience 但 _infer 給不同建議 → log WARN + 用 infer 結果（**enforce mechanism over agent discretion**）\n2. 寫 unit test (tests/test_audience_inference.py) — 至少 mile_d0d66405 case + 10 個 negative case\n3. 更新 .claude/skills/feed-publisher/SKILL.md 加 audience taxonomy 段（general / research / methodology / event / member_qa / daily）+ 何時用哪個\n4. 更新 .claude/rules/publishing.md 加 audience gate 硬規則\n5. Backfill check: 加 CI invariant scripts/validate_feed_audience.py — feed 沒有「audience=general 但標題含 ≥2 academic keyword」entries 才 PASS\n\n預估 45-60 min。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "platform_ops",
       "feed_publisher",
@@ -11500,6 +11511,28 @@
       "followup_from_mile_d0d66405"
     ],
     "created_at": "2026-05-26T10:51:06.442787+00:00",
-    "source": "main_thread_2026_05_26_audience_misclass"
+    "source": "main_thread_2026_05_26_audience_misclass",
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-05-26T11:11:34.751016+00:00",
+    "claim_session_id": "85897149f789",
+    "started_at": "2026-05-26T11:11:35.224332+00:00",
+    "completed_at": "2026-05-26T11:20:35.056972+00:00",
+    "result": "commit dc9f26bb. 5/5 deliverables: publisher.py _infer_audience() enforce gate + _ACADEMIC_KEYWORDS const / 26 unit tests pass (test_audience_inference.py) / 既有 12 audit tests 仍 pass / SKILL.md audience taxonomy 段 / publishing.md audience gate hard rule / scripts/validate_feed_audience.py CI invariant (exit 1 on fail). Validator 偵測 371 個歷史 violations (mile_*, milestone_* 過往 mis-tag) — backfill 範圍另起 followup task."
+  },
+  {
+    "id": "platform_ops_audience_backfill_371_historical",
+    "title": "[platform_ops] audience backfill — 371 historical violations (mile_*, milestone_* mis-tag general but contain ≥2 academic keywords)",
+    "description": "Followup from platform_ops_feed_publisher_audience_gate (commit dc9f26bb). validate_feed_audience.py 偵測 371 個歷史 entries audience=general 但含 ≥2 academic keyword (K-id / Sharpe / QLIKE / GARCH 等) → 應為 research. Deliverable: 寫 scripts/backfill_audience.py (idempotent, dry-run preview + --apply mode); 跑 backfill; 驗證 validate_feed_audience.py 通過 (exit 0); commit + Supabase mirror sync.",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "tags": [
+      "platform_ops",
+      "audience",
+      "backfill",
+      "followup_from_dc9f26bb"
+    ],
+    "created_at": "2026-05-26T11:20:47+00:00",
+    "source": "main_thread_2026_05_26_hourly_19_dispatch"
   }
 ]

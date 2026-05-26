@@ -8503,5 +8503,24 @@
     "task_type": "member_qa",
     "outcome": "evaluate_rerank_dispatched",
     "summary": "hourly-17 main thread: question 44b3cfcd-4bfe-4904-80a0-70274ff7ba62 (yaoxk1431 import-cars) evaluated 4-dim (avg 6.0) → ranked #1 → member_qa_44b3cfcd_import_cars P2 task enqueued for next hourly. Root cause of 36-day silent gap (5-layer: session_cron unreliable + alert auto-remediation not enforced) documented docs/error_log.md. Close email sent (notification 842e7038). email-11736-659035 completed."
+  },
+  {
+    "timestamp": "2026-05-26T10:11:16Z",
+    "task_type": "email_reply",
+    "task_id": "email-11748-7b1f24",
+    "result": "Root cause + fix: ack & close email subjects identical → user could not distinguish. Patched gmail_inbox_poll.py ack title to [ACK] prefix. Close email 1e429773 sent. Commit 8b5222d1.",
+    "by": "hourly-18"
+  },
+  {
+    "timestamp": "2026-05-26T19:09",
+    "task_type": "email_reply",
+    "task_id": "email-11750-53fa5c",
+    "result": "email-11750-53fa5c close: 答覆用戶『你寄過哪個任務的完工通知？』→ 最近一次 = email-11748-7b1f24 (commit 8b5222d1, close f683ffef)"
+  },
+  {
+    "timestamp": "2026-05-26T19:20",
+    "task_type": "platform_ops",
+    "task_id": "platform_ops_feed_publisher_audience_gate",
+    "result": "platform_ops_feed_publisher_audience_gate succeeded: commit dc9f26bb _infer_audience() enforce gate. 26+12 tests pass. Validator 371 violations 待 backfill."
   }
 ]
