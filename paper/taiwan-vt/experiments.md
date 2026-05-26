@@ -12,7 +12,9 @@ Columns: K-ID | Paper Section | Title | Verdict | Status | Location
 |---|---------------|-------|---------|--------|----------|
 | K461 | Sec 3.3 Cross-Market Spillover | SSVS macro predictors for 0050.TW ARX-GARCH — SPY_ret_L1 PIP=1.0, VIX PIP=0.801 | CONDITIONAL_PASS | complete | local |
 | K472 | Sec 4.2 GJR vs GARCH | Taiwan comprehensive vol prediction — EWMA / HAR / semivariance all ≈ GJR (DM p>0.05) | CONDITIONAL_PASS | complete | root |
-| K512 | Sec 4.3 Macro / Ex-Dividend | Taiwan ex-dividend vol study — no significant pre-ex-div vol elevation; ex-div return spike confirmed | NULL | complete | root |
+| K512 | Sec 6.4 Ex-Dividend Vol | Taiwan ex-div vol — pre-div calm, post-div +32% (0050, t=2.28) / +69% (0056, t=3.80) spike; fill rates 79% / 90% within 60d | CONDITIONAL_PASS | complete | root |
+| K515 | Sec 5.3 Overnight Gap | Taiwan overnight gap alpha — gap=86.5% of total return; SPY+VIX conditional gap=+10.73bp (t=6.845, Harvey PASS) but ETF TX=38.5bp non-tradeable | CONDITIONAL_PASS | complete | root |
+| K516 | Sec 5.3 Futures Implementation | Overnight gap with TAIFEX futures TX=5bp — SPY+VIX Sharpe=0.926, 5/5 cross-OOS positive; breakeven TX=10.73bp (institutional-only) | CONDITIONAL_PASS | complete | root |
 | K553 | Sec 4.4 Conditional Leverage | VIX-conditional leverage VT for Taiwan — Hybrid RV+Pctile lev=1.5 Sharpe +0.248; Harvey t>3.0 PASS | PASS | complete | local |
 | K558 | Sec 4.4 Conditional Leverage | K553 deep validation — 11/11 gates PASS (Harvey / cross-OOS / sensitivity / tx-cost / drawdown) | PASS | complete | local |
 | K636 | Sec 3.2 Diversification Amplification | Taiwan amplification factor deep dive — γ-ratio TAIEX/stock ≈ 4.6×; reconciles K530 vs K633 | (verdict not recorded) | complete | root |
@@ -46,12 +48,11 @@ Columns: K-ID | Paper Section | Title | Verdict | Status | Location
 
 ## Experiment Count Summary
 
-- Total experiments: 31
+- Total experiments: 33
 - Local (`paper/taiwan-vt/experiments/`): 17 scripts + 18 result JSONs (k851 has 2 JSONs)
-- Root (`experiments/<K>/`): 14 experiments
+- Root (`experiments/<K>/`): 16 experiments
 - PASS: 8 (K553, K558, K892, K1145, K1147, K1150, K1302, K1302b, K1370c)
-- CONDITIONAL_PASS: 4 (K461, K472, K844, K850, K854)
-- NULL: 1 (K512)
+- CONDITIONAL_PASS: 7 (K461, K472, K512, K515, K516, K844, K850, K854)
 - FAIL: 1 (K1098)
 - PARTIAL_MATCH: 3 (K1175, K1176, K1181)
 - verdict not recorded: 14 (K636, K844, K847, K848, K849, K851, K852, K852b, K853, K886, K896, K900, K1302b, K1370)
