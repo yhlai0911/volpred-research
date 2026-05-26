@@ -4880,7 +4880,7 @@
   {
     "id": "Paper1_D3_kupiec_rounding_precision",
     "title": "Paper 1 MEDIUM: Kupiec p 1-decimal rounding — 建議 paper 改 2-decimal",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 3,
     "created_at": "2026-04-17T16:19:18+08:00",
     "description": "Paper 1 audit 發現: GJR+Student-t Kupiec p paper 0.60 actual 0.6698; GJR+HistSim paper 0.60 vs 0.6353. 1-decimal rounding 讓 Student-t 與 HistSim 看起來一樣 (都 0.60) 但實際 0.67 vs 0.64 明顯差. Basel zone 結論不變 (都 Yellow). **建議 (b) 修 paper 到 0.67 與 0.64** — 主線程 body rewrite 順便修, 誠實 research.",
@@ -4897,7 +4897,13 @@
         "rationale": "paper + body-rewrite verbs",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "hourly-07",
+    "claimed_at": "2026-05-25T23:08:32.820598+00:00",
+    "claim_session_id": "fb4a67e83fe4",
+    "started_at": "2026-05-25T23:08:37.910397+00:00",
+    "completed_at": "2026-05-25T23:09:42.309402+00:00",
+    "result": "STALE-RESOLVED: tables.tex L96/L98 已顯示 GJR+Student-t Kupiec p=0.67 + GJR+HistSim p=0.64（與 K802 actual 0.6698/K824v2 0.6353 一致），review_r3 §C2 標 RESOLVED + reproduce_report L27 註明 Kupiec p 0.60→0.67/0.40→0.64 已修正。body_v3.tex 無 0.60 Kupiec 殘留。任務 created 2026-04-17，已被後續 review cycle 解決，next_tasks 池 stale。"
   },
   {
     "id": "Paper1_D4_gamma_HM_clarification",
@@ -4949,7 +4955,7 @@
   {
     "id": "Paper1_KB_only_tables_10_11_12_C3_footnote",
     "title": "Paper 1: Tables 10/11/12/C3 6 KB-only 數字加 'pre-K era, KB source' footnote",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 3,
     "created_at": "2026-04-17T17:36:43+08:00",
     "description": "Paper 1 rescan 發現 Tables 10/11/12/C3 共 6 數字只在 knowledge.json, experiments/ 無 (pre-K numbering era). avg stock γ, t-stat, ES/kurtosis block, β_trend/Spearman, gold regime t-test. 建議 main-thread footnote: 'Source: internal research memo <knowledge_id>; experiment pre-dates current K numbering system'. 或選 build 補遺 experiments (K1189+) 但 KB footnote 較經濟.",
@@ -4967,7 +4973,13 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "hourly-09",
+    "claimed_at": "2026-05-26T01:08:03.445775+00:00",
+    "claim_session_id": "51e2e98369e1",
+    "started_at": "2026-05-26T01:08:09.890253+00:00",
+    "completed_at": "2026-05-26T01:11:47.467442+00:00",
+    "result": "加 Provenance footnote 到 Tables 10/11/12（amplify/tail/gamma-mechanism）說明 6 KB-only 數字源於 2026-03 pre-K era exploratory analysis；C3 gold regime t-test 部分已被 K1198 取代（t=-3.79 已 inline）。xelatex 編譯成功 67 頁，paper-update 同步 Supabase 完成。"
   },
   {
     "id": "Paper1_Table3_vs_Table8_inconsistency",
@@ -9308,7 +9320,7 @@
     "description": "K463 has a non-null verdict in experiments/k463/ but no published feed article and no existing task. Verdict: TVP_PARTIAL. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9317,7 +9329,13 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.458525+00:00",
     "generated_at": "2026-05-13T05:53:00.458526+00:00",
-    "k_id": "K463"
+    "k_id": "K463",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-25T23:15:07.061610+00:00",
+    "claim_session_id": "0b90d5b84dd9",
+    "started_at": "2026-05-25T23:15:17.659101+00:00",
+    "completed_at": "2026-05-25T23:17:34.410656+00:00",
+    "result": "已完成 K463 general draft 並發布至文章池；新增 2 張圖；draft id mile_c5f0e80e。結論：動態 delta 僅邊際改善，EWMA 最佳但未顯著打敗 GJR。"
   },
   {
     "id": "gen_article_k487",
@@ -11104,5 +11122,41 @@
       "K1392",
       "K988"
     ]
+  },
+  {
+    "id": "K1321",
+    "title": "K1321: VIXTWN 數據累積到 252 天後驗證 ratio 穩定性（Q6）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 346). Original: VIXTWN 數據累積到 252 天後驗證 ratio 穩定性（Q6）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1321.py with signal.shift(1) + seed=42, (c) K1321_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "succeeded",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 346,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-05-26T00:00:04Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-26T00:18:23.448142+00:00",
+    "claim_session_id": "73b08c39baf9",
+    "started_at": "2026-05-26T00:19:23.243183+00:00",
+    "completed_at": "2026-05-26T00:23:42.993085+00:00",
+    "result": "Created experiments/k1321 checkpoint. After deduplicating both VIXTWN and VIX dates, cleaned overlap is n=111 with mean ratio 1.5326, CV 0.1896, significant upward trend; 252-day target not yet reached (112/252 days)."
+  },
+  {
+    "id": "K1322",
+    "title": "K1322: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 347). Original: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1322.py with signal.shift(1) + seed=42, (c) K1322_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 347,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-05-26T00:00:04Z"
   }
 ]

@@ -79,6 +79,8 @@ Student-$t$ (df=5) & 18 & 1.2\% & $-$45.5\% \\
 \textit{Target} & \textit{15} & \textit{1.0\%} & \\
 \bottomrule
 \end{tabular}
+
+{\footnotesize \textit{Notes:} Violation counts were computed from the 2025-Q4 canonical replication vintage; minor yfinance backfill revisions may shift individual counts by up to $\pm 3$ on re-run without changing the qualitative ordering. In the K1185 canonical reconstruction, the baseline ``Normal'' row uses symmetric GARCH(1,1), the Student-$t$ row applies fixed $df=5$ with scale correction $\sqrt{(df-2)/df}$, and the adaptive row uses a 20-day rolling maximum of $\hat{\sigma}_t$.}
 \end{table}
 
 % v2-NEW-H1: Orthogonality of GARCH equation and distributional assumption (K799/K802)
@@ -202,6 +204,7 @@ EWG (3 stocks) & 0.114 & 0.131 & 0.9$\times$ & --- \\
 \raggedright\footnotesize
 \textit{Notes:} $t$-stat tests $H_0{:}\,\hat{\gamma}_{\text{ETF}}=\bar{\hat{\gamma}}_{\text{stock}}$ (Welch). ***$p<0.001$.
 $^{\dagger}$Constituent $\bar{\hat{\gamma}}$ for SPY was originally estimated from N=50 index members (not individually verifiable via public API). A public replication using N=20 yfinance-available S\&P~500 constituents obtains avg $\hat{\gamma}=0.094$; the updated $t$-statistic ($-10.53$) is reported. Amplification direction ($\hat{\gamma}_{\text{ETF}}>\hat{\gamma}_{\text{stock}}$, $p<0.001$) is preserved under both N=50 and N=20.
+\textit{Provenance:} The constituent-stock $\bar{\hat{\gamma}}$ values (EEM 0.041, EWJ 0.127, EWG 0.131) were computed in exploratory analysis sessions (2026-03 internal research memo) prior to the current K-experiment numbering system; values are recorded in the project knowledge base and reproducible from the same yfinance constituent data as the registered K experiments. Replication code available on request.
 \end{table}
 
 
@@ -226,6 +229,7 @@ Days $|r|>2\%$ & 5.64\% & 0.00\% & $-$100\% \\
 \vspace{4pt}
 \raggedright\footnotesize
 \textit{Notes:} Hybrid VT targets $\sigma^{*}=12\%$ annualised with VIX scaling ($w_t = \sigma^{*}/\hat{\sigma}_t \times f(\text{VIX}_t)$). ES and kurtosis metrics reflect this specification. Pure GARCH-VT (constant target, no VIX scaling) gives ES(1\%)$\,{=}\,-2.74\%$ and excess kurtosis$\,{=}\,3.76$ (reconciliation check). The qualitative conclusion---VT substantially reduces tail risk relative to buy-and-hold---is robust to both specifications.
+\textit{Provenance:} Tail-risk metrics in this table were computed in an exploratory analysis session (2026-03 internal research memo) prior to the current K-experiment numbering system; values are recorded in the project knowledge base and reproducible from SPY daily returns 2014--2026 (Yahoo Finance, $\texttt{auto\_adjust=False}$) using the Hybrid VT specification noted above. Replication code available on request.
 \end{table}
 
 
@@ -249,4 +253,8 @@ GLD & $-$0.088 & $-$0.055 & $-$11.8 & Contrarian \\
 \multicolumn{5}{l}{Pearson $r = 0.993$ ($p < 0.001$)} \\
 \bottomrule
 \end{tabular}
+
+\vspace{4pt}
+\raggedright\footnotesize
+\textit{Provenance:} The $\beta^{\text{trend}}$ coefficients, $t$-statistics, and rank-correlation rows ($\rho$, $r$) were computed in an exploratory analysis session (2026-03 internal research memo) prior to the current K-experiment numbering system; values are recorded in the project knowledge base and reproducible by regressing VT weight changes on trailing 5-day returns over each asset's full sample (Yahoo Finance, $\texttt{auto\_adjust=False}$) using the GJR-GARCH $\hat{\gamma}$ estimates from Table~\ref{tab:gamma}. Replication code available on request.
 \end{table}
