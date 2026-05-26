@@ -226,7 +226,7 @@ description: "<200-char SEO snippet>"
 
 Per `feedback_3model_review_discipline`:
 1. **Claude** 寫
-2. **Gemini pro** 一審（headless: `uv run python scripts/gemini_ask.py - 2>/dev/null <<EOF...EOF`）
+2. **Gemini pro** 一審（headless 首選 **agy 訂閱免費路徑**: `PROMPT=$(cat <<'EOF' ... EOF); agy -p "$PROMPT"`；**禁用** `scripts/gemini_ask.py`（會打 PAID API 觸發 email alert），僅 agy 不可用時才 fallback）
    - Prompt: "Check for (a) plagiarism risk vs URL <source-url>, (b) tone/framing originality, (c) fact accuracy on numbers cited, (d) VolPred angle clearly differentiated, (e) whether the prose still has AI-style landmines. VERDICT/CRITICAL/MINOR."
 3. **Codex** 二審（headless: `codex exec --skip-git-repo-check`）
    - Prompt: "Check for source-level issues: numerical accuracy via primary source verification, methodology claims valid, no implicit lookahead in any backtest reference, and whether the article has enough evidence/statistical support for VolPred platform standards. VERDICT/CRITICAL/MINOR."
