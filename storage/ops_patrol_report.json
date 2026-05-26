@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-26T12:14:40Z",
+  "timestamp": "2026-05-26T18:10:46Z",
   "all_ok": false,
   "checks": [
     {
@@ -10,7 +10,7 @@
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "strategy_metrics.json is 48.1 hours old (threshold: 26h). Last modified: 2026-05-24T12:10:53Z."
+      "detail": "strategy_metrics.json is ~53.9 hours old (threshold: 26h). mtime=1779624653, now=1779819047."
     },
     {
       "name": "ERROR_LOG",
@@ -20,12 +20,12 @@
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "15 strategies checked. No strategy has >2 nulls in last 3 portfolio_return entries."
+      "detail": "All strategies checked. No strategy has >2 nulls in last 3 portfolio_return entries."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files."
+      "detail": "0 uncommitted files. Working tree clean."
     },
     {
       "name": "KNOWLEDGE_SIZE",
@@ -34,6 +34,6 @@
     }
   ],
   "alerts": [
-    "STRATEGY_METRICS_FRESHNESS: strategy_metrics.json is 48.1 hours old (threshold: 26h)"
+    "STRATEGY_METRICS_FRESHNESS: strategy_metrics.json is ~53.9 hours old (threshold: 26h). Run strategy metrics recalculation."
   ]
 }
