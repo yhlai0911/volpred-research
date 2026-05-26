@@ -1,4 +1,4 @@
-# Handoff — 2026-05-26 14:11:02 台灣時間
+# Handoff — 2026-05-26 19:50:06 台灣時間
 
 **角色**：VolPred 自主運營經理（用戶 = 老闆 / report-only / full autonomy）
 
@@ -6,10 +6,10 @@
 
 ## 1. 任務池快照（`storage/next_tasks.json`）
 
-- **總數**：582
-  - pending: 21
-  - pending_main_thread: 28
-  - succeeded: 481
+- **總數**：597
+  - pending: 24
+  - pending_main_thread: 26
+  - succeeded: 495
   - failed: 3
   - blocked: 4
   - blocked_on_user: 1
@@ -18,7 +18,7 @@
   - daily_article: 280
   - paper_review: 132
   - experiment: 86
-  - platform_ops: 32
+  - platform_ops: 38
   - paper_body: 24
   - paper_decision: 14
 
@@ -30,18 +30,18 @@
 
 - (無未處理回信)
 
-_Gmail 最後 poll：2026-05-26T06:00:28.788809+00:00_
+_Gmail 最後 poll：2026-05-26T11:45:24.659429+00:00_
 
 ## 4. Pending 任務 top 8（依 priority asc）
 
+- `event_article_us_cpi_2026_06_13_preview` P1 [event_article] [event_article] US CPI 2026-06-13 預覽（T-7 / T-2 / T+0 三篇之 T-7）— VolPred vol regime + VIX term structu
+- `trending_repost_2026_05_26_etf_dividend_vol` P1 [trending_repost] [trending_repost] 5 月台股 ETF 配息潮 30 檔 — VolPred VT/risk-parity 角度看配息日 IV skew 與配置策略
+- `trending_repost_2026_05_26_silicon_valley_layoffs_capex` P1 [trending_repost] [trending_repost] 8000 人換 GPU：矽谷大裁員 × $725B AI CapEx 經濟學悖論 — VolPred labor-displacement vol 角度
+- `platform_ops_audience_misclassification_audit` P2 [platform_ops] [platform_ops] 既有 feed 41+ 篇 audience=general mis-classification audit + batch reclassify
+- `platform_ops_question_research_host_cron_migration` P2 [platform_ops] [platform_ops] question_research 從 session_cron 搬到 host_crontab（解 member_qa 36 天 silent gap）
+- `platform_ops_reader_facing_refill_cron` P2 [platform_ops] [platform_ops] 寫 cron_reader_facing_refill.sh + 加 host crontab，收斂 PHASE 0.5 prompt-level reader-faci
 - `K1268b_gdelt_with_paid_intraday` P3 [experiment] K1268b: GDELT 5-min vs SPY 5-min RV — re-run with backtest-grade intraday data
 - `K1310` P3 [experiment] K1310: I4: VIX futures roll yield 策略 — contango 環境下的 roll yield 收割 vs 尾部風險保護 ⚠️ **BLOCKED: 需要 VIX fu
-- `K1383` P3 [experiment] K1383: PatchTST-lite vs HAR-RV — MDPI 2025
-- `K1385` P3 [experiment] K1385: Sentiment-Augmented GARCH-LSTM — Computational Economics 2025
-- `K1388` P3 [experiment] K1388: HAR-GNN（Graph Neural Network）— ScienceDirect 2024
-- `K1389` P3 [experiment] K1389: KAN for VIX Forecasting — Expert Systems with Applications 2025
-- `Paper2_G20_T4_IS_Sharpe_errata` P3 [paper_review] Paper 2 G20 T4: IS Sharpe 0.732 vs K1180 0.413 (44% gap) — main-thread errata
-- `Paper2_Table4_documentation_errata` P3 [paper_review] Paper 2: Table 4 / Methodology / Data section 補說明 (K1176 發現)
 
 ## 5. 進行中 agent / worktree
 
@@ -51,23 +51,24 @@ _Gmail 最後 poll：2026-05-26T06:00:28.788809+00:00_
 
 ## 6. 最近 24h 完成（top 5）
 
-- `gen_article_k551` P4 [daily_article] K551: write general-audience article (auto-discovered, verdict={'checks': {'harvey_dm_t3': True, 'ha — claimed_by=codex-cli
-- `gen_article_k510` P4 [daily_article] K510: write general-audience article (auto-discovered, verdict=NEGATIVE — Volume-GARCH significantly — claimed_by=hourly-13
-- `gen_article_k524` P4 [daily_article] K524: write general-audience article (auto-discovered, verdict={'SPY': 'beats_baseline', 'SPY_GLD':  — claimed_by=codex-cli
-- `gen_article_k487` P4 [daily_article] K487: write general-audience article (auto-discovered, verdict=EQUITY-SPECIFIC) — claimed_by=hourly-12
-- `K1322` P3 [experiment] K1322: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）
+- `platform_ops_feed_publisher_audience_gate` P2 [platform_ops] [platform_ops] feed-publisher 加 audience classification gate（防新文章再 mis-tag general） — claimed_by=hourly-19
+- `email-11750-53fa5c` P3 [email_reply] [email_reply] Re: [VolPred Alert][INFO] [VolPred Alert][INFO] [VolPred Alert][INFO] [VolPred A — claimed_by=hourly-19
+- `platform_ops_dispatcher_type_rotation` P2 [platform_ops] [platform_ops] continue_task_dispatch.py 加 type-rotation sort weight（防 same-priority experiment 搶光 s — claimed_by=codex-cli
+- `member_qa_44b3cfcd_import_cars` P2 [member_qa] [member_qa] 會員 yaoxk1431 提問：台灣進口車比例與經濟變遷 + 個股推薦 2000 字 + 圖表
+- `email-11748-7b1f24` P3 [email_reply] [email_reply] Re: [VolPred Alert][INFO] [VolPred Alert][INFO] [VolPred Alert][WARN] Member Q&A — claimed_by=hourly-18
 
 ## 7. Dashboard 訊號
 
-- overall_status=ok (breaches=0, critical=0, generated=2026-05-26T06:00:44Z)
+- overall_status=warn (breaches=1, critical=0, generated=2026-05-26T11:30:10Z)
+- WARN: section=health_alerts_unhandled :: 2 warn/critical alerts last 6h (read + act per .claude/rules/alert.md)
 
 ## 8. 最近 work_log（5 筆，新→舊）
 
-- `2026-05-26T13:14` [daily_article] gen_article_k510
-- `2026-05-26T11:47` [experiment] K1322
-- `2026-05-26T10:15` [paper_review] Paper2_D3D4D5_gamma_VaR_days
-- `2026-05-26T08:07` [governance] hourly_08_cleanup_stale_k1401_todo
-- `2026-05-26T06:20` [daily_article] gen_article_k786
+- `2026-05-26T19:20` [platform_ops] platform_ops_feed_publisher_audience_gate
+- `2026-05-26T19:09` [email_reply] email-11750-53fa5c
+- `2026-05-26T10:11` [email_reply] email-11748-7b1f24
+- `2026-05-26T17:13` [member_qa] ?
+- `2026-05-26T16:13` [paper_review] Paper2_G20_T4_IS_Sharpe_errata
 
 ## 9. 接續提示詞（hourly dispatch / 互動 session 共用）
 

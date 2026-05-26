@@ -11372,7 +11372,7 @@
     "description": "Event: US CPI release 2026-06-13 (Friday, 8:30 ET / 20:30 TW)\nCron event_jobs.items: cpi-us-2026-06-13-t2 (lead-2 trigger) + cpi-us-2026-06-13-t0 (release day)\n本 task = T-7 preview article (2026-06-06 前發)\n\nVolPred angle:\n1. 近 12 個月 CPI release day VIX 變化 distribution\n2. VIX term structure（VIX/VIX9D ratio）CPI 前後行為\n3. 對應 K experiment 引用：K490 (VIX9D vs VIX)、K1401 (event article 模板)\n4. 對交易者建議：CPI release day VT-sized 部位調整 vs hold\n\n執行流程（per .claude/skills/feed-publisher/SKILL.md + event-article-templates.md）：\n1. yfinance 抓近 12 個月 CPI release day VIX 數據\n2. 算 release day VIX % change distribution + VIX/VIX9D ratio 路徑\n3. 寫 1500-2000 字繁中 + 至少 2 圖（CPI day VIX dist + VIX term ratio path）\n4. content_type=event_article, status=published 立即發\n5. **FB 雙發佈強制**（per publishing rules 2026-05-25 更新；共用 trending-repost FB SOP）\n6. 此事件配額：T-7 (本篇) + T-2 + T+0 共 3 篇上限，不要超發\n\nConstraint: published 立即發（事件驅動）+ FB 同步發佈。",
     "task_type": "event_article",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "tags": [
       "event_article",
       "us_cpi",
@@ -11380,7 +11380,11 @@
       "preview_t_minus_7"
     ],
     "created_at": "2026-05-26T10:03:20.915355+00:00",
-    "source": "main_thread_event_calendar_pull_2026_05_26"
+    "source": "main_thread_event_calendar_pull_2026_05_26",
+    "claimed_by": "hourly-20",
+    "claimed_at": "2026-05-26T12:08:18.864477+00:00",
+    "claim_session_id": "dd3f7f0f1f02",
+    "started_at": "2026-05-26T12:08:30.062583+00:00"
   },
   {
     "id": "platform_ops_reader_facing_refill_cron",
@@ -11486,7 +11490,7 @@
     "description": "Context: 用戶 2026-05-26 指 mile_d0d66405 (Range-Based GARCH Proxy) 標 audience=general 但內容是 Parkinson + 5×3 GARCH cross-test → 一般讀者看不懂。\nAudit 顯示 ≥41 篇 audience=general 標題含學術名詞 (GARCH/MLE/QLIKE/HAR/Patton/Hawkes/Diebold/Parkinson 等)，制度性 mis-categorization.\n\nDeliverable:\n1. 寫 scripts/audit_audience_classification.py:\n   - Scan feed.json 所有 audience=general\n   - 三維 score: (a) 標題關鍵詞 (GARCH/HAR/Patton/Parkinson/copula/EGARCH/MLE/QLIKE/Hawkes/spillover/cointegrat/panel/GMM/bootstrap/lookahead)\n                (b) 內文長度 + 學術術語密度（per 100 字 vocab unique ratio）\n                (c) 對應 K experiment 是否存在 (experiments/<k>/README.md)\n   - Output report (JSON + Markdown): 候選 reclassify 名單 + 信心分數\n2. 主線程 review report，三個 tier:\n   - HIGH confidence: agent 自動 batch PATCH audience → research\n   - MEDIUM: 列清單給用戶 review\n   - LOW: 保留 general (可能是 hybrid 寫法 OK)\n3. 已 PATCH 的 entries 加 audit_log entry + supabase sync\n4. 寫 docs/error_log.md 2026-05-26 entry 「audience taxonomy drift」\n\nConstraint: published feed 大批改動是 high-blast-radius，HIGH tier batch apply 前**必先 dry-run** + 用戶 confirm。\n預估 60-90 min。可派 codex:codex-rescue 或 general-purpose subagent。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "platform_ops",
       "audience_audit",
@@ -11494,7 +11498,12 @@
       "followup_from_mile_d0d66405"
     ],
     "created_at": "2026-05-26T10:51:06.442787+00:00",
-    "source": "main_thread_2026_05_26_audience_misclass"
+    "source": "main_thread_2026_05_26_audience_misclass",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-26T12:01:33.432829+00:00",
+    "claim_session_id": "35047c66f284",
+    "completed_at": "2026-05-26T12:05:31.141039+00:00",
+    "result": "Added audience misclassification dry-run auditor plus tests. Generated storage/ops/audience_audit_latest.{json,md}: scanned 534 general items, flagged 23 HIGH / 199 MEDIUM / 129 LOW; no batch feed rewrite applied because task requires post-dry-run main-thread review."
   },
   {
     "id": "platform_ops_feed_publisher_audience_gate",

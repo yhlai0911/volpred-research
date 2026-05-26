@@ -1,43 +1,60 @@
 {
-  "generated_at": "2026-05-25T20:07:39.492844+00:00",
+  "generated_at": "2026-05-26T11:00:28.567723+00:00",
   "slot_cap": 4,
   "slot_state": {
-    "worktrees": [],
+    "worktrees": [
+      "agent-af9b396e7976b970b"
+    ],
     "active_agents": [],
-    "occupied": 0
+    "occupied": 1
   },
-  "free_slots": 4,
-  "pending_total": 31,
-  "pending_agentable": 26,
-  "pending_main_thread": 1,
+  "free_slots": 3,
+  "pending_total": 25,
+  "pending_agentable": 14,
+  "pending_main_thread": 7,
   "pending_blocked": 4,
   "dispatch_candidates": [
+    {
+      "id": "platform_ops_feed_publisher_audience_gate",
+      "priority": 2,
+      "title": "[platform_ops] feed-publisher 加 audience classification gate（防新文章再 mis-tag general）"
+    },
+    {
+      "id": "platform_ops_question_research_host_cron_migration",
+      "priority": 2,
+      "title": "[platform_ops] question_research 從 session_cron 搬到 host_crontab（解 member_qa 36 天 silent gap）"
+    },
     {
       "id": "K1385",
       "priority": 3,
       "title": "K1385: Sentiment-Augmented GARCH-LSTM — Computational Economics 2025"
-    },
-    {
-      "id": "K1388",
-      "priority": 3,
-      "title": "K1388: HAR-GNN（Graph Neural Network）— ScienceDirect 2024"
-    },
-    {
-      "id": "K1389",
-      "priority": 3,
-      "title": "K1389: KAN for VIX Forecasting — Expert Systems with Applications 2025"
-    },
-    {
-      "id": "K705_article_general",
-      "priority": 4,
-      "title": "K705: write general-audience article (auto-discovered uncovered K)"
     }
   ],
   "main_thread_queue_top5": [
     {
-      "id": "BTC_GAS_negative_paper",
-      "priority": 4,
-      "title": "Negative-result methodology paper: \"Why GAS-t fails on BTC — Student-t innovation is the culprit, MS cannot rescue it\""
+      "id": "event_article_us_cpi_2026_06_13_preview",
+      "priority": 1,
+      "title": "[event_article] US CPI 2026-06-13 預覽（T-7 / T-2 / T+0 三篇之 T-7）— VolPred vol regime + VIX term structure 角度"
+    },
+    {
+      "id": "trending_repost_2026_05_26_etf_dividend_vol",
+      "priority": 1,
+      "title": "[trending_repost] 5 月台股 ETF 配息潮 30 檔 — VolPred VT/risk-parity 角度看配息日 IV skew 與配置策略"
+    },
+    {
+      "id": "trending_repost_2026_05_26_silicon_valley_layoffs_capex",
+      "priority": 1,
+      "title": "[trending_repost] 8000 人換 GPU：矽谷大裁員 × $725B AI CapEx 經濟學悖論 — VolPred labor-displacement vol 角度"
+    },
+    {
+      "id": "platform_ops_audience_misclassification_audit",
+      "priority": 2,
+      "title": "[platform_ops] 既有 feed 41+ 篇 audience=general mis-classification audit + batch reclassify"
+    },
+    {
+      "id": "platform_ops_reader_facing_refill_cron",
+      "priority": 2,
+      "title": "[platform_ops] 寫 cron_reader_facing_refill.sh + 加 host crontab，收斂 PHASE 0.5 prompt-level reader-facing pool refill"
     }
   ],
   "refill": null,

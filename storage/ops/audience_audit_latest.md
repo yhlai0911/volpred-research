@@ -1,0 +1,205 @@
+# Audience Classification Audit
+
+- generated_at: `2026-05-26T12:05:06.396251+00:00`
+- scanned general items: `534`
+- flagged candidates: `351`
+- HIGH / MEDIUM / LOW: `23` / `199` / `129`
+
+## Action rule
+
+- `HIGH`: 主線程 review 後可 batch reclassify `general -> research`
+- `MEDIUM`: 保留人工複核
+- `LOW`: 預設不動
+
+## HIGH
+
+- `mile_257ddc69` score=86 title_hits=[QLIKE, GARCH] refs=[K635, K634, K635_QLIKE_COMPARISON] readme=True :: GARCH 參數固定 vs 滾動估計，哪個贏？K635：固定贏在 QLIKE 也贏在 Sharpe
+- `mile_80e3835e` score=86 title_hits=[GARCH-X, GARCH] refs=[K1048, K1019, K1031] readme=True :: 高低恐慌兩個世界：門檻型 GARCH-X 模型可行嗎
+- `mile_0108572f` score=68 title_hits=[GARCH] refs=[K426, K419, K426_GENERAL_MODEL_COMPARISON] readme=True :: 給 GARCH 再加一層神經網路，為什麼預測反而更差？K426 的教訓
+- `mile_379b51cc` score=68 title_hits=[HAR-RV] refs=[K868, K1301, K1303] readme=True :: 四種 HAR 分解都無法超越標準 HAR-RV：台灣期貨波動率預測的系統性 NULL 結果
+- `mile_3b3e37ad` score=68 title_hits=[VaR] refs=[K896, K896_TAIWAN_ES_SUPPLEMENT_RESULTS, K829] readme=True :: 「最壞那幾天到底有多壞？」台股 0050 用 ES 補足 VaR 看不到的尾端
+- `mile_3eb8657c` score=68 title_hits=[VaR] refs=[K908, K889, K908_VAR_TRINITY_HEATMAP_C9D772] readme=True :: K908: 最強預測模型加上 HistSim — 跨三資產 6/6 通過 Trinity 的 Universal VaR 解
+- `mile_429cd241` score=68 title_hits=[GARCH] refs=[K432, K432_QLIKE_COMPARISON, K432_DM_TESTS] readme=True :: 用貝氏 MCMC 重新估計 GJR-GARCH，預測精度真的更好嗎？SPY 20 年資料給出意外答案
+- `mile_509005ee` score=68 title_hits=[HAR-RV] refs=[K953, K953_RV_ANALYSIS, K849] readme=True :: 56 天 5 分鐘 SPY 高頻數據能告訴我們什麼？HAR-RV pilot 的 PRELIMINARY 觀察（初步）
+- `mile_70f2fbf5` score=68 title_hits=[GARCH] refs=[K438, K430, K433] readme=True :: VIX 進入波動率方程式：六分之一的 OOS 改進，但摸到 GARCH 的天花板
+- `mile_768cec93` score=68 title_hits=[HAR-RV] refs=[K960, K960_HAR_RV_RESULTS, K960_RV_DISTRIBUTION] readme=True :: 56 天高頻 SPY 跑出來的 HAR-RV：第一份正式樣本，全是 PRELIMINARY
+- `mile_8b4e7c37` score=68 title_hits=[GARCH] refs=[K952, K952_COMPARISON] readme=True :: 門檻 ARMA 真的能打贏 GARCH 嗎？一場關於波動率預測的誠實檢驗
+- `mile_8bf877f5` score=68 title_hits=[GARCH] refs=[K435, K197, K435_FIG1_BREAKS_TIMELINE] readme=True :: 波動率不是穩態的 — 結構斷點告訴你 GARCH 模型何時失效（K435）
+- `mile_8e2bae2e` score=68 title_hits=[GARCH] refs=[K1031, K1013, K1031_SSVS_JOINT_RESULTS] readme=True :: 把六個總體變數一次丟進貝氏選模型，結果它什麼都沒選：聯合估計再次確認 GARCH 自己就夠了
+- `mile_9a629641` score=68 title_hits=[GARCH] refs=[K592, K530, K144] readme=True :: 兩段式波動率模型實戰：MF2-GARCH 在 SPY 真的贏過 GJR 嗎？
+- `mile_9b0aa0f0` score=68 title_hits=[VaR] refs=[K1076, K988, K1075] readme=True :: 風險模型的金本位：用 FZ 聯合分數重新檢驗 VaR/ES
+- `mile_a31f5bb0` score=68 title_hits=[GARCH] refs=[K947, K889, K942] readme=True :: 把 GARCH 在 VIX=18 一刀切兩半：21 年 SPY 實證告訴你「硬閾值」為什麼贏不了「平滑」
+- `mile_aeca4e68` score=68 title_hits=[GARCH] refs=[K623, K621, K970] readme=True :: 把實作 bug 修掉之後，MF2-GARCH 真的贏了 GJR——但 25% 收斂率讓這場勝利打了折
+- `mile_b274dbfa` score=68 title_hits=[VaR] refs=[K1026, K800, K1021] readme=True :: 不假設分配的風險值估計：Conformal VaR 在 SPY 13 年外樣本表現
+- `mile_cb59b7f6` score=68 title_hits=[VaR] refs=[K995, K988, K770B] readme=True :: K995：A4f Student-t 是唯一通過 1% VaR 檢定的模型 — GJR 系列風險低估一倍
+- `mile_cea0f585` score=68 title_hits=[GARCH] refs=[K197, K1024, K1048] readme=True :: GARCH 持續性會斷裂嗎？偵測得到、用不出來的誠實實驗
+- `mile_efecdbae` score=68 title_hits=[GARCH] refs=[K458, K414, K456] readme=True :: 35 個波動率實驗的 Meta-Analysis：為什麼 GJR-GARCH 還是難以被打敗？
+- `mile_f9d6014f` score=68 title_hits=[VaR] refs=[K1046, K1036, K1043] readme=True :: 蒙地卡羅 VaR 真的比較準嗎？一場關於風險估計的反直覺實驗
+- `mile_502f059d` score=64 title_hits=[GARCH] refs=[K782, K782_QLIKE_COMPARISON_963043] readme=True :: 學術界網紅模型遇上真實世界：HAR 為何輸給 GARCH？
+
+## MEDIUM
+
+- `mile_912dd699` score=58 title_hits=[GARCH] refs=[K986, K987, K986_OOS_COMPARISON] readme=True :: LASSO 救得了波動率預測嗎？10 個因子全選了，還是輸給古老的 GARCH
+- `mile_13fdd2aa` score=56 title_hits=[GARCH] refs=[K1266, K1266_QLIKE_COMPARISON, K1266_DM_HEATMAP] readme=True :: 多資產 rough volatility 聽起來很新，為什麼放到日線還是輸給老派 DCC-GARCH？
+- `mile_3a983f83` score=54 title_hits=[-] refs=[K625, K434] readme=True :: 100 個實驗之後，我們學到的最重要一課
+- `mile_f2340786` score=54 title_hits=[-] refs=[K1074_GENERAL, K1075, K1074] readme=True :: 更準的波動率模型，真的能賺更多嗎？
+- `mile_043a8a2c` score=50 title_hits=[-] refs=[K1116, K1121, K1122] readme=True :: 你追蹤的那個經濟指標，對你的投資可能根本沒用——我們做了 87 個組合測試結果全 NULL
+- `mile_052ed9e4` score=50 title_hits=[-] refs=[K1035, K1035_TRINITY_HEATMAP, K1035_VIOLATION_RATES] readme=True :: 為什麼好的波動率模型，連「極值理論」這個保險都不用買？
+- `mile_0761dced` score=50 title_hits=[-] refs=[K1029, K1029_FINSTRESS_TIMELINE, K55] readme=True :: 金融股壓力是 0050 波動率的領先訊號嗎
+- `mile_096db2f2` score=50 title_hits=[-] refs=[K1044, K53, K1044_GAMMA_VT_SCATTER] readme=True :: 高 Gamma 資產真的更適合波動率目標策略嗎？13 個跨類別資產的因果重檢
+- `mile_09c3dbf6` score=50 title_hits=[-] refs=[K497, K495, K497_RANKING_HEATMAP] readme=True :: 換一把尺，模型排名會變嗎？K497 用 5 條 Patton loss 對 SPY 波動率模型重排
+- `mile_0a30b03f` score=50 title_hits=[-] refs=[K881, K874E, K881_QLIKE_PER_ASSET] readme=True :: PRG 跨資產驗證：QQQ／GLD／EEM 三戰三勝？
+- `mile_0e16d067` score=50 title_hits=[-] refs=[K928, K928_IS_OOS_GAP_46ACFD, K928_REGIME_ASYMMETRY_69717A] readme=True :: BTC 鏈上指標能預測比特幣波動嗎？看似可以，實際上不行
+- `mile_12348568` score=50 title_hits=[-] refs=[K780_FORECAST_VS_RISK_122C47, K778, K778_MEM_R2_NATIVE] readme=True :: 預測最準的模型不是最安全的——為什麼風險管理需要不同的標準
+- `mile_17f67ce8` score=50 title_hits=[-] refs=[K1148_D1, K1145, K1148] readme=True :: 卡在門檻邊緣的研究結果，比『完全沒效』還危險 — 為什麼財金研究要堅持 t≥3？
+- `mile_19f7ce98` score=50 title_hits=[-] refs=[K799, K802, K800] readme=True :: 從假突破到真解法：為什麼預測和風險管理要分開選
+- `mile_1a5263af` score=50 title_hits=[-] refs=[K1135, K1129, K1138] readme=True :: 想用偏態 t 打敗波動率？商品市場給了個彆扭答案 — 波動預測沒救，但能救你的『最壞情境』
+- `mile_1b2ad1f8` score=50 title_hits=[-] refs=[K447, K877, K1053] readme=True :: CBOE SKEW 真能補捉尾端風險嗎？我們把它和 VIX 一起檢驗
+- `mile_1c877c91` score=50 title_hits=[-] refs=[K966, K624, K1024] readme=True :: 路徑依賴特徵在 5 分鐘 RV 上仍敗給標準 HAR
+- `mile_1d8652b5` score=50 title_hits=[-] refs=[K567, K567_GENERAL_SHARPE_BARS, K567_GENERAL_TSTAT_SCATTER] readme=True :: 別人的 VIX 策略不是你的 VIX 策略——6 個市場 18 個測試的殘酷真相
+- `mile_1f0e3bb0` score=50 title_hits=[-] refs=[K696, K696_FLOOR_SHARPE, K696_SHARPE_GAP] readme=True :: VT 加最低部位 floor 真的能贏 buy-and-hold 嗎？K696 答案：哪一個 floor 都贏不了
+- `mile_20e96f77` score=50 title_hits=[-] refs=[K649, K448, K1] readme=True :: 波動的波動率能預測動盪嗎？實證 NULL
+- `mile_2194b3fa` score=50 title_hits=[-] refs=[K793] readme=True :: 你的投資策略只看 Sharpe？這 8 個面向才是完整評估
+- `mile_21cf034d` score=50 title_hits=[-] refs=[K511, K115, K511_COINTEGRATION_PCT] readme=True :: ETF 配對交易還能賺錢嗎？K511 用 SPY-QQQ-IWM-GLD 實測：5 套策略全失敗
+- `mile_232ce5d4` score=50 title_hits=[-] refs=[K1091, K1090, K1091_META_VALIDATION] readme=True :: 為什麼同樣是『商品 ETF』，銅銀就是吃不到 VIX 紅利？—— 給散戶與資產配置者的一張資產相容性地圖
+- `mile_23964695` score=50 title_hits=[-] refs=[K1072, K1054, K1063] readme=True :: 5 分鐘 SPY 真的乾淨嗎？Realized Kernel vs RV 初步觀察
+- `mile_23ef12dd` score=50 title_hits=[-] refs=[K1021, K1004, K802] readme=True :: 波動率預測的『分布假設』到底重要嗎？同一個模型換 5 種誤差分布的實測
+- `mile_27038b04` score=50 title_hits=[-] refs=[K669, K669_GLOBAL_VT, K669_RESULTS] readme=True :: VIX 是全球恐慌指標，但 12/VIX 策略只在美股奏效——四大市場實證
+- `mile_289b1576` score=50 title_hits=[-] refs=[K426, K522, K515] readme=True :: 98 個實驗告訴你的 5 個投資真相——從波動率研究到實戰策略
+- `mile_2975939b` score=50 title_hits=[-] refs=[K957, K526, K566] readme=True :: 37 個失敗實驗教散戶的五件事：研究團隊踩過的坑，你不必再踩
+- `mile_2d607c5f` score=50 title_hits=[-] refs=[K1083, K1083_CURRENCY_DECOMPOSITION, K1083_DECOMPOSITION_BARS] readme=True :: 把台股穿上美元外衣：VIX 對 0050 的預測力，差別竟然在『計價貨幣』
+- `mile_2eab57ad` score=50 title_hits=[-] refs=[K1086, K1085, K1086_EXTENDED_DM] readme=True :: 債券波動率預測：MOVE 指數真的比 VIX 更懂長天期公債嗎？K1086 一個誠實的『失敗』實驗
+- `mile_30c68d4e` score=50 title_hits=[-] refs=[K1200, K880, K1200_METRICS_SIDE_BY_SIDE] readme=True :: 重寫一次發現數字微微跑掉：研究結論可信度其實是漸層、不是黑白
+- `mile_31fe10c1` score=50 title_hits=[-] refs=[K822, K822_VIXY_VS_SPY, K822_VIX_PRODUCT_TRADING] readme=True :: 預測準了又怎樣？買 VIXY 還是虧 99.99%——VIX 商品的致命陷阱
+- `mile_334a3f26` score=50 title_hits=[-] refs=[K1106B, K1100, K1104] readme=True :: 跨產業檢驗個股波動率的 VIX 敏感度：誠實的負面結果
+- `mile_35913b6c` score=50 title_hits=[-] refs=[K191, K877, K447] readme=True :: 情緒指標能預測波動嗎？Put-Call Ratio 的混合答案
+- `mile_3655a10a` score=50 title_hits=[-] refs=[K980, K1020, K980_OOS_COMPARISON] readme=True :: 把波動模型「拆兩半」反而比較差？低 VIX、高 VIX 真的不一樣，為什麼合在一起預測卻贏
+- `mile_36690fbd` score=50 title_hits=[-] refs=[K1096, K1089, K1025] readme=True :: 比特幣對股市恐慌脫鉤是真的嗎？我們設計四種「動態開關」想救它，結果四個都失敗
+- `mile_37555936` score=50 title_hits=[-] refs=[K195, K193, K195_TDA_DEEP_DIVE] readme=True :: 崩盤時你的資產一起跌、上漲時卻各走各的？Copula 尾部相依不對稱的多資產實證（K195）
+- `mile_38365a80` score=50 title_hits=[-] refs=[K933, K889, K442] readme=True :: 加上長記憶就能贏過 VIX？我們把兩個強模型合在一起，結果反而爆炸
+- `mile_3b7bdc47` score=50 title_hits=[-] refs=[K1148_D2, K1148_D1, K1148] readme=True :: 美股版本爆過、台股版本擦邊掉 — 同一條檢定線兩種命運的真實故事
+- `mile_4109d998` score=50 title_hits=[-] refs=[K625, K499, K512] readme=True :: 台灣投資人完整指南：用 8.63/VIX 管理 0050 的風險
+- `mile_4b38373c` score=50 title_hits=[-] refs=[K873, K873_WEEKEND_VOL, K873_RESULTS] readme=True :: 週末效應在波動率預測裡到底有沒有用？三市場的誠實答案
+- `mile_4df2d060` score=50 title_hits=[-] refs=[K479, K479_QLIKE_COMPARE, K479_DM_PVALUES] readme=True :: 小波分析能不能改善波動率預測？K479 給的答案是：看你怎麼比
+- `mile_50a70b23` score=50 title_hits=[-] refs=[K776] readme=True :: 把波動率拆成長期與短期，真的會比較準嗎？DMEM 雙乘子模型實測
+- `mile_56026ef7` score=50 title_hits=[-] refs=[K902, K1216C] readme=True :: 壞消息真的比好消息更會推升波動嗎？九個市場的誠實檢視
+- `mile_60a94878` score=50 title_hits=[-] refs=[K619, K618, K1263] readme=True :: K619：抓出 K618 兩個 bug 後，KAN 的真實成績單長這樣
+- `mile_616bd297` score=50 title_hits=[-] refs=[K764, K529, K530] readme=True :: 波動率有多「粗糙」？用顯微鏡看市場恐慌的紋理
+- `mile_63e51581` score=50 title_hits=[-] refs=[K194, K966, K1024] readme=True :: 分數階差分救得了波動率預測嗎？跨五資產的誠實答案
+- `mile_64b8e390` score=50 title_hits=[-] refs=[K707, K703, K621] readme=True :: 散戶 20 問完整 FAQ：86 個實驗濃縮的答案（K707）
+- `mile_65790fc5` score=50 title_hits=[-] refs=[K593, K593_WINDOW_CROSS_OOS_RESULTS, K591] readme=True :: 預測波動率該回望多久？五段歷史告訴我們：沒有萬靈丹
+- `mile_672f3c7c` score=50 title_hits=[-] refs=[K884, K880, K884_HAR_DAY_NIGHT] readme=True :: 把日盤夜盤拆開，台指期波動率預測會變更準嗎？一個誠實的否定答案
+- `mile_69861e0d` score=50 title_hits=[-] refs=[K1115, K1115_5MODEL_TRINITY, K1115_BREACH_CLUSTER_ACF] readme=True :: SPY 暴跌會「成串出現」嗎？條件式風險模型的真實答卷
+- `mile_6c2bd99e` score=50 title_hits=[-] refs=[K703, K697, K687] readme=True :: 19 年研究濃縮成 10 個數字：散戶該記住的一頁 cheatsheet（K703）
+- `mile_6dc01de9` score=50 title_hits=[-] refs=[K594, K406, K408] readme=True :: 動態調整估計視窗能改善 VT 嗎？K594 NULL：固定 W=2000 已經夠用
+- `mile_72fb5130` score=50 title_hits=[-] refs=[K1143, K1143_GENERAL_RESCUE_FAILURES_D3DDB7, K1138] readme=True :: 論文引用 2000+ 次的明星模型，在 SPY 反而虧得更慘——診斷報告
+- `mile_7408a93f` score=50 title_hits=[-] refs=[K199, K671, K1083] readme=True :: VIX 期貨基差能預測未來波動率嗎？17 年資料的誠實答案
+- `mile_7880295e` score=50 title_hits=[-] refs=[K1033, K1033_QLIKE_VS_REFIT, K1033_DM_VS_REFIT] readme=True :: 重新校正風險模型，到底要多勤快？K1033 告訴你：別再每月折騰一次了
+- `mile_7a4249ae` score=50 title_hits=[-] refs=[K1010_CALIBRATION_MAD_640040, K1010, K1010_RESULTS] readme=True :: 預測波動率「說了機率就要兌現」——我們驗證了 20 年數據，發現一個出乎意料的贏家
+- `mile_7a9fbc50` score=50 title_hits=[-] refs=[K936, K936_COMPARISON, K936_HURST_VIX_SCATTER] readme=True :: 把波動率拆解再預測，學界二十年都失敗——K936 用粗糙波動率再次撞上同一道牆
+- `mile_7b4c0a26` score=50 title_hits=[-] refs=[K1015, K1004, K1015_QLIKE_COMPARISON] readme=True :: 短天期恐慌指數已經夠了：把 VIX9D 和 VIX3M 一起放進模型，反而沒有加分
+- `mile_80aeb8a1` score=50 title_hits=[-] refs=[K700, K621, K699] readme=True :: 80 場實驗、4 次 Codex 把關之後：我們對波動率投資的三件確定事與三個慘痛錯誤
+- `mile_86e39d05` score=50 title_hits=[-] refs=[K1080, K1075, K1078] readme=True :: 小型股波動率也吃 VIX 嗎？把美股大中小三檔 ETF 一起放上同一張尺
+- `mile_8a82b298` score=50 title_hits=[-] refs=[K1149_GENERAL_OOS_TSTAT_COMPARISON, K1148_D1, K1148_D2] readme=True :: 為什麼學術論文堅持做『因子控制』？我們用真實數據展示差 5 倍的結論
+- `mile_8ae0e7d8` score=50 title_hits=[-] refs=[K302, K220, K279] readme=True :: 300 個實驗之後仍未解的 24 個問題——研究前沿的誠實清單
+- `mile_8c3829e5` score=50 title_hits=[-] refs=[K971, K967, K971_CUMULATIVE_RETURNS] readme=True :: 預測尾部贏了，操作 PnL 卻輸了——CAViaR-VT 的 11 年實證教訓
+- `mile_8d1c7528` score=50 title_hits=[-] refs=[K629] readme=True :: 處置效應與波動率：行為金融的視角好聽，但對預測沒幫助
+- `mile_8dc39724` score=50 title_hits=[-] refs=[K852, K849, K850] readme=True :: 為什麼預測最準的模型，反而最常踩到地雷？一個被「兩全其美」的方案打破的悖論
+- `mile_8e0b4b6f` score=50 title_hits=[-] refs=[K1054, K1049, K1054_PROXY_COMPARISON] readme=True :: 60 天 5 分鐘資料夠不夠用？三個波動率模型在 SPY 的真實對決
+- `mile_927eeb01` score=50 title_hits=[-] refs=[K973, K34, K973_HURST_TIMESERIES] readme=True :: 高頻學界紅得發紫的「粗糙波動率」，搬到日線就熄火了：我們把 2025 年新方法在 SPY 20 年資料上踩了一次
+- `mile_94be2de0` score=50 title_hits=[-] refs=[K1103, K1067, K1103_RESULTS] readme=True :: 抓 bug 重做實驗：τ-lag 修正後三檔台廠財報訊號是否仍站得住？
+- `mile_9a66c8b2` score=50 title_hits=[-] refs=[K301, K129, K405] readme=True :: 我們檢驗了自己 20 個主張，只有 13 個過關——這就是研究誠實的樣子
+- `mile_9b327220` score=50 title_hits=[-] refs=[K1020, K1019, K988] readme=True :: 兩個都贏的方法加在一起，為什麼反而輸了？K1020 的『資訊重疊』教訓
+- `mile_9eaadbd1` score=50 title_hits=[-] refs=[K274, K41, K32] readme=True :: 盤點 270 場實驗：哪些發現真正是新的？
+- `mile_9eb178cd` score=50 title_hits=[-] refs=[K1073, K988, K1056] readme=True :: VIX 該選哪個天期？四種 VIX 同台比拚波動率預測力
+- `mile_9f2c37aa` score=50 title_hits=[-] refs=[K1043, K1036, K1043_TRINITY_HEATMAP] readme=True :: 計算風險值的兩種非參數做法：FHS 與滾動 CF 的等價之爭
+- `mile_a404c9a2` score=50 title_hits=[-] refs=[K1148_D3, K1148_D1, K1148D3_EFFECT_SIZE_4A5CCA] readme=True :: 「設計被否決」比「結果是 null」更冷峻 — 一個 paper subsection 連 hypothesis 都不成立的故事
+- `mile_ab589f58` score=50 title_hits=[-] refs=[K804, K799, K804_CROSS_ASSET_VAR_VIOLATION_A8BFB2] readme=True :: 四種資產三種通過——比特幣為何是例外？
+- `mile_ae2b68bc` score=50 title_hits=[-] refs=[K859, K473, K547] readme=True :: VT 工程化改進的誠實告白：Floor/Cap、EWMA、再平衡頻率全試了
+- `mile_afe76891` score=50 title_hits=[-] refs=[K912_WIN_RATE_BY_REGIME_99E22B, K912_DM_STAT_BY_REGIME_6AD177, K912] readme=True :: 為什麼最好的波動率模型，在危機時反而失效？低 VIX 才是精準預測的黃金時段
+- `mile_b4774629` score=50 title_hits=[-] refs=[K1040, K1040_RESULTS, K1040_OOS_R2_DIRECTION] readme=True :: 經典論文搬到 OOS 會崩嗎？我們驗了 Bollerslev (2009)：能預測月報酬的不是 VRP，是 VIX 本身
+- `mile_b6249667` score=50 title_hits=[-] refs=[K485, K484, K479] readme=True :: 讓貝氏自己挑變數能改善波動率預測嗎？K485 跨 5 期 OOS 給出 PROMISING 但不全面顯著
+
+## LOW
+
+- `mile_0155c66a` score=34 title_hits=[-] refs=[K1116C, K1116, K1116B] readme=True :: 我們把同一份資料的時序對齊改了 6 次：EPU、NFCI 還是贏不了 VIX
+- `mile_06283d2e` score=34 title_hits=[-] refs=[K701, K701_CORR_BY_FREQ, K701_SHARPE_ALPHA] readme=True :: 日週月頻率比較：VT 拉低頻率能擠出 alpha 嗎？K701：3 個頻率都沒贏
+- `mile_0676092b` score=34 title_hits=[-] refs=[K674, K674_DD_HEATMAP, K674_AVG_VS_WORST] readme=True :: 五次歷史危機壓力測試：哪個策略真的扛得住？K674 用真實數據給答案
+- `mile_073884fd` score=34 title_hits=[-] refs=[K681, K679, K680] readme=True :: VIX 百分位策略走出美國：四個市場的真實成績單
+- `mile_088ce61e` score=34 title_hits=[-] refs=[K471, K471_CORR_WITH_FWD_RV, K471_DELTA_R2] readme=True :: 偏態與峰度能預測波動嗎？K471 給你三個資產的誠實答案
+- `mile_0aa76d4d` score=34 title_hits=[-] refs=[K517, K502, K515] readme=True :: 美股月度訊號能改善台股策略嗎？K517 用 SPY 月度 VIX 條件實測：4 套策略全失敗
+- `mile_0baeb00c` score=34 title_hits=[-] refs=[K604, K515, K625] readme=True :: 更正：我們算錯了台股交易成本——ETF 比我們說的便宜很多
+- `mile_0bdb89aa` score=34 title_hits=[-] refs=[K561, K507, K425] readme=True :: 債券還是黃金？動態切換『避險端』在波動率目標策略裡的真實表現
+- `mile_0c1f9687` score=34 title_hits=[-] refs=[K531, K504, K418] readme=True :: 新聞情緒、政策不確定性、信用利差能預測波動率嗎？四項『另類風向標』全面對決 VIX
+- `mile_0e63a96a` score=34 title_hits=[-] refs=[K991_SHARPE_VS_K_ARTICLE_39E71F, K991_SHARPE_DROP_BAR_57B6DC, K991] readme=True :: 投資公式有多穩？把核心參數調了 20%，績效幾乎紋風不動
+- `mile_19ed8830` score=34 title_hits=[-] refs=[K877, K877_OOS_R2_COMPARISON, K877_IS_VS_OOS_STRENGTH] readme=True :: 金銀比能預測美股波動嗎？一個 NULL 結果
+- `mile_1d221609` score=34 title_hits=[-] refs=[K319, K319_DECADE_TABLE, K319_DECADE_RESULTS] readme=True :: 十年又十年：同一套策略在五個年代怎麼表現？
+- `mile_1ed654f4` score=34 title_hits=[-] refs=[K544, K41, K15] readme=True :: 買 put 避險划算嗎？K544 給散戶的 NEGATIVE 答案：12/VIX VT 已經夠用
+- `mile_21e34b9b` score=34 title_hits=[-] refs=[K814, K814V2] readme=True :: 「GPS 給你一個點，但人生更需要地圖」——Bayesian 統計如何改變你看待投資預測的方式
+- `mile_227257a3` score=34 title_hits=[-] refs=[K695, K547, K561] readme=True :: EWMA 平滑參數最佳值：Lag 修正後的誠實答案
+- `mile_24307707` score=34 title_hits=[-] refs=[K715, K687, K715_STRATEGY_RANKING_2023_2026] readme=True :: VT 何時真的有效?同期間驗證:2023-2026 高 VIX 期間 VT 終於勝過 BH
+- `mile_2512c758` score=34 title_hits=[-] refs=[K818_HIT_RATES_640363, K818, K818_SSVS_RETURN_PREDICTION] readme=True :: 用 10 個指標預測美股漲跌方向：AI 統計方法的答案讓人清醒
+- `mile_27022311` score=34 title_hits=[-] refs=[K524, K524_GENERAL_POLICY_VS_BASELINE, K524_GENERAL_CROSS_OOS_WINDOWS] readme=True :: 讓機器自己找規則，真的能打敗 12/VIX 嗎？K524 的答案是：要看你有沒有黃金
+- `mile_284f64eb` score=34 title_hits=[-] refs=[K993, K975, K993_CUMULATIVE_RETURNS] readme=True :: VIX 期限結構斜率能預測波動，卻換不到交易 alpha：一個誠實的失敗紀錄
+- `mile_2afae61b` score=34 title_hits=[-] refs=[K932_SHARPE_COMPARISON_E4150F, K932_NET_SHARPE_02BD39, K932] readme=True :: 數學最優的投資組合為什麼反而輸了？——5 種策略 10 年實測的意外結論
+- `mile_304f4e32` score=34 title_hits=[-] refs=[K758, K758_FX_HEDGE_SHARPE_7BBF33, K758_TW_CROSS_BORDER_HEDGE] readme=True :: 台灣人買美股要避匯嗎？數據說：不用，反而更貴
+- `mile_3b689404` score=34 title_hits=[-] refs=[K904, K904_CHART1_N_COMPARISON, K721] readme=True :: 重做了一次論文 8 的「市場衝擊」實驗——數字對不上，故事卻變得更乾淨
+- `mile_3f3ccb72` score=34 title_hits=[-] refs=[K911, K907, K910] readme=True :: 危機來臨時，市場「尾端連動」會比「平均連動」更早拉警報嗎？K911 量化分位連結度實測
+- `mile_40fbffbb` score=34 title_hits=[-] refs=[K655, K655_RESULTS, K655_HORIZON_SHARPE_MINIMAX] readme=True :: 你以為 VIX 訊號越複雜越好？8 個投資期限告訴你：簡單的 60/40 才是長期王者
+- `mile_4c1045ea` score=34 title_hits=[-] refs=[K663, K663_SHARPE_HEATMAP, K663_EPISODES_COMPARE] readme=True :: 升降息環境下，黃金真的能避險嗎？K663 三種利率環境量化驗證
+- `mile_5302df53` score=34 title_hits=[-] refs=[K222, K87, K320] readme=True :: 【已修正】退休金策略：VT 提供更穩定的 4% 存活率，但不會翻倍
+- `mile_65e624d4` score=34 title_hits=[-] refs=[K761, K749, K739B] readme=True :: 台灣殖利率曲線能預測 0050 的波動嗎？一個 17 年資料的誠實答案
+- `mile_67169c30` score=34 title_hits=[-] refs=[K518, K518_5_STRATEGIES_VS_BUYHOLD_545D2E, K518_GOLDEN_CROSS_BY_VIX_REGIME_9B0A35] readme=True :: 5 個熱門均線/趨勢策略，27 年實測有 4 個輸給長抱、最好的 1 個也通不過嚴格檢驗
+- `mile_6779a71a` score=34 title_hits=[-] refs=[K1374, K1375, K1375_T0_COMPARISON] readme=True :: 個股除息那天，高股息 ETF 卻完全無感——為什麼？
+- `mile_67b6a9a6` score=34 title_hits=[-] refs=[K697, K702, K687] readme=True :: VIX 決策指南：17.48 這個數字告訴你現在該做什麼（1990-2026 完整實證）
+- `mile_684b277f` score=34 title_hits=[-] refs=[K890, K890_XYLD_VS_SPY_RETURN_SHARPE_2DFB14, K890_SHARPE_RANKING_0A6D10] readme=True :: 每月領 covered call ETF 配息很香？XYLD vs SPY 攤開算給你看
+- `mile_73161403` score=34 title_hits=[-] refs=[K503, K301, K877] readme=True :: VIX 真的會均值回歸，但你抓不到比 12/VIX 更多的肉
+- `mile_77c5e6d2` score=34 title_hits=[-] refs=[K320, K53, K87] readme=True :: 我們稽核了自己網站上 525 篇文章——找到 4 篇必須立刻修的誤導內容
+- `mile_78a0309e` score=34 title_hits=[-] refs=[K810, K810_SHARPE_COMPARISON_D6081D, K810_VIX_MEAN_REVERSION] readme=True :: 恐慌底部加碼很誘人，但有一個工具早就替你做好了
+- `mile_7cad937f` score=34 title_hits=[-] refs=[K205, K873, K1058] readme=True :: 比特幣週末波動真的比較低？微結構訊號改寫 VT 策略
+- `mile_871741dc` score=34 title_hits=[-] refs=[K813, K813_REGIME_CHART, K813_SMOOTH_TRANSITION_GARCH] readme=True :: 為什麼恐慌期的股市「跌起來沒完」？——平靜期 vs 恐慌期的市場雙面性
+- `mile_87c2efe0` score=34 title_hits=[-] refs=[K598, K597, K597_CRISIS_MDD_COMPARISON_7384AC] readme=True :: K598+K597 壓力測試完全報告——你的策略禁得起股災嗎？
+- `mile_8d3bcedc` score=34 title_hits=[-] refs=[K846, K1123_SHARPE_CAGR_COMPARISON_8ECB71, K1123_TX_DRAG_CEF9EA] readme=True :: 我們花了一整年想打敗 50/50 SPY/GLD — 連最新的 alt-data 武器都輸給它 0.15 個 Sharpe
+- `mile_8e899fba` score=34 title_hits=[-] refs=[K717, K717_RANKING_COMPARISON, K717_RADAR_TOP5] readme=True :: Sharpe 不夠用：六維度排名洗出完全不同的策略冠軍
+- `mile_94c1a524` score=34 title_hits=[-] refs=[K971] readme=True :: 台灣理財教育缺的那一課：商品教得很多，決策能力沒人教
+- `mile_9571f378` score=34 title_hits=[-] refs=[K478, K478_QLIKE_COMPARISON, K478_DM_PVALUES] readme=True :: 資訊熵能不能提升波動率預測？K478 給的答案是：不行
+- `mile_a181cffa` score=34 title_hits=[-] refs=[K694, K693, K640] readme=True :: Lookahead 修正後，14 策略誰是真贏家？K694 揭露 Sharpe 通膨最高 +2.04
+- `mile_a2c36f66` score=34 title_hits=[-] refs=[K821_PIP_CHART, K484, K821] readme=True :: 你盯了 8 個市場指標，AI 告訴你：全都沒用
+- `mile_a8ad6dad` score=34 title_hits=[-] refs=[K769, K769_TE_VIX_SCATTER, K769_SHARPE_COMPARISON] readme=True :: AI 給了我一個聽起來很合理的策略，然後資料說不
+- `mile_ada624d5` score=34 title_hits=[-] refs=[K709, K709_REGIME_OCCUPANCY, K709_REGIME_RETURNS] readme=True :: 降息時黃金漲 30.8%、股票漲 13.4%——那為什麼跟著利率調倉，幾乎等於沒做？
+- `mile_ae145f60` score=34 title_hits=[-] refs=[K925, K513, K925_CPI_2026_05_T2_SCENARIO_GRID] readme=True :: 5/12 美國 CPI 倒數 24 小時：三情境劇本 + 部位調整建議（VIX 18 適中，但 hot surprise 是唯一真風險）
+- `mile_b5a91c4d` score=34 title_hits=[-] refs=[K1199, K1128, K1131] readme=True :: 用「動態切點」救一個失敗故事：K1199 為何仍救不回 VIX 三段論
+- `mile_b5b227eb` score=34 title_hits=[-] refs=[K683, K683_COMPOSITE_METRICS, K683_DM_TSTAT_HARVEY] readme=True :: 同樣都看 VIX，為什麼百分位策略賺得更多，分段保守策略卻睡得更好？
+- `mile_be362f93` score=34 title_hits=[-] refs=[K1068, K1059, K1060] readme=True :: 台股財報公布後股價會怎麼動？10 檔權值股、560 場財報的真實答案
+- `mile_be5c763c` score=34 title_hits=[-] refs=[K824V2, K824V2_VAR_COMPARISON, K824V2_QUANTILE_FIXED] readme=True :: 為什麼「不假設形狀」反而更安全？裁縫量身訂做的啟示
+- `mile_c2879880` score=34 title_hits=[-] refs=[K860, K860_SHARPE_VS_PT_4AB39D] readme=True :: 你的大腦比你聰明——為什麼波動率管理「感覺」更好（數據證明它真的更好）
+- `mile_c496072f` score=34 title_hits=[-] refs=[K129, K301, K877] readme=True :: Microsoft Q3 FY26 深度解析：AI 業務 +123% 為何是 Mag 7 中唯一可量化的 AI 變現指標
+- `mile_c5127413` score=34 title_hits=[-] refs=[K571, K571_HALF_LIFE_OVERVIEW, K571_SHARPE_VS_HARVEY] readme=True :: VIX 均值回歸速度能用來擇時嗎？K571 給出 MARGINAL 答案
+- `mile_d08c7cbb` score=34 title_hits=[-] refs=[K819, K819_TAIL_FIRST_ES, K819_TAIL_FIRST_ES_RESULTS] readme=True :: 更精確的風險指標，反而讓你虧更多？ES 策略20年實測的反直覺發現
+- `mile_d368b4da` score=34 title_hits=[-] refs=[K307, K255] readme=True :: 我們測試了 25 個交易策略，沒有一個能打敗 50/50
+- `mile_d716099a` score=34 title_hits=[-] refs=[K129, K301, K877] readme=True :: Mag 7 Q1 2026 財報全解：AI capex $725B 與波動率重定價
+- `mile_d9d88717` score=34 title_hits=[-] refs=[K676, K676_FIG1_AFTERTAX_SHARPE, K676_FIG2_TAX_SAVINGS] readme=True :: VT 策略的稅務黑盒：年度再平衡 vs 損失收割 vs 每日再平衡，誰真的省稅？
+- `mile_daaff779` score=34 title_hits=[-] refs=[K1401, K1401_EVENT_STUDY, K1401_RESULTS] readme=True :: 五月底又來了：25年數據告訴你，GDP第二估對VIX毫無影響力，但VIX其實在看這三件事
+- `mile_dd48152c` score=34 title_hits=[-] refs=[K1071, K1070, K1068] readme=True :: 0050 財報日真的會放大波動嗎？尾端拆解的意外答案
+- `mile_df686527` score=34 title_hits=[-] refs=[K625] readme=True :: 台灣投資人看過來：用美國 VIX 管理你的 0050 持股
+- `mile_e058d38f` score=34 title_hits=[-] refs=[K1400, K1400_BUST_RATE_COMPARISON, K1400_FINAL_VALUE_DISTRIBUTION] readme=True :: 退休帶房貸，一次還清最安全？十萬條歷史路徑剛好說相反
+- `mile_eeeee765` score=34 title_hits=[-] refs=[K705, K705_GENERAL_ALIGNMENT_SCORES, K705_GENERAL_GAP_SEVERITY] readme=True :: 為什麼我們把『投資建議』改叫『風險管理工具』？K705 做了一次不太舒服但必要的自我審計
+- `mile_f09218ce` score=34 title_hits=[-] refs=[K677, K677_FIG1_VIX_BEFORE_RECESSIONS, K677_FIG2_PRECISION_COMPARISON] readme=True :: VIX 能預測經濟衰退嗎？升高時太遲、靜止時不漲，殖利率倒掛勝過它 5 倍
+- `mile_f1a2b212` score=34 title_hits=[-] refs=[K1001_MACRO_VS_VIX_6072E9, K1001] readme=True :: GDP、失業率、利率⋯這些總經數據能預測股市波動嗎？實測結果讓人意外
+- `mile_fffc6147` score=34 title_hits=[-] refs=[K550, K115, K222] readme=True :: 自適應 VIX 門檻能贏簡單 12/VIX 嗎？K550 給出 NUANCED 答案
+- `mile_08e92573` score=32 title_hits=[-] refs=[K28, K32, K14] readme=False :: 私人信貸恐慌 × 十年最大減持——我們的模型和 56 個實驗怎麼看？
+- `mile_57894028` score=32 title_hits=[-] refs=[-] readme=False :: 股市急漲時，選擇權市場在怕什麼
+- `mile_0ab416c5` score=30 title_hits=[-] refs=[K1006_OVERNIGHT_SHARPE_7326EC, K1006, K1006_RESULTS] readme=True :: 台指期貨隔夜放著不動能賺錢嗎？3480 天實測告訴你真相
+- `mile_103fd913` score=30 title_hits=[-] refs=[K812V2, K812V2_C2C_VS_OTC_SHARPE_A9825E, K812V2_US_TAIWAN_LEADLAG_OTC] readme=True :: 64% 準確率的美股跟單幻覺：20 年數據揭穿「昨晚美股跌，明天快賣」的迷思
+- `mile_13c7d908` score=30 title_hits=[-] refs=[K1056_GENERAL, K1056] readme=True :: 通過了一個「幾乎不可能」的測試：新模型在 5 個完全不同的市場中都贏
+- `mile_23ff3397` score=30 title_hits=[-] refs=[K808_SHARPE_COMPARISON_FA161F, K808_SHARPE_VS_MDD_2C72CB, K808] readme=True :: 四資產 All-Weather 組合測了 20 年：還是打不贏簡單的 50/50
+- `mile_27f2aef3` score=30 title_hits=[-] refs=[K754, K754_VOLUME_EXHAUSTION, K754_VOLUME_EXHAUSTION_RESULTS] readme=True :: 大盤暴跌時成交量暴增？這不是恐慌信號，是市場在「排毒」
+- `mile_2cfa32a4` score=30 title_hits=[-] refs=[K942, K943] readme=True :: VIX 不是萬能的——它在什麼時候最有用、什麼時候完全沒用？
+- `mile_38a91286` score=30 title_hits=[-] refs=[K755_FOMO_AFTERMATH_018338, K755_COOLING_SHARPE_89860E, K743] readme=True :: 大盤暴漲 2% 後你該追嗎？數據說：等兩天再說
+- `mile_45120cd4` score=30 title_hits=[-] refs=[K747, K747_GENERAL_TOP_RANKINGS, K747_GENERAL_DM_OOS] readme=True :: 越複雜不一定越好：K747 告訴你，這次 50/50 就贏了風險平價
+- `mile_50f44a46` score=30 title_hits=[-] refs=[K1137] readme=True :: 債市已在喊，股市還沒聽見：30 年公債殖利率破 5% 與 VIX 背離的意義
+- `mile_52710efa` score=30 title_hits=[-] refs=[K882, K882_DCA_SPREAD_676778, K882_RESULTS] readme=True :: 定期定額選哪天扣款？答案是：隨便——5 檔 ETF、33 年數據的真相
+- `mile_54f3019f` score=30 title_hits=[-] refs=[K737, K737_SHARPE_BY_ASSETS_20A11E] readme=True :: 投資組合的最佳比例真的是 50/50？我們測了 28 種組合告訴你答案
+- `mile_58173fe3` score=30 title_hits=[-] refs=[K512, K461] readme=True :: 台積電下週公布營收和法說——0050 投資人該注意什麼？
+- `mile_5f572055` score=30 title_hits=[-] refs=[K743_BEHAVIORAL_COST_EN, K743, K743_INVESTOR_BEHAVIOR] readme=True :: 追漲比恐慌更可怕！19年數據揭露投資人最昂貴的錯誤
+

@@ -1,13 +1,13 @@
 {
-  "dashboard_generated_at": "2026-05-25T22:00:33Z",
-  "overall_status": "ok",
-  "section_breaches": 0,
+  "dashboard_generated_at": "2026-05-26T12:00:29Z",
+  "overall_status": "warn",
+  "section_breaches": 1,
   "section_critical": 0,
   "sections": [
     {
       "section": "production_pending",
       "status": "ok",
-      "tldr": "30 pending tasks (top types: [('daily_article', 23), ('experiment', 6), ('paper_body', 1)])",
+      "tldr": "24 pending tasks (top types: [('daily_article', 10), ('experiment', 6), ('platform_ops', 4)])",
       "next": "dispatch top P1-P3 if slots free"
     },
     {
@@ -29,9 +29,9 @@
       "tldr": "3/3 sample live URLs return 200",
       "next": null,
       "sample": [
-        "mile_076979d0",
-        "mile_227257a3",
-        "mile_334a3f26"
+        "mile_ac709655",
+        "mile_cc3c987a",
+        "mile_69861e0d"
       ],
       "dead": []
     },
@@ -50,10 +50,21 @@
     },
     {
       "section": "health_alerts_unhandled",
-      "status": "ok",
-      "tldr": "0 warn/critical alerts last 6h (read + act per .claude/rules/alert.md)",
-      "next": null,
-      "breaches": []
+      "status": "warn",
+      "tldr": "2 warn/critical alerts last 6h (read + act per .claude/rules/alert.md)",
+      "next": "ingest alerts → run remediation per alert.md auto-action table",
+      "breaches": [
+        {
+          "ts": "08:00",
+          "level": "warn",
+          "subject": "[VolPred Alert][WARN] Member Q&A pending stale (max 24h)"
+        },
+        {
+          "ts": "09:00",
+          "level": "warn",
+          "subject": "[VolPred Alert][WARN] Member Q&A pending stale (max 25h)"
+        }
+      ]
     }
   ]
 }
