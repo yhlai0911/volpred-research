@@ -1,39 +1,39 @@
 {
-  "timestamp": "2026-05-27T06:13:11Z",
+  "timestamp": "2026-05-27T12:16:10Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "Total draft: 158 (general: 140, research: 18). All thresholds met (total>=12, research>=4, general>=8)."
+      "detail": "Total draft=158 (general=140, research=18). All thresholds met (total>=12, research>=4, general>=8)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json mtime=1779624653 (~66h ago). Threshold: 26h."
+      "detail": "storage/strategy_metrics.json is 72.1 hours old (threshold: >26h). Last modified epoch 1779624653."
     },
     {
-      "name": "ERROR_LOG",
+      "name": "ERROR_LOG_RECENT",
       "status": "ok",
-      "detail": "No entries dated 2026-05-27 or 2026-05-26. Most recent entry: 2026-05-21 (launchd exit-78 TCC issue, RESOLVED)."
+      "detail": "No entries dated 2026-05-26 or 2026-05-27 found in docs/error_log.md. Most recent entry is 2026-05-21 (hourly-dispatch TCC/LaunchAgent fix)."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All strategies checked. No strategy has >2 null portfolio_return in last 3 entries."
+      "detail": "No strategy has >2 null portfolio_return in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files."
+      "detail": "0 uncommitted files (threshold: >50)."
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json contains 2151 entries."
+      "detail": "storage/memory/knowledge.json has 2151 entries."
     }
   ],
   "alerts": [
-    "STRATEGY_METRICS_FRESHNESS: storage/strategy_metrics.json is ~66h old (threshold: 26h). Metrics may be stale."
+    "strategy_metrics stale: storage/strategy_metrics.json is 72.1 hours old (>26h threshold)"
   ]
 }
