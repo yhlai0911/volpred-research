@@ -8624,5 +8624,21 @@
     "task_id": "gen_article_k569",
     "summary": "K569 piecewise VT reader-facing article — mile_40027ab0 draft, honest mixed verdict (6/8 PASS, deployment_ready not strong_candidate), Harvey NS but JKM/bootstrap strong, MDD reduction 98%+ in crises. Anti-AI gate PASS. 2 new charts.",
     "owner": "hourly-09"
+  },
+  {
+    "timestamp": "2026-05-27T13:11:07+08:00",
+    "task_type": "platform_ops",
+    "task_id": "platform_ops_wrapper_drift_question_research_reader_facing_refill_sync",
+    "description": "Sync 2 missing host-cron wrappers to ~/.volpred/bin/ (cron_question_ops_maintain.sh + cron_reader_facing_refill.sh); piggy-back drift cleared. Both exit=0 under cron env simulation. Canonical scripts/ unchanged.",
+    "owner": "hourly-13",
+    "fire_id": "hourly_2026-05-27T13:07_CST"
+  },
+  {
+    "timestamp": "2026-05-27T15:23:02+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1122_article_general",
+    "description": "Published K1122 research-audience article (mile_0dcef1a5): Sigmoid 連續權重 NULL — 72 spec sweep on EPU/NFCI/STLFSI4 confirms K1121 step-regime null robust. status=draft → release_pool. 3 charts embedded, anti-AI gate PASS (2 non-blocking FB-tone WARN).",
+    "owner": "hourly-15",
+    "fire_id": "hourly_2026-05-27T15:07_CST"
   }
 ]

@@ -12165,7 +12165,7 @@
     "title": "Cron staleness: ops_dashboard — last fire 2.1h ago (expected ≤2.0h)",
     "description": "`ops_dashboard` last ran at 2026-05-27T02:00:32+00:00 (2.1h ago). Expected cadence per config/runtime_schedules.json gives gap ≤1.0h; observed >2x. Investigate: (a) wrapper script exists & executable, (b) recent log at storage/logs/cron/ops_dashboard.log, (c) launchd / crontab entry actually installed, (d) downstream consumer (release_pool / daily_update) for failure cascade.",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "platform_ops",
     "source": "diverse_gen",
     "tags": [
@@ -12173,14 +12173,20 @@
       "cron-staleness",
       "main-thread-only"
     ],
-    "created_at": "2026-05-27T04:07:44+00:00"
+    "created_at": "2026-05-27T04:07:44+00:00",
+    "claimed_by": "hourly-15",
+    "claimed_at": "2026-05-27T07:09:05.541479+00:00",
+    "claim_session_id": "b0c7604e923d",
+    "started_at": "2026-05-27T07:09:09.516933+00:00",
+    "completed_at": "2026-05-27T07:09:25.359353+00:00",
+    "result": "Auto-resolved: cron 已恢復。Task 創立時 (04:07 UTC) last_run=02:00 UTC (2.1h gap)，但 05:30/06:00 仍 exit 1，06:30/07:00 連續 2 次 exit 0 恢復；現在 (07:07 UTC) last fire 7min ago 在 cadence 內 (≤1h)。無需 patch；piggy-back :00 fire 接力 + :30 host cron 並存。"
   },
   {
     "id": "governance_skill_audit_20260527",
     "title": "Governance: 8 skill(s) untouched >30d (oldest: admin-ops)",
     "description": "8 skill(s) in .claude/skills/ have mtime older than 30 days; oldest is `admin-ops`. Audit each: (a) still relevant to current workflow, (b) reflects current rules / path triggers, (c) prune or refresh. Stale skills cause silent workflow drift — see CLAUDE.md `Rule path-trigger 時序原則`.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "governance",
     "source": "diverse_gen",
     "tags": [
@@ -12188,7 +12194,13 @@
       "skill-audit",
       "main-thread-only"
     ],
-    "created_at": "2026-05-27T04:07:44+00:00"
+    "created_at": "2026-05-27T04:07:44+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-27T07:13:24.375921+00:00",
+    "claim_session_id": "e0bfc9e222c2",
+    "started_at": "2026-05-27T07:13:27.103041+00:00",
+    "completed_at": "2026-05-27T07:18:17.711956+00:00",
+    "result": "Audited 8 stale .claude skills; refreshed legacy ops CLI/member_qa flow/experiment path examples, synced admin-ops and member-questions references, and upgraded check_skills_complete.sh to detect workflow drift + stale-age. Validation: clean skill audit (no dead refs, no workflow_drift)."
   },
   {
     "id": "platform_ops_topic_cluster_cooldown_enforcement",
@@ -12196,7 +12208,7 @@
     "description": "Context: 2026-05-27 用戶 feedback「炒冷飯 同議題 po 幾百次」。Audit：30 天 382 篇 feed → VIX 109 (28.5%) / SPY 32 / GARCH 22 / VT 18 / 台股 14 / 0050 11；前 5 主題佔 51.3%。\n\n根因：publication-candidates skill 沒強制 cluster cooldown；CLAUDE.md publishing.md narrative-arc dup check (layer 4) 是 agent 自律 — 沒 mechanism enforce。\n\nDeliverable:\n1. 寫 scripts/topic_cluster_audit.py — 統計 last N days feed 主題 cluster 分佈 + 算 dominant ratio\n2. publish_milestone() 加 PRE-PUBLISH gate: 若 30 days 同 cluster ≥ HARD CAP (VIX=15, SPY=10, GARCH=10, VT=8 各別) → reject + WARN; 由 agent 換題或請求 cluster waiver\n3. publication-candidates 加 cluster scoring: 同 cluster 30 days >quota → 候選 priority -50%\n4. continue_task_dispatch 加 cluster-rotation: 同 cluster pending 多時，rotate 非該 cluster task\n5. CI invariant scripts/validate_feed_diversity.py — last 30 days dominant cluster ratio > 25% fail\n6. 寫 unit test\n\nHard cap proposed:\n- VIX: 30 days ≤ 15\n- SPY: ≤ 10\n- GARCH-family: ≤ 10\n- VT 系列: ≤ 8\n- 台股 / 0050: ≤ 8\n- 其他 single cluster: ≤ 6\n\n預估 90-120 min。Codex 可接 (Python only, mechanism enforce)。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "platform_ops",
       "feed_quality",
@@ -12205,6 +12217,104 @@
       "p1_user_critical"
     ],
     "created_at": "2026-05-27T05:10:57.314294+00:00",
-    "source": "main_thread_2026_05_27_topic_recycling_audit"
+    "source": "main_thread_2026_05_27_topic_recycling_audit",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-27T06:06:12.025442+00:00",
+    "claim_session_id": "484046ea9b57",
+    "started_at": "2026-05-27T06:09:26.493633+00:00",
+    "completed_at": "2026-05-27T06:11:45.808860+00:00",
+    "result": "Implemented topic-cluster cooldown enforcement end-to-end. Added shared cluster classifier/caps in src/volpred/topic_clusters.py, scripts/topic_cluster_audit.py, and scripts/validate_feed_diversity.py; current audit shows VIX cluster at 312/375 articles in the last 30 days (83.2%), so the new validator correctly fails the live feed. publish_milestone() now blocks over-cap clusters unless details.cluster_waiver is supplied; build_publication_candidates.py now halves candidate score for over-cap clusters and records topic_cluster metadata; refill_task_pool.py sorts cooler clusters ahead and carries topic_cluster onto generated tasks. Tests: uv run pytest tests/test_topic_cluster_cooldown.py tests/test_generate_diverse_tasks.py -q => 5 passed."
+  },
+  {
+    "id": "email-11744-83712f",
+    "title": "[email_reply] Re: [VolPred Boss Report] 2026-05-27 13:00 台灣時間 平台運營報告",
+    "description": "Gmail UID: 11744\nMessage-ID: <31B083CE-E5B1-4799-8141-3AE143797867@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Wed, 27 May 2026 13:02:03 +0800\nSubject: Re: [VolPred Boss Report] 2026-05-27 13:00 台灣時間 平台運營報告\n\n--- 用戶回信內容 ---\n(empty)\n\n--- 原始助理寄出內容（引用部分） ---\n> health_cron\twarn\t1 cron jobs stale (over max-age)\tmanual fire ~/.volpred/bin/cron_<id>.sh\r\n> health_alerts_unhandled\tcritical\t4 warn/critical alerts last 6h (read + act per .claude/rules/alert.md)\tingest alerts → run remediation per alert.md auto-action table\r\n\r\n還是沒解決？\r\n\r\n\r\n\r\n> VolPred <yihao.lai@gmail.com> 於 2026年5月27日 13:00 寫道：\r\n> \r\n> VolPred Boss Report · 2026-05-27 13:00 台灣時間 · Overall CRITICAL\r\n> \r\n> ⓪ 本 cycle 意圖 / 目標 / 規劃\r\n> \r\n> 意圖 Intent\t從反應式 firefighting 轉成主動 ops 結構。建 dashboard + audit + boss report 三件套，然後 cycle 化主線程運營。\r\n> 本週目標 Weekly Goal\t• Mission 4: 0 stale cron 持續一週、live URL 100% 自動驗證\r\n> • Mission 1: 維持 ≥6 articles/day 同時把 narrative-arc dedup Layer 4 落地（已 ✅）\r\n> • Mission 3: Paper 4 body_v4 完成 rewrite gate\r\n> • Mission 5: FB MCP ext popup gate 找根因 + 解（不再說『修不到』）\r\n> 本 cycle 計劃 Plan\t• Cycle 1: 建 dashboard + 2 audit + boss report email infra（✅ 本 cycle 完成）\r\n> • Cycle 2-3: Paper 4 body_v4 rewrite main thread + 派 review agent 並行\r\n> • Cycle 4: free_tier_growth_plan.md spec + 識別 P1 analytics 工具選型\r\n> • Cycle 5+: MCP ext 根因 deep-dive；若不解，準備 Anthropic issue text\r\n> 成功標準 Success Criteria\t• 每 cycle 開頭 dashboard read 不再有 surprise critical（即 standing audit catch 問題早於我）\r\n> • 每 4h boss email 自動寄出無 fail\r\n> • 次次 cycle 至少 1 個結構性改善（不只 patch）+ 2 個 article 產出\r\n> 已知風險 Known Risks\t• main thread context 易爆（已多次 compact），需要更積極派 agent 卸載\r\n> • FB MCP root cause 可能要花 ≥2 cycles 才找到\r\n> • Paper 4 rewrite 過長吃掉太多 main thread bandwidth\r\n> ① 平台狀態\r\n> \r\n> 區段\t狀態\t說明\t建議行動\r\n> production_pending\tok\t7 pending tasks (top types: [('platform_ops', 3), ('paper_review', 3), ('governance', 1)])\tdispatch top P1-P3 if slots free\r\n> production_throughput\tok\t11 articles published last 24h (target 6/day)\t—\r\n> distribution_supabase\tok\t11/11 last-24h articles synced\t—\r\n> verification_live_url\tok\t3/3 sample live URLs return 200\t—\r\n> verification_fb_pipeline\tok\t2 FB posts awaiting interactive session\tinteractive session / Chrome MCP available時接手貼文與留言\r\n> health_cron\twarn\t1 cron jobs stale (over max-age)\tmanual fire ~/.volpred/bin/cron_<id>.sh\r\n> health_alerts_unhandled\tcritical\t4 warn/critical alerts last 6h (read + act per .claude/rules/alert.md)\tingest alerts → run remediation per alert.md auto-action table\r\n> ①-b 排程器成果掌握（cron 跑完沒 / 成功沒）\r\n> \r\n> 每個定時排程器的 runs / exit / 完成狀態。全部正常\r\n> \r\n> === cron 成果掌握 review — 2026-05-27 13:00:26（台灣時間）===\r\n> \r\n>   hourly_dispatch   runs=52 exit=0 idle | last: 2026-05-27 12:13:12\r\n>   compute_worker    runs=211 exit=0 idle | last: 2026-05-27 13:00:06\r\n>   check_alerts      runs=53 exit=0 running | last: 2026-05-27 13:00:04 (start)\r\n>   collect_tw        runs=2 exit=0 idle | last: 2026-05-26 15:00:46\r\n>   collect_us        runs=2 exit=0 idle | last: 2026-05-27 08:00:26\r\n>   daily_update      runs=2 exit=0 idle | last: 2026-05-27 08:15:44\r\n>   release_pool      runs=9 exit=0 idle | last: 2026-05-27 13:00:11\r\n>   market_cal        runs=0 exit=(never exited) idle | last: 2026-05-25 08:00:14 (piggy-back)\r\n>   memory_health     runs=2 exit=0 idle | last: 2026-05-27 06:00:11\r\n>   work_summary      runs=9 exit=0 idle | last: 2026-05-27 12:05:29\r\n> \r\n> 近 75 分鐘 git commits（hourly_dispatch 產出代理）：3 筆\r\n>   2aad6abf fix(sync): include updated_at in supabase_sync incremental filter\r\n>   4851c21b paper(garch-x-vix): fix tab:covid_robust footnote + L723 attribution + K1393 README downgrade\r\n>   c4d64725 fix(email): light-bg code block (user UI feedback 11:11) + critical incident followups\r\n> \r\n> ✅ 所有 cron 排程器：last exit 0、無逾時、無中斷班。\r\n> ② 本 cycle 活動（過去 4h）\r\n> \r\n> 5 commits\r\n> \r\n> SHA\tSubject\tTime\r\n> 2aad6abf\tfix(sync): include updated_at in supabase_sync incremental filter\t12:55\r\n> 4851c21b\tpaper(garch-x-vix): fix tab:covid_robust footnote + L723 attribution + K1393 README downgrade\t12:12\r\n> c4d64725\tfix(email): light-bg code block (user UI feedback 11:11) + critical incident followups\t11:46\r\n> bceb6dd7\tfix(audience): daily preservation (mile_a91f19be incident)\t11:40\r\n> bfe67f8e\tdaily_article(K569): publish piecewise VT validation feed article + cleanup\t09:21\r\n> ③ \n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-05-27T05:15:07.162233+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11744,
+    "email_message_id": "<31B083CE-E5B1-4799-8141-3AE143797867@gmail.com>",
+    "email_subject": "Re: [VolPred Boss Report] 2026-05-27 13:00 台灣時間 平台運營報告",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "hourly-14",
+    "claimed_at": "2026-05-27T06:07:28.794126+00:00",
+    "claim_session_id": "3707229f81ae",
+    "started_at": "2026-05-27T06:07:32.361286+00:00",
+    "completed_at": "2026-05-27T06:11:37.257892+00:00",
+    "result": "用戶問「還是沒解決？」根因找到：dashboard health_alerts_unhandled 未過濾 resolved_at，已 fix in commit d076c080。4 alerts mark resolved + 新增 mark_alert_resolved.py CLI + dashboard L4 加 filter。Re-run dashboard: critical→ok, breaches 1→0. Close email 寄出 (notification 80339265)"
+  },
+  {
+    "id": "paper_review_mile_73161403",
+    "title": "Paper review (Codex 24h-rule): VIX 真的會均值回歸，但你抓不到比 12/VIX 更多的肉",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_73161403 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_73161403",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-27T07:07:48+00:00"
+  },
+  {
+    "id": "paper_review_mile_1b2ad1f8",
+    "title": "Paper review (Codex 24h-rule): CBOE SKEW 真能補捉尾端風險嗎？我們把它和 VIX 一起檢驗",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_1b2ad1f8 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_1b2ad1f8",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-27T07:07:48+00:00"
+  },
+  {
+    "id": "paper_review_mile_ecda80a3",
+    "title": "Paper review (Codex 24h-rule): 夜盤與日內波動：誰才是隔日波動的主角？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_ecda80a3 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_ecda80a3",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-27T07:07:48+00:00"
+  },
+  {
+    "id": "K1122_article_general",
+    "title": "K1122: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1122 has verdict signal (score=4, reasons=None) but no general article. Verdict preview: ",
+    "priority": 3,
+    "status": "in_progress",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1122",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-27T07:07:48+00:00",
+    "claimed_by": "hourly-15",
+    "claimed_at": "2026-05-27T07:10:29.367563+00:00",
+    "claim_session_id": "798b58c82ac0",
+    "started_at": "2026-05-27T07:10:34.572627+00:00"
   }
 ]
