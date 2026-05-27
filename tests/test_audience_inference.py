@@ -230,3 +230,74 @@ class TestInferAudiencePublishMilestoneIntegration:
         feed = json.loads((tmp_path / "reports" / "feed.json").read_text())
         item = next(i for i in feed if i["id"] == pub_id)
         assert item["audience"] == "general"
+
+
+class TestInferAudienceDailyPreservation:
+    """2026-05-27 fix (mile_a91f19be incident): daily strategy articles must
+    preserve audience='daily' even when boilerplate description contains
+    academic keywords (GARCH/VaR/Sharpe), like member_qa/event preservation."""
+
+    @pytest.fixture
+    def pub(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("VOLPRED_ACTOR", "claude")
+        monkeypatch.setattr(Publisher, "REMOTE_URL", "", raising=False)
+        monkeypatch.setattr(Publisher, "_sync_feed_to_remote", lambda self: None, raising=False)
+        monkeypatch.setattr(Publisher, "_sync_report_to_remote", lambda self, *a, **kw: None, raising=False)
+        return Publisher(storage_dir=str(tmp_path))
+
+    def test_mile_a91f19be_daily_strategy_preserved(self, pub, tmp_path):
+        """Exact regression case: daily_update.py boilerplate hits ≥2
+        academic keywords (GARCH + VaR + Sharpe) yet audience='daily' must
+        survive — these are retail-facing daily recommendations, not research."""
+        daily_content = (
+            "# 2026-05-27 每日策略建議\n"
+            "> 基於 2026-05-26 收盤數據，預測下一交易日最佳持倉配置。\n\n"
+            "## 市場快照\n"
+            "- **SPY**: $750.59 (+0.66%)\n"
+            "- **VIX**: 17.01（正常）\n"
+            "- **GARCH 年化波動率**: 11.3%\n"
+            "- VaR 95% / Sharpe 0.8 全包含\n"
+        )
+        pub_id = pub.publish_milestone(
+            title="每日策略建議：VIX 17.01（正常）— 2026-05-27",
+            description=daily_content,
+            phase="daily_recommendation",
+            audience="daily",
+            category="general",
+            tags=["每日建議", "VIX", "策略配置"],
+            status="published",
+        )
+        feed = json.loads((tmp_path / "reports" / "feed.json").read_text())
+        item = next(i for i in feed if i["id"] == pub_id)
+        assert item["audience"] == "daily", (
+            f"daily preservation failed — got '{item['audience']}'. "
+            "Boilerplate GARCH/VaR/Sharpe must not override daily."
+        )
+
+    def test_daily_tag_alone_triggers_preservation_even_if_audience_missing(
+        self, pub, tmp_path
+    ):
+        """tag '每日建議' or 'daily-update' detection works without explicit audience."""
+        pub_id = pub.publish_milestone(
+            title="每日策略：GARCH 預測",
+            description="QLIKE 評估 + bootstrap CI（boilerplate academic terms）",
+            phase="daily_recommendation",
+            tags=["每日建議", "VIX"],
+            status="published",
+        )
+        feed = json.loads((tmp_path / "reports" / "feed.json").read_text())
+        item = next(i for i in feed if i["id"] == pub_id)
+        assert item["audience"] == "daily"
+
+    def test_daily_update_alias_tag_also_works(self, pub, tmp_path):
+        """English alias 'daily-update' tag should equally trigger preservation."""
+        pub_id = pub.publish_milestone(
+            title="Daily strategy update",
+            description="HAR-RV vs GJR-GARCH comparison (boilerplate)",
+            phase="daily_recommendation",
+            tags=["daily-update", "VIX"],
+            status="published",
+        )
+        feed = json.loads((tmp_path / "reports" / "feed.json").read_text())
+        item = next(i for i in feed if i["id"] == pub_id)
+        assert item["audience"] == "daily"

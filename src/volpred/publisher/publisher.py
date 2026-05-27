@@ -466,24 +466,36 @@ class Publisher:
         now = datetime.now(timezone.utc).isoformat()
         normalized_status = status if status in {'published', 'draft', 'scheduled', 'unpublished', 'archived'} else 'published'
         # Determine audience and category — _infer_audience is the enforce mechanism.
-        # Caller-supplied audience is only a HINT; inferred value always wins.
+        # Caller-supplied audience is only a HINT; inferred value always wins,
+        # EXCEPT for type-locked audiences (daily / member_qa / event) which are
+        # always preserved (like member_qa/event_article in _infer_audience itself).
         tag_list = tags or []
-        # Detect daily from tags before inference (daily is not covered by academic keywords)
-        if audience is None and ('每日建議' in tag_list or 'daily-update' in tag_list):
+        # 2026-05-27 fix (mile_a91f19be incident): daily preservation.
+        # Caller-supplied audience='daily' OR tag-detected '每日建議' / 'daily-update'
+        # must skip the academic-keyword inference. daily_update.py boilerplate
+        # description always contains GARCH / VaR / Sharpe (≥2 academic keywords)
+        # but these articles target retail readers, not researchers.
+        is_daily_signal = (
+            audience == 'daily'
+            or '每日建議' in tag_list
+            or 'daily-update' in tag_list
+        )
+        if is_daily_signal:
             audience = 'daily'
-        # 2026-05-26: _infer_audience enforce gate — prevents agents from mis-tagging
-        # research-grade content as 'general' (mile_d0d66405 incident).
-        inferred = _infer_audience(title, description or '', tag_list, content_type=category)
-        if audience is None:
-            audience = inferred
-        elif audience != inferred and inferred != 'general':
-            # Infer override: log WARN and use inferred result (enforce over discretion)
-            print(
-                f"  [_infer_audience] WARN: caller passed audience='{audience}' but "
-                f"content signals infer '{inferred}' — overriding to '{inferred}'. "
-                f"(title='{title[:60]}')"
-            )
-            audience = inferred
+        else:
+            # 2026-05-26: _infer_audience enforce gate — prevents agents from mis-tagging
+            # research-grade content as 'general' (mile_d0d66405 incident).
+            inferred = _infer_audience(title, description or '', tag_list, content_type=category)
+            if audience is None:
+                audience = inferred
+            elif audience != inferred and inferred != 'general':
+                # Infer override: log WARN and use inferred result (enforce over discretion)
+                print(
+                    f"  [_infer_audience] WARN: caller passed audience='{audience}' but "
+                    f"content signals infer '{inferred}' — overriding to '{inferred}'. "
+                    f"(title='{title[:60]}')"
+                )
+                audience = inferred
         if category is None:
             if audience == 'general':
                 category = 'general'
