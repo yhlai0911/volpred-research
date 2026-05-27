@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-26T18:10:46Z",
+  "timestamp": "2026-05-27T00:13:23Z",
   "all_ok": false,
   "checks": [
     {
@@ -10,17 +10,17 @@
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "strategy_metrics.json is ~53.9 hours old (threshold: 26h). mtime=1779624653, now=1779819047."
+      "detail": "strategy_metrics.json is ~60 hours old (threshold: 26h). mtime=1779624653, now=1779840807. Metrics stale."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated today (2026-05-26) or yesterday (2026-05-25) in last 30 lines. Most recent entry: 2026-05-21."
+      "detail": "No entries dated today (2026-05-27) or yesterday (2026-05-26) in last 30 lines. Most recent entry: 2026-05-21 (launchd exit-78 / TCC Desktop path)."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All strategies checked. No strategy has >2 nulls in last 3 portfolio_return entries."
+      "detail": "All 15 strategies checked. All entry arrays are empty (0 entries each). No portfolio_return nulls exceed threshold of >2 in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
@@ -30,10 +30,10 @@
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "knowledge.json contains 2151 entries."
+      "detail": "storage/memory/knowledge.json contains 2151 entries."
     }
   ],
   "alerts": [
-    "STRATEGY_METRICS_FRESHNESS: strategy_metrics.json is ~53.9 hours old (threshold: 26h). Run strategy metrics recalculation."
+    "STRATEGY_METRICS_FRESHNESS: strategy_metrics.json is ~60 hours old (threshold: 26h). Run strategy metrics recalculation."
   ]
 }
