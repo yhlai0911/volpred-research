@@ -31636,5 +31636,32 @@
     "task_id": "paper_review_mile_77c5e6d2",
     "review_log": "/tmp/review_mile_77c5e6d2.md",
     "created_at": "2026-05-28T03:15:15.459498"
+  },
+  {
+    "item_id": "b9fa2e72",
+    "category": "vol_forecast",
+    "verdict": "TAIL_CALIB_USABLE",
+    "experiment_id": "K1403",
+    "experiment_path": "experiments/k1403/",
+    "k_id": "K1403",
+    "reviewer": "Codex CLI 0.132.0 (gpt-5.4 medium reasoning)",
+    "reviewer_source": "codex_cli",
+    "codex_review": "CONDITIONAL_PASS → fix applied: split dm_status / tail_status explicit fields for aggregate verdict (per Codex 反饋；avoid conflating NULL labels)",
+    "content": "K1403 HAR-RV Quantile Forecasting cross-asset robustness on QQQ/GLD/TLT (2007-01-03 fit through 2020-12-31，OOS 2021-01-04 至 2026-05-15，n_oos=1355/asset)：3/3 dm_sig_neg（quantile-median QLIKE 顯著差於 OLS point forecast：QQQ dm=-12.68 p≈0、GLD dm=-10.51 p≈0、TLT dm=-11.59 p≈0）但 3/3 tail_status=TIGHT（τ=0.95/0.99 coverage gap 全部 < 1pp 且 Kupiec UC p 全 > 0.30）。Aggregate verdict = TAIL_CALIB_USABLE：與 K1402 SPY 結果（dm=-10.20 p=0 + tail coverage acceptable）一致，cross-asset 結論為 method 整體無法 取代 OLS 點預測但 tail VaR upper bound 在 4 asset class (SPY+QQQ+GLD+TLT) 都 well-calibrated。推導：HAR-RV quantile regression (Koenker-Bassett 1978) 對極端尾部 1d RV 的 conditional upper bound 是 universal usable tool，可餵 Risk Forecast 頁的 multi-asset tail band 視覺化。",
+    "evidence": [
+      "experiments/k1403/k1403_results.json",
+      "experiments/k1403/k1403.py",
+      "experiments/k1403/README.md",
+      "K1402 SPY 對照（dm=-10.20 p=0 + tail TIGHT）"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-05-28T06:18:38.656661",
+    "tags": [
+      "har-rv",
+      "quantile-regression",
+      "cross-asset",
+      "tail-coverage",
+      "var-upper-bound"
+    ]
   }
 ]
