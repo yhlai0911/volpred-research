@@ -1,6 +1,6 @@
 # Refactor Plan — hourly-dispatch worker daemon
 
-**Status**: TRIGGERED (3-strike threshold crossed). Phase = DESIGN-LOCKED, ready for IMPLEMENTATION.
+**Status**: TRIGGERED (3-strike threshold crossed). Phase = DESIGN-LOCKED, IMPLEMENTATION started (Deliverable 2/8 scaffold done 2026-05-28 01:07-01:13 台灣時間).
 **Authority**: `CLAUDE.md` Three-Strike Rule (commit `a55620b4`) — "strike 3 是 LATEST 觸發點不是 ONLY 觸發點；一旦看見結構性 root cause...就立刻三層重構".
 **Supersedes**: `docs/refactor_plan_cron_dispatch.md` (2026-05-14 pre-staged version, drafted for hang-class strikes only).
 **Parent task**: `platform_ops_refactor_hourly_dispatch_worker_daemon` (P2, `storage/next_tasks.json`).
@@ -129,9 +129,9 @@ Before phase 2 (shadow run start): submit `dispatch_supervisor.py` + tests to Co
 
 ## 8. Execution Order (next sessions)
 
-1. **This session (now)**: write this plan + commit + leave parent task in `pending` (Deliverable 1 complete; 2-8 await future fires)
-2. **Next hourly fire claiming this task**: skeleton `scripts/dispatch_supervisor.py` + state module (Deliverable 2 scaffold)
-3. **+1 session**: scheduler + worker + health modules + first 5 regression tests (Deliverable 3-4)
+1. **2026-05-27 17:07-17:30**: write this plan + commit + leave parent task in `pending` (Deliverable 1 complete). ✅
+2. **2026-05-28 01:07-01:13 hourly-01**: package scaffold `scripts/dispatch_supervisor/` (`__init__`, `state.py` full impl, `worker.py`/`scheduler.py`/`health.py`/`alerts.py`/`supervisor.py` stubs) + `scripts/tests/test_dispatch_state.py` (16 tests passing). State module persistence + lock + ring buffer + orphan cleanup verified. Supervisor entry refuses to run main loop (exit 78) until Deliverable 3. ✅
+3. **+1 session**: scheduler + worker + health modules full impl + remaining 5 regression tests (Deliverable 3-4)
 4. **+1 session**: Codex review submission; address findings (Deliverable 6 gate)
 5. **+1 session**: phase 2 shadow run start; daily diff for 7 days (Deliverable 5)
 6. **+2 sessions**: phase 3 cutover + 14-day observation (Deliverable 5-6)
@@ -149,4 +149,5 @@ That's the test for "structural fix" vs "patch": does the change make *future* s
 
 ---
 
-*Drafted 2026-05-27 17:07-17:30 台灣時間 by main thread under hourly-17 claim of task `platform_ops_refactor_hourly_dispatch_worker_daemon`. Deliverable 1/8 from parent task brief. Deliverables 2-8 sequenced in §8 above.*
+*Drafted 2026-05-27 17:07-17:30 台灣時間 by main thread under hourly-17 claim. Deliverable 1/8.*
+*Updated 2026-05-28 01:07-01:13 台灣時間 by main thread under hourly-01 claim. Deliverable 2/8 — package scaffold + state module + 16-test unit suite.*
