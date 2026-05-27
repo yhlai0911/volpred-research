@@ -78,7 +78,7 @@
     "title": "Negative-result methodology paper: \"Why GAS-t fails on BTC — Student-t innovation is the culprit, MS cannot rescue it\"",
     "priority": 4,
     "description": "K1129 full-sample reversal + K1133 sub-period concentration (P1 t=-4.67) + K1133b decomposition (75% Student-t innovation, 25% GAS dynamics NS) + MS-GAS rescue analysis. Materials: k1129 + k1133 + k1133b. Feasible as JBF-style methodology paper. Main thread decides framing after K1133b synthesis.",
-    "status": "pending",
+    "status": "pending_main_thread",
     "created_at": "2026-04-18T01:08:17.057769",
     "tags": [
       "Paper-new",
@@ -95,7 +95,9 @@
         "rationale": "matched: neg-result methodology paper",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "handoff_note": "paper_body is Claude main-thread only per .claude/rules/task-routing.md; Codex claimed it only to correct misrouting. Returned to pending_main_thread so the queue reflects canonical ownership instead of leaving a non-agentable task in pending.",
+    "handoff_at": "2026-05-27T02:58:37.158362+00:00"
   },
   {
     "id": "Data_summary_script_SPY_VIX",
@@ -1323,7 +1325,7 @@
     "title": "K1310: I4: VIX futures roll yield 策略 — contango 環境下的 roll yield 收割 vs 尾部風險保護 ⚠️ **BLOCKED: 需要 VIX futures 歷史數據（yfinance 無）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 221). Original: I4: VIX futures roll yield 策略 — contango 環境下的 roll yield 收割 vs 尾部風險保護 ⚠️ **BLOCKED: 需要 VIX futures 歷史數據（yfinance 無）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1310.py with signal.shift(1) + seed=42, (c) K1310_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "blocked",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "tags": [
@@ -1332,7 +1334,14 @@
     ],
     "created_at": "2026-05-12T02:47:48Z",
     "blocked_reason": "paid_data_source_decision_pending",
-    "blocked_note": "yfinance 無 VIX futures 歷史，需 Polygon/IEX paid feed"
+    "blocked_note": "Task brief itself says VIX futures history is required and unavailable from yfinance, and there is no experiments/k1310/ workspace yet. Blocking until paid/approved historical VIX futures data source is selected, rather than leaving an unexecutable experiment in pending.",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-27T01:56:22.983420+00:00",
+    "claim_session_id": "8784b078d9e9",
+    "started_at": "2026-05-27T01:56:32.322236+00:00",
+    "completed_at": "2026-05-27T01:56:32.392058+00:00",
+    "result": "Marked blocked because the task requires historical VIX futures data not available from current free sources (the brief itself says yfinance is insufficient), and no experiments/k1310 workspace exists yet. Queue state now matches the real blocker: paid/approved data-source decision pending before any reproducible experiment can begin.",
+    "blocked_at": "2026-05-27T01:56:32+00:00"
   },
   {
     "id": "K1311",
@@ -11989,5 +11998,85 @@
     "started_at": "2026-05-26T23:10:09.792347+00:00",
     "completed_at": "2026-05-26T23:11:00.830304+00:00",
     "result": "refill_trending_candidates 改回 skipped 而非 error；state.errors 已清空；commit 7ed7a775"
+  },
+  {
+    "id": "email-11735-7cab61",
+    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] hourly-dispatch 全 attempt 失敗 (exit 1) 10:11",
+    "description": "Gmail UID: 11735\nMessage-ID: <5BDF4052-665F-4C22-949E-F2028D0EDE76@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Wed, 27 May 2026 11:04:32 +0800\nSubject: Re: [VolPred Alert][CRITICAL] hourly-dispatch 全 attempt 失敗 (exit 1) 10:11\n\n--- 用戶回信內容 ---\n立刻解決 檢討底層邏輯和程式架構出了什麼問題\r\n寫一份完整報告給我\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年5月27日 10:11 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> hourly-dispatch 全 attempt 失敗 (exit 1) 10:11\r\n> Alert level: critical\r\n> CRITICAL\r\n> Hourly-dispatch 連續 3 次 attempt 全失敗\r\n> \r\n> 時間\r\n> \r\n> Fire 開始: 2026-05-27 10:11:42 CST\r\n> 最後 exit code: 1\r\n> Models tried: opus → opus → sonnet (fallback)\r\n> 最後 30 行 dispatch log\r\n> \r\n> fi )\r\n> === [hourly_dispatch] exit 0 at 2026-05-27 09:22:19 CST ===\r\n> === hourly-dispatch 2026-05-27 10:07:05 CST ===\r\n> === attempt 1/3 model=claude-opus-4-7 at 10:07:05 ===\r\n> error: An unknown error occurred (Unexpected)\r\n> [RETRY] attempt 1 failed exit=1; sleep 90s before next\r\n> [2]   Terminated: 15          ( sleep $((HOURLY_CAP_SEC + 60)); ACTUAL_CMD=$(ps -p \"$CLAUDE_PID\" -o comm= 2>/dev/null | tr -d '[:space:]'); if kill -0 \"$CLAUDE_PID\" 2> /dev/null && [[ \"$ACTUAL_CMD\" == *\"$CLAUDE_CMD_PATTERN\"* ]]; then\r\n>     echo \"[WATCHDOG] claude PID $CLAUDE_PID (cmd=$ACTUAL_CMD) alive past cap+60s; SIGTERM to PGID\"; kill -TERM -- \"-$CLAUDE_PID\" 2> /dev/null || kill -TERM \"$CLAUDE_PID\" 2> /dev/null; sleep 10; ACTUAL_CMD2=$(ps -p \"$CLAUDE_PID\" -o comm= 2>/dev/null | tr -d '[:space:]'); if kill -0 \"$CLAUDE_PID\" 2> /dev/null && [[ \"$ACTUAL_CMD2\" == *\"$CLAUDE_CMD_PATTERN\"* ]]; then\r\n>         echo \"[WATCHDOG] SIGTERM ignored; SIGKILL to PGID\"; kill -KILL -- \"-$CLAUDE_PID\" 2> /dev/null || kill -KILL \"$CLAUDE_PID\" 2> /dev/null;\r\n>     fi;\r\n> else\r\n>     if [ -n \"$ACTUAL_CMD\" ] && [[ \"$ACTUAL_CMD\" != *\"$CLAUDE_CMD_PATTERN\"* ]]; then\r\n>         echo \"[WATCHDOG] aborted — PID $CLAUDE_PID now belongs to '$ACTUAL_CMD' (PID reuse)\";\r\n>     fi;\r\n> fi )\r\n> === attempt 2/3 model=claude-opus-4-7 at 10:09:10 ===\r\n> error: An unknown error occurred (Unexpected)\r\n> [RETRY] attempt 2 failed exit=1; sleep 90s before next\r\n> [2]   Terminated: 15          ( sleep $((HOURLY_CAP_SEC + 60)); ACTUAL_CMD=$(ps -p \"$CLAUDE_PID\" -o comm= 2>/dev/null | tr -d '[:space:]'); if kill -0 \"$CLAUDE_PID\" 2> /dev/null && [[ \"$ACTUAL_CMD\" == *\"$CLAUDE_CMD_PATTERN\"* ]]; then\r\n>     echo \"[WATCHDOG] claude PID $CLAUDE_PID (cmd=$ACTUAL_CMD) alive past cap+60s; SIGTERM to PGID\"; kill -TERM -- \"-$CLAUDE_PID\" 2> /dev/null || kill -TERM \"$CLAUDE_PID\" 2> /dev/null; sleep 10; ACTUAL_CMD2=$(ps -p \"$CLAUDE_PID\" -o comm= 2>/dev/null | tr -d '[:space:]'); if kill -0 \"$CLAUDE_PID\" 2> /dev/null && [[ \"$ACTUAL_CMD2\" == *\"$CLAUDE_CMD_PATTERN\"* ]]; then\r\n>         echo \"[WATCHDOG] SIGTERM ignored; SIGKILL to PGID\"; kill -KILL -- \"-$CLAUDE_PID\" 2> /dev/null || kill -KILL \"$CLAUDE_PID\" 2> /dev/null;\r\n>     fi;\r\n> else\r\n>     if [ -n \"$ACTUAL_CMD\" ] && [[ \"$ACTUAL_CMD\" != *\"$CLAUDE_CMD_PATTERN\"* ]]; then\r\n>         echo \"[WATCHDOG] aborted — PID $CLAUDE_PID now belongs to '$ACTUAL_CMD' (PID reuse)\";\r\n>     fi;\r\n> fi )\r\n> === attempt 3/3 model=claude-sonnet-4-6 at 10:11:12 ===\r\n> error: An unknown error occurred (Unexpected)\r\n> [FAIL-REPORT] all 3 attempts failed, sending proactive alert\r\n> 影響範圍\r\n> \r\n> 本輪 dispatch 沒派工 → pool 沒消化（pending email_reply 持續累積）\r\n> 下次 fire 在 1 小時後（HH+1:07）\r\n> 可能根因\r\n> \r\n> Anthropic API 持續過載（連 sonnet fallback 也 fail）\r\n> 網路斷線\r\n> claude CLI binary 損壞\r\n> 系統資源耗盡（ulimit / memory）\r\n> 建議行動\r\n> \r\n> tail -100 /Users/yhlai0911/.volpred/logs/hourly_dispatch.log\r\n> curl -s https://status.claude.com/api/v2/status.json | jq .status\r\n> ps -ef | grep claude | head\r\n> Auto-sent by cron_hourly_dispatch.sh fail-report (proactive, bypasses check_alerts dedup)\n",
+    "task_type": "email_reply",
+    "priority": 1,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-05-27T03:15:14.723882+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11735,
+    "email_message_id": "<5BDF4052-665F-4C22-949E-F2028D0EDE76@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][CRITICAL] hourly-dispatch 全 attempt 失敗 (exit 1) 10:11",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-05-27T03:41:32.021385+00:00",
+    "claim_session_id": "b0720535a056",
+    "completed_at": "2026-05-27T03:46:40.463422+00:00",
+    "result": "consolidated close email sent (notification b7f67f73); root cause = LaunchAgent cannot access macOS keychain for claude CLI auth; hotfix CLI provided for user terminal; 2 followup platform_ops tasks queued (auth resilience P1 + worker daemon refactor 3-strike trigger)"
+  },
+  {
+    "id": "email-11738-787e4d",
+    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] hourly-dispatch 全 attempt 失敗 (exit 1) 11:11",
+    "description": "Gmail UID: 11738\nMessage-ID: <09854F60-9465-48E2-87CD-DDA4065EDA9A@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Wed, 27 May 2026 11:15:35 +0800\nSubject: Re: [VolPred Alert][CRITICAL] hourly-dispatch 全 attempt 失敗 (exit 1) 11:11\n\n--- 用戶回信內容 ---\n立刻解決\r\n另外 信件中的程式碼區域 不要用黑底顯示 看不清楚內容\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年5月27日 11:11 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> hourly-dispatch 全 attempt 失敗 (exit 1) 11:11\r\n> Alert level: critical\r\n> CRITICAL\r\n> Hourly-dispatch 連續 3 次 attempt 全失敗\r\n> \r\n> 時間\r\n> \r\n> Fire 開始: 2026-05-27 11:11:55 CST\r\n> 最後 exit code: 1\r\n> Models tried: opus → opus → sonnet (fallback)\r\n> 最後 30 行 dispatch log\r\n> \r\n> === hourly-dispatch end 2026-05-27 10:11:48 CST (exit=1) ===\r\n> === [hourly_dispatch] exit 1 at 2026-05-27 10:11:48 CST ===\r\n> === hourly-dispatch 2026-05-27 11:07:03 CST ===\r\n> === attempt 1/3 model=claude-opus-4-7 at 11:07:03 ===\r\n> error: An unknown error occurred (Unexpected)\r\n> [RETRY] attempt 1 failed exit=1; sleep 90s before next\r\n> [2]   Terminated: 15          ( sleep $((HOURLY_CAP_SEC + 60)); ACTUAL_CMD=$(ps -p \"$CLAUDE_PID\" -o comm= 2>/dev/null | tr -d '[:space:]'); if kill -0 \"$CLAUDE_PID\" 2> /dev/null && [[ \"$ACTUAL_CMD\" == *\"$CLAUDE_CMD_PATTERN\"* ]]; then\r\n>     echo \"[WATCHDOG] claude PID $CLAUDE_PID (cmd=$ACTUAL_CMD) alive past cap+60s; SIGTERM to PGID\"; kill -TERM -- \"-$CLAUDE_PID\" 2> /dev/null || kill -TERM \"$CLAUDE_PID\" 2> /dev/null; sleep 10; ACTUAL_CMD2=$(ps -p \"$CLAUDE_PID\" -o comm= 2>/dev/null | tr -d '[:space:]'); if kill -0 \"$CLAUDE_PID\" 2> /dev/null && [[ \"$ACTUAL_CMD2\" == *\"$CLAUDE_CMD_PATTERN\"* ]]; then\r\n>         echo \"[WATCHDOG] SIGTERM ignored; SIGKILL to PGID\"; kill -KILL -- \"-$CLAUDE_PID\" 2> /dev/null || kill -KILL \"$CLAUDE_PID\" 2> /dev/null;\r\n>     fi;\r\n> else\r\n>     if [ -n \"$ACTUAL_CMD\" ] && [[ \"$ACTUAL_CMD\" != *\"$CLAUDE_CMD_PATTERN\"* ]]; then\r\n>         echo \"[WATCHDOG] aborted — PID $CLAUDE_PID now belongs to '$ACTUAL_CMD' (PID reuse)\";\r\n>     fi;\r\n> fi )\r\n> === attempt 2/3 model=claude-opus-4-7 at 11:09:21 ===\r\n> error: An unknown error occurred (Unexpected)\r\n> [RETRY] attempt 2 failed exit=1; sleep 90s before next\r\n> [2]   Terminated: 15          ( sleep $((HOURLY_CAP_SEC + 60)); ACTUAL_CMD=$(ps -p \"$CLAUDE_PID\" -o comm= 2>/dev/null | tr -d '[:space:]'); if kill -0 \"$CLAUDE_PID\" 2> /dev/null && [[ \"$ACTUAL_CMD\" == *\"$CLAUDE_CMD_PATTERN\"* ]]; then\r\n>     echo \"[WATCHDOG] claude PID $CLAUDE_PID (cmd=$ACTUAL_CMD) alive past cap+60s; SIGTERM to PGID\"; kill -TERM -- \"-$CLAUDE_PID\" 2> /dev/null || kill -TERM \"$CLAUDE_PID\" 2> /dev/null; sleep 10; ACTUAL_CMD2=$(ps -p \"$CLAUDE_PID\" -o comm= 2>/dev/null | tr -d '[:space:]'); if kill -0 \"$CLAUDE_PID\" 2> /dev/null && [[ \"$ACTUAL_CMD2\" == *\"$CLAUDE_CMD_PATTERN\"* ]]; then\r\n>         echo \"[WATCHDOG] SIGTERM ignored; SIGKILL to PGID\"; kill -KILL -- \"-$CLAUDE_PID\" 2> /dev/null || kill -KILL \"$CLAUDE_PID\" 2> /dev/null;\r\n>     fi;\r\n> else\r\n>     if [ -n \"$ACTUAL_CMD\" ] && [[ \"$ACTUAL_CMD\" != *\"$CLAUDE_CMD_PATTERN\"* ]]; then\r\n>         echo \"[WATCHDOG] aborted — PID $CLAUDE_PID now belongs to '$ACTUAL_CMD' (PID reuse)\";\r\n>     fi;\r\n> fi )\r\n> === attempt 3/3 model=claude-sonnet-4-6 at 11:11:23 ===\r\n> error: An unknown error occurred (Unexpected)\r\n> [FAIL-REPORT] all 3 attempts failed, sending proactive alert\r\n> 影響範圍\r\n> \r\n> 本輪 dispatch 沒派工 → pool 沒消化（pending email_reply 持續累積）\r\n> 下次 fire 在 1 小時後（HH+1:07）\r\n> 可能根因\r\n> \r\n> Anthropic API 持續過載（連 sonnet fallback 也 fail）\r\n> 網路斷線\r\n> claude CLI binary 損壞\r\n> 系統資源耗盡（ulimit / memory）\r\n> 建議行動\r\n> \r\n> tail -100 /Users/yhlai0911/.volpred/logs/hourly_dispatch.log\r\n> curl -s https://status.claude.com/api/v2/status.json | jq .status\r\n> ps -ef | grep claude | head\r\n> Auto-sent by cron_hourly_dispatch.sh fail-report (proactive, bypasses check_alerts dedup)\n",
+    "task_type": "email_reply",
+    "priority": 1,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-05-27T03:30:13.139631+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11738,
+    "email_message_id": "<09854F60-9465-48E2-87CD-DDA4065EDA9A@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][CRITICAL] hourly-dispatch 全 attempt 失敗 (exit 1) 11:11",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-05-27T03:41:32.306356+00:00",
+    "claim_session_id": "7dfbf06d7ffc",
+    "completed_at": "2026-05-27T03:46:40.562731+00:00",
+    "result": "consolidated with email-11735-7cab61 close (same root cause); also fixed email code-block black-bg → light-bg per user UI feedback (email_notifier.py:167-169)"
+  },
+  {
+    "id": "platform_ops_hourly_dispatch_auth_resilience",
+    "title": "[platform_ops] cron_hourly_dispatch.sh 加 auth pre-flight + fallback (mid-term, P1)",
+    "description": "Context: 2026-05-27 10:07 + 11:07 連 2 hourly fire 全 fail，root cause = LaunchAgent 環境無法存取 keychain (claude CLI auth)。詳見 email-11735-7cab61 + email-11738-787e4d close reply (notification b7f67f73).\n\nDeliverable:\n1. cron_hourly_dispatch.sh 加 PHASE 0: pre-flight `claude -p \"ping\" --timeout 10` smoke test；fail 立即寄 alert with 1-line hotfix command + exit (不浪費 3 attempts)\n2. 加 fallback path: keychain auth fail → 試 `source ~/.zshrc` + 重試 (保 login shell env)\n3. Alert body 從 generic CRITICAL 改成 actionable hotfix command\n4. 寫 unit test (tests/test_cron_auth_preflight.py)\n5. 部署後 monitor 3 fire 確認 auth fail 不再發生\n\n預估 60-90 min。Codex 可接。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "tags": [
+      "platform_ops",
+      "cron",
+      "auth",
+      "hourly_dispatch",
+      "p1_user_critical"
+    ],
+    "created_at": "2026-05-27T03:46:39.543905+00:00",
+    "source": "main_thread_2026_05_27_critical_email_root_cause"
+  },
+  {
+    "id": "platform_ops_refactor_hourly_dispatch_worker_daemon",
+    "title": "[platform_ops] hourly-dispatch 重構 — worker daemon + queue 取代 LaunchAgent + claude CLI subprocess (3-strike trigger)",
+    "description": "Context: CLAUDE.md 3-strike rule 已超過 (5/25 strike 1+2 API 529 + 5/27 strike 3+4 auth)；同一架構脆弱性 (headless CLI subprocess + 環境隔離) 不同症狀。L162-180 規定不可再 patch — 必整體重構。\n\nDeliverable:\n1. 寫 `docs/refactor_plan_hourly_dispatch.md` — 三層診斷 (底層邏輯/流程/程式架構) + 重構方案 + 廢棄面 + 驗證 gate\n2. 設計：常駐 worker daemon (user login session 內持續跑，繼承 keychain unlock state) + queue (hourly cron 只 enqueue task，不 spawn 新 claude process)\n3. 廢棄 perl alarm + watchdog 防 hang 邏輯 (worker daemon 內建 health check)\n4. 廢棄 retry+sonnet fallback (5/25 patch) → worker queue 內處理 retry\n5. Migration: 跑 1 週並行新舊兩套，舊 LaunchAgent 設 stub 模式 (寫 log 不 spawn)，驗證新 worker 100% 取代\n6. 廢棄後刪 `~/.volpred/bin/cron_hourly_dispatch.sh` + LaunchAgent plist + scripts/cron_hourly_dispatch.sh (移到 _legacy/)\n7. Commit prefix `refactor(3-strike): hourly_dispatch worker_daemon`\n8. Regression test 覆蓋三次 incident 觸發條件\n\n預估 8-12 hour 工程，跨多 hourly fire。需主線程主導，不可全派 subagent。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "tags": [
+      "platform_ops",
+      "refactor",
+      "3_strike",
+      "worker_daemon",
+      "hourly_dispatch"
+    ],
+    "created_at": "2026-05-27T03:46:39.543905+00:00",
+    "source": "main_thread_2026_05_27_3strike_trigger"
   }
 ]
