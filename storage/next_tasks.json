@@ -12089,14 +12089,19 @@
       "hourly_dispatch"
     ],
     "created_at": "2026-05-27T03:46:39.543905+00:00",
-    "source": "main_thread_2026_05_27_3strike_trigger"
+    "source": "main_thread_2026_05_27_3strike_trigger",
+    "started_at": "2026-05-27T09:08:55.281551+00:00",
+    "progress_log": [
+      "2026-05-27 17:07-17:30 hourly-17: Deliverable 1/8 DONE — docs/refactor_plan_hourly_dispatch.md (三層診斷 7 strikes + worker daemon 架構 + 10-test verification gate + 24-26 day migration plan). Deliverables 2-8 sequenced in plan §8; await future main-thread fires. NOT all-complete yet."
+    ],
+    "last_released_at": "2026-05-27T09:12:02.875743+00:00"
   },
   {
     "id": "paper_review_mile_cc3c987a",
     "title": "Paper review (Codex 24h-rule): SPY 與黃金的下尾相依：50/50 分散化會崩嗎？",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_cc3c987a needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_cc3c987a",
@@ -12105,7 +12110,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-27T04:07:44+00:00"
+    "created_at": "2026-05-27T04:07:44+00:00",
+    "claimed_by": "hourly-16",
+    "claimed_at": "2026-05-27T08:08:39.748312+00:00",
+    "claim_session_id": "ba1541c9b53e",
+    "started_at": "2026-05-27T08:08:44.928580+00:00",
+    "completed_at": "2026-05-27T08:17:39.715061+00:00",
+    "result": "Codex 24h-rule review (NEEDS_REVISION verdict) applied: HIGH (BTC p=0.067 overclaim corrected), MEDIUM (11→10 estimable crisis segments clarified), LOW (in-sample descriptive caveat added). knowledge.json item bba41c9f. commit 76184b9b. live site synced."
   },
   {
     "id": "paper_review_mile_ebb5d6f5",
@@ -12270,7 +12281,7 @@
     "title": "Paper review (Codex 24h-rule): CBOE SKEW 真能補捉尾端風險嗎？我們把它和 VIX 一起檢驗",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_1b2ad1f8 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_1b2ad1f8",
@@ -12279,7 +12290,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-27T07:07:48+00:00"
+    "created_at": "2026-05-27T07:07:48+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-27T08:18:59.051218+00:00",
+    "claim_session_id": "7bc9597c73cf",
+    "started_at": "2026-05-27T08:18:59.098641+00:00",
+    "completed_at": "2026-05-27T08:23:08.569420+00:00",
+    "result": "Codex review complete: NEEDS_REVISION. Added experiments/k447/k447_post_publish_codex_review.md. Findings: (1) article claims t-1 lag but code uses contemporaneous SKEW/VIX features, (2) 'adding SKEW made VIX worse' overstates because AUC worsens but Brier improves, (3) OOS tercile narrative is stronger than chi-square p=0.134 supports."
   },
   {
     "id": "paper_review_mile_ecda80a3",
@@ -12302,7 +12319,7 @@
     "title": "K1122: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1122 has verdict signal (score=4, reasons=None) but no general article. Verdict preview: ",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1122",
@@ -12315,6 +12332,8 @@
     "claimed_by": "hourly-15",
     "claimed_at": "2026-05-27T07:10:29.367563+00:00",
     "claim_session_id": "798b58c82ac0",
-    "started_at": "2026-05-27T07:10:34.572627+00:00"
+    "started_at": "2026-05-27T07:10:34.572627+00:00",
+    "completed_at": "2026-05-27T07:40:28.758500+00:00",
+    "result": "Published mile_0dcef1a5 (audience=research, status=draft). 72 spec sweep article confirms K1121 step-regime null robust; H2 verdict from k1122_results.json. 3 既有 PNG embed (Supabase URLs), 11 tags, anti-AI gate PASS (2 non-blocking FB-tone WARN), feed-sync +398 insert/945 update success. Commit 605ce524."
   }
 ]
