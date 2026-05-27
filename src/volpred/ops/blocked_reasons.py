@@ -24,6 +24,7 @@ BLOCKED_REASONS: frozenset[str] = frozenset(
         "codex_quota_reset_pending",        # ChatGPT-account daily quota exhausted — paired with blocked_until
         "paid_data_source_decision_pending",  # task gated on user/admin paid-API decision
         "diversity_rule_post_null_quartet", # paused per CLAUDE.md ML novel-method NULL-quartet diversity rule
+        "awaiting_event_window",            # event_jobs not_before > now — paired with blocked_until=not_before
     }
 )
 

@@ -143,6 +143,18 @@ def refill_event_candidates(*, horizon_days: int = 14) -> dict[str, Any]:
         if delta_days < 0 or delta_days > horizon_days:
             skipped.append({"id": str(item.get("id")), "reason": "out_of_horizon"})
             continue
+        not_before_raw = item.get("not_before")
+        if not_before_raw:
+            try:
+                not_before_dt = datetime.fromisoformat(str(not_before_raw))
+            except ValueError:
+                not_before_dt = None
+            if not_before_dt is not None:
+                if not_before_dt.tzinfo is None:
+                    not_before_dt = not_before_dt.replace(tzinfo=LOCAL_TZ)
+                if now < not_before_dt.astimezone(timezone.utc):
+                    skipped.append({"id": str(item.get("id")), "reason": "not_yet_in_window"})
+                    continue
         task = _build_event_task(item)
         if _append_task(task):
             added.append(task["id"])

@@ -8733,5 +8733,13 @@
     "knowledge_item": "4eac7111",
     "reviewer": "main_thread_cross_check",
     "actor": "hourly-03"
+  },
+  {
+    "timestamp": "2026-05-28T04:13:25+08:00",
+    "task_type": "platform_ops",
+    "task_id": "platform_ops_refill_event_not_before_fix",
+    "summary": "Fix refill_reader_facing_pool.py refill_event_candidates 加 not_before 檢查 — CPI 6/11 T-2 (not_before=6/9) / T+0 (not_before=6/11) 提早 12-14 天被誤推入 pool 作 P1 phantom. 2 phantom task mark blocked w/ awaiting_event_window (新加 vocab) + blocked_until=not_before. 新加 unit test 4 passed. 修流程不修資料.",
+    "verdict": "PASS",
+    "actor": "hourly-04"
   }
 ]
