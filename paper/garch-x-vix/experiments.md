@@ -2,7 +2,7 @@
 
 **Paper**: Multiplicative GARCH-X with VIX: A Parsimonious Alternative to GARCH-MIDAS for Volatility Forecasting and Risk Management
 **Journal**: Journal of Empirical Finance / International Journal of Forecasting (under review)
-**Last Updated**: 2026-04-17
+**Last Updated**: 2026-05-27
 
 ---
 
@@ -15,6 +15,7 @@
 | K889v2 | MF-GJR Fixed (denominator-consistent) | Confirmed that fixing the denominator consistency improves performance | `experiments/k889v2/` |
 | K988 | Multiplicative GARCH-X vs GARCH-MIDAS(VIX) Specification Comparison | **Main horse race**: 11 models (A1–A5, A2f/A4f/A3f/A2n/A4n, B0), reveals A4f-VIX² free-omega as champion; established the 17-spec taxonomy used in Table 3 | `experiments/k988/` |
 | K988b | GARCH-MIDAS Supplement (6 additional) | Added B1/B2/B3/C1/C2/C3 MIDAS-RW and MIDAS-FS specs; confirmed all MIDAS lag-length variants fail to beat A4f | `experiments/k988/` (k988b files) |
+| `garch_midas_test` | Canonical GARCH-MIDAS baseline (Engle–Ghysels–Sohn 2013) | Supplementary check using the original EGS-2013 GARCH-MIDAS spec on RV and IP as long-run drivers. IS QLIKE: MIDAS-RV 1.450 vs GJR 1.468 (DM stat=−2.31, p=0.021 IS only). OOS 2023-01-03 to 2026-03-16 (n=802): MIDAS-RV QLIKE 1.682 vs GJR 1.672 (DM stat=0.66, p=0.51 NS); MIDAS-IP IS QLIKE 1.465. Confirms canonical GARCH-MIDAS does **not** beat GJR OOS and is far behind A4f (OOS QLIKE ≈ 1.408 per K1003 / K1027). | `experiments/garch_midas_test/` |
 | K989 | MF2-VIX + VIX² Convexity Synthesis | Tested VIX convexity (VIX⁴ poly) in tau; confirmed quadratic VIX² sufficient; tau vs OOS figure used in Figure 2 | `experiments/k989/` |
 | K1045 | A4f Residual Diagnostics Suite (Table 11) | **Table 11 source**: SPY OOS 2019-01-02 to 2026-04-10 (n=1,828), window=2000, refit/63d. Computes standardized residual kurtosis (GJR: 3.065 → A4f: 1.238, −60%), skewness (−0.856 → −0.594, −30.6%), JB stat (938.8 → 224.2, −76.1%), ν (GJR 5.28, A4f 8.00). Uses vix2=(vix/100)² and joint MLE with standard-t parameterization. **Verified K995b exact match** (rtol≤0.002). | `experiments/K1045/` |
 | K1023 | Proposition Verification (Discussion Props 1–2 source) | **Discussion Propositions source**: SPY full sample 2005–2026 (n_analysis=4,849). Prop.1: Corr(τ_t, g_t)=0.493 (paper ~0.49), Cov(τ,g)/E[σ²]=12.7% confirming E[σ²]=E[τ]E[g]+Cov(τ,g). Prop.2: theta1_ratio_A4=0.781 (paper 0.78), confirms MLE endogenously corrects for VRP discount. Prop.3: σ²/VIX² tracks VRP with Spearman ρ=0.819 (A3f, full period). | `experiments/k1023/` |
