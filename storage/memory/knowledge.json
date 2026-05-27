@@ -31575,5 +31575,17 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-05-27T16:16:36.320517"
+  },
+  {
+    "item_id": "7c0ce280",
+    "category": "garch_har_extensions",
+    "content": "[K1402] HAR-RV Quantile Forecasting (Pinball Loss) on SPY — verdict=NULL (\"median-under-QLIKE null\"). Setup: standard HAR-RV (Corsi 2009; daily RV proxy = |ret_pct|, rv_d/rv_w/rv_m 全 .shift(1)), SPY 2007-01-03→today, OOS 2021-01-04 起 (n_oos=1348), OLS baseline vs 5 個 statsmodels.QuantReg fit τ∈{0.50,0.75,0.90,0.95,0.99}, fixed-origin (無 OOS refit). Findings: (a) τ=0.95 emp coverage 96.07% gap +1.07pp Kupiec UC p=0.062 邊際 PASS; (b) τ=0.99 emp coverage 99.26% gap +0.26pp Kupiec UC p=0.318 PASS; (c) DM qmed vs OLS QLIKE stat<<0 p≈0.000 顯著 NEGATIVE. Interpretation: 用 QLIKE (對 conditional mean 一致的 loss) 評估 q50 conditional median, 目標函數不對稱 → q50 系統性 underforecast → DM 顯著為負是預期且具資訊量的 null. 不是 quantile HAR 全失敗: tail (q95/q99) coverage + Kupiec 不差, 可獨立服務 risk-management 上界. 避開 ML novel-method NULL quartet diversity rule (K1263/K1312/K816v2/K784) — non-ML extension. Reviewer: Codex CLI 0.132.0 (gpt-5.4 medium reasoning, ChatGPT auth). v1 FAIL → 修 2 HIGH (HAR spec mismatch + verdict classifier 缺 DM 負分支); v2 CONDITIONAL_PASS (Codex 同意 NULL 為 median-under-QLIKE null 而非整體失敗). Followup: K1402b rolling refit; K1402c log-QR; K1402d quantile-implied mean vs OLS 公平比較.",
+    "evidence": [
+      "experiments/k1402/k1402.py",
+      "experiments/k1402/k1402_results.json",
+      "experiments/k1402/README.md"
+    ],
+    "confidence": 0.7,
+    "created_at": "2026-05-27T21:23:25.735190"
   }
 ]

@@ -8662,5 +8662,27 @@
     "task_id": "Paper6_experiments_md_add_K874c_K874e",
     "commit": "63cc68f0",
     "notes": "experiments.md errata: K874c/K874e Table 2 mapping + K880/K880v2 timing note"
+  },
+  {
+    "timestamp": "2026-05-27T21:23:46+0800",
+    "task_type": "experiment",
+    "task_id": "K1402_har_quantile_pinball_spy",
+    "title": "K1402 HAR-RV Quantile Forecasting (Pinball Loss) on SPY",
+    "verdict": "NULL",
+    "narrative": "median-under-QLIKE null (mean-consistent loss 評估 conditional median 設計不對稱)",
+    "tail_coverage": {
+      "q95_emp": 0.9607,
+      "q99_emp": 0.9926,
+      "kupiec_95_p": 0.062,
+      "kupiec_99_p": 0.318
+    },
+    "reviewer": "Codex CLI 0.132.0 (gpt-5.4 medium) v2 CONDITIONAL_PASS",
+    "knowledge_id": "7c0ce280",
+    "owner": "hourly-21",
+    "files": [
+      "experiments/k1402/README.md",
+      "experiments/k1402/k1402.py",
+      "experiments/k1402/k1402_results.json"
+    ]
   }
 ]

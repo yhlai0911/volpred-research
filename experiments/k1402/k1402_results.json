@@ -1,0 +1,149 @@
+{
+  "experiment_id": "K1402",
+  "title": "HAR-RV Quantile Forecasting (Pinball Loss) — SPY",
+  "asset": "SPY",
+  "n_train": 3502,
+  "n_oos": 1348,
+  "oos_start": "2021-01-04",
+  "oos_first_date": "2021-01-04",
+  "oos_last_date": "2026-05-15",
+  "ols_baseline": {
+    "qlike_mean_oos": 1.1596836436895646,
+    "pinball_at_tau_0.50": 0.25421536804763
+  },
+  "quantile_median_vs_ols": {
+    "qlike_mean_oos_qmed": 1.9886210369786237,
+    "pinball_at_tau_0.50": 0.24397132511325537,
+    "dm_qmed_vs_ols": {
+      "dm_stat": -10.196849625157515,
+      "p_value": 0.0,
+      "n": 1348,
+      "mean_diff": -0.8289373932890594
+    }
+  },
+  "quantile_forecasts": {
+    "q50": {
+      "tau": 0.5,
+      "params": {
+        "const": 0.04621999446445102,
+        "rv_d": -0.0569835047299847,
+        "rv_w": 0.4926272980394515,
+        "rv_m": 0.28570692335074455
+      },
+      "pinball_loss_oos": 0.24397132511325537,
+      "empirical_coverage": 0.4910979228486647,
+      "nominal_coverage": 0.5,
+      "coverage_gap_pp": -0.8902077151335286,
+      "kupiec_uc": {
+        "violations": 686,
+        "n": 1348,
+        "p_hat": 0.5089020771513353,
+        "p_nominal": 0.5,
+        "lr_stat": 0.4273222809338222,
+        "p_value": 0.5133057977589996
+      }
+    },
+    "q75": {
+      "tau": 0.75,
+      "params": {
+        "const": 0.17962260700739208,
+        "rv_d": -0.04367981728044512,
+        "rv_w": 0.6498432424158693,
+        "rv_m": 0.5839473154558448
+      },
+      "pinball_loss_oos": 0.22730295300330042,
+      "empirical_coverage": 0.7433234421364985,
+      "nominal_coverage": 0.75,
+      "coverage_gap_pp": -0.667655786350152,
+      "kupiec_uc": {
+        "violations": 346,
+        "n": 1348,
+        "p_hat": 0.25667655786350146,
+        "p_nominal": 0.25,
+        "lr_stat": 0.3186020352854939,
+        "p_value": 0.5724489841326449
+      }
+    },
+    "q90": {
+      "tau": 0.9,
+      "params": {
+        "const": 0.3208779719325321,
+        "rv_d": -0.08517013804680573,
+        "rv_w": 1.1137198098936096,
+        "rv_m": 0.7668835494805535
+      },
+      "pinball_loss_oos": 0.1416703660144409,
+      "empirical_coverage": 0.9094955489614244,
+      "nominal_coverage": 0.9,
+      "coverage_gap_pp": 0.9495548961424349,
+      "kupiec_uc": {
+        "violations": 122,
+        "n": 1348,
+        "p_hat": 0.09050445103857567,
+        "p_nominal": 0.09999999999999998,
+        "lr_stat": 1.390413837835922,
+        "p_value": 0.23833522476981994
+      }
+    },
+    "q95": {
+      "tau": 0.95,
+      "params": {
+        "const": 0.45352739061741687,
+        "rv_d": -0.09415932401427085,
+        "rv_w": 1.1920757722447206,
+        "rv_m": 1.0472367680655168
+      },
+      "pinball_loss_oos": 0.09186191112783317,
+      "empirical_coverage": 0.9606824925816023,
+      "nominal_coverage": 0.95,
+      "coverage_gap_pp": 1.0682492581602365,
+      "kupiec_uc": {
+        "violations": 53,
+        "n": 1348,
+        "p_hat": 0.039317507418397624,
+        "p_nominal": 0.050000000000000044,
+        "lr_stat": 3.4838914939343795,
+        "p_value": 0.06196885136498076
+      }
+    },
+    "q99": {
+      "tau": 0.99,
+      "params": {
+        "const": 1.1001671774441917,
+        "rv_d": -0.08683598652110902,
+        "rv_w": 1.8486658902427422,
+        "rv_m": 0.9397739423185953
+      },
+      "pinball_loss_oos": 0.030479932232604718,
+      "empirical_coverage": 0.9925816023738873,
+      "nominal_coverage": 0.99,
+      "coverage_gap_pp": 0.25816023738872707,
+      "kupiec_uc": {
+        "violations": 10,
+        "n": 1348,
+        "p_hat": 0.00741839762611276,
+        "p_nominal": 0.010000000000000009,
+        "lr_stat": 0.9966265959733391,
+        "p_value": 0.31812815200201194
+      }
+    }
+  },
+  "verdict": "NULL",
+  "verdict_reasons": [
+    "DM significantly NEGATIVE (qmed worse than OLS, stat=-10.20 p=0.000) — quantile median forecast 顯著退步，整體 QLIKE quality 下降"
+  ],
+  "config": {
+    "seed": 42,
+    "data_start": "2007-01-03",
+    "oos_start": "2021-01-04",
+    "quantiles": [
+      0.5,
+      0.75,
+      0.9,
+      0.95,
+      0.99
+    ],
+    "model": "HAR-RV + statsmodels.QuantReg (Koenker-Bassett 1978)",
+    "refit": "none (single expanding fit through OOS_START)"
+  }
+}
