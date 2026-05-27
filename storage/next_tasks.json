@@ -12168,7 +12168,7 @@
     "title": "Paper review (Codex 24h-rule): Range-Based 估計子作為 GARCH Proxy：哪一個最準？",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_d0d66405 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "in_progress",
+    "status": "pending",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_d0d66405",
@@ -12178,10 +12178,9 @@
       "main-thread-only"
     ],
     "created_at": "2026-05-27T04:07:44+00:00",
-    "claimed_by": "hourly-18",
-    "claimed_at": "2026-05-27T10:09:45.848561+00:00",
-    "claim_session_id": "a29e2ac929ec",
-    "started_at": "2026-05-27T10:09:55.963470+00:00"
+    "started_at": "2026-05-27T10:09:55.963470+00:00",
+    "last_released_at": "2026-05-27T12:50:08.556912+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "platform_ops_cron_stale_daily_update",
@@ -12342,7 +12341,7 @@
     "title": "Paper review (Codex 24h-rule): 夜盤與日內波動：誰才是隔日波動的主角？",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_ecda80a3 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_ecda80a3",
@@ -12351,7 +12350,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-27T07:07:48+00:00"
+    "created_at": "2026-05-27T07:07:48+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-27T12:33:21.290423+00:00",
+    "claim_session_id": "cbaed5273d76",
+    "started_at": "2026-05-27T12:33:21.385196+00:00",
+    "completed_at": "2026-05-27T12:35:34.583563+00:00",
+    "result": "K1100G_D5 article/code/results reviewed. PASS: no lookahead, DM-HLN and OOS setup consistent, article correctly frames cross-DM p=0.47 as statistically indistinguishable / borderline."
   },
   {
     "id": "K1122_article_general",
@@ -12430,5 +12435,21 @@
       "main-thread"
     ],
     "created_at": "2026-05-27T11:20:57+00:00"
+  },
+  {
+    "id": "platform_ops_frontend_cluster_deprioritization",
+    "title": "[platform_ops] 前端 feed listing cluster-aware sort 降權（歷史 VIX 52% 解套）",
+    "description": "Context: cluster cooldown gate (commit ff f) forward-looking 守新文，但歷史累積 VIX 198/30d (52.7%) / SPY 67 / VT 15 / GARCH 19 仍嚴重失衡，讀者感受炒冷飯不解。retroactive delete 屬 destructive 不做。改 frontend listing sort 規則降權同 cluster 連續出現。\n\nDeliverable:\n1. frontend-v2-fix/ feed listing page 加 cluster-aware sort:\n   - 預設 published_at desc，但連續 2 篇同 cluster → 第 3 篇強制 swap 不同 cluster 文上來\n   - 演算法: greedy interleave by cluster, 同 cluster 間距 ≥3\n2. 後端 API /api/feed 加 `?diversify=cluster` query param\n3. 前端 default ON\n4. 加 e2e test 驗證連續 3 篇不同 cluster\n\n預估 90 min。Codex 可接 (frontend + Python API)。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "tags": [
+      "platform_ops",
+      "frontend",
+      "feed_diversity",
+      "炒冷飯_fix_v2"
+    ],
+    "created_at": "2026-05-27T12:55:47.493575+00:00",
+    "source": "main_thread_2026_05_27_cluster_followup"
   }
 ]
