@@ -1148,7 +1148,7 @@
     "title": "K1268b: GDELT 5-min vs SPY 5-min RV — re-run with backtest-grade intraday data",
     "priority": 3,
     "description": "K1268 FAIL_NO_DATA blocker: yfinance 1m/5m limited to last 30/60 days. Re-run with: (a) Polygon Stocks API (paid, ~/mo), (b) Databento, (c) self-hosted SPY 1-min rolling archive (start collecting now to cover future event days), or (d) IBKR TWS API historical. GDELT 5-min raw parquet (experiments/k1268/gdelt_5min_bars.parquet 864 bars × 3 event days) already cached — re-use directly. Test cross-correlation event-density / sentiment vs SPY 5-min RV with Bonferroni multiple-testing correction (3 signals × 4 lags = 12 tests/day).",
-    "status": "pending",
+    "status": "blocked",
     "task_type": "experiment",
     "source": "K1268_followup",
     "tags": [
@@ -1161,7 +1161,9 @@
     "prerequisites": "paid_intraday_data_source_decision",
     "blocked_reason": "paid_data_source_decision_pending",
     "last_note": "[2026-05-11] Queued as K1268 FAIL_NO_DATA follow-up. GDELT raw cached. Need user/admin policy on paid data source.",
-    "created_at": "2026-05-10T17:55:51Z"
+    "created_at": "2026-05-10T17:55:51Z",
+    "blocked_at": "2026-05-27T00:10:26+00:00",
+    "blocked_note": "Paid intraday source (Polygon/Databento/IBKR) decision pending; GDELT raw cached."
   },
   {
     "id": "K1302",
@@ -5950,7 +5952,7 @@
   {
     "id": "Paper9_experiments_md_add_garch_midas_test",
     "title": "Paper 9 QUICK WIN: experiments.md 加 garch_midas_test",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 3,
     "created_at": "2026-04-17T18:15:35+08:00",
     "description": "Non-K sweep 發現 experiments/garch_midas_test 是真實 experiment 支持 Paper 9 A4f vs GARCH-MIDAS 比較 (GJR 1.672 vs MIDAS 1.682, A4f 1.408 遠優). 未登錄 paper/garch-x-vix/experiments.md. 主線程 5 min edit.",
@@ -5967,7 +5969,13 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-05-27T00:09:03.064990+00:00",
+    "claim_session_id": "7a8b791ff367",
+    "started_at": "2026-05-27T00:09:07.577433+00:00",
+    "completed_at": "2026-05-27T00:09:58.370194+00:00",
+    "result": "experiments.md 加 garch_midas_test row (EGS-2013 canonical baseline; OOS QLIKE MIDAS-RV 1.682 vs GJR 1.672 NS, A4f 1.408 wins). commit 4988ed23."
   },
   {
     "id": "Paper9_subperiod_numbers_update_from_K1027",
@@ -9926,7 +9934,7 @@
     "description": "K816V2 has a non-null verdict in experiments/k816v2/ but no published feed article and no existing task. Verdict: MARGINAL: GINN-VIX has lowest QLIKE but difference not significant (Harvey t>3.0. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "blocked",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -9935,7 +9943,16 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-05-13T05:53:00.504008+00:00",
     "generated_at": "2026-05-13T05:53:00.504009+00:00",
-    "k_id": "K816V2"
+    "k_id": "K816V2",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-26T23:54:06.844235+00:00",
+    "claim_session_id": "abc59386c688",
+    "started_at": "2026-05-26T23:54:06.890513+00:00",
+    "completed_at": "2026-05-26T23:54:20.656331+00:00",
+    "result": "Marked deprecated/blocklisted from pending queue. Evidence: experiments/k816v2 is still a planning-shell README, while feed already contains published same-K reader-facing coverage ('K816v2：GJR Bug 修正後 ML Ceiling 第 6 次確認——DM 從 2.96 跌至 0.64', mile_c72ba620); this auto-discovered general-article task is duplicate/noise rather than a fresh publication candidate.",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-05-26T23:54:20+00:00",
+    "blocked_note": "Auto-discovered stale daily_article: experiments/k816v2 remains planning-shell, while feed already contains published same-K reader-facing coverage (mile_c72ba620, 'K816v2：GJR Bug 修正後 ML Ceiling 第 6 次確認——DM 從 2.96 跌至 0.64'); keep out of pending queue as duplicate/noise."
   },
   {
     "id": "gen_article_k820",
@@ -10341,7 +10358,7 @@
     "title": "K1388: HAR-GNN（Graph Neural Network）— ScienceDirect 2024",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 376). Original: HAR-GNN（Graph Neural Network）— ScienceDirect 2024\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1388.py with signal.shift(1) + seed=42, (c) K1388_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "blocked",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "tags": [
@@ -10353,7 +10370,10 @@
       "from": "K1311",
       "at": "2026-05-20",
       "reason": "kid_collision — generate_research_backlog id-assignment bug (fixed)"
-    }
+    },
+    "blocked_reason": "diversity_rule_post_null_quartet",
+    "blocked_at": "2026-05-27T00:10:30+00:00",
+    "blocked_note": "ML novel-method NULL-quartet skip per CLAUDE.md hourly dispatch rule"
   },
   {
     "id": "K1313",
@@ -10394,7 +10414,7 @@
     "title": "K1385: Sentiment-Augmented GARCH-LSTM — Computational Economics 2025",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 393). Original: Sentiment-Augmented GARCH-LSTM — Computational Economics 2025\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1385.py with signal.shift(1) + seed=42, (c) K1385_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "blocked",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "tags": [
@@ -10406,14 +10426,17 @@
       "from": "K1310",
       "at": "2026-05-20",
       "reason": "kid_collision — generate_research_backlog id-assignment bug (fixed)"
-    }
+    },
+    "blocked_reason": "diversity_rule_post_null_quartet",
+    "blocked_at": "2026-05-27T00:10:28+00:00",
+    "blocked_note": "ML novel-method NULL-quartet skip per CLAUDE.md hourly dispatch rule"
   },
   {
     "id": "K1389",
     "title": "K1389: KAN for VIX Forecasting — Expert Systems with Applications 2025",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 394). Original: KAN for VIX Forecasting — Expert Systems with Applications 2025\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1389.py with signal.shift(1) + seed=42, (c) K1389_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "blocked",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "tags": [
@@ -10425,7 +10448,10 @@
       "from": "K1311",
       "at": "2026-05-20",
       "reason": "kid_collision — generate_research_backlog id-assignment bug (fixed)"
-    }
+    },
+    "blocked_reason": "diversity_rule_post_null_quartet",
+    "blocked_at": "2026-05-27T00:10:30+00:00",
+    "blocked_note": "ML novel-method NULL-quartet skip per CLAUDE.md hourly dispatch rule"
   },
   {
     "id": "K1391",
@@ -10809,7 +10835,7 @@
     "title": "K1383: PatchTST-lite vs HAR-RV — MDPI 2025",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 284). Original: PatchTST-lite vs HAR-RV — MDPI 2025\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1383.py with signal.shift(1) + seed=42, (c) K1383_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "blocked",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "tags": [
@@ -10818,12 +10844,13 @@
     ],
     "created_at": "2026-05-12T04:08:13Z",
     "blocked_reason": "diversity_rule_post_null_quartet",
-    "blocked_note": "4 NULLs (K868/K1301/K1303/K1309) — pause novel-method experiments until quartet article gets Codex+reader signal",
+    "blocked_note": "ML novel-method NULL-quartet skip per CLAUDE.md hourly dispatch rule",
     "kid_reassigned": {
       "from": "K1308",
       "at": "2026-05-20",
       "reason": "kid_collision resolved — K1308 retained by 台灣 5-min HAR-RV task"
-    }
+    },
+    "blocked_at": "2026-05-27T00:10:27+00:00"
   },
   {
     "id": "K1308",
