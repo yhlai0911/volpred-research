@@ -8607,5 +8607,15 @@
     "summary": "refill_reader_facing_pool: trending_scan missing env reclassified from error to skipped (best-effort per design); state.errors cleaned",
     "commit": "7ed7a775",
     "mission_impact": "#5 流量 (dashboard noise removed, reader_facing refill cron runs clean)"
+  },
+  {
+    "timestamp": "2026-05-27T08:10:53+08:00",
+    "task_type": "paper_review",
+    "task_id": "Paper9_experiments_md_add_garch_midas_test",
+    "agent": "main_thread_hourly-08",
+    "summary": "Paper 9 experiments.md: add garch_midas_test row (Engle-Ghysels-Sohn 2013 canonical GARCH-MIDAS baseline; OOS QLIKE MIDAS-RV 1.682 vs GJR 1.672 NS, A4f 1.408 wins). Inline housekeeping: mark K1268b + K1383/K1385/K1388/K1389 blocked (paid-data / ML NULL-quartet).",
+    "commit": "4988ed23+cb5a7adc",
+    "verdict": "succeeded",
+    "mission_impact": "#3 paper quality (Paper 9 supporting-experiment index more complete) + #4 platform ops (5 stale tasks removed from dispatch surface)"
   }
 ]
