@@ -3,7 +3,7 @@
 **Paper**: Periodic Realized GARCH — Session-Boundary Information Transfers
 **Journal**: Finance Research Letters (FRL)
 **Status**: Near submission-ready (R2 SEVERE=0)
-**Last Updated**: 2026-04-17
+**Last Updated**: 2026-05-27
 
 ---
 
@@ -11,9 +11,9 @@
 
 | K | Title | Contribution | Path |
 |---|-------|-------------|------|
-| K874c | Periodic Realized GARCH (base) | Original PRG estimation; QLIKE benchmarking vs HAR/RV-GARCH on TAIFEX TX | `experiments/k874c/` |
+| K874c | Periodic Realized GARCH (base) | Original PRG estimation; QLIKE benchmarking vs HAR/RV-GARCH on TAIFEX TX; also source for Table 2 PRG-vs-Separate DM column (PRG_Extended_vs_Separate=-4.07) | `experiments/k874c/` |
 | K874d | Fair Comparison (methodology correction) | Corrected denominator-consistent OOS evaluation; DM t=5.10 TAIFEX PASS | `experiments/k874d/` |
-| K874e | Full Model Comparison | Comprehensive 5-model horse race (PRG vs HAR/RV-GARCH/EGARCH/GJR) | `experiments/k874e/` |
+| K874e | Full Model Comparison | Comprehensive 5-model horse race (PRG vs HAR/RV-GARCH/EGARCH/GJR); MCS source for Table 2 (surviving: PRG_Basic + PRG_Extended only; GJR p=0.0 and HAR p=0.0 eliminated at α=0.1) | `experiments/k874e/` |
 | K880 | PRG SPY Validation | SPY out-of-sample validation; DM t=6.00 PASS; overnight session transfer confirmed | `experiments/k880/` |
 | K880b | ES Supplement (SPY) | ES evaluation complement to VaR; UC/CC/DQ tests | `experiments/k880/` |
 | K880v2 | PRG Fixed (denominator fix) | Confirmed OOS improvement after denominator consistency fix | `experiments/k880v2/` |
@@ -50,7 +50,7 @@ These scripts are co-located in the paper folder for convenience. They mirror or
 | Table | Caption | Source Experiment |
 |-------|---------|------------------|
 | Table 1 | Data summary and session decomposition | K883 (TAIFEX tick data), K880 (SPY) |
-| Table 2 | Out-of-sample QLIKE and DM tests across six markets | K874d (TAIFEX), K880 (SPY), K881 (QQQ/GLD/EEM), K886 (0050.TW) |
+| Table 2 | Out-of-sample QLIKE and DM tests across six markets | K874d (TAIFEX QLIKE/DM/Spearman, PRG vs GJR, PRG vs HAR), K874c (TAIFEX PRG vs Separate DM=-4.07), K874e (TAIFEX MCS), K880 (SPY), K881 (QQQ/GLD/EEM), K886 (0050.TW) |
 | Table 3 | Ablation study: removing session-boundary update (SPY) | K880v2 |
 | Table 4 | VaR (1%) and ES evaluation | K880b (SPY), K881b (cross-asset) |
 | Table 5 | Volatility-timing strategy performance on TAIFEX TX | K874d/K883 |
@@ -65,6 +65,12 @@ These scripts are co-located in the paper folder for convenience. They mirror or
 | Fig. 2 | Rolling QLIKE ratio | `experiments/k880_charts/rolling_qlike_ratio.png` |
 | Fig. 3 | Multi-asset DM heatmap | `experiments/k881_charts/dm_heatmap.png` |
 | Fig. 4 | QLIKE all assets | `experiments/k881_charts/qlike_all_assets.png` |
+
+---
+
+## Methodology Notes
+
+- **K880 vs K880v2 timing convention**: K880v2 uses `h_overnight_t` (the forecast) as input to `h_intraday_t`, instead of K880's `r2_overnight[t]` (realized same-day). The sequential-timing interpretation matters: if the forecast horizon is "at t-1 close for full day t", K880v2 is correct (lookahead-free). If the interpretation is "at market open for the intraday period only", K880 may be valid. Paper clarifies in Eq. 3-4 and the methodology section. The QLIKE performance gap (0.748 → 0.864, +15.5%) supports the K880v2 correction.
 
 ---
 
