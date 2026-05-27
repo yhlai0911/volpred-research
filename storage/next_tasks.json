@@ -12442,7 +12442,7 @@
     "description": "Context: cluster cooldown gate (commit ff f) forward-looking 守新文，但歷史累積 VIX 198/30d (52.7%) / SPY 67 / VT 15 / GARCH 19 仍嚴重失衡，讀者感受炒冷飯不解。retroactive delete 屬 destructive 不做。改 frontend listing sort 規則降權同 cluster 連續出現。\n\nDeliverable:\n1. frontend-v2-fix/ feed listing page 加 cluster-aware sort:\n   - 預設 published_at desc，但連續 2 篇同 cluster → 第 3 篇強制 swap 不同 cluster 文上來\n   - 演算法: greedy interleave by cluster, 同 cluster 間距 ≥3\n2. 後端 API /api/feed 加 `?diversify=cluster` query param\n3. 前端 default ON\n4. 加 e2e test 驗證連續 3 篇不同 cluster\n\n預估 90 min。Codex 可接 (frontend + Python API)。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "platform_ops",
       "frontend",
@@ -12450,6 +12450,53 @@
       "炒冷飯_fix_v2"
     ],
     "created_at": "2026-05-27T12:55:47.493575+00:00",
-    "source": "main_thread_2026_05_27_cluster_followup"
+    "source": "main_thread_2026_05_27_cluster_followup",
+    "started_at": "2026-05-27T13:36:19.948082+00:00",
+    "last_released_at": "2026-05-27T13:12:02.174772+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-27T13:36:12.026441+00:00",
+    "claim_session_id": "9134c6a21cb5",
+    "completed_at": "2026-05-27T13:42:05.278978+00:00",
+    "result": "Added cluster-aware feed diversification in server/API/frontend defaults; added regression check; typecheck+smoke pass, build blocked by local Node 18.16.0 < 18.18.0."
+  },
+  {
+    "id": "paper_review_mile_91af7c48",
+    "title": "Paper review (Codex 24h-rule): 從 Sharpe 2.16 到輸基準：一場 lookahead 的攔截實錄",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_91af7c48 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_91af7c48",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-27T14:07:48+00:00",
+    "claimed_by": "hourly-22",
+    "claimed_at": "2026-05-27T14:08:52.377223+00:00",
+    "claim_session_id": "da5896f21a01",
+    "started_at": "2026-05-27T14:08:56.581238+00:00",
+    "completed_at": "2026-05-27T14:17:06.377707+00:00",
+    "result": "Codex 24h-review FAIL (4 SEVERE discrepancies). Article numbers historically real (error_log 2026-05-06) but K562 patch+rerun never committed. Wrote review record + created follow-up reproduce task. Not unpublishing. See experiments/k562/reviews/codex_review_mile_91af7c48_2026-05-27.md and docs/error_log.md 2026-05-27 entry."
+  },
+  {
+    "id": "paper_review_followup_K562_reproduce_lag_fix",
+    "title": "K562 reproduce: re-apply 2026-05-06 lag-fix patch + commit results (mile_91af7c48 backing)",
+    "description": "Per Codex review of mile_91af7c48 (see experiments/k562/reviews/codex_review_mile_91af7c48_2026-05-27.md): 2026-05-06 K562 lag-fix patch (prev = i-1 on line 222+230) was applied + rerun produced Sharpe 0.7247 vs benchmark 0.9359, 1/8 pass, bootstrap p_win=1.2% (per docs/error_log.md). BUT patch + results were never git-committed. Current source still has same-day [i] indexing, results.json still has pre-patch Sharpe 2.1566. Article cites lag-fixed numbers with no reproducible artifact. ACTION: (1) Re-apply lag patch to experiments/k562/k562_k560_sector_validation.py (vt_w = vt_weights[prev]; moms = sec_mom_arr[t][prev]; benchmark sym same prev; skip i=0). (2) Enqueue compute_queue rerun (heavy: 5283 days × 8 validations + 5000 bootstrap). (3) Diff new results vs article numbers (0.7247 / 0.9359 / 1/8 / 1.2%); if match, commit; if drift, add errata to article + update knowledge.json. (4) Same audit for K560 source/results. (5) Update error_log with reproduce outcome.",
+    "priority": 2,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "codex_review_followup",
+    "parent_article_id": "mile_91af7c48",
+    "parent_task_id": "paper_review_mile_91af7c48",
+    "tags": [
+      "lag-fix-reproduce",
+      "research-integrity",
+      "k562",
+      "compute-queue-eligible"
+    ],
+    "created_at": "2026-05-27T14:16:03+00:00"
   }
 ]

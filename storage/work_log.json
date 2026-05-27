@@ -8684,5 +8684,13 @@
       "experiments/k1402/k1402.py",
       "experiments/k1402/k1402_results.json"
     ]
+  },
+  {
+    "timestamp": "2026-05-27T22:16:59+08:00",
+    "task_type": "paper_review",
+    "task_id": "paper_review_mile_91af7c48",
+    "task_summary": "Codex 24h source-level audit of mile_91af7c48 (K562 lookahead 攔截實錄) — VERDICT FAIL: 4 SEVERE discrepancies between article claims (Sharpe 0.7247 / benchmark 0.9359 / 1/8 / bootstrap 1.2%) and committed K562/K560 source+results.json (Sharpe 2.1566 / 1.3444 / 6/8 / bootstrap p_win=1.0). Cross-check with docs/error_log.md 2026-05-06 confirms article numbers historically real (lag-fix rerun) but patch + rerun were never committed. Actions: (1) wrote review record experiments/k562/reviews/codex_review_mile_91af7c48_2026-05-27.md (2) created follow-up task paper_review_followup_K562_reproduce_lag_fix P2 to re-apply lag patch + rerun + commit (3) added error_log entry documenting drift (4) NOT unpublishing — narrative historically real + educational value high.",
+    "owner": "hourly-22",
+    "session": "da5896f21a01"
   }
 ]
