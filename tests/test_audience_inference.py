@@ -161,9 +161,28 @@ class TestInferAudiencePublishMilestoneIntegration:
     @pytest.fixture
     def pub(self, tmp_path, monkeypatch):
         monkeypatch.setenv("VOLPRED_ACTOR", "claude")
+        # Block Supabase URL discovery so any direct REST call has no target
+        monkeypatch.delenv("SUPABASE_URL", raising=False)
+        monkeypatch.delenv("SUPABASE_SERVICE_ROLE_KEY", raising=False)
         monkeypatch.setattr(Publisher, "REMOTE_URL", "", raising=False)
         monkeypatch.setattr(Publisher, "_sync_feed_to_remote", lambda self: None, raising=False)
         monkeypatch.setattr(Publisher, "_sync_report_to_remote", lambda self, *a, **kw: None, raising=False)
+        # 2026-05-27 fix (50-ghost Supabase pollution incident): stub
+        # supabase_sync.sync_article — Publisher.publish_milestone calls it
+        # directly via module-level import, bypassing the REMOTE_URL gate.
+        # Without this, every test fixture invocation publishes a real
+        # article to production Supabase.
+        import sys
+        import importlib
+        for mod_name in ("supabase_sync", "scripts.supabase_sync"):
+            try:
+                mod = sys.modules.get(mod_name) or importlib.import_module(mod_name)
+                if hasattr(mod, "sync_article"):
+                    monkeypatch.setattr(mod, "sync_article", lambda *a, **kw: True, raising=False)
+                if hasattr(mod, "_post"):
+                    monkeypatch.setattr(mod, "_post", lambda *a, **kw: False, raising=False)
+            except (ImportError, ModuleNotFoundError):
+                pass
         return Publisher(storage_dir=str(tmp_path))
 
     def test_explicit_general_overridden_when_content_is_research(
@@ -240,9 +259,28 @@ class TestInferAudienceDailyPreservation:
     @pytest.fixture
     def pub(self, tmp_path, monkeypatch):
         monkeypatch.setenv("VOLPRED_ACTOR", "claude")
+        # Block Supabase URL discovery so any direct REST call has no target
+        monkeypatch.delenv("SUPABASE_URL", raising=False)
+        monkeypatch.delenv("SUPABASE_SERVICE_ROLE_KEY", raising=False)
         monkeypatch.setattr(Publisher, "REMOTE_URL", "", raising=False)
         monkeypatch.setattr(Publisher, "_sync_feed_to_remote", lambda self: None, raising=False)
         monkeypatch.setattr(Publisher, "_sync_report_to_remote", lambda self, *a, **kw: None, raising=False)
+        # 2026-05-27 fix (50-ghost Supabase pollution incident): stub
+        # supabase_sync.sync_article — Publisher.publish_milestone calls it
+        # directly via module-level import, bypassing the REMOTE_URL gate.
+        # Without this, every test fixture invocation publishes a real
+        # article to production Supabase.
+        import sys
+        import importlib
+        for mod_name in ("supabase_sync", "scripts.supabase_sync"):
+            try:
+                mod = sys.modules.get(mod_name) or importlib.import_module(mod_name)
+                if hasattr(mod, "sync_article"):
+                    monkeypatch.setattr(mod, "sync_article", lambda *a, **kw: True, raising=False)
+                if hasattr(mod, "_post"):
+                    monkeypatch.setattr(mod, "_post", lambda *a, **kw: False, raising=False)
+            except (ImportError, ModuleNotFoundError):
+                pass
         return Publisher(storage_dir=str(tmp_path))
 
     def test_mile_a91f19be_daily_strategy_preserved(self, pub, tmp_path):
