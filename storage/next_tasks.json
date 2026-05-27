@@ -5479,7 +5479,7 @@
   {
     "id": "Paper3_split_sample_K1193_STRENGTHENING_update",
     "title": "Paper 3 GOOD NEWS: K1193 finds r=0.793 (STRENGTHENING) vs paper 0.487 — update Panel B narrative",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 3,
     "created_at": "2026-04-17T20:28:48+08:00",
     "description": "K1193 (fc0b3a02) 發現 Paper 3 Panel B split-sample 結果 **比原 paper narrative 更強**: r=0.793 vs paper 0.487, CI [0.589, 0.919] vs [0.114, 0.737]. 方向反轉: paper 'attenuation' → K1193 'STRENGTHENING'. Regime shift 2017-2026 消除 suppressive variance. 主線程 body edit: (1) Panel B 數字更新 r=0.793 (Pearson) / 0.749 (Spearman), CI [0.589, 0.919]; (2) Section 4 narrative 'attenuation' → 'strengthening' (實際對 paper 更有利); (3) 機制討論: second half 國際 ETFs + safe havens TSMOM loadings 翻正; (4) experiments.md 加 K1193 為 Panel B source. 此為 paper-friendly errata (結果變強).",
@@ -5496,7 +5496,13 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-05-27T11:17:27.396372+00:00",
+    "claim_session_id": "2f35b6c0c50e",
+    "started_at": "2026-05-27T11:17:27.928175+00:00",
+    "completed_at": "2026-05-27T11:20:35.706807+00:00",
+    "result": "All 4 task items verified done. (1) Panel B numbers r=0.793/0.749 + CI [0.589, 0.919] already in body_v3.tex lines 225-226 from prior commit. (2) §3.2 narrative attenuation→strengthening already in line 206. (3) Mechanism discussion (2017-26 regime shift, EWJ/EWU/EWA + GLD/TLT/VNQ flip positive) already in line 206. (4) experiments.md K1193 entry already at line 21 + Table 2 source at line 64. ADDITIONAL FIX this fire: discovered CI label mis-labeled as 90% in §3.2 + Table 2 Panel B (K1193 uses 95% CI via percentile 2.5/97.5). Fixed both locations in commit 6fba20f8, recompiled main_v3.pdf (37pp), paper-update CLI synced to Supabase (updated_at 2026-05-27T11:19:12+00:00, md5 match). Note: paper-update CLI abstract field still shows OLD content on Supabase response (likely extracts from main.tex not body_v3.tex) — separate issue, PDF itself is correct."
   },
   {
     "id": "Paper3_strategic_decision",
@@ -5541,7 +5547,7 @@
   {
     "id": "Paper4_DIV2_CV_0.33_to_0.37",
     "title": "Paper 4 MEDIUM: CV=0.33 應為 0.37 (全 paper 6 處 rounding/typo)",
-    "status": "pending_main_thread",
+    "status": "failed",
     "priority": 3,
     "created_at": "2026-04-17T17:09:27+08:00",
     "description": "K752 mean=0.446 std=0.165 CV=0.370, paper abstract+Table 5+§8+conclusion 共 6 處寫 0.33. 可能 typo 或 rounding 錯誤. 主線程 body edit 全改 0.33 → 0.37.",
@@ -5559,7 +5565,12 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-05-27T11:15:06.763506+00:00",
+    "claim_session_id": "83d1c1b55717",
+    "completed_at": "2026-05-27T11:15:13.205818+00:00",
+    "result": "Task premise incorrect. K752 results JSON (experiments/k752/k752_vix_sufficiency_eras_results.json .synthesis) shows: r2_mean=0.4461, r2_std=0.1476, r2_cv=0.3309 (rounded 0.33). Task claimed std=0.165 which would yield CV=0.37, but actual std=0.1476 yields CV=0.33. Paper 4 narrative (main.tex/main_v2.tex 5 locations: lines 48, 90, 556, 566, 817 incl. 'CV=0.33 well below 0.50 threshold') is CORRECT. No edit needed. Task close-only as 'invalid_premise'."
   },
   {
     "id": "Paper4_DIV3_Table3_Sharpe_ranking",
@@ -5665,7 +5676,7 @@
   {
     "id": "Paper4_experiments_md_add_vix_term_structure",
     "title": "Paper 4 QUICK WIN: experiments.md 加 vix_term_structure_vol_pred(_v2)",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 3,
     "created_at": "2026-04-17T18:15:35+08:00",
     "description": "Non-K sweep (ad6cb402) 發現 experiments/vix_term_structure_vol_pred + _v2 是真實 experiment 支持 Paper 4 VIX sufficiency 主論述 (DM t=-2.21 p=0.027, term structure 無增量). 未登錄 paper/vix-sufficiency/experiments.md. 主線程 5 min edit 加入, 解 Paper 4 audit partial no-source.",
@@ -5682,7 +5693,13 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-05-27T11:10:06.949326+00:00",
+    "claim_session_id": "bc18cddaed24",
+    "started_at": "2026-05-27T11:10:11.176522+00:00",
+    "completed_at": "2026-05-27T11:10:47.636907+00:00",
+    "result": "Already done in commit 2f9782b7 (paper(vix-sufficiency): add Part F vix_term_structure_vol_pred + v2 to experiments.md). Entries present at paper/vix-sufficiency/experiments.md lines 93-102 (Part F section, both vix_term_structure_vol_pred + _v2 with NULL verdicts + DM stats). Task was stale; close-only, no further edit needed."
   },
   {
     "id": "Paper4_v3_integrate_today",
@@ -5741,7 +5758,7 @@
   {
     "id": "Paper6_experiments_md_add_K874c_K874e",
     "title": "Paper 6 QUICK WIN: experiments.md 加 K874c (Table 2 PRG vs Separate) + K874e (MCS)",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 3,
     "created_at": "2026-04-17T17:43:58+08:00",
     "description": "Paper 6 rescan (c190fefd) 發現 2 UNDOCUMENTED_K: K874c exact match Table 2 DM=-4.07, K874e MCS result. Ready-to-apply block 在 paper/prg-periodic-garch/reproducibility_audit/undocumented_k_additions_for_experiments_md.md. 5 min main-thread edit.",
@@ -5758,7 +5775,13 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "hourly-20",
+    "claimed_at": "2026-05-27T12:10:31.407594+00:00",
+    "claim_session_id": "d8c85ea01a79",
+    "started_at": "2026-05-27T12:10:31.650439+00:00",
+    "completed_at": "2026-05-27T12:11:33.950118+00:00",
+    "result": "experiments.md 已加 K874c (Table 2 PRG vs Separate DM=-4.07) + K874e (Table 2 MCS) mapping + K880/K880v2 sequential-timing methodology note。Commit 63cc68f0。Resolves DIV-6 + NOTE-1."
   },
   {
     "id": "Paper6_major_errata_K880v2_canonical",
@@ -12094,7 +12117,7 @@
     "progress_log": [
       "2026-05-27 17:07-17:30 hourly-17: Deliverable 1/8 DONE — docs/refactor_plan_hourly_dispatch.md (三層診斷 7 strikes + worker daemon 架構 + 10-test verification gate + 24-26 day migration plan). Deliverables 2-8 sequenced in plan §8; await future main-thread fires. NOT all-complete yet."
     ],
-    "last_released_at": "2026-05-27T09:12:02.875743+00:00"
+    "last_released_at": "2026-05-27T09:25:13.195574+00:00"
   },
   {
     "id": "paper_review_mile_cc3c987a",
@@ -12123,7 +12146,7 @@
     "title": "Paper review (Codex 24h-rule): US CPI 2026-06-13 預覽（T-7）：VIX 當日反應是抽籤，term structure 才是訊號",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_ebb5d6f5 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_ebb5d6f5",
@@ -12132,14 +12155,20 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-27T04:07:44+00:00"
+    "created_at": "2026-05-27T04:07:44+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-27T10:27:35.797122+00:00",
+    "claim_session_id": "dfb4e6c854bb",
+    "started_at": "2026-05-27T10:27:35.842531+00:00",
+    "completed_at": "2026-05-27T10:29:25.911847+00:00",
+    "result": "Codex review complete: NEEDS_REVISION. Added storage/event_articles/us_cpi_2026_06_13_t7/codex_review.md. Findings: (1) HIGH title/lead date uses 2026-06-13 even though that is Saturday and evidence only covers releases through 2026-05-13, (2) HIGH unsupported claim that CPI surprise direction vs VIX reaction is near zero, (3) MEDIUM '抽籤/不可預測' framing overstates a 13-observation descriptive sample."
   },
   {
     "id": "paper_review_mile_d0d66405",
     "title": "Paper review (Codex 24h-rule): Range-Based 估計子作為 GARCH Proxy：哪一個最準？",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_d0d66405 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_d0d66405",
@@ -12148,7 +12177,11 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-27T04:07:44+00:00"
+    "created_at": "2026-05-27T04:07:44+00:00",
+    "claimed_by": "hourly-18",
+    "claimed_at": "2026-05-27T10:09:45.848561+00:00",
+    "claim_session_id": "a29e2ac929ec",
+    "started_at": "2026-05-27T10:09:55.963470+00:00"
   },
   {
     "id": "platform_ops_cron_stale_daily_update",
@@ -12265,7 +12298,7 @@
     "title": "Paper review (Codex 24h-rule): VIX 真的會均值回歸，但你抓不到比 12/VIX 更多的肉",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_73161403 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_73161403",
@@ -12274,7 +12307,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-27T07:07:48+00:00"
+    "created_at": "2026-05-27T07:07:48+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-27T09:25:13.242972+00:00",
+    "claim_session_id": "c46c16f12644",
+    "started_at": "2026-05-27T09:25:22.563112+00:00",
+    "completed_at": "2026-05-27T09:26:39.679097+00:00",
+    "result": "Codex review complete: FAIL. Added experiments/k503/k503_post_publish_codex_review.md. Findings: (1) CRITICAL same-day lookahead across VIX-based backtests because weights use same-day signals with same-day returns, (2) article's explicit t-1 lag claim is false, (3) long-horizon absolute return claims use raw Close with auto_adjust=False."
   },
   {
     "id": "paper_review_mile_1b2ad1f8",
@@ -12335,5 +12374,61 @@
     "started_at": "2026-05-27T07:10:34.572627+00:00",
     "completed_at": "2026-05-27T07:40:28.758500+00:00",
     "result": "Published mile_0dcef1a5 (audience=research, status=draft). 72 spec sweep article confirms K1121 step-regime null robust; H2 verdict from k1122_results.json. 3 既有 PNG embed (Supabase URLs), 11 tags, anti-AI gate PASS (2 non-blocking FB-tone WARN), feed-sync +398 insert/945 update success. Commit 605ce524."
+  },
+  {
+    "id": "paper_review_mile_35913b6c",
+    "title": "Paper review (Codex 24h-rule): 情緒指標能預測波動嗎？Put-Call Ratio 的混合答案",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_35913b6c needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_35913b6c",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-27T11:08:06+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-27T11:30:04.806844+00:00",
+    "claim_session_id": "dc3d73c8d888",
+    "started_at": "2026-05-27T11:30:04.899195+00:00",
+    "completed_at": "2026-05-27T11:32:12.621372+00:00",
+    "result": "CONDITIONAL_PASS: K523 main null-result claim holds; 2 major caveats: archive article overstates 'Harvey pass' and reverses composite VIX momentum sign. Review logged in docs/article_reviews_codex_2026_05_27.md."
+  },
+  {
+    "id": "K691_article_general",
+    "title": "K691: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K691 has verdict signal (score=1, reasons=None) but no general article. Verdict preview: ",
+    "priority": 4,
+    "status": "failed",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K691",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-27T11:08:06+00:00",
+    "completed_at": "2026-05-27T12:10:23.797902+00:00",
+    "result": "K691 是 session synthesis K（71 實驗彙整），5 個 conclusions 已散見於後續 K + 8+ feed VT/保險 articles；auto_discovered uncovered 訊號誤判，非真實 article candidate。改派 Paper 6 QUICK WIN errata。"
+  },
+  {
+    "id": "platform_ops_paper_update_abstract_extract_bug",
+    "title": "paper-update CLI abstract field 從錯誤 source 抓 (main.tex vs body_v3 input chain)",
+    "description": "2026-05-27 hourly-19 跑 vt-trend-following paper-update CLI 後 Supabase response abstract field 仍是 OLD content (r=0.487, 28.7 pp, confirming/not strengthening) 但 PDF 是新版 (r=0.793, 24.9 pp, strengthening, md5 match). 推測 paper-update CLI extract abstract 從 main_v3.tex 找 \\begin{abstract} fail (main_v3.tex 只 \\input{body_v3})，fallback 抓 main.tex (OLD abstract). Fix: 改 paper-update CLI 抽 abstract 邏輯：(1) 解 \\input chain 找實際含 \\begin{abstract} 的檔，OR (2) 從編譯後的 PDF 抽 abstract via pdftotext. 影響範圍：所有用 main_v(n).tex \\input body_v(n).tex pattern 的 paper.",
+    "priority": 3,
+    "status": "pending_main_thread",
+    "task_type": "platform_ops",
+    "source": "discovered_during_hourly-19",
+    "tags": [
+      "paper-update",
+      "supabase-sync",
+      "abstract-drift",
+      "main-thread"
+    ],
+    "created_at": "2026-05-27T11:20:57+00:00"
   }
 ]
