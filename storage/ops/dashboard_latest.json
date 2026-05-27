@@ -1,13 +1,13 @@
 {
-  "dashboard_generated_at": "2026-05-26T20:00:34Z",
+  "dashboard_generated_at": "2026-05-27T19:00:23Z",
   "overall_status": "warn",
   "section_breaches": 2,
   "section_critical": 0,
   "sections": [
     {
       "section": "production_pending",
-      "status": "ok",
-      "tldr": "19 pending tasks (top types: [('daily_article', 8), ('experiment', 6), ('event_article', 3)])",
+      "status": "warn",
+      "tldr": "3 pending tasks (top types: [('event_article', 2), ('platform_ops', 1)])",
       "next": "dispatch top P1-P3 if slots free"
     },
     {
@@ -29,9 +29,9 @@
       "tldr": "3/3 sample live URLs return 200",
       "next": null,
       "sample": [
-        "mile_91692461",
-        "mile_89889d46",
-        "mile_5b3569c3"
+        "mile_73161403",
+        "mile_ecda80a3",
+        "mile_a91f19be"
       ],
       "dead": []
     },
@@ -48,16 +48,10 @@
     },
     {
       "section": "health_cron",
-      "status": "warn",
-      "tldr": "1 cron jobs stale (over max-age)",
-      "next": "manual fire ~/.volpred/bin/cron_<id>.sh",
-      "stale": [
-        {
-          "job": "release_pool",
-          "age_h": 3.0,
-          "missed_expected_fire_at": "2026-05-27 03:07"
-        }
-      ]
+      "status": "ok",
+      "tldr": "0 cron jobs stale (over max-age)",
+      "next": null,
+      "stale": []
     },
     {
       "section": "health_alerts_unhandled",
@@ -66,9 +60,9 @@
       "next": "ingest alerts → run remediation per alert.md auto-action table",
       "breaches": [
         {
-          "ts": "14:16",
+          "ts": "16:14",
           "level": "warn",
-          "subject": "[VolPred Alert][WARN] ⚠️ gemini_ask.py 已呼叫 — 產生 Gemini API 費用"
+          "subject": "[VolPred Alert][WARN] Hourly 00:07 — TCC blocked crontab install (manual fire 已補"
         }
       ]
     }

@@ -31604,5 +31604,37 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-05-28T02:14:01.735800"
+  },
+  {
+    "item_id": "4eac7111",
+    "category": "article_review",
+    "verdict": "CONDITIONAL_PASS",
+    "article_id": "mile_77c5e6d2",
+    "experiment_id": "K320",
+    "experiment_path": "experiments/k320/",
+    "k_id": "K320",
+    "reviewer": "main_thread_cross_check_2026-05-28",
+    "reviewer_source": "main_thread cross-check (Codex 24h fallback). CONDITIONAL_PASS per CLAUDE.md K1259 only needs provenance; reviewer fields logged for audit symmetry with Codex entries.",
+    "content": "K320 元稽核文章 mile_77c5e6d2 (525 articles audit) 24h-rule review — CONDITIONAL_PASS. Frame/數字嚴謹 (525/4/25/13/17/19 全對齊 audit results)，但文章把 K320 audit (2026-03-25) snapshot 當 current state，未 re-verify 4 篇 MISLEADING 源文章: 實際 3 篇 (mile_d368b4da/e8aefbf1/5302df53) 於發佈日 2026-05-27 之前已加 errata 或重寫，1 篇 (mile_281af193) 部分修正。違反『推翻舊結論必回溯更正』(自我未回溯)。元稽核被自身打臉的諷刺反而是好教材。派 errata followup: 文末補 2026-05-28 更正塊，不重寫主體。",
+    "evidence": [
+      "K320 results.json: total=525, severity={MISLEADING:4,OUTDATED:25,STILL_VALID:13} 對齊 article",
+      "mile_d368b4da feed title='25 個策略，沒有一個能打敗 50/50' + body 已重寫 + 文末有 2026-03-25 errata (K255 Harvey t=2.34)",
+      "mile_e8aefbf1 body 開頭引用塊『重要更正聲明（2026-05-07）… 最大安全提領率仍為 4%』",
+      "mile_5302df53 body 開頭引用塊『重要更正聲明（2026-05-07）… 仍為 4%』",
+      "mile_281af193 body 已模糊化『91%』為『高達 部分』+ 標題加『——而且做對了』",
+      "Article 表格仍引用 K320 audit stale title (例: '12 個策略只有 1 個通過')"
+    ],
+    "confidence": 0.95,
+    "tags": [
+      "article_review",
+      "24h_rule",
+      "conditional_pass",
+      "k320",
+      "meta_audit",
+      "temporal_misalignment"
+    ],
+    "task_id": "paper_review_mile_77c5e6d2",
+    "review_log": "/tmp/review_mile_77c5e6d2.md",
+    "created_at": "2026-05-28T03:15:15.459498"
   }
 ]

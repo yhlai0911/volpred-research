@@ -1,4 +1,4 @@
-# Handoff — 2026-05-26 19:50:06 台灣時間
+# Handoff — 2026-05-28 02:50:04 台灣時間
 
 **角色**：VolPred 自主運營經理（用戶 = 老闆 / report-only / full autonomy）
 
@@ -6,21 +6,21 @@
 
 ## 1. 任務池快照（`storage/next_tasks.json`）
 
-- **總數**：597
-  - pending: 24
-  - pending_main_thread: 26
-  - succeeded: 495
-  - failed: 3
-  - blocked: 4
+- **總數**：639
+  - pending: 4
+  - pending_main_thread: 21
+  - succeeded: 538
+  - failed: 11
+  - blocked: 20
   - blocked_on_user: 1
 
 **type 分佈（top 6）**：
-  - daily_article: 280
-  - paper_review: 132
-  - experiment: 86
-  - platform_ops: 38
+  - daily_article: 282
+  - paper_review: 142
+  - experiment: 87
+  - platform_ops: 53
   - paper_body: 24
-  - paper_decision: 14
+  - email_reply: 18
 
 ## 2. 已 claim / in_progress 任務
 
@@ -30,45 +30,44 @@
 
 - (無未處理回信)
 
-_Gmail 最後 poll：2026-05-26T11:45:24.659429+00:00_
+_Gmail 最後 poll：2026-05-27T18:45:19.998354+00:00_
 
 ## 4. Pending 任務 top 8（依 priority asc）
 
-- `event_article_us_cpi_2026_06_13_preview` P1 [event_article] [event_article] US CPI 2026-06-13 預覽（T-7 / T-2 / T+0 三篇之 T-7）— VolPred vol regime + VIX term structu
-- `trending_repost_2026_05_26_etf_dividend_vol` P1 [trending_repost] [trending_repost] 5 月台股 ETF 配息潮 30 檔 — VolPred VT/risk-parity 角度看配息日 IV skew 與配置策略
-- `trending_repost_2026_05_26_silicon_valley_layoffs_capex` P1 [trending_repost] [trending_repost] 8000 人換 GPU：矽谷大裁員 × $725B AI CapEx 經濟學悖論 — VolPred labor-displacement vol 角度
-- `platform_ops_audience_misclassification_audit` P2 [platform_ops] [platform_ops] 既有 feed 41+ 篇 audience=general mis-classification audit + batch reclassify
-- `platform_ops_question_research_host_cron_migration` P2 [platform_ops] [platform_ops] question_research 從 session_cron 搬到 host_crontab（解 member_qa 36 天 silent gap）
-- `platform_ops_reader_facing_refill_cron` P2 [platform_ops] [platform_ops] 寫 cron_reader_facing_refill.sh + 加 host crontab，收斂 PHASE 0.5 prompt-level reader-faci
-- `K1268b_gdelt_with_paid_intraday` P3 [experiment] K1268b: GDELT 5-min vs SPY 5-min RV — re-run with backtest-grade intraday data
-- `K1310` P3 [experiment] K1310: I4: VIX futures roll yield 策略 — contango 環境下的 roll yield 收割 vs 尾部風險保護 ⚠️ **BLOCKED: 需要 VIX fu
+- `event_article_cpi_us_2026-06-11_tminus2` P1 [event_article] [event_article] Event article: CPI_US 2026-06-11 T-2
+- `event_article_cpi_us_2026-06-11_tplus0` P1 [event_article] [event_article] Event article: CPI_US 2026-06-11 T+0
+- `platform_ops_refactor_hourly_dispatch_worker_daemon` P2 [platform_ops] [platform_ops] hourly-dispatch 重構 — worker daemon + queue 取代 LaunchAgent + claude CLI subprocess (3-
+- `Paper2_Table4_documentation_errata` P3 [paper_review] Paper 2: Table 4 / Methodology / Data section 補說明 (K1176 發現)
+- `Paper4_body_integration_9_new_experiments` P3 [paper_decision] Paper 4 body stale: 9 新實驗未整合 main_v2.tex (integration_plan_v2 未套用)
+- `Paper6_DIV2_0050TW_OOS_date_errata` P3 [paper_review] Paper 6: 0050.TW OOS 起始 2019/12 vs K886 2021-01-08 (差 13 月)
+- `Paper6_DIV3_SPY_VaR_violation_rate` P3 [paper_review] Paper 6: SPY VaR VR=0.93%, Kupiec p=0.77 無對應 source
+- `Paper9_D5_0050TW_t144_source` P3 [paper_review] Paper 9: 0050.TW DM t=1.44 setting 不明
 
 ## 5. 進行中 agent / worktree
 
-- **slot 占用**：1 / 4
-- worktrees:
-  - `agent-af9b396e7976b970b`
+- **slot 占用**：0 / 4
+- (slot 全空)
 
 ## 6. 最近 24h 完成（top 5）
 
-- `platform_ops_feed_publisher_audience_gate` P2 [platform_ops] [platform_ops] feed-publisher 加 audience classification gate（防新文章再 mis-tag general） — claimed_by=hourly-19
-- `email-11750-53fa5c` P3 [email_reply] [email_reply] Re: [VolPred Alert][INFO] [VolPred Alert][INFO] [VolPred Alert][INFO] [VolPred A — claimed_by=hourly-19
-- `platform_ops_dispatcher_type_rotation` P2 [platform_ops] [platform_ops] continue_task_dispatch.py 加 type-rotation sort weight（防 same-priority experiment 搶光 s — claimed_by=codex-cli
-- `member_qa_44b3cfcd_import_cars` P2 [member_qa] [member_qa] 會員 yaoxk1431 提問：台灣進口車比例與經濟變遷 + 個股推薦 2000 字 + 圖表
-- `email-11748-7b1f24` P3 [email_reply] [email_reply] Re: [VolPred Alert][INFO] [VolPred Alert][INFO] [VolPred Alert][WARN] Member Q&A — claimed_by=hourly-18
+- `paper_review_mile_8ae0e7d8` P4 [paper_review] Paper review (Codex 24h-rule): 300 個實驗之後仍未解的 24 個問題——研究前沿的誠實清單 — claimed_by=hourly-02
+- `paper_review_mile_d0d66405` P4 [paper_review] Paper review (Codex 24h-rule): Range-Based 估計子作為 GARCH Proxy：哪一個最準？ — claimed_by=codex-cli
+- `paper_review_followup_K562_reproduce_lag_fix` P2 [experiment] K562 reproduce: re-apply 2026-05-06 lag-fix patch + commit results (mile_91af7c48 backing) — claimed_by=codex-cli
+- `paper_review_mile_91af7c48` P4 [paper_review] Paper review (Codex 24h-rule): 從 Sharpe 2.16 到輸基準：一場 lookahead 的攔截實錄 — claimed_by=hourly-22
+- `platform_ops_frontend_cluster_deprioritization` P2 [platform_ops] [platform_ops] 前端 feed listing cluster-aware sort 降權（歷史 VIX 52% 解套） — claimed_by=codex-cli
 
 ## 7. Dashboard 訊號
 
-- overall_status=warn (breaches=1, critical=0, generated=2026-05-26T11:30:10Z)
-- WARN: section=health_alerts_unhandled :: 2 warn/critical alerts last 6h (read + act per .claude/rules/alert.md)
+- overall_status=warn (breaches=1, critical=0, generated=2026-05-27T18:30:05Z)
+- WARN: section=health_alerts_unhandled :: 1 warn/critical alerts last 6h (read + act per .claude/rules/alert.md)
 
 ## 8. 最近 work_log（5 筆，新→舊）
 
-- `2026-05-26T19:20` [platform_ops] platform_ops_feed_publisher_audience_gate
-- `2026-05-26T19:09` [email_reply] email-11750-53fa5c
-- `2026-05-26T10:11` [email_reply] email-11748-7b1f24
-- `2026-05-26T17:13` [member_qa] ?
-- `2026-05-26T16:13` [paper_review] Paper2_G20_T4_IS_Sharpe_errata
+- `2026-05-27T18:14` [paper_review] paper_review_mile_8ae0e7d8
+- `2026-05-28T01:13` [platform_ops] hourly_dispatch supervisor refactor — Deliverable 2/8 scaffold (scripts/dispatch
+- `2026-05-28T00:09` [platform_ops] hourly_dispatch_2026_05_28_0007 reader_facing_refill manual fire + crontab insta
+- `2026-05-27T23:15` [paper_review] k560-lag-fix-mainthread-verify-20260527
+- `2026-05-27T22:16` [paper_review] paper_review_mile_91af7c48
 
 ## 9. 接續提示詞（hourly dispatch / 互動 session 共用）
 

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-26T20:07:51.088355+00:00",
+  "generated_at": "2026-05-27T19:08:06.981833+00:00",
   "slot_cap": 4,
   "slot_state": {
     "worktrees": [],
@@ -7,95 +7,45 @@
     "occupied": 0
   },
   "free_slots": 4,
-  "pending_total": 19,
-  "pending_agentable": 10,
+  "pending_total": 4,
+  "pending_agentable": 0,
   "pending_main_thread": 4,
-  "pending_blocked": 5,
-  "dispatch_candidates": [
-    {
-      "id": "K1385",
-      "priority": 3,
-      "title": "K1385: Sentiment-Augmented GARCH-LSTM — Computational Economics 2025"
-    },
-    {
-      "id": "K1388",
-      "priority": 3,
-      "title": "K1388: HAR-GNN（Graph Neural Network）— ScienceDirect 2024"
-    },
-    {
-      "id": "K1389",
-      "priority": 3,
-      "title": "K1389: KAN for VIX Forecasting — Expert Systems with Applications 2025"
-    },
-    {
-      "id": "gen_article_k521",
-      "priority": 4,
-      "title": "K521: write general-audience article (auto-discovered, verdict={'is_2d_artifact': False, 'is_data_align)"
-    }
-  ],
+  "pending_blocked": 0,
+  "dispatch_candidates": [],
   "main_thread_queue_top5": [
     {
-      "id": "event_article_nfp_us_2026-06-05_tminus2",
+      "id": "event_article_cpi_us_2026-06-11_tminus2",
       "priority": 1,
-      "title": "[event_article] Event article: US NFP 06/05 T-2 (consensus scenarios + position sizing)"
+      "title": "[event_article] Event article: CPI_US 2026-06-11 T-2"
     },
     {
-      "id": "event_article_nfp_us_2026-06-05_tplus0",
+      "id": "event_article_cpi_us_2026-06-11_tplus0",
       "priority": 1,
-      "title": "[event_article] Event article: US NFP 06/05 T+0 (actual vs expected + reaction)"
+      "title": "[event_article] Event article: CPI_US 2026-06-11 T+0"
     },
     {
-      "id": "event_article_tsmc_revenue_2026-06-10_tplus0",
-      "priority": 1,
-      "title": "[event_article] Event article: TSMC 5月營收 06/10 T+0 (YoY/MoM + AI demand signal)"
+      "id": "platform_ops_refactor_hourly_dispatch_worker_daemon",
+      "priority": 2,
+      "title": "[platform_ops] hourly-dispatch 重構 — worker daemon + queue 取代 LaunchAgent + claude CLI subprocess (3-strike trigger)"
     },
     {
-      "id": "BTC_GAS_negative_paper",
+      "id": "paper_review_mile_77c5e6d2",
       "priority": 4,
-      "title": "Negative-result methodology paper: \"Why GAS-t fails on BTC — Student-t innovation is the culprit, MS cannot rescue it\""
+      "title": "Paper review (Codex 24h-rule): 我們稽核了自己網站上 525 篇文章——找到 4 篇必須立刻修的誤導內容"
     }
   ],
-  "refill": null,
-  "blocked_tasks": [
-    {
-      "id": "fb_post_trending_silicon_layoffs_2026_05_27",
-      "priority": "P2",
-      "reason": "awaiting_interactive_session",
-      "title": "FB Ivan Lai dual-publish: 矽谷大裁員 × Mag7 CapEx (mile_89889d46)",
-      "blocked_at": "2026-05-26T19:38:03+00:00",
-      "blocked_until": null
-    },
-    {
-      "id": "K1268b_gdelt_with_paid_intraday",
-      "priority": 3,
-      "reason": "paid_data_source_decision_pending",
-      "title": "K1268b: GDELT 5-min vs SPY 5-min RV — re-run with backtest-grade intraday data",
-      "blocked_at": null,
-      "blocked_until": null
-    },
-    {
-      "id": "K1310",
-      "priority": 3,
-      "reason": "paid_data_source_decision_pending",
-      "title": "K1310: I4: VIX futures roll yield 策略 — contango 環境下的 roll yield 收割 vs 尾部風險保護 ⚠️ **BLOCKED: 需要 VIX futures 歷史數據（yfinance ",
-      "blocked_at": null,
-      "blocked_until": null
-    },
-    {
-      "id": "K1383",
-      "priority": 3,
-      "reason": "diversity_rule_post_null_quartet",
-      "title": "K1383: PatchTST-lite vs HAR-RV — MDPI 2025",
-      "blocked_at": null,
-      "blocked_until": null
-    },
-    {
-      "id": "K267_article_general",
-      "priority": 4,
-      "reason": "self_tagged_optional",
-      "title": "K267: write general-audience article (auto-discovered uncovered K)",
-      "blocked_at": "2026-05-06T01:25:20+00:00",
-      "blocked_until": null
+  "refill": {
+    "ok": true,
+    "added": 1,
+    "added_ids": [
+      "paper_review_mile_77c5e6d2"
+    ],
+    "by_type": {
+      "paper_review": 1,
+      "platform_ops": 0,
+      "governance": 0,
+      "experiment": 0
     }
-  ]
+  },
+  "blocked_tasks": []
 }

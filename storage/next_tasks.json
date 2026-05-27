@@ -12113,12 +12113,12 @@
     ],
     "created_at": "2026-05-27T03:46:39.543905+00:00",
     "source": "main_thread_2026_05_27_3strike_trigger",
-    "started_at": "2026-05-27T17:10:01.801853+00:00",
+    "started_at": "2026-05-27T18:59:09.763435+00:00",
     "progress_log": [
       "2026-05-27 17:07-17:30 hourly-17: Deliverable 1/8 DONE — docs/refactor_plan_hourly_dispatch.md (三層診斷 7 strikes + worker daemon 架構 + 10-test verification gate + 24-26 day migration plan). Deliverables 2-8 sequenced in plan §8; await future main-thread fires. NOT all-complete yet.",
       "2026-05-28 01:07-01:13 hourly-01: Deliverable 2/8 DONE — package scaffold scripts/dispatch_supervisor/ (state.py full impl: 240 lines with fcntl lock, ring buffer, orphan cleanup, auth-block toggle, alert dedup) + worker/scheduler/health/alerts/supervisor stubs + 16-test unit suite (all passing). Supervisor entry refuses prod launch (exit 78). Plan §8 updated. NEXT: Deliverable 3 (scheduler+worker+health impl) by next hourly fire claiming."
     ],
-    "last_released_at": "2026-05-27T17:13:58.521057+00:00"
+    "last_released_at": "2026-05-27T19:00:00.387147+00:00"
   },
   {
     "id": "paper_review_mile_cc3c987a",
@@ -12602,7 +12602,7 @@
     "title": "Paper review followup: mile_8ae0e7d8 K302 article errata (3 issues)",
     "description": "Codex 24h review verdict CONDITIONAL_PASS (knowledge item f73c94c0). Fix 3 errata in article content (storage/reports/feed.json + mirror):\n1. A1 段 \"36 次獨立驗證\" — 改寫為「K302 彙整列出 14 模型族；capture rate 見 K132；K650 cross-ref ledger 累積」，刪除 36 次表述或補 ledger source\n2. A1 段 5-min RV 天數 \"41 天\" — reconcile 與 R9=42天 / K196=47天，統一引用最新數字（建議 \"42-47 天\"）\n3. E1 段 K279/K281 句子 — 改寫為「K279 gross: 日 0.787 > 月 0.187；K281 5bps net: 月 0.239 > 日 0.192」；2-3 bps / 1-3 bps cost 補 source 或移除\n圖2 信心度註明為主觀研究排序（非 calibrated probability）。\nMain-thread only — 修文章後 publish-with-edits via feed-publisher + sync supabase + mirror.",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "codex_review_followup",
     "article_id": "mile_8ae0e7d8",
@@ -12614,6 +12614,53 @@
       "main-thread-only",
       "codex-followup"
     ],
-    "created_at": "2026-05-27T18:14:18+00:00"
+    "created_at": "2026-05-27T18:14:18+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-27T19:00:00.495384+00:00",
+    "claim_session_id": "67c19de684b4",
+    "started_at": "2026-05-27T19:00:09.025009+00:00",
+    "completed_at": "2026-05-27T19:04:18.049976+00:00",
+    "result": "mile_8ae0e7d8 errata fixed: A1 removed unsourced '36 validations', 5-min RV sample reconciled to 42-47 days, E1 clarified K279 gross vs K281 5bps net; article updated via publish_draft and single-article sync_article returned ok=True."
+  },
+  {
+    "id": "paper_review_mile_77c5e6d2",
+    "title": "Paper review (Codex 24h-rule): 我們稽核了自己網站上 525 篇文章——找到 4 篇必須立刻修的誤導內容",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_77c5e6d2 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_77c5e6d2",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-27T19:08:06+00:00",
+    "claimed_by": "hourly-03",
+    "claimed_at": "2026-05-27T19:09:26.484931+00:00",
+    "claim_session_id": "d2e3e3b9c565",
+    "started_at": "2026-05-27T19:09:33.671110+00:00",
+    "completed_at": "2026-05-27T19:15:44.054192+00:00",
+    "result": "24h-rule review on mile_77c5e6d2 (K320 元稽核 525 篇 audit): CONDITIONAL_PASS. 4 篇 MISLEADING 中 3 篇實際於 2026-05-27 發佈前已加 errata 或重寫 (mile_d368b4da/e8aefbf1/5302df53)，1 篇 (mile_281af193) 部分修正。Article 把 K320 audit (2026-03-25) snapshot 當 current state，未 re-verify。Frame/數字嚴謹 (525/4/25/13 全對齊)，無 fabrication / lookahead。Verdict CONDITIONAL_PASS + 強制 errata followup (文末補更正塊，不重寫主體)。knowledge_item=4eac7111. Followup task=paper_review_followup_mile_77c5e6d2_errata (P3 main-thread)."
+  },
+  {
+    "id": "paper_review_followup_mile_77c5e6d2_errata",
+    "title": "Errata mile_77c5e6d2: 文末補 2026-05-28 更正塊 (K320 audit snapshot stale)",
+    "description": "Per review verdict CONDITIONAL_PASS (knowledge_item=4eac7111). 在 mile_77c5e6d2 文末加更正塊，揭露 4 篇被標 MISLEADING 的文章實際狀態: (1) mile_d368b4da 標題已改 '25 個策略沒一個通過' + 文末已有 2026-03-25 K255 errata; (2) mile_e8aefbf1 開頭已有 2026-05-07 更正聲明 + 全文重寫; (3) mile_5302df53 開頭已有 2026-05-07 更正聲明 + 全文重寫; (4) mile_281af193 91% 數字已模糊化 + 標題加『——而且做對了』. 不重寫主體 — 元稽核被自身打臉是好教材。Errata template 見 /tmp/review_mile_77c5e6d2.md.",
+    "priority": 3,
+    "status": "pending_main_thread",
+    "task_type": "paper_review",
+    "source": "review_followup",
+    "article_id": "mile_77c5e6d2",
+    "parent_task_id": "paper_review_mile_77c5e6d2",
+    "knowledge_item": "4eac7111",
+    "tags": [
+      "paper-review",
+      "errata",
+      "main-thread-only",
+      "k320"
+    ],
+    "created_at": "2026-05-28T03:15:32.569561+08:00"
   }
 ]
