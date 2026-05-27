@@ -12113,12 +12113,13 @@
     ],
     "created_at": "2026-05-27T03:46:39.543905+00:00",
     "source": "main_thread_2026_05_27_3strike_trigger",
-    "started_at": "2026-05-27T18:59:09.763435+00:00",
+    "started_at": "2026-05-27T21:08:34.967800+00:00",
     "progress_log": [
       "2026-05-27 17:07-17:30 hourly-17: Deliverable 1/8 DONE — docs/refactor_plan_hourly_dispatch.md (三層診斷 7 strikes + worker daemon 架構 + 10-test verification gate + 24-26 day migration plan). Deliverables 2-8 sequenced in plan §8; await future main-thread fires. NOT all-complete yet.",
-      "2026-05-28 01:07-01:13 hourly-01: Deliverable 2/8 DONE — package scaffold scripts/dispatch_supervisor/ (state.py full impl: 240 lines with fcntl lock, ring buffer, orphan cleanup, auth-block toggle, alert dedup) + worker/scheduler/health/alerts/supervisor stubs + 16-test unit suite (all passing). Supervisor entry refuses prod launch (exit 78). Plan §8 updated. NEXT: Deliverable 3 (scheduler+worker+health impl) by next hourly fire claiming."
+      "2026-05-28 01:07-01:13 hourly-01: Deliverable 2/8 DONE — package scaffold scripts/dispatch_supervisor/ (state.py full impl: 240 lines with fcntl lock, ring buffer, orphan cleanup, auth-block toggle, alert dedup) + worker/scheduler/health/alerts/supervisor stubs + 16-test unit suite (all passing). Supervisor entry refuses prod launch (exit 78). Plan §8 updated. NEXT: Deliverable 3 (scheduler+worker+health impl) by next hourly fire claiming.",
+      "2026-05-28 05:07-05:14 hourly-05: Deliverable 3/8 DONE — alerts.py (5 fns + dedup) + worker.py (Popen + retry ladder opus→opus→sonnet + classify auth/529/hang + SIGTERM→SIGKILL) + health.py (check_once + health_loop) + scheduler.py (croniter + _tick_once + dry-run) + supervisor.py asyncio gather. Version 0.2.0-d3. 16 state tests pass; smoke: classifier 6/6, scheduler 3/3, health no-op pass. NEXT: Deliverable 4 (10 regression tests covering 7 strikes per §5)."
     ],
-    "last_released_at": "2026-05-27T19:00:00.387147+00:00"
+    "last_released_at": "2026-05-27T21:14:43.302348+00:00"
   },
   {
     "id": "paper_review_mile_cc3c987a",

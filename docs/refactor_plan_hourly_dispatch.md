@@ -131,7 +131,8 @@ Before phase 2 (shadow run start): submit `dispatch_supervisor.py` + tests to Co
 
 1. **2026-05-27 17:07-17:30**: write this plan + commit + leave parent task in `pending` (Deliverable 1 complete). ✅
 2. **2026-05-28 01:07-01:13 hourly-01**: package scaffold `scripts/dispatch_supervisor/` (`__init__`, `state.py` full impl, `worker.py`/`scheduler.py`/`health.py`/`alerts.py`/`supervisor.py` stubs) + `scripts/tests/test_dispatch_state.py` (16 tests passing). State module persistence + lock + ring buffer + orphan cleanup verified. Supervisor entry refuses to run main loop (exit 78) until Deliverable 3. ✅
-3. **+1 session**: scheduler + worker + health modules full impl + remaining 5 regression tests (Deliverable 3-4)
+3. **2026-05-28 05:07-05:14 hourly-05**: Deliverable 3/8 DONE — `alerts.py` (5 alert fns + per-class dedup), `worker.py` (240 lines: Popen + PGID + retry ladder opus→opus→sonnet + classify auth/529/hang/hard_failure + `_kill_pgid` SIGTERM→SIGKILL), `health.py` (60 lines: `check_once` sync + `health_loop` asyncio), `scheduler.py` (110 lines: croniter + `_due_to_fire` + `_tick_once` + dry-run path), `supervisor.py` real asyncio gather. Version bumped 0.1.0-scaffold → 0.2.0-d3. 16 state tests still pass; classifier smoke 6/6; scheduler decision smoke 3/3; health no-op smoke pass. ✅
+4. **+1 session**: Deliverable 4/8 — regression tests for strikes 1/2/3/5/6/7 + supervisor liveness + schedule fidelity + idempotency + concurrent safety (10 verification gates per §5)
 4. **+1 session**: Codex review submission; address findings (Deliverable 6 gate)
 5. **+1 session**: phase 2 shadow run start; daily diff for 7 days (Deliverable 5)
 6. **+2 sessions**: phase 3 cutover + 14-day observation (Deliverable 5-6)
@@ -151,3 +152,4 @@ That's the test for "structural fix" vs "patch": does the change make *future* s
 
 *Drafted 2026-05-27 17:07-17:30 台灣時間 by main thread under hourly-17 claim. Deliverable 1/8.*
 *Updated 2026-05-28 01:07-01:13 台灣時間 by main thread under hourly-01 claim. Deliverable 2/8 — package scaffold + state module + 16-test unit suite.*
+*Updated 2026-05-28 05:07-05:14 台灣時間 by main thread under hourly-05 claim. Deliverable 3/8 — alerts/worker/health/scheduler/supervisor real impl. Version 0.2.0-d3.*
