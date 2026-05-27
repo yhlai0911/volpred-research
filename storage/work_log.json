@@ -8699,5 +8699,13 @@
     "task_id": "k560-lag-fix-mainthread-verify-20260527",
     "summary": "K560 lag-fix rerun verify: compute_queue stdout 顯示 lag-fix script 已產出 momentum_top1 Sharpe 0.7241 / benchmark 0.928 / Harvey all FAIL，與 mile_91af7c48 article 0.7247/0.9359 一致。但 K560/K562 script output_path hardcoded 為 legacy 平面路徑導致 canonical results.json 未更新。主線程修 path + 搬檔 + commit + 標 compute followup_dispatched。K562 compute job 仍 queued 待 worker cron 跑。",
     "claimed_by": "hourly-23"
+  },
+  {
+    "timestamp": "2026-05-28T00:09:00+08:00",
+    "task_type": "platform_ops",
+    "title": "hourly_dispatch_2026_05_28_0007 reader_facing_refill manual fire + crontab install attempt",
+    "result": "manual fire 補 today state (event_added=2); install_host_crontab 被 macOS TCC 攔; 已建 blocked followup platform_ops_install_reader_facing_crontab",
+    "claimed_by": "hourly-00",
+    "fire_id": "2026-05-28T00:07"
   }
 ]
