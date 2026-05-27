@@ -8741,5 +8741,10 @@
     "summary": "Fix refill_reader_facing_pool.py refill_event_candidates 加 not_before 檢查 — CPI 6/11 T-2 (not_before=6/9) / T+0 (not_before=6/11) 提早 12-14 天被誤推入 pool 作 P1 phantom. 2 phantom task mark blocked w/ awaiting_event_window (新加 vocab) + blocked_until=not_before. 新加 unit test 4 passed. 修流程不修資料.",
     "verdict": "PASS",
     "actor": "hourly-04"
+  },
+  {
+    "timestamp": "2026-05-27T21:17Z",
+    "task_type": "platform_ops",
+    "task": "hourly-05 (2026-05-28 05:07-05:14 台灣時間): refactor(3-strike) Deliverable 3/8 — dispatch_supervisor modules impl (alerts/worker/health/scheduler/supervisor real); version 0.2.0-d3; 16 state tests pass + smoke 9/9; task released back pending for Deliverable 4 (10 regression tests per §5)"
   }
 ]
