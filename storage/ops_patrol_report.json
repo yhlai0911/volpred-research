@@ -1,31 +1,31 @@
 {
-  "timestamp": "2026-05-27T00:13:23Z",
+  "timestamp": "2026-05-27T06:13:11Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "Total drafts: 158 (>12 OK). Research audience: 18 (>=4 OK). General audience: 140 (>=8 OK)."
+      "detail": "Total draft: 158 (general: 140, research: 18). All thresholds met (total>=12, research>=4, general>=8)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "strategy_metrics.json is ~60 hours old (threshold: 26h). mtime=1779624653, now=1779840807. Metrics stale."
+      "detail": "storage/strategy_metrics.json mtime=1779624653 (~66h ago). Threshold: 26h."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated today (2026-05-27) or yesterday (2026-05-26) in last 30 lines. Most recent entry: 2026-05-21 (launchd exit-78 / TCC Desktop path)."
+      "detail": "No entries dated 2026-05-27 or 2026-05-26. Most recent entry: 2026-05-21 (launchd exit-78 TCC issue, RESOLVED)."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 15 strategies checked. All entry arrays are empty (0 entries each). No portfolio_return nulls exceed threshold of >2 in last 3 entries."
+      "detail": "All strategies checked. No strategy has >2 null portfolio_return in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files. Working tree clean."
+      "detail": "0 uncommitted files."
     },
     {
       "name": "KNOWLEDGE_SIZE",
@@ -34,6 +34,6 @@
     }
   ],
   "alerts": [
-    "STRATEGY_METRICS_FRESHNESS: strategy_metrics.json is ~60 hours old (threshold: 26h). Run strategy metrics recalculation."
+    "STRATEGY_METRICS_FRESHNESS: storage/strategy_metrics.json is ~66h old (threshold: 26h). Metrics may be stale."
   ]
 }
