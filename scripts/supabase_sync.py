@@ -762,9 +762,13 @@ def sync_full(storage_dir: str | Path = "storage") -> dict:
         last_feed_sync = state.get("feed_mtime", 0)
         if feed_mtime > last_feed_sync:
             last_sync_ts = state.get("articles_last_ts", "")
-            # Sync articles published/updated after last sync, OR drafts with created_at after last sync
+            # Sync articles published/updated after last sync, OR drafts with created_at after last sync.
+            # 2026-05-27 fix: also include updated_at — audience/category/tags backfill
+            # touches updated_at but not published_at, so the prior filter silently
+            # skipped them (mile_a91f19be etc. patched 5/27 11:25 invisible until force).
             to_sync = [item for item in feed
                        if (item.get("published_at") or item.get("created_at") or "") > last_sync_ts
+                       or (item.get("updated_at") or "") > last_sync_ts
                        or not last_sync_ts]
             ok = 0
             for item in to_sync:
@@ -779,7 +783,8 @@ def sync_full(storage_dir: str | Path = "storage") -> dict:
             state["feed_mtime"] = feed_mtime
             if feed:
                 state["articles_last_ts"] = max(
-                    (item.get("published_at") or item.get("created_at") or "") for item in feed
+                    (item.get("updated_at") or item.get("published_at") or item.get("created_at") or "")
+                    for item in feed
                 )
         else:
             counts["articles"] = 0  # skipped, unchanged
