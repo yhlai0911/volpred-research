@@ -235,19 +235,20 @@ rs_arrays = {t: df_analysis[f'rs60_{t}'].values for t in sector_tickers}
 
 # Initialize return arrays
 strat_returns = {
-    'benchmark_spy_vt_gld': np.zeros(n_days),       # 50% SPY VT + 50% GLD
-    'benchmark_spy_bh_gld': np.zeros(n_days),        # 50% SPY BH + 50% GLD
-    'momentum_top1': np.zeros(n_days),                # A: top-1 momentum
-    'lowvol_top1': np.zeros(n_days),                  # B: lowest vol
-    'mean_reversion_top1': np.zeros(n_days),          # C: worst 60d (contrarian)
-    'relative_strength': np.zeros(n_days),            # D: sectors > SPY
-    'momentum_top3': np.zeros(n_days),                # E: top-3 momentum
-    'mom_lowvol_combo': np.zeros(n_days),             # F: top-3 mom, then lowest vol
-    'equal_weight_all_sectors': np.zeros(n_days),     # G: equal-weight all sectors VT
+    'benchmark_spy_vt_gld': np.full(n_days, np.nan),   # 50% SPY VT + 50% GLD
+    'benchmark_spy_bh_gld': np.full(n_days, np.nan),   # 50% SPY BH + 50% GLD
+    'momentum_top1': np.full(n_days, np.nan),          # A: top-1 momentum
+    'lowvol_top1': np.full(n_days, np.nan),            # B: lowest vol
+    'mean_reversion_top1': np.full(n_days, np.nan),    # C: worst 60d (contrarian)
+    'relative_strength': np.full(n_days, np.nan),      # D: sectors > SPY
+    'momentum_top3': np.full(n_days, np.nan),          # E: top-3 momentum
+    'mom_lowvol_combo': np.full(n_days, np.nan),       # F: top-3 mom, then lowest vol
+    'equal_weight_all_sectors': np.full(n_days, np.nan),  # G: equal-weight all sectors VT
 }
 
-for i in range(n_days):
-    vt_w = vt_weights[i]
+for i in range(1, n_days):
+    sig_idx = i - 1
+    vt_w = vt_weights[sig_idx]
     gld_r = gld_rets[i]
     spy_r = spy_rets[i]
 
@@ -257,9 +258,9 @@ for i in range(n_days):
 
     # Get sector data for this day
     sec_rets = {t: sector_ret_arrays[t][i] for t in sector_tickers}
-    sec_moms = {t: mom_arrays[t][i] for t in sector_tickers}
-    sec_vols = {t: vol_arrays[t][i] for t in sector_tickers}
-    sec_rs = {t: rs_arrays[t][i] for t in sector_tickers}
+    sec_moms = {t: mom_arrays[t][sig_idx] for t in sector_tickers}
+    sec_vols = {t: vol_arrays[t][sig_idx] for t in sector_tickers}
+    sec_rs = {t: rs_arrays[t][sig_idx] for t in sector_tickers}
 
     # A. Momentum top-1
     best_mom = max(sector_tickers, key=lambda t: sec_moms[t])
@@ -742,7 +743,7 @@ results = {
 }
 
 # Save results
-output_path = 'experiments/k560_sector_rotation_vt_results.json'
+output_path = 'experiments/k560/k560_sector_rotation_vt_results.json'
 with open(output_path, 'w') as f:
     json.dump(results, f, indent=2, default=str)
 

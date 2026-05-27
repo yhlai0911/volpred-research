@@ -213,13 +213,14 @@ def compute_strategy_returns(df_in, sector_tickers, mom_window=60, top_n=1,
     else:
         rebal_days = set(range(n_days))
 
-    strat_rets = np.zeros(n_days)
-    bench_rets = np.zeros(n_days)
-    selections = []
+    strat_rets = np.full(n_days, np.nan)
+    bench_rets = np.full(n_days, np.nan)
+    selections = [None]
     current_selection = None
 
-    for i in range(n_days):
-        vt_w = vt_weights[i]
+    for i in range(1, n_days):
+        prev = i - 1
+        vt_w = vt_weights[prev]
         gld_r = gld_rets[i]
         spy_r = spy_rets[i]
 
@@ -228,7 +229,7 @@ def compute_strategy_returns(df_in, sector_tickers, mom_window=60, top_n=1,
 
         # Update selection on rebal days
         if i in rebal_days or current_selection is None:
-            moms = {t: sec_mom_arr[t][i] for t in sector_tickers}
+            moms = {t: sec_mom_arr[t][prev] for t in sector_tickers}
             sorted_sectors = sorted(sector_tickers, key=lambda t: moms[t], reverse=True)
             current_selection = sorted_sectors[:top_n]
 
@@ -239,8 +240,9 @@ def compute_strategy_returns(df_in, sector_tickers, mom_window=60, top_n=1,
         strat_rets[i] = 0.5 * vt_w * avg_sec_ret + 0.5 * gld_r
 
     # Compute turnover
-    changes = sum(1 for i in range(1, len(selections)) if selections[i] != selections[i-1])
-    turnover = changes / (len(selections) - 1) if len(selections) > 1 else 0
+    valid_selections = [s for s in selections if s is not None]
+    changes = sum(1 for i in range(1, len(valid_selections)) if valid_selections[i] != valid_selections[i-1])
+    turnover = changes / (len(valid_selections) - 1) if len(valid_selections) > 1 else 0
 
     return strat_rets, bench_rets, turnover, selections, df_work.index
 
@@ -432,26 +434,27 @@ spy_bw = df_bw['SPY'].values
 sec_ret_bw = {t: df_bw[t].values for t in sector_tickers}
 sec_mom_bw = {t: df_bw[f'mom_{t}'].values for t in sector_tickers}
 
-bw_strat = np.zeros(n_bw)
-bw_bench = np.zeros(n_bw)
+bw_strat = np.full(n_bw, np.nan)
+bw_bench = np.full(n_bw, np.nan)
 bw_selection = None
 monday_count = 0
 bw_changes = 0
 
-for i in range(n_bw):
+for i in range(1, n_bw):
+    prev = i - 1
     d = df_bw.index[i]
     if d.weekday() == 0:
         monday_count += 1
 
     if (d.weekday() == 0 and monday_count % 2 == 1) or bw_selection is None:
-        moms = {t: sec_mom_bw[t][i] for t in sector_tickers}
+        moms = {t: sec_mom_bw[t][prev] for t in sector_tickers}
         new_sel = max(sector_tickers, key=lambda t: moms[t])
         if bw_selection is not None and new_sel != bw_selection:
             bw_changes += 1
         bw_selection = new_sel
 
-    bw_strat[i] = 0.5 * vt_w_bw[i] * sec_ret_bw[bw_selection][i] + 0.5 * gld_bw[i]
-    bw_bench[i] = 0.5 * vt_w_bw[i] * spy_bw[i] + 0.5 * gld_bw[i]
+    bw_strat[i] = 0.5 * vt_w_bw[prev] * sec_ret_bw[bw_selection][i] + 0.5 * gld_bw[i]
+    bw_bench[i] = 0.5 * vt_w_bw[prev] * spy_bw[i] + 0.5 * gld_bw[i]
 
 bw_turnover = bw_changes / (n_bw - 1)
 m_bw = compute_metrics(bw_strat)
@@ -1042,7 +1045,7 @@ results = {
     'runtime_seconds': round(elapsed, 1),
 }
 
-output_path = 'experiments/k562_k560_sector_validation_results.json'
+output_path = 'experiments/k562/k562_k560_sector_validation_results.json'
 with open(output_path, 'w') as f:
     json.dump(results, f, indent=2, default=str)
 

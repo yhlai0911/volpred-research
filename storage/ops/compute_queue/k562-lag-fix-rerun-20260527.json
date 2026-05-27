@@ -1,0 +1,23 @@
+{
+  "id": "k562-lag-fix-rerun-20260527",
+  "title": "K562 lag-fix rerun after source reapply",
+  "script_path": "experiments/k562/k562_k560_sector_validation.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-05-27T14:50:31Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k562-lag-fix-rerun-20260527.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k562-lag-fix-rerun-20260527.stderr",
+  "result_artifact": "experiments/k562/k562_k560_sector_validation_results.json",
+  "claude_followup": {
+    "brief": "Read experiments/k562/k562_k560_sector_validation_results.json after rerun. Compare against article mile_91af7c48 claims (Sharpe 0.7247, benchmark 0.9359, pass_count 1/8, bootstrap p_win 1.2%). If numbers drift, open errata task instead of silently accepting.",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 3600
+}

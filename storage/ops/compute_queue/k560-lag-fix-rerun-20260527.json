@@ -1,0 +1,25 @@
+{
+  "id": "k560-lag-fix-rerun-20260527",
+  "title": "K560 lag-fix rerun after source reapply",
+  "script_path": "experiments/k560/k560_sector_rotation_vt.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-05-27T14:50:31Z",
+  "started_at": "2026-05-27T15:00:09Z",
+  "completed_at": "2026-05-27T15:00:51Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k560-lag-fix-rerun-20260527.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k560-lag-fix-rerun-20260527.stderr",
+  "result_artifact": "experiments/k560/k560_sector_rotation_vt_results.json",
+  "claude_followup": {
+    "brief": "Read experiments/k560/k560_sector_rotation_vt_results.json after rerun. Compare against archived rewrite article mile_4ec7b75e / storage/drafts/k560_sector_rotation_rewrite_draft.md. Confirm whether all rotation strategies remain below benchmark Sharpe ~0.944 and all Harvey tests fail.",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "timeout_seconds": 3600,
+  "followup_dispatched_at": "2026-05-27T15:11:16Z",
+  "followup_next_task_id": "k560-lag-fix-mainthread-verify-20260527"
+}

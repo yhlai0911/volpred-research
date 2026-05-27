@@ -8692,5 +8692,12 @@
     "task_summary": "Codex 24h source-level audit of mile_91af7c48 (K562 lookahead 攔截實錄) — VERDICT FAIL: 4 SEVERE discrepancies between article claims (Sharpe 0.7247 / benchmark 0.9359 / 1/8 / bootstrap 1.2%) and committed K562/K560 source+results.json (Sharpe 2.1566 / 1.3444 / 6/8 / bootstrap p_win=1.0). Cross-check with docs/error_log.md 2026-05-06 confirms article numbers historically real (lag-fix rerun) but patch + rerun were never committed. Actions: (1) wrote review record experiments/k562/reviews/codex_review_mile_91af7c48_2026-05-27.md (2) created follow-up task paper_review_followup_K562_reproduce_lag_fix P2 to re-apply lag patch + rerun + commit (3) added error_log entry documenting drift (4) NOT unpublishing — narrative historically real + educational value high.",
     "owner": "hourly-22",
     "session": "da5896f21a01"
+  },
+  {
+    "timestamp": "2026-05-27T23:15:00+08:00",
+    "task_type": "paper_review",
+    "task_id": "k560-lag-fix-mainthread-verify-20260527",
+    "summary": "K560 lag-fix rerun verify: compute_queue stdout 顯示 lag-fix script 已產出 momentum_top1 Sharpe 0.7241 / benchmark 0.928 / Harvey all FAIL，與 mile_91af7c48 article 0.7247/0.9359 一致。但 K560/K562 script output_path hardcoded 為 legacy 平面路徑導致 canonical results.json 未更新。主線程修 path + 搬檔 + commit + 標 compute followup_dispatched。K562 compute job 仍 queued 待 worker cron 跑。",
+    "claimed_by": "hourly-23"
   }
 ]
