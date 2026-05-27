@@ -18,6 +18,8 @@ from urllib import request, error
 from urllib.parse import quote
 
 REPO = Path(__file__).parent.parent
+FB_POST_TERMINAL_STATUSES = {"success", "wont_fix", "fb_silent_reject"}
+FB_POST_HANDOFF_STATUSES = {"awaiting_interactive_session"}
 
 
 def load_env():
@@ -48,6 +50,20 @@ def http_ok(url, timeout=8):
 
 def section(name, status, tldr, next_action=None, **details):
     return {"section": name, "status": status, "tldr": tldr, "next": next_action, **details}
+
+
+def classify_fb_pipeline(entries: list[dict]) -> tuple[list[dict], list[dict]]:
+    actionable = []
+    awaiting = []
+    for item in entries:
+        status = str(item.get("fb_post_status") or "").strip().lower()
+        if status in FB_POST_TERMINAL_STATUSES:
+            continue
+        if status in FB_POST_HANDOFF_STATUSES:
+            awaiting.append(item)
+            continue
+        actionable.append(item)
+    return actionable, awaiting
 
 
 def main():
@@ -118,12 +134,25 @@ def main():
 
     # L3 FB pipeline
     fb_log = jl(REPO / "storage" / "reports" / "trending_repost_log.json", [])
-    fb_pending = [x for x in fb_log if x.get("fb_post_status") not in ("success", "wont_fix", "fb_silent_reject")]
+    fb_pending, fb_awaiting = classify_fb_pipeline(fb_log)
+    fb_status = "ok" if len(fb_pending) == 0 else "warn" if len(fb_pending) <= 2 else "critical"
+    fb_tldr = (
+        f"{len(fb_awaiting)} FB posts awaiting interactive session"
+        if len(fb_pending) == 0 and fb_awaiting
+        else f"{len(fb_pending)} FB posts pending sync"
+    )
+    fb_next = None
+    if fb_pending:
+        fb_next = "handoff doc + manual paste or retry MCP"
+    elif fb_awaiting:
+        fb_next = "interactive session / Chrome MCP available時接手貼文與留言"
     out.append(section(
         "verification_fb_pipeline",
-        "ok" if len(fb_pending) == 0 else "warn" if len(fb_pending) <= 2 else "critical",
-        f"{len(fb_pending)} FB posts pending sync",
-        "handoff doc + manual paste or retry MCP" if fb_pending else None
+        fb_status,
+        fb_tldr,
+        fb_next,
+        actionable_pending=[x.get("mile_id") for x in fb_pending[:5]],
+        awaiting_interactive=[x.get("mile_id") for x in fb_awaiting[:5]],
     ))
 
     # L4 cron health — schedule-aware: read cron string from runtime_schedules.json,
@@ -215,12 +244,13 @@ def main():
             ts = n.get("timestamp", "")
             if ts < cutoff_6h: continue
             level = n.get("level", "info")
-            if level in ("warn", "critical"):
-                recent_breach.append({
-                    "ts": ts[11:16],
-                    "level": level,
-                    "subject": (n.get("subject") or n.get("title") or "")[:80],
-                })
+            if level not in ("warn", "critical"): continue
+            if n.get("resolved_at"): continue  # 已 acknowledged，不再計入 unhandled
+            recent_breach.append({
+                "ts": ts[11:16],
+                "level": level,
+                "subject": (n.get("subject") or n.get("title") or "")[:80],
+            })
     out.append(section(
         "health_alerts_unhandled",
         "ok" if not recent_breach else "warn" if len(recent_breach) <= 2 else "critical",
