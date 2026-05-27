@@ -6,6 +6,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 from volpred.config.runtime import get_default_remote_url
+from volpred.topic_clusters import classify_topic_cluster, cluster_gate_status
 
 
 # 2026-04-26: audience-content consistency gate. Prior bug: agent dispatched
@@ -461,6 +462,51 @@ class Publisher:
                 # Only append if not already has 延伸閱讀
                 if '延伸閱讀' not in description:
                     description += related_section
+
+        # 2026-05-27: topic-cluster cooldown gate. Reader-facing output cannot
+        # keep recycling a dominant theme indefinitely; block over-cap cluster
+        # publishes unless caller explicitly requests a waiver in details.
+        # TYPE-LOCKED EXEMPTIONS (per audience design — same as _infer_audience
+        # member_qa/event preservation): daily / member_qa / event / trending_repost
+        # are topic-bound by definition; cluster cap would break them. Only
+        # discretionary article types (general / research) are cluster-gated.
+        details = details or {}
+        tag_list_for_cluster = tags or []
+        cluster = classify_topic_cluster(title, tag_list_for_cluster, description or "")
+        # Determine if this publish is exempt from cluster cooldown:
+        is_type_locked = (
+            audience in ('daily', 'member_qa', 'event')
+            or category in ('daily-update', 'member_qa', 'event_article')
+            or '每日建議' in tag_list_for_cluster
+            or 'daily-update' in tag_list_for_cluster
+            or '會員提問' in tag_list_for_cluster
+            or 'member_qa' in tag_list_for_cluster
+            or 'event_article' in tag_list_for_cluster
+            or 'trending_repost' in tag_list_for_cluster
+            or 'trending' in tag_list_for_cluster
+            or (phase or '').startswith('daily_')
+            or (phase or '').startswith('event_')
+            or (phase or '').startswith('trending_')
+            or (phase or '').startswith('member_')
+        )
+        cluster_gate = cluster_gate_status(cluster)
+        if cluster:
+            details.setdefault("topic_cluster", cluster)
+            details.setdefault(
+                "topic_cluster_30d",
+                {
+                    "count": cluster_gate["count"],
+                    "cap": cluster_gate["cap"],
+                    "ratio": round(cluster_gate["ratio"], 4),
+                    "exempt": is_type_locked,
+                },
+            )
+        if cluster_gate["blocked"] and not is_type_locked and not details.get("cluster_waiver"):
+            raise ValueError(
+                "topic_cluster_cooldown_blocked: "
+                f"cluster={cluster} count_30d={cluster_gate['count']} cap={cluster_gate['cap']}. "
+                "Pick another topic or set details['cluster_waiver']=<reason>."
+            )
 
         pub_id = f"mile_{uuid.uuid4().hex[:8]}"
         now = datetime.now(timezone.utc).isoformat()
