@@ -28,7 +28,7 @@ K1392 had three deviations from K988's A4f spec:
 2. **theta1 bounds**: K1392 [1e-10, 1.0] vs K988 [1e-8, 1e-3] — allowed optimizer to over-scale VIX coefficient  
 3. **g initialization**: K1392 h_g[0]=1.0 vs K988 g[0]=omega/(1-persist) — wrong unconditional mean
 
-These caused K1392's A4f QLIKE to be -8.194 vs K988's -8.361 (large degradation), making GJR appear better (K1392 DM t=-1.606). K1393 uses K988's exact spec and recovers to A4f QLIKE = -8.360.
+These caused K1392's A4f QLIKE to be -8.194 vs K988's -8.361 (large degradation), making GJR appear better (K1392 DM t=-1.606). K1393 is a K988 A4f-path faithful replication (matched bounds, g initialization, optimizer, and Gaussian quasi-likelihood) and recovers A4f QLIKE = -8.360. Note: "faithful" not "exact" — K1393 is a fresh independent run reproducing the K988 spec, not a re-execution of K988 itself, so loss-path-level numbers (e.g., full-OOS DM $t$) can differ from K988's canonical values within Monte Carlo / numerical tolerance.
 
 ## Code Review
 
@@ -42,9 +42,10 @@ Reviewed by `feature-dev:code-reviewer` subagent (Codex overloaded at time of re
 ## Paper Action (C1 CRITICAL)
 
 Add robustness table:
-- Full OOS: DM t = +4.48 (K988 pinned, n=1825)
 - Non-COVID: DM t = +4.26 (K1393, n=1721) — Harvey-sig
 - COVID window: DM t = +1.48 (K1393, n=104) — not sig
+- Post-COVID: DM t = +3.76 (K1393, n=1448) — Harvey-sig
+- K1393 own full OOS check: DM t = +3.60 (n=1825), consistent with K988-faithful path. The paper-canonical full-OOS DM t = 4.03 comes from `paper/garch-x-vix/mcs_dm_results.json` (the multi-spec pairwise matrix used in `tab:main_results`); the two share specification but differ in loss-path source.
 
 Narrative: "VIX-augmented model advantage is not an artifact of the COVID crisis episode."
 
