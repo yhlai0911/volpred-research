@@ -31560,5 +31560,20 @@
       "revisit_gate_threshold_days": 200,
       "small_sample_flag": true
     }
+  },
+  {
+    "item_id": "bba41c9f",
+    "category": "review_finding",
+    "content": "Article mile_cc3c987a (SPY-GLD tail dependence, supported by K867) — Codex 24h-rule review verdict NEEDS_REVISION. 3 findings corrected in-place: (HIGH) BTC q=5% asymmetry test p=0.067 originally claimed '邊際顯著' — corrected to '未達 5% 顯著, 亦未達 Harvey |t|>3' (line 64, 131); (MEDIUM) crisis episodes — article said 11 segments but JSON shows 1 segment (2018-02) has empty correlations → clarified as '11 segments, 1 unestimable due to short sample, 10 estimable, 4 negative' (line 88, 97); (LOW) bear-day / decile analysis is full-sample in-sample descriptive — added caveat to 'crisis alpha moat' bullet explicitly distinguishing from OOS tradable signal (line 106). K867 source code k867_tail_dependence.py — no lookahead bias (descriptive cross-sectional, no time-lagged signal claim). Article integrity restored without changing methodology or core conclusions. Errata appended to feed.json with timestamp + review_task_id + Codex CLI v0.132.0 attribution.",
+    "evidence": [
+      "experiments/k867/k867_results.json",
+      "experiments/k867/k867_tail_dependence.py",
+      "storage/reports/feed.json:mile_cc3c987a.content",
+      "storage/reports/feed.json:mile_cc3c987a.errata.update_history[1]",
+      "Codex CLI v0.132.0 gpt-5.4 medium reasoning — /tmp/codex_review_v2_output.txt",
+      "next_tasks.json:paper_review_mile_cc3c987a"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-05-27T16:16:36.320517"
   }
 ]
