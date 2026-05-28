@@ -5521,7 +5521,7 @@
     "title": "Paper 3 Strategic Decision (PRIORITY 1) — A/B/C 三選一",
     "priority": 4,
     "description": "[priority 4 — wait for new evidence] K1100/K1100b/K1100f/K1100g/K1100g_d1/K1100g_d2/K1115 共 7 實驗證明 E055 三條件全 REJECTED。Lai 2024 PRS edge = TAIFEX market microstructure 特有，非通用方法論。需 user 決策：(A) 寫 negative result paper (B) Pivot to TAIFEX microstructure (C) Abandon Paper 3 資源轉其他 papers。 | 2026-04-17 narrative state machine 觸發: K1100b NULL + K1100d NULL + K1100c MIXED (2/5 PASS flight-to-safety). 3/3 互補實驗完成. **新 Paper 3 可發表主張浮現**: asset-class-specific copula advantage — Joe upper-tail significantly beats DCC on equity-bond & equity-gold (λ_L<0.05), NULL on equity-equity (λ_L>0.4, mixing-averaging 主導). 用戶選項: (A) Paper 3 reframe 為 asset-class-specific copula (需 K1172 衍生 N=10-15 pairs 擴驗 λ_L threshold) (B) 保留原 periodic/spot-futures 方向（PRS 延伸） (C) 結合 A+B 雙 subsection. 等用戶 confirm 再進 body rewrite.",
-    "status": "decision_ready_user_input_needed",
+    "status": "succeeded",
     "task_type": "paper_decision",
     "backfill_log": [
       {
@@ -5530,7 +5530,9 @@
         "rationale": "paper + narrative/decision verbs",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "completed_at": "2026-05-28T23:39:13.498962+00:00",
+    "result": "Boss decision 2026-05-29 07:39 TW: **A** (Reframe asset-class-specific copula advantage) + extended scope per boss directive: 'A 但是如果測試個股或其他股市或商品市場呢' — expand from cross-asset-class pairs to also include individual stocks, other equity markets (TWII/HSI/N225/STOXX50), and commodities (Gold/Oil/Copper/Wheat). Body rewrite blocked until expansion experiments complete."
   },
   {
     "id": "Paper4_DIV1_41pct_direction_CRITICAL",
@@ -13742,7 +13744,7 @@
     "title": "K1302: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1302 has verdict signal (score=0, reasons=None) but no general article in feed.json.  Verdict preview: ",
     "priority": 4,
-    "status": "pending",
+    "status": "claimed",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1302",
@@ -13751,7 +13753,10 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-28T23:07:46+00:00"
+    "created_at": "2026-05-28T23:07:46+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-28T23:38:56.098849+00:00",
+    "claim_session_id": "dcba67fdc5ea"
   },
   {
     "id": "K1370_article_general",
@@ -13827,5 +13832,73 @@
     ],
     "topic_cluster": "vix",
     "created_at": "2026-05-28T23:07:46+00:00"
+  },
+  {
+    "id": "Paper3_expansion_E1_individual_stocks_copula",
+    "title": "[experiment] Paper 3 A 擴展 E1 — 個股 copula λ_L threshold 驗證",
+    "description": "Boss 2026-05-29 directive: Paper 3 reframe (asset-class-specific copula advantage) 必須擴大驗證範圍至個股。\n\nSetup:\n- N=10-15 個股 pairs across same-sector + cross-sector (tech, fin, healthcare, energy, consumer)\n- 美股 large-cap (AAPL/MSFT/GOOGL/META/AMZN/NVDA/...) 為 baseline universe\n- 同 Joe upper-tail copula vs DCC benchmark, λ_L (lower-tail dependence) threshold scan\n- 預期: same-sector pairs (e.g. AAPL-MSFT) λ_L>0.4 → mixing-averaging dominant (NULL)\n- 預期: cross-sector pairs (e.g. AAPL-XOM, MSFT-JPM) λ_L<0.2 → copula advantage detectable\n\nOutput: experiments/paper3_E1_individual_stocks_copula/ + results.json with per-pair λ_L + QLIKE delta vs DCC.\n預估 4-6 hr compute (15 pairs × 200 boot draws × 5yr daily data).",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "tags": [
+      "experiment",
+      "paper3",
+      "copula",
+      "individual_stocks",
+      "boss_directive_29may"
+    ],
+    "created_at": "2026-05-28T23:39:13.498962+00:00",
+    "source": "boss_directive_2026_05_29_paper3_A_extended"
+  },
+  {
+    "id": "Paper3_expansion_E2_other_equity_markets_copula",
+    "title": "[experiment] Paper 3 A 擴展 E2 — 跨股市 copula (TWII/HSI/N225/STOXX50 + SPY)",
+    "description": "Boss 2026-05-29 directive: Paper 3 reframe 擴大至其他股市.\n\nSetup:\n- Markets: SPY (US), 0050.TW (Taiwan), ^HSI (Hong Kong), ^N225 (Japan), ^STOXX50E (Europe)\n- N=10 pairs (5 markets × C(5,2) - 上界 — pick 8-10 highest data quality + relevance)\n- 同 Joe upper-tail copula vs DCC, λ_L threshold scan\n- 預期: 已開發 vs 新興 cross-market pairs 可能 λ_L 偏低 (copula advantage)\n- 已開發 cross-market pairs (e.g. SPY-EuroStoxx) 已知高 correlation → λ_L 可能 >0.3 (NULL)\n\nOutput: experiments/paper3_E2_cross_market_copula/ + results.json.\n預估 3-4 hr compute.",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "tags": [
+      "experiment",
+      "paper3",
+      "copula",
+      "cross_market",
+      "boss_directive_29may"
+    ],
+    "created_at": "2026-05-28T23:39:13.498962+00:00",
+    "source": "boss_directive_2026_05_29_paper3_A_extended"
+  },
+  {
+    "id": "Paper3_expansion_E3_commodities_copula",
+    "title": "[experiment] Paper 3 A 擴展 E3 — 商品 copula (Gold/Oil/Copper/Wheat × SPY/Bonds)",
+    "description": "Boss 2026-05-29 directive: Paper 3 reframe 擴大至商品.\n\nSetup:\n- Commodities: GLD (gold), USO (oil), CPER (copper), WEAT (wheat)\n- Cross with: SPY (equity), TLT (bonds)\n- N=8 pairs (4 commodities × 2 anchor assets)\n- 同 Joe upper-tail copula vs DCC, λ_L threshold scan\n- 已驗證: Gold-SPY (K195) λ_L<0.05, copula advantage YES.\n- 未驗: Oil-SPY, Copper-SPY, Wheat-SPY, all-vs-TLT — 是否同樣 cross-asset-class effect?\n- 預期: agricultural (Wheat) 可能 λ_L 高 (climate factor sync); energy (Oil) λ_L 中 (macro factor sync); metals (Copper) 看景氣循環\n\nOutput: experiments/paper3_E3_commodities_copula/ + results.json.\n預估 3-4 hr compute.",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "tags": [
+      "experiment",
+      "paper3",
+      "copula",
+      "commodities",
+      "boss_directive_29may"
+    ],
+    "created_at": "2026-05-28T23:39:13.498962+00:00",
+    "source": "boss_directive_2026_05_29_paper3_A_extended"
+  },
+  {
+    "id": "Paper3_expansion_synthesis_decision_meta",
+    "title": "[paper_decision] Paper 3 A 三 E 完成後 → meta synthesis decision",
+    "description": "Trigger: E1+E2+E3 全部 succeeded after.\n\n主線程 review: 總共 33-43 pairs (15 stocks + 10 markets + 8 commodities) λ_L 分佈 + QLIKE deltas.\nDecision points:\n1. λ_L threshold 是否在 0.1-0.2 (推測 boundary) 顯著? 若 confirm → Paper 3 main thesis 站得住\n2. Same-sector NULL vs cross-sector PASS pattern 是否 robust across asset classes?\n3. Body rewrite scope: Section 4 重做 (new evidence-based) + 新 Table (per-asset-class λ_L distribution)\n\nBlock on: E1+E2+E3 status=succeeded.",
+    "task_type": "paper_decision",
+    "priority": 2,
+    "status": "blocked",
+    "blocked_reason": "blocked_on_E1_E2_E3_complete",
+    "tags": [
+      "paper_decision",
+      "paper3",
+      "synthesis",
+      "boss_directive_29may"
+    ],
+    "created_at": "2026-05-28T23:39:13.498962+00:00",
+    "source": "boss_directive_2026_05_29_paper3_A_extended"
   }
 ]

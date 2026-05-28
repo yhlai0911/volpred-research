@@ -2336,8 +2336,9 @@ def ops_send_daily_digest(target_date: str | None, force_send: bool, storage_dir
 @click.option("--body", default=None, help="Alert body (markdown — auto-rendered to HTML)")
 @click.option("--body-md", "body_md_file", default=None, type=click.Path(exists=True), help="Read markdown body from file (use for long emails with tables/headings)")
 @click.option("--force", "force_send", is_flag=True, help="Bypass 24h dedup and resend once")
+@click.option("--needs-reply", "needs_reply", is_flag=True, help="Mark this email as requiring boss decision — adds 🔴【需老闆回信】title prefix + red prominent banner at top")
 @click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
-def ops_send_alert(level: str, title: str, body: str | None, body_md_file: str | None, force_send: bool, storage_dir: str) -> None:
+def ops_send_alert(level: str, title: str, body: str | None, body_md_file: str | None, force_send: bool, needs_reply: bool, storage_dir: str) -> None:
     """Send a general-purpose ops alert email (HTML auto-rendered from markdown body)."""
     from pathlib import Path as _Path
     from volpred.ops import ALERT_RECIPIENT, send_alert
@@ -2346,6 +2347,17 @@ def ops_send_alert(level: str, title: str, body: str | None, body_md_file: str |
         body = _Path(body_md_file).read_text(encoding="utf-8")
     if not body or not body.strip():
         raise click.UsageError("Must provide --body or --body-md")
+
+    # 2026-05-29: boss-decision-needed marker. Prefix title + prepend red banner
+    # so boss can spot decision-needed emails immediately in inbox vs ops noise.
+    if needs_reply:
+        if not title.startswith("🔴"):
+            title = f"🔴【需老闆回信】{title}"
+        banner = (
+            "> **🔴 此 email 需老闆做出決定才能繼續推進。**\n"
+            "> 請看下方「需要的決定」段，回信告知選項即可。\n\n"
+        )
+        body = banner + body
 
     result = send_alert(
         level,

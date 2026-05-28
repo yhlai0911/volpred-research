@@ -167,6 +167,8 @@ def _email_shell(title: str, subtitle: str | None, body_html: str) -> str:
             code{{background:#f3f4f6;color:#111827;border-radius:4px;padding:2px 5px;font-size:13px;font-family:'SF Mono',Menlo,Monaco,Consolas,monospace}}
             pre{{background:#f9fafb;color:#111827;border:1px solid #e5e7eb;padding:14px;border-radius:10px;overflow:auto;font-size:13px;line-height:1.5;font-family:'SF Mono',Menlo,Monaco,Consolas,monospace}}
             pre code{{background:transparent;padding:0;font-size:13px;color:inherit}}
+            blockquote{{border-left:5px solid #dc2626;background:#fef2f2;color:#7f1d1d;padding:12px 16px;margin:1em 0;border-radius:6px;font-weight:500}}
+            blockquote strong{{color:#991b1b}}
             blockquote{{border-left:4px solid #10b981;padding-left:14px;color:#475569;margin:1em 0}}
             a{{color:#2563eb}}
           </style>
