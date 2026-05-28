@@ -122,6 +122,19 @@ def _score_to_priority(score: int) -> int:
     return 4
 
 
+def _has_publishable_title(cand: dict) -> bool:
+    """Require a non-empty candidate title before enqueueing a reader-facing task.
+
+    2026-05-28 K1378 incident: publication_candidates surfaced uncovered K rows
+    with blank `title`, which then became generic daily_article queue entries.
+    Those tasks lack a stable article angle and can easily correspond to stale or
+    superseded internal robustness experiments. Refill should skip them until the
+    upstream candidate metadata is repaired.
+    """
+    title = str(cand.get("title") or "").strip()
+    return bool(title)
+
+
 def _make_article_task(cand: dict, priority: int) -> dict:
     k_id = cand["k_id"]
     audiences_covered = cand.get("audiences_covered") or []
@@ -212,6 +225,10 @@ def refill(target: int, dry_run: bool = False) -> dict:
         # audiences_covered=[] because covered article was audience=null legacy.
         # Honor covered_by directly — if any milestone covers this K, skip.
         if cand.get("covered_by"):
+            continue
+        # 4th belt: blank-title candidates are not publication-ready and have
+        # repeatedly generated low-signal queue noise.
+        if not _has_publishable_title(cand):
             continue
         priority = _score_to_priority(int(cand.get("score") or 0))
         new_entries.append(_make_article_task(cand, priority))

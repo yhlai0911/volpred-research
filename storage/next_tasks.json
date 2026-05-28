@@ -13076,7 +13076,7 @@
     "title": "K1378: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1378 has verdict signal (score=4, reasons=None) but no general article. Verdict preview: ",
     "priority": 3,
-    "status": "pending",
+    "status": "failed",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1378",
@@ -13085,7 +13085,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-28T10:08:52+00:00"
+    "created_at": "2026-05-28T10:08:52+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-28T10:48:46.797493+00:00",
+    "claim_session_id": "7df4e970dea6",
+    "started_at": "2026-05-28T10:48:52.184229+00:00",
+    "completed_at": "2026-05-28T10:51:07.457107+00:00",
+    "result": "Invalid daily_article candidate: K1378 publication candidate has blank title and the core leave-COVID topic is already covered by K1393 article; no new article published. Added refill_task_pool guard to skip blank-title candidates so this stale/superseded pattern will not requeue."
   },
   {
     "id": "K1379_article_general",
