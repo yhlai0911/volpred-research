@@ -4925,7 +4925,7 @@
   {
     "id": "Paper1_D4_gamma_HM_clarification",
     "title": "Paper 1 CRITICAL: Sec 4.7 vs 5.4 γ_HM 值衝突 — 需主線程 clarification",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 4,
     "created_at": "2026-04-17T16:19:18+08:00",
     "description": "Paper 1 audit (a9f25e9f) 發現: body.tex Sec 4.7 report γ_HM=-0.035 t=-0.39 p=0.70 (不顯著), Sec 5.4 report γ_HM=-0.043 t=-4.06 p<0.001 (高度顯著). 同標記但不同值 — 兩節 likely 不同 setup (SPY-only short-window vs Hybrid VT full-period) 但 paper 未明說. **投稿 JBF 前必做**: 主線程 body rewrite 在兩節加入 explicit clarification 說明 γ_HM_section_4 vs γ_HM_section_5 是哪種 strategy × period. 主線程 .tex 修改 + commit (禁用 agent). 可能需升級為 γ_HM_A vs γ_HM_B 避免混淆.",
@@ -4943,7 +4943,13 @@
         "rationale": "paper + body-rewrite verbs",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-05-28T11:08:32.968009+00:00",
+    "claim_session_id": "73dc9a383e97",
+    "started_at": "2026-05-28T11:08:39.164484+00:00",
+    "completed_at": "2026-05-28T11:11:54.440501+00:00",
+    "result": "Sec 4.7 line 388 加 forward-reference footnote 點明 pure VT (γ_HM=-0.035 NS) vs Sec 5.x Hybrid VT (γ_HM=-0.043 sig) 兩個 spec 差異; line 446 subsubsection 加 label subsec:vt-alpha-nature; xelatex 2-pass compile PASS (67 pages, my new ref resolved); paper-update synced Supabase (updated_at 2026-05-28T11:11:20Z)"
   },
   {
     "id": "Paper1_GLD_gamma_negative_0.067_forensic",
