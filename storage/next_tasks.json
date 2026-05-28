@@ -5738,7 +5738,7 @@
         "at": "2026-05-25"
       }
     ],
-    "last_released_at": "2026-05-28T03:22:24.826754+00:00"
+    "last_released_at": "2026-05-28T04:25:30.091170+00:00"
   },
   {
     "id": "Paper6_DIV3_SPY_VaR_violation_rate",
@@ -12688,7 +12688,7 @@
     "title": "Errata mile_77c5e6d2: 文末補 2026-05-28 更正塊 (K320 audit snapshot stale)",
     "description": "Per review verdict CONDITIONAL_PASS (knowledge_item=4eac7111). 在 mile_77c5e6d2 文末加更正塊，揭露 4 篇被標 MISLEADING 的文章實際狀態: (1) mile_d368b4da 標題已改 '25 個策略沒一個通過' + 文末已有 2026-03-25 K255 errata; (2) mile_e8aefbf1 開頭已有 2026-05-07 更正聲明 + 全文重寫; (3) mile_5302df53 開頭已有 2026-05-07 更正聲明 + 全文重寫; (4) mile_281af193 91% 數字已模糊化 + 標題加『——而且做對了』. 不重寫主體 — 元稽核被自身打臉是好教材。Errata template 見 /tmp/review_mile_77c5e6d2.md.",
     "priority": 3,
-    "status": "pending_main_thread",
+    "status": "in_progress",
     "task_type": "paper_review",
     "source": "review_followup",
     "article_id": "mile_77c5e6d2",
@@ -12700,7 +12700,11 @@
       "main-thread-only",
       "k320"
     ],
-    "created_at": "2026-05-28T03:15:32.569561+08:00"
+    "created_at": "2026-05-28T03:15:32.569561+08:00",
+    "claimed_by": "hourly-14",
+    "claimed_at": "2026-05-28T06:08:40.395128+00:00",
+    "claim_session_id": "c6f620e77314",
+    "started_at": "2026-05-28T06:08:49.119264+00:00"
   },
   {
     "id": "paper_review_mile_4174473e",
@@ -12791,7 +12795,7 @@
     "title": "Paper review (Codex 24h-rule): 小波分析能不能改善波動率預測？K479 給的答案是：看你怎麼比",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_4df2d060 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_4df2d060",
@@ -12800,7 +12804,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-28T04:08:16+00:00"
+    "created_at": "2026-05-28T04:08:16+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-28T04:25:30.027343+00:00",
+    "claim_session_id": "f26d3d77740f",
+    "started_at": "2026-05-28T04:25:33.730078+00:00",
+    "completed_at": "2026-05-28T04:27:56.223577+00:00",
+    "result": "Codex CLI 0.132.0 review PASS with warnings: no lookahead, sample/period/results aligned, baseline vs wavelet comparisons use same OOS and lag convention, no statistical overclaim on HAR+wavelet null. Warnings only: K479 README remains planning stub; article closing rule-of-thumb ('2 estimation methods / 2 tests / cross-OOS') is editorial overgeneralization rather than evidence from this single-K run. No code/article change required."
   },
   {
     "id": "daily_K1404_TWII_quantile_tail_crossregion",
@@ -12824,5 +12834,96 @@
     "started_at": "2026-05-28T04:11:10.312016+00:00",
     "completed_at": "2026-05-28T04:17:02.721278+00:00",
     "result": "Published as draft (id=mile_15d43f72). Cross-region (US 4 + TW 1) tail-VaR transportability article — K1402/K1403/K1404 evidence chain. 8 tags, audience=research, experiment_refs=[K1402,K1403,K1404]. anti_ai_gate exit 0 (1-shot PASS, 2 non-blocking WARNs). DM stats spot-verified against k1403_results.json (QQQ -12.68 / GLD -10.51 / TLT -11.59 match)."
+  },
+  {
+    "id": "governance_repopulate_candidates_20260528_1309",
+    "title": "Repopulate publication_candidates (stale 17d) + refill daily_article pool",
+    "description": "publication_candidates.json generated 2026-05-11 (17d stale). Pool agentable=0 因 candidates already-known → refill no-op. Rebuild candidates + refill 4 daily_article tasks → 回 4/4 agentable pool.",
+    "task_type": "governance",
+    "priority": 3,
+    "status": "succeeded",
+    "source": "hourly_dispatch_self_assigned",
+    "created_at": "2026-05-28T05:09:14Z",
+    "claimed_by": "hourly-13",
+    "claimed_at": "2026-05-28T05:09:15.560009+00:00",
+    "claim_session_id": "18c823d27e66",
+    "started_at": "2026-05-28T05:09:21.049229+00:00",
+    "completed_at": "2026-05-28T05:11:41.892231+00:00",
+    "result": "Repopulated publication_candidates (627 K scanned, 24 uncovered, 25 missing general). Refilled 4 daily_article: K1157/K1151/K672/K1152. Pool agentable: 0→4."
+  },
+  {
+    "id": "K1157_article_general",
+    "title": "K1157: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1157 has verdict signal (score=10, reasons=None) but no general article. Verdict preview: ",
+    "priority": 3,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1157",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-28T05:11:18+00:00",
+    "claimed_by": "hourly-13",
+    "claimed_at": "2026-05-28T05:12:31.670951+00:00",
+    "claim_session_id": "ae7945149923",
+    "started_at": "2026-05-28T05:12:31.882892+00:00",
+    "completed_at": "2026-05-28T05:18:05.297180+00:00",
+    "result": "Published mile_477dfe5e (3424 chars, tags=8, audience=research). Anti-AI gate PASS (0 warn). K1157 JP TOPIX cross-market EAV universality. commit d49d30b5."
+  },
+  {
+    "id": "K1151_article_general",
+    "title": "K1151: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1151 has verdict signal (score=9, reasons=None) but no general article. Verdict preview: ",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1151",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-28T05:11:18+00:00"
+  },
+  {
+    "id": "K672_article_general",
+    "title": "K672: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K672 has verdict signal (score=9, reasons=None) but no general article. Verdict preview: ",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K672",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-28T05:11:18+00:00"
+  },
+  {
+    "id": "K1152_article_general",
+    "title": "K1152: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1152 has verdict signal (score=8, reasons=None) but no general article. Verdict preview: ",
+    "priority": 3,
+    "status": "failed",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1152",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-28T05:11:18+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-28T05:29:15.354448+00:00",
+    "claim_session_id": "a537c1ff7508",
+    "completed_at": "2026-05-28T05:30:08.440169+00:00",
+    "result": "Auto-discovered task invalid due topic duplication. Existing feed already covers K1152 angle, including research article『同樣是財報日，為什麼台股反應比美股小 3.5 倍？』and closely overlapping general/research earnings-announcement articles. Duplicate-check via grep + knowledge-index search shows high semantic overlap, so no new general article should be published."
   }
 ]

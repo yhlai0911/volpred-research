@@ -8764,5 +8764,36 @@
     "task_type": "paper_review",
     "summary": "Paper9_experiments_md_add_K1045",
     "notes": "verify-only close: K1045 Table 11 source line已在 commit f96888d1 補入 paper/garch-x-vix/experiments.md L20，task entry stale; no edit needed."
+  },
+  {
+    "timestamp": "2026-05-28T10:16:45+08:00",
+    "task_type": "paper_review",
+    "summary": "paper_review_mile_088ce61e (K471 article Codex 24h-rule)",
+    "notes": "Codex CLI 0.132.0 (gpt-5.4) CONDITIONAL_PASS → fixed K471 cross_asset_summary logic (best-ΔR² only → scan all models, QQQ flipped to dm_sig=true via M2 p=0.0136, BTC flipped to dm_sig=true via M3/M4/M5 negative-direction) + article wording (QQQ spec) + errata footnote. Commit 33214b96. Supabase synced 130 articles."
+  },
+  {
+    "timestamp": "2026-05-28T11:14",
+    "task_type": "platform_ops",
+    "task_id": "platform_ops_paper_update_abstract_extract_bug",
+    "result": "FIXED — paper-update CLI _count_tex_metrics now resolves \\input{} chain to find abstract in body files. Regression-clean across 11 papers. vt-trend-following Supabase abstract updated to new K1175+ content.",
+    "commit": "db6aedd9"
+  },
+  {
+    "timestamp": "2026-05-28T13:18:05",
+    "task_type": "daily_article",
+    "task_id": "K1157_article_general",
+    "title": "K1157 JP TOPIX cross-market EAV (mile_477dfe5e)",
+    "owner": "hourly-13",
+    "status": "succeeded",
+    "commit": "d49d30b5"
+  },
+  {
+    "timestamp": "2026-05-28T14:10:00+08:00",
+    "task_type": "paper_review",
+    "task_id": "paper_review_followup_mile_77c5e6d2_errata",
+    "title": "Errata mile_77c5e6d2: 文末補 2026-05-28 更正塊 (K320 audit snapshot stale)",
+    "status": "succeeded",
+    "result": "Appended 更正聲明（2026-05-28）block to mile_77c5e6d2 content (4013→4614 chars). Discloses that 3 of 4 MISLEADING articles (mile_d368b4da/e8aefbf1/5302df53/281af193) were already corrected between 2026-03-25 and 2026-05-07 — the article未即時 re-verify source. Supabase synced (articles=1).",
+    "owner": "hourly-14"
   }
 ]
