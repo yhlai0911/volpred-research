@@ -796,6 +796,27 @@ def check_image_gate(body: str, audience: str, bypass: bool) -> int:
     return 0
 
 
+def infer_publish_audience(title: str, body: str, publish_tags: list[str]) -> str:
+    """Mirror publisher-side audience inference for preflight validation.
+
+    `publish_draft.py` is the last deterministic checkpoint before invoking the
+    publisher CLI. If a draft is declared `audience=general` here but the
+    publisher would upcast it to `research`, letting the publish proceed creates
+    a queue/accounting bug: the `daily_article` task looks succeeded while the
+    platform still lacks general-audience coverage for that K. Import the same
+    `_infer_audience()` implementation used by Publisher so this script can fail
+    early and force the draft to be rewritten in genuinely general language.
+    """
+    import sys
+
+    src_dir = ROOT / "src"
+    if str(src_dir) not in sys.path:
+        sys.path.insert(0, str(src_dir))
+    from volpred.publisher.publisher import _infer_audience  # noqa: WPS433
+
+    return _infer_audience(title, body, publish_tags)
+
+
 def find_article_in_feed(feed: list, mile_id: str) -> int | None:
     """Return index of article with matching id, else None."""
     for i, art in enumerate(feed):
@@ -1267,6 +1288,28 @@ def main() -> int:
     rc = check_image_gate(body, audience, getattr(args, 'no_image_gate', False))
     if rc != 0:
         return rc
+
+    # 2026-05-29 platform_ops: fail fast when a supposed general-audience draft
+    # would be auto-upcast to research by Publisher. Silent upcast polluted the
+    # daily_article queue: task marked succeeded, but publication_candidates
+    # still saw missing general coverage and kept refilling v2/v3 retries.
+    if audience == "general":
+        inferred_audience = infer_publish_audience(
+            info["title"], body, publish_tag_list,
+        )
+        if inferred_audience != "general":
+            print(
+                "\n[publish_draft] AUDIENCE GATE: draft declares audience=general "
+                f"but publisher would infer '{inferred_audience}'.",
+                file=sys.stderr,
+            )
+            print(
+                "  Refusing to publish. Rewrite the draft in general-reader "
+                "language (remove K-id / statistical jargon from title and body) "
+                "or intentionally publish it as research.",
+                file=sys.stderr,
+            )
+            return 7
 
     # 2026-05-08 P3 platform_ops: tolerate /tmp/ and other out-of-repo
     # paths (agents sometimes write drafts to a temp dir before publish).

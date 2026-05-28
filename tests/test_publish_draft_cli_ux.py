@@ -332,3 +332,42 @@ def test_draft_flag_with_tmp_path_and_frontmatter_phase(tmp_path, monkeypatch):
     assert rc == 0
     assert captured.get("phase") == "tail-risk"
     assert captured.get("title") == "Combined"
+
+
+def test_general_draft_that_would_upcast_to_research_fails_fast(
+    tmp_path, monkeypatch, capsys,
+):
+    """General draft must fail before publisher CLI if content is research-grade.
+
+    Root cause (2026-05-29): daily_article tasks for K1151/K672/K957 wrote
+    `audience=general` drafts that still contained K-id / research jargon.
+    Publisher silently upcast them to `research`, making the task look
+    completed while general coverage was still missing. `publish_draft.py`
+    should now stop this at preflight.
+    """
+    draft = tmp_path / "researchy_general.md"
+    _write_draft(
+        draft,
+        {"title": "給一般讀者的文章", "audience": "general", "tags": ["投資"]},
+        body=(
+            "這篇其實還在談 K1151，而且會提到 bootstrap。"
+            "\n\n![x](https://example.com/a.png)\n![y](https://example.com/b.png)\n"
+        ),
+    )
+
+    called = []
+    monkeypatch.setattr(
+        publish_draft.subprocess, "run",
+        lambda cmd, *a, **k: (called.append(cmd) or _StubResult(0)),
+    )
+    monkeypatch.setattr(sys, "argv", [
+        "publish_draft.py",
+        str(draft),
+        "--phase", "research",
+        "--force-duplicate",
+    ])
+    rc = publish_draft.main()
+    assert rc == 7
+    assert not called, "publisher CLI must not run when audience gate fails"
+    err = capsys.readouterr().err
+    assert "AUDIENCE GATE" in err

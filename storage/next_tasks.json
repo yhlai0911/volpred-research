@@ -13596,7 +13596,7 @@
     "title": "Publisher audience-tag audit: K1151/K672/K957 general-target tasks published as research",
     "description": "ROOT-CAUSE: 連續 3 K (K1151, K672, K957) auto-discovered general-audience daily_article task 標 succeeded（或 failed），但 feed.json 內對應的 article 全部 audience=research（含 K1151 mile_0ae5323e draft / mile_477dfe5e published、K672 mile_cbbf35cb/c15c7b98、K957 mile_2975939b/a1f7bfa8）。publication_candidates 正確判定 'uncovered_for_general' → refill_task_pool 每輪重複生 v2/v3 retry → pool 永久污染。\n\nINVESTIGATE: (1) feed-publisher / Publisher.publish_milestone audience 欄位來源（agent param vs auto-classifier vs default）；(2) 是否 GJR/bootstrap 等技術 tag 觸發 auto-classifier rule 強制 research；(3) prior task 'succeeded' 但 audience mismatch 應該 fail 還是寫 v2 retry；(4) mile_0ae5323e (K1151 draft) 可否 re-tag general 或重發。\n\nFIX:  per CLAUDE.md 永遠修流程不修資料 — 修 publisher logic 確保 general task → general article；refill_task_pool 加 strict gate：prior task succeeded 即使 audience mismatch 也不 retry，丟給 platform_ops 修。\n\nLINKED: K1151_article_general_v3, K672_article_general_v2, K957_article_general_v2 已 mark failed by hourly-04 2026-05-29 fire；3 articles in feed 暫保留 audience=research。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "platform_ops",
     "source": "hourly_root_cause",
     "tags": [
@@ -13605,7 +13605,13 @@
       "refill-dedup",
       "root-cause"
     ],
-    "created_at": "2026-05-29T04:10:00+00:00"
+    "created_at": "2026-05-29T04:10:00+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-28T20:27:54.441041+00:00",
+    "claim_session_id": "5907008da81b",
+    "started_at": "2026-05-28T20:28:06.274498+00:00",
+    "completed_at": "2026-05-28T20:29:54.946419+00:00",
+    "result": "Added publish-time audience gate in scripts/publish_draft.py: general drafts that publisher would upcast to research now fail fast instead of silently publishing with wrong audience; added regression test. Verified refill_task_pool dry-run no longer requeues K1151/K672/K957 mismatch cases."
   },
   {
     "id": "K1151_article_general_v4",
