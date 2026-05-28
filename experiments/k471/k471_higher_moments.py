@@ -622,19 +622,27 @@ for asset in ASSETS:
     best_delta = max((v["delta_r2"] for v in inc["increments"].values()), default=0)
     best_model = max(inc["increments"], key=lambda k: inc["increments"][k]["delta_r2"]) if inc["increments"] else None
 
+    # K471 errata 2026-05-28: dm_significant 改判「任一模型 dm_p < 0.05」
+    # 原 logic 只看 best-ΔR² 模型的 dm_p → 漏判 QQQ M2_rv_skew_OLS (p=0.0136)
+    sig_models = [
+        (m, v["dm_pvalue"]) for m, v in inc["increments"].items()
+        if v.get("dm_pvalue") is not None and v["dm_pvalue"] < 0.05
+    ]
+    sig = len(sig_models) > 0
+
     if best_model:
-        dm_p = inc["increments"][best_model].get("dm_pvalue")
-        sig = dm_p is not None and dm_p < 0.05
         conclusions.append({
             "asset": asset,
             "baseline_r2": inc["baseline_r2"],
             "best_model": best_model,
             "best_delta_r2": best_delta,
             "dm_significant": sig,
+            "significant_models": [{"model": m, "dm_pvalue": p} for m, p in sig_models],
         })
 
         status = "SIGNIFICANT" if sig else "NOT significant"
-        print(f"  {asset}: Baseline R²={inc['baseline_r2']:.4f}, Best improvement: Δ={best_delta:+.4f} ({best_model}) [{status}]")
+        sig_detail = f" (sig models: {[m for m, _ in sig_models]})" if sig else ""
+        print(f"  {asset}: Baseline R²={inc['baseline_r2']:.4f}, Best improvement: Δ={best_delta:+.4f} ({best_model}) [{status}]{sig_detail}")
 
 elapsed = time.time() - START_TIME
 print(f"\nTotal elapsed: {elapsed:.1f}s")

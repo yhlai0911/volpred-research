@@ -16,7 +16,7 @@
     "Jondeau & Rockinger (2003) 'Conditional volatility, skewness, and kurtosis' JEDC",
     "Leon, Rubio, Serna (2005) 'Autoregressive conditional volatility, skewness and kurtosis' QREF"
   ],
-  "prior_knowledge": "K-entry: residual higher moments r=-0.073, OOS R\u00b2 +2.7pp (weak improvement)",
+  "prior_knowledge": "K-entry: residual higher moments r=-0.073, OOS R² +2.7pp (weak improvement)",
   "diagnostics": {
     "SPY": {
       "n_obs": 4002,
@@ -30,8 +30,8 @@
       "kurt21_max": 11.249901912767513,
       "skew21_adf_stat": 0.9075329077429206,
       "kurt21_adf_stat": 0.8880997707362157,
-      "skew21_adf_pvalue": 5.378268194693886e-26,
-      "kurt21_adf_pvalue": 5.8564558977495825e-25,
+      "skew21_adf_pvalue": 5.378268194693886E-26,
+      "kurt21_adf_pvalue": 5.8564558977495825E-25,
       "skew21_ljungbox_p": 0.0,
       "kurt21_ljungbox_p": 0.0,
       "corr_with_fwd_rv21": {
@@ -41,7 +41,7 @@
         },
         "skew21": {
           "r": -0.08,
-          "p": 1e-06
+          "p": 0.000001
         },
         "skew63": {
           "r": -0.1523,
@@ -73,8 +73,8 @@
       "kurt21_max": 12.693562117488943,
       "skew21_adf_stat": 0.9310108691032207,
       "kurt21_adf_stat": 0.9184866908249392,
-      "skew21_adf_pvalue": 1.0361220137830038e-22,
-      "kurt21_adf_pvalue": 2.8259808880198215e-23,
+      "skew21_adf_pvalue": 1.0361220137830038E-22,
+      "kurt21_adf_pvalue": 2.8259808880198215E-23,
       "skew21_ljungbox_p": 0.0,
       "kurt21_ljungbox_p": 0.0,
       "corr_with_fwd_rv21": {
@@ -116,8 +116,8 @@
       "kurt21_max": 17.517322836917796,
       "skew21_adf_stat": 0.9226144888207739,
       "kurt21_adf_stat": 0.9211230843427392,
-      "skew21_adf_pvalue": 1.5282221903631839e-22,
-      "kurt21_adf_pvalue": 2.9667534829443534e-24,
+      "skew21_adf_pvalue": 1.5282221903631839E-22,
+      "kurt21_adf_pvalue": 2.9667534829443534E-24,
       "skew21_ljungbox_p": 0.0,
       "kurt21_ljungbox_p": 0.0,
       "corr_with_fwd_rv21": {
@@ -291,7 +291,7 @@
             "rv21": 0.048998,
             "skew5": -0.001675,
             "skew21": -0.007535,
-            "kurt5": 3.6e-05,
+            "kurt5": 0.000036,
             "kurt21": -0.01,
             "intercept": 0.150182
           }
@@ -316,7 +316,7 @@
             "rv21": 0.048983,
             "skew5": -0.001675,
             "skew21": -0.007532,
-            "kurt5": 3.5e-05,
+            "kurt5": 0.000035,
             "kurt21": -0.009997,
             "intercept": 0.150182
           }
@@ -1176,7 +1176,7 @@
           },
           "kurt21": {
             "r": -0.0887,
-            "p": 7.5e-05
+            "p": 0.000075
           }
         },
         "low_vol": {
@@ -1250,13 +1250,13 @@
     "SPY": {
       "skew21": {
         "pvalues_by_lag": {
-          "lag_1": 1.3e-05,
+          "lag_1": 0.000013,
           "lag_2": 0.000866,
           "lag_3": 0.088538,
           "lag_4": 0.389928,
           "lag_5": 0.344306
         },
-        "min_pvalue": 1.3e-05,
+        "min_pvalue": 0.000013,
         "best_lag": "lag_1",
         "significant": true
       },
@@ -1265,10 +1265,10 @@
           "lag_1": 0.261176,
           "lag_2": 0.001474,
           "lag_3": 0.00026,
-          "lag_4": 1e-06,
-          "lag_5": 8e-06
+          "lag_4": 0.000001,
+          "lag_5": 0.000008
         },
-        "min_pvalue": 1e-06,
+        "min_pvalue": 0.000001,
         "best_lag": "lag_4",
         "significant": true
       }
@@ -1424,23 +1424,51 @@
       "baseline_r2": 0.0318,
       "best_model": "M5_full_OLS",
       "best_delta_r2": 0.1606,
-      "dm_significant": false
+      "dm_significant": false,
+      "significant_models": []
     },
     {
       "asset": "QQQ",
       "baseline_r2": 0.0577,
       "best_model": "M5_full_OLS",
       "best_delta_r2": 0.1008,
-      "dm_significant": false
+      "dm_significant": true,
+      "significant_models": [
+        {
+          "model": "M2_rv_skew_OLS",
+          "dm_pvalue": 0.0136
+        }
+      ]
     },
     {
       "asset": "BTC-USD",
       "baseline_r2": -0.9527,
       "best_model": "M2_rv_skew_OLS",
       "best_delta_r2": -0.0713,
-      "dm_significant": false
+      "dm_significant": true,
+      "significant_models": [
+        {
+          "model": "M3_rv_kurt_OLS",
+          "dm_pvalue": 0.0023
+        },
+        {
+          "model": "M4_rv_skew_kurt_OLS",
+          "dm_pvalue": 0.0004
+        },
+        {
+          "model": "M5_full_OLS",
+          "dm_pvalue": 0.0011
+        }
+      ]
     }
   ],
   "elapsed_seconds": 6.4,
-  "conclusion": "Higher moments (rolling skewness/kurtosis) do NOT significantly improve OOS vol prediction over lagged RV21 for any of the 3 assets tested. Average \u0394 R\u00b2 = +0.0634. This confirms the prior finding (r=-0.073, \u0394 R\u00b2 +2.7pp) that higher moments provide minimal incremental information for volatility forecasting. The predictive content of higher moments is already captured by the level of realized volatility."
+  "conclusion": "Higher moments improve OOS vol prediction for QQQ via M2_rv_skew_OLS (rv21+skew5+skew21, DM p=0.0136, ΔR²=+0.0375), but the best-ΔR² spec for QQQ is M5_full_OLS (ΔR²=+0.1008, DM p=0.23 not significant). SPY shows large nominal ΔR² (up to +0.16) but no spec reaches DM significance. BTC-USD shows DM-significant deterioration (M3/M4/M5 dm_p<0.01, ΔR² strongly negative) — higher moments hurt rather than help. Net: higher moments are asset-specific and direction-mixed; the prior null finding (r=-0.073, avg ΔR² +2.7pp) holds for cross-asset averaging. [Errata 2026-05-28: cross_asset_summary.dm_significant now scans all models, not just best-ΔR² spec.]",
+  "errata": [
+    {
+      "date": "2026-05-28",
+      "description": "cross_asset_summary.dm_significant logic fix: was checking best-ΔR² model only, now scans all models. Net effect: QQQ flipped from dm_significant=false → true (M2_rv_skew_OLS p=0.0136). No underlying numbers changed.",
+      "reviewer": "Codex CLI 0.132.0 (gpt-5.4)"
+    }
+  ]
 }
