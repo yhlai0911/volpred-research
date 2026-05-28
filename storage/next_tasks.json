@@ -12747,7 +12747,7 @@
     "title": "Errata mile_4174473e: rolling-window / COVID bucket / SPY wording fixes",
     "description": "Per Codex 24h review (`storage/ops/reviews/mile_4174473e_codex_review_20260528.md`). Main-thread article errata needed before treating mile_4174473e as clean: (1) replace 「美國始終是淨輸出國」 with wording limited to full-sample or average net spillover, because `rolling_spillover.spy_always_net_transmitter=false` and some windows have negative `spy_net`; (2) replace all 「200 日滾動視窗」 wording with `252 日滾動視窗` to match `k455_vol_spillover_network.py window=252`; (3) relabel COVID comparison from `2020-2021` to the actual hardcoded crisis bucket `2020-02-01 ~ 2020-06-30` (the 77.7% / n=5 figure is not a 2020-2021 average); (4) optional minor caption fix: Figure 2 source/receiver axis wording currently reversed vs implementation. Also note reproducibility hygiene issue in K455: README still planning stub and script output path writes to `experiments/k455_vol_spillover_results.json` rather than the in-folder canonical artifact.",
     "priority": 3,
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "review_followup",
     "article_id": "mile_4174473e",
@@ -12758,7 +12758,13 @@
       "main-thread-only",
       "codex-followup"
     ],
-    "created_at": "2026-05-28T08:15:43+08:00"
+    "created_at": "2026-05-28T08:15:43+08:00",
+    "claimed_by": "hourly-20",
+    "claimed_at": "2026-05-28T12:12:43.417150+00:00",
+    "claim_session_id": "b3b756777427",
+    "started_at": "2026-05-28T12:12:43.748511+00:00",
+    "completed_at": "2026-05-28T12:14:22.334529+00:00",
+    "result": "Errata mile_4174473e Codex 24h-review 4 修正完成: (1) 「美國始終是淨輸出國」改為 full-sample wording + 註明 spy_always_net_transmitter=false 反向窗口; (2) 全 200 日→252 日 (匹配 window=252); (3) COVID 2020-2021 → 2020-02 ~ 2020-06 n=5 hardcoded bucket; (4) 圖 2 軸來源/接收對調. 附 2026-05-28 更正塊. Sync Supabase OK (articles=2). K455 README/script path hygiene 為 separate concern, 留 errata task."
   },
   {
     "id": "K1404",
