@@ -12,8 +12,8 @@ Sub-modules:
   scheduler — asyncio tick → enqueue (croniter-driven)
   alerts    — send-alert shim with per-class dedup
 
-Status: Deliverable 3/8 — modules integrated. Remaining: regression tests
-(deliverable 4), Codex review gate (6), shadow run (5), cutover, deprecate.
+Status: Deliverable 4/8 — modules integrated + regression tests + ops CLI.
+Remaining: Codex review gate (6), shadow run (5), cutover, deprecate.
 """
 
-__version__ = "0.2.0-d3"
+__version__ = "0.3.0-d4"
