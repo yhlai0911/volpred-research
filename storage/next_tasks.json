@@ -5961,7 +5961,7 @@
   {
     "id": "Paper9_experiments_md_add_K1045",
     "title": "Paper 9: paper/garch-x-vix/experiments.md 加 K1045 為 Table 11 source (main-thread quick)",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 3,
     "created_at": "2026-04-17T16:52:19+08:00",
     "description": "K995b 確認 Paper 9 Table 11 (GJR-t / A4f-t kurtosis/skewness/JB) source 是 K1045. 主線程 edit paper/garch-x-vix/experiments.md 加一行: 'K1045: Table 11 residual diagnostics - joint MLE Student-t, Fisher excess kurt'. 5 min main-thread edit.",
@@ -5979,7 +5979,13 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "hourly-09",
+    "claimed_at": "2026-05-28T01:08:06.978413+00:00",
+    "claim_session_id": "7d506c675cd1",
+    "started_at": "2026-05-28T01:08:12.870383+00:00",
+    "completed_at": "2026-05-28T01:08:58.540774+00:00",
+    "result": "Verified work completed in prior commit f96888d1 ('Paper 9 experiments.md: register K1045/K1003/K1001/K1023 (audit quick-win)'). Line 20 of paper/garch-x-vix/experiments.md contains K1045 as Table 11 source with full residual diagnostics (kurtosis 3.065→1.238, skewness, JB 938.8→224.2, ν, K995b rtol≤0.002 verification) — exceeds task description scope. Stale task entry, no edit needed."
   },
   {
     "id": "Paper9_experiments_md_add_garch_midas_test",
