@@ -1,6 +1,6 @@
 {
   "experiment_id": "k603",
-  "title": "K603: Dynamic Target Volatility \u2014 Should 12 in 12/VIX Change?",
+  "title": "K603: Dynamic Target Volatility — Should 12 in 12/VIX Change?",
   "timestamp": "2026-03-28T05:44:45.677396+00:00",
   "data_source": "yfinance (SPY, GLD, ^VIX, ^IRX)",
   "data_period": "2004-11-19 to 2026-03-27",
@@ -16,7 +16,7 @@
     ],
     "cross_oos": "5 non-overlapping ~4yr periods",
     "statistical_tests": "DM test (Harvey t>3.0), JKM Sharpe test, block bootstrap",
-    "tx_cost": "1bp default"
+    "tx_cost": "10bp default (tx_cost=0.001; 2026-05-28 corrected from '1bp default' typo)"
   },
   "references": [
     "K4: Dynamic target vol (early phase null result)",
