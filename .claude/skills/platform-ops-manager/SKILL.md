@@ -74,6 +74,24 @@ destructive irreversible, policy pivots, true ambiguity. Otherwise
 decide, execute, log reason. If wrong, fix later — better than
 question-spam.
 
+### Rule 6 — Boss-decision emails must be visually distinct (2026-05-29)
+When an email genuinely requires boss decision before progress can
+continue (rare — only exceptions in Rule 5), **must** use:
+```bash
+uv run volpred ops send-alert --level warn --needs-reply \
+  --title "<具體決定內容>" --body-md /tmp/...md
+```
+The `--needs-reply` flag (added 2026-05-29 per boss directive):
+- Prefixes title with `🔴【需老闆回信】`
+- Prepends red blockquote banner to body
+- email_notifier.py CSS renders blockquote with red border / light red bg
+- Boss can spot decision-needed emails immediately in inbox vs ops noise
+
+Email body MUST also have one clear "需要的決定" section with **labeled
+options (A/B/C)** + recommendation + estimated work — boss should be
+able to reply with single letter. Don't list 15 backlog items asking
+for prioritization; pick ONE decision and ask about it cleanly.
+
 ## The Autonomous Loop (4 steps per fire)
 
 Detailed protocol: `storage/ops/autonomous_loop_protocol.md`. Summary:
