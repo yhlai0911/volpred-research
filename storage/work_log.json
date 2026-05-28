@@ -8805,5 +8805,14 @@
     "status": "succeeded",
     "claimed_by": "hourly-15",
     "notes": "continuous surprise (t=1.11/p=0.41) vs binary EAV (t=4.49/p=0.00) ΔAIC=+5479 binary 完勝; Publisher.publish_milestone 漏自動 chart upload — manual fix via SendMessage"
+  },
+  {
+    "timestamp": "2026-05-28T16:11",
+    "task_type": "paper_review",
+    "title": "Paper 6 (prg-periodic-garch) Table 1 0050.TW OOS period errata: 2019/12 → 2021/01",
+    "task_id": "Paper6_DIV2_0050TW_OOS_date_errata",
+    "status": "succeeded",
+    "claimed_by": "hourly-16",
+    "notes": "K886 actual OOS=2021-01-08 to 2026-04-02 (n_oos=1266, 70/30 split). Paper Table 1 stale at 2019/12 → fix to 2021/01. Spearman n=1251 = post-validity-filter (15 obs dropped invalid realized vol / non-positive forecast); not Table 1 column, no paper edit needed. xelatex PASS 15 pages; paper-update sync OK pages=14 PDF live."
   }
 ]

@@ -5720,7 +5720,7 @@
   {
     "id": "Paper6_DIV2_0050TW_OOS_date_errata",
     "title": "Paper 6: 0050.TW OOS 起始 2019/12 vs K886 2021-01-08 (差 13 月)",
-    "status": "pending",
+    "status": "succeeded",
     "priority": 3,
     "created_at": "2026-04-17T17:13:53+08:00",
     "description": "Paper 6 audit: Paper Table 1 0050.TW OOS starts 2019/12, K886 JSON 2021-01-08. n_oos=1266 一致但 Spearman n=1251 與 n_oos 不一致. 主線程 verify K886 70/30 split cutoff, update Table 1.",
@@ -5738,7 +5738,13 @@
         "at": "2026-05-25"
       }
     ],
-    "last_released_at": "2026-05-28T04:25:30.091170+00:00"
+    "last_released_at": "2026-05-28T04:25:30.091170+00:00",
+    "claimed_by": "hourly-16",
+    "claimed_at": "2026-05-28T08:08:33.494723+00:00",
+    "claim_session_id": "a488c163f0a7",
+    "started_at": "2026-05-28T08:08:33.895366+00:00",
+    "completed_at": "2026-05-28T08:12:44.007417+00:00",
+    "result": "Paper 6 (prg-periodic-garch) Table 1 0050.TW OOS period 2019/12→2021/01 fix; K886 confirmed OOS=2021-01-08 to 2026-04-02 (70/30 split, n=1266); Spearman n=1251 explained as post-validity-filter (15 dropped); xelatex PASS; paper-update sync PDF live"
   },
   {
     "id": "Paper6_DIV3_SPY_VaR_violation_rate",
@@ -12992,7 +12998,7 @@
     "title": "Publisher.publish_milestone 自動處理 details[charts] 觸發 Supabase upload + URL replace",
     "description": "K1151 (mile_0ae5323e) 發現 Publisher.publish_milestone 不會自動上傳圖片到 Supabase 也不會 rewrite markdown — 每篇文章都要主線程手補 (見 src/volpred/charts/article_charts.py::upload_chart 已存在但未被 publish flow 呼叫)。fix: Publisher 接到 details[charts] 或 markdown 內 relative path 時自動 upload + 更新 image_urls/supabase_storage_urls + replace markdown image src。affected: 所有 daily_article / event_article / trending_repost 寫文 flow。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "platform_ops",
     "source": "auto_discovered",
     "tags": [
@@ -13002,6 +13008,11 @@
       "audit-finding-K1151"
     ],
     "topic_cluster": "publisher_ops",
-    "created_at": "2026-05-28T15:21:03+08:00"
+    "created_at": "2026-05-28T15:21:03+08:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-28T07:32:14.332712+00:00",
+    "claim_session_id": "a5fbb7c05938",
+    "completed_at": "2026-05-28T07:38:14.551232+00:00",
+    "result": "Publisher.publish_milestone now auto-normalizes local chart refs using canonical publish_draft helpers: markdown image paths and details['charts']/image_urls/chart_urls are uploaded to Supabase and rewritten to HTTPS URLs; auto-populates image_urls + supabase_storage_urls. Added publisher regression test covering markdown+details chart upload path (3 tests passed in tests/test_publisher_provenance.py)."
   }
 ]
