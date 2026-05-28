@@ -66,6 +66,33 @@ storage/ops/*.lock
 storage/ops/locks/
 storage/ops/writer_log.jsonl
 
+# Cron / sync auto-generated state (2026-05-28: stop 113K-line noise per boss)
+# These regenerate every cron tick / agent action — no value in git history.
+storage/logs/cron/*.log
+storage/logs/cron/*.err
+storage/logs/gemini_ask_usage.jsonl
+storage/logs/hooks/
+storage/logs/compute/
+storage/ops/dashboard_latest.json
+storage/ops/alert_dedup.json
+storage/ops/cron_last_run.json
+storage/ops/pending_sessions.json
+storage/ops/gmail_inbox_state.json
+storage/ops/dispatch_report_latest.json
+storage/ops/handoff_latest.md
+storage/.release_settings.json
+storage/.supabase_sync_state.json
+storage/market_status.json
+storage/notifications/notification_log.json
+storage/notifications/*.json
+storage/session_state.json
+storage/work_log.json.append
+data/vixtwn/vixtwn_daily.csv
+
+# Experiments INDEX auto-regenerated (canonical = per-experiment README)
+experiments/INDEX.md
+experiments/index.json
+
 # Supabase local
 supabase/.temp/
 

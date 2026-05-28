@@ -141,3 +141,28 @@ PHASE B — 派新工:
 8. 若 last-3 涵蓋所有 candidates 的 type → 派沒做過的 type，必要時主動生 brief / 文章 / compute job。沒事做永不可接受。
 9. 嚴禁: force push, --no-verify, 寫 knowledge.json from agent (K1259), 假數字。研究誠實 > 一切。
 10. **完整完成 gate**：本 fire 結束前驗證 — (a) agent 跑完 + 結果 verify、(b) knowledge.json 或 work_log 已寫、(c) commit 已 push 主線 OR worktree merged、(d) 派出的 task next_tasks status 已標 succeeded/failed（不留 in_progress 殘留）。任一未完成 = 本 fire 未真正結束，繼續做完。下一輪 4h 後才開始下個新任務。
+
+PHASE Z — **Dispatch-end commit step**（2026-05-28 新增 hard rule，boss 抓 24h 60-file orphan incident）:
+
+本 fire 派完工 / agent 收完 / task 標完 status **之前**，**強制執行**:
+
+```bash
+# 1. 看本 fire 內主線程或 agent 改了什麼（排除 .gitignore 內的 state/log noise）
+git status -s | grep -vE '^.. (storage/logs/|storage/ops/dashboard_latest|storage/ops/alert_dedup|storage/.release_settings|storage/.supabase_sync_state|storage/market_status|storage/notifications/|data/vixtwn/|experiments/INDEX.md|experiments/index.json)'
+
+# 2. 若有非 noise 改動 → 加 + commit
+git add <關聯檔案>  # 不用 git add -A 避免抓到 noise
+git commit -m "<task_id> | <一句話 what changed | why>"
+
+# 3. Verify final status clean (signal-level)
+git status -s | grep -v '^?? ' | wc -l  # 應該 0 unstaged
+```
+
+**Why**: 沒 PHASE Z → agent 改檔 → dispatch 結束 → 改動成 orphan 躺 working tree → 24-48h 後 boss 抓到 60 files uncommitted（incident 2026-05-28 16:24）→ 磁碟壞掉就丟、多 session 衝突。
+
+**禁止**:
+- ❌ 用 `git add -A` 把 state/log noise 一起 commit（污染 history）
+- ❌ commit message 寫 "ops update" / "wip" / "save progress"（無 audit 價值）
+- ❌ skip PHASE Z 直接 exit（這條等於違反「完整完成」原則）
+
+**Boss directive 2026-05-28**：「當次問題 當次解決 不要排到下次」— PHASE Z 是本 fire 範圍內的事，不可變成 followup。
