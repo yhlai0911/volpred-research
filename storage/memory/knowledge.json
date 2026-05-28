@@ -31696,5 +31696,19 @@
       "cross-region",
       "TAIL_CALIB_USABLE"
     ]
+  },
+  {
+    "item_id": "a0768de7",
+    "category": "paper_review",
+    "content": "[Codex 24h-rule review: mile_f5714212 / K647 strategy matcher article — verdict CONDITIONAL_PASS] All 6 numerical claims verified against experiments/k647/k647_results.json + k647_strategy_matcher.py: Piecewise Conservative Sharpe 3.975 / MDD -2.48% ✓, 12/VIX net Sharpe -0.417 / TX 5.99% ✓, GARCH VT -0.187 / 4.08% ✓, Risk Parity 1.67% / 2.32 ✓, 11 strategies in DB ✓, 15-month live OOS 2025-01 to 2026-03 ✓. Lookahead: PASS (data_date=t weights, trade_date=t+1 returns per backfill_paper_trading.py + daily_update.py). No DM/Harvey overclaim. Pareto claim properly caveated as in-sample. CONDITIONAL because: (a) TX cost numbers (5.99%/4.08%/1.67%) written as if precise but actually K640 simplified estimate (rebalance count × 0.3 turnover × 10bps); (b) '11 strategies' needs clarification — K647 matcher universe includes Adaptive Tier but K640 ACTIVE_STRATEGIES has 10. REMEDIATION: appended '方法學澄清' footnote to mile_f5714212 content addressing both points; Supabase sync-all completed 6 articles. FOLLOWUP (low priority): refactor K647 to read K640_results.json directly instead of hardcoded numbers (numbers verified consistent for now). Source: storage/reviews/codex_review_mile_f5714212_20260529.log. Reviewer: Codex (gpt-5.4) via codex exec --skip-git-repo-check. Task: paper_review_mile_f5714212 (hourly-00 fire 2026-05-29 00:07 CST).",
+    "evidence": [
+      "experiments/k647/k647_results.json",
+      "experiments/k647/k647_strategy_matcher.py",
+      "experiments/k640/k640_live_performance_audit.py",
+      "storage/reviews/codex_review_mile_f5714212_20260529.log",
+      "storage/reports/feed.json#mile_f5714212"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-05-29T00:16:31.235809"
   }
 ]

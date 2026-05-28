@@ -13327,5 +13327,48 @@
     "started_at": "2026-05-28T15:14:32.352203+00:00",
     "completed_at": "2026-05-28T15:18:45.954178+00:00",
     "result": "Published mile_96fb5f73 K1314 GSP-HAR placebo-flagged replication (5 ETFs / 1 robust = SPY only). audience=research, status=draft, chart + table + anti-AI gate PASS (WARN 2/3 FB-tone non-blocking)."
+  },
+  {
+    "id": "paper_review_mile_f5714212",
+    "title": "Paper review (Codex 24h-rule): 策略池有 11 個，演算法怎麼幫你挑？K647 配對機制全公開",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_f5714212 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_f5714212",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-28T16:07:43+00:00",
+    "claimed_by": "hourly-00",
+    "claimed_at": "2026-05-28T16:10:38.189766+00:00",
+    "claim_session_id": "523f8d4592b7",
+    "started_at": "2026-05-28T16:10:43.883461+00:00",
+    "completed_at": "2026-05-28T16:16:43.101573+00:00",
+    "result": "Codex CONDITIONAL_PASS; all numbers verified; appended 方法學澄清 footnote + sync; knowledge=a0768de7; log=storage/reviews/codex_review_mile_f5714212_20260529.log"
+  },
+  {
+    "id": "paper_review_mile_bdf75de2",
+    "title": "Paper review (Codex 24h-rule): 禮拜一是不是最危險？跨三市場 day-of-week 大檢驗：幾乎全軍覆沒",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_bdf75de2 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_bdf75de2",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-28T16:07:43+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-28T16:08:27.530513+00:00",
+    "claim_session_id": "d30f3b3f4fed",
+    "completed_at": "2026-05-28T16:09:41.756813+00:00",
+    "result": "Codex 24h review completed for mile_bdf75de2. Findings: FAIL for source-code validity of HAR calendar-overlay claim due to t-vs-t+1 calendar dummy misalignment in k631; also pre-holiday labeling is contaminated by ordinary Friday-to-Monday weekend gaps. Article should get errata/follow-up before treating HAR null as verified."
   }
 ]
