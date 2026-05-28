@@ -122,6 +122,32 @@ def test_write_pending_sessions_records_due_and_dedupes(tmp_path, monkeypatch):
     import json
     data = json.loads(pending_path.read_text())
     assert data["schema_version"] == 1
+    assert "description" in data
     assert "daily_planning" in data["jobs"]
     assert data["jobs"]["daily_planning"]["recorded_count"] >= 2
     assert data["jobs"]["daily_planning"]["replayed_at"] is None
+
+
+def test_load_pending_sessions_normalizes_legacy_schema(tmp_path, monkeypatch):
+    import json
+    import run_due_jobs as rdj
+
+    pending_path = tmp_path / "pending_sessions.json"
+    monkeypatch.setattr(rdj, "PENDING_SESSIONS_PATH", pending_path)
+    pending_path.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "pending": {"legacy_a": {"recorded_count": 2}},
+                "session_crons": {"legacy_b": {"recorded_count": 1}},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    state = rdj._load_pending_sessions()
+
+    assert state["schema_version"] == 1
+    assert "description" in state
+    assert state["jobs"]["legacy_a"]["recorded_count"] == 2
+    assert state["jobs"]["legacy_b"]["recorded_count"] == 1

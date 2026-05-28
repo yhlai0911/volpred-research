@@ -1022,7 +1022,7 @@ def test_build_question_ops_summary_compacts_rerank_state(monkeypatch):
     assert summary["top_ranked"][0]["question_id"] == "q1"
     assert summary["pending_preview"][0]["question_id"] == "q2"
     assert summary["candidate_preview"][0]["question_id"] == "q3"
-    assert summary["detail_hints"]["maintain"].endswith("question-ops-maintain --source user --stub-if-no-work")
+    assert summary["detail_hints"]["maintain"].endswith("question-ops-maintain --source user --auto-create-task --stub-if-no-work")
     assert summary["detail_hints"]["workflow"].endswith("--source user --limit 3")
 
 
