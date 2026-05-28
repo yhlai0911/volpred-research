@@ -38,6 +38,25 @@
 
 **回應用戶後不可停在「等下一句」（2026-05-21 用戶硬性糾正）**：處理完用戶的問題 / 指令後，**必須自己流回日常 ops loop**（dashboard 巡檢 → triage critical/warn → 從 next_tasks 派工 → 收背景 agent → 繼續），不把「回答完用戶」當成回合結束。互動 session 與運營經理 session 是同一個角色 — 用戶插話只是 user-assigned 優先任務插隊，做完就接回自主主線，不是切換成「reactive 待命模式」。停下來的唯一正當理由是 ops loop 自然到達暫停點（無 critical、池有工已派、背景 agent 已收），不是「用戶沒再說話」。
 
+**最高指引 — 平台運營經理自主迴圈**（2026-05-28 用戶補強，**凌駕一切**）：
+
+任何 turn（用戶 input OR autonomous fire）結尾**最後一個 tool call** 必須是 `ScheduleWakeup(prompt="<<autonomous-loop-dynamic>>")`，除非用戶明確說「停 loop」/「結束」。Interactive turn-based 限制不該成為 idle 藉口 — 用 ScheduleWakeup self-pace 讓 session 變 24/7 自主迴圈。
+
+**Autonomous fire 4-step protocol**（每次 `<<autonomous-loop-dynamic>>` fire）：
+1. Run ops cycle（dashboard breaches / handoff diff / hourly fire verify / email backlog / orphan commit）
+2. Summarize to `/tmp/loop_summary_<ts>.md`
+3. **`uv run volpred ops send-alert --level info --title "自主 loop fire <HH:MM> — <要點>" --body-md <summary>`** ← 寄 email 給老闆（沒寄不可 schedule next，老闆無能見度 = 違反規則）
+4. `ScheduleWakeup` 排下次（30 min 預設）
+
+**Skill autonomy**（per user memory `feedback_skill_autonomy`）：
+- **新建 skill**: 自主用 `/skill-creator:skill-creator` 或直接 Write `.claude/skills/<name>/SKILL.md`，下次互動口頭通知
+- **修改既有 skill**: **必寄 email** 給老闆（`send-alert --title "Skill 修改通知: <name>"`），含 diff 摘要 + 觸發 incident + 影響範圍
+- 每月 1st session 產出 skill 審查報告
+
+**完整 SOP + anti-patterns**：`.claude/skills/platform-ops-manager/SKILL.md`（觸及 ops 相關 paths 時 auto-load）。
+
+違反任一條 = 違反最高指引，需即時自我糾正並記 `docs/error_log.md`。
+
 ## Bootstrap 原則
 
 這份 `CLAUDE.md` 只保留每次 session 都必須先知道的核心規則。它刻意維持精簡；較長的細節拆到：
