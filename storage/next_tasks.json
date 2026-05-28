@@ -12688,7 +12688,7 @@
     "title": "Errata mile_77c5e6d2: 文末補 2026-05-28 更正塊 (K320 audit snapshot stale)",
     "description": "Per review verdict CONDITIONAL_PASS (knowledge_item=4eac7111). 在 mile_77c5e6d2 文末加更正塊，揭露 4 篇被標 MISLEADING 的文章實際狀態: (1) mile_d368b4da 標題已改 '25 個策略沒一個通過' + 文末已有 2026-03-25 K255 errata; (2) mile_e8aefbf1 開頭已有 2026-05-07 更正聲明 + 全文重寫; (3) mile_5302df53 開頭已有 2026-05-07 更正聲明 + 全文重寫; (4) mile_281af193 91% 數字已模糊化 + 標題加『——而且做對了』. 不重寫主體 — 元稽核被自身打臉是好教材。Errata template 見 /tmp/review_mile_77c5e6d2.md.",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "review_followup",
     "article_id": "mile_77c5e6d2",
@@ -12704,7 +12704,9 @@
     "claimed_by": "hourly-14",
     "claimed_at": "2026-05-28T06:08:40.395128+00:00",
     "claim_session_id": "c6f620e77314",
-    "started_at": "2026-05-28T06:08:49.119264+00:00"
+    "started_at": "2026-05-28T06:08:49.119264+00:00",
+    "completed_at": "2026-05-28T06:11:18.406753+00:00",
+    "result": "Appended 2026-05-28 更正聲明 to mile_77c5e6d2 content (4013→4614 chars). Discloses 3/4 MISLEADING articles already corrected pre-publish; element of self-irony retained as audit教材. Supabase synced, committed f56f2709."
   },
   {
     "id": "paper_review_mile_4174473e",
@@ -12878,7 +12880,7 @@
     "title": "K1151: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1151 has verdict signal (score=9, reasons=None) but no general article. Verdict preview: ",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1151",
@@ -12887,14 +12889,20 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-28T05:11:18+00:00"
+    "created_at": "2026-05-28T05:11:18+00:00",
+    "claimed_by": "hourly-15",
+    "claimed_at": "2026-05-28T07:08:36.202324+00:00",
+    "claim_session_id": "3255e00fcf4d",
+    "started_at": "2026-05-28T07:08:51.682911+00:00",
+    "completed_at": "2026-05-28T07:19:52.304102+00:00",
+    "result": "mile_0ae5323e 散戶向 K1151 機制驗證文章 3490 字，2 張 Supabase PNG，anti_ai_gate PASS，supabase sync ok。Audit: Publisher.publish_milestone 未自動處理 details['charts'] → 已手補圖片 upload + URL replace。"
   },
   {
     "id": "K672_article_general",
     "title": "K672: write general-audience article (auto-discovered uncovered K)",
     "description": "K K672 has verdict signal (score=9, reasons=None) but no general article. Verdict preview: ",
     "priority": 3,
-    "status": "pending",
+    "status": "failed",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K672",
@@ -12903,7 +12911,12 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-28T05:11:18+00:00"
+    "created_at": "2026-05-28T05:11:18+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-28T06:30:49.674610+00:00",
+    "claim_session_id": "6561437ad571",
+    "completed_at": "2026-05-28T06:31:18.726765+00:00",
+    "result": "Auto-discovered task invalid due exact topic duplication. Existing general feed already published:『波動率預測研究的定論與開放問題：K672 對 1,421 條知識條目的四層證據地圖』(semantic search top match and exact title grep hit). No new article should be published for K672 under current angle."
   },
   {
     "id": "K1152_article_general",
@@ -12925,5 +12938,53 @@
     "claim_session_id": "a537c1ff7508",
     "completed_at": "2026-05-28T05:30:08.440169+00:00",
     "result": "Auto-discovered task invalid due topic duplication. Existing feed already covers K1152 angle, including research article『同樣是財報日，為什麼台股反應比美股小 3.5 倍？』and closely overlapping general/research earnings-announcement articles. Duplicate-check via grep + knowledge-index search shows high semantic overlap, so no new general article should be published."
+  },
+  {
+    "id": "paper_review_mile_477dfe5e",
+    "title": "Paper review (Codex 24h-rule): 財報驚喜有多大，不影響當日波動率：日美跨市場的同一結論",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_477dfe5e needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_477dfe5e",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-28T07:07:48+00:00"
+  },
+  {
+    "id": "K1167_article_general",
+    "title": "K1167: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1167 has verdict signal (score=8, reasons=None) but no general article. Verdict preview: ",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1167",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-28T07:07:48+00:00"
+  },
+  {
+    "id": "K1305_article_general",
+    "title": "K1305: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1305 has verdict signal (score=6, reasons=None) but no general article. Verdict preview: ",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1305",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-28T07:07:48+00:00"
   }
 ]
