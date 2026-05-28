@@ -12950,7 +12950,7 @@
     "title": "Paper review (Codex 24h-rule): 財報驚喜有多大，不影響當日波動率：日美跨市場的同一結論",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_477dfe5e needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_477dfe5e",
@@ -12959,7 +12959,12 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-28T07:07:48+00:00"
+    "created_at": "2026-05-28T07:07:48+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-28T08:39:00.678111+00:00",
+    "claim_session_id": "a84a5b1c6991",
+    "completed_at": "2026-05-28T08:40:07.203442+00:00",
+    "result": "Codex CLI 0.132.0 review CONDITIONAL_PASS. Code/results pass lookahead and reproducibility checks: VIX and surprise signals both lagged by 1 day; bootstrap/placebo/drop-5 seeds fixed at 42. Article main null-result narrative is honest, but two errata needed: (1) article says『對日內波動率做迴歸』while source uses daily close-to-close returns / daily variance proxy, not intraday vol; (2) article says continuous spec adds almost zero info with combined Δlogℓ ≈ -3400, but K1151 + K1157 source implies roughly 2739.7 + 1275.7 = 4015.4 log-likelihood units in binary’s favor. Recommend article wording correction only; no code bug found."
   },
   {
     "id": "K1167_article_general",
