@@ -1,0 +1,60 @@
+{
+  "experiment_id": "K1307",
+  "status": "scaffold_with_local_diagnostic",
+  "executed_full_experiment": false,
+  "seed": 42,
+  "related_experiments": [
+    "K848",
+    "K850",
+    "K852",
+    "K1318"
+  ],
+  "research_question": "When 0050.TW 5-minute RV sample is long enough, can HAR-RV beat daily-proxy baselines on Taiwan volatility forecasting?",
+  "data_sources": {
+    "tw_rv": {
+      "path": "data/intraday/0050_TW_daily_rv.csv",
+      "total_rows": 76,
+      "non_null_rows": 63,
+      "first_non_null": "2026-02-09",
+      "last_non_null": "2026-05-22"
+    },
+    "spy_rv_reference": {
+      "path": "data/intraday/SPY_daily_rv.csv",
+      "total_rows": 90,
+      "non_null_rows": 90,
+      "first_non_null": "2026-01-14",
+      "last_non_null": "2026-05-22"
+    }
+  },
+  "lookahead_certification": {
+    "rule": "signal from t-1, target at t",
+    "enforcement": [
+      "rv_1d = rv.shift(1)",
+      "rv_5d = rv.shift(1).rolling(5).mean()",
+      "rv_22d = rv.shift(1).rolling(22).mean()"
+    ]
+  },
+  "diagnostic": {
+    "verdict": "NOT_READY_SAMPLE_TOO_SHORT",
+    "non_null_rv_days": 63,
+    "har_feature_rows_after_lags": 41,
+    "min_har_lag_days": 22,
+    "min_train_days": 30,
+    "max_oos_obs_after_min_train": 11,
+    "powered_oos_target_days": 252,
+    "meets_powered_threshold": false,
+    "notes": [
+      "This file is a sample-readiness diagnostic, not a full forecasting run.",
+      "K1318 already showed methodology is viable but 0050.TW OOS power is too low in short samples.",
+      "Use signal from t-1 to predict RV at t; explicit rv.shift(1) enforced in feature construction."
+    ]
+  },
+  "success_criteria": {
+    "current_turn": "Create traceable research package and local readiness gate.",
+    "future_full_run": [
+      "At least ~252 non-null 0050.TW RV days for a powered OOS comparison",
+      "QLIKE-based forecast comparison against HAR-ABS / HAR-SQ / EWMA",
+      "DM-HLN / Harvey threshold with honest null reporting if not significant"
+    ]
+  }
+}

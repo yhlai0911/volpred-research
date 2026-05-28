@@ -1,0 +1,80 @@
+{
+  "experiment_id": "k1321",
+  "title": "VIXTWN ratio stability checkpoint before 252 days",
+  "date": "2026-05-26",
+  "seed": 42,
+  "data_sources": {
+    "vixtwn": "data/vixtwn/vixtwn_daily.csv",
+    "vix": "paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv"
+  },
+  "cleaning": {
+    "vixtwn": {
+      "raw_rows": 117,
+      "duplicate_dates_removed": 5,
+      "unique_rows": 112,
+      "start": "2025-12-01",
+      "end": "2026-05-22"
+    },
+    "vix": {
+      "raw_rows": 4790,
+      "duplicate_dates_removed": 12,
+      "unique_rows": 4778,
+      "start": "2008-01-02",
+      "end": "2026-05-22"
+    },
+    "alignment": "intersection of deduplicated same-date labels",
+    "dedup_rule": "sort by date, drop_duplicates(date, keep=\"first\")"
+  },
+  "baseline_comparison": {
+    "k1181_mean": 1.3906,
+    "k1181_note": "Early official sample from Dec 2025 to Apr 2026"
+  },
+  "progress_to_252": {
+    "target_days": 252,
+    "unique_vixtwn_days": 112,
+    "overlap_days": 111,
+    "completion_ratio": 0.444444,
+    "days_remaining": 140,
+    "target_reached": false
+  },
+  "ratio_stats": {
+    "n": 111,
+    "mean": 1.532583,
+    "median": 1.451046,
+    "std": 0.290524,
+    "cv": 0.189565,
+    "min": 1.09109,
+    "max": 2.278679,
+    "first_half_mean": 1.378676,
+    "second_half_mean": 1.683741,
+    "trend_slope_per_day": 0.006624,
+    "trend_rvalue": 0.733823,
+    "trend_pvalue": 0.0,
+    "trend_stderr": 0.000587,
+    "ttest_vs_k1181_mean": {
+      "baseline_mean": 1.3906,
+      "t_stat": 5.1489,
+      "p_value": 1e-06
+    },
+    "rolling_20_mean_start": 1.314385,
+    "rolling_20_mean_end": 2.075699
+  },
+  "verdict": {
+    "ratio_stable_before_252": false,
+    "reason": "Mean is above K1181 baseline, CV is elevated, and the time trend is strongly positive. Current sample is still below 252 trading days."
+  },
+  "key_findings": [
+    "Cleaned overlap sample is n=111 with mean=1.5326 and CV=0.1896.",
+    "First-half mean=1.3787 vs second-half mean=1.6837.",
+    "Trend slope=0.006624/day (p=5.139e-20).",
+    "One-sample t-test vs K1181 mean 1.3906: t=5.1489, p=1.158e-06.",
+    "Progress to 252-day target: 112/252 (44.4%)."
+  ],
+  "tail_snapshot": {
+    "2026-05-18": 2.19248,
+    "2026-05-19": 2.188815,
+    "2026-05-20": 2.116399,
+    "2026-05-21": 2.050716,
+    "2026-05-22": 1.981437
+  }
+}

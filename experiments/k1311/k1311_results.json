@@ -1,0 +1,38 @@
+{
+  "experiment_id": "K1311",
+  "status": "scaffold_with_local_diagnostic",
+  "executed_full_experiment": false,
+  "seed": 42,
+  "related_experiments": [
+    "K1181",
+    "K1308"
+  ],
+  "research_question": "Once VIXTWN reaches ~252 trading days, does the VIXTWN/VIX ratio stabilize or remain time-varying?",
+  "data_sources": {
+    "vixtwn": {
+      "path": "data/vixtwn/vixtwn_daily.csv",
+      "total_rows": 112,
+      "non_null_rows": 112,
+      "first_date": "2025-12-01",
+      "last_date": "2026-05-22"
+    }
+  },
+  "readiness_gate": {
+    "verdict": "NOT_READY_BELOW_252D_GATE",
+    "current_n": 112,
+    "target_n": 252,
+    "pct_complete": 44.4,
+    "remaining_trading_days": 140,
+    "notes": [
+      "K1181 provided the early ratio baseline; K1308 already documented intermediate instability at 119 days.",
+      "K1311 is a readiness gate, not a replacement for K1308's substantive findings.",
+      "Do not upgrade narrative claims until the sample reaches the 252-day threshold."
+    ]
+  },
+  "future_full_validation_plan": [
+    "Recompute ratio distribution on the full 252-day sample",
+    "Compare against K1181 and K1308 baselines with explicit sample-end dates",
+    "Re-run rolling stability, time-trend, and structural-change diagnostics",
+    "State clearly whether Paper 2 can still use a fixed ratio constant"
+  ]
+}

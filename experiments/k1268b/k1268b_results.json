@@ -1,0 +1,40 @@
+{
+  "experiment_id": "k1268b",
+  "status": "scaffold_only",
+  "executed": false,
+  "seed": 42,
+  "data_sources": {
+    "gdelt_5min_bars": "experiments/k1268/gdelt_5min_bars.parquet",
+    "spy_intraday_source": null
+  },
+  "planned_sample_dates": [
+    "2020-03-12",
+    "2023-03-13",
+    "2024-08-05"
+  ],
+  "methodology": {
+    "target": "SPY 5-minute realized variance",
+    "predictors": "GDELT 5-minute event/sentiment intensity bars",
+    "lags": [
+      1,
+      2,
+      3,
+      6
+    ],
+    "lookahead_guard": "signal.shift(1) — use GDELT signal from t-1 to predict RV at t",
+    "multiple_testing_note": "Preserve K1268 headline adjustment over the pre-registered lag grid."
+  },
+  "coverage": {
+    "gdelt_rows": null,
+    "spy_intraday_rows": null,
+    "aligned_5min_rows": null
+  },
+  "results": {
+    "per_date": [],
+    "headline_verdict": null,
+    "notes": [
+      "Placeholder schema only.",
+      "Do not replace crisis dates with recent yfinance-accessible windows."
+    ]
+  }
+}

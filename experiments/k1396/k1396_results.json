@@ -1,0 +1,49 @@
+{
+  "experiment_id": "K1396",
+  "run_at": "2026-05-22T13:31:27.143324+00:00",
+  "elapsed_seconds": 39.8,
+  "configuration": {
+    "data_file": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
+    "data_start": "2005-01-01",
+    "oos_start": "2019-01-01",
+    "window": 2000,
+    "refit_every": 63,
+    "loss": "QLIKE_Patton2011",
+    "seed": 42
+  },
+  "sample_sizes": {
+    "n_oos": 1866,
+    "n_refits": 30
+  },
+  "mean_qlike": {
+    "HAR": 1.5611519742545494,
+    "HAR_VIX": 1.522854467466379,
+    "A4f": 1.5389513340376022
+  },
+  "dm_tests": {
+    "HAR_vs_A4f": {
+      "t_stat": 0.8659742598565282,
+      "p_value": 0.38661566311812917,
+      "harvey_significant": false,
+      "interpretation": "positive t = A4f has lower QLIKE (A4f better)"
+    },
+    "HAR_VIX_vs_A4f": {
+      "t_stat": -0.8768318276230287,
+      "p_value": 0.3806909169128035,
+      "harvey_significant": false,
+      "interpretation": "positive t = A4f has lower QLIKE (A4f better)"
+    },
+    "HAR_VIX_vs_HAR": {
+      "t_stat": -2.6040441104105785,
+      "p_value": 0.009286223952342777,
+      "harvey_significant": false,
+      "interpretation": "positive t = HAR has lower QLIKE (HAR better)"
+    }
+  },
+  "notes": [
+    "C4 Paper 9 benchmark: HAR-RV (Corsi 2009) vs A4f (GARCH-X-VIX champion)",
+    "A4f forecast uses steady-state g at each refit boundary (approximation)",
+    "For full recursion-based A4f forecasts, compare with K988/compute_mcs_dm results",
+    "HAR features: rv_d=r\u00b2_{t-1}, rv_w=5-day avg, rv_m=22-day avg (no lookahead)"
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "experiment_id": "k1380_v4",
+  "title": "Paper 9 White RC / Hansen SPA Test \u2014 17-Spec Horse Race (v4 3-Strike Fix)",
+  "metadata": {
+    "data_source": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
+    "oos_start": "2019-01-01",
+    "window": 2000,
+    "refit_every": 63,
+    "bootstrap_B": 499,
+    "bootstrap_seed": 42,
+    "harvey_threshold": 3.0,
+    "qlike_proxy": "r_squared (Patton 2011 proxy-robust)",
+    "coverage_threshold": 0.95,
+    "n_eligible_specs": 15,
+    "eligible_specs": [
+      "A1",
+      "A2",
+      "A3",
+      "A4",
+      "A5",
+      "A2f",
+      "A4f",
+      "A3f",
+      "A2n",
+      "A4n",
+      "B1",
+      "B2",
+      "B3",
+      "C2",
+      "C3"
+    ],
+    "ineligible_specs": [
+      "C1"
+    ],
+    "n_valid_spa": 1854,
+    "elapsed_seconds": 949.6,
+    "timestamp": "2026-05-22T06:45:56.567003+00:00",
+    "lookahead_free": "signal.shift(1): vix[abs_idx-1] for t-1 VIX lag",
+    "c3_critical_addressed": true,
+    "v4_fixes": [
+      "per-model valid_i masks (no joint mask)",
+      "SPA restricted to coverage>=95% specs",
+      "per-model NaN coverage diagnostics",
+      "MIDAS B-series lag matrix via slicing (no np.roll)"
+    ]
+  },
+  "per_model_coverage": {
+    "A1": {
+      "n_valid": 1854,
+      "coverage": 0.9936,
+      "eligible": 

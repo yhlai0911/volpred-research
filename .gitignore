@@ -98,6 +98,12 @@ storage/risk_forecast.json
 storage/strategy_metrics.json
 storage/reports/trending_repost_log.json
 
+# 3rd-party tool caches
+.antigravitycli/
+.codex-companion/
+# Stray root-level conftest (real test conftest is tests/conftest.py)
+/conftest.py
+
 # Supabase local
 supabase/.temp/
 
