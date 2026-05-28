@@ -1,0 +1,250 @@
+{
+  "experiment_id": "K1404",
+  "title": "HAR-RV Quantile Tail Forecasting on TW market (^TWII)",
+  "asset": "^TWII",
+  "oos_start": "2021-01-04",
+  "n_test": 1305,
+  "pinball_by_tau": {
+    "q50": 0.29125785176684427,
+    "q75": 0.28185554561176807,
+    "q90": 0.17941977804593828,
+    "q95": 0.11594228149767721,
+    "q99": 0.03702518897222107
+  },
+  "coverage_by_tau": {
+    "q50": {
+      "nominal": 0.5,
+      "empirical": 0.4781609195402299,
+      "gap_pp": -2.183908045977012
+    },
+    "q75": {
+      "nominal": 0.75,
+      "empirical": 0.7333333333333333,
+      "gap_pp": -1.6666666666666718
+    },
+    "q90": {
+      "nominal": 0.9,
+      "empirical": 0.89272030651341,
+      "gap_pp": -0.7279693486590078
+    },
+    "q95": {
+      "nominal": 0.95,
+      "empirical": 0.9501915708812261,
+      "gap_pp": 0.019157088122612187
+    },
+    "q99": {
+      "nominal": 0.99,
+      "empirical": 0.9885057471264368,
+      "gap_pp": -0.14942528735631955
+    }
+  },
+  "kupiec_uc_by_tau": {
+    "q50": {
+      "violations": 681,
+      "n": 1305,
+      "p_hat": 0.5218390804597701,
+      "p_nominal": 0.5,
+      "lr_stat": 2.490447396906802,
+      "p_value": 0.11453916050721524
+    },
+    "q75": {
+      "violations": 348,
+      "n": 1305,
+      "p_hat": 0.26666666666666666,
+      "p_nominal": 0.25,
+      "lr_stat": 1.9057646109095003,
+      "p_value": 0.16743449247073927
+    },
+    "q90": {
+      "violations": 140,
+      "n": 1305,
+      "p_hat": 0.10727969348659004,
+      "p_nominal": 0.09999999999999998,
+      "lr_stat": 0.7524240659776069,
+      "p_value": 0.3857098407305767
+    },
+    "q95": {
+      "violations": 65,
+      "n": 1305,
+      "p_hat": 0.04980842911877394,
+      "p_nominal": 0.050000000000000044,
+      "lr_stat": 0.0010094900700323706,
+      "p_value": 0.9746534985430602
+    },
+    "q99": {
+      "violations": 15,
+      "n": 1305,
+      "p_hat": 0.011494252873563218,
+      "p_nominal": 0.010000000000000009,
+      "lr_stat": 0.28080672726295575,
+      "p_value": 0.5961729460461995
+    }
+  },
+  "dm_test": {
+    "dm_stat": -8.901361383452468,
+    "p_value": 0.0,
+    "n": 1305,
+    "mean_diff": -0.9318414543858589
+  },
+  "verdict": "TAIL_CALIB_USABLE",
+  "verdict_reason": "DM significantly NEGATIVE (qmed worse than OLS stat=-8.90 p=0.000) BUT tail coverage acceptable (gap95=0.02pp gap99=0.15pp) + Kupiec PASS (p95=0.975 p99=0.596) → tail VaR upper bound usable",
+  "dm_status": "SIG_NEG",
+  "tail_status": "TIGHT",
+  "per_asset_full": {
+    "asset": "^TWII",
+    "asset_slug": "twii",
+    "n_train": 3410,
+    "n_oos": 1305,
+    "oos_first_date": "2021-01-04",
+    "oos_last_date": "2026-05-26",
+    "ols_baseline": {
+      "qlike_mean_oos": 1.5676379142711994,
+      "pinball_at_tau_0.50": 0.3009649419065826
+    },
+    "quantile_median_vs_ols": {
+      "qlike_mean_oos_qmed": 2.4994793686570587,
+      "pinball_at_tau_0.50": 0.29125785176684427,
+      "dm_qmed_vs_ols": {
+        "dm_stat": -8.901361383452468,
+        "p_value": 0.0,
+        "n": 1305,
+        "mean_diff": -0.9318414543858589
+      }
+    },
+    "quantile_forecasts": {
+      "q50": {
+        "tau": 0.5,
+        "params": {
+          "const": 0.16821393315661082,
+          "rv_d": -0.07677004748941751,
+          "rv_w": 0.1909366858360908,
+          "rv_m": 0.4389864571062816
+        },
+        "pinball_loss_oos": 0.29125785176684427,
+        "empirical_coverage": 0.4781609195402299,
+        "nominal_coverage": 0.5,
+        "coverage_gap_pp": -2.183908045977012,
+        "kupiec_uc": {
+          "violations": 681,
+          "n": 1305,
+          "p_hat": 0.5218390804597701,
+          "p_nominal": 0.5,
+          "lr_stat": 2.490447396906802,
+          "p_value": 0.11453916050721524
+        }
+      },
+      "q75": {
+        "tau": 0.75,
+        "params": {
+          "const": 0.15238920326820882,
+          "rv_d": -0.10868175820893988,
+          "rv_w": 0.41335688215079713,
+          "rv_m": 0.9378491007867353
+        },
+        "pinball_loss_oos": 0.28185554561176807,
+        "empirical_coverage": 0.7333333333333333,
+        "nominal_coverage": 0.75,
+        "coverage_gap_pp": -1.6666666666666718,
+        "kupiec_uc": {
+          "violations": 348,
+          "n": 1305,
+          "p_hat": 0.26666666666666666,
+          "p_nominal": 0.25,
+          "lr_stat": 1.9057646109095003,
+          "p_value": 0.16743449247073927
+        }
+      },
+      "q90": {
+        "tau": 0.9,
+        "params": {
+          "const": 0.24711550708695995,
+          "rv_d": -0.09475786907179895,
+          "rv_w": 0.6326632633788165,
+          "rv_m": 1.3241852818109123
+        },
+        "pinball_loss_oos": 0.17941977804593828,
+        "empirical_coverage": 0.89272030651341,
+        "nominal_coverage": 0.9,
+        "coverage_gap_pp": -0.7279693486590078,
+        "kupiec_uc": {
+          "violations": 140,
+          "n": 1305,
+          "p_hat": 0.10727969348659004,
+          "p_nominal": 0.09999999999999998,
+          "lr_stat": 0.7524240659776069,
+          "p_value": 0.3857098407305767
+        }
+      },
+      "q95": {
+        "tau": 0.95,
+        "params": {
+          "const": 0.29022803927722407,
+          "rv_d": -0.08111608758255784,
+          "rv_w": 1.039308120987073,
+          "rv_m": 1.4328450551970633
+        },
+        "pinball_loss_oos": 0.11594228149767721,
+        "empirical_coverage": 0.9501915708812261,
+        "nominal_coverage": 0.95,
+        "coverage_gap_pp": 0.019157088122612187,
+        "kupiec_uc": {
+          "violations": 65,
+          "n": 1305,
+          "p_hat": 0.04980842911877394,
+          "p_nominal": 0.050000000000000044,
+          "lr_stat": 0.0010094900700323706,
+          "p_value": 0.9746534985430602
+        }
+      },
+      "q99": {
+        "tau": 0.99,
+        "params": {
+          "const": 1.2445928276714397,
+          "rv_d": -0.21195246309284688,
+          "rv_w": 1.512125441351003,
+          "rv_m": 1.175317657611302
+        },
+        "pinball_loss_oos": 0.03702518897222107,
+        "empirical_coverage": 0.9885057471264368,
+        "nominal_coverage": 0.99,
+        "coverage_gap_pp": -0.14942528735631955,
+        "kupiec_uc": {
+          "violations": 15,
+          "n": 1305,
+          "p_hat": 0.011494252873563218,
+          "p_nominal": 0.010000000000000009,
+          "lr_stat": 0.28080672726295575,
+          "p_value": 0.5961729460461995
+        }
+      }
+    },
+    "verdict": "TAIL_CALIB_USABLE",
+    "verdict_reasons": [
+      "DM significantly NEGATIVE (qmed worse than OLS stat=-8.90 p=0.000) BUT tail coverage acceptable (gap95=0.02pp gap99=0.15pp) + Kupiec PASS (p95=0.975 p99=0.596) → tail VaR upper bound usable"
+    ],
+    "dm_status": "SIG_NEG",
+    "tail_status": "TIGHT"
+  },
+  "config": {
+    "seed": 42,
+    "data_start": "2007-01-03",
+    "oos_start": "2021-01-04",
+    "quantiles": [
+      0.5,
+      0.75,
+      0.9,
+      0.95,
+      0.99
+    ],
+    "model": "HAR-RV + statsmodels.QuantReg (Koenker-Bassett 1978)",
+    "refit": "none (single fixed-origin fit)",
+    "target": "daily_rv = |daily log return %|",
+    "features": "rv_d/rv_w/rv_m all via .shift(1) — signal at t-1, target at t"
+  },
+  "related_k": [
+    "K1402",
+    "K1403",
+    "K1322",
+    "K783c"
+  ]
+}
