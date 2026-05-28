@@ -31710,5 +31710,53 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-05-29T00:16:31.235809"
+  },
+  {
+    "id": "mile_4c1045ea_codex_24h_review_2026_05_29",
+    "title": "Article mile_4c1045ea (K663 升降息 黃金避險) Codex 24h-rule review — CONDITIONAL_PASS",
+    "summary": "Codex 24h-rule review on production article mile_4c1045ea (K663 三利率環境量化驗證). All 14 quoted numbers verified against experiments/k663/k663_results.json exactly. Source code k663_rate_environment_vt.py:179 `vt_weight.shift(1)` confirms no signal-level lookahead. Codex VERDICT: CONDITIONAL_PASS (confidence high) — 2 framing/inference issues: (1) regime classification is ex-post descriptive segmentation but article opening reads as actionable real-time rule; (2) '差了整整 1.35 Sharpe 不是雜訊' without DM / Harvey / bootstrap CI. Action: appended methodology errata footnote (607 chars) to feed.json + reports/mile_4c1045ea.json disclosing ex-post nature, missing formal stats, untested parameter sensitivity. Article kept published, errata transparent. Follow-up K's flagged for sensitivity / DM / regime proxy / TLT alternatives.",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "K663",
+    "experiment_path": "experiments/k663/",
+    "reviewer": "codex-cli gpt-5.4",
+    "reviewer_source": "codex_cli_primary",
+    "codex_review": "CONDITIONAL_PASS, confidence high, 2 framing/inference issues, no code-level leak",
+    "article_id": "mile_4c1045ea",
+    "asset": "SPY/GLD/TLT/VIX/^TNX",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "k663",
+      "article-mile_4c1045ea",
+      "gold-hedging",
+      "rate-regime",
+      "ex-post-segmentation",
+      "errata-applied"
+    ],
+    "key_metrics": {
+      "sample_days": 4962,
+      "regime_split_rising_stable_falling": [
+        1023,
+        2998,
+        941
+      ],
+      "sharpe_delta_50_50_minus_pure_stock_rising": -0.381,
+      "sharpe_delta_50_50_minus_pure_stock_falling": 0.97,
+      "sharpe_range_50_50": 1.046,
+      "spy_tlt_corr_rising": 0.0227,
+      "spy_tlt_corr_falling": -0.5341,
+      "all_numbers_verified": 14,
+      "fabrication_count": 0
+    },
+    "follow_up_suggested": [
+      "K-sensitivity: 50bp ± 20bp + 126d ± 63d sweep",
+      "K-formal-test: DM + bootstrap CI on Sharpe rising vs falling",
+      "K-regime-proxy: real-time observable indicator (Fed funds futures / FOMC dots)",
+      "K-TLT-alt: replace TLT with IEF / TIP"
+    ],
+    "action_taken": "errata_footnote_appended_to_feed_and_reports_json",
+    "review_report": "storage/ops/article_reviews/mile_4c1045ea_codex_review.md",
+    "created_at": "2026-05-28T19:14:22.099581+00:00",
+    "session_id": "hourly-dispatch-2026-05-29-03"
   }
 ]

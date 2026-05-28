@@ -13421,7 +13421,7 @@
     "title": "Paper review (Codex 24h-rule): 升降息環境下，黃金真的能避險嗎？K663 三種利率環境量化驗證",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_4c1045ea needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_4c1045ea",
@@ -13430,7 +13430,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-28T18:14:03+00:00"
+    "created_at": "2026-05-28T18:14:03+00:00",
+    "claimed_by": "hourly-03",
+    "claimed_at": "2026-05-28T19:09:20.402260+00:00",
+    "claim_session_id": "38a7be4a8014",
+    "started_at": "2026-05-28T19:09:29.747141+00:00",
+    "completed_at": "2026-05-28T19:14:55.266344+00:00",
+    "result": "Codex 24h-rule CONDITIONAL_PASS. 14 quoted numbers all match results.json. VT signal shift(1) verified. 2 framing issues: ex-post regime segmentation read as actionable, '不是雜訊' claim w/o DM/Harvey/CI. Action: appended methodology errata footnote (607 chars) to feed.json + reports JSON. Knowledge entry mile_4c1045ea_codex_24h_review_2026_05_29 written. Synced 3 articles + 2 knowledge to Supabase. Review report: storage/ops/article_reviews/mile_4c1045ea_codex_review.md"
   },
   {
     "id": "K1117_article_general",
