@@ -13664,7 +13664,7 @@
     "title": "K1320: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1320 has verdict signal (score=2, reasons=None) but no general article in feed.json.  Verdict preview: ",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1320",
@@ -13673,7 +13673,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-28T20:12:39+00:00"
+    "created_at": "2026-05-28T20:12:39+00:00",
+    "claimed_by": "hourly-05",
+    "claimed_at": "2026-05-28T21:09:13.329536+00:00",
+    "claim_session_id": "f3b4f8b16fa2",
+    "started_at": "2026-05-28T21:09:17.045595+00:00",
+    "completed_at": "2026-05-28T21:18:43.311364+00:00",
+    "result": "Feed draft mile_2c4efefa published (general audience); anti-AI gate PASS; charts copied to storage/reports/charts/k1320/; 2 supabase image urls; HE numbers byte-for-byte match k1320_results.json (Gumbel OOS HE=0.8880, DCC p=0.617 NULL)"
   },
   {
     "id": "K1387_article_general",
@@ -13690,5 +13696,21 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-05-28T20:12:39+00:00"
+  },
+  {
+    "id": "K1391_article_general",
+    "title": "K1391: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1391 has verdict signal (score=1, reasons=None) but no general article in feed.json.  Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1391",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-28T21:07:52+00:00"
   }
 ]
