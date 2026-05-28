@@ -1095,6 +1095,8 @@ def main() -> int:
                         help="comma-separated; overrides frontmatter tags entirely")
     parser.add_argument("--kid", default=None,
                         help="K-id for experiment_refs; overrides frontmatter")
+    parser.add_argument("--cluster-waiver", default=None,
+                        help="details.cluster_waiver reason used to justify topic cooldown exception")
     parser.add_argument("--no-sanitize", action="store_true",
                         help="skip ban-list sanitizer (default applies for audience=general)")
     parser.add_argument("--force-duplicate", action="store_true",
@@ -1208,12 +1210,19 @@ def main() -> int:
     # badge is added by the publisher itself so we strip it from the
     # `--tags` we pass through (publisher will re-insert exactly one
     # canonical Chinese tag); we assemble it here only for the cap budget.
+    # K-id refs stay in details.experiment_refs and must NOT leak into
+    # user-facing tags, otherwise publisher._infer_audience will correctly
+    # force audience='research' on a draft that was otherwise written for
+    # general readers.
     capped_tags, tag_audit = _cap_tags_with_priority(
         user_tag_list, audience, refs, max_tags=TAG_CAP,
     )
     # Drop the audience tag we added — publisher inserts canonical version.
     audience_tag_inserted = tag_audit.get("input_audience_tag", "")
-    publish_tag_list = [t for t in capped_tags if t != audience_tag_inserted]
+    publish_tag_list = [
+        t for t in capped_tags
+        if t != audience_tag_inserted and not re.match(r"^K\d", t)
+    ]
     tags = ",".join(publish_tag_list)
     if tag_audit["evicted"]:
         print(
@@ -1304,6 +1313,8 @@ def main() -> int:
         # canonical URL (frontend reads this top-level field). Surfaces that
         # consume `details.image_url` also work via this nested copy.
         details_payload["image_url"] = image_url_field
+    if args.cluster_waiver:
+        details_payload["cluster_waiver"] = args.cluster_waiver
     cmd = [
         "uv", "run", "volpred", "ops", "publish-milestone",
         "--title", info["title"],
