@@ -5212,7 +5212,7 @@
   {
     "id": "Paper2_Table4_documentation_errata",
     "title": "Paper 2: Table 4 / Methodology / Data section 補說明 (K1176 發現)",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 3,
     "created_at": "2026-04-17T17:05:46+08:00",
     "description": "K1176 (c9937d49) 確認 Paper 2 TZ momentum 方向結論成立，需補 documentation: (1) Table 4 備注: o2o 精確公式 (open→close 日內段 or open_t/open_{t-1}?); (2) 0050.TW 2014-01-02 4:1 split 處理方式腳注 (重要: yfinance auto_adjust 仍保留虛假 -75%); (3) Section 5 methodology: 資料來源 TEJ/Bloomberg/yfinance 明載 + 若差異顯著需討論; (4) experiments.md 加 K1176 為 Table 4 source; (5) 若 paper 最終採 K1176 magnitude → 更新 Sharpe 1.473 → 1.915 (+30%), 組合 Sharpe 1.810 → 2.192. 方向結論不變. 主線程 body edit. 配合 Paper2_errata_Table3_full_rewrite 一併做.",
@@ -5230,7 +5230,13 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-28T02:18:28.249877+00:00",
+    "claim_session_id": "399a6afa38c8",
+    "started_at": "2026-05-28T02:18:28.295122+00:00",
+    "completed_at": "2026-05-28T02:21:22.130719+00:00",
+    "result": "補齊 Paper 2 K1176 source 說明：資料來源分層、0050 split 處理、o2o 精確公式；appendix Table 4/時區動能數字改對齊 K1176，experiments.md 更新 source 綁定。"
   },
   {
     "id": "Paper2_errata_Table3_full_rewrite",
@@ -5714,7 +5720,7 @@
   {
     "id": "Paper6_DIV2_0050TW_OOS_date_errata",
     "title": "Paper 6: 0050.TW OOS 起始 2019/12 vs K886 2021-01-08 (差 13 月)",
-    "status": "pending_main_thread",
+    "status": "pending",
     "priority": 3,
     "created_at": "2026-04-17T17:13:53+08:00",
     "description": "Paper 6 audit: Paper Table 1 0050.TW OOS starts 2019/12, K886 JSON 2021-01-08. n_oos=1266 一致但 Spearman n=1251 與 n_oos 不一致. 主線程 verify K886 70/30 split cutoff, update Table 1.",
@@ -5731,7 +5737,8 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "last_released_at": "2026-05-28T03:22:24.826754+00:00"
   },
   {
     "id": "Paper6_DIV3_SPY_VaR_violation_rate",
@@ -5880,7 +5887,7 @@
   {
     "id": "Paper9_D5_0050TW_t144_source",
     "title": "Paper 9: 0050.TW DM t=1.44 setting 不明",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 3,
     "created_at": "2026-04-17T16:24:26+08:00",
     "description": "Paper 9 audit: tex t=1.44 但 K997 t=1.677, K1098 t=2.68. 找不到生成 1.44 的設定. **動作**: 主線程檢查 paper 草稿期 notebook 或 deprecated 腳本找出 1.44 來源; 若找不到 → 更新 tex 用 K997 (1.677) 或 K1098 (2.68) 的 canonical 結果. 影響：t=1.44 NS 與 t=1.677 NS 結論相同, t=2.68 Harvey 不顯著但超過 2.0.",
@@ -5896,7 +5903,13 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-28T03:23:13.756076+00:00",
+    "claim_session_id": "f6fe407dc5a1",
+    "started_at": "2026-05-28T03:23:18.552817+00:00",
+    "completed_at": "2026-05-28T03:24:39.593339+00:00",
+    "result": "確認 Paper 9 Table 6 的 0050.TW DM t=1.44 來源為 K994：experiments/k994/k994_results.json 中 A4f_vs_GJR dm_t=-1.4388，paper 以絕對值呈現。已在 paper/garch-x-vix/experiments.md 補 K994 為 Table 6 source，並在 main.tex 的 0050.TW row 加 inline source 註記，區分 K994（paper-period cross-asset）與 K997/K1098（local-fear robustness）。"
   },
   {
     "id": "Paper9_STOXX50E_ticker_forensic",
@@ -12443,7 +12456,7 @@
     "title": "paper-update CLI abstract field 從錯誤 source 抓 (main.tex vs body_v3 input chain)",
     "description": "2026-05-27 hourly-19 跑 vt-trend-following paper-update CLI 後 Supabase response abstract field 仍是 OLD content (r=0.487, 28.7 pp, confirming/not strengthening) 但 PDF 是新版 (r=0.793, 24.9 pp, strengthening, md5 match). 推測 paper-update CLI extract abstract 從 main_v3.tex 找 \\begin{abstract} fail (main_v3.tex 只 \\input{body_v3})，fallback 抓 main.tex (OLD abstract). Fix: 改 paper-update CLI 抽 abstract 邏輯：(1) 解 \\input chain 找實際含 \\begin{abstract} 的檔，OR (2) 從編譯後的 PDF 抽 abstract via pdftotext. 影響範圍：所有用 main_v(n).tex \\input body_v(n).tex pattern 的 paper.",
     "priority": 3,
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "task_type": "platform_ops",
     "source": "discovered_during_hourly-19",
     "tags": [
@@ -12452,7 +12465,13 @@
       "abstract-drift",
       "main-thread"
     ],
-    "created_at": "2026-05-27T11:20:57+00:00"
+    "created_at": "2026-05-27T11:20:57+00:00",
+    "claimed_by": "hourly-11",
+    "claimed_at": "2026-05-28T03:09:02.843930+00:00",
+    "claim_session_id": "5764dd6ad285",
+    "started_at": "2026-05-28T03:09:08.139294+00:00",
+    "completed_at": "2026-05-28T03:13:43.439198+00:00",
+    "result": "Fixed paper-update CLI abstract extraction: when main_v*.tex lacks \\begin{abstract}, walk \\input{} chain and try body files. src/volpred/ops/papers.py _count_tex_metrics. Verified all 11 papers (no regression) + pushed vt-trend-following → Supabase abstract now NEW (r=-0.806, 24.9 pp, drawdown insurance). Commit db6aedd9."
   },
   {
     "id": "platform_ops_frontend_cluster_deprioritization",
@@ -12744,5 +12763,66 @@
     "started_at": "2026-05-27T23:10:29.699743+00:00",
     "completed_at": "2026-05-28T00:17:32.987541+00:00",
     "result": "K1404 HAR-RV Quantile on ^TWII: TAIL_CALIB_USABLE verdict (DM SIG_NEG stat=-8.90 p=0 but τ=0.95/0.99 tail TIGHT, Kupiec p=0.97/0.60). Codex review CONDITIONAL_PASS. knowledge.json item_id=aadbea07. commits: 5e566d9d + 99a710ff (errata)."
+  },
+  {
+    "id": "paper_review_mile_088ce61e",
+    "title": "Paper review (Codex 24h-rule): 偏態與峰度能預測波動嗎？K471 給你三個資產的誠實答案",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_088ce61e needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_088ce61e",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-28T02:07:50+00:00",
+    "claimed_by": "hourly-10",
+    "claimed_at": "2026-05-28T02:08:34.071663+00:00",
+    "claim_session_id": "95ce670f5e1e",
+    "started_at": "2026-05-28T02:08:40.143025+00:00",
+    "completed_at": "2026-05-28T02:16:45.408035+00:00",
+    "result": "Codex CLI 0.132.0 review CONDITIONAL_PASS → fixed: (a) K471 cross_asset_summary.dm_significant logic now scans all models (was best-ΔR² only); (b) article wording: QQQ sig spec 「+偏態21」→「rv21+偏態5+偏態21」(M2_rv_skew_OLS p=0.0136); (c) added BTC reverse-direction DM sig paragraph + errata footnote. Numbers unchanged, only summary aggregation + narrative. Commit 33214b96. Supabase synced."
+  },
+  {
+    "id": "paper_review_mile_4df2d060",
+    "title": "Paper review (Codex 24h-rule): 小波分析能不能改善波動率預測？K479 給的答案是：看你怎麼比",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_4df2d060 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_4df2d060",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-28T04:08:16+00:00"
+  },
+  {
+    "id": "daily_K1404_TWII_quantile_tail_crossregion",
+    "task_type": "daily_article",
+    "priority": 3,
+    "status": "succeeded",
+    "title": "K1404 TWII HAR-RV Quantile Tail — 跨區域 (US→TW) 確認 tail-VaR usable",
+    "description": "K1404 已完成 (verdict=TAIL_CALIB_USABLE)；TWII 2021-01-04→today, n=1305; τ=0.95 empirical=95.02% Kupiec p=0.975; τ=0.99 empirical=98.85% Kupiec p=0.596。與 K1402 SPY + K1403 QQQ/GLD/TLT 構成 cross-region US 4 + TW 1 全部 tail-usable 證據鏈。寫成繁中 reader-facing daily_article，evidence-first，anti-AI gate 必過，draft 進池。",
+    "source": "hourly_main_thread_generated",
+    "created_at": "2026-05-28T04:11:02.176285Z",
+    "evidence_paths": [
+      "experiments/K1404/",
+      "experiments/K1404/K1404_results.json",
+      "experiments/K1404/coverage_plot.png",
+      "experiments/k1403/",
+      "experiments/k1403/k1403_results.json"
+    ],
+    "claimed_by": "hourly-12",
+    "claimed_at": "2026-05-28T04:11:06.594275+00:00",
+    "claim_session_id": "2e39975e3bca",
+    "started_at": "2026-05-28T04:11:10.312016+00:00",
+    "completed_at": "2026-05-28T04:17:02.721278+00:00",
+    "result": "Published as draft (id=mile_15d43f72). Cross-region (US 4 + TW 1) tail-VaR transportability article — K1402/K1403/K1404 evidence chain. 8 tags, audience=research, experiment_refs=[K1402,K1403,K1404]. anti_ai_gate exit 0 (1-shot PASS, 2 non-blocking WARNs). DM stats spot-verified against k1403_results.json (QQQ -12.68 / GLD -10.51 / TLT -11.59 match)."
   }
 ]
