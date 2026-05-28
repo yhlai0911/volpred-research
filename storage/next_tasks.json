@@ -12986,5 +12986,22 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-05-28T07:07:48+00:00"
+  },
+  {
+    "id": "platform_ops_publisher_auto_chart_upload",
+    "title": "Publisher.publish_milestone 自動處理 details[charts] 觸發 Supabase upload + URL replace",
+    "description": "K1151 (mile_0ae5323e) 發現 Publisher.publish_milestone 不會自動上傳圖片到 Supabase 也不會 rewrite markdown — 每篇文章都要主線程手補 (見 src/volpred/charts/article_charts.py::upload_chart 已存在但未被 publish flow 呼叫)。fix: Publisher 接到 details[charts] 或 markdown 內 relative path 時自動 upload + 更新 image_urls/supabase_storage_urls + replace markdown image src。affected: 所有 daily_article / event_article / trending_repost 寫文 flow。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "platform_ops",
+    "source": "auto_discovered",
+    "tags": [
+      "publisher",
+      "supabase",
+      "chart-upload",
+      "audit-finding-K1151"
+    ],
+    "topic_cluster": "publisher_ops",
+    "created_at": "2026-05-28T15:21:03+08:00"
   }
 ]
