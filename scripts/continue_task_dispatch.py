@@ -339,6 +339,16 @@ def build_report(*, auto_refill: bool = True) -> dict:
 
     free_slots = max(0, SLOT_CAP - slots["occupied"])
     candidates_to_dispatch = cats["agentable"][:free_slots]
+    pending_summary = {
+        "agentable": len(cats["agentable"]),
+        "main_thread": len(cats["main_thread"]),
+        "blocked": len(cats["blocked"]),
+        "label": (
+            f"agentable {len(cats['agentable'])} / "
+            f"main_thread {len(cats['main_thread'])} / "
+            f"blocked {len(cats['blocked'])}"
+        ),
+    }
 
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -349,6 +359,7 @@ def build_report(*, auto_refill: bool = True) -> dict:
         "pending_agentable": len(cats["agentable"]),
         "pending_main_thread": len(cats["main_thread"]),
         "pending_blocked": len(cats["blocked"]),
+        "pending_summary": pending_summary,
         "dispatch_candidates": [
             {
                 "id": t.get("id"),
@@ -383,6 +394,13 @@ def build_report(*, auto_refill: bool = True) -> dict:
 def print_report(report: dict) -> None:
     print(f"[dispatch] generated_at={report['generated_at']}")
     s = report["slot_state"]
+    pending_summary = report.get("pending_summary", {})
+    pending_label = pending_summary.get(
+        "label",
+        f"agentable {report['pending_agentable']} / "
+        f"main_thread {report['pending_main_thread']} / "
+        f"blocked {report.get('pending_blocked', 0)}",
+    )
     print(
         f"[dispatch] slots: occupied={s['occupied']}/{report['slot_cap']} "
         f"(worktrees={len(s['worktrees'])}, active_agents={len(s['active_agents'])}) "
@@ -390,7 +408,7 @@ def print_report(report: dict) -> None:
     )
     print(
         f"[dispatch] pending: total={report['pending_total']} "
-        f"agentable={report['pending_agentable']} main_thread={report['pending_main_thread']} "
+        f"{pending_label} "
         f"blocked={report.get('pending_blocked', 0)}"
     )
 

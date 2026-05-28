@@ -267,7 +267,7 @@ $(tail -30 "$HOURLY_LOG_PATH" 2>&1 | sed 's/\`/<bt>/g')
 
 ## 影響範圍
 
-- 本輪 dispatch 沒派工 → pool 沒消化（pending email_reply 持續累積）
+- 本輪 dispatch 沒派工 → agentable queue 沒消化（main_thread queue 可能仍有待辦；pending email_reply 持續累積）
 - 下次 fire 在 1 小時後（HH+1:07）
 
 ## 可能根因

@@ -13401,13 +13401,19 @@
     "description": "2026-05-29 01:00 boss 收 [INFO] loop 00:39 alert 寫 'pool 0 連 2 tick' 誤以為平台空轉. 實際是 agentable=0 但 main_thread queue 15 個飽和. Fix: 修 check_alerts.py 或 alert formatter, 把 pool 拆成兩個 field, e.g. 'agentable 0 / main_thread 15 / 連 2 tick'. 對應 task email-11786-c5c02c.",
     "task_type": "platform_ops",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "platform_ops",
       "alert_disambiguation",
       "boss_feedback"
     ],
     "source": "email_reply_followup",
-    "created_at": "2026-05-28T17:10:00+00:00"
+    "created_at": "2026-05-28T17:10:00+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-28T17:10:21.496774+00:00",
+    "claim_session_id": "2c68d23d0182",
+    "started_at": "2026-05-28T17:10:21.584747+00:00",
+    "completed_at": "2026-05-28T17:13:18.528825+00:00",
+    "result": "Disambiguated pending-pool wording: continue_task_dispatch report now emits pending_summary='agentable X / main_thread Y / blocked Z'; hourly_dispatch failure alert text no longer says ambiguous 'pool'. Added unit test coverage."
   }
 ]

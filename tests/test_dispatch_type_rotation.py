@@ -52,3 +52,28 @@ def test_categorize_keeps_p1_non_experiment_on_main_thread():
 
     assert [t["id"] for t in cats["agentable"]] == ["exp-1"]
     assert [t["id"] for t in cats["main_thread"]] == ["event-1", "trend-1"]
+
+
+def test_build_report_exposes_disambiguated_pending_summary(monkeypatch):
+    tasks = [
+        _task("platform-1", "platform_ops", priority=3),
+        _task("paper-1", "paper_review", priority=3),
+        _task("event-1", "event_article", priority=1),
+    ]
+
+    monkeypatch.setattr(dispatch, "count_active_slots", lambda: {"worktrees": [], "active_agents": [], "occupied": 0})
+    monkeypatch.setattr(dispatch, "load_pending_tasks", lambda: tasks)
+    monkeypatch.setattr(dispatch, "load_recent_task_type_counts", lambda limit=10: Counter())
+    monkeypatch.setattr(dispatch, "_maybe_refill", lambda *args, **kwargs: None)
+
+    report = dispatch.build_report(auto_refill=False)
+
+    assert report["pending_agentable"] == 2
+    assert report["pending_main_thread"] == 1
+    assert report["pending_blocked"] == 0
+    assert report["pending_summary"] == {
+        "agentable": 2,
+        "main_thread": 1,
+        "blocked": 0,
+        "label": "agentable 2 / main_thread 1 / blocked 0",
+    }
