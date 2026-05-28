@@ -1,0 +1,132 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-05-28",
+  "week_range": "2026-05-22 → 2026-05-29",
+  "totals": {
+    "input_tokens": 11,
+    "output_tokens": 791,
+    "cache_read_tokens": 58866,
+    "cache_create_tokens": 88737,
+    "billable_total": 89539,
+    "assistant_messages": 5,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.3623
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 11,
+      "output_tokens": 791,
+      "cache_read_tokens": 58866,
+      "cache_create_tokens": 88737,
+      "messages": 5,
+      "estimated_cost_usd": 0.3623
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 7,
+      "output_tokens": 484,
+      "cache_read_tokens": 29433,
+      "cache_create_tokens": 59085,
+      "messages": 3,
+      "billable_total": 59576,
+      "estimated_cost_usd": 0.2377,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "token_report": {
+      "input_tokens": 4,
+      "output_tokens": 307,
+      "cache_read_tokens": 29433,
+      "cache_create_tokens": 29652,
+      "messages": 2,
+      "billable_total": 29963,
+      "estimated_cost_usd": 0.1246,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 3,
+      "billable_total": 59576,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 3,
+          "billable_total": 59576
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "other",
+          "messages": 2,
+          "billable_total": 29963
+        },
+        {
+          "name": "non-text assistant message",
+          "messages": 1,
+          "billable_total": 29613
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 1,
+          "billable_total": 29613
+        },
+        {
+          "name": "⏱ 開始 2026-05-28 00:00:00 先確認日期與腳本存在。",
+          "messages": 1,
+          "billable_total": 29613
+        },
+        {
+          "name": "今天是週四，不需要週報。執行詳細日報。",
+          "messages": 1,
+          "billable_total": 350
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 0,
+      "billable_total": 0,
+      "family_breakdown": [],
+      "prefix_breakdown": [],
+      "top_first_lines": []
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 1,
+      "cache_create_tokens": 88737,
+      "billable_total": 89539,
+      "cache_create_share_pct": 99.1,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "4c1fce67-94c6-48df-8afb-8e434eb3667f",
+          "messages": 5,
+          "billable_total": 89539,
+          "cache_create_tokens": 88737,
+          "cache_read_tokens": 58866,
+          "duration_minutes": 0.1,
+          "cache_create_share_pct": 99.1,
+          "first_ts": "2026-05-28T14:43:58.921000+00:00",
+          "last_ts": "2026-05-28T14:44:06.224000+00:00"
+        }
+      ]
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "419e533",
+      "message": "Ops patrol report 2026-05-28T12:16Z"
+    },
+    {
+      "sha": "e7563d6",
+      "message": "Ops patrol report 2026-05-28T06:16Z"
+    },
+    {
+      "sha": "c64d32a",
+      "message": "Ops patrol report 2026-05-28T00:16Z"
+    }
+  ]
+}
