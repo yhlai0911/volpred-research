@@ -100,6 +100,75 @@ def _live_kids(tasks: list) -> set[str]:
     return kids
 
 
+def _kids_with_terminal_article_attempts(tasks: list) -> set[str]:
+    """K-ids that already had any article task reach a terminal state.
+
+    Terminal = succeeded / failed / superseded / closed.
+    Used together with `_any_feed_coverage` to suppress infinite retry loops
+    where (a) prior task ended terminal, (b) feed.json has K coverage under
+    some non-`general` audience, (c) refill keeps re-flagging as
+    uncovered_for_general → blind retry pollutes pool.
+
+    2026-05-29 incident: K1151/K672/K957 — prior `_article_general` task
+    'succeeded' but published article tagged audience=research; refill produced
+    v2/v3/v4 endlessly. Proper fix is publisher audience-tagging audit
+    (see platform_ops_audience_tag_audit_K1151_K672_K957); this guard stops
+    bleeding while audit completes.
+    """
+    TERMINAL = {"succeeded", "failed", "superseded", "closed"}
+    kids: set[str] = set()
+    import re
+    for t in tasks:
+        if str(t.get("status") or "").lower() not in TERMINAL:
+            continue
+        # Only consider article tasks (auto-discovered daily_article).
+        if str(t.get("task_type") or "") != "daily_article":
+            continue
+        tid = str(t.get("id") or "")
+        if "_article_" not in tid:
+            continue
+        for key in ("k_id", "experiment_id"):
+            v = t.get(key)
+            if v:
+                kids.add(str(v).upper())
+        m = re.match(r"^(K\d{2,5})_article_", tid)
+        if m:
+            kids.add(m.group(1).upper())
+    return kids
+
+
+def _any_feed_coverage_kids() -> set[str]:
+    """K-ids referenced by ANY feed article regardless of audience.
+
+    Pairs with `_kids_with_terminal_article_attempts` — when a K already has
+    feed coverage (even mis-tagged audience) AND a prior terminal article
+    task, retry is the wrong fix; audience-tag audit is.
+    """
+    import re
+    kids: set[str] = set()
+    feed_path = ROOT / "storage" / "reports" / "feed.json"
+    if not feed_path.exists():
+        return kids
+    try:
+        feed = json.loads(feed_path.read_text(encoding="utf-8"))
+    except Exception:
+        return kids
+    for art in feed:
+        if not isinstance(art, dict):
+            continue
+        if art.get("status") not in ("draft", "published", "scheduled"):
+            continue
+        details = art.get("details") or {}
+        refs = details.get("experiment_refs") if isinstance(details, dict) else []
+        if isinstance(refs, list):
+            for r in refs:
+                kids.add(str(r).upper())
+        title = art.get("title", "") or ""
+        for m in re.findall(r"\bK\d{2,5}[a-z_]*\b", title):
+            kids.add(m.upper())
+    return kids
+
+
 def _next_retry_suffix(k_id: str, audience: str, tasks: list) -> str:
     """Pick next v2/v3/... suffix for a retry K article task id.
 
@@ -224,6 +293,10 @@ def refill(target: int, dry_run: bool = False) -> dict:
     existing = _existing_ids(tasks)
     live_kids = _live_kids(tasks)
     already_covered = _kids_with_general_article()
+    # 2026-05-29 audience-mismatch retry-loop guard (see helper docstrings).
+    terminal_article_kids = _kids_with_terminal_article_attempts(tasks)
+    any_feed_kids = _any_feed_coverage_kids()
+    audit_pending_kids = terminal_article_kids & any_feed_kids
 
     # Compose ranked candidate list: top_10_uncovered first (highest signal),
     # then missing_research_top5 (prefer research over general for novelty),
@@ -277,6 +350,12 @@ def refill(target: int, dry_run: bool = False) -> dict:
         # Belt-and-suspenders: skip if a general article already exists in
         # feed.json (publication_candidates' uncovered flag can lag).
         if kid.upper() in already_covered:
+            continue
+        # 5th belt (2026-05-29): K had a terminal article task AND feed has
+        # coverage under some audience → audience-tag mismatch (publisher bug),
+        # not a missing-article case. Don't blind-retry; let
+        # platform_ops_audience_tag_audit_K1151_K672_K957 (or equivalent) sort.
+        if kid.upper() in audit_pending_kids:
             continue
         # 3rd belt: candidates may have populated `covered_by` but stale
         # `audiences_covered=[]` (pre-2026-04-14 audience metadata gap).

@@ -13511,7 +13511,7 @@
     "title": "K672: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K672 has verdict signal (score=9, reasons=None) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: ",
     "priority": 3,
-    "status": "pending",
+    "status": "failed",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K672",
@@ -13521,14 +13521,20 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-28T18:15:59+00:00"
+    "created_at": "2026-05-28T18:15:59+00:00",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-05-28T20:10:41.642479+00:00",
+    "claim_session_id": "acb8f83c1910",
+    "started_at": "2026-05-28T20:10:42.152386+00:00",
+    "completed_at": "2026-05-28T20:10:42.527278+00:00",
+    "result": "stale auto-discovered retry: prior K672_article_general task failed for exact-topic dup; existing feed coverage K672 is audience=research (mile_cbbf35cb, mile_c15c7b98). publication_candidates lists uncovered_for_general but blind retry won't resolve audience tag mismatch. See platform_ops_audience_tag_audit_K1151_K672_K957"
   },
   {
     "id": "K957_article_general_v2",
     "title": "K957: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K957 has verdict signal (score=6, reasons=None) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: ",
     "priority": 3,
-    "status": "pending",
+    "status": "failed",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K957",
@@ -13538,6 +13544,145 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-28T18:15:59+00:00"
+    "created_at": "2026-05-28T18:15:59+00:00",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-05-28T20:10:44.157560+00:00",
+    "claim_session_id": "8785c0ba6d88",
+    "started_at": "2026-05-28T20:10:44.409973+00:00",
+    "completed_at": "2026-05-28T20:10:44.651005+00:00",
+    "result": "stale auto-discovered retry: prior K957_article_general task standing as 'succeeded' but existing feed coverage K957 is audience=research only (mile_2975939b, mile_a1f7bfa8). publication_candidates lists uncovered_for_general but blind retry won't address audience tag mismatch. See platform_ops_audience_tag_audit_K1151_K672_K957"
+  },
+  {
+    "id": "K1151_article_general_v3",
+    "title": "K1151: write general-audience article [retry-v3] (auto-discovered uncovered K)",
+    "description": "K K1151 has verdict signal (score=9, reasons=None) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: ",
+    "priority": 3,
+    "status": "failed",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1151",
+    "tags": [
+      "auto-discovered",
+      "audience-general",
+      "retry-v3"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-28T20:07:50+00:00",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-05-28T20:10:30.748115+00:00",
+    "claim_session_id": "af430fb9181b",
+    "started_at": "2026-05-28T20:10:37.643120+00:00",
+    "completed_at": "2026-05-28T20:10:37.983012+00:00",
+    "result": "stale auto-discovered retry: prior K1151_article_general task standing as 'succeeded' but actual feed article mile_0ae5323e tagged audience=research (not general). publication_candidates uncovered_for_general flag is correct vs feed but refill should not blind-retry until publisher audience-tagging audit completes. See platform_ops_audience_tag_audit_K1151_K672_K957"
+  },
+  {
+    "id": "K1371_article_general",
+    "title": "K1371: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1371 has verdict signal (score=3, reasons=None) but no general article in feed.json.  Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1371",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-28T20:07:50+00:00"
+  },
+  {
+    "id": "platform_ops_audience_tag_audit_K1151_K672_K957",
+    "title": "Publisher audience-tag audit: K1151/K672/K957 general-target tasks published as research",
+    "description": "ROOT-CAUSE: 連續 3 K (K1151, K672, K957) auto-discovered general-audience daily_article task 標 succeeded（或 failed），但 feed.json 內對應的 article 全部 audience=research（含 K1151 mile_0ae5323e draft / mile_477dfe5e published、K672 mile_cbbf35cb/c15c7b98、K957 mile_2975939b/a1f7bfa8）。publication_candidates 正確判定 'uncovered_for_general' → refill_task_pool 每輪重複生 v2/v3 retry → pool 永久污染。\n\nINVESTIGATE: (1) feed-publisher / Publisher.publish_milestone audience 欄位來源（agent param vs auto-classifier vs default）；(2) 是否 GJR/bootstrap 等技術 tag 觸發 auto-classifier rule 強制 research；(3) prior task 'succeeded' 但 audience mismatch 應該 fail 還是寫 v2 retry；(4) mile_0ae5323e (K1151 draft) 可否 re-tag general 或重發。\n\nFIX:  per CLAUDE.md 永遠修流程不修資料 — 修 publisher logic 確保 general task → general article；refill_task_pool 加 strict gate：prior task succeeded 即使 audience mismatch 也不 retry，丟給 platform_ops 修。\n\nLINKED: K1151_article_general_v3, K672_article_general_v2, K957_article_general_v2 已 mark failed by hourly-04 2026-05-29 fire；3 articles in feed 暫保留 audience=research。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "platform_ops",
+    "source": "hourly_root_cause",
+    "tags": [
+      "audience-tagging",
+      "publisher-bug",
+      "refill-dedup",
+      "root-cause"
+    ],
+    "created_at": "2026-05-29T04:10:00+00:00"
+  },
+  {
+    "id": "K1151_article_general_v4",
+    "title": "K1151: write general-audience article [retry-v4] (auto-discovered uncovered K)",
+    "description": "K K1151 has verdict signal (score=9, reasons=None) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: ",
+    "priority": 3,
+    "status": "failed",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1151",
+    "tags": [
+      "auto-discovered",
+      "audience-general",
+      "retry-v4"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-28T20:11:20+00:00",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-05-28T20:12:32.072248+00:00",
+    "claim_session_id": "64ee6a52ff90",
+    "started_at": "2026-05-28T20:12:32.399962+00:00",
+    "completed_at": "2026-05-28T20:12:32.699037+00:00",
+    "result": "auto-refilled by prior buggy refill logic; same audience-tag mismatch root cause as v2/v3. See platform_ops_audience_tag_audit_K1151_K672_K957. refill_task_pool now guards against this in audit_pending_kids gate."
+  },
+  {
+    "id": "K672_article_general_v3",
+    "title": "K672: write general-audience article [retry-v3] (auto-discovered uncovered K)",
+    "description": "K K672 has verdict signal (score=9, reasons=None) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: ",
+    "priority": 3,
+    "status": "failed",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K672",
+    "tags": [
+      "auto-discovered",
+      "audience-general",
+      "retry-v3"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-28T20:11:20+00:00",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-05-28T20:12:33.008125+00:00",
+    "claim_session_id": "caf8d1f41827",
+    "started_at": "2026-05-28T20:12:33.346611+00:00",
+    "completed_at": "2026-05-28T20:12:33.610054+00:00",
+    "result": "auto-refilled by prior buggy refill logic; same audience-tag mismatch root cause as v2/v3. See platform_ops_audience_tag_audit_K1151_K672_K957. refill_task_pool now guards against this in audit_pending_kids gate."
+  },
+  {
+    "id": "K1320_article_general",
+    "title": "K1320: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1320 has verdict signal (score=2, reasons=None) but no general article in feed.json.  Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1320",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-28T20:12:39+00:00"
+  },
+  {
+    "id": "K1387_article_general",
+    "title": "K1387: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1387 has verdict signal (score=1, reasons=None) but no general article in feed.json.  Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1387",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-28T20:12:39+00:00"
   }
 ]
