@@ -13014,5 +13014,21 @@
     "claim_session_id": "a5fbb7c05938",
     "completed_at": "2026-05-28T07:38:14.551232+00:00",
     "result": "Publisher.publish_milestone now auto-normalizes local chart refs using canonical publish_draft helpers: markdown image paths and details['charts']/image_urls/chart_urls are uploaded to Supabase and rewritten to HTTPS URLs; auto-populates image_urls + supabase_storage_urls. Added publisher regression test covering markdown+details chart upload path (3 tests passed in tests/test_publisher_provenance.py)."
+  },
+  {
+    "id": "platform_ops_gitignore_state_files_and_commit_step",
+    "title": "[platform_ops] .gitignore state files + hourly cron PHASE Z commit step",
+    "description": "Boss caught 60 uncommitted files 2026-05-28 16:24 — 30 real changes (24h orphan from hourly cron) + 30+ state/log noise (113K lines).\n\nDeliverable:\n1. .gitignore add: storage/logs/cron/*.log, storage/ops/*.json (dashboard/alert_dedup/cron_last_run/pending_sessions/gmail_inbox_state/dispatch_report/writer_log), storage/.release_settings.json + .supabase_sync_state.json, storage/market_status.json, storage/notifications/notification_log.json, storage/logs/gemini_ask_usage.jsonl, data/vixtwn/vixtwn_daily.csv\n2. git rm --cached to untrack (preserve disk)\n3. scripts/cron_hourly_dispatch_prompt.md add PHASE Z: 'git add + commit before dispatch end' (prevent 24h orphan)\n4. unit test verify cron-end git status clean after new ignore\n\nEst 30-45 min. Codex can take.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "tags": [
+      "platform_ops",
+      "gitignore",
+      "commit_discipline",
+      "p1_boss_critical"
+    ],
+    "created_at": "2026-05-28T08:26:38.798255+00:00",
+    "source": "main_thread_2026_05_28_uncommitted_audit"
   }
 ]
