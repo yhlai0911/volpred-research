@@ -80,7 +80,7 @@ rv_m = daily_rv.rolling(22).mean().shift(1)
 
 - **Verdict = TAIL_CALIB_USABLE**（與 K1403 跨資產驗證、K1402 SPY 同 pattern
   並擴展到亞洲市場）
-- n_test = 1,305 (OOS 2021-01-04 → 2026-05-27)
+- n_test = 1,305 (OOS 2021-01-04 → 2026-05-26；2026-05-27 yfinance 尾端 NaN 由 panel dropna 自動排除)
 - DM HLN stat = **-8.901** (p ≈ 0) → qmed QLIKE 顯著差於 OLS（dm_status=SIG_NEG）
 - τ=0.95 coverage gap = **+0.019 pp**（empirical 95.02% vs nominal 95%）
 - τ=0.99 coverage gap = **-0.149 pp**（empirical 98.85% vs nominal 99%）
