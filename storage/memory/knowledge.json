@@ -31663,5 +31663,38 @@
       "tail-coverage",
       "var-upper-bound"
     ]
+  },
+  {
+    "item_id": "aadbea07",
+    "category": "vol_forecast",
+    "verdict": "TAIL_CALIB_USABLE",
+    "review_verdict": "CONDITIONAL_PASS",
+    "experiment_id": "K1404",
+    "experiment_path": "experiments/K1404/",
+    "k_id": "K1404",
+    "reviewer": "Codex CLI 0.132.0 (gpt-5.4 medium reasoning)",
+    "reviewer_source": "codex_cli",
+    "codex_review": "CONDITIONAL_PASS — 統計核心全 PASS (lookahead/pinball/coverage/Kupiec UC LR/DM HLN/JSON internal consistency)；唯一 issue: README L83 OOS 結束日 typo 2026-05-27 已 errata 修為 2026-05-26 (commit 99a710ff)；CAVEAT: load_asset 未顯式 dropna，靠 build_har_panel 隱式排除 yfinance NaN tail",
+    "content": "K1404 HAR-RV Quantile Forecasting on ^TWII (TW market, 2007-01-03 fit through OOS 2021-01-04 至 2026-05-26, n_oos=1305): dm_status=SIG_NEG (HLN-adjusted stat=-8.90 p≈0, quantile-median QLIKE 顯著差於 OLS point forecast, mean_diff=-0.932) BUT tail_status=TIGHT (τ=0.95 coverage gap=+0.019pp Kupiec UC p=0.9747; τ=0.99 coverage gap=-0.149pp Kupiec UC p=0.5962). Aggregate verdict = TAIL_CALIB_USABLE. 與 K1402 SPY (NULL, tail acceptable) + K1403 QQQ/GLD/TLT (TAIL_CALIB_USABLE) 一致 — HAR-RV quantile regression (Koenker-Bassett 1978) 對 1d RV conditional upper bound 在 13 assets 跨 4 區域 (US equity/bond/commodity + TW equity) 全部 well-calibrated，可作 universal tool 餵 Risk Forecast 頁 multi-asset tail band (含 TW)。Lookahead 自檢 PASS: rv_d/rv_w/rv_m 全 .shift(1), target daily_rv at t. Seed=42.",
+    "evidence": [
+      "experiments/K1404/K1404_results.json",
+      "experiments/K1404/K1404.py",
+      "experiments/K1404/README.md",
+      "experiments/K1404/coverage_plot.png",
+      "K1402 SPY 對照 (DM stat=-10.20 p=0 + tail acceptable)",
+      "K1403 QQQ/GLD/TLT 對照 (3/3 dm_sig_neg + 3/3 tail TIGHT)",
+      "Codex CLI 0.132.0 review report (CONDITIONAL_PASS)"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-05-28T08:17:23.137813",
+    "tags": [
+      "har-rv",
+      "quantile-regression",
+      "tail-coverage",
+      "var-upper-bound",
+      "tw-market",
+      "cross-region",
+      "TAIL_CALIB_USABLE"
+    ]
   }
 ]

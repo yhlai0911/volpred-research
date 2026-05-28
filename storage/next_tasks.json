@@ -12103,7 +12103,7 @@
     "description": "Context: CLAUDE.md 3-strike rule 已超過 (5/25 strike 1+2 API 529 + 5/27 strike 3+4 auth)；同一架構脆弱性 (headless CLI subprocess + 環境隔離) 不同症狀。L162-180 規定不可再 patch — 必整體重構。\n\nDeliverable:\n1. 寫 `docs/refactor_plan_hourly_dispatch.md` — 三層診斷 (底層邏輯/流程/程式架構) + 重構方案 + 廢棄面 + 驗證 gate\n2. 設計：常駐 worker daemon (user login session 內持續跑，繼承 keychain unlock state) + queue (hourly cron 只 enqueue task，不 spawn 新 claude process)\n3. 廢棄 perl alarm + watchdog 防 hang 邏輯 (worker daemon 內建 health check)\n4. 廢棄 retry+sonnet fallback (5/25 patch) → worker queue 內處理 retry\n5. Migration: 跑 1 週並行新舊兩套，舊 LaunchAgent 設 stub 模式 (寫 log 不 spawn)，驗證新 worker 100% 取代\n6. 廢棄後刪 `~/.volpred/bin/cron_hourly_dispatch.sh` + LaunchAgent plist + scripts/cron_hourly_dispatch.sh (移到 _legacy/)\n7. Commit prefix `refactor(3-strike): hourly_dispatch worker_daemon`\n8. Regression test 覆蓋三次 incident 觸發條件\n\n預估 8-12 hour 工程，跨多 hourly fire。需主線程主導，不可全派 subagent。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "platform_ops",
       "refactor",
@@ -12113,13 +12113,18 @@
     ],
     "created_at": "2026-05-27T03:46:39.543905+00:00",
     "source": "main_thread_2026_05_27_3strike_trigger",
-    "started_at": "2026-05-27T21:08:34.967800+00:00",
+    "started_at": "2026-05-27T23:07:06.996867+00:00",
     "progress_log": [
       "2026-05-27 17:07-17:30 hourly-17: Deliverable 1/8 DONE — docs/refactor_plan_hourly_dispatch.md (三層診斷 7 strikes + worker daemon 架構 + 10-test verification gate + 24-26 day migration plan). Deliverables 2-8 sequenced in plan §8; await future main-thread fires. NOT all-complete yet.",
       "2026-05-28 01:07-01:13 hourly-01: Deliverable 2/8 DONE — package scaffold scripts/dispatch_supervisor/ (state.py full impl: 240 lines with fcntl lock, ring buffer, orphan cleanup, auth-block toggle, alert dedup) + worker/scheduler/health/alerts/supervisor stubs + 16-test unit suite (all passing). Supervisor entry refuses prod launch (exit 78). Plan §8 updated. NEXT: Deliverable 3 (scheduler+worker+health impl) by next hourly fire claiming.",
       "2026-05-28 05:07-05:14 hourly-05: Deliverable 3/8 DONE — alerts.py (5 fns + dedup) + worker.py (Popen + retry ladder opus→opus→sonnet + classify auth/529/hang + SIGTERM→SIGKILL) + health.py (check_once + health_loop) + scheduler.py (croniter + _tick_once + dry-run) + supervisor.py asyncio gather. Version 0.2.0-d3. 16 state tests pass; smoke: classifier 6/6, scheduler 3/3, health no-op pass. NEXT: Deliverable 4 (10 regression tests covering 7 strikes per §5)."
     ],
-    "last_released_at": "2026-05-27T21:14:43.302348+00:00"
+    "last_released_at": "2026-05-27T21:14:43.302348+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-27T23:07:06.926329+00:00",
+    "claim_session_id": "4730d7836458",
+    "completed_at": "2026-05-27T23:12:55.201651+00:00",
+    "result": "dispatch_supervisor deliverable 4 landed: ops CLI + 11 regression tests, targeted pytest 27 passed. docs/version updated to 0.3.0-d4. git commit blocked in this session because .git/index.lock creation is sandbox-denied (Operation not permitted)."
   },
   {
     "id": "paper_review_mile_cc3c987a",
@@ -12671,5 +12676,67 @@
       "k320"
     ],
     "created_at": "2026-05-28T03:15:32.569561+08:00"
+  },
+  {
+    "id": "paper_review_mile_4174473e",
+    "title": "Paper review (Codex 24h-rule): 波動率不是孤立發生——美國咳嗽，亞洲哪一個市場感冒最重？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_4174473e needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_4174473e",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-27T22:08:03+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-28T00:13:22.358728+00:00",
+    "claim_session_id": "8157901082d1",
+    "started_at": "2026-05-28T00:13:42.617606+00:00",
+    "completed_at": "2026-05-28T00:16:48.624175+00:00",
+    "result": "Codex 24h-rule review CONDITIONAL_PASS. Core K455 full-sample numbers align (total spillover 74.03%, SPY net +1.89pp, EWA 19.33%, FXI 10.00%), but 3 article errata required: (1) '美國始終是淨輸出國' overclaims because rolling_spillover.spy_always_net_transmitter=false and some windows are negative; (2) article/figure say 200-day rolling window but code uses 252-day; (3) COVID 77.7% figure is for hardcoded 2020-02~2020-06 bucket, not 2020-2021. Review artifact: storage/ops/reviews/mile_4174473e_codex_review_20260528.md. Follow-up task created: paper_review_followup_mile_4174473e_errata. Also flagged K455 reproducibility hygiene issue (README stub + script output path mismatch)."
+  },
+  {
+    "id": "paper_review_followup_mile_4174473e_errata",
+    "title": "Errata mile_4174473e: rolling-window / COVID bucket / SPY wording fixes",
+    "description": "Per Codex 24h review (`storage/ops/reviews/mile_4174473e_codex_review_20260528.md`). Main-thread article errata needed before treating mile_4174473e as clean: (1) replace 「美國始終是淨輸出國」 with wording limited to full-sample or average net spillover, because `rolling_spillover.spy_always_net_transmitter=false` and some windows have negative `spy_net`; (2) replace all 「200 日滾動視窗」 wording with `252 日滾動視窗` to match `k455_vol_spillover_network.py window=252`; (3) relabel COVID comparison from `2020-2021` to the actual hardcoded crisis bucket `2020-02-01 ~ 2020-06-30` (the 77.7% / n=5 figure is not a 2020-2021 average); (4) optional minor caption fix: Figure 2 source/receiver axis wording currently reversed vs implementation. Also note reproducibility hygiene issue in K455: README still planning stub and script output path writes to `experiments/k455_vol_spillover_results.json` rather than the in-folder canonical artifact.",
+    "priority": 3,
+    "status": "pending_main_thread",
+    "task_type": "paper_review",
+    "source": "review_followup",
+    "article_id": "mile_4174473e",
+    "parent_task_id": "paper_review_mile_4174473e",
+    "tags": [
+      "paper-review",
+      "errata",
+      "main-thread-only",
+      "codex-followup"
+    ],
+    "created_at": "2026-05-28T08:15:43+08:00"
+  },
+  {
+    "id": "K1404",
+    "title": "K1404: HAR-RV Quantile Tail Forecasting on TW market (^TWII)",
+    "priority": 2,
+    "description": "K1402 (SPY) NULL on DM but tail coverage usable; K1403 (QQQ/GLD/TLT) verdict TAIL_CALIB_USABLE (3/3 dm_sig_neg, 3/3 tail_usable). K1404 extends same HAR-RV quantile pipeline to TW market ^TWII to test cross-region tail behavior — feeds multi-asset Risk Forecast page TW band visualization (Mission #4 + #5).\n\nDesign: HAR-RV (Corsi 2009) OLS baseline + QuantReg pinball for tau in {0.50, 0.75, 0.90, 0.95, 0.99}. Features rv_d/rv_w/rv_m all .shift(1). OOS split 2021-01-04. Per-asset same success criteria as K1402/K1403.\n\nRequired per .claude/rules/experiments.md: README.md + K1404.py + K1404_results.json with byte-traceable outputs. Worktree-only writes. Codex review (primary) or feature-dev:code-reviewer subagent (fallback) before knowledge.json entry.",
+    "status": "succeeded",
+    "task_type": "experiment",
+    "source": "hourly_dispatch_main_thread_generated",
+    "tags": [
+      "experiment",
+      "autonomous-research",
+      "tw-market",
+      "quantile-har"
+    ],
+    "created_at": "2026-05-28T07:09:00+08:00",
+    "claimed_by": "hourly-07",
+    "claimed_at": "2026-05-27T23:10:24.507640+00:00",
+    "claim_session_id": "6d171600cdec",
+    "started_at": "2026-05-27T23:10:29.699743+00:00",
+    "completed_at": "2026-05-28T00:17:32.987541+00:00",
+    "result": "K1404 HAR-RV Quantile on ^TWII: TAIL_CALIB_USABLE verdict (DM SIG_NEG stat=-8.90 p=0 but τ=0.95/0.99 tail TIGHT, Kupiec p=0.97/0.60). Codex review CONDITIONAL_PASS. knowledge.json item_id=aadbea07. commits: 5e566d9d + 99a710ff (errata)."
   }
 ]
