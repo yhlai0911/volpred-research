@@ -93,8 +93,14 @@ def _parse_json_input(raw: str | None, *, default: object) -> object:
     if raw is None:
         return default
     candidate = Path(raw)
-    if candidate.exists():
-        return json.loads(candidate.read_text())
+    try:
+        if candidate.exists():
+            return json.loads(candidate.read_text())
+    except OSError:
+        # Long inline JSON strings (for example --details-json with a verbose
+        # cluster_waiver) are not filesystem paths; Path.exists() may raise
+        # ENAMETOOLONG before we get a chance to decode them as JSON.
+        pass
     return json.loads(raw)
 
 

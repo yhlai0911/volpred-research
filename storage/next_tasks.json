@@ -13580,7 +13580,7 @@
     "title": "K1371: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1371 has verdict signal (score=3, reasons=None) but no general article in feed.json.  Verdict preview: ",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1371",
@@ -13589,7 +13589,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-28T20:07:50+00:00"
+    "created_at": "2026-05-28T20:07:50+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-28T21:30:31.320167+00:00",
+    "claim_session_id": "f8d91632ce0a",
+    "started_at": "2026-05-28T21:30:41.703267+00:00",
+    "completed_at": "2026-05-28T21:34:22.753958+00:00",
+    "result": "Published general-audience draft mile_4152e8c3 for K1371; angle focuses on why financial-sector lead stories can sound right but still fail to improve TSMC OOS volatility forecasts. Added two K1371 charts and fixed CLI --details-json long-string parsing so cluster_waiver publish path works."
   },
   {
     "id": "platform_ops_audience_tag_audit_K1151_K672_K957",
