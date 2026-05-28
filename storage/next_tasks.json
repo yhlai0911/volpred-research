@@ -13104,7 +13104,7 @@
     "title": "K1379: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1379 has verdict signal (score=3, reasons=None) but no general article. Verdict preview: ",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1379",
@@ -13113,7 +13113,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-28T10:08:52+00:00"
+    "created_at": "2026-05-28T10:08:52+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-28T11:52:02.539072+00:00",
+    "claim_session_id": "a83e9a473b5f",
+    "started_at": "2026-05-28T11:52:15.009514+00:00",
+    "completed_at": "2026-05-28T11:56:49.741637+00:00",
+    "result": "Published general-audience draft mile_8a9ae3c8 for K1379. Angle: newer volatility models showed only small point-estimate gains and failed to pull clearly away from simpler alternatives. Used local-only publish path (embedded chart, remote sync disabled in script) to work within sandboxed no-network environment."
   },
   {
     "id": "K1398_article_general",
@@ -13130,5 +13136,128 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-05-28T10:08:52+00:00"
+  },
+  {
+    "id": "K1304_article_general",
+    "title": "K1304: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1304 has verdict signal (score=0, reasons=['cluster cooldown penalty (taiwan 30d=13>8)']) but no general article. Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1304",
+    "tags": [
+      "bma",
+      "taiwan",
+      "0050.TW",
+      "paper-2",
+      "paper-3",
+      "null-result",
+      "posterior-degeneracy",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "taiwan",
+    "created_at": "2026-05-28T12:08:57+00:00"
+  },
+  {
+    "id": "K1317_article_general",
+    "title": "K1317: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1317 has verdict signal (score=0, reasons=['cluster cooldown penalty (spy 30d=35>10)']) but no general article. Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1317",
+    "tags": [
+      "BMA",
+      "dynamic-model-averaging",
+      "forgetting-factor",
+      "model-diversity",
+      "QLIKE",
+      "DM-Harvey",
+      "SPY",
+      "GLD",
+      "Taiwan",
+      "null-result",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "spy",
+    "created_at": "2026-05-28T12:08:57+00:00"
+  },
+  {
+    "id": "K1396_article_general",
+    "title": "K1396: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1396 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (vix 30d=130>15)']) but no general article. Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1396",
+    "tags": [
+      "HAR-RV",
+      "paper9",
+      "garch-x-vix",
+      "DM-test",
+      "benchmark",
+      "C4",
+      "SPY",
+      "OOS",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vix",
+    "created_at": "2026-05-28T12:08:57+00:00"
+  },
+  {
+    "id": "K1399_article_general",
+    "title": "K1399: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1399 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (vix 30d=130>15)']) but no general article. Verdict preview: [Claude main thread + primary-path Codex CLI, 2026-05-23] K1399 decomposes VIX into 4 components to identify which drives HAR-X advantage over HAR-ABS baseline: (L) level, (dV) 1-day change, (P) vol premium VIX/(|r|*sqrt(252)), (T) MA5 trend. SPY daily |r_t| target, IS 2005-2018 ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1399",
+    "tags": [
+      "VIX",
+      "HAR",
+      "HAR-X",
+      "feature-decomposition",
+      "sufficient-statistic",
+      "QLIKE",
+      "DM-HLN",
+      "SPY",
+      "VIF",
+      "parsimony",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vix",
+    "created_at": "2026-05-28T12:08:57+00:00"
+  },
+  {
+    "id": "K901_article_general",
+    "title": "K901: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K901 has verdict signal (score=1, reasons=['cross-market/universal', 'cluster cooldown penalty (vix 30d=130>15)']) but no general article. Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K901",
+    "tags": [
+      "VT",
+      "international",
+      "MDD",
+      "GJR-GARCH",
+      "Paper3",
+      "Table5",
+      "13-markets",
+      "bootstrap",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vix",
+    "created_at": "2026-05-28T12:08:57+00:00"
   }
 ]
