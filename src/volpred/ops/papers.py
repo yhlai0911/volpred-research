@@ -295,20 +295,30 @@ def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
         except Exception:
             pass
 
-    # Extract abstract from \begin{abstract} … \end{abstract} (2026-05-11:
-    # taiwan-vt incident — body.tex promoted to K1175 canonical but Supabase
-    # still pushed pre-K1175 abstract because CLI didn't extract from .tex).
-    abstract_match = re.search(
+    # Extract abstract from \begin{abstract} … \end{abstract}. main_v*.tex
+    # often only `\input{body_v*}` and has no \begin{abstract}; resolve \input
+    # chain so we read the body file that actually carries the abstract.
+    # (2026-05-27 vt-trend-following incident: main_v3.tex won the file
+    # priority, lacked \begin{abstract}, so Supabase abstract stayed stale.)
+    abstract_re = re.compile(
         r"\\begin\{abstract\}\s*(?:\\noindent\s*)?(.*?)\\end\{abstract\}",
-        content,
         re.DOTALL,
     )
-    if abstract_match:
-        raw = abstract_match.group(1).strip()
-        # Collapse internal whitespace runs to single space for tidy display.
-        cleaned = re.sub(r"\s+", " ", raw)
+    search_sources: list[str] = [content]
+    for input_name in re.findall(r"\\input\{([^}]+)\}", content):
+        stem = input_name.strip()
+        for candidate in (paper_dir / stem, paper_dir / f"{stem}.tex"):
+            if candidate.is_file():
+                search_sources.append(candidate.read_text(errors="ignore"))
+                break
+    for src in search_sources:
+        m = abstract_re.search(src)
+        if not m:
+            continue
+        cleaned = re.sub(r"\s+", " ", m.group(1).strip())
         if cleaned:
             metrics["abstract"] = cleaned
+            break
 
     return metrics
 
