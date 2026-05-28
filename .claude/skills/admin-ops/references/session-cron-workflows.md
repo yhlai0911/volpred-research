@@ -52,7 +52,7 @@ uv run volpred ops question-ops-summary --limit 5
 ### Step 3: 執行 stable insertion rerank
 
 ```bash
-uv run python -m volpred.cli ops question-rerank --evaluations-json /path/to/evaluations.json
+uv run volpred ops question-rerank --evaluations-json /path/to/evaluations.json
 ```
 
 ### 建議的 session cron prompt 骨架
@@ -78,7 +78,7 @@ uv run python -m volpred.cli ops question-rerank --evaluations-json /path/to/eva
 ### Step 1: 讀平台摘要
 
 ```bash
-uv run python -m volpred.cli ops platform-cycle-summary --storage-dir storage --limit 20
+uv run volpred ops platform-cycle-summary --storage-dir storage --limit 20
 ```
 
 回傳重點：
@@ -104,7 +104,7 @@ uv run python -m volpred.cli ops platform-cycle-summary --storage-dir storage --
 ### Step 3: 依設定釋出
 
 ```bash
-uv run python -m volpred.cli ops release-pool-by-settings --storage-dir storage
+uv run volpred ops release-pool-by-settings --storage-dir storage
 ```
 
 ### Step 4: 視需要補管理通知
@@ -112,13 +112,13 @@ uv run python -m volpred.cli ops release-pool-by-settings --storage-dir storage
 若剛完成真正發布，可補送：
 
 ```bash
-uv run python -m volpred.cli ops send-article-notification <pub_id>
+uv run volpred ops send-article-notification <pub_id>
 ```
 
 若當天已有多篇發布，且目前是固定摘要時間點，可補送：
 
 ```bash
-uv run python -m volpred.cli ops send-daily-digest --target-date YYYY-MM-DD
+uv run volpred ops send-daily-digest --target-date YYYY-MM-DD
 ```
 
 注意：
@@ -166,18 +166,18 @@ cd paper/<name> && xelatex main.tex && xelatex main.tex
 2. 更新論文 metadata（若有變）
 
 ```bash
-uv run python -m volpred.cli ops paper-upsert ...
+uv run volpred ops paper-upsert ...
 ```
 
 3. 上傳新版 PDF
 
 ```bash
-uv run python -m volpred.cli ops paper-upload-pdf --paper-id <id> --file paper/<name>/main.pdf
+uv run volpred ops paper-upload-pdf --paper-id <id> --file paper/<name>/main.pdf
 ```
 
 4. 驗證
 
-- `uv run python -m volpred.cli ops paper-list`
+- `uv run volpred ops paper-list`
 - 檢查 `/paper`
 
 ### 規則
@@ -211,7 +211,7 @@ CronCreate(cron="23 22 * * *", prompt="Token 用量日報（token-usage-maintain
 
 - 先讀摘要（`platform-patrol-summary` / `question-ops-summary`）
 - 再決定是否寫入
-- 寫入前先建立正式 queue task（`uv run python -m volpred.cli ops assign ...`）
+- 寫入前先建立正式 queue task（`uv run volpred ops assign ...`）
 - 寫入後留可觀測結果（snapshot / execution receipt 存 `storage/ops/`）
 
 **標準「繼續任務」cron 為 `*/30 * * * *`（嚴格每 30 分鐘等距 fire；2026-04-26 用戶指定 4h→30min，對齊 Claude Code Max $200 plan 1-hour prompt cache TTL — 已於 Anthropic 'Using Claude Code with your Pro or Max plan' support article 驗證；30min 永遠落在 cache window 中央，cache 命中率最佳，避免 cold miss 同時維持發文與研究節奏）**。任務類型不限於研究（涵蓋發文/論文/ops/bug fix/會員問題/文件/重構）。禁止高於 `*/2` 的密度，避免資源爆衝。

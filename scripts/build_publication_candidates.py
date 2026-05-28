@@ -30,6 +30,10 @@ KNOWLEDGE_PATH = ROOT / "storage/memory/knowledge.json"
 FEED_PATH = ROOT / "storage/reports/feed.json"
 OUTPUT_PATH = ROOT / "storage/publication_candidates.json"
 
+sys.path.insert(0, str(ROOT / "src"))
+
+from volpred.topic_clusters import classify_topic_cluster, cluster_gate_status
+
 
 def extract_k_id(experiment_id: str) -> str | None:
     """Normalize K1145, k1145, K1145b → K1145."""
@@ -172,14 +176,31 @@ def main():
                     "audience": article.get("audience"),
                 })
         score, reasons = score_priority(entry)
+        cluster = classify_topic_cluster(
+            entry.get("title", ""),
+            entry.get("tags") or [],
+            entry.get("content", ""),
+        )
+        cluster_gate = cluster_gate_status(cluster)
+        adjusted_score = score
+        if cluster and cluster_gate["count"] > cluster_gate["cap"]:
+            adjusted_score = max(0, int(score * 0.5))
+            reasons = reasons + [f"cluster cooldown penalty ({cluster} 30d={cluster_gate['count']}>{cluster_gate['cap']})"]
         candidates.append({
             "k_id": k_id,
             "title": entry.get("title", ""),
-            "score": score,
+            "score": adjusted_score,
+            "base_score": score,
             "reasons": reasons,
             "verdict_preview": entry.get("content", "")[:300],
             "covered_by": covering_articles,
             "uncovered": len(covering_articles) == 0,
+            "topic_cluster": cluster,
+            "topic_cluster_30d": {
+                "count": cluster_gate["count"],
+                "cap": cluster_gate["cap"],
+                "ratio": round(cluster_gate["ratio"], 4),
+            },
             # Treat audience=None/empty as 'general' (pre-2026-04-14 articles
             # had no audience metadata; platform default-tone was general).
             # 2026-05-11 K665/K630/K622 incidents: dropping audience=null from

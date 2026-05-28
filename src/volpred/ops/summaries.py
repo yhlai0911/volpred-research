@@ -1703,7 +1703,7 @@ def build_question_ops_summary(*, source: str = "user", limit: int = 5) -> dict[
         ],
         "suggestions": list(summary.get("suggestions") or [])[:3],
         "detail_hints": {
-            "maintain": f"uv run volpred ops question-ops-maintain --source {source} --stub-if-no-work",
+            "maintain": f"uv run volpred ops question-ops-maintain --source {source} --auto-create-task --stub-if-no-work",
             "summary": f"uv run volpred ops question-ranking-summary --source {source} --limit {max(limit, 1)}",
             "workflow": f"uv run volpred ops question-ranking-workflow --source {source} --limit {max(limit, 1)}",
             "rerank": "uv run volpred ops question-rerank --evaluations-json /path/to/evaluations.json",

@@ -25,6 +25,7 @@ from __future__ import annotations
 import argparse
 import json
 import random
+import re
 import sys
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -34,6 +35,7 @@ NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 FEED = ROOT / "storage" / "reports" / "feed.json"
 CRON_LAST_RUN = ROOT / "storage" / "ops" / "cron_last_run.json"
 RUNTIME_SCHEDULES = ROOT / "config" / "runtime_schedules.json"
+CRON_LOGS = ROOT / "storage" / "logs" / "cron"
 SKILLS_DIR = ROOT / ".claude" / "skills"
 ERROR_LOG = ROOT / "docs" / "error_log.md"
 
@@ -165,8 +167,47 @@ def _parse_cron_gap_seconds(cron: str) -> int | None:
     return None
 
 
+def _parse_banner_ts(text: str) -> datetime | None:
+    m = re.search(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:\+00:00|\+\d{4})", text)
+    if m:
+        raw = m.group(0)
+        if re.search(r"[+-]\d{4}$", raw):
+            raw = raw[:-5] + raw[-5:-2] + ":" + raw[-2:]
+        try:
+            return datetime.fromisoformat(raw).astimezone(timezone.utc)
+        except ValueError:
+            pass
+    m = re.search(r"\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}", text)
+    if m:
+        try:
+            return datetime.strptime(
+                m.group(0).replace("T", " "),
+                "%Y-%m-%d %H:%M:%S",
+            ).replace(tzinfo=timezone(timedelta(hours=8))).astimezone(timezone.utc)
+        except ValueError:
+            return None
+    return None
+
+
+def _latest_cron_log_ts(job_id: str) -> datetime | None:
+    log_path = CRON_LOGS / f"{job_id}.log"
+    if not log_path.exists():
+        return None
+    try:
+        lines = log_path.read_text(encoding="utf-8", errors="ignore").splitlines()
+    except OSError:
+        return None
+    for line in reversed(lines):
+        if "===" not in line or "exit" not in line:
+            continue
+        ts = _parse_banner_ts(line)
+        if ts is not None:
+            return ts
+    return None
+
+
 def gen_platform_ops_tasks(existing: set[str]) -> list[dict]:
-    """Detect stale cron jobs — last_run gap > 2x expected cadence."""
+    """Detect stale cron jobs — prefer recent log banner over stale cron_last_run."""
     if not CRON_LAST_RUN.exists() or not RUNTIME_SCHEDULES.exists():
         return []
     last_run = json.loads(CRON_LAST_RUN.read_text(encoding="utf-8"))
@@ -190,6 +231,10 @@ def gen_platform_ops_tasks(existing: set[str]) -> list[dict]:
             last_dt = datetime.fromisoformat(last_iso.replace("Z", "+00:00"))
         except Exception:
             continue
+        log_dt = _latest_cron_log_ts(cid)
+        if log_dt and log_dt > last_dt:
+            last_dt = log_dt
+            last_iso = last_dt.isoformat()
         gap = int((now - last_dt).total_seconds())
         if gap > 2 * expected and gap > 3600:  # absolute floor 1h to skip recently-fired
             stale.append((cid, last_iso, gap, expected))

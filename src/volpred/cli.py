@@ -1907,13 +1907,15 @@ def ops_question_ops_summary(source: str, limit: int) -> None:
 @click.option("--source", default="user", show_default=True, help="Question source to inspect")
 @click.option("--limit", default=5, show_default=True, type=int, help="Max rows per compact section")
 @click.option("--stub-if-no-work", is_flag=True, help="Emit a tiny JSON stub when there are no pending questions")
-def ops_question_ops_maintain(source: str, limit: int, stub_if_no_work: bool) -> None:
+@click.option("--auto-create-task", is_flag=True, help="When member_qa work exists, materialize one next_tasks entry for hourly dispatch")
+def ops_question_ops_maintain(source: str, limit: int, stub_if_no_work: bool, auto_create_task: bool) -> None:
     """Run the canonical member-question gate with optional no-work stub output."""
     from volpred.ops import build_question_ops_maintenance
-    from volpred.ops.pending_replay import mark_self_replayed
-    mark_self_replayed("question_research")
+    from volpred.ops.questions import ensure_member_qa_task
 
     result = build_question_ops_maintenance(source=source, limit=limit)
+    if auto_create_task and not result.get("skip"):
+        result["task_materialization"] = ensure_member_qa_task(source=source)
     if stub_if_no_work and result.get("skip"):
         _print_json(
             {

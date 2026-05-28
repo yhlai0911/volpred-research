@@ -41,7 +41,7 @@ user-invocable: true
 
 ## 流程
 1. 先讀目前榜單與待評分題目：
-   - `uv run python -m volpred.cli ops question-ranking-summary --limit 20`
+   - `uv run volpred ops question-ranking-summary --limit 20`
    - 或 `/api/admin/questions/summary`
 2. 對 `pending_questions` 逐題做 LLM 評分，產生：
    - `score`
@@ -59,13 +59,14 @@ user-invocable: true
 6. 若進研究候選池，遵循 lifecycle：
    - `queued` → `claimed` → `completed` / `cancelled`
 7. 做研究（LanceDB 搜尋 + Agent 實驗 if needed）
-8. 發 feed 文章：`uv run volpred ops publish-milestone --title "..." --description "..." --phase member_qa --category member_qa --audience member_qa --proposer 會員名稱 --status draft --tags "會員提問,..."`
+8. 發 feed 文章：`uv run volpred ops publish-milestone --title "..." --description "..." --phase member_qa --category member_qa --audience member_qa --proposer 會員名稱 --status published --tags "會員提問,..."`  
    - **必須傳 `--category member_qa`、`--audience member_qa` 和 `--proposer 會員名稱`**（否則 badge 和署名不顯示）
+   - **member_qa 是 reader-facing immediate flow**：不要先存 `draft` 等 release pool
 9. 連結文章到問題：`uv run volpred ops question-answer <question_id> --answer "摘要" --article-id <article_slug>`
-   - **文章是 draft → 問題保持 `researching`**（不是 answered），文章發佈時 release-pool 自動改為 `answered`
-   - **文章是 published → 問題直接標為 `answered`**
-   - ⚠️ **不要在文章發佈前手動改問題狀態為 answered**——這是之前的 bug
-10. 回報：處理了哪個問題、發了什麼文章、問題狀態（researching=等待發佈 / answered=已完成）
+   - `question-answer` 綁 published 文章後，問題應直接進 `answered`
+   - ⚠️ **不要手動 patch 問題狀態**——交給 `question-answer` / `question-finish` 正式流程
+10. 完成研究收尾：`uv run volpred ops question-finish --question-id <question_id> --actor claude`
+11. 回報：處理了哪個問題、發了什麼文章、問題狀態（`answered` / `completed`）
 
 ## 測試 / Spam 清理
 

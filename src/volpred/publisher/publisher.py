@@ -82,6 +82,112 @@ _ACADEMIC_KEYWORDS: list[tuple[re.Pattern, str]] = [
 _ACADEMIC_KEYWORD_THRESHOLD = 2  # ≥2 matches → infer research
 
 
+def _load_publish_draft_image_helpers():
+    """Load canonical image normalization helpers from publish_draft.py."""
+    import sys
+
+    scripts_dir = Path(__file__).resolve().parents[3] / "scripts"
+    if str(scripts_dir) not in sys.path:
+        sys.path.insert(0, str(scripts_dir))
+    from publish_draft import normalize_image_paths, normalize_image_url_field
+    return normalize_image_paths, normalize_image_url_field
+
+
+def _should_treat_as_local_upload_ref(value: str) -> bool:
+    """True for local file refs that should upload, False for web URLs/routes."""
+    if not isinstance(value, str) or not value.strip():
+        return False
+    value = value.strip()
+    if re.match(r"^https?://", value, re.IGNORECASE):
+        return False
+    # Site-rooted web paths like /charts/foo.png should pass through unchanged.
+    if value.startswith("/"):
+        return False
+    return True
+
+
+def _normalize_publish_assets(
+    description: str | None,
+    details: dict | None,
+    *,
+    root: Path,
+) -> tuple[str | None, dict]:
+    """Upload local chart refs and rewrite them to canonical URLs."""
+    details = dict(details or {})
+    cache: dict[str, str] = {}
+    normalize_image_paths, normalize_image_url_field = _load_publish_draft_image_helpers()
+    uploaded_urls: list[str] = []
+
+    def _record_uploaded_url(url: str):
+        if isinstance(url, str) and url.startswith("http") and url not in uploaded_urls:
+            uploaded_urls.append(url)
+
+    def _normalize_scalar_ref(value: str) -> str:
+        if not _should_treat_as_local_upload_ref(value):
+            return value
+        new_value = normalize_image_url_field(value, root, cache=cache)
+        _record_uploaded_url(new_value)
+        return new_value
+
+    if isinstance(description, str) and "![" in description:
+        new_description, _ = normalize_image_paths(description, root, cache=cache)
+        description = new_description
+        for url in cache.values():
+            _record_uploaded_url(url)
+
+    if _should_treat_as_local_upload_ref(details.get("image_url", "")):
+        details["image_url"] = _normalize_scalar_ref(details["image_url"])
+
+    for list_key in ("image_urls", "chart_urls", "supabase_storage_urls"):
+        values = details.get(list_key)
+        if isinstance(values, list):
+            details[list_key] = [
+                _normalize_scalar_ref(v) if isinstance(v, str) else v
+                for v in values
+            ]
+
+    charts = details.get("charts")
+    if isinstance(charts, list):
+        normalized_charts = []
+        for entry in charts:
+            if isinstance(entry, str):
+                normalized_charts.append(_normalize_scalar_ref(entry))
+                continue
+            if isinstance(entry, dict):
+                chart_entry = dict(entry)
+                for key in ("path", "url", "image_url", "src"):
+                    value = chart_entry.get(key)
+                    if isinstance(value, str) and _should_treat_as_local_upload_ref(value):
+                        chart_entry[key] = _normalize_scalar_ref(value)
+                normalized_charts.append(chart_entry)
+                continue
+            normalized_charts.append(entry)
+        details["charts"] = normalized_charts
+
+    if uploaded_urls:
+        existing_image_urls = details.get("image_urls")
+        if isinstance(existing_image_urls, list):
+            details["image_urls"] = list(dict.fromkeys(existing_image_urls + uploaded_urls))
+        else:
+            details["image_urls"] = uploaded_urls.copy()
+
+        existing_supabase_urls = details.get("supabase_storage_urls")
+        if isinstance(existing_supabase_urls, list):
+            details["supabase_storage_urls"] = list(dict.fromkeys(existing_supabase_urls + uploaded_urls))
+        else:
+            details["supabase_storage_urls"] = uploaded_urls.copy()
+
+    return description, details
+
+
+def _publish_asset_root_from_storage_dir(storage_dir: Path) -> Path:
+    """Resolve article asset paths from the canonical project root."""
+    storage_dir = storage_dir.resolve()
+    if storage_dir.name == "storage":
+        return storage_dir.parent
+    return storage_dir
+
+
 def _infer_audience(
     title: str,
     content: str,
@@ -470,6 +576,11 @@ class Publisher:
         # member_qa/event preservation): daily / member_qa / event / trending_repost
         # are topic-bound by definition; cluster cap would break them. Only
         # discretionary article types (general / research) are cluster-gated.
+        description, details = _normalize_publish_assets(
+            description,
+            details,
+            root=_publish_asset_root_from_storage_dir(self.reports_dir.parent),
+        )
         details = details or {}
         tag_list_for_cluster = tags or []
         cluster = classify_topic_cluster(title, tag_list_for_cluster, description or "")

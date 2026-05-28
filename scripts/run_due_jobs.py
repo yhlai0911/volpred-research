@@ -110,19 +110,34 @@ def _parse_iso(raw: str | None) -> datetime | None:
 
 
 def _load_pending_sessions() -> dict[str, Any]:
+    default_state = {
+        "schema_version": 1,
+        "description": "Due session_crons recorded while Claude Code session is offline; replay on next session startup.",
+        "jobs": {},
+    }
     if not PENDING_SESSIONS_PATH.exists():
-        return {
-            "schema_version": 1,
-            "description": "Due session_crons recorded while Claude Code session is offline; replay on next session startup.",
-            "jobs": {},
-        }
+        return default_state
     try:
         data = json.loads(PENDING_SESSIONS_PATH.read_text())
-        if "jobs" not in data or not isinstance(data.get("jobs"), dict):
-            data["jobs"] = {}
+        if not isinstance(data, dict):
+            return default_state
+        jobs = data.get("jobs")
+        if not isinstance(jobs, dict):
+            jobs = {}
+        # Legacy migration: older buggy payloads could write top-level
+        # `pending` / `session_crons` objects instead of canonical `jobs`.
+        for legacy_key in ("pending", "session_crons"):
+            legacy = data.get(legacy_key)
+            if isinstance(legacy, dict):
+                for job_id, job in legacy.items():
+                    if job_id not in jobs and isinstance(job, dict):
+                        jobs[job_id] = job
+        data["schema_version"] = int(data.get("schema_version", 1) or 1)
+        data["description"] = str(data.get("description") or default_state["description"])
+        data["jobs"] = jobs
         return data
     except (OSError, ValueError):
-        return {"schema_version": 1, "jobs": {}}
+        return default_state
 
 
 def _save_pending_sessions(state: dict[str, Any]) -> None:

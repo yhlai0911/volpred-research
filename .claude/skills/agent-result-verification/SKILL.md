@@ -33,7 +33,8 @@ Do **not** use this skill for：
 ### 1. 讀取 results JSON（不信 agent summary）
 ```python
 import json
-with open(f'experiments/K{ID}/k{id}_results.json') as f:
+experiment_id = "k123"  # or k123b
+with open(f'experiments/{experiment_id}/{experiment_id}_results.json') as f:
     r = json.load(f)
 ```
 

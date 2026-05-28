@@ -37,7 +37,7 @@ Columns: K-ID | Paper Section | Title | Verdict | Status | Location
 | K1147 | Sec 5 EAV / Three-Market Evidence | A4f-EAV US (N=30 S&P 500) — primary t PASS, bootstrap PASS | PASS | complete | root |
 | K1150 | Sec 5 EAV / Three-Market Evidence | A4f-EAV Japan (N=30 TOPIX) — primary t PASS, bootstrap PASS | PASS | complete | root |
 | K1175 | Sec 4.2 / Sec 4.3 / Conclusion | Table 3 VT 2010–2026 canonical replication — buy-hold Sharpe diff ~9.6% from paper (period mismatch) | PARTIAL_MATCH | complete | root |
-| K1176 | Appendix Time-Zone | Cross-market VT Sharpe comparison — PARTIAL_MATCH; c2c Sharpe 1.92 vs paper 1.47 (split-correction) | PARTIAL_MATCH | complete | root |
+| K1176 | Appendix Time-Zone / Table 4 | Cross-market TZ momentum replication — split-corrected 0050.TW c2c Sharpe 1.915 vs legacy 1.473; canonical o2o defined as adj-open$_t$/adj-open$_{t-1}$ with 2014-01-02 split date excluded | PARTIAL_MATCH | complete | root |
 | K1180 | Sec 6.2 / Sec 6.3 BCI Momentum | Coincident MoM strategy IS Sharpe 0.413 (paper 0.732 unreproducible — errata applied to body.tex line 486); OOS Sharpe 1.2694 (paper 1.260) MATCH; BCI null t=-0.5349 (paper -0.53) MATCH; Leading MoM t=3.74 PARTIAL_MATCH | PARTIAL_MATCH | complete | root |
 | K1181 | Sec 2.4 VIX Proxy / Sec 4.5 | VIXTWN stats + Steiger Z — ρ=0.594 matched (paper 0.595); 64-month window confirmed | PARTIAL_MATCH | complete | root |
 | K1302 | Sec 2 / Sec 3.1 / Sec 8.5 | Table 2 individual γ rebuild — 9+1 stocks, 100 multistart, 0 failures; all targets matched | PASS | complete | root |

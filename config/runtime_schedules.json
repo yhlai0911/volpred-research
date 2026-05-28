@@ -2,7 +2,7 @@
   "metadata": {
     "canonical_path": "config/runtime_schedules.json",
     "timezone": "Asia/Taipei",
-    "updated_at": "2026-04-26",
+    "updated_at": "2026-05-26",
     "policy_summary": "Queue-first local control plane. Session-only work should be recreated from this spec; continue_task heartbeat 設為 */30 * * * *（嚴格 30 分鐘等距，對齊 Claude Code Max $200/月 plan 1-hour prompt cache TTL，已於 2026-04-26 經 Anthropic support article 驗證）。The formal clock is the cron-driven shared scheduler, while idle_policy only governs slot-aware continuation/selection."
   },
   "system_crontab": {
@@ -187,6 +187,32 @@
         ]
       },
       {
+        "id": "question_research",
+        "label": "Member Q&A maintain + task materialization",
+        "cron": "0 */6 * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_question_ops_maintain.sh",
+        "log_path": "storage/logs/cron/question_ops_maintain.log",
+        "description": "每 6 小時跑 member question maintain gate。question-ops-maintain 會在有 pending / ranked 問題時自動 materialize 一筆 member_qa task 進 storage/next_tasks.json，讓 hourly dispatch 接手 evaluate 或 research。2026-05-26 從 session_cron 遷移到 host crontab，修 36 天 silent gap。",
+        "host_crontab_managed": true,
+        "matchers": [
+          "question-ops-maintain",
+          "cron_question_ops_maintain.sh"
+        ]
+      },
+      {
+        "id": "reader_facing_refill",
+        "label": "Reader-facing badge pool refill (event/trending/member_qa)",
+        "cron": "0 6,12,18 * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_reader_facing_refill.sh",
+        "log_path": "storage/logs/cron/reader_facing_refill.log",
+        "description": "早/午/晚各 1 次補 reader-facing badge pool。統一處理 event_article / trending_repost / member_qa 的 candidate scan 與 next_tasks materialization，取代 hourly dispatch prompt PHASE 0.5 的人工掃描。trending source scan 走可插拔命令介面（VOLPRED_TRENDING_SCAN_CMD），event/member 走本地 canonical sources。",
+        "host_crontab_managed": true,
+        "matchers": [
+          "refill_reader_facing_pool.py",
+          "cron_reader_facing_refill.sh"
+        ]
+      },
+      {
         "id": "work_summary_6h",
         "label": "6h 工作摘要 email (HTML, 用戶 2026-05-17 要求)",
         "cron": "5 */6 * * *",
@@ -311,13 +337,6 @@
         "prompt": "繼續任務（slot-aware）：執行 continue-task-maintain --stub-if-no-work。**先看 heartbeat 回傳的 alerts.items**：若 critical_count > 0（draft_pool=0 / release_pool gap / member_qa stale / host_cron_fail 等），**alert auto-remediation 優先於 dispatch candidate**——照 .claude/rules/alert.md 對應 action 立即執行，不可 skip。alerts 處理完才看 dispatch candidate **並 fill 至 slot=4 上限（slot<4 時派 (4-current) 個 parallel）**；不一次一個。",
         "recurring": true,
         "description": "Slot-aware continuation heartbeat。cron `*/30` 嚴格每 30 分鐘等距 fire（每小時 :00 / :30），永遠落在 Claude Code Max $200 plan 1-hour prompt cache window 中央，cache 命中率最佳。2026-04-26 用戶指定 4h→30min；先嘗試 50min 但發現 `*/50` 標準 cron 解析為 :00 / :50（50/10 不等距），改用 `*/30` 才是真正等距。Cache TTL 已於 Anthropic support article 'Using Claude Code with your Pro or Max plan' 確認 Max plan = 1h；Pro / API key = 5min。**單一 cron 行表達等距 cadence 的限制**：只能用 60 的因數（1/2/3/4/5/6/10/12/15/20/30/60）；45 無法用單一 `*/45` 等距表達（會解析為 :00 / :45 = 45/15 gap）；要真等距 45min 需 3 條 entries cycle 過 3-hour period。歷史 2026-05-10 用戶問 45min，回答 vanilla cron 限制，最終保持 `*/30`（或可選 hourly `0 * * * *` 真減頻）。注意：2026-03 初 default TTL 曾悄悄從 1h 降到 5min（GH issue #46829），Max 訂閱保持 1h 但需監控未來變動，若降級則本 cadence 失效。Slot fill rule (per feedback_pool_fill_to_threshold): cron fire 時 slot < 4 派 (4-current) 個 agent 並行補滿，不一次一個。"
-      },
-      {
-        "id": "question_research",
-        "cron": "17 */6 * * *",
-        "prompt": "會員問題研究：執行 question-ops-maintain --stub-if-no-work。若 pending>0 且 ranked=0：(a) 跑 question-ranking-workflow --source user --output-json /tmp/q_workflow.json；(b) 主線程逐題 4 維度評分（研究可行性/讀者價值/研究相關性/預期影響力 各 1-10）寫 evaluation JSON 到 /tmp/q_evals.json；(c) 跑 question-rerank --evaluations-json /tmp/q_evals.json。若 ranked>0 且 researching=0：dispatch claude general-purpose subagent 走 question-claim → research → answer → question-finish 路徑。**不可僅 review report 就停**（5 天 silent gap 教訓 2026-04-26）。",
-        "recurring": true,
-        "description": "每 6 小時執行會員問題評分與研究 pipeline。actionable not review-only — pending 必走 evaluate→rerank→claim→research，避免 5 天 silent gap (lesson 2026-04-26 question 29cbeb5c)。"
       },
       {
         "id": "platform_patrol",

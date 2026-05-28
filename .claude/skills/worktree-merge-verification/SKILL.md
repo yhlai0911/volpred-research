@@ -37,7 +37,7 @@ bash scripts/merge_worktree.sh <agent-name>
 
 ### Step 2: 驗證檔案是否到位
 ```bash
-ls experiments/K{ID}/ 2>/dev/null || echo "FILES MISSING"
+ls experiments/<experiment_id>/ 2>/dev/null || echo "FILES MISSING"
 ```
 如果檔案不存在 → 進入 Step 3 恢復流程。
 
@@ -50,7 +50,7 @@ merge_worktree.sh 有已知的邊緣情況：worktree 有 commit 但腳本判斷
 git branch -a | grep <agent-name>
 
 # 2. 搜尋 reflog
-git reflog --all | grep "K{ID}\|<agent-name>" | head -5
+git reflog --all | grep "<experiment_id>\|<agent-name>" | head -5
 
 # 3. Cherry-pick 遺失的 commit
 git cherry-pick <commit-hash> --no-edit
@@ -63,7 +63,8 @@ git branch -D worktree-<agent-name> 2>/dev/null
 **K1016 教訓：agent 回報的數字可能與 JSON 不一致。**
 ```python
 import json
-with open(f'experiments/K{ID}/k{id}_results.json') as f:
+experiment_id = "k123"  # or k123b
+with open(f'experiments/{experiment_id}/{experiment_id}_results.json') as f:
     r = json.load(f)
 # 逐一核對 agent summary 中的關鍵數字（DM t-stat, QLIKE, VaR pass/fail）
 ```

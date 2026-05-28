@@ -33,7 +33,7 @@
 直接在 repo 根目錄執行：
 
 ```bash
-uv run python -m volpred.cli ops ...
+uv run volpred ops ...
 ```
 
 本地 CLI 不需要網站登入 session。
@@ -45,14 +45,14 @@ uv run python -m volpred.cli ops ...
 1. 站務健康
 
 ```bash
-uv run python -m volpred.cli ops health
+uv run volpred ops health
 ```
 
 2. 工作佇列
 
 ```bash
-uv run python -m volpred.cli ops jobs --limit 20
-uv run python -m volpred.cli ops job-show <job_id>
+uv run volpred ops jobs --limit 20
+uv run volpred ops job-show <job_id>
 ```
 
 3. 讀者/內容摘要
@@ -74,7 +74,7 @@ curl -sS -H "x-ops-key: $OPS_ADMIN_TOKEN" \
 #### 先存入池，不直接發布
 
 ```bash
-uv run python -m volpred.cli ops publish-milestone \
+uv run volpred ops publish-milestone \
   --title "..." \
   --description "..." \
   --phase research \
@@ -84,7 +84,7 @@ uv run python -m volpred.cli ops publish-milestone \
 #### 排程發布
 
 ```bash
-uv run python -m volpred.cli ops publish-milestone \
+uv run volpred ops publish-milestone \
   --title "..." \
   --description "..." \
   --phase member_qa \
@@ -95,7 +95,7 @@ uv run python -m volpred.cli ops publish-milestone \
 #### 依節奏設定釋出文章池
 
 ```bash
-uv run python -m volpred.cli ops release-pool-by-settings
+uv run volpred ops release-pool-by-settings
 ```
 
 若只是測試是否會釋出，先看 `/admin/content` 裡的節奏設定與內容池清單。
@@ -103,15 +103,15 @@ uv run python -m volpred.cli ops release-pool-by-settings
 #### 釋出指定文章或少量文章
 
 ```bash
-uv run python -m volpred.cli ops release-pool --pub-id <pub_id>
-uv run python -m volpred.cli ops release-pool --limit 1
+uv run volpred ops release-pool --pub-id <pub_id>
+uv run volpred ops release-pool --limit 1
 ```
 
 #### 下架 / 清理
 
 ```bash
-uv run python -m volpred.cli ops unpublish <pub_id>
-uv run python -m volpred.cli ops cleanup-post <pub_id> --hard-delete
+uv run volpred ops unpublish <pub_id>
+uv run volpred ops cleanup-post <pub_id> --hard-delete
 ```
 
 #### 管理通知與每日摘要
@@ -119,13 +119,13 @@ uv run python -m volpred.cli ops cleanup-post <pub_id> --hard-delete
 單篇文章通知：
 
 ```bash
-uv run python -m volpred.cli ops send-article-notification <pub_id>
+uv run volpred ops send-article-notification <pub_id>
 ```
 
 每日發文摘要：
 
 ```bash
-uv run python -m volpred.cli ops send-daily-digest --target-date YYYY-MM-DD
+uv run volpred ops send-daily-digest --target-date YYYY-MM-DD
 ```
 
 判讀規則：
@@ -141,7 +141,7 @@ uv run python -m volpred.cli ops send-daily-digest --target-date YYYY-MM-DD
 #### 讀取論文清單
 
 ```bash
-uv run python -m volpred.cli ops paper-list
+uv run volpred ops paper-list
 ```
 
 或：
@@ -154,7 +154,7 @@ curl -sS -H "x-ops-key: $OPS_ADMIN_TOKEN" \
 #### 更新論文 metadata
 
 ```bash
-uv run python -m volpred.cli ops paper-upsert \
+uv run volpred ops paper-upsert \
   --paper-id leverage-direction \
   --title "..." \
   --authors "Yi-Hao Lai, VolPred Research System" \
@@ -166,7 +166,7 @@ uv run python -m volpred.cli ops paper-upsert \
 #### 上傳新版 PDF
 
 ```bash
-uv run python -m volpred.cli ops paper-upload-pdf \
+uv run volpred ops paper-upload-pdf \
   --paper-id leverage-direction \
   --file paper/leverage-direction/main.pdf
 ```
@@ -174,7 +174,7 @@ uv run python -m volpred.cli ops paper-upload-pdf \
 #### 把舊靜態 PDF 搬到 Storage
 
 ```bash
-uv run python -m volpred.cli ops paper-migrate-storage --paper-id leverage-direction
+uv run volpred ops paper-migrate-storage --paper-id leverage-direction
 ```
 
 判讀規則：
@@ -194,7 +194,7 @@ uv run python -m volpred.cli ops paper-migrate-storage --paper-id leverage-direc
 CLI：
 
 ```bash
-uv run python -m volpred.cli ops question-ranking-summary --limit 20
+uv run volpred ops question-ranking-summary --limit 20
 ```
 
 Admin API：
@@ -216,7 +216,7 @@ curl -sS -H "x-ops-key: $OPS_ADMIN_TOKEN" \
 若要讓 Claude 一次拿到「榜單 + 待評分題目 + evaluation template + 下一步命令」，可直接用：
 
 ```bash
-uv run python -m volpred.cli ops question-ranking-workflow --limit 20
+uv run volpred ops question-ranking-workflow --limit 20
 ```
 
 #### 第二步：用 LLM 評估 `pending_questions`
@@ -241,7 +241,7 @@ uv run python -m volpred.cli ops question-ranking-workflow --limit 20
 #### 第三步：執行 stable insertion rerank
 
 ```bash
-uv run python -m volpred.cli ops question-rerank \
+uv run volpred ops question-rerank \
   --evaluations-json /path/to/evaluations.json
 ```
 
@@ -299,7 +299,7 @@ curl -sS -X POST \
 若 Claude 在固定節奏中只想先看「現在平台層該不該做事」，可直接用：
 
 ```bash
-uv run python -m volpred.cli ops platform-cycle-summary --storage-dir storage --limit 20
+uv run volpred ops platform-cycle-summary --storage-dir storage --limit 20
 ```
 
 這會一次回：
@@ -325,7 +325,7 @@ uv run python -m volpred.cli ops platform-cycle-summary --storage-dir storage --
 #### 更新策略 metadata
 
 ```bash
-uv run python -m volpred.cli ops strategy-upsert \
+uv run volpred ops strategy-upsert \
   --strategy-key simple_12vix \
   --strategy-name "12/VIX (SPY)" \
   --weights-json '{"SPY":0.48,"cash":0.52}'
@@ -334,16 +334,16 @@ uv run python -m volpred.cli ops strategy-upsert \
 #### 啟用 / 停用
 
 ```bash
-uv run python -m volpred.cli ops strategy-set-active simple_12vix --active
-uv run python -m volpred.cli ops strategy-set-active simple_12vix --inactive
+uv run volpred ops strategy-set-active simple_12vix --active
+uv run volpred ops strategy-set-active simple_12vix --inactive
 ```
 
 ### F. 同步 / 每日站務
 
 ```bash
-uv run python -m volpred.cli ops sync-all
-uv run python -m volpred.cli ops daily-update
-uv run python -m volpred.cli ops recalc-metrics
+uv run volpred ops sync-all
+uv run volpred ops daily-update
+uv run volpred ops recalc-metrics
 ```
 
 ## 3. `/api/admin/*` 摘要

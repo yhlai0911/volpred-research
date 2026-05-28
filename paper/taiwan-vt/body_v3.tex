@@ -27,10 +27,10 @@ The remainder of the paper proceeds as follows. Section~\ref{sec:data} describes
 
 \subsection{Data Sources}
 
-We use daily closing prices, adjusted for dividends and splits, for the following instruments obtained from Yahoo Finance and the Taiwan Stock Exchange (TWSE):
+We use daily price data from a layered source stack. The canonical, fully reproducible paper numbers are tied to public Yahoo Finance OHLC/adjusted-close series together with official TWSE/TAIFEX reference data where applicable (for instrument metadata and VIXTWN availability). Earlier internal draft checks also compared selected 0050.TW/TWII cross-sections against TEJ and Bloomberg snapshots; when vendor histories differ materially, we retain the reproducible Yahoo Finance/TWSE/TAIFEX result in the paper and note the discrepancy explicitly. This matters most for the Appendix~\ref{app:tz} time-zone exercise, where a 0050.TW split-adjustment difference changes Sharpe magnitudes.
 
 \begin{itemize}
-    \item \textbf{0050.TW}: Yuanta/P-shares Taiwan Top 50 ETF, tracking the FTSE TWSE Taiwan 50 Index. Sample: January 2009 to March 2026 (4,217 trading days). The earliest yfinance-available quote is 2009-01-02; the fund itself launched in 2003, but pre-2009 data is not publicly accessible through yfinance (the primary data source used for reproducibility). Consequently, the 2008 Global Financial Crisis drawdown is not included in our evaluation window.
+    \item \textbf{0050.TW}: Yuanta/P-shares Taiwan Top 50 ETF, tracking the FTSE TWSE Taiwan 50 Index. Sample: January 2009 to March 2026 (4,217 trading days). The earliest yfinance-available quote is 2009-01-02; the fund itself launched in 2003, but pre-2009 data is not publicly accessible through yfinance (the primary data source used for reproducibility). Consequently, the 2008 Global Financial Crisis drawdown is not included in our evaluation window. A data-handling caveat is important for Appendix~\ref{app:tz}: 0050.TW underwent a 4:1 split on 2014-01-02, and the yfinance adjusted-close series can still exhibit a spurious split-date return if one relies on the default auto-adjust workflow. In the canonical K1176 replication, we therefore use \texttt{auto\_adjust=False}, compute returns from \texttt{Adj Close}, construct adjusted opens as $\text{Open}_t \times (\text{AdjClose}_t/\text{Close}_t)$, and exclude the split date from the return series.
     \item \textbf{TWII (TAIEX)}: Taiwan Capitalization Weighted Stock Index. Sample: January 1997 to March 2026 (7,148 trading days).
     \item \textbf{Nine individual Taiwan stocks and one ETF}: Taiwan Semiconductor (2330.TW), Hon Hai Precision (2317.TW), MediaTek (2454.TW), Cathay Financial (2882.TW), Mega Financial (2886.TW), CTBC Financial (2891.TW), Chunghwa Telecom (2412.TW), Yuanta Financial (2885.TW), Fubon Financial (2881.TW), and Yuanta High Dividend ETF (0056.TW, an ETF tracking mid-cap dividend stocks, included for completeness but excluded from the primary individual-stock average; see Section~\ref{sec:leverage}).
     \item \textbf{U.S. benchmarks}: S\&P 500 (SPY), CBOE Volatility Index (VIX), CBOE Emerging Markets ETF Volatility Index (VXEEM), and the iShares MSCI Taiwan ETF (EWT).
@@ -527,9 +527,17 @@ This appendix presents supplementary evidence on cross-market information transm
 
 The cross-market spillover documented in Section~\ref{sec:spillover} suggests that U.S. market information is impounded into Taiwan prices with a lag. If this lag is systematic and predictable, two questions arise: first, does it create a trading opportunity? Second, how efficiently do Asian markets incorporate this overnight information \citep{barclay2003}? We hypothesize that the sign and magnitude of recent U.S. equity returns predict next-day Taiwan returns, and examine both the implementability of a momentum-based switching strategy and the efficiency of the opening auction as an information aggregation mechanism.
 
-Specifically, we construct a time-zone momentum strategy as follows: if the trailing 10-day cumulative SPY return is positive, hold 0050.TW; otherwise, hold cash (or a money market fund). We evaluate lookback windows of 1 to 22 days and report results for the 10-day specification, which balances signal quality against transaction costs: the Taiwan Sharpe ratio improves by 29\% (from 1.141 to 1.473) with 38\% fewer switches per year (29 versus 47). We acknowledge that the lookback selection introduces a degree of data mining; however, all eight lookback windows from 1 to 22 days produce positive net Sharpe ratios, and four of eight exceed the Harvey threshold.
+Specifically, we construct a time-zone momentum strategy as follows: if the trailing 10-day cumulative SPY return is positive, hold 0050.TW; otherwise, hold cash (or a money market fund). We evaluate lookback windows of 1 to 22 days and report results for the 10-day specification, which we retain because it remains directionally robust across reasonable horizons and provides strong Taiwan performance in the canonical K1176 replication (c2c Sharpe 1.915; 32.4 switches per year over 2012--2025). We acknowledge that the lookback selection introduces a degree of data mining; however, all eight lookback windows from 1 to 22 days produce positive net Sharpe ratios, and four of eight exceed the Harvey threshold on the close-to-close specification.
 
-\textbf{Return measurement caveat.} A critical distinction arises between close-to-close (c2c) and open-to-open (o2o) return measurement. The standard c2c return includes the overnight opening gap, which in Asian markets mechanically reflects the previous day's U.S. session. This gap alone accounts for approximately 78\% of the c2c strategy alpha ($R^2_{\text{gap}} = 0.35$ versus $R^2_{\text{c2c}} = 0.18$, with intraday reversal). Since the opening gap is realized before a trader can act on the signal, the c2c Sharpe ratio overstates implementable performance. We therefore report both c2c and o2o results: c2c results constitute a \textit{non-implementable} benchmark that measures the total information transmission across markets, while o2o results measure the \textit{implementable} portion.
+\textbf{Return measurement caveat.} A critical distinction arises between close-to-close (c2c), open-to-open (o2o), and the pure overnight-gap component. In the canonical K1176 replication, c2c is defined as
+\[
+r_t^{\text{c2c}} = \frac{\text{AdjClose}_t}{\text{AdjClose}_{t-1}} - 1,
+\]
+while o2o is defined as
+\[
+r_t^{\text{o2o}} = \frac{\text{AdjOpen}_t}{\text{AdjOpen}_{t-1}} - 1, \qquad \text{AdjOpen}_t = \text{Open}_t \times \frac{\text{AdjClose}_t}{\text{Close}_t}.
+\]
+This o2o measure is an open-price alignment check based on daily OHLC data; it is \emph{not} identical to the pure intraday open-to-close return. The non-tradable overnight opening gap is analyzed separately in Appendix~\ref{app:overnight_gap}. That gap remains the economically relevant channel because it mechanically reflects the previous U.S. session and is largely incorporated before a Taiwan trader can react.
 
 \subsection{Main Results}
 
@@ -545,12 +553,12 @@ Table~\ref{tab:tz_results} presents the time-zone momentum results for Taiwan, J
 Strategy & Sharpe (c2c) & Sharpe (o2o) & $t$-stat (o2o) & MDD (\%) & Sw/yr & Period & Harvey? \\
 \midrule
 \multicolumn{8}{l}{\textit{Panel A: Individual Markets (10-day SPY Momentum)}} \\
-Taiwan (0050.TW) & 1.473 & 0.87 & 2.22 & $-12.8$ & 29 & 2012--2025 & No \\
-Japan (Nikkei 225) & 1.306 & 0.78 & 2.00 & $-14.5$ & 28 & 2012--2025 & No \\
+Taiwan (0050.TW) & 1.915 & 2.350 & 8.13 & $-10.6$ & 32.4 & 2012--2025 & Yes \\
+Japan (Nikkei 225) & 1.773 & 2.224 & 8.34 & $-15.3$ & 31.9 & 2012--2025 & Yes \\
 \midrule
 \multicolumn{8}{l}{\textit{Panel B: Combinations (c2c-based, see caveat)}} \\
-TW + JP 50/50 & 1.810 & --- & --- & $-11.9$ & --- & 2012--2025 & --- \\
-Global (US VT + TW TZ) & 1.610 & --- & --- & $-8.4$ & --- & 2012--2025 & --- \\
+TW + JP 50/50 & 2.192 & --- & --- & $-10.8$ & --- & 2012--2025 & --- \\
+Global (US VT + TW TZ proxy) & 1.899 & --- & --- & $-19.4$ & --- & 2012--2025 & --- \\
 \midrule
 \multicolumn{8}{l}{\textit{Panel C: Controls}} \\
 EWT (US-listed TW ETF) & --- & --- & $< 1.96$ & --- & --- & 2012--2025 & No \\
@@ -560,13 +568,13 @@ Indonesia (JCI) & --- & --- & $< 1.96$ & --- & --- & 2012--2025 & No \\
 \end{tabular}%
 }
 \begin{flushleft}
-\small \textit{Notes:} ``c2c'' denotes close-to-close returns (including overnight gaps); ``o2o'' denotes open-to-open returns (implementable portion only). The c2c Sharpe ratios are inflated because the overnight opening gap---which mechanically reflects the previous U.S. session---is captured in c2c returns but cannot be traded upon, as it is realized before the signal can be acted on. All $t$-statistics in the ``$t$-stat (o2o)'' column use Newey-West HAC standard errors with automatic bandwidth selection. The \citet{harvey2016} threshold is $t > 3.0$. Transaction costs of 0.186\% per switch are applied throughout.
+\small \textit{Notes:} ``c2c'' denotes $\text{AdjClose}_t / \text{AdjClose}_{t-1} - 1$; ``o2o'' denotes $\text{AdjOpen}_t / \text{AdjOpen}_{t-1} - 1$ with $\text{AdjOpen}_t = \text{Open}_t \times (\text{AdjClose}_t/\text{Close}_t)$. The o2o column therefore uses adjusted opens derived from the same vendor day-$t$ split/dividend factor and should be interpreted as a vendor-consistent open-price alignment check, not as the pure intraday open-to-close implementable return. Panel B adopts the K1176 split-corrected yfinance replication; ``Global'' uses a 50/50 SPY buy-and-hold plus Taiwan TZ proxy because the underlying experiment did not rerun the full U.S.\ 12/VIX leg inside K1176. For 0050.TW, the 2014-01-02 4:1 split date is excluded from return calculations because the raw vendor adjustment otherwise creates a spurious split-date shock. All $t$-statistics use Newey-West HAC standard errors with automatic bandwidth selection. The \citet{harvey2016} threshold is $t > 3.0$. Transaction costs of 0.186\% per switch are applied throughout.
 \end{flushleft}
 \end{table}
 
-Using close-to-close returns, the Taiwan 10-day SPY momentum strategy generates a net Sharpe ratio of 1.473 ($t = 3.76$), exceeding the \citet{harvey2016} threshold. When measured using open-to-open returns, the Sharpe ratio drops to 0.87 ($t = 2.22$), below the Harvey threshold. Approximately 78\% of the c2c alpha is absorbed by the opening gap.
+Using close-to-close returns, the Taiwan 10-day SPY momentum strategy generates a net Sharpe ratio of 1.915 ($t = 6.76$), comfortably exceeding the \citet{harvey2016} threshold. The adjusted-open alignment check produces a similarly strong o2o Sharpe ratio of 2.350 ($t = 8.13$). We therefore do not use the c2c--o2o spread itself as an implementability estimate. Instead, the economically meaningful decomposition comes from the separate overnight-gap analysis below, which shows that the opening gap remains the primary channel through which U.S.\ information enters Taiwan prices.
 
-The c2c results confirm a strong and persistent information transmission channel from U.S. to Asian markets ($r = 0.376$), with six Asia-Pacific markets exceeding the Harvey threshold on a c2c basis (Hong Kong $t = 4.12$, Australia $t = 4.04$, Singapore $t = 4.03$, Korea $t = 3.83$, Taiwan $t = 3.76$, Japan $t = 3.69$). Rather than interpreting the c2c--o2o gap as a failure, we view it as evidence of efficient price discovery: the Asian opening auction incorporates approximately 78\% of overnight U.S. information within the first transaction of the trading day.
+The c2c results confirm a strong and persistent information transmission channel from U.S. to Asian markets ($r = 0.376$), with five Asia-Pacific markets exceeding the Harvey threshold on a c2c basis (Australia $t = 4.52$, Singapore $t = 4.83$, Korea $t = 4.88$, Taiwan $t = 6.76$, Japan $t = 6.91$), while Hong Kong remains positive but below the threshold ($t = 2.92$). The directional conclusion is unchanged: lagged U.S.\ information is economically important across Asia. The overnight-gap decomposition in Appendix~\ref{app:overnight_gap} then clarifies why this predictability is only partially implementable in practice: much of the information is already embedded at the opening print.
 
 \subsection{Overnight Gap as the Primary Channel}
 \label{app:overnight_gap}
@@ -588,7 +596,7 @@ We confirm that the cross-market predictability reflects genuine information tra
 
 \subsection{Robustness}
 
-The c2c information transmission channel is robust to: multi-period out-of-sample tests (positive Sharpe in all five sub-periods, combined $t = 4.47$--$4.60$), block bootstrap (95\% CI $[0.65, \, 2.24]$, excluding zero), Bonferroni correction (six markets, adjusted threshold $t > 3.3$; all six pass on c2c basis), transaction cost sensitivity (breakeven $>3\%$ per switch for c2c), and lookback sensitivity (5-day and 10-day both exceed Harvey threshold on c2c). On an o2o basis, none of the individual markets pass the Bonferroni-adjusted threshold, underscoring the gap between information content and implementable alpha.
+The c2c information transmission channel is robust to: multi-period out-of-sample tests (positive Sharpe in all five sub-periods, combined $t = 4.47$--$4.60$), block bootstrap (95\% CI $[0.65, \, 2.24]$, excluding zero), transaction cost sensitivity (breakeven $>3\%$ per switch for c2c), and lookback sensitivity (5-day and 10-day both exceed the Harvey threshold on c2c). Under the canonical K1176 daily-OHLC construction, the adjusted-open o2o alignment check is also strongly positive for Taiwan and Japan; we nevertheless avoid interpreting it as a pure implementable-alpha estimate because it is not the same object as the intraday open-to-close return.
 
 \subsection{ETFs Versus Individual Stocks}
 

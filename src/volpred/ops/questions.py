@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import fcntl
+import json
 from typing import Any
 
 from scripts.supabase_sync import (
@@ -208,6 +210,14 @@ def _ensure_article_question_metadata(article_slug: str, question_id: str) -> No
 
 ACTIVE_USER_STATUSES = {"ranked", "researching"}
 PENDING_USER_STATUSES = {"evaluating", "pending", "open"}
+MEMBER_QA_ACTIVE_TASK_STATUSES = {
+    "pending",
+    "claimed",
+    "in_progress",
+    "blocked",
+    "blocked_on_user",
+    "pending_main_thread",
+}
 
 
 def _parse_time(value: Any) -> float:
@@ -435,6 +445,155 @@ def get_member_question_ranking_summary(
         "candidate_pool": candidate_rows[: max(limit, 1)],
         "suggestions": suggestions,
     }
+
+
+def ensure_member_qa_task(
+    *,
+    source: str = "user",
+    storage_dir: str = "storage",
+) -> dict[str, Any]:
+    """Materialize one member_qa task into next_tasks.json when work is pending.
+
+    Priority order:
+    1. Top-ranked question with no researching question in flight.
+    2. Latest pending-evaluation question as an evaluate→rerank→research task.
+
+    Dedupe key is `question_id` against active next_tasks member_qa entries.
+    """
+    summary = get_member_question_ranking_summary(source=source, limit=10)
+    ranked_table = summary.get("ranked_table") if isinstance(summary.get("ranked_table"), list) else []
+    pending_questions = summary.get("pending_questions") if isinstance(summary.get("pending_questions"), list) else []
+    health = summary.get("health") if isinstance(summary.get("health"), dict) else {}
+
+    if int(health.get("researching", 0) or 0) > 0:
+        return {"created": False, "reason": "already_researching"}
+
+    candidate: dict[str, Any] | None = None
+    mode = "research"
+    for item in ranked_table:
+        if isinstance(item, dict) and str(item.get("status") or "") == "ranked":
+            candidate = item
+            break
+
+    if candidate is None and pending_questions:
+        for item in pending_questions:
+            if isinstance(item, dict):
+                candidate = item
+                mode = "evaluate"
+                break
+
+    if candidate is None:
+        return {"created": False, "reason": "no_pending_member_qa_work"}
+
+    question_id = str(candidate.get("question_id") or "").strip()
+    if not question_id:
+        return {"created": False, "reason": "missing_question_id"}
+
+    next_tasks_path = project_path(storage_dir, "next_tasks.json")
+    next_tasks_path.parent.mkdir(parents=True, exist_ok=True)
+    if not next_tasks_path.exists():
+        next_tasks_path.write_text("[]\n", encoding="utf-8")
+
+    with next_tasks_path.open("r+", encoding="utf-8") as fh:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+        try:
+            tasks = json.load(fh)
+            if not isinstance(tasks, list):
+                raise ValueError("next_tasks.json is not a list")
+
+            for task in tasks:
+                if not isinstance(task, dict):
+                    continue
+                if str(task.get("task_type") or "") != "member_qa":
+                    continue
+                if str(task.get("question_id") or "") != question_id:
+                    continue
+                if str(task.get("status") or "") in MEMBER_QA_ACTIVE_TASK_STATUSES:
+                    return {
+                        "created": False,
+                        "reason": "task_already_exists",
+                        "task_id": task.get("id"),
+                    }
+
+            title = _build_member_qa_task_title(candidate)
+            task_id = _build_member_qa_task_id(question_id=question_id, mode=mode)
+            task = {
+                "id": task_id,
+                "title": title,
+                "description": _build_member_qa_task_description(candidate, mode=mode),
+                "task_type": "member_qa",
+                "priority": 2,
+                "status": "pending",
+                "tags": ["member_qa", source],
+                "created_at": _utc_now(),
+                "source": "question_ops_maintain",
+                "question_id": question_id,
+                "question_status": candidate.get("status"),
+                "proposer": candidate.get("proposer"),
+                "question_score": candidate.get("score"),
+                "task_mode": mode,
+            }
+            tasks.append(task)
+            fh.seek(0)
+            fh.truncate()
+            json.dump(tasks, fh, indent=2, ensure_ascii=False)
+            fh.write("\n")
+        finally:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+
+    return {
+        "created": True,
+        "task_id": task_id,
+        "question_id": question_id,
+        "mode": mode,
+    }
+
+
+def _build_member_qa_task_id(*, question_id: str, mode: str) -> str:
+    suffix = "research" if mode == "research" else "evaluate"
+    return f"member_qa_{question_id.split('-')[0]}_{suffix}"
+
+
+def _build_member_qa_task_title(candidate: dict[str, Any]) -> str:
+    proposer = str(candidate.get("proposer") or "會員").strip()
+    question = " ".join(str(candidate.get("question") or "").split())
+    if not question:
+        question = f"question {candidate.get('question_id')}"
+    return f"[member_qa] {proposer} 提問：{question[:80]}"
+
+
+def _build_member_qa_task_description(candidate: dict[str, Any], *, mode: str) -> str:
+    question_id = str(candidate.get("question_id") or "").strip()
+    proposer = str(candidate.get("proposer") or "會員").strip()
+    question = str(candidate.get("question") or "").strip()
+    created_at = str(candidate.get("created_at") or "").strip()
+    score = candidate.get("score")
+    score_line = f"Current score: {score}\n" if isinstance(score, (int, float)) else ""
+    if mode == "research":
+        workflow = (
+            "執行流程：\n"
+            f"1. uv run volpred ops question-claim --question-id {question_id} --actor claude\n"
+            "2. 依 member_qa workflow 完成 research / write / question-answer / question-finish\n"
+            "3. 文章需 published（member_qa 不走 release pool）並加非投資建議 disclaimer\n"
+        )
+    else:
+        workflow = (
+            "執行流程：\n"
+            "1. uv run volpred ops question-ranking-workflow --source user --output-json /tmp/q_workflow.json\n"
+            "2. 主線程逐題做 4 維度評分（研究可行性 / 讀者價值 / 研究相關性 / 預期影響力）\n"
+            "3. uv run volpred ops question-rerank --evaluations-json /tmp/q_evals.json\n"
+            f"4. rerank 後如本題入榜，再 uv run volpred ops question-claim --question-id {question_id} --actor claude\n"
+            "5. 完成 research / write / question-answer / question-finish\n"
+        )
+    return (
+        f"Member question id: {question_id}\n"
+        f"Proposer: {proposer}\n"
+        f"Created: {created_at}\n"
+        f"{score_line}"
+        f"\n原題：\n{question}\n\n"
+        f"{workflow}\n"
+        "注意：member_qa 為 reader-facing published flow，不可只 review report 就停。"
+    )
 
 
 def build_question_rerank_workflow(

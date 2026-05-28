@@ -106,13 +106,13 @@ uv run volpred ops question-ops-summary --limit 5
 若 `pending_questions > 0` 再跑：
 
 ```bash
-uv run python -m volpred.cli ops question-ranking-summary --limit 20
+uv run volpred ops question-ranking-summary --limit 20
 ```
 
 或：
 
 ```bash
-uv run python -m volpred.cli ops question-ranking-workflow --limit 20
+uv run volpred ops question-ranking-workflow --limit 20
 ```
 
 你應該拿到：
@@ -133,7 +133,7 @@ uv run python -m volpred.cli ops question-ranking-workflow --limit 20
 ### Step 3: 執行 stable insertion rerank
 
 ```bash
-uv run python -m volpred.cli ops question-rerank \
+uv run volpred ops question-rerank \
   --evaluations-json /path/to/evaluations.json
 ```
 
@@ -225,7 +225,7 @@ uv run volpred ops publish-milestone \
   --category member_qa \
   --audience member_qa \
   --proposer 會員名稱 \
-  --status draft \
+  --status published \
   --tags "會員提問,..."
 ```
 
@@ -239,12 +239,9 @@ uv run volpred ops question-answer <question_id> \
 
 規則：
 
-- 若文章仍是 `draft`：
-  - 問題狀態保持 `researching`
-  - 等 release-pool 真正發佈時，再由流程轉成 `answered`
-
-- 若文章已是 `published`：
-  - 問題可直接標為 `answered`
+- `member_qa` 是 reader-facing immediate flow，文章應直接 `published`
+- `question-answer` 綁定 published 文章後，問題可直接標為 `answered`
+- 後續用 `question-finish` 做正式收尾，不要靠 release-pool 補轉狀態
 
 ### 禁止事項
 

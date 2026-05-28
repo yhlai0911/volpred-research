@@ -21,7 +21,7 @@ Use this skill for **platform-layer work**. Treat it as the operating manual for
 
 - `/admin/*`
 - `/api/admin/*`
-- `uv run python -m volpred.cli ops ...`
+- `uv run volpred ops ...`
 
 ## Scope Boundary
 
@@ -81,7 +81,7 @@ Follow these rules in order:
 1. **Prefer existing control-plane surfaces**
    - First check `/admin/*`
    - Then `/api/admin/*`
-   - Then `uv run python -m volpred.cli ops ...`
+   - Then `uv run volpred ops ...`
 
 2. **Prefer CLI/API before adding UI**
    - If a capability is missing, add the smallest shared surface first
@@ -117,7 +117,7 @@ For any platform task, follow this sequence:
 
 3. Choose the narrowest stable surface:
    - human/manual view → `/admin/*`
-   - Claude local operation → `uv run python -m volpred.cli ops ...`
+   - Claude local operation → `uv run volpred ops ...`
    - structured read/write integration → `/api/admin/*`
 
 4. If missing, extend the platform in this order:
@@ -169,6 +169,9 @@ Load these references only when relevant:
 
 - `references/session-cron-workflows.md`
   - use when the task is about packaging platform operations into Claude session cron routines
+
+- `references/scheduling.md`
+  - use when the task is about canonical cron cadence, host crontab / LaunchAgent alignment, or schedule drift audits
 
 - `references/governance.md`
   - use when diagnosing errors or deciding whether to manually fix data vs fix the process

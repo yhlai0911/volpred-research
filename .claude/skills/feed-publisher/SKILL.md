@@ -261,7 +261,7 @@ pub.publish_milestone(
 - **禁止直接 `status=published`**：除非用戶明確說「立即發布這篇」
 - **Agent prompt 必須指定 `status="draft"`**：不可省略
 - 文章池每 **15 分鐘**自動釋出 1 篇（正式時鐘以 shared scheduler / canonical runtime schedule 為準；若本機仍留 session cron，只視為過渡期便利）
-- CLI 指令：`uv run python -m volpred.cli ops release-pool --include-drafts --limit 1 --storage-dir storage`
+- CLI 指令：`uv run volpred ops release-pool --include-drafts --limit 1 --storage-dir storage`
 
 ### 文章類型寫作模板（寫作前必須選定類型）
 
@@ -449,8 +449,8 @@ uv run python scripts/record_and_publish.py \
 ### 方法 C：平台層釋出（文章池 / 節奏發布）
 
 ```bash
-uv run python -m volpred.cli ops publish-milestone ...
-uv run python -m volpred.cli ops release-pool-by-settings --storage-dir storage
+uv run volpred ops publish-milestone ...
+uv run volpred ops release-pool-by-settings --storage-dir storage
 ```
 
 需要查看現況或管理釋出節奏時，優先參考：
@@ -468,8 +468,8 @@ uv run python -m volpred.cli ops release-pool-by-settings --storage-dir storage
 - 若需要補送或重寄，交由 `admin-ops`：
 
 ```bash
-uv run python -m volpred.cli ops send-article-notification <pub_id>
-uv run python -m volpred.cli ops send-daily-digest --target-date YYYY-MM-DD
+uv run volpred ops send-article-notification <pub_id>
+uv run volpred ops send-daily-digest --target-date YYYY-MM-DD
 ```
 
 - 若 `sent=false`，代表通知已建立，但 SMTP 尚未配置或尚未真正送出

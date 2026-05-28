@@ -30,6 +30,7 @@ paths:
 2. **Hard block schema** — 任務帶 `blocked_reason` (controlled vocab) + `blocked_at` + `blocked_until` (auto-recheck) + `blocked_note`
 3. **Soft block 自動偵測** — title/description 含 `(optional)` / `否則跳過` / `only if truly new` → 自動歸類 `self_tagged_optional`
 4. **Hard-block CLI** — `scripts/mark_task_blocked.py --id <id> --reason <vocab> --note "..." [--until YYYY-MM-DD]`；`--unblock` 反向
+5. **Main-thread handoff CLI** — `uv run python scripts/task_pool_claim.py handoff-main-thread --id <id> --note "..."`；用於已 claim 後才確認屬 `paper_body` / `paper_decision` / 其他主線程專屬任務，將 task 轉成 `pending_main_thread` 並清除 claim，禁止用 `blocked` 假裝收尾
 
 **Controlled vocabulary**（`BLOCKED_REASONS` — single source `src/volpred/ops/blocked_reasons.py`，2026-05-27 統一）：
 - `awaiting_external_data` — 缺 auth / credentials / 原始資料（GCP, Dropbox 等）

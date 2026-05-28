@@ -139,6 +139,7 @@ def _make_article_task(cand: dict, priority: int) -> dict:
         "source": "auto_discovered",
         "k_id": k_id,
         "tags": (cand.get("tags") or []) + ["auto-discovered", f"audience-{needed_audience}"],
+        "topic_cluster": cand.get("topic_cluster"),
         "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
 
@@ -180,6 +181,14 @@ def refill(target: int, dry_run: bool = False) -> dict:
         fallback_pool.append(cand)
     fallback_pool.sort(key=lambda c: c.get("score") or 0, reverse=True)
     pool.extend(fallback_pool)
+    pool.sort(
+        key=lambda c: (
+            int(((c.get("topic_cluster_30d") or {}).get("count") or 0) > ((c.get("topic_cluster_30d") or {}).get("cap") or 999)),
+            (c.get("topic_cluster_30d") or {}).get("count") or 0,
+            -(c.get("score") or 0),
+            c.get("k_id") or "",
+        )
+    )
 
     new_entries = []
     for cand in pool:

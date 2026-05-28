@@ -10,6 +10,12 @@ from pathlib import Path
 REPO = Path(__file__).parent.parent
 LOG = REPO / "storage" / "reports" / "trending_repost_log.json"
 STALE_HOURS = 24
+TERMINAL_OR_HANDOFF_STATUSES = {
+    "success",
+    "wont_fix",
+    "fb_silent_reject",
+    "awaiting_interactive_session",
+}
 
 
 def main():
@@ -21,8 +27,8 @@ def main():
     cutoff_iso = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(now - STALE_HOURS * 3600))
     pending = []
     for e in data:
-        s = e.get("fb_post_status", "")
-        if s in ("success", "wont_fix", "fb_silent_reject"):
+        s = str(e.get("fb_post_status", "")).strip().lower()
+        if s in TERMINAL_OR_HANDOFF_STATUSES:
             continue
         created = e.get("date") or e.get("created_at") or e.get("timestamp", "")
         if created and created < cutoff_iso:

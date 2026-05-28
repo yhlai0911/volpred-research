@@ -85,7 +85,7 @@
 - `GET /api/admin/questions/summary`
   - 會員問題排行摘要、待評分題目、建議
 
-## 本地 CLI（`uv run python -m volpred.cli ops ...`）
+## 本地 CLI（`uv run volpred ops ...`）
 
 - `ops health`
 - `ops sync-all`

@@ -31,6 +31,27 @@ fi
 missing_skill_md=()
 empty_frontmatter=()
 dead_references=()
+workflow_drift=()
+stale_skills=()
+STALE_DAYS=30
+
+if [ "${1:-}" = "--stale-days" ]; then
+    if [ -z "${2:-}" ] || ! [[ "${2:-}" =~ ^[0-9]+$ ]]; then
+        echo "error: --stale-days requires integer days" >&2
+        exit 2
+    fi
+    STALE_DAYS="$2"
+    shift 2
+elif [ "${2:-}" = "--stale-days" ]; then
+    if [ -z "${3:-}" ] || ! [[ "${3:-}" =~ ^[0-9]+$ ]]; then
+        echo "error: --stale-days requires integer days" >&2
+        exit 2
+    fi
+    STALE_DAYS="$3"
+fi
+
+now_epoch=$(date +%s)
+stale_cutoff=$((now_epoch - STALE_DAYS * 86400))
 
 for skill_dir in "$SKILLS_DIR"/*/; do
     [ -d "$skill_dir" ] || continue
@@ -45,6 +66,11 @@ for skill_dir in "$SKILLS_DIR"/*/; do
     # Frontmatter must have at least `name:` and `description:` lines
     if ! grep -q "^name:" "$skill_md" || ! grep -q "^description:" "$skill_md"; then
         empty_frontmatter+=("$skill_name")
+    fi
+
+    skill_mtime=$(stat -f "%m" "$skill_md")
+    if [ "$skill_mtime" -lt "$stale_cutoff" ]; then
+        stale_skills+=("$skill_name")
     fi
 
     # Find references in SKILL.md，三種形式皆檢查：
@@ -82,6 +108,19 @@ for skill_dir in "$SKILLS_DIR"/*/; do
         fi
     done < <(grep -oE '(\.agents|\.claude)/skills/[a-zA-Z0-9_./-]+\.md|(^|[^a-zA-Z./])references/[a-zA-Z0-9_./-]+\.md' "$skill_md" \
         | sed -E 's/^[^a-zA-Z./]+//' | sort -u)
+
+    while IFS= read -r md_file; do
+        [ -f "$md_file" ] || continue
+        rel_file="${md_file#$ROOT/}"
+
+        if grep -q 'uv run python -m volpred\.cli ops' "$md_file"; then
+            workflow_drift+=("$skill_name :: $rel_file :: legacy ops CLI (uv run python -m volpred.cli ops) -> use uv run volpred ops")
+        fi
+
+        if grep -q 'experiments/K{ID}/k{id}_results\.json\|experiments/K{ID}/\|grep "K{ID}' "$md_file"; then
+            workflow_drift+=("$skill_name :: $rel_file :: legacy uppercase experiment placeholder (experiments/K{ID}) -> use lowercase experiments/<experiment_id>/")
+        fi
+    done < <(find "$skill_dir" -type f -name '*.md' | sort)
 done
 
 if [ "$JSON_MODE" = "1" ]; then
@@ -101,10 +140,22 @@ if [ "$JSON_MODE" = "1" ]; then
         printf '"%s"' "${empty_frontmatter[$i]}"
     done
     printf '],\n'
+    printf '  "stale_skills": ['
+    for i in "${!stale_skills[@]}"; do
+        [ "$i" -gt 0 ] && printf ', '
+        printf '"%s"' "${stale_skills[$i]}"
+    done
+    printf '],\n'
     printf '  "dead_references": ['
     for i in "${!dead_references[@]}"; do
         [ "$i" -gt 0 ] && printf ', '
         printf '"%s"' "${dead_references[$i]}"
+    done
+    printf '],\n'
+    printf '  "workflow_drift": ['
+    for i in "${!workflow_drift[@]}"; do
+        [ "$i" -gt 0 ] && printf ', '
+        printf '"%s"' "${workflow_drift[$i]}"
     done
     printf ']\n'
     printf '}\n'
@@ -131,6 +182,15 @@ else
         echo "✅ all SKILL.md have name + description frontmatter"
     fi
 
+    echo "ℹ️  stale threshold: ${STALE_DAYS} day(s)"
+    if [ ${#stale_skills[@]} -gt 0 ]; then
+        echo "⚠️  stale SKILL.md mtime (${#stale_skills[@]}):"
+        printf '  - %s\n' "${stale_skills[@]}"
+        echo ""
+    else
+        echo "✅ no SKILL.md older than ${STALE_DAYS} days"
+    fi
+
     if [ ${#dead_references[@]} -gt 0 ]; then
         echo "🔴 dead references in SKILL.md (${#dead_references[@]}):"
         printf '  - %s\n' "${dead_references[@]}"
@@ -138,10 +198,18 @@ else
     else
         echo "✅ all references/*.md mentions in SKILL.md exist"
     fi
+
+    if [ ${#workflow_drift[@]} -gt 0 ]; then
+        echo "🔴 workflow drift patterns (${#workflow_drift[@]}):"
+        printf '  - %s\n' "${workflow_drift[@]}"
+        echo ""
+    else
+        echo "✅ no legacy workflow patterns detected"
+    fi
 fi
 
 # Exit 1 if any issue found
-if [ ${#missing_skill_md[@]} -gt 0 ] || [ ${#dead_references[@]} -gt 0 ]; then
+if [ ${#missing_skill_md[@]} -gt 0 ] || [ ${#dead_references[@]} -gt 0 ] || [ ${#workflow_drift[@]} -gt 0 ]; then
     exit 1
 fi
 

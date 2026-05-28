@@ -66,27 +66,16 @@ uv run python scripts/task_pool_claim.py list --status pending --limit 50 2>/dev
 ### Phase 0.C — 都沒事 → 進 PHASE 0.5
 若 0.A 全 close 完、0.B 無新單 → PHASE 0.5。
 
-PHASE 0.5 — **每日 reader-facing badge pool top-up**（2026-05-26 新增，防 badge 一面倒）:
+PHASE 0.5 — **verify-only：reader-facing badge pool refill 狀態檢查**（2026-05-27 更新）
 
-**根因**：`refill_task_pool.py` 只補 `daily_article` + `experiment`；`generate_diverse_tasks.py` 只補 paper_review / platform_ops / governance / experiment。`event_article` / `trending_repost` / `member_qa` 三類 reader-facing badge **完全沒 auto refill** — 若主線程不親跑 candidate scan，前端 badge 會持續 100% 「一般讀者」（general）+ milestone（experiment→PASS）。
+`event_article / trending_repost / member_qa` 的每日補池已收斂到 host cron `cron_reader_facing_refill.sh`。
 
-**Mechanism**：
-1. 檢查 `storage/ops/daily_reader_facing_scan_state.json`：
-   ```bash
-   TODAY=$(TZ='Asia/Taipei' date '+%Y-%m-%d')
-   STATE=$(jq -r --arg today "$TODAY" 'if .date == $today then .scanned // false else false end' storage/ops/daily_reader_facing_scan_state.json 2>/dev/null || echo false)
-   ```
-2. 若 `STATE=false`（今日尚未掃描） → 主線程**親跑**（**不可派 subagent** — trending source scan 需主線程判斷 VolPred angle relevance）：
-   - **trending_repost source scan** per `.claude/skills/trending-repost/SKILL.md` Step 1：奇日國際 (WSJ/FT/Bloomberg/Substack) / 偶日台灣 (工商/經濟日報/Inside/Yahoo TW)，30 天 dedup（`storage/reports/trending_repost_log.json`），VolPred angle 確認，候選 1 個 → enqueue `task_type=trending_repost priority=1` 進 `storage/next_tasks.json`
-   - **event_article candidate pull** per `event_jobs.items`：撈 ≤14 天即將到來事件（CPI/NFP/FOMC/major earnings），每事件最多 3-4 篇 (T-7 / T-2 / T+0 / T+1) — 用 jq scan feed.json 已發幾篇 → enqueue 缺的 brief priority=1
-   - **member_qa pending evaluation**（若 `storage/community_questions.json` 有 status=pending）：跑 question-ranking-workflow → rerank → enqueue top-1 priority=2
-3. 寫 state：
-   ```bash
-   echo "{\"date\":\"$TODAY\",\"scanned\":true,\"scanned_at\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"trending_added\":<n>,\"event_added\":<n>,\"member_qa_added\":<n>}" > storage/ops/daily_reader_facing_scan_state.json
-   ```
-4. 若 STATE=true → skip，直接進 PHASE A。
+主線程在這裡只做 verify，不再手跑 source scan：
+1. 讀 `storage/ops/daily_reader_facing_scan_state.json`
+2. 若 `date != today` 或 `scanned != true` 或存在 `errors` → 建 / claim `platform_ops_reader_facing_refill_cron` followup，不在 hourly prompt 內直接做人工掃描
+3. 若 state 正常 → 直接進 PHASE A
 
-**注意**：此 phase 失敗（WebSearch quota / API down 等）不阻塞後續 phase；寫 fail 進 state 加 `"failed_reason": "<msg>"` 讓下一輪 hourly retry。完整流程後續會收斂為 host cron `cron_reader_facing_refill.sh`（已建 followup task `platform_ops_reader_facing_refill_cron`），目前先靠 hourly fire 主線程親跑。
+這樣做的目的：把 reader-facing pool top-up 從 prompt-level 紀律改成 repo-level script + host cron，可測試、可重跑、可觀測。
 
 PHASE A — 檢查 compute queue 有無 completed 待 followup:
 1. 跑 `uv run python scripts/compute_queue.py list --completed-pending-followup --json`

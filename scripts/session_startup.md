@@ -91,7 +91,7 @@ scripts/install_scheduler_cron.sh
 uv run python scripts/session_replay_pending.py
 ```
 
-該 script 自動 mark 所有 `recorded_count > 0` 且 `replayed_at < recorded_at` 的 job `replayed_at = now`。session 內 in-process cron 會自動 fire 高頻 cron（continue_task / question_research 等）— mark 等於聲明「session 已 catch up」，piggy-back recorder 不再重複累積同 window。
+該 script 自動 mark 所有 `recorded_count > 0` 且 `replayed_at < recorded_at` 的 job `replayed_at = now`。session 內 in-process cron 會自動 fire高頻 session jobs（如 `continue_task`）— mark 等於聲明「session 已 catch up」，piggy-back recorder 不再重複累積同 window。
 
 **Edge case（低頻 cron）**: ndc-indicator-maintain (月頻) 等若有 pending fire 表示真實 missed work — 主線程必先執行對應 maintain command，再跑 script mark replayed。Dry-run 先 audit：
 
@@ -106,12 +106,13 @@ uv run python scripts/session_replay_pending.py --dry-run
 ```python
 CronCreate(cron="3 9 * * *", prompt="每日任務審視：執行 daily-planning-maintain --stub-if-no-work；若有 planning gap 再建立正式 task")
 CronCreate(cron="*/30 * * * *", prompt="繼續任務（slot-aware）：執行 continue-task-maintain --stub-if-no-work；若有 dispatch candidate 再處理 1 個正式 task")
-CronCreate(cron="17 */6 * * *", prompt="會員問題研究：執行 question-ops-maintain --stub-if-no-work；若有 pending 再看 workflow")
 CronCreate(cron="37 */6 * * *", prompt="平台巡檢：執行 platform-patrol-maintain --stub-if-no-work；若有訊號再看 detail CLI")
 CronCreate(cron="47 */4 * * *", prompt="Git sync：執行 git-sync-maintain --stub-if-no-work；若需同步再依 wrapper 建議處理 commit / pull / push")
 CronCreate(cron="7 */6 * * *", prompt="知識索引維護：執行 knowledge-index-maintain --stub-if-no-work；若有動作再回報 after summary")
 CronCreate(cron="23 22 * * *", prompt="Token 用量日報：執行 token-usage-maintain --stub-if-no-work；只有缺日報或週報時才生成並回報 after summary")
 CronCreate(cron="0 10 28 * *", prompt="更新 NDC 景氣指標：執行 ndc-indicator-maintain --stub-if-no-work；只有 canonical CSV 落後時才展開人工更新流程")
+
+註：`question_research` 已於 2026-05-26 遷移到 host cron `0 */6 * * * ~/.volpred/bin/cron_question_ops_maintain.sh`，不再由 session CronCreate 重建。
 ```
 
 **繼續任務 cron 規則（`*/30 * * * *` 嚴格每 30 分鐘等距 fire，slot-aware heartbeat，任務類型不限於研究）**：

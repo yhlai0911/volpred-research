@@ -8,12 +8,24 @@
 # TCC copy: ~/.volpred/bin/cron_hourly_dispatch.sh
 # After editing: cp scripts/cron_hourly_dispatch.sh ~/.volpred/bin/ && chmod +x ~/.volpred/bin/cron_hourly_dispatch.sh
 
+REPO_ROOT="${VOLPRED_REPO_ROOT:-/Users/yhlai0911/Desktop/volpred-research}"
+VOLPRED_HOME_DIR="${VOLPRED_HOME_DIR:-/Users/yhlai0911/.volpred}"
+HOURLY_LOG_PATH="${HOURLY_LOG_PATH:-$VOLPRED_HOME_DIR/logs/hourly_dispatch.log}"
+CLAUDE_BIN="${CLAUDE_BIN:-/Users/yhlai0911/.local/bin/claude}"
+UV_BIN="${UV_BIN:-/Users/yhlai0911/.local/bin/uv}"
+PROMPT_FILE="${PROMPT_FILE:-$REPO_ROOT/scripts/cron_hourly_dispatch_prompt.md}"
+ZSHRC_PATH="${ZSHRC_PATH:-$HOME/.zshrc}"
+AUTH_PREFLIGHT_TIMEOUT_SEC="${AUTH_PREFLIGHT_TIMEOUT_SEC:-10}"
+AUTH_PREFLIGHT_MODEL="${AUTH_PREFLIGHT_MODEL:-claude-sonnet-4-6}"
+AUTH_HOTFIX_CMD="${AUTH_HOTFIX_CMD:-security set-generic-password-partition-list -S apple-tool:,apple:,launchd:,unsigned: -s \"Claude Code-credentials\" -k login.keychain}"
+
 # Log target lives OUTSIDE Desktop/ — macOS TCC protects ~/Desktop and blocks
 # launchd-spawned processes from opening files there (2026-05-21 incident:
 # plist StandardOutPath under Desktop → spawn failed EX_CONFIG/78, script body
 # never ran). storage/logs/cron/hourly_dispatch.log is a symlink to this.
-exec >> /Users/yhlai0911/.volpred/logs/hourly_dispatch.log 2>&1
-cd /Users/yhlai0911/Desktop/volpred-research || exit 1
+mkdir -p "$(dirname "$HOURLY_LOG_PATH")"
+exec >> "$HOURLY_LOG_PATH" 2>&1
+cd "$REPO_ROOT" || exit 1
 
 # Raise file-descriptor SOFT limit. LaunchAgent-spawned processes inherit
 # launchd's default (soft 256 / hard unlimited — `launchctl limit maxfiles`)
@@ -46,9 +58,6 @@ cleanup() {
 }
 trap cleanup EXIT TERM INT HUP
 
-# Read prompt from external file to avoid bash quoting hell with Chinese + backticks
-PROMPT=$(cat /Users/yhlai0911/Desktop/volpred-research/scripts/cron_hourly_dispatch_prompt.md)
-
 # Two-layer hang defense (50min hard cap, 60min interval - 10min buffer):
 # Layer 1: perl alarm SIGALRM (verified working across exec on macOS 25.3:
 #   `perl -e 'alarm 2; exec sleep 10'` → exit 142). Cheap, no extra process.
@@ -71,13 +80,98 @@ HOURLY_CAP_SEC=3000
 #
 CLAUDE_CMD_PATTERN="claude"
 
+run_auth_preflight() {
+  /usr/bin/perl -e 'alarm shift; exec @ARGV' "$AUTH_PREFLIGHT_TIMEOUT_SEC" \
+    "$CLAUDE_BIN" -p --dangerously-skip-permissions \
+    --model "$AUTH_PREFLIGHT_MODEL" "ping" 2>&1
+  return $?
+}
+
+send_auth_preflight_alert() {
+  local first_output=$1
+  local retry_output=$2
+  local auth_body tmp
+  auth_body=$(printf '%s\n' \
+"## 觸發條件" \
+"- \`cron_hourly_dispatch.sh\` auth pre-flight 在 launchd env 失敗，且 source \`~/.zshrc\` 後重試仍失敗" \
+"- pre-flight timeout: ${AUTH_PREFLIGHT_TIMEOUT_SEC}s" \
+"" \
+"首次輸出：" \
+'```' \
+"${first_output}" \
+'```' \
+"" \
+"重試輸出：" \
+'```' \
+"${retry_output}" \
+'```' \
+"" \
+"## 影響" \
+"- 本輪 hourly dispatch 不會進入 3-attempt 主流程，避免無效重試與重複 generic CRITICAL" \
+"- 直到 keychain / Claude CLI auth 恢復前，排程派工會持續停擺" \
+"" \
+"## 建議行動" \
+'```' \
+"${AUTH_HOTFIX_CMD}" \
+'```' \
+"" \
+"執行後可用：" \
+'```' \
+"env -i HOME=\$HOME PATH=\$PATH ${CLAUDE_BIN} -p \"say hi\" 2>&1 | head -3" \
+'```' \
+"確認不再出現 \`Not logged in · Please run /login\`")
+  tmp=$(mktemp -t hourly_auth_fail.XXXXXX).md
+  echo "$auth_body" > "$tmp"
+  "$UV_BIN" run volpred ops send-alert \
+    --level critical \
+    --title "hourly-dispatch auth preflight failed $(date '+%H:%M')" \
+    --body-md "$tmp" --force 2>&1 | tail -1
+  rm -f "$tmp"
+}
+
+echo "=== auth-preflight $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
+AUTH_PREFLIGHT_OUTPUT=$(run_auth_preflight)
+AUTH_PREFLIGHT_CODE=$?
+if [ $AUTH_PREFLIGHT_CODE -ne 0 ]; then
+  echo "[AUTH-PREFLIGHT] launchd env failed exit=$AUTH_PREFLIGHT_CODE"
+  echo "$AUTH_PREFLIGHT_OUTPUT"
+  if [ -f "$ZSHRC_PATH" ]; then
+    echo "[AUTH-PREFLIGHT] sourcing $ZSHRC_PATH then retry"
+    # shellcheck source=/dev/null
+    source "$ZSHRC_PATH" 2>/dev/null || true
+  else
+    echo "[AUTH-PREFLIGHT] no zshrc at $ZSHRC_PATH"
+  fi
+  AUTH_PREFLIGHT_RETRY_OUTPUT=$(run_auth_preflight)
+  AUTH_PREFLIGHT_RETRY_CODE=$?
+  if [ $AUTH_PREFLIGHT_RETRY_CODE -ne 0 ]; then
+    echo "[AUTH-PREFLIGHT] retry failed exit=$AUTH_PREFLIGHT_RETRY_CODE"
+    echo "$AUTH_PREFLIGHT_RETRY_OUTPUT"
+    send_auth_preflight_alert "$AUTH_PREFLIGHT_OUTPUT" "$AUTH_PREFLIGHT_RETRY_OUTPUT"
+    echo "=== hourly-dispatch end $(date '+%Y-%m-%d %H:%M:%S %Z') (exit=1 preflight-auth) ==="
+    echo "=== [hourly_dispatch] exit 1 at $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
+    exit 1
+  fi
+  echo "[AUTH-PREFLIGHT] recovered after sourcing zshrc"
+else
+  echo "[AUTH-PREFLIGHT] ok"
+fi
+
+if [ "${HOURLY_PREFLIGHT_ONLY:-0}" = "1" ]; then
+  echo "[AUTH-PREFLIGHT] test-only exit after successful preflight"
+  exit 0
+fi
+
+# Read prompt from external file to avoid bash quoting hell with Chinese + backticks
+PROMPT=$(cat "$PROMPT_FILE")
+
 # Single dispatch attempt with full hang-defense (perl alarm + watchdog).
 # Returns claude's exit code via global EXIT_CODE. Sets CLAUDE_PID for trap.
 run_one_attempt() {
   local model=$1
 
   /usr/bin/perl -e 'alarm shift; exec @ARGV' "$HOURLY_CAP_SEC" \
-    /Users/yhlai0911/.local/bin/claude -p --dangerously-skip-permissions \
+    "$CLAUDE_BIN" -p --dangerously-skip-permissions \
     --model "$model" "$PROMPT" &
   CLAUDE_PID=$!
 
@@ -168,7 +262,7 @@ if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 142 ] && [ $EXIT_CODE -ne 143 ] && [
 ## 最後 30 行 dispatch log
 
 \`\`\`
-$(tail -30 /Users/yhlai0911/.volpred/logs/hourly_dispatch.log 2>&1 | sed 's/\`/<bt>/g')
+$(tail -30 "$HOURLY_LOG_PATH" 2>&1 | sed 's/\`/<bt>/g')
 \`\`\`
 
 ## 影響範圍
@@ -186,7 +280,7 @@ $(tail -30 /Users/yhlai0911/.volpred/logs/hourly_dispatch.log 2>&1 | sed 's/\`/<
 ## 建議行動
 
 \`\`\`
-tail -100 /Users/yhlai0911/.volpred/logs/hourly_dispatch.log
+tail -100 $HOURLY_LOG_PATH
 curl -s https://status.claude.com/api/v2/status.json | jq .status
 ps -ef | grep claude | head
 \`\`\`
@@ -198,7 +292,7 @@ FAILEOF
 )
   TMP=$(mktemp -t hourly_fail.XXXXXX).md
   echo "$FAIL_BODY" > "$TMP"
-  /Users/yhlai0911/.local/bin/uv run volpred ops send-alert \
+  "$UV_BIN" run volpred ops send-alert \
     --level critical \
     --title "hourly-dispatch 全 attempt 失敗 (exit $EXIT_CODE) $(date '+%H:%M')" \
     --body-md "$TMP" --force 2>&1 | tail -1

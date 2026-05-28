@@ -9,7 +9,7 @@ Schema additions to storage/next_tasks.json task entries:
   - result            : str  (already exists)
 
 Status machine:
-  pending  --claim-->  claimed  --start-->  in_progress  --complete-->  succeeded / failed
+  pending  --claim-->  claimed  --start-->  in_progress  --complete-->  succeeded / failed / blocked
                           |
                           +--release-->  pending
 
@@ -17,7 +17,8 @@ Commands:
   claim    --id <task_id> --owner <name> [--session <sid>]
   release  --id <task_id>
   start    --id <task_id>
-  complete --id <task_id> [--result <text>] [--status succeeded|failed]
+  handoff-main-thread --id <task_id> --note <text>
+  complete --id <task_id> [--result <text>] [--status succeeded|failed|blocked]
   list     [--status pending|claimed|in_progress|stale] [--owner <name>] [--limit N]
   cleanup  --stale-hours <N>   (auto-release claims older than N hours with no completion)
 
@@ -122,6 +123,21 @@ def cmd_release(args: argparse.Namespace) -> dict[str, Any]:
         return {"ok": True, "task_id": args.id, "released_from": prev_owner}
 
 
+def cmd_handoff_main_thread(args: argparse.Namespace) -> dict[str, Any]:
+    with _locked_load() as (_fh, tasks):
+        task = _find(tasks, args.id)
+        prev_status = (task.get("status") or "").lower()
+        if prev_status not in {"claimed", "in_progress", "pending", "pending_main_thread"}:
+            return {"ok": False, "reason": "wrong_status", "status": task.get("status")}
+        task["status"] = "pending_main_thread"
+        task["handoff_note"] = args.note
+        task["handoff_at"] = _now()
+        task.pop("claimed_by", None)
+        task.pop("claimed_at", None)
+        task.pop("claim_session_id", None)
+        return {"ok": True, "task_id": args.id, "status": "pending_main_thread"}
+
+
 def cmd_complete(args: argparse.Namespace) -> dict[str, Any]:
     with _locked_load() as (_fh, tasks):
         task = _find(tasks, args.id)
@@ -208,7 +224,8 @@ def main() -> int:
     p = sub.add_parser("claim"); p.add_argument("--id", required=True); p.add_argument("--owner", required=True); p.add_argument("--session"); p.set_defaults(fn=cmd_claim)
     p = sub.add_parser("start"); p.add_argument("--id", required=True); p.set_defaults(fn=cmd_start)
     p = sub.add_parser("release"); p.add_argument("--id", required=True); p.set_defaults(fn=cmd_release)
-    p = sub.add_parser("complete"); p.add_argument("--id", required=True); p.add_argument("--status", choices=["succeeded", "failed"], default="succeeded"); p.add_argument("--result"); p.set_defaults(fn=cmd_complete)
+    p = sub.add_parser("handoff-main-thread"); p.add_argument("--id", required=True); p.add_argument("--note", required=True); p.set_defaults(fn=cmd_handoff_main_thread)
+    p = sub.add_parser("complete"); p.add_argument("--id", required=True); p.add_argument("--status", choices=["succeeded", "failed", "blocked"], default="succeeded"); p.add_argument("--result"); p.set_defaults(fn=cmd_complete)
     p = sub.add_parser("list"); p.add_argument("--status"); p.add_argument("--owner"); p.add_argument("--limit", type=int); p.add_argument("--stale-hours", type=int, default=DEFAULT_STALE_HOURS); p.set_defaults(fn=cmd_list)
     p = sub.add_parser("cleanup"); p.add_argument("--stale-hours", type=int, default=DEFAULT_STALE_HOURS); p.set_defaults(fn=cmd_cleanup)
 

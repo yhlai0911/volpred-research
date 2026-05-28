@@ -1,6 +1,6 @@
 # Refactor Plan — hourly-dispatch worker daemon
 
-**Status**: TRIGGERED (3-strike threshold crossed). Phase = DESIGN-LOCKED, IMPLEMENTATION started (Deliverable 2/8 scaffold done 2026-05-28 01:07-01:13 台灣時間).
+**Status**: TRIGGERED (3-strike threshold crossed). Phase = DESIGN-LOCKED, IMPLEMENTATION started (Deliverable 4/8 tests+CLI done 2026-05-28 07:12 台灣時間).
 **Authority**: `CLAUDE.md` Three-Strike Rule (commit `a55620b4`) — "strike 3 是 LATEST 觸發點不是 ONLY 觸發點；一旦看見結構性 root cause...就立刻三層重構".
 **Supersedes**: `docs/refactor_plan_cron_dispatch.md` (2026-05-14 pre-staged version, drafted for hang-class strikes only).
 **Parent task**: `platform_ops_refactor_hourly_dispatch_worker_daemon` (P2, `storage/next_tasks.json`).
@@ -132,11 +132,11 @@ Before phase 2 (shadow run start): submit `dispatch_supervisor.py` + tests to Co
 1. **2026-05-27 17:07-17:30**: write this plan + commit + leave parent task in `pending` (Deliverable 1 complete). ✅
 2. **2026-05-28 01:07-01:13 hourly-01**: package scaffold `scripts/dispatch_supervisor/` (`__init__`, `state.py` full impl, `worker.py`/`scheduler.py`/`health.py`/`alerts.py`/`supervisor.py` stubs) + `scripts/tests/test_dispatch_state.py` (16 tests passing). State module persistence + lock + ring buffer + orphan cleanup verified. Supervisor entry refuses to run main loop (exit 78) until Deliverable 3. ✅
 3. **2026-05-28 05:07-05:14 hourly-05**: Deliverable 3/8 DONE — `alerts.py` (5 alert fns + per-class dedup), `worker.py` (240 lines: Popen + PGID + retry ladder opus→opus→sonnet + classify auth/529/hang/hard_failure + `_kill_pgid` SIGTERM→SIGKILL), `health.py` (60 lines: `check_once` sync + `health_loop` asyncio), `scheduler.py` (110 lines: croniter + `_due_to_fire` + `_tick_once` + dry-run path), `supervisor.py` real asyncio gather. Version bumped 0.1.0-scaffold → 0.2.0-d3. 16 state tests still pass; classifier smoke 6/6; scheduler decision smoke 3/3; health no-op smoke pass. ✅
-4. **+1 session**: Deliverable 4/8 — regression tests for strikes 1/2/3/5/6/7 + supervisor liveness + schedule fidelity + idempotency + concurrent safety (10 verification gates per §5)
-4. **+1 session**: Codex review submission; address findings (Deliverable 6 gate)
-5. **+1 session**: phase 2 shadow run start; daily diff for 7 days (Deliverable 5)
-6. **+2 sessions**: phase 3 cutover + 14-day observation (Deliverable 5-6)
-7. **+1 session**: phase 5 deprecate + retro entry (Deliverable 6-8)
+4. **2026-05-28 07:12 hourly-07**: Deliverable 4/8 DONE — add `tests/test_dispatch_supervisor.py` covering worker retry/auth/hang, scheduler skip/dry-run/fire, health kill/silent-death, RLIMIT regression, and `scripts.dispatch_supervisor.cli` (`status`, `unblock-auth`, `health-check`). Version bumped 0.2.0-d3 → 0.3.0-d4. ✅
+5. **+1 session**: Codex review submission; address findings (Deliverable 6 gate)
+6. **+1 session**: phase 2 shadow run start; daily diff for 7 days (Deliverable 5)
+7. **+2 sessions**: phase 3 cutover + 14-day observation (Deliverable 5-6)
+8. **+1 session**: phase 5 deprecate + retro entry (Deliverable 6-8)
 
 Each step independently committable; each session ≤ 50min cap; heavy compute (none expected for this refactor — pure orchestration code) goes to `compute_queue.py` if needed.
 
@@ -153,3 +153,4 @@ That's the test for "structural fix" vs "patch": does the change make *future* s
 *Drafted 2026-05-27 17:07-17:30 台灣時間 by main thread under hourly-17 claim. Deliverable 1/8.*
 *Updated 2026-05-28 01:07-01:13 台灣時間 by main thread under hourly-01 claim. Deliverable 2/8 — package scaffold + state module + 16-test unit suite.*
 *Updated 2026-05-28 05:07-05:14 台灣時間 by main thread under hourly-05 claim. Deliverable 3/8 — alerts/worker/health/scheduler/supervisor real impl. Version 0.2.0-d3.*
+*Updated 2026-05-28 07:12 台灣時間 by Codex hourly tick. Deliverable 4/8 — regression tests + ops CLI. Version 0.3.0-d4.*

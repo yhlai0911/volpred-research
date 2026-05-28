@@ -40,7 +40,7 @@ pub.publish_comparison(experiment_ids, title, ranking, analysis, tags)
 ### Legacy POST API (已棄用)
 舊版 Express server POST API 已不使用。現在改用 CLI + Supabase sync：
 ```bash
-uv run python -m volpred.cli ops publish-milestone --title "..." --description "..." --phase "..."
+uv run volpred ops publish-milestone --title "..." --description "..." --phase "..."
 ```
 
 ## 新版平台層發佈
@@ -56,18 +56,18 @@ uv run python -m volpred.cli ops publish-milestone --title "..." --description "
 
 常用入口：
 ```bash
-uv run python -m volpred.cli ops publish-milestone ...
-uv run python -m volpred.cli ops release-pool-by-settings --storage-dir storage
+uv run volpred ops publish-milestone ...
+uv run volpred ops release-pool-by-settings --storage-dir storage
 ```
 
 ## 論文交付（非 feed 發佈）
 
 論文寫作與修訂仍屬研究層，但論文頁 metadata / PDF 交付現在屬平台層：
 
-- 讀論文清單：`uv run python -m volpred.cli ops paper-list`
-- 更新 metadata：`uv run python -m volpred.cli ops paper-upsert ...`
-- 上傳新版 PDF：`uv run python -m volpred.cli ops paper-upload-pdf --paper-id <id> --file paper/<name>/main.pdf`
-- 舊靜態 PDF 搬遷：`uv run python -m volpred.cli ops paper-migrate-storage --paper-id <id>`
+- 讀論文清單：`uv run volpred ops paper-list`
+- 更新 metadata：`uv run volpred ops paper-upsert ...`
+- 上傳新版 PDF：`uv run volpred ops paper-upload-pdf --paper-id <id> --file paper/<name>/main.pdf`
+- 舊靜態 PDF 搬遷：`uv run volpred ops paper-migrate-storage --paper-id <id>`
 
 若只是論文 metadata / PDF 更新：
 
