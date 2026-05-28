@@ -1,39 +1,39 @@
 {
-  "timestamp": "2026-05-28T00:16:02Z",
+  "timestamp": "2026-05-28T06:15:17Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "Total draft=158 (threshold>=12 OK); research=18 (threshold>=4 OK); general=140 (threshold>=8 OK)"
+      "detail": "Total draft: 158 (general: 140, research: 18). All thresholds met (total>=12, research>=4, general>=8)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json is 84 hours old (threshold=26h). Last modified ~2026-05-24T08h UTC."
+      "detail": "storage/strategy_metrics.json is 90 hours old (threshold: 26h). Last modified: 2026-05-24T10:10:53Z."
     },
     {
-      "name": "ERROR_LOG",
+      "name": "ERROR_LOG_RECENT",
       "status": "ok",
-      "detail": "No entries dated today (2026-05-28) or yesterday (2026-05-27) in docs/error_log.md. Latest entry is 2026-05-21 (LaunchAgent TCC issue, RESOLVED)."
+      "detail": "No entries dated 2026-05-27 or 2026-05-28. Last entry: 2026-05-21 (hourly-dispatch launchd exit-78)."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "No strategy has >2 portfolio_return=null in its last 3 entries."
+      "detail": "All 14 strategies have at most 1 null in last 3 entries (threshold: >2 nulls). No gaps detected."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold=50). Working tree clean."
+      "detail": "0 uncommitted files (threshold: >50)."
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json contains 2151 entries."
+      "detail": "knowledge.json contains 2151 entries."
     }
   ],
   "alerts": [
-    "strategy_metrics stale: storage/strategy_metrics.json is 84 hours old (threshold=26h). Run strategy metrics recalculation."
+    "STRATEGY_METRICS_FRESHNESS: storage/strategy_metrics.json is 90 hours old (>26h threshold)"
   ]
 }
