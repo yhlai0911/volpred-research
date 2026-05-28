@@ -67,6 +67,56 @@ def _existing_ids(tasks: list) -> set[str]:
     return ids
 
 
+def _live_kids(tasks: list) -> set[str]:
+    """K-ids whose article task is still 'live' (should not be retried).
+
+    Live = pending / claimed / in_progress / blocked / pending_main_thread.
+    Excludes terminal states (succeeded / failed / superseded / closed) — those
+    are eligible for v2 retry IF feed.json still lacks the audience article.
+
+    2026-05-29 fix: K1157 / K672 / K1151 had `_article_general` task in
+    'succeeded' status but feed.json had no general-audience article →
+    `_kids_with_general_article` correctly flagged them as uncovered, but the
+    old `_existing_ids`-only filter blanket-skipped them, leaving the refill
+    pool dry. The task receipt was unreliable; trust feed.json.
+    """
+    LIVE = {"pending", "claimed", "in_progress", "blocked",
+            "pending_main_thread", "compute_queued",
+            "decision_made_awaiting_body_rewrite"}
+    kids: set[str] = set()
+    for t in tasks:
+        if str(t.get("status") or "").lower() not in LIVE:
+            continue
+        for key in ("k_id", "experiment_id"):
+            v = t.get(key)
+            if v:
+                kids.add(str(v).upper())
+        # Extract K-id from task id like 'K1157_article_general' or 'K1157_v2'.
+        import re
+        tid = str(t.get("id") or "")
+        m = re.match(r"^(K\d{2,5}[a-z_]*)", tid)
+        if m:
+            kids.add(m.group(1).upper())
+    return kids
+
+
+def _next_retry_suffix(k_id: str, audience: str, tasks: list) -> str:
+    """Pick next v2/v3/... suffix for a retry K article task id.
+
+    Returns '' if base id `<K>_article_<audience>` not in existing, else 'v2'
+    if v2 not in existing, else 'v3', etc.
+    """
+    base = f"{k_id}_article_{audience}"
+    ids = {str(t.get("id") or "") for t in tasks}
+    if base not in ids:
+        return ""
+    for n in range(2, 20):
+        cand = f"{base}_v{n}"
+        if cand not in ids:
+            return f"v{n}"
+    return "v20"
+
+
 def _kids_with_general_article() -> set[str]:
     """Return set of K-ids that already have a non-unpublished general article.
 
@@ -135,23 +185,31 @@ def _has_publishable_title(cand: dict) -> bool:
     return bool(title)
 
 
-def _make_article_task(cand: dict, priority: int) -> dict:
+def _make_article_task(cand: dict, priority: int, retry_suffix: str = "") -> dict:
     k_id = cand["k_id"]
     audiences_covered = cand.get("audiences_covered") or []
     needed_audience = "general" if "general" not in audiences_covered else "research"
+    task_id = f"{k_id}_article_{needed_audience}"
+    if retry_suffix:
+        task_id = f"{task_id}_{retry_suffix}"
+    title_prefix = f"{k_id}"
+    retry_note = f" [retry-{retry_suffix}]" if retry_suffix else ""
     return {
-        "id": f"{k_id}_article_{needed_audience}",
-        "title": f"{k_id}: write {needed_audience}-audience article (auto-discovered uncovered K)",
+        "id": task_id,
+        "title": f"{title_prefix}: write {needed_audience}-audience article{retry_note} (auto-discovered uncovered K)",
         "description": (
             f"K {k_id} has verdict signal (score={cand.get('score')}, reasons={cand.get('reasons')}) "
-            f"but no {needed_audience} article. Verdict preview: {(cand.get('verdict_preview') or '')[:280]}"
+            f"but no {needed_audience} article in feed.json. "
+            f"{'Prior task terminal but feed lacks coverage — retry.' if retry_suffix else ''} "
+            f"Verdict preview: {(cand.get('verdict_preview') or '')[:280]}"
         ),
         "priority": priority,
         "status": "pending",
         "task_type": "daily_article",
         "source": "auto_discovered",
         "k_id": k_id,
-        "tags": (cand.get("tags") or []) + ["auto-discovered", f"audience-{needed_audience}"],
+        "tags": (cand.get("tags") or []) + ["auto-discovered", f"audience-{needed_audience}"]
+              + ([f"retry-{retry_suffix}"] if retry_suffix else []),
         "topic_cluster": cand.get("topic_cluster"),
         "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
@@ -164,6 +222,7 @@ def refill(target: int, dry_run: bool = False) -> dict:
     cand_data = json.loads(CANDIDATES.read_text(encoding="utf-8"))
     payload, tasks = _load_tasks()
     existing = _existing_ids(tasks)
+    live_kids = _live_kids(tasks)
     already_covered = _kids_with_general_article()
 
     # Compose ranked candidate list: top_10_uncovered first (highest signal),
@@ -208,12 +267,12 @@ def refill(target: int, dry_run: bool = False) -> dict:
         if len(new_entries) >= target:
             break
         kid = cand["k_id"]
-        # Skip if K-id already in next_tasks under ANY status — even completed
-        # tasks shouldn't trigger duplicate article entries (they may have an
-        # article task already, just not visible via covered_by).
-        article_id = f"{kid}_article_general"
-        if (kid in existing or article_id in existing
-                or f"{kid}_article_research" in existing):
+        audiences_covered = cand.get("audiences_covered") or []
+        needed_audience = "general" if "general" not in audiences_covered else "research"
+        # Skip if K has a LIVE task (pending/in_progress/blocked) — don't dup.
+        # Terminal tasks (succeeded/failed/superseded) eligible for retry if
+        # feed.json still lacks coverage (2026-05-29 fix; see _live_kids).
+        if kid.upper() in live_kids:
             continue
         # Belt-and-suspenders: skip if a general article already exists in
         # feed.json (publication_candidates' uncovered flag can lag).
@@ -221,17 +280,15 @@ def refill(target: int, dry_run: bool = False) -> dict:
             continue
         # 3rd belt: candidates may have populated `covered_by` but stale
         # `audiences_covered=[]` (pre-2026-04-14 audience metadata gap).
-        # 2026-05-11 K665 incident: candidate had covered_by=mile_b5fe2026 but
-        # audiences_covered=[] because covered article was audience=null legacy.
-        # Honor covered_by directly — if any milestone covers this K, skip.
         if cand.get("covered_by"):
             continue
-        # 4th belt: blank-title candidates are not publication-ready and have
-        # repeatedly generated low-signal queue noise.
+        # 4th belt: blank-title candidates are not publication-ready.
         if not _has_publishable_title(cand):
             continue
         priority = _score_to_priority(int(cand.get("score") or 0))
-        new_entries.append(_make_article_task(cand, priority))
+        # Pick retry suffix if base id already used by terminal task
+        retry_suffix = _next_retry_suffix(kid, needed_audience, tasks)
+        new_entries.append(_make_article_task(cand, priority, retry_suffix))
 
     if not new_entries:
         return {"ok": True, "added": 0, "reason": "no_new_candidates_passing_filter"}

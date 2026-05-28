@@ -13415,5 +13415,109 @@
     "started_at": "2026-05-28T17:10:21.584747+00:00",
     "completed_at": "2026-05-28T17:13:18.528825+00:00",
     "result": "Disambiguated pending-pool wording: continue_task_dispatch report now emits pending_summary='agentable X / main_thread Y / blocked Z'; hourly_dispatch failure alert text no longer says ambiguous 'pool'. Added unit test coverage."
+  },
+  {
+    "id": "paper_review_mile_4c1045ea",
+    "title": "Paper review (Codex 24h-rule): 升降息環境下，黃金真的能避險嗎？K663 三種利率環境量化驗證",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_4c1045ea needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_4c1045ea",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-28T18:14:03+00:00"
+  },
+  {
+    "id": "K1117_article_general",
+    "title": "K1117: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1117 has verdict signal (score=7, reasons=None) but no general article. Verdict preview: ",
+    "priority": 3,
+    "status": "in_progress",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1117",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-28T18:14:03+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-28T18:14:15.275030+00:00",
+    "claim_session_id": "79604b359a26",
+    "started_at": "2026-05-28T18:14:15.379233+00:00"
+  },
+  {
+    "id": "K1157_article_general_v2",
+    "title": "K1157: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K1157 has verdict signal (score=10, reasons=None) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: ",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1157",
+    "tags": [
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-28T18:15:59+00:00"
+  },
+  {
+    "id": "K1151_article_general_v2",
+    "title": "K1151: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K1151 has verdict signal (score=9, reasons=None) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: ",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1151",
+    "tags": [
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-28T18:15:59+00:00"
+  },
+  {
+    "id": "K672_article_general_v2",
+    "title": "K672: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K672 has verdict signal (score=9, reasons=None) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: ",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K672",
+    "tags": [
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-28T18:15:59+00:00"
+  },
+  {
+    "id": "K957_article_general_v2",
+    "title": "K957: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K957 has verdict signal (score=6, reasons=None) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: ",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K957",
+    "tags": [
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-28T18:15:59+00:00"
   }
 ]
