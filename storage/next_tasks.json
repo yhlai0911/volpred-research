@@ -13476,7 +13476,7 @@
     "title": "K1151: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K1151 has verdict signal (score=9, reasons=None) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: ",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1151",
@@ -13486,7 +13486,13 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-28T18:15:59+00:00"
+    "created_at": "2026-05-28T18:15:59+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-28T18:21:32.810189+00:00",
+    "claim_session_id": "ff30037fef5b",
+    "started_at": "2026-05-28T18:21:32.851702+00:00",
+    "completed_at": "2026-05-28T18:21:51.251375+00:00",
+    "result": "stale retry task: feed already contains general-audience K1151 coverage, so no duplicate publish was performed"
   },
   {
     "id": "K672_article_general_v2",
