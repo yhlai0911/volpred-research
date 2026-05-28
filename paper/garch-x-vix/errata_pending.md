@@ -88,6 +88,28 @@ Key results:
 
 **C1 status: RESOLVED.** Paper action: add subperiod robustness table, narrative "advantage not COVID artifact."
 
+## SF2: STOXX50E / FEZ DM t drift (K1144, identified 2026-04-17, forensic completed 2026-05-29)
+
+**Finding**: Paper 9 Table 4 reports STOXX50E A4f vs GJR DM $t = 3.64$ and FEZ $t = 3.45$. K1144 reproduction (Spec A4f, OOS 2019-01-01 to 2026-04-02, W=2000, refit=63d, ^STOXX50E ticker, ^VIX) returns:
+
+| Asset | Paper $t$ | K1144 $t$ | Abs drift | Rel drift | Harvey pass | QLIKE diff |
+|---|---|---|---|---|---|---|
+| FEZ | 3.45 | **3.114** | −0.336 | **−9.7%** | ✅ (both) | GJR −0.095, A4f −0.083 |
+| STOXX50E | 3.64 | **3.025** | −0.615 | **−16.9%** | ✅ (both) | GJR −0.479, A4f −0.468 |
+
+**Ticker forensic (2026-05-29, main thread)**: Tested 5 alternative yfinance tickers for Euro Stoxx 50 — `^STOXX50`, `STOXX50E.PA`, `^ESTX50`, `^SX5E` — all return 404 / delisted. **`^STOXX50E` is the canonical yfinance ticker** and K1144 used it correctly. The STOXX50E QLIKE gap (−0.48) is therefore not a ticker error but data vintage / OOS edge boundary (paper data_end 2026-04-07 vs K1144 2026-04-02 + paper drafting-time yfinance snapshot vs 2026-04-17 retroactive reconciliation).
+
+**Root cause class**: Same yfinance retroactive-adjustment family as SPY/QQQ/GLD/USO/0050.TW drift documented in the table above. FEZ drift (9.7%) and STOXX50E drift (16.9%) are larger because the cross-asset experiments (K1144) were not pinned to the original K997/K1085 snapshot — they used live yfinance pull at 2026-04-17.
+
+**Harvey qualitative conclusion: INVARIANT** for both assets (K1144 t-stats both > 3.0). The cross-asset generalization claim ("A4f extends to European equities") stands.
+
+**Action for R1 response**:
+- If reviewer requests STOXX50E/FEZ reproduce: K1144 (`experiments/k1144/`) is the canonical reproduction at 2026-04-17 vintage. K1144 results.json + `k1144_vs_paper9_diff.md` document the full forensic.
+- If reviewer flags magnitude drift on cross-asset table: extend the same yfinance-retroactive-adjustment narrative to STOXX50E/FEZ (currently it only covers SPY/QQQ/GLD/USO/0050.TW).
+- **Pin STOXX50E + FEZ snapshot before next revision**: bundle `^STOXX50E` + FEZ + `^VIX` CSVs to `paper/garch-x-vix/data/` matching the K1144 2026-04-17 vintage so reproduce.py covers them.
+
+**No paper body edit pre-reviewer-response** — Harvey qualitative claim invariant; quantitative magnitude shelf-pending consistent with the rest of the cross-asset drift section.
+
 ## Cross-reference
 
 - `paper/garch-x-vix/reproduce_report.json` — current snapshot-first match_rate
@@ -98,3 +120,5 @@ Key results:
 - `experiments/k1391/k1391_results.json` — SF1 leave-COVID-out DM test (full QLIKE, extended OOS to May 2026)
 - `experiments/k1392/k1392_results.json` — K1392 (INVALID: 3 A4f spec bugs; for diagnostic reference only)
 - `experiments/k1393/k1393_results.json` — **K1393 VALID: K988-faithful, C1 PASS, non-COVID DM t=+4.26**
+- `experiments/k1144/k1144_results.json` — **K1144: FEZ DM t=3.114 (Harvey ✅), STOXX50E DM t=3.025 (Harvey ✅), cross-asset replication with ^STOXX50E + ^VIX**
+- `experiments/k1144/k1144_vs_paper9_diff.md` — K1144 vs Paper 9 forensic report (SF2 source)

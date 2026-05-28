@@ -5926,7 +5926,7 @@
   {
     "id": "Paper9_STOXX50E_ticker_forensic",
     "title": "Paper 9: STOXX50E ticker 查 (^STOXX50E vs ^ESTX50, K1144 30% QLIKE 差)",
-    "status": "pending_main_thread",
+    "status": "in_progress",
     "priority": 3,
     "created_at": "2026-04-17T16:58:13+08:00",
     "description": "K1144 (1e3ecff8) 發現 STOXX50E QLIKE 1.09 vs paper 1.565 (30% 差). 疑 ^STOXX50E yfinance ticker 有 FX 因子或收市時差. 嘗試 ^ESTX50 或其他 source 看能否收斂. 若可收斂 → K1144 update 對齊 paper; 若仍差 → (b) paper errata STOXX50E 到 K1144 canonical 3.03 (Harvey 仍顯著). **Harvey significance 不受影響**, 此為 magnitude cosmetic fix. 主線程 forensic.",
@@ -5943,7 +5943,11 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "hourly-07",
+    "claimed_at": "2026-05-28T23:08:38.279045+00:00",
+    "claim_session_id": "6051a3e81b04",
+    "started_at": "2026-05-28T23:08:45.836173+00:00"
   },
   {
     "id": "Paper9_Table12_footnote_errata",
@@ -13714,7 +13718,7 @@
     "title": "K1391: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1391 has verdict signal (score=1, reasons=None) but no general article in feed.json.  Verdict preview: ",
     "priority": 4,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1391",
@@ -13727,6 +13731,99 @@
     "claimed_by": "codex-cli",
     "claimed_at": "2026-05-28T22:35:14.262098+00:00",
     "claim_session_id": "b9a7b4fee4d4",
-    "started_at": "2026-05-28T22:35:24.667903+00:00"
+    "started_at": "2026-05-28T22:35:24.667903+00:00",
+    "completed_at": "2026-05-28T22:38:10.935918+00:00",
+    "result": "Published general-audience draft mile_76bde651 for K1391; angle focuses on how 41 extra trading days flipped the apparent model winner, emphasizing stability over leaderboard chasing. Added two K1391 charts and used cluster_waiver because topic family hit spy cooldown despite distinct methodology angle."
+  },
+  {
+    "id": "K1302_article_general",
+    "title": "K1302: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1302 has verdict signal (score=0, reasons=None) but no general article in feed.json.  Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1302",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-28T23:07:46+00:00"
+  },
+  {
+    "id": "K1370_article_general",
+    "title": "K1370: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1370 has verdict signal (score=0, reasons=['robust inference', 'cluster cooldown penalty (garch 30d=11>10)']) but no general article in feed.json.  Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1370",
+    "tags": [
+      "leverage-effect",
+      "amplification-ratio",
+      "bootstrap",
+      "paper2",
+      "taiwan-vt",
+      "gjr-garch",
+      "canonical-spec",
+      "research-honesty-correction",
+      "spec-mismatch-artifact",
+      "k1370-v2-supersedes-v1",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "garch",
+    "created_at": "2026-05-28T23:07:46+00:00"
+  },
+  {
+    "id": "K851_article_general_v2",
+    "title": "K851: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K851 has verdict signal (score=0, reasons=['cluster cooldown penalty (taiwan 30d=13>8)']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Claude, 執行: Claude] K851 tests whether TAIFEX TX1 jump components (Barndorff-Nielsen & Shephard 2004 bipower variation, formal z-test α=0.001) predict next-day RV in log-HAR framework. Data: 2,107 days (2017-2026 night session era), OOS: 633 days (2023-2026). CRITICAL FINDIN",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K851",
+    "tags": [
+      "jump_dynamics",
+      "HAR-RV",
+      "bipower_variation",
+      "BNS_test",
+      "TAIFEX",
+      "Taiwan",
+      "null_result",
+      "high_frequency",
+      "ABD2007",
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": "taiwan",
+    "created_at": "2026-05-28T23:07:46+00:00"
+  },
+  {
+    "id": "K1308_article_general",
+    "title": "K1308: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1308 has verdict signal (score=0, reasons=['cluster cooldown penalty (vix 30d=134>15)']) but no general article in feed.json.  Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1308",
+    "tags": [
+      "vixtwn",
+      "vix",
+      "ratio",
+      "taiwan",
+      "stability",
+      "paper2",
+      "time-varying",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vix",
+    "created_at": "2026-05-28T23:07:46+00:00"
   }
 ]
