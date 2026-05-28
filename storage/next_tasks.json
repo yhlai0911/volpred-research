@@ -13370,5 +13370,44 @@
     "claim_session_id": "d30f3b3f4fed",
     "completed_at": "2026-05-28T16:09:41.756813+00:00",
     "result": "Codex 24h review completed for mile_bdf75de2. Findings: FAIL for source-code validity of HAR calendar-overlay claim due to t-vs-t+1 calendar dummy misalignment in k631; also pre-holiday labeling is contaminated by ordinary Friday-to-Monday weekend gaps. Article should get errata/follow-up before treating HAR null as verified."
+  },
+  {
+    "id": "email-11786-c5c02c",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] loop 00:39 — 12 連 PASS, pool 0 連 2 tick",
+    "description": "Gmail UID: 11786\nMessage-ID: <73411DA1-0AE3-411E-8B5A-18AC2A455E62@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Fri, 29 May 2026 00:40:32 +0800\nSubject: Re: [VolPred Alert][INFO] loop 00:39 — 12 連 PASS, pool 0 連 2 tick\n\n--- 用戶回信內容 ---\n這意思是說你都沒在工作囉\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年5月29日 00:39 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> loop 00:39 — 12 連 PASS, pool 0 連 2 tick\r\n> Alert level: info\r\n> INFO\r\n> 00:07 fire 0 (12 連) / PHASE Z 1 paper review / breaches 0 / pool 0 (連 2 tick — refill 沒跟上) / git clean\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-05-28T16:45:09.742065+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11786,
+    "email_message_id": "<73411DA1-0AE3-411E-8B5A-18AC2A455E62@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] loop 00:39 — 12 連 PASS, pool 0 連 2 tick",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "claimed_by": "hourly-01",
+    "claimed_at": "2026-05-28T17:07:41.508900+00:00",
+    "claim_session_id": "fbb4bb73094d",
+    "started_at": "2026-05-28T17:08:17.241187+00:00",
+    "completed_at": "2026-05-28T17:09:23.898501+00:00",
+    "result": "用戶質疑 12 連 PASS 是否沒工作 — 釐清: 24h 完成 16 work_log + 30 commits + pool 0 真正意涵是 agentable=0 但 main_thread queue 15 個飽和 (paper_decision/paper_body 需主線程). Refill 跑 no_new_candidates 證 daily_article 階段尾聲. 寄 close email (notification 207abfc1) + 建 followup alert msg disambiguate task."
+  },
+  {
+    "id": "platform_ops_alert_msg_disambiguate_pool_field",
+    "title": "Alert msg: 'pool 0' 拆成 agentable=0 / main_thread=N 避免 boss 誤讀",
+    "description": "2026-05-29 01:00 boss 收 [INFO] loop 00:39 alert 寫 'pool 0 連 2 tick' 誤以為平台空轉. 實際是 agentable=0 但 main_thread queue 15 個飽和. Fix: 修 check_alerts.py 或 alert formatter, 把 pool 拆成兩個 field, e.g. 'agentable 0 / main_thread 15 / 連 2 tick'. 對應 task email-11786-c5c02c.",
+    "task_type": "platform_ops",
+    "priority": 4,
+    "status": "pending",
+    "tags": [
+      "platform_ops",
+      "alert_disambiguation",
+      "boss_feedback"
+    ],
+    "source": "email_reply_followup",
+    "created_at": "2026-05-28T17:10:00+00:00"
   }
 ]
