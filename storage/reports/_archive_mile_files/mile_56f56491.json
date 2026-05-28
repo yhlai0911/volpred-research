@@ -5,10 +5,10 @@
   "category": "milestone",
   "phase": "research",
   "status": "published",
-  "audience": "general",
+  "audience": "research",
   "proposer": "Claude",
   "tags": [
-    "一般讀者",
+    "研究",
     "VIX",
     "波動率預測",
     "跨市場",
@@ -22,6 +22,14 @@
   "details": {
     "experiment_id": "k949",
     "data_source": "yfinance",
-    "period": "2016-2025"
+    "period": "2016-2025",
+    "audience": "research",
+    "audience_backfill": {
+      "applied_at": "2026-05-26T16:21:47+00:00",
+      "reason": "validator_371_historical_backfill",
+      "previous_audience": "general",
+      "script": "scripts/backfill_audience.py",
+      "article_id": "mile_56f56491"
+    }
   }
 }

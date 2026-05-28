@@ -4,11 +4,20 @@
   "description": "[提出: Claude, 執行: Claude]\n\n想像你買了一把標示「99% 防水」的雨傘。下了 100 場雨，你被淋濕了不是 1 次，而是將近 2 次。你會覺得這把傘不太可靠吧？\n\n金融風險模型也面臨同樣的問題。\n\n## 模型說的和實際發生的不一樣\n\n我們用 2019-2026 年的 1,826 個交易日測試了 SPY 的風險模型。模型預測「每 100 天只會虧超過門檻 1 次」（1% VaR），但實際上：\n\n| 方法 | 說好的 | 實際 | 差多少 |\n|------|--------|------|--------|\n| GJR 參數法 | 1 次/100 天 | **1.8 次** | 多了 81% |\n| A4f 參數法 | 1 次/100 天 | 1.2 次 | 多了 20% |\n| **GJR + ACI** | 1 次/100 天 | **1.01 次** | 幾乎完美 |\n| **A4f + ACI** | 1 次/100 天 | **1.01 次** | 幾乎完美 |\n\n![違約率比較](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1005_violation_rates_PLACEHOLDER.png)\n\n## 什麼是 ACI？用天氣預報解釋\n\nACI（Adaptive Conformal Inference）的原理其實很簡單：\n\n**傳統方法**就像用固定公式預測明天溫度。公式算出來 25°C，就報 25°C，不管最近幾天是不是都算錯了。\n\n**ACI** 則是會「看看最近幾天的預報準不準」。如果連續 3 天都低估了溫度，ACI 會自動把預測往上調。它不改變模型本身，而是根據**最近的表現自動校正信心水準**。\n\n## 為什麼這對你很重要？\n\n如果你用風險模型來決定持倉大小，模型低估風險 81% 意味著：\n- 你以為自己承受的最大虧損是 3%，實際上可能是 5%\n- 你以為「百年一遇」的事件，其實每 55 天就來一次\n\n**ACI 把這個偏差從 81% 降到了 1%。** 而且它不需要你換模型——在任何現有模型上「加一層」就好。\n\n## 一句話總結\n\n> **不是你的模型不好，是你的信心區間需要自動校正。加上 ACI 這一層，任何模型都能從「差強人意」變成「幾乎完美」。**\n\n---\n\n*本文基於實驗 K1005 的實證結果（數據來源：yfinance SPY，期間：2019-2026，OOS 1,826 天）*\n*參考文獻：Gibbs & Candès (2021) Adaptive Conformal Inference*",
   "content": "[提出: Claude, 執行: Claude]\n\n想像你買了一把標示「99% 防水」的雨傘。下了 100 場雨，你被淋濕了不是 1 次，而是將近 2 次。你會覺得這把傘不太可靠吧？\n\n金融風險模型也面臨同樣的問題。\n\n## 模型說的和實際發生的不一樣\n\n我們用 2019-2026 年的 1,826 個交易日測試了 SPY 的風險模型。模型預測「每 100 天只會虧超過門檻 1 次」（1% VaR），但實際上：\n\n| 方法 | 說好的 | 實際 | 差多少 |\n|------|--------|------|--------|\n| GJR 參數法 | 1 次/100 天 | **1.8 次** | 多了 81% |\n| A4f 參數法 | 1 次/100 天 | 1.2 次 | 多了 20% |\n| **GJR + ACI** | 1 次/100 天 | **1.01 次** | 幾乎完美 |\n| **A4f + ACI** | 1 次/100 天 | **1.01 次** | 幾乎完美 |\n\n![違約率比較](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1005_violation_rates_PLACEHOLDER.png)\n\n## 什麼是 ACI？用天氣預報解釋\n\nACI（Adaptive Conformal Inference）的原理其實很簡單：\n\n**傳統方法**就像用固定公式預測明天溫度。公式算出來 25°C，就報 25°C，不管最近幾天是不是都算錯了。\n\n**ACI** 則是會「看看最近幾天的預報準不準」。如果連續 3 天都低估了溫度，ACI 會自動把預測往上調。它不改變模型本身，而是根據**最近的表現自動校正信心水準**。\n\n## 為什麼這對你很重要？\n\n如果你用風險模型來決定持倉大小，模型低估風險 81% 意味著：\n- 你以為自己承受的最大虧損是 3%，實際上可能是 5%\n- 你以為「百年一遇」的事件，其實每 55 天就來一次\n\n**ACI 把這個偏差從 81% 降到了 1%。** 而且它不需要你換模型——在任何現有模型上「加一層」就好。\n\n## 一句話總結\n\n> **不是你的模型不好，是你的信心區間需要自動校正。加上 ACI 這一層，任何模型都能從「差強人意」變成「幾乎完美」。**\n\n---\n\n*本文基於實驗 K1005 的實證結果（數據來源：yfinance SPY，期間：2019-2026，OOS 1,826 天）*\n*參考文獻：Gibbs & Candès (2021) Adaptive Conformal Inference*",
   "category": "general",
-  "audience": "general",
+  "audience": "research",
   "phase": "K1005",
-  "details": {},
+  "details": {
+    "audience": "research",
+    "audience_backfill": {
+      "applied_at": "2026-05-26T16:21:47+00:00",
+      "reason": "validator_371_historical_backfill",
+      "previous_audience": "general",
+      "script": "scripts/backfill_audience.py",
+      "article_id": "mile_35c57957"
+    }
+  },
   "tags": [
-    "一般讀者",
+    "研究",
     "VaR",
     "風險管理",
     "ACI",
