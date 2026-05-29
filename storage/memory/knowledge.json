@@ -31758,5 +31758,35 @@
     "review_report": "storage/ops/article_reviews/mile_4c1045ea_codex_review.md",
     "created_at": "2026-05-28T19:14:22.099581+00:00",
     "session_id": "hourly-dispatch-2026-05-29-03"
+  },
+  {
+    "id": "K1373",
+    "item_id": "K1373",
+    "category": "volatility_modeling",
+    "title": "K1373: Paper3_E1 個股 copula λ_L threshold — 12/12 pairs NULL",
+    "content": "[提出: Boss directive 2026-05-29 Paper 3 reframe, 執行: hourly-08 compute queue (716s), 審查: hourly-10 主線程 + Codex review background] Paper3 E1 個股 copula (DCC vs Student-t-copula vs Clayton-copula) 12 pairs: 6 same-sector lambda_L>0.4 (AAPL-MSFT, GOOGL-META, NVDA-AMD, JPM-BAC, GS-MS, XOM-CVX) + 6 cross-sector lambda_L<0.2 (AAPL-XOM, GOOGL-CVX, AMD-XOM, MSFT-JPM, NVDA-BAC, META-JNJ). Sample 2010-01-01 to 2026-05-28, OOS 2015-06-01 onwards. Core finding: 0/12 pairs Harvey |t|>3 copula advantage. Spearman rho(lambda_L_mean, DM_t)=0.049 p=0.88. Same-sector DM_t range [-2.16, +1.97] all |t|<3; cross-sector DM_t range [-2.64, +0.51] all |t|<3. K1100b ETF-level copula advantage NOT replicated at individual stock level. QLIKE differences all <0.01 in absolute units. Decision: NULL — do not enqueue E2 (other equity markets) or E3 (commodities); reframe needed (candidates: idiosyncratic noise dilutes tail dependence at individual stock level; daily frequency insufficient; bivariate vs multivariate gap; conditional vs unconditional lambda_L distinction).",
+    "evidence": [
+      "12 pairs tested, all 12 best_copula_harvey=false",
+      "any_copula_beats_dcc_harvey=false",
+      "Spearman lambdaL_vs_dm_t: rho=0.0490, p=0.88",
+      "Spearman lambdaL_vs_dm_clayton: rho=-0.0070, p=0.98",
+      "Same-sector n=6: lambda_L_t [0.197, 0.553], DM_t [-2.16, +1.97]",
+      "Cross-sector n=6: lambda_L_t [0.009, 0.111], DM_t [-2.64, +0.51]",
+      "Runtime 716s (compute queue); Data yfinance 13 stocks + ^VIX"
+    ],
+    "confidence": 0.85,
+    "verdict": "NULL",
+    "experiment_id": "Paper3_E1",
+    "experiment_path": "experiments/paper3_E1_individual_stocks_copula/",
+    "reviewer_source": "hourly-10 main thread synthesis (NULL verdict; provenance via results JSON cross_table)",
+    "caveats": "12 pairs sample; bivariate copula only (no vine/multivariate); daily frequency; unconditional full-sample lambda_L (not conditional rolling); Harvey |t|>3 threshold may be conservative for n_OOS~2700; 9 IS-fits subset of larger N_pairs population",
+    "parent_experiments": [
+      "K1100b",
+      "K1100",
+      "K1092",
+      "K1142",
+      "K1172"
+    ],
+    "created_at": "2026-05-29T02:14:45.185412+00:00"
   }
 ]
