@@ -137,9 +137,9 @@ def _next_fire_dt(cron_expr: str):
 
 
 def _fmt_tw(dt):
-    """回傳 (台灣時間實際時刻, 相對描述, 排序用 epoch)。"""
+    """回傳 (台灣時間實際時刻, 相對描述, 排序用 epoch, 每日時刻分鐘數)。"""
     if dt is None:
-        return "?", "", 9e18
+        return "?", "", 9e18, 9999
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=TZ)
     dt = dt.astimezone(TZ)
@@ -153,7 +153,7 @@ def _fmt_tw(dt):
         rel = f"{mins // 60}時{mins % 60}分後"
     else:
         rel = f"{mins // 1440}天後"
-    return label, rel, dt.timestamp()
+    return label, rel, dt.timestamp(), dt.hour * 60 + dt.minute
 
 
 def _rel_time(iso: str):
@@ -248,7 +248,7 @@ def build_work() -> dict:
     schedule = []
     for item in (scheds.get("system_crontab", {}) or {}).get("items", []):
         jid = item.get("id")
-        ntw, nrel, nsort = _fmt_tw(_next_fire_dt(item.get("cron", "")))
+        ntw, nrel, nsort, nday = _fmt_tw(_next_fire_dt(item.get("cron", "")))
         cat = JOB_CAT.get(jid, "other")
         cname, ccolor = CAT_META.get(cat, CAT_META["other"])
         schedule.append({
@@ -256,11 +256,11 @@ def build_work() -> dict:
             "label": item.get("label") or (item.get("description") or "")[:36],
             "desc": JOB_DESC.get(jid) or (item.get("description") or "")[:34],
             "cat": cname, "color": ccolor,
-            "next_tw": ntw, "next_rel": nrel, "_sort": nsort,
+            "next_tw": ntw, "next_rel": nrel, "_sort": nsort, "_day": nday,
             "last": _rel_time(last_run.get(jid, "")),
             "skip": bool(item.get("piggy_back_skip") or item.get("host_crontab_managed") is False),
         })
-    schedule.sort(key=lambda s: s["_sort"])  # 依接下來發生順序
+    schedule.sort(key=lambda s: s["_sort"])  # 預設依接下來發生順序
 
     # 內容 pipeline
     published = [a for a in feed if isinstance(a, dict) and (a.get("status") == "published")]
@@ -337,12 +337,13 @@ h1{font-size:15px;margin:0}h2{font-size:13px;margin:0;padding:9px 13px;backgroun
 .sched .nm{font-weight:600;color:#e6edf3}.sched .dsc{color:#9aa4af;font-size:10px}
 .ct{display:inline-block;padding:0 5px;border-radius:7px;font-size:9px;font-weight:600}
 button{background:#21262d;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:2px 7px;font-size:10px;cursor:pointer;margin-left:4px}button:hover{background:#30363d}
+.sbtn{font-size:10px;padding:2px 8px}.sbtn.on{background:#1f6feb;border-color:#1f6feb;color:#fff}
 </style></head><body>
 <header><h1>🤖 VolPred · AI 工作監控</h1><span id=health class=pill>…</span><span id=daemons></span>
 <span class=muted id=gen></span><span class=muted style=margin-left:auto>每 15s 自動刷新</span></header>
 <div class=strip id=strip></div>
 <div class=cols>
-  <div class=col><h2><span>⏰ 工作排程(依接下來順序 · 台灣時間)</span></h2><div id=schedule></div></div>
+  <div class=col><h2><span>⏰ 工作排程 · 台灣時間</span><span><button id=sb-next class="sbtn on">下次時間</button><button id=sb-day class=sbtn>每日順序</button></span></h2><div id=schedule></div></div>
   <div class=col>
     <div style="border-bottom:1px solid #30363d"><h2><span>🔄 進行中</span><span class=muted id=on-n></span></h2><div id=ongoing></div></div>
     <h2><span>⏳ 未來(待辦池)</span><span class=muted id=fu-n></span></h2><div id=future></div>
@@ -376,11 +377,7 @@ async function load(){
     chip('台股資料',esc(c.data_tw)),chip('美股資料',esc(c.data_us)),chip('FRED',esc(c.data_fred)),
   ].join('');
   // schedule
-  el('schedule').innerHTML=d.schedule.map(s=>
-    '<div class=sched style="border-left:3px solid '+esc(s.color)+'"><span class=cr>'+esc(s.cron)+'</span><span>'+
-    '<span class=ct style="background:'+esc(s.color)+'22;color:'+esc(s.color)+'">'+esc(s.cat)+'</span> <span class=nm>'+esc(s.label)+'</span>'+(s.skip?' <span class=muted>(LA)</span>':'')+
-    '<br><span class=dsc>'+esc(s.desc)+'</span><br><span class=muted>上次 '+esc(s.last)+'</span></span>'+
-    '<span class=nx>'+esc(s.next_tw)+'<br><span class=muted>'+esc(s.next_rel)+'</span></span></div>').join('');
+  SCHED=d.schedule; renderSchedule();
   // ongoing
   el('ongoing').innerHTML=d.ongoing.length?d.ongoing.map(t=>card(t.title,[t.type,'by '+(t.by||'?')],'',null,false)).join(''):'<div class=card><span class=muted>無 agent 進行中(slot 閒置)</span></div>';
   el('on-n').textContent=d.ongoing.length+' 活動';
@@ -404,6 +401,18 @@ async function adj(id,action){
   let d;try{d=await (await fetch('/api/task',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,id})})).json()}catch(e){alert('error');return}
   alert(d.ok?'已'+action+': '+id:'失敗: '+(d.error||d.stderr));load();
 }
+let SCHED=[], sortMode='next';
+function renderSchedule(){
+  let arr=SCHED.slice().sort((a,b)=> sortMode==='next' ? a._sort-b._sort : a._day-b._day);
+  el('schedule').innerHTML=arr.map(s=>
+    '<div class=sched style="border-left:3px solid '+esc(s.color)+'"><span class=cr>'+esc(s.cron)+'</span><span>'+
+    '<span class=ct style="background:'+esc(s.color)+'22;color:'+esc(s.color)+'">'+esc(s.cat)+'</span> <span class=nm>'+esc(s.label)+'</span>'+(s.skip?' <span class=muted>(LA)</span>':'')+
+    '<br><span class=dsc>'+esc(s.desc)+'</span><br><span class=muted>上次 '+esc(s.last)+'</span></span>'+
+    '<span class=nx>'+esc(s.next_tw)+'<br><span class=muted>'+esc(s.next_rel)+'</span></span></div>').join('');
+  el('sb-next').classList.toggle('on',sortMode==='next');el('sb-day').classList.toggle('on',sortMode==='day');
+}
+el('sb-next').onclick=function(){sortMode='next';renderSchedule()};
+el('sb-day').onclick=function(){sortMode='day';renderSchedule()};
 load();setInterval(load,15000);
 </script></body></html>"""
 
