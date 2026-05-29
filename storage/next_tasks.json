@@ -13744,7 +13744,7 @@
     "title": "K1302: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1302 has verdict signal (score=0, reasons=None) but no general article in feed.json.  Verdict preview: ",
     "priority": 4,
-    "status": "claimed",
+    "status": "pending",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1302",
@@ -13754,9 +13754,7 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-05-28T23:07:46+00:00",
-    "claimed_by": "codex-cli",
-    "claimed_at": "2026-05-28T23:38:56.098849+00:00",
-    "claim_session_id": "dcba67fdc5ea"
+    "last_released_at": "2026-05-28T23:39:18.317056+00:00"
   },
   {
     "id": "K1370_article_general",
@@ -13815,7 +13813,7 @@
     "title": "K1308: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1308 has verdict signal (score=0, reasons=['cluster cooldown penalty (vix 30d=134>15)']) but no general article in feed.json.  Verdict preview: ",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1308",
@@ -13831,7 +13829,13 @@
       "audience-general"
     ],
     "topic_cluster": "vix",
-    "created_at": "2026-05-28T23:07:46+00:00"
+    "created_at": "2026-05-28T23:07:46+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-28T23:39:18.391609+00:00",
+    "claim_session_id": "884878e88638",
+    "started_at": "2026-05-28T23:39:27.830142+00:00",
+    "completed_at": "2026-05-28T23:41:32.589004+00:00",
+    "result": "Published general-audience draft mile_02c71e74 for K1308; angle focuses on why VIXTWN/VIX is no longer a stable fixed conversion factor. Added two K1308 charts and used cluster_waiver because the distinct ratio-instability angle still fell under vix cooldown."
   },
   {
     "id": "Paper3_expansion_E1_individual_stocks_copula",
@@ -13839,7 +13843,7 @@
     "description": "Boss 2026-05-29 directive: Paper 3 reframe (asset-class-specific copula advantage) 必須擴大驗證範圍至個股。\n\nSetup:\n- N=10-15 個股 pairs across same-sector + cross-sector (tech, fin, healthcare, energy, consumer)\n- 美股 large-cap (AAPL/MSFT/GOOGL/META/AMZN/NVDA/...) 為 baseline universe\n- 同 Joe upper-tail copula vs DCC benchmark, λ_L (lower-tail dependence) threshold scan\n- 預期: same-sector pairs (e.g. AAPL-MSFT) λ_L>0.4 → mixing-averaging dominant (NULL)\n- 預期: cross-sector pairs (e.g. AAPL-XOM, MSFT-JPM) λ_L<0.2 → copula advantage detectable\n\nOutput: experiments/paper3_E1_individual_stocks_copula/ + results.json with per-pair λ_L + QLIKE delta vs DCC.\n預估 4-6 hr compute (15 pairs × 200 boot draws × 5yr daily data).",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "tags": [
       "experiment",
       "paper3",
@@ -13848,7 +13852,11 @@
       "boss_directive_29may"
     ],
     "created_at": "2026-05-28T23:39:13.498962+00:00",
-    "source": "boss_directive_2026_05_29_paper3_A_extended"
+    "source": "boss_directive_2026_05_29_paper3_A_extended",
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-05-29T00:08:41.149116+00:00",
+    "claim_session_id": "36cd5fc05f40",
+    "started_at": "2026-05-29T00:15:07.603638+00:00"
   },
   {
     "id": "Paper3_expansion_E2_other_equity_markets_copula",

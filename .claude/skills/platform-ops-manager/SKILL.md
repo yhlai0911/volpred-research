@@ -74,6 +74,34 @@ destructive irreversible, policy pivots, true ambiguity. Otherwise
 decide, execute, log reason. If wrong, fix later — better than
 question-spam.
 
+### Rule 6.5 — ScheduleWakeup is session-scoped (2026-05-29 incident)
+**Critical limitation**: `ScheduleWakeup` is NOT persistent cron — it
+only fires within the current Claude Code session. If user types
+`/exit` or closes the session, the scheduled wakeup is silently
+discarded (no error, no notification). The autonomous loop will appear
+to "die" without trace.
+
+**True 24/7 persistence requires OS cron / LaunchAgent** (already in
+place for hourly dispatch `:07`, compute-worker `*/15`, daily-update,
+etc — see crontab + `~/Library/LaunchAgents/com.volpred.*.plist`).
+
+**How to apply**:
+- At interactive session start, ALWAYS check `git status` for orphan
+  commits + pool for stale `claimed` tasks (sign of prior loop death)
+- After session resume, immediately re-invoke ScheduleWakeup to
+  restart the loop
+- If boss asks "is the loop still running?" — honest answer based on
+  whether session has been continuously alive
+- Tell boss explicitly when session restart is needed (don't pretend
+  loop continued through `/exit`)
+
+### Rule 7 — Don't disturb running hourly fire (2026-05-29)
+If `ps aux | grep cron_hourly_dispatch` shows live PIDs from current
+hour's `:07` minute, the fire is mid-flight. State files (next_tasks.json,
+feed.json, paper_trading.json) and active task directories are being
+written. Don't commit/edit them — wait for `PHASE Z` to land + fire-end
+log entry. Only commit truly orphan files from PRIOR cycles.
+
 ### Rule 6 — Boss-decision emails must be visually distinct (2026-05-29)
 When an email genuinely requires boss decision before progress can
 continue (rare — only exceptions in Rule 5), **must** use:

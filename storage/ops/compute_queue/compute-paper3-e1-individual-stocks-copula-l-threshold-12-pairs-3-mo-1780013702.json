@@ -1,0 +1,23 @@
+{
+  "id": "compute-paper3-e1-individual-stocks-copula-l-threshold-12-pairs-3-mo-1780013702",
+  "title": "Paper3_E1 — Individual stocks copula λ_L threshold (12 pairs × 3 models = 36 cells)",
+  "script_path": "experiments/paper3_E1_individual_stocks_copula/paper3_E1.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "running",
+  "queued_at": "2026-05-29T00:15:02Z",
+  "started_at": "2026-05-29T00:15:04Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-paper3-e1-individual-stocks-copula-l-threshold-12-pairs-3-mo-1780013702.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-paper3-e1-individual-stocks-copula-l-threshold-12-pairs-3-mo-1780013702.stderr",
+  "result_artifact": "experiments/paper3_E1_individual_stocks_copula/paper3_E1_results.json",
+  "claude_followup": {
+    "brief": "Read paper3_E1_results.json. Verify H1 (same-sector NULL: AAPL-MSFT/GOOGL-META/NVDA-AMD/JPM-BAC/GS-MS/XOM-CVX λ_L>0.4 NULL vs DCC), H2 (cross-sector PASS: AAPL-XOM/GOOGL-CVX/AMD-XOM/MSFT-JPM/NVDA-BAC/META-JNJ λ_L<0.2 Harvey |t|>3), H3 (DM-vs-λ_L correlation), H4 (K1100b replication). Codex review pre-write. Write knowledge.json PASS/CONDITIONAL_PASS/FAIL + experiment_id=Paper3_E1 + reviewer_source. Decision: enqueue E2/E3 or revise. Mark task_pool_claim.py complete --id Paper3_expansion_E1_individual_stocks_copula --status succeeded after.",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 14400
+}
