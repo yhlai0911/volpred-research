@@ -55,19 +55,32 @@ def _now():
     return datetime.now(TZ)
 
 
-def _next_fire(cron_expr: str):
+def _next_fire_dt(cron_expr: str):
     try:
         from croniter import croniter
-        nxt = croniter(cron_expr, _now()).get_next(datetime)
-        delta = nxt - _now()
-        mins = int(delta.total_seconds() // 60)
-        if mins < 60:
-            return f"{mins}m"
-        if mins < 1440:
-            return f"{mins // 60}h{mins % 60}m"
-        return f"{mins // 1440}d"
+        return croniter(cron_expr, _now()).get_next(datetime)
     except Exception:
-        return "?"
+        return None
+
+
+def _fmt_tw(dt):
+    """回傳 (台灣時間實際時刻, 相對描述, 排序用 epoch)。"""
+    if dt is None:
+        return "?", "", 9e18
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=TZ)
+    dt = dt.astimezone(TZ)
+    now = _now()
+    same_day = dt.date() == now.date()
+    label = dt.strftime("%H:%M") if same_day else dt.strftime("%m/%d %H:%M")
+    mins = int((dt - now).total_seconds() // 60)
+    if mins < 60:
+        rel = f"{mins}分後"
+    elif mins < 1440:
+        rel = f"{mins // 60}時{mins % 60}分後"
+    else:
+        rel = f"{mins // 1440}天後"
+    return label, rel, dt.timestamp()
 
 
 def _rel_time(iso: str):
@@ -154,17 +167,19 @@ def build_work() -> dict:
                    "when": _rel_time(t.get("completed_at") or ""), "result": (t.get("result") or "")[:130]}
                   for t in done[:12]]
 
-    # 工作排程:cron + 下次 fire + 上次執行
+    # 工作排程:cron + 下次 fire(台灣時間,依發生順序排序)+ 上次執行
     schedule = []
     for item in (scheds.get("system_crontab", {}) or {}).get("items", []):
         jid = item.get("id")
+        ntw, nrel, nsort = _fmt_tw(_next_fire_dt(item.get("cron", "")))
         schedule.append({
             "id": jid, "cron": item.get("cron", "?"),
             "label": item.get("label") or (item.get("description") or "")[:36],
-            "next": _next_fire(item.get("cron", "")),
+            "next_tw": ntw, "next_rel": nrel, "_sort": nsort,
             "last": _rel_time(last_run.get(jid, "")),
             "skip": bool(item.get("piggy_back_skip") or item.get("host_crontab_managed") is False),
         })
+    schedule.sort(key=lambda s: s["_sort"])  # 依接下來發生順序
 
     # 內容 pipeline
     published = [a for a in feed if isinstance(a, dict) and (a.get("status") == "published")]
@@ -243,7 +258,7 @@ button{background:#21262d;color:#e6edf3;border:1px solid #30363d;border-radius:6
 <span class=muted id=gen></span><span class=muted style=margin-left:auto>每 15s 自動刷新</span></header>
 <div class=strip id=strip></div>
 <div class=cols>
-  <div class=col><h2><span>⏰ 工作排程(cron 自動 fire)</span></h2><div id=schedule></div></div>
+  <div class=col><h2><span>⏰ 工作排程(依接下來順序 · 台灣時間)</span></h2><div id=schedule></div></div>
   <div class=col>
     <div style="border-bottom:1px solid #30363d"><h2><span>🔄 進行中</span><span class=muted id=on-n></span></h2><div id=ongoing></div></div>
     <h2><span>⏳ 未來(待辦池)</span><span class=muted id=fu-n></span></h2><div id=future></div>
@@ -279,7 +294,7 @@ async function load(){
   // schedule
   el('schedule').innerHTML=d.schedule.map(s=>
     '<div class=sched><span class=cr>'+esc(s.cron)+'</span><span>'+esc(s.label)+(s.skip?' <span class=muted>(LA)</span>':'')+
-    '<br><span class=muted>上次 '+esc(s.last)+'</span></span><span class=nx>'+esc(s.next)+'</span></div>').join('');
+    '<br><span class=muted>上次 '+esc(s.last)+'</span></span><span class=nx>'+esc(s.next_tw)+'<br><span class=muted>'+esc(s.next_rel)+'</span></span></div>').join('');
   // ongoing
   el('ongoing').innerHTML=d.ongoing.length?d.ongoing.map(t=>card(t.title,[t.type,'by '+(t.by||'?')],'',null,false)).join(''):'<div class=card><span class=muted>無 agent 進行中(slot 閒置)</span></div>';
   el('on-n').textContent=d.ongoing.length+' 活動';
