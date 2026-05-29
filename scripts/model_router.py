@@ -54,12 +54,33 @@ TASK_TYPE_TO_MODEL: dict[str, tuple[str, str]] = {
 
 # Map to CLI flag (`claude -p --model <X>`)
 MODEL_TO_CLI_FLAG: dict[str, str] = {
-    "opus":   "claude-opus-4-7",
+    "opus":   "claude-opus-4-8",
     "sonnet": "claude-sonnet-4-6",
     "haiku":  "claude-haiku-4-5-20251001",
 }
 
 DEFAULT = ("sonnet", "medium")  # fallback for unknown task_type
+
+# ─────────────────────────────────────────────────────────────────────────
+# Effort/model escalation ladder (2026-05-29 boss directive)
+# ─────────────────────────────────────────────────────────────────────────
+# "問題沒辦法解決就持續調高 effort" — but with a HARD CEILING (opus/high) and
+# a strategy-switch handoff once exhausted (→ 3-strike rule: decompose / add
+# context / second-opinion / human-escalate, NOT infinite retry).
+#
+# Monotonic cost-ordered ladder. On a verifiable failure (test fail / verdict
+# FAIL / exception / non-convergence / reviewer reject), the dispatcher
+# re-dispatches at the NEXT rung above the task's current position.
+ESCALATION_LADDER: list[tuple[str, str]] = [
+    ("haiku",  "low"),
+    ("haiku",  "medium"),
+    ("sonnet", "low"),
+    ("sonnet", "medium"),
+    ("sonnet", "high"),
+    ("opus",   "medium"),
+    ("opus",   "high"),     # ← CEILING. Beyond this: switch strategy, don't retry.
+]
+CEILING = ("opus", "high")
 
 
 def pick_model(task_type: str | None) -> tuple[str, str]:
@@ -67,6 +88,50 @@ def pick_model(task_type: str | None) -> tuple[str, str]:
     if not task_type:
         return DEFAULT
     return TASK_TYPE_TO_MODEL.get(task_type, DEFAULT)
+
+
+def _ladder_index(model: str, effort: str) -> int:
+    """Position of (model, effort) on the ladder; -1 if off-ladder."""
+    try:
+        return ESCALATION_LADDER.index((model, effort))
+    except ValueError:
+        return -1
+
+
+def pick_model_escalated(task_type: str | None, attempt: int = 0) -> dict:
+    """Return model+effort escalated `attempt` rungs above the task's base tier.
+
+    attempt=0 → task's normal (model, effort) from TASK_TYPE_TO_MODEL.
+    attempt=N → N rungs higher on ESCALATION_LADDER, capped at CEILING.
+
+    Used by the dispatch retry loop: on a verifiable failure, re-dispatch with
+    attempt+1 so a harder problem gets a stronger model/effort. Returns:
+      {model, effort, attempt, at_ceiling, exhausted}
+    - at_ceiling: this dispatch IS at opus/high (max reasoning available)
+    - exhausted: caller requested escalation BEYOND ceiling → must switch
+      strategy per 3-strike rule (decompose / +context / Codex 2nd-opinion /
+      escalate to human), NOT keep retrying same approach.
+    """
+    base_model, base_effort = pick_model(task_type)
+    base_idx = _ladder_index(base_model, base_effort)
+    if base_idx < 0:
+        # Off-ladder base (shouldn't happen) → start from sonnet/medium rung
+        base_idx = _ladder_index("sonnet", "medium")
+
+    target_idx = base_idx + max(0, attempt)
+    exhausted = target_idx > (len(ESCALATION_LADDER) - 1)
+    target_idx = min(target_idx, len(ESCALATION_LADDER) - 1)
+    model, effort = ESCALATION_LADDER[target_idx]
+    return {
+        "task_type": task_type,
+        "model": model,
+        "effort": effort,
+        "cli_flag": cli_flag(model),
+        "agent_short": model,
+        "attempt": attempt,
+        "at_ceiling": (model, effort) == CEILING,
+        "exhausted": exhausted,
+    }
 
 
 def cli_flag(model_short: str) -> str:
@@ -79,6 +144,11 @@ def main() -> int:
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--task-type", help="Task type to route")
     g.add_argument("--list", action="store_true", help="Show full mapping table")
+    ap.add_argument(
+        "--attempt", type=int, default=0,
+        help="Escalation attempt (0=base tier; N=N rungs higher on ladder, capped at opus/high). "
+             "Use in dispatch retry loop: bump on each verifiable failure.",
+    )
     args = ap.parse_args()
 
     if args.list:
@@ -88,6 +158,13 @@ def main() -> int:
         for t, (m, e) in rows:
             print(f"{t:<22} {m:<8} {e:<8} {cli_flag(m):<32}")
         print(f"\nfallback (unknown): {DEFAULT[0]} / {DEFAULT[1]}")
+        print(f"\nescalation ladder: {' → '.join(f'{m}/{e}' for m, e in ESCALATION_LADDER)}")
+        return 0
+
+    if args.attempt > 0:
+        out = pick_model_escalated(args.task_type, args.attempt)
+        out["fallback"] = args.task_type not in TASK_TYPE_TO_MODEL
+        print(json.dumps(out, indent=2, ensure_ascii=False))
         return 0
 
     model, effort = pick_model(args.task_type)
@@ -97,6 +174,9 @@ def main() -> int:
         "effort": effort,
         "cli_flag": cli_flag(model),
         "agent_short": model,
+        "attempt": 0,
+        "at_ceiling": (model, effort) == CEILING,
+        "exhausted": False,
         "fallback": args.task_type not in TASK_TYPE_TO_MODEL,
     }
     print(json.dumps(out, indent=2, ensure_ascii=False))

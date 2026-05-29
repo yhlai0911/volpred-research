@@ -115,6 +115,16 @@ PHASE B — 派新工:
    - Brief 必含一行 `**Model**: <picked> (per task_type routing)`，便於 audit
    - 違反（例：experiment 派 sonnet）= 違反 CLAUDE.md 紀律，下次 boss_report 會抓
 
+   **Effort escalation on failure（2026-05-29 boss directive）**：任務若**可驗證地失敗**（test fail / verdict FAIL / exception / 不收斂 / Codex reject），重派時調高 model/effort：
+   ```bash
+   # attempt 0 失敗 → attempt 1 重派（ladder 上爬一階）
+   MODEL_INFO=$(uv run python scripts/model_router.py --task-type <type> --attempt <N>)
+   # ladder: haiku/low → haiku/med → sonnet/low → sonnet/med → sonnet/high → opus/med → opus/high
+   ```
+   - `at_ceiling=true` → 已到 opus/high，這是最強 reasoning，無法再調高
+   - `exhausted=true` → escalation 已超天花板 → **禁止繼續同法重試**，改觸發 **3-strike rule**：拆解問題 / 補文獻 context / 派 Codex 二審 / escalate email 給老闆（`--needs-reply`）
+   - Attempt cap = ladder 長度（最多到 opus/high）；每個 task 的 escalation 次數記在 next_tasks task 的 `escalation_attempts` 欄位，避免無限重試 token 燒爆
+
 5. 分流決策（token 節省）:
    - heavy compute (GARCH MLE / Bootstrap / data fetch / 全期 backtest / pooled-MLE multistart) → 改 `uv run python scripts/compute_queue.py enqueue --script <path> --title <T> --result-artifact <path> --followup-brief 'brief' --followup-task-type paper_review --timeout 3600`。Compute worker cron */15 min 接手；下次 hourly 自動派 interpretation agent（省 60-70% tokens）。注意: 腳本必須完整已寫才能 enqueue。
    - decision / writing / narrative → 派 Claude agent 正常流程（worktree for experiments；main repo for articles/paper body）。
