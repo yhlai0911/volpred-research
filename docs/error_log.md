@@ -1247,3 +1247,29 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 1. `host_cron_fail` 的前提不是 regex 正確，而是 **每支 wrapper 都必須保證 canonical exit line 存在**。
 2. 觀測能力要靠 shared helper 收斂，不能靠每支 wrapper 各自記得複製貼上尾段。
 3. 之後新增 cron wrapper 時，預設應 source `scripts/cron_lib.sh`；若仍用 `exec`-form，必須先證明 exit banner 由別層保證，否則視為 observability regression。
+
+---
+
+## 2026-05-29 | `ops_dashboard.py` exit code 誤被 `host_cron_fail` 當成 wrapper failure
+
+**問題**：`check_alerts` 11:00 之後唯一剩下的 critical breach 是 `host_cron_fail`，指向 `storage/logs/cron/ops_dashboard.log exit=1`。但實際檢查 `ops_dashboard.log` 可見 dashboard JSON 正常輸出，沒有腳本崩潰、traceback 或 I/O 失敗。
+
+**根因**：
+1. `scripts/ops_dashboard.py` 末尾是 `sys.exit(main())`。
+2. `main()` 在 dashboard 有任一 critical section 時回傳 `1`，把「平台狀態有 critical」混同於「wrapper 執行失敗」。
+3. `host_cron_fail` 只看 canonical exit line / process exit code，不懂 dashboard semantics，因此把健康訊號誤判成 cron wrapper 壞掉。
+
+**Fix**：
+- `ops_dashboard.py` 改為：
+  - 照常輸出 dashboard JSON
+  - 成功寫出 snapshot 時永遠 `return 0`
+  - 註解明寫：dashboard 是 reporting surface，不是 execution gate
+- 新增測試：`tests/test_fb_pipeline_status.py::test_ops_dashboard_returns_zero_even_when_sections_are_critical`
+- 驗證：
+  - `python3 scripts/ops_dashboard.py` → `EXIT:0`
+  - `uv run python scripts/check_alerts.py` → `breaches=0`，`host_cron_fail` 回到 `[ok]`
+
+**教訓**：
+1. **Health snapshot script 不應用 exit code 表達內容嚴重度**；exit code 只能表達「腳本有沒有成功完成」。
+2. 監控鏈路中的每一層都要分清楚「signal」和「failure」：critical dashboard section 是 signal，wrapper crash 才是 failure。
+3. 若某腳本的輸出已含 `overall_status` / `section_critical`，就不要再用 shell exit code 重複編碼狀態，否則很容易被上游 generic monitor 誤讀。

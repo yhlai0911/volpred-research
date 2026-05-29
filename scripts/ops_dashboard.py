@@ -262,14 +262,17 @@ def main():
     # Summary header
     breaches = sum(1 for s in out if s["status"] in ("warn", "critical"))
     critical = sum(1 for s in out if s["status"] == "critical")
-    print(json.dumps({
+    payload = {
         "dashboard_generated_at": now_iso,
         "overall_status": "critical" if critical else "warn" if breaches else "ok",
         "section_breaches": breaches,
         "section_critical": critical,
         "sections": out,
-    }, ensure_ascii=False, indent=2))
-    return 1 if critical else 0
+    }
+    print(json.dumps(payload, ensure_ascii=False, indent=2))
+    # Dashboard is a reporting surface, not an execution gate. Non-zero exit
+    # here would be misclassified by host_cron_fail as wrapper breakage.
+    return 0
 
 
 if __name__ == "__main__":
