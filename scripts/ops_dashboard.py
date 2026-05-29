@@ -192,9 +192,13 @@ def main():
     schedules = jl(REPO / "config" / "runtime_schedules.json", {})
     # Build {job_id: cron_string} from system_crontab + cron_jobs sections
     job_cron_map = {}
+    job_log_map = {}  # 2026-05-29: piggy_back_skip 的 job 不更新 cron_last_run.json(LaunchAgent 不寫),
+                      # 用 log 檔 mtime 當「是否有 fire」的補充證據,避免 false-positive stale。
     for item in (schedules.get("system_crontab", {}) or {}).get("items", []):
         if isinstance(item, dict) and item.get("id") and item.get("cron"):
             job_cron_map[item["id"]] = item["cron"]
+        if isinstance(item, dict) and item.get("id") and item.get("log_path"):
+            job_log_map[item["id"]] = item["log_path"]
     for item in (schedules.get("cron_jobs", []) or []):
         if isinstance(item, dict) and item.get("id") and item.get("cron"):
             # cron_jobs use 'volpred-XXX' ids; map to underscore form for cron_last_run.json
@@ -219,11 +223,24 @@ def main():
         local_tz = None
     for job, grace_min in monitored.items():
         last = cron.get(job, "")
-        if not last:
-            continue
-        try:
-            last_ts = calendar.timegm(time.strptime(last[:19], "%Y-%m-%dT%H:%M:%S"))
-        except Exception:
+        last_ts = None
+        if last:
+            try:
+                last_ts = calendar.timegm(time.strptime(last[:19], "%Y-%m-%dT%H:%M:%S"))
+            except Exception:
+                last_ts = None
+        # LaunchAgent-fired (piggy_back_skip) jobs touch their log on each fire but
+        # do NOT update cron_last_run.json → use log mtime as additional "did it fire"
+        # evidence (success/failure is host_cron_fail's job, not staleness).
+        log_rel = job_log_map.get(job)
+        if log_rel:
+            log_path = REPO / log_rel
+            try:
+                if log_path.exists():
+                    last_ts = max(last_ts or 0, int(log_path.stat().st_mtime))
+            except Exception:
+                pass
+        if not last_ts:
             continue
         cron_str = job_cron_map.get(job)
         if cron_str and croniter:
