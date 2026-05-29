@@ -4954,7 +4954,7 @@
   {
     "id": "Paper1_GLD_gamma_negative_0.067_forensic",
     "title": "Paper 1: GLD mean γ=-0.067 反推不出，需查原始 K799 spec",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 4,
     "created_at": "2026-04-17T16:48:14+08:00",
     "description": "K903 試 data_start=2010 + step=63 + HAC lags=8，GLD mean γ=+0.002 (67% negative) 無法重現 paper -0.067 (93% negative) **符號翻轉**. date_start alone insufficient. **主線程 forensic**: 查 K799 (paper GLD 段原始實驗) 腳本實際 settings — sample filter, weighting, 是否 truncated early data, HAC lags. 若找到 → K903 update 試 match; 若找不到 → paper errata -0.067 → K903 +0.002 (GLD 反而 positive gamma, 結論可能要重寫). 影響: 若 +0.002 canonical，則 'GLD leverage negative' claim 可能錯誤.",
@@ -4973,7 +4973,13 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "hourly-00",
+    "claimed_at": "2026-05-29T16:10:22.921252+00:00",
+    "claim_session_id": "750dd610a922",
+    "started_at": "2026-05-29T16:10:36.208362+00:00",
+    "completed_at": "2026-05-29T16:14:10.298471+00:00",
+    "result": "Forensic 完成：paper Table 2 GLD γ=-0.067 無 reproducible source；K799 是 SPY-only 並無 GLD 段（task description 前提錯誤）；K903 用 paper canonical spec (504/63, 2010-2026) 得 +0.002 (67% neg, HAC t=+0.15)；其他 6 assets 同 spec 方向一致排除 sample period 差異；paper body L170 footnote 對 K903 描述事實錯誤（K903 是 rolling estimator 非 full-sample）。建議 errata path (c)：Table 2 GLD row 改 K903 canonical + body Section 5 narrative 大幅降溫 + leverage taxonomy 將 GLD 改歸 γ≈0。新增 2 個 follow-up tasks：Paper1_body_GLD_section_rewrite_per_forensic (P3 paper_body) + K903_extension_GLD_2025_2026_subwindow (P4 experiment)。Report: paper/leverage-direction/errata_gld_rolling_gamma_forensic.md"
   },
   {
     "id": "Paper1_KB_only_tables_10_11_12_C3_footnote",
@@ -14361,5 +14367,25 @@
     "started_at": "2026-05-29T15:08:38.429617+00:00",
     "completed_at": "2026-05-29T15:15:30.275798+00:00",
     "result": "Codex 24h-rule audit verdict=FAIL → ERRATA 修正 (1) 文章宣稱 6 維但 composite 實為 5 維均值 (cagr/sharpe/calmar/mdd/win_rate_monthly 各 _norm 平均；stress_apr2025 未入分) (2) 冠軍 taiwan_spy_momentum 已被 daily_update.py:578 標 c2c bias + o2o Harvey FAIL。已加 caveat + 文末 ERRATA section + errata.update_history 留檔。Supabase sync 完成 6 articles。"
+  },
+  {
+    "id": "Paper1_body_GLD_section_rewrite_per_forensic",
+    "title": "Paper 1 body L170-198 GLD inverted leverage 段重寫（per errata_gld_rolling_gamma_forensic.md）",
+    "description": "依 paper/leverage-direction/errata_gld_rolling_gamma_forensic.md 改 Table 2 GLD row 為 K903 canonical (+0.002 / 67% / +0.15)；改 body L170-172 + L181 + L182 + L196-198 narrative；刪除錯誤 K903 footnote；leverage taxonomy 將 GLD 改歸 γ≈0 而非 γ<0。**主線程寫作 task — main_v2.tex 編譯後跑 paper-update CLI**。Forensic source: paper/leverage-direction/errata_gld_rolling_gamma_forensic.md",
+    "priority": 3,
+    "status": "pending_main_thread",
+    "task_type": "paper_body",
+    "source": "forensic_followup",
+    "created_at": "2026-05-30T00:30:00+08:00"
+  },
+  {
+    "id": "K903_extension_GLD_2025_2026_subwindow",
+    "title": "K903 extension: 驗證 paper L196-198 GLD γ=-0.089 / 100% neg in 2025-2026 claim",
+    "description": "Paper body.tex L196-198 寫 'GLD γ in 2025--2026 mean=-0.089, 100% negative, Iran/Hormuz crisis intensified safe-haven demand'。需要獨立實驗驗證此 sub-window claim。Spec: 2025-01-01 to 2026-04-16 (K903 data end)，rolling 504/63，HAC lags=8，GJR-GARCH negative-γ-allowed version。期望結果: 若 reproducible → paper L196-198 留；若無法 reproduce → 再次 errata。Source: experiments/k903/k903.py + errata_gld_rolling_gamma_forensic.md §6.6",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "forensic_followup",
+    "created_at": "2026-05-30T00:30:00+08:00"
   }
 ]
