@@ -1,0 +1,88 @@
+{
+  "experiment_id": "k1324",
+  "title": "0050.TW 5-min HAR-RV continuation checkpoint",
+  "generated_at": "2026-05-29T07:09:11.955569+00:00",
+  "seed": 42,
+  "related_experiments": [
+    "K1307",
+    "K1318",
+    "K1322"
+  ],
+  "data_source": {
+    "intraday_glob": "data/intraday",
+    "symbol_prefix": "0050_TW_5min",
+    "daily_rv_snapshot": "experiments/k1324/data/0050_tw_daily_rv_rebuilt.csv"
+  },
+  "lookahead_free_certification": "HAR features use rv.shift(1), lagged rolling 5/22 means on the shifted series, and chronological 70/30 split. Target is log(RV_t); no contemporaneous RV enters predictors.",
+  "sample": {
+    "n_total_days": 80,
+    "date_start": "2026-01-20",
+    "date_end": "2026-05-28",
+    "n_har_rows_after_warmup": 58,
+    "n_train": 40,
+    "n_test": 18,
+    "mean_n_bars": 52.15,
+    "min_n_bars": 52
+  },
+  "model": {
+    "alternative": "HAR-RV (log-spec, Corsi 2009)",
+    "baseline": "Random Walk on log(RV_{t-1})",
+    "loss": "QLIKE on RV level",
+    "dm_test": "Newey-West HAC + HLN small-sample correction (h=1)"
+  },
+  "har_fit": {
+    "betas": {
+      "intercept": -15.11969,
+      "beta_d": 0.234498,
+      "beta_w": 0.314355,
+      "beta_m": -1.162509
+    },
+    "std_errors": {
+      "intercept": 5.403608,
+      "beta_d": 0.181395,
+      "beta_w": 0.277517,
+      "beta_m": 0.580171
+    }
+  },
+  "results": {
+    "HAR_QLIKE_test": 0.353347,
+    "RW_QLIKE_test": 0.536309,
+    "HAR_MSE_test": 0.50005,
+    "RW_MSE_test": 0.773367,
+    "HAR_OOS_R2": -0.140233,
+    "RW_OOS_R2": -0.76346,
+    "DM_HLN_t": 0.992484,
+    "DM_HLN_p": 0.334879
+  },
+  "comparison_to_k1322": {
+    "prior_n_total_days": 76,
+    "prior_n_test": 17,
+    "delta_total_days": 4,
+    "delta_test_days": 1,
+    "prior_dm_hln_t": 1.81655,
+    "current_dm_hln_t": 0.992484,
+    "delta_dm_hln_t": -0.824066,
+    "prior_har_qlike": 0.169805,
+    "current_har_qlike": 0.353347,
+    "delta_har_qlike": 0.183542,
+    "note": "Only four additional daily files moved DM-HLN t from about 1.82 to 0.99. This instability itself is evidence that the current sample remains too short for strong inference."
+  },
+  "verdict": "UNTRUSTWORTHY_SMALL_SAMPLE",
+  "revisit_gate": {
+    "n_total_days_required": 200,
+    "n_test_days_required": 50,
+    "current_n_total_days": 80,
+    "current_n_test_days": 18,
+    "gate_passed": false
+  },
+  "key_findings": [
+    "Daily 5-min RV sample increased from 76 to 80 days, but OOS test window is still only 18 days.",
+    "HAR-RV still beats Random Walk on raw QLIKE (0.353 vs 0.536), but DM-HLN t=0.99, p=0.335 remains far below the Harvey |t|>3 bar.",
+    "DM-HLN t shifted from 1.82 to 0.99 after just four new days, showing strong small-sample fragility."
+  ],
+  "artifacts": {
+    "figure": "k1324_rv_forecasts.png",
+    "daily_rv_snapshot": "0050_tw_daily_rv_rebuilt.csv"
+  },
+  "elapsed_seconds": 0.48
+}

@@ -45,6 +45,29 @@ def extract_k_id(experiment_id: str) -> str | None:
     return f"K{m.group(1)}"
 
 
+def derive_title(entry: dict) -> str:
+    """Title fallback: knowledge entries 沒 title 時，從 content 第一句取。
+
+    2026-05-29: K1318/K1322/K1378/K1382 等 entries title=null 但 content 開頭就有
+    完整 K-id 描述（e.g. 'K1318: HAR-RV 5-min Pilot — SPY & 0050.TW ...'）。
+    沒有 fallback 時 refill `_has_publishable_title` belt 會擋掉全部 → pool 永空。
+    截斷規則：第一個句號（. / 。）前的 first line，cap 160 chars。
+    """
+    explicit = str(entry.get("title") or "").strip()
+    if explicit:
+        return explicit
+    content = str(entry.get("content") or "").strip()
+    if not content:
+        return ""
+    first_line = content.split("\n", 1)[0].strip()
+    for sep in ("。", ". "):
+        cut = first_line.find(sep)
+        if cut > 10:  # avoid cutting at 'K1318.' prefix
+            first_line = first_line[:cut]
+            break
+    return first_line[:160].strip()
+
+
 def score_priority(entry: dict) -> tuple[int, list[str]]:
     """Score 0-10 based on content keywords. Return (score, reasons)."""
     content = (entry.get("content", "") + " " + entry.get("title", "")).lower()
@@ -188,7 +211,7 @@ def main():
             reasons = reasons + [f"cluster cooldown penalty ({cluster} 30d={cluster_gate['count']}>{cluster_gate['cap']})"]
         candidates.append({
             "k_id": k_id,
-            "title": entry.get("title", ""),
+            "title": derive_title(entry),
             "score": adjusted_score,
             "base_score": score,
             "reasons": reasons,

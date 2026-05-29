@@ -14037,7 +14037,7 @@
     "title": "K1324: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 354). Original: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1324.py with signal.shift(1) + seed=42, (c) K1324_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 354,
@@ -14045,7 +14045,13 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-05-29T05:08:21Z"
+    "created_at": "2026-05-29T05:08:21Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-29T07:05:24.218166+00:00",
+    "claim_session_id": "9d7f72447243",
+    "started_at": "2026-05-29T07:05:28.374404+00:00",
+    "completed_at": "2026-05-29T07:09:23.056431+00:00",
+    "result": "Built K1324 as a continuation checkpoint of 0050.TW 5-min HAR-RV. Rebuilt daily RV from 80 raw intraday files, reran the K1322-reviewed HAR-RV vs Random Walk pipeline, and produced experiment-scoped artifacts. HAR still wins on raw QLIKE (0.353 vs 0.536), but OOS test window is only 18 days and DM-HLN t fell from 1.82 to 0.99 after just four new files, so verdict remains UNTRUSTWORTHY_SMALL_SAMPLE."
   },
   {
     "id": "K709_rebuild_reproducibility",
@@ -14064,5 +14070,70 @@
     "started_at": "2026-05-29T05:23:26.675824+00:00",
     "completed_at": "2026-05-29T05:31:35.627657+00:00",
     "result": "Rebuilt K709 reproducibility pack: added k709.py, yfinance snapshots, figures, README, and formal tests. Reproduced falling-regime descriptive gap (~GLD 30.8% vs SPY 13.4%), but fair lagged monthly backtest gives near-zero delta Sharpe (-0.002, JK p=0.947, bootstrap CI crosses 0), so published +0.019 is not reproducible from surviving artifacts."
+  },
+  {
+    "id": "K1404_article_general",
+    "title": "K1404: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1404 has verdict signal (score=6, reasons=None) but no general article in feed.json.  Verdict preview: ",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1404",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-29T07:18:45+00:00"
+  },
+  {
+    "id": "K1378_article_general_v2",
+    "title": "K1378: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K1378 has verdict signal (score=4, reasons=None) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: ",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1378",
+    "tags": [
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-29T07:18:45+00:00"
+  },
+  {
+    "id": "K1318_article_general",
+    "title": "K1318: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1318 has verdict signal (score=3, reasons=None) but no general article in feed.json.  Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1318",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-29T07:18:45+00:00"
+  },
+  {
+    "id": "K1322_article_general",
+    "title": "K1322: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1322 has verdict signal (score=3, reasons=None) but no general article in feed.json.  Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1322",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-29T07:18:45+00:00"
   }
 ]

@@ -14,7 +14,7 @@
 - `docs/project_improvement_status.md`：專案優化計劃狀態
 - `config/project_targets.json`：active frontend / active service / runtime targets 唯一來源
 - `config/runtime_schedules.json`：排程唯一來源
-- `.agents/skills/`：工作流與 task-specific reference（Codex plugin 時仍讀）
+- `.claude/skills/`：工作流與 task-specific reference（Codex subagent 經 codex-rescue 派工時可讀專案內任何檔）
 
 ## 研究誠實原則（最高優先，不可違反）
 
@@ -93,7 +93,7 @@
 
 若你要改的是流程、規格、長期工作法，優先改 canonical：
 
-- `.agents/skills/`（Codex plugin 讀的）
+- `.claude/skills/`（Codex plugin 讀的）
 - `docs/`
 - `config/`
 - 對應 Python / frontend 實作
@@ -113,7 +113,7 @@
 1. 先讀 `docs/error_log.md`
 2. 搜尋 `storage/memory/knowledge.json`，確認是否已有相似 K
 3. 搜尋相關文獻（至少 3 篇）
-4. 讀 `.agents/skills/autonomous-research/references/experiment-preamble.md`
+4. 讀 `.claude/skills/autonomous-research/references/experiment-preamble.md`
 5. 在 agent brief 中寫清楚：
    - 動機
    - 差異化
@@ -162,7 +162,7 @@
 
 文章細節與檢查清單：
 
-- `.agents/skills/feed-publisher/SKILL.md`
+- `.claude/skills/feed-publisher/SKILL.md`
 - `docs/architecture.md`
 - `research_program.md` 的發佈規範段
 
@@ -212,8 +212,8 @@
 - 任務若與目前對話主線無關，優先用 fresh-context subagent。
 - Agent prompt 必須包含必要路徑、K 編號、error log 規則、成功標準與要讀的 skill。
 - 標準模板：
-  - brief：`.agents/skills/autonomous-research/references/agent-brief-template.md`
-  - result：`.agents/skills/autonomous-research/references/agent-result-template.md`
+  - brief：`.claude/skills/autonomous-research/references/agent-brief-template.md`
+  - result：`.claude/skills/autonomous-research/references/agent-result-template.md`
 
 ## 活文件原則
 
@@ -224,7 +224,7 @@
 - 研究方向與重大發現：`research_program.md`
 - 根因修正與教訓：`docs/error_log.md`
 - 專案優化進度：`docs/project_improvement_status.md`
-- 重複性 SOP：`.agents/skills/`
+- 重複性 SOP：`.claude/skills/`
 
 可以直接新增補充內容；但**刪除或改寫既有治理規範前，先取得使用者同意。**
 

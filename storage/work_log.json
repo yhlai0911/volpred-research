@@ -8887,5 +8887,14 @@
     "task_id": "Paper9_STOXX50E_ticker_forensic",
     "title": "Paper 9 (garch-x-vix) STOXX50E/FEZ ticker forensic + errata shelf補完",
     "result": "K1144 reproduction 確認 ^STOXX50E 為唯一可用 yfinance ticker (4 alts all delisted)；STOXX50E/FEZ drift (-16.9%/-9.7%) 屬 yfinance vintage 家族非 ticker 錯；Harvey 仍 invariant；補 SF2 entry 到 errata_pending.md + research_program.md L604"
+  },
+  {
+    "timestamp": "2026-05-29T15:19:14+08:00",
+    "task_type": "platform_ops",
+    "task_id": "platform_ops_refill_title_fallback",
+    "title": "build_publication_candidates: title fallback from content first sentence",
+    "summary": "根因: knowledge.json 部分 entries title=null（K1318/K1322/K1378/K1382等），build_publication_candidates 直取得空字串 → refill `_has_publishable_title` belt 擋全 7 uncovered → pool 永空。修流程: 加 derive_title() helper，title 缺時從 content 第一句（句號前 cap 160 chars）取 fallback。Verify: 重跑 build → refill 補 4 個 (K1404/K1378_v2/K1318/K1322 article tasks)。",
+    "owner": "hourly-15",
+    "outcome": "succeeded"
   }
 ]
