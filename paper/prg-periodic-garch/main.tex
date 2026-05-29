@@ -242,7 +242,7 @@ The result is striking: removing the session-boundary update causes QLIKE to det
 
 \subsection{VaR and Expected Shortfall evaluation}
 
-Table~\ref{tab:var_es} reports VaR and ES backtesting results. The PRG Extended model produces well-calibrated VaR forecasts: at the 1\% level, the violation rate on SPY is 0.93\% (Kupiec $p = 0.77$), compared to 1.92\% for GJR (Kupiec $p < 0.001$). On TAIFEX, the PRG Extended VaR is conservative (0.24\% violations vs.\ the expected 1\%), reflecting the model's tendency to overestimate tail risk when using 5-minute realized variance---a desirable property for risk management.
+Table~\ref{tab:var_es} reports VaR and ES backtesting results. The PRG Extended model produces well-calibrated VaR forecasts: at the 1\% level, the violation rate on SPY is 0.93\% (Kupiec $p = 0.77$), compared to 1.92\% for GJR (Kupiec $p < 0.001$).\footnote{The SPY VaR row uses the canonical K880 timing convention, not K880v2. K880 conditions the intraday variance on the same-day overnight realized variance, which is admissible under the paper's information-set definition in Eqs.~(3)--(4): the forecast target is the intraday period formed at market open, when the overnight return is already observed. Under the alternative full-day-at-$t\!-\!1$-close convention of K880v2, the same PRG Extended row becomes 1.59\% violations with Kupiec $p = 0.0196$; see \texttt{experiments.md} and the 2026-05-29 source audit note for the provenance fork.} On TAIFEX, the PRG Extended VaR is conservative (0.24\% violations vs.\ the expected 1\%), reflecting the model's tendency to overestimate tail risk when using 5-minute realized variance---a desirable property for risk management.
 
 \begin{table}[htbp]
 \centering

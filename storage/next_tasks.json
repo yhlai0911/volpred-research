@@ -14280,11 +14280,15 @@
     "id": "Paper6_DIV3b_spy_var_footnote_K880_vs_K880v2",
     "task_type": "paper_review",
     "priority": 3,
-    "status": "pending_main_thread",
+    "status": "in_progress",
     "source": "forensic_followup",
     "created_at": "2026-05-29T20:30:00+08:00",
     "title": "Paper 6: main.tex L245 加 inline footnote 解釋 K880 vs K880v2 timing-convention 抉擇",
     "description": "Paper6_DIV3 forensic (2026-05-29) 確認 SPY VR=0.93%/p=0.77 = K880 PRG_Extended（不是 K880v2）；數字 reproducible 無 errata 需求。但 main.tex L245 未 inline 標明 source，讀者不知 K880v2 同位置數字會變 1.59%（FAIL Kupiec）。需 (1) main.tex L245 加 footnote 指向 K880 並解釋 timing-convention (參考 experiments.md L73 + Eq 3-4 information set 定義) (2) reproduce.py L179 註解標 Table 4 SPY rows source (3) SUBMISSION_READY.md 加 audit log entry。完整 forensic note: paper/prg-periodic-garch/research_notes/spy_var_source_audit_2026_05_29.md",
-    "parent_task": "Paper6_DIV3_SPY_VaR_violation_rate"
+    "parent_task": "Paper6_DIV3_SPY_VaR_violation_rate",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-29T12:25:47.276132+00:00",
+    "claim_session_id": "3280d57b9103",
+    "started_at": "2026-05-29T12:25:47.326036+00:00"
   }
 ]

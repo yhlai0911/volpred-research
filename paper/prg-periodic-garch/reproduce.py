@@ -177,6 +177,14 @@ checks = []
 
 # ============================================================
 # Table 2 — K880: SPY Daily (main result)
+# NOTE 2026-05-29 provenance audit: Table 4 / §4.4 SPY VaR rows (VR=0.93%, Kupiec
+# p=0.77 for PRG Ext; VR=1.92%, p<0.001 for GJR) also source from K880, not K880v2.
+# Reason: the manuscript defines the forecast information set at market open for
+# the intraday period only (Eqs. 3-4), so same-day overnight realized variance is
+# already observed and belongs to the admissible information set. K880v2 instead
+# enforces the stricter full-day-at-t-1-close convention and yields SPY PRG Ext
+# VaR_1pct = 1.59%, Kupiec p = 0.0196; that version is cited only as a timing-
+# convention fork / ablation, not as the canonical Table 4 source.
 # ============================================================
 d_spy, _ = run_experiment(
     "k880_prg_spy_validation.py",

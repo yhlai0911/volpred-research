@@ -118,3 +118,7 @@
 - `experiments/k1260/k1260_results.json` (§4.5 K1260 fair-info source)
 - Memory: `project_paper_portfolio_decisions_2026_04_27.md` (Tier A)
 - Memory: `feedback_paper_multi_round_review.md` / `feedback_paper_cross_paper_meta_eval.md` / `feedback_3spec_disambiguation.md`
+
+## Audit Log
+
+- **2026-05-29 — SPY VaR source audit (Paper6_DIV3b)**: `main.tex` Table 4 / §4.4 SPY VaR numbers (`0.93%`, `Kupiec p=0.77`) verified against `experiments/k880/k880_results.json::layer4_var.PRG_Extended.VaR_1pct`; no numeric errata required. Added inline footnote clarifying the K880 vs K880v2 timing-convention fork, and annotated `reproduce.py` so future provenance checks do not mistakenly upcast K880v2 (`1.59%`, `p=0.0196`) into the canonical paper row.
