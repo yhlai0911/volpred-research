@@ -5618,7 +5618,7 @@
   {
     "id": "Paper4_DIV3_Table3_Sharpe_ranking",
     "title": "Paper 4: Table 3 BH 50/50 Sharpe 0.947 vs K731 0.827 — 可能 ranking 翻轉",
-    "status": "pending_main_thread",
+    "status": "in_progress",
     "priority": 4,
     "created_at": "2026-04-17T17:09:27+08:00",
     "description": "Paper 4 audit: Table 3 BH 50/50 Sharpe paper 0.947 vs K731 (2008-2026 canonical) 0.827. 12/VIX Sharpe 0.870 一致. 若 K731 canonical → 12/VIX (0.870) > BH (0.827) 為 ranking 翻轉, **影響 Paper 4 核心敘事 'BH 打不贏' 可能變成 'BH 打 平但 12/VIX 更好'**. 主線程 forensic: (a) K731 的 2008-2026 是否為 paper 設定 (可能 paper 用不同 window); (b) 確認 Table 3 來源 K, 若非 K731 → 找正確 K; (c) 若 K731 canonical → errata Table 3 + 重寫相關 narrative.",
@@ -5636,7 +5636,11 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-05-29T20:09:03.770632+00:00",
+    "claim_session_id": "78f7ddbcd24f",
+    "started_at": "2026-05-29T20:09:10.389673+00:00"
   },
   {
     "id": "Paper4_DIV4_Table6_era_Harvey_passes",
@@ -14438,7 +14442,7 @@
     "title": "K1061: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1061 has verdict signal (score=5, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson']) but no general article in feed.json.  Verdict preview: [code-reviewer subagent CONDITIONAL PASS, 2026-05-13; primary-path Codex verification pending per experiments.md] K1061 extends K1060 (10-stock EAV, binom underpowered 6/10 p=0.377) to full TWSE 50 constituents (N=50). Method: |return| proxy, T+0=announcement date (Taiwan post-cl",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1061",
@@ -14455,7 +14459,12 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-29T18:45:31+00:00"
+    "created_at": "2026-05-29T18:45:31+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-29T19:46:24.776339+00:00",
+    "claim_session_id": "5d0ad5da98be",
+    "completed_at": "2026-05-29T19:49:41.384280+00:00",
+    "result": "No publish. Dedup check found existing published general article mile_6c391484 ('你看錯日子了：台股財報對股價的影響其實發生在第二天') already covers the same T+1 Taiwan earnings-volatility angle; semantic search returned it as top hit (dist=0.632). Draft was discarded instead of forcing a cluster waiver or duplicating feed coverage."
   },
   {
     "id": "K1056_article_general",

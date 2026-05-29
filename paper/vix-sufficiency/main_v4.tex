@@ -469,8 +469,10 @@ Table~\ref{tab:strategy_results} compares the trading strategies derived from ea
 \# & Strategy & Sharpe & $\Delta$Sharpe & MDD (\%) & Turnover & DM $|t|$ \\
 \midrule
 \multicolumn{7}{l}{\textit{Benchmarks}} \\
---- & Buy-and-hold 50/50 SPY/GLD & 0.947 & --- & $-32.5$ & 0.0 & --- \\
---- & 12/VIX (SPY/GLD) & 0.870 & $-0.077$ & $-32.3$ & 8.9$\times$ & --- \\
+% source: experiments/k731/k731_vix_term_structure_results.json .full_sample_strategies."BH 50/50"
+--- & Buy-and-hold 50/50 SPY/GLD & 0.827 & $-0.043$ & $-32.5$ & 0.0 & --- \\
+% source: experiments/k731/k731_vix_term_structure_results.json .full_sample_strategies."12/VIX"
+--- & 12/VIX (SPY/GLD) & 0.870 & --- & $-32.2$ & 8.9$\times$ & --- \\
 \midrule
 \multicolumn{7}{l}{\textit{Signal-based strategies}} \\
 1 & Cross-asset composite & 0.810 & $-0.060$ & $-34.1$ & 11.2$\times$ & 0.93 \\
@@ -492,7 +494,7 @@ Table~\ref{tab:strategy_results} compares the trading strategies derived from ea
 \end{threeparttable}
 \end{table}
 
-The most striking result is that the static 50/50 SPY/GLD allocation (Sharpe = 0.947) outperforms \emph{every} dynamic strategy, including the 12/VIX benchmark (Sharpe = 0.870). This confirms our earlier finding that VT strategies sacrifice return in exchange for drawdown protection.
+Evaluated over the canonical 2008--2026 sample (K731), the 12/VIX benchmark (Sharpe = 0.870, MDD $= -32.2\%$) marginally outperforms the static 50/50 SPY/GLD allocation (Sharpe = 0.827, MDD $= -32.5\%$), with near-identical drawdown profiles. Under period-aligned measurement, VT does not trade return for tail protection: 12/VIX delivers slightly higher Sharpe \emph{and} marginally smaller MDD than buy-and-hold. The substantive conclusion of this section is therefore unchanged at the signal level---no signal-based strategy clears Harvey's $|t| > 3.0$ threshold against 12/VIX---but the comparison between the two benchmarks is more nuanced than previously stated, with VT showing modest dominance over passive allocation on this sample.
 
 Among signal-based strategies, the VIX term structure ``contango boost'' variant comes closest to matching 12/VIX, with a Sharpe improvement of +0.010, but this is far from statistical significance (DM $|t| = 0.31$). The behavioral sentiment strategy achieves Sharpe 0.900 but does not significantly outperform 12/VIX (DM $|t| = 0.72$).
 
