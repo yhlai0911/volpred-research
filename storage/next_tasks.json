@@ -14383,9 +14383,31 @@
     "title": "K903 extension: 驗證 paper L196-198 GLD γ=-0.089 / 100% neg in 2025-2026 claim",
     "description": "Paper body.tex L196-198 寫 'GLD γ in 2025--2026 mean=-0.089, 100% negative, Iran/Hormuz crisis intensified safe-haven demand'。需要獨立實驗驗證此 sub-window claim。Spec: 2025-01-01 to 2026-04-16 (K903 data end)，rolling 504/63，HAC lags=8，GJR-GARCH negative-γ-allowed version。期望結果: 若 reproducible → paper L196-198 留；若無法 reproduce → 再次 errata。Source: experiments/k903/k903.py + errata_gld_rolling_gamma_forensic.md §6.6",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "forensic_followup",
-    "created_at": "2026-05-30T00:30:00+08:00"
+    "created_at": "2026-05-30T00:30:00+08:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-29T16:34:56.679916+00:00",
+    "claim_session_id": "66afc2e30cd1",
+    "started_at": "2026-05-29T16:34:56.754829+00:00",
+    "completed_at": "2026-05-29T16:38:50.279065+00:00",
+    "result": "K903 extension complete: local-CSV replication of GLD 2025-2026 rolling gamma claim. Only 5 quarterly windows; mean gamma=-0.033, 80% negative, HAC t=-1.27. Paper claim mean=-0.089 / 100% negative not reproduced; errata path reinforced."
+  },
+  {
+    "id": "paper_review_mile_3b689404",
+    "title": "Paper review (Codex 24h-rule): 重做了一次論文 8 的「市場衝擊」實驗——數字對不上，故事卻變得更乾淨",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_3b689404 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_3b689404",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-29T17:08:26+00:00"
   }
 ]

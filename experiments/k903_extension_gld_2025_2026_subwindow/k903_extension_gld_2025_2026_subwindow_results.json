@@ -1,0 +1,85 @@
+{
+  "experiment_id": "k903_extension_gld_2025_2026_subwindow",
+  "title": "K903 extension: GLD 2025-2026 rolling gamma subwindow verification",
+  "data_source": "paper/leverage-direction/data/spy_qqq_gld_tlt_eem_iwm_slv_btc_usd_vix_2010-2026.csv",
+  "asset": "GLD",
+  "methodology": {
+    "returns": "gld_adj_close.pct_change()",
+    "rolling_window": 504,
+    "rolling_step": 63,
+    "full_start": "2010-01-01",
+    "subwindow_start": "2025-01-01",
+    "subwindow_end": "2026-04-16",
+    "model": "GJR-GARCH unconstrained gamma (imported from experiments/k903/k903.py)"
+  },
+  "paper_claim": {
+    "mean_gamma": -0.089,
+    "pct_negative": 100.0
+  },
+  "full_sample_summary": {
+    "n_windows": 57,
+    "mean_gamma": -0.0007880423930361774,
+    "std_gamma": 0.06206442563319143,
+    "pct_negative": 68.42105263157895,
+    "min_gamma": -0.12208259496503315,
+    "max_gamma": 0.18149933978856128,
+    "hac_tstat": -0.0494574869121007,
+    "hac_requested_lags": 8,
+    "hac_effective_lags": 8
+  },
+  "subwindow_summary": {
+    "n_windows": 5,
+    "mean_gamma": -0.03284137631580282,
+    "std_gamma": 0.05849272854423164,
+    "pct_negative": 80.0,
+    "min_gamma": -0.12208259496503315,
+    "max_gamma": 0.06270827525228104,
+    "hac_tstat": -1.2651982255853043,
+    "hac_requested_lags": 8,
+    "hac_effective_lags": 1
+  },
+  "subwindow_windows": [
+    {
+      "window_start": "2023-01-10",
+      "window_end": "2025-01-13",
+      "gamma": -0.12208259496503315,
+      "alpha": 0.1638215969006544,
+      "beta": 0.7904873378847025,
+      "persistence": 0.9543089347853568
+    },
+    {
+      "window_start": "2023-04-12",
+      "window_end": "2025-04-14",
+      "gamma": -0.034944187269951014,
+      "alpha": 0.04494418738833225,
+      "beta": 0.9297147441639877,
+      "persistence": 0.97465893155232
+    },
+    {
+      "window_start": "2023-07-13",
+      "window_end": "2025-07-16",
+      "gamma": 0.06270827525228104,
+      "alpha": 0.03477718076378232,
+      "beta": 0.907848008482244,
+      "persistence": 0.9739793268721668
+    },
+    {
+      "window_start": "2023-10-11",
+      "window_end": "2025-10-14",
+      "gamma": -0.034944187271413685,
+      "alpha": 0.04494418739277208,
+      "beta": 0.9297147441505202,
+      "persistence": 0.9746589315432923
+    },
+    {
+      "window_start": "2024-01-11",
+      "window_end": "2026-01-14",
+      "gamma": -0.0349441873248973,
+      "alpha": 0.04494418752823357,
+      "beta": 0.9297147441174121,
+      "persistence": 0.9746589316456457
+    }
+  ],
+  "verdict": "not_reproduced",
+  "conclusion": "Paper subwindow claim not reproduced."
+}

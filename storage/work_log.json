@@ -8945,5 +8945,12 @@
     "verdict": "CONDITIONAL_PASS (ERRATA 後保留發布)",
     "reviewer": "codex-cli 0.135.0 source-code-level review",
     "commit_pending": true
+  },
+  {
+    "timestamp": "2026-05-30T01:13:42+08:00",
+    "task_type": "platform_ops",
+    "task_id": "anti_ai_gate_post_normalizer_audit_2026_05_30",
+    "summary": "30-sample audit post em-dash normalizer + backfill: PASS 66.7% (20/30). FAIL 80% root cause = MUST 1.1 不是...而是 套路對比。建議下一波 normalizer 焦點。",
+    "report": "storage/reports/audits/anti_ai_style_gate_audit_2026_05_30.md"
   }
 ]
