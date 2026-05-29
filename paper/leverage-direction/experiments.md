@@ -18,7 +18,7 @@ points), `reproduce.py` (verifier).
 |---|---|---|---|---|
 | Table 1 | Descriptive statistics across 7 primary assets | K902 | `experiments/k902_paper1_tables_supplement_results.json::table1_descriptive_stats` | MATCH (per K902 rerun) |
 | Table 2 | Subperiod descriptive stats | (no dedicated K) | — | UNTRACEABLE (structural data-limit) |
-| Table 3 | GARCH family parameter estimates | K799 + K902 | `experiments/k799_grand_evaluation_results.json` + `k902_*_results.json` | MATCH |
+| Table 3 | QLIKE OOS comparison (Table 3 SPY 2023--2024 errata aligned to K903; Table 2 remains rolling-$\gamma$ supplement) | K903 + K902 | `../experiments/k903/tables/k903_table3.csv` + `k902_*_results.json` | PARTIAL: SPY 2023--2024 corrected to K903; remaining rows still legacy |
 | Table 4 | VaR 1% Attribution Analysis (SPY 2020-2025, 1508 days) | K1185 | `../experiments/k1185/k1185_results.json` | MATCH (canonical replication of 4-config stack) |
 | Table 5 | Cross-OOS QLIKE / VaR panel (SPY) | K799 / K802 / K824v2 (cherry-pick — R1 C3) | `experiments/k{799,802,824v2}_*_results.json` | Partial (R1 C3: standardisation pending K899) |
 | Table 6 | VaR panel across 7 assets | K829 | (path TBD; ref in body §4.2) | UNTRACEABLE in current report — K829 result not yet shimmed |
