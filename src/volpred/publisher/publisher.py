@@ -902,6 +902,25 @@ class Publisher:
                     f"  [feed_publisher] WARN unfixable table rows for "
                     f"{item.get('id', 'unknown')}: lines={report.unfixed_lines}"
                 )
+            # Anti-AI-style landmine 9 defense (2026-05-29): auto-correct
+            # over-used CJK appositive em-dashes (「——」/「—」) to commas at the
+            # canonical write site. publishing.md §7 mandates anti-ai-style
+            # co-run but the publisher had no hard gate — relied on agent
+            # self-discipline (validate_anti_ai_style.py: only ~10% of recent
+            # articles clean). Conservative: only CJK-flanked appositive dashes
+            # are rewritten (fix (b)「改逗號併入主句」, semantically lossless);
+            # numeric ranges / Latin compounds / attribution / code / tables
+            # are skipped. Same two-layer pattern as markdown_table_sanitizer.
+            from volpred.publisher.emdash_normalizer import normalize_emdash
+
+            normalized, emrep = normalize_emdash(item['content'])
+            if emrep.changed:
+                item['content'] = normalized
+                print(
+                    f"  [feed_publisher] emdash_normalizer auto-fixed "
+                    f"{emrep.replaced} em-dash(es) for "
+                    f"{item.get('id', 'unknown')}: {emrep.summary()}"
+                )
         # Serialize concurrent writers (Claude Code, Codex, cron workers)
         # against feed.json. Lock name follows docs/agent-collab-invariants.md.
         from volpred.ops.shared_lock import shared_state_lock
