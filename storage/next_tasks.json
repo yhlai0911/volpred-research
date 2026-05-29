@@ -13988,5 +13988,67 @@
     "claim_session_id": "d508cb0d03ae",
     "completed_at": "2026-05-29T02:44:57.270818+00:00",
     "result": "confirmed solved: 10:16 dispatch exit 0 (after 09:11+10:07 exit 1). Two-layer fix verified end-to-end (token bypass keychain + preflight 45s)."
+  },
+  {
+    "id": "paper_review_mile_ada624d5",
+    "title": "Paper review (Codex 24h-rule): 降息時黃金漲 30.8%、股票漲 13.4%——那為什麼跟著利率調倉，幾乎等於沒做？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_ada624d5 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "in_progress",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_ada624d5",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-29T05:08:20+00:00",
+    "claimed_by": "hourly-13",
+    "claimed_at": "2026-05-29T05:10:41.891300+00:00",
+    "claim_session_id": "095a64f13c9c",
+    "started_at": "2026-05-29T05:10:46.100555+00:00"
+  },
+  {
+    "id": "K1323",
+    "title": "K1323: VIXTWN 數據累積到 252 天後驗證 ratio 穩定性（Q6）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 353). Original: VIXTWN 數據累積到 252 天後驗證 ratio 穩定性（Q6）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1323.py with signal.shift(1) + seed=42, (c) K1323_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 353,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-05-29T05:08:21Z"
+  },
+  {
+    "id": "K1324",
+    "title": "K1324: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 354). Original: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1324.py with signal.shift(1) + seed=42, (c) K1324_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 354,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-05-29T05:08:21Z"
+  },
+  {
+    "id": "K709_rebuild_reproducibility",
+    "task_type": "experiment",
+    "priority": 3,
+    "status": "pending",
+    "title": "K709 重建可重現性：補 k709.py + 重算 30.8%/13.4%/regime 佔比 + DM/Harvey/bootstrap 對 Δ=0.019",
+    "description": "Codex 24h-review (storage/reviews/codex_24h/mile_ada624d5_review.md) 判定 K709 FAIL_PROVENANCE：無 k709.py 腳本，README placeholder，data/references/ 空，results.json 僅含 3 個數字。文章 mile_ada624d5 已退回 draft + 加 caveat。\n\nRequired: (a) experiments/k709/k709.py 完整實作（yfinance SPY/GLD/TNX 2006-2026 + TNX 6m 變化 regime 分類 + 6m lag rebalance signal.shift(1) + monthly rebalance + Sharpe 計算 + regime occupancy）, (b) README.md 補 問題/動機/方法/結論 4 章節, (c) k709_results.json 補 regime_occupancy {rising/stable/falling}、regime_returns {SPY/GLD × 3 regimes}、Sharpe + DM-HLN p-value + bootstrap CI for Δ=0.019, (d) Codex re-review primary path PASS 後才能 republish 文章 + 刪 caveat. \n\nSource article: storage/reports/feed.json article id=mile_ada624d5",
+    "source": "codex_24h_audit",
+    "created_at": "2026-05-29T05:13:34.622419+00:00",
+    "linked_review": "storage/reviews/codex_24h/mile_ada624d5_review.md",
+    "linked_article_id": "mile_ada624d5"
   }
 ]

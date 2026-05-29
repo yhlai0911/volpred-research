@@ -18138,7 +18138,12 @@
     "data_source": "yfinance SPY/GLD/TNX 2006-2026",
     "experiment_id": "k709",
     "created_at": "2026-03-29T17:51:45.543484",
-    "importance": 1
+    "importance": 1,
+    "verdict": "FAIL_PROVENANCE",
+    "reviewer_source": "Codex CLI 0.132.0 (gpt-5.4 medium, ChatGPT auth) — 2026-05-29 13:15 台灣時間",
+    "codex_review": "storage/reviews/codex_24h/mile_ada624d5_review.md",
+    "audit_at": "2026-05-29T05:13:47.288859+00:00",
+    "audit_note": "Codex 24h-review found K709 has no k709.py script, empty data/references/, README placeholders. results.json only has 3 numbers (cond_sharpe=0.869, bh_sharpe=0.85, delta=0.019). Article-claimed specifics (30.8%/13.4%/regime occupancy 21/62/19%) have no artifact source. Article mile_ada624d5 reverted to draft. Followup task: K709_rebuild_reproducibility."
   },
   {
     "id": "K710",
