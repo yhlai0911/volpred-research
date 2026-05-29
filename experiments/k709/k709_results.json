@@ -1,5 +1,163 @@
 {
-  "cond_sharpe": 0.869,
-  "bh_sharpe": 0.85,
-  "delta": 0.019
+  "meta": {
+    "experiment_id": "k709",
+    "title": "Rate-Conditional SPY/GLD Allocation Rebuild",
+    "generated_at": "2026-05-29T05:31:03.495548+00:00",
+    "data_source": "yfinance SPY / GLD / ^TNX / ^IRX",
+    "sample_start": "2005-12-01",
+    "sample_end": "2026-05-28",
+    "seed": 42
+  },
+  "spec": {
+    "lookback_days": 126,
+    "signal_lag_days": 126,
+    "threshold_pct_points": 0.5,
+    "allocation_rule": {
+      "rising": {
+        "SPY": 0.6,
+        "GLD": 0.4
+      },
+      "stable": {
+        "SPY": 0.5,
+        "GLD": 0.5
+      },
+      "falling": {
+        "SPY": 0.4,
+        "GLD": 0.6
+      }
+    },
+    "rebalance_rule": "month-end signal, applied next month"
+  },
+  "descriptive_same_day_regime_stats": {
+    "lookback_days": 126,
+    "threshold_pct_points": 0.5,
+    "sample_start": "2006-06-06",
+    "sample_end": "2026-05-28",
+    "n_days": 5023,
+    "regimes": {
+      "rising": {
+        "n_days": 1044,
+        "occupancy_pct": 20.784,
+        "spy_ann_return_pct": 13.326,
+        "gld_ann_return_pct": -0.533
+      },
+      "stable": {
+        "n_days": 3039,
+        "occupancy_pct": 60.502,
+        "spy_ann_return_pct": 12.247,
+        "gld_ann_return_pct": 8.948
+      },
+      "falling": {
+        "n_days": 940,
+        "occupancy_pct": 18.714,
+        "spy_ann_return_pct": 13.362,
+        "gld_ann_return_pct": 30.793
+      }
+    }
+  },
+  "tradable_lagged_strategy": {
+    "sample_start": "2007-01-03",
+    "sample_end": "2026-05-28",
+    "conditional": {
+      "ann_return": 0.115159,
+      "ann_vol": 0.135271,
+      "sharpe_rf0": 0.851323,
+      "sharpe_irx": 0.740201,
+      "mdd": -0.313731,
+      "n_days": 4879
+    },
+    "buy_and_hold_50_50": {
+      "ann_return": 0.116247,
+      "ann_vol": 0.136241,
+      "sharpe_rf0": 0.853245,
+      "sharpe_irx": 0.742915,
+      "mdd": -0.333796,
+      "n_days": 4879
+    },
+    "delta_sharpe_rf0": -0.001922,
+    "delta_sharpe_irx": -0.002714
+  },
+  "statistical_tests": {
+    "dm_hln_daily_return_diff": {
+      "stat": 0.277232,
+      "p_value": 0.781614,
+      "mean_daily_return_diff": -4.32e-06,
+      "n": 4879
+    },
+    "jobson_korkie_memmel_sharpe_diff": {
+      "z_stat": -0.066568,
+      "p_value": 0.946926,
+      "delta_sharpe_rf0": -0.001922
+    },
+    "moving_block_bootstrap_sharpe_diff": {
+      "block_size_days": 21,
+      "n_boot": 2000,
+      "seed": 42,
+      "delta_sharpe_mean": -0.003386,
+      "delta_sharpe_ci_95": [
+        -0.059149,
+        0.048052
+      ],
+      "p_two_sided_against_zero": 0.906
+    }
+  },
+  "threshold_sensitivity": [
+    {
+      "threshold_pct_points": 0.48,
+      "descriptive_falling_gld_ann_pct": 31.119,
+      "descriptive_falling_spy_ann_pct": 11.722,
+      "descriptive_occupancy_pct": {
+        "rising": 21.581,
+        "stable": 59.048,
+        "falling": 19.371
+      },
+      "tradable_cond_sharpe_rf0": 0.856576,
+      "tradable_bh_sharpe_rf0": 0.853245,
+      "tradable_delta_sharpe_rf0": 0.003331
+    },
+    {
+      "threshold_pct_points": 0.49,
+      "descriptive_falling_gld_ann_pct": 30.486,
+      "descriptive_falling_spy_ann_pct": 12.3,
+      "descriptive_occupancy_pct": {
+        "rising": 21.043,
+        "stable": 59.984,
+        "falling": 18.973
+      },
+      "tradable_cond_sharpe_rf0": 0.850375,
+      "tradable_bh_sharpe_rf0": 0.853245,
+      "tradable_delta_sharpe_rf0": -0.00287
+    },
+    {
+      "threshold_pct_points": 0.5,
+      "descriptive_falling_gld_ann_pct": 30.793,
+      "descriptive_falling_spy_ann_pct": 13.362,
+      "descriptive_occupancy_pct": {
+        "rising": 20.784,
+        "stable": 60.502,
+        "falling": 18.714
+      },
+      "tradable_cond_sharpe_rf0": 0.851323,
+      "tradable_bh_sharpe_rf0": 0.853245,
+      "tradable_delta_sharpe_rf0": -0.001922
+    }
+  ],
+  "article_claim_reconciliation": {
+    "observation": "A single threshold/spec does not reproduce all article claims exactly. With +/-50bp same-day regimes, the descriptive 30.8% GLD vs 13.4% SPY falling-rate gap appears. Under the fair monthly tradable implementation, delta Sharpe is essentially zero (about -0.002 rf=0), while nearby threshold variants only move the result by a few basis points.",
+    "best_faith_interpretation": "The published article likely mixed a hindsight descriptive regime table with a separate lagged tradable backtest, and the surviving artifacts are insufficient to recover the published +0.019 exactly."
+  },
+  "artifacts": {
+    "figures": [
+      "k709_regime_occupancy.png",
+      "k709_regime_returns.png",
+      "k709_sharpe_compare.png"
+    ],
+    "data_files": [
+      "GLD_yfinance_snapshot.csv",
+      "IRX_yfinance_snapshot.csv",
+      "SPY_yfinance_snapshot.csv",
+      "TNX_yfinance_snapshot.csv",
+      "adj_close_panel.csv"
+    ]
+  }
 }

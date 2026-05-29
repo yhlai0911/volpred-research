@@ -1,0 +1,16 @@
+# volpred canonical system crontab (config/runtime_schedules.json)
+0 15 * * 1-5 /Users/yhlai0911/.volpred/bin/cron_collect_tw.sh >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/collect_tw.log 2>&1 # volpred-collect-tw-data
+3 7 * * 2-6 /Users/yhlai0911/.volpred/bin/cron_collect_us.sh >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/collect_us.log 2>&1 # volpred-collect-us-data
+7 */3 * * * /Users/yhlai0911/.volpred/bin/cron_release_pool.sh >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/release_pool.log 2>&1 # volpred-release-pool
+0 8 * * 1 /Users/yhlai0911/.volpred/bin/cron_market_cal.sh >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/market_cal.log 2>&1 # volpred-market-calendar-sync
+30 5 * * * /Users/yhlai0911/.volpred/bin/cron_memory_health.sh >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/memory_health.log 2>&1 # volpred-memory-health-daily
+0 6 * * 1 /Users/yhlai0911/.volpred/bin/cron_refresh_paper_snapshots.sh >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/refresh_paper_snapshots.log 2>&1 # volpred-refresh-paper-snapshots
+17 */6 * * * /Users/yhlai0911/.volpred/bin/cron_release_settings_audit.sh >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/release_settings_audit.log 2>&1 # volpred-release-settings-audit
+0 */6 * * * /Users/yhlai0911/.volpred/bin/cron_paper_sync_all.sh >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/paper_sync_all.log 2>&1 # volpred-paper-sync-all
+0 7 * * 1 /Users/yhlai0911/.volpred/bin/cron_populate_events.sh >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/populate_events.log 2>&1 # volpred-populate-events-weekly
+0 8 * * * /Users/yhlai0911/.volpred/bin/cron_research_backlog.sh >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/research_backlog.log 2>&1 # volpred-research-backlog-daily
+15 * * * * /Users/yhlai0911/.volpred/bin/cron_audit_publish_sync.sh >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/audit_publish_sync.log 2>&1 # volpred-audit-publish-sync
+20 */6 * * * /Users/yhlai0911/.volpred/bin/cron_audit_fb_pipeline.sh >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/audit_fb_pipeline.log 2>&1 # volpred-audit-fb-pipeline
+30 * * * * /Users/yhlai0911/.volpred/bin/cron_ops_dashboard.sh >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/ops_dashboard.log 2>&1 # volpred-ops-dashboard
+10 */4 * * * /Users/yhlai0911/.volpred/bin/cron_boss_report.sh >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/boss_report.log 2>&1 # volpred-boss-report-4h
+*/30 * * * * /Users/yhlai0911/.volpred/bin/cron_fred_backfill_guard.sh # volpred-fred-backfill-guard

@@ -14045,12 +14045,18 @@
     "id": "K709_rebuild_reproducibility",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "title": "K709 重建可重現性：補 k709.py + 重算 30.8%/13.4%/regime 佔比 + DM/Harvey/bootstrap 對 Δ=0.019",
     "description": "Codex 24h-review (storage/reviews/codex_24h/mile_ada624d5_review.md) 判定 K709 FAIL_PROVENANCE：無 k709.py 腳本，README placeholder，data/references/ 空，results.json 僅含 3 個數字。文章 mile_ada624d5 已退回 draft + 加 caveat。\n\nRequired: (a) experiments/k709/k709.py 完整實作（yfinance SPY/GLD/TNX 2006-2026 + TNX 6m 變化 regime 分類 + 6m lag rebalance signal.shift(1) + monthly rebalance + Sharpe 計算 + regime occupancy）, (b) README.md 補 問題/動機/方法/結論 4 章節, (c) k709_results.json 補 regime_occupancy {rising/stable/falling}、regime_returns {SPY/GLD × 3 regimes}、Sharpe + DM-HLN p-value + bootstrap CI for Δ=0.019, (d) Codex re-review primary path PASS 後才能 republish 文章 + 刪 caveat. \n\nSource article: storage/reports/feed.json article id=mile_ada624d5",
     "source": "codex_24h_audit",
     "created_at": "2026-05-29T05:13:34.622419+00:00",
     "linked_review": "storage/reviews/codex_24h/mile_ada624d5_review.md",
-    "linked_article_id": "mile_ada624d5"
+    "linked_article_id": "mile_ada624d5",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-29T05:23:23.582517+00:00",
+    "claim_session_id": "6aae62281908",
+    "started_at": "2026-05-29T05:23:26.675824+00:00",
+    "completed_at": "2026-05-29T05:31:35.627657+00:00",
+    "result": "Rebuilt K709 reproducibility pack: added k709.py, yfinance snapshots, figures, README, and formal tests. Reproduced falling-regime descriptive gap (~GLD 30.8% vs SPY 13.4%), but fair lagged monthly backtest gives near-zero delta Sharpe (-0.002, JK p=0.947, bootstrap CI crosses 0), so published +0.019 is not reproducible from surviving artifacts."
   }
 ]
