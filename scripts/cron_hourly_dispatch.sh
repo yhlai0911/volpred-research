@@ -41,6 +41,26 @@ set -m
 
 echo "=== hourly-dispatch $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
 
+# ── PERMANENT AUTH FIX (2026-05-29, 3-strike: keychain ACL reset on token refresh) ──
+# Root cause (evidence-based, not guessed): Claude CLI OAuth token refresh
+# rewrites the macOS keychain item "Claude Code-credentials", which RESETS its
+# partition-list ACL → launchd loses access → next fire "Not logged in".
+# Confirmed: keychain mdat=2026-05-29 08:07 (refresh) → 09:07 fire failed; the
+# 5/27 `security set-generic-password-partition-list` hotfix survived only until
+# the next refresh.
+# Fix: use a long-lived token (`claude setup-token`, Max subscription) exported
+# via CLAUDE_CODE_OAUTH_TOKEN — bypasses keychain entirely, immune to refresh.
+# Token file is chmod 600, gitignored. If absent, fall through to keychain
+# (+ existing auth-preflight hotfix) so this degrades gracefully.
+OAUTH_TOKEN_FILE="${OAUTH_TOKEN_FILE:-$VOLPRED_HOME_DIR/secrets/claude_oauth_token}"
+if [ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] && [ -f "$OAUTH_TOKEN_FILE" ]; then
+  CLAUDE_CODE_OAUTH_TOKEN="$(tr -d '[:space:]' < "$OAUTH_TOKEN_FILE")"
+  export CLAUDE_CODE_OAUTH_TOKEN
+  echo "[auth] using long-lived CLAUDE_CODE_OAUTH_TOKEN from $OAUTH_TOKEN_FILE (keychain-independent)"
+else
+  echo "[auth] no token file at $OAUTH_TOKEN_FILE — falling back to keychain (run 'claude setup-token' for permanent fix)"
+fi
+
 # Cleanup trap: if launchd / external kill / shell error terminates parent
 # mid-flight, ensure claude + watchdog don't orphan. Codex review 2026-05-14
 # CRITICAL #2.
