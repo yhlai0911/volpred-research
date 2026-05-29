@@ -13744,7 +13744,7 @@
     "title": "K1302: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1302 has verdict signal (score=0, reasons=None) but no general article in feed.json.  Verdict preview: ",
     "priority": 4,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1302",
@@ -13758,7 +13758,9 @@
     "claimed_by": "codex-vscode",
     "claimed_at": "2026-05-29T02:12:27.109235+00:00",
     "claim_session_id": "dc90ffa22ef4",
-    "started_at": "2026-05-29T02:12:35.803860+00:00"
+    "started_at": "2026-05-29T02:12:35.803860+00:00",
+    "completed_at": "2026-05-29T02:16:20.704076+00:00",
+    "result": "Published draft mile_cc9c9573 for K1302 with a stock-level heterogeneity angle. Added two charts from canonical K1302 results and avoided the prior K1370 sample-mismatch storyline."
   },
   {
     "id": "K1370_article_general",
@@ -13959,7 +13961,7 @@
     "description": "Gmail UID: 11820\nMessage-ID: <0ACBFE81-A593-47E4-82F4-5EFCE3135698@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Fri, 29 May 2026 10:08:20 +0800\nSubject: Re: [VolPred Alert][CRITICAL] 🔴【需老闆回信】hourly-dispatch keychain 根因+永久解 — 需你跑一次 claude setup-token\n\n--- 用戶回信內容 ---\n我已解決 對吧\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年5月29日 09:35 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> 🔴【需老闆回信】hourly-dispatch keychain 根因+永久解 — 需你跑一次 claude setup-token\r\n> Alert level: critical\r\n> CRITICAL\r\n> 🔴 此 email 需老闆做出決定才能繼續推進。\r\n> 請看下方「需要的決定」段，回信告知選項即可。\r\n> 不猜了 — 根因有證據，永久解已落地\r\n> \r\n> Root cause（keychain ACL 被 token refresh 重置）\r\n> 不是「API 過載/網路/binary 損壞」那些猜測。實際證據：\r\n> 證據\t值\r\n> keychain Claude Code-credentials 最後修改\t2026-05-29 08:07:12 台灣時間\r\n> 08:07 fire\t✅ exit 0\r\n> 09:07 fire\t❌ exit 1「Not logged in」\r\n> 機制：Claude CLI 會定期 refresh OAuth token → 改寫 keychain item → 重置它的 partition-list ACL（你 5/27 grant 給 launchd 的授權）→ launchd 失去讀取權 → 下一班 fire「Not logged in」。\r\n> 這解釋了為何每次 hotfix 都撐約 2 天就壞 — 撐到下一次 token refresh 為止。security set-generic-password-partition-list 治標不治本。\r\n> 永久解（已 commit，繞過 keychain）\r\n> cron wrapper 改用 long-lived token（CLAUDE_CODE_OAUTH_TOKEN env），完全不碰 keychain → token refresh 再也不影響 → 根除。\r\n> token 存 ~/.volpred/secrets/claude_oauth_token（chmod 600 + gitignored）\r\n> wrapper 自動載入；檔案不存在則 fallback keychain（graceful degrade）\r\n> 已驗證 wrapper 語法 + token 載入邏輯\r\n> 🔴 需要你做一件事（只此一次，~30 秒）\r\n> long-lived token 必須你親自產生（瀏覽器 OAuth，我無法代跑）：\r\n> claude setup-token\r\n> （你是 Max 訂閱，支援此功能。它會開瀏覽器授權 → 印出一個 token）\r\n> 然後存進檔案：\r\n> echo '<貼上印出的 token>' > ~/.volpred/secrets/claude_oauth_token\r\n> chmod 600 ~/.volpred/secrets/claude_oauth_token\r\n> 做完後下一班 hourly fire（或你手動測 bash ~/.volpred/bin/cron_hourly_dispatch.sh）就會用 token 認證，永久不再 keychain 故障。\r\n> 在你做之前\r\n> 我會保持 autonomous loop（ScheduleWakeup）+ 互動 session 替代跑關鍵 ops，hourly cron 失敗不影響我這邊。FRED guard、daily-update（08:03 LaunchAgent 不靠 claude CLI）都正常。\r\n> 關於 ultra effort\r\n> 你說「必要時開到 ultra」。這題我用紮實證據單線就 root-cause + 永久解了，沒燒 ultra 多 agent — 證據夠硬不需要。escalation ladder（昨天建的）保留給真的單線解不出的題。\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "pending",
+    "status": "claimed",
     "tags": [
       "email_reply",
       "user_input"
@@ -13969,6 +13971,9 @@
     "email_uid": 11820,
     "email_message_id": "<0ACBFE81-A593-47E4-82F4-5EFCE3135698@gmail.com>",
     "email_subject": "Re: [VolPred Alert][CRITICAL] 🔴【需老闆回信】hourly-dispatch keychain 根因+永久解 — 需你跑一次 claude setup-token",
-    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>"
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-05-29T02:44:07.894726+00:00",
+    "claim_session_id": "d508cb0d03ae"
   }
 ]
