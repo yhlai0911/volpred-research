@@ -5618,7 +5618,7 @@
   {
     "id": "Paper4_DIV3_Table3_Sharpe_ranking",
     "title": "Paper 4: Table 3 BH 50/50 Sharpe 0.947 vs K731 0.827 — 可能 ranking 翻轉",
-    "status": "in_progress",
+    "status": "succeeded",
     "priority": 4,
     "created_at": "2026-04-17T17:09:27+08:00",
     "description": "Paper 4 audit: Table 3 BH 50/50 Sharpe paper 0.947 vs K731 (2008-2026 canonical) 0.827. 12/VIX Sharpe 0.870 一致. 若 K731 canonical → 12/VIX (0.870) > BH (0.827) 為 ranking 翻轉, **影響 Paper 4 核心敘事 'BH 打不贏' 可能變成 'BH 打 平但 12/VIX 更好'**. 主線程 forensic: (a) K731 的 2008-2026 是否為 paper 設定 (可能 paper 用不同 window); (b) 確認 Table 3 來源 K, 若非 K731 → 找正確 K; (c) 若 K731 canonical → errata Table 3 + 重寫相關 narrative.",
@@ -5640,7 +5640,9 @@
     "claimed_by": "hourly-04",
     "claimed_at": "2026-05-29T20:09:03.770632+00:00",
     "claim_session_id": "78f7ddbcd24f",
-    "started_at": "2026-05-29T20:09:10.389673+00:00"
+    "started_at": "2026-05-29T20:09:10.389673+00:00",
+    "completed_at": "2026-05-29T20:14:49.228283+00:00",
+    "result": "Errata applied: Table3 BH Sharpe 0.947→0.827 (K731 canonical, prev K507 different period). Ranking flipped: 12/VIX (0.870) > BH (0.827), MDD near-identical -32.2 vs -32.5. §5 narrative rewritten. decisions/errata_table3_bh_sharpe_canonical_fix.md. paper-update synced. Commit c49d2502. Signal-level vix-sufficiency core conclusion unchanged."
   },
   {
     "id": "Paper4_DIV4_Table6_era_Harvey_passes",
