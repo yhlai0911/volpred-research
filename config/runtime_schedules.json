@@ -21,6 +21,17 @@
         ]
       },
       {
+        "id": "codex_update",
+        "label": "codex-cli 週度自動更新",
+        "cron": "0 9 * * 1",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_codex_update.sh",
+        "log_path": "storage/logs/cron/codex_update.log",
+        "description": "每週一 09:00 把 @openai/codex 更新到 latest（含 darwin-arm64 optional binary）。codex-cli 是降低 Claude Code token 消耗的輔助 agent，需保持最新。僅版本變動時寄 info email。由 piggy-back run_due_jobs 執行（週一 09:00 hourly tick 評估 due）。2026-05-29 用戶指定。",
+        "matchers": [
+          "cron_codex_update.sh"
+        ]
+      },
+      {
         "id": "collect_tw_data",
         "label": "台股/0050/VIXTWN 收集",
         "cron": "0 15 * * 1-5",
