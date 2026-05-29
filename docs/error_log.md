@@ -1201,3 +1201,15 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 3. **修 `_write_pending_sessions` schema bug** — 確認 `pending_sessions.json` 寫入時真有 populate `pending` / `session_crons` 字段，加 unit test
 
 **為什麼這是 3-strike trigger 邊緣**：silent gap 5 天 (2026-04-26 question 29cbeb5c) → 5 天 → 24h (今天) = 同根因（session_cron 不可靠 + alert auto-remediation 未 enforce）三次累積。下次再復發 → 必走 worker daemon + queue 重構（host cron + next_tasks polling），不再依賴 session_cron。
+
+## 2026-05-29 — hourly-dispatch keychain auth 3-strike RESOLVED (permanent)
+
+**3-STRIKE TRIGGER**: 2026-05-27 09:07 + 11:07 (×2) + 2026-05-29 09:07 — 同根因 "An unknown error occurred (Unexpected)" = claude CLI 在 LaunchAgent env 失去 keychain auth。
+
+**ROOT CAUSE（證據，非猜測）**：keychain item `Claude Code-credentials` mdat=2026-05-29 08:07:12 TW。Claude CLI 定期 refresh OAuth token → 改寫 keychain item → **重置 partition-list ACL**（5/27 `security set-generic-password-partition-list` grant 給 launchd 的授權）→ launchd 失去讀取權 → 下一班 fire「Not logged in」。每次 hotfix 撐約 2 天 = 撐到下次 token refresh。
+
+**PERMANENT FIX**（commit 7578e335）：cron wrapper 載入 long-lived token (`claude setup-token` → `CLAUDE_CODE_OAUTH_TOKEN` env，存 `~/.volpred/secrets/claude_oauth_token` chmod 600 gitignored) → 完全繞過 keychain → token refresh 不再影響。Graceful fallback 到 keychain + auth-preflight 若 token 檔不存在。驗證：cron-env (env -i, 無 keychain) + token → `pong` exit 0。
+
+**計費確認**：OAuth token 用 Max 訂閱額度，**非** 付費 API key。與既有 keychain OAuth 同源，計費不變。
+
+**Regression 防護**：wrapper auth-load 區塊 + token 檔 600 權限。下次若 token 失效（訂閱到期/撤銷）→ fallback keychain + auth-preflight 寄 alert。
