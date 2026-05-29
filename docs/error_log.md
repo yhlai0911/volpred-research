@@ -1213,3 +1213,37 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 **計費確認**：OAuth token 用 Max 訂閱額度，**非** 付費 API key。與既有 keychain OAuth 同源，計費不變。
 
 **Regression 防護**：wrapper auth-load 區塊 + token 檔 600 權限。下次若 token 失效（訂閱到期/撤銷）→ fallback keychain + auth-preflight 寄 alert。
+
+---
+
+## 2026-05-29 | cron wrapper observability follow-up — exec-form wrappers now self-emit canonical exit banners
+
+**問題**：`2026-05-20` 那次排程徹查雖已修 `check_alerts` / `hourly_dispatch` / `daily_update`，但多支 host-cron wrapper 仍保留 `exec uv run ...` 形式，實際上**不會自己寫** `=== [job] exit N at ... (duration=Xs) ===`。這代表一旦未來這些 wrapper 脫離 piggy-back banner，`host_cron_fail` 又會回到「有跑失敗但 log 沒 canonical exit line」的盲區。
+
+**本次修正**：
+- 新增共享 helper：`scripts/cron_lib.sh`
+  - `cron_emit_start(job)`
+  - `cron_emit_exit(job, exit_code, started_at)`
+- 把下列 wrapper 從 `exec`-form 改成「執行 command → capture exit code → emit canonical exit banner」：
+  - `scripts/cron_collect_tw.sh`
+  - `scripts/cron_collect_us.sh`
+  - `scripts/cron_market_cal.sh`
+  - `scripts/cron_paper_sync_all.sh`
+  - `scripts/cron_refresh_paper_snapshots.sh`
+  - `scripts/cron_release_pool.sh`
+  - `scripts/cron_question_ops_maintain.sh`
+  - `scripts/cron_reader_facing_refill.sh`
+  - `scripts/cron_release_settings_audit.sh`
+  - `scripts/cron_research_backlog.sh`
+  - `scripts/cron_populate_events.sh`
+- 驗證：`bash -n` 檢查上述 scripts + `cron_lib.sh` 全數通過。
+
+**根因**：
+1. 先前 fix 只處理高優先 wrapper，沒有把「wrapper 自發 banner」抽象成共享做法。
+2. `exec` 會直接把 shell 進程替換掉，shell 沒機會在 command 結束後統一寫 exit banner。
+3. 監控 regex 雖修好，但若 log 根本沒有 canonical exit line，monitor 仍然無從判定成功或失敗。
+
+**教訓**：
+1. `host_cron_fail` 的前提不是 regex 正確，而是 **每支 wrapper 都必須保證 canonical exit line 存在**。
+2. 觀測能力要靠 shared helper 收斂，不能靠每支 wrapper 各自記得複製貼上尾段。
+3. 之後新增 cron wrapper 時，預設應 source `scripts/cron_lib.sh`；若仍用 `exec`-form，必須先證明 exit banner 由別層保證，否則視為 observability regression。
