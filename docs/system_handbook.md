@@ -1,5 +1,9 @@
 # 完整系統說明書
 
+> ⚠️ **STALE（2026-04-18，v11）— 控制面/架構章節已過時，勿據此配置**。
+> 當前真實架構與願景見：`VISION.md`、`docs/master_plan.md`、`docs/architecture.md`（頂部 2026-05-29 修正區塊）、`.claude/rules/control-plane.md`。
+> 本檔描述的 v11 shared scheduler / 3-terminal 構想已棄用（實際 = LaunchAgent + piggy-back + codex_loop daemon + dispatch_supervisor 重構中）。保留作歷史；dispatch_supervisor 完成後整體重寫或歸檔。
+
 Last updated: 2026-04-18
 
 ## 目的
