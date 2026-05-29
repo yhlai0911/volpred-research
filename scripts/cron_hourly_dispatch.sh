@@ -17,6 +17,12 @@ PROMPT_FILE="${PROMPT_FILE:-$REPO_ROOT/scripts/cron_hourly_dispatch_prompt.md}"
 ZSHRC_PATH="${ZSHRC_PATH:-$HOME/.zshrc}"
 AUTH_PREFLIGHT_TIMEOUT_SEC="${AUTH_PREFLIGHT_TIMEOUT_SEC:-90}"
 AUTH_PREFLIGHT_MODEL="${AUTH_PREFLIGHT_MODEL:-claude-sonnet-4-6}"
+# Backoff before a 3rd preflight attempt — the first 2 attempts fire within
+# seconds (launchd-env + zshrc-source), so a transient Claude API blip
+# ("An unknown error occurred (Unexpected)") defeats both. ~8% of runs hit
+# this and self-recover the next hour; this backoff lets the blip clear within
+# the same run instead of skipping a dispatch slot. 2026-05-30 (05:08 incident).
+AUTH_PREFLIGHT_BACKOFF_SEC="${AUTH_PREFLIGHT_BACKOFF_SEC:-20}"
 AUTH_HOTFIX_CMD="${AUTH_HOTFIX_CMD:-security set-generic-password-partition-list -S apple-tool:,apple:,launchd:,unsigned: -s \"Claude Code-credentials\" -k login.keychain}"
 
 # Log target lives OUTSIDE Desktop/ — macOS TCC protects ~/Desktop and blocks
@@ -167,12 +173,24 @@ if [ $AUTH_PREFLIGHT_CODE -ne 0 ]; then
   if [ $AUTH_PREFLIGHT_RETRY_CODE -ne 0 ]; then
     echo "[AUTH-PREFLIGHT] retry failed exit=$AUTH_PREFLIGHT_RETRY_CODE"
     echo "$AUTH_PREFLIGHT_RETRY_OUTPUT"
-    send_auth_preflight_alert "$AUTH_PREFLIGHT_OUTPUT" "$AUTH_PREFLIGHT_RETRY_OUTPUT"
-    echo "=== hourly-dispatch end $(date '+%Y-%m-%d %H:%M:%S %Z') (exit=1 preflight-auth) ==="
-    echo "=== [hourly_dispatch] exit 1 at $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
-    exit 1
+    # 3rd attempt with backoff — env-source can't fix a transient API blip
+    # because attempts 1-2 fire within seconds. Let the blip clear, then retry.
+    echo "[AUTH-PREFLIGHT] backoff ${AUTH_PREFLIGHT_BACKOFF_SEC}s then 3rd attempt"
+    sleep "$AUTH_PREFLIGHT_BACKOFF_SEC"
+    AUTH_PREFLIGHT_RETRY3_OUTPUT=$(run_auth_preflight)
+    AUTH_PREFLIGHT_RETRY3_CODE=$?
+    if [ $AUTH_PREFLIGHT_RETRY3_CODE -ne 0 ]; then
+      echo "[AUTH-PREFLIGHT] 3rd attempt failed exit=$AUTH_PREFLIGHT_RETRY3_CODE"
+      echo "$AUTH_PREFLIGHT_RETRY3_OUTPUT"
+      send_auth_preflight_alert "$AUTH_PREFLIGHT_OUTPUT" "$AUTH_PREFLIGHT_RETRY3_OUTPUT"
+      echo "=== hourly-dispatch end $(date '+%Y-%m-%d %H:%M:%S %Z') (exit=1 preflight-auth) ==="
+      echo "=== [hourly_dispatch] exit 1 at $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
+      exit 1
+    fi
+    echo "[AUTH-PREFLIGHT] recovered after backoff 3rd attempt"
+  else
+    echo "[AUTH-PREFLIGHT] recovered after sourcing zshrc"
   fi
-  echo "[AUTH-PREFLIGHT] recovered after sourcing zshrc"
 else
   echo "[AUTH-PREFLIGHT] ok"
 fi
