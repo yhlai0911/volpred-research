@@ -7,5 +7,11 @@ exec >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/market_cal.l
 # cron daemon from exec'ing .sh files under Desktop/. The cron-exec target
 # lives at ~/.volpred/bin/cron_market_cal.sh. After editing this file,
 # sync with:   cp scripts/cron_market_cal.sh ~/.volpred/bin/ && chmod +x ~/.volpred/bin/cron_market_cal.sh
-cd /Users/yhlai0911/Desktop/volpred-research
-exec /opt/homebrew/bin/uv run python -m volpred.market_calendar sync
+cd /Users/yhlai0911/Desktop/volpred-research || exit 1
+source scripts/cron_lib.sh
+_start=$SECONDS
+cron_emit_start "market_cal"
+/opt/homebrew/bin/uv run python -m volpred.market_calendar sync
+_ec=$?
+cron_emit_exit "market_cal" "$_ec" "$_start"
+exit "$_ec"

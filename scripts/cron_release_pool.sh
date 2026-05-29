@@ -7,5 +7,11 @@ exec >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/release_pool
 # cron daemon from exec'ing .sh files under Desktop/. The cron-exec target
 # lives at ~/.volpred/bin/cron_release_pool.sh. After editing this file,
 # sync with:   cp scripts/cron_release_pool.sh ~/.volpred/bin/ && chmod +x ~/.volpred/bin/cron_release_pool.sh
-cd /Users/yhlai0911/Desktop/volpred-research
-exec /opt/homebrew/bin/uv run volpred ops release-pool-by-settings
+cd /Users/yhlai0911/Desktop/volpred-research || exit 1
+source scripts/cron_lib.sh
+_start=$SECONDS
+cron_emit_start "release_pool"
+/opt/homebrew/bin/uv run volpred ops release-pool-by-settings
+_ec=$?
+cron_emit_exit "release_pool" "$_ec" "$_start"
+exit "$_ec"

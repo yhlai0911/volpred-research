@@ -8,6 +8,11 @@ exec >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/paper_sync_a
 # target lives at ~/.volpred/bin/cron_paper_sync_all.sh. After editing this
 # file, sync with:
 #   cp scripts/cron_paper_sync_all.sh ~/.volpred/bin/ && chmod +x ~/.volpred/bin/cron_paper_sync_all.sh
-cd /Users/yhlai0911/Desktop/volpred-research
-echo "=== paper-sync-all $(date '+%Y-%m-%d %H:%M:%S') ==="
-exec /opt/homebrew/bin/uv run volpred ops paper-sync-all
+cd /Users/yhlai0911/Desktop/volpred-research || exit 1
+source scripts/cron_lib.sh
+_start=$SECONDS
+cron_emit_start "paper_sync_all"
+/opt/homebrew/bin/uv run volpred ops paper-sync-all
+_ec=$?
+cron_emit_exit "paper_sync_all" "$_ec" "$_start"
+exit "$_ec"
