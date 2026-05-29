@@ -319,6 +319,19 @@ FAILEOF
   rm -f "$TMP"
 fi
 
+# ── PHASE Z safety-net (2026-05-29): wrapper-enforced commit ──
+# PHASE Z in the dispatch prompt is agent-discretion → ~90% reliable (15:07
+# fire left scan_trending_agy.py untracked despite git-add-A instruction).
+# This deterministic post-dispatch commit catches whatever the agent missed.
+# All state/log noise is gitignored, so `git add -A` only stages real work.
+if [ -n "$(/usr/bin/git -C "$REPO_ROOT" status --porcelain 2>/dev/null)" ]; then
+  echo "[PHASE-Z-safety] uncommitted changes after dispatch — auto-committing"
+  /usr/bin/git -C "$REPO_ROOT" add -A 2>&1 | tail -1
+  /usr/bin/git -C "$REPO_ROOT" commit -m "ops(hourly $(date '+%H:%M')): PHASE-Z safety-net auto-commit (agent left uncommitted)" 2>&1 | tail -1
+else
+  echo "[PHASE-Z-safety] working tree clean — agent PHASE Z committed everything"
+fi
+
 echo "=== hourly-dispatch end $(date '+%Y-%m-%d %H:%M:%S %Z') (exit=$EXIT_CODE) ==="
 # Canonical exit banner — host_cron_fail alert (src/volpred/ops/alerts.py
 # _CRON_EXIT_RE) only recognises the `=== [<job>] exit <N> at <ts> ===` form.
