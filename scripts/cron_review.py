@@ -106,13 +106,28 @@ def launchctl_state(label: str) -> dict:
 
 
 def last_log_run(log_path: Path) -> dict:
-    """Last run banner: start + end datetimes (tz-aware TPE), complete?"""
+    """Last run banner: start + end datetimes (tz-aware TPE), complete?
+
+    `mtime` (log file modification time) is also returned as an authoritative
+    last-activity floor: many wrappers (e.g. collect_tw) emit a completion
+    marker that is NOT a parseable `===…(exit|end)…` banner (collect_tw uses
+    `✓ 台股數據收集完成`), so banner-parsed `end` falsely reverts to an old
+    run. The wrapper writes the log on every fire → mtime never lies about
+    *when the job last ran*. Used by main() to override stale `end` for the
+    staleness gap check (same fix philosophy as ops_dashboard.py health_cron,
+    2026-05-29).
+    """
     if not log_path.exists():
         return {"error": "log missing"}
     try:
         lines = log_path.read_text(errors="ignore").splitlines()
     except OSError as e:
         return {"error": str(e)}
+    mtime = None
+    try:
+        mtime = datetime.fromtimestamp(log_path.stat().st_mtime, TPE)
+    except OSError:
+        pass
     start = end = None
     for ln in reversed(lines):
         if "===" not in ln:
@@ -126,7 +141,7 @@ def last_log_run(log_path: Path) -> dict:
         elif not is_end:
             start = ts
             break
-    return {"start": start, "end": end,
+    return {"start": start, "end": end, "mtime": mtime,
             "complete": bool(end) and (start is None or end >= start)}
 
 
@@ -160,9 +175,18 @@ def main() -> int:
             if pb_end and (end is None or pb_end > end):
                 end = pb_end
                 source = "piggy-back"
+        # log-mtime override（2026-05-29）：wrapper 每次 fire 都寫 log，mtime 是
+        # 權威「最後活動」floor。當 banner/piggy-back 抓到的 end 比 mtime 舊（例
+        # collect_tw 完成標記非 ===banner，banner end 退回舊班），mtime 勝出 —
+        # 修掉對 piggy_back_skip / 非標準 banner job 的假 stale + 假中斷。
+        mtime = lg.get("mtime")
+        if mtime and (end is None or mtime > end):
+            end = mtime
+            source = "log-mtime"
         when = "?"
         if end:
-            suffix = "" if source == "log" else " (piggy-back)"
+            suffix = {"log": "", "piggy-back": " (piggy-back)",
+                      "log-mtime": " (log-mtime)"}.get(source, "")
             when = end.strftime("%Y-%m-%d %H:%M:%S") + suffix
             gap_h = (now - end).total_seconds() / 3600
             if gap_h > max_gap_h:

@@ -13,6 +13,27 @@ SPEC.loader.exec_module(cron_review)
 TPE = cron_review.TPE
 expected_prev_fire = cron_review.expected_prev_fire
 is_stale = cron_review.is_stale
+last_log_run = cron_review.last_log_run
+
+
+def test_last_log_run_returns_mtime_when_completion_marker_not_banner(tmp_path):
+    """collect_tw 假 stale regression（2026-05-29）：完成標記 `✓ 台股數據收集完成`
+    不是 ===exit/end banner，banner parser 抓不到 end；log-mtime 必須回傳，
+    供 main() override 過舊的 banner/piggy-back end，消除假 30h stale。"""
+    log = tmp_path / "collect_tw.log"
+    log.write_text(
+        "=== 台股數據收集: 2026-05-29 15:00 ===\n"
+        "  0050.TW: 2026-05-29 close=105.40 (1552 rows)\n"
+        "✓ 台股數據收集完成\n",
+        encoding="utf-8",
+    )
+    res = last_log_run(log)
+    # 完成標記非 banner → banner end 抓不到，但 mtime 必在且為近期
+    assert res.get("mtime") is not None
+    assert res["mtime"].tzinfo is not None  # tz-aware TPE
+    # mtime 應約等於剛寫入的當下（寬鬆 24h 容差，跨時區安全）
+    now = datetime.now(TPE)
+    assert abs((now - res["mtime"]).total_seconds()) < 86400
 
 
 def test_expected_prev_fire_respects_weekday_restricted_collect_us_cron():
