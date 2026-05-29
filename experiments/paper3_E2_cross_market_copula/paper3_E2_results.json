@@ -1,0 +1,250 @@
+{
+  "experiment_id": "Paper3_E2",
+  "pair_results": {
+    "SPY-TW0050": {
+      "pair_name": "SPY-TW0050",
+      "asset1": "SPY",
+      "asset2": "TW0050",
+      "reg1": "vix2",
+      "reg2": "vix2",
+      "region_class": "developed_vs_emerging_asia",
+      "n_oos": 2067,
+      "full_sample_corr": 0.16814386255816044,
+      "models": {
+        "Copula-t-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 1.3088915533354708,
+                "p_value": 0.2525954437478586,
+                "violations": 60,
+                "rate": 0.02902757619738752,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 4.4029011100288855,
+                "p_value": 0.03587784852889264,
+                "clusters": 5,
+                "pass": false
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 7.5,
+                "n_blocks": 8,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.3078436739499464,
+                "p_value": 0.758201287259922,
+                "pass": true,
+                "n_violations": 60
+              },
+              "trinity_pass": false,
+              "n_oos": 2067,
+              "violation_rate": 0.02902757619738752
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 14.338858750235147,
+                "p_value": 0.00015268053934325287,
+                "violations": 40,
+                "rate": 0.019351717464925013,
+                "expected_rate": 0.01,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 3.9341782131389493,
+                "p_value": 0.047314252352877784,
+                "clusters": 3,
+                "pass": false
+              },
+              "basel": {
+                "color": "Yellow",
+                "violations_per_block": 5.0,
+                "n_blocks": 8,
+                "pass": false
+              },
+              "es_test": {
+                "z_stat": 1.214450813038011,
+                "p_value": 0.2245756217491991,
+                "pass": true,
+                "n_violations": 40
+              },
+              "trinity_pass": false,
+              "n_oos": 2067,
+              "violation_rate": 0.019351717464925013
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.0207267714405335,
+              "n": 2067
+            },
+            "alpha_0.010": {
+              "mean": -4.711982270688917,
+              "n": 2067
+            }
+          }
+        }
+      },
+      "dm_qlike": {},
+      "dm_fz": {
+        "alpha_0.025": {},
+        "alpha_0.010": {}
+      },
+      "mean_qlike": {
+        "Copula-t-A4f-ASYM": -7.918201146743646
+      },
+      "copula_stats": {
+        "student_t": {
+          "rho_mean": 0.17622193428527425,
+          "rho_std": 0.10483327238491338,
+          "rho_min": -0.1386612719251485,
+          "rho_max": 0.3554225321939435,
+          "nu_mean": 45.27559764521939,
+          "lambda_L_mean": 0.008906950086241735,
+          "lambda_L_std": 0.027396503458248473,
+          "lambda_L_min": 9.24980950813792e-13,
+          "lambda_L_max": 0.12997101722102952
+        },
+        "clayton": {
+          "theta_mean": NaN,
+          "theta_std": NaN,
+          "theta_min": NaN,
+          "theta_max": NaN,
+          "lambda_L_mean": NaN,
+          "lambda_L_std": NaN,
+          "lambda_L_min": NaN,
+          "lambda_L_max": NaN
+        }
+      },
+      "oos_dates_first": "2015-06-01",
+      "oos_dates_last": "2026-05-27"
+    }
+  },
+  "cross_pair_table": [
+    {
+      "pair": "SPY-TW0050",
+      "region_class": "developed_vs_emerging_asia",
+      "lambda_L_t_mean": 0.008906950086241735,
+      "lambda_L_clayton_mean": NaN,
+      "qlike_dcc": NaN,
+      "qlike_copula_t": -7.918201146743646,
+      "qlike_clayton": NaN,
+      "dm_dcc_vs_copula_t": 0.0,
+      "dm_dcc_vs_clayton": 0.0,
+      "best_copula": "Clayton",
+      "best_copula_dm_t": 0.0,
+      "best_copula_harvey": false,
+      "full_sample_corr": 0.16814386255816044
+    }
+  ],
+  "core_answers": {
+    "n_pairs": 1,
+    "cross_table": [
+      {
+        "pair": "SPY-TW0050",
+        "region_class": "developed_vs_emerging_asia",
+        "lambda_L_t_mean": 0.008906950086241735,
+        "lambda_L_clayton_mean": NaN,
+        "qlike_dcc": NaN,
+        "qlike_copula_t": -7.918201146743646,
+        "qlike_clayton": NaN,
+        "dm_dcc_vs_copula_t": 0.0,
+        "dm_dcc_vs_clayton": 0.0,
+        "best_copula": "Clayton",
+        "best_copula_dm_t": 0.0,
+        "best_copula_harvey": false,
+        "full_sample_corr": 0.16814386255816044
+      }
+    ],
+    "any_copula_beats_dcc_harvey": false,
+    "pairs_with_copula_advantage_harvey": [],
+    "spearman_lambdaL_vs_dm_t": null,
+    "spearman_lambdaL_vs_dm_clayton": null,
+    "by_region": {
+      "developed_vs_emerging_asia": {
+        "n_pairs": 1,
+        "pairs": [
+          "SPY-TW0050"
+        ],
+        "lambda_L_t_mean": 0.008906950086241735,
+        "lambda_L_clayton_mean": NaN,
+        "dm_dcc_vs_copula_t_mean": 0.0,
+        "dm_dcc_vs_clayton_mean": 0.0,
+        "n_harvey_sig": 0
+      }
+    }
+  },
+  "config": {
+    "oos_start": "2015-06-01",
+    "window": 100,
+    "refit_every": 50,
+    "alpha_levels": [
+      0.025,
+      0.01
+    ],
+    "weights": [
+      0.5,
+      0.5
+    ],
+    "mc_paths": 200,
+    "seed": 42,
+    "smoke_test": true,
+    "models_filter": [
+      "Copula-t-A4f-ASYM"
+    ],
+    "ticker_used": {
+      "SPY": "SPY",
+      "TW0050": "0050.TW",
+      "HSI": "^HSI",
+      "N225": "^N225",
+      "STOXX50": "^STOXX50E"
+    }
+  },
+  "metadata": {
+    "experiment_id": "Paper3_E2",
+    "parent_experiments": [
+      "K1100b",
+      "K1100",
+      "K1092",
+      "K1142",
+      "K1172",
+      "Paper3_E1"
+    ],
+    "data_source": "yfinance (5 equity markets + ^VIX)",
+    "data_period": "2010-01-01 to 2026-05-28",
+    "oos_start": "2015-06-01",
+    "pairs": [
+      "SPY-TW0050"
+    ],
+    "markets": [
+      "SPY",
+      "TW0050",
+      "HSI",
+      "N225",
+      "STOXX50"
+    ],
+    "ticker_used": {
+      "SPY": "SPY",
+      "TW0050": "0050.TW",
+      "HSI": "^HSI",
+      "N225": "^N225",
+      "STOXX50": "^STOXX50E"
+    },
+    "proposer": "Boss directive 2026-05-29 (Paper 3 reframe E2 expansion)",
+    "runtime_seconds": 11.944025993347168,
+    "timestamp": "2026-05-29T03:17:09.653827+00:00",
+    "references": [
+      "K1100b (ETF-level asset-class copula advantage)",
+      "Paper3_E1 (individual stocks NULL verdict, 2026-05-29)",
+      "Patton (2006) IER 47(2)",
+      "Christoffersen et al. (2012) RFS int copula tail",
+      "Karolyi & Stulz (1996) JF cross-country equity comov",
+      "Forbes & Rigobon (2002) JF contagion vs interdependence",
+      "Longin & Solnik (2001) JF extreme corr int equity",
+      "Lai (2024) APFM 31(2) PRS copula"
+    ]
+  }
+}

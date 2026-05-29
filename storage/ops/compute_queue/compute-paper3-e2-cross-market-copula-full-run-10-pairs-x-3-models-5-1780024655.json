@@ -1,0 +1,23 @@
+{
+  "id": "compute-paper3-e2-cross-market-copula-full-run-10-pairs-x-3-models-5-1780024655",
+  "title": "Paper3_E2_cross_market_copula full run (10 pairs x 3 models, 5 equity markets)",
+  "script_path": "experiments/paper3_E2_cross_market_copula/paper3_E2.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-05-29T03:17:35Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-paper3-e2-cross-market-copula-full-run-10-pairs-x-3-models-5-1780024655.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-paper3-e2-cross-market-copula-full-run-10-pairs-x-3-models-5-1780024655.stderr",
+  "result_artifact": "experiments/paper3_E2_cross_market_copula/paper3_E2_results.json",
+  "claude_followup": {
+    "brief": "Paper3 E2 cross-market copula full results ready. Read experiments/paper3_E2_cross_market_copula/paper3_E2_results.json + paper3_E2_tail_dependence_by_pair.png + paper3_E2_dm_vs_lambdaL.png + paper3_E2_fz_heatmap.png. Compare with Paper3_E1 results (NULL 12/12 verdict, 2026-05-29). Write knowledge.json K-id (next available, likely K1380s/K1390s — check current next K via grep storage/memory/knowledge.json). Provide verdict per region class (developed_cross_region / developed_vs_emerging_asia / asia_intraregional) — does any region produce Harvey |t|>3 advantage? Update research_program.md Paper 3 reframe section. Decide if E3 commodities scope needs adjustment given E1+E2 results pattern. IMPORTANT: do NOT immediately rewrite paper body — need E3 commodity results first per boss directive 2026-05-29.",
+    "task_type": "paper_review",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 14400
+}
