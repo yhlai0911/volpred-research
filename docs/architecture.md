@@ -1,5 +1,16 @@
 # 系統架構
 
+> ⚠️ **當前真實架構修正（2026-05-29，本檔下方 v12 描述部分已 superseded）**
+> 願景見 `VISION.md`；重新擘劃藍圖見 `docs/master_plan.md`（含完整現況/目標/7-phase 路線圖）。
+> **實際控制面 = 5 層並存**（非單純 v12 單線程）：
+> 1. **LaunchAgent**（macOS 原生，最可靠）— hourly-dispatch / compute-worker / check-alerts / daily-update / gmail-poll / collect / release / work-summary / handoff-regen 等 12 個
+> 2. **piggy-back universal scheduler** — `check_alerts (0 * * * *)` → `scripts/run_due_jobs.py` 讀 `runtime_schedules.json` 評估 due 並執行（macOS host cron 只可靠 fire `0` 分 pattern，故非 0 分 job 走此路）。`piggy_back_skip:true` / `host_crontab_managed:false` 的 job 由 LaunchAgent 專責、piggy-back 跳過（防雙 fire）
+> 3. **codex_loop.sh daemon**（VSCode terminal，常駐）— Codex 每小時 tick，讀 `AGENTS.md`（Codex 版指令檔，**勿歸檔**）claim task
+> 4. **task pool** — `next_tasks.json`（pending queue，目前實際多靠 hourly-dispatch 自生）+ `storage/ops/tasks/`（audit receipts）
+> 5. **dispatch_supervisor 重構（進行中，D4/8）** — 目標 long-lived asyncio supervisor 收斂上述為「1 樞紐 + 3 消費端」（見 `docs/refactor_plan_hourly_dispatch.md`）
+> crontab 多數條目是 no-op fallback（不刪、勿手動改，只透過 `install_host_crontab.sh`）。
+> 下方 v12「單一主線程 / 不再有常駐 supervisor」描述為歷史，dispatch_supervisor 完成後本檔將整體重寫。
+
 補充總覽文件：`docs/system_handbook.md`。若你要一次看完整系統架構、功能、資料流、排程、control plane、前後台與維運邏輯，先讀這份再回來查本檔細節。`2026-04-19` v12 架構已收斂為**單一主線程 Claude Code session 作為唯一 orchestrator**；不再有常駐 supervisor / worker terminal pool。舊的 3-terminal / supervisor-worker 構想（`docs/multi-agent-terminal-workflow-codex.md`）已 deprecated，僅保留歷史。
 
 ## 網站架構（v4 Supabase + Admin CMS + Mirror API）

@@ -151,3 +151,50 @@ def test_load_pending_sessions_normalizes_legacy_schema(tmp_path, monkeypatch):
     assert "description" in state
     assert state["jobs"]["legacy_a"]["recorded_count"] == 2
     assert state["jobs"]["legacy_b"]["recorded_count"] == 1
+
+
+def test_run_due_jobs_skips_piggy_back_skip_items(tmp_path, monkeypatch):
+    """piggy_back_skip=true items should be skipped by run_due_jobs even if due.
+
+    Distinct from host_crontab_managed=false (which removes from host crontab).
+    Used for items whose host-cron pattern fires reliably and would double-fire
+    if piggy-back also dispatched them. Verified 2026-05-29 collect_us_data
+    incident (host cron 07:03 + piggy-back 00:00 UTC = 2 yfinance fetches/day).
+    """
+    import json
+    import run_due_jobs as rdj
+
+    config_path = tmp_path / "schedules.json"
+    last_run_path = tmp_path / "cron_last_run.json"
+    state = {}
+    last_run_path.write_text(json.dumps(state))
+
+    config_path.write_text(json.dumps({
+        "system_crontab": {
+            "items": [
+                {
+                    "id": "collect_us_test",
+                    "cron": "3 7 * * 2-6",
+                    "wrapper_script": "/nonexistent/wrapper.sh",
+                    "log_path": "storage/logs/cron/test.log",
+                    "piggy_back_skip": True,
+                },
+                {
+                    "id": "regular_test",
+                    "cron": "0 8 * * 1",
+                    "wrapper_script": "/nonexistent/wrapper.sh",
+                    "log_path": "storage/logs/cron/test2.log",
+                },
+            ]
+        }
+    }))
+    monkeypatch.setattr(rdj, "CONFIG_PATH", config_path)
+    monkeypatch.setattr(rdj, "LAST_RUN_PATH", last_run_path)
+
+    result = rdj.run_due_jobs()
+
+    jobs = {r["job_id"]: r for r in result["jobs"]}
+    assert jobs["collect_us_test"]["action"] == "skip"
+    assert jobs["collect_us_test"]["reason"] == "piggy_back_skip_host_managed"
+    # regular_test fails wrapper_missing (not piggy_back_skip) — confirms flag isolation
+    assert jobs["regular_test"]["reason"] != "piggy_back_skip_host_managed"

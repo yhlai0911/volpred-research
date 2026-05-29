@@ -261,6 +261,7 @@ def run_due_jobs(subprocess_timeout: int = DEFAULT_SUBPROCESS_TIMEOUT_SEC) -> di
         cron_expr = item.get("cron")
         wrapper = item.get("wrapper_script")
         managed = item.get("host_crontab_managed")
+        piggy_back_skip = item.get("piggy_back_skip")
         log_rel = item.get("log_path") or f"storage/logs/cron/{job_id}.log"
 
         if not job_id or not cron_expr or not wrapper:
@@ -268,6 +269,16 @@ def run_due_jobs(subprocess_timeout: int = DEFAULT_SUBPROCESS_TIMEOUT_SEC) -> di
         if job_id in SKIP_JOB_IDS:
             continue
         if managed is False:
+            continue
+        # piggy_back_skip=true means host crontab already fires this item
+        # reliably; piggy-back must not double-fire. Distinct from
+        # host_crontab_managed=false (which removes from host crontab too).
+        # Set true for items whose host-cron pattern is empirically reliable
+        # (e.g. `3 7 * * 2-6` collect_us — verified double-fire in 2026-05-29
+        # incident: host cron 07:03 + piggy-back 00:00 UTC = 2 fetches/day).
+        if piggy_back_skip is True:
+            results.append({"job_id": job_id, "action": "skip",
+                            "reason": "piggy_back_skip_host_managed"})
             continue
 
         wrapper_path = Path(wrapper) if wrapper.startswith("/") else PROJECT_ROOT / wrapper

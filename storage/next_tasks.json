@@ -14016,7 +14016,7 @@
     "title": "K1323: VIXTWN 數據累積到 252 天後驗證 ratio 穩定性（Q6）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 353). Original: VIXTWN 數據累積到 252 天後驗證 ratio 穩定性（Q6）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1323.py with signal.shift(1) + seed=42, (c) K1323_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 353,
@@ -14024,7 +14024,13 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-05-29T05:08:21Z"
+    "created_at": "2026-05-29T05:08:21Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-29T06:00:57.683927+00:00",
+    "claim_session_id": "2f4b499eed88",
+    "started_at": "2026-05-29T06:01:01.613021+00:00",
+    "completed_at": "2026-05-29T06:04:49.647891+00:00",
+    "result": "Built K1323 readiness update with fresh-source audit. VIXTWN has only 116/252 days (46.0%), so the formal one-year gate is still not ready. Primary local VIX pairing is stale at 2026-05-19 (only 108 overlaps); a fresh ^VIX snapshot extends overlap to 115 days, but ratio instability remains or strengthens (mean 1.553, CV 0.197, strong positive trend), so verdict is NOT_READY_AND_UNSTABLE."
   },
   {
     "id": "K1324",

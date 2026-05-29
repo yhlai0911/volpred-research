@@ -1,0 +1,159 @@
+{
+  "experiment_id": "k1323",
+  "title": "VIXTWN 252-day gate update with VIX source freshness audit",
+  "generated_at": "2026-05-29T06:04:28.903256+00:00",
+  "seed": 42,
+  "related_experiments": [
+    "K1181",
+    "K1308",
+    "K1321"
+  ],
+  "progress_to_252": {
+    "target_days": 252,
+    "unique_vixtwn_days": 116,
+    "completion_ratio": 0.460317,
+    "days_remaining": 136,
+    "target_reached": false
+  },
+  "data_sources": {
+    "vixtwn": {
+      "path": "data/vixtwn/vixtwn_daily.csv",
+      "raw_rows": 116,
+      "duplicate_dates_removed": 0,
+      "unique_rows": 116,
+      "start": "2025-12-01",
+      "end": "2026-05-28"
+    },
+    "local_vix_primary": {
+      "path": "paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv",
+      "raw_rows": 4785,
+      "duplicate_dates_removed": 10,
+      "non_null_rows": 4624,
+      "start": "2008-01-02",
+      "end": "2026-05-19"
+    },
+    "fresh_vix_audit": {
+      "path": "experiments/k1323/data/vix_yfinance_snapshot.csv",
+      "non_null_rows": 124,
+      "start": "2025-12-01",
+      "end": "2026-05-28"
+    }
+  },
+  "cleaning": {
+    "dedup_rule": "sort by date, drop_duplicates(date, keep=\"first\")",
+    "alignment": "intersection on date labels only",
+    "lookahead": "not applicable; descriptive stability audit only"
+  },
+  "primary_local_gate": {
+    "purpose": "strictly comparable continuation of K1321 using the same local VIX source family",
+    "ratio_stats": {
+      "n": 108,
+      "start": "2025-12-01",
+      "end": "2026-05-19",
+      "mean": 1.518223,
+      "median": 1.435249,
+      "std": 0.281043,
+      "cv": 0.185113,
+      "min": 1.09109,
+      "max": 2.278679,
+      "ci_95_mean": [
+        1.464613,
+        1.571834
+      ],
+      "first_half_mean": 1.377966,
+      "second_half_mean": 1.658481,
+      "trend_slope_per_day": 0.006372,
+      "trend_rvalue": 0.710171,
+      "trend_pvalue": 0.0,
+      "ttest_vs_k1181_mean": {
+        "baseline_mean": 1.3906,
+        "t_stat": 4.719204,
+        "p_value": 7e-06
+      },
+      "rolling20_mean_start": 1.314385,
+      "rolling20_mean_end": 2.00942,
+      "tail_snapshot": {
+        "2026-05-13": 2.13822,
+        "2026-05-14": 2.278679,
+        "2026-05-15": 2.093869,
+        "2026-05-18": 2.19248,
+        "2026-05-19": 2.188815
+      }
+    }
+  },
+  "fresh_vix_audit": {
+    "purpose": "check whether the local gate is materially distorted by stale VIX pairing data",
+    "ratio_stats": {
+      "n": 115,
+      "start": "2025-12-01",
+      "end": "2026-05-28",
+      "mean": 1.552664,
+      "median": 1.459397,
+      "std": 0.305599,
+      "cv": 0.196823,
+      "min": 1.09109,
+      "max": 2.305591,
+      "ci_95_mean": [
+        1.496211,
+        1.609117
+      ],
+      "first_half_mean": 1.386924,
+      "second_half_mean": 1.715546,
+      "trend_slope_per_day": 0.006971,
+      "trend_rvalue": 0.760602,
+      "trend_pvalue": 0.0,
+      "ttest_vs_k1181_mean": {
+        "baseline_mean": 1.3906,
+        "t_stat": 5.686983,
+        "p_value": 0.0
+      },
+      "rolling20_mean_start": 1.314385,
+      "rolling20_mean_end": 2.111967,
+      "tail_snapshot": {
+        "2026-05-22": 1.981437,
+        "2026-05-25": 2.045811,
+        "2026-05-26": 1.934156,
+        "2026-05-27": 2.154082,
+        "2026-05-28": 2.305591
+      }
+    }
+  },
+  "source_freshness_gap": {
+    "vixtwn_last_date": "2026-05-28",
+    "local_vix_last_date": "2026-05-19",
+    "fresh_vix_last_date": "2026-05-28",
+    "local_pairing_overlap_days": 108,
+    "fresh_pairing_overlap_days": 115,
+    "overlap_gain_from_fresh_vix": 7,
+    "local_source_stale_vs_vixtwn_days": 7
+  },
+  "comparison_to_k1321": {
+    "k1321_overlap_days": 111,
+    "current_local_overlap_days": 108,
+    "current_fresh_overlap_days": 115,
+    "delta_local_mean_vs_k1321": -0.01436,
+    "delta_fresh_mean_vs_k1321": 0.020081,
+    "delta_local_cv_vs_k1321": -0.004452,
+    "delta_fresh_cv_vs_k1321": 0.007258
+  },
+  "baseline_comparison": {
+    "k1181_mean": 1.3906,
+    "k1181_cv": 0.098
+  },
+  "verdict": {
+    "target_reached": false,
+    "stable_under_local_gate": false,
+    "stable_under_fresh_audit": false,
+    "summary": "NOT_READY_AND_UNSTABLE: VIXTWN has only 116 unique days, far below the 252-day gate. Under both the old local VIX pairing and a fresh experiment-scoped ^VIX snapshot, the ratio remains above K1181's 1.3906 baseline, dispersion is elevated, and the time trend is strongly positive."
+  },
+  "key_findings": [
+    "252-day gate progress is 116/252 (46.0%); the formal one-year validation is not ready.",
+    "Primary local pairing yields n=108 through 2026-05-19, mean=1.5182, CV=0.1851.",
+    "Fresh ^VIX pairing extends overlap to n=115 through 2026-05-28, mean=1.5527, CV=0.1968.",
+    "Local VIX source is stale at 2026-05-19 while VIXTWN already reaches 2026-05-28; freshness audit adds 7 paired days but does not restore stability."
+  ],
+  "artifacts": {
+    "figure": "k1323_ratio_paths.png",
+    "fresh_vix_snapshot": "experiments/k1323/data/vix_yfinance_snapshot.csv"
+  }
+}

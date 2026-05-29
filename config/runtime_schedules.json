@@ -42,7 +42,9 @@
         "matchers": [
           "collect_tw_data.py",
           "cron_collect_tw.sh"
-        ]
+        ],
+        "piggy_back_skip": true,
+        "piggy_back_skip_reason": "host crontab fires reliably; 2026-05-29 incident confirmed double-fire (host + piggy-back). See docs/error_log.md."
       },
       {
         "id": "collect_us_data",
@@ -55,7 +57,9 @@
         "matchers": [
           "collect_us_data.py",
           "cron_collect_us.sh"
-        ]
+        ],
+        "piggy_back_skip": true,
+        "piggy_back_skip_reason": "host crontab fires reliably; 2026-05-29 incident confirmed double-fire (host + piggy-back). See docs/error_log.md."
       },
       {
         "id": "daily_update",
@@ -97,7 +101,9 @@
           "volpred.market_calendar sync",
           "market_status.log",
           "cron_market_cal.sh"
-        ]
+        ],
+        "piggy_back_skip": true,
+        "piggy_back_skip_reason": "host crontab fires reliably; 2026-05-29 incident confirmed double-fire (host + piggy-back). See docs/error_log.md."
       },
       {
         "id": "shared_scheduler_tick",
@@ -141,7 +147,9 @@
         "matchers": [
           "memory_health",
           "cron_memory_health.sh"
-        ]
+        ],
+        "piggy_back_skip": true,
+        "piggy_back_skip_reason": "host crontab fires reliably; 2026-05-29 incident confirmed double-fire (host + piggy-back). See docs/error_log.md."
       },
       {
         "id": "refresh_paper_snapshots",
