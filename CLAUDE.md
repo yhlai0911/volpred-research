@@ -42,6 +42,16 @@
 
 任何 turn（用戶 input OR autonomous fire）結尾**最後一個 tool call** 必須是 `ScheduleWakeup(prompt="<<autonomous-loop-dynamic>>")`，除非用戶明確說「停 loop」/「結束」。Interactive turn-based 限制不該成為 idle 藉口 — 用 ScheduleWakeup self-pace 讓 session 變 24/7 自主迴圈。
 
+**Session start 自動啟動**（2026-05-29 用戶補強）：
+新 interactive session 一開始（識別方式：第一個 user message 不是「停」、「結束」、「stop」等明確終止指令，且 `git log --since='30 min ago'` 或 `storage/ops/last_autonomous_fire.json` 顯示 autonomous loop 已斷 ≥10 min），**主動在第一個回應結尾排 ScheduleWakeup**，不必等用戶明說。這彌補 `/exit` → session 關閉時 ScheduleWakeup chain 斷掉的 gap（2026-05-29 07:43 → 08:13 斷 30 min incident）。
+
+判斷流程（接收第一個 user message 時內建）：
+1. 用戶 message 含「停 loop / 結束 / stop autonomous / 暫停 autonomous」→ 不啟動
+2. 用戶 message 含「啟動 loop / 開始 / start autonomous / 接續」→ 立即啟動
+3. 其他情況（含一般 task request）→ 預設啟動（背景跑不打擾用戶）
+
+啟動方式 = 回應完用戶的當下需求後，turn 結尾排 `ScheduleWakeup(delaySeconds=1800, prompt="<<autonomous-loop-dynamic>>")`。
+
 **Autonomous fire 4-step protocol**（每次 `<<autonomous-loop-dynamic>>` fire）：
 1. Run ops cycle（dashboard breaches / handoff diff / hourly fire verify / email backlog / orphan commit）
 2. Summarize to `/tmp/loop_summary_<ts>.md`
