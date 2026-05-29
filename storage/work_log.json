@@ -8896,5 +8896,18 @@
     "summary": "根因: knowledge.json 部分 entries title=null（K1318/K1322/K1378/K1382等），build_publication_candidates 直取得空字串 → refill `_has_publishable_title` belt 擋全 7 uncovered → pool 永空。修流程: 加 derive_title() helper，title 缺時從 content 第一句（句號前 cap 160 chars）取 fallback。Verify: 重跑 build → refill 補 4 個 (K1404/K1378_v2/K1318/K1322 article tasks)。",
     "owner": "hourly-15",
     "outcome": "succeeded"
+  },
+  {
+    "task_id": "trending_repost_2026_05_29_ai基建債務",
+    "task_type": "trending_repost",
+    "timestamp": "2026-05-29T08:23:21.647998+00:00",
+    "status": "succeeded",
+    "summary": "Published trending_repost: 單季 766 億 AI 基建燒錢競賽背後的波動率訊號 (mile_4c141c2f). Evidence: Q1 2026 四大超算 capex $76.6B (+61% YoY); Mag5 avg RV60=33.1%; HYG=$80.23; rolling corr +0.671. Anti-AI gate: PASS (warn=0, round=1). FB: fb_pending_chrome_mcp_p6.",
+    "output": {
+      "mile_id": "mile_4c141c2f",
+      "title": "單季 766 億，AI 基建燒錢競賽背後的波動率訊號",
+      "draft_path": "storage/drafts/trending_ai_capex_debt_draft_v1.md",
+      "fb_status": "fb_pending_chrome_mcp_p6"
+    }
   }
 ]
