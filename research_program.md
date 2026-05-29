@@ -432,6 +432,11 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 - [ ] Partial Cointegration Hedging — RQFA 2023
 - [ ] Regime-Switching Correlation Hedging
 
+### 新發現（2026-05-29 arXiv 文獻搜尋；scan_arxiv_topics.py 能力建立）
+> 來源：WebSearch arXiv q-fin（export API 當下對本 IP 限流，改 WebSearch 取得；ID 經 arxiv.org URL 驗證為真實）。`scripts/scan_arxiv_topics.py` 為自動掃描器（ground-truth API fetch，throttle 解除後可排程跑）。
+- [ ] **Autoencoder Enhanced Realised GARCH** — arXiv:2411.17136。以 autoencoder 生成合成 realised measure，非線性整合多個 realised measures；4 大股市 one-step rolling 預測勝傳統 Realised GARCH。**面向A 可測**：對齊我方 multi-RM / A4f 線，可比 K-series HAR-RV baseline。
+- [ ] **Quantum Reservoir Computing for Realized Volatility Forecasting** — arXiv:2505.13933 (2026-04)。指出 GARCH 低維參數遞迴對複雜非線性/多尺度動態表達受限，改用 reservoir computing。**面向A/D 觀察**：方法新穎但需評估是否可在無量子硬體下以 echo-state network 近似復現（reproducibility gate）。
+
 ### 新發現（2026-04-01 文獻搜尋）
 - [ ] **Transfer Learning for New Issues Vol** — arXiv:2503.12648 (March 2025)。多源遷移學習預測數據稀少資產（新 IPO/分割股）的波動率。實務導向工具。
 
