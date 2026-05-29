@@ -40,6 +40,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import time
 import urllib.error
@@ -53,21 +54,37 @@ ROOT = Path(__file__).resolve().parents[1]
 RESEARCH_PROGRAM = ROOT / "research_program.md"
 
 ARXIV_API = "http://export.arxiv.org/api/query"
+# RSS 是 PRIMARY source（2026-05-29）：export API query 端點對本機 IP 持續
+# 429，但 per-category RSS feed（專為輪詢設計）穩定可用。RSS 給「最新公告批次」
+# (new + cross + replace)，正好適合週期掃描。export API 留作 --source api fallback。
+RSS_BASE = "https://rss.arxiv.org/rss"
+RSS_CATEGORIES = ["q-fin.ST", "q-fin.RM", "q-fin.PM", "q-fin.TR"]
 USER_AGENT = "VolPred-Research/1.0 (mailto:yihao.lai@gmail.com)"
 _ATOM = {"a": "http://www.w3.org/2005/Atom"}
 
-# 對齊 research_program.md 研究面向：每軸一組 abs: 關鍵詞 + 標籤。
-# 標籤回填到 candidate.matched_axis，方便注入時歸入對應面向。
-AXES: list[tuple[str, str]] = [
-    ("面向A_波動率預測", "volatility forecasting OR realized volatility OR GARCH"),
-    ("面向B_風險管理", "Value-at-Risk OR expected shortfall OR tail risk"),
-    ("面向I_期貨避險", "hedging OR hedge ratio OR minimum variance hedge"),
-    ("前沿_rough_vol", "rough volatility OR Hurst OR fractional volatility"),
-    ("前沿_ML_GARCH", "machine learning volatility OR neural network GARCH OR deep learning realized"),
-    ("前沿_jump_conformal", "jump diffusion volatility OR conformal prediction finance"),
+# 對齊 research_program.md 研究面向：每軸一組小寫關鍵詞（client-side 比對 RSS
+# 的 title+abstract）+ 標籤。標籤回填到 candidate.matched_axis 方便注入歸面向。
+# RSS 無法 server-side 搜尋，故改為本地子字串比對；用戶 copula 專長也納入。
+AXES: list[tuple[str, list[str]]] = [
+    ("面向A_波動率預測", ["volatility forecast", "realized volatility", "realised volatility", "garch", "har-rv", "har model"]),
+    ("面向B_風險管理", ["value-at-risk", "value at risk", "expected shortfall", "tail risk", "var model"]),
+    ("面向I_期貨避險", ["hedging", "hedge ratio", "minimum variance hedge", "futures hedge"]),
+    ("面向_copula", ["copula", "dependence structure", "tail dependence"]),
+    ("前沿_rough_vol", ["rough volatility", "hurst", "fractional volatility", "fractional brownian"]),
+    ("前沿_ML_GARCH", ["machine learning volatil", "neural network", "deep learning", "autoencoder", "transformer", "reservoir computing"]),
+    ("前沿_jump_tail", ["jump diffusion", "conformal prediction", "jump variation", "extreme value"]),
 ]
-# 限縮在 q-fin 類別，避免撈到無關 cs/stat 論文。
+# export API fallback 用的 cat 限縮字串。
 CATEGORIES = "cat:q-fin.ST OR cat:q-fin.RM OR cat:q-fin.PM OR cat:q-fin.TR"
+
+
+def _match_axis(title: str, abstract: str) -> str | None:
+    """回傳第一個命中的研究軸標籤；無命中回 None。"""
+    hay = (title + " " + abstract).lower()
+    for axis, kws in AXES:
+        if any(kw in hay for kw in kws):
+            return axis
+    return None
 
 
 def _fetch(search_query: str, max_results: int, *, retries: int = 3) -> bytes | None:
@@ -145,6 +162,85 @@ def _parse(raw: bytes, axis: str, since: datetime) -> list[dict]:
     return out
 
 
+def _fetch_rss(category: str, *, retries: int = 3) -> bytes | None:
+    """抓 per-category RSS feed（PRIMARY）。429 指數退避。失敗回 None。"""
+    url = f"{RSS_BASE}/{category}"
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    delay = 3
+    for attempt in range(retries):
+        try:
+            return urllib.request.urlopen(req, timeout=30).read()
+        except urllib.error.HTTPError as exc:
+            if exc.code == 429 and attempt < retries - 1:
+                time.sleep(delay)
+                delay *= 2
+                continue
+            print(f"  [scan_arxiv] RSS HTTP {exc.code} for {category}", file=sys.stderr)
+            return None
+        except Exception as exc:  # noqa: BLE001
+            print(f"  [scan_arxiv] RSS {type(exc).__name__} for {category}: {exc}", file=sys.stderr)
+            return None
+    return None
+
+
+# RSS description 形如 "arXiv:2605.29413v1 Announce Type: cross Abstract: <text>"
+_ABSTRACT_RE = re.compile(r"Abstract:\s*(.*)", re.DOTALL)
+_ID_IN_DESC_RE = re.compile(r"arXiv:(\d{4}\.\d{4,5})")
+
+
+def _parse_rss(raw: bytes, *, include_replace: bool = False) -> list[dict]:
+    """解析 RSS feed → candidate dict list（已套用研究軸關鍵詞過濾）。"""
+    out: list[dict] = []
+    head = raw[:4096].lower()
+    if b"<!doctype" in head or b"<!entity" in head:
+        print("  [scan_arxiv] RSS refused: DTD/entity in response", file=sys.stderr)
+        return out
+    try:
+        root = ET.fromstring(raw)
+    except ET.ParseError:
+        return out
+    atom_announce = "{http://arxiv.org/schemas/atom}announce_type"
+    for it in root.findall(".//item"):
+        title_el = it.find("title")
+        link_el = it.find("link")
+        desc_el = it.find("description")
+        if title_el is None or link_el is None:
+            continue
+        title = " ".join((title_el.text or "").split())
+        desc_raw = " ".join((desc_el.text or "").split()) if desc_el is not None else ""
+        # announce_type: new / cross / replace — replace 是舊論文更新版，預設略過
+        ann_el = it.find(atom_announce)
+        ann = (ann_el.text or "").strip() if ann_el is not None else ""
+        if ann == "replace" and not include_replace:
+            continue
+        # arxiv id：優先 link，退而求其次 description
+        arxiv_id = (link_el.text or "").rsplit("/", 1)[-1].split("v")[0]
+        if not re.fullmatch(r"\d{4}\.\d{4,5}", arxiv_id):
+            m = _ID_IN_DESC_RE.search(desc_raw)
+            arxiv_id = m.group(1) if m else ""
+        if not arxiv_id:
+            continue
+        m = _ABSTRACT_RE.search(desc_raw)
+        abstract = m.group(1).strip() if m else desc_raw
+        axis = _match_axis(title, abstract)
+        if axis is None:
+            continue  # 不在任何研究軸 → 跳過
+        cats = [c.text for c in it.findall("category") if c.text]
+        pub_el = it.find("pubDate")
+        published = (pub_el.text or "")[:16] if pub_el is not None else ""
+        out.append({
+            "arxiv_id": arxiv_id,
+            "title": title,
+            "published": published,
+            "primary_category": cats[0] if cats else "",
+            "announce_type": ann,
+            "abstract_snippet": abstract[:280],
+            "pdf_url": f"https://arxiv.org/pdf/{arxiv_id}",
+            "matched_axis": axis,
+        })
+    return out
+
+
 def _existing_ids() -> set[str]:
     """已出現在 research_program.md 的 arxiv id（去重用）。"""
     if not RESEARCH_PROGRAM.exists():
@@ -154,27 +250,39 @@ def _existing_ids() -> set[str]:
     return set(re.findall(r"\b\d{4}\.\d{4,5}\b", text))
 
 
-def scan(*, days: int, max_per_axis: int) -> dict:
-    from datetime import timedelta
-    # 不能用 argless datetime.now() 在某些 runtime；這裡是真實腳本（非 workflow），允許。
+def scan(*, source: str = "rss", days: int = 30, max_per_axis: int = 6,
+         include_replace: bool = False) -> dict:
+    """掃 arXiv q-fin 新論文。source='rss'（預設，本機可靠）或 'api'（fallback）。"""
     now = datetime.now(timezone.utc)
-    since = now - timedelta(days=days)
     seen_ids = _existing_ids()
     found: dict[str, dict] = {}
-    for axis, terms in AXES:
-        q = f"({CATEGORIES}) AND (abs:{terms})" if " OR " in terms else f"({CATEGORIES}) AND abs:{terms}"
-        raw = _fetch(q, max_per_axis)
-        if raw:
-            for c in _parse(raw, axis, since):
-                # 同一論文多軸命中 → 保留首見軸
-                found.setdefault(c["arxiv_id"], c)
-        time.sleep(3)  # arXiv 政策：每 3 秒 1 request
+
+    if source == "rss":
+        for cat in RSS_CATEGORIES:
+            raw = _fetch_rss(cat)
+            if raw:
+                for c in _parse_rss(raw, include_replace=include_replace):
+                    found.setdefault(c["arxiv_id"], c)
+            time.sleep(3)  # arXiv 政策：每 3 秒 1 request
+        src_label = f"RSS:{','.join(RSS_CATEGORIES)}"
+    else:  # api fallback
+        from datetime import timedelta
+        since = now - timedelta(days=days)
+        for axis, kws in AXES:
+            terms = " OR ".join(kws[:3])
+            q = f"({CATEGORIES}) AND (abs:{terms})"
+            raw = _fetch(q, max_per_axis)
+            if raw:
+                for c in _parse(raw, axis, since):
+                    found.setdefault(c["arxiv_id"], c)
+            time.sleep(3)
+        src_label = CATEGORIES
+
     new = [c for c in found.values() if c["arxiv_id"] not in seen_ids]
-    new.sort(key=lambda c: c["published"], reverse=True)
+    new.sort(key=lambda c: c.get("published", ""), reverse=True)
     return {
         "scanned_at": now.isoformat(),
-        "categories": CATEGORIES,
-        "days": days,
+        "source": src_label,
         "total_found": len(found),
         "new_count": len(new),
         "candidates": new,
@@ -185,7 +293,7 @@ def _to_markdown(result: dict) -> str:
     date = result["scanned_at"][:10]
     lines = [f"### 新發現（{date} arXiv 自動掃描，scan_arxiv_topics.py）", ""]
     if not result["candidates"]:
-        lines.append("（本次掃描無新論文 — 既有 research_program 已覆蓋，或 API 暫時限流）")
+        lines.append("（本次掃描無命中研究軸的新論文 — 既有 research_program 已覆蓋，或本批公告無相關題）")
         return "\n".join(lines)
     for c in result["candidates"]:
         lines.append(
@@ -199,12 +307,16 @@ def _to_markdown(result: dict) -> str:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--days", type=int, default=30, help="只取最近 N 天投稿（預設 30）")
-    ap.add_argument("--max", type=int, default=6, help="每個研究軸最多取 N 篇（預設 6）")
+    ap.add_argument("--source", choices=["rss", "api"], default="rss",
+                    help="rss=per-category RSS（預設，本機可靠）/ api=export query（fallback）")
+    ap.add_argument("--days", type=int, default=30, help="api 模式：只取最近 N 天投稿")
+    ap.add_argument("--max", type=int, default=6, help="api 模式：每軸最多 N 篇")
+    ap.add_argument("--include-replace", action="store_true", help="rss 模式：含 replace（舊論文更新版）")
     ap.add_argument("--markdown", action="store_true", help="輸出 research_program.md 可貼區塊")
     args = ap.parse_args()
 
-    result = scan(days=args.days, max_per_axis=args.max)
+    result = scan(source=args.source, days=args.days, max_per_axis=args.max,
+                  include_replace=args.include_replace)
     if args.markdown:
         print(_to_markdown(result))
     else:
