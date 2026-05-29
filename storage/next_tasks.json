@@ -5007,7 +5007,7 @@
   {
     "id": "Paper1_Table3_vs_Table8_inconsistency",
     "title": "Paper 1 CRITICAL: Table 3 vs Table 8 同設定 GJR QLIKE 值不同 (-9.034 vs -8.671)",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 4,
     "created_at": "2026-04-17T16:48:14+08:00",
     "description": "K903 (efaa93c0) 發現 Paper 1 Table 3 GJR QLIKE=-9.034 vs Table 8 (同 SPY 2023-24 w=504)=-8.671，差 0.363 (4.1%). K903 重現 -8.674 (match Table 8 0.003 內). Paper 1 內部不一致類似 Paper 2 算術錯誤. **主線程 decision**: (a) Table 3 用了 daily refit 而非 63d - 需確認 paper 是否有未明說; (b) errata 修 Table 3 到 K903 canonical (= Table 8); (c) errata pending. **research integrity**: 同 paper 兩 table 同設定不同值必須解釋.",
@@ -5026,7 +5026,13 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-29T14:29:42.513187+00:00",
+    "claim_session_id": "581cb7c70e92",
+    "started_at": "2026-05-29T14:29:51.381215+00:00",
+    "completed_at": "2026-05-29T14:33:27.028833+00:00",
+    "result": "Corrected Paper 1 Table 3 SPY 2023-2024 QLIKE row to K903 canonical values; synced body/body_v3 practical ceiling text; downgraded experiments.md provenance from MATCH to PARTIAL pending broader Table 3 cleanup."
   },
   {
     "id": "Paper1_Table4_footnote_and_methodology_clarify",
@@ -14333,5 +14339,27 @@
     "started_at": "2026-05-29T13:47:09.850658+00:00",
     "completed_at": "2026-05-29T13:47:27.998761+00:00",
     "result": "老闆「有問題就立刻處理」→ 查證 collect_tw >30h stale 為假陽性(今日15:00實際成功跑完)；根因=cron_review banner parser 抓不到非-===完成標記，改用 log mtime override 修復(commit a46dec90)+regression test。已回信。"
+  },
+  {
+    "id": "paper_review_mile_8e899fba",
+    "title": "Paper review (Codex 24h-rule): Sharpe 不夠用：六維度排名洗出完全不同的策略冠軍",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_8e899fba needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_8e899fba",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-29T15:07:51+00:00",
+    "claimed_by": "hourly-23",
+    "claimed_at": "2026-05-29T15:08:38.157917+00:00",
+    "claim_session_id": "0afa3e3fb1aa",
+    "started_at": "2026-05-29T15:08:38.429617+00:00",
+    "completed_at": "2026-05-29T15:15:30.275798+00:00",
+    "result": "Codex 24h-rule audit verdict=FAIL → ERRATA 修正 (1) 文章宣稱 6 維但 composite 實為 5 維均值 (cagr/sharpe/calmar/mdd/win_rate_monthly 各 _norm 平均；stress_apr2025 未入分) (2) 冠軍 taiwan_spy_momentum 已被 daily_update.py:578 標 c2c bias + o2o Harvey FAIL。已加 caveat + 文末 ERRATA section + errata.update_history 留檔。Supabase sync 完成 6 articles。"
   }
 ]

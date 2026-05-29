@@ -1347,3 +1347,26 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 1. `pending_main_thread` 不是「非任務」，只是「不能派給一般 agent」；live dashboard 不能把它當不存在。
 2. 補池動作應建立在「可執行 backlog 真的為 0」之上，不是看單一狀態碼。
 3. Handoff 與 dashboard 若同時是 ops surface，必須對 task-pool status semantics 使用同一套口徑，否則會給出相反指令。
+
+## 2026-05-29 — Codex 24h-rule 抓到 production article 兩個 critical bug（task: paper_review_mile_8e899fba）
+
+**Article**: mile_8e899fba「Sharpe 不夠用：六維度排名洗出完全不同的策略冠軍」（K717）
+
+**Codex verdict**: FAIL → ERRATA 修正
+
+**Two bugs**:
+1. **「六維」誤導**：文章開頭講「6 個維度評分... 等權重 1/6」，但 k717_results.json 只有 5 個 `_norm` 欄位（cagr/sharpe/calmar/mdd/win_rate_monthly），composite=各 norm 5 維均值。壓力期 `stress_apr2025` 在 narrative 中討論但**未進入 composite 計算**。驗證: composite 0.687 = sum5 (3.437) / 5。
+2. **冠軍 strategy biased 揭露**：綜合 #1 的 `taiwan_spy_momentum` 在 `scripts/daily_update.py:578-595` 內部已標記 c2c (close-to-close) timing bias 且 o2o (open-to-open) 模式 Harvey FAIL (t<3)。文章把它當主角頌揚但未補上此 caveat。
+
+**根因**：寫 article 時用 narrative 描述「6 維」但實際 normalize 計算只用 5 維欄位 — agent 寫文時把 "narrative discussion of stress test" 誤當成 "stress 也算 1/6"。冠軍 caveat 沒從 daily_update.py 同步到 article。
+
+**已修**：
+- 文章開頭、表格、雷達圖、限制段、文末 ERRATA section 全面修正
+- 冠軍 caveat 加在 #1 介紹 + 限制段第 6/7 點
+- errata.update_history append `codex_24h_rule_errata` entry
+- Supabase sync 完成（6 articles 含 mile_8e899fba 更新）
+
+**教訓 / 未來防錯**：
+1. 寫 composite ranking 文章前必 grep `_norm` 欄位確認 dimensions 數，不憑 narrative 印象
+2. 引用 strategy 在 daily_update.py / 對應 backtest script 內如有 `biased` / `FAIL Harvey` 註解，article 必須**同步轉述 caveat**，不可隱藏
+3. Codex 24h-rule audit 是 K1018 lesson 落實 — 本次抓到結構性 narrative-vs-data drift，證明 rule 有效，需繼續執行不可跳過
