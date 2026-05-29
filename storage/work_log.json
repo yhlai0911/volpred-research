@@ -8927,5 +8927,13 @@
     "output": "mile_67c5ec83 published to feed (draft). 2 figures (k1318_qlike_bars.png, k1318_power_curve.png). Anti-AI gate PASS. Cluster waiver applied (SPY).",
     "proposer": "hourly-19",
     "executor": "Claude"
+  },
+  {
+    "timestamp": "2026-05-29T20:23",
+    "task_type": "paper_review",
+    "task_id": "Paper6_DIV3_SPY_VaR_violation_rate",
+    "verdict": "succeeded",
+    "summary": "Paper 6 SPY VaR=0.93%/p=0.77 forensic: 完全 reproducible from K880 PRG_Extended (raw 0.00932529, kupiec_p 0.76964). Task description claim 兩版不吻合 = 不正確; K880 完全吻合. K880v2 (lookahead+cov+stationarity bug fix) verdict COLLAPSED_ARTIFACT (VR 1.59% Kupiec FAIL) 但 paper 選 K880 因 timing-convention = intraday period at market open (no lookahead). Followup Paper6_DIV3b: main.tex L245 加 inline footnote 解釋抉擇.",
+    "actor": "hourly-20"
   }
 ]

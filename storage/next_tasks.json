@@ -5757,7 +5757,7 @@
   {
     "id": "Paper6_DIV3_SPY_VaR_violation_rate",
     "title": "Paper 6: SPY VaR VR=0.93%, Kupiec p=0.77 無對應 source",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 3,
     "created_at": "2026-04-17T17:13:53+08:00",
     "description": "Paper 6 audit: Paper SPY VR=0.93% Kupiec p=0.77 vs K880v2 VR=1.59% p=0.0196. 兩版都不吻合. 若 DIV-1 確認 K880 為正確 source, 需從 K880 重取 VaR 數字重核 Table 4.",
@@ -5774,7 +5774,15 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "started_at": "2026-05-29T12:21:02.265446+00:00",
+    "handoff_note": "hourly-20 claim for forensic SPY VaR source",
+    "handoff_at": "2026-05-29T12:20:58.974650+00:00",
+    "claimed_by": "hourly-20",
+    "claimed_at": "2026-05-29T12:20:59.150457+00:00",
+    "claim_session_id": "4e6c0c2bc3dc",
+    "completed_at": "2026-05-29T12:23:52.848322+00:00",
+    "result": "Forensic 確認 paper main.tex L245 SPY VR=0.93%/p=0.77 完全 reproducible from experiments/k880/k880_results.json::layer4_var.PRG_Extended.VaR_1pct (raw 0.009325287986834888, kupiec_p 0.7696385726099294). Task description 中 '兩版都不吻合' 不正確 — K880 完全吻合。K880v2 是 lookahead/cov bug fix 後 verdict COLLAPSED_ARTIFACT (VR 1.59% Kupiec FAIL)，但 paper 模型選擇 timing convention = 'intraday period at market open'，K880 在此 information set 下無 lookahead。Forensic note: paper/prg-periodic-garch/research_notes/spy_var_source_audit_2026_05_29.md。Followup Paper6_DIV3b: main.tex L245 加 inline footnote 解釋抉擇 (P3 pending_main_thread)."
   },
   {
     "id": "Paper6_experiments_md_add_K874c_K874e",
@@ -14252,7 +14260,7 @@
     "title": "Paper review (Codex 24h-rule): 銀行法規說用「平方根法」估一個月風險，但它真的失準了嗎？SPY 十年數據給出一個不舒服的答案",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_55b0f69f needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_55b0f69f",
@@ -14261,6 +14269,22 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-29T11:08:11+00:00"
+    "created_at": "2026-05-29T11:08:11+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-29T11:22:55.258906+00:00",
+    "claim_session_id": "36854b93d9a4",
+    "completed_at": "2026-05-29T11:24:20.698009+00:00",
+    "result": "Codex 24h review completed for mile_55b0f69f (K1382). Verdict: CONDITIONAL_PASS — headline ratios are supported and lookahead is clean, but results.json summary.main_finding contains wrong monthly GARCH-Sim numbers and the article overstates untested causal/statistical claims."
+  },
+  {
+    "id": "Paper6_DIV3b_spy_var_footnote_K880_vs_K880v2",
+    "task_type": "paper_review",
+    "priority": 3,
+    "status": "pending_main_thread",
+    "source": "forensic_followup",
+    "created_at": "2026-05-29T20:30:00+08:00",
+    "title": "Paper 6: main.tex L245 加 inline footnote 解釋 K880 vs K880v2 timing-convention 抉擇",
+    "description": "Paper6_DIV3 forensic (2026-05-29) 確認 SPY VR=0.93%/p=0.77 = K880 PRG_Extended（不是 K880v2）；數字 reproducible 無 errata 需求。但 main.tex L245 未 inline 標明 source，讀者不知 K880v2 同位置數字會變 1.59%（FAIL Kupiec）。需 (1) main.tex L245 加 footnote 指向 K880 並解釋 timing-convention (參考 experiments.md L73 + Eq 3-4 information set 定義) (2) reproduce.py L179 註解標 Table 4 SPY rows source (3) SUBMISSION_READY.md 加 audit log entry。完整 forensic note: paper/prg-periodic-garch/research_notes/spy_var_source_audit_2026_05_29.md",
+    "parent_task": "Paper6_DIV3_SPY_VaR_violation_rate"
   }
 ]
