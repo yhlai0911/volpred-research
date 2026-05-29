@@ -376,7 +376,9 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
     secondary belt-and-suspenders catch for content that bypassed the
     publisher path (legacy entries, manual edits, hot-fix scripts).
     Auto-escapes unescaped statistical-notation pipes like `|t|` inside
-    markdown table cells before Supabase write.
+    markdown table cells before Supabase write. Same secondary pass also
+    runs the anti-AI-style em-dash normalizer (CJK appositive `——`/`—` →
+    comma) so manual/legacy/hot-fix content gets the landmine-9 fix too.
     """
     content = item.get("content") or item.get("description") or ""
     if content:
@@ -399,6 +401,23 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
                 )
         except Exception as exc:
             print(f"  [supabase_sync] markdown_table_sanitizer error: {exc}")
+        # Secondary anti-AI-style em-dash normalizer (2026-05-29): same
+        # belt-and-suspenders rationale — catches manual edits / legacy
+        # entries / hot-fix scripts that bypassed publisher._append_to_feed.
+        # Conservative CJK-appositive-only rewrite (landmine 9 fix (b)).
+        try:
+            from volpred.publisher.emdash_normalizer import normalize_emdash
+
+            normalized, emrep = normalize_emdash(content)
+            if emrep.changed:
+                content = normalized
+                print(
+                    f"  [supabase_sync] emdash_normalizer auto-fixed "
+                    f"{emrep.replaced} em-dash(es) for "
+                    f"{item.get('id', 'unknown')}: {emrep.summary()}"
+                )
+        except Exception as exc:
+            print(f"  [supabase_sync] emdash_normalizer error: {exc}")
     row = {
         "slug": item.get("id", ""),
         "title": item.get("title", ""),
