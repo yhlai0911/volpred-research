@@ -112,32 +112,96 @@ def main():
 
 
 def _collect_fred():
-    """從 FRED 下載最新總經指標（直接 CSV，不依賴 pandas_datareader）。"""
+    """從 FRED 下載最新總經指標。
+
+    2026-05-29 fix: 公開 `fredgraph.csv` scraping endpoint 已被 FRED bot-detection
+    擋掉（回傳 HTML/403），約 4/16 起所有日頻系列 (DGS10/DGS2/EFFR/BAMLH...)
+    silent stale 6 週。改用官方 API (api.stlouisfed.org) + FRED_API_KEY
+    (.env.local，2026-05-10 已備)。官方 API 不被 bot-block，回傳乾淨 JSON。
+    """
+    import os
     import pandas as pd
 
-    base_url = "https://fred.stlouisfed.org/graph/fredgraph.csv"
+    api_key = os.environ.get("FRED_API_KEY")
+    if not api_key:
+        # Load from .env.local if not in env (cron may not source profile)
+        env_local = PROJECT / ".env.local"
+        if env_local.exists():
+            for line in env_local.read_text().splitlines():
+                line = line.strip()
+                if line.startswith("FRED_API_KEY="):
+                    api_key = line.split("=", 1)[1].strip()
+                    break
+    if not api_key:
+        print("  ❌ FRED_API_KEY 缺失 (.env.local) — 無法抓 FRED；macro 數據將 stale")
+        print("  FRED: 0 updated, 0 failed (no api key)")
+        return
+
+    api_url = "https://api.stlouisfed.org/fred/series/observations"
     macro_dir = PROJECT / "storage" / "macro"
     updated = 0
     failed = 0
+    stale_warn = []
+
+    import time
+
+    def _fetch_with_retry(params, *, attempts=3):
+        """FRED API 偶發 5xx (504 Gateway Timeout) — transient server-side.
+        Retry with backoff before giving up (2026-05-29: FRED API outage during
+        backfill). 4xx (bad key / bad series) fails fast, no retry."""
+        last_exc = None
+        for i in range(attempts):
+            try:
+                resp = requests.get(api_url, params=params, timeout=45)
+                if resp.status_code >= 500:
+                    last_exc = RuntimeError(f"HTTP {resp.status_code} (server-side)")
+                    time.sleep(5 * (i + 1))
+                    continue
+                resp.raise_for_status()
+                return resp
+            except requests.exceptions.RequestException as e:
+                last_exc = e
+                time.sleep(5 * (i + 1))
+        raise last_exc or RuntimeError("fetch failed")
 
     for ticker in sorted(FRED_TICKERS):
         outpath = macro_dir / f"fred_{ticker}.csv"
         try:
-            url = f"{base_url}?id={ticker}"
-            resp = requests.get(url, timeout=30)
-            resp.raise_for_status()
-            df = pd.read_csv(io.StringIO(resp.text), index_col=0, parse_dates=True)
+            params = {
+                "series_id": ticker,
+                "api_key": api_key,
+                "file_type": "json",
+                "observation_start": "2006-01-01",
+            }
+            resp = _fetch_with_retry(params)
+            payload = resp.json()
+            obs = payload.get("observations", [])
+            if not obs:
+                raise ValueError("empty observations")
+            df = pd.DataFrame(obs)[["date", "value"]].copy()
+            df["date"] = pd.to_datetime(df["date"])
+            df = df.set_index("date")
             df.columns = [ticker]
             df[ticker] = pd.to_numeric(df[ticker], errors="coerce")
+            valid = df.dropna()
+            if valid.empty:
+                raise ValueError("all values NaN after coerce")
             df.to_csv(outpath)
-            last_valid = df.dropna().index[-1].strftime("%Y-%m-%d")
+            last_valid = valid.index[-1].strftime("%Y-%m-%d")
             print(f"  ✅ {ticker:20s} → {last_valid}")
             updated += 1
+            # Flag daily-frequency series that are >7 days stale (data integrity)
+            if (datetime.now() - valid.index[-1].to_pydatetime()).days > 14 and ticker in {
+                "DGS10", "DGS2", "EFFR", "BAMLH0A0HYM2", "T10YIE", "WALCL",
+            }:
+                stale_warn.append(f"{ticker}={last_valid}")
         except Exception as e:
             print(f"  ❌ {ticker:20s}: {str(e)[:60]}")
             failed += 1
 
     print(f"  FRED: {updated} updated, {failed} failed")
+    if stale_warn:
+        print(f"  ⚠️  FRED daily series >14d stale (check FRED publish): {stale_warn}")
 
 
 if __name__ == "__main__":
