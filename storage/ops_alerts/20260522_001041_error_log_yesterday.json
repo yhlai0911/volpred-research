@@ -1,0 +1,18 @@
+{
+  "timestamp": "2026-05-22T00:10:41Z",
+  "alert_type": "error_log_recent_entries",
+  "severity": "info",
+  "detail": "docs/error_log.md contains entries dated 2026-05-21 (yesterday)",
+  "entries": [
+    {
+      "date": "2026-05-21",
+      "title": "paper-upsert CLI bug — --status default fix",
+      "summary": "paper-upsert --status gate fixed; 4 lessons added: same-model self-review blind spot, method-code cross-check requirement, Harvey |t|>3 misuse recurrence, reproduce gate gap"
+    },
+    {
+      "date": "2026-05-21",
+      "title": "hourly-dispatch launchd exit-78 — TCC Desktop path",
+      "summary": "LaunchAgent plist StandardOutPath pointed to TCC-protected ~/Desktop; spawn failed with exit-78, zero log. Fixed by moving log paths to ~/.volpred/logs/. 4 lessons added."
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "timestamp": "2026-05-21T18:05:11Z",
+  "alert_type": "error_log_today",
+  "severity": "high",
+  "summary": "5 error log entries dated today (2026-05-21) or yesterday (2026-05-20) indicate active platform instability and paper quality failures.",
+  "entries": [
+    {
+      "date": "2026-05-21",
+      "title": "hourly-dispatch 02:07 + 03:07 CST SIGALRM (exit=142)",
+      "severity": "high"
+    },
+    {
+      "date": "2026-05-21",
+      "title": "3 ready_for_submission papers failed independent review — Claude self-review blind spot; all 3 received BLOCKING issues (Harvey |t|>3 misuse, method-code mismatch, identification problems)",
+      "severity": "high"
+    },
+    {
+      "date": "2026-05-21",
+      "title": "hourly-dispatch launchd exit-78 — plist StandardOutPath in TCC-protected ~/Desktop; fix: moved log paths to ~/.volpred/logs/",
+      "severity": "medium"
+    },
+    {
+      "date": "2026-05-20",
+      "title": "hourly-dispatch 8/12 runs failed — fd limit + org subscription two root causes",
+      "severity": "high"
+    },
+    {
+      "date": "2026-05-20",
+      "title": "Thorough scheduling failure root-cause audit — 5 root causes identified",
+      "severity": "medium"
+    }
+  ],
+  "action_required": [
+    "Verify hourly-dispatch is stable after launchd exit-78 fix (plist reloaded?)",
+    "Re-run independent review (Codex/agy) on all 3 REJECT papers before re-submitting",
+    "Confirm fd limit issue from 2026-05-20 is resolved"
+  ]
+}

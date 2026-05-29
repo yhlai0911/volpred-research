@@ -1,0 +1,156 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-05-26",
+  "week_range": "2026-05-22 → 2026-05-29",
+  "totals": {
+    "input_tokens": 14,
+    "output_tokens": 1327,
+    "cache_read_tokens": 152560,
+    "cache_create_tokens": 94195,
+    "billable_total": 95536,
+    "assistant_messages": 8,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.4189
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 14,
+      "output_tokens": 1327,
+      "cache_read_tokens": 152560,
+      "cache_create_tokens": 94195,
+      "messages": 8,
+      "estimated_cost_usd": 0.4189
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 8,
+      "output_tokens": 688,
+      "cache_read_tokens": 61336,
+      "cache_create_tokens": 61940,
+      "messages": 4,
+      "billable_total": 62636,
+      "estimated_cost_usd": 0.261,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "bash_other": {
+      "input_tokens": 3,
+      "output_tokens": 173,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 29888,
+      "messages": 1,
+      "billable_total": 30064,
+      "estimated_cost_usd": 0.1147,
+      "emoji": "💭",
+      "description": "其他 Bash 操作"
+    },
+    "token_report": {
+      "input_tokens": 3,
+      "output_tokens": 466,
+      "cache_read_tokens": 91224,
+      "cache_create_tokens": 2367,
+      "messages": 3,
+      "billable_total": 2836,
+      "estimated_cost_usd": 0.0432,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 4,
+      "billable_total": 62636,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 4,
+          "billable_total": 62636
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "non-text assistant message",
+          "messages": 3,
+          "billable_total": 32572
+        },
+        {
+          "name": "other",
+          "messages": 1,
+          "billable_total": 30064
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 3,
+          "billable_total": 32572
+        },
+        {
+          "name": "⏱ 開始 2026-05-26 00:00:00",
+          "messages": 1,
+          "billable_total": 30064
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 1,
+      "billable_total": 30064,
+      "family_breakdown": [
+        {
+          "name": "other bash",
+          "messages": 1,
+          "billable_total": 30064
+        }
+      ],
+      "prefix_breakdown": [
+        {
+          "name": "date",
+          "messages": 1,
+          "billable_total": 30064
+        }
+      ],
+      "top_first_lines": [
+        {
+          "name": "date",
+          "messages": 1,
+          "billable_total": 30064
+        }
+      ]
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 1,
+      "cache_create_tokens": 94195,
+      "billable_total": 95536,
+      "cache_create_share_pct": 98.6,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "72f3f938-19e0-403d-9512-afc2015e4485",
+          "messages": 8,
+          "billable_total": 95536,
+          "cache_create_tokens": 94195,
+          "cache_read_tokens": 152560,
+          "duration_minutes": 0.7,
+          "cache_create_share_pct": 98.6,
+          "first_ts": "2026-05-26T14:44:02.741000+00:00",
+          "last_ts": "2026-05-26T14:44:46.563000+00:00"
+        }
+      ]
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "cb1ca8a",
+      "message": "Ops patrol report 2026-05-26T12:14Z"
+    },
+    {
+      "sha": "fb0c58e",
+      "message": "Ops patrol report 2026-05-26T06:12Z"
+    },
+    {
+      "sha": "082b908",
+      "message": "Ops patrol report 2026-05-26T00:04Z"
+    }
+  ]
+}

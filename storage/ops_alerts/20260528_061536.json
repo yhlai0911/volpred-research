@@ -1,0 +1,7 @@
+{
+  "timestamp": "2026-05-28T06:15:36Z",
+  "alert_type": "STRATEGY_METRICS_FRESHNESS",
+  "severity": "warn",
+  "detail": "storage/strategy_metrics.json is 90 hours old. Last modified approximately 2026-05-24T10:10:53Z. Threshold is 26 hours. Strategy performance metrics may be stale for users viewing the platform.",
+  "recommended_action": "Run strategy metrics recalculation: uv run volpred ops update-strategy-metrics or equivalent."
+}

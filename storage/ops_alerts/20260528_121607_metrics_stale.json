@@ -1,0 +1,7 @@
+{
+  "timestamp": "2026-05-28T12:16:07Z",
+  "alert_type": "metrics stale",
+  "severity": "warn",
+  "detail": "storage/strategy_metrics.json is 96.1 hours old (last modified 2026-05-24T16:04:13Z). Threshold: 26 hours. Strategy metrics are used by frontend ranking and admin views — staleness may cause outdated rankings to be displayed.",
+  "recommended_action": "Re-run strategy metrics calculation: uv run volpred ops recalc-metrics"
+}

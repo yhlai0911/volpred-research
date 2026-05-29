@@ -1,0 +1,7 @@
+{
+  "timestamp": "2026-05-27T12:16:10Z",
+  "severity": "warn",
+  "check": "STRATEGY_METRICS_FRESHNESS",
+  "alert": "metrics stale",
+  "detail": "storage/strategy_metrics.json is 72.1 hours old. Threshold is >26 hours. Please re-run strategy metrics calculation (e.g. uv run volpred ops update-metrics)."
+}

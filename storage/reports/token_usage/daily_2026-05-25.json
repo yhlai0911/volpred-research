@@ -1,0 +1,172 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-05-25",
+  "week_range": "2026-05-22 → 2026-05-29",
+  "totals": {
+    "input_tokens": 12,
+    "output_tokens": 1208,
+    "cache_read_tokens": 180647,
+    "cache_create_tokens": 64553,
+    "billable_total": 65773,
+    "assistant_messages": 8,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.3144
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 12,
+      "output_tokens": 1208,
+      "cache_read_tokens": 180647,
+      "cache_create_tokens": 64553,
+      "messages": 8,
+      "estimated_cost_usd": 0.3144
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 6,
+      "output_tokens": 647,
+      "cache_read_tokens": 90451,
+      "cache_create_tokens": 32857,
+      "messages": 4,
+      "billable_total": 33510,
+      "estimated_cost_usd": 0.1601,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "bash_other": {
+      "input_tokens": 3,
+      "output_tokens": 105,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 29891,
+      "messages": 1,
+      "billable_total": 29999,
+      "estimated_cost_usd": 0.1137,
+      "emoji": "💭",
+      "description": "其他 Bash 操作"
+    },
+    "investigation": {
+      "input_tokens": 2,
+      "output_tokens": 298,
+      "cache_read_tokens": 60305,
+      "cache_create_tokens": 1671,
+      "messages": 2,
+      "billable_total": 1971,
+      "estimated_cost_usd": 0.0288,
+      "emoji": "🔍",
+      "description": "閱讀 / 搜尋檔案"
+    },
+    "token_report": {
+      "input_tokens": 1,
+      "output_tokens": 158,
+      "cache_read_tokens": 29891,
+      "cache_create_tokens": 134,
+      "messages": 1,
+      "billable_total": 293,
+      "estimated_cost_usd": 0.0118,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 4,
+      "billable_total": 33510,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 4,
+          "billable_total": 33510
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "non-text assistant message",
+          "messages": 2,
+          "billable_total": 31608
+        },
+        {
+          "name": "other",
+          "messages": 2,
+          "billable_total": 1902
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 2,
+          "billable_total": 31608
+        },
+        {
+          "name": "正在下載依賴包，等待完成。",
+          "messages": 1,
+          "billable_total": 1609
+        },
+        {
+          "name": "⏱ 開始 2026-05-25 14:43:56 今天是週一，只執行日報。",
+          "messages": 1,
+          "billable_total": 293
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 1,
+      "billable_total": 29999,
+      "family_breakdown": [
+        {
+          "name": "other bash",
+          "messages": 1,
+          "billable_total": 29999
+        }
+      ],
+      "prefix_breakdown": [
+        {
+          "name": "date",
+          "messages": 1,
+          "billable_total": 29999
+        }
+      ],
+      "top_first_lines": [
+        {
+          "name": "date",
+          "messages": 1,
+          "billable_total": 29999
+        }
+      ]
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 1,
+      "cache_create_tokens": 64553,
+      "billable_total": 65773,
+      "cache_create_share_pct": 98.1,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "bac52d20-82d4-488e-b11c-f59b8ed7fcaf",
+          "messages": 8,
+          "billable_total": 65773,
+          "cache_create_tokens": 64553,
+          "cache_read_tokens": 180647,
+          "duration_minutes": 1.2,
+          "cache_create_share_pct": 98.1,
+          "first_ts": "2026-05-25T14:43:55.898000+00:00",
+          "last_ts": "2026-05-25T14:45:07.790000+00:00"
+        }
+      ]
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "4a12af4",
+      "message": "Ops patrol report 2026-05-25T12:12Z"
+    },
+    {
+      "sha": "8742d3e",
+      "message": "Ops patrol report 2026-05-25T06:12Z"
+    },
+    {
+      "sha": "3003530",
+      "message": "Ops patrol report 2026-05-25T00:04Z"
+    }
+  ]
+}

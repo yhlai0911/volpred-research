@@ -1,0 +1,7 @@
+{
+  "timestamp": "2026-05-25T06:12:58Z",
+  "alert_type": "paper_trading_gap",
+  "severity": "warning",
+  "strategy": "_market_daily",
+  "detail": "Strategy '_market_daily' has 3/3 null portfolio_returns in the last 3 trading entries (dates: 2026-05-18, 2026-05-19, 2026-05-20). This exceeds the threshold of >2 nulls. All other 14 strategies show only 1/3 nulls (expected: 2026-05-20 is a Monday but last entry is 2026-05-19 with one null). Investigate _market_daily data pipeline."
+}

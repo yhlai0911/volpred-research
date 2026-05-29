@@ -1,37 +1,39 @@
 {
-  "timestamp": "2026-05-21T06:10:31Z",
-  "all_ok": true,
+  "timestamp": "2026-05-29T06:11:44Z",
+  "all_ok": false,
   "checks": [
     {
-      "name": "article_pool",
+      "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "161 total drafts (research: 18, general: 143). All thresholds met (total>=12, research>=4, general>=8)."
+      "detail": "158 draft articles total (research: 18, general: 140). All thresholds met (total>=12, research>=4, general>=8)."
     },
     {
-      "name": "strategy_metrics_freshness",
-      "status": "ok",
-      "detail": "storage/strategy_metrics.json is ~21 seconds old (mtime=1779343773). Well within 26-hour threshold."
+      "name": "STRATEGY_METRICS_FRESHNESS",
+      "status": "alert",
+      "detail": "storage/strategy_metrics.json is 114.0 hours old (threshold: 26h). Last modified: 2026-05-24T12:10 UTC."
     },
     {
-      "name": "error_log",
+      "name": "ERROR_LOG_RECENT",
       "status": "ok",
-      "detail": "Today 2026-05-21: hourly-dispatch 02:07+03:07 CST two SIGALRM exits (exit=142, HANG-KILLED after 3000s). Root cause: complex platform_ops tasks exceeded 50min cap — resolved. feed.json article mile_4ec7b75e description field term fix confirmed, release-pool-by-settings passed. 04:07 exit=0. No unresolved incidents."
+      "detail": "Last 30 lines of docs/error_log.md contain entries from 2026-05-21. No entries dated today (2026-05-29) or yesterday (2026-05-28)."
     },
     {
-      "name": "paper_trading_gaps",
+      "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "15 strategies checked: slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, _market_daily, adaptive_tier. No strategy has >2 consecutive null portfolio_return in last 3 entries."
+      "detail": "5 strategies checked (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix). No strategy has >2 null portfolio_return in last 3 entries."
     },
     {
-      "name": "git_status",
+      "name": "GIT_STATUS",
       "status": "ok",
       "detail": "0 uncommitted files."
     },
     {
-      "name": "knowledge_size",
+      "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "2151 entries in storage/memory/knowledge.json."
+      "detail": "storage/memory/knowledge.json contains 2151 entries."
     }
   ],
-  "alerts": []
+  "alerts": [
+    "strategy_metrics stale (114.0h > 26h threshold)"
+  ]
 }
