@@ -1,0 +1,323 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-05-29",
+  "week_range": "2026-05-29 → 2026-06-05",
+  "totals": {
+    "input_tokens": 12,
+    "output_tokens": 1392,
+    "cache_read_tokens": 0,
+    "cache_create_tokens": 120120,
+    "billable_total": 121524,
+    "assistant_messages": 4,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.4714
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 12,
+      "output_tokens": 1392,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 120120,
+      "messages": 4,
+      "estimated_cost_usd": 0.4714
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 6,
+      "output_tokens": 696,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 60060,
+      "messages": 2,
+      "billable_total": 60762,
+      "estimated_cost_usd": 0.2357,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "token_report": {
+      "input_tokens": 6,
+      "output_tokens": 696,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 60060,
+      "messages": 2,
+      "billable_total": 60762,
+      "estimated_cost_usd": 0.2357,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 2,
+      "billable_total": 60762,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 2,
+          "billable_total": 60762
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "non-text assistant message",
+          "messages": 1,
+          "billable_total": 30381
+        },
+        {
+          "name": "other",
+          "messages": 1,
+          "billable_total": 30381
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 1,
+          "billable_total": 30381
+        },
+        {
+          "name": "今天是週五，並行執行日報和週報。",
+          "messages": 1,
+          "billable_total": 30381
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 0,
+      "billable_total": 0,
+      "family_breakdown": [],
+      "prefix_breakdown": [],
+      "top_first_lines": []
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 1,
+      "cache_create_tokens": 120120,
+      "billable_total": 121524,
+      "cache_create_share_pct": 98.8,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "49045609-5c9d-4457-9932-c50b93a53531",
+          "messages": 4,
+          "billable_total": 121524,
+          "cache_create_tokens": 120120,
+          "cache_read_tokens": 0,
+          "duration_minutes": 0.0,
+          "cache_create_share_pct": 98.8,
+          "first_ts": "2026-05-29T14:45:58.660000+00:00",
+          "last_ts": "2026-05-29T14:46:00.832000+00:00"
+        }
+      ]
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "3bc3c4d",
+      "message": "ops(hourly 22:15): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    },
+    {
+      "sha": "aa0c9b2",
+      "message": "ops(task-complete): Paper3_D1 errata 標 succeeded (PHASE Z trailing state)"
+    },
+    {
+      "sha": "a56d489",
+      "message": "Paper3_D1_errata_TSMOM_direction_research_integrity | Introduction line 30 consi"
+    },
+    {
+      "sha": "8da3dd7",
+      "message": "Paper4_DIV1_41pct_direction_CRITICAL | orphan rescue: 41.8% QLIKE direction inve"
+    },
+    {
+      "sha": "a46dec9",
+      "message": "fix(cron-review): log-mtime override 消除 collect_tw 假 stale (老闆「有問題就立刻處理」)"
+    },
+    {
+      "sha": "31c27aa",
+      "message": "Paper3_H4_TSMOM_1.4pct_origin | forensic complete: 1.4% untraceable, 5.3% K898 c"
+    },
+    {
+      "sha": "dfe5839",
+      "message": "ops(hourly 20:26): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    },
+    {
+      "sha": "cf68e49",
+      "message": "Paper6_DIV3_SPY_VaR_violation_rate | forensic complete: VR=0.93% reproducible fr"
+    },
+    {
+      "sha": "fb267c0",
+      "message": "fix(research): arXiv scanner 改用 RSS feed 為主 (export API 持續 429 本機)"
+    },
+    {
+      "sha": "941b3f6",
+      "message": "K1318_article_general | publish K1318 HAR-RV 5-min pilot NULL-result article (dr"
+    },
+    {
+      "sha": "9de48dc",
+      "message": "research(frontier): 注入 2026-05-29 arXiv 新發現 (Autoencoder-RGARCH + Quantum Reserv"
+    },
+    {
+      "sha": "fe05cb2",
+      "message": "feat(research): arXiv q-fin 前沿主題自動掃描器 (補「研究框住」缺口)"
+    },
+    {
+      "sha": "31584cd",
+      "message": "K1382_article_general | publish mile_55b0f69f Basel III SRT vs GARCH-Sim multi-h"
+    },
+    {
+      "sha": "690e59a",
+      "message": "ops: mark K1382_article_general succeeded in next_tasks"
+    },
+    {
+      "sha": "d3913b6",
+      "message": "ops: work_log entry K1382_article_general"
+    },
+    {
+      "sha": "e6550f1",
+      "message": "K1382_article_general | publish K1382 multi-horizon VaR article"
+    },
+    {
+      "sha": "8f0b731",
+      "message": "feat(anti-ai-style): em-dash normalizer secondary layer in supabase_sync"
+    },
+    {
+      "sha": "2130d74",
+      "message": "feat(anti-ai-style): publish-time em-dash normalizer (landmine 9 hard gate)"
+    },
+    {
+      "sha": "72d37bb",
+      "message": "K1404_article_general | publish mile_67f75353 daily_article + carry-over K1378 p"
+    },
+    {
+      "sha": "af73d7c",
+      "message": "fix(ops): health_cron staleness false-positive — piggy_back_skip jobs 用 log mtim"
+    },
+    {
+      "sha": "8736b2c",
+      "message": "ops(hourly-16): trending P1 closed (mile_4c141c2f published 13min); k1322 draft "
+    },
+    {
+      "sha": "601d523",
+      "message": "feat(feed): trending_repost AI 基建債務 vs 科技股 IV"
+    },
+    {
+      "sha": "9bb4cd7",
+      "message": "feat(integrity): anti-ai-style 自動偵測 validator — 補上規則強制但程式缺的硬檢查"
+    },
+    {
+      "sha": "185af7a",
+      "message": "feat(dashboard): 工作排程可切換排序(下次執行時間 / 每日執行順序)"
+    },
+    {
+      "sha": "2f82312",
+      "message": "feat(dashboard): 排程附中文說明 + 類型色塊分類 + 待辦池依五大 mission 色塊"
+    },
+    {
+      "sha": "23405be",
+      "message": "feat(dashboard): 工作排程依接下來發生順序排序 + 標台灣時間實際時刻"
+    },
+    {
+      "sha": "247dfa1",
+      "message": "feat(dashboard): AI 工作監控視覺化 dashboard — 零依賴本地 server"
+    },
+    {
+      "sha": "87f7cb9",
+      "message": "feat(外運營): trending 自動掃描器 — 免費 agy 驅動，修 trending_repost 停擺"
+    },
+    {
+      "sha": "c49494e",
+      "message": "fix(PHASE Z): wrapper-enforced safety-net commit (deterministic, not agent-discr"
+    },
+    {
+      "sha": "bfaca76",
+      "message": "ops(orphan): scan_trending_agy.py from 15:07 fire (PHASE Z prompt-level missed)"
+    },
+    {
+      "sha": "bfe3fab",
+      "message": "hourly-15 | refill 卡點修流程 + 收 orphan ops state"
+    },
+    {
+      "sha": "535ead8",
+      "message": "chore(P1): 刪除 35 個死的一次性發佈腳本（publish_k*/publish_<topic>，全驗證無引用）"
+    },
+    {
+      "sha": "4f8a3eb",
+      "message": "docs(plan): master_plan 補 P1/P2 執行狀態 + explorer over-reach 方法論教訓"
+    },
+    {
+      "sha": "403dabe",
+      "message": "docs(P2): system_handbook.md 加 STALE 警告 header（architecture.md 卻叫人先讀它）"
+    },
+    {
+      "sha": "59d9006",
+      "message": "chore(P1): 刪除 16 個一次性/廢棄腳本（已驗證無 import/cron/config 引用）"
+    },
+    {
+      "sha": "02acc62",
+      "message": "docs(P2): 修 AGENTS.md 7 處過時 .agents/→.claude/ 路徑 + 歸檔 DEPRECATED 3-terminal 計劃"
+    },
+    {
+      "sha": "b1e0143",
+      "message": "ops(fb): mile_5b3569c3 + mile_89889d46 標 wont_fix — 跳過 3 天 stale FB 補發"
+    },
+    {
+      "sha": "c44aaec",
+      "message": "Merge remote-tracking branch 'origin/main'"
+    },
+    {
+      "sha": "5250ace",
+      "message": "docs(architecture): 加當前真實架構修正區塊（原 v12 描述已 stale）"
+    },
+    {
+      "sha": "e6a77ab",
+      "message": "docs(cleanup): �­�� 11 ��次�� audit/incident �件�� docs/archived/incident-"
+    },
+    {
+      "sha": "768552a",
+      "message": "Ops patrol report 2026-05-29T06:11Z"
+    },
+    {
+      "sha": "0e88ca6",
+      "message": "docs(plan): master 重新擘劃藍圖 — 綜合 3 份架構盤點 + session audit（前後端+控制面+文件）"
+    },
+    {
+      "sha": "148e5c4",
+      "message": "docs(vision): canonical VISION.md — 用戶 2026-05-29 完整願景存檔"
+    },
+    {
+      "sha": "2208cdc",
+      "message": "fix(handoff): generate_handoff.py 實作 KEEP 區段保留（原本未實作，手寫補充每 :50 被清）"
+    },
+    {
+      "sha": "19cadf9",
+      "message": "docs(ops): 大改重構安全網 + 回滾指令存檔（用戶要求，防 compact/clear 遺忘）"
+    },
+    {
+      "sha": "a54cb40",
+      "message": "feat(ops): codex-cli 週度自動更新 job (piggy-back, 用戶 2026-05-29 指定)"
+    },
+    {
+      "sha": "2b252a8",
+      "message": "checkpoint(pre-refactor): ops/data state + audit fixes before sweeping-changes b"
+    },
+    {
+      "sha": "0c19fc9",
+      "message": "fix(PHASE Z): git add -A now safe (noise gitignored) — stop recurring orphan cle"
+    },
+    {
+      "sha": "9db7327",
+      "message": "ops(orphan): 13:07 dispatch outputs (cron_log_rotate + ops_dashboard + state) — "
+    },
+    {
+      "sha": "3955f03",
+      "message": "paper_review(K709 mile_ada624d5): Codex 24h-rule FAIL_PROVENANCE → revert to dra"
+    },
+    {
+      "sha": "8e52a0f",
+      "message": "fix(auth-preflight): timeout 45→90s (12:07 cold-start >45s hit retry path) + dis"
+    },
+    {
+      "sha": "6ec994b",
+      "message": "Ops patrol report 2026-05-29T00:10Z"
+    }
+  ]
+}
