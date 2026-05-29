@@ -8958,5 +8958,23 @@
     "task_type": "platform_ops",
     "summary": "fb_pipeline_drift_fix_mile_4c141c2f + refill_diagnosis",
     "details": "Fixed FB pipeline warn (mile_4c141c2f fb_pending_chrome_mcp_p6 → canonical awaiting_interactive_session per FB_POST_HANDOFF_STATUSES). dashboard warns 2 → 1 (剩 production_pending paper backlog 為設計訊號). Diagnosed refill 乾涸: top_10 + missing_general candidates 全已 cover or audit_pending; queued followup task platform_ops_refresh_pub_candidates_20260530_0213."
+  },
+  {
+    "task_id": "K1056_article_general",
+    "task_type": "daily_article",
+    "status": "completed",
+    "completed_at": "2026-05-30T03:14:25+08:00",
+    "output": {
+      "article_id": "mile_bcdd203c",
+      "title": "五個市場時代、從沒輸過：A4f 波動率預測的跨時間穩健性驗證",
+      "status": "draft",
+      "audience": "research",
+      "experiment_refs": [
+        "K1056"
+      ],
+      "anti_ai_gate": "PASS (warn=2/3)",
+      "draft_file": "/tmp/k1056_article_draft.md"
+    },
+    "notes": "K1056 A4f sub-period robustness article; _infer_audience upgraded general→research due to GARCH/QLIKE keywords"
   }
 ]

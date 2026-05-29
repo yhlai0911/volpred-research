@@ -300,11 +300,10 @@ def refill(target: int, dry_run: bool = False) -> dict:
 
     # Compose ranked candidate list: top_10_uncovered first (highest signal),
     # then missing_research_top5 (prefer research over general for novelty),
-    # then missing_general_top5. Then a 4th fallback tier (2026-05-07 fix):
-    # all `candidates` array entries that are uncovered_for_general but score
-    # too low (≤1) to make top_10 — without this fallback, ~97 K-experiments
-    # silently never refill into next_tasks even though they need articles.
-    # Sort fallback by score desc so least-bad-priority surface first.
+    # then missing_general_top5. If those shortlist slices are exhausted by
+    # guards (e.g. audit_pending, already_covered), continue scanning the full
+    # candidate table for audience-gap rows before falling back to low-score
+    # fully-uncovered experiments.
     pool = []
     seen_in_pool: set[str] = set()
     for source_key in ("top_10_uncovered", "missing_research_top5", "missing_general_top5"):
@@ -315,7 +314,25 @@ def refill(target: int, dry_run: bool = False) -> dict:
             seen_in_pool.add(kid)
             pool.append(cand)
 
-    # Fallback tier — score-0/1 uncovered K's from full candidates array.
+    # Fallback tier 1: full candidate table audience-gap rows beyond top5.
+    # 2026-05-30 incident: top5 missing_general was fully occupied by
+    # audit_pending K672/K1151/K957/K1086/K1404, leaving truly eligible
+    # audience-gap candidates invisible and the refill pool dry.
+    audience_gap_pool = []
+    for cand in cand_data.get("candidates", []) or []:
+        kid = cand.get("k_id")
+        if not kid or kid in seen_in_pool:
+            continue
+        audiences_covered = cand.get("audiences_covered") or []
+        if not cand.get("covered_by"):
+            continue
+        if "general" in audiences_covered and "research" in audiences_covered:
+            continue
+        audience_gap_pool.append(cand)
+    audience_gap_pool.sort(key=lambda c: (c.get("score") or 0), reverse=True)
+    pool.extend(audience_gap_pool)
+
+    # Fallback tier 2 — score-0/1 uncovered K's from full candidates array.
     fallback_pool = []
     for cand in cand_data.get("candidates", []) or []:
         kid = cand.get("k_id")
@@ -359,7 +376,10 @@ def refill(target: int, dry_run: bool = False) -> dict:
             continue
         # 3rd belt: candidates may have populated `covered_by` but stale
         # `audiences_covered=[]` (pre-2026-04-14 audience metadata gap).
-        if cand.get("covered_by"):
+        # Legit audience-gap candidates (e.g. research exists, missing general)
+        # must remain eligible; only suppress rows whose structured audience
+        # coverage is missing altogether.
+        if cand.get("covered_by") and not audiences_covered:
             continue
         # 4th belt: blank-title candidates are not publication-ready.
         if not _has_publishable_title(cand):
