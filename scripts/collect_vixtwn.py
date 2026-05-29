@@ -19,7 +19,10 @@ Exit codes (2026-05-04 silent-fail fix):
       host_cron_fail then triggers per .claude/rules/alert.md)
 """
 import csv
+import fcntl
+import os
 import sys
+import tempfile
 from datetime import datetime
 from pathlib import Path
 
@@ -28,6 +31,8 @@ import requests
 
 OUTPUT_DIR = Path("data/vixtwn")
 OUTPUT_FILE = OUTPUT_DIR / "vixtwn_daily.csv"
+LOCK_FILE = OUTPUT_DIR / ".vixtwn_daily.lock"
+FIELDNAMES = ["date", "vixtwn_close", "vixtwn_1min_avg"]
 TAIFEX_URL = "https://www.taifex.com.tw/file/taifex/Dailydownload/vix/log2data/{ym}new.txt"
 
 
@@ -88,20 +93,61 @@ def load_existing() -> set[str]:
     return existing
 
 
-def save_records(records: list[dict], existing: set[str]):
-    """Append new records to CSV."""
-    new_records = [r for r in records if r["date"] not in existing]
-    if not new_records:
-        return 0
+def _read_existing_rows() -> dict[str, dict]:
+    """Load existing CSV as {date: row}, last-occurrence wins (dedup-on-read)."""
+    rows: dict[str, dict] = {}
+    if not OUTPUT_FILE.exists():
+        return rows
+    with open(OUTPUT_FILE) as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            d = (row.get("date") or "").strip()
+            if d:
+                rows[d] = {k: row.get(k, "") for k in FIELDNAMES}
+    return rows
 
-    file_exists = OUTPUT_FILE.exists()
-    with open(OUTPUT_FILE, "a", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=["date", "vixtwn_close", "vixtwn_1min_avg"])
-        if not file_exists:
-            writer.writeheader()
-        writer.writerows(new_records)
 
-    return len(new_records)
+def save_records_atomic(records: list[dict]) -> int:
+    """Idempotent atomic write (2026-05-29 race-condition fix).
+
+    Prior `save_records` did load_existing()→append, which under
+    piggy-back catch-up fires running 2-3× concurrently produced
+    duplicate date rows (each run saw "date not in existing" before the
+    others' append landed). 9 dup rows accumulated (5/26×3, 5/27×3, ...).
+
+    Fix: hold an exclusive flock, read full CSV, merge new records (new
+    overrides old for same date — fresher fetch wins), dedup by date,
+    sort, write to temp + atomic rename. Concurrent runs serialize on
+    the lock and each produces a clean deduped file. Returns count of
+    dates added (not previously present).
+    """
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    with open(LOCK_FILE, "w") as lockf:
+        fcntl.flock(lockf, fcntl.LOCK_EX)
+        try:
+            merged = _read_existing_rows()
+            before = set(merged.keys())
+            for r in records:
+                d = (r.get("date") or "").strip()
+                if d:
+                    merged[d] = {k: r.get(k, "") for k in FIELDNAMES}
+            ordered = [merged[d] for d in sorted(merged.keys())]
+
+            fd, tmp_path = tempfile.mkstemp(dir=str(OUTPUT_DIR), prefix=".vixtwn_tmp_", suffix=".csv")
+            try:
+                with os.fdopen(fd, "w", newline="") as tf:
+                    writer = csv.DictWriter(tf, fieldnames=FIELDNAMES)
+                    writer.writeheader()
+                    writer.writerows(ordered)
+                os.replace(tmp_path, OUTPUT_FILE)
+            except Exception:
+                if os.path.exists(tmp_path):
+                    os.unlink(tmp_path)
+                raise
+
+            return len(set(merged.keys()) - before)
+        finally:
+            fcntl.flock(lockf, fcntl.LOCK_UN)
 
 
 def main():
@@ -136,9 +182,9 @@ def main():
             # same-day-not-yet-published.
             fetch_failures.append(ym)
 
-    # Save
-    n_new = save_records(all_records, existing)
-    total = len(existing) + n_new
+    # Save — atomic idempotent rewrite (dedup-on-write, race-safe via flock)
+    n_new = save_records_atomic(all_records)
+    total = len(load_existing())
 
     print(f"\n  New records: {n_new}")
     print(f"  Total records: {total}")
