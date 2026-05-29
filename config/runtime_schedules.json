@@ -751,6 +751,12 @@
       "canonical_script": "scripts/cron_compute_worker.sh",
       "tcc_bypass_copy": "~/.volpred/bin/cron_compute_worker.sh",
       "installed_at": "2026-05-12T06:41:51Z"
+    },
+    {
+      "id": "volpred-fred-backfill-guard",
+      "schedule": "*/30 * * * *",
+      "script": "/Users/yhlai0911/.volpred/bin/cron_fred_backfill_guard.sh",
+      "purpose": "self-healing FRED daily-rate backfill (2026-05-29 bot-block+504 incident); self-noops when fresh"
     }
   ]
 }
