@@ -15,7 +15,7 @@ CLAUDE_BIN="${CLAUDE_BIN:-/Users/yhlai0911/.local/bin/claude}"
 UV_BIN="${UV_BIN:-/Users/yhlai0911/.local/bin/uv}"
 PROMPT_FILE="${PROMPT_FILE:-$REPO_ROOT/scripts/cron_hourly_dispatch_prompt.md}"
 ZSHRC_PATH="${ZSHRC_PATH:-$HOME/.zshrc}"
-AUTH_PREFLIGHT_TIMEOUT_SEC="${AUTH_PREFLIGHT_TIMEOUT_SEC:-10}"
+AUTH_PREFLIGHT_TIMEOUT_SEC="${AUTH_PREFLIGHT_TIMEOUT_SEC:-45}"
 AUTH_PREFLIGHT_MODEL="${AUTH_PREFLIGHT_MODEL:-claude-sonnet-4-6}"
 AUTH_HOTFIX_CMD="${AUTH_HOTFIX_CMD:-security set-generic-password-partition-list -S apple-tool:,apple:,launchd:,unsigned: -s \"Claude Code-credentials\" -k login.keychain}"
 
