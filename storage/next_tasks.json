@@ -14076,7 +14076,7 @@
     "title": "K1404: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1404 has verdict signal (score=6, reasons=None) but no general article in feed.json.  Verdict preview: ",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1404",
@@ -14085,14 +14085,20 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-29T07:18:45+00:00"
+    "created_at": "2026-05-29T07:18:45+00:00",
+    "claimed_by": "hourly-17",
+    "claimed_at": "2026-05-29T09:10:42.193726+00:00",
+    "claim_session_id": "31b0111377f3",
+    "started_at": "2026-05-29T09:11:05.026626+00:00",
+    "completed_at": "2026-05-29T09:18:56.496110+00:00",
+    "result": "mile_67f75353 published draft, audience=research, 4683 chars, 2 figures uploaded to Supabase, anti_ai_gate PASS, k_refs=[K1404,K1402,K1403], byte-exact verified against K1404_results.json"
   },
   {
     "id": "K1378_article_general_v2",
     "title": "K1378: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K1378 has verdict signal (score=4, reasons=None) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: ",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1378",
@@ -14102,7 +14108,13 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-29T07:18:45+00:00"
+    "created_at": "2026-05-29T07:18:45+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-29T09:14:54.162778+00:00",
+    "claim_session_id": "62f6c59058dd",
+    "started_at": "2026-05-29T09:15:05.256414+00:00",
+    "completed_at": "2026-05-29T09:19:05.345828+00:00",
+    "result": "Published general-audience draft mile_54f79768 for K1378 with two charts rebuilt from saved loss arrays. Core message: removing COVID does not rescue the complex model; cluster waiver used only to add first uncovered general coverage for this K."
   },
   {
     "id": "K1318_article_general",
@@ -14162,5 +14174,26 @@
     "started_at": "2026-05-29T08:09:40.526779+00:00",
     "completed_at": "2026-05-29T08:25:44.553168+00:00",
     "result": "已 published feed=mile_4c141c2f「單季766億，AI基建燒錢競賽背後的波動率訊號」; anti-AI gate 1輪 PASS; content=3831字; 13min 完成. Caveats: figures欄位空[]需follow-up引用Supabase上傳的fig1/fig2; FB pending_chrome_mcp_p6."
+  },
+  {
+    "id": "email-11822-822c07",
+    "title": "[email_reply] Re: [VolPred Boss Report] 2026-05-29 17:00 台灣時間 平台運營報告",
+    "description": "Gmail UID: 11822\nMessage-ID: <78816373-DEE3-4A46-A6F0-9456755A6FC4@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Fri, 29 May 2026 17:10:03 +0800\nSubject: Re: [VolPred Boss Report] 2026-05-29 17:00 台灣時間 平台運營報告\n\n--- 用戶回信內容 ---\nverification_fb_pipeline\twarn\t1 FB posts pending sync\thandoff doc + manual paste or retry MCP\r\n\r\n不趕快解決？\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年5月29日 17:00 寫道：\r\n> \r\n> verification_fb_pipeline\twarn\t1 FB posts pending sync\thandoff doc + manual paste or retry MCP\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-05-29T09:15:05.541309+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11822,
+    "email_message_id": "<78816373-DEE3-4A46-A6F0-9456755A6FC4@gmail.com>",
+    "email_subject": "Re: [VolPred Boss Report] 2026-05-29 17:00 台灣時間 平台運營報告",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "fast_path_pattern": "pending",
+    "result": "[fast_path:pending] answered inline at queue time (no dispatch)",
+    "completed_at": "2026-05-29T09:15:05.541483+00:00"
   }
 ]
