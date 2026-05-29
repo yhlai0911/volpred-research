@@ -99,3 +99,29 @@ def test_axis_label_attached():
     copula = next(c for c in out if c["arxiv_id"] == "2605.29541")
     assert copula["matched_axis"] == "面向_copula"
     assert copula["announce_type"] == "new"
+
+
+def test_write_staging_dedup_and_first_seen(tmp_path, monkeypatch):
+    """staging 池：dedup by arxiv_id + 保留 first_seen + status=new。"""
+    staging = tmp_path / "arxiv_candidates.json"
+    monkeypatch.setattr(s, "STAGING", staging)
+
+    r1 = {"scanned_at": "2026-05-29T06:00:00+00:00",
+          "candidates": [{"arxiv_id": "2605.00001", "title": "A", "matched_axis": "面向_copula"},
+                         {"arxiv_id": "2605.00002", "title": "B", "matched_axis": "前沿_rough_vol"}]}
+    out1 = s.write_staging(r1)
+    assert out1 == {"added": 2, "total": 2}
+
+    # 第二次：1 篇重複（不應改 first_seen）+ 1 篇新
+    r2 = {"scanned_at": "2026-06-05T06:00:00+00:00",
+          "candidates": [{"arxiv_id": "2605.00001", "title": "A", "matched_axis": "面向_copula"},
+                         {"arxiv_id": "2606.00003", "title": "C", "matched_axis": "面向A_波動率預測"}]}
+    out2 = s.write_staging(r2)
+    assert out2 == {"added": 1, "total": 3}
+
+    import json as _json
+    pool = _json.loads(staging.read_text(encoding="utf-8"))
+    by_id = {c["arxiv_id"]: c for c in pool["candidates"]}
+    assert by_id["2605.00001"]["first_seen"] == "2026-05-29T06:00:00+00:00"  # 保留首見
+    assert by_id["2606.00003"]["first_seen"] == "2026-06-05T06:00:00+00:00"
+    assert all(c["status"] == "new" for c in pool["candidates"])

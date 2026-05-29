@@ -32,6 +32,18 @@
         ]
       },
       {
+        "id": "arxiv_scan",
+        "label": "arXiv q-fin 前沿主題週度掃描",
+        "cron": "0 6 * * 1",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_arxiv_scan.sh",
+        "log_path": "storage/logs/cron/arxiv_scan.log",
+        "description": "每週一 06:00 掃 arXiv q-fin RSS（ground-truth，不經 LLM），把命中研究軸的新論文 seed 到 staging 候選池 storage/research/arxiv_candidates.json，補『研究方向被既有主題框住』缺口。只 seed 候選不自動改 research_program 北極星檔；主線程選題時 review promote。有新候選才寄 info email。由 piggy-back run_due_jobs 執行。2026-05-29 老闆『你決定』授權（Phase 2）。",
+        "matchers": [
+          "cron_arxiv_scan.sh",
+          "scan_arxiv_topics.py"
+        ]
+      },
+      {
         "id": "collect_tw_data",
         "label": "台股/0050/VIXTWN 收集",
         "cron": "0 15 * * 1-5",

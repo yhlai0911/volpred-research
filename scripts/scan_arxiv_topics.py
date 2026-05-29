@@ -305,6 +305,45 @@ def _to_markdown(result: dict) -> str:
     return "\n".join(lines)
 
 
+STAGING = ROOT / "storage" / "research" / "arxiv_candidates.json"
+
+
+def write_staging(result: dict) -> dict:
+    """合併本次掃描結果到 staging 候選池（dedup by arxiv_id，保留 first_seen）。
+
+    Phase 2 設計：scanner（cron）只 seed 候選到 staging，**不自動寫 research_program
+    北極星檔**（避免 axis matcher 邊際命中污染研究方向）。主線程選題時 review
+    staging、把真正相關的 promote 到 research_program + seed experiment。
+    狀態 status: new（待 review）→ reviewed/promoted/rejected（主線程更新）。
+    """
+    STAGING.parent.mkdir(parents=True, exist_ok=True)
+    existing = {}
+    if STAGING.exists():
+        try:
+            for c in json.loads(STAGING.read_text(encoding="utf-8")).get("candidates", []):
+                existing[c["arxiv_id"]] = c
+        except (json.JSONDecodeError, KeyError):
+            pass
+    added = 0
+    for c in result["candidates"]:
+        aid = c["arxiv_id"]
+        if aid in existing:
+            continue  # 已在池中，保留原 first_seen/status
+        existing[aid] = {**c, "first_seen": result["scanned_at"], "status": "new"}
+        added += 1
+    payload = {
+        "updated_at": result["scanned_at"],
+        "total": len(existing),
+        "new_this_run": added,
+        "candidates": sorted(existing.values(),
+                             key=lambda c: c.get("first_seen", ""), reverse=True),
+    }
+    tmp = STAGING.with_name(f".{STAGING.name}.tmp")
+    tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    tmp.replace(STAGING)
+    return {"added": added, "total": len(existing)}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--source", choices=["rss", "api"], default="rss",
@@ -313,10 +352,16 @@ def main() -> int:
     ap.add_argument("--max", type=int, default=6, help="api 模式：每軸最多 N 篇")
     ap.add_argument("--include-replace", action="store_true", help="rss 模式：含 replace（舊論文更新版）")
     ap.add_argument("--markdown", action="store_true", help="輸出 research_program.md 可貼區塊")
+    ap.add_argument("--write-staging", action="store_true",
+                    help="合併結果到 storage/research/arxiv_candidates.json（cron 用）")
     args = ap.parse_args()
 
     result = scan(source=args.source, days=args.days, max_per_axis=args.max,
                   include_replace=args.include_replace)
+    if args.write_staging:
+        st = write_staging(result)
+        print(f"[scan_arxiv] staging 更新：新增 {st['added']} 候選，池中共 {st['total']}",
+              file=sys.stderr)
     if args.markdown:
         print(_to_markdown(result))
     else:

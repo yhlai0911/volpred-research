@@ -127,7 +127,7 @@ paths:
 
 | 來源 | 頻率 | 做法 | 寫入位置 |
 |------|------|------|---------|
-| **學術前沿文獻檢索** | 每 session 至少 1 次 | WebSearch arXiv/SSRN/JFE/JFM 搜尋最新 vol forecasting、futures hedging、risk management 論文 → 提取可測試的假說 → 寫入「待探索方向」 | 待探索方向區 + 對應面向 |
+| **學術前沿文獻檢索** | 每 session 至少 1 次 | **先讀 `storage/research/arxiv_candidates.json`**（週度 cron `arxiv_scan` 自動 seed 的 staging 候選池，status=new 待 review）→ 把真正相關的 promote 到「待探索方向」+ seed experiment、無關的標 status=rejected；池空或要補深度再 WebSearch arXiv/SSRN/JFE/JFM。工具：`scripts/scan_arxiv_topics.py`（ground-truth RSS，不經 LLM 避免 hallucinate citation） | 待探索方向區 + 對應面向 |
 | **Codex/Gemini 建議** | 每 5-10 個實驗 | 主動詢問「接下來該研究什麼方向？」→ 標注 `[提出: Codex/Gemini]` | 對應面向 |
 | **用戶指定** | 隨時（最高優先） | 用戶提出的方向立刻寫入 research_program.md | 對應面向 |
 | **會員問題** | 每 6 小時 cron | 評估排名會員提問 → 高分問題轉為研究方向 | 對應面向 |
