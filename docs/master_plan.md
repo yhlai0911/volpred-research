@@ -103,4 +103,23 @@ AGENTS.md 歸檔；scheduler 規則歸 control-plane.md 唯一源（其餘指向
 5. CLAUDE.md autonomous-loop 段 → 獨立 `.claude/rules/autonomous-loop.md`
 
 ---
-*Drafted 2026-05-29 by main thread. 對應 worktree branch refactor/autonomy-overhaul。實施逐項驗證後獨立 commit。*
+
+## 7. 執行狀態（2026-05-29 更新）
+
+### P1 清理 — ✅ 大致完成（安全項）
+- 舊前端 515MB → Trash；16 死腳本刪除（驗證無引用，scripts 179→163）；12 文件歸檔（11 audit + 1 deprecated）。
+- 剩：publish_k*.py 35+ → **需先建 `publish_draft.py` 統一才能刪**（真 refactor，未做）。
+
+### P2 文件優化 — ✅ 安全項完成；2 項判定為 explorer over-reach 不做
+- ✅ AGENTS.md 7 處 `.agents/`→`.claude/` 壞路徑（Codex 活躍指令檔）；architecture.md + system_handbook STALE 修正 header。
+- ❌ **autonomous-loop 抽離獨立 rule** — 違反 user memory `feedback_claudemd_keep_inline`（CLAUDE.md 不拆，Claude 常忘讀外部檔）→ **正確做法是不做**。
+- ❌ **publishing.md 砍 60%/slim 到 100 行** — 經全文檢視，publishing.md 絕大部分是正當 always-loaded 治理政策（audience gate / 4 層查重 / novelty quota / 失敗模式 / pipe 跳脫）。**治理 rule 的「重複」是刻意 enforcement 冗餘**（rule path-trigger 自動載入並強制；skill 僅 on-demand）→ 搬進 skill 會削弱 enforcement → **正確做法是不砍**。
+- ⏳ scheduler 規則「4-way dedup」— 待逐檔驗證是真重複還是 contextual reference 再定（architecture.md 已加指向 control-plane 的 header）。
+
+**方法論教訓**：explorer 的 DRY / single-source 建議**不能直接套用到治理文件** — always-loaded 規則的冗餘常是 enforcement 設計。本 session 共擋下 ~5 個 explorer over-reach（AGENTS 歸檔、memory 計數、context-hygiene path、publishing slim、autonomous-loop 抽離）。
+
+### P0 / P3-P6 — 多 session 工程（非 chat 可完成）
+supervisor D5-D8、前端商業化（付費漏斗/可復現詳頁）、資料管線樞紐、provenance 補修、內容引擎 selectivity gate。由 autonomous loop 逐步推進。
+
+---
+*Drafted 2026-05-29 by main thread. 對應 worktree branch refactor/autonomy-overhaul。實施逐項驗證後獨立 commit。Status 區 2026-05-29 補。*
