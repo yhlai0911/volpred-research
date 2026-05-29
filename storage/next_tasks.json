@@ -14379,10 +14379,16 @@
     "title": "Paper 1 body L170-198 GLD inverted leverage 段重寫（per errata_gld_rolling_gamma_forensic.md）",
     "description": "依 paper/leverage-direction/errata_gld_rolling_gamma_forensic.md 改 Table 2 GLD row 為 K903 canonical (+0.002 / 67% / +0.15)；改 body L170-172 + L181 + L182 + L196-198 narrative；刪除錯誤 K903 footnote；leverage taxonomy 將 GLD 改歸 γ≈0 而非 γ<0。**主線程寫作 task — main_v2.tex 編譯後跑 paper-update CLI**。Forensic source: paper/leverage-direction/errata_gld_rolling_gamma_forensic.md",
     "priority": 3,
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "task_type": "paper_body",
     "source": "forensic_followup",
-    "created_at": "2026-05-30T00:30:00+08:00"
+    "created_at": "2026-05-30T00:30:00+08:00",
+    "claimed_by": "hourly-07",
+    "claimed_at": "2026-05-29T23:32:29.115104+00:00",
+    "claim_session_id": "6a060b7b18d9",
+    "started_at": "2026-05-29T23:32:35.800857+00:00",
+    "completed_at": "2026-05-29T23:38:29.149455+00:00",
+    "result": "Body L168/L172/L178/L180/L189/L191/L193/L197 + tables.tex Table 2 GLD row 改為 K903 canonical (+0.002 / 67% neg / +0.15 HAC NS); abstract intro L12 改為 regime-dependent; 加 errata footnote 兩處 (rolling -0.067 untraceable + 2025-2026 -0.089 pending); 加 follow-up task K903_extension_GLD_2025_2026_subwindow. xelatex 編譯 69 頁 OK; paper-update CLI Supabase HTTP 200."
   },
   {
     "id": "K903_extension_GLD_2025_2026_subwindow",
@@ -14501,7 +14507,7 @@
     "title": "K1088: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1088 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1088 tests A4f on USO (oil) with OVX (CBOE oil VIX). n=2,960 OOS 2010-2026. ALL HYPOTHESES PASS: H1 USO+OVX Harvey PASS DM t=+4.475 (p<1e-5). H2 OVX beats VIX head-to-head DM t=+3.18 (OVX_SUPERIOR confirmed). H3 θ₁ stability reasonable (CV OVX 2.99 vs VI",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1088",
@@ -14518,14 +14524,20 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-29T18:45:31+00:00"
+    "created_at": "2026-05-29T18:45:31+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-29T20:50:22.842027+00:00",
+    "claim_session_id": "75bef4c7064a",
+    "started_at": "2026-05-29T20:50:22.898566+00:00",
+    "completed_at": "2026-05-29T20:51:07.038670+00:00",
+    "result": "No publish. Dedup check found existing published general article mile_8d61b9b3 ('石油市場嚇壞了，股票市場沒有：OVX 120 與 VIX 17 說的兩個故事') already covers the same reader-facing angle: oil risk should be read through OVX rather than VIX. Semantic search also surfaced overlapping OVX/VIX energy articles, so K1088 should remain research-side unless a materially different consumer angle is defined."
   },
   {
     "id": "K1403_article_general",
     "title": "K1403: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1403 has verdict signal (score=4, reasons=['cross-market/universal', 'robust inference']) but no general article in feed.json.  Verdict preview: K1403 HAR-RV Quantile Forecasting cross-asset robustness on QQQ/GLD/TLT (2007-01-03 fit through 2020-12-31，OOS 2021-01-04 至 2026-05-15，n_oos=1355/asset)：3/3 dm_sig_neg（quantile-median QLIKE 顯著差於 OLS point forecast：QQQ dm=-12.68 p≈0、GLD dm=-10.51 p≈0、TLT dm=-11.59 p≈0）但 3/3 tail_s",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1403",
@@ -14539,6 +14551,27 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-29T18:45:31+00:00"
+    "created_at": "2026-05-29T18:45:31+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-29T21:52:01.846985+00:00",
+    "claim_session_id": "7a3c2b4c22f7",
+    "started_at": "2026-05-29T21:52:10.789228+00:00",
+    "completed_at": "2026-05-29T21:52:43.245972+00:00",
+    "result": "No publish. General angle is already covered by existing K1404 research draft mile_67f75353 ('1978 年的方法，在台股 1,305 天測試後：尾部區間比點預測更可信'), which explains the same reader-facing takeaway: HAR-RV quantile forecasts fail on point prediction but work as tail bounds. K1403 is also already subsumed inside the cross-asset synthesis draft mile_15d43f72 (K1402/K1403/K1404). Publishing a separate K1403 general article would duplicate feed coverage."
+  },
+  {
+    "id": "trending_repost_2026_05_30_ai波動",
+    "title": "[trending_repost] 輝達狂賺八百億股價卻震盪，AI選擇權隱含波動率透露了什麼？",
+    "description": "從輝達單季營收衝上 816 億美元但股價高檔震盪切入，分析市場對 Blackwell 產能瓶頸與高估值的擔憂。可量化：輝達與台積電的隱含波動率偏斜（skew）與財報公布前後波動率驟降（IV Crush）的關聯性。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-05-29T22:00:36+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
   }
 ]
