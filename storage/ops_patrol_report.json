@@ -1,39 +1,39 @@
 {
-  "timestamp": "2026-05-28T18:11:35Z",
+  "timestamp": "2026-05-29T00:10:50Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "Total draft: 158 (general: 140, research: 18). All thresholds met (total>=12, research>=4, general>=8)."
+      "detail": "Total drafts=158 (>=12 ok). research=18 (>=4 ok). general=140 (>=8 ok)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json is 102 hours old (threshold: 26h). Metrics remain stale since last patrol."
+      "detail": "storage/strategy_metrics.json is 108 hours old (threshold: 26h). ALERT: metrics stale."
     },
     {
-      "name": "ERROR_LOG_RECENT",
+      "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated 2026-05-27 or 2026-05-28. Last entry: 2026-05-21 (hourly-dispatch launchd exit-78)."
+      "detail": "No entries dated today (2026-05-29) or yesterday (2026-05-28) in last 30 lines. Most recent entry: 2026-05-21."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "No strategies with >2 portfolio_return=null in last 3 entries."
+      "detail": "No strategy has more than 2 nulls in last 3 portfolio_return entries."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold: >50). Working tree clean."
+      "detail": "0 uncommitted files (threshold: 50)."
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "knowledge.json contains 2151 entries."
+      "detail": "2151 entries in storage/memory/knowledge.json."
     }
   ],
   "alerts": [
-    "STRATEGY_METRICS_FRESHNESS: storage/strategy_metrics.json is 102 hours old (>26h threshold). Run metrics recalculation."
+    "metrics stale: storage/strategy_metrics.json is 108 hours old (threshold 26h)"
   ]
 }
