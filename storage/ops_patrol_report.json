@@ -1,39 +1,40 @@
 {
-  "timestamp": "2026-05-29T06:11:44Z",
+  "timestamp": "2026-05-29T18:13:37Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "158 draft articles total (research: 18, general: 140). All thresholds met (total>=12, research>=4, general>=8)."
+      "detail": "44 draft articles total (general: 20, research: 24). All thresholds met: total>=12 OK, general>=8 OK, research>=4 OK."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json is 114.0 hours old (threshold: 26h). Last modified: 2026-05-24T12:10 UTC."
+      "detail": "storage/strategy_metrics.json does not exist — file missing entirely. Cannot determine freshness."
     },
     {
       "name": "ERROR_LOG_RECENT",
-      "status": "ok",
-      "detail": "Last 30 lines of docs/error_log.md contain entries from 2026-05-21. No entries dated today (2026-05-29) or yesterday (2026-05-28)."
+      "status": "alert",
+      "detail": "9 entries dated 2026-05-29 (today) in docs/error_log.md: (1) piggy-back scheduler double-fire on 4 jobs; (2) agent manually edited host crontab violating control-plane rules (restored from backup); (3) tests DeprecationWarning fixed; (4) hourly-dispatch keychain auth 3-strike RESOLVED; (5) cron wrapper observability follow-up; (6) ops_dashboard.py exit code misread; (7) health_alerts_unhandled reading stale notifications; (8) production_pending missing pending_main_thread; (9) Codex 24h-rule caught 2 critical article bugs in mile_8e899fba (ERRATA applied)."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "5 strategies checked (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix). No strategy has >2 null portfolio_return in last 3 entries."
+      "detail": "14 strategies checked. All have exactly 1 null in last 3 entries (2026-05-28 data not yet populated — expected T+1 lag). Threshold >2 nulls not breached. _market_daily has no entries (ignored)."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files."
+      "detail": "0 uncommitted files. Working tree clean."
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json contains 2151 entries."
+      "detail": "2177 entries in storage/memory/knowledge.json."
     }
   ],
   "alerts": [
-    "strategy_metrics stale (114.0h > 26h threshold)"
+    "strategy_metrics missing — storage/strategy_metrics.json does not exist (was stale 114h as of last patrol; now absent)",
+    "error_log 9 entries dated 2026-05-29 (today) — most are RESOLVED incidents; key open item: strategy_metrics.json still missing"
   ]
 }

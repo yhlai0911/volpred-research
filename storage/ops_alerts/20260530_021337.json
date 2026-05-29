@@ -1,0 +1,28 @@
+{
+  "timestamp": "2026-05-29T18:13:37Z",
+  "patrol_run": "20260530_021337",
+  "alerts": [
+    {
+      "level": "warn",
+      "code": "strategy_metrics_missing",
+      "message": "storage/strategy_metrics.json does not exist. Previous patrol (06:11 UTC) had it at 114h stale; file may have been deleted or never regenerated.",
+      "action_required": "Run strategy metrics recalculation job or check if generation pipeline failed."
+    },
+    {
+      "level": "info",
+      "code": "error_log_today_entries",
+      "message": "9 error_log entries dated 2026-05-29 recorded. Most are RESOLVED. Key residual: strategy_metrics.json still missing after incidents.",
+      "entries_summary": [
+        "piggy-back double-fire on 4 cron jobs (RESOLVED via piggy_back_skip flag)",
+        "agent manually edited host crontab (RESOLVED — restored from backup)",
+        "tests DeprecationWarning (RESOLVED)",
+        "hourly-dispatch keychain auth 3-strike (RESOLVED — permanent fix)",
+        "cron wrapper observability (RESOLVED)",
+        "ops_dashboard.py exit code (RESOLVED)",
+        "health_alerts_unhandled stale reads (RESOLVED)",
+        "production_pending missing pending_main_thread (RESOLVED)",
+        "Codex 24h-rule article bugs in mile_8e899fba (RESOLVED — ERRATA applied)"
+      ]
+    }
+  ]
+}
