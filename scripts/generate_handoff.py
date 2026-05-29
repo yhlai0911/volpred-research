@@ -332,17 +332,43 @@ def build() -> str:
     lines.append("")
     lines.append("## 候補 / 手動補充")
     lines.append("")
-    lines.append("（此區由人工 / 互動 session 編輯；hourly auto-regen 會保留此區以下內容若手動加在 `<!-- KEEP -->` 區段內。預設覆寫所有自動章節。）")
+    lines.append("（此區由人工 / 互動 session 編輯。只有放在 KEEP 註解標記區段內的手寫內容會被 auto-regen 保留，其餘自動章節每 :50 覆寫。標記語法見 generate_handoff.py `_extract_keep_block` 或 docs；標記本身不寫在此說明以免與 extractor 自我衝突。）")
     lines.append("")
 
     return "\n".join(lines)
 
 
+def _extract_keep_block(path: Path) -> str:
+    """跨 regen 保留手動內容：包在 <!-- KEEP --> ... <!-- /KEEP --> 之間的區段。
+
+    回傳 KEEP 區段（含 marker），無則回 ""。
+    缺結尾 marker 時，從 <!-- KEEP --> 保留到 EOF（容錯）。
+    2026-05-29 修：原 main() 直接覆寫整檔、從不讀回舊內容，導致檔內「會保留
+    KEEP 區段」的說明是假的，手寫 handoff 補充每 :50 被清空。
+    """
+    if not path.exists():
+        return ""
+    try:
+        txt = path.read_text(encoding="utf-8")
+    except Exception:
+        return ""
+    start = txt.find("<!-- KEEP -->")
+    if start == -1:
+        return ""
+    end = txt.find("<!-- /KEEP -->", start)
+    if end == -1:
+        return txt[start:].rstrip()
+    return txt[start:end + len("<!-- /KEEP -->")]
+
+
 def main() -> int:
     HANDOFF.parent.mkdir(parents=True, exist_ok=True)
+    keep = _extract_keep_block(HANDOFF)
     content = build()
+    if keep:
+        content = content.rstrip() + "\n\n" + keep + "\n"
     HANDOFF.write_text(content, encoding="utf-8")
-    print(f"handoff regenerated: {HANDOFF}  bytes={len(content)}")
+    print(f"handoff regenerated: {HANDOFF}  bytes={len(content)}  keep_preserved={bool(keep)}")
     return 0
 
 
