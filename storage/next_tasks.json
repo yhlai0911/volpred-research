@@ -5405,7 +5405,7 @@
   {
     "id": "Paper3_H4_TSMOM_1.4pct_origin",
     "title": "Paper 3 BLOCKER: '1.4% TSMOM Sharpe contribution' 數字來源不明 (K898 back-calc 5.3%)",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 4,
     "created_at": "2026-04-17T16:30:37+08:00",
     "description": "Paper 3 audit: paper 寫 '1.4% TSMOM Sharpe contribution' 但 K898 back-calc = 5.3% (0.043/0.805), K898 paper_comparison 硬寫 93% 而非 1.4%. **數字可能錯誤**. 主線程決: (a) 找原始 derivation notebook (likely 草稿期 ad-hoc 計算), (b) 更新 tex 到 5.3% (K898 back-calc canonical), (c) errata pending. 不可靜默保留.",
@@ -5423,7 +5423,13 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "hourly-21",
+    "claimed_at": "2026-05-29T13:08:49.262953+00:00",
+    "claim_session_id": "cd196ebde4e0",
+    "started_at": "2026-05-29T13:08:53.892868+00:00",
+    "completed_at": "2026-05-29T13:11:40.876689+00:00",
+    "result": "Forensic 完成: 1.4% TSMOM-Sharpe contribution origin **untraceable** to any K-experiment computation (grep 全 experiments/scripts/storage/memory 無 derivation). canonical = K898 back-calc 5.3% = 0.043/0.805. body_v3.tex L34/L194/L251 已 update, L484 已 errata note 標 1.4% origin untraceable + qualitative claim retained. main_v3.tex (canonical loader → body_v3) 已 published Supabase 2026-05-28 (paper-list 顯示 published=yes, updated_at 2026-05-28T04:00). 本次補 main.tex (v1 legacy standalone, 仍 1.4%) STALE header 防混淆: 指向 main_v3.tex canonical + 描述 1.4% legacy 來歷. main_v3.pdf 未 touch (May 27 編譯版仍 canonical)."
   },
   {
     "id": "Paper3_K1128_pivot_decision",
@@ -14280,7 +14286,7 @@
     "id": "Paper6_DIV3b_spy_var_footnote_K880_vs_K880v2",
     "task_type": "paper_review",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "forensic_followup",
     "created_at": "2026-05-29T20:30:00+08:00",
     "title": "Paper 6: main.tex L245 加 inline footnote 解釋 K880 vs K880v2 timing-convention 抉擇",
@@ -14289,6 +14295,8 @@
     "claimed_by": "codex-cli",
     "claimed_at": "2026-05-29T12:25:47.276132+00:00",
     "claim_session_id": "3280d57b9103",
-    "started_at": "2026-05-29T12:25:47.326036+00:00"
+    "started_at": "2026-05-29T12:25:47.326036+00:00",
+    "completed_at": "2026-05-29T12:26:33.774789+00:00",
+    "result": "Added inline main.tex footnote explaining why Table 4 SPY VaR uses K880 rather than K880v2, annotated reproduce.py with the same provenance rule, and logged the 2026-05-29 SPY VaR audit in SUBMISSION_READY.md."
   }
 ]
