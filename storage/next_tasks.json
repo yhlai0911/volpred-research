@@ -5356,7 +5356,7 @@
   {
     "id": "Paper3_D1_errata_TSMOM_direction_research_integrity",
     "title": "Paper 3 ERRATA: Table 3 narrative 'TSMOM hedge 93% retention' → '100%+ enhances MDD'",
-    "status": "pending_main_thread",
+    "status": "in_progress",
     "priority": 4,
     "created_at": "2026-04-17T17:29:23+08:00",
     "description": "K1177 (25af9f1e) + K898 雙 independent implementation 都顯示 TSMOM hedging retention >100% (107-141%), **paper 聲稱 93% (protection 降低) 方向反了**. 類似 Paper 4 DIV-1 41.8% 方向錯 pattern. **Research integrity issue**. 主線程 body edit: (1) Table 3 narrative 'TSMOM hedging only retains 93% of VT protection' → 'TSMOM hedging retains 100%+ of VT protection and further enhances MDD reduction'; (2) Section 4.7 γ_HM 解釋需改 (hedge coefficient 方向); (3) Abstract/Conclusion 重新措辭; (4) 同時修 text/code inconsistency (paper 寫 monthly 但 -24.7% 是 daily) — 選 K1177 monthly canonical 或 paper 原 daily, 在 methodology section 明載選擇. 投稿 JPM/FAJ 前必做.",
@@ -5376,7 +5376,11 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "hourly-22",
+    "claimed_at": "2026-05-29T14:08:44.960552+00:00",
+    "claim_session_id": "96d97b7c1861",
+    "started_at": "2026-05-29T14:08:48.379324+00:00"
   },
   {
     "id": "Paper3_D2_errata_Table5_and_remove_rho_0.830",
@@ -5543,7 +5547,7 @@
   {
     "id": "Paper4_DIV1_41pct_direction_CRITICAL",
     "title": "Paper 4 CRITICAL: '41.8% QLIKE improvement' Abstract 方向錯 (research integrity)",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 4,
     "created_at": "2026-04-17T17:09:27+08:00",
     "description": "Paper 4 audit (a772592a) 發現 Abstract L98 + §8.2 L703 '5-min HAR-RV 比 daily 改善 41.8% QLIKE' **方向完全反了**. K745 improvement_pct=-41.8 實際 daily HAR-ABS (QLIKE=0.077) 比 5-min HAR-RV (QLIKE=0.109) 好 41.8%. K745 N=37 PRELIMINARY; K1139 未執行. **主線程決策**: (a) 跑 K1139 完整 5-min RV target 實驗對比, 看是否能改變方向; (b) **立即 errata** — 修 abstract + §8.2 將 direction 反轉，承認 5-min 不優於 daily 或至少 preliminary N=37; (c) 保留 pending 待 K1139. **research integrity — 必須在下次 submission commit 前解**.",
@@ -5562,7 +5566,12 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-29T13:27:55.864198+00:00",
+    "claim_session_id": "00f0c2e3c4d9",
+    "completed_at": "2026-05-29T13:28:57.992290+00:00",
+    "result": "Errata applied to paper/vix-sufficiency/main.tex: reversed the K745 41.8% direction error in abstract, §8.2, and conclusion. New wording now states the K745 pilot (N=37) found daily HAR-ABS outperformed 5-minute HAR-RV, pending larger K1139 follow-up."
   },
   {
     "id": "Paper4_DIV2_CV_0.33_to_0.37",
@@ -14298,5 +14307,29 @@
     "started_at": "2026-05-29T12:25:47.326036+00:00",
     "completed_at": "2026-05-29T12:26:33.774789+00:00",
     "result": "Added inline main.tex footnote explaining why Table 4 SPY VaR uses K880 rather than K880v2, annotated reproduce.py with the same provenance rule, and logged the 2026-05-29 SPY VaR audit in SUBMISSION_READY.md."
+  },
+  {
+    "id": "email-11842-ada04b",
+    "title": "[email_reply] Re: [VolPred Boss Report] 2026-05-29 21:00 台灣時間 平台運營報告",
+    "description": "Gmail UID: 11842\nMessage-ID: <47B82507-994A-466B-993B-C266DB7F0233@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Fri, 29 May 2026 21:10:48 +0800\nSubject: Re: [VolPred Boss Report] 2026-05-29 21:00 台灣時間 平台運營報告\n\n--- 用戶回信內容 ---\n有問題就立刻處理\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年5月29日 21:00 寫道：\r\n> ﻿\r\n> VolPred Boss Report · 2026-05-29 21:00 台灣時間 · Overall WARN\r\n> \r\n> ⓪ 本 cycle 意圖 / 目標 / 規劃\r\n> \r\n> 意圖 Intent\t從反應式 firefighting 轉成主動 ops 結構。建 dashboard + audit + boss report 三件套，然後 cycle 化主線程運營。\r\n> 本週目標 Weekly Goal\t• Mission 4: 0 stale cron 持續一週、live URL 100% 自動驗證\r\n> • Mission 1: 維持 ≥6 articles/day 同時把 narrative-arc dedup Layer 4 落地（已 ✅）\r\n> • Mission 3: Paper 4 body_v4 完成 rewrite gate\r\n> • Mission 5: FB MCP ext popup gate 找根因 + 解（不再說『修不到』）\r\n> 本 cycle 計劃 Plan\t• Cycle 1: 建 dashboard + 2 audit + boss report email infra（✅ 本 cycle 完成）\r\n> • Cycle 2-3: Paper 4 body_v4 rewrite main thread + 派 review agent 並行\r\n> • Cycle 4: free_tier_growth_plan.md spec + 識別 P1 analytics 工具選型\r\n> • Cycle 5+: MCP ext 根因 deep-dive；若不解，準備 Anthropic issue text\r\n> 成功標準 Success Criteria\t• 每 cycle 開頭 dashboard read 不再有 surprise critical（即 standing audit catch 問題早於我）\r\n> • 每 4h boss email 自動寄出無 fail\r\n> • 次次 cycle 至少 1 個結構性改善（不只 patch）+ 2 個 article 產出\r\n> 已知風險 Known Risks\t• main thread context 易爆（已多次 compact），需要更積極派 agent 卸載\r\n> • FB MCP root cause 可能要花 ≥2 cycles 才找到\r\n> • Paper 4 rewrite 過長吃掉太多 main thread bandwidth\r\n> ① 平台狀態\r\n> \r\n> 區段\t狀態\t說明\t建議行動\r\n> production_pending\twarn\t0 pending tasks, but 13 pending_main_thread tasks (top types: [('paper_review', 10), ('paper_body', 2), ('paper_decision', 1)])\tmain-thread backlog exists; do not auto-refill agentable pool blindly\r\n> production_throughput\tok\t9 articles published last 24h (target 6/day)\t—\r\n> distribution_supabase\tok\t9/9 last-24h articles synced\t—\r\n> verification_live_url\tok\t3/3 sample live URLs return 200\t—\r\n> verification_fb_pipeline\twarn\t1 FB posts pending sync\thandoff doc + manual paste or retry MCP\r\n> health_cron\tok\t0 cron jobs stale (over max-age)\t—\r\n> health_alerts_unhandled\tok\t0 current warn/critical alert conditions\t—\r\n> ①-b 排程器成果掌握（cron 跑完沒 / 成功沒）\r\n> \r\n> 每個定時排程器的 runs / exit / 完成狀態。有需要掌握的項目 ↓\r\n> \r\n> === cron 成果掌握 review — 2026-05-29 21:00:43（台灣時間）===\r\n> \r\n>   hourly_dispatch   runs=108 exit=0 idle | last: 2026-05-29 20:26:24\r\n>   compute_worker    runs=435 exit=0 idle | last: 2026-05-29 21:00:06\r\n>   check_alerts      runs=109 exit=0 running | last: 2026-05-29 21:00:05 (start)\r\n>   collect_tw        runs=5 exit=0 idle | last: 2026-05-28 15:00:24  ⚠️ 上次完成 30.0h 前（>30h）\r\n>   collect_us        runs=4 exit=0 idle | last: 2026-05-29 08:00:52\r\n>   daily_update      runs=4 exit=0 idle | last: 2026-05-29 08:20:47\r\n>   release_pool      runs=18 exit=0 idle | last: 2026-05-29 19:00:11\r\n>   market_cal        runs=0 exit=(never exited) idle | last: 2026-05-25 08:00:14 (piggy-back)\r\n>   memory_health     runs=4 exit=0 idle | last: 2026-05-29 06:00:20\r\n>   work_summary      runs=18 exit=0 idle | last: 2026-05-29 18:05:20\r\n> \r\n> 近 75 分鐘 git commits（hourly_dispatch 產出代理）：3 筆\r\n>   dfe5839f ops(hourly 20:26): PHASE-Z safety-net auto-commit (agent left uncommitted)\r\n>   cf68e496 Paper6_DIV3_SPY_VaR_violation_rate | forensic complete: VR=0.93% reproducible from K880\r\n>   fb267c0d fix(research): arXiv scanner 改用 RSS feed 為主 (export API 持續 429 本機)\r\n> \r\n> 🔴 需要掌握/處理：\r\n>   - collect_tw: ⚠️ 上次完成 30.0h 前（>30h）\r\n> ② 本 cycle 活動（過去 4h）\r\n> \r\n> 13 commits\r\n> \r\n> SHA\tSubject\tTime\r\n> dfe5839f\tops(hourly 20:26): PHASE-Z safety-net auto-commit (agent left uncommitted)\t20:26\r\n> cf68e496\tPaper6_DIV3_SPY_VaR_violation_rate\tomple\r\n> fb267c0d\tfix(research): arXiv scanner 改用 RSS feed 為主 (export API 持續 429 本機)\t19:47\r\n> 941b3f62\tK1318_article_general\t318 H\r\n> 9de48dca\tresearch(frontier): 注入 2026-05-29 arXiv 新發現 (Autoencoder-RGARCH + Quantum Reservoir RV)\t19:11\r\n> fe05cb20\tfeat(research): arXiv q-fin 前沿主題自動掃描器 (補「研究框住」缺口)\t19:09\r\n> 31584cd8\tK1382_article_general\tle_55\r\n> 690e59a9\tops: mark K1382_article_general succeeded in next_tasks\t18:21\r\n> d3913b64\tops: work_log entry K1382_article_general\t18:20\r\n> e6550f19\tK1382_article_general\t382 m\r\n> 8f0b7312\tfeat(anti-ai-style): em-dash normalizer secondary layer in supabase_sync\t18:12\r\n> 2130d746\tfeat(anti-ai-style): publish-time em-dash normalizer \n",
+    "task_type": "email_reply",
+    "priority": 1,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-05-29T13:15:09.415554+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11842,
+    "email_message_id": "<47B82507-994A-466B-993B-C266DB7F0233@gmail.com>",
+    "email_subject": "Re: [VolPred Boss Report] 2026-05-29 21:00 台灣時間 平台運營報告",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-05-29T13:43:11.392729+00:00",
+    "claim_session_id": "c0b4e194629f",
+    "started_at": "2026-05-29T13:47:09.850658+00:00",
+    "completed_at": "2026-05-29T13:47:27.998761+00:00",
+    "result": "老闆「有問題就立刻處理」→ 查證 collect_tw >30h stale 為假陽性(今日15:00實際成功跑完)；根因=cron_review banner parser 抓不到非-===完成標記，改用 log mtime override 修復(commit a46dec90)+regression test。已回信。"
   }
 ]
