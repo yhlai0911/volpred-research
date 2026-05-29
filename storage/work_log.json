@@ -8952,5 +8952,11 @@
     "task_id": "anti_ai_gate_post_normalizer_audit_2026_05_30",
     "summary": "30-sample audit post em-dash normalizer + backfill: PASS 66.7% (20/30). FAIL 80% root cause = MUST 1.1 不是...而是 套路對比。建議下一波 normalizer 焦點。",
     "report": "storage/reports/audits/anti_ai_style_gate_audit_2026_05_30.md"
+  },
+  {
+    "timestamp": "2026-05-29T18:13Z",
+    "task_type": "platform_ops",
+    "summary": "fb_pipeline_drift_fix_mile_4c141c2f + refill_diagnosis",
+    "details": "Fixed FB pipeline warn (mile_4c141c2f fb_pending_chrome_mcp_p6 → canonical awaiting_interactive_session per FB_POST_HANDOFF_STATUSES). dashboard warns 2 → 1 (剩 production_pending paper backlog 為設計訊號). Diagnosed refill 乾涸: top_10 + missing_general candidates 全已 cover or audit_pending; queued followup task platform_ops_refresh_pub_candidates_20260530_0213."
   }
 ]

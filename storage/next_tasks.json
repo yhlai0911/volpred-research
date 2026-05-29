@@ -14399,7 +14399,7 @@
     "title": "Paper review (Codex 24h-rule): 重做了一次論文 8 的「市場衝擊」實驗——數字對不上，故事卻變得更乾淨",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_3b689404 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_3b689404",
@@ -14408,6 +14408,23 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-29T17:08:26+00:00"
+    "created_at": "2026-05-29T17:08:26+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-29T17:40:07.093129+00:00",
+    "claim_session_id": "a56572cb3426",
+    "started_at": "2026-05-29T17:40:07.179234+00:00",
+    "completed_at": "2026-05-29T17:41:28.301084+00:00",
+    "result": "Codex review: FAIL. Article overclaims risk-off as statistically significant, overstates NFP stratified pattern despite interaction p=0.127, and omits that K904 selects the shock threshold ex post to best match paper counts; source JSON also contains an internal contradiction on geopolitical absorption."
+  },
+  {
+    "id": "platform_ops_refresh_pub_candidates_20260530_0213",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "title": "刷新 publication_candidates pool — 修 refill 乾涸",
+    "description": "Symptom: scripts/refill_task_pool.py --apply 回 no_new_candidates_passing_filter；top_10_uncovered + missing_general_top5 都已被前輪 article cover（K1086/K1404/K1390 succeeded, K267 blocked, K1151/K672/K957 audit pending）。Action: (1) 跑 publication-candidates skill 重新 scan storage/memory/knowledge.json vs storage/reports/feed.json 找真正未 cover 的 K；(2) 更新 storage/publication_candidates.json；(3) 重跑 refill_task_pool.py --apply 驗證 pending pool 補滿到 4。",
+    "source": "auto_discovered",
+    "created_at": "2026-05-29T18:13:40Z",
+    "created_by": "hourly-02"
   }
 ]
