@@ -13994,7 +13994,7 @@
     "title": "Paper review (Codex 24h-rule): 降息時黃金漲 30.8%、股票漲 13.4%——那為什麼跟著利率調倉，幾乎等於沒做？",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_ada624d5 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_ada624d5",
@@ -14007,7 +14007,9 @@
     "claimed_by": "hourly-13",
     "claimed_at": "2026-05-29T05:10:41.891300+00:00",
     "claim_session_id": "095a64f13c9c",
-    "started_at": "2026-05-29T05:10:46.100555+00:00"
+    "started_at": "2026-05-29T05:10:46.100555+00:00",
+    "completed_at": "2026-05-29T05:15:13.389409+00:00",
+    "result": "Codex 24h-review FAIL_PROVENANCE. Article reverted to draft + caveat. K709 has no script; results.json only 3 numbers; article-specific %s have no artifact source. Followup K709_rebuild_reproducibility queued. Review: storage/reviews/codex_24h/mile_ada624d5_review.md. Commit 3955f033."
   },
   {
     "id": "K1323",

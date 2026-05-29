@@ -18,6 +18,12 @@ from urllib import request, error
 from urllib.parse import quote
 
 REPO = Path(__file__).parent.parent
+SRC = REPO / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
+
+from volpred.ops.alerts import build_alert_condition_report
+
 FB_POST_TERMINAL_STATUSES = {"success", "wont_fix", "fb_silent_reject"}
 FB_POST_HANDOFF_STATUSES = {"awaiting_interactive_session"}
 
@@ -75,14 +81,37 @@ def main():
     # L1 Production
     nt = jl(REPO / "storage" / "next_tasks.json", [])
     pending = [t for t in nt if t.get("status") == "pending"]
+    pending_main = [t for t in nt if t.get("status") == "pending_main_thread"]
+    actionable = pending + pending_main
     by_type = {}
-    for t in pending:
+    for t in actionable:
         by_type[t.get("task_type", "?")] = by_type.get(t.get("task_type", "?"), 0) + 1
+    if pending:
+        pending_tldr = (
+            f"{len(pending)} pending tasks"
+            + (f" + {len(pending_main)} pending_main_thread" if pending_main else "")
+            + f" (top types: {sorted(by_type.items(), key=lambda x:-x[1])[:3]})"
+        )
+        pending_status = "ok" if len(actionable) >= 4 else "warn"
+        pending_next = "dispatch top P1-P3 if slots free"
+    elif pending_main:
+        pending_tldr = (
+            f"0 pending tasks, but {len(pending_main)} pending_main_thread tasks"
+            f" (top types: {sorted(by_type.items(), key=lambda x:-x[1])[:3]})"
+        )
+        pending_status = "warn"
+        pending_next = "main-thread backlog exists; do not auto-refill agentable pool blindly"
+    else:
+        pending_tldr = "0 pending tasks (top types: [])"
+        pending_status = "critical"
+        pending_next = "refill pool"
     out.append(section(
         "production_pending",
-        "ok" if len(pending) >= 4 else "warn" if len(pending) >= 1 else "critical",
-        f"{len(pending)} pending tasks (top types: {sorted(by_type.items(), key=lambda x:-x[1])[:3]})",
-        "dispatch top P1-P3 if slots free" if len(pending) > 0 else "refill pool"
+        pending_status,
+        pending_tldr,
+        pending_next,
+        pending_count=len(pending),
+        pending_main_thread_count=len(pending_main),
     ))
 
     feed = jl(REPO / "storage" / "reports" / "feed.json", [])
@@ -234,27 +263,23 @@ def main():
         stale=stale
     ))
 
-    # L4 alerts — INGEST recent warn/critical from notification_log + surface as actionable
-    nlog = jl(REPO / "storage" / "notifications" / "notification_log.json", [])
-    cutoff_6h = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(now - 6 * 3600))
+    # L4 alerts — reflect CURRENT breached conditions, not historical notification
+    # rows. Otherwise a resolved incident can keep dashboard red for hours merely
+    # because old alert emails remain unresolved in notification_log.json.
+    alert_report = build_alert_condition_report(storage_dir=str(REPO / "storage"))
     recent_breach = []
-    if isinstance(nlog, list):
-        for n in nlog:
-            if not isinstance(n, dict): continue
-            ts = n.get("timestamp", "")
-            if ts < cutoff_6h: continue
-            level = n.get("level", "info")
-            if level not in ("warn", "critical"): continue
-            if n.get("resolved_at"): continue  # 已 acknowledged，不再計入 unhandled
-            recent_breach.append({
-                "ts": ts[11:16],
-                "level": level,
-                "subject": (n.get("subject") or n.get("title") or "")[:80],
-            })
+    for item in alert_report.get("conditions", []):
+        if not item.get("breached"):
+            continue
+        recent_breach.append({
+            "ts": now_iso[11:16],
+            "level": item.get("level", "info"),
+            "subject": str(item.get("title") or "")[:80],
+        })
     out.append(section(
         "health_alerts_unhandled",
         "ok" if not recent_breach else "warn" if len(recent_breach) <= 2 else "critical",
-        f"{len(recent_breach)} warn/critical alerts last 6h (read + act per .claude/rules/alert.md)",
+        f"{len(recent_breach)} current warn/critical alert conditions",
         "ingest alerts → run remediation per alert.md auto-action table" if recent_breach else None,
         breaches=recent_breach[:8],
     ))

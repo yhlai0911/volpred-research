@@ -10,6 +10,17 @@
     "note": "Persistent local tasks that should exist in the host crontab.",
     "items": [
       {
+        "id": "log_rotate",
+        "label": "cron/launchd log rotation",
+        "cron": "40 4 * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_log_rotate.sh",
+        "log_path": "storage/logs/cron/log_rotate.log",
+        "description": "每日 04:40 把 storage/logs/cron 與 ~/.volpred/logs 內 >5MB 的 log 截斷為最後 4000 行（原子替換）。2026-05-29 新增：codex_loop.log 無 rotation 曾達 46MB。由 piggy-back run_due_jobs 執行（host cron 只可靠 0 * * * *，非 0 分 pattern 走 piggy-back）。",
+        "matchers": [
+          "cron_log_rotate.sh"
+        ]
+      },
+      {
         "id": "collect_tw_data",
         "label": "台股/0050/VIXTWN 收集",
         "cron": "0 15 * * 1-5",

@@ -8,6 +8,7 @@
 
 | 日期 | 問題 | 現象 | 過程 | 解決方法 |
 |------|------|------|------|---------|
+| 2026-05-29 | `tests/test_fb_pipeline_status.py` 仍用 `datetime.utcnow()`，pytest 持續噴 `DeprecationWarning` | 每次跑 `uv run pytest tests/test_fb_pipeline_status.py -q` 雖然 6 tests 全過，但都會附帶 `datetime.datetime.utcnow() is deprecated` warning，讓 dashboard/ops regression suite 留下一條非功能性噪音。 | warning 來源在 `test_ops_dashboard_returns_zero_even_when_sections_are_critical()` 建測試 notification timestamp 時仍用 naive UTC；這和近幾輪剛修完的 ops dashboard regression suite 綁在一起，容易把真正失敗訊號埋進 warning 雜訊。 | 測試改成 `datetime.now(UTC)` 產生 timezone-aware UTC timestamp，重新跑 `uv run pytest tests/test_fb_pipeline_status.py -q` 後 warnings 歸零、6 tests 仍全過。教訓：測試中的時間 API 也要跟 production 一樣採 timezone-aware 寫法，避免「測試永遠黃字」讓真正 regression 被稀釋。 |
 | 2026-05-27 | mile_91af7c48 (K562 lookahead 攔截實錄) Codex 24h-review: 文章數字真實但 K562 patch + rerun 從未 commit → repo source/results 與文章 claim 全面不一致 | 主線程 hourly-22 跑 paper_review_mile_91af7c48 task。Codex source-level audit VERDICT=FAIL：(1) 文章 (line 53-89) 展示 `prev = i-1` 修正後 code，但 `experiments/k562/k562_k560_sector_validation.py:222,231,238` 仍是 same-day `[i]` indexing — 無 patch 痕跡 (2) 文章 headline Sharpe 0.7247 / benchmark 0.9359 **不在** `experiments/k562/*.json` 或 `experiments/k560/*.json`；canonical 仍是 `baseline_replication.daily_sharpe=2.1566 / benchmark_sharpe=1.3444` (3) 文章 1/8 pass + bootstrap 1.2% vs results.json `final_summary.pass_count=6/8 / v7_bootstrap.daily.p_win=1.0` (4) 文章 verdict「100% bug / 輸基準 / null result」vs results.json verdict `CONDITIONALLY RECOMMENDED (daily rebalancing only)` (5) 後記 K560 patch 敘述同樣 K560 source 無對應 lag patch。Codex tokens=60008。Cross-check `docs/error_log.md` 2026-05-06 entry 確認文章數字 *歷史真實*（K562 lag-fix rerun 結果），但 patch + results overwrite **從未 git commit**（`git log -G"prev = i" -- experiments/k562/` 0 commits）。 | (R1) 2026-05-06 lag-fix rerun 在工作 session 中執行但 commit step 漏掉 / 被 stash / worktree 未 merge 導致 patched code + results 從未進 main branch (R2) 文章敘事在當時 session 內 valid（reviewer 看到 rerun 數字），但 repo 視角後續視為「未發生」(R3) `experiments/` 內 K562 source / results 沒有「最後 update timestamp」或「git revision` provenance binding 文章內容 — 文章發佈 publisher 沒 verify cited K-id 的 last-modified commit hash 對得上文章 claim (R4) 違反 CLAUDE.md §2「實驗三件套」可驗證要求 — 文章 cite 的數字必須對得上 git-tracked artifact | **不 unpublish** mile_91af7c48 — 文章敘事歷史真實 (error_log 2026-05-06 entry 為證) + 教育價值高（lookahead audit 機制示範）+ verified_live_at 已 stamp。**Follow-up**：(a) 寫 `experiments/k562/reviews/codex_review_mile_91af7c48_2026-05-27.md` 完整 review record (b) 建 `paper_review_followup_K562_reproduce_lag_fix` P2 task to next_tasks.json — 重 apply `prev = i-1` patch + rerun K562/K560 + diff vs 文章數字 + commit (c) 本 error_log entry 記載 drift 發現 (d) 未來 publish-time gate (P3 idea)：publisher 對 `details.experiment_refs` 內每個 K-id 取 source `.py` 最新 commit hash + 寫入 `details.cited_revisions: {K562: "sha"}`，這樣文章 claim 即與 git tracked artifact 綁定。**教訓**：(L1) 任何 K-experiment patch + rerun 必須在 working session 結束前 commit — 否則 repo 視角為「從未發生」(L2) 文章 cite 實驗數字必有 git-tracked artifact 對應；error_log 紀錄可作 historical narrative source 但不能替代 reproducible artifact (L3) Codex 24h-rule 是 last-mile gate — 此 incident 在 publish 後 9h 被 catch，下次應 publish-time block（reject publish if cited Sharpe ≠ results.json Sharpe within 1e-3 tolerance）(L4) Production article 引用「修正後」數字必對應 *currently-committed* code state — 「曾經跑過」不等於「現在可復現」 |
 | 2026-05-27 | K560 lag-fix rerun via compute_queue: results 寫到非 canonical 路徑（`experiments/k560_*.json` 而非 `experiments/k560/k560_*.json`），K562 同樣 hardcoded 舊路徑 | hourly-23 PHASE A 處理 compute followup `k560-lag-fix-rerun-20260527`。讀 stdout 顯示 lag-fix rerun 完整跑完（runtime 7.1s）conclusion 確認「No rotation strategy beats SPY VT + GLD benchmark (Sharpe 0.928) in-sample. No Harvey pass」— 與 mile_91af7c48 article 數字一致（momentum_top1 Sharpe 0.7241 vs article 0.7247；benchmark 0.928 vs article 0.9359）。但 canonical path `experiments/k560/k560_sector_rotation_vt_results.json` mtime 仍 5/18，新 results 反而落在 `experiments/k560_sector_rotation_vt_results.json`（experiments 根目錄）→ canonical path 永遠 stale。 | (R1) K560/K562 script `output_path` hardcoded 為 legacy 平面路徑（pre-migration commit 76aa426d 之前的 layout），migrate_legacy_experiment_artifacts 沒改 `*.py` 內 path constant (R2) compute_queue 沒 verify `result_artifact` 路徑與 script 實際寫出路徑一致（result_artifact field 是 advisory 不是 enforced） (R3) 沒 regression test 驗 K-experiment script 寫檔位置 == `experiments/<kid>/<kid>_*.json` | (a) `experiments/k560/k560_sector_rotation_vt.py:746` output_path 改 canonical (b) `experiments/k562/k562_k560_sector_validation.py:1048` 同樣修正 (c) 已搬新 lag-fixed K560 results 到 canonical path (d) 標 compute_queue followup_dispatched=true 防重派 (e) K562 compute job 仍 queued — worker cron */15 跑後 results 將寫到 canonical path |
 | 2026-05-27 | K562/K560 lag-fix follow-up: source patch re-applied, but reproducible rerun blocked by sandbox DNS/network and missing local price snapshots | 依 `paper_review_followup_K562_reproduce_lag_fix` 任務，Codex 先把缺失的 lag patch 重新寫回 `experiments/k562/k562_k560_sector_validation.py` 與 `experiments/k560/k560_sector_rotation_vt.py`：K562 `compute_strategy_returns()` / bi-weekly block 改成 `prev = i - 1`；K560 主 loop 改成 `sig_idx = i - 1`，且 `vt_weights / sec_moms / sec_vols / sec_rs` 全部改讀 `t-1`。本地 smoke test 立刻驗證 rerun blocker：`python experiments/k562/k562_k560_sector_validation.py` 在 `[1] Downloading data...` 階段失敗，stderr 為 `curl: (6) Could not resolve host: guce.yahoo.com`；`experiments/k560/data/` 與 `experiments/k562/data/` 均無本地 CSV snapshot。為避免「手造 results.json」，本 session **沒有**覆寫 K560/K562 results artifacts。另找到 repo 內歷史證據鏈仍存在：`storage/reports/feed.json.bak_d716099a_pre_rewrite` 保存 `mile_91af7c48` 與 `mile_4ec7b75e` 兩篇 patch 後文章內容；`storage/drafts/k560_sector_rotation_rewrite_draft.md` 記錄 K560 post-patch full-sample / OOS 摘要；`experiments/k560/figures/make_rewrite_figs.py` 明寫 inputs 應為 `post-patch, 2026-05-07` results.json。 | (R1) 2026-05-06 rerun 當時沒有把 raw price snapshot 一起 pin 到 `experiments/k560/data` / `k562/data`，導致之後離線環境無法重現 (R2) 兩支腳本 hard-code `yf.download(...)`，沒有 `local snapshot first, network fallback second` 的資料載入層 (R3) 發文與 error_log 雖保留「歷史真實」敘事，但缺少 commit 級結果 artifact，造成 source / results / article 三方漂移 (R4) 當前 sandbox 無外網 DNS，說明 rerun 若要成為 production-proof，必須支援 pinned local data 而不是把 Yahoo 當唯一重現路徑 | **已做**：(a) source lag patch 已重新 commit-able（見 `experiments/k562/reviews/lag_fix_reapply_2026-05-27.md`）(b) 明確記錄「本地 rerun 受 env 阻塞，不能誠實覆寫 results.json」(c) 後續應由有網路的 host worker 或先補本地 snapshot 後再跑完整 rerun。**教訓**：(L1) `results.json` 不可從文章或 error_log 反推回填；沒有可執行 rerun 就不要手修數字 (L2) 對外文稿與 `error_log` 可以保存歷史真實，但 canonical experiment artifact 仍必須由可重跑 code 直接產生 (L3) 凡是依賴 Yahoo / 第三方 API 的實驗，只要被文章引用，就該同步 pin local CSV snapshot，否則未來任何離線或 vendor drift 都會讓「真實發生過」退化成「只能口述」 |
@@ -1273,3 +1274,74 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 1. **Health snapshot script 不應用 exit code 表達內容嚴重度**；exit code 只能表達「腳本有沒有成功完成」。
 2. 監控鏈路中的每一層都要分清楚「signal」和「failure」：critical dashboard section 是 signal，wrapper crash 才是 failure。
 3. 若某腳本的輸出已含 `overall_status` / `section_critical`，就不要再用 shell exit code 重複編碼狀態，否則很容易被上游 generic monitor 誤讀。
+
+---
+
+## 2026-05-29 | `health_alerts_unhandled` 讀歷史 notification，而非當前 alert conditions
+
+**問題**：`uv run python scripts/check_alerts.py` 已回 `breaches=0`，但 `scripts/ops_dashboard.py` 的 `health_alerts_unhandled` section 仍維持 critical，原因是它直接掃 `storage/notifications/notification_log.json` 最近 6 小時內所有未標 `resolved_at` 的 warn/critical 通知。結果是：
+- 即使 underlying alert condition 已解除
+- 只要沒手動跑 `mark_alert_resolved.py`
+- dashboard 就會繼續把歷史通知當成「目前未處理 breach」
+
+這讓 dashboard 與 `check_alerts` 的 source of truth 分裂：一邊看 current condition，一邊看 historical inbox log。
+
+**根因**：
+1. `ops_dashboard.py` L4 alert section 把 notification log 當成 active state，而不是當成 audit trail。
+2. notification log 的 `resolved_at` 目前是手動/額外流程欄位，不是 alert condition 清除後自動回寫。
+3. 因此「歷史上曾經 critical」會被誤讀成「現在仍 critical」。
+
+**Fix**：
+- `ops_dashboard.py` 改直接讀 `volpred.ops.alerts.build_alert_condition_report()`。
+- `health_alerts_unhandled` 現在只反映**當前** `conditions[].breached`。
+- 歷史通知繼續留在 `notification_log.json` 做 audit，但不再用來判定 live dashboard 狀態。
+- 新增 regression test：當 notification log 仍有舊 critical、但 `build_alert_condition_report()` 回 0 breach 時，dashboard section 應為 `ok`。
+
+**驗證**：
+- `uv run pytest tests/test_fb_pipeline_status.py -q` → 5 passed
+- `uv run python scripts/check_alerts.py` → `breaches=0`
+
+**教訓**：
+1. **notification log 是歷史紀錄，不是當前狀態機**。
+2. live dashboard 若要做 triage，必須只讀 current condition source of truth，不要把「曾寄過信」直接等同於「還沒處理完」。
+3. 「resolved_at」這種人工欄位可以保留給 audit / human workflow，但不應成為 live health surface 的唯一去重或清警報機制。
+
+---
+
+## 2026-05-29 | `production_pending` 只算 `pending`，把 `pending_main_thread` 誤報成空池
+
+**問題**：handoff 與 `next_tasks.json` 明明仍有 14 筆 `pending_main_thread`（Paper 1/2/3/4/6 的 paper_review / paper_body / paper_decision backlog），但 `ops_dashboard.py` 的 `production_pending` 只統計 `status == "pending"`，導致 section 長期顯示：
+
+- `0 pending tasks`
+- status=`critical`
+- next=`refill pool`
+
+這會把「主線程 backlog 很滿」誤讀成「任務池空了需要補池」。
+
+**根因**：
+1. `ops_dashboard.py` L1 production section 對 `next_tasks.json` 的 status 分類過窄，只看 `pending`。
+2. 但 handoff / control-plane working convention 會把一部分不能給 agent 接的工放在 `pending_main_thread`。
+3. 因此 dashboard 與 handoff 對同一個 task pool 給出互相矛盾的 operational guidance。
+
+**Fix**：
+- `production_pending` 現在同時統計：
+  - `pending_count`
+  - `pending_main_thread_count`
+- 若 `pending=0` 但 `pending_main_thread>0`：
+  - section 改為 `warn`，不是 `critical`
+  - tldr 顯示 `0 pending tasks, but N pending_main_thread tasks`
+  - next 改成 `main-thread backlog exists; do not auto-refill agentable pool blindly`
+- 只在兩者都為 0 時才真正顯示 `refill pool`
+- 新增 regression test 鎖這個口徑
+
+**驗證**：
+- `uv run pytest tests/test_fb_pipeline_status.py -q` → 6 passed
+- `storage/ops/dashboard_latest.json` 現在為：
+  - `overall_status=warn`
+  - `production_pending.status=warn`
+  - `pending_main_thread_count=14`
+
+**教訓**：
+1. `pending_main_thread` 不是「非任務」，只是「不能派給一般 agent」；live dashboard 不能把它當不存在。
+2. 補池動作應建立在「可執行 backlog 真的為 0」之上，不是看單一狀態碼。
+3. Handoff 與 dashboard 若同時是 ops surface，必須對 task-pool status semantics 使用同一套口徑，否則會給出相反指令。

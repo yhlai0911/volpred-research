@@ -3,7 +3,7 @@ from __future__ import annotations
 import importlib.util
 import json
 from pathlib import Path
-from datetime import datetime
+from datetime import UTC, datetime
 
 
 def _load_module(name: str, rel_path: str):
@@ -45,7 +45,7 @@ def test_ops_dashboard_returns_zero_even_when_sections_are_critical(tmp_path, mo
     (repo / "storage" / "ops" / "cron_last_run.json").write_text("{}\n", encoding="utf-8")
     (repo / "storage" / "reports" / "trending_repost_log.json").write_text("[]\n", encoding="utf-8")
     (repo / "config" / "runtime_schedules.json").write_text('{"system_crontab":{"items":[]}}\n', encoding="utf-8")
-    recent = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
+    recent = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S")
     (repo / "storage" / "notifications" / "notification_log.json").write_text(
         json.dumps([{"timestamp": recent, "level": "critical", "subject": "boom"}], ensure_ascii=False),
         encoding="utf-8",
@@ -56,6 +56,89 @@ def test_ops_dashboard_returns_zero_even_when_sections_are_critical(tmp_path, mo
 
     rc = ops_dashboard.main()
     assert rc == 0
+
+
+def test_ops_dashboard_health_alerts_reflect_current_breaches_not_old_notifications(tmp_path, monkeypatch) -> None:
+    repo = tmp_path
+    (repo / "storage" / "reports").mkdir(parents=True)
+    (repo / "storage" / "ops").mkdir(parents=True)
+    (repo / "storage" / "notifications").mkdir(parents=True)
+    (repo / "config").mkdir(parents=True)
+
+    (repo / "storage" / "next_tasks.json").write_text("[]\n", encoding="utf-8")
+    (repo / "storage" / "reports" / "feed.json").write_text("[]\n", encoding="utf-8")
+    (repo / "storage" / "ops" / "cron_last_run.json").write_text("{}\n", encoding="utf-8")
+    (repo / "storage" / "reports" / "trending_repost_log.json").write_text("[]\n", encoding="utf-8")
+    (repo / "config" / "runtime_schedules.json").write_text('{"system_crontab":{"items":[]}}\n', encoding="utf-8")
+    (repo / "storage" / "notifications" / "notification_log.json").write_text(
+        json.dumps(
+            [{"timestamp": "2026-05-29T01:11:00", "level": "critical", "subject": "old alert", "resolved_at": None}],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(ops_dashboard, "REPO", repo)
+    monkeypatch.setattr(ops_dashboard, "http_ok", lambda url, timeout=8: True)
+    monkeypatch.setattr(
+        ops_dashboard,
+        "build_alert_condition_report",
+        lambda storage_dir="storage": {"conditions": [], "breach_count": 0},
+    )
+
+    import io
+    import contextlib
+
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        rc = ops_dashboard.main()
+    payload = json.loads(buf.getvalue())
+    health_section = next(s for s in payload["sections"] if s["section"] == "health_alerts_unhandled")
+
+    assert rc == 0
+    assert health_section["status"] == "ok"
+    assert health_section["breaches"] == []
+
+
+def test_ops_dashboard_production_pending_counts_pending_main_thread(tmp_path, monkeypatch) -> None:
+    repo = tmp_path
+    (repo / "storage" / "reports").mkdir(parents=True)
+    (repo / "storage" / "ops").mkdir(parents=True)
+    (repo / "storage" / "notifications").mkdir(parents=True)
+    (repo / "config").mkdir(parents=True)
+
+    tasks = [
+        {"id": "t1", "status": "pending_main_thread", "task_type": "paper_review"},
+        {"id": "t2", "status": "pending_main_thread", "task_type": "paper_body"},
+    ]
+    (repo / "storage" / "next_tasks.json").write_text(json.dumps(tasks, ensure_ascii=False), encoding="utf-8")
+    (repo / "storage" / "reports" / "feed.json").write_text("[]\n", encoding="utf-8")
+    (repo / "storage" / "ops" / "cron_last_run.json").write_text("{}\n", encoding="utf-8")
+    (repo / "storage" / "reports" / "trending_repost_log.json").write_text("[]\n", encoding="utf-8")
+    (repo / "storage" / "notifications" / "notification_log.json").write_text("[]\n", encoding="utf-8")
+    (repo / "config" / "runtime_schedules.json").write_text('{"system_crontab":{"items":[]}}\n', encoding="utf-8")
+
+    monkeypatch.setattr(ops_dashboard, "REPO", repo)
+    monkeypatch.setattr(ops_dashboard, "http_ok", lambda url, timeout=8: True)
+    monkeypatch.setattr(
+        ops_dashboard,
+        "build_alert_condition_report",
+        lambda storage_dir="storage": {"conditions": [], "breach_count": 0},
+    )
+
+    import io
+    import contextlib
+
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        rc = ops_dashboard.main()
+    payload = json.loads(buf.getvalue())
+    section = next(s for s in payload["sections"] if s["section"] == "production_pending")
+
+    assert rc == 0
+    assert section["status"] == "warn"
+    assert section["pending_count"] == 0
+    assert section["pending_main_thread_count"] == 2
 
 
 def test_audit_terminal_or_handoff_statuses_include_interactive() -> None:
