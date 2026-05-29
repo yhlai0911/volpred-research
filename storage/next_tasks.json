@@ -13884,7 +13884,7 @@
     "description": "Boss 2026-05-29 directive: Paper 3 reframe 擴大至其他股市.\n\nSetup:\n- Markets: SPY (US), 0050.TW (Taiwan), ^HSI (Hong Kong), ^N225 (Japan), ^STOXX50E (Europe)\n- N=10 pairs (5 markets × C(5,2) - 上界 — pick 8-10 highest data quality + relevance)\n- 同 Joe upper-tail copula vs DCC, λ_L threshold scan\n- 預期: 已開發 vs 新興 cross-market pairs 可能 λ_L 偏低 (copula advantage)\n- 已開發 cross-market pairs (e.g. SPY-EuroStoxx) 已知高 correlation → λ_L 可能 >0.3 (NULL)\n\nOutput: experiments/paper3_E2_cross_market_copula/ + results.json.\n預估 3-4 hr compute.",
     "task_type": "experiment",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "tags": [
       "experiment",
       "paper3",
@@ -13899,7 +13899,9 @@
     "claimed_by": "hourly-11",
     "claimed_at": "2026-05-29T03:09:12.327118+00:00",
     "claim_session_id": "eef14df5bc98",
-    "started_at": "2026-05-29T03:09:17.919235+00:00"
+    "started_at": "2026-05-29T03:09:17.919235+00:00",
+    "completed_at": "2026-05-29T04:11:57.163822+00:00",
+    "result": "Paper3 E2 cross-market copula 10 pairs done (compute queue 471s). Verdict NULL pair-level (1/10 Harvey sig: TW0050-N225 Student-t DM_t=3.92). By-region: developed 0/3, dev-emerging 0/4, asia-intra 1/3. Spearman ρ(λ_L_clayton, DM_clayton)=0.903 p=0.0003. K entry: Paper3_E2_cross_market_copula (NULL). research_program.md Paper3 reframe extension audit updated. E3 commodities scope pending boss decision."
   },
   {
     "id": "Paper3_expansion_E3_commodities_copula",

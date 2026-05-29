@@ -31788,5 +31788,75 @@
       "K1172"
     ],
     "created_at": "2026-05-29T02:14:45.185412+00:00"
+  },
+  {
+    "id": "Paper3_E2_cross_market_copula",
+    "item_id": "Paper3_E2_cross_market_copula",
+    "category": "volatility_modeling",
+    "title": "Paper3_E2 跨股市 copula λ_L threshold — 10 pairs 1/10 Harvey sig (asia_intraregional only)",
+    "content": "[提出: Boss directive 2026-05-29 Paper 3 reframe E2, 執行: hourly-11 claim → compute queue (471s), 審查: hourly-12 主線程 cross-pair_table synthesis] Paper3 E2 跨股市 copula (DCC vs Student-t-copula vs Clayton-copula) 10 pairs across 5 equity markets (SPY/0050.TW/^HSI/^N225/^STOXX50E). Sample 2010-01-01 to 2026-05-28, OOS 2015-06-01 onwards, refit_every=63, window=1250, MC=5000, seed=42. Regions: developed_cross_region n=3 (SPY-STOXX50/SPY-N225/STOXX50-N225), developed_vs_emerging_asia n=4 (SPY-HSI/SPY-TW0050/STOXX50-HSI/STOXX50-TW0050), asia_intraregional n=3 (HSI-N225/TW0050-HSI/TW0050-N225). Core finding: 1/10 pairs Harvey |t|>3 copula advantage (TW0050-N225 Student-t DM_t=3.92). By-region: developed_cross_region 0/3 Harvey sig; developed_vs_emerging_asia 0/4 sig; asia_intraregional 1/3 sig (TW0050-N225). Spearman ρ(λ_L_clayton, dm_clayton)=0.903, p=0.0003 highly sig — λ_L 大 pair 越偏好 Clayton; Spearman ρ(λ_L_t, dm_t)=0.406, p=0.244 not sig for Student-t. QLIKE absolute differences all <0.01. Compared to E1 (NULL 0/12 + Spearman non-sig), E2 shows weak partial pattern at aggregate level but individual-pair Harvey threshold mostly NOT crossed. Decision: NULL at pair level (matching E1 framing), with PARTIAL pattern at regional/aggregate level. Asia intraregional (TW0050-N225 specifically) is single positive — likely driven by high λ_L (0.071) + high full-sample corr (0.586) + Asian trading-hour overlap. E3 commodities scope decision PENDING per boss directive — do NOT immediately rewrite paper body.",
+    "evidence": [
+      "10 pairs tested, 1/10 best_copula_harvey=true (TW0050-N225 Student-t DM_t=3.92)",
+      "any_copula_beats_dcc_harvey=true (single pair only)",
+      "pairs_with_copula_advantage_harvey=['TW0050-N225']",
+      "by_region.developed_cross_region: 3 pairs, lambda_L_clayton_mean=0.191, DM_clayton_mean=0.214, 0/3 sig",
+      "by_region.developed_vs_emerging_asia: 4 pairs, lambda_L_clayton_mean=0.091, DM_clayton_mean=-0.711, 0/4 sig",
+      "by_region.asia_intraregional: 3 pairs, lambda_L_clayton_mean=0.398, DM_clayton_mean=1.138, 1/3 sig",
+      "Spearman lambdaL_vs_dm_clayton: rho=0.903, p=0.0003 (highly significant)",
+      "Spearman lambdaL_vs_dm_t: rho=0.406, p=0.244 (not significant)",
+      "TW0050-N225 Harvey-sig pair: lambda_L_clayton=0.416, full_sample_corr=0.586, Student-t best",
+      "QLIKE absolute diffs all <0.01 across 10 pairs (DCC vs best_copula)",
+      "Runtime 471.8s (compute queue); Data yfinance 5 markets + ^VIX",
+      "Tickers used: SPY=SPY, TW0050=0050.TW, HSI=^HSI, N225=^N225, STOXX50=^STOXX50E"
+    ],
+    "confidence": 0.8,
+    "verdict": "NULL",
+    "experiment_id": "Paper3_E2",
+    "experiment_path": "experiments/paper3_E2_cross_market_copula/",
+    "reviewer_source": "hourly-12 main thread synthesis from cross_pair_table + by_region aggregates (NULL pair-level, PARTIAL aggregate-level Spearman pattern); no separate Codex review run",
+    "caveats": "10 pairs sample (low power); bivariate copula only; daily frequency; unconditional full-sample lambda_L (not conditional rolling); Harvey |t|>3 threshold conservative for n_OOS~2700; TW0050-N225 single-positive could be type-I error or genuine — needs sensitivity (different OOS start / window / refit_every); Spearman ρ=0.903 strong but small sample n=10 (p=0.0003 should be Bonferroni-corrected if claimed); no formal multivariate vine copula tested",
+    "parent_experiments": [
+      "K1100b",
+      "K1100",
+      "K1092",
+      "K1142",
+      "K1172",
+      "Paper3_E1"
+    ],
+    "key_metrics": {
+      "n_pairs": 10,
+      "harvey_sig_count": 1,
+      "harvey_sig_pairs": [
+        "TW0050-N225"
+      ],
+      "spearman_rho_lambdaL_vs_dm_clayton": 0.903,
+      "spearman_p_lambdaL_vs_dm_clayton": 0.0003,
+      "spearman_rho_lambdaL_vs_dm_t": 0.406,
+      "spearman_p_lambdaL_vs_dm_t": 0.244,
+      "runtime_seconds": 471.8,
+      "data_period": "2010-01-01 to 2026-05-28",
+      "oos_start": "2015-06-01"
+    },
+    "follow_up_suggested": [
+      "Sensitivity: TW0050-N225 robustness under different OOS start / refit_every",
+      "E3 commodity scope decision: pending boss review of E1+E2 pattern",
+      "Multivariate vine copula on Asia intraregional cluster (HSI-N225-TW0050)",
+      "Conditional lambda_L (rolling window) vs unconditional full-sample comparison",
+      "Bonferroni correction on Spearman cluster if claimed as robust pattern"
+    ],
+    "tags": [
+      "paper-3",
+      "copula",
+      "cross-market",
+      "lambda-L",
+      "tail-dependence",
+      "DCC",
+      "Student-t-copula",
+      "Clayton-copula",
+      "harvey-rule",
+      "asia-intraregional",
+      "compute-queue"
+    ],
+    "created_at": "2026-05-29T04:11:17.312906+00:00"
   }
 ]
