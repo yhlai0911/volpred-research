@@ -15344,5 +15344,98 @@
     "started_at": "2026-05-30T18:11:03.312704+00:00",
     "completed_at": "2026-05-30T18:11:03.694495+00:00",
     "result": "Dedup catch (Layer 2 grep): mile_ef333028 已 cover K861 finding（4839 days, oil drops +4.8pp t=5.82, oil spikes +0.7pp t=0.70；general 語氣）。已補 mile_ef333028 details.experiment_refs=[K861] 防 publication_candidates 再誤判 uncovered。文章 audience_backfill 2026-05-26 標 research 是 over-classification（內容語氣明顯 general）— 此為 audience classifier 校準問題不在本 task scope。"
+  },
+  {
+    "id": "K893_article_general",
+    "title": "K893: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K893 has verdict signal (score=3, reasons=['paradigm/decisive null', 'robust inference']) but no general article in feed.json.  Verdict preview: [提出: arXiv:2602.03903, 執行: Claude] RWC λ=0.05: 3/3 Trinity PASS (same as HistSim) but 3-4% tighter VaR intervals. λ=0.1 also works. λ=0.2 too aggressive (2/3 FAIL). Student-t fails QQQ 1%. HistSim remains robust baseline (no tuning needed). RWC is useful refinement, not paradigm ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K893",
+    "tags": [
+      "conformal",
+      "regime",
+      "VaR",
+      "RWC",
+      "HistSim",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-30T19:08:28+00:00"
+  },
+  {
+    "id": "K951_article_general",
+    "title": "K951: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K951 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] Copula-GARCH hedge on 3 high-corr ETF pairs: SPY-QQQ(r=0.94), GLD-SLV(r=0.76), SPY-EWG(r=0.79)。OOS 2019-2025。Rolling OLS(252)全勝：SPY-QQQ HE=0.879, GLD-SLV 0.570, SPY-EWG 0.625。Copula-GARCH全敗：0.821, 0.442, 0.561。DM test全Harvey顯著(copula更差)。原因：Student-t copul",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K951",
+    "tags": [
+      "hedging",
+      "copula",
+      "ETF",
+      "tail-dependence",
+      "Rolling-OLS",
+      "null-result",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-30T19:08:28+00:00"
+  },
+  {
+    "id": "K1162_article_general",
+    "title": "K1162: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1162 has verdict signal (score=2, reasons=['methodology/mechanism lesson']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1151 (US) + K1157 (JP) continuous EAV 全 NS 後做 mechanism control: 分高低 analyst coverage sub-sample, 檢驗 'noise-masks-true-effect' 假說。Pool 分: yfinance numberOfAnalystOpinions median=32.5 → HIGH n=15 (MSFT/NVDA/GOOGL/META/AMZN 等 33-64 analysts), LOW n=15 (BRK",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1162",
+    "tags": [
+      "K1162",
+      "Paper2",
+      "analyst-coverage",
+      "binary-fundamental",
+      "K1151-K1157-followup",
+      "mechanism-confirmed",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-30T19:08:28+00:00",
+    "claimed_by": "hourly-03",
+    "claimed_at": "2026-05-30T19:09:15.136813+00:00",
+    "claim_session_id": "787cb319b185",
+    "started_at": "2026-05-30T19:09:15.425241+00:00",
+    "completed_at": "2026-05-30T19:17:52.274079+00:00",
+    "result": "Draft published: mile_3f18cb8e (audience=research auto-override due to stats density); 1500-1800字 + 2 圖 + null result mechanism 角度; anti-ai gate PASS (1 MUST fix, 2 WARN); commit b144f691"
+  },
+  {
+    "id": "K708_article_general_v2",
+    "title": "K708: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K708 has verdict signal (score=2, reasons=['paradigm/decisive null']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: session 收尾, 執行: Claude] 7 settled(不再重訪), 7 actionable(下週), 8 unexplored(新方向)。Tier 1: messaging fixes + papers + NFP。Tier 2: HAR-RV 5min + TSMC + /guide。Tier 3: intraday alpha + conditional corr + bond VT。5 efficiency lessons: Codex mandatory, cross-OOS, smooth weights, stop ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K708",
+    "tags": [
+      "roadmap",
+      "next-session",
+      "priorities",
+      "tier-matrix",
+      "session-close",
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-30T19:08:28+00:00"
   }
 ]
