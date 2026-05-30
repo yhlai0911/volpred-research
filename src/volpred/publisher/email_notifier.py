@@ -161,8 +161,12 @@ def _email_shell(title: str, subtitle: str | None, body_html: str) -> str:
           <style>
             h1,h2,h3{{color:#0f172a;line-height:1.35;margin:1.2em 0 .5em}}
             p{{margin:.8em 0}}
-            table{{width:100%;border-collapse:collapse;margin:1em 0;font-size:14px}}
-            th,td{{border:1px solid #d1d5db;padding:8px 10px;text-align:left;vertical-align:top}}
+            /* table-layout:fixed + word-break 防 mobile 溢出（2026-05-30 boss 回饋：
+               HTML 表格超過頁面寬度且無法捲動）。fixed 讓表格 honor width:100%、
+               cell 內長文字/路徑/hash 換行而非撐破容器 viewport。 */
+            table{{width:100%;border-collapse:collapse;margin:1em 0;font-size:14px;table-layout:fixed}}
+            th,td{{border:1px solid #d1d5db;padding:8px 10px;text-align:left;vertical-align:top;word-break:break-word;overflow-wrap:anywhere}}
+            td code,th code{{word-break:break-all;white-space:normal}}
             th{{background:#f9fafb}}
             code{{background:#f3f4f6;color:#111827;border-radius:4px;padding:2px 5px;font-size:13px;font-family:'SF Mono',Menlo,Monaco,Consolas,monospace}}
             pre{{background:#f9fafb;color:#111827;border:1px solid #e5e7eb;padding:14px;border-radius:10px;overflow:auto;font-size:13px;line-height:1.5;font-family:'SF Mono',Menlo,Monaco,Consolas,monospace}}
