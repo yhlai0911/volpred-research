@@ -5259,7 +5259,7 @@
   {
     "id": "Paper2_errata_Table3_full_rewrite",
     "title": "Paper 2 ERRATA: Table 3 全面重寫 (K1175 canonical) + Data section + abstract",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 4,
     "created_at": "2026-04-17T16:42:10+08:00",
     "description": "K1175 audit 發現 Paper 2 Table 3 紙面 Sharpe 0.729 與 Return/Vol (10.2/20.8=0.490) 算術矛盾 — **research integrity 問題**。Paper 2 投稿 PBFJ 前必做 errata： (1) main.tex Table 3 全 cells 改為 K1175 canonical (B&H Sharpe=0.799, MDD=-33.83%, Return=14.48%, Vol=18.13%; EWMA/GARCH/GJR VT 也改 K1175); (2) Data section 明載 '0050.TW data from 2009-01 (yfinance earliest)，缺 2008 crisis'; (3) Methodology section 明載 daily rebalancing (不 monthly); (4) Abstract 更新敘述; (5) Section 4 'Sharpe 從 0.729 到 0.796' 改為 K1175 數字. 主線程 body edit only (禁用 agent 改 .tex).",
@@ -5278,7 +5278,13 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "hourly-20",
+    "claimed_at": "2026-05-30T12:09:13.913312+00:00",
+    "claim_session_id": "4d6837ceff03",
+    "started_at": "2026-05-30T12:09:20.672788+00:00",
+    "completed_at": "2026-05-30T12:15:27.642125+00:00",
+    "result": "K1175 canonical errata 套用 body.tex + body_v3.tex: (1) 8.63/VIX Sharpe 0.690→1.137, MDD -15.3%→-13.7% (line 264, 273, 308, 310, 486) (2) B&H 2016-2026 0.729→1.127 (K1175 sub-period reproduction) (3) -37.6%→-33.8% (4) narrative 重寫承認 Sharpe 與 B&H 持平、20pp MDD 改善為真效應 (5) main_v3.pdf 48p + main.pdf 54p compile OK + Supabase sync 20:15 CST."
   },
   {
     "id": "Paper2_experiments_md_add_K515_K516_K512",
