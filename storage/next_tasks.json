@@ -15371,7 +15371,7 @@
     "title": "K951: write general-audience article (auto-discovered uncovered K)",
     "description": "K K951 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] Copula-GARCH hedge on 3 high-corr ETF pairs: SPY-QQQ(r=0.94), GLD-SLV(r=0.76), SPY-EWG(r=0.79)。OOS 2019-2025。Rolling OLS(252)全勝：SPY-QQQ HE=0.879, GLD-SLV 0.570, SPY-EWG 0.625。Copula-GARCH全敗：0.821, 0.442, 0.561。DM test全Harvey顯著(copula更差)。原因：Student-t copul",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K951",
@@ -15386,7 +15386,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-30T19:08:28+00:00"
+    "created_at": "2026-05-30T19:08:28+00:00",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-05-30T20:09:28.444860+00:00",
+    "claim_session_id": "3ff7812b3cd9",
+    "started_at": "2026-05-30T20:09:32.353530+00:00",
+    "completed_at": "2026-05-30T20:28:53.887739+00:00",
+    "result": "mile_a1507cf2 published draft (audience=research, 1709 字, 2 圖 hedge_comparison + dm_tstats); anti_ai_gate PASS; reviewer=agy CONDITIONAL_PASS (Codex usage limit fallback, valid per 2026-04-28 SOP); K931 對照已補 (Copula nu=5.74 個股 vs nu=30.0 ETF 對比)"
   },
   {
     "id": "K1162_article_general",
@@ -15421,7 +15427,7 @@
     "title": "K708: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K708 has verdict signal (score=2, reasons=['paradigm/decisive null']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: session 收尾, 執行: Claude] 7 settled(不再重訪), 7 actionable(下週), 8 unexplored(新方向)。Tier 1: messaging fixes + papers + NFP。Tier 2: HAR-RV 5min + TSMC + /guide。Tier 3: intraday alpha + conditional corr + bond VT。5 efficiency lessons: Codex mandatory, cross-OOS, smooth weights, stop ",
     "priority": 4,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K708",
@@ -15436,6 +15442,9 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-30T19:08:28+00:00"
+    "created_at": "2026-05-30T19:08:28+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-05-30T20:09:28+00:00",
+    "blocked_note": "K708 內容為 'Next Session Roadmap' meta-planning（task 列表/lesson 整理），非可發表 research result。v1 已 retry 失敗根因即此。改標 deprecated，不再重派。"
   }
 ]
