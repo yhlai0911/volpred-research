@@ -1,0 +1,7 @@
+{
+  "alert_type": "STRATEGY_METRICS_MISSING",
+  "severity": "warn",
+  "timestamp": "2026-05-30T00:11:14Z",
+  "detail": "storage/strategy_metrics.json does not exist. File has been missing across multiple patrol cycles. Strategy metrics page will be unavailable. Needs regeneration via uv run volpred ops compute-metrics or equivalent.",
+  "affected_path": "storage/strategy_metrics.json"
+}
