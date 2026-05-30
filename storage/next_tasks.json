@@ -14980,5 +14980,34 @@
     "started_at": "2026-05-30T02:59:27.400128+00:00",
     "completed_at": "2026-05-30T03:00:30.659575+00:00",
     "result": "Added publisher-side last-mile tag sanitizer in src/volpred/publisher/publisher.py: all articles now hard-cap user-facing tags at 8, and general audience strips statistical jargon tags. Audited feed.json and found 4 over-cap records currently, including K1034; future publishes are now blocked from leaking 9+ tags."
+  },
+  {
+    "id": "email-11828-2ba5ec",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] 自主 loop fire 14:07 — K430 VRP 文章 draft 發佈",
+    "description": "Gmail UID: 11828\nMessage-ID: <552D229E-D54D-4762-BF2D-A27AB8CDCE6B@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Sat, 30 May 2026 14:26:50 +0800\nSubject: Re: [VolPred Alert][INFO] 自主 loop fire 14:07 — K430 VRP 文章 draft 發佈\n\n--- 用戶回信內容 ---\n波動率預測研究系統volpred.zeabur.app\n檢視過去任一年投入後至今的年化報酬率和irr和相關指標的差異寫成一篇文章 做trending article也是連結文章的延續研究探討 −−\n\nVolPred <yihao.lai@gmail.com> 於 2026年5月30日 14:21 寫道：\n\n﻿\r\n\r\n  \r\n    \r\n    \r\n    自主 loop fire 14:07 — K430 VRP 文章 draft 發佈\r\n  \r\n  \r\n    \r\n      \r\n        \r\n          VolPred 管理通知\r\n          自主 loop fire 14:07 — K430 VRP 文章 draft 發佈\r\n          Alert level: info\n\n\r\n        \r\n        \r\n          \r\n          INFO自主 loop fire 14:07 — K430 VRP 文章發佈\r\n完成項目\r\n\r\n\r\n\r\n項目\r\n內容\r\n\r\n\r\n\r\n\r\nTask\r\nK430_article_general (daily_article P4) → succeeded\r\n\r\n\r\nDraft slug\r\nmile_5f57d3f9\r\n\r\n\r\n標題\r\n恐慌剛過，市場最安靜：VRP 極端低點後的波動率規律\r\n\r\n\r\n字數\r\n~1572 中文字\r\n\r\n\r\nAudience\r\nresearch（publisher 自動判定，含統計術語）\r\n\r\n\r\nStatus\r\ndraft（進池，等節奏釋出 — 非事件驅動文章不直發）\r\n\r\n\r\nImage\r\nk430_vrp_asymmetry.png（兩格並排：Q1-Q5 方向準確率 + 極端 VRP 後波動率變化）\r\n\r\n\r\nAnti-AI gate\r\nPASS（破折號密度 8.4→0）\r\n\r\n\r\nCommit\r\n8d8add61\r\n\r\n\r\nAgent model\r\nsonnet medium\r\n\r\n\r\n\r\n關鍵數字驗證（已對 experiments/k430/k430_vrp_predictability_results.json）\r\n\r\n\r\n\r\n文章引用\r\nresults.json 實值\r\nOK\r\n\r\n\r\n\r\n\r\nQ1 方向準確率 87.6%\r\n87.6 ✓\r\n✓\r\n\r\n\r\n極端低 VRP (p10) 後波動率下降機率 92.5%\r\n92.45%\r\n✓\r\n\r\n\r\n平均後續 21d 報酬 +4.45%\r\n4.4537%\r\n✓\r\n\r\n\r\nOOS QLIKE 改善 16.7%\r\n16.68%\r\n✓\r\n\r\n\r\n\r\n派工決策（依規則）\r\n\r\nPhase 0：無 email_reply pending ✓\r\nPhase 0.5：reader-facing scan 今日已執行（trending +1, member_qa no-pending）✓\r\nPhase A：無 compute_queue followup pending ✓\r\nPhase B：pending agentable 僅 2 條（K430/K450 daily_article P4），main_thread 7 條 paper 類（hourly 不可派）。今日 work_log diversity OK（daily=1, paper_body=1, platform_ops=2, trending=1）。挑 K430（evidence 完整）。\r\n模型分流：daily_article → sonnet medium ✓\r\n\r\n系統訊號\r\n\r\nDashboard overall=warn（1 breach: FB pipeline 1 post pending sync — mile_783e6f49 actionable，留下次處理；非 critical）\r\nPending pool 派完剩 1 條（K450）；refill 機制 floor=4 自動補充\r\nWorking tree clean（agent 已自行 commit）\r\n\r\n待 / 下次\r\n\r\nK450_article_general 待派（pool 自動補充應已啟動）\r\nFB pending sync mile_783e6f49：可主線程推或 hourly cron 接\r\n7 條 paper main_thread tasks（Paper 2/3/4/5/6 errata + BTC_GAS negative paper）持續等互動 session\n\n--- 原始助理寄出內容（引用部分） ---\n(no quote)\n",
+    "task_type": "email_reply",
+    "priority": 2,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-05-30T06:30:14.753476+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11828,
+    "email_message_id": "<552D229E-D54D-4762-BF2D-A27AB8CDCE6B@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] 自主 loop fire 14:07 — K430 VRP 文章 draft 發佈",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-05-30T07:07:27.203590+00:00",
+    "claim_session_id": "b68b61594d83",
+    "started_at": "2026-05-30T07:08:02.153444+00:00",
+    "completed_at": "2026-05-30T07:32:04.786078+00:00",
+    "result": "老闆指派延續文章：真實歷史進場年份的 TWR vs IRR 分歧（接 DCA/IRR 文）。已派 K1407 實驗（worktree，用 K1406 真實資料），回來後寫文+發 feed+FB。已回信確認。\n\nK1407 TWR vs IRR 分歧文章已發佈 (mile_4989d730 published, live 200): https://volpred.zeabur.app/reports/mile_4989d730 — SPY 20 entry year TWR-IRR 中位差 -1.14pp, 0050.TW 16 entry year 中位差 -9.17pp, pooled 中位 -3.15pp, corr(early-late, TWR-IRR)=+0.56 支持 path 機制。Codex 暫達 daily quota, 已附 review_status 獨立解析驗證 (TWR factor chain, IRR closed-form, 36/36 lump IRR==CAGR)。",
+    "plan": "## 計畫（K1407 延續研究 + trending article）\n\n| 步驟 | 動作 | 預期產出 | ETA |\n|---|---|---|---|\n| 1 | K1407 實驗：SPY 1994-2025 + 0050 2009-2025 各 entry year lump-sum hold to today | results.json + 2-3 真圖 | 15min |\n| 2 | 寫 trending article（anti-ai-style）：「過去任一年進場至今 — 你進場的時點，比你選哪個策略更重要」 | draft.md | 15min |\n| 3 | anti-ai gate + feed-publisher published（user-assigned trending → 直發不入草稿池） | feed slug | 5min |\n| 4 | Commit + close email_reply task | git commit | 2min |\n| 5 | FB Ivan Lai 雙發 → 留 followup（需 Chrome MCP，hourly cron 無法） | task `K1407_fb_dual_publish` | followup |\n\n**關鍵指標**：每個 entry year 投入到 2026-05-30 的 CAGR / IRR / max DD / break-even months。Lump-sum 下 IRR ≡ CAGR 是純 fact；本文重點是「不同 entry year 結果分佈」遠大於 DCA vs Lump 差異 — 讀者最在意「我這時進場會不會虧」的真實答案。\n\n**研究誠實**：lookahead 0（從 entry day 起算）；資料來源 yfinance；數字一律 ground 在 results.json。\n",
+    "linked_task_ids": [
+      "K1407_lump_entry_year_trending"
+    ],
+    "needs_close_reply": true
   }
 ]
