@@ -1,0 +1,342 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-05-30",
+  "week_range": "2026-05-29 → 2026-06-05",
+  "totals": {
+    "input_tokens": 22,
+    "output_tokens": 2911,
+    "cache_read_tokens": 318681,
+    "cache_create_tokens": 135172,
+    "billable_total": 138105,
+    "assistant_messages": 14,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.6462
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 22,
+      "output_tokens": 2911,
+      "cache_read_tokens": 318681,
+      "cache_create_tokens": 135172,
+      "messages": 14,
+      "estimated_cost_usd": 0.6462
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 10,
+      "output_tokens": 1350,
+      "cache_read_tokens": 125104,
+      "cache_create_tokens": 66860,
+      "messages": 6,
+      "billable_total": 68220,
+      "estimated_cost_usd": 0.3085,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "token_report": {
+      "input_tokens": 6,
+      "output_tokens": 745,
+      "cache_read_tokens": 96941,
+      "cache_create_tokens": 32595,
+      "messages": 4,
+      "billable_total": 33346,
+      "estimated_cost_usd": 0.1625,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    },
+    "bash_other": {
+      "input_tokens": 5,
+      "output_tokens": 710,
+      "cache_read_tokens": 64247,
+      "cache_create_tokens": 34471,
+      "messages": 3,
+      "billable_total": 35186,
+      "estimated_cost_usd": 0.1592,
+      "emoji": "💭",
+      "description": "其他 Bash 操作"
+    },
+    "investigation": {
+      "input_tokens": 1,
+      "output_tokens": 106,
+      "cache_read_tokens": 32389,
+      "cache_create_tokens": 1246,
+      "messages": 1,
+      "billable_total": 1353,
+      "estimated_cost_usd": 0.016,
+      "emoji": "🔍",
+      "description": "閱讀 / 搜尋檔案"
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 6,
+      "billable_total": 68220,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 6,
+          "billable_total": 68220
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "non-text assistant message",
+          "messages": 3,
+          "billable_total": 35186
+        },
+        {
+          "name": "other",
+          "messages": 3,
+          "billable_total": 33034
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 3,
+          "billable_total": 35186
+        },
+        {
+          "name": "⏱ 開始 2026-05-30 執行 token 用量日報",
+          "messages": 1,
+          "billable_total": 30519
+        },
+        {
+          "name": "網路逾時下載 ripser，改用直接 Python 執行。",
+          "messages": 1,
+          "billable_total": 2024
+        },
+        {
+          "name": "今天是週五，需要執行每日 + 週報。",
+          "messages": 1,
+          "billable_total": 491
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 3,
+      "billable_total": 35186,
+      "family_breakdown": [
+        {
+          "name": "other bash",
+          "messages": 2,
+          "billable_total": 32543
+        },
+        {
+          "name": "inline parsing/json inspection",
+          "messages": 1,
+          "billable_total": 2643
+        }
+      ],
+      "prefix_breakdown": [
+        {
+          "name": "TZ='Asia/Taipei'",
+          "messages": 1,
+          "billable_total": 30519
+        },
+        {
+          "name": "python3 -c \"import",
+          "messages": 1,
+          "billable_total": 2643
+        },
+        {
+          "name": "which",
+          "messages": 1,
+          "billable_total": 2024
+        }
+      ],
+      "top_first_lines": [
+        {
+          "name": "TZ='Asia/Taipei' date '+%Y-%m-%d %H:%M:%S'",
+          "messages": 1,
+          "billable_total": 30519
+        },
+        {
+          "name": "python3 -c \"import json, subprocess, re, sys; from datetime import datetime, timedelta, timezone; from pathlib import Path; from collections import Counter, defaultdict; print('OK'",
+          "messages": 1,
+          "billable_total": 2643
+        },
+        {
+          "name": "which python3 && python3 --version 2>&1",
+          "messages": 1,
+          "billable_total": 2024
+        }
+      ]
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 1,
+      "cache_create_tokens": 135172,
+      "billable_total": 138105,
+      "cache_create_share_pct": 97.9,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "63bc9a48-4bbe-4c02-b6d9-15fa88621464",
+          "messages": 14,
+          "billable_total": 138105,
+          "cache_create_tokens": 135172,
+          "cache_read_tokens": 318681,
+          "duration_minutes": 0.8,
+          "cache_create_share_pct": 97.9,
+          "first_ts": "2026-05-30T14:43:58.348000+00:00",
+          "last_ts": "2026-05-30T14:44:48.809000+00:00"
+        }
+      ]
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "53fff88",
+      "message": "Ops patrol report 2026-05-30T20:12Z"
+    },
+    {
+      "sha": "a450f7b",
+      "message": "ops(hourly-19): paper_review_mile_cbb93ff8 PASS (K1202 article, agy fallback; Co"
+    },
+    {
+      "sha": "02625dd",
+      "message": "ops(fb): K1409 月月配文 FB 排程明天20:00 + handoff 2-followup（留言連結待補）"
+    },
+    {
+      "sha": "171e419",
+      "message": "publish(trending): K1409 高股息ETF月月配1萬模擬 (user-assigned, ChatGPT對話延伸)"
+    },
+    {
+      "sha": "7958ffe",
+      "message": "experiment(K1409): 高股息ETF月月配1萬 bootstrap 模擬 (user-assigned)"
+    },
+    {
+      "sha": "8e5fb7d",
+      "message": "ops(hourly-18): K1081 article general task succeeded — mile_811bfc61 (audience=r"
+    },
+    {
+      "sha": "51cfbfb",
+      "message": "publish(K1081): EEM 五資產跨市場文章 — VIX 平方項在新興市場的 Harvey PASS 結果"
+    },
+    {
+      "sha": "1d32f52",
+      "message": "ops(hourly-17): Paper3_D2 errata task verify-and-close"
+    },
+    {
+      "sha": "db721fd",
+      "message": "ops(fb): K1408 文 FB 排程明早9:00 + handoff follow-up（留言連結待發後補）"
+    },
+    {
+      "sha": "6073469",
+      "message": "publish(K450): daily_article — 兩個都有用的指標加在一起卻沒更厲害"
+    },
+    {
+      "sha": "a8a8ca1",
+      "message": "publish(trending): K1408 進場時機是否重要 — 擇時 NULL 正確版文章 (user-assigned)"
+    },
+    {
+      "sha": "65f7d01",
+      "message": "experiment(K1408): 進場時點顯著性 — 擇時 NULL，差異全來自 horizon (user-assigned)"
+    },
+    {
+      "sha": "71bac2e",
+      "message": "ops(fb): K1407 TWR vs IRR 延續文 FB 發佈完成 — 寫回 fb_post_status"
+    },
+    {
+      "sha": "03d5a27",
+      "message": "publish(K1407): TWR vs IRR 分歧 trending article (user-assigned 延續)"
+    },
+    {
+      "sha": "6df60df",
+      "message": "publish(trending): K1407 TWR vs IRR 延續文章 (user-assigned follow-up)"
+    },
+    {
+      "sha": "6215b66",
+      "message": "experiment(K1407): 真實進場年份 TWR vs IRR 分歧 (延續 DCA-IRR 研究)"
+    },
+    {
+      "sha": "d2083ac",
+      "message": "publish(K430): VRP 極端低點波動率不對稱文章 — draft mile_5f57d3f9"
+    },
+    {
+      "sha": "52c1978",
+      "message": "Ops patrol report 2026-05-30T14:12Z"
+    },
+    {
+      "sha": "2b0de1e",
+      "message": "K1372_article_general task closed succeeded | next_tasks status update (hourly-1"
+    },
+    {
+      "sha": "0022b94",
+      "message": "K1372_article_general | BTC 半減期波動率實際下降，三次一致但樣本不足為鐵律 (mile_838a91bc)"
+    },
+    {
+      "sha": "b9a6d23",
+      "message": "ops(fb): K1406 兩篇 trending FB 雙發佈完成 — 寫回 fb_post_status (user-assigned)"
+    },
+    {
+      "sha": "c208f7d",
+      "message": "publish(trending): K1406 DCA-vs-Lump + dip-vs-fixed 兩篇讀者文章 (user-assigned)"
+    },
+    {
+      "sha": "ba44af3",
+      "message": "experiment(K1406): 投資時機策略 conditional bootstrap (DCA vs Lump / dip vs fixed)"
+    },
+    {
+      "sha": "6a834de",
+      "message": "K1109_article_general | pre-registration vs cherry-pick methodology lesson publi"
+    },
+    {
+      "sha": "8d4a3bd",
+      "message": "K1039_article_general | A4f multi-horizon VaR 一般讀者 + publisher tag-cap enforceme"
+    },
+    {
+      "sha": "36299e7",
+      "message": "platform_ops | followup task: publisher tag-cap enforcement (K1034 article 9 tag"
+    },
+    {
+      "sha": "165b833",
+      "message": "K1034_article_general | CF-Rolling VaR Trinity 6/6 perfect — Rolling vs Expandin"
+    },
+    {
+      "sha": "33cb399",
+      "message": "K1022_article_general | A4f cross-asset Student-t article published (mile_f484ad"
+    },
+    {
+      "sha": "a8403d3",
+      "message": "trending_repost done | email mobile table overflow fix + next_tasks claim"
+    },
+    {
+      "sha": "213556d",
+      "message": "trending_repost_2026_05_30_ai波動 | 輝達狂賺八百億，選擇權市場卻在問：下一步還能信嗎？"
+    },
+    {
+      "sha": "f258522",
+      "message": "Paper1_body_GLD_section_rewrite_per_forensic | GLD rolling-γ revised to K903 can"
+    },
+    {
+      "sha": "38ead54",
+      "message": "fix(dispatch): pin CLAUDE_BIN 2.1.156 — claude 2.1.157 launchd auth regression"
+    },
+    {
+      "sha": "12db596",
+      "message": "fix(auth-preflight): backoff'd 3rd attempt 抗 transient API blip (05:08 incident)"
+    },
+    {
+      "sha": "3e14670",
+      "message": "Paper4_DIV3 task closed succeeded | next_tasks status update"
+    },
+    {
+      "sha": "f712305",
+      "message": "Paper4_DIV3 Table3 BH Sharpe ranking flip errata | K731 canonical 0.827 (not K50"
+    },
+    {
+      "sha": "17e1b21",
+      "message": "hourly-03 K1056 | A4f sub-period robustness 一般讀者文章 draft (mile_bcdd203c)"
+    },
+    {
+      "sha": "f72ba0f",
+      "message": "hourly-02 | fb pipeline drift fix + refill diagnosis"
+    },
+    {
+      "sha": "73286ab",
+      "message": "Ops patrol report 2026-05-30T00:11Z"
+    }
+  ]
+}
