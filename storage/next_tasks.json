@@ -14866,7 +14866,7 @@
     "title": "K1114: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1114 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] Paper 2 cross-sectional exhaustion (K1109/K1113) 後改 dimension：θ_EAV 是否 time-varying？對 TSMC 2330/UMC 2303/MediaTek 2454 跑 rolling 2-yr A4f-EAV step=21（128/132/124 成功 fits）。3 tests × 3 stocks = 9 p-values，BH-FDR 後 3 PASS：(1) UMC structural trend t=3.06 BH-p",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1114",
@@ -14886,14 +14886,20 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-30T01:09:05+00:00"
+    "created_at": "2026-05-30T01:09:05+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-30T05:02:18.475616+00:00",
+    "claim_session_id": "fff06f2241d5",
+    "started_at": "2026-05-30T05:02:18.764329+00:00",
+    "completed_at": "2026-05-30T05:02:37.483328+00:00",
+    "result": "No publish: K1114 is a preliminary Paper 2 methods step (tags include HAC-needed, preliminary) already absorbed by published research chain on HAC/block-bootstrap and announcement-day heterogeneity. Not suitable as a standalone general article."
   },
   {
     "id": "K1372_article_general",
     "title": "K1372: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1372 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: autonomous-research (mock_user_questions.json uq_mock1), 執行: Claude worktree, 審查: feature-dev:code-reviewer subagent CONDITIONAL_PASS 2026-05-17] GJR-GARCH(1,1)-t 全樣本估計（BTC-USD 2013-2025，N=4122）顯示 persistence=1.0000（IGARCH，BTC 加密貨幣市場已知特性）。三次半減期個別 Mann-Whitney U 檢定：H2(2016) p",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1372",
@@ -14902,7 +14908,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-30T01:09:05+00:00"
+    "created_at": "2026-05-30T01:09:05+00:00",
+    "claimed_by": "hourly-13",
+    "claimed_at": "2026-05-30T05:11:51.077147+00:00",
+    "claim_session_id": "c9ab9f21039b",
+    "started_at": "2026-05-30T05:11:51.346456+00:00",
+    "completed_at": "2026-05-30T05:18:55.489319+00:00",
+    "result": "draft published mile_838a91bc, BTC halving post-vol < pre-vol 3/3, MW p<0.01; general audience, no academic kw, anti_ai_gate PASS, commit 0022b941"
   },
   {
     "id": "K430_article_general",
