@@ -1,0 +1,5731 @@
+{
+  "experiment_id": "k1408",
+  "title": "進場時點是否顯著影響最終年化報酬與 IRR",
+  "seed": 20260530,
+  "data_source": "experiments/k1406/data/{SPY.csv, 0050.TW.csv} (yfinance auto-adjust)",
+  "data_span": {
+    "SPY": "2005-01-03..2026-05-29 (5385 days)",
+    "0050.TW": "2009-01-02..2026-05-28 (4257 days)"
+  },
+  "method": {
+    "entry_frequency": "月頻（每 21 交易日一進場點）",
+    "holding": "每個進場點 t 持有到資料末日 T（t→T）",
+    "min_horizon_days": 63,
+    "lump": "單筆 t 投入持有到 T；年化=(P_T/P_t)^(1/years)-1（=單一現金流 IRR）",
+    "dca_twr": "標的 daily 報酬鏈幾何年化（時間加權，與投入排程無關）",
+    "dca_irr": "每月投入 1 單位 money-weighted IRR，brentq grid-scan 求根避免 (1+r)^t overflow",
+    "horizon_def": "years=(T_idx - t_idx)/252",
+    "trend_test": "Spearman ρ + moving block bootstrap (block=12 進場點) 修正自相關 + Newey-West HAC OLS",
+    "within_band_test": "相近 horizon band 內 block bootstrap 比較全 band std vs 局部(相近時點) std",
+    "n_boot": 10000,
+    "block_len_entrypoints": 12
+  },
+  "results": {
+    "SPY": {
+      "name": "SPY",
+      "n_entry_points": 254,
+      "date_T": "2026-05-29",
+      "price_T": 756.47998046875,
+      "horizon_years_range": [
+        0.2817,
+        21.3651
+      ],
+      "descriptive": {
+        "lump_annualized": {
+          "n": 254,
+          "mean": 0.16004925950452692,
+          "median": 0.15097118151673872,
+          "std": 0.04437929805391545,
+          "min": 0.10860971511503648,
+          "max": 0.45227465087004326,
+          "range": 0.3436649357550068,
+          "iqr": 0.023926709208877572,
+          "p25": 0.14147787141855828,
+          "p75": 0.16540458062743585
+        },
+        "dca_twr_annualized": {
+          "n": 254,
+          "mean": 0.16004925950452698,
+          "median": 0.15097118151673883,
+          "std": 0.04437929805391587,
+          "min": 0.10860971511503648,
+          "max": 0.4522746508700515,
+          "range": 0.343664935755015,
+          "iqr": 0.023926709208878072,
+          "p25": 0.1414778714185579,
+          "p75": 0.16540458062743596
+        },
+        "dca_irr": {
+          "n": 254,
+          "mean": 0.18035788868538835,
+          "median": 0.1612337871682773,
+          "std": 0.05940505069457141,
+          "min": 0.13335507027022123,
+          "max": 0.6875359096559538,
+          "range": 0.5541808393857326,
+          "iqr": 0.030456756791963524,
+          "p25": 0.15094336057836305,
+          "p75": 0.18140011737032657
+        }
+      },
+      "horizon_buckets": {
+        "lump_annualized": {
+          ">10年": {
+            "n": 137,
+            "mean": 0.13654021511654896,
+            "median": 0.14302711254113443,
+            "std": 0.017056049400932877,
+            "min": 0.10860971511503648,
+            "max": 0.1705750831100843,
+            "range": 0.061965367995047815,
+            "iqr": 0.03470277534501198,
+            "p25": 0.11415435316692468,
+            "p75": 0.14885712851193666,
+            "mean_horizon": 15.698400000000001
+          },
+          "5-10年": {
+            "n": 60,
+            "mean": 0.15962122084841227,
+            "median": 0.15555696736697144,
+            "std": 0.010784460232991197,
+            "min": 0.14147276817660526,
+            "max": 0.1950155611675326,
+            "range": 0.053542792990927346,
+            "iqr": 0.013295973853393317,
+            "p25": 0.15257981162955692,
+            "p75": 0.16587578548295023,
+            "mean_horizon": 7.490066666666666
+          },
+          "2-5年": {
+            "n": 36,
+            "mean": 0.19719801585302915,
+            "median": 0.21304305442658056,
+            "std": 0.04284835155254283,
+            "min": 0.12656306274754026,
+            "max": 0.2610346202792184,
+            "range": 0.13447155753167817,
+            "iqr": 0.08102634624885979,
+            "p25": 0.1495109147614483,
+            "p75": 0.23053726101030808,
+            "mean_horizon": 3.490066666666667
+          },
+          "<2年": {
+            "n": 21,
+            "mean": 0.25095717245565996,
+            "median": 0.24338513434659026,
+            "std": 0.066575664149849,
+            "min": 0.1778987712075777,
+            "max": 0.45227465087004326,
+            "range": 0.27437587966246557,
+            "iqr": 0.0826364550868719,
+            "p25": 0.2020954941131039,
+            "p75": 0.2847319491999758,
+            "mean_horizon": 1.1150666666666664
+          }
+        },
+        "dca_twr_annualized": {
+          ">10年": {
+            "n": 137,
+            "mean": 0.13654021511654887,
+            "median": 0.14302711254113376,
+            "std": 0.01705604940093288,
+            "min": 0.10860971511503648,
+            "max": 0.1705750831100843,
+            "range": 0.061965367995047815,
+            "iqr": 0.03470277534501198,
+            "p25": 0.11415435316692468,
+            "p75": 0.14885712851193666,
+            "mean_horizon": 15.698400000000001
+          },
+          "5-10年": {
+            "n": 60,
+            "mean": 0.15962122084841218,
+            "median": 0.15555696736697144,
+            "std": 0.01078446023299128,
+            "min": 0.1414727681766048,
+            "max": 0.19501556116753305,
+            "range": 0.053542792990928234,
+            "iqr": 0.01329597385339315,
+            "p25": 0.15257981162955714,
+            "p75": 0.1658757854829503,
+            "mean_horizon": 7.490066666666666
+          },
+          "2-5年": {
+            "n": 36,
+            "mean": 0.197198015853029,
+            "median": 0.21304305442658056,
+            "std": 0.04284835155254294,
+            "min": 0.12656306274754048,
+            "max": 0.26103462027921887,
+            "range": 0.1344715575316784,
+            "iqr": 0.0810263462488604,
+            "p25": 0.14951091476144773,
+            "p75": 0.23053726101030814,
+            "mean_horizon": 3.490066666666667
+          },
+          "<2年": {
+            "n": 21,
+            "mean": 0.2509571724556612,
+            "median": 0.24338513434659115,
+            "std": 0.06657566414985049,
+            "min": 0.17789877120757835,
+            "max": 0.4522746508700515,
+            "range": 0.2743758796624731,
+            "iqr": 0.08263645508687767,
+            "p25": 0.2020954941131019,
+            "p75": 0.2847319491999796,
+            "mean_horizon": 1.1150666666666664
+          }
+        },
+        "dca_irr": {
+          ">10年": {
+            "n": 137,
+            "mean": 0.14989760516638828,
+            "median": 0.1509911394680151,
+            "std": 0.0075176971593797865,
+            "min": 0.13335507027022123,
+            "max": 0.16314706101183207,
+            "range": 0.029791990741610846,
+            "iqr": 0.007444104675718488,
+            "p25": 0.1460000802294274,
+            "p75": 0.1534441849051459,
+            "mean_horizon": 15.698400000000001
+          },
+          "5-10年": {
+            "n": 60,
+            "mean": 0.17365964301350012,
+            "median": 0.17471034427069282,
+            "std": 0.00699298010725961,
+            "min": 0.16330077138193927,
+            "max": 0.1891852578450939,
+            "range": 0.025884486463154638,
+            "iqr": 0.012612834576075455,
+            "p25": 0.166974101297282,
+            "p75": 0.17958693587335745,
+            "mean_horizon": 7.490066666666666
+          },
+          "2-5年": {
+            "n": 36,
+            "mean": 0.22263371431846762,
+            "median": 0.22971862257613052,
+            "std": 0.013335901627941698,
+            "min": 0.1910925384528574,
+            "max": 0.23362576054211653,
+            "range": 0.04253322208925914,
+            "iqr": 0.015417291190802374,
+            "p25": 0.21649174117122952,
+            "p75": 0.2319090323620319,
+            "mean_horizon": 3.490066666666667
+          },
+          "<2年": {
+            "n": 21,
+            "mean": 0.3257399772389811,
+            "median": 0.29567637009867587,
+            "std": 0.10909412391774964,
+            "min": 0.23536343097286458,
+            "max": 0.6875359096559538,
+            "range": 0.4521724786830892,
+            "iqr": 0.06663377380749236,
+            "p25": 0.25839116640104004,
+            "p75": 0.3250249402085324,
+            "mean_horizon": 1.1150666666666664
+          }
+        }
+      },
+      "variance_horizon_scaling": {
+        "lump_annualized": {
+          "slope": -0.6314345374670156,
+          "intercept": -2.648063415423377,
+          "r": -0.8565054630434931,
+          "p": 0.1434945369565069,
+          "se": 0.26905991266613327,
+          "theory_slope": -0.5,
+          "interpretation": "斜率接近 -0.5 即支持 σ∝1/√horizon"
+        },
+        "dca_twr_annualized": {
+          "slope": -0.631434537467023,
+          "intercept": -2.6480634154233575,
+          "r": -0.8565054630434971,
+          "p": 0.14349453695650294,
+          "se": 0.2690599126661317,
+          "theory_slope": -0.5,
+          "interpretation": "斜率接近 -0.5 即支持 σ∝1/√horizon"
+        },
+        "dca_irr": {
+          "slope": -1.0451157587054964,
+          "intercept": -2.4959585672342515,
+          "r": -0.9175298600800107,
+          "p": 0.08247013991998932,
+          "se": 0.32029386865040876,
+          "theory_slope": -0.5,
+          "interpretation": "斜率接近 -0.5 即支持 σ∝1/√horizon"
+        }
+      },
+      "trend_spearman_blockboot": {
+        "lump_annualized": {
+          "rho": 0.8003203796223912,
+          "p_block_bootstrap": 0.0,
+          "p_naive_iid": 6.497057004888981e-58,
+          "n_boot": 10000,
+          "block_len": 12,
+          "boot_rho_std": 0.20330713635222428,
+          "note": "p_block_bootstrap 是修正自相關後的顯著性；p_naive_iid 會嚴重低估"
+        },
+        "dca_twr_annualized": {
+          "rho": 0.8003203796223912,
+          "p_block_bootstrap": 0.0,
+          "p_naive_iid": 6.497057004888981e-58,
+          "n_boot": 10000,
+          "block_len": 12,
+          "boot_rho_std": 0.2025727468432725,
+          "note": "p_block_bootstrap 是修正自相關後的顯著性；p_naive_iid 會嚴重低估"
+        },
+        "dca_irr": {
+          "rho": 0.998391145073385,
+          "p_block_bootstrap": 0.0,
+          "p_naive_iid": 4.05856746e-316,
+          "n_boot": 10000,
+          "block_len": 12,
+          "boot_rho_std": 0.21971351592522784,
+          "note": "p_block_bootstrap 是修正自相關後的顯著性；p_naive_iid 會嚴重低估"
+        }
+      },
+      "trend_newey_west": {
+        "lump_annualized": {
+          "slope": 0.000453855939765079,
+          "slope_per_year": 0.005446271277180947,
+          "se_naive": 2.5111658027001212e-05,
+          "p_naive": 0.0,
+          "se_hac": 5.945282340192134e-05,
+          "t_hac": 7.6338837046788885,
+          "p_hac": 4.709566070459914e-13,
+          "nw_lag": 4,
+          "note": "p_hac 是 Newey-West 修正後；p_naive 低估"
+        },
+        "dca_twr_annualized": {
+          "slope": 0.0004538559397650813,
+          "slope_per_year": 0.005446271277180976,
+          "se_naive": 2.511165802700157e-05,
+          "p_naive": 0.0,
+          "se_hac": 5.945282340192228e-05,
+          "t_hac": 7.633883704678807,
+          "p_hac": 4.709566070459914e-13,
+          "nw_lag": 4,
+          "note": "p_hac 是 Newey-West 修正後；p_naive 低估"
+        },
+        "dca_irr": {
+          "slope": 0.0005699533722533727,
+          "slope_per_year": 0.006839440467040472,
+          "se_naive": 3.6130658234363996e-05,
+          "p_naive": 0.0,
+          "se_hac": 0.0001010476338315496,
+          "t_hac": 5.640442538253864,
+          "p_hac": 4.544416620788638e-08,
+          "nw_lag": 4,
+          "note": "p_hac 是 Newey-West 修正後；p_naive 低估"
+        }
+      },
+      "within_horizon_band_dispersion": {
+        "lump_annualized": {
+          ">10年": {
+            "n": 137,
+            "mean_horizon": 15.698400000000001,
+            "horizon_years_span": [
+              10.0317,
+              21.3651
+            ],
+            "raw_std": 0.017056049400932877,
+            "resid_std_after_horizon": 0.010990970366481527,
+            "horizon_explained_r2": 0.5847447007306525,
+            "resid_vs_calendar_spearman_rho": 0.01979763660462598,
+            "p_calendar_effect_blockboot": 0.9346,
+            "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+          },
+          "5-10年": {
+            "n": 60,
+            "mean_horizon": 7.490066666666666,
+            "horizon_years_span": [
+              5.0317,
+              9.9484
+            ],
+            "raw_std": 0.010784460232991197,
+            "resid_std_after_horizon": 0.0102238076769828,
+            "horizon_explained_r2": 0.1012714964567315,
+            "resid_vs_calendar_spearman_rho": 0.026674076132258966,
+            "p_calendar_effect_blockboot": 0.9146,
+            "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+          },
+          "2-5年": {
+            "n": 36,
+            "mean_horizon": 3.490066666666667,
+            "horizon_years_span": [
+              2.0317,
+              4.9484
+            ],
+            "raw_std": 0.04284835155254283,
+            "resid_std_after_horizon": 0.02433174766574961,
+            "horizon_explained_r2": 0.6775381280928966,
+            "resid_vs_calendar_spearman_rho": 0.024453024453024455,
+            "p_calendar_effect_blockboot": 0.9392,
+            "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+          },
+          "<2年": {
+            "n": 21,
+            "mean_horizon": 1.1150666666666664,
+            "horizon_years_span": [
+              0.2817,
+              1.9484
+            ],
+            "raw_std": 0.066575664149849,
+            "resid_std_after_horizon": 0.050775390917155605,
+            "horizon_explained_r2": 0.4183315123280684,
+            "resid_vs_calendar_spearman_rho": -0.18961038961038962,
+            "p_calendar_effect_blockboot": 0.5656,
+            "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+          }
+        },
+        "dca_twr_annualized": {
+          ">10年": {
+            "n": 137,
+            "mean_horizon": 15.698400000000001,
+            "horizon_years_span": [
+              10.0317,
+              21.3651
+            ],
+            "raw_std": 0.01705604940093288,
+            "resid_std_after_horizon": 0.010990970366481535,
+            "horizon_explained_r2": 0.5847447007306519,
+            "resid_vs_calendar_spearman_rho": 0.01979763660462598,
+            "p_calendar_effect_blockboot": 0.9346,
+            "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+          },
+          "5-10年": {
+            "n": 60,
+            "mean_horizon": 7.490066666666666,
+            "horizon_years_span": [
+              5.0317,
+              9.9484
+            ],
+            "raw_std": 0.01078446023299128,
+            "resid_std_after_horizon": 0.010223807676982895,
+            "horizon_explained_r2": 0.10127149645672862,
+            "resid_vs_calendar_spearman_rho": 0.026674076132258966,
+            "p_calendar_effect_blockboot": 0.9194,
+            "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+          },
+          "2-5年": {
+            "n": 36,
+            "mean_horizon": 3.490066666666667,
+            "horizon_years_span": [
+              2.0317,
+              4.9484
+            ],
+            "raw_std": 0.04284835155254294,
+            "resid_std_after_horizon": 0.024331747665749612,
+            "horizon_explained_r2": 0.6775381280928983,
+            "resid_vs_calendar_spearman_rho": 0.024453024453024455,
+            "p_calendar_effect_blockboot": 0.9476,
+            "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+          },
+          "<2年": {
+            "n": 21,
+            "mean_horizon": 1.1150666666666664,
+            "horizon_years_span": [
+              0.2817,
+              1.9484
+            ],
+            "raw_std": 0.06657566414985049,
+            "resid_std_after_horizon": 0.05077539091715653,
+            "horizon_explained_r2": 0.4183315123280734,
+            "resid_vs_calendar_spearman_rho": -0.18961038961038962,
+            "p_calendar_effect_blockboot": 0.5548,
+            "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+          }
+        },
+        "dca_irr": {
+          ">10年": {
+            "n": 137,
+            "mean_horizon": 15.698400000000001,
+            "horizon_years_span": [
+              10.0317,
+              21.3651
+            ],
+            "raw_std": 0.0075176971593797865,
+            "resid_std_after_horizon": 0.0023255996816689693,
+            "horizon_explained_r2": 0.9043025721288662,
+            "resid_vs_calendar_spearman_rho": 0.023652621950081207,
+            "p_calendar_effect_blockboot": 0.9172,
+            "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+          },
+          "5-10年": {
+            "n": 60,
+            "mean_horizon": 7.490066666666666,
+            "horizon_years_span": [
+              5.0317,
+              9.9484
+            ],
+            "raw_std": 0.00699298010725961,
+            "resid_std_after_horizon": 0.0009950153615537803,
+            "horizon_explained_r2": 0.9797541979854222,
+            "resid_vs_calendar_spearman_rho": -0.05268130036121146,
+            "p_calendar_effect_blockboot": 0.8548,
+            "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+          },
+          "2-5年": {
+            "n": 36,
+            "mean_horizon": 3.490066666666667,
+            "horizon_years_span": [
+              2.0317,
+              4.9484
+            ],
+            "raw_std": 0.013335901627941698,
+            "resid_std_after_horizon": 0.007386272868293329,
+            "horizon_explained_r2": 0.693234914671008,
+            "resid_vs_calendar_spearman_rho": -0.01904761904761905,
+            "p_calendar_effect_blockboot": 0.9678,
+            "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+          },
+          "<2年": {
+            "n": 21,
+            "mean_horizon": 1.1150666666666664,
+            "horizon_years_span": [
+              0.2817,
+              1.9484
+            ],
+            "raw_std": 0.10909412391774964,
+            "resid_std_after_horizon": 0.065391080431635,
+            "horizon_explained_r2": 0.640718952600852,
+            "resid_vs_calendar_spearman_rho": -0.3194805194805195,
+            "p_calendar_effect_blockboot": 0.4384,
+            "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+          }
+        }
+      }
+    },
+    "0050.TW": {
+      "name": "0050.TW",
+      "n_entry_points": 200,
+      "date_T": "2026-05-28",
+      "price_T": 100.5,
+      "horizon_years_range": [
+        0.3056,
+        16.8889
+      ],
+      "descriptive": {
+        "lump_annualized": {
+          "n": 200,
+          "mean": 0.33739319576282745,
+          "median": 0.25192481466585415,
+          "std": 0.35162326745162176,
+          "min": 0.06722887111263054,
+          "max": 2.3284098127314934,
+          "range": 2.261180941618863,
+          "iqr": 0.23577304113659397,
+          "p25": 0.09006006047486037,
+          "p75": 0.32583310161145435
+        },
+        "dca_twr_annualized": {
+          "n": 200,
+          "mean": 0.33739319576282695,
+          "median": 0.2519248146658545,
+          "std": 0.35162326745162065,
+          "min": 0.06722887111263054,
+          "max": 2.3284098127314827,
+          "range": 2.261180941618852,
+          "iqr": 0.23577304113659325,
+          "p25": 0.09006006047486054,
+          "p75": 0.3258331016114538
+        },
+        "dca_irr": {
+          "n": 200,
+          "mean": 0.46031822503982495,
+          "median": 0.31560412661706927,
+          "std": 0.40171252947686253,
+          "min": 0.16469361431958232,
+          "max": 2.337355990822259,
+          "range": 2.1726623765026765,
+          "iqr": 0.25597020321098396,
+          "p25": 0.23772650413691887,
+          "p75": 0.49369670734790283
+        }
+      },
+      "horizon_buckets": {
+        "lump_annualized": {
+          ">10年": {
+            "n": 83,
+            "mean": 0.12235282771140597,
+            "median": 0.08775361143964155,
+            "std": 0.06529280973177909,
+            "min": 0.06722887111263054,
+            "max": 0.24569468970432595,
+            "range": 0.1784658185916954,
+            "iqr": 0.13874323359879093,
+            "p25": 0.07580256140615982,
+            "p75": 0.21454579500495075,
+            "mean_horizon": 13.472233734939756
+          },
+          "5-10年": {
+            "n": 60,
+            "mean": 0.2819655168507988,
+            "median": 0.27168057210792795,
+            "std": 0.03298902085231952,
+            "min": 0.24361941365755935,
+            "max": 0.3697707685957101,
+            "range": 0.12615135493815077,
+            "iqr": 0.05741212455336103,
+            "p25": 0.25136470182266385,
+            "p75": 0.3087768263760249,
+            "mean_horizon": 7.513899999999999
+          },
+          "2-5年": {
+            "n": 36,
+            "mean": 0.4585838968387608,
+            "median": 0.4829233734310493,
+            "std": 0.12966846310297217,
+            "min": 0.2796590808675874,
+            "max": 0.6615971061920332,
+            "range": 0.38193802532444576,
+            "iqr": 0.23382451970184331,
+            "p25": 0.3195093858816748,
+            "p75": 0.5533339055835181,
+            "mean_horizon": 3.5139
+          },
+          "<2年": {
+            "n": 21,
+            "mean": 1.1379239597750224,
+            "median": 1.0353475994344161,
+            "std": 0.52881207496189,
+            "min": 0.5147981724528743,
+            "max": 2.3284098127314934,
+            "range": 1.813611640278619,
+            "iqr": 0.7276970687369362,
+            "p25": 0.6869093897862859,
+            "p75": 1.414606458523222,
+            "mean_horizon": 1.1389
+          }
+        },
+        "dca_twr_annualized": {
+          ">10年": {
+            "n": 83,
+            "mean": 0.12235282771140601,
+            "median": 0.08775361143964155,
+            "std": 0.06529280973177914,
+            "min": 0.06722887111263054,
+            "max": 0.24569468970432617,
+            "range": 0.17846581859169564,
+            "iqr": 0.13874323359879104,
+            "p25": 0.07580256140615982,
+            "p75": 0.21454579500495086,
+            "mean_horizon": 13.472233734939756
+          },
+          "5-10年": {
+            "n": 60,
+            "mean": 0.2819655168507988,
+            "median": 0.2716805721079275,
+            "std": 0.03298902085231935,
+            "min": 0.24361941365755957,
+            "max": 0.3697707685957101,
+            "range": 0.12615135493815055,
+            "iqr": 0.057412124553361144,
+            "p25": 0.2513647018226636,
+            "p75": 0.30877682637602477,
+            "mean_horizon": 7.513899999999999
+          },
+          "2-5年": {
+            "n": 36,
+            "mean": 0.45858389683875994,
+            "median": 0.48292337343104863,
+            "std": 0.12966846310297192,
+            "min": 0.27965908086758695,
+            "max": 0.6615971061920332,
+            "range": 0.3819380253244462,
+            "iqr": 0.2338245197018422,
+            "p25": 0.31950938588167427,
+            "p75": 0.5533339055835165,
+            "mean_horizon": 3.5139
+          },
+          "<2年": {
+            "n": 21,
+            "mean": 1.1379239597750197,
+            "median": 1.035347599434418,
+            "std": 0.5288120749618875,
+            "min": 0.5147981724528727,
+            "max": 2.3284098127314827,
+            "range": 1.81361164027861,
+            "iqr": 0.7276970687369344,
+            "p25": 0.686909389786285,
+            "p75": 1.4146064585232194,
+            "mean_horizon": 1.1389
+          }
+        },
+        "dca_irr": {
+          ">10年": {
+            "n": 83,
+            "mean": 0.2238076916509367,
+            "median": 0.2206835326422942,
+            "std": 0.0392120700246678,
+            "min": 0.16469361431958232,
+            "max": 0.28873562605395164,
+            "range": 0.12404201173436932,
+            "iqr": 0.07330043927042501,
+            "p25": 0.18813776213452754,
+            "p75": 0.26143820140495255,
+            "mean_horizon": 13.472233734939756
+          },
+          "5-10年": {
+            "n": 60,
+            "mean": 0.34885867495736606,
+            "median": 0.3459438166352651,
+            "std": 0.04096858920097045,
+            "min": 0.28997968261974166,
+            "max": 0.43455918740672583,
+            "range": 0.14457950478698417,
+            "iqr": 0.06801898315708899,
+            "p25": 0.31220769549209154,
+            "p75": 0.3802266786491805,
+            "mean_horizon": 7.513899999999999
+          },
+          "2-5年": {
+            "n": 36,
+            "mean": 0.6128708979857306,
+            "median": 0.6128214460209297,
+            "std": 0.11043974688048842,
+            "min": 0.44165519252796626,
+            "max": 0.8156690729327976,
+            "range": 0.3740138804048313,
+            "iqr": 0.18182669787347794,
+            "p25": 0.5176718740249295,
+            "p75": 0.6994985718984075,
+            "mean_horizon": 3.5139
+          },
+          "<2年": {
+            "n": 21,
+            "mean": 1.4520349417147138,
+            "median": 1.4231197495600623,
+            "std": 0.47862750267422455,
+            "min": 0.842845453625612,
+            "max": 2.337355990822259,
+            "range": 1.494510537196647,
+            "iqr": 0.7018383925047669,
+            "p25": 1.0366021454309429,
+            "p75": 1.7384405379357097,
+            "mean_horizon": 1.1389
+          }
+        }
+      },
+      "variance_horizon_scaling": {
+        "lump_annualized": {
+          "slope": -0.9921294164419879,
+          "intercept": -0.7158579646465004,
+          "r": -0.892957044445902,
+          "p": 0.10704295555409807,
+          "se": 0.353648798073779,
+          "theory_slope": -0.5,
+          "interpretation": "斜率接近 -0.5 即支持 σ∝1/√horizon"
+        },
+        "dca_twr_annualized": {
+          "slope": -0.9921294164419864,
+          "intercept": -0.715857964646506,
+          "r": -0.8929570444459011,
+          "p": 0.10704295555409894,
+          "se": 0.35364879807378025,
+          "theory_slope": -0.5,
+          "interpretation": "斜率接近 -0.5 即支持 σ∝1/√horizon"
+        },
+        "dca_irr": {
+          "slope": -1.0720985417560436,
+          "intercept": -0.7341927510622706,
+          "r": -0.9750861430610434,
+          "p": 0.024913856938956643,
+          "se": 0.17246073271812012,
+          "theory_slope": -0.5,
+          "interpretation": "斜率接近 -0.5 即支持 σ∝1/√horizon"
+        }
+      },
+      "trend_spearman_blockboot": {
+        "lump_annualized": {
+          "rho": 0.9745383634590865,
+          "p_block_bootstrap": 0.0,
+          "p_naive_iid": 1.5775475578685719e-130,
+          "n_boot": 10000,
+          "block_len": 12,
+          "boot_rho_std": 0.23893575541910267,
+          "note": "p_block_bootstrap 是修正自相關後的顯著性；p_naive_iid 會嚴重低估"
+        },
+        "dca_twr_annualized": {
+          "rho": 0.9745383634590865,
+          "p_block_bootstrap": 0.0,
+          "p_naive_iid": 1.5775475578685719e-130,
+          "n_boot": 10000,
+          "block_len": 12,
+          "boot_rho_std": 0.24165721165352694,
+          "note": "p_block_bootstrap 是修正自相關後的顯著性；p_naive_iid 會嚴重低估"
+        },
+        "dca_irr": {
+          "rho": 1.0,
+          "p_block_bootstrap": 0.0,
+          "p_naive_iid": 0.0,
+          "n_boot": 10000,
+          "block_len": 12,
+          "boot_rho_std": 0.247804563157316,
+          "note": "p_block_bootstrap 是修正自相關後的顯著性；p_naive_iid 會嚴重低估"
+        }
+      },
+      "trend_newey_west": {
+        "lump_annualized": {
+          "slope": 0.004518079107170353,
+          "slope_per_year": 0.05421694928604423,
+          "se_naive": 0.00028862353709365086,
+          "p_naive": 0.0,
+          "se_hac": 0.0008662286769460742,
+          "t_hac": 5.21580412587936,
+          "p_hac": 4.593507685335396e-07,
+          "nw_lag": 4,
+          "note": "p_hac 是 Newey-West 修正後；p_naive 低估"
+        },
+        "dca_twr_annualized": {
+          "slope": 0.00451807910717034,
+          "slope_per_year": 0.05421694928604408,
+          "se_naive": 0.0002886235370936498,
+          "p_naive": 0.0,
+          "se_hac": 0.0008662286769460717,
+          "t_hac": 5.21580412587936,
+          "p_hac": 4.593507685335396e-07,
+          "nw_lag": 4,
+          "note": "p_hac 是 Newey-West 修正後；p_naive 低估"
+        },
+        "dca_irr": {
+          "slope": 0.005217796644085966,
+          "slope_per_year": 0.0626135597290316,
+          "se_naive": 0.00032524761292969883,
+          "p_naive": 0.0,
+          "se_hac": 0.0009821406966704675,
+          "t_hac": 5.3126773605601505,
+          "p_hac": 2.892961714628939e-07,
+          "nw_lag": 4,
+          "note": "p_hac 是 Newey-West 修正後；p_naive 低估"
+        }
+      },
+      "within_horizon_band_dispersion": {
+        "lump_annualized": {
+          ">10年": {
+            "n": 83,
+            "mean_horizon": 13.472233734939756,
+            "horizon_years_span": [
+              10.0556,
+              16.8889
+            ],
+            "raw_std": 0.06529280973177909,
+            "resid_std_after_horizon": 0.03816496312035573,
+            "horizon_explained_r2": 0.6583361909860571,
+            "resid_vs_calendar_spearman_rho": 0.028273372234582924,
+            "p_calendar_effect_blockboot": 0.9184,
+            "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+          },
+          "5-10年": {
+            "n": 60,
+            "mean_horizon": 7.513899999999999,
+            "horizon_years_span": [
+              5.0556,
+              9.9722
+            ],
+            "raw_std": 0.03298902085231952,
+            "resid_std_after_horizon": 0.018062899349978984,
+            "horizon_explained_r2": 0.7001969318584065,
+            "resid_vs_calendar_spearman_rho": 0.04201166990830787,
+            "p_calendar_effect_blockboot": 0.8938,
+            "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+          },
+          "2-5年": {
+            "n": 36,
+            "mean_horizon": 3.5139,
+            "horizon_years_span": [
+              2.0556,
+              4.9722
+            ],
+            "raw_std": 0.12966846310297217,
+            "resid_std_after_horizon": 0.03214807845855955,
+            "horizon_explained_r2": 0.9385330997553686,
+            "resid_vs_calendar_spearman_rho": 0.053796653796653805,
+            "p_calendar_effect_blockboot": 0.8518,
+            "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+          },
+          "<2年": {
+            "n": 21,
+            "mean_horizon": 1.1389,
+            "horizon_years_span": [
+              0.3056,
+              1.9722
+            ],
+            "raw_std": 0.52881207496189,
+            "resid_std_after_horizon": 0.1975167440955685,
+            "horizon_explained_r2": 0.8604900736879317,
+            "resid_vs_calendar_spearman_rho": -0.06753246753246753,
+            "p_calendar_effect_blockboot": 0.7988,
+            "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+          }
+        },
+        "dca_twr_annualized": {
+          ">10年": {
+            "n": 83,
+            "mean_horizon": 13.472233734939756,
+            "horizon_years_span": [
+              10.0556,
+              16.8889
+            ],
+            "raw_std": 0.06529280973177914,
+            "resid_std_after_horizon": 0.03816496312035572,
+            "horizon_explained_r2": 0.6583361909860579,
+            "resid_vs_calendar_spearman_rho": 0.028273372234582924,
+            "p_calendar_effect_blockboot": 0.9212,
+            "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+          },
+          "5-10年": {
+            "n": 60,
+            "mean_horizon": 7.513899999999999,
+            "horizon_years_span": [
+              5.0556,
+              9.9722
+            ],
+            "raw_std": 0.03298902085231935,
+            "resid_std_after_horizon": 0.018062899349979004,
+            "horizon_explained_r2": 0.7001969318584025,
+            "resid_vs_calendar_spearman_rho": 0.04201166990830787,
+            "p_calendar_effect_blockboot": 0.883,
+            "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+          },
+          "2-5年": {
+            "n": 36,
+            "mean_horizon": 3.5139,
+            "horizon_years_span": [
+              2.0556,
+              4.9722
+            ],
+            "raw_std": 0.12966846310297192,
+            "resid_std_after_horizon": 0.032148078458559395,
+            "horizon_explained_r2": 0.9385330997553689,
+            "resid_vs_calendar_spearman_rho": 0.053796653796653805,
+            "p_calendar_effect_blockboot": 0.8468,
+            "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+          },
+          "<2年": {
+            "n": 21,
+            "mean_horizon": 1.1389,
+            "horizon_years_span": [
+              0.3056,
+              1.9722
+            ],
+            "raw_std": 0.5288120749618875,
+            "resid_std_after_horizon": 0.19751674409556672,
+            "horizon_explained_r2": 0.860490073687933,
+            "resid_vs_calendar_spearman_rho": -0.06753246753246753,
+            "p_calendar_effect_blockboot": 0.8012,
+            "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+          }
+        },
+        "dca_irr": {
+          ">10年": {
+            "n": 83,
+            "mean_horizon": 13.472233734939756,
+            "horizon_years_span": [
+              10.0556,
+              16.8889
+            ],
+            "raw_std": 0.0392120700246678,
+            "resid_std_after_horizon": 0.003019605123387736,
+            "horizon_explained_r2": 0.9940699170531875,
+            "resid_vs_calendar_spearman_rho": 0.06422904160194787,
+            "p_calendar_effect_blockboot": 0.8472,
+            "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+          },
+          "5-10年": {
+            "n": 60,
+            "mean_horizon": 7.513899999999999,
+            "horizon_years_span": [
+              5.0556,
+              9.9722
+            ],
+            "raw_std": 0.04096858920097045,
+            "resid_std_after_horizon": 0.004588410949506909,
+            "horizon_explained_r2": 0.9874563884211468,
+            "resid_vs_calendar_spearman_rho": -0.08507918866351766,
+            "p_calendar_effect_blockboot": 0.7948,
+            "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+          },
+          "2-5年": {
+            "n": 36,
+            "mean_horizon": 3.5139,
+            "horizon_years_span": [
+              2.0556,
+              4.9722
+            ],
+            "raw_std": 0.11043974688048842,
+            "resid_std_after_horizon": 0.006200610936492718,
+            "horizon_explained_r2": 0.9968477681070758,
+            "resid_vs_calendar_spearman_rho": -0.02290862290862291,
+            "p_calendar_effect_blockboot": 0.951,
+            "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+          },
+          "<2年": {
+            "n": 21,
+            "mean_horizon": 1.1389,
+            "horizon_years_span": [
+              0.3056,
+              1.9722
+            ],
+            "raw_std": 0.47862750267422455,
+            "resid_std_after_horizon": 0.09608911669966023,
+            "horizon_explained_r2": 0.9596955404641938,
+            "resid_vs_calendar_spearman_rho": -0.16103896103896104,
+            "p_calendar_effect_blockboot": 0.6598,
+            "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+          }
+        }
+      }
+    }
+  },
+  "verdict": {
+    "SPY": {
+      "asset": "SPY",
+      "lump_annualized_range_pct": [
+        10.86,
+        45.23
+      ],
+      "lump_annualized_full_range_pct": 34.37,
+      "lump_median_pct": 15.1,
+      "dca_irr_range_pct": [
+        13.34,
+        68.75
+      ],
+      "dca_irr_full_range_pct": 55.42,
+      "long_horizon_std_pct": 1.71,
+      "long_horizon_range_pct": 6.2,
+      "short_horizon_std_pct": 6.66,
+      "short_horizon_range_pct": 27.44,
+      "trend_rho": 0.8,
+      "trend_p_block_bootstrap": 0.0,
+      "trend_p_naive_iid": 0.0,
+      "nw_slope_per_year_pct": 0.5446,
+      "nw_p_hac": 0.0,
+      "nw_p_naive": 0.0,
+      "within_band_dispersion": {
+        ">10年": {
+          "n": 137,
+          "mean_horizon": 15.698400000000001,
+          "horizon_years_span": [
+            10.0317,
+            21.3651
+          ],
+          "raw_std": 0.017056049400932877,
+          "resid_std_after_horizon": 0.010990970366481527,
+          "horizon_explained_r2": 0.5847447007306525,
+          "resid_vs_calendar_spearman_rho": 0.01979763660462598,
+          "p_calendar_effect_blockboot": 0.9346,
+          "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+        },
+        "5-10年": {
+          "n": 60,
+          "mean_horizon": 7.490066666666666,
+          "horizon_years_span": [
+            5.0317,
+            9.9484
+          ],
+          "raw_std": 0.010784460232991197,
+          "resid_std_after_horizon": 0.0102238076769828,
+          "horizon_explained_r2": 0.1012714964567315,
+          "resid_vs_calendar_spearman_rho": 0.026674076132258966,
+          "p_calendar_effect_blockboot": 0.9146,
+          "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+        },
+        "2-5年": {
+          "n": 36,
+          "mean_horizon": 3.490066666666667,
+          "horizon_years_span": [
+            2.0317,
+            4.9484
+          ],
+          "raw_std": 0.04284835155254283,
+          "resid_std_after_horizon": 0.02433174766574961,
+          "horizon_explained_r2": 0.6775381280928966,
+          "resid_vs_calendar_spearman_rho": 0.024453024453024455,
+          "p_calendar_effect_blockboot": 0.9392,
+          "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+        },
+        "<2年": {
+          "n": 21,
+          "mean_horizon": 1.1150666666666664,
+          "horizon_years_span": [
+            0.2817,
+            1.9484
+          ],
+          "raw_std": 0.066575664149849,
+          "resid_std_after_horizon": 0.050775390917155605,
+          "horizon_explained_r2": 0.4183315123280684,
+          "resid_vs_calendar_spearman_rho": -0.18961038961038962,
+          "p_calendar_effect_blockboot": 0.5656,
+          "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+        }
+      }
+    },
+    "TW0050": {
+      "asset": "0050.TW",
+      "lump_annualized_range_pct": [
+        6.72,
+        232.84
+      ],
+      "lump_annualized_full_range_pct": 226.12,
+      "lump_median_pct": 25.19,
+      "dca_irr_range_pct": [
+        16.47,
+        233.74
+      ],
+      "dca_irr_full_range_pct": 217.27,
+      "long_horizon_std_pct": 6.53,
+      "long_horizon_range_pct": 17.85,
+      "short_horizon_std_pct": 52.88,
+      "short_horizon_range_pct": 181.36,
+      "trend_rho": 0.975,
+      "trend_p_block_bootstrap": 0.0,
+      "trend_p_naive_iid": 0.0,
+      "nw_slope_per_year_pct": 5.4217,
+      "nw_p_hac": 0.0,
+      "nw_p_naive": 0.0,
+      "within_band_dispersion": {
+        ">10年": {
+          "n": 83,
+          "mean_horizon": 13.472233734939756,
+          "horizon_years_span": [
+            10.0556,
+            16.8889
+          ],
+          "raw_std": 0.06529280973177909,
+          "resid_std_after_horizon": 0.03816496312035573,
+          "horizon_explained_r2": 0.6583361909860571,
+          "resid_vs_calendar_spearman_rho": 0.028273372234582924,
+          "p_calendar_effect_blockboot": 0.9184,
+          "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+        },
+        "5-10年": {
+          "n": 60,
+          "mean_horizon": 7.513899999999999,
+          "horizon_years_span": [
+            5.0556,
+            9.9722
+          ],
+          "raw_std": 0.03298902085231952,
+          "resid_std_after_horizon": 0.018062899349978984,
+          "horizon_explained_r2": 0.7001969318584065,
+          "resid_vs_calendar_spearman_rho": 0.04201166990830787,
+          "p_calendar_effect_blockboot": 0.8938,
+          "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+        },
+        "2-5年": {
+          "n": 36,
+          "mean_horizon": 3.5139,
+          "horizon_years_span": [
+            2.0556,
+            4.9722
+          ],
+          "raw_std": 0.12966846310297217,
+          "resid_std_after_horizon": 0.03214807845855955,
+          "horizon_explained_r2": 0.9385330997553686,
+          "resid_vs_calendar_spearman_rho": 0.053796653796653805,
+          "p_calendar_effect_blockboot": 0.8518,
+          "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+        },
+        "<2年": {
+          "n": 21,
+          "mean_horizon": 1.1389,
+          "horizon_years_span": [
+            0.3056,
+            1.9722
+          ],
+          "raw_std": 0.52881207496189,
+          "resid_std_after_horizon": 0.1975167440955685,
+          "horizon_explained_r2": 0.8604900736879317,
+          "resid_vs_calendar_spearman_rho": -0.06753246753246753,
+          "p_calendar_effect_blockboot": 0.7988,
+          "interpretation": "控制 horizon 後，殘差仍隨日曆順序系統性變化(|ρ| 大且 p 小) → 真日曆擇時效應；p 大 → band 內離散主要是 horizon 殘餘長度差異"
+        }
+      }
+    },
+    "calendar_effect_summary": {
+      "SPY": {
+        "n_bands": 4,
+        "n_bands_sig_calendar": 0,
+        "sig_bands": [],
+        "max_abs_resid_calendar_rho": 0.19,
+        "min_p_calendar": 0.5656,
+        "mean_horizon_R2": 0.445
+      },
+      "0050.TW": {
+        "n_bands": 4,
+        "n_bands_sig_calendar": 0,
+        "sig_bands": [],
+        "max_abs_resid_calendar_rho": 0.068,
+        "min_p_calendar": 0.7988,
+        "mean_horizon_R2": 0.789
+      }
+    },
+    "verdict_statements": [
+      "(a) 進場時點對最終年化報酬/IRR 的影響：兩資產的單筆年化報酬在不同進場點之間確有可觀 raw range（SPY 34.37 個百分點、0050 226.12 個百分點；0050 的極大值來自 2025 末進場、僅持有約 4 個月的短窗年化放大，非長期可實現報酬）。",
+      "(b) 差異主要來源 = horizon 長度，不是日曆擇時。raw range 絕大部分由「越晚進場 horizon 越短 → 年化離散度爆增」驅動：長 horizon(>10年)band 內年化 std 僅 SPY 1.71%/0050 6.53%，短 horizon(<2年)飆到 SPY 6.66%/0050 52.88%，驗證 σ_annualized∝1/√horizon。控制 horizon 後（OLS 去 horizon → 殘差 vs 日曆順序 Spearman ρ + block bootstrap），SPY 0/4 band、0050 0/4 band 有顯著(<0.05)日曆效應；最大殘差-日曆 |ρ| 僅 SPY 0.19/0050 0.068，min p=0.5656/0.7988 → 控制持有期後，沒有任何進場月份系統性勝出（NULL 擇時效應）。",
+      "(c) 是否隨 horizon 收斂：是。拉長持有期後不同進場點的年化報酬大幅收斂（>10年 band std 約為 <2年 band 的 1/4~1/8），且 horizon 在各 band 解釋了 平均 0.445(SPY)/0.789(0050) 的離散。結論：長期投資者進場時點影響有限且不可預測擇時；短期投資者結果離散巨大，但那是運氣/雜訊（σ∝1/√horizon），非任何進場時點本身的可重複優劣。",
+      "趨勢檢定（純機械、僅作 overlapping-window 修正示範）：晚進場因 horizon 短 + 近期價格在高點，年化機械偏高 → Spearman ρ 為正且大（SPY ρ=0.8, 0050 ρ=0.975）；block-bootstrap p（SPY 0.0）與 naive iid p（0.0）差距示範 overlapping-window 下 naive iid 嚴重低估 p。此 ρ 是 horizon 機械耦合，不是可交易擇時 — 真正分離後（within-band）擇時效應為 null。"
+    ]
+  },
+  "entry_tables": {
+    "SPY": [
+      {
+        "entry_date": "2005-01-03",
+        "entry_idx": 0,
+        "horizon_years": 21.3651,
+        "horizon_cal_days": 7816,
+        "n_contributions": 257,
+        "lump_annualized": 0.10999170956949933,
+        "dca_twr_annualized": 0.10999170956949933,
+        "dca_irr": 0.13335507027022123
+      },
+      {
+        "entry_date": "2005-02-02",
+        "entry_idx": 21,
+        "horizon_years": 21.2817,
+        "horizon_cal_days": 7786,
+        "n_contributions": 256,
+        "lump_annualized": 0.11089414149225041,
+        "dca_twr_annualized": 0.11089414149225019,
+        "dca_irr": 0.13366178865436057
+      },
+      {
+        "entry_date": "2005-03-04",
+        "entry_idx": 42,
+        "horizon_years": 21.1984,
+        "horizon_cal_days": 7756,
+        "n_contributions": 255,
+        "lump_annualized": 0.10985525563525411,
+        "dca_twr_annualized": 0.10985525563525411,
+        "dca_irr": 0.13396335153331487
+      },
+      {
+        "entry_date": "2005-04-05",
+        "entry_idx": 63,
+        "horizon_years": 21.1151,
+        "horizon_cal_days": 7724,
+        "n_contributions": 254,
+        "lump_annualized": 0.11208925456688346,
+        "dca_twr_annualized": 0.11208925456688346,
+        "dca_irr": 0.1342802474576151
+      },
+      {
+        "entry_date": "2005-05-04",
+        "entry_idx": 84,
+        "horizon_years": 21.0317,
+        "horizon_cal_days": 7695,
+        "n_contributions": 253,
+        "lump_annualized": 0.11286727885636894,
+        "dca_twr_annualized": 0.11286727885636894,
+        "dca_irr": 0.1345778502335563
+      },
+      {
+        "entry_date": "2005-06-03",
+        "entry_idx": 105,
+        "horizon_years": 20.9484,
+        "horizon_cal_days": 7665,
+        "n_contributions": 252,
+        "lump_annualized": 0.11215609267428817,
+        "dca_twr_annualized": 0.11215609267428772,
+        "dca_irr": 0.1348712824536299
+      },
+      {
+        "entry_date": "2005-07-05",
+        "entry_idx": 126,
+        "horizon_years": 20.8651,
+        "horizon_cal_days": 7633,
+        "n_contributions": 251,
+        "lump_annualized": 0.1122629604092773,
+        "dca_twr_annualized": 0.1122629604092773,
+        "dca_irr": 0.13517684462852336
+      },
+      {
+        "entry_date": "2005-08-03",
+        "entry_idx": 147,
+        "horizon_years": 20.7817,
+        "horizon_cal_days": 7604,
+        "n_contributions": 250,
+        "lump_annualized": 0.11089162540758535,
+        "dca_twr_annualized": 0.11089162540758513,
+        "dca_irr": 0.13548573683195794
+      },
+      {
+        "entry_date": "2005-09-01",
+        "entry_idx": 168,
+        "horizon_years": 20.6984,
+        "horizon_cal_days": 7575,
+        "n_contributions": 249,
+        "lump_annualized": 0.11233123171647619,
+        "dca_twr_annualized": 0.11233123171647619,
+        "dca_irr": 0.13581394329378074
+      },
+      {
+        "entry_date": "2005-10-03",
+        "entry_idx": 189,
+        "horizon_years": 20.6151,
+        "horizon_cal_days": 7543,
+        "n_contributions": 248,
+        "lump_annualized": 0.11253228477333188,
+        "dca_twr_annualized": 0.11253228477333144,
+        "dca_irr": 0.13613145764637094
+      },
+      {
+        "entry_date": "2005-11-01",
+        "entry_idx": 210,
+        "horizon_years": 20.5317,
+        "horizon_cal_days": 7514,
+        "n_contributions": 247,
+        "lump_annualized": 0.11395541497974793,
+        "dca_twr_annualized": 0.1139554149797477,
+        "dca_irr": 0.1364514800252757
+      },
+      {
+        "entry_date": "2005-12-01",
+        "entry_idx": 231,
+        "horizon_years": 20.4484,
+        "horizon_cal_days": 7484,
+        "n_contributions": 246,
+        "lump_annualized": 0.11171414281583458,
+        "dca_twr_annualized": 0.1117141428158348,
+        "dca_irr": 0.13676051829662542
+      },
+      {
+        "entry_date": "2006-01-03",
+        "entry_idx": 252,
+        "horizon_years": 20.3651,
+        "horizon_cal_days": 7451,
+        "n_contributions": 245,
+        "lump_annualized": 0.11190299669983395,
+        "dca_twr_annualized": 0.1119029966998335,
+        "dca_irr": 0.1370988071140509
+      },
+      {
+        "entry_date": "2006-02-02",
+        "entry_idx": 273,
+        "horizon_years": 20.2817,
+        "horizon_cal_days": 7421,
+        "n_contributions": 244,
+        "lump_annualized": 0.1123011935163265,
+        "dca_twr_annualized": 0.11230119351632628,
+        "dca_irr": 0.1374400714352795
+      },
+      {
+        "entry_date": "2006-03-06",
+        "entry_idx": 294,
+        "horizon_years": 20.1984,
+        "horizon_cal_days": 7389,
+        "n_contributions": 243,
+        "lump_annualized": 0.11224125733366064,
+        "dca_twr_annualized": 0.11224125733366042,
+        "dca_irr": 0.1377821046996703
+      },
+      {
+        "entry_date": "2006-04-04",
+        "entry_idx": 315,
+        "horizon_years": 20.1151,
+        "horizon_cal_days": 7360,
+        "n_contributions": 242,
+        "lump_annualized": 0.11149063273974513,
+        "dca_twr_annualized": 0.11149063273974491,
+        "dca_irr": 0.13812989856849217
+      },
+      {
+        "entry_date": "2006-05-04",
+        "entry_idx": 336,
+        "horizon_years": 20.0317,
+        "horizon_cal_days": 7330,
+        "n_contributions": 241,
+        "lump_annualized": 0.1116404656188641,
+        "dca_twr_annualized": 0.11164046561886432,
+        "dca_irr": 0.13849096792092278
+      },
+      {
+        "entry_date": "2006-06-05",
+        "entry_idx": 357,
+        "horizon_years": 19.9484,
+        "horizon_cal_days": 7298,
+        "n_contributions": 240,
+        "lump_annualized": 0.11396274165342013,
+        "dca_twr_annualized": 0.11396274165341991,
+        "dca_irr": 0.13885582057031656
+      },
+      {
+        "entry_date": "2006-07-05",
+        "entry_idx": 378,
+        "horizon_years": 19.8651,
+        "horizon_cal_days": 7268,
+        "n_contributions": 239,
+        "lump_annualized": 0.11424182906187785,
+        "dca_twr_annualized": 0.11424182906187763,
+        "dca_irr": 0.1392008022091068
+      },
+      {
+        "entry_date": "2006-08-03",
+        "entry_idx": 399,
+        "horizon_years": 19.7817,
+        "horizon_cal_days": 7239,
+        "n_contributions": 238,
+        "lump_annualized": 0.11415435316692468,
+        "dca_twr_annualized": 0.11415435316692468,
+        "dca_irr": 0.1395479320154032
+      },
+      {
+        "entry_date": "2006-09-01",
+        "entry_idx": 420,
+        "horizon_years": 19.6984,
+        "horizon_cal_days": 7210,
+        "n_contributions": 237,
+        "lump_annualized": 0.11335800623102799,
+        "dca_twr_annualized": 0.11335800623102776,
+        "dca_irr": 0.1399013481841435
+      },
+      {
+        "entry_date": "2006-10-03",
+        "entry_idx": 441,
+        "horizon_years": 19.6151,
+        "horizon_cal_days": 7178,
+        "n_contributions": 236,
+        "lump_annualized": 0.11278524089448005,
+        "dca_twr_annualized": 0.11278524089447983,
+        "dca_irr": 0.14026899267815188
+      },
+      {
+        "entry_date": "2006-11-01",
+        "entry_idx": 462,
+        "horizon_years": 19.5317,
+        "horizon_cal_days": 7149,
+        "n_contributions": 235,
+        "lump_annualized": 0.11181705815695886,
+        "dca_twr_annualized": 0.11181705815695908,
+        "dca_irr": 0.14064850671030643
+      },
+      {
+        "entry_date": "2006-12-01",
+        "entry_idx": 483,
+        "horizon_years": 19.4484,
+        "horizon_cal_days": 7119,
+        "n_contributions": 234,
+        "lump_annualized": 0.11093584678781632,
+        "dca_twr_annualized": 0.11093584678781654,
+        "dca_irr": 0.1410442368618903
+      },
+      {
+        "entry_date": "2007-01-04",
+        "entry_idx": 504,
+        "horizon_years": 19.3651,
+        "horizon_cal_days": 7085,
+        "n_contributions": 233,
+        "lump_annualized": 0.11052992119603333,
+        "dca_twr_annualized": 0.11052992119603333,
+        "dca_irr": 0.14145531051139132
+      },
+      {
+        "entry_date": "2007-02-05",
+        "entry_idx": 525,
+        "horizon_years": 19.2817,
+        "horizon_cal_days": 7053,
+        "n_contributions": 232,
+        "lump_annualized": 0.10975481915328889,
+        "dca_twr_annualized": 0.10975481915328866,
+        "dca_irr": 0.1418768478649582
+      },
+      {
+        "entry_date": "2007-03-07",
+        "entry_idx": 546,
+        "horizon_years": 19.1984,
+        "horizon_cal_days": 7023,
+        "n_contributions": 231,
+        "lump_annualized": 0.11241023431415176,
+        "dca_twr_annualized": 0.11241023431415154,
+        "dca_irr": 0.1423127838299708
+      },
+      {
+        "entry_date": "2007-04-05",
+        "entry_idx": 567,
+        "horizon_years": 19.1151,
+        "horizon_cal_days": 6994,
+        "n_contributions": 230,
+        "lump_annualized": 0.11077816757879266,
+        "dca_twr_annualized": 0.11077816757879222,
+        "dca_irr": 0.14272736126401953
+      },
+      {
+        "entry_date": "2007-05-07",
+        "entry_idx": 588,
+        "horizon_years": 19.0317,
+        "horizon_cal_days": 6962,
+        "n_contributions": 229,
+        "lump_annualized": 0.1086373673006833,
+        "dca_twr_annualized": 0.10863736730068307,
+        "dca_irr": 0.14316559520453412
+      },
+      {
+        "entry_date": "2007-06-06",
+        "entry_idx": 609,
+        "horizon_years": 18.9484,
+        "horizon_cal_days": 6932,
+        "n_contributions": 228,
+        "lump_annualized": 0.10879628437438127,
+        "dca_twr_annualized": 0.10879628437438127,
+        "dca_irr": 0.14363246918150344
+      },
+      {
+        "entry_date": "2007-07-06",
+        "entry_idx": 630,
+        "horizon_years": 18.8651,
+        "horizon_cal_days": 6902,
+        "n_contributions": 227,
+        "lump_annualized": 0.10860971511503648,
+        "dca_twr_annualized": 0.10860971511503648,
+        "dca_irr": 0.14410476948961223
+      },
+      {
+        "entry_date": "2007-08-06",
+        "entry_idx": 651,
+        "horizon_years": 18.7817,
+        "horizon_cal_days": 6871,
+        "n_contributions": 226,
+        "lump_annualized": 0.11179313577086636,
+        "dca_twr_annualized": 0.11179313577086658,
+        "dca_irr": 0.14458608245877716
+      },
+      {
+        "entry_date": "2007-09-05",
+        "entry_idx": 672,
+        "horizon_years": 18.6984,
+        "horizon_cal_days": 6841,
+        "n_contributions": 225,
+        "lump_annualized": 0.11167914474842688,
+        "dca_twr_annualized": 0.11167914474842666,
+        "dca_irr": 0.14504186601489338
+      },
+      {
+        "entry_date": "2007-10-04",
+        "entry_idx": 693,
+        "horizon_years": 18.6151,
+        "horizon_cal_days": 6812,
+        "n_contributions": 224,
+        "lump_annualized": 0.10945978610188578,
+        "dca_twr_annualized": 0.10945978610188534,
+        "dca_irr": 0.1455059020976341
+      },
+      {
+        "entry_date": "2007-11-02",
+        "entry_idx": 714,
+        "horizon_years": 18.5317,
+        "horizon_cal_days": 6783,
+        "n_contributions": 223,
+        "lump_annualized": 0.11108550110003956,
+        "dca_twr_annualized": 0.11108550110003912,
+        "dca_irr": 0.1460000802294274
+      },
+      {
+        "entry_date": "2007-12-04",
+        "entry_idx": 735,
+        "horizon_years": 18.4484,
+        "horizon_cal_days": 6751,
+        "n_contributions": 222,
+        "lump_annualized": 0.11357638518933033,
+        "dca_twr_annualized": 0.11357638518933055,
+        "dca_irr": 0.14648510335767226
+      },
+      {
+        "entry_date": "2008-01-04",
+        "entry_idx": 756,
+        "horizon_years": 18.3651,
+        "horizon_cal_days": 6720,
+        "n_contributions": 221,
+        "lump_annualized": 0.11593061977609809,
+        "dca_twr_annualized": 0.11593061977609787,
+        "dca_irr": 0.14695120131089018
+      },
+      {
+        "entry_date": "2008-02-05",
+        "entry_idx": 777,
+        "horizon_years": 18.2817,
+        "horizon_cal_days": 6688,
+        "n_contributions": 220,
+        "lump_annualized": 0.11967791488090551,
+        "dca_twr_annualized": 0.11967791488090573,
+        "dca_irr": 0.14739871171615687
+      },
+      {
+        "entry_date": "2008-03-06",
+        "entry_idx": 798,
+        "horizon_years": 18.1984,
+        "horizon_cal_days": 6658,
+        "n_contributions": 219,
+        "lump_annualized": 0.12168389979348793,
+        "dca_twr_annualized": 0.12168389979348815,
+        "dca_irr": 0.1478101305924812
+      },
+      {
+        "entry_date": "2008-04-07",
+        "entry_idx": 819,
+        "horizon_years": 18.1151,
+        "horizon_cal_days": 6626,
+        "n_contributions": 218,
+        "lump_annualized": 0.11924674607318497,
+        "dca_twr_annualized": 0.11924674607318475,
+        "dca_irr": 0.1482041186729193
+      },
+      {
+        "entry_date": "2008-05-06",
+        "entry_idx": 840,
+        "horizon_years": 18.0317,
+        "horizon_cal_days": 6597,
+        "n_contributions": 217,
+        "lump_annualized": 0.11756570929599719,
+        "dca_twr_annualized": 0.11756570929599719,
+        "dca_irr": 0.1486339878802521
+      },
+      {
+        "entry_date": "2008-06-05",
+        "entry_idx": 861,
+        "horizon_years": 17.9484,
+        "horizon_cal_days": 6567,
+        "n_contributions": 216,
+        "lump_annualized": 0.11870222404971065,
+        "dca_twr_annualized": 0.11870222404971065,
+        "dca_irr": 0.1490905089345552
+      },
+      {
+        "entry_date": "2008-07-07",
+        "entry_idx": 882,
+        "horizon_years": 17.8651,
+        "horizon_cal_days": 6535,
+        "n_contributions": 215,
+        "lump_annualized": 0.126436234242431,
+        "dca_twr_annualized": 0.12643623424243144,
+        "dca_irr": 0.14954134051635412
+      },
+      {
+        "entry_date": "2008-08-05",
+        "entry_idx": 903,
+        "horizon_years": 17.7817,
+        "horizon_cal_days": 6506,
+        "n_contributions": 214,
+        "lump_annualized": 0.12539501924870722,
+        "dca_twr_annualized": 0.12539501924870722,
+        "dca_irr": 0.1499038497280978
+      },
+      {
+        "entry_date": "2008-09-04",
+        "entry_idx": 924,
+        "horizon_years": 17.6984,
+        "horizon_cal_days": 6476,
+        "n_contributions": 213,
+        "lump_annualized": 0.12820656173373846,
+        "dca_twr_annualized": 0.12820656173373823,
+        "dca_irr": 0.15028621997238606
+      },
+      {
+        "entry_date": "2008-10-03",
+        "entry_idx": 945,
+        "horizon_years": 17.6151,
+        "horizon_cal_days": 6447,
+        "n_contributions": 212,
+        "lump_annualized": 0.1359983533442648,
+        "dca_twr_annualized": 0.1359983533442648,
+        "dca_irr": 0.15063813841697668
+      },
+      {
+        "entry_date": "2008-11-03",
+        "entry_idx": 966,
+        "horizon_years": 17.5317,
+        "horizon_cal_days": 6416,
+        "n_contributions": 211,
+        "lump_annualized": 0.1449983133712085,
+        "dca_twr_annualized": 0.1449983133712085,
+        "dca_irr": 0.15088507079738878
+      },
+      {
+        "entry_date": "2008-12-03",
+        "entry_idx": 987,
+        "horizon_years": 17.4484,
+        "horizon_cal_days": 6386,
+        "n_contributions": 210,
+        "lump_annualized": 0.15273812598718184,
+        "dca_twr_annualized": 0.15273812598718162,
+        "dca_irr": 0.1509911394680151
+      },
+      {
+        "entry_date": "2009-01-05",
+        "entry_idx": 1008,
+        "horizon_years": 17.3651,
+        "horizon_cal_days": 6353,
+        "n_contributions": 209,
+        "lump_annualized": 0.14891778390149746,
+        "dca_twr_annualized": 0.14891778390149746,
+        "dca_irr": 0.15095778656045505
+      },
+      {
+        "entry_date": "2009-02-04",
+        "entry_idx": 1029,
+        "horizon_years": 17.2817,
+        "horizon_cal_days": 6323,
+        "n_contributions": 208,
+        "lump_annualized": 0.15690626329159296,
+        "dca_twr_annualized": 0.15690626329159274,
+        "dca_irr": 0.15099576182414526
+      },
+      {
+        "entry_date": "2009-03-06",
+        "entry_idx": 1050,
+        "horizon_years": 17.1984,
+        "horizon_cal_days": 6293,
+        "n_contributions": 207,
+        "lump_annualized": 0.1705750831100843,
+        "dca_twr_annualized": 0.1705750831100843,
+        "dca_irr": 0.15087896849178214
+      },
+      {
+        "entry_date": "2009-04-06",
+        "entry_idx": 1071,
+        "horizon_years": 17.1151,
+        "horizon_cal_days": 6262,
+        "n_contributions": 206,
+        "lump_annualized": 0.15784788692471996,
+        "dca_twr_annualized": 0.15784788692471996,
+        "dca_irr": 0.15044776501763443
+      },
+      {
+        "entry_date": "2009-05-06",
+        "entry_idx": 1092,
+        "horizon_years": 17.0317,
+        "horizon_cal_days": 6232,
+        "n_contributions": 205,
+        "lump_annualized": 0.15208032126431248,
+        "dca_twr_annualized": 0.15208032126431248,
+        "dca_irr": 0.1502996264077117
+      },
+      {
+        "entry_date": "2009-06-05",
+        "entry_idx": 1113,
+        "horizon_years": 16.9484,
+        "horizon_cal_days": 6202,
+        "n_contributions": 204,
+        "lump_annualized": 0.1511275373200378,
+        "dca_twr_annualized": 0.15112753732003736,
+        "dca_irr": 0.15026532769131054
+      },
+      {
+        "entry_date": "2009-07-07",
+        "entry_idx": 1134,
+        "horizon_years": 16.8651,
+        "horizon_cal_days": 6170,
+        "n_contributions": 203,
+        "lump_annualized": 0.15640931661396862,
+        "dca_twr_annualized": 0.15640931661396817,
+        "dca_irr": 0.15024879229398497
+      },
+      {
+        "entry_date": "2009-08-05",
+        "entry_idx": 1155,
+        "horizon_years": 16.7817,
+        "horizon_cal_days": 6141,
+        "n_contributions": 202,
+        "lump_annualized": 0.14822906548714232,
+        "dca_twr_annualized": 0.14822906548714254,
+        "dca_irr": 0.15012587873327815
+      },
+      {
+        "entry_date": "2009-09-03",
+        "entry_idx": 1176,
+        "horizon_years": 16.6984,
+        "horizon_cal_days": 6112,
+        "n_contributions": 201,
+        "lump_annualized": 0.14885712851193666,
+        "dca_twr_annualized": 0.14885712851193666,
+        "dca_irr": 0.15016171308046322
+      },
+      {
+        "entry_date": "2009-10-05",
+        "entry_idx": 1197,
+        "horizon_years": 16.6151,
+        "horizon_cal_days": 6080,
+        "n_contributions": 200,
+        "lump_annualized": 0.14705228028556805,
+        "dca_twr_annualized": 0.14705228028556827,
+        "dca_irr": 0.15018652352151723
+      },
+      {
+        "entry_date": "2009-11-03",
+        "entry_idx": 1218,
+        "horizon_years": 16.5317,
+        "horizon_cal_days": 6051,
+        "n_contributions": 199,
+        "lump_annualized": 0.14742667929787379,
+        "dca_twr_annualized": 0.14742667929787312,
+        "dca_irr": 0.15024553550304934
+      },
+      {
+        "entry_date": "2009-12-03",
+        "entry_idx": 1239,
+        "horizon_years": 16.4484,
+        "horizon_cal_days": 6021,
+        "n_contributions": 198,
+        "lump_annualized": 0.1445111868093163,
+        "dca_twr_annualized": 0.1445111868093163,
+        "dca_irr": 0.15029886840958087
+      },
+      {
+        "entry_date": "2010-01-05",
+        "entry_idx": 1260,
+        "horizon_years": 16.3651,
+        "horizon_cal_days": 5988,
+        "n_contributions": 197,
+        "lump_annualized": 0.14289403287401337,
+        "dca_twr_annualized": 0.14289403287401337,
+        "dca_irr": 0.15040648740904558
+      },
+      {
+        "entry_date": "2010-02-04",
+        "entry_idx": 1281,
+        "horizon_years": 16.2817,
+        "horizon_cal_days": 5958,
+        "n_contributions": 196,
+        "lump_annualized": 0.1482762978485499,
+        "dca_twr_annualized": 0.14827629784855012,
+        "dca_irr": 0.15054499139230815
+      },
+      {
+        "entry_date": "2010-03-08",
+        "entry_idx": 1302,
+        "horizon_years": 16.1984,
+        "horizon_cal_days": 5926,
+        "n_contributions": 195,
+        "lump_annualized": 0.14406894887501465,
+        "dca_twr_annualized": 0.14406894887501487,
+        "dca_irr": 0.15058844800164453
+      },
+      {
+        "entry_date": "2010-04-07",
+        "entry_idx": 1323,
+        "horizon_years": 16.1151,
+        "horizon_cal_days": 5896,
+        "n_contributions": 194,
+        "lump_annualized": 0.1420785581859032,
+        "dca_twr_annualized": 0.14207855818590298,
+        "dca_irr": 0.15071017855024155
+      },
+      {
+        "entry_date": "2010-05-06",
+        "entry_idx": 1344,
+        "horizon_years": 16.0317,
+        "horizon_cal_days": 5867,
+        "n_contributions": 193,
+        "lump_annualized": 0.14621393608613587,
+        "dca_twr_annualized": 0.14621393608613587,
+        "dca_irr": 0.15086962460177297
+      },
+      {
+        "entry_date": "2010-06-07",
+        "entry_idx": 1365,
+        "horizon_years": 15.9484,
+        "horizon_cal_days": 5835,
+        "n_contributions": 192,
+        "lump_annualized": 0.15195002625534926,
+        "dca_twr_annualized": 0.15195002625534948,
+        "dca_irr": 0.15095819224709836
+      },
+      {
+        "entry_date": "2010-07-07",
+        "entry_idx": 1386,
+        "horizon_years": 15.8651,
+        "horizon_cal_days": 5805,
+        "n_contributions": 191,
+        "lump_annualized": 0.15203577910854604,
+        "dca_twr_annualized": 0.15203577910854627,
+        "dca_irr": 0.15093855191766573
+      },
+      {
+        "entry_date": "2010-08-05",
+        "entry_idx": 1407,
+        "horizon_years": 15.7817,
+        "horizon_cal_days": 5776,
+        "n_contributions": 190,
+        "lump_annualized": 0.14840704380671776,
+        "dca_twr_annualized": 0.1484070438067182,
+        "dca_irr": 0.15091675561426934
+      },
+      {
+        "entry_date": "2010-09-03",
+        "entry_idx": 1428,
+        "horizon_years": 15.6984,
+        "horizon_cal_days": 5747,
+        "n_contributions": 189,
+        "lump_annualized": 0.15053430049936734,
+        "dca_twr_annualized": 0.1505343004993669,
+        "dca_irr": 0.15096557530142876
+      },
+      {
+        "entry_date": "2010-10-05",
+        "entry_idx": 1449,
+        "horizon_years": 15.6151,
+        "horizon_cal_days": 5715,
+        "n_contributions": 188,
+        "lump_annualized": 0.1476606598318404,
+        "dca_twr_annualized": 0.14766065983184062,
+        "dca_irr": 0.15097410249848528
+      },
+      {
+        "entry_date": "2010-11-03",
+        "entry_idx": 1470,
+        "horizon_years": 15.5317,
+        "horizon_cal_days": 5686,
+        "n_contributions": 187,
+        "lump_annualized": 0.14606106549858744,
+        "dca_twr_annualized": 0.14606106549858722,
+        "dca_irr": 0.15103858757535016
+      },
+      {
+        "entry_date": "2010-12-03",
+        "entry_idx": 1491,
+        "horizon_years": 15.4484,
+        "horizon_cal_days": 5656,
+        "n_contributions": 186,
+        "lump_annualized": 0.14510790774550464,
+        "dca_twr_annualized": 0.14510790774550464,
+        "dca_irr": 0.15113472566000397
+      },
+      {
+        "entry_date": "2011-01-04",
+        "entry_idx": 1512,
+        "horizon_years": 15.3651,
+        "horizon_cal_days": 5624,
+        "n_contributions": 185,
+        "lump_annualized": 0.1431202302368686,
+        "dca_twr_annualized": 0.1431202302368686,
+        "dca_irr": 0.151250729996487
+      },
+      {
+        "entry_date": "2011-02-03",
+        "entry_idx": 1533,
+        "horizon_years": 15.2817,
+        "horizon_cal_days": 5594,
+        "n_contributions": 184,
+        "lump_annualized": 0.1417491512708844,
+        "dca_twr_annualized": 0.14174915127088417,
+        "dca_irr": 0.15140568991437275
+      },
+      {
+        "entry_date": "2011-03-07",
+        "entry_idx": 1554,
+        "horizon_years": 15.1984,
+        "horizon_cal_days": 5562,
+        "n_contributions": 183,
+        "lump_annualized": 0.14220667614535976,
+        "dca_twr_annualized": 0.14220667614535953,
+        "dca_irr": 0.15158864398747837
+      },
+      {
+        "entry_date": "2011-04-05",
+        "entry_idx": 1575,
+        "horizon_years": 15.1151,
+        "horizon_cal_days": 5533,
+        "n_contributions": 182,
+        "lump_annualized": 0.1416829335464258,
+        "dca_twr_annualized": 0.14168293354642558,
+        "dca_irr": 0.15176735422156368
+      },
+      {
+        "entry_date": "2011-05-05",
+        "entry_idx": 1596,
+        "horizon_years": 15.0317,
+        "horizon_cal_days": 5503,
+        "n_contributions": 181,
+        "lump_annualized": 0.1423111407054105,
+        "dca_twr_annualized": 0.14231114070541073,
+        "dca_irr": 0.15195932642447246
+      },
+      {
+        "entry_date": "2011-06-06",
+        "entry_idx": 1617,
+        "horizon_years": 14.9484,
+        "horizon_cal_days": 5471,
+        "n_contributions": 180,
+        "lump_annualized": 0.1458233258214836,
+        "dca_twr_annualized": 0.14582332582148383,
+        "dca_irr": 0.15214417800220606
+      },
+      {
+        "entry_date": "2011-07-06",
+        "entry_idx": 1638,
+        "horizon_years": 14.8651,
+        "horizon_cal_days": 5441,
+        "n_contributions": 179,
+        "lump_annualized": 0.14342897189280635,
+        "dca_twr_annualized": 0.14342897189280635,
+        "dca_irr": 0.15226821452760816
+      },
+      {
+        "entry_date": "2011-08-04",
+        "entry_idx": 1659,
+        "horizon_years": 14.7817,
+        "horizon_cal_days": 5412,
+        "n_contributions": 178,
+        "lump_annualized": 0.1526812877603485,
+        "dca_twr_annualized": 0.15268128776034828,
+        "dca_irr": 0.15243964766990753
+      },
+      {
+        "entry_date": "2011-09-02",
+        "entry_idx": 1680,
+        "horizon_years": 14.6984,
+        "horizon_cal_days": 5383,
+        "n_contributions": 177,
+        "lump_annualized": 0.15520018654143453,
+        "dca_twr_annualized": 0.15520018654143408,
+        "dca_irr": 0.15243467892597518
+      },
+      {
+        "entry_date": "2011-10-04",
+        "entry_idx": 1701,
+        "horizon_years": 14.6151,
+        "horizon_cal_days": 5351,
+        "n_contributions": 176,
+        "lump_annualized": 0.15953544254331287,
+        "dca_twr_annualized": 0.15953544254331287,
+        "dca_irr": 0.15237677146429526
+      },
+      {
+        "entry_date": "2011-11-02",
+        "entry_idx": 1722,
+        "horizon_years": 14.5317,
+        "horizon_cal_days": 5322,
+        "n_contributions": 175,
+        "lump_annualized": 0.1526668647788061,
+        "dca_twr_annualized": 0.1526668647788063,
+        "dca_irr": 0.1522224315552718
+      },
+      {
+        "entry_date": "2011-12-02",
+        "entry_idx": 1743,
+        "horizon_years": 14.4484,
+        "horizon_cal_days": 5292,
+        "n_contributions": 174,
+        "lump_annualized": 0.15305366973315215,
+        "dca_twr_annualized": 0.15305366973315193,
+        "dca_irr": 0.15221320718886258
+      },
+      {
+        "entry_date": "2012-01-04",
+        "entry_idx": 1764,
+        "horizon_years": 14.3651,
+        "horizon_cal_days": 5259,
+        "n_contributions": 173,
+        "lump_annualized": 0.15169432717045628,
+        "dca_twr_annualized": 0.15169432717045583,
+        "dca_irr": 0.15219567045819749
+      },
+      {
+        "entry_date": "2012-02-03",
+        "entry_idx": 1785,
+        "horizon_years": 14.2817,
+        "horizon_cal_days": 5229,
+        "n_contributions": 172,
+        "lump_annualized": 0.14844037092355067,
+        "dca_twr_annualized": 0.14844037092355,
+        "dca_irr": 0.152206079434017
+      },
+      {
+        "entry_date": "2012-03-06",
+        "entry_idx": 1806,
+        "horizon_years": 14.1984,
+        "horizon_cal_days": 5197,
+        "n_contributions": 171,
+        "lump_annualized": 0.1492473962031362,
+        "dca_twr_annualized": 0.14924739620313643,
+        "dca_irr": 0.15228302675572059
+      },
+      {
+        "entry_date": "2012-04-04",
+        "entry_idx": 1827,
+        "horizon_years": 14.1151,
+        "horizon_cal_days": 5168,
+        "n_contributions": 170,
+        "lump_annualized": 0.14680730353866323,
+        "dca_twr_annualized": 0.146807303538663,
+        "dca_irr": 0.15234553333686612
+      },
+      {
+        "entry_date": "2012-05-04",
+        "entry_idx": 1848,
+        "horizon_years": 14.0317,
+        "horizon_cal_days": 5138,
+        "n_contributions": 169,
+        "lump_annualized": 0.14943184657915842,
+        "dca_twr_annualized": 0.14943184657915864,
+        "dca_irr": 0.15245832668514447
+      },
+      {
+        "entry_date": "2012-06-05",
+        "entry_idx": 1869,
+        "horizon_years": 13.9484,
+        "horizon_cal_days": 5106,
+        "n_contributions": 168,
+        "lump_annualized": 0.15531675035930403,
+        "dca_twr_annualized": 0.1553167503593036,
+        "dca_irr": 0.15252108457567884
+      },
+      {
+        "entry_date": "2012-07-05",
+        "entry_idx": 1890,
+        "horizon_years": 13.8651,
+        "horizon_cal_days": 5076,
+        "n_contributions": 167,
+        "lump_annualized": 0.15105599913793455,
+        "dca_twr_annualized": 0.15105599913793455,
+        "dca_irr": 0.1524609476486544
+      },
+      {
+        "entry_date": "2012-08-03",
+        "entry_idx": 1911,
+        "horizon_years": 13.7817,
+        "horizon_cal_days": 5047,
+        "n_contributions": 166,
+        "lump_annualized": 0.1504866329798551,
+        "dca_twr_annualized": 0.15048663297985487,
+        "dca_irr": 0.15249054347731647
+      },
+      {
+        "entry_date": "2012-09-04",
+        "entry_idx": 1932,
+        "horizon_years": 13.6984,
+        "horizon_cal_days": 5015,
+        "n_contributions": 165,
+        "lump_annualized": 0.150461292505355,
+        "dca_twr_annualized": 0.15046129250535478,
+        "dca_irr": 0.1525327565617076
+      },
+      {
+        "entry_date": "2012-10-03",
+        "entry_idx": 1953,
+        "horizon_years": 13.6151,
+        "horizon_cal_days": 4986,
+        "n_contributions": 164,
+        "lump_annualized": 0.14860168959062414,
+        "dca_twr_annualized": 0.1486016895906237,
+        "dca_irr": 0.1525765270587842
+      },
+      {
+        "entry_date": "2012-11-05",
+        "entry_idx": 1974,
+        "horizon_years": 13.5317,
+        "horizon_cal_days": 4953,
+        "n_contributions": 163,
+        "lump_annualized": 0.15150231644734213,
+        "dca_twr_annualized": 0.1515023164473419,
+        "dca_irr": 0.15265992649016485
+      },
+      {
+        "entry_date": "2012-12-05",
+        "entry_idx": 1995,
+        "horizon_years": 13.4484,
+        "horizon_cal_days": 4923,
+        "n_contributions": 162,
+        "lump_annualized": 0.15272103577563922,
+        "dca_twr_annualized": 0.15272103577563922,
+        "dca_irr": 0.15268468628861687
+      },
+      {
+        "entry_date": "2013-01-07",
+        "entry_idx": 2016,
+        "horizon_years": 13.3651,
+        "horizon_cal_days": 4890,
+        "n_contributions": 161,
+        "lump_annualized": 0.15045280112545045,
+        "dca_twr_annualized": 0.15045280112545045,
+        "dca_irr": 0.15268390100409593
+      },
+      {
+        "entry_date": "2013-02-06",
+        "entry_idx": 2037,
+        "horizon_years": 13.2817,
+        "horizon_cal_days": 4860,
+        "n_contributions": 160,
+        "lump_annualized": 0.14843994451518228,
+        "dca_twr_annualized": 0.14843994451518228,
+        "dca_irr": 0.15273167162851609
+      },
+      {
+        "entry_date": "2013-03-08",
+        "entry_idx": 2058,
+        "horizon_years": 13.1984,
+        "horizon_cal_days": 4830,
+        "n_contributions": 159,
+        "lump_annualized": 0.14701492525270687,
+        "dca_twr_annualized": 0.14701492525270687,
+        "dca_irr": 0.15282287908040204
+      },
+      {
+        "entry_date": "2013-04-09",
+        "entry_idx": 2079,
+        "horizon_years": 13.1151,
+        "horizon_cal_days": 4798,
+        "n_contributions": 158,
+        "lump_annualized": 0.14689249199448362,
+        "dca_twr_annualized": 0.14689249199448318,
+        "dca_irr": 0.15294578834097167
+      },
+      {
+        "entry_date": "2013-05-08",
+        "entry_idx": 2100,
+        "horizon_years": 13.0317,
+        "horizon_cal_days": 4769,
+        "n_contributions": 157,
+        "lump_annualized": 0.14427634313564708,
+        "dca_twr_annualized": 0.14427634313564752,
+        "dca_irr": 0.15307424153540353
+      },
+      {
+        "entry_date": "2013-06-07",
+        "entry_idx": 2121,
+        "horizon_years": 12.9484,
+        "horizon_cal_days": 4739,
+        "n_contributions": 156,
+        "lump_annualized": 0.1444824692463289,
+        "dca_twr_annualized": 0.14448246924632846,
+        "dca_irr": 0.15325902162209276
+      },
+      {
+        "entry_date": "2013-07-09",
+        "entry_idx": 2142,
+        "horizon_years": 12.8651,
+        "horizon_cal_days": 4707,
+        "n_contributions": 155,
+        "lump_annualized": 0.14483553438653995,
+        "dca_twr_annualized": 0.14483553438653973,
+        "dca_irr": 0.1534441849051459
+      },
+      {
+        "entry_date": "2013-08-07",
+        "entry_idx": 2163,
+        "horizon_years": 12.7817,
+        "horizon_cal_days": 4678,
+        "n_contributions": 154,
+        "lump_annualized": 0.14367550924942507,
+        "dca_twr_annualized": 0.14367550924942463,
+        "dca_irr": 0.15362676905101433
+      },
+      {
+        "entry_date": "2013-09-06",
+        "entry_idx": 2184,
+        "horizon_years": 12.6984,
+        "horizon_cal_days": 4648,
+        "n_contributions": 153,
+        "lump_annualized": 0.14637354299447414,
+        "dca_twr_annualized": 0.14637354299447392,
+        "dca_irr": 0.15383731378779078
+      },
+      {
+        "entry_date": "2013-10-07",
+        "entry_idx": 2205,
+        "horizon_years": 12.6151,
+        "horizon_cal_days": 4617,
+        "n_contributions": 152,
+        "lump_annualized": 0.14620860377352618,
+        "dca_twr_annualized": 0.14620860377352596,
+        "dca_irr": 0.15399798063272027
+      },
+      {
+        "entry_date": "2013-11-05",
+        "entry_idx": 2226,
+        "horizon_years": 12.5317,
+        "horizon_cal_days": 4588,
+        "n_contributions": 151,
+        "lump_annualized": 0.14254857755644923,
+        "dca_twr_annualized": 0.14254857755644923,
+        "dca_irr": 0.15416611891872592
+      },
+      {
+        "entry_date": "2013-12-05",
+        "entry_idx": 2247,
+        "horizon_years": 12.4484,
+        "horizon_cal_days": 4558,
+        "n_contributions": 150,
+        "lump_annualized": 0.14218800749827376,
+        "dca_twr_annualized": 0.14218800749827398,
+        "dca_irr": 0.15441322247149641
+      },
+      {
+        "entry_date": "2014-01-07",
+        "entry_idx": 2268,
+        "horizon_years": 12.3651,
+        "horizon_cal_days": 4525,
+        "n_contributions": 149,
+        "lump_annualized": 0.1403982678517326,
+        "dca_twr_annualized": 0.14039826785173237,
+        "dca_irr": 0.1546737302685943
+      },
+      {
+        "entry_date": "2014-02-06",
+        "entry_idx": 2289,
+        "horizon_years": 12.2817,
+        "horizon_cal_days": 4495,
+        "n_contributions": 148,
+        "lump_annualized": 0.14450938226998988,
+        "dca_twr_annualized": 0.14450938226998922,
+        "dca_irr": 0.1549763677558087
+      },
+      {
+        "entry_date": "2014-03-10",
+        "entry_idx": 2310,
+        "horizon_years": 12.1984,
+        "horizon_cal_days": 4463,
+        "n_contributions": 147,
+        "lump_annualized": 0.14009067473333947,
+        "dca_twr_annualized": 0.14009067473333947,
+        "dca_irr": 0.15520360984600973
+      },
+      {
+        "entry_date": "2014-04-08",
+        "entry_idx": 2331,
+        "horizon_years": 12.1151,
+        "horizon_cal_days": 4434,
+        "n_contributions": 146,
+        "lump_annualized": 0.14224943984383387,
+        "dca_twr_annualized": 0.14224943984383387,
+        "dca_irr": 0.15552596669132213
+      },
+      {
+        "entry_date": "2014-05-08",
+        "entry_idx": 2352,
+        "horizon_years": 12.0317,
+        "horizon_cal_days": 4404,
+        "n_contributions": 145,
+        "lump_annualized": 0.1419875617352866,
+        "dca_twr_annualized": 0.14198756173528637,
+        "dca_irr": 0.15581318890760273
+      },
+      {
+        "entry_date": "2014-06-09",
+        "entry_idx": 2373,
+        "horizon_years": 11.9484,
+        "horizon_cal_days": 4372,
+        "n_contributions": 144,
+        "lump_annualized": 0.13910793623998874,
+        "dca_twr_annualized": 0.13910793623998896,
+        "dca_irr": 0.15611306038625905
+      },
+      {
+        "entry_date": "2014-07-09",
+        "entry_idx": 2394,
+        "horizon_years": 11.8651,
+        "horizon_cal_days": 4342,
+        "n_contributions": 143,
+        "lump_annualized": 0.1389380621283478,
+        "dca_twr_annualized": 0.13893806212834736,
+        "dca_irr": 0.1564783136419986
+      },
+      {
+        "entry_date": "2014-08-07",
+        "entry_idx": 2415,
+        "horizon_years": 11.7817,
+        "horizon_cal_days": 4313,
+        "n_contributions": 142,
+        "lump_annualized": 0.14302711254113443,
+        "dca_twr_annualized": 0.14302711254113376,
+        "dca_irr": 0.15685623017932293
+      },
+      {
+        "entry_date": "2014-09-08",
+        "entry_idx": 2436,
+        "horizon_years": 11.6984,
+        "horizon_cal_days": 4281,
+        "n_contributions": 141,
+        "lump_annualized": 0.13935021451567242,
+        "dca_twr_annualized": 0.13935021451567264,
+        "dca_irr": 0.15716110992620233
+      },
+      {
+        "entry_date": "2014-10-07",
+        "entry_idx": 2457,
+        "horizon_years": 11.6151,
+        "horizon_cal_days": 4252,
+        "n_contributions": 140,
+        "lump_annualized": 0.14361875312735362,
+        "dca_twr_annualized": 0.14361875312735384,
+        "dca_irr": 0.1575487051064969
+      },
+      {
+        "entry_date": "2014-11-05",
+        "entry_idx": 2478,
+        "horizon_years": 11.5317,
+        "horizon_cal_days": 4223,
+        "n_contributions": 139,
+        "lump_annualized": 0.14017973693986807,
+        "dca_twr_annualized": 0.14017973693986807,
+        "dca_irr": 0.15785907640244654
+      },
+      {
+        "entry_date": "2014-12-05",
+        "entry_idx": 2499,
+        "horizon_years": 11.4484,
+        "horizon_cal_days": 4193,
+        "n_contributions": 138,
+        "lump_annualized": 0.13852207207568434,
+        "dca_twr_annualized": 0.1385220720756839,
+        "dca_irr": 0.1582484614698909
+      },
+      {
+        "entry_date": "2015-01-07",
+        "entry_idx": 2520,
+        "horizon_years": 11.3651,
+        "horizon_cal_days": 4160,
+        "n_contributions": 137,
+        "lump_annualized": 0.141837110951889,
+        "dca_twr_annualized": 0.141837110951889,
+        "dca_irr": 0.1586814854687954
+      },
+      {
+        "entry_date": "2015-02-06",
+        "entry_idx": 2541,
+        "horizon_years": 11.2817,
+        "horizon_cal_days": 4130,
+        "n_contributions": 136,
+        "lump_annualized": 0.14134786437566405,
+        "dca_twr_annualized": 0.14134786437566382,
+        "dca_irr": 0.1590583171266025
+      },
+      {
+        "entry_date": "2015-03-10",
+        "entry_idx": 2562,
+        "horizon_years": 11.1984,
+        "horizon_cal_days": 4098,
+        "n_contributions": 135,
+        "lump_annualized": 0.14275468365575072,
+        "dca_twr_annualized": 0.14275468365575117,
+        "dca_irr": 0.15945533298488052
+      },
+      {
+        "entry_date": "2015-04-09",
+        "entry_idx": 2583,
+        "horizon_years": 11.1151,
+        "horizon_cal_days": 4068,
+        "n_contributions": 134,
+        "lump_annualized": 0.14149318114441733,
+        "dca_twr_annualized": 0.1414931811444171,
+        "dca_irr": 0.1598336380566766
+      },
+      {
+        "entry_date": "2015-05-08",
+        "entry_idx": 2604,
+        "horizon_years": 11.0317,
+        "horizon_cal_days": 4039,
+        "n_contributions": 133,
+        "lump_annualized": 0.14129569453184687,
+        "dca_twr_annualized": 0.1412956945318471,
+        "dca_irr": 0.16024859463710348
+      },
+      {
+        "entry_date": "2015-06-09",
+        "entry_idx": 2625,
+        "horizon_years": 10.9484,
+        "horizon_cal_days": 4007,
+        "n_contributions": 132,
+        "lump_annualized": 0.14402039572174852,
+        "dca_twr_annualized": 0.1440203957217483,
+        "dca_irr": 0.16067890968154835
+      },
+      {
+        "entry_date": "2015-07-09",
+        "entry_idx": 2646,
+        "horizon_years": 10.8651,
+        "horizon_cal_days": 3977,
+        "n_contributions": 131,
+        "lump_annualized": 0.14650137290806642,
+        "dca_twr_annualized": 0.1465013729080662,
+        "dca_irr": 0.16106325890633702
+      },
+      {
+        "entry_date": "2015-08-07",
+        "entry_idx": 2667,
+        "horizon_years": 10.7817,
+        "horizon_cal_days": 3948,
+        "n_contributions": 130,
+        "lump_annualized": 0.14614174628240795,
+        "dca_twr_annualized": 0.1461417462824075,
+        "dca_irr": 0.1614043154302176
+      },
+      {
+        "entry_date": "2015-09-08",
+        "entry_idx": 2688,
+        "horizon_years": 10.6984,
+        "horizon_cal_days": 3916,
+        "n_contributions": 129,
+        "lump_annualized": 0.15294118633401665,
+        "dca_twr_annualized": 0.1529411863340171,
+        "dca_irr": 0.1617628514682638
+      },
+      {
+        "entry_date": "2015-10-07",
+        "entry_idx": 2709,
+        "horizon_years": 10.6151,
+        "horizon_cal_days": 3887,
+        "n_contributions": 128,
+        "lump_annualized": 0.15258231070018602,
+        "dca_twr_annualized": 0.15258231070018535,
+        "dca_irr": 0.16197705894803305
+      },
+      {
+        "entry_date": "2015-11-05",
+        "entry_idx": 2730,
+        "horizon_years": 10.5317,
+        "horizon_cal_days": 3858,
+        "n_contributions": 127,
+        "lump_annualized": 0.14814492266423374,
+        "dca_twr_annualized": 0.1481449226642344,
+        "dca_irr": 0.16220589694255094
+      },
+      {
+        "entry_date": "2015-12-07",
+        "entry_idx": 2751,
+        "horizon_years": 10.4484,
+        "horizon_cal_days": 3826,
+        "n_contributions": 126,
+        "lump_annualized": 0.1503573785143799,
+        "dca_twr_annualized": 0.15035737851437947,
+        "dca_irr": 0.16254375486808992
+      },
+      {
+        "entry_date": "2016-01-07",
+        "entry_idx": 2772,
+        "horizon_years": 10.3651,
+        "horizon_cal_days": 3795,
+        "n_contributions": 125,
+        "lump_annualized": 0.15891733514211137,
+        "dca_twr_annualized": 0.15891733514211137,
+        "dca_irr": 0.16284062904785548
+      },
+      {
+        "entry_date": "2016-02-08",
+        "entry_idx": 2793,
+        "horizon_years": 10.2817,
+        "horizon_cal_days": 3763,
+        "n_contributions": 124,
+        "lump_annualized": 0.165448716903432,
+        "dca_twr_annualized": 0.165448716903432,
+        "dca_irr": 0.1629400682282493
+      },
+      {
+        "entry_date": "2016-03-09",
+        "entry_idx": 2814,
+        "horizon_years": 10.1984,
+        "horizon_cal_days": 3733,
+        "n_contributions": 123,
+        "lump_annualized": 0.1586314958350037,
+        "dca_twr_annualized": 0.1586314958350037,
+        "dca_irr": 0.1628744559100944
+      },
+      {
+        "entry_date": "2016-04-08",
+        "entry_idx": 2835,
+        "horizon_years": 10.1151,
+        "horizon_cal_days": 3703,
+        "n_contributions": 122,
+        "lump_annualized": 0.15654526181779604,
+        "dca_twr_annualized": 0.15654526181779582,
+        "dca_irr": 0.16298296476030127
+      },
+      {
+        "entry_date": "2016-05-09",
+        "entry_idx": 2856,
+        "horizon_years": 10.0317,
+        "horizon_cal_days": 3672,
+        "n_contributions": 121,
+        "lump_annualized": 0.15716171863507777,
+        "dca_twr_annualized": 0.15716171863507755,
+        "dca_irr": 0.16314706101183207
+      },
+      {
+        "entry_date": "2016-06-08",
+        "entry_idx": 2877,
+        "horizon_years": 9.9484,
+        "horizon_cal_days": 3642,
+        "n_contributions": 120,
+        "lump_annualized": 0.15497426429564043,
+        "dca_twr_annualized": 0.15497426429564043,
+        "dca_irr": 0.16330077138193927
+      },
+      {
+        "entry_date": "2016-07-08",
+        "entry_idx": 2898,
+        "horizon_years": 9.8651,
+        "horizon_cal_days": 3612,
+        "n_contributions": 119,
+        "lump_annualized": 0.15561860285645102,
+        "dca_twr_annualized": 0.15561860285645102,
+        "dca_irr": 0.16351387902696027
+      },
+      {
+        "entry_date": "2016-08-08",
+        "entry_idx": 2919,
+        "horizon_years": 9.7817,
+        "horizon_cal_days": 3581,
+        "n_contributions": 118,
+        "lump_annualized": 0.1540809875122624,
+        "dca_twr_annualized": 0.15408098751226218,
+        "dca_irr": 0.163717502645046
+      },
+      {
+        "entry_date": "2016-09-07",
+        "entry_idx": 2940,
+        "horizon_years": 9.6984,
+        "horizon_cal_days": 3551,
+        "n_contributions": 117,
+        "lump_annualized": 0.15497966337175062,
+        "dca_twr_annualized": 0.15497966337175084,
+        "dca_irr": 0.16396587714209646
+      },
+      {
+        "entry_date": "2016-10-06",
+        "entry_idx": 2961,
+        "horizon_years": 9.6151,
+        "horizon_cal_days": 3522,
+        "n_contributions": 116,
+        "lump_annualized": 0.1576044498719842,
+        "dca_twr_annualized": 0.15760444987198352,
+        "dca_irr": 0.16419951353643464
+      },
+      {
+        "entry_date": "2016-11-04",
+        "entry_idx": 2982,
+        "horizon_years": 9.5317,
+        "horizon_cal_days": 3493,
+        "n_contributions": 115,
+        "lump_annualized": 0.1632382572749751,
+        "dca_twr_annualized": 0.16323825727497554,
+        "dca_irr": 0.16437360828705913
+      },
+      {
+        "entry_date": "2016-12-06",
+        "entry_idx": 3003,
+        "horizon_years": 9.4484,
+        "horizon_cal_days": 3461,
+        "n_contributions": 114,
+        "lump_annualized": 0.15727689556018354,
+        "dca_twr_annualized": 0.15727689556018354,
+        "dca_irr": 0.1644043811705547
+      },
+      {
+        "entry_date": "2017-01-06",
+        "entry_idx": 3024,
+        "horizon_years": 9.3651,
+        "horizon_cal_days": 3430,
+        "n_contributions": 113,
+        "lump_annualized": 0.15502341140141418,
+        "dca_twr_annualized": 0.1550234114014144,
+        "dca_irr": 0.16459441668582958
+      },
+      {
+        "entry_date": "2017-02-07",
+        "entry_idx": 3045,
+        "horizon_years": 9.2817,
+        "horizon_cal_days": 3398,
+        "n_contributions": 112,
+        "lump_annualized": 0.15557419143056106,
+        "dca_twr_annualized": 0.15557419143056084,
+        "dca_irr": 0.16484893666374908
+      },
+      {
+        "entry_date": "2017-03-09",
+        "entry_idx": 3066,
+        "horizon_years": 9.1984,
+        "horizon_cal_days": 3368,
+        "n_contributions": 111,
+        "lump_annualized": 0.15281872859085155,
+        "dca_twr_annualized": 0.15281872859085155,
+        "dca_irr": 0.16509746959635174
+      },
+      {
+        "entry_date": "2017-04-07",
+        "entry_idx": 3087,
+        "horizon_years": 9.1151,
+        "horizon_cal_days": 3339,
+        "n_contributions": 110,
+        "lump_annualized": 0.1546595123150083,
+        "dca_twr_annualized": 0.15465951231500785,
+        "dca_irr": 0.16542516169161392
+      },
+      {
+        "entry_date": "2017-05-09",
+        "entry_idx": 3108,
+        "horizon_years": 9.0317,
+        "horizon_cal_days": 3307,
+        "n_contributions": 109,
+        "lump_annualized": 0.15390766187708205,
+        "dca_twr_annualized": 0.15390766187708182,
+        "dca_irr": 0.16571602511847167
+      },
+      {
+        "entry_date": "2017-06-08",
+        "entry_idx": 3129,
+        "horizon_years": 8.9484,
+        "horizon_cal_days": 3277,
+        "n_contributions": 108,
+        "lump_annualized": 0.1531298531227756,
+        "dca_twr_annualized": 0.15312985312277583,
+        "dca_irr": 0.16603610309248445
+      },
+      {
+        "entry_date": "2017-07-10",
+        "entry_idx": 3150,
+        "horizon_years": 8.8651,
+        "horizon_cal_days": 3245,
+        "n_contributions": 107,
+        "lump_annualized": 0.1547972461638114,
+        "dca_twr_annualized": 0.15479724616381163,
+        "dca_irr": 0.16638709082424416
+      },
+      {
+        "entry_date": "2017-08-08",
+        "entry_idx": 3171,
+        "horizon_years": 8.7817,
+        "horizon_cal_days": 3216,
+        "n_contributions": 106,
+        "lump_annualized": 0.15374815401347885,
+        "dca_twr_annualized": 0.15374815401347863,
+        "dca_irr": 0.16670599774460512
+      },
+      {
+        "entry_date": "2017-09-07",
+        "entry_idx": 3192,
+        "horizon_years": 8.6984,
+        "horizon_cal_days": 3186,
+        "n_contributions": 105,
+        "lump_annualized": 0.15553974330338183,
+        "dca_twr_annualized": 0.15553974330338205,
+        "dca_irr": 0.16706346914817427
+      },
+      {
+        "entry_date": "2017-10-06",
+        "entry_idx": 3213,
+        "horizon_years": 8.6151,
+        "horizon_cal_days": 3157,
+        "n_contributions": 104,
+        "lump_annualized": 0.15248144555579857,
+        "dca_twr_annualized": 0.15248144555579835,
+        "dca_irr": 0.16738527580485396
+      },
+      {
+        "entry_date": "2017-11-06",
+        "entry_idx": 3234,
+        "horizon_years": 8.5317,
+        "horizon_cal_days": 3126,
+        "n_contributions": 103,
+        "lump_annualized": 0.15172084256281693,
+        "dca_twr_annualized": 0.15172084256281693,
+        "dca_irr": 0.16779989557873742
+      },
+      {
+        "entry_date": "2017-12-06",
+        "entry_idx": 3255,
+        "horizon_years": 8.4484,
+        "horizon_cal_days": 3096,
+        "n_contributions": 102,
+        "lump_annualized": 0.15103317398633287,
+        "dca_twr_annualized": 0.1510331739863331,
+        "dca_irr": 0.1682489624852899
+      },
+      {
+        "entry_date": "2018-01-08",
+        "entry_idx": 3276,
+        "horizon_years": 8.3651,
+        "horizon_cal_days": 3063,
+        "n_contributions": 101,
+        "lump_annualized": 0.1464811847093761,
+        "dca_twr_annualized": 0.14648118470937632,
+        "dca_irr": 0.16873183354073076
+      },
+      {
+        "entry_date": "2018-02-07",
+        "entry_idx": 3297,
+        "horizon_years": 8.2817,
+        "horizon_cal_days": 3033,
+        "n_contributions": 100,
+        "lump_annualized": 0.1512633713776217,
+        "dca_twr_annualized": 0.15126337137762147,
+        "dca_irr": 0.16935102285040057
+      },
+      {
+        "entry_date": "2018-03-09",
+        "entry_idx": 3318,
+        "horizon_years": 8.1984,
+        "horizon_cal_days": 3003,
+        "n_contributions": 99,
+        "lump_annualized": 0.1471628891652048,
+        "dca_twr_annualized": 0.1471628891652048,
+        "dca_irr": 0.16986541386271703
+      },
+      {
+        "entry_date": "2018-04-10",
+        "entry_idx": 3339,
+        "horizon_years": 8.1151,
+        "horizon_cal_days": 2971,
+        "n_contributions": 98,
+        "lump_annualized": 0.15537616582572888,
+        "dca_twr_annualized": 0.15537616582572844,
+        "dca_irr": 0.17050721073004269
+      },
+      {
+        "entry_date": "2018-05-09",
+        "entry_idx": 3360,
+        "horizon_years": 8.0317,
+        "horizon_cal_days": 2942,
+        "n_contributions": 97,
+        "lump_annualized": 0.15476679300385965,
+        "dca_twr_annualized": 0.1547667930038592,
+        "dca_irr": 0.17094891645833835
+      },
+      {
+        "entry_date": "2018-06-08",
+        "entry_idx": 3381,
+        "horizon_years": 7.9484,
+        "horizon_cal_days": 2912,
+        "n_contributions": 96,
+        "lump_annualized": 0.15190185856009664,
+        "dca_twr_annualized": 0.15190185856009597,
+        "dca_irr": 0.17142371254994024
+      },
+      {
+        "entry_date": "2018-07-10",
+        "entry_idx": 3402,
+        "horizon_years": 7.8651,
+        "horizon_cal_days": 2880,
+        "n_contributions": 95,
+        "lump_annualized": 0.1525984899558226,
+        "dca_twr_annualized": 0.15259848995582304,
+        "dca_irr": 0.17199561105293634
+      },
+      {
+        "entry_date": "2018-08-08",
+        "entry_idx": 3423,
+        "horizon_years": 7.7817,
+        "horizon_cal_days": 2851,
+        "n_contributions": 94,
+        "lump_annualized": 0.15090918904714457,
+        "dca_twr_annualized": 0.15090918904714457,
+        "dca_irr": 0.17256912360125368
+      },
+      {
+        "entry_date": "2018-09-07",
+        "entry_idx": 3444,
+        "horizon_years": 7.6984,
+        "horizon_cal_days": 2821,
+        "n_contributions": 93,
+        "lump_annualized": 0.15154382319800974,
+        "dca_twr_annualized": 0.15154382319800996,
+        "dca_irr": 0.17321103549829714
+      },
+      {
+        "entry_date": "2018-10-08",
+        "entry_idx": 3465,
+        "horizon_years": 7.6151,
+        "horizon_cal_days": 2790,
+        "n_contributions": 92,
+        "lump_annualized": 0.1525237766507599,
+        "dca_twr_annualized": 0.15252377665075945,
+        "dca_irr": 0.17385911276854443
+      },
+      {
+        "entry_date": "2018-11-06",
+        "entry_idx": 3486,
+        "horizon_years": 7.5317,
+        "horizon_cal_days": 2761,
+        "n_contributions": 91,
+        "lump_annualized": 0.16127251134610554,
+        "dca_twr_annualized": 0.16127251134610554,
+        "dca_irr": 0.1745038645210419
+      },
+      {
+        "entry_date": "2018-12-07",
+        "entry_idx": 3507,
+        "horizon_years": 7.4484,
+        "horizon_cal_days": 2730,
+        "n_contributions": 90,
+        "lump_annualized": 0.16993391029965643,
+        "dca_twr_annualized": 0.16993391029965643,
+        "dca_irr": 0.17491682402034375
+      },
+      {
+        "entry_date": "2019-01-09",
+        "entry_idx": 3528,
+        "horizon_years": 7.3651,
+        "horizon_cal_days": 2697,
+        "n_contributions": 89,
+        "lump_annualized": 0.17450684679167328,
+        "dca_twr_annualized": 0.17450684679167283,
+        "dca_irr": 0.17507737657531533
+      },
+      {
+        "entry_date": "2019-02-08",
+        "entry_idx": 3549,
+        "horizon_years": 7.2817,
+        "horizon_cal_days": 2667,
+        "n_contributions": 88,
+        "lump_annualized": 0.16904946920497133,
+        "dca_twr_annualized": 0.16904946920497155,
+        "dca_irr": 0.17509613775667546
+      },
+      {
+        "entry_date": "2019-03-12",
+        "entry_idx": 3570,
+        "horizon_years": 7.1984,
+        "horizon_cal_days": 2635,
+        "n_contributions": 87,
+        "lump_annualized": 0.16584007176902582,
+        "dca_twr_annualized": 0.16584007176902582,
+        "dca_irr": 0.17529357637246082
+      },
+      {
+        "entry_date": "2019-04-10",
+        "entry_idx": 3591,
+        "horizon_years": 7.1151,
+        "horizon_cal_days": 2606,
+        "n_contributions": 86,
+        "lump_annualized": 0.16214137864868272,
+        "dca_twr_annualized": 0.1621413786486825,
+        "dca_irr": 0.17560205802007542
+      },
+      {
+        "entry_date": "2019-05-10",
+        "entry_idx": 3612,
+        "horizon_years": 7.0317,
+        "horizon_cal_days": 2576,
+        "n_contributions": 85,
+        "lump_annualized": 0.1643218358084726,
+        "dca_twr_annualized": 0.1643218358084726,
+        "dca_irr": 0.1760405708236415
+      },
+      {
+        "entry_date": "2019-06-11",
+        "entry_idx": 3633,
+        "horizon_years": 6.9484,
+        "horizon_cal_days": 2544,
+        "n_contributions": 84,
+        "lump_annualized": 0.16598292662472347,
+        "dca_twr_annualized": 0.1659829266247237,
+        "dca_irr": 0.17642771096439294
+      },
+      {
+        "entry_date": "2019-07-11",
+        "entry_idx": 3654,
+        "horizon_years": 6.8651,
+        "horizon_cal_days": 2514,
+        "n_contributions": 83,
+        "lump_annualized": 0.16132932183336912,
+        "dca_twr_annualized": 0.16132932183336957,
+        "dca_irr": 0.17677717066479964
+      },
+      {
+        "entry_date": "2019-08-09",
+        "entry_idx": 3675,
+        "horizon_years": 6.7817,
+        "horizon_cal_days": 2485,
+        "n_contributions": 82,
+        "lump_annualized": 0.16793955324842802,
+        "dca_twr_annualized": 0.16793955324842758,
+        "dca_irr": 0.17729233401441627
+      },
+      {
+        "entry_date": "2019-09-10",
+        "entry_idx": 3696,
+        "horizon_years": 6.6984,
+        "horizon_cal_days": 2453,
+        "n_contributions": 81,
+        "lump_annualized": 0.16634670912481786,
+        "dca_twr_annualized": 0.16634670912481786,
+        "dca_irr": 0.17761221358097815
+      },
+      {
+        "entry_date": "2019-10-09",
+        "entry_idx": 3717,
+        "horizon_years": 6.6151,
+        "horizon_cal_days": 2424,
+        "n_contributions": 80,
+        "lump_annualized": 0.1719130043326853,
+        "dca_twr_annualized": 0.17191300433268508,
+        "dca_irr": 0.1779993957525483
+      },
+      {
+        "entry_date": "2019-11-07",
+        "entry_idx": 3738,
+        "horizon_years": 6.5317,
+        "horizon_cal_days": 2395,
+        "n_contributions": 79,
+        "lump_annualized": 0.16418531991878083,
+        "dca_twr_annualized": 0.16418531991878127,
+        "dca_irr": 0.17821334112531892
+      },
+      {
+        "entry_date": "2019-12-09",
+        "entry_idx": 3759,
+        "horizon_years": 6.4484,
+        "horizon_cal_days": 2363,
+        "n_contributions": 78,
+        "lump_annualized": 0.16316421464914255,
+        "dca_twr_annualized": 0.16316421464914233,
+        "dca_irr": 0.17870181703671287
+      },
+      {
+        "entry_date": "2020-01-09",
+        "entry_idx": 3780,
+        "horizon_years": 6.3651,
+        "horizon_cal_days": 2332,
+        "n_contributions": 77,
+        "lump_annualized": 0.15729701306522692,
+        "dca_twr_annualized": 0.1572970130652267,
+        "dca_irr": 0.1792466104455229
+      },
+      {
+        "entry_date": "2020-02-10",
+        "entry_idx": 3801,
+        "horizon_years": 6.2817,
+        "horizon_cal_days": 2300,
+        "n_contributions": 76,
+        "lump_annualized": 0.1550678711780813,
+        "dca_twr_annualized": 0.15506787117808107,
+        "dca_irr": 0.1800130726717713
+      },
+      {
+        "entry_date": "2020-03-11",
+        "entry_idx": 3822,
+        "horizon_years": 6.1984,
+        "horizon_cal_days": 2270,
+        "n_contributions": 75,
+        "lump_annualized": 0.1950155611675326,
+        "dca_twr_annualized": 0.19501556116753305,
+        "dca_irr": 0.18088820572137465
+      },
+      {
+        "entry_date": "2020-04-09",
+        "entry_idx": 3843,
+        "horizon_years": 6.1151,
+        "horizon_cal_days": 2241,
+        "n_contributions": 74,
+        "lump_annualized": 0.19405537789293037,
+        "dca_twr_annualized": 0.1940553778929306,
+        "dca_irr": 0.1803405202374734
+      },
+      {
+        "entry_date": "2020-05-11",
+        "entry_idx": 3864,
+        "horizon_years": 6.0317,
+        "horizon_cal_days": 2209,
+        "n_contributions": 73,
+        "lump_annualized": 0.1870788972628903,
+        "dca_twr_annualized": 0.1870788972628903,
+        "dca_irr": 0.17980476911651835
+      },
+      {
+        "entry_date": "2020-06-10",
+        "entry_idx": 3885,
+        "horizon_years": 5.9484,
+        "horizon_cal_days": 2179,
+        "n_contributions": 72,
+        "lump_annualized": 0.1727111947653539,
+        "dca_twr_annualized": 0.1727111947653539,
+        "dca_irr": 0.17952213498196581
+      },
+      {
+        "entry_date": "2020-07-10",
+        "entry_idx": 3906,
+        "horizon_years": 5.8651,
+        "horizon_cal_days": 2149,
+        "n_contributions": 71,
+        "lump_annualized": 0.17537672197970422,
+        "dca_twr_annualized": 0.17537672197970378,
+        "dca_irr": 0.17978133854753228
+      },
+      {
+        "entry_date": "2020-08-10",
+        "entry_idx": 3927,
+        "horizon_years": 5.7817,
+        "horizon_cal_days": 2118,
+        "n_contributions": 70,
+        "lump_annualized": 0.16694940863001828,
+        "dca_twr_annualized": 0.16694940863001806,
+        "dca_irr": 0.17995168702029188
+      },
+      {
+        "entry_date": "2020-09-09",
+        "entry_idx": 3948,
+        "horizon_years": 5.6984,
+        "horizon_cal_days": 2088,
+        "n_contributions": 69,
+        "lump_annualized": 0.1670249914807711,
+        "dca_twr_annualized": 0.1670249914807711,
+        "dca_irr": 0.1804511274558454
+      },
+      {
+        "entry_date": "2020-10-08",
+        "entry_idx": 3969,
+        "horizon_years": 5.6151,
+        "horizon_cal_days": 2059,
+        "n_contributions": 68,
+        "lump_annualized": 0.16644365338390932,
+        "dca_twr_annualized": 0.16644365338390998,
+        "dca_irr": 0.18097261498671255
+      },
+      {
+        "entry_date": "2020-11-06",
+        "entry_idx": 3990,
+        "horizon_years": 5.5317,
+        "horizon_cal_days": 2030,
+        "n_contributions": 67,
+        "lump_annualized": 0.16527217179944742,
+        "dca_twr_annualized": 0.16527217179944786,
+        "dca_irr": 0.18154261816486458
+      },
+      {
+        "entry_date": "2020-12-08",
+        "entry_idx": 4011,
+        "horizon_years": 5.4484,
+        "horizon_cal_days": 1998,
+        "n_contributions": 66,
+        "lump_annualized": 0.15614871353554372,
+        "dca_twr_annualized": 0.15614871353554372,
+        "dca_irr": 0.18218678470281863
+      },
+      {
+        "entry_date": "2021-01-08",
+        "entry_idx": 4032,
+        "horizon_years": 5.3651,
+        "horizon_cal_days": 1967,
+        "n_contributions": 65,
+        "lump_annualized": 0.15148586748011694,
+        "dca_twr_annualized": 0.15148586748011694,
+        "dca_irr": 0.18321159593801603
+      },
+      {
+        "entry_date": "2021-02-09",
+        "entry_idx": 4053,
+        "horizon_years": 5.2817,
+        "horizon_cal_days": 1935,
+        "n_contributions": 64,
+        "lump_annualized": 0.1489702624731981,
+        "dca_twr_annualized": 0.14897026247319722,
+        "dca_irr": 0.1844643310379819
+      },
+      {
+        "entry_date": "2021-03-11",
+        "entry_idx": 4074,
+        "horizon_years": 5.1984,
+        "horizon_cal_days": 1905,
+        "n_contributions": 63,
+        "lump_annualized": 0.14967825347119268,
+        "dca_twr_annualized": 0.14967825347119246,
+        "dca_irr": 0.18587674246816105
+      },
+      {
+        "entry_date": "2021-04-12",
+        "entry_idx": 4095,
+        "horizon_years": 5.1151,
+        "horizon_cal_days": 1873,
+        "n_contributions": 62,
+        "lump_annualized": 0.14147276817660526,
+        "dca_twr_annualized": 0.1414727681766048,
+        "dca_irr": 0.18733744770164587
+      },
+      {
+        "entry_date": "2021-05-11",
+        "entry_idx": 4116,
+        "horizon_years": 5.0317,
+        "horizon_cal_days": 1844,
+        "n_contributions": 61,
+        "lump_annualized": 0.14256282300149192,
+        "dca_twr_annualized": 0.14256282300149148,
+        "dca_irr": 0.1891852578450939
+      },
+      {
+        "entry_date": "2021-06-10",
+        "entry_idx": 4137,
+        "horizon_years": 4.9484,
+        "horizon_cal_days": 1814,
+        "n_contributions": 60,
+        "lump_annualized": 0.13994887344840778,
+        "dca_twr_annualized": 0.13994887344840756,
+        "dca_irr": 0.1910925384528574
+      },
+      {
+        "entry_date": "2021-07-12",
+        "entry_idx": 4158,
+        "horizon_years": 4.8651,
+        "horizon_cal_days": 1782,
+        "n_contributions": 59,
+        "lump_annualized": 0.13441992030863537,
+        "dca_twr_annualized": 0.13441992030863514,
+        "dca_irr": 0.19320418985894477
+      },
+      {
+        "entry_date": "2021-08-10",
+        "entry_idx": 4179,
+        "horizon_years": 4.7817,
+        "horizon_cal_days": 1753,
+        "n_contributions": 58,
+        "lump_annualized": 0.13389315186084838,
+        "dca_twr_annualized": 0.13389315186084882,
+        "dca_irr": 0.19564315694797016
+      },
+      {
+        "entry_date": "2021-09-09",
+        "entry_idx": 4200,
+        "horizon_years": 4.6984,
+        "horizon_cal_days": 1723,
+        "n_contributions": 57,
+        "lump_annualized": 0.1330102774846449,
+        "dca_twr_annualized": 0.1330102774846449,
+        "dca_irr": 0.19824034416499375
+      },
+      {
+        "entry_date": "2021-10-08",
+        "entry_idx": 4221,
+        "horizon_years": 4.6151,
+        "horizon_cal_days": 1694,
+        "n_contributions": 56,
+        "lump_annualized": 0.14096459113824933,
+        "dca_twr_annualized": 0.14096459113824844,
+        "dca_irr": 0.2010210266384537
+      },
+      {
+        "entry_date": "2021-11-08",
+        "entry_idx": 4242,
+        "horizon_years": 4.5317,
+        "horizon_cal_days": 1663,
+        "n_contributions": 55,
+        "lump_annualized": 0.12656306274754026,
+        "dca_twr_annualized": 0.12656306274754048,
+        "dca_irr": 0.2036525483456288
+      },
+      {
+        "entry_date": "2021-12-08",
+        "entry_idx": 4263,
+        "horizon_years": 4.4484,
+        "horizon_cal_days": 1633,
+        "n_contributions": 54,
+        "lump_annualized": 0.1287618238780719,
+        "dca_twr_annualized": 0.12876182387807056,
+        "dca_irr": 0.20700909196603828
+      },
+      {
+        "entry_date": "2022-01-07",
+        "entry_idx": 4284,
+        "horizon_years": 4.3651,
+        "horizon_cal_days": 1603,
+        "n_contributions": 53,
+        "lump_annualized": 0.13236675536051257,
+        "dca_twr_annualized": 0.1323667553605128,
+        "dca_irr": 0.21048265693534796
+      },
+      {
+        "entry_date": "2022-02-08",
+        "entry_idx": 4305,
+        "horizon_years": 4.2817,
+        "horizon_cal_days": 1571,
+        "n_contributions": 52,
+        "lump_annualized": 0.14390376466657107,
+        "dca_twr_annualized": 0.14390376466657084,
+        "dca_irr": 0.2140262437950644
+      },
+      {
+        "entry_date": "2022-03-10",
+        "entry_idx": 4326,
+        "horizon_years": 4.1984,
+        "horizon_cal_days": 1541,
+        "n_contributions": 51,
+        "lump_annualized": 0.16294761337288688,
+        "dca_twr_annualized": 0.1629476133728871,
+        "dca_irr": 0.2173135736299512
+      },
+      {
+        "entry_date": "2022-04-08",
+        "entry_idx": 4347,
+        "horizon_years": 4.1151,
+        "horizon_cal_days": 1512,
+        "n_contributions": 50,
+        "lump_annualized": 0.15137996479307403,
+        "dca_twr_annualized": 0.15137996479307336,
+        "dca_irr": 0.21997361279424513
+      },
+      {
+        "entry_date": "2022-05-10",
+        "entry_idx": 4368,
+        "horizon_years": 4.0317,
+        "horizon_cal_days": 1480,
+        "n_contributions": 49,
+        "lump_annualized": 0.18804681614624275,
+        "dca_twr_annualized": 0.18804681614624208,
+        "dca_irr": 0.22333518561103533
+      },
+      {
+        "entry_date": "2022-06-09",
+        "entry_idx": 4389,
+        "horizon_years": 3.9484,
+        "horizon_cal_days": 1450,
+        "n_contributions": 48,
+        "lump_annualized": 0.19060350644928237,
+        "dca_twr_annualized": 0.19060350644928192,
+        "dca_irr": 0.2251801149106062
+      },
+      {
+        "entry_date": "2022-07-12",
+        "entry_idx": 4410,
+        "horizon_years": 3.8651,
+        "horizon_cal_days": 1417,
+        "n_contributions": 47,
+        "lump_annualized": 0.21014810894515912,
+        "dca_twr_annualized": 0.21014810894515845,
+        "dca_irr": 0.22702505226050912
+      },
+      {
+        "entry_date": "2022-08-10",
+        "entry_idx": 4431,
+        "horizon_years": 3.7817,
+        "horizon_cal_days": 1388,
+        "n_contributions": 46,
+        "lump_annualized": 0.18419622402215263,
+        "dca_twr_annualized": 0.18419622402215263,
+        "dca_irr": 0.22796349338211153
+      },
+      {
+        "entry_date": "2022-09-09",
+        "entry_idx": 4452,
+        "horizon_years": 3.6984,
+        "horizon_cal_days": 1358,
+        "n_contributions": 45,
+        "lump_annualized": 0.19917572753469837,
+        "dca_twr_annualized": 0.19917572753469814,
+        "dca_irr": 0.2303661726615134
+      },
+      {
+        "entry_date": "2022-10-10",
+        "entry_idx": 4473,
+        "horizon_years": 3.6151,
+        "horizon_cal_days": 1327,
+        "n_contributions": 44,
+        "lump_annualized": 0.24401467027759116,
+        "dca_twr_annualized": 0.24401467027759094,
+        "dca_irr": 0.23214095136037108
+      },
+      {
+        "entry_date": "2022-11-08",
+        "entry_idx": 4494,
+        "horizon_years": 3.5317,
+        "horizon_cal_days": 1298,
+        "n_contributions": 43,
+        "lump_annualized": 0.2296335032690986,
+        "dca_twr_annualized": 0.22963350326909948,
+        "dca_irr": 0.2314175723588077
+      },
+      {
+        "entry_date": "2022-12-08",
+        "entry_idx": 4515,
+        "horizon_years": 3.4484,
+        "horizon_cal_days": 1268,
+        "n_contributions": 42,
+        "lump_annualized": 0.22274488785292967,
+        "dca_twr_annualized": 0.22274488785293012,
+        "dca_irr": 0.23152660986721543
+      },
+      {
+        "entry_date": "2023-01-10",
+        "entry_idx": 4536,
+        "horizon_years": 3.3651,
+        "horizon_cal_days": 1235,
+        "n_contributions": 41,
+        "lump_annualized": 0.23243539887067088,
+        "dca_twr_annualized": 0.2324353988706711,
+        "dca_irr": 0.2320699555130008
+      },
+      {
+        "entry_date": "2023-02-09",
+        "entry_idx": 4557,
+        "horizon_years": 3.2817,
+        "horizon_cal_days": 1205,
+        "n_contributions": 40,
+        "lump_annualized": 0.2234606405433439,
+        "dca_twr_annualized": 0.22346064054334414,
+        "dca_irr": 0.23204666094452553
+      },
+      {
+        "entry_date": "2023-03-13",
+        "entry_idx": 4578,
+        "horizon_years": 3.1984,
+        "horizon_cal_days": 1173,
+        "n_contributions": 39,
+        "lump_annualized": 0.25118282214942234,
+        "dca_twr_annualized": 0.25118282214942167,
+        "dca_irr": 0.2326005253007927
+      },
+      {
+        "entry_date": "2023-04-12",
+        "entry_idx": 4599,
+        "horizon_years": 3.1151,
+        "horizon_cal_days": 1143,
+        "n_contributions": 38,
+        "lump_annualized": 0.2342891036660406,
+        "dca_twr_annualized": 0.23428910366604083,
+        "dca_irr": 0.23134407493311906
+      },
+      {
+        "entry_date": "2023-05-11",
+        "entry_idx": 4620,
+        "horizon_years": 3.0317,
+        "horizon_cal_days": 1114,
+        "n_contributions": 37,
+        "lump_annualized": 0.23738390356294903,
+        "dca_twr_annualized": 0.23738390356294925,
+        "dca_irr": 0.23114366894400387
+      },
+      {
+        "entry_date": "2023-06-12",
+        "entry_idx": 4641,
+        "horizon_years": 2.9484,
+        "horizon_cal_days": 1082,
+        "n_contributions": 36,
+        "lump_annualized": 0.22340646233593975,
+        "dca_twr_annualized": 0.22340646233593864,
+        "dca_irr": 0.23070817904155674
+      },
+      {
+        "entry_date": "2023-07-13",
+        "entry_idx": 4662,
+        "horizon_years": 2.8651,
+        "horizon_cal_days": 1051,
+        "n_contributions": 35,
+        "lump_annualized": 0.2137981644057756,
+        "dca_twr_annualized": 0.21379816440577537,
+        "dca_irr": 0.23122378887382966
+      },
+      {
+        "entry_date": "2023-08-11",
+        "entry_idx": 4683,
+        "horizon_years": 2.7817,
+        "horizon_cal_days": 1022,
+        "n_contributions": 34,
+        "lump_annualized": 0.22470383689141626,
+        "dca_twr_annualized": 0.22470383689141582,
+        "dca_irr": 0.23247532139946475
+      },
+      {
+        "entry_date": "2023-09-12",
+        "entry_idx": 4704,
+        "horizon_years": 2.6984,
+        "horizon_cal_days": 990,
+        "n_contributions": 33,
+        "lump_annualized": 0.23204608771311608,
+        "dca_twr_annualized": 0.2320460877131163,
+        "dca_irr": 0.2330527463545976
+      },
+      {
+        "entry_date": "2023-10-11",
+        "entry_idx": 4725,
+        "horizon_years": 2.6151,
+        "horizon_cal_days": 961,
+        "n_contributions": 32,
+        "lump_annualized": 0.2490233845741865,
+        "dca_twr_annualized": 0.24902338457418582,
+        "dca_irr": 0.2331299421372015
+      },
+      {
+        "entry_date": "2023-11-09",
+        "entry_idx": 4746,
+        "horizon_years": 2.5317,
+        "horizon_cal_days": 932,
+        "n_contributions": 31,
+        "lump_annualized": 0.2610346202792184,
+        "dca_twr_annualized": 0.26103462027921887,
+        "dca_irr": 0.23186315616786735
+      },
+      {
+        "entry_date": "2023-12-11",
+        "entry_idx": 4767,
+        "horizon_years": 2.4484,
+        "horizon_cal_days": 900,
+        "n_contributions": 30,
+        "lump_annualized": 0.23880806927221698,
+        "dca_twr_annualized": 0.23880806927221765,
+        "dca_irr": 0.22945455374089807
+      },
+      {
+        "entry_date": "2024-01-11",
+        "entry_idx": 4788,
+        "horizon_years": 2.3651,
+        "horizon_cal_days": 869,
+        "n_contributions": 29,
+        "lump_annualized": 0.23003431877603875,
+        "dca_twr_annualized": 0.23003431877603875,
+        "dca_irr": 0.22867080699922637
+      },
+      {
+        "entry_date": "2024-02-12",
+        "entry_idx": 4809,
+        "horizon_years": 2.2817,
+        "horizon_cal_days": 837,
+        "n_contributions": 28,
+        "lump_annualized": 0.21228794444738552,
+        "dca_twr_annualized": 0.21228794444738575,
+        "dca_irr": 0.22855364554217328
+      },
+      {
+        "entry_date": "2024-03-13",
+        "entry_idx": 4830,
+        "horizon_years": 2.1984,
+        "horizon_cal_days": 807,
+        "n_contributions": 27,
+        "lump_annualized": 0.20489926424545213,
+        "dca_twr_annualized": 0.20489926424545235,
+        "dca_irr": 0.229982691411363
+      },
+      {
+        "entry_date": "2024-04-12",
+        "entry_idx": 4851,
+        "horizon_years": 2.1151,
+        "horizon_cal_days": 777,
+        "n_contributions": 26,
+        "lump_annualized": 0.2177296450688888,
+        "dca_twr_annualized": 0.2177296450688897,
+        "dca_irr": 0.23225410167743218
+      },
+      {
+        "entry_date": "2024-05-13",
+        "entry_idx": 4872,
+        "horizon_years": 2.0317,
+        "horizon_cal_days": 746,
+        "n_contributions": 25,
+        "lump_annualized": 0.21588166035038991,
+        "dca_twr_annualized": 0.21588166035038947,
+        "dca_irr": 0.23362576054211653
+      },
+      {
+        "entry_date": "2024-06-12",
+        "entry_idx": 4893,
+        "horizon_years": 1.9484,
+        "horizon_cal_days": 716,
+        "n_contributions": 24,
+        "lump_annualized": 0.2020954941131039,
+        "dca_twr_annualized": 0.2020954941131019,
+        "dca_irr": 0.23536343097286458
+      },
+      {
+        "entry_date": "2024-07-15",
+        "entry_idx": 4914,
+        "horizon_years": 1.8651,
+        "horizon_cal_days": 683,
+        "n_contributions": 23,
+        "lump_annualized": 0.18643152644871974,
+        "dca_twr_annualized": 0.1864315264487193,
+        "dca_irr": 0.23873251879217988
+      },
+      {
+        "entry_date": "2024-08-13",
+        "entry_idx": 4935,
+        "horizon_years": 1.7817,
+        "horizon_cal_days": 654,
+        "n_contributions": 22,
+        "lump_annualized": 0.21990355022138575,
+        "dca_twr_annualized": 0.2199035502213842,
+        "dca_irr": 0.24422380155095136
+      },
+      {
+        "entry_date": "2024-09-12",
+        "entry_idx": 4956,
+        "horizon_years": 1.6984,
+        "horizon_cal_days": 624,
+        "n_contributions": 21,
+        "lump_annualized": 0.20959987968948335,
+        "dca_twr_annualized": 0.20959987968948424,
+        "dca_irr": 0.24692438150633483
+      },
+      {
+        "entry_date": "2024-10-11",
+        "entry_idx": 4977,
+        "horizon_years": 1.6151,
+        "horizon_cal_days": 595,
+        "n_contributions": 20,
+        "lump_annualized": 0.19234973556660084,
+        "dca_twr_annualized": 0.19234973556660107,
+        "dca_irr": 0.2512506220860504
+      },
+      {
+        "entry_date": "2024-11-11",
+        "entry_idx": 4998,
+        "horizon_years": 1.5317,
+        "horizon_cal_days": 564,
+        "n_contributions": 19,
+        "lump_annualized": 0.1784997411847249,
+        "dca_twr_annualized": 0.17849974118472622,
+        "dca_irr": 0.25839116640104004
+      },
+      {
+        "entry_date": "2024-12-11",
+        "entry_idx": 5019,
+        "horizon_years": 1.4484,
+        "horizon_cal_days": 534,
+        "n_contributions": 18,
+        "lump_annualized": 0.1778987712075777,
+        "dca_twr_annualized": 0.17789877120757835,
+        "dca_irr": 0.2685782842115494
+      },
+      {
+        "entry_date": "2025-01-14",
+        "entry_idx": 5040,
+        "horizon_years": 1.3651,
+        "horizon_cal_days": 500,
+        "n_contributions": 17,
+        "lump_annualized": 0.22432796583399917,
+        "dca_twr_annualized": 0.2243279658339996,
+        "dca_irr": 0.2808332147402281
+      },
+      {
+        "entry_date": "2025-02-13",
+        "entry_idx": 5061,
+        "horizon_years": 1.2817,
+        "horizon_cal_days": 470,
+        "n_contributions": 16,
+        "lump_annualized": 0.19660819438790256,
+        "dca_twr_annualized": 0.19660819438790456,
+        "dca_irr": 0.2890184440006187
+      },
+      {
+        "entry_date": "2025-03-17",
+        "entry_idx": 5082,
+        "horizon_years": 1.1984,
+        "horizon_cal_days": 438,
+        "n_contributions": 15,
+        "lump_annualized": 0.2870837603784129,
+        "dca_twr_annualized": 0.28708376037841443,
+        "dca_irr": 0.30325716864674906
+      },
+      {
+        "entry_date": "2025-04-15",
+        "entry_idx": 5103,
+        "horizon_years": 1.1151,
+        "horizon_cal_days": 409,
+        "n_contributions": 14,
+        "lump_annualized": 0.3723390822326824,
+        "dca_twr_annualized": 0.3723390822326835,
+        "dca_irr": 0.3059518849841478
+      },
+      {
+        "entry_date": "2025-05-15",
+        "entry_idx": 5124,
+        "horizon_years": 1.0317,
+        "horizon_cal_days": 379,
+        "n_contributions": 13,
+        "lump_annualized": 0.2855645779528644,
+        "dca_twr_annualized": 0.2855645779528664,
+        "dca_irr": 0.2940418590108782
+      },
+      {
+        "entry_date": "2025-06-16",
+        "entry_idx": 5145,
+        "horizon_years": 0.9484,
+        "horizon_cal_days": 347,
+        "n_contributions": 12,
+        "lump_annualized": 0.2861728170887441,
+        "dca_twr_annualized": 0.28617281708874764,
+        "dca_irr": 0.29567637009867587
+      },
+      {
+        "entry_date": "2025-07-17",
+        "entry_idx": 5166,
+        "horizon_years": 0.8651,
+        "horizon_cal_days": 316,
+        "n_contributions": 11,
+        "lump_annualized": 0.25214294270468707,
+        "dca_twr_annualized": 0.25214294270468796,
+        "dca_irr": 0.29767252896485136
+      },
+      {
+        "entry_date": "2025-08-15",
+        "entry_idx": 5187,
+        "horizon_years": 0.7817,
+        "horizon_cal_days": 287,
+        "n_contributions": 10,
+        "lump_annualized": 0.24338513434659026,
+        "dca_twr_annualized": 0.24338513434659115,
+        "dca_irr": 0.3082219117973033
+      },
+      {
+        "entry_date": "2025-09-16",
+        "entry_idx": 5208,
+        "horizon_years": 0.6984,
+        "horizon_cal_days": 255,
+        "n_contributions": 9,
+        "lump_annualized": 0.2305307624003725,
+        "dca_twr_annualized": 0.2305307624003745,
+        "dca_irr": 0.3250249402085324
+      },
+      {
+        "entry_date": "2025-10-15",
+        "entry_idx": 5229,
+        "horizon_years": 0.6151,
+        "horizon_cal_days": 226,
+        "n_contributions": 8,
+        "lump_annualized": 0.24403990325618619,
+        "dca_twr_annualized": 0.24403990325618685,
+        "dca_irr": 0.3529274197504035
+      },
+      {
+        "entry_date": "2025-11-13",
+        "entry_idx": 5250,
+        "horizon_years": 0.5317,
+        "horizon_cal_days": 197,
+        "n_contributions": 7,
+        "lump_annualized": 0.26271214589566827,
+        "dca_twr_annualized": 0.26271214589566605,
+        "dca_irr": 0.3902514344880222
+      },
+      {
+        "entry_date": "2025-12-15",
+        "entry_idx": 5271,
+        "horizon_years": 0.4484,
+        "horizon_cal_days": 165,
+        "n_contributions": 6,
+        "lump_annualized": 0.28140803658913494,
+        "dca_twr_annualized": 0.28140803658913605,
+        "dca_irr": 0.44240097113203936
+      },
+      {
+        "entry_date": "2026-01-15",
+        "entry_idx": 5292,
+        "horizon_years": 0.3651,
+        "horizon_cal_days": 134,
+        "n_contributions": 5,
+        "lump_annualized": 0.2847319491999758,
+        "dca_twr_annualized": 0.2847319491999796,
+        "dca_irr": 0.5242612590192293
+      },
+      {
+        "entry_date": "2026-02-17",
+        "entry_idx": 5313,
+        "horizon_years": 0.2817,
+        "horizon_cal_days": 101,
+        "n_contributions": 4,
+        "lump_annualized": 0.45227465087004326,
+        "dca_twr_annualized": 0.4522746508700515,
+        "dca_irr": 0.6875359096559538
+      }
+    ],
+    "0050.TW": [
+      {
+        "entry_date": "2009-01-02",
+        "entry_idx": 0,
+        "horizon_years": 16.8889,
+        "horizon_cal_days": 6355,
+        "n_contributions": 203,
+        "lump_annualized": 0.09880344140451824,
+        "dca_twr_annualized": 0.0988034414045178,
+        "dca_irr": 0.16469361431958232
+      },
+      {
+        "entry_date": "2009-02-11",
+        "entry_idx": 21,
+        "horizon_years": 16.8056,
+        "horizon_cal_days": 6315,
+        "n_contributions": 202,
+        "lump_annualized": 0.10330351998075771,
+        "dca_twr_annualized": 0.10330351998075771,
+        "dca_irr": 0.16555366574663083
+      },
+      {
+        "entry_date": "2009-03-12",
+        "entry_idx": 42,
+        "horizon_years": 16.7222,
+        "horizon_cal_days": 6286,
+        "n_contributions": 201,
+        "lump_annualized": 0.09751852765516622,
+        "dca_twr_annualized": 0.09751852765516622,
+        "dca_irr": 0.16639028157664326
+      },
+      {
+        "entry_date": "2009-04-13",
+        "entry_idx": 63,
+        "horizon_years": 16.6389,
+        "horizon_cal_days": 6254,
+        "n_contributions": 200,
+        "lump_annualized": 0.0871600431666586,
+        "dca_twr_annualized": 0.08716004316665837,
+        "dca_irr": 0.1672862465345298
+      },
+      {
+        "entry_date": "2009-05-13",
+        "entry_idx": 84,
+        "horizon_years": 16.5556,
+        "horizon_cal_days": 6224,
+        "n_contributions": 199,
+        "lump_annualized": 0.08068041282989125,
+        "dca_twr_annualized": 0.08068041282989102,
+        "dca_irr": 0.1682697032429173
+      },
+      {
+        "entry_date": "2009-06-15",
+        "entry_idx": 105,
+        "horizon_years": 16.4722,
+        "horizon_cal_days": 6191,
+        "n_contributions": 198,
+        "lump_annualized": 0.0835471526930609,
+        "dca_twr_annualized": 0.08354715269306112,
+        "dca_irr": 0.16930849176241097
+      },
+      {
+        "entry_date": "2009-07-14",
+        "entry_idx": 126,
+        "horizon_years": 16.3889,
+        "horizon_cal_days": 6162,
+        "n_contributions": 197,
+        "lump_annualized": 0.0793988977137603,
+        "dca_twr_annualized": 0.07939889771375985,
+        "dca_irr": 0.1703448246411629
+      },
+      {
+        "entry_date": "2009-08-12",
+        "entry_idx": 147,
+        "horizon_years": 16.3056,
+        "horizon_cal_days": 6133,
+        "n_contributions": 196,
+        "lump_annualized": 0.07686326571222968,
+        "dca_twr_annualized": 0.07686326571222968,
+        "dca_irr": 0.17142153478784736
+      },
+      {
+        "entry_date": "2009-09-10",
+        "entry_idx": 168,
+        "horizon_years": 16.2222,
+        "horizon_cal_days": 6104,
+        "n_contributions": 195,
+        "lump_annualized": 0.07124277490322761,
+        "dca_twr_annualized": 0.07124277490322717,
+        "dca_irr": 0.17252859316480637
+      },
+      {
+        "entry_date": "2009-10-09",
+        "entry_idx": 189,
+        "horizon_years": 16.1389,
+        "horizon_cal_days": 6075,
+        "n_contributions": 194,
+        "lump_annualized": 0.07099844564916769,
+        "dca_twr_annualized": 0.07099844564916791,
+        "dca_irr": 0.17368231846792564
+      },
+      {
+        "entry_date": "2009-11-09",
+        "entry_idx": 210,
+        "horizon_years": 16.0556,
+        "horizon_cal_days": 6044,
+        "n_contributions": 193,
+        "lump_annualized": 0.07213479169406067,
+        "dca_twr_annualized": 0.0721347916940609,
+        "dca_irr": 0.17485399803955357
+      },
+      {
+        "entry_date": "2009-12-08",
+        "entry_idx": 231,
+        "horizon_years": 15.9722,
+        "horizon_cal_days": 6015,
+        "n_contributions": 192,
+        "lump_annualized": 0.07132657500550965,
+        "dca_twr_annualized": 0.07132657500550943,
+        "dca_irr": 0.17603675026530374
+      },
+      {
+        "entry_date": "2010-01-07",
+        "entry_idx": 252,
+        "horizon_years": 15.8889,
+        "horizon_cal_days": 5985,
+        "n_contributions": 191,
+        "lump_annualized": 0.06722887111263054,
+        "dca_twr_annualized": 0.06722887111263054,
+        "dca_irr": 0.17724101632749434
+      },
+      {
+        "entry_date": "2010-02-05",
+        "entry_idx": 273,
+        "horizon_years": 15.8056,
+        "horizon_cal_days": 5956,
+        "n_contributions": 190,
+        "lump_annualized": 0.0759445956578555,
+        "dca_twr_annualized": 0.07594459565785527,
+        "dca_irr": 0.17848360053890905
+      },
+      {
+        "entry_date": "2010-03-17",
+        "entry_idx": 294,
+        "horizon_years": 15.7222,
+        "horizon_cal_days": 5916,
+        "n_contributions": 189,
+        "lump_annualized": 0.07193178145882428,
+        "dca_twr_annualized": 0.0719317814588245,
+        "dca_irr": 0.17969901852437845
+      },
+      {
+        "entry_date": "2010-04-16",
+        "entry_idx": 315,
+        "horizon_years": 15.6389,
+        "horizon_cal_days": 5886,
+        "n_contributions": 188,
+        "lump_annualized": 0.0710125962090633,
+        "dca_twr_annualized": 0.0710125962090633,
+        "dca_irr": 0.18095410793351405
+      },
+      {
+        "entry_date": "2010-05-17",
+        "entry_idx": 336,
+        "horizon_years": 15.5556,
+        "horizon_cal_days": 5855,
+        "n_contributions": 187,
+        "lump_annualized": 0.07566052715446414,
+        "dca_twr_annualized": 0.07566052715446436,
+        "dca_irr": 0.1822326350823491
+      },
+      {
+        "entry_date": "2010-06-15",
+        "entry_idx": 357,
+        "horizon_years": 15.4722,
+        "horizon_cal_days": 5826,
+        "n_contributions": 186,
+        "lump_annualized": 0.0777113426587912,
+        "dca_twr_annualized": 0.0777113426587912,
+        "dca_irr": 0.1835056266304119
+      },
+      {
+        "entry_date": "2010-07-15",
+        "entry_idx": 378,
+        "horizon_years": 15.3889,
+        "horizon_cal_days": 5796,
+        "n_contributions": 185,
+        "lump_annualized": 0.07471567502702703,
+        "dca_twr_annualized": 0.07471567502702658,
+        "dca_irr": 0.18478654239301293
+      },
+      {
+        "entry_date": "2010-08-13",
+        "entry_idx": 399,
+        "horizon_years": 15.3056,
+        "horizon_cal_days": 5767,
+        "n_contributions": 184,
+        "lump_annualized": 0.07305985689744876,
+        "dca_twr_annualized": 0.07305985689744898,
+        "dca_irr": 0.1861034698226652
+      },
+      {
+        "entry_date": "2010-09-13",
+        "entry_idx": 420,
+        "horizon_years": 15.2222,
+        "horizon_cal_days": 5736,
+        "n_contributions": 183,
+        "lump_annualized": 0.07101342830607238,
+        "dca_twr_annualized": 0.0710134283060726,
+        "dca_irr": 0.18744928052254042
+      },
+      {
+        "entry_date": "2010-10-13",
+        "entry_idx": 441,
+        "horizon_years": 15.1389,
+        "horizon_cal_days": 5706,
+        "n_contributions": 182,
+        "lump_annualized": 0.07173019306258577,
+        "dca_twr_annualized": 0.07173019306258599,
+        "dca_irr": 0.1888262437465147
+      },
+      {
+        "entry_date": "2010-11-11",
+        "entry_idx": 462,
+        "horizon_years": 15.0556,
+        "horizon_cal_days": 5677,
+        "n_contributions": 181,
+        "lump_annualized": 0.07095549079690411,
+        "dca_twr_annualized": 0.07095549079690366,
+        "dca_irr": 0.1902206073016502
+      },
+      {
+        "entry_date": "2010-12-10",
+        "entry_idx": 483,
+        "horizon_years": 14.9722,
+        "horizon_cal_days": 5648,
+        "n_contributions": 180,
+        "lump_annualized": 0.06916078504760637,
+        "dca_twr_annualized": 0.06916078504760614,
+        "dca_irr": 0.1916403977463289
+      },
+      {
+        "entry_date": "2011-01-10",
+        "entry_idx": 504,
+        "horizon_years": 14.8889,
+        "horizon_cal_days": 5617,
+        "n_contributions": 179,
+        "lump_annualized": 0.06889802517297783,
+        "dca_twr_annualized": 0.06889802517297827,
+        "dca_irr": 0.1930911305192867
+      },
+      {
+        "entry_date": "2011-02-16",
+        "entry_idx": 525,
+        "horizon_years": 14.8056,
+        "horizon_cal_days": 5580,
+        "n_contributions": 178,
+        "lump_annualized": 0.06929895656735319,
+        "dca_twr_annualized": 0.06929895656735363,
+        "dca_irr": 0.19456562961531754
+      },
+      {
+        "entry_date": "2011-03-18",
+        "entry_idx": 546,
+        "horizon_years": 14.7222,
+        "horizon_cal_days": 5550,
+        "n_contributions": 177,
+        "lump_annualized": 0.07230299130172346,
+        "dca_twr_annualized": 0.07230299130172324,
+        "dca_irr": 0.19606109688705137
+      },
+      {
+        "entry_date": "2011-04-20",
+        "entry_idx": 567,
+        "horizon_years": 14.6389,
+        "horizon_cal_days": 5517,
+        "n_contributions": 176,
+        "lump_annualized": 0.06956754829986189,
+        "dca_twr_annualized": 0.06956754829986167,
+        "dca_irr": 0.197564836457859
+      },
+      {
+        "entry_date": "2011-05-20",
+        "entry_idx": 588,
+        "horizon_years": 14.5556,
+        "horizon_cal_days": 5487,
+        "n_contributions": 175,
+        "lump_annualized": 0.06901105111979189,
+        "dca_twr_annualized": 0.06901105111979167,
+        "dca_irr": 0.1991061387901224
+      },
+      {
+        "entry_date": "2011-06-21",
+        "entry_idx": 609,
+        "horizon_years": 14.4722,
+        "horizon_cal_days": 5455,
+        "n_contributions": 174,
+        "lump_annualized": 0.071946717568945,
+        "dca_twr_annualized": 0.07194671756894477,
+        "dca_irr": 0.200674578284962
+      },
+      {
+        "entry_date": "2011-07-20",
+        "entry_idx": 630,
+        "horizon_years": 14.3889,
+        "horizon_cal_days": 5426,
+        "n_contributions": 173,
+        "lump_annualized": 0.07063318326117596,
+        "dca_twr_annualized": 0.07063318326117596,
+        "dca_irr": 0.2022532952933681
+      },
+      {
+        "entry_date": "2011-08-18",
+        "entry_idx": 651,
+        "horizon_years": 14.3056,
+        "horizon_cal_days": 5397,
+        "n_contributions": 172,
+        "lump_annualized": 0.08102294259572007,
+        "dca_twr_annualized": 0.08102294259572007,
+        "dca_irr": 0.2038639784170917
+      },
+      {
+        "entry_date": "2011-09-19",
+        "entry_idx": 672,
+        "horizon_years": 14.2222,
+        "horizon_cal_days": 5365,
+        "n_contributions": 171,
+        "lump_annualized": 0.08115839648598278,
+        "dca_twr_annualized": 0.08115839648598278,
+        "dca_irr": 0.20544529612766285
+      },
+      {
+        "entry_date": "2011-10-19",
+        "entry_idx": 693,
+        "horizon_years": 14.1389,
+        "horizon_cal_days": 5335,
+        "n_contributions": 170,
+        "lump_annualized": 0.0828886596790146,
+        "dca_twr_annualized": 0.08288865967901438,
+        "dca_irr": 0.2070518897861778
+      },
+      {
+        "entry_date": "2011-11-17",
+        "entry_idx": 714,
+        "horizon_years": 14.0556,
+        "horizon_cal_days": 5306,
+        "n_contributions": 169,
+        "lump_annualized": 0.08488769405879615,
+        "dca_twr_annualized": 0.08488769405879615,
+        "dca_irr": 0.2086751896297214
+      },
+      {
+        "entry_date": "2011-12-16",
+        "entry_idx": 735,
+        "horizon_years": 13.9722,
+        "horizon_cal_days": 5277,
+        "n_contributions": 168,
+        "lump_annualized": 0.0911580406824386,
+        "dca_twr_annualized": 0.0911580406824386,
+        "dca_irr": 0.21031391808448927
+      },
+      {
+        "entry_date": "2012-01-16",
+        "entry_idx": 756,
+        "horizon_years": 13.8889,
+        "horizon_cal_days": 5246,
+        "n_contributions": 167,
+        "lump_annualized": 0.08795571973495009,
+        "dca_twr_annualized": 0.08795571973495031,
+        "dca_irr": 0.21194182237613193
+      },
+      {
+        "entry_date": "2012-02-23",
+        "entry_idx": 777,
+        "horizon_years": 13.8056,
+        "horizon_cal_days": 5208,
+        "n_contributions": 166,
+        "lump_annualized": 0.08167055917522714,
+        "dca_twr_annualized": 0.0816705591752267,
+        "dca_irr": 0.21361755110459593
+      },
+      {
+        "entry_date": "2012-03-27",
+        "entry_idx": 798,
+        "horizon_years": 13.7222,
+        "horizon_cal_days": 5175,
+        "n_contributions": 165,
+        "lump_annualized": 0.08125347829906349,
+        "dca_twr_annualized": 0.08125347829906326,
+        "dca_irr": 0.21535890204195224
+      },
+      {
+        "entry_date": "2012-04-26",
+        "entry_idx": 819,
+        "horizon_years": 13.6389,
+        "horizon_cal_days": 5145,
+        "n_contributions": 164,
+        "lump_annualized": 0.08613062906095914,
+        "dca_twr_annualized": 0.0861306290609598,
+        "dca_irr": 0.21713226673659616
+      },
+      {
+        "entry_date": "2012-05-28",
+        "entry_idx": 840,
+        "horizon_years": 13.5556,
+        "horizon_cal_days": 5113,
+        "n_contributions": 163,
+        "lump_annualized": 0.09115118300379232,
+        "dca_twr_annualized": 0.09115118300379232,
+        "dca_irr": 0.2189078254300946
+      },
+      {
+        "entry_date": "2012-06-26",
+        "entry_idx": 861,
+        "horizon_years": 13.4722,
+        "horizon_cal_days": 5084,
+        "n_contributions": 162,
+        "lump_annualized": 0.09253052528346384,
+        "dca_twr_annualized": 0.09253052528346362,
+        "dca_irr": 0.2206835326422942
+      },
+      {
+        "entry_date": "2012-07-25",
+        "entry_idx": 882,
+        "horizon_years": 13.3889,
+        "horizon_cal_days": 5055,
+        "n_contributions": 161,
+        "lump_annualized": 0.09334942824685744,
+        "dca_twr_annualized": 0.09334942824685744,
+        "dca_irr": 0.2224817515646682
+      },
+      {
+        "entry_date": "2012-08-23",
+        "entry_idx": 903,
+        "horizon_years": 13.3056,
+        "horizon_cal_days": 5026,
+        "n_contributions": 160,
+        "lump_annualized": 0.08683291531727488,
+        "dca_twr_annualized": 0.08683291531727444,
+        "dca_irr": 0.22430661525618745
+      },
+      {
+        "entry_date": "2012-09-21",
+        "entry_idx": 924,
+        "horizon_years": 13.2222,
+        "horizon_cal_days": 4997,
+        "n_contributions": 159,
+        "lump_annualized": 0.08415607234798173,
+        "dca_twr_annualized": 0.08415607234798195,
+        "dca_irr": 0.22620427301931914
+      },
+      {
+        "entry_date": "2012-10-23",
+        "entry_idx": 945,
+        "horizon_years": 13.1389,
+        "horizon_cal_days": 4965,
+        "n_contributions": 158,
+        "lump_annualized": 0.08860545904341932,
+        "dca_twr_annualized": 0.08860545904341954,
+        "dca_irr": 0.2281512949365801
+      },
+      {
+        "entry_date": "2012-11-21",
+        "entry_idx": 966,
+        "horizon_years": 13.0556,
+        "horizon_cal_days": 4936,
+        "n_contributions": 157,
+        "lump_annualized": 0.09395967208362244,
+        "dca_twr_annualized": 0.09395967208362221,
+        "dca_irr": 0.23010675782095494
+      },
+      {
+        "entry_date": "2012-12-20",
+        "entry_idx": 987,
+        "horizon_years": 12.9722,
+        "horizon_cal_days": 4907,
+        "n_contributions": 156,
+        "lump_annualized": 0.08955566632344403,
+        "dca_twr_annualized": 0.08955566632344403,
+        "dca_irr": 0.23206420397093708
+      },
+      {
+        "entry_date": "2013-01-22",
+        "entry_idx": 1008,
+        "horizon_years": 12.8889,
+        "horizon_cal_days": 4874,
+        "n_contributions": 155,
+        "lump_annualized": 0.08858164616461028,
+        "dca_twr_annualized": 0.08858164616461028,
+        "dca_irr": 0.23408486770204848
+      },
+      {
+        "entry_date": "2013-03-04",
+        "entry_idx": 1029,
+        "horizon_years": 12.8056,
+        "horizon_cal_days": 4833,
+        "n_contributions": 154,
+        "lump_annualized": 0.08808915839777187,
+        "dca_twr_annualized": 0.08808915839777187,
+        "dca_irr": 0.23614831563953956
+      },
+      {
+        "entry_date": "2013-04-02",
+        "entry_idx": 1050,
+        "horizon_years": 12.7222,
+        "horizon_cal_days": 4804,
+        "n_contributions": 153,
+        "lump_annualized": 0.08853487620238942,
+        "dca_twr_annualized": 0.08853487620238987,
+        "dca_irr": 0.23825256696937866
+      },
+      {
+        "entry_date": "2013-05-06",
+        "entry_idx": 1071,
+        "horizon_years": 12.6389,
+        "horizon_cal_days": 4770,
+        "n_contributions": 152,
+        "lump_annualized": 0.08598650495288584,
+        "dca_twr_annualized": 0.08598650495288584,
+        "dca_irr": 0.24039297997868886
+      },
+      {
+        "entry_date": "2013-06-04",
+        "entry_idx": 1092,
+        "horizon_years": 12.5556,
+        "horizon_cal_days": 4741,
+        "n_contributions": 151,
+        "lump_annualized": 0.0870388106242741,
+        "dca_twr_annualized": 0.08703881062427432,
+        "dca_irr": 0.24258814473195053
+      },
+      {
+        "entry_date": "2013-07-04",
+        "entry_idx": 1113,
+        "horizon_years": 12.4722,
+        "horizon_cal_days": 4711,
+        "n_contributions": 150,
+        "lump_annualized": 0.09022819185866582,
+        "dca_twr_annualized": 0.09022819185866604,
+        "dca_irr": 0.24481807135123132
+      },
+      {
+        "entry_date": "2013-08-02",
+        "entry_idx": 1134,
+        "horizon_years": 12.3889,
+        "horizon_cal_days": 4682,
+        "n_contributions": 149,
+        "lump_annualized": 0.08833759104108085,
+        "dca_twr_annualized": 0.0883375910410813,
+        "dca_irr": 0.24707088866965835
+      },
+      {
+        "entry_date": "2013-09-03",
+        "entry_idx": 1155,
+        "horizon_years": 12.3056,
+        "horizon_cal_days": 4650,
+        "n_contributions": 148,
+        "lump_annualized": 0.0888053275622418,
+        "dca_twr_annualized": 0.08880532756224202,
+        "dca_irr": 0.2493777371912054
+      },
+      {
+        "entry_date": "2013-10-04",
+        "entry_idx": 1176,
+        "horizon_years": 12.2222,
+        "horizon_cal_days": 4619,
+        "n_contributions": 147,
+        "lump_annualized": 0.08665254689662905,
+        "dca_twr_annualized": 0.08665254689662927,
+        "dca_irr": 0.2517257509355739
+      },
+      {
+        "entry_date": "2013-11-05",
+        "entry_idx": 1197,
+        "horizon_years": 12.1389,
+        "horizon_cal_days": 4587,
+        "n_contributions": 146,
+        "lump_annualized": 0.08775361143964155,
+        "dca_twr_annualized": 0.08775361143964155,
+        "dca_irr": 0.2541314125337602
+      },
+      {
+        "entry_date": "2013-12-04",
+        "entry_idx": 1218,
+        "horizon_years": 12.0556,
+        "horizon_cal_days": 4558,
+        "n_contributions": 145,
+        "lump_annualized": 0.08735947576644221,
+        "dca_twr_annualized": 0.08735947576644221,
+        "dca_irr": 0.25657700180610366
+      },
+      {
+        "entry_date": "2014-01-03",
+        "entry_idx": 1239,
+        "horizon_years": 11.9722,
+        "horizon_cal_days": 4528,
+        "n_contributions": 144,
+        "lump_annualized": 0.22085110487905957,
+        "dca_twr_annualized": 0.22085110487906,
+        "dca_irr": 0.2590723614372508
+      },
+      {
+        "entry_date": "2014-02-11",
+        "entry_idx": 1260,
+        "horizon_years": 11.8889,
+        "horizon_cal_days": 4489,
+        "n_contributions": 143,
+        "lump_annualized": 0.22417338081382399,
+        "dca_twr_annualized": 0.22417338081382399,
+        "dca_irr": 0.26002665062055086
+      },
+      {
+        "entry_date": "2014-03-13",
+        "entry_idx": 1281,
+        "horizon_years": 11.8056,
+        "horizon_cal_days": 4459,
+        "n_contributions": 142,
+        "lump_annualized": 0.22094856484726222,
+        "dca_twr_annualized": 0.220948564847262,
+        "dca_irr": 0.2609365039742502
+      },
+      {
+        "entry_date": "2014-04-14",
+        "entry_idx": 1302,
+        "horizon_years": 11.7222,
+        "horizon_cal_days": 4427,
+        "n_contributions": 141,
+        "lump_annualized": 0.22043951253245497,
+        "dca_twr_annualized": 0.22043951253245542,
+        "dca_irr": 0.26193989883565494
+      },
+      {
+        "entry_date": "2014-05-14",
+        "entry_idx": 1323,
+        "horizon_years": 11.6389,
+        "horizon_cal_days": 4397,
+        "n_contributions": 140,
+        "lump_annualized": 0.22090001874553167,
+        "dca_twr_annualized": 0.22090001874553167,
+        "dca_irr": 0.2629814067167539
+      },
+      {
+        "entry_date": "2014-06-13",
+        "entry_idx": 1344,
+        "horizon_years": 11.5556,
+        "horizon_cal_days": 4367,
+        "n_contributions": 139,
+        "lump_annualized": 0.2192105958270294,
+        "dca_twr_annualized": 0.21921059582702984,
+        "dca_irr": 0.26404193350684807
+      },
+      {
+        "entry_date": "2014-07-14",
+        "entry_idx": 1365,
+        "horizon_years": 11.4722,
+        "horizon_cal_days": 4336,
+        "n_contributions": 138,
+        "lump_annualized": 0.213200148005394,
+        "dca_twr_annualized": 0.21320014800539422,
+        "dca_irr": 0.2651666408687133
+      },
+      {
+        "entry_date": "2014-08-12",
+        "entry_idx": 1386,
+        "horizon_years": 11.3889,
+        "horizon_cal_days": 4307,
+        "n_contributions": 137,
+        "lump_annualized": 0.21903953239913965,
+        "dca_twr_annualized": 0.21903953239913942,
+        "dca_irr": 0.2664422700933626
+      },
+      {
+        "entry_date": "2014-09-11",
+        "entry_idx": 1407,
+        "horizon_years": 11.3056,
+        "horizon_cal_days": 4277,
+        "n_contributions": 136,
+        "lump_annualized": 0.21713263124084592,
+        "dca_twr_annualized": 0.21713263124084636,
+        "dca_irr": 0.26763608096204133
+      },
+      {
+        "entry_date": "2014-10-13",
+        "entry_idx": 1428,
+        "horizon_years": 11.2222,
+        "horizon_cal_days": 4245,
+        "n_contributions": 135,
+        "lump_annualized": 0.22615315406590364,
+        "dca_twr_annualized": 0.22615315406590386,
+        "dca_irr": 0.2689015204304101
+      },
+      {
+        "entry_date": "2014-11-11",
+        "entry_idx": 1449,
+        "horizon_years": 11.1389,
+        "horizon_cal_days": 4216,
+        "n_contributions": 134,
+        "lump_annualized": 0.21375668914212875,
+        "dca_twr_annualized": 0.21375668914212875,
+        "dca_irr": 0.27001400079098453
+      },
+      {
+        "entry_date": "2014-12-10",
+        "entry_idx": 1470,
+        "horizon_years": 11.0556,
+        "horizon_cal_days": 4187,
+        "n_contributions": 133,
+        "lump_annualized": 0.21661979190541802,
+        "dca_twr_annualized": 0.2166197919054187,
+        "dca_irr": 0.271412789923678
+      },
+      {
+        "entry_date": "2015-01-12",
+        "entry_idx": 1491,
+        "horizon_years": 10.9722,
+        "horizon_cal_days": 4154,
+        "n_contributions": 132,
+        "lump_annualized": 0.2176705310328486,
+        "dca_twr_annualized": 0.21767053103284906,
+        "dca_irr": 0.2727937045579756
+      },
+      {
+        "entry_date": "2015-02-10",
+        "entry_idx": 1512,
+        "horizon_years": 10.8889,
+        "horizon_cal_days": 4125,
+        "n_contributions": 131,
+        "lump_annualized": 0.21533490086777274,
+        "dca_twr_annualized": 0.21533490086777296,
+        "dca_irr": 0.27419211875083865
+      },
+      {
+        "entry_date": "2015-03-20",
+        "entry_idx": 1533,
+        "horizon_years": 10.8056,
+        "horizon_cal_days": 4087,
+        "n_contributions": 130,
+        "lump_annualized": 0.21343641629308485,
+        "dca_twr_annualized": 0.2134364162930844,
+        "dca_irr": 0.27567614814514346
+      },
+      {
+        "entry_date": "2015-04-22",
+        "entry_idx": 1554,
+        "horizon_years": 10.7222,
+        "horizon_cal_days": 4054,
+        "n_contributions": 129,
+        "lump_annualized": 0.2167182824984233,
+        "dca_twr_annualized": 0.2167182824984233,
+        "dca_irr": 0.2772386688775575
+      },
+      {
+        "entry_date": "2015-05-22",
+        "entry_idx": 1575,
+        "horizon_years": 10.6389,
+        "horizon_cal_days": 4024,
+        "n_contributions": 128,
+        "lump_annualized": 0.21687653661212192,
+        "dca_twr_annualized": 0.21687653661212192,
+        "dca_irr": 0.27878066812601476
+      },
+      {
+        "entry_date": "2015-06-23",
+        "entry_idx": 1596,
+        "horizon_years": 10.5556,
+        "horizon_cal_days": 3992,
+        "n_contributions": 127,
+        "lump_annualized": 0.2206587369247459,
+        "dca_twr_annualized": 0.2206587369247459,
+        "dca_irr": 0.2803632232400247
+      },
+      {
+        "entry_date": "2015-07-22",
+        "entry_idx": 1617,
+        "horizon_years": 10.4722,
+        "horizon_cal_days": 3963,
+        "n_contributions": 126,
+        "lump_annualized": 0.2255758127787426,
+        "dca_twr_annualized": 0.22557581277874306,
+        "dca_irr": 0.2819148856678147
+      },
+      {
+        "entry_date": "2015-08-20",
+        "entry_idx": 1638,
+        "horizon_years": 10.3889,
+        "horizon_cal_days": 3934,
+        "n_contributions": 125,
+        "lump_annualized": 0.2393493020302373,
+        "dca_twr_annualized": 0.23934930203023774,
+        "dca_irr": 0.2834093741965429
+      },
+      {
+        "entry_date": "2015-09-18",
+        "entry_idx": 1659,
+        "horizon_years": 10.3056,
+        "horizon_cal_days": 3905,
+        "n_contributions": 124,
+        "lump_annualized": 0.23493343563027658,
+        "dca_twr_annualized": 0.23493343563027613,
+        "dca_irr": 0.28464073652974303
+      },
+      {
+        "entry_date": "2015-10-21",
+        "entry_idx": 1680,
+        "horizon_years": 10.2222,
+        "horizon_cal_days": 3872,
+        "n_contributions": 123,
+        "lump_annualized": 0.23585331211498395,
+        "dca_twr_annualized": 0.23585331211498395,
+        "dca_irr": 0.2860122633657864
+      },
+      {
+        "entry_date": "2015-11-19",
+        "entry_idx": 1701,
+        "horizon_years": 10.1389,
+        "horizon_cal_days": 3843,
+        "n_contributions": 122,
+        "lump_annualized": 0.24036137173738847,
+        "dca_twr_annualized": 0.24036137173738847,
+        "dca_irr": 0.28740484993420623
+      },
+      {
+        "entry_date": "2015-12-18",
+        "entry_idx": 1722,
+        "horizon_years": 10.0556,
+        "horizon_cal_days": 3814,
+        "n_contributions": 121,
+        "lump_annualized": 0.24569468970432595,
+        "dca_twr_annualized": 0.24569468970432617,
+        "dca_irr": 0.28873562605395164
+      },
+      {
+        "entry_date": "2016-01-19",
+        "entry_idx": 1743,
+        "horizon_years": 9.9722,
+        "horizon_cal_days": 3782,
+        "n_contributions": 120,
+        "lump_annualized": 0.2554319689199911,
+        "dca_twr_annualized": 0.2554319689199913,
+        "dca_irr": 0.28997968261974166
+      },
+      {
+        "entry_date": "2016-02-26",
+        "entry_idx": 1764,
+        "horizon_years": 9.8889,
+        "horizon_cal_days": 3744,
+        "n_contributions": 119,
+        "lump_annualized": 0.24927974865387315,
+        "dca_twr_annualized": 0.2492797486538738,
+        "dca_irr": 0.2910155973569902
+      },
+      {
+        "entry_date": "2016-03-29",
+        "entry_idx": 1785,
+        "horizon_years": 9.8056,
+        "horizon_cal_days": 3712,
+        "n_contributions": 118,
+        "lump_annualized": 0.24674845340374718,
+        "dca_twr_annualized": 0.24674845340374763,
+        "dca_irr": 0.2922449318730555
+      },
+      {
+        "entry_date": "2016-04-29",
+        "entry_idx": 1806,
+        "horizon_years": 9.7222,
+        "horizon_cal_days": 3681,
+        "n_contributions": 117,
+        "lump_annualized": 0.25332062545963874,
+        "dca_twr_annualized": 0.2533206254596385,
+        "dca_irr": 0.29357794979503377
+      },
+      {
+        "entry_date": "2016-05-31",
+        "entry_idx": 1827,
+        "horizon_years": 9.6389,
+        "horizon_cal_days": 3649,
+        "n_contributions": 116,
+        "lump_annualized": 0.2525362112579921,
+        "dca_twr_annualized": 0.2525362112579923,
+        "dca_irr": 0.2947876014143616
+      },
+      {
+        "entry_date": "2016-07-01",
+        "entry_idx": 1848,
+        "horizon_years": 9.5556,
+        "horizon_cal_days": 3618,
+        "n_contributions": 115,
+        "lump_annualized": 0.24871998900595393,
+        "dca_twr_annualized": 0.24871998900595438,
+        "dca_irr": 0.2960581241372054
+      },
+      {
+        "entry_date": "2016-08-01",
+        "entry_idx": 1869,
+        "horizon_years": 9.4722,
+        "horizon_cal_days": 3587,
+        "n_contributions": 114,
+        "lump_annualized": 0.24361941365755935,
+        "dca_twr_annualized": 0.24361941365755957,
+        "dca_irr": 0.2974687465074974
+      },
+      {
+        "entry_date": "2016-08-30",
+        "entry_idx": 1890,
+        "horizon_years": 9.3889,
+        "horizon_cal_days": 3558,
+        "n_contributions": 113,
+        "lump_annualized": 0.2446952235548494,
+        "dca_twr_annualized": 0.24469522355484985,
+        "dca_irr": 0.2990527044517625
+      },
+      {
+        "entry_date": "2016-09-30",
+        "entry_idx": 1911,
+        "horizon_years": 9.3056,
+        "horizon_cal_days": 3527,
+        "n_contributions": 112,
+        "lump_annualized": 0.24533222678286726,
+        "dca_twr_annualized": 0.24533222678286726,
+        "dca_irr": 0.30066273836334995
+      },
+      {
+        "entry_date": "2016-11-01",
+        "entry_idx": 1932,
+        "horizon_years": 9.2222,
+        "horizon_cal_days": 3495,
+        "n_contributions": 111,
+        "lump_annualized": 0.24469690112054154,
+        "dca_twr_annualized": 0.24469690112054177,
+        "dca_irr": 0.3023107604568909
+      },
+      {
+        "entry_date": "2016-11-30",
+        "entry_idx": 1953,
+        "horizon_years": 9.1389,
+        "horizon_cal_days": 3466,
+        "n_contributions": 110,
+        "lump_annualized": 0.2488872913597635,
+        "dca_twr_annualized": 0.24888729135976329,
+        "dca_irr": 0.3040296477448073
+      },
+      {
+        "entry_date": "2016-12-29",
+        "entry_idx": 1974,
+        "horizon_years": 9.0556,
+        "horizon_cal_days": 3437,
+        "n_contributions": 109,
+        "lump_annualized": 0.252314547711715,
+        "dca_twr_annualized": 0.25231454771171524,
+        "dca_irr": 0.305702318747601
+      },
+      {
+        "entry_date": "2017-02-07",
+        "entry_idx": 1995,
+        "horizon_years": 8.9722,
+        "horizon_cal_days": 3397,
+        "n_contributions": 108,
+        "lump_annualized": 0.2509730639912213,
+        "dca_twr_annualized": 0.25097306399122177,
+        "dca_irr": 0.3073449272814152
+      },
+      {
+        "entry_date": "2017-03-10",
+        "entry_idx": 2016,
+        "horizon_years": 8.8889,
+        "horizon_cal_days": 3366,
+        "n_contributions": 107,
+        "lump_annualized": 0.2528165034950771,
+        "dca_twr_annualized": 0.2528165034950769,
+        "dca_irr": 0.3090789564481055
+      },
+      {
+        "entry_date": "2017-04-12",
+        "entry_idx": 2037,
+        "horizon_years": 8.8056,
+        "horizon_cal_days": 3333,
+        "n_contributions": 106,
+        "lump_annualized": 0.251495247766478,
+        "dca_twr_annualized": 0.2514952477664776,
+        "dca_irr": 0.3108259242480709
+      },
+      {
+        "entry_date": "2017-05-12",
+        "entry_idx": 2058,
+        "horizon_years": 8.7222,
+        "horizon_cal_days": 3303,
+        "n_contributions": 105,
+        "lump_annualized": 0.24988383523911928,
+        "dca_twr_annualized": 0.24988383523911994,
+        "dca_irr": 0.3126682859067651
+      },
+      {
+        "entry_date": "2017-06-14",
+        "entry_idx": 2079,
+        "horizon_years": 8.6389,
+        "horizon_cal_days": 3270,
+        "n_contributions": 104,
+        "lump_annualized": 0.2515350816199933,
+        "dca_twr_annualized": 0.2515350816199937,
+        "dca_irr": 0.3146166410398477
+      },
+      {
+        "entry_date": "2017-07-13",
+        "entry_idx": 2100,
+        "horizon_years": 8.5556,
+        "horizon_cal_days": 3241,
+        "n_contributions": 103,
+        "lump_annualized": 0.24444554973799337,
+        "dca_twr_annualized": 0.24444554973799337,
+        "dca_irr": 0.3165916121942909
+      },
+      {
+        "entry_date": "2017-08-11",
+        "entry_idx": 2121,
+        "horizon_years": 8.4722,
+        "horizon_cal_days": 3212,
+        "n_contributions": 102,
+        "lump_annualized": 0.2475760259029829,
+        "dca_twr_annualized": 0.2475760259029831,
+        "dca_irr": 0.3188148997102809
+      },
+      {
+        "entry_date": "2017-09-11",
+        "entry_idx": 2142,
+        "horizon_years": 8.3889,
+        "horizon_cal_days": 3181,
+        "n_contributions": 101,
+        "lump_annualized": 0.24795685002307466,
+        "dca_twr_annualized": 0.2479568500230751,
+        "dca_irr": 0.3210390206083048
+      },
+      {
+        "entry_date": "2017-10-13",
+        "entry_idx": 2163,
+        "horizon_years": 8.3056,
+        "horizon_cal_days": 3149,
+        "n_contributions": 100,
+        "lump_annualized": 0.24802463725319512,
+        "dca_twr_annualized": 0.24802463725319446,
+        "dca_irr": 0.3233330998688004
+      },
+      {
+        "entry_date": "2017-11-13",
+        "entry_idx": 2184,
+        "horizon_years": 8.2222,
+        "horizon_cal_days": 3118,
+        "n_contributions": 99,
+        "lump_annualized": 0.2503785675008994,
+        "dca_twr_annualized": 0.25037856750089915,
+        "dca_irr": 0.3257080700314913
+      },
+      {
+        "entry_date": "2017-12-12",
+        "entry_idx": 2205,
+        "horizon_years": 8.1389,
+        "horizon_cal_days": 3089,
+        "n_contributions": 98,
+        "lump_annualized": 0.25950212327031164,
+        "dca_twr_annualized": 0.25950212327031164,
+        "dca_irr": 0.3281096336446124
+      },
+      {
+        "entry_date": "2018-01-11",
+        "entry_idx": 2226,
+        "horizon_years": 8.0556,
+        "horizon_cal_days": 3059,
+        "n_contributions": 97,
+        "lump_annualized": 0.25784737981422334,
+        "dca_twr_annualized": 0.25784737981422357,
+        "dca_irr": 0.3303608322352389
+      },
+      {
+        "entry_date": "2018-02-09",
+        "entry_idx": 2247,
+        "horizon_years": 7.9722,
+        "horizon_cal_days": 3030,
+        "n_contributions": 96,
+        "lump_annualized": 0.26531985184821405,
+        "dca_twr_annualized": 0.26531985184821383,
+        "dca_irr": 0.33274091741119466
+      },
+      {
+        "entry_date": "2018-03-21",
+        "entry_idx": 2268,
+        "horizon_years": 7.8889,
+        "horizon_cal_days": 2990,
+        "n_contributions": 95,
+        "lump_annualized": 0.25902598468665583,
+        "dca_twr_annualized": 0.25902598468665605,
+        "dca_irr": 0.33500783427652675
+      },
+      {
+        "entry_date": "2018-04-24",
+        "entry_idx": 2289,
+        "horizon_years": 7.8056,
+        "horizon_cal_days": 2956,
+        "n_contributions": 94,
+        "lump_annualized": 0.27066691275067467,
+        "dca_twr_annualized": 0.2706669127506751,
+        "dca_irr": 0.3375339157330218
+      },
+      {
+        "entry_date": "2018-05-24",
+        "entry_idx": 2310,
+        "horizon_years": 7.7222,
+        "horizon_cal_days": 2926,
+        "n_contributions": 93,
+        "lump_annualized": 0.26986601827423384,
+        "dca_twr_annualized": 0.26986601827423384,
+        "dca_irr": 0.3398345359499789
+      },
+      {
+        "entry_date": "2018-06-25",
+        "entry_idx": 2331,
+        "horizon_years": 7.6389,
+        "horizon_cal_days": 2894,
+        "n_contributions": 92,
+        "lump_annualized": 0.2745144811300555,
+        "dca_twr_annualized": 0.2745144811300546,
+        "dca_irr": 0.3422489881178863
+      },
+      {
+        "entry_date": "2018-07-24",
+        "entry_idx": 2352,
+        "horizon_years": 7.5556,
+        "horizon_cal_days": 2865,
+        "n_contributions": 91,
+        "lump_annualized": 0.2687934567436008,
+        "dca_twr_annualized": 0.2687934567436012,
+        "dca_irr": 0.3446252321015803
+      },
+      {
+        "entry_date": "2018-08-22",
+        "entry_idx": 2373,
+        "horizon_years": 7.4722,
+        "horizon_cal_days": 2836,
+        "n_contributions": 90,
+        "lump_annualized": 0.272267114928161,
+        "dca_twr_annualized": 0.272267114928161,
+        "dca_irr": 0.3472624011689499
+      },
+      {
+        "entry_date": "2018-09-20",
+        "entry_idx": 2394,
+        "horizon_years": 7.3889,
+        "horizon_cal_days": 2807,
+        "n_contributions": 89,
+        "lump_annualized": 0.2731986652604468,
+        "dca_twr_annualized": 0.27319866526044656,
+        "dca_irr": 0.34990614040677925
+      },
+      {
+        "entry_date": "2018-10-23",
+        "entry_idx": 2415,
+        "horizon_years": 7.3056,
+        "horizon_cal_days": 2774,
+        "n_contributions": 88,
+        "lump_annualized": 0.2942515876764624,
+        "dca_twr_annualized": 0.29425158767646264,
+        "dca_irr": 0.3526307732386822
+      },
+      {
+        "entry_date": "2018-11-21",
+        "entry_idx": 2436,
+        "horizon_years": 7.2222,
+        "horizon_cal_days": 2745,
+        "n_contributions": 87,
+        "lump_annualized": 0.3022074078145709,
+        "dca_twr_annualized": 0.30220740781457067,
+        "dca_irr": 0.35482064817767234
+      },
+      {
+        "entry_date": "2018-12-20",
+        "entry_idx": 2457,
+        "horizon_years": 7.1389,
+        "horizon_cal_days": 2716,
+        "n_contributions": 86,
+        "lump_annualized": 0.3085311697081281,
+        "dca_twr_annualized": 0.3085311697081279,
+        "dca_irr": 0.3568418725167822
+      },
+      {
+        "entry_date": "2019-01-22",
+        "entry_idx": 2478,
+        "horizon_years": 7.0556,
+        "horizon_cal_days": 2683,
+        "n_contributions": 85,
+        "lump_annualized": 0.3095137963797152,
+        "dca_twr_annualized": 0.30951379637971543,
+        "dca_irr": 0.3587352890041996
+      },
+      {
+        "entry_date": "2019-03-05",
+        "entry_idx": 2499,
+        "horizon_years": 6.9722,
+        "horizon_cal_days": 2641,
+        "n_contributions": 84,
+        "lump_annualized": 0.30701043775022563,
+        "dca_twr_annualized": 0.30701043775022585,
+        "dca_irr": 0.36067963548131343
+      },
+      {
+        "entry_date": "2019-04-03",
+        "entry_idx": 2520,
+        "horizon_years": 6.8889,
+        "horizon_cal_days": 2612,
+        "n_contributions": 83,
+        "lump_annualized": 0.3030256877964528,
+        "dca_twr_annualized": 0.3030256877964521,
+        "dca_irr": 0.36280012927314725
+      },
+      {
+        "entry_date": "2019-05-07",
+        "entry_idx": 2541,
+        "horizon_years": 6.8056,
+        "horizon_cal_days": 2578,
+        "n_contributions": 82,
+        "lump_annualized": 0.300216252237526,
+        "dca_twr_annualized": 0.300216252237526,
+        "dca_irr": 0.365155255393245
+      },
+      {
+        "entry_date": "2019-06-05",
+        "entry_idx": 2562,
+        "horizon_years": 6.7222,
+        "horizon_cal_days": 2549,
+        "n_contributions": 81,
+        "lump_annualized": 0.31616923926254104,
+        "dca_twr_annualized": 0.31616923926254126,
+        "dca_irr": 0.3677139247522916
+      },
+      {
+        "entry_date": "2019-07-05",
+        "entry_idx": 2583,
+        "horizon_years": 6.6389,
+        "horizon_cal_days": 2519,
+        "n_contributions": 80,
+        "lump_annualized": 0.31180351050309274,
+        "dca_twr_annualized": 0.3118035105030923,
+        "dca_irr": 0.3698276000865109
+      },
+      {
+        "entry_date": "2019-08-05",
+        "entry_idx": 2604,
+        "horizon_years": 6.5556,
+        "horizon_cal_days": 2488,
+        "n_contributions": 79,
+        "lump_annualized": 0.3189699527337242,
+        "dca_twr_annualized": 0.3189699527337242,
+        "dca_irr": 0.37220021248840335
+      },
+      {
+        "entry_date": "2019-09-04",
+        "entry_idx": 2625,
+        "horizon_years": 6.4722,
+        "horizon_cal_days": 2458,
+        "n_contributions": 78,
+        "lump_annualized": 0.3186487958589719,
+        "dca_twr_annualized": 0.3186487958589719,
+        "dca_irr": 0.3744232823181025
+      },
+      {
+        "entry_date": "2019-10-08",
+        "entry_idx": 2646,
+        "horizon_years": 6.3889,
+        "horizon_cal_days": 2424,
+        "n_contributions": 77,
+        "lump_annualized": 0.31276996626903375,
+        "dca_twr_annualized": 0.3127699662690333,
+        "dca_irr": 0.37676635226873445
+      },
+      {
+        "entry_date": "2019-11-08",
+        "entry_idx": 2667,
+        "horizon_years": 6.3056,
+        "horizon_cal_days": 2393,
+        "n_contributions": 76,
+        "lump_annualized": 0.30344983228160305,
+        "dca_twr_annualized": 0.30344983228160216,
+        "dca_irr": 0.37944144690566123
+      },
+      {
+        "entry_date": "2019-12-09",
+        "entry_idx": 2688,
+        "horizon_years": 6.2222,
+        "horizon_cal_days": 2362,
+        "n_contributions": 75,
+        "lump_annualized": 0.3056028550665848,
+        "dca_twr_annualized": 0.3056028550665848,
+        "dca_irr": 0.38258237387973837
+      },
+      {
+        "entry_date": "2020-01-08",
+        "entry_idx": 2709,
+        "horizon_years": 6.1389,
+        "horizon_cal_days": 2332,
+        "n_contributions": 74,
+        "lump_annualized": 0.30583485153857404,
+        "dca_twr_annualized": 0.30583485153857337,
+        "dca_irr": 0.3858000632495161
+      },
+      {
+        "entry_date": "2020-02-17",
+        "entry_idx": 2730,
+        "horizon_years": 6.0556,
+        "horizon_cal_days": 2292,
+        "n_contributions": 73,
+        "lump_annualized": 0.3114345701185659,
+        "dca_twr_annualized": 0.31143457011856523,
+        "dca_irr": 0.3891684114189476
+      },
+      {
+        "entry_date": "2020-03-18",
+        "entry_idx": 2751,
+        "horizon_years": 5.9722,
+        "horizon_cal_days": 2262,
+        "n_contributions": 72,
+        "lump_annualized": 0.3697707685957101,
+        "dca_twr_annualized": 0.3697707685957101,
+        "dca_irr": 0.39250148178613176
+      },
+      {
+        "entry_date": "2020-04-20",
+        "entry_idx": 2772,
+        "horizon_years": 5.8889,
+        "horizon_cal_days": 2229,
+        "n_contributions": 71,
+        "lump_annualized": 0.34558581472433314,
+        "dca_twr_annualized": 0.3455858147243327,
+        "dca_irr": 0.39359383741095877
+      },
+      {
+        "entry_date": "2020-05-20",
+        "entry_idx": 2793,
+        "horizon_years": 5.8056,
+        "horizon_cal_days": 2199,
+        "n_contributions": 70,
+        "lump_annualized": 0.3491002807217951,
+        "dca_twr_annualized": 0.34910028072179466,
+        "dca_irr": 0.39581922223949967
+      },
+      {
+        "entry_date": "2020-06-18",
+        "entry_idx": 2814,
+        "horizon_years": 5.7222,
+        "horizon_cal_days": 2170,
+        "n_contributions": 69,
+        "lump_annualized": 0.34107849950732905,
+        "dca_twr_annualized": 0.34107849950732816,
+        "dca_irr": 0.39801520090440856
+      },
+      {
+        "entry_date": "2020-07-21",
+        "entry_idx": 2835,
+        "horizon_years": 5.6389,
+        "horizon_cal_days": 2137,
+        "n_contributions": 68,
+        "lump_annualized": 0.3204630883828756,
+        "dca_twr_annualized": 0.3204630883828754,
+        "dca_irr": 0.40067548585974827
+      },
+      {
+        "entry_date": "2020-08-19",
+        "entry_idx": 2856,
+        "horizon_years": 5.5556,
+        "horizon_cal_days": 2108,
+        "n_contributions": 67,
+        "lump_annualized": 0.31298739129643294,
+        "dca_twr_annualized": 0.3129873912964325,
+        "dca_irr": 0.404324430072703
+      },
+      {
+        "entry_date": "2020-09-17",
+        "entry_idx": 2877,
+        "horizon_years": 5.4722,
+        "horizon_cal_days": 2079,
+        "n_contributions": 66,
+        "lump_annualized": 0.31580279161130864,
+        "dca_twr_annualized": 0.31580279161130864,
+        "dca_irr": 0.40846363319010026
+      },
+      {
+        "entry_date": "2020-10-21",
+        "entry_idx": 2898,
+        "horizon_years": 5.3889,
+        "horizon_cal_days": 2045,
+        "n_contributions": 65,
+        "lump_annualized": 0.3201233485779982,
+        "dca_twr_annualized": 0.3201233485779984,
+        "dca_irr": 0.41271954950640594
+      },
+      {
+        "entry_date": "2020-11-19",
+        "entry_idx": 2919,
+        "horizon_years": 5.3056,
+        "horizon_cal_days": 2016,
+        "n_contributions": 64,
+        "lump_annualized": 0.3073952038935701,
+        "dca_twr_annualized": 0.30739520389356967,
+        "dca_irr": 0.4170407294125269
+      },
+      {
+        "entry_date": "2020-12-18",
+        "entry_idx": 2940,
+        "horizon_years": 5.2222,
+        "horizon_cal_days": 1987,
+        "n_contributions": 63,
+        "lump_annualized": 0.30426252019697486,
+        "dca_twr_annualized": 0.30426252019697486,
+        "dca_irr": 0.4221042901241805
+      },
+      {
+        "entry_date": "2021-01-19",
+        "entry_idx": 2961,
+        "horizon_years": 5.1389,
+        "horizon_cal_days": 1955,
+        "n_contributions": 62,
+        "lump_annualized": 0.2710940292876949,
+        "dca_twr_annualized": 0.271094029287694,
+        "dca_irr": 0.4275735072241858
+      },
+      {
+        "entry_date": "2021-02-26",
+        "entry_idx": 2982,
+        "horizon_years": 5.0556,
+        "horizon_cal_days": 1917,
+        "n_contributions": 61,
+        "lump_annualized": 0.27915740913102804,
+        "dca_twr_annualized": 0.2791574091310276,
+        "dca_irr": 0.43455918740672583
+      },
+      {
+        "entry_date": "2021-03-30",
+        "entry_idx": 3003,
+        "horizon_years": 4.9722,
+        "horizon_cal_days": 1885,
+        "n_contributions": 60,
+        "lump_annualized": 0.2796590808675874,
+        "dca_twr_annualized": 0.27965908086758695,
+        "dca_irr": 0.44165519252796626
+      },
+      {
+        "entry_date": "2021-05-04",
+        "entry_idx": 3024,
+        "horizon_years": 4.8889,
+        "horizon_cal_days": 1850,
+        "n_contributions": 59,
+        "lump_annualized": 0.28283619032282137,
+        "dca_twr_annualized": 0.2828361903228205,
+        "dca_irr": 0.4491405917652145
+      },
+      {
+        "entry_date": "2021-06-02",
+        "entry_idx": 3045,
+        "horizon_years": 4.8056,
+        "horizon_cal_days": 1821,
+        "n_contributions": 58,
+        "lump_annualized": 0.2871210939555682,
+        "dca_twr_annualized": 0.28712109395556706,
+        "dca_irr": 0.4569477796954798
+      },
+      {
+        "entry_date": "2021-07-02",
+        "entry_idx": 3066,
+        "horizon_years": 4.7222,
+        "horizon_cal_days": 1791,
+        "n_contributions": 57,
+        "lump_annualized": 0.2916771610215938,
+        "dca_twr_annualized": 0.2916771610215936,
+        "dca_irr": 0.4650611161936153
+      },
+      {
+        "entry_date": "2021-08-02",
+        "entry_idx": 3087,
+        "horizon_years": 4.6389,
+        "horizon_cal_days": 1760,
+        "n_contributions": 56,
+        "lump_annualized": 0.29772538437299123,
+        "dca_twr_annualized": 0.297725384372991,
+        "dca_irr": 0.47349482646802643
+      },
+      {
+        "entry_date": "2021-08-31",
+        "entry_idx": 3108,
+        "horizon_years": 4.5556,
+        "horizon_cal_days": 1731,
+        "n_contributions": 55,
+        "lump_annualized": 0.2988959678429741,
+        "dca_twr_annualized": 0.2988959678429728,
+        "dca_irr": 0.48221753821263974
+      },
+      {
+        "entry_date": "2021-10-01",
+        "entry_idx": 3129,
+        "horizon_years": 4.4722,
+        "horizon_cal_days": 1700,
+        "n_contributions": 54,
+        "lump_annualized": 0.3189337972469286,
+        "dca_twr_annualized": 0.31893379724692905,
+        "dca_irr": 0.4914440575130956
+      },
+      {
+        "entry_date": "2021-11-02",
+        "entry_idx": 3150,
+        "horizon_years": 4.3889,
+        "horizon_cal_days": 1668,
+        "n_contributions": 53,
+        "lump_annualized": 0.32075130231282944,
+        "dca_twr_annualized": 0.320751302312829,
+        "dca_irr": 0.5004546568523245
+      },
+      {
+        "entry_date": "2021-12-01",
+        "entry_idx": 3171,
+        "horizon_years": 4.3056,
+        "horizon_cal_days": 1639,
+        "n_contributions": 52,
+        "lump_annualized": 0.31887893501355524,
+        "dca_twr_annualized": 0.318878935013555,
+        "dca_irr": 0.5099844023017674
+      },
+      {
+        "entry_date": "2021-12-30",
+        "entry_idx": 3192,
+        "horizon_years": 4.2222,
+        "horizon_cal_days": 1610,
+        "n_contributions": 51,
+        "lump_annualized": 0.31472233420099727,
+        "dca_twr_annualized": 0.3147223342009964,
+        "dca_irr": 0.5202343645993168
+      },
+      {
+        "entry_date": "2022-02-09",
+        "entry_idx": 3213,
+        "horizon_years": 4.1389,
+        "horizon_cal_days": 1569,
+        "n_contributions": 50,
+        "lump_annualized": 0.31970124875992356,
+        "dca_twr_annualized": 0.3197012487599227,
+        "dca_irr": 0.5313612887964826
+      },
+      {
+        "entry_date": "2022-03-11",
+        "entry_idx": 3234,
+        "horizon_years": 4.0556,
+        "horizon_cal_days": 1539,
+        "n_contributions": 49,
+        "lump_annualized": 0.34862808936691136,
+        "dca_twr_annualized": 0.3486280893669118,
+        "dca_irr": 0.5430516636465914
+      },
+      {
+        "entry_date": "2022-04-13",
+        "entry_idx": 3255,
+        "horizon_years": 3.9722,
+        "horizon_cal_days": 1506,
+        "n_contributions": 48,
+        "lump_annualized": 0.3554694772774656,
+        "dca_twr_annualized": 0.3554694772774645,
+        "dca_irr": 0.5542839146417506
+      },
+      {
+        "entry_date": "2022-05-13",
+        "entry_idx": 3276,
+        "horizon_years": 3.8889,
+        "horizon_cal_days": 1476,
+        "n_contributions": 47,
+        "lump_annualized": 0.39942376465643403,
+        "dca_twr_annualized": 0.39942376465643314,
+        "dca_irr": 0.5660227914297539
+      },
+      {
+        "entry_date": "2022-06-14",
+        "entry_idx": 3297,
+        "horizon_years": 3.8056,
+        "horizon_cal_days": 1444,
+        "n_contributions": 46,
+        "lump_annualized": 0.40674786772426486,
+        "dca_twr_annualized": 0.40674786772426486,
+        "dca_irr": 0.5764466687722869
+      },
+      {
+        "entry_date": "2022-07-13",
+        "entry_idx": 3318,
+        "horizon_years": 3.7222,
+        "horizon_cal_days": 1415,
+        "n_contributions": 45,
+        "lump_annualized": 0.4497599352435857,
+        "dca_twr_annualized": 0.4497599352435846,
+        "dca_irr": 0.5872992885611029
+      },
+      {
+        "entry_date": "2022-08-11",
+        "entry_idx": 3339,
+        "horizon_years": 3.6389,
+        "horizon_cal_days": 1386,
+        "n_contributions": 44,
+        "lump_annualized": 0.4326267555887122,
+        "dca_twr_annualized": 0.4326267555887109,
+        "dca_irr": 0.5965870549163947
+      },
+      {
+        "entry_date": "2022-09-12",
+        "entry_idx": 3360,
+        "horizon_years": 3.5556,
+        "horizon_cal_days": 1354,
+        "n_contributions": 43,
+        "lump_annualized": 0.46089040551999316,
+        "dca_twr_annualized": 0.4608904055199927,
+        "dca_irr": 0.6076619265951897
+      },
+      {
+        "entry_date": "2022-10-12",
+        "entry_idx": 3381,
+        "horizon_years": 3.4722,
+        "horizon_cal_days": 1324,
+        "n_contributions": 42,
+        "lump_annualized": 0.5354434506670385,
+        "dca_twr_annualized": 0.5354434506670374,
+        "dca_irr": 0.6179809654466697
+      },
+      {
+        "entry_date": "2022-11-10",
+        "entry_idx": 3402,
+        "horizon_years": 3.3889,
+        "horizon_cal_days": 1295,
+        "n_contributions": 41,
+        "lump_annualized": 0.5369537022440252,
+        "dca_twr_annualized": 0.5369537022440236,
+        "dca_irr": 0.6242467644520175
+      },
+      {
+        "entry_date": "2022-12-09",
+        "entry_idx": 3423,
+        "horizon_years": 3.3056,
+        "horizon_cal_days": 1266,
+        "n_contributions": 40,
+        "lump_annualized": 0.5049563413421054,
+        "dca_twr_annualized": 0.5049563413421045,
+        "dca_irr": 0.6309866011948738
+      },
+      {
+        "entry_date": "2023-01-10",
+        "entry_idx": 3444,
+        "horizon_years": 3.2222,
+        "horizon_cal_days": 1234,
+        "n_contributions": 39,
+        "lump_annualized": 0.5158559483488754,
+        "dca_twr_annualized": 0.515855948348874,
+        "dca_irr": 0.6406431446733445
+      },
+      {
+        "entry_date": "2023-02-20",
+        "entry_idx": 3465,
+        "horizon_years": 3.1389,
+        "horizon_cal_days": 1193,
+        "n_contributions": 38,
+        "lump_annualized": 0.5105643053234556,
+        "dca_twr_annualized": 0.5105643053234548,
+        "dca_irr": 0.6504520525723811
+      },
+      {
+        "entry_date": "2023-03-23",
+        "entry_idx": 3486,
+        "horizon_years": 3.0556,
+        "horizon_cal_days": 1162,
+        "n_contributions": 37,
+        "lump_annualized": 0.5158664679468048,
+        "dca_twr_annualized": 0.5158664679468048,
+        "dca_irr": 0.6616099538062216
+      },
+      {
+        "entry_date": "2023-04-26",
+        "entry_idx": 3507,
+        "horizon_years": 2.9722,
+        "horizon_cal_days": 1128,
+        "n_contributions": 36,
+        "lump_annualized": 0.5587964021738254,
+        "dca_twr_annualized": 0.5587964021738241,
+        "dca_irr": 0.6735028804147543
+      },
+      {
+        "entry_date": "2023-05-26",
+        "entry_idx": 3528,
+        "horizon_years": 2.8889,
+        "horizon_cal_days": 1098,
+        "n_contributions": 35,
+        "lump_annualized": 0.5350006138997916,
+        "dca_twr_annualized": 0.5350006138997907,
+        "dca_irr": 0.683315961225404
+      },
+      {
+        "entry_date": "2023-06-28",
+        "entry_idx": 3549,
+        "horizon_years": 2.8056,
+        "horizon_cal_days": 1065,
+        "n_contributions": 34,
+        "lump_annualized": 0.5410355527911972,
+        "dca_twr_annualized": 0.5410355527911956,
+        "dca_irr": 0.6960782088442288
+      },
+      {
+        "entry_date": "2023-07-27",
+        "entry_idx": 3570,
+        "horizon_years": 2.7222,
+        "horizon_cal_days": 1036,
+        "n_contributions": 33,
+        "lump_annualized": 0.551513073386749,
+        "dca_twr_annualized": 0.5515130733867473,
+        "dca_irr": 0.7097596610609437
+      },
+      {
+        "entry_date": "2023-08-28",
+        "entry_idx": 3591,
+        "horizon_years": 2.6389,
+        "horizon_cal_days": 1004,
+        "n_contributions": 32,
+        "lump_annualized": 0.5927209008263876,
+        "dca_twr_annualized": 0.5927209008263854,
+        "dca_irr": 0.7241267102466742
+      },
+      {
+        "entry_date": "2023-09-26",
+        "entry_idx": 3612,
+        "horizon_years": 2.5556,
+        "horizon_cal_days": 975,
+        "n_contributions": 31,
+        "lump_annualized": 0.6337870688778953,
+        "dca_twr_annualized": 0.633787068877895,
+        "dca_irr": 0.7366051180916366
+      },
+      {
+        "entry_date": "2023-10-30",
+        "entry_idx": 3633,
+        "horizon_years": 2.4722,
+        "horizon_cal_days": 941,
+        "n_contributions": 30,
+        "lump_annualized": 0.6615971061920332,
+        "dca_twr_annualized": 0.6615971061920332,
+        "dca_irr": 0.7468066853395428
+      },
+      {
+        "entry_date": "2023-11-28",
+        "entry_idx": 3654,
+        "horizon_years": 2.3889,
+        "horizon_cal_days": 912,
+        "n_contributions": 29,
+        "lump_annualized": 0.640333770353603,
+        "dca_twr_annualized": 0.6403337703536012,
+        "dca_irr": 0.7555796183525859
+      },
+      {
+        "entry_date": "2023-12-27",
+        "entry_idx": 3675,
+        "horizon_years": 2.3056,
+        "horizon_cal_days": 883,
+        "n_contributions": 28,
+        "lump_annualized": 0.6457001879725108,
+        "dca_twr_annualized": 0.6457001879725086,
+        "dca_irr": 0.7676363546296877
+      },
+      {
+        "entry_date": "2024-01-26",
+        "entry_idx": 3696,
+        "horizon_years": 2.2222,
+        "horizon_cal_days": 853,
+        "n_contributions": 27,
+        "lump_annualized": 0.6599802291966552,
+        "dca_twr_annualized": 0.6599802291966532,
+        "dca_irr": 0.7807714141447146
+      },
+      {
+        "entry_date": "2024-03-07",
+        "entry_idx": 3717,
+        "horizon_years": 2.1389,
+        "horizon_cal_days": 812,
+        "n_contributions": 26,
+        "lump_annualized": 0.6038759981081863,
+        "dca_twr_annualized": 0.6038759981081865,
+        "dca_irr": 0.7942320365688222
+      },
+      {
+        "entry_date": "2024-04-09",
+        "entry_idx": 3738,
+        "horizon_years": 2.0556,
+        "horizon_cal_days": 779,
+        "n_contributions": 25,
+        "lump_annualized": 0.5805903752491126,
+        "dca_twr_annualized": 0.580590375249112,
+        "dca_irr": 0.8156690729327976
+      },
+      {
+        "entry_date": "2024-05-09",
+        "entry_idx": 3759,
+        "horizon_years": 1.9722,
+        "horizon_cal_days": 749,
+        "n_contributions": 24,
+        "lump_annualized": 0.6254036090523205,
+        "dca_twr_annualized": 0.6254036090523185,
+        "dca_irr": 0.842845453625612
+      },
+      {
+        "entry_date": "2024-06-07",
+        "entry_idx": 3780,
+        "horizon_years": 1.8889,
+        "horizon_cal_days": 720,
+        "n_contributions": 23,
+        "lump_annualized": 0.5967032966381658,
+        "dca_twr_annualized": 0.5967032966381636,
+        "dca_irr": 0.8692743660075137
+      },
+      {
+        "entry_date": "2024-07-09",
+        "entry_idx": 3801,
+        "horizon_years": 1.8056,
+        "horizon_cal_days": 688,
+        "n_contributions": 22,
+        "lump_annualized": 0.5147981724528743,
+        "dca_twr_annualized": 0.5147981724528727,
+        "dca_irr": 0.9034293064171519
+      },
+      {
+        "entry_date": "2024-08-09",
+        "entry_idx": 3822,
+        "horizon_years": 1.7222,
+        "horizon_cal_days": 657,
+        "n_contributions": 21,
+        "lump_annualized": 0.6491747019492766,
+        "dca_twr_annualized": 0.6491747019492746,
+        "dca_irr": 0.953222163172822
+      },
+      {
+        "entry_date": "2024-09-09",
+        "entry_idx": 3843,
+        "horizon_years": 1.6389,
+        "horizon_cal_days": 626,
+        "n_contributions": 20,
+        "lump_annualized": 0.7143647285406056,
+        "dca_twr_annualized": 0.7143647285406052,
+        "dca_irr": 0.9953150709705871
+      },
+      {
+        "entry_date": "2024-10-14",
+        "entry_idx": 3864,
+        "horizon_years": 1.5556,
+        "horizon_cal_days": 591,
+        "n_contributions": 19,
+        "lump_annualized": 0.6427772444729989,
+        "dca_twr_annualized": 0.6427772444729962,
+        "dca_irr": 1.0366021454309429
+      },
+      {
+        "entry_date": "2024-11-13",
+        "entry_idx": 3885,
+        "horizon_years": 1.4722,
+        "horizon_cal_days": 561,
+        "n_contributions": 18,
+        "lump_annualized": 0.6869093897862859,
+        "dca_twr_annualized": 0.686909389786285,
+        "dca_irr": 1.0967571458976886
+      },
+      {
+        "entry_date": "2024-12-12",
+        "entry_idx": 3906,
+        "horizon_years": 1.3889,
+        "horizon_cal_days": 532,
+        "n_contributions": 17,
+        "lump_annualized": 0.7252333505926758,
+        "dca_twr_annualized": 0.7252333505926751,
+        "dca_irr": 1.1634517060758764
+      },
+      {
+        "entry_date": "2025-01-13",
+        "entry_idx": 3927,
+        "horizon_years": 1.3056,
+        "horizon_cal_days": 500,
+        "n_contributions": 16,
+        "lump_annualized": 0.7916232187580474,
+        "dca_twr_annualized": 0.7916232187580454,
+        "dca_irr": 1.2396082198249287
+      },
+      {
+        "entry_date": "2025-02-20",
+        "entry_idx": 3948,
+        "horizon_years": 1.2222,
+        "horizon_cal_days": 462,
+        "n_contributions": 15,
+        "lump_annualized": 0.8269542552956257,
+        "dca_twr_annualized": 0.8269542552956257,
+        "dca_irr": 1.3232864585563497
+      },
+      {
+        "entry_date": "2025-03-24",
+        "entry_idx": 3969,
+        "horizon_years": 1.1389,
+        "horizon_cal_days": 430,
+        "n_contributions": 14,
+        "lump_annualized": 1.0353475994344161,
+        "dca_twr_annualized": 1.035347599434418,
+        "dca_irr": 1.4231197495600623
+      },
+      {
+        "entry_date": "2025-04-24",
+        "entry_idx": 3990,
+        "horizon_years": 1.0556,
+        "horizon_cal_days": 399,
+        "n_contributions": 13,
+        "lump_annualized": 1.414606458523222,
+        "dca_twr_annualized": 1.4146064585232194,
+        "dca_irr": 1.5080471267536573
+      },
+      {
+        "entry_date": "2025-05-26",
+        "entry_idx": 4011,
+        "horizon_years": 0.9722,
+        "horizon_cal_days": 367,
+        "n_contributions": 12,
+        "lump_annualized": 1.3265420699329784,
+        "dca_twr_annualized": 1.3265420699329789,
+        "dca_irr": 1.5302326861068511
+      },
+      {
+        "entry_date": "2025-06-25",
+        "entry_idx": 4032,
+        "horizon_years": 0.8889,
+        "horizon_cal_days": 337,
+        "n_contributions": 11,
+        "lump_annualized": 1.3414781512909908,
+        "dca_twr_annualized": 1.3414781512909841,
+        "dca_irr": 1.5823417022673132
+      },
+      {
+        "entry_date": "2025-07-24",
+        "entry_idx": 4053,
+        "horizon_years": 0.8056,
+        "horizon_cal_days": 308,
+        "n_contributions": 10,
+        "lump_annualized": 1.3618994873345343,
+        "dca_twr_annualized": 1.3618994873345347,
+        "dca_irr": 1.649598486136373
+      },
+      {
+        "entry_date": "2025-08-22",
+        "entry_idx": 4074,
+        "horizon_years": 0.7222,
+        "horizon_cal_days": 279,
+        "n_contributions": 9,
+        "lump_annualized": 1.5559438673000505,
+        "dca_twr_annualized": 1.5559438673000474,
+        "dca_irr": 1.7384405379357097
+      },
+      {
+        "entry_date": "2025-09-22",
+        "entry_idx": 4095,
+        "horizon_years": 0.6389,
+        "horizon_cal_days": 248,
+        "n_contributions": 8,
+        "lump_annualized": 1.4562522927234034,
+        "dca_twr_annualized": 1.4562522927234074,
+        "dca_irr": 1.8009036603944544
+      },
+      {
+        "entry_date": "2025-10-27",
+        "entry_idx": 4116,
+        "horizon_years": 0.5556,
+        "horizon_cal_days": 213,
+        "n_contributions": 7,
+        "lump_annualized": 1.323689630963215,
+        "dca_twr_annualized": 1.3236896309632091,
+        "dca_irr": 1.936685673880718
+      },
+      {
+        "entry_date": "2025-11-25",
+        "entry_idx": 4137,
+        "horizon_years": 0.4722,
+        "horizon_cal_days": 184,
+        "n_contributions": 6,
+        "lump_annualized": 2.033367468199802,
+        "dca_twr_annualized": 2.033367468199793,
+        "dca_irr": 2.228386732787234
+      },
+      {
+        "entry_date": "2025-12-24",
+        "entry_idx": 4158,
+        "horizon_years": 0.3889,
+        "horizon_cal_days": 155,
+        "n_contributions": 5,
+        "lump_annualized": 2.3284098127314934,
+        "dca_twr_annualized": 2.3284098127314827,
+        "dca_irr": 2.3338293933848813
+      },
+      {
+        "entry_date": "2026-01-26",
+        "entry_idx": 4179,
+        "horizon_years": 0.3056,
+        "horizon_cal_days": 122,
+        "n_contributions": 4,
+        "lump_annualized": 1.9449243493024908,
+        "dca_twr_annualized": 1.9449243493024801,
+        "dca_irr": 2.337355990822259
+      }
+    ]
+  },
+  "figures": [
+    "figs/fig_a_spy_lump_vs_entry.png",
+    "figs/fig_b_spy_dca_vs_entry.png",
+    "figs/fig_c_spy_dispersion_vs_horizon.png",
+    "figs/fig_d_tw_lump_vs_entry.png",
+    "figs/fig_e_dispersion_loglog.png",
+    "figs/fig_f_tw_dca_vs_entry.png"
+  ]
+}
