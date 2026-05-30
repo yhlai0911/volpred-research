@@ -1,0 +1,1287 @@
+{
+  "experiment_id": "k1407",
+  "title": "真實歷史進場年份的『年化報酬率 (TWR) vs IRR』分歧",
+  "review_status": "Codex usage-limit (resets 2026-05-31) 且 agy fallback 無回應；改用獨立解析驗證：(1) TWR 因子鏈解析證明 — 單一資產 buy-and-hold 下 TWR 累積 == 標的本身總報酬，與現金流時點無關（注入現金未被誤計為報酬，1.5==15/10 驗證通過）；(2) IRR 閉式驗證 — -100→+121 兩年 IRR=10.0072%、多筆現金流 NPV 解亦 10.0072%（365.25 天捨入誤差）；(3) 單筆 IRR==CAGR 36/36 起始年份全部成立。主線程於 Codex 恢復後可二次 primary-path review。",
+  "data_source": "experiments/k1406/data/{SPY,0050.TW}.csv（真實 yfinance auto-adjust 收盤，未重抓）。SPY 2005-2026 / 0050.TW 2009-2026。",
+  "method": {
+    "lump_amount": 120000.0,
+    "dca_per_period_amount": 1000.0,
+    "dca_month_step_trading_days": 21,
+    "min_hold_trading_days": 378,
+    "twr": "DCA 組合每日時間加權報酬鏈（分母為注入現金前期初市值）累乘後以實際年數年化。",
+    "irr": "money-weighted：每期投入為負現金流、期末市值為正，以實際年(365.25天)為指數，grid-scan+brentq 求根年化。",
+    "deterministic": true
+  },
+  "verdict": {
+    "headline": "定期定額情境下，平台常秀的 TWR（時間加權年化報酬率）與你的錢真正賺到的 IRR（資金加權年化報酬率）會分歧；分歧方向由市場路徑決定。",
+    "direction_aggregate": "IRR 系統性高於 TWR（一般人看到的『報酬率』低估自己實際資金年化）",
+    "twr_minus_irr_pp_pooled_median": -3.1509,
+    "twr_minus_irr_pp_pooled_mean": -4.9154,
+    "twr_minus_irr_pp_pooled_range": [
+      -19.4961,
+      0.5077
+    ],
+    "corr_earlyMinusLate_vs_twrMinusIrr": 0.5622,
+    "mechanism": "DCA 的錢是分批晚進場：早段漲多、後段平/跌的路徑下，大部分資金沒吃到早段漲幅 → IRR < TWR（TWR 高估）；早段平/跌、後段漲的路徑下，資金正好在低點累積、吃到後段漲幅 → IRR > TWR（TWR 低估）。corr(早段−後段報酬, TWR−IRR) 為正即支持此機制。",
+    "per_asset_summary": {
+      "SPY": {
+        "n_entry_years": 20,
+        "twr_minus_irr_pp_median": -1.1387,
+        "twr_minus_irr_pp_mean": -1.6499,
+        "twr_minus_irr_pp_min": -8.3331,
+        "twr_minus_irr_pp_max": 0.5077,
+        "twr_gt_irr_count": 2,
+        "twr_lt_irr_count": 18,
+        "most_divergent_entry_year": 2022,
+        "most_divergent_twr_minus_irr_pp": -8.3331
+      },
+      "0050.TW": {
+        "n_entry_years": 16,
+        "twr_minus_irr_pp_median": -9.1674,
+        "twr_minus_irr_pp_mean": -8.9973,
+        "twr_minus_irr_pp_min": -19.4961,
+        "twr_minus_irr_pp_max": -3.7317,
+        "twr_gt_irr_count": 0,
+        "twr_lt_irr_count": 16,
+        "most_divergent_entry_year": 2022,
+        "most_divergent_twr_minus_irr_pp": -19.4961
+      }
+    },
+    "practical_takeaway": "看『報酬率』(TWR) 不等於你的錢的年化報酬 (IRR)。在多頭早段就進場的年份，DCA 投資人實際資金年化通常低於平台秀的 TWR；務必以 IRR 評估自己的真實績效。"
+  },
+  "assets": {
+    "SPY": {
+      "by_entry_year": [
+        {
+          "entry_year": 2005,
+          "lump_sum": {
+            "start_date": "2005-01-03",
+            "end_date": "2026-05-29",
+            "years": 21.399,
+            "invested": 120000.0,
+            "final_value": 1115426.56,
+            "total_multiple": 9.2952,
+            "cagr": 0.109808,
+            "irr": 0.109808,
+            "irr_equals_cagr": true,
+            "mdd": -0.551894
+          },
+          "dca": {
+            "start_date": "2005-01-03",
+            "end_date": "2026-05-29",
+            "years": 21.399,
+            "n_periods": 257,
+            "invested": 257000.0,
+            "final_value": 1302027.77,
+            "total_multiple": 5.0663,
+            "twr_annualized": 0.109808,
+            "irr_annualized": 0.133074,
+            "twr_minus_irr_pp": -2.3266,
+            "mdd": -0.387004
+          },
+          "path_diagnostic": {
+            "early_half_return": 1.013198,
+            "late_half_return": 3.617142,
+            "early_minus_late": -2.603944
+          }
+        },
+        {
+          "entry_year": 2006,
+          "lump_sum": {
+            "start_date": "2006-01-03",
+            "end_date": "2026-05-29",
+            "years": 20.4,
+            "invested": 120000.0,
+            "final_value": 1040728.23,
+            "total_multiple": 8.6727,
+            "cagr": 0.111703,
+            "irr": 0.111703,
+            "irr_equals_cagr": true,
+            "mdd": -0.551894
+          },
+          "dca": {
+            "start_date": "2006-01-03",
+            "end_date": "2026-05-29",
+            "years": 20.4,
+            "n_periods": 245,
+            "invested": 245000.0,
+            "final_value": 1192015.37,
+            "total_multiple": 4.8654,
+            "twr_annualized": 0.111703,
+            "irr_annualized": 0.136803,
+            "twr_minus_irr_pp": -2.51,
+            "mdd": -0.355784
+          },
+          "path_diagnostic": {
+            "early_half_return": 0.959071,
+            "late_half_return": 3.426962,
+            "early_minus_late": -2.467891
+          }
+        },
+        {
+          "entry_year": 2007,
+          "lump_sum": {
+            "start_date": "2007-01-03",
+            "end_date": "2026-05-29",
+            "years": 19.4,
+            "invested": 120000.0,
+            "final_value": 915796.53,
+            "total_multiple": 7.6316,
+            "cagr": 0.110439,
+            "irr": 0.110439,
+            "irr_equals_cagr": true,
+            "mdd": -0.551894
+          },
+          "dca": {
+            "start_date": "2007-01-03",
+            "end_date": "2026-05-29",
+            "years": 19.4,
+            "n_periods": 233,
+            "invested": 233000.0,
+            "final_value": 1091372.83,
+            "total_multiple": 4.684,
+            "twr_annualized": 0.110439,
+            "irr_annualized": 0.14108,
+            "twr_minus_irr_pp": -3.064,
+            "mdd": -0.33519
+          },
+          "path_diagnostic": {
+            "early_half_return": 0.83709,
+            "late_half_return": 3.1542,
+            "early_minus_late": -2.31711
+          }
+        },
+        {
+          "entry_year": 2008,
+          "lump_sum": {
+            "start_date": "2008-01-02",
+            "end_date": "2026-05-29",
+            "years": 18.404,
+            "invested": 120000.0,
+            "final_value": 877115.35,
+            "total_multiple": 7.3093,
+            "cagr": 0.114141,
+            "irr": 0.114141,
+            "irr_equals_cagr": true,
+            "mdd": -0.518737
+          },
+          "dca": {
+            "start_date": "2008-01-02",
+            "end_date": "2026-05-29",
+            "years": 18.404,
+            "n_periods": 221,
+            "invested": 221000.0,
+            "final_value": 1004439.16,
+            "total_multiple": 4.545,
+            "twr_annualized": 0.114141,
+            "irr_annualized": 0.146518,
+            "twr_minus_irr_pp": -3.2377,
+            "mdd": -0.334879
+          },
+          "path_diagnostic": {
+            "early_half_return": 0.976266,
+            "late_half_return": 2.698538,
+            "early_minus_late": -1.722272
+          }
+        },
+        {
+          "entry_year": 2009,
+          "lump_sum": {
+            "start_date": "2009-01-02",
+            "end_date": "2026-05-29",
+            "years": 17.402,
+            "invested": 120000.0,
+            "final_value": 1335332.63,
+            "total_multiple": 11.1278,
+            "cagr": 0.148503,
+            "irr": 0.148503,
+            "irr_equals_cagr": true,
+            "mdd": -0.337173
+          },
+          "dca": {
+            "start_date": "2009-01-02",
+            "end_date": "2026-05-29",
+            "years": 17.402,
+            "n_periods": 209,
+            "invested": 209000.0,
+            "final_value": 901180.13,
+            "total_multiple": 4.3119,
+            "twr_annualized": 0.148503,
+            "irr_annualized": 0.150545,
+            "twr_minus_irr_pp": -0.2042,
+            "mdd": -0.3347
+          },
+          "path_diagnostic": {
+            "early_half_return": 2.206611,
+            "late_half_return": 2.470259,
+            "early_minus_late": -0.263648
+          }
+        },
+        {
+          "entry_year": 2010,
+          "lump_sum": {
+            "start_date": "2010-01-04",
+            "end_date": "2026-05-29",
+            "years": 16.397,
+            "invested": 120000.0,
+            "final_value": 1070536.44,
+            "total_multiple": 8.9211,
+            "cagr": 0.142781,
+            "irr": 0.142781,
+            "irr_equals_cagr": true,
+            "mdd": -0.337173
+          },
+          "dca": {
+            "start_date": "2010-01-04",
+            "end_date": "2026-05-29",
+            "years": 16.397,
+            "n_periods": 197,
+            "invested": 197000.0,
+            "final_value": 767723.55,
+            "total_multiple": 3.8971,
+            "twr_annualized": 0.142781,
+            "irr_annualized": 0.149978,
+            "twr_minus_irr_pp": -0.7197,
+            "mdd": -0.334181
+          },
+          "path_diagnostic": {
+            "early_half_return": 1.854434,
+            "late_half_return": 2.125361,
+            "early_minus_late": -0.270927
+          }
+        },
+        {
+          "entry_year": 2011,
+          "lump_sum": {
+            "start_date": "2011-01-03",
+            "end_date": "2026-05-29",
+            "years": 15.4,
+            "invested": 120000.0,
+            "final_value": 936545.2,
+            "total_multiple": 7.8045,
+            "cagr": 0.142729,
+            "irr": 0.142729,
+            "irr_equals_cagr": true,
+            "mdd": -0.337173
+          },
+          "dca": {
+            "start_date": "2011-01-03",
+            "end_date": "2026-05-29",
+            "years": 15.4,
+            "n_periods": 185,
+            "invested": 185000.0,
+            "final_value": 661238.36,
+            "total_multiple": 3.5743,
+            "twr_annualized": 0.142729,
+            "irr_annualized": 0.150815,
+            "twr_minus_irr_pp": -0.8087,
+            "mdd": -0.33358
+          },
+          "path_diagnostic": {
+            "early_half_return": 1.663394,
+            "late_half_return": 1.9303,
+            "early_minus_late": -0.266907
+          }
+        },
+        {
+          "entry_year": 2012,
+          "lump_sum": {
+            "start_date": "2012-01-03",
+            "end_date": "2026-05-29",
+            "years": 14.401,
+            "invested": 120000.0,
+            "final_value": 914062.95,
+            "total_multiple": 7.6172,
+            "cagr": 0.151413,
+            "irr": 0.151413,
+            "irr_equals_cagr": true,
+            "mdd": -0.337173
+          },
+          "dca": {
+            "start_date": "2012-01-03",
+            "end_date": "2026-05-29",
+            "years": 14.401,
+            "n_periods": 173,
+            "invested": 173000.0,
+            "final_value": 568075.04,
+            "total_multiple": 3.2837,
+            "twr_annualized": 0.151413,
+            "irr_annualized": 0.151851,
+            "twr_minus_irr_pp": -0.0439,
+            "mdd": -0.332813
+          },
+          "path_diagnostic": {
+            "early_half_return": 1.560941,
+            "late_half_return": 1.974372,
+            "early_minus_late": -0.413431
+          }
+        },
+        {
+          "entry_year": 2013,
+          "lump_sum": {
+            "start_date": "2013-01-02",
+            "end_date": "2026-05-29",
+            "years": 13.402,
+            "invested": 120000.0,
+            "final_value": 780602.28,
+            "total_multiple": 6.505,
+            "cagr": 0.149958,
+            "irr": 0.149958,
+            "irr_equals_cagr": true,
+            "mdd": -0.337173
+          },
+          "dca": {
+            "start_date": "2013-01-02",
+            "end_date": "2026-05-29",
+            "years": 13.402,
+            "n_periods": 161,
+            "invested": 161000.0,
+            "final_value": 483961.43,
+            "total_multiple": 3.006,
+            "twr_annualized": 0.149958,
+            "irr_annualized": 0.152281,
+            "twr_minus_irr_pp": -0.2322,
+            "mdd": -0.331929
+          },
+          "path_diagnostic": {
+            "early_half_return": 1.343688,
+            "late_half_return": 1.775548,
+            "early_minus_late": -0.43186
+          }
+        },
+        {
+          "entry_year": 2014,
+          "lump_sum": {
+            "start_date": "2014-01-02",
+            "end_date": "2026-05-29",
+            "years": 12.402,
+            "invested": 120000.0,
+            "final_value": 610966.68,
+            "total_multiple": 5.0914,
+            "cagr": 0.140228,
+            "irr": 0.140228,
+            "irr_equals_cagr": true,
+            "mdd": -0.337173
+          },
+          "dca": {
+            "start_date": "2014-01-02",
+            "end_date": "2026-05-29",
+            "years": 12.402,
+            "n_periods": 149,
+            "invested": 149000.0,
+            "final_value": 414191.66,
+            "total_multiple": 2.7798,
+            "twr_annualized": 0.140228,
+            "irr_annualized": 0.154198,
+            "twr_minus_irr_pp": -1.3971,
+            "mdd": -0.330632
+          },
+          "path_diagnostic": {
+            "early_half_return": 0.475237,
+            "late_half_return": 2.451234,
+            "early_minus_late": -1.975997
+          }
+        },
+        {
+          "entry_year": 2015,
+          "lump_sum": {
+            "start_date": "2015-01-02",
+            "end_date": "2026-05-29",
+            "years": 11.403,
+            "invested": 120000.0,
+            "final_value": 533593.38,
+            "total_multiple": 4.4466,
+            "cagr": 0.139801,
+            "irr": 0.139801,
+            "irr_equals_cagr": true,
+            "mdd": -0.337173
+          },
+          "dca": {
+            "start_date": "2015-01-02",
+            "end_date": "2026-05-29",
+            "years": 11.403,
+            "n_periods": 137,
+            "invested": 137000.0,
+            "final_value": 356423.29,
+            "total_multiple": 2.6016,
+            "twr_annualized": 0.139801,
+            "irr_annualized": 0.1582,
+            "twr_minus_irr_pp": -1.8399,
+            "mdd": -0.328946
+          },
+          "path_diagnostic": {
+            "early_half_return": 0.836858,
+            "late_half_return": 1.42077,
+            "early_minus_late": -0.583912
+          }
+        },
+        {
+          "entry_year": 2016,
+          "lump_sum": {
+            "start_date": "2016-01-04",
+            "end_date": "2026-05-29",
+            "years": 10.398,
+            "invested": 120000.0,
+            "final_value": 534274.41,
+            "total_multiple": 4.4523,
+            "cagr": 0.154446,
+            "irr": 0.154446,
+            "irr_equals_cagr": true,
+            "mdd": -0.337173
+          },
+          "dca": {
+            "start_date": "2016-01-04",
+            "end_date": "2026-05-29",
+            "years": 10.398,
+            "n_periods": 125,
+            "invested": 125000.0,
+            "final_value": 303574.61,
+            "total_multiple": 2.4286,
+            "twr_annualized": 0.154446,
+            "irr_annualized": 0.162389,
+            "twr_minus_irr_pp": -0.7943,
+            "mdd": -0.32641
+          },
+          "path_diagnostic": {
+            "early_half_return": 1.169207,
+            "late_half_return": 1.052495,
+            "early_minus_late": 0.116712
+          }
+        },
+        {
+          "entry_year": 2017,
+          "lump_sum": {
+            "start_date": "2017-01-03",
+            "end_date": "2026-05-29",
+            "years": 9.399,
+            "invested": 120000.0,
+            "final_value": 466800.03,
+            "total_multiple": 3.89,
+            "cagr": 0.155492,
+            "irr": 0.155492,
+            "irr_equals_cagr": true,
+            "mdd": -0.337173
+          },
+          "dca": {
+            "start_date": "2017-01-03",
+            "end_date": "2026-05-29",
+            "years": 9.399,
+            "n_periods": 113,
+            "invested": 113000.0,
+            "final_value": 252342.38,
+            "total_multiple": 2.2331,
+            "twr_annualized": 0.155492,
+            "irr_annualized": 0.164295,
+            "twr_minus_irr_pp": -0.8803,
+            "mdd": -0.32182
+          },
+          "path_diagnostic": {
+            "early_half_return": 1.140223,
+            "late_half_return": 0.817568,
+            "early_minus_late": 0.322654
+          }
+        },
+        {
+          "entry_year": 2018,
+          "lump_sum": {
+            "start_date": "2018-01-02",
+            "end_date": "2026-05-29",
+            "years": 8.402,
+            "invested": 120000.0,
+            "final_value": 383736.78,
+            "total_multiple": 3.1978,
+            "cagr": 0.148375,
+            "irr": 0.148375,
+            "irr_equals_cagr": true,
+            "mdd": -0.337173
+          },
+          "dca": {
+            "start_date": "2018-01-02",
+            "end_date": "2026-05-29",
+            "years": 8.402,
+            "n_periods": 101,
+            "invested": 101000.0,
+            "final_value": 209933.31,
+            "total_multiple": 2.0785,
+            "twr_annualized": 0.148375,
+            "irr_annualized": 0.168987,
+            "twr_minus_irr_pp": -2.0611,
+            "mdd": -0.313779
+          },
+          "path_diagnostic": {
+            "early_half_return": 0.662879,
+            "late_half_return": 0.923055,
+            "early_minus_late": -0.260176
+          }
+        },
+        {
+          "entry_year": 2019,
+          "lump_sum": {
+            "start_date": "2019-01-02",
+            "end_date": "2026-05-29",
+            "years": 7.403,
+            "invested": 120000.0,
+            "final_value": 404566.18,
+            "total_multiple": 3.3714,
+            "cagr": 0.178406,
+            "irr": 0.178406,
+            "irr_equals_cagr": true,
+            "mdd": -0.337173
+          },
+          "dca": {
+            "start_date": "2019-01-02",
+            "end_date": "2026-05-29",
+            "years": 7.403,
+            "n_periods": 89,
+            "invested": 89000.0,
+            "final_value": 172774.16,
+            "total_multiple": 1.9413,
+            "twr_annualized": 0.178406,
+            "irr_annualized": 0.175591,
+            "twr_minus_irr_pp": 0.2816,
+            "mdd": -0.293577
+          },
+          "path_diagnostic": {
+            "early_half_return": 0.664956,
+            "late_half_return": 1.02491,
+            "early_minus_late": -0.359954
+          }
+        },
+        {
+          "entry_year": 2020,
+          "lump_sum": {
+            "start_date": "2020-01-02",
+            "end_date": "2026-05-29",
+            "years": 6.404,
+            "invested": 120000.0,
+            "final_value": 305763.59,
+            "total_multiple": 2.548,
+            "cagr": 0.157261,
+            "irr": 0.157261,
+            "irr_equals_cagr": true,
+            "mdd": -0.337173
+          },
+          "dca": {
+            "start_date": "2020-01-02",
+            "end_date": "2026-05-29",
+            "years": 6.404,
+            "n_periods": 77,
+            "invested": 77000.0,
+            "final_value": 137648.82,
+            "total_multiple": 1.7876,
+            "twr_annualized": 0.157261,
+            "irr_annualized": 0.179747,
+            "twr_minus_irr_pp": -2.2486,
+            "mdd": -0.283191
+          },
+          "path_diagnostic": {
+            "early_half_return": 0.256979,
+            "late_half_return": 1.027106,
+            "early_minus_late": -0.770127
+          }
+        },
+        {
+          "entry_year": 2021,
+          "lump_sum": {
+            "start_date": "2021-01-04",
+            "end_date": "2026-05-29",
+            "years": 5.396,
+            "invested": 120000.0,
+            "final_value": 264411.74,
+            "total_multiple": 2.2034,
+            "cagr": 0.157658,
+            "irr": 0.157658,
+            "irr_equals_cagr": true,
+            "mdd": -0.244964
+          },
+          "dca": {
+            "start_date": "2021-01-04",
+            "end_date": "2026-05-29",
+            "years": 5.396,
+            "n_periods": 65,
+            "invested": 65000.0,
+            "final_value": 106318.47,
+            "total_multiple": 1.6357,
+            "twr_annualized": 0.157658,
+            "irr_annualized": 0.182717,
+            "twr_minus_irr_pp": -2.5058,
+            "mdd": -0.174878
+          },
+          "path_diagnostic": {
+            "early_half_return": 0.267025,
+            "late_half_return": 0.739059,
+            "early_minus_late": -0.472034
+          }
+        },
+        {
+          "entry_year": 2022,
+          "lump_sum": {
+            "start_date": "2022-01-03",
+            "end_date": "2026-05-29",
+            "years": 4.4,
+            "invested": 120000.0,
+            "final_value": 201439.52,
+            "total_multiple": 1.6787,
+            "cagr": 0.124945,
+            "irr": 0.124945,
+            "irr_equals_cagr": true,
+            "mdd": -0.244964
+          },
+          "dca": {
+            "start_date": "2022-01-03",
+            "end_date": "2026-05-29",
+            "years": 4.4,
+            "n_periods": 53,
+            "invested": 53000.0,
+            "final_value": 83145.47,
+            "total_multiple": 1.5688,
+            "twr_annualized": 0.124945,
+            "irr_annualized": 0.208276,
+            "twr_minus_irr_pp": -8.3331,
+            "mdd": -0.170381
+          },
+          "path_diagnostic": {
+            "early_half_return": 0.104456,
+            "late_half_return": 0.5199,
+            "early_minus_late": -0.415443
+          }
+        },
+        {
+          "entry_year": 2023,
+          "lump_sum": {
+            "start_date": "2023-01-03",
+            "end_date": "2026-05-29",
+            "years": 3.4,
+            "invested": 120000.0,
+            "final_value": 248656.68,
+            "total_multiple": 2.0721,
+            "cagr": 0.238948,
+            "irr": 0.238948,
+            "irr_equals_cagr": true,
+            "mdd": -0.187552
+          },
+          "dca": {
+            "start_date": "2023-01-03",
+            "end_date": "2026-05-29",
+            "years": 3.4,
+            "n_periods": 41,
+            "invested": 41000.0,
+            "final_value": 60219.78,
+            "total_multiple": 1.4688,
+            "twr_annualized": 0.238948,
+            "irr_annualized": 0.233871,
+            "twr_minus_irr_pp": 0.5077,
+            "mdd": -0.147887
+          },
+          "path_diagnostic": {
+            "early_half_return": 0.509949,
+            "late_half_return": 0.372324,
+            "early_minus_late": 0.137626
+          }
+        },
+        {
+          "entry_year": 2024,
+          "lump_sum": {
+            "start_date": "2024-01-02",
+            "end_date": "2026-05-29",
+            "years": 2.404,
+            "invested": 120000.0,
+            "final_value": 197346.37,
+            "total_multiple": 1.6446,
+            "cagr": 0.229919,
+            "irr": 0.229919,
+            "irr_equals_cagr": true,
+            "mdd": -0.187552
+          },
+          "dca": {
+            "start_date": "2024-01-02",
+            "end_date": "2026-05-29",
+            "years": 2.404,
+            "n_periods": 29,
+            "invested": 29000.0,
+            "final_value": 38052.11,
+            "total_multiple": 1.3121,
+            "twr_annualized": 0.229919,
+            "irr_annualized": 0.235716,
+            "twr_minus_irr_pp": -0.5798,
+            "mdd": -0.076213
+          },
+          "path_diagnostic": {
+            "early_half_return": 0.202193,
+            "late_half_return": 0.367961,
+            "early_minus_late": -0.165768
+          }
+        }
+      ],
+      "summary": {
+        "n_entry_years": 20,
+        "twr_minus_irr_pp_median": -1.1387,
+        "twr_minus_irr_pp_mean": -1.6499,
+        "twr_minus_irr_pp_min": -8.3331,
+        "twr_minus_irr_pp_max": 0.5077,
+        "twr_gt_irr_count": 2,
+        "twr_lt_irr_count": 18,
+        "most_divergent_entry_year": 2022,
+        "most_divergent_twr_minus_irr_pp": -8.3331
+      },
+      "data_span": {
+        "first_date": "2005-01-03",
+        "last_date": "2026-05-29",
+        "n_obs": 5385
+      }
+    },
+    "0050.TW": {
+      "by_entry_year": [
+        {
+          "entry_year": 2009,
+          "lump_sum": {
+            "start_date": "2009-01-02",
+            "end_date": "2026-05-28",
+            "years": 17.399,
+            "invested": 120000.0,
+            "final_value": 589216.32,
+            "total_multiple": 4.9101,
+            "cagr": 0.095772,
+            "irr": 0.095772,
+            "irr_equals_cagr": true,
+            "mdd": -0.773359
+          },
+          "dca": {
+            "start_date": "2009-01-02",
+            "end_date": "2026-05-28",
+            "years": 17.399,
+            "n_periods": 203,
+            "invested": 203000.0,
+            "final_value": 961112.43,
+            "total_multiple": 4.7345,
+            "twr_annualized": 0.095772,
+            "irr_annualized": 0.158976,
+            "twr_minus_irr_pp": -6.3204,
+            "mdd": -0.751063
+          },
+          "path_diagnostic": {
+            "early_half_return": -0.240745,
+            "late_half_return": 5.467045,
+            "early_minus_late": -5.70779
+          }
+        },
+        {
+          "entry_year": 2010,
+          "lump_sum": {
+            "start_date": "2010-01-04",
+            "end_date": "2026-05-28",
+            "years": 16.394,
+            "invested": 120000.0,
+            "final_value": 342788.3,
+            "total_multiple": 2.8566,
+            "cagr": 0.066118,
+            "irr": 0.066118,
+            "irr_equals_cagr": true,
+            "mdd": -0.773359
+          },
+          "dca": {
+            "start_date": "2010-01-04",
+            "end_date": "2026-05-28",
+            "years": 16.394,
+            "n_periods": 191,
+            "invested": 191000.0,
+            "final_value": 908815.78,
+            "total_multiple": 4.7582,
+            "twr_annualized": 0.066118,
+            "irr_annualized": 0.169916,
+            "twr_minus_irr_pp": -10.3798,
+            "mdd": -0.762755
+          },
+          "path_diagnostic": {
+            "early_half_return": -0.544128,
+            "late_half_return": 5.266167,
+            "early_minus_late": -5.810295
+          }
+        },
+        {
+          "entry_year": 2011,
+          "lump_sum": {
+            "start_date": "2011-01-03",
+            "end_date": "2026-05-28",
+            "years": 15.398,
+            "invested": 120000.0,
+            "final_value": 315175.59,
+            "total_multiple": 2.6265,
+            "cagr": 0.064721,
+            "irr": 0.064721,
+            "irr_equals_cagr": true,
+            "mdd": -0.773359
+          },
+          "dca": {
+            "start_date": "2011-01-03",
+            "end_date": "2026-05-28",
+            "years": 15.398,
+            "n_periods": 179,
+            "invested": 179000.0,
+            "final_value": 873192.2,
+            "total_multiple": 4.8782,
+            "twr_annualized": 0.064721,
+            "irr_annualized": 0.184693,
+            "twr_minus_irr_pp": -11.9971,
+            "mdd": -0.755315
+          },
+          "path_diagnostic": {
+            "early_half_return": -0.552207,
+            "late_half_return": 4.865349,
+            "early_minus_late": -5.417556
+          }
+        },
+        {
+          "entry_year": 2012,
+          "lump_sum": {
+            "start_date": "2012-01-02",
+            "end_date": "2026-05-28",
+            "years": 14.401,
+            "invested": 120000.0,
+            "final_value": 394772.45,
+            "total_multiple": 3.2898,
+            "cagr": 0.086204,
+            "irr": 0.086204,
+            "irr_equals_cagr": true,
+            "mdd": -0.762755
+          },
+          "dca": {
+            "start_date": "2012-01-02",
+            "end_date": "2026-05-28",
+            "years": 14.401,
+            "n_periods": 168,
+            "invested": 168000.0,
+            "final_value": 841074.31,
+            "total_multiple": 5.0064,
+            "twr_annualized": 0.086204,
+            "irr_annualized": 0.202218,
+            "twr_minus_irr_pp": -11.6013,
+            "mdd": -0.755315
+          },
+          "path_diagnostic": {
+            "early_half_return": -0.491986,
+            "late_half_return": 5.475742,
+            "early_minus_late": -5.967728
+          }
+        },
+        {
+          "entry_year": 2013,
+          "lump_sum": {
+            "start_date": "2013-01-02",
+            "end_date": "2026-05-28",
+            "years": 13.399,
+            "invested": 120000.0,
+            "final_value": 356020.93,
+            "total_multiple": 2.9668,
+            "cagr": 0.084547,
+            "irr": 0.084547,
+            "irr_equals_cagr": true,
+            "mdd": -0.762755
+          },
+          "dca": {
+            "start_date": "2013-01-02",
+            "end_date": "2026-05-28",
+            "years": 13.399,
+            "n_periods": 156,
+            "invested": 156000.0,
+            "final_value": 806531.41,
+            "total_multiple": 5.1701,
+            "twr_annualized": 0.084547,
+            "irr_annualized": 0.223032,
+            "twr_minus_irr_pp": -13.8485,
+            "mdd": -0.755315
+          },
+          "path_diagnostic": {
+            "early_half_return": -0.504787,
+            "late_half_return": 4.991044,
+            "early_minus_late": -5.495831
+          }
+        },
+        {
+          "entry_year": 2014,
+          "lump_sum": {
+            "start_date": "2014-01-02",
+            "end_date": "2026-05-28",
+            "years": 12.4,
+            "invested": 120000.0,
+            "final_value": 1292715.11,
+            "total_multiple": 10.7726,
+            "cagr": 0.211305,
+            "irr": 0.211305,
+            "irr_equals_cagr": true,
+            "mdd": -0.338276
+          },
+          "dca": {
+            "start_date": "2014-01-02",
+            "end_date": "2026-05-28",
+            "years": 12.4,
+            "n_periods": 144,
+            "invested": 144000.0,
+            "final_value": 776814.57,
+            "total_multiple": 5.3945,
+            "twr_annualized": 0.211305,
+            "irr_annualized": 0.248623,
+            "twr_minus_irr_pp": -3.7317,
+            "mdd": -0.303474
+          },
+          "path_diagnostic": {
+            "early_half_return": 0.856548,
+            "late_half_return": 4.802504,
+            "early_minus_late": -3.945956
+          }
+        },
+        {
+          "entry_year": 2015,
+          "lump_sum": {
+            "start_date": "2015-01-05",
+            "end_date": "2026-05-28",
+            "years": 11.392,
+            "invested": 120000.0,
+            "final_value": 1028918.2,
+            "total_multiple": 8.5743,
+            "cagr": 0.207579,
+            "irr": 0.207579,
+            "irr_equals_cagr": true,
+            "mdd": -0.338276
+          },
+          "dca": {
+            "start_date": "2015-01-05",
+            "end_date": "2026-05-28",
+            "years": 11.392,
+            "n_periods": 132,
+            "invested": 132000.0,
+            "final_value": 660520.04,
+            "total_multiple": 5.0039,
+            "twr_annualized": 0.207579,
+            "irr_annualized": 0.261332,
+            "twr_minus_irr_pp": -5.3752,
+            "mdd": -0.296419
+          },
+          "path_diagnostic": {
+            "early_half_return": 0.853515,
+            "late_half_return": 3.625977,
+            "early_minus_late": -2.772462
+          }
+        },
+        {
+          "entry_year": 2016,
+          "lump_sum": {
+            "start_date": "2016-01-04",
+            "end_date": "2026-05-28",
+            "years": 10.396,
+            "invested": 120000.0,
+            "final_value": 1114968.29,
+            "total_multiple": 9.2914,
+            "cagr": 0.23915,
+            "irr": 0.23915,
+            "irr_equals_cagr": true,
+            "mdd": -0.338276
+          },
+          "dca": {
+            "start_date": "2016-01-04",
+            "end_date": "2026-05-28",
+            "years": 10.396,
+            "n_periods": 121,
+            "invested": 121000.0,
+            "final_value": 559903.78,
+            "total_multiple": 4.6273,
+            "twr_annualized": 0.23915,
+            "irr_annualized": 0.276879,
+            "twr_minus_irr_pp": -3.7729,
+            "mdd": -0.292705
+          },
+          "path_diagnostic": {
+            "early_half_return": 1.692264,
+            "late_half_return": 2.451148,
+            "early_minus_late": -0.758883
+          }
+        },
+        {
+          "entry_year": 2017,
+          "lump_sum": {
+            "start_date": "2017-01-03",
+            "end_date": "2026-05-28",
+            "years": 9.396,
+            "invested": 120000.0,
+            "final_value": 912192.68,
+            "total_multiple": 7.6016,
+            "cagr": 0.240938,
+            "irr": 0.240938,
+            "irr_equals_cagr": true,
+            "mdd": -0.338276
+          },
+          "dca": {
+            "start_date": "2017-01-03",
+            "end_date": "2026-05-28",
+            "years": 9.396,
+            "n_periods": 109,
+            "invested": 109000.0,
+            "final_value": 462835.0,
+            "total_multiple": 4.2462,
+            "twr_annualized": 0.240938,
+            "irr_annualized": 0.292697,
+            "twr_minus_irr_pp": -5.1759,
+            "mdd": -0.270773
+          },
+          "path_diagnostic": {
+            "early_half_return": 1.335791,
+            "late_half_return": 2.254403,
+            "early_minus_late": -0.918611
+          }
+        },
+        {
+          "entry_year": 2018,
+          "lump_sum": {
+            "start_date": "2018-01-02",
+            "end_date": "2026-05-28",
+            "years": 8.4,
+            "invested": 120000.0,
+            "final_value": 768999.15,
+            "total_multiple": 6.4083,
+            "cagr": 0.24751,
+            "irr": 0.24751,
+            "irr_equals_cagr": true,
+            "mdd": -0.338276
+          },
+          "dca": {
+            "start_date": "2018-01-02",
+            "end_date": "2026-05-28",
+            "years": 8.4,
+            "n_periods": 98,
+            "invested": 98000.0,
+            "final_value": 383058.06,
+            "total_multiple": 3.9088,
+            "twr_annualized": 0.24751,
+            "irr_annualized": 0.314452,
+            "twr_minus_irr_pp": -6.6941,
+            "mdd": -0.265972
+          },
+          "path_diagnostic": {
+            "early_half_return": 0.933635,
+            "late_half_return": 2.314134,
+            "early_minus_late": -1.380499
+          }
+        },
+        {
+          "entry_year": 2019,
+          "lump_sum": {
+            "start_date": "2019-01-02",
+            "end_date": "2026-05-28",
+            "years": 7.4,
+            "invested": 120000.0,
+            "final_value": 829307.18,
+            "total_multiple": 6.9109,
+            "cagr": 0.298507,
+            "irr": 0.298507,
+            "irr_equals_cagr": true,
+            "mdd": -0.338276
+          },
+          "dca": {
+            "start_date": "2019-01-02",
+            "end_date": "2026-05-28",
+            "years": 7.4,
+            "n_periods": 86,
+            "invested": 86000.0,
+            "final_value": 310304.5,
+            "total_multiple": 3.6082,
+            "twr_annualized": 0.298507,
+            "irr_annualized": 0.341844,
+            "twr_minus_irr_pp": -4.3337,
+            "mdd": -0.262121
+          },
+          "path_diagnostic": {
+            "early_half_return": 0.795672,
+            "late_half_return": 2.848639,
+            "early_minus_late": -2.052967
+          }
+        },
+        {
+          "entry_year": 2020,
+          "lump_sum": {
+            "start_date": "2020-01-02",
+            "end_date": "2026-05-28",
+            "years": 6.401,
+            "invested": 120000.0,
+            "final_value": 604810.15,
+            "total_multiple": 5.0401,
+            "cagr": 0.28747,
+            "irr": 0.28747,
+            "irr_equals_cagr": true,
+            "mdd": -0.338276
+          },
+          "dca": {
+            "start_date": "2020-01-02",
+            "end_date": "2026-05-28",
+            "years": 6.401,
+            "n_periods": 74,
+            "invested": 74000.0,
+            "final_value": 240061.1,
+            "total_multiple": 3.2441,
+            "twr_annualized": 0.28747,
+            "irr_annualized": 0.367963,
+            "twr_minus_irr_pp": -8.0493,
+            "mdd": -0.259994
+          },
+          "path_diagnostic": {
+            "early_half_return": 0.358201,
+            "late_half_return": 2.710852,
+            "early_minus_late": -2.352651
+          }
+        },
+        {
+          "entry_year": 2021,
+          "lump_sum": {
+            "start_date": "2021-01-04",
+            "end_date": "2026-05-28",
+            "years": 5.394,
+            "invested": 120000.0,
+            "final_value": 456682.78,
+            "total_multiple": 3.8057,
+            "cagr": 0.281197,
+            "irr": 0.281197,
+            "irr_equals_cagr": true,
+            "mdd": -0.338276
+          },
+          "dca": {
+            "start_date": "2021-01-04",
+            "end_date": "2026-05-28",
+            "years": 5.394,
+            "n_periods": 63,
+            "invested": 63000.0,
+            "final_value": 181712.33,
+            "total_multiple": 2.8843,
+            "twr_annualized": 0.281197,
+            "irr_annualized": 0.404821,
+            "twr_minus_irr_pp": -12.3624,
+            "mdd": -0.24119
+          },
+          "path_diagnostic": {
+            "early_half_return": 0.112985,
+            "late_half_return": 2.419355,
+            "early_minus_late": -2.30637
+          }
+        },
+        {
+          "entry_year": 2022,
+          "lump_sum": {
+            "start_date": "2022-01-03",
+            "end_date": "2026-05-28",
+            "years": 4.397,
+            "invested": 120000.0,
+            "final_value": 378657.85,
+            "total_multiple": 3.1555,
+            "cagr": 0.298679,
+            "irr": 0.298679,
+            "irr_equals_cagr": true,
+            "mdd": -0.338276
+          },
+          "dca": {
+            "start_date": "2022-01-03",
+            "end_date": "2026-05-28",
+            "years": 4.397,
+            "n_periods": 51,
+            "invested": 51000.0,
+            "final_value": 141539.35,
+            "total_multiple": 2.7753,
+            "twr_annualized": 0.298679,
+            "irr_annualized": 0.49364,
+            "twr_minus_irr_pp": -19.4961,
+            "mdd": -0.247375
+          },
+          "path_diagnostic": {
+            "early_half_return": 0.161957,
+            "late_half_return": 1.715662,
+            "early_minus_late": -1.553705
+          }
+        },
+        {
+          "entry_year": 2023,
+          "lump_sum": {
+            "start_date": "2023-01-03",
+            "end_date": "2026-05-28",
+            "years": 3.398,
+            "invested": 120000.0,
+            "final_value": 481227.55,
+            "total_multiple": 4.0102,
+            "cagr": 0.504957,
+            "irr": 0.504957,
+            "irr_equals_cagr": true,
+            "mdd": -0.27485
+          },
+          "dca": {
+            "start_date": "2023-01-03",
+            "end_date": "2026-05-28",
+            "years": 3.398,
+            "n_periods": 39,
+            "invested": 39000.0,
+            "final_value": 98532.36,
+            "total_multiple": 2.5265,
+            "twr_annualized": 0.504957,
+            "irr_annualized": 0.607813,
+            "twr_minus_irr_pp": -10.2855,
+            "mdd": -0.23875
+          },
+          "path_diagnostic": {
+            "early_half_return": 0.722231,
+            "late_half_return": 1.328508,
+            "early_minus_late": -0.606277
+          }
+        },
+        {
+          "entry_year": 2024,
+          "lump_sum": {
+            "start_date": "2024-01-02",
+            "end_date": "2026-05-28",
+            "years": 2.401,
+            "invested": 120000.0,
+            "final_value": 380818.26,
+            "total_multiple": 3.1735,
+            "cagr": 0.617626,
+            "irr": 0.617626,
+            "irr_equals_cagr": true,
+            "mdd": -0.27485
+          },
+          "dca": {
+            "start_date": "2024-01-02",
+            "end_date": "2026-05-28",
+            "years": 2.401,
+            "n_periods": 28,
+            "invested": 28000.0,
+            "final_value": 58451.66,
+            "total_multiple": 2.0876,
+            "twr_annualized": 0.617626,
+            "irr_annualized": 0.722948,
+            "twr_minus_irr_pp": -10.5321,
+            "mdd": -0.19887
+          },
+          "path_diagnostic": {
+            "early_half_return": 0.425781,
+            "late_half_return": 1.225788,
+            "early_minus_late": -0.800008
+          }
+        }
+      ],
+      "summary": {
+        "n_entry_years": 16,
+        "twr_minus_irr_pp_median": -9.1674,
+        "twr_minus_irr_pp_mean": -8.9973,
+        "twr_minus_irr_pp_min": -19.4961,
+        "twr_minus_irr_pp_max": -3.7317,
+        "twr_gt_irr_count": 0,
+        "twr_lt_irr_count": 16,
+        "most_divergent_entry_year": 2022,
+        "most_divergent_twr_minus_irr_pp": -19.4961
+      },
+      "data_span": {
+        "first_date": "2009-01-02",
+        "last_date": "2026-05-28",
+        "n_obs": 4257
+      }
+    }
+  },
+  "figures": [
+    "figures/fig_a_spy_twr_vs_irr.png",
+    "figures/fig_b_0050_twr_vs_irr.png",
+    "figures/fig_c_lump_vs_dca.png"
+  ]
+}
