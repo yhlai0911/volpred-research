@@ -15260,5 +15260,89 @@
     "started_at": "2026-05-30T17:09:56.200923+00:00",
     "completed_at": "2026-05-30T17:12:48.763881+00:00",
     "result": "用戶授權「直接處理」alert 中需注意項。已處理: (1) kill pid 10004 (36h abandoned claude session) + 清 3 worktree + 6 branch (含 3 orphan K1322/K1390/K1406), 預驗 0 unique-on-branch 無資料風險, platform_ops cleanup task → succeeded. 未處理: paper R1 backlog 5 task 留給專注 session (hourly 50min cap). Close email sent."
+  },
+  {
+    "id": "paper_review_mile_8d0e6f48",
+    "title": "Paper review (Codex 24h-rule): 把樣本拆成「景氣循環的上升期 vs 下降期」再測一次，晶圓代工財報日的謎還是沒解開",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_8d0e6f48 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_8d0e6f48",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-30T18:08:04+00:00"
+  },
+  {
+    "id": "paper_review_mile_d3897886",
+    "title": "Paper review (Codex 24h-rule): 晶圓代工財報日為什麼比較劇烈？我們連四層猜想全部失敗了，這篇講為什麼這對你是好消息",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_d3897886 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_d3897886",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-30T18:08:04+00:00"
+  },
+  {
+    "id": "K492_article_general_v2",
+    "title": "K492: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K492 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: Method: Manual classification + statistical analysis of all K414-K491 results Reference: Harvey, Liu, Zhu (2016) ...and the Cross-Section of Expected Returns, RFS Reference: Timmermann (2006) Forecast Combinations, Handbook of Economic Forecasting",
+    "priority": 4,
+    "status": "blocked",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K492",
+    "tags": [
+      "har",
+      "meta-analysis",
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-30T18:08:05+00:00",
+    "blocked_reason": "prior_attempts_failed",
+    "blocked_at": "2026-05-30T18:11:19+00:00",
+    "blocked_note": "K492 是 K414-K491 meta-analysis (research_efficiency)；results.json verdict=null summary='' 無 striking single finding；v1 已 fail；本 task 對 general audience 不適合。Followup: publication_candidates 應 filter verdict=null 的 meta-K，避免 retry 進 pool。"
+  },
+  {
+    "id": "K861_article_general",
+    "title": "K861: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K861 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K861 tests oil price shocks as climate/macro proxy for equity vol prediction. Data: SPY/XLE/DBA/CL=F 2007-2026 (4,839 days). KEY FINDING: Strong asymmetry — oil DROPS increase SPY RV by +4.8pp (t=5.82 Harvey PASS), but oil SPIKES only +0.7pp (t=0.70 NS). ",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K861",
+    "tags": [
+      "climate_finance",
+      "oil",
+      "volatility_spillover",
+      "asymmetry",
+      "Granger",
+      "XLE",
+      "DBA",
+      "跳躍式探索",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-30T18:08:05+00:00",
+    "claimed_by": "hourly-02",
+    "claimed_at": "2026-05-30T18:10:53.687564+00:00",
+    "claim_session_id": "3c0f336683b1",
+    "started_at": "2026-05-30T18:11:03.312704+00:00",
+    "completed_at": "2026-05-30T18:11:03.694495+00:00",
+    "result": "Dedup catch (Layer 2 grep): mile_ef333028 已 cover K861 finding（4839 days, oil drops +4.8pp t=5.82, oil spikes +0.7pp t=0.70；general 語氣）。已補 mile_ef333028 details.experiment_refs=[K861] 防 publication_candidates 再誤判 uncovered。文章 audience_backfill 2026-05-26 標 research 是 over-classification（內容語氣明顯 general）— 此為 audience classifier 校準問題不在本 task scope。"
   }
 ]
