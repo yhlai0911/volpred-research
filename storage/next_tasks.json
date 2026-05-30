@@ -14924,5 +14924,16 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-05-30T01:09:05+00:00"
+  },
+  {
+    "id": "platform_ops_publisher_tag_cap_enforcement",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "agent-discovered",
+    "title": "Publisher tag-cap enforcement: K1034 article 9 tags through (SKILL says ≤8)",
+    "description": "mile_e38c9656 (K1034 daily_article) published with 9 tags (研究,風險管理,SPY,QQQ,GLD,VaR,Cornish-Fisher,波動率,GARCH). SKILL says ≤8 + ban stat terms (Cornish-Fisher is borderline stat term). Investigate _append_to_feed / publisher pipeline tag trimming logic, add hard gate + reject Cornish-Fisher / Kupiec / Harvey / QLIKE / DM-test class names from tags. Also audit other recent feed entries for over-cap tags.",
+    "created_at": "2026-05-30T10:20:43+08:00",
+    "owner_session": null
   }
 ]
