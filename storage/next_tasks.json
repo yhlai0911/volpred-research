@@ -15075,7 +15075,7 @@
     "title": "K1081: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K1081 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Claude, 執行: Claude] K1081 tests A4f on EEM (MSCI Emerging Markets ETF, 85% non-US) 2007-2026 n=4848. FULL OOS Harvey PASS: DM t=+5.25 p<0.0001, QLIKE -0.43%, CI [0.016, 0.050]. All 3 OOS windows directional PASS (Middle +3.68 Harvey); all 4 crisis sub-periods directional win",
     "priority": 4,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1081",
@@ -15092,6 +15092,95 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-30T09:08:16+00:00"
+    "created_at": "2026-05-30T09:08:16+00:00",
+    "claimed_by": "hourly-18",
+    "claimed_at": "2026-05-30T10:11:13.900688+00:00",
+    "claim_session_id": "a4d27af79f5b",
+    "started_at": "2026-05-30T10:11:17.814971+00:00"
+  },
+  {
+    "id": "email-11836-9833be",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] 自主 loop fire 17:07 — Paper3 D2 errata verify-and-close",
+    "description": "Gmail UID: 11836\nMessage-ID: <92EE6045-BEC9-40A1-820D-6C8B14F796FC@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Sat, 30 May 2026 17:50:32 +0800\nSubject: Re: [VolPred Alert][INFO] 自主 loop fire 17:07 — Paper3 D2 errata verify-and-close\n\n--- 用戶回信內容 ---\n看看這段對話chatgpt.com \n做模擬然後寫成一篇trending文章−−\n\nVolPred <yihao.lai@gmail.com> 於 2026年5月30日 17:14 寫道：\n\n﻿\r\n\r\n  \r\n    \r\n    \r\n    自主 loop fire 17:07 — Paper3 D2 errata verify-and-close\r\n  \r\n  \r\n    \r\n      \r\n        \r\n          VolPred 管理通知\r\n          自主 loop fire 17:07 — Paper3 D2 errata verify-and-close\r\n          Alert level: info\n\n\r\n        \r\n        \r\n          \r\n          INFO自主 loop fire 17:07 — Paper 3 D2 errata verify-and-close\r\n本班動作摘要\r\nPhase 0 (email_reply): 無 in_progress / pending 待處理。\n\r\nPhase 0.5 (reader-facing refill): state OK (scanned=true, errors=[])。\n\r\nPhase A (compute queue): 無 completed-pending-followup。\n\r\nPhase B (派工):\n\n\r\n\r\n挑 Paper3_D2_errata_Table5_and_remove_rho_0.830 (paper_review, P4, pending_main_thread 18 天)\r\ndiversity 通過 (last-3: paper_body/trending_repost/platform_ops/daily_article ×2; paper_review 不在 last-3)\r\nmission §3 (top-tier journal paper) 對齊\r\nclaim → start → 主線程審 → complete\r\n\r\n發現\r\nTask 實際已在 v2→v3 升級時完成 — body_v3.tex 已實現所有 4 項 scope：\n\n\r\n\r\n\r\n\r\nScope\r\nBody location\r\n狀態\r\n\r\n\r\n\r\n\r\nTable 5 數字 → K1178 canonical\r\nline 444-445 (avg ΔMDD 24.9, t=10.25), line 449 (r=-0.806, ρ=-0.835)\r\n✅ done\r\n\r\n\r\nRemove ρ=0.830 GJR γ vs ΔSharpe\r\nline 450 \"Removed in v3\" note + line 483 forensic discussion\r\n✅ done\r\n\r\n\r\ndata_sources.md 標 K1178 source\r\nline 34, 92 (含 auto_adjust 註記)\r\n✅ done\r\n\r\n\r\nexperiments.md 標 K1178 source\r\nline 19, 67, 70 (Table 5 + Figure 2)\r\n✅ done\r\n\r\n\r\n\r\nVerify K1178 results.json 對齊：\n\n\r\n\r\ncross_sectional.vix_sens_vs_delta_mdd_pearson_r = -0.8063 (p=0.00087) → body 用 -0.806 ✓\r\ncross_sectional.vix_sens_vs_delta_mdd_spearman_rho = -0.8351 (p=0.00038) → body 用 -0.835 ✓\r\n\r\nGrep clean: body_v3 已無 stale K901 數字 (28.7 / 15.70 / -0.770 / -0.720)。\n\n\r\n後續 backlog\r\nPaper 3 pending_main_thread 7→6。剩餘:\n\n\r\n\r\nBTC_GAS_negative_paper P4 paper_body\r\nPaper2_errata_Table3_full_rewrite P4 paper_review\r\nPaper4_DIV4_Table6_era_Harvey_passes P4 paper_review\r\nPaper4_body_integration_9_new_experiments P3 paper_decision (next-up)\r\nPaper6_major_errata_K880v2_canonical P4 paper_review\r\nVolAbsorption_errata_decision P4 paper_body\r\n\r\n下班 fire 應先驗證其他 P4 errata 是否同樣 stale (v2→v3 已 done)。Paper 4 (P3) 是最高 priority，需 narrative decision + 9 實驗 body integration，建議獨立 fire 處理。\n\n\r\n紀律 check\r\n\r\n✅ Claim → start → complete 完整 (cross-session lock 保護)\r\n✅ PHASE Z commit 1d32f52e\r\n✅ work_log entry added (973→974)\r\n✅ 研究誠實: 數字 cell-level verify (Pearson/Spearman 對齊 results.json)\r\n✅ \"先修流程，不修資料\": 確認 v3 已實現，標 succeeded，不額外 patch\r\n✅ Mission §3 alignment: Paper 3 投稿前 errata 護城河\r\n\r\n時間\r\n\r\n⏱ 開始 2026-05-30 17:07:46 (台灣時間)\r\n⏱ 停止 2026-05-30 17:13:30 (台灣時間)\r\n總耗時 ~6 分鐘\r\n⏭ 下次 autonomous fire: 2026-05-30 17:43 (台灣時間, 30min wakeup)\r\n⏭ 下次 hourly cron: 2026-05-30 18:07 (台灣時間)\n\n--- 原始助理寄出內容（引用部分） ---\n(no quote)\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "blocked",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-05-30T10:00:10.824897+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11836,
+    "email_message_id": "<92EE6045-BEC9-40A1-820D-6C8B14F796FC@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] 自主 loop fire 17:07 — Paper3 D2 errata verify-and-close",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-05-30T10:11:07.863693+00:00",
+    "claim_session_id": "61c1ba18db8b",
+    "blocked_reason": "awaiting_external_data",
+    "blocked_at": "2026-05-30T10:14:34+00:00",
+    "blocked_note": "等老闆補 ChatGPT 對話分享連結才能做模擬+寫文章；已回信請求",
+    "completed_at": "2026-05-30T10:14:42.005753+00:00",
+    "result": "請求補 ChatGPT 對話連結（信中只有 chatgpt.com 字樣無實際分享連結）；已回信(d1f9e60e)。拿到連結後做 VolPred 模擬+寫 trending 文章。"
+  },
+  {
+    "id": "K492_article_general",
+    "title": "K492: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K492 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: Method: Manual classification + statistical analysis of all K414-K491 results Reference: Harvey, Liu, Zhu (2016) ...and the Cross-Section of Expected Returns, RFS Reference: Timmermann (2006) Forecast Combinations, Handbook of Economic Forecasting",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K492",
+    "tags": [
+      "har",
+      "meta-analysis",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-30T10:10:10+00:00"
+  },
+  {
+    "id": "K501_article_general",
+    "title": "K501: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K501 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: 用戶, 執行: Claude] K501: SSVS return prediction. Taiwan: SPY_ret PIP=0.95, OOS R²=15.6%, hit rate 67.5%, DM t=5.70 (Harvey PASS!). BUT: c2c includes non-tradable overnight gap (I8: gap captures 93%). SPY/QQQ: R²=1-2% (EMH). Signal is real but not implementable without o2o verif",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K501",
+    "tags": [
+      "return_prediction",
+      "SSVS",
+      "Taiwan",
+      "timing_bias",
+      "Chen_CWS",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-30T10:10:10+00:00"
+  },
+  {
+    "id": "K506_article_general",
+    "title": "K506: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K506 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: Reference: Moreira & Muir (2017) 'Volatility-Managed Portfolios' JF Reference: Harvey, Liu, Zhu (2016) '...and the Cross-Section of Expected Returns' RFS",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K506",
+    "tags": [
+      "cross-oos",
+      "har",
+      "strategy",
+      "taiwan",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-30T10:10:10+00:00"
   }
 ]
