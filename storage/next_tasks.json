@@ -15027,7 +15027,7 @@
     "title": "Paper review (Codex 24h-rule): K1202：六層 NULL 的終點 — 非 capex 量化指引對晶圓代工個股 RV 的預測力檢驗",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_cbb93ff8 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_cbb93ff8",
@@ -15036,14 +15036,20 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-30T09:08:15+00:00"
+    "created_at": "2026-05-30T09:08:15+00:00",
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-05-30T11:10:12.739821+00:00",
+    "claim_session_id": "788ac1f3afeb",
+    "started_at": "2026-05-30T11:10:19.465958+00:00",
+    "completed_at": "2026-05-30T11:12:05.940016+00:00",
+    "result": "K1202 article review PASS (agy fallback; Codex quota exhausted to 5/31 07:01). 數字 100% match results.json (n=135, partial-F p=0.320, max|t_HAC|=0.25, bootstrap CI 全含 0, FINAL_NULL). Lookahead: HAC lag 非 lookahead, 22d 後向 RV 為 standard event-study. Harvey 門檻 honest under-claim 未偷渡. UNCERTAIN_SCRAPE 79.3% LLM 明文 caveat. 三層 robustness 一致 NULL. Reviewer: agy (Antigravity CLI) — Codex CLI hit usage limit."
   },
   {
     "id": "paper_review_mile_d9c62a56",
     "title": "Paper review (Codex 24h-rule): 測了 16 個模型組合，唯一看起來成功的那個，其實是資料時序用錯了",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_d9c62a56 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_d9c62a56",
@@ -15052,14 +15058,18 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-30T09:08:15+00:00"
+    "created_at": "2026-05-30T09:08:15+00:00",
+    "blocked_reason": "codex_quota_reset_pending",
+    "blocked_at": "2026-05-30T11:12:30+00:00",
+    "blocked_note": "Codex CLI hit usage limit until 2026-05-31 07:01 CST. Auto-recheck after reset.",
+    "blocked_until": "2026-05-31"
   },
   {
     "id": "paper_review_mile_379b51cc",
     "title": "Paper review (Codex 24h-rule): 四種 HAR 分解都無法超越標準 HAR-RV：台灣期貨波動率預測的系統性 NULL 結果",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_379b51cc needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_379b51cc",
@@ -15068,7 +15078,11 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-30T09:08:15+00:00"
+    "created_at": "2026-05-30T09:08:15+00:00",
+    "blocked_reason": "codex_quota_reset_pending",
+    "blocked_at": "2026-05-30T11:12:31+00:00",
+    "blocked_note": "Codex CLI hit usage limit until 2026-05-31 07:01 CST. Auto-recheck after reset.",
+    "blocked_until": "2026-05-31"
   },
   {
     "id": "K1081_article_general_v2",
