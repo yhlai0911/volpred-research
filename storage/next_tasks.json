@@ -15266,7 +15266,7 @@
     "title": "Paper review (Codex 24h-rule): 把樣本拆成「景氣循環的上升期 vs 下降期」再測一次，晶圓代工財報日的謎還是沒解開",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_8d0e6f48 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_8d0e6f48",
@@ -15275,7 +15275,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-30T18:08:04+00:00"
+    "created_at": "2026-05-30T18:08:04+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-30T23:05:13.766428+00:00",
+    "claim_session_id": "bcddb317c502",
+    "started_at": "2026-05-30T23:05:20.388908+00:00",
+    "completed_at": "2026-05-30T23:08:26.885352+00:00",
+    "result": "Codex 24h review completed for mile_8d0e6f48. Core null claim verified against K1108f code/results; flagged method-footnote mismatch, stale future-work state, and one wording overclaim. Review saved to storage/reviews/codex_24h/mile_8d0e6f48_review.md."
   },
   {
     "id": "paper_review_mile_d3897886",
@@ -15501,5 +15507,27 @@
       "trending_followup"
     ],
     "created_at": "2026-05-30T22:30:00+08:00"
+  },
+  {
+    "id": "K1407_article_general",
+    "title": "K1407: write general-audience article (TWR vs IRR divergence, real-history)",
+    "description": "K1407 real-history 36 entry years SPY+0050 TWR vs IRR 分歧 — Part 3 延續 K1406 DCA/Lump 系列。verdict: pooled median TWR-IRR=-3.15pp (IRR系統性>TWR);  conditional: 早段多頭進場時 TWR>IRR (corr 0.56). 投資人看的『報酬率』(TWR)不等於自己的錢年化(IRR)。5圖+36年面板。Reader-facing draft 進 feed (draft pool).",
+    "task_type": "daily_article",
+    "priority": 4,
+    "status": "succeeded",
+    "created_at": "2026-05-31T07:11:15.603636+08:00",
+    "source": "agent_discovery_uncovered_K",
+    "tags": [
+      "daily_article",
+      "K1407",
+      "reader_facing",
+      "k1406_series_part3"
+    ],
+    "claimed_by": "hourly-07",
+    "claimed_at": "2026-05-30T23:11:21.130026+00:00",
+    "claim_session_id": "b36d08d5fe24",
+    "started_at": "2026-05-30T23:11:21.627204+00:00",
+    "completed_at": "2026-05-31T07:16:53+08:00",
+    "mile_id": "mile_22d9d2a5"
   }
 ]
