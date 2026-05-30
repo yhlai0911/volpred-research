@@ -14670,7 +14670,7 @@
     "title": "K1028: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1028 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] A4f 多變量擴展。SPY+QQQ 50/50 portfolio。Portfolio QLIKE: CCC-A4f=-8.074（最佳）, DCC-A4f=-8.073, DCC-GJR=-7.992, CCC-GJR=-7.999。DCC-A4f vs DCC-GJR: DM t=2.58（5% sig 但未達 Harvey 3.0）。DCC vs CCC: DM t=0.2 ns。結論：A4f univariate 改善傳遞到 portfolio level，但 dynamic correlatio",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1028",
@@ -14685,14 +14685,20 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-30T00:08:45+00:00"
+    "created_at": "2026-05-30T00:08:45+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-30T01:57:41.600455+00:00",
+    "claim_session_id": "414a93272f38",
+    "started_at": "2026-05-30T01:57:55.559946+00:00",
+    "completed_at": "2026-05-30T01:58:50.919734+00:00",
+    "result": "No publish: K1028's reader-facing takeaway is superseded by published K1041 articles on the same DCC-vs-marginal-risk story. Existing research coverage already explains that better volatility marginals matter more than dynamic correlation."
   },
   {
     "id": "K1034_article_general",
     "title": "K1034: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1034 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] Cornish-Fisher (CF) 展開作為 distribution-free VaR 方法。CF-Rolling 達到 Trinity 6/6 PASS（Kupiec + Christoffersen + Basel + ES），Normal 0/6、Student-t 1/6。CF 利用 252 天滾動 skewness/kurtosis 調整 Normal quantile，無需假設分配。SPY 負偏 -0.40、超額峰態 2.82 解釋固定參數方法失敗。Rolling 優於 Expandin",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1034",
@@ -14706,7 +14712,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-30T00:08:45+00:00"
+    "created_at": "2026-05-30T00:08:45+00:00",
+    "claimed_by": "hourly-10",
+    "claimed_at": "2026-05-30T02:10:57.973999+00:00",
+    "claim_session_id": "1304dda4a75e",
+    "started_at": "2026-05-30T02:10:58.370957+00:00",
+    "completed_at": "2026-05-30T02:17:40.292539+00:00",
+    "result": "feed_id=mile_e38c9656 | title=同一個公式，兩種用法，差距天壤之別 | audience=research (inferred from content) | anti-ai gate PASS warn=2"
   },
   {
     "id": "email-11856-20b32d",
