@@ -1,0 +1,221 @@
+{
+  "experiment_id": "k1409",
+  "title": "高股息 ETF 月月配 1 萬規劃 block-bootstrap 模擬",
+  "generated_at": "2026-05-30T10:39:15.660649+00:00",
+  "config": {
+    "tickers": [
+      "0056.TW",
+      "00878.TW",
+      "00919.TW"
+    ],
+    "lots": {
+      "0056.TW": 10.0,
+      "00878.TW": 23.8,
+      "00919.TW": 12.8
+    },
+    "shares": {
+      "0056.TW": 10000.0,
+      "00878.TW": 23800.0,
+      "00919.TW": 12800.0
+    },
+    "seed": 20260530,
+    "n_sim": 5000,
+    "horizon_months": 36,
+    "price_block_size_months": 3,
+    "monthly_target_ntd": 10000.0,
+    "implied_yield_from_chart": 0.097,
+    "price_basis": "auto_adjust=False raw close (price return only, no dividend re-added)",
+    "dividend_basis": "Ticker.dividends; real ex-div calendar months preserved, per-share amount bootstrapped from overlap-period payment pool, counted as cash separately from price",
+    "method": "price returns: joint block bootstrap (block=3m) over common-overlap monthly returns; dividends: real calendar schedule + amount bootstrap"
+  },
+  "data_meta": {
+    "spans": {
+      "0056.TW": [
+        "2008-01-02",
+        "2026-05-29"
+      ],
+      "00878.TW": [
+        "2020-07-10",
+        "2026-05-29"
+      ],
+      "00919.TW": [
+        "2022-10-13",
+        "2026-05-29"
+      ]
+    },
+    "common_start": "2022-11-30",
+    "common_end": "2026-05-31",
+    "common_months": 43,
+    "div_months_in_overlap": {
+      "0056.TW": [
+        1,
+        4,
+        7,
+        10
+      ],
+      "00878.TW": [
+        2,
+        5,
+        8,
+        11
+      ],
+      "00919.TW": [
+        3,
+        6,
+        9,
+        12
+      ]
+    },
+    "n_payments_in_overlap": {
+      "0056.TW": 12,
+      "00878.TW": 14,
+      "00919.TW": 12
+    },
+    "payments_per_year": {
+      "0056.TW": 3.43,
+      "00878.TW": 4.0,
+      "00919.TW": 3.43
+    },
+    "per_share_div_overlap": {
+      "0056.TW": [
+        1.0,
+        1.2,
+        0.7,
+        0.79,
+        1.07,
+        1.07,
+        1.07,
+        1.07,
+        0.866,
+        0.866,
+        0.866,
+        1.0
+      ],
+      "00878.TW": [
+        0.27,
+        0.27,
+        0.35,
+        0.35,
+        0.4,
+        0.51,
+        0.55,
+        0.55,
+        0.5,
+        0.47,
+        0.4,
+        0.4,
+        0.42,
+        0.66
+      ],
+      "00919.TW": [
+        0.54,
+        0.54,
+        0.55,
+        0.66,
+        0.7,
+        0.72,
+        0.72,
+        0.72,
+        0.72,
+        0.54,
+        0.54,
+        0.78
+      ]
+    }
+  },
+  "results": {
+    "principal_total": 1605416.0160064697,
+    "principal_by_ticker": {
+      "0056.TW": 502000.00762939453,
+      "00878.TW": 732088.0054473877,
+      "00919.TW": 371328.0029296875
+    },
+    "last_close": {
+      "0056.TW": 50.20000076293945,
+      "00878.TW": 30.760000228881836,
+      "00919.TW": 29.010000228881836
+    },
+    "monthly_div_stats": {
+      "all_months_median": 9216.0,
+      "all_months_p5": 6912.0,
+      "all_months_p95": 13090.000000000002,
+      "all_months_mean": 9420.096022222222,
+      "all_months_P_ge_10000": 0.3385722222222222,
+      "all_months_P_zero": 0.0,
+      "paid_months_median": 9216.0,
+      "paid_months_p5": 6912.0,
+      "paid_months_p95": 13090.000000000002,
+      "paid_months_P_ge_10000": 0.3385722222222222,
+      "calendar_months_with_any_dividend": 12
+    },
+    "monthly_div_avg_stats": {
+      "median": 9418.388888888889,
+      "p5": 8927.708333333332,
+      "p95": 9906.58611111111,
+      "P_avg_ge_10000": 0.0266
+    },
+    "nav_stats": {
+      "m6": {
+        "median": 1719026.3922420053,
+        "p5": 1473738.8337098914,
+        "p95": 2059378.6730341916
+      },
+      "m12": {
+        "median": 1837750.1441661362,
+        "p5": 1480879.560887082,
+        "p95": 2338439.5600540615
+      },
+      "m36": {
+        "median": 2435183.588578126,
+        "p5": 1663026.8923278002,
+        "p95": 3685547.921359876
+      }
+    },
+    "total_ret_stats_36m": {
+      "median": 0.7263297409215764,
+      "p5": 0.24585887696271858,
+      "p95": 1.5085605165008658,
+      "price_only_median": 0.5168551729262879,
+      "div_only_median": 0.21119883981438592,
+      "P_total_negative": 0.002
+    },
+    "downside_risk": {
+      "MDD_wealth_median": -0.095380434213379,
+      "MDD_wealth_p5_worst": -0.1643718206784599,
+      "MDD_nav_median": -0.12206393731618753,
+      "MDD_nav_p5_worst": -0.22032144874261433,
+      "VaR5_total_ret_36m": 0.24585887696271858,
+      "CVaR5_total_ret_36m": 0.15769074146633452,
+      "nav_p5_36m": 1663026.8923278002,
+      "nav_p5_drawdown_vs_principal": 0.03588532551496493
+    },
+    "yield_stats": {
+      "implied_yield_from_chart": 0.097,
+      "realized_yield_median": 0.07039961327146196,
+      "realized_yield_p5": 0.06673192426876116,
+      "realized_yield_p95": 0.07404874010728335,
+      "P_realized_ge_implied": 0.0
+    }
+  },
+  "verdict": {
+    "paid_month_hit_prob": 0.3385722222222222,
+    "avg_monthly_hit_prob": 0.0266,
+    "calendar_months_covered": 12,
+    "bad_case_paid_month_div_p5": 6912.0,
+    "nav_p5_36m": 1663026.8923278002,
+    "nav_p5_drawdown_vs_principal": 0.03588532551496493,
+    "implied_yield": 0.097,
+    "realized_yield_median": 0.07039961327146196,
+    "implied_optimistic": true,
+    "summary": "季配錯開使 12 個日曆月中約 11 個有配息（4 月空窗）；但『有配息月就能領滿 1 萬』達標率不高，平均月配息達 1 萬的機率更低，因為實際可實現殖利率中位數(7.0%) 低於圖中隱含 9.7%。隱含值偏樂觀。母體短且偏多頭，真實下檔風險與斷配風險很可能被低估。"
+  },
+  "data_limitations": [
+    "價格報酬 bootstrap 母體取三檔共同重疊期（受 00919 yfinance 價格 ~2022-10 起限制）。",
+    "共同重疊期僅 43 個月（2022-11-30 ~ 2026-05-31），樣本短。",
+    "重疊期幾乎只經歷 2022 一次空頭 + 後續多頭 → 偏多頭，下檔風險與殖利率結論帶樂觀偏誤。",
+    "配息金額母體為重疊期實際每次配息；若未來配息政策縮水或斷配，模型未涵蓋（樂觀偏誤）。",
+    "0056 重疊期內由年配轉季配；模型用實際發生的配息次數與金額，不外插歷史年配型態。",
+    "block bootstrap 假設未來月報酬/配息與重疊期同分布；長空頭或殖利率結構改變時實際更差。",
+    "模型未計交易成本、二代健保補充保費、股利所得稅，實際可支配現金流會更低。"
+  ]
+}
