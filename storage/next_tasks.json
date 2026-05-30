@@ -5399,7 +5399,7 @@
   {
     "id": "Paper3_D2_errata_Table5_and_remove_rho_0.830",
     "title": "Paper 3 ERRATA: Table 5 update K1178 canonical + REMOVE ρ=0.830 unreproducible claim",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 4,
     "created_at": "2026-04-17T17:39:42+08:00",
     "description": "K1178 (ca5ec507) 確認 Paper 3 Table 5: core claim (13/13 改善, r=-0.806) robust; 但 avg ΔMDD 24.9 vs 28.7 + t 10.25 vs 15.70 需更新; **ρ=0.830 GJR γ vs ΔSharpe 完全 NOT REPRODUCIBLE (K1178 +0.187 NS)** — 可能 fabricated 或 pre-K 原 source 丟失. **主線程 body edit**: (1) Table 5 數字全更新為 K1178 canonical (24.9pp, t=10.25, r=-0.806, ρ_spearman=-0.835); (2) **刪除** 'ρ=0.830 GJR γ vs ΔSharpe' 相關段落 (無法 replicate); (3) Section methodology 補 K1178 提到的 auto_adjust + 13 market list; (4) experiments.md 加 K1178 為 Table 5 source.",
@@ -5418,7 +5418,13 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "hourly-17",
+    "claimed_at": "2026-05-30T09:10:43.746874+00:00",
+    "claim_session_id": "64027871d5c7",
+    "started_at": "2026-05-30T09:10:47.883808+00:00",
+    "completed_at": "2026-05-30T09:12:16.438493+00:00",
+    "result": "body_v3.tex 已完整實現 4 項 scope (created 2026-04-17, 18 天前 stale): (1) Table 5 數字全 K1178 canonical: avg ΔMDD=24.9pp t=10.25 (line 444-445), Pearson r=-0.806 + Spearman ρ=-0.835 (line 449); (2) ρ=0.830 GJR γ vs ΔSharpe claim REMOVED (line 450 'Removed in v3' note + line 483 forensic discussion: K1178 reproduced ρ=0.187 NS); (3) data_sources.md line 34/92 標 K1178 為 13-market canonical source + auto_adjust=True; (4) experiments.md line 19/67/70 標 K1178 為 Table 5 + Figure 2 canonical source. Verified clean: body_v3 已無 stale 28.7/15.70/-0.770/-0.720. K1178 results.json: pearson=-0.806 (p=0.00087), spearman=-0.835 (p=0.00038) match body exactly."
   },
   {
     "id": "Paper3_H4_TSMOM_1.4pct_origin",
@@ -15015,5 +15021,77 @@
       "K1407_lump_entry_year_trending"
     ],
     "needs_close_reply": true
+  },
+  {
+    "id": "paper_review_mile_cbb93ff8",
+    "title": "Paper review (Codex 24h-rule): K1202：六層 NULL 的終點 — 非 capex 量化指引對晶圓代工個股 RV 的預測力檢驗",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_cbb93ff8 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_cbb93ff8",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-30T09:08:15+00:00"
+  },
+  {
+    "id": "paper_review_mile_d9c62a56",
+    "title": "Paper review (Codex 24h-rule): 測了 16 個模型組合，唯一看起來成功的那個，其實是資料時序用錯了",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_d9c62a56 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_d9c62a56",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-30T09:08:15+00:00"
+  },
+  {
+    "id": "paper_review_mile_379b51cc",
+    "title": "Paper review (Codex 24h-rule): 四種 HAR 分解都無法超越標準 HAR-RV：台灣期貨波動率預測的系統性 NULL 結果",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_379b51cc needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_379b51cc",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-30T09:08:15+00:00"
+  },
+  {
+    "id": "K1081_article_general_v2",
+    "title": "K1081: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K1081 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Claude, 執行: Claude] K1081 tests A4f on EEM (MSCI Emerging Markets ETF, 85% non-US) 2007-2026 n=4848. FULL OOS Harvey PASS: DM t=+5.25 p<0.0001, QLIKE -0.43%, CI [0.016, 0.050]. All 3 OOS windows directional PASS (Middle +3.68 Harvey); all 4 crisis sub-periods directional win",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1081",
+    "tags": [
+      "A4f",
+      "EEM",
+      "emerging-markets",
+      "cross-asset",
+      "Paper9",
+      "Taiwan-specific",
+      "diagnostic",
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-30T09:08:16+00:00"
   }
 ]
