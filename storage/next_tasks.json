@@ -15174,7 +15174,7 @@
     "title": "K501: write general-audience article (auto-discovered uncovered K)",
     "description": "K K501 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: 用戶, 執行: Claude] K501: SSVS return prediction. Taiwan: SPY_ret PIP=0.95, OOS R²=15.6%, hit rate 67.5%, DM t=5.70 (Harvey PASS!). BUT: c2c includes non-tradable overnight gap (I8: gap captures 93%). SPY/QQQ: R²=1-2% (EMH). Signal is real but not implementable without o2o verif",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K501",
@@ -15188,7 +15188,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-30T10:10:10+00:00"
+    "created_at": "2026-05-30T10:10:10+00:00",
+    "claimed_by": "hourly-23",
+    "claimed_at": "2026-05-30T15:08:39.369411+00:00",
+    "claim_session_id": "7eb774932582",
+    "started_at": "2026-05-30T15:08:47.039971+00:00",
+    "completed_at": "2026-05-30T15:15:47.719215+00:00",
+    "result": "feed draft mile_d95b730a published (status=draft, 2 figs, anti-ai-gate PASS, caveat addressed). commit 6deaed13. audience auto-bumped general→research; topic_cluster 'spy' cooldown 48/30d 由 cluster_waiver 兜底。"
   },
   {
     "id": "K506_article_general",
