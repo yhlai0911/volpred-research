@@ -254,6 +254,31 @@ def _has_publishable_title(cand: dict) -> bool:
     return bool(title)
 
 
+def _is_retracted_or_overturned_candidate(cand: dict) -> bool:
+    """Skip candidates whose canonical angle is already overturned/retracted.
+
+    2026-05-30 K680 incident: an audience-gap fallback re-queued a
+    general-audience write task for a K whose own title was
+    "OVERTURNED" and whose primary existing coverage was a retraction.
+    These are legitimate research-history artifacts, but they should not
+    be auto-materialized into new daily_article tasks by the refill loop.
+    """
+    needles = ("overturned", "retracted", "撤稿", "推翻")
+    haystacks = [
+        str(cand.get("title") or ""),
+        str(cand.get("verdict_preview") or ""),
+        " ".join(str(t) for t in (cand.get("tags") or [])),
+    ]
+    covered_by = cand.get("covered_by") or []
+    for art in covered_by:
+        if not isinstance(art, dict):
+            continue
+        haystacks.append(str(art.get("title") or ""))
+        haystacks.append(str(art.get("status") or ""))
+    merged = "\n".join(haystacks).lower()
+    return any(token in merged for token in needles)
+
+
 def _make_article_task(cand: dict, priority: int, retry_suffix: str = "") -> dict:
     k_id = cand["k_id"]
     audiences_covered = cand.get("audiences_covered") or []
@@ -324,9 +349,13 @@ def refill(target: int, dry_run: bool = False) -> dict:
         if not kid or kid in seen_in_pool:
             continue
         audiences_covered = cand.get("audiences_covered") or []
+        collisions = cand.get("topic_family_collisions") or {}
+        needed_audience = "general" if "general" not in audiences_covered else "research"
         if not cand.get("covered_by"):
             continue
         if "general" in audiences_covered and "research" in audiences_covered:
+            continue
+        if collisions.get(needed_audience):
             continue
         audience_gap_pool.append(cand)
     audience_gap_pool.sort(key=lambda c: (c.get("score") or 0), reverse=True)
@@ -383,6 +412,10 @@ def refill(target: int, dry_run: bool = False) -> dict:
             continue
         # 4th belt: blank-title candidates are not publication-ready.
         if not _has_publishable_title(cand):
+            continue
+        # 6th belt: don't auto-queue reader-facing articles for candidates
+        # whose own canonical status is already overturned/retracted.
+        if _is_retracted_or_overturned_candidate(cand):
             continue
         priority = _score_to_priority(int(cand.get("score") or 0))
         # Pick retry suffix if base id already used by terminal task

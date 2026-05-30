@@ -14585,7 +14585,7 @@
     "title": "K1061: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K1061 has verdict signal (score=5, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [code-reviewer subagent CONDITIONAL PASS, 2026-05-13; primary-path Codex verification pending per experiments.md] K1061 extends K1060 (10-stock EAV, binom underpowered 6/10 p=0.377) to full TWSE 50 constituents (N=50). Method: |return| proxy, T+0=announcement date (Taiwan post-cl",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1061",
@@ -14603,14 +14603,20 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-30T00:08:45+00:00"
+    "created_at": "2026-05-30T00:08:45+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-30T00:54:11.848783+00:00",
+    "claim_session_id": "b6a2b11b5443",
+    "started_at": "2026-05-30T00:54:11.895210+00:00",
+    "completed_at": "2026-05-30T00:54:53.463120+00:00",
+    "result": "No publish. Existing published general article mile_6c391484 already covers the same Taiwan T+1 earnings-volatility angle. Root cause of the v2 retry was a refill_task_pool audience-gap fallback bug: it ignored publication_candidates.topic_family_collisions when scanning full candidates beyond top5. Patched that gate so K1061-style topic-family duplicates no longer re-enter the queue as retry tasks."
   },
   {
     "id": "K680_article_general",
     "title": "K680: write general-audience article (auto-discovered uncovered K)",
     "description": "K K680 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: [提出: K679 驗證, 執行: Claude] VIX percentile cross-OOS 5 期間全勝（GFC +0.77, Recovery +0.71, Low Vol +0.28, COVID +0.46, Post-Hike +0.15）。Avg diff +0.47。DM t=3.157 p=0.0016 Harvey PASS。Bootstrap 95% CI [+0.35, +0.83] 不含零 p=0.000。Rolling Sharpe percentile 更高 96.4% 的時間。Sensitivity: 126d/25",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K680",
@@ -14625,14 +14631,20 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-30T00:08:45+00:00"
+    "created_at": "2026-05-30T00:08:45+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-30T00:55:57.678823+00:00",
+    "claim_session_id": "b13be074e47b",
+    "started_at": "2026-05-30T00:55:57.725479+00:00",
+    "completed_at": "2026-05-30T00:57:08.861338+00:00",
+    "result": "No publish: K680 is already covered by a retraction article and should not auto-queue as general. Added refill gate to skip overturned/retracted candidates from daily_article materialization."
   },
   {
     "id": "K1022_article_general",
     "title": "K1022: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1022 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: 賴奕豪, 執行: Claude] A4f-t(df=8) 跨 6 資產驗證。所有資產 QLIKE 改善（1.2-6.8%）但無一達 Harvey |t|>3.0。SPY DM=-2.75, QQQ DM=-2.12, GLD DM=-2.39, EEM DM=-1.61, TLT DM=-2.75, 0050.TW DM=-0.52。VaR: A4f 全 PASS, GJR 3/6 FAIL。結論：A4f 方向正確但跨資產統計顯著性有限。注意：另一 session 佔用 K1022 編號（原本要做 Crypto Fear Channel），Cr",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1022",
@@ -14645,7 +14657,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-30T00:08:45+00:00"
+    "created_at": "2026-05-30T00:08:45+00:00",
+    "claimed_by": "hourly-09",
+    "claimed_at": "2026-05-30T01:10:12.619977+00:00",
+    "claim_session_id": "9ca5cf1d89ae",
+    "started_at": "2026-05-30T01:10:13.144245+00:00",
+    "completed_at": "2026-05-30T01:17:02.971963+00:00",
+    "result": "Published mile_f484adf4 (audience=research, status=draft, 3922 words, 2 figures Supabase). anti_ai_gate 2 rounds to PASS. Frame: QLIKE 6/6 改善但 Harvey 全敗、VaR 才是真贏點。Cluster-waiver used (Paper 9 milestone). Title 含「——」未被 emdash_normalizer 處理（後續 platform_ops 跟進 title-level normalization）。"
   },
   {
     "id": "K1028_article_general",
@@ -14696,7 +14714,7 @@
     "description": "Gmail UID: 11856\nMessage-ID: <601D7CD1-A8AB-4067-B4F8-0EB9D1CD28D8@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Sat, 30 May 2026 08:10:15 +0800\nSubject: Re: [VolPred Alert][INFO] 自主 loop fire 07:31 — Paper 1 GLD errata 套用\n\n--- 用戶回信內容 ---\n你寄給我的信HTML表格超過頁面寬度且不能夠移動\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年5月30日 07:40 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> 自主 loop fire 07:31 — Paper 1 GLD errata 套用\r\n> Alert level: info\r\n> INFO\r\n> 自主 loop fire 07:31 — Paper 1 GLD errata 套用\r\n> \r\n> 本班完成\r\n> \r\n> 任務：Paper1_body_GLD_section_rewrite_per_forensic (P3 paper_body, pending_main_thread)\r\n> Mission：#3 把學術論文寫好 — Paper 1 投稿前的研究誠實 errata\r\n> \r\n> 改動範圍\r\n> 檔案\t位置\t變更\r\n> tables.tex\tTable 2 GLD row\t-0.067 / 93% / -5.79 → K903 canonical +0.002 / 67% / +0.15 NS\r\n> tables.tex\tCaption\t加 errata 註：earlier-draft 來源 spec 不可追溯\r\n> body_v3.tex\tL12 intro\t「inverted leverage statistically significant」→ regime-dependent narrative\r\n> body_v3.tex\tL168 Section 4.1\t+ errata footnote 指 forensic doc\r\n> body_v3.tex\tL172 safe-haven 解釋\tbull-bear regime 分離（非 unconditional inverted）\r\n> body_v3.tex\tL178 / L180 model selection\tγ < 0 for GLD → γ ≈ 0；skewness misleading 因 GJR 無收益\r\n> body_v3.tex\tL189 / L191 / L193 robustness\tHAC t / bootstrap CI / non-overlap 全改 K903\r\n> body_v3.tex\tL197 2025-2026 sub-window\tK903 extension 實驗結果 -0.033 / 80% neg / -1.27 NS 取代 unreproducible -0.089 / 100%\r\n> 驗證\r\n> xelatex: 69 頁 OK，只有 pre-existing sec:var_compliance undefined ref（非本次引入）\r\n> Supabase sync: HTTP 200，updated_at = 2026-05-29T23:39:16 UTC（07:39 台灣）\r\n> Commit: dbc49381 7 files / +69 / -33\r\n> PHASE Z: git status clean\r\n> Mission 服務\r\n> \r\n> #3 學術論文：移除 Paper 1 無法復現的 headline claim（\"gold inverted leverage statistically significant, HAC t=-5.79\"），改用 K903 canonical 規格 + 公開 errata footnote 指向 forensic 報告 + 帶 K903 extension 實驗的負結果。投稿時 reviewer 可在 paper 內看到完整的 audit trail。\r\n> 研究誠實原則：path (c) major errata 完整執行 — 不偽造、不硬 code、不掩飾 spec 翻盤，反而把 forensic doc 與 follow-up 實驗結果寫入 paper 本身。\r\n> 三方一致：tables.tex（數字）/ body_v3.tex（敘述）/ K903 + extension experiments（程式）現在全部對齊。\r\n> 任務池狀態\r\n> \r\n> pending → 1（trending_repost AI 隱含波動率 P1，待 interactive session 處理 FB 雙發佈）\r\n> pending_main_thread → 7（少 1 = 本班完成的 Paper1_body）\r\n> succeeded → 625\r\n> 下次任務\r\n> \r\n> 下班 hourly fire = 2026-05-30 08:07 台灣時間（compute-worker 07:45 為 worker cron 非 dispatch）。\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "claimed",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -14709,6 +14727,190 @@
     "email_from": "Ivan Lai <yihao.lai@gmail.com>",
     "claimed_by": "interactive-claude",
     "claimed_at": "2026-05-30T00:19:09.944251+00:00",
-    "claim_session_id": "283dfd9922b9"
+    "claim_session_id": "283dfd9922b9",
+    "started_at": "2026-05-30T00:22:34.951533+00:00",
+    "completed_at": "2026-05-30T00:22:38.864352+00:00",
+    "result": "boss 回饋 email HTML 表格溢出手機無法捲動。根因=CSS 缺 table-layout:fixed+word-break。修復 email_notifier._email_shell CSS（commit 02f433bd 已上雲），回信含測試表請 boss 當場驗證。影響全 alert + 每日 report。"
+  },
+  {
+    "id": "K1039_article_general",
+    "title": "K1039: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1039 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1039 multi-horizon VaR factorial（2 model × 3 method × 3 horizon）。SPY+QQQ OOS 2019-2026。核心發現：(1) A4f+CF-Rolling h=1 和 h=5 都 100% Trinity PASS (2) h=10 降為 75%（182 blocks 小樣本問題，非模型失敗）(3) √h scaling = proper h-step GARCH（pass rate 完全相同）→ 實務上不需要 h-step 公式 (4)",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1039",
+    "tags": [
+      "VaR",
+      "multi-horizon",
+      "A4f",
+      "CF-Rolling",
+      "Basel",
+      "h-step",
+      "sqrt-h",
+      "Paper9",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-30T01:09:05+00:00"
+  },
+  {
+    "id": "K1081_article_general",
+    "title": "K1081: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1081 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1081 tests A4f on EEM (MSCI Emerging Markets ETF, 85% non-US) 2007-2026 n=4848. FULL OOS Harvey PASS: DM t=+5.25 p<0.0001, QLIKE -0.43%, CI [0.016, 0.050]. All 3 OOS windows directional PASS (Middle +3.68 Harvey); all 4 crisis sub-periods directional win",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1081",
+    "tags": [
+      "A4f",
+      "EEM",
+      "emerging-markets",
+      "cross-asset",
+      "Paper9",
+      "Taiwan-specific",
+      "diagnostic",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-30T01:09:05+00:00"
+  },
+  {
+    "id": "K1108_article_general",
+    "title": "K1108: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1108 has verdict signal (score=3, reasons=['methodology/mechanism lesson', 'paradigm/decisive null', 'robust inference', 'inconclusive (data limit)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1108 TSMC-only 48 events diff=+8.0e-5 Wald t=+0.94 INCONCLUSIVE (可能 direction-only)。K1108b 擴 5-stock foundry pool: TSMC+UMC+TSM ADR+GFS+SMIC, primary pool 4 firms (exclude TSM ADR due local-listing trading-day mismatch) = 9844 obs, 63 change + 73 stable ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1108",
+    "tags": [
+      "K1108b",
+      "Paper2",
+      "foundry-capex",
+      "DECISIVE-NULL",
+      "K1108-overturn",
+      "multi-stock-pool",
+      "within-stock-noise-artifact",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-30T01:09:05+00:00"
+  },
+  {
+    "id": "K1109_article_general",
+    "title": "K1109: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1109 has verdict signal (score=3, reasons=['methodology/mechanism lesson', 'robust inference']) but no general article in feed.json.  Verdict preview: [提出: Claude 承接 K1106b E052, 執行: Claude] Pre-registered random sample N=31 across 8 sectors（pre-reg commit 4c59a41a 先於結果 commit 19a19b19，audit trail 完整）。**ANOVA H1 FAIL**: F(7,20)=1.31, p=0.297; BH-FDR 無任何 dummy <0.05。**H2 fabless<foundry FAIL**: β=-1.24e-3, raw p=0.040 但 BH-adj p",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1109",
+    "tags": [
+      "Paper_2",
+      "A4f-EAV",
+      "pre-registration",
+      "cherry-pick-bias-confirmed",
+      "sector-effect-FAIL",
+      "BH-FDR-correction",
+      "bootstrap-CI",
+      "K1106b-invalidated",
+      "Taiwan",
+      "confirmatory-test",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-30T01:09:05+00:00"
+  },
+  {
+    "id": "K1114_article_general",
+    "title": "K1114: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1114 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] Paper 2 cross-sectional exhaustion (K1109/K1113) 後改 dimension：θ_EAV 是否 time-varying？對 TSMC 2330/UMC 2303/MediaTek 2454 跑 rolling 2-yr A4f-EAV step=21（128/132/124 成功 fits）。3 tests × 3 stocks = 9 p-values，BH-FDR 後 3 PASS：(1) UMC structural trend t=3.06 BH-p",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1114",
+    "tags": [
+      "K1114",
+      "Paper2",
+      "A4f-EAV",
+      "rolling-theta",
+      "time-varying",
+      "TSMC",
+      "UMC",
+      "MediaTek",
+      "BH-FDR",
+      "HAC-needed",
+      "preliminary",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-30T01:09:05+00:00"
+  },
+  {
+    "id": "K1372_article_general",
+    "title": "K1372: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1372 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: autonomous-research (mock_user_questions.json uq_mock1), 執行: Claude worktree, 審查: feature-dev:code-reviewer subagent CONDITIONAL_PASS 2026-05-17] GJR-GARCH(1,1)-t 全樣本估計（BTC-USD 2013-2025，N=4122）顯示 persistence=1.0000（IGARCH，BTC 加密貨幣市場已知特性）。三次半減期個別 Mann-Whitney U 檢定：H2(2016) p",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1372",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-30T01:09:05+00:00"
+  },
+  {
+    "id": "K430_article_general",
+    "title": "K430: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K430 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K430: Volatility Risk Premium (VIX - RV21) predictability for future vol. IS: VRP t=4.38 (passes Harvey t>3.0). OOS: 16.7% QLIKE improvement but DM p=0.163 (not significant, overlapping 21d windows reduce power). 核心發現：極端 VRP 行為不對稱——low VRP (post-shock): v",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K430",
+    "tags": [
+      "VRP",
+      "behavioral_finance",
+      "risk_premium",
+      "partial_positive",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-30T01:09:05+00:00"
+  },
+  {
+    "id": "K450_article_general",
+    "title": "K450: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K450 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: Claude(K436+K449結合), 執行: Claude] K450: Combined VRP + semivariance model. Both contain unique info (encompassing: Semi beyond VRP t=3.88 p=0.0001, VRP beyond Semi t=2.65 p=0.008 for SPY). BUT combined model NOT significantly better than individuals (all DM p>0.7, all fail Ha",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K450",
+    "tags": [
+      "VRP",
+      "semivariance",
+      "combined",
+      "no_synergy",
+      "encompassing",
+      "curse_of_dimensionality",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-30T01:09:05+00:00"
   }
 ]
