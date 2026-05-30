@@ -14921,7 +14921,7 @@
     "title": "K430: write general-audience article (auto-discovered uncovered K)",
     "description": "K K430 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K430: Volatility Risk Premium (VIX - RV21) predictability for future vol. IS: VRP t=4.38 (passes Harvey t>3.0). OOS: 16.7% QLIKE improvement but DM p=0.163 (not significant, overlapping 21d windows reduce power). 核心發現：極端 VRP 行為不對稱——low VRP (post-shock): v",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K430",
@@ -14934,7 +14934,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-30T01:09:05+00:00"
+    "created_at": "2026-05-30T01:09:05+00:00",
+    "claimed_by": "hourly-14",
+    "claimed_at": "2026-05-30T06:09:23.935007+00:00",
+    "claim_session_id": "2004c4795166",
+    "started_at": "2026-05-30T06:09:28.340644+00:00",
+    "completed_at": "2026-05-30T06:18:47.768159+00:00",
+    "result": "article slug=mile_5f57d3f9, title=恐慌剛過市場最安靜VRP極端低點後的波動率規律, status=draft, audience=research, 1572 zh chars, 10 verified numbers, chart=k430_vrp_asymmetry.png, anti_ai_gate=PASS"
   },
   {
     "id": "K450_article_general",
