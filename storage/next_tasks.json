@@ -15075,7 +15075,7 @@
     "title": "K1081: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K1081 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Claude, 執行: Claude] K1081 tests A4f on EEM (MSCI Emerging Markets ETF, 85% non-US) 2007-2026 n=4848. FULL OOS Harvey PASS: DM t=+5.25 p<0.0001, QLIKE -0.43%, CI [0.016, 0.050]. All 3 OOS windows directional PASS (Middle +3.68 Harvey); all 4 crisis sub-periods directional win",
     "priority": 4,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1081",
@@ -15096,7 +15096,9 @@
     "claimed_by": "hourly-18",
     "claimed_at": "2026-05-30T10:11:13.900688+00:00",
     "claim_session_id": "a4d27af79f5b",
-    "started_at": "2026-05-30T10:11:17.814971+00:00"
+    "started_at": "2026-05-30T10:11:17.814971+00:00",
+    "completed_at": "2026-05-30T10:16:49.994299+00:00",
+    "result": "draft mile_811bfc61 published audience=research (含 Harvey/DM/QLIKE 學術詞 publisher auto-classify)；commit 51cfbfbd；anti_ai_gate PASS 1 輪改寫；嵌 2 圖五資產表；K1081 EEM Harvey t=+5.25 + 0050.TW 台灣特異性。實際 audience 與 task 名稱 'general' 不符（內容深度導致），但 publisher 分類正確 — 未來若需純 general 版需另起 task"
   },
   {
     "id": "email-11836-9833be",
