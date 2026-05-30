@@ -287,6 +287,35 @@ def _audit_general_content(audience: str, tags: list[str], content: str) -> list
         )
     return issues
 
+
+def _sanitize_publish_tags(audience: str, tags: list[str]) -> list[str]:
+    """Canonical last-mile tag sanitizer before writing to feed.
+
+    `publish_draft.py` already caps tags on the CLI path, but direct
+    Publisher callers and drift between call sites can still leak over-cap
+    tag lists into feed.json. Keep the storage invariant here as the final
+    enforcement point:
+    - all audiences: cap user-facing tags to `_GENERAL_MAX_TAG_COUNT`
+    - general only: drop research/statistical jargon tags that should stay in
+      body text, not badges
+    """
+    cleaned: list[str] = []
+    seen: set[str] = set()
+    for raw in tags or []:
+        tag = str(raw).strip()
+        if not tag or tag in seen:
+            continue
+        seen.add(tag)
+        if audience == 'general':
+            tag_lower = tag.lower()
+            if any(
+                token in tag_lower
+                for token in ('cornish-fisher', 'kupiec', 'harvey', 'qlike', 'dm-test', 'christoffersen')
+            ):
+                continue
+        cleaned.append(tag)
+    return cleaned[:_GENERAL_MAX_TAG_COUNT]
+
 class Publisher:
     """Publishes research results to storage/reports/ for Web platform consumption.
 
@@ -677,6 +706,7 @@ class Publisher:
         # clouds and confuse general-audience readers. Always extract; never
         # leave K-ids in the user-facing tag list.
         tag_list, experiment_refs = _extract_experiment_refs(tag_list)
+        tag_list = _sanitize_publish_tags(audience, tag_list)
 
         # 2026-04-26: audience-content consistency gate. Audit BEFORE building
         # the item so we fail fast and avoid writing a polluted record.

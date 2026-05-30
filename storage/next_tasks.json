@@ -14749,7 +14749,7 @@
     "title": "K1039: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1039 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1039 multi-horizon VaR factorial（2 model × 3 method × 3 horizon）。SPY+QQQ OOS 2019-2026。核心發現：(1) A4f+CF-Rolling h=1 和 h=5 都 100% Trinity PASS (2) h=10 降為 75%（182 blocks 小樣本問題，非模型失敗）(3) √h scaling = proper h-step GARCH（pass rate 完全相同）→ 實務上不需要 h-step 公式 (4)",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1039",
@@ -14766,7 +14766,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-30T01:09:05+00:00"
+    "created_at": "2026-05-30T01:09:05+00:00",
+    "claimed_by": "hourly-11",
+    "claimed_at": "2026-05-30T03:10:32.827000+00:00",
+    "claim_session_id": "541ee17ea0be",
+    "started_at": "2026-05-30T03:10:36.807408+00:00",
+    "completed_at": "2026-05-30T03:18:14.460724+00:00",
+    "result": "mile_90f2f916 published draft; A4f multi-horizon VaR 一般讀者文章; anti_ai_gate PASS; 9/9 editor-sop; 1200 字; tags 8/8; figures referenced k1039_trinity_heatmap.png"
   },
   {
     "id": "K1081_article_general",
@@ -14796,7 +14802,7 @@
     "title": "K1108: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1108 has verdict signal (score=3, reasons=['methodology/mechanism lesson', 'paradigm/decisive null', 'robust inference', 'inconclusive (data limit)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1108 TSMC-only 48 events diff=+8.0e-5 Wald t=+0.94 INCONCLUSIVE (可能 direction-only)。K1108b 擴 5-stock foundry pool: TSMC+UMC+TSM ADR+GFS+SMIC, primary pool 4 firms (exclude TSM ADR due local-listing trading-day mismatch) = 9844 obs, 63 change + 73 stable ",
     "priority": 4,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1108",
@@ -14812,7 +14818,10 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-30T01:09:05+00:00"
+    "created_at": "2026-05-30T01:09:05+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-05-30T03:18:17+00:00",
+    "blocked_note": "Already covered by mile_fe578587 (晶圓代工財報日波動率謎題 — K1108 系列六層機制 NULL 全記錄). Auto-discovery missed because experiment_refs is empty in that feed entry."
   },
   {
     "id": "K1109_article_general",
@@ -14929,11 +14938,17 @@
     "id": "platform_ops_publisher_tag_cap_enforcement",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "agent-discovered",
     "title": "Publisher tag-cap enforcement: K1034 article 9 tags through (SKILL says ≤8)",
     "description": "mile_e38c9656 (K1034 daily_article) published with 9 tags (研究,風險管理,SPY,QQQ,GLD,VaR,Cornish-Fisher,波動率,GARCH). SKILL says ≤8 + ban stat terms (Cornish-Fisher is borderline stat term). Investigate _append_to_feed / publisher pipeline tag trimming logic, add hard gate + reject Cornish-Fisher / Kupiec / Harvey / QLIKE / DM-test class names from tags. Also audit other recent feed entries for over-cap tags.",
     "created_at": "2026-05-30T10:20:43+08:00",
-    "owner_session": null
+    "owner_session": null,
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-30T02:59:27.318717+00:00",
+    "claim_session_id": "2fc9ad9a641a",
+    "started_at": "2026-05-30T02:59:27.400128+00:00",
+    "completed_at": "2026-05-30T03:00:30.659575+00:00",
+    "result": "Added publisher-side last-mile tag sanitizer in src/volpred/publisher/publisher.py: all articles now hard-cap user-facing tags at 8, and general audience strips statistical jargon tags. Audited feed.json and found 4 over-cap records currently, including K1034; future publishes are now blocked from leaking 9+ tags."
   }
 ]
