@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-05-31T08:11:30+08:00",
+  "timestamp": "2026-05-31T14:12:45+08:00",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "53 draft articles total (research: 31, general: 28). All thresholds met: total>=12 OK, research>=4 OK, general>=8 OK."
+      "detail": "53 draft articles total. Research/null audience: 31 (>=4 ✓). General audience: 22 (>=8 ✓). Total >=12 ✓."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
@@ -15,12 +15,12 @@
     {
       "name": "ERROR_LOG_RECENT",
       "status": "alert",
-      "detail": "Entry dated 2026-05-30 (yesterday) in docs/error_log.md: claude CLI 2.1.157 auto-update at 04:38 caused launchd-context auth regression. hourly_dispatch failed 3 consecutive runs (05:07/06:07/07:07). Root cause: auto-update broke headless auth in launchd context. Fix applied: rollback symlink to 2.1.156, CLAUDE_BIN pinned to explicit version path. Lessons L1-L5 recorded."
+      "detail": "Entry dated 2026-05-30 (yesterday) in docs/error_log.md: claude CLI 2.1.157 auto-update at 04:38 caused launchd-context auth regression. hourly_dispatch failed 3 consecutive runs (05:07/06:07/07:07). Fix applied: rollback symlink to 2.1.156, CLAUDE_BIN pinned. Lessons L1-L5 recorded."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "No strategy has >2 null portfolio_return values in last 3 entries."
+      "detail": "15 strategies checked. No strategy has >2 null portfolio_return values in last 3 entries. Each has exactly 1 null (today's entry pending update). No alert triggered."
     },
     {
       "name": "GIT_STATUS",
