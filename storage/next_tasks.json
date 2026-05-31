@@ -16207,7 +16207,7 @@
     "title": "K202: write general-audience article (auto-discovered uncovered K)",
     "description": "K K202 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: BTC-Specific Features as Volatility Predictors. BTC-Specific Features as Volatility Predictors. weekend_ratio: mean=0.6952838874629987, std=0.2722898030878035. btc_spy_corr: mean=0.19890542361577424, std=0.19886090094381711. DM weekend_ratio: t=?, p=0.0033725721625270655. DM btc_",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K202",
@@ -16217,14 +16217,20 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-31T12:10:38+00:00"
+    "created_at": "2026-05-31T12:10:38+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-31T13:59:46.992798+00:00",
+    "claim_session_id": "22b9fe5e8401",
+    "started_at": "2026-05-31T13:59:47.070149+00:00",
+    "completed_at": "2026-05-31T14:01:16.472033+00:00",
+    "result": "published BTC-specific feature article; many crypto-native features correlated with future vol but all single-feature OOS R² stayed negative"
   },
   {
     "id": "K208_article_general",
     "title": "K208: write general-audience article (auto-discovered uncovered K)",
     "description": "K K208 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: title: Implied-Realized Volatility Gap as Dynamic Risk Indicator",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K208",
@@ -16234,7 +16240,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-31T12:10:38+00:00"
+    "created_at": "2026-05-31T12:10:38+00:00",
+    "claimed_by": "hourly-22",
+    "claimed_at": "2026-05-31T14:09:13.044721+00:00",
+    "claim_session_id": "23bd8b17219c",
+    "started_at": "2026-05-31T14:09:13.400394+00:00",
+    "completed_at": "2026-05-31T14:16:24.968997+00:00",
+    "result": "mile_7dd6a0fd: VIX-GARCH gap 19 年量化 + IS partial corr +0.37 但 OOS F=0.085 p=0.77 對 VIX 無增量 — 誠實 null。2 PNG(OOS R² + regime)上 Supabase, content 3157 字, anti_ai_gate PASS"
   },
   {
     "id": "paper_review_mile_c3c0ce07",
