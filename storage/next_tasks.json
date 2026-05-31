@@ -15811,7 +15811,7 @@
     "title": "K575: write general-audience article (auto-discovered uncovered K)",
     "description": "K K575 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] 1000 bootstrap paths, 4 profiles. Young+VCL: $23.7M (4.94x vs conservative). Retiree+PW: 0% ruin vs B&H 5.2%. Strategy matching > return maximization for shorter horizons.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K575",
@@ -15825,14 +15825,20 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-31T05:08:43+00:00"
+    "created_at": "2026-05-31T05:08:43+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-31T05:25:43.278967+00:00",
+    "claim_session_id": "ba5689fe3f09",
+    "started_at": "2026-05-31T05:25:54.077414+00:00",
+    "completed_at": "2026-05-31T05:30:21.031728+00:00",
+    "result": "Published draft mile_ea4b38b7 for K575. Angle: wrong-strategy cost across life stages; cited young 4.94x terminal wealth gap and retiree 0% vs 5.2% ruin. Uploaded 3 K575 charts and added general-audience draft to feed pool."
   },
   {
     "id": "K693_article_general",
     "title": "K693: write general-audience article (auto-discovered uncovered K)",
     "description": "K K693 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: [提出: K692 修正, 執行: Claude] 修正 paper_trading.json 801 筆歷史 lookahead。9,935 entries fixed（跨 12 策略）。Sharpe 變化：Piecewise 3.16→1.56(-1.60), Adaptive 3.02→1.51(-1.51), TW+JP 3.03→1.63(-1.40), VIX Cond 2.64→1.76(-0.88)。平滑策略受影響小：slow_vt -0.07, risk_parity -0.05, 12/VIX -0.04。與 K690 lag rob",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K693",
@@ -15846,6 +15852,130 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-31T05:08:43+00:00"
+    "created_at": "2026-05-31T05:08:43+00:00",
+    "claimed_by": "hourly-14",
+    "claimed_at": "2026-05-31T06:09:35.636250+00:00",
+    "claim_session_id": "97dfcb46530c",
+    "started_at": "2026-05-31T06:09:39.645235+00:00",
+    "completed_at": "2026-05-31T06:16:14.309155+00:00",
+    "result": "mile_c3c0ce07 published; K693 lookahead bias retrospective; 12 strategies avg ΔSharpe -0.62; 2 charts uploaded to Supabase"
+  },
+  {
+    "id": "K1023_article_general_v2",
+    "title": "K1023: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K1023 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Claude, 執行: Claude] Paper 9 source decomposition 理論基礎。3 個命題：(1) E(σ²)=E(τ)E(g)+Cov(τ,g) 精確成立（誤差<0.003%），但 Corr(τ,g)=0.48 非可忽略。(2) Constrained θ₁ ratio=0.78，自動校正 21.9% VRP discount。Free ω 分裂 VRP 到 θ₁(1.96)+E(g)(0.48)。(3) Direct g vs VRP 弱（τ 吸收 VRP signal by construction），g-pr",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1023",
+    "tags": [
+      "theory",
+      "E(g)=1",
+      "VRP",
+      "source-decomposition",
+      "Paper-9",
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T06:08:24+00:00"
+  },
+  {
+    "id": "K1057_article_general",
+    "title": "K1057: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1057 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1057 decomposes 60-day SPY 5-min RV into continuous (BPV) and jump components (BN-S 2006). 8/60 significant jumps (13.3%), jump fraction 3.9% of total RV. KEY NULL: Adding jump to HAR does NOT improve forecasting — HAR-RV (-8.597) > HAR-RV-J (-8.572) > H",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1057",
+    "tags": [
+      "HAR-RV-J",
+      "jump",
+      "bipower-variation",
+      "5-min",
+      "microstructure",
+      "NULL",
+      "PRELIMINARY",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T06:08:24+00:00"
+  },
+  {
+    "id": "K1082_article_general",
+    "title": "K1082: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1082 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1082 tests A4f on 3 single-country EM ETFs (USD-denominated) to isolate currency vs market structure effects. n=4,848 OOS 2007-2026. RESULTS: EWT (Taiwan USD) DM t=+2.26 FAIL Harvey (but 95% CI PASS). EWZ (Brazil USD) +2.33 FAIL. FXI (China USD) +3.61 PA",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1082",
+    "tags": [
+      "A4f",
+      "EWT",
+      "EWZ",
+      "FXI",
+      "USD-wrapper",
+      "currency",
+      "Paper9",
+      "cross-asset",
+      "diagnostic",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T06:08:24+00:00"
+  },
+  {
+    "id": "K1087_article_general",
+    "title": "K1087: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1087 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1087 tests 7 regressor candidates for TLT A4f: VIX, MOVE, Yield Level, Slope, Realized Rate Vol, Butterfly, Combo. n=3,756 OOS 2011-2026, 60 refits. ALL 4 HYPOTHESES FAIL. Full OOS DM t: VIX +2.02 (best but NS), MOVE +1.87, Level -1.26 NEGATIVE, Slope -1",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1087",
+    "tags": [
+      "A4f",
+      "TLT",
+      "yield-curve",
+      "bonds",
+      "NULL",
+      "theory-limit",
+      "Paper9",
+      "methodology-finding",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T06:08:24+00:00"
+  },
+  {
+    "id": "K1096_article_general_v2",
+    "title": "K1096: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K1096 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Claude, 執行: Claude] K1096 tests 5 regime-switching variants to rescue K1089 BTC A4f NULL. OOS 2018-2026 n=3023. ALL FAIL: A4f-VIX full t=+1.13, Reg-VIX-OFF-HighVIX t=+0.82, Reg-VIX-ON-HighCorr t=+1.19, Adaptive |corr| t=-0.92 (WORSE than GJR). H1-H4 FAIL, no regime variant H",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1096",
+    "tags": [
+      "BTC",
+      "regime-switching",
+      "NULL",
+      "crypto-boundary",
+      "Paper6",
+      "Paper9",
+      "structural-limit",
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T06:08:24+00:00"
   }
 ]
