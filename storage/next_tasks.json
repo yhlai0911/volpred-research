@@ -15865,7 +15865,7 @@
     "title": "K1023: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K1023 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Claude, 執行: Claude] Paper 9 source decomposition 理論基礎。3 個命題：(1) E(σ²)=E(τ)E(g)+Cov(τ,g) 精確成立（誤差<0.003%），但 Corr(τ,g)=0.48 非可忽略。(2) Constrained θ₁ ratio=0.78，自動校正 21.9% VRP discount。Free ω 分裂 VRP 到 θ₁(1.96)+E(g)(0.48)。(3) Direct g vs VRP 弱（τ 吸收 VRP signal by construction），g-pr",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1023",
@@ -15880,14 +15880,20 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-31T06:08:24+00:00"
+    "created_at": "2026-05-31T06:08:24+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-31T06:31:24.529552+00:00",
+    "claim_session_id": "1e764cd40630",
+    "started_at": "2026-05-31T06:31:32.307384+00:00",
+    "completed_at": "2026-05-31T06:36:42.873170+00:00",
+    "result": "Published draft mile_206b2186 for K1023 retry-v2. Angle: why implied-vol insurance pricing is usually richer than realized risk; highlighted 21.9% auto-discount and 0.003% identity error. Added 2 chart embeds and used cluster waiver for missing general-coverage retry."
   },
   {
     "id": "K1057_article_general",
     "title": "K1057: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1057 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1057 decomposes 60-day SPY 5-min RV into continuous (BPV) and jump components (BN-S 2006). 8/60 significant jumps (13.3%), jump fraction 3.9% of total RV. KEY NULL: Adding jump to HAR does NOT improve forecasting — HAR-RV (-8.597) > HAR-RV-J (-8.572) > H",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1057",
@@ -15903,7 +15909,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-31T06:08:24+00:00"
+    "created_at": "2026-05-31T06:08:24+00:00",
+    "claimed_by": "hourly-15",
+    "claimed_at": "2026-05-31T07:10:43.727627+00:00",
+    "claim_session_id": "b385e32f6268",
+    "started_at": "2026-05-31T07:10:43.819376+00:00",
+    "completed_at": "2026-05-31T07:25:55.584031+00:00",
+    "result": "mile_fa859ea5 published draft (research, 2 figs, 2000+ 字), HAR-RV-J NULL 結果, anti_ai_gate PASS, byte-exact 對應 results.json"
   },
   {
     "id": "K1082_article_general",
