@@ -1371,3 +1371,26 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 1. 寫 composite ranking 文章前必 grep `_norm` 欄位確認 dimensions 數，不憑 narrative 印象
 2. 引用 strategy 在 daily_update.py / 對應 backtest script 內如有 `biased` / `FAIL Harvey` 註解，article 必須**同步轉述 caveat**，不可隱藏
 3. Codex 24h-rule audit 是 K1018 lesson 落實 — 本次抓到結構性 narrative-vs-data drift，證明 rule 有效，需繼續執行不可跳過
+
+## 2026-06-01 — Codex 24h-rule 抓到 K208 VIX-GARCH 文章兩個 horizon/sample 標籤誤標（task: paper_review_mile_7dd6a0fd）
+
+**Article**: mile_7dd6a0fd「VIX 和 GARCH 的差，能告訴你市場明天會怎樣嗎？」（K208）
+
+**Codex verdict**: FAIL → ERRATA 修正（數字正確，文字標籤錯）
+
+**Three issues found**:
+1. **OOS horizon 標籤誤標**：文章寫「樣本外 R²（預測目標是 5 日後波動率）」，但 `k208_implied_realized_gap.py:584` 實際 `y = oos_reg['rv_22d_fwd']` — 是 22 日 horizon。R² 數字（17.92% / 8.74% / 17.93% / 0.35%）與 F=0.085/p=0.77 本身正確，但代表的是 22 日，文字寫成 5 日是 narrative-vs-code drift。
+2. **Regime t-test 樣本範圍誤標**：文章將「High Fear vs Complacent t-test p=0.963」放在「OOS 期間 regime 分析」段落內，暗示 p 值是 OOS 計算。但 `k208_implied_realized_gap.py:279-320` 實際 `full_valid = df_gap.dropna(...)` → t-test 在 full sample（2006-2024）上算。p=0.9629 正確，但範圍是 full sample 非 OOS。
+3. **GARCH 視窗描述偏簡化**：「估計窗口 2000 天，滾動向前更新」屬實但未明指是 fixed 2000-day rolling（非 expanding），且未提 GARCH 收斂失敗時 fallback EWMA λ=0.94（line 80）。
+
+**根因**：寫 article 時 narrative 想用「5 日 horizon」與「OOS regime」框架（更貼近散戶語感 + 故事流暢），但 code 實作是 22 日 horizon + full sample t-test。沒在發文前對 code 結果做逐句 horizon/sample audit。
+
+**已修（2026-06-01 01:16 CST）**：
+- feed.json mile_7dd6a0fd description + content：(a) OOS table 上方明標「未來 22 日（≈1 個月）已實現波動率」(b) Regime 段落明標 t-test 「口徑是 full sample（2006-2024），不是 OOS 子樣本」+ 解釋 OOS 子樣本過小做 t-test 信度不足 (c) 方法段補充 GARCH = fixed 2000-day rolling（非 expanding）+ EWMA fallback 註記 (d) 文末加「修訂紀錄（Errata）」block (e) 文首加 2026-06-01 修訂 callout (f) revisions[] 加 codex_24h_source_review entry
+- anti_ai_gate.py PASS（FB-mode warnings 2 是長文段落結構，可忽略）
+- `uv run volpred ops sync-all` → 1 article synced Supabase
+
+**教訓 / 未來防錯**：
+1. **寫文章前的 horizon/sample audit checklist**：寫每個 OOS 段落前必逐句檢查「我寫的 horizon (5d/22d) = code 用的 horizon?」「我寫的 sample (OOS/full) = code 用的 sample?」— 否則默認假設 narrative tone 對齊 code 是 narrative-vs-data drift 高發區
+2. **K1018 lesson 持續驗證**：Codex 24h-rule audit 連續抓到 2 篇 production article 的 label drift（K717 + 本次 K208），證明 publishing 時 self-review 不夠強，必須 mandate 過 Codex 才算 closure。已是 .claude/rules/agent-delegation.md 規範，繼續強制執行
+3. **數字 PASS + 標籤 FAIL 是 valid verdict 類別**：本次 Codex review 5/7 子項 PASS + 2 個 FAIL 全部是文字標籤錯。修補成本低（改文字）但不修不誠實。errata 修補後不影響核心結論方向（gap 對 VIX OOS 無增量、IS 漂亮相關 OOS 消失 — 仍為 null）

@@ -9122,5 +9122,12 @@
     "summary": "Codex 24h-review of K693 lookahead retrospective article (mile_c3c0ce07). Verdict CONDITIONAL_PASS — headline 12-strategy avg Sharpe drop 0.62 verified vs results.json. Applied 3 amendments to feed.json content: scope narrowing + sample size correction + field name fix. Erratum recorded in details.errata.",
     "claimed_by_session": "hourly-00",
     "verdict": "CONDITIONAL_PASS"
+  },
+  {
+    "timestamp": "2026-05-31T17:17:14.990933+00:00",
+    "task_type": "paper_review",
+    "task_id": "paper_review_mile_7dd6a0fd",
+    "summary": "K208 VIX-GARCH article (mile_7dd6a0fd) Codex 24h-rule review: FAIL → ERRATA fix. Three label drifts: (1) OOS horizon 5d→22d (2) Regime t-test sample full vs OOS clarification (3) GARCH window fixed-rolling detail. feed.json updated + Supabase synced + error_log appended.",
+    "actor": "hourly-01"
   }
 ]

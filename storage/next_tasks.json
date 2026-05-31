@@ -16297,7 +16297,7 @@
     "title": "Paper review (Codex 24h-rule): K1207：GICS 行業別是法說會超額波動的獨立驅動因素——跨 12 市場 182 股驗證",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_34be417d needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_34be417d",
@@ -16306,7 +16306,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-31T13:08:53+00:00"
+    "created_at": "2026-05-31T13:08:53+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-31T17:08:39.033728+00:00",
+    "claim_session_id": "5cccb2afea20",
+    "started_at": "2026-05-31T17:08:48.004906+00:00",
+    "completed_at": "2026-05-31T17:09:28.207130+00:00",
+    "result": "CONDITIONAL_PASS: 核心數字與 K1207 results/code 一致，但 article 將 dummy 數量寫錯（market FE 實為 11、sector FE 實為 9）且有少數過強敘事，應小修後保留。"
   },
   {
     "id": "K274_article_general_v2",
@@ -16393,5 +16399,79 @@
     "blocked_reason": "deprecated",
     "blocked_at": "2026-05-31T15:10:44+00:00",
     "blocked_note": "refill 重複：對應 K 已有 published general article (feed grep verified)"
+  },
+  {
+    "id": "paper_review_mile_7dd6a0fd",
+    "title": "Paper review (Codex 24h-rule): VIX 和 GARCH 的差，能告訴你市場明天會怎樣嗎？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_7dd6a0fd needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_7dd6a0fd",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-31T17:09:00+00:00",
+    "claimed_by": "hourly-01",
+    "claimed_at": "2026-05-31T17:10:30.671000+00:00",
+    "claim_session_id": "085bcc63d581",
+    "started_at": "2026-05-31T17:10:38.409644+00:00",
+    "completed_at": "2026-05-31T17:17:16.814588+00:00",
+    "result": "Codex 24h-rule source review: FAIL→ERRATA. 3 label drifts fixed in feed.json (OOS horizon 5d→22d / regime t-test sample / GARCH window). anti_ai_gate PASS. sync-all 1 article. error_log + work_log appended."
+  },
+  {
+    "id": "K453_article_general",
+    "title": "K453: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K453 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: Reference: Patton & Sheppard (2015) JFQA Reference: K449: SPY RS⁻ DM p=0.007, QQQ p=0.003, GLD FAIL",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K453",
+    "tags": [
+      "experiment",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T17:09:00+00:00"
+  },
+  {
+    "id": "K457_article_general",
+    "title": "K457: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K457 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: Weekly Frequency Volatility Prediction for Taiwan. Data: 2005-01-01 to 2026-03-27, OOS: 2023-01-01 to 2025-12-31. Rank 1: Semivar QLIKE=-6.8091089677865035 Rank 2: VIX_scaled QLIKE=-6.798828435556252 Rank 3: HAR_like QLIKE=-6.76445697144039 Best model: Semivar. VRP_model_QLIKE: V",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K457",
+    "tags": [
+      "experiment",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T17:09:00+00:00"
+  },
+  {
+    "id": "K467_article_general",
+    "title": "K467: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K467 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: Assets: SPY, QQQ, EEM Method: Rolling window VaR backtest with Trinity test (Kupiec + Christoffersen + DQ) best_score: 6/6 HAR-Range VaR FAILS — does not pass Trinity test IMPORTANT: Best vol forecaster (HAR, K465) does NOT automatically produce best VaR. Semivariance captures do",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K467",
+    "tags": [
+      "har",
+      "strategy",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T17:09:00+00:00"
   }
 ]
