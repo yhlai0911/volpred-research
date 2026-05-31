@@ -16542,7 +16542,7 @@
     "title": "K480: write general-audience article (auto-discovered uncovered K)",
     "description": "K K480 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: Asset: SPY NEGATIVE: No regime-switching model matches GJR's VaR performance (best: RS_Ternary 0.500 vs GJR 0.700). HAR contamination persists even with regime selection. For risk management, GJR remains the only reliable tool. GJR: QLIKE rank 4.2, VaR 7/10 (0.700) HAR: QLIKE ran",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K480",
@@ -16553,14 +16553,20 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-31T20:09:17+00:00"
+    "created_at": "2026-05-31T20:09:17+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-31T20:19:51.215790+00:00",
+    "claim_session_id": "eccbfcbe3ae9",
+    "started_at": "2026-05-31T20:20:00.639846+00:00",
+    "completed_at": "2026-05-31T20:25:08.561654+00:00",
+    "result": "Published general-audience draft mile_42b4330c for K480. Angle focuses on why switching models during market stress improved average forecasting but still failed to match GJR on tail-risk checks; included 2 charts and topic-cluster waiver."
   },
   {
     "id": "K482_article_general",
     "title": "K482: write general-audience article (auto-discovered uncovered K)",
     "description": "K K482 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K482: MCS p-value weighted ensemble vs equal weight. Equal weight avg QLIKE rank 2.60 vs MCS p-value 3.80. Equal wins 3/5 periods, MCS wins 2/5 (negligible margins). DM: Equal significantly better in 1/5 (p=0.009), never significantly worse. MCS weighting",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K482",
@@ -16574,7 +16580,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-31T20:09:17+00:00"
+    "created_at": "2026-05-31T20:09:17+00:00",
+    "claimed_by": "hourly-05",
+    "claimed_at": "2026-05-31T21:09:45.760380+00:00",
+    "claim_session_id": "1a94c7d27195",
+    "started_at": "2026-05-31T21:09:50.574637+00:00",
+    "completed_at": "2026-05-31T21:18:44.958669+00:00",
+    "result": "mile_97e0bb31 published draft — K482 MCS p-value 加權 5 市況全輸等權重；2430 字 + 2 真圖，anti_ai_gate PASS (must=0, warn=2)"
   },
   {
     "id": "K484_article_general",
