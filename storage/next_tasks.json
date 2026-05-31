@@ -16473,7 +16473,7 @@
     "title": "K467: write general-audience article (auto-discovered uncovered K)",
     "description": "K K467 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: Assets: SPY, QQQ, EEM Method: Rolling window VaR backtest with Trinity test (Kupiec + Christoffersen + DQ) best_score: 6/6 HAR-Range VaR FAILS — does not pass Trinity test IMPORTANT: Best vol forecaster (HAR, K465) does NOT automatically produce best VaR. Semivariance captures do",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K467",
@@ -16484,14 +16484,20 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-31T17:09:00+00:00"
+    "created_at": "2026-05-31T17:09:00+00:00",
+    "claimed_by": "hourly-03",
+    "claimed_at": "2026-05-31T19:08:55.122349+00:00",
+    "claim_session_id": "ae58f53544ba",
+    "started_at": "2026-05-31T19:09:31.012833+00:00",
+    "completed_at": "2026-05-31T19:17:39.736248+00:00",
+    "result": "mile_b65e01ee | 波動率預測最準的模型，為什麼算風險卻輸得最慘？ | audience=research (infer override) | status=draft | tags=har,var,risk-management,trinity-test,gjr-garch | experiment_refs=K465,K467 | anti_ai_gate=PASS | commit=5c85c02f"
   },
   {
     "id": "paper_review_mile_5b6f9e1b",
     "title": "Paper review (Codex 24h-rule): 換掉 yfinance 也救不回來：新興市場法人持股階梯為何是結構問題",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_5b6f9e1b needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_5b6f9e1b",
@@ -16500,6 +16506,10 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-31T18:08:15+00:00"
+    "created_at": "2026-05-31T18:08:15+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-31T19:17:20.789779+00:00",
+    "claim_session_id": "a4f3f07c90e9",
+    "started_at": "2026-05-31T19:17:29.188587+00:00"
   }
 ]
