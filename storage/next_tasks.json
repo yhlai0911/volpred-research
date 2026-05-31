@@ -16161,7 +16161,7 @@
     "title": "K190: write general-audience article (auto-discovered uncovered K)",
     "description": "K K190 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: title: Realized Semivariance Decomposition for Volatility Prediction",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K190",
@@ -16171,14 +16171,20 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-31T12:10:38+00:00"
+    "created_at": "2026-05-31T12:10:38+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-31T12:56:42.223854+00:00",
+    "claim_session_id": "bf895bedd191",
+    "started_at": "2026-05-31T12:57:16.608500+00:00",
+    "completed_at": "2026-05-31T12:58:46.479056+00:00",
+    "result": "published semivariance article; downside asymmetry exists in SPY/QQQ but finer decomposition rarely beat simpler baseline across 5 assets"
   },
   {
     "id": "K193_article_general",
     "title": "K193: write general-audience article (auto-discovered uncovered K)",
     "description": "K K193 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: POSITIVE title: Dynamic Copula Tail Dependence and Volatility Prediction",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K193",
@@ -16188,7 +16194,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-31T12:10:38+00:00"
+    "created_at": "2026-05-31T12:10:38+00:00",
+    "claimed_by": "hourly-21",
+    "claimed_at": "2026-05-31T13:10:12.065862+00:00",
+    "claim_session_id": "c851e1d1f612",
+    "started_at": "2026-05-31T13:10:16.601109+00:00",
+    "completed_at": "2026-05-31T13:19:42.295090+00:00",
+    "result": "K193 daily_article draft published (feed id=mile_6a601155, slug=k193_general_draft, status=draft). Anti-AI gate PASS (2 WARN non-blocking). 6 real numbers (λ_L=0.753, r=0.111/-0.057, Granger F=32.6, QLIKE -13.3%/-12.1%, SPY-TLT p=0.27 null). 2 figs embedded. 1477 字 zh-Hant. Honest caveat: 2/4 pairs DM not sig (SPY-TLT, QQQ-TLT) stated in body."
   },
   {
     "id": "K202_article_general",
@@ -16223,5 +16235,53 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-05-31T12:10:38+00:00"
+  },
+  {
+    "id": "paper_review_mile_c3c0ce07",
+    "title": "Paper review (Codex 24h-rule): 我們抓到自己作弊：12 個策略的 Sharpe 在修正後平均掉了 0.62",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_c3c0ce07 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_c3c0ce07",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-31T13:08:53+00:00"
+  },
+  {
+    "id": "paper_review_mile_1fde450d",
+    "title": "Paper review (Codex 24h-rule): 論文發出去之後，6 個數字裡有 3 個對不上：一場我們自己抓自己的核對",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_1fde450d needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_1fde450d",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-31T13:08:53+00:00"
+  },
+  {
+    "id": "paper_review_mile_34be417d",
+    "title": "Paper review (Codex 24h-rule): K1207：GICS 行業別是法說會超額波動的獨立驅動因素——跨 12 市場 182 股驗證",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_34be417d needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_34be417d",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-31T13:08:53+00:00"
   }
 ]
