@@ -15980,7 +15980,7 @@
     "title": "K1096: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K1096 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Claude, 執行: Claude] K1096 tests 5 regime-switching variants to rescue K1089 BTC A4f NULL. OOS 2018-2026 n=3023. ALL FAIL: A4f-VIX full t=+1.13, Reg-VIX-OFF-HighVIX t=+0.82, Reg-VIX-ON-HighCorr t=+1.19, Adaptive |corr| t=-0.92 (WORSE than GJR). H1-H4 FAIL, no regime variant H",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1096",
@@ -15997,7 +15997,13 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-31T06:08:24+00:00"
+    "created_at": "2026-05-31T06:08:24+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-31T10:49:35.939514+00:00",
+    "claim_session_id": "cdb37ee01ded",
+    "started_at": "2026-05-31T10:49:47.106640+00:00",
+    "completed_at": "2026-05-31T10:51:44.831165+00:00",
+    "result": "published general BTC/VIX article; switching VIX off in panic reduced local damage but could not rescue full-sample crypto predictability"
   },
   {
     "id": "K1104_article_general",
@@ -16105,7 +16111,9 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-31T08:11:19+00:00"
+    "created_at": "2026-05-31T08:11:19+00:00",
+    "started_at": "2026-05-31T10:49:13.931735+00:00",
+    "last_released_at": "2026-05-31T10:49:35.983443+00:00"
   },
   {
     "id": "Paper6_table2_timing_footnote",
