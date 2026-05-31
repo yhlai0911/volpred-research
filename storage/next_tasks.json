@@ -16636,5 +16636,92 @@
     "started_at": "2026-05-31T22:09:27.133316+00:00",
     "completed_at": "2026-05-31T22:15:55.035977+00:00",
     "result": "feed_mile_id=mile_622a2b73; FB skipped (headless); HV-proxy used (IV unavailable); N=10 (MSFT+META, 5 quarters each)"
+  },
+  {
+    "id": "paper_review_mile_696c6063",
+    "title": "Paper review (Codex 24h-rule): 澳洲股市的謎——我們以為找到了答案，結果發現問題出在資料本身",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_696c6063 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_696c6063",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-31T23:07:59+00:00"
+  },
+  {
+    "id": "K514_article_general",
+    "title": "K514: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K514 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: Codex(event-surprise), 執行: Claude] K514: FOMC VIX-change surprise → future vol. IS: 21d t=-8.18 (strong!), delta-R²=0.74%. BUT OOS: DM t=+3.89 p=0.0001 (significantly WORSE). VIX surprise proxy overfits IS. Large surprise magnitude (both directions) → higher vol, but directi",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K514",
+    "tags": [
+      "FOMC",
+      "surprise",
+      "IS_OOS_disconnect",
+      "event_study",
+      "null_OOS",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T23:08:00+00:00",
+    "claimed_by": "hourly-07",
+    "claimed_at": "2026-05-31T23:09:01.866411+00:00",
+    "claim_session_id": "750c45526090",
+    "started_at": "2026-05-31T23:09:02.233943+00:00",
+    "completed_at": "2026-05-31T23:16:45.410562+00:00",
+    "result": "K514 article published as draft mile_77795ca2 (research audience, FOMC IS-OOS disconnect teaching case, 2 真實圖表). cluster=vix 30d cap waiver: 文章 cluster 應為 FOMC/methodology，VIX-change 僅 proxy 出現。"
+  },
+  {
+    "id": "K604_article_general",
+    "title": "K604: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K604 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] 11 策略 6 維成本分析。Net Sharpe: Adaptive Tier 2.095 (best), Piecewise 1.776 (best value/complexity)。TW 13x more expensive than US (手續費+證交稅)。US tax drag 2.3-6.7%/yr (dominant)。Avg Sharpe reduction 27.2%。TW minimum $800K-$1M。",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K604",
+    "tags": [
+      "implementation",
+      "costs",
+      "practical",
+      "tax",
+      "minimum_size",
+      "taiwan",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T23:08:00+00:00"
+  },
+  {
+    "id": "K675_article_general",
+    "title": "K675: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K675 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: 跳躍探索/社會影響, 執行: Claude] 4 投資人原型模擬（$50K, 20yr）。Uninformed（panic sell）$86K, Basic（60/40）$419K, VT-Aware $221K, Optimal $189K。Panic selling 28 次損失 $276K（76%）。Gini 0.282→uninformed 升級 basic 後降 37%。危機時差距擴大最多（GFC +13pp）。Lookup table（literacy 3/5）比 12/VIX continuous（4/5）更簡單且 MDD 更好（",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K675",
+    "tags": [
+      "wealth-inequality",
+      "panic-selling",
+      "financial-literacy",
+      "social-impact",
+      "Gini",
+      "education",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T23:08:00+00:00"
   }
 ]
