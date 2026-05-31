@@ -31919,5 +31919,28 @@
       }
     ],
     "created_at": "2026-05-31T05:15:00+00:00"
+  },
+  {
+    "id": "kn_d714320d153d",
+    "created_at": "2026-05-31T16:16:46.736267+00:00",
+    "title": "mile_c3c0ce07 (K693 lookahead retrospective) Codex 24h-review: CONDITIONAL_PASS + amended",
+    "summary": "Codex 24h review confirmed headline claim (12 strategies, avg Sharpe drop 0.62 = -0.619324) and lookahead-fix logic (signal.shift via trade_date+1 + actual_returns recompute from shifted entries). 3 amendments applied to feed.json content: (1) narrowed 'all historical backtests' to '12 strategies, 10,073 old-format entries' (no evidence covers backtests outside K693 scope); (2) removed 'uniform 801 trading days' over-statement — per-strategy n_entries actually 700-1079 with 135 skipped + 3 nulled; (3) corrected 'CAGR' field name to 'cumulative_return' (matches results.json schema).",
+    "verdict": "CONDITIONAL_PASS",
+    "k_id": "K693",
+    "experiment_id": "k693",
+    "experiment_path": "experiments/k693/",
+    "reviewer": "codex-cli 0.135.0 (ChatGPT auth, gpt-5.4)",
+    "reviewer_source": "codex_review_primary_path",
+    "codex_review": true,
+    "linked_feed_id": "mile_c3c0ce07",
+    "task_id": "paper_review_mile_c3c0ce07",
+    "tokens_used": 37698,
+    "tags": [
+      "paper_review",
+      "codex_24h_rule",
+      "lookahead_bias",
+      "K693",
+      "amendment_applied"
+    ]
   }
 ]

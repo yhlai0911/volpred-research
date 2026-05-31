@@ -9114,5 +9114,13 @@
     "fix": "include archived in both helpers' status sets; retracted/unpublished still excluded as explicit non-coverage",
     "verification": "tests/test_refill_task_pool.py +1 regression test (test_archived_articles_count_as_feed_coverage), 2/2 pass; dry-run preview now proposes K453-K675 with zero false positives",
     "deliverable": "scripts/refill_task_pool.py + tests/test_refill_task_pool.py"
+  },
+  {
+    "timestamp": "2026-05-31T16:16:59.735091+00:00",
+    "task_type": "paper_review",
+    "task_id": "paper_review_mile_c3c0ce07",
+    "summary": "Codex 24h-review of K693 lookahead retrospective article (mile_c3c0ce07). Verdict CONDITIONAL_PASS — headline 12-strategy avg Sharpe drop 0.62 verified vs results.json. Applied 3 amendments to feed.json content: scope narrowing + sample size correction + field name fix. Erratum recorded in details.errata.",
+    "claimed_by_session": "hourly-00",
+    "verdict": "CONDITIONAL_PASS"
   }
 ]

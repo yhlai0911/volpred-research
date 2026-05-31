@@ -16253,7 +16253,7 @@
     "title": "Paper review (Codex 24h-rule): 我們抓到自己作弊：12 個策略的 Sharpe 在修正後平均掉了 0.62",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_c3c0ce07 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_c3c0ce07",
@@ -16262,7 +16262,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-31T13:08:53+00:00"
+    "created_at": "2026-05-31T13:08:53+00:00",
+    "claimed_by": "hourly-00",
+    "claimed_at": "2026-05-31T16:11:21.949227+00:00",
+    "claim_session_id": "22994ddd9dc0",
+    "started_at": "2026-05-31T16:11:22.203443+00:00",
+    "completed_at": "2026-05-31T16:17:15.361476+00:00",
+    "result": "Codex 24h-review CONDITIONAL_PASS. Headline (12 strategies, avg Sharpe drop 0.62 = -0.619324) verified vs k693_results.json. Lookahead-fix logic (trade_date+1 shift + actual_returns recompute) sound. Applied 3 amendments to feed.json content (mile_c3c0ce07): (1) narrowed 'all historical' to '12 strategies, 10,073 old-format entries' (2) replaced 'uniform 801 trading days' with 'per-strategy n=700-1079' (3) corrected 'CAGR' to 'cumulative_return'. Erratum recorded in details.errata. Knowledge entry kn_d714320d153d. Tokens=37698."
   },
   {
     "id": "paper_review_mile_1fde450d",
