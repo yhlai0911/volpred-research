@@ -16101,7 +16101,7 @@
     "title": "K189: write general-audience article (auto-discovered uncovered K)",
     "description": "K K189 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: title: Attention-Weighted Volatility (Cross-Asset Information Aggregation) data_source: yfinance daily (SPY/QQQ/GLD/TLT/EEM/IWM)",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K189",
@@ -16112,8 +16112,13 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-05-31T08:11:19+00:00",
-    "started_at": "2026-05-31T10:49:13.931735+00:00",
-    "last_released_at": "2026-05-31T10:49:35.983443+00:00"
+    "started_at": "2026-05-31T11:53:05.488890+00:00",
+    "last_released_at": "2026-05-31T10:49:35.983443+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-31T11:53:05.428912+00:00",
+    "claim_session_id": "a8133b6a6ed3",
+    "completed_at": "2026-05-31T11:55:37.307702+00:00",
+    "result": "published general cross-asset attention article; six-asset attention weighting added noise and lost to simpler own-history baseline across all assets"
   },
   {
     "id": "Paper6_table2_timing_footnote",
@@ -16150,5 +16155,73 @@
     "status": "pending_main_thread",
     "source": "auto_discovered_from_paper6_errata_decision",
     "created_at": "2026-05-31T16:13:58"
+  },
+  {
+    "id": "K190_article_general",
+    "title": "K190: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K190 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: title: Realized Semivariance Decomposition for Volatility Prediction",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K190",
+    "tags": [
+      "experiment",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T12:10:38+00:00"
+  },
+  {
+    "id": "K193_article_general",
+    "title": "K193: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K193 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: POSITIVE title: Dynamic Copula Tail Dependence and Volatility Prediction",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K193",
+    "tags": [
+      "experiment",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T12:10:38+00:00"
+  },
+  {
+    "id": "K202_article_general",
+    "title": "K202: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K202 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: BTC-Specific Features as Volatility Predictors. BTC-Specific Features as Volatility Predictors. weekend_ratio: mean=0.6952838874629987, std=0.2722898030878035. btc_spy_corr: mean=0.19890542361577424, std=0.19886090094381711. DM weekend_ratio: t=?, p=0.0033725721625270655. DM btc_",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K202",
+    "tags": [
+      "experiment",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T12:10:38+00:00"
+  },
+  {
+    "id": "K208_article_general",
+    "title": "K208: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K208 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: title: Implied-Realized Volatility Gap as Dynamic Risk Indicator",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K208",
+    "tags": [
+      "experiment",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T12:10:38+00:00"
   }
 ]
