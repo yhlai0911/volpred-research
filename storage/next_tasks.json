@@ -15584,7 +15584,7 @@
     "title": "K1090: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1090 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1090 performs meta-regression of A4f DM t on asset characteristics for 12 assets (K1075-K1089). COMPACT OLS FORMULA: DM_t ≈ -1.22 + 3.38·USD_dummy - 4.11·corr(ret,ΔVIX), SEs 1.79/1.90/1.88, R²=0.54, LOOCV R²=0.26, LOOCV RMSE=1.94. LASSO independently sel",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1090",
@@ -15600,7 +15600,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-31T00:08:00+00:00"
+    "created_at": "2026-05-31T00:08:00+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-31T02:13:23.521993+00:00",
+    "claim_session_id": "f71323b18505",
+    "started_at": "2026-05-31T02:14:40.260703+00:00",
+    "completed_at": "2026-05-31T02:16:30.813266+00:00",
+    "result": "已完成 K1090 一般讀者稿並發佈為 draft（mile_f8af30d0）。主題聚焦 scope prediction / 研究排程，不把兩變數公式寫成保證；以 cluster_waiver 通過 vix cooldown gate。"
   },
   {
     "id": "K1107_article_general",
@@ -15636,7 +15642,7 @@
     "title": "K1113: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1113 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: [提出: Claude 承接 K1109 sector FAIL, 執行: Claude] Pre-registered 5 hypotheses **全 FAIL**：H1 min BH-adj p=0.854; H2 log_mktcap β=-1.10e-4 p=0.682; H3 price_volatility β=+3.28e-5 p=0.854; H4 CV R²=-0.661 (zero out-of-sample predictive power); H5 Tier A=0 (全 31 家都是 Tier B, 沒有 firm class",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1113",
@@ -15653,7 +15659,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-31T00:11:21+00:00"
+    "created_at": "2026-05-31T00:11:21+00:00",
+    "claimed_by": "hourly-11",
+    "claimed_at": "2026-05-31T03:11:14.693559+00:00",
+    "claim_session_id": "e169010a4ddd",
+    "started_at": "2026-05-31T03:11:26.592123+00:00",
+    "completed_at": "2026-05-31T03:17:30.445181+00:00",
+    "result": "K1113 general-audience article published as draft mile_85502a95 (audience=research after gate auto-correct; null-result methodology piece). 1600+ words, 8 真實數字對齊 results.json, 2 charts auto-uploaded to supabase. anti_ai_gate.py PASS (0 landmines, 2 minor WARN for FB-tone unrelated)."
   },
   {
     "id": "email-11845-087ffb",
@@ -15677,7 +15689,44 @@
     "claimed_at": "2026-05-31T02:10:07.139860+00:00",
     "claim_session_id": "769a1161eed1",
     "started_at": "2026-05-31T02:10:07.556371+00:00",
-    "completed_at": "2026-05-31T02:11:43.065546+00:00",
-    "result": "FB 根因回信寄出 (c1ebfc7a) — 解釋個人帳號物理限制 + 短期 fix (2 篇 reclassify awaiting_interactive_session) + 提 Option A/B/C 等老闆裁示。Dashboard FB warn 立即清掉。"
+    "completed_at": "2026-05-31T02:14:13.242195+00:00",
+    "result": "FB 根因回信寄出 (c1ebfc7a) — 解釋個人帳號物理限制 + 短期 fix (2 篇 reclassify awaiting_interactive_session) + 提 Option A/B/C 等老闆裁示。Dashboard FB warn 立即清掉。\n\nFB留言沒連結根因=FB原生排程只能排貼文本體不能排留言→排程貼文與留言被拆兩時間點→事後補留言步驟漏掉。已補上K1408 mile_15dcf8e6第一則留言連結(驗證posted)+feed標fb success+supabase sync+SKILL硬規則禁用FB原生排程(貼文留言必同session原子完成)。K1409 20:00排程待原子處理。已於互動session同步回覆老闆。"
+  },
+  {
+    "id": "paper_review_mile_1a5263af",
+    "title": "Paper review (Codex 24h-rule): 想用偏態 t 打敗波動率？商品市場給了個彆扭答案 — 波動預測沒救，但能救你的『最壞情境』",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_1a5263af needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "in_progress",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_1a5263af",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-31T03:08:13+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-31T03:17:21.325224+00:00",
+    "claim_session_id": "5e0c49d59660",
+    "started_at": "2026-05-31T03:17:29.053597+00:00"
+  },
+  {
+    "id": "K460_article_general",
+    "title": "K460: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K460 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: title: Semivariance Cross-OOS Validation (5 Periods × 2 Assets) publication_verdict: PUBLICATION READY: Semivariance finding is robust across periods and assets",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K460",
+    "tags": [
+      "cross-oos",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T03:08:14+00:00"
   }
 ]
