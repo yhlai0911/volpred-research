@@ -1,5 +1,6 @@
 {
-  "timestamp": "2026-05-31T20:12:42+08:00",
+  "timestamp": "2026-05-31T18:11:15Z",
+  "taiwan_time": "2026-06-01 02:11:15",
   "all_ok": false,
   "checks": [
     {
@@ -14,8 +15,8 @@
     },
     {
       "name": "ERROR_LOG_RECENT",
-      "status": "alert",
-      "detail": "Entry dated 2026-05-30 (yesterday) in docs/error_log.md: claude CLI 2.1.157 auto-update at 04:38 caused launchd-context auth regression. hourly_dispatch failed 3 consecutive runs (05:07/06:07/07:07). Fix applied: rollback symlink to 2.1.156, CLAUDE_BIN pinned. Lessons L1-L5 recorded."
+      "status": "ok",
+      "detail": "No entries dated today (2026-06-01) or yesterday (2026-05-31). Most recent entry: 2026-05-29 — Codex 24h-rule caught 2 critical bugs in article mile_8e899fba (K717): 5-dim vs 6-dim composite narrative mismatch + biased strategy caveat missing. ERRATA applied, Supabase synced."
     },
     {
       "name": "PAPER_TRADING_GAPS",
@@ -34,7 +35,6 @@
     }
   ],
   "alerts": [
-    "METRICS_MISSING: storage/strategy_metrics.json does not exist — strategy metrics file absent entirely",
-    "ERROR_LOG_YESTERDAY (2026-05-30): claude CLI 2.1.157 auto-update caused 3-hour hourly_dispatch outage (05:07-07:07 TST). Rollback to 2.1.156 resolved. CLAUDE_BIN now pinned in cron wrapper."
+    "METRICS_MISSING: storage/strategy_metrics.json does not exist — strategy metrics file absent entirely (>26h threshold)"
   ]
 }

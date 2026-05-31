@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-05-31T18:11:15Z",
+  "taiwan_time": "2026-06-01 02:11:15",
+  "alert_type": "METRICS_MISSING",
+  "severity": "warn",
+  "title": "strategy_metrics.json not found",
+  "detail": "storage/strategy_metrics.json does not exist. File is missing entirely — cannot assess freshness. Threshold: >26h stale triggers alert. Action: regenerate via 'uv run volpred ops update-metrics' or equivalent."
+}
