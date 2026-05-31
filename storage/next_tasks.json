@@ -5862,7 +5862,7 @@
   {
     "id": "Paper6_major_errata_K880v2_canonical",
     "title": "Paper 6 MAJOR ERRATA: SPY 主結果改為 K880v2 canonical (DM 6.00 → -0.57)",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 4,
     "created_at": "2026-04-17T17:43:58+08:00",
     "description": "Paper 6 rescan 程式碼層級確認 K880 line 512 r2_overnight[t] 是 lookahead. K880v2 才是 canonical. **Paper 6 SPY 核心 claim 'PRG beats GJR on SPY, DM=6.00' 是 artifact**. K880v2 canonical: DM=-0.57 NS, 'PRG no significant advantage on SPY'. **主線程 major decision**: (1) 全面 rewrite SPY 欄位到 K880v2 canonical — paper 主 contribution 弱化為 'TAIFEX only, SPY null' (2) 若保留 K880 敘事 — 需明確 'forecast at open using realized overnight return' methodology Eq 3-4 defensible claim (非 traditional volatility forecast convention); (3) 撤稿或大幅 restructure. **FRL 投稿前不可避免 — 現 paper 數字無法 reviewer replication**.",
@@ -5882,7 +5882,13 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "hourly-16",
+    "claimed_at": "2026-05-31T08:11:40.167246+00:00",
+    "claim_session_id": "48089230d31c",
+    "started_at": "2026-05-31T08:11:43.529895+00:00",
+    "completed_at": "2026-05-31T08:14:04.079515+00:00",
+    "result": "NO ERRATA REQUIRED. K880 timing legitimate per paper Eq 3-4 (forecast at market open, overnight already realized). Paper Table 2 SPY DM=6.00 + Table 4 VR=0.93%/p=0.77 都 100% reproducible from K880. main.tex L245 footnote 已 disclose K880 vs K880v2 choice. Decision memo: paper/prg-periodic-garch/research_notes/k880_errata_decision_2026_05_31.md. 3 followup tasks added (Table 2 footnote, Table 3 relabel, online appendix K880v2 robustness; all P5-P6 reviewer-facing 強化, 非 errata)."
   },
   {
     "id": "Paper7_minor_errata_97_80bps",
@@ -15487,32 +15493,22 @@
     "result": "mile_1b0477a8 published — VIX 15，個股波動率卻是兩倍半（COR3M dispersion angle）; anti-AI gate PASS; FB pending (autonomous fire 無 Chrome MCP); commit f022aaa0"
   },
   {
-    "task_id": "fb_post_pending_mile_1b0477a8",
-    "task_type": "platform_ops",
-    "priority": "P2",
-    "title": "FB Ivan Lai 發文 — mile_1b0477a8 VIX/dispersion article",
-    "description": "trending_repost 文章 mile_1b0477a8 已發佈，需要 Ivan Lai FB 改寫版 200-400 字 + VolPred 連結留第一則留言。URL: https://volpred.zeabur.app/v3/reports/mile_1b0477a8。FB SOP: .claude/skills/trending-repost/SKILL.md Step 7。",
-    "status": "pending",
-    "created_at": "2026-05-31",
-    "mile_id": "mile_1b0477a8",
-    "fb_comment_url": "https://volpred.zeabur.app/v3/reports/mile_1b0477a8"
-  },
-  {
     "id": "fb_post_pending_mile_1b0477a8",
     "task_type": "platform_ops",
     "priority": "P2",
     "title": "FB Ivan Lai dual-publish: AI 集中度 vs VIX 個股波動率 (mile_1b0477a8)",
     "description": "FB Ivan Lai 雙發布 trending 文 mile_1b0477a8: 「VIX 15，個股波動率卻是兩倍半：期權市場在定價什麼？」. 改寫 200-400 字 Ivan Lai 口吻 FB 版（不貼 VolPred 內文），主貼文不放連結，VolPred URL 放第一則留言 https://volpred.zeabur.app/v3/reports/mile_1b0477a8 . 走 .claude/skills/trending-repost/references/fb-ivanlai-tone.md SOP + anti_ai_gate.py。",
-    "status": "pending",
+    "status": "blocked",
     "blocked_reason": "awaiting_interactive_session",
-    "blocked_note": "Needs interactive Chrome MCP / logged-in FB session; hourly autonomous fire 無法自主完成",
+    "blocked_note": "FB requires Chrome MCP per memory feedback_fb_personal_account_chrome_only; cannot be done by hourly cron",
     "source": "auto_followup_from_trending_repost_2026_05_31_ai擁擠度",
     "tags": [
       "platform_ops",
       "fb_post",
       "trending_followup"
     ],
-    "created_at": "2026-05-30T22:30:00+08:00"
+    "created_at": "2026-05-30T22:30:00+08:00",
+    "blocked_at": "2026-05-31T08:11:12+00:00"
   },
   {
     "id": "K1407_article_general",
@@ -15940,14 +15936,16 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-31T06:08:24+00:00"
+    "created_at": "2026-05-31T06:08:24+00:00",
+    "started_at": "2026-05-31T07:37:31.581208+00:00",
+    "last_released_at": "2026-05-31T07:37:52.162805+00:00"
   },
   {
     "id": "K1087_article_general",
     "title": "K1087: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1087 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1087 tests 7 regressor candidates for TLT A4f: VIX, MOVE, Yield Level, Slope, Realized Rate Vol, Butterfly, Combo. n=3,756 OOS 2011-2026, 60 refits. ALL 4 HYPOTHESES FAIL. Full OOS DM t: VIX +2.02 (best but NS), MOVE +1.87, Level -1.26 NEGATIVE, Slope -1",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1087",
@@ -15964,7 +15962,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-31T06:08:24+00:00"
+    "created_at": "2026-05-31T06:08:24+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-31T07:38:01.752882+00:00",
+    "claim_session_id": "ef76f4fd370e",
+    "started_at": "2026-05-31T07:38:01.796528+00:00",
+    "completed_at": "2026-05-31T07:40:41.700191+00:00",
+    "result": "Published draft mile_579ad22f for K1087. Angle: bond volatility looks like a rates story, but VIX still beats yield-curve factors and none pass the strict threshold. Added 2 TLT charts and used cluster waiver for uncovered-K coverage."
   },
   {
     "id": "K1096_article_general_v2",
@@ -15989,5 +15993,125 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-05-31T06:08:24+00:00"
+  },
+  {
+    "id": "K1104_article_general",
+    "title": "K1104: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1104 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: Claude 根據 K1067c monotonicity FAIL, 執行: Claude] 24 檔 0050.TW 成分股（ASE hold-out）cross-sectional OLS of θ₂ on firm covariates。**H2 (fabless→負) 統計顯著**：coef=-9.61e-4, t=-2.22, p=0.039 * （MediaTek/Realtek/Novatek/Phison 共 4 檔 fabless 一致 θ₂<0）。H1 (foundry→正) 方向性支持但 N=2 不顯著：coef=+4.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1104",
+    "tags": [
+      "Paper_2",
+      "A4f-EAV",
+      "cross-sectional-regression",
+      "firm-selection",
+      "fabless-foundry",
+      "K1067-series-synthesis",
+      "statistically-significant",
+      "Taiwan",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T08:11:19+00:00"
+  },
+  {
+    "id": "K1306_article_research",
+    "title": "K1306: write research-audience article (auto-discovered uncovered K)",
+    "description": "K K1306 has verdict signal (score=0, reasons=[]) but no research article in feed.json.  Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1306",
+    "tags": [
+      "NLP",
+      "financial-sentiment",
+      "Loughran-McDonald",
+      "SEC-EDGAR",
+      "10-K",
+      "RV-prediction",
+      "small-N",
+      "null-result",
+      "US-equity",
+      "annual-frequency",
+      "auto-discovered",
+      "audience-research"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T08:11:19+00:00"
+  },
+  {
+    "id": "K1400_article_general",
+    "title": "K1400: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1400 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1400",
+    "tags": [
+      "retirement",
+      "mortgage",
+      "decumulation",
+      "sequence-risk",
+      "bootstrap",
+      "taiwan",
+      "trending_repost",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T08:11:19+00:00"
+  },
+  {
+    "id": "K189_article_general",
+    "title": "K189: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K189 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: title: Attention-Weighted Volatility (Cross-Asset Information Aggregation) data_source: yfinance daily (SPY/QQQ/GLD/TLT/EEM/IWM)",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K189",
+    "tags": [
+      "experiment",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T08:11:19+00:00"
+  },
+  {
+    "id": "Paper6_table2_timing_footnote",
+    "title": "Paper 6 Table 2 SPY DM=6.00 row: add timing-convention cross-ref footnote",
+    "description": "main.tex Table 2 (L196) SPY 行加 footnote 指向 L245 K880/K880v2 disclosure。Reviewer 讀到 DM=6.00 main result 時需知此為 K880 convention + K880v2 alternative + paper Eq 3-4 justify K880。建議 footnote: 'SPY DM statistics use the canonical K880 timing convention (forecast at market open with realized overnight); see footnote on Table 4 for the timing-convention disclosure.' 來源: research_notes/k880_errata_decision_2026_05_31.md Gap 1.",
+    "priority": 5,
+    "task_type": "paper_body",
+    "status": "pending_main_thread",
+    "source": "auto_discovered_from_paper6_errata_decision",
+    "created_at": "2026-05-31T16:13:58"
+  },
+  {
+    "id": "Paper6_table3_relabel_ablation_vs_timing",
+    "title": "Paper 6 Table 3 relabel: 'Ablation' → 'Alternative timing convention'",
+    "description": "Table 3 (L221) 標籤 'Ablation removing session-boundary update' 其實是 K880 vs K880v2 timing convention 比較 (DM 6.00 → -0.57)。Reviewer-level critique: relabel 為 'Alternative timing convention comparison'。可選同步補 within-K880 真 ablation (remove cross-session h_{n-1} carryover) 作補強。來源: research_notes/k880_errata_decision_2026_05_31.md Gap 3.",
+    "priority": 6,
+    "task_type": "paper_body",
+    "status": "pending_main_thread",
+    "source": "auto_discovered_from_paper6_errata_decision",
+    "created_at": "2026-05-31T16:13:58"
+  },
+  {
+    "id": "Paper6_online_appendix_k880v2_robustness",
+    "title": "Paper 6 online appendix: K880v2 alternative convention robustness table",
+    "description": "Online appendix 加 K880v2 alternative timing convention 完整 robustness table (DM stats + VaR + ES)。提供 reviewer 透明 disclosure: under alternative convention, PRG_Ext loses significance on SPY (DM=-0.57 NS, VR Kupiec FAIL p=0.0196). Main paper Eq 3-4 仍 justify K880 為 canonical。來源: research_notes/k880_errata_decision_2026_05_31.md Gap 1 + recommendation.",
+    "priority": 6,
+    "task_type": "paper_body",
+    "status": "pending_main_thread",
+    "source": "auto_discovered_from_paper6_errata_decision",
+    "created_at": "2026-05-31T16:13:58"
   }
 ]
