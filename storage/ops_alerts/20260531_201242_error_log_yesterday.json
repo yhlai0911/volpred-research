@@ -1,0 +1,6 @@
+{
+  "timestamp": "2026-05-31T20:12:42+08:00",
+  "alert_type": "ERROR_LOG_RECENT",
+  "severity": "info",
+  "detail": "docs/error_log.md has an entry dated 2026-05-30 (yesterday): claude CLI 2.1.157 auto-update (04:38 TST) caused launchd-context auth regression. hourly_dispatch failed 3 runs (05:07/06:07/07:07 TST). Root cause: auto-update repointed symlink, breaking headless auth. Fix: rollback to 2.1.156 + pin CLAUDE_BIN in cron wrapper. Dispatch restored. Lessons L1-L5 recorded in error_log.md."
+}

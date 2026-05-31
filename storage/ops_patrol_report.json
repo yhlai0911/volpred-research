@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-05-31T14:12:45+08:00",
+  "timestamp": "2026-05-31T20:12:42+08:00",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "53 draft articles total. Research/null audience: 31 (>=4 ✓). General audience: 22 (>=8 ✓). Total >=12 ✓."
+      "detail": "64 draft articles total. Research audience: 33 (>=4 ✓). General audience: 31 (>=8 ✓). Total >=12 ✓."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
@@ -20,7 +20,7 @@
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "15 strategies checked. No strategy has >2 null portfolio_return values in last 3 entries. Each has exactly 1 null (today's entry pending update). No alert triggered."
+      "detail": "15 strategies checked. No strategy has >2 null portfolio_return values in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
@@ -30,7 +30,7 @@
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "2177 entries in storage/memory/knowledge.json."
+      "detail": "2178 entries in storage/memory/knowledge.json."
     }
   ],
   "alerts": [
