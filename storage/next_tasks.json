@@ -16513,5 +16513,89 @@
     "started_at": "2026-05-31T19:17:29.188587+00:00",
     "completed_at": "2026-05-31T19:18:44.156800+00:00",
     "result": "Codex review: numbers largely match K1173 results, but article overstates source purity; MX/CH refined inputs include search/news-summary fallbacks, so disclosure-quality claim needs caveat."
+  },
+  {
+    "id": "K475_article_general",
+    "title": "K475: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K475 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: Asset: SPY CONFIRMED: Equal-weight ensemble of 3 validated methods achieves good forecasting (avg rank 2.0/7) AND good VaR. Timmermann (2006) forecast combination puzzle applies — simple 1/N beats complex BMA (K434). This is the first method to perform well on BOTH tasks simultan",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K475",
+    "tags": [
+      "har",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T20:09:17+00:00",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-05-31T20:09:46.040235+00:00",
+    "claim_session_id": "b11169a65cd2",
+    "started_at": "2026-05-31T20:09:46.132162+00:00",
+    "completed_at": "2026-05-31T20:16:39.875455+00:00",
+    "result": "mile_c5881a5b draft published: '把兩個模型加在一起，反而打敗了其中最強的那一個' 1626 字 anti-ai-gate PASS 1 rewrite, 3-stage checklist all PASS. K475 ensemble (Ens_GJR_HAR) rank #1 跨 5 OOS periods，honest caveat: DM 未顯著。audience auto=research, status=draft"
+  },
+  {
+    "id": "K480_article_general",
+    "title": "K480: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K480 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: Asset: SPY NEGATIVE: No regime-switching model matches GJR's VaR performance (best: RS_Ternary 0.500 vs GJR 0.700). HAR contamination persists even with regime selection. For risk management, GJR remains the only reliable tool. GJR: QLIKE rank 4.2, VaR 7/10 (0.700) HAR: QLIKE ran",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K480",
+    "tags": [
+      "har",
+      "leverage-effect",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T20:09:17+00:00"
+  },
+  {
+    "id": "K482_article_general",
+    "title": "K482: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K482 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K482: MCS p-value weighted ensemble vs equal weight. Equal weight avg QLIKE rank 2.60 vs MCS p-value 3.80. Equal wins 3/5 periods, MCS wins 2/5 (negligible margins). DM: Equal significantly better in 1/5 (p=0.009), never significantly worse. MCS weighting",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K482",
+    "tags": [
+      "MCS",
+      "ensemble",
+      "equal_weight",
+      "combination_puzzle",
+      "Timmermann",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T20:09:17+00:00"
+  },
+  {
+    "id": "K484_article_general",
+    "title": "K484: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K484 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: 用戶(創意), 執行: Claude] K484: SSVS for variance equation component selection (Chen CWS method extended). **4/5 components PIP=1.000**: GJR(1.000), VIX(1.000), Parkinson range(1.000), |ε|(1.000). Only semivariance excluded (PIP=0.094). SSVS median model QLIKE -7.43% vs base GARCH",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K484",
+    "tags": [
+      "SSVS",
+      "variance_equation",
+      "Chen_CWS",
+      "user_idea",
+      "breakthrough",
+      "model_selection",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T20:09:17+00:00"
   }
 ]
