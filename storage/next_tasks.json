@@ -15739,7 +15739,7 @@
     "title": "K465: write general-audience article (auto-discovered uncovered K)",
     "description": "K K465 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: Assets: SPY, EWT Method: 5-period cross-OOS with IS=2000d, QLIKE evaluation, DM test PUBLICATION READY — HAR log-range robust across both assets and all regimes Reference: Corsi (2009) J Financial Econometrics — HAR-RV model Reference: Alizadeh, Brandt & Diebold (2002) JFE — Rang",
     "priority": 4,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K465",
@@ -15755,7 +15755,9 @@
     "claimed_by": "codex-cli",
     "claimed_at": "2026-05-31T04:20:31.816300+00:00",
     "claim_session_id": "2ef7b3fd61fb",
-    "started_at": "2026-05-31T04:20:39.218533+00:00"
+    "started_at": "2026-05-31T04:20:39.218533+00:00",
+    "completed_at": "2026-05-31T04:25:01.827498+00:00",
+    "result": "已完成 K465 一般讀者稿並發佈為 draft（mile_85699c9e）。主題聚焦跨五段市場都要贏才算穩，補了 2 張圖；以 cluster_waiver 通過 spy cooldown gate。"
   },
   {
     "id": "K469_article_general",
@@ -15781,5 +15783,63 @@
     "started_at": "2026-05-31T04:10:47.276271+00:00",
     "completed_at": "2026-05-31T04:19:30.698457+00:00",
     "result": "mile_7c104f6d draft published. K469 cross-OOS HAR-LR robust under r² proxy (5/5 SPY, 4/5 EWT). Tautology correction angle. Anti-AI-gate PASS (2 WARN, 0 MUST). 1050 zh chars + 圖表 + DM tests."
+  },
+  {
+    "id": "paper_review_mile_fd36c6cd",
+    "title": "Paper review (Codex 24h-rule): 我們把自己論文裡的兩個數字重做了一次：5.2 跟 −0.05 真的對嗎",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_fd36c6cd needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_fd36c6cd",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-31T05:08:43+00:00"
+  },
+  {
+    "id": "K575_article_general",
+    "title": "K575: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K575 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] 1000 bootstrap paths, 4 profiles. Young+VCL: $23.7M (4.94x vs conservative). Retiree+PW: 0% ruin vs B&H 5.2%. Strategy matching > return maximization for shorter horizons.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K575",
+    "tags": [
+      "life_stage",
+      "retirement",
+      "strategy_matching",
+      "monte_carlo",
+      "practical",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T05:08:43+00:00"
+  },
+  {
+    "id": "K693_article_general",
+    "title": "K693: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K693 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: [提出: K692 修正, 執行: Claude] 修正 paper_trading.json 801 筆歷史 lookahead。9,935 entries fixed（跨 12 策略）。Sharpe 變化：Piecewise 3.16→1.56(-1.60), Adaptive 3.02→1.51(-1.51), TW+JP 3.03→1.63(-1.40), VIX Cond 2.64→1.76(-0.88)。平滑策略受影響小：slow_vt -0.07, risk_parity -0.05, 12/VIX -0.04。與 K690 lag rob",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K693",
+    "tags": [
+      "data-fix",
+      "lookahead-correction",
+      "paper-trading",
+      "historical",
+      "Sharpe-deflation",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T05:08:43+00:00"
   }
 ]
