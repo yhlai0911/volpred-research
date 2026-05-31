@@ -282,6 +282,16 @@ Log to `storage/reports/trending_repost_log.json`:
 >    沒成功查原因，不連點 — retry-loop 2026-05-19 造成 3 篇 Nikkei dup。
 > 8. 發佈流程：composer → 確認本體乾淨 → `繼續` → `貼文設定`頁點藍色`發佈`
 >    （不是`排程選項` row）→ 等 → screenshot 驗 composer 關閉 + 牆上「剛剛」。
+> 9. **【硬規則 2026-05-31，違反 = 留言連結必漏】禁用 FB 原生「排程選項」發
+>    trending / event 貼文。** 根因：FB 排程只能排貼文本體，**不能排第一則
+>    留言**。一旦用排程，貼文到時自動發出，但「連結放第一則留言」要事後手動
+>    回 Chrome 補 —— 貼文與留言被拆成兩個時間點，那個事後補留言步驟反覆漏掉
+>    （K1408/K1409 2026-05-31 incident：兩篇排程貼文發出但留言無連結，老闆抓到）。
+>    **貼文與留言必須是同一個 Chrome session 的原子操作**：發佈貼文 → 立刻在
+>    同一 session 補第一則留言 → screenshot 驗留言已送出 → patch feed.json
+>    `fb_post_status=success`。若老闆要求特定時段發佈，**由主線程
+>    `ScheduleWakeup` 在目標時段醒來，再一次性做完「發佈+留言」**，不靠 FB
+>    自己的排程器。發佈與留言之間**不可有時間落差**。
 
 **Primary path**: claude-in-chrome browser automation.
 - Open https://facebook.com (assumes Ivan Lai logged in on the user's Chrome profile)
