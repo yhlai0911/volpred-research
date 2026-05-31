@@ -16427,7 +16427,7 @@
     "title": "K453: write general-audience article (auto-discovered uncovered K)",
     "description": "K K453 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: Reference: Patton & Sheppard (2015) JFQA Reference: K449: SPY RS⁻ DM p=0.007, QQQ p=0.003, GLD FAIL",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K453",
@@ -16437,14 +16437,20 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-31T17:09:00+00:00"
+    "created_at": "2026-05-31T17:09:00+00:00",
+    "claimed_by": "hourly-02",
+    "claimed_at": "2026-05-31T18:09:33.011705+00:00",
+    "claim_session_id": "5a4fc9b0248a",
+    "started_at": "2026-05-31T18:09:36.157302+00:00",
+    "completed_at": "2026-05-31T18:15:16.851288+00:00",
+    "result": "draft mile_938a158f published to feed pool (1946 字繁體, audience=research, 8 tags, K453 in experiment_refs, anti_ai_gate PASS, 9-checklist all pass, 1 table + 10+ key numbers, Harvey caveats included). 待 publish-cycle 升 published."
   },
   {
     "id": "K457_article_general",
     "title": "K457: write general-audience article (auto-discovered uncovered K)",
     "description": "K K457 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: Weekly Frequency Volatility Prediction for Taiwan. Data: 2005-01-01 to 2026-03-27, OOS: 2023-01-01 to 2025-12-31. Rank 1: Semivar QLIKE=-6.8091089677865035 Rank 2: VIX_scaled QLIKE=-6.798828435556252 Rank 3: HAR_like QLIKE=-6.76445697144039 Best model: Semivar. VRP_model_QLIKE: V",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K457",
@@ -16454,7 +16460,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-31T17:09:00+00:00"
+    "created_at": "2026-05-31T17:09:00+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-31T18:10:51.736221+00:00",
+    "claim_session_id": "40ab66812a17",
+    "started_at": "2026-05-31T18:10:59.751234+00:00",
+    "completed_at": "2026-05-31T18:15:23.544276+00:00",
+    "result": "Published draft mile_08704ceb for K457 weekly-vol article; added 2 charts and general-audience writeup emphasizing weekly frequency does not create a clear model winner."
   },
   {
     "id": "K467_article_general",
@@ -16473,5 +16485,21 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-05-31T17:09:00+00:00"
+  },
+  {
+    "id": "paper_review_mile_5b6f9e1b",
+    "title": "Paper review (Codex 24h-rule): 換掉 yfinance 也救不回來：新興市場法人持股階梯為何是結構問題",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_5b6f9e1b needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_5b6f9e1b",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-31T18:08:15+00:00"
   }
 ]
