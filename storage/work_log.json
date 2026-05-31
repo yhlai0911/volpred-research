@@ -9102,5 +9102,17 @@
     "status": "completed",
     "claimed_by": "hourly-21",
     "timestamp": "2026-05-31T21:19:44+08:00"
+  },
+  {
+    "task_type": "platform_ops",
+    "work_id": "platform_ops_refill_archived_status_fix",
+    "title": "scripts/refill_task_pool.py: include archived in dedup status set (fix K274/K288/K319 dup v2 incident)",
+    "status": "completed",
+    "claimed_by": "hourly-23",
+    "timestamp": "2026-05-31T23:14:59+08:00",
+    "root_cause": "_any_feed_coverage_kids + _kids_with_general_article only treated (draft, published, scheduled) as feed coverage; 122 archived articles with K refs were invisible -> audit_pending_kids dedup missed K274/K288/K319 (archived + audience=research) -> refill produced 3 dup _v2 tasks out of 4",
+    "fix": "include archived in both helpers' status sets; retracted/unpublished still excluded as explicit non-coverage",
+    "verification": "tests/test_refill_task_pool.py +1 regression test (test_archived_articles_count_as_feed_coverage), 2/2 pass; dry-run preview now proposes K453-K675 with zero false positives",
+    "deliverable": "scripts/refill_task_pool.py + tests/test_refill_task_pool.py"
   }
 ]

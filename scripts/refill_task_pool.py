@@ -156,7 +156,12 @@ def _any_feed_coverage_kids() -> set[str]:
     for art in feed:
         if not isinstance(art, dict):
             continue
-        if art.get("status") not in ("draft", "published", "scheduled"):
+        # 2026-05-31 fix: include "archived" — 122 archived articles carry K refs
+        # and represent real historical coverage; excluding them let refill
+        # auto-create v2 dups for K274/K288/K319 (audience=research+archived
+        # invisible to both dedup helpers). Retracted/unpublished still excluded
+        # (those are explicit "not coverage").
+        if art.get("status") not in ("draft", "published", "scheduled", "archived"):
             continue
         details = art.get("details") or {}
         refs = details.get("experiment_refs") if isinstance(details, dict) else []
@@ -214,7 +219,10 @@ def _kids_with_general_article() -> set[str]:
         audience = art.get("audience")
         if audience not in (None, "", "general"):
             continue
-        if art.get("status") not in ("draft", "published", "scheduled"):
+        # 2026-05-31 fix: archived articles still represent K coverage (the
+        # general-audience article was published then archived; refill must
+        # not auto-recreate it). See _any_feed_coverage_kids same-date fix.
+        if art.get("status") not in ("draft", "published", "scheduled", "archived"):
             continue
         details = art.get("details") or {}
         refs = details.get("experiment_refs") if isinstance(details, dict) else []

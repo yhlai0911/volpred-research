@@ -16269,7 +16269,7 @@
     "title": "Paper review (Codex 24h-rule): 論文發出去之後，6 個數字裡有 3 個對不上：一場我們自己抓自己的核對",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_1fde450d needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_1fde450d",
@@ -16278,7 +16278,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-31T13:08:53+00:00"
+    "created_at": "2026-05-31T13:08:53+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-31T15:02:30.368869+00:00",
+    "claim_session_id": "e21940560c8c",
+    "started_at": "2026-05-31T15:02:30.427931+00:00",
+    "completed_at": "2026-05-31T15:03:58.227172+00:00",
+    "result": "CONDITIONAL_PASS: article verdict aligns with K1198, but overstates (1) 20-stock divergence as API limitation and (2) VT tail-risk conclusion as fully revalidated despite Hybrid-VT mismatch note"
   },
   {
     "id": "paper_review_mile_34be417d",
@@ -16295,5 +16301,85 @@
       "main-thread-only"
     ],
     "created_at": "2026-05-31T13:08:53+00:00"
+  },
+  {
+    "id": "K274_article_general_v2",
+    "title": "K274: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K274 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: experiment_id: K274 title: Paper Contribution Mapping — Which Findings Are Novel vs Known? date: 2026-03-24T19:44:08.819103",
+    "priority": 4,
+    "status": "blocked",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K274",
+    "tags": [
+      "experiment",
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T15:08:25+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-05-31T15:10:43+00:00",
+    "blocked_note": "refill 重複：對應 K 已有 published general article (feed grep verified)"
+  },
+  {
+    "id": "K286_article_general",
+    "title": "K286: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K286 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: title: Research System Cumulative Summary (2026-03-14 to 2026-03-22)",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K286",
+    "tags": [
+      "experiment",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T15:08:25+00:00"
+  },
+  {
+    "id": "K288_article_general_v2",
+    "title": "K288: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K288 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: Cross-Period Stability of Major Findings. Data: yfinance (SPY, GLD, VIX). F1: VIX sufficient: stability=0. F2: GJR best/tied: stability=3. F3: 50/50 > SPY: stability=2. F4: VT reduces MDD: stability=4. F5: K insensitive: stability=4. F6: Monthly >= Quarterly: stability=2. F7: SPY",
+    "priority": 4,
+    "status": "blocked",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K288",
+    "tags": [
+      "experiment",
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T15:08:25+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-05-31T15:10:43+00:00",
+    "blocked_note": "refill 重複：對應 K 已有 published general article (feed grep verified)"
+  },
+  {
+    "id": "K319_article_general_v2",
+    "title": "K319: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K319 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: title: Decade-by-Decade Performance — The Complete Historical Record",
+    "priority": 4,
+    "status": "blocked",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K319",
+    "tags": [
+      "experiment",
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T15:08:25+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-05-31T15:10:44+00:00",
+    "blocked_note": "refill 重複：對應 K 已有 published general article (feed grep verified)"
   }
 ]
