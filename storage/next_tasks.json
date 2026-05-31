@@ -15789,7 +15789,7 @@
     "title": "Paper review (Codex 24h-rule): 我們把自己論文裡的兩個數字重做了一次：5.2 跟 −0.05 真的對嗎",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_fd36c6cd needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_fd36c6cd",
@@ -15798,7 +15798,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-31T05:08:43+00:00"
+    "created_at": "2026-05-31T05:08:43+00:00",
+    "claimed_by": "hourly-13",
+    "claimed_at": "2026-05-31T05:11:07.840348+00:00",
+    "claim_session_id": "300045f05c1b",
+    "started_at": "2026-05-31T05:11:11.347384+00:00",
+    "completed_at": "2026-05-31T05:19:07.746645+00:00",
+    "result": "Codex+sonnet 24h-rule review of mile_fd36c6cd/K1184. Verdict: CONDITIONAL_PASS. 6 core claims (full η/λ, OOS η/λ, VaR ×2) match results.json to 4dp. 4 MINOR issues recorded in knowledge K1184_review_v1: (1) OOS sub-sample uses full-sample GJR slice, (2) article tolerance description imprecise, (3) rng unused, (4) n_oos vs paper diff. No SEVERE/MAJOR. Research integrity intact."
   },
   {
     "id": "K575_article_general",

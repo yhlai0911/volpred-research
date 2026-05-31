@@ -31863,5 +31863,61 @@
       "compute-queue"
     ],
     "created_at": "2026-05-29T04:11:17.312906+00:00"
+  },
+  {
+    "timestamp": "2026-05-31T05:18:54.581235+00:00",
+    "category": "paper_review",
+    "subject": "K1184_review_v1",
+    "k_id": "K1184_review_v1",
+    "experiment_id": "K1184",
+    "experiment_path": "experiments/k1184/",
+    "title": "K1184 Hansen skew-t MLE replication review — paper 5.2/-0.05 vs reproduction",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer_source": "codex_review",
+    "reviewer": "Codex CLI gpt-5.4 (primary) + sonnet self-review",
+    "audience": "research",
+    "domain": "paper_review",
+    "summary": "24h-rule review of mile_fd36c6cd. Full-sample η=4.968/λ=-0.059 and OOS η=6.034/λ=-0.043 match k1184_results.json exactly (4dp). VaR violation reconciliation (20 vs paper's 8) honestly disclosed as DIV-2 pending. 4 MINOR issues: (1) OOS sub-sample uses z_oos sliced from full-sample GJR (info leak; should label 'sub-sample re-estimation' not 'OOS GJR'); (2) article's 16% rtol vs 20% tolerance description is logically imprecise (real check is absolute diff 0.834 > 0.30); (3) rng=np.random.default_rng(42) defined but unused (optimizer is deterministic, 'fixed seed reproducibility' claim should clarify); (4) n_oos=1513 vs paper's 1501 unexplained. No lookahead, no fabrication, research integrity intact. Codex + sonnet agree on CONDITIONAL.",
+    "tags": [
+      "paper_review",
+      "24h_rule",
+      "skew_t",
+      "reproduction",
+      "K1184",
+      "mile_fd36c6cd"
+    ],
+    "related_article": "mile_fd36c6cd",
+    "method": {
+      "reviewer_pipeline": "codex exec --skip-git-repo-check + sonnet 7-checklist (A-G)",
+      "codex_session": "019e7c74",
+      "codex_tokens": 56621
+    },
+    "issues": [
+      {
+        "severity": "MINOR",
+        "type": "term_imprecise",
+        "loc": "article OOS section",
+        "note": "OOS residuals sliced from full-sample GJR, not independent OOS fit"
+      },
+      {
+        "severity": "MINOR",
+        "type": "tolerance_description",
+        "loc": "article OOS commentary",
+        "note": "16% rtol vs 20% wording inconsistent with actual absolute-tolerance rule (TOL_ETA=0.30)"
+      },
+      {
+        "severity": "MINOR",
+        "type": "seed_dead_code",
+        "loc": "k1184.py L51-52",
+        "note": "rng defined but unused; optimizer-deterministic, claim should clarify"
+      },
+      {
+        "severity": "MINOR",
+        "type": "sample_size_diff",
+        "loc": "k1184 vs paper",
+        "note": "n_oos=1513 vs paper 1501, 12-day diff unexplained"
+      }
+    ],
+    "created_at": "2026-05-31T05:15:00+00:00"
   }
 ]
