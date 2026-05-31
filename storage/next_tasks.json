@@ -15288,7 +15288,7 @@
     "title": "Paper review (Codex 24h-rule): 晶圓代工財報日為什麼比較劇烈？我們連四層猜想全部失敗了，這篇講為什麼這對你是好消息",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_d3897886 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_d3897886",
@@ -15297,7 +15297,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-30T18:08:04+00:00"
+    "created_at": "2026-05-30T18:08:04+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-31T00:09:20.448035+00:00",
+    "claim_session_id": "0d3439f80eb3",
+    "started_at": "2026-05-31T00:09:26.044566+00:00",
+    "completed_at": "2026-05-31T00:10:53.813458+00:00",
+    "result": "Codex 24h review completed for mile_d3897886. Core K1108/K1108b/K1108c/K1108e null-chain verified; flagged one factual table contradiction, Harvey 2016 attribution error, two stale research-state references, and one trading-edge overclaim. Review saved to storage/reviews/codex_24h/mile_d3897886_review.md."
   },
   {
     "id": "K492_article_general_v2",
@@ -15529,5 +15535,112 @@
     "started_at": "2026-05-30T23:11:21.627204+00:00",
     "completed_at": "2026-05-31T07:16:53+08:00",
     "mile_id": "mile_22d9d2a5"
+  },
+  {
+    "id": "paper_review_mile_fcaad8fe",
+    "title": "Paper review (Codex 24h-rule): 為什麼只有公債吃這套？我們把另類數據丟到三個資產，結果只有 TLT 點頭",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_fcaad8fe needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_fcaad8fe",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-31T00:08:00+00:00"
+  },
+  {
+    "id": "platform_ops_cron_stale_memory_health_daily",
+    "title": "Cron staleness: memory_health_daily — last fire 50.1h ago (expected ≤48.0h)",
+    "description": "`memory_health_daily` last ran at 2026-05-28T22:00:20+00:00 (50.1h ago). Expected cadence per config/runtime_schedules.json gives gap ≤24.0h; observed >2x. Investigate: (a) wrapper script exists & executable, (b) recent log at storage/logs/cron/memory_health_daily.log, (c) launchd / crontab entry actually installed, (d) downstream consumer (release_pool / daily_update) for failure cascade.",
+    "priority": 3,
+    "status": "succeeded",
+    "task_type": "platform_ops",
+    "source": "diverse_gen",
+    "tags": [
+      "platform-ops",
+      "cron-staleness",
+      "main-thread-only"
+    ],
+    "created_at": "2026-05-31T00:08:00+00:00",
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-05-31T00:08:21.845733+00:00",
+    "claim_session_id": "de56159b0bb9",
+    "started_at": "2026-05-31T00:11:37.066729+00:00",
+    "completed_at": "2026-05-31T00:11:37.318111+00:00",
+    "result": "Root cause: cron_memory_health.sh wrapper missing cron_lib.sh banner emit (其他 3 個 piggy_back_skip wrapper 已用 cron_lib pattern, 它是 outlier). 2026-05-29 加 piggy_back_skip:true 後, host crontab 直接 fire 不更新 cron_last_run.json + wrapper 不寫 banner = staleness detector 永遠 fallback 用 stale state. Fix: cron_memory_health.sh 改用 cron_lib.sh emit_start/emit_exit pattern, sync ~/.volpred/bin, env-i 模擬 cron 驗證 banner 已寫 (exit 0, duration=1s). dispatch report 不再 surface stale task."
+  },
+  {
+    "id": "K1090_article_general",
+    "title": "K1090: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1090 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1090 performs meta-regression of A4f DM t on asset characteristics for 12 assets (K1075-K1089). COMPACT OLS FORMULA: DM_t ≈ -1.22 + 3.38·USD_dummy - 4.11·corr(ret,ΔVIX), SEs 1.79/1.90/1.88, R²=0.54, LOOCV R²=0.26, LOOCV RMSE=1.94. LASSO independently sel",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1090",
+    "tags": [
+      "meta-regression",
+      "cross-asset",
+      "A4f",
+      "scope-prediction",
+      "Paper9",
+      "predictor-formula",
+      "LASSO",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T00:08:00+00:00"
+  },
+  {
+    "id": "K1107_article_general",
+    "title": "K1107: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1107 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1104 firm-level OLS: fabless β=-9.61e-4 t=-2.22 p=0.039 *, K1107 加 Year+Quarter FE 重估 panel (23 firms × ~60 events = 1377 events)。**結果 NOT SUPPORTED for Fabless but SUPPORTED for Foundry**。Outcome #2 model-free log(r²_event/r²_baseline) panel: Fabless β=",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1107",
+    "tags": [
+      "K1107",
+      "Paper2",
+      "time-FE",
+      "fabless-rule-withdrawn",
+      "foundry-rule-robust",
+      "within-type-bimodal",
+      "K1104-followup",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T00:11:21+00:00"
+  },
+  {
+    "id": "K1113_article_general",
+    "title": "K1113: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1113 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: [提出: Claude 承接 K1109 sector FAIL, 執行: Claude] Pre-registered 5 hypotheses **全 FAIL**：H1 min BH-adj p=0.854; H2 log_mktcap β=-1.10e-4 p=0.682; H3 price_volatility β=+3.28e-5 p=0.854; H4 CV R²=-0.661 (zero out-of-sample predictive power); H5 Tier A=0 (全 31 家都是 Tier B, 沒有 firm class",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1113",
+    "tags": [
+      "Paper_2",
+      "A4f-EAV",
+      "strong-null",
+      "firm-level-covariates-FAIL",
+      "Paper_2-selection-exhausted",
+      "K1109-continuation",
+      "Codex-saves-from-bugs",
+      "K1067-series-closure",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T00:11:21+00:00"
   }
 ]

@@ -1,4 +1,7 @@
 #!/bin/bash
+
+# Auto-injected: TCC bypass — bash has FDA (System Settings), self-redirect to Desktop log avoids launchd-process-level TCC denial
+exec >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/memory_health.log 2>&1
 # Canonical source for the host-cron wrapper.
 # IMPORTANT: host cron does NOT exec this file — macOS TCC (FDA) blocks
 # cron daemon from exec'ing .sh files under Desktop/. The cron-exec target
@@ -8,8 +11,12 @@
 # Runs memory-health-summary daily; if status != ok, fire send-alert (24h dedup
 # auto-handled by send-alert CLI). Prevents the 2026-04-10 knowledge.json bloat
 # pattern (54.5MB / 50,304 entries / 96.4% duplicates) from recurring.
-cd /Users/yhlai0911/Desktop/volpred-research
+cd /Users/yhlai0911/Desktop/volpred-research || exit 1
+source scripts/cron_lib.sh
+_start=$SECONDS
+cron_emit_start "memory_health_daily"
 RESULT=$(/opt/homebrew/bin/uv run volpred ops memory-health-summary 2>&1)
+_ec=$?
 echo "$RESULT"
 STATUS=$(echo "$RESULT" | grep -oE 'overall=[a-z]+' | cut -d= -f2)
 if [ "$STATUS" != "ok" ] && [ -n "$STATUS" ]; then
@@ -18,3 +25,5 @@ if [ "$STATUS" != "ok" ] && [ -n "$STATUS" ]; then
     --title "Memory health: status=$STATUS" \
     --body "$RESULT"
 fi
+cron_emit_exit "memory_health_daily" "$_ec" "$_start"
+exit "$_ec"
