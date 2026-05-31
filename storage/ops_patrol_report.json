@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-05-31T02:10:48+08:00",
+  "timestamp": "2026-05-31T08:11:30+08:00",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "50 draft articles total (research: 29, general: 21). All thresholds met: total>=12 OK, research>=4 OK, general>=8 OK."
+      "detail": "53 draft articles total (research: 31, general: 28). All thresholds met: total>=12 OK, research>=4 OK, general>=8 OK."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
@@ -15,7 +15,7 @@
     {
       "name": "ERROR_LOG_RECENT",
       "status": "alert",
-      "detail": "Entry dated 2026-05-29 (yesterday relative to 2026-05-30) in docs/error_log.md: Codex 24h-rule caught two critical bugs in production article mile_8e899fba — (1) '六維' label but only 5 _norm dimensions in composite calc; (2) champion strategy taiwan_spy_momentum had undisclosed c2c bias + Harvey FAIL. Verdict: FAIL->ERRATA applied, Supabase sync completed."
+      "detail": "Entry dated 2026-05-30 (yesterday) in docs/error_log.md: claude CLI 2.1.157 auto-update at 04:38 caused launchd-context auth regression. hourly_dispatch failed 3 consecutive runs (05:07/06:07/07:07). Root cause: auto-update broke headless auth in launchd context. Fix applied: rollback symlink to 2.1.156, CLAUDE_BIN pinned to explicit version path. Lessons L1-L5 recorded."
     },
     {
       "name": "PAPER_TRADING_GAPS",
@@ -34,7 +34,7 @@
     }
   ],
   "alerts": [
-    "METRICS_STALE: storage/strategy_metrics.json is MISSING (file does not exist) — strategy metrics unavailable",
-    "ERROR_LOG_YESTERDAY: docs/error_log.md has entry from 2026-05-29 — Codex 24h-rule ERRATA on article mile_8e899fba (六維 dimension count error + champion strategy caveat omission); ERRATA already applied"
+    "METRICS_MISSING: storage/strategy_metrics.json does not exist — strategy metrics file absent entirely",
+    "ERROR_LOG_YESTERDAY (2026-05-30): claude CLI 2.1.157 auto-update caused 3-hour hourly_dispatch outage (05:07-07:07 TST). Rollback to 2.1.156 resolved. CLAUDE_BIN now pinned in cron wrapper."
   ]
 }

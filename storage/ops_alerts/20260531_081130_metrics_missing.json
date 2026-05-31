@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-05-31T08:11:30+08:00",
+  "alert_type": "METRICS_MISSING",
+  "severity": "high",
+  "detail": "storage/strategy_metrics.json does not exist. File is missing entirely — strategy metrics are unavailable. This has been the case since at least previous patrol runs. Action needed: regenerate strategy_metrics.json via ops CLI or metrics update job.",
+  "threshold": ">26h stale",
+  "actual": "file absent"
+}
