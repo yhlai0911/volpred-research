@@ -16593,7 +16593,7 @@
     "title": "K484: write general-audience article (auto-discovered uncovered K)",
     "description": "K K484 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: 用戶(創意), 執行: Claude] K484: SSVS for variance equation component selection (Chen CWS method extended). **4/5 components PIP=1.000**: GJR(1.000), VIX(1.000), Parkinson range(1.000), |ε|(1.000). Only semivariance excluded (PIP=0.094). SSVS median model QLIKE -7.43% vs base GARCH",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K484",
@@ -16608,6 +16608,33 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-31T20:09:17+00:00"
+    "created_at": "2026-05-31T20:09:17+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-31T21:25:46.930052+00:00",
+    "claim_session_id": "d1c0f5769860",
+    "started_at": "2026-05-31T21:25:46.992325+00:00",
+    "completed_at": "2026-05-31T21:28:16.134601+00:00",
+    "result": "Published general-audience draft mile_5e0786d0 for K484. Article explains why a volatility model improved most when it pruned one weak component instead of keeping every signal; included 2 charts and a topic-cluster waiver."
+  },
+  {
+    "id": "trending_repost_2026_06_01_ai資本",
+    "title": "[trending_repost] AI 巨巨頭資本支出飆升，科技股隱含波動率的定價偏誤",
+    "description": "分析微軟、亞馬遜等 hyperscaler 在 2026 年資本支出突破新高後，隱含波動率與資本支出增幅的偏離。可量化：利用科技股 IV skew 與 CapEx 指引修訂進行迴歸分析，評估市場對下行風險的低估程度。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "succeeded",
+    "created_at": "2026-05-31T22:01:22+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ],
+    "claimed_by": "hourly-06",
+    "claimed_at": "2026-05-31T22:09:24.098251+00:00",
+    "claim_session_id": "736adee2ece0",
+    "started_at": "2026-05-31T22:09:27.133316+00:00",
+    "completed_at": "2026-05-31T22:15:55.035977+00:00",
+    "result": "feed_mile_id=mile_622a2b73; FB skipped (headless); HV-proxy used (IV unavailable); N=10 (MSFT+META, 5 quarters each)"
   }
 ]
