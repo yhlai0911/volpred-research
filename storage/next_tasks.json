@@ -16121,9 +16121,15 @@
     "description": "main.tex Table 2 (L196) SPY 行加 footnote 指向 L245 K880/K880v2 disclosure。Reviewer 讀到 DM=6.00 main result 時需知此為 K880 convention + K880v2 alternative + paper Eq 3-4 justify K880。建議 footnote: 'SPY DM statistics use the canonical K880 timing convention (forecast at market open with realized overnight); see footnote on Table 4 for the timing-convention disclosure.' 來源: research_notes/k880_errata_decision_2026_05_31.md Gap 1.",
     "priority": 5,
     "task_type": "paper_body",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "source": "auto_discovered_from_paper6_errata_decision",
-    "created_at": "2026-05-31T16:13:58"
+    "created_at": "2026-05-31T16:13:58",
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-05-31T11:11:40.812930+00:00",
+    "claim_session_id": "50d2e86bd6ea",
+    "started_at": "2026-05-31T11:11:44.870689+00:00",
+    "completed_at": "2026-05-31T11:12:59.468624+00:00",
+    "result": "main.tex L205 Table 2 notes 加 K880v2 cross-ref (alternative full-day-at-t-1-close convention → SPY DM=-0.57; see footnote Table 4). xelatex 15 pages clean. paper-update sync supabase OK."
   },
   {
     "id": "Paper6_table3_relabel_ablation_vs_timing",
