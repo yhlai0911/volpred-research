@@ -15697,7 +15697,7 @@
     "title": "Paper review (Codex 24h-rule): 想用偏態 t 打敗波動率？商品市場給了個彆扭答案 — 波動預測沒救，但能救你的『最壞情境』",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_1a5263af needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_1a5263af",
@@ -15710,14 +15710,16 @@
     "claimed_by": "codex-cli",
     "claimed_at": "2026-05-31T03:17:21.325224+00:00",
     "claim_session_id": "5e0c49d59660",
-    "started_at": "2026-05-31T03:17:29.053597+00:00"
+    "started_at": "2026-05-31T03:17:29.053597+00:00",
+    "completed_at": "2026-05-31T03:19:55.566484+00:00",
+    "result": "已完成 mile_1a5263af 的 Codex review，review 檔已寫入 storage/reviews/codex_24h。結論為 CONDITIONAL_PASS：主方向成立，但有 3 個要修的點，最重要的是 ES 一句話結論把 UNG 也誤寫成從 fail 翻正，以及 USO QLIKE 用 raw p 講成顯著較差。"
   },
   {
     "id": "K460_article_general",
     "title": "K460: write general-audience article (auto-discovered uncovered K)",
     "description": "K K460 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: title: Semivariance Cross-OOS Validation (5 Periods × 2 Assets) publication_verdict: PUBLICATION READY: Semivariance finding is robust across periods and assets",
     "priority": 4,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K460",
@@ -15727,6 +15729,53 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-31T03:08:14+00:00"
+    "created_at": "2026-05-31T03:08:14+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-05-31T04:10:42+00:00",
+    "blocked_note": "Already covered by mile_d610cb89 (2026-03-26 K459 vs K460): same 5-period cross-OOS framework, explicitly states K460 Semivariance 5/5 wins. Narrative arc fully subsumed."
+  },
+  {
+    "id": "K465_article_general",
+    "title": "K465: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K465 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: Assets: SPY, EWT Method: 5-period cross-OOS with IS=2000d, QLIKE evaluation, DM test PUBLICATION READY — HAR log-range robust across both assets and all regimes Reference: Corsi (2009) J Financial Econometrics — HAR-RV model Reference: Alizadeh, Brandt & Diebold (2002) JFE — Rang",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K465",
+    "tags": [
+      "cross-oos",
+      "har",
+      "taiwan",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T04:08:03+00:00"
+  },
+  {
+    "id": "K469_article_general",
+    "title": "K469: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K469 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: Assets: SPY, EWT Method: 5-period cross-OOS with r² proxy. HAR forecasts scaled from Parkinson to r² level using IS calibration ratio. DM test for statistical significance. HAR log-range is ROBUST: wins persist with r² evaluation Reference: Corsi (2009) J Financial Econometrics —",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K469",
+    "tags": [
+      "cross-oos",
+      "har",
+      "taiwan",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-05-31T04:08:03+00:00",
+    "claimed_by": "hourly-12",
+    "claimed_at": "2026-05-31T04:10:43.291139+00:00",
+    "claim_session_id": "def847c11814",
+    "started_at": "2026-05-31T04:10:47.276271+00:00",
+    "completed_at": "2026-05-31T04:19:30.698457+00:00",
+    "result": "mile_7c104f6d draft published. K469 cross-OOS HAR-LR robust under r² proxy (5/5 SPY, 4/5 EWT). Tautology correction angle. Anti-AI-gate PASS (2 WARN, 0 MUST). 1050 zh chars + 圖表 + DM tests."
   }
 ]
