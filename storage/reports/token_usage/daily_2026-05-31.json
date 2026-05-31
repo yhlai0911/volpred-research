@@ -1,0 +1,199 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-05-31",
+  "week_range": "2026-05-29 → 2026-06-05",
+  "totals": {
+    "input_tokens": 9,
+    "output_tokens": 813,
+    "cache_read_tokens": 0,
+    "cache_create_tokens": 90726,
+    "billable_total": 91548,
+    "assistant_messages": 3,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.3524
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 9,
+      "output_tokens": 813,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 90726,
+      "messages": 3,
+      "estimated_cost_usd": 0.3524
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 6,
+      "output_tokens": 542,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 60484,
+      "messages": 2,
+      "billable_total": 61032,
+      "estimated_cost_usd": 0.235,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "token_report": {
+      "input_tokens": 3,
+      "output_tokens": 271,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 30242,
+      "messages": 1,
+      "billable_total": 30516,
+      "estimated_cost_usd": 0.1175,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 2,
+      "billable_total": 61032,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 2,
+          "billable_total": 61032
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "non-text assistant message",
+          "messages": 1,
+          "billable_total": 30516
+        },
+        {
+          "name": "other",
+          "messages": 1,
+          "billable_total": 30516
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 1,
+          "billable_total": 30516
+        },
+        {
+          "name": "Token 用量日報任務開始，先執行報告腳本。",
+          "messages": 1,
+          "billable_total": 30516
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 0,
+      "billable_total": 0,
+      "family_breakdown": [],
+      "prefix_breakdown": [],
+      "top_first_lines": []
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 1,
+      "cache_create_tokens": 90726,
+      "billable_total": 91548,
+      "cache_create_share_pct": 99.1,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "87a2ee3c-c915-464c-8139-232498566987",
+          "messages": 3,
+          "billable_total": 91548,
+          "cache_create_tokens": 90726,
+          "cache_read_tokens": 0,
+          "duration_minutes": 0.0,
+          "cache_create_share_pct": 99.1,
+          "first_ts": "2026-05-31T14:44:47.014000+00:00",
+          "last_ts": "2026-05-31T14:44:48.755000+00:00"
+        }
+      ]
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "2a4a2ed",
+      "message": "Ops patrol report 2026-05-31T20:12Z"
+    },
+    {
+      "sha": "a06ddc6",
+      "message": "Paper6_table2_timing_footnote | main.tex Table 2 notes: add K880v2 cross-ref"
+    },
+    {
+      "sha": "86fa31a",
+      "message": "ops(hourly-19): K1096_article_general_v2 — BTC/VIX regime article publish + 3 fi"
+    },
+    {
+      "sha": "ecc7e96",
+      "message": "K1082_article_general | mile_a6b1ed98 draft — USD wrapper 計價實驗：同組成台股 TWD vs USD "
+    },
+    {
+      "sha": "ef354c6",
+      "message": "ops(hourly-18): PHASE-Z carry-over — K1400 retirement_mortgage article figures +"
+    },
+    {
+      "sha": "4768ac5",
+      "message": "K1306_article_research | mile_2e12b166 research draft — SEC 10-K LM tone NULL on"
+    },
+    {
+      "sha": "3de596a",
+      "message": "ops(hourly-17): PHASE-Z carry-over — K1104 codex publish artifacts"
+    },
+    {
+      "sha": "8ae4527",
+      "message": "Paper6_major_errata_K880v2_canonical | decision memo — NO ERRATA REQUIRED"
+    },
+    {
+      "sha": "8f3dcf9",
+      "message": "K1057_article_general | mile_fa859ea5 draft — HAR-RV-J NULL on SPY 60d"
+    },
+    {
+      "sha": "b2df851",
+      "message": "K693_article_general | publish mile_c3c0ce07 lookahead bias retrospective"
+    },
+    {
+      "sha": "4b0e27c",
+      "message": "ops(hourly-13): paper_review_mile_fd36c6cd CONDITIONAL_PASS"
+    },
+    {
+      "sha": "47dbb7b",
+      "message": "ops(hourly-13): PHASE-Z carry-over commit — K465 article assets + feed/next_task"
+    },
+    {
+      "sha": "499a699",
+      "message": "ops(hourly 12:21): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    },
+    {
+      "sha": "d25c326",
+      "message": "K469_article_general | mile_7c104f6d draft — HAR Log-Range r² proxy tautology co"
+    },
+    {
+      "sha": "0d9d2cd",
+      "message": "ops(hourly-11): K1113 daily_article published as draft mile_85502a95"
+    },
+    {
+      "sha": "0929736",
+      "message": "ops(hourly-10): FB 根因回信 (email-11845) + 2 篇 reclassify awaiting_interactive_sess"
+    },
+    {
+      "sha": "5a7f473",
+      "message": "ops(hourly-09): K1107 task complete + orphan codex review"
+    },
+    {
+      "sha": "df06885",
+      "message": "K1107_article_general | mile_2ed9949e draft — IC設計財報日類別平均的 bimodal 陷阱"
+    },
+    {
+      "sha": "35be2db",
+      "message": "ops(hourly-08): fix memory_health_daily false staleness — wrapper banner emit"
+    },
+    {
+      "sha": "8493efd",
+      "message": "Ops patrol report 2026-05-31T06:12Z"
+    },
+    {
+      "sha": "46931c0",
+      "message": "Ops patrol report 2026-05-31T08:11Z"
+    }
+  ]
+}
