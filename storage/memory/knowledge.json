@@ -31942,5 +31942,81 @@
       "K693",
       "amendment_applied"
     ]
+  },
+  {
+    "id": "K1410_codex_review_partialmonth_fix",
+    "timestamp": "2026-06-01T15:31:43.947527Z",
+    "k_id": "K1410",
+    "experiment_id": "k1410",
+    "experiment_ids": [
+      "k1410"
+    ],
+    "experiment_path": "experiments/k1410/",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "Codex CLI 0.135.0 (gpt-5.4)",
+    "reviewer_source": "Codex review (production article 24h-rule, paper_review_mile_c2020d8c)",
+    "codex_review": true,
+    "tags": [
+      "sequence-of-returns-risk",
+      "retirement-withdrawal",
+      "stationary-bootstrap",
+      "partial-month-bug",
+      "errata",
+      "guyton-klinger"
+    ],
+    "topic": "Sequence of Returns Risk: dynamic withdrawal beats other strategies",
+    "summary": "K1410（順序風險）Codex 一審 FAIL — 抓到 monthly_returns() 把 TWII 2026-06-01 單日當完整 6 月月末納入 （partial-month 污染所有台股統計）。Fix: 在 resample 後比對 last obs 與當前日曆月，若落在當月則剔最後一個 resampled month。重跑後 TWII n_months 347→346，所有 TWII 數字微調（動態 GK 96.5→96.6%, bond tent 76.9→77.0%, 60/40 75.3→75.4%, WR3.5% 70.6→70.9%, defer3y 68.0→68.2%, Y1 崩盤 65.7→66.5%, 早晚 ratio 1.64→1.66, 4% baseline 63.3→63.4%）。GSPC 不變（last obs 5/29 是 5 月最後交易日）。文章 mile_c2020d8c 已加 Errata + 數字更新 + 「全是真資料」措辭改成股市真實/債券 proxy disclosure + 「退休前 5 年」→「退休後最初 5 年」修正。Supabase 已 sync。主結論不變（動態提領仍冠軍 96%+）。",
+    "lessons": [
+      "yfinance + resample(ME) 對活躍交易日資料有 partial-month 陷阱 — 當 last obs 在當前日曆月時 ME 會強行 align 到當月最後一天，把 1-N 日的部分當完整月。defensive monthly_returns 必須檢查 last_obs 月份 vs today 月份，若同月剔最後一筆。",
+      "Codex production-article 24h-rule 抓到 critical bug（partial-month），證明 review pipeline 對研究誠實是 load-bearing — Claude self-review 無法替代 fresh-context source-code 審。",
+      "Article 措辭「全是真資料」當 dataset 含 model proxy（bond）時是 overclaim — 必須在文章顯著位置揭露 proxy 來源 + 限制段落單獨點出。",
+      "Errata footnote 是 published article 修正的正確路徑：標日期、列具體數字 delta、聲明主結論是否變。不可暗中改數字不留 trail。"
+    ],
+    "numbers_pre_fix_vs_post_fix": {
+      "TWII_dynamic_GK_pct": [
+        96.5,
+        96.6
+      ],
+      "TWII_bond_tent_pct": [
+        76.9,
+        77.0
+      ],
+      "TWII_static6040_pct": [
+        75.3,
+        75.4
+      ],
+      "TWII_WR3.5_pct": [
+        70.6,
+        70.9
+      ],
+      "TWII_defer3y_pct": [
+        68.0,
+        68.2
+      ],
+      "TWII_WR4_baseline_pct": [
+        63.3,
+        63.4
+      ],
+      "TWII_WR5_pct": [
+        48.3,
+        48.3
+      ],
+      "TWII_crash_y1_pct": [
+        65.7,
+        66.5
+      ],
+      "TWII_crash_y30_pct": [
+        36.6,
+        36.3
+      ],
+      "TWII_early_late_ratio": [
+        1.64,
+        1.66
+      ],
+      "GSPC_all": "unchanged"
+    },
+    "article_mile_id": "mile_c2020d8c",
+    "fix_commit": "pending",
+    "related_task": "paper_review_mile_c2020d8c"
   }
 ]

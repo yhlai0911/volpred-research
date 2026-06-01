@@ -17396,7 +17396,7 @@
     "title": "Paper review (Codex 24h-rule): K667: VT 波動率目標策略的保險成本定量分析——20 年 5,089 交易日實證",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_0dcb826e needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_0dcb826e",
@@ -17405,14 +17405,20 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-01T14:09:46+00:00"
+    "created_at": "2026-06-01T14:09:46+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-01T14:18:02.248856+00:00",
+    "claim_session_id": "301151edc7d1",
+    "started_at": "2026-06-01T14:18:02.293769+00:00",
+    "completed_at": "2026-06-01T14:18:44.432947+00:00",
+    "result": "Codex review found no lookahead leakage: K667 uses lagged VIX at t-1 for day-t weights. Main issue is claim/stat mismatch: article says the 12/VIX annual premium is 2.505% and ties that directly to t=2.245, p=0.0369, but source code computes 2.505% as full-sample CAGR difference while the t-test is run on 20 yearly premium observations whose mean is 3.696%, not 2.505%. The article should separate these two metrics instead of presenting the t-stat as if it validates the CAGR-gap number. Secondary caution: ATM put 26.1% is a Black-Scholes/VIX proxy estimate and should stay framed as rough upper-bound comparison, not a hard market cost."
   },
   {
     "id": "paper_review_mile_c2020d8c",
     "title": "Paper review (Codex 24h-rule): 買的時候時點沒那麼重要，賣的時候順序可能決定你幾歲把錢花光",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_c2020d8c needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_c2020d8c",
@@ -17421,14 +17427,20 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-01T14:09:46+00:00"
+    "created_at": "2026-06-01T14:09:46+00:00",
+    "claimed_by": "hourly-23",
+    "claimed_at": "2026-06-01T15:08:46.615153+00:00",
+    "claim_session_id": "b63bc173aecb",
+    "started_at": "2026-06-01T15:08:54.481305+00:00",
+    "completed_at": "2026-06-01T15:19:44.326733+00:00",
+    "result": "Codex review found no lookahead or seed issues, but caught a critical TWII partial-month bug: 2026-06-01 was being treated as a full June month in monthly resampling. Fixed k1410 to drop incomplete terminal months, regenerated results, and published errata updating TWII numbers plus clarifying that retirement-risk-zone evidence here is retirement-post years 1-30 only and that bond strategies use a bond proxy."
   },
   {
     "id": "K1000_article_general",
     "title": "K1000: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1000 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: 賴奕豪, 執行: Claude] A4f + Student-t 聯合 MLE vs 2-step 比較。結果：(1) 三個 A4f 變體均達 VaR/ES scorecard 6/6（UC+CC+DQ+Basel+ES_Z1+ES_Z2 全 PASS）；(2) Student-t 改善 1% VaR violation（1.75%→1.21%），但不改善 QLIKE；(3) 2-step vs joint 幾乎無差（df~7.8-8.0）；(4) A4f vs GJR DM |t|>4.2 顯著；(5) GJR_N 只 3/6，GJR_t 5",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1000",
@@ -17444,7 +17456,13 @@
       "audience-general"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-06-01T14:09:47+00:00"
+    "created_at": "2026-06-01T14:09:47+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-01T15:20:10.676896+00:00",
+    "claim_session_id": "30e75295c2cb",
+    "started_at": "2026-06-01T15:20:19.795642+00:00",
+    "completed_at": "2026-06-01T15:24:30.144227+00:00",
+    "result": "Published draft general-audience K1000 article as mile_5ab020d7 via publish_draft with explicit cluster_waiver because K1000 previously had research-only coverage and the VIX cluster is over cooldown cap. Article translates the result into a general-reader angle: market fear signal matters more than piling extra math onto an old model."
   },
   {
     "id": "K1002_article_general",

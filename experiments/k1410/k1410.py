@@ -111,7 +111,18 @@ def fetch(name, symbol, refresh=False):
 
 
 def monthly_returns(px):
-    return px.resample("ME").last().pct_change().dropna()
+    """Resample 至月末取最後成交價、pct_change。**排除未完成的尾端月**
+    （若資料最後一筆觀察落在當前日曆月，視為 partial-month → 剔除），
+    避免把不完整月當成整月報酬污染統計。
+    Codex review 2026-06-01 catch：原版把 TWII 2026-06-01 單日當 6 月月末。"""
+    m = px.resample("ME").last()
+    if len(m) >= 1:
+        last_obs = px.index.max()
+        today = pd.Timestamp.today().normalize()
+        # 若最後觀察在當前日曆月內 → partial → 剔最後一個 resampled month
+        if (last_obs.year == today.year) and (last_obs.month == today.month):
+            m = m.iloc[:-1]
+    return m.pct_change().dropna()
 
 
 # ---------------------------------------------------------------------------
