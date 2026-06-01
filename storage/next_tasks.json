@@ -16759,7 +16759,7 @@
     "title": "K699: write general-audience article (auto-discovered uncovered K)",
     "description": "K K699 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: K698 驗證, 執行: Claude] Default(1%/±20%) 3/5 FAIL。Optimized(2%/±30%) 4/5 PASS but Harvey t=2.19 FAIL。Alpha regime-dependent: corr(alpha, neg-autocorr)=-0.873。Low-vol periods 無效。Codex審查: K698 有多個 bug(BH baseline非真BH、TX undercount、NaN bug、in-sample optimization)。+0.035 alpha 不可信。",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K699",
@@ -16774,7 +16774,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-01T01:08:24+00:00"
+    "created_at": "2026-06-01T01:08:24+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-01T03:39:11.856799+00:00",
+    "claim_session_id": "80030f6bcff0",
+    "started_at": "2026-06-01T03:39:22.689556+00:00",
+    "completed_at": "2026-06-01T03:41:17.263466+00:00",
+    "result": "Published general-audience draft mile_9d646fae for K699. Article explains that contrarian tilt looks intuitive but loses robustness once tested across five distinct OOS periods; included 2 charts on period-by-period deltas and robustness scorecard."
   },
   {
     "id": "K713_article_general",
@@ -16854,7 +16860,7 @@
     "title": "K880: write general-audience article (auto-discovered uncovered K)",
     "description": "K K880 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: Codex(誤判), 執行: Claude] K880v2 removes r_overnight_t from h_intraday_t (Codex called it 'lookahead'). Result: DM drops 6.00→-0.57. BUT user clarified: using just-completed session info for next session is NOT lookahead — it's the core PRS design (Lai 2024). K880v2 actually pr",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K880",
@@ -16868,6 +16874,12 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-01T02:10:08+00:00"
+    "created_at": "2026-06-01T02:10:08+00:00",
+    "claimed_by": "hourly-12",
+    "claimed_at": "2026-06-01T04:09:53.434978+00:00",
+    "claim_session_id": "4ea1f5c6caa9",
+    "started_at": "2026-06-01T04:10:00.394348+00:00",
+    "completed_at": "2026-06-01T04:18:10.312335+00:00",
+    "result": "feed=mile_862223de (draft/research audience); 2 figs (qlike_bar + cross_recursion_value) Supabase 已 upload; anti_ai_gate PASS; 1420 chars; commit f08c72bb. cluster_waiver applied (spy cluster 60/30d, K880 是 PRG methodology validation 非 SPY market commentary)"
   }
 ]
