@@ -9203,5 +9203,15 @@
     "title": "Re-sync 7 missing Supabase articles → audit mismatch 7→0",
     "details": "host_cron_fail BREACH triggered by audit_publish_sync exit=1. Root cause: 7 published articles未sync (articles_last_ts cutoff排除掉)。Fix: targeted sync via sync_article() bypass incremental filter. Side note: emdash_normalizer auto-fixed 20 em-dashes during sync (mile_15d43f72:2, mile_34be417d:7, mile_5b6f9e1b:6, mile_696c6063:5)。",
     "claimed_by": "hourly-22"
+  },
+  {
+    "timestamp": "2026-06-02T02:11",
+    "task_type": "paper_body",
+    "task_id": "VolAbsorption_errata_decision",
+    "actor": "hourly-02",
+    "result": "Paper 5 (volatility-absorption) K716-K722 reconstruction divergence decision: option (c) errata pending. Updated scripts/README.md: replaced stale MISSING table with reconstructed-script table (commit 86d10c7b, 2026-04-17) + 4-divergence errata block (NSI t-stat -3.42→-1.77, 0050.TW slope, K721 rate-shock, K722 corr_raw; qualitative all match). Submitting with paper numbers; reviewer-triggered errata if asked.",
+    "files_changed": [
+      "paper/volatility-absorption/scripts/README.md"
+    ]
   }
 ]

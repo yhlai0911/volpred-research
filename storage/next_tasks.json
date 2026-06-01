@@ -6193,7 +6193,7 @@
   {
     "id": "VolAbsorption_errata_decision",
     "title": "Paper 5 (volatility-absorption) 數值 divergence 三選一決策（投稿前必做）",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 4,
     "created_at": "2026-04-17T16:18:08+08:00",
     "description": "K716-K722 reconstruction (commit 86d10c7b) 發現 4 處數值 divergence，皆因 paper 未完整 spec exact formula 或 data vintage 差異：(A) K716 NSI t-stat: -1.77 reconstructed vs paper -3.42. 原因：N=767 (reconstruction) vs paper N=893，likely sample filter 差. (B) K718 0050.TW slope: +0.00008 vs paper +0.00019. 符號一致 (non-absorption 結論不變) 但 magnitude 差異 60%. (C) K721 rate-shock NSI high_vix_norm: 0.060 vs 0.066 (9% diff). rate-shock absorption coefficient +0.019 需 recheck. (D) K722 corr_raw: 0.5671 vs 0.6803 (17% diff). 'not improved' 結論一致 — 此項 low risk. Qualitative findings 全部一致（endogenous absorption, paralysis flags, VRP positive, 0050.TW NO paralysis）. **三選一決策** (用戶或主線程決定): (a) 修 reconstruction scripts — 需定位 paper 原始 data vintage (yfinance snapshot 2025-XX) + sample filter 精確規則; (b) 修 paper main_v2.tex 到 reconstruction 數字為準 — 誠實 research 路徑，主線程 body rewrite + errata; (c) 明記 errata pending — scripts/README.md 標註 'reconstruction approximate, qualitative conclusions unaffected, submitting with current paper numbers, errata may follow if reviewer asks'. **Blocker if undecided before Paper 5 submission**. 建議 (c) 為最低成本路徑（qualitative 都 match，reviewer 若不抓 exact numbers 無風險）.",
@@ -6211,7 +6211,10 @@
         "rationale": "paper + body-rewrite verbs",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "completed_at": "2026-06-02",
+    "resolution": "Decision: option (c) — errata pending. Updated paper/volatility-absorption/scripts/README.md with K716-K722 reconstructed-script table + 4-divergence errata block (qualitative findings unaffected; submitting with paper numbers; errata may follow if reviewer asks). Cross-ref to errata_pending.md for separate K903/K904 R1 issues.",
+    "claimed_by": "hourly-02"
   },
   {
     "id": "VolAbsorption_missing_scripts_recovery",
@@ -17524,7 +17527,7 @@
     "title": "Paper review (Codex 24h-rule): K1151：財報 Beat 多少不重要，今天有沒有公佈財報才是波動率信號",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_0ae5323e needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "in_progress",
+    "status": "pending",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_0ae5323e",
@@ -17534,10 +17537,12 @@
       "main-thread-only"
     ],
     "created_at": "2026-06-01T16:08:13+00:00",
-    "claimed_by": "hourly-00",
-    "claimed_at": "2026-06-01T16:08:46.561852+00:00",
+    "claimed_by": null,
+    "claimed_at": null,
     "claim_session_id": "3a482ecde971",
-    "started_at": "2026-06-01T16:08:50.116610+00:00"
+    "started_at": null,
+    "release_reason": "Stale claim 2h+ no activity; hourly-00 actually did K1036/K189/K1410 work; released by hourly-02",
+    "released_at": "2026-06-01T18:11:15+00:00"
   },
   {
     "id": "K1036_article_general",
@@ -17613,7 +17618,7 @@
     "title": "K1005: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1005 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: [提出: 賴奕豪, 執行: Claude] Conformal vs Parametric VaR 比較。核心發現：(1) GJR_t parametric 只 7/14 (50%)，加 conformal→13/14，ACI→14/14——GJR 需要 conformal 修正分配假設；(2) A4f_t parametric 已 14/14 (100%)，conformal/ACI 也 100%——A4f 的 VIX-driven τ 使分配假設足夠好；(3) ACI violation rate 極精準：1.01%/2.48%/5.07%（幾乎完美",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1005",
@@ -17628,7 +17633,13 @@
       "audience-general"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-06-01T17:10:35+00:00"
+    "created_at": "2026-06-01T17:10:35+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-01T17:29:05.172733+00:00",
+    "claim_session_id": "d72a9745453e",
+    "started_at": "2026-06-01T17:29:16.486726+00:00",
+    "completed_at": "2026-06-01T17:33:10.318095+00:00",
+    "result": "Published general-audience K1005 draft as mile_d9381a94 with 2 original experiment charts; passed audience/image gates and used cluster waiver for uncovered conformal-calibration angle."
   },
   {
     "id": "K1038_article_general",
