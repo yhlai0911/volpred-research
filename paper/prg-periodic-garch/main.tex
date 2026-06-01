@@ -38,7 +38,7 @@ Email: yhlai@mail.dyu.edu.tw}}
 \maketitle
 
 \begin{abstract}
-This paper proposes the Periodic Realized GARCH (PRG) model, which maintains a single GARCH variance recursion while allowing session-specific parameters for overnight and intraday periods. The key mechanism is that the conditional variance $h_{n-1}$ from one session carries into the next, creating an information bridge across session boundaries. Using tick-level data from Taiwan futures (TAIFEX), daily OHLC data from four U.S. exchange-traded funds (SPY, QQQ, GLD, EEM), and the Taiwan 0050 ETF, the PRG model significantly outperforms GJR-GARCH in all six markets under the QLIKE loss function, with Diebold--Mariano test statistics of 6.63 (EEM), 6.12 (GLD), 6.00 (SPY), 5.27 (0050.TW), 5.10 (TAIFEX), and 4.26 (QQQ)---all exceeding the \citet{Harvey2016} threshold of $|t|>3.0$. An ablation removing the session-boundary update collapses the advantage (DM $t = 6.00 \to -0.57$), and a fair-information GJR-X benchmark on SPY confirms PRG's dominance is structural, not informational (PRG vs GJR-X DM $t = 7.72$; GJR-X vs GJR DM $t = -0.53$, NS). PRG also dominates in VaR and Expected Shortfall evaluations and yields economic gains in TAIFEX volatility timing.
+This paper proposes the Periodic Realized GARCH (PRG) model, which maintains a single GARCH variance recursion while allowing session-specific parameters for overnight and intraday periods. The key mechanism is that the conditional variance $h_{n-1}$ from one session carries into the next, creating an information bridge across session boundaries. Using tick-level data from Taiwan futures (TAIFEX), daily OHLC data from four U.S. exchange-traded funds (SPY, QQQ, GLD, EEM), and the Taiwan 0050 ETF, the PRG model significantly outperforms GJR-GARCH in all six markets under the QLIKE loss function, with Diebold--Mariano test statistics of 6.63 (EEM), 6.12 (GLD), 6.00 (SPY), 5.27 (0050.TW), 5.10 (TAIFEX), and 4.26 (QQQ)---all exceeding the \citet{Harvey2016} threshold of $|t|>3.0$. A cross-market session-boundary ablation, operationalized as PRG vs.\ Separate GARCH (which retains session-specific parameters but removes the cross-session $h_{n-1}$ bridge), is Harvey-significant in all six markets ($-6.69 \leq \text{DM } t \leq -4.07$), isolating the information bridge as the mechanism. A robustness check under an alternative full-day-at-$t{-}1$-close timing convention reduces the SPY advantage from DM $t = 6.00$ to $-0.57$, confirming that the bridge value materializes only when overnight information is exploited at the natural intraday-forecast horizon (market open). A fair-information GJR-X benchmark on SPY confirms PRG's dominance is structural, not informational (PRG vs GJR-X DM $t = 7.72$; GJR-X vs GJR DM $t = -0.53$, NS). PRG also dominates in VaR and Expected Shortfall evaluations and yields economic gains in TAIFEX volatility timing.
 
 \medskip\noindent
 \textbf{Keywords:} Volatility forecasting; Periodic GARCH; Session decomposition; Overnight variance; Cross-session information transfer
@@ -212,33 +212,34 @@ The TAIFEX MCS analysis is particularly informative: at the 10\% significance le
 
 A notable finding concerns the GJR--HAR comparison. On the common $\sigma^2_{\text{full}}$ target, GJR and HAR are statistically indistinguishable on TAIFEX (DM $t = 0.57$). This stands in sharp contrast to results obtained when each model is evaluated on its native target, where HAR appears to dominate. The discrepancy illustrates the target-mismatch problem identified by \citet{Patton2011}: comparing models on different targets can produce spurious rankings.
 
-\subsection{Ablation: the value of session-boundary updates}
+\subsection{Alternative timing convention comparison (K880 vs.\ K880v2)}
+\label{sec:timing_convention}
 
-To isolate the contribution of the session-boundary information transfer, we estimate a ``PRG-Ablated'' model that removes the cross-session update---specifically, the intraday variance no longer conditions on the just-completed overnight return. Table~\ref{tab:ablation} reports the results for SPY.
+The paper's canonical forecast convention, defined by Eqs.~(\ref{eq:prg_ov_forecast})--(\ref{eq:prg_in_forecast}), issues the intraday-variance forecast \emph{at the day-$d$ open} conditional on the realized overnight return $r^2_{\text{overnight},d}$. We refer to this as the K880 convention. As a sensitivity exercise, we re-evaluate PRG Extended under an alternative convention---K880v2---that issues the full-day forecast at the day-$(d-1)$ close. Under K880v2, the overnight return is not yet observed, so the intraday variance must use the forecast $\hat h_{\text{overnight},d}$ rather than $r^2_{\text{overnight},d}$. Table~\ref{tab:ablation} reports the resulting SPY comparison; we emphasize that this is a horizon convention contrast, not a within-K880 ablation of the cross-session bridge (the latter is provided implicitly by the PRG-vs-Separate-GARCH comparisons in Table~\ref{tab:main_results}; see the cross-market generalization paragraph below).
 
 \begin{table}[htbp]
 \centering
-\caption{Ablation study: removing session-boundary update (SPY)}
+\caption{Alternative timing convention comparison: K880 (forecast at day-$d$ open) vs.\ K880v2 (forecast at day-$(d-1)$ close), SPY}
 \label{tab:ablation}
 \small
 \begin{tabular}{lcccc}
 \toprule
  & QLIKE & DM $t$ vs GJR & Spearman $\rho$ & MZ-$R^2$ \\
 \midrule
-PRG Extended (full)    & 0.748 & 6.00$^{***}$ & 0.568 & 0.464 \\
-PRG-Ablated            & 0.864 & $-$0.57      & 0.474 & 0.264 \\[2pt]
-\emph{Gap (full $-$ ablated)} & $-$0.116 & \multicolumn{3}{c}{$\Delta(\text{DM } t) = 6.57$} \\
+PRG Extended, K880 (at open)   & 0.748 & 6.00$^{***}$ & 0.568 & 0.464 \\
+PRG Extended, K880v2 (at close) & 0.864 & $-$0.57      & 0.474 & 0.264 \\[2pt]
+\emph{Gap (K880 $-$ K880v2)} & $-$0.116 & \multicolumn{3}{c}{$\Delta(\text{DM } t) = 6.57$} \\
 \bottomrule
 \end{tabular}
 \begin{flushleft}
 \footnotesize
-\emph{Notes:} PRG-Ablated removes $r^2_{\text{overnight},d}$ from $h_{\text{intraday},d}$, severing the cross-session link. The Mincer--Zarnowitz $R^2$ drops from 0.464 to 0.264. The DM-$t$ gap of $6.57$ between full and ablated specifications quantifies the forecasting value of the session-boundary information transfer.
+\emph{Notes:} Both rows use the identical PRG Extended specification; only the forecast issuance horizon differs. K880 issues the intraday forecast at the day-$d$ open conditional on the already-realized $r^2_{\text{overnight},d}$ (the convention defined in Eqs.~(\ref{eq:prg_ov_forecast})--(\ref{eq:prg_in_forecast}) and standard in the session-based volatility literature). K880v2 issues the full-day forecast at the day-$(d-1)$ close, so the intraday-variance equation uses the model-implied forecast $\hat h_{\text{overnight},d}$ rather than the realized $r^2_{\text{overnight},d}$. The DM-$t$ gap of $6.57$ quantifies the value of evaluating the model at the natural intraday-forecast horizon (market open), where overnight information is fully observed.
 \end{flushleft}
 \end{table}
 
-The result is striking: removing the session-boundary update causes QLIKE to deteriorate from 0.748 to 0.864, and the DM statistic against GJR collapses from $6.00$ to $-0.57$---a swing of $6.57$ standard deviations. The ablated PRG is statistically indistinguishable from GJR, confirming that the session-boundary information transfer is the sole driver of PRG's forecasting advantage. The Mincer--Zarnowitz $R^2$ drops from 0.464 to 0.264, indicating that the cross-session update explains nearly half of the variance captured by the full model.
+The contrast is informative for two reasons. First, K880v2 forecasts deteriorate substantially (QLIKE 0.748 $\to$ 0.864; MZ $R^2$ 0.464 $\to$ 0.264), and the DM statistic against GJR collapses from $6.00$ to $-0.57$. This is not because the session-boundary mechanism has been removed---both K880 and K880v2 retain the cross-session $h_{n-1}$ recursion---but because forecasting the intraday session before its overnight predecessor has even closed forces the model to plug in $\hat h_{\text{overnight},d}$ in place of the much more informative $r^2_{\text{overnight},d}$. Second, this validates the K880 convention used throughout the paper as the natural and admissible choice under the information-set definition in Eqs.~(\ref{eq:prg_ov_forecast})--(\ref{eq:prg_in_forecast}): the intraday forecast is issued at market open, when overnight information is already in the agent's information set. The K880v2 row therefore functions as a robustness check against alternative-convention scepticism, not as a session-bridge ablation.
 
-\paragraph{Cross-market generalization.} We report the explicit ablation on SPY because it provides the longest continuous high-quality OHLC sample and a well-studied benchmark. However, the PRG-vs-Separate-GARCH comparisons in Table~\ref{tab:main_results} serve as the \emph{implicit} cross-market ablation: Separate GARCH uses identical session-specific parameterization but lacks the cross-session information bridge, so the PRG-vs-Separate gap isolates exactly the bridge effect. The Harvey-significant gaps span DM $t = -4.07$ (TAIFEX) to $-6.69$ (SPY) across all six markets, confirming that the SPY ablation result generalizes.
+\paragraph{Cross-market session-boundary ablation.} The explicit within-K880 ablation of the session-boundary bridge is provided by the PRG-vs-Separate-GARCH comparisons in Table~\ref{tab:main_results}. Separate GARCH retains identical session-specific parameterization but estimates the two sessions independently, removing the cross-session $h_{n-1}$ recursion; the PRG-vs-Separate gap therefore isolates exactly the bridge effect. The Harvey-significant gaps span DM $t = -4.07$ (TAIFEX) to $-6.69$ (SPY) across all six markets, providing the cross-market evidence that the session-boundary information transfer---not session-specific parameterization alone---is the mechanism behind PRG's advantage.
 
 \subsection{VaR and Expected Shortfall evaluation}
 
@@ -357,7 +358,7 @@ Three limitations merit acknowledgment. First, the OHLC-based session decomposit
 
 This paper introduces the Periodic Realized GARCH, a parsimonious model that captures session-specific volatility dynamics through a single GARCH recursion with periodic parameters. The key innovation is the cross-session information bridge: each session's variance forecast inherits information from the completed session's return, creating a natural conduit for overnight-to-intraday (and intraday-to-overnight) information flow.
 
-Three findings stand out. First, the PRG significantly outperforms GJR-GARCH in all six markets tested, with DM $t$-statistics of 4.26--6.63, well above the Harvey (2016) threshold. Second, the ablation study demonstrates that removing the session-boundary update eliminates the entire advantage, establishing that periodic information transfer---not simply additional parameters---is the mechanism. Third, the fair comparison framework reveals that previously reported HAR dominance over GJR is substantially an artifact of target mismatch.
+Three findings stand out. First, the PRG significantly outperforms GJR-GARCH in all six markets tested, with DM $t$-statistics of 4.26--6.63, well above the Harvey (2016) threshold. Second, the cross-market PRG-vs-Separate-GARCH gaps ($-6.69 \leq \text{DM } t \leq -4.07$) demonstrate that the cross-session $h_{n-1}$ bridge---not session-specific parameterization alone---is the mechanism behind PRG's advantage, and a robustness comparison against an alternative full-day-at-$t{-}1$-close timing convention reinforces that this advantage materializes only when overnight information is exploited at the natural intraday-forecast horizon. Third, the fair comparison framework reveals that previously reported HAR dominance over GJR is substantially an artifact of target mismatch.
 
 These results suggest that the overnight--intraday session boundary is a first-order feature of return dynamics that standard volatility models fail to exploit. The PRG provides a practical and effective way to incorporate this structure.
 

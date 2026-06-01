@@ -16142,9 +16142,15 @@
     "description": "Table 3 (L221) 標籤 'Ablation removing session-boundary update' 其實是 K880 vs K880v2 timing convention 比較 (DM 6.00 → -0.57)。Reviewer-level critique: relabel 為 'Alternative timing convention comparison'。可選同步補 within-K880 真 ablation (remove cross-session h_{n-1} carryover) 作補強。來源: research_notes/k880_errata_decision_2026_05_31.md Gap 3.",
     "priority": 6,
     "task_type": "paper_body",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "source": "auto_discovered_from_paper6_errata_decision",
-    "created_at": "2026-05-31T16:13:58"
+    "created_at": "2026-05-31T16:13:58",
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-06-01T00:09:55.414514+00:00",
+    "claim_session_id": "9cacbbb56ea0",
+    "started_at": "2026-06-01T00:10:04.048550+00:00",
+    "completed_at": "2026-06-01T00:12:39.547157+00:00",
+    "result": "Paper 6 Table 3 relabel: 'Ablation removing session-boundary update' → 'Alternative timing convention comparison (K880 vs K880v2)'. Reframed §3.6 + abstract + conclusion; row labels K880/K880v2; cross-market session-bridge ablation now clearly attributed to PRG-vs-Separate-GARCH (Table 2). 解 errata Gap 3 (k880_errata_decision_2026_05_31.md). xelatex 2-pass clean (17 pages), paper-update synced (updated_at 2026-06-01T00:12)."
   },
   {
     "id": "Paper6_online_appendix_k880v2_robustness",
@@ -16642,7 +16648,7 @@
     "title": "Paper review (Codex 24h-rule): 澳洲股市的謎——我們以為找到了答案，結果發現問題出在資料本身",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_696c6063 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_696c6063",
@@ -16651,7 +16657,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-05-31T23:07:59+00:00"
+    "created_at": "2026-05-31T23:07:59+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-05-31T23:29:11.134917+00:00",
+    "claim_session_id": "f16e021d18c2",
+    "started_at": "2026-05-31T23:29:11.157286+00:00",
+    "completed_at": "2026-05-31T23:30:15.090991+00:00",
+    "result": "Codex review: K1210 supports H1 rejected, H2 supported, and stock-driven instability, with lag discipline intact. But article overstates two points: yfinance cross-check has 3 covered events but only 2 matched comparisons, and code does not directly prove pooled-MLE local minima without multi-start."
   },
   {
     "id": "K514_article_general",
