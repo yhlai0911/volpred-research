@@ -1,39 +1,40 @@
 {
-  "timestamp": "2026-06-01T12:13:24Z",
+  "timestamp": "2026-06-01T18:12:04Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "total_drafts=64 (general=31, research=33); all thresholds met (total>=12, research>=4, general>=8)"
+      "detail": "Total drafts: 89 (general: 53, research: 36). All thresholds passed (total≥12, general≥8, research≥4)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json does not exist (file missing, not just stale)"
+      "detail": "storage/strategy_metrics.json does not exist (NOT_FOUND). File is missing entirely."
     },
     {
       "name": "ERROR_LOG",
-      "status": "ok",
-      "detail": "No entries dated 2026-06-01 or 2026-05-31 found in docs/error_log.md; most recent entry is 2026-05-29"
+      "status": "alert",
+      "detail": "Entries found dated 2026-06-01 (yesterday, Taiwan time): (1) Codex 24h-rule audit caught K717 composite ranking normalization error in production article — errata fix applied, Supabase synced. (2) Codex 24h-rule audit caught K208 VIX-GARCH article with OOS horizon mislabeled (5d vs 22d) and regime t-test sample mislabeled (OOS vs full sample) — errata fix applied, Supabase synced."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 14 strategies checked; each has 1/3 nulls in last 3 entries (latest day, within tolerance); no strategy exceeds threshold of >2 nulls"
+      "detail": "Checked 15 strategies. No strategy has >2 nulls in last 3 portfolio_return entries."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files"
+      "detail": "0 uncommitted files."
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "knowledge.json contains 2178 entries"
+      "detail": "storage/memory/knowledge.json has 2180 entries."
     }
   ],
   "alerts": [
-    "strategy_metrics.json missing (file not found — metrics cannot be checked for staleness)"
+    "STRATEGY_METRICS_FRESHNESS: storage/strategy_metrics.json is missing (NOT_FOUND)",
+    "ERROR_LOG: entries dated 2026-06-01 — K717 composite ranking article errata + K208 VIX-GARCH horizon/sample label errata, both Codex 24h-rule audit catches, both fixed and synced"
   ]
 }
