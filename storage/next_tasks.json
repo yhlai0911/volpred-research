@@ -17175,7 +17175,7 @@
     "title": "K1047: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1047 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1047 正式 ABM：1000 agents（F/C/V），5000 天，50 MC reps。VT 採用率影響：0%→25% 微降（穩定化），50% 開始惡化（vol 21.1%），75% 嚴重（24.7%, kurt=6.09），90% 病態（vol 30.5% +50.6%, kurt=14.57, AC|r|=0.449, skew=-0.750）。臨界點 50-75%。機制：VT feedback loop（高 vol→全體賣→更高 vol）。K742 的 \"always converge\"",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1047",
@@ -17192,6 +17192,73 @@
       "audience-general"
     ],
     "topic_cluster": "vt",
-    "created_at": "2026-06-01T07:08:38+00:00"
+    "created_at": "2026-06-01T07:08:38+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-01T08:59:16.747812+00:00",
+    "claim_session_id": "c9384cf27752",
+    "completed_at": "2026-06-01T09:01:20.111770+00:00",
+    "result": "Published draft mile_ec28b1cc for K1047 general coverage. Added a reader-facing article on VT crowding externalities using 2 simulation charts. Used cluster waiver because task explicitly filled uncovered general coverage."
+  },
+  {
+    "id": "paper_review_mile_eeeee765",
+    "title": "Paper review (Codex 24h-rule): 為什麼我們把『投資建議』改叫『風險管理工具』？K705 做了一次不太舒服但必要的自我審計",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_eeeee765 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_eeeee765",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-01T09:09:30+00:00"
+  },
+  {
+    "id": "K1095_article_general",
+    "title": "K1095: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1095 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1095 tests synthesis strategy: 8.63/VIX normally + A4f-VT only in [-5,+5] window around top-10 stock earnings. OOS 2017-2026 (N=2,160), net 20bp TX. ALL 3 HYPOTHESES REJECTED. SHARPE: Pure 8.63/VIX 0.929, Pure A4f-VT 0.966, Event-Switched 0.777 (WORST), ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1095",
+    "tags": [
+      "Taiwan",
+      "event-switching",
+      "VT",
+      "NULL",
+      "turnover-cost",
+      "synthesis-fail",
+      "Paper2",
+      "Paper3",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vt",
+    "created_at": "2026-06-01T09:09:30+00:00"
+  },
+  {
+    "id": "K538_article_general",
+    "title": "K538: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K538 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: Codex #5, 執行: Claude] Meta-labeling (López de Prado 2018) for VT on/off。16 features (VIX/momentum/HAR/cross-asset/term structure)，3 models (Logistic/XGBoost/RF)。\n\nAll 16 features |r|<0.02 with next-day VT-vs-BH outcome。AUC 0.48-0.52（coin flip）。Walk-forward: Logistic Sharpe 0",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K538",
+    "tags": [
+      "meta_labeling",
+      "ML",
+      "VT_strategy",
+      "null_result",
+      "Codex_suggestion",
+      "action_first",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vt",
+    "created_at": "2026-06-01T09:09:30+00:00"
   }
 ]
