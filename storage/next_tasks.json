@@ -17527,7 +17527,7 @@
     "title": "Paper review (Codex 24h-rule): K1151：財報 Beat 多少不重要，今天有沒有公佈財報才是波動率信號",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_0ae5323e needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_0ae5323e",
@@ -17537,12 +17537,14 @@
       "main-thread-only"
     ],
     "created_at": "2026-06-01T16:08:13+00:00",
-    "claimed_by": null,
-    "claimed_at": null,
-    "claim_session_id": "3a482ecde971",
-    "started_at": null,
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-01T18:34:06.713488+00:00",
+    "claim_session_id": "dc7e95512fae",
+    "started_at": "2026-06-01T18:34:19.289575+00:00",
     "release_reason": "Stale claim 2h+ no activity; hourly-00 actually did K1036/K189/K1410 work; released by hourly-02",
-    "released_at": "2026-06-01T18:11:15+00:00"
+    "released_at": "2026-06-01T18:11:15+00:00",
+    "completed_at": "2026-06-01T18:34:19.353870+00:00",
+    "result": "Codex source-code review verdict FAIL: pooled MLE not converged yet Hessian t/AIC used for main claims; bootstrap/placebo only partially re-optimized (2-3 outer iters) so p-values are not clean inference; lookahead check clean; article overclaims mechanism certainty and should be caveated or corrected before trust."
   },
   {
     "id": "K1036_article_general",
@@ -17578,7 +17580,7 @@
     "title": "K491: write general-audience article (auto-discovered uncovered K)",
     "description": "K K491 has verdict signal (score=3, reasons=['cross-market/universal']) but no general article in feed.json.  Verdict preview: Persistence range: [0.9522, 1.0000], mean=0.9802 ± 0.0141 Very tight clustering — suggestive of a universal persistence law Hillebrand inflation CONFIRMED: mean gap=+0.0336 (t=5.03, p=0.0002) Persistence co-movement: mean rho=0.170, 28/78 pairs significantly positive Persistence ",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K491",
@@ -17588,7 +17590,13 @@
       "audience-general"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-06-01T16:08:13+00:00"
+    "created_at": "2026-06-01T16:08:13+00:00",
+    "claimed_by": "hourly-03",
+    "claimed_at": "2026-06-01T19:11:06.257102+00:00",
+    "claim_session_id": "a3c67ccad0f1",
+    "started_at": "2026-06-01T19:11:10.174125+00:00",
+    "completed_at": "2026-06-01T19:15:33.767132+00:00",
+    "result": "mile_bf13d810 | persistence 0.9802 均值，14 資產，draft 已入池 | 圖: storage/figures/k491_persistence_law_bar.png"
   },
   {
     "id": "K998_article_general",
