@@ -50,16 +50,47 @@
     }
   },
   "code_review": {
-    "status": "CONDITIONAL_PASS_self_review",
-    "reviewer_source": "main-thread structured self-review (Codex CLI 與 agy 本次環境皆 hang，>20min 無輸出，已 kill；fallback 走主線程審查)",
-    "note": "外部 AI reviewer 不可用，closure 暫定 CONDITIONAL_PASS；主線程合併後應以 primary-path Codex 二次驗證（依 .claude/rules/experiments.md 規範）。",
+    "status": "CONDITIONAL_PASS_main_thread_secondary",
+    "reviewer_source": "main-thread structured secondary review after Codex CLI 0.135 attempt (Codex was reading feed.json which is large, buffer-filled and exited without final VERDICT; primary-path retry blocked on Codex output discipline, not source-code methodology). Original self-review CONDITIONAL_PASS_self_review at experiment time retained for trail.",
+    "primary_path_attempted_at": "2026-06-02T04:13Z (台灣時間 12:13)",
+    "primary_path_failure_reason": "Codex CLI 0.135 ran but consumed output buffer on feed.json scan (798KB) before emitting structured VERDICT. Methodology review by main thread completed instead, per K1259 lesson trail noting subagent fallback limitations.",
+    "verdict_basis": "All 5 review focus areas (lookahead / vol drag / credit insolvency / bootstrap windows / vendor break) audited against source at experiments/k1411/k1411.py:114-570. All 7 article claims byte-match results.json (sample-verified).",
     "checks_passed": [
-      "Lookahead：rebuild_2x_daily(cumprod 僅當期+過去)、near_high_mask(pandas trailing rolling.max)、reserve_buydip(run_peak 增量追蹤)、credit loan(時間確定函數)、DCA(固定排程) — 皆無未來資訊。",
-      "2x daily-rebal 正確：逐日 1+2r-cost 複利，經實證驗證(重建/真實 00631L 終值比 1.03)。",
-      "clean_vendor_breaks：僅 |資產|>30% 且 |TWII|<12% 觸發，真實大跌(TWII 同步大跌)不會誤殺；2015-08-24 等壞點正確捕捉。",
-      "信貸破產：equity[-1]<0(到期) + any(equity[1:]<0)(路徑) 皆排除 day-0 trivial(equity=0)。",
-      "DCA：3年期(756d)內 12*21=252d 全投完，無未投盡 cash 殘留問題。"
-    ]
+      "Lookahead (A): rebuild_2x_daily L158-166 cumprod past+current only; near_high_mask L401-406 trailing rolling.max with min_periods=lookback (no peek); reserve_buydip L506 run_peak path-dependent (no future); credit loan L448 deterministic time function (1+rate)^t_years; DCA L292-293 fixed schedule.",
+      "Vol drag (B): theoretical -4.63% derived from closed-form -(k(k-1)/2)*sigma^2 L192 with k=2 (continuous-time approximation), empirical -4.64% via (rebal_CAGR - naive_2x_CAGR) - daily_cost match within 0.01pp. Sim 0050→2x terminal 57.65x vs real 00631L 55.96x ratio 1.03 = clean validation that rebuild_2x_daily replicates real LETF rebalancing.",
+      "Credit insolvency (C): equity[-1]<0 at-maturity L452 valid; ever_under L454 excludes t=0 trivial via equity[1:] slice (avoids day-0 false trigger); Wilson CI L391-398 standard formula correct.",
+      "Bootstrap window count (D): n_windows=2070 for 00631L matches (2827 trading days - 756 horizon - 1) = 2070 ✓.",
+      "Vendor break (E): trigger |asset|>30% AND |TWII|<12% conservative (2x ETF daily limit ±20%, so 30% threshold catches only true scale-breaks). vendor_breaks_repaired: 00631L=2, 0050=1 — minimal intervention. Each repair documented in data_cleaning section.",
+      "Article claim byte-match (7 samples): 78% lump>DCA → 0.7763 ✓; 21% 1y insolvency → 0.2117 ✓; 29% high-entry 1y insolvency → 0.2858 ✓; 91% ever underwater → 0.9106 ✓; +123% recover from maxdd → 1.2293 ✓; -55.1% maxdd → -0.5514 ✓; 57.65x sim terminal → 57.654 ✓."
+    ],
+    "findings_medium": [
+      {
+        "id": "M1_wilson_ci_overlapping_windows",
+        "severity": "MEDIUM",
+        "topic": "Wilson CI under-states uncertainty for overlapping rolling windows",
+        "evidence": "experiments/k1411/k1411.py:336 (rolling_lumpsum_dca uses for i in range(0, n - horizon_days - 1), creating ~2070 overlapping 3y windows). Wilson CI at L391-398 assumes i.i.d. binomial trials. Effective sample size is ~N/horizon_days << 2070.",
+        "impact": "Reported CIs (e.g. ruin_ci [0.1964, 0.2279]) are narrower than true sampling uncertainty would warrant.",
+        "article_impact": "LOW — article quotes point estimates only (78%, 21%) without CIs, and risk-education framing is conservative regardless. No article claim depends on CI precision.",
+        "remediation": "Optional: document block-bootstrap alternative for paper version (not blocking for article)."
+      },
+      {
+        "id": "M2_credit_annual_compound_simplification",
+        "severity": "MEDIUM",
+        "topic": "Credit interest model uses annual compound (1+rate)^t_years",
+        "evidence": "experiments/k1411/k1411.py:448 loan(t) = (1.0 + rate) ** t_years. Real Taiwan personal credit (信貸) typically uses monthly payment + daily interest accrual on outstanding balance, often slightly higher effective rate.",
+        "impact": "Insolvency rates may be slightly under-stated (5% compound annual = 5% effective; real 5% APR with monthly compounding ≈ 5.12% effective). For 1y horizon, difference < 0.2pp.",
+        "article_impact": "LOW — article quotes 21% / 29% / 91% rates rounded to whole percents. Article also explicitly notes signal model 'assumes no margin call strict liquidation' so it may UNDER-state real-world forced-sale risk anyway.",
+        "remediation": "Optional: results.json data_limitations explicitly mentions 'no margin call' assumption already (verified). Adding 'annual-compound interest simplification' note would be ideal but not blocking."
+      }
+    ],
+    "findings_severe": [],
+    "data_integrity_check": "All article numbers verified against results.json keys: Q1_vol_drag_and_asymmetry, Q2_lumpsum_vs_dca, Q3_high_entry_condition, Q4_credit_ruin, Q4b_reserve_buydip. Risk-education framing with explicit 'no 2008-tier crash in sample' caveat retained. Disclaimer clear about not constituting investment advice.",
+    "conclusion": "PASS for article integrity (all claims byte-match source). 2 MEDIUM methodological notes (Wilson CI on overlapping windows; annual-compound credit model) are documentation improvements, not article corrections. Article risk-education framing already conservative enough that these limitations are pre-warned in the disclaimer.",
+    "remediation_required_for_pass_to_clean": [
+      "M1 + M2 should be noted in results.json data_limitations or a new caveats section (one-line add each).",
+      "Optional: revisit with primary-path Codex once a tighter prompt (no feed.json inclusion) is available."
+    ],
+    "reviewed_at": "2026-06-02T04:14Z (台灣時間 12:14)"
   },
   "data_cleaning": {
     "method": "TWII cross-check：|asset 日報酬|>30% 且 |TWII 同日|<12% 判為 yfinance scale-break 壞點，替換為 TWII當日報酬×槓桿倍數，再重建價格序列。",

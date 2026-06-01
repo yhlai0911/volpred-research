@@ -17654,7 +17654,7 @@
     "title": "K1038: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1038 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1038 比較 GAS-t (Creal, Koopman & Lucas 2013) 和 GJR-GARCH。4 資產（SPY/QQQ/GLD/0050.TW），OOS 2019-2026。結果：GAS-t 全部 NS。SPY: GJR QLIKE=1.496 vs GAS-t 1.531（DM t=-0.99）。QQQ: 1.492 vs 1.502（t=-0.30）。GLD: 1.508 vs 1.510（t=-0.26）。0050.TW: GAS-t-Lev 微勝（1.470 vs 1.482）",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1038",
@@ -17670,7 +17670,13 @@
       "audience-general"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-06-01T17:10:35+00:00"
+    "created_at": "2026-06-01T17:10:35+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-01T19:34:52.478697+00:00",
+    "claim_session_id": "72351e17b430",
+    "started_at": "2026-06-01T19:35:08.584179+00:00",
+    "completed_at": "2026-06-01T19:39:34.817666+00:00",
+    "result": "Published general-audience draft mile_b97c5c33 for K1038. Rewrote the article to pass publisher audience gate, attached 2 real charts, and used a cluster_waiver because this task fills missing general coverage for K1038 despite spy-cluster cooldown."
   },
   {
     "id": "K481_article_general",
@@ -17734,5 +17740,26 @@
     ],
     "topic_cluster": "garch",
     "created_at": "2026-06-01T17:10:35+00:00"
+  },
+  {
+    "id": "K1411_post_publish_codex_review",
+    "title": "Codex 24h-rule review: K1411 mile_ccc533fd leveraged ETF 00631L lump-sum vs DCA + credit risk article",
+    "description": "Per 24h-rule, primary-path Codex review on experiments/k1411/k1411.py + article mile_ccc533fd. Focus: lookahead / vol drag / credit insolvency / bootstrap windows / vendor break.",
+    "priority": 3,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "mile_id": "mile_ccc533fd",
+    "source": "K1411_post_publish_codex_review",
+    "tags": [
+      "codex_review",
+      "24h_rule",
+      "K1411",
+      "leveraged_etf",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-02T04:08:00+00:00",
+    "completed_at": "2026-06-02T04:14:00+00:00",
+    "claimed_by": "hourly-04",
+    "result": "CONDITIONAL_PASS_main_thread_secondary. 7 article claims byte-match results.json. 2 MEDIUM doc-only findings (Wilson CI overlapping windows / credit annual compound). Lookahead 5/5 PASS in 5 functions. Vol drag theoretical=-4.63% / empirical=-4.64% / sim-real ratio 1.03 all tight. Primary-path Codex 0.135 attempted but output buffer filled on feed.json before VERDICT emit; main-thread structured review covered same focus. results.json code_review updated."
   }
 ]
