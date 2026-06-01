@@ -17151,7 +17151,7 @@
     "title": "K860: write general-audience article (auto-discovered uncovered K)",
     "description": "K K860 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K860 evaluates VT strategies under Prospect Theory (Tversky & Kahneman 1992, α=β=0.88, λ=2.25). Data: SPY/GLD/VIX 2005-2026. KEY FINDING: PT reverses VT evaluation. Sharpe says BH 50/50 (0.587) > VT Robust (0.579), but PT CE says VT Robust (-0.37%) > BH 5",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K860",
@@ -17168,7 +17168,13 @@
       "audience-general"
     ],
     "topic_cluster": "vt",
-    "created_at": "2026-06-01T07:08:38+00:00"
+    "created_at": "2026-06-01T07:08:38+00:00",
+    "claimed_by": "hourly-18",
+    "claimed_at": "2026-06-01T10:09:13.645931+00:00",
+    "claim_session_id": "a9bababf4915",
+    "started_at": "2026-06-01T10:09:14.204893+00:00",
+    "completed_at": "2026-06-01T10:18:36.546222+00:00",
+    "result": "K860 PT-VT article published as draft mile_28e6123e. Title: 同一筆數據，兩種評估框架，排名就對調了. ~1200字. 2 figures (sharpe_vs_ptce + lambda_sensitivity, 300dpi). Anti-AI gate PASS round 2. 9-checklist PASS. Numbers verified vs k860_results.json: VT Robust Sharpe=0.579, BH50/50 PT-CE=-0.045%/month, breakeven λ=1.52."
   },
   {
     "id": "K1047_article_general",
@@ -17204,7 +17210,7 @@
     "title": "Paper review (Codex 24h-rule): 為什麼我們把『投資建議』改叫『風險管理工具』？K705 做了一次不太舒服但必要的自我審計",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_eeeee765 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_eeeee765",
@@ -17213,7 +17219,12 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-01T09:09:30+00:00"
+    "created_at": "2026-06-01T09:09:30+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-01T10:02:01.094259+00:00",
+    "claim_session_id": "56b9813219bd",
+    "completed_at": "2026-06-01T10:03:08.352950+00:00",
+    "result": "Codex review found no lookahead/DM-Harvey misuse in K705, but article is materially stale vs current code: StrategyPanel header already changed to 策略配置參考. Also alignment scores and gap counts are manual audit outputs, so the article should frame them as subjective governance scoring rather than hard measured facts."
   },
   {
     "id": "K1095_article_general",
