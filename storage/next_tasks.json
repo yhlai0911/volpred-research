@@ -17469,7 +17469,7 @@
     "title": "K1002: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1002 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: 賴奕豪, 執行: Claude] Paper 5 統一比較：A4f-N, A4f-t, GJR-N, GJR-t, EGARCH-t, HAR-ABS, Macro-X。結果：(1) MCS 10% 只含 {A4f-N, A4f-t}——其他全被淘汰；(2) A4f-t VaR/ES scorecard 7/7（唯一完美），A4f-N 5/7；(3) A4f-t vs GJR-N DM t=-4.34，vs HAR-ABS t=-6.13，vs Macro-X t=-4.96（全部 Harvey PASS）；(4) A4f-N vs A4f-t",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1002",
@@ -17486,7 +17486,13 @@
       "audience-general"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-06-01T14:09:47+00:00"
+    "created_at": "2026-06-01T14:09:47+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-01T16:25:28.531852+00:00",
+    "claim_session_id": "8fac4a0e7944",
+    "started_at": "2026-06-01T16:25:39.198301+00:00",
+    "completed_at": "2026-06-01T16:28:16.764711+00:00",
+    "result": "Published general-audience K1002 article as mile_f4f62c9b via publish_draft. Used explicit cluster_waiver because K1002 already had research-only coverage and the garch cluster is above cooldown cap; article reframes the result as a reader-facing lesson that the winning models were the ones that read market fear earliest, not the most complex ones."
   },
   {
     "id": "platform_ops_supabase_sync_20260601T141218Z",
@@ -17512,5 +17518,65 @@
     "started_at": "2026-06-01T14:12:20.169255+00:00",
     "completed_at": "2026-06-01T14:14:05.839486+00:00",
     "result": "Re-synced 7 missing articles (mile_15d43f72/34be417d/5b6f9e1b/696c6063/b427f3ba/cfcd4eaa/eeeee765) via targeted sync_article(); audit mismatch_total 7→0; CRITICAL host_cron_fail breach root-cause cleared."
+  },
+  {
+    "id": "paper_review_mile_0ae5323e",
+    "title": "Paper review (Codex 24h-rule): K1151：財報 Beat 多少不重要，今天有沒有公佈財報才是波動率信號",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_0ae5323e needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "in_progress",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_0ae5323e",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-01T16:08:13+00:00",
+    "claimed_by": "hourly-00",
+    "claimed_at": "2026-06-01T16:08:46.561852+00:00",
+    "claim_session_id": "3a482ecde971",
+    "started_at": "2026-06-01T16:08:50.116610+00:00"
+  },
+  {
+    "id": "K1036_article_general",
+    "title": "K1036: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1036 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: 賴奕豪, 執行: Claude] K1036 factorial design (2 model × 3 VaR method). Trinity PASS: GJR+Normal 0/6, GJR+t 1/6, GJR+CF 6/6, A4f+Normal 1/6, A4f+t 5/6, A4f+CF 6/6. 核心發現：(1) CF-Rolling 是 VaR 王者——不管用 GJR 或 A4f，CF-Rolling 都 6/6 PASS (2) A4f 對 Student-t 有巨大改善（1/6→5/6），但 CF-Rolling 已把 ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1036",
+    "tags": [
+      "VaR",
+      "CF-Rolling",
+      "A4f",
+      "GJR",
+      "Trinity",
+      "factorial",
+      "interaction",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "garch",
+    "created_at": "2026-06-01T16:08:13+00:00"
+  },
+  {
+    "id": "K491_article_general",
+    "title": "K491: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K491 has verdict signal (score=3, reasons=['cross-market/universal']) but no general article in feed.json.  Verdict preview: Persistence range: [0.9522, 1.0000], mean=0.9802 ± 0.0141 Very tight clustering — suggestive of a universal persistence law Hillebrand inflation CONFIRMED: mean gap=+0.0336 (t=5.03, p=0.0002) Persistence co-movement: mean rho=0.170, 28/78 pairs significantly positive Persistence ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K491",
+    "tags": [
+      "garch",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "garch",
+    "created_at": "2026-06-01T16:08:13+00:00"
   }
 ]
