@@ -16915,7 +16915,7 @@
     "title": "K888: write general-audience article (auto-discovered uncovered K)",
     "description": "K K888 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: 會員yihao.lai, 執行: Claude] 14,127 House trades, 46 tickers. Copy: -0.294%/trade t=-1.81 NS. Contrarian: -0.147% t=-0.91 NS. Large-trade: -0.100% t=-0.25 NS. 28-day disclosure lag makes signals stale. Consistent with Eggers & Hainmueller (2013).",
     "priority": 4,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K888",
@@ -16930,7 +16930,10 @@
     "topic_cluster": null,
     "created_at": "2026-06-01T05:11:33+00:00",
     "started_at": "2026-06-01T05:45:00.764726+00:00",
-    "last_released_at": "2026-06-01T05:46:05.858456+00:00"
+    "last_released_at": "2026-06-01T05:46:05.858456+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-01T06:13:26+00:00",
+    "blocked_note": "K888 Congressional contrarian 已 cover in mile_9795c0a9 (member_qa audience). Auto-discovery 把 audience-variant 算 uncovered 不正確; Layer 3 narrative-arc dedup 視為 dup."
   },
   {
     "id": "K905_article_general",
@@ -16957,15 +16960,15 @@
     "claimed_at": "2026-06-01T05:46:14.051985+00:00",
     "claim_session_id": "0328414ae4cc",
     "started_at": "2026-06-01T05:46:27.423506+00:00",
-    "completed_at": "2026-06-01T05:50:54.386566+00:00",
-    "result": "Published draft mile_40c66bef for K905 general coverage. Added 2 charts and a general-audience article on simpler FHS beating fancier tail-risk models. Used cluster waiver because task explicitly filled an uncovered-K gap."
+    "completed_at": "2026-06-01T06:14:41.524877+00:00",
+    "result": "Published draft mile_40c66bef for K905 general coverage. Added 2 charts and a general-audience article on simpler FHS beating fancier tail-risk models. Used cluster waiver because task explicitly filled an uncovered-K gap.\n\nCodex-cli 寫好但留 5 處「不是A而是B」AI 套路（MUST gate FAIL）+ artifacts 未 commit。主線程改寫 5 處到 anti-AI PASS（WARN 2/3 OK）+ feed.json mile_40c66bef content sync + experiments/k905 figs/script + draft commit (97ccda64)。"
   },
   {
     "id": "K932_article_general",
     "title": "K932: write general-audience article (auto-discovered uncovered K)",
     "description": "K K932 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: 用戶, 執行: Claude] 5 methods (50/50, Min-Var, Min-CVaR, Max CRRA gamma=5, Risk Parity) on SPY/GLD/TLT. OOS 2016-2026. Static 50/50 Sharpe 1.216 beats all. Min-CVaR≈Min-Var (Normal CVaR→variance). Max CRRA≈Min-Var (return unpredictable→utility=risk). Turnover kills dynamic. 50/5",
     "priority": 4,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K932",
@@ -16979,6 +16982,99 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-01T05:11:33+00:00"
+    "created_at": "2026-06-01T05:11:33+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-01T06:13:27+00:00",
+    "blocked_note": "K932 Utility allocation NULL 已 cover in mile_2afae61b (research audience). Same audience-variant 誤判."
+  },
+  {
+    "id": "K969_article_general",
+    "title": "K969: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K969 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: Patton & Zhang JoE 2026 Bespoke RV, 執行: Claude] SPY OHLCV 2006-2026 (5094 天), IS=3270, OOS=1824。用 5 種日頻 vol proxy (r², Parkinson, GK, RS, Yang-Zhang) 測試最優加權。(1) HAR-Bespoke 最佳 QLIKE=1.448，顯著勝出所有 AR(1) (DM p<0.001)。(2) Bespoke OLS 因多重共線性失敗 (QLIKE=14009)：range-based proxies 相關",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K969",
+    "tags": [
+      "Bespoke-RV",
+      "HAR",
+      "range-based-vol",
+      "Patton-Zhang",
+      "multicollinearity",
+      "vol-proxy",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-01T06:13:31+00:00"
+  },
+  {
+    "id": "K470_article_general",
+    "title": "K470: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K470 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: HAR-VT shows significant improvement at 5% level but does NOT pass Harvey t>3.0 threshold Reference: Corsi (2009) J Financial Econometrics — HAR-RV model Reference: Alizadeh, Brandt & Diebold (2002) JFE — Range-based vol estimation",
+    "priority": 4,
+    "status": "blocked",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K470",
+    "tags": [
+      "har",
+      "strategy",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vt",
+    "created_at": "2026-06-01T06:13:31+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-01T06:14:37+00:00",
+    "blocked_note": "Substring false-positive: feed match 是 K470 字串巧合而非 experiment_refs; 此 K 無真正 general-audience gap, 但 refill 邏輯需修。"
+  },
+  {
+    "id": "K536_article_general",
+    "title": "K536: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K536 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] EVT (Extreme Value Theory) VaR 實驗。GPD Peaks-over-Threshold + HAR/GJR vol models。OOS 2023-2024。\n\n**HAR-EVT score=10, 唯一雙 alpha PASS**: 1% viol=0.60% (PASS), 2.5% viol=1.79% (PASS)。GJR-Normal/GJR-EVT/GJR-t 都只 score=6（單 alpha pass）。HAR-Normal 災難性 4.58% viol。",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K536",
+    "tags": [
+      "EVT",
+      "VaR",
+      "HAR",
+      "GPD",
+      "Trinity_test",
+      "risk_management",
+      "breakthrough",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vt",
+    "created_at": "2026-06-01T06:13:31+00:00"
+  },
+  {
+    "id": "K543_article_general",
+    "title": "K543: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K543 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] Drawdown 深度作 VT 調節信號。5090 天，5 期 cross-OOS。VIX-drawdown corr=-0.77（高度冗餘）。\n\nSharpe: 最佳 DD-Enhanced +0.012 (t=1.79, NS)。Harvey 全未通過。\n\n但 MDD 顯著改善：DD-Conditional -15.4% vs baseline -28.6%（幾乎減半）。Combined -17.4%。代價是 return 從 6.76% 降到 5.00%。\n\n結論：drawdown 調節不產生 al",
+    "priority": 4,
+    "status": "blocked",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K543",
+    "tags": [
+      "drawdown",
+      "VT_strategy",
+      "MDD",
+      "risk_return_tradeoff",
+      "null_sharpe",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vt",
+    "created_at": "2026-06-01T06:13:31+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-01T06:14:38+00:00",
+    "blocked_note": "Substring false-positive: 同 K470 — feed cover=2 為巧合字串非 exp_refs;refill 邏輯改善前先 block。"
   }
 ]
