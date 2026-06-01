@@ -275,7 +275,11 @@ Log to `storage/reports/trending_repost_log.json`:
 >    這不是 dup，是同一篇未發佈草稿。別誤判、別關掉真草稿。
 > 4. **主貼文本體絕不放 URL**。若不慎打入 → `cmd+a` → `Delete` → 重打乾淨版
 >    → 移除 FB 自動生成的連結預覽卡（卡片右上 X）。
-> 5. **留言用獨立 send 鍵**（留言框右下藍色紙飛機 icon），不靠 Return。
+> 5. **留言送出**：先試獨立 send 鍵（留言框右下藍色紙飛機 / `貼文留言` button）。
+>    但 **2026-05-31 實測：FB 個人檔案 inline composer 的 send button 用 ref-click
+>    點兩次都沒送出**，改在已聚焦的留言框按 **Return** 才成功送出（且送出後 box 清空、
+>    留言出現在列表 = 可驗證）。所以 send-button 無效時 **fallback = Return**，不要
+>    連點 send button。送出後一律 `find` 確認「留言框已清空」+「留言已出現在 list」。
 > 6. **每個關鍵步驟後 screenshot 確認**（composer 開了沒 / 發佈成功沒 /
 >    留言送出沒），不靠 find 描述猜狀態。
 > 7. **single-shot，禁 retry-loop**。發佈鍵點一次後等 6-8s + screenshot 驗，
