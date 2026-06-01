@@ -77,17 +77,16 @@ paths:
    - **共用**：FB 文案是改寫版 200-400 字、不直接貼 feed 內文、Ivan Lai 口吻、主貼文不放連結、連結放第一則留言、URL 必 `https://volpred.zeabur.app/v3/reports/<mile_id>`（pre-publish `curl -I` 驗 200）
    - **差異**：event_article **不算入 trending_repost daily cap**（不同 type）；event_article FB 文案語氣可更貼近「即時市場觀察」而非「專欄式 commentary」（事件驅動的時效感）
    - **失敗策略**：FB 失敗**不阻塞** feed publish（同 trending_repost），但必須留 retry log + work_log entry `fb_post_failed`
-   - **FB success 必寫回 article record**（2026-05-25 新增；K1401 `mile_daaff779` 教訓）：FB post 成功後**必須** patch `feed.json` 對應 entry 的 `details`：
-     ```json
-     "details": {
-       "fb_post_status": "success",
-       "fb_post_url": "https://www.facebook.com/<user>/posts/<pfbid>",
-       "fb_comment_url": "https://volpred.zeabur.app/v3/reports/<mile_id>",
-       "fb_post_timestamp": "<ISO8601>"
-     }
+   - **FB success 必寫回 article record**（2026-05-25 新增；K1401 `mile_daaff779` 教訓 / 2026-06-01 dual-source 修正）：FB post 成功後**必須**寫回 `feed.json`，但 **`fb_post_status` 是 single source-of-truth，只能用 `mark_fb_post_status.py` 寫到 entry 頂層**，URL/timestamp metadata 才放 `details`：
+     ```bash
+     # 1) 狀態 → 頂層（canonical，dashboard/audit 唯一讀的位置）
+     uv run python scripts/mark_fb_post_status.py --mile-id <mile_id> --status success
+     # 2) URL/timestamp metadata → details（jq patch 即可）
+     #    details.fb_post_url / details.fb_comment_url / details.fb_post_timestamp
      ```
+     **🚫 絕對禁止寫 `details.fb_post_status`** — 那是 2026-06-01 抓到的 dual-source-of-truth bug 來源：頂層 `fb_post_status`（mark/dashboard/audit 用）與 `details.fb_post_status`（舊 doc 誤導手動寫）會 drift，導致 mark 的 success 在報表上看不到（K1408/K1409 incident）。已用 `scripts/migrate_fb_post_status_single_source.py` 收斂成單一頂層欄位。
      **Why**：catch-up / 自動 post success 若只記 work_log 不寫回 feed.json，下游 audit / 重發掃描看不到 FB URL → 反覆判定「未發」嘗試重 post（mile_daaff779 03:33 catch-up success 但 details 為空，11:44 又被掃成未發後 fail，留 noise entry）。
-     **執行**：catch-up script 或 trending-repost Step 7 / fb-ivanlai-tone Step 8 完成後必跑 `jq` patch + `scripts/supabase_sync.py sync-article --id <mile_id>` 推上線。
+     **執行**：catch-up script 或 trending-repost Step 7 / fb-ivanlai-tone Step 8 完成後必跑 `mark_fb_post_status.py`（狀態）+ `jq` patch（URL/timestamp）+ `scripts/supabase_sync.py full` 推上線。
 4. **每篇必備**：
    - 至少 2 張**真實圖表**（matplotlib PNG + Supabase upload；禁 ASCII / 文字框冒充）
    - 標明**數據來源**（yfinance / FRED / TAIFEX / K 編號）
