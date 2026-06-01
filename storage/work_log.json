@@ -9195,5 +9195,13 @@
     ],
     "anti_ai_gate": "PASS",
     "supabase_sync": "OK"
+  },
+  {
+    "timestamp": "2026-06-01T22:14",
+    "task_type": "platform_ops",
+    "id": "platform_ops_supabase_sync_20260601T141218Z",
+    "title": "Re-sync 7 missing Supabase articles → audit mismatch 7→0",
+    "details": "host_cron_fail BREACH triggered by audit_publish_sync exit=1. Root cause: 7 published articles未sync (articles_last_ts cutoff排除掉)。Fix: targeted sync via sync_article() bypass incremental filter. Side note: emdash_normalizer auto-fixed 20 em-dashes during sync (mile_15d43f72:2, mile_34be417d:7, mile_5b6f9e1b:6, mile_696c6063:5)。",
+    "claimed_by": "hourly-22"
   }
 ]
