@@ -17544,7 +17544,7 @@
     "title": "K1036: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1036 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: 賴奕豪, 執行: Claude] K1036 factorial design (2 model × 3 VaR method). Trinity PASS: GJR+Normal 0/6, GJR+t 1/6, GJR+CF 6/6, A4f+Normal 1/6, A4f+t 5/6, A4f+CF 6/6. 核心發現：(1) CF-Rolling 是 VaR 王者——不管用 GJR 或 A4f，CF-Rolling 都 6/6 PASS (2) A4f 對 Student-t 有巨大改善（1/6→5/6），但 CF-Rolling 已把 ",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1036",
@@ -17560,7 +17560,13 @@
       "audience-general"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-06-01T16:08:13+00:00"
+    "created_at": "2026-06-01T16:08:13+00:00",
+    "claimed_by": "hourly-01",
+    "claimed_at": "2026-06-01T17:10:34.301113+00:00",
+    "claim_session_id": "d05232c1bf09",
+    "started_at": "2026-06-01T17:10:39.390358+00:00",
+    "completed_at": "2026-06-01T17:19:07.842731+00:00",
+    "result": "mile_a1f3e23f 已 published；factorial decomposition narrative：方法效應+91pp ≫ 模型效應+28pp；anti-AI gate PASS；3 圖嵌入；narrative dedup vs K1022/K1034 通過"
   },
   {
     "id": "K491_article_general",
@@ -17578,5 +17584,136 @@
     ],
     "topic_cluster": "garch",
     "created_at": "2026-06-01T16:08:13+00:00"
+  },
+  {
+    "id": "K998_article_general",
+    "title": "K998: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K998 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: 賴奕豪, 執行: Claude] 測試 K988 A4f 的 g 成分能否預測未來 VRP。結果：(1) Granger causality in-sample 顯著（h=1,5,10 F>13），但控制 VRP lag 後 Newey-West t 最高僅 2.34（未達 Harvey 3.0）；(2) OOS R² 為負（in-sample overfitting）；(3) g-based variance swap strategy Sharpe=-0.64（反向指標），遠不如 naive sell variance 的 0.85；(4)",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K998",
+    "tags": [
+      "VRP",
+      "predictability",
+      "GARCH-X",
+      "NULL",
+      "g-component",
+      "Granger",
+      "variance-swap",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "garch",
+    "created_at": "2026-06-01T17:10:35+00:00"
+  },
+  {
+    "id": "K1005_article_general",
+    "title": "K1005: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1005 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: [提出: 賴奕豪, 執行: Claude] Conformal vs Parametric VaR 比較。核心發現：(1) GJR_t parametric 只 7/14 (50%)，加 conformal→13/14，ACI→14/14——GJR 需要 conformal 修正分配假設；(2) A4f_t parametric 已 14/14 (100%)，conformal/ACI 也 100%——A4f 的 VIX-driven τ 使分配假設足夠好；(3) ACI violation rate 極精準：1.01%/2.48%/5.07%（幾乎完美",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1005",
+    "tags": [
+      "conformal-VaR",
+      "ACI",
+      "proxy-robust",
+      "GARCH-X",
+      "distribution-free",
+      "Patton-2011",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "garch",
+    "created_at": "2026-06-01T17:10:35+00:00"
+  },
+  {
+    "id": "K1038_article_general",
+    "title": "K1038: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1038 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1038 比較 GAS-t (Creal, Koopman & Lucas 2013) 和 GJR-GARCH。4 資產（SPY/QQQ/GLD/0050.TW），OOS 2019-2026。結果：GAS-t 全部 NS。SPY: GJR QLIKE=1.496 vs GAS-t 1.531（DM t=-0.99）。QQQ: 1.492 vs 1.502（t=-0.30）。GLD: 1.508 vs 1.510（t=-0.26）。0050.TW: GAS-t-Lev 微勝（1.470 vs 1.482）",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1038",
+    "tags": [
+      "GAS",
+      "score-driven",
+      "GJR",
+      "GARCH",
+      "null result",
+      "Student-t",
+      "robustification",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "garch",
+    "created_at": "2026-06-01T17:10:35+00:00"
+  },
+  {
+    "id": "K481_article_general",
+    "title": "K481: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K481 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: Asset: SPY MCS (r² proxy, α=0.1): 5 of 8 models in superior set. | Included: ['EGARCH', 'GJR+HAR_Ens', 'GJR-GARCH', 'HAR_logrange', 'Semivar_RS-'] | Excluded: ['EWMA', 'GARCH', 'Rolling_21d'] | Cross-period: most robust model(s) = [('GJR+HAR_Ens', 5), ('EGARCH', 4), ('GJR-GARCH',",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K481",
+    "tags": [
+      "garch",
+      "har",
+      "leverage-effect",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "garch",
+    "created_at": "2026-06-01T17:10:35+00:00"
+  },
+  {
+    "id": "K690_article_general",
+    "title": "K690: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K690 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: [提出: K689 延伸, 執行: Claude] 5 策略 lag robustness ratio（Sharpe lag=1/lag=0）。EWMA VT 0.756（autocorr 0.9897，最穩健）。12/VIX 0.399。P3-AGG 0.297。Percentile 0.211。Piecewise 0.046（幾乎歸零）。相關：weight autocorr r=+0.56，mean|dw| r=-0.80。Lag=0 Sharpe 最高的策略（Piecewise 1.46, Percentile 1.68）恰好是 lookahead",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K690",
+    "tags": [
+      "weight-smoothness",
+      "lag-robustness",
+      "EWMA",
+      "autocorrelation",
+      "practical",
+      "timing",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "garch",
+    "created_at": "2026-06-01T17:10:35+00:00"
+  },
+  {
+    "id": "K930_article_general",
+    "title": "K930: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K930 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] Rolling MF-GJR parameter estimation on SPY/QQQ/0050.TW (144 refits). theta_1 (VIX elasticity) CV<15% within asset = moderately stable. But significant upward TREND for SPY/QQQ (p<0.001) — VIX influence strengthening. ADF: non-stationary for SPY/0050.TW. C",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K930",
+    "tags": [
+      "MF-GJR",
+      "parameter stability",
+      "theta_1",
+      "COVID",
+      "structural break",
+      "robustness",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "garch",
+    "created_at": "2026-06-01T17:10:35+00:00"
   }
 ]
