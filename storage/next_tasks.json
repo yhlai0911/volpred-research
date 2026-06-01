@@ -16992,7 +16992,7 @@
     "title": "K969: write general-audience article (auto-discovered uncovered K)",
     "description": "K K969 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: Patton & Zhang JoE 2026 Bespoke RV, 執行: Claude] SPY OHLCV 2006-2026 (5094 天), IS=3270, OOS=1824。用 5 種日頻 vol proxy (r², Parkinson, GK, RS, Yang-Zhang) 測試最優加權。(1) HAR-Bespoke 最佳 QLIKE=1.448，顯著勝出所有 AR(1) (DM p<0.001)。(2) Bespoke OLS 因多重共線性失敗 (QLIKE=14009)：range-based proxies 相關",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K969",
@@ -17007,7 +17007,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-01T06:13:31+00:00"
+    "created_at": "2026-06-01T06:13:31+00:00",
+    "claimed_by": "hourly-15",
+    "claimed_at": "2026-06-01T07:08:51.463497+00:00",
+    "claim_session_id": "9a331a4dc41d",
+    "started_at": "2026-06-01T07:08:51.748847+00:00",
+    "completed_at": "2026-06-01T07:15:06.399625+00:00",
+    "result": "Published draft mile_47ff52c7 for K969 (HAR-Bespoke RV general-reader article). Figures: k969_forecast_comparison.png + k969_weight_analysis.png. anti_ai_gate PASS (1 non-blocking WARN). Cluster waiver applied (SPY cooldown). Existing research article mile_cfab6308 covers research audience; this covers general."
   },
   {
     "id": "K470_article_general",
@@ -17035,7 +17041,7 @@
     "title": "K536: write general-audience article (auto-discovered uncovered K)",
     "description": "K K536 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] EVT (Extreme Value Theory) VaR 實驗。GPD Peaks-over-Threshold + HAR/GJR vol models。OOS 2023-2024。\n\n**HAR-EVT score=10, 唯一雙 alpha PASS**: 1% viol=0.60% (PASS), 2.5% viol=1.79% (PASS)。GJR-Normal/GJR-EVT/GJR-t 都只 score=6（單 alpha pass）。HAR-Normal 災難性 4.58% viol。",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K536",
@@ -17051,7 +17057,13 @@
       "audience-general"
     ],
     "topic_cluster": "vt",
-    "created_at": "2026-06-01T06:13:31+00:00"
+    "created_at": "2026-06-01T06:13:31+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-01T06:51:53.532515+00:00",
+    "claim_session_id": "131d54c81e74",
+    "started_at": "2026-06-01T06:52:03.722853+00:00",
+    "completed_at": "2026-06-01T06:54:03.277889+00:00",
+    "result": "Published draft mile_483425f2 for K536 general coverage. Added 2 charts and a reader-facing article focused on why EVT materially fixes HAR but barely changes GJR. Used cluster waiver because task explicitly filled uncovered general coverage."
   },
   {
     "id": "K543_article_general",
@@ -17076,5 +17088,98 @@
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-01T06:14:38+00:00",
     "blocked_note": "Substring false-positive: 同 K470 — feed cover=2 為巧合字串非 exp_refs;refill 邏輯改善前先 block。"
+  },
+  {
+    "id": "K991_article_general",
+    "title": "K991: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K991 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: 上架檢驗 #4, 執行: Claude] 0050.TW 2006-2026, k/VIX 策略 k=[5-16] grid。★ 上架檢驗通過：k=8.63 +-20% (6.90-10.36) Sharpe 最大降幅 2.2%（全樣本）/ 0.5%（OOS），遠低於 30% 門檻。Sharpe vs k 曲線極平坦（k=5-10 range: 0.81-0.85）。Optimal k ≈ 6.0-6.5 但改善 < 2%。MDD 與 k 線性：-9.5%(k=5) → -29.5%(k=16)，8.63 為 -15.9%。SPY optima",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K991",
+    "tags": [
+      "sensitivity",
+      "Taiwan-VT",
+      "0050.TW",
+      "parameter-robustness",
+      "listing-test",
+      "PASS",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vt",
+    "created_at": "2026-06-01T07:08:38+00:00"
+  },
+  {
+    "id": "K864_article_general",
+    "title": "K864: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K864 has verdict signal (score=2, reasons=['methodology/mechanism lesson']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K864 tests whether strategy heterogeneity reduces VT crowding (K827 extension). 1000 agents, 200 noise fixed, 4 VT types (12/VIX, Floor+Cap, Risk Parity, EWMA), 2600 sims. SHOCKING RESULT: Heterogeneity makes crowding WORSE. At 50% adoption: flash crashes",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K864",
+    "tags": [
+      "ABM",
+      "crowding",
+      "heterogeneous",
+      "VT策略",
+      "flash_crash",
+      "Paper_5",
+      "counterintuitive",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vt",
+    "created_at": "2026-06-01T07:08:38+00:00"
+  },
+  {
+    "id": "K860_article_general",
+    "title": "K860: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K860 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K860 evaluates VT strategies under Prospect Theory (Tversky & Kahneman 1992, α=β=0.88, λ=2.25). Data: SPY/GLD/VIX 2005-2026. KEY FINDING: PT reverses VT evaluation. Sharpe says BH 50/50 (0.587) > VT Robust (0.579), but PT CE says VT Robust (-0.37%) > BH 5",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K860",
+    "tags": [
+      "prospect_theory",
+      "behavioral_finance",
+      "loss_aversion",
+      "VT策略",
+      "CRRA",
+      "utility",
+      "Kahneman",
+      "Tversky",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vt",
+    "created_at": "2026-06-01T07:08:38+00:00"
+  },
+  {
+    "id": "K1047_article_general",
+    "title": "K1047: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1047 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1047 正式 ABM：1000 agents（F/C/V），5000 天，50 MC reps。VT 採用率影響：0%→25% 微降（穩定化），50% 開始惡化（vol 21.1%），75% 嚴重（24.7%, kurt=6.09），90% 病態（vol 30.5% +50.6%, kurt=14.57, AC|r|=0.449, skew=-0.750）。臨界點 50-75%。機制：VT feedback loop（高 vol→全體賣→更高 vol）。K742 的 \"always converge\"",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1047",
+    "tags": [
+      "ABM",
+      "VT",
+      "crowding",
+      "tipping point",
+      "simulation",
+      "feedback loop",
+      "kurtosis",
+      "safe zone",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vt",
+    "created_at": "2026-06-01T07:08:38+00:00"
   }
 ]
