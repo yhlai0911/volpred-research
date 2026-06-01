@@ -1,39 +1,39 @@
 {
-  "timestamp": "2026-06-01T00:12:39Z",
+  "timestamp": "2026-06-01T06:12:35Z",
   "all_ok": false,
   "checks": [
     {
-      "name": "article_pool",
+      "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "64 draft articles total (31 general, 33 research). All thresholds met (total>=12, research>=4, general>=8)."
+      "detail": "draft=64 (research=33, general=31)"
     },
     {
-      "name": "strategy_metrics_freshness",
+      "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json does not exist (file missing)."
+      "detail": "storage/strategy_metrics.json not found"
     },
     {
-      "name": "error_log_recent",
+      "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No error log entries dated 2026-06-01 or 2026-05-31. Last visible entries are from 2026-05-29."
+      "detail": "no entries dated 2026-06-01 or 2026-05-31 in last 30 lines; most recent entry: 2026-05-29"
     },
     {
-      "name": "paper_trading_gaps",
+      "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "14 strategies checked. All have <=1 null portfolio_return in last 3 entries (2026-05-30 entry uniformly null — likely weekend/pending). No strategy exceeds 2 nulls."
+      "detail": "strategies checked: slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix; no strategy has >2 nulls in last 3 entries"
     },
     {
-      "name": "git_status",
+      "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files."
+      "detail": "0 uncommitted files"
     },
     {
-      "name": "knowledge_size",
+      "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json contains 2178 entries."
+      "detail": "2178 entries in storage/memory/knowledge.json"
     }
   ],
   "alerts": [
-    "strategy_metrics_missing: storage/strategy_metrics.json does not exist"
+    "strategy_metrics.json missing"
   ]
 }
