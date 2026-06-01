@@ -5659,7 +5659,7 @@
   {
     "id": "Paper4_DIV4_Table6_era_Harvey_passes",
     "title": "Paper 4 MAJOR: Table 6 era-specific Harvey pass 隱藏 + incr R² 低估 10-186×",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 4,
     "created_at": "2026-04-17T17:09:27+08:00",
     "description": "Paper 4 audit: Table 6 era 數字與 K752 不符. K752 Era3 GFC 3 訊號過 Harvey (t=-3.15, -6.51, +7.6), Era5 COVID 1 過 (t=+9.3). Paper Table 6 顯示 0/5 Harvey pass, 數字小 10-186×. **Paper '全 null' universal claim 實際 era-specific 有顯著**. 影響核心 contribution. 主線程 decision: (a) 修腳本重建 Table 6 (K752 是 canonical?); (b) paper errata 承認 era-specific Harvey passes, 弱化 universal claim; (c) errata pending.",
@@ -5677,7 +5677,13 @@
         "rationale": "paper + default (errata/footnote/clarif)",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "hourly-11",
+    "claimed_at": "2026-06-01T03:09:47.024136+00:00",
+    "claim_session_id": "a6d0bf6e99ee",
+    "started_at": "2026-06-01T03:09:51.211435+00:00",
+    "completed_at": "2026-06-01T03:10:44.181342+00:00",
+    "result": "Audit verified: main_v4.tex Table 6 已 100% match K752 (4 † crosses, footnote, narrative all correct). Sub4 fix landed in main_v3 (2026-04-19) and polished in main_v4 (2026-05-30). v1 was stale at 0/5 (task description source). No paper action needed; no errata. Audit memo: paper/vix-sufficiency/decisions/sub4_table6_audit_2026-06-01.md"
   },
   {
     "id": "Paper4_body_integration_9_new_experiments",
@@ -16826,7 +16832,7 @@
     "title": "Paper review (Codex 24h-rule): 澳洲股市那個看起來特別低的財報波動，其實可能只是日期差兩天",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_cfcd4eaa needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_cfcd4eaa",
@@ -16835,7 +16841,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-01T02:10:08+00:00"
+    "created_at": "2026-06-01T02:10:08+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-01T02:37:29.148494+00:00",
+    "claim_session_id": "ed2fa6a8eb35",
+    "started_at": "2026-06-01T02:37:29.225162+00:00",
+    "completed_at": "2026-06-01T02:38:03.631694+00:00",
+    "result": "Codex review: article is directionally supported by K1210 and is more restrained than mile_696c6063, but still overstates one inference: code supports date sensitivity and stock-driven instability, not direct proof of a two-basin/multi-basin pooled-MLE landscape without multi-start estimation."
   },
   {
     "id": "K880_article_general",
