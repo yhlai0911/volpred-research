@@ -16796,7 +16796,7 @@
     "title": "K740: write general-audience article (auto-discovered uncovered K)",
     "description": "K K740 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: 用戶, 執行: Claude] 14 策略 meta-analysis（2023-01-04~2026-03-27 實際 paper trading）。核心發現：(1) 複雜度不預測 Sharpe（Spearman rho=0.149, p=0.611），簡單 VIX 策略表現與 GARCH 同級。(2) 多資產分散溢酬 +0.826 Sharpe，SPY+GLD 均值 2.546 vs SPY-only 1.176。(3) Piecewise Conservative 獨佔效率前緣（Sharpe 3.158, MDD -2.48%, Calm",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K740",
@@ -16813,6 +16813,49 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-01T01:08:24+00:00"
+    "created_at": "2026-06-01T01:08:24+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-01T01:33:42.912612+00:00",
+    "claim_session_id": "8dc02bfbf4a0",
+    "started_at": "2026-06-01T01:33:42.971371+00:00",
+    "completed_at": "2026-06-01T01:36:50.279622+00:00",
+    "result": "Published general-audience draft mile_2fb1dfb3 for K740. Article explains that across 14 paper-trading strategies, simpler diversified approaches often beat more complex ones; included 2 charts on ranking and complexity-vs-performance."
+  },
+  {
+    "id": "paper_review_mile_cfcd4eaa",
+    "title": "Paper review (Codex 24h-rule): 澳洲股市那個看起來特別低的財報波動，其實可能只是日期差兩天",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_cfcd4eaa needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_cfcd4eaa",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-01T02:10:08+00:00"
+  },
+  {
+    "id": "K880_article_general",
+    "title": "K880: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K880 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: Codex(誤判), 執行: Claude] K880v2 removes r_overnight_t from h_intraday_t (Codex called it 'lookahead'). Result: DM drops 6.00→-0.57. BUT user clarified: using just-completed session info for next session is NOT lookahead — it's the core PRS design (Lai 2024). K880v2 actually pr",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K880",
+    "tags": [
+      "PRG",
+      "session_boundary",
+      "information_value",
+      "Codex_error",
+      "PRS",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-01T02:10:08+00:00"
   }
 ]
