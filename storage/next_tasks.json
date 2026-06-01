@@ -16123,8 +16123,8 @@
     "claimed_by": "codex-cli",
     "claimed_at": "2026-05-31T11:53:05.428912+00:00",
     "claim_session_id": "a8133b6a6ed3",
-    "completed_at": "2026-05-31T11:55:37.307702+00:00",
-    "result": "published general cross-asset attention article; six-asset attention weighting added noise and lost to simpler own-history baseline across all assets"
+    "completed_at": "2026-06-01T13:20:14.293544+00:00",
+    "result": "published general cross-asset attention article; six-asset attention weighting added noise and lost to simpler own-history baseline across all assets\n\nK189 article published as mile_48c8328b (draft, research audience). attention-weighted cross-asset vol 0/6 beats GJR, best_alpha=0.9 effectively deactivates attention. anti_ai_gate PASS. fig + draft + plot script committed."
   },
   {
     "id": "Paper6_table2_timing_footnote",
@@ -17368,7 +17368,7 @@
     "title": "K698: write general-audience article (auto-discovered uncovered K)",
     "description": "K K698 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: K697 contrarian lead, 執行: Claude] SPY lag-1 autocorr=-0.107(t=-7.41)。Contrarian tilt(BH 50/50 ±20% on >1% moves) NET Sharpe 0.878 vs BH 0.843(+0.035)。Best config: threshold 2% tilt ±30% NET 0.941 turnover 10.4x。MDD -24.8% vs -32.5%。Big down days(>1%) mean next-day return +43",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K698",
@@ -17383,6 +17383,12 @@
       "audience-general"
     ],
     "topic_cluster": "vt",
-    "created_at": "2026-06-01T11:08:53+00:00"
+    "created_at": "2026-06-01T11:08:53+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-01T13:13:33.345116+00:00",
+    "claim_session_id": "766e672e33ab",
+    "started_at": "2026-06-01T13:13:41.892239+00:00",
+    "completed_at": "2026-06-01T13:17:21.366220+00:00",
+    "result": "Published general-audience draft mile_67b3714d for K698. Added 2 charts and a reader-facing article explaining that short-term mean-reversion exists, but net alpha survives only when the contrarian overlay is applied sparingly with controlled turnover. Used topic-cluster waiver because the pending queue only had K698 and the angle is net-of-cost contrarian tradeoff rather than prior VT parameter/crowding coverage."
   }
 ]
