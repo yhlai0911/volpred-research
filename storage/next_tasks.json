@@ -17432,8 +17432,8 @@
     "claimed_at": "2026-06-01T15:08:46.615153+00:00",
     "claim_session_id": "b63bc173aecb",
     "started_at": "2026-06-01T15:08:54.481305+00:00",
-    "completed_at": "2026-06-01T15:19:44.326733+00:00",
-    "result": "Codex review found no lookahead or seed issues, but caught a critical TWII partial-month bug: 2026-06-01 was being treated as a full June month in monthly resampling. Fixed k1410 to drop incomplete terminal months, regenerated results, and published errata updating TWII numbers plus clarifying that retirement-risk-zone evidence here is retirement-post years 1-30 only and that bond strategies use a bond proxy."
+    "completed_at": "2026-06-01T15:33:30.250569+00:00",
+    "result": "Codex review found no lookahead or seed issues, but caught a critical TWII partial-month bug: 2026-06-01 was being treated as a full June month in monthly resampling. Fixed k1410 to drop incomplete terminal months, regenerated results, and published errata updating TWII numbers plus clarifying that retirement-risk-zone evidence here is retirement-post years 1-30 only and that bond strategies use a bond proxy.\n\nCodex 24h-rule review caught CRITICAL partial-month bug in monthly_returns() — TWII 2026-06-01 single day mis-treated as June month-end, polluting all Taiwan statistics. Fix applied + re-run + article updated + Errata footnote + Supabase synced. Commit 4233e1ad. Knowledge K1410_codex_review_partialmonth_fix added (entries 2179→2180, provenance 0 violations). GSPC unchanged, TWII numbers +0.1~0.8pp adjustments, main conclusions intact. Codex 2nd review in progress (background) — verdict will land in next fire if needed for follow-up."
   },
   {
     "id": "K1000_article_general",
