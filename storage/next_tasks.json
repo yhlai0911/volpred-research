@@ -17094,7 +17094,7 @@
     "title": "K991: write general-audience article (auto-discovered uncovered K)",
     "description": "K K991 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: 上架檢驗 #4, 執行: Claude] 0050.TW 2006-2026, k/VIX 策略 k=[5-16] grid。★ 上架檢驗通過：k=8.63 +-20% (6.90-10.36) Sharpe 最大降幅 2.2%（全樣本）/ 0.5%（OOS），遠低於 30% 門檻。Sharpe vs k 曲線極平坦（k=5-10 range: 0.81-0.85）。Optimal k ≈ 6.0-6.5 但改善 < 2%。MDD 與 k 線性：-9.5%(k=5) → -29.5%(k=16)，8.63 為 -15.9%。SPY optima",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K991",
@@ -17109,14 +17109,20 @@
       "audience-general"
     ],
     "topic_cluster": "vt",
-    "created_at": "2026-06-01T07:08:38+00:00"
+    "created_at": "2026-06-01T07:08:38+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-01T07:54:48.049125+00:00",
+    "claim_session_id": "1a2cfca99e57",
+    "started_at": "2026-06-01T07:55:06.022601+00:00",
+    "completed_at": "2026-06-01T07:58:32.740121+00:00",
+    "result": "Published draft mile_cea70f87 for K991 general coverage. Wrote a reader-facing article on Taiwan VT parameter robustness and uploaded 3 charts. Used cluster waiver because task explicitly filled uncovered general coverage."
   },
   {
     "id": "K864_article_general",
     "title": "K864: write general-audience article (auto-discovered uncovered K)",
     "description": "K K864 has verdict signal (score=2, reasons=['methodology/mechanism lesson']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K864 tests whether strategy heterogeneity reduces VT crowding (K827 extension). 1000 agents, 200 noise fixed, 4 VT types (12/VIX, Floor+Cap, Risk Parity, EWMA), 2600 sims. SHOCKING RESULT: Heterogeneity makes crowding WORSE. At 50% adoption: flash crashes",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K864",
@@ -17132,7 +17138,13 @@
       "audience-general"
     ],
     "topic_cluster": "vt",
-    "created_at": "2026-06-01T07:08:38+00:00"
+    "created_at": "2026-06-01T07:08:38+00:00",
+    "claimed_by": "hourly-16",
+    "claimed_at": "2026-06-01T08:10:37.585768+00:00",
+    "claim_session_id": "a7977ede8528",
+    "started_at": "2026-06-01T08:10:41.337573+00:00",
+    "completed_at": "2026-06-01T08:17:33.185265+00:00",
+    "result": "draft mile_1a6d9369 published (status=draft, audience=research auto-overridden, cluster_waiver=vt cooldown reason ABM_crowding angle differentiated). Anti-AI gate PASS (warn=2/3, MUST=0). 3 figs + script committed 7a4491d3."
   },
   {
     "id": "K860_article_general",
