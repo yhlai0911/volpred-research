@@ -16697,7 +16697,7 @@
     "title": "K604: write general-audience article (auto-discovered uncovered K)",
     "description": "K K604 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] 11 策略 6 維成本分析。Net Sharpe: Adaptive Tier 2.095 (best), Piecewise 1.776 (best value/complexity)。TW 13x more expensive than US (手續費+證交稅)。US tax drag 2.3-6.7%/yr (dominant)。Avg Sharpe reduction 27.2%。TW minimum $800K-$1M。",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K604",
@@ -16712,14 +16712,20 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-31T23:08:00+00:00"
+    "created_at": "2026-05-31T23:08:00+00:00",
+    "claimed_by": "hourly-09",
+    "claimed_at": "2026-06-01T01:10:22.498093+00:00",
+    "claim_session_id": "e6030f5f1848",
+    "started_at": "2026-06-01T01:10:26.697265+00:00",
+    "completed_at": "2026-06-01T01:19:05.322511+00:00",
+    "result": "Article 'mile_651c242d 好策略被成本吃掉 27%：11 個 VT 策略的實施費用拆解' published as draft (general audience). anti-AI gate PASS (warn=2 non-blocking). 1192 字 + 11 策略表 + 推薦表."
   },
   {
     "id": "K675_article_general",
     "title": "K675: write general-audience article (auto-discovered uncovered K)",
     "description": "K K675 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: 跳躍探索/社會影響, 執行: Claude] 4 投資人原型模擬（$50K, 20yr）。Uninformed（panic sell）$86K, Basic（60/40）$419K, VT-Aware $221K, Optimal $189K。Panic selling 28 次損失 $276K（76%）。Gini 0.282→uninformed 升級 basic 後降 37%。危機時差距擴大最多（GFC +13pp）。Lookup table（literacy 3/5）比 12/VIX continuous（4/5）更簡單且 MDD 更好（",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K675",
@@ -16734,6 +16740,79 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-05-31T23:08:00+00:00"
+    "created_at": "2026-05-31T23:08:00+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-01T00:31:03.043571+00:00",
+    "claim_session_id": "3d390518cbca",
+    "started_at": "2026-06-01T00:31:03.131923+00:00",
+    "completed_at": "2026-06-01T00:32:56.591583+00:00",
+    "result": "Published general-audience draft mile_5ef55c52 for K675. Article focuses on how panic selling, more than model sophistication, drives a near-5x terminal wealth gap from the same starting capital; included 2 charts."
+  },
+  {
+    "id": "K699_article_general",
+    "title": "K699: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K699 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: K698 驗證, 執行: Claude] Default(1%/±20%) 3/5 FAIL。Optimized(2%/±30%) 4/5 PASS but Harvey t=2.19 FAIL。Alpha regime-dependent: corr(alpha, neg-autocorr)=-0.873。Low-vol periods 無效。Codex審查: K698 有多個 bug(BH baseline非真BH、TX undercount、NaN bug、in-sample optimization)。+0.035 alpha 不可信。",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K699",
+    "tags": [
+      "contrarian",
+      "cross-OOS",
+      "marginal",
+      "Harvey-FAIL",
+      "Codex-warned",
+      "regime-dependent",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-01T01:08:24+00:00"
+  },
+  {
+    "id": "K713_article_general",
+    "title": "K713: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K713 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: K702 延伸, 執行: Claude] 50/50 SPY/GLD 加入 TLT 0-30%。Sharpe 單調增到 25%TLT(0.933)然後微降。MDD 單調改善(-36.8→-23.8%)。Calmar 在 25%TLT 最佳(0.41 vs 0%TLT 0.31)。37.5/37.5/25 SPY/GLD/TLT 可能是更好的 3-asset 靜態配置。但：TLT CAGR 低(2.89%)且 2022 升息大虧——需 cross-OOS 確認 TLT 不是 period-specific。CAGR 從 11.4%→9.7%（犧牲",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K713",
+    "tags": [
+      "TLT",
+      "3-asset",
+      "static-allocation",
+      "Sharpe-improvement",
+      "MDD",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-01T01:08:24+00:00"
+  },
+  {
+    "id": "K740_article_general",
+    "title": "K740: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K740 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: 用戶, 執行: Claude] 14 策略 meta-analysis（2023-01-04~2026-03-27 實際 paper trading）。核心發現：(1) 複雜度不預測 Sharpe（Spearman rho=0.149, p=0.611），簡單 VIX 策略表現與 GARCH 同級。(2) 多資產分散溢酬 +0.826 Sharpe，SPY+GLD 均值 2.546 vs SPY-only 1.176。(3) Piecewise Conservative 獨佔效率前緣（Sharpe 3.158, MDD -2.48%, Calm",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K740",
+    "tags": [
+      "meta-analysis",
+      "strategy-selection",
+      "paper-trading",
+      "composite-score",
+      "efficiency-frontier",
+      "diversification",
+      "complexity",
+      "用戶提問",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-01T01:08:24+00:00"
   }
 ]
