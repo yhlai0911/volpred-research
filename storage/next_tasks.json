@@ -17683,7 +17683,7 @@
     "title": "K481: write general-audience article (auto-discovered uncovered K)",
     "description": "K K481 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: Asset: SPY MCS (r² proxy, α=0.1): 5 of 8 models in superior set. | Included: ['EGARCH', 'GJR+HAR_Ens', 'GJR-GARCH', 'HAR_logrange', 'Semivar_RS-'] | Excluded: ['EWMA', 'GARCH', 'Rolling_21d'] | Cross-period: most robust model(s) = [('GJR+HAR_Ens', 5), ('EGARCH', 4), ('GJR-GARCH',",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K481",
@@ -17695,7 +17695,13 @@
       "audience-general"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-06-01T17:10:35+00:00"
+    "created_at": "2026-06-01T17:10:35+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-01T20:40:21.054931+00:00",
+    "claim_session_id": "08c3b6478d79",
+    "started_at": "2026-06-01T20:40:29.037764+00:00",
+    "completed_at": "2026-06-01T20:47:08.057264+00:00",
+    "result": "Published general draft mile_4f76e498 for K481 with 2 original charts; angle focuses on five-model superior set and regime robustness. Passed anti-AI and publish_draft gates; used topic-cluster waiver due distinct MCS/elimination angle."
   },
   {
     "id": "K690_article_general",
@@ -17761,5 +17767,52 @@
     "completed_at": "2026-06-02T04:14:00+00:00",
     "claimed_by": "hourly-04",
     "result": "CONDITIONAL_PASS_main_thread_secondary. 7 article claims byte-match results.json. 2 MEDIUM doc-only findings (Wilson CI overlapping windows / credit annual compound). Lookahead 5/5 PASS in 5 functions. Vol drag theoretical=-4.63% / empirical=-4.64% / sim-real ratio 1.03 all tight. Primary-path Codex 0.135 attempted but output buffer filled on feed.json before VERDICT emit; main-thread structured review covered same focus. results.json code_review updated."
+  },
+  {
+    "id": "paper_review_mile_a1f3e23f",
+    "title": "Paper review (Codex 24h-rule): 換了更好的模型，風險計算卻沒變好多少：36 場測試告訴你，關鍵在哪裡",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_a1f3e23f needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_a1f3e23f",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-01T21:08:06+00:00"
+  },
+  {
+    "id": "paper_review_mile_ccc533fd",
+    "title": "Paper review (Codex 24h-rule): 借錢買正二，最該怕的不是賠光，是「賣也賣不掉」的那一年",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_ccc533fd needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_ccc533fd",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-01T21:08:06+00:00"
+  },
+  {
+    "id": "trending_repost_2026_06_02_fed新局",
+    "title": "[trending_repost] 新Fed主席首秀遇通膨，美債MOVE如何定價鷹派尾部風險？",
+    "description": "從新任聯準會主席首場會議與 4 月 CPI 升至 3.8% 切入，分析債券選擇權隱含波動率（MOVE）的非對稱偏斜。可量化：比較歷次 Fed 主席更迭前後的 MOVE 指數均值回歸速度，以及利率期貨隱含波動率對「再升息」機率的定價。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-01T21:11:12+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
   }
 ]
