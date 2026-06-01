@@ -32018,5 +32018,33 @@
     "article_mile_id": "mile_c2020d8c",
     "fix_commit": "pending",
     "related_task": "paper_review_mile_c2020d8c"
+  },
+  {
+    "id": "K1167_codex_24h_review_mile_95f49685",
+    "title": "Codex 24h-rule review: mile_95f49685 台股財報日波動率 verdict CONDITIONAL_PASS + K1167 README 0.707 errata",
+    "summary": "Paper_review (Codex primary path) on published article mile_95f49685 (2026-05-28 publish, K1167+K1166+K1164+K1152+K1153 refs). VERDICT: CONDITIONAL_PASS. LOOKAHEAD: PASS (theta_EAV uses EAV[t-1]+VIX^2[t-1]; institutions_pct snapshot is cross-sectional). CLAIM_EVIDENCE: PASS — all article numbers (30%, 2.8x, N=110, rho=+0.80, rho=+0.40, panel beta/t, US rho=+0.575, r(log_analyst,theta_EAV)=+0.265 p=0.005) match k1167_results.json. Codex flagged article's '+0.707 pooled Pearson' but verified article does NOT actually quote this number — K1167 README does. OVERCLAIM: CONDITIONAL — title '原因是結構，不是消息量' marginally exceeds mechanism_verdict='PARTIAL/two-level'; body article has hedging language (N=4 preliminary, p=0.20 acknowledged). Acted: corrected K1167 README +0.707 → +0.667 in 4 locations + added errata section; verified via uv run python recompute (Pearson r(log_analyst, institutions_pct)=0.6669, N=110). No feed errata needed (article never quoted the wrong number).",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_ids": [
+      "K1167",
+      "K1166",
+      "K1164",
+      "K1152",
+      "K1153"
+    ],
+    "experiment_id": "K1167",
+    "k_id": "K1167",
+    "experiment_path": "experiments/k1167",
+    "reviewer": "Codex CLI (gpt-5.4 medium, 24h-rule primary path)",
+    "reviewer_source": "codex_review",
+    "codex_review": "passed_with_caveats",
+    "tags": [
+      "paper_review",
+      "codex_24h_rule",
+      "errata",
+      "mile_95f49685",
+      "K1167"
+    ],
+    "date_recorded": "2026-06-02",
+    "session_id": "31cd452cb270"
   }
 ]

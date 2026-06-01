@@ -12,7 +12,7 @@
 > - **Cross-market (N=4)**: institutions_pct ranking `TW(0.247) < EU(0.416) < JP(0.425) < US(0.750)` **matches** θ_rel cluster split; Spearman ρ=+0.80 (p=0.20; limited by N=4). Analyst-median ranking `TW<JP<EU<US` does **not** match (ρ=+0.40).
 > - **Within-market (N=109, demeaned)**: log_analyst × θ_EAV r=+0.265 (p=0.005); institutions_pct × θ_EAV r=-0.057 (p=0.56). Analyst dominates.
 > - **Joint panel (market FE + log_mcap, N=109)**: log_analyst β=+1.14e-3, t=+2.71; institutions_pct β=-2.73e-3, t=-0.93 (not sig). **Analyst remains the primary per-stock driver; institutions_pct does not subsume it.**
-> - **Regressor collinearity**: pooled Pearson r(log_analyst, institutions_pct)=+0.707. The two variables carry overlapping between-market information but distinct within-market information.
+> - **Regressor collinearity**: pooled Pearson r(log_analyst, institutions_pct)=+0.667 (N=110; see errata at end of file). The two variables carry overlapping between-market information but distinct within-market information.
 > - **Mechanism verdict (preliminary, N=4 markets)**: two-level story — institutional% captures the between-market (cross-country) vol-response concentration; analyst coverage captures the within-market (per-stock) vol-response sensitivity. Neither alone is sufficient.
 
 [提出: Claude (承接 K1166 next_tasks K1167), 執行: Claude]
@@ -152,9 +152,10 @@ correlating residuals:
 | institutions_pct × θ_EAV_i | -0.057 | 0.56 | 109 |
 | log_analyst × institutions_pct | +0.362 | 0.0001 | 109 |
 
-The pooled raw correlation between log_analyst and institutions_pct is +0.707
-(collinear because US stocks are both high-analyst and high-institutional
-simultaneously); within-market it drops to +0.362. The crucial finding is that
+The pooled raw correlation between log_analyst and institutions_pct is +0.667
+(N=110; see errata at end of file; collinear because US stocks are both
+high-analyst and high-institutional simultaneously); within-market it drops
+to +0.362. The crucial finding is that
 **only log_analyst carries within-market signal to θ_EAV_i; institutions_pct
 has zero within-market signal once the market mean is removed**.
 
@@ -265,9 +266,10 @@ demeaning.
    holders**. Mechanism assumes "institutional = algorithmic/IV-arb", but a
    high Vanguard-index-fund ownership is **not** algorithmic. A finer
    decomposition (active vs passive institutional) is needed.
-4. **Collinearity log_analyst vs institutions_pct**: pooled Pearson +0.707.
-   US has both highest analysts and highest institutions%; TW has both
-   lowest. Separating between-market effects requires more markets.
+4. **Collinearity log_analyst vs institutions_pct**: pooled Pearson +0.667
+   (corrected, was +0.707 — see errata). US has both highest analysts and
+   highest institutions%; TW has both lowest. Separating between-market
+   effects requires more markets.
 5. **EU-vs-JP gap (0.14 vs 0.39) not fully explained** by institutions_pct
    alone (nearly equal institutions_pct 0.416 vs 0.425). The residual is
    consistent with K1153's press-concentration hypothesis but not tested here.
@@ -327,3 +329,27 @@ before any strong causal claim.
 - `data/institutional_ownership.json` — yfinance snapshot (110 records)
 - `data/k1166_per_stock_table.csv` — copy of K1166 per-stock panel (source)
 - `run_fetch.log`, `run.log` — execution logs
+
+---
+
+## Errata (2026-06-02, via mile_95f49685 Codex 24h-rule review)
+
+- **Pooled Pearson r(log_analyst, institutions_pct)**: originally stated `+0.707`
+  in 4 places (TL;DR L15, Section 3.5 narrative L155, Limitations point 4 L268,
+  and minor cross-refs). Re-computed from raw source data:
+  `k1166_per_stock_table.csv (converged subset)` merged on
+  `data/institutional_ownership.json (institutionsPercentHeld)`, log-transformed
+  via `log(analyst_count + 1)` → actual Pearson = **+0.6669** (N=110).
+  Updated all four occurrences to `+0.667`.
+- Reproduce: `uv run python -c "import json,pandas as pd,numpy as np; \
+  k=pd.read_csv('experiments/k1166/k1166_per_stock_table.csv'); \
+  k=k[k['converged'].astype(bool)]; p=json.load(open('experiments/k1167/data/institutional_ownership.json')); \
+  r=pd.DataFrame([{'ticker':x['ticker'],'institutions_pct':(x.get('major_holders') or {}).get('institutionsPercentHeld')} for x in p['records']]); \
+  m=k.merge(r,on='ticker'); m['la']=np.log(m['analyst_count'].fillna(0)+1); \
+  g=m.dropna(subset=['la','institutions_pct']); print(g['la'].corr(g['institutions_pct']),len(g))"`
+- Published article `mile_95f49685` 「台股財報日波動率只有美股的 30%？...」 did
+  **not** quote this number, so no feed errata needed; this is a README-only
+  data integrity fix to prevent future article-writers from copying the wrong
+  value.
+- Triggered by: paper_review_mile_95f49685 (Codex 24h-rule primary path),
+  2026-06-02 hourly-07 dispatch.
