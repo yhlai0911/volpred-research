@@ -1,0 +1,992 @@
+{
+  "experiment_id": "k1411",
+  "title": "槓桿型 ETF（00631L）單筆 vs 分批、波動率拖累、與借貸/加碼金風險",
+  "generated_at": "2026-06-01T18:42:33.218660+00:00",
+  "config": {
+    "seed": 20260602,
+    "leverage": 2.0,
+    "lev_daily_cost_annual_assumed": 0.015,
+    "credit_rates": [
+      0.03,
+      0.05,
+      0.07
+    ],
+    "dca_months": 12,
+    "holding_horizon_years_main": 3,
+    "near_zero_threshold_frac": 0.1,
+    "near_high_within_pct": 0.05,
+    "near_high_lookback_days": 252,
+    "buydip_reserve_frac": 0.3,
+    "buydip_dip_trigger": 0.2,
+    "lookahead_check": "重建 2x 用逐日報酬複利（僅當期及過去）；rolling 視窗投入/估值只用視窗內已實現價格；trailing-high mask 只用過去 252 日；加碼觸發只看已實現回落；信貸利息為時間函數不含未來資訊。"
+  },
+  "data_meta": {
+    "L00631L": {
+      "symbol": "00631L.TW",
+      "start": "2014-10-23",
+      "end": "2026-06-01",
+      "n_days": 2827,
+      "ann_vol": 0.3674,
+      "ann_ret": 0.5324,
+      "vendor_breaks_repaired": 2
+    },
+    "T0050": {
+      "symbol": "0050.TW",
+      "start": "2009-01-02",
+      "end": "2026-06-01",
+      "n_days": 4259,
+      "ann_vol": 0.2151,
+      "ann_ret": 0.2242,
+      "vendor_breaks_repaired": 1
+    },
+    "TWII": {
+      "symbol": "^TWII",
+      "start": "1997-07-02",
+      "end": "2026-05-29",
+      "n_days": 7083,
+      "ann_vol": 0.2155,
+      "ann_ret": 0.0836,
+      "vendor_breaks_repaired": 0
+    }
+  },
+  "code_review": {
+    "status": "CONDITIONAL_PASS_self_review",
+    "reviewer_source": "main-thread structured self-review (Codex CLI 與 agy 本次環境皆 hang，>20min 無輸出，已 kill；fallback 走主線程審查)",
+    "note": "外部 AI reviewer 不可用，closure 暫定 CONDITIONAL_PASS；主線程合併後應以 primary-path Codex 二次驗證（依 .claude/rules/experiments.md 規範）。",
+    "checks_passed": [
+      "Lookahead：rebuild_2x_daily(cumprod 僅當期+過去)、near_high_mask(pandas trailing rolling.max)、reserve_buydip(run_peak 增量追蹤)、credit loan(時間確定函數)、DCA(固定排程) — 皆無未來資訊。",
+      "2x daily-rebal 正確：逐日 1+2r-cost 複利，經實證驗證(重建/真實 00631L 終值比 1.03)。",
+      "clean_vendor_breaks：僅 |資產|>30% 且 |TWII|<12% 觸發，真實大跌(TWII 同步大跌)不會誤殺；2015-08-24 等壞點正確捕捉。",
+      "信貸破產：equity[-1]<0(到期) + any(equity[1:]<0)(路徑) 皆排除 day-0 trivial(equity=0)。",
+      "DCA：3年期(756d)內 12*21=252d 全投完，無未投盡 cash 殘留問題。"
+    ]
+  },
+  "data_cleaning": {
+    "method": "TWII cross-check：|asset 日報酬|>30% 且 |TWII 同日|<12% 判為 yfinance scale-break 壞點，替換為 TWII當日報酬×槓桿倍數，再重建價格序列。",
+    "repaired_breaks": {
+      "L00631L": [
+        {
+          "date": "2015-01-05",
+          "raw_return": -0.9544,
+          "twii_return": -0.0036,
+          "replaced_with": -0.0071
+        },
+        {
+          "date": "2015-08-24",
+          "raw_return": -0.3364,
+          "twii_return": -0.0484,
+          "replaced_with": -0.0967
+        }
+      ],
+      "T0050": [
+        {
+          "date": "2014-01-02",
+          "raw_return": -0.7506,
+          "twii_return": 0.0001,
+          "replaced_with": 0.0001
+        }
+      ],
+      "TWII": []
+    }
+  },
+  "Q1_vol_drag_and_asymmetry": {
+    "drag_from_0050": {
+      "underlying_label": "0050.TW（2009起）",
+      "period_start": "2009-01-05",
+      "period_end": "2026-06-01",
+      "n_days": 4258,
+      "years": 16.9,
+      "underlying_ann_vol": 0.2151,
+      "underlying_total_return_x": 20.673,
+      "underlying_cagr": 0.1963,
+      "naive_2x_cagr_expectation": 0.3926,
+      "buyhold_2x_terminal_x": 40.346,
+      "buyhold_2x_cagr": 0.2446,
+      "daily_rebal_2x_terminal_x": 152.0217,
+      "daily_rebal_2x_cagr": 0.3463,
+      "theoretical_annual_vol_drag": -0.0463,
+      "empirical_annual_drag_rebal_minus_naive": -0.0464,
+      "daily_cost_annual_assumed": 0.015
+    },
+    "drag_from_twii": {
+      "underlying_label": "^TWII（1997起）",
+      "period_start": "1997-07-03",
+      "period_end": "2026-05-29",
+      "n_days": 7082,
+      "years": 28.1,
+      "underlying_ann_vol": 0.2155,
+      "underlying_total_return_x": 4.9722,
+      "underlying_cagr": 0.0587,
+      "naive_2x_cagr_expectation": 0.1175,
+      "buyhold_2x_terminal_x": 8.9443,
+      "buyhold_2x_cagr": 0.0811,
+      "daily_rebal_2x_terminal_x": 4.355,
+      "daily_rebal_2x_cagr": 0.0537,
+      "theoretical_annual_vol_drag": -0.0464,
+      "empirical_annual_drag_rebal_minus_naive": -0.0637,
+      "daily_cost_annual_assumed": 0.015
+    },
+    "real_00631L_vs_rebuilt_2x_daily": {
+      "overlap_start": "2014-10-23",
+      "overlap_end": "2026-06-01",
+      "n_days": 2822,
+      "years": 11.19,
+      "real_00631L_terminal_x": 55.9594,
+      "rebuilt_2x_daily_rebal_terminal_x": 57.654,
+      "naive_2x_buyhold_terminal_x": 19.3572,
+      "real_cagr": 0.4326,
+      "rebuilt_cagr": 0.4365,
+      "rebuilt_vs_real_terminal_ratio": 1.0303
+    },
+    "real_00631L_max_drawdown": -0.5514,
+    "real_00631L_recover_multiple_from_maxdd": 1.2293,
+    "underlying_0050_max_drawdown": -0.3383,
+    "asymmetry_examples": {
+      "dd_30pct_needs_recover_pct": 42.9,
+      "dd_50pct_needs_recover_pct": 100.0,
+      "dd_70pct_needs_recover_pct": 233.3
+    }
+  },
+  "Q2_lumpsum_vs_dca": {
+    "leverage_00631L_all": {
+      "label": "00631L 槓桿",
+      "horizon_days": 756,
+      "horizon_years": 3.0,
+      "dca_months": 12,
+      "near_zero_threshold": 0.1,
+      "n_windows": 2070,
+      "lumpsum_median_terminal": 2.1803,
+      "dca_median_terminal": 2.03,
+      "lumpsum_mean_terminal": 2.5209,
+      "dca_mean_terminal": 2.2486,
+      "lumpsum_p5_terminal": 1.5471,
+      "dca_p5_terminal": 1.3498,
+      "lumpsum_p95_terminal": 4.4464,
+      "dca_p95_terminal": 3.7433,
+      "lumpsum_median_cagr": 0.2967,
+      "dca_median_cagr": 0.2662,
+      "lumpsum_median_mdd": -0.513,
+      "dca_median_mdd": -0.513,
+      "lumpsum_worst_mdd": -0.5514,
+      "dca_worst_mdd": -0.5514,
+      "lumpsum_near_zero_prob": 0.0,
+      "lumpsum_near_zero_ci": [
+        0.0,
+        0.0019
+      ],
+      "dca_near_zero_prob": 0.0,
+      "dca_near_zero_ci": [
+        0.0,
+        0.0019
+      ],
+      "lumpsum_beats_dca_prob": 0.7763
+    },
+    "underlying_0050_all": {
+      "label": "0050 非槓桿",
+      "horizon_days": 756,
+      "horizon_years": 3.0,
+      "dca_months": 12,
+      "near_zero_threshold": 0.1,
+      "n_windows": 3502,
+      "lumpsum_median_terminal": 1.4305,
+      "dca_median_terminal": 1.339,
+      "lumpsum_mean_terminal": 1.4861,
+      "dca_mean_terminal": 1.4153,
+      "lumpsum_p5_terminal": 1.0183,
+      "dca_p5_terminal": 0.9856,
+      "lumpsum_p95_terminal": 2.1487,
+      "dca_p95_terminal": 2.0033,
+      "lumpsum_median_cagr": 0.1267,
+      "dca_median_cagr": 0.1022,
+      "lumpsum_median_mdd": -0.2581,
+      "dca_median_mdd": -0.2504,
+      "lumpsum_worst_mdd": -0.3383,
+      "dca_worst_mdd": -0.3383,
+      "lumpsum_near_zero_prob": 0.0,
+      "lumpsum_near_zero_ci": [
+        0.0,
+        0.0011
+      ],
+      "dca_near_zero_prob": 0.0,
+      "dca_near_zero_ci": [
+        0.0,
+        0.0011
+      ],
+      "lumpsum_beats_dca_prob": 0.7399
+    },
+    "leverage_flipped_conclusion": {
+      "lumpsum_beats_dca_leverage": 0.7763,
+      "lumpsum_beats_dca_underlying": 0.7399,
+      "flipped": false,
+      "interpretation": "槓桿下單筆勝率 78% vs 非槓桿 74%"
+    }
+  },
+  "Q3_high_entry_condition": {
+    "leverage_00631L_high": {
+      "label": "00631L 槓桿(高位)",
+      "horizon_days": 756,
+      "horizon_years": 3.0,
+      "dca_months": 12,
+      "near_zero_threshold": 0.1,
+      "n_windows": 850,
+      "lumpsum_median_terminal": 1.9205,
+      "dca_median_terminal": 1.7496,
+      "lumpsum_mean_terminal": 2.053,
+      "dca_mean_terminal": 1.9198,
+      "lumpsum_p5_terminal": 1.5018,
+      "dca_p5_terminal": 1.2725,
+      "lumpsum_p95_terminal": 3.2063,
+      "dca_p95_terminal": 3.5047,
+      "lumpsum_median_cagr": 0.243,
+      "dca_median_cagr": 0.205,
+      "lumpsum_median_mdd": -0.513,
+      "dca_median_mdd": -0.513,
+      "lumpsum_worst_mdd": -0.5213,
+      "dca_worst_mdd": -0.5213,
+      "lumpsum_near_zero_prob": 0.0,
+      "lumpsum_near_zero_ci": [
+        0.0,
+        0.0045
+      ],
+      "dca_near_zero_prob": 0.0,
+      "dca_near_zero_ci": [
+        0.0,
+        0.0045
+      ],
+      "lumpsum_beats_dca_prob": 0.7494
+    },
+    "underlying_0050_high": {
+      "label": "0050 非槓桿(高位)",
+      "horizon_days": 756,
+      "horizon_years": 3.0,
+      "dca_months": 12,
+      "near_zero_threshold": 0.1,
+      "n_windows": 1836,
+      "lumpsum_median_terminal": 1.3986,
+      "dca_median_terminal": 1.3346,
+      "lumpsum_mean_terminal": 1.3977,
+      "dca_mean_terminal": 1.3578,
+      "lumpsum_p5_terminal": 1.02,
+      "dca_p5_terminal": 1.0323,
+      "lumpsum_p95_terminal": 1.7928,
+      "dca_p95_terminal": 1.8535,
+      "lumpsum_median_cagr": 0.1183,
+      "dca_median_cagr": 0.101,
+      "lumpsum_median_mdd": -0.2581,
+      "dca_median_mdd": -0.213,
+      "lumpsum_worst_mdd": -0.3383,
+      "dca_worst_mdd": -0.3383,
+      "lumpsum_near_zero_prob": 0.0,
+      "lumpsum_near_zero_ci": [
+        0.0,
+        0.0021
+      ],
+      "dca_near_zero_prob": 0.0,
+      "dca_near_zero_ci": [
+        0.0,
+        0.0021
+      ],
+      "lumpsum_beats_dca_prob": 0.6983
+    }
+  },
+  "Q4_credit_ruin": {
+    "leverage_00631L_all_entries": {
+      "1y": {
+        "3pct": {
+          "annual_rate": 0.03,
+          "n_windows": 2574,
+          "ruin_prob": 0.2001,
+          "ruin_ci": [
+            0.1851,
+            0.216
+          ],
+          "ever_underwater_prob": 0.9091,
+          "ever_underwater_ci": [
+            0.8974,
+            0.9196
+          ],
+          "median_final_equity": 0.3755,
+          "p5_final_equity": -0.2614,
+          "median_min_equity": -0.1322
+        },
+        "5pct": {
+          "annual_rate": 0.05,
+          "n_windows": 2574,
+          "ruin_prob": 0.2117,
+          "ruin_ci": [
+            0.1964,
+            0.2279
+          ],
+          "ever_underwater_prob": 0.9106,
+          "ever_underwater_ci": [
+            0.899,
+            0.9211
+          ],
+          "median_final_equity": 0.3555,
+          "p5_final_equity": -0.2814,
+          "median_min_equity": -0.1363
+        },
+        "7pct": {
+          "annual_rate": 0.07,
+          "n_windows": 2574,
+          "ruin_prob": 0.2214,
+          "ruin_ci": [
+            0.2058,
+            0.2379
+          ],
+          "ever_underwater_prob": 0.9149,
+          "ever_underwater_ci": [
+            0.9035,
+            0.9251
+          ],
+          "median_final_equity": 0.3355,
+          "p5_final_equity": -0.3014,
+          "median_min_equity": -0.1412
+        }
+      },
+      "2y": {
+        "3pct": {
+          "annual_rate": 0.03,
+          "n_windows": 2322,
+          "ruin_prob": 0.0715,
+          "ruin_ci": [
+            0.0617,
+            0.0827
+          ],
+          "ever_underwater_prob": 0.9363,
+          "ever_underwater_ci": [
+            0.9256,
+            0.9455
+          ],
+          "median_final_equity": 0.7568,
+          "p5_final_equity": -0.02,
+          "median_min_equity": -0.1782
+        },
+        "5pct": {
+          "annual_rate": 0.05,
+          "n_windows": 2322,
+          "ruin_prob": 0.0995,
+          "ruin_ci": [
+            0.088,
+            0.1123
+          ],
+          "ever_underwater_prob": 0.9406,
+          "ever_underwater_ci": [
+            0.9302,
+            0.9495
+          ],
+          "median_final_equity": 0.7152,
+          "p5_final_equity": -0.0616,
+          "median_min_equity": -0.1982
+        },
+        "7pct": {
+          "annual_rate": 0.07,
+          "n_windows": 2322,
+          "ruin_prob": 0.1258,
+          "ruin_ci": [
+            0.1129,
+            0.1399
+          ],
+          "ever_underwater_prob": 0.9462,
+          "ever_underwater_ci": [
+            0.9362,
+            0.9546
+          ],
+          "median_final_equity": 0.6728,
+          "p5_final_equity": -0.104,
+          "median_min_equity": -0.2207
+        }
+      },
+      "3y": {
+        "3pct": {
+          "annual_rate": 0.03,
+          "n_windows": 2070,
+          "ruin_prob": 0.0024,
+          "ruin_ci": [
+            0.001,
+            0.0056
+          ],
+          "ever_underwater_prob": 0.9333,
+          "ever_underwater_ci": [
+            0.9218,
+            0.9433
+          ],
+          "median_final_equity": 1.0876,
+          "p5_final_equity": 0.4544,
+          "median_min_equity": -0.229
+        },
+        "5pct": {
+          "annual_rate": 0.05,
+          "n_windows": 2070,
+          "ruin_prob": 0.0058,
+          "ruin_ci": [
+            0.0033,
+            0.0101
+          ],
+          "ever_underwater_prob": 0.9362,
+          "ever_underwater_ci": [
+            0.9249,
+            0.946
+          ],
+          "median_final_equity": 1.0227,
+          "p5_final_equity": 0.3895,
+          "median_min_equity": -0.2517
+        },
+        "7pct": {
+          "annual_rate": 0.07,
+          "n_windows": 2070,
+          "ruin_prob": 0.0092,
+          "ruin_ci": [
+            0.0059,
+            0.0143
+          ],
+          "ever_underwater_prob": 0.9406,
+          "ever_underwater_ci": [
+            0.9296,
+            0.95
+          ],
+          "median_final_equity": 0.9553,
+          "p5_final_equity": 0.3221,
+          "median_min_equity": -0.2824
+        }
+      },
+      "5y": {
+        "3pct": {
+          "annual_rate": 0.03,
+          "n_windows": 1566,
+          "ruin_prob": 0.0,
+          "ruin_ci": [
+            0.0,
+            0.0024
+          ],
+          "ever_underwater_prob": 0.9336,
+          "ever_underwater_ci": [
+            0.9202,
+            0.9449
+          ],
+          "median_final_equity": 3.6463,
+          "p5_final_equity": 1.6122,
+          "median_min_equity": -0.1856
+        },
+        "5pct": {
+          "annual_rate": 0.05,
+          "n_windows": 1566,
+          "ruin_prob": 0.0,
+          "ruin_ci": [
+            0.0,
+            0.0024
+          ],
+          "ever_underwater_prob": 0.9419,
+          "ever_underwater_ci": [
+            0.9292,
+            0.9524
+          ],
+          "median_final_equity": 3.5293,
+          "p5_final_equity": 1.4952,
+          "median_min_equity": -0.2128
+        },
+        "7pct": {
+          "annual_rate": 0.07,
+          "n_windows": 1566,
+          "ruin_prob": 0.0,
+          "ruin_ci": [
+            0.0,
+            0.0024
+          ],
+          "ever_underwater_prob": 0.9464,
+          "ever_underwater_ci": [
+            0.9341,
+            0.9565
+          ],
+          "median_final_equity": 3.403,
+          "p5_final_equity": 1.3689,
+          "median_min_equity": -0.2499
+        }
+      }
+    },
+    "leverage_00631L_high_entries": {
+      "1y": {
+        "3pct": {
+          "annual_rate": 0.03,
+          "n_windows": 1053,
+          "ruin_prob": 0.2754,
+          "ruin_ci": [
+            0.2493,
+            0.3032
+          ],
+          "ever_underwater_prob": 0.9155,
+          "ever_underwater_ci": [
+            0.8971,
+            0.9308
+          ],
+          "median_final_equity": 0.2819,
+          "p5_final_equity": -0.2998,
+          "median_min_equity": -0.1148
+        },
+        "5pct": {
+          "annual_rate": 0.05,
+          "n_windows": 1053,
+          "ruin_prob": 0.2858,
+          "ruin_ci": [
+            0.2594,
+            0.3139
+          ],
+          "ever_underwater_prob": 0.9164,
+          "ever_underwater_ci": [
+            0.8982,
+            0.9317
+          ],
+          "median_final_equity": 0.2619,
+          "p5_final_equity": -0.3198,
+          "median_min_equity": -0.1191
+        },
+        "7pct": {
+          "annual_rate": 0.07,
+          "n_windows": 1053,
+          "ruin_prob": 0.3029,
+          "ruin_ci": [
+            0.2759,
+            0.3314
+          ],
+          "ever_underwater_prob": 0.925,
+          "ever_underwater_ci": [
+            0.9075,
+            0.9394
+          ],
+          "median_final_equity": 0.2419,
+          "p5_final_equity": -0.3398,
+          "median_min_equity": -0.1227
+        }
+      },
+      "2y": {
+        "3pct": {
+          "annual_rate": 0.03,
+          "n_windows": 1006,
+          "ruin_prob": 0.1163,
+          "ruin_ci": [
+            0.0979,
+            0.1376
+          ],
+          "ever_underwater_prob": 0.9642,
+          "ever_underwater_ci": [
+            0.9509,
+            0.974
+          ],
+          "median_final_equity": 0.3733,
+          "p5_final_equity": -0.0594,
+          "median_min_equity": -0.1997
+        },
+        "5pct": {
+          "annual_rate": 0.05,
+          "n_windows": 1006,
+          "ruin_prob": 0.1521,
+          "ruin_ci": [
+            0.1312,
+            0.1756
+          ],
+          "ever_underwater_prob": 0.9702,
+          "ever_underwater_ci": [
+            0.9577,
+            0.979
+          ],
+          "median_final_equity": 0.3317,
+          "p5_final_equity": -0.101,
+          "median_min_equity": -0.2243
+        },
+        "7pct": {
+          "annual_rate": 0.07,
+          "n_windows": 1006,
+          "ruin_prob": 0.1849,
+          "ruin_ci": [
+            0.1621,
+            0.2101
+          ],
+          "ever_underwater_prob": 0.9801,
+          "ever_underwater_ci": [
+            0.9695,
+            0.9871
+          ],
+          "median_final_equity": 0.2893,
+          "p5_final_equity": -0.1434,
+          "median_min_equity": -0.2507
+        }
+      },
+      "3y": {
+        "3pct": {
+          "annual_rate": 0.03,
+          "n_windows": 850,
+          "ruin_prob": 0.0035,
+          "ruin_ci": [
+            0.0012,
+            0.0103
+          ],
+          "ever_underwater_prob": 0.9624,
+          "ever_underwater_ci": [
+            0.9473,
+            0.9732
+          ],
+          "median_final_equity": 0.8277,
+          "p5_final_equity": 0.4091,
+          "median_min_equity": -0.3241
+        },
+        "5pct": {
+          "annual_rate": 0.05,
+          "n_windows": 850,
+          "ruin_prob": 0.0071,
+          "ruin_ci": [
+            0.0032,
+            0.0153
+          ],
+          "ever_underwater_prob": 0.9671,
+          "ever_underwater_ci": [
+            0.9528,
+            0.9771
+          ],
+          "median_final_equity": 0.7628,
+          "p5_final_equity": 0.3442,
+          "median_min_equity": -0.3704
+        },
+        "7pct": {
+          "annual_rate": 0.07,
+          "n_windows": 850,
+          "ruin_prob": 0.0094,
+          "ruin_ci": [
+            0.0048,
+            0.0185
+          ],
+          "ever_underwater_prob": 0.9765,
+          "ever_underwater_ci": [
+            0.9639,
+            0.9847
+          ],
+          "median_final_equity": 0.6954,
+          "p5_final_equity": 0.2768,
+          "median_min_equity": -0.4063
+        }
+      },
+      "5y": {
+        "3pct": {
+          "annual_rate": 0.03,
+          "n_windows": 720,
+          "ruin_prob": 0.0,
+          "ruin_ci": [
+            0.0,
+            0.0053
+          ],
+          "ever_underwater_prob": 0.9708,
+          "ever_underwater_ci": [
+            0.9558,
+            0.9808
+          ],
+          "median_final_equity": 3.7202,
+          "p5_final_equity": 1.3974,
+          "median_min_equity": -0.272
+        },
+        "5pct": {
+          "annual_rate": 0.05,
+          "n_windows": 720,
+          "ruin_prob": 0.0,
+          "ruin_ci": [
+            0.0,
+            0.0053
+          ],
+          "ever_underwater_prob": 0.9792,
+          "ever_underwater_ci": [
+            0.9659,
+            0.9873
+          ],
+          "median_final_equity": 3.6032,
+          "p5_final_equity": 1.2804,
+          "median_min_equity": -0.3244
+        },
+        "7pct": {
+          "annual_rate": 0.07,
+          "n_windows": 720,
+          "ruin_prob": 0.0,
+          "ruin_ci": [
+            0.0,
+            0.0053
+          ],
+          "ever_underwater_prob": 0.9875,
+          "ever_underwater_ci": [
+            0.9764,
+            0.9934
+          ],
+          "median_final_equity": 3.4769,
+          "p5_final_equity": 1.1541,
+          "median_min_equity": -0.375
+        }
+      }
+    },
+    "underlying_0050_all_entries": {
+      "1y": {
+        "3pct": {
+          "annual_rate": 0.03,
+          "n_windows": 4006,
+          "ruin_prob": 0.2579,
+          "ruin_ci": [
+            0.2446,
+            0.2716
+          ],
+          "ever_underwater_prob": 0.9351,
+          "ever_underwater_ci": [
+            0.927,
+            0.9423
+          ],
+          "median_final_equity": 0.1035,
+          "p5_final_equity": -0.1758,
+          "median_min_equity": -0.0822
+        },
+        "5pct": {
+          "annual_rate": 0.05,
+          "n_windows": 4006,
+          "ruin_prob": 0.2876,
+          "ruin_ci": [
+            0.2738,
+            0.3018
+          ],
+          "ever_underwater_prob": 0.9403,
+          "ever_underwater_ci": [
+            0.9326,
+            0.9473
+          ],
+          "median_final_equity": 0.0835,
+          "p5_final_equity": -0.1958,
+          "median_min_equity": -0.0893
+        },
+        "7pct": {
+          "annual_rate": 0.07,
+          "n_windows": 4006,
+          "ruin_prob": 0.3377,
+          "ruin_ci": [
+            0.3233,
+            0.3525
+          ],
+          "ever_underwater_prob": 0.9456,
+          "ever_underwater_ci": [
+            0.9381,
+            0.9522
+          ],
+          "median_final_equity": 0.0635,
+          "p5_final_equity": -0.2158,
+          "median_min_equity": -0.0953
+        }
+      },
+      "2y": {
+        "3pct": {
+          "annual_rate": 0.03,
+          "n_windows": 3754,
+          "ruin_prob": 0.2195,
+          "ruin_ci": [
+            0.2065,
+            0.233
+          ],
+          "ever_underwater_prob": 0.955,
+          "ever_underwater_ci": [
+            0.9479,
+            0.9612
+          ],
+          "median_final_equity": 0.1863,
+          "p5_final_equity": -0.1358,
+          "median_min_equity": -0.1046
+        },
+        "5pct": {
+          "annual_rate": 0.05,
+          "n_windows": 3754,
+          "ruin_prob": 0.2536,
+          "ruin_ci": [
+            0.2399,
+            0.2678
+          ],
+          "ever_underwater_prob": 0.9638,
+          "ever_underwater_ci": [
+            0.9573,
+            0.9693
+          ],
+          "median_final_equity": 0.1447,
+          "p5_final_equity": -0.1774,
+          "median_min_equity": -0.1224
+        },
+        "7pct": {
+          "annual_rate": 0.07,
+          "n_windows": 3754,
+          "ruin_prob": 0.3426,
+          "ruin_ci": [
+            0.3276,
+            0.3579
+          ],
+          "ever_underwater_prob": 0.968,
+          "ever_underwater_ci": [
+            0.9619,
+            0.9732
+          ],
+          "median_final_equity": 0.1023,
+          "p5_final_equity": -0.2198,
+          "median_min_equity": -0.1411
+        }
+      },
+      "3y": {
+        "3pct": {
+          "annual_rate": 0.03,
+          "n_windows": 3502,
+          "ruin_prob": 0.1288,
+          "ruin_ci": [
+            0.1181,
+            0.1403
+          ],
+          "ever_underwater_prob": 0.96,
+          "ever_underwater_ci": [
+            0.953,
+            0.966
+          ],
+          "median_final_equity": 0.3377,
+          "p5_final_equity": -0.0744,
+          "median_min_equity": -0.1203
+        },
+        "5pct": {
+          "annual_rate": 0.05,
+          "n_windows": 3502,
+          "ruin_prob": 0.1559,
+          "ruin_ci": [
+            0.1443,
+            0.1683
+          ],
+          "ever_underwater_prob": 0.9714,
+          "ever_underwater_ci": [
+            0.9654,
+            0.9765
+          ],
+          "median_final_equity": 0.2728,
+          "p5_final_equity": -0.1393,
+          "median_min_equity": -0.1418
+        },
+        "7pct": {
+          "annual_rate": 0.07,
+          "n_windows": 3502,
+          "ruin_prob": 0.1699,
+          "ruin_ci": [
+            0.1578,
+            0.1827
+          ],
+          "ever_underwater_prob": 0.9783,
+          "ever_underwater_ci": [
+            0.9729,
+            0.9826
+          ],
+          "median_final_equity": 0.2054,
+          "p5_final_equity": -0.2067,
+          "median_min_equity": -0.1712
+        }
+      },
+      "5y": {
+        "3pct": {
+          "annual_rate": 0.03,
+          "n_windows": 2998,
+          "ruin_prob": 0.0087,
+          "ruin_ci": [
+            0.0059,
+            0.0127
+          ],
+          "ever_underwater_prob": 0.961,
+          "ever_underwater_ci": [
+            0.9534,
+            0.9673
+          ],
+          "median_final_equity": 0.654,
+          "p5_final_equity": 0.1097,
+          "median_min_equity": -0.1082
+        },
+        "5pct": {
+          "annual_rate": 0.05,
+          "n_windows": 2998,
+          "ruin_prob": 0.0524,
+          "ruin_ci": [
+            0.045,
+            0.0609
+          ],
+          "ever_underwater_prob": 0.9736,
+          "ever_underwater_ci": [
+            0.9673,
+            0.9788
+          ],
+          "median_final_equity": 0.537,
+          "p5_final_equity": -0.0074,
+          "median_min_equity": -0.1326
+        },
+        "7pct": {
+          "annual_rate": 0.07,
+          "n_windows": 2998,
+          "ruin_prob": 0.1197,
+          "ruin_ci": [
+            0.1086,
+            0.1319
+          ],
+          "ever_underwater_prob": 0.9823,
+          "ever_underwater_ci": [
+            0.9769,
+            0.9865
+          ],
+          "median_final_equity": 0.4107,
+          "p5_final_equity": -0.1336,
+          "median_min_equity": -0.1639
+        }
+      }
+    }
+  },
+  "Q4b_reserve_buydip": {
+    "leverage_00631L_all": {
+      "label": "00631L 全部進場",
+      "horizon_years": 3.0,
+      "reserve_frac": 0.3,
+      "dip_trigger": 0.2,
+      "n_windows": 2070,
+      "full_median_terminal": 2.1803,
+      "reserve_median_terminal": 2.1678,
+      "full_p5_terminal": 1.5471,
+      "reserve_p5_terminal": 1.5561,
+      "full_near_zero_prob": 0.0,
+      "full_near_zero_ci": [
+        0.0,
+        0.0019
+      ],
+      "reserve_near_zero_prob": 0.0,
+      "reserve_near_zero_ci": [
+        0.0,
+        0.0019
+      ],
+      "reserve_beats_full_prob": 0.4232,
+      "reserve_deployed_prob": 1.0
+    },
+    "leverage_00631L_high": {
+      "label": "00631L 高位進場",
+      "horizon_years": 3.0,
+      "reserve_frac": 0.3,
+      "dip_trigger": 0.2,
+      "n_windows": 850,
+      "full_median_terminal": 1.9205,
+      "reserve_median_terminal": 1.8712,
+      "full_p5_terminal": 1.5018,
+      "reserve_p5_terminal": 1.4831,
+      "full_near_zero_prob": 0.0,
+      "full_near_zero_ci": [
+        0.0,
+        0.0045
+      ],
+      "reserve_near_zero_prob": 0.0,
+      "reserve_near_zero_ci": [
+        0.0,
+        0.0045
+      ],
+      "reserve_beats_full_prob": 0.5094,
+      "reserve_deployed_prob": 1.0
+    }
+  },
+  "data_limitations": [
+    "重建 2x daily-rebal 用年化 1.5% 總拖累 proxy（管理費~1.13% + 融資/展延成本），真實 00631L 內扣費用與期貨展延成本逐期變動，重建為近似。",
+    "00631L 樣本僅 2014-10 起 ~11.5 年，含 2015 股災/2018/2020/2022 但無 2008，尾部破產率可能低估（缺最嚴重空頭）。",
+    "rolling windows 重疊 → 視窗間非獨立，CI 為近似（未做 block-adjusted SE）。",
+    "信貸模型假設借款一次性全投、利息年複利、無提前還款/margin call 強平機制，真實券商維持率追繳會更早觸發實質破產（此模型可能低估破產時點）。",
+    "分批未投入現金假設不計息（保守），若放定存會略改善分批相對表現。",
+    "DCA 用固定 21 交易日為一個月近似；高位 mask 用 5% 容差 + 252 日回看。"
+  ]
+}
