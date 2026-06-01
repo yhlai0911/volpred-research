@@ -17289,7 +17289,7 @@
     "title": "Paper review (Codex 24h-rule): K1402/K1403/K1404：跨市場 HAR-RV 尾部分位數預測驗證 — 美股、債券、黃金、台股全數通過",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_15d43f72 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_15d43f72",
@@ -17298,14 +17298,20 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-01T11:08:52+00:00"
+    "created_at": "2026-06-01T11:08:52+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-01T12:11:29.006816+00:00",
+    "claim_session_id": "d46508c2e567",
+    "started_at": "2026-06-01T12:11:36.548069+00:00",
+    "completed_at": "2026-06-01T12:12:42.412098+00:00",
+    "result": "Codex review found no lookahead leakage: K1402/K1403/K1404 HAR features all use .shift(1), so signal timing is clean. Main issue is claim strength: article title/body overstate the evidence by saying cross-market validation '全數通過' / 'transportability 成立', while underlying verdicts are K1402=NULL, K1403 aggregate=TAIL_CALIB_USABLE, K1404=TAIL_CALIB_USABLE. Accurate phrasing is that tail coverage / Kupiec passed 10/10, but point-forecast performance failed consistently and overall method verdict is tail-only usable, not blanket pass."
   },
   {
     "id": "K541_article_general",
     "title": "K541: write general-audience article (auto-discovered uncovered K)",
     "description": "K K541 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: Claude(K538延伸), 執行: Claude] 週頻 meta-labeling。Feature r 比日頻好 4x (max 0.084 vs 0.02) 但仍太弱。XGBoost AUC=0.558（略好於 coin flip），regime-dependent（COVID 0.675, Bear 0.439）。\n\n最重要發現：VT 在所有 VIX regime 的週頻勝率都 <44%，weekly excess 全部為負（-0.2 到 -35.3 bps/wk）。VT edge 不在於「贏更多週」而是「贏的時候複利效果更大」——純",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K541",
@@ -17320,7 +17326,13 @@
       "audience-general"
     ],
     "topic_cluster": "vt",
-    "created_at": "2026-06-01T11:08:53+00:00"
+    "created_at": "2026-06-01T11:08:53+00:00",
+    "claimed_by": "hourly-20",
+    "claimed_at": "2026-06-01T12:08:48.871627+00:00",
+    "claim_session_id": "9464b2061440",
+    "started_at": "2026-06-01T12:09:31.490754+00:00",
+    "completed_at": "2026-06-01T12:20:06.203242+00:00",
+    "result": "mile_6ccb9715 draft published (audience=research due to K-id+Sharpe academic keyword trigger); anti_ai_gate PASS exit 0 (1 WARN); 9-checklist 9/9 PASS; 2 figures (regime_analysis + sharpe_comparison) uploaded to Supabase article-images; evidence: XGB AUC 0.558, 5-regime win rates 36.8-43.6%, Sharpe B&H 0.785/VT 0.899/XGB 0.600; commit c191be48"
   },
   {
     "id": "K667_article_research",
