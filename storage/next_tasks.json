@@ -17220,7 +17220,7 @@
     "title": "K1095: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1095 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1095 tests synthesis strategy: 8.63/VIX normally + A4f-VT only in [-5,+5] window around top-10 stock earnings. OOS 2017-2026 (N=2,160), net 20bp TX. ALL 3 HYPOTHESES REJECTED. SHARPE: Pure 8.63/VIX 0.929, Pure A4f-VT 0.966, Event-Switched 0.777 (WORST), ",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1095",
@@ -17237,7 +17237,13 @@
       "audience-general"
     ],
     "topic_cluster": "vt",
-    "created_at": "2026-06-01T09:09:30+00:00"
+    "created_at": "2026-06-01T09:09:30+00:00",
+    "claimed_by": "hourly-17",
+    "claimed_at": "2026-06-01T09:11:25.569716+00:00",
+    "claim_session_id": "a7ab2a0bade3",
+    "started_at": "2026-06-01T09:11:30.169582+00:00",
+    "completed_at": "2026-06-01T09:20:47.360882+00:00",
+    "result": "Published draft mile_c11a2ced for K1095 — null result on event-switched VT, hypothesis falsified honestly. Images uploaded to Supabase. anti_ai_gate PASS (1 warn). Audience=general."
   },
   {
     "id": "K538_article_general",
