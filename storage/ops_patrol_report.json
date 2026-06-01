@@ -1,40 +1,39 @@
 {
-  "timestamp": "2026-05-31T18:11:15Z",
-  "taiwan_time": "2026-06-01 02:11:15",
+  "timestamp": "2026-06-01T00:12:39Z",
   "all_ok": false,
   "checks": [
     {
-      "name": "ARTICLE_POOL",
+      "name": "article_pool",
       "status": "ok",
-      "detail": "64 draft articles total. Research audience: 33 (>=4 ✓). General audience: 31 (>=8 ✓). Total >=12 ✓."
+      "detail": "64 draft articles total (31 general, 33 research). All thresholds met (total>=12, research>=4, general>=8)."
     },
     {
-      "name": "STRATEGY_METRICS_FRESHNESS",
+      "name": "strategy_metrics_freshness",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json does not exist — file missing entirely. Treated as infinitely stale (>26h threshold exceeded)."
+      "detail": "storage/strategy_metrics.json does not exist (file missing)."
     },
     {
-      "name": "ERROR_LOG_RECENT",
+      "name": "error_log_recent",
       "status": "ok",
-      "detail": "No entries dated today (2026-06-01) or yesterday (2026-05-31). Most recent entry: 2026-05-29 — Codex 24h-rule caught 2 critical bugs in article mile_8e899fba (K717): 5-dim vs 6-dim composite narrative mismatch + biased strategy caveat missing. ERRATA applied, Supabase synced."
+      "detail": "No error log entries dated 2026-06-01 or 2026-05-31. Last visible entries are from 2026-05-29."
     },
     {
-      "name": "PAPER_TRADING_GAPS",
+      "name": "paper_trading_gaps",
       "status": "ok",
-      "detail": "15 strategies checked. No strategy has >2 null portfolio_return values in last 3 entries."
+      "detail": "14 strategies checked. All have <=1 null portfolio_return in last 3 entries (2026-05-30 entry uniformly null — likely weekend/pending). No strategy exceeds 2 nulls."
     },
     {
-      "name": "GIT_STATUS",
+      "name": "git_status",
       "status": "ok",
-      "detail": "0 uncommitted files. Working tree clean."
+      "detail": "0 uncommitted files."
     },
     {
-      "name": "KNOWLEDGE_SIZE",
+      "name": "knowledge_size",
       "status": "ok",
-      "detail": "2178 entries in storage/memory/knowledge.json."
+      "detail": "storage/memory/knowledge.json contains 2178 entries."
     }
   ],
   "alerts": [
-    "METRICS_MISSING: storage/strategy_metrics.json does not exist — strategy metrics file absent entirely (>26h threshold)"
+    "strategy_metrics_missing: storage/strategy_metrics.json does not exist"
   ]
 }
