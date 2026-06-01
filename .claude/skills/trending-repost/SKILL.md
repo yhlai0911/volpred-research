@@ -275,6 +275,13 @@ Log to `storage/reports/trending_repost_log.json`:
 >    這不是 dup，是同一篇未發佈草稿。別誤判、別關掉真草稿。
 > 4. **主貼文本體絕不放 URL**。若不慎打入 → `cmd+a` → `Delete` → 重打乾淨版
 >    → 移除 FB 自動生成的連結預覽卡（卡片右上 X）。
+> 4b. **開 composer 的可靠做法**（2026-06-02 實測，4 次失敗後找到）：FB 個人檔案
+>    「在想些什麼？」composer **ref-click 與半 render 狀態下的座標點都開不起來**
+>    （DOM 只剩 trigger button、開不出 `建立貼文` dialog）。可靠步驟：(1) 先
+>    scroll 讓 composer box **完整 render 進 viewport**（不能只露半截、不能貼著
+>    sticky nav 邊緣）→ (2) 乾淨 screenshot 取**精確中心座標** → (3) 座標點該中心
+>    → (4) `find` 確認 `建立貼文` dialog + contenteditable textbox 出現才繼續。
+>    開不起來時 reload + 重新 scroll-to-center，不要連點同一個壞座標。
 > 5. **留言送出**：先試獨立 send 鍵（留言框右下藍色紙飛機 / `貼文留言` button）。
 >    但 **2026-05-31 實測：FB 個人檔案 inline composer 的 send button 用 ref-click
 >    點兩次都沒送出**，改在已聚焦的留言框按 **Return** 才成功送出（且送出後 box 清空、
