@@ -16787,7 +16787,7 @@
     "title": "K713: write general-audience article (auto-discovered uncovered K)",
     "description": "K K713 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: K702 延伸, 執行: Claude] 50/50 SPY/GLD 加入 TLT 0-30%。Sharpe 單調增到 25%TLT(0.933)然後微降。MDD 單調改善(-36.8→-23.8%)。Calmar 在 25%TLT 最佳(0.41 vs 0%TLT 0.31)。37.5/37.5/25 SPY/GLD/TLT 可能是更好的 3-asset 靜態配置。但：TLT CAGR 低(2.89%)且 2022 升息大虧——需 cross-OOS 確認 TLT 不是 period-specific。CAGR 從 11.4%→9.7%（犧牲",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K713",
@@ -16801,7 +16801,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-01T01:08:24+00:00"
+    "created_at": "2026-06-01T01:08:24+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-01T04:41:55.287323+00:00",
+    "claim_session_id": "105a9f6fd04d",
+    "started_at": "2026-06-01T04:42:06.254365+00:00",
+    "completed_at": "2026-06-01T04:43:59.502753+00:00",
+    "result": "Published general-audience draft mile_1b56cf6b for K713. Article frames TLT as a tradeoff tool: giving up some return to meaningfully reduce drawdown, with 20-25% emerging as the most balanced zone; included 2 charts."
   },
   {
     "id": "K740_article_general",
@@ -16881,5 +16887,90 @@
     "started_at": "2026-06-01T04:10:00.394348+00:00",
     "completed_at": "2026-06-01T04:18:10.312335+00:00",
     "result": "feed=mile_862223de (draft/research audience); 2 figs (qlike_bar + cross_recursion_value) Supabase 已 upload; anti_ai_gate PASS; 1420 chars; commit f08c72bb. cluster_waiver applied (spy cluster 60/30d, K880 是 PRG methodology validation 非 SPY market commentary)"
+  },
+  {
+    "id": "paper_review_mile_b427f3ba",
+    "title": "Paper review (Codex 24h-rule): 比特幣半減後波動真的會降嗎？K1372 的答案是：看起來像，但還不能當鐵律",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_b427f3ba needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_b427f3ba",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-01T05:11:32+00:00",
+    "claimed_by": "hourly-13",
+    "claimed_at": "2026-06-01T05:12:23.042461+00:00",
+    "claim_session_id": "a8d6d03f67fe",
+    "started_at": "2026-06-01T05:12:34.423621+00:00",
+    "completed_at": "2026-06-01T05:16:03.177269+00:00",
+    "result": "Codex 24h review: CONDITIONAL_PASS. 套用 3 fix: (1) MW p-values 加 serial-dep/window-overlap caveat (2) GARCH full-sample retrospective disclaimer (3) persistence≈1 + gamma 不顯著 (p=0.30) caveat. anti-AI gate PASS (FB+default modes; 3 處 不是X而是Y 套路一併改寫). Supabase sync OK."
+  },
+  {
+    "id": "K888_article_general",
+    "title": "K888: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K888 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: 會員yihao.lai, 執行: Claude] 14,127 House trades, 46 tickers. Copy: -0.294%/trade t=-1.81 NS. Contrarian: -0.147% t=-0.91 NS. Large-trade: -0.100% t=-0.25 NS. 28-day disclosure lag makes signals stale. Consistent with Eggers & Hainmueller (2013).",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K888",
+    "tags": [
+      "congressional_trading",
+      "contrarian",
+      "null_result",
+      "member_question",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-01T05:11:33+00:00"
+  },
+  {
+    "id": "K905_article_general",
+    "title": "K905: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K905 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: research_program, 執行: Claude] SPY OOS 2019-2026. CAViaR (GARCH-like quantile recursion): too conservative at 1% (0.88%), CC FAIL. QuantHAR: also CC FAIL. FHS best pinball loss at both 1% and 5%. Student-t only Trinity PASS at 1%. No method passes 5% Trinity (Basel Red). Dire",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K905",
+    "tags": [
+      "quantile_regression",
+      "CAViaR",
+      "VaR",
+      "null_result",
+      "FHS",
+      "pinball",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-01T05:11:33+00:00"
+  },
+  {
+    "id": "K932_article_general",
+    "title": "K932: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K932 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: [提出: 用戶, 執行: Claude] 5 methods (50/50, Min-Var, Min-CVaR, Max CRRA gamma=5, Risk Parity) on SPY/GLD/TLT. OOS 2016-2026. Static 50/50 Sharpe 1.216 beats all. Min-CVaR≈Min-Var (Normal CVaR→variance). Max CRRA≈Min-Var (return unpredictable→utility=risk). Turnover kills dynamic. 50/5",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K932",
+    "tags": [
+      "allocation",
+      "Min-CVaR",
+      "CRRA",
+      "50/50 irreducible",
+      "null",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-01T05:11:33+00:00"
   }
 ]
