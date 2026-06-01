@@ -17708,7 +17708,7 @@
     "title": "K690: write general-audience article (auto-discovered uncovered K)",
     "description": "K K690 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: [提出: K689 延伸, 執行: Claude] 5 策略 lag robustness ratio（Sharpe lag=1/lag=0）。EWMA VT 0.756（autocorr 0.9897，最穩健）。12/VIX 0.399。P3-AGG 0.297。Percentile 0.211。Piecewise 0.046（幾乎歸零）。相關：weight autocorr r=+0.56，mean|dw| r=-0.80。Lag=0 Sharpe 最高的策略（Piecewise 1.46, Percentile 1.68）恰好是 lookahead",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K690",
@@ -17723,7 +17723,13 @@
       "audience-general"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-06-01T17:10:35+00:00"
+    "created_at": "2026-06-01T17:10:35+00:00",
+    "claimed_by": "hourly-06",
+    "claimed_at": "2026-06-01T22:11:17.822340+00:00",
+    "claim_session_id": "08c006c28c4b",
+    "started_at": "2026-06-01T22:11:21.500258+00:00",
+    "completed_at": "2026-06-01T22:16:50.665633+00:00",
+    "result": "Published as draft mile_8a5e7f5c. K690 weight smoothness & lag robustness; main message: EWMA 75.6% Sharpe retention vs Piecewise 4.6% at lag-1; turnover↔robustness corr=-0.80. Anti-AI gate PASS. Cluster waiver applied (classifier mis-tagged as garch)."
   },
   {
     "id": "K930_article_general",
@@ -17773,7 +17779,7 @@
     "title": "Paper review (Codex 24h-rule): 換了更好的模型，風險計算卻沒變好多少：36 場測試告訴你，關鍵在哪裡",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_a1f3e23f needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_a1f3e23f",
@@ -17782,14 +17788,20 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-01T21:08:06+00:00"
+    "created_at": "2026-06-01T21:08:06+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-01T21:48:06.946507+00:00",
+    "claim_session_id": "a27520b19445",
+    "started_at": "2026-06-01T21:48:18.587538+00:00",
+    "completed_at": "2026-06-01T21:50:10.349259+00:00",
+    "result": "Codex review completed for mile_a1f3e23f / K1036. No lookahead found in GJR, A4f-VIX, or CF-rolling implementation. Review found two wording-level medium issues: article overstates a clean 2x3 factorial separation because both models are fit under fixed Student-t likelihood, and it calls 36 shared-path cells 'independent comparisons' / treats PASS-rate gaps as stronger than descriptive evidence."
   },
   {
     "id": "paper_review_mile_ccc533fd",
     "title": "Paper review (Codex 24h-rule): 借錢買正二，最該怕的不是賠光，是「賣也賣不掉」的那一年",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_ccc533fd needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_ccc533fd",
@@ -17798,7 +17810,9 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-01T21:08:06+00:00"
+    "created_at": "2026-06-01T21:08:06+00:00",
+    "completed_at": "2026-06-01T22:11:16.769636+00:00",
+    "result": "Completed in commit 32cbc58d (K1411 24h-rule primary-path Codex attempt + main-thread secondary CONDITIONAL_PASS; mile_ccc533fd is K1411's published article)."
   },
   {
     "id": "trending_repost_2026_06_02_fed新局",
@@ -17806,13 +17820,16 @@
     "description": "從新任聯準會主席首場會議與 4 月 CPI 升至 3.8% 切入，分析債券選擇權隱含波動率（MOVE）的非對稱偏斜。可量化：比較歷次 Fed 主席更迭前後的 MOVE 指數均值回歸速度，以及利率期貨隱含波動率對「再升息」機率的定價。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "created_at": "2026-06-01T21:11:12+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "blocked_reason": "awaiting_interactive_session",
+    "blocked_at": "2026-06-01T22:11:15+00:00",
+    "blocked_note": "reader-facing 需新建 MOVE/Fed quant evidence + anti-AI gate 多輪改寫 + Chrome FB 雙發；hourly cron 50min cap 風險高，留互動 session 收尾"
   }
 ]
