@@ -1,0 +1,801 @@
+{
+  "experiment_id": "k1410",
+  "title": "報酬順序風險 (Sequence of Returns Risk) 真實資料模擬",
+  "generated_at": "2026-06-01T12:27:28.215952+00:00",
+  "config": {
+    "seed": 20260601,
+    "n_sim": 10000,
+    "horizon_years": 30,
+    "init_wealth_normalized": 1000.0,
+    "cpi_inflation_for_withdrawal_growth": 0.02,
+    "base_withdrawal_rate": 0.04,
+    "stationary_bootstrap_mean_block_months": 12,
+    "crash_year_risk_n_sim": 5000,
+    "bond_proxy": {
+      "ann_mean": 0.04,
+      "ann_vol": 0.05,
+      "note": "獨立常態 proxy，與股市設 0 相關（保守，不誇大分散效果）"
+    },
+    "withdrawal_timing": "年初提領（先扣再投資該年市場報酬）",
+    "lookahead_check": "bootstrap 路徑僅由歷史月報酬 resample；提領決策只用當期/過去淨值"
+  },
+  "data_meta": {
+    "GSPC": {
+      "symbol": "^GSPC",
+      "monthly_start": "1928-01-31",
+      "monthly_end": "2026-05-31",
+      "n_months": 1181,
+      "ann_mean_ret": 0.0818,
+      "ann_vol": 0.1848
+    },
+    "TWII": {
+      "symbol": "^TWII",
+      "monthly_start": "1997-08-31",
+      "monthly_end": "2026-06-30",
+      "n_months": 347,
+      "ann_mean_ret": 0.0796,
+      "ann_vol": 0.2229
+    }
+  },
+  "permutation_demo": {
+    "gspc_30y": {
+      "label": "美股 S&P500",
+      "basket_returns_pct": [
+        20.26,
+        31.01,
+        26.67,
+        19.53,
+        -10.14,
+        -13.04,
+        -23.37,
+        26.38,
+        8.99,
+        3.0,
+        13.62,
+        3.53,
+        -38.49,
+        23.45,
+        12.78,
+        -0.0,
+        13.41,
+        29.6,
+        11.39,
+        -0.73,
+        9.54,
+        19.42,
+        -6.24,
+        28.88,
+        16.26,
+        26.89,
+        -19.44,
+        24.23,
+        23.31,
+        16.39
+      ],
+      "basket_gross_product_order_invariant": 11.1141,
+      "no_withdrawal_terminal_any_order": 11114.09,
+      "n_years": 30,
+      "mode": "sampled",
+      "n_permutations_evaluated": 20000,
+      "best_terminal": 8027.93,
+      "worst_terminal": 0.0,
+      "median_terminal": 4683.48,
+      "mean_terminal": 4342.73,
+      "p5_terminal": 617.89,
+      "p95_terminal": 6775.43,
+      "best_to_worst_ratio": null,
+      "n_orderings_depleted": 632,
+      "pct_orderings_depleted": 3.16,
+      "init_wealth": 1000.0,
+      "base_withdrawal_rate": 0.04
+    },
+    "twii_30y": {
+      "label": "台股加權",
+      "basket_returns_pct": [
+        -23.97,
+        -3.14,
+        9.47,
+        -46.36,
+        13.49,
+        7.65,
+        1.92,
+        16.44,
+        2.26,
+        43.89,
+        -24.37,
+        0.76,
+        9.65,
+        11.39,
+        -15.89,
+        11.52,
+        14.9,
+        -6.98,
+        3.68,
+        16.06,
+        6.04,
+        -2.11,
+        17.01,
+        36.18,
+        -13.03,
+        14.3,
+        29.48,
+        6.05
+      ],
+      "basket_gross_product_order_invariant": 2.3387,
+      "no_withdrawal_terminal_any_order": 2338.75,
+      "n_years": 30,
+      "mode": "sampled",
+      "n_permutations_evaluated": 20000,
+      "best_terminal": 1371.45,
+      "worst_terminal": 0.0,
+      "median_terminal": 0.0,
+      "mean_terminal": 219.58,
+      "p5_terminal": 0.0,
+      "p95_terminal": 846.96,
+      "best_to_worst_ratio": null,
+      "n_orderings_depleted": 10320,
+      "pct_orderings_depleted": 51.6,
+      "init_wealth": 1000.0,
+      "base_withdrawal_rate": 0.04
+    },
+    "gspc_8y_exhaustive": {
+      "label": "美股 S&P500（8年窮舉）",
+      "basket_returns_pct": [
+        -6.24,
+        28.88,
+        16.26,
+        26.89,
+        -19.44,
+        24.23,
+        23.31,
+        16.39
+      ],
+      "basket_gross_product_order_invariant": 2.5604,
+      "no_withdrawal_terminal_any_order": 2560.4,
+      "n_years": 8,
+      "mode": "exhaustive",
+      "n_permutations_evaluated": 40320,
+      "best_terminal": 2104.2,
+      "worst_terminal": 1732.39,
+      "median_terminal": 1961.86,
+      "mean_terminal": 1953.1,
+      "p5_terminal": 1806.49,
+      "p95_terminal": 2068.76,
+      "best_to_worst_ratio": 1.21,
+      "n_orderings_depleted": 0,
+      "pct_orderings_depleted": 0.0,
+      "init_wealth": 1000.0,
+      "base_withdrawal_rate": 0.04
+    }
+  },
+  "crash_year_risk": {
+    "gspc": {
+      "label": "美股 S&P500",
+      "crash_size_monthly": -0.35,
+      "n_sim": 5000,
+      "base_fail_prob_no_injected_crash": 0.2722,
+      "curve": [
+        {
+          "crash_year": 1,
+          "fail_prob": 0.5534,
+          "ci_lo": 0.5396,
+          "ci_hi": 0.5671
+        },
+        {
+          "crash_year": 2,
+          "fail_prob": 0.5352,
+          "ci_lo": 0.5214,
+          "ci_hi": 0.549
+        },
+        {
+          "crash_year": 3,
+          "fail_prob": 0.5194,
+          "ci_lo": 0.5055,
+          "ci_hi": 0.5332
+        },
+        {
+          "crash_year": 4,
+          "fail_prob": 0.5024,
+          "ci_lo": 0.4885,
+          "ci_hi": 0.5163
+        },
+        {
+          "crash_year": 5,
+          "fail_prob": 0.4912,
+          "ci_lo": 0.4774,
+          "ci_hi": 0.5051
+        },
+        {
+          "crash_year": 6,
+          "fail_prob": 0.4796,
+          "ci_lo": 0.4658,
+          "ci_hi": 0.4935
+        },
+        {
+          "crash_year": 7,
+          "fail_prob": 0.4642,
+          "ci_lo": 0.4504,
+          "ci_hi": 0.478
+        },
+        {
+          "crash_year": 8,
+          "fail_prob": 0.4512,
+          "ci_lo": 0.4374,
+          "ci_hi": 0.465
+        },
+        {
+          "crash_year": 9,
+          "fail_prob": 0.4388,
+          "ci_lo": 0.4251,
+          "ci_hi": 0.4526
+        },
+        {
+          "crash_year": 10,
+          "fail_prob": 0.429,
+          "ci_lo": 0.4153,
+          "ci_hi": 0.4428
+        },
+        {
+          "crash_year": 11,
+          "fail_prob": 0.4174,
+          "ci_lo": 0.4038,
+          "ci_hi": 0.4311
+        },
+        {
+          "crash_year": 12,
+          "fail_prob": 0.4088,
+          "ci_lo": 0.3952,
+          "ci_hi": 0.4225
+        },
+        {
+          "crash_year": 13,
+          "fail_prob": 0.4004,
+          "ci_lo": 0.3869,
+          "ci_hi": 0.4141
+        },
+        {
+          "crash_year": 14,
+          "fail_prob": 0.3886,
+          "ci_lo": 0.3752,
+          "ci_hi": 0.4022
+        },
+        {
+          "crash_year": 15,
+          "fail_prob": 0.3778,
+          "ci_lo": 0.3645,
+          "ci_hi": 0.3913
+        },
+        {
+          "crash_year": 16,
+          "fail_prob": 0.372,
+          "ci_lo": 0.3587,
+          "ci_hi": 0.3855
+        },
+        {
+          "crash_year": 17,
+          "fail_prob": 0.3634,
+          "ci_lo": 0.3502,
+          "ci_hi": 0.3768
+        },
+        {
+          "crash_year": 18,
+          "fail_prob": 0.356,
+          "ci_lo": 0.3428,
+          "ci_hi": 0.3694
+        },
+        {
+          "crash_year": 19,
+          "fail_prob": 0.3498,
+          "ci_lo": 0.3367,
+          "ci_hi": 0.3631
+        },
+        {
+          "crash_year": 20,
+          "fail_prob": 0.3416,
+          "ci_lo": 0.3286,
+          "ci_hi": 0.3549
+        },
+        {
+          "crash_year": 21,
+          "fail_prob": 0.336,
+          "ci_lo": 0.323,
+          "ci_hi": 0.3492
+        },
+        {
+          "crash_year": 22,
+          "fail_prob": 0.3268,
+          "ci_lo": 0.3139,
+          "ci_hi": 0.3399
+        },
+        {
+          "crash_year": 23,
+          "fail_prob": 0.3216,
+          "ci_lo": 0.3088,
+          "ci_hi": 0.3347
+        },
+        {
+          "crash_year": 24,
+          "fail_prob": 0.3132,
+          "ci_lo": 0.3005,
+          "ci_hi": 0.3262
+        },
+        {
+          "crash_year": 25,
+          "fail_prob": 0.3066,
+          "ci_lo": 0.294,
+          "ci_hi": 0.3195
+        },
+        {
+          "crash_year": 26,
+          "fail_prob": 0.2984,
+          "ci_lo": 0.2859,
+          "ci_hi": 0.3112
+        },
+        {
+          "crash_year": 27,
+          "fail_prob": 0.2904,
+          "ci_lo": 0.278,
+          "ci_hi": 0.3031
+        },
+        {
+          "crash_year": 28,
+          "fail_prob": 0.2844,
+          "ci_lo": 0.2721,
+          "ci_hi": 0.2971
+        },
+        {
+          "crash_year": 29,
+          "fail_prob": 0.28,
+          "ci_lo": 0.2677,
+          "ci_hi": 0.2926
+        },
+        {
+          "crash_year": 30,
+          "fail_prob": 0.2722,
+          "ci_lo": 0.26,
+          "ci_hi": 0.2847
+        }
+      ],
+      "early_crash_avg_fail_y1_5": 0.5203,
+      "late_crash_avg_fail_y26_30": 0.2851,
+      "early_to_late_ratio": 1.83
+    },
+    "twii": {
+      "label": "台股加權",
+      "crash_size_monthly": -0.35,
+      "n_sim": 5000,
+      "base_fail_prob_no_injected_crash": 0.3656,
+      "curve": [
+        {
+          "crash_year": 1,
+          "fail_prob": 0.6566,
+          "ci_lo": 0.6433,
+          "ci_hi": 0.6696
+        },
+        {
+          "crash_year": 2,
+          "fail_prob": 0.6406,
+          "ci_lo": 0.6272,
+          "ci_hi": 0.6538
+        },
+        {
+          "crash_year": 3,
+          "fail_prob": 0.6324,
+          "ci_lo": 0.6189,
+          "ci_hi": 0.6457
+        },
+        {
+          "crash_year": 4,
+          "fail_prob": 0.6166,
+          "ci_lo": 0.603,
+          "ci_hi": 0.63
+        },
+        {
+          "crash_year": 5,
+          "fail_prob": 0.6072,
+          "ci_lo": 0.5936,
+          "ci_hi": 0.6206
+        },
+        {
+          "crash_year": 6,
+          "fail_prob": 0.5928,
+          "ci_lo": 0.5791,
+          "ci_hi": 0.6063
+        },
+        {
+          "crash_year": 7,
+          "fail_prob": 0.5814,
+          "ci_lo": 0.5677,
+          "ci_hi": 0.595
+        },
+        {
+          "crash_year": 8,
+          "fail_prob": 0.5704,
+          "ci_lo": 0.5566,
+          "ci_hi": 0.5841
+        },
+        {
+          "crash_year": 9,
+          "fail_prob": 0.561,
+          "ci_lo": 0.5472,
+          "ci_hi": 0.5747
+        },
+        {
+          "crash_year": 10,
+          "fail_prob": 0.5518,
+          "ci_lo": 0.538,
+          "ci_hi": 0.5655
+        },
+        {
+          "crash_year": 11,
+          "fail_prob": 0.538,
+          "ci_lo": 0.5242,
+          "ci_hi": 0.5518
+        },
+        {
+          "crash_year": 12,
+          "fail_prob": 0.5294,
+          "ci_lo": 0.5155,
+          "ci_hi": 0.5432
+        },
+        {
+          "crash_year": 13,
+          "fail_prob": 0.5198,
+          "ci_lo": 0.5059,
+          "ci_hi": 0.5336
+        },
+        {
+          "crash_year": 14,
+          "fail_prob": 0.5152,
+          "ci_lo": 0.5013,
+          "ci_hi": 0.529
+        },
+        {
+          "crash_year": 15,
+          "fail_prob": 0.5052,
+          "ci_lo": 0.4913,
+          "ci_hi": 0.519
+        },
+        {
+          "crash_year": 16,
+          "fail_prob": 0.4948,
+          "ci_lo": 0.481,
+          "ci_hi": 0.5087
+        },
+        {
+          "crash_year": 17,
+          "fail_prob": 0.4872,
+          "ci_lo": 0.4734,
+          "ci_hi": 0.5011
+        },
+        {
+          "crash_year": 18,
+          "fail_prob": 0.478,
+          "ci_lo": 0.4642,
+          "ci_hi": 0.4919
+        },
+        {
+          "crash_year": 19,
+          "fail_prob": 0.4696,
+          "ci_lo": 0.4558,
+          "ci_hi": 0.4835
+        },
+        {
+          "crash_year": 20,
+          "fail_prob": 0.4588,
+          "ci_lo": 0.445,
+          "ci_hi": 0.4726
+        },
+        {
+          "crash_year": 21,
+          "fail_prob": 0.4502,
+          "ci_lo": 0.4365,
+          "ci_hi": 0.464
+        },
+        {
+          "crash_year": 22,
+          "fail_prob": 0.4408,
+          "ci_lo": 0.4271,
+          "ci_hi": 0.4546
+        },
+        {
+          "crash_year": 23,
+          "fail_prob": 0.433,
+          "ci_lo": 0.4193,
+          "ci_hi": 0.4468
+        },
+        {
+          "crash_year": 24,
+          "fail_prob": 0.4224,
+          "ci_lo": 0.4088,
+          "ci_hi": 0.4361
+        },
+        {
+          "crash_year": 25,
+          "fail_prob": 0.4146,
+          "ci_lo": 0.401,
+          "ci_hi": 0.4283
+        },
+        {
+          "crash_year": 26,
+          "fail_prob": 0.4038,
+          "ci_lo": 0.3903,
+          "ci_hi": 0.4175
+        },
+        {
+          "crash_year": 27,
+          "fail_prob": 0.393,
+          "ci_lo": 0.3795,
+          "ci_hi": 0.4066
+        },
+        {
+          "crash_year": 28,
+          "fail_prob": 0.3856,
+          "ci_lo": 0.3722,
+          "ci_hi": 0.3992
+        },
+        {
+          "crash_year": 29,
+          "fail_prob": 0.376,
+          "ci_lo": 0.3627,
+          "ci_hi": 0.3895
+        },
+        {
+          "crash_year": 30,
+          "fail_prob": 0.3656,
+          "ci_lo": 0.3524,
+          "ci_hi": 0.379
+        }
+      ],
+      "early_crash_avg_fail_y1_5": 0.6307,
+      "late_crash_avg_fail_y26_30": 0.3848,
+      "early_to_late_ratio": 1.64
+    }
+  },
+  "strategy_evaluation": {
+    "gspc": {
+      "WR3.5%_100stock": {
+        "success_rate": 0.7997,
+        "ci_lo": 0.7917,
+        "ci_hi": 0.8074,
+        "median_final_wealth": 2369.6,
+        "p5_final_wealth": 0.0,
+        "median_depletion_year_if_failed": 22.0,
+        "n_sim": 10000
+      },
+      "WR4.0%_100stock": {
+        "success_rate": 0.737,
+        "ci_lo": 0.7283,
+        "ci_hi": 0.7455,
+        "median_final_wealth": 1773.86,
+        "p5_final_wealth": 0.0,
+        "median_depletion_year_if_failed": 21.0,
+        "n_sim": 10000
+      },
+      "WR5.0%_100stock": {
+        "success_rate": 0.5895,
+        "ci_lo": 0.5798,
+        "ci_hi": 0.5991,
+        "median_final_wealth": 658.63,
+        "p5_final_wealth": 0.0,
+        "median_depletion_year_if_failed": 20.0,
+        "n_sim": 10000
+      },
+      "WR4.0%_static6040": {
+        "success_rate": 0.8185,
+        "ci_lo": 0.8108,
+        "ci_hi": 0.8259,
+        "median_final_wealth": 1424.19,
+        "p5_final_wealth": 0.0,
+        "median_depletion_year_if_failed": 25.0,
+        "n_sim": 10000
+      },
+      "WR4.0%_bond_tent": {
+        "success_rate": 0.8309,
+        "ci_lo": 0.8234,
+        "ci_hi": 0.8381,
+        "median_final_wealth": 1283.26,
+        "p5_final_wealth": 0.0,
+        "median_depletion_year_if_failed": 26.0,
+        "n_sim": 10000
+      },
+      "WR4.0%_dynamic_GK": {
+        "success_rate": 0.9672,
+        "ci_lo": 0.9635,
+        "ci_hi": 0.9705,
+        "median_final_wealth": 1936.58,
+        "p5_final_wealth": 83.17,
+        "median_depletion_year_if_failed": 22.0,
+        "n_sim": 10000
+      },
+      "WR4.0%_defer3y": {
+        "success_rate": 0.7775,
+        "ci_lo": 0.7692,
+        "ci_hi": 0.7855,
+        "median_final_wealth": 2034.09,
+        "p5_final_wealth": 0.0,
+        "median_depletion_year_if_failed": 28.0,
+        "n_sim": 10000
+      }
+    },
+    "twii": {
+      "WR3.5%_100stock": {
+        "success_rate": 0.7059,
+        "ci_lo": 0.6969,
+        "ci_hi": 0.7148,
+        "median_final_wealth": 1283.26,
+        "p5_final_wealth": 0.0,
+        "median_depletion_year_if_failed": 22.0,
+        "n_sim": 10000
+      },
+      "WR4.0%_100stock": {
+        "success_rate": 0.633,
+        "ci_lo": 0.6235,
+        "ci_hi": 0.6424,
+        "median_final_wealth": 788.87,
+        "p5_final_wealth": 0.0,
+        "median_depletion_year_if_failed": 21.0,
+        "n_sim": 10000
+      },
+      "WR5.0%_100stock": {
+        "success_rate": 0.4829,
+        "ci_lo": 0.4731,
+        "ci_hi": 0.4927,
+        "median_final_wealth": 0.0,
+        "p5_final_wealth": 0.0,
+        "median_depletion_year_if_failed": 19.0,
+        "n_sim": 10000
+      },
+      "WR4.0%_static6040": {
+        "success_rate": 0.7532,
+        "ci_lo": 0.7447,
+        "ci_hi": 0.7616,
+        "median_final_wealth": 1009.1,
+        "p5_final_wealth": 0.0,
+        "median_depletion_year_if_failed": 24.0,
+        "n_sim": 10000
+      },
+      "WR4.0%_bond_tent": {
+        "success_rate": 0.7689,
+        "ci_lo": 0.7605,
+        "ci_hi": 0.7771,
+        "median_final_wealth": 907.91,
+        "p5_final_wealth": 0.0,
+        "median_depletion_year_if_failed": 26.0,
+        "n_sim": 10000
+      },
+      "WR4.0%_dynamic_GK": {
+        "success_rate": 0.9646,
+        "ci_lo": 0.9608,
+        "ci_hi": 0.968,
+        "median_final_wealth": 1323.33,
+        "p5_final_wealth": 42.43,
+        "median_depletion_year_if_failed": 23.5,
+        "n_sim": 10000
+      },
+      "WR4.0%_defer3y": {
+        "success_rate": 0.6797,
+        "ci_lo": 0.6705,
+        "ci_hi": 0.6888,
+        "median_final_wealth": 1047.47,
+        "p5_final_wealth": 0.0,
+        "median_depletion_year_if_failed": 28.0,
+        "n_sim": 10000
+      }
+    }
+  },
+  "strategy_ranking": {
+    "gspc": {
+      "baseline_4pct_100stock": 0.737,
+      "ranking": [
+        {
+          "strategy": "WR4.0%_dynamic_GK",
+          "success_rate": 0.9672,
+          "improvement_vs_4pct_baseline_pp": 23.02,
+          "median_final_wealth": 1936.58
+        },
+        {
+          "strategy": "WR4.0%_bond_tent",
+          "success_rate": 0.8309,
+          "improvement_vs_4pct_baseline_pp": 9.39,
+          "median_final_wealth": 1283.26
+        },
+        {
+          "strategy": "WR4.0%_static6040",
+          "success_rate": 0.8185,
+          "improvement_vs_4pct_baseline_pp": 8.15,
+          "median_final_wealth": 1424.19
+        },
+        {
+          "strategy": "WR3.5%_100stock",
+          "success_rate": 0.7997,
+          "improvement_vs_4pct_baseline_pp": 6.27,
+          "median_final_wealth": 2369.6
+        },
+        {
+          "strategy": "WR4.0%_defer3y",
+          "success_rate": 0.7775,
+          "improvement_vs_4pct_baseline_pp": 4.05,
+          "median_final_wealth": 2034.09
+        },
+        {
+          "strategy": "WR4.0%_100stock",
+          "success_rate": 0.737,
+          "improvement_vs_4pct_baseline_pp": 0.0,
+          "median_final_wealth": 1773.86
+        },
+        {
+          "strategy": "WR5.0%_100stock",
+          "success_rate": 0.5895,
+          "improvement_vs_4pct_baseline_pp": -14.75,
+          "median_final_wealth": 658.63
+        }
+      ]
+    },
+    "twii": {
+      "baseline_4pct_100stock": 0.633,
+      "ranking": [
+        {
+          "strategy": "WR4.0%_dynamic_GK",
+          "success_rate": 0.9646,
+          "improvement_vs_4pct_baseline_pp": 33.16,
+          "median_final_wealth": 1323.33
+        },
+        {
+          "strategy": "WR4.0%_bond_tent",
+          "success_rate": 0.7689,
+          "improvement_vs_4pct_baseline_pp": 13.59,
+          "median_final_wealth": 907.91
+        },
+        {
+          "strategy": "WR4.0%_static6040",
+          "success_rate": 0.7532,
+          "improvement_vs_4pct_baseline_pp": 12.02,
+          "median_final_wealth": 1009.1
+        },
+        {
+          "strategy": "WR3.5%_100stock",
+          "success_rate": 0.7059,
+          "improvement_vs_4pct_baseline_pp": 7.29,
+          "median_final_wealth": 1283.26
+        },
+        {
+          "strategy": "WR4.0%_defer3y",
+          "success_rate": 0.6797,
+          "improvement_vs_4pct_baseline_pp": 4.67,
+          "median_final_wealth": 1047.47
+        },
+        {
+          "strategy": "WR4.0%_100stock",
+          "success_rate": 0.633,
+          "improvement_vs_4pct_baseline_pp": 0.0,
+          "median_final_wealth": 788.87
+        },
+        {
+          "strategy": "WR5.0%_100stock",
+          "success_rate": 0.4829,
+          "improvement_vs_4pct_baseline_pp": -15.01,
+          "median_final_wealth": 0.0
+        }
+      ]
+    }
+  },
+  "iid_vs_stationary_robustness": {
+    "GSPC": {
+      "stationary_success_4pct": 0.7405,
+      "iid_success_4pct": 0.7387
+    },
+    "TWII": {
+      "stationary_success_4pct": 0.6323,
+      "iid_success_4pct": 0.6096
+    }
+  },
+  "data_limitations": [
+    "債券報酬用獨立常態 proxy（年化~4%/vol~5%，與股市 0 相關），非真實債券序列；真實股債相關隨時期變動，bond tent / 60/40 的分散效果可能被高/低估。",
+    "股票月報酬用指數 auto_adjust 收盤近似總報酬，未扣管理費/稅/交易成本。",
+    "stationary bootstrap 假設未來月報酬與歷史同分布；結構性轉變（長期低報酬、高通膨）下實際破產風險可能更高。",
+    "CPI 固定 2%，實際通膨波動會額外加重提領期壓力（未建模通膨不確定性）。",
+    "Guyton-Klinger 用簡化單一護欄（±20% band, ±10% 調整），非完整四規則版。",
+    "排列示範取最近 N 年一籃真實報酬，僅代表該段歷史的報酬分布，非普適。"
+  ]
+}
