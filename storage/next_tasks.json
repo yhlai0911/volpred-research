@@ -18020,7 +18020,7 @@
     "title": "K434: write general-audience article (auto-discovered uncovered K)",
     "description": "K K434 has verdict signal (score=0, reasons=['cluster cooldown penalty (garch 30d=16>10)']) but no general article in feed.json.  Verdict preview: Asset: SPY BMA does NOT beat the best single model (EGARCH(1,1)-N). BMA QLIKE=0.548005 vs best single QLIKE=0.542960. BMA weights outperform equal weights, suggesting BIC-based model selection adds value. The highest average BMA weight goes to EGARCH(1,1)-t (0.998), indicating th",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K434",
@@ -18030,7 +18030,13 @@
       "audience-general"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-06-02T01:16:35+00:00"
+    "created_at": "2026-06-02T01:16:35+00:00",
+    "claimed_by": "hourly-13",
+    "claimed_at": "2026-06-02T05:09:26.111652+00:00",
+    "claim_session_id": "c62658d8b893",
+    "started_at": "2026-06-02T05:09:40.269534+00:00",
+    "completed_at": "2026-06-02T05:15:59.270249+00:00",
+    "result": "feed mile_b3ff7f9e draft (BMA QLIKE 0.548 vs best single EGARCH-N 0.543; DM p=0.643 null; egarch-t weight 0.998 winner-take-all); 2 figs commit 0b4060d3; gate PASS"
   },
   {
     "id": "K437_article_general",
@@ -18134,7 +18140,7 @@
     "title": "Paper review (Codex 24h-rule): 波動率預測不是把指標愈疊愈多就會愈準",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_8a9ae3c8 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_8a9ae3c8",
@@ -18143,7 +18149,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-02T04:08:16+00:00"
+    "created_at": "2026-06-02T04:08:16+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-02T04:29:29.943794+00:00",
+    "claim_session_id": "7463eb7fbb79",
+    "started_at": "2026-06-02T04:29:44.106225+00:00",
+    "completed_at": "2026-06-02T04:30:35.776973+00:00",
+    "result": "FAIL review: article reverses K1379 ranking (GJR actually best, A4f worse) and published feed contains base64 data URI plus local absolute chart path metadata; needs correction."
   },
   {
     "id": "paper_review_mile_487275d0",
@@ -18160,5 +18172,64 @@
       "main-thread-only"
     ],
     "created_at": "2026-06-02T04:08:16+00:00"
+  },
+  {
+    "id": "K463_article_general",
+    "title": "K463: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K463 has verdict signal (score=0, reasons=['cluster cooldown penalty (garch 30d=16>10)']) but no general article in feed.json.  Verdict preview: Asset: 0050.TW Best TVP variant: EWMA GARCH-X(λ=0.95) (ΔQLIKE=-1.71%). Time-varying delta marginally helps over fixed GARCH-X. TVP_PARTIAL",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K463",
+    "tags": [
+      "garch",
+      "taiwan",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "garch",
+    "created_at": "2026-06-02T05:08:19+00:00"
+  },
+  {
+    "id": "K464_article_general",
+    "title": "K464: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K464 has verdict signal (score=0, reasons=['cluster cooldown penalty (garch 30d=16>10)']) but no general article in feed.json.  Verdict preview: [提出: 用戶(Chen CWS 2013), 執行: Claude] K464: Threshold quasi-SV (log-range) for 6 markets (SPY/EWT/EWJ/EWH/EWY/EWS). Ref: Chen, Liu, So (2013) Comp Stat 28:2415-2447. **HAR log-range wins 6/6 markets** (DM p<0.001 vs AR(1)). Simple AR(1) log-range beats GJR-GARCH 5/6 markets. Thresh",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K464",
+    "tags": [
+      "threshold_SV",
+      "log_range",
+      "HAR",
+      "Asian_markets",
+      "Chen_CWS",
+      "Parkinson",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "garch",
+    "created_at": "2026-06-02T05:08:19+00:00"
+  },
+  {
+    "id": "K468_article_general",
+    "title": "K468: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K468 has verdict signal (score=0, reasons=['cluster cooldown penalty (garch 30d=16>10)']) but no general article in feed.json.  Verdict preview: Assets: SPY, QQQ, EEM Method: Compare 5 vol proxies (r², Parkinson, GK, YZ-1d, YZ-5d) for evaluating GJR-GARCH and HAR models. HAR-YZ model uses Yang-Zhang as target. VaR Trinity test for HAR-YZ vs HAR-Parkinson. HAR-YZ PARTIALLY FIXES K467 — Yang-Zhang overnight component improv",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K468",
+    "tags": [
+      "garch",
+      "har",
+      "leverage-effect",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "garch",
+    "created_at": "2026-06-02T05:08:19+00:00"
   }
 ]
