@@ -94,7 +94,7 @@ Plots:
 
 - ✅ Smoke test passes (1 pair × Copula-t × 100-obs window)
 - ✅ All 10 pairs complete OOS (checkpoint after each pair)
-- ✅ ≥1 pair: Harvey |t|>3 → flag H1 PASS (else NULL)
+- ✅ ≥1 pair: HLN-corrected DM exceeds pair-specific Student-t critical value → flag H1 PASS (else NULL)
 - ✅ Spearman ρ(λ_L, DM t) with p < 0.20 → H4 SUPPORTED
 - ✅ By-region rollups available for narrative selection
 

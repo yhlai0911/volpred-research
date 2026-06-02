@@ -1,8 +1,9 @@
 """K1412 — TW0050-N225 Harvey-sig OOS sensitivity (rule out type-I).
 
 Paper3_E2 Open Question (research_program.md):
-TW0050-N225 是 cross-market copula 10 pairs 中唯一 Harvey-sig
-(Clayton DM_t=3.92, oos_start=2015-06-01). 三因子 candidate:
+TW0050-N225 是 cross-market copula 10 pairs 中原始 raw-DM 規則下唯一
+Harvey-sig pair (Student-t DM_t=3.92, oos_start=2015-06-01). 三因子
+candidate:
   (a) λ_L_clayton=0.444  (b) full_sample_corr=0.586
   (c) Asian trading-hour overlap
 

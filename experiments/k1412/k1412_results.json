@@ -100,7 +100,7 @@
     "n_oos_completed": 5,
     "n_harvey_sig": 5,
     "robust_ratio": 1.0,
-    "verdict": "ROBUST (\u22654/5 Harvey-sig)",
+    "verdict": "ROBUST (\u22654/5 HLN-sig)",
     "per_oos_harvey_clayton": {
       "2014-01-02": false,
       "2015-06-01": false,
@@ -134,5 +134,13 @@
     "research_program.md Open Question (TW0050-N225 \u552f\u4e00 Harvey-sig)",
     "Harvey/Liu/Newman (1997) HLN small-sample DM correction",
     "Patton (2006) IER 47(2) tail dependence copula"
-  ]
+  ],
+  "retrofit_notes": {
+    "Paper3_E2_harvey_hln_retrofit": {
+      "method": "inference from stored K1412 DM t-stats under worst-case valid dm_test sample size n=10; no direct rerun because yfinance fetch was network-blocked in current environment",
+      "student_t_pass_reason": "min stored DM_t 3.044 > max valid HLN threshold 2.262 / sqrt(9/10)",
+      "clayton_fail_reason": "max stored DM_t 1.699 < min valid HLN threshold 2.262",
+      "timestamp": "2026-06-02T08:48:43.598819+00:00"
+    }
+  }
 }

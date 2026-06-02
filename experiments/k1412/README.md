@@ -2,7 +2,7 @@
 
 ## Motivation
 
-Paper3_E2 (paper3_E2_cross_market_copula, 2026-05-29) 跑 5 markets × 10 pairs cross-market copula，**唯一** Harvey-sig 結果是 TW0050-N225 (Clayton DM_t=3.92, oos_start=2015-06-01). Aggregate Spearman ρ(λ_L_clayton, dm_clayton)=0.903 p=0.0003 highly sig，但**個別 pair Harvey 只過一個**。
+Paper3_E2 (paper3_E2_cross_market_copula, 2026-05-29) 原始 raw-DM 版本跑 5 markets × 10 pairs cross-market copula，**唯一** Harvey-sig 結果是 TW0050-N225 (Student-t DM_t=3.92, oos_start=2015-06-01)。在 2026-06-02 的 HLN retrofit 後，`TW0050-HSI` 也跨過 HLN 臨界值；但 K1412 仍保留價值，因為它專門檢查 `TW0050-N225` 是否只是 single-start type-I。
 
 `research_program.md` 明列 Open Question:
 

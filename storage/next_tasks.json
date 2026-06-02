@@ -18216,7 +18216,7 @@
     "title": "K464: write general-audience article (auto-discovered uncovered K)",
     "description": "K K464 has verdict signal (score=0, reasons=['cluster cooldown penalty (garch 30d=16>10)']) but no general article in feed.json.  Verdict preview: [提出: 用戶(Chen CWS 2013), 執行: Claude] K464: Threshold quasi-SV (log-range) for 6 markets (SPY/EWT/EWJ/EWH/EWY/EWS). Ref: Chen, Liu, So (2013) Comp Stat 28:2415-2447. **HAR log-range wins 6/6 markets** (DM p<0.001 vs AR(1)). Simple AR(1) log-range beats GJR-GARCH 5/6 markets. Thresh",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K464",
@@ -18231,7 +18231,12 @@
       "audience-general"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-06-02T05:08:19+00:00"
+    "created_at": "2026-06-02T05:08:19+00:00",
+    "claimed_by": "hourly-17",
+    "claimed_at": "2026-06-02T09:09:38.395896+00:00",
+    "claim_session_id": "6bac3bc1d057",
+    "completed_at": "2026-06-02T09:11:14.295573+00:00",
+    "result": "Skipped (dedup hit): K464 已被 mile_729fdd9d (K464→K467: HAR Log-Range 的光與影) 涵蓋，narrative arc 重複。改派 K483 commodity vol。"
   },
   {
     "id": "K468_article_general",
@@ -18288,12 +18293,80 @@
     "description": "Codex K1412 review (2026-06-02) 指出 paper3_E2 系列 dm_test() 只用 Newey-West + |t|>3 自製門檻判 Harvey-sig，缺 Harvey/Liu/Newman (1997) small-sample correction. Retrofit: (1) paper3_E2.py::dm_test 加 HLN correction factor sqrt((T+1-2h+T^-1*h*(h-1))/T) h=horizon=1. (2) significant_harvey() 改用 student-t CV at T-1 df 而非 |t|>3. (3) 重跑 paper3_E2 10 pairs + K1412 5 OOS — 驗證 K1412 5/5 ROBUST + paper3_E2 唯一 TW0050-N225 Harvey-sig 在 HLN 下是否仍成立。Light compute (parent already cached). 若 retrofit 後 K1412 ≥4/5 仍 sig → paper3 narrative robust；否則需 hedge.",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "auto_discovered_from_codex_review",
     "parent_experiments": [
       "K1412",
       "Paper3_E2"
     ],
-    "created_at": "2026-06-02T08:11:31.689749+00:00"
+    "created_at": "2026-06-02T08:11:31.689749+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-02T08:44:07.657583+00:00",
+    "claim_session_id": "31130b858648",
+    "started_at": "2026-06-02T08:44:13.981648+00:00",
+    "completed_at": "2026-06-02T08:49:13.769693+00:00",
+    "result": "Retrofitted paper3_E2 dm_test() to HLN small-sample correction with Student-t critical values. Deterministic retrofit of stored results shows HLN-sig pairs = TW0050-HSI, TW0050-N225; K1412 remains 5/5 ROBUST under worst-case valid HLN bound. Direct rerun was blocked by yfinance DNS failure in this sandbox."
+  },
+  {
+    "id": "paper_review_mile_03796a84",
+    "title": "Paper review (Codex 24h-rule): 同樣是模型投票，為什麼 0050 很快就只剩一個人說話？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_03796a84 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_03796a84",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-02T09:08:12+00:00"
+  },
+  {
+    "id": "K483_article_general",
+    "title": "K483: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K483 has verdict signal (score=0, reasons=['cluster cooldown penalty (garch 30d=16>10)']) but no general article in feed.json.  Verdict preview: Assets: GLD, USO q1_qlike_ceiling: GJR-GARCH QLIKE ceiling does NOT hold for commodities. GARCH(1,1) wins USO; GJR marginally wins GLD (DM p=0.068, not significant). Symmetric GARCH is sufficient. q2_leverage_direction: GLD: standard negative gamma (-0.029, 46% significant, weak)",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K483",
+    "tags": [
+      "garch",
+      "har",
+      "leverage-effect",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "garch",
+    "created_at": "2026-06-02T09:08:12+00:00",
+    "claimed_by": "hourly-17",
+    "claimed_at": "2026-06-02T09:11:14.804357+00:00",
+    "claim_session_id": "56baf0050d5b",
+    "started_at": "2026-06-02T09:11:15.055680+00:00",
+    "completed_at": "2026-06-02T09:21:43.466134+00:00",
+    "result": "Published draft mile_02c403ef '黃金跌時波動反而縮？石油衝擊下的槓桿非對稱效應' (1300 字, draft pool, audience=research). Key findings: GLD GJR γ=-0.029 inverse leverage (45.7% sig), USO GJR γ=+0.078 standard leverage (100% sig). HAR-LR 在 commodity 全敗 (DM 7.76/5.37 p=0). Anti-AI gate PASS warn=1/3. Fixed DM stat typo 5.29→5.37 post-publish."
+  },
+  {
+    "id": "K522_article_general",
+    "title": "K522: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K522 has verdict signal (score=0, reasons=['cluster cooldown penalty (garch 30d=16>10)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K522: HAR-RV pilot with 50 days 5-min SPY data. PRELIMINARY: only 17 IS obs after 22d warmup → 4 params overfits. Monthly beta=3.54 (pathological). HAR-RV worst (QLIKE 0.178). EWMA wins (0.067, zero params immune to overfitting). Daily-only HAR(d) QLIKE=0",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K522",
+    "tags": [
+      "HAR_RV",
+      "5min",
+      "pilot",
+      "preliminary",
+      "insufficient_data",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "garch",
+    "created_at": "2026-06-02T09:08:12+00:00"
   }
 ]

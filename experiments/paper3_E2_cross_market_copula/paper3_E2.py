@@ -56,7 +56,7 @@ Pairs (region classification):
 
 Evaluation (identical to E1):
   - Portfolio VaR/ES via CF-Rolling (DCC) or MC (copula), alpha=1%, 2.5%
-  - Trinity (Kupiec + CC + Basel) + FZ + DM QLIKE (Harvey |t|>3)
+  - Trinity (Kupiec + CC + Basel) + FZ + DM QLIKE (HLN-corrected DM)
   - Cross-pair scatter: DM t vs mean lambda_L (H4)
 
 Data: yfinance 5 indices/ETFs + ^VIX (2010-01-01 to 2026-05-28).
@@ -754,7 +754,13 @@ def trinity_test(port_returns, var_series, es_series, alpha):
 # ============================================================
 # 5. DM TESTS (identical to E1 / K1100)
 # ============================================================
-def dm_test(loss_series_1, loss_series_2):
+def hln_small_sample_factor(n, h=1):
+    if n <= 1:
+        return 1.0
+    return np.sqrt((n + 1 - 2 * h + (h * (h - 1)) / n) / n)
+
+
+def dm_test(loss_series_1, loss_series_2, horizon=1):
     valid = np.isfinite(loss_series_1) & np.isfinite(loss_series_2)
     l1 = loss_series_1[valid]
     l2 = loss_series_2[valid]
@@ -762,7 +768,9 @@ def dm_test(loss_series_1, loss_series_2):
     n = len(d)
     if n < 10:
         return {'t_stat': 0.0, 'p_value': 1.0, 'mean_loss_diff': 0.0,
-                'n': n, 'significant_harvey': False}
+                'n': n, 'significant_harvey': False,
+                't_stat_raw': 0.0, 'hln_factor': 1.0,
+                'critical_value': np.nan}
     d_bar = np.mean(d)
     max_lag = max(1, int(n ** (1/3)))
     gamma_0 = np.var(d, ddof=1)
@@ -772,11 +780,18 @@ def dm_test(loss_series_1, loss_series_2):
         gamma_k = np.cov(d[k:], d[:-k])[0, 1]
         nw_var += 2 * w * gamma_k
     se = np.sqrt(nw_var / n) if nw_var > 0 else 1e-12
-    t_stat = d_bar / se if se > 1e-12 else 0.0
-    p_val = 2 * norm.cdf(-abs(t_stat))
+    t_stat_raw = d_bar / se if se > 1e-12 else 0.0
+    hln_factor = hln_small_sample_factor(n, h=horizon)
+    t_stat = t_stat_raw * hln_factor
+    df = max(n - 1, 1)
+    p_val = 2 * student_t.cdf(-abs(t_stat), df=df)
+    critical_value = student_t.ppf(0.975, df=df)
     return {'t_stat': float(t_stat), 'p_value': float(p_val),
             'mean_loss_diff': float(d_bar), 'n': int(n),
-            'significant_harvey': bool(abs(t_stat) > 3.0)}
+            'significant_harvey': bool(abs(t_stat) > critical_value),
+            't_stat_raw': float(t_stat_raw),
+            'hln_factor': float(hln_factor),
+            'critical_value': float(critical_value)}
 
 
 def dm_qlike(actual_r2, forecast_var1, forecast_var2):
@@ -1108,6 +1123,11 @@ def load_data():
     # INNER JOIN: drop any row missing any market's return (calendar overlap)
     ret_cols = [f'ret_{short}' for short in MARKETS]
     df_full = df.dropna(subset=ret_cols + ['vix2'])
+    if df_full.empty:
+        raise RuntimeError(
+            "load_data() produced an empty inner-joined panel; "
+            "yfinance data fetch likely failed in this environment."
+        )
 
     print(f"\nData (inner-joined across all markets):")
     print(f"  Period: {df_full.index[0].strftime('%Y-%m-%d')} to "
@@ -1387,12 +1407,12 @@ def main():
             dm_vs_t = pr['dm_qlike']['DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM']
         else:
             dm_vs_t = {'t_stat': 0.0, 'significant_harvey': False,
-                       'p_value': 1.0}
+                       'p_value': 1.0, 'critical_value': np.nan}
         if 'DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM' in pr['dm_qlike']:
             dm_vs_c = pr['dm_qlike']['DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM']
         else:
             dm_vs_c = {'t_stat': 0.0, 'significant_harvey': False,
-                       'p_value': 1.0}
+                       'p_value': 1.0, 'critical_value': np.nan}
         if dm_vs_t['t_stat'] > dm_vs_c['t_stat']:
             best_cop = 'Student-t'
             best_dm = dm_vs_t
@@ -1418,7 +1438,7 @@ def main():
         cross_table.append(row)
 
     print(f"\n{'Pair':<18} {'region':<28} {'corr':>6} {'λ_L(t)':>8} "
-          f"{'λ_L(C)':>7} {'DM(t)':>7} {'DM(C)':>7} {'Harvey':>7}")
+          f"{'λ_L(C)':>7} {'DM(t)':>7} {'DM(C)':>7} {'HLN':>7}")
     print("-" * 100)
     for r in cross_table:
         harvey = "Y" if r['best_copula_harvey'] else "N"
@@ -1543,13 +1563,13 @@ def main():
     print(f"{'=' * 72}")
     if core['any_copula_beats_dcc_harvey']:
         print(f"✅ H1 CONFIRMED: Copula-GARCH beats DCC-A4f-ASYM "
-              f"at Harvey |t|>3 on pair(s): "
+              f"at the HLN-corrected critical value on pair(s): "
               f"{core['pairs_with_copula_advantage_harvey']}")
         print("  → Cross-market copula advantage IDENTIFIED. Investigate "
               "which region class drives it (H2 candidate).")
     else:
         print("❌ H1 REJECTED: No cross-market pair shows copula beating "
-              "DCC at Harvey |t|>3.")
+              "DCC at the HLN-corrected critical value.")
         print("  → Combined with E1 NULL, Paper 3 reframe needs E3 commodity "
               "results to determine whether asset-class advantage exists.")
     if r_t is not None:
@@ -1564,7 +1584,7 @@ def main():
         print(f"  {region}: n={agg['n_pairs']}, "
               f"mean λ_L(t)={agg['lambda_L_t_mean']:.4f}, "
               f"mean DM(t)={agg['dm_dcc_vs_copula_t_mean']:+.3f}, "
-              f"Harvey-sig pairs={agg['n_harvey_sig']}")
+              f"HLN-sig pairs={agg['n_harvey_sig']}")
 
 
 def make_plots(pair_results, cross_table):
@@ -1624,10 +1644,6 @@ def make_plots(pair_results, cross_table):
                 ax.annotate(n, (xi, yi), fontsize=8,
                             xytext=(5, 5), textcoords='offset points')
         ax.axhline(0, color='black', lw=0.5)
-        ax.axhline(3, color='green', lw=0.8, linestyle='--',
-                   label='Harvey +3')
-        ax.axhline(-3, color='red', lw=0.8, linestyle='--',
-                   label='Harvey -3')
         ax.set_xlabel(f'Mean λ_L ({cop_label} copula)')
         ax.set_ylabel(f'DM t-stat: DCC-A4f-ASYM vs {cop_label}\n'
                       f'(positive → copula better)')
