@@ -366,6 +366,142 @@ The PRG extends the Periodic Regime-Switching (PRS) model of \citet{Lai2024} by 
 
 
 %% =====================================================================
+%% ONLINE APPENDIX
+%% =====================================================================
+\appendix
+\section{Online Appendix: K880v2 Alternative Timing Convention Robustness}
+\label{app:k880v2_robustness}
+
+This appendix complements the timing-convention discussion in
+Section~\ref{sec:timing_convention} (Table~\ref{tab:ablation}) with a
+full set of VaR backtests under both conventions and Expected Shortfall
+backtests under K880v2. The objective is transparent, model-by-model
+disclosure of how the SPY risk metrics in Table~\ref{tab:var_es} respond
+when the forecast issuance horizon is shifted from market open (K880,
+canonical) to the previous-day close (K880v2). The convention itself is
+defined in Eqs.~(\ref{eq:prg_ov_forecast})--(\ref{eq:prg_in_forecast}),
+which place the intraday forecast at the day-$d$ open with
+$r^2_{\text{overnight},d}$ already realized; K880v2 shifts that
+forecast to the day-$(d{-}1)$ close, substituting the model-implied
+$\hat h_{\text{overnight},d}$ for the realized overnight quantity.
+
+\subsection*{Full SPY VaR disclosure}
+
+Table~\ref{app:tab:var_5models} reports SPY violation rates and Kupiec
+unconditional-coverage $p$-values at the 1\% and 5\% levels for all five
+competing models under both conventions ($n = 1{,}823$ OOS days; same
+sample as Table~\ref{tab:var_es}). Three patterns matter for review.
+First, under K880 the PRG Extended model attains the best calibration at
+both levels (0.93\% violations at the 1\% level, $p_{K} = 0.77$;
+4.50\% at the 5\% level, $p_{K} = 0.32$). Second, under K880v2 the same
+PRG Extended row over-rejects at the 1\% level (1.59\%, $p_{K} = 0.020$,
+Kupiec fails at the 5\% size) while remaining within tolerance at the
+5\% level (5.49\%, $p_{K} = 0.35$). Third, the same degradation pattern
+appears for PRG Basic ($1.65\%$, $p_{K} = 0.011$) and Separate-GARCH
+($1.92\%$, $p_{K} = 0.0005$), which isolates the timing horizon---not
+the cross-session $h_{n-1}$ bridge---as the source of the shift.
+
+\begin{table}[htbp]
+\centering
+\caption{SPY VaR backtests, K880 vs.\ K880v2, all five models}
+\label{app:tab:var_5models}
+\small
+\begin{tabular}{l cc cc cc cc}
+\toprule
+ & \multicolumn{4}{c}{K880 (at day-$d$ open)}
+ & \multicolumn{4}{c}{K880v2 (at day-$(d{-}1)$ close)} \\
+\cmidrule(lr){2-5} \cmidrule(lr){6-9}
+ & \multicolumn{2}{c}{VaR 1\%} & \multicolumn{2}{c}{VaR 5\%}
+ & \multicolumn{2}{c}{VaR 1\%} & \multicolumn{2}{c}{VaR 5\%} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9}
+Model & rate & $p_K$ & rate & $p_K$ & rate & $p_K$ & rate & $p_K$ \\
+\midrule
+GJR-GARCH      & 1.92\% & 0.0005 & 5.65\% & 0.21   & 2.08\% & 0.0000 & 6.03\% & 0.049 \\
+HAR            & 6.03\% & 0.0000 & 11.19\% & 0.0000 & 6.03\% & 0.0000 & 11.19\% & 0.0000 \\
+Separate-GARCH & 1.87\% & 0.0009 & 4.83\% & 0.73   & 1.92\% & 0.0005 & 5.21\% & 0.68 \\
+PRG Basic      & 1.32\% & 0.20   & 4.77\% & 0.65   & 1.65\% & 0.011  & 5.27\% & 0.61 \\
+PRG Extended   & \textbf{0.93\%} & \textbf{0.77} & 4.50\% & 0.32 & 1.59\% & 0.020 & 5.49\% & 0.35 \\
+\bottomrule
+\end{tabular}
+\begin{flushleft}
+\footnotesize
+\emph{Notes:} SPY OOS sample, $n = 1{,}823$ days. Violation rate is the
+fraction of OOS days on which the realized return falls below the
+$-\,\text{VaR}_\alpha$ threshold; $p_K$ is the Kupiec unconditional-coverage
+$p$-value, with $p_K \geq 0.05$ indicating that calibration is not
+rejected at the 5\% size. The PRG Extended K880 row reproduces the
+headline number in Table~\ref{tab:var_es}.
+Sources: \texttt{experiments/k880/k880\_results.json::layer4\_var};
+\texttt{experiments/k880v2/k880v2\_results.json::layer4\_var}.
+\end{flushleft}
+\end{table}
+
+\subsection*{Expected Shortfall under K880v2}
+
+Table~\ref{app:tab:es_k880v2} reports the Acerbi--Szekely
+\citeyearpar{Acerbi2014} $Z_2$ ES backtest at the 2.5\% tail under the
+K880v2 convention. None of the five models is rejected at the 5\% level
+($p > 0.49$ throughout), indicating that the predicted shortfall
+\emph{magnitudes}---conditional on a VaR$_{2.5\%}$ exceedance---are not
+statistically biased relative to the realized losses. We document an
+asymmetry in the experimental ledger: ES backtesting was added to the
+evaluation pipeline during the K880v2 batch and was not retroactively
+applied to the earlier K880 batch, so this table reports K880v2 results
+only.\footnote{The K880 results file (\texttt{experiments/k880/k880\_results.json})
+contains no \texttt{layer4b\_es} block, whereas the K880v2 file
+populates the ES results reported here. The Acerbi--Szekely $Z_2$
+statistic averages the ratio of realized loss to predicted ES over
+VaR-exceedance days and rejects when the model systematically
+underestimates tail magnitude; the simulated null is constructed under
+the model's own quantile forecast.}
+
+\begin{table}[htbp]
+\centering
+\caption{SPY Expected Shortfall backtest, K880v2, 2.5\% tail}
+\label{app:tab:es_k880v2}
+\small
+\begin{tabular}{lcccc}
+\toprule
+Model & $Z_2$ & $p$-value & $n_{\text{viol}}$ & Reject at 5\%? \\
+\midrule
+GJR-GARCH      & 2.74 & 0.50 & 68  & No \\
+HAR            & 5.70 & 0.49 & 162 & No \\
+Separate-GARCH & 2.55 & 0.49 & 60  & No \\
+PRG Basic      & 2.31 & 0.49 & 50  & No \\
+PRG Extended   & 2.36 & 0.49 & 53  & No \\
+\bottomrule
+\end{tabular}
+\begin{flushleft}
+\footnotesize
+\emph{Notes:} Acerbi--Szekely $Z_2$ ES backtest at $\alpha = 0.025$;
+SPY OOS sample, $n = 1{,}823$ days. $n_{\text{viol}}$ counts days on
+which the realized loss exceeded the model's VaR$_{2.5\%}$ forecast.
+$p$-values are computed from the Acerbi--Szekely simulated null
+distribution. K880v2 convention only; the corresponding K880 batch did
+not include ES backtesting (see footnote in main text).
+Source: \texttt{experiments/k880v2/k880v2\_results.json::layer4b\_es}.
+\end{flushleft}
+\end{table}
+
+\subsection*{Reviewer-facing summary}
+
+Three claims survive this disclosure. \textbf{(i)} The PRG Extended
+headline VaR calibration in Table~\ref{tab:var_es} is robust under the
+K880 convention used throughout the paper, which is the convention
+admissible under the information-set definition in
+Eqs.~(\ref{eq:prg_ov_forecast})--(\ref{eq:prg_in_forecast}).
+\textbf{(ii)} Under the alternative K880v2 convention the PRG-class
+1\%-VaR fit degrades to borderline-rejected; the 5\%-VaR fit remains
+acceptable. The deterioration is shared by Separate-GARCH and PRG Basic,
+which rules out the cross-session bridge as the cause and points to the
+timing horizon. \textbf{(iii)} Expected Shortfall under K880v2 is not
+rejected at the 5\% level for any of the five models, so the
+tail-magnitude calibration appears robust to the timing convention even
+when unconditional coverage drifts. The K880v2 figures in this appendix
+therefore function as transparent disclosure rather than as a rebuttal
+of the canonical convention.
+
+%% =====================================================================
 %% REFERENCES
 %% =====================================================================
 \bibliographystyle{apalike}

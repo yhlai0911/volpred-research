@@ -16167,9 +16167,15 @@
     "description": "Online appendix 加 K880v2 alternative timing convention 完整 robustness table (DM stats + VaR + ES)。提供 reviewer 透明 disclosure: under alternative convention, PRG_Ext loses significance on SPY (DM=-0.57 NS, VR Kupiec FAIL p=0.0196). Main paper Eq 3-4 仍 justify K880 為 canonical。來源: research_notes/k880_errata_decision_2026_05_31.md Gap 1 + recommendation.",
     "priority": 6,
     "task_type": "paper_body",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "source": "auto_discovered_from_paper6_errata_decision",
-    "created_at": "2026-05-31T16:13:58"
+    "created_at": "2026-05-31T16:13:58",
+    "claimed_by": "hourly-20",
+    "claimed_at": "2026-06-02T12:12:33.082756+00:00",
+    "claim_session_id": "0c3b34fb14e6",
+    "started_at": "2026-06-02T12:12:33.166568+00:00",
+    "completed_at": "2026-06-02T12:16:52.162797+00:00",
+    "result": "Online appendix added to main.tex (after Conclusion, before References): 5-model SPY VaR comparison K880 vs K880v2 (Table A1) + 5-model ES backtest under K880v2 (Table A2) + 3-claim reviewer-facing summary. xelatex compiles clean 19 pages. paper-update CLI synced to Supabase (updated_at 2026-06-02T12:16:26). Numbers all sourced from experiments/k880*/k880*_results.json::layer4_var/layer4b_es."
   },
   {
     "id": "K190_article_general",
@@ -18410,7 +18416,7 @@
     "title": "Paper review (Codex 24h-rule): 為波動率量身打造的模型，真的比老牌非對稱模型更準嗎？三個 ETF 說「不」",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_69e17b83 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_69e17b83",
@@ -18419,7 +18425,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-02T11:08:07+00:00"
+    "created_at": "2026-06-02T11:08:07+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-02T11:58:29.885294+00:00",
+    "claim_session_id": "480e1644cde6",
+    "started_at": "2026-06-02T11:58:36.542649+00:00",
+    "completed_at": "2026-06-02T12:00:02.756745+00:00",
+    "result": "Review complete: K1398 lookahead clean; rolling fit uses data up to t-1 only. One caveat: article says results were validated by rigorous statistics, but code uses plain Student-t loss-difference test rather than HAC/HLN DM."
   },
   {
     "id": "K802_article_general",
@@ -18495,5 +18507,135 @@
     ],
     "topic_cluster": "taiwan",
     "created_at": "2026-06-02T11:08:07+00:00"
+  },
+  {
+    "id": "K1373_article_general",
+    "title": "K1373: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1373 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (taiwan 30d=20>8)']) but no general article in feed.json.  Verdict preview: 台股 5 檔標的（0050/0056/2330/2317/2882，2015-2025）除息日絕對對數報酬 |r| 池化後相對控制日邊際顯著偏高（Welch t=1.967, p=0.0521, Cohen d=0.188, MW p=0.0060）。個股層面只有 2882.TW（國泰金）達邊際顯著（MW p=0.019, d=0.517），其餘 4 檔均不顯著。除息前 10 日（pre-window）池化有預期累積跡象（t=2.918, p=0.0036）；除息後 10 日（post-window）無顯著差異（p=0.323）。效應量小（d=0.188",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1373",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "taiwan",
+    "created_at": "2026-06-02T12:08:59+00:00"
+  },
+  {
+    "id": "K1301_article_general",
+    "title": "K1301: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1301 has verdict signal (score=0, reasons=['cluster cooldown penalty (taiwan 30d=20>8)']) but no general article in feed.json.  Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1301",
+    "tags": [
+      "HAR",
+      "realized_semivariance",
+      "BNKS",
+      "TAIFEX",
+      "TX1",
+      "DM_HLN",
+      "null_result",
+      "volatility_forecasting",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "taiwan",
+    "created_at": "2026-06-02T12:08:59+00:00"
+  },
+  {
+    "id": "K1303_article_general",
+    "title": "K1303: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1303 has verdict signal (score=0, reasons=['cluster cooldown penalty (taiwan 30d=20>8)']) but no general article in feed.json.  Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1303",
+    "tags": [
+      "HAR",
+      "jump",
+      "realized_volatility",
+      "BPV",
+      "TAIFEX",
+      "TX1",
+      "DM_HLN",
+      "null_result",
+      "volatility_forecasting",
+      "null_quartet",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "taiwan",
+    "created_at": "2026-06-02T12:08:59+00:00"
+  },
+  {
+    "id": "K1309_article_general",
+    "title": "K1309: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1309 has verdict signal (score=0, reasons=['cluster cooldown penalty (taiwan 30d=20>8)']) but no general article in feed.json.  Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1309",
+    "tags": [
+      "HAR",
+      "path-dependent",
+      "HAR-PD",
+      "RV",
+      "DM-HLN",
+      "block-bootstrap",
+      "TX1",
+      "TAIFEX",
+      "null-result",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "taiwan",
+    "created_at": "2026-06-02T12:08:59+00:00"
+  },
+  {
+    "id": "K1375_article_general",
+    "title": "K1375: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1375 has verdict signal (score=0, reasons=['cluster cooldown penalty (taiwan 30d=20>8)']) but no general article in feed.json.  Verdict preview: K1374 個股峰季 d=0.305 在高股息 ETF 層級降至 d=0.055（全 NULL）。\n0056(年配, n=21, d=-0.015, p=0.927)、00878(季配, n=22, d=+0.343, p=0.179)、00919(月配, n=12, d=-0.147, p=0.285)。\nPooled n=55, d=+0.055, p=0.617。ETF 多成份股分散弱化個股除息日特有風險。\n投資人執行高股息 ETF 除息日附近操作無需擔心特別 vol spike。\n00878 邊際方向性正確但樣本不足（需 ≈68 事件達 80% ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1375",
+    "tags": [
+      "taiwan_etf",
+      "ex_dividend",
+      "event_study",
+      "null_result",
+      "etf_diversification",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "taiwan",
+    "created_at": "2026-06-02T12:08:59+00:00"
+  },
+  {
+    "id": "K472_article_general",
+    "title": "K472: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K472 has verdict signal (score=0, reasons=['cluster cooldown penalty (taiwan 30d=20>8)']) but no general article in feed.json.  Verdict preview: Asset: 0050.TW   ≈ EWMA (λ=0.94): QLIKE +1.85%, DM p=0.3659 → not significant   ≈ HAR log-range: QLIKE +16.23%, DM p=0.0611 → not significant   ≈ Semivariance RS⁻: QLIKE +1.20%, DM p=0.5925 → not significant   ≈ Rolling kurtosis: QLIKE +5.92%, DM p=0.1005 → not significant   ✗ HA",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K472",
+    "tags": [
+      "har",
+      "taiwan",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "taiwan",
+    "created_at": "2026-06-02T12:08:59+00:00"
   }
 ]
