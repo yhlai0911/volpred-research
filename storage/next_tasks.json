@@ -17924,7 +17924,7 @@
     "title": "K157: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K157 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: Q1 (Better correlation forecast?): Yes — some models improve over Rolling 22d Q2 (DCC-GARCH best?): DCC among best Q3 (Better corr -> better portfolio?): Yes — MinVar with model corr beats 50/50 Q1 (Better correlation forecast?): Yes — some models improve over Rolling 22d | Q2 (D",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K157",
@@ -17935,7 +17935,13 @@
       "retry-v2"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-06-02T00:09:02+00:00"
+    "created_at": "2026-06-02T00:09:02+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-02T01:00:26.562781+00:00",
+    "claim_session_id": "d9f536964ed9",
+    "started_at": "2026-06-02T01:00:31.329797+00:00",
+    "completed_at": "2026-06-02T01:10:36.306945+00:00",
+    "result": "Published general-audience K157 draft as mile_47ad5dc0 in feed.json; added anti-AI-checked draft source; Supabase sync deferred via .failed_supabase_syncs.json due no network."
   },
   {
     "id": "K180_article_general",
@@ -17953,7 +17959,8 @@
       "audience-general"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-06-02T00:09:02+00:00"
+    "created_at": "2026-06-02T00:09:02+00:00",
+    "last_released_at": "2026-06-02T01:11:06.061226+00:00"
   },
   {
     "id": "K188_article_general",
@@ -17990,5 +17997,77 @@
     ],
     "topic_cluster": "garch",
     "created_at": "2026-06-02T00:09:02+00:00"
+  },
+  {
+    "id": "K434_article_general",
+    "title": "K434: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K434 has verdict signal (score=0, reasons=['cluster cooldown penalty (garch 30d=16>10)']) but no general article in feed.json.  Verdict preview: Asset: SPY BMA does NOT beat the best single model (EGARCH(1,1)-N). BMA QLIKE=0.548005 vs best single QLIKE=0.542960. BMA weights outperform equal weights, suggesting BIC-based model selection adds value. The highest average BMA weight goes to EGARCH(1,1)-t (0.998), indicating th",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K434",
+    "tags": [
+      "garch",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "garch",
+    "created_at": "2026-06-02T01:16:35+00:00"
+  },
+  {
+    "id": "K437_article_general",
+    "title": "K437: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K437 has verdict signal (score=0, reasons=['cluster cooldown penalty (garch 30d=16>10)']) but no general article in feed.json.  Verdict preview: Asset: SPY GAS-t underperforms standard GARCH family. The score-driven approach does not help for SPY OOS 2023-2024.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K437",
+    "tags": [
+      "garch",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "garch",
+    "created_at": "2026-06-02T01:16:35+00:00"
+  },
+  {
+    "id": "K445_article_general",
+    "title": "K445: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K445 has verdict signal (score=0, reasons=['cluster cooldown penalty (garch 30d=16>10)']) but no general article in feed.json.  Verdict preview: Method: empirical q1_gjr_gamma: Gamma NOT significant (p=0.1191) — no clear asymmetry in full sample q2_best_in_sample: EGARCH_t q3_best_oos: GARCH_SkewT Reference: Baur & Dimpfl (2018) Economics Letters Reference: Katsiampa (2017) Economics Letters",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K445",
+    "tags": [
+      "garch",
+      "leverage-effect",
+      "taiwan",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "garch",
+    "created_at": "2026-06-02T01:16:35+00:00"
+  },
+  {
+    "id": "K462_article_general",
+    "title": "K462: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K462 has verdict signal (score=0, reasons=['cluster cooldown penalty (garch 30d=16>10)']) but no general article in feed.json.  Verdict preview: Asset: 0050.TW NULL: No model beats GJR baseline on Taiwan. Best alt: GARCH-X(SPY r²) (diff=2.519%). GARCH ceiling extends to Taiwan market. NULL",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K462",
+    "tags": [
+      "garch",
+      "leverage-effect",
+      "taiwan",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "garch",
+    "created_at": "2026-06-02T01:16:35+00:00"
   }
 ]
