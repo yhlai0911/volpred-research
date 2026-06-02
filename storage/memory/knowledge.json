@@ -32119,5 +32119,21 @@
       "codex_FAIL"
     ],
     "timestamp": "2026-06-02T08:10:43.221077+00:00"
+  },
+  {
+    "item_id": "7616fd75",
+    "category": "paper_review_correction",
+    "content": "K1374 paper_review (Codex 24h-rule): mile_5f46ac4e 文章首版 FAIL — 3 處 claim-evidence 不符已修正回溯。\n\n實驗本身 PASS（pooled n=226, Welch t=4.019, p=0.0001, Cohen's d=0.305, ratio 1.34；lookahead 與樣本完整性無虞）。\n\n文章首版 3 blockers（已修正、已 sync feed.json + reports/mile_5f46ac4e.json + Supabase）：\n1. 旺季/淡季 d 寫成 0.346/0.105，實際 results.json 為 0.3055/0.133 → 改為 0.31/0.13\n2. 「其他 16 檔樣本數太少（各 11 事件）」不符，per_ticker 含 0050(21)/0056(18)/2330(31)/2454(13) → 改正\n3. 「金融和工業股波動比平日高約 50%（d > 0.5）」誤把 Cohen's d 當百分比 → 改為「Cohen's d 超過 0.5（中等規模），工業 sector 實際 |r| 比值 ~1.66 倍、金融 ~1.56 倍」（從 per_ticker mean_ex/mean_ctrl 重算驗證）\n\nVerdict: FAIL → 修正後（未再經 Codex 二審；下輪可選二審 closure）\n\nReviewer: Codex CLI (gpt-5.4, 24h-rule); reviewer_source=codex_review\n",
+    "evidence": [
+      "experiment_id=k1374",
+      "experiment_path=experiments/k1374",
+      "mile_id=mile_5f46ac4e",
+      "codex_review_output=/tmp/codex_k1374_review_output.txt",
+      "verdict=CONDITIONAL_PASS",
+      "reviewer=Codex CLI 24h-rule",
+      "reviewer_source=codex_review"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-06-02T21:14:27.763682"
   }
 ]

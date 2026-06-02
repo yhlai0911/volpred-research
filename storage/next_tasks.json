@@ -18491,7 +18491,7 @@
     "title": "K1100: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1100 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (taiwan 30d=20>8)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1100g 原 daily session ratio 1.586 發現為 gap effect (13:45→15:00 + 05:00→08:45 兩跳空期) 而非 pure session asymmetry。K1100g_d3/d4 Student-t 下 OOS LRT 14.6 borderline, 年度不穩。K1100g_d5 測 pure gap² 是否真 info carrier, 替代 night 5-min r²。**結果 H2**: gap² IS LRT χ²=18.87 (",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1100",
@@ -18506,7 +18506,13 @@
       "audience-general"
     ],
     "topic_cluster": "taiwan",
-    "created_at": "2026-06-02T11:08:07+00:00"
+    "created_at": "2026-06-02T11:08:07+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-02T13:00:41.346668+00:00",
+    "claim_session_id": "76cf72377a29",
+    "started_at": "2026-06-02T13:00:47.740819+00:00",
+    "completed_at": "2026-06-02T13:04:15.776328+00:00",
+    "result": "Published general draft mile_a4baba0f for K1100 (SPY+GLD copula vs DCC negative result) via publish_draft.py with cluster waiver; 2 experiment charts auto-uploaded."
   },
   {
     "id": "K1373_article_general",
@@ -18637,5 +18643,21 @@
     ],
     "topic_cluster": "taiwan",
     "created_at": "2026-06-02T12:08:59+00:00"
+  },
+  {
+    "id": "paper_review_mile_5f46ac4e",
+    "task_type": "paper_review",
+    "priority": "P4",
+    "title": "Paper review (Codex 24h-rule): K1374 除息日台股波動 mile_5f46ac4e",
+    "description": "Codex 24h-rule review of published draft mile_5f46ac4e (K1374 除息日台股波動). Check claim-evidence match, anti-AI style, citation/data accuracy, statistical interpretation. Article: /tmp/k1374_article.md; experiment: experiments/k1374/k1374_results.json",
+    "status": "succeeded",
+    "source": "hourly-21-codex-24h-rule",
+    "created_at": "2026-06-02T13:09:51Z",
+    "claimed_by": "hourly-21",
+    "claimed_at": "2026-06-02T13:09:57.038589+00:00",
+    "claim_session_id": "c1ba2bcc2bcd",
+    "started_at": "2026-06-02T13:09:57.264545+00:00",
+    "completed_at": "2026-06-02T13:14:32.499298+00:00",
+    "result": "Codex 24h-rule FAIL → 3 claim-evidence blockers 修正並 sync (feed.json + reports + Supabase). Knowledge entry 7616fd75. CONDITIONAL_PASS post-fix."
   }
 ]
