@@ -18838,11 +18838,17 @@
     "id": "K1399_article_revise_overclaim",
     "task_type": "daily_article",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "title": "K1399 article overclaim fix (Codex FAIL 2026-06-03)",
     "description": "Codex source-code review (hourly-00 2026-06-03) flagged mile_34157161 (K1399) FAIL: article headline '只有一個分量真的有用' contradicts results.json — HAR_VIX_T (5d-MA) also clears Harvey threshold (DM t=-3.53 vs baseline, |t|>3). Article must be revised: (1) title → '只有 2 個分量單獨有用，但水準最強' OR similar; (2) summary remove '只有 VIX 水準通過 Harvey 門檻' claim; (3) remove mechanism overclaim '訊號完整集中在水準本身' / '為什麼水準把訊號吃光' — DM/QLIKE 無法支撐 mechanism; (4) defensible conclusion: HAR-VIX-L is BEST single component AND HAR-VIX-All not significantly better than HAR-VIX-L; HAR-VIX-T is the close-second runner-up. Re-publish via feed-publisher with anti-AI gate. Source-level code clean (lookahead/DM/QLIKE all OK).",
     "created_at": "2026-06-03T00:30:00+00:00",
     "source": "codex_review_finding",
-    "blocked_reason": null
+    "blocked_reason": null,
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-02T16:17:15.916291+00:00",
+    "claim_session_id": "d94133597a54",
+    "started_at": "2026-06-02T16:17:15.973525+00:00",
+    "completed_at": "2026-06-02T16:21:01.265343+00:00",
+    "result": "修正 mile_34157161 過度宣稱：標題與摘要改為『VIX 水準最強、MA5 次佳但無增量優勢』；移除『只有一個分量有用』與機制式斷言。已更新 feed/article/index 本地內容，保留 errata trail；未做 Supabase sync。"
   }
 ]

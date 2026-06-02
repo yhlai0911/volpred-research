@@ -1,0 +1,72 @@
+{
+  "id": "mile_34157161",
+  "title": "K1399：VIX 四個分量裡，水準最強；5 日均線也過門檻，但沒有增量優勢",
+  "description": "摘要：把 VIX 拆成水準（Level）、變化量（ΔVIX）、波動率溢酬（Vol Premium）、5 日均線（MA5）四個分量，分別放進 HAR-ABS 預測 SPY 日絕對報酬。結果要講得更精確：VIX 水準是表現最好的單一分量（DM t = -4.40 vs HAR-ABS），5 日均線也能單獨擊敗基準（DM t = -3.53），但直接和水準相比則顯著較差（DM t = +3.47）。",
+  "content": "# K1399：VIX 四個分量裡，水準最強；5 日均線也過門檻，但沒有增量優勢\n\n**摘要**：把 VIX 拆成水準（Level）、變化量（ΔVIX）、波動率溢酬（Vol Premium）、5 日均線（MA5）四個分量，分別放進 HAR-ABS 預測 SPY 日絕對報酬。結果要講得更精確：VIX 水準是表現最好的單一分量（DM t = -4.40 vs HAR-ABS），5 日均線也能單獨擊敗基準（DM t = -3.53），但直接和水準相比則顯著較差（DM t = +3.47）。ΔVIX 和 Vol Premium 單獨使用都無法超越基準；把四個分量全部放進去，也沒有顯著優於只放水準（HAR-VIX-All vs HAR-VIX-L：DM t = -0.40，p = 0.69）。\n\n---\n\n## 研究背景\n\nK1315 已確認：在 HAR-ABS 模型裡加入前一日 VIX 水準，OOS QLIKE 會比只用歷史波動率的基準更好。但那個結果只告訴我們「VIX 有用」，沒有回答更細的問題：VIX 的優勢究竟來自哪個分量？\n\nK1399 的設計是把 VIX 拆成四個特徵，分別檢查：\n\n1. 水準本身是否最重要。\n2. ΔVIX 是否提供額外動態資訊。\n3. Vol Premium 是否能捕捉 regime。\n4. 5 日均線是否能提供比水準更穩定的訊號。\n\n這個拆解有實務意義。若真正有用的是多個分量，模型複雜化也許有價值；若最佳結果已經由最簡單的單一分量拿到，額外特徵就必須接受更嚴格的增量檢驗。\n\n---\n\n## 方法與數據\n\n| 項目 | 設定 |\n|------|------|\n| 資產 | SPY（本地 CSV：`paper/leverage-direction/data/spy_vix_2004-2026.csv`） |\n| 預測目標 | 日絕對 log 報酬 `\\|r_t\\|` |\n| IS 期間 | 2005-01-04 至 2018-12-31（n = 3,522） |\n| OOS 期間 | 2019-01-02 至 2026-05-19（n = 1,865） |\n| 模型估計 | OLS + HC3（IS 固定係數，OOS 靜態預測） |\n| 損失函數 | QLIKE（Patton 2011 Form B：`mean[log(ŷ) + \\|r\\| / ŷ]`） |\n| 顯著性門檻 | Harvey et al. (2016) 建議的 `\\|t\\| > 3.0` |\n| DM 檢定 | HLN 修正，NW bandwidth = `T^(1/3)`，`t(T-1)` 分佈 |\n\n### 六個模型規格\n\n| 模型 | 特徵組合 |\n|------|---------|\n| HAR-ABS（基準） | rv1, rv5, rv22 |\n| HAR-VIX-L | + VIX 水準（t-1） |\n| HAR-VIX-dV | + ΔVIX（t-1） |\n| HAR-VIX-P | + 波動率溢酬（VIX / (`\\|r\\|` × √252)）（t-1） |\n| HAR-VIX-T | + VIX 五日均線（t-1） |\n| HAR-VIX-All | + 全部四個分量 |\n\n### Lookahead 防護\n\n所有特徵都只用 t-1 或更早的資訊：\n\n| 特徵 | 構造方式 |\n|------|---------|\n| rv1 | `abs_r.shift(1)` |\n| rv5 | `abs_r.rolling(5).mean().shift(1)` |\n| rv22 | `abs_r.rolling(22).mean().shift(1)` |\n| VIX 水準 | `vix_close.shift(1)` |\n| ΔVIX | `vix_close.diff().shift(1)` |\n| 波動率溢酬 | `(vix / (\\|r\\| × √252)).shift(1)`，以 IS 1-99 百分位 winsorize |\n| VIX 五日均線 | `vix_close.rolling(5).mean().shift(1)` |\n\nVol Premium 的 winsorize 邊界只用 IS 樣本估計，再套用到 OOS，避免邊界本身偷看外樣本。\n\n---\n\n## 核心結果\n\n![K1399 OOS QLIKE 比較圖：六個 HAR-X 模型的 OOS QLIKE 排名。HAR-VIX-All、HAR-VIX-L、HAR-VIX-T 都優於 HAR-ABS，但只有 HAR-VIX-L 是最佳單一分量。](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1399_qlike_comparison.png)\n\n### 發現一：最佳單一分量是 VIX 水準，但不是唯一能過基準門檻的分量\n\n| 排名 | 模型 | OOS QLIKE | vs HAR-ABS | DM t vs 基準 | Harvey 通過 |\n|------|------|-----------|-----------|--------------|-------------|\n| 1 | HAR-VIX-All | -3.9423 | -0.0260 | -4.36 | ✓ |\n| 2 | HAR-VIX-L | -3.9411 | -0.0248 | -4.40 | ✓ |\n| 3 | HAR-VIX-T | -3.9312 | -0.0150 | -3.53 | ✓ |\n| 4 | HAR-ABS（基準） | -3.9163 | — | — | — |\n| 5 | HAR-VIX-P | -3.9161 | +0.0001 | +0.82 | ✗ |\n| 6 | HAR-VIX-dV | -3.9121 | +0.0042 | +1.01 | ✗ |\n\n這張表最重要的訊息有兩層：\n\n1. **最佳單一分量是 VIX 水準。**\n2. **5 日均線也能單獨擊敗基準，但沒有贏過水準。**\n\n所以嚴格地說，這篇文章不能寫成「只有一個分量有用」。更準確的口徑是：**VIX 水準是最強的單一分量；5 日均線是次佳替代品；ΔVIX 與 Vol Premium 則沒有單獨超越基準。**\n\n### 發現二：5 日均線可以過基準，但對水準沒有增量優勢\n\n若只看「各自 vs HAR-ABS」，HAR-VIX-T 的確通過了 `|t| > 3` 門檻。但研究上更重要的是下一步：它是否比 HAR-VIX-L 更好？\n\n| 比較 | DM t | p-value | Harvey 通過 | 解讀 |\n|------|------|---------|-------------|------|\n| HAR-VIX-dV vs L | +4.15 | 3.4e-05 | ✓ | dV 顯著差於 L |\n| HAR-VIX-P vs L | +4.42 | 1.1e-05 | ✓ | P 顯著差於 L |\n| HAR-VIX-T vs L | +3.47 | 5.3e-04 | ✓ | T 顯著差於 L |\n| HAR-VIX-All vs L | -0.40 | 0.690 | ✗ | 與 L 無顯著差異 |\n\n這裡的訊息很清楚：**HAR-VIX-T 雖然能贏基準，但在直接對決裡仍然輸給 HAR-VIX-L。** 因此，若你的問題是「最值得加進 HAR 的那一個 VIX 分量是誰」，答案還是水準，不是 5 日均線。\n\n### 發現三：HAR-VIX-All 拿到最佳 QLIKE，但沒有顯著贏過 HAR-VIX-L\n\nHAR-VIX-All 的 OOS QLIKE 排名第一，但只比 HAR-VIX-L 好 0.0012 左右；對應的 pairwise DM t = -0.40，p = 0.69，完全不到 Harvey 門檻。\n\n這代表：\n\n- 若只看點估計排名，All 在樣本裡略勝。\n- 若要求統計上可區分的增益，**沒有證據**顯示 All 優於 L。\n\n因此，較穩健的結論是：**在目前樣本下，複雜化沒有帶來可檢定的額外好處。**\n\n### 發現四：共線性診斷支持「水準優先」的 parsimonious 讀法\n\nHAR-VIX-All 的 IS 樣本 VIF：\n\n| 特徵 | VIF |\n|------|-----|\n| rv1 | 2.25 |\n| rv5 | 5.13 |\n| rv22 | 8.14 |\n| VIX 水準 | 60.26 |\n| ΔVIX | 2.10 |\n| 波動率溢酬 | 1.12 |\n| VIX 五日均線 | 68.30 |\n\n`vix_L` 和 `ma5_vix` 的 VIF 都非常高，說明兩者在這個設計裡高度重疊。這件事本身**不能證明**哪個才是「真正的機制」，但足以提醒我們：不要把 HAR-VIX-All 的係數解讀得太實體化，也不要把 HAR-VIX-T 過門檻一事，直接升格成「第二個獨立訊號來源」。\n\n---\n\n## 這組結果能說到哪裡為止\n\n在 Harvey / DM 紀律下，K1399 可以穩健支持的結論是：\n\n1. **VIX 水準是最佳單一分量。**\n2. **5 日均線是能過基準門檻的次佳替代規格，但直接對決輸給水準。**\n3. **ΔVIX 與 Vol Premium 單獨使用都無法超越 HAR-ABS。**\n4. **把四個分量全放進去，沒有顯著優於只放水準。**\n\n但這組結果**不能單靠本文直接證明**：\n\n1. 為什麼 ΔVIX 和 Vol Premium 失敗。\n2. 為什麼水準「吸收了全部訊號」。\n3. 5 日均線過門檻的經濟機制一定是什麼。\n\n這些都屬於解釋層，而不是本次 QLIKE + DM 檢定直接交付的結論。較保守的說法是：**在這個樣本、這個 loss、這個 OOS 設定下，若只准加一個 VIX 分量，水準是最穩健的選擇。**\n\n---\n\n## 實務意義\n\n1. **單一特徵選擇**：如果 HAR 只想加一個 VIX 分量，首選仍是前一日 VIX 水準。\n2. **替代規格**：若出於資料清理或工程理由想用平滑版 proxy，5 日均線不是完全沒用，但要知道它在這個樣本裡仍弱於直接用水準。\n3. **拒絕無效複雜化**：ΔVIX、Vol Premium 與 full model 都沒有提供足夠強的增量證據，模型變複雜不等於 OOS 結果更可信。\n\n---\n\n## 限制\n\n- 本實驗只檢查 SPY 日頻資料；不能直接外推到其他資產或更低頻率。\n- OOS 採固定 IS 係數，不是滾動重估；若模型允許隨時間重估，分量表現可能不同。\n- HAR-VIX-All 的點估計雖然排名第一，但在高共線性下不宜過度閱讀係數或微小 QLIKE 優勢。\n\n---\n\n## 結論\n\nK1399 的結論應改寫成更精確的版本：**VIX 水準是最強的單一分量；5 日均線也能單獨擊敗 HAR-ABS，但沒有贏過水準；ΔVIX 與 Vol Premium 則無法單獨超越基準。** 進一步看增量比較，HAR-VIX-All 並沒有顯著優於 HAR-VIX-L（DM t = -0.40，p = 0.69），因此 parsimonious 的讀法仍然成立。\n\n對建模者來說，這篇最重要的 takeaway 很務實：**要 VIX 訊號，可以先加水準；若想再加別的分量，先證明它對水準有增量優勢，而不是只看它能不能單獨贏基準。**\n\n*本文基於實驗 K1399（腳本：`experiments/k1399/k1399_vix_decomp.py`，結果：`experiments/k1399/k1399_vix_decomp_results.json`）。數據來源：SPY 與 VIX 本地整理資料，期間涵蓋 2004-2026；本文檢定樣本為 IS 3,522、OOS 1,865。*\n",
+  "category": "milestone",
+  "audience": "research",
+  "phase": "research",
+  "details": {
+    "experiment_refs": [
+      "K1399"
+    ],
+    "cluster_waiver": "K1399 is explicitly assigned task; VIX internal decomposition is distinct from generic VIX sufficiency articles (K301/K1315); this is the parsimony test result on 4 sub-components",
+    "topic_cluster": "vix",
+    "topic_cluster_30d": {
+      "count": 130,
+      "cap": 15,
+      "ratio": 0.5039,
+      "exempt": false
+    }
+  },
+  "tags": [
+    "研究",
+    "VIX",
+    "HAR",
+    "HAR-X",
+    "feature-decomposition",
+    "sufficient-statistic",
+    "QLIKE",
+    "DM-HLN",
+    "SPY",
+    "parsimony"
+  ],
+  "related_articles": [],
+  "created_at": "2026-05-28T14:30:01.374181+00:00",
+  "published_at": "2026-06-02T16:07:08.092151+00:00",
+  "status": "published",
+  "proposer": "Claude",
+  "verified_live_at": "2026-06-02T16:07:17.711269+00:00",
+  "errata": {
+    "update_at": "2026-06-02T16:20:24.842677+00:00",
+    "update_action": "codex_review_fix",
+    "update_summary": "修正文案過度宣稱：改標題、改摘要、移除『只有一個分量有用』與機制式斷言，改成 VIX 水準最強且 HAR-VIX-All 不顯著優於 HAR-VIX-L。",
+    "update_history": [
+      {
+        "at": "2026-06-02T16:19:53.305094+00:00",
+        "action": "codex_review_fix",
+        "summary": "修正文案過度宣稱：改標題、改摘要、移除『只有一個分量有用』與機制式斷言，改成 VIX 水準最強且 HAR-VIX-All 不顯著優於 HAR-VIX-L。",
+        "old_content_chars": 6402,
+        "new_content_chars": 5084,
+        "title_changed": true,
+        "description_changed": true,
+        "description_source": "auto (first paragraph)",
+        "image_paths_normalized": 0,
+        "image_url_changed": false
+      },
+      {
+        "at": "2026-06-02T16:20:24.842677+00:00",
+        "action": "codex_review_fix",
+        "summary": "修正文案過度宣稱：改標題、改摘要、移除『只有一個分量有用』與機制式斷言，改成 VIX 水準最強且 HAR-VIX-All 不顯著優於 HAR-VIX-L。",
+        "old_content_chars": 5084,
+        "new_content_chars": 5034,
+        "title_changed": false,
+        "description_changed": true,
+        "description_source": "auto (first paragraph)",
+        "image_paths_normalized": 0,
+        "image_url_changed": false
+      }
+    ]
+  },
+  "last_updated_at": "2026-06-02T16:20:24.842677+00:00"
+}
