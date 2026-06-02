@@ -17603,7 +17603,7 @@
     "title": "K998: write general-audience article (auto-discovered uncovered K)",
     "description": "K K998 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: 賴奕豪, 執行: Claude] 測試 K988 A4f 的 g 成分能否預測未來 VRP。結果：(1) Granger causality in-sample 顯著（h=1,5,10 F>13），但控制 VRP lag 後 Newey-West t 最高僅 2.34（未達 Harvey 3.0）；(2) OOS R² 為負（in-sample overfitting）；(3) g-based variance swap strategy Sharpe=-0.64（反向指標），遠不如 naive sell variance 的 0.85；(4)",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K998",
@@ -17619,7 +17619,13 @@
       "audience-general"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-06-01T17:10:35+00:00"
+    "created_at": "2026-06-01T17:10:35+00:00",
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-06-02T00:09:27.289755+00:00",
+    "claim_session_id": "7aedc9c4d81a",
+    "started_at": "2026-06-02T00:09:39.449871+00:00",
+    "completed_at": "2026-06-02T00:27:52.065980+00:00",
+    "result": "Draft mile_b722be0e published (status=draft). Anti-AI gate PASS, Codex CONDITIONAL_PASS post-fix. 3 commits 81e84b4e/8a2cf306/1754d10a. Knowledge entries 663a24b3/a13d0723."
   },
   {
     "id": "K1005_article_general",
@@ -17865,7 +17871,7 @@
     "title": "K1312: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1312 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: ",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1312",
@@ -17882,8 +17888,13 @@
     ],
     "topic_cluster": "garch",
     "created_at": "2026-06-01T23:09:50+00:00",
-    "started_at": "2026-06-01T23:10:32.110970+00:00",
-    "last_released_at": "2026-06-01T23:11:36.816566+00:00"
+    "started_at": "2026-06-01T23:55:09.795279+00:00",
+    "last_released_at": "2026-06-01T23:11:36.816566+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-01T23:54:54.285038+00:00",
+    "claim_session_id": "2405d90df250",
+    "completed_at": "2026-06-01T23:59:36.211845+00:00",
+    "result": "Published general-audience draft mile_d3993bd1 for K1312. Added 2 charts, passed audience gate via neutral image paths, and used cluster waiver for spy-topic cooldown."
   },
   {
     "id": "K157_article_general",
@@ -17907,5 +17918,77 @@
     "started_at": "2026-06-01T23:11:09.511886+00:00",
     "completed_at": "2026-06-01T23:18:00.536273+00:00",
     "result": "Published draft mile_41441382. Anti-AI-gate PASS (破折號 0.26/1000). Publish_draft_gate PASS. SPY cluster_waiver applied (distinct DCC angle). Audience auto-overridden to research due to GARCH/EWMA keywords. Figures: k157_rmse_comparison + k157_portfolio_comparison. Evidence: SPY-GLD EWMA_097 DM t=2.69 / SPY-TLT DCC_GARCH DM t=4.25 / GLD-TLT EWMA_097 DM t=4.64, all p<0.01. MinVar beats 50/50 on MDD all 3 pairs; GLD-TLT Sharpe +37%."
+  },
+  {
+    "id": "K157_article_general_v2",
+    "title": "K157: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K157 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: Q1 (Better correlation forecast?): Yes — some models improve over Rolling 22d Q2 (DCC-GARCH best?): DCC among best Q3 (Better corr -> better portfolio?): Yes — MinVar with model corr beats 50/50 Q1 (Better correlation forecast?): Yes — some models improve over Rolling 22d | Q2 (D",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K157",
+    "tags": [
+      "garch",
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": "garch",
+    "created_at": "2026-06-02T00:09:02+00:00"
+  },
+  {
+    "id": "K180_article_general",
+    "title": "K180: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K180 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: title: Directional Change (DC) Framework for Volatility Prediction hypothesis: DC intrinsic-time features break GJR-GARCH QLIKE ceiling",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K180",
+    "tags": [
+      "garch",
+      "leverage-effect",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "garch",
+    "created_at": "2026-06-02T00:09:02+00:00"
+  },
+  {
+    "id": "K188_article_general",
+    "title": "K188: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K188 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: GARCH beats HAR in majority of comparisons. HAR on daily data underperforms — needs intraday RV for its advantage.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K188",
+    "tags": [
+      "garch",
+      "har",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "garch",
+    "created_at": "2026-06-02T00:09:02+00:00"
+  },
+  {
+    "id": "K431_article_general",
+    "title": "K431: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K431 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: Asset: SPY STGARCH does NOT beat GJR. Best ST: STGARCH-lagvol diff=9.362%. QLIKE ceiling confirmed.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K431",
+    "tags": [
+      "garch",
+      "leverage-effect",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "garch",
+    "created_at": "2026-06-02T00:09:02+00:00"
   }
 ]

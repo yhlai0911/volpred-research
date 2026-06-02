@@ -18,29 +18,29 @@ K988b 發現 A4f 模型的 g 成分與 VRP (Variance Risk Premium) 有高同期�
 ### Granger Causality
 | Horizon | F-stat | p-value | Significant? |
 |---------|--------|---------|-------------|
-| h=1     | 45.51  | <0.001  | Yes          |
-| h=5     | 23.13  | <0.001  | Yes          |
-| h=10    | 13.07  | 0.0003  | Yes          |
-| h=22    | 1.76   | 0.1846  | No           |
+| h=1     | 65.81  | <0.001  | Yes          |
+| h=5     | 31.78  | <0.001  | Yes          |
+| h=10    | 17.83  | <0.001  | Yes          |
+| h=22    | 2.10   | 0.1473  | No           |
 
 ### Predictive Regressions (g coefficient, controlling for VRP lag)
 | Horizon | t_g (NW) | Harvey sig? | In-sample R² |
 |---------|----------|------------|-------------|
-| h=1     | -1.95    | No         | 0.0647      |
-| h=5     | -1.78    | No         | 0.0220      |
-| h=10    | -1.51    | No         | 0.0119      |
-| h=22    | -1.28    | No         | 0.0011      |
+| h=1     | -2.15    | No         | 0.0748      |
+| h=5     | -1.91    | No         | 0.0266      |
+| h=10    | -1.61    | No         | 0.0145      |
+| h=22    | -1.40    | No         | 0.0013      |
 
 ### OOS R² (vs historical mean)
 | Horizon | R²_OOS(g) | R²_OOS(AR1) | R²_OOS(AR1+g) |
 |---------|-----------|------------|---------------|
-| h=1     | 0.013     | -0.079     | -0.059        |
-| h=5     | 0.001     | -0.419     | -0.409        |
-| h=10    | -0.005    | -0.458     | -0.429        |
-| h=22    | -0.003    | -0.005     | -0.008        |
+| h=1     | 0.011     | -0.079     | -0.053        |
+| h=5     | -0.004    | -0.419     | -0.412        |
+| h=10    | -0.012    | -0.457     | -0.434        |
+| h=22    | -0.002    | -0.005     | -0.006        |
 
 ### Variance Swap Strategy
-- g-based signal: Sharpe = **-0.64** (negative!)
+- g-based signal: Sharpe = **-1.06** (negative — reverse indicator!)
 - Baseline (always sell variance): Sharpe = **0.85**
 - g signal destroys value vs naive strategy
 
