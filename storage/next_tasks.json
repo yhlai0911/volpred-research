@@ -18698,7 +18698,7 @@
     "title": "K745: write general-audience article (auto-discovered uncovered K)",
     "description": "K K745 has verdict signal (score=1, reasons=['methodology/mechanism lesson', 'cluster cooldown penalty (spy 30d=69>10)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K745: PILOT HAR-RV with 51 days SPY 5-min data (2026-01-14 to 2026-03-27, N_OOS=37). PRELIMINARY — below 252-day OOS minimum. Part A: Realized measures computed — mean RV annualized vol 11.1%, jump fraction low (4.8%), AC(1)=0.423, ADF stationary (t=-4.41",
     "priority": 4,
-    "status": "blocked",
+    "status": "in_progress",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K745",
@@ -18717,11 +18717,14 @@
     ],
     "topic_cluster": "spy",
     "created_at": "2026-06-02T15:09:40+00:00",
-    "started_at": "2026-06-02T17:22:02.656422+00:00",
+    "started_at": "2026-06-02T20:38:06.935929+00:00",
     "last_released_at": "2026-06-02T17:22:55.082472+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-02T20:10:37+00:00",
-    "blocked_note": "Topic covered by feed mile_69c4f0de: K744/K745 合題已 published"
+    "blocked_note": "Topic covered by feed mile_69c4f0de: K744/K745 合題已 published",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-02T20:38:06.912961+00:00",
+    "claim_session_id": "b864de16fe8c"
   },
   {
     "id": "K772_article_general",
@@ -18979,7 +18982,7 @@
     "title": "Paper review (Codex 24h-rule): 模型只贏 1%，很多時候還不能算真的贏",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_7fbc61c8 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "claimed",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_7fbc61c8",
@@ -18988,14 +18991,17 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-02T20:09:06+00:00"
+    "created_at": "2026-06-02T20:09:06+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-02T20:37:54.072373+00:00",
+    "claim_session_id": "d858d6082079"
   },
   {
     "id": "K744_article_general",
     "title": "K744: write general-audience article (auto-discovered uncovered K)",
     "description": "K K744 has verdict signal (score=0, reasons=['cluster cooldown penalty (spy 30d=69>10)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K744: DATA VALIDATION of 51 days SPY 5-min data (2026-01-14 to 2026-03-27). Part A: Data quality good — mean 76 bars/day, only 3/51 flagged (2 partial days + 1 gap). Part B: CRITICAL FINDING — RV AC(1)=0.423 vs daily r² AC(1)=0.076, confirming K196 (0.414",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K744",
@@ -19013,11 +19019,16 @@
     ],
     "topic_cluster": "spy",
     "created_at": "2026-06-02T20:09:07+00:00",
-    "started_at": "2026-06-02T20:09:45.809721+00:00",
+    "started_at": "2026-06-02T20:39:06.107077+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-02T20:10:36+00:00",
     "blocked_note": "Topic covered by feed mile_69c4f0de: K744/K745 從日頻到 5 分鐘——高頻數據揭示 GARCH 的天花板 (already published)",
-    "last_released_at": "2026-06-02T20:10:41.552095+00:00"
+    "last_released_at": "2026-06-02T20:10:41.552095+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-02T20:38:58.341130+00:00",
+    "claim_session_id": "1d26ebcf1c20",
+    "completed_at": "2026-06-02T20:42:45.129981+00:00",
+    "result": "Updated existing draft mile_ee5a9ac0 with a K744-based general article, added 2 charts, refreshed feed entry and rebuilt feed index."
   },
   {
     "id": "K906_article_general",
@@ -19079,7 +19090,7 @@
     "title": "K941: write general-audience article (auto-discovered uncovered K)",
     "description": "K K941 has verdict signal (score=0, reasons=['cluster cooldown penalty (spy 30d=69>10)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] 首次quantile volatility forecasting實驗。5模型：CAViaR-SAV/QR-GARCH/Quantile RF/GARCH parametric(Student-t)/MF-GJR parametric。SPY OOS 2016-2025 (2513天)。CAViaR-SAV全面勝出：mean pinball loss=0.000040、calibration MAD=0.006、coverage=91.2%、Winkler=0.000902。GARCH parametri",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K941",
@@ -19096,7 +19107,13 @@
       "audience-general"
     ],
     "topic_cluster": "spy",
-    "created_at": "2026-06-02T20:10:42+00:00"
+    "created_at": "2026-06-02T20:10:42+00:00",
+    "claimed_by": "hourly-05",
+    "claimed_at": "2026-06-02T21:08:56.383774+00:00",
+    "claim_session_id": "6c2f2263e622",
+    "started_at": "2026-06-02T21:09:00.879545+00:00",
+    "completed_at": "2026-06-02T21:09:47.410151+00:00",
+    "result": "Dedup: K941 article already published in feed.json as mile_1c0150fc (sync issue — task was pending in next_tasks.json but article exists in feed). Layer 2 grep dedup caught it before dispatching agent. Marking succeeded."
   },
   {
     "id": "K948_article_general",
