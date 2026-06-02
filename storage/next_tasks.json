@@ -5688,7 +5688,7 @@
   {
     "id": "Paper4_body_integration_9_new_experiments",
     "title": "Paper 4 body stale: 9 新實驗未整合 main_v2.tex (integration_plan_v2 未套用)",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 3,
     "created_at": "2026-04-17T17:09:27+08:00",
     "description": "Paper 4 audit 確認 K1116/K1117/K1118/K1116b/K1121/K1098/K1129/K1136/K1138 皆未整合到 main_v2.tex. K1135/K1137/K1139/K1141/K1143/K1123 agent 找不到 (但實驗 dir 存在, 可能 path issue). integration_plan_v2.md 存在但完全未套用. 主線程 body rewrite 任務: 先完成 critical errata (DIV-1/3/4), 再整合 9 個新實驗 + K1141 table/heatmap 到 §4. narrative state 已設 decision_made_awaiting_body_rewrite.",
@@ -5706,7 +5706,13 @@
         "rationale": "paper + narrative/decision verbs",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "claimed_by": "hourly-02",
+    "claimed_at": "2026-06-02T18:08:41.763790+00:00",
+    "claim_session_id": "dc0776c77bdd",
+    "started_at": "2026-06-02T18:13:05.411011+00:00",
+    "completed_at": "2026-06-02T18:13:14.914346+00:00",
+    "result": "Steps 1+2 of integration_plan_v2 §5 completed: main_v2.tex Table 1 extended to 13 families (+Family 12 EPU USEPU/WLEMU N=431 weekly +Family 13 FinStress NFCI/ANFCI/STLFSI4 N=431 weekly with source-tagged % comments), §3 heading renamed Eleven→Thirteen, §3.2.12 (EPU description, Baker-Bloom-Davis 2016 citation, K1116 M3 DM t=-2.55 active harm verdict) + §3.2.13 (FinStress description, Brave-Butters 2011 + Kliesen-Smith 2010 citations, K1116 M4 DM t=-3.00 original / t=-3.61 corrected active harm verdict) added with publication-lag conventions documented. Bib +3 entries (baker2016 QJE 2016, brave2011 Chicago Fed Econ Perspectives, kliesen2010 St Louis Fed Econ Synopses). PDF compiles to 40 pages (was 39), no undefined citations. Items 3-15 (publication-delay subsection / cross-asset §7.x / allocation §7.x / conclusion / abstract / figures / paper-update) tracked in new task Paper4_body_integration_steps_3_to_15."
   },
   {
     "id": "Paper4_body_rewrite",
@@ -18907,5 +18913,44 @@
     ],
     "topic_cluster": "spy",
     "created_at": "2026-06-02T17:09:48+00:00"
+  },
+  {
+    "id": "K566_article_general",
+    "title": "K566: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K566 has verdict signal (score=0, reasons=['cluster cooldown penalty (spy 30d=69>10)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] 5 factor ETFs (VLUE/MTUM/QUAL/IWM/USMV) monthly rotation + VT。全部 monthly DM negative (t=-0.18 to -2.99)。QUAL 最接近 (1.514 vs 1.545) 但 NS。Daily rebal 2.091 vs monthly 1.448——再次確認 microstructure artifact (K560/K562/K563 pattern)。Cross-OOS 0/3。Factor ETFs corr",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K566",
+    "tags": [
+      "factor",
+      "rotation",
+      "QUAL",
+      "USMV",
+      "null_result",
+      "microstructure_artifact",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "spy",
+    "created_at": "2026-06-02T18:08:01+00:00"
+  },
+  {
+    "id": "Paper4_body_integration_steps_3_to_15",
+    "title": "Paper 4 body integration steps 3-15 (publication-delay / cross-asset §7.x / allocation §7.x / conclusion / abstract / figures)",
+    "description": "Paper 4 main_v2.tex integration plan v2 — items 3-15 pending. Steps 1+2 completed 2026-06-03 02:30 hourly-02 (Family 12+13 to Table 1 + descriptions + bib baker2016/brave2011/kliesen2010). Remaining: §4.5 publication-delay convention, Table 2 extended rows, new §7.3 cross-asset universal sufficiency (~3p), new §7.4 publication-delay robustness (~1.5p), new §7.5 alt-data fails allocation (~2p), §8.2 update, §9 conclusion null count update, abstract rewrite, +4 bib (Politis-Romano / Opdyke / Harvey-Leybourne-Newbold etc), 2 figures, README update, paper-update CLI. Plan: paper/vix-sufficiency/integration_plan_v2.md §5 items 3-15. Slice into 50-min hourly bites.",
+    "status": "pending",
+    "priority": 3,
+    "created_at": "2026-06-03T02:12:59+08:00",
+    "task_type": "paper_body",
+    "tags": [
+      "paper-4",
+      "vix-sufficiency",
+      "body-rewrite",
+      "main-thread",
+      "follow-up"
+    ],
+    "source": "hourly-02-2026-06-03"
   }
 ]

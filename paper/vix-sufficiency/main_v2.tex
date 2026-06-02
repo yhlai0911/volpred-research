@@ -145,7 +145,7 @@ Our contribution differs from these studies in three ways: (i) we test eleven si
 
 
 %=================================================================
-\section{Data and the Eleven Signal Families}
+\section{Data and the Thirteen Signal Families}
 \label{sec:data}
 %=================================================================
 
@@ -160,15 +160,15 @@ RV_{t}^{(22)} = \sqrt{\frac{252}{22} \sum_{i=0}^{21} r_{t-i}^2},
 \end{equation}
 where $r_t = \ln(P_t/P_{t-1})$ is the daily log return. This serves as the forecast target for all volatility prediction exercises.
 
-\subsection{The Eleven Signal Families}
+\subsection{The Thirteen Signal Families}
 
-We pre-specify eleven signal families spanning six broad categories: cross-asset, derivatives-based, behavioral, macroeconomic, alternative data, and calendar. Table~\ref{tab:signals} summarizes each family.
+We pre-specify thirteen signal families spanning seven broad categories: cross-asset, derivatives-based, behavioral, macroeconomic, alternative data, calendar, and economic-policy/financial-stress uncertainty. Table~\ref{tab:signals} summarizes each family. Families 12--13 are added in this revision to test whether canonical alt-data uncertainty proxies (EPU and financial-stress indices) carry orthogonal information beyond VIX.
 
 % ─── Table 1: Signal Families ────────────────────────────────
 \begin{table}[H]
 \centering
 \small
-\caption{The Eleven Signal Families}
+\caption{The Thirteen Signal Families}
 \label{tab:signals}
 \begin{threeparttable}
 \resizebox{\textwidth}{!}{%
@@ -187,12 +187,14 @@ We pre-specify eleven signal families spanning six broad categories: cross-asset
 9 & Google Trends fear & Alt.\ data & 5 fear search terms (weekly) & 2010--2026 & 797 \\
 10 & Overnight VIX & Microstructure & $|\text{VIX}_{\text{open}} - \text{VIX}_{\text{close},t-1}|$ & 2010--2026 & 4,082 \\
 11 & Calendar anomaly & Calendar & Monthly/seasonal dummies & 1993--2026 & 8,325 \\
+12 & Economic policy uncertainty & Alt.\ data & USEPU + WLEMU composite \citep{baker2016} & 2018--2026 & 431$^\dagger$ \\ % source: experiments/k1116/k1116_results.json n_full=431 (260 IS + 171 OOS, weekly)
+13 & Financial-stress indices & Macro & NFCI + ANFCI + STLFSI4 composite \citep{brave2011, kliesen2010} & 2018--2026 & 431$^\dagger$ \\ % source: experiments/k1116/k1116_results.json n_full=431 (weekly aggregation)
 \bottomrule
 \end{tabular}%
 }
 \begin{tablenotes}
 \small
-\item \textit{Notes}: All signals are computed using information available at market close on day $t-1$ and applied to day $t$ returns. Google Trends data are weekly and converted to daily by forward-filling. Sample sizes vary by data availability. VIX3M begins in 2008; Bitcoin reliable pricing begins in 2015; Google Trends via pytrends begins in 2004 but we use 2010+ for stability.
+\item \textit{Notes}: All signals are computed using information available at market close on day $t-1$ and applied to day $t$ returns. Google Trends data are weekly and converted to daily by forward-filling. Sample sizes vary by data availability. VIX3M begins in 2008; Bitcoin reliable pricing begins in 2015; Google Trends via pytrends begins in 2004 but we use 2010+ for stability. $^\dagger$Families 12 and 13 operate on weekly observations (Friday-aligned realized vol target) due to NFCI's weekly release frequency; $N=431$ refers to the weekly count over 2018--2026 (260 IS + 171 OOS). Publication delays for FRED series are addressed via $\text{shift}(2)$ for daily series (USEPU, NFCI, ANFCI) and $\text{shift}(1)$ for weekly series (WLEMU, STLFSI4); see \S\ref{sec:methodology}.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -240,6 +242,14 @@ Overnight price changes reflect the processing of after-hours news, earnings ann
 \subsubsection{Family 11: Calendar Anomaly}
 
 The ``Halloween effect'' and other calendar anomalies have been documented in equity markets \citep{bouman2002}. We test whether VIX-based timing is simply a disguised calendar strategy by examining the correlation between VIX-implied weights and monthly/seasonal dummies.
+
+\subsubsection{Family 12: Economic Policy Uncertainty}
+
+\citet{baker2016} construct the Economic Policy Uncertainty (EPU) index from newspaper coverage, tax-code expiration counts, and forecaster disagreement, and document its association with elevated volatility in equity and macroeconomic series. The daily U.S.\ EPU index (FRED: \texttt{USEPUINDXD}) and the weekly World Leading Economic Monetary Uncertainty index (\texttt{WLEMUINDXD}) provide canonical text-based uncertainty proxies that are widely cited in subsequent volatility-forecasting work. We test whether their composite carries information about future realized volatility orthogonal to VIX. Because EPU is publicly released with a one- to two-day lag relative to the underlying news sample, all EPU inputs enter the forecast at $\text{shift}(2)$ in daily alignment (verified in the K1116b robustness audit summarized in \S\ref{sec:methodology}). Under this convention the EPU composite (Model M3 in the K1116 horse race) is dominated by the VIX baseline with Diebold--Mariano $t=-2.55$ in out-of-sample QLIKE comparison---active harm rather than incremental information.
+
+\subsubsection{Family 13: Financial-Stress Indices}
+
+The Chicago Fed's National Financial Conditions Index \citep[NFCI;][]{brave2011} and the St.\ Louis Fed's Financial Stress Index \citep[STLFSI;][]{kliesen2010} aggregate prices, spreads, and balance-sheet quantities into composite financial-conditions readings that have been shown to lead recession dates and credit cycles. The Adjusted NFCI (\texttt{ANFCI}) removes the macroeconomic component to isolate the residual financial signal. These three indices---released weekly each Wednesday with a one-week lag for NFCI and STLFSI4---constitute the most academically-canonical set of financial-stress proxies and are obvious candidates for delivering incremental information beyond VIX during stress episodes. We test their composite against the VIX baseline under publication-lag-corrected alignment ($\text{shift}(2)$ for NFCI and ANFCI weekly-to-daily forward-fill; $\text{shift}(1)$ for STLFSI4); the composite (Model M4 in K1116) loses to VIX with $t=-3.00$ under the original convention and $t=-3.61$ under the corrected convention. As with EPU, the verdict is active harm: stress indices add measurement error rather than signal once VIX is in the conditioning set.
 
 
 %=================================================================
@@ -834,6 +844,9 @@ Andersen, T.~G., Bollerslev, T., Diebold, F.~X., \& Labys, P. (2003). Modeling a
 \bibitem[Baker and Wurgler(2006)]{baker2006}
 Baker, M., \& Wurgler, J. (2006). Investor sentiment and the cross-section of stock returns. \textit{Journal of Finance}, 61(4), 1645--1680.
 
+\bibitem[Baker et al.(2016)]{baker2016}
+Baker, S.~R., Bloom, N., \& Davis, S.~J. (2016). Measuring economic policy uncertainty. \textit{Quarterly Journal of Economics}, 131(4), 1593--1636.
+
 \bibitem[Barunik et al.(2016)]{barunik2016}
 Barunik, J., Kocenda, E., \& Vacha, L. (2016). Asymmetric connectedness on the U.S.\ stock market: Bad and good volatility spillovers. \textit{Journal of Financial Markets}, 27, 55--78.
 
@@ -851,6 +864,9 @@ Bouri, E., Molnar, P., Azzi, G., Roubaud, D., \& Hagfors, L.~I. (2017). On the h
 
 \bibitem[Bouman and Jacobsen(2002)]{bouman2002}
 Bouman, S., \& Jacobsen, B. (2002). The Halloween indicator, ``sell in May and go away'': Another puzzle. \textit{American Economic Review}, 92(5), 1618--1635.
+
+\bibitem[Brave and Butters(2011)]{brave2011}
+Brave, S.~A., \& Butters, R.~A. (2011). Monitoring financial stability: A financial conditions index approach. \textit{Federal Reserve Bank of Chicago Economic Perspectives}, 35(1), 22--43.
 
 \bibitem[Bozovic(2024)]{bozovic2024}
 Bozovic, M. (2024). VIX-managed portfolios. \textit{International Review of Financial Analysis}, 95, 103353.
@@ -911,6 +927,9 @@ Engle, R.~F., \& Gallo, G.~M. (2006). A multiple indicators model for volatility
 
 \bibitem[Jiang and Tian(2005)]{jiang2005}
 Jiang, G.~J., \& Tian, Y.~S. (2005). The model-free implied volatility and its information content. \textit{Review of Financial Studies}, 18(4), 1305--1342.
+
+\bibitem[Kliesen and Smith(2010)]{kliesen2010}
+Kliesen, K.~L., \& Smith, D.~C. (2010). Measuring financial market stress. \textit{Federal Reserve Bank of St.\ Louis Economic Synopses}, 2010-2, 1--2.
 
 \bibitem[Kupiec(1995)]{kupiec1995}
 Kupiec, P.~H. (1995). Techniques for verifying the accuracy of risk measurement models. \textit{Journal of Derivatives}, 3(2), 73--84.

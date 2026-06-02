@@ -2,8 +2,11 @@
 
 **Date**: 2026-04-13
 **Author**: Claude (research coordinator, not worktree)
-**Target file**: `paper/vix-sufficiency/main_v2.tex` (current 953 LoC, 39 pages, 40 citations)
-**Status**: PLAN ONLY — no `.tex` edits in this pass. Main thread executes edits after review.
+**Target file**: `paper/vix-sufficiency/main_v2.tex` (current 989 LoC, 40 pages after step 1+2, 43 citations)
+**Status**: IN PROGRESS — Steps 1+2 of 15 executed 2026-06-03 02:30 台灣時間 (hourly-02 fire). Steps 3-15 pending.
+
+**Progress log**:
+- 2026-06-03 02:30 — Step 1 (Table 1 extended to 13 rows: +Family 12 EPU, +Family 13 FinStress) + Step 2 (§3.2.12 + §3.2.13 description prose, 2 paragraphs each) + bib entries baker2016 / brave2011 / kliesen2010 added. Compile passes 40 pages. No `\citet` undefined warnings.
 
 This plan integrates **six new pieces of evidence (K1116, K1116b, K1118, K1121, K504, K1098)**
 into the existing "Can Anything Beat VIX?" manuscript, upgrading the contribution from a
