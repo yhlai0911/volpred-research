@@ -17973,7 +17973,7 @@
     "title": "K188: write general-audience article (auto-discovered uncovered K)",
     "description": "K K188 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: GARCH beats HAR in majority of comparisons. HAR on daily data underperforms — needs intraday RV for its advantage.",
     "priority": 4,
-    "status": "pending",
+    "status": "completed",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K188",
@@ -17988,7 +17988,13 @@
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-02T02:13:13+00:00",
     "blocked_note": "Standalone feed article already exists: mile_f1e927f5 (K188 HAR 天花板效應)",
-    "last_released_at": "2026-06-02T03:21:18.929862+00:00"
+    "last_released_at": "2026-06-02T03:21:18.929862+00:00",
+    "claimed_by": "hourly-14",
+    "claimed_at": "2026-06-02T06:10:38.730295+00:00",
+    "claim_session_id": "4de79f561cef",
+    "started_at": "2026-06-02T06:10:42.118741+00:00",
+    "completed_mile_id": "mile_e8d4f335",
+    "notes": "Draft published as mile_e8d4f335 (research audience, draft pool). 60-cell proxy×model grid article."
   },
   {
     "id": "K431_article_general",
@@ -18162,7 +18168,7 @@
     "title": "Paper review (Codex 24h-rule): 資料版本洗到最乾淨後，黃金美債比特幣的波動還是先看自己",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_487275d0 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_487275d0",
@@ -18171,7 +18177,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-02T04:08:16+00:00"
+    "created_at": "2026-06-02T04:08:16+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-02T05:31:24.412212+00:00",
+    "claim_session_id": "4e79a418fea8",
+    "started_at": "2026-06-02T05:31:30.732485+00:00",
+    "completed_at": "2026-06-02T05:32:23.017741+00:00",
+    "result": "Review found no claim-direction bug in K1305 article; main issues are publisher hygiene: general article shipped with only 1 image and details.charts still stores a local absolute path despite remote image_urls existing."
   },
   {
     "id": "K463_article_general",
