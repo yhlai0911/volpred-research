@@ -18094,5 +18094,23 @@
     "created_at": "2026-06-02T01:16:35+00:00",
     "started_at": "2026-06-02T02:11:08.485354+00:00",
     "last_released_at": "2026-06-02T02:11:36.423767+00:00"
+  },
+  {
+    "id": "email-11908-78c3df",
+    "title": "[email_reply] Re: [VolPred Alert][WARN] Supabase sync queue has 2 pending",
+    "description": "Gmail UID: 11908\nMessage-ID: <D6FB4C17-874A-47B5-B5F7-CC256E85177C@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Tue, 2 Jun 2026 11:13:35 +0800\nSubject: Re: [VolPred Alert][WARN] Supabase sync queue has 2 pending\n\n--- 用戶回信內容 ---\n盡快找出底層原因並解決\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月2日 11:00 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> Supabase sync queue has 2 pending\r\n> Alert level: warn\r\n> WARN\r\n> 觸發條件\r\n> \r\n> .failed_supabase_syncs.json 累積 2 篇 article sync 失敗。\r\n> \r\n> pending_ids (前 5): ['mile_47ad5dc0', 'mile_0908542b']\r\n> queue_path: storage/.failed_supabase_syncs.json\r\n> 影響\r\n> \r\n> 本地 feed.json 已更新（status=published / draft）但 Supabase 行可能停在舊狀態，\r\n> 造成讀者讀到的網站 status 與本地真值不一致。Mission 第 4 條（平台運營）+\r\n> 第 1 條（文章正確）受損。\r\n> \r\n> 建議行動\r\n> \r\n> 看單篇 divergence：\r\n> uv run python -c \"from scripts.supabase_sync import _select_rows; print(_select_rows('articles', select='slug,status,published_at', slug='<id>'))\"\r\n> 對齊本地 feed -> Supabase：\r\n> uv run python -c \"import json; from pathlib import Path; from scripts.supabase_sync import sync_article; feed=json.loads(Path('storage/reports/feed.json').read_text()); [sync_article(it, 'storage') for it in feed if it.get('id') in <list>]\"\r\n> sync 成功後從 .failed_supabase_syncs.json 移除對應 id。\r\n> 若連續 3 次 retry 仍 fail，查 supabase_sync log + Supabase service status。\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "pending",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-02T03:15:09.302160+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11908,
+    "email_message_id": "<D6FB4C17-874A-47B5-B5F7-CC256E85177C@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][WARN] Supabase sync queue has 2 pending",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>"
   }
 ]
