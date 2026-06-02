@@ -1,0 +1,23 @@
+{
+  "id": "k1412_tw0050_n225_oos_sensitivity",
+  "title": "K1412 TW0050-N225 OOS sensitivity (5 OOS starts)",
+  "script_path": "experiments/k1412/k1412.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-06-02T07:13:09Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k1412_tw0050_n225_oos_sensitivity.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k1412_tw0050_n225_oos_sensitivity.stderr",
+  "result_artifact": "experiments/k1412/k1412_results.json",
+  "claude_followup": {
+    "brief": "K1412 done: 讀 experiments/k1412/k1412_results.json summary.verdict (ROBUST / PARTIAL / TYPE-I_SUSPECT). 寫 knowledge.json entry (provenance: k_id=K1412, experiment_id=K1412, reviewer=Codex review pending). Codex review k1412.py 確認 no lookahead + paper3_E2 module reuse safe. 若 verdict=ROBUST → 更新 research_program.md Open Question 標部分 resolved (OOS robust, 待 window/refit_every sensitivity); 若 TYPE-I_SUSPECT → research_program.md Paper3_E2 段加 note 警示原 2015-06-01 Harvey sig 可能 type-I, paper3 narrative 需 hedge. Mark next_tasks K1412_tw0050_n225_oos_sensitivity status=succeeded.",
+    "task_type": "experiment",
+    "priority": 4
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 1800
+}

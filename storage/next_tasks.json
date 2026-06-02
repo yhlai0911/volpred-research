@@ -18232,7 +18232,7 @@
     "title": "K468: write general-audience article (auto-discovered uncovered K)",
     "description": "K K468 has verdict signal (score=0, reasons=['cluster cooldown penalty (garch 30d=16>10)']) but no general article in feed.json.  Verdict preview: Assets: SPY, QQQ, EEM Method: Compare 5 vol proxies (r², Parkinson, GK, YZ-1d, YZ-5d) for evaluating GJR-GARCH and HAR models. HAR-YZ model uses Yang-Zhang as target. VaR Trinity test for HAR-YZ vs HAR-Parkinson. HAR-YZ PARTIALLY FIXES K467 — Yang-Zhang overnight component improv",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K468",
@@ -18244,6 +18244,36 @@
       "audience-general"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-06-02T05:08:19+00:00"
+    "created_at": "2026-06-02T05:08:19+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-02T06:34:27.132893+00:00",
+    "claim_session_id": "3b45db65d33c",
+    "started_at": "2026-06-02T06:34:50.082787+00:00",
+    "completed_at": "2026-06-02T06:38:32.255962+00:00",
+    "result": "Published general draft mile_323788f8 for K468 using existing remote K938 charts; local feed updated, Supabase sync deferred due no-network."
+  },
+  {
+    "id": "K1412_tw0050_n225_oos_sensitivity",
+    "title": "K1412: TW0050-N225 唯一 Harvey-sig OOS sensitivity (rule out type-I)",
+    "description": "Paper3_E2 Open Question (research_program.md): TW0050-N225 是 10 pairs 中唯一 Harvey-sig (Clayton DM_t=3.92). λ_L_clayton=0.444 + full_sample_corr=0.586 + Asian trading-hour overlap 三因子哪個 driver? 跑 5 OOS starts (2014/2015/2016/2017/2018) × baseline window=1250 × refit_every=63, single pair (TW0050-N225). 若 ≥4/5 variant Harvey 仍 PASS → robust 非 type-I; 否則 type-I 嫌疑. Parent=Paper3_E2 (paper3_E2_cross_market_copula).",
+    "priority": 4,
+    "status": "in_progress",
+    "task_type": "experiment",
+    "source": "hourly-15 reactive autogen (research_program Open Question + diversity 4.d experiment=0 today)",
+    "tags": [
+      "experiment",
+      "K1412",
+      "Paper3_E2",
+      "sensitivity",
+      "copula",
+      "type-I-rule-out"
+    ],
+    "created_at": "2026-06-02T07:08:00+00:00",
+    "claim_session_id": "ebdb8c482611",
+    "claimed_at": "2026-06-02T07:11:37.629727+00:00",
+    "claimed_by": "hourly-15",
+    "started_at": "2026-06-02T07:11:37.961677+00:00",
+    "completed_at": null,
+    "result": null
   }
 ]
