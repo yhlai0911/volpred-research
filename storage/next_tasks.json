@@ -18192,7 +18192,7 @@
     "title": "K463: write general-audience article (auto-discovered uncovered K)",
     "description": "K K463 has verdict signal (score=0, reasons=['cluster cooldown penalty (garch 30d=16>10)']) but no general article in feed.json.  Verdict preview: Asset: 0050.TW Best TVP variant: EWMA GARCH-X(λ=0.95) (ΔQLIKE=-1.71%). Time-varying delta marginally helps over fixed GARCH-X. TVP_PARTIAL",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K463",
@@ -18203,7 +18203,13 @@
       "audience-general"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-06-02T05:08:19+00:00"
+    "created_at": "2026-06-02T05:08:19+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-02T07:39:54.696378+00:00",
+    "claim_session_id": "0ab012001171",
+    "started_at": "2026-06-02T07:40:07.304771+00:00",
+    "completed_at": "2026-06-02T07:43:24.959933+00:00",
+    "result": "Published general draft mile_3665201d for K463 using existing remote K930 charts; local feed updated, Supabase sync deferred due no-network."
   },
   {
     "id": "K464_article_general",
@@ -18257,7 +18263,7 @@
     "title": "K1412: TW0050-N225 唯一 Harvey-sig OOS sensitivity (rule out type-I)",
     "description": "Paper3_E2 Open Question (research_program.md): TW0050-N225 是 10 pairs 中唯一 Harvey-sig (Clayton DM_t=3.92). λ_L_clayton=0.444 + full_sample_corr=0.586 + Asian trading-hour overlap 三因子哪個 driver? 跑 5 OOS starts (2014/2015/2016/2017/2018) × baseline window=1250 × refit_every=63, single pair (TW0050-N225). 若 ≥4/5 variant Harvey 仍 PASS → robust 非 type-I; 否則 type-I 嫌疑. Parent=Paper3_E2 (paper3_E2_cross_market_copula).",
     "priority": 4,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "hourly-15 reactive autogen (research_program Open Question + diversity 4.d experiment=0 today)",
     "tags": [
@@ -18273,7 +18279,21 @@
     "claimed_at": "2026-06-02T07:11:37.629727+00:00",
     "claimed_by": "hourly-15",
     "started_at": "2026-06-02T07:11:37.961677+00:00",
-    "completed_at": null,
-    "result": null
+    "completed_at": "2026-06-02T08:11:14.846813+00:00",
+    "result": "5/5 OOS robust raw 結果 (Student-t DM_t 3.04-3.89, λ_L 0.414-0.418) — 初步排除 single-start type-I。Codex FAIL: paper3_E2 Harvey 自製 |t|>3 非 HLN，需 retrofit。Knowledge entry K1412 verdict=FAIL。Open Question 升級為 HLN-retrofitted robustness。Followup: Paper3_E2_harvey_hln_retrofit P3."
+  },
+  {
+    "id": "Paper3_E2_harvey_hln_retrofit",
+    "title": "Paper3_E2 retrofit: 加 HLN small-sample DM correction，重跑 10 pairs + K1412 5 OOS starts",
+    "description": "Codex K1412 review (2026-06-02) 指出 paper3_E2 系列 dm_test() 只用 Newey-West + |t|>3 自製門檻判 Harvey-sig，缺 Harvey/Liu/Newman (1997) small-sample correction. Retrofit: (1) paper3_E2.py::dm_test 加 HLN correction factor sqrt((T+1-2h+T^-1*h*(h-1))/T) h=horizon=1. (2) significant_harvey() 改用 student-t CV at T-1 df 而非 |t|>3. (3) 重跑 paper3_E2 10 pairs + K1412 5 OOS — 驗證 K1412 5/5 ROBUST + paper3_E2 唯一 TW0050-N225 Harvey-sig 在 HLN 下是否仍成立。Light compute (parent already cached). 若 retrofit 後 K1412 ≥4/5 仍 sig → paper3 narrative robust；否則需 hedge.",
+    "task_type": "experiment",
+    "priority": 3,
+    "status": "pending",
+    "source": "auto_discovered_from_codex_review",
+    "parent_experiments": [
+      "K1412",
+      "Paper3_E2"
+    ],
+    "created_at": "2026-06-02T08:11:31.689749+00:00"
   }
 ]

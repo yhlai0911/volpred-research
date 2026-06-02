@@ -32082,5 +32082,42 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-06-02T08:26:46.561020"
+  },
+  {
+    "id": "K1412_tw0050_n225_oos_sensitivity_1780387843",
+    "k_id": "K1412",
+    "experiment_id": "K1412",
+    "experiment_path": "experiments/k1412/",
+    "title": "K1412 TW0050-N225 OOS sensitivity — ROBUST 5/5 raw but methodology FAIL (Harvey self-impl |t|>3, no HLN correction)",
+    "verdict": "FAIL",
+    "reviewer": "Codex review (gpt-5.4 medium, session 019e8760)",
+    "reviewer_source": "codex_review",
+    "codex_review": "FAIL",
+    "summary": "K1412 跑 5 OOS starts (2014-2018) 確認 TW0050-N225 Student-t Harvey-pass 5/5 (DM_t 3.04-3.89, λ_L_clayton 0.414-0.418, full_sample_corr 0.586). Raw 統計 robust 替原 2015-06-01 single-start 結論排除 type-I error。但 Codex 指出 paper3_E2 系列 (K1412 繼承) 用自製 Newey-West DM + |t|>3 門檻判 Harvey-sig，並無 Harvey/Liu/Newman (1997) HLN small-sample correction；docstring 寫『Harvey-HLN』與實作不符 (mislabel)。Lookahead/seed/refit 邊界皆 clean。整體 verdict=FAIL：結論 raw 數字成立但 methodology disclosure 失誤，需 paper3_E2 系列 retrofit HLN correction 後重跑才可在 paper 引用。",
+    "key_findings": [
+      "5/5 OOS starts: Student-t DM_t 3.04-3.89 (all >3 self-impl Harvey threshold)",
+      "lambda_L_clayton 穩定 0.414-0.418, full_sample_corr 0.586 跨 OOS 不變",
+      "Clayton DM_t 1.15-1.70 全部 <3 (Clayton not best across all OOS) — 與 paper3_E2 原 2015-06-01 結果一致",
+      "Codex 指出 paper3_E2 共同 issue: self-impl |t|>3 ≠ HLN small-sample-corrected Harvey/DM"
+    ],
+    "follow_up_tasks": [
+      "Paper3_E2_harvey_hln_retrofit: 在 paper3_E2 module 加 HLN small-sample correction (Diebold-Mariano with HLN modifier)，重跑 10 pairs，驗證 K1412 5/5 ROBUST 是否在 HLN 下仍成立"
+    ],
+    "references": [
+      "Codex review verdict (gpt-5.4 medium, session 019e8760, 2026-06-02)",
+      "experiments/k1412/k1412_results.json",
+      "research_program.md L284-287 Paper3_E2 Open Question",
+      "Harvey/Liu/Newman (1997) JBES small-sample DM correction"
+    ],
+    "tags": [
+      "paper3_E2",
+      "K1412",
+      "OOS_sensitivity",
+      "TW0050_N225",
+      "harvey_test",
+      "methodology_FAIL",
+      "codex_FAIL"
+    ],
+    "timestamp": "2026-06-02T08:10:43.221077+00:00"
   }
 ]

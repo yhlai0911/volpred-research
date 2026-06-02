@@ -1,0 +1,138 @@
+{
+  "experiment_id": "K1412",
+  "pair": "TW0050-N225",
+  "config": {
+    "window": 1250,
+    "refit_every": 63,
+    "mc_paths": 5000,
+    "seed": 42
+  },
+  "oos_starts": [
+    "2014-01-02",
+    "2015-06-01",
+    "2016-01-04",
+    "2017-01-03",
+    "2018-01-02"
+  ],
+  "per_oos": {
+    "2014-01-02": {
+      "lambda_L_t_mean": 0.06731900565036703,
+      "lambda_L_clayton_mean": 0.41680220798407397,
+      "full_sample_corr": 0.5863764251825558,
+      "mean_qlike_dcc": -8.255454417507975,
+      "mean_qlike_copula_t": -8.265025028912063,
+      "mean_qlike_clayton": -8.260316049173365,
+      "dm_dcc_vs_t": 3.2402372492360056,
+      "dm_dcc_vs_clayton": 1.6577911485203347,
+      "harvey_pass_t": true,
+      "harvey_pass_clayton": false,
+      "best_copula": "Student-t",
+      "best_dm_t": 3.2402372492360056,
+      "best_harvey_pass": true,
+      "n_oos_obs": null
+    },
+    "2015-06-01": {
+      "lambda_L_t_mean": 0.07149480838226566,
+      "lambda_L_clayton_mean": 0.41530590755468244,
+      "full_sample_corr": 0.5863764251825558,
+      "mean_qlike_dcc": -8.222586798053117,
+      "mean_qlike_copula_t": -8.232831270539585,
+      "mean_qlike_clayton": -8.227355029108907,
+      "dm_dcc_vs_t": 3.8915099217614926,
+      "dm_dcc_vs_clayton": 1.5459992529683468,
+      "harvey_pass_t": true,
+      "harvey_pass_clayton": false,
+      "best_copula": "Student-t",
+      "best_dm_t": 3.8915099217614926,
+      "best_harvey_pass": true,
+      "n_oos_obs": null
+    },
+    "2016-01-04": {
+      "lambda_L_t_mean": 0.0752774928805874,
+      "lambda_L_clayton_mean": 0.4142204845218773,
+      "full_sample_corr": 0.5863764251825558,
+      "mean_qlike_dcc": -8.22612508757225,
+      "mean_qlike_copula_t": -8.237202757712502,
+      "mean_qlike_clayton": -8.231700878085649,
+      "dm_dcc_vs_t": 3.6606680552878026,
+      "dm_dcc_vs_clayton": 1.6989604701980927,
+      "harvey_pass_t": true,
+      "harvey_pass_clayton": false,
+      "best_copula": "Student-t",
+      "best_dm_t": 3.6606680552878026,
+      "best_harvey_pass": true,
+      "n_oos_obs": null
+    },
+    "2017-01-03": {
+      "lambda_L_t_mean": 0.0766765918651468,
+      "lambda_L_clayton_mean": 0.4150254333881477,
+      "full_sample_corr": 0.5863764251825558,
+      "mean_qlike_dcc": -8.264455952181965,
+      "mean_qlike_copula_t": -8.273228387703085,
+      "mean_qlike_clayton": -8.269375720431663,
+      "dm_dcc_vs_t": 3.0441761522487436,
+      "dm_dcc_vs_clayton": 1.6315600886947508,
+      "harvey_pass_t": true,
+      "harvey_pass_clayton": false,
+      "best_copula": "Student-t",
+      "best_dm_t": 3.0441761522487436,
+      "best_harvey_pass": true,
+      "n_oos_obs": null
+    },
+    "2018-01-02": {
+      "lambda_L_t_mean": 0.07868618419151163,
+      "lambda_L_clayton_mean": 0.41812488242116,
+      "full_sample_corr": 0.5863764251825558,
+      "mean_qlike_dcc": -8.118332459238593,
+      "mean_qlike_copula_t": -8.127741511368408,
+      "mean_qlike_clayton": -8.122029816703039,
+      "dm_dcc_vs_t": 3.0928869629100944,
+      "dm_dcc_vs_clayton": 1.1545103984967657,
+      "harvey_pass_t": true,
+      "harvey_pass_clayton": false,
+      "best_copula": "Student-t",
+      "best_dm_t": 3.0928869629100944,
+      "best_harvey_pass": true,
+      "n_oos_obs": null
+    }
+  },
+  "summary": {
+    "n_oos_completed": 5,
+    "n_harvey_sig": 5,
+    "robust_ratio": 1.0,
+    "verdict": "ROBUST (\u22654/5 Harvey-sig)",
+    "per_oos_harvey_clayton": {
+      "2014-01-02": false,
+      "2015-06-01": false,
+      "2016-01-04": false,
+      "2017-01-03": false,
+      "2018-01-02": false
+    },
+    "per_oos_dm_clayton": {
+      "2014-01-02": 1.6577911485203347,
+      "2015-06-01": 1.5459992529683468,
+      "2016-01-04": 1.6989604701980927,
+      "2017-01-03": 1.6315600886947508,
+      "2018-01-02": 1.1545103984967657
+    },
+    "lambda_L_clayton_range": [
+      0.4142204845218773,
+      0.41812488242116
+    ],
+    "full_sample_corr_range": [
+      0.5863764251825558,
+      0.5863764251825558
+    ]
+  },
+  "runtime_seconds": 210.53844904899597,
+  "timestamp": "2026-06-02T07:18:35.327899+00:00",
+  "parent_experiments": [
+    "Paper3_E2"
+  ],
+  "references": [
+    "Paper3_E2 (paper3_E2_cross_market_copula, 2026-05-29)",
+    "research_program.md Open Question (TW0050-N225 \u552f\u4e00 Harvey-sig)",
+    "Harvey/Liu/Newman (1997) HLN small-sample DM correction",
+    "Patton (2006) IER 47(2) tail dependence copula"
+  ]
+}

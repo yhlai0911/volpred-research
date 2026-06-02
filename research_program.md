@@ -285,6 +285,7 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 - **E1+E2 統一 pattern**：copula advantage 不是「跨 equity 市場 universal」— K1100b ETF asset-class 結果是 asset-class boundary 效應，不是 cross-market 通則
 - **E3 commodities scope decision**：boss directive 2026-05-29 「需 E3 commodity results first before paper body rewrite」— E3 (gold/oil/copper 與 equity 配對) 仍待 enqueue。E3 之後再判定 paper narrative 是維持「asset-class-specific」框架 or 收斂為「Joe upper-tail mechanism 限 flight-to-safety pair」
 - **Open question**: TW0050-N225 唯一 Harvey sig — λ_L_clayton=0.444 + full_sample_corr=0.586 + Asian trading-hour overlap 三因子哪個是 driver？ 需 sensitivity (different OOS start / refit_every / window) 排除 type-I error
+  - **K1412 (2026-06-02) partial update**：5 OOS starts (2014/2015/2016/2017/2018) raw 5/5 Student-t DM_t 3.04-3.89，**初步排除 single-start type-I**。但 Codex review FAIL：paper3_E2 系列 Harvey 判定為自製 `|t|>3`，**非** HLN small-sample correction，docstring mislabel。Paper 引用前須先 retrofit HLN correction 重跑。Open question 升級為「HLN-retrofitted 是否仍 robust + 三因子 driver identification」
 
 **未來可能的第四篇：VIX Sufficient Statistic**
 - 23+ 個指標全被 VIX 吸收的 comprehensive study
