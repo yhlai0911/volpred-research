@@ -18698,7 +18698,7 @@
     "title": "K745: write general-audience article (auto-discovered uncovered K)",
     "description": "K K745 has verdict signal (score=1, reasons=['methodology/mechanism lesson', 'cluster cooldown penalty (spy 30d=69>10)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K745: PILOT HAR-RV with 51 days SPY 5-min data (2026-01-14 to 2026-03-27, N_OOS=37). PRELIMINARY — below 252-day OOS minimum. Part A: Realized measures computed — mean RV annualized vol 11.1%, jump fraction low (4.8%), AC(1)=0.423, ADF stationary (t=-4.41",
     "priority": 4,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K745",
@@ -18718,7 +18718,10 @@
     "topic_cluster": "spy",
     "created_at": "2026-06-02T15:09:40+00:00",
     "started_at": "2026-06-02T17:22:02.656422+00:00",
-    "last_released_at": "2026-06-02T17:22:55.082472+00:00"
+    "last_released_at": "2026-06-02T17:22:55.082472+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-02T20:10:37+00:00",
+    "blocked_note": "Topic covered by feed mile_69c4f0de: K744/K745 合題已 published"
   },
   {
     "id": "K772_article_general",
@@ -18902,7 +18905,7 @@
     "title": "K935: write general-audience article (auto-discovered uncovered K)",
     "description": "K K935 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (spy 30d=69>10)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] 修復K934發現的Parkinson CARR隔夜gap偏差。4種range estimator: Parkinson/Garman-Klass/Rogers-Satchell/Yang-Zhang 各自建CARR(1,1)。SPY 2006-2026, OOS 2016-2025。QLIKE on r²排名：MF-GJR(1.480) > CARR_YZ(1.556) > GARCH(1.603) > CARR_RS(1.608) > CARR_GK(1.670) > CARR_Parkinson(1.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K935",
@@ -18918,7 +18921,13 @@
       "audience-general"
     ],
     "topic_cluster": "spy",
-    "created_at": "2026-06-02T17:09:48+00:00"
+    "created_at": "2026-06-02T17:09:48+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-02T19:33:15.404404+00:00",
+    "claim_session_id": "301cc3d93f6e",
+    "started_at": "2026-06-02T19:33:24.179030+00:00",
+    "completed_at": "2026-06-02T19:37:13.103612+00:00",
+    "result": "確認 K935 general draft 已入池（mile_1bff1fe5），並用 update 模式同步成最終版文案：重點是隔夜 gap 修正後 Yang-Zhang 明顯優於 Parkinson，但整體第一仍是含恐慌資訊的基準模型。"
   },
   {
     "id": "K566_article_general",
@@ -18964,5 +18973,157 @@
       "follow-up"
     ],
     "source": "hourly-02-2026-06-03"
+  },
+  {
+    "id": "paper_review_mile_7fbc61c8",
+    "title": "Paper review (Codex 24h-rule): 模型只贏 1%，很多時候還不能算真的贏",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_7fbc61c8 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_7fbc61c8",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-02T20:09:06+00:00"
+  },
+  {
+    "id": "K744_article_general",
+    "title": "K744: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K744 has verdict signal (score=0, reasons=['cluster cooldown penalty (spy 30d=69>10)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K744: DATA VALIDATION of 51 days SPY 5-min data (2026-01-14 to 2026-03-27). Part A: Data quality good — mean 76 bars/day, only 3/51 flagged (2 partial days + 1 gap). Part B: CRITICAL FINDING — RV AC(1)=0.423 vs daily r² AC(1)=0.076, confirming K196 (0.414",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K744",
+    "tags": [
+      "realized_volatility",
+      "data_validation",
+      "intraday",
+      "5min",
+      "HAR-RV",
+      "proxy_comparison",
+      "SPY",
+      "methodology",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "spy",
+    "created_at": "2026-06-02T20:09:07+00:00",
+    "started_at": "2026-06-02T20:09:45.809721+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-02T20:10:36+00:00",
+    "blocked_note": "Topic covered by feed mile_69c4f0de: K744/K745 從日頻到 5 分鐘——高頻數據揭示 GARCH 的天花板 (already published)",
+    "last_released_at": "2026-06-02T20:10:41.552095+00:00"
+  },
+  {
+    "id": "K906_article_general",
+    "title": "K906: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K906 has verdict signal (score=0, reasons=['cluster cooldown penalty (spy 30d=69>10)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] PRELIMINARY (29 OOS days). SPY 5-min data (55 days, Jan-Apr 2026). HAR-RV vs GJR-GARCH fair comparison using Patton (2011) QLIKE on r² and Hansen & Lunde (2005) RV_total. GJR wins both unified targets by enormous margin: QLIKE on r² = 1.14 vs HAR 41,845; ",
+    "priority": 4,
+    "status": "blocked",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K906",
+    "tags": [
+      "HAR-RV",
+      "GJR-GARCH",
+      "SPY",
+      "5-min",
+      "realized volatility",
+      "overnight variance",
+      "Patton 2011",
+      "Hansen Lunde 2005",
+      "preliminary",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "spy",
+    "created_at": "2026-06-02T20:09:07+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-02T20:11:01+00:00",
+    "blocked_note": "Already published: mile_83a21599"
+  },
+  {
+    "id": "K934_article_general",
+    "title": "K934: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K934 has verdict signal (score=0, reasons=['cluster cooldown penalty (spy 30d=69>10)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] CARR(1,1) conditional autoregressive range model (Chou 2005) 用 high-low range 預測波動率。SPY 2006-2026, OOS 2016-2025 (2514天)。5模型比較：GARCH/GJR/MF-GJR(VIX)/CARR/CARR-MF(VIX)。QLIKE on r² 排名：MF-GJR(1.475) > GJR(1.562) > GARCH(1.602) > CARR-MF(1.699) > CARR(1.815)。",
+    "priority": 4,
+    "status": "blocked",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K934",
+    "tags": [
+      "volatility",
+      "CARR",
+      "range-based",
+      "Chou-2005",
+      "Parkinson",
+      "calibration-bias",
+      "SPY",
+      "model-comparison",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "spy",
+    "created_at": "2026-06-02T20:10:42+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-02T20:11:02+00:00",
+    "blocked_note": "Already published: mile_dc22093c"
+  },
+  {
+    "id": "K941_article_general",
+    "title": "K941: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K941 has verdict signal (score=0, reasons=['cluster cooldown penalty (spy 30d=69>10)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] 首次quantile volatility forecasting實驗。5模型：CAViaR-SAV/QR-GARCH/Quantile RF/GARCH parametric(Student-t)/MF-GJR parametric。SPY OOS 2016-2025 (2513天)。CAViaR-SAV全面勝出：mean pinball loss=0.000040、calibration MAD=0.006、coverage=91.2%、Winkler=0.000902。GARCH parametri",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K941",
+    "tags": [
+      "volatility",
+      "quantile-forecasting",
+      "CAViaR",
+      "prediction-interval",
+      "pinball-loss",
+      "Winkler-score",
+      "SPY",
+      "positive-result",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "spy",
+    "created_at": "2026-06-02T20:10:42+00:00"
+  },
+  {
+    "id": "K948_article_general",
+    "title": "K948: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K948 has verdict signal (score=0, reasons=['cluster cooldown penalty (spy 30d=69>10)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] 測試週頻(h=5)return可預測性。SPY OOS 2016-2026, 514個non-overlapping weeks。5模型：OLS/Ridge/LASSO/RF/Historical Mean。所有線性模型OOS R²<0（比historical mean差）。RF R²=0.0097但DM t=-1.06 NS。Directional accuracy最佳也只有53.7%（市場62%時間為正）。RF Sharpe=0.99但97% long只31次交易——不是預測力而是市場上漲趨勢。結論：",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K948",
+    "tags": [
+      "return-prediction",
+      "weekly",
+      "efficient-market",
+      "Welch-Goyal",
+      "SPY",
+      "null-result",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "spy",
+    "created_at": "2026-06-02T20:10:42+00:00",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-06-02T20:11:15.719933+00:00",
+    "claim_session_id": "f1b997f3de61",
+    "started_at": "2026-06-02T20:11:16.128712+00:00",
+    "completed_at": "2026-06-02T20:17:12.511767+00:00",
+    "result": "K948 文章 draft 上池 mile_f314fcb3；4/5 模型 OOS R²<0 + DM 全 NS NULL；嵌真圖 k948_comparison.png + 真表 + Welch & Goyal 2008；anti_ai_gate PASS（1 retry fix）"
   }
 ]
