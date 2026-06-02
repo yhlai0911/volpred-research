@@ -18438,7 +18438,7 @@
     "title": "K802: write general-audience article (auto-discovered uncovered K)",
     "description": "K K802 has verdict signal (score=0, reasons=['cluster cooldown penalty (garch 30d=16>10)']) but no general article in feed.json.  Verdict preview: [提出: 用戶, 執行: Claude]\n\nK802 resolves the K799 conflict: GJR wins QLIKE but fails VaR 1% under Normal distribution assumption. By replacing the Normal quantile with a fat-tail distribution, GJR achieves BOTH best QLIKE and VaR Trinity PASS simultaneously.\n\nKEY RESULTS (SPY 2023-202",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K802",
@@ -18455,7 +18455,13 @@
       "audience-general"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-06-02T11:08:07+00:00"
+    "created_at": "2026-06-02T11:08:07+00:00",
+    "claimed_by": "hourly-22",
+    "claimed_at": "2026-06-02T14:10:34.069180+00:00",
+    "claim_session_id": "098f62ed9125",
+    "started_at": "2026-06-02T14:10:34.323625+00:00",
+    "completed_at": "2026-06-02T14:17:14.173697+00:00",
+    "result": "Published mile_cbf8ba62 K802 article (GJR+SkewedT VaR Trinity story); 2 charts uploaded (k802_violation_rate_chart.png + k802_trinity_heatmap.png); anti-ai gate PASS exit 0; audience=research (publisher inferred correctly per rules)"
   },
   {
     "id": "K1374_article_general",
@@ -18519,7 +18525,7 @@
     "title": "K1373: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1373 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (taiwan 30d=20>8)']) but no general article in feed.json.  Verdict preview: 台股 5 檔標的（0050/0056/2330/2317/2882，2015-2025）除息日絕對對數報酬 |r| 池化後相對控制日邊際顯著偏高（Welch t=1.967, p=0.0521, Cohen d=0.188, MW p=0.0060）。個股層面只有 2882.TW（國泰金）達邊際顯著（MW p=0.019, d=0.517），其餘 4 檔均不顯著。除息前 10 日（pre-window）池化有預期累積跡象（t=2.918, p=0.0036）；除息後 10 日（post-window）無顯著差異（p=0.323）。效應量小（d=0.188",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1373",
@@ -18528,7 +18534,13 @@
       "audience-general"
     ],
     "topic_cluster": "taiwan",
-    "created_at": "2026-06-02T12:08:59+00:00"
+    "created_at": "2026-06-02T12:08:59+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-02T14:04:54.492505+00:00",
+    "claim_session_id": "c6cee4d5cedc",
+    "started_at": "2026-06-02T14:05:06.871015+00:00",
+    "completed_at": "2026-06-02T14:08:43.640268+00:00",
+    "result": "Published draft mile_c725b44c for K1373 general article; generated 2 charts and wrote pre-ex-date buildup angle distinct from K512/K1374 with cluster waiver."
   },
   {
     "id": "K1301_article_general",
