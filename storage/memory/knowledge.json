@@ -32046,5 +32046,19 @@
     ],
     "date_recorded": "2026-06-02",
     "session_id": "31cd452cb270"
+  },
+  {
+    "item_id": "50191950",
+    "category": "risk_management",
+    "content": "K1411 槓桿型 ETF（00631L 元大台灣50正2）單筆 vs 分批 + 波動率拖累 + 信貸/加碼金風險。真實 00631L 2014-10~2026-06（N=2827）+ 0050/TWII 重建 2x（重建vs真實終值比 1.03，模型驗證）。(1) 2x 每日重置年化波動率拖累：理論 −4.63% ≈ 實證 −4.64%；00631L 史上 MDD −55.1% 需 +123% 回本（讀者「跌50漲100」直覺成立、槓桿放大）。(2) 槓桿未翻轉單筆優勢：00631L 單筆勝分批 78%（vs 0050 74%），高位進場（≥近一年高點95%）仍 75%。(3) 信貸全押風險最高：到期資不抵債 1年 21%/高位 29%；路徑曾資不抵債 91-94%（被迫下車把帳面虧損變真虧）。(4) 加碼金（保留30%現金、回落20%加碼）此樣本無明顯幫助。限制：樣本無 2008，破產率可能低估，結論綁台股長多前提。verdict=CONDITIONAL_PASS。reviewer=code-reviewer subagent fallback（Codex CLI 兩度 hang，per experiments.md fallback path；6/6 檢查通過、數字 byte-match results.json、無 critical bug）。primary-path Codex 二審 pending 才升 full closure（per .claude/rules/experiments.md K1259 規則）。發佈為 member_qa 文章 mile_ccc533fd + FB 回覆讀者 David Huang。",
+    "evidence": [
+      "experiments/k1411/k1411_results.json",
+      "experiments/k1411/README.md",
+      "experiments/k1411/k1411.py",
+      "mile_ccc533fd",
+      "reviewer_source: code-reviewer subagent fallback; codex_reverify_pending"
+    ],
+    "confidence": 0.7,
+    "created_at": "2026-06-02T08:14:30.694501"
   }
 ]
