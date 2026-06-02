@@ -138,9 +138,10 @@
 | 5 | **MDD 可接受** | 同期間 MDD < -20% | `evaluate_new_strategy.py` |
 
 ## Zeabur 服務 ID
-- Project: 69b5b264800a475a1f82b073
-- Environment: 69b5b2646853f6f4f5f6a16d
-- volpred-web: 69b5b279e0a0c18cef9d780d
-- volpred-v2: 69b8ed895a53b5901a3c8d25
-- volpred-v3: 69be521a1066986b9a1692be
-- volpred-mirror: 69c105e1ceee47754dacb2af
+**唯一真實來源 = `config/project_targets.json` 的 `.deploy`**；換伺服器只改 config，勿在文件硬編（2026-06-02 教訓見 deploy-and-runtime.md）。`jq '.deploy' config/project_targets.json`。
+現值（2026-06-02 換伺服器後）：
+- Project: 6a15c5a8f14c612a409a4d77
+- Environment: 6a15c5a85dd63457627dd6c7
+- volpred-v3（active，volpred.zeabur.app）: 6a15c5a9938e05c2b6854116
+- 舊伺服器（已遷移、勿用，存 config `.deploy._legacy_pre_20260602`）：Project 69b5b264800a475a1f82b073 / Env 69b5b2646853f6f4f5f6a16d / volpred-v3 69be521a1066986b9a1692be / volpred-web 69b5b279e0a0c18cef9d780d / volpred-v2 69b8ed895a53b5901a3c8d25
+- volpred-mirror: 69c105e1ceee47754dacb2af（如未遷移仍為此；以 config / mirror URL 為準）

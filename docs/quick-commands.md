@@ -65,13 +65,17 @@ uv run volpred ops experiments migrate --experiment-id k1121                  # 
 uv run volpred ops experiments migrate --experiment-id k1121 --apply          # 實際搬移該實驗的根層散檔
 
 # Zeabur CLI（部署 + 域名管理）
-# Project ID: 69b5b264800a475a1f82b073
-# Environment ID: 69b5b2646853f6f4f5f6a16d
-# Services: volpred-web (69b5b279e0a0c18cef9d780d), volpred-v2 (69b8ed895a53b5901a3c8d25), volpred-v3 (69be521a1066986b9a1692be)
+# ⚠️ ID 唯一真實來源 = config/project_targets.json 的 .deploy（換伺服器只改那裡，別在文件硬編）
+#    取值： jq '.deploy' config/project_targets.json
+#    PID=$(jq -r '.deploy.zeabur_project_id' config/project_targets.json)
+#    ENV=$(jq -r '.deploy.zeabur_environment_id' config/project_targets.json)
+#    SVC=$(jq -r '.deploy.services[.deploy.active_service]' config/project_targets.json)  # 註：需兩段 jq，見下
+# 現值（2026-06-02 換伺服器後）：Project 6a15c5a8f14c612a409a4d77 / Env 6a15c5a85dd63457627dd6c7 / volpred-v3 6a15c5a9938e05c2b6854116
+# 舊伺服器（已遷移、勿用）：Project 69b5b264… / Env 69b5b264…6a16d / volpred-v3 69be521a…（保留於 config .deploy._legacy_pre_20260602）
 npx zeabur@latest auth status                    # 確認登入狀態
-npx zeabur@latest service list --project-id 69b5b264800a475a1f82b073 --json  # 列出服務
+npx zeabur@latest service list --project-id "$(jq -r '.deploy.zeabur_project_id' config/project_targets.json)" --json  # 列出服務
 npx zeabur@latest domain list --id <service_id> -i=false --json              # 列出域名
-npx zeabur@latest domain create --id <service_id> --domain <subdomain> --env-id 69b5b2646853f6f4f5f6a16d -g -y -i=false  # 綁定 *.zeabur.app 域名（-g 時只寫子域名如 'volpred'，不要寫完整 'volpred.zeabur.app'）
+npx zeabur@latest domain create --id <service_id> --domain <subdomain> --env-id "$(jq -r '.deploy.zeabur_environment_id' config/project_targets.json)" -g -y -i=false  # 綁定 *.zeabur.app 域名（-g 時只寫子域名如 'volpred'，不要寫完整 'volpred.zeabur.app'）
 npx zeabur@latest domain delete --id <domain_id> -i=false -y                 # 刪除域名
 npx zeabur@latest service redeploy --id <service_id> -i=false -y             # 重新部署
 # 安全部署前端代碼到 live service（volpred.zeabur.app -> volpred-v3 service）:

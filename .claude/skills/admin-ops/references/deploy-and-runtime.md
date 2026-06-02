@@ -82,12 +82,13 @@
 
 ## Zeabur 目前識別資訊
 
-- Source of truth: `config/project_targets.json`
-- Project ID: `69b5b264800a475a1f82b073`
-- Environment ID: `69b5b2646853f6f4f5f6a16d`
-- `volpred-web`: `69b5b279e0a0c18cef9d780d`
-- `volpred-v2`: `69b8ed895a53b5901a3c8d25`
-- `volpred-v3`: `69be521a1066986b9a1692be`
+**Source of truth = `config/project_targets.json` 的 `.deploy`**（含 `zeabur_project_id` / `zeabur_environment_id` / `services`）。換伺服器只改 config，**不要在文件硬編 ID**（2026-06-02 教訓：硬編 + script 硬編 env-id 導致換伺服器後 deploy 一直打到舊伺服器、build 後 REMOVED 從未上線）。取值 `jq '.deploy' config/project_targets.json`。
+
+現值（2026-06-02 換伺服器後）：
+- Project ID: `6a15c5a8f14c612a409a4d77`
+- Environment ID: `6a15c5a85dd63457627dd6c7`
+- `volpred-v3`（active）: `6a15c5a9938e05c2b6854116`
+- 舊伺服器（已遷移、勿用，保留於 config `.deploy._legacy_pre_20260602`）：Project `69b5b264800a475a1f82b073` / Env `69b5b2646853f6f4f5f6a16d` / volpred-v3 `69be521a1066986b9a1692be`
 
 ## 常用命令
 
