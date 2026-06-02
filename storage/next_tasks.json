@@ -18711,8 +18711,8 @@
     ],
     "topic_cluster": "spy",
     "created_at": "2026-06-02T15:09:40+00:00",
-    "started_at": "2026-06-02T15:10:06.828141+00:00",
-    "last_released_at": "2026-06-02T15:10:17.374810+00:00"
+    "started_at": "2026-06-02T17:22:02.656422+00:00",
+    "last_released_at": "2026-06-02T17:22:55.082472+00:00"
   },
   {
     "id": "K772_article_general",
@@ -18748,7 +18748,7 @@
     "title": "K783: write general-audience article (auto-discovered uncovered K)",
     "description": "K K783 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (spy 30d=69>10)']) but no general article in feed.json.  Verdict preview: [提出: 用戶, 執行: Claude] K783c 驗證 GJR-GARCH(1,1) 訓練視窗大小是否依市場 regime 不同而有差異。三個不重疊 OOS 期間（各 ~500 天）：高波動（2020-2021 COVID 崩潰+復甦）、中等（2018-2019 貿易戰/Fed pivot）、平靜（2016-2017 低 VIX 時代）。視窗：{252, 504, 1000, 2000, 3000, ALL}，指標：QLIKE on r²（Patton 2011）。\n核心發現：最佳視窗確實因 regime 不同而改變——高波動期(2020-21): ",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K783",
@@ -18764,7 +18764,13 @@
       "audience-general"
     ],
     "topic_cluster": "spy",
-    "created_at": "2026-06-02T15:09:40+00:00"
+    "created_at": "2026-06-02T15:09:40+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-02T17:23:06.466408+00:00",
+    "claim_session_id": "5ca270b2c852",
+    "started_at": "2026-06-02T17:23:06.540708+00:00",
+    "completed_at": "2026-06-02T17:29:26.908643+00:00",
+    "result": "新增 general draft mile_ec0e72ee：主題是訓練視窗會隨市況改變；危機期最佳 2000 天、中波動期 504 天、平靜期 252 天。已通過 anti-AI/audience gate，附 2 張真圖並以 cluster_waiver 入池。"
   },
   {
     "id": "K824_article_general",
@@ -18823,7 +18829,7 @@
     "title": "Paper review (Codex 24h-rule): 讓模型更常改變心意，不代表它就更會預測",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_e5f33cfa needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_e5f33cfa",
@@ -18832,7 +18838,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-02T16:08:17+00:00"
+    "created_at": "2026-06-02T16:08:17+00:00",
+    "claimed_by": "hourly-01",
+    "claimed_at": "2026-06-02T17:11:45.692607+00:00",
+    "claim_session_id": "5aae73cdfd1d",
+    "started_at": "2026-06-02T17:11:49.713758+00:00",
+    "completed_at": "2026-06-02T17:40:31.019376+00:00",
+    "result": "Verdict CONDITIONAL_PASS (agy primary + 主線程 audit, codex blocked by 22h stuck codex_loop child). SPY/GLD direction reversed in article — inline-fixed + errata footnote appended; core thesis (diversity restored != accuracy improved) intact. Review report: storage/ops/article_reviews/mile_e5f33cfa_agy_review.md. Supabase synced."
   },
   {
     "id": "K1399_article_revise_overclaim",
@@ -18850,5 +18862,50 @@
     "started_at": "2026-06-02T16:17:15.973525+00:00",
     "completed_at": "2026-06-02T16:21:01.265343+00:00",
     "result": "修正 mile_34157161 過度宣稱：標題與摘要改為『VIX 水準最強、MA5 次佳但無增量優勢』；移除『只有一個分量有用』與機制式斷言。已更新 feed/article/index 本地內容，保留 errata trail；未做 Supabase sync。"
+  },
+  {
+    "id": "K858_article_general",
+    "title": "K858: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K858 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (spy 30d=69>10)']) but no general article in feed.json.  Verdict preview: [提出: 會員 ideahub.everything, 執行: Claude] K858 tests whether aggregate U.S. congressional stock trades generate alpha. Data: 13,401 trades (2020-2022), 165 House members, 2,061 tickers. STRATEGY: Monthly top-10 net-bought tickers (equal weight), using disclosure_date+1 (realistic, ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K858",
+    "tags": [
+      "congressional_trades",
+      "alternative_data",
+      "member_qa",
+      "null_result",
+      "STOCK_Act",
+      "alpha",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "spy",
+    "created_at": "2026-06-02T17:09:48+00:00"
+  },
+  {
+    "id": "K935_article_general",
+    "title": "K935: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K935 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (spy 30d=69>10)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] 修復K934發現的Parkinson CARR隔夜gap偏差。4種range estimator: Parkinson/Garman-Klass/Rogers-Satchell/Yang-Zhang 各自建CARR(1,1)。SPY 2006-2026, OOS 2016-2025。QLIKE on r²排名：MF-GJR(1.480) > CARR_YZ(1.556) > GARCH(1.603) > CARR_RS(1.608) > CARR_GK(1.670) > CARR_Parkinson(1.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K935",
+    "tags": [
+      "volatility",
+      "CARR",
+      "Yang-Zhang",
+      "range-based",
+      "gap-adjustment",
+      "SPY",
+      "positive-result",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "spy",
+    "created_at": "2026-06-02T17:09:48+00:00"
   }
 ]
