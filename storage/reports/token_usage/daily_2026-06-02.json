@@ -1,0 +1,228 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-06-02",
+  "week_range": "2026-05-29 → 2026-06-05",
+  "totals": {
+    "input_tokens": 90,
+    "output_tokens": 2938,
+    "cache_read_tokens": 383510,
+    "cache_create_tokens": 129762,
+    "billable_total": 132790,
+    "assistant_messages": 16,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.646
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 90,
+      "output_tokens": 2938,
+      "cache_read_tokens": 383510,
+      "cache_create_tokens": 129762,
+      "messages": 16,
+      "estimated_cost_usd": 0.646
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 45,
+      "output_tokens": 1474,
+      "cache_read_tokens": 193311,
+      "cache_create_tokens": 64661,
+      "messages": 8,
+      "billable_total": 66180,
+      "estimated_cost_usd": 0.3227,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "bash_other": {
+      "input_tokens": 9,
+      "output_tokens": 977,
+      "cache_read_tokens": 94382,
+      "cache_create_tokens": 62660,
+      "messages": 5,
+      "billable_total": 63646,
+      "estimated_cost_usd": 0.278,
+      "emoji": "💭",
+      "description": "其他 Bash 操作"
+    },
+    "scheduling": {
+      "input_tokens": 3,
+      "output_tokens": 277,
+      "cache_read_tokens": 32886,
+      "cache_create_tokens": 1822,
+      "messages": 1,
+      "billable_total": 2102,
+      "estimated_cost_usd": 0.0209,
+      "emoji": "⏰",
+      "description": "Cron / Monitor 排程"
+    },
+    "token_report": {
+      "input_tokens": 32,
+      "output_tokens": 136,
+      "cache_read_tokens": 30393,
+      "cache_create_tokens": 271,
+      "messages": 1,
+      "billable_total": 439,
+      "estimated_cost_usd": 0.0123,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    },
+    "tool_setup": {
+      "input_tokens": 1,
+      "output_tokens": 74,
+      "cache_read_tokens": 32538,
+      "cache_create_tokens": 348,
+      "messages": 1,
+      "billable_total": 423,
+      "estimated_cost_usd": 0.0122,
+      "emoji": "🛠️",
+      "description": "ToolSearch 載入工具"
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 8,
+      "billable_total": 66180,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 8,
+          "billable_total": 66180
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "non-text assistant message",
+          "messages": 4,
+          "billable_total": 34047
+        },
+        {
+          "name": "other",
+          "messages": 4,
+          "billable_total": 32133
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 4,
+          "billable_total": 34047
+        },
+        {
+          "name": "⏱ 開始 2026-06-02 執行 token 用量日報",
+          "messages": 1,
+          "billable_total": 30622
+        },
+        {
+          "name": "套件仍在安裝中，等待完成。",
+          "messages": 1,
+          "billable_total": 707
+        },
+        {
+          "name": "今天是週二，只跑日報。",
+          "messages": 1,
+          "billable_total": 439
+        },
+        {
+          "name": "監控已啟動，等待腳本完成通知。",
+          "messages": 1,
+          "billable_total": 365
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 5,
+      "billable_total": 63646,
+      "family_breakdown": [
+        {
+          "name": "other bash",
+          "messages": 2,
+          "billable_total": 61244
+        },
+        {
+          "name": "log tailing",
+          "messages": 3,
+          "billable_total": 2402
+        }
+      ],
+      "prefix_breakdown": [
+        {
+          "name": "TZ='Asia/Taipei'",
+          "messages": 2,
+          "billable_total": 61244
+        },
+        {
+          "name": "cat /tmp/claude-0/-home-user-volpred-research/b2021701-c100-4e57-ba81-17e2e8dfb422/tasks/b24n9emwt.o",
+          "messages": 2,
+          "billable_total": 1786
+        },
+        {
+          "name": "sleep",
+          "messages": 1,
+          "billable_total": 616
+        }
+      ],
+      "top_first_lines": [
+        {
+          "name": "TZ='Asia/Taipei' date '+%A'",
+          "messages": 1,
+          "billable_total": 30622
+        },
+        {
+          "name": "TZ='Asia/Taipei' date '+%Y-%m-%d %H:%M:%S'",
+          "messages": 1,
+          "billable_total": 30622
+        },
+        {
+          "name": "cat /tmp/claude-0/-home-user-volpred-research/b2021701-c100-4e57-ba81-17e2e8dfb422/tasks/b24n9emwt.output 2>&1 | tail -40",
+          "messages": 1,
+          "billable_total": 1079
+        },
+        {
+          "name": "cat /tmp/claude-0/-home-user-volpred-research/b2021701-c100-4e57-ba81-17e2e8dfb422/tasks/b24n9emwt.output 2>&1 | tail -20",
+          "messages": 1,
+          "billable_total": 707
+        },
+        {
+          "name": "sleep 30 && cat /tmp/claude-0/-home-user-volpred-research/b2021701-c100-4e57-ba81-17e2e8dfb422/tasks/b24n9emwt.output 2>&1 | tail -30",
+          "messages": 1,
+          "billable_total": 616
+        }
+      ]
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 1,
+      "cache_create_tokens": 129762,
+      "billable_total": 132790,
+      "cache_create_share_pct": 97.7,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "b2021701-c100-4e57-ba81-17e2e8dfb422",
+          "messages": 16,
+          "billable_total": 132790,
+          "cache_create_tokens": 129762,
+          "cache_read_tokens": 383510,
+          "duration_minutes": 1.4,
+          "cache_create_share_pct": 97.7,
+          "first_ts": "2026-06-02T14:44:16.832000+00:00",
+          "last_ts": "2026-06-02T14:45:42.948000+00:00"
+        }
+      ]
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "cd677d5",
+      "message": "Ops patrol report 2026-06-02T12:12Z"
+    },
+    {
+      "sha": "8fa015e",
+      "message": "Ops patrol report 2026-06-02T06:11Z"
+    },
+    {
+      "sha": "0c40730",
+      "message": "Ops patrol report 2026-06-02T00:12Z"
+    }
+  ]
+}
