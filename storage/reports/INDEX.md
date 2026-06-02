@@ -1,23 +1,24 @@
 # Feed Index
 
-_Last built: 2026-06-02 20:42 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-06-02 21:46 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
-- Total articles: **1493**  (with thumbnail: 56)
+- Total articles: **1494**  (with thumbnail: 56)
 - Last 30 days: **499**
-- Total chars (content): 6,327,753
+- Total chars (content): 6,329,592
 
-**Status**: published=1245, archived=122, draft=112, unpublished=9, retracted=5
+**Status**: published=1245, archived=122, draft=113, unpublished=9, retracted=5
 
-**Audience**: research=1047, general=251, daily=107, unknown=77, member_qa=10, event=1
+**Audience**: research=1047, general=252, daily=107, unknown=77, member_qa=10, event=1
 
-**Category**: milestone=778, general=604, unknown=73, member_qa=10, research=9, daily_article=8, qa=5, experiment=3, event_article=2, diary=1
+**Category**: milestone=778, general=605, unknown=73, member_qa=10, research=9, daily_article=8, qa=5, experiment=3, event_article=2, diary=1
 
 ## 最近 30 天 (499)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-06-02 | `mile_1cb111ed` | 高頻資料終於能上場比賽了，但 37 天還太早宣布新王登基 | general | general | draft | 1839 |  | 一般讀者, SPY, 5分鐘資料, 波動模型, 小樣本, 風險觀察 |
 | 2026-06-02 | `mile_f314fcb3` | 週頻也救不了 Return 預測 — 514 週測試後，5 個模型全敗給歷史平均 | research | milestone | draft | 3056 |  | 研究, SPY, return-predictability, weekly, OOS, null-result |
 | 2026-06-02 | `mile_1bff1fe5` | 白天波動看得很清楚，為什麼模型還是會估錯？問題常常出在『隔夜那一下』 | general | general | draft | 2432 |  | 一般讀者, 美股, 波動率, SPY, 風險模型, 隔夜跳空 |
 | 2026-06-02 | `mile_5acc24ee` | 跟單國會議員的股票交易能打敗市場嗎？實證告訴你不能 | general | general | draft | 2978 |  | 一般讀者, 美股, 跟單策略, 投資策略, 市場效率, 行為金融 |
@@ -516,12 +517,12 @@ _Last built: 2026-06-02 20:42 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-05-04 | `mile_8d8d864f` | 每日策略建議：VIX 16.99（正常）— 2026-05-04 | daily | general | published | 1446 | Y | 每日建議, VIX, 策略配置 |
 | 2026-05-04 | `mile_93993100` | 2026-05-04 本日持倉比率建議（依據 2026-05-01 收盤數據） | daily | milestone | published | 820 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
 | 2026-05-04 | `mile_40fbffbb` | 你以為 VIX 訊號越複雜越好？8 個投資期限告訴你：簡單的 60/40 才是長期王者 | research | milestone | published | 4409 |  | 研究, horizon, 60/40, buy-and-hold, simplicity, SPY |
-| 2026-05-03 | `mile_7de1c5a2` | K195：Copula 尾部依賴不對稱多配對深度驗證 — Bonferroni 修正後 26/66 配對 OOS 仍顯著 | research | milestone | published | 8468 |  | 研究, copula, tail-dependence, Bonferroni, GJR-GARCH, leverage-effect |
 
-<details><summary>## 2026-Q2 (322)</summary>
+<details><summary>## 2026-Q2 (323)</summary>
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-05-03 | `mile_7de1c5a2` | K195：Copula 尾部依賴不對稱多配對深度驗證 — Bonferroni 修正後 26/66 配對 OOS 仍顯著 | research | milestone | published | 8468 |  | 研究, copula, tail-dependence, Bonferroni, GJR-GARCH, leverage-effect |
 | 2026-05-03 | `mile_67169c30` | 5 個熱門均線/趨勢策略，27 年實測有 4 個輸給長抱、最好的 1 個也通不過嚴格檢驗 | research | milestone | published | 4202 |  | 研究, SPY, 趨勢追蹤, 均線策略, 黃金交叉, 投資策略 |
 | 2026-05-03 | `mile_cbbf35cb` | 兩年研究、25 個結論：波動率投資的這些事，現在「穩了」、「快穩了」、「還沒答案」 | research | milestone | published | 3673 |  | 研究, 波動率, VT策略, VIX, GARCH, 研究綜述 |
 | 2026-05-03 | `mile_50030b56` | 多資產分散投資真的有用嗎？21 年實測：看得到、量不到、還會被 2022 咬一口 | research | milestone | published | 4157 |  | 研究, SPY, GLD, TLT, EFA, VNQ |

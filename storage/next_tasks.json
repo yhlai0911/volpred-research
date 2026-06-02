@@ -18698,7 +18698,7 @@
     "title": "K745: write general-audience article (auto-discovered uncovered K)",
     "description": "K K745 has verdict signal (score=1, reasons=['methodology/mechanism lesson', 'cluster cooldown penalty (spy 30d=69>10)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K745: PILOT HAR-RV with 51 days SPY 5-min data (2026-01-14 to 2026-03-27, N_OOS=37). PRELIMINARY — below 252-day OOS minimum. Part A: Realized measures computed — mean RV annualized vol 11.1%, jump fraction low (4.8%), AC(1)=0.423, ADF stationary (t=-4.41",
     "priority": 4,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K745",
@@ -18724,7 +18724,9 @@
     "blocked_note": "Topic covered by feed mile_69c4f0de: K744/K745 合題已 published",
     "claimed_by": "codex-cli",
     "claimed_at": "2026-06-02T20:38:06.912961+00:00",
-    "claim_session_id": "b864de16fe8c"
+    "claim_session_id": "b864de16fe8c",
+    "completed_at": "2026-06-02T21:45:21.814811+00:00",
+    "result": "Published a new K745 general article on the first 37-day high-frequency model race, added 2 charts, and kept the conclusion preliminary rather than overclaiming a regime shift."
   },
   {
     "id": "K772_article_general",
@@ -18982,7 +18984,7 @@
     "title": "Paper review (Codex 24h-rule): 模型只贏 1%，很多時候還不能算真的贏",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_7fbc61c8 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "claimed",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_7fbc61c8",
@@ -18994,7 +18996,9 @@
     "created_at": "2026-06-02T20:09:06+00:00",
     "claimed_by": "codex-cli",
     "claimed_at": "2026-06-02T20:37:54.072373+00:00",
-    "claim_session_id": "d858d6082079"
+    "claim_session_id": "d858d6082079",
+    "completed_at": "2026-06-02T21:46:41.900768+00:00",
+    "result": "Codex review completed: article framing is disciplined, but experiment K1396 has a material implementation caveat. A4f OOS forecasts use steady-state g approximation instead of the canonical recursive update, and DM uses NW+t-threshold without an HLN-style small-sample correction."
   },
   {
     "id": "K744_article_general",
@@ -19142,5 +19146,266 @@
     "started_at": "2026-06-02T20:11:16.128712+00:00",
     "completed_at": "2026-06-02T20:17:12.511767+00:00",
     "result": "K948 文章 draft 上池 mile_f314fcb3；4/5 模型 OOS R²<0 + DM 全 NS NULL；嵌真圖 k948_comparison.png + 真表 + Welch & Goyal 2008；anti_ai_gate PASS（1 retry fix）"
+  },
+  {
+    "id": "trending_repost_2026_06_03_ai支出",
+    "title": "[trending_repost] AI巨頭瘋資本支出，期權波動率偏斜如何定價下行風險？",
+    "description": "從美股科技巨頭Implied Volatility的Skewness切入，分析市場對AI投資回報不及預期的恐慌程度。可量化：比較CapEx宣告日前後之波動率微笑（Vol Smile）不對稱度的變化。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-02T22:00:46+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
+  },
+  {
+    "id": "trending_repost_2026_06_03_跨市場風險",
+    "title": "[trending_repost] 美股震盪VIX飆，台股該恐慌？跨市場波動率預測的統計真相",
+    "description": "探討台灣投資人習慣用美股 VIX 衡量台股風險的盲點。從實證切入，量化說明美股 VIX 對台股的預測力在 HLN 檢定下顯著為 NULL。建議改以台指期 VIXTWN 進行 localized 波動率定價。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "blocked",
+    "created_at": "2026-06-02T22:00:46+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ],
+    "claimed_by": "hourly-06",
+    "claimed_at": "2026-06-02T22:10:08.296068+00:00",
+    "claim_session_id": "2ca26a29e585",
+    "started_at": "2026-06-02T22:10:12.818982+00:00",
+    "completed_at": "2026-06-02T22:18:05.098654+00:00",
+    "result": "Hard arc-dup: K1098 已被 mile_81b4713f (2026-04-19 research audience) 完整覆蓋，內含同樣 OOS 數字 + Harvey + DM。Publisher dup gate 拒絕；且 narrative-arc 與 mile_609d9ff3 (2026-05-16 trending VIXTWN/VIX divergence) 屬同 cluster。標 failed-dup 不重派。",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-02T22:18:10+00:00",
+    "blocked_note": "K1098 angle 與 mile_81b4713f (research, 2026-04-19) hard dup + mile_609d9ff3 (trending, 2026-05-16) narrative-arc 同 cluster。寫成另一篇會踩 publisher dup gate 與 dedup rule。"
+  },
+  {
+    "id": "paper_review_mile_31529fdf",
+    "title": "Paper review (Codex 24h-rule): 只贏一點點的模型，很多時候還不能算真的贏",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_31529fdf needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_31529fdf",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-02T22:08:13+00:00"
+  },
+  {
+    "id": "K1412_article_general",
+    "title": "K1412: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1412 has verdict signal (score=3, reasons=None) but no general article in feed.json.  Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1412",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-02T22:08:13+00:00"
+  },
+  {
+    "id": "K941_article_general_v2",
+    "title": "K941: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K941 has verdict signal (score=0, reasons=['cluster cooldown penalty (spy 30d=81>10)']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Claude, 執行: Claude] 首次quantile volatility forecasting實驗。5模型：CAViaR-SAV/QR-GARCH/Quantile RF/GARCH parametric(Student-t)/MF-GJR parametric。SPY OOS 2016-2025 (2513天)。CAViaR-SAV全面勝出：mean pinball loss=0.000040、calibration MAD=0.006、coverage=91.2%、Winkler=0.000902。GARCH parametri",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K941",
+    "tags": [
+      "volatility",
+      "quantile-forecasting",
+      "CAViaR",
+      "prediction-interval",
+      "pinball-loss",
+      "Winkler-score",
+      "SPY",
+      "positive-result",
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": "spy",
+    "created_at": "2026-06-02T22:08:13+00:00"
+  },
+  {
+    "id": "K965_article_general",
+    "title": "K965: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K965 has verdict signal (score=0, reasons=['robust inference', 'cluster cooldown penalty (spy 30d=81>10)']) but no general article in feed.json.  Verdict preview: [提出: JRFM 2024, 執行: Claude] K965: Wild Bootstrap Optimal Hedge Ratio。數據: SPY+ES=F 4084天 (2010-2026), corr=0.974。6個方法 OOS 比較: WB-75th HE=0.9437, OLS Static 0.9435, WB-50th 0.9436, WB-25th 0.9420, Rolling-OLS 0.9396, DCC-GARCH 0.9344。DM test: 所有 WB vs OLS |t|<1.0 不顯著。DCC-GARCH 最差 (",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K965",
+    "tags": [
+      "wild-bootstrap",
+      "hedge-ratio",
+      "futures-hedging",
+      "dcc-garch",
+      "spy",
+      "es-futures",
+      "hedging-effectiveness",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "spy",
+    "created_at": "2026-06-02T22:08:13+00:00"
+  },
+  {
+    "id": "K1315_article_general",
+    "title": "K1315: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1315 has verdict signal (score=3, reasons=['PASS/Harvey-significant', 'cross-market/universal', 'cluster cooldown penalty (vix 30d=148>15)']) but no general article in feed.json.  Verdict preview: [Claude main thread, 2026-05-15] K1315 tests 5 forecast combination methods (HAR-ABS alone, HAR-VIX alone, Equal-Weight, Anti-QLIKE, Bates-Granger) for SPY daily realized variance OOS 2019-2024. Static IS coefficients 2005-2018 (consistent with K530). Key results: (1) ALL combina",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1315",
+    "tags": [
+      "forecast-combination",
+      "HAR-VIX",
+      "VIX-sufficient-statistic",
+      "SPY",
+      "PASS_NULL",
+      "Bates-Granger",
+      "Anti-QLIKE",
+      "K1316-boundary",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vix",
+    "created_at": "2026-06-02T22:18:24+00:00"
+  },
+  {
+    "id": "K949_article_general",
+    "title": "K949: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K949 has verdict signal (score=3, reasons=['PASS/Harvey-significant', 'cross-market/universal', 'cluster cooldown penalty (vix 30d=148>15)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] MF-GJR(VIX)跨市場驗證：SPY/FEZ(歐元區)/EWG(德國)/EWJ(日本)/EWU(英國)。OOS 2016-2025。4/5市場Harvey顯著：SPY +11.1%(t=3.44)、FEZ +4.4%(t=3.84)、EWG +4.1%(t=3.48)、EWJ +4.6%(t=4.22)、EWU +7.7%(t=2.40 borderline)。VIX elasticity(θ₁)跨市場穩定：mean=2.10, std=0.19。非美市場θ₁反而更高(2.1-2.3 vs SPY 1",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K949",
+    "tags": [
+      "volatility",
+      "MF-GJR",
+      "VIX",
+      "cross-market",
+      "global-risk",
+      "Europe",
+      "Japan",
+      "paper-ready",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vix",
+    "created_at": "2026-06-02T22:18:24+00:00"
+  },
+  {
+    "id": "K1006_article_general",
+    "title": "K1006: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1006 has verdict signal (score=2, reasons=['PASS/Harvey-significant', 'robust inference', 'cluster cooldown penalty (vix 30d=148>15)']) but no general article in feed.json.  Verdict preview: [提出: 賴奕豪, 執行: Claude] TAIFEX TX tick data 3480 天回測。(1) Overnight gap=83.6% total return（確認 K515）；(2) Naive overnight Sharpe=0.317 after costs（gross 0.739），Bootstrap CI [-0.198, 0.888] 含零；(3) VIX conditioning FAIL：VIX>20 平均 gap -3.59 pts（負的！），VIX≤20 +10.60 pts——高恐慌時 gap 雙向不是單向；(4)",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1006",
+    "tags": [
+      "TAIFEX",
+      "overnight-gap",
+      "holding-premium",
+      "VIX-conditional",
+      "NULL-strategy",
+      "Taiwan",
+      "tick-data",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vix",
+    "created_at": "2026-06-02T22:18:24+00:00"
+  },
+  {
+    "id": "K1074_article_general",
+    "title": "K1074: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1074 has verdict signal (score=2, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson', 'cluster cooldown penalty (vix 30d=148>15)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1074 tests whether A4f's statistical QLIKE edge (K988 DM t=4.48) translates to VT strategy Sharpe. OOS 2013-2026 (n=3338 days). FIVE STRATEGIES tested with proper signal.shift(1) lag and 5bp TX cost. NET SHARPE: 12/VIX-VT 0.861 ★ (wins SPY-VT cohort) > A",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1074",
+    "tags": [
+      "A4f-VT",
+      "12/VIX",
+      "Sharpe",
+      "economic-significance",
+      "Paper3",
+      "Paper9",
+      "BH-50/50",
+      "TSMOM",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vix",
+    "created_at": "2026-06-02T22:18:24+00:00"
+  },
+  {
+    "id": "K1075_article_general",
+    "title": "K1075: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1075 has verdict signal (score=2, reasons=['PASS/Harvey-significant', 'robust inference', 'cluster cooldown penalty (vix 30d=148>15)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1075 tests A4f vs GJR across 2007-2026 SPY (n=4848 days), covering GFC, Euro crisis, Taper tantrum, COVID, Rate Hike. FULL OOS DM t=+7.915 (double K988's 4.48). Bootstrap CI=[0.056, 0.094] fully positive. QLIKE improvement 0.89%. THREE NON-OVERLAPPING WI",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1075",
+    "tags": [
+      "A4f",
+      "GFC",
+      "2008",
+      "stress-test",
+      "Paper9",
+      "extended-history",
+      "VIX-bucket",
+      "reviewer-proof",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vix",
+    "created_at": "2026-06-02T22:18:24+00:00"
+  },
+  {
+    "id": "K970_article_general",
+    "title": "K970: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K970 has verdict signal (score=2, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson', 'cluster cooldown penalty (vix 30d=148>15)']) but no general article in feed.json.  Verdict preview: [提出: Conrad & Engle JAE 2025, 執行: Claude] SPY 2006-2026, IS=3249, OOS=1824。σ²=τ×g 乘法分解。⚠️ Codex 審查發現 tau 數據洩漏（tau_rv/ema 包含當天 r²）→ 修正 shift(1)。修正後結果：(1) MF2-VIX 仍勝 QLIKE 0.849 vs GJR 0.939（-9.55%），DM t=2.94 接近但未達 Harvey 3.0。(2) MF2-RV 修正後更差 +4.49%（原始 -14.2% 完全是 leakage）。(3) MF2-E",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K970",
+    "tags": [
+      "MF2-GARCH",
+      "mixed-frequency",
+      "VIX",
+      "GJR",
+      "Conrad-Engle",
+      "data-leakage-fix",
+      "Codex-caught",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vix",
+    "created_at": "2026-06-02T22:18:24+00:00"
   }
 ]
