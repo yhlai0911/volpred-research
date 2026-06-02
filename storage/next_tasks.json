@@ -18919,7 +18919,7 @@
     "title": "K566: write general-audience article (auto-discovered uncovered K)",
     "description": "K K566 has verdict signal (score=0, reasons=['cluster cooldown penalty (spy 30d=69>10)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] 5 factor ETFs (VLUE/MTUM/QUAL/IWM/USMV) monthly rotation + VT。全部 monthly DM negative (t=-0.18 to -2.99)。QUAL 最接近 (1.514 vs 1.545) 但 NS。Daily rebal 2.091 vs monthly 1.448——再次確認 microstructure artifact (K560/K562/K563 pattern)。Cross-OOS 0/3。Factor ETFs corr",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K566",
@@ -18934,7 +18934,13 @@
       "audience-general"
     ],
     "topic_cluster": "spy",
-    "created_at": "2026-06-02T18:08:01+00:00"
+    "created_at": "2026-06-02T18:08:01+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-02T18:30:11.335863+00:00",
+    "claim_session_id": "28abd9fcb7df",
+    "started_at": "2026-06-02T18:30:24.095813+00:00",
+    "completed_at": "2026-06-02T18:32:35.474278+00:00",
+    "result": "新增 general draft mile_190c7e3c：月頻因子 ETF 輪動沒有打敗 SPY+黃金+VIX 基準；最佳 QUAL 仍低於 benchmark，日頻高分則再次顯示 rebalancing artifact。已附 2 張真圖並用 cluster_waiver 入池。"
   },
   {
     "id": "Paper4_body_integration_steps_3_to_15",
