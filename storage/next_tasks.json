@@ -18547,7 +18547,7 @@
     "title": "K1301: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1301 has verdict signal (score=0, reasons=['cluster cooldown penalty (taiwan 30d=20>8)']) but no general article in feed.json.  Verdict preview: ",
     "priority": 4,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1301",
@@ -18564,14 +18564,17 @@
       "audience-general"
     ],
     "topic_cluster": "taiwan",
-    "created_at": "2026-06-02T12:08:59+00:00"
+    "created_at": "2026-06-02T12:08:59+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-02T15:09:37+00:00",
+    "blocked_note": "covered + taiwan cluster cooldown 20/8 (per publication_candidates score=0)"
   },
   {
     "id": "K1303_article_general",
     "title": "K1303: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1303 has verdict signal (score=0, reasons=['cluster cooldown penalty (taiwan 30d=20>8)']) but no general article in feed.json.  Verdict preview: ",
     "priority": 4,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1303",
@@ -18590,14 +18593,17 @@
       "audience-general"
     ],
     "topic_cluster": "taiwan",
-    "created_at": "2026-06-02T12:08:59+00:00"
+    "created_at": "2026-06-02T12:08:59+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-02T15:09:37+00:00",
+    "blocked_note": "covered + taiwan cluster cooldown 20/8 (per publication_candidates score=0)"
   },
   {
     "id": "K1309_article_general",
     "title": "K1309: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1309 has verdict signal (score=0, reasons=['cluster cooldown penalty (taiwan 30d=20>8)']) but no general article in feed.json.  Verdict preview: ",
     "priority": 4,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1309",
@@ -18615,14 +18621,17 @@
       "audience-general"
     ],
     "topic_cluster": "taiwan",
-    "created_at": "2026-06-02T12:08:59+00:00"
+    "created_at": "2026-06-02T12:08:59+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-02T15:09:38+00:00",
+    "blocked_note": "covered + taiwan cluster cooldown 20/8 (per publication_candidates score=0)"
   },
   {
     "id": "K1375_article_general",
     "title": "K1375: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1375 has verdict signal (score=0, reasons=['cluster cooldown penalty (taiwan 30d=20>8)']) but no general article in feed.json.  Verdict preview: K1374 個股峰季 d=0.305 在高股息 ETF 層級降至 d=0.055（全 NULL）。\n0056(年配, n=21, d=-0.015, p=0.927)、00878(季配, n=22, d=+0.343, p=0.179)、00919(月配, n=12, d=-0.147, p=0.285)。\nPooled n=55, d=+0.055, p=0.617。ETF 多成份股分散弱化個股除息日特有風險。\n投資人執行高股息 ETF 除息日附近操作無需擔心特別 vol spike。\n00878 邊際方向性正確但樣本不足（需 ≈68 事件達 80% ",
     "priority": 4,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1375",
@@ -18636,14 +18645,17 @@
       "audience-general"
     ],
     "topic_cluster": "taiwan",
-    "created_at": "2026-06-02T12:08:59+00:00"
+    "created_at": "2026-06-02T12:08:59+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-02T15:09:38+00:00",
+    "blocked_note": "covered + taiwan cluster cooldown 20/8 (per publication_candidates score=0)"
   },
   {
     "id": "K472_article_general",
     "title": "K472: write general-audience article (auto-discovered uncovered K)",
     "description": "K K472 has verdict signal (score=0, reasons=['cluster cooldown penalty (taiwan 30d=20>8)']) but no general article in feed.json.  Verdict preview: Asset: 0050.TW   ≈ EWMA (λ=0.94): QLIKE +1.85%, DM p=0.3659 → not significant   ≈ HAR log-range: QLIKE +16.23%, DM p=0.0611 → not significant   ≈ Semivariance RS⁻: QLIKE +1.20%, DM p=0.5925 → not significant   ≈ Rolling kurtosis: QLIKE +5.92%, DM p=0.1005 → not significant   ✗ HA",
     "priority": 4,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K472",
@@ -18654,7 +18666,10 @@
       "audience-general"
     ],
     "topic_cluster": "taiwan",
-    "created_at": "2026-06-02T12:08:59+00:00"
+    "created_at": "2026-06-02T12:08:59+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-02T15:09:39+00:00",
+    "blocked_note": "covered + taiwan cluster cooldown 20/8 (per publication_candidates score=0)"
   },
   {
     "id": "paper_review_mile_5f46ac4e",
@@ -18671,5 +18686,114 @@
     "started_at": "2026-06-02T13:09:57.264545+00:00",
     "completed_at": "2026-06-02T13:14:32.499298+00:00",
     "result": "Codex 24h-rule FAIL → 3 claim-evidence blockers 修正並 sync (feed.json + reports + Supabase). Knowledge entry 7616fd75. CONDITIONAL_PASS post-fix."
+  },
+  {
+    "id": "K745_article_general",
+    "title": "K745: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K745 has verdict signal (score=1, reasons=['methodology/mechanism lesson', 'cluster cooldown penalty (spy 30d=69>10)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K745: PILOT HAR-RV with 51 days SPY 5-min data (2026-01-14 to 2026-03-27, N_OOS=37). PRELIMINARY — below 252-day OOS minimum. Part A: Realized measures computed — mean RV annualized vol 11.1%, jump fraction low (4.8%), AC(1)=0.423, ADF stationary (t=-4.41",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K745",
+    "tags": [
+      "HAR-RV",
+      "realized_volatility",
+      "5-min_data",
+      "high_frequency",
+      "pilot",
+      "SPY",
+      "QLIKE",
+      "daily_proxy",
+      "preliminary",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "spy",
+    "created_at": "2026-06-02T15:09:40+00:00",
+    "started_at": "2026-06-02T15:10:06.828141+00:00",
+    "last_released_at": "2026-06-02T15:10:17.374810+00:00"
+  },
+  {
+    "id": "K772_article_general",
+    "title": "K772: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K772 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (spy 30d=69>10)']) but no general article in feed.json.  Verdict preview: [提出: 用戶, 執行: Claude] K772: Hansen & Lunde (2005) overnight/intraday decomposition for SPY (2007-2026, n=4840). Part A: Overnight variance share = 36.8% of total (Hansen & Lunde benchmark ~20% — difference because they used 2000-era data with less overnight trading). Corr(overnigh",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K772",
+    "tags": [
+      "overnight",
+      "intraday",
+      "Hansen-Lunde",
+      "variance-decomposition",
+      "HAR-OC",
+      "AMEM",
+      "GJR",
+      "null-result",
+      "SPY",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "spy",
+    "created_at": "2026-06-02T15:09:40+00:00",
+    "started_at": "2026-06-02T15:10:22.585065+00:00",
+    "last_released_at": "2026-06-02T15:10:58.627371+00:00",
+    "completed_at": "2026-06-02T15:18:02.999879+00:00",
+    "result": "Published mile_0a7041f4 (3432 字 + 3 charts) — caveat: audience auto-upgraded research by publisher (學術詞觸發); tags 含統計術語 (下次 fire 修)"
+  },
+  {
+    "id": "K783_article_general",
+    "title": "K783: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K783 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (spy 30d=69>10)']) but no general article in feed.json.  Verdict preview: [提出: 用戶, 執行: Claude] K783c 驗證 GJR-GARCH(1,1) 訓練視窗大小是否依市場 regime 不同而有差異。三個不重疊 OOS 期間（各 ~500 天）：高波動（2020-2021 COVID 崩潰+復甦）、中等（2018-2019 貿易戰/Fed pivot）、平靜（2016-2017 低 VIX 時代）。視窗：{252, 504, 1000, 2000, 3000, ALL}，指標：QLIKE on r²（Patton 2011）。\n核心發現：最佳視窗確實因 regime 不同而改變——高波動期(2020-21): ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K783",
+    "tags": [
+      "window-size",
+      "gjr-garch",
+      "regime",
+      "cross-period",
+      "spy",
+      "qlike",
+      "dm-test",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "spy",
+    "created_at": "2026-06-02T15:09:40+00:00"
+  },
+  {
+    "id": "K824_article_general",
+    "title": "K824: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K824 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (spy 30d=69>10)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K824v2修正K824的兩個bug後(Student-t df scale term + Basel 250天窗口)重新驗證4種1% VaR方法。結果：HistSim 4/502 violations(0.80%), Basel Green, Trinity PASS——唯一通過所有檢驗的方法。Student-t 7/502(1.39%) Basel Yellow; Normal 9/502(1.79%) Basel Yellow; QuantReg 5/502(1.00%) Basel Yellow。",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K824",
+    "tags": [
+      "VaR",
+      "quantile forecasting",
+      "HistSim",
+      "Student-t",
+      "Basel",
+      "Trinity",
+      "GJR-GARCH",
+      "SPY",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "spy",
+    "created_at": "2026-06-02T15:09:40+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-02T15:11:23.534732+00:00",
+    "claim_session_id": "9b330a13c04f",
+    "started_at": "2026-06-02T15:11:37.305854+00:00",
+    "completed_at": "2026-06-02T15:16:37.920294+00:00",
+    "result": "Published draft mile_328ced24 for K824 general coverage; generated 2 charts and framed the takeaway as HistSim being safer than higher-assumption tails under 1% worst-day backtests."
   }
 ]
