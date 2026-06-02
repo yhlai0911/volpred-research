@@ -1,41 +1,40 @@
 {
-  "timestamp": "2026-06-02T12:12:24Z",
-  "timestamp_taipei": "2026-06-02 20:12:24",
+  "timestamp": "2026-06-02T18:12:16Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "89 total drafts (36 research, 53 general). Thresholds: total>=12 OK, research>=4 OK, general>=8 OK."
+      "detail": "total_drafts=89 (research=36, general=53); thresholds: total>=12 OK, research>=4 OK, general>=8 OK"
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json does not exist (file missing, not just stale). File has been absent since ~2026-05-31 per alert history."
+      "detail": "storage/strategy_metrics.json not found (missing, not just stale)"
     },
     {
-      "name": "ERROR_LOG_RECENT",
+      "name": "ERROR_LOG",
       "status": "alert",
-      "detail": "Two 2026-06-01 entries: (1) fb_post_status dual-source drift — top-level vs details.fb_post_status divergence; 7 entries migrated via migrate_fb_post_status_single_source.py; publishing.md updated to forbid details.fb_post_status. (2) Codex 24h-rule audit found K208 VIX-GARCH article OOS horizon mislabelled 5d (actual 22d) and regime t-test mislabelled OOS (actual full-sample 2006-2024). Both resolved 2026-06-01. No entries dated 2026-06-02."
+      "detail": "2 entries dated today/yesterday: ['2026-06-01: dual-source fb_post_status drift — top-level vs details.fb_post_status mismatch; migrated to single canonical top-level field', '2026-06-01: Codex 24h-rule caught K208 VIX-GARCH article — OOS horizon label (5d written, 22d actual) and regime t-test sample scope (OOS written, full-sample actual); errata applied']"
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "15 strategies checked. No strategy has >2 null portfolio_return in last 3 entries."
+      "detail": "All 14 strategies checked; max last-3 null_count=1 (most recent day, normal); no strategy exceeds threshold of >2 nulls"
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files. Working tree clean."
+      "detail": "0 uncommitted files (clean working tree)"
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "2180 entries in storage/memory/knowledge.json."
+      "detail": "knowledge.json entry count: 2180"
     }
   ],
   "alerts": [
-    "METRICS MISSING: storage/strategy_metrics.json does not exist — file has been absent since ~2026-05-31.",
-    "ERROR_LOG 2026-06-01: fb_post_status dual-source resolved; K208 VIX-GARCH article label errata resolved."
+    "metrics missing: storage/strategy_metrics.json does not exist",
+    "error_log has 2 recent entries (2026-06-01)"
   ]
 }
