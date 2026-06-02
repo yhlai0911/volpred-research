@@ -18359,7 +18359,7 @@
     "title": "K522: write general-audience article (auto-discovered uncovered K)",
     "description": "K K522 has verdict signal (score=0, reasons=['cluster cooldown penalty (garch 30d=16>10)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K522: HAR-RV pilot with 50 days 5-min SPY data. PRELIMINARY: only 17 IS obs after 22d warmup → 4 params overfits. Monthly beta=3.54 (pathological). HAR-RV worst (QLIKE 0.178). EWMA wins (0.067, zero params immune to overfitting). Daily-only HAR(d) QLIKE=0",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K522",
@@ -18373,7 +18373,13 @@
       "audience-general"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-06-02T09:08:12+00:00"
+    "created_at": "2026-06-02T09:08:12+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-02T10:52:07.935781+00:00",
+    "claim_session_id": "11572dfd0fda",
+    "started_at": "2026-06-02T10:56:34.001457+00:00",
+    "completed_at": "2026-06-02T10:57:18.628550+00:00",
+    "result": "Published general-audience draft mile_ee5a9ac0 for K522 via publish_draft. Angle: 50 days of 5-min SPY data is too short for a day-week-month volatility model; only 17 IS obs remained after warmup, monthly coefficient blew out to 3.54, and simple smoothing beat the more complex spec. Used cluster waiver and text-only exception because K522 has no canonical PNG charts yet."
   },
   {
     "id": "email-11923-305cbb",
@@ -18398,5 +18404,96 @@
     "started_at": "2026-06-02T10:11:44.905238+00:00",
     "completed_at": "2026-06-02T10:15:33.976131+00:00",
     "result": "Boss critique 'who's bad news' 100% 正確 — 原文 conflated cross-asset story (equity 恐慌→黃金漲) 解釋 own-shock γ<0；GJR γ 是 own bad news → own vol 的非對稱。Patch storage/reports/feed.json mile_02c403ef 反槓桿段落為正確 own-shock framing + 3 點機制 (rebalance flow / regime not shock / 訊號弱)。Anti-AI gate re-run PASS warn=1。寄 close email notification_id=438c06b2。Draft 留池等 boss next-round review。"
+  },
+  {
+    "id": "paper_review_mile_69e17b83",
+    "title": "Paper review (Codex 24h-rule): 為波動率量身打造的模型，真的比老牌非對稱模型更準嗎？三個 ETF 說「不」",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_69e17b83 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_69e17b83",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-02T11:08:07+00:00"
+  },
+  {
+    "id": "K802_article_general",
+    "title": "K802: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K802 has verdict signal (score=0, reasons=['cluster cooldown penalty (garch 30d=16>10)']) but no general article in feed.json.  Verdict preview: [提出: 用戶, 執行: Claude]\n\nK802 resolves the K799 conflict: GJR wins QLIKE but fails VaR 1% under Normal distribution assumption. By replacing the Normal quantile with a fat-tail distribution, GJR achieves BOTH best QLIKE and VaR Trinity PASS simultaneously.\n\nKEY RESULTS (SPY 2023-202",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K802",
+    "tags": [
+      "GJR-GARCH",
+      "skewed-t",
+      "VaR",
+      "distribution",
+      "QLIKE",
+      "fat-tails",
+      "model-evaluation",
+      "K799-followup",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "garch",
+    "created_at": "2026-06-02T11:08:07+00:00"
+  },
+  {
+    "id": "K1374_article_general",
+    "title": "K1374: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1374 has verdict signal (score=2, reasons=['PASS/Harvey-significant', 'robust inference', 'cluster cooldown penalty (taiwan 30d=20>8)']) but no general article in feed.json.  Verdict preview: K1374 擴展 K1373（5股 CONDITIONAL_PASS p=0.052 d=0.188）到 17 TWSE 主要成份股。\nPooled 226 除息日事件：Welch t=4.019, p=0.0001, Cohen d=0.305（統計 PASS 門檻）。\nMann-Whitney p=3.5e-7。Ex-date mean |r|=0.0132 vs ctrl=0.0099（ratio=1.342）。\n板塊差異：Industrial d=0.579 > Financial d=0.520 >> ETF d=0.187 > Tech d=",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1374",
+    "tags": [
+      "taiwan_stocks",
+      "ex_dividend",
+      "event_study",
+      "volatility",
+      "TWSE50",
+      "seasonality",
+      "sector_heterogeneity",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "taiwan",
+    "created_at": "2026-06-02T11:08:07+00:00",
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-06-02T11:09:41.436053+00:00",
+    "claim_session_id": "c3d470fd69ab",
+    "started_at": "2026-06-02T11:09:41.736848+00:00",
+    "completed_at": "2026-06-02T11:17:58.437186+00:00",
+    "result": "mile_5f46ac4e drafted ~850字 / 3 圖 / anti_ai_gate PASS / 6月除息旺季時效性 / Welch t=4.019 ratio 1.34x Cohen d=0.305 PASS"
+  },
+  {
+    "id": "K1100_article_general",
+    "title": "K1100: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1100 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (taiwan 30d=20>8)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1100g 原 daily session ratio 1.586 發現為 gap effect (13:45→15:00 + 05:00→08:45 兩跳空期) 而非 pure session asymmetry。K1100g_d3/d4 Student-t 下 OOS LRT 14.6 borderline, 年度不穩。K1100g_d5 測 pure gap² 是否真 info carrier, 替代 night 5-min r²。**結果 H2**: gap² IS LRT χ²=18.87 (",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1100",
+    "tags": [
+      "K1100g_d5",
+      "Paper3",
+      "gap-vs-night-r2",
+      "H2-indistinguishable",
+      "K1100g_d3-followup",
+      "Harvey-threshold-unreached",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "taiwan",
+    "created_at": "2026-06-02T11:08:07+00:00"
   }
 ]
