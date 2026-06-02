@@ -32135,5 +32135,29 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-06-02T21:14:27.763682"
+  },
+  {
+    "k_id": "K1399_review",
+    "experiment_id": "k1399",
+    "experiment_path": "experiments/k1399/",
+    "verdict": "FAIL",
+    "reviewer": "Codex 0.135",
+    "reviewer_source": "codex_cli_source_code_review",
+    "codex_review": true,
+    "timestamp": "2026-06-02T16:13:12.691121+00:00",
+    "summary": "Article mile_34157161 (K1399) FAIL paper_review: code-level integrity OK (lookahead clean, DM-HLN/QLIKE correct, numbers match results.json), but article narrative overclaims. HAR_VIX_T (5d-MA) dm_t=-3.53 is Harvey-significant vs baseline (|t|>3.0), contradicting the headline '只有一個分量真的有用'. Defensible conclusion is narrower: HAR-VIX-L is BEST single component and HAR-VIX-All not significantly better than HAR-VIX-L; HAR-VIX-T is also significant (runner-up).",
+    "critical_issues": [
+      "Article headline contradicts results.json: HAR_VIX_T dm_t=-3.53 (Harvey-significant) but article says only one component useful.",
+      "Mechanism overclaim: '訊號完整集中在水準本身' / '為什麼水準把訊號吃光' exceed what DM/QLIKE can establish.",
+      "Script not publication-frozen: OOS end = latest; rerun changes numbers."
+    ],
+    "follow_up_task": "K1399_article_revise_overclaim",
+    "tags": [
+      "paper_review",
+      "codex_review",
+      "overclaim",
+      "HAR-VIX",
+      "K1399"
+    ]
   }
 ]

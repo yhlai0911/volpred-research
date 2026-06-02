@@ -18795,5 +18795,54 @@
     "started_at": "2026-06-02T15:11:37.305854+00:00",
     "completed_at": "2026-06-02T15:16:37.920294+00:00",
     "result": "Published draft mile_328ced24 for K824 general coverage; generated 2 charts and framed the takeaway as HistSim being safer than higher-assumption tails under 1% worst-day backtests."
+  },
+  {
+    "id": "paper_review_mile_34157161",
+    "title": "Paper review (Codex 24h-rule): K1399：VIX 拆成 4 個分量之後，只有一個真的有用",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_34157161 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_34157161",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-02T16:08:17+00:00",
+    "claimed_by": "hourly-00",
+    "claimed_at": "2026-06-02T16:09:15.777913+00:00",
+    "claim_session_id": "24185635531c",
+    "started_at": "2026-06-02T16:09:26.921174+00:00",
+    "completed_at": "2026-06-02T16:12:53.225034+00:00",
+    "result": "Codex source-code review完成 (hourly-00 2026-06-03 00:25). Verdict=FAIL: code integrity OK (lookahead/DM-HLN/QLIKE all clean, numbers match results.json), but article narrative overclaims. Critical: HAR_VIX_T (5d-MA) dm_t=-3.53 also Harvey-significant vs baseline, contradicting headline '只有一個分量有用'. Follow-up: K1399_article_revise_overclaim (P2). Reviewer=Codex 0.135 / 78K tokens."
+  },
+  {
+    "id": "paper_review_mile_e5f33cfa",
+    "title": "Paper review (Codex 24h-rule): 讓模型更常改變心意，不代表它就更會預測",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_e5f33cfa needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_e5f33cfa",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-02T16:08:17+00:00"
+  },
+  {
+    "id": "K1399_article_revise_overclaim",
+    "task_type": "daily_article",
+    "priority": 2,
+    "status": "pending",
+    "title": "K1399 article overclaim fix (Codex FAIL 2026-06-03)",
+    "description": "Codex source-code review (hourly-00 2026-06-03) flagged mile_34157161 (K1399) FAIL: article headline '只有一個分量真的有用' contradicts results.json — HAR_VIX_T (5d-MA) also clears Harvey threshold (DM t=-3.53 vs baseline, |t|>3). Article must be revised: (1) title → '只有 2 個分量單獨有用，但水準最強' OR similar; (2) summary remove '只有 VIX 水準通過 Harvey 門檻' claim; (3) remove mechanism overclaim '訊號完整集中在水準本身' / '為什麼水準把訊號吃光' — DM/QLIKE 無法支撐 mechanism; (4) defensible conclusion: HAR-VIX-L is BEST single component AND HAR-VIX-All not significantly better than HAR-VIX-L; HAR-VIX-T is the close-second runner-up. Re-publish via feed-publisher with anti-AI gate. Source-level code clean (lookahead/DM/QLIKE all OK).",
+    "created_at": "2026-06-03T00:30:00+00:00",
+    "source": "codex_review_finding",
+    "blocked_reason": null
   }
 ]
