@@ -24,9 +24,9 @@
     "zeabur_project_id": "6a15c5a8f14c612a409a4d77",
     "active_service": "volpred-v3",
     "services": {
-      "volpred-web": "69b5b279e0a0c18cef9d780d",
+      "volpred-web": "6a15c5a9938e05c2b6854116",
       "volpred-v2": "69b8ed895a53b5901a3c8d25",
-      "volpred-v3": "6a15c5a9938e05c2b6854116"
+      "volpred-v3": "6a15c5a9938e05c2b6854117"
     },
     "_legacy_pre_20260602": {
       "zeabur_project_id": "69b5b264800a475a1f82b073",
@@ -38,7 +38,8 @@
       },
       "note": "舊伺服器 (deploy 一直 REMOVED 未上線)；2026-06-02 老闆換伺服器後改指新 project/service/env"
     },
-    "zeabur_environment_id": "6a15c5a85dd63457627dd6c7"
+    "zeabur_environment_id": "6a15c5a85dd63457627dd6c7",
+    "_deploy_method_note": "部署方法=CLI `frontend-v2-fix/scripts/deploy-zeabur-safe.sh`（zeabur deploy 上傳 build）。live 站 volpred.zeabur.app = volpred-v3 服務（…117，綁 domain）。2026-06-02 搬機器=只換這三個 ID：zeabur_project_id / zeabur_environment_id / services.volpred-v3。volpred-web(…116, GitHub yhlai0911/volpred-web)無 domain、非前端、勿動。前端原始碼 repo=github yhlai0911/volpred-v2（但部署不靠 git push，靠上面的 CLI 上傳 working dir）。2026-06-02 實測：target 對(…117)即 RUNNING+上線；之前全因 target 錯(舊專案/volpred-web)而 REMOVED。"
   },
   "mirror": {
     "default_url": "https://mirror-api.zeabur.app"
