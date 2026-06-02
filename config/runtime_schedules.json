@@ -334,6 +334,19 @@
           "cron_handoff_regen.sh",
           "com.volpred.handoff-regen"
         ]
+      },
+      {
+        "id": "supabase_sync_drain",
+        "label": "Supabase 失敗 sync 隊列排空",
+        "cron": "*/30 * * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_drain_failed_syncs.sh",
+        "log_path": "storage/logs/cron/drain_failed_syncs.log",
+        "description": "排空 .failed_supabase_syncs.json：重試 transient sync 失敗、移除成功者，留下持續失敗者續觸 WARN。2026-06-02 結構修：原 dead-letter queue 無 consumer，transient 失敗會累積。由 run_due_jobs piggy-back 執行。",
+        "matchers": [
+          "drain_failed_supabase_syncs.py",
+          "drain_failed_syncs.log",
+          "cron_drain_failed_syncs.sh"
+        ]
       }
     ]
   },
