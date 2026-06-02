@@ -17948,7 +17948,7 @@
     "title": "K180: write general-audience article (auto-discovered uncovered K)",
     "description": "K K180 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: title: Directional Change (DC) Framework for Volatility Prediction hypothesis: DC intrinsic-time features break GJR-GARCH QLIKE ceiling",
     "priority": 4,
-    "status": "pending",
+    "status": "failed",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K180",
@@ -17960,7 +17960,13 @@
     ],
     "topic_cluster": "garch",
     "created_at": "2026-06-02T00:09:02+00:00",
-    "last_released_at": "2026-06-02T01:11:06.061226+00:00"
+    "last_released_at": "2026-06-02T01:11:06.061226+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-02T02:11:53.641922+00:00",
+    "claim_session_id": "274ee6a4b7ad",
+    "started_at": "2026-06-02T02:12:05.445794+00:00",
+    "completed_at": "2026-06-02T02:16:46.024687+00:00",
+    "result": "Aborted in this session: article needed newly generated charts, but image upload to Supabase failed because network is unavailable; feed entry rolled back."
   },
   {
     "id": "K188_article_general",
@@ -17978,7 +17984,11 @@
       "audience-general"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-06-02T00:09:02+00:00"
+    "created_at": "2026-06-02T00:09:02+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-02T02:13:13+00:00",
+    "blocked_note": "Standalone feed article already exists: mile_f1e927f5 (K188 HAR 天花板效應)",
+    "last_released_at": "2026-06-02T02:17:20.849485+00:00"
   },
   {
     "id": "K431_article_general",
@@ -17996,7 +18006,8 @@
       "audience-general"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-06-02T00:09:02+00:00"
+    "created_at": "2026-06-02T00:09:02+00:00",
+    "last_released_at": "2026-06-02T02:17:20.975337+00:00"
   },
   {
     "id": "K434_article_general",
@@ -18020,7 +18031,7 @@
     "title": "K437: write general-audience article (auto-discovered uncovered K)",
     "description": "K K437 has verdict signal (score=0, reasons=['cluster cooldown penalty (garch 30d=16>10)']) but no general article in feed.json.  Verdict preview: Asset: SPY GAS-t underperforms standard GARCH family. The score-driven approach does not help for SPY OOS 2023-2024.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K437",
@@ -18030,14 +18041,20 @@
       "audience-general"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-06-02T01:16:35+00:00"
+    "created_at": "2026-06-02T01:16:35+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-02T02:17:20.917823+00:00",
+    "claim_session_id": "a24668d304bf",
+    "started_at": "2026-06-02T02:17:29.544236+00:00",
+    "completed_at": "2026-06-02T02:19:58.366503+00:00",
+    "result": "Published general-audience K437 draft as mile_0908542b in feed.json using existing remote charts from follow-up K1129; Supabase sync deferred via .failed_supabase_syncs.json due no network."
   },
   {
     "id": "K445_article_general",
     "title": "K445: write general-audience article (auto-discovered uncovered K)",
     "description": "K K445 has verdict signal (score=0, reasons=['cluster cooldown penalty (garch 30d=16>10)']) but no general article in feed.json.  Verdict preview: Method: empirical q1_gjr_gamma: Gamma NOT significant (p=0.1191) — no clear asymmetry in full sample q2_best_in_sample: EGARCH_t q3_best_oos: GARCH_SkewT Reference: Baur & Dimpfl (2018) Economics Letters Reference: Katsiampa (2017) Economics Letters",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K445",
@@ -18049,7 +18066,13 @@
       "audience-general"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-06-02T01:16:35+00:00"
+    "created_at": "2026-06-02T01:16:35+00:00",
+    "claimed_by": "hourly-10",
+    "claimed_at": "2026-06-02T02:13:13.490954+00:00",
+    "claim_session_id": "c5c42fcf50ac",
+    "started_at": "2026-06-02T02:13:16.537371+00:00",
+    "completed_at": "2026-06-02T02:20:52.696341+00:00",
+    "result": "mile_a95a2285 draft: BTC inverse leverage time-varying (γ -0.151 2015-2016 sig; only 2/6 subperiods sig; anti_ai_gate PASS; 2 figs uploaded)"
   },
   {
     "id": "K462_article_general",
@@ -18068,6 +18091,8 @@
       "audience-general"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-06-02T01:16:35+00:00"
+    "created_at": "2026-06-02T01:16:35+00:00",
+    "started_at": "2026-06-02T02:11:08.485354+00:00",
+    "last_released_at": "2026-06-02T02:11:36.423767+00:00"
   }
 ]
