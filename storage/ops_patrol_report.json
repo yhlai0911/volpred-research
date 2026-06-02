@@ -1,40 +1,40 @@
 {
-  "timestamp": "2026-06-02T00:12:03Z",
+  "timestamp": "2026-06-02T06:11:14Z",
+  "timestamp_taipei": "2026-06-02 14:11:14",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "Total drafts: 89 (general: 53, research: 36). All thresholds passed (total≥12, general≥8, research≥4)."
+      "detail": "89 total drafts (36 research, 53 general). Thresholds: total>=12 OK, research>=4 OK, general>=8 OK."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json does not exist (NOT_FOUND). File is missing entirely."
+      "detail": "storage/strategy_metrics.json does not exist (file missing, not just stale). Recent alerts confirm ongoing absence since ~2026-05-31."
     },
     {
-      "name": "ERROR_LOG",
-      "status": "alert",
-      "detail": "Entries found dated 2026-06-01 (yesterday, Taiwan time): (1) Codex 24h-rule audit caught K717 composite ranking normalization error in production article — errata fix applied, Supabase synced. (2) Codex 24h-rule audit caught K208 VIX-GARCH article with OOS horizon mislabeled (5d vs 22d) and regime t-test sample mislabeled (OOS vs full sample) — errata fix applied, Supabase synced."
+      "name": "ERROR_LOG_RECENT",
+      "status": "ok",
+      "detail": "Entry from 2026-06-01 (yesterday): Codex 24h-rule audit found K208 VIX-GARCH article had OOS horizon mislabelled as 5d (actual 22d) and regime t-test sample mislabelled as OOS (actual full sample). Errata published; Supabase synced. No entries dated 2026-06-02."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "Checked 15 strategies. No strategy has >2 nulls in last 3 portfolio_return entries."
+      "detail": "14 strategies checked. All have exactly 1/3 last entries with null portfolio_return (likely today not yet settled). No strategy exceeds 2 nulls. Strategies: slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, adaptive_tier."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files."
+      "detail": "0 uncommitted files. Working tree clean."
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json has 2180 entries."
+      "detail": "2180 entries in storage/memory/knowledge.json."
     }
   ],
   "alerts": [
-    "STRATEGY_METRICS_FRESHNESS: storage/strategy_metrics.json is missing (NOT_FOUND)",
-    "ERROR_LOG: entries dated 2026-06-01 — K717 composite ranking article errata + K208 VIX-GARCH horizon/sample label errata, both Codex 24h-rule audit catches, both fixed and synced"
+    "METRICS MISSING: storage/strategy_metrics.json does not exist — strategy metrics cannot be evaluated for freshness. File has been absent since ~2026-05-31 per alert history."
   ]
 }

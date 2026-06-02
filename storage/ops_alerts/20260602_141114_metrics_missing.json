@@ -1,0 +1,9 @@
+{
+  "timestamp": "2026-06-02T06:11:14Z",
+  "timestamp_taipei": "2026-06-02 14:11:14",
+  "alert_type": "metrics_missing",
+  "severity": "warning",
+  "check": "STRATEGY_METRICS_FRESHNESS",
+  "detail": "storage/strategy_metrics.json does not exist. File has been absent since approximately 2026-05-31 based on alert history in storage/ops_alerts/. Strategy metrics freshness cannot be evaluated. Investigate: uv run volpred ops update-metrics or equivalent command to regenerate.",
+  "suggested_action": "Run strategy metrics update job to regenerate storage/strategy_metrics.json"
+}
