@@ -19153,14 +19153,20 @@
     "description": "從美股科技巨頭Implied Volatility的Skewness切入，分析市場對AI投資回報不及預期的恐慌程度。可量化：比較CapEx宣告日前後之波動率微笑（Vol Smile）不對稱度的變化。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-06-02T22:00:46+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "claimed_by": "hourly-07",
+    "claimed_at": "2026-06-02T23:08:41.241394+00:00",
+    "claim_session_id": "376568b991bd",
+    "started_at": "2026-06-02T23:08:45.022671+00:00",
+    "completed_at": "2026-06-02T23:20:07.532610+00:00",
+    "result": "Published mile_49616ac2 'AI 資本支出狂潮下,期權市場押的是上行而不是下行' to feed (status=published). Cross-section IV skew snapshot: META -5.3 vol pts (call skew), SPY +9.5 vol pts (put skew), 14+ vol pt gap. yfinance 6 tickers + chart uploaded to Supabase. FB draft saved (mile_id filled), pending Chrome posting. Anti-AI gate PASS both. Evidence: experiments/trending_repost_2026_06_03_ai_capex_skew/"
   },
   {
     "id": "trending_repost_2026_06_03_跨市場風險",
@@ -19319,7 +19325,7 @@
     "title": "K1006: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1006 has verdict signal (score=2, reasons=['PASS/Harvey-significant', 'robust inference', 'cluster cooldown penalty (vix 30d=148>15)']) but no general article in feed.json.  Verdict preview: [提出: 賴奕豪, 執行: Claude] TAIFEX TX tick data 3480 天回測。(1) Overnight gap=83.6% total return（確認 K515）；(2) Naive overnight Sharpe=0.317 after costs（gross 0.739），Bootstrap CI [-0.198, 0.888] 含零；(3) VIX conditioning FAIL：VIX>20 平均 gap -3.59 pts（負的！），VIX≤20 +10.60 pts——高恐慌時 gap 雙向不是單向；(4)",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1006",
@@ -19335,7 +19341,12 @@
       "audience-general"
     ],
     "topic_cluster": "vix",
-    "created_at": "2026-06-02T22:18:24+00:00"
+    "created_at": "2026-06-02T22:18:24+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-02T22:47:30.618490+00:00",
+    "claim_session_id": "e2b7e88beaed",
+    "completed_at": "2026-06-02T22:49:34.203902+00:00",
+    "result": "Published a K1006 general article on why overnight returns dominate TAIFEX yet still fail to become a clean standalone strategy after costs, using 2 existing experiment charts."
   },
   {
     "id": "K1074_article_general",

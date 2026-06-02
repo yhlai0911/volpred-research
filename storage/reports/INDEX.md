@@ -1,6 +1,6 @@
 # Feed Index
 
-_Last built: 2026-06-02 21:46 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-06-02 22:49 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
@@ -8,7 +8,7 @@ _Last built: 2026-06-02 21:46 UTC — source: `storage/reports/feed.json` (do NO
 - Last 30 days: **499**
 - Total chars (content): 6,329,592
 
-**Status**: published=1245, archived=122, draft=113, unpublished=9, retracted=5
+**Status**: published=1246, archived=122, draft=112, unpublished=9, retracted=5
 
 **Audience**: research=1047, general=252, daily=107, unknown=77, member_qa=10, event=1
 
@@ -18,6 +18,7 @@ _Last built: 2026-06-02 21:46 UTC — source: `storage/reports/feed.json` (do NO
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-06-02 | `mile_31529fdf` | 只贏一點點的模型，很多時候還不能算真的贏 | research | milestone | published | 105522 |  | 研究, 波動率預測, 模型比較, 投資研究, 負面結果, VIX |
 | 2026-06-02 | `mile_1cb111ed` | 高頻資料終於能上場比賽了，但 37 天還太早宣布新王登基 | general | general | draft | 1839 |  | 一般讀者, SPY, 5分鐘資料, 波動模型, 小樣本, 風險觀察 |
 | 2026-06-02 | `mile_f314fcb3` | 週頻也救不了 Return 預測 — 514 週測試後，5 個模型全敗給歷史平均 | research | milestone | draft | 3056 |  | 研究, SPY, return-predictability, weekly, OOS, null-result |
 | 2026-06-02 | `mile_1bff1fe5` | 白天波動看得很清楚，為什麼模型還是會估錯？問題常常出在『隔夜那一下』 | general | general | draft | 2432 |  | 一般讀者, 美股, 波動率, SPY, 風險模型, 隔夜跳空 |
@@ -185,7 +186,6 @@ _Last built: 2026-06-02 21:46 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-05-28 | `mile_96fb5f73` | 「Consistently outperforms」這句話的代價：GSP-HAR 在 5 檔美股 ETF 上的誠實複製 | research | milestone | draft | 137939 |  | 研究, HAR-RV, GSP-HAR, graph-signal-processing, placebo-test, DM-test |
 | 2026-05-28 | `mile_2d4edb65` | 一套方法在 13 個市場都有效，卻不代表它會幫你賺更多 | general | milestone | draft | 118890 |  | 一般讀者, 投資研究, 跨市場, 風險管理, 回撤控制, 負面結果 |
 | 2026-05-28 | `mile_7825c8a2` | 只贏一點點，很多時候還不能算模型真的比較強 | general | milestone | draft | 105510 |  | 一般讀者, 波動率預測, 模型比較, 投資研究, 負面結果, VIX |
-| 2026-05-28 | `mile_31529fdf` | 只贏一點點的模型，很多時候還不能算真的贏 | research | milestone | draft | 105522 |  | 研究, 波動率預測, 模型比較, 投資研究, 負面結果, VIX |
 | 2026-05-28 | `mile_bdf75de2` | 禮拜一是不是最危險？跨三市場 day-of-week 大檢驗：幾乎全軍覆沒 | research | general | published | 4277 |  | 研究, 週一效應, 跨市場, OpEx, 統計迷思 |
 | 2026-05-28 | `mile_f5714212` | 策略池有 11 個，演算法怎麼幫你挑？K647 配對機制全公開 | research | general | published | 4816 |  | 研究, strategy-matching, investor-profile, tx-cost, live-oos, pareto-frontier |
 | 2026-05-28 | `mile_1964c5c7` | 把資料版本修到最乾淨，總體指標還是贏不了各資產自己的恐慌表 | research | milestone | unpublished | 2256 |  | 研究, GLD, TLT, BTC, ALFRED, 波動率預測 |
