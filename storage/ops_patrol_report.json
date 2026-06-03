@@ -1,40 +1,39 @@
 {
-  "timestamp": "2026-06-02T18:12:16Z",
+  "timestamp": "2026-06-03T08:11:42+08:00",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "total_drafts=89 (research=36, general=53); thresholds: total>=12 OK, research>=4 OK, general>=8 OK"
+      "detail": "Total drafts: 89 (>=12 OK). Research audience: 36 (>=4 OK). General audience: 53 (>=8 OK)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json not found (missing, not just stale)"
+      "detail": "storage/strategy_metrics.json does not exist (MISSING). Alert: metrics stale/missing."
     },
     {
       "name": "ERROR_LOG",
-      "status": "alert",
-      "detail": "2 entries dated today/yesterday: ['2026-06-01: dual-source fb_post_status drift — top-level vs details.fb_post_status mismatch; migrated to single canonical top-level field', '2026-06-01: Codex 24h-rule caught K208 VIX-GARCH article — OOS horizon label (5d written, 22d actual) and regime t-test sample scope (OOS written, full-sample actual); errata applied']"
+      "status": "ok",
+      "detail": "Last 30 lines checked. Most recent entry is 2026-06-01 (K208 VIX-GARCH errata). No entries dated today (2026-06-03) or yesterday (2026-06-02)."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 14 strategies checked; max last-3 null_count=1 (most recent day, normal); no strategy exceeds threshold of >2 nulls"
+      "detail": "All 15 strategies checked. No strategy has >2 null portfolio_return in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (clean working tree)"
+      "detail": "0 uncommitted files. Clean working tree."
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "knowledge.json entry count: 2180"
+      "detail": "storage/memory/knowledge.json contains 2180 entries."
     }
   ],
   "alerts": [
-    "metrics missing: storage/strategy_metrics.json does not exist",
-    "error_log has 2 recent entries (2026-06-01)"
+    "strategy_metrics.json MISSING — metrics stale/missing"
   ]
 }
