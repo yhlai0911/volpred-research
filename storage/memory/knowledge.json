@@ -32209,5 +32209,28 @@
       "NULL-result",
       "CONDITIONAL_PASS"
     ]
+  },
+  {
+    "item_id": "779769e8",
+    "category": "vol_forecast_feature",
+    "content": "K1415 CONDITIONAL_PASS: log(VIX9D/VIX) 短端 IV 期限結構比率作為 HAR-RV(daily/weekly/monthly) baseline 之邊際 SPY 1-day-ahead RV 預測因子，OOS 2020-2026 expanding window 年末 refit。OOS QLIKE 改善 +6.56% (M0=2.156 → M1=2.014)，DM stat=-7.70, p=1.4e-14。Full-sample OLS β_TR=+4.043 (HAC t=8.56, p<1e-17)，符號與 H1 一致（短端 IV 相對長端高 → 下日 RV 高）。Post-2021 sub-sample (n=1357) Δ%=+5.64%, DM p<1e-10 穩健。RV proxy = daily r²×252 (no intraday 5-min)；單一資產 SPY；未做 multiple-ratio testing 校正。Codex review (codex-cli 0.135.0): lookahead / QLIKE 公式 / DM HAC(22) 全乾淨無 implementation bug；verdict CONDITIONAL_PASS 因 single asset + RV proxy + multiple-testing 未校正。Monetization angle: 可作 VolPred daily public signal (短端 IV 期限結構 → 明日 vol 預期) + VIX 期限結構交易策略 building block (K1408 變奏)。",
+    "evidence": [
+      "experiments/k1415/k1415_results.json",
+      "experiments/k1415/README.md",
+      "experiments/k1415/k1415.py"
+    ],
+    "confidence": 0.75,
+    "created_at": "2026-06-04T05:22:39.478324",
+    "experiment_id": "k1415",
+    "k_id": "K1415",
+    "experiment_path": "experiments/k1415",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "codex-cli 0.135.0 ChatGPT auth",
+    "reviewer_source": "codex_primary_path",
+    "codex_review": "CONDITIONAL_PASS - code clean, conditional due to single-asset + RV proxy + no multi-ratio testing correction",
+    "asset": "SPY",
+    "sample_period": "2014-02-05..2026-05-29",
+    "n_obs_oos": 1610,
+    "seed": 42
   }
 ]

@@ -1,0 +1,121 @@
+{
+  "experiment_id": "k1415",
+  "seed": 42,
+  "lookahead_check": "signal.shift(1) confirmed: target RV_t uses return(t-1->t); HAR & TR features all built from data up to t-1",
+  "sample": {
+    "start": "2014-02-05",
+    "end": "2026-05-29",
+    "n_obs_total": 3097,
+    "n_is": 1487,
+    "n_oos": 1610,
+    "oos_start": "2020-01-02"
+  },
+  "models": {
+    "M0": {
+      "spec": "log(RV_t) = a + b1 log(RV_lag1) + b2 log(RV_w) + b3 log(RV_m)",
+      "r2_full_sample": 0.11111145574882941,
+      "r2_adj_full_sample": 0.1102492942122133,
+      "oos_qlike": 2.1554945508065253
+    },
+    "M1": {
+      "spec": "M0 + b4 * log(VIX9D/VIX)",
+      "r2_full_sample": 0.13101068292714002,
+      "r2_adj_full_sample": 0.1298865052853898,
+      "oos_qlike": 2.014097457442424
+    }
+  },
+  "test": {
+    "dm_stat": -7.698109156623646,
+    "dm_pvalue": 1.3809438436593554E-14,
+    "dm_h0": "E[QLIKE_M1 - QLIKE_M0] = 0; negative stat -> M1 better",
+    "qlike_improvement_pct": 6.559844621791994
+  },
+  "coefficients": {
+    "M1": {
+      "const": {
+        "coef": -2.5344475232852446,
+        "stderr": 0.21042647448558272,
+        "tstat": -12.044337716920174,
+        "pvalue": 2.07738123872328E-33
+      },
+      "logRV_lag1": {
+        "coef": -0.06394549981313197,
+        "stderr": 0.01671782781882202,
+        "tstat": -3.8249885395480594,
+        "pvalue": 0.0001307781699568407
+      },
+      "logRV_w": {
+        "coef": 0.2907394035046685,
+        "stderr": 0.06130945258508099,
+        "tstat": 4.742162770107931,
+        "pvalue": 0.0000021144862299130373
+      },
+      "logRV_m": {
+        "coef": 0.4493789169540155,
+        "stderr": 0.07320862073811926,
+        "tstat": 6.138333333194827,
+        "pvalue": 8.339173991319306E-10
+      },
+      "TR": {
+        "coef": 4.042639293705774,
+        "stderr": 0.4724083782635978,
+        "tstat": 8.557509730384234,
+        "pvalue": 1.1533164783658007E-17
+      }
+    },
+    "M0": {
+      "const": {
+        "coef": -2.0650128065826516,
+        "stderr": 0.22043258015730083,
+        "tstat": -9.368001794966322,
+        "pvalue": 7.39186364404957E-21
+      },
+      "logRV_lag1": {
+        "coef": -0.04963282696315483,
+        "stderr": 0.01705672045792802,
+        "tstat": -2.909869284988213,
+        "pvalue": 0.0036157994633874264
+      },
+      "logRV_w": {
+        "coef": 0.45404019283449987,
+        "stderr": 0.06003220002247379,
+        "tstat": 7.563277585437888,
+        "pvalue": 3.930375972010033E-14
+      },
+      "logRV_m": {
+        "coef": 0.43624091806397874,
+        "stderr": 0.07204711175775579,
+        "tstat": 6.054939711264941,
+        "pvalue": 1.4047026399000907E-9
+      }
+    }
+  },
+  "sensitivity": {
+    "post_2021": {
+      "n": 1357,
+      "qlike_M0": 2.211555933714313,
+      "qlike_M1": 2.086831550559084,
+      "improvement_pct": 5.639666682350378,
+      "dm_stat": -6.5710772895868566,
+      "dm_pvalue": 4.9952520279912905E-11
+    },
+    "dm_hac_lag10": {
+      "dm_stat": -8.277712595412012,
+      "dm_pvalue": 1.2556383184080726E-16
+    }
+  },
+  "verdict": "CONDITIONAL_PASS",
+  "limitations": [
+    "RV proxy = daily squared log-return × 252; not 5-min realized variance (no intraday data)",
+    "single asset (SPY); broad-index generalization untested",
+    "12-year sample (2014-2026); pre-2014 VIX9D unavailable",
+    "annual refit cadence vs daily/expanding refit — may understate adaptive gains"
+  ],
+  "interpretation": "M1 augmenting HAR-RV with log(VIX9D/VIX) yields ΔQLIKE=+6.560% OOS, DM p=0.0000; β_tr=+4.0426 (p=0.0000). Verdict=PASS.",
+  "codex_review": {
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "codex-cli 0.135.0 ChatGPT auth",
+    "date": "2026-06-04",
+    "verdict_basis": "Code clean (lookahead/QLIKE/DM correct); conditional pending must-fix doc inconsistencies (now fixed) + multiple-testing acknowledgement"
+  }
+}

@@ -20367,5 +20367,22 @@
     "started_at": "2026-06-03T20:09:52.815123+00:00",
     "completed_at": "2026-06-03T20:14:43.916542+00:00",
     "result": "Codex 24h-rule review: MIXED verdict. 數字全正確；3 處敘述+1 方法 caveat 已修正（lookahead wording / claim softening / null result framing / MLE non-convergence note）。feed.json content + review_log 已寫。work_log entry 已落地。"
+  },
+  {
+    "id": "K1415_vix9d_term_ratio_har",
+    "task_type": "experiment",
+    "status": "succeeded",
+    "priority": "P3",
+    "title": "K1415: VIX9D/VIX term ratio as marginal predictor of next-day RV (HAR-RV baseline)",
+    "description": "OLS-based experiment evaluating short-end VIX term structure (VIX9D/VIX ratio) as marginal predictor of next-day SPY realized variance over HAR-RV baseline. Non-ML novel method (avoids quartet diversity block). Scope: SPY daily 2014-2026, OOS 2020-2026 expanding window, QLIKE + DM(HAC) test. Monetization angle: if marginal R²≥1% confirmed, VIX9D/VIX serves as intraday vol-regime gate for existing conservative VT strategy.",
+    "source": "main_thread_autonomous",
+    "created_at": "2026-06-03T21:14:31+00:00",
+    "updated_at": "2026-06-03T21:14:31+00:00",
+    "claimed_by": "hourly-05",
+    "claimed_at": "2026-06-03T21:14:32.963828+00:00",
+    "claim_session_id": "e11bc57e95a4",
+    "started_at": "2026-06-03T21:14:33.249149+00:00",
+    "completed_at": "2026-06-03T21:22:46.815527+00:00",
+    "result": "K1415 verdict=CONDITIONAL_PASS; OOS QLIKE +6.56% DM p=1.4e-14; β_TR=+4.043 t=8.56; Codex code clean; doc inconsistencies fixed; knowledge.json item_id=779769e8 written"
   }
 ]

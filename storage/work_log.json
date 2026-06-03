@@ -9391,5 +9391,15 @@
     "timestamp": "2026-06-04T04:14:41+08:00",
     "claimed_by": "hourly-04",
     "note": "Codex 24h-rule review on production article (publish + 10min). 數字全部正確 (raw_max 13261.17 / raw_mean 64.85 / p99 788.9 / n_clipped 15)，但 4 處敘述需修正：(1) 當天震 → 下一交易日條件波動 (2) 翻方向過頭 → 只 1/3 random drop-5 翻負 (3) 主結論不顯著 (bootstrap t=1.32 p=0.31 CI 跨 0) (4) MLE n_outer_iters=8 未收斂未註記。5 處 wording fix + 加方法說明段 caveat 全套用，feed.json content + details.review_log 已寫。"
+  },
+  {
+    "ts": "2026-06-03T21:22:50+08:00",
+    "task_type": "experiment",
+    "task_id": "K1415_vix9d_term_ratio_har",
+    "verdict": "CONDITIONAL_PASS",
+    "k_id": "K1415",
+    "reviewer": "codex-cli",
+    "commit": null,
+    "summary": "VIX9D/VIX term ratio marginal HAR-RV predictor (SPY 2014-2026) — OOS QLIKE +6.56%, DM p=1.4e-14, β_TR +4.04 (full-sample). Codex code clean."
   }
 ]
