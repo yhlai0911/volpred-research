@@ -24,7 +24,7 @@ if str(SRC) not in sys.path:
 
 from volpred.ops.alerts import build_alert_condition_report
 
-FB_POST_TERMINAL_STATUSES = {"success", "wont_fix", "fb_silent_reject"}
+FB_POST_TERMINAL_STATUSES = {"success", "wont_fix", "fb_silent_reject", "expired_skip"}
 FB_POST_HANDOFF_STATUSES = {"awaiting_interactive_session"}
 
 
