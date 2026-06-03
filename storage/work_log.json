@@ -9344,5 +9344,12 @@
       "storage/reports/feed.json",
       "experiments/trending_repost_2026_06_03_ai_capex_skew/fetch_iv_skew.py"
     ]
+  },
+  {
+    "timestamp": "2026-06-03T11:20:07+00:00",
+    "task_type": "platform_ops",
+    "task_id": "refill_audience_aware_gap_fix_2026_06_03_1907",
+    "summary": "K1120/K1393 article_general task dup-gate-reject root-cause fix. 274 K affected: candidate scorer flagged missing_general where research version title was already reader-friendly (e.g. mile_b8a4dc23 「升息專用風控」); auto-generated _article_general task got force-upgraded by audience gate then dup-rejected. Added belt 7 in scripts/refill_task_pool.py (_research_cover_is_reader_friendly helper) + 2 regression tests. Closed K1120_article_general + K1393_article_general as succeeded (主題已被 reader-friendly research 覆蓋).",
+    "outcome": "succeeded"
   }
 ]

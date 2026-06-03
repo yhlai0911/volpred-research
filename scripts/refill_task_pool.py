@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -262,6 +263,42 @@ def _has_publishable_title(cand: dict) -> bool:
     return bool(title)
 
 
+# 2026-06-03 K1120/K1393 incident: 274 K's have audience=research coverage
+# whose title is reader-friendly (no K-id / no statistical jargon). Refill
+# kept auto-generating `_article_general` tasks for them; agents would write
+# the general draft, audience gate in publisher.py would force-upgrade to
+# research (≥2 academic keyword match), then duplicate gate would reject
+# vs the existing research version. Net effect: task succeeded with zero
+# content shipped + wasted hourly fire slot. Skip when research-side cover
+# is already reader-friendly enough to serve general readers.
+_ACADEMIC_TITLE_RE = re.compile(
+    r"K\d+|p[-\s]?value|t[-\s]?stat|QLIKE|Sharpe|Bonferroni|"
+    r"bootstrap|MLE|cointegration|GARCH|Harvey|Diebold|"
+    r"DM\s+test|HAR[-\s]?RV|MCS|VaR",
+    re.IGNORECASE,
+)
+
+
+def _research_cover_is_reader_friendly(cand: dict) -> bool:
+    """True if K already has audience=research article(s) whose title is
+    free of academic jargon — in that case the research article already
+    serves general readers and a separate general companion would (a) get
+    force-upgraded by the audience gate, (b) be rejected by the duplicate
+    gate. Refill should skip.
+    """
+    if "research" not in (cand.get("audiences_covered") or []):
+        return False
+    for art in cand.get("covered_by") or []:
+        if not isinstance(art, dict):
+            continue
+        if art.get("audience") != "research":
+            continue
+        title = str(art.get("title") or "")
+        if title and not _ACADEMIC_TITLE_RE.search(title):
+            return True
+    return False
+
+
 def _is_retracted_or_overturned_candidate(cand: dict) -> bool:
     """Skip candidates whose canonical angle is already overturned/retracted.
 
@@ -424,6 +461,11 @@ def refill(target: int, dry_run: bool = False) -> dict:
         # 6th belt: don't auto-queue reader-facing articles for candidates
         # whose own canonical status is already overturned/retracted.
         if _is_retracted_or_overturned_candidate(cand):
+            continue
+        # 7th belt (2026-06-03 K1120/K1393): research-covered K whose
+        # research article title is already reader-friendly serves general
+        # readers; a general companion would dup-gate-reject. Skip.
+        if needed_audience == "general" and _research_cover_is_reader_friendly(cand):
             continue
         priority = _score_to_priority(int(cand.get("score") or 0))
         # Pick retry suffix if base id already used by terminal task

@@ -19749,7 +19749,7 @@
     "title": "Paper review (Codex 24h-rule): 「Consistently outperforms」這句話的代價：GSP-HAR 在 5 檔美股 ETF 上的誠實複製",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_96fb5f73 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_96fb5f73",
@@ -19762,7 +19762,9 @@
     "claimed_by": "codex-cli",
     "claimed_at": "2026-06-03T10:20:49.381654+00:00",
     "claim_session_id": "f0827b27882e",
-    "started_at": "2026-06-03T10:20:57.677374+00:00"
+    "started_at": "2026-06-03T10:20:57.677374+00:00",
+    "completed_at": "2026-06-03T10:23:01.462357+00:00",
+    "result": "CONDITIONAL_PASS: K1314 anti-lookahead and placebo framing hold, but pooled t=3.73 should not be described as formally decomposed '拼湊' without attribution test."
   },
   {
     "id": "K1008_article_general",
@@ -19845,7 +19847,7 @@
     "title": "K1097: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1097 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (vix 30d=148>15)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1097 pivoted from duplicating K1019 to extending with Student-t innovations + full Trinity. Agent detected K1019 already did MS-GJR vs GJR + A4f-VIX (per CLAUDE.md 不重複原則). RESULTS: M3 MS-GJR-t QLIKE=1.630 vs M2 MS-GJR-N=1.614 → Student-t does NOT improve",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1097",
@@ -19861,14 +19863,20 @@
       "audience-general"
     ],
     "topic_cluster": "vix",
-    "created_at": "2026-06-03T10:10:12+00:00"
+    "created_at": "2026-06-03T10:10:12+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-03T10:23:26.879338+00:00",
+    "claim_session_id": "f328c7003c86",
+    "started_at": "2026-06-03T10:26:57.091753+00:00",
+    "completed_at": "2026-06-03T10:26:57.154354+00:00",
+    "result": "Wrote storage/drafts/k1097_general_draft.md and verified it passes publish_draft --dry-run as general audience with 2 auto-uploadable charts."
   },
   {
     "id": "K1120_article_general",
     "title": "K1120: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1120 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (vix 30d=148>15)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1120 Post-2022 TLT FinStress signal DM t=+5.68 raw 可能 Fed common shock proxy (VIX+MOVE+NFCI 三者同時 react to Fed +475bp)。K1120b 做 residualization: NFCI_t = α + β_VIX×VIX_t + β_MOVE×MOVE_t + ε_t (rolling 252-day trailing), 取殘差 ε_t 再測。**Verdict GENUINE**: Res",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1120",
@@ -19884,14 +19892,20 @@
       "audience-general"
     ],
     "topic_cluster": "vix",
-    "created_at": "2026-06-03T10:10:12+00:00"
+    "created_at": "2026-06-03T10:10:12+00:00",
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-06-03T11:08:53.600871+00:00",
+    "claim_session_id": "3d2b8de47305",
+    "started_at": "2026-06-03T11:08:54.112585+00:00",
+    "completed_at": "2026-06-03T11:14:00.177965+00:00",
+    "result": "K1120+K1120b 主題已被 mile_b8a4dc23（audience=research, 3720 字, 標題 reader-friendly「升息專用風控」, has_k1120b=true）完整覆蓋。draft 已寫但 dup gate 攔下；archived to storage/drafts/archived/K1120_general_draft_dup_of_mile_b8a4dc23.md。Publication-candidates scorer audience-aware gap: 把 K1120 標為 missing-general 但實際 research 版已 reader-friendly cover 同主題；待 candidate rebuild 修正。"
   },
   {
     "id": "K1393_article_general",
     "title": "K1393: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1393 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (vix 30d=148>15)']) but no general article in feed.json.  Verdict preview: K1393: non-COVID DM t=4.26 Harvey-sig; A4f advantage not COVID-driven; Paper 9 C1 CRITICAL PASS",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1393",
@@ -19910,7 +19924,13 @@
       "audience-general"
     ],
     "topic_cluster": "vix",
-    "created_at": "2026-06-03T10:10:12+00:00"
+    "created_at": "2026-06-03T10:10:12+00:00",
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-06-03T11:14:40.213025+00:00",
+    "claim_session_id": "e5f7c523f2cf",
+    "started_at": "2026-06-03T11:14:40.687953+00:00",
+    "completed_at": "2026-06-03T11:14:41.164879+00:00",
+    "result": "K1393 主題已被 mile_b73b57c7（audience=research, 標題 reader-friendly『排除新冠再看一次：VIX 預測優勢在正常市場更清晰』）完整覆蓋。同 K1120 模式 — publication-candidates scorer audience-aware gap：missing_general 判定未考慮 research 版若 reader-friendly 已覆蓋同主題。待 scorer fix。"
   },
   {
     "id": "K446_article_general",
