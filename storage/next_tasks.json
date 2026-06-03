@@ -19225,7 +19225,7 @@
     "title": "K1412: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1412 has verdict signal (score=3, reasons=None) but no general article in feed.json.  Verdict preview: ",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1412",
@@ -19234,7 +19234,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-02T22:08:13+00:00"
+    "created_at": "2026-06-02T22:08:13+00:00",
+    "claimed_by": "hourly-10",
+    "claimed_at": "2026-06-03T02:10:09.413440+00:00",
+    "claim_session_id": "9112b428ed4b",
+    "started_at": "2026-06-03T02:10:09.637135+00:00",
+    "completed_at": "2026-06-03T02:19:38.423668+00:00",
+    "result": "Published draft mile_6a189e72 '台股與日股同漲同跌，比你以為的還要黏：5 次嚴格重測全數通過' — K1412 ROBUST 5/5 HLN-sig (Student-t copula driver, NOT Clayton); 真圖 figure_k1412_oos_sensitivity.png 雙 bar chart + HLN critical line; anti_ai_gate PASS (0 MUST 0 WARN, em-dash 0.43/1000)"
   },
   {
     "id": "K941_article_general_v2",
@@ -19395,7 +19401,7 @@
     "title": "K1075: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1075 has verdict signal (score=2, reasons=['PASS/Harvey-significant', 'robust inference', 'cluster cooldown penalty (vix 30d=148>15)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1075 tests A4f vs GJR across 2007-2026 SPY (n=4848 days), covering GFC, Euro crisis, Taper tantrum, COVID, Rate Hike. FULL OOS DM t=+7.915 (double K988's 4.48). Bootstrap CI=[0.056, 0.094] fully positive. QLIKE improvement 0.89%. THREE NON-OVERLAPPING WI",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1075",
@@ -19412,7 +19418,13 @@
       "audience-general"
     ],
     "topic_cluster": "vix",
-    "created_at": "2026-06-02T22:18:24+00:00"
+    "created_at": "2026-06-02T22:18:24+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-03T01:55:45.224928+00:00",
+    "claim_session_id": "5d3888a55228",
+    "started_at": "2026-06-03T01:55:54.216136+00:00",
+    "completed_at": "2026-06-03T02:00:14.463138+00:00",
+    "result": "Published general-audience K1075 article as draft mile_9c7f4c7f, using a cluster waiver for an uncovered VIX-family K. Angle focuses on the stronger claim only: A4f stays better across 2007-2026 and passes the 2008-09 GFC subperiod, while Euro and extreme-VIX evidence remain framed as limited."
   },
   {
     "id": "K970_article_general",
@@ -19463,7 +19475,7 @@
     "description": "Gmail UID: 11939\nMessage-ID: <66F3DF07-DBCB-40BD-A89D-D7795A0AC03D@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Wed, 3 Jun 2026 09:03:27 +0800\nSubject: Re: [VolPred Boss Report] 2026-06-03 09:00 台灣時間 平台運營報告\n\n--- 用戶回信內容 ---\nFacebook到底要錯幾次？\r\n每次都不能夠正常的Po文\r\n你到底有沒有在檢討底層的邏輯跟問題在哪裡？\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月3日 09:00 寫道：\r\n> \r\n> ﻿\r\n> VolPred Boss Report · 2026-06-03 09:00 台灣時間 · Overall WARN\r\n> \r\n> ⓪ 本 cycle 意圖 / 目標 / 規劃\r\n> \r\n> 意圖 Intent\t從反應式 firefighting 轉成主動 ops 結構。建 dashboard + audit + boss report 三件套，然後 cycle 化主線程運營。\r\n> 本週目標 Weekly Goal\t• Mission 4: 0 stale cron 持續一週、live URL 100% 自動驗證\r\n> • Mission 1: 維持 ≥6 articles/day 同時把 narrative-arc dedup Layer 4 落地（已 ✅）\r\n> • Mission 3: Paper 4 body_v4 完成 rewrite gate\r\n> • Mission 5: FB MCP ext popup gate 找根因 + 解（不再說『修不到』）\r\n> 本 cycle 計劃 Plan\t• Cycle 1: 建 dashboard + 2 audit + boss report email infra（✅ 本 cycle 完成）\r\n> • Cycle 2-3: Paper 4 body_v4 rewrite main thread + 派 review agent 並行\r\n> • Cycle 4: free_tier_growth_plan.md spec + 識別 P1 analytics 工具選型\r\n> • Cycle 5+: MCP ext 根因 deep-dive；若不解，準備 Anthropic issue text\r\n> 成功標準 Success Criteria\t• 每 cycle 開頭 dashboard read 不再有 surprise critical（即 standing audit catch 問題早於我）\r\n> • 每 4h boss email 自動寄出無 fail\r\n> • 次次 cycle 至少 1 個結構性改善（不只 patch）+ 2 個 article 產出\r\n> 已知風險 Known Risks\t• main thread context 易爆（已多次 compact），需要更積極派 agent 卸載\r\n> • FB MCP root cause 可能要花 ≥2 cycles 才找到\r\n> • Paper 4 rewrite 過長吃掉太多 main thread bandwidth\r\n> ① 平台狀態\r\n> \r\n> 區段\t狀態\t說明\t建議行動\r\n> production_pending\tok\t8 pending tasks + 1 pending_main_thread (top types: [('daily_article', 7), ('paper_body', 2)])\tdispatch top P1-P3 if slots free\r\n> production_throughput\tok\t11 articles published last 24h (target 6/day)\t—\r\n> distribution_supabase\tok\t11/11 last-24h articles synced\t—\r\n> verification_live_url\tok\t3/3 sample live URLs return 200\t—\r\n> verification_fb_pipeline\twarn\t1 FB posts pending sync\thandoff doc + manual paste or retry MCP\r\n> health_cron\tok\t0 cron jobs stale (over max-age)\t—\r\n> health_alerts_unhandled\tok\t0 current warn/critical alert conditions\t—\r\n> ①-b 排程器成果掌握（cron 跑完沒 / 成功沒）\r\n> \r\n> 每個定時排程器的 runs / exit / 完成狀態。全部正常\r\n> \r\n> === cron 成果掌握 review — 2026-06-03 09:00:42（台灣時間）===\r\n> \r\n>   hourly_dispatch   runs=218 exit=0 idle | last: 2026-06-03 08:18:19 (log-mtime)\r\n>   compute_worker    runs=867 exit=0 idle | last: 2026-06-03 09:00:05 (log-mtime)\r\n>   check_alerts      runs=217 exit=0 running | last: 2026-06-03 09:00:05 (log-mtime)\r\n>   collect_tw        runs=7 exit=0 idle | last: 2026-06-02 15:00:26 (log-mtime)\r\n>   collect_us        runs=7 exit=0 idle | last: 2026-06-03 07:03:35 (log-mtime)\r\n>   daily_update      runs=8 exit=0 idle | last: 2026-06-03 08:17:21 (log-mtime)\r\n>   release_pool      runs=36 exit=0 idle | last: 2026-06-03 07:00:10 (log-mtime)\r\n>   market_cal        runs=1 exit=0 idle | last: 2026-06-01 08:00:15 (log-mtime)\r\n>   memory_health     runs=9 exit=0 idle | last: 2026-06-03 05:30:06 (log-mtime)\r\n>   work_summary      runs=36 exit=0 idle | last: 2026-06-03 06:05:28 (log-mtime)\r\n> \r\n> 近 75 分鐘 git commits（hourly_dispatch 產出代理）：1 筆\r\n>   e68feda2 hourly-08_dispatch | K1074 daily_article — A4f QLIKE 統計勝但 turnover +68% 吃光，淨 Sharpe 不贏 12/VIX\r\n> \r\n> ✅ 所有 cron 排程器：last exit 0、無逾時、無中斷班。\r\n> ② 本 cycle 活動（過去 4h）\r\n> \r\n> 4 commits\r\n> \r\n> SHA\tSubject\tTime\r\n> e68feda2\thourly-08_dispatch\ty_art\r\n> 11266a82\thourly-07_dispatch\tepost\r\n> 3a324ea4\thourly-06_dispatch\tepost\r\n> 71f2d0f9\thourly-05_dispatch\tps +\r\n> ③ Pending 池與論文組合\r\n> \r\n> Pending tasks: 8\r\n> \r\n> By type: daily_article · 7paper_body · 1\r\n> \r\n> 論文組合\r\n> \r\n> Paper\tStatus\r\n> crypto-fear-channel\t**READY FOR SUBMISSION** (2026-05-17 v4.\r\n> eav-universal-magnitude\tscaffold v2 (paper_decision confirmed 20\r\n> garch-x-vix\tsubmitted (under review) | Reproduce gat\r\n> leverage-direction\tR1 review — 2 CRITICAL (C3/C4/C5 subsets\r\n> prg-periodic-garch\t✅ **Submission-ready (all clear)** (2026\r\n> taiwan-vt\t**Major Revision Required** — 2 HIGH blo\r\n> vix-sufficiency\tReproduce gate GREEN (98.0% match, alert\r\n> volatility-absorption\tR1 review — Path B errata revision appli\r\n> vt-crowding-abm\t✅ Submission-ready (R3 SEVERE=0; v2 revi\r\n> vt-insurance-cost\t✅ **Submission-ready — GREEN 100% (9/9)*\r\n> vt-trend-following\tbody_v3 HIGH = 0 (after v3 H1–H4 fixes,\r\n> ⑤ 下個 cycle 行動（無需你決策）\r\n> \r\n> 1. [pending] Wire audit +\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "pending",
+    "status": "claimed",
     "tags": [
       "email_reply",
       "user_input"
@@ -19473,7 +19485,10 @@
     "email_uid": 11939,
     "email_message_id": "<66F3DF07-DBCB-40BD-A89D-D7795A0AC03D@gmail.com>",
     "email_subject": "Re: [VolPred Boss Report] 2026-06-03 09:00 台灣時間 平台運營報告",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>"
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-06-03T01:56:25.870347+00:00",
+    "claim_session_id": "d81bb1c0f576"
   },
   {
     "id": "Paper4_body_steps_5_to_15_with_version_reconcile",
@@ -19492,5 +19507,28 @@
       "version-reconcile"
     ],
     "source": "hourly-09-2026-06-03"
+  },
+  {
+    "id": "email-11944-9461cb",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] 自主 loop fire 09:07 — Paper 4 §4.6 pub-delay + Table 2 ",
+    "description": "Gmail UID: 11944\nMessage-ID: <D730F230-2D1B-408E-BE72-B79D451FF77C@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Wed, 3 Jun 2026 09:37:51 +0800\nSubject: Re: [VolPred Alert][INFO] 自主 loop fire 09:07 — Paper 4 §4.6 pub-delay + Table 2 擴至 13 行\n\n--- 用戶回信內容 ---\nhttps://volpred.zeabur.app/reports/mile_31529fdf\r\n\r\nhttps://volpred.zeabur.app/reports/mile_7fbc61c8\r\n\r\n檢討為什麼兩篇雷同的文章會被發出來\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月3日 09:19 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> 自主 loop fire 09:07 — Paper 4 §4.6 pub-delay + Table 2 擴至 13 行\r\n> Alert level: info\r\n> INFO\r\n> Hourly Fire 09:07 摘要 — Paper 4 整合步驟 3-4 完成\r\n> \r\n> 完成項目\r\n> \r\n> Claim 任務：Paper4_body_integration_steps_3_to_15 (P3, paper_body, main-thread)\r\n> 執行內容：integration_plan_v2 §5 step 3 (§4.6 Publication-Delay Convention) + step 4 (Table 2 擴至 13 行)\r\n> Step 3 — §4.6 Publication-Delay Convention（~1.5 頁）\r\n> Release calendar 表（USEPU/WLEMU daily $t+1$、NFCI/STLFSI4 weekly $t+5\\sim 6$ 日）\r\n> shift(2) 在 daily/weekly 一致性說明 + 公式\r\n> K1116b 驗證：SPY M4 從 $t=-3.00$ 加深到 $-3.61$；TLT M4 唯一 apparent niche 從 $+3.74$ 崩到 $+1.96$\r\n> 16-cell K1116b 14 cells 穩定的 robustness chunk\r\n> Step 4 — Table 2 擴至 13 行\r\n> 加 Family 12 EPU $|t|=2.55^\\dagger$（raw $p=0.012$, HB $p=1.000$, signed harmful）\r\n> 加 Family 13 FinStress $|t|=3.61^{\\dagger\\dagger}$（shift(2) corrected, original $3.00$）\r\n> HB FWER denominator 8→10 testable families\r\n> 4 條 footnote：proxy horizon mismatch + harmful direction + spec ID + 整體說明\r\n> 編譯驗證\r\n> \r\n> xelatex 2 pass clean\r\n> main_v2.tex 989→1064 LoC，PDF 40→42 頁\r\n> 無 undefined references；3 個 overfull \\hbox 警告皆 pre-existing\r\n> ⚠️ 版本分歧（已建 follow-up）\r\n> \r\n> paper-update CLI 推 main_v4.pdf（src/volpred/ops/papers.py:236 priority main_v4 > main_v3 > main_v2）。但 integration_plan_v2 目標是 main_v2，我的編輯在 main_v2。main_v4（5/30）有獨立 §7 PIT panorama + Channel-Specific Heterogeneity 卻沒 Family 12/13 整合。今天未 clobber main_v4（保留其獨立工作），follow-up task Paper4_body_steps_5_to_15_with_version_reconcile (P3) 已建，下次先決定 canonical：(a) merge main_v4 §7 入 main_v2 再 rename (b) 直接編輯 main_v4 (c) 改 priority 順序。\r\n> 任務池\r\n> \r\n> Paper4_body_integration_steps_3_to_15 → succeeded (commit 83747b2b)\r\n> Paper4_body_steps_5_to_15_with_version_reconcile → pending (P3)\r\n> Commits\r\n> \r\n> 83747b2b paper edits + k1325 experiment files\r\n> next_tasks.json update commit (在 PHASE Z 補)\r\n> 下班時段\r\n> \r\n> 開始 09:07:49\r\n> 完成 ~09:19（約 11 分鐘，遠低於 50min cap）\r\n> 下次 fire ~10:07（hourly :07）\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-03T01:45:08.359716+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11944,
+    "email_message_id": "<D730F230-2D1B-408E-BE72-B79D451FF77C@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] 自主 loop fire 09:07 — Paper 4 §4.6 pub-delay + Table 2 擴至 13 行",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-06-03T01:56:26.095327+00:00",
+    "claim_session_id": "c6f06f1dcca1",
+    "completed_at": "2026-06-03T02:01:16.396215+00:00",
+    "result": "兩篇雷同根因=publisher dedup 只擋 exact-title-24h，不同標題的同實驗近重複(K1396, 0.48 title-sim, 相同開頭)只 warn 不擋→兩篇都發。已(1)retract 較晚的 mile_31529fdf(keep mile_7fbc61c8)+sync Supabase 隱藏(2)結構修:publish_milestone 加 hard-block(同 experiment_ref+sim>0.40 或 sim>0.55，14天內)→實測擋住該 K1396 dup(3)commit+tests pass。dup_waiver 可override。"
   }
 ]
