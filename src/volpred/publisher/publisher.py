@@ -561,9 +561,45 @@ class Publisher:
 
         # --- Similar topic check: warn if keyword overlap with existing ---
         similar = self._find_similar_articles(title, feed, audience)
+
+        # --- HARD BLOCK near-duplicates (2026-06-03 fix; K1396 dup incident) ---
+        # Previously only exact-title-within-24h blocked; different-title near-dups
+        # of the SAME experiment merely WARNED and published anyway (mile_7fbc61c8 +
+        # mile_31529fdf, both K1396, 0.48 title-sim, identical opening). Now block:
+        #   (a) same experiment_ref AND title-sim > 0.40, OR
+        #   (b) title-sim > 0.55 (very high regardless of ref)
+        # within the last 14 days. Override with details['dup_waiver']=<reason> for a
+        # genuinely differentiated same-topic piece.
+        if not (details or {}).get('dup_waiver'):
+            import re as _re
+            new_refs = set()
+            for _t in (tags or []):
+                _ts = str(_t).strip()
+                if _re.fullmatch(r'[Kk]\d+[a-z]?', _ts):
+                    new_refs.add(_ts.upper())
+            for _m in _re.findall(r'[Kk]\d{2,}[a-z]?', f"{title} {description or ''}"):
+                new_refs.add(_m.upper())
+            cutoff_dup = datetime.now(timezone.utc) - timedelta(days=14)
+            for s in similar:
+                existing = next((a for a in feed if a.get('id') == s['id']), None)
+                if not existing or existing.get('status') in ('unpublished', 'retracted'):
+                    continue
+                erefs = {str(r).upper() for r in ((existing.get('details') or {}).get('experiment_refs') or [])}
+                shared = bool(new_refs & erefs)
+                try:
+                    from dateutil.parser import parse as dtparse
+                    recent = dtparse(existing.get('published_at') or existing.get('created_at', '')) > cutoff_dup
+                except Exception:
+                    recent = True
+                if recent and ((shared and s['similarity'] > 0.40) or s['similarity'] > 0.55):
+                    print(f"  🚫 BLOCKED near-duplicate (sim={s['similarity']:.0%}, shared_ref={shared}) "
+                          f"of {s['id']} '{existing.get('title','')[:50]}' — skipping publish. "
+                          f"Set details['dup_waiver'] to override.")
+                    return s['id']
+
         high_overlap = [s for s in similar if s['similarity'] > 0.30]
         if high_overlap:
-            print(f"  🚫 HIGH similarity articles found ({len(high_overlap)}) — likely duplicate topic:")
+            print(f"  ⚠️ HIGH similarity articles found ({len(high_overlap)}) — likely duplicate topic:")
             for s in high_overlap[:3]:
                 print(f"    [{s['similarity']:.0%}] {s['id']}: {s['title'][:60]}")
             print(f"  → Consider skipping or differentiating this article significantly.")
