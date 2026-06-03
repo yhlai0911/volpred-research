@@ -319,6 +319,49 @@ R^2_{\text{OOS,VIX}} = 1 - \frac{\sum_{t \in \text{OOS}} (RV_t - \hat{RV}_t^{\te
 \end{equation}
 where positive values indicate improvement over VIX. This is a more stringent test because VIX is itself a strong predictor (Campbell-Thompson $R^2_{\text{OOS,CT}}$ for VIX alone ranges from 0.24 to 0.64 across eras). Our research question is specifically whether any signal adds value \emph{beyond} VIX, making the VIX-relative metric the appropriate primary measure. However, reporting both metrics ensures that our results are comparable to the existing literature and demonstrates that VIX's own forecasting power is substantial---many signals that achieve positive $R^2_{\text{OOS,CT}}$ (i.e., beat the historical mean) still show zero $R^2_{\text{OOS,VIX}}$ (i.e., add nothing beyond VIX).
 
+\subsection{Publication-Delay Convention}
+\label{sec:pub_delay}
+
+A subtle but consequential timing issue arises whenever an economic or financial-stress signal published with a real-world release lag is treated as if it were available the moment the observation period ends. For market-derived series (VIX, term structure, returns) the observation is its own release: closing prices are known at the close. For FRED macro and financial-stress series the observation date and the release date diverge by one to six calendar days, and a forecaster cannot condition on an observation until \emph{after} it has been published. Ignoring this gap silently introduces look-ahead bias---trivial for daily series but material for the weekly financial-stress block, where the gap is sometimes longer than the data frequency itself.
+
+\paragraph{Release calendar.} Table~\ref{tab:pub_delay_calendar} summarizes the canonical release lags for the FRED inputs to Families 12--13.
+
+% ─── Table: Release Calendar ─────────────────────────────────
+\begin{table}[H]
+\centering
+\small
+\caption{Publication Release Calendar for Families 12--13}
+\label{tab:pub_delay_calendar}
+\begin{threeparttable}
+\begin{tabular}{@{}lllll@{}}
+\toprule
+Family & Series (FRED ID) & Native frequency & Release lag & Required shift \\
+\midrule
+12 (EPU) & USEPUINDXD & Daily & $t+1$ business day & shift(2) daily / shift(1) weekly \\
+12 (EPU) & WLEMUINDXD & Daily & $t+1$ business day & shift(2) daily / shift(1) weekly \\
+13 (FinStress) & NFCI & Weekly (Fri obs) & $t+5$ calendar days & shift(2) weekly \\
+13 (FinStress) & ANFCI & Weekly (Fri obs) & $t+5$ calendar days & shift(2) weekly \\
+13 (FinStress) & STLFSI4 & Weekly (Fri obs) & $t+6$ calendar days & shift(2) weekly \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes}: ``Daily'' rows refer to the series sampling frequency, not the forecasting frequency. ``shift($k$)'' means the signal observed at period $t$ is treated as conditioning information at period $t+k$. The daily and weekly shifts are consistent: at weekly aggregation, a daily series with a one-business-day release lag still appears in the prior week's available information set, while a Friday-observed weekly series released the following Wednesday is not in the prior week's set and must wait an additional week. Release lags are verified against the FRED ALFRED real-time vintage archive.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\paragraph{Notation.} Let $X_{j,t}$ denote signal family $j$ observed at period $t$ and $\delta_j$ its release lag in periods. The information set available to a forecaster at the start of period $t+1$ is
+\begin{equation}
+\mathcal{F}_t = \{X_{j,t-\delta_j+1}\}_{j=1}^{J},
+\label{eq:info_set_pub_delay}
+\end{equation}
+which collapses to the standard $\mathcal{F}_t = \{X_{j,t}\}_{j=1}^J$ only when $\delta_j = 1$ for all $j$. For Families 12 and 13 we set $\delta = 2$ at weekly frequency (Wednesday-released signals enter the following week's set); equivalently, all primary results in this paper use \texttt{Signal.shift(2)} for these two families.
+
+\paragraph{Why this matters.} Our companion robustness experiment (K1116b) re-estimates every Family 12--13 specification under both the conventional shift(1) and the publication-delay-corrected shift(2). For SPY the null finding strengthens: the M4 financial-stress specification moves from DM $t=-3.00$ under shift(1) to $t=-3.61$ under shift(2), pushing it further past the Harvey threshold of $|t|>3.0$ in the wrong direction. The single \emph{apparent} cross-asset niche reported in an earlier draft---TLT volatility forecast with the financial-stress block, with shift(1) DM $t=+3.74$---collapses to $t=+1.96$ under shift(2), which fails the Harvey threshold and is no longer significant after Holm-Bonferroni correction. All other 14 of the 16 K1116b cells are stable across the two shift conventions. The convention adopted in the main text is therefore the conservative one and a reader applying the conventional shift(1) would obtain a single weakly-significant cell whose collapse under shift(2) is informative on its own; we report both in Section~\ref{sec:results} for completeness.
+
+\paragraph{Generalization.} The convention extends naturally to other release-lagged data: for daily macro series with a one-business-day lag (e.g., daily EPU) the daily-frequency shift is 2; for monthly series with a one-month release lag the monthly shift is 2; for irregularly-released series (e.g., CPI, NFP) the appropriate shift is the maximum business-day gap between observation reference period and release. Implementing this convention requires only a one-line correction at signal construction and does not interact with any subsequent estimation choice.
+
 
 %=================================================================
 \section{Statistical Evaluation and Multiple-Testing Control}
@@ -411,13 +454,13 @@ Net portfolio return is $r_t^{\text{net}} = r_t^{\text{gross}} - \text{TX}_t$.
 
 \subsection{Volatility Forecasting: No Signal Beats VIX}
 
-Table~\ref{tab:main_results} presents the main results for all eleven signal families. The key finding is unanimous: no signal produces a statistically significant out-of-sample improvement over VIX.
+Table~\ref{tab:main_results} presents the main results for all thirteen signal families. The key finding is unanimous: no signal produces a statistically significant out-of-sample improvement over VIX; two of the canonical alt-data families (EPU and financial stress) are signed in the \emph{harmful} direction, i.e., the augmented forecast is significantly worse than the VIX-only baseline.
 
 % ─── Table 2: Main Results ───────────────────────────────────
 \begin{table}[H]
 \centering
 \small
-\caption{Volatility Forecasting: Eleven Signal Families vs.\ VIX}
+\caption{Volatility Forecasting: Thirteen Signal Families vs.\ VIX}
 \label{tab:main_results}
 \begin{threeparttable}
 \resizebox{\textwidth}{!}{%
@@ -436,6 +479,8 @@ Table~\ref{tab:main_results} presents the main results for all eleven signal fam
 9 & Google Trends fear & 0.271 & 0.038 & $7.92^{***}$ & 0.361 & $<0.001$ & 0.67 & 0.503 & 1.000 \\
 10 & Overnight VIX & 0.030 & 0.005 & $5.07^{***}$ & 0.374 & 0.003 & 1.12 & 0.263 & 1.000 \\
 11 & Calendar anomaly & $-0.007$ & 0.012 & $-2.39^{*}$ & 0.348 & 0.000 & 0.15 & 0.881 & 1.000 \\
+12 & Economic Policy Uncertainty$^{\ddagger}$ & --- & $-0.001$ & --- & --- & $-0.015$ & $2.55^{\dagger}$ & 0.012 & 1.000 \\
+13 & Financial Stress Indices$^{\ddagger}$ & --- & 0.010 & --- & --- & $-0.085$ & $3.61^{\dagger\dagger}$ & $<0.001$ & 1.000 \\
 \midrule
 \multicolumn{2}{l}{\textit{VIX-only benchmark}} & --- & --- & --- & 0.365 & --- & --- & --- & --- \\
 \multicolumn{2}{l}{\textit{Harvey (2016) approx.\ threshold}} & & & & & & $> 3.0$ & & \\
@@ -445,8 +490,11 @@ Table~\ref{tab:main_results} presents the main results for all eleven signal fam
 }
 \begin{tablenotes}
 \small
-\item \textit{Notes}: Partial $r|\text{VIX}$ is the partial correlation between the signal and 22-day forward realized volatility, controlling for VIX level. IS $\Delta R^2$ is the in-sample increase in $R^2$ from adding the signal to a VIX-only regression. IS $t$-stat tests $H_0: \beta_{\text{signal}} = 0$. $R^2_{\text{OOS,CT}}$ is the \citet{campbell2008} out-of-sample $R^2$ relative to the expanding-window historical mean (Equation~\ref{eq:oos_r2_ct}). $R^2_{\text{OOS,VIX}}$ is the out-of-sample $R^2$ relative to VIX-only forecasts (Equation~\ref{eq:oos_r2}). DM $|t|$ is the absolute Diebold-Mariano statistic with \citet{newey1987} HAC standard errors (bandwidth = 22). Raw $p$ is the two-sided $p$-value from the DM test. HB $p$ is the Holm-Bonferroni adjusted $p$-value controlling FWER at $\alpha = 0.05$ across the 8 testable families. Families 5--6 are portfolio strategies without direct volatility forecasting components. Family 7 (Bitcoin) is tested for Granger causality rather than regression. $^{***}p<0.001$; $^{**}p<0.01$; $^{*}p<0.05$ (in-sample only, conventional thresholds).
-\item All signals lagged one trading day. Note that several signals achieve positive $R^2_{\text{OOS,CT}}$ (i.e., they beat the historical mean) but zero or negative $R^2_{\text{OOS,VIX}}$ (i.e., they add nothing beyond VIX), confirming that VIX itself is a strong forecaster.
+\item \textit{Notes}: Partial $r|\text{VIX}$ is the partial correlation between the signal and 22-day forward realized volatility, controlling for VIX level. IS $\Delta R^2$ is the in-sample increase in $R^2$ from adding the signal to a VIX-only regression. IS $t$-stat tests $H_0: \beta_{\text{signal}} = 0$. $R^2_{\text{OOS,CT}}$ is the \citet{campbell2008} out-of-sample $R^2$ relative to the expanding-window historical mean (Equation~\ref{eq:oos_r2_ct}). $R^2_{\text{OOS,VIX}}$ is the out-of-sample $R^2$ relative to VIX-only forecasts (Equation~\ref{eq:oos_r2}). DM $|t|$ is the absolute Diebold-Mariano statistic with \citet{newey1987} HAC standard errors (bandwidth = 22 for daily Families 1--11; bandwidth = 4 for weekly Families 12--13). Raw $p$ is the two-sided $p$-value from the DM test. HB $p$ is the Holm-Bonferroni adjusted $p$-value controlling FWER at $\alpha = 0.05$ across the 10 testable families. Families 5--6 are portfolio strategies without direct volatility forecasting components. Family 7 (Bitcoin) is tested for Granger causality rather than regression. $^{***}p<0.001$; $^{**}p<0.01$; $^{*}p<0.05$ (in-sample only, conventional thresholds).
+\item Families 1--11 use signals lagged one trading day. Families 12--13 follow the publication-delay convention of Section~\ref{sec:pub_delay} (\texttt{shift(2)} at weekly W-FRI frequency for both EPU and financial-stress series). Families 12--13 are evaluated on the AR(1)+VIX+signal specification on a 2018--2026 weekly sample (K1116/K1116b); the partial-$r$ and IS $t$-stat columns are left blank because the 22-day-forward horizon used for the daily families does not align with the weekly evaluation horizon.
+\item $^{\ddagger}$ Signal direction: signed DM $t$ is \emph{negative}, indicating that the VIX-only baseline forecasts \emph{better} than the augmented specification. The directional one-sided null---``signal beats VIX''---is therefore not rejected (one-sided $p>0.99$); the two-sided rejection reflects \emph{harmful} information, not predictive value. We follow \citet{harvey2016} and treat these as null findings for the purpose of model selection.
+\item $^{\dagger}$ Family 12 (EPU): combined USEPU+WLEMU specification (K1116, M3). $^{\dagger\dagger}$ Family 13 (Financial Stress): combined NFCI+ANFCI+STLFSI4 specification reported under the publication-delay-corrected shift(2) (K1116b). The corresponding shift(1) DM $|t|$ is 3.00, which strengthens to 3.61 under shift(2)---both significantly negative, reinforcing the null. The pooled M5 (EPU+FinStress jointly) yields DM $|t|=1.01$ (raw $p=0.315$, indistinguishable from VIX).
+\item Note that several signals achieve positive $R^2_{\text{OOS,CT}}$ (i.e., they beat the historical mean) but zero or negative $R^2_{\text{OOS,VIX}}$ (i.e., they add nothing beyond VIX), confirming that VIX itself is a strong forecaster.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
