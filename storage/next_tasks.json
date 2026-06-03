@@ -19277,7 +19277,7 @@
     "title": "K965: write general-audience article (auto-discovered uncovered K)",
     "description": "K K965 has verdict signal (score=0, reasons=['robust inference', 'cluster cooldown penalty (spy 30d=81>10)']) but no general article in feed.json.  Verdict preview: [提出: JRFM 2024, 執行: Claude] K965: Wild Bootstrap Optimal Hedge Ratio。數據: SPY+ES=F 4084天 (2010-2026), corr=0.974。6個方法 OOS 比較: WB-75th HE=0.9437, OLS Static 0.9435, WB-50th 0.9436, WB-25th 0.9420, Rolling-OLS 0.9396, DCC-GARCH 0.9344。DM test: 所有 WB vs OLS |t|<1.0 不顯著。DCC-GARCH 最差 (",
     "priority": 4,
-    "status": "pending",
+    "status": "failed",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K965",
@@ -19293,7 +19293,13 @@
       "audience-general"
     ],
     "topic_cluster": "spy",
-    "created_at": "2026-06-02T22:08:13+00:00"
+    "created_at": "2026-06-02T22:08:13+00:00",
+    "claimed_by": "hourly-15",
+    "claimed_at": "2026-06-03T07:08:46.794312+00:00",
+    "claim_session_id": "cbd97f209f8f",
+    "started_at": "2026-06-03T07:08:47.818385+00:00",
+    "completed_at": "2026-06-03T07:09:57.054860+00:00",
+    "result": "narrative_arc_dup: K965 已 published as mile_408efe7a (2026-04-08, '用期貨避險到底多有效？')；同主題不再寫第二篇"
   },
   {
     "id": "K1315_article_general",
@@ -19512,8 +19518,8 @@
     "claimed_by": "interactive-claude",
     "claimed_at": "2026-06-03T01:56:25.870347+00:00",
     "claim_session_id": "d81bb1c0f576",
-    "completed_at": "2026-06-03T03:18:12.033023+00:00",
-    "result": "FB 根因+永久解 commit fix（audit+enum+4篇 expired+ permanent_fix doc）+ 寄 close email fb177969 給用戶（不問選擇題；只剩 5min user action 創 FB Page + 拿 token）",
+    "completed_at": "2026-06-03T06:52:59.729645+00:00",
+    "result": "FB 根因+永久解 commit fix（audit+enum+4篇 expired+ permanent_fix doc）+ 寄 close email fb177969 給用戶（不問選擇題；只剩 5min user action 創 FB Page + 拿 token）\n\nFB 根因=個人檔案無 API、headless cron 無法自動發→需 Chrome 互動且脆弱→積壓。老闆選 Option A 粉專+Graph API。已建 scripts/fb_page_post.py（Page /feed + 留言連結，token 從 .env，--drain 自動清待發；dry-run 驗證 3 篇+mile_49616ac2）。待老闆建粉專+提供 long-lived Page token 進 .env→我生 FB 文案+API drain+接 cron 全自動。步驟已給老闆。",
     "linked_task_ids": [
       "fb_page_graph_api_integration"
     ],
@@ -19614,7 +19620,7 @@
     "id": "Paper4_body_steps_7_to_15_post_reconcile",
     "title": "Paper 4 body integration steps 7-15 (post-reconcile, target main_v4.tex)",
     "description": "Continue integration_plan_v2.md post-reconcile. Pre-req DONE (main_v4 = renamed main_v2 + merged §7.8/§7.9). Steps remaining: 7 §7.4 Pub-Delay Robustness K1116b 16-cell table (~1.5p), 8 §7.5 Alt-Data Fails Allocation K1121 (~2p), 9 §8.2 update, 10 §9 conclusion null count refresh, 11 abstract refresh, 12 title Option B, 13 bib (politis1994 / opdyke2007 / harvey1997 verify), 14 figures (Fig A 5-asset heatmap + Fig B K1121 bootstrap), 15 README update + post-edit validation. Slice into 50-min hourly bites; do 1-2 items/fire. Main thread only. Target file: paper/vix-sufficiency/main_v4.tex.",
-    "status": "pending",
+    "status": "succeeded",
     "priority": 3,
     "created_at": "2026-06-03T14:30:00+08:00",
     "task_type": "paper_body",
@@ -19625,6 +19631,21 @@
       "main-thread",
       "follow-up"
     ],
-    "source": "hourly-14-2026-06-03"
+    "source": "hourly-14-2026-06-03",
+    "claimed_by": "hourly-15",
+    "claimed_at": "2026-06-03T07:13:02.323427+00:00",
+    "claim_session_id": "431c66682420",
+    "started_at": "2026-06-03T07:13:02.585513+00:00",
+    "completed_at": "2026-06-03T07:17:16.552546+00:00",
+    "result": "Step 7 only (scope切小，50min cap): §7.5 Publication-Delay Robustness inserted at line 838 in main_v4.tex; ~1083 words; xelatex PASS 48→52 pages; 0 undefined refs; K1116b 16-cell DM panorama, 3 threshold-relevant flips (TLT M4 +3.74→+1.96 collapse 是 lookahead removed real, BTC M5 強化 -1.28→-3.64, GLD inconsequential). Remaining steps 8-15 (§7.6 K1121 allocation + §8.2 update + §9 conclusion + abstract + bib + figures + paper-update) requeued as Paper4_body_steps_8_to_15."
+  },
+  {
+    "id": "Paper4_body_steps_8_to_15",
+    "priority": 3,
+    "task_type": "paper_body",
+    "description": "Paper 4 body integration Step 8 onwards (§7.6 K1121 allocation +2p + §8.2 update + §9 conclusion null count + abstract + bib add Politis-Romano Opdyke + 5-asset heatmap fig + K1121 bootstrap dist fig + paper-update CLI + latex-academic-reviewer + citation-verifier). Predecessor: Step 7 done in commit (forthcoming). Scope: 切小到 §7.6 only first fire; 後續 fire 接 §8.2/§9/abstract。",
+    "status": "pending",
+    "created_at": "2026-06-03T07:18:00+00:00",
+    "source": "hourly-15 followup after Step 7 done"
   }
 ]
