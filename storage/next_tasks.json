@@ -20345,5 +20345,27 @@
     "started_at": "2026-06-03T19:09:56.480724+00:00",
     "completed_at": "2026-06-03T19:12:30.814349+00:00",
     "result": "3-layer dedup violation: mile_49616ac2 (AI 資本支出 + 期權市場上行 vol) + mile_622a2b73 (資本支出暴增+波動率定價迷局) 已 published 完全覆蓋此 angle (narrative arc dup per memory feedback_narrative_arc_dedup). Subagent stopped mid-data-pull, no waste output."
+  },
+  {
+    "id": "paper_review_mile_858690fd",
+    "title": "Paper review (Codex 24h-rule): 13,261% 的財報驚喜，為什麼反而是壞訊號？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_858690fd needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_858690fd",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-03T20:08:10+00:00",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-06-03T20:09:52.725102+00:00",
+    "claim_session_id": "2d1d08d436da",
+    "started_at": "2026-06-03T20:09:52.815123+00:00",
+    "completed_at": "2026-06-03T20:14:43.916542+00:00",
+    "result": "Codex 24h-rule review: MIXED verdict. 數字全正確；3 處敘述+1 方法 caveat 已修正（lookahead wording / claim softening / null result framing / MLE non-convergence note）。feed.json content + review_log 已寫。work_log entry 已落地。"
   }
 ]
