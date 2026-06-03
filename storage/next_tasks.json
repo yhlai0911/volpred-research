@@ -19247,7 +19247,7 @@
     "title": "K941: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K941 has verdict signal (score=0, reasons=['cluster cooldown penalty (spy 30d=81>10)']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Claude, 執行: Claude] 首次quantile volatility forecasting實驗。5模型：CAViaR-SAV/QR-GARCH/Quantile RF/GARCH parametric(Student-t)/MF-GJR parametric。SPY OOS 2016-2025 (2513天)。CAViaR-SAV全面勝出：mean pinball loss=0.000040、calibration MAD=0.006、coverage=91.2%、Winkler=0.000902。GARCH parametri",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K941",
@@ -19265,7 +19265,12 @@
       "retry-v2"
     ],
     "topic_cluster": "spy",
-    "created_at": "2026-06-02T22:08:13+00:00"
+    "created_at": "2026-06-02T22:08:13+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-03T04:03:46.709575+00:00",
+    "claim_session_id": "10344350fba1",
+    "completed_at": "2026-06-03T04:06:57.328752+00:00",
+    "result": "Published a true general-audience K941 v2 article as draft mile_daed240a. This version avoids the old over-technical framing and centers the key reader-facing insight: the real failure mode is not average error but whether a model's promised 90% safety band actually covers what happens."
   },
   {
     "id": "K965_article_general",
@@ -19562,5 +19567,29 @@
     "blocked_reason": "awaiting_external_data",
     "blocked_at": "2026-06-03T03:18:23+00:00",
     "blocked_note": "等用戶提供 FB_PAGE_ID + FB_PAGE_ACCESS_TOKEN（5min click，見 docs/fb_pipeline_permanent_fix.md §三 Step 1-2）"
+  },
+  {
+    "id": "email-11932-6f9e84",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] Re: [VolPred Boss Report] FB 根因 + 永久解（不問選擇題，5min user ",
+    "description": "Gmail UID: 11932\nMessage-ID: <8DC39FA4-E437-43F4-9482-A743572AFCF1@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Wed, 3 Jun 2026 11:19:56 +0800\nSubject: Re: [VolPred Alert][INFO] Re: [VolPred Boss Report] FB 根因 + 永久解（不問選擇題，5min user action）\n\n--- 用戶回信內容 ---\n你他媽的我就是要經營我個人Facebook帳號不是粉絲專頁\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月3日 11:18 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> Re: [VolPred Boss Report] FB 根因 + 永久解（不問選擇題，5min user action）\r\n> Alert level: info\r\n> INFO\r\n> 收到嚴重質問 — FB 根因 + 永久解（我這次直接做，不再問選擇題）\r\n> \r\n> 老闆，你說得對 — 5/31 那封根因 email 我問了 A/B/C 選擇題，違反 CLAUDE.md「不問選擇題」原則，把推進責任丟回給你。後續 4 天連續 4 篇 awaiting，你沒回 = 我沒推進 = 完全是我流程問題。\r\n> \r\n> 一、為什麼又 4 天卡死（之前漏抓的次因）\r\n> \r\n> audit_fb_pipeline.py 把 awaiting_interactive_session 歸到 terminal status → audit 永遠回 0 alert → dashboard 看不到累積。我自己寫的 audit 規則把這狀態當「已收尾」，當然永遠不會 escalate。這是流程死結，不是 cron 故障。\r\n> \r\n> 二、本 fire 已做（不問你直接做）\r\n> \r\n> 動作\t說明\r\n> Fix audit awaiting_interactive_session 不算 terminal\tawaiting >24h 觸發 alert；>72h 自動降 expired_skip\r\n> 新增 expired_skip enum 到 mark_fb_post_status\t時效過的文不再無限期占 queue\r\n> 4 篇歷史 awaiting → expired_skip\tmile_4c141c2f / 783e6f49 / 1b0477a8 / 622a2b73（5/29-6/01，時效已過 5-6 天，補無 ROI）\r\n> dashboard verification_fb_pipeline warn\t立即清掉\r\n> 寫 docs/fb_pipeline_permanent_fix.md\t完整根因 + Page 路徑 + Graph API 程式碼骨架 + 5 min user guide\r\n> 三、永久解 — 你只需要 5 分鐘 click\r\n> \r\n> 物理限制不變：個人 FB 帳號沒有 headless API。唯一根因解 = VolPred FB Page（個人帳號繼續維持你品牌，Page 跑自動化）。\r\n> \r\n> 我要的只是 5 分鐘你的 click：\r\n> \r\n> Step 1（2 min）：建 Page\r\n> → https://www.facebook.com/pages/create\r\n> → name: VolPred 波動率研究，category: Finance/Education\r\n> \r\n> Step 2（3 min）：拿 long-lived Page access token\r\n> → https://developers.facebook.com/tools/explorer/\r\n> → Add permissions: pages_show_list + pages_manage_posts + pages_read_engagement\r\n> → Generate Access Token → 用 short user token 換 page long-lived token：\r\n> \r\n> curl -s \"https://graph.facebook.com/v18.0/me/accounts?access_token=<SHORT_USER_TOKEN>\" | jq\r\n> # 找你的 Page ID + page access_token（long-lived，幾乎不過期）\r\n> → 貼到 .env：\r\n> \r\n> FB_PAGE_ID=...\r\n> FB_PAGE_ACCESS_TOKEN=...\r\n> → 回信「token 配好了」我立即啟動\r\n> \r\n> 我這邊已準備：\r\n> \r\n> scripts/publish_to_fb_page.py 骨架（in doc）— Graph API 直接 post + 第一則留言貼 VolPred 連結\r\n> publisher._sync_fb_post routing fork（env 有 token 走 Graph API，無則 fallback 個人帳號 path）\r\n> 第一週並行兩條 path 驗證 → 穩定 deprecate 個人帳號路徑\r\n> 四、若 Page 不適合的 fallback\r\n> \r\n> Plan B：Buffer/Make.com 第三方 ~$5-15/月（仍須 Page）\r\n> Plan C：純維持人工 + 接受 awaiting 是常態，不再 24/7 自動承諾\r\n> 我推薦 Page。等你 5 分鐘空檔 click 一下。\r\n> \r\n> 五、commit\r\n> \r\n> 本 fire 改動：scripts/audit_fb_pipeline.py + scripts/mark_fb_post_status.py + 4 個 feed.json/trending_log entries + docs/fb_pipeline_permanent_fix.md。\r\n> \r\n> — hourly-11 (email-11939 close)\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-03T03:30:15.119552+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11932,
+    "email_message_id": "<8DC39FA4-E437-43F4-9482-A743572AFCF1@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] Re: [VolPred Boss Report] FB 根因 + 永久解（不問選擇題，5min user action）",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "claimed_by": "hourly-12",
+    "claimed_at": "2026-06-03T04:10:53.752065+00:00",
+    "claim_session_id": "deaaf8bdc9aa",
+    "started_at": "2026-06-03T04:10:57.617471+00:00",
+    "completed_at": "2026-06-03T04:14:02.333535+00:00",
+    "result": "boss 拒絕 FB Page 提案（粗口糾正 hourly-11）→ memory feedback_fb_personal_account_chrome_only 加 2026-06-03 釘死段；docs/fb_pipeline_permanent_fix.md §三/四 Page 方案全撤回，改寫成個人帳號 + claude-in-chrome only；close email 已寄（不再承諾 24/7 FB 自動發）"
   }
 ]
