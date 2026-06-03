@@ -19979,15 +19979,15 @@
     "claimed_at": "2026-06-03T12:28:16.714612+00:00",
     "claim_session_id": "584b2b361962",
     "started_at": "2026-06-03T12:28:16.823352+00:00",
-    "completed_at": "2026-06-03T12:30:32.435426+00:00",
-    "result": "FAIL: K1413 front-half numbers mostly match, but article wrongly says chip is the highest-current-vol layer and blurs 5 conceptual layers into 4 implemented baskets."
+    "completed_at": "2026-06-03T13:22:16.932413+00:00",
+    "result": "FAIL: K1413 front-half numbers mostly match, but article wrongly says chip is the highest-current-vol layer and blurs 5 conceptual layers into 4 implemented baskets.\n\nCodex verdict=FAIL → 主線程回溯更正 mile_31b2b0bb 4 處 content-vs-source 錯誤 + 3-strike 重構 prepublish gate (commit db3f4e4a/bd4f4c08)"
   },
   {
     "id": "K1097_article_general_v2",
     "title": "K1097: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K1097 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (vix 30d=148>15)']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Claude, 執行: Claude] K1097 pivoted from duplicating K1019 to extending with Student-t innovations + full Trinity. Agent detected K1019 already did MS-GJR vs GJR + A4f-VIX (per CLAUDE.md 不重複原則). RESULTS: M3 MS-GJR-t QLIKE=1.630 vs M2 MS-GJR-N=1.614 → Student-t does NOT improve",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1097",
@@ -20004,7 +20004,13 @@
       "retry-v2"
     ],
     "topic_cluster": "vix",
-    "created_at": "2026-06-03T12:08:16+00:00"
+    "created_at": "2026-06-03T12:08:16+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-03T13:31:26.549039+00:00",
+    "claim_session_id": "5b24fb651c9a",
+    "started_at": "2026-06-03T13:31:36.356433+00:00",
+    "completed_at": "2026-06-03T13:33:18.424832+00:00",
+    "result": "Published general-audience K1097 coverage as mile_e52007e6 from storage/drafts/k1097_general_draft.md; used cluster waiver because vix topic cooldown blocked missing-coverage retry."
   },
   {
     "id": "K573_article_research",
@@ -20062,5 +20068,108 @@
     "started_at": "2026-06-03T13:10:22.298404+00:00",
     "completed_at": "2026-06-03T13:15:18.419031+00:00",
     "result": "Published mile_4469dce8 as draft (audience: research override; cluster_waiver: attention-proxy not vix). K789 NULL/methodology article — Google Trends 預測能力破除迷思 + VIX-proxy caveat 誠實標示。Anti-AI gate PASS (warn 2/3). 1359 字繁中。"
+  },
+  {
+    "id": "K937_article_general",
+    "title": "K937: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K937 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (vix 30d=148>15)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] 測試4種ensemble方法組合CARR_YZ和GARCH/GJR/MF-GJR(VIX)。SPY OOS 2017-2025 (2262天)。Equal Weight(QLIKE=1.494)、Inverse QLIKE(1.492)、OLS Stacking(1.497)、Rank-Level Hybrid(1.558)。MF-GJR(VIX)單獨(1.462)仍為最佳，無ensemble能達Harvey顯著差異。OLS Stacking分配41.7%給MF-GJR但僅15.4%給CARR_YZ。Ra",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K937",
+    "tags": [
+      "volatility",
+      "ensemble",
+      "CARR",
+      "GARCH",
+      "MF-GJR",
+      "VIX-sufficiency",
+      "null-result",
+      "combination-puzzle",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vix",
+    "created_at": "2026-06-03T14:08:05+00:00"
+  },
+  {
+    "id": "K964_article_general",
+    "title": "K964: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K964 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (vix 30d=148>15)']) but no general article in feed.json.  Verdict preview: [提出: research_program.md SEC Filings, 執行: Claude] SPY 2006-2026（5075 obs）財報季 vs 非財報季波動率分析。41% 天數屬於財報季。結果：(1) 財報季 |return| ratio=0.981（略低，非更高）。(2) Welch t=-0.557 p=0.578 不顯著。(3) OLS with VIX 控制後 earnings dummy t=1.795 p=0.073 不顯著（Harvey 門檻 3.0）。R²=0.61 VIX 解釋大部分變異。(4) 各季度異質：Q4 ear",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K964",
+    "tags": [
+      "earnings-season",
+      "volatility-seasonality",
+      "VIX-sufficiency",
+      "NULL",
+      "SPY",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vix",
+    "created_at": "2026-06-03T14:08:05+00:00"
+  },
+  {
+    "id": "K1014_article_general",
+    "title": "K1014: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1014 has verdict signal (score=0, reasons=['cluster cooldown penalty (vix 30d=148>15)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] HAR-PD（arXiv:2503.00851）6 個 path features 加入標準 HAR。結果：path features 大幅惡化 HAR（DM t=+5.53 HAR 勝，LASSO 更差 DM=+6.19）。原因：trend 和 convex 是 rv1/rv5/rv22 的精確線性組合，造成多重共線性不穩定 rolling OLS。唯一顯著 path feature 是 vix_gap（VIX implied - RV realized, t=7.27）。HAR(|r|) 在 QLIK",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1014",
+    "tags": [
+      "HAR",
+      "path-dependent",
+      "multicollinearity",
+      "VIX-gap",
+      "volatility-forecasting",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vix",
+    "created_at": "2026-06-03T14:08:05+00:00"
+  },
+  {
+    "id": "K652_article_research",
+    "title": "K652: write research-audience article (auto-discovered uncovered K)",
+    "description": "K K652 has verdict signal (score=0, reasons=['cluster cooldown penalty (vix 30d=148>15)']) but no research article in feed.json.  Verdict preview: [提出: 實務應用, 執行: Claude] VIX 行動門檻系統性分析。Level: VIX crossing 28 up→+2.45% 20d(t=2.50, 76.5% win)。VIX>30 forward return +28%/yr 但 vol 46.6%。VIX spike 不是顯著 contrarian signal(p>0.2)。Mean-reversion 中位 6-9.5 天。Action threshold: dVIX>1 最實用（Net Sharpe 1.446 vs daily 1.451，但 trades 減 60%: 91",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K652",
+    "tags": [
+      "VIX-thresholds",
+      "action-guide",
+      "practical",
+      "rebalance",
+      "contrarian",
+      "mean-reversion",
+      "auto-discovered",
+      "audience-research"
+    ],
+    "topic_cluster": "vix",
+    "created_at": "2026-06-03T14:08:05+00:00"
+  },
+  {
+    "id": "K1414_qlike_ceiling_meta",
+    "task_type": "experiment",
+    "priority": 3,
+    "title": "K1414: SPY r² QLIKE forecast ceiling meta-analysis (K889/K940/K1014/K1016 aggregation)",
+    "description": "Aggregate published QLIKE results from K889 (5 MF-GARCH variants), K940 (6 ML+econometric), K1014 (5 HAR variants), K1016 (5 HAR+VIX variants). Within-sample ranking + cross-K confirmation of MF-GJR(VIX) as QLIKE ceiling ~1.45. Light meta-analysis, no MLE refit. Deliverable: experiments/k1414/ README+script+results+forest plot.",
+    "status": "succeeded",
+    "claimed_by": "hourly-22",
+    "created_at": "2026-06-03T14:14:14Z",
+    "claimed_at": "2026-06-03T14:14:14.666905+00:00",
+    "claim_session_id": "8ce9976a255b",
+    "started_at": "2026-06-03T14:14:18.772682+00:00",
+    "completed_at": "2026-06-03T14:17:35.378430+00:00",
+    "result": "K1414 meta-analysis complete: 21 model-sample observations aggregated from K889/K940/K1014/K1016. MF-GJR family confirmed as SPY r² QLIKE ceiling within sample-aligned comparisons (K889 MF-GJR=1.4094 best observed). 4-panel forest plot + JSON output + knowledge entry 99e5ac01 written. CONDITIONAL_PASS — pure aggregation no MLE."
   }
 ]

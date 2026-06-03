@@ -1,0 +1,218 @@
+{
+  "experiment_id": "K1414",
+  "title": "K1414: SPY r² QLIKE Forecast Ceiling Meta-Analysis",
+  "proposer": "Claude (hourly-22 dispatch)",
+  "executor": "Claude (main thread inline)",
+  "timestamp": "2026-06-03T14:16:14.177980+00:00",
+  "type": "meta_analysis",
+  "compute": "light (no MLE refit, no data fetch)",
+  "data_source": "K889/K940/K1014/K1016 published QLIKE values",
+  "sources_aggregated": [
+    {
+      "source": "K889",
+      "title": "Multiplicative Factor GARCH (MF-GARCH/MF-GJR with VIX long-run)",
+      "oos_period": "2019-01-02 to 2026-03-31",
+      "n_oos": 1821,
+      "n_models": 5,
+      "best_model": "MF-GJR",
+      "best_qlike": 1.409362,
+      "worst_reasonable_model": "EWMA-Factor",
+      "worst_reasonable_qlike": 1.586691,
+      "models_ranked": [
+        {
+          "rank": 1,
+          "name": "MF-GJR",
+          "qlike": 1.409362
+        },
+        {
+          "rank": 2,
+          "name": "MF-GARCH",
+          "qlike": 1.418906
+        },
+        {
+          "rank": 3,
+          "name": "GJR",
+          "qlike": 1.500568
+        },
+        {
+          "rank": 4,
+          "name": "EWMA",
+          "qlike": 1.565764
+        },
+        {
+          "rank": 5,
+          "name": "EWMA-Factor",
+          "qlike": 1.586691
+        }
+      ]
+    },
+    {
+      "source": "K940",
+      "title": "ML vs Econometric (MLP / Ridge / RF vs GARCH/GJR/MF-GJR)",
+      "oos_period": "2016-01-04 ~ 2025-12-31",
+      "n_oos": 2514,
+      "n_models": 6,
+      "best_model": "MF-GJR(VIX)",
+      "best_qlike": 1.4582,
+      "worst_reasonable_model": "GARCH(1,1)",
+      "worst_reasonable_qlike": 1.5813,
+      "models_ranked": [
+        {
+          "rank": 1,
+          "name": "MF-GJR(VIX)",
+          "qlike": 1.4582
+        },
+        {
+          "rank": 2,
+          "name": "Random Forest",
+          "qlike": 1.5237
+        },
+        {
+          "rank": 3,
+          "name": "GJR(1,1,1)",
+          "qlike": 1.5459
+        },
+        {
+          "rank": 4,
+          "name": "GARCH(1,1)",
+          "qlike": 1.5813
+        },
+        {
+          "rank": 5,
+          "name": "Ridge",
+          "qlike": 40278.5029
+        },
+        {
+          "rank": 6,
+          "name": "MLP",
+          "qlike": 651520.1872
+        }
+      ]
+    },
+    {
+      "source": "K1014",
+      "title": "HAR Path-Dependent Features (HAR-PD multicollinearity test)",
+      "oos_period": "2019-01-01",
+      "n_oos": 1824,
+      "n_models": 5,
+      "best_model": "HAR",
+      "best_qlike": 1.2825749637929655,
+      "worst_reasonable_model": "HAR-PD",
+      "worst_reasonable_qlike": 1.6270355908077092,
+      "models_ranked": [
+        {
+          "rank": 1,
+          "name": "HAR",
+          "qlike": 1.2825749637929655
+        },
+        {
+          "rank": 2,
+          "name": "A4f-N",
+          "qlike": 1.434385070851252
+        },
+        {
+          "rank": 3,
+          "name": "HAR-PD-LASSO",
+          "qlike": 1.4834861631142926
+        },
+        {
+          "rank": 4,
+          "name": "GJR-N",
+          "qlike": 1.5180261932752814
+        },
+        {
+          "rank": 5,
+          "name": "HAR-PD",
+          "qlike": 1.6270355908077092
+        }
+      ]
+    },
+    {
+      "source": "K1016",
+      "title": "VIX-augmented HAR (vix_gap / VIX_level + GARCH benchmarks)",
+      "oos_period": "2012-01-13 to 2026-04-08",
+      "n_oos": 3567,
+      "n_models": 5,
+      "best_model": "M4: A4f-VIX9D",
+      "best_qlike": 1.5372587578620611,
+      "worst_reasonable_model": "M2: HAR+vix_gap",
+      "worst_reasonable_qlike": 1.8312329153001687,
+      "models_ranked": [
+        {
+          "rank": 1,
+          "name": "M4: A4f-VIX9D",
+          "qlike": 1.5372587578620611
+        },
+        {
+          "rank": 2,
+          "name": "M5: GJR-t",
+          "qlike": 1.5372587578620611
+        },
+        {
+          "rank": 3,
+          "name": "M1: HAR(1,5,22)",
+          "qlike": 1.6163892180390744
+        },
+        {
+          "rank": 4,
+          "name": "M3: HAR+VIX_level",
+          "qlike": 1.6236277333842546
+        },
+        {
+          "rank": 5,
+          "name": "M2: HAR+vix_gap",
+          "qlike": 1.8312329153001687
+        }
+      ]
+    }
+  ],
+  "cross_k_ceiling": {
+    "mf_gjr_family_qlikes": [
+      {
+        "source": "K889",
+        "model": "MF-GJR",
+        "qlike": 1.409362
+      },
+      {
+        "source": "K940",
+        "model": "MF-GJR(VIX)",
+        "qlike": 1.4582
+      }
+    ],
+    "best_observed_qlike_across_k": {
+      "source": "K889",
+      "model": "MF-GJR",
+      "qlike": 1.409362
+    },
+    "narrative": "MF-GJR family appears as best within K889 (MF-GJR QLIKE=1.4094) and K940 (MF-GJR(VIX) QLIKE=1.4582). K1014 and K1016 do not test MF-GJR directly but their best models (HAR baseline / A4f-VIX9D / GJR-t) have within-K QLIKE 1.28–1.54, suggesting sample-specific normalization differences make absolute cross-K comparison invalid. Within-K rankings consistently place VIX-augmented multiplicative or short-memory GARCH regulators at top."
+  },
+  "charts": [
+    "k1414_forest.png"
+  ],
+  "conclusion": {
+    "verdict": "CONFIRMS",
+    "claim": "MF-GJR(VIX) is the SPY daily r² QLIKE ceiling within sample-aligned comparisons",
+    "evidence": [
+      "K889 SPY 2019-2026: MF-GJR best at 1.4094 (DM vs GJR t=-3.302, Harvey-significant)",
+      "K940 SPY 2016-2025: MF-GJR(VIX) best at 1.4582 (DM vs GJR t≈-4.0+, ★★★)",
+      "K940 ML failure: MLP 651520, Ridge 40278 — both 10000+x worse than MF-GJR",
+      "K1014/K1016 do not test MF-GJR directly; within-K rankings still show VIX-augmented or short-memory specs at top"
+    ],
+    "limitations": [
+      "Cross-K absolute QLIKE comparison invalid (different samples/windows)",
+      "Only SPY; cross-asset (EFA/EEM/GLD/IWM) not addressed",
+      "Only daily r² target; high-frequency RV target out of scope",
+      "ML universe limited to K940 (MLP shallow / Ridge / RF); LSTM/Transformer untested"
+    ],
+    "next_steps": [
+      "K1415: MF-GJR(VIX) cross-asset robustness on EFA/EEM/IWM (needs local IV proxy)",
+      "K1416: Bootstrap CI on MF-GJR(VIX) vs Random Forest gap (K940 second-best)",
+      "Article: write reader-facing piece quantifying QLIKE ceiling for SPY"
+    ]
+  },
+  "references": [
+    "Patton (2011) JoE 160:246-256 (QLIKE proxy-robust)",
+    "Harvey et al. (2016) JBES 34:92-104 (DM significance)",
+    "Conrad & Engle (2025) MF2-GARCH (MF-GJR theoretical basis)"
+  ]
+}

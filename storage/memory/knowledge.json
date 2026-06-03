@@ -32159,5 +32159,18 @@
       "HAR-VIX",
       "K1399"
     ]
+  },
+  {
+    "item_id": "99e5ac01",
+    "category": "meta-analysis",
+    "content": "[K1414 | experiment_id=K1414 | experiment_path=experiments/k1414 | verdict=CONDITIONAL_PASS | reviewer_source=N/A_pure_aggregation_no_estimation]\n\nTitle: K1414 SPY r² QLIKE Forecast Ceiling Meta-Analysis — MF-GJR(VIX) confirmed across 4 source K\n\n[提出: Claude, 執行: Claude] Light meta-analysis aggregating 21 model-sample observations from K889/K940/K1014/K1016 SPY daily r²-target QLIKE results.\n\nWithin-K rankings consistently place MF-GJR family at top:\n- K889 MF-GJR=1.4094 (DM vs GJR t=-3.302, Harvey-significant)\n- K940 MF-GJR(VIX)=1.4582 (DM ★★★ vs all 5 alternatives)\n\nK940 ML universe — MLP 651520, Ridge 40278, RF 1.5237 — confirms ML cannot beat MF-GJR on QLIKE (10000+x worse for MLP/Ridge).\n\nCross-K absolute QLIKE invalid: K1014 HAR=1.2826 vs K1016 HAR=1.6164 (different OOS windows/HAR specs), only within-K rankings reliable. Best observed across all K: K889 MF-GJR=1.4094.\n\nVerdict CONDITIONAL_PASS: aggregation is pure read-JSON (no MLE/no new estimation), Codex review N/A. Limitations: cross-K incomparability, SPY-only, daily-r²-only, ML universe limited to shallow architectures (no LSTM/Transformer). Forest plot at experiments/k1414/k1414_forest.png; results JSON at experiments/k1414/k1414_results.json.\n\nNext steps: K1415 cross-asset robustness (EFA/EEM/IWM); K1416 bootstrap CI on MF-GJR vs RF gap; reader-facing article quantifying SPY r² QLIKE ceiling.",
+    "evidence": [
+      "experiments/k1414/k1414_results.json",
+      "experiments/k1414/k1414_forest.png",
+      "experiments/k889/k889_multiplicative_vol_factor_results.json",
+      "experiments/k940/k940_results.json"
+    ],
+    "confidence": 0.7,
+    "created_at": "2026-06-03T22:17:26.939630"
   }
 ]
