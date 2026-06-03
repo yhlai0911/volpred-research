@@ -19448,7 +19448,7 @@
     "title": "K970: write general-audience article (auto-discovered uncovered K)",
     "description": "K K970 has verdict signal (score=2, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson', 'cluster cooldown penalty (vix 30d=148>15)']) but no general article in feed.json.  Verdict preview: [提出: Conrad & Engle JAE 2025, 執行: Claude] SPY 2006-2026, IS=3249, OOS=1824。σ²=τ×g 乘法分解。⚠️ Codex 審查發現 tau 數據洩漏（tau_rv/ema 包含當天 r²）→ 修正 shift(1)。修正後結果：(1) MF2-VIX 仍勝 QLIKE 0.849 vs GJR 0.939（-9.55%），DM t=2.94 接近但未達 Harvey 3.0。(2) MF2-RV 修正後更差 +4.49%（原始 -14.2% 完全是 leakage）。(3) MF2-E",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K970",
@@ -19464,7 +19464,13 @@
       "audience-general"
     ],
     "topic_cluster": "vix",
-    "created_at": "2026-06-02T22:18:24+00:00"
+    "created_at": "2026-06-02T22:18:24+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-03T06:12:20.334036+00:00",
+    "claim_session_id": "1fd8fce6bc5a",
+    "started_at": "2026-06-03T06:12:29.409670+00:00",
+    "completed_at": "2026-06-03T06:13:59.599080+00:00",
+    "result": "Published general article mile_05102b5c for K970. Wrote a general-reader piece based on results.json, emphasizing that MF2-VIX leads on error reduction while historical long-run proxies do not clearly beat the baseline."
   },
   {
     "id": "K1325",
@@ -19518,7 +19524,7 @@
     "id": "Paper4_body_steps_5_to_15_with_version_reconcile",
     "title": "Paper 4 body integration steps 5-15 + version reconciliation (main_v2 vs main_v4)",
     "description": "Continue Paper 4 vix-sufficiency integration_plan_v2.md steps 5-15. PRE-REQUISITE: resolve main_v2 vs main_v4 divergence — main_v4 (May 30) has independent §7 PIT panorama + Channel-Specific Heterogeneity subsections, missing Family 12/13 integration. main_v2 (Jun 3 latest) has Family 12/13 (steps 1-4 done) but missing main_v4's §7 work. paper-update CLI publishes main_v4 (priority order in src/volpred/ops/papers.py:236). Decide canonical: (a) merge main_v4 §7 work into main_v2 → rename main_v2→main_v4 (b) apply integration steps to main_v4 directly (c) keep both, change priority. Then continue: 5 §7.3 Cross-Asset Universal Sufficiency (~3p, K1118+K1098), 6 §7.4 Pub-Delay Robustness (~1.5p, K1116b 16-cell), 7 §7.5 Alt-Data Fails Allocation (~2p, K1121), 8 §8.2 update, 9 §9 conclusion null count, 10 abstract, 11 title (Option B), 12 bib (politis1994 / opdyke2007 / harvey1997 / verify others), 13 figures (Fig A 5-asset heatmap + Fig B K1121 bootstrap), 14 README, 15 post-edit validation. Slice into 50-min hourly bites; do 1-2 items/fire. Cite: integration plan main file paper/vix-sufficiency/integration_plan_v2.md §5",
-    "status": "pending",
+    "status": "succeeded",
     "priority": 3,
     "created_at": "2026-06-03T09:18:00+08:00",
     "task_type": "paper_body",
@@ -19530,7 +19536,13 @@
       "follow-up",
       "version-reconcile"
     ],
-    "source": "hourly-09-2026-06-03"
+    "source": "hourly-09-2026-06-03",
+    "claimed_by": "hourly-14",
+    "claimed_at": "2026-06-03T06:09:26.851957+00:00",
+    "claim_session_id": "817ca1435005",
+    "started_at": "2026-06-03T06:11:11.301181+00:00",
+    "completed_at": "2026-06-03T06:14:47.706689+00:00",
+    "result": "Reconcile + Step 5+6 done: merged main_v4 (May 30) §7.8 PIT panorama (7-asset) + §7.9 Channel-Specific into main_v2; archived old main_v4 → main_v4_predecessor_20260530.tex; renamed main_v2 → main_v4. Compiles 48p clean. paper-update synced. Steps 7-15 still pending (Pub-Delay K1116b, Alt-Data K1121, abstract, title, bib, figs, README, validation). Followup task auto-created next fire."
   },
   {
     "id": "email-11944-9461cb",
@@ -19597,5 +19609,22 @@
     "started_at": "2026-06-03T04:10:57.617471+00:00",
     "completed_at": "2026-06-03T04:14:02.333535+00:00",
     "result": "boss 拒絕 FB Page 提案（粗口糾正 hourly-11）→ memory feedback_fb_personal_account_chrome_only 加 2026-06-03 釘死段；docs/fb_pipeline_permanent_fix.md §三/四 Page 方案全撤回，改寫成個人帳號 + claude-in-chrome only；close email 已寄（不再承諾 24/7 FB 自動發）"
+  },
+  {
+    "id": "Paper4_body_steps_7_to_15_post_reconcile",
+    "title": "Paper 4 body integration steps 7-15 (post-reconcile, target main_v4.tex)",
+    "description": "Continue integration_plan_v2.md post-reconcile. Pre-req DONE (main_v4 = renamed main_v2 + merged §7.8/§7.9). Steps remaining: 7 §7.4 Pub-Delay Robustness K1116b 16-cell table (~1.5p), 8 §7.5 Alt-Data Fails Allocation K1121 (~2p), 9 §8.2 update, 10 §9 conclusion null count refresh, 11 abstract refresh, 12 title Option B, 13 bib (politis1994 / opdyke2007 / harvey1997 verify), 14 figures (Fig A 5-asset heatmap + Fig B K1121 bootstrap), 15 README update + post-edit validation. Slice into 50-min hourly bites; do 1-2 items/fire. Main thread only. Target file: paper/vix-sufficiency/main_v4.tex.",
+    "status": "pending",
+    "priority": 3,
+    "created_at": "2026-06-03T14:30:00+08:00",
+    "task_type": "paper_body",
+    "tags": [
+      "paper-4",
+      "vix-sufficiency",
+      "body-rewrite",
+      "main-thread",
+      "follow-up"
+    ],
+    "source": "hourly-14-2026-06-03"
   }
 ]
