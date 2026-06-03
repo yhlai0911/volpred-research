@@ -18966,7 +18966,7 @@
     "id": "Paper4_body_integration_steps_3_to_15",
     "title": "Paper 4 body integration steps 3-15 (publication-delay / cross-asset §7.x / allocation §7.x / conclusion / abstract / figures)",
     "description": "Paper 4 main_v2.tex integration plan v2 — items 3-15 pending. Steps 1+2 completed 2026-06-03 02:30 hourly-02 (Family 12+13 to Table 1 + descriptions + bib baker2016/brave2011/kliesen2010). Remaining: §4.5 publication-delay convention, Table 2 extended rows, new §7.3 cross-asset universal sufficiency (~3p), new §7.4 publication-delay robustness (~1.5p), new §7.5 alt-data fails allocation (~2p), §8.2 update, §9 conclusion null count update, abstract rewrite, +4 bib (Politis-Romano / Opdyke / Harvey-Leybourne-Newbold etc), 2 figures, README update, paper-update CLI. Plan: paper/vix-sufficiency/integration_plan_v2.md §5 items 3-15. Slice into 50-min hourly bites.",
-    "status": "in_progress",
+    "status": "succeeded",
     "priority": 3,
     "created_at": "2026-06-03T02:12:59+08:00",
     "task_type": "paper_body",
@@ -18981,7 +18981,9 @@
     "claimed_by": "hourly-09",
     "claimed_at": "2026-06-03T01:09:16.296440+00:00",
     "claim_session_id": "7e50084d6939",
-    "started_at": "2026-06-03T01:09:50.562283+00:00"
+    "started_at": "2026-06-03T01:09:50.562283+00:00",
+    "completed_at": "2026-06-03T01:18:16.399027+00:00",
+    "result": "Sliced into bites; this bite = steps 3+4 done in commit 83747b2b. Remaining 5-15 → follow-up task Paper4_body_steps_5_to_15_with_version_reconcile (with version reconciliation between main_v2 vs main_v4)."
   },
   {
     "id": "paper_review_mile_7fbc61c8",
@@ -19472,5 +19474,23 @@
     "email_message_id": "<66F3DF07-DBCB-40BD-A89D-D7795A0AC03D@gmail.com>",
     "email_subject": "Re: [VolPred Boss Report] 2026-06-03 09:00 台灣時間 平台運營報告",
     "email_from": "Ivan Lai <yihao.lai@gmail.com>"
+  },
+  {
+    "id": "Paper4_body_steps_5_to_15_with_version_reconcile",
+    "title": "Paper 4 body integration steps 5-15 + version reconciliation (main_v2 vs main_v4)",
+    "description": "Continue Paper 4 vix-sufficiency integration_plan_v2.md steps 5-15. PRE-REQUISITE: resolve main_v2 vs main_v4 divergence — main_v4 (May 30) has independent §7 PIT panorama + Channel-Specific Heterogeneity subsections, missing Family 12/13 integration. main_v2 (Jun 3 latest) has Family 12/13 (steps 1-4 done) but missing main_v4's §7 work. paper-update CLI publishes main_v4 (priority order in src/volpred/ops/papers.py:236). Decide canonical: (a) merge main_v4 §7 work into main_v2 → rename main_v2→main_v4 (b) apply integration steps to main_v4 directly (c) keep both, change priority. Then continue: 5 §7.3 Cross-Asset Universal Sufficiency (~3p, K1118+K1098), 6 §7.4 Pub-Delay Robustness (~1.5p, K1116b 16-cell), 7 §7.5 Alt-Data Fails Allocation (~2p, K1121), 8 §8.2 update, 9 §9 conclusion null count, 10 abstract, 11 title (Option B), 12 bib (politis1994 / opdyke2007 / harvey1997 / verify others), 13 figures (Fig A 5-asset heatmap + Fig B K1121 bootstrap), 14 README, 15 post-edit validation. Slice into 50-min hourly bites; do 1-2 items/fire. Cite: integration plan main file paper/vix-sufficiency/integration_plan_v2.md §5",
+    "status": "pending",
+    "priority": 3,
+    "created_at": "2026-06-03T09:18:00+08:00",
+    "task_type": "paper_body",
+    "tags": [
+      "paper-4",
+      "vix-sufficiency",
+      "body-rewrite",
+      "main-thread",
+      "follow-up",
+      "version-reconcile"
+    ],
+    "source": "hourly-09-2026-06-03"
   }
 ]
