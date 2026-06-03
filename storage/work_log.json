@@ -9331,5 +9331,18 @@
     "summary": "§7.5 inserted line 838 main_v4.tex, ~1083 words, xelatex 48→52 pages PASS. K1116b 16-cell DM panorama: 3 threshold flips (TLT M4 collapse, BTC M5 strengthen, GLD inconsequential). Step 8-15 requeued.",
     "model": "opus medium",
     "reviewer": "main_thread_verify"
+  },
+  {
+    "timestamp": "2026-06-03T08:25:00+00:00",
+    "task_type": "paper_review",
+    "task_id": "paper_review_mile_49616ac2",
+    "actor": "hourly-16",
+    "result": "FAIL_then_REVISED",
+    "summary": "Codex 24h-rule review on mile_49616ac2 (AI capex options skew) returned FAIL: 25Δ mislabel (actual=90%/110% moneyness proxy), 30日 RV mislabel (actual=21 交易日), no liquidity filter, sell-OTM-calls overclaim. Applied 7 in-place fixes to feed.json content+description, added liquidity caveat block + revision note. Supabase sync confirmed 7 articles propagated. Core finding (SPY downside-insurance vs META call-wing) unchanged.",
+    "reviewer": "Codex (codex exec --skip-git-repo-check)",
+    "related_files": [
+      "storage/reports/feed.json",
+      "experiments/trending_repost_2026_06_03_ai_capex_skew/fetch_iv_skew.py"
+    ]
   }
 ]

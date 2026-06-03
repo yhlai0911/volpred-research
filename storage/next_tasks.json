@@ -19647,5 +19647,87 @@
     "status": "pending",
     "created_at": "2026-06-03T07:18:00+00:00",
     "source": "hourly-15 followup after Step 7 done"
+  },
+  {
+    "id": "paper_review_mile_7825c8a2",
+    "title": "Paper review (Codex 24h-rule): 只贏一點點，很多時候還不能算模型真的比較強",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_7825c8a2 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_7825c8a2",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-03T08:08:36+00:00"
+  },
+  {
+    "id": "paper_review_mile_2d4edb65",
+    "title": "Paper review (Codex 24h-rule): 一套方法在 13 個市場都有效，卻不代表它會幫你賺更多",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_2d4edb65 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "in_progress",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_2d4edb65",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-03T08:08:36+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-03T08:15:41.495298+00:00",
+    "claim_session_id": "007b33ca0af0",
+    "started_at": "2026-06-03T08:15:48.742278+00:00"
+  },
+  {
+    "id": "paper_review_mile_49616ac2",
+    "title": "Paper review (Codex 24h-rule): AI 資本支出狂潮下，期權市場押的是上行而不是下行",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_49616ac2 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_49616ac2",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-03T08:08:36+00:00",
+    "claimed_by": "hourly-16",
+    "claimed_at": "2026-06-03T08:10:51.661397+00:00",
+    "claim_session_id": "cbd3c669fa67",
+    "started_at": "2026-06-03T08:10:55.971491+00:00",
+    "completed_at": "2026-06-03T08:17:05.545487+00:00",
+    "result": "Codex 24h-rule review FAIL → 7-replacement fix applied (25Δ→moneyness proxy, 30日 RV→21 交易日 RV, +liquidity caveat, soften sell-OTM overclaim) + revision note. Supabase synced. Core SPY-vs-META observation preserved."
+  },
+  {
+    "id": "K965_article_general_v2",
+    "title": "K965: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K965 has verdict signal (score=0, reasons=['robust inference', 'cluster cooldown penalty (spy 30d=81>10)']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: JRFM 2024, 執行: Claude] K965: Wild Bootstrap Optimal Hedge Ratio。數據: SPY+ES=F 4084天 (2010-2026), corr=0.974。6個方法 OOS 比較: WB-75th HE=0.9437, OLS Static 0.9435, WB-50th 0.9436, WB-25th 0.9420, Rolling-OLS 0.9396, DCC-GARCH 0.9344。DM test: 所有 WB vs OLS |t|<1.0 不顯著。DCC-GARCH 最差 (",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K965",
+    "tags": [
+      "wild-bootstrap",
+      "hedge-ratio",
+      "futures-hedging",
+      "dcc-garch",
+      "spy",
+      "es-futures",
+      "hedging-effectiveness",
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": "spy",
+    "created_at": "2026-06-03T08:08:36+00:00"
   }
 ]
