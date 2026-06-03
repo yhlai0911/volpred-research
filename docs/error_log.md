@@ -1397,3 +1397,29 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 1. **寫文章前的 horizon/sample audit checklist**：寫每個 OOS 段落前必逐句檢查「我寫的 horizon (5d/22d) = code 用的 horizon?」「我寫的 sample (OOS/full) = code 用的 sample?」— 否則默認假設 narrative tone 對齊 code 是 narrative-vs-data drift 高發區
 2. **K1018 lesson 持續驗證**：Codex 24h-rule audit 連續抓到 2 篇 production article 的 label drift（K717 + 本次 K208），證明 publishing 時 self-review 不夠強，必須 mandate 過 Codex 才算 closure。已是 .claude/rules/agent-delegation.md 規範，繼續強制執行
 3. **數字 PASS + 標籤 FAIL 是 valid verdict 類別**：本次 Codex review 5/7 子項 PASS + 2 個 FAIL 全部是文字標籤錯。修補成本低（改文字）但不修不誠實。errata 修補後不影響核心結論方向（gap 對 VIX OOS 無增量、IS 漂亮相關 OOS 消失 — 仍為 null）
+
+## 2026-06-03 — FB pipeline 4 天 100% 失敗根因（email-11939 用戶嚴重質問）
+
+**Trigger**：用戶 email-11939 質問「FB 到底要錯幾次？每次都不能夠正常的Po文，你到底有沒有在檢討底層的邏輯跟問題在哪裡？」連續 4 天 100% awaiting_interactive_session（5/29 mile_4c141c2f、5/30 mile_783e6f49、5/30 mile_1b0477a8、5/31 mile_622a2b73）。
+
+**根因（三層）**：
+
+1. **物理限制（不可解，需架構繞行）**：個人 FB 帳號無 headless API（Meta Graph API 不開放個人帳號 programmatic post；Selenium 有風控鎖帳風險；Chrome MCP 需互動 session）。24/7 cron 環境物理上無發文能力。
+
+2. **流程死結（已修）**：`scripts/audit_fb_pipeline.py` 把 `awaiting_interactive_session` 歸到 `TERMINAL_OR_HANDOFF_STATUSES` → audit 永遠回 0 alert → dashboard 看不到 4 天累積。**self-built audit 規則把不該算 terminal 的狀態算成 terminal → silent failure**。
+
+3. **元流程死結（已修 + memory 強化）**：5/31 email-11845 我已寫過根因 + 問了 Option A/B/C 三選一給用戶 → **違反 CLAUDE.md「不問選擇題」+ memory `feedback_dont_ask_do` 第三次重申** → 用戶把 email 當「卡關等他」忘了回 → 4 天無進展 → 同問題再發。我自己違反「AI 完全運營」契約。
+
+**已修（2026-06-03 hourly-11 commit）**：
+- `scripts/audit_fb_pipeline.py` 移 `awaiting_interactive_session` 出 terminal set；加 `AUTO_EXPIRE_HOURS=72` 自動降 `expired_skip`；awaiting >24h 計入 stale_pending 觸發 alert
+- `scripts/mark_fb_post_status.py` VALID_STATUSES 加 `expired_skip`
+- 4 篇歷史 awaiting 全標 `expired_skip`（時效過 5-6 天補無 ROI）
+- `docs/fb_pipeline_permanent_fix.md` 永久解 + Graph API 程式碼骨架 + 5min user action guide
+- 寄 close email fb177969 給用戶 — **不問選擇題**，告知「我做了 X、Y、Z；唯一剩 5 分鐘 click（FB Page 物理需 user 帳號親建）」
+- 建 blocked task `fb_page_graph_api_integration`（blocked_reason=awaiting_external_data）等用戶 FB_PAGE_ID + token
+
+**教訓 / 未來防錯**：
+1. **不要 self-build audit 把「等不到」狀態當 terminal** — 任何 `awaiting_*` / `pending_*` 都應有 max-age 觸發升級或自動降級。Audit terminal set 只能含 `success / wont_fix / fb_silent_reject / expired_skip` 這類**主動決策的終態**，不能含「無限期等」這類**被動 stuck** 狀態
+2. **「不問選擇題」適用於 root-cause email 回覆**：即使是分支策略不確定（A/B/C），也要主動選一條推進 + 留 fallback，不要 punt 給用戶讓他做選擇 → 他不會回，問題會回鍋
+3. **物理限制 ≠ 卡關藉口**：FB 個人帳號無 headless 是物理事實，但繞行方案（FB Page）我這邊能做的 80% 都該提前準備，剩下 user 那 20% 寫清楚是「5 分鐘 click」具體步驟 + 我已 wait-ready，不是寬泛建議
+4. **3-strike rule 觸發**：FB pipeline 5/18 wont_fix → 5/26 wont_fix → 5/29-6/01 awaiting 4 連 → 已 strike 3+，本應更早重構（audit fix + 永久解 doc）。下次任何重複 incident pattern 出現在 audit script 上即重構，不等 strike

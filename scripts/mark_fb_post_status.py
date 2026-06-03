@@ -27,6 +27,7 @@ VALID_STATUSES = {
     "wont_fix",
     "fb_silent_reject",
     "awaiting_interactive_session",
+    "expired_skip",
 }
 
 
