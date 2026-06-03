@@ -1423,3 +1423,32 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 2. **「不問選擇題」適用於 root-cause email 回覆**：即使是分支策略不確定（A/B/C），也要主動選一條推進 + 留 fallback，不要 punt 給用戶讓他做選擇 → 他不會回，問題會回鍋
 3. **物理限制 ≠ 卡關藉口**：FB 個人帳號無 headless 是物理事實，但繞行方案（FB Page）我這邊能做的 80% 都該提前準備，剩下 user 那 20% 寫清楚是「5 分鐘 click」具體步驟 + 我已 wait-ready，不是寬泛建議
 4. **3-strike rule 觸發**：FB pipeline 5/18 wont_fix → 5/26 wont_fix → 5/29-6/01 awaiting 4 連 → 已 strike 3+，本應更早重構（audit fix + 永久解 doc）。下次任何重複 incident pattern 出現在 audit script 上即重構，不等 strike
+
+---
+## 2026-06-03 20:03 compact 目標值對 1M 模型結構性失效 → 降門檻（用戶 2026-06-03「從底層架構去修正」）
+
+**症狀**：互動 session 跑到 ~280 turns 仍未 auto-compact，context 嚴重膨脹導致工具 parse 失敗、連線重置、模型 degrade。用戶第二次指出「compact 目標值還是失效」。
+
+**根因（架構錯配，非自律問題）**：
+- `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE = "62"`（.claude/settings.json + settings.local.json）= context 用到 **62%** 才 auto-compact。
+- 但 active 模型 opus-4-8 是 **1M context window**，62% ≈ **620K tokens** — 模型/工具在遠低於此（~250-400K）就開始 degrade。所以 62% 這個門檻掛在 1M 母數上，絕對觸發點爆表，等於永不在合理點 compact。
+- 且 `/compact` 是用戶指令，主 agent **無法自行觸發** → 「靠主 agent 在 62% 自律 /compact」這條路結構上不可靠（CLAUDE.md L209-213 的 55/62/70% 門檻同樣是 1M 母數下的誤導值）。
+
+**修法（修流程，不靠自律）**：
+- `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` **62 → 25**（兩個 settings 檔），對 1M ≈ 250K 工作量結構性早 compact。env 在 session start 讀取 → **下個 session 生效**。
+- 安全網不變：PreCompact hook（save_session_state.sh）+ 每小時 :50 generate_handoff.py 確保 handoff_latest.md 恆新，即使 compact 點不準也可復原。
+- **待驗證**：若降到 25% 仍不 fire，代表 harness 未實際讀此 env override（次一層問題）；下個長 session 觀察是否在 ~250K 觸發。
+
+### 2026-06-03 20:08 更正前一條診斷 — compact 真根因(用戶糾正「不是改高改低,是沒觸發」)
+前一條把 62% 當「對 1M 太高」是**錯的**。用戶指出 context 已 80% 仍沒 compact,代表是**觸發機制壞了**,非值問題。claude-code-guide 查證真根因:
+1. **放錯位置**:`CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` 放 `settings.json` 的 `env` 區塊**不被 harness 讀**;必須放 **shell init(~/.zshrc)**。→ 已加 `export` 到 ~/.zshrc(值還原 62,settings 檔的值留著當 belt-and-suspenders)。
+2. **上游 BUG**:Claude Code v2.1.92 對 Opus 1M context auto-compact 有 regression(GitHub #43989);override 有上限只能往下(#31806);多人回報設了不觸發(#36381)。→ **auto-compact 在 1M Opus 本身不可靠**。
+3. **agent 無法自觸發 /compact**(user-only slash 指令,Skill 工具禁 built-in)→「靠主 agent 自律 compact」結構上做不到。
+**可靠安全網(不靠 auto-compact)**:(a) handoff_latest.md 恆新(每小時 :50 + PreCompact hook save_session_state.sh);(b) **新增硬規則:主 agent 偵測 context 偏高時,主動請用戶 /compact**(見 CLAUDE.md 補充)。env 修正下個 session 生效,但因上游 bug 不保證 1M 上準觸發,故 (b) 是主要保險。
+
+### 2026-06-03 20:11 再更正 — auto-compact 主修法是「放對位置讓它自動」,非手動(用戶二次糾正)
+用戶點破:auto-compact threshold 本來就該**自動**觸發,「請用戶手動 /compact」違背設計目的,收回該 fallback。
+**確定根因**:`CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=62` 設在 settings.json `env` 區塊 → harness 不讀 → 62 被忽略 → 實際跑在**預設 ~83%** → context 80% 時尚未達 83%,所以「沒觸發」其實是「跑在預設門檻、還沒到」。非機制壞,是自訂值沒生效。
+**主修法**:`export CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=62` 已加入 ~/.zshrc(真正被讀的位置),settings 兩檔保留 62 當備援 → 下個 session 自動在 62% compact,無需手動。
+**殘留風險**:Claude Code 2.1.158 仍可能受 1M-Opus regression(#43989)影響;若放對位置後仍不自動觸發 → 上游 bug,彙整 repro 回報 Anthropic。
+**結論**:不institutionalize 手動 /compact;手動僅限「當前 session 已超載」的一次性救援。

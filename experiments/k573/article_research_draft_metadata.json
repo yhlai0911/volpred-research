@@ -1,0 +1,35 @@
+{
+  "task_id": "K573_article_research",
+  "mile_id": "mile_6a4554d4",
+  "title": "K573：三種 VT 策略效率前緣——最低 MDD 不等於最佳風險管理",
+  "audience": "research",
+  "status": "draft",
+  "published_at": "2026-06-03T20:18:35+08:00",
+  "word_count_approx_zh": 5759,
+  "char_count": 6462,
+  "figures": [
+    {
+      "file": "experiments/k573/figures/efficiency_frontier.png",
+      "supabase_url": "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/efficiency_frontier.png",
+      "description": "三種 VT 策略效率前緣散點圖：x=MDD改善幅度(pp), y=CAGR成本(%/yr)"
+    }
+  ],
+  "tables": 6,
+  "experiment_refs": ["k573"],
+  "verification": {
+    "anti_ai_gate": "PASS (exit 0, 2 non-blocking warns for FB-mode long paragraphs)",
+    "dedup_check": "PASS: no existing research audience article for k573; general audience article mile_0f898126 confirmed different angle",
+    "data_verified": "All hardcoded numbers verified against k573_insurance_pricing_results.json"
+  },
+  "self_assessment": {
+    "depth": "5/5 — full cost decomposition + efficiency frontier + tail protection + breakeven VIX mechanism + statistical tests",
+    "readability": "4/5 — academic report style appropriate for research audience; clear section headers",
+    "informativeness": "5/5 — 6 tables + 1 efficiency frontier figure + HAC statistics; all numbers traceable to results.json",
+    "referenceability": "4/5 — cites Moreira&Muir 2017, Fleming et al. 2001, Barroso&Santa-Clara 2015 + K41/K62/K74/K544 prior work"
+  },
+  "deviation_notes": [
+    "cluster_waiver required: vix cluster at 151/30d vs cap 15; waiver granted for assigned task (research-audience tier not yet covered)",
+    "emdash_normalizer auto-fixed 4 em-dashes (lines 1, 54, 95, 99) — publisher handled automatically",
+    "experiment_refs passed via details={} not direct kwarg (API difference from task brief)"
+  ]
+}
