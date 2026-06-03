@@ -20300,5 +20300,27 @@
     "started_at": "2026-06-03T16:45:44.990272+00:00",
     "completed_at": "2026-06-03T16:50:20.451615+00:00",
     "result": "Published general-audience K872 article as mile_f1be9128. Added two real PNG charts from results.json, passed audience/image/source gates, and used a narrow retry-v2 cluster waiver for missing general coverage."
+  },
+  {
+    "id": "paper_review_mile_f1be9128",
+    "title": "Paper review (Codex 24h-rule): 高收益債利差看起來很會預警，真正拿來預測波動卻幾乎沒多加幾分",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_f1be9128 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_f1be9128",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-03T18:08:17+00:00",
+    "claimed_by": "hourly-02",
+    "claimed_at": "2026-06-03T18:10:38.697336+00:00",
+    "claim_session_id": "3adc3986d27a",
+    "started_at": "2026-06-03T18:10:42.899028+00:00",
+    "completed_at": "2026-06-03T18:15:36.463695+00:00",
+    "result": "Codex 24h-rule review PASS: Lookahead/DM/Harvey/Data 全 PASS, Methodology CONDITIONAL 補 3 qualifier 已 patch 進 feed.json; knowledge item_id=47afefe8"
   }
 ]

@@ -32172,5 +32172,42 @@
     ],
     "confidence": 0.7,
     "created_at": "2026-06-03T22:17:26.939630"
+  },
+  {
+    "item_id": "47afefe8",
+    "id": "paper_review_mile_f1be9128_1780510530",
+    "category": "paper_review",
+    "k_id": "K872",
+    "experiment_id": "K872",
+    "experiment_path": "experiments/k872/",
+    "title": "Paper review (Codex 24h-rule): mile_f1be9128 高收益債利差 NULL article",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "Codex CLI gpt-5.4 (codex 0.135)",
+    "reviewer_source": "Codex review primary path",
+    "codex_review": true,
+    "content": "K872 HY OAS article review: Lookahead PASS (shift(1) at k872 lines 88-89, 203-207). DM/Harvey PASS (4 tests p>0.3, passes_harvey=False, article phrasing consistent). Methodology CONDITIONAL: 3 qualifiers added (raw-level / in-sample DeltaR2=0.000266 + F p=0.067 + below 5% / preset 5y windows 2001-2005...2021-2025). Data integrity PASS with caveat (FRED OAS ffill to trading days acceptable). All 3 article patches applied to feed.json mile_f1be9128.",
+    "evidence": [
+      "experiments/k872/k872_results.json",
+      "experiments/k872/k872_credit_spread_vol.py:88-89 (shift(1))",
+      "experiments/k872/k872_credit_spread_vol.py:457-475 (incremental F-test)",
+      "experiments/k872/k872_credit_spread_vol.py:482-518 (5-year subperiod stability)",
+      "storage/reports/feed.json mile_f1be9128 revision_log"
+    ],
+    "article_id": "mile_f1be9128",
+    "edits_applied": [
+      "raw-level qualifier on 0.55/0.71/0.77 correlations",
+      "in-sample OLS DeltaR2=0.000266 + F-test p=0.067 + below 5%",
+      "preset 5-year windows (2001-2005...2021-2025) explicit"
+    ],
+    "confidence": 0.85,
+    "review_date": "2026-06-04T02:30+08:00",
+    "created_at": "2026-06-04T02:15:30.622024",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "K872",
+      "NULL-result",
+      "CONDITIONAL_PASS"
+    ]
   }
 ]
