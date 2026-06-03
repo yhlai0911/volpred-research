@@ -19965,7 +19965,7 @@
     "title": "Paper review (Codex 24h-rule): AI 五層產業鏈，我們不講故事，看波動率怎麼說",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_31b2b0bb needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_31b2b0bb",
@@ -19974,7 +19974,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-03T12:08:15+00:00"
+    "created_at": "2026-06-03T12:08:15+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-03T12:28:16.714612+00:00",
+    "claim_session_id": "584b2b361962",
+    "started_at": "2026-06-03T12:28:16.823352+00:00",
+    "completed_at": "2026-06-03T12:30:32.435426+00:00",
+    "result": "FAIL: K1413 front-half numbers mostly match, but article wrongly says chip is the highest-current-vol layer and blurs 5 conceptual layers into 4 implemented baskets."
   },
   {
     "id": "K1097_article_general_v2",
@@ -20033,7 +20039,7 @@
     "title": "K789: write general-audience article (auto-discovered uncovered K)",
     "description": "K K789 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (vix 30d=148>15)']) but no general article in feed.json.  Verdict preview: [提出: User, 執行: Claude] K789: Google Trends Search Volume as Return/Tail-Risk Predictor. DIFFERENTIATION from K750 (vol prediction NULL): K789 tests RETURN direction + TAIL RISK prediction (Da et al. 2011 found search volume predicts returns, not vol). DATA LIMITATION: pytrends fa",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K789",
@@ -20049,6 +20055,12 @@
       "audience-general"
     ],
     "topic_cluster": "vix",
-    "created_at": "2026-06-03T12:08:16+00:00"
+    "created_at": "2026-06-03T12:08:16+00:00",
+    "claimed_by": "hourly-21",
+    "claimed_at": "2026-06-03T13:10:21.992268+00:00",
+    "claim_session_id": "422f0fda5121",
+    "started_at": "2026-06-03T13:10:22.298404+00:00",
+    "completed_at": "2026-06-03T13:15:18.419031+00:00",
+    "result": "Published mile_4469dce8 as draft (audience: research override; cluster_waiver: attention-proxy not vix). K789 NULL/methodology article — Google Trends 預測能力破除迷思 + VIX-proxy caveat 誠實標示。Anti-AI gate PASS (warn 2/3). 1359 字繁中。"
   }
 ]
