@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-06-03T12:12:38Z",
-  "patrol_time_taipei": "2026-06-03 20:12:22",
+  "timestamp": "2026-06-04T02:11:44+08:00",
+  "patrol_time_taipei": "2026-06-04 02:11:44",
   "all_ok": false,
   "checks": [
     {
@@ -11,22 +11,22 @@
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json does not exist (MISSING). Alert: metrics stale/missing."
+      "detail": "storage/strategy_metrics.json does not exist (FILE_MISSING). Cannot assess freshness. Alert: metrics file missing."
     },
     {
       "name": "ERROR_LOG",
       "status": "alert",
-      "detail": "Entry found dated 2026-06-03 (today): 'FB pipeline 4 天 100% 失敗根因（email-11939 用戶嚴重質問）'. Root cause: FB personal account has no headless API; audit script treated awaiting_interactive_session as terminal causing silent failure; AI violated no-choice-question rule. Fix applied 2026-06-03 hourly-11: audit script patched, 4 stale awaiting entries marked expired_skip, permanent fix doc created, blocked task fb_page_graph_api_integration created."
+      "detail": "Entry dated 2026-06-03 (yesterday): FB pipeline 4-day 100% failure root cause. Three-layer fix: audit script patched (awaiting_interactive_session removed from terminal set, 72h auto-expire added); meta-process fixed (no-choice-question violation corrected); physical FB API limitation documented. 4 stale awaiting posts marked expired_skip. Permanent fix doc at docs/fb_pipeline_permanent_fix.md. Blocked task fb_page_graph_api_integration awaiting user FB_PAGE_ID + token."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "14 active strategies checked. Each has exactly 1 null in last 3 entries (today's data not yet populated — within normal range, not >2). _market_daily has 0 entries (benchmark, not a trading strategy). No alert triggered."
+      "detail": "14 active strategies checked (adaptive_tier, fear_dca, global_vt_tz, piecewise_conservative, recommended_5050, risk_parity, simple_12vix, slow_vt, taiwan_8.63vix, taiwan_hybrid_leverage, taiwan_spy_momentum, tz_tw_jp_5050, vix_cond_leverage, vix_leading_guard). No strategy has >2 null portfolio_return in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files. Clean working tree."
+      "detail": "0 uncommitted files. Working tree clean."
     },
     {
       "name": "KNOWLEDGE_SIZE",
@@ -35,7 +35,7 @@
     }
   ],
   "alerts": [
-    "METRICS STALE/MISSING: storage/strategy_metrics.json does not exist.",
-    "ERROR LOG TODAY (2026-06-03): FB pipeline 4-day 100% failure root cause logged. Three-layer fix applied in hourly-11 commit."
+    "STRATEGY METRICS MISSING: storage/strategy_metrics.json does not exist — investigate whether file was deleted or never generated.",
+    "ERROR LOG 2026-06-03: FB pipeline 4-day 100% failure. Root cause documented and fixed. Monitor for recurrence. Awaiting user FB_PAGE_ID + token for permanent Graph API solution."
   ]
 }
