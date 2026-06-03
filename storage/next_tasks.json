@@ -20248,7 +20248,7 @@
     "title": "K665: write research-audience article (auto-discovered uncovered K)",
     "description": "K K665 has verdict signal (score=0, reasons=['cluster cooldown penalty (vix 30d=148>15)']) but no research article in feed.json.  Verdict preview: [提出: 產品化/簡化, 執行: Claude] 12/VIX 連續公式簡化為 lookup table。Table B（3 行）：VIX<15→100%, 15-25→50%, >25→20%。Sharpe 0.703 vs continuous 0.722（retention 97.4%），weight changes 23/yr vs 231/yr（10x 減少）。Table A（5 行）甚至勝過 continuous（102.8%）。反直覺：越細越差（7 行 92.9%）——粗略離散化恰好產生更好的平均配置。VIX Action Card: 3 ",
     "priority": 4,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K665",
@@ -20268,7 +20268,9 @@
     "claimed_by": "hourly-01",
     "claimed_at": "2026-06-03T17:12:43.273361+00:00",
     "claim_session_id": "fb5c2229b1ca",
-    "started_at": "2026-06-03T17:12:46.933405+00:00"
+    "started_at": "2026-06-03T17:12:46.933405+00:00",
+    "completed_at": "2026-06-03T17:20:37.891785+00:00",
+    "result": "K665 research-audience published as draft (mile_207fe825): retention U-shape mechanism (5-row=102.8% vs 7-row=92.9%), sub-period robustness, in-sample optimization failure finding; 2 charts generated"
   },
   {
     "id": "K872_article_general_v2",
