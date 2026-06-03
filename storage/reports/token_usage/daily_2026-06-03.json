@@ -1,0 +1,375 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-06-03",
+  "week_range": "2026-05-29 → 2026-06-05",
+  "totals": {
+    "input_tokens": 24,
+    "output_tokens": 4272,
+    "cache_read_tokens": 490727,
+    "cache_create_tokens": 108288,
+    "billable_total": 112584,
+    "assistant_messages": 18,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.6175
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 24,
+      "output_tokens": 4272,
+      "cache_read_tokens": 490727,
+      "cache_create_tokens": 108288,
+      "messages": 18,
+      "estimated_cost_usd": 0.6175
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 14,
+      "output_tokens": 2461,
+      "cache_read_tokens": 264524,
+      "cache_create_tokens": 70098,
+      "messages": 10,
+      "billable_total": 72573,
+      "estimated_cost_usd": 0.3792,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "bash_other": {
+      "input_tokens": 3,
+      "output_tokens": 266,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 30384,
+      "messages": 1,
+      "billable_total": 30653,
+      "estimated_cost_usd": 0.1179,
+      "emoji": "💭",
+      "description": "其他 Bash 操作"
+    },
+    "investigation": {
+      "input_tokens": 4,
+      "output_tokens": 920,
+      "cache_read_tokens": 129587,
+      "cache_create_tokens": 3975,
+      "messages": 4,
+      "billable_total": 4899,
+      "estimated_cost_usd": 0.0676,
+      "emoji": "🔍",
+      "description": "閱讀 / 搜尋檔案"
+    },
+    "token_report": {
+      "input_tokens": 3,
+      "output_tokens": 625,
+      "cache_read_tokens": 96616,
+      "cache_create_tokens": 3831,
+      "messages": 3,
+      "billable_total": 4459,
+      "estimated_cost_usd": 0.0527,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 10,
+      "billable_total": 72573,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 10,
+          "billable_total": 72573
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "non-text assistant message",
+          "messages": 5,
+          "billable_total": 36870
+        },
+        {
+          "name": "other",
+          "messages": 5,
+          "billable_total": 35703
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 5,
+          "billable_total": 36870
+        },
+        {
+          "name": "Token 用量日報流程開始，先執行報告腳本。",
+          "messages": 1,
+          "billable_total": 30653
+        },
+        {
+          "name": "腳本只用標準函式庫，可以直接用 Python 執行，不需要 uv。",
+          "messages": 1,
+          "billable_total": 2355
+        },
+        {
+          "name": "環境正在安裝依賴，需要等待。讓我同時檢查腳本是否存在並確認報告輸出路徑。",
+          "messages": 1,
+          "billable_total": 1671
+        },
+        {
+          "name": "安裝過程耗時較長（大型 GPU 套件）。讓我查看腳本需求，看是否能直接執行。",
+          "messages": 1,
+          "billable_total": 591
+        },
+        {
+          "name": "⏱ 開始 2026-06-03 22:44:21（台灣時間）",
+          "messages": 1,
+          "billable_total": 433
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 1,
+      "billable_total": 30653,
+      "family_breakdown": [
+        {
+          "name": "other bash",
+          "messages": 1,
+          "billable_total": 30653
+        }
+      ],
+      "prefix_breakdown": [
+        {
+          "name": "TZ='Asia/Taipei'",
+          "messages": 1,
+          "billable_total": 30653
+        }
+      ],
+      "top_first_lines": [
+        {
+          "name": "TZ='Asia/Taipei' date '+%Y-%m-%d %H:%M:%S'",
+          "messages": 1,
+          "billable_total": 30653
+        }
+      ]
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 1,
+      "cache_create_tokens": 108288,
+      "billable_total": 112584,
+      "cache_create_share_pct": 96.2,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "626bb50b-2a5d-4f1b-bfe7-88e4e2f30292",
+          "messages": 18,
+          "billable_total": 112584,
+          "cache_create_tokens": 108288,
+          "cache_read_tokens": 490727,
+          "duration_minutes": 1.5,
+          "cache_create_share_pct": 96.2,
+          "first_ts": "2026-06-03T14:44:19.998000+00:00",
+          "last_ts": "2026-06-03T14:45:50.514000+00:00"
+        }
+      ]
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "319ac1c",
+      "message": "Ops patrol report 2026-06-03T12:12Z"
+    },
+    {
+      "sha": "97f2929",
+      "message": "Paper4_body_steps_5_to_15_with_version_reconcile | Step 5+6 done + version recon"
+    },
+    {
+      "sha": "3621ea1",
+      "message": "hourly-13_dispatch | FB pipeline CRITICAL 永久解（dashboard terminal drift + mile_49"
+    },
+    {
+      "sha": "f660fc6",
+      "message": "email-11932 close | FB Page 方案永久撤回（boss 粗口糾正 hourly-11）"
+    },
+    {
+      "sha": "756b9ab",
+      "message": "hourly-11_dispatch | email-11939 FB 根因 + 永久解 (Audit fix + 4篇 expired + Page Grap"
+    },
+    {
+      "sha": "22aa0a7",
+      "message": "ops(hourly 10:22): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    },
+    {
+      "sha": "c5191e6",
+      "message": "hourly-10_dispatch | K1412 article published draft mile_6a189e72 + orphan drafts"
+    },
+    {
+      "sha": "23f25a7",
+      "message": "K1412_article_general | TW0050-N225 cross-market copula ROBUST 5/5 HLN-sig draft"
+    },
+    {
+      "sha": "9b26ddd",
+      "message": "fix(publisher): hard-block near-duplicate articles of same experiment (K1396 dup"
+    },
+    {
+      "sha": "dc33bd2",
+      "message": "hourly-09_dispatch | Paper4_body steps 3-4 ✅ + follow-up steps 5-15 with version"
+    },
+    {
+      "sha": "6d2c480",
+      "message": "Paper4_body_integration_steps_3_to_4 | §4.6 publication-delay convention + Table"
+    },
+    {
+      "sha": "800d109",
+      "message": "hourly-08_dispatch | K1074 daily_article — A4f QLIKE 統計勝但 turnover +68% 吃光，淨 Sha"
+    },
+    {
+      "sha": "ad0f3a8",
+      "message": "hourly-07_dispatch | trending_repost mile_49616ac2 — AI mega-cap IV skew cross-s"
+    },
+    {
+      "sha": "81fc198",
+      "message": "hourly-06_dispatch | trending_repost dup-block + pool refill +6 + cache/ gitigno"
+    },
+    {
+      "sha": "c1e4abc",
+      "message": "hourly-05_dispatch | platform_ops + orphan_sweep: K941 dedup catch + K744 orphan"
+    },
+    {
+      "sha": "9d12f0f",
+      "message": "PHASE-Z-orphan-sweep: K935 leftovers (gap/range charts + general_draft + mile_1b"
+    },
+    {
+      "sha": "0213cd1",
+      "message": "K948_article_general | daily_article: 週頻 return predictability NULL — 連回 vol-tar"
+    },
+    {
+      "sha": "58d385d",
+      "message": "K858_article_general | hourly-03: null-result article — Congressional trading do"
+    },
+    {
+      "sha": "3b87c74",
+      "message": "PHASE-Z-orphan-sweep: codex-cli K566 article leftovers + pool state diff"
+    },
+    {
+      "sha": "0360cf8",
+      "message": "Paper4_body_integration_9_new_experiments | hourly-02: integration_plan_v2 steps"
+    },
+    {
+      "sha": "f496b41",
+      "message": "ops(hourly 01:44): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    },
+    {
+      "sha": "6d6d097",
+      "message": "paper_review_mile_e5f33cfa | hourly-01: CONDITIONAL_PASS — SPY/GLD direction rev"
+    },
+    {
+      "sha": "9c90ef6",
+      "message": "K1399_article_revise_overclaim | hourly-01: fix overclaim — 水準最強 MA5 次佳但無增量優勢; S"
+    },
+    {
+      "sha": "9be0614",
+      "message": "paper_review_mile_34157161 | hourly-00: Codex K1399 review FAIL — article overcl"
+    },
+    {
+      "sha": "8eedde9",
+      "message": "ops(hourly 23:19): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    },
+    {
+      "sha": "eda3b78",
+      "message": "K772_article_general | hourly-23: publish mile_0a7041f4 SPY 隔夜波動分解 general (audi"
+    },
+    {
+      "sha": "4002a5b",
+      "message": "hourly-22 | K802_article_general published mile_cbf8ba62 (GJR+SkewedT VaR Trinit"
+    },
+    {
+      "sha": "c241c0c",
+      "message": "paper_review_mile_5f46ac4e | hourly-21: Codex 24h-rule FAIL → fix K1374 3 claim-"
+    },
+    {
+      "sha": "fe22c2f",
+      "message": "Paper6_online_appendix_k880v2_robustness | hourly-20: K880v2 robustness online a"
+    },
+    {
+      "sha": "9d9e29e",
+      "message": "K1374_article_general | hourly-19: publish draft mile_5f46ac4e '除息日台股波動高了幾成？11 年"
+    },
+    {
+      "sha": "a916662",
+      "message": "ops(hourly 18:17): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    },
+    {
+      "sha": "94e5e84",
+      "message": "email-11923-305cbb | hourly-18: own-shock framing 修正 K483 mile_02c403ef (boss cr"
+    },
+    {
+      "sha": "020a720",
+      "message": "K483_article_general | hourly-17: publish draft mile_02c403ef '黃金跌時波動反而縮？石油衝擊下的槓"
+    },
+    {
+      "sha": "0fe824a",
+      "message": "K1412_tw0050_n225_oos_sensitivity | hourly-16 interpret: 5/5 OOS robust raw but "
+    },
+    {
+      "sha": "82b9470",
+      "message": "ops(hourly 15:15): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    },
+    {
+      "sha": "bd65aec",
+      "message": "K1412_tw0050_n225_oos_sensitivity | hourly-15 claim + enqueue compute (5 OOS sta"
+    },
+    {
+      "sha": "f714213",
+      "message": "K188_article_general | task pool: claim→complete (mile_e8d4f335 draft published,"
+    },
+    {
+      "sha": "cfc3238",
+      "message": "K188_article_general | feed K188 HAR ceiling article (mile_e8d4f335, draft)"
+    },
+    {
+      "sha": "93badbb",
+      "message": "K434_article_general | task pool: claim→complete (mile_b3ff7f9e draft published)"
+    },
+    {
+      "sha": "a69a07a",
+      "message": "feat(article): K434 BMA-GARCH feed article (mile_b3ff7f9e, draft)"
+    },
+    {
+      "sha": "fc52ceb",
+      "message": "docs(deploy): document deploy target/architecture, server-move 3-ID rule, mandat"
+    },
+    {
+      "sha": "5334e87",
+      "message": "docs(error_log): record server-move deploy-target saga + lessons (verify live re"
+    },
+    {
+      "sha": "5e5d927",
+      "message": "fix(deploy): correct deploy target to new server's volpred-v3 (…117) — ×100 fix "
+    },
+    {
+      "sha": "1cda92b",
+      "message": "fix(deploy): repoint deploy target to migrated server + config as single source "
+    },
+    {
+      "sha": "b419116",
+      "message": "K431_article_general | STGARCH SPY negative-result research article published (m"
+    },
+    {
+      "sha": "fb8fa8d",
+      "message": "fix(ops): drain mechanism for .failed_supabase_syncs.json dead-letter queue"
+    },
+    {
+      "sha": "bd19085",
+      "message": "ops(hourly 11:15): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    },
+    {
+      "sha": "39631bc",
+      "message": "hourly-11 | platform_ops: orphan worktree cleanup (a3f3d597 K189/K1410 + ad483bd"
+    },
+    {
+      "sha": "25ef87b",
+      "message": "K445_article_general | BTC inverse leverage draft + parallel K180/K437 worker or"
+    },
+    {
+      "sha": "e8ccf6c",
+      "message": "hourly-09 | rebuild publication_candidates + refill pool +4 (K434/437/445/462)"
+    }
+  ]
+}
