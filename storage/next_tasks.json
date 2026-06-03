@@ -20074,7 +20074,7 @@
     "title": "K937: write general-audience article (auto-discovered uncovered K)",
     "description": "K K937 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (vix 30d=148>15)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] 測試4種ensemble方法組合CARR_YZ和GARCH/GJR/MF-GJR(VIX)。SPY OOS 2017-2025 (2262天)。Equal Weight(QLIKE=1.494)、Inverse QLIKE(1.492)、OLS Stacking(1.497)、Rank-Level Hybrid(1.558)。MF-GJR(VIX)單獨(1.462)仍為最佳，無ensemble能達Harvey顯著差異。OLS Stacking分配41.7%給MF-GJR但僅15.4%給CARR_YZ。Ra",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K937",
@@ -20091,7 +20091,13 @@
       "audience-general"
     ],
     "topic_cluster": "vix",
-    "created_at": "2026-06-03T14:08:05+00:00"
+    "created_at": "2026-06-03T14:08:05+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-03T15:39:30.425984+00:00",
+    "claim_session_id": "0b88d879d060",
+    "started_at": "2026-06-03T15:41:11.535881+00:00",
+    "completed_at": "2026-06-03T15:42:07.645431+00:00",
+    "result": "Published general-audience K937 coverage as mile_4c5eddb2, with two PNG panels from the ensemble comparison chart and a cluster waiver for first-time general coverage."
   },
   {
     "id": "K964_article_general",
@@ -20186,5 +20192,94 @@
     "started_at": "2026-06-03T14:14:18.772682+00:00",
     "completed_at": "2026-06-03T14:17:35.378430+00:00",
     "result": "K1414 meta-analysis complete: 21 model-sample observations aggregated from K889/K940/K1014/K1016. MF-GJR family confirmed as SPY r² QLIKE ceiling within sample-aligned comparisons (K889 MF-GJR=1.4094 best observed). 4-panel forest plot + JSON output + knowledge entry 99e5ac01 written. CONDITIONAL_PASS — pure aggregation no MLE."
+  },
+  {
+    "id": "paper_review_mile_778a9b85",
+    "title": "Paper review (Codex 24h-rule): 市場最恐慌那幾天，我們還是沒找到另類數據的增量價值",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_778a9b85 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_778a9b85",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-03T16:09:22+00:00"
+  },
+  {
+    "id": "K653_article_research",
+    "title": "K653: write research-audience article (auto-discovered uncovered K)",
+    "description": "K K653 has verdict signal (score=0, reasons=['cluster cooldown penalty (vix 30d=148>15)']) but no research article in feed.json.  Verdict preview: [提出: 行為金融/實務, 執行: Claude] 5 種行為偏差模擬（50/50 12/VIX，2010-2026）。最大代價：Lazy rebalancer -40% 財富（$240K, t=3.60 p<0.001）。Panic seller -11.2%（NS）。驚人：News reactor（VIX spike 時減半）Sharpe 1.97 > perfect 1.56，Terminal +$305K。Overrider（VIX>25 全現金）也更好 Sharpe 1.88。Performance chaser +$92K。結論：(1)最重要",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K653",
+    "tags": [
+      "behavioral-finance",
+      "simulation",
+      "rebalancing",
+      "investor-behavior",
+      "Piecewise",
+      "practical",
+      "auto-discovered",
+      "audience-research"
+    ],
+    "topic_cluster": "vix",
+    "created_at": "2026-06-03T16:09:22+00:00",
+    "claimed_by": "hourly-00",
+    "claimed_at": "2026-06-03T16:11:16.596202+00:00",
+    "claim_session_id": "c79ca29dcfbd",
+    "started_at": "2026-06-03T16:11:19.743167+00:00",
+    "completed_at": "2026-06-03T16:26:12.318323+00:00",
+    "result": "Published mile_720c1519 as draft (research-audience, behavioral paradox: News Reactor Sharpe 1.97 > Perfect 1.56 statistically significant p<0.001; Overrider direction-only not-sig p=0.084). Tier-2 conclusion-consistency flag caught & corrected. mile_ddd3d9dc superseded (unpublished)."
+  },
+  {
+    "id": "K665_article_research",
+    "title": "K665: write research-audience article (auto-discovered uncovered K)",
+    "description": "K K665 has verdict signal (score=0, reasons=['cluster cooldown penalty (vix 30d=148>15)']) but no research article in feed.json.  Verdict preview: [提出: 產品化/簡化, 執行: Claude] 12/VIX 連續公式簡化為 lookup table。Table B（3 行）：VIX<15→100%, 15-25→50%, >25→20%。Sharpe 0.703 vs continuous 0.722（retention 97.4%），weight changes 23/yr vs 231/yr（10x 減少）。Table A（5 行）甚至勝過 continuous（102.8%）。反直覺：越細越差（7 行 92.9%）——粗略離散化恰好產生更好的平均配置。VIX Action Card: 3 ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K665",
+    "tags": [
+      "lookup-table",
+      "simplification",
+      "VIX-action-card",
+      "practical",
+      "product",
+      "retail-investor",
+      "auto-discovered",
+      "audience-research"
+    ],
+    "topic_cluster": "vix",
+    "created_at": "2026-06-03T16:09:22+00:00"
+  },
+  {
+    "id": "K872_article_general_v2",
+    "title": "K872: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K872 has verdict signal (score=0, reasons=['cluster cooldown penalty (vix 30d=148>15)']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Claude, 執行: Claude] K872 tests FRED HY OAS (BAMLH0A0HYM2) for vol prediction. Raw corr with fwd vol r=0.55 but VIX r=0.71. HY-VIX corr=0.77 (redundant). Delta-R² after VIX control = 0.0003. OOS: best credit model QLIKE 0.088 vs VIX 0.090, DM t=0.57 NS. HY OAS leads VIX by ~7",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K872",
+    "tags": [
+      "credit_spread",
+      "HY_OAS",
+      "FRED",
+      "VIX_sufficiency",
+      "null_result",
+      "coefficient_instability",
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": "vix",
+    "created_at": "2026-06-03T16:09:22+00:00"
   }
 ]
