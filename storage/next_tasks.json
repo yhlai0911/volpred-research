@@ -19644,9 +19644,11 @@
     "priority": 3,
     "task_type": "paper_body",
     "description": "Paper 4 body integration Step 8 onwards (§7.6 K1121 allocation +2p + §8.2 update + §9 conclusion null count + abstract + bib add Politis-Romano Opdyke + 5-asset heatmap fig + K1121 bootstrap dist fig + paper-update CLI + latex-academic-reviewer + citation-verifier). Predecessor: Step 7 done in commit (forthcoming). Scope: 切小到 §7.6 only first fire; 後續 fire 接 §8.2/§9/abstract。",
-    "status": "pending",
+    "status": "pending_main_thread",
     "created_at": "2026-06-03T07:18:00+00:00",
-    "source": "hourly-15 followup after Step 7 done"
+    "source": "hourly-15 followup after Step 7 done",
+    "handoff_note": "paper_body is Claude main-thread only per .claude/rules/task-routing.md; Codex claimed it only to correct misrouting. Returned to pending_main_thread so the queue reflects canonical ownership instead of leaving a non-agentable task in pending.",
+    "handoff_at": "2026-06-03T18:52:52.593819+00:00"
   },
   {
     "id": "paper_review_mile_7825c8a2",
@@ -20322,5 +20324,26 @@
     "started_at": "2026-06-03T18:10:42.899028+00:00",
     "completed_at": "2026-06-03T18:15:36.463695+00:00",
     "result": "Codex 24h-rule review PASS: Lookahead/DM/Harvey/Data 全 PASS, Methodology CONDITIONAL 補 3 qualifier 已 patch 進 feed.json; knowledge item_id=47afefe8"
+  },
+  {
+    "id": "trending_repost_2026_06_04_ai資本支出",
+    "title": "[trending_repost] AI巨頭資本支出飆升，科技股波動率定價是否低估風險？",
+    "description": "從科技巨頭CapEx指引與實際盈餘成長的落差切入，分析隱含波動率的期限結構。可量化：利用HAR-VIX模型檢驗CapEx修正公告前後，科技股波動率偏斜與跳躍風險的變動。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "failed",
+    "created_at": "2026-06-03T19:08:51+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ],
+    "claimed_by": "hourly-03",
+    "claimed_at": "2026-06-03T19:09:52.909947+00:00",
+    "claim_session_id": "f3498a03c661",
+    "started_at": "2026-06-03T19:09:56.480724+00:00",
+    "completed_at": "2026-06-03T19:12:30.814349+00:00",
+    "result": "3-layer dedup violation: mile_49616ac2 (AI 資本支出 + 期權市場上行 vol) + mile_622a2b73 (資本支出暴增+波動率定價迷局) 已 published 完全覆蓋此 angle (narrative arc dup per memory feedback_narrative_arc_dedup). Subagent stopped mid-data-pull, no waste output."
   }
 ]
