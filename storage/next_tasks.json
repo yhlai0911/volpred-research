@@ -19197,7 +19197,7 @@
     "title": "Paper review (Codex 24h-rule): 只贏一點點的模型，很多時候還不能算真的贏",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_31529fdf needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_31529fdf",
@@ -19206,7 +19206,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-02T22:08:13+00:00"
+    "created_at": "2026-06-02T22:08:13+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-02T23:50:22.414801+00:00",
+    "claim_session_id": "2a6422ade07b",
+    "started_at": "2026-06-02T23:50:30.278374+00:00",
+    "completed_at": "2026-06-02T23:50:41.236744+00:00",
+    "result": "Codex review completed: article framing is disciplined, but experiment K1396 still has a material benchmark caveat. A4f OOS forecasts use steady-state g approximation instead of the canonical recursive update, and DM is NW+t-threshold without an HLN-style small-sample correction."
   },
   {
     "id": "K1412_article_general",
@@ -19353,7 +19359,7 @@
     "title": "K1074: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1074 has verdict signal (score=2, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson', 'cluster cooldown penalty (vix 30d=148>15)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K1074 tests whether A4f's statistical QLIKE edge (K988 DM t=4.48) translates to VT strategy Sharpe. OOS 2013-2026 (n=3338 days). FIVE STRATEGIES tested with proper signal.shift(1) lag and 5bp TX cost. NET SHARPE: 12/VIX-VT 0.861 ★ (wins SPY-VT cohort) > A",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1074",
@@ -19370,7 +19376,13 @@
       "audience-general"
     ],
     "topic_cluster": "vix",
-    "created_at": "2026-06-02T22:18:24+00:00"
+    "created_at": "2026-06-02T22:18:24+00:00",
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-06-03T00:09:58.904621+00:00",
+    "claim_session_id": "7d93ae141d40",
+    "started_at": "2026-06-03T00:10:43.856379+00:00",
+    "completed_at": "2026-06-03T00:16:28.237445+00:00",
+    "result": "K1074 daily_article published as mile_765f6391 (draft). 1521 chars, 2 supabase images, exp_refs=K1074, anti_ai_gate PASS exit 0. Core narrative: A4f QLIKE 統計勝（DM |t|=4.48）但 turnover +68% 被 5bp TX 吃光，淨 Sharpe 0.843 vs 12/VIX 0.861（p=0.64 NS）。BH 50/50 0.873 第8次無人能勝。方法論 takeaway: 統計顯著 ≠ 經濟顯著，必雙測。"
   },
   {
     "id": "K1075_article_general",
@@ -19418,5 +19430,20 @@
     ],
     "topic_cluster": "vix",
     "created_at": "2026-06-02T22:18:24+00:00"
+  },
+  {
+    "id": "K1325",
+    "title": "K1325: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 355). Original: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1325.py with signal.shift(1) + seed=42, (c) K1325_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 355,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-03T00:00:03Z"
   }
 ]

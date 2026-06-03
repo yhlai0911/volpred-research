@@ -1,23 +1,27 @@
 # Feed Index
 
-_Last built: 2026-06-02 22:49 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-06-03 00:05 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
-- Total articles: **1494**  (with thumbnail: 56)
-- Last 30 days: **499**
-- Total chars (content): 6,329,592
+- Total articles: **1498**  (with thumbnail: 57)
+- Last 30 days: **503**
+- Total chars (content): 6,338,434
 
-**Status**: published=1246, archived=122, draft=112, unpublished=9, retracted=5
+**Status**: published=1249, archived=122, draft=113, unpublished=9, retracted=5
 
-**Audience**: research=1047, general=252, daily=107, unknown=77, member_qa=10, event=1
+**Audience**: research=1047, general=254, daily=109, unknown=77, member_qa=10, event=1
 
-**Category**: milestone=778, general=605, unknown=73, member_qa=10, research=9, daily_article=8, qa=5, experiment=3, event_article=2, diary=1
+**Category**: milestone=779, general=608, unknown=73, member_qa=10, research=9, daily_article=8, qa=5, experiment=3, event_article=2, diary=1
 
-## 最近 30 天 (499)
+## 最近 30 天 (503)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-06-03 | `mile_e5700a83` | 每日策略建議：VIX 15.77（正常）— 2026-06-03 | daily | general | published | 1650 | Y | 每日建議, VIX, 策略配置 |
+| 2026-06-03 | `mile_95b8086b` | 2026-06-03 本日持倉比率建議（依據 2026-06-02 收盤數據） | daily | milestone | published | 1047 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
+| 2026-06-02 | `mile_49616ac2` | AI 資本支出狂潮下，期權市場押的是上行而不是下行 | general | general | published | 4066 |  | 一般讀者, trending, options, implied-volatility, ai-capex, skew |
+| 2026-06-02 | `mile_458d0fc9` | 台指期大部分的錢都在隔夜發生，但把它單獨抓出來做，反而沒那麼好賺 | general | general | draft | 2079 |  | 一般讀者, 台指期, 隔夜跳空, 台股, 交易成本, 風險管理 |
 | 2026-06-02 | `mile_31529fdf` | 只贏一點點的模型，很多時候還不能算真的贏 | research | milestone | published | 105522 |  | 研究, 波動率預測, 模型比較, 投資研究, 負面結果, VIX |
 | 2026-06-02 | `mile_1cb111ed` | 高頻資料終於能上場比賽了，但 37 天還太早宣布新王登基 | general | general | draft | 1839 |  | 一般讀者, SPY, 5分鐘資料, 波動模型, 小樣本, 風險觀察 |
 | 2026-06-02 | `mile_f314fcb3` | 週頻也救不了 Return 預測 — 514 週測試後，5 個模型全敗給歷史平均 | research | milestone | draft | 3056 |  | 研究, SPY, return-predictability, weekly, OOS, null-result |
