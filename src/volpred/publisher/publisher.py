@@ -743,7 +743,12 @@ class Publisher:
             msg = (
                 "pre-publish content-vs-source violations: the following numbers "
                 f"are not found in cited sources {sorted(audit_k_ids)}:\n  - {issue_text}\n"
-                "Fix the article numbers / cite the correct experiment, or set "
+                "Each cited statistic must appear verbatim in the cited results.json "
+                "(its fraction/percent form is accepted). DERIVED numbers — a "
+                "difference (0.83-0.61=0.22), an average across periods, a ratio — "
+                "are NOT in source and will trip this gate: cite the component "
+                "values instead, or add the derived value as an explicit results.json "
+                "field. Fix the numbers / cite the correct experiment, or set "
                 "audit_strict=False (batch migrations only)."
             )
             if audit_strict:

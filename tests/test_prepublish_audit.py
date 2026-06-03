@@ -121,11 +121,32 @@ def test_extract_requires_stat_context():
     assert any(c["value"] == 30.0 for c in claims2)
 
 
-def test_load_source_values_seeds_unit_variants():
+def test_load_source_values_is_verbatim_only():
+    # Code-review Issue 1 (2026-06-03): source values are VERBATIM only — NO
+    # blanket *100 / /100 seeding (which created a cross-scale false-match
+    # cloud). 0.517 is present; its 51.7 cloud variant must NOT be seeded.
     vals = load_source_values(["K1413"], root=str(REPO_ROOT))
-    # 0.517 present; *100 and /100 variants seeded.
     assert any(abs(v - 0.517) < 1e-9 for v in vals)
-    assert any(abs(v - 51.7) < 1e-9 for v in vals)
+    assert not any(abs(v - 51.7) < 1e-9 for v in vals)
+
+
+def test_fabricated_bare_number_not_rescued_by_unit_cloud():
+    # The fraction<->percent flexibility lives on the CLAIM side and only for
+    # %-tagged numbers. A fabricated BARE Sharpe that happens to equal a source
+    # leaf * 100 must still be flagged (no source-side cloud to rescue it).
+    import json, tempfile
+    from pathlib import Path
+    d = tempfile.mkdtemp()
+    kdir = Path(d) / "experiments" / "k9999"
+    kdir.mkdir(parents=True)
+    (kdir / "k9999_results.json").write_text(
+        json.dumps({"corr": 0.025, "vol": 0.517, "sharpe": 0.83})
+    )
+    bad = audit_content_provenance("本策略 Sharpe 2.5 遠勝大盤。", ["K9999"], root=d)
+    assert [f["raw"] for f in bad["tier1_findings"]] == ["2.5"]
+    # A %-tagged number still resolves via the claim-side /100 path.
+    good = audit_content_provenance("年化波動率達 51.7%。", ["K9999"], root=d)
+    assert good["tier1_findings"] == []
 
 
 if __name__ == "__main__":
