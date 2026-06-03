@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-06-03T06:12:38Z",
-  "patrol_time_taipei": "2026-06-03 14:12:38",
+  "timestamp": "2026-06-03T12:12:38Z",
+  "patrol_time_taipei": "2026-06-03 20:12:22",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "Total drafts: 89 (>=12 OK). Research audience: 36 (>=4 OK). General audience: 53 (>=8 OK)."
+      "detail": "Total drafts: 118 (>=12 OK). Research audience: 45 (>=4 OK). General audience: 73 (>=8 OK)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
@@ -15,13 +15,13 @@
     },
     {
       "name": "ERROR_LOG",
-      "status": "ok",
-      "detail": "Last 30 lines checked. Most recent entry is 2026-06-01 (K208 VIX-GARCH errata). No entries dated today (2026-06-03) or yesterday (2026-06-02)."
+      "status": "alert",
+      "detail": "Entry found dated 2026-06-03 (today): 'FB pipeline 4 天 100% 失敗根因（email-11939 用戶嚴重質問）'. Root cause: FB personal account has no headless API; audit script treated awaiting_interactive_session as terminal causing silent failure; AI violated no-choice-question rule. Fix applied 2026-06-03 hourly-11: audit script patched, 4 stale awaiting entries marked expired_skip, permanent fix doc created, blocked task fb_page_graph_api_integration created."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 15 strategies checked. No strategy has >2 null portfolio_return in last 3 entries."
+      "detail": "14 active strategies checked. Each has exactly 1 null in last 3 entries (today's data not yet populated — within normal range, not >2). _market_daily has 0 entries (benchmark, not a trading strategy). No alert triggered."
     },
     {
       "name": "GIT_STATUS",
@@ -31,10 +31,11 @@
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json contains 2180 entries."
+      "detail": "storage/memory/knowledge.json contains 2187 entries."
     }
   ],
   "alerts": [
-    "strategy_metrics.json MISSING — metrics stale/missing"
+    "METRICS STALE/MISSING: storage/strategy_metrics.json does not exist.",
+    "ERROR LOG TODAY (2026-06-03): FB pipeline 4-day 100% failure root cause logged. Three-layer fix applied in hourly-11 commit."
   ]
 }
