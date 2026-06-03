@@ -20098,7 +20098,7 @@
     "title": "K964: write general-audience article (auto-discovered uncovered K)",
     "description": "K K964 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (vix 30d=148>15)']) but no general article in feed.json.  Verdict preview: [提出: research_program.md SEC Filings, 執行: Claude] SPY 2006-2026（5075 obs）財報季 vs 非財報季波動率分析。41% 天數屬於財報季。結果：(1) 財報季 |return| ratio=0.981（略低，非更高）。(2) Welch t=-0.557 p=0.578 不顯著。(3) OLS with VIX 控制後 earnings dummy t=1.795 p=0.073 不顯著（Harvey 門檻 3.0）。R²=0.61 VIX 解釋大部分變異。(4) 各季度異質：Q4 ear",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K964",
@@ -20112,14 +20112,20 @@
       "audience-general"
     ],
     "topic_cluster": "vix",
-    "created_at": "2026-06-03T14:08:05+00:00"
+    "created_at": "2026-06-03T14:08:05+00:00",
+    "claimed_by": "hourly-23",
+    "claimed_at": "2026-06-03T15:10:07.759692+00:00",
+    "claim_session_id": "2624e9ca5632",
+    "started_at": "2026-06-03T15:10:12.188384+00:00",
+    "completed_at": "2026-06-03T15:17:49.926045+00:00",
+    "result": "mile_e46449ca published as draft. 2220字, gate PASS(1 WARN), 2 真圖上 Supabase. NULL result: SPY 財報季 5 指標 ratio 0.93-0.99（皆<1），t/OLS 統計不顯著，季度互抵+VIX 已吸收。experiment_refs=[K964], cluster_waiver=event_study primary."
   },
   {
     "id": "K1014_article_general",
     "title": "K1014: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1014 has verdict signal (score=0, reasons=['cluster cooldown penalty (vix 30d=148>15)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] HAR-PD（arXiv:2503.00851）6 個 path features 加入標準 HAR。結果：path features 大幅惡化 HAR（DM t=+5.53 HAR 勝，LASSO 更差 DM=+6.19）。原因：trend 和 convex 是 rv1/rv5/rv22 的精確線性組合，造成多重共線性不穩定 rolling OLS。唯一顯著 path feature 是 vix_gap（VIX implied - RV realized, t=7.27）。HAR(|r|) 在 QLIK",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1014",
@@ -20133,14 +20139,20 @@
       "audience-general"
     ],
     "topic_cluster": "vix",
-    "created_at": "2026-06-03T14:08:05+00:00"
+    "created_at": "2026-06-03T14:08:05+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-03T14:33:54.173321+00:00",
+    "claim_session_id": "fac8a9236273",
+    "started_at": "2026-06-03T14:37:20.456091+00:00",
+    "completed_at": "2026-06-03T14:38:52.740360+00:00",
+    "result": "Published general-audience K1014 coverage as mile_c8b81b48, with two cropped PNG charts derived from the experiment comparison figure and prepublish gate-cleared wording."
   },
   {
     "id": "K652_article_research",
     "title": "K652: write research-audience article (auto-discovered uncovered K)",
     "description": "K K652 has verdict signal (score=0, reasons=['cluster cooldown penalty (vix 30d=148>15)']) but no research article in feed.json.  Verdict preview: [提出: 實務應用, 執行: Claude] VIX 行動門檻系統性分析。Level: VIX crossing 28 up→+2.45% 20d(t=2.50, 76.5% win)。VIX>30 forward return +28%/yr 但 vol 46.6%。VIX spike 不是顯著 contrarian signal(p>0.2)。Mean-reversion 中位 6-9.5 天。Action threshold: dVIX>1 最實用（Net Sharpe 1.446 vs daily 1.451，但 trades 減 60%: 91",
     "priority": 4,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K652",
@@ -20155,7 +20167,10 @@
       "audience-research"
     ],
     "topic_cluster": "vix",
-    "created_at": "2026-06-03T14:08:05+00:00"
+    "created_at": "2026-06-03T14:08:05+00:00",
+    "blocked_reason": "prior_attempts_failed",
+    "blocked_at": "2026-06-03T15:10:07+00:00",
+    "blocked_note": "K652 README/實驗仍處 planning 階段（README 待補充、無 results 內容），不可寫研究文章。等實驗本身完成才能轉成 daily_article。"
   },
   {
     "id": "K1414_qlike_ceiling_meta",
