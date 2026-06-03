@@ -6,6 +6,7 @@ Used by record_and_publish.py and daily_update.py.
 Requires: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY env vars
 (or uses defaults from .env.local)
 """
+import hashlib
 import json
 import os
 import re
@@ -737,6 +738,29 @@ def sync_memory_entry(entry_id: str, entry_type: str, content: dict) -> bool:
     return _post("memory_entries", row)
 
 
+# Syncable article fields whose change must trigger a re-sync, regardless of
+# whether any timestamp was bumped. 2026-06-03 3-strike (refactor plan
+# docs/refactor_plan_prepublish_content_gate.md, 根因 B): the prior incremental
+# filter was timestamp-gated only — editing content without bumping updated_at
+# silently skipped the row (the K1413 correction was silent-dropped until
+# updated_at was force-bumped). Content-hash-based detection catches any
+# syncable-field change and is decoupled from timestamps.
+_ARTICLE_HASH_FIELDS = (
+    "content", "title", "excerpt", "status", "audience", "category", "details",
+)
+
+
+def _article_hash(item: dict) -> str:
+    """Stable sha256 over the syncable fields of an article.
+
+    Uses sort_keys + ensure_ascii=False so equal content always produces an
+    equal digest (idempotent) and any field change flips it.
+    """
+    payload = {k: item.get(k) for k in _ARTICLE_HASH_FIELDS}
+    blob = json.dumps(payload, sort_keys=True, ensure_ascii=False, default=str)
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()
+
+
 def _load_sync_state(storage: Path) -> dict:
     """Load last sync timestamp per category."""
     state_path = storage / ".supabase_sync_state.json"
@@ -777,29 +801,65 @@ def sync_full(storage_dir: str | Path = "storage") -> dict:
             for item in items:
                 if isinstance(item, dict) and item.get("id") not in seen_ids:
                     feed.append(item)
+    # 2026-06-03 code-review Issue 4: the change-detection block below is gated
+    # by `feed_mtime > last_feed_sync`. Article bodies can be corrected in a
+    # per-article reports/<id>.json WITHOUT touching feed.json (the merge at
+    # ~L827 pulls body from there) — that edit would otherwise leave feed_mtime
+    # unchanged and silently skip the hash check, re-creating the exact
+    # silent-drift the hash refactor fixes. Fold every reports/*.json mtime into
+    # feed_mtime so any body edit re-opens the block; the per-article hash then
+    # decides which single article actually re-syncs.
+    reports_dir = storage / "reports"
+    if reports_dir.exists():
+        for rp in reports_dir.glob("*.json"):
+            try:
+                feed_mtime = max(feed_mtime, rp.stat().st_mtime)
+            except OSError:
+                pass
     if feed:
         last_feed_sync = state.get("feed_mtime", 0)
         if feed_mtime > last_feed_sync:
             last_sync_ts = state.get("articles_last_ts", "")
-            # Sync articles published/updated after last sync, OR drafts with created_at after last sync.
-            # 2026-05-27 fix: also include updated_at — audience/category/tags backfill
-            # touches updated_at but not published_at, so the prior filter silently
-            # skipped them (mile_a91f19be etc. patched 5/27 11:25 invisible until force).
-            to_sync = [item for item in feed
-                       if (item.get("published_at") or item.get("created_at") or "") > last_sync_ts
-                       or (item.get("updated_at") or "") > last_sync_ts
-                       or not last_sync_ts]
-            ok = 0
-            for item in to_sync:
+            article_hashes = state.get("article_hashes")
+            if not isinstance(article_hashes, dict):
+                article_hashes = {}
+            # 2026-06-03 3-strike (根因 B): content-hash-based change detection.
+            # First merge the canonical body from reports/<id>.json so the hash
+            # reflects exactly what gets synced, THEN decide what changed.
+            # Selection condition (OR'd, defence-in-depth):
+            #   (a) article content hash differs from last-synced hash, OR
+            #   (b) legacy timestamp condition (back-compat; updated_at/published_at/
+            #       created_at after last_sync_ts — kept as fallback, not removed), OR
+            #   (c) no last_sync_ts (first run -> full).
+            to_sync = []
+            for item in feed:
                 report_path = storage / "reports" / f"{item['id']}.json"
                 if report_path.exists():
-                    report = json.loads(report_path.read_text())
+                    try:
+                        report = json.loads(report_path.read_text())
+                    except (json.JSONDecodeError, OSError):
+                        report = {}
                     if report.get("content"):
                         item["content"] = report["content"]
+                slug = item.get("id")
+                cur_hash = _article_hash(item)
+                hash_changed = article_hashes.get(slug) != cur_hash
+                ts_changed = (
+                    (item.get("published_at") or item.get("created_at") or "") > last_sync_ts
+                    or (item.get("updated_at") or "") > last_sync_ts
+                )
+                if hash_changed or ts_changed or not last_sync_ts:
+                    to_sync.append(item)
+            ok = 0
+            for item in to_sync:
                 if sync_article(item, storage_dir=storage):
                     ok += 1
+                    # Only record the hash after a successful sync so a failed
+                    # push retries next run.
+                    article_hashes[item.get("id")] = _article_hash(item)
             counts["articles"] = ok
             state["feed_mtime"] = feed_mtime
+            state["article_hashes"] = article_hashes
             if feed:
                 state["articles_last_ts"] = max(
                     (item.get("updated_at") or item.get("published_at") or item.get("created_at") or "")

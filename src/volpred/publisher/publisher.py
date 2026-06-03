@@ -684,6 +684,95 @@ class Publisher:
                 "Pick another topic or set details['cluster_waiver']=<reason>."
             )
 
+        # --- Pre-publish content-vs-source provenance gate (2026-06-03 3-strike) ---
+        # Refactor plan: docs/refactor_plan_prepublish_content_gate.md.
+        # Verify cited numbers against cited results.json BEFORE this article goes
+        # out (incl. trending "立刻發" — fabrication-grade misses must block
+        # regardless of status). Tier-1 deterministic = hard gate (raises iff
+        # audit_strict, mirroring _audit_general_content); Tier-2 LLM = warn-only
+        # + content_audit_flagged stamp, never blocks.
+        content_audit_flagged = False
+        try:
+            from volpred.publisher.prepublish_audit import audit_content_provenance
+            import re as _re_prov
+            audit_k_ids: set[str] = set()
+            for _t in (tags or []):
+                _ts = str(_t).strip()
+                if _re_prov.fullmatch(r'[Kk]\d+[a-z]?', _ts):
+                    audit_k_ids.add(_ts.upper())
+            for _r in ((details or {}).get('experiment_refs') or []):
+                _rs = str(_r).strip()
+                if _re_prov.fullmatch(r'[Kk]\d+[a-z]?', _rs):
+                    audit_k_ids.add(_rs.upper())
+            for _m in _re_prov.findall(r'[Kk]\d{2,}[a-z]?', f"{title} {description or ''}"):
+                audit_k_ids.add(_m.upper())
+            prov_root = _publish_asset_root_from_storage_dir(self.reports_dir.parent)
+            prov = audit_content_provenance(description or '', sorted(audit_k_ids), root=prov_root)
+        except Exception as _prov_exc:
+            # A bug in the gate must never silently block a legit publish; surface
+            # loudly but degrade. BUT a silent degrade is itself dangerous: it
+            # reverts to pre-refactor behaviour (fabricated numbers ship) without
+            # anyone knowing. So we (a) stamp the article so dashboard/audit see
+            # the gate did NOT run, and (b) alert the boss inbox
+            # (code-review Issue 6, 2026-06-03).
+            print(f"  [prepublish_audit] Tier-1 gate exception (degrading): {_prov_exc}")
+            prov = {"tier1_findings": [], "skipped": True, "reason": "gate_exception"}
+            content_audit_flagged = True
+            try:
+                from volpred.ops.alerts import send_alert
+                send_alert(
+                    level="warn",
+                    title="prepublish_audit gate 失效 — 文章未經 content-vs-source 驗證即發佈",
+                    body=(
+                        f"`publish_milestone` 的 pre-publish content gate 拋出例外並 degrade，"
+                        f"文章 `{title[:60]}` 在**未驗證 cited 數字 vs source** 的情況下繼續發佈。\n\n"
+                        f"例外：`{_prov_exc}`\n\n"
+                        "請檢查 `src/volpred/publisher/prepublish_audit.py` 是否壞掉（3-strike refactor "
+                        "`docs/refactor_plan_prepublish_content_gate.md`）。該文已標 `content_audit_flagged=True`。"
+                    ),
+                    storage_dir=str(self.reports_dir.parent),
+                )
+            except Exception as _alert_exc:
+                print(f"  [prepublish_audit] gate-exception alert failed: {_alert_exc}")
+
+        if prov.get("tier1_findings") and not prov.get("skipped"):
+            lines = []
+            for f in prov["tier1_findings"]:
+                lines.append(f"{f.get('raw')!r} (context: …{f.get('context','')}…)")
+            issue_text = '\n  - '.join(lines)
+            msg = (
+                "pre-publish content-vs-source violations: the following numbers "
+                f"are not found in cited sources {sorted(audit_k_ids)}:\n  - {issue_text}\n"
+                "Fix the article numbers / cite the correct experiment, or set "
+                "audit_strict=False (batch migrations only)."
+            )
+            if audit_strict:
+                raise ValueError(msg)
+            print(f"  ⚠️ prepublish_audit Tier-1 findings (audit_strict=False bypass):\n  - {issue_text}")
+
+        # Tier-2 LLM conclusion consistency — fully wrapped; never blocks.
+        if not prov.get("skipped"):
+            try:
+                from volpred.publisher.prepublish_audit import (
+                    run_llm_consistency_check,
+                    load_source_values,
+                )
+                key_claims = (description or '')[:2000]
+                src_vals = sorted(load_source_values(sorted(audit_k_ids), root=prov_root))
+                source_summary = (
+                    f"cited K-ids: {sorted(audit_k_ids)}; "
+                    f"flattened source numeric values (sample): {src_vals[:80]}"
+                )
+                tier2 = run_llm_consistency_check(key_claims, source_summary)
+                if tier2.get("verdict") == "FLAG":
+                    content_audit_flagged = True
+                    print(
+                        "  ⚠️ prepublish_audit Tier-2 FLAG (conclusion-consistency): "
+                        f"{tier2.get('contradictions')}"
+                    )
+            except Exception as _t2_exc:
+                print(f"  [prepublish_audit] Tier-2 skipped (degrading): {_t2_exc}")
+
         pub_id = f"mile_{uuid.uuid4().hex[:8]}"
         now = datetime.now(timezone.utc).isoformat()
         normalized_status = status if status in {'published', 'draft', 'scheduled', 'unpublished', 'archived'} else 'published'
@@ -790,6 +879,10 @@ class Publisher:
             'published_at': publish_at or now,
             'status': normalized_status,
         }
+        if content_audit_flagged:
+            # Tier-2 (LLM conclusion-consistency) flagged a possible contradiction.
+            # Non-blocking, but visible to dashboard / audit / boss inbox.
+            item['content_audit_flagged'] = True
         if proposer:
             item['proposer'] = proposer
 
