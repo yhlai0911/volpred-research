@@ -20936,11 +20936,33 @@
     "id": "paper9_main_a4f_edge_review",
     "task_type": "paper_review",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "title": "Paper 9 main A4f-edge claim re-examination triggered by K1378 finding",
     "description": "K1378 leave-COVID-out 揭示 A4f 在 3 個 sub-period 全輸 GJR (DM t = -1.19/-0.36/-1.54, GJR QLIKE mean 624 vs A4f 688 in full OOS)。SF1 confirmed 是預期結果，但 GJR 在所有期間都贏 A4f 的 finding 比預期強。需要對照 paper 9 (garch-x-vix) 主結果，確認：(1) paper 9 main 用什麼 evaluation metric/OOS window 證明 A4f 優勢？(2) K1378 setup (W=2000, refit=63, OOS=2019-01, QLIKE proxy=r²) 是否符合 paper 9 main setup？(3) 若 setup 一致而結論相反，paper 9 main claim 需要 major 修訂；若 setup 不同，K1378 caveat 需在 paper body 註明 evaluation 依賴 setup。檢視 paper/garch-x-vix/body*.tex + 對應 reproduce.py 確認。Source articles: feed mile_7e70a8ea (K1378 published 2026-06-04) + paper 9 latest body.tex.",
     "source": "auto_discovered",
     "created_at": "2026-06-04T13:35:32Z",
-    "k_id": "K1378"
+    "k_id": "K1378",
+    "claimed_by": "hourly-22",
+    "claimed_at": "2026-06-04T14:08:12.913166+00:00",
+    "claim_session_id": "f309a2d76bba",
+    "started_at": "2026-06-04T14:08:13.265239+00:00",
+    "completed_at": "2026-06-04T14:13:12.637049+00:00",
+    "result": "Verdict: Paper main claim CORRECT. K1378 superseded by K1393 (5-bug fix). Paper.tex K1393 numbers (non-COVID t=4.26 etc) match k1393_results.json exactly. Actions: (1) k1378 README SUPERSEDED notice (2) mile_7e70a8ea draft→wont_fix +superseded_by (3) paper.tex K1393→k1393 case fix x2 (4) errata_pending.md verdict entry. No journal disclosure needed (article was draft-only)."
+  },
+  {
+    "id": "paper_review_mile_b0d66991",
+    "title": "Paper review (Codex 24h-rule): 同一組資料沒對齊，10 倍恐慌放大可能被說太大了",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_b0d66991 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_b0d66991",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-04T14:07:58+00:00"
   }
 ]

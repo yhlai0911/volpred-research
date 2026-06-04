@@ -122,3 +122,29 @@ Key results:
 - `experiments/k1393/k1393_results.json` — **K1393 VALID: K988-faithful, C1 PASS, non-COVID DM t=+4.26**
 - `experiments/k1144/k1144_results.json` — **K1144: FEZ DM t=3.114 (Harvey ✅), STOXX50E DM t=3.025 (Harvey ✅), cross-asset replication with ^STOXX50E + ^VIX**
 - `experiments/k1144/k1144_vs_paper9_diff.md` — K1144 vs Paper 9 forensic report (SF2 source)
+
+---
+
+## 2026-06-04 Review: K1378 vs K1393 setup conflict (paper main claim VERIFIED, no body change)
+
+**Trigger**: Pending task `paper9_main_a4f_edge_review` raised by autonomous dispatch after K1378 article (`mile_7e70a8ea`) reported "GJR beats A4f in all 3 sub-periods, SF1 confirmed", contradicting paper §tab:covid_robust (non-COVID DM t=+4.26, A4f wins).
+
+**Verdict**: Paper main claim is **CORRECT**. K1378 is superseded by K1393.
+
+**Root cause of K1378 reversal**:
+1. K1378 ran 2026-05-19, **before** K1392 5-bug fix landed in K1393 (2026-05-22): theta0/theta1 bounds, g_init, optimizer SLSQP→L-BFGS-B, rolling recompute→state-based recursive
+2. K1378 COVID window: 2020-03-01 to 2021-06-30 (~15 months); paper + K1393 use 2020-02-01 to 2020-06-30 (5 months, acute phase only)
+3. K1378 QLIKE in +624/+688 range (non-log-domain kernel); paper + K1393 use −8.36 log-domain → not directly comparable
+
+**Verification**: K1393 results.json values match paper Table tab:covid_robust exactly:
+- non-COVID t=4.26, n=1721, Harvey YES ✓
+- pre_covid t=2.52, n=273, Harvey No ✓
+- covid_window t=1.48, n=104, Harvey No ✓
+- post_covid t=3.76, n=1448, Harvey YES ✓
+
+**Actions taken (no R1 disclosure needed)**:
+- `experiments/k1378/README.md` — added SUPERSEDED notice atop (commit hourly-22)
+- `storage/reports/feed.json` mile_7e70a8ea — status `draft` → `wont_fix` + `superseded_by=K1393` + `superseded_reason` field
+- `paper/garch-x-vix/main.tex` lines 723 + 745 — `K1393` (case-sensitive FS hazard) → `k1393` for Linux/Docker reproducibility
+
+**No errata for journal**: Paper main.tex was always cite-faithful to K1393 (the correct experiment); the bug was confined to a draft-pool article based on a superseded experiment. Article never published to readers.

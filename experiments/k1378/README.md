@@ -1,5 +1,21 @@
 # K1378 — Paper 9 Leave-COVID-out DM Test (SF1 Robustness Fix)
 
+> ## ⚠️ SUPERSEDED by K1393 (2026-05-22)
+>
+> K1378 跑於 2026-05-19，**早於** K1392 的 5 個 bug 修補（theta0/theta1 bounds、g_init、optimizer、rolling
+> recursion），且採用較寬的 COVID exclusion window（2020-03-01 to 2021-06-30, ~15 個月）。其 QLIKE 值
+> 落在 +624/+688 範圍（非 log-domain kernel），無法與 paper main.tex Table~\ref{tab:main_results} 的
+> -8.36 log-QLIKE 直接比較。
+>
+> **正確版本**：[K1393](../k1393/) — K988-faithful spec、COVID window 2020-02-01 to 2020-06-30（5 個月，
+> 與 paper 一致）。K1393 non-COVID DM t = +4.26（Harvey-significant YES），A4f 仍勝出，與 paper
+> §tab:covid_robust 一致。
+>
+> **K1378 結論（"GJR 全勝 A4f"）由 bugged A4f spec 驅動，不是真實 finding。** 已 published article
+> `mile_7e70a8ea` 對應加註 SUPERSEDED 並從 draft pool 撤回。
+>
+> 保留本實驗作 audit trail，禁止用於 paper claim 或 article publishing。
+
 ## Motivation
 
 Paper 9 (garch-x-vix) review v3 identified SERIOUS FLAW SF1:
