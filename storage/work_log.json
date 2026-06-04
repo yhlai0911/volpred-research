@@ -9443,5 +9443,12 @@
       "DCC_t mislabeled"
     ],
     "owner": "hourly-09"
+  },
+  {
+    "timestamp": "2026-06-04T02:50",
+    "task_type": "experiment",
+    "title": "K1320 fix dynamic Gumbel lookahead + DM redo (Codex 24h review followup mile_2c4efefa)",
+    "result": "4 fixes landed: np.interp→piecewise-hold (HE 0.8876→0.8874), DM r^4→squared-return (sound), DCC_t→StudentT_Copula_static rename, hr_lagged[0]=0. Sound DM 新發現: OLS p<0.0001 / Rolling OLS p=0.015 / Clayton p=0.0001 皆顯著差於 DCC; Copula 內部 vs DCC 仍 null (p=0.396, 原 0.617 結論成立). Article mile_2c4efefa caveat+數字+OLS 段全更新 (4108→4739 chars), 圖重生+supabase upload, feed-sync 952 updated 0 failed. Commits: ef063134, 89d5cd95, e7fbaf84.",
+    "commit": "e7fbaf84"
   }
 ]
