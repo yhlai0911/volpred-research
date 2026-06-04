@@ -19644,7 +19644,7 @@
     "priority": 3,
     "task_type": "paper_body",
     "description": "Paper 4 body integration Step 8 onwards (§7.6 K1121 allocation +2p + §8.2 update + §9 conclusion null count + abstract + bib add Politis-Romano Opdyke + 5-asset heatmap fig + K1121 bootstrap dist fig + paper-update CLI + latex-academic-reviewer + citation-verifier). Predecessor: Step 7 done in commit (forthcoming). Scope: 切小到 §7.6 only first fire; 後續 fire 接 §8.2/§9/abstract。",
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-06-03T07:18:00+00:00",
     "source": "hourly-15 followup after Step 7 done",
     "handoff_note": "paper_body is Claude main-thread only per .claude/rules/task-routing.md; Codex claimed it only to correct misrouting. Returned to pending_main_thread so the queue reflects canonical ownership instead of leaving a non-agentable task in pending.",
@@ -19652,7 +19652,9 @@
     "claimed_by": "hourly-11",
     "claimed_at": "2026-06-04T03:10:47.240369+00:00",
     "claim_session_id": "d95bfcc70ff5",
-    "started_at": "2026-06-04T03:10:51.866292+00:00"
+    "started_at": "2026-06-04T03:10:51.866292+00:00",
+    "completed_at": "2026-06-04T03:17:34.205813+00:00",
+    "result": "§7.x K1121 Alt-Data Allocation NULL subsection inserted (3 tables: headline 6-strategy, bootstrap 9 Sharpe comparisons w/ Politis-Romano CI, stress wSPY 3 episodes); 2 bib entries politis1994+opdyke2007. xelatex clean 58 pages (52→58, +6p). Cross-ref fixes: label subsec:break_vix added on §8.2, sec:vt_dd→sec:economic_significance. commit e57ede17. Steps 9-15 (§8.2 update, §9 null-count, abstract, 5-asset heatmap, K1121 bootstrap-dist fig, paper-update CLI, reviewers) → followup task Paper4_body_steps_9_to_15."
   },
   {
     "id": "paper_review_mile_7825c8a2",
@@ -20679,5 +20681,23 @@
       "main-thread-only"
     ],
     "created_at": "2026-06-04T03:08:12+00:00"
+  },
+  {
+    "id": "Paper4_body_steps_9_to_15",
+    "priority": 3,
+    "status": "pending_main_thread",
+    "task_type": "paper_body",
+    "title": "Paper 4 (vix-sufficiency) body integration Steps 9-15: §8.2 update, §9 null-count, abstract, figs, paper-update, reviewers",
+    "description": "Predecessor: Paper4_body_steps_8_to_15 done in commit e57ede17 (§7.x K1121 Allocation NULL inserted, 58 pages). Remaining steps from integration_plan_v2.md: (9) Update §8.2 \"What Might Break VIX Sufficiency\" — remove alt-data uncertainty + regime-based allocation as plausible mechanisms (K1116/K1118/K1121 refute); (10) Update §9 Conclusion null count 36→~42; (11) Update abstract — 13 families / 5 asset classes / 2 applications / publication-delay corrected; (12) Add 5-asset forecasting-sufficiency heatmap fig (K1118+K1098); (13) Add K1121 bootstrap-dist fig (6 Sharpe-diff curves vs 50/50); (14) Update README.md (pages 48→58, +K1121/K1116b); (15) uv run volpred ops paper-update --paper-id vix-sufficiency + latex-academic-reviewer + citation-verifier. Main thread only (.tex). Scope切小 to §8.2+§9 first fire; abstract / fig / paper-update next fire.",
+    "source": "continuation",
+    "created_at": "2026-06-04T03:17:00Z",
+    "related_experiments": [
+      "k1121",
+      "k1116",
+      "k1118",
+      "k1116b",
+      "k1098"
+    ],
+    "paper_id": "vix-sufficiency"
   }
 ]
