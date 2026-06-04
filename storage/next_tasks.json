@@ -20817,7 +20817,7 @@
     "title": "Paper review (Codex 24h-rule): 只多 41 個交易日，最好的模型就換人了",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_76bde651 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_76bde651",
@@ -20826,6 +20826,24 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-04T08:08:03+00:00"
+    "created_at": "2026-06-04T08:08:03+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-04T08:19:55.890163+00:00",
+    "claim_session_id": "d8c7c499b543",
+    "started_at": "2026-06-04T08:20:29.361770+00:00",
+    "completed_at": "2026-06-04T08:20:29.437271+00:00",
+    "result": "Codex review: 1 actionable finding. mile_76bde651 status drifts between feed.json (published) and index/INDEX.md (draft), same pipeline inconsistency seen in other recent articles. K1391 article body aligns with experiment results: +4.15→-2.03 reversal, COVID/non-COVID narrative, and 41-day OOS extension details all match."
+  },
+  {
+    "id": "K1414_paper3_hln_retrofit",
+    "title": "K1414: Paper 3 HLN small-sample DM correction retrofit (TW0050-N225 唯一 Harvey sig)",
+    "task_type": "experiment",
+    "priority": "P2",
+    "status": "pending_main_thread",
+    "description": "Paper 3 (DCC-Clayton) submission blocker per research_program.md open question. K1412 partial update 跑了 5 OOS starts (2014-2018) Student-t DM_t=3.04-3.89 raw `|t|>3` PASS，但 Codex review FAIL: 自製判定非 HLN small-sample correction。需做：(a) 對 5 OOS starts 應用 HLN (1997) correction: t_HLN = t * sqrt((n+1-2h+h(h-1)/n)/n), h=horizon=1 → t/sqrt((n-1)/n) ≈ t for n large；但對 small-sample OOS 仍須正式套用 (b) 三因子 driver identification: λ_L_clayton=0.444 vs full_sample_corr=0.586 vs Asian trading-hour overlap (CLOSE-to-CLOSE vs OPEN-to-CLOSE) (c) 若 HLN-retrofit 仍 robust → Paper 3 submission OK；若 fail → 撤回 唯一 Harvey sig 主張。Main thread only (paper methodology decision)，禁 background agent。實驗目錄 experiments/k1414/。",
+    "source": "research_program_open_question",
+    "created_at": "2026-06-04T17:08:00+08:00",
+    "created_by": "hourly-17",
+    "mission_angle": "M3 paper submission-ready blocker — Paper 3 retract or proceed depends on HLN result"
   }
 ]
