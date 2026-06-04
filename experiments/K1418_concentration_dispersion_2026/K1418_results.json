@@ -1,0 +1,67 @@
+{
+  "experiment_id": "K1418",
+  "title": "S&P 500 集中度 × vol 結構不對稱 — Dispersion Trading 機制分析",
+  "date_run": "2026-06-05",
+  "data_period": "2020-01-01 to 2026-06-04",
+  "seed": 42,
+  "data_sources": [
+    "yfinance daily close (SPY, AAPL, MSFT, NVDA, AMZN, GOOG) — auto_adjust=True",
+    "SPDR SPY Fact Sheet (historical top-5 weights approximate, for illustration)"
+  ],
+  "methodology": {
+    "rv_window": "21-day rolling realized vol, annualized (×√252)",
+    "iv_note": "IV data not publicly available; RV used as IV proxy throughout",
+    "concentration": "Top-5 weights estimated from public ETF fact sheets (approximate)"
+  },
+  "key_findings": {
+    "latest_date": "2026-06-03",
+    "latest_spy_rv_pct": 9.86,
+    "latest_avg_top5_rv_pct": 30.11,
+    "latest_vol_gap_pct": 20.25,
+    "period_2020_2024_stats": {
+      "spy_rv_mean_pct": 19.09,
+      "avg_top5_rv_mean_pct": 35.73,
+      "vol_gap_mean_pct": 16.64
+    },
+    "period_2024_2026_stats": {
+      "spy_rv_mean_pct": 13.87,
+      "avg_top5_rv_mean_pct": 30.21,
+      "vol_gap_mean_pct": 16.35
+    },
+    "individual_stock_rv_2024_2026": {
+      "AAPL": {
+        "rv_mean_pct": 24.78,
+        "rv_std_pct": 11.66
+      },
+      "MSFT": {
+        "rv_mean_pct": 22.36,
+        "rv_std_pct": 8.54
+      },
+      "NVDA": {
+        "rv_mean_pct": 45.84,
+        "rv_std_pct": 17.43
+      },
+      "AMZN": {
+        "rv_mean_pct": 29.56,
+        "rv_std_pct": 9.9
+      },
+      "GOOG": {
+        "rv_mean_pct": 28.53,
+        "rv_std_pct": 8.37
+      }
+    },
+    "concentration_latest_pct": 32.8,
+    "concentration_2020_pct": 17.8,
+    "concentration_change_pp": 15.0
+  },
+  "figures": [
+    "fig_concentration_over_time.png",
+    "fig_rv_gap_timeseries.png"
+  ],
+  "research_honesty_notes": [
+    "Top-5 concentration weights are approximate estimates from public SPDR fact sheets; precise historical weights require paid data",
+    "IV data requires paid options data (e.g., OptionMetrics); RV (21-day) used as proxy throughout",
+    "Vol gap = avg individual stock RV minus index RV; this mechanically follows from correlation structure, not a prediction",
+    "No forward-looking signal; this is a structural description, not a return forecast"
+  ]
+}
