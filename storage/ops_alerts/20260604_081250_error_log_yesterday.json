@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-06-04T08:12:50+08:00",
+  "alert_type": "error_log_yesterday",
+  "severity": "info",
+  "message": "Error log entry dated 2026-06-03 (yesterday): FB pipeline 4-day 100% failure. Root cause documented and three-layer fix committed.",
+  "detail": "Root causes: (1) audit script treated awaiting_interactive_session as terminal (fixed), (2) meta-process violation: asked user choice question instead of deciding autonomously (fixed), (3) physical FB personal account API limitation (workaround documented). 4 stale awaiting posts marked expired_skip. Blocked task fb_page_graph_api_integration awaiting user FB_PAGE_ID + token.",
+  "doc_ref": "docs/fb_pipeline_permanent_fix.md"
+}
