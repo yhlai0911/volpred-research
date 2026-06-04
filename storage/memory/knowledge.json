@@ -32291,5 +32291,29 @@
       "dm_test",
       "cross_market_copula"
     ]
+  },
+  {
+    "item_id": "k851review01",
+    "category": "article_review",
+    "content": "K851 Codex 24h-rule source-code-level review for published article mile_02190b48 「夜盤最會嚇人，但不代表隔天更好猜」. Article claims: 10.1% jump days, 2.5% jump RV share, 62.5% night session share, 1.23% best ext-model improvement vs HAR-RV (DM not Harvey-sig). \n\n【PASS items】(1) Lookahead clean — features use t-1/t-5:t-1/t-22:t-1 lags (k851_jump_dynamics.py:474-525), OOS only uses i<t history (lines 564-617). (2) Numbers verified: 10.1%, 2.5%, 62.5%, 1.23% all match k851_results.json + k851_jump_dynamics_results.json exactly. (3) Claim-evidence aligned: '差距不夠穩' wording correctly reflects Harvey_significant=false on all DM tests (best ext-model HAR-RV-SignedJ t=-1.198 NS). (4) BNS alpha=0.001 conservative (literature-standard for ABD-style jump filtering).\n\n【CONDITIONAL ISSUE】Article phrasing 「這些可見的跳動裡，有 62.5% 來自夜盤」reads as event-count share; source code (k851_jump_dynamics.py:924-934) computes mean(J_night)/(mean(J_day)+mean(J_night)) — jump-VARIANCE share, not event-count share. Not a wrong number, but ambiguous metric definition. Article-level lesson: future jump-decomposition pieces must disambiguate variance-share vs event-count-share explicitly.\n\n【MINOR】Rolling-refit comment in script claims 'rolling refit every 63 days' but implementation is expanding window + 63-day refit cadence (not fixed-length rolling). No lookahead impact; method description should be tightened in future papers.\n\n【Outcome】CONDITIONAL_PASS — article stays published (no wrong number), lesson logged to docs/error_log.md so future jump-share articles add explicit metric definition.",
+    "evidence": [
+      "experiments/K851/k851_results.json: n_trading_days=2107, jump_pct=10.1, jump_contribution_pct=2.5, night_jump_share_pct=62.5",
+      "experiments/K851/k851_jump_dynamics_results.json: HAR-RV QLIKE=0.180684, HAR-RV-SignedJ QLIKE=0.178465 (1.23% improvement)",
+      "DM HAR-RV-SignedJ vs HAR-RV: t=-1.198, p=0.231, Harvey_significant=false",
+      "Codex review verdict CONDITIONAL_PASS (gpt-5.4 medium, 2026-06-05)",
+      "Source-code citation: k851_jump_dynamics.py:474-525 (lag features), :564-617 (OOS train), :924-934 (night share calc)",
+      "Article mile_02190b48 in storage/reports/feed.json"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-04T17:13:18.538339+00:00",
+    "k_id": "K851",
+    "experiment_id": "K851",
+    "experiment_path": "experiments/K851/",
+    "article_id": "mile_02190b48",
+    "title": "K851 Codex 24h review for article mile_02190b48 — variance-share vs event-count phrasing caveat [CONDITIONAL_PASS]",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "codex-cli 0.135.0 (gpt-5.4 medium)",
+    "reviewer_source": "Codex review",
+    "codex_review": "CONDITIONAL_PASS 2026-06-05"
   }
 ]

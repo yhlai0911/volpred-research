@@ -20988,5 +20988,27 @@
     "started_at": "2026-06-04T16:11:03.669309+00:00",
     "completed_at": "2026-06-04T16:15:42.157597+00:00",
     "result": "Published research-audience draft mile_c9dc52b5 for K1416 (Paper 3 HLN retrofit). 789 CJK chars, 2 charts (Supabase-hosted), anti_ai_gate=PASS. Covers HLN formula derivation, K1412 flaw, 5/5 OOS robustness with margins, CONDITIONAL_PASS caveats."
+  },
+  {
+    "id": "paper_review_mile_02190b48",
+    "title": "Paper review (Codex 24h-rule): 夜盤最會嚇人，但不代表隔天更好猜",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_02190b48 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_02190b48",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-04T17:08:00+00:00",
+    "claimed_by": "hourly-01",
+    "claimed_at": "2026-06-04T17:08:20.149650+00:00",
+    "claim_session_id": "10d15a372148",
+    "started_at": "2026-06-04T17:08:25.878315+00:00",
+    "completed_at": "2026-06-04T17:13:39.612509+00:00",
+    "result": "Codex 24h-rule review CONDITIONAL_PASS: lookahead clean, numbers verified (10.1%/2.5%/62.5%/1.23% all match K851 results), DM Harvey NS correctly reflected as \"差距不夠穩\". One caveat: 62.5% night share is variance-mean ratio not event-count ratio (k851_jump_dynamics.py:924-934). Lesson logged to error_log + knowledge entry k851review01. Article stays published."
   }
 ]

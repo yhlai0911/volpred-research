@@ -1453,3 +1453,16 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 **主修法**:`export CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=62` 已加入 ~/.zshrc(真正被讀的位置),settings 兩檔保留 62 當備援 → 下個 session 自動在 62% compact,無需手動。
 **殘留風險**:Claude Code 2.1.158 仍可能受 1M-Opus regression(#43989)影響;若放對位置後仍不自動觸發 → 上游 bug,彙整 repro 回報 Anthropic。
 **結論**:不institutionalize 手動 /compact;手動僅限「當前 session 已超載」的一次性救援。
+
+## 2026-06-05 — Jump-share variance vs event-count phrasing (K851 / mile_02190b48 Codex review)
+
+**Lesson**: Article mile_02190b48 對「62.5% 夜盤跳動」措辭可被讀成 event-count share，但 K851 源碼 (`k851_jump_dynamics.py:924-934`) 計算的是 `mean(J_night) / (mean(J_day) + mean(J_night))` — **jump variance 平均占比**，不是 event-count 占比。Codex 24h 審查標 CONDITIONAL_PASS（數字正確、lookahead 乾淨、claim-evidence 對齊；唯一 issue 是 metric definition 模糊）。
+
+**Rule**: 未來寫 jump / volatility-decomposition 類文章，**必須明確區分**：
+- "jump 事件次數 share"（events / days）
+- "jump 波動量 share"（variance / mean(J)）
+- "jump 占總 RV 比例"（contribution to total variance）
+
+三者不同，數字差異可能 10x。讀者向文章 + paper body 都需明寫 share 的分母與分子。
+
+**Where**: `.claude/skills/feed-publisher/` 與寫作 brief 加 jump-decomposition checklist；K851 review entry id `k851review01`；review JSON `experiments/K851/codex_24h_review_mile_02190b48.json`。

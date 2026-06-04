@@ -1,0 +1,18 @@
+{
+  "verdict": "CONDITIONAL_PASS",
+  "lookahead_clean": true,
+  "numbers_verified": true,
+  "claim_evidence_aligned": true,
+  "issues": [
+    "Night-session 的 62.5% 在程式中是以 `mean(J_night) / (mean(J_day) + mean(J_night))` 計算，代表的是「平均 jump variance 量的夜盤占比」，不是 jump days 事件數占比，也不是 `J_full` 的嚴格加總分解。見 `experiments/K851/k851_jump_dynamics.py:924-934`。文章第 17 行「這些可見的跳動裡，有 62.5% 來自夜盤」語意偏強，容易被讀成事件數 share。"
+  ],
+  "minor_notes": [
+    "Lookahead 檢查通過：特徵明確用 `t-1`、`t-5:t-1`、`t-22:t-1`，見 `experiments/K851/k851_jump_dynamics.py:474-525`；OOS 訓練只用 `i < t` 歷史資料，見 `:564-617`。",
+    "BNS jump detection 是用 `rv_full/bpv_full/tq_full` 做 full-session test，再另外對 `day` 與 `night` 各自跑一次 BNS，見 `:357-445`。因此 10.1% jump days 來自 full-session BNS；62.5% 則來自 session-level jump variance 比例。",
+    "數字二次核對無誤：`k851_results.json` 有 `n_trading_days=2107`、`jump_pct=10.1`、`jump_contribution_pct=2.5`、`night_jump_share_pct=62.5`；`k851_jump_dynamics_results.json` 有 `improvement_pct=1.23`。",
+    "DM test 與文章措辭一致：延伸樣本最佳模型 `HAR-RV-SignedJ` 雖有 1.23% QLIKE 改善，但 `dm_tests` 全為 `Harvey_significant=false`，文章寫成「差距不夠穩」是保守且正確的。",
+    "方法論上 `JUMP_ALPHA=0.001` 是 99.9% 門檻，屬保守做法，文獻中常見於 BNS/ABD 類 jump filtering；不是明顯離譜設定。",
+    "程式註解寫的是「rolling refit every 63 days」，但實作其實是 expanding window + 每 63 天重新估一次，不是固定長度 rolling window。見 `:564-598`。這不構成 lookahead，但方法描述應更精確。"
+  ],
+  "summary": "K851 主腳本在預測設計上未見 lookahead bias，文章的 10.1%、2.5%、1.23% 與 DM 不顯著敘述都能被結果檔支持。唯一需要保留的是 62.5% 的夜盤說法：源碼算的是夜盤 jump variance 的平均占比，不是 jump 事件數占比，也不是 full-session jump 的嚴格拆分；文章若要最嚴謹，應補一句定義。"
+}
