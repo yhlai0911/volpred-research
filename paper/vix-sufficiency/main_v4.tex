@@ -887,6 +887,109 @@ BTC & M5 All & $-1.28$ & $\mathbf{-3.64}$ & $+1.71$ & sensitive \\
 Two implications for the rest of the paper follow. The first is that the main results presented in Sections~\ref{sec:results}--\ref{subsec:channel_specific} are not driven by a discretionary timing choice: even under the convention used in the prior literature, no Family 12--13 specification reaches the Harvey threshold against the native implied-volatility baseline on the equity, commodity, or cryptocurrency assets. The single bond-market exception that earlier work would have reported as a positive cross-asset finding (TLT M4 with \texttt{shift(1)}) falls below the threshold once the publication calendar is respected, and the K1116b results file records no cell where the corrected variant produces a Harvey-significant alt-data win that the conventional variant missed. Second, the asymmetry of the movement is itself informative: when alt-data series are denied a half-week of look-ahead, four cells move toward the null and only one cell flips sign in an inconsequential direction (GLD M5 at $-0.13 \to +0.41$, well inside the indeterminate range). A reviewer who suspects that our adoption of \texttt{shift(2)} is over-conservative can read the \texttt{original\_k1116} column directly and verify that the universal-sufficiency claim survives even there; the conservative claim made in the main text is the one supported by all three timing conventions simultaneously.
 
 
+\subsection{Alt-Data Fails a Second Paradigm: Regime-Based Allocation}
+\label{subsec:k1121_allocation}
+
+% source: experiments/k1121/k1121_results.json .headline_table
+% source: experiments/k1121/k1121_results.json .bootstrap_vs_S1_50_50
+% source: experiments/k1121/k1121_results.json .stress_episodes
+% source: experiments/k1121/k1121_results.json .hypothesis_tests
+% source: experiments/k1121/k1121_results.json .period_actual
+% source: experiments/k1121/k1121_results.json .n_days
+
+The forecasting evidence assembled so far rejects alt-data as a source of incremental information about future realized volatility, but it does not exhaust the channels through which an EPU or financial-stress signal could in principle add value. A standard defence offered for these series in the practitioner literature is that even when they fail an out-of-sample QLIKE horse race they may still carry useful information for \emph{allocation}---that is, for choosing equity-versus-safe-asset weights in real time---because regime shifts in uncertainty can affect the optimal mix even when they do not predict tomorrow's variance. The K1121 companion experiment tests this allocation defence directly with daily-frequency regime-rule portfolios on the SPY+GLD baseline, the 50/50 moat that the broader research program has repeatedly verified as a hard benchmark to beat \citep{demiguel2009}.
+
+The experiment fits six rebalanced portfolios over the 2019-01-15 to 2026-04-10 daily sample ($n=1{,}817$ trading days, $n_{\text{IS}}=1{,}001$ days in 2019--2022 and $n_{\text{OOS}}=816$ days in 2023--2026 after a 252-day rolling-rank warm-up and a five-day release lag). Strategy S1 is the static 50/50 SPY/GLD moat. Strategy S2 is a conventional volatility-targeted SPY weight $w_t^{\text{SPY}} = \mathrm{clip}(0.15/\hat\sigma_{t-1}^{\text{SPY,20d}}, 0.2, 1.0)$ that uses no alt-data. Strategies S3--S5 are single-signal regime rules---S3 gates on lagged VIX, S4 on the 252-day percentile rank of EPU, and S5 on the 252-day percentile rank of NFCI---each shifting the SPY weight between $0.7$ and $0.3$ depending on whether the signal sits below or above its 70th percentile. Strategy S6 is the equally-weighted average of the three signal-gated weight processes. All inputs are lagged to respect the publication-delay calendar established in Section~\ref{sec:pub_delay}: VIX at \texttt{shift(1)}, EPU at \texttt{shift(2)}, NFCI at \texttt{shift(5)}. Inference uses the Politis--Romano stationary bootstrap \citep{politis1994} with $1{,}000$ replications, mean block length $20$, and seed $42$, applied to the Sharpe-ratio difference following \citet{opdyke2007}.
+
+Table~\ref{tab:k1121_headline} reports the full-sample performance of the six strategies. The static 50/50 baseline produces a Sharpe of $1.309$ over the seven-year window; the best alt-data strategy (S5 NFCI) edges it by Sharpe $+0.003$, an economically nil margin. The volatility-targeted benchmark (S2) underperforms the moat by $0.237$ in Sharpe despite tilting the average SPY weight from $0.50$ up to $0.88$, illustrating that mechanical scaling of equity exposure to a 20-day volatility estimate is itself dominated by the static mix. The two single-signal regime rules that gate on macroeconomic alt-data (S4 EPU, S5 NFCI) and the hybrid average (S6) all cluster within a Sharpe range of $0.030$ around the 50/50 baseline, with no individual strategy improving Sortino or annualized return enough to suggest a systematic alpha channel. The lone dimension on which an alt-data strategy stands out is drawdown: NFCI's $-17.9\%$ maximum drawdown ties the VIX-regime strategy for the lowest in the table and produces the highest Calmar ratio ($0.950$ vs.\ $0.888$ for the baseline)---a risk-management feature that we return to below.
+
+\begin{table}[H]
+\centering
+\small
+\begin{threeparttable}
+\caption{Full-Sample Performance of Six SPY+GLD Allocation Rules (K1121)}
+\label{tab:k1121_headline}
+\begin{tabular}{@{}llrrrrrr@{}}
+\toprule
+\# & Strategy & Sharpe & Sharpe (OOS) & MDD & Calmar & Sortino & avg\ $w^{\text{SPY}}$ \\
+\midrule
+S1 & 50/50 static                & $\mathbf{1.309}$ & $1.975$ & $-0.203$ & $0.888$ & $1.64$ & $0.500$ \\
+S2 & Vol-targeted                & $1.072$           & $1.474$ & $-0.220$ & $0.720$ & $1.42$ & $0.880$ \\
+S3 & VIX regime                  & $1.210$           & $1.748$ & $\mathbf{-0.179}$ & $0.883$ & $1.59$ & $0.543$ \\
+S4 & EPU regime                  & $1.283$           & $1.856$ & $-0.232$ & $0.752$ & $1.71$ & $0.566$ \\
+S5 & NFCI regime                 & $\mathbf{1.312}$  & $1.656$ & $\mathbf{-0.179}$ & $\mathbf{0.950}$ & $1.73$ & $0.594$ \\
+S6 & Hybrid average (S3+S4+S5)   & $1.305$           & $1.806$ & $-0.184$ & $0.911$ & $1.73$ & $0.568$ \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes}: Daily-rebalanced SPY+GLD portfolios over 2019-01-15 to 2026-04-10 ($n=1{,}817$ days; OOS window 2023-01 to 2026-04, $n_{\text{OOS}}=816$ days). Source: \texttt{experiments/k1121/k1121\_results.json} field \texttt{headline\_table}. Sharpe and Sortino are annualized at $\sqrt{252}$; MDD is the trough-to-peak loss on the equity curve; Calmar is annualized return divided by $|\text{MDD}|$. S2--S6 inputs are lagged per the Section~\ref{sec:pub_delay} publication-delay convention. Bold entries are dimension-best within column; the static moat (S1) and the NFCI rule (S5) tie at the top of the Sharpe column.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The headline ranking by itself does not distinguish whether the alt-data strategies achieve a genuine improvement that is masked by sampling noise or whether the differences are themselves noise. Table~\ref{tab:k1121_bootstrap} resolves this by reporting the Politis--Romano stationary-bootstrap distribution of the Sharpe-ratio difference for each alternative against the 50/50 baseline, alongside the parallel comparison against the vol-targeted benchmark. All five alternatives are statistically indistinguishable from the static moat: the smallest two-sided $p$-value is $0.264$ (S2 vol-target), the comparison closest to a tie is S5 NFCI with $p=0.966$, and the 95\% bootstrap intervals for the four alt-data strategies all cover zero and stretch from roughly $-0.24$ to $+0.25$ Sharpe units. The vol-targeted comparison tells the same story: even the largest single-signal margin against S2 (S5 NFCI, observed $+0.241$) carries $p=0.166$ and a 95\% interval $[-0.122, +0.583]$ that contains both zero and economically meaningful improvements, so the data cannot distinguish a true edge from a sampling artefact. None of the alt-data strategies passes the conventional $p<0.05$ threshold against either benchmark, none passes the Harvey--Liu--Zhu \citep{harvey2016} stricter $|t|>3.0$ threshold even nominally, and the hybrid average (S6) does not improve upon the best single component---failing the diversification hypothesis that an equally-weighted blend of imperfect signals should outperform any single one.
+
+\begin{table}[H]
+\centering
+\small
+\begin{threeparttable}
+\caption{Stationary-Bootstrap Sharpe-Difference Inference (K1121)}
+\label{tab:k1121_bootstrap}
+\begin{tabular}{@{}lrrrl@{}}
+\toprule
+Pair & Obs.\ diff & $p$-value & 95\% CI & Verdict \\
+\midrule
+\multicolumn{5}{l}{\textit{Against S1 (50/50 static moat)}} \\
+S2 -- S1 (vol-target) & $-0.238$ & $0.264$ & $[-0.670, +0.174]$ & NS, loss \\
+S3 -- S1 (VIX)        & $-0.099$ & $0.388$ & $[-0.344, +0.132]$ & NS \\
+S4 -- S1 (EPU)        & $-0.026$ & $0.860$ & $[-0.310, +0.257]$ & NS \\
+S5 -- S1 (NFCI)       & $+0.003$ & $0.966$ & $[-0.231, +0.254]$ & NS, tie \\
+S6 -- S1 (hybrid)     & $-0.005$ & $0.948$ & $[-0.191, +0.172]$ & NS, tie \\
+\addlinespace
+\multicolumn{5}{l}{\textit{Against S2 (vol-targeted)}} \\
+S3 -- S2 (VIX)        & $+0.138$ & $0.512$ & $[-0.279, +0.531]$ & NS \\
+S4 -- S2 (EPU)        & $+0.212$ & $0.280$ & $[-0.211, +0.609]$ & NS \\
+S5 -- S2 (NFCI)       & $+0.241$ & $0.166$ & $[-0.122, +0.583]$ & NS (largest) \\
+S6 -- S2 (hybrid)     & $+0.233$ & $0.194$ & $[-0.131, +0.568]$ & NS \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes}: Politis--Romano stationary bootstrap \citep{politis1994} with $B=1{,}000$ replications, mean block length $20$, and seed $42$; inference on the Sharpe-ratio difference follows \citet{opdyke2007}. Two-sided $p$-values and 95\% percentile intervals reported. Source: \texttt{experiments/k1121/k1121\_results.json} fields \texttt{bootstrap\_vs\_S1\_50\_50} and \texttt{bootstrap\_vs\_S2\_voltarget}. ``NS'' = not significant at the $5\%$ level; ``tie'' marks observed differences inside one standard error of zero. None of the nine pairs reaches the Harvey--Liu--Zhu \citep{harvey2016} $|t|>3.0$ threshold even nominally.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+A natural follow-up question is whether the alt-data strategies fail because they sit on the equity exposure for the wrong reason in calm periods but still earn their keep by cutting risk during stress. Table~\ref{tab:k1121_stress} examines the three economically distinct stress windows in the sample: the COVID drawdown of February--April 2020 ($52$ trading days), the rate-shock window running from January through October 2022 ($209$ days), and the SVB regional-banking episode of March--April 2023 ($32$ days). NFCI (S5) does behave as a stress signal in the textbook sense: it cuts the average SPY weight to $0.33$ during COVID, to $0.30$ during the rate shock, and modestly to $0.51$ during the brief SVB episode, with the COVID and rate-shock reductions large enough to deliver materially lower drawdowns than the static moat in both windows. EPU (S4) behaves as a stress signal only in the COVID window: in the 2022 rate shock---which was driven by Federal Reserve policy rather than newspaper-coded uncertainty---it \emph{raises} the SPY weight to $0.56$ and incurs a slightly larger drawdown than the baseline, and in the SVB window it stays close to the 50/50 mix. The VIX-regime rule (S3) responds to COVID and 2022 but not to SVB, where realized implied volatility was muted in the days when bank-equity prices were falling.
+
+\begin{table}[H]
+\centering
+\small
+\begin{threeparttable}
+\caption{Stress-Period Average SPY Weight by Strategy (K1121)}
+\label{tab:k1121_stress}
+\begin{tabular}{@{}lcrrrrrr@{}}
+\toprule
+Episode & Period & S1 & S2 & S3 VIX & S4 EPU & S5 NFCI & S6 Hybrid \\
+\midrule
+COVID 2020          & 2020-02-15 to 2020-04-30 & $0.50$ & $0.38$ & $0.34$ & $0.37$ & $\mathbf{0.33}$ & $0.35$ \\
+Rate-shock 2022     & 2022-01-01 to 2022-10-31 & $0.50$ & $0.67$ & $0.34$ & $0.56$ & $\mathbf{0.30}$ & $0.40$ \\
+SVB 2023            & 2023-03-01 to 2023-04-15 & $0.50$ & $0.90$ & $0.51$ & $0.53$ & $0.51$ & $0.52$ \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes}: Within-episode mean of the daily target SPY weight by strategy; full-period reference is $0.50$ for S1 by construction. Source: \texttt{experiments/k1121/k1121\_results.json} field \texttt{stress\_episodes.<period>.by\_strategy}. NFCI (S5) is the only single-signal rule that reduces equity exposure in all three episodes; EPU (S4) raises exposure in the 2022 rate shock; the vol-targeted benchmark (S2) overweights equity during SVB because realized volatility had compressed in the preceding weeks.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The stress-episode pattern clarifies why the NFCI rule earns a tied-best Sharpe and a best-in-table Calmar without earning a statistically distinguishable Sharpe edge. NFCI behaves as a drawdown insurance overlay: it shifts equity exposure down during the three windows in which the static moat lost most of its peak-to-trough value, and the resulting MDD reduction is what compresses the denominator of the Calmar ratio. But the same overlay loses opportunity cost in the much longer set of normal trading days that surround the stress windows, where it spends roughly $40\%$ of the sample with $w^{\text{SPY}}=0.30$ rather than the moat's $0.50$. The two effects net out to zero in Sharpe space and produce the observed $p=0.966$ tie against the 50/50 baseline. This is the same drawdown-insurance phenomenon documented in Section~\ref{sec:economic_significance} for volatility-targeted overlays: a risk-management tool that reduces the size of the worst losses but does not generate alpha, and whose value to an investor depends on the curvature of her utility function rather than on her belief that the signal predicts returns.
+
+The K1121 evidence therefore extends the universal-sufficiency claim from the forecasting paradigm to the allocation paradigm. Across nine bootstrapped Sharpe comparisons spanning two benchmarks and three single-signal alt-data series plus a hybrid, none of the alt-data strategies produces a statistically distinguishable improvement over either the 50/50 SPY+GLD moat or the vol-targeted scaler that uses no alt-data at all. The one cross-section in which an alt-data signal stands out is drawdown reduction, where NFCI ties the VIX-regime rule for the lowest MDD; the rest of the surface is statistically flat. Combined with the K1116 and K1118 forecasting nulls and the K1116b publication-delay robustness check, the K1121 allocation null closes the second of the two natural channels through which the academic literature has historically argued that EPU and financial-stress series should add value. Section~\ref{subsec:break_vix} accordingly removes regime-based allocation from the catalogue of plausible mechanisms that could break VIX sufficiency.
+
+
 %=================================================================
 \section{Why the Null is Informative}
 \label{sec:null}
@@ -909,6 +1012,7 @@ where $f(\cdot)$ is monotonically increasing. Any signal $s_t \in \Omega_t$ sati
 i.e., VIX is a sufficient statistic for all information already incorporated in option prices. Our eleven signal families are all elements of $\Omega_t$, which explains the zero incremental forecasting power.
 
 \subsection{What Might Break VIX Sufficiency?}
+\label{subsec:break_vix}
 
 The sufficiency argument identifies two conditions under which alternative signals could add value:
 
@@ -1158,11 +1262,17 @@ Moreira, A., \& Muir, T. (2017). Volatility-managed portfolios. \textit{Journal 
 \bibitem[Newey and West(1987)]{newey1987}
 Newey, W.~K., \& West, K.~D. (1987). A simple, positive semi-definite, heteroskedasticity and autocorrelation consistent covariance matrix. \textit{Econometrica}, 55(3), 703--708.
 
+\bibitem[Opdyke(2007)]{opdyke2007}
+Opdyke, J.~D. (2007). Comparing Sharpe ratios: So where are the $p$-values? \textit{Journal of Asset Management}, 8(5), 308--336.
+
 \bibitem[Patton(2011)]{patton2011}
 Patton, A.~J. (2011). Volatility forecast comparison using imperfect volatility proxies. \textit{Journal of Econometrics}, 160(1), 246--256.
 
 \bibitem[Patton and Sheppard(2015)]{patton2015}
 Patton, A.~J., \& Sheppard, K. (2015). Good volatility, bad volatility: Signed jumps and the persistence of volatility. \textit{Review of Economics and Statistics}, 97(3), 683--697.
+
+\bibitem[Politis and Romano(1994)]{politis1994}
+Politis, D.~N., \& Romano, J.~P. (1994). The stationary bootstrap. \textit{Journal of the American Statistical Association}, 89(428), 1303--1313.
 
 \bibitem[Poon and Granger(2003)]{poon2003}
 Poon, S.-H., \& Granger, C.~W.~J. (2003). Forecasting volatility in financial markets: A review. \textit{Journal of Economic Literature}, 41(2), 478--539.

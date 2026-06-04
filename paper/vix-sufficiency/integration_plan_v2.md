@@ -2,13 +2,15 @@
 
 **Date**: 2026-04-13
 **Author**: Claude (research coordinator, not worktree)
-**Target file**: `paper/vix-sufficiency/main_v4.tex` (48 pages after step 5+6, 45 citations) — renamed from main_v2 after 2026-06-03 14:xx reconcile
-**Status**: IN PROGRESS — Steps 1-6 of 15 done. Steps 7-15 pending.
+**Target file**: `paper/vix-sufficiency/main_v4.tex` (58 pages after step 8, 47 citations) — renamed from main_v2 after 2026-06-03 14:xx reconcile
+**Status**: IN PROGRESS — Steps 1-8 of 15 done. Steps 9-15 pending.
 
 **Progress log**:
 - 2026-06-03 02:30 — Step 1 (Table 1 extended to 13 rows: +Family 12 EPU, +Family 13 FinStress) + Step 2 (§3.2.12 + §3.2.13 description prose, 2 paragraphs each) + bib entries baker2016 / brave2011 / kliesen2010 added. Compile passes 40 pages. No `\citet` undefined warnings.
 - 2026-06-03 09:14 — Step 3 (§4.6 Publication-Delay Convention) + Step 4 (Table 2 extended to 13 rows with shift(2) corrected EPU/FinStress). main_v2 → 41 pages.
 - 2026-06-03 14:xx (hourly-14 fire) — **Version reconcile + Step 5+6**: merged main_v4 (May 30) §7.8 Cross-Asset PIT Panorama (7-asset, supersedes plan §7.3 which was 5-asset K1118+K1098 only) + §7.9 Channel-Specific Heterogeneity into main_v2. Added bib `crealetal2013` + `hansen1994`. Renamed old main_v4.tex → main_v4_predecessor_20260530.tex (archive). Renamed main_v2.tex → main_v4.tex (new canonical for papers.py picker). xelatex compiles clean, 48 pages, no undefined refs. **Step 5 (planned §7.3 Cross-Asset) and Step 6 (Channel-Specific, was Step 12 in original plan but absorbed earlier) done by merge. Plan §7.4 Pub-Delay Robustness K1116b still pending (Step 7 next).**
+- 2026-06-03 15:17 (commit 6f358c2b, hourly-15) — **Step 7 (§7.x Publication-Delay Robustness, K1116b)**: new subsection inserted after §7.9 Channel-Specific. 16-cell DM-HLN robustness table. Three threshold-relevant flips highlighted (SPY M4 strengthen, BTC M5 strengthen, TLT M4 collapse). main_v4 → 52 pages.
+- 2026-06-04 11:xx (hourly-11) — **Step 8 (§7.x Alt-Data Fails a Second Paradigm: Regime-Based Allocation, K1121)**: new subsection inserted after §7.x Publication-Delay Robustness with three tables (full-sample 6-strategy metrics, stationary-bootstrap 9 Sharpe comparisons, stress-period wSPY across COVID/Rate-2022/SVB). Bib entries `politis1994` + `opdyke2007` added. Cross-section reference `\ref{sec:vt_dd}` redirected to `sec:economic_significance`; new label `subsec:break_vix` added for §8.2 forward-ref. xelatex compiles clean, 58 pages, 0 undefined refs. Plan steps 9 onwards (§8.2 update, §9 null-count update, abstract update, 5-asset heatmap, K1121 bootstrap-dist figure, paper-update CLI, latex-academic-reviewer + citation-verifier pass) remain pending.
 
 This plan integrates **six new pieces of evidence (K1116, K1116b, K1118, K1121, K504, K1098)**
 into the existing "Can Anything Beat VIX?" manuscript, upgrading the contribution from a
