@@ -32315,5 +32315,44 @@
     "reviewer": "codex-cli 0.135.0 (gpt-5.4 medium)",
     "reviewer_source": "Codex review",
     "codex_review": "CONDITIONAL_PASS 2026-06-05"
+  },
+  {
+    "item_id": "5c29ecfa",
+    "k_id": "K1417",
+    "experiment_id": "K1417",
+    "experiment_path": "experiments/k1417/",
+    "experiment_script": "experiments/k1417/k1417.py",
+    "experiment_files": [
+      "experiments/k1417/k1417.py",
+      "experiments/k1417/k1417_results.json",
+      "experiments/k1417/README.md"
+    ],
+    "related_experiments": [
+      "K1192"
+    ],
+    "category": "robustness_check",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "Codex CLI (gpt-5.4, codex-cli 0.135.0)",
+    "reviewer_source": "codex exec --skip-git-repo-check (2026-06-05 06:21 TPE); methodology verdict CONDITIONAL_PASS — points 1-3 PASS (stationary bootstrap Politis-Romano correct, K1192 logic inherited lookahead-clean, seed reproducible), point 4 CONDITIONAL_PASS (verdict-threshold operationalization 3/5+3pp not strictly pre-specified but symbol logic correct). Base commit: 8bde3a2f.",
+    "paper_link": "paper/vt-trend-following/review_history/v4/README.md (H2)",
+    "title": "K1417 — Paper 3 v4 Gemini H2 robustness: stationary bootstrap MDD CI",
+    "content": "K1417 stationary bootstrap (Politis & Romano 1994; mean_block ∈ {756, 1260} trading days = 3y/5y) re-runs K1192's MDD-retention 90% CI under Gemini v4 review HIGH-2: 'fixed 252-day blocks destroy multi-year drawdown autocorrelation, mechanically inflating retention CI'. Result rejects H2. Across 5 assets (SPY / 50:50 SPY-GLD / DIA / QQQ / IWM), the stationary bootstrap retention 90% CI lower bound at mean_block=1260 SHIFTS UPWARD vs K1192 fixed-block, not downward: mean lo_shift = +9.28pp, median = +10.4pp, n_assets with material downward shift (≤ -3pp) = 0/5. Per-asset lo_shift_1260: SPY +11.7, 50/50 -0.2, DIA +10.4, QQQ +15.5, IWM +9.0. Interpretation: K1192's fixed-block CI was if anything CONSERVATIVE — long-memory drawdowns under stationary blocks produce LESS extreme synthetic BH MDDs in this sample (likely because the 2008/2020/2022 drawdowns dominate the empirical bh_mdd and circular continuation rarely strings together multiple crisis blocks). Retention ratio is robust to bootstrap block-length choice. Paper 3 v4 Gemini HIGH-2 rejected on empirical grounds. K1192's published [86, 90, 82, 91, 91] lo-bound retention can stand; no body rewrite of retention claims required. Remaining v4 Gemini items (H1 PureVT trough decomposition, M1 safe-haven dummy, M2 VRP, 3 missing citations) still pending under Paper3_v4_revision_gemini_2h.",
+    "evidence": [
+      "experiments/k1417/k1417_results.json::summary.mean_lo_shift_at_1260=9.28",
+      "experiments/k1417/k1417_results.json::summary.n_assets_with_material_shift_at_1260=0",
+      "experiments/k1417/k1417_results.json::comparison_rows[*].lo_shift_1260",
+      "experiments/k1417/README.md (acceptance criterion: n_material>=3 for H2 SUPPORTED)"
+    ],
+    "summary_metrics": {
+      "mean_lo_shift_at_1260_pp": 9.28,
+      "median_lo_shift_at_1260_pp": 10.4,
+      "n_assets_material_downward_shift": 0,
+      "n_assets_total": 5,
+      "h2_verdict": "NOT SUPPORTED",
+      "bootstrap_reps": 10000,
+      "seed": 42
+    },
+    "confidence": 0.85,
+    "created_at": "2026-06-05T06:21:55.584187"
   }
 ]

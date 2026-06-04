@@ -21017,14 +21017,20 @@
     "description": "Auto-generated from research_program.md unchecked item: 投稿準備（cover letter, highlights, graphical abstract）",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "research-backlog"
     ],
     "source": "task_generator_v2_experiment",
     "created_at": "2026-06-04T17:34:25.718044+00:00",
-    "generated_at": "2026-06-04T17:34:25.718706+00:00"
+    "generated_at": "2026-06-04T17:34:25.718706+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-04T21:48:44.838003+00:00",
+    "claim_session_id": "76cb727c6fa7",
+    "started_at": "2026-06-04T21:49:12.102137+00:00",
+    "completed_at": "2026-06-04T21:50:17.189703+00:00",
+    "result": "Prepared submission materials for paper/leverage-direction: added graphical_abstract.svg and submission_package.md, and updated README.md to index cover letter, highlights, and graphical abstract. Existing cover letter/highlights were preserved; this task packages materials without changing manuscript readiness state."
   },
   {
     "id": "gen_exp_修正_Gemini_指出的_3_弱點",
@@ -21410,7 +21416,11 @@
     "needs_close_reply": false,
     "h2_compute_queue_id": "k1417-paper3-h2-stationary-bootstrap",
     "h2_smoke_finding": "B=200 smoke: lo bound shifts UP +10pp (opposite of Gemini H2 prediction). Full B=10000 needed for verdict.",
-    "h2_dispatched_at": "2026-06-04T21:13:46Z"
+    "h2_dispatched_at": "2026-06-04T21:13:46Z",
+    "h2_completed": true,
+    "h2_verdict": "H2 NOT SUPPORTED — retention robust, lo_shift +9.28pp mean (n_material=0/5)",
+    "h2_completed_at": "2026-06-04T22:22:09Z",
+    "h2_knowledge_id": "K1417"
   },
   {
     "id": "paper_review_mile_8d8b8877",
@@ -21433,7 +21443,7 @@
     "title": "K1326: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 356). Original: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1326.py with signal.shift(1) + seed=42, (c) K1326_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 356,
@@ -21441,6 +21451,42 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-04T21:08:10Z"
+    "created_at": "2026-06-04T21:08:10Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-04T22:18:48.285288+00:00",
+    "claim_session_id": "c0165f875f6a",
+    "started_at": "2026-06-04T22:18:48.352759+00:00",
+    "completed_at": "2026-06-04T22:20:01.492460+00:00",
+    "result": "Duplicate of K1307 confirmed. Re-ran experiments/k1307/k1307.py on 2026-06-05 with refreshed local RV data through 2026-06-03: 0050.TW non-null RV days 71, HAR usable rows 49, max OOS after min-train 19. Verdict unchanged: NOT_READY_SAMPLE_TOO_SHORT; no new K1326 package created to avoid duplicate experiment fabrication."
+  },
+  {
+    "id": "trending_repost_2026_06_05_美股集中度",
+    "title": "[trending_repost] 科技巨頭權重破表，指數與個股波動率脫鉤的交易策略",
+    "description": "分析 S&P 500 集中度創歷史新高下，指數隱含波動率（VIX）與個股隱含波動率（IV）的隱性背離。可量化：以 Dispersion Trading (離散度交易) 策略，驗證科技股個股期權相較於指數期權的溢價空間。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-04T22:00:23+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
+  },
+  {
+    "id": "trending_repost_2026_06_05_地緣風險溢價",
+    "title": "[trending_repost] Computex後，台股與ADR波動率偏斜如何定價地緣風險？",
+    "description": "分析Computex 2026後，台灣半導體供應鏈的期權 implied volatility skew（偏斜度）。可量化：比較台積電期權 skew 與地緣政治不確定性指數（GPR）的動態相關性，驗證避險資金流入看跌期權的程度。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-04T22:00:36+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
   }
 ]

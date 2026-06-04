@@ -1,0 +1,613 @@
+{
+  "experiment_id": "K1417",
+  "title": "Paper 3 H2 \u2014 Stationary bootstrap MDD CI",
+  "description": "Stationary bootstrap (Politis & Romano 1994) variant of K1192. Mean block lengths 756 (3y) and 1260 (5y) trading days. Tests Gemini v4 H2: fixed 252-day blocks bias retention CI upward by destroying multi-year drawdown autocorrelation.",
+  "data_source": "yfinance",
+  "period": "2005-01-03 to 2026-04-01",
+  "methodology": {
+    "vt_rule": "w = min(12/VIX_month_end, 1), monthly rebalancing, lag 1 month",
+    "cash_proxy": "SHY",
+    "tsmom_lookback": 252,
+    "bootstrap": "Stationary (Politis & Romano 1994), mean_blocks=[756, 1260] trading days, B=10000, seed=42",
+    "ci": "90%"
+  },
+  "reference_k1192_fixed_block_ci": {
+    "SPY": {
+      "lo": 86,
+      "hi": 97
+    },
+    "50/50": {
+      "lo": 90,
+      "hi": 99
+    },
+    "DIA": {
+      "lo": 83,
+      "hi": 96
+    },
+    "QQQ": {
+      "lo": 82,
+      "hi": 95
+    },
+    "IWM": {
+      "lo": 91,
+      "hi": 100
+    }
+  },
+  "assets": {
+    "SPY": {
+      "asset": "SPY",
+      "n_obs": 5240,
+      "by_mean_block": {
+        "756": {
+          "n_obs": 5240,
+          "n_reps": 10000,
+          "mean_block": 756,
+          "ci_pct": 90,
+          "lo_pct_used": 4.999999999999999,
+          "hi_pct_used": 95.0,
+          "point_estimates": {
+            "bh_mdd_pct": -55.19,
+            "vt_mdd_pct": -26.31,
+            "hedged_mdd_pct": -25.25,
+            "a_retention": 103.7,
+            "b_vt_reduction": 52.3,
+            "c_hedged_abs_mdd": -25.3,
+            "d_hedged_vs_bh": -54.2
+          },
+          "def_a_retention_fraction": {
+            "lo": 97.1,
+            "hi": 181.1,
+            "mean": 126.2,
+            "median": 103.8,
+            "n": 10000
+          },
+          "def_b_vt_mdd_reduction": {
+            "lo": 27.4,
+            "hi": 53.9,
+            "mean": 44.3,
+            "median": 50.5,
+            "n": 10000
+          },
+          "def_c_hedged_abs_mdd": {
+            "lo": -28.9,
+            "hi": -13.1,
+            "mean": -22.7,
+            "median": -25.3,
+            "n": 10000
+          },
+          "def_d_hedged_vs_bh": {
+            "lo": -57.2,
+            "hi": -46.7,
+            "mean": -52.3,
+            "median": -54.1,
+            "n": 10000
+          }
+        },
+        "1260": {
+          "n_obs": 5240,
+          "n_reps": 10000,
+          "mean_block": 1260,
+          "ci_pct": 90,
+          "lo_pct_used": 4.999999999999999,
+          "hi_pct_used": 95.0,
+          "point_estimates": {
+            "bh_mdd_pct": -55.19,
+            "vt_mdd_pct": -26.31,
+            "hedged_mdd_pct": -25.25,
+            "a_retention": 103.7,
+            "b_vt_reduction": 52.3,
+            "c_hedged_abs_mdd": -25.3,
+            "d_hedged_vs_bh": -54.2
+          },
+          "def_a_retention_fraction": {
+            "lo": 97.7,
+            "hi": 181.1,
+            "mean": 124.0,
+            "median": 103.7,
+            "n": 10000
+          },
+          "def_b_vt_mdd_reduction": {
+            "lo": 27.4,
+            "hi": 53.5,
+            "mean": 45.3,
+            "median": 52.3,
+            "n": 10000
+          },
+          "def_c_hedged_abs_mdd": {
+            "lo": -27.7,
+            "hi": -17.0,
+            "mean": -23.1,
+            "median": -25.3,
+            "n": 10000
+          },
+          "def_d_hedged_vs_bh": {
+            "lo": -56.4,
+            "hi": -49.0,
+            "mean": -52.6,
+            "median": -54.2,
+            "n": 10000
+          }
+        }
+      }
+    },
+    "50/50": {
+      "asset": "50/50",
+      "n_obs": 5121,
+      "by_mean_block": {
+        "756": {
+          "n_obs": 5121,
+          "n_reps": 10000,
+          "mean_block": 756,
+          "ci_pct": 90,
+          "lo_pct_used": 4.999999999999999,
+          "hi_pct_used": 95.0,
+          "point_estimates": {
+            "bh_mdd_pct": -32.49,
+            "vt_mdd_pct": -16.84,
+            "hedged_mdd_pct": -17.53,
+            "a_retention": 95.6,
+            "b_vt_reduction": 48.2,
+            "c_hedged_abs_mdd": -17.5,
+            "d_hedged_vs_bh": -46.0
+          },
+          "def_a_retention_fraction": {
+            "lo": 84.7,
+            "hi": 149.6,
+            "mean": 105.5,
+            "median": 95.6,
+            "n": 9904
+          },
+          "def_b_vt_mdd_reduction": {
+            "lo": 22.4,
+            "hi": 48.2,
+            "mean": 40.9,
+            "median": 48.2,
+            "n": 10000
+          },
+          "def_c_hedged_abs_mdd": {
+            "lo": -18.4,
+            "hi": -11.6,
+            "mean": -16.3,
+            "median": -17.5,
+            "n": 10000
+          },
+          "def_d_hedged_vs_bh": {
+            "lo": -50.5,
+            "hi": -23.6,
+            "mean": -41.9,
+            "median": -46.0,
+            "n": 10000
+          }
+        },
+        "1260": {
+          "n_obs": 5121,
+          "n_reps": 10000,
+          "mean_block": 1260,
+          "ci_pct": 90,
+          "lo_pct_used": 4.999999999999999,
+          "hi_pct_used": 95.0,
+          "point_estimates": {
+            "bh_mdd_pct": -32.49,
+            "vt_mdd_pct": -16.84,
+            "hedged_mdd_pct": -17.53,
+            "a_retention": 95.6,
+            "b_vt_reduction": 48.2,
+            "c_hedged_abs_mdd": -17.5,
+            "d_hedged_vs_bh": -46.0
+          },
+          "def_a_retention_fraction": {
+            "lo": 89.8,
+            "hi": 149.6,
+            "mean": 102.2,
+            "median": 95.6,
+            "n": 9967
+          },
+          "def_b_vt_mdd_reduction": {
+            "lo": 28.7,
+            "hi": 48.2,
+            "mean": 42.2,
+            "median": 48.2,
+            "n": 10000
+          },
+          "def_c_hedged_abs_mdd": {
+            "lo": -17.5,
+            "hi": -11.6,
+            "mean": -16.3,
+            "median": -17.5,
+            "n": 10000
+          },
+          "def_d_hedged_vs_bh": {
+            "lo": -48.4,
+            "hi": -30.4,
+            "mean": -42.9,
+            "median": -46.0,
+            "n": 10000
+          }
+        }
+      }
+    },
+    "DIA": {
+      "asset": "DIA",
+      "n_obs": 5240,
+      "by_mean_block": {
+        "756": {
+          "n_obs": 5240,
+          "n_reps": 10000,
+          "mean_block": 756,
+          "ci_pct": 90,
+          "lo_pct_used": 4.999999999999999,
+          "hi_pct_used": 95.0,
+          "point_estimates": {
+            "bh_mdd_pct": -51.87,
+            "vt_mdd_pct": -26.78,
+            "hedged_mdd_pct": -25.23,
+            "a_retention": 106.2,
+            "b_vt_reduction": 48.4,
+            "c_hedged_abs_mdd": -25.2,
+            "d_hedged_vs_bh": -51.4
+          },
+          "def_a_retention_fraction": {
+            "lo": 91.3,
+            "hi": 137.2,
+            "mean": 113.6,
+            "median": 106.2,
+            "n": 10000
+          },
+          "def_b_vt_mdd_reduction": {
+            "lo": 27.0,
+            "hi": 55.2,
+            "mean": 42.7,
+            "median": 48.4,
+            "n": 10000
+          },
+          "def_c_hedged_abs_mdd": {
+            "lo": -28.9,
+            "hi": -14.7,
+            "mean": -24.2,
+            "median": -25.2,
+            "n": 10000
+          },
+          "def_d_hedged_vs_bh": {
+            "lo": -55.1,
+            "hi": -37.0,
+            "mean": -46.5,
+            "median": -50.2,
+            "n": 10000
+          }
+        },
+        "1260": {
+          "n_obs": 5240,
+          "n_reps": 10000,
+          "mean_block": 1260,
+          "ci_pct": 90,
+          "lo_pct_used": 4.999999999999999,
+          "hi_pct_used": 95.0,
+          "point_estimates": {
+            "bh_mdd_pct": -51.87,
+            "vt_mdd_pct": -26.78,
+            "hedged_mdd_pct": -25.23,
+            "a_retention": 106.2,
+            "b_vt_reduction": 48.4,
+            "c_hedged_abs_mdd": -25.2,
+            "d_hedged_vs_bh": -51.4
+          },
+          "def_a_retention_fraction": {
+            "lo": 93.4,
+            "hi": 137.2,
+            "mean": 112.4,
+            "median": 106.2,
+            "n": 10000
+          },
+          "def_b_vt_mdd_reduction": {
+            "lo": 27.0,
+            "hi": 55.0,
+            "mean": 43.6,
+            "median": 48.4,
+            "n": 10000
+          },
+          "def_c_hedged_abs_mdd": {
+            "lo": -27.4,
+            "hi": -23.1,
+            "mean": -24.5,
+            "median": -25.2,
+            "n": 10000
+          },
+          "def_d_hedged_vs_bh": {
+            "lo": -53.5,
+            "hi": -37.0,
+            "mean": -47.1,
+            "median": -51.4,
+            "n": 10000
+          }
+        }
+      }
+    },
+    "QQQ": {
+      "asset": "QQQ",
+      "n_obs": 5240,
+      "by_mean_block": {
+        "756": {
+          "n_obs": 5240,
+          "n_reps": 10000,
+          "mean_block": 756,
+          "ci_pct": 90,
+          "lo_pct_used": 4.999999999999999,
+          "hi_pct_used": 95.0,
+          "point_estimates": {
+            "bh_mdd_pct": -53.4,
+            "vt_mdd_pct": -28.46,
+            "hedged_mdd_pct": -26.21,
+            "a_retention": 109.0,
+            "b_vt_reduction": 46.7,
+            "c_hedged_abs_mdd": -26.2,
+            "d_hedged_vs_bh": -50.9
+          },
+          "def_a_retention_fraction": {
+            "lo": 97.5,
+            "hi": 199.0,
+            "mean": 127.2,
+            "median": 109.0,
+            "n": 10000
+          },
+          "def_b_vt_mdd_reduction": {
+            "lo": 26.3,
+            "hi": 48.6,
+            "mean": 43.4,
+            "median": 46.7,
+            "n": 10000
+          },
+          "def_c_hedged_abs_mdd": {
+            "lo": -28.2,
+            "hi": -12.8,
+            "mean": -22.4,
+            "median": -26.2,
+            "n": 10000
+          },
+          "def_d_hedged_vs_bh": {
+            "lo": -63.6,
+            "hi": -44.4,
+            "mean": -53.2,
+            "median": -50.9,
+            "n": 10000
+          }
+        },
+        "1260": {
+          "n_obs": 5240,
+          "n_reps": 10000,
+          "mean_block": 1260,
+          "ci_pct": 90,
+          "lo_pct_used": 4.999999999999999,
+          "hi_pct_used": 95.0,
+          "point_estimates": {
+            "bh_mdd_pct": -53.4,
+            "vt_mdd_pct": -28.46,
+            "hedged_mdd_pct": -26.21,
+            "a_retention": 109.0,
+            "b_vt_reduction": 46.7,
+            "c_hedged_abs_mdd": -26.2,
+            "d_hedged_vs_bh": -50.9
+          },
+          "def_a_retention_fraction": {
+            "lo": 97.5,
+            "hi": 174.1,
+            "mean": 124.7,
+            "median": 109.0,
+            "n": 10000
+          },
+          "def_b_vt_mdd_reduction": {
+            "lo": 33.5,
+            "hi": 48.1,
+            "mean": 44.1,
+            "median": 46.7,
+            "n": 10000
+          },
+          "def_c_hedged_abs_mdd": {
+            "lo": -26.8,
+            "hi": -12.8,
+            "mean": -22.8,
+            "median": -26.2,
+            "n": 10000
+          },
+          "def_d_hedged_vs_bh": {
+            "lo": -63.6,
+            "hi": -46.5,
+            "mean": -53.3,
+            "median": -50.9,
+            "n": 10000
+          }
+        }
+      }
+    },
+    "IWM": {
+      "asset": "IWM",
+      "n_obs": 5240,
+      "by_mean_block": {
+        "756": {
+          "n_obs": 5240,
+          "n_reps": 10000,
+          "mean_block": 756,
+          "ci_pct": 90,
+          "lo_pct_used": 4.999999999999999,
+          "hi_pct_used": 95.0,
+          "point_estimates": {
+            "bh_mdd_pct": -58.64,
+            "vt_mdd_pct": -30.97,
+            "hedged_mdd_pct": -30.35,
+            "a_retention": 102.2,
+            "b_vt_reduction": 47.2,
+            "c_hedged_abs_mdd": -30.3,
+            "d_hedged_vs_bh": -48.2
+          },
+          "def_a_retention_fraction": {
+            "lo": 97.3,
+            "hi": 140.7,
+            "mean": 109.8,
+            "median": 103.3,
+            "n": 10000
+          },
+          "def_b_vt_mdd_reduction": {
+            "lo": 22.9,
+            "hi": 50.8,
+            "mean": 39.2,
+            "median": 42.9,
+            "n": 10000
+          },
+          "def_c_hedged_abs_mdd": {
+            "lo": -38.4,
+            "hi": -22.3,
+            "mean": -30.5,
+            "median": -30.3,
+            "n": 10000
+          },
+          "def_d_hedged_vs_bh": {
+            "lo": -53.1,
+            "hi": -26.1,
+            "mean": -42.0,
+            "median": -46.2,
+            "n": 10000
+          }
+        },
+        "1260": {
+          "n_obs": 5240,
+          "n_reps": 10000,
+          "mean_block": 1260,
+          "ci_pct": 90,
+          "lo_pct_used": 4.999999999999999,
+          "hi_pct_used": 95.0,
+          "point_estimates": {
+            "bh_mdd_pct": -58.64,
+            "vt_mdd_pct": -30.97,
+            "hedged_mdd_pct": -30.35,
+            "a_retention": 102.2,
+            "b_vt_reduction": 47.2,
+            "c_hedged_abs_mdd": -30.3,
+            "d_hedged_vs_bh": -48.2
+          },
+          "def_a_retention_fraction": {
+            "lo": 100.0,
+            "hi": 131.0,
+            "mean": 107.6,
+            "median": 102.9,
+            "n": 10000
+          },
+          "def_b_vt_mdd_reduction": {
+            "lo": 24.7,
+            "hi": 49.9,
+            "mean": 40.5,
+            "median": 46.4,
+            "n": 10000
+          },
+          "def_c_hedged_abs_mdd": {
+            "lo": -36.2,
+            "hi": -28.3,
+            "mean": -30.4,
+            "median": -30.3,
+            "n": 10000
+          },
+          "def_d_hedged_vs_bh": {
+            "lo": -52.2,
+            "hi": -26.2,
+            "mean": -42.8,
+            "median": -48.2,
+            "n": 10000
+          }
+        }
+      }
+    }
+  },
+  "summary": {
+    "comparison_rows": [
+      {
+        "asset": "SPY",
+        "k1192_fixed_252": [
+          86,
+          97
+        ],
+        "k1417_stationary_756": [
+          97.1,
+          181.1
+        ],
+        "lo_shift_756": 11.1,
+        "k1417_stationary_1260": [
+          97.7,
+          181.1
+        ],
+        "lo_shift_1260": 11.7
+      },
+      {
+        "asset": "50/50",
+        "k1192_fixed_252": [
+          90,
+          99
+        ],
+        "k1417_stationary_756": [
+          84.7,
+          149.6
+        ],
+        "lo_shift_756": -5.3,
+        "k1417_stationary_1260": [
+          89.8,
+          149.6
+        ],
+        "lo_shift_1260": -0.2
+      },
+      {
+        "asset": "DIA",
+        "k1192_fixed_252": [
+          83,
+          96
+        ],
+        "k1417_stationary_756": [
+          91.3,
+          137.2
+        ],
+        "lo_shift_756": 8.3,
+        "k1417_stationary_1260": [
+          93.4,
+          137.2
+        ],
+        "lo_shift_1260": 10.4
+      },
+      {
+        "asset": "QQQ",
+        "k1192_fixed_252": [
+          82,
+          95
+        ],
+        "k1417_stationary_756": [
+          97.5,
+          199.0
+        ],
+        "lo_shift_756": 15.5,
+        "k1417_stationary_1260": [
+          97.5,
+          174.1
+        ],
+        "lo_shift_1260": 15.5
+      },
+      {
+        "asset": "IWM",
+        "k1192_fixed_252": [
+          91,
+          100
+        ],
+        "k1417_stationary_756": [
+          97.3,
+          140.7
+        ],
+        "lo_shift_756": 6.3,
+        "k1417_stationary_1260": [
+          100.0,
+          131.0
+        ],
+        "lo_shift_1260": 9.0
+      }
+    ],
+    "mean_lo_shift_at_1260": 9.28,
+    "median_lo_shift_at_1260": 10.4,
+    "n_assets_with_material_shift_at_1260": 0,
+    "verdict": "H2 NOT SUPPORTED \u2014 CI shift below 3pp on majority of assets; retention robust to bootstrap block length"
+  },
+  "timestamp": "2026-06-04T21:16:40.680528Z",
+  "paper_link": "paper/vt-trend-following/review_history/v4/README.md (H2)"
+}
