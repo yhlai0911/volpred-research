@@ -20685,12 +20685,36 @@
   {
     "id": "Paper4_body_steps_9_to_15",
     "priority": 3,
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "task_type": "paper_body",
     "title": "Paper 4 (vix-sufficiency) body integration Steps 9-15: §8.2 update, §9 null-count, abstract, figs, paper-update, reviewers",
     "description": "Predecessor: Paper4_body_steps_8_to_15 done in commit e57ede17 (§7.x K1121 Allocation NULL inserted, 58 pages). Remaining steps from integration_plan_v2.md: (9) Update §8.2 \"What Might Break VIX Sufficiency\" — remove alt-data uncertainty + regime-based allocation as plausible mechanisms (K1116/K1118/K1121 refute); (10) Update §9 Conclusion null count 36→~42; (11) Update abstract — 13 families / 5 asset classes / 2 applications / publication-delay corrected; (12) Add 5-asset forecasting-sufficiency heatmap fig (K1118+K1098); (13) Add K1121 bootstrap-dist fig (6 Sharpe-diff curves vs 50/50); (14) Update README.md (pages 48→58, +K1121/K1116b); (15) uv run volpred ops paper-update --paper-id vix-sufficiency + latex-academic-reviewer + citation-verifier. Main thread only (.tex). Scope切小 to §8.2+§9 first fire; abstract / fig / paper-update next fire.",
     "source": "continuation",
     "created_at": "2026-06-04T03:17:00Z",
+    "related_experiments": [
+      "k1121",
+      "k1116",
+      "k1118",
+      "k1116b",
+      "k1098"
+    ],
+    "paper_id": "vix-sufficiency",
+    "claimed_by": "hourly-12",
+    "claimed_at": "2026-06-04T04:08:41.204961+00:00",
+    "claim_session_id": "1081ef5576e5",
+    "started_at": "2026-06-04T04:08:49.194174+00:00",
+    "completed_at": "2026-06-04T04:12:45.751544+00:00",
+    "result": "Step 9 done: §8.2 (line 1014-1023) added paragraph explicitly ruling out alt-data uncertainty proxies (K1116/K1116b/K1118) + regime-based allocation (K1121 ref subsec:k1121_allocation); both channels closed. Step 10 done: §9 conclusion 36 nulls→42 (added +6 from K1116/K1116b/K1118/K1121 extensions). xelatex compile pass 59p (was 58p). Steps 11-15 split to Paper4_body_steps_11_to_15."
+  },
+  {
+    "id": "Paper4_body_steps_11_to_15",
+    "priority": 3,
+    "status": "pending_main_thread",
+    "task_type": "paper_body",
+    "title": "Paper 4 (vix-sufficiency) body integration Steps 11-15: abstract, figures, README, paper-update, review",
+    "description": "Predecessor: Paper4_body_steps_9_to_15 completed Step 9 + Step 10. Remaining: (11) Update abstract — 13 families / 5 asset classes / 2 applications / publication-delay corrected, also eleven→thirteen sweep in §9 line ~1121-1123; (12) Add 5-asset forecasting-sufficiency heatmap fig (K1118+K1098); (13) Add K1121 bootstrap-dist fig (6 Sharpe-diff curves vs 50/50); (14) Update README.md (pages 48→59, +K1121/K1116b); (15) uv run volpred ops paper-update --paper-id vix-sufficiency + latex-academic-reviewer + citation-verifier. Main thread only (.tex). Scope切小 across fires.",
+    "source": "continuation",
+    "created_at": "2026-06-04T04:18:00Z",
     "related_experiments": [
       "k1121",
       "k1116",
