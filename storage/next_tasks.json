@@ -20857,12 +20857,34 @@
     "title": "K1416: Paper 3 HLN small-sample DM correction retrofit (TW0050-N225 唯一 Harvey sig) [renamed from K1414 — kid_collision]",
     "task_type": "experiment",
     "priority": "P2",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "description": "Paper 3 (DCC-Clayton) submission blocker per research_program.md open question. K1412 partial update 跑了 5 OOS starts (2014-2018) Student-t DM_t=3.04-3.89 raw `|t|>3` PASS，但 Codex review FAIL: 自製判定非 HLN small-sample correction。需做：(a) 對 5 OOS starts 應用 HLN (1997) correction: t_HLN = t * sqrt((n+1-2h+h(h-1)/n)/n), h=horizon=1 → t/sqrt((n-1)/n) ≈ t for n large；但對 small-sample OOS 仍須正式套用 (b) 三因子 driver identification: λ_L_clayton=0.444 vs full_sample_corr=0.586 vs Asian trading-hour overlap (CLOSE-to-CLOSE vs OPEN-to-CLOSE) (c) 若 HLN-retrofit 仍 robust → Paper 3 submission OK；若 fail → 撤回 唯一 Harvey sig 主張。Main thread only (paper methodology decision)，禁 background agent。實驗目錄 experiments/k1416/ (k1414 已被 SPY r² QLIKE Meta-Analysis 占用，已 rename)。",
     "source": "research_program_open_question",
     "created_at": "2026-06-04T18:11:00+08:00",
     "created_by": "hourly-18",
     "mission_angle": "M3 paper submission-ready blocker — Paper 3 retract or proceed depends on HLN result",
-    "related_predecessor": "K1414_paper3_hln_retrofit (blocked kid_collision)"
+    "related_predecessor": "K1414_paper3_hln_retrofit (blocked kid_collision)",
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-06-04T11:12:27.082051+00:00",
+    "claim_session_id": "e3e536cb41a9",
+    "started_at": "2026-06-04T11:12:30.581493+00:00",
+    "completed_at": "2026-06-04T11:21:15.341333+00:00",
+    "result": "K1416 HLN retrofit complete: 5/5 HLN-sig @ 5% AND @ 1%, baseline factor stored==computed verified, K1412 stored t confirmed HLN-corrected per paper3_E2.dm_test:783-785. Codex CONDITIONAL_PASS (gpt-5.4 medium). Paper 3 submission gate PASS with caveats (sensitivity grid not independent replication; n_oos estimated negligible-impact). Knowledge.json item d3f6dd5c written + provenance OK. Step (b) 三因子 driver identification + (c) Paper 3 body integration留下個 fire."
+  },
+  {
+    "id": "paper_review_mile_02c71e74",
+    "title": "Paper review (Codex 24h-rule): 別再把美國 VIX 直接乘 1.4 來看台股風險了",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_02c71e74 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_02c71e74",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-04T11:09:36+00:00"
   }
 ]

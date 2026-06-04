@@ -1,0 +1,109 @@
+{
+  "experiment_id": "K1416",
+  "pair": "TW0050-N225",
+  "parent_experiments": [
+    "K1412",
+    "Paper3_E2"
+  ],
+  "data_end_used": "2026-05-28",
+  "baseline_oos_start": "2015-06-01",
+  "baseline_n_oos": 2067,
+  "n_estimation_method": "trading-day ratio from paper3_E2 baseline (TW0050+N225 calendar intersection); 2015-06-01 exact, others inferred (typical accuracy \u00b120 days for ~2000 obs, negligible impact on HLN factor)",
+  "hln_correction_formula": "factor = sqrt((n + 1 - 2h + h(h-1)/n) / n), h=1 \u21d2 sqrt((n-1)/n)",
+  "critical_value_method": "scipy.stats.t.ppf(0.975, df=n-1)",
+  "per_oos": {
+    "2014-01-02": {
+      "n_oos_obs_inferred": 2332,
+      "n_oos_obs_exact_from_paper3_E2": null,
+      "hln_factor": 0.9997855687763489,
+      "critical_value_5pct": 1.960982209573912,
+      "t_HLN_from_k1412": 3.2402372492360056,
+      "t_raw_inferred": 3.2409322062947714,
+      "hln_significant_5pct": true,
+      "hln_significant_1pct": true,
+      "abs_t_minus_critical": 1.2792550396620936
+    },
+    "2015-06-01": {
+      "n_oos_obs_inferred": 2067,
+      "n_oos_obs_exact_from_paper3_E2": 2067,
+      "hln_factor": 0.9997580742676584,
+      "critical_value_5pct": 1.9611128896683716,
+      "t_HLN_from_k1412": 3.8915099217614926,
+      "t_raw_inferred": 3.8924516059668703,
+      "hln_significant_5pct": true,
+      "hln_significant_1pct": true,
+      "abs_t_minus_critical": 1.930397032093121
+    },
+    "2016-01-04": {
+      "n_oos_obs_inferred": 1955,
+      "n_oos_obs_exact_from_paper3_E2": null,
+      "hln_factor": 0.9997442128107537,
+      "critical_value_5pct": 1.9611787830928074,
+      "t_HLN_from_k1412": 3.6606680552878026,
+      "t_raw_inferred": 3.6616046468485512,
+      "hln_significant_5pct": true,
+      "hln_significant_1pct": true,
+      "abs_t_minus_critical": 1.6994892721949952
+    },
+    "2017-01-03": {
+      "n_oos_obs_inferred": 1767,
+      "n_oos_obs_exact_from_paper3_E2": null,
+      "hln_factor": 0.9997169944757249,
+      "critical_value_5pct": 1.961308191954512,
+      "t_HLN_from_k1412": 3.0441761522487436,
+      "t_raw_inferred": 3.0450379148002593,
+      "hln_significant_5pct": true,
+      "hln_significant_1pct": true,
+      "abs_t_minus_critical": 1.0828679602942317
+    },
+    "2018-01-02": {
+      "n_oos_obs_inferred": 1580,
+      "n_oos_obs_exact_from_paper3_E2": null,
+      "hln_factor": 0.9996834942158418,
+      "critical_value_5pct": 1.9614675056158524,
+      "t_HLN_from_k1412": 3.0928869629100944,
+      "t_raw_inferred": 3.0938661894544683,
+      "hln_significant_5pct": true,
+      "hln_significant_1pct": true,
+      "abs_t_minus_critical": 1.131419457294242
+    }
+  },
+  "summary": {
+    "n_oos_total": 5,
+    "n_hln_sig_5pct": 5,
+    "n_hln_sig_1pct": 5,
+    "robust_ratio_5pct": 1.0,
+    "robust_ratio_1pct": 1.0,
+    "verdict": "ROBUST (\u22654/5 HLN-sig at 5%) \u2014 Paper 3 OK to submit",
+    "paper3_E2_baseline_verification": {
+      "stored_hln_factor": 0.9997580742676584,
+      "computed_hln_factor": 0.9997580742676584,
+      "factors_match": true,
+      "stored_t_HLN": 3.9229611340411856,
+      "stored_t_raw": 3.923910428945351,
+      "implied_factor": 0.9997580742676584,
+      "implied_matches_computed": true
+    }
+  },
+  "references": [
+    "Harvey/Leybourne/Newbold (1997) IJF 13(2) 281-291",
+    "K1412 (experiments/k1412/k1412_results.json)",
+    "Paper3_E2 (paper3_E2.py:757-792 internal HLN math)",
+    "research_program.md Paper 3 Open Question"
+  ],
+  "timestamp": "2026-06-04T11:19:29.467886+00:00",
+  "codex_review_target": "Verify: (1) HLN formula coded correctly; (2) n_est method documented and reasonable; (3) K1412 stored t IS HLN-corrected per paper3_E2.dm_test:783-785; (4) verdict logic matches Paper 3 submission rule.",
+  "codex_review_outcome": {
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "codex-cli 0.135.0 (gpt-5.4 medium)",
+    "timestamp": "2026-06-04",
+    "core_logic": "PASS \u2014 HLN formula correct, critical_value correct, K1412 stored t IS HLN-corrected (verified)",
+    "outstanding_caveats": [
+      "n_oos \u70ba\u4f30\u7b97\u975e\u5be6\u6e2c \u2014 4 \u500b\u975e baseline OOS \u7528 calendar-day ratio proxy\uff1b\u5f71\u97ff negligible (factor \u5dee <4e-6 \u5c0d \u00b120 obs\uff1b\u6700\u5c0f |t|=3.044 \u96e2 critical \u9084\u6709 ~1.08 margin)\uff0c\u7d50\u8ad6\u4e0d\u7ffb",
+      "5/5 \u662f sensitivity grid \u4e0d\u662f 5 \u6b21\u7368\u7acb replication \u2014 overlapping samples \u4e0d\u53ef\u8996\u70ba familywise-error \u6821\u6b63",
+      "\u226580% PASS gate \u662f internal submission gate\uff0c\u4e0d\u662f econometric evidence \u672c\u8eab\uff1bpaper wording \u4e0d\u53ef\u5305\u88dd\u6210\u7d71\u8a08\u5b9a\u7406"
+    ],
+    "paper_wording_required": "The HLN-adjusted superiority is stable across 5 alternative OOS starts (5/5 significant at 5% AND 1%), supporting robustness (sensitivity grid, not independent replication).",
+    "future_work_optional": "paper3_E2.dm_test \u4e0a\u6e38\u52a0 per-OOS exact n storage\uff1bK1412 \u91cd\u8dd1\u5e36 metadata\uff1bK1416 \u88dc exact-n verification (post-submission)"
+  }
+}

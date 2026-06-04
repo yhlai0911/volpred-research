@@ -326,7 +326,7 @@
     "category": "research_methodology",
     "content": "User guidance: (1) Discussions with user that have reference value must be auto-saved to knowledge base. (2) Web search results (papers, methods, data) must also be saved. (3) These rules must be written into the research skill. The system should not wait to be told — proactively preserve valuable information.",
     "evidence": [],
-    "confidence": 1.0,
+    "confidence": 1,
     "created_at": "2026-03-14T22:31:53.700655",
     "legacy": true
   },
@@ -495,7 +495,7 @@
     "category": "research_methodology",
     "content": "Paper trading started on 2026-03-14. Each day records: sigma prediction, recommended weight, and (next day) actual return/RV. This creates a prospective out-of-sample track record that cannot be biased by hindsight. The log is at storage/paper_trading.json.",
     "evidence": [],
-    "confidence": 1.0,
+    "confidence": 1,
     "created_at": "2026-03-14T23:24:42.054335",
     "legacy": true
   },
@@ -513,7 +513,7 @@
     "category": "research_methodology",
     "content": "Paper trading portfolio started 2026-03-14 with $1,000,000. Initial allocation: 77% SPY ($770,000 ≈ 1163 shares @$662.29) + 23% cash/T-bills ($230,000). Strategy: slow-adjustment vol targeting at 12% annual. Rebalance weekly. Track record at storage/paper_trading.json.",
     "evidence": [],
-    "confidence": 1.0,
+    "confidence": 1,
     "created_at": "2026-03-14T23:26:56.966221",
     "legacy": true
   },
@@ -6608,7 +6608,7 @@
     "category": "platform",
     "content": "[提出: 用戶] 部署策略確認：新網站用新 Zeabur 專案 + 新 GitHub repo (volpred-v2)。現有 volpred.zeabur.app 完全不動。等新站全部沒問題後用戶再把 domain 換過去。",
     "evidence": "用戶指示 2026-03-17",
-    "confidence": 1.0,
+    "confidence": 1,
     "created_at": "2026-03-17T11:50:36.775323",
     "legacy": true
   },
@@ -6617,7 +6617,7 @@
     "category": "platform",
     "content": "[提出: 用戶] 新網站完成後要建立 website-manager skill。內容：後台自主管理（發文排程、品質控制）、數據驅動研究方向調整、會員問題排名+研究、會員管理、每週研究日記、feature gating。",
     "evidence": "用戶指示 2026-03-17",
-    "confidence": 1.0,
+    "confidence": 1,
     "created_at": "2026-03-17T11:51:07.582881",
     "legacy": true
   },
@@ -6626,7 +6626,7 @@
     "category": "platform",
     "content": "[提出: 用戶] 需要兩種文章層次：(1) 研究文章（專業，現有）(2) 一般文章（非專業讀者）。autonomous-research 過程中要分時間寫一般性文章。網站要能篩選文章類型。需建立新 skill 或擴展現有 skill。",
     "evidence": "用戶指示 2026-03-17",
-    "confidence": 1.0,
+    "confidence": 1,
     "created_at": "2026-03-17T11:55:33.985581",
     "legacy": true
   },
@@ -20592,7 +20592,7 @@
       "equity_finding": "Student-t fixes Normal on all 3 equity/commodity assets",
       "btc_df": 3.2,
       "qqq_df": 8.2,
-      "gld_df": 5.0,
+      "gld_df": 5,
       "tw50_df": 4.9
     }
   },
@@ -30284,9 +30284,9 @@
       "llm_close_plus_match_rate_pct": 66.7,
       "llm_major_diverge_rate_pct": 16.7,
       "llm_mean_abs_diff_pp": 5.02,
-      "proxy_annual_major_diverge_pct": 50.0,
+      "proxy_annual_major_diverge_pct": 50,
       "proxy_annual_by_design": true,
-      "utilization_verifiable_rate_pct": 0.0,
+      "utilization_verifiable_rate_pct": 0,
       "primary_source_used": "stockanalysis.com (upstream SEC 6-K)",
       "primary_source_blocked": "TSMC IR 403, UMC IR PDF 403, TSMC stopped publishing utilization since 2019"
     },
@@ -30571,7 +30571,7 @@
       "sharpe_change_pct": -73.3,
       "null_result_maintained": true,
       "max_hac_t_vs_baseline": 1.49,
-      "harvey_threshold": 3.0,
+      "harvey_threshold": 3,
       "n_oos_periods": 3,
       "block_bootstrap_block_size": 21
     },
@@ -30731,10 +30731,10 @@
       "ci_lo_negative_count": 1,
       "slv_ci_lo": -2.5,
       "spy_point": 103.7,
-      "spy_ci_lo": 93.0,
+      "spy_ci_lo": 93,
       "spy_ci_hi": 182.2,
-      "qqq_point": 109.0,
-      "qqq_ci_lo": 89.0,
+      "qqq_point": 109,
+      "qqq_ci_lo": 89,
       "lqd_ci_lo": 76.2,
       "bootstrap_reps": 10000,
       "block_size": 252,
@@ -31979,7 +31979,7 @@
       ],
       "TWII_bond_tent_pct": [
         76.9,
-        77.0
+        77
       ],
       "TWII_static6040_pct": [
         75.3,
@@ -31990,7 +31990,7 @@
         70.9
       ],
       "TWII_defer3y_pct": [
-        68.0,
+        68,
         68.2
       ],
       "TWII_WR4_baseline_pct": [
@@ -32255,5 +32255,41 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-06-04T01:15:57.667037+00:00"
+  },
+  {
+    "item_id": "d3f6dd5c",
+    "category": "paper3_robustness",
+    "content": "K1416: Paper 3 HLN(1997) small-sample DM correction retrofit (TW0050-N225). 正式套用 HLN formula 至 K1412 5 OOS starts (2014/2015/2016/2017/2018) Student-t copula vs DCC. 5/5 HLN-sig @ 5% AND @ 1%: t_HLN={3.24, 3.89, 3.66, 3.04, 3.09} 全 > critical~1.961 (df=n-1, n_est={2332,2067,1955,1767,1580}). baseline (OOS_START=2015-06-01) n=2067 exact from paper3_E2_results.json, stored hln_factor 0.99975807 == K1416 computed 0.99975807 完全吻合 → confirms K1412 stored dm_dcc_vs_t IS HLN-corrected per paper3_E2.dm_test:783-785 (t_stat = t_stat_raw * hln_factor)。\n\n【Codex review CONDITIONAL_PASS】(codex-cli 0.135.0 gpt-5.4 medium, 2026-06-04): core econometric logic PASS (HLN formula 正確、critical_value 正確、K1412 stored t IS HLN-corrected verified)。Outstanding caveats: (1) n_oos 為估算非實測 (calendar-day ratio proxy)，影響 negligible (factor 差<4e-6、最小 |t|=3.044 離 critical 還有 ~1.08 margin) 但非 full rerun audit; (2) 5/5 是 sensitivity grid 非獨立 replication，overlapping samples 不可視為 familywise-error 校正; (3) ≥80% PASS gate 是 internal submission gate 非 econometric 統計定理。\n\n【Paper 3 submission decision】PROCEED — TW0050-N225 唯一 Harvey-sig 主張 robust to OOS_START。Paper wording 必用: 'The HLN-adjusted superiority is stable across 5 alternative OOS starts (5/5 significant at 5% AND 1%), supporting robustness (sensitivity grid, not independent replication).'\n\n【Future work optional】paper3_E2.dm_test 上游加 per-OOS exact n storage; K1412 重跑帶 metadata; K1416 補 exact-n verification (post-submission)。",
+    "evidence": [
+      "5/5 HLN-sig @ 5%: t_HLN={3.24, 3.89, 3.66, 3.04, 3.09}",
+      "5/5 HLN-sig @ 1%: all > critical ~2.578",
+      "baseline stored hln_factor 0.99975807 == K1416 computed 0.99975807",
+      "K1412 stored t IS HLN-corrected (verified at paper3_E2.dm_test:783-785)",
+      "Codex review CONDITIONAL_PASS (gpt-5.4 medium, 2026-06-04)",
+      "source: experiments/k1416/k1416_results.json + Codex review log"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-04T19:20:51.372840",
+    "k_id": "K1416",
+    "experiment_id": "K1416",
+    "experiment_path": "experiments/k1416/",
+    "title": "K1416: Paper 3 HLN small-sample DM correction retrofit (TW0050-N225 唯一 Harvey sig) [CONDITIONAL_PASS]",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "codex-cli 0.135.0 (gpt-5.4 medium)",
+    "reviewer_source": "Codex review",
+    "codex_review": "CONDITIONAL_PASS 2026-06-04",
+    "parent_experiments": [
+      "K1412",
+      "Paper3_E2"
+    ],
+    "reference": "Harvey/Leybourne/Newbold (1997) IJF 13(2) 281-291",
+    "data_period": "5 OOS starts: 2014-01-02 / 2015-06-01 / 2016-01-04 / 2017-01-03 / 2018-01-02, all to 2026-05-28",
+    "tags": [
+      "paper3",
+      "robustness",
+      "hln_correction",
+      "dm_test",
+      "cross_market_copula"
+    ]
   }
 ]
