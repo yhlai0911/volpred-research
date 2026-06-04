@@ -20971,5 +20971,22 @@
     "started_at": "2026-06-04T14:29:57.762728+00:00",
     "completed_at": "2026-06-04T14:30:44.454636+00:00",
     "result": "Codex review: article direction mostly holds, but K1370 source-code provenance is not self-consistent. The script claims to reproduce the paper's mixed-sample 10x headline, yet its own mixed-sample output is only 4.45 (not 10.07); narrative should treat 10.07 as legacy paper value, not as reverified by K1370."
+  },
+  {
+    "id": "K1416_article_research",
+    "status": "succeeded",
+    "priority": 3,
+    "task_type": "daily_article",
+    "title": "K1416 research-audience article: Paper 3 HLN small-sample DM correction retrofit",
+    "description": "Write research-audience article on K1416 experiment (Paper 3 HLN retrofit). General article mile_6000a480 already published; this fills the missing_research coverage. Include: (1) HLN(1997) formula derivation, (2) why K1412 raw-DM rule was insufficient (Codex caveat), (3) explicit critical_value computation via scipy.stats.t.ppf, (4) 5/5 OOS pass with margin breakdown, (5) caveat that 4/5 alternative OOS starts share data with baseline (not independent replication, sensitivity grid only), (6) Paper 3 submission implications. Evidence: experiments/k1416/k1416_results.json + 2 PNGs. Anti-AI-style + 9-checklist + anti_ai_gate.py mandatory before publish.",
+    "created_at": "2026-06-05T00:08:00+08:00",
+    "source": "auto_discovered_uncovered_research",
+    "k_id": "K1416",
+    "claimed_by": "hourly-00",
+    "claimed_at": "2026-06-04T16:11:03.368601+00:00",
+    "claim_session_id": "3714096ba0c7",
+    "started_at": "2026-06-04T16:11:03.669309+00:00",
+    "completed_at": "2026-06-04T16:15:42.157597+00:00",
+    "result": "Published research-audience draft mile_c9dc52b5 for K1416 (Paper 3 HLN retrofit). 789 CJK chars, 2 charts (Supabase-hosted), anti_ai_gate=PASS. Covers HLN formula derivation, K1412 flaw, 5/5 OOS robustness with margins, CONDITIONAL_PASS caveats."
   }
 ]
