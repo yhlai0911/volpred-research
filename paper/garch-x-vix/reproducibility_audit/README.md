@@ -55,11 +55,12 @@ The central horse-race (Table 3: 17 models × QLIKE + DM t) is **fully reproduci
 **Script output**: No JSON contains these values. Only ν (degrees of freedom) is from K995.  
 **Recommendation**: (a) Extend K995.py to compute and save residual diagnostics to k995_results.json. Critical for reviewer replication.
 
-### 4. Sensitivity Table (Table 12) — NO DEDICATED SOURCE (MEDIUM RISK)
+### 4. Sensitivity Table (Table 12) — SOURCE IDENTIFIED (LOW RISK)
 **Location**: Table 12  
 **Paper claims**: 16 DM t-statistics across 4 design dimensions  
-**Script output**: No sensitivity results JSON found anywhere.  
-**Recommendation**: (a) Create experiments/k988_sensitivity/ with k988_sensitivity.py that sweeps refit_freq, window, and VIX variants; save results JSON.
+**Canonical source**: `experiments/k1003/k1003_results.json`  
+**Status**: Resolved at the source level. K1003 covers refit frequency, estimation window, OOS sub-period, and VIX-variant sensitivity on the paper-period sample (`n_valid=1823`). Key paper values match the registered Table 12 source to tight tolerance (see `paper/garch-x-vix/experiments.md` and `nosource_rescan_report.md`).  
+**Residual nuance**: Table 12 baseline reports `DM t=3.92`, while the main horse-race table uses `4.03`; this is a documented pipeline/baseline difference, not a missing-source problem.
 
 ### 5. 0050.TW DM t=1.44 — MISMATCH (MEDIUM RISK)
 **Location**: Table 6  
@@ -94,10 +95,12 @@ The central horse-race (Table 3: 17 models × QLIKE + DM t) is **fully reproduci
 
 **NOT currently reproducible from clean clone**:
 - Table 11 (residual diagnostics — no script saves these)
-- Table 12 (sensitivity — no sensitivity results JSON)
 - FEZ/STOXX50E rows of Table 6
 - VIX vs macro comparison (Section 5.3)
-- Seven two-year windows sub-period analysis (Section 4.3)
+
+**Now sourced but still worth packet-level cleanup**:
+- Table 12 (sensitivity) — sourced by `experiments/k1003/`
+- Seven two-year windows sub-period analysis (Section 4.3) — sourced by `experiments/k1027/`
 
 ---
 
@@ -106,10 +109,10 @@ The central horse-race (Table 3: 17 models × QLIKE + DM t) is **fully reproduci
 | Priority | Fix | Effort |
 |----------|-----|--------|
 | P1 | Extend K995.py to save residual diagnostics JSON | 1 hour |
-| P2 | Create K988_sensitivity.py with full Table 12 | 3 hours |
+| P2 | Extend paper-local docs to point to K1003 / K1027 canonical sources | 30 min |
 | P3 | Dedicated A4f on FEZ/STOXX50E OOS 2019-2026 | 2 hours |
 | P4 | Resolve 0050.TW t=1.44 vs K997/K1098 discrepancy | 1 hour |
-| P5 | Add macro comparison and 7-window results to JSON | 2 hours |
+| P5 | Add macro comparison packet note for K1001 and verify paper wording | 1 hour |
 
 Total estimated fix effort: ~9 hours of scripting.
 

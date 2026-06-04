@@ -16,7 +16,7 @@
 | Table 5 | Model Confidence Set (MCS at α=0.10, 0.25) | `mcs_dm_results.json` → `mcs_results` key |
 | Table 6 | Cross-asset results (SPY/QQQ/EEM/GLD/0050.TW) | `experiments/k988/`, `k1085/`, `k1088/`, `k1098/` |
 | Table 7 | VaR backtest scorecard (UC/CC/DQ, 5 confidence levels) | `experiments/k988/k988_results.json` → `var_backtest` |
-| Table 8 | Robustness: VIX variants (VIX9D, VIX3M) | Sub-period robustness in `k988_results.json` |
+| Table 8 | Sensitivity analysis: refit frequency, window size, sub-period, VIX variants | `experiments/k1003/k1003_results.json` |
 
 ---
 
@@ -38,6 +38,8 @@
 | `k988_results.json` | `experiments/k988/` | 11-model QLIKE, VaR backtest |
 | `k988b_results.json` | `experiments/k988/` | 6 additional MIDAS specs |
 | `k989_mf2_vix2_results.json` | `experiments/k989/` | VIX² convexity synthesis |
+| `k1003_results.json` | `experiments/k1003/` | Table 12 sensitivity analysis (16 cells) |
+| `k1027_results.json` | `experiments/k1027/` | Seven non-overlapping 2-year sub-period robustness |
 | `k1085_results.json` | `experiments/k1085/` | GLD+GVZ cross-asset |
 | `k1088_results.json` | `experiments/k1088/` | USO+OVX cross-asset |
 | `k1098_results.json` | `experiments/k1098/` | 0050.TW+VIXTWN full test |
@@ -53,6 +55,8 @@ uv run python paper/garch-x-vix/compute_mcs_dm.py
 # Individual experiment reproductions
 uv run python experiments/k988/k988.py
 uv run python experiments/k989/k989_mf2_vix2.py
+uv run python experiments/k1003/k1003.py
+uv run python experiments/k1027/k1027.py
 ```
 
 OOS period: 2019-01-01 to 2026-04-08 (n=1,825 observations)

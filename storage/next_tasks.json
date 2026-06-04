@@ -21089,14 +21089,20 @@
     "description": "Auto-generated from research_program.md unchecked item: 補充 robustness（refit frequency sensitivity、sub-period analysis）",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "research-backlog"
     ],
     "source": "task_generator_v2_experiment",
     "created_at": "2026-06-04T17:34:25.718800+00:00",
-    "generated_at": "2026-06-04T17:34:25.718801+00:00"
+    "generated_at": "2026-06-04T17:34:25.718801+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-04T20:46:24.603204+00:00",
+    "claim_session_id": "3b3fe1fe9ad4",
+    "started_at": "2026-06-04T20:46:33.825390+00:00",
+    "completed_at": "2026-06-04T20:47:48.570849+00:00",
+    "result": "Closed this robustness backlog item by wiring existing canonical experiments into the paper packet. Updated reproducibility_audit/README.md, results/README.md, and scripts/README.md to point Table 12 sensitivity to K1003 and extended sub-period robustness to K1027."
   },
   {
     "id": "gen_paper_decision_P1",
@@ -21401,6 +21407,40 @@
     "created": "2026-06-05T20:10:00+08:00",
     "plan": null,
     "linked_task_ids": [],
-    "needs_close_reply": false
+    "needs_close_reply": false,
+    "h2_compute_queue_id": "k1417-paper3-h2-stationary-bootstrap",
+    "h2_smoke_finding": "B=200 smoke: lo bound shifts UP +10pp (opposite of Gemini H2 prediction). Full B=10000 needed for verdict.",
+    "h2_dispatched_at": "2026-06-04T21:13:46Z"
+  },
+  {
+    "id": "paper_review_mile_8d8b8877",
+    "title": "Paper review (Codex 24h-rule): NFP 前夕，VIX 跌到 15.4——市場算便宜了，但就業日波動還是會放大 1.5 倍",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_8d8b8877 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_8d8b8877",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-04T21:08:10+00:00"
+  },
+  {
+    "id": "K1326",
+    "title": "K1326: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 356). Original: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1326.py with signal.shift(1) + seed=42, (c) K1326_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 356,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-04T21:08:10Z"
   }
 ]

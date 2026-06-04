@@ -1,0 +1,23 @@
+{
+  "id": "k1417-paper3-h2-stationary-bootstrap",
+  "title": "K1417 Paper3 H2 stationary bootstrap MDD CI (B=10000, mean_block=756,1260)",
+  "script_path": "experiments/k1417/k1417.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-06-04T21:13:36Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k1417-paper3-h2-stationary-bootstrap.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k1417-paper3-h2-stationary-bootstrap.stderr",
+  "result_artifact": "experiments/k1417/k1417_results.json",
+  "claude_followup": {
+    "brief": "K1417 has produced experiments/k1417/k1417_results.json — the stationary-bootstrap MDD CI variant for Paper 3 v4 Gemini H2 (paper/vt-trend-following/review_history/v4/README.md). Read summary.comparison_rows vs K1192 fixed-block CIs (reference_k1192_fixed_block_ci) and summary.verdict. Then: (1) integrate into paper/vt-trend-following/body_v4.tex Table 6 — if H2_SUPPORTED add a stationary-bootstrap CI column and revise retention narrative; if H2_NOT_SUPPORTED add a footnote citing K1417 as robustness check showing retention insensitive to block length. (2) Write knowledge.json entry K1417 with verdict + Codex/code-reviewer review provenance per .claude/rules/experiments.md provenance gate. (3) Mark next_tasks Paper3_v4_revision_gemini_2h H2 sub-step done; HIGH-1 PureVT trough decomposition and M1/M2/citations remain. Do NOT publish to feed (paper sub-step). Codex review methodology before knowledge write.",
+    "task_type": "paper_body",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 5400
+}

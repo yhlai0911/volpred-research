@@ -18,6 +18,8 @@ All core model estimation and evaluation scripts live in the respective experime
 | `experiments/k988/k988.py` | K988 | 11 multiplicative GARCH-X models (A1–A5, free-omega variants) horse race |
 | `experiments/k988/k988b_supplement.py` | K988 | 6 GARCH-MIDAS alternatives (B1–B3, C1–C3) |
 | `experiments/k989/k989_mf2_vix2.py` | K989 | VIX² convexity synthesis + tau component visualization |
+| `experiments/k1003/k1003.py` | K1003 | Table 12 sensitivity analysis (refit/window/sub-period/VIX variants) |
+| `experiments/k1027/k1027.py` | K1027 | Seven 2-year non-overlapping sub-period robustness |
 | `experiments/k1085/` (see README) | K1085 | GLD+GVZ cross-asset robustness |
 | `experiments/k1088/` (see README) | K1088 | USO+OVX cross-asset robustness |
 | `experiments/k1098/k1098_*.py` | K1098 | 0050.TW + VIXTWN 15-year Taiwan test |
@@ -33,10 +35,14 @@ uv run python experiments/k988/k988b_supplement.py
 # Step 2: Convexity synthesis (K989)
 uv run python experiments/k989/k989_mf2_vix2.py
 
-# Step 3: MCS + DM tests (uses K988 + K988b results)
+# Step 3: Sensitivity / robustness sources (K1003, K1027)
+uv run python experiments/k1003/k1003.py
+uv run python experiments/k1027/k1027.py
+
+# Step 4: MCS + DM tests (uses K988 + K988b results)
 uv run python paper/garch-x-vix/compute_mcs_dm.py
 
-# Step 4: Cross-asset (K1085, K1088, K1098)
+# Step 5: Cross-asset (K1085, K1088, K1098)
 # See individual experiment README files for entry points
 ```
 
