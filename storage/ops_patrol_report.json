@@ -1,27 +1,27 @@
 {
-  "timestamp": "2026-06-04T08:12:50+08:00",
-  "patrol_time_taipei": "2026-06-04 08:12:50",
+  "timestamp": "2026-06-04T06:12:17Z",
+  "patrol_time_taipei": "2026-06-04 14:12:17",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "Total drafts: 118 (>=12 OK). Research audience: 45 (>=4 OK). General audience: 73 (>=8 OK)."
+      "detail": "Total drafts: 128 (>=12 OK). Research audience: 52 (>=4 OK). General audience: 76 (>=8 OK)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json does not exist (FILE_MISSING). Cannot assess freshness. Alert: metrics file missing."
+      "detail": "storage/strategy_metrics.json does not exist (FILE_MISSING). Cannot assess freshness."
     },
     {
       "name": "ERROR_LOG",
       "status": "alert",
-      "detail": "Entry dated 2026-06-03 (yesterday): FB pipeline 4-day 100% failure root cause. Three-layer fix: audit script patched (awaiting_interactive_session removed from terminal set, 72h auto-expire added); meta-process fixed (no-choice-question violation corrected); physical FB API limitation documented. 4 stale awaiting posts marked expired_skip. Permanent fix doc at docs/fb_pipeline_permanent_fix.md. Blocked task fb_page_graph_api_integration awaiting user FB_PAGE_ID + token."
+      "detail": "Entries dated 2026-06-03 (yesterday): (1) auto-compact threshold (CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=62) set in settings.json env block not read by harness — real fix is export in ~/.zshrc; (2) further correction: manual /compact not institutionalised — auto-compact is primary mechanism; placed in correct location for next session."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "14 active strategies checked (adaptive_tier, fear_dca, global_vt_tz, piecewise_conservative, recommended_5050, risk_parity, simple_12vix, slow_vt, taiwan_8.63vix, taiwan_hybrid_leverage, taiwan_spy_momentum, tz_tw_jp_5050, vix_cond_leverage, vix_leading_guard). No strategy has >2 null portfolio_return in last 3 entries."
+      "detail": "14 active strategies checked. All have last_date=2026-06-03 with exactly 1 null in last 3 entries (today's return not yet available — expected). No strategy exceeds >2 nulls. Strategies: slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, adaptive_tier."
     },
     {
       "name": "GIT_STATUS",
@@ -31,11 +31,11 @@
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json contains 2187 entries."
+      "detail": "storage/memory/knowledge.json contains 2191 entries."
     }
   ],
   "alerts": [
-    "STRATEGY METRICS MISSING: storage/strategy_metrics.json does not exist — investigate whether file was deleted or never generated.",
-    "ERROR LOG 2026-06-03: FB pipeline 4-day 100% failure. Root cause documented and fixed. Monitor for recurrence. Awaiting user FB_PAGE_ID + token for permanent Graph API solution."
+    "strategy_metrics_missing: storage/strategy_metrics.json does not exist — investigate whether file was deleted or never generated",
+    "error_log_recent: entries from 2026-06-03 (yesterday) — auto-compact CLAUDE_AUTOCOMPACT_PCT_OVERRIDE misconfiguration; fix placed in ~/.zshrc for next session"
   ]
 }
