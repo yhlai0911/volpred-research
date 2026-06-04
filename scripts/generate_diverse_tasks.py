@@ -23,10 +23,12 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import fcntl
 import json
 import random
 import re
 import sys
+import time
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
@@ -52,13 +54,26 @@ EXPERIMENTS_DIR = ROOT / "experiments"
 RESEARCH_PROGRAM = ROOT / "research_program.md"
 
 
-def _load_tasks() -> tuple[dict | list, list]:
+def _load_tasks(max_retries: int = 5, sleep_s: float = 0.1) -> tuple[dict | list, list]:
     if not NEXT_TASKS.exists():
         return [], []
-    data = json.loads(NEXT_TASKS.read_text(encoding="utf-8"))
-    if isinstance(data, dict):
-        return data, data.get("tasks", [])
-    return data, data
+    last_err: Exception | None = None
+    for attempt in range(max_retries):
+        with NEXT_TASKS.open("r", encoding="utf-8") as fh:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_SH)
+            try:
+                data = json.load(fh)
+            except json.JSONDecodeError as exc:
+                last_err = exc
+            else:
+                if isinstance(data, dict):
+                    return data, data.get("tasks", [])
+                return data, data
+            finally:
+                fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+        if attempt < max_retries - 1:
+            time.sleep(sleep_s)
+    raise SystemExit(f"failed to parse {NEXT_TASKS} after {max_retries} retries: {last_err}")
 
 
 def _save_tasks(payload: dict | list, tasks: list) -> None:

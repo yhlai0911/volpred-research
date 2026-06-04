@@ -23,9 +23,11 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import fcntl
 import json
 import re
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -54,6 +56,28 @@ def find_next_k_id(start: int = 1300, *, existing_task_ids: set | None = None) -
     while f"k{n}" in existing:
         n += 1
     return n
+
+
+def _load_tasks(max_retries: int = 5, sleep_s: float = 0.1) -> tuple[dict | list, list]:
+    if not NEXT_TASKS.exists():
+        return [], []
+    last_err: Exception | None = None
+    for attempt in range(max_retries):
+        with NEXT_TASKS.open("r", encoding="utf-8") as fh:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_SH)
+            try:
+                data = json.load(fh)
+            except json.JSONDecodeError as exc:
+                last_err = exc
+            else:
+                if isinstance(data, dict):
+                    return data, data.get("tasks", [])
+                return data, data
+            finally:
+                fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+        if attempt < max_retries - 1:
+            time.sleep(sleep_s)
+    raise SystemExit(f"failed to parse {NEXT_TASKS} after {max_retries} retries: {last_err}")
 
 
 def extract_unchecked_items(text: str, *, limit: int = 20) -> list[dict]:
