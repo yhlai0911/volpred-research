@@ -20839,11 +20839,30 @@
     "title": "K1414: Paper 3 HLN small-sample DM correction retrofit (TW0050-N225 唯一 Harvey sig)",
     "task_type": "experiment",
     "priority": "P2",
-    "status": "pending_main_thread",
+    "status": "blocked",
     "description": "Paper 3 (DCC-Clayton) submission blocker per research_program.md open question. K1412 partial update 跑了 5 OOS starts (2014-2018) Student-t DM_t=3.04-3.89 raw `|t|>3` PASS，但 Codex review FAIL: 自製判定非 HLN small-sample correction。需做：(a) 對 5 OOS starts 應用 HLN (1997) correction: t_HLN = t * sqrt((n+1-2h+h(h-1)/n)/n), h=horizon=1 → t/sqrt((n-1)/n) ≈ t for n large；但對 small-sample OOS 仍須正式套用 (b) 三因子 driver identification: λ_L_clayton=0.444 vs full_sample_corr=0.586 vs Asian trading-hour overlap (CLOSE-to-CLOSE vs OPEN-to-CLOSE) (c) 若 HLN-retrofit 仍 robust → Paper 3 submission OK；若 fail → 撤回 唯一 Harvey sig 主張。Main thread only (paper methodology decision)，禁 background agent。實驗目錄 experiments/k1414/。",
     "source": "research_program_open_question",
     "created_at": "2026-06-04T17:08:00+08:00",
     "created_by": "hourly-17",
-    "mission_angle": "M3 paper submission-ready blocker — Paper 3 retract or proceed depends on HLN result"
+    "mission_angle": "M3 paper submission-ready blocker — Paper 3 retract or proceed depends on HLN result",
+    "started_at": "2026-06-04T10:09:22.634378+00:00",
+    "handoff_note": "K-id collision: experiments/k1414/ 已被 K1414 SPY r² QLIKE Meta-Analysis (2026-06-03, CONFIRMS) 占用。建立 K1416_paper3_hln_retrofit 替代。",
+    "handoff_at": "2026-06-04T10:10:15.121105+00:00",
+    "blocked_reason": "kid_collision",
+    "blocked_at": "2026-06-04T10:10:25+00:00",
+    "blocked_note": "experiments/k1414/ 已被 2026-06-03 K1414 SPY r² QLIKE Meta-Analysis (CONFIRMS) 占用且 results.json 齊全。改用 K1416_paper3_hln_retrofit (見 next_tasks 新增 entry)。"
+  },
+  {
+    "id": "K1416_paper3_hln_retrofit",
+    "title": "K1416: Paper 3 HLN small-sample DM correction retrofit (TW0050-N225 唯一 Harvey sig) [renamed from K1414 — kid_collision]",
+    "task_type": "experiment",
+    "priority": "P2",
+    "status": "pending_main_thread",
+    "description": "Paper 3 (DCC-Clayton) submission blocker per research_program.md open question. K1412 partial update 跑了 5 OOS starts (2014-2018) Student-t DM_t=3.04-3.89 raw `|t|>3` PASS，但 Codex review FAIL: 自製判定非 HLN small-sample correction。需做：(a) 對 5 OOS starts 應用 HLN (1997) correction: t_HLN = t * sqrt((n+1-2h+h(h-1)/n)/n), h=horizon=1 → t/sqrt((n-1)/n) ≈ t for n large；但對 small-sample OOS 仍須正式套用 (b) 三因子 driver identification: λ_L_clayton=0.444 vs full_sample_corr=0.586 vs Asian trading-hour overlap (CLOSE-to-CLOSE vs OPEN-to-CLOSE) (c) 若 HLN-retrofit 仍 robust → Paper 3 submission OK；若 fail → 撤回 唯一 Harvey sig 主張。Main thread only (paper methodology decision)，禁 background agent。實驗目錄 experiments/k1416/ (k1414 已被 SPY r² QLIKE Meta-Analysis 占用，已 rename)。",
+    "source": "research_program_open_question",
+    "created_at": "2026-06-04T18:11:00+08:00",
+    "created_by": "hourly-18",
+    "mission_angle": "M3 paper submission-ready blocker — Paper 3 retract or proceed depends on HLN result",
+    "related_predecessor": "K1414_paper3_hln_retrofit (blocked kid_collision)"
   }
 ]
