@@ -9531,5 +9531,18 @@
     "summary": "Paper 3 vt-trend-following Gemini 第三方審查完成 (gemini-3.1-pro-preview, prompt 77K)。Verdict=Major Revision。Gemini 抓到 2 NEW HIGH 是前 v2/v3 latex-academic-reviewer 完全沒看到的 econometric blind spots: (1) MDD retention >100% (95.6-109.0%) 可能是 momentum-crash mechanical artifact (從 VT 減 TSMOM 在 market bottom 反注入正 return); (2) block bootstrap 252-day 對 21 年序列只給 21 個 independent blocks, 切碎 secular bear peak-to-recovery 路徑導致 MDD_BH 分母 shrinks → retention ratio inflated。落地 review_history/v4/{README.md,gemini_review_v1.md}。research_program.md unchecked → [x]。Follow-up paper_body task 入池 (Paper3_v4_revision_gemini_2h)。",
     "claimed_by": "hourly-04",
     "status": "succeeded"
+  },
+  {
+    "timestamp": "2026-06-04T21:15:33Z",
+    "task_type": "experiment",
+    "task_id": "k1417_paper3_h2_stationary_bootstrap",
+    "verdict": "DISPATCHED",
+    "result": "K1417 script written (stationary bootstrap variant of K1192 for Paper 3 v4 Gemini H2), smoke B=200 PASS (script end-to-end OK), full B=10000 enqueued to compute_queue. Smoke direction surprising: lo bound moves UP +10pp not DOWN — Gemini H2 hypothesis may flip after B=10000 settles MC noise. Followup interpretation agent will dispatch next hourly fire via compute_queue claude_followup hook.",
+    "commits": [
+      "ea7e29b4"
+    ],
+    "compute_queue_id": "k1417-paper3-h2-stationary-bootstrap",
+    "parent_paper_task": "Paper3_v4_revision_gemini_2h",
+    "actor": "hourly-05"
   }
 ]
