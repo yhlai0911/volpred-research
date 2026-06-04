@@ -1,0 +1,363 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-06-04",
+  "week_range": "2026-05-29 → 2026-06-05",
+  "totals": {
+    "input_tokens": 24,
+    "output_tokens": 3832,
+    "cache_read_tokens": 407554,
+    "cache_create_tokens": 139009,
+    "billable_total": 142865,
+    "assistant_messages": 16,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.7011
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 24,
+      "output_tokens": 3832,
+      "cache_read_tokens": 407554,
+      "cache_create_tokens": 139009,
+      "messages": 16,
+      "estimated_cost_usd": 0.7011
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 12,
+      "output_tokens": 2040,
+      "cache_read_tokens": 205504,
+      "cache_create_tokens": 69226,
+      "messages": 8,
+      "billable_total": 71278,
+      "estimated_cost_usd": 0.3519,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "bash_other": {
+      "input_tokens": 6,
+      "output_tokens": 454,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 64340,
+      "messages": 2,
+      "billable_total": 64800,
+      "estimated_cost_usd": 0.2481,
+      "emoji": "💭",
+      "description": "其他 Bash 操作"
+    },
+    "investigation": {
+      "input_tokens": 3,
+      "output_tokens": 581,
+      "cache_read_tokens": 100571,
+      "cache_create_tokens": 3454,
+      "messages": 3,
+      "billable_total": 4038,
+      "estimated_cost_usd": 0.0518,
+      "emoji": "🔍",
+      "description": "閱讀 / 搜尋檔案"
+    },
+    "token_report": {
+      "input_tokens": 3,
+      "output_tokens": 757,
+      "cache_read_tokens": 101479,
+      "cache_create_tokens": 1989,
+      "messages": 3,
+      "billable_total": 2749,
+      "estimated_cost_usd": 0.0493,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 8,
+      "billable_total": 71278,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 8,
+          "billable_total": 71278
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "non-text assistant message",
+          "messages": 4,
+          "billable_total": 36129
+        },
+        {
+          "name": "other",
+          "messages": 4,
+          "billable_total": 35149
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 4,
+          "billable_total": 36129
+        },
+        {
+          "name": "⏱ 開始 2026-06-04 執行 token 用量日報。",
+          "messages": 1,
+          "billable_total": 32400
+        },
+        {
+          "name": "正在安裝依賴（大量 CUDA/torch 套件），需要等待完成。",
+          "messages": 1,
+          "billable_total": 1604
+        },
+        {
+          "name": "安裝 CUDA/torch 等大型套件需時，嘗試直接用 python3 執行以避開完整 uv 環境建置。",
+          "messages": 1,
+          "billable_total": 706
+        },
+        {
+          "name": "今天是週四，只需執行日報。",
+          "messages": 1,
+          "billable_total": 439
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 2,
+      "billable_total": 64800,
+      "family_breakdown": [
+        {
+          "name": "other bash",
+          "messages": 2,
+          "billable_total": 64800
+        }
+      ],
+      "prefix_breakdown": [
+        {
+          "name": "TZ='Asia/Taipei'",
+          "messages": 2,
+          "billable_total": 64800
+        }
+      ],
+      "top_first_lines": [
+        {
+          "name": "TZ='Asia/Taipei' date '+%A'",
+          "messages": 1,
+          "billable_total": 32400
+        },
+        {
+          "name": "TZ='Asia/Taipei' date '+%Y-%m-%d %H:%M:%S'",
+          "messages": 1,
+          "billable_total": 32400
+        }
+      ]
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 1,
+      "cache_create_tokens": 139009,
+      "billable_total": 142865,
+      "cache_create_share_pct": 97.3,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "0570b04d-5a0d-42a9-b218-81a77f8d341c",
+          "messages": 16,
+          "billable_total": 142865,
+          "cache_create_tokens": 139009,
+          "cache_read_tokens": 407554,
+          "duration_minutes": 1.4,
+          "cache_create_share_pct": 97.3,
+          "first_ts": "2026-06-04T14:44:29.523000+00:00",
+          "last_ts": "2026-06-04T14:45:56.044000+00:00"
+        }
+      ]
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "c53dbfb",
+      "message": "Ops patrol report 2026-06-04T12:15Z"
+    },
+    {
+      "sha": "a71a217",
+      "message": "ops(hourly-17): build K1414 HLN-retrofit task (Paper 3 submission blocker)"
+    },
+    {
+      "sha": "f3ec1c7",
+      "message": "ops(hourly-16): publication_candidates rebuild + refill audit | pool genuinely c"
+    },
+    {
+      "sha": "9b5e5d5",
+      "message": "gen_article_k1404_general | K1404 general article 發佈 draft (mile_c43717b0)"
+    },
+    {
+      "sha": "d80e789",
+      "message": "gen_article_k1151_general | K1151 general 文章 mile_b0bf6634 發佈 draft"
+    },
+    {
+      "sha": "24a05a9",
+      "message": "gen_article_k1091_general | K1091 general-audience 文章發佈 (mile_50e5d950)"
+    },
+    {
+      "sha": "9e8e6a3",
+      "message": "Paper4_body_step_9_10 | §8.2 alt-data refutation + §9 null count 36→42"
+    },
+    {
+      "sha": "ebb5199",
+      "message": "ops(hourly-11): work_log + Paper4 followup task"
+    },
+    {
+      "sha": "bc954c4",
+      "message": "Paper4_body_step_8 | §7.x K1121 allocation NULL inserted"
+    },
+    {
+      "sha": "0bdf995",
+      "message": "feat(skill): lazypack-infographic — 一般讀者文章文末懶人包圖組（NotebookLM 免費）"
+    },
+    {
+      "sha": "11982d6",
+      "message": "ops(hourly 10:51): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    },
+    {
+      "sha": "1ba3b58",
+      "message": "Ops patrol report 2026-06-04T06:12Z"
+    },
+    {
+      "sha": "e7fbaf8",
+      "message": "K1320 fix close: mark next_tasks succeeded + audit-trail publishing.md edit (par"
+    },
+    {
+      "sha": "89d5cd9",
+      "message": "K1320_fix_dynamic_lookahead_DM | update mile_2c4efefa article (post K1320 fix 2d"
+    },
+    {
+      "sha": "712cc19",
+      "message": "feat(ops): scripts/send_email_attachment.py — email with file attachment(s)"
+    },
+    {
+      "sha": "ef06313",
+      "message": "K1320 fix: remove dynamic Gumbel lookahead + redo DM test + rename DCC_t (mile_2"
+    },
+    {
+      "sha": "869c019",
+      "message": "paper_review_mile_2c4efefa | K1320 SPY/QQQ hedging Codex 24h review verdict=MIXE"
+    },
+    {
+      "sha": "0028e11",
+      "message": "gen_article_k1100g_d9 | K1100g_d9 cadence-artifact 故事文 (mile_acee71be) — DM 翻轉與復"
+    },
+    {
+      "sha": "536edab",
+      "message": "gen_article_k1390 | K1390 Regime-Weighted Conformal VaR draft (mile_5c8ef549) — "
+    },
+    {
+      "sha": "0c0aa28",
+      "message": "gen_article_k1319 | K1319 HAR-Wavelet NULL → draft article mile_d11e45ff"
+    },
+    {
+      "sha": "bcabd72",
+      "message": "K1415 experiment | VIX9D/VIX term ratio marginal HAR-RV predictor (CONDITIONAL_P"
+    },
+    {
+      "sha": "d7852f8",
+      "message": "paper_review_mile_858690fd | Codex 24h-rule MIXED → 4 wording fixes applied"
+    },
+    {
+      "sha": "9cebaac",
+      "message": "hourly-03 work_log entry | dedup catch + K1413 worktree merge"
+    },
+    {
+      "sha": "2517cad",
+      "message": "hourly-03 | trending_repost dedup catch (mile_49616ac2/622a2b73 已 published) + K"
+    },
+    {
+      "sha": "1adfbd1",
+      "message": "hourly-02 | paper_review_mile_f1be9128 Codex 24h-rule CONDITIONAL_PASS (K872 HY "
+    },
+    {
+      "sha": "56860a8",
+      "message": "hourly-01 | task pool state sync (K665_article_research → succeeded)"
+    },
+    {
+      "sha": "6a1bc6b",
+      "message": "K665_article_research | discretization U-shape mechanism article published as dr"
+    },
+    {
+      "sha": "16a0bb8",
+      "message": "hourly-01 | K872 orphan figures/draft + mile_778a9b85 Codex review (PASS)"
+    },
+    {
+      "sha": "6bd4317",
+      "message": "hourly-00 | K653_article_research published as draft (mile_720c1519) + K937 orph"
+    },
+    {
+      "sha": "5c7b151",
+      "message": "hourly-23 | K964_article_general + K652 blocked + carryover k1014 assets"
+    },
+    {
+      "sha": "381e476",
+      "message": "K1414_qlike_ceiling_meta | SPY r² QLIKE ceiling meta-analysis | aggregate K889/K"
+    },
+    {
+      "sha": "fcb4ab8",
+      "message": "K789_article_general | publish mile_4469dce8 NULL-methodology article"
+    },
+    {
+      "sha": "76e3f32",
+      "message": "refactor(3-strike): prepublish content gate + hash sync"
+    },
+    {
+      "sha": "a079669",
+      "message": "refactor(3-strike): prepublish content-vs-source provenance gate (orphan cleanup"
+    },
+    {
+      "sha": "24cfc14",
+      "message": "fix(k1413): 回溯更正 mile_31b2b0bb content-vs-source FAIL（Codex 24h review）"
+    },
+    {
+      "sha": "7cb2d46",
+      "message": "fb(k1413): mile_31b2b0bb 雙發完成 — Ivan Lai 個人 + VolPred 粉專"
+    },
+    {
+      "sha": "ac89148",
+      "message": "K573_article_research | research-audience VT efficiency frontier article (mile_6"
+    },
+    {
+      "sha": "2434850",
+      "message": "refill_task_pool belt 7: skip general companion when research cover is reader-fr"
+    },
+    {
+      "sha": "010dfe3",
+      "message": "ops(hourly 18:21): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    },
+    {
+      "sha": "c192492",
+      "message": "hourly-18 | K446 GPR article draft (mile_eabd7e46) + 3 stale K dedup-blocked + c"
+    },
+    {
+      "sha": "2fee64f",
+      "message": "K446_article_general | 地緣政治風險 GPR 預測力研究 published as draft"
+    },
+    {
+      "sha": "a7de99b",
+      "message": "hourly-17 | K965 general article draft + gen_image.py salvage"
+    },
+    {
+      "sha": "1bc7fde",
+      "message": "hourly-16 followup | paper_review_mile_2d4edb65 succeeded (parallel codex-cli se"
+    },
+    {
+      "sha": "f42bdaf",
+      "message": "hourly-16 | Codex 24h-rule paper_review mile_49616ac2: FAIL → 7-fix REVISED"
+    },
+    {
+      "sha": "6f358c2",
+      "message": "hourly-15 | Paper 4 §7.5 Publication-Delay Robustness (K1116b) inserted"
+    },
+    {
+      "sha": "c648ed3",
+      "message": "feat(fb): FB Page Graph-API auto-poster (enables headless FB automation)"
+    },
+    {
+      "sha": "34d8424",
+      "message": "Ops patrol report 2026-06-04T08:12Z"
+    }
+  ]
+}
