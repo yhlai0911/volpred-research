@@ -21038,14 +21038,20 @@
     "description": "Auto-generated from research_program.md unchecked item: 修正 Gemini 指出的 3 弱點",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "research-backlog"
     ],
     "source": "task_generator_v2_experiment",
     "created_at": "2026-06-04T17:34:25.718726+00:00",
-    "generated_at": "2026-06-04T17:34:25.718728+00:00"
+    "generated_at": "2026-06-04T17:34:25.718728+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-04T22:50:45.027942+00:00",
+    "claim_session_id": "86a62217f73a",
+    "started_at": "2026-06-04T22:50:45.089876+00:00",
+    "completed_at": "2026-06-04T22:51:57.091567+00:00",
+    "result": "Closure audit: this stale Paper 2 backlog item was already satisfied by existing artifacts. Mapped Gemini R1 SEVERE 1/2/3 to paper2_R1_transaction_tax_fix, paper2_R1_linear_scaling_fix, and K1183+K1302; updated research_program.md to mark complete and prevent duplicate redispatch."
   },
   {
     "id": "gen_exp_Gemini_審查",
@@ -21465,14 +21471,20 @@
     "description": "分析 S&P 500 集中度創歷史新高下，指數隱含波動率（VIX）與個股隱含波動率（IV）的隱性背離。可量化：以 Dispersion Trading (離散度交易) 策略，驗證科技股個股期權相較於指數期權的溢價空間。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-06-04T22:00:23+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "claimed_by": "hourly-07",
+    "claimed_at": "2026-06-04T23:09:04.037861+00:00",
+    "claim_session_id": "742eb87c1e17",
+    "started_at": "2026-06-04T23:09:08.206572+00:00",
+    "completed_at": "2026-06-04T23:22:46.742165+00:00",
+    "result": "mile_123a3855 published (status=published, URL 200 OK); FB pending_chrome_followup; K1418 evidence: top-5 17.8→32.8% (+15pp), SPY RV 13.87% vs Top5 30.21%, vol gap +16.35% avg / +20.25% latest (2026-06-03); anti_ai_gate PASS; Codex CONDITIONAL_PASS (2 fixes applied)\n\nmile_123a3855 published (S&P 500 集中度 32% × vol gap 16.35%); K1418 evidence: Top-5 17.8%→32.8% (+15pp 2020-2026), SPY RV 13.87% vs Top-5 30.21%; anti_ai_gate PASS warn=1/3; Codex CONDITIONAL_PASS (2 fixes applied); FB pending_chrome_followup (draft saved /tmp/fb_post_K1418.txt); commit acbc7c34"
   },
   {
     "id": "trending_repost_2026_06_05_地緣風險溢價",
@@ -21487,6 +21499,22 @@
       "trending_repost",
       "reader_facing",
       "auto_refill"
+    ]
+  },
+  {
+    "id": "fb_followup_K1418_concentration",
+    "title": "[FB followup] K1418 集中度文 Ivan Lai FB 補發 + 留言貼 mile_123a3855 連結",
+    "description": "K1418 trending_repost mile_123a3855 已 VolPred publish + commit acbc7c34；FB Ivan Lai pending_chrome_followup（hourly agent 無 chrome 工具）。下次 chrome session 接：(1) 用 /tmp/fb_post_K1418.txt 草稿貼到 facebook.com/yihao.lai（claude-in-chrome MACBOOK 398dcdba）(2) 主貼文純文字、不放連結 (3) 發送後到第一則留言貼 https://volpred.zeabur.app/v3/reports/mile_123a3855 (4) screenshot 確認 (5) 寫回 feed.json fb_post_status=success + fb_post_url + work_log entry。失敗 max retry 3 後標 wont_fix。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-06-04T23:23:00+00:00",
+    "source": "trending_repost_fb_split",
+    "tags": [
+      "fb_post",
+      "trending_repost_followup",
+      "manual_chrome",
+      "K1418"
     ]
   }
 ]

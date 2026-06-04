@@ -146,7 +146,7 @@
 - 初稿、Codex 審查、引用驗證已完成（見 archive）
 - [x] Gemini 審查 → gemini_review_v1.md（3 weaknesses: TX tax、linear scaling、TSMC endogeneity）
 - [ ] `/latex-academic-reviewer` 全面審查
-- [ ] 修正 Gemini 指出的 3 弱點
+- [x] 修正 Gemini 指出的 3 弱點（2026-06-05 closure audit：SEVERE 1 → `experiments/paper2_R1_transaction_tax_fix/`；SEVERE 2 → `experiments/paper2_R1_linear_scaling_fix/`；SEVERE 3 / TSMC endogeneity → `experiments/k1183/` + `experiments/k1302/` concentration robustness）
 
 **★ Paper 2 θ_EAV Heterogeneity Narrative — DECISION_MADE (2026-05-16, K1144)**
 
@@ -864,4 +864,3 @@ Codex CLI 0.121.0 production-path proven 2026-04-28; daily quota fully consumed 
 - **Table 2 individual gamma** (3): Hon Hai 0.052/MediaTek 0.044/0056 0.112 — paper spec doesn't match any existing K (K1060 Hon Hai=0.105)
 
 Each cat needs dedicated session work; not iterative one-cycle fixes.
-
