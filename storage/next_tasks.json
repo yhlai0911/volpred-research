@@ -20717,8 +20717,8 @@
     "priority": 3,
     "status": "pending_main_thread",
     "task_type": "paper_body",
-    "title": "Paper 4 (vix-sufficiency) body integration Steps 11-15: abstract, figures, README, paper-update, review",
-    "description": "Predecessor: Paper4_body_steps_9_to_15 completed Step 9 + Step 10. Remaining: (11) Update abstract — 13 families / 5 asset classes / 2 applications / publication-delay corrected, also eleven→thirteen sweep in §9 line ~1121-1123; (12) Add 5-asset forecasting-sufficiency heatmap fig (K1118+K1098); (13) Add K1121 bootstrap-dist fig (6 Sharpe-diff curves vs 50/50); (14) Update README.md (pages 48→59, +K1121/K1116b); (15) uv run volpred ops paper-update --paper-id vix-sufficiency + latex-academic-reviewer + citation-verifier. Main thread only (.tex). Scope切小 across fires.",
+    "title": "Paper 4 (vix-sufficiency) body integration Steps 12-15: figures, README, paper-update, review",
+    "description": "Predecessor: Step 11 abstract update + §9 eleven->thirteen sweep done. Remaining: (12) Add 5-asset forecasting-sufficiency heatmap fig (K1118+K1098); (13) Add K1121 bootstrap-dist fig (6 Sharpe-diff curves vs 50/50); (14) Update README.md (pages 48->59, +K1121/K1116b); (15) uv run volpred ops paper-update --paper-id vix-sufficiency + latex-academic-reviewer + citation-verifier. ALSO: §5.x methodology audit needed - line 388/390 references 11 primary DM tests but Table 1 says 10 testable families; this stale count was already mis-aligned pre-Step 11 and should be reconciled with §6 table totals. Main thread only (.tex). Scope切小 across fires.",
     "source": "continuation",
     "created_at": "2026-06-04T04:18:00Z",
     "related_experiments": [
@@ -20728,7 +20728,8 @@
       "k1116b",
       "k1098"
     ],
-    "paper_id": "vix-sufficiency"
+    "paper_id": "vix-sufficiency",
+    "step_11_completed_at": "2026-06-04T23:09:00+08:00"
   },
   {
     "id": "paper_review_mile_8d9858f4",
@@ -20954,7 +20955,7 @@
     "title": "Paper review (Codex 24h-rule): 同一組資料沒對齊，10 倍恐慌放大可能被說太大了",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_b0d66991 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_b0d66991",
@@ -20963,6 +20964,12 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-04T14:07:58+00:00"
+    "created_at": "2026-06-04T14:07:58+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-04T14:29:48.789225+00:00",
+    "claim_session_id": "fcc5b91d926a",
+    "started_at": "2026-06-04T14:29:57.762728+00:00",
+    "completed_at": "2026-06-04T14:30:44.454636+00:00",
+    "result": "Codex review: article direction mostly holds, but K1370 source-code provenance is not self-consistent. The script claims to reproduce the paper's mixed-sample 10x headline, yet its own mixed-sample output is only 4.45 (not 10.07); narrative should treat 10.07 as legacy paper value, not as reverified by K1370."
   }
 ]
