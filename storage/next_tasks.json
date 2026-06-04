@@ -20793,5 +20793,23 @@
     "started_at": "2026-06-04T06:09:32.765883+00:00",
     "completed_at": "2026-06-04T06:26:15.739300+00:00",
     "result": "K1151 general 文章 mile_b0bf6634 已 publish 為 draft；anti-ai gate PASS；2 真圖 (tstat comparison + crossmarket summary)；4 K refs (K1151/K1147/K1150/K1157)；audience=general；8 tags"
+  },
+  {
+    "id": "gen_article_k1404_general",
+    "task_type": "daily_article",
+    "title": "K1404 general-audience: 台股波動率的「分位數預測」— HAR-RV quantile 能不能準確告訴你尾巴風險？",
+    "description": "K1404 (HAR-RV Quantile on ^TWII, n_oos=1305, 2021-01-04 起 5 年 OOS) verdict=TAIL_CALIB_USABLE。三尾 Kupiec UC 全通過：q95 empirical 95.02%/p=0.975, q99 empirical 98.85%/p=0.596, q90 p=0.386。DM_SIG_NEG vs OLS point forecast (quantile-median MSE 顯著輸 OLS)。Reader angle: 台股投資人能用 HAR-RV quantile 校準尾巴風險 (VaR/止損) 但不能取代均值預測。",
+    "priority": 3,
+    "status": "succeeded",
+    "source": "auto_discovered_main_thread",
+    "k_id": "K1404",
+    "created_at": "2026-06-04T07:11:00+00:00",
+    "audience": "general",
+    "claimed_by": "hourly-15",
+    "claimed_at": "2026-06-04T07:12:13.832156+00:00",
+    "claim_session_id": "d42544368feb",
+    "started_at": "2026-06-04T07:12:16.731352+00:00",
+    "completed_at": "2026-06-04T07:30:17.710314+00:00",
+    "result": "K1404 general article published as draft (mile_c43717b0). anti_ai_gate PASS, 2 figures embedded (coverage_plot + lazypack), content 2525 chars covering ^TWII HAR-RV quantile tail forecasting, n_oos=1305, Kupiec UC q90/q95/q99 all pass."
   }
 ]
