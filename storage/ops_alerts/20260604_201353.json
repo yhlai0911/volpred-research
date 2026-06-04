@@ -1,0 +1,21 @@
+{
+  "timestamp": "2026-06-04T12:13:53Z",
+  "timestamp_tw": "2026-06-04 20:13:53 台灣時間",
+  "alerts": [
+    {
+      "id": "strategy_metrics_missing",
+      "level": "warn",
+      "title": "strategy_metrics.json missing",
+      "detail": "storage/strategy_metrics.json does not exist. File absent entirely — metrics refresh pipeline may never have been run or file was deleted. Action: investigate and run metrics refresh.",
+      "check": "STRATEGY_METRICS_FRESHNESS"
+    },
+    {
+      "id": "paper_trading_market_daily_all_null",
+      "level": "warn",
+      "title": "_market_daily paper trading: all 843 entries have portfolio_return=null",
+      "detail": "_market_daily strategy has 843 date-keyed entries, all with portfolio_return=null. This indicates the tracking pipeline was never populated with actual returns for this strategy. Action: investigate paper_trading update pipeline for _market_daily.",
+      "check": "PAPER_TRADING_GAPS"
+    }
+  ],
+  "patrol_report_ref": "storage/ops_patrol_report.json"
+}

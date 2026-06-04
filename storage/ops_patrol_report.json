@@ -1,27 +1,27 @@
 {
-  "timestamp": "2026-06-04T06:12:17Z",
-  "patrol_time_taipei": "2026-06-04 14:12:17",
+  "timestamp": "2026-06-04T12:13:53Z",
+  "patrol_time_taipei": "2026-06-04 20:13:53",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "Total drafts: 128 (>=12 OK). Research audience: 52 (>=4 OK). General audience: 76 (>=8 OK)."
+      "detail": "Total drafts: 129 (>=12 OK). Research audience: 51 (>=4 OK). General audience: 78 (>=8 OK)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json does not exist (FILE_MISSING). Cannot assess freshness."
+      "detail": "storage/strategy_metrics.json does not exist (FILE_MISSING). Cannot assess freshness — file absent entirely."
     },
     {
       "name": "ERROR_LOG",
-      "status": "alert",
-      "detail": "Entries dated 2026-06-03 (yesterday): (1) auto-compact threshold (CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=62) set in settings.json env block not read by harness — real fix is export in ~/.zshrc; (2) further correction: manual /compact not institutionalised — auto-compact is primary mechanism; placed in correct location for next session."
+      "status": "ok",
+      "detail": "No entries dated 2026-06-04 (today). Entries dated 2026-06-03 (yesterday): (1) compact 目標值對 1M 模型結構性失效分析 — CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=62 placed in settings.json env block not read by harness; (2) correction: real fix is export in ~/.zshrc — already applied; (3) final correction: auto-compact is primary mechanism, manual /compact not institutionalised. All items resolved/documented."
     },
     {
       "name": "PAPER_TRADING_GAPS",
-      "status": "ok",
-      "detail": "14 active strategies checked. All have last_date=2026-06-03 with exactly 1 null in last 3 entries (today's return not yet available — expected). No strategy exceeds >2 nulls. Strategies: slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, adaptive_tier."
+      "status": "alert",
+      "detail": "_market_daily: 3/3 portfolio_return=null in last 3 entries (843 total date-keyed entries — ALL null). 14 standard strategies (slow_vt, risk_parity, etc.): exactly 1/3 null (latest entry only — today not yet settled, within normal tolerance). Only _market_daily exceeds >2 null threshold."
     },
     {
       "name": "GIT_STATUS",
@@ -35,7 +35,7 @@
     }
   ],
   "alerts": [
-    "strategy_metrics_missing: storage/strategy_metrics.json does not exist — investigate whether file was deleted or never generated",
-    "error_log_recent: entries from 2026-06-03 (yesterday) — auto-compact CLAUDE_AUTOCOMPACT_PCT_OVERRIDE misconfiguration; fix placed in ~/.zshrc for next session"
+    "strategy_metrics_missing: storage/strategy_metrics.json does not exist — investigate whether metrics refresh pipeline was ever run or file was deleted",
+    "paper_trading_gap: _market_daily strategy has ALL 843 entries with portfolio_return=null — tracking pipeline likely never populated returns for this strategy"
   ]
 }
