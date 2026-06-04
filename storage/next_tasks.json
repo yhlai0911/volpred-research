@@ -20635,7 +20635,7 @@
     "title": "K1320 fix: remove dynamic copula np.interp lookahead + redo DM test with valid loss",
     "description": "Codex 24h review of mile_2c4efefa (paper_review_mile_2c4efefa, 2026-06-04) flagged 3 must-fix issues in experiments/k1320/k1320.py:\n  1. Dynamic Gumbel (k1320.py:541, 580) uses np.interp on future re-estimates → lookahead MED. Change to piecewise-hold (use latest-known estimate until next re-estimate) or expanding-window forecast.\n  2. DM test (k1320.py:897, 915, 945) builds e=rets**2 then internal d=e1**2-e2**2 → effective loss = r^4 (UNSOUND). Redo with d_t = r2_DCC,t − r2_model,t HAC DM, OR bootstrap CI on HE difference.\n  3. Rename DCC_t (k1320.py:714, 720) → StudentT_Copula_static OR implement true dynamic t-DCC.\nAlso fix first-day hedge comment/code mismatch (k1320.py:732 vs 749).\nAfter re-run: update article mile_2c4efefa table + statistical-significance language, then re-publish with corrected caveat. Review file: storage/reviews/codex_24h/mile_2c4efefa_review.md.",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "codex_24h_review_followup",
     "article_id": "mile_2c4efefa",
@@ -20651,6 +20651,8 @@
     "claimed_by": "hourly-10",
     "claimed_at": "2026-06-04T02:09:05.295423+00:00",
     "claim_session_id": "da2737fe2cc9",
-    "started_at": "2026-06-04T02:09:11.785376+00:00"
+    "started_at": "2026-06-04T02:09:11.785376+00:00",
+    "completed_at": "2026-06-04T02:39:50.725782+00:00",
+    "result": "Codex 24h review 找到的 4 個 bugs 全修：(1) np.interp 改 piecewise-hold (HE 0.8876→0.8874 微小) (2) DM loss r^4→squared hedged return (sound) — 新發現 OLS p<0.0001/Rolling OLS p=0.015/Clayton p=0.0001 皆顯著差於 DCC，但 Copula 內部 vs DCC 仍 null (p=0.396) (3) DCC_t → StudentT_Copula_static rename (4) hr_lagged[0]=0 首日 unhedged 對齊註解。Article mile_2c4efefa caveat + 數字 + DM 結論 + OLS 段落改寫 (4108→4739 chars)。圖已重生並上傳 supabase。Commits: 2db4150e (code fix), 957cb2f8 (article patch). Feed-sync 跑著 (PID 12824, ~20min in)。"
   }
 ]
