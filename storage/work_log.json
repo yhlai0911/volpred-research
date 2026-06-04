@@ -9401,5 +9401,27 @@
     "reviewer": "codex-cli",
     "commit": null,
     "summary": "VIX9D/VIX term ratio marginal HAR-RV predictor (SPY 2014-2026) — OOS QLIKE +6.56%, DM p=1.4e-14, β_TR +4.04 (full-sample). Codex code clean."
+  },
+  {
+    "task_id": "gen_article_k1100g_d9",
+    "task_type": "daily_article",
+    "k_id": "K1100G_D9",
+    "mile_id": "mile_acee71be",
+    "title": "同一份資料、同一個模型，三次跑出三個不同方向——差別只在「多久重估一次」",
+    "status": "draft",
+    "verdict_summary": "ROBUST_WITH_RECOVERY; cadence_sensitivity_verdict=CADENCE_ARTIFACT_FOR_STUDENT_T_NOT_FOR_SKEWED_T; N225 DM +2.31→-1.92→+2.31; anti_ai_gate=PASS exit 0",
+    "completed_at": "2026-06-04T00:22:13.438569+00:00",
+    "notes": "audit_strict=False used: d-series K-id regex mismatch (K1100g_d9 not parseable by [Kk]\\d+[a-z]? pattern); numbers verified against experiments/k1100g_d9/k1100g_d9_results.json"
+  },
+  {
+    "timestamp": "2026-06-04T08:24",
+    "task_type": "daily_article",
+    "task_id": "gen_article_k1100g_d9",
+    "k_id": "K1100G_D9",
+    "mile_id": "mile_acee71be",
+    "status": "succeeded",
+    "summary": "K1100g_d9 cadence-artifact story (DM 翻轉與復原, refit_every=5 vs 25), 5697 chars draft, anti_ai_gate PASS",
+    "verdict": "ROBUST_WITH_RECOVERY",
+    "claimed_by": "hourly-08"
   }
 ]

@@ -1,30 +1,30 @@
 {
-  "generated_at": "2026-06-03T00:05:20.715148+00:00",
+  "generated_at": "2026-06-04T00:05:07.199553+00:00",
   "source": "storage/reports/feed.json",
   "summary": {
-    "total": 1498,
-    "last_30_days": 503,
+    "total": 1521,
+    "last_30_days": 517,
     "status": {
-      "published": 1249,
+      "published": 1256,
+      "draft": 127,
       "archived": 122,
-      "draft": 113,
-      "unpublished": 9,
+      "unpublished": 11,
       "retracted": 5
     },
     "audience": {
-      "research": 1047,
-      "general": 254,
+      "research": 1058,
+      "general": 266,
       "daily": 109,
       "unknown": 77,
       "member_qa": 10,
       "event": 1
     },
     "category": {
-      "milestone": 779,
-      "general": 608,
+      "milestone": 790,
+      "general": 619,
       "unknown": 73,
+      "research": 10,
       "member_qa": 10,
-      "research": 9,
       "daily_article": 8,
       "qa": 5,
       "experiment": 3,
@@ -32,9 +32,557 @@
       "diary": 1
     },
     "with_thumbnail": 57,
-    "total_chars": 6338434
+    "total_chars": 6417038
   },
   "articles": [
+    {
+      "id": "mile_5c8ef549",
+      "title": "K1390：VIX 體制拆分的 Conformal VaR — 唯一同時通過 Kupiec 與 Christoffersen 的方法",
+      "date": "2026-06-03T23:17:02.920326+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "draft",
+      "tags": [
+        "研究",
+        "VaR",
+        "conformal",
+        "VIX",
+        "SPY",
+        "regime",
+        "Kupiec",
+        "Christoffersen"
+      ],
+      "length_chars": 4950,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_2c4efefa",
+      "title": "最貴的避險模型不一定最好：SPY 用 QQQ 對沖，花大力氣的複雜公式差多少？",
+      "date": "2026-06-03T23:00:17.591240+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "研究",
+        "volatility",
+        "hedging",
+        "copula",
+        "spy",
+        "qqq",
+        "var-reduction",
+        "避險"
+      ],
+      "length_chars": 3763,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_d11e45ff",
+      "title": "小波分解碰上股市噪音：一個漂亮的工具，一次誠實的失敗",
+      "date": "2026-06-03T22:17:56.527715+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "draft",
+      "tags": [
+        "研究",
+        "美股",
+        "波動率",
+        "HAR",
+        "小波分解",
+        "負結果",
+        "實驗報告"
+      ],
+      "length_chars": 2605,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_b3e68ca2",
+      "title": "VIX 還不夠快？短端 VIX 比率替歷史波動模型多補了一點明日資訊",
+      "date": "2026-06-03T22:00:43.049828+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "波動率預測",
+        "VIX",
+        "SPY",
+        "期限結構",
+        "風險管理"
+      ],
+      "length_chars": 2008,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_858690fd",
+      "title": "13,261% 的財報驚喜，為什麼反而是壞訊號？",
+      "date": "2026-06-03T20:00:02.828093+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "財報",
+        "日本股市",
+        "資料解讀",
+        "波動率",
+        "軟銀"
+      ],
+      "length_chars": 2130,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_207fe825",
+      "title": "離散化策略為何在 5 列時反超連續公式？U 形保留率的機制解析",
+      "date": "2026-06-03T17:19:17.047917+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "draft",
+      "tags": [
+        "研究",
+        "volatility-targeting",
+        "VIX",
+        "12VIX",
+        "lookup-table",
+        "discretization",
+        "SPY",
+        "GLD"
+      ],
+      "length_chars": 4838,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_f1be9128",
+      "title": "高收益債利差看起來很會預警，真正拿來預測波動卻幾乎沒多加幾分",
+      "date": "2026-06-03T16:49:47.457699+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "credit-spread",
+        "HY_OAS",
+        "FRED",
+        "VIX_sufficiency",
+        "null_result",
+        "coefficient_instability"
+      ],
+      "length_chars": 2281,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_720c1519",
+      "title": "K653 行為模擬：偏離者反而贏過嚴格執行者——6 種行為偏差對 VIX 動態再平衡策略的成本量化",
+      "date": "2026-06-03T16:25:50.611148+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "draft",
+      "tags": [
+        "研究",
+        "behavioral-finance",
+        "vix-timing",
+        "simulation",
+        "vol-scaling",
+        "bootstrap",
+        "paradox"
+      ],
+      "length_chars": 6238,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_ddd3d9dc",
+      "title": "K653 模擬：「不按表操課」反而贏過嚴格執行者？6 種行為偏差對 VIX 動態再平衡策略的成本量化",
+      "date": "2026-06-03T16:23:44.748894+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "unpublished",
+      "tags": [
+        "研究",
+        "behavioral-finance",
+        "vix-timing",
+        "simulation",
+        "vol-scaling",
+        "bootstrap",
+        "paradox"
+      ],
+      "length_chars": 6010,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_4c5eddb2",
+      "title": "把幾個普通模型湊在一起，真的會比最強單模型更準嗎？",
+      "date": "2026-06-03T15:41:48.497530+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "volatility",
+        "ensemble",
+        "risk-model",
+        "forecast"
+      ],
+      "length_chars": 1853,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_e46449ca",
+      "title": "財報季來了，股市真的比較動盪？20年數據說：沒這回事",
+      "date": "2026-06-03T15:14:40.138529+00:00",
+      "audience": "general",
+      "category": "milestone",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "SPY",
+        "財報季",
+        "波動率",
+        "事件研究",
+        "指數投資",
+        "NULL result"
+      ],
+      "length_chars": 2220,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_778a9b85",
+      "title": "市場最恐慌那幾天，我們還是沒找到另類數據的增量價值",
+      "date": "2026-06-03T15:00:49.332284+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "波動率預測",
+        "另類數據",
+        "VIX",
+        "跳躍事件",
+        "Paper4"
+      ],
+      "length_chars": 2153,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_c8b81b48",
+      "title": "幫風險模型多裝一大包聰明指標，結果反而更差",
+      "date": "2026-06-03T14:38:36.719502+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "volatility",
+        "risk-model",
+        "forecast",
+        "model-comparison"
+      ],
+      "length_chars": 2310,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_e52007e6",
+      "title": "市場分成兩種狀態，再把極端行情看得更重，風險預測就會更準嗎？",
+      "date": "2026-06-03T13:33:01.449288+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "volatility",
+        "risk-model",
+        "regime-switching",
+        "student-t",
+        "vix"
+      ],
+      "length_chars": 2230,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_4469dce8",
+      "title": "Google 搜尋熱度真的能預測股市嗎？K789 的誠實答案",
+      "date": "2026-06-03T13:14:58.086731+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "draft",
+      "tags": [
+        "研究",
+        "google-trends",
+        "attention-proxy",
+        "vix",
+        "null-result",
+        "methodology",
+        "retail-myth",
+        "fear-index"
+      ],
+      "length_chars": 3589,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_6a4554d4",
+      "title": "K573：三種 VT 策略效率前緣——最低 MDD 不等於最佳風險管理",
+      "date": "2026-06-03T12:16:01.432832+00:00",
+      "audience": "research",
+      "category": "research",
+      "status": "draft",
+      "tags": [
+        "研究",
+        "VT策略",
+        "SPY",
+        "GLD",
+        "VIX",
+        "波動率管理",
+        "風險管理",
+        "MDD效率"
+      ],
+      "length_chars": 6458,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_31b2b0bb",
+      "title": "AI 五層產業鏈，我們不講故事，看波動率怎麼說",
+      "date": "2026-06-03T11:58:26.503980+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "波動率",
+        "相關性",
+        "AI 產業鏈",
+        "資料中心",
+        "晶片",
+        "輝達",
+        "科技股"
+      ],
+      "length_chars": 3452,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_eabd7e46",
+      "title": "地緣政治風險指數能預測美股波動嗎？六千個交易日的答案",
+      "date": "2026-06-03T10:17:35.600949+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "draft",
+      "tags": [
+        "研究",
+        "地緣政治",
+        "波動率",
+        "VIX",
+        "GPR",
+        "美股",
+        "預測",
+        "事件研究"
+      ],
+      "length_chars": 5249,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_e1a1f7f7",
+      "title": "你花大力氣讓模型「動態調整」，卻讓避險效果變更差",
+      "date": "2026-06-03T09:14:07.308304+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "draft",
+      "tags": [
+        "研究",
+        "hedge-ratio",
+        "futures-hedging",
+        "spy",
+        "es-futures",
+        "wild-bootstrap",
+        "避險",
+        "期貨"
+      ],
+      "length_chars": 3491,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_96fb5f73",
+      "title": "「Consistently outperforms」這句話的代價：GSP-HAR 在 5 檔美股 ETF 上的誠實複製",
+      "date": "2026-06-03T09:01:08.797894+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "研究",
+        "HAR-RV",
+        "GSP-HAR",
+        "graph-signal-processing",
+        "placebo-test",
+        "DM-test",
+        "replication",
+        "marginal-result"
+      ],
+      "length_chars": 137939,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_05102b5c",
+      "title": "把波動拆成長期和短期之後，真正有幫助的不是歷史平均，而是市場現在有多怕",
+      "date": "2026-06-03T06:13:42.587879+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "VIX",
+        "波動率預測",
+        "SPY",
+        "風險管理",
+        "模型比較"
+      ],
+      "length_chars": 2393,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_2d4edb65",
+      "title": "一套方法在 13 個市場都有效，卻不代表它會幫你賺更多",
+      "date": "2026-06-03T06:01:05.293955+00:00",
+      "audience": "general",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "投資研究",
+        "跨市場",
+        "風險管理",
+        "回撤控制",
+        "負面結果"
+      ],
+      "length_chars": 118890,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_e2c4bac5",
+      "title": "美國人在怕什麼，為什麼日本和德國的股市波動也會先發燒？",
+      "date": "2026-06-03T05:10:59.296140+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "VIX",
+        "全球市場",
+        "波動率預測",
+        "SPY",
+        "日本",
+        "歐洲"
+      ],
+      "length_chars": 2513,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_daed240a",
+      "title": "風險模型最怕的不是猜不準平均，而是你以為安全、其實根本沒罩住",
+      "date": "2026-06-03T04:06:45.741954+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "風險管理",
+        "SPY",
+        "分位數預測",
+        "預測區間",
+        "波動率預測"
+      ],
+      "length_chars": 2253,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_b0c35c0b",
+      "title": "把兩個看起來都不錯的模型混在一起，為什麼最後還是贏不了最強那個？",
+      "date": "2026-06-03T03:02:57.606328+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "波動率預測",
+        "SPY",
+        "VIX",
+        "模型組合",
+        "預測"
+      ],
+      "length_chars": 2505,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_7825c8a2",
+      "title": "只贏一點點，很多時候還不能算模型真的比較強",
+      "date": "2026-06-03T03:00:53.459665+00:00",
+      "audience": "general",
+      "category": "milestone",
+      "status": "published",
+      "tags": [
+        "一般讀者",
+        "波動率預測",
+        "模型比較",
+        "投資研究",
+        "負面結果",
+        "VIX"
+      ],
+      "length_chars": 105510,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_6a189e72",
+      "title": "台股與日股同漲同跌，比你以為的還要黏：5 次嚴格重測全數通過",
+      "date": "2026-06-03T02:15:56.702719+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "draft",
+      "tags": [
+        "研究",
+        "0050.TW",
+        "N225",
+        "台日ETF",
+        "Copula",
+        "尾部相依",
+        "跨市場",
+        "OOS敏感性"
+      ],
+      "length_chars": 2301,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_9c7f4c7f",
+      "title": "一個波動率模型如果連 2008 金融海嘯都撐得住，才比較像真的有用",
+      "date": "2026-06-03T02:00:03.416374+00:00",
+      "audience": "general",
+      "category": "general",
+      "status": "draft",
+      "tags": [
+        "一般讀者",
+        "波動率預測",
+        "SPY",
+        "VIX",
+        "金融海嘯",
+        "風險模型"
+      ],
+      "length_chars": 2786,
+      "thumbnail_url": null
+    },
+    {
+      "id": "mile_765f6391",
+      "title": "波動率預測準了，策略卻沒贏：A4f 的 turnover 把 QLIKE 優勢吃光",
+      "date": "2026-06-03T00:15:15.893174+00:00",
+      "audience": "research",
+      "category": "milestone",
+      "status": "draft",
+      "tags": [
+        "研究",
+        "A4f",
+        "GARCH",
+        "VT策略",
+        "QLIKE",
+        "Sharpe",
+        "turnover",
+        "波動率預測"
+      ],
+      "length_chars": 3447,
+      "thumbnail_url": null
+    },
     {
       "id": "mile_e5700a83",
       "title": "每日策略建議：VIX 15.77（正常）— 2026-06-03",
@@ -85,7 +633,7 @@
         "skew",
         "mega-cap"
       ],
-      "length_chars": 4066,
+      "length_chars": 4505,
       "thumbnail_url": null
     },
     {
@@ -112,7 +660,7 @@
       "date": "2026-06-02T22:07:03.342536+00:00",
       "audience": "research",
       "category": "milestone",
-      "status": "published",
+      "status": "unpublished",
       "tags": [
         "研究",
         "波動率預測",
@@ -3087,26 +3635,6 @@
       "thumbnail_url": null
     },
     {
-      "id": "mile_2c4efefa",
-      "title": "最貴的避險模型不一定最好：SPY 用 QQQ 對沖，花大力氣的複雜公式差多少？",
-      "date": "2026-05-28T21:14:34.898627+00:00",
-      "audience": "research",
-      "category": "milestone",
-      "status": "draft",
-      "tags": [
-        "研究",
-        "volatility",
-        "hedging",
-        "copula",
-        "spy",
-        "qqq",
-        "var-reduction",
-        "避險"
-      ],
-      "length_chars": 3763,
-      "thumbnail_url": null
-    },
-    {
       "id": "mile_a0ac369d",
       "title": "你以為持有 5 個策略就分散風險？我們把 14 個策略兩兩相關拉出來看，發現一些「套娃」——K678",
       "date": "2026-05-28T21:00:57.711172+00:00",
@@ -3123,42 +3651,6 @@
         "cross-market"
       ],
       "length_chars": 4906,
-      "thumbnail_url": null
-    },
-    {
-      "id": "mile_858690fd",
-      "title": "13,261% 的財報驚喜，為什麼反而是壞訊號？",
-      "date": "2026-05-28T19:26:32.015593+00:00",
-      "audience": "general",
-      "category": "general",
-      "status": "draft",
-      "tags": [
-        "一般讀者",
-        "財報",
-        "日本股市",
-        "資料解讀",
-        "波動率",
-        "軟銀"
-      ],
-      "length_chars": 1945,
-      "thumbnail_url": null
-    },
-    {
-      "id": "mile_778a9b85",
-      "title": "市場最恐慌那幾天，我們還是沒找到另類數據的增量價值",
-      "date": "2026-05-28T18:19:45.086566+00:00",
-      "audience": "general",
-      "category": "general",
-      "status": "draft",
-      "tags": [
-        "一般讀者",
-        "波動率預測",
-        "另類數據",
-        "VIX",
-        "跳躍事件",
-        "Paper4"
-      ],
-      "length_chars": 2153,
       "thumbnail_url": null
     },
     {
@@ -3195,62 +3687,6 @@
         "反直覺"
       ],
       "length_chars": 4365,
-      "thumbnail_url": null
-    },
-    {
-      "id": "mile_96fb5f73",
-      "title": "「Consistently outperforms」這句話的代價：GSP-HAR 在 5 檔美股 ETF 上的誠實複製",
-      "date": "2026-05-28T15:17:21.877244+00:00",
-      "audience": "research",
-      "category": "milestone",
-      "status": "draft",
-      "tags": [
-        "研究",
-        "HAR-RV",
-        "GSP-HAR",
-        "graph-signal-processing",
-        "placebo-test",
-        "DM-test",
-        "replication",
-        "marginal-result"
-      ],
-      "length_chars": 137939,
-      "thumbnail_url": null
-    },
-    {
-      "id": "mile_2d4edb65",
-      "title": "一套方法在 13 個市場都有效，卻不代表它會幫你賺更多",
-      "date": "2026-05-28T15:07:32.499275+00:00",
-      "audience": "general",
-      "category": "milestone",
-      "status": "draft",
-      "tags": [
-        "一般讀者",
-        "投資研究",
-        "跨市場",
-        "風險管理",
-        "回撤控制",
-        "負面結果"
-      ],
-      "length_chars": 118890,
-      "thumbnail_url": null
-    },
-    {
-      "id": "mile_7825c8a2",
-      "title": "只贏一點點，很多時候還不能算模型真的比較強",
-      "date": "2026-05-28T15:05:23.636470+00:00",
-      "audience": "general",
-      "category": "milestone",
-      "status": "draft",
-      "tags": [
-        "一般讀者",
-        "波動率預測",
-        "模型比較",
-        "投資研究",
-        "負面結果",
-        "VIX"
-      ],
-      "length_chars": 105510,
       "thumbnail_url": null
     },
     {
