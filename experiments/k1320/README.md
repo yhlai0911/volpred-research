@@ -189,3 +189,72 @@ Threshold: |t| > 1.96 (5% two-sided). Harvey |t|>3 threshold is NOT applicable h
 - **Best copula**: Gumbel (AIC=-6940, OOS HE=0.8880, upper tail dependence captures SPY-QQQ joint bull-market behavior)
 - **OOS HE vs DCC**: Gumbel HE=0.8880 > DCC_Gaussian HE=0.8862 (+0.0018), DM t=0.50, p=0.617 — **not statistically significant**
 - **Verdict rationale**: CONDITIONAL (not PASS) because the improvement over DCC is economically trivial and statistically non-significant. The honest conclusion is "copula methods match DCC; Gumbel marginally preferred on AIC grounds; all copula methods dominate simple OLS."
+
+## Fix log 2026-06-04 (K1320_fix_dynamic_lookahead_DM)
+
+Codex 24h review (`storage/reviews/codex_24h/mile_2c4efefa_review.md`) found 4 must-fix issues. All four resolved; experiment re-run end-to-end with seed=42.
+
+### Fix 1 — Dynamic Gumbel `np.interp` lookahead removal (HIGH)
+
+- **Before**: `rho_interp = np.interp(oos_indices, sampled_indices, sampled_rho)` linearly interpolated between the 21-day re-estimate sample points. For OOS day `i` falling between sample `j` and `j+1`, the interpolated rho used the *future* sample at `j+1` → t+21 information leaked into t.
+- **After**: piecewise-hold (forward-fill). Each day `i` uses `rho_dynamic_values[max(k : k ≤ i)]` — the most recent already-estimated rho, no future leak.
+- **Code**: `k1320.py` §9 (lines 575-595).
+- **Impact**: Dynamic Gumbel OOS HE **0.8876 → 0.8874** (−0.0002). As Codex predicted, lookahead bias was small in magnitude because rho was very stable across re-estimate windows.
+
+### Fix 2 — DM test loss object: r^4 → squared hedged returns (HIGH)
+
+- **Before**: caller computed `e = rets**2`, passed to `dm_test_hln_hac`, which internally did `d = e1**2 - e2**2`. Final loss differential was `r_hedged_t^4 - r_hedged_t^4` — not a standard DM, not Patton volatility loss, not variance-reduction test. UNSOUND per Codex.
+- **After**: `dm_test_hln_hac` now treats `e1, e2` as loss series directly: `d = e1 - e2`. Caller still passes `rets**2` (squared hedged return = daily variance proxy), so the test is now a proper DM on squared hedged returns → equivalent to a variance-reduction test (rejecting H₀ means one model genuinely produces lower hedged variance).
+- **Code**: `k1320.py` §14 `dm_test_hln_hac` (lines 916-936).
+- **Impact**: DM p-values change substantially:
+
+  | Strategy vs DCC_Gaussian | Old DM t | Old p | New DM t | New p | New sig 5%? |
+  |---|---|---|---|---|---|
+  | Copula_Gumbel_static | 0.500 | 0.617 | **0.849** | **0.396** | no |
+  | Copula_Gumbel_dynamic | 0.441 | 0.659 | **0.628** | **0.530** | no |
+  | Copula_Student_t_static | 0.506 | 0.612 | **0.777** | **0.437** | no |
+  | Copula_Normal_static | 0.507 | 0.612 | **0.753** | **0.452** | no |
+  | Copula_Frank_static | 0.508 | 0.612 | **0.719** | **0.472** | no |
+  | StudentT_Copula_static (was DCC_t) | 0.506 | 0.612 | **0.777** | **0.437** | no |
+  | OLS | -0.838 | 0.402 | **-4.949** | **0.0000** | **YES** |
+  | Rolling_OLS | -0.769 | 0.442 | **-2.436** | **0.0149** | **YES** |
+  | Copula_Clayton_static | -1.739 | 0.082 | **-4.035** | **0.0001** | **YES** |
+
+  Three findings that flip sign-class:
+  - OLS, Rolling_OLS, Clayton are now **significantly worse** than DCC_Gaussian at 5% (previously masked by r^4 loss inflating variance).
+  - Copula vs DCC (Normal/Student-t/Gumbel/Frank) remain **not significant** — Codex's "no statistical difference" conclusion still holds under the sound test, but with different p-values (0.40–0.53, not 0.61).
+
+### Fix 3 — `DCC_t` rename → `StudentT_Copula_static`
+
+- **Before**: label `DCC_t` suggested dynamic Student-t DCC; actual code was `rho_t * spy_sigma_oos / qqq_sigma_oos` (static t-copula rho × GARCH sigmas). HE numerically identical to `Copula_Student_t_static` (0.8879).
+- **After**: renamed to `StudentT_Copula_static` throughout `k1320.py` (lines 720-722, 779, 851-855) and `k1320_results.json` (`hedge_effectiveness.IS.StudentT_Copula_static` / `.OOS.StudentT_Copula_static`, `performance_metrics_oos.StudentT_Copula_static`, `dm_tests_vs_dcc_gaussian.StudentT_Copula_static`). Numerical results unchanged (same code path); only label corrected.
+
+### Fix 4 — First-day hedge consistency
+
+- **Before**: docstring at `compute_hedged_returns` said "first observation has no hedge (unhedged)" but code `hr_lagged[0] = hedge_ratios[0]` applied the day-1 hedge. Same inconsistency in 5 inline `np.roll` sites for IS HE.
+- **After**: all 6 sites set `hr_lagged[0] = 0.0` — first observation truly unhedged. Affects 1/3522 IS + 1/1509 OOS = 0.07% of observations.
+- **Impact**: HE_IS changes by ≤0.0003 across all strategies (e.g. Gumbel_static IS HE 0.8516 → 0.8513). HE_OOS unchanged at displayed 4-decimal precision (e.g. Gumbel_static OOS HE remains 0.8880). Within rounding noise — as Codex noted, audit-trail-only fix.
+
+### New OOS HE summary (after all fixes)
+
+| Strategy | Old OOS HE | New OOS HE | Δ |
+|---|---|---|---|
+| Copula_Gumbel_static | 0.8880 | 0.8880 | 0.0000 |
+| Copula_Gumbel_dynamic | 0.8876 | 0.8874 | −0.0002 (lookahead fix) |
+| Copula_Student_t_static | 0.8879 | 0.8879 | 0.0000 |
+| Copula_Normal_static | 0.8879 | 0.8879 | 0.0000 |
+| Copula_Frank_static | 0.8878 | 0.8878 | 0.0000 |
+| StudentT_Copula_static (was DCC_t) | 0.8879 | 0.8879 | 0.0000 (label only) |
+| DCC_Gaussian | 0.8862 | 0.8862 | 0.0000 |
+| Rolling_OLS | 0.8701 | 0.8701 | 0.0000 |
+| OLS | 0.8584 | 0.8584 | 0.0000 |
+| Copula_Clayton_static | 0.7133 | 0.7133 | 0.0000 |
+
+OOS HE essentially unchanged; the substantive corrections are in the **DM tests** (loss object) and **interpretation** (OLS/Rolling/Clayton now significantly worse than DCC, copula vs DCC remains null at sound test).
+
+### Article (`mile_2c4efefa`) implications
+
+- Codex's lookahead concern is **confirmed but immaterial in magnitude** (HE moved −0.0002). The "no future information leak" claim was technically false for dynamic Gumbel; now true after fix.
+- "Gumbel and DCC have no statistically distinguishable difference" remains the **honest conclusion** under the corrected DM test (Gumbel_static p=0.396, Gumbel_dynamic p=0.530). The article's caveat note about Codex review can stay; the underlying message holds.
+- The article's claim "all models are within statistical noise" is **wrong for OLS/Rolling_OLS/Clayton vs DCC** — these are now significantly worse at 5%. Reference K1320 README v2 for the corrected DM table.
+- `DCC_t` row in article should be renamed to `StudentT_Copula_static` (or replaced with the clarification that it is *static* t-copula × GARCH, not a real t-DCC).

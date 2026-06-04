@@ -572,15 +572,28 @@ for i_oos in range(0, len(spy_oos), step):
 
     rho_dynamic_values[i_oos] = rho_val
 
-# Interpolate rho for all OOS days
+# LOOKAHEAD FIX (Codex review mile_2c4efefa, 2026-06-04):
+# Original code used np.interp() which linearly interpolated between adjacent
+# 21-day re-estimates — this leaked the t+21 estimate back into time t.
+# Replace with piecewise-hold (forward-fill): each OOS day uses the most recent
+# already-estimated rho (sampled_idx <= i), strictly past information only.
 oos_indices = np.arange(len(spy_oos))
-sampled_indices = sorted(rho_dynamic_values.keys())
-sampled_rho = [rho_dynamic_values[k] for k in sampled_indices]
+sampled_indices = np.array(sorted(rho_dynamic_values.keys()))
+sampled_rho = np.array([rho_dynamic_values[k] for k in sampled_indices])
 
-rho_interp = np.interp(oos_indices, sampled_indices, sampled_rho)
+rho_piecewise = np.zeros(len(spy_oos))
+for i in oos_indices:
+    # find last sampled_idx <= i (forward-fill / piecewise-hold)
+    eligible = sampled_indices[sampled_indices <= i]
+    if len(eligible) == 0:
+        # no re-estimate yet — fallback to first available rho
+        rho_piecewise[i] = sampled_rho[0]
+    else:
+        last_idx = eligible[-1]
+        rho_piecewise[i] = rho_dynamic_values[last_idx]
 
-# Compute dynamic hedge ratios using interpolated rho
-hr_dynamic_best = rho_interp * spy_sigma_oos / qqq_sigma_oos
+# Compute dynamic hedge ratios using piecewise-hold rho (no future leak)
+hr_dynamic_best = rho_piecewise * spy_sigma_oos / qqq_sigma_oos
 
 print(f"  Dynamic {best_copula} HR: mean={hr_dynamic_best.mean():.4f}, std={hr_dynamic_best.std():.4f}")
 
@@ -711,14 +724,13 @@ rho_dcc_oos = rho_dcc_full[len(spy_is):]
 hr_dcc_gaussian = rho_dcc_oos * spy_sigma_oos / qqq_sigma_oos
 print(f"  DCC Gaussian: mean rho_oos={rho_dcc_oos.mean():.4f}, mean HR={hr_dcc_gaussian.mean():.4f}")
 
-# DCC-t: same DCC recursion but with t-distributed standardized residuals
-# For simplicity, use same DCC params with t-distributed margins
-# (The copula parameter rho_t is close to rho_normal for high correlation pairs)
-# Use Student-t DCC: different only in the tail behavior, not the hedge ratio formula
-# For this experiment, Student-t DCC uses rho_t from Student-t copula (static)
-# Dynamic version follows the same DCC recursion
-hr_dcc_t_arr = rho_t * spy_sigma_oos / qqq_sigma_oos  # static t-copula rho
-print(f"  DCC-t (static): rho={rho_t:.4f}, mean HR={hr_dcc_t_arr.mean():.4f}")
+# StudentT_Copula_static: NOT a dynamic t-DCC.
+# RENAME FIX (Codex review mile_2c4efefa, 2026-06-04):
+# Original label was "DCC_t" but implementation is just static rho_t * GARCH sigma_t,
+# not a dynamic t-DCC recursion. Rename to reflect actual implementation.
+# Numerically identical to Copula_Student_t_static (same path).
+hr_studentt_copula_static_arr = rho_t * spy_sigma_oos / qqq_sigma_oos  # static t-copula rho
+print(f"  StudentT_Copula_static (was 'DCC_t'): rho={rho_t:.4f}, mean HR={hr_studentt_copula_static_arr.mean():.4f}")
 
 # ============================================================
 # 11. HEDGED PORTFOLIO RETURNS — OOS (LOOKAHEAD-FREE)
@@ -745,8 +757,12 @@ def compute_hedged_returns(spy_returns, qqq_returns, hedge_ratios):
         hedged_returns: array (first obs is unhedged due to lag)
     """
     # Shift hedge ratio by 1: h_{t-1} applied to return at t
+    # FIRST-DAY UNHEDGED FIX (Codex review mile_2c4efefa, 2026-06-04):
+    # Original code set hr_lagged[0] = hedge_ratios[0] (applied current HR),
+    # contradicting the docstring "first observation has no hedge (unhedged)".
+    # Now: first observation truly unhedged (hr=0). Affects 1/1509 = 0.07% of OOS.
     hr_lagged = np.roll(hedge_ratios, 1)
-    hr_lagged[0] = hedge_ratios[0]  # first period: use first available HR (no alternative)
+    hr_lagged[0] = 0.0  # first period: truly unhedged (matches docstring)
 
     hedged = spy_returns - hr_lagged * qqq_returns
     return hedged, hr_lagged
@@ -769,9 +785,9 @@ strategies['Rolling_OLS'] = h_rolling
 h_dcc_g, _ = compute_hedged_returns(spy_oos, qqq_oos, hr_dcc_gaussian)
 strategies['DCC_Gaussian'] = h_dcc_g
 
-# DCC-t (static)
-h_dcc_t, _ = compute_hedged_returns(spy_oos, qqq_oos, hr_dcc_t_arr)
-strategies['DCC_t'] = h_dcc_t
+# StudentT_Copula_static (was 'DCC_t' — renamed per Codex review mile_2c4efefa)
+h_studentt_copula_static, _ = compute_hedged_returns(spy_oos, qqq_oos, hr_studentt_copula_static_arr)
+strategies['StudentT_Copula_static'] = h_studentt_copula_static
 
 # Static copula hedge ratios
 for name, hr in hr_copulas_static.items():
@@ -802,14 +818,14 @@ he_oos = {}
 
 for name, rho_eq in rho_equiv.items():
     hr_is = compute_hedge_ratio(rho_eq, spy_sigma_is_arr, qqq_sigma_is_arr)
-    hr_is_lag = np.roll(hr_is, 1); hr_is_lag[0] = hr_is[0]
+    hr_is_lag = np.roll(hr_is, 1); hr_is_lag[0] = 0.0  # first day unhedged (Codex fix)
     h_is = spy_is - hr_is_lag * qqq_is
     he_is[f'Copula_{name}_static'] = hedge_effectiveness(h_is, spy_is)
     he_oos[f'Copula_{name}_static'] = hedge_effectiveness(strategies[f'Copula_{name}_static'], spy_oos)
 
-# IS OLS
+# IS OLS (first day unhedged per Codex fix)
 hr_ols_is_lag = np.full(len(spy_is), hr_ols)
-hr_ols_is_lag[0] = hr_ols
+hr_ols_is_lag[0] = 0.0  # first day unhedged
 h_ols_is = spy_is - hr_ols_is_lag * qqq_is
 he_is['OLS'] = hedge_effectiveness(h_ols_is, spy_is)
 he_oos['OLS'] = hedge_effectiveness(h_ols, spy_oos)
@@ -826,21 +842,26 @@ for i in range(len(spy_is)):
         cov_w = np.cov(spy_win, qqq_win)
         hr_rolling_is[i] = cov_w[0,1] / cov_w[1,1]
 
-hr_rolling_is_lag = np.roll(hr_rolling_is, 1); hr_rolling_is_lag[0] = hr_rolling_is[0]
+hr_rolling_is_lag = np.roll(hr_rolling_is, 1); hr_rolling_is_lag[0] = 0.0  # first day unhedged
 h_rolling_is = spy_is - hr_rolling_is_lag * qqq_is
 he_is['Rolling_OLS'] = hedge_effectiveness(h_rolling_is, spy_is)
 he_oos['Rolling_OLS'] = hedge_effectiveness(h_rolling, spy_oos)
 
-# DCC IS
+# DCC IS (first day unhedged per Codex fix)
 rho_dcc_is = rho_dcc_full[:len(spy_is)]
 hr_dcc_is = rho_dcc_is * spy_sigma_is / qqq_sigma_is
-hr_dcc_is_lag = np.roll(hr_dcc_is, 1); hr_dcc_is_lag[0] = hr_dcc_is[0]
+hr_dcc_is_lag = np.roll(hr_dcc_is, 1); hr_dcc_is_lag[0] = 0.0  # first day unhedged
 h_dcc_is = spy_is - hr_dcc_is_lag * qqq_is
 he_is['DCC_Gaussian'] = hedge_effectiveness(h_dcc_is, spy_is)
 he_oos['DCC_Gaussian'] = hedge_effectiveness(h_dcc_g, spy_oos)
 
-he_is['DCC_t'] = hedge_effectiveness(spy_is - np.roll(rho_t * spy_sigma_is / qqq_sigma_is, 1) * qqq_is, spy_is)
-he_oos['DCC_t'] = hedge_effectiveness(h_dcc_t, spy_oos)
+# StudentT_Copula_static IS HE (was 'DCC_t')
+# First-day unhedged per Codex review fix (hr_lagged[0] = 0)
+_hr_studentt_is = rho_t * spy_sigma_is / qqq_sigma_is
+_hr_studentt_is_lag = np.roll(_hr_studentt_is, 1)
+_hr_studentt_is_lag[0] = 0  # first day truly unhedged
+he_is['StudentT_Copula_static'] = hedge_effectiveness(spy_is - _hr_studentt_is_lag * qqq_is, spy_is)
+he_oos['StudentT_Copula_static'] = hedge_effectiveness(h_studentt_copula_static, spy_oos)
 
 # Dynamic copula IS (approximate using static)
 he_is[f'Copula_{best_copula}_dynamic'] = he_is[f'Copula_{best_copula}_static']
@@ -904,15 +925,23 @@ DM test threshold: |t| > 1.96 (5% two-sided), NOT Harvey |t|>3
 def dm_test_hln_hac(e1, e2, h=1, nw_lags=None):
     """
     Diebold-Mariano test with HLN small-sample correction and HAC variance.
-    e1: forecast errors for model 1 (baseline)
-    e2: forecast errors for model 2 (challenger)
+
+    LOSS OBJECT FIX (Codex review mile_2c4efefa, 2026-06-04):
+    Original signature took raw returns and squared them inside (e1**2 - e2**2),
+    but callers were already passing squared returns → final loss diff was r^4
+    (UNSOUND). Now: callers pass loss values directly (squared hedged returns
+    = daily variance proxy), and we compute d = e1 - e2. This is the standard
+    DM on squared hedged returns, equivalent to a variance-reduction test.
+
+    e1: loss series for model 1 (baseline) — pass r_hedged**2
+    e2: loss series for model 2 (challenger) — pass r_hedged**2
     h: forecast horizon (1 for one-step-ahead)
     nw_lags: Newey-West lags (default: floor(T^(1/3)))
 
     Returns: (DM_stat, p_value)
-    Positive stat means model 2 is MORE accurate (lower squared error).
+    Positive stat means model 2 has lower squared hedged return (better hedge).
     """
-    d = e1**2 - e2**2  # loss differential: positive = model 1 worse than model 2
+    d = e1 - e2  # loss differential on squared hedged returns (variance proxy)
     T = len(d)
 
     if nw_lags is None:
@@ -998,7 +1027,7 @@ ax1.grid(True, alpha=0.3)
 
 # Chart 2: HE comparison (IS and OOS)
 ax2 = axes[0, 1]
-he_strategies = ['OLS', 'Rolling_OLS', 'DCC_Gaussian', 'DCC_t',
+he_strategies = ['OLS', 'Rolling_OLS', 'DCC_Gaussian', 'StudentT_Copula_static',
                   'Copula_Normal_static', 'Copula_Student_t_static',
                   'Copula_Clayton_static', 'Copula_Gumbel_static',
                   'Copula_Frank_static', f'Copula_{best_copula}_dynamic']
