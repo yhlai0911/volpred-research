@@ -21146,7 +21146,7 @@
     "description": "Paper P8 (volatility-absorption) is in a pending/amber state. Status excerpt: 🔴 61.3% amber + **CRITICAL errata 識別** (2026-04-20 re-verified: 46 MATCH / 12 MISMATCH / 17 UNTRACE / 75 total — 無 drift since 2026-04-19)",
     "task_type": "paper_decision",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "paper-decision",
@@ -21156,7 +21156,13 @@
     "created_at": "2026-06-04T17:34:25.719564+00:00",
     "generated_at": "2026-06-04T17:34:25.719565+00:00",
     "paper_id": "P8",
-    "paper_name": "volatility-absorption"
+    "paper_name": "volatility-absorption",
+    "claimed_by": "hourly-03",
+    "claimed_at": "2026-06-04T19:10:02.743588+00:00",
+    "claim_session_id": "0c35faea4588",
+    "started_at": "2026-06-04T19:11:14.388511+00:00",
+    "completed_at": "2026-06-04T19:12:35.006341+00:00",
+    "result": "Path B 已實質完成於 2026-05-13（main_v3.tex commit efeca644）；platform 同步狀態 working/synced=yes，canonical PDF = main_v3.pdf。決議：Path B 為正確路徑，已落地 SPY/threshold/sub-period/RV-norm/controlled 全 row。剩餘 cross-asset table GLD/TLT/0050.TW snapshot rerun 已切割為 followup paper_body task Paper8_cross_asset_snapshot_rerun。errata_pending.md 已加 Decision Closure 區段。"
   },
   {
     "id": "gen_paper_decision_P9",
@@ -21346,7 +21352,7 @@
     "description": "K903_EXTENSION_GLD_2025_2026_SUBWINDOW has a non-null verdict in experiments/k903_extension_gld_2025_2026_subwindow/ but no published feed article and no existing task. Verdict: not_reproduced. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -21355,6 +21361,22 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-06-04T17:34:26.525978+00:00",
     "generated_at": "2026-06-04T17:34:26.525991+00:00",
-    "k_id": "K903_EXTENSION_GLD_2025_2026_SUBWINDOW"
+    "k_id": "K903_EXTENSION_GLD_2025_2026_SUBWINDOW",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-04T18:39:30.743326+00:00",
+    "claim_session_id": "ff67920bf355",
+    "started_at": "2026-06-04T18:39:41.844951+00:00",
+    "completed_at": "2026-06-04T18:42:34.740552+00:00",
+    "result": "Published draft mile_832dcc03 for K903 GLD subwindow general audience. Article focuses on claim-vs-reproduction gap: claimed mean gamma -0.089 and 100% negative vs reproduced -0.033 and 80% negative over 5 windows; includes chart-backed comparison and cluster waiver for uncovered K article."
+  },
+  {
+    "id": "Paper8_cross_asset_snapshot_rerun",
+    "task_type": "paper_body",
+    "title": "Paper 8 (volatility-absorption): cross-asset table snapshot rerun (GLD/TLT/0050.TW)",
+    "description": "main_v3.tex Lines 801-804 cross-asset table still uses paper-drafting-time yfinance values. K903 only covered SPY. Need: (a) rerun absorption regression on GLD/TLT/0050.TW with auto_adjust=False pinned snapshots, (b) update Table cross_asset_detail β/t under current snapshot, (c) sync text claims around cross-asset robustness, (d) re-run paper-update --paper-id volatility-absorption. Parent decision: gen_paper_decision_P8 (closed 2026-06-05).",
+    "status": "pending",
+    "priority": 3,
+    "source": "auto_discovered",
+    "created_at": "2026-06-05T03:15:00+08:00"
   }
 ]

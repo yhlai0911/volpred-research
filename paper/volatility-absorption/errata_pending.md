@@ -78,6 +78,20 @@ Same as P9: yfinance retroactive adjustments. K903/K904 snapshot rerun (Codex `t
 - Cross-asset table (lines 801-804): GLD/TLT/0050.TW snapshot rerun needed (K903 only covers SPY)
 - paper-update sync: `uv run volpred ops paper-update --paper-id volatility-absorption`
 
+## Decision Closure (2026-06-05 03:14 台灣時間, hourly-03)
+
+**Resolved**: Path B was the correct path and HAS been executed. main_v3.tex (2026-05-13, commit efeca644) is canonical and synced to platform (`paper-list` shows `volatility-absorption working synced=yes`, registered PDF = `main_v3.pdf`).
+
+**Decision task `gen_paper_decision_P8` closed as succeeded**.
+
+**Remaining work** (split off as separate `paper_body` task `Paper8_cross_asset_snapshot_rerun`):
+- Run K903-equivalent regression on GLD/TLT/0050.TW with `auto_adjust=False` pinned snapshots
+- Update Table `cross_asset_detail` (lines 801-804) with new β/t under current snapshot
+- Sync text claims around cross-asset robustness
+- Re-run `paper-update --paper-id volatility-absorption` afterwards
+
+Note: SPY row in cross-asset table also uses paper-time values (t=-3.42); main_v3 Line 67 footnote already discloses the snapshot t-stat is -1.77. Cross-asset rerun will replicate this disclosure pattern for the other three assets.
+
 ## Cross-reference
 
 - `paper/volatility-absorption/reproduce_report.json` — current snapshot_mode match_rate 61.3%
