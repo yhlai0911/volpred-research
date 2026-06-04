@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Graphical abstract for Leverage Direction Matters</title>
+  <desc id="desc">Three-panel graphical abstract summarizing leverage direction taxonomy, volatility targeting implications, and Asia time-zone spillover evidence.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f4efe6"/>
+      <stop offset="100%" stop-color="#e4ecf2"/>
+    </linearGradient>
+    <linearGradient id="panelA" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#17324d"/>
+      <stop offset="100%" stop-color="#274f73"/>
+    </linearGradient>
+    <linearGradient id="panelB" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#365c2d"/>
+      <stop offset="100%" stop-color="#5c873d"/>
+    </linearGradient>
+    <linearGradient id="panelC" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#73322b"/>
+      <stop offset="100%" stop-color="#b45836"/>
+    </linearGradient>
+    <style>
+      .title { font: 700 42px Georgia, 'Times New Roman', serif; fill: #142433; }
+      .subtitle { font: 400 22px Georgia, 'Times New Roman', serif; fill: #304457; }
+      .panel-title { font: 700 26px Georgia, 'Times New Roman', serif; fill: #ffffff; }
+      .panel-text { font: 400 22px Georgia, 'Times New Roman', serif; fill: #ffffff; }
+      .big { font: 700 34px Georgia, 'Times New Roman', serif; fill: #ffffff; }
+      .label { font: 700 20px Georgia, 'Times New Roman', serif; fill: #f8fafc; letter-spacing: 1px; }
+      .footer { font: 400 19px Georgia, 'Times New Roman', serif; fill: #425466; }
+      .num { font: 700 28px Georgia, 'Times New Roman', serif; fill: #fff7ed; }
+      .num-dark { font: 700 28px Georgia, 'Times New Roman', serif; fill: #17324d; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <rect x="40" y="34" width="1520" height="832" rx="28" fill="#fffdfa" stroke="#d9d8d2" stroke-width="2"/>
+
+  <text x="90" y="98" class="title">Leverage Direction Matters</text>
+  <text x="90" y="132" class="subtitle">Cross-asset GARCH asymmetry, volatility-targeting behavior, and delayed Asia spillover in one framework</text>
+
+  <rect x="86" y="180" width="448" height="560" rx="26" fill="url(#panelA)"/>
+  <rect x="576" y="180" width="448" height="560" rx="26" fill="url(#panelB)"/>
+  <rect x="1066" y="180" width="448" height="560" rx="26" fill="url(#panelC)"/>
+
+  <text x="116" y="226" class="label">PANEL A</text>
+  <text x="116" y="266" class="panel-title">Leverage direction is not universal</text>
+  <text x="116" y="322" class="big">Gold flips sign</text>
+  <text x="116" y="360" class="panel-text">fear-rally episodes show inverted leverage</text>
+  <text x="116" y="432" class="num">t = -5.79</text>
+  <text x="116" y="474" class="panel-text">93% of rolling gamma estimates are negative</text>
+  <line x1="116" y1="520" x2="504" y2="520" stroke="#cfe0f2" stroke-width="2" opacity="0.6"/>
+  <text x="116" y="570" class="panel-text">Rule of thumb:</text>
+  <text x="116" y="608" class="panel-text">use GJR-GARCH only when</text>
+  <text x="116" y="646" class="num">gamma &gt; 0.10</text>
+  <text x="116" y="694" class="panel-text">12/12 DM comparisons classified correctly</text>
+
+  <text x="606" y="226" class="label">PANEL B</text>
+  <text x="606" y="266" class="panel-title">Volatility targeting has two channels</text>
+  <text x="606" y="326" class="big">Signal channel</text>
+  <text x="606" y="366" class="panel-text">Within equities, gamma predicts whether VT</text>
+  <text x="606" y="404" class="panel-text">behaves like trend-following or contrarian</text>
+  <text x="606" y="458" class="num">rho = 0.886</text>
+  <line x1="606" y1="500" x2="994" y2="500" stroke="#d9ebc8" stroke-width="2" opacity="0.6"/>
+  <text x="606" y="552" class="big">Insurance channel</text>
+  <text x="606" y="592" class="panel-text">Drawdown reduction is broad-based and tied to</text>
+  <text x="606" y="630" class="panel-text">base volatility rather than asymmetry sign</text>
+  <text x="606" y="684" class="num">rho = 0.944</text>
+
+  <text x="1096" y="226" class="label">PANEL C</text>
+  <text x="1096" y="266" class="panel-title">U.S. close predicts Asia next day</text>
+  <circle cx="1166" cy="390" r="54" fill="#ffd8b1" opacity="0.95"/>
+  <circle cx="1412" cy="390" r="54" fill="#ffe8cc" opacity="0.95"/>
+  <path d="M1234 390 H1350" stroke="#fff1e6" stroke-width="12" stroke-linecap="round"/>
+  <polygon points="1350,390 1320,370 1320,410" fill="#fff1e6"/>
+  <text x="1132" y="398" class="num-dark">US</text>
+  <text x="1380" y="398" class="num-dark">Asia</text>
+  <text x="1096" y="492" class="panel-text">One-day delayed spillover survives</text>
+  <text x="1096" y="530" class="panel-text">Harvey multiple-testing threshold</text>
+  <text x="1096" y="586" class="num">6 markets</text>
+  <text x="1096" y="624" class="panel-text">with t &gt; 3.0 after costs</text>
+  <text x="1096" y="684" class="panel-text">Practical implication: local closing-time</text>
+  <text x="1096" y="722" class="panel-text">allocation rules can remain simple and tradable</text>
+
+  <rect x="86" y="772" width="1428" height="56" rx="18" fill="#f0eee8" stroke="#d8d2c8"/>
+  <text x="112" y="808" class="footer">Takeaway: asymmetry sign tells you when extra GARCH complexity matters; volatility targeting mostly earns its keep through universal drawdown control, with a separate delayed information channel in Asia-Pacific markets.</text>
+</svg>

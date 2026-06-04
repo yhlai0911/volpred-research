@@ -21,6 +21,13 @@
 uv run python paper/leverage-direction/reproduce.py
 ```
 
+## Submission Materials
+
+- `cover_letter.tex` / `cover_letter.pdf` — current JBF cover letter draft
+- `highlights.txt` — five highlights for submission portal
+- `graphical_abstract.svg` — visual summary for graphical-abstract upload
+- `submission_package.md` — package checklist and journal-specific notes
+
 ## Self-contained replication package
 
 This folder is structured per `.claude/rules/paper-workflow.md` §Self-contained

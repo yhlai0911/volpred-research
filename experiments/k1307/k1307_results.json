@@ -13,17 +13,17 @@
   "data_sources": {
     "tw_rv": {
       "path": "data/intraday/0050_TW_daily_rv.csv",
-      "total_rows": 76,
-      "non_null_rows": 63,
+      "total_rows": 84,
+      "non_null_rows": 71,
       "first_non_null": "2026-02-09",
-      "last_non_null": "2026-05-22"
+      "last_non_null": "2026-06-03"
     },
     "spy_rv_reference": {
       "path": "data/intraday/SPY_daily_rv.csv",
-      "total_rows": 90,
-      "non_null_rows": 90,
+      "total_rows": 97,
+      "non_null_rows": 97,
       "first_non_null": "2026-01-14",
-      "last_non_null": "2026-05-22"
+      "last_non_null": "2026-06-03"
     }
   },
   "lookahead_certification": {
@@ -36,11 +36,11 @@
   },
   "diagnostic": {
     "verdict": "NOT_READY_SAMPLE_TOO_SHORT",
-    "non_null_rv_days": 63,
-    "har_feature_rows_after_lags": 41,
+    "non_null_rv_days": 71,
+    "har_feature_rows_after_lags": 49,
     "min_har_lag_days": 22,
     "min_train_days": 30,
-    "max_oos_obs_after_min_train": 11,
+    "max_oos_obs_after_min_train": 19,
     "powered_oos_target_days": 252,
     "meets_powered_threshold": false,
     "notes": [
