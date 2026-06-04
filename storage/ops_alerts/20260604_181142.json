@@ -1,0 +1,7 @@
+{
+  "timestamp": "2026-06-04T18:11:43Z",
+  "level": "alert",
+  "check": "STRATEGY_METRICS_FRESHNESS",
+  "message": "metrics stale",
+  "detail": "storage/strategy_metrics.json does not exist. File is MISSING — this exceeds the 26-hour staleness threshold. Action required: regenerate strategy metrics via 'uv run volpred ops ...' or equivalent."
+}
