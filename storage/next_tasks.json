@@ -20914,5 +20914,33 @@
     "started_at": "2026-06-04T12:24:52.149036+00:00",
     "completed_at": "2026-06-04T12:28:20.924692+00:00",
     "result": "Published general-audience draft mile_6000a480 for K1416 via publish_draft.py with 2 charts. Focused on 5/5 alternative OOS starts passing HLN-adjusted thresholds and explicitly noted the overlap caveat (sensitivity grid, not independent replication)."
+  },
+  {
+    "id": "gen_article_k1378_research",
+    "task_type": "daily_article",
+    "priority": 3,
+    "status": "succeeded",
+    "title": "K1378 research-audience: Paper 9 Leave-COVID-out DM test — SF1 robustness confirmed (A4f no edge ex-COVID)",
+    "description": "Write research-audience article for K1378 (Paper 9 leave-COVID-out robustness check). Key finding: SF1 CONFIRMED — A4f loses its Harvey-significant edge over GJR once COVID is excluded (DM t -0.36 no-COVID vs -1.19 full vs -1.54 COVID-only). Honest negative-result framing: paper 9 robustness claim cannot be supported quantitatively. Source: experiments/k1378/k1378_results.json. Audience: research. Status: draft (non-event).",
+    "source": "auto_discovered",
+    "created_at": "2026-06-04T13:14:28Z",
+    "k_id": "K1378",
+    "claimed_by": "hourly-21",
+    "claimed_at": "2026-06-04T13:14:30.473170+00:00",
+    "claim_session_id": "829b5cd2a05b",
+    "started_at": "2026-06-04T13:14:30.991842+00:00",
+    "completed_at": "2026-06-04T13:35:15.940408+00:00",
+    "result": "K1378 research article mile_7e70a8ea published (draft). SF1 CONFIRMED: GJR beats A4f in all 3 sub-periods (full -1.19, no-COVID -0.36, COVID-only -1.54). First-pass mile_1fedb546 retracted due to sign error. Anti-AI gate PASS; prepublish_audit PASS. Commit 2dc79bdd. Caveat: result is stronger than expected — implies paper 9 main A4f-edge claim itself may need re-examination, not just SF1."
+  },
+  {
+    "id": "paper9_main_a4f_edge_review",
+    "task_type": "paper_review",
+    "priority": 2,
+    "status": "pending",
+    "title": "Paper 9 main A4f-edge claim re-examination triggered by K1378 finding",
+    "description": "K1378 leave-COVID-out 揭示 A4f 在 3 個 sub-period 全輸 GJR (DM t = -1.19/-0.36/-1.54, GJR QLIKE mean 624 vs A4f 688 in full OOS)。SF1 confirmed 是預期結果，但 GJR 在所有期間都贏 A4f 的 finding 比預期強。需要對照 paper 9 (garch-x-vix) 主結果，確認：(1) paper 9 main 用什麼 evaluation metric/OOS window 證明 A4f 優勢？(2) K1378 setup (W=2000, refit=63, OOS=2019-01, QLIKE proxy=r²) 是否符合 paper 9 main setup？(3) 若 setup 一致而結論相反，paper 9 main claim 需要 major 修訂；若 setup 不同，K1378 caveat 需在 paper body 註明 evaluation 依賴 setup。檢視 paper/garch-x-vix/body*.tex + 對應 reproduce.py 確認。Source articles: feed mile_7e70a8ea (K1378 published 2026-06-04) + paper 9 latest body.tex.",
+    "source": "auto_discovered",
+    "created_at": "2026-06-04T13:35:32Z",
+    "k_id": "K1378"
   }
 ]
