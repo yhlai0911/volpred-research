@@ -86,18 +86,23 @@ def _extract_nb_id(res) -> str | None:
 
 
 def generate_panels(
-    *, source_file: Path, title: str, panels: list[dict], out_dir: Path,
+    *, source_files: list[Path], title: str, panels: list[dict], out_dir: Path,
     keep_notebook: bool,
 ) -> list[Path]:
     """Generate MULTIPLE infographics (poster-session style) from one notebook.
 
-    panels: [{name, prompt, style?, orientation?, detail?}]. The source is added
-    ONCE; each panel is a separate `generate infographic` call (different focused
-    prompt/style) so each image covers ONE info type — concept, method, results —
-    instead of cramming everything onto one image.
+    source_files: the FULL evidence package the article was written from —
+    experiment <k>_results.json + README.md + draft/article + references — NOT
+    just the finished article prose. Feeding the source data (not the lossy
+    article text) lets the method/results panels be accurate (boss directive
+    2026-06-04). All sources are added to one notebook.
 
-    Returns the list of successfully written PNG paths (download artifact = the
-    most recent generation, so panels are produced & downloaded one at a time).
+    panels: [{name, prompt, style?, orientation?, detail?}]. Each panel is a
+    separate `generate infographic` call (different focused prompt/style) so each
+    image covers ONE info type — concept, method, results — instead of cramming
+    everything onto one image (poster-session feel).
+
+    Returns the list of successfully written PNG paths.
     """
     ok, res = _run([NB_BIN, "create", title, "--json"], parse_json=True)
     nb_id = _extract_nb_id(res)
@@ -108,13 +113,23 @@ def generate_panels(
     written: list[Path] = []
     out_dir.mkdir(parents=True, exist_ok=True)
     try:
-        ok, res = _run(
-            [NB_BIN, "source", "add", str(source_file), "-n", nb_id,
-             "--title", title, "--json"],
-            parse_json=True,
-        )
-        if not ok:
-            print(f"ERROR: source add failed: {res}", file=sys.stderr)
+        added = 0
+        for sf in source_files:
+            if not sf.exists():
+                print(f"  WARN: source not found, skipping: {sf}", file=sys.stderr)
+                continue
+            ok, res = _run(
+                [NB_BIN, "source", "add", str(sf), "-n", nb_id,
+                 "--title", sf.name, "--json"],
+                parse_json=True,
+            )
+            if ok:
+                added += 1
+                print(f"  source added: {sf.name}")
+            else:
+                print(f"  WARN: source add failed for {sf.name}: {res}", file=sys.stderr)
+        if added == 0:
+            print("ERROR: no sources added", file=sys.stderr)
             return []
 
         for i, panel in enumerate(panels, 1):
@@ -151,40 +166,94 @@ def generate_panels(
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    src = ap.add_mutually_exclusive_group(required=True)
-    src.add_argument("--article-id", help="feed.json article id (mile_...)")
-    src.add_argument("--source-file", help="path to a .md/.txt article file")
+    # Sources = the FULL evidence package (combine freely). Feed the source DATA
+    # (results.json / README / refs), not just the finished article prose.
+    ap.add_argument("--experiment", action="append", default=[],
+                    help="K-id — auto-adds experiments/<k>/{<k>_results.json,README.md,draft.md}; repeatable")
+    ap.add_argument("--source", action="append", default=[],
+                    help="extra source file (data/refs/.md); repeatable")
+    ap.add_argument("--article-id", help="feed.json article id (mile_...) — adds article content as a source")
+    ap.add_argument("--source-file", help="(legacy alias for --source) single article file")
     ap.add_argument("--title", default="懶人包")
-    ap.add_argument("--prompt", required=True, help="GOOD infographic prompt (see skill)")
-    ap.add_argument("--out", required=True)
+    # Single-panel mode:
+    ap.add_argument("--prompt", help="single-panel GOOD prompt (see skill)")
+    ap.add_argument("--out", help="single-panel output png path")
     ap.add_argument("--style", default="professional", choices=sorted(VALID_STYLES))
     ap.add_argument("--orientation", default="landscape", choices=sorted(VALID_ORIENT))
     ap.add_argument("--detail", default="standard", choices=sorted(VALID_DETAIL))
+    # Multi-panel (poster-session) mode:
+    ap.add_argument("--plan", help="JSON file: [{name,prompt,style?,orientation?,detail?}] "
+                    "— one infographic per panel (concept / method / results), each its own info type")
+    ap.add_argument("--out-dir", help="output dir for multi-panel mode")
     ap.add_argument("--keep-notebook", action="store_true")
     a = ap.parse_args()
 
+    if not a.plan and not (a.prompt and a.out):
+        ap.error("provide either --plan + --out-dir (multi) or --prompt + --out (single)")
+
+    # --- Build the evidence-package source list ---
+    source_files: list[Path] = []
+    for k in a.experiment:
+        k_lower = k.lower()
+        kdir = ROOT / "experiments" / k_lower
+        for fname in (f"{k_lower}_results.json", "README.md", "draft.md"):
+            p = kdir / fname
+            if p.exists():
+                source_files.append(p)
+    for s in a.source:
+        source_files.append(Path(s))
+    if a.source_file:
+        source_files.append(Path(a.source_file))
     if a.article_id:
         content = _article_content(a.article_id)
-        if not content:
-            print(f"ERROR: article {a.article_id} not found in feed.json", file=sys.stderr)
-            return 1
-        tmp = Path(tempfile.mkstemp(suffix=".md")[1])
-        tmp.write_text(content, encoding="utf-8")
-        source_file = tmp
-        title = a.title if a.title != "懶人包" else f"{a.article_id} 懶人包"
-    else:
-        source_file = Path(a.source_file)
-        if not source_file.exists():
-            print(f"ERROR: source file not found: {source_file}", file=sys.stderr)
-            return 1
-        title = a.title
+        if content:
+            tmp = Path(tempfile.mkstemp(suffix="_article.md")[1])
+            tmp.write_text(content, encoding="utf-8")
+            source_files.append(tmp)
+        else:
+            print(f"WARN: article {a.article_id} not found in feed.json (continuing with other sources)",
+                  file=sys.stderr)
+    if not source_files:
+        print("ERROR: no sources — provide --experiment / --source / --source-file / --article-id",
+              file=sys.stderr)
+        return 1
 
-    ok = generate(
-        source_file=source_file, title=title, prompt=a.prompt, out=Path(a.out),
-        style=a.style, orientation=a.orientation, detail=a.detail,
-        keep_notebook=a.keep_notebook,
+    title = a.title
+    if title == "懶人包":
+        if a.experiment:
+            title = f"{a.experiment[0]} 懶人包"
+        elif a.article_id:
+            title = f"{a.article_id} 懶人包"
+
+    if a.plan:
+        panels = json.loads(Path(a.plan).read_text(encoding="utf-8"))
+        if not isinstance(panels, list) or not panels:
+            print("ERROR: --plan must be a non-empty JSON list", file=sys.stderr)
+            return 1
+        out_dir = Path(a.out_dir or tempfile.mkdtemp())
+        written = generate_panels(
+            source_files=source_files, title=title, panels=panels,
+            out_dir=out_dir, keep_notebook=a.keep_notebook,
+        )
+        print(f"\nDONE: {len(written)}/{len(panels)} panels -> {out_dir}")
+        for p in written:
+            print(f"  {p}")
+        return 0 if written else 1
+
+    # single-panel: map to a 1-panel plan
+    out = Path(a.out)
+    written = generate_panels(
+        source_files=source_files, title=title,
+        panels=[{"name": out.stem, "prompt": a.prompt, "style": a.style,
+                 "orientation": a.orientation, "detail": a.detail}],
+        out_dir=out.parent, keep_notebook=a.keep_notebook,
     )
-    return 0 if ok else 1
+    if written and written[0] != out:
+        try:
+            written[0].replace(out)
+        except OSError:
+            pass
+    return 0 if written else 1
 
 
 if __name__ == "__main__":

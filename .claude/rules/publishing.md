@@ -91,10 +91,11 @@ paths:
    - 至少 2 張**真實圖表**（matplotlib PNG + Supabase upload；禁 ASCII / 文字框冒充）
    - 標明**數據來源**（yfinance / FRED / TAIFEX / K 編號）
    - 2000+ 字繁中正文（research）或 1500+ 字（general）
-   - **一般讀者（audience='general'）文章 → 文末必附「懶人包圖」**（2026-06-04 用戶硬性要求）：一張設計過的 explainer infographic，講解該文**主要結果 / 主要方法 / 重要概念**，放文章最後。
-     - **生成路線（零 API 費用 — 用戶硬約束「不要花錢」）**：primary = **Nano Banana Pro（Gemini 網頁版）**經 computer-use（用戶 Google AI 訂閱，網頁生圖不收費）；fallback = ChatGPT Plus 網頁。**禁用**付費 API（gpt-image-2 / 付費 Gemini API key `gemini_ask.py` 那支）。NotebookLM 不產此類海報、agy/codex coding CLI 不吐圖檔 → 皆不可用。
-     - **headless 限制**：網頁生圖需登入瀏覽器 session，hourly cron 做不到 → 懶人包圖在有瀏覽器的互動 session 補進文末（發文當下先出文字+真數據圖，懶人包隨後補）。例外：若日後有免費額度 Gemini API key，可 headless 程式化生圖、發文即附。
-     - 懶人包圖一樣走 Supabase article-images bucket upload，append 在正文最後（`## 懶人包` 或圖片區）。
+   - **一般讀者（audience='general'，含 reader-facing event/daily/trending）文章 → 文末必附「懶人包圖組」**（2026-06-04 用戶硬性要求）。完整 SOP 走 **`lazypack-infographic` skill**。三鐵則：
+     - **多圖 poster 模式**：通常 2–4 張,每張只講**一種資訊型態**(概念/框架、方法、結果、結論),**禁止全塞一張**。
+     - **餵 source 數據、寫文中生**:用 `notebooklm` + `scripts/gen_lazypack_infographic.py`,source 餵**全部 evidence package**(`experiments/<k>/<k>_results.json` + README + draft + refs),**不是**等文章寫完用 prose 去生(prose 是 lossy,方法圖會不準)。
+     - **零 API 費**:只用 NotebookLM(免費網頁產品,CLI 可 headless)。**禁用**付費影像 API(`gpt-image-2` / 付費 Gemini key `gemini_ask.py`)。
+     - png → Supabase `article-images` upload → append 文末「## 懶人包」圖區。
 5. **寫前必做主題查重**：
    - `grep -i "關鍵詞" storage/reports/feed.json | head` 或
    - LanceDB semantic search（dist < 0.45 視為 hard duplicate，需換角度或放棄）
