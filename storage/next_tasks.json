@@ -20494,7 +20494,7 @@
     "description": "K1370C has a non-null verdict in experiments/k1370c/ but no published feed article and no existing task. Verdict: PASS — N_start=10 sufficient; Codex residual concern closed. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -20503,7 +20503,13 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-06-03T21:56:12.619420+00:00",
     "generated_at": "2026-06-03T21:56:12.619423+00:00",
-    "k_id": "K1370C"
+    "k_id": "K1370C",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-04T01:08:15.744207+00:00",
+    "claim_session_id": "ab6145a1bfc3",
+    "started_at": "2026-06-04T01:08:25.349586+00:00",
+    "completed_at": "2026-06-04T01:13:43.837364+00:00",
+    "result": "K1370C general draft 已發佈至 feed（mile_50616ca2，status=draft）。新增 2 張摘要圖，主題聚焦快版與完整版答案幾乎一致，完成 duplicate/preflight/image gate 檢查。"
   },
   {
     "id": "gen_article_k1390",
@@ -20595,5 +20601,46 @@
     "started_at": "2026-06-03T21:56:27.666630+00:00",
     "completed_at": "2026-06-03T22:00:15.473034+00:00",
     "result": "Drafted K1415 general-audience article with 2 charts; published to feed as draft after general-audience gate and image gate passed.\n\nPublished K1415 general-audience article to feed as draft with cluster waiver; added 2 charts and passed general-audience/image gates."
+  },
+  {
+    "id": "paper_review_mile_2c4efefa",
+    "title": "Paper review (Codex 24h-rule): 最貴的避險模型不一定最好：SPY 用 QQQ 對沖，花大力氣的複雜公式差多少？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_2c4efefa needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_2c4efefa",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-04T01:08:54+00:00",
+    "claimed_by": "hourly-09",
+    "claimed_at": "2026-06-04T01:10:06.150271+00:00",
+    "claim_session_id": "a1c3c3ee525e",
+    "started_at": "2026-06-04T01:10:20.212433+00:00",
+    "completed_at": "2026-06-04T01:16:10.317236+00:00",
+    "result": "Codex 24h review verdict=MIXED. Found dynamic Gumbel lookahead (k1320.py:541,580), DM test loss=r^4 UNSOUND, DCC_t mislabel. Review saved storage/reviews/codex_24h/mile_2c4efefa_review.md, caveat inserted in article, knowledge entry 3d9bd601, followup task K1320_fix_dynamic_lookahead_DM opened (P2)."
+  },
+  {
+    "id": "K1320_fix_dynamic_lookahead_DM",
+    "title": "K1320 fix: remove dynamic copula np.interp lookahead + redo DM test with valid loss",
+    "description": "Codex 24h review of mile_2c4efefa (paper_review_mile_2c4efefa, 2026-06-04) flagged 3 must-fix issues in experiments/k1320/k1320.py:\n  1. Dynamic Gumbel (k1320.py:541, 580) uses np.interp on future re-estimates → lookahead MED. Change to piecewise-hold (use latest-known estimate until next re-estimate) or expanding-window forecast.\n  2. DM test (k1320.py:897, 915, 945) builds e=rets**2 then internal d=e1**2-e2**2 → effective loss = r^4 (UNSOUND). Redo with d_t = r2_DCC,t − r2_model,t HAC DM, OR bootstrap CI on HE difference.\n  3. Rename DCC_t (k1320.py:714, 720) → StudentT_Copula_static OR implement true dynamic t-DCC.\nAlso fix first-day hedge comment/code mismatch (k1320.py:732 vs 749).\nAfter re-run: update article mile_2c4efefa table + statistical-significance language, then re-publish with corrected caveat. Review file: storage/reviews/codex_24h/mile_2c4efefa_review.md.",
+    "priority": 2,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "codex_24h_review_followup",
+    "article_id": "mile_2c4efefa",
+    "experiment_id": "K1320",
+    "review_file": "storage/reviews/codex_24h/mile_2c4efefa_review.md",
+    "tags": [
+      "codex-review-followup",
+      "lookahead-fix",
+      "dm-redo",
+      "K1320"
+    ],
+    "created_at": "2026-06-04T01:14:58.254818+00:00"
   }
 ]

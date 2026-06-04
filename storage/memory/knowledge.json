@@ -32232,5 +32232,28 @@
     "sample_period": "2014-02-05..2026-05-29",
     "n_obs_oos": 1610,
     "seed": 42
+  },
+  {
+    "item_id": "3d9bd601",
+    "category": "paper_review",
+    "content": "K1320 SPY/QQQ hedging article (mile_2c4efefa) — 24h Codex source-code review found dynamic Gumbel Copula uses np.interp on future re-estimates (lookahead MED), DM test loss object = r^4 not standard forecast-error loss (UNSOUND, invalidates 'no statistical difference' claim), and DCC_t is mislabeled (actually static Student-t copula). Static OLS / Rolling OLS / static Copula / DCC Gaussian IS-OOS splits clean; main numbers (HE/AIC/rho_equiv) consistent with results.json. Article caveat inserted; followup task K1320_fix_dynamic_lookahead_DM opened (P2 experiment).",
+    "verdict": "MIXED",
+    "experiment_id": "K1320",
+    "article_id": "mile_2c4efefa",
+    "task_id": "paper_review_mile_2c4efefa",
+    "reviewer": "Codex CLI 0.135.0 (gpt-5.4, ChatGPT auth)",
+    "reviewer_source": "codex_review",
+    "codex_review": true,
+    "lookahead_risk": "MED",
+    "dm_methodology": "UNSOUND",
+    "evidence": [
+      "storage/reviews/codex_24h/mile_2c4efefa_review.md",
+      "experiments/k1320/k1320.py:541,580 (dynamic Gumbel np.interp future-window)",
+      "experiments/k1320/k1320.py:897,915,945 (DM test r^4 loss object)",
+      "experiments/k1320/k1320.py:714,720 (DCC_t mislabel)",
+      "experiments/k1320/k1320_results.json (HE/AIC numbers match article)"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-04T01:15:57.667037+00:00"
   }
 ]
