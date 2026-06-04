@@ -250,7 +250,8 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
   - HIGH: 樣本期間不一致、BAB proxy（SPLV→AQR）、MDD 只有 5 美股、1.4% 數字不可驗證、需引用 K687/K697/K688
   - K687 分析：**不矛盾**——VT 打敗 BH(SPY) 但打不過 BH(50/50)，支持 insurance 論述
 - [x] 修正 review_v2 的 5 HIGH（A.1+B.1+C.1 done 2026-05-18; B.2→K1371 PASS; B.3→K1376 PASS 2026-05-19）
-- [ ] Gemini 審查
+- [x] Gemini 審查 → `paper/vt-trend-following/review_history/v4/gemini_review_v1.md`（2026-06-05；Major Revision；2 HIGH NEW：MDD retention >100% mechanical artifact + block bootstrap 252-day insufficient）
+- [ ] 修正 Gemini v4 的 2 HIGH（MDD trough decomposition 顯示是否 rebound 驅動 + stationary bootstrap K1192 re-run mean block 3-5y）
 - [ ] `/citation-verifier` 引用驗證
 
 **第三篇相關方向探索：Copula-GARCH for Portfolio Risk Management**（2026-04-17 narrative state machine triggered, user decision pending）

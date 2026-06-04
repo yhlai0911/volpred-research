@@ -9523,5 +9523,13 @@
     "summary": "P8 volatility-absorption: Path B 早已落地 main_v3.tex (efeca644 2026-05-13)，canonical PDF synced。決議 closure，剩 cross-asset GLD/TLT/0050.TW snapshot rerun 切 followup paper_body task",
     "claimed_by": "hourly-03",
     "status": "succeeded"
+  },
+  {
+    "timestamp": "2026-06-05T04:25+08:00",
+    "task_type": "experiment",
+    "task_id": "gen_exp_Gemini_審查",
+    "summary": "Paper 3 vt-trend-following Gemini 第三方審查完成 (gemini-3.1-pro-preview, prompt 77K)。Verdict=Major Revision。Gemini 抓到 2 NEW HIGH 是前 v2/v3 latex-academic-reviewer 完全沒看到的 econometric blind spots: (1) MDD retention >100% (95.6-109.0%) 可能是 momentum-crash mechanical artifact (從 VT 減 TSMOM 在 market bottom 反注入正 return); (2) block bootstrap 252-day 對 21 年序列只給 21 個 independent blocks, 切碎 secular bear peak-to-recovery 路徑導致 MDD_BH 分母 shrinks → retention ratio inflated。落地 review_history/v4/{README.md,gemini_review_v1.md}。research_program.md unchecked → [x]。Follow-up paper_body task 入池 (Paper3_v4_revision_gemini_2h)。",
+    "claimed_by": "hourly-04",
+    "status": "succeeded"
   }
 ]

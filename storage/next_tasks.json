@@ -21047,14 +21047,20 @@
     "description": "Auto-generated from research_program.md unchecked item: Gemini 審查",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "research-backlog"
     ],
     "source": "task_generator_v2_experiment",
     "created_at": "2026-06-04T17:34:25.718763+00:00",
-    "generated_at": "2026-06-04T17:34:25.718764+00:00"
+    "generated_at": "2026-06-04T17:34:25.718764+00:00",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-06-04T20:10:40.717352+00:00",
+    "claim_session_id": "76da7d30ea4d",
+    "started_at": "2026-06-04T20:10:45.167827+00:00",
+    "completed_at": "2026-06-04T20:14:16.582808+00:00",
+    "result": "Paper 3 vt-trend-following Gemini review 完成。Verdict=Major Revision。落地 paper/vt-trend-following/review_history/v4/{gemini_review_v1.md,README.md}。Gemini 抓到 2 HIGH (NEW class, latex-reviewer 漏掉): (1) MDD retention >100% 可能是 momentum-crash artifact - 需 daily PureVT trough 分解; (2) block bootstrap 252-day 對 MDD long-memory 不足 - 需 stationary bootstrap mean block 3-5y。+ 2 MEDIUM (split-sample regime shift / VRP confound) + 3 missing citations (Bollerslev-Tauchen-Zhou / Campbell-Cochrane / Bondarenko-Bernardo)。research_program.md unchecked → [x]。Follow-up task: Paper3_v4_revision_gemini_2h 已入池。"
   },
   {
     "id": "gen_exp_Codex_adversarial_review",
@@ -21062,14 +21068,20 @@
     "description": "Auto-generated from research_program.md unchecked item: Codex adversarial review",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "research-backlog"
     ],
     "source": "task_generator_v2_experiment",
     "created_at": "2026-06-04T17:34:25.718791+00:00",
-    "generated_at": "2026-06-04T17:34:25.718792+00:00"
+    "generated_at": "2026-06-04T17:34:25.718792+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-04T19:43:29.737707+00:00",
+    "claim_session_id": "7005b5694743",
+    "started_at": "2026-06-04T19:44:23.261625+00:00",
+    "completed_at": "2026-06-04T19:45:51.860742+00:00",
+    "result": "Added paper/garch-x-vix/review_history/v7/codex_adversarial_review_2026-06-05.md. Review finds 4 remaining issues: stale replication-facing metadata, over-strong HAR non-inferiority wording, g_t vs g-proxy VRP conflation, and overstated cross-asset conclusion."
   },
   {
     "id": "gen_exp_補充_robustness_refit_frequency_sensitivit",
@@ -21378,5 +21390,17 @@
     "priority": 3,
     "source": "auto_discovered",
     "created_at": "2026-06-05T03:15:00+08:00"
+  },
+  {
+    "id": "Paper3_v4_revision_gemini_2h",
+    "status": "pending",
+    "priority": 3,
+    "task_type": "paper_body",
+    "title": "Paper 3 (vt-trend-following) v4 revision: address Gemini HIGH-1 (MDD mechanical artifact) + HIGH-2 (stationary bootstrap)",
+    "description": "Per paper/vt-trend-following/review_history/v4/README.md, Gemini surfaced 2 NEW HIGH issues: (1) MDD retention >100% may be momentum-crash artifact — need daily PureVT trough decomposition for 2009-03/2020-03/2022-09; (2) block bootstrap 252-day insufficient for MDD long-memory — re-run K1192 with stationary bootstrap mean block 3-5y. Plus M1 safe-haven dummy + M2 VRP-confound clarification + 3 missing citations.",
+    "created": "2026-06-05T20:10:00+08:00",
+    "plan": null,
+    "linked_task_ids": [],
+    "needs_close_reply": false
   }
 ]
