@@ -4,34 +4,34 @@
   "date": "2026-06-04",
   "week_range": "2026-05-29 → 2026-06-05",
   "totals": {
-    "input_tokens": 24,
-    "output_tokens": 3832,
-    "cache_read_tokens": 407554,
-    "cache_create_tokens": 139009,
-    "billable_total": 142865,
-    "assistant_messages": 16,
+    "input_tokens": 30,
+    "output_tokens": 5100,
+    "cache_read_tokens": 632626,
+    "cache_create_tokens": 146179,
+    "billable_total": 151309,
+    "assistant_messages": 22,
     "unique_sessions": 1,
-    "estimated_cost_usd": 0.7011
+    "estimated_cost_usd": 0.8145
   },
   "by_model": {
     "claude-sonnet-4-6": {
-      "input_tokens": 24,
-      "output_tokens": 3832,
-      "cache_read_tokens": 407554,
-      "cache_create_tokens": 139009,
-      "messages": 16,
-      "estimated_cost_usd": 0.7011
+      "input_tokens": 30,
+      "output_tokens": 5100,
+      "cache_read_tokens": 632626,
+      "cache_create_tokens": 146179,
+      "messages": 22,
+      "estimated_cost_usd": 0.8145
     }
   },
   "by_category": {
     "text_only": {
-      "input_tokens": 12,
-      "output_tokens": 2040,
-      "cache_read_tokens": 205504,
-      "cache_create_tokens": 69226,
-      "messages": 8,
-      "billable_total": 71278,
-      "estimated_cost_usd": 0.3519,
+      "input_tokens": 14,
+      "output_tokens": 2694,
+      "cache_read_tokens": 278062,
+      "cache_create_tokens": 73498,
+      "messages": 10,
+      "billable_total": 76206,
+      "estimated_cost_usd": 0.3995,
       "emoji": "💬",
       "description": "純文字回覆（無工具）"
     },
@@ -45,6 +45,17 @@
       "estimated_cost_usd": 0.2481,
       "emoji": "💭",
       "description": "其他 Bash 操作"
+    },
+    "git_sync": {
+      "input_tokens": 4,
+      "output_tokens": 614,
+      "cache_read_tokens": 152514,
+      "cache_create_tokens": 2898,
+      "messages": 4,
+      "billable_total": 3516,
+      "estimated_cost_usd": 0.0658,
+      "emoji": "🔄",
+      "description": "Git commit / pull / push"
     },
     "investigation": {
       "input_tokens": 3,
@@ -71,37 +82,42 @@
   },
   "drilldown": {
     "text_only": {
-      "messages": 8,
-      "billable_total": 71278,
+      "messages": 10,
+      "billable_total": 76206,
       "length_buckets": [
         {
           "name": "<200 chars",
-          "messages": 8,
-          "billable_total": 71278
+          "messages": 10,
+          "billable_total": 76206
         }
       ],
       "reason_groups": [
         {
           "name": "non-text assistant message",
-          "messages": 4,
-          "billable_total": 36129
+          "messages": 5,
+          "billable_total": 38593
         },
         {
           "name": "other",
-          "messages": 4,
-          "billable_total": 35149
+          "messages": 5,
+          "billable_total": 37613
         }
       ],
       "top_signatures": [
         {
           "name": "(content types: thinking)",
-          "messages": 4,
-          "billable_total": 36129
+          "messages": 5,
+          "billable_total": 38593
         },
         {
           "name": "⏱ 開始 2026-06-04 執行 token 用量日報。",
           "messages": 1,
           "billable_total": 32400
+        },
+        {
+          "name": "報告已產生。現在執行 git 操作。",
+          "messages": 1,
+          "billable_total": 2464
         },
         {
           "name": "正在安裝依賴（大量 CUDA/torch 套件），需要等待完成。",
@@ -152,25 +168,29 @@
     },
     "cache_diagnostics": {
       "sessions_in_window": 1,
-      "cache_create_tokens": 139009,
-      "billable_total": 142865,
-      "cache_create_share_pct": 97.3,
+      "cache_create_tokens": 146179,
+      "billable_total": 151309,
+      "cache_create_share_pct": 96.6,
       "top_sessions_by_cache_create": [
         {
           "session_id": "0570b04d-5a0d-42a9-b218-81a77f8d341c",
-          "messages": 16,
-          "billable_total": 142865,
-          "cache_create_tokens": 139009,
-          "cache_read_tokens": 407554,
-          "duration_minutes": 1.4,
-          "cache_create_share_pct": 97.3,
+          "messages": 22,
+          "billable_total": 151309,
+          "cache_create_tokens": 146179,
+          "cache_read_tokens": 632626,
+          "duration_minutes": 1.7,
+          "cache_create_share_pct": 96.6,
           "first_ts": "2026-06-04T14:44:29.523000+00:00",
-          "last_ts": "2026-06-04T14:45:56.044000+00:00"
+          "last_ts": "2026-06-04T14:46:13.011000+00:00"
         }
       ]
     }
   },
   "git_commits_context": [
+    {
+      "sha": "4d9dbde",
+      "message": "Token usage daily report"
+    },
     {
       "sha": "c53dbfb",
       "message": "Ops patrol report 2026-06-04T12:15Z"
