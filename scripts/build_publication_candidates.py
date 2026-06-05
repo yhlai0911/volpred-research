@@ -153,6 +153,39 @@ def k_covered_by_article(k_id: str, article: dict) -> bool:
     return False
 
 
+def _extract_overturned_map(knowledge: list) -> dict[str, list[str]]:
+    """Map of overturned K-id → sorted list of overturning K-ids.
+
+    Scans entries whose title contains "OVERTURNED" (the canonical overturn
+    marker) and extracts referenced K-ids from their content (regex K\\d+).
+    Self-reference is excluded.
+
+    2026-06-06 K683 incident root cause: build script previously emitted
+    overturned K's into missing_general/missing_research top5, where
+    publishing agents would reject them ("invalid stale K, already
+    overturned"), wasting hourly fire slots. Pre-filter at build time.
+
+    Note: only catches *explicit* K-ref linkages. Topic-level relationships
+    (e.g. K683's "percentile" claim overturned by K686 which only names
+    K679 explicitly) are not caught — those still slip through and require
+    main-thread judgment + per-task blocked-deprecated marking.
+    """
+    overturned_map: dict[str, set[str]] = {}
+    k_ref_re = re.compile(r"K\d{3,4}")
+    for entry in knowledge:
+        title = str(entry.get("title") or "")
+        if "OVERTURNED" not in title.upper():
+            continue
+        own_kid = extract_k_id(entry.get("experiment_id", "") or entry.get("id", ""))
+        if not own_kid:
+            continue
+        content = str(entry.get("content") or "")
+        for ref in k_ref_re.findall(content):
+            if ref != own_kid:
+                overturned_map.setdefault(ref, set()).add(own_kid)
+    return {kid: sorted(refs) for kid, refs in overturned_map.items()}
+
+
 def main():
     if not KNOWLEDGE_PATH.exists():
         print(f"ERROR: {KNOWLEDGE_PATH} not found", file=sys.stderr)
@@ -163,6 +196,7 @@ def main():
 
     knowledge = json.loads(KNOWLEDGE_PATH.read_text())
     feed = json.loads(FEED_PATH.read_text())
+    overturned_map = _extract_overturned_map(knowledge)
 
     # Deduplicate knowledge by experiment_id (keep latest)
     by_k: dict[str, dict] = {}
@@ -235,6 +269,7 @@ def main():
             }),
             "updated_at": entry.get("updated_at", ""),
             "tags": entry.get("tags", []),
+            "overturned_by": overturned_map.get(k_id, []),
         })
 
     # Sort: uncovered first, then by score desc, then by recency desc
@@ -322,12 +357,22 @@ def main():
             "research": _topic_family_collision(cand_tags, "research"),
         }
 
+    # 2026-06-06: also skip candidates whose own title contains OVERTURNED/
+    # 撤稿/推翻 — they are research-history artifacts, not promotable signal.
+    # Mirrors refill_task_pool.py::_is_retracted_or_overturned_candidate.
+    _self_overturned_needles = ("OVERTURNED", "RETRACTED", "撤稿", "推翻")
+    def _self_overturned(c: dict) -> bool:
+        t = str(c.get("title") or "").upper()
+        return any(n in t for n in _self_overturned_needles)
+
     missing_general = [
         c for c in candidates
         if c["covered_by"]
         and "general" not in c["audiences_covered"]
         and c["score"] >= 4
         and not c["topic_family_collisions"]["general"]  # exclude topic-family clashes
+        and not c["overturned_by"]  # 2026-06-06: skip explicitly-overturned K's
+        and not _self_overturned(c)
     ]
     missing_research = [
         c for c in candidates
@@ -335,6 +380,8 @@ def main():
         and "research" not in c["audiences_covered"]
         and c["score"] >= 4
         and not c["topic_family_collisions"]["research"]
+        and not c["overturned_by"]
+        and not _self_overturned(c)
     ]
 
     output = {
@@ -347,9 +394,10 @@ def main():
             "missing_general_audience": len(missing_general),
             "missing_research_audience": len(missing_research),
         },
+        "overturned_kids": sorted(overturned_map.keys()),
         "top_10_uncovered": [
             {"k_id": c["k_id"], "score": c["score"], "title": c["title"][:120]}
-            for c in candidates[:10] if c["uncovered"]
+            for c in candidates[:10] if c["uncovered"] and not c["overturned_by"]
         ],
         "missing_general_top5": [
             {"k_id": c["k_id"], "score": c["score"], "title": c["title"][:120],
@@ -372,6 +420,7 @@ def main():
     print(f"  High-priority uncovered (score≥5): {len(high_uncovered)}")
     print(f"  Covered but missing general audience: {len(missing_general)}")
     print(f"  Covered but missing research audience: {len(missing_research)}")
+    print(f"  Explicitly-overturned K's excluded from missing lists: {len(overturned_map)} ({sorted(overturned_map.keys())})")
     print()
     print("Top 5 uncovered candidates:")
     for c in [c for c in candidates if c["uncovered"]][:5]:

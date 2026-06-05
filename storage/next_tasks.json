@@ -21959,7 +21959,7 @@
     "title": "K683: write general-audience article (auto-discovered uncovered K)",
     "description": "K K683 (★★★ Percentile vs Piecewise VIX regime — DM t=3.74 Harvey PASS) has verdict signal (score=4) and research-audience article (mile_839322eb) but missing general-audience version. Goal: rewrite research piece in plain-language angle (regime-switching trade-off, when percentile beats piecewise, intuition behind 11/35 composite ranking) targeting retail readers. Base: storage/reports/mile_839322eb.json + experiments/K683/. Audience: general. Tone: educational + actionable, no jargon walls. Length: 1200-2000 字繁中. Follow .claude/skills/anti-ai-style + .claude/skills/feed-publisher gates.",
     "priority": 3,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K683",
@@ -21968,6 +21968,15 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-05T18:16:19.920123+00:00"
+    "created_at": "2026-06-05T18:16:19.920123+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-05T18:31:35.170317+00:00",
+    "claim_session_id": "78226ec03364",
+    "started_at": "2026-06-05T18:31:46.339581+00:00",
+    "completed_at": "2026-06-05T18:32:30.803809+00:00",
+    "result": "Invalid stale task: K683 already has published article mile_839322eb, and K683 itself was later overturned by K686/K691/K700 as lookahead-biased. No new general-audience article should be produced from this K without explicit retrospective/errata framing.",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-05T19:20:17+00:00",
+    "blocked_note": "K683 percentile claim overturned by K686 (lookahead artifact). Topic-level relation not caught by explicit-K-ref scan in build_publication_candidates. Auto-retry from refill not desired; future general article requires errata framing built by main thread."
   }
 ]
