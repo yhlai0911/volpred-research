@@ -21699,7 +21699,7 @@
     "title": "Paper review (Codex 24h-rule): S&P 500 集中度突破 32%，指數波動率卻跌到 14%：這個缺口是怎麼來的",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_123a3855 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_123a3855",
@@ -21708,7 +21708,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-05T06:08:25+00:00"
+    "created_at": "2026-06-05T06:08:25+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-05T07:00:42.294634+00:00",
+    "claim_session_id": "a38dee993315",
+    "started_at": "2026-06-05T07:00:47.062327+00:00",
+    "completed_at": "2026-06-05T07:01:31.122925+00:00",
+    "result": "Codex review: CONDITIONAL_PASS. Article numerics match K1418 (32.8%, 13.87%, 30.21%, 16.35%, 20.25); no lookahead issue because this is descriptive RV-gap analysis, not a forecast. Main caveat remains that concentration weights are approximate and RV is only an IV proxy, both already disclosed."
   },
   {
     "id": "paper_review_mile_b62810dd",
@@ -21731,5 +21737,21 @@
     "started_at": "2026-06-05T06:11:06.773726+00:00",
     "completed_at": "2026-06-05T06:13:55.618252+00:00",
     "result": "Codex 24h-rule review of mile_b62810dd (HAR-RV 0050 article). Numbers verified against K1322/K1324 results.json — all PASS. Lookahead-free certification matches code (rv.shift(1)). DM p=0.335 hedge appropriate. OVERALL: CONDITIONAL_PASS. Minor: '多等 4 個交易日' narrative could mislead (OOS only +1 day not +4). Review saved to experiments/k1324/codex_review_published_article_2026-06-05.md. No content change needed."
+  },
+  {
+    "id": "K1417_article_general",
+    "title": "K1417: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1417 has verdict signal (score=1, reasons=None) but no general article in feed.json.  Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1417",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-05T07:16:23+00:00"
   }
 ]
