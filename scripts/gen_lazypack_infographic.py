@@ -42,8 +42,20 @@ VALID_STYLES = {
     "auto", "sketch-note", "professional", "bento-grid", "editorial",
     "instructional", "bricks", "clay", "anime", "kawaii", "scientific",
 }
+# Cartoon / cute / hand-drawn styles look unprofessional for finance content
+# (user 2026-06-04: "不要做得太卡通顯得很不專業"; mile_71dd116b 卡通小人踩過坑).
+PRO_STYLES = {"professional", "bento-grid", "editorial", "scientific"}
+CARTOON_STYLES = {"sketch-note", "instructional", "kawaii", "anime", "clay", "bricks"}
 VALID_ORIENT = {"landscape", "portrait", "square"}
 VALID_DETAIL = {"concise", "standard", "detailed"}
+
+# Appended to EVERY infographic prompt as a belt-and-suspenders professional
+# guard, even if a caller forgets (style alone is not enough — the model still
+# inserts cartoon mascots unless the prompt forbids them).
+_NO_CARTOON = (
+    "風格務必專業、簡潔、資料導向；嚴禁卡通人物、可愛插畫、手繪塗鴉、emoji 表情人物；"
+    "用乾淨的圖表、圖示與數字，呈現像專業財經研究報告的質感。"
+)
 
 
 def _run(args: list[str], parse_json: bool = False):
@@ -134,8 +146,16 @@ def generate_panels(
 
         for i, panel in enumerate(panels, 1):
             name = panel.get("name") or f"panel{i}"
-            prompt = panel["prompt"]
             style = panel.get("style", "professional")
+            # Force professional: cartoon/cute styles look unprofessional for
+            # finance content (user 2026-06-04). Silently downgrade + warn.
+            if style in CARTOON_STYLES:
+                print(f"  [pro-guard] style '{style}' is cartoonish → using 'professional'",
+                      file=sys.stderr)
+                style = "professional"
+            # Append the no-cartoon directive to the prompt (style alone leaks
+            # cartoon mascots without it).
+            prompt = panel["prompt"].rstrip() + "\n\n" + _NO_CARTOON
             orientation = panel.get("orientation", "landscape")
             detail = panel.get("detail", "standard")
             print(f"--- panel {i}/{len(panels)}: {name} ({style}) ---")

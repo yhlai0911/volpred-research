@@ -47,9 +47,9 @@ uv run python scripts/gen_lazypack_infographic.py \
 ### plan.json 格式
 ```json
 [
-  {"name": "1_framework", "style": "instructional", "prompt": "只講框架是什麼…"},
-  {"name": "2_method",    "style": "sketch-note",   "prompt": "只講方法怎麼量（白話）…"},
-  {"name": "3_results",   "style": "bento-grid",    "prompt": "只講主要結果與結論…"}
+  {"name": "1_framework", "style": "professional", "prompt": "只講框架是什麼…"},
+  {"name": "2_method",    "style": "editorial",    "prompt": "只講方法怎麼量（白話）…"},
+  {"name": "3_results",   "style": "bento-grid",   "prompt": "只講主要結果與結論…"}
 ]
 ```
 
@@ -62,7 +62,10 @@ uv run python scripts/gen_lazypack_infographic.py \
 4. **版面要求**：分區、用圖示與數字、一眼看懂。
 5. **資料來源標註**：`資料來源：experiment K<id>`。
 
-`--style` 可選：`professional`（資料型）、`bento-grid`（結論卡）、`instructional`/`sketch-note`（框架/方法）、`editorial`、`scientific` 等。
+### 🚫 風格鐵則：專業、不卡通（用戶 2026-06-04 硬性）
+財務內容要**專業、資料導向**。**只用**：`professional`、`bento-grid`、`editorial`、`scientific`。
+**禁用卡通/可愛/手繪風**：`kawaii`、`anime`、`clay`、`bricks`、`sketch-note`、`instructional`（後兩者會放卡通小人/塗鴉,顯得不專業 — mile_71dd116b 踩過坑）。
+**prompt 內也要寫死**：「風格專業、簡潔、資料導向;**禁止卡通人物、可愛插畫、手繪塗鴉風**;用乾淨圖表、圖示與數字」。讓 style + prompt 雙重保險。
 
 ## 發佈後處理
 
