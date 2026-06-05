@@ -9653,5 +9653,23 @@
     "task_id": "hourly_03_K683_stale_candidate_rootfix",
     "summary": "build_publication_candidates 加 explicit-overturn filter (8 K's) + self-overturned filter (K680); K683 mark blocked deprecated (topic-level relation not caught by explicit-K-ref scan, known limitation)",
     "commit": "a16112ff"
+  },
+  {
+    "timestamp": "2026-06-06T04:13:35.850182",
+    "task_type": "paper_review",
+    "task_id": "paper_review_mile_67c5ec83",
+    "summary": "hourly_04_K1318_codex_24h_review_CONDITIONAL_PASS",
+    "verdict": "CONDITIONAL_PASS",
+    "actor": "hourly-04",
+    "details": {
+      "article_id": "mile_67c5ec83",
+      "experiment_id": "K1318",
+      "reviewer": "codex-cli 0.135.0",
+      "lookahead": "CLEAN",
+      "number_consistency": "MATCHED",
+      "overclaim": "MINOR",
+      "fixes_applied": 3,
+      "knowledge_id": "74816457"
+    }
   }
 ]

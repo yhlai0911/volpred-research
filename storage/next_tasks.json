@@ -21978,5 +21978,27 @@
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-05T19:20:17+00:00",
     "blocked_note": "K683 percentile claim overturned by K686 (lookahead artifact). Topic-level relation not caught by explicit-K-ref scan in build_publication_candidates. Auto-retry from refill not desired; future general article requires errata framing built by main thread."
+  },
+  {
+    "id": "paper_review_mile_67c5ec83",
+    "title": "Paper review (Codex 24h-rule): 我們花了四個月每天收 SPY 五分鐘報酬——八十八天後的結論是：還不夠",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_67c5ec83 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_67c5ec83",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-05T20:08:14+00:00",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-06-05T20:08:53.303538+00:00",
+    "claim_session_id": "3a7e007328ce",
+    "started_at": "2026-06-05T20:08:53.670155+00:00",
+    "completed_at": "2026-06-05T20:13:31.307141+00:00",
+    "result": "Codex 24h-rule review CONDITIONAL_PASS: lookahead CLEAN, numbers MATCHED, overclaim MINOR. 3 issues 已回溯更正 article (LOG direction / power-curve specifics / EWMA warm-start note). knowledge 74816457 written, supabase synced."
   }
 ]

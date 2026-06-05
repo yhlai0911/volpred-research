@@ -32412,5 +32412,32 @@
       "production-article-correction-required",
       "research-honesty"
     ]
+  },
+  {
+    "item_id": "74816457",
+    "category": "review/paper_review",
+    "content": "Production article mile_67c5ec83 (K1318 HAR-RV-5min on SPY/0050.TW) 通過 Codex 24h-rule source-code review，verdict=CONDITIONAL_PASS。所有 QLIKE / DM-HLN t / p-value 數字與 results.json 完全相符；lookahead 經 shift(1) 與 OLS [0,t-1] 訓練窗驗證 CLEAN；EWMA 首日 warm-start 不影響 30 訓練窗口後啟動的 OOS 比較。三項 minor 修正已回溯更新文章：(1) HAR-LOG 機制方向從「系統性高估」改成「level-scale QLIKE 失真」(2) power-curve「n≈200 達 80%」具體數字移除、改示意（缺源碼支撐）(3) 細節區補註 EWMA warm-start 非污染 OOS。",
+    "evidence": [
+      "experiments/k1318/k1318.py:115-129 (EWMA warm-start)",
+      "experiments/k1318/k1318_results.json (SPY QLIKE 0.487 / DM t=-0.24 / p=0.81)",
+      "storage/reports/feed.json mile_67c5ec83.details.codex_reviews[-1]"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-06T04:13:23.779928",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "K1318",
+    "k_id": "K1318",
+    "reviewer": "codex-cli 0.135.0 (ChatGPT auth)",
+    "reviewer_source": "codex_exec_24h_rule",
+    "codex_verdict": "CONDITIONAL_PASS",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "HAR-RV",
+      "K1318",
+      "NULL-result"
+    ],
+    "article_id": "mile_67c5ec83",
+    "task_id": "paper_review_mile_67c5ec83"
   }
 ]
