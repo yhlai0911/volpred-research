@@ -32354,5 +32354,63 @@
     },
     "confidence": 0.85,
     "created_at": "2026-06-05T06:21:55.584187"
+  },
+  {
+    "k_id": "K-review-mile_379b51cc-v1",
+    "verdict": "FAIL",
+    "summary": "Codex 24h-rule review of production article mile_379b51cc (HAR 分解 NULL synthesis, published 2026-05-30) — Overall FAIL: K1303 數字與現行 v2_abd results.json 完全不符 (TX1 DM symbol flipped -0.91→+1.00; SPY DM symbol flipped +3.33→-0.94; J=0 41%→98.95%); 'DM-HLN/Harvey 1997' 口徑誤稱 (K868/K1303 actually use NW HAC); '局部充分性 (locally sufficient)' overclaim (failure to reject ≠ accept).",
+    "experiment_id": "review_mile_379b51cc",
+    "experiment_ids": [
+      "k868",
+      "k1301",
+      "k1303",
+      "k1309"
+    ],
+    "k_id_refs": [
+      "K868",
+      "K1301",
+      "K1303",
+      "K1309"
+    ],
+    "experiment_path": "storage/reports/mile_379b51cc.json",
+    "article_id": "mile_379b51cc",
+    "reviewer": "Codex CLI (gpt-5.4, primary path, read-only)",
+    "reviewer_source": "Codex review",
+    "codex_review": true,
+    "review_log": "/tmp/codex_review_mile_379b51cc.log",
+    "issues": [
+      {
+        "severity": "CRITICAL",
+        "type": "stale_numbers",
+        "k": "K1303",
+        "detail": "Article cites TX1 MSE HAR-CJ=1.489 vs HAR-RV=1.471 + DM=-0.91 + SPY DM=3.33 / MSE HAR-CJ=1.411 / J=0=41%. Current v2_abd results.json shows TX1 MSE both ~1.483 (basically tied) + DM=+1.00, SPY DM=-0.94 + MSE HAR-CJ=1.569, frac_jump_days=1.05% (J=0=98.95%). K1303 was revised to v2_abd (3-sigma jump threshold + 1-step lag) after article publish."
+      },
+      {
+        "severity": "HIGH",
+        "type": "method_misstatement",
+        "k": "K868,K1303",
+        "detail": "Article claims DM-HLN / Harvey (1997) but K868 (line 483) and K1303 (via model_evaluation.py:83) use only Newey-West HAC, no HLN small-sample correction. K1301/K1309 do have HLN. Mixed methodology should be stated explicitly."
+      },
+      {
+        "severity": "HIGH",
+        "type": "overclaim",
+        "k": "synthesis",
+        "detail": "Conclusion '局部充分性 (locally sufficient)' + Paper 4 theoretical-基礎 chain go beyond what 4 NULLs can support (failure to reject ≠ acceptance). Should be reframed as '在 K868/K1301/K1303/K1309 這四個 tested decompositions 上，未觀察到相對 HAR-RV 的穩健增量預測力'."
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "lookahead",
+        "k": "K868",
+        "detail": "K868 uses train s<t / features at t -> predict t+1 (not pure t-1 -> t). No leakage but loose lag discipline; CONDITIONAL_PASS."
+      }
+    ],
+    "remediation_required": "Production article (Supabase + Mirror + feed.json + reports/mile_379b51cc.json) must be corrected: (1) Pull current K1303 v2_abd numbers; (2) Rewrite K1303 narrative + figures (SPY no longer 'effective', it's NULL like TX1); (3) Restate methodology line: 'TX1 K1301/K1309 用 DM-HLN; K868/K1303 用 HAC-DM'; (4) Soften '局部充分性' to '4 tested decompositions show no robust improvement'. Filed as followup task paper_review_mile_379b51cc_fix_followup.",
+    "date": "2026-06-05",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "production-article-correction-required",
+      "research-honesty"
+    ]
   }
 ]
