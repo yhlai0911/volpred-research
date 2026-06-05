@@ -1,39 +1,40 @@
 {
-  "timestamp": "2026-06-05T00:12:46Z",
+  "timestamp": "2026-06-05T14:06:43+08:00",
   "all_ok": false,
   "checks": [
     {
-      "name": "ARTICLE_POOL",
+      "name": "ARTICLE POOL",
       "status": "ok",
-      "detail": "129 drafts total (research: 51, general: 78). All thresholds met (total>=12, research>=4, general>=8)."
+      "detail": "129 draft articles (general: 77, research: 52). All thresholds met (total>=12, research>=4, general>=8)."
     },
     {
-      "name": "STRATEGY_METRICS_FRESHNESS",
+      "name": "STRATEGY METRICS FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json does not exist (FILE_NOT_FOUND). Persistent missing-metrics condition."
+      "detail": "storage/strategy_metrics.json is MISSING (file does not exist). Persistent missing-metrics condition."
     },
     {
-      "name": "ERROR_LOG",
+      "name": "ERROR LOG",
+      "status": "alert",
+      "detail": "Entry dated 2026-06-05 (today) found: K851 jump-decomposition article metric definition ambiguity — Codex 24h review CONDITIONAL_PASS. Rule added: must distinguish jump event-count share vs jump variance share vs jump-RV contribution in articles."
+    },
+    {
+      "name": "PAPER TRADING GAPS",
       "status": "ok",
-      "detail": "Last entries dated 2026-06-03 (2 days ago). No entries from today (2026-06-05) or yesterday (2026-06-04)."
+      "detail": "15 strategies checked. No strategy has >2 portfolio_return=null in last 3 entries."
     },
     {
-      "name": "PAPER_TRADING_GAPS",
-      "status": "ok",
-      "detail": "No strategy had >2 nulls in last 3 portfolio_return entries."
-    },
-    {
-      "name": "GIT_STATUS",
+      "name": "GIT STATUS",
       "status": "ok",
       "detail": "0 uncommitted files."
     },
     {
-      "name": "KNOWLEDGE_SIZE",
+      "name": "KNOWLEDGE SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json has 2191 entries."
+      "detail": "2194 entries in storage/memory/knowledge.json."
     }
   ],
   "alerts": [
-    "metrics_missing: storage/strategy_metrics.json does not exist"
+    "metrics_missing: storage/strategy_metrics.json does not exist",
+    "error_log_today: 2026-06-05 entry — K851 jump-decomposition article Codex CONDITIONAL_PASS (metric definition ambiguity)"
   ]
 }
