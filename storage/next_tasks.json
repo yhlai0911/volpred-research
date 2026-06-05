@@ -21776,7 +21776,7 @@
     "title": "Paper review (Codex 24h-rule): K1404：1978 年的方法在台股 1,305 天測試後 — 尾部區間比點預測更可信",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_67f75353 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_67f75353",
@@ -21785,6 +21785,28 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-05T09:07:55+00:00"
+    "created_at": "2026-06-05T09:07:55+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-05T10:10:34.046306+00:00",
+    "claim_session_id": "3926f503a956",
+    "started_at": "2026-06-05T10:10:34.131939+00:00",
+    "completed_at": "2026-06-05T10:11:50.714525+00:00",
+    "result": "Codex review CONDITIONAL_PASS: K1404 article numerics align with results.json (^TWII n_test=1305, DM=-8.90, q95/q99 gaps +0.02/-0.15pp), HAR features all shift(1) so no lookahead. Main caveat is claim strength: tail-only usability is supported, but \"transportability\" remains provisional because evidence is Kupiec UC only, fixed-origin fit, and prior K1402/K1403 per-asset verdicts are NULL on point prediction."
+  },
+  {
+    "id": "paper_review_mile_54f79768",
+    "title": "Paper review (Codex 24h-rule): 把疫情那段拿掉之後，複雜模型還剩下什麼？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_54f79768 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_54f79768",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-05T10:12:49+00:00"
   }
 ]
