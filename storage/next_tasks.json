@@ -21867,7 +21867,7 @@
     "title": "Production article mile_379b51cc 回溯更正 (HAR null synthesis stale K1303 v1 numbers)",
     "description": "Codex 24h-rule review FAIL (knowledge K-review-mile_379b51cc-v1). Production article (5/30 published) cites K1303 v1 numbers that have been superseded by v2_abd (3-sigma threshold). Specific fixes needed:\n1. K1303 TX1 section: DM=-0.91 → +1.00 (sign flip), MSE both ~1.483 (basically tied not 1.489 vs 1.471), J=0=41% → 98.95% (jump_days=23/2186 with 3-sigma threshold).\n2. K1303 SPY section: DM=+3.33 → -0.94 (sign flip), MSE HAR-CJ=1.411 → 1.569, MSE HAR-RV=2.827 → 0.685. SPY conclusion '跳躍分解對美股有效!' is wrong — under v2_abd SPY also NULL, **remove cross-market 對比 entirely** or restate as both-NULL.\n3. Methodology line: 'TX1 K1301/K1309 用 DM-HLN; K868/K1303 用 HAC-DM' (don't claim DM-HLN globally).\n4. Soften '局部充分性 (locally sufficient)' → '在 4 個 tested decompositions 上未觀察到穩健增量預測力' (failure to reject ≠ accept).\n5. Update fig_1 / fig_2 with current numbers if numbers in figures changed.\n6. Sync feed.json + reports/mile_379b51cc.json + supabase (via uv run volpred ops publish-update or similar).\nDeliverable: updated article content + new revision note + commit.",
     "priority": 2,
-    "status": "claimed",
+    "status": "in_progress",
     "task_type": "daily_article",
     "source": "codex_review_followup",
     "article_id": "mile_379b51cc",
@@ -21881,6 +21881,7 @@
     "created_at": "2026-06-05T21:25:00+00:00",
     "claimed_by": "codex-cli",
     "claimed_at": "2026-06-05T14:18:05.322149+00:00",
-    "claim_session_id": "9ffaff4254d3"
+    "claim_session_id": "9ffaff4254d3",
+    "started_at": "2026-06-05T14:19:23.288715+00:00"
   }
 ]
