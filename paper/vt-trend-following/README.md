@@ -2,7 +2,7 @@
 
 **Full title**: Is Volatility Targeting Just Trend Following? Decomposing the Benefits of Volatility Targeting
 **Target Journal**: Journal of Portfolio Management / Financial Analysts Journal
-**Status**: body_v3 HIGH = 0 (after v3 H1–H4 fixes, 2026-05-23); 13 MEDIUM + 7 LOW carry-forward from R4; ready for R5 review before submission
+**Status**: body_v3 HIGH = 0 in latex/citation channels; **v4 Gemini review (2026-06-05) surfaced 2 NEW HIGH** (MDD retention >100% momentum-crash artifact + block bootstrap 252d insufficient for MDD long-memory) + 2 MEDIUM (M1 regime-shift, M2 VRP confound) + 3 missing citations. **NOT ready for submission** — pending `Paper3_v4_revision_gemini_2h`. Stage = **review/revision**.
 **Current body**: `body_v3.tex` / `main_v3.tex` (supersedes v1 and v2)
 **Pages**: 33 | **Citations**: 18
 

@@ -9610,5 +9610,10 @@
     "task_type": "platform_ops",
     "activity": "Hourly-19: blocked_until expired sweep 治本 — 寫 scripts/unblock_expired_blocked_tasks.py（ISO datetime 嚴謹比對）+ fix mark_task_blocked.py deprecated 自動 clear blocked_until（防 sweep 誤撈）。Apply: 3 unblock (codex_re_review platform_ops + 2 paper_review codex_quota_reset)。precision-fix NFP T+0 blocked_until → ISO 21:30+08:00（NFP release time, 22:07 fire 後 auto-unblock）。Mark NFP T-2 deprecated。Dispatcher pool: agentable 0→1, pending 5→7。下班 fire 接手派 codex_re_review。",
     "session": "hourly-19"
+  },
+  {
+    "timestamp": "2026-06-05T20:09",
+    "task_type": "paper_decision",
+    "title": "gen_paper_decision_P3 — P3 stage=review/revision, v4 Gemini 2 NEW HIGH, next=Paper3_v4_revision_gemini_2h"
   }
 ]
