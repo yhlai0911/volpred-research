@@ -1,41 +1,52 @@
 {
-  "timestamp": "2026-06-05T12:06:11Z",
-  "timestamp_tw": "2026-06-05T20:06:11+08:00",
+  "timestamp": "2026-06-05T18:05:35Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
-      "status": "ok",
-      "detail": "Total drafts: 129 (threshold: <12). Research-category drafts: 52 (threshold: <4). General-category drafts: 77 (threshold: <8). All pools healthy."
+      "status": "alert",
+      "detail": "Total drafts: 129 (OK). research drafts: 2 (<4 threshold). general drafts: 71 (OK). milestone drafts: 56.",
+      "counts": {
+        "total": 129,
+        "research": 2,
+        "general": 71,
+        "milestone": 56
+      }
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json does not exist (FILE_MISSING). This has been a persistent issue since at least 2026-05-31."
+      "detail": "storage/strategy_metrics.json does not exist (missing/never written)."
     },
     {
-      "name": "ERROR_LOG_RECENT",
+      "name": "ERROR_LOG",
       "status": "alert",
-      "detail": "Entry dated 2026-06-05 found in last 30 lines of docs/error_log.md: K851 jump-share variance vs event-count phrasing lesson (Codex CONDITIONAL_PASS). Oldest recent: 2026-06-03 auto-compact root cause correction."
+      "detail": "Entry dated 2026-06-05 (today) found: Jump-share variance vs event-count phrasing (K851/mile_02190b48). Codex 24h review CONDITIONAL_PASS. Rule added: distinguish jump event-count share vs jump variance share vs jump-to-total-RV in articles.",
+      "entries_today": [
+        "2026-06-05 — Jump-share variance vs event-count phrasing (K851 / mile_02190b48 Codex review)"
+      ]
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "Checked 15 strategies (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, _market_daily, adaptive_tier). No strategy has >2 nulls in last 3 portfolio_return entries."
+      "detail": "All 15 strategies checked. No strategy has >2 portfolio_return=null in last 3 entries.",
+      "strategies_checked": 15
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files. Working tree clean."
+      "detail": "0 uncommitted files."
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json contains 2194 entries."
+      "detail": "storage/memory/knowledge.json contains 2194 entries.",
+      "count": 2194
     }
   ],
   "alerts": [
-    "strategy_metrics.json MISSING — file has not existed since at least 2026-05-31",
-    "error_log entry from today (2026-06-05): K851 jump-share variance lesson, CONDITIONAL_PASS"
+    "research article pool low: 2 drafts (<4 threshold)",
+    "strategy_metrics.json missing (file does not exist)",
+    "error_log entry dated today (2026-06-05): Jump-share variance phrasing — K851/mile_02190b48 Codex CONDITIONAL_PASS"
   ]
 }
