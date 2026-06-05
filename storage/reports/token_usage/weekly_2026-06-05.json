@@ -1,0 +1,162 @@
+{
+  "report_type": "weekly",
+  "source": "claude_code_jsonl",
+  "week_range": "2026-06-05 → 2026-06-12",
+  "totals": {
+    "input_tokens": 17,
+    "output_tokens": 1927,
+    "cache_read_tokens": 162155,
+    "cache_create_tokens": 140460,
+    "billable_total": 142404,
+    "assistant_messages": 9,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.6043
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 17,
+      "output_tokens": 1927,
+      "cache_read_tokens": 162155,
+      "cache_create_tokens": 140460,
+      "messages": 9,
+      "estimated_cost_usd": 0.6043
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 8,
+      "output_tokens": 856,
+      "cache_read_tokens": 65146,
+      "cache_create_tokens": 71688,
+      "messages": 4,
+      "billable_total": 72552,
+      "estimated_cost_usd": 0.3012,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "token_report": {
+      "input_tokens": 5,
+      "output_tokens": 620,
+      "cache_read_tokens": 64791,
+      "cache_create_tokens": 36199,
+      "messages": 3,
+      "billable_total": 36824,
+      "estimated_cost_usd": 0.1645,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    },
+    "bash_other": {
+      "input_tokens": 4,
+      "output_tokens": 451,
+      "cache_read_tokens": 32218,
+      "cache_create_tokens": 32573,
+      "messages": 2,
+      "billable_total": 33028,
+      "estimated_cost_usd": 0.1386,
+      "emoji": "💭",
+      "description": "其他 Bash 操作"
+    }
+  },
+  "daily_breakdown": {
+    "2026-06-05": {
+      "input_tokens": 17,
+      "output_tokens": 1927,
+      "cache_read_tokens": 162155,
+      "cache_create_tokens": 140460,
+      "messages": 9,
+      "billable_total": 142404,
+      "estimated_cost_usd": 0.6043
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 4,
+      "billable_total": 72552,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 4,
+          "billable_total": 72552
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "non-text assistant message",
+          "messages": 2,
+          "billable_total": 36276
+        },
+        {
+          "name": "other",
+          "messages": 2,
+          "billable_total": 36276
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 2,
+          "billable_total": 36276
+        },
+        {
+          "name": "⏱ 開始 2026-06-05 執行 token 用量日報。",
+          "messages": 1,
+          "billable_total": 32480
+        },
+        {
+          "name": "今天是週五，需要額外執行週報。",
+          "messages": 1,
+          "billable_total": 3796
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 2,
+      "billable_total": 33028,
+      "family_breakdown": [
+        {
+          "name": "other bash",
+          "messages": 2,
+          "billable_total": 33028
+        }
+      ],
+      "prefix_breakdown": [
+        {
+          "name": "TZ='Asia/Taipei'",
+          "messages": 2,
+          "billable_total": 33028
+        }
+      ],
+      "top_first_lines": [
+        {
+          "name": "TZ='Asia/Taipei' date '+%Y-%m-%d %H:%M:%S'",
+          "messages": 1,
+          "billable_total": 32480
+        },
+        {
+          "name": "TZ='Asia/Taipei' date '+%u'",
+          "messages": 1,
+          "billable_total": 548
+        }
+      ]
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 1,
+      "cache_create_tokens": 140460,
+      "billable_total": 142404,
+      "cache_create_share_pct": 98.6,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "1731a95b-3126-46e2-b70d-e7243fdb49a4",
+          "messages": 9,
+          "billable_total": 142404,
+          "cache_create_tokens": 140460,
+          "cache_read_tokens": 162155,
+          "duration_minutes": 1.4,
+          "cache_create_share_pct": 98.6,
+          "first_ts": "2026-06-05T14:44:42.231000+00:00",
+          "last_ts": "2026-06-05T14:46:03.883000+00:00"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,257 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-06-05",
+  "week_range": "2026-06-05 → 2026-06-12",
+  "totals": {
+    "input_tokens": 14,
+    "output_tokens": 1420,
+    "cache_read_tokens": 64436,
+    "cache_create_tokens": 129582,
+    "billable_total": 131016,
+    "assistant_messages": 6,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.5266
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 14,
+      "output_tokens": 1420,
+      "cache_read_tokens": 64436,
+      "cache_create_tokens": 129582,
+      "messages": 6,
+      "estimated_cost_usd": 0.5266
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 6,
+      "output_tokens": 518,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 64436,
+      "messages": 2,
+      "billable_total": 64960,
+      "estimated_cost_usd": 0.2494,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "bash_other": {
+      "input_tokens": 4,
+      "output_tokens": 451,
+      "cache_read_tokens": 32218,
+      "cache_create_tokens": 32573,
+      "messages": 2,
+      "billable_total": 33028,
+      "estimated_cost_usd": 0.1386,
+      "emoji": "💭",
+      "description": "其他 Bash 操作"
+    },
+    "token_report": {
+      "input_tokens": 4,
+      "output_tokens": 451,
+      "cache_read_tokens": 32218,
+      "cache_create_tokens": 32573,
+      "messages": 2,
+      "billable_total": 33028,
+      "estimated_cost_usd": 0.1386,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 2,
+      "billable_total": 64960,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 2,
+          "billable_total": 64960
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "non-text assistant message",
+          "messages": 1,
+          "billable_total": 32480
+        },
+        {
+          "name": "other",
+          "messages": 1,
+          "billable_total": 32480
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 1,
+          "billable_total": 32480
+        },
+        {
+          "name": "⏱ 開始 2026-06-05 執行 token 用量日報。",
+          "messages": 1,
+          "billable_total": 32480
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 2,
+      "billable_total": 33028,
+      "family_breakdown": [
+        {
+          "name": "other bash",
+          "messages": 2,
+          "billable_total": 33028
+        }
+      ],
+      "prefix_breakdown": [
+        {
+          "name": "TZ='Asia/Taipei'",
+          "messages": 2,
+          "billable_total": 33028
+        }
+      ],
+      "top_first_lines": [
+        {
+          "name": "TZ='Asia/Taipei' date '+%Y-%m-%d %H:%M:%S'",
+          "messages": 1,
+          "billable_total": 32480
+        },
+        {
+          "name": "TZ='Asia/Taipei' date '+%u'",
+          "messages": 1,
+          "billable_total": 548
+        }
+      ]
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 1,
+      "cache_create_tokens": 129582,
+      "billable_total": 131016,
+      "cache_create_share_pct": 98.9,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "1731a95b-3126-46e2-b70d-e7243fdb49a4",
+          "messages": 6,
+          "billable_total": 131016,
+          "cache_create_tokens": 129582,
+          "cache_read_tokens": 64436,
+          "duration_minutes": 0.1,
+          "cache_create_share_pct": 98.9,
+          "first_ts": "2026-06-05T14:44:42.231000+00:00",
+          "last_ts": "2026-06-05T14:44:48.458000+00:00"
+        }
+      ]
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "6fbd63c",
+      "message": "Ops patrol report 2026-06-05T12:06Z"
+    },
+    {
+      "sha": "bcaaf4d",
+      "message": "Ops patrol report 2026-06-05T14:06Z"
+    },
+    {
+      "sha": "adb5cbf",
+      "message": "email-11706-7ef167 | mile_71dd116b lazypack poster set (3 panels) appended"
+    },
+    {
+      "sha": "043fb1e",
+      "message": "ops(hourly 08:21): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    },
+    {
+      "sha": "3c1b37c",
+      "message": "ops: add fb_followup_cpi_20260611_mile_71dd116b task for chrome FB post"
+    },
+    {
+      "sha": "41c7be6",
+      "message": "event_cpi_20260611 | T-6 CPI 6/11 波動前瞻 + VIX term structure baseline 對比"
+    },
+    {
+      "sha": "8294a01",
+      "message": "ops(hourly 07:07): K1418 trending_repost close — FB followup split + Gemini-3-we"
+    },
+    {
+      "sha": "2f0aed7",
+      "message": "K1418 trending_repost: S&P 500 集中度 × vol 結構不對稱 dispersion analysis"
+    },
+    {
+      "sha": "b92ca6a",
+      "message": "ops(hourly 06:07): PHASE-Z sweep — codex-cli leverage-direction submission packa"
+    },
+    {
+      "sha": "05d62ea",
+      "message": "K1417 paper3 H2 | stationary bootstrap rejects Gemini H2 — retention robust to b"
+    },
+    {
+      "sha": "346bb49",
+      "message": "ops(hourly 05:16): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    },
+    {
+      "sha": "305a56c",
+      "message": "k1417_paper3_h2 | stationary bootstrap MDD CI variant for Paper 3 Gemini v4 H2"
+    },
+    {
+      "sha": "a24bffe",
+      "message": "gen_exp_Gemini_審查 | Paper 3 vt-trend-following Gemini v4 third-party review (Maj"
+    },
+    {
+      "sha": "7216257",
+      "message": "gen_paper_decision_P8 | P8 Path B closure — already executed 2026-05-13 main_v3."
+    },
+    {
+      "sha": "95aee7f",
+      "message": "event_jobs_20260605 | NFP 2026-06-05 preview article published mile_8d8b8877"
+    },
+    {
+      "sha": "3801081",
+      "message": "paper_review_mile_02190b48 | Codex 24h CONDITIONAL_PASS for K851 jump-dynamics a"
+    },
+    {
+      "sha": "0cc3afd",
+      "message": "K1416_article_research | research-audience article published mile_c9dc52b5"
+    },
+    {
+      "sha": "d1744a7",
+      "message": "Paper4_body_step_11 | abstract + §9 eleven->thirteen sweep"
+    },
+    {
+      "sha": "1286324",
+      "message": "paper9_main_a4f_edge_review | Paper 9 K1378 vs K1393 review — paper claim verifi"
+    },
+    {
+      "sha": "a5b43e7",
+      "message": "ops(hourly 21:07-21:34): K1378 research article + paper 9 follow-up queued"
+    },
+    {
+      "sha": "a65d691",
+      "message": "K1378 article: GJR beats A4f in all sub-periods, SF1 confirmed"
+    },
+    {
+      "sha": "7e30736",
+      "message": "ops(hourly 21:07): PHASE-Z commit K1416 general article artefacts + pool rebuild"
+    },
+    {
+      "sha": "1f9ab16",
+      "message": "ops(hourly 20:07): candidates pool rebuild + refill +K1416_article_general"
+    },
+    {
+      "sha": "9a7d030",
+      "message": "ops(hourly 19:23): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    },
+    {
+      "sha": "8a4a355",
+      "message": "K1416 paper3-hln-retrofit | TW0050-N225 5/5 HLN-sig (CONDITIONAL_PASS)"
+    },
+    {
+      "sha": "cf11c1c",
+      "message": "ops(hourly-18): K1414 paper3-hln-retrofit kid_collision triage → K1416 rename"
+    },
+    {
+      "sha": "2fcb3fe",
+      "message": "Ops patrol report 2026-06-05T00:13Z"
+    }
+  ]
+}
