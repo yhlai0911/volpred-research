@@ -2,9 +2,9 @@
 
 **Full title**: Is Volatility Targeting Just Trend Following? Decomposing the Benefits of Volatility Targeting
 **Target Journal**: Journal of Portfolio Management / Financial Analysts Journal
-**Status**: body_v3 HIGH = 0 in latex/citation channels; **v4 Gemini review (2026-06-05) surfaced 2 NEW HIGH** (MDD retention >100% momentum-crash artifact + block bootstrap 252d insufficient for MDD long-memory) + 2 MEDIUM (M1 regime-shift, M2 VRP confound) + 3 missing citations. **NOT ready for submission** — pending `Paper3_v4_revision_gemini_2h`. Stage = **review/revision**.
+**Status**: `Paper3_v4_revision_gemini_2h` 已整合進 `body_v3.tex`: H1 以保守口徑重寫（$>100\%$ retention 不再過度解讀為獨立增強機制）、H2 補入 stationary-bootstrap robustness 說明（K1417 task audit）、M1/M2 加入 regime/safe-haven 與 VRP confound 限定語、3 個缺 citation 已補。**Ready for next review pass**；是否可投稿仍取決於下一輪審查。 Stage = **review/revision**.
 **Current body**: `body_v3.tex` / `main_v3.tex` (supersedes v1 and v2)
-**Pages**: 33 | **Citations**: 18
+**Pages**: 33 | **Citations**: 21
 
 ---
 
@@ -85,5 +85,12 @@ See `scripts/README.md` for dependencies and full reproduction sequence.
 - **B.3** MDD retention only reported for 5 equity assets; no non-equity extension.
 - **Section 3.4 sector r=0.163 NS** traceability — text claim has no dedicated K experiment; need K1179 (11 SPDR sectors) or explicit text-only footnote before submission.
 - **H5** K687/K688 reconciliation — the per-asset VT vs VT-on-blend methodology gap needs footnote in Section 4; K697 (VIX direction vs magnitude) should be cited in Section 4.2.
+
+**Addressed in `Paper3_v4_revision_gemini_2h`**:
+
+- H1 momentum-crash artifact: body text now treats $>100\%$ retention as non-erosion evidence, not proof of a stronger standalone insurance channel.
+- H2 bootstrap long-memory concern: methodology / Table 6 note / discussion now document stationary-bootstrap robustness via K1417 task audit.
+- M1 split-sample strengthening: text now attributes part of the increase to regime and safe-haven loading shifts rather than stronger causal identification.
+- M2 VRP confound: insurance-pricing discussion now cites VIX as a reduced-form bundle of expected volatility, VRP, and downside-protection demand.
 
 See `reproducibility_audit/diff_report.md`, `experiments.md`, and `results/README.md` for the full forensic trail.
