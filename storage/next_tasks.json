@@ -21683,7 +21683,7 @@
     "title": "Paper review (Codex 24h-rule): 同樣遇到壞消息，台股 5 檔代表股的波動反應差了快 7 倍",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_cc9c9573 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_cc9c9573",
@@ -21692,7 +21692,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-05T06:08:25+00:00"
+    "created_at": "2026-06-05T06:08:25+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-05T08:02:18.141908+00:00",
+    "claim_session_id": "ce7ada2b1bb4",
+    "started_at": "2026-06-05T08:02:23.123738+00:00",
+    "completed_at": "2026-06-05T08:03:07.918317+00:00",
+    "result": "Codex review: CONDITIONAL_PASS. Article numerics match K1302 TWA/TWC cells: 0056 γ=0.0668 vs 2383 γ=0.00945 (~7.1x), 2454=0.0406, 2317=0.0320, 2886=0.0379, and 0056 TWC γ=0.208. No lookahead issue because this is in-sample GJR asymmetry estimation, not a forecasting signal. Main caveat: the article relies on point-estimate ranking; several γ t-stats are modest, so claims should stay descriptive rather than causal/tradable."
   },
   {
     "id": "paper_review_mile_123a3855",
@@ -21743,7 +21749,7 @@
     "title": "K1417: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1417 has verdict signal (score=1, reasons=None) but no general article in feed.json.  Verdict preview: ",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1417",
@@ -21752,6 +21758,11 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-05T07:16:23+00:00"
+    "created_at": "2026-06-05T07:16:23+00:00",
+    "claimed_by": "hourly-16",
+    "claimed_at": "2026-06-05T08:09:23.949139+00:00",
+    "claim_session_id": "37826fa81912",
+    "started_at": "2026-06-05T08:09:47.973021+00:00",
+    "result_summary": "Article published as mile_2849a7b5 (draft, audience=research)"
   }
 ]
