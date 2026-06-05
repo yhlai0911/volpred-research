@@ -21937,7 +21937,7 @@
     "title": "Paper review (Codex 24h-rule): 類股輪動加波動目標：每日再平衡能贏，但月頻就沒戲——一份策略上架前的八關體檢",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_26d8616d needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_26d8616d",
@@ -21946,6 +21946,28 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-05T17:17:22+00:00"
+    "created_at": "2026-06-05T17:17:22+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-05T17:28:16.451028+00:00",
+    "claim_session_id": "d489b3d3fa85",
+    "started_at": "2026-06-05T17:28:24.163292+00:00",
+    "completed_at": "2026-06-05T17:30:02.287934+00:00",
+    "result": "Codex review found K562 source/results/article drift: source now uses lagged t-1 signals, but committed results and the published article still rely on pre-lag favorable numbers. The article's conditional-recommend verdict therefore is not source-verifiable at HEAD and materially understates the known lag-fix risk documented in error_log / lag_fix_reapply."
+  },
+  {
+    "id": "K683_article_general",
+    "title": "K683: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K683 (★★★ Percentile vs Piecewise VIX regime — DM t=3.74 Harvey PASS) has verdict signal (score=4) and research-audience article (mile_839322eb) but missing general-audience version. Goal: rewrite research piece in plain-language angle (regime-switching trade-off, when percentile beats piecewise, intuition behind 11/35 composite ranking) targeting retail readers. Base: storage/reports/mile_839322eb.json + experiments/K683/. Audience: general. Tone: educational + actionable, no jargon walls. Length: 1200-2000 字繁中. Follow .claude/skills/anti-ai-style + .claude/skills/feed-publisher gates.",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K683",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-05T18:16:19.920123+00:00"
   }
 ]
