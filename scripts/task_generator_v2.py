@@ -323,8 +323,7 @@ def generate_paper_decision_tasks(
 # ---------------------------------------------------------------------------
 
 TODO_PATTERN = re.compile(
-    r"(TODO|\\todo\{[^}]*\}|\[PLACEHOLDER\]|\[FIXME\]|\[TBD\])",
-    re.IGNORECASE
+    r"(\bTODO\b|\\todo\{[^}]*\}|\[PLACEHOLDER\]|\[FIXME\]|\[TBD\])"
 )
 
 

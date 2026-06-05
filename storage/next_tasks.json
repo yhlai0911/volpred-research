@@ -21231,7 +21231,7 @@
     "description": "Found 4 TODO/\\todo{}/PLACEHOLDER markers in paper/prg-periodic-garch/main.tex that need resolution.\nSample:\n  L59: Several approaches have been proposed to exploit session-level information. \\citet{Bollerslev1996} introduce periodic st\n  L351: Three limitations merit acknowledgment. First, the OHLC-based session decomposition uses squared returns rather than rea\n  L637: \\bibitem[Todorova and Sou\\v{c}ek(2014)]{Todorova2014}\n  L638: Todorova, N. and Sou\\v{c}ek, M. (2014).",
     "task_type": "paper_body",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "paper-body",
@@ -21242,7 +21242,13 @@
     "generated_at": "2026-06-04T17:34:25.734297+00:00",
     "paper_slug": "prg-periodic-garch",
     "tex_file": "paper/prg-periodic-garch/main.tex",
-    "todo_count": 4
+    "todo_count": 4,
+    "claimed_by": "hourly-10",
+    "claimed_at": "2026-06-05T02:09:14.209724+00:00",
+    "claim_session_id": "14495b737dd0",
+    "started_at": "2026-06-05T02:10:08.035744+00:00",
+    "completed_at": "2026-06-05T02:11:05.321535+00:00",
+    "result": "task_generator_v2 bug fixed: TODO_PATTERN IGNORECASE+no word boundary 把 'Todorova' 作者名誤判為 TODO marker。實際 grep '\\bTODO\\b' 0 matches。修 scripts/task_generator_v2.py L325 加 word boundary + 拿掉 IGNORECASE。8 unit assertions PASS。"
   },
   {
     "id": "gen_paper_body_prg-periodic-garch_main_pre_v3_m2",
@@ -21250,7 +21256,7 @@
     "description": "Found 4 TODO/\\todo{}/PLACEHOLDER markers in paper/prg-periodic-garch/main_pre_v3_m2.tex that need resolution.\nSample:\n  L59: Several approaches have been proposed to exploit session-level information. \\citet{Bollerslev1996} introduce periodic st\n  L311: Three limitations merit acknowledgment. First, the OHLC-based session decomposition uses squared returns rather than rea\n  L449: \\bibitem[Todorova and Soucek(2014)]{Todorova2014}\n  L450: Todorova, N. and Soucek, M. (2014).",
     "task_type": "paper_body",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "paper-body",
@@ -21261,7 +21267,13 @@
     "generated_at": "2026-06-04T17:34:25.735467+00:00",
     "paper_slug": "prg-periodic-garch",
     "tex_file": "paper/prg-periodic-garch/main_pre_v3_m2.tex",
-    "todo_count": 4
+    "todo_count": 4,
+    "claimed_by": "hourly-10",
+    "claimed_at": "2026-06-05T02:11:08.082563+00:00",
+    "claim_session_id": "1e9c8f04c4e1",
+    "started_at": "2026-06-05T02:11:08.347875+00:00",
+    "completed_at": "2026-06-05T02:11:08.749008+00:00",
+    "result": "task_generator_v2 false positive (Todorova 誤判)；pattern bug fixed in same fire"
   },
   {
     "id": "gen_paper_body_volatility-absorption_main_v2",
@@ -21269,7 +21281,7 @@
     "description": "Found 5 TODO/\\todo{}/PLACEHOLDER markers in paper/volatility-absorption/main_v2.tex that need resolution.\nSample:\n  L75: Our findings connect to several strands of the literature. First, the volatility clustering literature \\citep{engle1982,\n  L96: \\citet{bollerslev2009} document a significant variance risk premium (VRP)---the spread between risk-neutral and physical\n  L460: This finding is important because it clarifies a potential misconception. Some studies examining short crisis sub-sample\n  L745: \\bibitem[Todorov(2010)]{todorov2010}\n  L746: Todorov, V. (2010). Variance risk-premium dynamics: The role of jumps. \\textit{Review of Financial Studies}, 23(1), 345-",
     "task_type": "paper_body",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "paper-body",
@@ -21280,7 +21292,13 @@
     "generated_at": "2026-06-04T17:34:25.749958+00:00",
     "paper_slug": "volatility-absorption",
     "tex_file": "paper/volatility-absorption/main_v2.tex",
-    "todo_count": 5
+    "todo_count": 5,
+    "claimed_by": "hourly-10",
+    "claimed_at": "2026-06-05T02:11:09.051524+00:00",
+    "claim_session_id": "97ab47413f44",
+    "started_at": "2026-06-05T02:11:09.429790+00:00",
+    "completed_at": "2026-06-05T02:11:09.721657+00:00",
+    "result": "task_generator_v2 false positive (Todorova 誤判)；pattern bug fixed in same fire"
   },
   {
     "id": "gen_paper_body_volatility-absorption_main_v3",
@@ -21288,7 +21306,7 @@
     "description": "Found 5 TODO/\\todo{}/PLACEHOLDER markers in paper/volatility-absorption/main_v3.tex that need resolution.\nSample:\n  L75: Our findings connect to several strands of the literature. First, the volatility clustering literature \\citep{engle1982,\n  L96: \\citet{bollerslev2009} document a significant variance risk premium (VRP)---the spread between risk-neutral and physical\n  L460: This finding is important because it clarifies a potential misconception. Some studies examining short crisis sub-sample\n  L745: \\bibitem[Todorov(2010)]{todorov2010}\n  L746: Todorov, V. (2010). Variance risk-premium dynamics: The role of jumps. \\textit{Review of Financial Studies}, 23(1), 345-",
     "task_type": "paper_body",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "paper-body",
@@ -21299,7 +21317,13 @@
     "generated_at": "2026-06-04T17:34:25.755745+00:00",
     "paper_slug": "volatility-absorption",
     "tex_file": "paper/volatility-absorption/main_v3.tex",
-    "todo_count": 5
+    "todo_count": 5,
+    "claimed_by": "hourly-10",
+    "claimed_at": "2026-06-05T02:11:10.054934+00:00",
+    "claim_session_id": "ffb56c885d33",
+    "started_at": "2026-06-05T02:11:10.488026+00:00",
+    "completed_at": "2026-06-05T02:11:10.790583+00:00",
+    "result": "task_generator_v2 false positive (Todorova 誤判)；pattern bug fixed in same fire"
   },
   {
     "id": "gen_paper_body_vt-insurance-cost_main",
@@ -21307,7 +21331,7 @@
     "description": "Found 3 TODO/\\todo{}/PLACEHOLDER markers in paper/vt-insurance-cost/main.tex that need resolution.\nSample:\n  L205: Second, VVIX conditioning does not improve the volatility forecast itself; rather, it identifies \\emph{when forecasting \n  L236: \\bibitem[Todorov(2010)]{todorov2010}\n  L237: Todorov, V., 2010. Variance risk-premium dynamics: The role of jumps. \\textit{Review of Financial Studies} 23, 345--383.",
     "task_type": "paper_body",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "paper-body",
@@ -21318,7 +21342,13 @@
     "generated_at": "2026-06-04T17:34:25.758591+00:00",
     "paper_slug": "vt-insurance-cost",
     "tex_file": "paper/vt-insurance-cost/main.tex",
-    "todo_count": 3
+    "todo_count": 3,
+    "claimed_by": "hourly-10",
+    "claimed_at": "2026-06-05T02:11:11.185648+00:00",
+    "claim_session_id": "bc0faee88321",
+    "started_at": "2026-06-05T02:11:11.506494+00:00",
+    "completed_at": "2026-06-05T02:11:11.875236+00:00",
+    "result": "task_generator_v2 false positive (Todorova 誤判)；pattern bug fixed in same fire"
   },
   {
     "id": "event_cpi_20260611",
