@@ -1,0 +1,123 @@
+{
+  "experiment_id": "k1410_ai_capex_iv_divergence",
+  "title": "AI CapEx 暴衝 vs 波動率背離：市場真的 priced in AI ROI 質疑了嗎？",
+  "generated_at": "2026-06-05T21:18:48.720401+00:00",
+  "data_sources": [
+    "yfinance (stock prices, quarterly cashflow)",
+    "^VIX"
+  ],
+  "tickers": [
+    "META",
+    "MSFT",
+    "GOOGL",
+    "AMZN",
+    "NVDA"
+  ],
+  "capex_summary": {
+    "META": {
+      "latest_quarter_bn": 19.0,
+      "latest_quarter_date": "2026-03-31",
+      "ttm_bn": 75.75,
+      "yoy_growth_pct": 46.8,
+      "ttm_yoy_growth_pct": null
+    },
+    "MSFT": {
+      "latest_quarter_bn": 30.88,
+      "latest_quarter_date": "2026-03-31",
+      "ttm_bn": 97.22,
+      "yoy_growth_pct": 84.4,
+      "ttm_yoy_growth_pct": null
+    },
+    "GOOGL": {
+      "latest_quarter_bn": 35.67,
+      "latest_quarter_date": "2026-03-31",
+      "ttm_bn": 109.92,
+      "yoy_growth_pct": 107.4,
+      "ttm_yoy_growth_pct": null
+    },
+    "AMZN": {
+      "latest_quarter_bn": 44.2,
+      "latest_quarter_date": "2026-03-31",
+      "ttm_bn": 151.0,
+      "yoy_growth_pct": 76.7,
+      "ttm_yoy_growth_pct": null
+    },
+    "NVDA": {
+      "latest_quarter_bn": 1.76,
+      "latest_quarter_date": "2026-04-30",
+      "ttm_bn": 6.57,
+      "yoy_growth_pct": 43.2,
+      "ttm_yoy_growth_pct": null
+    }
+  },
+  "vol_comparison": {
+    "META": {
+      "h1_2024_rv_pct": 36.7,
+      "h1_2025_rv_pct": 38.9,
+      "2026ytd_rv_pct": 37.4,
+      "vol_change_2024_to_2025_pct": 2.2
+    },
+    "MSFT": {
+      "h1_2024_rv_pct": 18.9,
+      "h1_2025_rv_pct": 27.5,
+      "2026ytd_rv_pct": 29.7,
+      "vol_change_2024_to_2025_pct": 8.6
+    },
+    "GOOGL": {
+      "h1_2024_rv_pct": 27.0,
+      "h1_2025_rv_pct": 35.5,
+      "2026ytd_rv_pct": 28.0,
+      "vol_change_2024_to_2025_pct": 8.5
+    },
+    "AMZN": {
+      "h1_2024_rv_pct": 23.5,
+      "h1_2025_rv_pct": 35.2,
+      "2026ytd_rv_pct": 28.3,
+      "vol_change_2024_to_2025_pct": 11.7
+    },
+    "NVDA": {
+      "h1_2024_rv_pct": 47.7,
+      "h1_2025_rv_pct": 60.2,
+      "2026ytd_rv_pct": 36.0,
+      "vol_change_2024_to_2025_pct": 12.5
+    }
+  },
+  "price_stats": {
+    "META": {
+      "cumulative_return_2023_to_2026_pct": 407.1,
+      "max_drawdown_pct": -34.2
+    },
+    "MSFT": {
+      "cumulative_return_2023_to_2026_pct": 83.8,
+      "max_drawdown_pct": -33.9
+    },
+    "GOOGL": {
+      "cumulative_return_2023_to_2026_pct": 321.1,
+      "max_drawdown_pct": -29.8
+    },
+    "AMZN": {
+      "cumulative_return_2023_to_2026_pct": 195.7,
+      "max_drawdown_pct": -30.9
+    },
+    "NVDA": {
+      "cumulative_return_2023_to_2026_pct": 1430.9,
+      "max_drawdown_pct": -36.9
+    }
+  },
+  "vix_stats": {
+    "2023_avg": 16.9,
+    "2024_avg": 15.6,
+    "2025_avg": 19.0,
+    "2026ytd_avg": 19.5
+  },
+  "figures": {
+    "fig1": "figures/fig_price_and_rv.png",
+    "fig2": "figures/fig_capex_vs_rv.png"
+  },
+  "key_findings": [
+    "META + MSFT + GOOGL + AMZN + NVDA TTM CapEx 合計 $440B",
+    "H1 2025 平均 30日實現波動率 39.5%（相較 2022/2023 熊市顯著低）",
+    "2025 年 VIX 全年均值 19.0，為近年相對低點",
+    "META 自 2023 至今累計漲幅 +407%，同期 CapEx YoY 持續擴張"
+  ]
+}
