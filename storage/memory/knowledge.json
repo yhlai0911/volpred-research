@@ -32439,5 +32439,17 @@
     ],
     "article_id": "mile_67c5ec83",
     "task_id": "paper_review_mile_67c5ec83"
+  },
+  {
+    "item_id": "47bd47db",
+    "category": "article_review",
+    "content": "[K1410_review] Codex 24h review of mile_d1609f75 (AI CapEx vs IV divergence trending article).\n\nVERDICT: FAIL  |  LOOKAHEAD_RISK: HIGH  |  OVERCLAIM_RISK: HIGH  |  REPRODUCIBILITY: 2/5\nReviewer: codex-cli-0.135 (ChatGPT auth)\nExperiment: experiments/k1410_ai_capex_iv_divergence/\nReview artifact: experiments/k1410_ai_capex_iv_divergence/review_codex_24h.md\nArticle: mile_d1609f75 (published 2026-06-05T21:21+08)\n\n3 issues raised by Codex:\n1. AI-specific attribution unsupported (CRITICAL): run.py:35 pulls total CapEx cashflow, no AI-segmented breakdown. Article wrote 'AI CapEx' / 'AI infra spend' without 10-Q/10-K segment evidence.\n2. Ex-post window mixing (HIGH): run.py:103/137/155/171 stitches 2026 Q1 TTM CapEx + 2023-2026 cumulative returns + 2024 VIX mean + 2025 H1 RV into one narrative without event-time alignment.\n3. Overclaim without formal test + proxy mismatch (HIGH): no formal statistical test (none of Diebold-Mariano, Harvey-adjustment, regression, structural-break test) backing the 'vol did not widen to match AI ROI uncertainty' claim. Single-name realized vol vs index VIX is an asymmetric proxy pair.\n\nRemediation applied (hourly-06 main thread, article revised in place not unpublished):\n- Replaced 'AI infrastructure spend' wording with 'overall CapEx (includes but not limited to AI infrastructure)'\n- Replaced 'lowest since 2017' with 'low end of 2022-2026 sample window'\n- Softened 'vol did not widen to match AI ROI uncertainty' to descriptive observation + explicit no-formal-test caveat\n- Strengthened RV vs IV proxy disclosure: single-name RV + index VIX mismatch caveat appended\n\nBacklog (not this fire scope): K1411 candidate = 10-K segment-level CapEx attribution; K1412 candidate = ATM IV term structure for cleaner vol-uncertainty test.",
+    "evidence": [
+      "experiments/k1410_ai_capex_iv_divergence/review_codex_24h.md",
+      "storage/reports/feed.json#mile_d1609f75",
+      "paper_review_mile_d1609f75"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-06-06T06:13:00.515915"
   }
 ]

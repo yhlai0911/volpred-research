@@ -21527,7 +21527,7 @@
   },
   {
     "id": "Paper3_v4_revision_gemini_2h",
-    "status": "pending",
+    "status": "succeeded",
     "priority": 3,
     "task_type": "paper_body",
     "title": "Paper 3 (vt-trend-following) v4 revision: address Gemini HIGH-1 (MDD mechanical artifact) + HIGH-2 (stationary bootstrap)",
@@ -21542,7 +21542,13 @@
     "h2_completed": true,
     "h2_verdict": "H2 NOT SUPPORTED — retention robust, lo_shift +9.28pp mean (n_material=0/5)",
     "h2_completed_at": "2026-06-04T22:22:09Z",
-    "h2_knowledge_id": "K1417"
+    "h2_knowledge_id": "K1417",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-05T21:47:09.204496+00:00",
+    "claim_session_id": "d2c2df449de5",
+    "started_at": "2026-06-05T21:47:14.649106+00:00",
+    "completed_at": "2026-06-05T21:55:18.105062+00:00",
+    "result": "Rewrote body_v3 to qualify >100% retention as non-erosion, added K1417 stationary-bootstrap robustness language, softened split-sample/VRP claims, and added 3 missing citations. README status updated for next review pass; LaTeX compile remains blocked by missing local font PingFang TC."
   },
   {
     "id": "paper_review_mile_8d8b8877",
@@ -22027,5 +22033,27 @@
     "started_at": "2026-06-05T21:14:51.475903+00:00",
     "completed_at": "2026-06-05T21:24:28.521629+00:00",
     "result": "Published mile_d1609f75 '五家公司砸了四千四百億，波動率卻睡著了' (general audience, trending_repost). Anti-AI gate PASS (1 minor warn). Evidence: yfinance MAG7 CapEx YoY (GOOGL+107% / MSFT+84% / AMZN+77%) vs realized vol 27-60% range; VIX 2024 avg 15.6 multi-year low. FB awaiting_interactive_session (hourly cron no Chrome)."
+  },
+  {
+    "id": "paper_review_mile_d1609f75",
+    "title": "Paper review (Codex 24h-rule): 五家公司砸了四千四百億，波動率卻睡著了",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_d1609f75 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_d1609f75",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-05T22:07:51+00:00",
+    "claimed_by": "hourly-06",
+    "claimed_at": "2026-06-05T22:08:11.714035+00:00",
+    "claim_session_id": "56faf1d444f8",
+    "started_at": "2026-06-05T22:13:07.892107+00:00",
+    "completed_at": "2026-06-05T22:13:08.086872+00:00",
+    "result": "Codex 24h review FAIL (lookahead HIGH + overclaim HIGH). 3 issues: AI-specific attribution / ex-post window mix / overclaim without DM-Harvey test. Remediation applied to feed.json (4 patches softening claims). Knowledge K47bd47db + review artifact experiments/k1410_ai_capex_iv_divergence/review_codex_24h.md."
   }
 ]
