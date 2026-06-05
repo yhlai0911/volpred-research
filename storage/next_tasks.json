@@ -21271,7 +21271,7 @@
     "description": "Paper P9 (garch-x-vix) is in a pending/amber state. Status excerpt: 🟡 submitted under review, snapshot 53.8% / live 84.6%, **shelf errata ready**",
     "task_type": "paper_decision",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "paper-decision",
@@ -21281,7 +21281,13 @@
     "created_at": "2026-06-04T17:34:25.719571+00:00",
     "generated_at": "2026-06-04T17:34:25.719572+00:00",
     "paper_id": "P9",
-    "paper_name": "garch-x-vix"
+    "paper_name": "garch-x-vix",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-05T16:26:26.161079+00:00",
+    "claim_session_id": "2235db4d27f5",
+    "started_at": "2026-06-05T16:26:34.777449+00:00",
+    "completed_at": "2026-06-05T16:27:40.835390+00:00",
+    "result": "Decision recorded: keep P9 submitted/amber, freeze main.tex pre-R1, and restrict pre-review work to replication-packet cleanup plus queued wording fixes. Added review_history/v7 decision memo with explicit triggers for when body edits may reopen."
   },
   {
     "id": "gen_paper_body_prg-periodic-garch_main",
@@ -21925,5 +21931,21 @@
     "started_at": "2026-06-05T16:11:23.797466+00:00",
     "completed_at": "2026-06-05T16:18:40.473839+00:00",
     "result": "mile_26d8616d published [general audience, K562 八關體檢驗證], 2 charts uploaded, URL 200, supabase synced"
+  },
+  {
+    "id": "paper_review_mile_26d8616d",
+    "title": "Paper review (Codex 24h-rule): 類股輪動加波動目標：每日再平衡能贏，但月頻就沒戲——一份策略上架前的八關體檢",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_26d8616d needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_26d8616d",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-05T17:17:22+00:00"
   }
 ]
