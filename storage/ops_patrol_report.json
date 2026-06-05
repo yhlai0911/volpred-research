@@ -1,41 +1,39 @@
 {
-  "timestamp": "2026-06-04T18:11:43Z",
-  "patrol_time_taipei": "2026-06-05 02:11:43",
+  "timestamp": "2026-06-05T00:12:46Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "Total drafts: 129 (>=12 OK). Research audience: 51 (>=4 OK). General audience: 78 (>=8 OK)."
+      "detail": "129 drafts total (research: 51, general: 78). All thresholds met (total>=12, research>=4, general>=8)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json does not exist (FILE_MISSING). Cannot assess freshness — file absent entirely. Counts as stale (>26h)."
+      "detail": "storage/strategy_metrics.json does not exist (FILE_NOT_FOUND). Persistent missing-metrics condition."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated 2026-06-04 or 2026-06-05 (today). Entries dated 2026-06-03 (yesterday): compact auto-trigger root-cause trilogy — CLAUDE_AUTOCOMPACT_PCT_OVERRIDE placed in wrong location (settings.json env block not read by harness); fix applied via ~/.zshrc export. All items resolved/documented.",
-      "recent_entry_dates": ["2026-06-03"]
+      "detail": "Last entries dated 2026-06-03 (2 days ago). No entries from today (2026-06-05) or yesterday (2026-06-04)."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "15 list-structured strategies checked. No strategy has >2 null portfolio_return in last 3 entries. Note: dict-keyed strategies (e.g. _market_daily date-indexed) are excluded from this check — see previous patrol for _market_daily all-null warning which remains unresolved at pipeline level."
+      "detail": "No strategy had >2 nulls in last 3 portfolio_return entries."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files. Working tree clean."
+      "detail": "0 uncommitted files."
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json contains 2191 entries."
+      "detail": "storage/memory/knowledge.json has 2191 entries."
     }
   ],
   "alerts": [
-    "strategy_metrics_missing: storage/strategy_metrics.json does not exist — investigate whether metrics refresh pipeline was ever run or file was deleted"
+    "metrics_missing: storage/strategy_metrics.json does not exist"
   ]
 }
