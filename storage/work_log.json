@@ -9646,5 +9646,12 @@
     "task_id": "hourly_02_pool_refill_K683",
     "summary": "Pool 乾枯 (pending=2 全 paper_body 主線程) + refill 自動全乾 (publication_candidates 列 K672/K957/K593/K680 missing general 但實際 audience-tag mismatch / failed v2-3 已有 audit task / refill 已加 guard)。補 K683_article_general (score=4, 唯一無 failed history 的 missing-general K) 進 pool pending P3，留下 hourly 派工。K672 三次失敗根因已 known (audience tag mismatch + research article 在 mile_c15c7b98)，platform_ops_audience_tag_audit_K1151_K672_K957 已處理；refill guard audit_pending_kids 已防重派。",
     "notes": "本 fire 不派 agent 寫文章 (50min cap + last-3 含 daily_article diversity)，做 pool maintenance 修補空轉狀態。"
+  },
+  {
+    "timestamp": "2026-06-06T03:23",
+    "task_type": "platform_ops",
+    "task_id": "hourly_03_K683_stale_candidate_rootfix",
+    "summary": "build_publication_candidates 加 explicit-overturn filter (8 K's) + self-overturned filter (K680); K683 mark blocked deprecated (topic-level relation not caught by explicit-K-ref scan, known limitation)",
+    "commit": "a16112ff"
   }
 ]
