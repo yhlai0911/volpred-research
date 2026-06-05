@@ -1,5 +1,18 @@
 [
   {
+    "id": "fb_followup_cpi_20260611_mile_71dd116b",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "blocked",
+    "blocked_reason": "awaiting_interactive_session",
+    "blocked_note": "chrome session 接手：在 Ivan Lai FB 個人帳號發 event_article 改寫版 200-400 字，主貼文純文字無連結，第一則留言貼 https://volpred.zeabur.app/v3/reports/mile_71dd116b 。文章：VIX 從 17 降到 15：CPI 前市場已在說什麼。anti-AI FB style 適用。發完後 mark_fb_post_status.py --mile-id mile_71dd116b --status success。",
+    "description": "FB 雙發佈 followup: event_cpi_20260611 mile_71dd116b",
+    "created_at": "2026-06-05T08:16:00+08:00",
+    "source": "event_cpi_20260611",
+    "article_mile_id": "mile_71dd116b",
+    "article_url": "https://volpred.zeabur.app/v3/reports/mile_71dd116b"
+  },
+  {
     "id": "K1401_gdp_q1_second_estimate_event_study",
     "title": "K1401: GDP Q1 Second Estimate Event Study — VIX/SPY vol reaction to BEA revision history",
     "description": "Run event study on 25 years of Q1 GDP second estimate releases (late May each year). Analyze VIX level and SPY returns [-5,+5] days around release. Test whether upward vs downward GDP revisions produce asymmetric vol response. Supports 05/29 Q1 2026 GDP second estimate event article.",
@@ -21313,7 +21326,7 @@
     "description": "BLS CPI release June 2026 — US inflation data。距離事件：距今 6 天。撰寫市場波動率前瞻：VIX 水平、期貨隱含波動率、FOMC/BLS 相關波動規律分析。需引用最新 VIX 數據與本平台相關研究（PRG / VIX-sufficiency 等）。",
     "task_type": "event_article",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "event-driven",
@@ -21325,7 +21338,13 @@
     "generated_at": "2026-06-04T17:34:25.758787+00:00",
     "event_type": "cpi",
     "event_date": "2026-06-11",
-    "days_until": 6
+    "days_until": 6,
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-06-05T00:10:00.869463+00:00",
+    "claim_session_id": "6203e703a949",
+    "started_at": "2026-06-05T00:10:08.150349+00:00",
+    "completed_at": "2026-06-05T00:17:34.811884+00:00",
+    "result": "mile_71dd116b commit f3e4a09a | T-6 CPI 前瞻：VIX 17→15，term structure 結構分析，29 CPI日分佈，K513機制引用，anti_ai_gate PASS"
   },
   {
     "id": "event_jobs_20260605",
@@ -21433,7 +21452,7 @@
     "title": "Paper review (Codex 24h-rule): NFP 前夕，VIX 跌到 15.4——市場算便宜了，但就業日波動還是會放大 1.5 倍",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_8d8b8877 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_8d8b8877",
@@ -21442,7 +21461,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-04T21:08:10+00:00"
+    "created_at": "2026-06-04T21:08:10+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-04T23:53:07.707616+00:00",
+    "claim_session_id": "46a62ff09d85",
+    "started_at": "2026-06-04T23:53:10.485651+00:00",
+    "completed_at": "2026-06-04T23:54:37.351175+00:00",
+    "result": "Codex review verdict: CONDITIONAL_PASS. No lookahead/DM-Harvey overclaim found in the event-study framing, but two claim fixes are needed before treating the piece as clean.\nCRITICAL: article compares VIX/√252 (1-day implied sigma, about 0.97%) directly to mean absolute NFP-day return (0.944%); these are not the same metric, so the sentence that they \"幾乎一樣\" is methodologically wrong.\nMINOR: \"VIX 上調空間比下調空間大\" is speculative from a 60-day relative-level comparison and should be softened to a scenario statement, not presented as supported quant evidence."
   },
   {
     "id": "K1326",
@@ -21492,14 +21517,20 @@
     "description": "分析Computex 2026後，台灣半導體供應鏈的期權 implied volatility skew（偏斜度）。可量化：比較台積電期權 skew 與地緣政治不確定性指數（GPR）的動態相關性，驗證避險資金流入看跌期權的程度。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "failed",
     "created_at": "2026-06-04T22:00:36+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-06-05T00:08:53.608201+00:00",
+    "claim_session_id": "206650d06d4f",
+    "started_at": "2026-06-05T00:09:03.663743+00:00",
+    "completed_at": "2026-06-05T00:10:00.054438+00:00",
+    "result": "topic_overlap_with_mile_eabd7e46 (GPR×vol 2026-06-03 已覆蓋全期 6000 day analysis) + mile_3ef6edd5 (TSMC vol 2026-05-18) + option IV skew historical 數據需付費 OptionMetrics（yfinance 只有 snapshot 無法做 rolling correlation）。Pivot 到 event_cpi_20260611。"
   },
   {
     "id": "fb_followup_K1418_concentration",
@@ -21507,7 +21538,7 @@
     "description": "K1418 trending_repost mile_123a3855 已 VolPred publish + commit acbc7c34；FB Ivan Lai pending_chrome_followup（hourly agent 無 chrome 工具）。下次 chrome session 接：(1) 用 /tmp/fb_post_K1418.txt 草稿貼到 facebook.com/yihao.lai（claude-in-chrome MACBOOK 398dcdba）(2) 主貼文純文字、不放連結 (3) 發送後到第一則留言貼 https://volpred.zeabur.app/v3/reports/mile_123a3855 (4) screenshot 確認 (5) 寫回 feed.json fb_post_status=success + fb_post_url + work_log entry。失敗 max retry 3 後標 wont_fix。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "blocked",
     "created_at": "2026-06-04T23:23:00+00:00",
     "source": "trending_repost_fb_split",
     "tags": [
@@ -21515,6 +21546,9 @@
       "trending_repost_followup",
       "manual_chrome",
       "K1418"
-    ]
+    ],
+    "blocked_reason": "awaiting_interactive_session",
+    "blocked_at": "2026-06-05T00:08:53+00:00",
+    "blocked_note": "需 claude-in-chrome MACBOOK session 才能貼 FB + 留言；hourly cron 無 chrome 工具。下次 interactive session 接手。"
   }
 ]
