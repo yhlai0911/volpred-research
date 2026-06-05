@@ -9604,5 +9604,11 @@
     "task_type": "platform_ops",
     "activity": "PHASE Z: 接手 codex-cli 留下的 Paper2_v2_fix_H1_H2_blocking 未 commit 工作 → 落 commit 2939ffdc + 補 LaTeX intermediate gitignore（防未來再見 noise）",
     "session": "hourly-17"
+  },
+  {
+    "timestamp": "2026-06-05T19:18:00+08:00",
+    "task_type": "platform_ops",
+    "activity": "Hourly-19: blocked_until expired sweep 治本 — 寫 scripts/unblock_expired_blocked_tasks.py（ISO datetime 嚴謹比對）+ fix mark_task_blocked.py deprecated 自動 clear blocked_until（防 sweep 誤撈）。Apply: 3 unblock (codex_re_review platform_ops + 2 paper_review codex_quota_reset)。precision-fix NFP T+0 blocked_until → ISO 21:30+08:00（NFP release time, 22:07 fire 後 auto-unblock）。Mark NFP T-2 deprecated。Dispatcher pool: agentable 0→1, pending 5→7。下班 fire 接手派 codex_re_review。",
+    "session": "hourly-19"
   }
 ]

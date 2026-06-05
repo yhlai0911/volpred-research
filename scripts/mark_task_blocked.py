@@ -124,6 +124,10 @@ def main() -> int:
                 matched["blocked_note"] = args.note
             if args.until:
                 matched["blocked_until"] = args.until
+            elif args.reason == "deprecated":
+                # Deprecated = permanent retire; no auto-recheck window.
+                # Clear stale blocked_until so sweep scripts don't mis-pick it.
+                matched.pop("blocked_until", None)
             print(
                 f"[mark_task_blocked] id={args.id} reason={args.reason}"
                 + (f" until={args.until}" if args.until else "")

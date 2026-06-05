@@ -11,6 +11,14 @@ Hourly dispatch trigger (LaunchAgent HH:07 CST, 24 slots/day). 規則 (token-con
 4. 完工標 succeeded/failed：`uv run python scripts/task_pool_claim.py complete --id <id> --status succeeded --result "<摘要>"`
 5. 雙 session 撞題保護：claim 機制已 cross-session atomic（fcntl LOCK_EX on next_tasks.json）— 互動 session 與 hourly session claim 同 id 時後者得 `already_claimed`，自動換工。
 
+PRE-PHASE-0 — Auto-unblock expired blocked tasks（2026-06-05 加，治本 NFP T+0 卡死案例）:
+
+```bash
+uv run python scripts/unblock_expired_blocked_tasks.py --apply 2>&1 | head -5
+```
+
+把所有 `status=blocked` 且 `blocked_until` 已過期的 task flip 回 `status=pending`（ISO datetime 嚴謹比對 — `2026-06-05T21:30:00+08:00` 精確到分鐘）。沒此 step → dispatcher line 102 status filter 永遠 drop blocked task，即便 categorize blocked_until check 已過期也救不回（雙層 gate 設計）。Sweep 後接 PHASE 0。
+
 PHASE 0 — Email reply 任務（**最高優先**，超越 compute queue followup）:
 
 **Filter 已收緊（2026-05-25）**：只處理 from owner + Re: prefix + subject 含 `[VolPred` 三條件齊全的回信。其他不會入池。

@@ -6313,7 +6313,7 @@
     "title": "Codex primary-path re-review of publish_draft.py image validation (post-MAJ fixes)",
     "description": "Per .claude/rules/experiments.md K1259 教訓: subagent fallback PASS ≠ Codex primary PASS. fix_publish_draft_image_url_validation closed via feature-dev:code-reviewer fallback (Codex CLI hung 50min 2026-05-08 11:00-11:50 then cancelled). When Codex CLI recovers (smoke test: codex exec --skip-git-repo-check \"echo TEST\"), re-run /codex:review on scripts/publish_draft.py to validate the 4 MAJ/MED fixes (MAJ-2 gate consolidation / MAJ-1 reference-image documentation / MAJ-3 errata audit field / MED-3 test assertion). Verdict CONDITIONAL_PASS+ confirms primary-path coverage. P3 because subagent fallback verdict is sufficient for now.",
     "priority": 3,
-    "status": "blocked",
+    "status": "pending",
     "task_type": "platform_ops",
     "source": "codex_hung_2026_05_08_fallback_followup",
     "tags": [
@@ -6323,8 +6323,14 @@
     ],
     "created_at": "2026-05-08T11:55:00+00:00",
     "note": "Codex CLI: smoke test echo TEST PASS but adversarial-review fails on git ENOBUFS (large diff). Recurring per .claude/rules/experiments.md. Re-attempt after ENOBUFS root cause identified or git buffer increase.",
-    "blocked_reason": "codex_cli_enobufs",
-    "blocked_until": "2026-05-15"
+    "status_history": [
+      {
+        "at": "2026-06-05T11:14:47.696824+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-05-15)"
+      }
+    ]
   },
   {
     "id": "codex_review_k222b_code",
@@ -12023,10 +12029,9 @@
       "nfp_us",
       "T-2"
     ],
-    "blocked_reason": "awaiting_external_data",
-    "blocked_at": "2026-05-27T01:10:12+00:00",
-    "blocked_note": "Event not yet occurred — consensus/actual data unavailable until 2026-06-03. Premature in pool.",
-    "blocked_until": "2026-06-03"
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-05T11:13:44+00:00",
+    "blocked_note": "T-2 window passed (2026-06-03). Event already occurred today; T+0 task handles actual results. Cleared from pending pool."
   },
   {
     "id": "event_article_nfp_us_2026-06-05_tplus0",
@@ -12050,8 +12055,8 @@
     ],
     "blocked_reason": "awaiting_external_data",
     "blocked_at": "2026-05-27T01:10:12+00:00",
-    "blocked_note": "Event not yet occurred — consensus/actual data unavailable until 2026-06-05. Premature in pool.",
-    "blocked_until": "2026-06-05"
+    "blocked_note": "NFP data releases at 21:30 Taiwan (08:30 ET). Auto-unblock after release.",
+    "blocked_until": "2026-06-05T21:30:00+08:00"
   },
   {
     "id": "event_article_tsmc_revenue_2026-06-10_tplus0",
@@ -15089,7 +15094,7 @@
     "title": "Paper review (Codex 24h-rule): 測了 16 個模型組合，唯一看起來成功的那個，其實是資料時序用錯了",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_d9c62a56 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "blocked",
+    "status": "pending",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_d9c62a56",
@@ -15099,17 +15104,21 @@
       "main-thread-only"
     ],
     "created_at": "2026-05-30T09:08:15+00:00",
-    "blocked_reason": "codex_quota_reset_pending",
-    "blocked_at": "2026-05-30T11:12:30+00:00",
-    "blocked_note": "Codex CLI hit usage limit until 2026-05-31 07:01 CST. Auto-recheck after reset.",
-    "blocked_until": "2026-05-31"
+    "status_history": [
+      {
+        "at": "2026-06-05T11:14:47.696913+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-05-31)"
+      }
+    ]
   },
   {
     "id": "paper_review_mile_379b51cc",
     "title": "Paper review (Codex 24h-rule): 四種 HAR 分解都無法超越標準 HAR-RV：台灣期貨波動率預測的系統性 NULL 結果",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_379b51cc needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "blocked",
+    "status": "pending",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_379b51cc",
@@ -15119,10 +15128,14 @@
       "main-thread-only"
     ],
     "created_at": "2026-05-30T09:08:15+00:00",
-    "blocked_reason": "codex_quota_reset_pending",
-    "blocked_at": "2026-05-30T11:12:31+00:00",
-    "blocked_note": "Codex CLI hit usage limit until 2026-05-31 07:01 CST. Auto-recheck after reset.",
-    "blocked_until": "2026-05-31"
+    "status_history": [
+      {
+        "at": "2026-06-05T11:14:47.696919+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-05-31)"
+      }
+    ]
   },
   {
     "id": "K1081_article_general_v2",
@@ -21798,7 +21811,7 @@
     "title": "Paper review (Codex 24h-rule): 把疫情那段拿掉之後，複雜模型還剩下什麼？",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_54f79768 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_54f79768",
@@ -21807,6 +21820,12 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-05T10:12:49+00:00"
+    "created_at": "2026-06-05T10:12:49+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-05T11:12:22.614935+00:00",
+    "claim_session_id": "b9dfffa71087",
+    "started_at": "2026-06-05T11:12:22.687335+00:00",
+    "completed_at": "2026-06-05T11:12:53.781813+00:00",
+    "result": "Codex review FAIL: article mile_54f79768 is based on superseded experiment K1378, whose README explicitly says the old A4f spec was bugged and must not be used for paper/article claims. While K1378 code itself uses lagged VIX (no lookahead), the article’s core narrative (removing COVID does not rescue the complex model) is no longer valid after K1393, which finds non-COVID DM t=+4.26 and A4f still wins outside COVID."
   }
 ]
