@@ -1,0 +1,143 @@
+% Submission-length tables for main paper
+
+\begin{table}[H]
+\centering
+\caption{Descriptive Statistics of Daily Returns (In-Sample Period: 2017--2025)}
+\label{tab:desc}
+\begin{tabular}{lrrrrrrr}
+\toprule
+Asset & Mean (\%) & Std (\%) & Skewness & Kurtosis & Min (\%) & Max (\%) & N \\
+\midrule
+SPY & 0.063 & 1.16 & -0.32 & 14.6 & -10.9 & 10.5 & 2260 \\
+QQQ & 0.086 & 1.45 & -0.19 & 7.6 & -12.0 & 12.0 & 2260 \\
+EEM & 0.036 & 1.27 & -0.57 & 9.9 & -12.5 & 8.1 & 2260 \\
+GLD & 0.061 & 0.92 & -0.30 & 3.5 & -6.4 & 4.9 & 2260 \\
+TLT & 0.002 & 0.96 & 0.15 & 5.1 & -6.7 & 7.5 & 2260 \\
+BTC & 0.202 & 3.61 & -0.03 & 7.7 & -37.2 & 25.2 & 3285 \\
+SLV & 0.082 & 1.76 & -0.13 & 5.8 & -13.6 & 9.1 & 2260 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{GJR-GARCH $\gamma$ Parameter: Rolling Quarterly Estimates ($w = 504$, step $= 63$, 2010--2026; HAC $t$ uses Newey--West with 8 lags). The GLD row reflects the K903 canonical replication ($n = 58$ quarterly windows, mean $+0.002$, HAC $t = +0.15$ NS), replacing an earlier-draft estimate (mean $-0.067$, HAC $t = -5.79$) whose source experiment could not be re-located in the current ledger.}
+\label{tab:gamma}
+\begin{tabular}{lrrrrl}
+\toprule
+Asset & Mean $\gamma$ & Std & \% Negative & HAC $t$ & Model Choice \\
+\midrule
+SPY & +0.211 & 0.044 & 0\% & +8.30 & GJR \\
+QQQ & +0.110 & 0.072 & 12\% & +3.21 & GJR/Context \\
+EEM & +0.180 & 0.095 & 8\% & +4.12 & GJR \\
+GLD & +0.002 & 0.055 & 67\% & +0.15 & GARCH \\
+TLT & -0.008 & 0.048 & 52\% & -0.34 & GARCH \\
+BTC & +0.117 & 0.136 & 28\% & +1.83 & GARCH \\
+SLV & -0.041 & 0.058 & 72\% & -2.91 & GARCH \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Out-of-Sample QLIKE: GARCH(1,1) vs.\ GJR-GARCH(1,1), $w = 504$. Values are quasi-log-likelihood scores (Eq.~\eqref{eq:qlike}); lower (more negative) = better. $\Delta$ is percentage improvement of GJR over GARCH. * denotes DM significance at 5\%.}
+\label{tab:qlike}
+\begin{tabular}{llrrrl}
+\toprule
+Asset & OOS Period & GARCH & GJR & $\Delta$ (\%) & DM $p$ \\
+\midrule
+SPY & 2023--2024 & -8.623 & -8.674 & -0.59 & 0.003* \\
+SPY & 2025 & -8.719 & -8.818 & -1.13 & 0.029* \\
+QQQ & 2023--2024 & -8.554 & -8.475 & +0.92 & 0.067 \\
+QQQ & 2025 & -8.367 & -8.454 & -1.04 & 0.023* \\
+GLD & 2023--2024 & -9.058 & -9.065 & -0.07 & 0.871 \\
+GLD & 2025 & -8.637 & -8.633 & +0.05 & 0.350 \\
+TLT & 2023--2024 & -9.169 & -9.170 & -0.01 & 0.104 \\
+EEM & 2023--2024 & -8.867 & -8.889 & -0.25 & 0.156 \\
+BTC & 2023--2024 & -6.871 & -6.881 & -0.14 & 0.293 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{VaR 1\% Attribution Analysis: SPY (2020--2025, 1508 days)}
+\label{tab:var}
+\begin{tabular}{lrrr}
+\toprule
+Configuration & Violations & Rate & Improvement \\
+\midrule
+Normal & 33 & 2.2\% & --- \\
+Student-$t$ (df=5) & 18 & 1.2\% & $-$45.5\% \\
++ Adaptive threshold & 14 & 0.9\% & $-$22.2\% \\
++ Jump augmentation & 14 & 0.9\% & 0.0\% \\
+\midrule
+\textit{Target} & \textit{15} & \textit{1.0\%} & \\
+\bottomrule
+\end{tabular}
+
+{\footnotesize \textit{Notes:} Violation counts were computed from the 2025-Q4 canonical replication vintage; minor yfinance backfill revisions may shift individual counts by up to $\pm 3$ on re-run without changing the qualitative ordering. In the K1185 canonical reconstruction, the baseline ``Normal'' row uses symmetric GARCH(1,1), the Student-$t$ row applies fixed $df=5$ with scale correction $\sqrt{(df-2)/df}$, and the adaptive row uses a 20-day rolling maximum of $\hat{\sigma}_t$.}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{VaR 1\% Orthogonality: GARCH Equation $\times$ Distribution (SPY, 2023--2024, 502 days)}
+\label{tab:var_ortho}
+\begin{tabular}{llrrrll}
+\toprule
+GARCH Equation & Distribution & Violations & Rate & Kupiec $p$ & Basel Zone & Status \\
+\midrule
+GARCH(1,1) & Normal        & 7  & 1.39\% & 0.64 & Green & PASS \\
+GJR-GARCH  & Normal        & 10 & 1.99\% & 0.049 & Yellow & \textbf{Borderline FAIL} \\
+GJR-GARCH  & Student-$t$(5) & 6  & 1.20\% & 0.67 & Green & PASS \\
+\midrule
+\multicolumn{7}{l}{\textit{GJR wins QLIKE ($-3.8\%$, DM $p = 0.001$) but fails VaR under Normal.}} \\
+\multicolumn{7}{l}{\textit{Student-$t$ restores compliance: two optimization domains are independent.}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{VaR Backtest Panel: Joint Pass Rates by Distributional Method and Asset}
+\label{tab:var_panel}
+\small
+\begin{tabular}{lccccccc|r}
+\toprule
+Method & SPY & QQQ & GLD & TLT & EEM & BTC & IWM & Pass Rate$^{\dagger}$ \\
+\midrule
+Skewed-$t$   & \cmark & \cmark & \xmark & \cmark & \cmark & \xmark & \cmark & 90.5\% (19/21) \\
+FHS          & \cmark & \cmark & \cmark & \xmark & \cmark & \cmark & \cmark & 76.2\% (16/21) \\
+CF-VaR       & \xmark & \cmark & \xmark & \cmark & \cmark & \xmark & \cmark & 76.2\% (16/21) \\
+Student-$t$(5) & \xmark & \xmark & \cmark & \cmark & \xmark & \cmark & \cmark & 76.2\% (16/21) \\
+Normal       & \cmark & \xmark & \xmark & \xmark & \cmark & \cmark & \cmark & 57.1\% (12/21) \\
+\bottomrule
+\end{tabular}
+
+\vspace{4pt}
+\raggedright\footnotesize
+\textit{Notes:} Each cell summarizes 3 $\alpha$ levels (1\%, 2.5\%, 5\%) $\times$ 3 tests (Kupiec, Christoffersen, DQ) = 9 sub-tests. \cmark\ = all 3 $\alpha$ levels pass the Trinity criterion (3/3 joint tests); \xmark\ = at least one $\alpha$ level fails. Total cells: 7 assets $\times$ 3 $\alpha$ $\times$ 5 methods = 105.
+$^{\dagger}$Three pass rates and asset-level indicators were updated from initial reported values: Student-$t$(5) $57.1\% \to 76.2\%$ (12/21$\to$16/21); Skewed-$t$ $76.2\% \to 90.5\%$ (16/21$\to$19/21); CF-VaR $66.7\% \to 76.2\%$ (14/21$\to$16/21). Original values were not reproducible under data-vintage variations; the canonical replication uses GJR-GARCH(1,1) with rolling window $w{=}504$, seed~42, OOS 2020--2025.
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Volatility Targeting: Cross-Asset Performance}
+\label{tab:vt}
+\begin{tabular}{lrrrrr}
+\toprule
+Asset & BH Sharpe & VT Sharpe & $\Delta$ Sharpe & BH MaxDD & VT MaxDD \\
+\midrule
+SPY & 0.82 & 0.85 & +0.03 & $-$33.7\% & $-$14.8\% \\
+GLD & 1.56 & 1.71 & +0.15 & $-$25.1\% & $-$13.4\% \\
+TLT & 0.02 & 0.33 & +0.31 & $-$43.8\% & $-$30.7\% \\
+EEM & 0.42 & 0.45 & +0.03 & $-$38.2\% & $-$21.5\% \\
+BTC & 0.43 & 0.60 & +0.17 & $-$76.6\% & $-$21.3\% \\
+\bottomrule
+\end{tabular}
+
+\vspace{4pt}
+\raggedright\footnotesize
+\textit{Notes:} Each asset uses its native evaluation window per the analysis in Section~\ref{sec:var_compliance}. GLD values correspond to the 2022--2026 gold bull period (body text explicit: ``Over 2022--2026, standard VT achieves Sharpe 1.71 versus \ldots buy-and-hold's 1.56''). SPY uses 2014--2026 ($\sim$12 years; confirmed by BH Sharpe fingerprint match). TLT and EEM use approximately 2015--2026. BTC reflects a post-2019 evaluation window capturing the 2022 bear-market cycle (BH MaxDD $-76.6\%$). $\Delta$ Sharpe $=$ VT Sharpe $-$ BH Sharpe. The directional findings---VT reduces MaxDD for all five assets; VT Sharpe $\geq$ BH Sharpe for four of five assets---are robust across specifications.
+\textit{Replication note:} A reproducibility check matched 6/20 cells using a uniform 2015--2026 OOS window. Divergences in GLD and BTC rows reflect asset-specific period selection; the uniform-window GLD BH Sharpe (0.83) is not comparable to the paper's 2022--2026 estimate (1.56). Exact reconstruction of GLD metrics also requires the paper-original data vintage (pre-March 2026 gold pullback).
+\end{table}

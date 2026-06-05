@@ -12,7 +12,7 @@ This paper makes two contributions to the volatility forecasting and financial r
 
 \textbf{Second}, we apply the leverage taxonomy to volatility targeting (VT), linking leverage direction to the economic channel through which VT generates alpha. This generalizes the equity-specific finding of \citet{hood2025}. Within equity-type assets, $\gamma$ predicts whether VT acts as trend-following or contrarian (Spearman $\rho = 0.886$, $p = 0.019$ for six equity-type assets; see Section~\ref{sec:gamma-mechanism} for domain restrictions), with out-of-sample predictive power ($\rho = 0.821$ using $\gamma$ from 2010--2017 to predict trend beta in 2018--2026). However, this relationship does not extend to diverse asset classes ($\rho = -0.448$, $p = 0.14$ for twelve assets), delineating the proposition's domain. Meanwhile, VT's primary benefit---maximum drawdown reduction---is universal across all tested assets and driven by base volatility level (Pearson $\rho = 0.944$, $p < 0.001$, $N = 5$ primary assets; Pearson $\rho = 0.83$, $p = 0.0002$, $N = 14$ in the extended sample), independent of $\gamma$.
 
-Supporting findings reinforce a broader pattern: increasing model sophistication improves statistical measurement but not investable allocation decisions. Supplementary evidence of cross-market information transmission is presented in Appendix~\ref{sec:tz_arbitrage}.
+Supporting findings reinforce a broader pattern: increasing model sophistication improves statistical measurement but not investable allocation decisions. Supplementary evidence on cross-market transmission and auxiliary robustness checks is reported in the online supplement.
 
 The remainder of the paper is organized as follows. Section~\ref{sec:literature} reviews the literature. Section~\ref{sec:data_methodology} describes data and methodology. Section~\ref{sec:empirical_results} presents empirical results. Section~\ref{sec:implications} discusses implications and limitations. Section~\ref{sec:conclusion} concludes.
 
@@ -20,33 +20,9 @@ The remainder of the paper is organized as follows. Section~\ref{sec:literature}
 
 \section{Literature Review}\label{sec:literature}
 
-\subsection{GARCH Models and the Leverage Effect}
+The paper sits at the intersection of three literatures. The first studies asymmetric volatility models: GARCH captures volatility clustering, while GJR-GARCH and EGARCH allow negative and positive shocks to affect variance differently \citep{bollerslev1986,glosten1993,nelson1991}. In equities, this leverage effect is standard and economically tied to balance-sheet amplification \citep{black1976,christie1982,engle2018}. A smaller literature shows that non-equity assets can reverse the sign of the asymmetry, especially for gold and some commodities, but stops short of turning that sign information into a model-selection rule \citep{chevallier2017,batten2010,chang2021}.
 
-\citeauthor{bollerslev1986}'s (\citeyear{bollerslev1986}) GARCH model captures the well-documented volatility clustering in financial returns but assumes symmetric responses to positive and negative innovations. The ``leverage effect''---negative equity returns increasing future volatility more than positive returns of equal magnitude---was first noted by \citet{black1976} and attributed to changes in financial leverage by \citet{christie1982}. This motivated asymmetric extensions: \citet{nelson1991} introduced the EGARCH, modeling the logarithm of conditional variance with separate coefficients for sign and magnitude, while \citet{glosten1993} proposed the GJR-GARCH, adding an indicator function for negative innovations. \citet{engle2018} provide a structural interpretation linking GJR's $\gamma$ to capital structure dynamics. Two parallel extensions widened the GARCH design space. \citet{engleGhyselsSohn2013} introduce GARCH-MIDAS, which decomposes conditional variance into a high-frequency GARCH component and a low-frequency macro-driven component, tying long-run volatility to observable economic fundamentals. \citet{pattonSheppard2015} show that the asymmetric response of volatility can be traced specifically to realized negative semivariance (``bad'' volatility), sharpening the interpretation of $\gamma$-type asymmetry as a downside-risk channel. Asymmetric models generally improve upon symmetric specifications for equity indices (see \citealt{hansen2005} for a comprehensive comparison of 330 GARCH variants), but whether the direction of the asymmetric response extends systematically to non-equity assets---and whether the ``bad''-volatility interpretation reverses for safe havens---has received less attention.
-
-\subsection{Commodity Volatility and Inverted Asymmetry}
-
-The behavior of volatility in commodity markets differs from equities in important ways. \citet{chevallier2017} investigate the leverage effect across a broad set of commodities and find that gold, wheat, coffee, and cocoa exhibit inverted asymmetric volatility---where positive price shocks increase volatility more than negative shocks---consistent with earlier findings for precious metals \citep{batten2010}.
-
-The economic interpretation differs from equities: while equity leverage operates through capital structure, commodity price increases during stress reflect uncertainty about supply, demand, or financial conditions. For gold specifically, \citet{baur2010safe} and \citet{baur2010hedge} establish that gold functions as both a hedge and a safe haven for developed market equities, with hedging effectiveness increasing during extreme downturns. \citet{chang2021} use a Markov-switching GJR-GARCH to link gold's inverted asymmetry to high-volatility regimes, showing that gold's safe-haven ability is concentrated in these regimes. Our analysis extends this to a broader asset class framework, examining implications for model selection, VaR compliance, and portfolio construction---dimensions not addressed in the existing literature.
-
-\subsection{Value-at-Risk and Basel III}
-
-The Basel Committee's internal models approach \citep{bcbs2006,bcbs2019} requires banks to backtest their VaR models against realized losses. \citet{kupiec1995} provides the unconditional coverage test, while \citet{christoffersen1998} adds the independence dimension. \citet{mcneil2015} provide a comprehensive treatment of quantitative risk management methodology.
-
-The distributional assumption significantly impacts VaR accuracy. \citet{bollerslev1987} introduced Student-$t$ innovations for GARCH models, and subsequent work (e.g., \citealt{hansen1994}) developed skewed-$t$ and other flexible distributions. \citet{kuester2006} find that GARCH with appropriate distributions outperforms historical simulation and extreme value approaches.
-
-\subsection{Volatility Targeting}
-
-\citet{moreira2017} demonstrate that scaling portfolio exposure by the inverse of conditional variance---volatility targeting---generates significant alphas across equity factors, value, momentum, and currency carry. Their key insight is that changes in volatility are not offset by proportional changes in expected returns, creating a risk-return tradeoff that VT exploits.
-
-\citet{harvey2018} extend these results to multi-asset portfolios. \citet{fleming2001,fleming2003} provide earlier evidence that volatility timing improves performance. \citet{hood2025} demonstrate that equity VT alpha arises primarily from implicit trend-following via the leverage effect: because negative returns raise volatility and trigger deleveraging, VT mechanically reduces exposure after declines. This equity-specific mechanism reverses for inverted-leverage assets, connecting directly to our $\gamma$ taxonomy.
-
-Within their comprehensive evaluation of 103 equity strategies---whose headline finding is that VT does not systematically improve Sharpe ratios over unmanaged portfolios---\citet{cederburg2020} find that using VIX as the scaling signal produces substantially higher alpha versus realized-variance scaling for a subset of equity specifications.\footnote{Their reported specifications yield an approximate 4.9\% annualized alpha differential; exact figures are Table-specific and depend on sample and leverage calibration; see their Tables 2--3. The VIX-vs-RV comparison is a secondary within-paper finding; Cederburg et al.'s overarching conclusion is negative on VT broadly.} \citet{bozovic2024} confirms VIX dominance through forward-looking information. \citet{demiguel2024} reframe volatility-managed portfolios from a multifactor perspective, showing that the in-sample Sharpe gains of VT strategies are substantially attenuated once exposures to standard risk factors are controlled for---motivating the leverage-direction cross-section we develop here. \citet{xu2024} validates real-time viability across 197 equity factors. However, VT effectiveness across different leverage regimes---particularly for inverted-leverage assets---has not been previously examined.
-
-\subsection{Deep Learning for Volatility Forecasting}
-
-Recent work has explored neural network approaches to volatility forecasting. Hybrid GARCH-LSTM models (e.g., \citealt{kim2019}; \citealt{araya2024}) attempt to combine the structural advantages of GARCH with the flexibility of deep learning. However, the incremental improvement over well-specified GARCH models remains debated, particularly at daily frequency where GARCH models may already extract the available signal in squared returns (see \citealt{bucci2020} for a skeptical assessment).
+The second literature concerns risk management. Basel backtesting makes the distributional assumption as important as the variance equation itself \citep{bcbs2006,bcbs2019,kupiec1995,christoffersen1998}. Student-$t$ and skewed-$t$ innovations often improve tail coverage relative to Gaussian specifications \citep{bollerslev1987,hansen1994,kuester2006}. The third literature studies volatility targeting: inverse-volatility scaling improves drawdown control and sometimes improves Sharpe ratios, though the evidence is criterion- and asset-dependent \citep{fleming2001,fleming2003,moreira2017,harvey2018,cederburg2020,bozovic2024,demiguel2024,hood2025,xu2024}. Our contribution is to connect these strands through a single empirical object, the sign and magnitude of $\gamma$, and then test where that information matters for forecasting, VaR, and portfolio construction.
 
 
 
@@ -58,24 +34,12 @@ Recent work has explored neural network approaches to volatility forecasting. Hy
 We use daily adjusted closing prices for seven exchange-traded assets: SPDR S\&P 500 ETF Trust (SPY), Invesco QQQ Trust (QQQ), iShares MSCI Emerging Markets ETF (EEM), SPDR Gold Shares (GLD), iShares Silver Trust (SLV), iShares 20+ Year Treasury Bond ETF (TLT), and Bitcoin (BTC-USD). Data are sourced from Yahoo Finance adjusted close prices for the period January 2017 through March 2026.
 
 \paragraph{Data source justification.}
-Yahoo Finance is among the most widely used free data sources in empirical finance research. For large-cap U.S.\ equities and highly liquid ETFs---the asset universe of this study---prior validation studies document high concordance between Yahoo Finance and institutional-grade databases. \citet{bali2016} employ Yahoo Finance as the primary data source for their comprehensive textbook on empirical asset pricing methods, establishing an accepted precedent in the literature. Prior comparisons of CRSP with free alternative data sources---including Yahoo Finance---document that discrepancies are concentrated in small-cap stocks subject to infrequent trading and delayed corporate action adjustments, whereas large-cap U.S.\ equities and highly liquid ETFs track institutional-grade feeds closely. Neither concern applies to our ETF sample, where average daily dollar volume exceeds \$1 billion for all instruments except SLV.
-
-For U.S.-listed ETFs, Yahoo Finance prices reflect official exchange data with corporate action adjustments (splits, dividends). We perform three validation checks: (i)~spot-checking price accuracy against Bloomberg terminal data for key crisis dates (COVID crash, March 2020; Iran/Hormuz crisis, March 2026), finding no discrepancies; (ii)~verifying that VIX index values from Yahoo Finance match CBOE official data obtained via FRED (correlation $> 0.9999$ across 2,200+ trading days); and (iii)~confirming that computed daily return distributions match those reported in published studies using CRSP data for overlapping periods \citep{moreira2017,cederburg2020}.
-
-While Yahoo Finance data may contain occasional errors---for example, delayed corporate action adjustments for less liquid securities or temporary data feed interruptions---these issues are negligible for the large-cap, highly liquid ETFs in our sample. We nevertheless acknowledge this as a limitation: all results should be verified with institutional-grade data (CRSP, Bloomberg, or Refinitiv) before deployment in production risk management systems. Daily returns are computed as simple percentage changes $r_t = (P_t - P_{t-1})/P_{t-1}$.
+Yahoo Finance provides the daily history for all assets. This choice is standard in empirical asset-pricing practice and is defensible here because the sample consists of large, liquid ETFs and Bitcoin, not microcaps where stale prices and delayed corporate-action adjustments are more problematic \citep{bali2016}. We validate the feed by spot-checking crisis dates against Bloomberg, matching Yahoo VIX to official series, and confirming that return moments line up with overlapping benchmark studies \citep{moreira2017,cederburg2020}. Daily returns are computed as simple percentage changes. We nevertheless treat institutional-grade replication as the relevant production standard.
 
 Table~\ref{tab:desc} reports descriptive statistics. All return series reject normality (Jarque-Bera $p < 0.001$), exhibit significant ARCH effects (Engle's LM test \citep{engle1982}, $p < 0.001$), and are stationary (ADF $p < 0.001$). Excess kurtosis ranges from 3.52 (GLD) to 14.61 (SPY), motivating the consideration of fat-tailed distributions for VaR estimation.
 
 \paragraph{Sample period justification.}
-Our primary asset data span January 2017 through March 2026 (approximately 2,300 trading days per asset). We acknowledge that an eight-year primary sample is shorter than the multi-decade panels common in the GARCH forecasting literature. However, several design features mitigate this limitation.
-
-First, the rolling estimation window ($w = 504$) is re-estimated at every forecast origin, so each model fit draws on the most recent two years of data---a standard requirement for GARCH parameter stability \citep{hwang2006}. For extended-window robustness checks ($w \in \{2000, 3000, 5000\}$), training data reach back to 2006 or earlier, encompassing the Global Financial Crisis and subsequent recovery. The estimation sample therefore spans 11+ calendar years even when the evaluation window is shorter.
-
-Second, our out-of-sample evaluation periods satisfy the minimum length recommendation of \citet{hansen2005}, who argue that at least 252 trading days are necessary for reliable forecast comparison. Our primary OOS (2023--2024) contains approximately 504 days, and the validation OOS (2025--March 2026) adds a further $\sim$300 days. Critically, these periods cover distinct market regimes: the post-COVID normalization and low-volatility environment of 2023, the rate-cut cycle and renewed equity momentum of 2024, and the geopolitical shock of the 2025--2026 Iran/Hormuz crisis---providing meaningful regime diversity for evaluating model robustness.
-
-Third, the central research question concerns the \textit{sign} of the leverage parameter $\gamma$---a structural characteristic of each asset's volatility dynamics---rather than short-horizon return prediction. Structural features such as the leverage effect are detectable in relatively short samples: \citet{glosten1993} established the leverage effect in U.S.\ equities using approximately 735 monthly observations (CRSP 1926--1987), and \citet{engle2004} documented asymmetric variance dynamics for individual stocks with as few as 500 observations per estimation window. The gamma taxonomy documented in this paper---positive for equities, negative for gold, near-zero for bonds---is invariant across all window sizes tested ($w \in \{252, 504, 756, 1000, 2000, 3000, 5000\}$; Table~\ref{tab:window}), confirming that this structural classification does not require longer samples.
-
-Fourth, we verify that the key results---the gamma taxonomy, the complexity ceiling, and the VaR orthogonality finding---hold in the high-volatility sub-period of 2020--2022 (COVID crash through rate-hiking cycle), which represents the most stressed market conditions in our sample. Results are qualitatively unchanged (details available upon request), further supporting the robustness of our conclusions across market regimes.
+The primary sample spans January 2017 to March 2026, with 2023--2024 as the main out-of-sample period and 2025--March 2026 as validation. This is shorter than some long-horizon GARCH studies, but each forecast is estimated on a rolling two-year window, and robustness checks extend the effective estimation history with larger windows back to 2006. The key object is not long-horizon return predictability but the sign and usefulness of $\gamma$, which is stable across the window sizes we test and remains qualitatively unchanged in stressed subperiods such as 2020--2022 and the 2025--2026 Iran/Hormuz episode.
 
 \subsection{Volatility Models}
 
@@ -92,7 +56,7 @@ All models are estimated with Normal quasi-likelihood via the \texttt{arch} pack
 
 \subsection{Rolling Estimation}
 
-We employ a rolling window approach with re-estimation at each forecast origin. The primary window size is $w = 504$ trading days (approximately 2 calendar years), which satisfies the minimum sample size recommendation for GARCH estimation ($\geq 500$ observations; see \citealt{hwang2006}) while avoiding contamination from distant regime changes. Robustness checks with $w \in \{252, 1000, 2000, 3000, 5000\}$ (Table~\ref{tab:window}) confirm that QLIKE rankings are qualitatively robust to window choice, though $w = 504$ produces the best QLIKE during high-volatility periods (2020--2021) while larger windows ($w \geq 2000$) perform marginally better during calm periods (2023--2024). The gamma sign classification is invariant to window size across all tested values.
+We employ a rolling window approach with re-estimation at each forecast origin. The primary window size is $w = 504$ trading days (approximately 2 calendar years), which satisfies the minimum sample size recommendation for GARCH estimation ($\geq 500$ observations; see \citealt{hwang2006}) while avoiding contamination from distant regime changes. Robustness checks with $w \in \{252, 1000, 2000, 3000, 5000\}$ (reported in the online supplement) confirm that QLIKE rankings are qualitatively robust to window choice, though $w = 504$ produces the best QLIKE during high-volatility periods (2020--2021) while larger windows ($w \geq 2000$) perform marginally better during calm periods (2023--2024). The gamma sign classification is invariant to window size across all tested values.
 
 For each out-of-sample date $t$, we estimate the model using data from $t-w$ to $t-1$, and produce a one-step-ahead variance forecast $\hat{\sigma}^2_t$. The realized variance proxy is the squared daily return $r^2_t$.
 
@@ -100,7 +64,7 @@ For each out-of-sample date $t$, we estimate the model using data from $t-w$ to 
 
 \subsubsection{Statistical Loss Functions}
 
-The primary evaluation metric is the QLIKE loss function \citep{patton2011}, defined as the Gaussian quasi-log-likelihood contribution:\footnote{This formulation is equivalent to $-\ln f(r_t \mid \hat{\sigma}^2_t)$ under Gaussian quasi-likelihood, up to an additive constant. Values are negative for daily returns because $\ln \hat{\sigma}^2_t \approx \ln(10^{-4}) \approx -9.2$. \textbf{Lower (more negative) values indicate better forecasts.} An alternative convention in the literature defines the Patton (2011) centered loss as $L^*(\sigma^2, h) = \sigma^2/h - \ln(\sigma^2/h) - 1$, which produces values centered near 1.0. Both formulations preserve forecast rankings; we adopt the quasi-log-likelihood form throughout Tables~\ref{tab:qlike}--\ref{tab:window} for consistency with maximum likelihood estimation.}
+The primary evaluation metric is the QLIKE loss function \citep{patton2011}, defined as the Gaussian quasi-log-likelihood contribution:\footnote{This formulation is equivalent to $-\ln f(r_t \mid \hat{\sigma}^2_t)$ under Gaussian quasi-likelihood, up to an additive constant. Values are negative for daily returns because $\ln \hat{\sigma}^2_t \approx \ln(10^{-4}) \approx -9.2$. \textbf{Lower (more negative) values indicate better forecasts.} An alternative convention in the literature defines the Patton (2011) centered loss as $L^*(\sigma^2, h) = \sigma^2/h - \ln(\sigma^2/h) - 1$, which produces values centered near 1.0. Both formulations preserve forecast rankings; we adopt the quasi-log-likelihood form throughout the main text and the online supplement for consistency with maximum likelihood estimation.}
 \begin{equation}
 \text{QLIKE} = \frac{1}{T} \sum_{t=1}^{T} \left( \frac{r^2_t}{\hat{\sigma}^2_t} + \ln \hat{\sigma}^2_t \right)
 \label{eq:qlike}
@@ -274,13 +238,6 @@ evaluated under the same GARCH-distribution pairs. Direct computation on this pa
 \label{fig:rolling_gamma}
 \end{figure}
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.95\textwidth]{fig_vix_garch_ratio.pdf}
-\caption{VIX/GARCH ratio time series (2014--2026). The horizontal line at 1.3 marks the Hybrid VT switching threshold ($\approx$ long-run VRP median of 1.31). Ratio spikes precede major drawdowns; the Hybrid VT switches to VIX-based weights when the ratio exceeds this threshold, providing faster regime adaptation than GARCH alone.}
-\label{fig:vix_garch_ratio}
-\end{figure}
-
 \subsection{Volatility Targeting Across Leverage Regimes}
 \label{sec:vt_results}
 
@@ -290,16 +247,9 @@ Following the methodology of Section~\ref{sec:vt_methodology}, we construct vola
 
 \subsubsection{Cross-Asset Results}
 
-Table~\ref{tab:vt} presents buy-and-hold versus VT performance for five assets over 7--16 year periods. The most consistent finding is that \textbf{maximum drawdown improves for all five assets}, with improvement strongly correlated with base volatility. For the five primary assets in Table~\ref{tab:vt}, Pearson $\rho = 0.944$ ($p < 0.001$); for the extended sample of $N = 14$ assets (including eight additional commodities and international equities from Appendix~A), Pearson $\rho = 0.83$ ($p = 0.0002$, Spearman $\rho = 0.88$). BTC-USD, with the highest base volatility (51.7\% annualized), sees MaxDD improve from $-76.6\%$ to $-21.3\%$ (55.3pp). Even for lower-volatility assets like TLT (15.0\%), MaxDD improves by 13.1pp.
+Table~\ref{tab:vt} presents buy-and-hold versus VT performance for five assets over 7--16 year periods. The most consistent finding is that \textbf{maximum drawdown improves for all five assets}, with improvement strongly correlated with base volatility. For the five primary assets in Table~\ref{tab:vt}, Pearson $\rho = 0.944$ ($p < 0.001$); for the extended sample of $N = 14$ assets reported in the online supplement, Pearson $\rho = 0.83$ ($p = 0.0002$, Spearman $\rho = 0.88$). BTC-USD, with the highest base volatility (51.7\% annualized), sees MaxDD improve from $-76.6\%$ to $-21.3\%$ (55.3pp). Even for lower-volatility assets like TLT (15.0\%), MaxDD improves by 13.1pp.
 
-Sharpe ratio improvement is more heterogeneous: BTC-USD gains $+41\%$ ($0.43 \to 0.60$), GLD $+11\%$, TLT $+33\%$, while SPY and EEM show negligible changes. The Sharpe improvement correlates with base volatility ($\rho = 0.80$, $p = 0.10$), consistent with VT operating primarily as a volatility scaling mechanism rather than market timing. Figure~\ref{fig:cumulative_returns} shows the cumulative log return comparison for SPY.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.95\textwidth]{fig_cumulative_returns.pdf}
-\caption{Cumulative log returns for Buy-and-Hold vs.\ Hybrid VT strategy (SPY, 2014--2026). The Hybrid VT achieves comparable terminal wealth with substantially reduced drawdowns, particularly during the 2020 COVID crash, 2022 rate-hiking cycle, and 2025--2026 Iran/Hormuz crisis.}
-\label{fig:cumulative_returns}
-\end{figure}
+Sharpe ratio improvement is more heterogeneous: BTC-USD gains $+41\%$ ($0.43 \to 0.60$), GLD $+11\%$, TLT $+33\%$, while SPY and EEM show negligible changes. The Sharpe improvement correlates with base volatility ($\rho = 0.80$, $p = 0.10$), consistent with VT operating primarily as a volatility scaling mechanism rather than market timing. The supplementary figures show that, for SPY, Hybrid VT preserves comparable terminal wealth while materially compressing drawdowns.
 
 \subsubsection{Leverage Direction Does Not Affect VT Effectiveness}
 
@@ -330,7 +280,7 @@ An important interaction between window size and rebalancing frequency emerges. 
 
 \subsubsection{Window Size and Proxy Sensitivity}
 
-Gamma sign classifications are qualitatively identical with $w \in \{252, 504, 756\}$, and QLIKE rankings are preserved under the \citet{parkinson1980} proxy (DM $p < 0.001$ for SPY). Table~\ref{tab:window} shows a U-shaped QLIKE--window relationship reflecting the tension between estimation precision (favoring larger samples; \citealt{hwang2006}) and regime relevance (favoring recent data). Cross-OOS validation across six periods (2015--2026) reveals $w = 5000$ produces the lowest QLIKE in 3 of 6 periods, $w = 504$ in only 1 (COVID-19).
+Gamma sign classifications are qualitatively identical with $w \in \{252, 504, 756\}$, and QLIKE rankings are preserved under the \citet{parkinson1980} proxy (DM $p < 0.001$ for SPY). The online supplement shows a U-shaped QLIKE--window relationship reflecting the tension between estimation precision (favoring larger samples; \citealt{hwang2006}) and regime relevance (favoring recent data). Cross-OOS validation across six periods (2015--2026) reveals $w = 5000$ produces the lowest QLIKE in 3 of 6 periods, $w = 504$ in only 1 (COVID-19).
 
 The GJR advantage amplifies at larger windows: QLIKE improvement grows from $-3.8\%$ ($w = 504$) to $-6.1\%$ ($w = 2000$) for 2023--2024, as the larger sample estimates $\gamma$ more precisely. For VaR, $w = 2000$ reduces the 1\% violation rate from 1.1\% to 0.8\%. For portfolio construction, $w = 2000$ improves MaxDD ($-25.6\%$ vs.\ $-29.5\%$) but sacrifices Sharpe (0.635 vs.\ 0.745), reflecting the trade-off between preventing premature re-leveraging after crises and slower recovery during bull markets. The pattern is asset-specific: equities and commodities favor $w = 2000$, while bonds favor $w = 504$ (consistent with frequent interest-rate regime changes). We report both windows throughout.
 
@@ -350,7 +300,7 @@ Rolling estimation of df reveals substantial time variation (4.27 to $>100$, mea
 
 Standardized residuals from the optimal GJR model show no significant autocorrelation (Ljung-Box on $z^2_t$: $p = 0.76$ at 5 lags, $p = 0.94$ at 10 lags, $p = 0.97$ at 20 lags), indicating the GARCH filter has extracted all exploitable variance dynamics from daily returns.
 
-A comprehensive ablation of twelve alternatives confirms this diagnostic (Table~\ref{tab:nulls}): LSTM/GRU cascades (DM $p > 0.27$), GARCH-LSTM hybrids (unstable factor, std $= 1.16$), HAR with squared-return proxy (QLIKE worse by 0.28\%; but see Section~\ref{sec:har_paradox} for the proxy-corrected result), EMD decomposition ($-0.04\%$), Ridge stacking ($-5.3\%$, Ridge zeroes all features), and expanding windows (worst QLIKE, distant regime contamination). All fail to improve upon GJR-GARCH(1,1).
+A comprehensive ablation of twelve alternatives, reported in the online supplement, confirms this diagnostic: LSTM/GRU cascades (DM $p > 0.27$), GARCH-LSTM hybrids (unstable factor, std $= 1.16$), HAR with squared-return proxy (QLIKE worse by 0.28\%; but see Section~\ref{sec:har_paradox} for the proxy-corrected result), EMD decomposition ($-0.04\%$), Ridge stacking ($-5.3\%$, Ridge zeroes all features), and expanding windows (worst QLIKE, distant regime contamination). All fail to improve upon GJR-GARCH(1,1).
 
 The sole exception involves implied volatility in the \textit{variance equation}. Including VIX in the \textit{mean equation} yields no improvement---SSVS consistently selects the empty model. However, GJR-GARCH-X with VIX in the variance equation ($\sigma^2_t = \omega + \alpha \varepsilon^2_{t-1} + \gamma \varepsilon^2_{t-1} \mathbf{1}_{[\varepsilon_{t-1}<0]} + \beta \sigma^2_{t-1} + \delta \text{VIX}^2_{t-1}$) achieves $-17.4\%$ QLIKE improvement (DM $t = -2.93$, $p < 0.01$, confirmed across five cross-OOS periods). VIX9D (9-day) further outperforms VIX (DM $t = 6.63$), consistent with closer horizon matching. This demonstrates that the ceiling applies to \textit{return-based} models; implied volatility provides forward-looking information the variance equation can exploit.
 
@@ -397,7 +347,7 @@ On February 28, 2026, US-Israel strikes on Iran triggered the Strait of Hormuz b
 
 All six assets achieve Basel III Green Zone at the 1\% level (Student-$t$, df $= 5$): SPY (0/49 violations), QQQ (0/49), GLD (1/49), TLT (0/49), EEM (1/49), USO (0/49). USO's zero violations despite a 73\% surge demonstrates GARCH's capacity to adapt to extreme environments. The gamma taxonomy extends correctly: USO $\gamma = -0.14$ (inverted, confirming supply-shock commodity pattern), GLD $\gamma = -0.22$ (intensifying from $-0.09$ pre-crisis), EEM $\gamma = +0.34$ ($t = 1.71$, standard leverage).
 
-Hybrid VT provides protection across all ten identifiable crisis episodes (2008--2026), with drawdown improvement scaling with severity: COVID-19 ($+23.5$pp), GFC ($+16.3$pp), 2022 rate hiking ($+10.9$pp), Iran ($+2.0$pp). The switching threshold (1.3) is robust: Sharpe remains in $[0.93, 0.98]$ for all thresholds in $[1.0, 1.6]$ (Figure~\ref{fig:vix_garch_ratio}). The 2026 episode is the only genuinely OOS crisis test.
+Hybrid VT provides protection across all ten identifiable crisis episodes (2008--2026), with drawdown improvement scaling with severity: COVID-19 ($+23.5$pp), GFC ($+16.3$pp), 2022 rate hiking ($+10.9$pp), Iran ($+2.0$pp). The switching threshold (1.3) is robust: Sharpe remains in $[0.93, 0.98]$ for all thresholds in $[1.0, 1.6]$ under the ratio diagnostics reported in the supplement. The 2026 episode is the only genuinely OOS crisis test.
 
 
 
@@ -409,16 +359,6 @@ Our finding that gold exhibits inverted leverage has a natural economic interpre
 
 The taxonomy---risk assets (standard leverage), safe-haven assets (inverted), interest rate instruments (neutral)---suggests that leverage direction is determined by the economic mechanism linking returns to uncertainty, not by statistical properties alone. This explains why skewness misleads: gold has negative skewness (reflecting sharp selloffs) but inverted leverage (reflecting the fear-driven nature of its rallies).
 
-\subsection{Diversification Amplifies Leverage}
-
-SPY's GJR gamma (0.211) is 2.7$\times$ larger than the average of its twenty largest constituents (0.079, $t = -10.68$, $p < 0.0001$), attributable to correlation asymmetry during declines \citep{longin2001}. This amplification is market-dependent---present in U.S.\ and emerging market indices but absent in Japanese and German indices---and implies that asymmetric GARCH specifications are more valuable for index ETFs than for individual equities (Table~\ref{tab:amplify}).
-
-\subsection{Conditional Leverage: Regime Dependence}
-
-We investigate whether $\gamma$ varies with the volatility regime by regressing rolling gamma estimates on the annualized volatility of each estimation window. For SPY, $\gamma$ is weakly negatively correlated with volatility (slope $= -0.36$, $p = 0.02$, $R^2 = 0.07$): the leverage effect is marginally stronger in calm markets (mean $\gamma = +0.27$) than in stressed markets (mean $\gamma = +0.20$). For GLD, inverted leverage weakens in high-volatility periods (slope $= +0.49$, $p = 0.04$). Both effects are statistically significant but economically modest, supporting fixed model assignment rather than regime-conditional switching.
-
-A notable shift in cross-asset dependence occurred post-2022: the SPY--TLT correlation changed from $-0.42$ (2010--2021) to $+0.09$ (2022--2026), a statistically significant difference (Fisher's $z = -13.58$, $p < 0.0001$). While it remains premature to characterize this as a permanent structural break---the post-2022 sample is short and coincides with unusual monetary tightening---the reversal challenges the negative stock-bond correlation assumption underlying 60/40 portfolios \citep[cf.][]{campbell2017}. In contrast, SPY--GLD tail correlation remains approximately zero across all VIX regimes, consistent with gold's diversification properties being independent of the interest rate environment.
-
 \subsection{Implications for Risk Management Practice}
 
 \subsubsection{VaR: Simplicity Beats Complexity}
@@ -426,12 +366,6 @@ A notable shift in cross-asset dependence occurred post-2022: the SPY--TLT corre
 Our VaR attribution analysis carries a practical message for risk managers: the largest improvements in Basel III compliance come from the simplest adjustment---using Student-$t$ instead of Normal quantiles. This pushes back against the trend toward increasingly complex tail-risk models. The Student-$t$ correction addresses the fundamental problem (fat tails) directly, while more sophisticated approaches capture second-order effects that are empirically negligible.
 
 A further null result clarifies the role of distributional assumptions: changing the innovation distribution materially affects VaR performance but does not affect QLIKE rankings (DM $p = 0.56$). This separation is economically intuitive: QLIKE evaluates second-moment forecasting, whereas VaR depends on tail quantiles. The orthogonality is starkly demonstrated when GJR-GARCH---the QLIKE-optimal equation---produces a borderline VaR failure under Normal innovations (10/502 violations, Kupiec $p = 0.049$), while symmetric GARCH passes comfortably (7/502, $p = 0.64$). Restoring compliance requires only a distributional upgrade: GJR-GARCH with Student-$t$(df=5) achieves 6/502 violations ($p = 0.67$), retaining the forecast advantage while satisfying risk management constraints (Table~\ref{tab:var_ortho}). The lesson is that optimizing the variance equation and the distributional assumption are independent tasks that must be pursued jointly.
-
-\subsubsection{Criterion-Dependent Model Rankings}
-
-The model comparison framework reveals that rankings depend critically on the evaluation criterion. In a comprehensive comparison across seven volatility models, GJR-GARCH dominates on QLIKE($r^2$)---the \citet{patton2011} proxy-robust metric---while the Asymmetric Multiplicative Error Model (AMEM; \citealt{engle2006}) with Gamma-distributed innovations dominates on VaR calibration, achieving a 1\% violation rate of 1.09\% versus the 1\% target. This asymmetry between forecast accuracy and risk management quality has practical implications: practitioners selecting models for VaR compliance should prefer AMEM's Gamma-distributed innovations, which naturally accommodate the right-skewed distribution of volatility, while researchers evaluating point forecast accuracy should use GJR-GARCH as the benchmark. The finding reinforces the three-domain separation in Table~\ref{tab:complexity_ceiling}: the GARCH equation governs QLIKE, the distributional assumption governs VaR, and neither domain's ranking transfers to the other.
-
-A deeper comparison reveals that \textit{leverage direction}---not model family---is the binding factor for forecast improvement. The AMEM of \citet{engle2006}, which models conditional expected absolute returns $\mu_t = \omega + \alpha |r_{t-1}| + \gamma |r_{t-1}| \mathbf{1}_{[r_{t-1}<0]} + \beta \mu_{t-1}$ with Gamma innovations, represents a fundamentally different model class from GARCH: it targets $|r_t|$ rather than $\sigma^2_t$, uses a multiplicative error structure, and requires no distributional transformation for VaR. Despite these structural differences, AMEM's QLIKE on $r^2$ (1.4689) is statistically indistinguishable from GJR-GARCH (1.4824) by the Diebold-Mariano test (DM $t = -2.19$, NS at the \citealt{harvey2016} $t > 3.0$ threshold). In contrast, asymmetric variants significantly outperform their symmetric counterparts \textit{within} each model family: AMEM versus MEM (DM $t = 3.78$, $p < 0.001$) and GJR-GARCH versus GARCH (DM $t = -4.27$, $p < 0.001$). The common factor driving both improvements is the $\gamma$ term capturing leverage direction, not the choice between variance-targeting and absolute-return-targeting model architectures. This result generalizes the leverage taxonomy beyond the GARCH family: the sign of $\gamma$ is informative regardless of whether the conditional moment being modeled is $\sigma^2_t$ or $E[|r_t|]$.
 
 \subsubsection{Model Selection: Check Gamma, Not Skewness}
 
@@ -446,7 +380,7 @@ Multi-asset portfolios that include both equities (standard leverage) and gold (
 
 We evaluate market timing using the \citet{henriksson1981} framework on approximately 3,100 daily observations (2014--2026). Hybrid VT generates statistically significant alpha of 5.77\% annualized ($t = 3.99$, $p < 0.001$) with negative $\gamma_{HM} = -0.043$ ($t = -4.06$), indicating that VT alpha originates from \textit{variance management}---reducing exposure during all high-volatility episodes---rather than directional market timing, which would produce positive $\gamma_{HM}$.\footnote{The three $\gamma_{HM}$ estimates reported in this paper share the same symbol but correspond to distinct Henriksson--Merton regressions on different samples: $\gamma_{HM} = -0.035$ ($t = -0.39$) for the pure-VT strategy over the full 2014--2026 sample (Section~\ref{sec:timing_tests}); $\gamma_{HM} = -0.068$ ($t = -4.63$) for the pure-VT strategy conditional on high-VIX episodes (VIX $>25$); and $\gamma_{HM} = -0.043$ ($t = -4.06$) for the \emph{Hybrid} VT strategy over the full sample (this section). The consistent negative sign across all three specifications supports the variance-management interpretation; the magnitudes differ as expected from sample and strategy heterogeneity.}
 
-An important caveat: during high-VIX periods (VIX $> 25$, 21\% of the sample), Hybrid VT underperforms buy-and-hold by 16.9 percentage points annualized, because reduced exposure misses post-crisis recoveries. The strategy's value is better characterized as maximum drawdown reduction ($-33.7\% \to -11.4\%$; Table~\ref{tab:hybrid}) than crisis-period outperformance. Across tail risk dimensions, Hybrid VT reduces ES(1\%) from $-4.68\%$ to $-1.35\%$ and worst single-day return from $-11.59\%$ to $-1.70\%$ (Table~\ref{tab:tail}).
+An important caveat: during high-VIX periods (VIX $> 25$, 21\% of the sample), Hybrid VT underperforms buy-and-hold by 16.9 percentage points annualized, because reduced exposure misses post-crisis recoveries. The strategy's value is better characterized as maximum drawdown reduction ($-33.7\% \to -11.4\%$ in the supplementary strategy comparison) than crisis-period outperformance. Across tail risk dimensions, Hybrid VT reduces ES(1\%) from $-4.68\%$ to $-1.35\%$ and worst single-day return from $-11.59\%$ to $-1.70\%$ (online supplement).
 
 \subsection{Proposition: Gamma Determines the VT Alpha Mechanism}
 \label{sec:gamma-mechanism}
@@ -465,14 +399,7 @@ The regularity is statistically supported for equity-type assets (Spearman $\rho
 
 \subsubsection{Evidence}
 
-Table~\ref{tab:gamma-mechanism} and Figure~\ref{fig:gamma_mechanism} report the results of regressing VT weight changes on trailing 5-day returns. The Spearman correlation between $\gamma$ and $\beta^{\text{trend}}$ is $\rho = 1.000$ ($p < 0.001$) across seven primary assets, with Pearson $r = 0.993$. The perfect rank correlation is not a mathematical identity: it reflects that the \emph{sign} of $\gamma$—determined by the asset's price-driving mechanism, not by VT construction—perfectly separates the seven assets into positive-$\beta^{\text{trend}}$ (trend-following) and negative-$\beta^{\text{trend}}$ (contrarian) groups, with monotone magnitudes within each group. The Pearson $r = 0.993 < 1$ confirms that the linear relationship is near-perfect but not algebraically exact, ruling out definitional circularity. Crucially, $\gamma$ is estimated over the in-sample period (2010--2017) while $\beta^{\text{trend}}$ is estimated over the separate OOS period (2018--2026); the $\rho = 1.000$ therefore cannot be a mechanical artifact of shared estimation data (OOS $\rho = 0.821$, $p < 0.05$). This pattern arises because $\gamma > 0$ implies that bad news raises volatility more than good news, which causes VT weights to fall after down moves and rise after up moves—mechanically producing trend-following—while $\gamma < 0$ inverts this dynamic.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.85\textwidth]{fig_gamma_mechanism.pdf}
-\caption{Cross-asset relationship between GJR-GARCH $\gamma$ and implicit trend-following intensity ($\beta^{\text{trend}}$). Standard leverage ($\gamma > 0$, green) produces trend-following; inverted leverage ($\gamma < 0$, red) produces contrarian behavior; near-zero $\gamma$ (yellow) shows no directional bias. Spearman $\rho = 1.000$ across 7 assets.}
-\label{fig:gamma_mechanism}
-\end{figure}
+Supplementary table and figure report the results of regressing VT weight changes on trailing 5-day returns. The Spearman correlation between $\gamma$ and $\beta^{\text{trend}}$ is $\rho = 1.000$ ($p < 0.001$) across seven primary assets, with Pearson $r = 0.993$. The perfect rank correlation is not a mathematical identity: it reflects that the \emph{sign} of $\gamma$---determined by the asset's price-driving mechanism, not by VT construction---perfectly separates the seven assets into positive-$\beta^{\text{trend}}$ (trend-following) and negative-$\beta^{\text{trend}}$ (contrarian) groups, with monotone magnitudes within each group. The Pearson $r = 0.993 < 1$ confirms that the linear relationship is near-perfect but not algebraically exact, ruling out definitional circularity. Crucially, $\gamma$ is estimated over the in-sample period (2010--2017) while $\beta^{\text{trend}}$ is estimated over the separate OOS period (2018--2026); the $\rho = 1.000$ therefore cannot be a mechanical artifact of shared estimation data (OOS $\rho = 0.821$, $p < 0.05$). This pattern arises because $\gamma > 0$ implies that bad news raises volatility more than good news, which causes VT weights to fall after down moves and rise after up moves---mechanically producing trend-following---while $\gamma < 0$ inverts this dynamic.
 
 This correlation is partly mechanical, as both $\beta^{\text{trend}}$ and $\gamma$ derive from the GJR specification. However, the proposition has genuine predictive content: $\gamma$ from 2010--2017 predicts $\beta^{\text{trend}}$ in 2018--2026 ($\rho = 0.821$, $p < 0.05$). The mapping degrades across expanding samples ($\rho = 0.874$ for $N = 17$, $0.753$ for $N = 26$) and becomes insignificant for 12 diverse assets ($\rho = -0.448$, $p = 0.14$); restricting to equity-type assets recovers it ($\rho = 0.886$, $p = 0.019$, $N = 6$).
 
@@ -498,42 +425,14 @@ The insurance cost can be partially offset through VIX-conditional leverage. Dec
 
 A methodological implication follows from the criterion-dependent rankings documented in Section~\ref{sec:qlike_ceiling}: proper evaluation of VT strategies---and the volatility models underlying them---requires assessment on multiple targets. Following the \citet{patton2011} framework, we evaluate each model on its native loss function (QLIKE with $r^2$ proxy), rank-based metrics (Spearman correlation between forecast and realized), and tail-risk measures (VaR/ES violation rates). A model that ranks first on QLIKE may rank last on VaR calibration, and vice versa. For VT specifically, the binding evaluation target is not forecast accuracy but allocation quality (Sharpe, MDD), which depends on the signal's forward-looking content rather than its backward-looking precision---explaining why VIX-based 12/VIX outperforms statistically superior HAR forecasts (Section~\ref{sec:har_paradox}).
 
-\subsection{VT Alpha Is Not a Calendar Anomaly}
-\label{sec:calendar}
-
-A competing explanation for VT alpha is that it proxies for a calendar effect: if VIX is systematically lower in certain months, the 12/VIX rule mechanically overweights equities during historically favorable periods (e.g., the ``Sell in May'' anomaly). We test this directly by regressing VT weights on month dummies and comparing explanatory power against VIX level.
-
-The calendar hypothesis is decisively rejected. Month dummies explain only $R^2 = 1.2\%$ of VT weight variation, compared to 88\% for VIX level alone. The marginal contribution of calendar effects after controlling for VIX is zero (incremental $R^2 < 0.001$, $F$-test $p > 0.90$). The strongest monthly dummy coefficient is $\beta = -0.001$ ($t = -0.15$). Furthermore, VIX is actually \textit{higher} in winter months (October--March mean VIX $= 20.1$) than summer months (April--September mean VIX $= 17.8$), opposite to what the ``Sell in May'' hypothesis would predict. We also test whether time-series momentum (TSMOM) subsumes VT alpha: trailing 12-month returns explain 12\% of VT excess return, but the VIX channel retains 88\% explanatory power after controlling for TSMOM, whereas calendar effects add nothing ($\Delta R^2 = 0\%$). VT alpha is driven by the volatility--expected-return disconnect documented by \citet{moreira2017}, not by seasonal patterns.
-
-\subsection{Cross-Asset VT Applicability}
-\label{sec:cross_asset_vt}
-
-We test 12/VIX targeting across three asset classes beyond equities. \textbf{International equities} (10 markets): US VIX outperforms local realized variance as the scaling signal in 10 of 10 markets for MDD, consistent with VIX's forward-looking nature. \textbf{Currency carry} (AUD/JPY): VIX-timed carry reduces MDD from $-40\%$ to $-14\%$ ($p = 0.001$) and improves Sharpe from 0.146 to 0.426; own-volatility targeting is nearly ineffective (Sharpe 0.085), because carry crashes are triggered by global risk-off events. \textbf{Commodities} (USO, GLD, DBA): VIX-based VT produces no significant improvement (DM $p > 0.05$, MDD bootstrap $p > 0.93$), because commodity volatility is supply-driven.
-
-The effectiveness boundary is the VIX-volatility correlation: assets with $|\rho| > 0.60$ exhibit significant MDD improvement. VIX-based VT is an \textit{equity-ecosystem} strategy, effective for assets whose risk dynamics are driven by equity market stress.
-
 \subsection{Practical Implementation: Implied-Volatility Targeting}
 \label{sec:ivt}
 
-The GARCH-based VT framework requires daily model re-estimation, introducing computational overhead. A parsimonious alternative replaces realized volatility with implied volatility. Following \citet{moreira2017}, substituting VIX for $\hat{\sigma}_t$ yields $w_t = \sigma_{\text{target}} / \text{VIX}_t$. With $\sigma_{\text{target}} = 12\%$, the rule reduces to $w_t = 12 / \text{VIX}_t$, equivalent to the VIX-managed portfolio of \citet{bozovic2024} reframed within the VT paradigm. Figure~\ref{fig:vix_weight} shows the resulting weight series.
+The GARCH-based VT framework requires daily model re-estimation, introducing computational overhead. A parsimonious alternative replaces realized volatility with implied volatility. Following \citet{moreira2017}, substituting VIX for $\hat{\sigma}_t$ yields $w_t = \sigma_{\text{target}} / \text{VIX}_t$. With $\sigma_{\text{target}} = 12\%$, the rule reduces to $w_t = 12 / \text{VIX}_t$, equivalent to the VIX-managed portfolio of \citet{bozovic2024} reframed within the VT paradigm.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.95\textwidth]{fig_vix_weight_timeline.pdf}
-\caption{Top: VIX with 12\% target threshold. Bottom: SPY weight from 12/VIX (2007--2026). Crisis periods show weights of 15--30\%.}
-\label{fig:vix_weight}
-\end{figure}
+Across seven OOS periods (2009--2025), 12/VIX achieves Sharpe 0.856 vs.\ GARCH VT's 0.826 and MDD $-16.5\%$ vs.\ $-18.4\%$. The Sharpe improvement is not significant ($t = 0.33$; achieving $t > 3.0$ would require $\sim$1,573 years), but the MDD improvement \textit{is} significant (bootstrap $p = 0.0004$, 95\% CI $[+9.2\text{pp}, +71.7\text{pp}]$). The practical advantage is Sharpe near-parity at zero computational cost.
 
-Across seven OOS periods (2009--2025), 12/VIX achieves Sharpe 0.856 vs.\ GARCH VT's 0.826 and MDD $-16.5\%$ vs.\ $-18.4\%$. The Sharpe improvement is not significant ($t = 0.33$; achieving $t > 3.0$ would require $\sim$1,573 years), but the MDD improvement \textit{is} significant (bootstrap $p = 0.0004$, 95\% CI $[+9.2\text{pp}, +71.7\text{pp}]$). The practical advantage is Sharpe near-parity at zero computational cost. Figure~\ref{fig:mdd_comparison} presents the cross-crisis breakdown.
-
-A direct comparison using properly lagged weights ($\text{VIX}_t$ for $r_{t+1}$) shows similar risk-adjusted returns (DM $p = 0.62$). Same-day implementation ($\text{VIX}_t$ for $r_t$) inflates Sharpe to 1.98 via contemporaneous correlation ($\rho = +0.65$); GARCH is naturally immune since $\sigma_t$ uses only lagged information.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.90\textwidth]{fig_mdd_comparison.pdf}
-\caption{Maximum drawdown comparison across seven major crises (2008--2026). 12/VIX (green) reduces drawdowns by +4pp to +36pp relative to Buy \& Hold (red).}
-\label{fig:mdd_comparison}
-\end{figure}
+A direct comparison using properly lagged weights ($\text{VIX}_t$ for $r_{t+1}$) shows similar risk-adjusted returns (DM $p = 0.62$). Same-day implementation ($\text{VIX}_t$ for $r_t$) inflates Sharpe to 1.98 via contemporaneous correlation ($\rho = +0.65$); GARCH is naturally immune since $\sigma_t$ uses only lagged information. The online supplement reports the weight path and crisis-by-crisis drawdown comparison.
 
 This asymmetry between Sharpe insignificance and MDD significance illuminates a fundamental insight: the primary value of volatility targeting lies in \textit{mechanical drawdown compression}---which requires only a contemporaneous volatility estimate---rather than in Sharpe enhancement, which demands genuine forecasting skill. Because VIX embeds the market's consensus volatility expectation, it captures regime shifts instantaneously, whereas GARCH responds with a lag governed by $\alpha + \beta$.
 
@@ -579,7 +478,7 @@ The complexity ceiling does not imply sophisticated models are useless---they im
 
 The complexity ceiling delimits where additional sophistication stops improving investment allocation, not risk measurement.
 
-We test the VIX sufficient statistic hypothesis across 16 categories of indicators (Table~\ref{tab:nulls}): composite sentiment (CNN Fear \& Greed, AAII, Michigan), tail risk (SKEW, VVIX), credit (HY/IG spread, yield curve), macroeconomic (42 FRED series), and Taiwan-specific (27 DGBAS indicators). After controlling for VIX, partial correlations with next-period realized volatility are uniformly below 0.03 for all U.S.\ indicators. A ridge regression ensemble (leave-one-year-out CV) shrinks all non-VIX coefficients to approximately zero ($\alpha = 100$). A panel GARCH-X with the five strongest candidates \textit{worsens} OOS QLIKE by $-8.31\%$ ($p = 0.022$), consistent with overfitting. The sole exception is Taiwan import growth year-over-year ($+5.6\%$, DM $p = 0.043$), consistent with VIX's incomplete coverage of trade-dependent Asian economies.
+We test the VIX sufficient statistic hypothesis across 16 categories of indicators in the online supplement: composite sentiment (CNN Fear \& Greed, AAII, Michigan), tail risk (SKEW, VVIX), credit (HY/IG spread, yield curve), macroeconomic (42 FRED series), and Taiwan-specific (27 DGBAS indicators). After controlling for VIX, partial correlations with next-period realized volatility are uniformly below 0.03 for all U.S.\ indicators. A ridge regression ensemble (leave-one-year-out CV) shrinks all non-VIX coefficients to approximately zero ($\alpha = 100$). A panel GARCH-X with the five strongest candidates \textit{worsens} OOS QLIKE by $-8.31\%$ ($p = 0.022$), consistent with overfitting. The sole exception is Taiwan import growth year-over-year ($+5.6\%$, DM $p = 0.043$), consistent with VIX's incomplete coverage of trade-dependent Asian economies.
 
 Causal discovery (PC algorithm on 12 financial indicators) confirms VIX as an \textit{information sink}: in-degree 4 (receiving edges from credit spreads, equity returns, yield curve, sentiment), out-degree 1. This topology explains why VIX functions as a sufficient statistic: it aggregates causal influences from multiple sources, leaving no residual predictive content after conditioning.
 
@@ -588,7 +487,7 @@ Taken together, these results suggest that VIX subsumes the volatility-relevant 
 \subsection{The HAR Paradox: Prediction Superiority Without Economic Improvement}
 \label{sec:har_paradox}
 
-HAR with absolute returns ($|r_t|$) achieves QLIKE of 0.49 versus GJR-GARCH's 1.51 (DM $= -15.45$, $p < 0.001$).\footnote{The HAR comparison uses the \citet{patton2011} centered QLIKE loss, $L^*(\sigma^2, h) = \sigma^2/h - \ln(\sigma^2/h) - 1$, which produces values centered near 1.0. This differs from the quasi-log-likelihood formulation in Eq.~\eqref{eq:qlike} used in Tables~\ref{tab:qlike}--\ref{tab:window} (values near $-9.0$). The two formulations are order-preserving: model rankings are identical under both conventions. The centered form is used here because HAR targets $|r_t|$ rather than $r^2_t$, making the quasi-log-likelihood scale inapplicable.} This result is universal: HAR-ABS outperforms GJR-GARCH in all seven markets tested (SPY, QQQ, EFA, EWZ, GLD, TLT, 0050.TW), with DM statistics from $-11.11$ to $-21.74$, all at $p < 0.001$. The proxy choice is decisive: HAR with $r^2_t$ produces QLIKE $= 1.57$, \textit{worse} than GJR---a threefold swing from the same model structure.
+HAR with absolute returns ($|r_t|$) achieves QLIKE of 0.49 versus GJR-GARCH's 1.51 (DM $= -15.45$, $p < 0.001$).\footnote{The HAR comparison uses the \citet{patton2011} centered QLIKE loss, $L^*(\sigma^2, h) = \sigma^2/h - \ln(\sigma^2/h) - 1$, which produces values centered near 1.0. This differs from the quasi-log-likelihood formulation in Eq.~\eqref{eq:qlike} used in the main text and the online supplement (values near $-9.0$). The two formulations are order-preserving: model rankings are identical under both conventions. The centered form is used here because HAR targets $|r_t|$ rather than $r^2_t$, making the quasi-log-likelihood scale inapplicable.} This result is universal: HAR-ABS outperforms GJR-GARCH in all seven markets tested (SPY, QQQ, EFA, EWZ, GLD, TLT, 0050.TW), with DM statistics from $-11.11$ to $-21.74$, all at $p < 0.001$. The proxy choice is decisive: HAR with $r^2_t$ produces QLIKE $= 1.57$, \textit{worse} than GJR---a threefold swing from the same model structure.
 
 Yet HAR-ABS produces the \textit{lowest} VT Sharpe (1.12 vs.\ 1.75 for 12/VIX) with $1.9\times$ higher turnover and weight correlation of only 0.51 with 12/VIX. The resolution: HAR is backward-looking, optimally aggregating historical magnitudes at daily, weekly, and monthly horizons. VIX is forward-looking, embedding the variance risk premium. For \textit{measurement}, backward aggregation is superior; for \textit{allocation}, forward-looking risk pricing is irreplaceable. This is the fifth independent confirmation of the prediction$\neq$application paradox in our analysis, sharpening rather than refuting the complexity ceiling.
 
@@ -612,62 +511,4 @@ This paper establishes that the direction of the asymmetric volatility response-
 
 First, the leverage direction taxonomy---risk assets ($\gamma > 0$), safe-haven assets ($\gamma < 0$), interest rate instruments ($\gamma \approx 0$)---provides a reliable criterion for GARCH model selection. The threshold-based classification correctly classifies all nine Diebold-Mariano comparisons in the primary sample (Table~\ref{tab:qlike}), with out-of-sample validation achieving 6/6 correct classifications using 2023 $\gamma$ to predict 2024--2025 model choice---though the small cross-section ($N = 6$) limits the statistical power of this OOS test. Gold's inverted leverage is regime-dependent: inverted during fear-driven rallies, standard during liquidation-driven declines. This taxonomy replaces the conventional but misleading skewness-based heuristic.
 
-Second, leverage direction determines the economic channel through which volatility targeting generates alpha: trend-following for standard-leverage equities, contrarian for inverted-leverage assets, and pure variance management for neutral-leverage assets (Empirical Regularity~1). This relationship holds within equity-type assets (Spearman $\rho = 0.886$, $p = 0.019$, $N = 6$), with out-of-sample predictive power ($\rho = 0.821$), generalizing the equity-specific finding of \citet{hood2025}. Importantly, the mapping does not extend to diverse asset classes ($\rho = -0.448$, $p = 0.14$ for $N = 12$), delineating a clear domain restriction. Meanwhile, VT's primary benefit---maximum drawdown reduction---is universal across all tested assets and driven by base volatility level ($\rho = 0.944$ for $N = 5$ primary assets; $\rho = 0.83$ for the extended $N = 14$ sample), independent of $\gamma$. A broader pattern emerges: increasing model sophistication (DCC-GARCH, copula, GARCH-MIDAS, Markov-switching) improves statistical measurement but not investable allocation decisions. Supplementary evidence on cross-market information transmission between U.S.\ and Asian equity markets is presented in Appendix~\ref{sec:tz_arbitrage}.
-
-
-
-\appendix
-
-\section{Commodity Extension}
-
-\subsection{Leverage Direction Across Commodities}
-
-To test the generalizability of the leverage direction taxonomy, we estimate GJR-GARCH $\gamma$ for eight commodity ETFs. A clear pattern links the price mechanism to leverage direction.
-
-\textbf{Supply-shock sensitive commodities}---where price increases reflect supply disruptions or scarcity---exhibit inverted leverage. Coffee (JO) shows the strongest inverted effect ($\gamma = -0.082$, 100\% quarterly negative), followed by natural gas (UNG, 83\% negative) and wheat (WEAT, 66\% negative). These commodities share a common feature: price spikes are driven by supply-side events (weather, disease, pipeline disruptions) that simultaneously increase uncertainty.
-
-\textbf{Demand-driven commodities}---where prices primarily reflect economic activity---exhibit standard leverage. Crude oil (USO, $\gamma = +0.102$, 17\% negative) is the clearest example: falling prices signal weakening demand, increasing uncertainty about future conditions.
-
-\textbf{Mixed commodities} show intermediate behavior: silver (SLV, 72\% negative) reflects its dual role as safe-haven metal and industrial input; platinum (PPLT, 55\% negative) has similar characteristics. This supply-versus-demand framework provides a deeper economic foundation for the taxonomy: the direction of asymmetric volatility reflects whether the price-driving mechanism operates through fear/scarcity (inverted) or risk/decline (standard).
-
-\subsection{Volatility Targeting for Inverted-Leverage Commodities}
-
-We test VT for the most extreme inverted-leverage commodity: coffee (JO, $\gamma = -0.082$, 100\% quarterly negative). Over 2020--2023, VT improves Sharpe from 0.40 to 0.59 ($+48\%$) and MDD from $-41.7\%$ to $-13.8\%$. Combined with gold ($+11\%$ Sharpe) and equity results, this confirms VT effectiveness is independent of leverage direction across a broad range of asset classes and leverage intensities.
-
-
-\section{Time-Zone Information Transmission: Supplementary Evidence}
-\label{sec:tz_arbitrage}
-
-This appendix presents supplementary evidence on cross-market information transmission between U.S.\ and Asian equity markets. While not a main contribution of this paper, the lead-lag relationship provides independent evidence that the leverage-direction taxonomy has cross-market implications: U.S.\ equity volatility (driven by standard leverage) transmits to Asian markets with predictable timing.
-
-Non-overlapping trading hours create a persistent lead-lag: SPY-to-next-day Asian market correlation is $r = 0.376$ for Taiwan, with VIX Granger-causing 0050.TW volatility ($F = 58.8$, $p < 0.0001$). A momentum strategy---hold the local index when trailing SPY return (5--10 day lookback) is positive, otherwise cash---exceeds the Harvey $t > 3.0$ threshold in six markets using c2c returns (Table~\ref{tab:tz_arbitrage}): Hong Kong ($t = 4.12$), Australia ($t = 4.04$), Singapore ($t = 4.03$), Korea ($t = 3.83$), Taiwan ($t = 3.75$), Japan ($t = 3.69$). India and Indonesia fail (consistent with microstructure frictions), as do all U.S.-listed ETFs tracking these markets (confirming the time-zone gap mechanism) and European markets (trading-hour overlap).
-
-\textbf{Critical caveat: c2c vs.\ o2o returns.} The c2c Sharpe ratios include overnight opening gaps that mechanically reflect U.S.\ price discovery. Approximately 78\% of c2c alpha is not capturable. Using o2o returns, Taiwan Sharpe drops from 1.62 to 0.87 ($t = 2.22$), \textit{failing} the Harvey threshold. The c2c results are scientifically valuable as evidence of information transmission speed but should not be interpreted as achievable returns.
-
-\begin{table}[H]
-\centering
-\caption{Time-Zone Momentum Strategy: Close-to-Close vs.\ Open-to-Open Performance}
-\label{tab:tz_arbitrage}
-\small
-\begin{tabular}{lccccccc}
-\hline
-Market & c2c Sharpe & o2o Sharpe & c2c $t$ & MDD & Sw/yr & Cost (bp) & Harvey (o2o)? \\
-\hline
-Hong Kong  & 1.53 & --- & 4.12 & $-$14.2\% & 38 & 10 & --- \\
-Australia  & 1.50 & --- & 4.04 & $-$12.8\% & 35 & 15 & --- \\
-Singapore  & 1.49 & --- & 4.03 & $-$13.5\% & 36 & 15 & --- \\
-Korea      & 1.42 & --- & 3.83 & $-$15.1\% & 40 & 20 & --- \\
-Taiwan     & 1.62 & 0.87 & 3.75 & $-$9.5\%  & 42 & 30 & No \\
-Japan      & 1.23 & 0.78 & 3.69 & $-$16.3\% & 39 & 20 & No \\
-\hline
-India      & 0.74 & --- & 1.98 & $-$22.4\% & 44 & 50 & No \\
-Indonesia  & 0.61 & --- & 1.63 & $-$25.7\% & 41 & 50 & No \\
-\hline
-\end{tabular}
-\end{table}
-
-A global portfolio combining U.S.\ VT and Taiwan TZ momentum achieves c2c Sharpe 1.61 ($t = 4.31$, MDD $-8.4\%$), but implementable o2o performance would be substantially lower. These results measure diversification potential between variance management and cross-market information channels.
-
-
-
-The gamma-based framework requires minimal computational overhead. For model selection, estimate GJR-GARCH(1,1) on 504 trading days; if $\gamma$ is significantly positive ($t > 1.65$), use GJR; otherwise use symmetric GARCH. For gold, re-evaluate quarterly as $\gamma$ sign depends on market regime. For VaR, use Student-$t$ with fixed df~$= 5$ and monitor the VIX/GARCH ratio (apply a 1.5$\times$ VaR multiplier when ratio exceeds 1.5). For volatility targeting, monthly rebalancing at $\sigma_{\text{target}} = 10\text{--}12\%$ provides the best cost-adjusted performance. All estimation uses the Python \texttt{arch} package \citep{sheppard2023} at approximately 6ms per model, with Yahoo Finance data.
+Second, leverage direction determines the economic channel through which volatility targeting generates alpha: trend-following for standard-leverage equities, contrarian for inverted-leverage assets, and pure variance management for neutral-leverage assets (Empirical Regularity~1). This relationship holds within equity-type assets (Spearman $\rho = 0.886$, $p = 0.019$, $N = 6$), with out-of-sample predictive power ($\rho = 0.821$), generalizing the equity-specific finding of \citet{hood2025}. Importantly, the mapping does not extend to diverse asset classes ($\rho = -0.448$, $p = 0.14$ for $N = 12$), delineating a clear domain restriction. Meanwhile, VT's primary benefit---maximum drawdown reduction---is universal across all tested assets and driven by base volatility level ($\rho = 0.944$ for $N = 5$ primary assets; $\rho = 0.83$ for the extended $N = 14$ sample), independent of $\gamma$. A broader pattern emerges: increasing model sophistication (DCC-GARCH, copula, GARCH-MIDAS, Markov-switching) improves statistical measurement but not investable allocation decisions. Supplementary evidence on cross-market transmission and auxiliary extensions is reported in the online supplement.

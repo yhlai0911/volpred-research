@@ -2,7 +2,7 @@
 
 **Target Journal**: Journal of Banking and Finance (JBF)
 **Status**: R1 review — 2 CRITICAL (C3/C4/C5 subsets), needs revision | **Reproduce gate 0 MISMATCH** (2026-04-19 post-session: C1 HM gamma RESOLVED via K1256 3-spec; C2 Kupiec rounding RESOLVED via tables.tex L93/L95 + 5 cross-source NOTE reclass; 7 figure scripts bundled self-contained). 28 MATCH / 0 MISMATCH / 9 NOTE / 19 UNTRACEABLE (structural data-limit, non-error).
-**Pages**: 62 | **Citations**: 54
+**Pages**: 48 | **Citations**: 54
 
 ## Data Sources
 - SPY, QQQ, GLD, TLT, EEM, BTC-USD, IWM, SLV: yfinance
@@ -27,6 +27,7 @@ uv run python paper/leverage-direction/reproduce.py
 - `highlights.txt` — five highlights for submission portal
 - `graphical_abstract.svg` — visual summary for graphical-abstract upload
 - `submission_package.md` — package checklist and journal-specific notes
+- `supplementary.tex` / `supplementary.pdf` — companion supplementary material for moved appendix / robustness tables
 
 ## Self-contained replication package
 
@@ -47,7 +48,7 @@ paper folder (JBF submission hard requirement). Entry points:
 - ~~C2: Kupiec p-values aggressively rounded (0.67→0.60)~~ **RESOLVED 2026-04-19**: tables.tex tab:var_ortho L93 GARCH-Normal 0.40→0.64 + L95 GJR-Student-t 0.60→0.67 (standard rounding of K802 source); reproduce.py HistSim phantom row reclassified UNTRACEABLE. Reproduce gate 7 MISMATCH → 0 across this session: 5 cross-source/period divergences reclassified to NOTE tier (K799 vs K802 DM p / K799 vs K802 GJR+Normal violations / K824v2 vs K802 FHS implementation / Table 1 vs Table 11 kurtosis periods / DM p in-text location), all legitimate reconciliation.
 - C3: Table 5 cherry-picks from 3 experiments — K899 unified VaR pending
 - C4-C5: Tables 1, 3 partially untraceable
-- Paper needs shortening to ~45 pages for JBF
+- Main manuscript shortened to 48 pages; remaining compression to ~45 pages is optional rather than blocking
 
 ## Supporting Experiments
 

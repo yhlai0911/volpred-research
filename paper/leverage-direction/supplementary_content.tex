@@ -1,0 +1,57 @@
+\section*{Online Supplementary Material}
+
+This supplement collects auxiliary null-result tables, commodity extensions, and cross-market evidence that support the main paper but are not required for the submission-length version.
+
+\input{tables_supplement}
+\input{table_nulls}
+
+\appendix
+
+\section{Commodity Extension}
+
+\subsection{Leverage Direction Across Commodities}
+
+To test the generalizability of the leverage direction taxonomy, we estimate GJR-GARCH $\gamma$ for eight commodity ETFs. A clear pattern links the price mechanism to leverage direction.
+
+\textbf{Supply-shock sensitive commodities}---where price increases reflect supply disruptions or scarcity---exhibit inverted leverage. Coffee (JO) shows the strongest inverted effect ($\gamma = -0.082$, 100\% quarterly negative), followed by natural gas (UNG, 83\% negative) and wheat (WEAT, 66\% negative). These commodities share a common feature: price spikes are driven by supply-side events (weather, disease, pipeline disruptions) that simultaneously increase uncertainty.
+
+\textbf{Demand-driven commodities}---where prices primarily reflect economic activity---exhibit standard leverage. Crude oil (USO, $\gamma = +0.102$, 17\% negative) is the clearest example: falling prices signal weakening demand, increasing uncertainty about future conditions.
+
+\textbf{Mixed commodities} show intermediate behavior: silver (SLV, 72\% negative) reflects its dual role as safe-haven metal and industrial input; platinum (PPLT, 55\% negative) has similar characteristics. This supply-versus-demand framework provides a deeper economic foundation for the taxonomy: the direction of asymmetric volatility reflects whether the price-driving mechanism operates through fear/scarcity (inverted) or risk/decline (standard).
+
+\subsection{Volatility Targeting for Inverted-Leverage Commodities}
+
+We test VT for the most extreme inverted-leverage commodity: coffee (JO, $\gamma = -0.082$, 100\% quarterly negative). Over 2020--2023, VT improves Sharpe from 0.40 to 0.59 ($+48\%$) and MDD from $-41.7\%$ to $-13.8\%$. Combined with gold ($+11\%$ Sharpe) and equity results, this confirms VT effectiveness is independent of leverage direction across a broad range of asset classes and leverage intensities.
+
+\section{Time-Zone Information Transmission: Supplementary Evidence}
+\label{sec:tz_arbitrage}
+
+This appendix presents supplementary evidence on cross-market information transmission between U.S.\ and Asian equity markets. While not a main contribution of this paper, the lead-lag relationship provides independent evidence that the leverage-direction taxonomy has cross-market implications: U.S.\ equity volatility (driven by standard leverage) transmits to Asian markets with predictable timing.
+
+Non-overlapping trading hours create a persistent lead-lag: SPY-to-next-day Asian market correlation is $r = 0.376$ for Taiwan, with VIX Granger-causing 0050.TW volatility ($F = 58.8$, $p < 0.0001$). A momentum strategy---hold the local index when trailing SPY return (5--10 day lookback) is positive, otherwise cash---exceeds the Harvey $t > 3.0$ threshold in six markets using c2c returns (Table~\ref{tab:tz_arbitrage}): Hong Kong ($t = 4.12$), Australia ($t = 4.04$), Singapore ($t = 4.03$), Korea ($t = 3.83$), Taiwan ($t = 3.75$), Japan ($t = 3.69$). India and Indonesia fail (consistent with microstructure frictions), as do all U.S.-listed ETFs tracking these markets (confirming the time-zone gap mechanism) and European markets (trading-hour overlap).
+
+\textbf{Critical caveat: c2c vs.\ o2o returns.} The c2c Sharpe ratios include overnight opening gaps that mechanically reflect U.S.\ price discovery. Approximately 78\% of c2c alpha is not capturable. Using o2o returns, Taiwan Sharpe drops from 1.62 to 0.87 ($t = 2.22$), \textit{failing} the Harvey threshold. The c2c results are scientifically valuable as evidence of information transmission speed but should not be interpreted as achievable returns.
+
+\begin{table}[H]
+\centering
+\caption{Time-Zone Momentum Strategy: Close-to-Close vs.\ Open-to-Open Performance}
+\label{tab:tz_arbitrage}
+\small
+\begin{tabular}{lccccccc}
+\hline
+Market & c2c Sharpe & o2o Sharpe & c2c $t$ & MDD & Sw/yr & Cost (bp) & Harvey (o2o)? \\
+\hline
+Hong Kong  & 1.53 & --- & 4.12 & $-$14.2\% & 38 & 10 & --- \\
+Australia  & 1.50 & --- & 4.04 & $-$12.8\% & 35 & 15 & --- \\
+Singapore  & 1.49 & --- & 4.03 & $-$13.5\% & 36 & 15 & --- \\
+Korea      & 1.42 & --- & 3.83 & $-$15.1\% & 40 & 20 & --- \\
+Taiwan     & 1.62 & 0.87 & 3.75 & $-$9.5\%  & 42 & 30 & No \\
+Japan      & 1.23 & 0.78 & 3.69 & $-$16.3\% & 39 & 20 & No \\
+\hline
+India      & 0.74 & --- & 1.98 & $-$22.4\% & 44 & 50 & No \\
+Indonesia  & 0.61 & --- & 1.63 & $-$25.7\% & 41 & 50 & No \\
+\hline
+\end{tabular}
+\end{table}
+
+A global portfolio combining U.S.\ VT and Taiwan TZ momentum achieves c2c Sharpe 1.61 ($t = 4.31$, MDD $-8.4\%$), but implementable o2o performance would be substantially lower. These results measure diversification potential between variance management and cross-market information channels.

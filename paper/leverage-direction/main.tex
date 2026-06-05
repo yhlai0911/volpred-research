@@ -12,7 +12,7 @@
 \usepackage{float}
 \usepackage{fontspec}           % XeLaTeX for Unicode/CJK support
 \usepackage{xeCJK}              % 繁體中文支援
-\setCJKmainfont{PingFang TC}    % macOS 內建繁體中文字型
+\IfFontExistsTF{PingFang TC}{\setCJKmainfont{PingFang TC}}{\setCJKmainfont{Songti TC}}
 
 \usepackage{pifont}% for \ding check/cross marks
 \newcommand{\cmark}{\ding{51}}%
@@ -47,20 +47,18 @@ The direction of the asymmetric volatility response---measured by the GJR-GARCH 
 \textbf{JEL Classification:} C22, C53, G01, G11, G17
 \end{abstract}
 
-\newpage
-
 % ─── Body (auto-converted from paper_complete.md) ────────────
 \input{body}
 
 % Tables are embedded in body.tex at the appropriate locations
 % Additional formal tables:
-\input{tables}
-
-% Null results comprehensive table
-\input{table_nulls}
+\input{tables_main}
 
 % ─── References ──────────────────────────────────────────────
 \bibliographystyle{apalike}
+\begingroup
+\singlespacing
+\small
 \begin{thebibliography}{99}
 
 \bibitem[Araya et al.(2024)]{araya2024}
@@ -235,5 +233,6 @@ Xu, X. (2024). Improving volatility-managed portfolios in real time. \textit{Cri
 Campbell, J.~Y., Sunderam, A., \& Viceira, L.~M. (2017). Inflation bets or deflation hedges? The changing risks of nominal bonds. \textit{Critical Finance Review}, 6(2), 263--301. https://doi.org/10.1561/104.00000043
 
 \end{thebibliography}
+\endgroup
 
 \end{document}
