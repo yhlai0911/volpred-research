@@ -12,8 +12,8 @@
     "is_period": "2010-01-01 ~ 2021-12-31",
     "oos_period": "2022-01-01 ~ 2026-05-19",
     "n_is": 3021,
-    "n_oos": 1128,
-    "n_eval": 1127
+    "n_oos": 1135,
+    "n_eval": 1134
   },
   "hurst_estimates": {
     "SPY": 0.103081,
@@ -34,18 +34,18 @@
   },
   "model_ar_lag_p": 20,
   "qlike_oos": {
-    "HAR": 0.36879574,
-    "fGN_univariate": 0.461357,
-    "fGN_multivariate": 0.46271202
+    "HAR": 0.36866513,
+    "fGN_univariate": 0.46001163,
+    "fGN_multivariate": 0.461349
   },
   "dm_test": {
     "fGN_uni_vs_HAR": {
-      "t_stat": 3.268827,
+      "t_stat": 3.245095,
       "sign_convention": "d = loss_fGN_uni - loss_HAR; t>0 => fGN-uni WORSE; t<0 => fGN-uni BETTER",
       "verdict": "H0 rejected (|t|>2.0)"
     },
     "fGN_multi_vs_HAR": {
-      "t_stat": 3.257408,
+      "t_stat": 3.233787,
       "sign_convention": "d = loss_fGN_multi - loss_HAR; t>0 => fGN-multi WORSE; t<0 => fGN-multi BETTER",
       "verdict": "H0 rejected (|t|>2.0)"
     }

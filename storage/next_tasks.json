@@ -21891,7 +21891,7 @@
     "title": "Paper review (Codex 24h-rule): 市場真的很「粗糙」，但更複雜的模型還是沒贏",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_f3ade114 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_f3ade114",
@@ -21900,6 +21900,30 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-05T15:08:15+00:00"
+    "created_at": "2026-06-05T15:08:15+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-05T15:23:21.413805+00:00",
+    "claim_session_id": "e7415b866718",
+    "started_at": "2026-06-05T15:23:28.488036+00:00",
+    "completed_at": "2026-06-05T15:25:22.125832+00:00",
+    "result": "Codex review found a train/test boundary leak in K1386 HAR-RV, stale/conflicting README numbers, and non-pinned rolling data metadata drift that breaks strict reproducibility of mile_f3ade114 at HEAD. Article headline direction remains broadly consistent with current outputs, but the experiment package needs cleanup before the result should be treated as audit-clean."
+  },
+  {
+    "id": "daily_article_K562_publish_20260606_0011",
+    "task_type": "daily_article",
+    "title": "K562 general-audience 發佈：類股輪動加波動目標的八關體檢",
+    "description": "Draft (storage/drafts/k562_general_draft.md, 14KB May 18) 既有但未發布到 feed。anti_ai_gate FAIL 2 hits 套路句，需 inline 修正後 publish via publish_draft.py。",
+    "priority": "P2",
+    "status": "succeeded",
+    "source": "hourly_dispatch_autogen",
+    "created_at": "2026-06-06T00:11:23+08:00",
+    "k_id": "K562",
+    "audience": "general",
+    "claimed_by": "hourly-00",
+    "claimed_at": "2026-06-05T16:11:23.705361+00:00",
+    "claim_session_id": "1c36252ca780",
+    "started_at": "2026-06-05T16:11:23.797466+00:00",
+    "completed_at": "2026-06-05T16:18:40.473839+00:00",
+    "result": "mile_26d8616d published [general audience, K562 八關體檢驗證], 2 charts uploaded, URL 200, supabase synced"
   }
 ]
