@@ -1,40 +1,41 @@
 {
-  "timestamp": "2026-06-05T14:06:43+08:00",
+  "timestamp": "2026-06-05T12:06:11Z",
+  "timestamp_tw": "2026-06-05T20:06:11+08:00",
   "all_ok": false,
   "checks": [
     {
-      "name": "ARTICLE POOL",
+      "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "129 draft articles (general: 77, research: 52). All thresholds met (total>=12, research>=4, general>=8)."
+      "detail": "Total drafts: 129 (threshold: <12). Research-category drafts: 52 (threshold: <4). General-category drafts: 77 (threshold: <8). All pools healthy."
     },
     {
-      "name": "STRATEGY METRICS FRESHNESS",
+      "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json is MISSING (file does not exist). Persistent missing-metrics condition."
+      "detail": "storage/strategy_metrics.json does not exist (FILE_MISSING). This has been a persistent issue since at least 2026-05-31."
     },
     {
-      "name": "ERROR LOG",
+      "name": "ERROR_LOG_RECENT",
       "status": "alert",
-      "detail": "Entry dated 2026-06-05 (today) found: K851 jump-decomposition article metric definition ambiguity — Codex 24h review CONDITIONAL_PASS. Rule added: must distinguish jump event-count share vs jump variance share vs jump-RV contribution in articles."
+      "detail": "Entry dated 2026-06-05 found in last 30 lines of docs/error_log.md: K851 jump-share variance vs event-count phrasing lesson (Codex CONDITIONAL_PASS). Oldest recent: 2026-06-03 auto-compact root cause correction."
     },
     {
-      "name": "PAPER TRADING GAPS",
+      "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "15 strategies checked. No strategy has >2 portfolio_return=null in last 3 entries."
+      "detail": "Checked 15 strategies (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, _market_daily, adaptive_tier). No strategy has >2 nulls in last 3 portfolio_return entries."
     },
     {
-      "name": "GIT STATUS",
+      "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files."
+      "detail": "0 uncommitted files. Working tree clean."
     },
     {
-      "name": "KNOWLEDGE SIZE",
+      "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "2194 entries in storage/memory/knowledge.json."
+      "detail": "storage/memory/knowledge.json contains 2194 entries."
     }
   ],
   "alerts": [
-    "metrics_missing: storage/strategy_metrics.json does not exist",
-    "error_log_today: 2026-06-05 entry — K851 jump-decomposition article Codex CONDITIONAL_PASS (metric definition ambiguity)"
+    "strategy_metrics.json MISSING — file has not existed since at least 2026-05-31",
+    "error_log entry from today (2026-06-05): K851 jump-share variance lesson, CONDITIONAL_PASS"
   ]
 }
