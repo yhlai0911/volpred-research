@@ -21135,7 +21135,7 @@
     "description": "Paper P1 (leverage-direction) is in a pending/amber state. Status excerpt: 🟡 **0 MISMATCH** + 28 MATCH + 9 NOTE + 19 UNTRACE (structural data-limit)",
     "task_type": "paper_decision",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "paper-decision",
@@ -21145,7 +21145,12 @@
     "created_at": "2026-06-04T17:34:25.719541+00:00",
     "generated_at": "2026-06-04T17:34:25.719543+00:00",
     "paper_id": "P1",
-    "paper_name": "leverage-direction"
+    "paper_name": "leverage-direction",
+    "claimed_by": "hourly-11",
+    "claimed_at": "2026-06-05T03:12:10.866353+00:00",
+    "claim_session_id": "232cd1920127",
+    "completed_at": "2026-06-05T03:14:02.244138+00:00",
+    "result": "P1 leverage-direction decision: ready_for_submission 已維持自 v9 (2026-05-23)；採 submit-first 路徑，C3 K899 unified VaR defer R&R round。建 3 sub-tasks: Paper1_v10_citation_cleanup (P3) + Paper1_shorten_for_jbf (P2, 66pp→≤48pp) + Paper1_jbf_submission_prep (P3, soft-blocked)。Decision memo: paper/leverage-direction/decision_2026_06_05.md。"
   },
   {
     "id": "gen_paper_decision_P3",
@@ -21453,10 +21458,13 @@
     "task_type": "paper_body",
     "title": "Paper 8 (volatility-absorption): cross-asset table snapshot rerun (GLD/TLT/0050.TW)",
     "description": "main_v3.tex Lines 801-804 cross-asset table still uses paper-drafting-time yfinance values. K903 only covered SPY. Need: (a) rerun absorption regression on GLD/TLT/0050.TW with auto_adjust=False pinned snapshots, (b) update Table cross_asset_detail β/t under current snapshot, (c) sync text claims around cross-asset robustness, (d) re-run paper-update --paper-id volatility-absorption. Parent decision: gen_paper_decision_P8 (closed 2026-06-05).",
-    "status": "pending",
+    "status": "pending_main_thread",
     "priority": 3,
     "source": "auto_discovered",
-    "created_at": "2026-06-05T03:15:00+08:00"
+    "created_at": "2026-06-05T03:15:00+08:00",
+    "started_at": "2026-06-05T03:10:39.160762+00:00",
+    "handoff_note": "Scope 超 50min cap：含 K903 GLD/TLT/0050.TW rerun（0050.TW pinned CSV 缺）+ Table cross_asset_detail β/t 改 + cross_asset_robustness narrative sync + paper-update + errata_pending 已有 5 SEVERE (T10 sign flip / controlled t Harvey boundary)；需 multi-fire pipeline 並由主線程 narrative decision，不適合 hourly fire 派 agent。",
+    "handoff_at": "2026-06-05T03:11:57.036738+00:00"
   },
   {
     "id": "Paper3_v4_revision_gemini_2h",
@@ -21604,5 +21612,38 @@
     "started_at": "2026-06-05T01:24:26.274500+00:00",
     "completed_at": "2026-06-05T01:25:23.428494+00:00",
     "result": "mile_71dd116b 補 3 張 lazypack poster (framework/method/results)，NotebookLM 免費，數字逐張對齊文章，已上傳 Supabase + sync mirror，live URL 可見 3 張圖，close email 已寄。"
+  },
+  {
+    "id": "Paper1_v10_citation_cleanup",
+    "task_type": "paper_review",
+    "priority": 3,
+    "source": "decision_2026_06_05",
+    "status": "pending",
+    "title": "P1 (leverage-direction) v10 citation cleanup: 1 MEDIUM + 3 MINOR",
+    "description": "Per v9 README deferred items: (1) engle1982 DOI verify (flagged citation-verifier v9 — 10.2307/1912773 unverified; actual = Engle 1982 ARCH Econometrica); (2) moreira2017 journal abbreviation consistency; (3) cederburg2020 page range missing; (4) bayerdimitriadis2022 preprint vs published. Edit references.bib + recompile + write v10 review_history. Decision: paper/leverage-direction/decision_2026_06_05.md.",
+    "created_at": "2026-06-05T11:18:00+08:00"
+  },
+  {
+    "id": "Paper1_shorten_for_jbf",
+    "task_type": "paper_body",
+    "priority": 2,
+    "source": "decision_2026_06_05",
+    "status": "pending",
+    "title": "P1 (leverage-direction) 篇幅縮減 66 pp → ≤48 pp for JBF",
+    "description": "JBF soft target ~45 pp. Current main_v9 compile = 66 pp. Strategy: (a) split appendix: reproducibility_audit + extended robustness tables → companion supplementary file (b) §4-§5 figure-table 重排 + duplicate paragraph 砍 15-20% (c) abstract / intro 精簡至 page 1.5 內. 主線程任務 (paper_body — narrative decisions on what to cut). Decision: paper/leverage-direction/decision_2026_06_05.md. Blocks Paper1_jbf_submission_prep.",
+    "created_at": "2026-06-05T11:18:00+08:00"
+  },
+  {
+    "id": "Paper1_jbf_submission_prep",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "source": "decision_2026_06_05",
+    "status": "blocked",
+    "blocked_reason": "awaiting_external_data",
+    "blocked_at": "2026-06-05T11:18:00+08:00",
+    "blocked_note": "Soft block: depends on Paper1_v10_citation_cleanup + Paper1_shorten_for_jbf 完成。當 dispatcher 看到那兩個 succeeded 後再 unblock。",
+    "title": "P1 (leverage-direction) JBF submission portal prep",
+    "description": "After v10 citation cleanup + 篇幅縮減 done: (a) cover_letter.tex Editor-in-Chief 名稱對齊 JBF 最新人選 (b) highlights.txt 5 條校稿 (c) graphical_abstract.svg → portal-spec PNG/PDF export (d) cover letter 內 acknowledge C3 K899 unified VaR 「reserved for revision round」 (e) submission package 最終 README 標 ready_for_upload. Decision: paper/leverage-direction/decision_2026_06_05.md.",
+    "created_at": "2026-06-05T11:18:00+08:00"
   }
 ]
