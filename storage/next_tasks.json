@@ -23026,7 +23026,7 @@
     "title": "K1026: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K1026 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: arXiv:2603.22569 文獻, 執行: Claude] K1026 測試 Conformal VaR（rolling quantile of standardized residuals）vs parametric VaR。SPY OOS 2013-2026。核心發現：(1) Conformal-GJR/A4f 92% pass rate (11/12 tests) vs GJR+Normal 58% vs A4f+t(8) 83% (2) 2.5% VaR: Conformal 6/6 perfect scorecard，viola",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1026",
@@ -23042,7 +23042,13 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-06T20:08:33+00:00"
+    "created_at": "2026-06-06T20:08:33+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-06T22:14:19.363264+00:00",
+    "claim_session_id": "6acaafe019f5",
+    "started_at": "2026-06-06T22:14:30.431878+00:00",
+    "completed_at": "2026-06-06T22:16:48.622972+00:00",
+    "result": "Published K1026 general draft as mile_dcf3a192. Angle: making fewer distribution assumptions yields more realistic risk estimates, at the cost of wider safety margins. Used var_scorecard + var_sharpness charts and a SPY-cluster waiver for methodology framing."
   },
   {
     "id": "K1043_article_general_v2",
@@ -23096,9 +23102,15 @@
     "description": "Codex review 2026-06-07 標 mile_faaddb06 為 FAIL。SEVERE: (1) k593_window_cross_oos.py:215-221 refit-every-21d 之間 last_model.forecast 反覆呼叫同一 forecast 結果，沒做 sequential state update; (2) DM test :370/403/432 用 [:min_len] 截斷無日期對齊; (3) decision rule 無 pre-reg 時間戳. Action: 修 forecast loop（兩次 refit 間每日 update + forecast），DM 按 datetime join，results 存子目錄，重跑 → 對比新舊數字。Full review: storage/reports/review_history/mile_faaddb06/codex_review_2026-06-07.md",
     "task_type": "experiment",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "codex_review_followup",
-    "parent_review": "mile_faaddb06"
+    "parent_review": "mile_faaddb06",
+    "claimed_by": "hourly-06",
+    "claimed_at": "2026-06-06T22:10:31.352171+00:00",
+    "claim_session_id": "3cb9b45d0729",
+    "started_at": "2026-06-06T22:11:14.849661+00:00",
+    "completed_at": "2026-06-06T22:16:54.554246+00:00",
+    "result": "Code fix + Codex CONDITIONAL_PASS + 重跑 enqueued to compute_queue (id=compute-k593-v2-...-1780784179). Fixes: (1) GJR recursion sequential state update between refits (2) DM date-aligned via pd.Series intersection (3) Results subdir experiments/k593/k593_window_cross_oos_v2_results.json (4) Bonferroni N=11 + ex-post decision rule status. 3 audit fields added (refit_failures / state_breakdowns / aligned n_days) per Codex recommendation. Followup interpretation + mile_faaddb06 corrigendum 由 compute_queue completion → 下次 hourly PHASE A 自動派 paper_review agent。"
   },
   {
     "id": "mile_faaddb06_corrigendum",
@@ -23112,5 +23124,35 @@
     "blocked_note": "等 K593_fix_forecast_bug 完成 + 新舊數字比對才動文章。先處理 script bug。",
     "source": "codex_review_followup",
     "parent_review": "mile_faaddb06"
+  },
+  {
+    "id": "trending_repost_2026_06_07_ai晶片",
+    "title": "[trending_repost] Nvidia新晶片出貨延遲與科技股隱含波動率攀升",
+    "description": "從最新 AI 晶片出貨指引切入，分析市場對科技龍頭股的高估值定價容錯率。可量化：SOXX 隱含偏斜度（Skew）與供應鏈量產延遲事件的相關性。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-06T22:00:19+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
+  },
+  {
+    "id": "trending_repost_2026_06_07_台股集中度",
+    "title": "[trending_repost] 護國神山獨秀，台股波動率指標是否已失去定價功能？",
+    "description": "從台積電權重過高切入，分析台股波動率是否被單一股票綁架。可量化：檢定台積電隱含波動率與 VIXTWN 的共變關係，並驗證美股 VIX 預測台指期波動的跨市場失效邊界。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-06T22:00:23+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
   }
 ]

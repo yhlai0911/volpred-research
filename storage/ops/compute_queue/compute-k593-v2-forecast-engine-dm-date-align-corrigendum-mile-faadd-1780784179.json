@@ -1,0 +1,23 @@
+{
+  "id": "compute-k593-v2-forecast-engine-dm-date-align-corrigendum-mile-faadd-1780784179",
+  "title": "K593-v2: forecast engine + DM date-align corrigendum (mile_faaddb06 Codex FAIL fix)",
+  "script_path": "experiments/k593/k593_window_cross_oos_v2.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-06-06T22:16:19Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k593-v2-forecast-engine-dm-date-align-corrigendum-mile-faadd-1780784179.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k593-v2-forecast-engine-dm-date-align-corrigendum-mile-faadd-1780784179.stderr",
+  "result_artifact": "experiments/k593/k593_window_cross_oos_v2_results.json",
+  "claude_followup": {
+    "brief": "K593-v2 重跑完成。讀 experiments/k593/k593_window_cross_oos_v2_results.json，對比 v1 (experiments/k593_window_cross_oos_results.json)：QLIKE / DM stats / win counts / verdict 變化。寫 mile_faaddb06 corrigendum：(a) 5 段 QLIKE 表更新（若實質變化）(b) per-period DM 加 Bonferroni 校正（N=11, alpha=0.00455）(c) 改寫 'decision rule 事先寫死' → 'ex-post documentation'(d) '沒有萬靈丹' 限定為 'SPY 5 段 OOS' 表述 (e) 移除 Feng & Zhang (2025) 待驗證引文 (f) 文章標 corrigendum_published_2026-06-XX + 加 review link。寫 knowledge.json K593-v2 entry + verdict + reviewer=Codex CONDITIONAL_PASS_2026-06-07。同步 review_history/mile_faaddb06/corrigendum_note.md。",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 5400
+}
