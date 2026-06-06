@@ -149,5 +149,35 @@ def test_fabricated_bare_number_not_rescued_by_unit_cloud():
     assert good["tier1_findings"] == []
 
 
+def test_negative_number_claims_match_verbatim_source():
+    import json, tempfile
+    from pathlib import Path
+    d = tempfile.mkdtemp()
+    kdir = Path(d) / "experiments" / "k725"
+    kdir.mkdir(parents=True)
+    (kdir / "k725_results.json").write_text(
+        json.dumps({"strategy": {"high_sharpe": -6.66, "delta": -8.41}})
+    )
+
+    content = "危機期 high_sharpe -6.66，delta -8.41，代表策略表現急劇惡化。"
+    result = audit_content_provenance(content, ["K725"], root=d)
+    assert result["skipped"] is False
+    assert result["tier1_findings"] == []
+
+
+def test_negative_claim_without_source_match_is_flagged():
+    import json, tempfile
+    from pathlib import Path
+    d = tempfile.mkdtemp()
+    kdir = Path(d) / "experiments" / "k725"
+    kdir.mkdir(parents=True)
+    (kdir / "k725_results.json").write_text(
+        json.dumps({"strategy": {"high_sharpe": -6.66, "delta": -8.41}})
+    )
+
+    bad = audit_content_provenance("危機期 high_sharpe -7.00。", ["K725"], root=d)
+    assert [f["raw"] for f in bad["tier1_findings"]] == ["-7.00"]
+
+
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__, "-v"]))

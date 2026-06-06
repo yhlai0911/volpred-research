@@ -69,10 +69,10 @@ _STAT_KEYWORDS = [
 # Pure-year / pure-label tokens to exclude even if a stat keyword is nearby.
 _YEAR_RE = re.compile(r"^(?:19|20)\d{2}$")
 
-# Numeric token: percentages (42.4%), decimals (0.79), thousands-separated
-# (1,234.5), plain integers. Captures the leading number; the trailing % (if
-# any) is detected separately so we can record the percent flag.
-_NUM_RE = re.compile(r"(?<![\w.])(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?)(\s*%)?")
+# Numeric token: percentages (-42.4%), decimals (-0.79), thousands-separated
+# (-1,234.5), plain integers. Optional leading "-" is required so Tier-1
+# provenance matches negative Sharpe / delta claims verbatim.
+_NUM_RE = re.compile(r"(?<![\w.])(-?(?:\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?))(\s*%)?")
 
 _REL_TOL = 1e-3
 _ABS_TOL = 0.01
