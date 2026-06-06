@@ -22827,7 +22827,7 @@
     "title": "K1076: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K1076 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson', 'robust inference', 'inconclusive (data limit)']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Claude, 執行: Claude] K1076 applies Fissler-Ziegel (2016) joint VaR/ES scoring — the rigorous gold standard — to A4f vs GJR. SPY 2007-2026, n=4,848. ALL 4 specifications Harvey PASS: Normal 5% DM t=+5.08, Normal 1% +3.51, Student-t(5) 5% +5.15, Student-t(5) 1% +3.53. KEY FINDI",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1076",
@@ -22845,14 +22845,20 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-06T16:15:31+00:00"
+    "created_at": "2026-06-06T16:15:31+00:00",
+    "claimed_by": "hourly-01",
+    "claimed_at": "2026-06-06T17:09:39.603242+00:00",
+    "claim_session_id": "1513943fb32d",
+    "started_at": "2026-06-06T17:10:14.790339+00:00",
+    "completed_at": "2026-06-06T17:36:33.567570+00:00",
+    "result": "Updated mile_9b0aa0f0 in place (v1 was empty placeholder body_chars=0). New body 3899 chars, audience=research preserved, title rewritten to '為什麼風險模型要用「金本位分數」量？SPY 19 年的答案'. Content: 4 spec全 PASS Harvey + AS Z2 ES under-forecast + VIX regime 拆解. 2 真實圖 uploaded. anti_ai_gate PASS, errata audit trail logged, feed-sync rc=0."
   },
   {
     "id": "K1103_article_general_v2",
     "title": "K1103: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K1103 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson', 'mixed/non-novel']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Codex, 執行: Claude] K1067c Codex 發現 u_prev=r_{t-1}/√τ[t] 應為 τ[t-1] (timing mismatch)。三公司同步修正重跑對照：**UMC 穩固且更強**（event DM t=-2.20→-2.40，improvement +39.27%→+39.43%，θ₂ pos_frac 1.00 unchanged，p=6.7e-15→8.3e-13 仍極度顯著）；**MediaTek 幾乎不變**（DM t=+1.59→+1.41，improvement -23.46%→-22.56%",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1103",
@@ -22869,6 +22875,11 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-06T16:15:31+00:00"
+    "created_at": "2026-06-06T16:15:31+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-06T16:53:59.749547+00:00",
+    "claim_session_id": "bd3dd60bc710",
+    "completed_at": "2026-06-06T16:57:24.027032+00:00",
+    "result": "Published K1103 general draft as mile_bb068925. Angle: bug-fix rerun as research-honesty story; shows UMC signal survives tau-lag correction while TSMC stays null and MediaTek remains negative. Used two experiment charts and cluster_waiver for taiwan cooldown."
   }
 ]
