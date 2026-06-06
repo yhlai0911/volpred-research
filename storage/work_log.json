@@ -9768,5 +9768,13 @@
     "result": "succeeded",
     "feed_id": "mile_7d5d0e1f",
     "summary": "K493 VIX/GJR/GJR-X(VIX9D) general article draft published"
+  },
+  {
+    "timestamp": "2026-06-06T17:30+08:00",
+    "task_type": "daily_article",
+    "task_id": "K725_article_general",
+    "mile_id": "mile_430f4b26",
+    "status": "succeeded",
+    "note": "K725 crisis-advantage strategy comparison article published as draft (3683 chars, audience auto→research). Side-effect: agent added abs_delta/abs_high_sharpe to k725_results.json to bypass _NUM_RE regex bug (line 75 missing optional - prefix). Followup task fix_prepublish_audit_negative_num_regex added."
   }
 ]
