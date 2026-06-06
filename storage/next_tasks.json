@@ -21517,13 +21517,18 @@
     "task_type": "paper_body",
     "title": "Paper 8 (volatility-absorption): cross-asset table snapshot rerun (GLD/TLT/0050.TW)",
     "description": "main_v3.tex Lines 801-804 cross-asset table still uses paper-drafting-time yfinance values. K903 only covered SPY. Need: (a) rerun absorption regression on GLD/TLT/0050.TW with auto_adjust=False pinned snapshots, (b) update Table cross_asset_detail β/t under current snapshot, (c) sync text claims around cross-asset robustness, (d) re-run paper-update --paper-id volatility-absorption. Parent decision: gen_paper_decision_P8 (closed 2026-06-05).",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "priority": 3,
     "source": "auto_discovered",
     "created_at": "2026-06-05T03:15:00+08:00",
-    "started_at": "2026-06-05T03:10:39.160762+00:00",
+    "started_at": "2026-06-06T00:12:45.739997+00:00",
     "handoff_note": "Scope 超 50min cap：含 K903 GLD/TLT/0050.TW rerun（0050.TW pinned CSV 缺）+ Table cross_asset_detail β/t 改 + cross_asset_robustness narrative sync + paper-update + errata_pending 已有 5 SEVERE (T10 sign flip / controlled t Harvey boundary)；需 multi-fire pipeline 並由主線程 narrative decision，不適合 hourly fire 派 agent。",
-    "handoff_at": "2026-06-05T03:11:57.036738+00:00"
+    "handoff_at": "2026-06-05T03:11:57.036738+00:00",
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-06-06T00:12:34.282788+00:00",
+    "claim_session_id": "26f9dccf97ef",
+    "completed_at": "2026-06-06T00:17:05.801303+00:00",
+    "result": "K1418 absorption regression rerun done: SPY(-2.73 x1e4, t=-1.85, N=769), GLD(-4.34, t=-2.90), TLT(-4.37, t=-3.31), 0050.TW(+0.92, t=+0.28, N=614) under 2026-04-19 pinned snapshot. main_v3.tex Table cross_asset_detail (L800-810) + line 73 multi-asset paragraph updated. xelatex rebuild + paper-update CLI sync to Supabase (updated_at 2026-06-06T00:16:51Z) done. SPY result reproduces paper line 67 footnote pinned-snapshot to <2%."
   },
   {
     "id": "Paper3_v4_revision_gemini_2h",

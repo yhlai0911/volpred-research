@@ -1,0 +1,83 @@
+{
+  "experiment_id": "K1418",
+  "title": "Paper 8 cross-asset NSI absorption regression rerun under 2026-04-19 pinned snapshot",
+  "data_sources": {
+    "pinned_csv": "paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv",
+    "0050_tw_note": "0050.TW fetched via yfinance auto_adjust=False, snapshot_at=2026-06-06",
+    "sample_period": [
+      "2006-01-01",
+      "2026-04-19"
+    ],
+    "shock_tau": 2.0,
+    "nw_lags": 10
+  },
+  "results": [
+    {
+      "asset": "SPY",
+      "n": 769,
+      "alpha": 0.08216797400343638,
+      "alpha_se": 0.004045974704594792,
+      "alpha_t": 20.30857333589424,
+      "beta": -0.0002730717544888453,
+      "beta_se": 0.00014787167652686607,
+      "beta_t": -1.8466805875378864,
+      "r2": 0.008892737076884871,
+      "r2_adj": 0.007600550293412778,
+      "sample_start": "2006-01-20",
+      "sample_end": "2026-04-08",
+      "tau": 2.0,
+      "nw_lags": 10
+    },
+    {
+      "asset": "GLD",
+      "n": 769,
+      "alpha": 0.05479698582694164,
+      "alpha_se": 0.00596775549096244,
+      "alpha_t": 9.182176768120964,
+      "beta": -0.00043401497920729433,
+      "beta_se": 0.00014964525608656982,
+      "beta_t": -2.9002922682441503,
+      "r2": 0.015530043290564954,
+      "r2_adj": 0.014246510100591747,
+      "sample_start": "2006-01-20",
+      "sample_end": "2026-04-08",
+      "tau": 2.0,
+      "nw_lags": 10
+    },
+    {
+      "asset": "TLT",
+      "n": 769,
+      "alpha": 0.05307857528850017,
+      "alpha_se": 0.004061038215296832,
+      "alpha_t": 13.07019842575417,
+      "beta": -0.0004370910566044166,
+      "beta_se": 0.00013205504755077482,
+      "beta_t": -3.309915559542366,
+      "r2": 0.030232285597464936,
+      "r2_adj": 0.0289679209111513,
+      "sample_start": "2006-01-20",
+      "sample_end": "2026-04-08",
+      "tau": 2.0,
+      "nw_lags": 10
+    },
+    {
+      "asset": "0050.TW",
+      "n": 614,
+      "alpha": 0.04731651199390317,
+      "alpha_se": 0.007802521463857275,
+      "alpha_t": 6.06425912611481,
+      "beta": 9.214219261553058e-05,
+      "beta_se": 0.00032570390930253485,
+      "beta_t": 0.2829017091408103,
+      "r2": 0.00037084655101549124,
+      "r2_adj": -0.001262534418672523,
+      "sample_start": "2009-01-07",
+      "sample_end": "2026-04-08",
+      "tau": 2.0,
+      "nw_lags": 10,
+      "snapshot_note": "0050.TW fetched via yfinance auto_adjust=False, snapshot_at=2026-06-06"
+    }
+  ],
+  "generated_at": "2026-06-06T00:14:14.369779+00:00",
+  "verdict_summary": "Cross-asset NSI absorption regression results under 2026-04-19 pinned snapshot. Paper 8 main_v3.tex Table 'cross_asset_detail' should be updated to reflect these values."
+}
