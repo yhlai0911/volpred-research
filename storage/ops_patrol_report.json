@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-06-06T20:08:47+08:00",
+  "timestamp": "2026-06-07T02:06:20+08:00",
   "all_ok": false,
   "checks": [
     {
@@ -19,22 +19,22 @@
     },
     {
       "name": "ERROR_LOG",
-      "status": "alert",
-      "detail": "Entry dated 2026-06-05 (yesterday) found: 'Jump-share variance vs event-count phrasing (K851 / mile_02190b48 Codex review)' — jump variance metric definition ambiguity, CONDITIONAL_PASS. Also auto-compact root-cause corrections (2026-06-03, 2026-06-05).",
+      "status": "ok",
+      "detail": "No entries dated today (2026-06-07) or yesterday (2026-06-06). Most recent entry: 2026-06-05 (K851 jump-share phrasing lesson, CONDITIONAL_PASS). No alert triggered.",
       "entries_recent": [
-        "2026-06-05 — Jump-share variance vs event-count phrasing (K851 / mile_02190b48 Codex review): CONDITIONAL_PASS",
+        "2026-06-05 — Jump-share variance vs event-count phrasing (K851): CONDITIONAL_PASS",
         "2026-06-03 — auto-compact true root cause: env var placement fix (zshrc)"
       ]
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "No strategies with >2 consecutive portfolio_return=null in last 3 entries."
+      "detail": "15 strategies present. Schema is per-strategy dict (not list), last-3 null check not applicable in this format. No alerts triggered."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files."
+      "detail": "0 uncommitted files (threshold: 50). Working tree clean."
     },
     {
       "name": "KNOWLEDGE_SIZE",
@@ -44,7 +44,6 @@
     }
   ],
   "alerts": [
-    "metrics_missing: storage/strategy_metrics.json does not exist (persistent issue)",
-    "error_log_yesterday: error_log.md has entries dated 2026-06-05 — K851 jump-share CONDITIONAL_PASS + auto-compact root-cause fix"
+    "metrics_missing: storage/strategy_metrics.json does not exist (persistent — strategy metrics display may be broken on frontend)"
   ]
 }

@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-06-07T02:06:20+08:00",
+  "level": "warn",
+  "alert_type": "metrics_missing",
+  "title": "strategy_metrics.json missing",
+  "detail": "storage/strategy_metrics.json does not exist. Strategy metrics freshness cannot be verified. Frontend strategy display may be showing stale or no data. This issue has persisted across multiple patrol runs.",
+  "recommended_action": "Check if strategy_metrics.json was accidentally deleted or never generated. Run the metrics computation pipeline to regenerate: `uv run volpred ops compute-strategy-metrics` or equivalent."
+}
