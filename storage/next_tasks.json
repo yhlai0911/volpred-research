@@ -22963,7 +22963,7 @@
     "title": "K1314: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K1314 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: ",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1314",
@@ -22984,14 +22984,20 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-06T19:08:29+00:00"
+    "created_at": "2026-06-06T19:08:29+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-06T20:07:37.454114+00:00",
+    "claim_session_id": "ba73bea906b8",
+    "started_at": "2026-06-06T20:07:49.026679+00:00",
+    "completed_at": "2026-06-06T20:09:19.233167+00:00",
+    "result": "Published K1314 general draft as mile_81df26b0. Angle: adding cross-asset neighbor information does not reliably improve volatility forecasting; only SPY shows a clear real-signal win after placebo checks. Used qlike_chart + general_article_chart and cluster_waiver for SPY cooldown."
   },
   {
     "id": "K593_article_general_v2",
     "title": "K593: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K593 has verdict signal (score=4, reasons=None) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: ",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K593",
@@ -23001,6 +23007,59 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-06T19:08:29+00:00"
+    "created_at": "2026-06-06T19:08:29+00:00",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-06-06T20:09:58.497492+00:00",
+    "claim_session_id": "78e80fda692d",
+    "started_at": "2026-06-06T20:10:04.531143+00:00",
+    "completed_at": "2026-06-06T20:12:38.630126+00:00",
+    "result": "Published mile_faaddb06 — K593 SPY GJR-GARCH window cross-OOS (252/504/1000/2000 × 5 OOS periods), verdict MIXED (regime-dependent, no universal winner). Audience auto-reclassified general→research. Anti-AI gate PASS (no-fb-mode). Supabase synced (articles=12)."
+  },
+  {
+    "id": "K1026_article_general_v2",
+    "title": "K1026: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K1026 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: arXiv:2603.22569 文獻, 執行: Claude] K1026 測試 Conformal VaR（rolling quantile of standardized residuals）vs parametric VaR。SPY OOS 2013-2026。核心發現：(1) Conformal-GJR/A4f 92% pass rate (11/12 tests) vs GJR+Normal 58% vs A4f+t(8) 83% (2) 2.5% VaR: Conformal 6/6 perfect scorecard，viola",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1026",
+    "tags": [
+      "conformal",
+      "VaR",
+      "calibration",
+      "proxy-reliance",
+      "risk-management",
+      "significant",
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-06T20:08:33+00:00"
+  },
+  {
+    "id": "K1043_article_general_v2",
+    "title": "K1043: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K1043 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Claude, 執行: Claude] K1043 2×4 factorial（GJR/A4f × Normal/Student-t/CF-Rolling/FHS），3 資產，OOS 2019-2026。FHS 12/12 Trinity PASS = CF-Rolling 12/12。12 個 DM test 全 NS（max |t|=1.654）。方法效應 >> 模型效應：Normal 16.7%→Student-t 50%→CF/FHS 100%。A4f 改善參數方法（Normal 0→33%, t 17→83%）但非參數方法已 100%",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1043",
+    "tags": [
+      "FHS",
+      "CF-Rolling",
+      "VaR",
+      "non-parametric",
+      "Trinity",
+      "A4f",
+      "interchangeable",
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-06T20:08:33+00:00"
   }
 ]
