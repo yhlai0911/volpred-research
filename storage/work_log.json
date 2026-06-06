@@ -9827,5 +9827,13 @@
     "task_id": "K593_article_general_v2",
     "summary": "K593 SPY GJR-GARCH window cross-OOS general article — published mile_faaddb06, verdict MIXED regime-dependent",
     "fire": "hourly-04"
+  },
+  {
+    "timestamp": "2026-06-07T05:14:00+08:00",
+    "task_type": "paper_review",
+    "task_id": "paper_review_mile_faaddb06",
+    "owner": "hourly-05",
+    "status": "succeeded",
+    "result": "Codex FAIL on mile_faaddb06 (K593 cross-OOS GJR-GARCH window article). 3 SEVERE: forecast engine missing sequential state-update between refits (k593_window_cross_oos.py:215-221), DM test missing date-align (:370/403/432), pre-reg claim ex-post documentation. Numerical check 3/3 PASS (article-JSON diff<1e-4). Followup: K593_fix_forecast_bug + mile_faaddb06_corrigendum (blocked-until 2026-06-14). Article stamped corrigendum_pending=true."
   }
 ]

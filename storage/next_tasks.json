@@ -22774,7 +22774,7 @@
     "title": "K957: write general-audience article [retry-v3] (auto-discovered uncovered K)",
     "description": "K K957 has verdict signal (score=6, reasons=None) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: ",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K957",
@@ -22784,7 +22784,13 @@
       "retry-v3"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-06T16:15:31+00:00"
+    "created_at": "2026-06-06T16:15:31+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-06T21:09:54.949803+00:00",
+    "claim_session_id": "081db207f02c",
+    "started_at": "2026-06-06T21:10:05.295780+00:00",
+    "completed_at": "2026-06-06T21:13:39.032971+00:00",
+    "result": "Published K957 general draft as mile_08407091, then updated it via publish_draft --update to fix a five-lessons consistency gap flagged by prepublish audit. Angle: 40 tests show where investors and researchers waste time; used timeline + sankey charts and a VIX-cluster waiver."
   },
   {
     "id": "K1021_article_general_v2",
@@ -23061,5 +23067,50 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-06-06T20:08:33+00:00"
+  },
+  {
+    "id": "paper_review_mile_faaddb06",
+    "title": "Paper review (Codex 24h-rule): 預測波動率該回望多久？五段歷史告訴我們：沒有萬靈丹",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_faaddb06 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_faaddb06",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-06T21:08:20+00:00",
+    "claimed_by": "hourly-05",
+    "claimed_at": "2026-06-06T21:09:21.929975+00:00",
+    "claim_session_id": "5022649d2296",
+    "started_at": "2026-06-06T21:09:26.916362+00:00",
+    "completed_at": "2026-06-06T21:13:10.855272+00:00",
+    "result": "Codex FAIL: 3 SEVERE (forecast engine bug k593_window_cross_oos.py:215-221 sequential state-update missing; DM date-align missing :370/403/432; pre-reg claim unsupported). NUMERICAL CHECK PASS (3/3 article-JSON diff<1e-4). Followup tasks created: K593_fix_forecast_bug (P1 pending) + mile_faaddb06_corrigendum (P1 blocked-until 2026-06-14). Article details stamped corrigendum_pending=true + linked review. Full review: storage/reports/review_history/mile_faaddb06/codex_review_2026-06-07.md"
+  },
+  {
+    "id": "K593_fix_forecast_bug",
+    "title": "K593: 修 forecast engine + DM date-align bugs (Codex FAIL mile_faaddb06)",
+    "description": "Codex review 2026-06-07 標 mile_faaddb06 為 FAIL。SEVERE: (1) k593_window_cross_oos.py:215-221 refit-every-21d 之間 last_model.forecast 反覆呼叫同一 forecast 結果，沒做 sequential state update; (2) DM test :370/403/432 用 [:min_len] 截斷無日期對齊; (3) decision rule 無 pre-reg 時間戳. Action: 修 forecast loop（兩次 refit 間每日 update + forecast），DM 按 datetime join，results 存子目錄，重跑 → 對比新舊數字。Full review: storage/reports/review_history/mile_faaddb06/codex_review_2026-06-07.md",
+    "task_type": "experiment",
+    "priority": 1,
+    "status": "pending",
+    "source": "codex_review_followup",
+    "parent_review": "mile_faaddb06"
+  },
+  {
+    "id": "mile_faaddb06_corrigendum",
+    "title": "Article mile_faaddb06 corrigendum: numbers + pre-reg claim + Bonferroni + SPY scope",
+    "description": "Codex review FAIL 觸發。當 K593_fix_forecast_bug 完成後（forecast engine + DM date-align 修好、results.json 重跑），對比新舊數字決定 corrigendum scope: (a) 若 5 段 QLIKE / DM stats 實質改變 → 更新 article 表格 + per-period stats; (b) 「事先把判讀規則寫死」改寫為 ex-post documentation 表述; (c) 補 Bonferroni 校正說明（OOS1/OOS2 顯著性下調為 n.s.）; (d)「沒有萬靈丹」/「市場環境會挑視窗嗎」限定 SPY 這 5 段; (e) 移除/降調 Feng & Zhang (2025, JoF) 引文。不下架。details 加 corrigendum note + linked review path.",
+    "task_type": "daily_article",
+    "priority": 1,
+    "status": "blocked",
+    "blocked_reason": "prior_attempts_failed",
+    "blocked_until": "2026-06-14",
+    "blocked_note": "等 K593_fix_forecast_bug 完成 + 新舊數字比對才動文章。先處理 script bug。",
+    "source": "codex_review_followup",
+    "parent_review": "mile_faaddb06"
   }
 ]
