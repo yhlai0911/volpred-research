@@ -71,11 +71,21 @@ def _locked_load() -> Iterator[tuple[Any, list[dict[str, Any]]]]:
         fh.close()
 
 
+def _matches(tasks: list[dict[str, Any]], task_id: str) -> list[dict[str, Any]]:
+    return [t for t in tasks if t.get("id") == task_id]
+
+
 def _find(tasks: list[dict[str, Any]], task_id: str) -> dict[str, Any]:
-    for t in tasks:
-        if t.get("id") == task_id:
-            return t
-    raise SystemExit(f"task id not found: {task_id}")
+    matches = _matches(tasks, task_id)
+    if not matches:
+        raise SystemExit(f"task id not found: {task_id}")
+    if len(matches) > 1:
+        statuses = [str(t.get("status") or "") for t in matches]
+        raise SystemExit(
+            f"duplicate task id detected: {task_id} count={len(matches)} statuses={statuses}. "
+            "Run scripts/dedupe_next_tasks.py first."
+        )
+    return matches[0]
 
 
 def cmd_claim(args: argparse.Namespace) -> dict[str, Any]:

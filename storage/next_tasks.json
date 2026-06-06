@@ -10226,39 +10226,6 @@
     "verdict_notes": "Option A adopted (2026-05-16): Update Table 2 all individual stock rows to K1302 canonical (full-sample GJR-GARCH BW-robust) for internal consistency with TAIEX/0050/TSMC/SPY. Root cause: 4 rows used legacy rolling-w2000 NW-HAC spec. K1302 covers 2317/2454/2886/0056. Pending K1302b for 5 remaining unlisted stocks (2882/2891/2412/2885/2881) to compute canonical 9-stock average. Full Table 2 + §5 amplification update deferred to post-K1302b."
   },
   {
-    "task_id": "task-k1303-v2-codex-review",
-    "task_type": "paper_review",
-    "priority": "P2",
-    "status": "succeeded",
-    "title": "K1303-v2 Codex primary-path re-review (post ABD revision)",
-    "description": "Codex primary-path review of K1303-v2 code after 3-defect ABD revision. Check: (1) BNS 3-sigma jump threshold correctly identifies jump days; (2) HAC DM test via dm_test() from model_evaluation.py; (3) standard 1-step lag. Blocking knowledge.json entry for K1303 NULL result.",
-    "created_at": "2026-05-13T06:11:32.457685Z",
-    "notes": [],
-    "completed_at": "2026-05-13T06:20:35.580175+00:00"
-  },
-  {
-    "task_id": "task-k1137-v2-codex-review",
-    "task_type": "paper_review",
-    "priority": "P2",
-    "status": "succeeded",
-    "title": "K1137-v2 Codex re-review (post regime window fix)",
-    "description": "Codex re-review of K1137-v2 after regime window off-by-one fix. Check: vix_series[i-w:i] (unshifted) used for quantile window; vix_lag1 used for regime-label comparison only. Also verify 10% guard is now hard skip. If PASS, enables K1137 knowledge.json entry.",
-    "created_at": "2026-05-13T06:11:32.457685Z",
-    "notes": [],
-    "completed_at": "2026-05-13T06:20:35.580175+00:00"
-  },
-  {
-    "task_id": "task-k1138-v2-codex-review",
-    "task_type": "paper_review",
-    "priority": "P2",
-    "status": "succeeded",
-    "title": "K1138-v2 Codex re-review (post BH-FDR fix)",
-    "description": "Codex re-review of K1138-v2 after BH-FDR enforcement fix at asset/model summary level. Check: asset_pass = any(c[DM_HLN_t]>2.0 AND c[DM_HLN_p_BH]<0.05 for c in asset_cells). IWM correctly NULL. If PASS, enables K1138 knowledge.json entry.",
-    "created_at": "2026-05-13T06:11:32.457685Z",
-    "notes": [],
-    "completed_at": "2026-05-13T06:20:35.580175+00:00"
-  },
-  {
     "id": "task-k1123-bh-fix-rerun",
     "title": "K1123 BH-FDR fix + re-run (CONDITIONAL PASS → closure)",
     "status": "succeeded",
@@ -20772,7 +20739,7 @@
     "status": "pending_main_thread",
     "task_type": "paper_body",
     "title": "Paper 4 (vix-sufficiency) body integration Steps 12-15: figures, README, paper-update, review",
-    "description": "Predecessor: Step 11 abstract update + §9 eleven->thirteen sweep done. Remaining: (12) Add 5-asset forecasting-sufficiency heatmap fig (K1118+K1098); (13) Add K1121 bootstrap-dist fig (6 Sharpe-diff curves vs 50/50); (14) Update README.md (pages 48->59, +K1121/K1116b); (15) uv run volpred ops paper-update --paper-id vix-sufficiency + latex-academic-reviewer + citation-verifier. ALSO: §5.x methodology audit needed - line 388/390 references 11 primary DM tests but Table 1 says 10 testable families; this stale count was already mis-aligned pre-Step 11 and should be reconciled with §6 table totals. Main thread only (.tex). Scope切小 across fires.",
+    "description": "Predecessor: Step 11 abstract update + §9 eleven->thirteen sweep done. **2026-06-06 22:15 hourly-22**: §5 methodology count reconciliation done — line 388/390 stale 11→10 fixed (10 primary DM tests + 3 non-DM families 5/6/7 explicit; Holm-Bonferroni rank range 1..10). v4 compile clean 59pp, paper-update synced. **Bonferroni threshold |t|>3.23 still asserted but may need recompute under N=10 (currently |t|>3.21 from α=0.05/10) — left as approximate, low priority.** Remaining: (12) Add 5-asset forecasting-sufficiency heatmap fig (K1118+K1098); (13) Add K1121 bootstrap-dist fig (6 Sharpe-diff curves vs 50/50); (14) Update README.md (pages 48->59, +K1121/K1116b); (15) uv run volpred ops paper-update --paper-id vix-sufficiency + latex-academic-reviewer + citation-verifier. Also line 504 \"All eight testable DM tests\" needs review vs new 10-count (8 daily families 1-4,8-11 with raw p > 0.05 vs 12-13 weekly with raw p < 0.05 but harmful direction — current text is technically correct for the 8 it counts but confusing). Main thread only (.tex). Scope切小 across fires.",
     "source": "continuation",
     "created_at": "2026-06-04T04:18:00Z",
     "related_experiments": [
@@ -20783,7 +20750,10 @@
       "k1098"
     ],
     "paper_id": "vix-sufficiency",
-    "step_11_completed_at": "2026-06-04T23:09:00+08:00"
+    "step_11_completed_at": "2026-06-04T23:09:00+08:00",
+    "started_at": "2026-06-06T14:10:09.005358+00:00",
+    "step_5_methodology_reconciled_at": "2026-06-06T22:16:44+08:00",
+    "last_released_at": "2026-06-06T14:16:47.860753+00:00"
   },
   {
     "id": "paper_review_mile_8d9858f4",
@@ -21994,7 +21964,9 @@
     "result": "Invalid stale task: K683 already has published article mile_839322eb, and K683 itself was later overturned by K686/K691/K700 as lookahead-biased. No new general-audience article should be produced from this K without explicit retrospective/errata framing.\n\nK683 general article 已發佈 mile_d5746aab (draft, audience=general)。修正兩處 prepublish soft warnings：(1) 子時期 7→5 不一致 (2) COVID 期間 avg_weight 10.2% 描述更精確（整段平均非 VIX>20）。Anti-ai gate PASS。Sharpe 1.68 vs 1.483 + DM t=3.74 p=0.0002 Harvey PASS.",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-05T19:20:17+00:00",
-    "blocked_note": "K683 percentile claim overturned by K686 (lookahead artifact). Topic-level relation not caught by explicit-K-ref scan in build_publication_candidates. Auto-retry from refill not desired; future general article requires errata framing built by main thread."
+    "blocked_note": "K683 percentile claim overturned by K686 (lookahead artifact). Topic-level relation not caught by explicit-K-ref scan in build_publication_candidates. Auto-retry from refill not desired; future general article requires errata framing built by main thread.",
+    "dedup_kept_at": "2026-06-06T13:49:44.071977Z",
+    "dedup_kept_reason": "kept among 2 duplicates by status/receipt precedence; statuses=['succeeded', 'pending']"
   },
   {
     "id": "paper_review_mile_67c5ec83",
@@ -22696,13 +22668,36 @@
     "result": "用戶指最新文章搞錯重點(寫成美股,實為台灣夜盤崩3000點)。已改寫 mile_f900a8c5 成台灣夜盤崩盤主軸(EWT -7.25% 佐證≈3270點)、上線+sync、Ivan Lai 個人 FB 已發+留言連結;VolPred 粉專 pending(瀏覽器渲染)。"
   },
   {
-    "id": "K683_article_general",
-    "task_type": "daily_article",
-    "title": "K683: VIX Percentile vs Piecewise Conservative 對決 general-audience 文章",
-    "description": "K683 是 percentile-based 與 piecewise-based VIX 配置策略的 head-to-head：4838 trading days (2007-2026)，DM t=3.74 Harvey PASS，Percentile 勝 composite 11/35。寫成 general-audience 文章解釋兩種 VIX timing 思路的取捨。",
-    "priority": 4,
-    "status": "pending",
-    "source": "auto_discovered",
-    "created_at": "2026-06-06T21:08:00+08:00"
+    "task_id": "task-k1303-v2-codex-review",
+    "task_type": "paper_review",
+    "priority": "P2",
+    "status": "succeeded",
+    "title": "K1303-v2 Codex primary-path re-review (post ABD revision)",
+    "description": "Codex primary-path review of K1303-v2 code after 3-defect ABD revision. Check: (1) BNS 3-sigma jump threshold correctly identifies jump days; (2) HAC DM test via dm_test() from model_evaluation.py; (3) standard 1-step lag. Blocking knowledge.json entry for K1303 NULL result.",
+    "created_at": "2026-05-13T06:11:32.457685Z",
+    "notes": [],
+    "completed_at": "2026-05-13T06:20:35.580175+00:00"
+  },
+  {
+    "task_id": "task-k1137-v2-codex-review",
+    "task_type": "paper_review",
+    "priority": "P2",
+    "status": "succeeded",
+    "title": "K1137-v2 Codex re-review (post regime window fix)",
+    "description": "Codex re-review of K1137-v2 after regime window off-by-one fix. Check: vix_series[i-w:i] (unshifted) used for quantile window; vix_lag1 used for regime-label comparison only. Also verify 10% guard is now hard skip. If PASS, enables K1137 knowledge.json entry.",
+    "created_at": "2026-05-13T06:11:32.457685Z",
+    "notes": [],
+    "completed_at": "2026-05-13T06:20:35.580175+00:00"
+  },
+  {
+    "task_id": "task-k1138-v2-codex-review",
+    "task_type": "paper_review",
+    "priority": "P2",
+    "status": "succeeded",
+    "title": "K1138-v2 Codex re-review (post BH-FDR fix)",
+    "description": "Codex re-review of K1138-v2 after BH-FDR enforcement fix at asset/model summary level. Check: asset_pass = any(c[DM_HLN_t]>2.0 AND c[DM_HLN_p_BH]<0.05 for c in asset_cells). IWM correctly NULL. If PASS, enables K1138 knowledge.json entry.",
+    "created_at": "2026-05-13T06:11:32.457685Z",
+    "notes": [],
+    "completed_at": "2026-05-13T06:20:35.580175+00:00"
   }
 ]
