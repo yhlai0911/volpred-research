@@ -236,3 +236,62 @@ def test_research_cover_helper_acceptance():
         "audiences_covered": ["research"],
         "covered_by": [],
     }) is False
+
+
+def test_terminal_article_attempts_release_pre_gate_kids():
+    """2026-06-07 K672/K957/K593/K1021/K1151 unblock fix.
+
+    Pre-gate (before 2026-05-28T20:29:54+00:00) all terminal article tasks
+    are caught by publish-time audience gate now → safe to re-enter refill pool.
+    Only K-ids with a post-gate terminal article task stay audit_pending.
+    """
+    tasks = [
+        # K672: only pre-gate terminal failures → should be released
+        {"id": "K672_article_general", "status": "failed",
+         "task_type": "daily_article", "k_id": "K672",
+         "completed_at": "2026-05-28T06:31:18+00:00"},
+        {"id": "K672_article_general_v2", "status": "failed",
+         "task_type": "daily_article", "k_id": "K672",
+         "completed_at": "2026-05-28T20:10:42+00:00"},
+        # K1021/K593: date-only completed_at (pre-2026-05-28) → released
+        {"id": "K1021_article_general", "status": "succeeded",
+         "task_type": "daily_article", "k_id": "K1021",
+         "completed_at": "2026-05-05"},
+        {"id": "K593_article_general", "status": "succeeded",
+         "task_type": "daily_article", "k_id": "K593",
+         "completed_at": "2026-05-05"},
+        # K9999: ONE terminal task post-gate → stays blocked
+        {"id": "K9999_article_general_v3", "status": "failed",
+         "task_type": "daily_article", "k_id": "K9999",
+         "completed_at": "2026-05-29T10:00:00+00:00"},
+        # K9999: also has a pre-gate task — presence of any post-gate failure dominates
+        {"id": "K9999_article_general", "status": "succeeded",
+         "task_type": "daily_article", "k_id": "K9999",
+         "completed_at": "2026-05-04"},
+        # Non-article task → ignored
+        {"id": "platform_ops_some_audit", "status": "succeeded",
+         "task_type": "platform_ops", "k_id": "K1234"},
+        # Pending task → ignored (not terminal)
+        {"id": "K5555_article_general", "status": "pending",
+         "task_type": "daily_article", "k_id": "K5555"},
+    ]
+    blocked = MODULE._kids_with_terminal_article_attempts(tasks)
+    assert "K672" not in blocked, "pre-gate terminal-only K should be released"
+    assert "K1021" not in blocked, "date-only completed_at treated as pre-gate"
+    assert "K593" not in blocked, "date-only completed_at treated as pre-gate"
+    assert "K9999" in blocked, "any post-gate terminal task → stays blocked"
+    assert "K1234" not in blocked, "non-article task should not block K"
+    assert "K5555" not in blocked, "pending tasks are not terminal"
+
+
+def test_terminal_article_attempts_null_completed_at_treated_as_pregate():
+    """If completed_at is null/missing, allow retry (pre-gate by default)."""
+    tasks = [
+        {"id": "K7777_article_general", "status": "failed",
+         "task_type": "daily_article", "k_id": "K7777",
+         "completed_at": None},
+        {"id": "K7777_article_general_v2", "status": "succeeded",
+         "task_type": "daily_article", "k_id": "K7777"},
+    ]
+    blocked = MODULE._kids_with_terminal_article_attempts(tasks)
+    assert "K7777" not in blocked

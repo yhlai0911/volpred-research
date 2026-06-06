@@ -116,8 +116,18 @@ def _live_kids(tasks: list) -> set[str]:
     return kids
 
 
+# Publish-time audience gate became active in scripts/publish_draft.py at
+# 2026-05-28T20:29:54Z (when platform_ops_audience_tag_audit_K1151_K672_K957
+# completed). Pre-gate: publisher silently upcast general→research → article
+# tasks succeeded with wrong-audience entries → refill flagged uncovered_for_general
+# → v2/v3/v4 retry pollution. Post-gate: publish_draft returns code 7 on upcast,
+# so retries are safe. We treat "all terminal article tasks predate this gate"
+# as a release valve — those K-ids re-enter the candidate pool.
+_AUDIENCE_GATE_ENABLED_AT = "2026-05-28T20:29:54+00:00"
+
+
 def _kids_with_terminal_article_attempts(tasks: list) -> set[str]:
-    """K-ids that already had any article task reach a terminal state.
+    """K-ids whose terminal article tasks include at least one post-gate failure.
 
     Terminal = succeeded / failed / superseded / closed.
     Used together with `_any_feed_coverage` to suppress infinite retry loops
@@ -127,29 +137,72 @@ def _kids_with_terminal_article_attempts(tasks: list) -> set[str]:
 
     2026-05-29 incident: K1151/K672/K957 — prior `_article_general` task
     'succeeded' but published article tagged audience=research; refill produced
-    v2/v3/v4 endlessly. Proper fix is publisher audience-tagging audit
-    (see platform_ops_audience_tag_audit_K1151_K672_K957); this guard stops
-    bleeding while audit completes.
+    v2/v3/v4 endlessly. Proper fix was publisher audience-tagging audit
+    (see platform_ops_audience_tag_audit_K1151_K672_K957) which added a
+    publish-time gate in scripts/publish_draft.py. After the gate is active,
+    a K whose ALL terminal article attempts predate the gate is safe to retry —
+    a future failure mode (publisher would upcast again) is now caught by the
+    gate (exit 7), not silently swallowed.
+
+    2026-06-07 follow-up: pre-fix this helper kept K672/K957/K1151/K593/K1021
+    audit_pending forever even though their last terminal task predated the gate,
+    leaving refill pool permanently dry. Now we only block K-ids that have at
+    least one post-gate terminal attempt (i.e., the gate was active and the
+    retry still failed → audit_pending is the right state).
     """
+    from datetime import datetime
+
     TERMINAL = {"succeeded", "failed", "superseded", "closed"}
-    kids: set[str] = set()
+    try:
+        gate_ts = datetime.fromisoformat(_AUDIENCE_GATE_ENABLED_AT)
+    except ValueError:
+        gate_ts = None
+
+    per_kid: dict[str, list[object]] = {}
     import re
     for t in tasks:
         if str(t.get("status") or "").lower() not in TERMINAL:
             continue
-        # Only consider article tasks (auto-discovered daily_article).
         if str(t.get("task_type") or "") != "daily_article":
             continue
         tid = str(t.get("id") or "")
         if "_article_" not in tid:
             continue
+        candidate_kids: set[str] = set()
         for key in ("k_id", "experiment_id"):
             v = t.get(key)
             if v:
-                kids.add(str(v).upper())
+                candidate_kids.add(str(v).upper())
         m = re.match(r"^(K\d{2,5})_article_", tid)
         if m:
-            kids.add(m.group(1).upper())
+            candidate_kids.add(m.group(1).upper())
+        if not candidate_kids:
+            continue
+        completed = t.get("completed_at")
+        for kid in candidate_kids:
+            per_kid.setdefault(kid, []).append(completed)
+
+    kids: set[str] = set()
+    for kid, completed_list in per_kid.items():
+        if gate_ts is None:
+            kids.add(kid)
+            continue
+        # Block only if any terminal attempt completed AT OR AFTER the gate.
+        # Date-only / null / unparsable completed_at → treat as pre-gate
+        # (the 2026-05-04/05 dateless entries are all pre-gate by construction).
+        for c in completed_list:
+            if not c or not isinstance(c, str):
+                continue
+            try:
+                ts = datetime.fromisoformat(c)
+            except ValueError:
+                # date-only like "2026-05-05" → pre-gate
+                continue
+            if ts.tzinfo is None:
+                continue  # naive timestamp — skip, treat as ambiguous (pre-gate)
+            if ts >= gate_ts:
+                kids.add(kid)
+                break
     return kids
 
 

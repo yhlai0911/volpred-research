@@ -22710,7 +22710,7 @@
     "title": "Paper review (Codex 24h-rule): 當「顯著」變不顯著：預先登錄如何揭穿 cherry-pick",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_7d0eb239 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_7d0eb239",
@@ -22719,6 +22719,156 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-06T15:08:11+00:00"
+    "created_at": "2026-06-06T15:08:11+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-06T15:51:10.761870+00:00",
+    "claim_session_id": "918c0e5d402a",
+    "started_at": "2026-06-06T15:51:10.789365+00:00",
+    "completed_at": "2026-06-06T15:52:49.306632+00:00",
+    "result": "Codex review completed: core K1109 confirmatory claim is supported (ANOVA p=0.297, fabless BH p=0.278, no obvious lookahead in K1109 code). Findings: article overstates git-commit verifiability because prereg_sample.json does not contain the claimed commit hash; article should more clearly distinguish planned sample N=32 from fitted sample N=31 due one download failure. Verdict: CONDITIONAL_PASS."
+  },
+  {
+    "id": "platform_ops_refill_audit_pending_unblock",
+    "title": "Refill audit_pending guard: stale-pre-gate K-ids 永久卡死 → 加 GATE_ENABLED_AT cutoff",
+    "description": "ROOT-CAUSE: refill_task_pool._kids_with_terminal_article_attempts treats any K with terminal article task + any feed coverage as audit_pending → blocked forever. Audit task 2026-05-28T20:29 已加 publish-time audience gate (publish_draft.py:1296-1312) prevent silent upcast → retries 現在安全。但 refill 仍永久 block K672/K957/K1151/K593/K1021，pool 全乾。FIX: 加 _AUDIENCE_GATE_ENABLED_AT cutoff，K-ids 所有 terminal article tasks 都在 gate 啟用前完成 → 從 audit_pending 移除（gate 會保護新 retry）。",
+    "priority": 3,
+    "status": "succeeded",
+    "task_type": "platform_ops",
+    "source": "interactive_root_cause",
+    "tags": [
+      "refill",
+      "audit-pending",
+      "root-cause",
+      "pool-empty"
+    ],
+    "created_at": "2026-06-06T16:14:06+00:00",
+    "claimed_by": "hourly-00",
+    "claimed_at": "2026-06-06T16:14:07.731210+00:00",
+    "claim_session_id": "aa9006942a34",
+    "started_at": "2026-06-06T16:14:07.978751+00:00",
+    "completed_at": "2026-06-06T16:15:50.836847+00:00",
+    "result": "Refactored _kids_with_terminal_article_attempts to use _AUDIENCE_GATE_ENABLED_AT (2026-05-28T20:29:54Z) cutoff. K-ids with only pre-gate terminal article tasks now re-enter refill pool (publish-time audience gate in publish_draft.py:1296-1312 protects retries). Added 2 regression tests; tests/test_refill_task_pool.py 全綠。Verified: refill_task_pool.py --apply 解放 6 K (K672/K957/K1021/K1024/K1076/K1103) v2-v4 retry tasks，pool 0→6 agentable。"
+  },
+  {
+    "id": "K672_article_general_v4",
+    "title": "K672: write general-audience article [retry-v4] (auto-discovered uncovered K)",
+    "description": "K K672 has verdict signal (score=9, reasons=None) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: ",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K672",
+    "tags": [
+      "auto-discovered",
+      "audience-general",
+      "retry-v4"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-06T16:15:31+00:00"
+  },
+  {
+    "id": "K957_article_general_v3",
+    "title": "K957: write general-audience article [retry-v3] (auto-discovered uncovered K)",
+    "description": "K K957 has verdict signal (score=6, reasons=None) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: ",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K957",
+    "tags": [
+      "auto-discovered",
+      "audience-general",
+      "retry-v3"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-06T16:15:31+00:00"
+  },
+  {
+    "id": "K1021_article_general_v2",
+    "title": "K1021: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K1021 has verdict signal (score=4, reasons=None) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: ",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1021",
+    "tags": [
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-06T16:15:31+00:00"
+  },
+  {
+    "id": "K1024_article_general_v2",
+    "title": "K1024: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K1024 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Paper 9 需求, 執行: Claude] K1024 測試 A4f refit frequency 敏感度（5d/21d/63d/126d/252d）。SPY OOS 2013-2026 (N=3337)。核心發現：(1) QLIKE 差異僅 0.021%（-8.6373 to -8.6391），幾乎不受 refit 頻率影響 (2) 63d refit 是最佳：QLIKE -8.6391，DM t=-6.87 vs GJR (3) 所有頻率 DM 全通過 Harvey（t 從 -6.09 到 -6.87）(4) 跨頻率 DM 全 NS（",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1024",
+    "tags": [
+      "A4f",
+      "refit-frequency",
+      "sensitivity",
+      "robustness",
+      "Paper-9",
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-06T16:15:31+00:00"
+  },
+  {
+    "id": "K1076_article_general_v2",
+    "title": "K1076: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K1076 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson', 'robust inference', 'inconclusive (data limit)']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Claude, 執行: Claude] K1076 applies Fissler-Ziegel (2016) joint VaR/ES scoring — the rigorous gold standard — to A4f vs GJR. SPY 2007-2026, n=4,848. ALL 4 specifications Harvey PASS: Normal 5% DM t=+5.08, Normal 1% +3.51, Student-t(5) 5% +5.15, Student-t(5) 1% +3.53. KEY FINDI",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1076",
+    "tags": [
+      "Fissler-Ziegel",
+      "VaR",
+      "ES",
+      "joint-elicitability",
+      "A4f",
+      "Paper9",
+      "Student-t",
+      "risk-management",
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-06T16:15:31+00:00"
+  },
+  {
+    "id": "K1103_article_general_v2",
+    "title": "K1103: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K1103 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson', 'mixed/non-novel']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Codex, 執行: Claude] K1067c Codex 發現 u_prev=r_{t-1}/√τ[t] 應為 τ[t-1] (timing mismatch)。三公司同步修正重跑對照：**UMC 穩固且更強**（event DM t=-2.20→-2.40，improvement +39.27%→+39.43%，θ₂ pos_frac 1.00 unchanged，p=6.7e-15→8.3e-13 仍極度顯著）；**MediaTek 幾乎不變**（DM t=+1.59→+1.41，improvement -23.46%→-22.56%",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1103",
+    "tags": [
+      "Paper_2",
+      "A4f-EAV",
+      "tau-lag-bug",
+      "robustness-check",
+      "K1067-verified",
+      "SCENARIO-STABLE",
+      "Codex-audit-followup",
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-06T16:15:31+00:00"
   }
 ]
