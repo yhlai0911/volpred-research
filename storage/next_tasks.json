@@ -22247,7 +22247,7 @@
     "title": "mile_bcdd203c: append methodology footnote (DM nomenclature + ex post VIX bucket disclaimer)",
     "description": "Codex review found: (a) DM is plain Diebold-Mariano + Newey-West HAC, not Harvey-Leybourne-Newbold corrected; |t|>3 is Harvey (2016) multi-testing empirical threshold. (b) VIX regime split is ex post conditional stratification with contemporaneous VIX_t, not predictable regime switch. Article should add a methodology footnote making both points explicit. No retraction of numbers needed. Edit storage/reports/feed.json article id=mile_bcdd203c content + storage/reports/mile_bcdd203c.json (if exists). Review report: storage/reports/codex_reviews/mile_bcdd203c_k1056.md",
     "priority": 3,
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "task_type": "platform_ops",
     "source": "codex_review_followup",
     "article_id": "mile_bcdd203c",
@@ -22258,7 +22258,13 @@
       "main-thread-only"
     ],
     "parent_review": "mile_bcdd203c_k1056",
-    "created_at": "2026-06-06T02:15:34.464424+00:00"
+    "created_at": "2026-06-06T02:15:34.464424+00:00",
+    "claimed_by": "hourly-20",
+    "claimed_at": "2026-06-06T12:09:53.131754+00:00",
+    "claim_session_id": "7ff1e6725c82",
+    "started_at": "2026-06-06T12:10:04.582148+00:00",
+    "completed_at": "2026-06-06T12:11:02.236590+00:00",
+    "result": "Appended methodology footnote to mile_bcdd203c.content: (1) DM=plain DM+Newey-West HAC; |t|>3 是 Harvey 多重比較經驗門檻 (2) VIX bucket 為 ex post conditional stratification (contemporaneous VIX_t), 非 predictable regime switch. supabase_sync.py 已同步 (articles=2)"
   },
   {
     "id": "paper_review_mile_f484adf4",
@@ -22520,14 +22526,16 @@
       "audience-general"
     ],
     "topic_cluster": "vix",
-    "created_at": "2026-06-06T09:08:21+00:00"
+    "created_at": "2026-06-06T09:08:21+00:00",
+    "started_at": "2026-06-06T11:41:16.602168+00:00",
+    "last_released_at": "2026-06-06T11:41:54.262545+00:00"
   },
   {
     "id": "K987_article_general",
     "title": "K987: write general-audience article (auto-discovered uncovered K)",
     "description": "K K987 has verdict signal (score=0, reasons=['robust inference', 'cluster cooldown penalty (vix 30d=156>15)']) but no general article in feed.json.  Verdict preview: [提出: K979 side finding, 執行: Claude] SPY 2006-2026, IS 3269, OOS 1824。系統測試 VIX 非線性形式。★ 核心發現：(1) M2 Quadratic（VIX+VIX²）OOS R²=0.258 最高，顯著優於 linear 0.202。(2) M5 Spline QLIKE=1.464 最低（最佳 proxy-robust 指標）。(3) M7 MF2-VIX² QLIKE=1.486 接近 spline。(4) M1/M3/M6 的 QLIKE 異常大（45k/31k/16k），可能因低",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K987",
@@ -22541,7 +22549,13 @@
       "audience-general"
     ],
     "topic_cluster": "vix",
-    "created_at": "2026-06-06T09:08:21+00:00"
+    "created_at": "2026-06-06T09:08:21+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-06T11:41:54.173131+00:00",
+    "claim_session_id": "5b0f0f09b96d",
+    "started_at": "2026-06-06T11:42:02.954053+00:00",
+    "completed_at": "2026-06-06T11:43:52.746412+00:00",
+    "result": "Published general-audience K987 draft mile_30367280 with 2 charts and anti-ai/publish gates passing. Applied cluster_waiver because vix topic cooldown blocked missing-coverage article despite distinct convexity/nonlinearity angle."
   },
   {
     "id": "email-11714-8f8025",
@@ -22641,11 +22655,14 @@
   {
     "id": "fb-friday-crash-event-1780744835",
     "task_type": "platform_ops",
-    "status": "pending",
+    "status": "blocked",
     "priority": "P3",
     "title": "FB Ivan Lai 雙發佈: Friday 06-05 vol-crash event article (mile_f900a8c5)",
     "description": "VolPred article mile_f900a8c5 已 publish；改寫 FB 版本（重組 200-400 字，主貼文不放連結，VolPred URL 放第一則留言：https://volpred.zeabur.app/v3/reports/mile_f900a8c5）並走 Claude in Chrome 推送。SOP: .claude/skills/trending-repost/references/fb-ivanlai-tone.md。必跑 anti_ai_gate.py FB mode。",
     "created_at": "2026-06-06T11:17:54+00:00",
-    "linked_article_id": "mile_f900a8c5"
+    "linked_article_id": "mile_f900a8c5",
+    "blocked_reason": "awaiting_interactive_session",
+    "blocked_at": "2026-06-06T12:09:15+00:00",
+    "blocked_note": "FB 個人帳號 Ivan Lai 只能走 Claude in Chrome，hourly cron 無自主能力；待互動 session 接手走 fb-ivanlai-tone.md SOP"
   }
 ]
