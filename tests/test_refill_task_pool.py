@@ -111,20 +111,17 @@ def test_archived_articles_count_as_feed_coverage(tmp_path, monkeypatch):
     assert "K999" not in general
 
 
-def test_research_reader_friendly_skips_general_companion(tmp_path, monkeypatch):
-    """Regression: 2026-06-03 K1120/K1393 audience-aware-gap incident.
+def test_research_reader_friendly_still_allows_general_companion(tmp_path, monkeypatch):
+    """Regression: 2026-06-06 candidate-pool saturation audit.
 
-    `publication_candidates.json` flagged 274 K's as missing_general where
-    the audience=research article title was already free of K-id and
-    statistical jargon (e.g. mile_b8a4dc23 「升息專用風控」). Refill
-    auto-generated `_article_general` tasks for them; the resulting general
-    drafts hit the audience gate (publisher.py _infer_audience ≥2 academic
-    keyword match → force-upgrade to research) then the duplicate gate
-    rejected vs the existing research version. Net: task closed succeeded
-    with zero content shipped + hourly slot wasted.
+    The 2026-06-03 "7th belt" skip was too aggressive: if a research article
+    title already sounded reader-friendly, refill suppressed the general
+    companion entirely. That dried up legitimate dual-audience candidates such
+    as K593/K683/K1021 even though publish-time gates already protect against
+    research-style drafts and true (K-id, audience) duplicates.
 
-    Fix: belt 7 — when research cover title is already reader-friendly,
-    skip the general companion.
+    Current rule: refill should still enqueue the general companion. The
+    audience gate / duplicate gate remain the final enforcement layer.
     """
     next_tasks = tmp_path / "storage" / "next_tasks.json"
     candidates = tmp_path / "storage" / "publication_candidates.json"
@@ -185,9 +182,9 @@ def test_research_reader_friendly_skips_general_companion(tmp_path, monkeypatch)
     assert result["ok"] is True
     added_ids = json.loads(next_tasks.read_text(encoding="utf-8"))
     ids = [t["id"] for t in added_ids]
-    # K1120 has reader-friendly research title → skip general companion
-    assert "K1120_article_general" not in ids, (
-        f"belt 7 should skip K1120 (reader-friendly research title); got {ids}"
+    # Reader-friendly research coverage no longer suppresses the general queue.
+    assert "K1120_article_general" in ids, (
+        f"K1120 should remain eligible for a general companion; got {ids}"
     )
     # K9999 has academic-jargon-laden title (K-id, GARCH, bootstrap, p-value, t-stat)
     # → still eligible for general companion

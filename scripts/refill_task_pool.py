@@ -278,14 +278,16 @@ def _has_publishable_title(cand: dict) -> bool:
     return bool(title)
 
 
-# 2026-06-03 K1120/K1393 incident: 274 K's have audience=research coverage
-# whose title is reader-friendly (no K-id / no statistical jargon). Refill
-# kept auto-generating `_article_general` tasks for them; agents would write
-# the general draft, audience gate in publisher.py would force-upgrade to
-# research (≥2 academic keyword match), then duplicate gate would reject
-# vs the existing research version. Net effect: task succeeded with zero
-# content shipped + wasted hourly fire slot. Skip when research-side cover
-# is already reader-friendly enough to serve general readers.
+# 2026-06-03 K1120/K1393 incident introduced a conservative "7th belt":
+# if research coverage already used a reader-friendly title, refill skipped
+# the general companion entirely. 2026-06-06 saturation audit showed this was
+# too aggressive: K593/K683/K1021 had legitimate dual-audience value
+# (different evidence packaging / framing / tone) but were filtered out,
+# leaving the candidate pool dry. We keep the helper for diagnostics, but the
+# actual hard stop now lives at publish time:
+#   1. audience gate blocks research-style drafts masquerading as general
+#   2. duplicate gate blocks an actual (K-id, general) collision
+# Refill should not pre-emptively suppress the queue.
 _ACADEMIC_TITLE_RE = re.compile(
     r"K\d+|p[-\s]?value|t[-\s]?stat|QLIKE|Sharpe|Bonferroni|"
     r"bootstrap|MLE|cointegration|GARCH|Harvey|Diebold|"
@@ -476,11 +478,6 @@ def refill(target: int, dry_run: bool = False) -> dict:
         # 6th belt: don't auto-queue reader-facing articles for candidates
         # whose own canonical status is already overturned/retracted.
         if _is_retracted_or_overturned_candidate(cand):
-            continue
-        # 7th belt (2026-06-03 K1120/K1393): research-covered K whose
-        # research article title is already reader-friendly serves general
-        # readers; a general companion would dup-gate-reject. Skip.
-        if needed_audience == "general" and _research_cover_is_reader_friendly(cand):
             continue
         priority = _score_to_priority(int(cand.get("score") or 0))
         # Pick retry suffix if base id already used by terminal task

@@ -32451,5 +32451,26 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-06-06T06:13:00.515915"
+  },
+  {
+    "item_id": "7303060b",
+    "category": "paper_review",
+    "content": "K1056 Codex 24h-rule review (mile_bcdd203c article) — Verdict: CONDITIONAL_PASS. Codex CLI 0.135.0 source-code audit. Bugs found: (1) A4f recursion u_prev=r_{t-1}/sqrt(tau_t) should use sqrt(tau_{t-1}) — state alignment misalignment (k1056.py L237/L353/L377); tau_prev written L358 but unused. Quantitative impact likely small; 5/5 directional result robust. (2) dm_test() is plain DM+Newey-West HAC, not Harvey-Leybourne-Newbold corrected; article '|t|>3' is Harvey (2016) multi-testing empirical threshold, not Harvey-corrected DM. (3) VIX regime bucket uses contemporaneous VIX_t — ex post stratification, not ex-ante. Article numerical accuracy [H] verified: 5/5 wins, binomial p=0.03125, full OOS n=2828/t=-6.59/6.27%, VIX 9.0/1.0/13.7/25.9, theta1 45 refits all positive — all match results.json. n_oos=2834 raw vs n_valid=2828 effective nomenclature. Cross-paper risk: u_prev alignment may recur in K988/K988b/K994/K1024/K1033 (audit task pending). Action: methodology footnote to article + K1056b refit with corrected recursion. Full review: storage/reports/codex_reviews/mile_bcdd203c_k1056.md.",
+    "evidence": [
+      "experiments/k1056/k1056.py",
+      "experiments/k1056/k1056_results.json",
+      "storage/reports/codex_reviews/mile_bcdd203c_k1056.md",
+      "storage/reports/feed.json#mile_bcdd203c"
+    ],
+    "confidence": 0.85,
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "K1056",
+    "k_id": "K1056",
+    "article_id": "mile_bcdd203c",
+    "reviewer": "Codex CLI 0.135.0",
+    "reviewer_source": "codex_exec --skip-git-repo-check (read-only)",
+    "codex_review": true,
+    "codex_review_verdict": "CONDITIONAL_PASS",
+    "created_at": "2026-06-06T10:15:00.440713"
   }
 ]

@@ -22066,7 +22066,7 @@
     "title": "Paper review (Codex 24h-rule): 五個市場時代、從沒輸過：A4f 波動率預測的跨時間穩健性驗證",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_bcdd203c needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_bcdd203c",
@@ -22075,16 +22075,177 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-06T01:09:47+00:00"
+    "created_at": "2026-06-06T01:09:47+00:00",
+    "claimed_by": "hourly-10",
+    "claimed_at": "2026-06-06T02:09:24.667115+00:00",
+    "claim_session_id": "2deef297e21d",
+    "started_at": "2026-06-06T02:09:25.141476+00:00",
+    "completed_at": "2026-06-06T02:15:11.542438+00:00",
+    "result": "Codex CONDITIONAL_PASS — 3 bugs (A4f tau-alignment, DM nomenclature, contemp VIX bucket). Article numbers verified. Review: storage/reports/codex_reviews/mile_bcdd203c_k1056.md. Knowledge: K1056 entry 7303060b."
   },
   {
     "id": "platform_ops_candidate_pool_dual_audience_rule",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "title": "Candidate pool 7th belt 規則放寬：允 general + research dual-audience",
     "description": "Root cause 2026-06-06 09:09 hourly fire: publication_candidates 跑 regen 後 missing_general_top5 5 條全被 scripts/refill_task_pool.py 7th belt 擋 (research-covered K 的 research 文章 title 已 reader-friendly → general 被 skip)，加上 13 missing_general 全部 0 可派。pool dry root cause = mature-state filter saturation。\n\n動作：\n(a) 評估 7th belt 規則是否該放寬 — research 文章 reader-friendly 不代表 general audience 無價值，因 evidence package / framing / 語氣不同\n(b) 若放寬，同步看 scripts/anti_ai_gate.py + feed-publisher dedup gate 不會 dup-reject\n(c) 或加新規則 — 若 K score≥4 + last_research_article_age > 90d，允 general companion\n(d) Test 案例：K593 (Window Cross-OOS), K683 (Percentile vs Piecewise), K1021 (A4f t df) 應能進池\n(e) 若決定不放寬，補 alternative source — e.g. arXiv literature scan 自動生 daily_article brief\n\n成功標準：refill --dry-run --target 5 returns ≥3 new entries OR 提供書面 design doc 解釋為何 saturation 是 acceptable steady state",
     "created_at": "2026-06-06T09:17:03+08:00",
-    "source": "hourly-09-audit"
+    "source": "hourly-09-audit",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-06T01:57:13.922625+00:00",
+    "claim_session_id": "a62691207a62",
+    "started_at": "2026-06-06T01:57:22.311347+00:00",
+    "completed_at": "2026-06-06T01:59:57.750439+00:00",
+    "result": "Relaxed refill 7th belt: general companions no longer blocked by reader-friendly research titles; dry-run target=5 now yields 5 candidates; tests pass."
+  },
+  {
+    "id": "K597_article_general",
+    "title": "K597: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K597 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (vix 30d=156>15)']) but no general article in feed.json.  Verdict preview: [提出: 用戶, 執行: Claude] 5 個核心美股策略在 5 個極端情境的壓力測試（2005-2026, yfinance SPY+GLD+VIX, 5342 交易日）。結果：保守型VT(Piecewise) PASS 4/5 情境——GFC 全現金(MDD=0%)、2022慢熊 MDD僅-0.9%、閃崩保護最佳，但犧牲 V 型反彈上行（COVID 期 return=0%）。自適應三階VT PASS 3/5——GFC 退出（return=0%）、2022 大幅勝出(+10.1% vs B&H)，但年均 27.3 次 regime switch、77",
+    "priority": 4,
+    "status": "blocked",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K597",
+    "tags": [
+      "stress_test",
+      "strategy",
+      "production_readiness",
+      "extreme_scenario",
+      "VIX",
+      "piecewise",
+      "adaptive_tier",
+      "12_vix",
+      "fear_dca",
+      "vix_cond_leverage",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vix",
+    "created_at": "2026-06-06T02:08:01+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-06T02:09:22+00:00",
+    "blocked_note": "VIX cluster cooldown 156>15; refill should not regenerate while cluster saturated"
+  },
+  {
+    "id": "K682_article_general",
+    "title": "K682: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K682 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (vix 30d=156>15)']) but no general article in feed.json.  Verdict preview: [提出: K679 簡化, 執行: Claude] Percentile-inspired lookup table。VIX percentile thresholds: 25th=13.7, 50th=17.1, 75th=22.5, 90th=28.8（但 CV=16.7% 不夠穩定）。7 個 table 排名：K665 Table A(5-row) Sharpe 0.74 最佳，P3-AGG(3-row <15→80%, 15-25→45%, >25→10%) 0.73 第二。True percentile 在同框架下其實 0.64 < 12/VI",
+    "priority": 4,
+    "status": "blocked",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K682",
+    "tags": [
+      "lookup-table",
+      "percentile",
+      "simplification",
+      "P3-AGG",
+      "retail",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vix",
+    "created_at": "2026-06-06T02:08:01+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-06T02:09:22+00:00",
+    "blocked_note": "VIX cluster cooldown 156>15; refill should not regenerate while cluster saturated"
+  },
+  {
+    "id": "K204_article_general",
+    "title": "K204: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K204 has verdict signal (score=0, reasons=['cluster cooldown penalty (vix 30d=156>15)']) but no general article in feed.json.  Verdict preview: verdict: NULL: GLD momentum does NOT significantly improve 12/VIX VT",
+    "priority": 4,
+    "status": "blocked",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K204",
+    "tags": [
+      "vix",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vix",
+    "created_at": "2026-06-06T02:08:01+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-06T02:09:20+00:00",
+    "blocked_note": "VIX cluster cooldown 156>15; refill should not regenerate while cluster saturated"
+  },
+  {
+    "id": "K275_article_general",
+    "title": "K275: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K275 has verdict signal (score=0, reasons=['cluster cooldown penalty (vix 30d=156>15)']) but no general article in feed.json.  Verdict preview: title: The Complete Case for 50/50 SPY/GLD + 12/VIX — Synthesizing All Evidence type: SYNTHESIS (no new data analysis) data_sources: All prior experiments (K1-K274, J1-J18, N1-N176, Phases P/Q/R/T/U/G/I). Original data from yfinance, FRED, CBOE. Periods: 1948-2026.",
+    "priority": 4,
+    "status": "blocked",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K275",
+    "tags": [
+      "meta-analysis",
+      "vix",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vix",
+    "created_at": "2026-06-06T02:08:01+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-06T02:09:21+00:00",
+    "blocked_note": "VIX cluster cooldown 156>15; refill should not regenerate while cluster saturated"
+  },
+  {
+    "id": "K1056b_refit_tau_alignment_fix",
+    "title": "K1056b: refit A4f recursion with corrected tau alignment (Codex CONDITIONAL_PASS followup)",
+    "description": "Per Codex 24h review of mile_bcdd203c, A4f recursion uses u_prev=r_{t-1}/sqrt(tau_t) but should use sqrt(tau_{t-1}). Two-step state update: standardize r_{t-1} with tau_{t-1} to get u_{t-1}, update g_t, then sigma2_t=tau_t*g_t. Re-run K1056 with fix, compare magnitudes vs original. Expected: directional 5/5 unchanged, magnitudes <2% drift. If drift >5%, update article numbers + retract correction. Review report: storage/reports/codex_reviews/mile_bcdd203c_k1056.md",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "codex_review_followup",
+    "k_id": "K1056b",
+    "tags": [
+      "k1056",
+      "paper9",
+      "a4f",
+      "tau-alignment",
+      "codex-followup"
+    ],
+    "parent_review": "mile_bcdd203c_k1056",
+    "created_at": "2026-06-06T02:15:34.464424+00:00"
+  },
+  {
+    "id": "paper9_a4f_alignment_audit",
+    "title": "Paper 9 A4f scripts: audit u_prev tau-alignment across K988/K988b/K994/K1024/K1033",
+    "description": "Codex K1056 review identified u_prev/tau_t misalignment in A4f recursion. Same pattern likely in other Paper 9 A4f experiments. Grep `u_prev` / `tau_prev` in experiments/k988*/k994*/k1024*/k1033*/k1056*, document which scripts have the bug. If systematic, queue refits + Paper 9 narrative update. Review report: storage/reports/codex_reviews/mile_bcdd203c_k1056.md",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "codex_review_followup",
+    "tags": [
+      "paper9",
+      "a4f",
+      "tau-alignment",
+      "cross-paper-audit",
+      "codex-followup"
+    ],
+    "parent_review": "mile_bcdd203c_k1056",
+    "created_at": "2026-06-06T02:15:34.464424+00:00"
+  },
+  {
+    "id": "mile_bcdd203c_methodology_footnote",
+    "title": "mile_bcdd203c: append methodology footnote (DM nomenclature + ex post VIX bucket disclaimer)",
+    "description": "Codex review found: (a) DM is plain Diebold-Mariano + Newey-West HAC, not Harvey-Leybourne-Newbold corrected; |t|>3 is Harvey (2016) multi-testing empirical threshold. (b) VIX regime split is ex post conditional stratification with contemporaneous VIX_t, not predictable regime switch. Article should add a methodology footnote making both points explicit. No retraction of numbers needed. Edit storage/reports/feed.json article id=mile_bcdd203c content + storage/reports/mile_bcdd203c.json (if exists). Review report: storage/reports/codex_reviews/mile_bcdd203c_k1056.md",
+    "priority": 3,
+    "status": "pending_main_thread",
+    "task_type": "platform_ops",
+    "source": "codex_review_followup",
+    "article_id": "mile_bcdd203c",
+    "tags": [
+      "mile_bcdd203c",
+      "methodology-footnote",
+      "codex-followup",
+      "main-thread-only"
+    ],
+    "parent_review": "mile_bcdd203c_k1056",
+    "created_at": "2026-06-06T02:15:34.464424+00:00"
   }
 ]
