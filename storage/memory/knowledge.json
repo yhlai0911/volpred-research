@@ -32546,5 +32546,38 @@
     "reviewer_source": "feature-dev:code-reviewer (subagent fallback)",
     "codex_review": "attempted_exec_exit_0_no_verdict",
     "codex_review_verdict": "no_verdict_emitted"
+  },
+  {
+    "item_id": "271f69be",
+    "category": "methodology_window_cross_oos",
+    "content": "K593-v2 (corrigendum fix) — SPY GJR-GARCH(1,1)-t 跨 5 段 OOS 視窗交叉驗證：修正 v1 forecast engine（每段視窗 refit 後遞迴更新 σ² 狀態，取代凍結 last_model.forecast）+ DM 檢定 per-period/pooled 序列以日期 intersection 嚴格對齊。v2 各 cell QLIKE 均較 v1 更低（bug 修後 GARCH recursion 預測一致改善）；winner 排序變動：v1 (252×2,504×2,2000×1,1000×0) → v2 (252×2,1000×2,504×1,2000×0)。Mean rank v2: 252=1.8, 1000=2.0, 504=2.4, 2000=3.8。Pooled DM 504_vs_2000 dm=-1.73 p=0.083（5% 不顯著，10% 邊際）；Bonferroni 校正 N=11 family α=0.00455 後 0/11 通過。verdict: NULL on 'W=504 是穩定最佳' — 無視窗在 SPY 5 段 OOS 上能跨期穩定勝出。核心 narrative「沒有萬靈丹」維持成立，限定 SPY 5 段 OOS 範圍。Article mile_faaddb06 已 stamp corrigendum_published 2026-06-07。Reviewer: corrigendum 對應 Codex review 2026-06-07 FAIL 之 fix（pending Codex re-review post-corrigendum）。",
+    "evidence": [
+      "experiments/k593/k593_window_cross_oos_v2.py",
+      "experiments/k593/k593_window_cross_oos_v2_results.json",
+      "experiments/k593/k593_window_cross_oos_results.json (v1 audit trail)",
+      "storage/reports/review_history/mile_faaddb06/codex_review_2026-06-07.md",
+      "storage/reports/review_history/mile_faaddb06/corrigendum_note.md",
+      "Pooled DM 504_vs_2000: dm=-1.731, p=0.0835 (n_aligned_days=2508)",
+      "Bonferroni N=11 alpha=0.00455 → 0 wins both 504/2000",
+      "Win counts v2: W=252=2 (OOS2,OOS5), W=1000=2 (OOS3,OOS4), W=504=1 (OOS1), W=2000=0",
+      "Mean rank v2: 252=1.8, 1000=2.0, 504=2.4, 2000=3.8"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-07T07:14:05.725653",
+    "verdict": "NULL",
+    "experiment_id": "K593-v2",
+    "experiment_ids": [
+      "K593-v2",
+      "K593"
+    ],
+    "k_id": "K593-v2",
+    "experiment_path": "experiments/k593/",
+    "experiment_script": "experiments/k593/k593_window_cross_oos_v2.py",
+    "reviewer": "Codex review 2026-06-07 (v1 FAIL → v2 corrigendum)",
+    "reviewer_source": "storage/reports/review_history/mile_faaddb06/codex_review_2026-06-07.md",
+    "related_articles": [
+      "mile_faaddb06"
+    ],
+    "corrigendum_status": "corrigendum_published"
   }
 ]

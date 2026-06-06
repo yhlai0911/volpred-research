@@ -5,11 +5,11 @@
   "interpreter": "uv run python",
   "args": [],
   "env": {},
-  "status": "queued",
+  "status": "completed",
   "queued_at": "2026-06-06T22:16:19Z",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-06-06T22:30:08Z",
+  "completed_at": "2026-06-06T22:30:34Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k593-v2-forecast-engine-dm-date-align-corrigendum-mile-faadd-1780784179.stdout",
   "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k593-v2-forecast-engine-dm-date-align-corrigendum-mile-faadd-1780784179.stderr",
   "result_artifact": "experiments/k593/k593_window_cross_oos_v2_results.json",
@@ -18,6 +18,8 @@
     "task_type": "paper_review",
     "priority": 3
   },
-  "followup_dispatched": false,
-  "timeout_seconds": 5400
+  "followup_dispatched": true,
+  "timeout_seconds": 5400,
+  "followup_dispatched_at": "2026-06-06T23:14:12Z",
+  "followup_next_task_id": "mile_faaddb06_corrigendum_2026_06_07"
 }

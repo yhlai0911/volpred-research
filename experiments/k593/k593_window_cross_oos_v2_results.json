@@ -1,0 +1,411 @@
+{
+  "experiment_id": "K593-v2",
+  "parent_experiment_id": "K593",
+  "parent_article": "mile_faaddb06",
+  "fix_source": "Codex review 2026-06-07 (storage/reports/review_history/mile_faaddb06/codex_review_2026-06-07.md)",
+  "fix_summary": [
+    "(1) Forecast engine: refit \u9593\u6bcf\u65e5\u7528 fitted params + GJR recursion update sigma2 state (\u53d6\u4ee3 frozen last_model.forecast \u53cd\u8986\u547c\u53eb)",
+    "(2) DM tests: per-period + pooled \u5168 date-aligned via per_day_series (pd.Series indexed by date) intersection",
+    "(3) Decision rule \u6a19 ex-post documentation; pre-reg claim \u79fb\u9664",
+    "(4) Output \u6539\u5b58 experiments/k593/k593_window_cross_oos_v2_results.json (\u539f v1 \u5728 repo \u6839 experiments/ \u4e0b)",
+    "(5) Bonferroni-adjusted threshold \u8a08\u5165 N=11 family (5 per-period 504_vs_2000 + 6 pairwise pooled)"
+  ],
+  "title": "Window Size Cross-OOS Validation V2 \u2014 corrigendum fix",
+  "timestamp": "2026-06-06T22:30:33.625793+00:00",
+  "elapsed_seconds": 11.1,
+  "data_source": "yfinance",
+  "asset": "SPY",
+  "model": "GJR-GARCH(1,1)-t (zero-mean)",
+  "windows_tested": [
+    252,
+    504,
+    1000,
+    2000
+  ],
+  "refit_every": 21,
+  "oos_periods": {
+    "OOS1_2012-2013": {
+      "start": "2012-01-01",
+      "end": "2013-12-31"
+    },
+    "OOS2_2014-2015": {
+      "start": "2014-01-01",
+      "end": "2015-12-31"
+    },
+    "OOS3_2016-2017": {
+      "start": "2016-01-01",
+      "end": "2017-12-31"
+    },
+    "OOS4_2020-2021": {
+      "start": "2020-01-01",
+      "end": "2021-12-31"
+    },
+    "OOS5_2023-2024": {
+      "start": "2023-01-01",
+      "end": "2024-12-31"
+    }
+  },
+  "qlike_by_period_and_window": {
+    "OOS1_2012-2013": {
+      "252": {
+        "qlike": 1.4635674318108924,
+        "n_forecasts": 502,
+        "convergence_rate": 1.0,
+        "avg_persistence": 0.9494708084986883,
+        "refit_failures": 0,
+        "state_breakdowns": 0
+      },
+      "504": {
+        "qlike": 1.4587779350033763,
+        "n_forecasts": 502,
+        "convergence_rate": 1.0,
+        "avg_persistence": 0.9812427598508732,
+        "refit_failures": 0,
+        "state_breakdowns": 0
+      },
+      "1000": {
+        "qlike": 1.4685090321198377,
+        "n_forecasts": 502,
+        "convergence_rate": 1.0,
+        "avg_persistence": 0.9854034639503878,
+        "refit_failures": 0,
+        "state_breakdowns": 0
+      },
+      "2000": {
+        "qlike": 1.4726500946286216,
+        "n_forecasts": 502,
+        "convergence_rate": 1.0,
+        "avg_persistence": 0.9921909893781148,
+        "refit_failures": 0,
+        "state_breakdowns": 0
+      }
+    },
+    "OOS2_2014-2015": {
+      "252": {
+        "qlike": 1.4489863832554233,
+        "n_forecasts": 504,
+        "convergence_rate": 1.0,
+        "avg_persistence": 0.9271833058774795,
+        "refit_failures": 0,
+        "state_breakdowns": 0
+      },
+      "504": {
+        "qlike": 1.4553465641621388,
+        "n_forecasts": 504,
+        "convergence_rate": 1.0,
+        "avg_persistence": 0.9315827950883966,
+        "refit_failures": 0,
+        "state_breakdowns": 0
+      },
+      "1000": {
+        "qlike": 1.4629618172934131,
+        "n_forecasts": 504,
+        "convergence_rate": 1.0,
+        "avg_persistence": 0.974078841084351,
+        "refit_failures": 0,
+        "state_breakdowns": 0
+      },
+      "2000": {
+        "qlike": 1.4900464918977678,
+        "n_forecasts": 504,
+        "convergence_rate": 1.0,
+        "avg_persistence": 0.9911724439790669,
+        "refit_failures": 0,
+        "state_breakdowns": 0
+      }
+    },
+    "OOS3_2016-2017": {
+      "252": {
+        "qlike": 1.7929906558677062,
+        "n_forecasts": 503,
+        "convergence_rate": 1.0,
+        "avg_persistence": 0.9291161507141396,
+        "refit_failures": 0,
+        "state_breakdowns": 0
+      },
+      "504": {
+        "qlike": 1.80549386242354,
+        "n_forecasts": 503,
+        "convergence_rate": 1.0,
+        "avg_persistence": 0.982120266820962,
+        "refit_failures": 0,
+        "state_breakdowns": 0
+      },
+      "1000": {
+        "qlike": 1.7795326970567162,
+        "n_forecasts": 503,
+        "convergence_rate": 1.0,
+        "avg_persistence": 0.9612335322219997,
+        "refit_failures": 0,
+        "state_breakdowns": 0
+      },
+      "2000": {
+        "qlike": 1.8026111743709208,
+        "n_forecasts": 503,
+        "convergence_rate": 1.0,
+        "avg_persistence": 0.9864628961101328,
+        "refit_failures": 0,
+        "state_breakdowns": 0
+      }
+    },
+    "OOS4_2020-2021": {
+      "252": {
+        "qlike": 1.4787284740060795,
+        "n_forecasts": 505,
+        "convergence_rate": 1.0,
+        "avg_persistence": 0.9707988783977616,
+        "refit_failures": 0,
+        "state_breakdowns": 0
+      },
+      "504": {
+        "qlike": 1.4703881729976667,
+        "n_forecasts": 505,
+        "convergence_rate": 1.0,
+        "avg_persistence": 0.9965991882788086,
+        "refit_failures": 0,
+        "state_breakdowns": 0
+      },
+      "1000": {
+        "qlike": 1.4678328228168454,
+        "n_forecasts": 505,
+        "convergence_rate": 1.0,
+        "avg_persistence": 0.9955439293409454,
+        "refit_failures": 0,
+        "state_breakdowns": 0
+      },
+      "2000": {
+        "qlike": 1.5142893187975182,
+        "n_forecasts": 505,
+        "convergence_rate": 1.0,
+        "avg_persistence": 0.9877548078067054,
+        "refit_failures": 0,
+        "state_breakdowns": 0
+      }
+    },
+    "OOS5_2023-2024": {
+      "252": {
+        "qlike": 1.4690065188892545,
+        "n_forecasts": 502,
+        "convergence_rate": 1.0,
+        "avg_persistence": 0.9609121822991881,
+        "refit_failures": 0,
+        "state_breakdowns": 0
+      },
+      "504": {
+        "qlike": 1.4779645135544095,
+        "n_forecasts": 502,
+        "convergence_rate": 1.0,
+        "avg_persistence": 0.9907104647855043,
+        "refit_failures": 0,
+        "state_breakdowns": 0
+      },
+      "1000": {
+        "qlike": 1.4708045251176995,
+        "n_forecasts": 502,
+        "convergence_rate": 1.0,
+        "avg_persistence": 0.9891960596028148,
+        "refit_failures": 0,
+        "state_breakdowns": 0
+      },
+      "2000": {
+        "qlike": 1.487915443936733,
+        "n_forecasts": 502,
+        "convergence_rate": 1.0,
+        "avg_persistence": 0.9994489652767443,
+        "refit_failures": 0,
+        "state_breakdowns": 0
+      }
+    }
+  },
+  "rankings_by_period": {
+    "OOS1_2012-2013": {
+      "504": 1,
+      "252": 2,
+      "1000": 3,
+      "2000": 4
+    },
+    "OOS2_2014-2015": {
+      "252": 1,
+      "504": 2,
+      "1000": 3,
+      "2000": 4
+    },
+    "OOS3_2016-2017": {
+      "1000": 1,
+      "252": 2,
+      "2000": 3,
+      "504": 4
+    },
+    "OOS4_2020-2021": {
+      "1000": 1,
+      "504": 2,
+      "252": 3,
+      "2000": 4
+    },
+    "OOS5_2023-2024": {
+      "252": 1,
+      "1000": 2,
+      "504": 3,
+      "2000": 4
+    }
+  },
+  "win_counts": {
+    "252": 2,
+    "504": 1,
+    "1000": 2,
+    "2000": 0
+  },
+  "mean_ranks": {
+    "252": 1.8,
+    "504": 2.4,
+    "1000": 2.0,
+    "2000": 3.8
+  },
+  "dm_tests_504_vs_2000_per_period": {
+    "OOS1_2012-2013": {
+      "dm_stat": -1.7738983476444328,
+      "p_value": 0.07669341337540247,
+      "better": "W=504",
+      "significant": "*",
+      "n_days": 497
+    },
+    "OOS2_2014-2015": {
+      "dm_stat": -2.0012664970214997,
+      "p_value": 0.04590039743083607,
+      "better": "W=504",
+      "significant": "**",
+      "n_days": 504
+    },
+    "OOS3_2016-2017": {
+      "dm_stat": 0.09685631825260989,
+      "p_value": 0.9228793088906047,
+      "better": "W=2000",
+      "significant": "n.s.",
+      "n_days": 501
+    },
+    "OOS4_2020-2021": {
+      "dm_stat": -1.1051109102533216,
+      "p_value": 0.26963880431019205,
+      "better": "W=504",
+      "significant": "n.s.",
+      "n_days": 505
+    },
+    "OOS5_2023-2024": {
+      "dm_stat": -0.45662494157286865,
+      "p_value": 0.6481389441202823,
+      "better": "W=504",
+      "significant": "n.s.",
+      "n_days": 501
+    }
+  },
+  "pooled_dm_test_504_vs_2000": {
+    "dm_stat": -1.7316349767060535,
+    "p_value": 0.08346158914975543,
+    "better": "W=504",
+    "significant": "*",
+    "n_aligned_days": 2508
+  },
+  "all_pairwise_pooled_dm": {
+    "252_vs_504": {
+      "dm_stat": -0.33493990977386445,
+      "p_value": 0.7376984366155732,
+      "better": "W=252",
+      "significant": "",
+      "n_aligned_days": 2508
+    },
+    "252_vs_1000": {
+      "dm_stat": 0.07993003686364249,
+      "p_value": 0.9362992798732339,
+      "better": "W=1000",
+      "significant": "",
+      "n_aligned_days": 2508
+    },
+    "252_vs_2000": {
+      "dm_stat": -1.7011850426566602,
+      "p_value": 0.0890322507224639,
+      "better": "W=252",
+      "significant": "*",
+      "n_aligned_days": 2508
+    },
+    "504_vs_1000": {
+      "dm_stat": 0.6606116490773155,
+      "p_value": 0.5089220915612023,
+      "better": "W=1000",
+      "significant": "",
+      "n_aligned_days": 2508
+    },
+    "504_vs_2000": {
+      "dm_stat": -1.7316349767060535,
+      "p_value": 0.08346158914975543,
+      "better": "W=504",
+      "significant": "*",
+      "n_aligned_days": 2508
+    },
+    "1000_vs_2000": {
+      "dm_stat": -2.621970930185542,
+      "p_value": 0.008795171690121784,
+      "better": "W=1000",
+      "significant": "***",
+      "n_aligned_days": 2508
+    }
+  },
+  "regime_analysis": {
+    "OOS1_2012-2013": {
+      "avg_vix": 16.007390430724005,
+      "max_vix": 26.65999984741211,
+      "std_ret": 0.7510247360794292,
+      "regime": "calm",
+      "best_window": 504
+    },
+    "OOS2_2014-2015": {
+      "avg_vix": 15.424186541920616,
+      "max_vix": 40.7400016784668,
+      "std_ret": 0.8509753121981134,
+      "regime": "calm",
+      "best_window": 252
+    },
+    "OOS3_2016-2017": {
+      "avg_vix": 13.462644133368732,
+      "max_vix": 28.139999389648438,
+      "std_ret": 0.6553886986200766,
+      "regime": "calm",
+      "best_window": 1000
+    },
+    "OOS4_2020-2021": {
+      "avg_vix": 24.463346547419484,
+      "max_vix": 82.69000244140625,
+      "std_ret": 1.6063409171211456,
+      "regime": "elevated",
+      "best_window": 1000
+    },
+    "OOS5_2023-2024": {
+      "avg_vix": 16.23629481478991,
+      "max_vix": 38.56999969482422,
+      "std_ret": 0.8071782046968913,
+      "regime": "calm",
+      "best_window": 252
+    }
+  },
+  "multiple_testing_correction": {
+    "family_size_N": 11,
+    "alpha_bonferroni": 0.004545454545454546,
+    "n_504_wins_bonferroni": 0,
+    "n_2000_wins_bonferroni": 0
+  },
+  "verdict": "TENTATIVE: W=504 wins most periods but pooled test not significant. Report both.",
+  "pre_registration_status": "EX-POST documentation only \u2014 decision rule was written alongside results, not independently timestamped pre-OOS. Article corrigendum required.",
+  "decision_rule_ex_post": {
+    "revise_threshold": "W=504 wins >=4/5 AND pooled DM significant",
+    "keep_threshold": "W=504 wins <=2/5",
+    "mixed_threshold": "W=504 wins 3/5"
+  },
+  "references": [
+    "K591: Window Size Sensitivity Sweep (single OOS 2023-24, W=504 best, DM=3.68)",
+    "Hillebrand (2005) \u2014 persistence bias in short windows",
+    "Hansen & Lunde (2005) J.Applied Econometrics \u2014 QLIKE",
+    "Patton (2011) JoE \u2014 imperfect proxies",
+    "K406/K408: w=2000 upgrade based on persistence bias",
+    "K474/K476: Cross-OOS caught 53% false positive rate",
+    "(Feng & Zhang 2025 J.Forecasting \u2014 citation needs verification, removed in v2)"
+  ]
+}
