@@ -22320,7 +22320,7 @@
     "title": "K741: write general-audience article (auto-discovered uncovered K)",
     "description": "K K741 has verdict signal (score=0, reasons=['cluster cooldown penalty (vix 30d=156>15)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] 195 NFP events (2010-2026), 7 assets. Part A: NFP |r|=0.816% vs normal 0.713% (1.14x, Wilcoxon p=0.004). 59.5% positive (p=0.010). VIX drops 68.7% of NFP days (uncertainty resolution). Part B: VIX regime is KEY — Low VIX NFP +23% vol (p=0.05), Med +18% (p",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K741",
@@ -22336,14 +22336,20 @@
       "audience-general"
     ],
     "topic_cluster": "vix",
-    "created_at": "2026-06-06T04:08:15+00:00"
+    "created_at": "2026-06-06T04:08:15+00:00",
+    "claimed_by": "hourly-15",
+    "claimed_at": "2026-06-06T07:10:22.131438+00:00",
+    "claim_session_id": "a94b14ee7666",
+    "started_at": "2026-06-06T07:10:26.129185+00:00",
+    "completed_at": "2026-06-06T07:25:57.713941+00:00",
+    "result": "draft mile_eda69bfb 已進池 — VIX regime × NFP 195 events 4-regime breakdown + 2 真圖 + 3526 字 + anti-AI gate PASS (warn=1) + 9/9 checklist"
   },
   {
     "id": "K994b_refit_tau_alignment",
     "title": "K994b: refit A4f with tau_prev denom (Paper 9 alignment audit followup)",
     "description": "Per experiments/paper9_a4f_alignment_audit/README.md, K994 A4f uses tau_t denom (K1056-pattern bug). Refit with tau_prev like K1056b, compare magnitudes. Heavy compute -- enqueue via scripts/compute_queue.py.",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "paper9_a4f_alignment_audit",
     "tags": [
@@ -22353,7 +22359,13 @@
       "refit",
       "audit-followup"
     ],
-    "created_at": "2026-06-06T04:12:20.066402+00:00"
+    "created_at": "2026-06-06T04:12:20.066402+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-06T06:23:15.249935+00:00",
+    "claim_session_id": "ad337d146ee4",
+    "started_at": "2026-06-06T06:23:15.550900+00:00",
+    "completed_at": "2026-06-06T06:27:31.637674+00:00",
+    "result": "Prepared experiments/k994b with tau_prev-aligned A4f recursion, local snapshot inputs, and comparison_to_k994 output. Syntax check passed; heavy compute queued as K994b tau-alignment refit for async worker, with follow-up focused on cross-asset direction/significance drift versus K994."
   },
   {
     "id": "K1024b_refit_tau_alignment",

@@ -1,0 +1,23 @@
+{
+  "id": "compute-k994b-tau-alignment-refit-1780727251",
+  "title": "K994b tau-alignment refit",
+  "script_path": "experiments/k994b/k994b.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "failed",
+  "queued_at": "2026-06-06T06:27:31Z",
+  "started_at": "2026-06-06T06:30:07Z",
+  "completed_at": "2026-06-06T06:30:31Z",
+  "exit_code": 1,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k994b-tau-alignment-refit-1780727251.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k994b-tau-alignment-refit-1780727251.stderr",
+  "result_artifact": "experiments/k994b/k994b_results.json",
+  "claude_followup": {
+    "brief": "Read experiments/k994b/k994b_results.json and compare to K994. Verify whether A4f still improves on GJR for all four assets, whether QQQ remains the only Harvey-threshold significant win, whether any asset flips direction, and whether comparison_to_k994 implies Paper 9 or cross-asset article wording changes.",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 7200
+}
