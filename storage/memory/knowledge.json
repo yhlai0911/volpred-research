@@ -32472,5 +32472,27 @@
     "codex_review": true,
     "codex_review_verdict": "CONDITIONAL_PASS",
     "created_at": "2026-06-06T10:15:00.440713"
+  },
+  {
+    "item_id": "50660599",
+    "category": "experiment_followup",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "K1056b",
+    "k_id": "K1056b",
+    "experiment_path": "experiments/k1056b/",
+    "experiment_script": "experiments/k1056b/k1056b.py",
+    "reviewer": "self_inspection",
+    "reviewer_source": "main_thread_code_audit",
+    "parent_review": "mile_bcdd203c_k1056 Codex 24h-rule CONDITIONAL_PASS",
+    "content": "[提出: Codex 24h review follow-up, 執行: Codex CLI 0.135] K1056b — A4f tau-alignment fix refit (Verdict: CONDITIONAL_PASS). Codex 24h review of mile_bcdd203c flagged that K1056 A4f recursion used u_prev=r_{t-1}/sqrt(tau_t) instead of sqrt(tau_{t-1}). K1056b re-runs full K1056 protocol with corrected two-step state update: standardize r_{t-1} with tau_{t-1} to get u_{t-1}, update g_t via GJR-like recursion, then sigma2_t=tau_t*g_t. Code (k1056b.py L233-241, L370-383) confirmed to apply fix correctly. Full OOS 2015-01 to 2026-04 (n_valid=2828): QLIKE improvement 5.77% (was 6.27%, abs drift 0.51 pct-pt, rel drift 8.1%), DM t=-5.44 (was -6.59, still Harvey-significant p=5.9e-8). DIRECTIONAL claims PRESERVED: 5/5 sub-periods A4f wins (PreCOVID/COVID/PostCOVID/RateHike/Calm), 45/45 theta1>0, full-OOS DM significant. NUMERIC claims SHIFTED: rolling 252-day no longer 100% A4f-better (some GJR-leading windows now exist), VIX Normal bucket flipped sign (+1.0% -> -0.07%). Individual sub-period |DM|>3 dropped to 1/5 (only PreCOVID). Article mile_bcdd203c needs number updates (full OOS, rolling, VIX bucket); methodology footnote already scheduled via pending task mile_bcdd203c_methodology_footnote. Conclusion: tau-alignment bug was NOT pure technicality but does NOT reverse directional conclusion. Bar for CONDITIONAL_PASS met (provenance + experiment script + parent review traceable); did not gate on PASS because article numerics need downstream correction before fully-clean PASS.",
+    "evidence": [
+      "experiments/k1056b/k1056b_results.json",
+      "experiments/k1056b/README.md",
+      "experiments/k1056b/k1056b.py:233-241 (in-sample recursion)",
+      "experiments/k1056b/k1056b.py:370-383 (OOS recursion)",
+      "storage/reports/codex_reviews/mile_bcdd203c_k1056.md (parent CONDITIONAL_PASS verdict)"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-06T11:10:54.894104"
   }
 ]

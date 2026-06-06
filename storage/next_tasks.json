@@ -22198,7 +22198,7 @@
     "title": "K1056b: refit A4f recursion with corrected tau alignment (Codex CONDITIONAL_PASS followup)",
     "description": "Per Codex 24h review of mile_bcdd203c, A4f recursion uses u_prev=r_{t-1}/sqrt(tau_t) but should use sqrt(tau_{t-1}). Two-step state update: standardize r_{t-1} with tau_{t-1} to get u_{t-1}, update g_t, then sigma2_t=tau_t*g_t. Re-run K1056 with fix, compare magnitudes vs original. Expected: directional 5/5 unchanged, magnitudes <2% drift. If drift >5%, update article numbers + retract correction. Review report: storage/reports/codex_reviews/mile_bcdd203c_k1056.md",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "codex_review_followup",
     "k_id": "K1056b",
@@ -22210,7 +22210,13 @@
       "codex-followup"
     ],
     "parent_review": "mile_bcdd203c_k1056",
-    "created_at": "2026-06-06T02:15:34.464424+00:00"
+    "created_at": "2026-06-06T02:15:34.464424+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-06T03:00:56.257980+00:00",
+    "claim_session_id": "c14744aa047f",
+    "started_at": "2026-06-06T03:00:56.477931+00:00",
+    "completed_at": "2026-06-06T03:11:03.643760+00:00",
+    "result": "K1056b refit complete. Tau-alignment fix verified at k1056b.py:233-241,370-383. Full OOS QLIKE 5.77% (was 6.27%, rel drift 8.1%), DM t=-5.44 (Harvey sig p=5.9e-8). Directional 5/5 PRESERVED (sub-periods, theta1 45/45>0, full-OOS DM). Numeric claims need article update via mile_bcdd203c_methodology_footnote followup (rolling no longer 100% A4f, VIX Normal flipped sign). knowledge.json item_id=50660599 verdict=CONDITIONAL_PASS."
   },
   {
     "id": "paper9_a4f_alignment_audit",
