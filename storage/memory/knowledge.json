@@ -32519,5 +32519,32 @@
     ],
     "paper_impact": "Paper 9 — no conclusion change; methodology footnote (already pending) suffices",
     "notes": "CONDITIONAL_PASS because this is a main-thread data interpretation of a Codex-compatible compute_queue artifact, not a primary-path Codex review. Standard provenance bar per .claude/rules/experiments.md."
+  },
+  {
+    "item_id": "550b60e4",
+    "category": "paper_review",
+    "content": "K1039 paper review (24h-rule fallback) for production article mile_90f2f916 (sqrt(h) 與精確多期 GARCH VaR scaling). Codex CLI 0.135.0 exec exit-0 但中途斷流未產 VERDICT；fallback 改 feature-dev:code-reviewer subagent 單回合 review。Verdict: CONDITIONAL_PASS. Findings: 5 minor 全 PASS — (1) Lookahead: CF-Rolling window 嚴格 `combined_resid[start_idx:idx_combined]` 排除 t 本身、GJR/A4f 1-step forecast 正確用 ret[t-1] lag (NO lookahead); (3) Trinity AND-gate line 995 `kupiec=='PASS' and cc=='PASS' and basel=='PASS'` 正確 — SKIP→FAIL 一致 (QQQ GJR/A4f CF-Rolling h10 0.01 cc='SKIP' trinity='FAIL'); (4) Kupiec n_viol=0 邊界公式 `lr = -2*n*log(1-α)` 正確 (n=182 α=0.01 → p=0.0558 PASS)；CC/ES SKIP 邏輯與文章描述一致; (5) SPY/QQQ 同期 n_oos=1827 oos_start 2019-01-02 一致 (n_total 5349); (6) Cornish-Fisher 4-項展開公式 `z + (z²-1)/6·S + (z³-3z)/24·K - (2z³-5z)/36·S²` 標準. 1 major: (2) 文章原 claim 「sqrt(h) 跟精確算法一樣準，差距是 0 個百分點」屬 binary Trinity 通過率比較 over-reach — 未做 DM test 或個別 VaR loss 函數比較。Violation count 實際不同 (SPY GJR sqrt h5 α2.5%: 9 vs CF 8; A4f h10 α2.5%: 3 vs 2)，只是不夠大改變 Basel 顏色。已加 methodology caveat 段落，明確 binary Trinity 邊界 + 應用 caveat。文章可維持 published。Feed sync 完成 (incremental, emdash_normalizer 自動修 1 個破折號 line 63 density 1.32/1k)。Process lesson: Codex CLI 處理大檔（k1039.py ~900 lines + results.json）+ 6 條 audit 容易在 reasoning 階段斷流 (exit 0 但 stdout truncated). 對大量 file-walking 的 review 改用 subagent fallback 較穩。",
+    "evidence": [
+      "/tmp/mile_90f2f916_content.md",
+      "experiments/K1039/k1039.py:761-784 (CF-Rolling window lag)",
+      "experiments/K1039/k1039.py:995 (Trinity AND-gate)",
+      "experiments/K1039/k1039.py:901-909 (Kupiec n_viol=0 path)",
+      "experiments/K1039/k1039.py:265-268 (Cornish-Fisher expansion)",
+      "experiments/K1039/k1039_results.json (SPY/QQQ Trinity verdicts)",
+      "storage/reports/feed.json#mile_90f2f916 (revised content + review_history)",
+      "/tmp/codex_review_mile_90f2f916.txt (Codex truncated output)"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-06T18:17:25.498436",
+    "verdict": "CONDITIONAL_PASS",
+    "k_id": "K1039",
+    "experiment_id": "K1039",
+    "experiment_path": "experiments/K1039/",
+    "article_id": "mile_90f2f916",
+    "task_id": "paper_review_mile_90f2f916",
+    "reviewer": "feature-dev:code-reviewer (subagent fallback after Codex CLI exec mid-stream truncation)",
+    "reviewer_source": "feature-dev:code-reviewer (subagent fallback)",
+    "codex_review": "attempted_exec_exit_0_no_verdict",
+    "codex_review_verdict": "no_verdict_emitted"
   }
 ]
