@@ -22060,5 +22060,31 @@
     "started_at": "2026-06-05T22:13:07.892107+00:00",
     "completed_at": "2026-06-05T22:13:08.086872+00:00",
     "result": "Codex 24h review FAIL (lookahead HIGH + overclaim HIGH). 3 issues: AI-specific attribution / ex-post window mix / overclaim without DM-Harvey test. Remediation applied to feed.json (4 patches softening claims). Knowledge K47bd47db + review artifact experiments/k1410_ai_capex_iv_divergence/review_codex_24h.md."
+  },
+  {
+    "id": "paper_review_mile_bcdd203c",
+    "title": "Paper review (Codex 24h-rule): 五個市場時代、從沒輸過：A4f 波動率預測的跨時間穩健性驗證",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_bcdd203c needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_bcdd203c",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-06T01:09:47+00:00"
+  },
+  {
+    "id": "platform_ops_candidate_pool_dual_audience_rule",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "title": "Candidate pool 7th belt 規則放寬：允 general + research dual-audience",
+    "description": "Root cause 2026-06-06 09:09 hourly fire: publication_candidates 跑 regen 後 missing_general_top5 5 條全被 scripts/refill_task_pool.py 7th belt 擋 (research-covered K 的 research 文章 title 已 reader-friendly → general 被 skip)，加上 13 missing_general 全部 0 可派。pool dry root cause = mature-state filter saturation。\n\n動作：\n(a) 評估 7th belt 規則是否該放寬 — research 文章 reader-friendly 不代表 general audience 無價值，因 evidence package / framing / 語氣不同\n(b) 若放寬，同步看 scripts/anti_ai_gate.py + feed-publisher dedup gate 不會 dup-reject\n(c) 或加新規則 — 若 K score≥4 + last_research_article_age > 90d，允 general companion\n(d) Test 案例：K593 (Window Cross-OOS), K683 (Percentile vs Piecewise), K1021 (A4f t df) 應能進池\n(e) 若決定不放寬，補 alternative source — e.g. arXiv literature scan 自動生 daily_article brief\n\n成功標準：refill --dry-run --target 5 returns ≥3 new entries OR 提供書面 design doc 解釋為何 saturation 是 acceptable steady state",
+    "created_at": "2026-06-06T09:17:03+08:00",
+    "source": "hourly-09-audit"
   }
 ]

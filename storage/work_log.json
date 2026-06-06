@@ -9708,5 +9708,12 @@
     ],
     "actor": "hourly-08-main-thread",
     "note": "Paper 8 cross_asset_detail table reruns under pinned snapshot; main_v3 rebuilt + Supabase synced; SPY reproduces paper line 67 footnote to <2%"
+  },
+  {
+    "timestamp": "2026-06-06T09:16",
+    "task_type": "platform_ops",
+    "task_id": "hourly_09_candidate_pool_saturation_audit",
+    "result": "no_dispatch",
+    "note": "pool agentable=0, last-3 paper_review×2 禁 paper_*; refill 跑 publication_candidates regen → 1 uncovered (K267 meta)、13 missing_general 全被 7th belt 擋 (research 已 reader-friendly)、0 missing_research。Saturation 是 mature-state 設計問題（需改 publisher dedup gate 允 dual-audience），非 hourly 範圍"
   }
 ]
