@@ -32494,5 +32494,30 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-06-06T11:10:54.894104"
+  },
+  {
+    "item_id": "k1024b_taua",
+    "category": "experiment_validation",
+    "content": "K1024b CONFIRMS K1024 refit-frequency sensitivity result holds after Paper 9 tau-alignment fix (u_{t-1}=r_{t-1}/sqrt(tau_{t-1}) vs old tau_t). All 5 refit frequencies (5d/21d/63d/126d/252d) show direction_unchanged=true: A4f still beats GJR in QLIKE at every frequency, all DM t-stats remain strongly significant (|t|>5 across all freqs). Material drift: QLIKE deltas ≤ +0.006 (absolute, vs baseline ~-8.64 → relative drift <0.1%); DM t-stats narrowed slightly (e.g. freq_63 t = -6.87 → -5.86) but stay deeply in significance region. freq_63 (quarterly) remains the practical default with DM t=-5.86. CONCLUSION: tau-alignment fix is a methodological hygiene improvement that does NOT overturn K1024's substantive findings — no Paper 9 conclusion update required, only the existing pending Paper9_alignment_methodology_footnote task needs the standard disclosure footnote.",
+    "experiment_id": "K1024b",
+    "experiment_path": "experiments/k1024b/",
+    "k_id": "K1024b",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "main_thread_data_interpretation",
+    "reviewer_source": "compute_queue_followup_hourly-13",
+    "evidence": [
+      "experiments/k1024b/k1024b_results.json:comparison_to_k1024",
+      "experiments/k1024b/k1024b_qlike_vs_frequency.png",
+      "experiments/k1024b/k1024b_dm_vs_frequency.png"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-06T13:09:24.893360",
+    "related_experiments": [
+      "K1024",
+      "K1056b",
+      "paper9_a4f_alignment_audit"
+    ],
+    "paper_impact": "Paper 9 — no conclusion change; methodology footnote (already pending) suffices",
+    "notes": "CONDITIONAL_PASS because this is a main-thread data interpretation of a Codex-compatible compute_queue artifact, not a primary-path Codex review. Standard provenance bar per .claude/rules/experiments.md."
   }
 ]

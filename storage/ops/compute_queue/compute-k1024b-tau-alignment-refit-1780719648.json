@@ -1,0 +1,25 @@
+{
+  "id": "compute-k1024b-tau-alignment-refit-1780719648",
+  "title": "K1024b tau-alignment refit",
+  "script_path": "experiments/k1024b/k1024b.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-06-06T04:20:48Z",
+  "started_at": "2026-06-06T04:30:05Z",
+  "completed_at": "2026-06-06T04:32:11Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1024b-tau-alignment-refit-1780719648.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1024b-tau-alignment-refit-1780719648.stderr",
+  "result_artifact": "experiments/k1024b/k1024b_results.json",
+  "claude_followup": {
+    "brief": "Read experiments/k1024b/k1024b_results.json and compare to K1024. Verify whether A4f still beats GJR at all 5 refit frequencies, whether freq_63 remains the practical default, and whether any direction flips or >material DM/QLIKE drifts require Paper 9 methodology updates. Focus on comparison_to_k1024.freq_63 and all frequencies.",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "timeout_seconds": 7200,
+  "followup_dispatched_at": "2026-06-06T05:08:41Z",
+  "followup_next_task_id": "hourly-13-k1024b-interpretation"
+}

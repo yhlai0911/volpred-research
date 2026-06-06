@@ -22360,7 +22360,7 @@
     "title": "K1024b: refit A4f with tau_prev denom (Paper 9 alignment audit followup)",
     "description": "Per experiments/paper9_a4f_alignment_audit/README.md, K1024 A4f uses tau_t denom (K1056-pattern bug). Refit with tau_prev like K1056b. Heavy compute -- enqueue via scripts/compute_queue.py.",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "paper9_a4f_alignment_audit",
     "tags": [
@@ -22370,7 +22370,13 @@
       "refit",
       "audit-followup"
     ],
-    "created_at": "2026-06-06T04:12:20.066402+00:00"
+    "created_at": "2026-06-06T04:12:20.066402+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-06T04:17:37.090325+00:00",
+    "claim_session_id": "23317319a789",
+    "started_at": "2026-06-06T04:17:37.375505+00:00",
+    "completed_at": "2026-06-06T04:20:56.283935+00:00",
+    "result": "Prepared experiments/k1024b/ with local-snapshot data load, tau_prev recursion fix, renamed outputs, and comparison_to_k1024 diagnostics.\nEnqueued compute job compute-k1024b-tau-alignment-refit-1780719648 for heavy full-grid refit (5/21/63/126/252-day frequencies).\nFollow-up should read experiments/k1024b/k1024b_results.json and verify whether freq_63 and all-frequency A4f>GJR conclusions survive the alignment fix."
   },
   {
     "id": "K988_sens_alignment_clarify",
