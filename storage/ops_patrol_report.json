@@ -1,36 +1,35 @@
 {
-  "timestamp": "2026-06-05T18:05:35Z",
+  "timestamp": "2026-06-06T00:04:32Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
-      "status": "alert",
-      "detail": "Total drafts: 129 (OK). research drafts: 2 (<4 threshold). general drafts: 71 (OK). milestone drafts: 56.",
+      "status": "ok",
+      "detail": "Total drafts: 129 (threshold ≥12 ✓). Research audience: 52 (threshold ≥4 ✓). General audience: 77 (threshold ≥8 ✓).",
       "counts": {
         "total": 129,
-        "research": 2,
-        "general": 71,
-        "milestone": 56
+        "research": 52,
+        "general": 77
       }
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json does not exist (missing/never written)."
+      "detail": "storage/strategy_metrics.json does not exist — file missing entirely (persistent since prior patrols)."
     },
     {
       "name": "ERROR_LOG",
       "status": "alert",
-      "detail": "Entry dated 2026-06-05 (today) found: Jump-share variance vs event-count phrasing (K851/mile_02190b48). Codex 24h review CONDITIONAL_PASS. Rule added: distinguish jump event-count share vs jump variance share vs jump-to-total-RV in articles.",
-      "entries_today": [
-        "2026-06-05 — Jump-share variance vs event-count phrasing (K851 / mile_02190b48 Codex review)"
+      "detail": "Entry dated 2026-06-05 (yesterday) found: 'Jump-share variance vs event-count phrasing (K851 / mile_02190b48 Codex review)' — jump variance metric definition ambiguity, CONDITIONAL_PASS. Also auto-compact root-cause corrections (2026-06-03, 2026-06-05).",
+      "entries_recent": [
+        "2026-06-05 — Jump-share variance vs event-count phrasing (K851 / mile_02190b48 Codex review): CONDITIONAL_PASS",
+        "2026-06-03 — auto-compact true root cause: env var placement fix (zshrc)"
       ]
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 15 strategies checked. No strategy has >2 portfolio_return=null in last 3 entries.",
-      "strategies_checked": 15
+      "detail": "No strategies with >2 consecutive portfolio_return=null in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
@@ -45,8 +44,7 @@
     }
   ],
   "alerts": [
-    "research article pool low: 2 drafts (<4 threshold)",
-    "strategy_metrics.json missing (file does not exist)",
-    "error_log entry dated today (2026-06-05): Jump-share variance phrasing — K851/mile_02190b48 Codex CONDITIONAL_PASS"
+    "metrics_missing: storage/strategy_metrics.json does not exist (persistent issue)",
+    "error_log_yesterday: error_log.md has entries dated 2026-06-05 — K851 jump-share CONDITIONAL_PASS + auto-compact root-cause fix"
   ]
 }
