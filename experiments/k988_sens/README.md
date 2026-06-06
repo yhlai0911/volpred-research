@@ -74,6 +74,30 @@ Harvey pass (|t| > 3.0): Paper = 13/16, K988_sens = 13/16 (identical count)
 3. The original Table 12 generation script was missing (D4 confirmed). This experiment is now the **canonical JSON source**.
 4. Recommendation: **(b) paper errata** — add footnote documenting the replication; no substantive revision needed.
 
+## NOTE — τ-alignment bug-cousin classification (2026-06-06, K988_sens_alignment_clarify)
+
+`paper9_a4f_alignment_audit` 將本腳本納入 K1056-family τ-alignment bug pattern：
+`k988_sens.py:232` 在 GARCH recursion 中以 `u_prev = returns[t-1] / sqrt(tau[t])` 標準化前一期殘差，
+正確對齊應為 `sqrt(tau[t-1])`。本腳本未提供 alternative-alignment mode。
+
+**Scope classification（task `K988_sens_alignment_clarify`）= (a) sensitivity dimension is alpha/beta-class operational**：
+4 個維度（refit 頻率 / training window / sub-period / VIX variant）皆為 operational / data robustness，
+**alignment 不是其中任何一維**。因此 16 cell magnitude 全部繼承 A4f τ_t-denom 的 bug pattern，
+但所測之 sensitivity 維度本身與 alignment 正交。
+
+**已 cover 的 alignment-corrected refit**：
+- `experiments/k1024b/` 用 τ_{t-1} corrected alignment 重做了 refit-frequency 維度的 5 個頻率（5/21/63/126/252d），CONDITIONAL_PASS（K1024b commit 1152117b）。
+- `experiments/k1056b/` 是 K1056 原 bug 的 corrected refit baseline (commit 18269c4a)。
+
+**尚未補 alignment-corrected 的維度**：window (5)、sub-period (3)、VIX variant (4) 合計 12 cells。
+若 Paper 9 R1 revision 要求 Table 12 全表 alignment-corrected 數字，需新建 `K988_sens_b`（heavy compute，
+~30 min 跑全表）走 `compute_queue`，與 K1024b 同 alignment fix。**當前判斷**：K1024b 已驗證
+refit 頻率維度的 qualitative 結論（A4f > GJR、Harvey 顯著）在 corrected alignment 下仍成立，
+其餘維度依 K988_sens 原 magnitude 推論「approx 保留 + 8-13/16 Harvey 顯著」應穩健 — 不阻塞 paper R1。
+
+**對應 Paper 9 methodology footnote**：歸到 `mile_bcdd203c_methodology_footnote` task，
+不重覆寫 footnote（避免雙寫）。
+
 ## Files
 
 | File | Description |

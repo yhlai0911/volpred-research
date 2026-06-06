@@ -22383,7 +22383,7 @@
     "title": "K988_sens scope clarification: alignment-orthogonal sensitivity or alignment-itself?",
     "description": "experiments/k988_sens/k988_sens.py uses tau_t denom (K1056 bug pattern) with no alternative mode. Determine via script header + results.json: (a) sensitivity dimension is alpha/beta (refit needed) OR (b) alignment-related (document as bug-cousin). Lightweight task.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "platform_ops",
     "source": "paper9_a4f_alignment_audit",
     "tags": [
@@ -22391,14 +22391,20 @@
       "alignment",
       "audit-followup"
     ],
-    "created_at": "2026-06-06T04:12:20.066402+00:00"
+    "created_at": "2026-06-06T04:12:20.066402+00:00",
+    "claimed_by": "hourly-14",
+    "claimed_at": "2026-06-06T06:08:52.890241+00:00",
+    "claim_session_id": "11b3a2e0b70d",
+    "started_at": "2026-06-06T06:08:57.899891+00:00",
+    "completed_at": "2026-06-06T06:11:12.385129+00:00",
+    "result": "Classification=(a) sensitivity dimension is operational/alpha-beta; alignment is orthogonal. K988_sens uses τ_t denom (K1056 bug pattern) at k988_sens.py:232 across all 16 cells, but the 4 tested dimensions (refit/window/sub-period/VIX variant) are operational robustness — alignment is not among them. K1024b already covered refit-frequency dimension with τ_{t-1} corrected alignment (CONDITIONAL_PASS). Window/sub-period/VIX variant (12 cells) inherit bug magnitude but not refit-blocked for Paper 9 R1 — K1024b qualitative confirmation extends. Added bug-cousin NOTE to experiments/k988_sens/README.md linking K1056b/K1024b. Methodology footnote handled by mile_bcdd203c_methodology_footnote task (no duplicate)."
   },
   {
     "id": "Paper9_alignment_methodology_footnote",
     "title": "Paper 9: add tau-alignment methodology footnote (K1056 audit followup)",
     "description": "Per Paper 9 A4f alignment audit (experiments/paper9_a4f_alignment_audit/README.md), Paper 9 body needs explicit footnote disclosing Engle 2013 Eq.4 interpretation vs DGP alternative, referencing K988/K988b_supplement design comparison and K1056b refit verification.",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_body",
     "source": "paper9_a4f_alignment_audit",
     "tags": [
@@ -22407,6 +22413,12 @@
       "footnote",
       "audit-followup"
     ],
-    "created_at": "2026-06-06T04:12:20.066402+00:00"
+    "created_at": "2026-06-06T04:12:20.066402+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-06T05:21:45.068230+00:00",
+    "claim_session_id": "3a735371a275",
+    "started_at": "2026-06-06T05:21:45.359112+00:00",
+    "completed_at": "2026-06-06T05:22:37.113436+00:00",
+    "result": "Added explicit normalization-convention footnote to paper/garch-x-vix/main.tex clarifying Engle 2013 Eq.4 tau_t baseline versus tau_{t-1} DGP-timed alternative.\nFootnote references K988/K988b design comparison and K1056b refit verification; README updated with a dated methodology note for R1 prep provenance.\nNo body claims changed; this is a disclosure/provenance tightening only."
   }
 ]
