@@ -9698,5 +9698,15 @@
     "title": "hourly_07_candidate_pool_dry_audit (no_dispatch)",
     "status": "completed",
     "notes": "Hourly-07 audit: pool exhausted, refill no-op, K1086/K1061 audience metadata stale. Email sent to boss. Action items in /tmp/loop_summary_0707.md."
+  },
+  {
+    "timestamp": "2026-06-06T08:17:30+08:00",
+    "task_type": "paper_body",
+    "task_id": "Paper8_cross_asset_snapshot_rerun",
+    "k_ids": [
+      "K1418"
+    ],
+    "actor": "hourly-08-main-thread",
+    "note": "Paper 8 cross_asset_detail table reruns under pinned snapshot; main_v3 rebuilt + Supabase synced; SPY reproduces paper line 67 footnote to <2%"
   }
 ]
