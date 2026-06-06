@@ -22478,7 +22478,7 @@
     "title": "K894: write general-audience article (auto-discovered uncovered K)",
     "description": "K K894 has verdict signal (score=0, reasons=['cluster cooldown penalty (vix 30d=156>15)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] GJR-X(VIX) additive: DM t=-2.39 Harvey FAIL. MF-GJR multiplicative: DM t=-3.15 Harvey PASS. MF-GJR vs GJR-X(VIX): DM t=-3.01 Harvey PASS. MCS eliminates GJR/GJR-X, only MF-GJR/MF-GARCH survive. Proves multiplicative decomposition σ²=exp(θ₀+θ₁×logVIX)×g_t ",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K894",
@@ -22493,7 +22493,13 @@
       "audience-general"
     ],
     "topic_cluster": "vix",
-    "created_at": "2026-06-06T08:08:43+00:00"
+    "created_at": "2026-06-06T08:08:43+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-06T10:34:02.847876+00:00",
+    "claim_session_id": "b3085dc14cd4",
+    "started_at": "2026-06-06T10:34:17.892770+00:00",
+    "completed_at": "2026-06-06T10:39:23.136428+00:00",
+    "result": "Published general-audience K894 draft mile_52f0d19b with 2 charts and anti-ai/publish gates passing. Applied cluster_waiver because vix topic cooldown blocked missing-coverage article despite distinct structure-vs-input angle."
   },
   {
     "id": "K976_article_general",
@@ -22543,7 +22549,7 @@
     "description": "Gmail UID: 11714\nMessage-ID: <CD18D8B4-65FE-43DA-AFFC-D8440786CC49@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Sat, 6 Jun 2026 17:03:51 +0800\nSubject: Re: [VolPred Boss Report] 2026-06-06 17:00 台灣時間 平台運營報告\n\n--- 用戶回信內容 ---\n週五股市大崩盤\r\n應該要寫一下專文抓時效發文\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月6日 17:01 寫道：\r\n> \r\n> VolPred Boss Report · 2026-06-06 17:00 台灣時間 · Overall WARN\r\n> \r\n> ⓪ 本 cycle 意圖 / 目標 / 規劃\r\n> \r\n> 意圖 Intent\t從反應式 firefighting 轉成主動 ops 結構。建 dashboard + audit + boss report 三件套，然後 cycle 化主線程運營。\r\n> 本週目標 Weekly Goal\t• Mission 4: 0 stale cron 持續一週、live URL 100% 自動驗證\r\n> • Mission 1: 維持 ≥6 articles/day 同時把 narrative-arc dedup Layer 4 落地（已 ✅）\r\n> • Mission 3: Paper 4 body_v4 完成 rewrite gate\r\n> • Mission 5: FB MCP ext popup gate 找根因 + 解（不再說『修不到』）\r\n> 本 cycle 計劃 Plan\t• Cycle 1: 建 dashboard + 2 audit + boss report email infra（✅ 本 cycle 完成）\r\n> • Cycle 2-3: Paper 4 body_v4 rewrite main thread + 派 review agent 並行\r\n> • Cycle 4: free_tier_growth_plan.md spec + 識別 P1 analytics 工具選型\r\n> • Cycle 5+: MCP ext 根因 deep-dive；若不解，準備 Anthropic issue text\r\n> 成功標準 Success Criteria\t• 每 cycle 開頭 dashboard read 不再有 surprise critical（即 standing audit catch 問題早於我）\r\n> • 每 4h boss email 自動寄出無 fail\r\n> • 次次 cycle 至少 1 個結構性改善（不只 patch）+ 2 個 article 產出\r\n> 已知風險 Known Risks\t• main thread context 易爆（已多次 compact），需要更積極派 agent 卸載\r\n> • FB MCP root cause 可能要花 ≥2 cycles 才找到\r\n> • Paper 4 rewrite 過長吃掉太多 main thread bandwidth\r\n> ① 平台狀態\r\n> \r\n> 區段\t狀態\t說明\t建議行動\r\n> production_pending\tok\t2 pending tasks + 3 pending_main_thread (top types: [('daily_article', 2), ('paper_body', 2), ('platform_ops', 1)])\tdispatch top P1-P3 if slots free\r\n> production_throughput\tok\t10 articles published last 24h (target 6/day)\t—\r\n> distribution_supabase\tok\t10/10 last-24h articles synced\t—\r\n> verification_live_url\tok\t3/3 sample live URLs return 200\t—\r\n> verification_fb_pipeline\tok\t2 FB posts awaiting interactive session\tinteractive session / Chrome MCP available時接手貼文與留言\r\n> health_cron\tok\t0 cron jobs stale (over max-age)\t—\r\n> health_alerts_unhandled\twarn\t1 current warn/critical alert conditions\tingest alerts → run remediation per alert.md auto-action table\r\n> ①-b 排程器成果掌握（cron 跑完沒 / 成功沒）\r\n> \r\n> 每個定時排程器的 runs / exit / 完成狀態。全部正常\r\n> \r\n> === cron 成果掌握 review — 2026-06-06 17:01:09（台灣時間）===\r\n> \r\n>   hourly_dispatch   runs=298 exit=0 idle | last: 2026-06-06 16:23:01 (log-mtime)\r\n>   compute_worker    runs=1187 exit=0 idle | last: 2026-06-06 17:00:05 (log-mtime)\r\n>   check_alerts      runs=297 exit=0 running | last: 2026-06-06 17:00:04 (log-mtime)\r\n>   collect_tw        runs=10 exit=0 idle | last: 2026-06-05 15:00:32 (log-mtime)\r\n>   collect_us        runs=10 exit=0 idle | last: 2026-06-06 07:03:24 (log-mtime)\r\n>   daily_update      runs=11 exit=0 idle | last: 2026-06-06 08:18:17 (log-mtime)\r\n>   release_pool      runs=49 exit=0 idle | last: 2026-06-06 16:00:10 (log-mtime)\r\n>   market_cal        runs=1 exit=0 idle | last: 2026-06-01 08:00:15 (log-mtime)\r\n>   memory_health     runs=12 exit=0 idle | last: 2026-06-06 05:30:16 (log-mtime)\r\n>   work_summary      runs=49 exit=0 idle | last: 2026-06-06 12:05:21 (log-mtime)\r\n> \r\n> 近 75 分鐘 git commits（hourly_dispatch 產出代理）：1 筆\r\n>   cb1b4819 hourly-16 | K493_article_general daily_article publish mile_7d5d0e1f\r\n> \r\n> ✅ 所有 cron 排程器：last exit 0、無逾時、無中斷班。\r\n> ② 本 cycle 活動（過去 4h）\r\n> \r\n> 5 commits\r\n> \r\n> SHA\tSubject\tTime\r\n> cb1b4819\thourly-16 \tle_ge\r\n> f1d6ed03\tops(hourly 15:28): PHASE-Z safety-net auto-commit (agent left uncommitted)\t15:28\r\n> 2c4a15a9\thourly-15 \taily_\r\n> 9585baeb\thourly-14 \talign\r\n> 1152117b\thourly-13 \t-alig\r\n> ③ Pending 池與論文組合\r\n> \r\n> Pending tasks: 2\r\n> \r\n> By type: daily_article · 2\r\n> \r\n> 論文組合\r\n> \r\n> Paper\tStatus\r\n> crypto-fear-channel\t**READY FOR SUBMISSION** (2026-05-17 v4.\r\n> eav-universal-magnitude\tscaffold v2 (paper_decision confirmed 20\r\n> garch-x-vix\tsubmitted (under review) | Reproduce gat\r\n> leverage-direction\tR1 review — 2 CRITICAL (C3/C4/C5 subsets\r\n> prg-periodic-garch\t✅ **Submission-ready (all clear)** (2026\r\n> taiwan-vt\t**Major Revision Required** — 2 HIGH blo\r\n> vix-sufficiency\tReproduce gate GREEN (98.0% match, alert\r\n> volatility-absorption\tR1 review — Path B errata revision appli\r\n> vt-crowding-abm\t✅ Submission-ready (R3 SEVERE=0; v2 revi\r\n> vt-insurance-cost\t✅ **Submission-ready — GREE\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "claimed",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -22556,7 +22562,13 @@
     "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
     "claimed_by": "interactive-claude",
     "claimed_at": "2026-06-06T10:07:23.708509+00:00",
-    "claim_session_id": "854f7cf77503"
+    "claim_session_id": "854f7cf77503",
+    "started_at": "2026-06-06T11:11:17.883864+00:00",
+    "plan": "1) Dispatch event_article agent: write Friday 2026-06-05 vol-crash article (VIX 15.40→21.51 +39.68% / SPY -2.58% / QQQ -4.80% / TWII -1.33% / TSMC -0.84%); evidence package real data + VolPred vol-forecast angle. 2) Anti-AI-style gate + 3-canon enforcement. 3) Publish to feed.json + reports/<id>.json + Supabase. 4) Queue FB dual-publish followup task. 5) Close reply email when feed published + sub-task queued.",
+    "linked_task_ids": [],
+    "needs_close_reply": true,
+    "completed_at": "2026-06-06T11:26:53.732471+00:00",
+    "result": "Friday vol-crash event_article mile_f900a8c5 published (1742 chars zh-Hant). VIX +39.68% main angle, de-leveraging pattern (股+金+債齊跌) thesis, K61/K92/K75 VolPred regime mapping. Feed published, Supabase synced (125 articles), live URL 200, FB dual-publish queued as fb-friday-crash-event-1780744835. anti_ai_gate PASSED try 2. Replied close email to owner."
   },
   {
     "id": "fix_prepublish_audit_negative_num_regex",
@@ -22608,7 +22620,7 @@
     "description": "Gmail UID: 11718\nMessage-ID: <C41B4DEA-3CEB-4F68-AA67-E338B87F68F1@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Sat, 6 Jun 2026 18:06:32 +0800\nSubject: Re: [VolPred 6h Summary] 6h 平台運營彙報 2026-06-06 12:05 → 18:05 台灣時間\n\n--- 用戶回信內容 ---\n🚨 critical alert 記錄：13:01 [VolPred Alert][CRITICAL] Host cron failure detected\r\n\r\n\r\n這要處理嗎？\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月6日 18:05 寫道：\r\n> \r\n> 🚨 critical alert 記錄：13:01 [VolPred Alert][CRITICAL] Host cron failure detected\r\n>\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -22618,6 +22630,22 @@
     "email_uid": 11718,
     "email_message_id": "<C41B4DEA-3CEB-4F68-AA67-E338B87F68F1@gmail.com>",
     "email_subject": "Re: [VolPred 6h Summary] 6h 平台運營彙報 2026-06-06 12:05 → 18:05 台灣時間",
-    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>"
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-06-06T11:07:25.525779+00:00",
+    "claim_session_id": "cb948d91d633",
+    "started_at": "2026-06-06T11:11:16.830218+00:00",
+    "completed_at": "2026-06-06T11:12:27.125835+00:00",
+    "result": "13:01 Host cron failure alert = transient; dedup skip_count=88, 13 sent over 6 weeks; all 14 LaunchAgents loaded; 19:00 logs all written; dashboard health_cron=ok 0 stale. Replied (notification_id d0e111e1) with 自我恢復 + 何時要 escalate criteria."
+  },
+  {
+    "id": "fb-friday-crash-event-1780744835",
+    "task_type": "platform_ops",
+    "status": "pending",
+    "priority": "P3",
+    "title": "FB Ivan Lai 雙發佈: Friday 06-05 vol-crash event article (mile_f900a8c5)",
+    "description": "VolPred article mile_f900a8c5 已 publish；改寫 FB 版本（重組 200-400 字，主貼文不放連結，VolPred URL 放第一則留言：https://volpred.zeabur.app/v3/reports/mile_f900a8c5）並走 Claude in Chrome 推送。SOP: .claude/skills/trending-repost/references/fb-ivanlai-tone.md。必跑 anti_ai_gate.py FB mode。",
+    "created_at": "2026-06-06T11:17:54+00:00",
+    "linked_article_id": "mile_f900a8c5"
   }
 ]
