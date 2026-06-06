@@ -223,8 +223,14 @@ def _infer_audience(
     if re.search(r'K\d+', title or ''):
         return 'research'
 
-    # Rule 4: count academic keywords across title + content + tags
-    combined = ' '.join(filter(None, [title or '', content or '', ' '.join(tags or [])]))
+    # Rule 4: count academic keywords across title + content + tags.
+    # Strip image markdown URLs before checking: `![alt](url)` → `![alt]()`.
+    # Image filenames often contain K-ids (e.g. k1024_qlike.png) but are not
+    # editorial content — counting them as academic jargon would incorrectly
+    # upcast legitimate general articles that embed experiment charts.
+    _img_url_strip = re.compile(r'!\[([^\]]*)\]\([^)]+\)')
+    content_no_img_urls = _img_url_strip.sub(r'![\1]()', content or '')
+    combined = ' '.join(filter(None, [title or '', content_no_img_urls, ' '.join(tags or [])]))
     hit_count = 0
     hit_labels: list[str] = []
     seen: set[str] = set()
