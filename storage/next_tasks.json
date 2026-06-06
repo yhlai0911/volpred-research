@@ -22265,7 +22265,7 @@
     "title": "Paper review (Codex 24h-rule): GJR 在三個資產上的 VaR 是壞的，A4f 補上了那個缺口——但統計門檻沒給它金牌",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_f484adf4 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_f484adf4",
@@ -22278,14 +22278,16 @@
     "claimed_by": "codex-cli",
     "claimed_at": "2026-06-06T07:28:13.434238+00:00",
     "claim_session_id": "93585700cfdb",
-    "started_at": "2026-06-06T07:28:13.471438+00:00"
+    "started_at": "2026-06-06T07:28:13.471438+00:00",
+    "completed_at": "2026-06-06T07:29:29.439481+00:00",
+    "result": "Codex review complete: K1022 article numbers largely match k1022_results.json, including 6/6 QLIKE wins and 3 GJR Kupiec FAILs. But source code still has the tau_t denominator alignment bug in A4f recursion/OOS forecast, and DM is plain HAC DM with a Harvey-style |t|>3 reporting threshold rather than an actual Harvey-corrected statistic; article should be treated as CONDITIONAL_PASS, not clean PASS."
   },
   {
     "id": "K493_article_general",
     "title": "K493: write general-audience article (auto-discovered uncovered K)",
     "description": "K K493 has verdict signal (score=0, reasons=['cluster cooldown penalty (vix 30d=156>15)']) but no general article in feed.json.  Verdict preview: best_qlike_model: GJR-X(VIX9D) mz_r2_best: GJR-X(VIX9D) Reference: Patton (2011) Volatility Forecast Comparison Using Imperfect Proxies, JoE Reference: Mincer & Zarnowitz (1969) The Evaluation of Economic Forecasts",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K493",
@@ -22296,7 +22298,13 @@
       "audience-general"
     ],
     "topic_cluster": "vix",
-    "created_at": "2026-06-06T04:08:15+00:00"
+    "created_at": "2026-06-06T04:08:15+00:00",
+    "claimed_by": "hourly-16",
+    "claimed_at": "2026-06-06T08:09:33.656251+00:00",
+    "claim_session_id": "b83d5291ab74",
+    "started_at": "2026-06-06T08:09:49.035216+00:00",
+    "completed_at": "2026-06-06T08:20:15.085004+00:00",
+    "result": "Wrote general-audience article for K493 (VIX/GJR/GJR-X(VIX9D) signal comparison). Published as mile_7d5d0e1f (draft, audience=research after publisher upcast). Anti-ai-gate PASS (1 warn paragraph length). Fig: experiments/k493/article_figs/fig_k493_signals.png."
   },
   {
     "id": "K725_article_general",
@@ -22436,5 +22444,43 @@
     "started_at": "2026-06-06T05:21:45.359112+00:00",
     "completed_at": "2026-06-06T05:22:37.113436+00:00",
     "result": "Added explicit normalization-convention footnote to paper/garch-x-vix/main.tex clarifying Engle 2013 Eq.4 tau_t baseline versus tau_{t-1} DGP-timed alternative.\nFootnote references K988/K988b design comparison and K1056b refit verification; README updated with a dated methodology note for R1 prep provenance.\nNo body claims changed; this is a disclosure/provenance tightening only."
+  },
+  {
+    "id": "paper_review_mile_e38c9656",
+    "title": "Paper review (Codex 24h-rule): 同一個公式，兩種用法，差距天壤之別：VaR 的「記憶長度」決定你的風險計算準不準",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_e38c9656 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_e38c9656",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-06T08:08:43+00:00"
+  },
+  {
+    "id": "K894_article_general",
+    "title": "K894: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K894 has verdict signal (score=0, reasons=['cluster cooldown penalty (vix 30d=156>15)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] GJR-X(VIX) additive: DM t=-2.39 Harvey FAIL. MF-GJR multiplicative: DM t=-3.15 Harvey PASS. MF-GJR vs GJR-X(VIX): DM t=-3.01 Harvey PASS. MCS eliminates GJR/GJR-X, only MF-GJR/MF-GARCH survive. Proves multiplicative decomposition σ²=exp(θ₀+θ₁×logVIX)×g_t ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K894",
+    "tags": [
+      "MF-GJR",
+      "GJR-X",
+      "VIX",
+      "multiplicative",
+      "Harvey_PASS",
+      "structure",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vix",
+    "created_at": "2026-06-06T08:08:43+00:00"
   }
 ]
