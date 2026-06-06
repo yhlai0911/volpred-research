@@ -22215,15 +22215,15 @@
     "claimed_at": "2026-06-06T03:00:56.257980+00:00",
     "claim_session_id": "c14744aa047f",
     "started_at": "2026-06-06T03:00:56.477931+00:00",
-    "completed_at": "2026-06-06T03:11:03.643760+00:00",
-    "result": "K1056b refit complete. Tau-alignment fix verified at k1056b.py:233-241,370-383. Full OOS QLIKE 5.77% (was 6.27%, rel drift 8.1%), DM t=-5.44 (Harvey sig p=5.9e-8). Directional 5/5 PRESERVED (sub-periods, theta1 45/45>0, full-OOS DM). Numeric claims need article update via mile_bcdd203c_methodology_footnote followup (rolling no longer 100% A4f, VIX Normal flipped sign). knowledge.json item_id=50660599 verdict=CONDITIONAL_PASS."
+    "completed_at": "2026-06-06T03:14:36.643478+00:00",
+    "result": "K1056b refit complete. Tau-alignment fix verified at k1056b.py:233-241,370-383. Full OOS QLIKE 5.77% (was 6.27%, rel drift 8.1%), DM t=-5.44 (Harvey sig p=5.9e-8). Directional 5/5 PRESERVED (sub-periods, theta1 45/45>0, full-OOS DM). Numeric claims need article update via mile_bcdd203c_methodology_footnote followup (rolling no longer 100% A4f, VIX Normal flipped sign). knowledge.json item_id=50660599 verdict=CONDITIONAL_PASS.\n\nK1056b complete: corrected tau_{t-1} alignment rerun preserved 5/5 subperiod wins but reduced full-OOS improvement 6.27% -> 5.77% and DM -6.59 -> -5.44.\nArticle-impacting drifts found: Normal VIX bucket flips to -0.07% and rolling 252d A4f-better falls from 100.0% to 97.6% (some GJR-leading windows).\nAdded experiments/k1056b/ with script, README, results, and comparison-to-K1056 diagnostics."
   },
   {
     "id": "paper9_a4f_alignment_audit",
     "title": "Paper 9 A4f scripts: audit u_prev tau-alignment across K988/K988b/K994/K1024/K1033",
     "description": "Codex K1056 review identified u_prev/tau_t misalignment in A4f recursion. Same pattern likely in other Paper 9 A4f experiments. Grep `u_prev` / `tau_prev` in experiments/k988*/k994*/k1024*/k1033*/k1056*, document which scripts have the bug. If systematic, queue refits + Paper 9 narrative update. Review report: storage/reports/codex_reviews/mile_bcdd203c_k1056.md",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "codex_review_followup",
     "tags": [
@@ -22234,7 +22234,13 @@
       "codex-followup"
     ],
     "parent_review": "mile_bcdd203c_k1056",
-    "created_at": "2026-06-06T02:15:34.464424+00:00"
+    "created_at": "2026-06-06T02:15:34.464424+00:00",
+    "claimed_by": "hourly-12",
+    "claimed_at": "2026-06-06T04:09:39.940983+00:00",
+    "claim_session_id": "a7cc24dd6d18",
+    "started_at": "2026-06-06T04:09:46.618249+00:00",
+    "completed_at": "2026-06-06T04:12:29.578019+00:00",
+    "result": "Audit complete: 3 confirmed bugs (K1056/K994/K1024 same tau_t denom pattern), 2 research-design (K988/K988b explicit alignment comparison per Engle 2013 vs DGP), 1 fix verified (K1056b), 1 needs clarify (K988_sens). 4 followup tasks queued. Cross-paper impact: Paper 9 directional robust, magnitudes need K994b/K1024b refit verification. Audit report: experiments/paper9_a4f_alignment_audit/README.md"
   },
   {
     "id": "mile_bcdd203c_methodology_footnote",
@@ -22253,5 +22259,148 @@
     ],
     "parent_review": "mile_bcdd203c_k1056",
     "created_at": "2026-06-06T02:15:34.464424+00:00"
+  },
+  {
+    "id": "paper_review_mile_f484adf4",
+    "title": "Paper review (Codex 24h-rule): GJR 在三個資產上的 VaR 是壞的，A4f 補上了那個缺口——但統計門檻沒給它金牌",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_f484adf4 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_f484adf4",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-06T04:08:14+00:00"
+  },
+  {
+    "id": "K493_article_general",
+    "title": "K493: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K493 has verdict signal (score=0, reasons=['cluster cooldown penalty (vix 30d=156>15)']) but no general article in feed.json.  Verdict preview: best_qlike_model: GJR-X(VIX9D) mz_r2_best: GJR-X(VIX9D) Reference: Patton (2011) Volatility Forecast Comparison Using Imperfect Proxies, JoE Reference: Mincer & Zarnowitz (1969) The Evaluation of Economic Forecasts",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K493",
+    "tags": [
+      "leverage-effect",
+      "vix",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vix",
+    "created_at": "2026-06-06T04:08:15+00:00"
+  },
+  {
+    "id": "K725_article_general",
+    "title": "K725: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K725 has verdict signal (score=0, reasons=['cluster cooldown penalty (vix 30d=156>15)']) but no general article in feed.json.  Verdict preview: [提出: 策略 crisis 表現, 執行: Claude] VIX≥25 vs <25 策略 Sharpe 比較。所有策略 crisis 時下降但幅度差異巨大。Best crisis: TW Momentum +1.44（台股 VIX lag 優勢）, TW+JP TZ +1.21, Piecewise 0.00（全現金）。Worst: GARCH VT -6.66, 12/VIX -6.07, Fear DCA -3.72。Smooth-weight 策略在 crisis 最脆弱（持有太多曝險）。台灣策略反而 crisis 最好——可能因 US VI",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K725",
+    "tags": [
+      "crisis-advantage",
+      "strategy-comparison",
+      "Taiwan",
+      "VIX-regime",
+      "GARCH-worst",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vix",
+    "created_at": "2026-06-06T04:08:15+00:00"
+  },
+  {
+    "id": "K741_article_general",
+    "title": "K741: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K741 has verdict signal (score=0, reasons=['cluster cooldown penalty (vix 30d=156>15)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] 195 NFP events (2010-2026), 7 assets. Part A: NFP |r|=0.816% vs normal 0.713% (1.14x, Wilcoxon p=0.004). 59.5% positive (p=0.010). VIX drops 68.7% of NFP days (uncertainty resolution). Part B: VIX regime is KEY — Low VIX NFP +23% vol (p=0.05), Med +18% (p",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K741",
+    "tags": [
+      "NFP",
+      "event_study",
+      "VIX_regime",
+      "sector_dispersion",
+      "strategy",
+      "April_2026",
+      "研究",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "vix",
+    "created_at": "2026-06-06T04:08:15+00:00"
+  },
+  {
+    "id": "K994b_refit_tau_alignment",
+    "title": "K994b: refit A4f with tau_prev denom (Paper 9 alignment audit followup)",
+    "description": "Per experiments/paper9_a4f_alignment_audit/README.md, K994 A4f uses tau_t denom (K1056-pattern bug). Refit with tau_prev like K1056b, compare magnitudes. Heavy compute -- enqueue via scripts/compute_queue.py.",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "paper9_a4f_alignment_audit",
+    "tags": [
+      "A4f",
+      "tau-alignment",
+      "paper9",
+      "refit",
+      "audit-followup"
+    ],
+    "created_at": "2026-06-06T04:12:20.066402+00:00"
+  },
+  {
+    "id": "K1024b_refit_tau_alignment",
+    "title": "K1024b: refit A4f with tau_prev denom (Paper 9 alignment audit followup)",
+    "description": "Per experiments/paper9_a4f_alignment_audit/README.md, K1024 A4f uses tau_t denom (K1056-pattern bug). Refit with tau_prev like K1056b. Heavy compute -- enqueue via scripts/compute_queue.py.",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "paper9_a4f_alignment_audit",
+    "tags": [
+      "A4f",
+      "tau-alignment",
+      "paper9",
+      "refit",
+      "audit-followup"
+    ],
+    "created_at": "2026-06-06T04:12:20.066402+00:00"
+  },
+  {
+    "id": "K988_sens_alignment_clarify",
+    "title": "K988_sens scope clarification: alignment-orthogonal sensitivity or alignment-itself?",
+    "description": "experiments/k988_sens/k988_sens.py uses tau_t denom (K1056 bug pattern) with no alternative mode. Determine via script header + results.json: (a) sensitivity dimension is alpha/beta (refit needed) OR (b) alignment-related (document as bug-cousin). Lightweight task.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "platform_ops",
+    "source": "paper9_a4f_alignment_audit",
+    "tags": [
+      "K988_sens",
+      "alignment",
+      "audit-followup"
+    ],
+    "created_at": "2026-06-06T04:12:20.066402+00:00"
+  },
+  {
+    "id": "Paper9_alignment_methodology_footnote",
+    "title": "Paper 9: add tau-alignment methodology footnote (K1056 audit followup)",
+    "description": "Per Paper 9 A4f alignment audit (experiments/paper9_a4f_alignment_audit/README.md), Paper 9 body needs explicit footnote disclosing Engle 2013 Eq.4 interpretation vs DGP alternative, referencing K988/K988b_supplement design comparison and K1056b refit verification.",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "paper_body",
+    "source": "paper9_a4f_alignment_audit",
+    "tags": [
+      "Paper9",
+      "methodology",
+      "footnote",
+      "audit-followup"
+    ],
+    "created_at": "2026-06-06T04:12:20.066402+00:00"
   }
 ]
