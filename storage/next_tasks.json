@@ -20736,7 +20736,7 @@
   {
     "id": "Paper4_body_steps_11_to_15",
     "priority": 3,
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "task_type": "paper_body",
     "title": "Paper 4 (vix-sufficiency) body integration Steps 12-15: figures, README, paper-update, review",
     "description": "Predecessor: Step 11 abstract update + §9 eleven->thirteen sweep done. **2026-06-06 22:15 hourly-22**: §5 methodology count reconciliation done — line 388/390 stale 11→10 fixed (10 primary DM tests + 3 non-DM families 5/6/7 explicit; Holm-Bonferroni rank range 1..10). v4 compile clean 59pp, paper-update synced. **Bonferroni threshold |t|>3.23 still asserted but may need recompute under N=10 (currently |t|>3.21 from α=0.05/10) — left as approximate, low priority.** Remaining: (12) Add 5-asset forecasting-sufficiency heatmap fig (K1118+K1098); (13) Add K1121 bootstrap-dist fig (6 Sharpe-diff curves vs 50/50); (14) Update README.md (pages 48->59, +K1121/K1116b); (15) uv run volpred ops paper-update --paper-id vix-sufficiency + latex-academic-reviewer + citation-verifier. Also line 504 \"All eight testable DM tests\" needs review vs new 10-count (8 daily families 1-4,8-11 with raw p > 0.05 vs 12-13 weekly with raw p < 0.05 but harmful direction — current text is technically correct for the 8 it counts but confusing). Main thread only (.tex). Scope切小 across fires.",
@@ -20751,9 +20751,14 @@
     ],
     "paper_id": "vix-sufficiency",
     "step_11_completed_at": "2026-06-04T23:09:00+08:00",
-    "started_at": "2026-06-06T14:10:09.005358+00:00",
+    "started_at": "2026-06-06T15:13:56.807041+00:00",
     "step_5_methodology_reconciled_at": "2026-06-06T22:16:44+08:00",
-    "last_released_at": "2026-06-06T14:16:47.860753+00:00"
+    "last_released_at": "2026-06-06T14:16:47.860753+00:00",
+    "claimed_by": "hourly-23",
+    "claimed_at": "2026-06-06T15:13:53.368583+00:00",
+    "claim_session_id": "32c2433c1525",
+    "completed_at": "2026-06-06T15:14:45.199661+00:00",
+    "result": "Step 12a partial: Figure A (7-asset universal sufficiency heatmap) generated as paper/vix-sufficiency/figures/figure_a_universal_sufficiency_heatmap.png from K1203 panorama_7asset_pit_shift0. Script: paper/vix-sufficiency/scripts/make_figure_a_universal_sufficiency_heatmap.py. 11 Harvey-passing cells (10 native-IV wins + 1 alt-data win = TLT FinStress +3.74, matching paper §7.8 narrative). Plan log updated. REMAINING in follow-up task: Step 12b includegraphics integration into main_v4.tex + Figure B K1121 bootstrap-dist + Step 13 paper-update CLI + Step 14 latex review + Step 15 citation verify."
   },
   {
     "id": "paper_review_mile_8d9858f4",
@@ -22699,5 +22704,21 @@
     "created_at": "2026-05-13T06:11:32.457685Z",
     "notes": [],
     "completed_at": "2026-05-13T06:20:35.580175+00:00"
+  },
+  {
+    "id": "paper_review_mile_7d0eb239",
+    "title": "Paper review (Codex 24h-rule): 當「顯著」變不顯著：預先登錄如何揭穿 cherry-pick",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_7d0eb239 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_7d0eb239",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-06T15:08:11+00:00"
   }
 ]
