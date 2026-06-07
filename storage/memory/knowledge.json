@@ -32613,5 +32613,38 @@
     "reviewer_source": "codex_cli",
     "codex_review": "FAIL — 比較公平性 FAIL (OLS point forecast vs QR@tau 設計性 advantage) + Bootstrap p-value 公式錯誤 (boot_T_centered >= T_obs 應改 >= 0)；Lookahead PASS，DM HLN PASS",
     "created_at": "2026-06-08T04:19:25.441425"
+  },
+  {
+    "item_id": "ac45422a",
+    "category": "vol_forecast",
+    "verdict": "PASS",
+    "k_id": "K1422",
+    "experiment_id": "K1422",
+    "experiment_path": "experiments/k1422/",
+    "summary": "K1422 以三個 fair baselines 重跑 K1421 commodity HAR-Quantile 比較後，formal tail improvement 仍成立：QR 對 GLD/USO/UNG 在 q05 全部 baseline 都有 3/3 資產 DM 顯著正向，q95 有 2/3，centered-null joint bootstrap 亦通過。正確口徑是 K1421 原 artifact 因設計錯誤作廢，但 K1422 重新支持 commodity tail forecasting improvement。",
+    "content": "K1422（GLD/USO/UNG；IS 2012-2020，OOS 2021-06-05 ending sample n_oos=1362/asset）針對 K1421 的兩個 blocking issue 重做公平 rerun。\n\n**修正 1 — fair baselines**：不用 OLS point forecast 直接套 pinball@tau，而改成三個合法 quantile baseline，全部共用同一組 HAR 特徵：\n(1) HAR Gaussian constant sigma；\n(2) HAR empirical residual quantile；\n(3) HAR location-scale Gaussian（先做 HAR mean，再用 HAR on |resid| 估 scale）。\n\n**修正 2 — bootstrap**：joint test 改成 centered-null stationary bootstrap；對每個 asset 的 loss diff 先去均值，再重抽 block，檢定 H0: mean(diff)<=0 vs H1>0，避免 K1421 的錯誤 p-value 寫法。\n\n**結果**：三個 fair baselines 全部 formal PASS。\n- baseline A HAR Gaussian constant sigma：q05 3/3 assets DM sig POS，q95 2/3；joint p(q05)=0.000, p(q95)=0.000。\n- baseline B HAR empirical residual quantile：q05 3/3，q95 2/3；joint p(q05)=0.000, p(q95)=0.000。\n- baseline C HAR location-scale Gaussian：q05 3/3，q95 2/3；joint p(q05)=0.000, p(q95)=0.001。\n\n**per-asset pattern**：USO/UNG 的 q95 改善最穩定；GLD 的顯著改善主要集中在 q05。這表示 commodity tail gain 並不是 K1421 設計性 advantage 假象，在 fair comparison 下仍存在，而且 lower-tail 訊號比 upper-tail 更一致。\n\n**重要 caveat**：K1422 只修正『比較公平性』與『joint bootstrap』，並未解掉 QR 校正問題。QR q05 的 Kupiec 在 GLD/UNG 仍 rejected（coverage gap 約 -2.36pp / -2.28pp），USO q05 才 PASS。故正確結論不是『commodity q05 forecast 已可直接拿去做校準良好的 VaR』，而是『相對於 fair HAR baselines，QR tail loss 有統計上增益，但 calibration 仍需後續修正』。\n\n**lineage 更正**：K1402→K1403→K1421 的 commodity formal claim 不應引用 K1421 原 artifact；從現在起應改引用 K1422。K1421 保留為 FAIL artifact（研究誠實：錯的設計不刪），K1422 才是 canonical rerun。",
+    "evidence": [
+      "experiments/k1422/k1422.py",
+      "experiments/k1422/k1422_results.json",
+      "experiments/k1422/README.md",
+      "storage/memory/knowledge.json#ac45417a"
+    ],
+    "confidence": 0.87,
+    "tags": [
+      "har-rv",
+      "quantile-regression",
+      "commodity",
+      "GLD",
+      "USO",
+      "UNG",
+      "fair-baseline-rerun",
+      "bootstrap-fix",
+      "K1421-correction",
+      "tail-forecasting"
+    ],
+    "reviewer": "Codex CLI 0.135.0",
+    "reviewer_source": "codex_cli",
+    "codex_review": "SELF-RERUN with fair baselines; K1421 source-level concerns addressed in new artifact K1422",
+    "created_at": "2026-06-08T05:55:00"
   }
 ]
