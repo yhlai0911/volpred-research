@@ -1,27 +1,27 @@
 {
-  "timestamp": "2026-06-07T06:08:44Z",
-  "timestamp_taipei": "2026-06-07 14:08:44",
+  "timestamp": "2026-06-07T12:09:50Z",
+  "timestamp_taipei": "2026-06-07 20:09:50",
   "all_ok": false,
   "checks": [
     {
       "name": "article_pool",
       "status": "ok",
-      "detail": "Total draft=137 (OK >=12). research=49 (OK >=4). general=88 (OK >=8)."
+      "detail": "Total draft=144 (OK >=12). research=48 (OK >=4). general=96 (OK >=8)."
     },
     {
       "name": "strategy_metrics_freshness",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json does not exist (file missing, persistent issue — was also missing in previous patrol run at 00:09 UTC)."
+      "detail": "storage/strategy_metrics.json does not exist (persistent — also absent at 06:08 UTC and 00:09 UTC patrols today)."
     },
     {
       "name": "error_log",
       "status": "ok",
-      "detail": "Last entry dated 2026-06-05 (jump-share variance K851). No entries from today (2026-06-07) or yesterday (2026-06-06)."
+      "detail": "No entries dated 2026-06-07 (today) or 2026-06-06 (yesterday). Last entry dated 2026-06-05 (jump-share variance K851)."
     },
     {
       "name": "paper_trading_gaps",
       "status": "ok",
-      "detail": "All strategies checked. No strategy has >2 nulls in last 3 portfolio_return entries."
+      "detail": "15 strategies checked. All have only 1 entry each (portfolio_return=null), max 1 null per strategy — does not exceed >2 threshold. Note: thin data, tracking appears to not have run recently."
     },
     {
       "name": "git_status",
@@ -31,10 +31,10 @@
     {
       "name": "knowledge_size",
       "status": "ok",
-      "detail": "knowledge.json has 2202 entries (+8 since last patrol at 00:09 UTC)."
+      "detail": "knowledge.json has 2202 entries (unchanged from 06:08 UTC patrol — no new entries in past ~6 hours)."
     }
   ],
   "alerts": [
-    "metrics_missing: storage/strategy_metrics.json not found (persistent — also absent at 00:09 UTC patrol)"
+    "metrics_missing: storage/strategy_metrics.json not found (persistent — absent at 00:09, 06:08, and 12:09 UTC patrols on 2026-06-07)"
   ]
 }
