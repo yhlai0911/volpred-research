@@ -32579,5 +32579,39 @@
       "mile_faaddb06"
     ],
     "corrigendum_status": "corrigendum_published"
+  },
+  {
+    "item_id": "ac45417a",
+    "category": "vol_forecast",
+    "verdict": "NULL",
+    "k_id": "K1421",
+    "experiment_id": "K1421",
+    "experiment_path": "experiments/k1421/",
+    "summary": "K1421 HAR-Quantile commodity robustness (GLD/USO/UNG)：aggregate label=PASS 但 Codex review FAIL — 兩個結構性問題：(1) DM q05/q95 比較不公平（OLS point forecast 套 pinball@τ vs QR@τ 直接最小化 pinball@τ，是設計性 advantage）；(2) joint bootstrap p-value 公式錯誤（boot_T_centered >= T_obs 應改 >= 0）。Lookahead/DM HLN 實作無誤。formal conclusion 不可採信，不可宣稱 commodity tail forecasting improvement。",
+    "content": "K1421（GLD/USO/UNG，2012-2020 IS / 2021-2026 OOS，n_oos=1362/asset）：compute job 成功產出 aggregate PASS，但 Codex gpt-5.4 review 於 2026-06-08 判定 FAIL on 兩個 blocking dim：\n\n**dim1 比較公平性 FAIL**：run_asset() L236 令 pin_ols_q05 = pinball_series(y_oos, yhat_ols, 0.05)，yhat_ols 是 OLS conditional mean；DM 比的是 QR@τ=0.05（直接最小化 pinball@0.05 的最佳解）vs OLS point forecast 套 pinball@0.05。QR@τ 在自身 criterion 上理論必然 dominate OLS，DM POS 是設計性 advantage，非 true forecasting improvement。q50 DM 可接受（OLS≈conditional mean≈τ=0.5 的 pinball minimizer）。q05/q95 需改為公平 baseline（Gaussian quantile、location-scale、歷史殘差分位等）。\n\n**dim2 Bootstrap p-value FAIL**：joint_bootstrap() L340 boot_T_centered = boot_T - T_obs，p_one_sided = mean(boot_T_centered >= T_obs)。等價於 mean(boot_T >= 2*T_obs)，過度嚴格 non-standard null。正確寫法應為 mean(boot_T_centered >= 0) 或等價的 percentile-recentered test。\n\n**dim3 Lookahead PASS**：build_har_panel() rv_d/rv_w/rv_m 全 shift(1)，OOS single fixed-origin predict，無洩漏。\n\n**dim4 DM HLN PASS**：h=1 只用 gamma0 正確，HLN k=sqrt((n-1)/n) 正確。\n\n**per-asset 原始數字（參考，不可作為 conclusion）**：GLD DM(q05)=24.01 p≈0，Kupiec q05 p=0.000（REJECT）；USO DM(q05)=24.51 p≈0，Kupiec q05 p=0.247（PASS）；UNG DM(q05)=22.43 p≈0，Kupiec q05 p=0.000（REJECT）。即使不考慮公平性問題，GLD/UNG Kupiec q05 也 rejected（empirical coverage 2.6%/2.7% vs nominal 5%），代表 QR@q05 forecast 在 commodity 上 systematically under-predicts lower tail。\n\n**對比 K1403**：K1403 DM 比較基準是 quantile-median QLIKE（sig NEG），K1421 是 per-tau pinball（sig POS）——完全不同評估指標，結論方向相反，不具可比性，不可交叉宣稱。\n\n**lineage 結論**：K1402→K1403→K1421 pipeline 在 commodity 的 formal test 仍不成立（需修正比較設計 + bootstrap 公式後重跑）。GLD/UNG Kupiec q05 rejected 額外說明 commodity 尾部校正問題比 equity 更嚴重。",
+    "evidence": [
+      "experiments/k1421/k1421_results.json",
+      "experiments/k1421/k1421.py",
+      "experiments/k1421/README.md",
+      "K1402 SPY baseline / K1403 QQQ/GLD/TLT TAIL_CALIB_USABLE",
+      "Codex gpt-5.4 review 2026-06-08"
+    ],
+    "confidence": 0.88,
+    "tags": [
+      "har-rv",
+      "quantile-regression",
+      "commodity",
+      "cross-asset",
+      "GLD",
+      "USO",
+      "UNG",
+      "K1402-K1403-lineage",
+      "fair-comparison-violation",
+      "bootstrap-bug"
+    ],
+    "reviewer": "Codex CLI 0.135.0 (gpt-5.4 medium reasoning)",
+    "reviewer_source": "codex_cli",
+    "codex_review": "FAIL — 比較公平性 FAIL (OLS point forecast vs QR@tau 設計性 advantage) + Bootstrap p-value 公式錯誤 (boot_T_centered >= T_obs 應改 >= 0)；Lookahead PASS，DM HLN PASS",
+    "created_at": "2026-06-08T04:19:25.441425"
   }
 ]

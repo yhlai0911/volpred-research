@@ -1,0 +1,424 @@
+{
+  "experiment_id": "K1421",
+  "title": "HAR-Quantile Cross-Asset Robustness on Commodities (GLD/USO/UNG)",
+  "assets": [
+    "GLD",
+    "USO",
+    "UNG"
+  ],
+  "data_start": "2012-01-03",
+  "oos_start": "2021-01-04",
+  "per_asset": [
+    {
+      "asset": "GLD",
+      "n_train": 2243,
+      "n_oos": 1362,
+      "oos_first_date": "2021-01-04",
+      "oos_last_date": "2026-06-05",
+      "ols_baseline": {
+        "ols_params": {
+          "const": 0.09495194311878022,
+          "rv_d": 0.1448000147195309,
+          "rv_w": 0.2870337070593709,
+          "rv_m": 0.38837122824248427
+        },
+        "pinball_at_tau_0.05": 0.08839366448761238,
+        "pinball_at_tau_0.50": 0.09393510588823868,
+        "pinball_at_tau_0.95": 0.09947654728886496
+      },
+      "quantile_forecasts": {
+        "q05": {
+          "tau": 0.05,
+          "params": {
+            "const": 0.07759758985321774,
+            "rv_d": 0.060708177538134844,
+            "rv_w": 0.156042483314204,
+            "rv_m": 0.105943273812251
+          },
+          "pinball_loss_oos": 0.017052626872042766,
+          "empirical_coverage_below": 0.02643171806167401,
+          "nominal_coverage": 0.05,
+          "coverage_gap_pp": -2.3568281938325994,
+          "kupiec_uc": {
+            "violations": 36,
+            "n": 1362,
+            "p_hat": 0.02643171806167401,
+            "p_nominal": 0.05,
+            "lr_stat": 19.09285900183113,
+            "p_value": 1.2450989055112771e-05
+          }
+        },
+        "q50": {
+          "tau": 0.5,
+          "params": {
+            "const": 0.07830191454105773,
+            "rv_d": 0.07940106982409834,
+            "rv_w": 0.16715080479970723,
+            "rv_m": 0.48435845966836766
+          },
+          "pinball_loss_oos": 0.09249739939527991,
+          "empirical_coverage_below": 0.4552129221732746,
+          "nominal_coverage": 0.5,
+          "coverage_gap_pp": -4.478707782672542,
+          "kupiec_uc": {
+            "violations": 742,
+            "n": 1362,
+            "p_hat": 0.5447870778267254,
+            "p_nominal": 0.5,
+            "lr_stat": 10.942707677651015,
+            "p_value": 0.0009397273774689463
+          }
+        },
+        "q95": {
+          "tau": 0.95,
+          "params": {
+            "const": 0.26300870060731185,
+            "rv_d": 0.490000134456932,
+            "rv_w": 0.438296037820626,
+            "rv_m": 0.5097136656879186
+          },
+          "pinball_loss_oos": 0.042707328767225224,
+          "empirical_coverage_below": 0.9537444933920705,
+          "nominal_coverage": 0.95,
+          "coverage_gap_pp": 0.37444933920705026,
+          "kupiec_uc": {
+            "violations": 63,
+            "n": 1362,
+            "p_hat": 0.046255506607929514,
+            "p_nominal": 0.050000000000000044,
+            "lr_stat": 0.4119223256470832,
+            "p_value": 0.5209954179062837
+          }
+        }
+      },
+      "dm_qr_vs_ols": {
+        "q05": {
+          "dm_stat": 24.0131873364595,
+          "p_value": 0.0,
+          "n": 1362,
+          "mean_diff": 0.07134103761556962
+        },
+        "q50": {
+          "dm_stat": 1.391383956886824,
+          "p_value": 0.16433640766986302,
+          "n": 1362,
+          "mean_diff": 0.001437706492958736
+        },
+        "q95": {
+          "dm_stat": 12.810184560438493,
+          "p_value": 0.0,
+          "n": 1362,
+          "mean_diff": 0.05676921852163974
+        }
+      },
+      "asymmetry": {
+        "upper_ratio": 0.46171383245834857,
+        "lower_ratio": 0.18435790609820055,
+        "asymmetry": 0.27735592636014805
+      },
+      "verdict": "NULL",
+      "verdict_reasons": [
+        "Kupiec q05 reject (p=0.000)"
+      ]
+    },
+    {
+      "asset": "USO",
+      "n_train": 2243,
+      "n_oos": 1362,
+      "oos_first_date": "2021-01-04",
+      "oos_last_date": "2026-06-05",
+      "ols_baseline": {
+        "ols_params": {
+          "const": 0.12235342936454974,
+          "rv_d": 0.23406343953507638,
+          "rv_w": 0.31032548124188764,
+          "rv_m": 0.3666668401707578
+        },
+        "pinball_at_tau_0.05": 0.2162324434822959,
+        "pinball_at_tau_0.50": 0.21879077137439723,
+        "pinball_at_tau_0.95": 0.2213490992664986
+      },
+      "quantile_forecasts": {
+        "q05": {
+          "tau": 0.05,
+          "params": {
+            "const": 0.1005176319047223,
+            "rv_d": 0.02046430979572733,
+            "rv_w": 0.2657946579042232,
+            "rv_m": 0.14774273162373674
+          },
+          "pinball_loss_oos": 0.03877163728784641,
+          "empirical_coverage_below": 0.04331864904552129,
+          "nominal_coverage": 0.05,
+          "coverage_gap_pp": -0.6681350954478714,
+          "kupiec_uc": {
+            "violations": 59,
+            "n": 1362,
+            "p_hat": 0.04331864904552129,
+            "p_nominal": 0.05,
+            "lr_stat": 1.3379580249863352,
+            "p_value": 0.24739439585077638
+          }
+        },
+        "q50": {
+          "tau": 0.5,
+          "params": {
+            "const": 0.1589205289292579,
+            "rv_d": 0.15849446815240498,
+            "rv_w": 0.3979109866950239,
+            "rv_m": 0.23421292318953135
+          },
+          "pinball_loss_oos": 0.21100381985043418,
+          "empirical_coverage_below": 0.4933920704845815,
+          "nominal_coverage": 0.5,
+          "coverage_gap_pp": -0.6607929515418498,
+          "kupiec_uc": {
+            "violations": 690,
+            "n": 1362,
+            "p_hat": 0.5066079295154186,
+            "p_nominal": 0.5,
+            "lr_stat": 0.23789238784229383,
+            "p_value": 0.6257325045121249
+          }
+        },
+        "q95": {
+          "tau": 0.95,
+          "params": {
+            "const": -0.11633134585552796,
+            "rv_d": 0.4208619274492591,
+            "rv_w": 0.7877657887852507,
+            "rv_m": 0.6463180167843063
+          },
+          "pinball_loss_oos": 0.08915095453458666,
+          "empirical_coverage_below": 0.9434654919236417,
+          "nominal_coverage": 0.95,
+          "coverage_gap_pp": -0.6534508076358247,
+          "kupiec_uc": {
+            "violations": 77,
+            "n": 1362,
+            "p_hat": 0.0565345080763583,
+            "p_nominal": 0.050000000000000044,
+            "lr_stat": 1.1769030085770282,
+            "p_value": 0.27798738443523197
+          }
+        }
+      },
+      "dm_qr_vs_ols": {
+        "q05": {
+          "dm_stat": 24.51392096647782,
+          "p_value": 0.0,
+          "n": 1362,
+          "mean_diff": 0.17746080619444946
+        },
+        "q50": {
+          "dm_stat": 4.003397343196869,
+          "p_value": 6.580819831758511e-05,
+          "n": 1362,
+          "mean_diff": 0.007786951523963044
+        },
+        "q95": {
+          "dm_stat": 13.687590261221855,
+          "p_value": 0.0,
+          "n": 1362,
+          "mean_diff": 0.1321981447319119
+        }
+      },
+      "asymmetry": {
+        "upper_ratio": 0.42250872329126327,
+        "lower_ratio": 0.1837485089858985,
+        "asymmetry": 0.23876021430536476
+      },
+      "verdict": "PASS",
+      "verdict_reasons": [
+        "DM(q05) sig POS (stat=24.51 p=0.000); Kupiec PASS"
+      ]
+    },
+    {
+      "asset": "UNG",
+      "n_train": 2243,
+      "n_oos": 1362,
+      "oos_first_date": "2021-01-04",
+      "oos_last_date": "2026-06-05",
+      "ols_baseline": {
+        "ols_params": {
+          "const": 0.2048809499003541,
+          "rv_d": -0.003032254795730221,
+          "rv_w": 0.5583306116502346,
+          "rv_m": 0.3147053760451594
+        },
+        "pinball_at_tau_0.05": 0.2772302344494502,
+        "pinball_at_tau_0.50": 0.3217265020980273,
+        "pinball_at_tau_0.95": 0.36622276974660434
+      },
+      "quantile_forecasts": {
+        "q05": {
+          "tau": 0.05,
+          "params": {
+            "const": 0.015819401296880642,
+            "rv_d": -0.010753678728065097,
+            "rv_w": 0.2799729636441306,
+            "rv_m": 0.22404730140340234
+          },
+          "pinball_loss_oos": 0.062148044005478194,
+          "empirical_coverage_below": 0.027165932452276064,
+          "nominal_coverage": 0.05,
+          "coverage_gap_pp": -2.2834067547723937,
+          "kupiec_uc": {
+            "violations": 37,
+            "n": 1362,
+            "p_hat": 0.027165932452276064,
+            "p_nominal": 0.05,
+            "lr_stat": 17.797208922969162,
+            "p_value": 2.457434662472835e-05
+          }
+        },
+        "q50": {
+          "tau": 0.5,
+          "params": {
+            "const": 0.03339364340049045,
+            "rv_d": -0.0364786435335982,
+            "rv_w": 0.5468811249153838,
+            "rv_m": 0.3897264412636936
+          },
+          "pinball_loss_oos": 0.3225093620656124,
+          "empirical_coverage_below": 0.4684287812041116,
+          "nominal_coverage": 0.5,
+          "coverage_gap_pp": -3.1571218795888423,
+          "kupiec_uc": {
+            "violations": 724,
+            "n": 1362,
+            "p_hat": 0.5315712187958884,
+            "p_nominal": 0.5,
+            "lr_stat": 5.4338637711975935,
+            "p_value": 0.019749935470011803
+          }
+        },
+        "q95": {
+          "tau": 0.95,
+          "params": {
+            "const": 0.5028416956291863,
+            "rv_d": -0.03758075364967084,
+            "rv_w": 1.1615753198744017,
+            "rv_m": 0.34461575125209265
+          },
+          "pinball_loss_oos": 0.11989035679237278,
+          "empirical_coverage_below": 0.9486049926578561,
+          "nominal_coverage": 0.95,
+          "coverage_gap_pp": -0.1395007342143817,
+          "kupiec_uc": {
+            "violations": 70,
+            "n": 1362,
+            "p_hat": 0.0513950073421439,
+            "p_nominal": 0.050000000000000044,
+            "lr_stat": 0.0553154264788418,
+            "p_value": 0.814059468085379
+          }
+        }
+      },
+      "dm_qr_vs_ols": {
+        "q05": {
+          "dm_stat": 22.43202132566775,
+          "p_value": 0.0,
+          "n": 1362,
+          "mean_diff": 0.21508219044397203
+        },
+        "q50": {
+          "dm_stat": -0.552544562937774,
+          "p_value": 0.580666042204117,
+          "n": 1362,
+          "mean_diff": -0.0007828599675851038
+        },
+        "q95": {
+          "dm_stat": 17.102275235056563,
+          "p_value": 0.0,
+          "n": 1362,
+          "mean_diff": 0.24633241295423158
+        }
+      },
+      "asymmetry": {
+        "upper_ratio": 0.37174225276592704,
+        "lower_ratio": 0.19270151913554243,
+        "asymmetry": 0.1790407336303846
+      },
+      "verdict": "NULL",
+      "verdict_reasons": [
+        "Kupiec q05 reject (p=0.000)"
+      ]
+    }
+  ],
+  "joint_bootstrap": {
+    "q05": {
+      "T_obs": 0.15462801141799704,
+      "per_asset_means": [
+        0.07134103761556962,
+        0.17746080619444946,
+        0.21508219044397203
+      ],
+      "p_one_sided": 0.0,
+      "p_two_sided": 0.0,
+      "boot_ci95": [
+        0.145521005776456,
+        0.16385221670491246
+      ],
+      "n_boot": 1000
+    },
+    "q50": {
+      "T_obs": 0.002813932683112225,
+      "per_asset_means": [
+        0.001437706492958736,
+        0.007786951523963044,
+        -0.0007828599675851038
+      ],
+      "p_one_sided": 0.0,
+      "p_two_sided": 0.0,
+      "boot_ci95": [
+        0.001326893675651988,
+        0.0043291231704749526
+      ],
+      "n_boot": 1000
+    },
+    "q95": {
+      "T_obs": 0.14509992540259442,
+      "per_asset_means": [
+        0.05676921852163974,
+        0.1321981447319119,
+        0.24633241295423158
+      ],
+      "p_one_sided": 0.0,
+      "p_two_sided": 0.0,
+      "boot_ci95": [
+        0.1319976917826013,
+        0.1588655827233243
+      ],
+      "n_boot": 1000
+    }
+  },
+  "aggregate_verdict": {
+    "label": "PASS",
+    "reason": "3/3 assets DM(q05) sig POS + joint bootstrap p_one_sided=0.000 < 0.10 → commodity tail forecasting improvement",
+    "n_dm_sig_pos_q05": 3,
+    "n_dm_sig_pos_any_quantile": 3,
+    "n_asymmetry_high": 0,
+    "asymmetry_scores": [
+      0.27735592636014805,
+      0.23876021430536476,
+      0.1790407336303846
+    ],
+    "joint_q05_p_one_sided": 0.0
+  },
+  "config": {
+    "seed": 42,
+    "n_boot": 1000,
+    "quantiles": [
+      0.05,
+      0.5,
+      0.95
+    ],
+    "rv_proxy": "Garman-Klass (1980)",
+    "model": "HAR-RV + statsmodels.QuantReg (Koenker-Bassett 1978)",
+    "refit": "none (single fixed-origin fit, IS pre-2021)",
+    "bootstrap_method": "Politis-Romano stationary bootstrap, L=ceil(n^{1/3})",
+    "extends": "K1403 (QQQ/GLD/TLT) → commodity asset class",
+    "reference_baseline_assets": "K1402 (SPY), K1403 (QQQ/GLD/TLT)"
+  }
+}
