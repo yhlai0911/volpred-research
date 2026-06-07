@@ -1,0 +1,23 @@
+{
+  "id": "compute-k1421-har-quantile-commodity-robustness-gld-uso-ung-1780859523",
+  "title": "K1421 HAR-Quantile commodity robustness (GLD/USO/UNG)",
+  "script_path": "experiments/k1421/k1421.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-06-07T19:12:03Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1421-har-quantile-commodity-robustness-gld-uso-ung-1780859523.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1421-har-quantile-commodity-robustness-gld-uso-ung-1780859523.stderr",
+  "result_artifact": "experiments/k1421/k1421_results.json",
+  "claude_followup": {
+    "brief": "Interpret K1421 commodity HAR-Quantile result: read experiments/k1421/k1421_results.json, classify per-asset verdicts vs SPY (K1402) and equity/bond (K1403) baselines, decide if asset-class-conditional quantile model selection claim survives. Codex review on k1421.py before any knowledge.json write. If verdict in (PASS / CONDITIONAL_PASS / DESCRIPTIVE_ASYMMETRY) write knowledge entry with provenance fields (experiment_id=K1421, reviewer=Codex). NULL also writes a null-result entry citing K1402/K1403 lineage. Update next_tasks K1421 status to succeeded/failed via task_pool_claim.py.",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 3600
+}

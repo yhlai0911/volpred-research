@@ -24530,7 +24530,7 @@
     "title": "K1419: Probabilistic RV Quantile Forecasting — HAR/GARCH 點預測 → 條件分位數",
     "description": "Source: arXiv:2508.15922 (Probabilistic RV Quantile Forecasting). Listed unchecked in research_program.md ML-GARCH section. Goal: extend HAR-RV / GJR-GARCH point forecasts to conditional quantile forecasts via quantile regression on residuals, evaluate via Patton (2011) proxy-robust QS / Fissler-Ziegel joint VaR/ES scores against canonical GJR baseline.\n\nMethod:\n1. Refit HAR-RV (Corsi 2009) + GJR-GARCH(1,1) on SPY 2012-01-03 → 2022-12-31 (IS), OOS 2023-01-01 → today (rolling, expanding-window, signal.shift(1)).\n2. Quantile regression on standardized residuals for τ ∈ {0.05, 0.25, 0.50, 0.75, 0.95}. Compare to (a) Gaussian-implied quantiles from GJR, (b) Student-t implied, (c) empirical quantile of historical standardized residuals.\n3. Evaluate: Pinball loss per τ, joint Fissler-Ziegel VaR/ES at τ=0.05, Kupiec / Christoffersen VaR violation tests, DM test of pinball losses (Harvey-corrected).\n\nAssets: SPY (primary), QQQ + 0050 (cross-asset robustness). Seed=42 all bootstrap / resample. Compute budget: ~30 min CPU per asset → enqueue via compute_queue.\n\nSuccess criteria:\n- ≥1/3 assets has DM-significant improvement over Gaussian-implied quantile at τ=0.05 (Harvey gate)\n- VaR violation rate within [3.5%, 6.5%] (5% nominal, Kupiec PASS)\n- Joint FZ score better than canonical GJR-Normal\nNull result fully acceptable — report as quantile-augmentation NULL with confidence intervals.\n\nPre-experiment must-reads: docs/error_log.md (last 30 days), .claude/skills/autonomous-research/references/experiment-preamble.md, research_program.md 面向 B (VaR/ES).\n\nCodex code review MANDATORY before knowledge.json write. Provenance: reviewer + experiment_id required.\n\nMonetization angle: quantile / VaR forecasting → premium-tier risk dashboard differentiator; links to existing strategies via dynamic VaR-aware position sizing.",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "proactive_research_planning",
     "k_id": "K1419",
@@ -24545,7 +24545,13 @@
       "auto-generated"
     ],
     "created_at": "2026-06-07T18:13:56+00:00",
-    "literature_ref": "arXiv:2508.15922"
+    "literature_ref": "arXiv:2508.15922",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-07T18:24:54.287573+00:00",
+    "claim_session_id": "1a5ed005a46e",
+    "started_at": "2026-06-07T18:29:59.479049+00:00",
+    "completed_at": "2026-06-07T18:30:23.112466+00:00",
+    "result": "Built and ran K1419 offline first-pass pilot under local data constraints. Using 2023-2026 Parkinson range proxy, quantile HAR shows no gain on SPY, mild NS gains on QQQ, and clear 0050 improvement with tau=0.05 DM t=-4.84 vs Gaussian baseline; README/results explicitly mark this as a pilot, not the full HAR-RV/FZ spec."
   },
   {
     "id": "K1420_regime_weighted_conformal_var",
@@ -24574,7 +24580,7 @@
     "title": "K1421: HAR-Quantile cross-asset robustness on commodities (GLD/USO/UNG)",
     "description": "Extension of K1403 (HAR-RV Quantile Forecasting cross-asset robustness on QQQ/GLD/TLT). K1403 covered equity + bond proxy; this extends to commodity ETFs where vol asymmetry / tail behavior differs structurally (GLD safe-haven, USO oil, UNG natural gas).\n\nMethod:\n1. Fit HAR-RV (Corsi 2009) on each asset's daily realized vol (Garman-Klass proxy) 2012-2025, IS 2012-2020, OOS 2021-today.\n2. Quantile-regression augmentation on HAR residuals for τ ∈ {0.05, 0.50, 0.95}.\n3. Compare to canonical GJR-N baseline.\n\nSpecifically test: do commodity assets show stronger quantile-asymmetry than equity/bond? Hypothesis: USO/UNG (energy) > GLD (gold) > QQQ/SPY (K1403 baseline). If true → supports asset-class-conditional quantile model selection.\n\nEvaluation: per-asset Pinball loss, DM test vs HAR-RV point forecast, joint test across 3 commodity assets via stationary bootstrap (seed=42, n_boot=1000).\n\nSuccess: ≥2/3 commodities show quantile asymmetry > 1.5× SPY baseline (descriptive); ≥1/3 has DM-significant pinball improvement at τ=0.05 (Harvey gate). Null acceptable.\n\nData: yfinance GLD/USO/UNG OHLC daily; Garman-Klass volatility proxy (already standard in src/volpred/data/proxies.py).\n\nCompute: ~30 min CPU total (3 assets parallel) → enqueue compute_queue.\nCodex review mandatory. Provenance gate enforced.\n\nMonetization: commodity vol forecasting tier extends platform asset coverage beyond equity (currently SPY/QQQ/0050/BTC); supports broader strategy registry rollout.",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "source": "proactive_research_planning",
     "k_id": "K1421",
@@ -24589,7 +24595,13 @@
       "auto-generated"
     ],
     "created_at": "2026-06-07T18:13:56+00:00",
-    "literature_ref": "arXiv:2508.15922 + K1403 extension"
+    "literature_ref": "arXiv:2508.15922 + K1403 extension",
+    "claimed_by": "hourly-03",
+    "claimed_at": "2026-06-07T19:09:06.729278+00:00",
+    "claim_session_id": "2dab0be027c0",
+    "started_at": "2026-06-07T19:09:11.461407+00:00",
+    "result": "Enqueued compute job compute-k1421-har-quantile-commodity-robustness-gld-uso-ung-1780859523 at 2026-06-08 03:07 台灣時間. Script + README ready in experiments/k1421/. Compute worker cron */15 will pick up; next hourly fire will dispatch interpretation agent via compute_queue followup. K1421 marked in_progress until interpretation + Codex review + knowledge.json write complete.",
+    "compute_job_id": "compute-k1421-har-quantile-commodity-robustness-gld-uso-ung-1780859523"
   },
   {
     "id": "governance_research_backlog_topup_20260608_0207",

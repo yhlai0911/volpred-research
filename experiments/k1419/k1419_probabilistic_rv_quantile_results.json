@@ -1,0 +1,379 @@
+{
+  "experiment_id": "K1419",
+  "title": "Probabilistic volatility-quantile pilot with local offline proxies",
+  "timestamp": "2026-06-07T18:29:46.393139+00:00",
+  "scope": {
+    "status": "pilot_offline_first_pass",
+    "reason": "Long-horizon 5-min RV coverage is unavailable locally for SPY/QQQ/0050, so this run uses Parkinson range proxy as the common target when daily RV files are too short.",
+    "oos_start": "2025-01-02",
+    "taus": [
+      0.05,
+      0.25,
+      0.5,
+      0.75,
+      0.95
+    ],
+    "refit_every_days": 21
+  },
+  "methodology": {
+    "point_model": "HAR-style OLS on log variance proxy",
+    "quantile_models": [
+      "Gaussian residual quantile around HAR point forecast",
+      "Empirical residual quantile around HAR point forecast",
+      "Direct quantile HAR regression"
+    ],
+    "evaluation": [
+      "Pinball loss per tau",
+      "Coverage vs nominal tau",
+      "DM test on pointwise pinball loss vs Gaussian baseline",
+      "Harvey gate |t| > 3.0"
+    ]
+  },
+  "asset_results": {
+    "SPY": {
+      "diagnostics": {
+        "rows_total": 858,
+        "rows_model": 609,
+        "oos_rows": 357,
+        "daily_rv_non_null": 99,
+        "target_used": "log_parkinson_proxy"
+      },
+      "quantile_results": {
+        "0.05": {
+          "gaussian": {
+            "pinball_mean": 0.13477905,
+            "coverage": 0.0476
+          },
+          "empirical": {
+            "pinball_mean": 0.13502782,
+            "coverage": 0.0532,
+            "dm_t_vs_gaussian": 0.5955,
+            "dm_p_vs_gaussian": 0.551864,
+            "harvey_gate": false
+          },
+          "qhar": {
+            "pinball_mean": 0.16140859,
+            "coverage": 0.0504,
+            "dm_t_vs_gaussian": 1.162,
+            "dm_p_vs_gaussian": 0.246009,
+            "harvey_gate": false
+          }
+        },
+        "0.25": {
+          "gaussian": {
+            "pinball_mean": 0.30968847,
+            "coverage": 0.2521
+          },
+          "empirical": {
+            "pinball_mean": 0.30977136,
+            "coverage": 0.2409,
+            "dm_t_vs_gaussian": 0.1809,
+            "dm_p_vs_gaussian": 0.85655,
+            "harvey_gate": false
+          },
+          "qhar": {
+            "pinball_mean": 0.30978958,
+            "coverage": 0.2381,
+            "dm_t_vs_gaussian": 0.1153,
+            "dm_p_vs_gaussian": 0.908258,
+            "harvey_gate": false
+          }
+        },
+        "0.5": {
+          "gaussian": {
+            "pinball_mean": 0.37285961,
+            "coverage": 0.4902
+          },
+          "empirical": {
+            "pinball_mean": 0.37386488,
+            "coverage": 0.4846,
+            "dm_t_vs_gaussian": 1.5383,
+            "dm_p_vs_gaussian": 0.124852,
+            "harvey_gate": false
+          },
+          "qhar": {
+            "pinball_mean": 0.37588301,
+            "coverage": 0.479,
+            "dm_t_vs_gaussian": 1.5454,
+            "dm_p_vs_gaussian": 0.123144,
+            "harvey_gate": false
+          }
+        },
+        "0.75": {
+          "gaussian": {
+            "pinball_mean": 0.28864188,
+            "coverage": 0.7479
+          },
+          "empirical": {
+            "pinball_mean": 0.28950393,
+            "coverage": 0.7255,
+            "dm_t_vs_gaussian": 0.7592,
+            "dm_p_vs_gaussian": 0.448259,
+            "harvey_gate": false
+          },
+          "qhar": {
+            "pinball_mean": 0.29199852,
+            "coverage": 0.7227,
+            "dm_t_vs_gaussian": 1.1297,
+            "dm_p_vs_gaussian": 0.259353,
+            "harvey_gate": false
+          }
+        },
+        "0.95": {
+          "gaussian": {
+            "pinball_mean": 0.0931734,
+            "coverage": 0.944
+          },
+          "empirical": {
+            "pinball_mean": 0.09368249,
+            "coverage": 0.9468,
+            "dm_t_vs_gaussian": 1.1648,
+            "dm_p_vs_gaussian": 0.244875,
+            "harvey_gate": false
+          },
+          "qhar": {
+            "pinball_mean": 0.09418416,
+            "coverage": 0.9468,
+            "dm_t_vs_gaussian": 1.1679,
+            "dm_p_vs_gaussian": 0.243623,
+            "harvey_gate": false
+          }
+        }
+      }
+    },
+    "QQQ": {
+      "diagnostics": {
+        "rows_total": 858,
+        "rows_model": 609,
+        "oos_rows": 357,
+        "daily_rv_non_null": 0,
+        "target_used": "log_parkinson_proxy"
+      },
+      "quantile_results": {
+        "0.05": {
+          "gaussian": {
+            "pinball_mean": 0.11025493,
+            "coverage": 0.0476
+          },
+          "empirical": {
+            "pinball_mean": 0.11042659,
+            "coverage": 0.056,
+            "dm_t_vs_gaussian": 0.3216,
+            "dm_p_vs_gaussian": 0.74793,
+            "harvey_gate": false
+          },
+          "qhar": {
+            "pinball_mean": 0.12592566,
+            "coverage": 0.0644,
+            "dm_t_vs_gaussian": 1.1041,
+            "dm_p_vs_gaussian": 0.270285,
+            "harvey_gate": false
+          }
+        },
+        "0.25": {
+          "gaussian": {
+            "pinball_mean": 0.27580292,
+            "coverage": 0.2493
+          },
+          "empirical": {
+            "pinball_mean": 0.27685719,
+            "coverage": 0.2577,
+            "dm_t_vs_gaussian": 1.5681,
+            "dm_p_vs_gaussian": 0.117742,
+            "harvey_gate": false
+          },
+          "qhar": {
+            "pinball_mean": 0.2823725,
+            "coverage": 0.2521,
+            "dm_t_vs_gaussian": 1.1288,
+            "dm_p_vs_gaussian": 0.259722,
+            "harvey_gate": false
+          }
+        },
+        "0.5": {
+          "gaussian": {
+            "pinball_mean": 0.34012758,
+            "coverage": 0.5154
+          },
+          "empirical": {
+            "pinball_mean": 0.33970427,
+            "coverage": 0.5014,
+            "dm_t_vs_gaussian": -0.4059,
+            "dm_p_vs_gaussian": 0.685082,
+            "harvey_gate": false
+          },
+          "qhar": {
+            "pinball_mean": 0.33439215,
+            "coverage": 0.4958,
+            "dm_t_vs_gaussian": -0.8496,
+            "dm_p_vs_gaussian": 0.396138,
+            "harvey_gate": false
+          }
+        },
+        "0.75": {
+          "gaussian": {
+            "pinball_mean": 0.26952517,
+            "coverage": 0.7731
+          },
+          "empirical": {
+            "pinball_mean": 0.2693448,
+            "coverage": 0.7255,
+            "dm_t_vs_gaussian": -0.0711,
+            "dm_p_vs_gaussian": 0.943369,
+            "harvey_gate": false
+          },
+          "qhar": {
+            "pinball_mean": 0.26790888,
+            "coverage": 0.7171,
+            "dm_t_vs_gaussian": -0.542,
+            "dm_p_vs_gaussian": 0.588172,
+            "harvey_gate": false
+          }
+        },
+        "0.95": {
+          "gaussian": {
+            "pinball_mean": 0.09550579,
+            "coverage": 0.9496
+          },
+          "empirical": {
+            "pinball_mean": 0.09556538,
+            "coverage": 0.9524,
+            "dm_t_vs_gaussian": 0.2144,
+            "dm_p_vs_gaussian": 0.830365,
+            "harvey_gate": false
+          },
+          "qhar": {
+            "pinball_mean": 0.09876309,
+            "coverage": 0.958,
+            "dm_t_vs_gaussian": 2.7117,
+            "dm_p_vs_gaussian": 0.007019,
+            "harvey_gate": false
+          }
+        }
+      }
+    },
+    "0050.TW": {
+      "diagnostics": {
+        "rows_total": 822,
+        "rows_model": 584,
+        "oos_rows": 342,
+        "daily_rv_non_null": 72,
+        "target_used": "log_parkinson_proxy"
+      },
+      "quantile_results": {
+        "0.05": {
+          "gaussian": {
+            "pinball_mean": 0.41950619,
+            "coverage": 0.0205
+          },
+          "empirical": {
+            "pinball_mean": 0.35694687,
+            "coverage": 0.0556,
+            "dm_t_vs_gaussian": -1.8767,
+            "dm_p_vs_gaussian": 0.061412,
+            "harvey_gate": false
+          },
+          "qhar": {
+            "pinball_mean": 0.33067635,
+            "coverage": 0.0585,
+            "dm_t_vs_gaussian": -4.8387,
+            "dm_p_vs_gaussian": 2e-06,
+            "harvey_gate": true
+          }
+        },
+        "0.25": {
+          "gaussian": {
+            "pinball_mean": 0.66690189,
+            "coverage": 0.0409
+          },
+          "empirical": {
+            "pinball_mean": 0.51910431,
+            "coverage": 0.2339,
+            "dm_t_vs_gaussian": -7.4675,
+            "dm_p_vs_gaussian": 0.0,
+            "harvey_gate": true
+          },
+          "qhar": {
+            "pinball_mean": 0.51794286,
+            "coverage": 0.2222,
+            "dm_t_vs_gaussian": -7.3135,
+            "dm_p_vs_gaussian": 0.0,
+            "harvey_gate": true
+          }
+        },
+        "0.5": {
+          "gaussian": {
+            "pinball_mean": 0.55438855,
+            "coverage": 0.3918
+          },
+          "empirical": {
+            "pinball_mean": 0.54275102,
+            "coverage": 0.4386,
+            "dm_t_vs_gaussian": -2.8124,
+            "dm_p_vs_gaussian": 0.005201,
+            "harvey_gate": false
+          },
+          "qhar": {
+            "pinball_mean": 0.53702731,
+            "coverage": 0.4532,
+            "dm_t_vs_gaussian": -1.0713,
+            "dm_p_vs_gaussian": 0.28479,
+            "harvey_gate": false
+          }
+        },
+        "0.75": {
+          "gaussian": {
+            "pinball_mean": 0.45613488,
+            "coverage": 0.9006
+          },
+          "empirical": {
+            "pinball_mean": 0.40757459,
+            "coverage": 0.7105,
+            "dm_t_vs_gaussian": -3.0957,
+            "dm_p_vs_gaussian": 0.002126,
+            "harvey_gate": true
+          },
+          "qhar": {
+            "pinball_mean": 0.37810312,
+            "coverage": 0.7222,
+            "dm_t_vs_gaussian": -2.6067,
+            "dm_p_vs_gaussian": 0.009544,
+            "harvey_gate": false
+          }
+        },
+        "0.95": {
+          "gaussian": {
+            "pinball_mean": 0.20899535,
+            "coverage": 0.9883
+          },
+          "empirical": {
+            "pinball_mean": 0.156587,
+            "coverage": 0.9415,
+            "dm_t_vs_gaussian": -2.6875,
+            "dm_p_vs_gaussian": 0.007551,
+            "harvey_gate": false
+          },
+          "qhar": {
+            "pinball_mean": 0.14581265,
+            "coverage": 0.9006,
+            "dm_t_vs_gaussian": -2.0828,
+            "dm_p_vs_gaussian": 0.038015,
+            "harvey_gate": false
+          }
+        }
+      }
+    }
+  },
+  "summary": {
+    "assets_with_any_harvey_pass": 1,
+    "harvey_pass_assets": [
+      "0050.TW"
+    ]
+  },
+  "limitations": [
+    "This is not the full brief-specified HAR-RV / GJR-GARCH / Fissler-Ziegel experiment.",
+    "SPY and 0050 local daily 5-min RV files only cover 2026; QQQ has no local daily RV file.",
+    "Therefore the common comparison target is a range-based proxy, not canonical long-horizon intraday RV.",
+    "VaR/ES mapping is deferred to a compute-queue follow-up once long-horizon intraday RV coverage is materialized."
+  ]
+}
