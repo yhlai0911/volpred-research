@@ -23900,7 +23900,7 @@
     "title": "K497: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K497 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: Asset: SPY ranking_stability: MODERATELY STABLE Reference: Patton (2011) \"Volatility Forecast Comparison Using Imperfect Volatility Proxies\" J Econometrics 160:99-109 Reference: Hansen, Lunde, Nason (2011) \"The Model Confidence Set\" Econometrica 79(2):453-497",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K497",
@@ -23911,7 +23911,13 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-07T07:15:55+00:00"
+    "created_at": "2026-06-07T07:15:55+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-07T11:51:48.916528+00:00",
+    "claim_session_id": "ae965db6b15a",
+    "started_at": "2026-06-07T11:51:49.012420+00:00",
+    "completed_at": "2026-06-07T11:53:17.324537+00:00",
+    "result": "Published general draft mile_b6803426 for K497. Rewrote the loss-sensitivity experiment into a general-reader methodology article on how model rankings change when the scoring rule changes, with 3 charts and an SPY cluster waiver."
   },
   {
     "id": "K603_article_general_v2",
@@ -23939,5 +23945,69 @@
     "started_at": "2026-06-07T08:43:24.720518+00:00",
     "completed_at": "2026-06-07T08:45:55.269301+00:00",
     "result": "Published general draft mile_b62392bc for K603; rewrote the existing draft into general-reader language, corrected tx-cost wording to 10bp, and published with a methodology-only cooldown waiver."
+  },
+  {
+    "id": "paper_review_mile_d8e36bcb",
+    "title": "Paper review (Codex 24h-rule): 在 VT 策略上多加一個訊號，反而輸了？ — 五段歷史測試告訴你真相",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_d8e36bcb needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_d8e36bcb",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-07T12:08:17+00:00",
+    "claimed_by": "hourly-20",
+    "claimed_at": "2026-06-07T12:08:50.247158+00:00",
+    "claim_session_id": "176cb4be26bf",
+    "started_at": "2026-06-07T12:09:15.652088+00:00",
+    "completed_at": "2026-06-07T12:13:24.952915+00:00",
+    "result": "Codex 24h FAIL: lookahead+DM overclaim+cost mismatch+provenance error. Article RETRACTED, correction notice prepended, K506_retry P1 排入, email 老闆已寄, sync-all 完成 (articles=12)"
+  },
+  {
+    "id": "K674_article_general_v2",
+    "title": "K674: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K674 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: 投資人溝通, 執行: Claude] 5 歷史危機情境（GFC/COVID/Rate Shock/Slow Bear/Flash Crash）× 4 策略。Piecewise avg DD -0.9%（$100K 虧$1,625），50/50+VT -8.8%（$13,803），12/VIX -18.2%（$28,951），BH SPY -35.9%（$57,165）。Piecewise 4/5 crisis 正收益。50/50+VT 3/5 正收益（最佳中庸）。12/VIX GFC 最大虧損 -28.5%（仍比 BH -55.2% 好很多）。",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K674",
+    "tags": [
+      "crisis-scenario",
+      "stress-test",
+      "Piecewise",
+      "50/50",
+      "investor-communication",
+      "practical",
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-07T12:08:17+00:00"
+  },
+  {
+    "id": "K506_retry_lookahead_fix",
+    "title": "K506 重做：fix lookahead + cost 統一 + Harvey-Bonferroni 校正",
+    "description": "Retraction follow-up to mile_d8e36bcb (Codex review FAIL). Required fixes:\n1. Lookahead: `target_w` 與 `vol_ratio` 全部 .shift(1)，t-1 訊號決定 t 報酬\n2. Cost: 統一為 0.001855（round-trip 0.1855%），同步 code + results.json\n3. Multiple testing: 5 段 + pooled = 6 tests，加 Harvey (2016) 或 Bonferroni 校正\n4. 數字溯源：禁混用 K505 的 1.66%/2.49% — 所有報導數字必須來自此 K506 retry results.json\n5. Codex review 通過才可重新發布更正版（new article id）\nReference: experiments/k506/ + Codex review at storage/ops/review_history/k506_codex_review_2026-06-07.md",
+    "priority": 1,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "retraction_follow_up",
+    "blocked_reason": null,
+    "tags": [
+      "retraction-followup",
+      "lookahead-fix",
+      "K506",
+      "cost-correction"
+    ],
+    "created_at": "2026-06-07T12:18:00+00:00",
+    "parent_review_task": "paper_review_mile_d8e36bcb",
+    "parent_article_id": "mile_d8e36bcb"
   }
 ]
