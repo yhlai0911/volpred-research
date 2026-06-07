@@ -23178,7 +23178,7 @@
     "title": "K1046: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K1046 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Claude, 執行: Claude] K1046 2×4 factorial（GJR/A4f × MC-Normal/MC-t/CF-Rolling/FHS），SPY+QQQ OOS 2019-2026，10K 模擬。MC 方法 6/16（37.5%）vs 非 MC 16/16（100%）。GJR+MC 0/8 完全失敗。A4f 救了 MC-t（4/4 PASS）但 MC-Normal 仍失敗。原因：1-day VaR 的條件方差已是確定性的（GARCH 已知），MC 只增加 innovation 採樣噪音。CF-Rolling 和 FHS ",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1046",
@@ -23195,14 +23195,20 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-07T00:10:05+00:00"
+    "created_at": "2026-06-07T00:10:05+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-07T00:20:26.466344+00:00",
+    "claim_session_id": "62f96bdb5878",
+    "started_at": "2026-06-07T00:20:37.218177+00:00",
+    "completed_at": "2026-06-07T00:22:35.377536+00:00",
+    "result": "Published K1046 general draft as mile_2607b7b6. Angle: large-scale Monte Carlo simulation does not beat lower-assumption tail-risk methods for 1-day VaR when the underlying market-shape assumption is wrong. Used trinity_heatmap + timing_comparison charts and a SPY-cluster waiver for methodology framing."
   },
   {
     "id": "K1054_article_general_v2",
     "title": "K1054: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K1054 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Claude, 執行: Claude] K1054 extends K1049 (28→30 OOS days) with 60 SPY 5-min trading days. Three models compared: HAR-RV (expanding OLS), GJR-GARCH (w=2000), A4f-VIX² (w=2000). QLIKE on RV proxy: A4f -7.811 > GJR -7.669 > HAR -7.657. QLIKE on r² proxy: A4f -8.123 > GJR -8.071 ",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1054",
@@ -23218,7 +23224,13 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-07T00:10:05+00:00"
+    "created_at": "2026-06-07T00:10:05+00:00",
+    "claimed_by": "hourly-09",
+    "claimed_at": "2026-06-07T01:09:11.498167+00:00",
+    "claim_session_id": "ac4a043b8b0c",
+    "started_at": "2026-06-07T01:09:11.670563+00:00",
+    "completed_at": "2026-06-07T01:39:52.954838+00:00",
+    "result": "mile_bb520db8 published draft (audience=general); K1054 proxy-robust ranking story; lazypack 3/3; anti_ai_gate PASS; mile_c481c8cf 因 audience misclassification 已 unpublish"
   },
   {
     "id": "K1084_article_general_v2",
@@ -23398,5 +23410,27 @@
       "tex"
     ],
     "parent_task_id": "BTC_GAS_negative_paper"
+  },
+  {
+    "id": "paper_review_mile_5f57d3f9",
+    "title": "Paper review (Codex 24h-rule): 恐慌剛過，市場最安靜：VRP 極端低點後的波動率規律",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_5f57d3f9 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_5f57d3f9",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-07T01:07:53+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-07T01:23:21.842720+00:00",
+    "claim_session_id": "7614887c6243",
+    "started_at": "2026-06-07T01:23:34.180921+00:00",
+    "completed_at": "2026-06-07T01:24:54.722876+00:00",
+    "result": "Review completed for mile_5f57d3f9: no obvious lookahead leakage, but found loss-function mismatch between claimed QLIKE improvement and MSE-based DM test, overstatement around 'statistical power 0.81', and reproducibility gaps in K430 artifacts/README. Verdict: CONDITIONAL_PASS."
   }
 ]
