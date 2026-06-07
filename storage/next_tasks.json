@@ -23973,7 +23973,7 @@
     "title": "K674: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K674 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: 投資人溝通, 執行: Claude] 5 歷史危機情境（GFC/COVID/Rate Shock/Slow Bear/Flash Crash）× 4 策略。Piecewise avg DD -0.9%（$100K 虧$1,625），50/50+VT -8.8%（$13,803），12/VIX -18.2%（$28,951），BH SPY -35.9%（$57,165）。Piecewise 4/5 crisis 正收益。50/50+VT 3/5 正收益（最佳中庸）。12/VIX GFC 最大虧損 -28.5%（仍比 BH -55.2% 好很多）。",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K674",
@@ -23989,14 +23989,20 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-07T12:08:17+00:00"
+    "created_at": "2026-06-07T12:08:17+00:00",
+    "claimed_by": "hourly-21",
+    "claimed_at": "2026-06-07T13:09:42.670232+00:00",
+    "claim_session_id": "1718fc2f11f0",
+    "started_at": "2026-06-07T13:09:42.958984+00:00",
+    "completed_at": "2026-06-07T13:14:20.870719+00:00",
+    "result": "Published mile_23399029 — 五次歷史危機壓力測試（K674）general article（4181 chars，4 圖，anti-ai gate PASS，cluster waiver applied）"
   },
   {
     "id": "K506_retry_lookahead_fix",
     "title": "K506 重做：fix lookahead + cost 統一 + Harvey-Bonferroni 校正",
     "description": "Retraction follow-up to mile_d8e36bcb (Codex review FAIL). Required fixes:\n1. Lookahead: `target_w` 與 `vol_ratio` 全部 .shift(1)，t-1 訊號決定 t 報酬\n2. Cost: 統一為 0.001855（round-trip 0.1855%），同步 code + results.json\n3. Multiple testing: 5 段 + pooled = 6 tests，加 Harvey (2016) 或 Bonferroni 校正\n4. 數字溯源：禁混用 K505 的 1.66%/2.49% — 所有報導數字必須來自此 K506 retry results.json\n5. Codex review 通過才可重新發布更正版（new article id）\nReference: experiments/k506/ + Codex review at storage/ops/review_history/k506_codex_review_2026-06-07.md",
     "priority": 1,
-    "status": "pending",
+    "status": "failed",
     "task_type": "experiment",
     "source": "retraction_follow_up",
     "blocked_reason": null,
@@ -24008,6 +24014,28 @@
     ],
     "created_at": "2026-06-07T12:18:00+00:00",
     "parent_review_task": "paper_review_mile_d8e36bcb",
-    "parent_article_id": "mile_d8e36bcb"
+    "parent_article_id": "mile_d8e36bcb",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-07T12:53:54.610671+00:00",
+    "claim_session_id": "5a6a176fde82",
+    "started_at": "2026-06-07T12:54:04.536542+00:00",
+    "completed_at": "2026-06-07T12:58:29.487851+00:00",
+    "result": "K506 logic fixed in code/README: t-1 lag + Bonferroni/BH + cost=0.1855%. Rerun blocked: local cache lacks EWT 2010-2021 and sandbox blocks yfinance download, so results.json not regenerated."
+  },
+  {
+    "id": "paper_review_mile_d95b730a",
+    "title": "Paper review (Codex 24h-rule): 美股昨晚跌了，今天台股會跌嗎？這個問題有答案，但答案沒你想的那麼好用",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_d95b730a needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_d95b730a",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-07T13:08:18+00:00"
   }
 ]
