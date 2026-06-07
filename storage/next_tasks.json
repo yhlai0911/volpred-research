@@ -24666,5 +24666,22 @@
       "reader_facing",
       "auto_refill"
     ]
+  },
+  {
+    "id": "K1422_har_quantile_commodity_rerun_fair",
+    "title": "K1422: HAR-Quantile commodity rerun with fair baselines + corrected bootstrap formula",
+    "task_type": "experiment",
+    "description": "Fix K1421 (verdict=NULL) two blocking issues identified by Codex gpt-5.4 review (knowledge entry ac45417a): (1) replace OLS point forecast套 pinball@τ as q05/q95 DM baseline with FAIR alternatives — Gaussian conditional quantile (μ+σ·Φ⁻¹(τ)), location-scale HAR-GARCH quantile, and historical-residual empirical quantile（任一即可，建議三選一同跑做 robustness）；(2) fix joint_bootstrap() p-value formula: change `p_one_sided = mean(boot_T_centered >= T_obs)` to `mean(boot_T_centered >= 0)` (or equivalent percentile-recentered test). Re-evaluate GLD/USO/UNG with corrected design. Pre-registered prediction: 若 fair baseline 下 DM q05/q95 仍 significant POS (HLN p<0.10) → 真有 tail forecasting improvement; 若 not significant → K1402→K1403→K1421 commodity lineage formal conclusion 推翻，需在 paper / feed 回溯更正。Lookahead PASS (verified by Codex), DM HLN PASS — 不需重做。\n\nDeliverables: experiments/k1422/{README.md, k1422.py, k1422_results.json}; updated knowledge entry; commit message containing K1422 + linked K1421 retract decision.\n\nFair comparison HARD: 不可加 Gaussian baseline 但 QR 仍在自己 criterion 上 dominate（這是設計性 advantage 非 forecasting skill）；建議 baseline 用 OLS HAR 點 forecast + sigma from rolling 60d residual std → conditional Gaussian quantile，這跟 QR 兩種模型都用相同 HAR 特徵但 distributional assumption 不同，比較成立。\n\nFalsifiability: 若所有 3 fair baselines 下 DM 都 NOT significant → write NULL + retract K1402-K1421 lineage 的 commodity tail claim。",
+    "priority": 3,
+    "status": "pending",
+    "source": "main_thread_followup",
+    "created_at": "2026-06-08T05:13:00+08:00",
+    "lineage": [
+      "K1402",
+      "K1403",
+      "K1421"
+    ],
+    "blocked_reason": null,
+    "claimed_by": null
   }
 ]
