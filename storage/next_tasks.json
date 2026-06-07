@@ -24303,7 +24303,7 @@
     "title": "[platform_ops] Audit refill_task_pool retry-v2 為何推已 covered K",
     "description": "2026-06-08 00:08 hourly fire 發現 7 條 K_article_general_v2 retry-v2 pending 全部 invalid：K676/K696/K707/K717/K904 5 條已在 feed.json 有 published article（mile_d9d88717/1f0e3bb0/64b8e390/8e899fba/3b689404），K506 卡 EWT 資料 retry_in_progress 無新數字，K709 FAIL_PROVENANCE。已逐條 mark succeeded/blocked。\n\nRoot cause 待查：publication_candidates.json 顯示 updated_at=null + top_10_uncovered 只剩 1 條 K267，但 refill_task_pool.py 的 _kids_with_general_article belt 應已過濾這類。需要 grep next_tasks.json 看這 7 條 created_at + audiences_covered 當時值，判斷是 (a) candidates stale 沒重 build (b) belt 邏輯 v2 retry 路徑漏 check covered (c) 其他 reproduction path。\n\nFix scope:\n1. 跑 uv run python scripts/build_publication_candidates.py 重 build candidates\n2. 看 refill_task_pool.py L490+ retry-v2 推進路徑是否仍依賴 audiences_covered=[]\n3. 加 regression test: refill 不能對 feed.json 已有 mile_*.experiment_refs 含 K_id 的 K 推 v2\n4. 跑 dry-run 確認新 pool 不再推這 7 條",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "platform_ops",
     "source": "agent_discovered",
     "tags": [
@@ -24311,6 +24311,10 @@
       "publication-candidates",
       "regression"
     ],
-    "created_at": "2026-06-08T00:25:00+08:00"
+    "created_at": "2026-06-08T00:25:00+08:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-07T16:13:52.916079+00:00",
+    "claim_session_id": "4f55038ff7c8",
+    "started_at": "2026-06-07T16:14:02.131430+00:00"
   }
 ]
