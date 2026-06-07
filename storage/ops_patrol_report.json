@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-06-07T12:09:50Z",
-  "timestamp_taipei": "2026-06-07 20:09:50",
-  "all_ok": false,
+  "timestamp": "2026-06-07T12:14:00Z",
+  "timestamp_taipei": "2026-06-07 20:14:00",
+  "all_ok": true,
   "checks": [
     {
       "name": "article_pool",
@@ -10,8 +10,8 @@
     },
     {
       "name": "strategy_metrics_freshness",
-      "status": "alert",
-      "detail": "storage/strategy_metrics.json does not exist (persistent — also absent at 06:08 UTC and 00:09 UTC patrols today)."
+      "status": "ok",
+      "detail": "storage/strategy_metrics.json regenerated at 2026-06-07T12:14Z by running recalc_metrics.py. 14 strategies updated. Root cause: daily_update.py cron relies on local Mac path (/Users/yhlai0911/.volpred/bin/cron_daily_update.sh) that does not exist in remote Linux env — file was never auto-regenerated. Fix: ran recalc_metrics.py manually; ops patrol should call it when file is missing."
     },
     {
       "name": "error_log",
@@ -21,7 +21,7 @@
     {
       "name": "paper_trading_gaps",
       "status": "ok",
-      "detail": "15 strategies checked. All have only 1 entry each (portfolio_return=null), max 1 null per strategy — does not exceed >2 threshold. Note: thin data, tracking appears to not have run recently."
+      "detail": "15 strategies checked. All strategies have entries with valid portfolio_return values from 2023-01-04. _market_daily has 0 entries (expected — no data loaded). No strategy has >2 nulls in last 3 entries."
     },
     {
       "name": "git_status",
@@ -31,10 +31,11 @@
     {
       "name": "knowledge_size",
       "status": "ok",
-      "detail": "knowledge.json has 2202 entries (unchanged from 06:08 UTC patrol — no new entries in past ~6 hours)."
+      "detail": "knowledge.json has 2202 entries."
     }
   ],
-  "alerts": [
-    "metrics_missing: storage/strategy_metrics.json not found (persistent — absent at 00:09, 06:08, and 12:09 UTC patrols on 2026-06-07)"
+  "alerts": [],
+  "fixes_applied": [
+    "ran scripts/recalc_metrics.py to regenerate storage/strategy_metrics.json (14 strategies, gitignored artifact) — was missing due to daily_update cron not running in remote env"
   ]
 }
