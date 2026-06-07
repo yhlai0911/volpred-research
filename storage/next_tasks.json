@@ -91,7 +91,7 @@
     "title": "Negative-result methodology paper: \"Why GAS-t fails on BTC — Student-t innovation is the culprit, MS cannot rescue it\"",
     "priority": 4,
     "description": "K1129 full-sample reversal + K1133 sub-period concentration (P1 t=-4.67) + K1133b decomposition (75% Student-t innovation, 25% GAS dynamics NS) + MS-GAS rescue analysis. Materials: k1129 + k1133 + k1133b. Feasible as JBF-style methodology paper. Main thread decides framing after K1133b synthesis.",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "created_at": "2026-04-18T01:08:17.057769",
     "tags": [
       "Paper-new",
@@ -110,7 +110,13 @@
       }
     ],
     "handoff_note": "paper_body is Claude main-thread only per .claude/rules/task-routing.md; Codex claimed it only to correct misrouting. Returned to pending_main_thread so the queue reflects canonical ownership instead of leaving a non-agentable task in pending.",
-    "handoff_at": "2026-05-27T02:58:37.158362+00:00"
+    "handoff_at": "2026-05-27T02:58:37.158362+00:00",
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-06-07T00:10:56.757503+00:00",
+    "claim_session_id": "ff747922c85c",
+    "started_at": "2026-06-07T00:11:02.721921+00:00",
+    "completed_at": "2026-06-07T00:14:46.567198+00:00",
+    "result": "v0 outline + abstract (210 words) + 3 contributions + 9-section structure + Key Numbers table (Period 1 DM=-4.67, M4 GAS-N recovers DM=-1.90 NS, MS rescue DM+5.97 vs M3 but still loses to M1). Drafted paper/btc-gas-negative/drafts/v0_outline_abstract.md. Queued 7 sub-tasks (5 body sections + R0 review + tex conversion). Working title: 'Why GAS-t Fails on Pre-Institutional Bitcoin: Student-t Innovation, Not Score-Driven Dynamics, Is the Culprit'. Target JBF/IJF negative-result methodology track."
   },
   {
     "id": "Data_summary_script_SPY_VIX",
@@ -23055,7 +23061,7 @@
     "title": "K1043: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K1043 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Claude, 執行: Claude] K1043 2×4 factorial（GJR/A4f × Normal/Student-t/CF-Rolling/FHS），3 資產，OOS 2019-2026。FHS 12/12 Trinity PASS = CF-Rolling 12/12。12 個 DM test 全 NS（max |t|=1.654）。方法效應 >> 模型效應：Normal 16.7%→Student-t 50%→CF/FHS 100%。A4f 改善參數方法（Normal 0→33%, t 17→83%）但非參數方法已 100%",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1043",
@@ -23072,7 +23078,13 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-06T20:08:33+00:00"
+    "created_at": "2026-06-06T20:08:33+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-06T23:17:29.497748+00:00",
+    "claim_session_id": "1af0ec4ee9fa",
+    "started_at": "2026-06-06T23:17:48.264059+00:00",
+    "completed_at": "2026-06-06T23:19:48.404863+00:00",
+    "result": "Published K1043 general draft as mile_0d68e13b. Angle: two low-assumption tail-risk methods end up giving nearly the same answer; the real win is to stop over-prescribing market shape. Used trinity_heatmap + fhs_vs_cf charts and a SPY-cluster waiver for methodology framing."
   },
   {
     "id": "paper_review_mile_faaddb06",
@@ -23131,14 +23143,17 @@
     "description": "從最新 AI 晶片出貨指引切入，分析市場對科技龍頭股的高估值定價容錯率。可量化：SOXX 隱含偏斜度（Skew）與供應鏈量產延遲事件的相關性。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "created_at": "2026-06-06T22:00:19+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-07T00:09:49+00:00",
+    "blocked_note": "30 天內 NVDA/SKEW 已 6 篇飽和 (NVDA 倒數/SKEW 真能補捉尾端/SKEW 增量預測 K979)；非真 trending 掃描而是 refill 自動產出，narrative arc 邊界 dup 換題"
   },
   {
     "id": "trending_repost_2026_06_07_台股集中度",
@@ -23146,13 +23161,242 @@
     "description": "從台積電權重過高切入，分析台股波動率是否被單一股票綁架。可量化：檢定台積電隱含波動率與 VIXTWN 的共變關係，並驗證美股 VIX 預測台指期波動的跨市場失效邊界。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "created_at": "2026-06-06T22:00:23+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-07T00:09:47+00:00",
+    "blocked_note": "Layer 4 narrative arc dup: mile_123a3855 SPY 集中度→低 VIX 已寫，proxy 換但同結論不重派"
+  },
+  {
+    "id": "K1046_article_general_v2",
+    "title": "K1046: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K1046 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Claude, 執行: Claude] K1046 2×4 factorial（GJR/A4f × MC-Normal/MC-t/CF-Rolling/FHS），SPY+QQQ OOS 2019-2026，10K 模擬。MC 方法 6/16（37.5%）vs 非 MC 16/16（100%）。GJR+MC 0/8 完全失敗。A4f 救了 MC-t（4/4 PASS）但 MC-Normal 仍失敗。原因：1-day VaR 的條件方差已是確定性的（GARCH 已知），MC 只增加 innovation 採樣噪音。CF-Rolling 和 FHS ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1046",
+    "tags": [
+      "Monte Carlo",
+      "VaR",
+      "CF-Rolling",
+      "FHS",
+      "simulation",
+      "dominated",
+      "A4f",
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-07T00:10:05+00:00"
+  },
+  {
+    "id": "K1054_article_general_v2",
+    "title": "K1054: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K1054 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Claude, 執行: Claude] K1054 extends K1049 (28→30 OOS days) with 60 SPY 5-min trading days. Three models compared: HAR-RV (expanding OLS), GJR-GARCH (w=2000), A4f-VIX² (w=2000). QLIKE on RV proxy: A4f -7.811 > GJR -7.669 > HAR -7.657. QLIKE on r² proxy: A4f -8.123 > GJR -8.071 ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1054",
+    "tags": [
+      "HAR-RV",
+      "A4f",
+      "proxy-robustness",
+      "5-min RV",
+      "Patton 2011",
+      "PRELIMINARY",
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-07T00:10:05+00:00"
+  },
+  {
+    "id": "K1084_article_general_v2",
+    "title": "K1084: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K1084 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Claude, 執行: Claude] K1084 tests Realized Skewness (RSk = Σr³/RV^1.5) and Realized Kurtosis (RKt = Σr⁴/RV²) for volatility prediction. 60-day SPY 5-min, OOS n=30 PRELIMINARY. ALL NULL: H1 (RSk) DM t=-1.78 p=0.086 NULL (below Harvey). H2 (RKt predicts tail) all 5% VaR methods ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1084",
+    "tags": [
+      "realized-skewness",
+      "realized-kurtosis",
+      "HAR",
+      "higher-moments",
+      "NULL",
+      "5-min",
+      "Paper9",
+      "K1063-confirmation",
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-07T00:10:05+00:00"
+  },
+  {
+    "id": "K1093_article_general_v2",
+    "title": "K1093: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K1093 has verdict signal (score=3, reasons=['PASS/Harvey-significant', 'robust inference', 'mixed/non-novel']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Claude, 執行: Claude] K1093 tests K1092 attenuation hypothesis: does GLD weight increase ASYM vs SYMM benefit? 5 portfolios × 3 DCC models. OOS 2013-2026, n=3234. ALL H1-H4 CONFIRMED monotonic. QLIKE DM t by GLD%: 30%:+1.30, 40%:+2.21, 50%:+2.87 (replicates K1092 +2.95), 60%:+",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1093",
+    "tags": [
+      "DCC-A4f",
+      "weight-sensitivity",
+      "asset-matched",
+      "Paper3",
+      "Paper9",
+      "monotonic",
+      "50/50",
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-07T00:10:05+00:00"
+  },
+  {
+    "id": "BTC_GAS_intro_section",
+    "title": "BTC-GAS paper Section 1 Introduction (~1500 words)",
+    "task_type": "paper_body",
+    "priority": 4,
+    "status": "pending_main_thread",
+    "description": "Write Section 1 Introduction from outline paper/btc-gas-negative/drafts/v0_outline_abstract.md. Hook + K1129 puzzle + two hypotheses + 3-period split + factorial 5-model + roadmap + 3 contributions. Use Key Numbers table for headline stats.",
+    "source": "BTC_GAS_negative_paper",
+    "created_at": "2026-06-07T00:30:00+00:00",
+    "tags": [
+      "Paper-new",
+      "BTC",
+      "GAS",
+      "negative-result",
+      "subsection"
+    ],
+    "parent_task_id": "BTC_GAS_negative_paper"
+  },
+  {
+    "id": "BTC_GAS_lit_review_section",
+    "title": "BTC-GAS paper Section 2 Literature Review (~1200 words)",
+    "task_type": "paper_body",
+    "priority": 4,
+    "status": "pending_main_thread",
+    "description": "Write Section 2 Literature Review from outline. GAS framework (CKL 2013, Harvey 2013) + GAS-t comparisons (Lucas-Zhang 2016) + BTC vol lit (Catania-Grassi 2017, Liu-Tsyvinski 2021) + MS-GARCH (Klaassen 2002, Marcucci 2005) + negative-result literature (Welch-Goyal, Harvey-Liu-Zhu).",
+    "source": "BTC_GAS_negative_paper",
+    "created_at": "2026-06-07T00:30:00+00:00",
+    "tags": [
+      "Paper-new",
+      "BTC",
+      "GAS",
+      "negative-result",
+      "subsection"
+    ],
+    "parent_task_id": "BTC_GAS_negative_paper"
+  },
+  {
+    "id": "BTC_GAS_methodology_section",
+    "title": "BTC-GAS paper Section 3 Data & Methodology (~1500 words)",
+    "task_type": "paper_body",
+    "priority": 4,
+    "status": "pending_main_thread",
+    "description": "Write Section 3 Data & Methodology from outline. BTC yfinance 2015-2026, 3-period split rationale, 5-model factorial table, MS-GAS-t Klaassen recursion equations, rolling 1000-day refit, 100-init multi-start MLE, QLIKE + DM-HLN + Harvey gate.",
+    "source": "BTC_GAS_negative_paper",
+    "created_at": "2026-06-07T00:30:00+00:00",
+    "tags": [
+      "Paper-new",
+      "BTC",
+      "GAS",
+      "negative-result",
+      "subsection"
+    ],
+    "parent_task_id": "BTC_GAS_negative_paper"
+  },
+  {
+    "id": "BTC_GAS_results_sections",
+    "title": "BTC-GAS paper Sections 4-6 Results (~3100 words)",
+    "task_type": "paper_body",
+    "priority": 4,
+    "status": "pending_main_thread",
+    "description": "Write Sections 4 (Cross-Period Reversal Decomposition) + 5 (Factorial Diagnosis) + 6 (MS Rescue) from outline + Key Numbers table. Reference fig 1 (QLIKE bar), fig 2 (DM heatmap), fig 3 (MS state prob). Pre-registration note for K1133b decomposition logic.",
+    "source": "BTC_GAS_negative_paper",
+    "created_at": "2026-06-07T00:30:00+00:00",
+    "tags": [
+      "Paper-new",
+      "BTC",
+      "GAS",
+      "negative-result",
+      "subsection"
+    ],
+    "parent_task_id": "BTC_GAS_negative_paper"
+  },
+  {
+    "id": "BTC_GAS_discussion_sections",
+    "title": "BTC-GAS paper Sections 7-9 Discussion+Robustness+Conclusion (~2400 words)",
+    "task_type": "paper_body",
+    "priority": 4,
+    "status": "pending_main_thread",
+    "description": "Write Sections 7 (Why pre-institutional) + 8 (Robustness) + 9 (Conclusion + Future). Compare with Catania-Grassi 2017 sample period; practitioner guidance; Period 3 sample size limitation; ETH/LTC altcoin extension as future work.",
+    "source": "BTC_GAS_negative_paper",
+    "created_at": "2026-06-07T00:30:00+00:00",
+    "tags": [
+      "Paper-new",
+      "BTC",
+      "GAS",
+      "negative-result",
+      "subsection"
+    ],
+    "parent_task_id": "BTC_GAS_negative_paper"
+  },
+  {
+    "id": "BTC_GAS_first_review_round",
+    "title": "BTC-GAS paper R0 review (paper-review-cycle)",
+    "task_type": "paper_review",
+    "priority": 4,
+    "status": "blocked",
+    "blocked_reason": "prior_attempts_failed",
+    "blocked_note": "Blocked until all 5 body subsections complete (intro/lit/method/results/discussion). Then run latex-academic-reviewer + citation-verifier parallel.",
+    "description": "After all 5 BTC-GAS body subsections complete, run paper-review-cycle for R0. Inputs = paper/btc-gas-negative/drafts/v0_*.md combined.",
+    "source": "BTC_GAS_negative_paper",
+    "created_at": "2026-06-07T00:30:00+00:00",
+    "tags": [
+      "Paper-new",
+      "BTC",
+      "GAS",
+      "negative-result",
+      "review"
+    ],
+    "parent_task_id": "BTC_GAS_negative_paper"
+  },
+  {
+    "id": "BTC_GAS_tex_conversion",
+    "title": "BTC-GAS paper markdown→LaTeX JBF template conversion",
+    "task_type": "paper_body",
+    "priority": 5,
+    "status": "blocked",
+    "blocked_reason": "prior_attempts_failed",
+    "blocked_note": "Blocked until R0 review converges. Then convert markdown drafts to JBF main.tex using paper/prg-periodic-garch/main.tex as template reference.",
+    "description": "Convert paper/btc-gas-negative/drafts/v0_*.md to LaTeX. JBF template style (Elsevier elsarticle). Compile main.tex with xelatex; check reproduce_report.json.",
+    "source": "BTC_GAS_negative_paper",
+    "created_at": "2026-06-07T00:30:00+00:00",
+    "tags": [
+      "Paper-new",
+      "BTC",
+      "GAS",
+      "negative-result",
+      "tex"
+    ],
+    "parent_task_id": "BTC_GAS_negative_paper"
   }
 ]
