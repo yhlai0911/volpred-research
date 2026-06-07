@@ -623,13 +623,66 @@ def poll(max_messages: int = 20, dry_run: bool = False, since_days: int = 2) -> 
     return {"ok": True, "queued": queued, "skipped": skipped, "dry_run": dry_run}
 
 
+_DISPATCH_WRAPPER = "/Users/yhlai0911/.volpred/bin/cron_hourly_dispatch.sh"
+_TRIGGER_MARKER = ROOT / "storage" / "ops" / ".last_email_immediate_dispatch"
+_TRIGGER_MIN_GAP_SEC = 240  # don't immediate-fire more than once per 4 min
+
+
+def _trigger_immediate_dispatch(queued: list[dict[str, Any]]) -> dict[str, Any]:
+    """On a NEW owner reply, fire the dispatch wrapper NOW (its PHASE-0 handles
+    email_reply first) instead of waiting up to ~1h for the next hourly tick.
+    User directive 2026-06-07「收到信馬上啟動讀信」. Guarded so it never collides
+    with a running dispatch or double-fires.
+    """
+    import subprocess, time
+    # only for genuine queued tasks that still need handling (fast-path already answered)
+    pending = [q for q in queued if not q.get("fast_path")]
+    if not pending:
+        return {"fired": False, "reason": "no_pending_reply"}
+    # guard 1: a dispatch already running → it will pick up PHASE-0 email itself
+    try:
+        r = subprocess.run(["pgrep", "-f", "cron_hourly_dispatch.sh"],
+                           capture_output=True, text=True, timeout=10)
+        if r.returncode == 0 and r.stdout.strip():
+            return {"fired": False, "reason": "dispatch_already_running"}
+    except Exception:
+        pass
+    # guard 2: min-gap since last immediate fire
+    try:
+        if _TRIGGER_MARKER.exists():
+            age = time.time() - _TRIGGER_MARKER.stat().st_mtime
+            if age < _TRIGGER_MIN_GAP_SEC:
+                return {"fired": False, "reason": f"min_gap_{int(age)}s"}
+    except Exception:
+        pass
+    if not Path(_DISPATCH_WRAPPER).exists():
+        return {"fired": False, "reason": "wrapper_missing"}
+    try:
+        _TRIGGER_MARKER.parent.mkdir(parents=True, exist_ok=True)
+        _TRIGGER_MARKER.write_text(_now_iso(), encoding="utf-8")
+        subprocess.Popen(["/bin/bash", _DISPATCH_WRAPPER],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                         start_new_session=True)
+        _log(f"  IMMEDIATE DISPATCH fired for {len(pending)} new reply(ies) "
+             f"(tasks: {[q['task_id'] for q in pending]})")
+        return {"fired": True, "count": len(pending)}
+    except Exception as exc:
+        _log(f"  immediate dispatch FAILED: {exc!r}")
+        return {"fired": False, "reason": f"error:{exc}"}
+
+
 def main() -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--dry-run", action="store_true", help="Do not write task / mark seen")
     p.add_argument("--max", type=int, default=20, help="Max messages per poll")
+    p.add_argument("--no-immediate-dispatch", action="store_true",
+                   help="Skip firing dispatch on new reply (queue only)")
     args = p.parse_args()
 
     result = poll(max_messages=args.max, dry_run=args.dry_run)
+    # 收到信馬上啟動讀信：new owner reply → fire dispatch now (PHASE-0 email).
+    if result.get("ok") and not args.dry_run and not args.no_immediate_dispatch:
+        result["immediate_dispatch"] = _trigger_immediate_dispatch(result.get("queued", []))
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0 if result.get("ok") else 1
 
