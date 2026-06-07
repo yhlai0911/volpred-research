@@ -448,8 +448,19 @@ def _latest_cron_exit(log_path: Path) -> dict[str, Any] | None:
 def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
     logs_dir = _cron_logs_dir(storage_dir)
     failing_logs: list[dict[str, Any]] = []
+    # 2026-06-07: audit_* scripts use the exit code as a FINDINGS signal
+    # (audit_fb_pipeline.py returns 1 when it finds stale-pending FB posts —
+    # see scripts/audit_fb_pipeline.py:132), NOT as an infra-failure signal.
+    # Those findings are already surfaced via the dashboard fb_pipeline section.
+    # host_cron_fail is about *infrastructure* health (dispatch/collect/sync), so
+    # treating "audit found a content backlog" as a CRITICAL host-cron-failure is
+    # a false-critical. Exclude audit-signal logs from the infra-failure scan;
+    # they keep their own exit-code contract for their own consumers.
+    _AUDIT_SIGNAL_LOGS = {"audit_fb_pipeline.log"}
     if logs_dir.exists():
         for log_path in sorted(logs_dir.glob("*.log")):
+            if log_path.name in _AUDIT_SIGNAL_LOGS:
+                continue
             latest = _latest_cron_exit(log_path)
             if latest and int(latest.get("exit_code", 0)) != 0:
                 failing_logs.append(latest)
