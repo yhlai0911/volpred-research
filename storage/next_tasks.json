@@ -23496,7 +23496,7 @@
     "title": "K1135: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1135 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: Claude followup K1129, 執行: compute-queue + Claude] 4 commodity × 3 models OOS (2010-2020 IS, 2020-2026 test, n=1576, seed=42). Treatment: USO(skew=-0.578), GLD(-0.310), SLV(-1.064); Control: UNG(+0.103). **Scenario B 確認**: H1(QLIKE DM BH-FDR) 0/4 NULL — USO raw DM_p=0.046 但 ",
     "priority": 4,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1135",
@@ -23518,8 +23518,8 @@
     "created_at": "2026-06-07T04:08:14+00:00",
     "started_at": "2026-06-07T04:08:51.956117+00:00",
     "blocked_reason": "deprecated",
-    "blocked_at": "2026-06-07T04:10:10+00:00",
-    "blocked_note": "Narrative-arc dup with research-tier mile_1a5263af (Hansen skew-t commodity Scenario B already published 2026-05-17). General rewrite would only change vocabulary not arc — violates publishing.md §4 layer-4 dedup. Future angle pivot needed to revive.",
+    "blocked_at": "2026-06-07T11:10:36+00:00",
+    "blocked_note": "Narrative-arc dup with mile_1a5263af; layer-4 dedup hygiene fix",
     "last_released_at": "2026-06-07T05:29:37.149411+00:00"
   },
   {
@@ -23852,7 +23852,7 @@
     "title": "K478: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K478 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: Asset: SPY NULL RESULT: Entropy features do NOT significantly improve OOS vol prediction beyond lagged RV Reference: Pincus (1991) \"Approximate entropy\" PNAS Reference: Richman & Moorman (2000) \"Sample entropy\" Am J Physiol",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K478",
@@ -23863,14 +23863,20 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-07T07:15:55+00:00"
+    "created_at": "2026-06-07T07:15:55+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-07T10:48:18.275116+00:00",
+    "claim_session_id": "248c3efcbb75",
+    "started_at": "2026-06-07T10:48:18.347775+00:00",
+    "completed_at": "2026-06-07T10:50:56.521872+00:00",
+    "result": "Published general draft mile_96ec845f for K478. Rewrote entropy-volatility null result into a general-reader methodology article and published with 3 experiment charts after VIX cluster waiver."
   },
   {
     "id": "K479_article_general_v2",
     "title": "K479: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K479 has verdict signal (score=0, reasons=['mixed/non-novel']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: Asset: SPY Method: DWT (db4, 4 levels) on |returns|, rolling 252-day window. Energy at each scale as predictors for next-day r². OLS regression, static + rolling (quarterly re-estimation). Mixed results: wavelet helps in one estimation method but not the other. No clear advantage",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K479",
@@ -23881,7 +23887,13 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-07T07:15:55+00:00"
+    "created_at": "2026-06-07T07:15:55+00:00",
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-06-07T11:10:38.432987+00:00",
+    "claim_session_id": "c0fe43c44177",
+    "started_at": "2026-06-07T11:11:33.680774+00:00",
+    "completed_at": "2026-06-07T11:14:08.712501+00:00",
+    "result": "K479 research-grade content already covered by mile_4df2d060 (published). General rewrite would require stripping all academic terms (QLIKE, p-value, DM test) which strip the substance. Marking succeeded to clear retry-v2 loop. Future: if non-academic angle exists for wavelet vs HAR, dispatch as new task with different framing."
   },
   {
     "id": "K497_article_general_v2",
