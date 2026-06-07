@@ -1,49 +1,40 @@
 {
-  "timestamp": "2026-06-07T02:06:20+08:00",
+  "timestamp": "2026-06-07T00:09:00Z",
+  "timestamp_taipei": "2026-06-07 08:09:00",
   "all_ok": false,
   "checks": [
     {
-      "name": "ARTICLE_POOL",
+      "name": "article_pool",
       "status": "ok",
-      "detail": "Total drafts: 129 (threshold ≥12 ✓). Research audience: 52 (threshold ≥4 ✓). General audience: 77 (threshold ≥8 ✓).",
-      "counts": {
-        "total": 129,
-        "research": 52,
-        "general": 77
-      }
+      "detail": "Total draft=129 (OK >=12). research=52 (OK >=4). general=77 (OK >=8)."
     },
     {
-      "name": "STRATEGY_METRICS_FRESHNESS",
+      "name": "strategy_metrics_freshness",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json does not exist — file missing entirely (persistent since prior patrols)."
+      "detail": "storage/strategy_metrics.json does not exist (file missing, persistent since ~2026-05-31)."
     },
     {
-      "name": "ERROR_LOG",
+      "name": "error_log",
       "status": "ok",
-      "detail": "No entries dated today (2026-06-07) or yesterday (2026-06-06). Most recent entry: 2026-06-05 (K851 jump-share phrasing lesson, CONDITIONAL_PASS). No alert triggered.",
-      "entries_recent": [
-        "2026-06-05 — Jump-share variance vs event-count phrasing (K851): CONDITIONAL_PASS",
-        "2026-06-03 — auto-compact true root cause: env var placement fix (zshrc)"
-      ]
+      "detail": "Last entry dated 2026-06-05 (jump-share variance K851). No entries from today (2026-06-07) or yesterday (2026-06-06)."
     },
     {
-      "name": "PAPER_TRADING_GAPS",
+      "name": "paper_trading_gaps",
       "status": "ok",
-      "detail": "15 strategies present. Schema is per-strategy dict (not list), last-3 null check not applicable in this format. No alerts triggered."
+      "detail": "All strategies have non-list structure (dicts); no portfolio_return=null arrays detected. No >2 null alerts triggered."
     },
     {
-      "name": "GIT_STATUS",
+      "name": "git_status",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold: 50). Working tree clean."
+      "detail": "0 uncommitted files (well under 50 threshold)."
     },
     {
-      "name": "KNOWLEDGE_SIZE",
+      "name": "knowledge_size",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json contains 2194 entries.",
-      "count": 2194
+      "detail": "knowledge.json has 2194 entries."
     }
   ],
   "alerts": [
-    "metrics_missing: storage/strategy_metrics.json does not exist (persistent — strategy metrics display may be broken on frontend)"
+    "metrics_missing: storage/strategy_metrics.json not found"
   ]
 }

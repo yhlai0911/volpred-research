@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-06-07T00:09:00Z",
+  "timestamp_taipei": "2026-06-07 08:09:00",
+  "alert_type": "metrics_missing",
+  "severity": "warn",
+  "detail": "storage/strategy_metrics.json does not exist. File has been missing since ~2026-05-31 based on alert history. Strategy performance metrics cannot be served or checked for freshness. Requires regeneration via uv run volpred ops compute-strategy-metrics or equivalent.",
+  "history_note": "Recurring alert in ops_alerts: metrics_missing entries visible from 20260531 onwards."
+}
