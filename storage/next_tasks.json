@@ -11637,7 +11637,7 @@
     "description": "Context: 2026-05-26 發現 reader-facing badge pipeline (event/trending/member_qa) 完全無 auto refill — 已加 cron_hourly_dispatch_prompt.md PHASE 0.5 由主線程親跑 source scan，但屬 prompt-level 紀律。\n\nDeliverable:\n1. 寫 scripts/refill_reader_facing_pool.py — 三 source 統一介面 (trending_scan / event_pull / member_qa_eval)，   trending 用 WebSearch (Claude API or external)、event 從 event_jobs.items pull、member_qa 從 community_questions.json pull\n2. 寫 wrapper ~/.volpred/bin/cron_reader_facing_refill.sh\n3. 加 host crontab: `0 6,12,18 * * * cron_reader_facing_refill.sh`（早午晚各 1 次）\n4. 加 storage/logs/cron/reader_facing_refill.log\n5. 寫 docs/error_log.md entry「2026-05-26 reader-facing pool refill gap」\n6. 修完後從 cron_hourly_dispatch_prompt.md 移除 PHASE 0.5 主線程 manual scan 邏輯 (改為 verify-only)\n\n預估 60-90 min。可派 codex:codex-rescue 或 general-purpose subagent。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "failed",
+    "status": "succeeded",
     "tags": [
       "platform_ops",
       "cron",
@@ -11651,8 +11651,8 @@
     "claimed_at": "2026-05-26T17:23:01.536302+00:00",
     "claim_session_id": "e843049a1982",
     "started_at": "2026-05-26T17:26:56.275125+00:00",
-    "completed_at": "2026-05-26T17:27:49.932397+00:00",
-    "result": "repo 內已交付 refill_reader_facing_pool.py、wrapper/spec、verify-only prompt 與 error_log，pytest 3/3 PASS；force run 已寫 state 並補 4 個 event_article。未完成項目是 host crontab / ~/.volpred/bin 安裝與 [codex] commit，sandbox 仍擋外部 home 寫入與 .git/index.lock。"
+    "completed_at": "2026-06-07T21:10:37.588897+00:00",
+    "result": "repo 內已交付 refill_reader_facing_pool.py、wrapper/spec、verify-only prompt 與 error_log，pytest 3/3 PASS；force run 已寫 state 並補 4 個 event_article。未完成項目是 host crontab / ~/.volpred/bin 安裝與 [codex] commit，sandbox 仍擋外部 home 寫入與 .git/index.lock。\n\n2026-06-08 hourly-05 fire 手動執行 cron_reader_facing_refill.sh exit 0 (26s)，scan_state.json date=2026-06-08 scanned=true errors=[]；今日無 event/trending/member_qa due (all not_yet_in_window)。Host cron 自動運行恢復；ScanState 更新成功。"
   },
   {
     "id": "platform_ops_dispatcher_type_rotation",
@@ -24514,7 +24514,7 @@
     "title": "Paper review (Codex 24h-rule): 五次歷史危機壓力測試：退休族手上四種策略，哪個真的扛得住？",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_23399029 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_23399029",
@@ -24523,7 +24523,12 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-07T17:23:36+00:00"
+    "created_at": "2026-06-07T17:23:36+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-07T20:39:52.743325+00:00",
+    "claim_session_id": "c83f72c578b6",
+    "completed_at": "2026-06-07T20:41:56.371873+00:00",
+    "result": "Codex 24h review completed for K674 article. Verdict FAIL: (1) '5 crises' double-counts GFC via overlapping Slow Bear window, biasing aggregate ranking; (2) protection-ratio formula labels retained DD as 'less drawdown'; (3) daily reweighting implementation conflicts with monthly-cost disclosure. Review artifact: storage/ops/review_history/mile_23399029_codex_review_2026-06-08.md"
   },
   {
     "id": "K1419_probabilistic_rv_quantile",
@@ -24630,5 +24635,36 @@
     "completed_at": "2026-06-07T18:14:24+00:00",
     "claimed_by": "hourly-02",
     "result": "added 3 experiment tasks K1419/K1420/K1421 to pool; pool exhaustion was correct system signal (research coverage saturated), routed to generating new K's via literature backlog rather than relaxing filter"
+  },
+  {
+    "id": "paper_review_mile_a1507cf2",
+    "title": "Paper review (Codex 24h-rule): K951：Copula-GARCH 在高相關 ETF 配對避險上全面落敗 Rolling OLS — 尾部結構缺失是根本原因",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_a1507cf2 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_a1507cf2",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-07T21:08:16+00:00"
+  },
+  {
+    "id": "trending_repost_2026_06_08_ai風險",
+    "title": "[trending_repost] 半導體指引未達高標，科技股震盪下的波動率對沖",
+    "description": "從 Broadcom 指引未達預期觸發科技股輪動切入，分析市場對 AI 資本支出回報率的敏感度。可量化：分析半導體板塊隱含波動率與 VIX 偏斜，檢定下行風險定價。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-07T21:10:08+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
   }
 ]
