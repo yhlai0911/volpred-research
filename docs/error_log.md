@@ -1466,3 +1466,13 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 三者不同，數字差異可能 10x。讀者向文章 + paper body 都需明寫 share 的分母與分子。
 
 **Where**: `.claude/skills/feed-publisher/` 與寫作 brief 加 jump-decomposition checklist；K851 review entry id `k851review01`；review JSON `experiments/K851/codex_24h_review_mile_02190b48.json`。
+
+## 2026-06-07 23:34 — pool 空 critical + 兩個 flow gap（autonomous tick proactive fix）
+
+**Incident**：23:07 hourly 消化完最後 pending（K966）後 pool 歸零 → production_pending critical。
+
+**Fix（當下）**：`refill_task_pool.py --apply` 補池；發現 K678 候選已有 draft（mile_a0ac369d, status=draft, experiment_refs=[K678]）→ 標 deprecated 避免重複任務；最終 pool 7 個 daily_article。
+
+**Flow gap 1 — candidates「uncovered」不認列既有 draft**：`publication_candidates` 的 uncovered 偵測似乎只看 published article，K 有 draft 但未 publish 仍被列 uncovered → refill 推薦 → 產生重複 article 任務。**待修**：refill / candidates generator 應把「有 draft 的 K」視為 in-progress/covered，不再 queue 新 article task。strike 1，記錄；若再現則修 candidates generator。
+
+**Flow gap 2 — dashboard_latest.json 只由 cron 刷新，tick 間 stale**：`ops_dashboard.py` 只 `print` stdout，靠 `cron_ops_dashboard.sh` 重導寫檔。autonomous tick 直接 `jq` 讀 dashboard_latest.json 會讀到上次 cron fire 的舊快照（本 incident 中補池後檔案仍顯示 critical，實際 live recompute 已 ok）。**教訓**：tick 巡檢若要可信，應 live recompute（`uv run python scripts/ops_dashboard.py | jq ...`）而非信任可能 stale 的檔案；或縮短 ops_dashboard cron 間隔。
