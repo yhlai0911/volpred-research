@@ -23636,7 +23636,7 @@
     "title": "K705: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K705 has verdict signal (score=2, reasons=['paradigm/decisive null']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: paradigm shift 落地, 執行: Claude] 網站 messaging 稽核。Alignment 5/10。4 HIGH gaps: (1)投資建議→策略配置參考 (2)Strategy Selector 強調 CAGR 暗示 alpha (3)MDD 應為 hero metric 不是 Sharpe (4)缺 insurance framing。9 推薦修改。Post-K693 metrics: Piecewise 1.56(was 3.16), Adaptive 1.51(was 3.02)。About page 正確但主要",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K705",
@@ -23651,7 +23651,13 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-07T05:08:34+00:00"
+    "created_at": "2026-06-07T05:08:34+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-07T15:12:30.508201+00:00",
+    "claim_session_id": "bdc6be1d3a1d",
+    "started_at": "2026-06-07T15:12:39.733060+00:00",
+    "completed_at": "2026-06-07T15:13:13.090845+00:00",
+    "result": "Task is a stale duplicate. Verified K705 general article already exists in canonical reports/feed + index as mile_eeeee765 with the same title and K705 refs, so no new article or publish step was needed."
   },
   {
     "id": "email-11724-574d34",
@@ -23747,7 +23753,7 @@
     "title": "K966: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K966 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: arXiv 2503.00851 + K624 follow-up, 執行: Claude] K624 在日頻 r² proxy 測試 HAR-PD → NULL（88% worse）。K966 用 56 天 SPY 5-min RV 重測。Best λ: λ₁=0.01, λ₂=0.20。IS: HAR-PD R²=0.841 vs HAR 0.575（典型過擬合）。OOS: HAR-PD QLIKE=0.377 vs HAR 0.331（worse 13.8%）。R1-only/R2-only/R1+R2 全部 OOS 更差。DM t=-1",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K966",
@@ -23764,7 +23770,13 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-07T07:15:55+00:00"
+    "created_at": "2026-06-07T07:15:55+00:00",
+    "claimed_by": "hourly-23",
+    "claimed_at": "2026-06-07T15:10:03.067837+00:00",
+    "claim_session_id": "b945a9f18200",
+    "started_at": "2026-06-07T15:10:56.485147+00:00",
+    "completed_at": "2026-06-07T15:13:44.163743+00:00",
+    "result": "general article draft written to storage/drafts/k966_har_pd_overfitting_v1.md (929 words). Anti-AI gate PASS (warn=2/3 non-blocking). Topic: HAR-PD 在 5-min SPY IS R²=0.841 vs HAR-RV 0.575 看似 +46% 但 OOS QLIKE -13.8% 反而惡化 — pilot N_OOS=17 NULL，跨頻率與 K624 日頻一致。"
   },
   {
     "id": "K1184_article_general",
@@ -24049,7 +24061,7 @@
     "title": "K501 重做：fix target/day 對齊 + 清洗 0050 + 加交易成本 + 補 I8 provenance",
     "description": "Retraction follow-up to mile_d95b730a (Codex 24h review FAIL). Required fixes:\n1. Target/day 對齊：明確區分『美股 t-1 → TW t close』vs『TW t close → TW t+1 close』；目前 `target = tw['ret'].shift(-1)` 與文章框架不符，須擇一並對齊文宣。\n2. 清洗 0050：呼叫 `clean_tw50_data()` 或 winsorize；確保 `min_pct` 與 `kurtosis` 進入 reasonable range，避免 -138.9% outlier 污染 OOS R²/hit rate/Sharpe。\n3. 可交易回測：策略報酬需扣除交易成本（往返 0.1855%）+ 明確 execution timestamp + 排除文章自承不可交易的 overnight gap；不可用 `np.sign(preds) * actuals` 報 Sharpe 5.66。\n4. Artifact 路徑統一：K501 script 寫入路徑與文章引用路徑必須一致（`experiments/k501/k501_return_prediction_results.json`），byte-for-byte 復現。\n5. I8 provenance：`3.09 → 0.87` 兩個數字補上 canonical artifact 來源（experiments/i8/ 或對應 results.json）。\n6. Codex review 通過才可重新發布更正版（new article id）。\nReference: experiments/k501/ + Codex review at storage/ops/review_history/mile_d95b730a_codex_review_2026-06-07.md",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "retraction_follow_up",
     "blocked_reason": null,
@@ -24063,6 +24075,12 @@
     ],
     "created_at": "2026-06-07T14:08:00+00:00",
     "parent_review_task": "paper_review_mile_d95b730a",
-    "parent_article_id": "mile_d95b730a"
+    "parent_article_id": "mile_d95b730a",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-07T15:02:38.072251+00:00",
+    "claim_session_id": "3be5d3c374d9",
+    "started_at": "2026-06-07T15:02:49.465215+00:00",
+    "completed_at": "2026-06-07T15:12:06.510907+00:00",
+    "result": "K501 retry rerun completed locally: target timing split into info vs tradable channels, 0050 cleaned, canonical results.json rewritten. TW C2C info survives (OOS R2 8.10%, hit 58.25%), but tradable O2C alpha is negative after 18.55bp costs (Sharpe -0.933); K521 now replaces invalid I8 provenance."
   }
 ]
