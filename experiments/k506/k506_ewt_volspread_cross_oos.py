@@ -14,7 +14,7 @@ Strategy:
     if ratio < 0.8 → weight *= 1.2  (increase: TW50 stable relative to EWT)
     else: no adjustment
   Monthly rebalancing (K499: monthly optimal for high TX cost)
-  TX: 0.585% round-trip (Taiwan)
+  TX: 0.1855% round-trip (Taiwan ETF, corrected in K625)
   Cash earns 1.5% annual (Taiwan short-term deposit proxy)
 
 Comparison:
@@ -50,16 +50,22 @@ Author: [提出: User, 執行: Claude]
 import warnings
 warnings.filterwarnings("ignore")
 
-import numpy as np
-import pandas as pd
-import yfinance as yf
 import json
 import time
 from datetime import datetime, timezone
-from scipy import stats
 from pathlib import Path
+import sqlite3
+
+import numpy as np
+import pandas as pd
+import yfinance as yf
+from scipy import stats
 
 RESULTS_PATH = Path(__file__).parent / "k506_ewt_volspread_cross_oos_results.json"
+EXPERIMENT_DIR = Path(__file__).parent
+DATA_DIR = EXPERIMENT_DIR / "data"
+LOCAL_PRICE_CACHE_DB = Path(__file__).resolve().parents[2] / "data" / "cache" / "price_cache.db"
+EWT_FALLBACK_CSV = Path(__file__).resolve().parents[1] / "k1090" / "data" / "EWT.csv"
 
 # ============================================================
 # Configuration
@@ -97,7 +103,7 @@ t0 = time.time()
 # ============================================================
 # 1. DATA DOWNLOAD
 # ============================================================
-print("\n[1/5] Downloading data...")
+print("\n[1/5] Loading data...")
 
 tickers = {
     "EWT": "EWT",           # iShares MSCI Taiwan ETF (USD)
@@ -105,13 +111,79 @@ tickers = {
     "VIX": "^VIX",          # CBOE VIX
 }
 
-raw = {}
-for name, ticker in tickers.items():
+def load_from_sqlite_cache(ticker):
+    """Load OHLC from the shared local price cache."""
+    if not LOCAL_PRICE_CACHE_DB.exists():
+        return None
+
+    query = (
+        "SELECT date, open, high, low, close, volume, adj_close "
+        "FROM price_data WHERE ticker = ? AND date >= ? AND date < ? ORDER BY date"
+    )
+    with sqlite3.connect(LOCAL_PRICE_CACHE_DB) as conn:
+        df = pd.read_sql_query(query, conn, params=(ticker, DATA_START, DATA_END))
+    if df.empty:
+        return None
+
+    df["date"] = pd.to_datetime(df["date"])
+    df = df.set_index("date")
+    df.index.name = None
+    return df.rename(
+        columns={
+            "open": "Open",
+            "high": "High",
+            "low": "Low",
+            "close": "Close",
+            "volume": "Volume",
+            "adj_close": "Adj Close",
+        }
+    )
+
+
+def load_ewt_fallback_csv():
+    """Load the repo-local EWT CSV snapshot if it covers the required range."""
+    if not EWT_FALLBACK_CSV.exists():
+        return None
+
+    df = pd.read_csv(EWT_FALLBACK_CSV, parse_dates=["Date"]).set_index("Date")
+    df.index.name = None
+    if df.index.min() > pd.Timestamp(DATA_START) or df.index.max() < pd.Timestamp(DATA_END) - pd.Timedelta(days=1):
+        return None
+    return df.sort_index()
+
+
+def load_market_data(name, ticker):
+    """Prefer deterministic local caches; fall back to yfinance only when needed."""
+    if ticker in {"0050.TW", "^VIX"}:
+        cached = load_from_sqlite_cache(ticker)
+        if cached is not None and not cached.empty:
+            return cached, f"sqlite:{LOCAL_PRICE_CACHE_DB.name}"
+
+    if ticker == "EWT":
+        cached = load_ewt_fallback_csv()
+        if cached is not None and not cached.empty:
+            return cached, f"csv:{EWT_FALLBACK_CSV.relative_to(Path(__file__).resolve().parents[2])}"
+
     df = yf.download(ticker, start=DATA_START, end=DATA_END, progress=False, auto_adjust=False)
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = df.columns.get_level_values(0)
+    if df.empty:
+        return None, "download_failed"
+    return df, "yfinance"
+
+
+raw = {}
+data_sources = {}
+for name, ticker in tickers.items():
+    df, source = load_market_data(name, ticker)
+    if df is None or df.empty:
+        raise RuntimeError(
+            f"Missing local data for {ticker}. "
+            f"EWT cannot be re-downloaded in the current restricted-network environment."
+        )
     raw[name] = df
-    print(f"  {name} ({ticker}): {len(df)} rows, {df.index[0].date()} to {df.index[-1].date()}")
+    data_sources[name] = source
+    print(f"  {name} ({ticker}) [{source}]: {len(df)} rows, {df.index[0].date()} to {df.index[-1].date()}")
 
 # ============================================================
 # 2. DATA PREPARATION (vectorized)
@@ -151,12 +223,14 @@ data["tw50_logret"] = np.log(data["tw50_close"] / data["tw50_close"].shift(1))
 data["tw50_ret"] = data["tw50_close"] / data["tw50_close"].shift(1) - 1
 data = data.dropna()
 
-# Rolling realized volatility (annualized)
+# Rolling realized volatility (annualized, using only information available by t close)
 data["ewt_vol"] = data["ewt_logret"].rolling(VOL_WINDOW).std() * np.sqrt(TRADING_DAYS)
 data["tw50_vol"] = data["tw50_logret"].rolling(VOL_WINDOW).std() * np.sqrt(TRADING_DAYS)
 data["vol_ratio"] = data["ewt_vol"] / data["tw50_vol"]
+data["vix_signal"] = data["vix"].shift(1)
+data["vol_ratio_signal"] = data["vol_ratio"].shift(1)
 
-# Drop NaN from rolling window
+# Drop NaN from rolling window + lagged signal construction
 data = data.dropna()
 
 print(f"  Final aligned dataset: {data.index[0].date()} to {data.index[-1].date()}")
@@ -214,8 +288,8 @@ def backtest_vt(data_slice, use_volspread=False):
     """
     dates = data_slice.index
     tw50_ret = data_slice["tw50_ret"].values
-    vix = data_slice["vix"].values
-    vol_ratio = data_slice["vol_ratio"].values
+    vix_signal = data_slice["vix_signal"].values
+    vol_ratio_signal = data_slice["vol_ratio_signal"].values
 
     # Identify month starts for rebalancing
     month_starts = get_month_starts(dates)  # numpy boolean array
@@ -233,10 +307,10 @@ def backtest_vt(data_slice, use_volspread=False):
         # Check if rebalance day (first day or month start)
         if i == 0 or month_starts[i]:
             # Compute target weight
-            target_w = min(VT_SCALAR / vix[i], MAX_WEIGHT) if vix[i] > 0 else 0
+            target_w = min(VT_SCALAR / vix_signal[i], MAX_WEIGHT) if vix_signal[i] > 0 else 0
 
             if use_volspread:
-                r = vol_ratio[i]
+                r = vol_ratio_signal[i]
                 if r > RATIO_HIGH:
                     target_w *= ADJUST_DOWN
                 elif r < RATIO_LOW:
@@ -251,7 +325,7 @@ def backtest_vt(data_slice, use_volspread=False):
             current_weight = target_w
             n_rebalances += 1
 
-            # Today's return (after rebalancing at open, approximate)
+            # Rebalance at t open using only t-1 information, then earn t close-to-close return.
             day_ret = current_weight * tw50_ret[i] + (1 - current_weight) * daily_cash_ret - tx_cost
         else:
             # Normal day: hold current weight
@@ -310,6 +384,30 @@ def dm_test(loss1, loss2, h=1):
     return float(t_stat), float(p_value)
 
 
+def bonferroni_adjust(p_values):
+    """Family-wise error rate control."""
+    m = len(p_values)
+    return [min(float(p) * m, 1.0) for p in p_values]
+
+
+def bh_adjust(p_values):
+    """Benjamini-Hochberg FDR control."""
+    p_values = np.asarray(p_values, dtype=float)
+    m = len(p_values)
+    order = np.argsort(p_values)
+    ranked = p_values[order]
+    adjusted = np.empty(m)
+    prev = 1.0
+    for i in range(m - 1, -1, -1):
+        rank = i + 1
+        value = min(prev, ranked[i] * m / rank)
+        adjusted[i] = value
+        prev = value
+    out = np.empty(m)
+    out[order] = adjusted
+    return [min(float(p), 1.0) for p in out]
+
+
 # ============================================================
 # 4. CROSS-OOS BACKTEST
 # ============================================================
@@ -320,6 +418,7 @@ vt_wins = 0
 vs_wins = 0
 all_vt_returns = []
 all_vs_returns = []
+dm_tests = []
 
 for oos_start, oos_end, label in OOS_PERIODS:
     print(f"\n  --- OOS Period: {label} ({oos_start} to {oos_end}) ---")
@@ -397,6 +496,7 @@ for oos_start, oos_end, label in OOS_PERIODS:
             "tx_total_pct": round(vs["tx_total_pct"], 3),
         },
         "dm_test_vs_minus_vt": {
+            "test_name": label,
             "t_stat": round(dm_t, 4),
             "p_value": round(dm_p, 4),
             "significant_5pct": dm_p < 0.05,
@@ -407,6 +507,7 @@ for oos_start, oos_end, label in OOS_PERIODS:
     }
 
     all_results[label] = period_result
+    dm_tests.append({"name": label, "t_stat": dm_t, "p_value": dm_p})
 
     print(f"    Buy&Hold:  Sharpe={bh['sharpe']:.4f}, Ret={bh['ann_ret']*100:.1f}%, MDD={bh['mdd']*100:.1f}%")
     print(f"    VT only:   Sharpe={vt['sharpe']:.4f}, Ret={vt['ann_ret']*100:.1f}%, MDD={vt['mdd']*100:.1f}%")
@@ -427,6 +528,7 @@ pooled_vs = pd.concat(all_vs_returns)
 pooled_vt_loss = -pooled_vt.values
 pooled_vs_loss = -pooled_vs.values
 pooled_dm_t, pooled_dm_p = dm_test(pooled_vt_loss, pooled_vs_loss)
+dm_tests.append({"name": "pooled", "t_stat": pooled_dm_t, "p_value": pooled_dm_p})
 
 # Pooled Sharpe
 n_years_pooled = len(pooled_vt) / TRADING_DAYS
@@ -444,6 +546,25 @@ print(f"    VT only   — Pooled Sharpe: {pooled_vt_sharpe:.4f}, Harvey t: {harv
 print(f"    VT+VS     — Pooled Sharpe: {pooled_vs_sharpe:.4f}, Harvey t: {harvey_vs_t:.3f}")
 print(f"    Pooled DM — t={pooled_dm_t:.4f}, p={pooled_dm_p:.4f}")
 print(f"    Harvey threshold: t > 3.0")
+
+raw_p_values = [test["p_value"] for test in dm_tests]
+bonferroni_p = bonferroni_adjust(raw_p_values)
+bh_p = bh_adjust(raw_p_values)
+for test, bonf_p, bh_p_value in zip(dm_tests, bonferroni_p, bh_p):
+    test["bonferroni_p_value"] = bonf_p
+    test["bh_p_value"] = bh_p_value
+    test["significant_5pct_bonferroni"] = bonf_p < 0.05
+    test["significant_5pct_bh"] = bh_p_value < 0.05
+
+for test in dm_tests:
+    if test["name"] == "pooled":
+        continue
+    all_results[test["name"]]["dm_test_vs_minus_vt"].update({
+        "bonferroni_p_value": round(test["bonferroni_p_value"], 4),
+        "bh_p_value": round(test["bh_p_value"], 4),
+        "significant_5pct_bonferroni": test["significant_5pct_bonferroni"],
+        "significant_5pct_bh": test["significant_5pct_bh"],
+    })
 
 print(f"\n  Score: VT+VS wins {vs_wins}/5, VT wins {vt_wins}/5")
 if vs_wins >= 4:
@@ -503,12 +624,14 @@ output = {
             "ratio_high_threshold": RATIO_HIGH,
             "ratio_low_threshold": RATIO_LOW,
             "adjust_down_multiplier": ADJUST_DOWN,
-            "adjust_up_multiplier": ADJUST_UP,
+        "adjust_up_multiplier": ADJUST_UP,
         },
         "rebalancing": "monthly (1st trading day)",
         "tx_cost_roundtrip": TX_ROUNDTRIP,
         "cash_rate_annual": CASH_RATE_ANNUAL,
+        "signal_timing": "t-1 VIX and t-1 vol_ratio determine t return",
     },
+    "data_inputs": data_sources,
     "oos_periods": {label: all_results.get(label, "skipped") for _, _, label in OOS_PERIODS},
     "pooled_analysis": {
         "n_total_days": n_total,
@@ -519,10 +642,18 @@ output = {
         "harvey_t_vs": round(float(harvey_vs_t), 3),
         "harvey_threshold": 3.0,
         "pooled_dm_test": {
+            "test_name": "pooled",
             "t_stat": round(pooled_dm_t, 4),
             "p_value": round(pooled_dm_p, 4),
             "significant_5pct": pooled_dm_p < 0.05,
+            "direction": "VT+VS better" if pooled_dm_t > 0 else "VT better",
+            "bonferroni_p_value": round(dm_tests[-1]["bonferroni_p_value"], 4),
+            "bh_p_value": round(dm_tests[-1]["bh_p_value"], 4),
+            "significant_5pct_bonferroni": dm_tests[-1]["significant_5pct_bonferroni"],
+            "significant_5pct_bh": dm_tests[-1]["significant_5pct_bh"],
         },
+        "multiple_testing_family_size": len(dm_tests),
+        "multiple_testing_method_note": "Reported both Bonferroni (FWER) and Benjamini-Hochberg (FDR) for 5 segment tests + pooled test.",
     },
     "cross_oos_score": {
         "vs_wins": vs_wins,
