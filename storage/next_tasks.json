@@ -23444,5 +23444,98 @@
     "started_at": "2026-06-07T01:23:34.180921+00:00",
     "completed_at": "2026-06-07T01:24:54.722876+00:00",
     "result": "Review completed for mile_5f57d3f9: no obvious lookahead leakage, but found loss-function mismatch between claimed QLIKE improvement and MSE-based DM test, overstatement around 'statistical power 0.81', and reproducibility gaps in K430 artifacts/README. Verdict: CONDITIONAL_PASS."
+  },
+  {
+    "id": "paper_review_mile_fbc8af54",
+    "title": "Paper review (Codex 24h-rule): 兩個都有用的指標，加在一起卻沒更厲害",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_fbc8af54 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_fbc8af54",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-07T04:08:13+00:00"
+  },
+  {
+    "id": "K1135_article_general",
+    "title": "K1135: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1135 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: [提出: Claude followup K1129, 執行: compute-queue + Claude] 4 commodity × 3 models OOS (2010-2020 IS, 2020-2026 test, n=1576, seed=42). Treatment: USO(skew=-0.578), GLD(-0.310), SLV(-1.064); Control: UNG(+0.103). **Scenario B 確認**: H1(QLIKE DM BH-FDR) 0/4 NULL — USO raw DM_p=0.046 但 ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1135",
+    "tags": [
+      "Paper_4",
+      "Channel_3_GAS_family",
+      "skew-t-GAS",
+      "Scenario_B",
+      "commodity-tail-risk",
+      "QLIKE-NULL",
+      "VaR-ES-rescued",
+      "K1129-companion",
+      "BH-FDR",
+      "Hansen-1994",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-07T04:08:14+00:00",
+    "started_at": "2026-06-07T04:08:51.956117+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-07T04:10:10+00:00",
+    "blocked_note": "Narrative-arc dup with research-tier mile_1a5263af (Hansen skew-t commodity Scenario B already published 2026-05-17). General rewrite would only change vocabulary not arc — violates publishing.md §4 layer-4 dedup. Future angle pivot needed to revive.",
+    "last_released_at": "2026-06-07T04:10:14.624457+00:00"
+  },
+  {
+    "id": "K195_article_general_v2",
+    "title": "K195: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K195 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: GENUINE title: Copula Tail Dependence Asymmetry — Multi-Pair Deep Dive verdict_detail: 26 pair(s) pass Bonferroni after 66-pair correction in OOS",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K195",
+    "tags": [
+      "leverage-effect",
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-07T04:08:14+00:00"
+  },
+  {
+    "id": "K620_article_general_v2",
+    "title": "K620: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K620 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Claude, 執行: Claude] K617 vol crush -13% 不可交易。Post-Revenue Boost NW t=3.70 但是 bull market artifact（30% 天數加碼 20% 在牛市必贏）。Combined Sharpe +0.52% NS。Post-revenue 有更高 mean return (+0.136%) 但 vol 沒降 (t=0.31)。Vol crush 是統計現象不是交易機會。",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K620",
+    "tags": [
+      "TSMC",
+      "vol_crush",
+      "event_study",
+      "null_result",
+      "bull_market_artifact",
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-07T04:08:14+00:00",
+    "claimed_by": "hourly-12",
+    "claimed_at": "2026-06-07T04:10:59.967484+00:00",
+    "claim_session_id": "5391146e9ff9",
+    "started_at": "2026-06-07T04:11:01.067523+00:00",
+    "completed_at": "2026-06-07T04:22:13.485301+00:00",
+    "result": "mile_bd2d1056 audience=general PASS anti-AI gate, 2105 字, 2 真實 PNG + 4 lazypack, commit bee379da"
   }
 ]
