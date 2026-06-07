@@ -54,7 +54,7 @@ We document a previously unreported reversal in Generalized Autoregressive Score
 - **Gap**: No prior paper decomposes BTC GAS-t reversal into innovation vs dynamics components or tests MS-GAS-t rescue with state-prob recursion.
 
 ### 3. Data and Methodology (~1,500 words)
-- **Data**: BTC-USD daily close 2015-01-01 to 2026-04-10 (Yahoo Finance via yfinance). Sample = 4,118 daily obs; OOS = 1,886 days across three periods.
+- **Data**: BTC-USD daily close 2015-01-01 to 2026-04-15 (Yahoo Finance via yfinance). Sample = 4,121 daily obs; OOS = 1,886 days across three periods. *(Updated 2026-06-07 to match K1133b experiment record.)*
 - **Three-period split** (institutional structure-based, pre-registered):
   - **Period 1 (pre-institutional)**: 2017-01-21 → 2020-12-31 (n_OOS = 1,441). No spot ETF, no major institutional custody, dominated by retail flow.
   - **Period 2 (FTX-Luna era)**: 2023-01-21 → 2023-12-31 (n_OOS = 345). Post-crash recovery, institutional rebuild.
@@ -70,7 +70,7 @@ We document a previously unreported reversal in Generalized Autoregressive Score
 | M5 GJR-N-std | Standardized Normal | GJR-GARCH |
 
 - **MS-GAS-t**: Two-state Markov-switching GAS-t with Klaassen (2002) state-probability recursion (avoids path-dependence).
-- **Estimation**: Rolling 1,000-day in-sample window, daily refit, OOS one-step-ahead variance forecast. Multi-start MLE (≥100 random inits per fit, per K1213 methodology rule). Lookahead-safe with explicit `signal.shift(1)`.
+- **Estimation**: Rolling 750-day in-sample window (min 500 at sample start), re-fit every 63 trading days (252 days for MS-GAS-t), OOS one-step-ahead variance forecast. Multi-start MLE (≥100 random inits per fit, per K1213 methodology rule). Lookahead-safe with explicit `signal.shift(1)`. *(Updated 2026-06-07 to match K1133b experiment record; earlier draft incorrectly stated 1000-day/daily refit.)*
 - **Evaluation**: QLIKE loss (Patton 2011); Diebold-Mariano-HLN t-statistic; Harvey-Liu-Zhu (2016) threshold (|DM| > 3 for sub-period stability); Spearman rank correlation between forecast and realized.
 
 ### 4. Results 1: Cross-Period Reversal Decomposition (~1,200 words)
@@ -166,7 +166,7 @@ We document a previously unreported reversal in Generalized Autoregressive Score
 - **Result JSONs**: same dirs, `*_results.json`
 - **Figures**: `*.png` in each experiment dir
 - **Seeds**: 42 (all three experiments); 100-init multi-start MLE seeds 1-100
-- **Data**: BTC-USD via yfinance, fetched 2026-04-10 (K1133b run timestamp); cached in `data/btc/btc_daily.parquet`
+- **Data**: BTC-USD via yfinance, last in-sample obs 2026-04-15 (K1133b results.json `created_at` 2026-04-17T17:04:57 UTC); cached in `data/btc/btc_daily.parquet`
 - **Reproducibility audit**: Codex independent review pending; will be linked from `paper/btc-gas-negative/reproducibility_audit/`
 
 ---
