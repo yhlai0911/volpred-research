@@ -23496,7 +23496,7 @@
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-07T04:10:10+00:00",
     "blocked_note": "Narrative-arc dup with research-tier mile_1a5263af (Hansen skew-t commodity Scenario B already published 2026-05-17). General rewrite would only change vocabulary not arc — violates publishing.md §4 layer-4 dedup. Future angle pivot needed to revive.",
-    "last_released_at": "2026-06-07T04:10:14.624457+00:00"
+    "last_released_at": "2026-06-07T05:29:37.149411+00:00"
   },
   {
     "id": "K195_article_general_v2",
@@ -23555,7 +23555,7 @@
     "title": "K681: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K681 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: K679/K680 延伸, 執行: Claude] VIX percentile on 4 markets。US Sharpe 1.68(t=3.13), EFA 1.84(t=5.42 Harvey PASS!), 0050.TW 0.27(NS t=0.29), TW+GLD 0.36(NS)。EFA 差距最大(+1.01)——歐洲市場受益最多。台灣不顯著因 TX cost 18.5bp + 高波動稀釋信號。Sub-period: EFA 3/3 穩健。結論：percentile 優勢不限美國，是 global phenomenon。非美市",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K681",
@@ -23571,7 +23571,12 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-07T05:08:34+00:00"
+    "created_at": "2026-06-07T05:08:34+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-07T05:29:37.079574+00:00",
+    "claim_session_id": "6a002ab3f922",
+    "completed_at": "2026-06-07T05:36:04.800928+00:00",
+    "result": "Published general draft mile_42ec17f0 for K681/K681b correction angle; added 2 charts and filled general coverage after audience/cooldown/source-audit fixes."
   },
   {
     "id": "K873_article_general_v2",
@@ -23624,7 +23629,7 @@
     "description": "Gmail UID: 11724\nMessage-ID: <45DFB8BA-472A-4912-92B3-E7CA78E839C8@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Sun, 7 Jun 2026 13:02:56 +0800\nSubject: Re: [VolPred Boss Report] 2026-06-07 13:00 台灣時間 平台運營報告\n\n--- 用戶回信內容 ---\n你看到紅色的警告應該該主動完成或者是主動安排要完成告訴我你會完成\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月7日 13:01 寫道：\r\n> \r\n> ﻿\r\n> VolPred Boss Report · 2026-06-07 13:00 台灣時間 · Overall WARN\r\n> \r\n> ⓪ 本 cycle 意圖 / 目標 / 規劃\r\n> \r\n> 意圖 Intent\t從反應式 firefighting 轉成主動 ops 結構。建 dashboard + audit + boss report 三件套，然後 cycle 化主線程運營。\r\n> 本週目標 Weekly Goal\t• Mission 4: 0 stale cron 持續一週、live URL 100% 自動驗證\r\n> • Mission 1: 維持 ≥6 articles/day 同時把 narrative-arc dedup Layer 4 落地（已 ✅）\r\n> • Mission 3: Paper 4 body_v4 完成 rewrite gate\r\n> • Mission 5: FB MCP ext popup gate 找根因 + 解（不再說『修不到』）\r\n> 本 cycle 計劃 Plan\t• Cycle 1: 建 dashboard + 2 audit + boss report email infra（✅ 本 cycle 完成）\r\n> • Cycle 2-3: Paper 4 body_v4 rewrite main thread + 派 review agent 並行\r\n> • Cycle 4: free_tier_growth_plan.md spec + 識別 P1 analytics 工具選型\r\n> • Cycle 5+: MCP ext 根因 deep-dive；若不解，準備 Anthropic issue text\r\n> 成功標準 Success Criteria\t• 每 cycle 開頭 dashboard read 不再有 surprise critical（即 standing audit catch 問題早於我）\r\n> • 每 4h boss email 自動寄出無 fail\r\n> • 次次 cycle 至少 1 個結構性改善（不只 patch）+ 2 個 article 產出\r\n> 已知風險 Known Risks\t• main thread context 易爆（已多次 compact），需要更積極派 agent 卸載\r\n> • FB MCP root cause 可能要花 ≥2 cycles 才找到\r\n> • Paper 4 rewrite 過長吃掉太多 main thread bandwidth\r\n> ① 平台狀態\r\n> \r\n> 區段\t狀態\t說明\t建議行動\r\n> production_pending\tok\t2 pending tasks + 5 pending_main_thread (top types: [('paper_body', 5), ('daily_article', 2)])\tdispatch top P1-P3 if slots free\r\n> production_throughput\tok\t8 articles published last 24h (target 6/day)\t—\r\n> distribution_supabase\tok\t8/8 last-24h articles synced\t—\r\n> verification_live_url\tok\t3/3 sample live URLs return 200\t—\r\n> verification_fb_pipeline\tok\t2 FB posts awaiting interactive session\tinteractive session / Chrome MCP available時接手貼文與留言\r\n> health_cron\tok\t0 cron jobs stale (over max-age)\t—\r\n> health_alerts_unhandled\twarn\t1 current warn/critical alert conditions\tingest alerts → run remediation per alert.md auto-action table\r\n> ①-b 排程器成果掌握（cron 跑完沒 / 成功沒）\r\n> \r\n> 每個定時排程器的 runs / exit / 完成狀態。有需要掌握的項目 ↓\r\n> \r\n> === cron 成果掌握 review — 2026-06-07 13:00:54（台灣時間）===\r\n> \r\n>   hourly_dispatch   runs=318 exit=0 idle | last: 2026-06-07 12:24:00 (log-mtime)\r\n>   compute_worker    runs=1267 exit=0 idle | last: 2026-06-07 13:00:06 (log-mtime)\r\n>   check_alerts      runs=317 exit=0 running | last: 2026-06-07 13:00:06 (log-mtime)\r\n>   collect_tw        runs=10 exit=0 idle | last: 2026-06-05 15:00:32 (log-mtime)  ⚠️ 上次完成 46.0h 前（>30h）\r\n>   collect_us        runs=10 exit=0 idle | last: 2026-06-06 07:03:24 (log-mtime)\r\n>   daily_update      runs=11 exit=0 idle | last: 2026-06-06 08:18:17 (log-mtime)\r\n>   release_pool      runs=53 exit=0 idle | last: 2026-06-07 13:00:08 (log-mtime)\r\n>   market_cal        runs=1 exit=0 idle | last: 2026-06-01 08:00:15 (log-mtime)\r\n>   memory_health     runs=13 exit=0 idle | last: 2026-06-07 05:30:14 (log-mtime)\r\n>   work_summary      runs=53 exit=0 idle | last: 2026-06-07 12:05:22 (log-mtime)\r\n> \r\n> 近 75 分鐘 git commits（hourly_dispatch 產出代理）：2 筆\r\n>   83534d44 hourly-12 | K620_article_general_v2 task succeeded (mile_bd2d1056)\r\n>   bee379da K620_article_general_v2 | TSMC vol crush bull market artifact (anti-AI PASS, lazypack, draft)\r\n> \r\n> 🔴 需要掌握/處理：\r\n>   - collect_tw: ⚠️ 上次完成 46.0h 前（>30h）\r\n> ② 本 cycle 活動（過去 4h）\r\n> \r\n> 70 commits\r\n> \r\n> SHA\tSubject\tTime\r\n> 83534d44\thourly-12\tle_ge\r\n> bee379da\tK620_article_general_v2\trush\r\n> 3e61e239\thourly-11\tcle_g\r\n> 946ffb6a\tK1093 article general — DCC-A4f weight sensitivity, monotonic Harvey on commodity-heavy\t11:21\r\n> 1c5dd4a5\thourly-10\tcle_g\r\n> db462110\tK1084_article_general_v2\tRKt N\r\n> 3e2727b2\thourly-09\tcle_g\r\n> f7a81bcf\thourly-08\tgativ\r\n> 707ab2ea\thourly-07\tb06 c\r\n> 31b8d84e\thourly-06\trecas\r\n> 5484083b\thourly-05\tew_mi\r\n> c6e44f4e\thourly-04\t-v2 p\r\n> 28d56a21\thourly-03\ty-v2\r\n> 97168ee1\thourly-02\ty-v2\r\n> 8cc46fff\tK1024 article published — A4f refit frequency sensitivity (general audience)\t02:23\r\n> ③ Pending 池與論文組合\r\n> \r\n> Pending tasks: 2\r\n> \r\n> By type: daily_article · 2\r\n> \r\n> 論文組合\r\n> \r\n> Paper\tStatus\r\n> btc-gas-negative\t?\r\n> crypto-fear-channel\t**READY FOR SUBMISSION** (2026-05-17 v4.\r\n\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -23634,6 +23639,47 @@
     "email_uid": 11724,
     "email_message_id": "<45DFB8BA-472A-4912-92B3-E7CA78E839C8@gmail.com>",
     "email_subject": "Re: [VolPred Boss Report] 2026-06-07 13:00 台灣時間 平台運營報告",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>"
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "completed_at": "2026-06-07T05:35:39.127782+00:00",
+    "result": "指示:紅色主動完成不被動回報。已完成 host_cron_fail critical(根因 audit_fb_pipeline exit1 誤判,修 alerts.py 排除+清 alerts,dashboard warn→ok)。存 feedback memory。剩 2 FB backlog 排 interactive session。"
+  },
+  {
+    "id": "paper_review_mile_811bfc61",
+    "title": "Paper review (Codex 24h-rule): VIX 平方加進模型，新興市場波動率預測也跟著改善了",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_811bfc61 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_811bfc61",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-07T06:08:04+00:00"
+  },
+  {
+    "id": "K1417_article_general_v2",
+    "title": "K1417: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K1417 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: K1417 stationary bootstrap (Politis & Romano 1994; mean_block ∈ {756, 1260} trading days = 3y/5y) re-runs K1192's MDD-retention 90% CI under Gemini v4 review HIGH-2: 'fixed 252-day blocks destroy multi-year drawdown autocorrelation, mechanically inflating retention CI'. Result re",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1417",
+    "tags": [
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-07T06:08:04+00:00",
+    "claimed_by": "hourly-14",
+    "claimed_at": "2026-06-07T06:09:57.055214+00:00",
+    "claim_session_id": "58d29534ee78",
+    "started_at": "2026-06-07T06:10:02.873925+00:00",
+    "completed_at": "2026-06-07T06:18:21.816289+00:00",
+    "result": "K1417 general 文章發佈 draft (mile_b029eb93)：H2 NOT SUPPORTED + 5 資產 lo shift 反向往上 (mean +9.28pp)，K1192 retention 結論不僅穩健且其實是保守估計。anti-AI gate exit 0；圖 fig_ci_forest.png 已嵌入；feed.json 通過 prepublish 審計 (50/50 → 50/50 股金 SPY/GLD，研究框架修正)；30天 VT cluster waiver 已加 (方法論 robustness check 角度，非重複)。"
   }
 ]
