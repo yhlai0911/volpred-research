@@ -23408,7 +23408,7 @@
     "title": "BTC-GAS paper R0 review (paper-review-cycle)",
     "task_type": "paper_review",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "description": "After all 5 BTC-GAS body subsections complete, run paper-review-cycle for R0. Inputs = paper/btc-gas-negative/drafts/v0_*.md combined.",
     "source": "BTC_GAS_negative_paper",
     "created_at": "2026-06-07T00:30:00+00:00",
@@ -23419,7 +23419,13 @@
       "negative-result",
       "review"
     ],
-    "parent_task_id": "BTC_GAS_negative_paper"
+    "parent_task_id": "BTC_GAS_negative_paper",
+    "claimed_by": "hourly-16",
+    "claimed_at": "2026-06-07T08:08:39.716387+00:00",
+    "claim_session_id": "ec4809a84ff4",
+    "started_at": "2026-06-07T08:08:56.896756+00:00",
+    "completed_at": "2026-06-07T08:14:52.681353+00:00",
+    "result": "R0 review 完成: MAJOR_REVISION. latex(3 SEVERE/5 MAJOR/7 MINOR) + citation(PASS,1 typo,3 missing bib). 報告寫到 paper/btc-gas-negative/review_history/v1/. 下一步 R1 派 BTC_GAS_R1_fix_severe (opus) + BTC_GAS_R1_bib_cleanup (sonnet)."
   },
   {
     "id": "BTC_GAS_tex_conversion",
@@ -23759,7 +23765,7 @@
     "title": "K1184: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1184 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: ",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1184",
@@ -23774,7 +23780,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-07T07:15:55+00:00"
+    "created_at": "2026-06-07T07:15:55+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-07T07:39:51.251890+00:00",
+    "claim_session_id": "05dfea3f0e25",
+    "started_at": "2026-06-07T07:39:51.334072+00:00",
+    "completed_at": "2026-06-07T07:42:51.867556+00:00",
+    "result": "Published general draft mile_0cac88dc from existing K1184 reproducibility article; rewrote the stored draft into general-reader language and filled general coverage gap."
   },
   {
     "id": "K320_article_general_v2",
