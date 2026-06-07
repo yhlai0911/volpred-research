@@ -1,17 +1,17 @@
 {
-  "timestamp": "2026-06-07T00:09:00Z",
-  "timestamp_taipei": "2026-06-07 08:09:00",
+  "timestamp": "2026-06-07T06:08:44Z",
+  "timestamp_taipei": "2026-06-07 14:08:44",
   "all_ok": false,
   "checks": [
     {
       "name": "article_pool",
       "status": "ok",
-      "detail": "Total draft=129 (OK >=12). research=52 (OK >=4). general=77 (OK >=8)."
+      "detail": "Total draft=137 (OK >=12). research=49 (OK >=4). general=88 (OK >=8)."
     },
     {
       "name": "strategy_metrics_freshness",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json does not exist (file missing, persistent since ~2026-05-31)."
+      "detail": "storage/strategy_metrics.json does not exist (file missing, persistent issue — was also missing in previous patrol run at 00:09 UTC)."
     },
     {
       "name": "error_log",
@@ -21,20 +21,20 @@
     {
       "name": "paper_trading_gaps",
       "status": "ok",
-      "detail": "All strategies have non-list structure (dicts); no portfolio_return=null arrays detected. No >2 null alerts triggered."
+      "detail": "All strategies checked. No strategy has >2 nulls in last 3 portfolio_return entries."
     },
     {
       "name": "git_status",
       "status": "ok",
-      "detail": "0 uncommitted files (well under 50 threshold)."
+      "detail": "0 uncommitted files (well under 50 threshold). Working tree is clean."
     },
     {
       "name": "knowledge_size",
       "status": "ok",
-      "detail": "knowledge.json has 2194 entries."
+      "detail": "knowledge.json has 2202 entries (+8 since last patrol at 00:09 UTC)."
     }
   ],
   "alerts": [
-    "metrics_missing: storage/strategy_metrics.json not found"
+    "metrics_missing: storage/strategy_metrics.json not found (persistent — also absent at 00:09 UTC patrol)"
   ]
 }

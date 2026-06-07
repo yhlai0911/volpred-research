@@ -1,0 +1,9 @@
+{
+  "timestamp": "2026-06-07T06:08:44Z",
+  "timestamp_taipei": "2026-06-07 14:08:44",
+  "alert_type": "metrics_missing",
+  "severity": "warn",
+  "title": "strategy_metrics.json not found",
+  "detail": "storage/strategy_metrics.json does not exist. This is a persistent issue — the file was also absent during the previous patrol run at 2026-06-07T00:09Z. Strategy metrics freshness cannot be verified. Likely needs regeneration via `uv run volpred ops` or `scripts/evaluate_new_strategy.py`.",
+  "action_required": "Regenerate or restore storage/strategy_metrics.json. Check if any strategy evaluation pipeline is broken or if the file was accidentally deleted."
+}
