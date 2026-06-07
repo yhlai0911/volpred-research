@@ -748,6 +748,90 @@
             "event_type": "CPI_US"
           }
         }
+      },
+      {
+        "id": "nfp-2026-07-03-t7",
+        "event_key": "NFP_US_2026_07_03",
+        "trigger_mode": "one_shot",
+        "dedupe_key": "nfp-2026-07-03-t7:one_shot",
+        "not_before": "2026-06-26T08:00:00+08:00",
+        "deadline": "2026-06-27T20:00:00+08:00",
+        "preferred_agent": "claude",
+        "public_effect": "published",
+        "task_template": {
+          "title": "Event article: NFP_US 2026-07-03 T-7",
+          "description": "Auto-populated by populate_upcoming_events.py. NFP_US 2026-07-03 T-7 slot. Run feed-publisher event template; 3-layer dedup; audience=general (T-7 may use research).",
+          "task_family": "content",
+          "priority": 30,
+          "preferred_agent": "claude",
+          "fallback_allowed": false,
+          "approval_mode": "auto",
+          "risk_level": "safe",
+          "public_effect": "published",
+          "preconditions": [],
+          "payload_patch": {
+            "audience": "research",
+            "event_series_slot": "T-7",
+            "event_date": "2026-07-03",
+            "event_type": "NFP_US"
+          }
+        }
+      },
+      {
+        "id": "nfp-2026-07-03-t2",
+        "event_key": "NFP_US_2026_07_03",
+        "trigger_mode": "one_shot",
+        "dedupe_key": "nfp-2026-07-03-t2:one_shot",
+        "not_before": "2026-07-01T08:00:00+08:00",
+        "deadline": "2026-07-02T20:00:00+08:00",
+        "preferred_agent": "claude",
+        "public_effect": "published",
+        "task_template": {
+          "title": "Event article: NFP_US 2026-07-03 T-2",
+          "description": "Auto-populated by populate_upcoming_events.py. NFP_US 2026-07-03 T-2 slot. Run feed-publisher event template; 3-layer dedup; audience=general (T-7 may use research).",
+          "task_family": "content",
+          "priority": 20,
+          "preferred_agent": "claude",
+          "fallback_allowed": false,
+          "approval_mode": "auto",
+          "risk_level": "safe",
+          "public_effect": "published",
+          "preconditions": [],
+          "payload_patch": {
+            "audience": "general",
+            "event_series_slot": "T-2",
+            "event_date": "2026-07-03",
+            "event_type": "NFP_US"
+          }
+        }
+      },
+      {
+        "id": "nfp-2026-07-03-t0",
+        "event_key": "NFP_US_2026_07_03",
+        "trigger_mode": "one_shot",
+        "dedupe_key": "nfp-2026-07-03-t0:one_shot",
+        "not_before": "2026-07-03T21:30:00+08:00",
+        "deadline": "2026-07-05T09:30:00+08:00",
+        "preferred_agent": "claude",
+        "public_effect": "published",
+        "task_template": {
+          "title": "Event article: NFP_US 2026-07-03 T+0",
+          "description": "Auto-populated by populate_upcoming_events.py. NFP_US 2026-07-03 T+0 slot. Run feed-publisher event template; 3-layer dedup; audience=general (T-7 may use research).",
+          "task_family": "content",
+          "priority": 15,
+          "preferred_agent": "claude",
+          "fallback_allowed": false,
+          "approval_mode": "auto",
+          "risk_level": "safe",
+          "public_effect": "published",
+          "preconditions": [],
+          "payload_patch": {
+            "audience": "general",
+            "event_series_slot": "T+0",
+            "event_date": "2026-07-03",
+            "event_type": "NFP_US"
+          }
+        }
       }
     ]
   },
