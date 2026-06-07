@@ -1,0 +1,370 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-06-07",
+  "week_range": "2026-06-05 → 2026-06-12",
+  "totals": {
+    "input_tokens": 21,
+    "output_tokens": 3056,
+    "cache_read_tokens": 304775,
+    "cache_create_tokens": 193076,
+    "billable_total": 196153,
+    "assistant_messages": 13,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.8614
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 21,
+      "output_tokens": 3056,
+      "cache_read_tokens": 304775,
+      "cache_create_tokens": 193076,
+      "messages": 13,
+      "estimated_cost_usd": 0.8614
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 11,
+      "output_tokens": 1658,
+      "cache_read_tokens": 169978,
+      "cache_create_tokens": 105366,
+      "messages": 7,
+      "billable_total": 107035,
+      "estimated_cost_usd": 0.471,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "token_report": {
+      "input_tokens": 5,
+      "output_tokens": 666,
+      "cache_read_tokens": 68181,
+      "cache_create_tokens": 50964,
+      "messages": 3,
+      "billable_total": 51635,
+      "estimated_cost_usd": 0.2216,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    },
+    "bash_other": {
+      "input_tokens": 3,
+      "output_tokens": 234,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 33000,
+      "messages": 1,
+      "billable_total": 33237,
+      "estimated_cost_usd": 0.1273,
+      "emoji": "💭",
+      "description": "其他 Bash 操作"
+    },
+    "investigation": {
+      "input_tokens": 2,
+      "output_tokens": 498,
+      "cache_read_tokens": 66616,
+      "cache_create_tokens": 3746,
+      "messages": 2,
+      "billable_total": 4246,
+      "estimated_cost_usd": 0.0415,
+      "emoji": "🔍",
+      "description": "閱讀 / 搜尋檔案"
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 7,
+      "billable_total": 107035,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 7,
+          "billable_total": 107035
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "other",
+          "messages": 4,
+          "billable_total": 53758
+        },
+        {
+          "name": "non-text assistant message",
+          "messages": 3,
+          "billable_total": 53277
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 3,
+          "billable_total": 53277
+        },
+        {
+          "name": "Token 用量日報開始執行。",
+          "messages": 1,
+          "billable_total": 33237
+        },
+        {
+          "name": "腳本只用標準庫，可直接用 `python3` 執行不需要重型依存套件。",
+          "messages": 1,
+          "billable_total": 17917
+        },
+        {
+          "name": "依存套件下載超時，先看腳本內容了解其邏輯，再找替代方式。",
+          "messages": 1,
+          "billable_total": 2123
+        },
+        {
+          "name": "⏱ 開始 2026-06-07 22:44:20（台灣時間） 今天是週日，執行 daily report（無週報需求）。",
+          "messages": 1,
+          "billable_total": 481
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 1,
+      "billable_total": 33237,
+      "family_breakdown": [
+        {
+          "name": "other bash",
+          "messages": 1,
+          "billable_total": 33237
+        }
+      ],
+      "prefix_breakdown": [
+        {
+          "name": "TZ='Asia/Taipei'",
+          "messages": 1,
+          "billable_total": 33237
+        }
+      ],
+      "top_first_lines": [
+        {
+          "name": "TZ='Asia/Taipei' date '+%Y-%m-%d %H:%M:%S'",
+          "messages": 1,
+          "billable_total": 33237
+        }
+      ]
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 1,
+      "cache_create_tokens": 193076,
+      "billable_total": 196153,
+      "cache_create_share_pct": 98.4,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "0e21fb0d-68ea-5e75-ae11-8d523efcb5a1",
+          "messages": 13,
+          "billable_total": 196153,
+          "cache_create_tokens": 193076,
+          "cache_read_tokens": 304775,
+          "duration_minutes": 1.0,
+          "cache_create_share_pct": 98.4,
+          "first_ts": "2026-06-07T14:44:18.284000+00:00",
+          "last_ts": "2026-06-07T14:45:15.702000+00:00"
+        }
+      ]
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "774cf13",
+      "message": "K674_article_general_v2 | hourly-21 publish: 五次歷史危機壓力測試 general article (mile_23"
+    },
+    {
+      "sha": "5fcd2ca",
+      "message": "paper_review_mile_d8e36bcb | hourly-20 Codex 24h FAIL → K506 article retracted"
+    },
+    {
+      "sha": "d1361aa",
+      "message": "K479_article_general_v2 | hourly-19 cleanup: K479 retry-v2 closed + K1135 re-blo"
+    },
+    {
+      "sha": "6b0e62b",
+      "message": "fix(refill): novelty-quota enforce — defer breached dominant clusters（防故步自封）"
+    },
+    {
+      "sha": "faf1b62",
+      "message": "K873_article_general | hourly-18 PHASE-Z: collect orphan K320 draft revision"
+    },
+    {
+      "sha": "633a165",
+      "message": "K873_article_general | hourly-18 dispatch: K873 週末效應 general 文章發佈 mile_77ef5c00"
+    },
+    {
+      "sha": "6ed8b57",
+      "message": "Ops patrol fix 2026-06-07T12:14Z — recalc strategy_metrics"
+    },
+    {
+      "sha": "064f629",
+      "message": "Ops patrol report 2026-06-07T12:09Z"
+    },
+    {
+      "sha": "af958c5",
+      "message": "K451_article_general | hourly-17 dispatch: release K320 → K451 draft published m"
+    },
+    {
+      "sha": "d058941",
+      "message": "K451_article_general | 發佈隔夜波動分解一般讀者文章（draft 池）"
+    },
+    {
+      "sha": "a77447b",
+      "message": "feat(gmail-poll): 收到回信立即 fire dispatch（不等 hourly tick）"
+    },
+    {
+      "sha": "5f48320",
+      "message": "ops(hourly 16:16): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    },
+    {
+      "sha": "a370fca",
+      "message": "BTC_GAS_first_review_round | R0 review MAJOR_REVISION (3 SEVERE/5 MAJOR/7 MINOR "
+    },
+    {
+      "sha": "e49acc0",
+      "message": "BTC-GAS paper body v1 (5/5 sections, ~9899 words) + replication package + K1135 "
+    },
+    {
+      "sha": "be20ee7",
+      "message": "K1417_article_general_v2 | VT robustness 'conservative test' general article (an"
+    },
+    {
+      "sha": "ee6c239",
+      "message": "fix(alerts): host_cron_fail 排除 audit_* findings-signal log（防 false-critical）"
+    },
+    {
+      "sha": "85a2a24",
+      "message": "hourly-13 | K195_article_general_v2 task succeeded (mile_59e04317)"
+    },
+    {
+      "sha": "5cd3bdf",
+      "message": "hourly-12 | K620_article_general_v2 task succeeded (mile_bd2d1056)"
+    },
+    {
+      "sha": "64ef00c",
+      "message": "K620_article_general_v2 | TSMC vol crush bull market artifact (anti-AI PASS, laz"
+    },
+    {
+      "sha": "50c516e",
+      "message": "hourly-11 | K1093_article_general_v2 task succeeded (mile_68fd0694)"
+    },
+    {
+      "sha": "e835f9e",
+      "message": "K1093 article general — DCC-A4f weight sensitivity, monotonic Harvey on commodit"
+    },
+    {
+      "sha": "fba5c91",
+      "message": "Ops patrol report 2026-06-07T06:08Z"
+    },
+    {
+      "sha": "1c5dd4a",
+      "message": "hourly-10 | K1084_article_general_v2 task succeeded (mile_001458ce)"
+    },
+    {
+      "sha": "db46211",
+      "message": "K1084_article_general_v2 | K1084 RSk/RKt NULL → semivariance 才是 asymmetry signal"
+    },
+    {
+      "sha": "3e2727b",
+      "message": "hourly-09 | K1054_article_general_v2 published (mile_bb520db8 draft general-audi"
+    },
+    {
+      "sha": "f7a81bc",
+      "message": "hourly-08 | BTC_GAS_negative_paper v0 outline+abstract drafted (paper_body main-"
+    },
+    {
+      "sha": "707ab2e",
+      "message": "hourly-07 | mile_faaddb06 corrigendum published (K593-v2 forecast engine + DM da"
+    },
+    {
+      "sha": "31b8d84",
+      "message": "hourly-06 | K593-v2 forecast engine + DM date-align corrigendum fix (mile_faaddb"
+    },
+    {
+      "sha": "5484083",
+      "message": "hourly-05 | paper_review_mile_faaddb06: Codex FAIL on K593 cross-OOS article (fo"
+    },
+    {
+      "sha": "c6e44f4",
+      "message": "hourly-04 | K593 retry-v2 published mile_faaddb06 (SPY GJR-GARCH window cross-OO"
+    },
+    {
+      "sha": "28d56a2",
+      "message": "hourly-03 | K1140 retry-v2 published mile_92acb943 (general-audience HAC robustn"
+    },
+    {
+      "sha": "97168ee",
+      "message": "hourly-02 | K1024 retry-v2 done + K672 v4 blocked (3-strike) + publisher audienc"
+    },
+    {
+      "sha": "8cc46ff",
+      "message": "K1024 article published — A4f refit frequency sensitivity (general audience)"
+    },
+    {
+      "sha": "b0aa57a",
+      "message": "hourly-01 | K1076 retry-v2 fill empty placeholder mile_9b0aa0f0"
+    },
+    {
+      "sha": "da96574",
+      "message": "hourly-00 | refill audit_pending unblock — pool 0→6 agentable"
+    },
+    {
+      "sha": "5909462",
+      "message": "hourly-23 | Paper4 Step 12a — Figure A 7-asset universal sufficiency heatmap"
+    },
+    {
+      "sha": "69718bb",
+      "message": "hourly-22 | Paper4_body §5 methodology count reconciliation (11→10) + orphan cle"
+    },
+    {
+      "sha": "561d8a1",
+      "message": "hourly-21 | K683_article_general daily_article published draft mile_d5746aab + 5"
+    },
+    {
+      "sha": "7df0d4a",
+      "message": "ops(hourly 20:13): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    },
+    {
+      "sha": "5aa2fe6",
+      "message": "hourly-20 | mile_bcdd203c methodology footnote + fb-friday→blocked"
+    },
+    {
+      "sha": "35bca8d",
+      "message": "hourly-19 | email_reply x2 (Friday vol-crash event_article + 13:01 alert) | mile"
+    },
+    {
+      "sha": "62d2578",
+      "message": "paper_review_mile_90f2f916 | K1039 24h-rule review CONDITIONAL_PASS, add methodo"
+    },
+    {
+      "sha": "e78e6ac",
+      "message": "ops(hourly 17:33): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    },
+    {
+      "sha": "a519871",
+      "message": "ops: codex-cli auto-claim fix_prepublish_audit_negative_num_regex"
+    },
+    {
+      "sha": "1618e5b",
+      "message": "hourly-17 | K725_article_general daily_article draft mile_430f4b26"
+    },
+    {
+      "sha": "9fa626b",
+      "message": "hourly-16 | K493_article_general daily_article publish mile_7d5d0e1f"
+    },
+    {
+      "sha": "df5e02f",
+      "message": "ops(hourly 15:28): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    },
+    {
+      "sha": "abfea56",
+      "message": "hourly-15 | K741 NFP daily_article draft mile_eda69bfb"
+    },
+    {
+      "sha": "9814246",
+      "message": "hourly-14 | K988_sens_alignment_clarify: classification (a) operational + paper9"
+    },
+    {
+      "sha": "a5d7bcd",
+      "message": "hourly-13 | K1024b tau-alignment refit-frequency confirmation (paper_review)"
+    }
+  ]
+}
